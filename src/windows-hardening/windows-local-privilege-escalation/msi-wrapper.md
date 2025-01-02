@@ -2,12 +2,12 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Download the free version app from [https://www.exemsi.com/documentation/getting-started/](https://www.exemsi.com/download/), execute it and wrap the "malicious" binary on it.\
-Note that you can wrap a "**.bat**" if you **just** want to **execute** **command lines (instead of cmd.exe select the .bat file)**
+Κατεβάστε την δωρεάν έκδοση της εφαρμογής από [https://www.exemsi.com/documentation/getting-started/](https://www.exemsi.com/download/), εκτελέστε την και τυλίξτε το "κακόβουλο" δυαδικό αρχείο σε αυτή.\
+Σημειώστε ότι μπορείτε να τυλίξετε ένα "**.bat**" αν θέλετε **μόνο** να **εκτελέσετε** **γραμμές εντολών (αντί για cmd.exe επιλέξτε το αρχείο .bat)**
 
 ![](<../../images/image (417).png>)
 
-And this is the most important part of the configuration:
+Και αυτό είναι το πιο σημαντικό μέρος της διαμόρφωσης:
 
 ![](<../../images/image (312).png>)
 
@@ -15,9 +15,8 @@ And this is the most important part of the configuration:
 
 ![](<../../images/image (1072).png>)
 
-(Please, note that if you try to pack your own binary you will be able to modify these values)
+(Παρακαλώ σημειώστε ότι αν προσπαθήσετε να πακετάρετε το δικό σας δυαδικό αρχείο θα μπορείτε να τροποποιήσετε αυτές τις τιμές)
 
-From here just click on **next buttons** and the last **build button and your installer/wrapper will be generated.**
+Από εδώ απλά κάντε κλικ στα **κουμπιά επόμενου** και το τελευταίο **κουμπί κατασκευής και ο εγκαταστάτης/τύλιγμά σας θα παραχθεί.**
 
 {{#include ../../banners/hacktricks-training.md}}
-

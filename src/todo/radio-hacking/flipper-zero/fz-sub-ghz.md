@@ -4,13 +4,13 @@
 
 ## Intro <a href="#kfpn7" id="kfpn7"></a>
 
-Flipper Zero can **receive and transmit radio frequencies in the range of 300-928 MHz** with its built-in module, which can read, save, and emulate remote controls. These controls are used for interaction with gates, barriers, radio locks, remote control switches, wireless doorbells, smart lights, and more. Flipper Zero can help you to learn if your security is compromised.
+Το Flipper Zero μπορεί να **λαμβάνει και να μεταδίδει ραδιοσυχνότητες στην περιοχή των 300-928 MHz** με το ενσωματωμένο του module, το οποίο μπορεί να διαβάσει, να αποθηκεύσει και να μιμηθεί τηλεχειριστήρια. Αυτά τα τηλεχειριστήρια χρησιμοποιούνται για αλληλεπίδραση με πύλες, φράκτες, ραδιοκλειδώματα, διακόπτες τηλεχειρισμού, ασύρματα κουδούνια, έξυπνα φώτα και άλλα. Το Flipper Zero μπορεί να σας βοηθήσει να μάθετε αν η ασφάλειά σας έχει παραβιαστεί.
 
 <figure><img src="../../../images/image (714).png" alt=""><figcaption></figcaption></figure>
 
 ## Sub-GHz hardware <a href="#kfpn7" id="kfpn7"></a>
 
-Flipper Zero has a built-in sub-1 GHz module based on a [﻿](https://www.st.com/en/nfc/st25r3916.html#overview)﻿[CC1101 chip](https://www.ti.com/lit/ds/symlink/cc1101.pdf) and a radio antenna (the maximum range is 50 meters). Both the CC1101 chip and the antenna are designed to operate at frequencies in the 300-348 MHz, 387-464 MHz, and 779-928 MHz bands.
+Το Flipper Zero διαθέτει ένα ενσωματωμένο υπο-1 GHz module βασισμένο σε [﻿](https://www.st.com/en/nfc/st25r3916.html#overview)﻿[τσιπ CC1101](https://www.ti.com/lit/ds/symlink/cc1101.pdf) και μια ραδιοκεραία (η μέγιστη εμβέλεια είναι 50 μέτρα). Τanto το τσιπ CC1101 όσο και η κεραία έχουν σχεδιαστεί για να λειτουργούν σε συχνότητες στις ζώνες 300-348 MHz, 387-464 MHz και 779-928 MHz.
 
 <figure><img src="../../../images/image (923).png" alt=""><figcaption></figcaption></figure>
 
@@ -19,87 +19,86 @@ Flipper Zero has a built-in sub-1 GHz module based on a [﻿](https://www.st.com
 ### Frequency Analyser
 
 > [!NOTE]
-> How to find which frequency is the remote using
+> Πώς να βρείτε ποια συχνότητα χρησιμοποιεί το τηλεχειριστήριο
 
-When analysing, Flipper Zero is scanning signals strength (RSSI) at all the frequencies available in frequency configuration. Flipper Zero displays the frequency with the highest RSSI value, with signal strength higher than -90 [dBm](https://en.wikipedia.org/wiki/DBm).
+Κατά την ανάλυση, το Flipper Zero σαρώνει την ισχύ των σημάτων (RSSI) σε όλες τις διαθέσιμες συχνότητες στη ρύθμιση συχνότητας. Το Flipper Zero εμφανίζει τη συχνότητα με την υψηλότερη τιμή RSSI, με ισχύ σήματος μεγαλύτερη από -90 [dBm](https://en.wikipedia.org/wiki/DBm).
 
-To determine the remote's frequency, do the following:
+Για να προσδιορίσετε τη συχνότητα του τηλεχειριστηρίου, κάντε τα εξής:
 
-1. Place the remote control very close to the left of Flipper Zero.
-2. Go to **Main Menu** **→ Sub-GHz**.
-3. Select **Frequency Analyzer**, then press and hold the button on the remote control you want to analyze.
-4. Review the frequency value on the screen.
+1. Τοποθετήστε το τηλεχειριστήριο πολύ κοντά στα αριστερά του Flipper Zero.
+2. Μεταβείτε στο **Κύριο Μενού** **→ Sub-GHz**.
+3. Επιλέξτε **Frequency Analyzer**, στη συνέχεια πατήστε και κρατήστε πατημένο το κουμπί στο τηλεχειριστήριο που θέλετε να αναλύσετε.
+4. Ελέγξτε την τιμή της συχνότητας στην οθόνη.
 
 ### Read
 
 > [!NOTE]
-> Find info about the frequency used (also another way to find which frequency is used)
+> Βρείτε πληροφορίες σχετικά με τη χρησιμοποιούμενη συχνότητα (επίσης ένας άλλος τρόπος για να βρείτε ποια συχνότητα χρησιμοποιείται)
 
-The **Read** option **listens on the configured frequency** on the indicated modulation: 433.92 AM by default. If **something is found** when reading, **info is given** in the screen. This info could be use to replicate the signal in the future.
+Η επιλογή **Read** **ακούει στη ρυθμισμένη συχνότητα** στην υποδεικνυόμενη διαμόρφωση: 433.92 AM από προεπιλογή. Εάν **βρεθεί κάτι** κατά την ανάγνωση, **παρέχονται πληροφορίες** στην οθόνη. Αυτές οι πληροφορίες θα μπορούσαν να χρησιμοποιηθούν για να αναπαραχθεί το σήμα στο μέλλον.
 
-While Read is in use, it's possible to press the **left button** and **configure it**.\
-At this moment it has **4 modulations** (AM270, AM650, FM328 and FM476), and **several relevant frequencies** stored:
+Ενώ η επιλογή Read είναι σε χρήση, είναι δυνατή η πίεση του **αριστερού κουμπιού** και **η ρύθμισή του**.\
+Αυτή τη στιγμή έχει **4 διαμορφώσεις** (AM270, AM650, FM328 και FM476), και **πολλές σχετικές συχνότητες** αποθηκευμένες:
 
 <figure><img src="../../../images/image (947).png" alt=""><figcaption></figcaption></figure>
 
-You can set **any that interests you**, however, if you are **not sure which frequency** could be the one used by the remote you have, **set Hopping to ON** (Off by default), and press the button several times until Flipper captures it and give you the info you need to set the frequency.
+Μπορείτε να ρυθμίσετε **οποιαδήποτε σας ενδιαφέρει**, ωστόσο, αν **δεν είστε σίγουροι ποια συχνότητα** θα μπορούσε να είναι αυτή που χρησιμοποιεί το τηλεχειριστήριο που έχετε, **ρυθμίστε το Hopping σε ON** (Off από προεπιλογή), και πατήστε το κουμπί αρκετές φορές μέχρι το Flipper να την καταγράψει και να σας δώσει τις πληροφορίες που χρειάζεστε για να ρυθμίσετε τη συχνότητα.
 
 > [!CAUTION]
-> Switching between frequencies takes some time, therefore signals transmitted at the time of switching can be missed. For better signal reception, set a fixed frequency determined by Frequency Analyzer.
+> Η εναλλαγή μεταξύ συχνοτήτων απαιτεί κάποιο χρόνο, επομένως τα σήματα που μεταδίδονται κατά την εναλλαγή μπορεί να χαθούν. Για καλύτερη λήψη σήματος, ρυθμίστε μια σταθερή συχνότητα που καθορίζεται από το Frequency Analyzer.
 
 ### **Read Raw**
 
 > [!NOTE]
-> Steal (and replay) a signal in the configured frequency
+> Κλέψτε (και επαναλάβετε) ένα σήμα στη ρυθμισμένη συχνότητα
 
-The **Read Raw** option **records signals** send in the listening frequency. This can be used to **steal** a signal and **repeat** it.
+Η επιλογή **Read Raw** **καταγράφει σήματα** που αποστέλλονται στη συχνότητα ακρόασης. Αυτό μπορεί να χρησιμοποιηθεί για να **κλέψει** ένα σήμα και να **το επαναλάβει**.
 
-By default **Read Raw is also in 433.92 in AM650**, but if with the Read option you found that the signal that interest you is in a **different frequency/modulation, you can also modify that** pressing left (while inside the Read Raw option).
+Από προεπιλογή, το **Read Raw είναι επίσης σε 433.92 σε AM650**, αλλά αν με την επιλογή Read διαπιστώσατε ότι το σήμα που σας ενδιαφέρει είναι σε **διαφορετική συχνότητα/διαμόρφωση, μπορείτε επίσης να το τροποποιήσετε** πατώντας αριστερά (εντός της επιλογής Read Raw).
 
 ### Brute-Force
 
-If you know the protocol used for example by the garage door it's possible to g**enerate all the codes and send them with the Flipper Zero.** This is an example that support general common types of garages: [**https://github.com/tobiabocchi/flipperzero-bruteforce**](https://github.com/tobiabocchi/flipperzero-bruteforce)
+Αν γνωρίζετε το πρωτόκολλο που χρησιμοποιείται για παράδειγμα από την πόρτα του γκαράζ, είναι δυνατό να **δημιουργήσετε όλους τους κωδικούς και να τους στείλετε με το Flipper Zero.** Αυτό είναι ένα παράδειγμα που υποστηρίζει γενικούς κοινούς τύπους γκαράζ: [**https://github.com/tobiabocchi/flipperzero-bruteforce**](https://github.com/tobiabocchi/flipperzero-bruteforce)
 
 ### Add Manually
 
 > [!NOTE]
-> Add signals from a configured list of protocols
+> Προσθέστε σήματα από μια ρυθμισμένη λίστα πρωτοκόλλων
 
-#### List of [supported protocols](https://docs.flipperzero.one/sub-ghz/add-new-remote) <a href="#id-3iglu" id="id-3iglu"></a>
+#### Λίστα [υποστηριζόμενων πρωτοκόλλων](https://docs.flipperzero.one/sub-ghz/add-new-remote) <a href="#id-3iglu" id="id-3iglu"></a>
 
-| Princeton_433 (works with the majority of static code systems) | 433.92 | Static  |
+| Princeton_433 (λειτουργεί με την πλειονότητα των στατικών συστημάτων κωδικών) | 433.92 | Στατικός  |
 | -------------------------------------------------------------- | ------ | ------- |
-| Nice Flo 12bit_433                                             | 433.92 | Static  |
-| Nice Flo 24bit_433                                             | 433.92 | Static  |
-| CAME 12bit_433                                                 | 433.92 | Static  |
-| CAME 24bit_433                                                 | 433.92 | Static  |
-| Linear_300                                                     | 300.00 | Static  |
-| CAME TWEE                                                      | 433.92 | Static  |
-| Gate TX_433                                                    | 433.92 | Static  |
-| DoorHan_315                                                    | 315.00 | Dynamic |
-| DoorHan_433                                                    | 433.92 | Dynamic |
-| LiftMaster_315                                                 | 315.00 | Dynamic |
-| LiftMaster_390                                                 | 390.00 | Dynamic |
-| Security+2.0_310                                               | 310.00 | Dynamic |
-| Security+2.0_315                                               | 315.00 | Dynamic |
-| Security+2.0_390                                               | 390.00 | Dynamic |
+| Nice Flo 12bit_433                                             | 433.92 | Στατικός  |
+| Nice Flo 24bit_433                                             | 433.92 | Στατικός  |
+| CAME 12bit_433                                                 | 433.92 | Στατικός  |
+| CAME 24bit_433                                                 | 433.92 | Στατικός  |
+| Linear_300                                                     | 300.00 | Στατικός  |
+| CAME TWEE                                                      | 433.92 | Στατικός  |
+| Gate TX_433                                                    | 433.92 | Στατικός  |
+| DoorHan_315                                                    | 315.00 | Δυναμικός |
+| DoorHan_433                                                    | 433.92 | Δυναμικός |
+| LiftMaster_315                                                 | 315.00 | Δυναμικός |
+| LiftMaster_390                                                 | 390.00 | Δυναμικός |
+| Security+2.0_310                                               | 310.00 | Δυναμικός |
+| Security+2.0_315                                               | 315.00 | Δυναμικός |
+| Security+2.0_390                                               | 390.00 | Δυναμικός |
 
-### Supported Sub-GHz vendors
+### Υποστηριζόμενοι προμηθευτές Sub-GHz
 
-Check the list in [https://docs.flipperzero.one/sub-ghz/supported-vendors](https://docs.flipperzero.one/sub-ghz/supported-vendors)
+Ελέγξτε τη λίστα στο [https://docs.flipperzero.one/sub-ghz/supported-vendors](https://docs.flipperzero.one/sub-ghz/supported-vendors)
 
-### Supported Frequencies by region
+### Υποστηριζόμενες συχνότητες ανά περιοχή
 
-Check the list in [https://docs.flipperzero.one/sub-ghz/frequencies](https://docs.flipperzero.one/sub-ghz/frequencies)
+Ελέγξτε τη λίστα στο [https://docs.flipperzero.one/sub-ghz/frequencies](https://docs.flipperzero.one/sub-ghz/frequencies)
 
 ### Test
 
 > [!NOTE]
-> Get dBms of the saved frequencies
+> Λάβετε dBms των αποθηκευμένων συχνοτήτων
 
 ## Reference
 
 - [https://docs.flipperzero.one/sub-ghz](https://docs.flipperzero.one/sub-ghz)
 
 {{#include ../../../banners/hacktricks-training.md}}
-

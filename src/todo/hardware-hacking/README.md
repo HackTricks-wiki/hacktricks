@@ -4,50 +4,49 @@
 
 ## JTAG
 
-JTAG allows to perform a boundary scan. The boundary scan analyzes certain circuitry, including embedded boundary-scan cells and registers for each pin.
+Το JTAG επιτρέπει την εκτέλεση ενός boundary scan. Ο boundary scan αναλύει συγκεκριμένα κυκλώματα, συμπεριλαμβανομένων των ενσωματωμένων boundary-scan κελιών και καταχωρητών για κάθε ακίδα.
 
-The JTAG standard defines **specific commands for conducting boundary scans**, including the following:
+Το πρότυπο JTAG ορίζει **συγκεκριμένες εντολές για τη διεξαγωγή boundary scans**, συμπεριλαμβανομένων των εξής:
 
-- **BYPASS** allows you to test a specific chip without the overhead of passing through other chips.
-- **SAMPLE/PRELOAD** takes a sample of the data entering and leaving the device when it’s in its normal functioning mode.
-- **EXTEST** sets and reads pin states.
+- **BYPASS** σας επιτρέπει να δοκιμάσετε ένα συγκεκριμένο τσιπ χωρίς το κόστος της διέλευσης από άλλα τσιπ.
+- **SAMPLE/PRELOAD** παίρνει ένα δείγμα των δεδομένων που εισέρχονται και εξέρχονται από τη συσκευή όταν είναι σε κανονική λειτουργία.
+- **EXTEST** ρυθμίζει και διαβάζει τις καταστάσεις των ακίδων.
 
-It can also support other commands such as:
+Μπορεί επίσης να υποστηρίξει άλλες εντολές όπως:
 
-- **IDCODE** for identifying a device
-- **INTEST** for the internal testing of the device
+- **IDCODE** για την αναγνώριση μιας συσκευής
+- **INTEST** για την εσωτερική δοκιμή της συσκευής
 
-You might come across these instructions when you use a tool like the JTAGulator.
+Μπορεί να συναντήσετε αυτές τις οδηγίες όταν χρησιμοποιείτε ένα εργαλείο όπως το JTAGulator.
 
 ### The Test Access Port
 
-Boundary scans include tests of the four-wire **Test Access Port (TAP)**, a general-purpose port that provides **access to the JTAG test support** functions built into a component. TAP uses the following five signals:
+Οι boundary scans περιλαμβάνουν δοκιμές της τετραπλής **Test Access Port (TAP)**, μιας γενικής θύρας που παρέχει **πρόσβαση στις λειτουργίες υποστήριξης δοκιμών JTAG** που είναι ενσωματωμένες σε ένα στοιχείο. Το TAP χρησιμοποιεί τα εξής πέντε σήματα:
 
-- Test clock input (**TCK**) The TCK is the **clock** that defines how often the TAP controller will take a single action (in other words, jump to the next state in the state machine).
-- Test mode select (**TMS**) input TMS controls the **finite state machine**. On each beat of the clock, the device’s JTAG TAP controller checks the voltage on the TMS pin. If the voltage is below a certain threshold, the signal is considered low and interpreted as 0, whereas if the voltage is above a certain threshold, the signal is considered high and interpreted as 1.
-- Test data input (**TDI**) TDI is the pin that sends **data into the chip through the scan cells**. Each vendor is responsible for defining the communication protocol over this pin, because JTAG doesn’t define this.
-- Test data output (**TDO**) TDO is the pin that sends **data out of the chip**.
-- Test reset (**TRST**) input The optional TRST resets the finite state machine **to a known good state**. Alternatively, if the TMS is held at 1 for five consecutive clock cycles, it invokes a reset, the same way the TRST pin would, which is why TRST is optional.
+- Test clock input (**TCK**) Το TCK είναι το **ρολόι** που καθορίζει πόσο συχνά ο ελεγκτής TAP θα εκτελεί μια ενέργεια (με άλλα λόγια, θα πηδά στην επόμενη κατάσταση στη μηχανή καταστάσεων).
+- Test mode select (**TMS**) input Το TMS ελέγχει τη **πεπερασμένη μηχανή καταστάσεων**. Σε κάθε χτύπημα του ρολογιού, ο ελεγκτής JTAG TAP της συσκευής ελέγχει την τάση στην ακίδα TMS. Εάν η τάση είναι κάτω από ένα συγκεκριμένο κατώφλι, το σήμα θεωρείται χαμηλό και ερμηνεύεται ως 0, ενώ αν η τάση είναι πάνω από ένα συγκεκριμένο κατώφλι, το σήμα θεωρείται υψηλό και ερμηνεύεται ως 1.
+- Test data input (**TDI**) Το TDI είναι η ακίδα που στέλνει **δεδομένα στο τσιπ μέσω των scan cells**. Κάθε προμηθευτής είναι υπεύθυνος για τον καθορισμό του πρωτοκόλλου επικοινωνίας μέσω αυτής της ακίδας, καθώς το JTAG δεν το καθορίζει.
+- Test data output (**TDO**) Το TDO είναι η ακίδα που στέλνει **δεδομένα από το τσιπ**.
+- Test reset (**TRST**) input Η προαιρετική TRST επαναφέρει τη πεπερασμένη μηχανή καταστάσεων **σε μια γνωστή καλή κατάσταση**. Εναλλακτικά, εάν το TMS κρατηθεί στο 1 για πέντε συνεχόμενους κύκλους ρολογιού, προκαλεί μια επαναφορά, με τον ίδιο τρόπο που θα έκανε η ακίδα TRST, γι' αυτό και η TRST είναι προαιρετική.
 
-Sometimes you will be able to find those pins marked in the PCB. In other occasions you might need to **find them**.
+Μερικές φορές θα μπορείτε να βρείτε αυτές τις ακίδες σημειωμένες στην PCB. Σε άλλες περιπτώσεις, μπορεί να χρειαστεί να **τις βρείτε**.
 
 ### Identifying JTAG pins
 
-The fastest but most expensive way to detect JTAG ports is by using the **JTAGulator**, a device created specifically for this purpose (although it can **also detect UART pinouts**).
+Ο ταχύτερος αλλά πιο ακριβός τρόπος για να ανιχνεύσετε τις θύρες JTAG είναι χρησιμοποιώντας το **JTAGulator**, μια συσκευή που έχει δημιουργηθεί ειδικά για αυτόν τον σκοπό (αν και μπορεί **επίσης να ανιχνεύσει τις ακίδες UART**).
 
-It has **24 channels** you can connect to the boards pins. Then it performs a **BF attack** of all the possible combinations sending **IDCODE** and **BYPASS** boundary scan commands. If it receives a response, it displays the channel corresponding to each JTAG signal
+Έχει **24 κανάλια** που μπορείτε να συνδέσετε στις ακίδες των πλακετών. Στη συνέχεια, εκτελεί μια **επίθεση BF** όλων των πιθανών συνδυασμών στέλνοντας **IDCODE** και **BYPASS** εντολές boundary scan. Εάν λάβει μια απάντηση, εμφανίζει το κανάλι που αντιστοιχεί σε κάθε σήμα JTAG.
 
-A cheaper but much slower way of identifying JTAG pinouts is by using the [**JTAGenum**](https://github.com/cyphunk/JTAGenum/) loaded on an Arduino-compatible microcontroller.
+Ένας φθηνότερος αλλά πολύ πιο αργός τρόπος για να προσδιορίσετε τις ακίδες JTAG είναι χρησιμοποιώντας το [**JTAGenum**](https://github.com/cyphunk/JTAGenum/) φορτωμένο σε έναν μικροελεγκτή συμβατό με Arduino.
 
-Using **JTAGenum**, you’d first **define the pins of the probing** device that you’ll use for the enumeration.You’d have to reference the device’s pinout diagram, and then connect these pins with the test points on your target device.
+Χρησιμοποιώντας το **JTAGenum**, θα πρέπει πρώτα να **καθορίσετε τις ακίδες της συσκευής δοκιμής** που θα χρησιμοποιήσετε για την αρίθμηση. Θα πρέπει να αναφερθείτε στο διάγραμμα ακίδων της συσκευής και στη συνέχεια να συνδέσετε αυτές τις ακίδες με τα σημεία δοκιμής στη στοχευμένη σας συσκευή.
 
-A **third way** to identify JTAG pins is by **inspecting the PCB** for one of the pinouts. In some cases, PCBs might conveniently provide the **Tag-Connect interface**, which is a clear indication that the board has a JTAG connector, too. You can see what that interface looks like at [https://www.tag-connect.com/info/](https://www.tag-connect.com/info/). Additionally, inspecting the **datasheets of the chipsets on the PCB** might reveal pinout diagrams that point to JTAG interfaces.
+Ένας **τρίτος τρόπος** για να προσδιορίσετε τις ακίδες JTAG είναι να **εξετάσετε την PCB** για μία από τις ακίδες. Σε ορισμένες περιπτώσεις, οι PCB μπορεί να παρέχουν βολικά τη **διεύθυνση Tag-Connect**, η οποία είναι μια σαφής ένδειξη ότι η πλακέτα έχει και έναν συνδετήρα JTAG. Μπορείτε να δείτε πώς φαίνεται αυτή η διεπαφή στο [https://www.tag-connect.com/info/](https://www.tag-connect.com/info/). Επιπλέον, η εξέταση των **datasheets των chipsets στην PCB** μπορεί να αποκαλύψει διαγράμματα ακίδων που δείχνουν σε διεπαφές JTAG.
 
 ## SDW
 
-SWD is an ARM-specific protocol designed for debugging.
+Το SWD είναι ένα πρωτόκολλο ειδικό για ARM που έχει σχεδιαστεί για αποσφαλμάτωση.
 
-The SWD interface requires **two pins**: a bidirectional **SWDIO** signal, which is the equivalent of JTAG’s **TDI and TDO pins and a clock**, and **SWCLK**, which is the equivalent of **TCK** in JTAG. Many devices support the **Serial Wire or JTAG Debug Port (SWJ-DP)**, a combined JTAG and SWD interface that enables you to connect either a SWD or JTAG probe to the target.
+Η διεπαφή SWD απαιτεί **δύο ακίδες**: ένα αμφίδρομο σήμα **SWDIO**, το οποίο είναι το ισοδύναμο των ακίδων **TDI και TDO του JTAG** και ένα ρολόι, και **SWCLK**, το οποίο είναι το ισοδύναμο του **TCK** στο JTAG. Πολλές συσκευές υποστηρίζουν τη **Serial Wire ή JTAG Debug Port (SWJ-DP)**, μια συνδυασμένη διεπαφή JTAG και SWD που σας επιτρέπει να συνδέσετε είτε μια συσκευή δοκιμής SWD είτε JTAG στο στόχο.
 
 {{#include ../../banners/hacktricks-training.md}}
-

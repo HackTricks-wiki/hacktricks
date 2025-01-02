@@ -6,95 +6,85 @@
 
 ## WDigest
 
-The [WDigest](<https://technet.microsoft.com/pt-pt/library/cc778868(v=ws.10).aspx?f=255&MSPPError=-2147217396>) protocol, introduced with Windows XP, is designed for authentication via the HTTP Protocol and is **enabled by default on Windows XP through Windows 8.0 and Windows Server 2003 to Windows Server 2012**. This default setting results in **plain-text password storage in LSASS** (Local Security Authority Subsystem Service). An attacker can use Mimikatz to **extract these credentials** by executing:
-
+Το [WDigest](<https://technet.microsoft.com/pt-pt/library/cc778868(v=ws.10).aspx?f=255&MSPPError=-2147217396>) πρωτόκολλο, που εισήχθη με τα Windows XP, έχει σχεδιαστεί για αυθεντικοποίηση μέσω του Πρωτοκόλλου HTTP και είναι **ενεργοποιημένο από προεπιλογή στα Windows XP μέχρι Windows 8.0 και Windows Server 2003 έως Windows Server 2012**. Αυτή η προεπιλεγμένη ρύθμιση έχει ως αποτέλεσμα **αποθήκευση κωδικών πρόσβασης σε απλό κείμενο στο LSASS** (Local Security Authority Subsystem Service). Ένας επιτιθέμενος μπορεί να χρησιμοποιήσει το Mimikatz για να **εξάγει αυτά τα διαπιστευτήρια** εκτελώντας:
 ```bash
 sekurlsa::wdigest
 ```
-
-To **toggle this feature off or on**, the _**UseLogonCredential**_ and _**Negotiate**_ registry keys within _**HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\SecurityProviders\WDigest**_ must be set to "1". If these keys are **absent or set to "0"**, WDigest is **disabled**:
-
+Για να **απενεργοποιήσετε ή ενεργοποιήσετε αυτή τη δυνατότητα**, τα _**UseLogonCredential**_ και _**Negotiate**_ κλειδιά μητρώου εντός του _**HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\SecurityProviders\WDigest**_ πρέπει να ρυθμιστούν σε "1". Εάν αυτά τα κλειδιά είναι **απουσία ή ρυθμισμένα σε "0"**, το WDigest είναι **απενεργοποιημένο**:
 ```bash
 reg query HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest /v UseLogonCredential
 ```
-
 ## LSA Protection
 
-Starting with **Windows 8.1**, Microsoft enhanced the security of LSA to **block unauthorized memory reads or code injections by untrusted processes**. This enhancement hinders the typical functioning of commands like `mimikatz.exe sekurlsa:logonpasswords`. To **enable this enhanced protection**, the _**RunAsPPL**_ value in _**HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA**_ should be adjusted to 1:
-
+Αρχής γενομένης από το **Windows 8.1**, η Microsoft ενίσχυσε την ασφάλεια του LSA για να **μπλοκάρει μη εξουσιοδοτημένες αναγνώσεις μνήμης ή εισαγωγές κώδικα από μη αξιόπιστες διαδικασίες**. Αυτή η βελτίωση εμποδίζει τη συνήθη λειτουργία εντολών όπως το `mimikatz.exe sekurlsa:logonpasswords`. Για να **επιτρέψετε αυτήν την ενισχυμένη προστασία**, η τιμή _**RunAsPPL**_ στο _**HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA**_ θα πρέπει να ρυθμιστεί σε 1:
 ```
 reg query HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA /v RunAsPPL
 ```
-
 ### Bypass
 
-It is possible to bypass this protection using Mimikatz driver mimidrv.sys:
+Είναι δυνατόν να παρακαμφθεί αυτή η προστασία χρησιμοποιώντας τον οδηγό Mimikatz mimidrv.sys:
 
 ![](../../images/mimidrv.png)
 
 ## Credential Guard
 
-**Credential Guard**, a feature exclusive to **Windows 10 (Enterprise and Education editions)**, enhances the security of machine credentials using **Virtual Secure Mode (VSM)** and **Virtualization Based Security (VBS)**. It leverages CPU virtualization extensions to isolate key processes within a protected memory space, away from the main operating system's reach. This isolation ensures that even the kernel cannot access the memory in VSM, effectively safeguarding credentials from attacks like **pass-the-hash**. The **Local Security Authority (LSA)** operates within this secure environment as a trustlet, while the **LSASS** process in the main OS acts merely as a communicator with the VSM's LSA.
+**Credential Guard**, μια δυνατότητα αποκλειστική για **Windows 10 (Enterprise και Education εκδόσεις)**, ενισχύει την ασφάλεια των διαπιστευτηρίων μηχανής χρησιμοποιώντας **Virtual Secure Mode (VSM)** και **Virtualization Based Security (VBS)**. Εκμεταλλεύεται τις επεκτάσεις εικονικοποίησης CPU για να απομονώσει κρίσιμες διαδικασίες εντός ενός προστατευμένου χώρου μνήμης, μακριά από την πρόσβαση του κύριου λειτουργικού συστήματος. Αυτή η απομόνωση διασφαλίζει ότι ακόμη και ο πυρήνας δεν μπορεί να έχει πρόσβαση στη μνήμη στο VSM, προστατεύοντας αποτελεσματικά τα διαπιστευτήρια από επιθέσεις όπως το **pass-the-hash**. Η **Local Security Authority (LSA)** λειτουργεί μέσα σε αυτό το ασφαλές περιβάλλον ως trustlet, ενώ η διαδικασία **LSASS** στο κύριο OS λειτουργεί απλώς ως επικοινωνιακός σύνδεσμος με την LSA του VSM.
 
-By default, **Credential Guard** is not active and requires manual activation within an organization. It's critical for enhancing security against tools like **Mimikatz**, which are hindered in their ability to extract credentials. However, vulnerabilities can still be exploited through the addition of custom **Security Support Providers (SSP)** to capture credentials in clear text during login attempts.
+Από προεπιλογή, **Credential Guard** δεν είναι ενεργό και απαιτεί χειροκίνητη ενεργοποίηση εντός ενός οργανισμού. Είναι κρίσιμο για την ενίσχυση της ασφάλειας κατά εργαλείων όπως το **Mimikatz**, τα οποία περιορίζονται στην ικανότητά τους να εξάγουν διαπιστευτήρια. Ωστόσο, οι ευπάθειες μπορούν να εκμεταλλευτούν μέσω της προσθήκης προσαρμοσμένων **Security Support Providers (SSP)** για να συλλάβουν διαπιστευτήρια σε καθαρό κείμενο κατά τις προσπάθειες σύνδεσης.
 
-To verify **Credential Guard**'s activation status, the registry key _**LsaCfgFlags**_ under _**HKLM\System\CurrentControlSet\Control\LSA**_ can be inspected. A value of "**1**" indicates activation with **UEFI lock**, "**2**" without lock, and "**0**" denotes it is not enabled. This registry check, while a strong indicator, is not the sole step for enabling Credential Guard. Detailed guidance and a PowerShell script for enabling this feature are available online.
-
+Για να επαληθεύσετε την κατάσταση ενεργοποίησης του **Credential Guard**, μπορεί να ελεγχθεί το κλειδί μητρώου _**LsaCfgFlags**_ κάτω από _**HKLM\System\CurrentControlSet\Control\LSA**_. Μια τιμή "**1**" υποδηλώνει ενεργοποίηση με **UEFI lock**, "**2**" χωρίς κλείδωμα, και "**0**" δηλώνει ότι δεν είναι ενεργοποιημένο. Αυτός ο έλεγχος μητρώου, αν και είναι ισχυρός δείκτης, δεν είναι το μόνο βήμα για την ενεργοποίηση του Credential Guard. Λεπτομερείς οδηγίες και ένα σενάριο PowerShell για την ενεργοποίηση αυτής της δυνατότητας είναι διαθέσιμα online.
 ```powershell
 reg query HKLM\System\CurrentControlSet\Control\LSA /v LsaCfgFlags
 ```
+Για μια ολοκληρωμένη κατανόηση και οδηγίες σχετικά με την ενεργοποίηση του **Credential Guard** στα Windows 10 και την αυτόματη ενεργοποίησή του σε συμβατά συστήματα των **Windows 11 Enterprise και Education (έκδοση 22H2)**, επισκεφθείτε [την τεκμηρίωση της Microsoft](https://docs.microsoft.com/en-us/windows/security/identity-protection/credential-guard/credential-guard-manage).
 
-For a comprehensive understanding and instructions on enabling **Credential Guard** in Windows 10 and its automatic activation in compatible systems of **Windows 11 Enterprise and Education (version 22H2)**, visit [Microsoft's documentation](https://docs.microsoft.com/en-us/windows/security/identity-protection/credential-guard/credential-guard-manage).
-
-Further details on implementing custom SSPs for credential capture are provided in [this guide](../active-directory-methodology/custom-ssp.md).
+Περισσότερες λεπτομέρειες σχετικά με την υλοποίηση προσαρμοσμένων SSP για την καταγραφή διαπιστευτηρίων παρέχονται [σε αυτόν τον οδηγό](../active-directory-methodology/custom-ssp.md).
 
 ## RDP RestrictedAdmin Mode
 
-**Windows 8.1 and Windows Server 2012 R2** introduced several new security features, including the _**Restricted Admin mode for RDP**_. This mode was designed to enhance security by mitigating the risks associated with [**pass the hash**](https://blog.ahasayen.com/pass-the-hash/) attacks.
+**Τα Windows 8.1 και Windows Server 2012 R2** εισήγαγαν πολλές νέες δυνατότητες ασφαλείας, συμπεριλαμβανομένης της _**Restricted Admin mode για RDP**_. Αυτή η λειτουργία σχεδιάστηκε για να ενισχύσει την ασφάλεια μειώνοντας τους κινδύνους που σχετίζονται με τις επιθέσεις [**pass the hash**](https://blog.ahasayen.com/pass-the-hash/).
 
-Traditionally, when connecting to a remote computer via RDP, your credentials are stored on the target machine. This poses a significant security risk, especially when using accounts with elevated privileges. However, with the introduction of _**Restricted Admin mode**_, this risk is substantially reduced.
+Παραδοσιακά, όταν συνδέεστε σε έναν απομακρυσμένο υπολογιστή μέσω RDP, τα διαπιστευτήριά σας αποθηκεύονται στη στοχοθετημένη μηχανή. Αυτό συνιστά σημαντικό κίνδυνο ασφαλείας, ειδικά όταν χρησιμοποιείτε λογαριασμούς με αυξημένα δικαιώματα. Ωστόσο, με την εισαγωγή της _**Restricted Admin mode**_, αυτός ο κίνδυνος μειώνεται σημαντικά.
 
-When initiating an RDP connection using the command **mstsc.exe /RestrictedAdmin**, authentication to the remote computer is performed without storing your credentials on it. This approach ensures that, in the event of a malware infection or if a malicious user gains access to the remote server, your credentials are not compromised, as they are not stored on the server.
+Όταν ξεκινάτε μια σύνδεση RDP χρησιμοποιώντας την εντολή **mstsc.exe /RestrictedAdmin**, η αυθεντικοποίηση στον απομακρυσμένο υπολογιστή πραγματοποιείται χωρίς να αποθηκεύονται τα διαπιστευτήριά σας σε αυτόν. Αυτή η προσέγγιση διασφαλίζει ότι, σε περίπτωση μόλυνσης από κακόβουλο λογισμικό ή αν ένας κακόβουλος χρήστης αποκτήσει πρόσβαση στον απομακρυσμένο διακομιστή, τα διαπιστευτήριά σας δεν θα διακυβευτούν, καθώς δεν αποθηκεύονται στον διακομιστή.
 
-It's important to note that in **Restricted Admin mode**, attempts to access network resources from the RDP session will not use your personal credentials; instead, the **machine's identity** is used.
+Είναι σημαντικό να σημειωθεί ότι στη **Restricted Admin mode**, οι προσπάθειες πρόσβασης σε πόρους δικτύου από τη συνεδρία RDP δεν θα χρησιμοποιούν τα προσωπικά σας διαπιστευτήρια. Αντίθετα, χρησιμοποιείται η **ταυτότητα της μηχανής**.
 
-This feature marks a significant step forward in securing remote desktop connections and protecting sensitive information from being exposed in case of a security breach.
+Αυτή η δυνατότητα σηματοδοτεί ένα σημαντικό βήμα προς τα εμπρός στην ασφάλιση των απομακρυσμένων συνδέσεων επιφάνειας εργασίας και στην προστασία ευαίσθητων πληροφοριών από την έκθεση σε περίπτωση παραβίασης ασφαλείας.
 
 ![](../../images/RAM.png)
 
-For more detailed information on visit [this resource](https://blog.ahasayen.com/restricted-admin-mode-for-rdp/).
+Για περισσότερες λεπτομερείς πληροφορίες επισκεφθείτε [αυτή την πηγή](https://blog.ahasayen.com/restricted-admin-mode-for-rdp/).
 
 ## Cached Credentials
 
-Windows secures **domain credentials** through the **Local Security Authority (LSA)**, supporting logon processes with security protocols like **Kerberos** and **NTLM**. A key feature of Windows is its capability to cache the **last ten domain logins** to ensure users can still access their computers even if the **domain controller is offline**—a boon for laptop users often away from their company's network.
+Τα Windows ασφαλίζουν τα **domain credentials** μέσω της **Local Security Authority (LSA)**, υποστηρίζοντας τις διαδικασίες σύνδεσης με πρωτόκολλα ασφαλείας όπως το **Kerberos** και το **NTLM**. Μια βασική δυνατότητα των Windows είναι η ικανότητά τους να αποθηκεύουν στην κρυφή μνήμη τις **τελευταίες δέκα συνδέσεις τομέα** για να διασφαλίσουν ότι οι χρήστες μπορούν να έχουν πρόσβαση στους υπολογιστές τους ακόμη και αν ο **domain controller είναι εκτός σύνδεσης**—ένα πλεονέκτημα για τους χρήστες φορητών υπολογιστών που συχνά βρίσκονται μακριά από το δίκτυο της εταιρείας τους.
 
-The number of cached logins is adjustable via a specific **registry key or group policy**. To view or change this setting, the following command is utilized:
-
+Ο αριθμός των αποθηκευμένων συνδέσεων μπορεί να ρυθμιστεί μέσω ενός συγκεκριμένου **registry key ή group policy**. Για να δείτε ή να αλλάξετε αυτή τη ρύθμιση, χρησιμοποιείται η παρακάτω εντολή:
 ```bash
 reg query "HKEY_LOCAL_MACHINE\SOFTWARE\MICROSOFT\WINDOWS NT\CURRENTVERSION\WINLOGON" /v CACHEDLOGONSCOUNT
 ```
+Η πρόσβαση σε αυτές τις αποθηκευμένες διαπιστεύσεις ελέγχεται αυστηρά, με μόνο τον λογαριασμό **SYSTEM** να έχει τις απαραίτητες άδειες για να τις δει. Οι διαχειριστές που χρειάζονται πρόσβαση σε αυτές τις πληροφορίες πρέπει να το κάνουν με προνόμια χρήστη SYSTEM. Οι διαπιστεύσεις αποθηκεύονται στη διεύθυνση: `HKEY_LOCAL_MACHINE\SECURITY\Cache`
 
-Access to these cached credentials is tightly controlled, with only the **SYSTEM** account having the necessary permissions to view them. Administrators needing to access this information must do so with SYSTEM user privileges. The credentials are stored at: `HKEY_LOCAL_MACHINE\SECURITY\Cache`
+**Mimikatz** μπορεί να χρησιμοποιηθεί για την εξαγωγή αυτών των αποθηκευμένων διαπιστεύσεων χρησιμοποιώντας την εντολή `lsadump::cache`.
 
-**Mimikatz** can be employed to extract these cached credentials using the command `lsadump::cache`.
+Για περισσότερες λεπτομέρειες, η αρχική [πηγή](http://juggernaut.wikidot.com/cached-credentials) παρέχει εκτενή πληροφορίες.
 
-For further details, the original [source](http://juggernaut.wikidot.com/cached-credentials) provides comprehensive information.
+## Προστατευμένοι Χρήστες
 
-## Protected Users
+Η συμμετοχή στην **ομάδα Προστατευμένων Χρηστών** εισάγει αρκετές βελτιώσεις ασφαλείας για τους χρήστες, εξασφαλίζοντας υψηλότερα επίπεδα προστασίας από κλοπή και κακή χρήση διαπιστεύσεων:
 
-Membership in the **Protected Users group** introduces several security enhancements for users, ensuring higher levels of protection against credential theft and misuse:
+- **Δεσμεύσεις Διαπιστεύσεων (CredSSP)**: Ακόμα και αν η ρύθμιση Πολιτικής Ομάδας για **Επιτρέπεται η δέσμευση προεπιλεγμένων διαπιστεύσεων** είναι ενεργοποιημένη, οι διαπιστεύσεις κειμένου απλού των Προστατευμένων Χρηστών δεν θα αποθηκεύονται.
+- **Windows Digest**: Από **Windows 8.1 και Windows Server 2012 R2**, το σύστημα δεν θα αποθηκεύει διαπιστεύσεις κειμένου απλού των Προστατευμένων Χρηστών, ανεξάρτητα από την κατάσταση του Windows Digest.
+- **NTLM**: Το σύστημα δεν θα αποθηκεύει τις διαπιστεύσεις κειμένου απλού των Προστατευμένων Χρηστών ή τις μονοκατευθυντικές συναρτήσεις NT (NTOWF).
+- **Kerberos**: Για τους Προστατευμένους Χρήστες, η πιστοποίηση Kerberos δεν θα δημιουργεί **DES** ή **RC4 κλειδιά**, ούτε θα αποθηκεύει διαπιστεύσεις κειμένου απλού ή μακροχρόνια κλειδιά πέρα από την αρχική απόκτηση του Ticket-Granting Ticket (TGT).
+- **Offline Sign-In**: Οι Προστατευμένοι Χρήστες δεν θα έχουν έναν αποθηκευμένο επαληθευτή που θα δημιουργείται κατά την είσοδο ή την ξεκλείδωμα, πράγμα που σημαίνει ότι η offline είσοδος δεν υποστηρίζεται για αυτούς τους λογαριασμούς.
 
-- **Credential Delegation (CredSSP)**: Even if the Group Policy setting for **Allow delegating default credentials** is enabled, plain text credentials of Protected Users will not be cached.
-- **Windows Digest**: Starting from **Windows 8.1 and Windows Server 2012 R2**, the system will not cache plain text credentials of Protected Users, regardless of the Windows Digest status.
-- **NTLM**: The system will not cache Protected Users' plain text credentials or NT one-way functions (NTOWF).
-- **Kerberos**: For Protected Users, Kerberos authentication will not generate **DES** or **RC4 keys**, nor will it cache plain text credentials or long-term keys beyond the initial Ticket-Granting Ticket (TGT) acquisition.
-- **Offline Sign-In**: Protected Users will not have a cached verifier created at sign-in or unlock, meaning offline sign-in is not supported for these accounts.
+Αυτές οι προστασίες ενεργοποιούνται τη στιγμή που ένας χρήστης, ο οποίος είναι μέλος της **ομάδας Προστατευμένων Χρηστών**, συνδέεται στη συσκευή. Αυτό εξασφαλίζει ότι κρίσιμα μέτρα ασφαλείας είναι σε εφαρμογή για την προστασία από διάφορες μεθόδους παραβίασης διαπιστεύσεων.
 
-These protections are activated the moment a user, who is a member of the **Protected Users group**, signs into the device. This ensures that critical security measures are in place to safeguard against various methods of credential compromise.
+Για περισσότερες λεπτομέρειες, ανατρέξτε στην επίσημη [τεκμηρίωση](https://docs.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/protected-users-security-group).
 
-For more detailed information, consult the official [documentation](https://docs.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/protected-users-security-group).
-
-**Table from** [**the docs**](https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/appendix-c--protected-accounts-and-groups-in-active-directory)**.**
+**Πίνακας από** [**την τεκμηρίωση**](https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/appendix-c--protected-accounts-and-groups-in-active-directory)**.**
 
 | Windows Server 2003 RTM | Windows Server 2003 SP1+ | <p>Windows Server 2012,<br>Windows Server 2008 R2,<br>Windows Server 2008</p> | Windows Server 2016          |
 | ----------------------- | ------------------------ | ----------------------------------------------------------------------------- | ---------------------------- |
@@ -116,4 +106,3 @@ For more detailed information, consult the official [documentation](https://docs
 | Server Operators        | Server Operators         | Server Operators                                                              | Server Operators             |
 
 {{#include ../../banners/hacktricks-training.md}}
-

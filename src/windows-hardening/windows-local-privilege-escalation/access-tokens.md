@@ -4,10 +4,9 @@
 
 ## Access Tokens
 
-Each **user logged** onto the system **holds an access token with security information** for that logon session. The system creates an access token when the user logs on. **Every process executed** on behalf of the user **has a copy of the access token**. The token identifies the user, the user's groups, and the user's privileges. A token also contains a logon SID (Security Identifier) that identifies the current logon session.
+Κάθε **χρήστης που έχει συνδεθεί** στο σύστημα **κρατά ένα access token με πληροφορίες ασφαλείας** για αυτή τη συνεδρία σύνδεσης. Το σύστημα δημιουργεί ένα access token όταν ο χρήστης συνδέεται. **Κάθε διαδικασία που εκτελείται** εκ μέρους του χρήστη **έχει ένα αντίγραφο του access token**. Το token προσδιορίζει τον χρήστη, τις ομάδες του χρήστη και τα δικαιώματα του χρήστη. Ένα token περιέχει επίσης ένα logon SID (Security Identifier) που προσδιορίζει την τρέχουσα συνεδρία σύνδεσης.
 
-You can see this information executing `whoami /all`
-
+Μπορείτε να δείτε αυτές τις πληροφορίες εκτελώντας `whoami /all`
 ```
 whoami /all
 
@@ -51,61 +50,55 @@ SeUndockPrivilege             Remove computer from docking station Disabled
 SeIncreaseWorkingSetPrivilege Increase a process working set       Disabled
 SeTimeZonePrivilege           Change the time zone                 Disabled
 ```
-
-or using _Process Explorer_ from Sysinternals (select process and access"Security" tab):
+ή χρησιμοποιώντας το _Process Explorer_ από τη Sysinternals (επιλέξτε τη διαδικασία και πρόσβαση στην καρτέλα "Security"):
 
 ![](<../../images/image (772).png>)
 
-### Local administrator
+### Τοπικός διαχειριστής
 
-When a local administrator logins, **two access tokens are created**: One with admin rights and other one with normal rights. **By default**, when this user executes a process the one with **regular** (non-administrator) **rights is used**. When this user tries to **execute** anything **as administrator** ("Run as Administrator" for example) the **UAC** will be used to ask for permission.\
-If you want to [**learn more about the UAC read this page**](../authentication-credentials-uac-and-efs/#uac)**.**
+Όταν ένας τοπικός διαχειριστής συνδέεται, **δημιουργούνται δύο διαπιστευτήρια πρόσβασης**: Ένα με δικαιώματα διαχειριστή και ένα άλλο με κανονικά δικαιώματα. **Από προεπιλογή**, όταν αυτός ο χρήστης εκτελεί μια διαδικασία, χρησιμοποιείται το **κανονικό** (μη διαχειριστή) **δικαίωμα**. Όταν αυτός ο χρήστης προσπαθεί να **εκτελέσει** οτιδήποτε **ως διαχειριστής** ("Εκτέλεση ως Διαχειριστής" για παράδειγμα), θα χρησιμοποιηθεί το **UAC** για να ζητήσει άδεια.\
+Αν θέλετε να [**μάθετε περισσότερα για το UAC διαβάστε αυτή τη σελίδα**](../authentication-credentials-uac-and-efs/#uac)**.**
 
-### Credentials user impersonation
+### Υποκατάσταση ταυτοτήτων χρηστών
 
-If you have **valid credentials of any other user**, you can **create** a **new logon session** with those credentials :
-
+Αν έχετε **έγκυρα διαπιστευτήρια οποιουδήποτε άλλου χρήστη**, μπορείτε να **δημιουργήσετε** μια **νέα συνεδρία σύνδεσης** με αυτά τα διαπιστευτήρια:
 ```
 runas /user:domain\username cmd.exe
 ```
-
-The **access token** has also a **reference** of the logon sessions inside the **LSASS**, this is useful if the process needs to access some objects of the network.\
-You can launch a process that **uses different credentials for accessing network services** using:
-
+Το **access token** έχει επίσης μια **αναφορά** των συνεδριών σύνδεσης μέσα στο **LSASS**, αυτό είναι χρήσιμο αν η διαδικασία χρειάζεται να έχει πρόσβαση σε ορισμένα αντικείμενα του δικτύου.\
+Μπορείτε να εκκινήσετε μια διαδικασία που **χρησιμοποιεί διαφορετικά διαπιστευτήρια για την πρόσβαση σε υπηρεσίες δικτύου** χρησιμοποιώντας:
 ```
 runas /user:domain\username /netonly cmd.exe
 ```
+Αυτό είναι χρήσιμο αν έχετε χρήσιμα διαπιστευτήρια για να αποκτήσετε πρόσβαση σε αντικείμενα στο δίκτυο, αλλά αυτά τα διαπιστευτήρια δεν είναι έγκυρα μέσα στον τρέχοντα υπολογιστή, καθώς θα χρησιμοποιηθούν μόνο στο δίκτυο (στον τρέχοντα υπολογιστή θα χρησιμοποιηθούν τα δικαιώματα του τρέχοντος χρήστη σας).
 
-This is useful if you have useful credentials to access objects in the network but those credentials aren't valid inside the current host as they are only going to be used in the network (in the current host your current user privileges will be used).
+### Τύποι διακριτικών
 
-### Types of tokens
+Υπάρχουν δύο τύποι διακριτικών διαθέσιμα:
 
-There are two types of tokens available:
+- **Πρωτεύον Διακριτικό**: Λειτουργεί ως αναπαράσταση των διαπιστευτηρίων ασφαλείας μιας διαδικασίας. Η δημιουργία και η συσχέτιση πρωτευόντων διακριτικών με διαδικασίες είναι ενέργειες που απαιτούν ανυψωμένα δικαιώματα, τονίζοντας την αρχή του διαχωρισμού των δικαιωμάτων. Συνήθως, μια υπηρεσία πιστοποίησης είναι υπεύθυνη για τη δημιουργία διακριτικών, ενώ μια υπηρεσία σύνδεσης χειρίζεται τη συσχέτισή τους με το περιβάλλον λειτουργικού συστήματος του χρήστη. Αξίζει να σημειωθεί ότι οι διαδικασίες κληρονομούν το πρωτεύον διακριτικό της γονικής τους διαδικασίας κατά τη δημιουργία.
+- **Διακριτικό Υποκατάστασης**: Δίνει τη δυνατότητα σε μια εφαρμογή διακομιστή να υιοθετήσει προσωρινά την ταυτότητα του πελάτη για την πρόσβαση σε ασφαλή αντικείμενα. Αυτός ο μηχανισμός είναι διαστρωμένος σε τέσσερα επίπεδα λειτουργίας:
+- **Ανώνυμο**: Παρέχει πρόσβαση στο διακομιστή παρόμοια με αυτήν ενός μη αναγνωρίσιμου χρήστη.
+- **Ταυτοποίηση**: Επιτρέπει στο διακομιστή να επαληθεύσει την ταυτότητα του πελάτη χωρίς να τη χρησιμοποιήσει για πρόσβαση σε αντικείμενα.
+- **Υποκατάσταση**: Δίνει τη δυνατότητα στο διακομιστή να λειτουργεί υπό την ταυτότητα του πελάτη.
+- **Ανάθεση**: Παρόμοιο με την Υποκατάσταση αλλά περιλαμβάνει τη δυνατότητα να επεκτείνει αυτήν την υπόθεση ταυτότητας σε απομακρυσμένα συστήματα με τα οποία αλληλεπιδρά ο διακομιστής, διασφαλίζοντας τη διατήρηση των διαπιστευτηρίων.
 
-- **Primary Token**: It serves as a representation of a process's security credentials. The creation and association of primary tokens with processes are actions that require elevated privileges, emphasizing the principle of privilege separation. Typically, an authentication service is responsible for token creation, while a logon service handles its association with the user's operating system shell. It is worth noting that processes inherit the primary token of their parent process at creation.
-- **Impersonation Token**: Empowers a server application to adopt the client's identity temporarily for accessing secure objects. This mechanism is stratified into four levels of operation:
-  - **Anonymous**: Grants server access akin to that of an unidentified user.
-  - **Identification**: Allows the server to verify the client's identity without utilizing it for object access.
-  - **Impersonation**: Enables the server to operate under the client's identity.
-  - **Delegation**: Similar to Impersonation but includes the ability to extend this identity assumption to remote systems the server interacts with, ensuring credential preservation.
+#### Υποκατάσταση Διακριτικών
 
-#### Impersonate Tokens
+Χρησιμοποιώντας το _**incognito**_ module του metasploit, αν έχετε αρκετά δικαιώματα, μπορείτε εύκολα να **καταγράψετε** και να **υποκαταστήσετε** άλλα **διακριτικά**. Αυτό θα μπορούσε να είναι χρήσιμο για να εκτελέσετε **ενέργειες σαν να ήσασταν ο άλλος χρήστης**. Μπορείτε επίσης να **ανεβάσετε δικαιώματα** με αυτήν την τεχνική.
 
-Using the _**incognito**_ module of metasploit if you have enough privileges you can easily **list** and **impersonate** other **tokens**. This could be useful to perform **actions as if you where the other user**. You could also **escalate privileges** with this technique.
+### Δικαιώματα Διακριτικών
 
-### Token Privileges
-
-Learn which **token privileges can be abused to escalate privileges:**
+Μάθετε ποια **δικαιώματα διακριτικών μπορούν να καταχραστούν για να ανεβάσουν δικαιώματα:**
 
 {{#ref}}
 privilege-escalation-abusing-tokens.md
 {{#endref}}
 
-Take a look to [**all the possible token privileges and some definitions on this external page**](https://github.com/gtworek/Priv2Admin).
+Ρίξτε μια ματιά σε [**όλα τα πιθανά δικαιώματα διακριτικών και μερικούς ορισμούς σε αυτήν την εξωτερική σελίδα**](https://github.com/gtworek/Priv2Admin).
 
-## References
+## Αναφορές
 
-Learn more about tokens in this tutorials: [https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa](https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa) and [https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)
+Μάθετε περισσότερα για τα διακριτικά σε αυτά τα σεμινάρια: [https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa](https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa) και [https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)
 
 {{#include ../../banners/hacktricks-training.md}}
-

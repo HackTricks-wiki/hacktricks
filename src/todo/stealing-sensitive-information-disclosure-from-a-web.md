@@ -1,14 +1,13 @@
-# Stealing Sensitive Information Disclosure from a Web
+# Κλοπή Ευαίσθητης Πληροφορίας από μια Ιστοσελίδα
 
 {{#include ../banners/hacktricks-training.md}}
 
-If at some point you find a **web page that presents you sensitive information based on your session**: Maybe it's reflecting cookies, or printing or CC details or any other sensitive information, you may try to steal it.\
-Here I present you the main ways to can try to achieve it:
+Αν σε κάποια στιγμή βρείτε μια **ιστοσελίδα που σας παρουσιάζει ευαίσθητες πληροφορίες με βάση τη συνεδρία σας**: Ίσως να αντικατοπτρίζει cookies, ή να εκτυπώνει ή λεπτομέρειες CC ή οποιαδήποτε άλλη ευαίσθητη πληροφορία, μπορείτε να προσπαθήσετε να την κλέψετε.\
+Εδώ σας παρουσιάζω τους κύριους τρόπους που μπορείτε να προσπαθήσετε να το πετύχετε:
 
-- [**CORS bypass**](../pentesting-web/cors-bypass.md): If you can bypass CORS headers you will be able to steal the information performing Ajax request for a malicious page.
-- [**XSS**](../pentesting-web/xss-cross-site-scripting/): If you find a XSS vulnerability on the page you may be able to abuse it to steal the information.
-- [**Danging Markup**](../pentesting-web/dangling-markup-html-scriptless-injection/): If you cannot inject XSS tags you still may be able to steal the info using other regular HTML tags.
-- [**Clickjaking**](../pentesting-web/clickjacking.md): If there is no protection against this attack, you may be able to trick the user into sending you the sensitive data (an example [here](https://medium.com/bugbountywriteup/apache-example-servlet-leads-to-61a2720cac20)).
+- [**CORS bypass**](../pentesting-web/cors-bypass.md): Αν μπορείτε να παρακάμψετε τα CORS headers θα είστε σε θέση να κλέψετε τις πληροφορίες εκτελώντας Ajax αίτημα για μια κακόβουλη σελίδα.
+- [**XSS**](../pentesting-web/xss-cross-site-scripting/): Αν βρείτε μια ευπάθεια XSS στη σελίδα, μπορεί να είστε σε θέση να την εκμεταλλευτείτε για να κλέψετε τις πληροφορίες.
+- [**Danging Markup**](../pentesting-web/dangling-markup-html-scriptless-injection/): Αν δεν μπορείτε να εισάγετε XSS tags, μπορεί ακόμα να είστε σε θέση να κλέψετε τις πληροφορίες χρησιμοποιώντας άλλες κανονικές HTML tags.
+- [**Clickjaking**](../pentesting-web/clickjacking.md): Αν δεν υπάρχει προστασία κατά αυτής της επίθεσης, μπορεί να είστε σε θέση να παραπλανήσετε τον χρήστη να σας στείλει τα ευαίσθητα δεδομένα (ένα παράδειγμα [εδώ](https://medium.com/bugbountywriteup/apache-example-servlet-leads-to-61a2720cac20)).
 
 {{#include ../banners/hacktricks-training.md}}
-

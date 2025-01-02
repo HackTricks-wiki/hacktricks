@@ -1,29 +1,28 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-**The original post is** [**https://itm4n.github.io/windows-registry-rpceptmapper-eop/**](https://itm4n.github.io/windows-registry-rpceptmapper-eop/)
+**Η αρχική ανάρτηση είναι** [**https://itm4n.github.io/windows-registry-rpceptmapper-eop/**](https://itm4n.github.io/windows-registry-rpceptmapper-eop/)
 
-## Summary
+## Περίληψη
 
-Two registry keys were found to be writable by the current user:
+Δύο κλειδιά μητρώου βρέθηκαν ότι είναι εγγράψιμα από τον τρέχοντα χρήστη:
 
 - **`HKLM\SYSTEM\CurrentControlSet\Services\Dnscache`**
 - **`HKLM\SYSTEM\CurrentControlSet\Services\RpcEptMapper`**
 
-It was suggested to check the permissions of the **RpcEptMapper** service using the **regedit GUI**, specifically the **Advanced Security Settings** window's **Effective Permissions** tab. This approach enables the assessment of granted permissions to specific users or groups without the need to examine each Access Control Entry (ACE) individually.
+Προτάθηκε να ελεγχθούν οι άδειες της υπηρεσίας **RpcEptMapper** χρησιμοποιώντας το **regedit GUI**, συγκεκριμένα την καρτέλα **Effective Permissions** του παραθύρου **Advanced Security Settings**. Αυτή η προσέγγιση επιτρέπει την αξιολόγηση των παραχωρημένων αδειών σε συγκεκριμένους χρήστες ή ομάδες χωρίς την ανάγκη να εξεταστεί κάθε Access Control Entry (ACE) ξεχωριστά.
 
-A screenshot showed the permissions assigned to a low-privileged user, among which the **Create Subkey** permission was notable. This permission, also referred to as **AppendData/AddSubdirectory**, corresponds with the script's findings.
+Μια στιγμιότυπη οθόνη έδειξε τις άδειες που αποδόθηκαν σε έναν χρήστη με χαμηλά προνόμια, μεταξύ των οποίων η άδεια **Create Subkey** ήταν αξιοσημείωτη. Αυτή η άδεια, που αναφέρεται επίσης ως **AppendData/AddSubdirectory**, αντιστοιχεί με τα ευρήματα του σεναρίου.
 
-The inability to modify certain values directly, yet the capability to create new subkeys, was noted. An example highlighted was an attempt to alter the **ImagePath** value, which resulted in an access denied message.
+Η αδυναμία τροποποίησης ορισμένων τιμών άμεσα, αλλά η ικανότητα δημιουργίας νέων υποκλειδιών, παρατηρήθηκε. Ένα παράδειγμα που τονίστηκε ήταν μια προσπάθεια να αλλάξει η τιμή **ImagePath**, η οποία είχε ως αποτέλεσμα ένα μήνυμα πρόσβασης απαγορευμένης.
 
-Despite these limitations, a potential for privilege escalation was identified through the possibility of leveraging the **Performance** subkey within the **RpcEptMapper** service's registry structure, a subkey not present by default. This could enable DLL registration and performance monitoring.
+Παρά αυτούς τους περιορισμούς, εντοπίστηκε μια πιθανότητα για κλιμάκωση προνομίων μέσω της δυνατότητας εκμετάλλευσης του υποκλειδιού **Performance** μέσα στη δομή μητρώου της υπηρεσίας **RpcEptMapper**, ένα υποκλειδί που δεν υπάρχει από προεπιλογή. Αυτό θα μπορούσε να επιτρέψει την εγγραφή DLL και την παρακολούθηση απόδοσης.
 
-Documentation on the **Performance** subkey and its utilization for performance monitoring was consulted, leading to the development of a proof-of-concept DLL. This DLL, demonstrating the implementation of **OpenPerfData**, **CollectPerfData**, and **ClosePerfData** functions, was tested via **rundll32**, confirming its operational success.
+Συμβουλευτήκαμε τεκμηρίωση σχετικά με το υποκλειδί **Performance** και τη χρήση του για παρακολούθηση απόδοσης, οδηγώντας στην ανάπτυξη ενός αποδεικτικού DLL. Αυτό το DLL, που αποδεικνύει την υλοποίηση των συναρτήσεων **OpenPerfData**, **CollectPerfData** και **ClosePerfData**, δοκιμάστηκε μέσω **rundll32**, επιβεβαιώνοντας την επιτυχία της λειτουργίας του.
 
-The goal was to coerce the **RPC Endpoint Mapper service** into loading the crafted Performance DLL. Observations revealed that executing WMI class queries related to Performance Data via PowerShell resulted in the creation of a log file, enabling the execution of arbitrary code under the **LOCAL SYSTEM** context, thus granting elevated privileges.
+Ο στόχος ήταν να αναγκαστεί η υπηρεσία **RPC Endpoint Mapper** να φορτώσει το κατασκευασμένο DLL απόδοσης. Παρατηρήσεις αποκάλυψαν ότι η εκτέλεση ερωτημάτων WMI κλάσεων που σχετίζονται με τα Δεδομένα Απόδοσης μέσω PowerShell είχε ως αποτέλεσμα τη δημιουργία ενός αρχείου καταγραφής, επιτρέποντας την εκτέλεση αυθαίρετου κώδικα υπό το πλαίσιο **LOCAL SYSTEM**, παρέχοντας έτσι ανυψωμένα προνόμια.
 
-The persistence and potential implications of this vulnerability were underscored, highlighting its relevance for post-exploitation strategies, lateral movement, and evasion of antivirus/EDR systems.
+Η επιμονή και οι πιθανές επιπτώσεις αυτής της ευπάθειας υπογραμμίστηκαν, τονίζοντας τη σημασία της για στρατηγικές μετά την εκμετάλλευση, πλευρική κίνηση και αποφυγή συστημάτων antivirus/EDR.
 
-Although the vulnerability was initially disclosed unintentionally through the script, it was emphasized that its exploitation is constrained to outdated Windows versions (e.g., **Windows 7 / Server 2008 R2**) and requires local access.
+Αν και η ευπάθεια αποκαλύφθηκε αρχικά ακούσια μέσω του σεναρίου, τονίστηκε ότι η εκμετάλλευσή της περιορίζεται σε παλαιότερες εκδόσεις των Windows (π.χ. **Windows 7 / Server 2008 R2**) και απαιτεί τοπική πρόσβαση.
 
 {{#include ../../banners/hacktricks-training.md}}
-

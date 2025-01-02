@@ -4,18 +4,17 @@
 
 ## Diamond Ticket
 
-**Like a golden ticket**, a diamond ticket is a TGT which can be used to **access any service as any user**. A golden ticket is forged completely offline, encrypted with the krbtgt hash of that domain, and then passed into a logon session for use. Because domain controllers don't track TGTs it (or they) have legitimately issued, they will happily accept TGTs that are encrypted with its own krbtgt hash.
+**Όπως ένα χρυσό εισιτήριο**, ένα διαμαντένιο εισιτήριο είναι ένα TGT που μπορεί να χρησιμοποιηθεί για **πρόσβαση σε οποιαδήποτε υπηρεσία ως οποιοσδήποτε χρήστης**. Ένα χρυσό εισιτήριο κατασκευάζεται εντελώς εκτός σύνδεσης, κρυπτογραφημένο με το hash krbtgt αυτού του τομέα, και στη συνέχεια εισάγεται σε μια συνεδρία σύνδεσης για χρήση. Δεδομένου ότι οι ελεγκτές τομέα δεν παρακολουθούν τα TGT που έχουν εκδοθεί νόμιμα, θα αποδεχτούν ευχαρίστως TGT που είναι κρυπτογραφημένα με το δικό τους hash krbtgt.
 
-There are two common techniques to detect the use of golden tickets:
+Υπάρχουν δύο κοινές τεχνικές για την ανίχνευση της χρήσης χρυσών εισιτηρίων:
 
-- Look for TGS-REQs that have no corresponding AS-REQ.
-- Look for TGTs that have silly values, such as Mimikatz's default 10-year lifetime.
+- Αναζητήστε TGS-REQ που δεν έχουν αντίστοιχο AS-REQ.
+- Αναζητήστε TGT που έχουν ανόητες τιμές, όπως η προεπιλεγμένη διάρκεια ζωής 10 ετών του Mimikatz.
 
-A **diamond ticket** is made by **modifying the fields of a legitimate TGT that was issued by a DC**. This is achieved by **requesting** a **TGT**, **decrypting** it with the domain's krbtgt hash, **modifying** the desired fields of the ticket, then **re-encrypting it**. This **overcomes the two aforementioned shortcomings** of a golden ticket because:
+Ένα **διαμαντένιο εισιτήριο** δημιουργείται με **την τροποποίηση των πεδίων ενός νόμιμου TGT που εκδόθηκε από έναν DC**. Αυτό επιτυγχάνεται με **την αίτηση** ενός **TGT**, **την αποκρυπτογράφηση** του με το hash krbtgt του τομέα, **την τροποποίηση** των επιθυμητών πεδίων του εισιτηρίου και στη συνέχεια **την επανακρυπτογράφηση** του. Αυτό **ξεπερνά τα δύο προαναφερθέντα μειονεκτήματα** ενός χρυσού εισιτηρίου επειδή:
 
-- TGS-REQs will have a preceding AS-REQ.
-- The TGT was issued by a DC which means it will have all the correct details from the domain's Kerberos policy. Even though these can be accurately forged in a golden ticket, it's more complex and open to mistakes.
-
+- Τα TGS-REQ θα έχουν έναν προηγούμενο AS-REQ.
+- Το TGT εκδόθηκε από έναν DC, πράγμα που σημαίνει ότι θα έχει όλες τις σωστές λεπτομέρειες από την πολιτική Kerberos του τομέα. Αν και αυτά μπορούν να κατασκευαστούν με ακρίβεια σε ένα χρυσό εισιτήριο, είναι πιο περίπλοκο και επιρρεπές σε λάθη.
 ```bash
 # Get user RID
 powershell Get-DomainUser -Identity <username> -Properties objectsid
@@ -28,6 +27,4 @@ powershell Get-DomainUser -Identity <username> -Properties objectsid
 # /groups are the desired group RIDs (512 being Domain Admins).
 # /krbkey is the krbtgt AES256 hash.
 ```
-
 {{#include ../../banners/hacktricks-training.md}}
-

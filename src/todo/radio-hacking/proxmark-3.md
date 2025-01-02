@@ -2,18 +2,17 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Attacking RFID Systems with Proxmark3
+## Επίθεση σε Συστήματα RFID με Proxmark3
 
-The first thing you need to do is to have a [**Proxmark3**](https://proxmark.com) and [**install the software and it's dependencie**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux)[**s**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux).
+Το πρώτο πράγμα που πρέπει να κάνετε είναι να έχετε ένα [**Proxmark3**](https://proxmark.com) και [**να εγκαταστήσετε το λογισμικό και τις εξαρτήσεις του**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux)[**s**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux).
 
-### Attacking MIFARE Classic 1KB
+### Επίθεση σε MIFARE Classic 1KB
 
-It has **16 sectors**, each of them has **4 blocks** and each block contains **16B**. The UID is in sector 0 block 0 (and can't be altered).\
-To access each sector you need **2 keys** (**A** and **B**) which are stored in **block 3 of each sector** (sector trailer). The sector trailer also stores the **access bits** that give the **read and write** permissions on **each block** using the 2 keys.\
-2 keys are useful to give permissions to read if you know the first one and write if you know the second one (for example).
+Έχει **16 τομείς**, κάθε ένας από αυτούς έχει **4 μπλοκ** και κάθε μπλοκ περιέχει **16B**. Το UID βρίσκεται στον τομέα 0 μπλοκ 0 (και δεν μπορεί να αλλάξει).\
+Για να αποκτήσετε πρόσβαση σε κάθε τομέα χρειάζεστε **2 κλειδιά** (**A** και **B**) που αποθηκεύονται στο **μπλοκ 3 κάθε τομέα** (trailer τομέα). Το trailer τομέα αποθηκεύει επίσης τα **bits πρόσβασης** που δίνουν τις **άδειες ανάγνωσης και εγγραφής** σε **κάθε μπλοκ** χρησιμοποιώντας τα 2 κλειδιά.\
+2 κλειδιά είναι χρήσιμα για να δώσουν άδειες ανάγνωσης αν γνωρίζετε το πρώτο και εγγραφής αν γνωρίζετε το δεύτερο (για παράδειγμα).
 
-Several attacks can be performed
-
+Μπορούν να εκτελούνται αρκετές επιθέσεις
 ```bash
 proxmark3> hf mf #List attacks
 
@@ -32,34 +31,28 @@ proxmark3> hf mf eset 01 000102030405060708090a0b0c0d0e0f # Write those bytes to
 proxmark3> hf mf eget 01 # Read block 1
 proxmark3> hf mf wrbl 01 B FFFFFFFFFFFF 000102030405060708090a0b0c0d0e0f # Write to the card
 ```
+Το Proxmark3 επιτρέπει την εκτέλεση άλλων ενεργειών όπως **παρακολούθηση** της **επικοινωνίας Tag προς Reader** για να προσπαθήσετε να βρείτε ευαίσθητα δεδομένα. Σε αυτή την κάρτα μπορείτε απλώς να καταγράψετε την επικοινωνία και να υπολογίσετε το χρησιμοποιούμενο κλειδί επειδή οι **κρυπτογραφικές λειτουργίες που χρησιμοποιούνται είναι αδύναμες** και γνωρίζοντας το απλό και το κρυπτογραφημένο κείμενο μπορείτε να το υπολογίσετε (εργαλείο `mfkey64`).
 
-The Proxmark3 allows to perform other actions like **eavesdropping** a **Tag to Reader communication** to try to find sensitive data. In this card you could just sniff the communication with and calculate the used key because the **cryptographic operations used are weak** and knowing the plain and cipher text you can calculate it (`mfkey64` tool).
+### Ακατέργαστες Εντολές
 
-### Raw Commands
-
-IoT systems sometimes use **nonbranded or noncommercial tags**. In this case, you can use Proxmark3 to send custom **raw commands to the tags**.
-
+Τα συστήματα IoT μερικές φορές χρησιμοποιούν **μη επώνυμα ή μη εμπορικά tags**. Σε αυτή την περίπτωση, μπορείτε να χρησιμοποιήσετε το Proxmark3 για να στείλετε προσαρμοσμένες **ακατέργαστες εντολές στα tags**.
 ```bash
 proxmark3> hf search UID : 80 55 4b 6c ATQA : 00 04
 SAK : 08 [2]
 TYPE : NXP MIFARE CLASSIC 1k | Plus 2k SL1
-  proprietary non iso14443-4 card found, RATS not supported
-  No chinese magic backdoor command detected
-  Prng detection: WEAK
-  Valid ISO14443A Tag Found - Quiting Search
+proprietary non iso14443-4 card found, RATS not supported
+No chinese magic backdoor command detected
+Prng detection: WEAK
+Valid ISO14443A Tag Found - Quiting Search
 ```
-
-With this information you could try to search information about the card and about the way to communicate with it. Proxmark3 allows to send raw commands like: `hf 14a raw -p -b 7 26`
+Με αυτές τις πληροφορίες μπορείτε να προσπαθήσετε να αναζητήσετε πληροφορίες σχετικά με την κάρτα και για τον τρόπο επικοινωνίας μαζί της. Το Proxmark3 επιτρέπει την αποστολή ωμών εντολών όπως: `hf 14a raw -p -b 7 26`
 
 ### Scripts
 
-The Proxmark3 software comes with a preloaded list of **automation scripts** that you can use to perform simple tasks. To retrieve the full list, use the `script list` command. Next, use the `script run` command, followed by the script’s name:
-
+Το λογισμικό Proxmark3 έρχεται με μια προφορτωμένη λίστα **σεναρίων αυτοματοποίησης** που μπορείτε να χρησιμοποιήσετε για να εκτελέσετε απλές εργασίες. Για να ανακτήσετε τη πλήρη λίστα, χρησιμοποιήστε την εντολή `script list`. Στη συνέχεια, χρησιμοποιήστε την εντολή `script run`, ακολουθούμενη από το όνομα του σεναρίου:
 ```
 proxmark3> script run mfkeys
 ```
-
-You can create a script to **fuzz tag readers**, so copying the data of a **valid card** just write a **Lua script** that **randomize** one or more random **bytes** and check if the **reader crashes** with any iteration.
+Μπορείτε να δημιουργήσετε ένα σενάριο για **fuzz tag readers**, οπότε αντιγράψτε τα δεδομένα μιας **έγκυρης κάρτας** απλά γράφοντας ένα **Lua script** που **τυχαία** ένα ή περισσότερα τυχαία **bytes** και ελέγξτε αν ο **αναγνώστης καταρρέει** με οποιαδήποτε επανάληψη.
 
 {{#include ../../banners/hacktricks-training.md}}
-

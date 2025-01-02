@@ -1,13 +1,12 @@
-# External Forest Domain - One-Way (Outbound)
+# Εξωτερικό Δάσος Τομέα - Μονοκατεύθυνση (Εξόδου)
 
 {{#include ../../banners/hacktricks-training.md}}
 
-In this scenario **your domain** is **trusting** some **privileges** to principal from a **different domains**.
+Σε αυτό το σενάριο **ο τομέας σας** **εμπιστεύεται** κάποιες **privileges** σε κύριο από **διαφορετικούς τομείς**.
 
-## Enumeration
+## Αριθμητική
 
-### Outbound Trust
-
+### Εμπιστοσύνη Εξόδου
 ```powershell
 # Notice Outbound trust
 Get-DomainTrust
@@ -29,56 +28,46 @@ MemberName              : S-1-5-21-1028541967-2937615241-1935644758-1115
 MemberDistinguishedName : CN=S-1-5-21-1028541967-2937615241-1935644758-1115,CN=ForeignSecurityPrincipals,DC=DOMAIN,DC=LOCAL
 ## Note how the members aren't from the current domain (ConvertFrom-SID won't work)
 ```
+## Επίθεση Λογαριασμού Εμπιστοσύνης
 
-## Trust Account Attack
+Μια ευπάθεια ασφαλείας υπάρχει όταν μια σχέση εμπιστοσύνης καθορίζεται μεταξύ δύο τομέων, που αναγνωρίζονται εδώ ως τομέας **A** και τομέας **B**, όπου ο τομέας **B** επεκτείνει την εμπιστοσύνη του στον τομέα **A**. Σε αυτή τη ρύθμιση, δημιουργείται ένας ειδικός λογαριασμός στον τομέα **A** για τον τομέα **B**, ο οποίος παίζει κρίσιμο ρόλο στη διαδικασία αυθεντικοποίησης μεταξύ των δύο τομέων. Αυτός ο λογαριασμός, που σχετίζεται με τον τομέα **B**, χρησιμοποιείται για την κρυπτογράφηση εισιτηρίων για την πρόσβαση σε υπηρεσίες μεταξύ των τομέων.
 
-A security vulnerability exists when a trust relationship is established between two domains, identified here as domain **A** and domain **B**, where domain **B** extends its trust to domain **A**. In this setup, a special account is created in domain **A** for domain **B**, which plays a crucial role in the authentication process between the two domains. This account, associated with domain **B**, is utilized for encrypting tickets for accessing services across the domains.
-
-The critical aspect to understand here is that the password and hash of this special account can be extracted from a Domain Controller in domain **A** using a command line tool. The command to perform this action is:
-
+Η κρίσιμη πτυχή που πρέπει να κατανοηθεί εδώ είναι ότι ο κωδικός πρόσβασης και το hash αυτού του ειδικού λογαριασμού μπορούν να εξαχθούν από έναν Domain Controller στον τομέα **A** χρησιμοποιώντας ένα εργαλείο γραμμής εντολών. Η εντολή για την εκτέλεση αυτής της ενέργειας είναι:
 ```powershell
 Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.my.domain.local
 ```
+Αυτή η εξαγωγή είναι δυνατή επειδή ο λογαριασμός, που αναγνωρίζεται με ένα **$** μετά το όνομά του, είναι ενεργός και ανήκει στην ομάδα "Domain Users" του τομέα **A**, κληρονομώντας έτσι τις άδειες που σχετίζονται με αυτή την ομάδα. Αυτό επιτρέπει σε άτομα να αυθεντικοποιούνται στον τομέα **A** χρησιμοποιώντας τα διαπιστευτήρια αυτού του λογαριασμού.
 
-This extraction is possible because the account, identified with a **$** after its name, is active and belongs to the "Domain Users" group of domain **A**, thereby inheriting permissions associated with this group. This allows individuals to authenticate against domain **A** using the credentials of this account.
+**Προειδοποίηση:** Είναι εφικτό να εκμεταλλευτεί κανείς αυτή την κατάσταση για να αποκτήσει πρόσβαση στον τομέα **A** ως χρήστης, αν και με περιορισμένες άδειες. Ωστόσο, αυτή η πρόσβαση είναι επαρκής για να εκτελέσει καταμέτρηση στον τομέα **A**.
 
-**Warning:** It is feasible to leverage this situation to gain a foothold in domain **A** as a user, albeit with limited permissions. However, this access is sufficient to perform enumeration on domain **A**.
-
-In a scenario where `ext.local` is the trusting domain and `root.local` is the trusted domain, a user account named `EXT$` would be created within `root.local`. Through specific tools, it is possible to dump the Kerberos trust keys, revealing the credentials of `EXT$` in `root.local`. The command to achieve this is:
-
+Σε ένα σενάριο όπου το `ext.local` είναι ο τομέας εμπιστοσύνης και το `root.local` είναι ο εμπιστευμένος τομέας, θα δημιουργηθεί ένας λογαριασμός χρήστη με το όνομα `EXT$` εντός του `root.local`. Μέσω συγκεκριμένων εργαλείων, είναι δυνατό να εκφορτωθούν τα κλειδιά εμπιστοσύνης Kerberos, αποκαλύπτοντας τα διαπιστευτήρια του `EXT$` στο `root.local`. Η εντολή για να επιτευχθεί αυτό είναι:
 ```bash
 lsadump::trust /patch
 ```
-
-Following this, one could use the extracted RC4 key to authenticate as `root.local\EXT$` within `root.local` using another tool command:
-
+Ακολουθώντας αυτό, θα μπορούσε κανείς να χρησιμοποιήσει το εξαγόμενο κλειδί RC4 για να πιστοποιηθεί ως `root.local\EXT$` εντός του `root.local` χρησιμοποιώντας μια άλλη εντολή εργαλείου:
 ```bash
 .\Rubeus.exe asktgt /user:EXT$ /domain:root.local /rc4:<RC4> /dc:dc.root.local /ptt
 ```
-
-This authentication step opens up the possibility to enumerate and even exploit services within `root.local`, such as performing a Kerberoast attack to extract service account credentials using:
-
+Αυτό το βήμα αυθεντικοποίησης ανοίγει τη δυνατότητα να καταμετρήσουμε και ακόμη και να εκμεταλλευτούμε υπηρεσίες εντός του `root.local`, όπως η εκτέλεση μιας επίθεσης Kerberoast για την εξαγωγή διαπιστευτηρίων λογαριασμού υπηρεσίας χρησιμοποιώντας:
 ```bash
 .\Rubeus.exe kerberoast /user:svc_sql /domain:root.local /dc:dc.root.local
 ```
+### Συλλογή καθαρού κωδικού εμπιστοσύνης
 
-### Gathering cleartext trust password
+Στην προηγούμενη ροή χρησιμοποιήθηκε το hash εμπιστοσύνης αντί για τον **καθαρό κωδικό πρόσβασης** (που επίσης **εξήχθη από το mimikatz**).
 
-In the previous flow it was used the trust hash instead of the **clear text password** (that was also **dumped by mimikatz**).
-
-The cleartext password can be obtained by converting the \[ CLEAR ] output from mimikatz from hexadecimal and removing null bytes ‘\x00’:
+Ο καθαρός κωδικός πρόσβασης μπορεί να αποκτηθεί μετατρέποντας την \[ CLEAR ] έξοδο από το mimikatz από δεκαεξαδικό και αφαιρώντας τα null bytes ‘\x00’:
 
 ![](<../../images/image (938).png>)
 
-Sometimes when creating a trust relationship, a password must be typed in by the user for the trust. In this demonstration, the key is the original trust password and therefore human readable. As the key cycles (30 days), the cleartext will not be human-readable but technically still usable.
+Μερικές φορές, κατά τη δημιουργία μιας σχέσης εμπιστοσύνης, ένας κωδικός πρέπει να πληκτρολογηθεί από τον χρήστη για την εμπιστοσύνη. Σε αυτή τη демонстрация, το κλειδί είναι ο αρχικός κωδικός εμπιστοσύνης και επομένως αναγνώσιμο από άνθρωπο. Καθώς το κλειδί κυκλώνει (30 ημέρες), ο καθαρός κωδικός δεν θα είναι αναγνώσιμος από άνθρωπο αλλά τεχνικά θα είναι ακόμα χρήσιμος.
 
-The cleartext password can be used to perform regular authentication as the trust account, an alternative to requesting a TGT using the Kerberos secret key of the trust account. Here, querying root.local from ext.local for members of Domain Admins:
+Ο καθαρός κωδικός πρόσβασης μπορεί να χρησιμοποιηθεί για κανονική αυθεντικοποίηση ως ο λογαριασμός εμπιστοσύνης, μια εναλλακτική λύση για την αίτηση ενός TGT χρησιμοποιώντας το μυστικό κλειδί Kerberos του λογαριασμού εμπιστοσύνης. Εδώ, ερωτώντας το root.local από το ext.local για μέλη των Domain Admins:
 
 ![](<../../images/image (792).png>)
 
-## References
+## Αναφορές
 
 - [https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-7-trust-account-attack-from-trusting-to-trusted](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-7-trust-account-attack-from-trusting-to-trusted)
 
 {{#include ../../banners/hacktricks-training.md}}
-

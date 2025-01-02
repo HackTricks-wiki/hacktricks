@@ -1,115 +1,114 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-# Wasm Decompilation and Wat Compilation Guide
+# Οδηγός Αποσυμπίεσης Wasm και Συμπίεσης Wat
 
-In the realm of **WebAssembly**, tools for **decompiling** and **compiling** are essential for developers. This guide introduces some online resources and software for handling **Wasm (WebAssembly binary)** and **Wat (WebAssembly text)** files.
+Στον τομέα του **WebAssembly**, τα εργαλεία για **αποσυμπίεση** και **συμπίεση** είναι απαραίτητα για τους προγραμματιστές. Αυτός ο οδηγός εισάγει μερικούς διαδικτυακούς πόρους και λογισμικό για την επεξεργασία αρχείων **Wasm (WebAssembly binary)** και **Wat (WebAssembly text)**.
 
-## Online Tools
+## Διαδικτυακά Εργαλεία
 
-- To **decompile** Wasm to Wat, the tool available at [Wabt's wasm2wat demo](https://webassembly.github.io/wabt/demo/wasm2wat/index.html) comes in handy.
-- For **compiling** Wat back to Wasm, [Wabt's wat2wasm demo](https://webassembly.github.io/wabt/demo/wat2wasm/) serves the purpose.
-- Another decompilation option can be found at [web-wasmdec](https://wwwg.github.io/web-wasmdec/).
+- Για να **αποσυμπιέσετε** το Wasm σε Wat, το εργαλείο που είναι διαθέσιμο στο [Wabt's wasm2wat demo](https://webassembly.github.io/wabt/demo/wasm2wat/index.html) είναι χρήσιμο.
+- Για **συμπίεση** του Wat πίσω σε Wasm, το [Wabt's wat2wasm demo](https://webassembly.github.io/wabt/demo/wat2wasm/) εξυπηρετεί τον σκοπό.
+- Μια άλλη επιλογή αποσυμπίεσης μπορεί να βρεθεί στο [web-wasmdec](https://wwwg.github.io/web-wasmdec/).
 
-## Software Solutions
+## Λύσεις Λογισμικού
 
-- For a more robust solution, [JEB by PNF Software](https://www.pnfsoftware.com/jeb/demo) offers extensive features.
-- The open-source project [wasmdec](https://github.com/wwwg/wasmdec) is also available for decompilation tasks.
+- Για μια πιο ισχυρή λύση, το [JEB by PNF Software](https://www.pnfsoftware.com/jeb/demo) προσφέρει εκτενή χαρακτηριστικά.
+- Το ανοιχτού κώδικα έργο [wasmdec](https://github.com/wwwg/wasmdec) είναι επίσης διαθέσιμο για εργασίες αποσυμπίεσης.
 
-# .Net Decompilation Resources
+# Πόροι Αποσυμπίεσης .Net
 
-Decompiling .Net assemblies can be accomplished with tools such as:
+Η αποσυμπίεση των .Net assemblies μπορεί να επιτευχθεί με εργαλεία όπως:
 
-- [ILSpy](https://github.com/icsharpcode/ILSpy), which also offers a [plugin for Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode), allowing cross-platform usage.
-- For tasks involving **decompilation**, **modification**, and **recompilation**, [dnSpy](https://github.com/0xd4d/dnSpy/releases) is highly recommended. **Right-clicking** a method and choosing **Modify Method** enables code changes.
-- [JetBrains' dotPeek](https://www.jetbrains.com/es-es/decompiler/) is another alternative for decompiling .Net assemblies.
+- [ILSpy](https://github.com/icsharpcode/ILSpy), το οποίο προσφέρει επίσης ένα [plugin για το Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode), επιτρέποντας τη διαλειτουργικότητα σε πολλές πλατφόρμες.
+- Για εργασίες που περιλαμβάνουν **αποσυμπίεση**, **τροποποίηση** και **επανσυμπίεση**, το [dnSpy](https://github.com/0xd4d/dnSpy/releases) συνιστάται ιδιαίτερα. **Δεξί κλικ** σε μια μέθοδο και επιλογή **Τροποποίηση Μεθόδου** επιτρέπει αλλαγές στον κώδικα.
+- [JetBrains' dotPeek](https://www.jetbrains.com/es-es/decompiler/) είναι μια άλλη εναλλακτική για την αποσυμπίεση των .Net assemblies.
 
-## Enhancing Debugging and Logging with DNSpy
+## Ενίσχυση Αποσφαλμάτωσης και Καταγραφής με DNSpy
 
-### DNSpy Logging
+### Καταγραφή DNSpy
 
-To log information to a file using DNSpy, incorporate the following .Net code snippet:
+Για να καταγράψετε πληροφορίες σε ένα αρχείο χρησιμοποιώντας το DNSpy, ενσωματώστε το παρακάτω απόσπασμα κώδικα .Net:
 
 %%%cpp
 using System.IO;
 path = "C:\\inetpub\\temp\\MyTest2.txt";
-File.AppendAllText(path, "Password: " + password + "\n");
+File.AppendAllText(path, "Κωδικός πρόσβασης: " + password + "\n");
 %%%
 
-### DNSpy Debugging
+### Αποσφαλμάτωση DNSpy
 
-For effective debugging with DNSpy, a sequence of steps is recommended to adjust **Assembly attributes** for debugging, ensuring that optimizations that could hinder debugging are disabled. This process includes changing the `DebuggableAttribute` settings, recompiling the assembly, and saving the changes.
+Για αποτελεσματική αποσφαλμάτωση με το DNSpy, προτείνεται μια σειρά βημάτων για την προσαρμογή των **χαρακτηριστικών Assembly** για αποσφαλμάτωση, διασφαλίζοντας ότι οι βελτιστοποιήσεις που θα μπορούσαν να εμποδίσουν την αποσφαλμάτωση είναι απενεργοποιημένες. Αυτή η διαδικασία περιλαμβάνει την αλλαγή των ρυθμίσεων `DebuggableAttribute`, την επανασυμπίεση του assembly και την αποθήκευση των αλλαγών.
 
-Moreover, to debug a .Net application run by **IIS**, executing `iisreset /noforce` restarts IIS. To attach DNSpy to the IIS process for debugging, the guide instructs on selecting the **w3wp.exe** process within DNSpy and starting the debugging session.
+Επιπλέον, για να αποσφαλματώσετε μια εφαρμογή .Net που εκτελείται από το **IIS**, η εκτέλεση του `iisreset /noforce` επανεκκινεί το IIS. Για να συνδέσετε το DNSpy στη διαδικασία IIS για αποσφαλμάτωση, ο οδηγός καθοδηγεί στην επιλογή της διαδικασίας **w3wp.exe** μέσα στο DNSpy και στην έναρξη της συνεδρίας αποσφαλμάτωσης.
 
-For a comprehensive view of loaded modules during debugging, accessing the **Modules** window in DNSpy is advised, followed by opening all modules and sorting assemblies for easier navigation and debugging.
+Για μια συνολική εικόνα των φορτωμένων μονάδων κατά την αποσφαλμάτωση, συνιστάται η πρόσβαση στο παράθυρο **Modules** στο DNSpy, ακολουθούμενη από το άνοιγμα όλων των μονάδων και την ταξινόμηση των assemblies για ευκολότερη πλοήγηση και αποσφαλμάτωση.
 
-This guide encapsulates the essence of WebAssembly and .Net decompilation, offering a pathway for developers to navigate these tasks with ease.
+Αυτός ο οδηγός συνοψίζει την ουσία της αποσυμπίεσης WebAssembly και .Net, προσφέροντας μια διαδρομή για τους προγραμματιστές να πλοηγηθούν σε αυτές τις εργασίες με ευκολία.
 
 ## **Java Decompiler**
 
-To decompile Java bytecode, these tools can be very helpful:
+Για να αποσυμπιέσετε τον bytecode Java, αυτά τα εργαλεία μπορεί να είναι πολύ χρήσιμα:
 
 - [jadx](https://github.com/skylot/jadx)
 - [JD-GUI](https://github.com/java-decompiler/jd-gui/releases)
 
-## **Debugging DLLs**
+## **Αποσφαλμάτωση DLLs**
 
-### Using IDA
+### Χρησιμοποιώντας IDA
 
-- **Rundll32** is loaded from specific paths for 64-bit and 32-bit versions.
-- **Windbg** is selected as the debugger with the option to suspend on library load/unload enabled.
-- Execution parameters include the DLL path and function name. This setup halts execution upon each DLL's loading.
+- **Rundll32** φορτώνεται από συγκεκριμένες διαδρομές για εκδόσεις 64-bit και 32-bit.
+- **Windbg** επιλέγεται ως ο αποσφαλματωτής με την επιλογή να ανασταλεί η φόρτωση/εκφόρτωση βιβλιοθήκης ενεργοποιημένη.
+- Οι παράμετροι εκτέλεσης περιλαμβάνουν τη διαδρομή DLL και το όνομα της συνάρτησης. Αυτή η ρύθμιση σταματά την εκτέλεση κατά τη φόρτωση κάθε DLL.
 
-### Using x64dbg/x32dbg
+### Χρησιμοποιώντας x64dbg/x32dbg
 
-- Similar to IDA, **rundll32** is loaded with command line modifications to specify the DLL and function.
-- Settings are adjusted to break on DLL entry, allowing breakpoint setting at the desired DLL entry point.
+- Παρόμοια με το IDA, το **rundll32** φορτώνεται με τροποποιήσεις γραμμής εντολών για να προσδιορίσει τη DLL και τη συνάρτηση.
+- Οι ρυθμίσεις προσαρμόζονται για να σπάσουν στην είσοδο DLL, επιτρέποντας την τοποθέτηση σημείων διακοπής στο επιθυμητό σημείο εισόδου DLL.
 
-### Images
+### Εικόνες
 
-- Execution stopping points and configurations are illustrated through screenshots.
+- Τα σημεία και οι ρυθμίσεις διακοπής εκτέλεσης απεικονίζονται μέσω στιγμιότυπων οθόνης.
 
 ## **ARM & MIPS**
 
-- For emulation, [arm_now](https://github.com/nongiach/arm_now) is a useful resource.
+- Για προσομοίωση, το [arm_now](https://github.com/nongiach/arm_now) είναι ένας χρήσιμος πόρος.
 
 ## **Shellcodes**
 
-### Debugging Techniques
+### Τεχνικές Αποσφαλμάτωσης
 
-- **Blobrunner** and **jmp2it** are tools for allocating shellcodes in memory and debugging them with Ida or x64dbg.
-  - Blobrunner [releases](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)
-  - jmp2it [compiled version](https://github.com/adamkramer/jmp2it/releases/)
-- **Cutter** offers GUI-based shellcode emulation and inspection, highlighting differences in shellcode handling as a file versus direct shellcode.
+- **Blobrunner** και **jmp2it** είναι εργαλεία για την κατανομή shellcodes στη μνήμη και την αποσφαλμάτωσή τους με το Ida ή το x64dbg.
+- Blobrunner [εκδόσεις](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)
+- jmp2it [συγκεντρωμένη έκδοση](https://github.com/adamkramer/jmp2it/releases/)
+- **Cutter** προσφέρει προσομοίωση και επιθεώρηση shellcode με GUI, επισημαίνοντας τις διαφορές στη διαχείριση shellcode ως αρχείο σε σχέση με άμεσο shellcode.
 
-### Deobfuscation and Analysis
+### Αποκατάσταση και Ανάλυση
 
-- **scdbg** provides insights into shellcode functions and deobfuscation capabilities.
-  %%%bash
-  scdbg.exe -f shellcode # Basic info
-  scdbg.exe -f shellcode -r # Analysis report
-  scdbg.exe -f shellcode -i -r # Interactive hooks
-  scdbg.exe -f shellcode -d # Dump decoded shellcode
-  scdbg.exe -f shellcode /findsc # Find start offset
-  scdbg.exe -f shellcode /foff 0x0000004D # Execute from offset
-  %%%
+- **scdbg** παρέχει πληροφορίες σχετικά με τις λειτουργίες shellcode και τις δυνατότητες αποκατάστασης.
+%%%bash
+scdbg.exe -f shellcode # Βασικές πληροφορίες
+scdbg.exe -f shellcode -r # Αναφορά ανάλυσης
+scdbg.exe -f shellcode -i -r # Διαδραστικά hooks
+scdbg.exe -f shellcode -d # Dump αποκωδικοποιημένου shellcode
+scdbg.exe -f shellcode /findsc # Βρείτε την αρχική μετατόπιση
+scdbg.exe -f shellcode /foff 0x0000004D # Εκτέλεση από μετατόπιση
+%%%
 
-- **CyberChef** for disassembling shellcode: [CyberChef recipe](https://gchq.github.io/CyberChef/#recipe=To_Hex%28'Space',0%29Disassemble_x86%28'32','Full%20x86%20architecture',16,0,true,true%29)
+- **CyberChef** για αποσυναρμολόγηση shellcode: [CyberChef recipe](https://gchq.github.io/CyberChef/#recipe=To_Hex%28'Space',0%29Disassemble_x86%28'32','Full%20x86%20architecture',16,0,true,true%29)
 
 ## **Movfuscator**
 
-- An obfuscator that replaces all instructions with `mov`.
-- Useful resources include a [YouTube explanation](https://www.youtube.com/watch?v=2VF_wPkiBJY) and [PDF slides](https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas_2015_the_movfuscator.pdf).
-- **demovfuscator** might reverse movfuscator's obfuscation, requiring dependencies like `libcapstone-dev` and `libz3-dev`, and installing [keystone](https://github.com/keystone-engine/keystone/blob/master/docs/COMPILE-NIX.md).
+- Ένας obfuscator που αντικαθιστά όλες τις εντολές με `mov`.
+- Χρήσιμοι πόροι περιλαμβάνουν μια [εξήγηση στο YouTube](https://www.youtube.com/watch?v=2VF_wPkiBJY) και [PDF διαφάνειες](https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas_2015_the_movfuscator.pdf).
+- **demovfuscator** μπορεί να αντιστρέψει την obfuscation του movfuscator, απαιτώντας εξαρτήσεις όπως `libcapstone-dev` και `libz3-dev`, και εγκαθιστώντας το [keystone](https://github.com/keystone-engine/keystone/blob/master/docs/COMPILE-NIX.md).
 
 ## **Delphi**
 
-- For Delphi binaries, [IDR](https://github.com/crypto2011/IDR) is recommended.
+- Για τα δυαδικά αρχεία Delphi, συνιστάται το [IDR](https://github.com/crypto2011/IDR).
 
-# Courses
+# Μαθήματα
 
 - [https://github.com/0xZ0F/Z0FCourse_ReverseEngineering](https://github.com/0xZ0F/Z0FCourse_ReverseEngineering)
-- [https://github.com/malrev/ABD](https://github.com/malrev/ABD) \(Binary deobfuscation\)
+- [https://github.com/malrev/ABD](https://github.com/malrev/ABD) \(Αποκατάσταση δυαδικών\)
 
 {{#include ../../banners/hacktricks-training.md}}
-

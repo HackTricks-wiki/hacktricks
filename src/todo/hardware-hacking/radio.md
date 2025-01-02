@@ -1,199 +1,198 @@
-# Radio
+# Ράδιο
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## SigDigger
 
-[**SigDigger** ](https://github.com/BatchDrake/SigDigger)is a free digital signal analyzer for GNU/Linux and macOS, designed to extract information of unknown radio signals. It supports a variety of SDR devices through SoapySDR, and allows adjustable demodulation of FSK, PSK and ASK signals, decode analog video, analyze bursty signals and listen to analog voice channels (all in real time).
+[**SigDigger** ](https://github.com/BatchDrake/SigDigger)είναι ένας δωρεάν αναλυτής ψηφιακού σήματος για GNU/Linux και macOS, σχεδιασμένος για να εξάγει πληροφορίες από άγνωστα ραδιοσήματα. Υποστηρίζει μια ποικιλία συσκευών SDR μέσω SoapySDR και επιτρέπει ρυθμιζόμενη αποδιαμόρφωση σημάτων FSK, PSK και ASK, αποκωδικοποίηση αναλογικού βίντεο, ανάλυση σπασμένων σημάτων και ακρόαση αναλογικών φωνητικών καναλιών (όλα σε πραγματικό χρόνο).
 
-### Basic Config
+### Βασική Ρύθμιση
 
-After installing there are a few things that you could consider configuring.\
-In settings (the second tab button) you can select the **SDR device** or **select a file** to read and which frequency to syntonise and the Sample rate (recommended to up to 2.56Msps if your PC support it)\\
+Μετά την εγκατάσταση υπάρχουν μερικά πράγματα που θα μπορούσατε να εξετάσετε να ρυθμίσετε.\
+Στις ρυθμίσεις (το δεύτερο κουμπί καρτέλας) μπορείτε να επιλέξετε τη **συσκευή SDR** ή **να επιλέξετε ένα αρχείο** για ανάγνωση και ποια συχνότητα να συντονίσετε και το ρυθμό δειγματοληψίας (συνιστάται έως 2.56Msps αν ο υπολογιστής σας το υποστηρίζει)\\
 
 ![](<../../images/image (245).png>)
 
-In the GUI behaviour it's recommended to enable a few things if your PC support it:
+Στη συμπεριφορά GUI συνιστάται να ενεργοποιήσετε μερικά πράγματα αν ο υπολογιστής σας το υποστηρίζει:
 
 ![](<../../images/image (472).png>)
 
 > [!NOTE]
-> If you realise that your PC is not capturing things try to disable OpenGL and lowering the sample rate.
+> Αν διαπιστώσετε ότι ο υπολογιστής σας δεν καταγράφει πράγματα, προσπαθήστε να απενεργοποιήσετε το OpenGL και να μειώσετε το ρυθμό δειγματοληψίας.
 
-### Uses
+### Χρήσεις
 
-- Just to **capture some time of a signal and analyze it** just maintain the button "Push to capture" as long as you need.
+- Απλά για να **καταγράψετε κάποιο χρόνο ενός σήματος και να το αναλύσετε** διατηρήστε το κουμπί "Push to capture" όσο χρειάζεστε.
 
 ![](<../../images/image (960).png>)
 
-- The **Tuner** of SigDigger helps to **capture better signals** (but it can also degrade them). Ideally start with 0 and keep **making it bigger until** you find the **noise** introduce is **bigger** than the **improvement of the signal** you need).
+- Ο **Τονιστής** του SigDigger βοηθά να **καταγράψετε καλύτερα σήματα** (αλλά μπορεί επίσης να τα υποβαθμίσει). Ιδανικά ξεκινήστε με 0 και συνεχίστε **να το αυξάνετε μέχρι** να βρείτε τον **θόρυβο** που εισάγεται να είναι **μεγαλύτερος** από την **βελτίωση του σήματος** που χρειάζεστε).
 
 ![](<../../images/image (1099).png>)
 
-### Synchronize with radio channel
+### Συγχρονισμός με ραδιοφωνικό κανάλι
 
-With [**SigDigger** ](https://github.com/BatchDrake/SigDigger)synchronize with the channel you want to hear, configure "Baseband audio preview" option, configure the bandwith to get all the info being sent and then set the Tuner to the level before the noise is really starting to increase:
+Με [**SigDigger** ](https://github.com/BatchDrake/SigDigger)συγχρονίστε με το κανάλι που θέλετε να ακούσετε, ρυθμίστε την επιλογή "Baseband audio preview", ρυθμίστε το πλάτος ζώνης για να λάβετε όλες τις πληροφορίες που αποστέλλονται και στη συνέχεια ρυθμίστε τον Τονιστή στο επίπεδο πριν αρχίσει πραγματικά να αυξάνεται ο θόρυβος:
 
 ![](<../../images/image (585).png>)
 
-## Interesting tricks
+## Ενδιαφέροντα κόλπα
 
-- When a device is sending bursts of information, usually the **first part is going to be a preamble** so you **don't** need to **worry** if you **don't find information** in there **or if there are some errors** there.
-- In frames of information you usually should **find different frames well aligned between them**:
+- Όταν μια συσκευή στέλνει εκρήξεις πληροφοριών, συνήθως το **πρώτο μέρος θα είναι ένα προοίμιο** οπότε **δεν χρειάζεται** να **ανησυχείτε** αν **δεν βρείτε πληροφορίες** εκεί **ή αν υπάρχουν κάποια σφάλματα** εκεί.
+- Σε πλαίσια πληροφοριών συνήθως θα πρέπει να **βρείτε διαφορετικά πλαίσια καλά ευθυγραμμισμένα μεταξύ τους**:
 
 ![](<../../images/image (1076).png>)
 
 ![](<../../images/image (597).png>)
 
-- **After recovering the bits you might need to process them someway**. For example, in Manchester codification a up+down will be a 1 or 0 and a down+up will be the other one. So pairs of 1s and 0s (ups and downs) will be a real 1 or a real 0.
-- Even if a signal is using Manchester codification (it's impossible to find more than two 0s or 1s in a row), you might **find several 1s or 0s together in the preamble**!
+- **Μετά την ανάκτηση των bits μπορεί να χρειαστεί να τα επεξεργαστείτε με κάποιο τρόπο**. Για παράδειγμα, στην κωδικοποίηση Manchester ένα up+down θα είναι 1 ή 0 και ένα down+up θα είναι το άλλο. Έτσι, ζεύγη 1s και 0s (ups και downs) θα είναι ένα πραγματικό 1 ή ένα πραγματικό 0.
+- Ακόμα και αν ένα σήμα χρησιμοποιεί κωδικοποίηση Manchester (είναι αδύνατο να βρείτε περισσότερα από δύο 0s ή 1s στη σειρά), μπορεί να **βρείτε αρκετά 1s ή 0s μαζί στο προοίμιο**!
 
-### Uncovering modulation type with IQ
+### Αποκάλυψη τύπου διαμόρφωσης με IQ
 
-There are 3 ways to store information in signals: Modulating the **amplitude**, **frequency** or **phase**.\
-If you are checking a signal there are different ways to try to figure out what is being used to store information (fin more ways below) but a good one is to check the IQ graph.
+Υπάρχουν 3 τρόποι αποθήκευσης πληροφοριών σε σήματα: Διαμόρφωση της **αμplitude**, **συχνότητας** ή **φάσης**.\
+Αν ελέγχετε ένα σήμα υπάρχουν διάφοροι τρόποι να προσπαθήσετε να καταλάβετε τι χρησιμοποιείται για την αποθήκευση πληροφοριών (βρείτε περισσότερους τρόπους παρακάτω) αλλά ένας καλός είναι να ελέγξετε το γράφημα IQ.
 
 ![](<../../images/image (788).png>)
 
-- **Detecting AM**: If in the IQ graph appears for example **2 circles** (probably one in 0 and other in a different amplitude), it could means that this is an AM signal. This is because in the IQ graph the distance between the 0 and the circle is the amplitude of the signal, so it's easy to visualize different amplitudes being used.
-- **Detecting PM**: Like in the previous image, if you find small circles not related between them it probably means that a phase modulation is used. This is because in the IQ graph, the angle between the point and the 0,0 is the phase of the signal, so that means that 4 different phases are used.
-  - Note that if the information is hidden in the fact that a phase is changed and not in the phase itself, you won't see different phases clearly differentiated.
-- **Detecting FM**: IQ doesn't have a field to identify frequencies (distance to centre is amplitude and angle is phase).\
-  Therefore, to identify FM, you should **only see basically a circle** in this graph.\
-  Moreover, a different frequency is "represented" by the IQ graph by a **speed acceleration across the circle** (so in SysDigger selecting the signal the IQ graph is populated, if you find an acceleration or change of direction in the created circle it could mean that this is FM):
+- **Ανίχνευση AM**: Αν στο γράφημα IQ εμφανίζονται για παράδειγμα **2 κύκλοι** (πιθανώς ένας στο 0 και άλλος σε διαφορετική αμplitude), αυτό θα μπορούσε να σημαίνει ότι αυτό είναι ένα σήμα AM. Αυτό συμβαίνει επειδή στο γράφημα IQ η απόσταση μεταξύ του 0 και του κύκλου είναι η αμplitude του σήματος, οπότε είναι εύκολο να οπτικοποιηθούν διαφορετικές αμplitudes που χρησιμοποιούνται.
+- **Ανίχνευση PM**: Όπως στην προηγούμενη εικόνα, αν βρείτε μικρούς κύκλους που δεν σχετίζονται μεταξύ τους πιθανώς σημαίνει ότι χρησιμοποιείται φάση διαμόρφωσης. Αυτό συμβαίνει επειδή στο γράφημα IQ, η γωνία μεταξύ του σημείου και του 0,0 είναι η φάση του σήματος, οπότε αυτό σημαίνει ότι χρησιμοποιούνται 4 διαφορετικές φάσεις.
+- Σημειώστε ότι αν οι πληροφορίες είναι κρυμμένες στο γεγονός ότι αλλάζει μια φάση και όχι στη φάση αυτή καθαυτή, δεν θα δείτε διαφορετικές φάσεις σαφώς διαφοροποιημένες.
+- **Ανίχνευση FM**: Το IQ δεν έχει πεδίο για να προσδιορίσει συχνότητες (η απόσταση από το κέντρο είναι η αμplitude και η γωνία είναι η φάση).\
+Επομένως, για να προσδιορίσετε το FM, θα πρέπει **να βλέπετε βασικά μόνο έναν κύκλο** σε αυτό το γράφημα.\
+Επιπλέον, μια διαφορετική συχνότητα "παριστάνεται" από το γράφημα IQ με μια **ταχύτητα επιτάχυνσης γύρω από τον κύκλο** (έτσι στο SysDigger επιλέγοντας το σήμα το γράφημα IQ γεμίζει, αν βρείτε μια επιτάχυνση ή αλλαγή κατεύθυνσης στον δημιουργημένο κύκλο αυτό θα μπορούσε να σημαίνει ότι αυτό είναι FM):
 
-## AM Example
+## Παράδειγμα AM
 
 {% file src="../../images/sigdigger_20220308_165547Z_2560000_433500000_float32_iq.raw" %}
 
-### Uncovering AM
+### Αποκάλυψη AM
 
-#### Checking the envelope
+#### Έλεγχος του περιγράμματος
 
-Checking AM info with [**SigDigger** ](https://github.com/BatchDrake/SigDigger)and just looking at the **envelop** you can see different clear amplitude levels. The used signal is sending pulses with information in AM, this is how one pulse looks like:
+Έλεγχος πληροφοριών AM με [**SigDigger** ](https://github.com/BatchDrake/SigDigger)και απλά κοιτάζοντας το **περίγραμμα** μπορείτε να δείτε διαφορετικά καθαρά επίπεδα αμplitude. Το χρησιμοποιούμενο σήμα στέλνει παλμούς με πληροφορίες σε AM, έτσι φαίνεται ένας παλμός:
 
 ![](<../../images/image (590).png>)
 
-And this is how part of the symbol looks like with the waveform:
+Και έτσι φαίνεται ένα μέρος του συμβόλου με την κυματομορφή:
 
 ![](<../../images/image (734).png>)
 
-#### Checking the Histogram
+#### Έλεγχος του Ιστογράμματος
 
-You can **select the whole signal** where information is located, select **Amplitude** mode and **Selection** and click on **Histogram.** You can observer that 2 clear levels are only found
+Μπορείτε να **επιλέξετε ολόκληρο το σήμα** όπου βρίσκονται οι πληροφορίες, να επιλέξετε τη λειτουργία **Αμplitude** και **Επιλογή** και να κάνετε κλικ στο **Ιστόγραμμα.** Μπορείτε να παρατηρήσετε ότι 2 καθαρά επίπεδα βρίσκονται μόνο
 
 ![](<../../images/image (264).png>)
 
-For example, if you select Frequency instead of Amplitude in this AM signal you find just 1 frequency (no way information modulated in frequency is just using 1 freq).
+Για παράδειγμα, αν επιλέξετε τη Συχνότητα αντί της Αμplitude σε αυτό το σήμα AM θα βρείτε μόνο 1 συχνότητα (δεν υπάρχει τρόπος πληροφορίες που διαμορφώνονται σε συχνότητα να χρησιμοποιούν μόνο 1 συχνότητα).
 
 ![](<../../images/image (732).png>)
 
-If you find a lot of frequencies potentially this won't be a FM, probably the signal frequency was just modified because of the channel.
+Αν βρείτε πολλές συχνότητες πιθανώς αυτό δεν θα είναι FM, πιθανώς η συχνότητα του σήματος έχει απλώς τροποποιηθεί λόγω του καναλιού.
 
-#### With IQ
+#### Με IQ
 
-In this example you can see how there is a **big circle** but also **a lot of points in the centre.**
+Σε αυτό το παράδειγμα μπορείτε να δείτε πώς υπάρχει ένας **μεγάλος κύκλος** αλλά και **πολλές κουκίδες στο κέντρο.**
 
 ![](<../../images/image (222).png>)
 
-### Get Symbol Rate
+### Λάβετε το Ρυθμό Συμβόλων
 
-#### With one symbol
+#### Με ένα σύμβολο
 
-Select the smallest symbol you can find (so you are sure it's just 1) and check the "Selection freq". I this case it would be 1.013kHz (so 1kHz).
+Επιλέξτε το μικρότερο σύμβολο που μπορείτε να βρείτε (έτσι είστε σίγουροι ότι είναι μόνο 1) και ελέγξτε τη "Συχνότητα Επιλογής". Σε αυτή την περίπτωση θα ήταν 1.013kHz (έτσι 1kHz).
 
 ![](<../../images/image (78).png>)
 
-#### With a group of symbols
+#### Με μια ομάδα συμβόλων
 
-You can also indicate the number of symbols you are going to select and SigDigger will calculate the frequency of 1 symbol (the more symbols selected the better probably). In this scenario I selected 10 symbols and the "Selection freq" is 1.004 Khz:
+Μπορείτε επίσης να υποδείξετε τον αριθμό των συμβόλων που πρόκειται να επιλέξετε και το SigDigger θα υπολογίσει τη συχνότητα ενός συμβόλου (όσο περισσότερα σύμβολα επιλέξετε τόσο καλύτερα πιθανώς). Σε αυτό το σενάριο επέλεξα 10 σύμβολα και η "Συχνότητα Επιλογής" είναι 1.004 Khz:
 
 ![](<../../images/image (1008).png>)
 
-### Get Bits
+### Λάβετε Bits
 
-Having found this is an **AM modulated** signal and the **symbol rate** (and knowing that in this case something up means 1 and something down means 0), it's very easy to **obtain the bits** encoded in the signal. So, select the signal with info and configure the sampling and decision and press sample (check that **Amplitude** is selected, the discovered **Symbol rate** is configured and the **Gadner clock recovery** is selected):
+Αφού διαπιστώσετε ότι αυτό είναι ένα **AM διαμορφωμένο** σήμα και ο **ρυθμός συμβόλων** (και γνωρίζοντας ότι σε αυτή την περίπτωση κάτι up σημαίνει 1 και κάτι down σημαίνει 0), είναι πολύ εύκολο να **αποκτήσετε τα bits** που κωδικοποιούνται στο σήμα. Έτσι, επιλέξτε το σήμα με πληροφορίες και ρυθμίστε τη δειγματοληψία και την απόφαση και πατήστε δείγμα (ελέγξτε ότι **Αμplitude** είναι επιλεγμένο, ο ανακαλυφθείς **Ρυθμός Συμβόλων** είναι ρυθμισμένος και η **Ανάκτηση Ρολογιού Gadner** είναι επιλεγμένη):
 
 ![](<../../images/image (965).png>)
 
-- **Sync to selection intervals** means that if you previously selected intervals to find the symbol rate, that symbol rate will be used.
-- **Manual** means that the indicated symbol rate is going to be used
-- In **Fixed interval selection** you indicate the number of intervals that should be selected and it calculates the symbol rate from it
-- **Gadner clock recovery** is usually the best option, but you still need to indicate some approximate symbol rate.
+- **Συγχρονισμός με τις επιλεγμένες περιόδους** σημαίνει ότι αν προηγουμένως επιλέξατε περιόδους για να βρείτε τον ρυθμό συμβόλων, αυτός ο ρυθμός συμβόλων θα χρησιμοποιηθεί.
+- **Χειροκίνητα** σημαίνει ότι ο υποδεικνυόμενος ρυθμός συμβόλων θα χρησιμοποιηθεί
+- Στην **Επιλογή Σταθερού Διαστήματος** υποδεικνύετε τον αριθμό των διαστημάτων που πρέπει να επιλεγούν και υπολογίζει τον ρυθμό συμβόλων από αυτό
+- **Ανάκτηση Ρολογιού Gadner** είναι συνήθως η καλύτερη επιλογή, αλλά πρέπει ακόμα να υποδείξετε κάποιο περίπου ρυθμό συμβόλων.
 
-Pressing sample this appears:
+Πατώντας δείγμα αυτό εμφανίζεται:
 
 ![](<../../images/image (644).png>)
 
-Now, to make SigDigger understand **where is the range** of the level carrying information you need to click on the **lower level** and maintain clicked until the biggest level:
+Τώρα, για να κάνει το SigDigger να καταλάβει **πού είναι το εύρος** του επιπέδου που μεταφέρει πληροφορίες πρέπει να κάνετε κλικ στο **χαμηλότερο επίπεδο** και να διατηρήσετε πατημένο μέχρι το μεγαλύτερο επίπεδο:
 
 ![](<../../images/image (439).png>)
 
-If there would have been for example **4 different levels of amplitude**, you should have need to configure the **Bits per symbol to 2** and select from the smallest to the biggest.
+Αν υπήρχαν για παράδειγμα **4 διαφορετικά επίπεδα αμplitude**, θα έπρεπε να ρυθμίσετε τα **Bits ανά σύμβολο σε 2** και να επιλέξετε από το μικρότερο στο μεγαλύτερο.
 
-Finally **increasing** the **Zoom** and **changing the Row size** you can see the bits (and you can select all and copy to get all the bits):
+Τέλος **αυξάνοντας** το **Ζουμ** και **αλλάζοντας το μέγεθος της σειράς** μπορείτε να δείτε τα bits (και μπορείτε να επιλέξετε όλα και να αντιγράψετε για να αποκτήσετε όλα τα bits):
 
 ![](<../../images/image (276).png>)
 
-If the signal has more than 1 bit per symbol (for example 2), SigDigger has **no way to know which symbol is** 00, 01, 10, 11, so it will use different **grey scales** the represent each (and if you copy the bits it will use **numbers from 0 to 3**, you will need to treat them).
+Αν το σήμα έχει περισσότερα από 1 bit ανά σύμβολο (για παράδειγμα 2), το SigDigger έχει **κανέναν τρόπο να ξέρει ποιο σύμβολο είναι** 00, 01, 10, 11, οπότε θα χρησιμοποιήσει διαφορετικές **γκρίζες κλίμακες** για να αναπαραστήσει το καθένα (και αν αντιγράψετε τα bits θα χρησιμοποιήσει **αριθμούς από 0 έως 3**, θα χρειαστεί να τα επεξεργαστείτε).
 
-Also, use **codifications** such as **Manchester**, and **up+down** can be **1 or 0** and an down+up can be a 1 or 0. In those cases you need to **treat the obtained ups (1) and downs (0)** to substitute the pairs of 01 or 10 as 0s or 1s.
+Επίσης, χρησιμοποιήστε **κωδικοποιήσεις** όπως **Manchester**, και **up+down** μπορεί να είναι **1 ή 0** και ένα down+up μπορεί να είναι 1 ή 0. Σε αυτές τις περιπτώσεις πρέπει να **επεξεργαστείτε τα αποκτηθέντα ups (1) και downs (0)** για να αντικαταστήσετε τα ζεύγη 01 ή 10 ως 0s ή 1s.
 
-## FM Example
+## Παράδειγμα FM
 
 {% file src="../../images/sigdigger_20220308_170858Z_2560000_433500000_float32_iq.raw" %}
 
-### Uncovering FM
+### Αποκάλυψη FM
 
-#### Checking the frequencies and waveform
+#### Έλεγχος των συχνοτήτων και της κυματομορφής
 
-Signal example sending information modulated in FM:
+Παράδειγμα σήματος που στέλνει πληροφορίες διαμορφωμένες σε FM:
 
 ![](<../../images/image (725).png>)
 
-In the previous image you can observe pretty good that **2 frequencies are used** but if you **observe** the **waveform** you might n**ot be able to identify correctly the 2 different frequencies**:
+Στην προηγούμενη εικόνα μπορείτε να παρατηρήσετε αρκετά καλά ότι **χρησιμοποιούνται 2 συχνότητες** αλλά αν **παρατηρήσετε** την **κυματομορφή** μπορεί να μην είστε σε θέση να προσδιορίσετε σωστά τις 2 διαφορετικές συχνότητες:
 
 ![](<../../images/image (717).png>)
 
-This is because I capture the signal in booth frequencies, therefore one is approximately the other in negative:
+Αυτό συμβαίνει επειδή κατέγραψα το σήμα και στις δύο συχνότητες, επομένως η μία είναι περίπου η άλλη σε αρνητική:
 
 ![](<../../images/image (942).png>)
 
-If the synchronized frequency is **closer to one frequency than to the other** you can easily see the 2 different frequencies:
+Αν η συγχρονισμένη συχνότητα είναι **πιο κοντά σε μία συχνότητα από ότι στην άλλη** μπορείτε εύκολα να δείτε τις 2 διαφορετικές συχνότητες:
 
 ![](<../../images/image (422).png>)
 
 ![](<../../images/image (488).png>)
 
-#### Checking the histogram
+#### Έλεγχος του ιστογράμματος
 
-Checking the frequency histogram of the signal with information you can easily see 2 different signals:
+Έλεγχος του ιστογράμματος συχνότητας του σήματος με πληροφορίες μπορείτε εύκολα να δείτε 2 διαφορετικά σήματα:
 
 ![](<../../images/image (871).png>)
 
-In this case if you check the **Amplitude histogram** you will find **only one amplitude**, so it **cannot be AM** (if you find a lot of amplitudes it might be because the signal has been losing power along the channel):
+Σε αυτή την περίπτωση αν ελέγξετε το **ιστόγραμμα αμplitude** θα βρείτε **μόνο μία αμplitude**, οπότε **δεν μπορεί να είναι AM** (αν βρείτε πολλές αμplitudes μπορεί να είναι επειδή το σήμα έχει χάσει ισχύ κατά μήκος του καναλιού):
 
 ![](<../../images/image (817).png>)
 
-And this is would be phase histogram (which makes very clear the signal is not modulated in phase):
+Και αυτό θα ήταν το ιστογράφημα φάσης (το οποίο καθιστά πολύ σαφές ότι το σήμα δεν είναι διαμορφωμένο σε φάση):
 
 ![](<../../images/image (996).png>)
 
-#### With IQ
+#### Με IQ
 
-IQ doesn't have a field to identify frequencies (distance to centre is amplitude and angle is phase).\
-Therefore, to identify FM, you should **only see basically a circle** in this graph.\
-Moreover, a different frequency is "represented" by the IQ graph by a **speed acceleration across the circle** (so in SysDigger selecting the signal the IQ graph is populated, if you find an acceleration or change of direction in the created circle it could mean that this is FM):
+Το IQ δεν έχει πεδίο για να προσδιορίσει συχνότητες (η απόσταση από το κέντρο είναι η αμplitude και η γωνία είναι η φάση).\
+Επομένως, για να προσδιορίσετε το FM, θα πρέπει **να βλέπετε βασικά μόνο έναν κύκλο** σε αυτό το γράφημα.\
+Επιπλέον, μια διαφορετική συχνότητα "παριστάνεται" από το γράφημα IQ με μια **ταχύτητα επιτάχυνσης γύρω από τον κύκλο** (έτσι στο SysDigger επιλέγοντας το σήμα το γράφημα IQ γεμίζει, αν βρείτε μια επιτάχυνση ή αλλαγή κατεύθυνσης στον δημιουργημένο κύκλο αυτό θα μπορούσε να σημαίνει ότι αυτό είναι FM):
 
 ![](<../../images/image (81).png>)
 
-### Get Symbol Rate
+### Λάβετε το Ρυθμό Συμβόλων
 
-You can use the **same technique as the one used in the AM example** to get the symbol rate once you have found the frequencies carrying symbols.
+Μπορείτε να χρησιμοποιήσετε την **ίδια τεχνική με αυτήν που χρησιμοποιήθηκε στο παράδειγμα AM** για να αποκτήσετε τον ρυθμό συμβόλων μόλις έχετε βρει τις συχνότητες που μεταφέρουν σύμβολα.
 
-### Get Bits
+### Λάβετε Bits
 
-You can use the **same technique as the one used in the AM example** to get the bits once you have **found the signal is modulated in frequency** and the **symbol rate**.
+Μπορείτε να χρησιμοποιήσετε την **ίδια τεχνική με αυτήν που χρησιμοποιήθηκε στο παράδειγμα AM** για να αποκτήσετε τα bits μόλις έχετε **βρει ότι το σήμα είναι διαμορφωμένο σε συχνότητα** και τον **ρυθμό συμβόλων**.
 
 {{#include ../../banners/hacktricks-training.md}}
-

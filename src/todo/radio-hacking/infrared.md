@@ -1,82 +1,81 @@
-# Infrared
+# Υπέρυθρη
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## How the Infrared Works <a href="#how-the-infrared-port-works" id="how-the-infrared-port-works"></a>
+## Πώς λειτουργεί η Υπέρυθρη <a href="#how-the-infrared-port-works" id="how-the-infrared-port-works"></a>
 
-**Infrared light is invisible to humans**. IR wavelength is from **0.7 to 1000 microns**. Household remotes use an IR signal for data transmission and operate in the wavelength range of 0.75..1.4 microns. A microcontroller in the remote makes an infrared LED blink with a specific frequency, turning the digital signal into an IR signal.
+**Το υπέρυθρο φως είναι αόρατο στους ανθρώπους**. Το μήκος κύματος IR κυμαίνεται από **0.7 έως 1000 μικρόμετρα**. Οι τηλεχειριστήρες χρησιμοποιούν ένα σήμα IR για τη μετάδοση δεδομένων και λειτουργούν στο εύρος μήκους κύματος 0.75..1.4 μικρόμετρα. Ένας μικροελεγκτής στον τηλεχειριστήριο κάνει μια υπέρυθρη LED να αναβοσβήνει με μια συγκεκριμένη συχνότητα, μετατρέποντας το ψηφιακό σήμα σε σήμα IR.
 
-To receive IR signals a **photoreceiver** is used. It **converts IR light into voltage pulses**, which are already **digital signals**. Usually, there is a **dark light filter inside the receiver**, which lets **only the desired wavelength through** and cuts out noise.
+Για να ληφθούν τα σήματα IR χρησιμοποιείται ένας **φωτοδέκτης**. Αυτός **μετατρέπει το υπέρυθρο φως σε παλμούς τάσης**, οι οποίοι είναι ήδη **ψηφιακά σήματα**. Συνήθως, υπάρχει ένα **φίλτρο σκοτεινού φωτός μέσα στον δέκτη**, το οποίο επιτρέπει **μόνο το επιθυμητό μήκος κύματος** και κόβει τον θόρυβο.
 
-### Variety of IR Protocols <a href="#variety-of-ir-protocols" id="variety-of-ir-protocols"></a>
+### Ποικιλία Πρωτοκόλλων IR <a href="#variety-of-ir-protocols" id="variety-of-ir-protocols"></a>
 
-IR protocols differ in 3 factors:
+Τα πρωτόκολλα IR διαφέρουν σε 3 παράγοντες:
 
-- bit encoding
-- data structure
-- carrier frequency — often in range 36..38 kHz
+- κωδικοποίηση bit
+- δομή δεδομένων
+- συχνότητα φορέα — συχνά στο εύρος 36..38 kHz
 
-#### Bit encoding ways <a href="#bit-encoding-ways" id="bit-encoding-ways"></a>
+#### Τρόποι κωδικοποίησης bit <a href="#bit-encoding-ways" id="bit-encoding-ways"></a>
 
-**1. Pulse Distance Encoding**
+**1. Κωδικοποίηση Απόστασης Παλμού**
 
-Bits are encoded by modulating the duration of the space between pulses. The width of the pulse itself is constant.
+Τα bits κωδικοποιούνται με την τροποποίηση της διάρκειας του διαστήματος μεταξύ των παλμών. Το πλάτος του παλμού είναι σταθερό.
 
 <figure><img src="../../images/image (295).png" alt=""><figcaption></figcaption></figure>
 
-**2. Pulse Width Encoding**
+**2. Κωδικοποίηση Πλάτους Παλμού**
 
-Bits are encoded by modulation of the pulse width. The width of space after pulse burst is constant.
+Τα bits κωδικοποιούνται με την τροποποίηση του πλάτους του παλμού. Το πλάτος του διαστήματος μετά την έκρηξη του παλμού είναι σταθερό.
 
 <figure><img src="../../images/image (282).png" alt=""><figcaption></figcaption></figure>
 
-**3. Phase Encoding**
+**3. Κωδικοποίηση Φάσης**
 
-It is also known as Manchester encoding. The logical value is defined by the polarity of the transition between pulse burst and space. "Space to pulse burst" denotes logic "0", "pulse burst to space" denotes logic "1".
+Είναι επίσης γνωστή ως κωδικοποίηση Manchester. Η λογική τιμή καθορίζεται από την πολικότητα της μετάβασης μεταξύ της έκρηξης του παλμού και του διαστήματος. "Διάστημα προς έκρηξη παλμού" δηλώνει λογική "0", "έκρηξη παλμού προς διάστημα" δηλώνει λογική "1".
 
 <figure><img src="../../images/image (634).png" alt=""><figcaption></figcaption></figure>
 
-**4. Combination of previous ones and other exotics**
+**4. Συνδυασμός των προηγούμενων και άλλων εξωτικών**
 
 > [!NOTE]
-> There are IR protocols that are **trying to become universal** for several types of devices. The most famous ones are RC5 and NEC. Unfortunately, the most famous **does not mean the most common**. In my environment, I met just two NEC remotes and no RC5 ones.
+> Υπάρχουν πρωτόκολλα IR που **προσπαθούν να γίνουν καθολικά** για αρκετούς τύπους συσκευών. Τα πιο διάσημα είναι τα RC5 και NEC. Δυστυχώς, το πιο διάσημο **δεν σημαίνει το πιο κοινό**. Στο περιβάλλον μου, συνάντησα μόνο δύο τηλεχειριστήρια NEC και κανένα RC5.
 >
-> Manufacturers love to use their own unique IR protocols, even within the same range of devices (for example, TV-boxes). Therefore, remotes from different companies and sometimes from different models from the same company, are unable to work with other devices of the same type.
+> Οι κατασκευαστές αγαπούν να χρησιμοποιούν τα δικά τους μοναδικά πρωτόκολλα IR, ακόμη και εντός της ίδιας κατηγορίας συσκευών (για παράδειγμα, τηλεοπτικά κουτιά). Επομένως, τα τηλεχειριστήρια από διαφορετικές εταιρείες και μερικές φορές από διαφορετικά μοντέλα της ίδιας εταιρείας, δεν μπορούν να λειτουργήσουν με άλλες συσκευές του ίδιου τύπου.
 
-### Exploring an IR signal
+### Εξερεύνηση ενός σήματος IR
 
-The most reliable way to see how the remote IR signal looks like is to use an oscilloscope. It does not demodulate or invert the received signal, it is just displayed "as is". This is useful for testing and debugging. I will show the expected signal on the example of the NEC IR protocol.
+Ο πιο αξιόπιστος τρόπος για να δείτε πώς φαίνεται το σήμα IR του τηλεχειριστηρίου είναι να χρησιμοποιήσετε ένα παλμογράφο. Δεν αποδιαμορφώνει ή αναστρέφει το ληφθέν σήμα, απλώς εμφανίζεται "όπως είναι". Αυτό είναι χρήσιμο για δοκιμές και αποσφαλμάτωση. Θα δείξω το αναμενόμενο σήμα με το παράδειγμα του πρωτοκόλλου IR NEC.
 
 <figure><img src="../../images/image (235).png" alt=""><figcaption></figcaption></figure>
 
-Usually, there is a preamble at the beginning of an encoded packet. This allows the receiver to determine the level of gain and background. There are also protocols without preamble, for example, Sharp.
+Συνήθως, υπάρχει μια προοίμια στην αρχή ενός κωδικοποιημένου πακέτου. Αυτό επιτρέπει στον δέκτη να προσδιορίσει το επίπεδο ενίσχυσης και το υπόβαθρο. Υπάρχουν επίσης πρωτόκολλα χωρίς προοίμια, για παράδειγμα, Sharp.
 
-Then data is transmitted. The structure, preamble, and bit encoding method are determined by the specific protocol.
+Στη συνέχεια, μεταδίδονται τα δεδομένα. Η δομή, η προοίμια και η μέθοδος κωδικοποίησης bit καθορίζονται από το συγκεκριμένο πρωτόκολλο.
 
-**NEC IR protocol** contains a short command and a repeat code, which is sent while the button is pressed. Both the command and the repeat code have the same preamble at the beginning.
+Το **πρωτόκολλο IR NEC** περιέχει μια σύντομη εντολή και έναν κωδικό επανάληψης, ο οποίος αποστέλλεται ενώ πατάτε το κουμπί. Και η εντολή και ο κωδικός επανάληψης έχουν την ίδια προοίμια στην αρχή.
 
-NEC **command**, in addition to the preamble, consists of an address byte and a command-number byte, by which the device understands what needs to be performed. Address and command-number bytes are duplicated with inverse values, to check the integrity of the transmission. There is an additional stop bit at the end of the command.
+Η **εντολή NEC**, εκτός από την προοίμια, αποτελείται από ένα byte διεύθυνσης και ένα byte αριθμού εντολής, με το οποίο η συσκευή καταλαβαίνει τι πρέπει να εκτελέσει. Τα byte διεύθυνσης και αριθμού εντολής επαναλαμβάνονται με αντίστροφες τιμές, για να ελέγξουν την ακεραιότητα της μετάδοσης. Υπάρχει ένα επιπλέον bit σταματήματος στο τέλος της εντολής.
 
-The **repeat code** has a "1" after the preamble, which is a stop bit.
+Ο **κωδικός επανάληψης** έχει ένα "1" μετά την προοίμια, το οποίο είναι ένα bit σταματήματος.
 
-For **logic "0" and "1"** NEC uses Pulse Distance Encoding: first, a pulse burst is transmitted after which there is a pause, its length sets the value of the bit.
+Για **λογική "0" και "1"** το NEC χρησιμοποιεί Κωδικοποίηση Απόστασης Παλμού: πρώτα, μεταδίδεται μια έκρηξη παλμού μετά την οποία υπάρχει μια παύση, το μήκος της οποίας καθορίζει την τιμή του bit.
 
-### Air Conditioners
+### Κλιματιστικά
 
-Unlike other remotes, **air conditioners do not transmit just the code of the pressed button**. They also **transmit all the information** when a button is pressed to assure that the **air conditioned machine and the remote are synchronised**.\
-This will avoid that a machine set as 20ºC is increased to 21ºC with one remote, and then when another remote, which still has the temperature as 20ºC, is used to increase more the temperature, it will "increase" it to 21ºC (and not to 22ºC thinking it's in 21ºC).
+Σε αντίθεση με άλλους τηλεχειριστήρες, **τα κλιματιστικά δεν μεταδίδουν μόνο τον κωδικό του πατημένου κουμπιού**. Μεταδίδουν επίσης **όλες τις πληροφορίες** όταν πατηθεί ένα κουμπί για να διασφαλίσουν ότι η **μηχανή κλιματισμού και το τηλεχειριστήριο είναι συγχρονισμένα**.\
+Αυτό θα αποτρέψει το να ρυθμιστεί μια μηχανή στους 20ºC και να αυξηθεί στους 21ºC με ένα τηλεχειριστήριο, και στη συνέχεια όταν χρησιμοποιηθεί ένα άλλο τηλεχειριστήριο, το οποίο έχει ακόμα τη θερμοκρασία στους 20ºC, να αυξηθεί περισσότερο η θερμοκρασία, θα "αυξηθεί" στους 21ºC (και όχι στους 22ºC νομίζοντας ότι είναι στους 21ºC).
 
-### Attacks
+### Επιθέσεις
 
-You can attack Infrared with Flipper Zero:
+Μπορείτε να επιτεθείτε στην Υπέρυθρη με το Flipper Zero:
 
 {{#ref}}
 flipper-zero/fz-infrared.md
 {{#endref}}
 
-## References
+## Αναφορές
 
 - [https://blog.flipperzero.one/infrared/](https://blog.flipperzero.one/infrared/)
 
 {{#include ../../banners/hacktricks-training.md}}
-

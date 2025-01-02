@@ -1,186 +1,185 @@
-# Cryptographic/Compression Algorithms
+# Κρυπτογραφικοί/Συμπιεστικοί Αλγόριθμοι
 
-## Cryptographic/Compression Algorithms
+## Κρυπτογραφικοί/Συμπιεστικοί Αλγόριθμοι
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Identifying Algorithms
+## Αναγνώριση Αλγορίθμων
 
-If you ends in a code **using shift rights and lefts, xors and several arithmetic operations** it's highly possible that it's the implementation of a **cryptographic algorithm**. Here it's going to be showed some ways to **identify the algorithm that it's used without needing to reverse each step**.
+Αν καταλήξετε σε έναν κώδικα **χρησιμοποιώντας shift δεξιά και αριστερά, xors και διάφορες αριθμητικές λειτουργίες** είναι πολύ πιθανό ότι πρόκειται για την υλοποίηση ενός **κρυπτογραφικού αλγορίθμου**. Εδώ θα παρουσιαστούν μερικοί τρόποι για να **αναγνωρίσετε τον αλγόριθμο που χρησιμοποιείται χωρίς να χρειάζεται να αναστρέψετε κάθε βήμα**.
 
-### API functions
+### Λειτουργίες API
 
 **CryptDeriveKey**
 
-If this function is used, you can find which **algorithm is being used** checking the value of the second parameter:
+Αν αυτή η λειτουργία χρησιμοποιείται, μπορείτε να βρείτε ποιος **αλγόριθμος χρησιμοποιείται** ελέγχοντας την τιμή της δεύτερης παραμέτρου:
 
 ![](<../../images/image (375) (1) (1) (1) (1).png>)
 
-Check here the table of possible algorithms and their assigned values: [https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id](https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id)
+Δείτε εδώ τον πίνακα των πιθανών αλγορίθμων και των ανατεθειμένων τιμών τους: [https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id](https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id)
 
 **RtlCompressBuffer/RtlDecompressBuffer**
 
-Compresses and decompresses a given buffer of data.
+Συμπιέζει και αποσυμπιέζει ένα δεδομένο buffer δεδομένων.
 
 **CryptAcquireContext**
 
-From [the docs](https://learn.microsoft.com/en-us/windows/win32/api/wincrypt/nf-wincrypt-cryptacquirecontexta): The **CryptAcquireContext** function is used to acquire a handle to a particular key container within a particular cryptographic service provider (CSP). **This returned handle is used in calls to CryptoAPI** functions that use the selected CSP.
+Από [τα docs](https://learn.microsoft.com/en-us/windows/win32/api/wincrypt/nf-wincrypt-cryptacquirecontexta): Η λειτουργία **CryptAcquireContext** χρησιμοποιείται για να αποκτήσει ένα handle σε ένα συγκεκριμένο key container εντός ενός συγκεκριμένου κρυπτογραφικού παρόχου υπηρεσιών (CSP). **Αυτό το επιστρεφόμενο handle χρησιμοποιείται σε κλήσεις σε λειτουργίες CryptoAPI** που χρησιμοποιούν τον επιλεγμένο CSP.
 
 **CryptCreateHash**
 
-Initiates the hashing of a stream of data. If this function is used, you can find which **algorithm is being used** checking the value of the second parameter:
+Αρχίζει την καταμέτρηση ενός ρεύματος δεδομένων. Αν αυτή η λειτουργία χρησιμοποιείται, μπορείτε να βρείτε ποιος **αλγόριθμος χρησιμοποιείται** ελέγχοντας την τιμή της δεύτερης παραμέτρου:
 
 ![](<../../images/image (376).png>)
 
 \
-Check here the table of possible algorithms and their assigned values: [https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id](https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id)
+Δείτε εδώ τον πίνακα των πιθανών αλγορίθμων και των ανατεθειμένων τιμών τους: [https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id](https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id)
 
-### Code constants
+### Σταθερές Κώδικα
 
-Sometimes it's really easy to identify an algorithm thanks to the fact that it needs to use a special and unique value.
+Μερικές φορές είναι πολύ εύκολο να αναγνωρίσετε έναν αλγόριθμο χάρη στο γεγονός ότι χρειάζεται να χρησιμοποιήσει μια ειδική και μοναδική τιμή.
 
 ![](<../../images/image (370).png>)
 
-If you search for the first constant in Google this is what you get:
+Αν ψάξετε για την πρώτη σταθερά στο Google αυτό είναι που θα βρείτε:
 
 ![](<../../images/image (371).png>)
 
-Therefore, you can assume that the decompiled function is a **sha256 calculator.**\
-You can search any of the other constants and you will obtain (probably) the same result.
+Επομένως, μπορείτε να υποθέσετε ότι η αποσυμπιεσμένη λειτουργία είναι ένας **υπολογιστής sha256.**\
+Μπορείτε να αναζητήσετε οποιαδήποτε από τις άλλες σταθερές και θα αποκτήσετε (πιθανώς) το ίδιο αποτέλεσμα.
 
-### data info
+### πληροφορίες δεδομένων
 
-If the code doesn't have any significant constant it may be **loading information from the .data section**.\
-You can access that data, **group the first dword** and search for it in google as we have done in the section before:
+Αν ο κώδικας δεν έχει καμία σημαντική σταθερά μπορεί να είναι **φορτώνοντας πληροφορίες από την ενότητα .data**.\
+Μπορείτε να αποκτήσετε πρόσβαση σε αυτά τα δεδομένα, **ομαδοποιώντας το πρώτο dword** και να το αναζητήσετε στο Google όπως κάναμε στην προηγούμενη ενότητα:
 
 ![](<../../images/image (372).png>)
 
-In this case, if you look for **0xA56363C6** you can find that it's related to the **tables of the AES algorithm**.
+Σε αυτή την περίπτωση, αν ψάξετε για **0xA56363C6** μπορείτε να βρείτε ότι σχετίζεται με τις **πίνακες του αλγορίθμου AES**.
 
-## RC4 **(Symmetric Crypt)**
+## RC4 **(Συμμετρική Κρυπτογράφηση)**
 
-### Characteristics
+### Χαρακτηριστικά
 
-It's composed of 3 main parts:
+Αποτελείται από 3 κύρια μέρη:
 
-- **Initialization stage/**: Creates a **table of values from 0x00 to 0xFF** (256bytes in total, 0x100). This table is commonly call **Substitution Box** (or SBox).
-- **Scrambling stage**: Will **loop through the table** crated before (loop of 0x100 iterations, again) creating modifying each value with **semi-random** bytes. In order to create this semi-random bytes, the RC4 **key is used**. RC4 **keys** can be **between 1 and 256 bytes in length**, however it is usually recommended that it is above 5 bytes. Commonly, RC4 keys are 16 bytes in length.
-- **XOR stage**: Finally, the plain-text or cyphertext is **XORed with the values created before**. The function to encrypt and decrypt is the same. For this, a **loop through the created 256 bytes** will be performed as many times as necessary. This is usually recognized in a decompiled code with a **%256 (mod 256)**.
+- **Στάδιο αρχικοποίησης/**: Δημιουργεί έναν **πίνακα τιμών από 0x00 έως 0xFF** (256bytes συνολικά, 0x100). Αυτός ο πίνακας ονομάζεται συνήθως **Substitution Box** (ή SBox).
+- **Στάδιο ανακατανομής**: Θα **περάσει μέσα από τον πίνακα** που δημιουργήθηκε πριν (κύκλος 0x100 επαναλήψεων, ξανά) δημιουργώντας τροποποιώντας κάθε τιμή με **ημι-τυχαία** bytes. Για να δημιουργηθούν αυτά τα ημι-τυχαία bytes, χρησιμοποιείται το **κλειδί RC4**. Τα **κλειδιά RC4** μπορούν να είναι **μεταξύ 1 και 256 bytes σε μήκος**, ωστόσο συνήθως συνιστάται να είναι πάνω από 5 bytes. Συνήθως, τα κλειδιά RC4 είναι 16 bytes σε μήκος.
+- **Στάδιο XOR**: Τέλος, το απλό κείμενο ή το κρυπτογραφημένο κείμενο είναι **XORed με τις τιμές που δημιουργήθηκαν πριν**. Η λειτουργία για την κρυπτογράφηση και την αποκρυπτογράφηση είναι η ίδια. Για αυτό, θα εκτελεστεί ένας **κύκλος μέσα από τα 256 bytes που δημιουργήθηκαν** όσες φορές είναι απαραίτητο. Αυτό συνήθως αναγνωρίζεται σε έναν αποσυμπιεσμένο κώδικα με ένα **%256 (mod 256)**.
 
 > [!NOTE]
-> **In order to identify a RC4 in a disassembly/decompiled code you can check for 2 loops of size 0x100 (with the use of a key) and then a XOR of the input data with the 256 values created before in the 2 loops probably using a %256 (mod 256)**
+> **Για να αναγνωρίσετε ένα RC4 σε έναν αποσυναρμολογημένο/αποσυμπιεσμένο κώδικα μπορείτε να ελέγξετε για 2 κύκλους μεγέθους 0x100 (με τη χρήση ενός κλειδιού) και στη συνέχεια ένα XOR των δεδομένων εισόδου με τις 256 τιμές που δημιουργήθηκαν πριν στους 2 κύκλους πιθανώς χρησιμοποιώντας ένα %256 (mod 256)**
 
-### **Initialization stage/Substitution Box:** (Note the number 256 used as counter and how a 0 is written in each place of the 256 chars)
+### **Στάδιο αρχικοποίησης/Substitution Box:** (Σημειώστε τον αριθμό 256 που χρησιμοποιείται ως μετρητής και πώς γράφεται ένα 0 σε κάθε θέση των 256 χαρακτήρων)
 
 ![](<../../images/image (377).png>)
 
-### **Scrambling Stage:**
+### **Στάδιο ανακατανομής:**
 
 ![](<../../images/image (378).png>)
 
-### **XOR Stage:**
+### **Στάδιο XOR:**
 
 ![](<../../images/image (379).png>)
 
-## **AES (Symmetric Crypt)**
+## **AES (Συμμετρική Κρυπτογράφηση)**
 
-### **Characteristics**
+### **Χαρακτηριστικά**
 
-- Use of **substitution boxes and lookup tables**
-  - It's possible to **distinguish AES thanks to the use of specific lookup table values** (constants). _Note that the **constant** can be **stored** in the binary **or created**_ _**dynamically**._
-- The **encryption key** must be **divisible** by **16** (usually 32B) and usually an **IV** of 16B is used.
+- Χρήση **substitution boxes και lookup tables**
+- Είναι δυνατόν να **διακρίνετε το AES χάρη στη χρήση συγκεκριμένων τιμών lookup table** (σταθερές). _Σημειώστε ότι η **σταθερά** μπορεί να είναι **αποθηκευμένη** στο δυαδικό **ή να δημιουργηθεί** _**δυναμικά**._
+- Το **κλειδί κρυπτογράφησης** πρέπει να είναι **διαιρέσιμο** με **16** (συνήθως 32B) και συνήθως χρησιμοποιείται ένα **IV** 16B.
 
-### SBox constants
+### Σταθερές SBox
 
 ![](<../../images/image (380).png>)
 
-## Serpent **(Symmetric Crypt)**
+## Serpent **(Συμμετρική Κρυπτογράφηση)**
 
-### Characteristics
+### Χαρακτηριστικά
 
-- It's rare to find some malware using it but there are examples (Ursnif)
-- Simple to determine if an algorithm is Serpent or not based on it's length (extremely long function)
+- Είναι σπάνιο να βρείτε κάποιο malware που να το χρησιμοποιεί αλλά υπάρχουν παραδείγματα (Ursnif)
+- Απλό να προσδιορίσετε αν ένας αλγόριθμος είναι Serpent ή όχι με βάση το μήκος του (εξαιρετικά μακρά λειτουργία)
 
-### Identifying
+### Αναγνώριση
 
-In the following image notice how the constant **0x9E3779B9** is used (note that this constant is also used by other crypto algorithms like **TEA** -Tiny Encryption Algorithm).\
-Also note the **size of the loop** (**132**) and the **number of XOR operations** in the **disassembly** instructions and in the **code** example:
+Στην παρακάτω εικόνα παρατηρήστε πώς χρησιμοποιείται η σταθερά **0x9E3779B9** (σημειώστε ότι αυτή η σταθερά χρησιμοποιείται επίσης από άλλους κρυπτογραφικούς αλγόριθμους όπως **TEA** -Tiny Encryption Algorithm).\
+Επίσης σημειώστε το **μέγεθος του κύκλου** (**132**) και τον **αριθμό των λειτουργιών XOR** στις **εντολές αποσυναρμολόγησης** και στο **παράδειγμα κώδικα**:
 
 ![](<../../images/image (381).png>)
 
-As it was mentioned before, this code can be visualized inside any decompiler as a **very long function** as there **aren't jumps** inside of it. The decompiled code can look like the following:
+Όπως αναφέρθηκε προηγουμένως, αυτός ο κώδικας μπορεί να οπτικοποιηθεί μέσα σε οποιονδήποτε αποσυμπιεστή ως μια **πολύ μακρά λειτουργία** καθώς **δεν υπάρχουν άλματα** μέσα σε αυτόν. Ο αποσυμπιεσμένος κώδικας μπορεί να φαίνεται όπως το εξής:
 
 ![](<../../images/image (382).png>)
 
-Therefore, it's possible to identify this algorithm checking the **magic number** and the **initial XORs**, seeing a **very long function** and **comparing** some **instructions** of the long function **with an implementation** (like the shift left by 7 and the rotate left by 22).
+Επομένως, είναι δυνατόν να αναγνωρίσετε αυτόν τον αλγόριθμο ελέγχοντας τον **μαγικό αριθμό** και τους **αρχικούς XORs**, βλέποντας μια **πολύ μακρά λειτουργία** και **συγκρίνοντας** κάποιες **εντολές** της μακράς λειτουργίας **με μια υλοποίηση** (όπως το shift αριστερά κατά 7 και την περιστροφή αριστερά κατά 22).
 
-## RSA **(Asymmetric Crypt)**
+## RSA **(Ασύμμετρη Κρυπτογράφηση)**
 
-### Characteristics
+### Χαρακτηριστικά
 
-- More complex than symmetric algorithms
-- There are no constants! (custom implementation are difficult to determine)
-- KANAL (a crypto analyzer) fails to show hints on RSA ad it relies on constants.
+- Πιο περίπλοκος από τους συμμετρικούς αλγόριθμους
+- Δεν υπάρχουν σταθερές! (οι προσαρμοσμένες υλοποιήσεις είναι δύσκολο να προσδιοριστούν)
+- KANAL (ένας αναλυτής κρυπτογράφησης) αποτυγχάνει να δείξει ενδείξεις για το RSA καθώς βασίζεται σε σταθερές.
 
-### Identifying by comparisons
+### Αναγνώριση μέσω συγκρίσεων
 
 ![](<../../images/image (383).png>)
 
-- In line 11 (left) there is a `+7) >> 3` which is the same as in line 35 (right): `+7) / 8`
-- Line 12 (left) is checking if `modulus_len < 0x040` and in line 36 (right) it's checking if `inputLen+11 > modulusLen`
+- Στη γραμμή 11 (αριστερά) υπάρχει ένα `+7) >> 3` που είναι το ίδιο με στη γραμμή 35 (δεξιά): `+7) / 8`
+- Η γραμμή 12 (αριστερά) ελέγχει αν `modulus_len < 0x040` και στη γραμμή 36 (δεξιά) ελέγχει αν `inputLen+11 > modulusLen`
 
 ## MD5 & SHA (hash)
 
-### Characteristics
+### Χαρακτηριστικά
 
-- 3 functions: Init, Update, Final
-- Similar initialize functions
+- 3 λειτουργίες: Init, Update, Final
+- Παρόμοιες λειτουργίες αρχικοποίησης
 
-### Identify
+### Αναγνώριση
 
 **Init**
 
-You can identify both of them checking the constants. Note that the sha_init has 1 constant that MD5 doesn't have:
+Μπορείτε να αναγνωρίσετε και τους δύο ελέγχοντας τις σταθερές. Σημειώστε ότι η sha_init έχει 1 σταθερά που δεν έχει το MD5:
 
 ![](<../../images/image (385).png>)
 
 **MD5 Transform**
 
-Note the use of more constants
+Σημειώστε τη χρήση περισσότερων σταθερών
 
 ![](<../../images/image (253) (1) (1) (1).png>)
 
 ## CRC (hash)
 
-- Smaller and more efficient as it's function is to find accidental changes in data
-- Uses lookup tables (so you can identify constants)
+- Μικρότερος και πιο αποδοτικός καθώς η λειτουργία του είναι να βρίσκει τυχαίες αλλαγές στα δεδομένα
+- Χρησιμοποιεί πίνακες αναζήτησης (έτσι μπορείτε να αναγνωρίσετε σταθερές)
 
-### Identify
+### Αναγνώριση
 
-Check **lookup table constants**:
+Ελέγξτε **σταθερές πίνακα αναζήτησης**:
 
 ![](<../../images/image (387).png>)
 
-A CRC hash algorithm looks like:
+Ένας αλγόριθμος hash CRC φαίνεται όπως:
 
 ![](<../../images/image (386).png>)
 
-## APLib (Compression)
+## APLib (Συμπίεση)
 
-### Characteristics
+### Χαρακτηριστικά
 
-- Not recognizable constants
-- You can try to write the algorithm in python and search for similar things online
+- Μη αναγνωρίσιμες σταθερές
+- Μπορείτε να προσπαθήσετε να γράψετε τον αλγόριθμο σε python και να αναζητήσετε παρόμοια πράγματα online
 
-### Identify
+### Αναγνώριση
 
-The graph is quiet large:
+Ο γραφικός πίνακας είναι αρκετά μεγάλος:
 
 ![](<../../images/image (207) (2) (1).png>)
 
-Check **3 comparisons to recognise it**:
+Ελέγξτε **3 συγκρίσεις για να το αναγνωρίσετε**:
 
 ![](<../../images/image (384).png>)
 
 {{#include ../../banners/hacktricks-training.md}}
-

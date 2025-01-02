@@ -1,52 +1,50 @@
-# Test LLMs
+# Δοκιμή LLMs
 
-## Run & train models locally
+## Εκτέλεση & εκπαίδευση μοντέλων τοπικά
 
 ### [**Hugging Face Transformers**](https://github.com/huggingface/transformers)
 
-Hugging Face Transformers is one of the most popular open-source libraries for using, training, and deploying LLMs such as GPT, BERT, and many others. It offers a comprehensive ecosystem that includes pre-trained models, datasets, and seamless integration with the Hugging Face Hub for fine-tuning and deployment.
+Hugging Face Transformers είναι μία από τις πιο δημοφιλείς βιβλιοθήκες ανοιχτού κώδικα για τη χρήση, εκπαίδευση και ανάπτυξη LLMs όπως το GPT, BERT και πολλά άλλα. Προσφέρει ένα ολοκληρωμένο οικοσύστημα που περιλαμβάνει προεκπαιδευμένα μοντέλα, σύνολα δεδομένων και απρόσκοπτη ενσωμάτωση με το Hugging Face Hub για λεπτομερή εκπαίδευση και ανάπτυξη.
 
 ### [**LangChain**](https://github.com/langchain-ai/langchain)
 
-LangChain is a framework designed for building applications with LLMs. It allows developers to connect language models with external data sources, APIs, and databases. LangChain provides tools for advanced prompt engineering, managing conversation history, and integrating LLMs into complex workflows.
+LangChain είναι ένα πλαίσιο σχεδιασμένο για την κατασκευή εφαρμογών με LLMs. Επιτρέπει στους προγραμματιστές να συνδέουν γλωσσικά μοντέλα με εξωτερικές πηγές δεδομένων, APIs και βάσεις δεδομένων. Το LangChain παρέχει εργαλεία για προηγμένη μηχανική προτροπών, διαχείριση ιστορικού συνομιλιών και ενσωμάτωση LLMs σε σύνθετες ροές εργασίας.
 
 ### [**LitGPT**](https://github.com/Lightning-AI/litgpt)
 
-LitGPT is a project developed by Lightning AI that leverages the Lightning framework to facilitate the training, fine-tuning, and deployment of GPT-based models. It integrates seamlessly with other Lightning AI tools, providing optimized workflows for handling large-scale language models with enhanced performance and scalability.
+LitGPT είναι ένα έργο που αναπτύχθηκε από την Lightning AI και αξιοποιεί το Lightning framework για να διευκολύνει την εκπαίδευση, λεπτομερή εκπαίδευση και ανάπτυξη μοντέλων βασισμένων σε GPT. Ενσωματώνεται απρόσκοπτα με άλλα εργαλεία της Lightning AI, παρέχοντας βελτιστοποιημένες ροές εργασίας για τη διαχείριση μεγάλων γλωσσικών μοντέλων με βελτιωμένη απόδοση και κλιμάκωση.
 
 ### [**LitServe**](https://github.com/Lightning-AI/LitServe)
 
-**Description:**\
-LitServe is a deployment tool from Lightning AI designed for quickly and efficiently deploying AI models. It simplifies the integration of LLMs into real-time applications by providing scalable and optimized serving capabilities.
+**Περιγραφή:**\
+Το LitServe είναι ένα εργαλείο ανάπτυξης από την Lightning AI σχεδιασμένο για γρήγορη και αποτελεσματική ανάπτυξη AI μοντέλων. Απλοποιεί την ενσωμάτωση LLMs σε εφαρμογές σε πραγματικό χρόνο παρέχοντας κλιμακωτές και βελτιστοποιημένες δυνατότητες εξυπηρέτησης.
 
 ### [**Axolotl**](https://github.com/axolotl-ai-cloud/axolotl)
 
-Axolotl is a cloud-based platform designed to streamline the deployment, scaling, and management of AI models, including LLMs. It offers features such as automated scaling, monitoring, and integration with various cloud services, making it easier to deploy models in production environments without extensive infrastructure management.
+Axolotl είναι μια πλατφόρμα cloud που έχει σχεδιαστεί για να απλοποιεί την ανάπτυξη, κλιμάκωση και διαχείριση AI μοντέλων, συμπεριλαμβανομένων των LLMs. Προσφέρει δυνατότητες όπως αυτοματοποιημένη κλιμάκωση, παρακολούθηση και ενσωμάτωση με διάφορες υπηρεσίες cloud, διευκολύνοντας την ανάπτυξη μοντέλων σε παραγωγικά περιβάλλοντα χωρίς εκτενή διαχείριση υποδομών.
 
-## Try models online
+## Δοκιμάστε μοντέλα online
 
 ### [**Hugging Face**](https://huggingface.co/)
 
-**Hugging Face** is a leading platform and community for machine learning, particularly known for its work in natural language processing (NLP). It provides tools, libraries, and resources that make it easier to develop, share, and deploy machine learning models.\
-It offers several sections like:
+**Hugging Face** είναι μια κορυφαία πλατφόρμα και κοινότητα για μηχανική μάθηση, ιδιαίτερα γνωστή για τη δουλειά της στην επεξεργασία φυσικής γλώσσας (NLP). Παρέχει εργαλεία, βιβλιοθήκες και πόρους που διευκολύνουν την ανάπτυξη, κοινοποίηση και ανάπτυξη μοντέλων μηχανικής μάθησης.\
+Προσφέρει αρκετές ενότητες όπως:
 
-* **Models**: A vast repository of **pre-trained machine learning models** where users can browse, download, and integrate models for various tasks like text generation, translation, image recognition, and more.
-* **Datasets:** A comprehensive **collection of datasets** used for training and evaluating models. It facilitates easy access to diverse data sources, enabling users to find and utilize data for their specific machine learning projects.
-* **Spaces:** A platform for hosting and sharing **interactive machine learning applications** and demos. It allows developers to **showcase** their models in action, create user-friendly interfaces, and collaborate with others by sharing live demos.
+* **Μοντέλα**: Ένα εκτενές αποθετήριο **προεκπαιδευμένων μοντέλων μηχανικής μάθησης** όπου οι χρήστες μπορούν να περιηγηθούν, να κατεβάσουν και να ενσωματώσουν μοντέλα για διάφορες εργασίες όπως η γεννήτρια κειμένου, η μετάφραση, η αναγνώριση εικόνας και άλλα.
+* **Σύνολα Δεδομένων:** Μια ολοκληρωμένη **συλλογή συνόλων δεδομένων** που χρησιμοποιούνται για την εκπαίδευση και αξιολόγηση μοντέλων. Διευκολύνει την εύκολη πρόσβαση σε ποικιλόμορφες πηγές δεδομένων, επιτρέποντας στους χρήστες να βρουν και να χρησιμοποιήσουν δεδομένα για τα συγκεκριμένα έργα μηχανικής μάθησης τους.
+* **Spaces:** Μια πλατφόρμα για τη φιλοξενία και κοινοποίηση **διαδραστικών εφαρμογών μηχανικής μάθησης** και επιδείξεων. Επιτρέπει στους προγραμματιστές να **παρουσιάσουν** τα μοντέλα τους σε δράση, να δημιουργήσουν φιλικά προς τον χρήστη περιβάλλοντα και να συνεργαστούν με άλλους μοιράζοντας ζωντανές επιδείξεις.
 
 ## [**TensorFlow Hub**](https://www.tensorflow.org/hub) **&** [**Kaggle**](https://www.kaggle.com/)
 
-**TensorFlow Hub** is a comprehensive repository of reusable machine learning modules developed by Google. It focuses on facilitating the sharing and deployment of machine learning models, especially those built with TensorFlow.
+**TensorFlow Hub** είναι ένα ολοκληρωμένο αποθετήριο επαναχρησιμοποιήσιμων μονάδων μηχανικής μάθησης που αναπτύχθηκε από την Google. Επικεντρώνεται στην διευκόλυνση της κοινοποίησης και ανάπτυξης μοντέλων μηχανικής μάθησης, ειδικά αυτών που έχουν κατασκευαστεί με το TensorFlow.
 
-* **Modules:** A vast collection of pre-trained models and model components where users can browse, download, and integrate modules for tasks such as image classification, text embedding, and more.
-* **Tutorials:** Step-by-step guides and examples which helps users understand how to implement and fine-tune models using TensorFlow Hub.
-* **Documentation:** Comprehensive guides and API references that assist developers in effectively utilizing the repository’s resources.
+* **Μονάδες:** Μια εκτενή συλλογή προεκπαιδευμένων μοντέλων και συστατικών μοντέλων όπου οι χρήστες μπορούν να περιηγηθούν, να κατεβάσουν και να ενσωματώσουν μονάδες για εργασίες όπως η ταξινόμηση εικόνας, η ενσωμάτωση κειμένου και άλλα.
+* **Μαθήματα:** Οδηγίες βήμα προς βήμα και παραδείγματα που βοηθούν τους χρήστες να κατανοήσουν πώς να υλοποιήσουν και να βελτιστοποιήσουν μοντέλα χρησιμοποιώντας το TensorFlow Hub.
+* **Τεκμηρίωση:** Ολοκληρωμένοι οδηγοί και αναφορές API που βοηθούν τους προγραμματιστές να αξιοποιήσουν αποτελεσματικά τους πόρους του αποθετηρίου.
 
 ## [**Replicate**](https://replicate.com/home)
 
-**Replicate** is a platform that allows developers to run machine learning models in the cloud via a simple API. It focuses on making ML models easily accessible and deployable without the need for extensive infrastructure setup.
+**Replicate** είναι μια πλατφόρμα που επιτρέπει στους προγραμματιστές να εκτελούν μοντέλα μηχανικής μάθησης στο cloud μέσω ενός απλού API. Επικεντρώνεται στο να καθιστά τα μοντέλα ML εύκολα προσβάσιμα και αναπτύξιμα χωρίς την ανάγκη εκτενούς ρύθμισης υποδομών.
 
-* **Models:** A repository of machine learning models contributed by the community which users can browse, try, and integrate models into their applications with minimal effort.
-* **API Access:** Simple APIs for running models the enable developers to deploy and scale models effortlessly within their own applications.
-
-
+* **Μοντέλα:** Ένα αποθετήριο μοντέλων μηχανικής μάθησης που έχει συνεισφέρει η κοινότητα, το οποίο οι χρήστες μπορούν να περιηγηθούν, να δοκιμάσουν και να ενσωματώσουν μοντέλα στις εφαρμογές τους με ελάχιστη προσπάθεια.
+* **Πρόσβαση API:** Απλά APIs για την εκτέλεση μοντέλων που επιτρέπουν στους προγραμματιστές να αναπτύσσουν και να κλιμακώνουν μοντέλα χωρίς κόπο μέσα στις δικές τους εφαρμογές.

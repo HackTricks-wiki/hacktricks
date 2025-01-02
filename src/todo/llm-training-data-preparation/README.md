@@ -1,10 +1,10 @@
 # LLM Training - Data Preparation
 
-**These are my notes from the very recommended book** [**https://www.manning.com/books/build-a-large-language-model-from-scratch**](https://www.manning.com/books/build-a-large-language-model-from-scratch) **with some extra information.**
+**Αυτές είναι οι σημειώσεις μου από το πολύ συνιστώμενο βιβλίο** [**https://www.manning.com/books/build-a-large-language-model-from-scratch**](https://www.manning.com/books/build-a-large-language-model-from-scratch) **με κάποιες επιπλέον πληροφορίες.**
 
 ## Basic Information
 
-You should start by reading this post for some basic concepts you should know about:
+Πρέπει να ξεκινήσετε διαβάζοντας αυτή την ανάρτηση για κάποιες βασικές έννοιες που πρέπει να γνωρίζετε:
 
 {{#ref}}
 0.-basic-llm-concepts.md
@@ -13,7 +13,7 @@ You should start by reading this post for some basic concepts you should know ab
 ## 1. Tokenization
 
 > [!TIP]
-> The goal of this initial phase is very simple: **Divide the input in tokens (ids) in some way that makes sense**.
+> Ο στόχος αυτής της αρχικής φάσης είναι πολύ απλός: **Διαιρέστε την είσοδο σε tokens (ids) με κάποιον τρόπο που έχει νόημα**.
 
 {{#ref}}
 1.-tokenizing.md
@@ -22,7 +22,7 @@ You should start by reading this post for some basic concepts you should know ab
 ## 2. Data Sampling
 
 > [!TIP]
-> The goal of this second phase is very simple: **Sample the input data and prepare it for the training phase usually by separating the dataset into sentences of a specific length and generating also the expected response.**
+> Ο στόχος αυτής της δεύτερης φάσης είναι πολύ απλός: **Δειγματοληψία των δεδομένων εισόδου και προετοιμασία τους για τη φάση εκπαίδευσης, συνήθως χωρίζοντας το σύνολο δεδομένων σε προτάσεις συγκεκριμένου μήκους και δημιουργώντας επίσης την αναμενόμενη απάντηση.**
 
 {{#ref}}
 2.-data-sampling.md
@@ -31,10 +31,10 @@ You should start by reading this post for some basic concepts you should know ab
 ## 3. Token Embeddings
 
 > [!TIP]
-> The goal of this third phase is very simple: **Assign each of the previous tokens in the vocabulary a vector of the desired dimensions to train the model.** Each word in the vocabulary will a point in a space of X dimensions.\
-> Note that initially the position of each word in the space is just initialised "randomly" and these positions are trainable parameters (will be improved during the training).
+> Ο στόχος αυτής της τρίτης φάσης είναι πολύ απλός: **Αναθέστε σε κάθε από τα προηγούμενα tokens στο λεξιλόγιο έναν διανύσματος των επιθυμητών διαστάσεων για να εκπαιδεύσετε το μοντέλο.** Κάθε λέξη στο λεξιλόγιο θα είναι ένα σημείο σε έναν χώρο X διαστάσεων.\
+> Σημειώστε ότι αρχικά η θέση κάθε λέξης στον χώρο είναι απλώς "τυχαία" και αυτές οι θέσεις είναι παραμετροποιήσιμες (θα βελτιωθούν κατά τη διάρκεια της εκπαίδευσης).
 >
-> Moreover, during the token embedding **another layer of embeddings is created** which represents (in this case) the **absolute possition of the word in the training sentence**. This way a word in different positions in the sentence will have a different representation (meaning).
+> Επιπλέον, κατά τη διάρκεια της ενσωμάτωσης tokens **δημιουργείται ένα άλλο επίπεδο ενσωματώσεων** που αντιπροσωπεύει (σε αυτή την περίπτωση) την **απόλυτη θέση της λέξης στην προτεινόμενη πρόταση εκπαίδευσης**. Με αυτόν τον τρόπο, μια λέξη σε διαφορετικές θέσεις στην πρόταση θα έχει διαφορετική αναπαράσταση (νόημα).
 
 {{#ref}}
 3.-token-embeddings.md
@@ -43,8 +43,8 @@ You should start by reading this post for some basic concepts you should know ab
 ## 4. Attention Mechanisms
 
 > [!TIP]
-> The goal of this fourth phase is very simple: **Apply some attetion mechanisms**. These are going to be a lot of **repeated layers** that are going to **capture the relation of a word in the vocabulary with its neighbours in the current sentence being used to train the LLM**.\
-> A lot of layers are used for this, so a lot of trainable parameters are going to be capturing this information.
+> Ο στόχος αυτής της τέταρτης φάσης είναι πολύ απλός: **Εφαρμόστε κάποιους μηχανισμούς προσοχής**. Αυτοί θα είναι πολλά **επανειλημμένα επίπεδα** που θα **καταγράφουν τη σχέση μιας λέξης στο λεξιλόγιο με τους γείτονές της στην τρέχουσα πρόταση που χρησιμοποιείται για την εκπαίδευση του LLM**.\
+> Χρησιμοποιούνται πολλά επίπεδα γι' αυτό, οπότε πολλοί παραμετροποιήσιμοι παράγοντες θα καταγράφουν αυτές τις πληροφορίες.
 
 {{#ref}}
 4.-attention-mechanisms.md
@@ -53,9 +53,9 @@ You should start by reading this post for some basic concepts you should know ab
 ## 5. LLM Architecture
 
 > [!TIP]
-> The goal of this fifth phase is very simple: **Develop the architecture of the full LLM**. Put everything together, apply all the layers and create all the functions to generate text or transform text to IDs and backwards.
+> Ο στόχος αυτής της πέμπτης φάσης είναι πολύ απλός: **Αναπτύξτε την αρχιτεκτονική του πλήρους LLM**. Συνδυάστε τα πάντα, εφαρμόστε όλα τα επίπεδα και δημιουργήστε όλες τις λειτουργίες για να παράγετε κείμενο ή να μετατρέπετε κείμενο σε IDs και αντίστροφα.
 >
-> This architecture will be used for both, training and predicting text after it was trained.
+> Αυτή η αρχιτεκτονική θα χρησιμοποιηθεί τόσο για την εκπαίδευση όσο και για την πρόβλεψη κειμένου μετά την εκπαίδευση.
 
 {{#ref}}
 5.-llm-architecture.md
@@ -64,7 +64,7 @@ You should start by reading this post for some basic concepts you should know ab
 ## 6. Pre-training & Loading models
 
 > [!TIP]
-> The goal of this sixth phase is very simple: **Train the model from scratch**. For this the previous LLM architecture will be used with some loops going over the data sets using the defined loss functions and optimizer to train all the parameters of the model.
+> Ο στόχος αυτής της έκτης φάσης είναι πολύ απλός: **Εκπαιδεύστε το μοντέλο από την αρχή**. Για αυτό θα χρησιμοποιηθεί η προηγούμενη αρχιτεκτονική LLM με κάποιους βρόχους που θα διατρέχουν τα σύνολα δεδομένων χρησιμοποιώντας τις καθορισμένες συναρτήσεις απώλειας και τον βελτιστοποιητή για να εκπαιδεύσουν όλους τους παραμέτρους του μοντέλου.
 
 {{#ref}}
 6.-pre-training-and-loading-models.md
@@ -73,7 +73,7 @@ You should start by reading this post for some basic concepts you should know ab
 ## 7.0. LoRA Improvements in fine-tuning
 
 > [!TIP]
-> The use of **LoRA reduce a lot the computation** needed to **fine tune** already trained models.
+> Η χρήση του **LoRA μειώνει πολύ την υπολογιστική** ανάγκη για **fine tune** ήδη εκπαιδευμένων μοντέλων.
 
 {{#ref}}
 7.0.-lora-improvements-in-fine-tuning.md
@@ -82,7 +82,7 @@ You should start by reading this post for some basic concepts you should know ab
 ## 7.1. Fine-Tuning for Classification
 
 > [!TIP]
-> The goal of this section is to show how to fine-tune an already pre-trained model so instead of generating new text the LLM will select give the **probabilities of the given text being categorized in each of the given categories** (like if a text is spam or not).
+> Ο στόχος αυτής της ενότητας είναι να δείξει πώς να κάνετε fine-tune ένα ήδη προεκπαιδευμένο μοντέλο έτσι ώστε αντί να παράγει νέο κείμενο, το LLM θα επιλέγει να δώσει τις **πιθανότητες του δεδομένου κειμένου να κατηγοριοποιηθεί σε κάθε μία από τις δεδομένες κατηγορίες** (όπως αν ένα κείμενο είναι spam ή όχι).
 
 {{#ref}}
 7.1.-fine-tuning-for-classification.md
@@ -91,9 +91,8 @@ You should start by reading this post for some basic concepts you should know ab
 ## 7.2. Fine-Tuning to follow instructions
 
 > [!TIP]
-> The goal of this section is to show how to **fine-tune an already pre-trained model to follow instructions** rather than just generating text, for example, responding to tasks as a chat bot.
+> Ο στόχος αυτής της ενότητας είναι να δείξει πώς να **fine-tune ένα ήδη προεκπαιδευμένο μοντέλο για να ακολουθεί οδηγίες** αντί να παράγει απλώς κείμενο, για παράδειγμα, απαντώντας σε εργασίες ως chatbot.
 
 {{#ref}}
 7.2.-fine-tuning-to-follow-instructions.md
 {{#endref}}
-

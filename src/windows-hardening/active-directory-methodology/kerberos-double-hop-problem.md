@@ -1,4 +1,4 @@
-# Kerberos Double Hop Problem
+# Πρόβλημα Kerberos Double Hop
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -6,98 +6,86 @@
 
 {% embed url="https://websec.nl/" %}
 
-## Introduction
+## Εισαγωγή
 
-The Kerberos "Double Hop" problem appears when an attacker attempts to use **Kerberos authentication across two** **hops**, for example using **PowerShell**/**WinRM**.
+Το πρόβλημα "Double Hop" του Kerberos εμφανίζεται όταν ένας επιτιθέμενος προσπαθεί να χρησιμοποιήσει **Kerberos authentication across two** **hops**, για παράδειγμα χρησιμοποιώντας **PowerShell**/**WinRM**.
 
-When an **authentication** occurs through **Kerberos**, **credentials** **aren't** cached in **memory.** Therefore, if you run mimikatz you **won't find credentials** of the user in the machine even if he is running processes.
+Όταν συμβαίνει μια **authentication** μέσω **Kerberos**, οι **credentials** **δεν** αποθηκεύονται στη **μνήμη.** Επομένως, αν τρέξετε το mimikatz **δεν θα βρείτε credentials** του χρήστη στη μηχανή ακόμα και αν εκτελεί διαδικασίες.
 
-This is because when connecting with Kerberos these are the steps:
+Αυτό συμβαίνει επειδή όταν συνδέεστε με Kerberos, αυτά είναι τα βήματα:
 
-1. User1 provides credentials and **domain controller** returns a Kerberos **TGT** to the User1.
-2. User1 uses **TGT** to request a **service ticket** to **connect** to Server1.
-3. User1 **connects** to **Server1** and provides **service ticket**.
-4. **Server1** **doesn't** have **credentials** of User1 cached or the **TGT** of User1. Therefore, when User1 from Server1 tries to login to a second server, he is **not able to authenticate**.
+1. Ο Χρήστης1 παρέχει credentials και ο **domain controller** επιστρέφει ένα Kerberos **TGT** στον Χρήστη1.
+2. Ο Χρήστης1 χρησιμοποιεί το **TGT** για να ζητήσει ένα **service ticket** για να **συνδεθεί** με τον Server1.
+3. Ο Χρήστης1 **συνδέεται** με τον **Server1** και παρέχει το **service ticket**.
+4. Ο **Server1** **δεν** έχει **credentials** του Χρήστη1 αποθηκευμένα ή το **TGT** του Χρήστη1. Επομένως, όταν ο Χρήστης1 από τον Server1 προσπαθεί να συνδεθεί σε έναν δεύτερο server, **δεν μπορεί να αυθεντικοποιηθεί**.
 
-### Unconstrained Delegation
+### Απεριόριστη Αντιπροσώπευση
 
-If **unconstrained delegation** is enabled in the PC, this won't happen as the **Server** will **get** a **TGT** of each user accessing it. Moreover, if unconstrained delegation is used you probably can **compromise the Domain Controller** from it.\
-[**More info in the unconstrained delegation page**](unconstrained-delegation.md).
+Εάν είναι ενεργοποιημένη η **unconstrained delegation** στον υπολογιστή, αυτό δεν θα συμβεί καθώς ο **Server** θα **λάβει** ένα **TGT** κάθε χρήστη που τον προσπελάσει. Επιπλέον, αν χρησιμοποιηθεί η απεριόριστη αντιπροσώπευση, πιθανώς μπορείτε να **συμβιβάσετε τον Domain Controller** από αυτό.\
+[**Περισσότερες πληροφορίες στη σελίδα της απεριόριστης αντιπροσώπευσης**](unconstrained-delegation.md).
 
 ### CredSSP
 
-Another way to avoid this problem which is [**notably insecure**](https://docs.microsoft.com/en-us/powershell/module/microsoft.wsman.management/enable-wsmancredssp?view=powershell-7) is **Credential Security Support Provider**. From Microsoft:
+Ένας άλλος τρόπος για να αποφευχθεί αυτό το πρόβλημα, το οποίο είναι [**ιδιαίτερα ανασφαλής**](https://docs.microsoft.com/en-us/powershell/module/microsoft.wsman.management/enable-wsmancredssp?view=powershell-7), είναι ο **Credential Security Support Provider**. Από τη Microsoft:
 
-> CredSSP authentication delegates the user credentials from the local computer to a remote computer. This practice increases the security risk of the remote operation. If the remote computer is compromised, when credentials are passed to it, the credentials can be used to control the network session.
+> Η αυθεντικοποίηση CredSSP αντιπροσωπεύει τα credentials του χρήστη από τον τοπικό υπολογιστή σε έναν απομακρυσμένο υπολογιστή. Αυτή η πρακτική αυξάνει τον κίνδυνο ασφαλείας της απομακρυσμένης λειτουργίας. Εάν ο απομακρυσμένος υπολογιστής συμβιβαστεί, όταν τα credentials μεταφέρονται σε αυτόν, τα credentials μπορούν να χρησιμοποιηθούν για τον έλεγχο της δικτυακής συνεδρίας.
 
-It is highly recommended that **CredSSP** be disabled on production systems, sensitive networks, and similar environments due to security concerns. To determine whether **CredSSP** is enabled, the `Get-WSManCredSSP` command can be run. This command allows for the **checking of CredSSP status** and can even be executed remotely, provided **WinRM** is enabled.
-
+Συνιστάται έντονα να είναι απενεργοποιημένο το **CredSSP** σε παραγωγικά συστήματα, ευαίσθητα δίκτυα και παρόμοια περιβάλλοντα λόγω ανησυχιών ασφαλείας. Για να προσδιορίσετε εάν είναι ενεργοποιημένο το **CredSSP**, μπορεί να εκτελεστεί η εντολή `Get-WSManCredSSP`. Αυτή η εντολή επιτρέπει τον **έλεγχο της κατάστασης του CredSSP** και μπορεί να εκτελεστεί ακόμη και απομακρυσμένα, εφόσον είναι ενεργοποιημένο το **WinRM**.
 ```powershell
 Invoke-Command -ComputerName bizintel -Credential ta\redsuit -ScriptBlock {
-    Get-WSManCredSSP
+Get-WSManCredSSP
 }
 ```
-
 ## Workarounds
 
 ### Invoke Command
 
-To address the double hop issue, a method involving a nested `Invoke-Command` is presented. This does not solve the problem directly but offers a workaround without needing special configurations. The approach allows executing a command (`hostname`) on a secondary server through a PowerShell command executed from an initial attacking machine or through a previously established PS-Session with the first server. Here's how it's done:
-
+Για να αντιμετωπιστεί το πρόβλημα του διπλού hop, παρουσιάζεται μια μέθοδος που περιλαμβάνει ένα εσωτερικό `Invoke-Command`. Αυτό δεν λύνει το πρόβλημα άμεσα αλλά προσφέρει μια εναλλακτική λύση χωρίς να απαιτούνται ειδικές ρυθμίσεις. Η προσέγγιση επιτρέπει την εκτέλεση μιας εντολής (`hostname`) σε έναν δευτερεύοντα διακομιστή μέσω μιας εντολής PowerShell που εκτελείται από μια αρχική επιτιθέμενη μηχανή ή μέσω μιας προηγουμένως καθορισμένης PS-Session με τον πρώτο διακομιστή. Να πώς γίνεται:
 ```powershell
 $cred = Get-Credential ta\redsuit
 Invoke-Command -ComputerName bizintel -Credential $cred -ScriptBlock {
-    Invoke-Command -ComputerName secdev -Credential $cred -ScriptBlock {hostname}
+Invoke-Command -ComputerName secdev -Credential $cred -ScriptBlock {hostname}
 }
 ```
+Εναλλακτικά, προτείνεται η δημιουργία μιας PS-Session με τον πρώτο διακομιστή και η εκτέλεση του `Invoke-Command` χρησιμοποιώντας το `$cred` για την κεντρικοποίηση των εργασιών.
 
-Alternatively, establishing a PS-Session with the first server and running the `Invoke-Command` using `$cred` is suggested for centralizing tasks.
+### Καταχώρηση Ρύθμισης PSSession
 
-### Register PSSession Configuration
-
-A solution to bypass the double hop problem involves using `Register-PSSessionConfiguration` with `Enter-PSSession`. This method requires a different approach than `evil-winrm` and allows for a session that does not suffer from the double hop limitation.
-
+Μια λύση για την παράκαμψη του προβλήματος διπλού άλματος περιλαμβάνει τη χρήση του `Register-PSSessionConfiguration` με το `Enter-PSSession`. Αυτή η μέθοδος απαιτεί μια διαφορετική προσέγγιση από το `evil-winrm` και επιτρέπει μια συνεδρία που δεν υποφέρει από τον περιορισμό του διπλού άλματος.
 ```powershell
 Register-PSSessionConfiguration -Name doublehopsess -RunAsCredential domain_name\username
 Restart-Service WinRM
 Enter-PSSession -ConfigurationName doublehopsess -ComputerName <pc_name> -Credential domain_name\username
 klist
 ```
-
 ### PortForwarding
 
-For local administrators on an intermediary target, port forwarding allows requests to be sent to a final server. Using `netsh`, a rule can be added for port forwarding, alongside a Windows firewall rule to allow the forwarded port.
-
+Για τοπικούς διαχειριστές σε έναν ενδιάμεσο στόχο, η προώθηση θυρών επιτρέπει την αποστολή αιτημάτων σε έναν τελικό διακομιστή. Χρησιμοποιώντας το `netsh`, μπορεί να προστεθεί ένας κανόνας για την προώθηση θυρών, μαζί με έναν κανόνα τείχους προστασίας των Windows για να επιτραπεί η προωθημένη θύρα.
 ```bash
 netsh interface portproxy add v4tov4 listenport=5446 listenaddress=10.35.8.17 connectport=5985 connectaddress=10.35.8.23
 netsh advfirewall firewall add rule name=fwd dir=in action=allow protocol=TCP localport=5446
 ```
-
 #### winrs.exe
 
-`winrs.exe` can be used for forwarding WinRM requests, potentially as a less detectable option if PowerShell monitoring is a concern. The command below demonstrates its use:
-
+`winrs.exe` μπορεί να χρησιμοποιηθεί για την προώθηση αιτημάτων WinRM, πιθανώς ως μια λιγότερο ανιχνεύσιμη επιλογή αν η παρακολούθηση του PowerShell είναι ανησυχητική. Η παρακάτω εντολή δείχνει τη χρήση του:
 ```bash
 winrs -r:http://bizintel:5446 -u:ta\redsuit -p:2600leet hostname
 ```
-
 ### OpenSSH
 
-Installing OpenSSH on the first server enables a workaround for the double-hop issue, particularly useful for jump box scenarios. This method requires CLI installation and setup of OpenSSH for Windows. When configured for Password Authentication, this allows the intermediary server to obtain a TGT on behalf of the user.
+Η εγκατάσταση του OpenSSH στον πρώτο διακομιστή επιτρέπει μια λύση για το πρόβλημα του double-hop, ιδιαίτερα χρήσιμη για σενάρια jump box. Αυτή η μέθοδος απαιτεί εγκατάσταση και ρύθμιση του OpenSSH για Windows μέσω CLI. Όταν ρυθμιστεί για Αυθεντικοποίηση με Κωδικό, αυτό επιτρέπει στον ενδιάμεσο διακομιστή να αποκτήσει ένα TGT εκ μέρους του χρήστη.
 
-#### OpenSSH Installation Steps
+#### Βήματα Εγκατάστασης OpenSSH
 
-1. Download and move the latest OpenSSH release zip to the target server.
-2. Unzip and run the `Install-sshd.ps1` script.
-3. Add a firewall rule to open port 22 and verify SSH services are running.
+1. Κατεβάστε και μεταφέρετε το τελευταίο zip του OpenSSH στον στόχο διακομιστή.
+2. Αποσυμπιέστε και εκτελέστε το σενάριο `Install-sshd.ps1`.
+3. Προσθέστε έναν κανόνα τείχους προστασίας για να ανοίξετε την πόρτα 22 και επαληθεύστε ότι οι υπηρεσίες SSH εκτελούνται.
 
-To resolve `Connection reset` errors, permissions might need to be updated to allow everyone read and execute access on the OpenSSH directory.
-
+Για να επιλυθούν τα σφάλματα `Connection reset`, οι άδειες ενδέχεται να χρειαστεί να ενημερωθούν για να επιτρέπουν σε όλους την πρόσβαση ανάγνωσης και εκτέλεσης στον κατάλογο OpenSSH.
 ```bash
 icacls.exe "C:\Users\redsuit\Documents\ssh\OpenSSH-Win64" /grant Everyone:RX /T
 ```
-
-## References
+## Αναφορές
 
 - [https://techcommunity.microsoft.com/t5/ask-the-directory-services-team/understanding-kerberos-double-hop/ba-p/395463?lightbox-message-images-395463=102145i720503211E78AC20](https://techcommunity.microsoft.com/t5/ask-the-directory-services-team/understanding-kerberos-double-hop/ba-p/395463?lightbox-message-images-395463=102145i720503211E78AC20)
 - [https://posts.slayerlabs.com/double-hop/](https://posts.slayerlabs.com/double-hop/)
@@ -109,4 +97,3 @@ icacls.exe "C:\Users\redsuit\Documents\ssh\OpenSSH-Win64" /grant Everyone:RX /T
 {% embed url="https://websec.nl/" %}
 
 {{#include ../../banners/hacktricks-training.md}}
-

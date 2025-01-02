@@ -3,175 +3,174 @@
 <figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=acls-dacls-sacls-aces) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+Χρησιμοποιήστε [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=acls-dacls-sacls-aces) για να δημιουργήσετε και να **αυτοματοποιήσετε ροές εργασίας** με τη βοήθεια των **πιο προηγμένων** εργαλείων της κοινότητας.\
+Αποκτήστε πρόσβαση σήμερα:
 
 {% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=acls-dacls-sacls-aces" %}
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## **Access Control List (ACL)**
+## **Λίστα Ελέγχου Πρόσβασης (ACL)**
 
-An Access Control List (ACL) consists of an ordered set of Access Control Entries (ACEs) that dictate the protections for an object and its properties. In essence, an ACL defines which actions by which security principals (users or groups) are permitted or denied on a given object.
+Μια Λίστα Ελέγχου Πρόσβασης (ACL) αποτελείται από ένα διατεταγμένο σύνολο Εισόδων Ελέγχου Πρόσβασης (ACEs) που καθορίζουν τις προστασίες για ένα αντικείμενο και τις ιδιότητές του. Στην ουσία, μια ACL ορίζει ποιες ενέργειες από ποιους ασφαλιστικούς φορείς (χρήστες ή ομάδες) επιτρέπονται ή απορρίπτονται σε ένα συγκεκριμένο αντικείμενο.
 
-There are two types of ACLs:
+Υπάρχουν δύο τύποι ACLs:
 
-- **Discretionary Access Control List (DACL):** Specifies which users and groups have or do not have access to an object.
-- **System Access Control List (SACL):** Governs the auditing of access attempts to an object.
+- **Διακριτική Λίστα Ελέγχου Πρόσβασης (DACL):** Καθορίζει ποιους χρήστες και ομάδες έχουν ή δεν έχουν πρόσβαση σε ένα αντικείμενο.
+- **Λίστα Ελέγχου Πρόσβασης Συστήματος (SACL):** Ρυθμίζει την παρακολούθηση των προσπαθειών πρόσβασης σε ένα αντικείμενο.
 
-The process of accessing a file involves the system checking the object's security descriptor against the user's access token to determine if access should be granted and the extent of that access, based on the ACEs.
+Η διαδικασία πρόσβασης σε ένα αρχείο περιλαμβάνει το σύστημα να ελέγχει τον ασφαλιστικό περιγραφέα του αντικειμένου σε σχέση με το διακριτικό πρόσβασης του χρήστη για να καθορίσει αν θα παραχωρηθεί πρόσβαση και το εύρος αυτής της πρόσβασης, με βάση τα ACEs.
 
-### **Key Components**
+### **Κύρια Συστατικά**
 
-- **DACL:** Contains ACEs that grant or deny access permissions to users and groups for an object. It's essentially the main ACL that dictates access rights.
-- **SACL:** Used for auditing access to objects, where ACEs define the types of access to be logged in the Security Event Log. This can be invaluable for detecting unauthorized access attempts or troubleshooting access issues.
+- **DACL:** Περιέχει ACEs που παραχωρούν ή απορρίπτουν δικαιώματα πρόσβασης σε χρήστες και ομάδες για ένα αντικείμενο. Είναι ουσιαστικά η κύρια ACL που καθορίζει τα δικαιώματα πρόσβασης.
+- **SACL:** Χρησιμοποιείται για την παρακολούθηση της πρόσβασης σε αντικείμενα, όπου τα ACEs καθορίζουν τους τύπους πρόσβασης που θα καταγράφονται στο Αρχείο Συμβάντων Ασφαλείας. Αυτό μπορεί να είναι πολύτιμο για την ανίχνευση μη εξουσιοδοτημένων προσπαθειών πρόσβασης ή την επίλυση προβλημάτων πρόσβασης.
 
-### **System Interaction with ACLs**
+### **Αλληλεπίδραση Συστήματος με ACLs**
 
-Each user session is associated with an access token that contains security information relevant to that session, including user, group identities, and privileges. This token also includes a logon SID that uniquely identifies the session.
+Κάθε συνεδρία χρήστη συνδέεται με ένα διακριτικό πρόσβασης που περιέχει πληροφορίες ασφαλείας σχετικές με αυτή τη συνεδρία, συμπεριλαμβανομένων των ταυτοτήτων χρηστών, ομάδων και προνομίων. Αυτό το διακριτικό περιλαμβάνει επίσης ένα SID σύνδεσης που προσδιορίζει μοναδικά τη συνεδρία.
 
-The Local Security Authority (LSASS) processes access requests to objects by examining the DACL for ACEs that match the security principal attempting access. Access is immediately granted if no relevant ACEs are found. Otherwise, LSASS compares the ACEs against the security principal's SID in the access token to determine access eligibility.
+Η Τοπική Αρχή Ασφαλείας (LSASS) επεξεργάζεται τα αιτήματα πρόσβασης σε αντικείμενα εξετάζοντας το DACL για ACEs που ταιριάζουν με τον ασφαλιστικό φορέα που προσπαθεί να αποκτήσει πρόσβαση. Η πρόσβαση παραχωρείται αμέσως αν δεν βρεθούν σχετικές ACEs. Διαφορετικά, η LSASS συγκρίνει τα ACEs με το SID του ασφαλιστικού φορέα στο διακριτικό πρόσβασης για να καθορίσει την επιλεξιμότητα πρόσβασης.
 
-### **Summarized Process**
+### **Συνοπτική Διαδικασία**
 
-- **ACLs:** Define access permissions through DACLs and audit rules through SACLs.
-- **Access Token:** Contains user, group, and privilege information for a session.
-- **Access Decision:** Made by comparing DACL ACEs with the access token; SACLs are used for auditing.
+- **ACLs:** Ορίζουν δικαιώματα πρόσβασης μέσω DACLs και κανόνες παρακολούθησης μέσω SACLs.
+- **Διακριτικό Πρόσβασης:** Περιέχει πληροφορίες χρήστη, ομάδας και προνομίων για μια συνεδρία.
+- **Απόφαση Πρόσβασης:** Λαμβάνεται συγκρίνοντας τα ACEs του DACL με το διακριτικό πρόσβασης; τα SACLs χρησιμοποιούνται για παρακολούθηση.
 
 ### ACEs
 
-There arey **three main types of Access Control Entries (ACEs)**:
+Υπάρχουν **τρία κύρια είδη Εισόδων Ελέγχου Πρόσβασης (ACEs)**:
 
-- **Access Denied ACE**: This ACE explicitly denies access to an object for specified users or groups (in a DACL).
-- **Access Allowed ACE**: This ACE explicitly grants access to an object for specified users or groups (in a DACL).
-- **System Audit ACE**: Positioned within a System Access Control List (SACL), this ACE is responsible for generating audit logs upon access attempts to an object by users or groups. It documents whether access was allowed or denied and the nature of the access.
+- **ACE Απορριπτόμενης Πρόσβασης**: Αυτή η ACE απορρίπτει ρητά την πρόσβαση σε ένα αντικείμενο για συγκεκριμένους χρήστες ή ομάδες (σε ένα DACL).
+- **ACE Επιτρεπόμενης Πρόσβασης**: Αυτή η ACE παραχωρεί ρητά πρόσβαση σε ένα αντικείμενο για συγκεκριμένους χρήστες ή ομάδες (σε ένα DACL).
+- **ACE Συστήματος Ελέγχου**: Τοποθετημένη μέσα σε μια Λίστα Ελέγχου Πρόσβασης Συστήματος (SACL), αυτή η ACE είναι υπεύθυνη για τη δημιουργία αρχείων ελέγχου κατά τις προσπάθειες πρόσβασης σε ένα αντικείμενο από χρήστες ή ομάδες. Καταγράφει αν η πρόσβαση επιτράπηκε ή απορρίφθηκε και τη φύση της πρόσβασης.
 
-Each ACE has **four critical components**:
+Κάθε ACE έχει **τέσσερα κρίσιμα συστατικά**:
 
-1. The **Security Identifier (SID)** of the user or group (or their principal name in a graphical representation).
-2. A **flag** that identifies the ACE type (access denied, allowed, or system audit).
-3. **Inheritance flags** that determine if child objects can inherit the ACE from their parent.
-4. An [**access mask**](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/7a53f60e-e730-4dfe-bbe9-b21b62eb790b?redirectedfrom=MSDN), a 32-bit value specifying the object's granted rights.
+1. Ο **Αναγνωριστικός Ασφαλείας (SID)** του χρήστη ή της ομάδας (ή το κύριο όνομά τους σε γραφική αναπαράσταση).
+2. Ένα **σημείο** που προσδιορίζει τον τύπο ACE (απορριπτόμενη, επιτρεπόμενη ή έλεγχος συστήματος).
+3. **Σημεία κληρονομιάς** που καθορίζουν αν τα παιδικά αντικείμενα μπορούν να κληρονομήσουν την ACE από τον γονέα τους.
+4. Ένα [**μάσκα πρόσβασης**](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/7a53f60e-e730-4dfe-bbe9-b21b62eb790b?redirectedfrom=MSDN), μια 32-bit τιμή που προσδιορίζει τα παραχωρηθέντα δικαιώματα του αντικειμένου.
 
-Access determination is conducted by sequentially examining each ACE until:
+Η καθοριστική πρόσβαση διεξάγεται εξετάζοντας διαδοχικά κάθε ACE μέχρι:
 
-- An **Access-Denied ACE** explicitly denies the requested rights to a trustee identified in the access token.
-- **Access-Allowed ACE(s)** explicitly grant all requested rights to a trustee in the access token.
-- Upon checking all ACEs, if any requested right has **not been explicitly allowed**, access is implicitly **denied**.
+- Μια **ACE Απορριπτόμενης Πρόσβασης** να απορρίπτει ρητά τα ζητούμενα δικαιώματα σε έναν δικαιούχο που προσδιορίζεται στο διακριτικό πρόσβασης.
+- **ACE Επιτρεπόμενης Πρόσβασης** να παραχωρεί ρητά όλα τα ζητούμενα δικαιώματα σε έναν δικαιούχο στο διακριτικό πρόσβασης.
+- Μετά την εξέταση όλων των ACEs, αν οποιοδήποτε ζητούμενο δικαίωμα **δεν έχει ρητά επιτραπεί**, η πρόσβαση απορρίπτεται **σιωπηρά**.
 
-### Order of ACEs
+### Σειρά των ACEs
 
-The way **ACEs** (rules that say who can or cannot access something) are put in a list called **DACL** is very important. This is because once the system gives or denies access based on these rules, it stops looking at the rest.
+Ο τρόπος που οι **ACEs** (κανόνες που λένε ποιος μπορεί ή δεν μπορεί να έχει πρόσβαση σε κάτι) τοποθετούνται σε μια λίστα που ονομάζεται **DACL** είναι πολύ σημαντικός. Αυτό συμβαίνει επειδή μόλις το σύστημα παραχωρήσει ή απορρίψει πρόσβαση με βάση αυτούς τους κανόνες, σταματά να εξετάζει τους υπόλοιπους.
 
-There is a best way to organize these ACEs, and it is called **"canonical order."** This method helps make sure everything works smoothly and fairly. Here is how it goes for systems like **Windows 2000** and **Windows Server 2003**:
+Υπάρχει ένας καλύτερος τρόπος να οργανωθούν αυτές οι ACEs, και ονομάζεται **"κανονική σειρά."** Αυτή η μέθοδος βοηθά να διασφαλιστεί ότι όλα λειτουργούν ομαλά και δίκαια. Εδώ είναι πώς γίνεται για συστήματα όπως **Windows 2000** και **Windows Server 2003**:
 
-- First, put all the rules that are made **specifically for this item** before the ones that come from somewhere else, like a parent folder.
-- In those specific rules, put the ones that say **"no" (deny)** before the ones that say **"yes" (allow)**.
-- For the rules that come from somewhere else, start with the ones from the **closest source**, like the parent, and then go back from there. Again, put **"no"** before **"yes."**
+- Πρώτα, τοποθετήστε όλους τους κανόνες που έχουν γίνει **ειδικά για αυτό το αντικείμενο** πριν από εκείνους που προέρχονται από κάπου αλλού, όπως ένας γονικός φάκελος.
+- Σε αυτούς τους ειδικούς κανόνες, τοποθετήστε εκείνους που λένε **"όχι" (απορρίπτω)** πριν από εκείνους που λένε **"ναι" (επιτρέπω)**.
+- Για τους κανόνες που προέρχονται από κάπου αλλού, ξεκινήστε με εκείνους από την **πλησιέστερη πηγή**, όπως ο γονέας, και στη συνέχεια προχωρήστε πίσω από εκεί. Και πάλι, τοποθετήστε **"όχι"** πριν από **"ναι."**
 
-This setup helps in two big ways:
+Αυτή η ρύθμιση βοηθά με δύο σημαντικούς τρόπους:
 
-- It makes sure that if there is a specific **"no,"** it is respected, no matter what other **"yes"** rules are there.
-- It lets the owner of an item have the **final say** on who gets in, before any rules from parent folders or further back come into play.
+- Διασφαλίζει ότι αν υπάρχει μια συγκεκριμένη **"όχι,"** αυτή θα τηρηθεί, ανεξάρτητα από τους άλλους κανόνες **"ναι."**
+- Επιτρέπει στον ιδιοκτήτη ενός αντικειμένου να έχει τον **τελικό λόγο** για το ποιος μπορεί να εισέλθει, πριν από οποιουσδήποτε κανόνες από γονικούς φακέλους ή πιο πίσω.
 
-By doing things this way, the owner of a file or folder can be very precise about who gets access, making sure the right people can get in and the wrong ones can't.
+Κάνοντας τα πράγματα με αυτόν τον τρόπο, ο ιδιοκτήτης ενός αρχείου ή φακέλου μπορεί να είναι πολύ ακριβής σχετικά με το ποιος έχει πρόσβαση, διασφαλίζοντας ότι οι σωστοί άνθρωποι μπορούν να εισέλθουν και οι λάθος δεν μπορούν.
 
 ![](https://www.ntfs.com/images/screenshots/ACEs.gif)
 
-So, this **"canonical order"** is all about making sure the access rules are clear and work well, putting specific rules first and organizing everything in a smart way.
+Έτσι, αυτή η **"κανονική σειρά"** αφορά τη διασφάλιση ότι οι κανόνες πρόσβασης είναι σαφείς και λειτουργούν καλά, τοποθετώντας τους ειδικούς κανόνες πρώτα και οργανώνοντας τα πάντα με έξυπνο τρόπο.
 
 <figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+Χρησιμοποιήστε [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) για να δημιουργήσετε και να **αυτοματοποιήσετε ροές εργασίας** με τη βοήθεια των **πιο προηγμένων** εργαλείων της κοινότητας.\
+Αποκτήστε πρόσβαση σήμερα:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
-### GUI Example
+### Παράδειγμα GUI
 
-[**Example from here**](https://secureidentity.se/acl-dacl-sacl-and-the-ace/)
+[**Παράδειγμα από εδώ**](https://secureidentity.se/acl-dacl-sacl-and-the-ace/)
 
-This is the classic security tab of a folder showing the ACL, DACL and ACEs:
+Αυτή είναι η κλασική καρτέλα ασφαλείας ενός φακέλου που δείχνει την ACL, DACL και ACEs:
 
 ![http://secureidentity.se/wp-content/uploads/2014/04/classicsectab.jpg](../../images/classicsectab.jpg)
 
-If we click the **Advanced button** we will get more options like inheritance:
+Αν κάνουμε κλικ στο **κουμπί Προχωρημένες επιλογές**, θα λάβουμε περισσότερες επιλογές όπως η κληρονομιά:
 
 ![http://secureidentity.se/wp-content/uploads/2014/04/aceinheritance.jpg](../../images/aceinheritance.jpg)
 
-And if you add or edit a Security Principal:
+Και αν προσθέσετε ή επεξεργαστείτε έναν Ασφαλιστικό Φορέα:
 
 ![http://secureidentity.se/wp-content/uploads/2014/04/editseprincipalpointers1.jpg](../../images/editseprincipalpointers1.jpg)
 
-And last we have the SACL in the Auditing tab:
+Και τέλος έχουμε το SACL στην καρτέλα Ελέγχου:
 
 ![http://secureidentity.se/wp-content/uploads/2014/04/audit-tab.jpg](../../images/audit-tab.jpg)
 
-### Explaining Access Control in a Simplified Manner
+### Εξήγηση του Ελέγχου Πρόσβασης με Απλό Τρόπο
 
-When managing access to resources, like a folder, we use lists and rules known as Access Control Lists (ACLs) and Access Control Entries (ACEs). These define who can or cannot access certain data.
+Όταν διαχειριζόμαστε την πρόσβαση σε πόρους, όπως ένας φάκελος, χρησιμοποιούμε λίστες και κανόνες που ονομάζονται Λίστες Ελέγχου Πρόσβασης (ACLs) και Εισόδους Ελέγχου Πρόσβασης (ACEs). Αυτές καθορίζουν ποιος μπορεί ή δεν μπορεί να έχει πρόσβαση σε ορισμένα δεδομένα.
 
-#### Denying Access to a Specific Group
+#### Απορρίπτοντας Πρόσβαση σε Μια Συγκεκριμένη Ομάδα
 
-Imagine you have a folder named Cost, and you want everyone to access it except for a marketing team. By setting up the rules correctly, we can ensure that the marketing team is explicitly denied access before allowing everyone else. This is done by placing the rule to deny access to the marketing team before the rule that allows access to everyone.
+Φανταστείτε ότι έχετε έναν φάκελο με όνομα Κόστος, και θέλετε όλοι να έχουν πρόσβαση σε αυτόν εκτός από μια ομάδα μάρκετινγκ. Ρυθμίζοντας σωστά τους κανόνες, μπορούμε να διασφαλίσουμε ότι η ομάδα μάρκετινγκ απορρίπτεται ρητά από την πρόσβαση πριν επιτραπεί σε όλους τους άλλους. Αυτό γίνεται τοποθετώντας τον κανόνα που απορρίπτει την πρόσβαση στην ομάδα μάρκετινγκ πριν από τον κανόνα που επιτρέπει την πρόσβαση σε όλους.
 
-#### Allowing Access to a Specific Member of a Denied Group
+#### Επιτρέποντας Πρόσβαση σε Ένα Συγκεκριμένο Μέλος μιας Απορριπτόμενης Ομάδας
 
-Let's say Bob, the marketing director, needs access to the Cost folder, even though the marketing team generally shouldn't have access. We can add a specific rule (ACE) for Bob that grants him access, and place it before the rule that denies access to the marketing team. This way, Bob gets access despite the general restriction on his team.
+Ας πούμε ότι ο Μπομπ, ο διευθυντής μάρκετινγκ, χρειάζεται πρόσβαση στον φάκελο Κόστος, αν και η ομάδα μάρκετινγκ γενικά δεν θα έπρεπε να έχει πρόσβαση. Μπορούμε να προσθέσουμε έναν συγκεκριμένο κανόνα (ACE) για τον Μπομπ που του παραχωρεί πρόσβαση, και να τον τοποθετήσουμε πριν από τον κανόνα που απορρίπτει την πρόσβαση στην ομάδα μάρκετινγκ. Με αυτόν τον τρόπο, ο Μπομπ αποκτά πρόσβαση παρά τον γενικό περιορισμό στην ομάδα του.
 
-#### Understanding Access Control Entries
+#### Κατανόηση των Εισόδων Ελέγχου Πρόσβασης
 
-ACEs are the individual rules in an ACL. They identify users or groups, specify what access is allowed or denied, and determine how these rules apply to sub-items (inheritance). There are two main types of ACEs:
+Τα ACEs είναι οι ατομικοί κανόνες σε μια ACL. Προσδιορίζουν χρήστες ή ομάδες, καθορίζουν ποια πρόσβαση επιτρέπεται ή απορρίπτεται, και καθορίζουν πώς εφαρμόζονται αυτοί οι κανόνες σε υπο-αντικείμενα (κληρονομιά). Υπάρχουν δύο κύριοι τύποι ACEs:
 
-- **Generic ACEs**: These apply broadly, affecting either all types of objects or distinguishing only between containers (like folders) and non-containers (like files). For example, a rule that allows users to see the contents of a folder but not to access the files within it.
-- **Object-Specific ACEs**: These provide more precise control, allowing rules to be set for specific types of objects or even individual properties within an object. For instance, in a directory of users, a rule might allow a user to update their phone number but not their login hours.
+- **Γενικά ACEs**: Αυτά εφαρμόζονται ευρέως, επηρεάζοντας είτε όλους τους τύπους αντικειμένων είτε διακρίνοντας μόνο μεταξύ κοντέινερ (όπως φάκελοι) και μη κοντέινερ (όπως αρχεία). Για παράδειγμα, ένας κανόνας που επιτρέπει στους χρήστες να βλέπουν το περιεχόμενο ενός φακέλου αλλά όχι να έχουν πρόσβαση στα αρχεία μέσα σε αυτόν.
+- **Συγκεκριμένα ACEs**: Αυτά παρέχουν πιο ακριβή έλεγχο, επιτρέποντας να ρυθμιστούν κανόνες για συγκεκριμένους τύπους αντικειμένων ή ακόμη και για μεμονωμένες ιδιότητες εντός ενός αντικειμένου. Για παράδειγμα, σε έναν κατάλογο χρηστών, ένας κανόνας μπορεί να επιτρέπει σε έναν χρήστη να ενημερώσει τον αριθμό τηλεφώνου του αλλά όχι τις ώρες σύνδεσης.
 
-Each ACE contains important information like who the rule applies to (using a Security Identifier or SID), what the rule allows or denies (using an access mask), and how it's inherited by other objects.
+Κάθε ACE περιέχει σημαντικές πληροφορίες όπως ποιος ισχύει ο κανόνας (χρησιμοποιώντας έναν Αναγνωριστικό Ασφαλείας ή SID), τι επιτρέπει ή απορρίπτει ο κανόνας (χρησιμοποιώντας μια μάσκα πρόσβασης), και πώς κληρονομείται από άλλα αντικείμενα.
 
-#### Key Differences Between ACE Types
+#### Κύριες Διαφορές Μεταξύ Τύπων ACE
 
-- **Generic ACEs** are suitable for simple access control scenarios, where the same rule applies to all aspects of an object or to all objects within a container.
-- **Object-Specific ACEs** are used for more complex scenarios, especially in environments like Active Directory, where you might need to control access to specific properties of an object differently.
+- **Γενικά ACEs** είναι κατάλληλα για απλές καταστάσεις ελέγχου πρόσβασης, όπου ο ίδιος κανόνας ισχύει για όλες τις πτυχές ενός αντικειμένου ή για όλα τα αντικείμενα εντός ενός κοντέινερ.
+- **Συγκεκριμένα ACEs** χρησιμοποιούνται για πιο σύνθετες καταστάσεις, ειδικά σε περιβάλλοντα όπως το Active Directory, όπου μπορεί να χρειαστεί να ελέγξετε την πρόσβαση σε συγκεκριμένες ιδιότητες ενός αντικειμένου διαφορετικά.
 
-In summary, ACLs and ACEs help define precise access controls, ensuring that only the right individuals or groups have access to sensitive information or resources, with the ability to tailor access rights down to the level of individual properties or object types.
+Συνοψίζοντας, οι ACLs και οι ACEs βοηθούν στον καθορισμό ακριβών ελέγχων πρόσβασης, διασφαλίζοντας ότι μόνο τα σωστά άτομα ή ομάδες έχουν πρόσβαση σε ευαίσθητες πληροφορίες ή πόρους, με τη δυνατότητα προσαρμογής των δικαιωμάτων πρόσβασης μέχρι το επίπεδο των μεμονωμένων ιδιοτήτων ή τύπων αντικειμένων.
 
-### Access Control Entry Layout
+### Διάταξη Εισόδου Ελέγχου Πρόσβασης
 
-| ACE Field   | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| Πεδίο ACE   | Περιγραφή                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Type        | Flag that indicates the type of ACE. Windows 2000 and Windows Server 2003 support six types of ACE: Three generic ACE types that are attached to all securable objects. Three object-specific ACE types that can occur for Active Directory objects.                                                                                                                                                                                                                                                            |
-| Flags       | Set of bit flags that control inheritance and auditing.                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| Size        | Number of bytes of memory that are allocated for the ACE.                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| Access mask | 32-bit value whose bits correspond to access rights for the object. Bits can be set either on or off, but the setting's meaning depends on the ACE type. For example, if the bit that corresponds to the right to read permissions is turned on, and the ACE type is Deny, the ACE denies the right to read the object's permissions. If the same bit is set on but the ACE type is Allow, the ACE grants the right to read the object's permissions. More details of the Access mask appear in the next table. |
-| SID         | Identifies a user or group whose access is controlled or monitored by this ACE.                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| Τύπος       | Σημείο που υποδεικνύει τον τύπο ACE. Τα Windows 2000 και Windows Server 2003 υποστηρίζουν έξι τύπους ACE: Τρεις γενικούς τύπους ACE που συνδέονται με όλα τα ασφαλίσιμα αντικείμενα. Τρεις συγκεκριμένους τύπους ACE που μπορούν να συμβούν για αντικείμενα Active Directory.                                                                                                                                                                                                                                                            |
+| Σημεία      | Σύνολο σημείων που ελέγχουν την κληρονομιά και την παρακολούθηση.                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| Μέγεθος     | Αριθμός byte μνήμης που έχει κατανεμηθεί για την ACE.                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| Μάσκα πρόσβασης | 32-bit τιμή των οποίων τα bits αντιστοιχούν σε δικαιώματα πρόσβασης για το αντικείμενο. Τα bits μπορούν να ρυθμιστούν είτε σε ενεργό είτε σε ανενεργό, αλλά η σημασία της ρύθμισης εξαρτάται από τον τύπο ACE. Για παράδειγμα, αν το bit που αντιστοιχεί στο δικαίωμα ανάγνωσης δικαιωμάτων είναι ενεργοποιημένο, και ο τύπος ACE είναι Απορρίπτω, η ACE απορρίπτει το δικαίωμα ανάγνωσης των δικαιωμάτων του αντικειμένου. Αν το ίδιο bit είναι ενεργοποιημένο αλλά ο τύπος ACE είναι Επιτρέπω, η ACE παραχωρεί το δικαίωμα ανάγνωσης των δικαιωμάτων του αντικειμένου. Περισσότερες λεπτομέρειες της μάσκας πρόσβασης εμφανίζονται στον επόμενο πίνακα. |
+| SID         | Προσδιορίζει έναν χρήστη ή μια ομάδα της οποίας η πρόσβαση ελέγχεται ή παρακολουθείται από αυτή την ACE.                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 
-### Access Mask Layout
+### Διάταξη Μάσκας Πρόσβασης
 
-| Bit (Range) | Meaning                            | Description/Example                       |
+| Bit (Εύρος) | Σημασία                            | Περιγραφή/Παράδειγμα                       |
 | ----------- | ---------------------------------- | ----------------------------------------- |
-| 0 - 15      | Object Specific Access Rights      | Read data, Execute, Append data           |
-| 16 - 22     | Standard Access Rights             | Delete, Write ACL, Write Owner            |
-| 23          | Can access security ACL            |                                           |
-| 24 - 27     | Reserved                           |                                           |
-| 28          | Generic ALL (Read, Write, Execute) | Everything below                          |
-| 29          | Generic Execute                    | All things necessary to execute a program |
-| 30          | Generic Write                      | All things necessary to write to a file   |
-| 31          | Generic Read                       | All things necessary to read a file       |
+| 0 - 15      | Δικαιώματα Πρόσβασης Σχετικά με το Αντικείμενο      | Ανάγνωση δεδομένων, Εκτέλεση, Προσθήκη δεδομένων           |
+| 16 - 22     | Τυπικά Δικαιώματα Πρόσβασης             | Διαγραφή, Γράψιμο ACL, Γράψιμο Ιδιοκτήτη            |
+| 23          | Μπορεί να έχει πρόσβαση στο ACL ασφαλείας            |                                           |
+| 24 - 27     | Κρατημένα                           |                                           |
+| 28          | Γενικά ΟΛΑ (Ανάγνωση, Γράψιμο, Εκτέλεση) | Όλα τα παρακάτω                          |
+| 29          | Γενική Εκτέλεση                    | Όλα τα πράγματα που είναι απαραίτητα για την εκτέλεση ενός προγράμματος |
+| 30          | Γενική Γράψιμο                      | Όλα τα πράγματα που είναι απαραίτητα για να γράψετε σε ένα αρχείο   |
+| 31          | Γενική Ανάγνωση                       | Όλα τα πράγματα που είναι απαραίτητα για να διαβάσετε ένα αρχείο       |
 
-## References
+## Αναφορές
 
 - [https://www.ntfs.com/ntfs-permissions-acl-use.htm](https://www.ntfs.com/ntfs-permissions-acl-use.htm)
 - [https://secureidentity.se/acl-dacl-sacl-and-the-ace/](https://secureidentity.se/acl-dacl-sacl-and-the-ace/)
-- [https://www.coopware.in2.info/\_ntfsacl_ht.htm](https://www.coopware.in2.info/_ntfsacl_ht.htm)
+- [https://www.coopware.in2.info/_ntfsacl_ht.htm](https://www.coopware.in2.info/_ntfsacl_ht.htm)
 
 {{#include ../../banners/hacktricks-training.md}}
 
 <figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=acls-dacls-sacls-aces) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+Χρησιμοποιήστε [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=acls-dacls-sacls-aces) για να δημιουργήσετε και να **αυτοματοποιήσετε ροές εργασίας** με τη βοήθεια των **πιο προηγμένων** εργαλείων της κοινότητας.\
+Αποκτήστε πρόσβαση σήμερα:
 
 {% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=acls-dacls-sacls-aces" %}
-

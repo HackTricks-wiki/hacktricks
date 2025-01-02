@@ -4,16 +4,15 @@
 
 ### Junk Code
 
-It's very common to find **junk code that is never used** to make the reversing of the macro more difficult.\
-For example, in the following image you can see that and If that is never going to be true is used to execute some junk and useless code.
+Είναι πολύ συνηθισμένο να βρίσκουμε **άχρηστο κώδικα που δεν χρησιμοποιείται ποτέ** για να δυσκολεύει την αναστροφή του μακροεντολής.\
+Για παράδειγμα, στην παρακάτω εικόνα μπορείτε να δείτε ότι μια If που δεν πρόκειται ποτέ να είναι αληθής χρησιμοποιείται για να εκτελέσει κάποιο άχρηστο και ανώφελο κώδικα.
 
 ![](<../images/image (369).png>)
 
 ### Macro Forms
 
-Using the **GetObject** function it's possible to obtain data from forms of the macro. This can be used to difficult the analysis. The following is a photo of a macro form used to **hide data inside text boxes** (a text box can be hiding other text boxes):
+Χρησιμοποιώντας τη λειτουργία **GetObject** είναι δυνατό να αποκτήσουμε δεδομένα από τις φόρμες της μακροεντολής. Αυτό μπορεί να χρησιμοποιηθεί για να δυσκολέψει την ανάλυση. Ακολουθεί μια φωτογραφία μιας φόρμας μακροεντολής που χρησιμοποιείται για **να κρύψει δεδομένα μέσα σε πλαίσια κειμένου** (ένα πλαίσιο κειμένου μπορεί να κρύβει άλλα πλαίσια κειμένου):
 
 ![](<../images/image (344).png>)
 
 {{#include ../banners/hacktricks-training.md}}
-

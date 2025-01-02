@@ -1,7 +1,5 @@
-# Fault Injection Attacks 
+# Επιθέσεις Εισαγωγής Σφαλμάτων
 
-Fault injections attacks includes introducing external distrubance in electronic circuits to influence it's behaviour, resulting to disclose information or even bypass certian restrictions in the circuit. This attacks opens a lot of possibilities for attacking electronic circuits. This attack is also referred as glitching of electronic circuits.
+Οι επιθέσεις εισαγωγής σφαλμάτων περιλαμβάνουν την εισαγωγή εξωτερικών διαταραχών σε ηλεκτρονικά κυκλώματα για να επηρεάσουν τη συμπεριφορά τους, με αποτέλεσμα την αποκάλυψη πληροφοριών ή ακόμη και την παράκαμψη ορισμένων περιορισμών στο κύκλωμα. Αυτές οι επιθέσεις ανοίγουν πολλές δυνατότητες για την επίθεση ηλεκτρονικών κυκλωμάτων. Αυτή η επίθεση αναφέρεται επίσης ως glitching ηλεκτρονικών κυκλωμάτων.
 
-There are a lot of methods and mediums for injecting fault into an electronic circuit. 
-
-
+Υπάρχουν πολλοί μέθοδοι και μέσα για την εισαγωγή σφαλμάτων σε ένα ηλεκτρονικό κύκλωμα.

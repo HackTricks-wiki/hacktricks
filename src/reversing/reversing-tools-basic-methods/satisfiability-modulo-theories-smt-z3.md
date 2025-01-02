@@ -1,13 +1,12 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-Very basically, this tool will help us to find values for variables that need to satisfy some conditions and calculating them by hand will be so annoying. Therefore, you can indicate to Z3 the conditions the variables need to satisfy and it will find some values (if possible).
+Πολύ βασικά, αυτό το εργαλείο θα μας βοηθήσει να βρούμε τιμές για μεταβλητές που πρέπει να ικανοποιούν ορισμένες συνθήκες και η υπολογιστική τους χειροκίνητα θα είναι πολύ ενοχλητική. Επομένως, μπορείτε να υποδείξετε στο Z3 τις συνθήκες που πρέπει να ικανοποιούν οι μεταβλητές και θα βρει κάποιες τιμές (αν είναι δυνατόν).
 
-**Some texts and examples are extracted from [https://ericpony.github.io/z3py-tutorial/guide-examples.htm](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)**
+**Ορισμένα κείμενα και παραδείγματα έχουν εξαχθεί από [https://ericpony.github.io/z3py-tutorial/guide-examples.htm](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)**
 
-# Basic Operations
+# Βασικές Λειτουργίες
 
-## Booleans/And/Or/Not
-
+## Boolean/Και/Ή/Όχι
 ```python
 #pip3 install z3-solver
 from z3 import *
@@ -22,9 +21,7 @@ s.add(And(Or(x,y,Not(z)),y))
 s.check() #If response is "sat" then the model is satifable, if "unsat" something is wrong
 print(s.model()) #Print valid values to satisfy the model
 ```
-
-## Ints/Simplify/Reals
-
+## Ακέραιοι/Απλοποίηση/Πραγματικοί αριθμοί
 ```python
 from z3 import *
 
@@ -44,9 +41,7 @@ print(solve(r1**2 + r2**2 == 3, r1**3 == 2))
 set_option(precision=30)
 print(solve(r1**2 + r2**2 == 3, r1**3 == 2))
 ```
-
-## Printing Model
-
+## Εκτύπωση Μοντέλου
 ```python
 from z3 import *
 
@@ -58,13 +53,11 @@ s.check()
 m = s.model()
 print ("x = %s" % m[x])
 for d in m.decls():
-    print("%s = %s" % (d.name(), m[d]))
+print("%s = %s" % (d.name(), m[d]))
 ```
+# Μηχανική Άλγεβρα
 
-# Machine Arithmetic
-
-Modern CPUs and main-stream programming languages use arithmetic over **fixed-size bit-vectors**. Machine arithmetic is available in Z3Py as **Bit-Vectors**.
-
+Οι σύγχρονοι επεξεργαστές και οι κυριότερες γλώσσες προγραμματισμού χρησιμοποιούν άλγεβρα πάνω σε **σταθερού μεγέθους bit-vectors**. Η μηχανική άλγεβρα είναι διαθέσιμη στο Z3Py ως **Bit-Vectors**.
 ```python
 from z3 import *
 
@@ -79,11 +72,9 @@ a = BitVecVal(-1, 32)
 b = BitVecVal(65535, 32)
 print(simplify(a == b)) #This is False
 ```
+## Υπογεγραμμένοι/Μη Υπογεγραμμένοι Αριθμοί
 
-## Signed/Unsigned Numbers
-
-Z3 provides special signed versions of arithmetical operations where it makes a difference whether the **bit-vector is treated as signed or unsigned**. In Z3Py, the operators **<, <=, >, >=, /, % and >>** correspond to the **signed** versions. The corresponding **unsigned** operators are **ULT, ULE, UGT, UGE, UDiv, URem and LShR.**
-
+Z3 παρέχει ειδικές υπογεγραμμένες εκδόσεις αριθμητικών λειτουργιών όπου έχει σημασία αν το **bit-vector αντιμετωπίζεται ως υπογεγραμμένο ή μη υπογεγραμμένο**. Στο Z3Py, οι τελεστές **<, <=, >, >=, /, % και >>** αντιστοιχούν στις **υπογεγραμμένες** εκδόσεις. Οι αντίστοιχοι **μη υπογεγραμμένοι** τελεστές είναι **ULT, ULE, UGT, UGE, UDiv, URem και LShR.**
 ```python
 from z3 import *
 
@@ -101,13 +92,11 @@ solve(x < 0)
 # using unsigned version of <
 solve(ULT(x, 0))
 ```
+## Συναρτήσεις
 
-## Functions
+**Ερμηνευμένες συναρτήσεις** όπως η αριθμητική όπου η **συνάρτηση +** έχει μια **σταθερή τυπική ερμηνεία** (προσθέτει δύο αριθμούς). **Μη ερμηνευμένες συναρτήσεις** και σταθερές είναι **μέγιστα ευέλικτες**; επιτρέπουν **οποιαδήποτε ερμηνεία** που είναι **συμβατή** με τους **περιορισμούς** πάνω στη συνάρτηση ή τη σταθερά.
 
-**Interpreted functio**ns such as arithmetic where the **function +** has a **fixed standard interpretation** (it adds two numbers). **Uninterpreted functions** and constants are **maximally flexible**; they allow **any interpretation** that is **consistent** with the **constraints** over the function or constant.
-
-Example: f applied twice to x results in x again, but f applied once to x is different from x.
-
+Παράδειγμα: η f εφαρμοσμένη δύο φορές στο x έχει ως αποτέλεσμα το x ξανά, αλλά η f εφαρμοσμένη μία φορά στο x είναι διαφορετική από το x.
 ```python
 from z3 import *
 
@@ -126,64 +115,60 @@ s.add(f(x) == 4) #Find the value that generates 4 as response
 s.check()
 print(m.model())
 ```
+# Παραδείγματα
 
-# Examples
-
-## Sudoku solver
-
+## Λύτης Sudoku
 ```python
 # 9x9 matrix of integer variables
 X = [ [ Int("x_%s_%s" % (i+1, j+1)) for j in range(9) ]
-      for i in range(9) ]
+for i in range(9) ]
 
 # each cell contains a value in {1, ..., 9}
 cells_c  = [ And(1 <= X[i][j], X[i][j] <= 9)
-             for i in range(9) for j in range(9) ]
+for i in range(9) for j in range(9) ]
 
 # each row contains a digit at most once
 rows_c   = [ Distinct(X[i]) for i in range(9) ]
 
 # each column contains a digit at most once
 cols_c   = [ Distinct([ X[i][j] for i in range(9) ])
-             for j in range(9) ]
+for j in range(9) ]
 
 # each 3x3 square contains a digit at most once
 sq_c     = [ Distinct([ X[3*i0 + i][3*j0 + j]
-                        for i in range(3) for j in range(3) ])
-             for i0 in range(3) for j0 in range(3) ]
+for i in range(3) for j in range(3) ])
+for i0 in range(3) for j0 in range(3) ]
 
 sudoku_c = cells_c + rows_c + cols_c + sq_c
 
 # sudoku instance, we use '0' for empty cells
 instance = ((0,0,0,0,9,4,0,3,0),
-            (0,0,0,5,1,0,0,0,7),
-            (0,8,9,0,0,0,0,4,0),
-            (0,0,0,0,0,0,2,0,8),
-            (0,6,0,2,0,1,0,5,0),
-            (1,0,2,0,0,0,0,0,0),
-            (0,7,0,0,0,0,5,2,0),
-            (9,0,0,0,6,5,0,0,0),
-            (0,4,0,9,7,0,0,0,0))
+(0,0,0,5,1,0,0,0,7),
+(0,8,9,0,0,0,0,4,0),
+(0,0,0,0,0,0,2,0,8),
+(0,6,0,2,0,1,0,5,0),
+(1,0,2,0,0,0,0,0,0),
+(0,7,0,0,0,0,5,2,0),
+(9,0,0,0,6,5,0,0,0),
+(0,4,0,9,7,0,0,0,0))
 
 instance_c = [ If(instance[i][j] == 0,
-                  True,
-                  X[i][j] == instance[i][j])
-               for i in range(9) for j in range(9) ]
+True,
+X[i][j] == instance[i][j])
+for i in range(9) for j in range(9) ]
 
 s = Solver()
 s.add(sudoku_c + instance_c)
 if s.check() == sat:
-    m = s.model()
-    r = [ [ m.evaluate(X[i][j]) for j in range(9) ]
-          for i in range(9) ]
-    print_matrix(r)
+m = s.model()
+r = [ [ m.evaluate(X[i][j]) for j in range(9) ]
+for i in range(9) ]
+print_matrix(r)
 else:
-    print "failed to solve"
+print "failed to solve"
 ```
-
-## References
+## Αναφορές
 
 - [https://ericpony.github.io/z3py-tutorial/guide-examples.htm](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)
 
 {{#include ../../banners/hacktricks-training.md}}
-

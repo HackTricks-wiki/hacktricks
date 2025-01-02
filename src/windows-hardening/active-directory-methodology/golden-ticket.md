@@ -4,12 +4,11 @@
 
 ## Golden ticket
 
-A **Golden Ticket** attack consist on the **creation of a legitimate Ticket Granting Ticket (TGT) impersonating any user** through the use of the **NTLM hash of the Active Directory (AD) krbtgt account**. This technique is particularly advantageous because it **enables access to any service or machine** within the domain as the impersonated user. It's crucial to remember that the **krbtgt account's credentials are never automatically updated**.
+Μια επίθεση **Golden Ticket** συνίσταται στη **δημιουργία ενός νόμιμου Ticket Granting Ticket (TGT) που προσποιείται οποιονδήποτε χρήστη** μέσω της χρήσης του **NTLM hash του λογαριασμού krbtgt του Active Directory (AD)**. Αυτή η τεχνική είναι ιδιαίτερα πλεονεκτική διότι **επιτρέπει την πρόσβαση σε οποιαδήποτε υπηρεσία ή μηχάνημα** εντός του τομέα ως ο προσποιούμενος χρήστης. Είναι κρίσιμο να θυμόμαστε ότι τα **διαπιστευτήρια του λογαριασμού krbtgt δεν ενημερώνονται ποτέ αυτόματα**.
 
-To **acquire the NTLM hash** of the krbtgt account, various methods can be employed. It can be extracted from the **Local Security Authority Subsystem Service (LSASS) process** or the **NT Directory Services (NTDS.dit) file** located on any Domain Controller (DC) within the domain. Furthermore, **executing a DCsync attack** is another strategy to obtain this NTLM hash, which can be performed using tools such as the **lsadump::dcsync module** in Mimikatz or the **secretsdump.py script** by Impacket. It's important to underscore that to undertake these operations, **domain admin privileges or a similar level of access is typically required**.
+Για να **αποκτηθεί το NTLM hash** του λογαριασμού krbtgt, μπορούν να χρησιμοποιηθούν διάφορες μέθοδοι. Μπορεί να εξαχθεί από τη **Διαδικασία Υποστήριξης Τοπικής Ασφάλειας (LSASS)** ή το **αρχείο NT Directory Services (NTDS.dit)** που βρίσκεται σε οποιονδήποτε Domain Controller (DC) εντός του τομέα. Επιπλέον, **η εκτέλεση μιας επίθεσης DCsync** είναι μια άλλη στρατηγική για την απόκτηση αυτού του NTLM hash, η οποία μπορεί να πραγματοποιηθεί χρησιμοποιώντας εργαλεία όπως το **lsadump::dcsync module** στο Mimikatz ή το **secretsdump.py script** από το Impacket. Είναι σημαντικό να τονιστεί ότι για να εκτελούνται αυτές οι λειτουργίες, **συνήθως απαιτούνται δικαιώματα διαχειριστή τομέα ή παρόμοιο επίπεδο πρόσβασης**.
 
-Although the NTLM hash serves as a viable method for this purpose, it is **strongly recommended** to **forge tickets using the Advanced Encryption Standard (AES) Kerberos keys (AES128 and AES256)** for operational security reasons.
-
+Αν και το NTLM hash χρησιμεύει ως μια βιώσιμη μέθοδος για αυτόν τον σκοπό, είναι **ισχυρά συνιστώμενο** να **κατασκευάζονται εισιτήρια χρησιμοποιώντας τα κλειδιά Kerberos Advanced Encryption Standard (AES) (AES128 και AES256)** για λόγους επιχειρησιακής ασφάλειας.
 ```bash:From Linux
 python ticketer.py -nthash 25b2076cda3bfd6209161a6c78a69c1c -domain-sid S-1-5-21-1339291983-1349129144-367733775 -domain jurassic.park stegosaurus
 export KRB5CCNAME=/root/impacket-examples/stegosaurus.ccache
@@ -25,24 +24,21 @@ klist #List tickets in memory
 # Example using aes key
 kerberos::golden /user:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-21-1874506631-3219952063-538504511 /aes256:430b2fdb13cc820d73ecf123dddd4c9d76425d4c2156b89ac551efb9d591a439 /ticket:golden.kirbi
 ```
+**Μόλις** έχετε **εισαγάγει το χρυσό εισιτήριο**, μπορείτε να έχετε πρόσβαση στα κοινά αρχεία **(C$)** και να εκτελέσετε υπηρεσίες και WMI, οπότε θα μπορούσατε να χρησιμοποιήσετε **psexec** ή **wmiexec** για να αποκτήσετε ένα shell (φαίνεται ότι δεν μπορείτε να αποκτήσετε ένα shell μέσω winrm).
 
-**Once** you have the **golden Ticket injected**, you can access the shared files **(C$)**, and execute services and WMI, so you could use **psexec** or **wmiexec** to obtain a shell (looks like yo can not get a shell via winrm).
+### Παράκαμψη κοινών ανιχνεύσεων
 
-### Bypassing common detections
-
-The most frequent ways to detect a golden ticket are by **inspecting Kerberos traffic** on the wire. By default, Mimikatz **signs the TGT for 10 years**, which will stand out as anomalous in subsequent TGS requests made with it.
+Οι πιο συχνές μέθοδοι ανίχνευσης ενός χρυσού εισιτηρίου είναι μέσω της **επιθεώρησης της κίνησης Kerberos** στο δίκτυο. Από προεπιλογή, το Mimikatz **υπογράφει το TGT για 10 χρόνια**, το οποίο θα ξεχωρίσει ως ανώμαλο σε επόμενα αιτήματα TGS που γίνονται με αυτό.
 
 `Lifetime : 3/11/2021 12:39:57 PM ; 3/9/2031 12:39:57 PM ; 3/9/2031 12:39:57 PM`
 
-Use the `/startoffset`, `/endin` and `/renewmax` parameters to control the start offset, duration and the maximum renewals (all in minutes).
-
+Χρησιμοποιήστε τις παραμέτρους `/startoffset`, `/endin` και `/renewmax` για να ελέγξετε την αρχική απόκλιση, τη διάρκεια και τις μέγιστες ανανεώσεις (όλα σε λεπτά).
 ```
 Get-DomainPolicy | select -expand KerberosPolicy
 ```
+Δυστυχώς, η διάρκεια ζωής του TGT δεν καταγράφεται στα 4769, οπότε δεν θα βρείτε αυτές τις πληροφορίες στα Windows event logs. Ωστόσο, αυτό που μπορείτε να συσχετίσετε είναι **η εμφάνιση 4769 χωρίς προηγούμενο 4768**. Είναι **αδύνατο να ζητήσετε ένα TGS χωρίς ένα TGT**, και αν δεν υπάρχει καταγραφή ενός TGT που να έχει εκδοθεί, μπορούμε να συμπεράνουμε ότι έχει κατασκευαστεί offline.
 
-Unfortunately, the TGT's lifetime is not logged in 4769's, so you won't find this information in the Windows event logs. However, what you can correlate is **seeing 4769's without a prior 4768**. It's **not possible to request a TGS without a TGT**, and if there is no record of a TGT being issued, we can infer that it was forged offline.
-
-In order to **bypass this detection** check the diamond tickets:
+Για να **παρακάμψετε αυτή την ανίχνευση**, ελέγξτε τα diamond tickets:
 
 {{#ref}}
 diamond-ticket.md
@@ -54,7 +50,7 @@ diamond-ticket.md
 - 4672: Admin Logon
 - `Get-WinEvent -FilterHashtable @{Logname='Security';ID=4672} -MaxEvents 1 | Format-List –Property`
 
-Other little tricks defenders can do is **alert on 4769's for sensitive users** such as the default domain administrator account.
+Άλλες μικρές τεχνικές που μπορούν να χρησιμοποιήσουν οι αμυντικοί είναι **να ειδοποιούν για 4769 για ευαίσθητους χρήστες** όπως ο προεπιλεγμένος λογαριασμός διαχειριστή τομέα.
 
 ## References
 
@@ -62,4 +58,3 @@ Other little tricks defenders can do is **alert on 4769's for sensitive users** 
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-golden-tickets] (https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-golden-tickets)
 
 {{#include ../../banners/hacktricks-training.md}}
-

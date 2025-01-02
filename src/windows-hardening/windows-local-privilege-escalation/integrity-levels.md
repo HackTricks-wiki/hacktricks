@@ -4,43 +4,40 @@
 
 ## Integrity Levels
 
-In Windows Vista and later versions, all protected items come with an **integrity level** tag. This setup mostly assigns a "medium" integrity level to files and registry keys, except for certain folders and files that Internet Explorer 7 can write to at a low integrity level. The default behavior is for processes initiated by standard users to have a medium integrity level, whereas services typically operate at a system integrity level. A high-integrity label safeguards the root directory.
+Στα Windows Vista και σε μεταγενέστερες εκδόσεις, όλα τα προστατευμένα αντικείμενα συνοδεύονται από μια ετικέτα **επίπεδου ακεραιότητας**. Αυτή η ρύθμιση αναθέτει κυρίως ένα "μεσαίο" επίπεδο ακεραιότητας σε αρχεία και κλειδιά μητρώου, εκτός από ορισμένους φακέλους και αρχεία στα οποία μπορεί να γράψει ο Internet Explorer 7 σε χαμηλό επίπεδο ακεραιότητας. Η προεπιλεγμένη συμπεριφορά είναι οι διαδικασίες που ξεκινούν από τυπικούς χρήστες να έχουν μεσαίο επίπεδο ακεραιότητας, ενώ οι υπηρεσίες συνήθως λειτουργούν σε επίπεδο ακεραιότητας συστήματος. Μια ετικέτα υψηλής ακεραιότητας προστατεύει τον ριζικό κατάλογο.
 
-A key rule is that objects can't be modified by processes with a lower integrity level than the object's level. The integrity levels are:
+Ένας βασικός κανόνας είναι ότι τα αντικείμενα δεν μπορούν να τροποποιηθούν από διαδικασίες με χαμηλότερο επίπεδο ακεραιότητας από το επίπεδο του αντικειμένου. Τα επίπεδα ακεραιότητας είναι:
 
-- **Untrusted**: This level is for processes with anonymous logins. %%%Example: Chrome%%%
-- **Low**: Mainly for internet interactions, especially in Internet Explorer's Protected Mode, affecting associated files and processes, and certain folders like the **Temporary Internet Folder**. Low integrity processes face significant restrictions, including no registry write access and limited user profile write access.
-- **Medium**: The default level for most activities, assigned to standard users and objects without specific integrity levels. Even members of the Administrators group operate at this level by default.
-- **High**: Reserved for administrators, allowing them to modify objects at lower integrity levels, including those at the high level itself.
-- **System**: The highest operational level for the Windows kernel and core services, out of reach even for administrators, ensuring protection of vital system functions.
-- **Installer**: A unique level that stands above all others, enabling objects at this level to uninstall any other object.
+- **Untrusted**: Αυτό το επίπεδο είναι για διαδικασίες με ανώνυμες συνδέσεις. %%%Example: Chrome%%%
+- **Low**: Κυρίως για διαδικτυακές αλληλεπιδράσεις, ειδικά στη Λειτουργία Προστασίας του Internet Explorer, επηρεάζοντας τα σχετικά αρχεία και διαδικασίες, και ορισμένους φακέλους όπως ο **Φάκελος Προσωρινών Διαδικτυακών Αρχείων**. Οι διαδικασίες χαμηλής ακεραιότητας αντιμετωπίζουν σημαντικούς περιορισμούς, συμπεριλαμβανομένης της απουσίας πρόσβασης εγγραφής στο μητρώο και περιορισμένης πρόσβασης εγγραφής στο προφίλ χρήστη.
+- **Medium**: Το προεπιλεγμένο επίπεδο για τις περισσότερες δραστηριότητες, που ανατίθεται σε τυπικούς χρήστες και αντικείμενα χωρίς συγκεκριμένα επίπεδα ακεραιότητας. Ακόμη και τα μέλη της ομάδας Διαχειριστών λειτουργούν σε αυτό το επίπεδο από προεπιλογή.
+- **High**: Διατηρείται για διαχειριστές, επιτρέποντάς τους να τροποποιούν αντικείμενα σε χαμηλότερα επίπεδα ακεραιότητας, συμπεριλαμβανομένων εκείνων στο υψηλό επίπεδο.
+- **System**: Το υψηλότερο λειτουργικό επίπεδο για τον πυρήνα των Windows και τις βασικές υπηρεσίες, εκτός εμβέλειας ακόμη και για διαχειριστές, διασφαλίζοντας την προστασία ζωτικών λειτουργιών του συστήματος.
+- **Installer**: Ένα μοναδικό επίπεδο που βρίσκεται πάνω από όλα τα άλλα, επιτρέποντας στα αντικείμενα σε αυτό το επίπεδο να απεγκαθιστούν οποιοδήποτε άλλο αντικείμενο.
 
-You can get the integrity level of a process using **Process Explorer** from **Sysinternals**, accessing the **properties** of the process and viewing the "**Security**" tab:
+Μπορείτε να αποκτήσετε το επίπεδο ακεραιότητας μιας διαδικασίας χρησιμοποιώντας το **Process Explorer** από το **Sysinternals**, αποκτώντας πρόσβαση στις **ιδιότητες** της διαδικασίας και βλέποντας την καρτέλα "**Security**":
 
 ![](<../../images/image (824).png>)
 
-You can also get your **current integrity level** using `whoami /groups`
+Μπορείτε επίσης να αποκτήσετε το **τρέχον επίπεδο ακεραιότητάς** σας χρησιμοποιώντας `whoami /groups`
 
 ![](<../../images/image (325).png>)
 
 ### Integrity Levels in File-system
 
-A object inside the file-system may need an **minimum integrity level requirement** and if a process doesn't have this integrity process it won't be able to interact with it.\
-For example, lets **create a regular from a regular user console file and check the permissions**:
-
+Ένα αντικείμενο μέσα στο σύστημα αρχείων μπορεί να χρειάζεται μια **ελάχιστη απαίτηση επιπέδου ακεραιότητας** και αν μια διαδικασία δεν έχει αυτή την ακεραιότητα δεν θα μπορεί να αλληλεπιδράσει με αυτό.\
+Για παράδειγμα, ας **δημιουργήσουμε ένα κανονικό αρχείο από μια κανονική κονσόλα χρήστη και να ελέγξουμε τις άδειες**:
 ```
 echo asd >asd.txt
 icacls asd.txt
 asd.txt BUILTIN\Administrators:(I)(F)
-        DESKTOP-IDJHTKP\user:(I)(F)
-        NT AUTHORITY\SYSTEM:(I)(F)
-        NT AUTHORITY\INTERACTIVE:(I)(M,DC)
-        NT AUTHORITY\SERVICE:(I)(M,DC)
-        NT AUTHORITY\BATCH:(I)(M,DC)
+DESKTOP-IDJHTKP\user:(I)(F)
+NT AUTHORITY\SYSTEM:(I)(F)
+NT AUTHORITY\INTERACTIVE:(I)(M,DC)
+NT AUTHORITY\SERVICE:(I)(M,DC)
+NT AUTHORITY\BATCH:(I)(M,DC)
 ```
-
-Now, lets assign a minimum integrity level of **High** to the file. This **must be done from a console** running as **administrator** as a **regular console** will be running in Medium Integrity level and **won't be allowed** to assign High Integrity level to an object:
-
+Τώρα, ας αναθέσουμε ένα ελάχιστο επίπεδο ακεραιότητας **Υψηλό** στο αρχείο. Αυτό **πρέπει να γίνει από μια κονσόλα** που τρέχει ως **διαχειριστής** καθώς μια **κανονική κονσόλα** θα τρέχει σε επίπεδο ακεραιότητας Μεσαίο και **δεν θα επιτρέπεται** να αναθέσει επίπεδο ακεραιότητας Υψηλό σε ένα αντικείμενο:
 ```
 icacls asd.txt /setintegritylevel(oi)(ci) High
 processed file: asd.txt
@@ -48,16 +45,14 @@ Successfully processed 1 files; Failed processing 0 files
 
 C:\Users\Public>icacls asd.txt
 asd.txt BUILTIN\Administrators:(I)(F)
-        DESKTOP-IDJHTKP\user:(I)(F)
-        NT AUTHORITY\SYSTEM:(I)(F)
-        NT AUTHORITY\INTERACTIVE:(I)(M,DC)
-        NT AUTHORITY\SERVICE:(I)(M,DC)
-        NT AUTHORITY\BATCH:(I)(M,DC)
-        Mandatory Label\High Mandatory Level:(NW)
+DESKTOP-IDJHTKP\user:(I)(F)
+NT AUTHORITY\SYSTEM:(I)(F)
+NT AUTHORITY\INTERACTIVE:(I)(M,DC)
+NT AUTHORITY\SERVICE:(I)(M,DC)
+NT AUTHORITY\BATCH:(I)(M,DC)
+Mandatory Label\High Mandatory Level:(NW)
 ```
-
-This is where things get interesting. You can see that the user `DESKTOP-IDJHTKP\user` has **FULL privileges** over the file (indeed this was the user that created the file), however, due to the minimum integrity level implemented he won't be able to modify the file anymore unless he is running inside a High Integrity Level (note that he will be able to read it):
-
+Αυτό είναι το σημείο όπου τα πράγματα γίνονται ενδιαφέροντα. Μπορείτε να δείτε ότι ο χρήστης `DESKTOP-IDJHTKP\user` έχει **ΠΛΗΡΗ δικαιώματα** πάνω στο αρχείο (στην πραγματικότητα αυτός ήταν ο χρήστης που δημιούργησε το αρχείο), ωστόσο, λόγω του ελάχιστου επιπέδου ακεραιότητας που έχει εφαρμοστεί, δεν θα μπορεί να τροποποιήσει το αρχείο πια εκτός αν εκτελείται σε Υψηλό Επίπεδο Ακεραιότητας (σημειώστε ότι θα μπορεί να το διαβάσει):
 ```
 echo 1234 > asd.txt
 Access is denied.
@@ -66,35 +61,31 @@ del asd.txt
 C:\Users\Public\asd.txt
 Access is denied.
 ```
-
 > [!NOTE]
-> **Therefore, when a file has a minimum integrity level, in order to modify it you need to be running at least in that integrity level.**
+> **Επομένως, όταν ένα αρχείο έχει ελάχιστο επίπεδο ακεραιότητας, για να το τροποποιήσετε πρέπει να εκτελείστε τουλάχιστον σε αυτό το επίπεδο ακεραιότητας.**
 
-### Integrity Levels in Binaries
+### Επίπεδα Ακεραιότητας σε Εκτελέσιμα
 
-I made a copy of `cmd.exe` in `C:\Windows\System32\cmd-low.exe` and set it an **integrity level of low from an administrator console:**
-
+Έκανα ένα αντίγραφο του `cmd.exe` στο `C:\Windows\System32\cmd-low.exe` και του έθεσα ένα **επίπεδο ακεραιότητας χαμηλό από μια κονσόλα διαχειριστή:**
 ```
 icacls C:\Windows\System32\cmd-low.exe
 C:\Windows\System32\cmd-low.exe NT AUTHORITY\SYSTEM:(I)(F)
-                                BUILTIN\Administrators:(I)(F)
-                                BUILTIN\Users:(I)(RX)
-                                APPLICATION PACKAGE AUTHORITY\ALL APPLICATION PACKAGES:(I)(RX)
-                                APPLICATION PACKAGE AUTHORITY\ALL RESTRICTED APP PACKAGES:(I)(RX)
-                                Mandatory Label\Low Mandatory Level:(NW)
+BUILTIN\Administrators:(I)(F)
+BUILTIN\Users:(I)(RX)
+APPLICATION PACKAGE AUTHORITY\ALL APPLICATION PACKAGES:(I)(RX)
+APPLICATION PACKAGE AUTHORITY\ALL RESTRICTED APP PACKAGES:(I)(RX)
+Mandatory Label\Low Mandatory Level:(NW)
 ```
-
-Now, when I run `cmd-low.exe` it will **run under a low-integrity level** instead of a medium one:
+Τώρα, όταν εκτελώ το `cmd-low.exe`, θα **εκτελείται υπό χαμηλό επίπεδο ακεραιότητας** αντί για μέτριο:
 
 ![](<../../images/image (313).png>)
 
-For curious people, if you assign high integrity level to a binary (`icacls C:\Windows\System32\cmd-high.exe /setintegritylevel high`) it won't run with high integrity level automatically (if you invoke it from a medium integrity level --by default-- it will run under a medium integrity level).
+Για τους περίεργους, αν αναθέσετε υψηλό επίπεδο ακεραιότητας σε ένα δυαδικό αρχείο (`icacls C:\Windows\System32\cmd-high.exe /setintegritylevel high`), δεν θα εκτελείται αυτόματα με υψηλό επίπεδο ακεραιότητας (αν το καλέσετε από μέτριο επίπεδο ακεραιότητας --κατά προεπιλογή-- θα εκτελείται υπό μέτριο επίπεδο ακεραιότητας).
 
-### Integrity Levels in Processes
+### Επίπεδα Ακεραιότητας σε Διαδικασίες
 
-Not all files and folders have a minimum integrity level, **but all processes are running under an integrity level**. And similar to what happened with the file-system, **if a process wants to write inside another process it must have at least the same integrity level**. This means that a process with low integrity level can’t open a handle with full access to a process with medium integrity level.
+Όλα τα αρχεία και οι φάκελοι δεν έχουν ελάχιστο επίπεδο ακεραιότητας, **αλλά όλες οι διαδικασίες εκτελούνται υπό ένα επίπεδο ακεραιότητας**. Και παρόμοια με ό,τι συνέβη με το σύστημα αρχείων, **αν μια διαδικασία θέλει να γράψει μέσα σε μια άλλη διαδικασία, πρέπει να έχει τουλάχιστον το ίδιο επίπεδο ακεραιότητας**. Αυτό σημαίνει ότι μια διαδικασία με χαμηλό επίπεδο ακεραιότητας δεν μπορεί να ανοίξει ένα handle με πλήρη πρόσβαση σε μια διαδικασία με μέτριο επίπεδο ακεραιότητας.
 
-Due to the restrictions commented in this and the previous section, from a security point of view, it's always **recommended to run a process in the lower level of integrity possible**.
+Λόγω των περιορισμών που αναφέρθηκαν σε αυτήν και την προηγούμενη ενότητα, από άποψη ασφάλειας, είναι πάντα **συνιστώμενο να εκτελείτε μια διαδικασία στο χαμηλότερο δυνατό επίπεδο ακεραιότητας**.
 
 {{#include ../../banners/hacktricks-training.md}}
-

@@ -4,7 +4,7 @@
 
 ## Intro <a href="#ir-signal-receiver-in-flipper-zero" id="ir-signal-receiver-in-flipper-zero"></a>
 
-For more info about how Infrared works check:
+Για περισσότερες πληροφορίες σχετικά με το πώς λειτουργεί το Infrared, ελέγξτε:
 
 {{#ref}}
 ../infrared.md
@@ -12,30 +12,29 @@ For more info about how Infrared works check:
 
 ## IR Signal Receiver in Flipper Zero <a href="#ir-signal-receiver-in-flipper-zero" id="ir-signal-receiver-in-flipper-zero"></a>
 
-Flipper uses a digital IR signal receiver TSOP, which **allows intercepting signals from IR remotes**. There are some **smartphones** like Xiaomi, which also have an IR port, but keep in mind that **most of them can only transmit** signals and are **unable to receive** them.
+Ο Flipper χρησιμοποιεί έναν ψηφιακό δέκτη σήματος IR TSOP, ο οποίος **επιτρέπει την παρεμβολή σημάτων από IR τηλεκοντρόλ**. Υπάρχουν μερικά **smartphones** όπως η Xiaomi, που έχουν επίσης θύρα IR, αλλά να έχετε υπόψη ότι **οι περισσότεροι από αυτούς μπορούν μόνο να μεταδίδουν** σήματα και είναι **ανίκανοι να τα λάβουν**.
 
-The Flipper infrared **receiver is quite sensitive**. You can even **catch the signal** while remaining **somewhere in between** the remote and the TV. Pointing the remote directly at Flipper's IR port is unnecessary. This comes in handy when someone is switching channels while standing near the TV, and both you and Flipper are some distance away.
+Ο δέκτης IR του Flipper **είναι αρκετά ευαίσθητος**. Μπορείτε ακόμη και να **πιάσετε το σήμα** ενώ παραμένετε **κάπου ενδιάμεσα** του τηλεκοντρόλ και της τηλεόρασης. Δεν είναι απαραίτητο να στοχεύετε το τηλεκοντρόλ απευθείας στη θύρα IR του Flipper. Αυτό είναι χρήσιμο όταν κάποιος αλλάζει κανάλια ενώ στέκεται κοντά στην τηλεόραση, και εσείς και ο Flipper είστε σε κάποια απόσταση.
 
-As the **decoding of the infrared** signal happens on the **software** side, Flipper Zero potentially supports the **reception and transmission of any IR remote codes**. In the case of **unknown** protocols which could not be recognized - it **records and plays back** the raw signal exactly as received.
+Καθώς η **αποκωδικοποίηση του σήματος infrared** συμβαίνει στην πλευρά του **λογισμικού**, ο Flipper Zero υποστηρίζει δυνητικά την **λήψη και μετάδοση οποιωνδήποτε κωδικών IR τηλεκοντρόλ**. Στην περίπτωση **άγνωστων** πρωτοκόλλων που δεν μπορούν να αναγνωριστούν - **καταγράφει και αναπαράγει** το ακατέργαστο σήμα ακριβώς όπως το έλαβε.
 
 ## Actions
 
 ### Universal Remotes
 
-Flipper Zero can be used as a **universal remote to control any TV, air conditioner, or media center**. In this mode, Flipper **bruteforces** all **known codes** of all supported manufacturers **according to the dictionary from the SD card**. You don't need to choose a particular remote to turn off a restaurant TV.
+Ο Flipper Zero μπορεί να χρησιμοποιηθεί ως **καθολικό τηλεκοντρόλ για τον έλεγχο οποιασδήποτε τηλεόρασης, κλιματιστικού ή κέντρου πολυμέσων**. Σε αυτή τη λειτουργία, ο Flipper **δοκιμάζει** όλους τους **γνωστούς κωδικούς** όλων των υποστηριζόμενων κατασκευαστών **σύμφωνα με το λεξικό από την κάρτα SD**. Δεν χρειάζεται να επιλέξετε ένα συγκεκριμένο τηλεκοντρόλ για να απενεργοποιήσετε μια τηλεόραση εστιατορίου.
 
-It is enough to press the power button in the Universal Remote mode, and Flipper will **sequentially send "Power Off"** commands of all the TVs it knows: Sony, Samsung, Panasonic... and so on. When the TV receives its signal, it will react and turn off.
+Αρκεί να πατήσετε το κουμπί τροφοδοσίας στη λειτουργία Καθολικού Τηλεκοντρόλ, και ο Flipper θα **στείλει διαδοχικά τις εντολές "Power Off"** όλων των τηλεοράσεων που γνωρίζει: Sony, Samsung, Panasonic... και ούτω καθεξής. Όταν η τηλεόραση λάβει το σήμα της, θα αντιδράσει και θα απενεργοποιηθεί.
 
-Such brute-force takes time. The larger the dictionary, the longer it will take to finish. It is impossible to find out which signal exactly the TV recognized since there is no feedback from the TV.
+Αυτή η δοκιμή απαιτεί χρόνο. Όσο μεγαλύτερο είναι το λεξικό, τόσο περισσότερο χρόνο θα χρειαστεί για να ολοκληρωθεί. Είναι αδύνατο να μάθετε ποιο σήμα ακριβώς αναγνώρισε η τηλεόραση, καθώς δεν υπάρχει ανατροφοδότηση από την τηλεόραση.
 
 ### Learn New Remote
 
-It's possible to **capture an infrared signal** with Flipper Zero. If it **finds the signal in the database** Flipper will automatically **know which device this is** and will let you interact with it.\
-If it doesn't, Flipper can **store** the **signal** and will allow you to **replay it**.
+Είναι δυνατόν να **καταγράψετε ένα σήμα infrared** με τον Flipper Zero. Αν **βρει το σήμα στη βάση δεδομένων**, ο Flipper θα γνωρίζει αυτόματα **ποια συσκευή είναι αυτή** και θα σας επιτρέψει να αλληλεπιδράσετε μαζί της.\
+Αν δεν το βρει, ο Flipper μπορεί να **αποθηκεύσει** το **σήμα** και θα σας επιτρέψει να το **αναπαράγετε**.
 
 ## References
 
 - [https://blog.flipperzero.one/infrared/](https://blog.flipperzero.one/infrared/)
 
 {{#include ../../../banners/hacktricks-training.md}}
-

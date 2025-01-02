@@ -1,118 +1,108 @@
-# Reversing Tools & Basic Methods
+# Εργαλεία Αντίστροφης Μηχανικής & Βασικές Μέθοδοι
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## ImGui Based Reversing tools
+## Εργαλεία Αντίστροφης Μηχανικής Βασισμένα σε ImGui
 
-Software:
+Λογισμικό:
 
 - ReverseKit: [https://github.com/zer0condition/ReverseKit](https://github.com/zer0condition/ReverseKit)
 
-## Wasm decompiler / Wat compiler
+## Αποσυμπιεστής Wasm / Μεταγλωττιστής Wat
 
-Online:
+Διαδικτυακά:
 
-- Use [https://webassembly.github.io/wabt/demo/wasm2wat/index.html](https://webassembly.github.io/wabt/demo/wasm2wat/index.html) to **decompile** from wasm (binary) to wat (clear text)
-- Use [https://webassembly.github.io/wabt/demo/wat2wasm/](https://webassembly.github.io/wabt/demo/wat2wasm/) to **compile** from wat to wasm
-- you can also try to use [https://wwwg.github.io/web-wasmdec/](https://wwwg.github.io/web-wasmdec/) to decompile
+- Χρησιμοποιήστε [https://webassembly.github.io/wabt/demo/wasm2wat/index.html](https://webassembly.github.io/wabt/demo/wasm2wat/index.html) για να **αποσυμπιέσετε** από wasm (δυαδικό) σε wat (καθαρό κείμενο)
+- Χρησιμοποιήστε [https://webassembly.github.io/wabt/demo/wat2wasm/](https://webassembly.github.io/wabt/demo/wat2wasm/) για να **μεταγλωττίσετε** από wat σε wasm
+- μπορείτε επίσης να δοκιμάσετε να χρησιμοποιήσετε [https://wwwg.github.io/web-wasmdec/](https://wwwg.github.io/web-wasmdec/) για αποσυμπίεση
 
-Software:
+Λογισμικό:
 
 - [https://www.pnfsoftware.com/jeb/demo](https://www.pnfsoftware.com/jeb/demo)
 - [https://github.com/wwwg/wasmdec](https://github.com/wwwg/wasmdec)
 
-## .NET decompiler
+## Αποσυμπιεστής .NET
 
 ### [dotPeek](https://www.jetbrains.com/decompiler/)
 
-dotPeek is a decompiler that **decompiles and examines multiple formats**, including **libraries** (.dll), **Windows metadata file**s (.winmd), and **executables** (.exe). Once decompiled, an assembly can be saved as a Visual Studio project (.csproj).
+Το dotPeek είναι ένας αποσυμπιεστής που **αποσυμπιέζει και εξετάζει πολλαπλές μορφές**, συμπεριλαμβανομένων των **βιβλιοθηκών** (.dll), **αρχείων μεταδεδομένων Windows** (.winmd) και **εκτελέσιμων** (.exe). Αφού αποσυμπιεστεί, μια συλλογή μπορεί να αποθηκευτεί ως έργο Visual Studio (.csproj).
 
-The merit here is that if a lost source code requires restoration from a legacy assembly, this action can save time. Further, dotPeek provides handy navigation throughout the decompiled code, making it one of the perfect tools for **Xamarin algorithm analysis.**
+Το πλεονέκτημα εδώ είναι ότι αν ένας χαμένος κωδικός πηγής απαιτεί αποκατάσταση από μια κληρονομική συλλογή, αυτή η ενέργεια μπορεί να εξοικονομήσει χρόνο. Επιπλέον, το dotPeek παρέχει βολική πλοήγηση σε όλο τον αποσυμπιεσμένο κώδικα, καθιστώντας το ένα από τα τέλεια εργαλεία για **ανάλυση αλγορίθμων Xamarin.**
 
 ### [.NET Reflector](https://www.red-gate.com/products/reflector/)
 
-With a comprehensive add-in model and an API that extends the tool to suit your exact needs, .NET reflector saves time and simplifies development. Let's take a look at the plethora of reverse engineering services this tool provides:
+Με ένα ολοκληρωμένο μοντέλο προσθέτων και μια API που επεκτείνει το εργαλείο για να ταιριάζει ακριβώς στις ανάγκες σας, το .NET Reflector εξοικονομεί χρόνο και απλοποιεί την ανάπτυξη. Ας ρίξουμε μια ματιά στην πληθώρα υπηρεσιών αντίστροφης μηχανικής που παρέχει αυτό το εργαλείο:
 
-- Provides an insight into how the data flows through a library or component
-- Provides insight into the implementation and usage of .NET languages and frameworks
-- Finds undocumented and unexposed functionality to get more out of the APIs and technologies used.
-- Finds dependencies and different assemblies
-- Tracks down the exact location of errors in your code, third-party components, and libraries.
-- Debugs into the source of all the .NET code you work with.
+- Παρέχει μια εικόνα για το πώς ρέει τα δεδομένα μέσω μιας βιβλιοθήκης ή συστατικού
+- Παρέχει πληροφορίες για την υλοποίηση και τη χρήση γλωσσών και πλαισίων .NET
+- Βρίσκει μη τεκμηριωμένη και μη εκτεθειμένη λειτουργικότητα για να αξιοποιήσει περισσότερο τις APIs και τις τεχνολογίες που χρησιμοποιούνται.
+- Βρίσκει εξαρτήσεις και διαφορετικές συλλογές
+- Εντοπίζει την ακριβή τοποθεσία σφαλμάτων στον κώδικά σας, σε τρίτα μέρη και σε βιβλιοθήκες.
+- Αποσφαλιδώνει την πηγή όλου του κώδικα .NET με τον οποίο εργάζεστε.
 
 ### [ILSpy](https://github.com/icsharpcode/ILSpy) & [dnSpy](https://github.com/dnSpy/dnSpy/releases)
 
-[ILSpy plugin for Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode): You can have it in any OS (you can install it directly from VSCode, no need to download the git. Click on **Extensions** and **search ILSpy**).\
-If you need to **decompile**, **modify** and **recompile** again you can use [**dnSpy**](https://github.com/dnSpy/dnSpy/releases) or an actively maintained fork of it, [**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases). (**Right Click -> Modify Method** to change something inside a function).
+[ILSpy plugin for Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode): Μπορείτε να το έχετε σε οποιοδήποτε λειτουργικό σύστημα (μπορείτε να το εγκαταστήσετε απευθείας από το VSCode, δεν χρειάζεται να κατεβάσετε το git. Κάντε κλικ στο **Extensions** και **αναζητήστε ILSpy**).\
+Αν χρειάζεστε να **αποσυμπιέσετε**, **τροποποιήσετε** και **μεταγλωττίσετε** ξανά μπορείτε να χρησιμοποιήσετε [**dnSpy**](https://github.com/dnSpy/dnSpy/releases) ή ένα ενεργά συντηρούμενο fork του, [**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases). (**Δεξί Κλικ -> Τροποποίηση Μεθόδου** για να αλλάξετε κάτι μέσα σε μια συνάρτηση).
 
-### DNSpy Logging
+### Καταγραφή DNSpy
 
-In order to make **DNSpy log some information in a file**, you could use this snippet:
-
+Για να κάνετε **το DNSpy να καταγράψει κάποιες πληροφορίες σε ένα αρχείο**, μπορείτε να χρησιμοποιήσετε αυτό το απόσπασμα:
 ```cs
 using System.IO;
 path = "C:\\inetpub\\temp\\MyTest2.txt";
 File.AppendAllText(path, "Password: " + password + "\n");
 ```
-
 ### DNSpy Debugging
 
-In order to debug code using DNSpy you need to:
+Για να κάνετε αποσφαλμάτωση κώδικα χρησιμοποιώντας το DNSpy, πρέπει να:
 
-First, change the **Assembly attributes** related to **debugging**:
+Αρχικά, αλλάξτε τα **Assembly attributes** που σχετίζονται με την **αποσφαλμάτωση**:
 
 ![](<../../images/image (973).png>)
-
-From:
-
 ```aspnet
 [assembly: Debuggable(DebuggableAttribute.DebuggingModes.IgnoreSymbolStoreSequencePoints)]
 ```
-
-To:
-
+Για:
 ```
 [assembly: Debuggable(DebuggableAttribute.DebuggingModes.Default |
 DebuggableAttribute.DebuggingModes.DisableOptimizations |
 DebuggableAttribute.DebuggingModes.IgnoreSymbolStoreSequencePoints |
 DebuggableAttribute.DebuggingModes.EnableEditAndContinue)]
 ```
-
-And click on **compile**:
+Και κάντε κλικ στο **compile**:
 
 ![](<../../images/image (314) (1).png>)
 
-Then save the new file via _**File >> Save module...**_:
+Στη συνέχεια, αποθηκεύστε το νέο αρχείο μέσω _**File >> Save module...**_:
 
 ![](<../../images/image (602).png>)
 
-This is necessary because if you don't do this, at **runtime** several **optimisations** will be applied to the code and it could be possible that while debugging a **break-point is never hit** or some **variables don't exist**.
+Αυτό είναι απαραίτητο γιατί αν δεν το κάνετε αυτό, κατά τη διάρκεια της **εκτέλεσης** θα εφαρμοστούν πολλές **βελτιστοποιήσεις** στον κώδικα και είναι πιθανό ότι κατά την αποσφαλμάτωση μια **σημείο διακοπής δεν θα χτυπηθεί ποτέ** ή κάποιες **μεταβλητές δεν θα υπάρχουν**.
 
-Then, if your .NET application is being **run** by **IIS** you can **restart** it with:
-
+Στη συνέχεια, αν η εφαρμογή .NET σας εκτελείται από το **IIS** μπορείτε να την **επανεκκινήσετε** με:
 ```
 iisreset /noforce
 ```
-
-Then, in order to start debugging you should close all the opened files and inside the **Debug Tab** select **Attach to Process...**:
+Στη συνέχεια, για να ξεκινήσετε την αποσφαλμάτωση, θα πρέπει να κλείσετε όλα τα ανοιχτά αρχεία και μέσα στην **Κατηγορία Αποσφαλμάτωσης** να επιλέξετε **Σύνδεση με Διαδικασία...**:
 
 ![](<../../images/image (318).png>)
 
-Then select **w3wp.exe** to attach to the **IIS server** and click **attach**:
+Στη συνέχεια, επιλέξτε **w3wp.exe** για να συνδεθείτε με τον **διακομιστή IIS** και κάντε κλικ στο **σύνδεση**:
 
 ![](<../../images/image (113).png>)
 
-Now that we are debugging the process, it's time to stop it and load all the modules. First click on _Debug >> Break All_ and then click on _**Debug >> Windows >> Modules**_:
+Τώρα που αποσφαλματώνουμε τη διαδικασία, ήρθε η ώρα να την σταματήσουμε και να φορτώσουμε όλα τα modules. Πρώτα κάντε κλικ στο _Αποσφαλμάτωση >> Διακοπή Όλων_ και στη συνέχεια κάντε κλικ στο _**Αποσφαλμάτωση >> Παράθυρα >> Modules**_:
 
 ![](<../../images/image (132).png>)
 
 ![](<../../images/image (834).png>)
 
-Click any module on **Modules** and select **Open All Modules**:
+Κάντε κλικ σε οποιοδήποτε module στο **Modules** και επιλέξτε **Άνοιγμα Όλων των Modules**:
 
 ![](<../../images/image (922).png>)
 
-Right click any module in **Assembly Explorer** and click **Sort Assemblies**:
+Κάντε δεξί κλικ σε οποιοδήποτε module στο **Assembly Explorer** και κάντε κλικ στο **Ταξινόμηση Assemblies**:
 
 ![](<../../images/image (339).png>)
 
@@ -121,48 +111,48 @@ Right click any module in **Assembly Explorer** and click **Sort Assemblies**:
 [https://github.com/skylot/jadx](https://github.com/skylot/jadx)\
 [https://github.com/java-decompiler/jd-gui/releases](https://github.com/java-decompiler/jd-gui/releases)
 
-## Debugging DLLs
+## Αποσφαλμάτωση DLLs
 
-### Using IDA
+### Χρησιμοποιώντας IDA
 
-- **Load rundll32** (64bits in C:\Windows\System32\rundll32.exe and 32 bits in C:\Windows\SysWOW64\rundll32.exe)
-- Select **Windbg** debugger
-- Select "**Suspend on library load/unload**"
+- **Φορτώστε το rundll32** (64bit στο C:\Windows\System32\rundll32.exe και 32bit στο C:\Windows\SysWOW64\rundll32.exe)
+- Επιλέξτε **Windbg** debugger
+- Επιλέξτε "**Αναστολή κατά τη φόρτωση/εκφόρτωση βιβλιοθήκης**"
 
 ![](<../../images/image (868).png>)
 
-- Configure the **parameters** of the execution putting the **path to the DLL** and the function that you want to call:
+- Ρυθμίστε τις **παραμέτρους** της εκτέλεσης βάζοντας το **μονοπάτι στη DLL** και τη συνάρτηση που θέλετε να καλέσετε:
 
 ![](<../../images/image (704).png>)
 
-Then, when you start debugging **the execution will be stopped when each DLL is loaded**, then, when rundll32 load your DLL the execution will be stopped.
+Στη συνέχεια, όταν ξεκινήσετε την αποσφαλμάτωση, **η εκτέλεση θα σταματήσει όταν φορτωθεί κάθε DLL**, στη συνέχεια, όταν το rundll32 φορτώσει τη DLL σας, η εκτέλεση θα σταματήσει.
 
-But, how can you get to the code of the DLL that was lodaded? Using this method, I don't know how.
+Αλλά, πώς μπορείτε να φτάσετε στον κώδικα της DLL που φορτώθηκε; Χρησιμοποιώντας αυτή τη μέθοδο, δεν ξέρω πώς.
 
-### Using x64dbg/x32dbg
+### Χρησιμοποιώντας x64dbg/x32dbg
 
-- **Load rundll32** (64bits in C:\Windows\System32\rundll32.exe and 32 bits in C:\Windows\SysWOW64\rundll32.exe)
-- **Change the Command Line** ( _File --> Change Command Line_ ) and set the path of the dll and the function that you want to call, for example: "C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii_2.dll",DLLMain
-- Change _Options --> Settings_ and select "**DLL Entry**".
-- Then **start the execution**, the debugger will stop at each dll main, at some point you will **stop in the dll Entry of your dll**. From there, just search for the points where you want to put a breakpoint.
+- **Φορτώστε το rundll32** (64bit στο C:\Windows\System32\rundll32.exe και 32bit στο C:\Windows\SysWOW64\rundll32.exe)
+- **Αλλάξτε τη Γραμμή Εντολών** (_Αρχείο --> Αλλαγή Γραμμής Εντολών_) και ορίστε το μονοπάτι της dll και τη συνάρτηση που θέλετε να καλέσετε, για παράδειγμα: "C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii_2.dll",DLLMain
+- Αλλάξτε _Επιλογές --> Ρυθμίσεις_ και επιλέξτε "**Είσοδος DLL**".
+- Στη συνέχεια **ξεκινήστε την εκτέλεση**, ο debugger θα σταματήσει σε κάθε κύρια dll, σε κάποιο σημείο θα **σταματήσετε στην είσοδο dll της dll σας**. Από εκεί, απλώς αναζητήστε τα σημεία όπου θέλετε να βάλετε ένα breakpoint.
 
-Notice that when the execution is stopped by any reason in win64dbg you can see **in which code you are** looking in the **top of the win64dbg window**:
+Σημειώστε ότι όταν η εκτέλεση σταματήσει για οποιονδήποτε λόγο στο win64dbg μπορείτε να δείτε **σε ποιον κώδικα βρίσκεστε** κοιτάζοντας **στην κορυφή του παραθύρου win64dbg**:
 
 ![](<../../images/image (842).png>)
 
-Then, looking to this ca see when the execution was stopped in the dll you want to debug.
+Στη συνέχεια, κοιτάζοντας αυτό μπορείτε να δείτε πότε η εκτέλεση σταμάτησε στη dll που θέλετε να αποσφαλματώσετε.
 
 ## GUI Apps / Videogames
 
-[**Cheat Engine**](https://www.cheatengine.org/downloads.php) is a useful program to find where important values are saved inside the memory of a running game and change them. More info in:
+[**Cheat Engine**](https://www.cheatengine.org/downloads.php) είναι ένα χρήσιμο πρόγραμμα για να βρείτε πού αποθηκεύονται σημαντικές τιμές μέσα στη μνήμη ενός τρέχοντος παιχνιδιού και να τις αλλάξετε. Περισσότερες πληροφορίες στο:
 
 {{#ref}}
 cheat-engine.md
 {{#endref}}
 
-[**PiNCE**](https://github.com/korcankaraokcu/PINCE) is a front-end/reverse engineering tool for the GNU Project Debugger (GDB), focused on games. However, it can be used for any reverse-engineering related stuff
+[**PiNCE**](https://github.com/korcankaraokcu/PINCE) είναι ένα εργαλείο front-end/αντίστροφης μηχανικής για τον GNU Project Debugger (GDB), επικεντρωμένο σε παιχνίδια. Ωστόσο, μπορεί να χρησιμοποιηθεί για οποιοδήποτε σχετικό με την αντίστροφη μηχανική.
 
-[**Decompiler Explorer**](https://dogbolt.org/) is a web front-end to a number of decompilers. This web service lets you compare the output of different decompilers on small executables.
+[**Decompiler Explorer**](https://dogbolt.org/) είναι ένα διαδικτυακό front-end για αρκετούς decompilers. Αυτή η διαδικτυακή υπηρεσία σας επιτρέπει να συγκρίνετε την έξοδο διαφορετικών decompilers σε μικρές εκτελέσιμες.
 
 ## ARM & MIPS
 
@@ -170,49 +160,48 @@ cheat-engine.md
 
 ## Shellcodes
 
-### Debugging a shellcode with blobrunner
+### Αποσφαλμάτωση ενός shellcode με το blobrunner
 
-[**Blobrunner**](https://github.com/OALabs/BlobRunner) will **allocate** the **shellcode** inside a space of memory, will **indicate** you the **memory address** were the shellcode was allocated and will **stop** the execution.\
-Then, you need to **attach a debugger** (Ida or x64dbg) to the process and put a **breakpoint the indicated memory address** and **resume** the execution. This way you will be debugging the shellcode.
+[**Blobrunner**](https://github.com/OALabs/BlobRunner) θα **κατανείμει** το **shellcode** μέσα σε έναν χώρο μνήμης, θα **υποδείξει** τη **διεύθυνση μνήμης** όπου το shellcode κατανέμεται και θα **σταματήσει** την εκτέλεση.\
+Στη συνέχεια, θα χρειαστεί να **συνδέσετε έναν debugger** (Ida ή x64dbg) στη διαδικασία και να βάλετε ένα **breakpoint στη διευθυνση μνήμης που υποδείχθηκε** και να **συνεχίσετε** την εκτέλεση. Με αυτόν τον τρόπο θα αποσφαλματώνετε το shellcode.
 
-The releases github page contains zips containing the compiled releases: [https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
-You can find a slightly modified version of Blobrunner in the following link. In order to compile it just **create a C/C++ project in Visual Studio Code, copy and paste the code and build it**.
+Η σελίδα κυκλοφορίας στο github περιέχει zip με τις εκδόσεις που έχουν μεταγλωττιστεί: [https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
+Μπορείτε να βρείτε μια ελαφρώς τροποποιημένη έκδοση του Blobrunner στον παρακάτω σύνδεσμο. Για να το μεταγλωττίσετε, απλώς **δημιουργήστε ένα έργο C/C++ στο Visual Studio Code, αντιγράψτε και επικολλήστε τον κώδικα και κάντε build**.
 
 {{#ref}}
 blobrunner.md
 {{#endref}}
 
-### Debugging a shellcode with jmp2it
+### Αποσφαλμάτωση ενός shellcode με το jmp2it
 
-[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4)is very similar to blobrunner. It will **allocate** the **shellcode** inside a space of memory, and start an **eternal loop**. You then need to **attach the debugger** to the process, **play start wait 2-5 secs and press stop** and you will find yourself inside the **eternal loop**. Jump to the next instruction of the eternal loop as it will be a call to the shellcode, and finally you will find yourself executing the shellcode.
+[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4)είναι πολύ παρόμοιο με το blobrunner. Θα **κατανείμει** το **shellcode** μέσα σε έναν χώρο μνήμης και θα ξεκινήσει έναν **αιώνιο βρόχο**. Στη συνέχεια, θα χρειαστεί να **συνδέσετε τον debugger** στη διαδικασία, **πατήστε play, περιμένετε 2-5 δευτερόλεπτα και πατήστε stop** και θα βρεθείτε μέσα στον **αιώνιο βρόχο**. Μεταβείτε στην επόμενη εντολή του αιώνιου βρόχου καθώς θα είναι μια κλήση στο shellcode, και τελικά θα βρεθείτε να εκτελείτε το shellcode.
 
 ![](<../../images/image (509).png>)
 
-You can download a compiled version of [jmp2it inside the releases page](https://github.com/adamkramer/jmp2it/releases/).
+Μπορείτε να κατεβάσετε μια μεταγλωττισμένη έκδοση του [jmp2it στη σελίδα κυκλοφορίας](https://github.com/adamkramer/jmp2it/releases/).
 
-### Debugging shellcode using Cutter
+### Αποσφαλμάτωση shellcode χρησιμοποιώντας το Cutter
 
-[**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0) is the GUI of radare. Using cutter you can emulate the shellcode and inspect it dynamically.
+[**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0) είναι το GUI του radare. Χρησιμοποιώντας το cutter μπορείτε να προσομοιώσετε το shellcode και να το επιθεωρήσετε δυναμικά.
 
-Note that Cutter allows you to "Open File" and "Open Shellcode". In my case when I opened the shellcode as a file it decompiled it correctly, but when I opened it as a shellcode it didn't:
+Σημειώστε ότι το Cutter σας επιτρέπει να "Ανοίξετε Αρχείο" και "Ανοίξετε Shellcode". Στην περίπτωσή μου, όταν άνοιξα το shellcode ως αρχείο, το αποσυμπίεσε σωστά, αλλά όταν το άνοιξα ως shellcode δεν το έκανε:
 
 ![](<../../images/image (562).png>)
 
-In order to start the emulation in the place you want to, set a bp there and apparently cutter will automatically start the emulation from there:
+Για να ξεκινήσετε την προσομοίωση από το σημείο που θέλετε, ορίστε ένα bp εκεί και προφανώς το cutter θα ξεκινήσει αυτόματα την προσομοίωση από εκεί:
 
 ![](<../../images/image (589).png>)
 
 ![](<../../images/image (387).png>)
 
-You can see the stack for example inside a hex dump:
+Μπορείτε να δείτε τη στοίβα, για παράδειγμα, μέσα σε μια εξαγωγή hex:
 
 ![](<../../images/image (186).png>)
 
-### Deobfuscating shellcode and getting executed functions
+### Αποκατάσταση shellcode και λήψη εκτελούμενων συναρτήσεων
 
-You should try [**scdbg**](http://sandsprite.com/blogs/index.php?uid=7&pid=152).\
-It will tell you things like **which functions** is the shellcode using and if the shellcode is **decoding** itself in memory.
-
+Θα πρέπει να δοκιμάσετε [**scdbg**](http://sandsprite.com/blogs/index.php?uid=7&pid=152).\
+Θα σας πει πράγματα όπως **ποιες συναρτήσεις** χρησιμοποιεί το shellcode και αν το shellcode **αποκωδικοποιεί** τον εαυτό του στη μνήμη.
 ```bash
 scdbg.exe -f shellcode # Get info
 scdbg.exe -f shellcode -r #show analysis report at end of run
@@ -221,67 +210,64 @@ scdbg.exe -f shellcode -d #Dump decoded shellcode
 scdbg.exe -f shellcode /findsc #Find offset where starts
 scdbg.exe -f shellcode /foff 0x0000004D #Start the executing in that offset
 ```
-
-scDbg also counts with a graphical launcher where you can select the options you want and execute the shellcode
+scDbg διαθέτει επίσης έναν γραφικό εκκινητή όπου μπορείτε να επιλέξετε τις επιλογές που θέλετε και να εκτελέσετε τον shellcode.
 
 ![](<../../images/image (258).png>)
 
-The **Create Dump** option will dump the final shellcode if any change is done to the shellcode dynamically in memory (useful to download the decoded shellcode). The **start offset** can be useful to start the shellcode at a specific offset. The **Debug Shell** option is useful to debug the shellcode using the scDbg terminal (however I find any of the options explained before better for this matter as you will be able to use Ida or x64dbg).
+Η επιλογή **Create Dump** θα αποθηκεύσει τον τελικό shellcode αν γίνει οποιαδήποτε αλλαγή στον shellcode δυναμικά στη μνήμη (χρήσιμο για να κατεβάσετε τον αποκωδικοποιημένο shellcode). Η **start offset** μπορεί να είναι χρήσιμη για να ξεκινήσει ο shellcode σε μια συγκεκριμένη θέση. Η επιλογή **Debug Shell** είναι χρήσιμη για να κάνετε αποσφαλμάτωση του shellcode χρησιμοποιώντας το τερματικό scDbg (ωστόσο, θεωρώ ότι οποιαδήποτε από τις επιλογές που εξηγήθηκαν προηγουμένως είναι καλύτερη για αυτό το θέμα, καθώς θα μπορείτε να χρησιμοποιήσετε το Ida ή το x64dbg).
 
-### Disassembling using CyberChef
+### Αποσυναρμολόγηση χρησιμοποιώντας το CyberChef
 
-Upload your shellcode file as input and use the following recipe to decompile it: [https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)](<https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)>)
+Ανεβάστε το αρχείο shellcode σας ως είσοδο και χρησιμοποιήστε την παρακάτω συνταγή για να το αποσυναρμολογήσετε: [https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)](<https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)>)
 
 ## [Movfuscator](https://github.com/xoreaxeaxeax/movfuscator)
 
-This obfuscator **modifies all the instructions for `mov`**(yeah, really cool). It also uses interruptions to change executions flows. For more information about how does it works:
+Αυτός ο obfuscator **τροποποιεί όλες τις εντολές για `mov`** (ναι, πραγματικά ωραίο). Χρησιμοποιεί επίσης διακοπές για να αλλάξει τις ροές εκτέλεσης. Για περισσότερες πληροφορίες σχετικά με το πώς λειτουργεί:
 
 - [https://www.youtube.com/watch?v=2VF_wPkiBJY](https://www.youtube.com/watch?v=2VF_wPkiBJY)
 - [https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas_2015_the_movfuscator.pdf](https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas_2015_the_movfuscator.pdf)
 
-If you are lucky [demovfuscator](https://github.com/kirschju/demovfuscator) will deofuscate the binary. It has several dependencies
-
+Αν είστε τυχεροί, ο [demovfuscator](https://github.com/kirschju/demovfuscator) θα απο-ομπλουκάρει το δυαδικό. Έχει αρκετές εξαρτήσεις.
 ```
 apt-get install libcapstone-dev
 apt-get install libz3-dev
 ```
+Και [install keystone](https://github.com/keystone-engine/keystone/blob/master/docs/COMPILE-NIX.md) (`apt-get install cmake; mkdir build; cd build; ../make-share.sh; make install`)
 
-And [install keystone](https://github.com/keystone-engine/keystone/blob/master/docs/COMPILE-NIX.md) (`apt-get install cmake; mkdir build; cd build; ../make-share.sh; make install`)
-
-If you are playing a **CTF, this workaround to find the flag** could be very useful: [https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html](https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html)
+Αν παίζετε ένα **CTF, αυτή η λύση για να βρείτε τη σημαία** θα μπορούσε να είναι πολύ χρήσιμη: [https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html](https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html)
 
 ## Rust
 
-To find the **entry point** search the functions by `::main` like in:
+Για να βρείτε το **entry point** αναζητήστε τις συναρτήσεις με `::main` όπως στο:
 
 ![](<../../images/image (1080).png>)
 
-In this case the binary was called authenticator, so it's pretty obvious that this is the interesting main function.\
-Having the **name** of the **functions** being called, search for them on the **Internet** to learn about their **inputs** and **outputs**.
+Σε αυτή την περίπτωση το δυαδικό αρχείο ονομάζεται authenticator, οπότε είναι προφανές ότι αυτή είναι η ενδιαφέρουσα κύρια συνάρτηση.\
+Έχοντας το **όνομα** των **συναρτήσεων** που καλούνται, αναζητήστε τις στο **Internet** για να μάθετε για τις **εισόδους** και **εξόδους** τους.
 
 ## **Delphi**
 
-For Delphi compiled binaries you can use [https://github.com/crypto2011/IDR](https://github.com/crypto2011/IDR)
+Για δυαδικά αρχεία που έχουν μεταγλωττιστεί με Delphi μπορείτε να χρησιμοποιήσετε [https://github.com/crypto2011/IDR](https://github.com/crypto2011/IDR)
 
-If you have to reverse a Delphi binary I would suggest you to use the IDA plugin [https://github.com/Coldzer0/IDA-For-Delphi](https://github.com/Coldzer0/IDA-For-Delphi)
+Αν πρέπει να αναστρέψετε ένα δυαδικό αρχείο Delphi, θα σας πρότεινα να χρησιμοποιήσετε το plugin IDA [https://github.com/Coldzer0/IDA-For-Delphi](https://github.com/Coldzer0/IDA-For-Delphi)
 
-Just press **ATL+f7** (import python plugin in IDA) and select the python plugin.
+Απλά πατήστε **ATL+f7** (εισαγωγή python plugin στο IDA) και επιλέξτε το python plugin.
 
-This plugin will execute the binary and resolve function names dynamically at the start of the debugging. After starting the debugging press again the Start button (the green one or f9) and a breakpoint will hit in the beginning of the real code.
+Αυτό το plugin θα εκτελέσει το δυαδικό αρχείο και θα επιλύσει τα ονόματα των συναρτήσεων δυναμικά στην αρχή της αποσφαλμάτωσης. Μετά την έναρξη της αποσφαλμάτωσης, πατήστε ξανά το κουμπί Έναρξη (το πράσινο ή f9) και ένα breakpoint θα χτυπήσει στην αρχή του πραγματικού κώδικα.
 
-It is also very interesting because if you press a button in the graphic application the debugger will stop in the function executed by that bottom.
+Είναι επίσης πολύ ενδιαφέρον γιατί αν πατήσετε ένα κουμπί στην γραφική εφαρμογή, ο αποσφαλματωτής θα σταματήσει στη συνάρτηση που εκτελείται από αυτό το κουμπί.
 
 ## Golang
 
-If you have to reverse a Golang binary I would suggest you to use the IDA plugin [https://github.com/sibears/IDAGolangHelper](https://github.com/sibears/IDAGolangHelper)
+Αν πρέπει να αναστρέψετε ένα δυαδικό αρχείο Golang, θα σας πρότεινα να χρησιμοποιήσετε το plugin IDA [https://github.com/sibears/IDAGolangHelper](https://github.com/sibears/IDAGolangHelper)
 
-Just press **ATL+f7** (import python plugin in IDA) and select the python plugin.
+Απλά πατήστε **ATL+f7** (εισαγωγή python plugin στο IDA) και επιλέξτε το python plugin.
 
-This will resolve the names of the functions.
+Αυτό θα επιλύσει τα ονόματα των συναρτήσεων.
 
 ## Compiled Python
 
-In this page you can find how to get the python code from an ELF/EXE python compiled binary:
+Σε αυτή τη σελίδα μπορείτε να βρείτε πώς να αποκτήσετε τον κώδικα python από ένα δυαδικό αρχείο python που έχει μεταγλωττιστεί σε ELF/EXE:
 
 {{#ref}}
 ../../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/.pyc.md
@@ -289,19 +275,18 @@ In this page you can find how to get the python code from an ELF/EXE python comp
 
 ## GBA - Game Body Advance
 
-If you get the **binary** of a GBA game you can use different tools to **emulate** and **debug** it:
+Αν αποκτήσετε το **δυαδικό** ενός παιχνιδιού GBA, μπορείτε να χρησιμοποιήσετε διάφορα εργαλεία για να **εξομοιώσετε** και να **αποσφαλματώσετε** αυτό:
 
-- [**no$gba**](https://problemkaputt.de/gba.htm) (_Download the debug version_) - Contains a debugger with interface
-- [**mgba** ](https://mgba.io)- Contains a CLI debugger
-- [**gba-ghidra-loader**](https://github.com/pudii/gba-ghidra-loader) - Ghidra plugin
-- [**GhidraGBA**](https://github.com/SiD3W4y/GhidraGBA) - Ghidra plugin
+- [**no$gba**](https://problemkaputt.de/gba.htm) (_Κατεβάστε την έκδοση αποσφαλμάτωσης_) - Περιέχει έναν αποσφαλματωτή με διεπαφή
+- [**mgba** ](https://mgba.io)- Περιέχει έναν CLI αποσφαλματωτή
+- [**gba-ghidra-loader**](https://github.com/pudii/gba-ghidra-loader) - Plugin Ghidra
+- [**GhidraGBA**](https://github.com/SiD3W4y/GhidraGBA) - Plugin Ghidra
 
-In [**no$gba**](https://problemkaputt.de/gba.htm), in _**Options --> Emulation Setup --> Controls**_\*\* \*\* you can see how to press the Game Boy Advance **buttons**
+Στο [**no$gba**](https://problemkaputt.de/gba.htm), στο _**Options --> Emulation Setup --> Controls**_\*\* \*\* μπορείτε να δείτε πώς να πατήσετε τα κουμπιά του Game Boy Advance **buttons**
 
 ![](<../../images/image (581).png>)
 
-When pressed, each **key has a value** to identify it:
-
+Όταν πατηθούν, κάθε **κουμπί έχει μια τιμή** για να το αναγνωρίσει:
 ```
 A = 1
 B = 2
@@ -314,91 +299,84 @@ DOWN = 128
 R = 256
 L = 256
 ```
-
-So, in this kind of program, the interesting part will be **how the program treats the user input**. In the address **0x4000130** you will find the commonly found function: **KEYINPUT**.
+Έτσι, σε αυτό το είδος προγράμματος, το ενδιαφέρον μέρος θα είναι **πώς το πρόγραμμα επεξεργάζεται την είσοδο του χρήστη**. Στη διεύθυνση **0x4000130** θα βρείτε τη συνήθως συναντώμενη συνάρτηση: **KEYINPUT**.
 
 ![](<../../images/image (447).png>)
 
-In the previous image you can find that the function is called from **FUN_080015a8** (addresses: _0x080015fa_ and _0x080017ac_).
+Στην προηγούμενη εικόνα μπορείτε να δείτε ότι η συνάρτηση καλείται από **FUN_080015a8** (διευθύνσεις: _0x080015fa_ και _0x080017ac_).
 
-In that function, after some init operations (without any importance):
-
+Σε αυτή τη συνάρτηση, μετά από κάποιες αρχικές λειτουργίες (χωρίς καμία σημασία):
 ```c
 void FUN_080015a8(void)
 
 {
-  ushort uVar1;
-  undefined4 uVar2;
-  undefined4 uVar3;
-  ushort uVar4;
-  int iVar5;
-  ushort *puVar6;
-  undefined *local_2c;
+ushort uVar1;
+undefined4 uVar2;
+undefined4 uVar3;
+ushort uVar4;
+int iVar5;
+ushort *puVar6;
+undefined *local_2c;
 
-  DISPCNT = 0x1140;
-  FUN_08000a74();
-  FUN_08000ce4(1);
-  DISPCNT = 0x404;
-  FUN_08000dd0(&DAT_02009584,0x6000000,&DAT_030000dc);
-  FUN_08000354(&DAT_030000dc,0x3c);
-  uVar4 = DAT_030004d8;
+DISPCNT = 0x1140;
+FUN_08000a74();
+FUN_08000ce4(1);
+DISPCNT = 0x404;
+FUN_08000dd0(&DAT_02009584,0x6000000,&DAT_030000dc);
+FUN_08000354(&DAT_030000dc,0x3c);
+uVar4 = DAT_030004d8;
 ```
-
-It's found this code:
-
+Βρέθηκε αυτός ο κώδικας:
 ```c
-  do {
-    DAT_030004da = uVar4; //This is the last key pressed
-    DAT_030004d8 = KEYINPUT | 0xfc00;
-    puVar6 = &DAT_0200b03c;
-    uVar4 = DAT_030004d8;
-    do {
-      uVar2 = DAT_030004dc;
-      uVar1 = *puVar6;
-      if ((uVar1 & DAT_030004da & ~uVar4) != 0) {
+do {
+DAT_030004da = uVar4; //This is the last key pressed
+DAT_030004d8 = KEYINPUT | 0xfc00;
+puVar6 = &DAT_0200b03c;
+uVar4 = DAT_030004d8;
+do {
+uVar2 = DAT_030004dc;
+uVar1 = *puVar6;
+if ((uVar1 & DAT_030004da & ~uVar4) != 0) {
 ```
-
-The last if is checking **`uVar4`** is in the **last Keys** and not is the current key, also called letting go off a button (current key is stored in **`uVar1`**).
-
+Ο τελευταίος έλεγχος αν είναι **`uVar4`** στις **τελευταίες Κλειδιά** και όχι στην τρέχουσα κλειδί, που ονομάζεται επίσης απελευθέρωση ενός κουμπιού (η τρέχουσα κλειδί αποθηκεύεται στο **`uVar1`**).
 ```c
-        if (uVar1 == 4) {
-          DAT_030000d4 = 0;
-          uVar3 = FUN_08001c24(DAT_030004dc);
-          FUN_08001868(uVar2,0,uVar3);
-          DAT_05000000 = 0x1483;
-          FUN_08001844(&DAT_0200ba18);
-          FUN_08001844(&DAT_0200ba20,&DAT_0200ba40);
-          DAT_030000d8 = 0;
-          uVar4 = DAT_030004d8;
-        }
-        else {
-          if (uVar1 == 8) {
-            if (DAT_030000d8 == 0xf3) {
-              DISPCNT = 0x404;
-              FUN_08000dd0(&DAT_02008aac,0x6000000,&DAT_030000dc);
-              FUN_08000354(&DAT_030000dc,0x3c);
-              uVar4 = DAT_030004d8;
-            }
-          }
-          else {
-            if (DAT_030000d4 < 8) {
-              DAT_030000d4 = DAT_030000d4 + 1;
-              FUN_08000864();
-              if (uVar1 == 0x10) {
-                DAT_030000d8 = DAT_030000d8 + 0x3a;
+if (uVar1 == 4) {
+DAT_030000d4 = 0;
+uVar3 = FUN_08001c24(DAT_030004dc);
+FUN_08001868(uVar2,0,uVar3);
+DAT_05000000 = 0x1483;
+FUN_08001844(&DAT_0200ba18);
+FUN_08001844(&DAT_0200ba20,&DAT_0200ba40);
+DAT_030000d8 = 0;
+uVar4 = DAT_030004d8;
+}
+else {
+if (uVar1 == 8) {
+if (DAT_030000d8 == 0xf3) {
+DISPCNT = 0x404;
+FUN_08000dd0(&DAT_02008aac,0x6000000,&DAT_030000dc);
+FUN_08000354(&DAT_030000dc,0x3c);
+uVar4 = DAT_030004d8;
+}
+}
+else {
+if (DAT_030000d4 < 8) {
+DAT_030000d4 = DAT_030000d4 + 1;
+FUN_08000864();
+if (uVar1 == 0x10) {
+DAT_030000d8 = DAT_030000d8 + 0x3a;
 ```
+Στον προηγούμενο κώδικα μπορείτε να δείτε ότι συγκρίνουμε το **uVar1** (το σημείο όπου βρίσκεται η **τιμή του πατημένου κουμπιού**) με κάποιες τιμές:
 
-In the previous code you can see that we are comparing **uVar1** (the place where the **value of the pressed button** is) with some values:
+- Πρώτα, συγκρίνεται με την **τιμή 4** (**SELECT** κουμπί): Στην πρόκληση αυτό το κουμπί καθαρίζει την οθόνη
+- Στη συνέχεια, συγκρίνεται με την **τιμή 8** (**START** κουμπί): Στην πρόκληση αυτό ελέγχει αν ο κώδικας είναι έγκυρος για να πάρει τη σημαία.
+- Σε αυτή την περίπτωση, η μεταβλητή **`DAT_030000d8`** συγκρίνεται με 0xf3 και αν η τιμή είναι η ίδια εκτελείται κάποιος κώδικας.
+- Σε οποιαδήποτε άλλη περίπτωση, ελέγχεται κάποια cont (`DAT_030000d4`). Είναι μια cont γιατί προσθέτει 1 αμέσως μετά την είσοδο στον κώδικα.\
+**Α**ν είναι λιγότερο από 8, γίνεται κάτι που περιλαμβάνει **προσθήκη** τιμών στο \*\*`DAT_030000d8` \*\* (βασικά προσθέτει τις τιμές των πατημένων πλήκτρων σε αυτή τη μεταβλητή όσο η cont είναι λιγότερη από 8).
 
-- First, it's compared with the **value 4** (**SELECT** button): In the challenge this button clears the screen
-- Then, it's comparing it with the **value 8** (**START** button): In the challenge this checks is the code is valid to get the flag.
-  - In this case the var **`DAT_030000d8`** is compared with 0xf3 and if the value is the same some code is executed.
-- In any other cases, some cont (`DAT_030000d4`) is checked. It's a cont because it's adding 1 right after entering in the code.\
-  **I**f less than 8 something that involves **adding** values to \*\*`DAT_030000d8` \*\* is done (basically it's adding the values of the keys pressed in this variable as long as the cont is less than 8).
+Έτσι, σε αυτή την πρόκληση, γνωρίζοντας τις τιμές των κουμπιών, έπρεπε να **πατήσετε έναν συνδυασμό με μήκος μικρότερο από 8 ώστε η προκύπτουσα προσθήκη να είναι 0xf3.**
 
-So, in this challenge, knowing the values of the buttons, you needed to **press a combination with a length smaller than 8 that the resulting addition is 0xf3.**
-
-**Reference for this tutorial:** [**https://exp.codes/Nostalgia/**](https://exp.codes/Nostalgia/)
+**Αναφορά για αυτό το σεμινάριο:** [**https://exp.codes/Nostalgia/**](https://exp.codes/Nostalgia/)
 
 ## Game Boy
 
@@ -407,7 +385,6 @@ So, in this challenge, knowing the values of the buttons, you needed to **press 
 ## Courses
 
 - [https://github.com/0xZ0F/Z0FCourse_ReverseEngineering](https://github.com/0xZ0F/Z0FCourse_ReverseEngineering)
-- [https://github.com/malrev/ABD](https://github.com/malrev/ABD) (Binary deobfuscation)
+- [https://github.com/malrev/ABD](https://github.com/malrev/ABD) (Αποσυμπίεση δυαδικών)
 
 {{#include ../../banners/hacktricks-training.md}}
-

@@ -1,35 +1,31 @@
-# The Modbus Protocol 
+# Το Πρωτόκολλο Modbus
 
-## Introduction to Modbus Protocol 
+## Εισαγωγή στο Πρωτόκολλο Modbus
 
-The Modbus protocol is a widely used protocol in Industrial Automation and Control Systems. Modbus allows communication between various devices such as programmable logic controllers (PLCs), sensors, actuators, and other industrial devices. Understanding the Modbus Protocol is essential since this is the single most used communication protocol in the ICS and has a lot of potential attack surface for sniffing and even injecting commands into PLCs.
+Το πρωτόκολλο Modbus είναι ένα ευρέως χρησιμοποιούμενο πρωτόκολλο στην Βιομηχανική Αυτοματοποίηση και τα Συστήματα Ελέγχου. Το Modbus επιτρέπει την επικοινωνία μεταξύ διαφόρων συσκευών όπως προγραμματιζόμενοι λογικοί ελεγκτές (PLCs), αισθητήρες, ενεργοποιητές και άλλες βιομηχανικές συσκευές. Η κατανόηση του Πρωτοκόλλου Modbus είναι απαραίτητη, καθώς αυτό είναι το πιο χρησιμοποιούμενο πρωτόκολλο επικοινωνίας στα ICS και έχει μεγάλη επιφάνεια πιθανών επιθέσεων για υποκλοπή και ακόμη και εισαγωγή εντολών σε PLCs.
 
-Here, concepts are stated point-wise providing context of the protcol and it's nature of operation. The biggest challenge in ICS system security is the cost of implementation and upgradation. These protocols and standards where designed in the early 80s and 90s which are still widely used. Since an industry has a lot of devices and connections, upgrading devices is very difficult, which provides hackers with an edge of dealing with outdated protocols. Attacks on Modbus is like practically unevitable since it is going to be used without upgradation is it's operation is critical to the industry. 
+Εδώ, οι έννοιες αναφέρονται σημειωτικά παρέχοντας το πλαίσιο του πρωτοκόλλου και τη φύση της λειτουργίας του. Η μεγαλύτερη πρόκληση στην ασφάλεια των συστημάτων ICS είναι το κόστος υλοποίησης και αναβάθμισης. Αυτά τα πρωτόκολλα και τα πρότυπα σχεδιάστηκαν στις αρχές της δεκαετίας του '80 και του '90 και εξακολουθούν να χρησιμοποιούνται ευρέως. Δεδομένου ότι μια βιομηχανία έχει πολλές συσκευές και συνδέσεις, η αναβάθμιση των συσκευών είναι πολύ δύσκολη, γεγονός που παρέχει στους χάκερ πλεονέκτημα στην αντιμετώπιση παλαιών πρωτοκόλλων. Οι επιθέσεις στο Modbus είναι σχεδόν αναπόφευκτες, καθώς θα χρησιμοποιείται χωρίς αναβάθμιση και η λειτουργία του είναι κρίσιμη για τη βιομηχανία.
 
-## The Client-Server Architecture
+## Η Αρχιτεκτονική Πελάτη-Εξυπηρετητή
 
-Modbus Protocol is typically used as in Client Server Architecture where a master device (client) initiates communication with one or more slave devices (servers). This is also referred to as Master-Slave architecture, which is widely used in electronics and IoT with SPI, I2C, etc. 
+Το Πρωτόκολλο Modbus χρησιμοποιείται συνήθως σε Αρχιτεκτονική Πελάτη-Εξυπηρετητή όπου μια κύρια συσκευή (πελάτης) ξεκινά την επικοινωνία με μία ή περισσότερες δευτερεύουσες συσκευές (εξυπηρετητές). Αυτό αναφέρεται επίσης ως αρχιτεκτονική Master-Slave, η οποία χρησιμοποιείται ευρέως στην ηλεκτρονική και το IoT με SPI, I2C, κ.λπ.
 
-## Serial and Etherent Versions
+## Εκδόσεις Σειριακής και Ethernet
 
-Modbus Protocol is designed for both, Serial Communication as well as Ethernet Communications. The Serial Communication is widely used in legacy systems while modern devices support Ethernet which offers high data rates and is more suitable for modern industrial networks. 
+Το Πρωτόκολλο Modbus έχει σχεδιαστεί τόσο για Σειριακή Επικοινωνία όσο και για Επικοινωνίες Ethernet. Η Σειριακή Επικοινωνία χρησιμοποιείται ευρέως σε κληρονομημένα συστήματα, ενώ οι σύγχρονες συσκευές υποστηρίζουν Ethernet, το οποίο προσφέρει υψηλές ταχύτητες δεδομένων και είναι πιο κατάλληλο για σύγχρονα βιομηχανικά δίκτυα.
 
-## Data Representation 
+## Αναπαράσταση Δεδομένων
 
-Data is transmitted in Modbus protocol as ASCII or Binary, although the binary format is used due to it's compactibility with older devices. 
+Τα δεδομένα μεταδίδονται στο πρωτόκολλο Modbus ως ASCII ή Δυαδικά, αν και η δυαδική μορφή χρησιμοποιείται λόγω της συμβατότητάς της με παλαιότερες συσκευές.
 
-## Function Codes 
+## Κωδικοί Λειτουργιών
 
- ModBus Protocol works with transmission of specific function codes that are used to operate the PLCs and various control devices. This portion is important to undertstand since replay attacks can be done by retransmitting function codes. Legacy devices do not support any encryption towards data transmission and usually have long wires which connect them, which results to tampering of these wires and capturing/injected data. 
+Το Πρωτόκολλο ModBus λειτουργεί με τη μετάδοση συγκεκριμένων κωδικών λειτουργιών που χρησιμοποιούνται για τη λειτουργία των PLCs και διαφόρων συσκευών ελέγχου. Αυτή η ενότητα είναι σημαντική για την κατανόηση, καθώς οι επιθέσεις επανάληψης μπορούν να γίνουν με την επαναμετάδοση κωδικών λειτουργιών. Οι κληρονομημένες συσκευές δεν υποστηρίζουν καμία κρυπτογράφηση κατά τη μετάδοση δεδομένων και συνήθως έχουν μακριά καλώδια που τις συνδέουν, γεγονός που οδηγεί σε παραποίηση αυτών των καλωδίων και σύλληψη/εισαγωγή δεδομένων.
 
- ## Addressing of Modbus 
+## Διευθύνσεις Modbus
 
-Each device in the network has some unique address which is essential for communication between devices. Protocols like Modbus RTU, Modbus TCP, etc. are used to implement addressing and serves like a transport layer to the data transmission. The data that is transferred is in the Modbus protocol format that contains the message.
+Κάθε συσκευή στο δίκτυο έχει κάποια μοναδική διεύθυνση που είναι απαραίτητη για την επικοινωνία μεταξύ των συσκευών. Πρωτόκολλα όπως Modbus RTU, Modbus TCP, κ.λπ. χρησιμοποιούνται για την υλοποίηση διευθύνσεων και λειτουργούν ως επίπεδο μεταφοράς για τη μετάδοση δεδομένων. Τα δεδομένα που μεταφέρονται είναι σε μορφή πρωτοκόλλου Modbus που περιέχει το μήνυμα.
 
-Furthermore, Modbus also implements error checks to ensure the integrity of the transmitted data. But most of al, Modbus is a Open Standard and anyone can implement it in their devices. This made this protocol to go on global standard and it's widespread in the industrial automation industry. 
+Επιπλέον, το Modbus εφαρμόζει επίσης ελέγχους σφαλμάτων για να διασφαλίσει την ακεραιότητα των μεταδιδόμενων δεδομένων. Αλλά το πιο σημαντικό, το Modbus είναι ένα Ανοιχτό Πρότυπο και ο καθένας μπορεί να το εφαρμόσει στις συσκευές του. Αυτό έκανε το πρωτόκολλο αυτό να γίνει παγκόσμιο πρότυπο και είναι ευρέως διαδεδομένο στη βιομηχανία αυτοματοποίησης.
 
-Due to it's large scale use and lack of upgradations, attacking Modbus provides a significant advantage with it's attack surface. ICS is highly dependent on communication between devices and any attacks made on them can be dangerous for the operation of the industrial systems. Attacks like replay, data injection, data sniffing and leaking, Denial of Service, data forgery, etc. can be carried out if the medium of transmission is identified by the attacker. 
-
-
-
-
+Λόγω της εκτενούς χρήσης του και της έλλειψης αναβαθμίσεων, η επίθεση στο Modbus παρέχει σημαντικό πλεονέκτημα με την επιφάνεια επίθεσής του. Το ICS εξαρτάται σε μεγάλο βαθμό από την επικοινωνία μεταξύ των συσκευών και οποιαδήποτε επίθεση σε αυτές μπορεί να είναι επικίνδυνη για τη λειτουργία των βιομηχανικών συστημάτων. Επιθέσεις όπως επανάληψη, εισαγωγή δεδομένων, υποκλοπή δεδομένων και διαρροή, Άρνηση Υπηρεσίας, πλαστογράφηση δεδομένων, κ.λπ. μπορούν να πραγματοποιηθούν εάν το μέσο μετάδοσης αναγνωριστεί από τον επιτιθέμενο.

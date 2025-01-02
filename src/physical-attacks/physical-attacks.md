@@ -1,58 +1,57 @@
-# Physical Attacks
+# Φυσικές Επιθέσεις
 
 {{#include ../banners/hacktricks-training.md}}
 
-## BIOS Password Recovery and System Security
+## Ανάκτηση Κωδικού BIOS και Ασφάλεια Συστήματος
 
-**Resetting the BIOS** can be achieved in several ways. Most motherboards include a **battery** that, when removed for around **30 minutes**, will reset the BIOS settings, including the password. Alternatively, a **jumper on the motherboard** can be adjusted to reset these settings by connecting specific pins.
+**Επαναφορά του BIOS** μπορεί να επιτευχθεί με διάφορους τρόπους. Οι περισσότερες μητρικές πλακέτες περιλαμβάνουν μια **μπαταρία** που, όταν αφαιρεθεί για περίπου **30 λεπτά**, θα επαναφέρει τις ρυθμίσεις του BIOS, συμπεριλαμβανομένου του κωδικού πρόσβασης. Εναλλακτικά, μπορεί να ρυθμιστεί ένα **jumper στη μητρική πλακέτα** για να επαναφέρει αυτές τις ρυθμίσεις συνδέοντας συγκεκριμένες ακίδες.
 
-For situations where hardware adjustments are not possible or practical, **software tools** offer a solution. Running a system from a **Live CD/USB** with distributions like **Kali Linux** provides access to tools like **_killCmos_** and **_CmosPWD_**, which can assist in BIOS password recovery.
+Για καταστάσεις όπου οι υλικές ρυθμίσεις δεν είναι δυνατές ή πρακτικές, τα **εργαλεία λογισμικού** προσφέρουν μια λύση. Η εκτέλεση ενός συστήματος από ένα **Live CD/USB** με διανομές όπως το **Kali Linux** παρέχει πρόσβαση σε εργαλεία όπως το **_killCmos_** και το **_CmosPWD_**, τα οποία μπορούν να βοηθήσουν στην ανάκτηση του κωδικού BIOS.
 
-In cases where the BIOS password is unknown, entering it incorrectly **three times** will typically result in an error code. This code can be used on websites like [https://bios-pw.org](https://bios-pw.org) to potentially retrieve a usable password.
+Σε περιπτώσεις όπου ο κωδικός BIOS είναι άγνωστος, η λανθασμένη εισαγωγή του **τρεις φορές** θα έχει συνήθως ως αποτέλεσμα έναν κωδικό σφάλματος. Αυτός ο κωδικός μπορεί να χρησιμοποιηθεί σε ιστοσελίδες όπως το [https://bios-pw.org](https://bios-pw.org) για να ανακτηθεί πιθανώς ένας χρήσιμος κωδικός.
 
-### UEFI Security
+### Ασφάλεια UEFI
 
-For modern systems using **UEFI** instead of traditional BIOS, the tool **chipsec** can be utilized to analyze and modify UEFI settings, including the disabling of **Secure Boot**. This can be accomplished with the following command:
+Για σύγχρονα συστήματα που χρησιμοποιούν **UEFI** αντί για παραδοσιακό BIOS, το εργαλείο **chipsec** μπορεί να χρησιμοποιηθεί για την ανάλυση και την τροποποίηση ρυθμίσεων UEFI, συμπεριλαμβανομένης της απενεργοποίησης του **Secure Boot**. Αυτό μπορεί να επιτευχθεί με την ακόλουθη εντολή:
 
 `python chipsec_main.py -module exploits.secure.boot.pk`
 
-### RAM Analysis and Cold Boot Attacks
+### Ανάλυση RAM και Επιθέσεις Ψυχρού Εκκίνησης
 
-RAM retains data briefly after power is cut, usually for **1 to 2 minutes**. This persistence can be extended to **10 minutes** by applying cold substances, such as liquid nitrogen. During this extended period, a **memory dump** can be created using tools like **dd.exe** and **volatility** for analysis.
+Η RAM διατηρεί δεδομένα για λίγο μετά την διακοπή ρεύματος, συνήθως για **1 έως 2 λεπτά**. Αυτή η επιμονή μπορεί να παραταθεί σε **10 λεπτά** με την εφαρμογή ψυχρών ουσιών, όπως το υγρό άζωτο. Κατά τη διάρκεια αυτής της παρατεταμένης περιόδου, μπορεί να δημιουργηθεί ένα **memory dump** χρησιμοποιώντας εργαλεία όπως το **dd.exe** και το **volatility** για ανάλυση.
 
-### Direct Memory Access (DMA) Attacks
+### Επιθέσεις Άμεσης Πρόσβασης Μνήμης (DMA)
 
-**INCEPTION** is a tool designed for **physical memory manipulation** through DMA, compatible with interfaces like **FireWire** and **Thunderbolt**. It allows for bypassing login procedures by patching memory to accept any password. However, it's ineffective against **Windows 10** systems.
+**INCEPTION** είναι ένα εργαλείο σχεδιασμένο για **φυσική χειραγώγηση μνήμης** μέσω DMA, συμβατό με διεπαφές όπως το **FireWire** και το **Thunderbolt**. Επιτρέπει την παράκαμψη διαδικασιών σύνδεσης με την επιδιόρθωση της μνήμης για να αποδεχτεί οποιονδήποτε κωδικό πρόσβασης. Ωστόσο, είναι αναποτελεσματικό κατά των συστημάτων **Windows 10**.
 
-### Live CD/USB for System Access
+### Live CD/USB για Πρόσβαση στο Σύστημα
 
-Changing system binaries like **_sethc.exe_** or **_Utilman.exe_** with a copy of **_cmd.exe_** can provide a command prompt with system privileges. Tools such as **chntpw** can be used to edit the **SAM** file of a Windows installation, allowing password changes.
+Η αλλαγή συστημικών δυαδικών αρχείων όπως το **_sethc.exe_** ή το **_Utilman.exe_** με ένα αντίγραφο του **_cmd.exe_** μπορεί να παρέχει μια γραμμή εντολών με δικαιώματα συστήματος. Εργαλεία όπως το **chntpw** μπορούν να χρησιμοποιηθούν για την επεξεργασία του αρχείου **SAM** μιας εγκατάστασης Windows, επιτρέποντας αλλαγές κωδικών πρόσβασης.
 
-**Kon-Boot** is a tool that facilitates logging into Windows systems without knowing the password by temporarily modifying the Windows kernel or UEFI. More information can be found at [https://www.raymond.cc](https://www.raymond.cc/blog/login-to-windows-administrator-and-linux-root-account-without-knowing-or-changing-current-password/).
+**Kon-Boot** είναι ένα εργαλείο που διευκολύνει την είσοδο σε συστήματα Windows χωρίς να γνωρίζετε τον κωδικό πρόσβασης, τροποποιώντας προσωρινά τον πυρήνα των Windows ή το UEFI. Περισσότερες πληροφορίες μπορείτε να βρείτε στο [https://www.raymond.cc](https://www.raymond.cc/blog/login-to-windows-administrator-and-linux-root-account-without-knowing-or-changing-current-password/).
 
-### Handling Windows Security Features
+### Διαχείριση Χαρακτηριστικών Ασφαλείας των Windows
 
-#### Boot and Recovery Shortcuts
+#### Συντομεύσεις Εκκίνησης και Ανάκτησης
 
-- **Supr**: Access BIOS settings.
-- **F8**: Enter Recovery mode.
-- Pressing **Shift** after the Windows banner can bypass autologon.
+- **Supr**: Πρόσβαση στις ρυθμίσεις BIOS.
+- **F8**: Είσοδος σε λειτουργία Ανάκτησης.
+- Πατώντας **Shift** μετά την μπάνερ των Windows μπορεί να παρακαμφθεί η αυτόματη σύνδεση.
 
-#### BAD USB Devices
+#### Συσκευές BAD USB
 
-Devices like **Rubber Ducky** and **Teensyduino** serve as platforms for creating **bad USB** devices, capable of executing predefined payloads when connected to a target computer.
+Συσκευές όπως το **Rubber Ducky** και το **Teensyduino** χρησιμεύουν ως πλατφόρμες για τη δημιουργία **bad USB** συσκευών, ικανών να εκτελούν προκαθορισμένα payloads όταν συνδεθούν σε έναν υπολογιστή-στόχο.
 
-#### Volume Shadow Copy
+#### Αντίγραφο Σκιάς Όγκου
 
-Administrator privileges allow for the creation of copies of sensitive files, including the **SAM** file, through PowerShell.
+Δικαιώματα διαχειριστή επιτρέπουν τη δημιουργία αντιγράφων ευαίσθητων αρχείων, συμπεριλαμβανομένου του αρχείου **SAM**, μέσω του PowerShell.
 
-### Bypassing BitLocker Encryption
+### Παράκαμψη Κρυπτογράφησης BitLocker
 
-BitLocker encryption can potentially be bypassed if the **recovery password** is found within a memory dump file (**MEMORY.DMP**). Tools like **Elcomsoft Forensic Disk Decryptor** or **Passware Kit Forensic** can be utilized for this purpose.
+Η κρυπτογράφηση BitLocker μπορεί ενδεχομένως να παρακαμφθεί αν ο **κωδικός ανάκτησης** βρεθεί μέσα σε ένα αρχείο memory dump (**MEMORY.DMP**). Εργαλεία όπως το **Elcomsoft Forensic Disk Decryptor** ή το **Passware Kit Forensic** μπορούν να χρησιμοποιηθούν για αυτό το σκοπό.
 
-### Social Engineering for Recovery Key Addition
+### Κοινωνική Μηχανική για Προσθήκη Κωδικού Ανάκτησης
 
-A new BitLocker recovery key can be added through social engineering tactics, convincing a user to execute a command that adds a new recovery key composed of zeros, thereby simplifying the decryption process.
+Ένας νέος κωδικός ανάκτησης BitLocker μπορεί να προστεθεί μέσω τακτικών κοινωνικής μηχανικής, πείθοντας έναν χρήστη να εκτελέσει μια εντολή που προσθέτει έναν νέο κωδικό ανάκτησης που αποτελείται από μηδενικά, απλοποιώντας έτσι τη διαδικασία αποκρυπτογράφησης.
 
 {{#include ../banners/hacktricks-training.md}}
-

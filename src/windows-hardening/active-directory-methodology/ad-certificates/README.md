@@ -2,111 +2,106 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Introduction
+## Εισαγωγή
 
-### Components of a Certificate
+### Συστατικά ενός Πιστοποιητικού
 
-- The **Subject** of the certificate denotes its owner.
-- A **Public Key** is paired with a privately held key to link the certificate to its rightful owner.
-- The **Validity Period**, defined by **NotBefore** and **NotAfter** dates, marks the certificate's effective duration.
-- A unique **Serial Number**, provided by the Certificate Authority (CA), identifies each certificate.
-- The **Issuer** refers to the CA that has issued the certificate.
-- **SubjectAlternativeName** allows for additional names for the subject, enhancing identification flexibility.
-- **Basic Constraints** identify if the certificate is for a CA or an end entity and define usage restrictions.
-- **Extended Key Usages (EKUs)** delineate the certificate's specific purposes, like code signing or email encryption, through Object Identifiers (OIDs).
-- The **Signature Algorithm** specifies the method for signing the certificate.
-- The **Signature**, created with the issuer's private key, guarantees the certificate's authenticity.
+- Ο **Θέμα** του πιστοποιητικού δηλώνει τον κάτοχό του.
+- Ένα **Δημόσιο Κλειδί** συνδυάζεται με ένα ιδιωτικά διατηρούμενο κλειδί για να συνδέσει το πιστοποιητικό με τον νόμιμο κάτοχό του.
+- Η **Περίοδος Ικανότητας**, που καθορίζεται από τις ημερομηνίες **NotBefore** και **NotAfter**, σηματοδοτεί τη διάρκεια ισχύος του πιστοποιητικού.
+- Ένας μοναδικός **Αριθμός Σειράς**, που παρέχεται από την Αρχή Πιστοποίησης (CA), προσδιορίζει κάθε πιστοποιητικό.
+- Ο **Εκδότης** αναφέρεται στην CA που έχει εκδώσει το πιστοποιητικό.
+- **SubjectAlternativeName** επιτρέπει πρόσθετα ονόματα για το θέμα, ενισχύοντας την ευελιξία αναγνώρισης.
+- **Basic Constraints** προσδιορίζουν αν το πιστοποιητικό είναι για μια CA ή μια τελική οντότητα και καθορίζουν περιορισμούς χρήσης.
+- **Extended Key Usages (EKUs)** καθορίζουν τους συγκεκριμένους σκοπούς του πιστοποιητικού, όπως η υπογραφή κώδικα ή η κρυπτογράφηση email, μέσω Αναγνωριστών Αντικειμένων (OIDs).
+- Ο **Αλγόριθμος Υπογραφής** προσδιορίζει τη μέθοδο υπογραφής του πιστοποιητικού.
+- Η **Υπογραφή**, που δημιουργείται με το ιδιωτικό κλειδί του εκδότη, εγγυάται την αυθεντικότητα του πιστοποιητικού.
 
-### Special Considerations
+### Ειδικές Σκέψεις
 
-- **Subject Alternative Names (SANs)** expand a certificate's applicability to multiple identities, crucial for servers with multiple domains. Secure issuance processes are vital to avoid impersonation risks by attackers manipulating the SAN specification.
+- **Subject Alternative Names (SANs)** επεκτείνουν την εφαρμογή ενός πιστοποιητικού σε πολλές ταυτότητες, κρίσιμο για διακομιστές με πολλαπλά domains. Οι ασφαλείς διαδικασίες έκδοσης είναι ζωτικής σημασίας για την αποφυγή κινδύνων προσποίησης από επιτιθέμενους που χειρίζονται την προδιαγραφή SAN.
 
-### Certificate Authorities (CAs) in Active Directory (AD)
+### Αρχές Πιστοποίησης (CAs) στο Active Directory (AD)
 
-AD CS acknowledges CA certificates in an AD forest through designated containers, each serving unique roles:
+Η AD CS αναγνωρίζει τα πιστοποιητικά CA σε ένα δάσος AD μέσω καθορισμένων κοντέινερ, το καθένα εξυπηρετεί μοναδικούς ρόλους:
 
-- **Certification Authorities** container holds trusted root CA certificates.
-- **Enrolment Services** container details Enterprise CAs and their certificate templates.
-- **NTAuthCertificates** object includes CA certificates authorized for AD authentication.
-- **AIA (Authority Information Access)** container facilitates certificate chain validation with intermediate and cross CA certificates.
+- Το κοντέινερ **Certification Authorities** περιέχει αξιόπιστα πιστοποιητικά ρίζας CA.
+- Το κοντέινερ **Enrolment Services** περιγράφει τις Enterprise CAs και τα πρότυπα πιστοποιητικών τους.
+- Το αντικείμενο **NTAuthCertificates** περιλαμβάνει πιστοποιητικά CA που έχουν εξουσιοδοτηθεί για την αυθεντικοποίηση AD.
+- Το κοντέινερ **AIA (Authority Information Access)** διευκολύνει την επικύρωση της αλυσίδας πιστοποιητικών με ενδιάμεσα και διασταυρούμενα πιστοποιητικά CA.
 
-### Certificate Acquisition: Client Certificate Request Flow
+### Απόκτηση Πιστοποιητικού: Ροή Αίτησης Πιστοποιητικού Πελάτη
 
-1. The request process begins with clients finding an Enterprise CA.
-2. A CSR is created, containing a public key and other details, after generating a public-private key pair.
-3. The CA assesses the CSR against available certificate templates, issuing the certificate based on the template's permissions.
-4. Upon approval, the CA signs the certificate with its private key and returns it to the client.
+1. Η διαδικασία αίτησης ξεκινά με τους πελάτες να βρίσκουν μια Enterprise CA.
+2. Δημιουργείται μια CSR, που περιέχει ένα δημόσιο κλειδί και άλλες λεπτομέρειες, μετά τη δημιουργία ενός ζεύγους δημόσιου-ιδιωτικού κλειδιού.
+3. Η CA αξιολογεί την CSR σε σχέση με τα διαθέσιμα πρότυπα πιστοποιητικών, εκδίδοντας το πιστοποιητικό με βάση τα δικαιώματα του προτύπου.
+4. Μετά την έγκριση, η CA υπογράφει το πιστοποιητικό με το ιδιωτικό της κλειδί και το επιστρέφει στον πελάτη.
 
-### Certificate Templates
+### Πρότυπα Πιστοποιητικών
 
-Defined within AD, these templates outline the settings and permissions for issuing certificates, including permitted EKUs and enrollment or modification rights, critical for managing access to certificate services.
+Ορισμένα εντός του AD, αυτά τα πρότυπα περιγράφουν τις ρυθμίσεις και τα δικαιώματα για την έκδοση πιστοποιητικών, συμπεριλαμβανομένων των επιτρεπόμενων EKUs και δικαιωμάτων εγγραφής ή τροποποίησης, κρίσιμα για τη διαχείριση της πρόσβασης στις υπηρεσίες πιστοποιητικών.
 
-## Certificate Enrollment
+## Εγγραφή Πιστοποιητικού
 
-The enrollment process for certificates is initiated by an administrator who **creates a certificate template**, which is then **published** by an Enterprise Certificate Authority (CA). This makes the template available for client enrollment, a step achieved by adding the template's name to the `certificatetemplates` field of an Active Directory object.
+Η διαδικασία εγγραφής για πιστοποιητικά ξεκινά από έναν διαχειριστή που **δημιουργεί ένα πρότυπο πιστοποιητικού**, το οποίο στη συνέχεια **δημοσιεύεται** από μια Enterprise Certificate Authority (CA). Αυτό καθιστά το πρότυπο διαθέσιμο για εγγραφή πελατών, ένα βήμα που επιτυγχάνεται προσθέτοντας το όνομα του προτύπου στο πεδίο `certificatetemplates` ενός αντικειμένου Active Directory.
 
-For a client to request a certificate, **enrollment rights** must be granted. These rights are defined by security descriptors on the certificate template and the Enterprise CA itself. Permissions must be granted in both locations for a request to be successful.
+Για να ζητήσει ένας πελάτης ένα πιστοποιητικό, πρέπει να παραχωρηθούν **δικαιώματα εγγραφής**. Αυτά τα δικαιώματα καθορίζονται από τους περιγραφείς ασφαλείας στο πρότυπο πιστοποιητικού και την ίδια την Enterprise CA. Τα δικαιώματα πρέπει να παραχωρούνται και στις δύο τοποθεσίες για να είναι επιτυχής μια αίτηση.
 
-### Template Enrollment Rights
+### Δικαιώματα Εγγραφής Προτύπου
 
-These rights are specified through Access Control Entries (ACEs), detailing permissions like:
+Αυτά τα δικαιώματα καθορίζονται μέσω Εισόδων Ελέγχου Πρόσβασης (ACEs), που περιγράφουν δικαιώματα όπως:
 
-- **Certificate-Enrollment** and **Certificate-AutoEnrollment** rights, each associated with specific GUIDs.
-- **ExtendedRights**, allowing all extended permissions.
-- **FullControl/GenericAll**, providing complete control over the template.
+- Δικαιώματα **Certificate-Enrollment** και **Certificate-AutoEnrollment**, το καθένα συνδεδεμένο με συγκεκριμένα GUIDs.
+- **ExtendedRights**, επιτρέποντας όλες τις επεκταμένες άδειες.
+- **FullControl/GenericAll**, παρέχοντας πλήρη έλεγχο πάνω στο πρότυπο.
 
-### Enterprise CA Enrollment Rights
+### Δικαιώματα Εγγραφής Enterprise CA
 
-The CA's rights are outlined in its security descriptor, accessible via the Certificate Authority management console. Some settings even allow low-privileged users remote access, which could be a security concern.
+Τα δικαιώματα της CA περιγράφονται στον περιγραφέα ασφαλείας της, προσβάσιμο μέσω της κονσόλας διαχείρισης Αρχής Πιστοποίησης. Ορισμένες ρυθμίσεις επιτρέπουν ακόμη και σε χρήστες με χαμηλά προνόμια απομακρυσμένη πρόσβαση, γεγονός που θα μπορούσε να είναι ανησυχητικό για την ασφάλεια.
 
-### Additional Issuance Controls
+### Πρόσθετοι Έλεγχοι Έκδοσης
 
-Certain controls may apply, such as:
+Ορισμένοι έλεγχοι μπορεί να ισχύουν, όπως:
 
-- **Manager Approval**: Places requests in a pending state until approved by a certificate manager.
-- **Enrolment Agents and Authorized Signatures**: Specify the number of required signatures on a CSR and the necessary Application Policy OIDs.
+- **Έγκριση Διαχειριστή**: Τοποθετεί τις αιτήσεις σε εκκρεμή κατάσταση μέχρι να εγκριθούν από έναν διαχειριστή πιστοποιητικών.
+- **Πράκτορες Εγγραφής και Εξουσιοδοτημένες Υπογραφές**: Προσδιορίζουν τον αριθμό των απαιτούμενων υπογραφών σε μια CSR και τις απαραίτητες Πολιτικές Εφαρμογής OIDs.
 
-### Methods to Request Certificates
+### Μέθοδοι Αίτησης Πιστοποιητικών
 
-Certificates can be requested through:
+Τα πιστοποιητικά μπορούν να ζητηθούν μέσω:
 
-1. **Windows Client Certificate Enrollment Protocol** (MS-WCCE), using DCOM interfaces.
-2. **ICertPassage Remote Protocol** (MS-ICPR), through named pipes or TCP/IP.
-3. The **certificate enrollment web interface**, with the Certificate Authority Web Enrollment role installed.
-4. The **Certificate Enrollment Service** (CES), in conjunction with the Certificate Enrollment Policy (CEP) service.
-5. The **Network Device Enrollment Service** (NDES) for network devices, using the Simple Certificate Enrollment Protocol (SCEP).
+1. **Windows Client Certificate Enrollment Protocol** (MS-WCCE), χρησιμοποιώντας διεπαφές DCOM.
+2. **ICertPassage Remote Protocol** (MS-ICPR), μέσω ονομάτων σωλήνων ή TCP/IP.
+3. Της **διαδικτυακής διεπαφής εγγραφής πιστοποιητικών**, με τον ρόλο Web Enrollment της Αρχής Πιστοποίησης εγκατεστημένο.
+4. Της **Υπηρεσίας Εγγραφής Πιστοποιητικών** (CES), σε συνδυασμό με την Υπηρεσία Πολιτικής Εγγραφής Πιστοποιητικών (CEP).
+5. Της **Υπηρεσίας Εγγραφής Συσκευών Δικτύου** (NDES) για συσκευές δικτύου, χρησιμοποιώντας το Πρωτόκολλο Απλής Εγγραφής Πιστοποιητικών (SCEP).
 
-Windows users can also request certificates via the GUI (`certmgr.msc` or `certlm.msc`) or command-line tools (`certreq.exe` or PowerShell's `Get-Certificate` command).
-
+Οι χρήστες Windows μπορούν επίσης να ζητήσουν πιστοποιητικά μέσω της GUI (`certmgr.msc` ή `certlm.msc`) ή εργαλείων γραμμής εντολών (`certreq.exe` ή της εντολής `Get-Certificate` του PowerShell).
 ```powershell
 # Example of requesting a certificate using PowerShell
 Get-Certificate -Template "User" -CertStoreLocation "cert:\\CurrentUser\\My"
 ```
+## Πιστοποίηση Πιστοποιητικού
 
-## Certificate Authentication
+Το Active Directory (AD) υποστηρίζει την πιστοποίηση μέσω πιστοποιητικού, κυρίως χρησιμοποιώντας τα πρωτόκολλα **Kerberos** και **Secure Channel (Schannel)**.
 
-Active Directory (AD) supports certificate authentication, primarily utilizing **Kerberos** and **Secure Channel (Schannel)** protocols.
+### Διαδικασία Πιστοποίησης Kerberos
 
-### Kerberos Authentication Process
-
-In the Kerberos authentication process, a user's request for a Ticket Granting Ticket (TGT) is signed using the **private key** of the user's certificate. This request undergoes several validations by the domain controller, including the certificate's **validity**, **path**, and **revocation status**. Validations also include verifying that the certificate comes from a trusted source and confirming the issuer's presence in the **NTAUTH certificate store**. Successful validations result in the issuance of a TGT. The **`NTAuthCertificates`** object in AD, found at:
-
+Στη διαδικασία πιστοποίησης Kerberos, το αίτημα ενός χρήστη για ένα Ticket Granting Ticket (TGT) υπογράφεται χρησιμοποιώντας το **ιδιωτικό κλειδί** του πιστοποιητικού του χρήστη. Αυτό το αίτημα υποβάλλεται σε πολλές επικυρώσεις από τον ελεγκτή τομέα, συμπεριλαμβανομένης της **έγκυρης** κατάστασης του πιστοποιητικού, της **διαδρομής** και της **κατάστασης ανάκλησης**. Οι επικυρώσεις περιλαμβάνουν επίσης την επαλήθευση ότι το πιστοποιητικό προέρχεται από μια αξιόπιστη πηγή και την επιβεβαίωση της παρουσίας του εκδότη στο **κατάστημα πιστοποιητικών NTAUTH**. Οι επιτυχείς επικυρώσεις οδηγούν στην έκδοση ενός TGT. Το αντικείμενο **`NTAuthCertificates`** στο AD, που βρίσκεται στο:
 ```bash
 CN=NTAuthCertificates,CN=Public Key Services,CN=Services,CN=Configuration,DC=<domain>,DC=<com>
 ```
-
-is central to establishing trust for certificate authentication.
+είναι κεντρικό για την establishment εμπιστοσύνης για την πιστοποίηση μέσω πιστοποιητικών.
 
 ### Secure Channel (Schannel) Authentication
 
-Schannel facilitates secure TLS/SSL connections, where during a handshake, the client presents a certificate that, if successfully validated, authorizes access. The mapping of a certificate to an AD account may involve Kerberos’s **S4U2Self** function or the certificate’s **Subject Alternative Name (SAN)**, among other methods.
+Το Schannel διευκολύνει ασφαλείς συνδέσεις TLS/SSL, όπου κατά τη διάρκεια ενός handshake, ο πελάτης παρουσιάζει ένα πιστοποιητικό που, αν επικυρωθεί επιτυχώς, εξουσιοδοτεί την πρόσβαση. Η αντιστοίχιση ενός πιστοποιητικού σε έναν λογαριασμό AD μπορεί να περιλαμβάνει τη λειτουργία **S4U2Self** του Kerberos ή το **Subject Alternative Name (SAN)** του πιστοποιητικού, μεταξύ άλλων μεθόδων.
 
 ### AD Certificate Services Enumeration
 
-AD's certificate services can be enumerated through LDAP queries, revealing information about **Enterprise Certificate Authorities (CAs)** and their configurations. This is accessible by any domain-authenticated user without special privileges. Tools like **[Certify](https://github.com/GhostPack/Certify)** and **[Certipy](https://github.com/ly4k/Certipy)** are used for enumeration and vulnerability assessment in AD CS environments.
+Οι υπηρεσίες πιστοποιητικών του AD μπορούν να καταμετρηθούν μέσω LDAP queries, αποκαλύπτοντας πληροφορίες σχετικά με **Enterprise Certificate Authorities (CAs)** και τις ρυθμίσεις τους. Αυτό είναι προσβάσιμο από οποιονδήποτε χρήστη που έχει πιστοποίηση τομέα χωρίς ειδικά προνόμια. Εργαλεία όπως **[Certify](https://github.com/GhostPack/Certify)** και **[Certipy](https://github.com/ly4k/Certipy)** χρησιμοποιούνται για την καταμέτρηση και την αξιολόγηση ευπαθειών σε περιβάλλοντα AD CS.
 
-Commands for using these tools include:
-
+Οι εντολές για τη χρήση αυτών των εργαλείων περιλαμβάνουν:
 ```bash
 # Enumerate trusted root CA certificates and Enterprise CAs with Certify
 Certify.exe cas
@@ -120,11 +115,9 @@ certipy find -vulnerable -u john@corp.local -p Passw0rd -dc-ip 172.16.126.128
 certutil.exe -TCAInfo
 certutil -v -dstemplate
 ```
-
-## References
+## Αναφορές
 
 - [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)
 - [https://comodosslstore.com/blog/what-is-ssl-tls-client-authentication-how-does-it-work.html](https://comodosslstore.com/blog/what-is-ssl-tls-client-authentication-how-does-it-work.html)
 
 {{#include ../../../banners/hacktricks-training.md}}
-

@@ -1,36 +1,35 @@
-# Other Web Tricks
+# Άλλες Τεχνικές Ιστού
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Host header
+### Κεφαλίδα Host
 
-Several times the back-end trust the **Host header** to perform some actions. For example, it could use its value as the **domain to send a password reset**. So when you receive an email with a link to reset your password, the domain being used is the one you put in the Host header.Then, you can request the password reset of other users and change the domain to one controlled by you to steal their password reset codes. [WriteUp](https://medium.com/nassec-cybersecurity-writeups/how-i-was-able-to-take-over-any-users-account-with-host-header-injection-546fff6d0f2).
+Πολλές φορές το back-end εμπιστεύεται την **κεφαλίδα Host** για να εκτελέσει κάποιες ενέργειες. Για παράδειγμα, μπορεί να χρησιμοποιήσει την τιμή της ως το **domain για να στείλει μια επαναφορά κωδικού πρόσβασης**. Έτσι, όταν λάβετε ένα email με έναν σύνδεσμο για να επαναφέρετε τον κωδικό σας, το domain που χρησιμοποιείται είναι αυτό που βάλατε στην κεφαλίδα Host. Στη συνέχεια, μπορείτε να ζητήσετε την επαναφορά κωδικού πρόσβασης άλλων χρηστών και να αλλάξετε το domain σε ένα που ελέγχετε εσείς για να κλέψετε τους κωδικούς επαναφοράς τους. [WriteUp](https://medium.com/nassec-cybersecurity-writeups/how-i-was-able-to-take-over-any-users-account-with-host-header-injection-546fff6d0f2).
 
 > [!WARNING]
-> Note that it's possible that you don't even need to wait for the user to click on the reset password link to get the token, as maybe even **spam filters or other intermediary devices/bots will click on it to analyze it**.
+> Σημειώστε ότι είναι πιθανό να μην χρειαστεί καν να περιμένετε τον χρήστη να κάνει κλικ στον σύνδεσμο επαναφοράς κωδικού πρόσβασης για να αποκτήσετε το token, καθώς ίσως ακόμη και **τα φίλτρα spam ή άλλες ενδιάμεσες συσκευές/bots να κάνουν κλικ σε αυτό για να το αναλύσουν**.
 
-### Session booleans
+### Boolean συνεδρίας
 
-Some times when you complete some verification correctly the back-end will **just add a boolean with the value "True" to a security attribute your session**. Then, a different endpoint will know if you successfully passed that check.\
-However, if you **pass the check** and your sessions is granted that "True" value in the security attribute, you can try to **access other resources** that **depends on the same attribute** but that you **shouldn't have permissions** to access. [WriteUp](https://medium.com/@ozguralp/a-less-known-attack-vector-second-order-idor-attacks-14468009781a).
+Ορισμένες φορές, όταν ολοκληρώνετε σωστά κάποια επαλήθευση, το back-end θα **προσθέσει απλώς ένα boolean με την τιμή "True" σε ένα χαρακτηριστικό ασφαλείας της συνεδρίας σας**. Στη συνέχεια, ένα διαφορετικό endpoint θα γνωρίζει αν περάσατε επιτυχώς αυτή την επαλήθευση.\
+Ωστόσο, αν **περάσετε την επαλήθευση** και η συνεδρία σας αποκτήσει αυτή την τιμή "True" στο χαρακτηριστικό ασφαλείας, μπορείτε να προσπαθήσετε να **πρόσβαση σε άλλους πόρους** που **εξαρτώνται από το ίδιο χαρακτηριστικό** αλλά που **δεν θα έπρεπε να έχετε άδειες** για πρόσβαση. [WriteUp](https://medium.com/@ozguralp/a-less-known-attack-vector-second-order-idor-attacks-14468009781a).
 
-### Register functionality
+### Λειτουργία εγγραφής
 
-Try to register as an already existent user. Try also using equivalent characters (dots, lots of spaces and Unicode).
+Δοκιμάστε να εγγραφείτε ως ήδη υπάρχων χρήστης. Δοκιμάστε επίσης να χρησιμοποιήσετε ισοδύναμους χαρακτήρες (τελείες, πολλές κενές θέσεις και Unicode).
 
-### Takeover emails
+### Κατάληψη email
 
-Register an email, before confirming it change the email, then, if the new confirmation email is sent to the first registered email,you can takeover any email. Or if you can enable the second email confirming the firt one, you can also takeover any account.
+Εγγραφείτε σε ένα email, πριν το επιβεβαιώσετε αλλάξτε το email, στη συνέχεια, αν το νέο email επιβεβαίωσης σταλεί στο πρώτο εγγεγραμμένο email, μπορείτε να καταλάβετε οποιοδήποτε email. Ή αν μπορείτε να ενεργοποιήσετε το δεύτερο email επιβεβαιώνοντας το πρώτο, μπορείτε επίσης να καταλάβετε οποιονδήποτε λογαριασμό.
 
-### Access Internal servicedesk of companies using atlassian
+### Πρόσβαση στο Εσωτερικό servicedesk εταιρειών που χρησιμοποιούν atlassian
 
 {% embed url="https://yourcompanyname.atlassian.net/servicedesk/customer/user/login" %}
 
-### TRACE method
+### Μέθοδος TRACE
 
-Developers might forget to disable various debugging options in the production environment. For example, the HTTP `TRACE` method is designed for diagnostic purposes. If enabled, the web server will respond to requests that use the `TRACE` method by echoing in the response the exact request that was received. This behaviour is often harmless, but occasionally leads to information disclosure, such as the name of internal authentication headers that may be appended to requests by reverse proxies.![Image for post](https://miro.medium.com/max/60/1*wDFRADTOd9Tj63xucenvAA.png?q=20)
+Οι προγραμματιστές μπορεί να ξεχάσουν να απενεργοποιήσουν διάφορες επιλογές αποσφαλμάτωσης στο περιβάλλον παραγωγής. Για παράδειγμα, η μέθοδος HTTP `TRACE` έχει σχεδιαστεί για διαγνωστικούς σκοπούς. Αν είναι ενεργοποιημένη, ο web server θα απαντήσει σε αιτήματα που χρησιμοποιούν τη μέθοδο `TRACE` επαναλαμβάνοντας στην απάντηση το ακριβές αίτημα που ελήφθη. Αυτή η συμπεριφορά είναι συχνά αβλαβής, αλλά περιστασιακά οδηγεί σε αποκάλυψη πληροφοριών, όπως το όνομα εσωτερικών κεφαλίδων αυθεντικοποίησης που μπορεί να προστεθούν σε αιτήματα από αντίστροφους μεσολαβητές.![Image for post](https://miro.medium.com/max/60/1*wDFRADTOd9Tj63xucenvAA.png?q=20)
 
 ![Image for post](https://miro.medium.com/max/1330/1*wDFRADTOd9Tj63xucenvAA.png)
 
 {{#include ../banners/hacktricks-training.md}}
-

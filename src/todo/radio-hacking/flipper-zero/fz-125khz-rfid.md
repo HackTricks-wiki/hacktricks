@@ -6,51 +6,51 @@
 
 {% embed url="https://websec.nl/" %}
 
-## Intro
+## Εισαγωγή
 
-For more info about how 125kHz tags work check:
+Για περισσότερες πληροφορίες σχετικά με το πώς λειτουργούν οι ετικέτες 125kHz, ελέγξτε:
 
 {{#ref}}
 ../pentesting-rfid.md
 {{#endref}}
 
-## Actions
+## Ενέργειες
 
-For more info about these types of tags [**read this intro**](../pentesting-rfid.md#low-frequency-rfid-tags-125khz).
+Για περισσότερες πληροφορίες σχετικά με αυτούς τους τύπους ετικετών [**διαβάστε αυτή την εισαγωγή**](../pentesting-rfid.md#low-frequency-rfid-tags-125khz).
 
-### Read
+### Ανάγνωση
 
-Tries to **read** the card info. Then it can **emulate** them.
+Προσπαθεί να **διαβάσει** τις πληροφορίες της κάρτας. Στη συνέχεια, μπορεί να **εξομοιώσει** αυτές.
 
 > [!WARNING]
-> Note that some intercoms try to protect themselves from key duplication by sending a write command prior to reading. If the write succeeds, that tag is considered fake. When Flipper emulates RFID there is no way for the reader to distinguish it from the original one, so no such problems occur.
+> Σημειώστε ότι ορισμένα θυροτηλέφωνα προσπαθούν να προστατευτούν από την αντιγραφή κλειδιών στέλνοντας μια εντολή εγγραφής πριν από την ανάγνωση. Εάν η εγγραφή είναι επιτυχής, αυτή η ετικέτα θεωρείται ψεύτικη. Όταν το Flipper εξομοιώνει RFID, δεν υπάρχει τρόπος για τον αναγνώστη να το διακρίνει από το αυθεντικό, οπότε δεν προκύπτουν τέτοια προβλήματα.
 
-### Add Manually
+### Προσθήκη Χειροκίνητα
 
-You can create **fake cards in Flipper Zero indicating the data** you manually and then emulate it.
+Μπορείτε να δημιουργήσετε **ψεύτικες κάρτες στο Flipper Zero υποδεικνύοντας τα δεδομένα** που εισάγετε χειροκίνητα και στη συνέχεια να τις εξομοιώσετε.
 
-#### IDs on cards
+#### IDs στις κάρτες
 
-Some times, when you get a card you will find the ID (or part) of it written in the card visible.
+Ορισμένες φορές, όταν αποκτάτε μια κάρτα, θα βρείτε το ID (ή μέρος του) γραμμένο στην κάρτα ορατό.
 
 - **EM Marin**
 
-For example in this EM-Marin card in the physical card is possible to **read the last 3 of 5 bytes in clear**.\
-The other 2 can be brute-forced if you cannot read them from the card.
+Για παράδειγμα, σε αυτή την κάρτα EM-Marin είναι δυνατό να **διαβάσετε τα τελευταία 3 από 5 bytes σε καθαρή μορφή**.\
+Τα άλλα 2 μπορούν να βρεθούν με brute-force αν δεν μπορείτε να τα διαβάσετε από την κάρτα.
 
 <figure><img src="../../../images/image (104).png" alt=""><figcaption></figcaption></figure>
 
 - **HID**
 
-Same happens in this HID card where only 2 out of 3 bytes can be found printed in the card
+Το ίδιο συμβαίνει σε αυτή την κάρτα HID όπου μόνο 2 από τα 3 bytes μπορούν να βρεθούν εκτυπωμένα στην κάρτα.
 
 <figure><img src="../../../images/image (1014).png" alt=""><figcaption></figcaption></figure>
 
-### Emulate/Write
+### Εξομοίωση/Εγγραφή
 
-After **copying** a card or **entering** the ID **manually** it's possible to **emulate** it with Flipper Zero or **write** it in a real card.
+Μετά την **αντιγραφή** μιας κάρτας ή την **εισαγωγή** του ID **χειροκίνητα**, είναι δυνατό να **εξομοιώσετε** αυτήν με το Flipper Zero ή να **εγγράψετε** την σε μια πραγματική κάρτα.
 
-## References
+## Αναφορές
 
 - [https://blog.flipperzero.one/rfid/](https://blog.flipperzero.one/rfid/)
 
@@ -59,4 +59,3 @@ After **copying** a card or **entering** the ID **manually** it's possible to **
 {% embed url="https://websec.nl/" %}
 
 {{#include ../../../banners/hacktricks-training.md}}
-

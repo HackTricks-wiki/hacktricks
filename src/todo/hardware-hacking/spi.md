@@ -4,57 +4,54 @@
 
 ## Basic Information
 
-SPI (Serial Peripheral Interface) is an Synchronous Serial Communication Protocol used in embedded systems for short distance communication between ICs (Integrated Circuits). SPI Communication Protocol makes use of the master-slave architecture which is orchastrated by the Clock and Chip Select Signal. A master-slave architecture consists of a master (usually a microprocessor) that manages external peripherals like EEPROM, sensors, control devices, etc. which are considered to be the slaves.
+SPI (Serial Peripheral Interface) είναι ένα Πρωτόκολλο Σύνθετης Σειριακής Επικοινωνίας που χρησιμοποιείται σε ενσωματωμένα συστήματα για σύντομες αποστάσεις επικοινωνίας μεταξύ ICs (Ενσωματωμένων Κυκλωμάτων). Το Πρωτόκολλο Επικοινωνίας SPI χρησιμοποιεί την αρχιτεκτονική master-slave, η οποία ελέγχεται από το Ρολόι και το Σήμα Επιλογής Chip. Μια αρχιτεκτονική master-slave αποτελείται από έναν master (συνήθως έναν μικροεπεξεργαστή) που διαχειρίζεται εξωτερικές περιφερειακές συσκευές όπως EEPROM, αισθητήρες, συσκευές ελέγχου κ.λπ., οι οποίες θεωρούνται ως οι slaves.
 
-Multiple slaves can be connected to a master but slaves can't communicate with each other. Slaves are administrated by two pins, clock and chip select. As SPI is an synchronous communication protocol, the input and output pins follow the clock signals. The chip select is used by the master to select a slave and interact with it. When the chip select is high, the slave device is not selected whereas when it's low, the chip has been selected and the master would be interacting with the slave.
+Πολλοί slaves μπορούν να συνδεθούν σε έναν master, αλλά οι slaves δεν μπορούν να επικοινωνούν μεταξύ τους. Οι slaves ελέγχονται από δύο ακίδες, το ρολόι και την επιλογή chip. Καθώς το SPI είναι ένα πρωτόκολλο συγχρονισμένης επικοινωνίας, οι ακίδες εισόδου και εξόδου ακολουθούν τα σήματα ρολογιού. Η επιλογή chip χρησιμοποιείται από τον master για να επιλέξει έναν slave και να αλληλεπιδράσει μαζί του. Όταν η επιλογή chip είναι υψηλή, η συσκευή slave δεν έχει επιλεγεί, ενώ όταν είναι χαμηλή, το chip έχει επιλεγεί και ο master θα αλληλεπιδράσει με τον slave.
 
-The MOSI (Master Out, Slave In) and MISO (Master In, Slave Out) are responsible for data sending and recieving data. Data is sent to the slave device through the MOSI pin while the chip select is held low. The input data contains instructions, memory addresses or data as per the datasheet of the slave device vendor. Upon a valid input, the MISO pin is responsible for transmitting data to the master. The output data is sent exactly at the next clock cycle after the input ends. The MISO pins transmits data till the data is fully transmitter or the master sets the chip select pin high (in that case, the slave would stop transmitting and master would not listen after that clock cycle).
+Οι MOSI (Master Out, Slave In) και MISO (Master In, Slave Out) είναι υπεύθυνες για την αποστολή και λήψη δεδομένων. Τα δεδομένα αποστέλλονται στη συσκευή slave μέσω της ακίδας MOSI ενώ η επιλογή chip κρατείται χαμηλή. Τα δεδομένα εισόδου περιέχουν οδηγίες, διευθύνσεις μνήμης ή δεδομένα σύμφωνα με το φύλλο δεδομένων του προμηθευτή της συσκευής slave. Μετά από μια έγκυρη είσοδο, η ακίδα MISO είναι υπεύθυνη για τη μετάδοση δεδομένων στον master. Τα δεδομένα εξόδου αποστέλλονται ακριβώς στον επόμενο κύκλο ρολογιού μετά την ολοκλήρωση της εισόδου. Οι ακίδες MISO μεταδίδουν δεδομένα μέχρι να ολοκληρωθεί η μετάδοση ή ο master να θέσει την ακίδα επιλογής chip υψηλή (σε αυτή την περίπτωση, ο slave θα σταματήσει τη μετάδοση και ο master δεν θα ακούσει μετά από αυτόν τον κύκλο ρολογιού).
 
 ## Dumping Firmware from EEPROMs
 
-Dumping firmware can be useful for analysing the firmware and finding vulnerabilities in them. Often times, the firmware is not available on the internet or is irrelevant due to variations of factors like model number, version, etc. Hence, extracting the firmware directly from the physical device can be helpful to be specific while hunting for threats.
+Η εξαγωγή firmware μπορεί να είναι χρήσιμη για την ανάλυση του firmware και την εύρεση ευπαθειών σε αυτό. Συχνά, το firmware δεν είναι διαθέσιμο στο διαδίκτυο ή είναι άσχετο λόγω παραλλαγών παραγόντων όπως ο αριθμός μοντέλου, η έκδοση κ.λπ. Επομένως, η εξαγωγή του firmware απευθείας από τη φυσική συσκευή μπορεί να είναι χρήσιμη για να είμαστε συγκεκριμένοι κατά την αναζήτηση απειλών.
 
-Getting Serial Console can be helpful, but often times it happens that the files are read-only. This constrains the analysis due to various reasons. For example, a tools that are required to send and recieve packages would not be there in the firmware. So extracting the binaries to reverse engineer them is not feasible. Hence, having the whole firmware dumped on the system and extracting the binaries for analysis can be very helpful.
+Η απόκτηση Σειριακής Κονσόλας μπορεί να είναι χρήσιμη, αλλά συχνά συμβαίνει ότι τα αρχεία είναι μόνο για ανάγνωση. Αυτό περιορίζει την ανάλυση λόγω διαφόρων λόγων. Για παράδειγμα, εργαλεία που απαιτούνται για την αποστολή και λήψη πακέτων δεν θα υπάρχουν στο firmware. Έτσι, η εξαγωγή των δυαδικών αρχείων για αντίστροφη μηχανική δεν είναι εφικτή. Επομένως, η ύπαρξη ολόκληρου του firmware αποθηκευμένου στο σύστημα και η εξαγωγή των δυαδικών αρχείων για ανάλυση μπορεί να είναι πολύ χρήσιμη.
 
-Also, during red reaming and getting physical access to devices, dumping the firmware can help on modifying the files or injecting malicious files and then reflashing them into the memory which could be helpful to implant a backdoor into the device. Hence, there are numerous possibilities that can be unlocked with firmware dumping.
+Επίσης, κατά τη διάρκεια της κόκκινης ανάγνωσης και της φυσικής πρόσβασης σε συσκευές, η εξαγωγή του firmware μπορεί να βοηθήσει στην τροποποίηση των αρχείων ή στην εισαγωγή κακόβουλων αρχείων και στη συνέχεια στην επαναφόρτωσή τους στη μνήμη, κάτι που θα μπορούσε να είναι χρήσιμο για την εμφύτευση ενός backdoor στη συσκευή. Επομένως, υπάρχουν πολλές δυνατότητες που μπορούν να ξεκλειδωθούν με την εξαγωγή firmware.
 
 ### CH341A EEPROM Programmer and Reader
 
-This device is an inexpensive tool for dumping firmwares from EEPROMs and also reflashing them with firmware files. This has been a popular choice for working with computer BIOS chips (which are just EEPROMs). This device connects over USB and needs minimal tools to get started. Also, it usually gets the task done quickly, so can be helpful in physical device access too.
+Αυτή η συσκευή είναι ένα οικονομικό εργαλείο για την εξαγωγή firmwares από EEPROMs και επίσης για την επαναφόρτωσή τους με αρχεία firmware. Αυτή έχει γίνει δημοφιλής επιλογή για εργασία με τσιπ BIOS υπολογιστών (τα οποία είναι απλώς EEPROMs). Αυτή η συσκευή συνδέεται μέσω USB και χρειάζεται ελάχιστα εργαλεία για να ξεκινήσει. Επίσης, συνήθως ολοκληρώνει την εργασία γρήγορα, οπότε μπορεί να είναι χρήσιμη και για φυσική πρόσβαση στη συσκευή.
 
 ![drawing](../../images/board_image_ch341a.jpg)
 
-Connect the EEPROM memory with the CH341a Programmer and plug the device into the computer. Incase the device is not getting detected, try installing drivers into the computer. Also, make sure that the EEPROM is connected in proper orientation (usually, place the VCC Pin in reverse orientation to the USB connector) or else, the software would not be able to detect the chip. Refer to the diagram if required:
+Συνδέστε τη μνήμη EEPROM με τον προγραμματιστή CH341a και συνδέστε τη συσκευή στον υπολογιστή. Σε περίπτωση που η συσκευή δεν ανιχνεύεται, δοκιμάστε να εγκαταστήσετε οδηγούς στον υπολογιστή. Επίσης, βεβαιωθείτε ότι η EEPROM είναι συνδεδεμένη στη σωστή κατεύθυνση (συνήθως, τοποθετήστε την ακίδα VCC σε αντίστροφη κατεύθυνση από τον συνδετήρα USB) αλλιώς, το λογισμικό δεν θα μπορεί να ανιχνεύσει το chip. Ανατρέξτε στο διάγραμμα αν χρειαστεί:
 
 ![drawing](../../images/connect_wires_ch341a.jpg) ![drawing](../../images/eeprom_plugged_ch341a.jpg)
 
-Finally, use softwares like flashrom, G-Flash (GUI), etc. for dumping the firmware. G-Flash is a minimal GUI tool is fast and detects the EEPROM automatically. This can be helpful in the firmware needs to be extracted quickly, without much tinkering with the documentation.
+Τέλος, χρησιμοποιήστε λογισμικά όπως flashrom, G-Flash (GUI), κ.λπ. για την εξαγωγή του firmware. Το G-Flash είναι ένα ελάχιστο εργαλείο GUI που είναι γρήγορο και ανιχνεύει αυτόματα την EEPROM. Αυτό μπορεί να είναι χρήσιμο αν το firmware πρέπει να εξαχθεί γρήγορα, χωρίς πολλές τροποποιήσεις στην τεκμηρίωση.
 
 ![drawing](../../images/connected_status_ch341a.jpg)
 
-After dumping the firmware, the analysis can be done on the binary files. Tools like strings, hexdump, xxd, binwalk, etc. can be used to extract a lot of information about the firmware as well as the whole file system too.
+Μετά την εξαγωγή του firmware, η ανάλυση μπορεί να γίνει στα δυαδικά αρχεία. Εργαλεία όπως strings, hexdump, xxd, binwalk, κ.λπ. μπορούν να χρησιμοποιηθούν για την εξαγωγή πολλών πληροφοριών σχετικά με το firmware καθώς και ολόκληρο το σύστημα αρχείων.
 
-To extract the contents from the firmware, binwalk can be used. Binwalk analyses for hex signatures and identifies the files in the binary file and is capabale of extracting them.
-
+Για να εξαγάγετε τα περιεχόμενα από το firmware, μπορεί να χρησιμοποιηθεί το binwalk. Το Binwalk αναλύει για υπογραφές hex και αναγνωρίζει τα αρχεία στο δυαδικό αρχείο και είναι ικανό να τα εξάγει.
 ```
 binwalk -e <filename>
 ```
-
-The can be .bin or .rom as per the tools and configurations used.
+Τα μπορεί να είναι .bin ή .rom ανάλογα με τα εργαλεία και τις ρυθμίσεις που χρησιμοποιούνται.
 
 > [!CAUTION]
-> Note that firmware extraction is a delicate process and requires a lot of patience. Any mishandling can potentially corrupt the firmware or even erase it completely and make the device unusable. It is recommended to study the specific device before attempting to extract the firmware.
+> Σημειώστε ότι η εξαγωγή firmware είναι μια λεπτή διαδικασία και απαιτεί πολλή υπομονή. Οποιαδήποτε κακή διαχείριση μπορεί να διαφθείρει το firmware ή ακόμη και να το διαγράψει εντελώς και να καταστήσει τη συσκευή μη χρησιμοποιήσιμη. Συνιστάται να μελετήσετε τη συγκεκριμένη συσκευή πριν προσπαθήσετε να εξαγάγετε το firmware.
 
 ### Bus Pirate + flashrom
 
 ![](<../../images/image (910).png>)
 
-Note that even if the PINOUT of the Pirate Bus indicates pins for **MOSI** and **MISO** to connect to SPI however some SPIs may indicate pins as DI and DO. **MOSI -> DI, MISO -> DO**
+Σημειώστε ότι ακόμη και αν το PINOUT του Pirate Bus υποδεικνύει ακίδες για **MOSI** και **MISO** για σύνδεση με SPI, ωστόσο μερικά SPIs μπορεί να υποδεικνύουν ακίδες ως DI και DO. **MOSI -> DI, MISO -> DO**
 
 ![](<../../images/image (360).png>)
 
-In Windows or Linux you can use the program [**`flashrom`**](https://www.flashrom.org/Flashrom) to dump the content of the flash memory running something like:
-
+Σε Windows ή Linux μπορείτε να χρησιμοποιήσετε το πρόγραμμα [**`flashrom`**](https://www.flashrom.org/Flashrom) για να αποθηκεύσετε το περιεχόμενο της μνήμης flash εκτελώντας κάτι σαν:
 ```bash
 # In this command we are indicating:
 # -VV Verbose
@@ -63,6 +60,4 @@ In Windows or Linux you can use the program [**`flashrom`**](https://www.flashro
 # -r <file> Image to save in the filesystem
 flashrom -VV -c "W25Q64.V" -p buspirate_spi:dev=COM3 -r flash_content.img
 ```
-
 {{#include ../../banners/hacktricks-training.md}}
-

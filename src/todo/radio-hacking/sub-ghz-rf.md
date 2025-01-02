@@ -4,34 +4,34 @@
 
 ## Garage Doors
 
-Garage door openers typically operate at frequencies in the 300-190 MHz range, with the most common frequencies being 300 MHz, 310 MHz, 315 MHz, and 390 MHz. This frequency range is commonly used for garage door openers because it is less crowded than other frequency bands and is less likely to experience interference from other devices.
+Οι ανοιχτήρες γκαραζόπορτας λειτουργούν συνήθως σε συχνότητες στην περιοχή 300-190 MHz, με τις πιο κοινές συχνότητες να είναι 300 MHz, 310 MHz, 315 MHz και 390 MHz. Αυτή η περιοχή συχνοτήτων χρησιμοποιείται συχνά για ανοιχτήρες γκαραζόπορτας επειδή είναι λιγότερο κορεσμένη από άλλες ζώνες συχνοτήτων και είναι λιγότερο πιθανό να υποστεί παρεμβολές από άλλες συσκευές.
 
 ## Car Doors
 
-Most car key fobs operate on either **315 MHz or 433 MHz**. These are both radio frequencies, and they are used in a variety of different applications. The main difference between the two frequencies is that 433 MHz has a longer range than 315 MHz. This means that 433 MHz is better for applications that require a longer range, such as remote keyless entry.\
-In Europe 433.92MHz is commonly used and in U.S. and Japan it's the 315MHz.
+Οι περισσότερες συσκευές κλειδώματος αυτοκινήτου λειτουργούν είτε σε **315 MHz είτε σε 433 MHz**. Αυτές είναι και οι δύο ραδιοσυχνότητες και χρησιμοποιούνται σε διάφορες εφαρμογές. Η κύρια διαφορά μεταξύ των δύο συχνοτήτων είναι ότι η 433 MHz έχει μεγαλύτερη εμβέλεια από την 315 MHz. Αυτό σημαίνει ότι η 433 MHz είναι καλύτερη για εφαρμογές που απαιτούν μεγαλύτερη εμβέλεια, όπως η απομακρυσμένη είσοδος χωρίς κλειδί.\
+Στην Ευρώπη, η 433.92MHz χρησιμοποιείται συνήθως και στις Η.Π.Α. και την Ιαπωνία είναι η 315MHz.
 
 ## **Brute-force Attack**
 
 <figure><img src="../../images/image (1084).png" alt=""><figcaption></figcaption></figure>
 
-If instead of sending each code 5 times (sent like this to make sure the receiver gets it) so just send it once, the time is reduced to 6mins:
+Εάν αντί να στείλετε κάθε κωδικό 5 φορές (στάλθηκε έτσι για να βεβαιωθείτε ότι ο δέκτης τον λαμβάνει) στείλετε μόνο μία φορά, ο χρόνος μειώνεται σε 6 λεπτά:
 
 <figure><img src="../../images/image (622).png" alt=""><figcaption></figcaption></figure>
 
-and if you **remove the 2 ms waiting** period between signals you can **reduce the time to 3minutes.**
+και αν **αφαιρέσετε την περίοδο αναμονής 2 ms** μεταξύ των σημάτων μπορείτε να **μειώσετε τον χρόνο σε 3 λεπτά.**
 
-Moreover, by using the De Bruijn Sequence (a way to reduce the number of bits needed to send all the potential binary numbers to burteforce) this **time is reduced just to 8 seconds**:
+Επιπλέον, χρησιμοποιώντας την Ακολουθία De Bruijn (ένας τρόπος για να μειωθεί ο αριθμός των bits που χρειάζονται για να σταλούν όλοι οι δυαδικοί αριθμοί για brute force) αυτός ο **χρόνος μειώνεται μόλις σε 8 δευτερόλεπτα**:
 
 <figure><img src="../../images/image (583).png" alt=""><figcaption></figcaption></figure>
 
-Example of this attack was implemented in [https://github.com/samyk/opensesame](https://github.com/samyk/opensesame)
+Παράδειγμα αυτής της επίθεσης εφαρμόστηκε στο [https://github.com/samyk/opensesame](https://github.com/samyk/opensesame)
 
-Requiring **a preamble will avoid the De Bruijn Sequence** optimization and **rolling codes will prevent this attack** (supposing the code is long enough to not be bruteforceable).
+Η απαίτηση **προακρόασης θα αποτρέψει την βελτιστοποίηση της Ακολουθίας De Bruijn** και οι **κυλιόμενοι κωδικοί θα αποτρέψουν αυτή την επίθεση** (υποθέτοντας ότι ο κωδικός είναι αρκετά μεγάλος ώστε να μην είναι brute forceable).
 
 ## Sub-GHz Attack
 
-To attack these signals with Flipper Zero check:
+Για να επιτεθείτε σε αυτά τα σήματα με το Flipper Zero ελέγξτε:
 
 {{#ref}}
 flipper-zero/fz-sub-ghz.md
@@ -39,43 +39,43 @@ flipper-zero/fz-sub-ghz.md
 
 ## Rolling Codes Protection
 
-Automatic garage door openers typically use a wireless remote control to open and close the garage door. The remote control **sends a radio frequency (RF) signal** to the garage door opener, which activates the motor to open or close the door.
+Οι αυτόματοι ανοιχτήρες γκαραζόπορτας χρησιμοποιούν συνήθως ένα ασύρματο τηλεχειριστήριο για να ανοίγουν και να κλείνουν την γκαραζόπορτα. Το τηλεχειριστήριο **στέλνει ένα σήμα ραδιοσυχνότητας (RF)** στον ανοιχτήρα γκαραζόπορτας, το οποίο ενεργοποιεί τον κινητήρα για να ανοίξει ή να κλείσει την πόρτα.
 
-It is possible for someone to use a device known as a code grabber to intercept the RF signal and record it for later use. This is known as a **replay attack**. To prevent this type of attack, many modern garage door openers use a more secure encryption method known as a **rolling code** system.
+Είναι δυνατόν για κάποιον να χρησιμοποιήσει μια συσκευή γνωστή ως code grabber για να παρεμβάλλει το σήμα RF και να το καταγράψει για μελλοντική χρήση. Αυτό είναι γνωστό ως **επανάληψη επίθεσης**. Για να αποτραπεί αυτός ο τύπος επίθεσης, πολλοί σύγχρονοι ανοιχτήρες γκαραζόπορτας χρησιμοποιούν μια πιο ασφαλή μέθοδο κρυπτογράφησης γνωστή ως **σύστημα κυλιόμενου κωδικού**.
 
-The **RF signal is typically transmitted using a rolling code**, which means that the code changes with each use. This makes it **difficult** for someone to **intercept** the signal and **use** it to gain **unauthorised** access to the garage.
+Το **σήμα RF μεταδίδεται συνήθως χρησιμοποιώντας έναν κυλιόμενο κωδικό**, που σημαίνει ότι ο κωδικός αλλάζει με κάθε χρήση. Αυτό καθιστά **δύσκολο** για κάποιον να **παρεμβάλλει** το σήμα και να **χρησιμοποιήσει** αυτό για να αποκτήσει **μη εξουσιοδοτημένη** πρόσβαση στην γκαραζόπορτα.
 
-In a rolling code system, the remote control and the garage door opener have a **shared algorithm** that **generates a new code** every time the remote is used. The garage door opener will only respond to the **correct code**, making it much more difficult for someone to gain unauthorised access to the garage just by capturing a code.
+Σε ένα σύστημα κυλιόμενου κωδικού, το τηλεχειριστήριο και ο ανοιχτήρας γκαραζόπορτας έχουν έναν **κοινό αλγόριθμο** που **παράγει έναν νέο κωδικό** κάθε φορά που χρησιμοποιείται το τηλεχειριστήριο. Ο ανοιχτήρας γκαραζόπορτας θα απαντήσει μόνο στον **σωστό κωδικό**, καθιστώντας πολύ πιο δύσκολο για κάποιον να αποκτήσει μη εξουσιοδοτημένη πρόσβαση στην γκαραζόπορτα απλά καταγράφοντας έναν κωδικό.
 
 ### **Missing Link Attack**
 
-Basically, you listen for the button and **capture the signal whilst the remote is out of range** of the device (say the car or garage). You then move to the device and **use the captured code to open it**.
+Βασικά, ακούτε το κουμπί και **καταγράφετε το σήμα ενώ το τηλεχειριστήριο είναι εκτός εμβέλειας** της συσκευής (ας πούμε του αυτοκινήτου ή της γκαραζόπορτας). Στη συνέχεια, μετακινείστε στη συσκευή και **χρησιμοποιείτε τον καταγεγραμμένο κωδικό για να την ανοίξετε**.
 
 ### Full Link Jamming Attack
 
-An attacker could **jam the signal near the vehicle or receive**r so the **receiver cannot actually ‘hear’ the code**, and once that is happening you can simply **capture and replay** the code when you have stopped jamming.
+Ένας επιτιθέμενος θα μπορούσε να **παρεμβάλλει το σήμα κοντά στο όχημα ή τον δέκτη** ώστε ο **δέκτης να μην μπορεί πραγματικά να ‘ακούσει’ τον κωδικό**, και μόλις συμβαίνει αυτό μπορείτε απλά να **καταγράψετε και να επαναλάβετε** τον κωδικό όταν έχετε σταματήσει την παρεμβολή.
 
-The victim at some point will use the **keys to lock the car**, but then the attack will have **recorded enough "close door" codes** that hopefully could be resent to open the door (a **change of frequency might be needed** as there are cars that use the same codes to open and close but listens for both commands in different frequencies).
+Το θύμα σε κάποια στιγμή θα χρησιμοποιήσει τα **κλειδιά για να κλειδώσει το αυτοκίνητο**, αλλά τότε η επίθεση θα έχει **καταγράψει αρκετούς "κωδικούς κλειδώματος"** που ελπίζουμε να μπορούν να ξανασταλούν για να ανοίξουν την πόρτα (μια **αλλαγή συχνότητας μπορεί να είναι απαραίτητη** καθώς υπάρχουν αυτοκίνητα που χρησιμοποιούν τους ίδιους κωδικούς για να ανοίγουν και να κλείνουν αλλά ακούνε και τις δύο εντολές σε διαφορετικές συχνότητες).
 
 > [!WARNING]
-> **Jamming works**, but it's noticeable as if the **person locking the car simply tests the doors** to ensure they are locked they would notice the car unlocked. Additionally if they were aware of such attacks they could even listen to the fact that the doors never made the lock **sound** or the cars **lights** never flashed when they pressed the ‘lock’ button.
+> **Η παρεμβολή λειτουργεί**, αλλά είναι αισθητή καθώς αν ο **άνθρωπος που κλειδώνει το αυτοκίνητο απλά δοκιμάσει τις πόρτες** για να βεβαιωθεί ότι είναι κλειδωμένες θα παρατηρήσει ότι το αυτοκίνητο είναι ξεκλείδωτο. Επιπλέον, αν ήταν ενήμερος για τέτοιες επιθέσεις θα μπορούσε ακόμη και να ακούσει το γεγονός ότι οι πόρτες δεν έκαναν τον ήχο **κλειδώματος** ή τα **φώτα** του αυτοκινήτου δεν αναβόσβησαν όταν πάτησε το κουμπί ‘κλειδώματος’.
 
 ### **Code Grabbing Attack ( aka ‘RollJam’ )**
 
-This is a more **stealth Jamming technique**. The attacker will jam the signal, so when the victim tries to lock the door it won't work, but the attacker will **record this code**. Then, the victim will **try to lock the car again** pressing the button and the car will **record this second code**.\
-Instantly after this the **attacker can send the first code** and the **car will lock** (victim will think the second press closed it). Then, the attacker will be able to **send the second stolen code to open** the car (supposing that a **"close car" code can also be used to open it**). A change of frequency might be needed (as there are cars that use the same codes to open and close but listens for both commands in different frequencies).
+Αυτή είναι μια πιο **διακριτική τεχνική παρεμβολής**. Ο επιτιθέμενος θα παρεμβάλλει το σήμα, έτσι όταν το θύμα προσπαθήσει να κλειδώσει την πόρτα δεν θα λειτουργήσει, αλλά ο επιτιθέμενος θα **καταγράψει αυτόν τον κωδικό**. Στη συνέχεια, το θύμα θα **προσπαθήσει να κλειδώσει το αυτοκίνητο ξανά** πατώντας το κουμπί και το αυτοκίνητο θα **καταγράψει αυτόν τον δεύτερο κωδικό**.\
+Άμεσα μετά από αυτό, ο **επιτιθέμενος μπορεί να στείλει τον πρώτο κωδικό** και το **αυτοκίνητο θα κλειδώσει** (το θύμα θα νομίζει ότι η δεύτερη πίεση το έκλεισε). Στη συνέχεια, ο επιτιθέμενος θα μπορεί να **στείλει τον δεύτερο κλεμμένο κωδικό για να ανοίξει** το αυτοκίνητο (υποθέτοντας ότι ένας **κωδικός "κλειδώματος αυτοκινήτου" μπορεί επίσης να χρησιμοποιηθεί για να το ανοίξει**). Μια αλλαγή συχνότητας μπορεί να είναι απαραίτητη (καθώς υπάρχουν αυτοκίνητα που χρησιμοποιούν τους ίδιους κωδικούς για να ανοίγουν και να κλείνουν αλλά ακούνε και τις δύο εντολές σε διαφορετικές συχνότητες).
 
-The attacker can **jam the car receiver and not his receiver** because if the car receiver is listening in for example a 1MHz broadband, the attacker won't **jam** the exact frequency used by the remote but **a close one in that spectrum** while the **attackers receiver will be listening in a smaller range** where he can listen the remote signal **without the jam signal**.
+Ο επιτιθέμενος μπορεί να **παρεμβάλλει τον δέκτη του αυτοκινήτου και όχι τον δικό του δέκτη** γιατί αν ο δέκτης του αυτοκινήτου ακούει για παράδειγμα σε ένα ευρύ φάσμα 1MHz, ο επιτιθέμενος δεν θα **παρεμβάλλει** τη συγκεκριμένη συχνότητα που χρησιμοποιείται από το τηλεχειριστήριο αλλά **μια κοντινή σε αυτό το φάσμα** ενώ ο **δέκτης του επιτιθέμενου θα ακούει σε μια μικρότερη περιοχή** όπου μπορεί να ακούσει το σήμα του τηλεχειριστηρίου **χωρίς το σήμα παρεμβολής**.
 
 > [!WARNING]
-> Other implementations seen in specifications show that the **rolling code is a portion** of the total code sent. Ie the code sent is a **24 bit key** where the first **12 are the rolling code**, the **second 8 are the command** (such as lock or unlock) and the last 4 is the **checksum**. Vehicles implementing this type are also naturally susceptible as the attacker merely needs to replace the rolling code segment to be able to **use any rolling code on both frequencies**.
+> Άλλες υλοποιήσεις που έχουν παρατηρηθεί σε προδιαγραφές δείχνουν ότι ο **κυλιόμενος κωδικός είναι ένα τμήμα** του συνολικού κωδικού που αποστέλλεται. Δηλαδή, ο κωδικός που αποστέλλεται είναι ένα **24 bit key** όπου τα πρώτα **12 είναι ο κυλιόμενος κωδικός**, τα **δεύτερα 8 είναι η εντολή** (όπως κλείδωμα ή ξεκλείδωμα) και τα τελευταία 4 είναι το **checksum**. Τα οχήματα που υλοποιούν αυτόν τον τύπο είναι επίσης φυσικά ευάλωτα καθώς ο επιτιθέμενος χρειάζεται απλώς να αντικαταστήσει το τμήμα του κυλιόμενου κωδικού για να μπορέσει να **χρησιμοποιήσει οποιονδήποτε κυλιόμενο κωδικό και στις δύο συχνότητες**.
 
 > [!CAUTION]
-> Note that if the victim sends a third code while the attacker is sending the first one, the first and second code will be invalidated.
+> Σημειώστε ότι αν το θύμα στείλει έναν τρίτο κωδικό ενώ ο επιτιθέμενος στέλνει τον πρώτο, ο πρώτος και ο δεύτερος κωδικός θα ακυρωθούν.
 
 ### Alarm Sounding Jamming Attack
 
-Testing against an aftermarket rolling code system installed on a car, **sending the same code twice** immediately **activated the alarm** and immobiliser providing a unique **denial of service** opportunity. Ironically the means of **disabling the alarm** and immobiliser was to **press** the **remote**, providing an attacker with the ability to **continually perform DoS attack**. Or mix this attack with the **previous one to obtain more codes** as the victim would like to stop the attack asap.
+Δοκιμάζοντας έναν aftermarket κυλιόμενο κωδικό σύστημα εγκατεστημένο σε ένα αυτοκίνητο, **η αποστολή του ίδιου κωδικού δύο φορές** αμέσως **ενεργοποίησε τον συναγερμό** και το immobiliser παρέχοντας μια μοναδική **ευκαιρία άρνησης υπηρεσίας**. Σαρκαστικά, ο τρόπος **απενεργοποίησης του συναγερμού** και του immobiliser ήταν να **πατήσετε** το **τηλεχειριστήριο**, παρέχοντας στον επιτιθέμενο τη δυνατότητα να **εκτελεί συνεχώς επίθεση DoS**. Ή να συνδυάσει αυτή την επίθεση με την **προηγούμενη για να αποκτήσει περισσότερους κωδικούς** καθώς το θύμα θα ήθελε να σταματήσει την επίθεση το συντομότερο δυνατό.
 
 ## References
 
@@ -85,4 +85,3 @@ Testing against an aftermarket rolling code system installed on a car, **sending
 - [https://hackaday.io/project/164566-how-to-hack-a-car/details](https://hackaday.io/project/164566-how-to-hack-a-car/details)
 
 {{#include ../../banners/hacktricks-training.md}}
-

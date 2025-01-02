@@ -4,81 +4,80 @@
 
 ## Basic overview
 
-**Active Directory** serves as a foundational technology, enabling **network administrators** to efficiently create and manage **domains**, **users**, and **objects** within a network. It is engineered to scale, facilitating the organization of an extensive number of users into manageable **groups** and **subgroups**, while controlling **access rights** at various levels.
+**Active Directory** λειτουργεί ως θεμελιώδης τεχνολογία, επιτρέποντας στους **διαχειριστές δικτύου** να δημιουργούν και να διαχειρίζονται αποτελεσματικά **τομείς**, **χρήστες** και **αντικείμενα** εντός ενός δικτύου. Είναι σχεδιασμένο να κλιμακώνεται, διευκολύνοντας την οργάνωση ενός εκτενούς αριθμού χρηστών σε διαχειρίσιμες **ομάδες** και **υποομάδες**, ενώ ελέγχει τα **δικαιώματα πρόσβασης** σε διάφορα επίπεδα.
 
-The structure of **Active Directory** is comprised of three primary layers: **domains**, **trees**, and **forests**. A **domain** encompasses a collection of objects, such as **users** or **devices**, sharing a common database. **Trees** are groups of these domains linked by a shared structure, and a **forest** represents the collection of multiple trees, interconnected through **trust relationships**, forming the uppermost layer of the organizational structure. Specific **access** and **communication rights** can be designated at each of these levels.
+Η δομή του **Active Directory** αποτελείται από τρία κύρια επίπεδα: **τομείς**, **δέντρα** και **δάση**. Ένας **τομέας** περιλαμβάνει μια συλλογή αντικειμένων, όπως **χρήστες** ή **συσκευές**, που μοιράζονται μια κοινή βάση δεδομένων. Τα **δέντρα** είναι ομάδες αυτών των τομέων που συνδέονται μέσω μιας κοινής δομής, και ένα **δάσος** αντιπροσωπεύει τη συλλογή πολλών δέντρων, διασυνδεδεμένων μέσω **σχέσεων εμπιστοσύνης**, σχηματίζοντας το ανώτατο επίπεδο της οργανωτικής δομής. Συγκεκριμένα **δικαιώματα πρόσβασης** και **επικοινωνίας** μπορούν να καθοριστούν σε καθένα από αυτά τα επίπεδα.
 
-Key concepts within **Active Directory** include:
+Βασικές έννοιες εντός του **Active Directory** περιλαμβάνουν:
 
-1. **Directory** – Houses all information pertaining to Active Directory objects.
-2. **Object** – Denotes entities within the directory, including **users**, **groups**, or **shared folders**.
-3. **Domain** – Serves as a container for directory objects, with the capability for multiple domains to coexist within a **forest**, each maintaining its own object collection.
-4. **Tree** – A grouping of domains that share a common root domain.
-5. **Forest** – The pinnacle of organizational structure in Active Directory, composed of several trees with **trust relationships** among them.
+1. **Κατάλογος** – Περιέχει όλες τις πληροφορίες που αφορούν τα αντικείμενα του Active Directory.
+2. **Αντικείμενο** – Δηλώνει οντότητες εντός του καταλόγου, συμπεριλαμβανομένων των **χρηστών**, **ομάδων** ή **κοινών φακέλων**.
+3. **Τομέας** – Λειτουργεί ως δοχείο για τα αντικείμενα του καταλόγου, με τη δυνατότητα να συνυπάρχουν πολλοί τομείς εντός ενός **δάσους**, καθένας διατηρώντας τη δική του συλλογή αντικειμένων.
+4. **Δέντρο** – Μια ομάδα τομέων που μοιράζονται έναν κοινό ριζικό τομέα.
+5. **Δάσος** – Η κορυφή της οργανωτικής δομής στο Active Directory, που αποτελείται από αρκετά δέντρα με **σχέσεις εμπιστοσύνης** μεταξύ τους.
 
-**Active Directory Domain Services (AD DS)** encompasses a range of services critical for the centralized management and communication within a network. These services comprise:
+**Υπηρεσίες Τομέα Active Directory (AD DS)** περιλαμβάνουν μια σειρά υπηρεσιών κρίσιμων για την κεντρική διαχείριση και επικοινωνία εντός ενός δικτύου. Αυτές οι υπηρεσίες περιλαμβάνουν:
 
-1. **Domain Services** – Centralizes data storage and manages interactions between **users** and **domains**, including **authentication** and **search** functionalities.
-2. **Certificate Services** – Oversees the creation, distribution, and management of secure **digital certificates**.
-3. **Lightweight Directory Services** – Supports directory-enabled applications through the **LDAP protocol**.
-4. **Directory Federation Services** – Provides **single-sign-on** capabilities to authenticate users across multiple web applications in a single session.
-5. **Rights Management** – Assists in safeguarding copyright material by regulating its unauthorized distribution and use.
-6. **DNS Service** – Crucial for the resolution of **domain names**.
+1. **Υπηρεσίες Τομέα** – Κεντρικοποιεί την αποθήκευση δεδομένων και διαχειρίζεται τις αλληλεπιδράσεις μεταξύ **χρηστών** και **τομέων**, συμπεριλαμβανομένων των λειτουργιών **αυθεντικοποίησης** και **αναζήτησης**.
+2. **Υπηρεσίες Πιστοποιητικών** – Εποπτεύει τη δημιουργία, διανομή και διαχείριση ασφαλών **ψηφιακών πιστοποιητικών**.
+3. **Ελαφριές Υπηρεσίες Καταλόγου** – Υποστηρίζει εφαρμογές που ενεργοποιούνται από τον κατάλογο μέσω του **πρωτοκόλλου LDAP**.
+4. **Υπηρεσίες Ομοσπονδίας Καταλόγου** – Παρέχει δυνατότητες **ενιαίας σύνδεσης** για την αυθεντικοποίηση χρηστών σε πολλές διαδικτυακές εφαρμογές σε μία μόνο συνεδρία.
+5. **Διαχείριση Δικαιωμάτων** – Βοηθά στην προστασία υλικού πνευματικών δικαιωμάτων ρυθμίζοντας τη μη εξουσιοδοτημένη διανομή και χρήση του.
+6. **Υπηρεσία DNS** – Κρίσιμη για την επίλυση **ονόματων τομέα**.
 
-For a more detailed explanation check: [**TechTerms - Active Directory Definition**](https://techterms.com/definition/active_directory)
+Για μια πιο λεπτομερή εξήγηση, ελέγξτε: [**TechTerms - Ορισμός Active Directory**](https://techterms.com/definition/active_directory)
 
 ### **Kerberos Authentication**
 
-To learn how to **attack an AD** you need to **understand** really good the **Kerberos authentication process**.\
-[**Read this page if you still don't know how it works.**](kerberos-authentication.md)
+Για να μάθετε πώς να **επιτεθείτε σε ένα AD** πρέπει να **κατανοήσετε** πολύ καλά τη διαδικασία **αυθεντικοποίησης Kerberos**.\
+[**Διαβάστε αυτή τη σελίδα αν δεν ξέρετε πώς λειτουργεί.**](kerberos-authentication.md)
 
 ## Cheat Sheet
 
-You can take a lot to [https://wadcoms.github.io/](https://wadcoms.github.io) to have a quick view of which commands you can run to enumerate/exploit an AD.
+Μπορείτε να επισκεφθείτε το [https://wadcoms.github.io/](https://wadcoms.github.io) για μια γρήγορη επισκόπηση των εντολών που μπορείτε να εκτελέσετε για να καταγράψετε/εκμεταλλευτείτε ένα AD.
 
 ## Recon Active Directory (No creds/sessions)
 
-If you just have access to an AD environment but you don't have any credentials/sessions you could:
+Αν έχετε πρόσβαση σε ένα περιβάλλον AD αλλά δεν έχετε κανένα διαπιστευτήριο/συνεδρίες, μπορείτε να:
 
-- **Pentest the network:**
-  - Scan the network, find machines and open ports and try to **exploit vulnerabilities** or **extract credentials** from them (for example, [printers could be very interesting targets](ad-information-in-printers.md).
-  - Enumerating DNS could give information about key servers in the domain as web, printers, shares, vpn, media, etc.
-    - `gobuster dns -d domain.local -t 25 -w /opt/Seclist/Discovery/DNS/subdomain-top2000.txt`
-  - Take a look to the General [**Pentesting Methodology**](../../generic-methodologies-and-resources/pentesting-methodology.md) to find more information about how to do this.
-- **Check for null and Guest access on smb services** (this won't work on modern Windows versions):
-  - `enum4linux -a -u "" -p "" <DC IP> && enum4linux -a -u "guest" -p "" <DC IP>`
-  - `smbmap -u "" -p "" -P 445 -H <DC IP> && smbmap -u "guest" -p "" -P 445 -H <DC IP>`
-  - `smbclient -U '%' -L //<DC IP> && smbclient -U 'guest%' -L //`
-  - A more detailed guide on how to enumerate a SMB server can be found here:
+- **Pentest το δίκτυο:**
+- Σαρώστε το δίκτυο, βρείτε μηχανές και ανοιχτές θύρες και προσπαθήστε να **εκμεταλλευτείτε ευπάθειες** ή **εξάγετε διαπιστευτήρια** από αυτές (για παράδειγμα, [οι εκτυπωτές θα μπορούσαν να είναι πολύ ενδιαφέροντες στόχοι](ad-information-in-printers.md)).
+- Η καταγραφή DNS θα μπορούσε να δώσει πληροφορίες σχετικά με βασικούς διακομιστές στο τομέα όπως ιστότοποι, εκτυπωτές, κοινές χρήσεις, vpn, μέσα κ.λπ.
+- `gobuster dns -d domain.local -t 25 -w /opt/Seclist/Discovery/DNS/subdomain-top2000.txt`
+- Ρίξτε μια ματιά στη Γενική [**Μεθοδολογία Pentesting**](../../generic-methodologies-and-resources/pentesting-methodology.md) για περισσότερες πληροφορίες σχετικά με το πώς να το κάνετε αυτό.
+- **Ελέγξτε για null και Guest πρόσβαση σε υπηρεσίες smb** (αυτό δεν θα λειτουργήσει σε σύγχρονες εκδόσεις Windows):
+- `enum4linux -a -u "" -p "" <DC IP> && enum4linux -a -u "guest" -p "" <DC IP>`
+- `smbmap -u "" -p "" -P 445 -H <DC IP> && smbmap -u "guest" -p "" -P 445 -H <DC IP>`
+- `smbclient -U '%' -L //<DC IP> && smbclient -U 'guest%' -L //`
+- Ένας πιο λεπτομερής οδηγός για το πώς να καταγράψετε έναν διακομιστή SMB μπορεί να βρεθεί εδώ:
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-smb/
 {{#endref}}
 
-- **Enumerate Ldap**
-  - `nmap -n -sV --script "ldap* and not brute" -p 389 <DC IP>`
-  - A more detailed guide on how to enumerate LDAP can be found here (pay **special attention to the anonymous access**):
+- **Καταγράψτε Ldap**
+- `nmap -n -sV --script "ldap* and not brute" -p 389 <DC IP>`
+- Ένας πιο λεπτομερής οδηγός για το πώς να καταγράψετε LDAP μπορεί να βρεθεί εδώ (δώστε **ιδιαίτερη προσοχή στην ανώνυμη πρόσβαση**):
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-ldap.md
 {{#endref}}
 
-- **Poison the network**
-  - Gather credentials [**impersonating services with Responder**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md)
-  - Access host by [**abusing the relay attack**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack)
-  - Gather credentials **exposing** [**fake UPnP services with evil-S**](../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md)[**SDP**](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)
+- **Δηλητηριάστε το δίκτυο**
+- Συγκεντρώστε διαπιστευτήρια [**υποδυόμενοι υπηρεσίες με Responder**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md)
+- Πρόσβαση σε υπολογιστή [**καταχρώντας την επίθεση relay**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack)
+- Συγκεντρώστε διαπιστευτήρια **εκθέτοντας** [**ψεύτικες υπηρεσίες UPnP με evil-S**](../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md)[**SDP**](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)
 - [**OSINT**](https://book.hacktricks.xyz/external-recon-methodology):
-  - Extract usernames/names from internal documents, social media, services (mainly web) inside the domain environments and also from the publicly available.
-  - If you find the complete names of company workers, you could try different AD **username conventions (**[**read this**](https://activedirectorypro.com/active-directory-user-naming-convention/)). The most common conventions are: _NameSurname_, _Name.Surname_, _NamSur_ (3letters of each), _Nam.Sur_, _NSurname_, _N.Surname_, _SurnameName_, _Surname.Name_, _SurnameN_, _Surname.N_, 3 _random letters and 3 random numbers_ (abc123).
-  - Tools:
-    - [w0Tx/generate-ad-username](https://github.com/w0Tx/generate-ad-username)
-    - [urbanadventurer/username-anarchy](https://github.com/urbanadventurer/username-anarchy)
+- Εξάγετε ονόματα χρηστών/ονόματα από εσωτερικά έγγραφα, κοινωνικά δίκτυα, υπηρεσίες (κυρίως ιστότοπους) εντός των περιβαλλόντων τομέα και επίσης από δημόσια διαθέσιμα.
+- Αν βρείτε τα πλήρη ονόματα των εργαζομένων της εταιρείας, μπορείτε να δοκιμάσετε διάφορες συμβάσεις **ονόματος χρήστη AD** ([**διαβάστε αυτό**](https://activedirectorypro.com/active-directory-user-naming-convention/)). Οι πιο κοινές συμβάσεις είναι: _NameSurname_, _Name.Surname_, _NamSur_ (3 γράμματα από το καθένα), _Nam.Sur_, _NSurname_, _N.Surname_, _SurnameName_, _Surname.Name_, _SurnameN_, _Surname.N_, 3 _τυχαία γράμματα και 3 τυχαίοι αριθμοί_ (abc123).
+- Εργαλεία:
+- [w0Tx/generate-ad-username](https://github.com/w0Tx/generate-ad-username)
+- [urbanadventurer/username-anarchy](https://github.com/urbanadventurer/username-anarchy)
 
 ### User enumeration
 
-- **Anonymous SMB/LDAP enum:** Check the [**pentesting SMB**](../../network-services-pentesting/pentesting-smb/) and [**pentesting LDAP**](../../network-services-pentesting/pentesting-ldap.md) pages.
-- **Kerbrute enum**: When an **invalid username is requested** the server will respond using the **Kerberos error** code _KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN_, allowing us to determine that the username was invalid. **Valid usernames** will illicit either the **TGT in a AS-REP** response or the error _KRB5KDC_ERR_PREAUTH_REQUIRED_, indicating that the user is required to perform pre-authentication.
-
+- **Ανώνυμη SMB/LDAP καταγραφή:** Ελέγξτε τις σελίδες [**pentesting SMB**](../../network-services-pentesting/pentesting-smb/) και [**pentesting LDAP**](../../network-services-pentesting/pentesting-ldap.md).
+- **Kerbrute καταγραφή**: Όταν ζητείται ένα **μη έγκυρο όνομα χρήστη**, ο διακομιστής θα απαντήσει χρησιμοποιώντας τον **κωδικό σφάλματος Kerberos** _KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN_, επιτρέποντάς μας να προσδιορίσουμε ότι το όνομα χρήστη ήταν μη έγκυρο. **Έγκυρα ονόματα χρήστη** θα προκαλέσουν είτε την **TGT σε μια απάντηση AS-REP** είτε το σφάλμα _KRB5KDC_ERR_PREAUTH_REQUIRED_, υποδεικνύοντας ότι ο χρήστης απαιτείται να εκτελέσει προαυθεντικοποίηση.
 ```bash
 ./kerbrute_linux_amd64 userenum -d lab.ropnop.com --dc 10.10.10.10 usernames.txt #From https://github.com/ropnop/kerbrute/releases
 
@@ -89,11 +88,9 @@ msf> use auxiliary/gather/kerberos_enumusers
 
 crackmapexec smb dominio.es  -u '' -p '' --users | awk '{print $4}' | uniq
 ```
-
 - **OWA (Outlook Web Access) Server**
 
-If you found one of these servers in the network you can also perform **user enumeration against it**. For example, you could use the tool [**MailSniper**](https://github.com/dafthack/MailSniper):
-
+Αν βρείτε έναν από αυτούς τους διακομιστές στο δίκτυο, μπορείτε επίσης να εκτελέσετε **user enumeration against it**. Για παράδειγμα, θα μπορούσατε να χρησιμοποιήσετε το εργαλείο [**MailSniper**](https://github.com/dafthack/MailSniper):
 ```bash
 ipmo C:\Tools\MailSniper\MailSniper.ps1
 # Get info about the domain
@@ -105,19 +102,18 @@ Invoke-PasswordSprayOWA -ExchHostname [ip] -UserList .\valid.txt -Password Summe
 # Get addresses list from the compromised mail
 Get-GlobalAddressList -ExchHostname [ip] -UserName [domain]\[username] -Password Summer2021 -OutFile gal.txt
 ```
-
 > [!WARNING]
-> You can find lists of usernames in [**this github repo**](https://github.com/danielmiessler/SecLists/tree/master/Usernames/Names) \*\*\*\* and this one ([**statistically-likely-usernames**](https://github.com/insidetrust/statistically-likely-usernames)).
+> Μπορείτε να βρείτε λίστες χρηστών σε [**αυτό το github repo**](https://github.com/danielmiessler/SecLists/tree/master/Usernames/Names) \*\*\*\* και σε αυτό ([**statistically-likely-usernames**](https://github.com/insidetrust/statistically-likely-usernames)).
 >
-> However, you should have the **name of the people working on the company** from the recon step you should have performed before this. With the name and surname you could used the script [**namemash.py**](https://gist.github.com/superkojiman/11076951) to generate potential valid usernames.
+> Ωστόσο, θα πρέπει να έχετε το **όνομα των ατόμων που εργάζονται στην εταιρεία** από το βήμα αναγνώρισης που θα έπρεπε να έχετε εκτελέσει πριν από αυτό. Με το όνομα και το επώνυμο μπορείτε να χρησιμοποιήσετε το σενάριο [**namemash.py**](https://gist.github.com/superkojiman/11076951) για να δημιουργήσετε πιθανά έγκυρα ονόματα χρηστών.
 
-### Knowing one or several usernames
+### Γνωρίζοντας ένα ή περισσότερα ονόματα χρηστών
 
-Ok, so you know you have already a valid username but no passwords... Then try:
+Εντάξει, οπότε γνωρίζετε ότι έχετε ήδη ένα έγκυρο όνομα χρήστη αλλά όχι κωδικούς πρόσβασης... Τότε δοκιμάστε:
 
-- [**ASREPRoast**](asreproast.md): If a user **doesn't have** the attribute _DONT_REQ_PREAUTH_ you can **request a AS_REP message** for that user that will contain some data encrypted by a derivation of the password of the user.
-- [**Password Spraying**](password-spraying.md): Let's try the most **common passwords** with each of the discovered users, maybe some user is using a bad password (keep in mind the password policy!).
-  - Note that you can also **spray OWA servers** to try to get access to the users mail servers.
+- [**ASREPRoast**](asreproast.md): Αν ένας χρήστης **δεν έχει** το χαρακτηριστικό _DONT_REQ_PREAUTH_ μπορείτε να **ζητήσετε ένα μήνυμα AS_REP** για αυτόν τον χρήστη που θα περιέχει κάποια δεδομένα κρυπτογραφημένα με μια παραλλαγή του κωδικού πρόσβασης του χρήστη.
+- [**Password Spraying**](password-spraying.md): Ας δοκιμάσουμε τους πιο **συνηθισμένους κωδικούς πρόσβασης** με κάθε έναν από τους ανακαλυφθέντες χρήστες, ίσως κάποιος χρήστης να χρησιμοποιεί έναν κακό κωδικό (κρατήστε στο μυαλό σας την πολιτική κωδικών πρόσβασης!).
+- Σημειώστε ότι μπορείτε επίσης να **spray OWA servers** για να προσπαθήσετε να αποκτήσετε πρόσβαση στους διακομιστές αλληλογραφίας των χρηστών.
 
 {{#ref}}
 password-spraying.md
@@ -125,7 +121,7 @@ password-spraying.md
 
 ### LLMNR/NBT-NS Poisoning
 
-You might be able to **obtain** some challenge **hashes** to crack **poisoning** some protocols of the **network**:
+Μπορείτε να **αποκτήσετε** κάποιες προκλήσεις **hashes** για να σπάσετε **poisoning** κάποιων πρωτοκόλλων του **δικτύου**:
 
 {{#ref}}
 ../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md
@@ -133,74 +129,73 @@ You might be able to **obtain** some challenge **hashes** to crack **poisoning**
 
 ### NTML Relay
 
-If you have managed to enumerate the active directory you will have **more emails and a better understanding of the network**. You might be able to to force NTML [**relay attacks**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack) \*\*\*\* to get access to the AD env.
+Αν έχετε καταφέρει να καταγράψετε το active directory θα έχετε **περισσότερα emails και καλύτερη κατανόηση του δικτύου**. Μπορείτε να αναγκάσετε NTML [**relay attacks**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack) \*\*\*\* για να αποκτήσετε πρόσβαση στο περιβάλλον AD.
 
-### Steal NTLM Creds
+### Κλοπή NTLM Creds
 
-If you can **access other PCs or shares** with the **null or guest user** you could **place files** (like a SCF file) that if somehow accessed will t**rigger an NTML authentication against you** so you can **steal** the **NTLM challenge** to crack it:
+Αν μπορείτε να **έχετε πρόσβαση σε άλλους υπολογιστές ή κοινόχρηστα** με τον **null ή guest user** μπορείτε να **τοποθετήσετε αρχεία** (όπως ένα αρχείο SCF) που αν αποκτηθούν με κάποιο τρόπο θα **ενεργοποιήσουν μια NTML αυθεντικοποίηση εναντίον σας** ώστε να μπορείτε να **κλέψετε** την **NTLM πρόκληση** για να την σπάσετε:
 
 {{#ref}}
 ../ntlm/places-to-steal-ntlm-creds.md
 {{#endref}}
 
-## Enumerating Active Directory WITH credentials/session
+## Καταγραφή Active Directory ΜΕ πιστοποιήσεις/συνεδρία
 
-For this phase you need to have **compromised the credentials or a session of a valid domain account.** If you have some valid credentials or a shell as a domain user, **you should remember that the options given before are still options to compromise other users**.
+Για αυτή τη φάση πρέπει να έχετε **συμβιβαστεί τις πιστοποιήσεις ή μια συνεδρία ενός έγκυρου λογαριασμού τομέα.** Αν έχετε κάποιες έγκυρες πιστοποιήσεις ή μια shell ως χρήστης τομέα, **θα πρέπει να θυμάστε ότι οι επιλογές που δόθηκαν πριν είναι ακόμα επιλογές για να συμβιβάσετε άλλους χρήστες**.
 
-Before start the authenticated enumeration you should know what is the **Kerberos double hop problem.**
+Πριν ξεκινήσετε την αυθεντικοποιημένη καταγραφή θα πρέπει να γνωρίζετε ποιο είναι το **πρόβλημα διπλής αναπήδησης Kerberos.**
 
 {{#ref}}
 kerberos-double-hop-problem.md
 {{#endref}}
 
-### Enumeration
+### Καταγραφή
 
-Having compromised an account is a **big step to start compromising the whole domain**, because you are going to be able to start the **Active Directory Enumeration:**
+Η κατοχή ενός λογαριασμού είναι ένα **μεγάλο βήμα για να αρχίσετε να συμβιβάζετε ολόκληρο το τομέα**, γιατί θα μπορείτε να ξεκινήσετε την **Καταγραφή Active Directory:**
 
-Regarding [**ASREPRoast**](asreproast.md) you can now find every possible vulnerable user, and regarding [**Password Spraying**](password-spraying.md) you can get a **list of all the usernames** and try the password of the compromised account, empty passwords and new promising passwords.
+Αναφορικά με [**ASREPRoast**](asreproast.md) μπορείτε τώρα να βρείτε κάθε πιθανό ευάλωτο χρήστη, και αναφορικά με [**Password Spraying**](password-spraying.md) μπορείτε να αποκτήσετε μια **λίστα με όλα τα ονόματα χρηστών** και να δοκιμάσετε τον κωδικό του συμβιβασμένου λογαριασμού, κενές κωδικούς και νέους υποσχόμενους κωδικούς.
 
-- You could use the [**CMD to perform a basic recon**](../basic-cmd-for-pentesters.md#domain-info)
-- You can also use [**powershell for recon**](../basic-powershell-for-pentesters/) which will be stealthier
-- You ca also [**use powerview**](../basic-powershell-for-pentesters/powerview.md) to extract more detailed information
-- Another amazing tool for recon in an active directory is [**BloodHound**](bloodhound.md). It is **not very stealthy** (depending on the collection methods you use), but **if you don't care** about that, you should totally give it a try. Find where users can RDP, find path to other groups, etc.
-  - **Other automated AD enumeration tools are:** [**AD Explorer**](bloodhound.md#ad-explorer)**,** [**ADRecon**](bloodhound.md#adrecon)**,** [**Group3r**](bloodhound.md#group3r)**,** [**PingCastle**](bloodhound.md#pingcastle)**.**
-- [**DNS records of the AD**](ad-dns-records.md) as they might contain interesting information.
-- A **tool with GUI** that you can use to enumerate the directory is **AdExplorer.exe** from **SysInternal** Suite.
-- You can also search in the LDAP database with **ldapsearch** to look for credentials in fields _userPassword_ & _unixUserPassword_, or even for _Description_. cf. [Password in AD User comment on PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#password-in-ad-user-comment) for other methods.
-- If you are using **Linux**, you could also enumerate the domain using [**pywerview**](https://github.com/the-useless-one/pywerview).
-- You could also try automated tools as:
-  - [**tomcarver16/ADSearch**](https://github.com/tomcarver16/ADSearch)
-  - [**61106960/adPEAS**](https://github.com/61106960/adPEAS)
-- **Extracting all domain users**
+- Μπορείτε να χρησιμοποιήσετε το [**CMD για να εκτελέσετε μια βασική αναγνώριση**](../basic-cmd-for-pentesters.md#domain-info)
+- Μπορείτε επίσης να χρησιμοποιήσετε [**powershell για αναγνώριση**](../basic-powershell-for-pentesters/) που θα είναι πιο διακριτικό
+- Μπορείτε επίσης να [**χρησιμοποιήσετε το powerview**](../basic-powershell-for-pentesters/powerview.md) για να εξαγάγετε πιο λεπτομερείς πληροφορίες
+- Ένα άλλο καταπληκτικό εργαλείο για αναγνώριση σε ένα active directory είναι το [**BloodHound**](bloodhound.md). Δεν είναι **πολύ διακριτικό** (ανάλογα με τις μεθόδους συλλογής που χρησιμοποιείτε), αλλά **αν δεν σας νοιάζει** γι' αυτό, θα πρέπει σίγουρα να το δοκιμάσετε. Βρείτε πού μπορούν οι χρήστες να RDP, βρείτε διαδρομές σε άλλες ομάδες, κ.λπ.
+- **Άλλα αυτοματοποιημένα εργαλεία καταγραφής AD είναι:** [**AD Explorer**](bloodhound.md#ad-explorer)**,** [**ADRecon**](bloodhound.md#adrecon)**,** [**Group3r**](bloodhound.md#group3r)**,** [**PingCastle**](bloodhound.md#pingcastle)**.**
+- [**DNS records του AD**](ad-dns-records.md) καθώς μπορεί να περιέχουν ενδιαφέρουσες πληροφορίες.
+- Ένα **εργαλείο με GUI** που μπορείτε να χρησιμοποιήσετε για να καταγράψετε τον κατάλογο είναι το **AdExplorer.exe** από το **SysInternal** Suite.
+- Μπορείτε επίσης να αναζητήσετε στη βάση δεδομένων LDAP με **ldapsearch** για να αναζητήσετε πιστοποιήσεις στα πεδία _userPassword_ & _unixUserPassword_, ή ακόμα και για _Description_. cf. [Password in AD User comment on PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#password-in-ad-user-comment) για άλλες μεθόδους.
+- Αν χρησιμοποιείτε **Linux**, μπορείτε επίσης να καταγράψετε το τομέα χρησιμοποιώντας [**pywerview**](https://github.com/the-useless-one/pywerview).
+- Μπορείτε επίσης να δοκιμάσετε αυτοματοποιημένα εργαλεία όπως:
+- [**tomcarver16/ADSearch**](https://github.com/tomcarver16/ADSearch)
+- [**61106960/adPEAS**](https://github.com/61106960/adPEAS)
+- **Εξαγωγή όλων των χρηστών του τομέα**
 
-  It's very easy to obtain all the domain usernames from Windows (`net user /domain` ,`Get-DomainUser` or `wmic useraccount get name,sid`). In Linux, you can use: `GetADUsers.py -all -dc-ip 10.10.10.110 domain.com/username` or `enum4linux -a -u "user" -p "password" <DC IP>`
+Είναι πολύ εύκολο να αποκτήσετε όλα τα ονόματα χρηστών του τομέα από τα Windows (`net user /domain` ,`Get-DomainUser` ή `wmic useraccount get name,sid`). Στο Linux, μπορείτε να χρησιμοποιήσετε: `GetADUsers.py -all -dc-ip 10.10.10.110 domain.com/username` ή `enum4linux -a -u "user" -p "password" <DC IP>`
 
-> Even if this Enumeration section looks small this is the most important part of all. Access the links (mainly the one of cmd, powershell, powerview and BloodHound), learn how to enumerate a domain and practice until you feel comfortable. During an assessment, this will be the key moment to find your way to DA or to decide that nothing can be done.
+> Ακόμα και αν αυτή η ενότητα καταγραφής φαίνεται μικρή, είναι το πιο σημαντικό μέρος όλων. Αποκτήστε πρόσβαση στους συνδέσμους (κυρίως αυτόν του cmd, powershell, powerview και BloodHound), μάθετε πώς να καταγράφετε ένα τομέα και εξασκηθείτε μέχρι να νιώσετε άνετα. Κατά τη διάρκεια μιας αξιολόγησης, αυτή θα είναι η κρίσιμη στιγμή για να βρείτε το δρόμο σας προς DA ή να αποφασίσετε ότι δεν μπορεί να γίνει τίποτα.
 
 ### Kerberoast
 
-Kerberoasting involves obtaining **TGS tickets** used by services tied to user accounts and cracking their encryption—which is based on user passwords—**offline**.
+Το Kerberoasting περιλαμβάνει την απόκτηση **TGS tickets** που χρησιμοποιούνται από υπηρεσίες που συνδέονται με λογαριασμούς χρηστών και την αποκρυπτογράφησή τους—η οποία βασίζεται στους κωδικούς πρόσβασης των χρηστών—**εκτός σύνδεσης**.
 
-More about this in:
+Περισσότερα γι' αυτό:
 
 {{#ref}}
 kerberoast.md
 {{#endref}}
 
-### Remote connexion (RDP, SSH, FTP, Win-RM, etc)
+### Απομακρυσμένη σύνδεση (RDP, SSH, FTP, Win-RM, κ.λπ.)
 
-Once you have obtained some credentials you could check if you have access to any **machine**. For that matter, you could use **CrackMapExec** to attempt connecting on several servers with different protocols, accordingly to your ports scans.
+Μόλις αποκτήσετε κάποιες πιστοποιήσεις μπορείτε να ελέγξετε αν έχετε πρόσβαση σε οποιαδήποτε **μηχανή**. Για αυτό το σκοπό, μπορείτε να χρησιμοποιήσετε το **CrackMapExec** για να προσπαθήσετε να συνδεθείτε σε αρκετούς διακομιστές με διαφορετικά πρωτόκολλα, ανάλογα με τις σάρωσεις θυρών σας.
 
-### Local Privilege Escalation
+### Τοπική Κλιμάκωση Προνομίων
 
-If you have compromised credentials or a session as a regular domain user and you have **access** with this user to **any machine in the domain** you should try to find your way to **escalate privileges locally and looting for credentials**. This is because only with local administrator privileges you will be able to **dump hashes of other users** in memory (LSASS) and locally (SAM).
+Αν έχετε συμβιβαστεί πιστοποιήσεις ή μια συνεδρία ως κανονικός χρήστης τομέα και έχετε **πρόσβαση** με αυτόν τον χρήστη σε **οποιαδήποτε μηχανή στον τομέα** θα πρέπει να προσπαθήσετε να βρείτε τον τρόπο σας για να **κλιμακώσετε τα προνόμια τοπικά και να αναζητήσετε πιστοποιήσεις**. Αυτό συμβαίνει γιατί μόνο με τοπικά προνόμια διαχειριστή θα μπορείτε να **dumpάρετε hashes άλλων χρηστών** στη μνήμη (LSASS) και τοπικά (SAM).
 
-There is a complete page in this book about [**local privilege escalation in Windows**](../windows-local-privilege-escalation/) and a [**checklist**](../checklist-windows-privilege-escalation.md). Also, don't forget to use [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite).
+Υπάρχει μια ολοκληρωμένη σελίδα σε αυτό το βιβλίο σχετικά με [**την τοπική κλιμάκωση προνομίων στα Windows**](../windows-local-privilege-escalation/) και μια [**λίστα ελέγχου**](../checklist-windows-privilege-escalation.md). Επίσης, μην ξεχάσετε να χρησιμοποιήσετε [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite).
 
-### Current Session Tickets
+### Τρέχοντα Εισιτήρια Συνεδρίας
 
-It's very **unlikely** that you will find **tickets** in the current user **giving you permission to access** unexpected resources, but you could check:
-
+Είναι πολύ **απίθανο** να βρείτε **εισιτήρια** στον τρέχοντα χρήστη **που να σας δίνουν άδεια πρόσβασης** σε απροσδόκητους πόρους, αλλά μπορείτε να ελέγξετε:
 ```bash
 ## List all tickets (if not admin, only current user tickets)
 .\Rubeus.exe triage
@@ -208,20 +203,19 @@ It's very **unlikely** that you will find **tickets** in the current user **givi
 .\Rubeus.exe dump /service:krbtgt /luid:<luid> /nowrap
 [IO.File]::WriteAllBytes("ticket.kirbi", [Convert]::FromBase64String("<BASE64_TICKET>"))
 ```
-
 ### NTML Relay
 
-If you have managed to enumerate the active directory you will have **more emails and a better understanding of the network**. You might be able to to force NTML [**relay attacks**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack)**.**
+Αν έχετε καταφέρει να καταγράψετε το active directory θα έχετε **περισσότερα emails και καλύτερη κατανόηση του δικτύου**. Μπορεί να είστε σε θέση να αναγκάσετε NTML [**relay attacks**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack)**.**
 
-### **Looks for Creds in Computer Shares**
+### **Ψάξτε για Creds σε Κοινόχρηστα Υπολογιστές**
 
-Now that you have some basic credentials you should check if you can **find** any **interesting files being shared inside the AD**. You could do that manually but it's a very boring repetitive task (and more if you find hundreds of docs you need to check).
+Τώρα που έχετε κάποιες βασικές διαπιστεύσεις θα πρέπει να ελέγξετε αν μπορείτε να **βρείτε** οποιαδήποτε **ενδιαφέροντα αρχεία που μοιράζονται μέσα στο AD**. Μπορείτε να το κάνετε αυτό χειροκίνητα αλλά είναι μια πολύ βαρετή επαναλαμβανόμενη εργασία (και περισσότερο αν βρείτε εκατοντάδες έγγραφα που πρέπει να ελέγξετε).
 
-[**Follow this link to learn about tools you could use.**](../../network-services-pentesting/pentesting-smb/#domain-shared-folders-search)
+[**Ακολουθήστε αυτόν τον σύνδεσμο για να μάθετε για εργαλεία που θα μπορούσατε να χρησιμοποιήσετε.**](../../network-services-pentesting/pentesting-smb/#domain-shared-folders-search)
 
-### Steal NTLM Creds
+### Κλέψτε NTLM Creds
 
-If you can **access other PCs or shares** you could **place files** (like a SCF file) that if somehow accessed will t**rigger an NTML authentication against you** so you can **steal** the **NTLM challenge** to crack it:
+Αν μπορείτε να **έχετε πρόσβαση σε άλλους υπολογιστές ή κοινόχρηστα** μπορείτε να **τοποθετήσετε αρχεία** (όπως ένα αρχείο SCF) που αν με κάποιο τρόπο αποκτηθούν θα **προκαλέσουν μια NTML αυθεντικοποίηση εναντίον σας** ώστε να μπορείτε να **κλέψετε** την **NTLM πρόκληση** για να την σπάσετε:
 
 {{#ref}}
 ../ntlm/places-to-steal-ntlm-creds.md
@@ -229,31 +223,31 @@ If you can **access other PCs or shares** you could **place files** (like a SCF 
 
 ### CVE-2021-1675/CVE-2021-34527 PrintNightmare
 
-This vulnerability allowed any authenticated user to **compromise the domain controller**.
+Αυτή η ευπάθεια επέτρεψε σε οποιονδήποτε αυθεντικοποιημένο χρήστη να **συμβιβάσει τον ελεγκτή τομέα**.
 
 {{#ref}}
 printnightmare.md
 {{#endref}}
 
-## Privilege escalation on Active Directory WITH privileged credentials/session
+## Ανάβαση προνομίων στο Active Directory ΜΕ προνομιακές διαπιστεύσεις/συνεδρία
 
-**For the following techniques a regular domain user is not enough, you need some special privileges/credentials to perform these attacks.**
+**Για τις παρακάτω τεχνικές ένας κανονικός χρήστης τομέα δεν είναι αρκετός, χρειάζεστε κάποιες ειδικές προνομίες/διαπιστεύσεις για να εκτελέσετε αυτές τις επιθέσεις.**
 
-### Hash extraction
+### Εξαγωγή Hash
 
-Hopefully you have managed to **compromise some local admin** account using [AsRepRoast](asreproast.md), [Password Spraying](password-spraying.md), [Kerberoast](kerberoast.md), [Responder](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md) including relaying, [EvilSSDP](../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md), [escalating privileges locally](../windows-local-privilege-escalation/).\
-Then, its time to dump all the hashes in memory and locally.\
-[**Read this page about different ways to obtain the hashes.**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/active-directory-methodology/broken-reference/README.md)
+Ελπίζω να έχετε καταφέρει να **συμβιβάσετε κάποιο τοπικό διαχειριστή** χρησιμοποιώντας [AsRepRoast](asreproast.md), [Password Spraying](password-spraying.md), [Kerberoast](kerberoast.md), [Responder](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md) συμπεριλαμβανομένων των relaying, [EvilSSDP](../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md), [αναβάθμιση προνομίων τοπικά](../windows-local-privilege-escalation/).\
+Τότε, είναι ώρα να εκφορτώσετε όλα τα hashes στη μνήμη και τοπικά.\
+[**Διαβάστε αυτή τη σελίδα για διαφορετικούς τρόπους απόκτησης των hashes.**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/active-directory-methodology/broken-reference/README.md)
 
-### Pass the Hash
+### Περάστε το Hash
 
-**Once you have the hash of a user**, you can use it to **impersonate** it.\
-You need to use some **tool** that will **perform** the **NTLM authentication using** that **hash**, **or** you could create a new **sessionlogon** and **inject** that **hash** inside the **LSASS**, so when any **NTLM authentication is performed**, that **hash will be used.** The last option is what mimikatz does.\
-[**Read this page for more information.**](../ntlm/#pass-the-hash)
+**Μόλις έχετε το hash ενός χρήστη**, μπορείτε να το χρησιμοποιήσετε για να **παριστάνετε** αυτόν.\
+Πρέπει να χρησιμοποιήσετε κάποιο **εργαλείο** που θα **εκτελέσει** την **NTLM αυθεντικοποίηση χρησιμοποιώντας** αυτό το **hash**, **ή** μπορείτε να δημιουργήσετε μια νέα **sessionlogon** και να **εισάγετε** αυτό το **hash** μέσα στο **LSASS**, έτσι ώστε όταν οποιαδήποτε **NTLM αυθεντικοποίηση εκτελείται**, αυτό το **hash θα χρησιμοποιηθεί.** Η τελευταία επιλογή είναι αυτό που κάνει το mimikatz.\
+[**Διαβάστε αυτή τη σελίδα για περισσότερες πληροφορίες.**](../ntlm/#pass-the-hash)
 
 ### Over Pass the Hash/Pass the Key
 
-This attack aims to **use the user NTLM hash to request Kerberos tickets**, as an alternative to the common Pass The Hash over NTLM protocol. Therefore, this could be especially **useful in networks where NTLM protocol is disabled** and only **Kerberos is allowed** as authentication protocol.
+Αυτή η επίθεση στοχεύει να **χρησιμοποιήσει το NTLM hash του χρήστη για να ζητήσει Kerberos tickets**, ως εναλλακτική στο κοινό Pass The Hash μέσω του πρωτοκόλλου NTLM. Επομένως, αυτό θα μπορούσε να είναι ιδιαίτερα **χρήσιμο σε δίκτυα όπου το πρωτόκολλο NTLM είναι απενεργοποιημένο** και μόνο **Kerberos επιτρέπεται** ως πρωτόκολλο αυθεντικοποίησης.
 
 {{#ref}}
 over-pass-the-hash-pass-the-key.md
@@ -261,82 +255,80 @@ over-pass-the-hash-pass-the-key.md
 
 ### Pass the Ticket
 
-In the **Pass The Ticket (PTT)** attack method, attackers **steal a user's authentication ticket** instead of their password or hash values. This stolen ticket is then used to **impersonate the user**, gaining unauthorized access to resources and services within a network.
+Στη μέθοδο επίθεσης **Pass The Ticket (PTT)**, οι επιτιθέμενοι **κλέβουν το εισιτήριο αυθεντικοποίησης ενός χρήστη** αντί για τον κωδικό πρόσβασης ή τις τιμές hash τους. Αυτό το κλεμμένο εισιτήριο χρησιμοποιείται στη συνέχεια για να **παριστάνει τον χρήστη**, αποκτώντας μη εξουσιοδοτημένη πρόσβαση σε πόρους και υπηρεσίες εντός ενός δικτύου.
 
 {{#ref}}
 pass-the-ticket.md
 {{#endref}}
 
-### Credentials Reuse
+### Επαναχρησιμοποίηση Διαπιστεύσεων
 
-If you have the **hash** or **password** of a **local administrato**r you should try to **login locally** to other **PCs** with it.
-
+Αν έχετε το **hash** ή τον **κωδικό πρόσβασης** ενός **τοπικού διαχειριστή** θα πρέπει να προσπαθήσετε να **συνδεθείτε τοπικά** σε άλλους **υπολογιστές** με αυτό.
 ```bash
 # Local Auth Spray (once you found some local admin pass or hash)
 ## --local-auth flag indicate to only try 1 time per machine
 crackmapexec smb --local-auth 10.10.10.10/23 -u administrator -H 10298e182387f9cab376ecd08491764a0 | grep +
 ```
-
 > [!WARNING]
-> Note that this is quite **noisy** and **LAPS** would **mitigate** it.
+> Σημειώστε ότι αυτό είναι αρκετά **θορυβώδες** και το **LAPS** θα **μειώσει** αυτό.
 
-### MSSQL Abuse & Trusted Links
+### Κατάχρηση MSSQL & Εμπιστευμένοι Σύνδεσμοι
 
-If a user has privileges to **access MSSQL instances**, he could be able to use it to **execute commands** in the MSSQL host (if running as SA), **steal** the NetNTLM **hash** or even perform a **relay** **attack**.\
-Also, if a MSSQL instance is trusted (database link) by a different MSSQL instance. If the user has privileges over the trusted database, he is going to be able to **use the trust relationship to execute queries also in the other instance**. These trusts can be chained and at some point the user might be able to find a misconfigured database where he can execute commands.\
-**The links between databases work even across forest trusts.**
+Εάν ένας χρήστης έχει δικαιώματα για **πρόσβαση σε MSSQL instances**, θα μπορούσε να το χρησιμοποιήσει για να **εκτελέσει εντολές** στον MSSQL host (αν τρέχει ως SA), να **κλέψει** το NetNTLM **hash** ή ακόμη και να εκτελέσει μια **επίθεση** **relay**.\
+Επίσης, αν ένα MSSQL instance είναι εμπιστευμένο (σύνδεσμος βάσης δεδομένων) από ένα διαφορετικό MSSQL instance. Εάν ο χρήστης έχει δικαιώματα πάνω στη εμπιστευμένη βάση δεδομένων, θα είναι σε θέση να **χρησιμοποιήσει τη σχέση εμπιστοσύνης για να εκτελέσει ερωτήματα και στην άλλη instance**. Αυτές οι εμπιστοσύνες μπορούν να αλυσωθούν και σε κάποιο σημείο ο χρήστης μπορεί να βρει μια κακώς ρυθμισμένη βάση δεδομένων όπου μπορεί να εκτελέσει εντολές.\
+**Οι σύνδεσμοι μεταξύ των βάσεων δεδομένων λειτουργούν ακόμη και σε διασυνδέσεις δασών.**
 
 {{#ref}}
 abusing-ad-mssql.md
 {{#endref}}
 
-### Unconstrained Delegation
+### Απεριόριστη Αντιπροσώπευση
 
-If you find any Computer object with the attribute [ADS_UF_TRUSTED_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>) and you have domain privileges in the computer, you will be able to dump TGTs from memory of every users that logins onto the computer.\
-So, if a **Domain Admin logins onto the computer**, you will be able to dump his TGT and impersonate him using [Pass the Ticket](pass-the-ticket.md).\
-Thanks to constrained delegation you could even **automatically compromise a Print Server** (hopefully it will be a DC).
+Εάν βρείτε οποιοδήποτε αντικείμενο Υπολογιστή με το χαρακτηριστικό [ADS_UF_TRUSTED_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>) και έχετε δικαιώματα τομέα στον υπολογιστή, θα μπορείτε να εξάγετε TGTs από τη μνήμη κάθε χρήστη που συνδέεται στον υπολογιστή.\
+Έτσι, αν ένας **Domain Admin συνδεθεί στον υπολογιστή**, θα μπορείτε να εξάγετε το TGT του και να τον προσποιηθείτε χρησιμοποιώντας [Pass the Ticket](pass-the-ticket.md).\
+Χάρη στην περιορισμένη αντιπροσώπευση, θα μπορούσατε ακόμη και να **συμβιβάσετε αυτόματα έναν Εκτυπωτή** (ελπίζουμε να είναι ένας DC).
 
 {{#ref}}
 unconstrained-delegation.md
 {{#endref}}
 
-### Constrained Delegation
+### Περιορισμένη Αντιπροσώπευση
 
-If a user or computer is allowed for "Constrained Delegation" it will be able to **impersonate any user to access some services in a computer**.\
-Then, if you **compromise the hash** of this user/computer you will be able to **impersonate any user** (even domain admins) to access some services.
+Εάν ένας χρήστης ή υπολογιστής επιτρέπεται για "Περιορισμένη Αντιπροσώπευση", θα είναι σε θέση να **προσποιηθεί οποιονδήποτε χρήστη για να αποκτήσει πρόσβαση σε ορισμένες υπηρεσίες σε έναν υπολογιστή**.\
+Έτσι, αν **συμβιβάσετε το hash** αυτού του χρήστη/υπολογιστή, θα μπορείτε να **προσποιηθείτε οποιονδήποτε χρήστη** (ακόμη και domain admins) για να αποκτήσετε πρόσβαση σε ορισμένες υπηρεσίες.
 
 {{#ref}}
 constrained-delegation.md
 {{#endref}}
 
-### Resourced-based Constrain Delegation
+### Αντιπροσώπευση Βασισμένη σε Πόρους
 
-Having **WRITE** privilege on an Active Directory object of a remote computer enables the attainment of code execution with **elevated privileges**:
+Έχοντας **WRITE** δικαίωμα σε ένα αντικείμενο Active Directory ενός απομακρυσμένου υπολογιστή επιτρέπει την εκτέλεση κώδικα με **υψηλά δικαιώματα**:
 
 {{#ref}}
 resource-based-constrained-delegation.md
 {{#endref}}
 
-### ACLs Abuse
+### Κατάχρηση ACLs
 
-The compromised user could have some **interesting privileges over some domain objects** that could let you **move** laterally/**escalate** privileges.
+Ο συμβιβασμένος χρήστης θα μπορούσε να έχει κάποια **ενδιαφέροντα δικαιώματα σε ορισμένα αντικείμενα τομέα** που θα σας επιτρέψουν να **κινηθείτε** πλάγια/**να κλιμακώσετε** δικαιώματα.
 
 {{#ref}}
 acl-persistence-abuse/
 {{#endref}}
 
-### Printer Spooler service abuse
+### Κατάχρηση Υπηρεσίας Εκτυπωτή Spooler
 
-Discovering a **Spool service listening** within the domain can be **abused** to **acquire new credentials** and **escalate privileges**.
+Η ανακάλυψη μιας **υπηρεσίας Spool που ακούει** εντός του τομέα μπορεί να **καταχραστεί** για να **αποκτηθούν νέα διαπιστευτήρια** και **να κλιμακωθούν δικαιώματα**.
 
 {{#ref}}
 printers-spooler-service-abuse.md
 {{#endref}}
 
-### Third party sessions abuse
+### Κατάχρηση Συνεδριών Τρίτων
 
-If **other users** **access** the **compromised** machine, it's possible to **gather credentials from memory** and even **inject beacons in their processes** to impersonate them.\
-Usually users will access the system via RDP, so here you have how to performa couple of attacks over third party RDP sessions:
+Εάν **άλλοι χρήστες** **πρόσβαση** στη **συμβιβασμένη** μηχανή, είναι δυνατόν να **συγκεντρωθούν διαπιστευτήρια από τη μνήμη** και ακόμη και να **εισαχθούν beacon στις διαδικασίες τους** για να τους προσποιηθούν.\
+Συνήθως οι χρήστες θα έχουν πρόσβαση στο σύστημα μέσω RDP, οπότε εδώ έχετε πώς να εκτελέσετε μερικές επιθέσεις σε τρίτες συνεδρίες RDP:
 
 {{#ref}}
 rdp-sessions-abuse.md
@@ -344,64 +336,64 @@ rdp-sessions-abuse.md
 
 ### LAPS
 
-**LAPS** provides a system for managing the **local Administrator password** on domain-joined computers, ensuring it's **randomized**, unique, and frequently **changed**. These passwords are stored in Active Directory and access is controlled through ACLs to authorized users only. With sufficient permissions to access these passwords, pivoting to other computers becomes possible.
+Το **LAPS** παρέχει ένα σύστημα για τη διαχείριση του **τοπικού κωδικού πρόσβασης διαχειριστή** σε υπολογιστές που ανήκουν σε τομέα, διασφαλίζοντας ότι είναι **τυχαίος**, μοναδικός και συχνά **αλλαγμένος**. Αυτοί οι κωδικοί πρόσβασης αποθηκεύονται στο Active Directory και η πρόσβαση ελέγχεται μέσω ACLs μόνο για εξουσιοδοτημένους χρήστες. Με επαρκή δικαιώματα για πρόσβαση σε αυτούς τους κωδικούς πρόσβασης, γίνεται δυνατή η μεταφορά σε άλλους υπολογιστές.
 
 {{#ref}}
 laps.md
 {{#endref}}
 
-### Certificate Theft
+### Κλοπή Πιστοποιητικών
 
-**Gathering certificates** from the compromised machine could be a way to escalate privileges inside the environment:
+Η **συγκέντρωση πιστοποιητικών** από τη συμβιβασμένη μηχανή θα μπορούσε να είναι ένας τρόπος για να κλιμακωθούν τα δικαιώματα μέσα στο περιβάλλον:
 
 {{#ref}}
 ad-certificates/certificate-theft.md
 {{#endref}}
 
-### Certificate Templates Abuse
+### Κατάχρηση Προτύπων Πιστοποιητικών
 
-If **vulnerable templates** are configured it's possible to abuse them to escalate privileges:
+Εάν είναι ρυθμισμένα **ευάλωτα πρότυπα**, είναι δυνατόν να τα καταχραστείτε για να κλιμακώσετε τα δικαιώματα:
 
 {{#ref}}
 ad-certificates/domain-escalation.md
 {{#endref}}
 
-## Post-exploitation with high privilege account
+## Μετά την εκμετάλλευση με λογαριασμό υψηλών δικαιωμάτων
 
-### Dumping Domain Credentials
+### Εξαγωγή Διαπιστευτηρίων Τομέα
 
-Once you get **Domain Admin** or even better **Enterprise Admin** privileges, you can **dump** the **domain database**: _ntds.dit_.
+Μόλις αποκτήσετε δικαιώματα **Domain Admin** ή ακόμη καλύτερα **Enterprise Admin**, μπορείτε να **εξάγετε** τη **βάση δεδομένων τομέα**: _ntds.dit_.
 
-[**More information about DCSync attack can be found here**](dcsync.md).
+[**Περισσότερες πληροφορίες σχετικά με την επίθεση DCSync μπορείτε να βρείτε εδώ**](dcsync.md).
 
-[**More information about how to steal the NTDS.dit can be found here**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/active-directory-methodology/broken-reference/README.md)
+[**Περισσότερες πληροφορίες σχετικά με το πώς να κλέψετε το NTDS.dit μπορείτε να βρείτε εδώ**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/active-directory-methodology/broken-reference/README.md)
 
-### Privesc as Persistence
+### Privesc ως Επιμονή
 
-Some of the techniques discussed before can be used for persistence.\
-For example you could:
+Ορισμένες από τις τεχνικές που συζητήθηκαν προηγουμένως μπορούν να χρησιμοποιηθούν για επιμονή.\
+Για παράδειγμα, θα μπορούσατε να:
 
-- Make users vulnerable to [**Kerberoast**](kerberoast.md)
+- Κάνετε τους χρήστες ευάλωτους σε [**Kerberoast**](kerberoast.md)
 
-  ```powershell
-  Set-DomainObject -Identity <username> -Set @{serviceprincipalname="fake/NOTHING"}r
-  ```
+```powershell
+Set-DomainObject -Identity <username> -Set @{serviceprincipalname="fake/NOTHING"}r
+```
 
-- Make users vulnerable to [**ASREPRoast**](asreproast.md)
+- Κάνετε τους χρήστες ευάλωτους σε [**ASREPRoast**](asreproast.md)
 
-  ```powershell
-  Set-DomainObject -Identity <username> -XOR @{UserAccountControl=4194304}
-  ```
+```powershell
+Set-DomainObject -Identity <username> -XOR @{UserAccountControl=4194304}
+```
 
-- Grant [**DCSync**](./#dcsync) privileges to a user
+- Χορηγήσετε [**DCSync**](./#dcsync) δικαιώματα σε έναν χρήστη
 
-  ```powershell
-  Add-DomainObjectAcl -TargetIdentity "DC=SUB,DC=DOMAIN,DC=LOCAL" -PrincipalIdentity bfarmer -Rights DCSync
-  ```
+```powershell
+Add-DomainObjectAcl -TargetIdentity "DC=SUB,DC=DOMAIN,DC=LOCAL" -PrincipalIdentity bfarmer -Rights DCSync
+```
 
 ### Silver Ticket
 
-The **Silver Ticket attack** creates a **legitimate Ticket Granting Service (TGS) ticket** for a specific service by using the **NTLM hash** (for instance, the **hash of the PC account**). This method is employed to **access the service privileges**.
+Η **επίθεση Silver Ticket** δημιουργεί ένα **νόμιμο εισιτήριο Υπηρεσίας Εισιτηρίων (TGS)** για μια συγκεκριμένη υπηρεσία χρησιμοποιώντας το **NTLM hash** (για παράδειγμα, το **hash του λογαριασμού PC**). Αυτή η μέθοδος χρησιμοποιείται για **πρόσβαση στα δικαιώματα υπηρεσίας**.
 
 {{#ref}}
 silver-ticket.md
@@ -409,9 +401,9 @@ silver-ticket.md
 
 ### Golden Ticket
 
-A **Golden Ticket attack** involves an attacker gaining access to the **NTLM hash of the krbtgt account** in an Active Directory (AD) environment. This account is special because it's used to sign all **Ticket Granting Tickets (TGTs)**, which are essential for authenticating within the AD network.
+Μια **επίθεση Golden Ticket** περιλαμβάνει έναν επιτιθέμενο που αποκτά πρόσβαση στο **NTLM hash του λογαριασμού krbtgt** σε ένα περιβάλλον Active Directory (AD). Αυτός ο λογαριασμός είναι ειδικός επειδή χρησιμοποιείται για να υπογράψει όλα τα **Εισιτήρια Υπηρεσίας Εισιτηρίων (TGTs)**, τα οποία είναι απαραίτητα για την αυθεντικοποίηση εντός του δικτύου AD.
 
-Once the attacker obtains this hash, they can create **TGTs** for any account they choose (Silver ticket attack).
+Μόλις ο επιτιθέμενος αποκτήσει αυτό το hash, μπορεί να δημιουργήσει **TGTs** για οποιονδήποτε λογαριασμό επιλέξει (επίθεση Silver ticket).
 
 {{#ref}}
 golden-ticket.md
@@ -419,53 +411,53 @@ golden-ticket.md
 
 ### Diamond Ticket
 
-These are like golden tickets forged in a way that **bypasses common golden tickets detection mechanisms.**
+Αυτά είναι σαν χρυσά εισιτήρια που έχουν παραχθεί με τρόπο που **παρακάμπτει τους κοινούς μηχανισμούς ανίχνευσης χρυσών εισιτηρίων.**
 
 {{#ref}}
 diamond-ticket.md
 {{#endref}}
 
-### **Certificates Account Persistence**
+### **Επιμονή Λογαριασμών Πιστοποιητικών**
 
-**Having certificates of an account or being able to request them** is a very good way to be able to persist in the users account (even if he changes the password):
+**Έχοντας πιστοποιητικά ενός λογαριασμού ή έχοντας τη δυνατότητα να τα ζητήσετε** είναι ένας πολύ καλός τρόπος για να μπορέσετε να επιμείνετε στον λογαριασμό των χρηστών (ακόμη και αν αλλάξει τον κωδικό πρόσβασης):
 
 {{#ref}}
 ad-certificates/account-persistence.md
 {{#endref}}
 
-### **Certificates Domain Persistence**
+### **Επιμονή Πιστοποιητικών Τομέα**
 
-**Using certificates is also possible to persist with high privileges inside the domain:**
+**Η χρήση πιστοποιητικών είναι επίσης δυνατή για να επιμείνετε με υψηλά δικαιώματα μέσα στον τομέα:**
 
 {{#ref}}
 ad-certificates/domain-persistence.md
 {{#endref}}
 
-### AdminSDHolder Group
+### Ομάδα AdminSDHolder
 
-The **AdminSDHolder** object in Active Directory ensures the security of **privileged groups** (like Domain Admins and Enterprise Admins) by applying a standard **Access Control List (ACL)** across these groups to prevent unauthorized changes. However, this feature can be exploited; if an attacker modifies the AdminSDHolder's ACL to give full access to a regular user, that user gains extensive control over all privileged groups. This security measure, meant to protect, can thus backfire, allowing unwarranted access unless closely monitored.
+Το αντικείμενο **AdminSDHolder** στο Active Directory διασφαλίζει την ασφάλεια των **προνομιούχων ομάδων** (όπως οι Domain Admins και Enterprise Admins) εφαρμόζοντας μια τυπική **Λίστα Ελέγχου Πρόσβασης (ACL)** σε αυτές τις ομάδες για να αποτρέψει μη εξουσιοδοτημένες αλλαγές. Ωστόσο, αυτή η δυνατότητα μπορεί να εκμεταλλευτεί· εάν ένας επιτιθέμενος τροποποιήσει την ACL του AdminSDHolder για να δώσει πλήρη πρόσβαση σε έναν κανονικό χρήστη, αυτός ο χρήστης αποκτά εκτενή έλεγχο σε όλες τις προνομιούχες ομάδες. Αυτό το μέτρο ασφαλείας, που προορίζεται για προστασία, μπορεί έτσι να έχει αντίκτυπο, επιτρέποντας αδικαιολόγητη πρόσβαση εκτός αν παρακολουθείται προσεκτικά.
 
-[**More information about AdminDSHolder Group here.**](privileged-groups-and-token-privileges.md#adminsdholder-group)
+[**Περισσότερες πληροφορίες σχετικά με την Ομάδα AdminDSHolder εδώ.**](privileged-groups-and-token-privileges.md#adminsdholder-group)
 
-### DSRM Credentials
+### Διαπιστευτήρια DSRM
 
-Inside every **Domain Controller (DC)**, a **local administrator** account exists. By obtaining admin rights on such a machine, the local Administrator hash can be extracted using **mimikatz**. Following this, a registry modification is necessary to **enable the use of this password**, allowing for remote access to the local Administrator account.
+Μέσα σε κάθε **Domain Controller (DC)**, υπάρχει ένας λογαριασμός **τοπικού διαχειριστή**. Αποκτώντας δικαιώματα διαχειριστή σε μια τέτοια μηχανή, το hash του τοπικού διαχειριστή μπορεί να εξαχθεί χρησιμοποιώντας **mimikatz**. Ακολουθώντας αυτό, είναι απαραίτητη μια τροποποίηση μητρώου για να **επιτραπεί η χρήση αυτού του κωδικού πρόσβασης**, επιτρέποντας την απομακρυσμένη πρόσβαση στον τοπικό λογαριασμό διαχειριστή.
 
 {{#ref}}
 dsrm-credentials.md
 {{#endref}}
 
-### ACL Persistence
+### Επιμονή ACL
 
-You could **give** some **special permissions** to a **user** over some specific domain objects that will let the user **escalate privileges in the future**.
+Μπορείτε να **δώσετε** κάποια **ειδικά δικαιώματα** σε έναν **χρήστη** πάνω σε ορισμένα συγκεκριμένα αντικείμενα τομέα που θα επιτρέψουν στον χρήστη να **κλιμακώσει δικαιώματα στο μέλλον**.
 
 {{#ref}}
 acl-persistence-abuse/
 {{#endref}}
 
-### Security Descriptors
+### Περιγραφείς Ασφαλείας
 
-The **security descriptors** are used to **store** the **permissions** an **object** have **over** an **object**. If you can just **make** a **little change** in the **security descriptor** of an object, you can obtain very interesting privileges over that object without needing to be member of a privileged group.
+Οι **περιγραφείς ασφαλείας** χρησιμοποιούνται για να **αποθηκεύουν** τα **δικαιώματα** που έχει ένα **αντικείμενο** **πάνω** σε ένα **αντικείμενο**. Εάν μπορείτε απλώς να **κάνετε** μια **μικρή αλλαγή** στον **περιγραφέα ασφαλείας** ενός αντικειμένου, μπορείτε να αποκτήσετε πολύ ενδιαφέροντα δικαιώματα πάνω σε αυτό το αντικείμενο χωρίς να χρειάζεται να είστε μέλος μιας προνομιούχας ομάδας.
 
 {{#ref}}
 security-descriptors.md
@@ -473,7 +465,7 @@ security-descriptors.md
 
 ### Skeleton Key
 
-Alter **LSASS** in memory to establish a **universal password**, granting access to all domain accounts.
+Αλλάξτε το **LSASS** στη μνήμη για να καθορίσετε έναν **καθολικό κωδικό πρόσβασης**, παρέχοντας πρόσβαση σε όλους τους λογαριασμούς τομέα.
 
 {{#ref}}
 skeleton-key.md
@@ -481,8 +473,8 @@ skeleton-key.md
 
 ### Custom SSP
 
-[Learn what is a SSP (Security Support Provider) here.](../authentication-credentials-uac-and-efs/#security-support-provider-interface-sspi)\
-You can create you **own SSP** to **capture** in **clear text** the **credentials** used to access the machine.\\
+[Μάθετε τι είναι ένα SSP (Security Support Provider) εδώ.](../authentication-credentials-uac-and-efs/#security-support-provider-interface-sspi)\
+Μπορείτε να δημιουργήσετε το **δικό σας SSP** για να **συλλάβετε** σε **καθαρό κείμενο** τα **διαπιστευτήρια** που χρησιμοποιούνται για την πρόσβαση στη μηχανή.\\
 
 {{#ref}}
 custom-ssp.md
@@ -490,77 +482,76 @@ custom-ssp.md
 
 ### DCShadow
 
-It registers a **new Domain Controller** in the AD and uses it to **push attributes** (SIDHistory, SPNs...) on specified objects **without** leaving any **logs** regarding the **modifications**. You **need DA** privileges and be inside the **root domain**.\
-Note that if you use wrong data, pretty ugly logs will appear.
+Καταχωρεί έναν **νέο Domain Controller** στο AD και τον χρησιμοποιεί για να **σπρώξει χαρακτηριστικά** (SIDHistory, SPNs...) σε καθορισμένα αντικείμενα **χωρίς** να αφήνει κανένα **καταγραφή** σχετικά με τις **τροποποιήσεις**. Χρειάζεστε δικαιώματα DA και να είστε μέσα στο **root domain**.\
+Σημειώστε ότι αν χρησιμοποιήσετε λανθασμένα δεδομένα, θα εμφανιστούν πολύ άσχημες καταγραφές.
 
 {{#ref}}
 dcshadow.md
 {{#endref}}
 
-### LAPS Persistence
+### Επιμονή LAPS
 
-Previously we have discussed about how to escalate privileges if you have **enough permission to read LAPS passwords**. However, these passwords can also be used to **maintain persistence**.\
-Check:
+Προηγουμένως έχουμε συζητήσει πώς να κλιμακώσετε δικαιώματα αν έχετε **αρκετά δικαιώματα για να διαβάσετε τους κωδικούς πρόσβασης LAPS**. Ωστόσο, αυτοί οι κωδικοί πρόσβασης μπορούν επίσης να χρησιμοποιηθούν για **διατήρηση επιμονής**.\
+Ελέγξτε:
 
 {{#ref}}
 laps.md
 {{#endref}}
 
-## Forest Privilege Escalation - Domain Trusts
+## Κλιμάκωση Δικαιωμάτων Δάσους - Εμπιστευμένοι Τομείς
 
-Microsoft views the **Forest** as the security boundary. This implies that **compromising a single domain could potentially lead to the entire Forest being compromised**.
+Η Microsoft βλέπει το **Δάσος** ως το όριο ασφαλείας. Αυτό σημαίνει ότι **η κατάχρηση ενός μόνο τομέα θα μπορούσε ενδεχομένως να οδηγήσει σε ολόκληρο το Δάσος να είναι συμβιβασμένο**.
 
-### Basic Information
+### Βασικές Πληροφορίες
 
-A [**domain trust**](<http://technet.microsoft.com/en-us/library/cc759554(v=ws.10).aspx>) is a security mechanism that enables a user from one **domain** to access resources in another **domain**. It essentially creates a linkage between the authentication systems of the two domains, allowing authentication verifications to flow seamlessly. When domains set up a trust, they exchange and retain specific **keys** within their **Domain Controllers (DCs)**, which are crucial to the trust's integrity.
+Μια [**εμπιστοσύνη τομέα**](<http://technet.microsoft.com/en-us/library/cc759554(v=ws.10).aspx>) είναι ένας μηχανισμός ασφαλείας που επιτρέπει σε έναν χρήστη από έναν **τομέα** να έχει πρόσβαση σε πόρους σε έναν άλλο **τομέα**. Δημιουργεί ουσιαστικά μια σύνδεση μεταξύ των συστημάτων αυθεντικοποίησης των δύο τομέων, επιτρέποντας την ομαλή ροή των επαληθεύσεων αυθεντικοποίησης. Όταν οι τομείς ρυθμίζουν μια εμπιστοσύνη, ανταλλάσσουν και διατηρούν συγκεκριμένα **κλειδιά** μέσα στους **Domain Controllers (DCs)** τους, τα οποία είναι κρίσιμα για την ακεραιότητα της εμπιστοσύνης.
 
-In a typical scenario, if a user intends to access a service in a **trusted domain**, they must first request a special ticket known as an **inter-realm TGT** from their own domain's DC. This TGT is encrypted with a shared **key** that both domains have agreed upon. The user then presents this TGT to the **DC of the trusted domain** to get a service ticket (**TGS**). Upon successful validation of the inter-realm TGT by the trusted domain's DC, it issues a TGS, granting the user access to the service.
+Σε ένα τυπικό σενάριο, εάν ένας χρήστης σκοπεύει να έχει πρόσβαση σε μια υπηρεσία σε έναν **εμπιστευμένο τομέα**, πρέπει πρώτα να ζητήσει ένα ειδικό εισιτήριο γνωστό ως **inter-realm TGT** από τον DC του δικού του τομέα. Αυτό το TGT είναι κρυπτογραφημένο με ένα κοινό **κλειδί** που έχουν συμφωνήσει και οι δύο τομείς. Ο χρήστης στη συνέχεια παρουσιάζει αυτό το TGT στον **DC του εμπιστευμένου τομέα** για να αποκτήσει ένα εισιτήριο υπηρεσίας (**TGS**). Μετά την επιτυχή επικύρωση του inter-realm TGT από τον DC του εμπιστευμένου τομέα, εκδίδει ένα TGS, παρέχοντας στον χρήστη πρόσβαση στην υπηρεσία.
 
-**Steps**:
+**Βήματα**:
 
-1. A **client computer** in **Domain 1** starts the process by using its **NTLM hash** to request a **Ticket Granting Ticket (TGT)** from its **Domain Controller (DC1)**.
-2. DC1 issues a new TGT if the client is authenticated successfully.
-3. The client then requests an **inter-realm TGT** from DC1, which is needed to access resources in **Domain 2**.
-4. The inter-realm TGT is encrypted with a **trust key** shared between DC1 and DC2 as part of the two-way domain trust.
-5. The client takes the inter-realm TGT to **Domain 2's Domain Controller (DC2)**.
-6. DC2 verifies the inter-realm TGT using its shared trust key and, if valid, issues a **Ticket Granting Service (TGS)** for the server in Domain 2 the client wants to access.
-7. Finally, the client presents this TGS to the server, which is encrypted with the server’s account hash, to get access to the service in Domain 2.
+1. Ένας **υπολογιστής-πελάτης** στον **Τομέα 1** ξεκινά τη διαδικασία χρησιμοποιώντας το **NTLM hash** του για να ζητήσει ένα **Ticket Granting Ticket (TGT)** από τον **Domain Controller (DC1)** του.
+2. Ο DC1 εκδίδει ένα νέο TGT εάν ο πελάτης αυθεντικοποιηθεί επιτυχώς.
+3. Ο πελάτης στη συνέχεια ζητά ένα **inter-realm TGT** από τον DC1, το οποίο είναι απαραίτητο για να αποκτήσει πρόσβαση σε πόρους στον **Τομέα 2**.
+4. Το inter-realm TGT κρυπτογραφείται με ένα **κλειδί εμπιστοσύνης** που μοιράζονται οι DC1 και DC2 ως μέρος της διπλής εμπιστοσύνης τομέα.
+5. Ο πελάτης παίρνει το inter-realm TGT στον **Domain Controller του Τομέα 2 (DC2)**.
+6. Ο DC2 επαληθεύει το inter-realm TGT χρησιμοποιώντας το κοινό κλειδί εμπιστοσύνης του και, εάν είναι έγκυρο, εκδίδει ένα **Ticket Granting Service (TGS)** για τον διακομιστή στον Τομέα 2 που θέλει να αποκτήσει πρόσβαση ο πελάτης.
+7. Τέλος, ο πελάτης παρουσιάζει αυτό το TGS στον διακομιστή, το οποίο είναι κρυπτογραφημένο με το hash του λογαριασμού του διακομιστή, για να αποκτήσει πρόσβαση στην υπηρεσία στον Τομέα 2.
 
-### Different trusts
+### Διάφορες εμπιστοσύνες
 
-It's important to notice that **a trust can be 1 way or 2 ways**. In the 2 ways options, both domains will trust each other, but in the **1 way** trust relation one of the domains will be the **trusted** and the other the **trusting** domain. In the last case, **you will only be able to access resources inside the trusting domain from the trusted one**.
+Είναι σημαντικό να σημειωθεί ότι **μια εμπιστοσύνη μπορεί να είναι 1 κατεύθυνσης ή 2 κατευθύνσεων**. Στην επιλογή 2 κατευθύνσεων, και οι δύο τομείς θα εμπιστεύονται ο ένας τον άλλο, αλλά στη **1 κατεύθυνσης** σχέση εμπιστοσύνης, ένας από τους τομείς θα είναι ο **εμπιστευμένος** και ο άλλος ο **εμπιστευόμενος** τομέας. Στην τελευταία περίπτωση, **θα μπορείτε να έχετε πρόσβαση σε πόρους μόνο μέσα στον εμπιστευόμενο τομέα από τον εμπιστευμένο.**
 
-If Domain A trusts Domain B, A is the trusting domain and B ins the trusted one. Moreover, in **Domain A**, this would be an **Outbound trust**; and in **Domain B**, this would be an **Inbound trust**.
+Εάν ο Τομέας A εμπιστεύεται τον Τομέα B, ο A είναι ο εμπιστευόμενος τομέας και ο B είναι ο εμπιστευμένος. Επιπλέον, στον **Τομέα A**, αυτό θα ήταν μια **Outbound trust**; και στον **Τομέα B**, αυτό θα ήταν μια **Inbound trust**.
 
-**Different trusting relationships**
+**Διαφορετικές σχέσεις εμπιστοσύνης**
 
-- **Parent-Child Trusts**: This is a common setup within the same forest, where a child domain automatically has a two-way transitive trust with its parent domain. Essentially, this means that authentication requests can flow seamlessly between the parent and the child.
-- **Cross-link Trusts**: Referred to as "shortcut trusts," these are established between child domains to expedite referral processes. In complex forests, authentication referrals typically have to travel up to the forest root and then down to the target domain. By creating cross-links, the journey is shortened, which is especially beneficial in geographically dispersed environments.
-- **External Trusts**: These are set up between different, unrelated domains and are non-transitive by nature. According to [Microsoft's documentation](<https://technet.microsoft.com/en-us/library/cc773178(v=ws.10).aspx>), external trusts are useful for accessing resources in a domain outside of the current forest that isn't connected by a forest trust. Security is bolstered through SID filtering with external trusts.
-- **Tree-root Trusts**: These trusts are automatically established between the forest root domain and a newly added tree root. While not commonly encountered, tree-root trusts are important for adding new domain trees to a forest, enabling them to maintain a unique domain name and ensuring two-way transitivity. More information can be found in [Microsoft's guide](<https://technet.microsoft.com/en-us/library/cc773178(v=ws.10).aspx>).
-- **Forest Trusts**: This type of trust is a two-way transitive trust between two forest root domains, also enforcing SID filtering to enhance security measures.
-- **MIT Trusts**: These trusts are established with non-Windows, [RFC4120-compliant](https://tools.ietf.org/html/rfc4120) Kerberos domains. MIT trusts are a bit more specialized and cater to environments requiring integration with Kerberos-based systems outside the Windows ecosystem.
+- **Εμπιστοσύνες Γονέα-Παιδιού**: Αυτή είναι μια κοινή ρύθμιση εντός του ίδιου δάσους, όπου ένας παιδικός τομέας έχει αυτόματα μια διπλή μεταβατική εμπιστοσύνη με τον γονικό τομέα του. Ουσιαστικά, αυτό σημαίνει ότι οι αιτήσεις αυθεντικοποίησης μπορούν να ρέουν ομαλά μεταξύ του γονέα και του παιδιού.
+- **Διασυνδεδεμένες Εμπιστοσύνες**: Αναφέρονται ως "συντομευμένες εμπιστοσύνες", αυτές καθορίζονται μεταξύ παιδικών τομέων για να επιταχύνουν τις διαδικασίες παραπομπής. Σε πολύπλοκα δάση, οι παραπομπές αυθεντικοποίησης συνήθως πρέπει να ταξιδεύουν μέχρι τη ρίζα του δάσους και στη συνέχεια προς τα κάτω στον στόχο τομέα. Δημιουργώντας διασυνδέσεις, η διαδρομή συντομεύεται, κάτι που είναι ιδιαίτερα ευεργετικό σε γεωγραφικά διασκορπισμένα περιβάλλοντα.
+- **Εξωτερικές Εμπιστοσύνες**: Αυτές καθορίζονται μεταξύ διαφορετικών, άσχετων τομέων και είναι μη μεταβατικές από τη φύση τους. Σύμφωνα με [την τεκμηρίωση της Microsoft](<https://technet.microsoft.com/en-us/library/cc773178(v=ws.10).aspx>), οι εξωτερικές εμπιστοσύνες είναι χρήσιμες για την πρόσβαση σε πόρους σε έναν τομέα εκτός του τρέχοντος δάσους που δεν είναι συνδεδεμένος μέσω μιας εμπιστοσύνης δάσους. Η ασφάλεια ενισχύεται μέσω φιλτραρίσματος SID με εξωτερικές εμπιστοσύνες.
+- **Εμπιστοσύνες Ρίζας Δέντρου**: Αυτές οι εμπιστοσύνες καθορίζονται αυτόματα μεταξύ του ριζικού τομέα του δάσους και ενός νέου ριζικού δέντρου που προστίθεται. Αν και δεν συναντώνται συχνά, οι εμπιστοσύνες ρίζας δέντρου είναι σημαντικές για την προσθήκη νέων δέντρων τομέα σε ένα δάσος, επιτρέποντάς τους να διατηρούν ένα μοναδικό όνομα τομέα και διασφαλίζοντας τη διπλή μεταβατικότητα. Περισσότερες πληροφορίες μπορείτε να βρείτε στον [οδηγό της Microsoft](<https://technet.microsoft.com/en-us/library/cc773178(v=ws.10).aspx>).
+- **Εμπιστοσύνες Δάσους**: Αυτός ο τύπος εμπιστοσύνης είναι μια διπλή μεταβατική εμπιστοσύνη μεταξύ δύο ριζικών τομέων δάσους, επιβάλλοντας επίσης φιλτράρισμα SID για την ενίσχυση των μέτρων ασφαλείας.
+- **Εμπιστοσύνες MIT**: Αυτές οι εμπιστοσύνες καθορίζονται με μη Windows, [RFC4120-compliant](https://tools.ietf.org/html/rfc4120) Kerberos τομείς. Οι εμπιστοσύνες MIT είναι λίγο πιο εξειδικευμένες και απευθύνονται σε περιβάλλοντα που απαιτούν ενσωμάτωση με συστήματα Kerberos εκτός του οικοσυστήματος Windows.
 
-#### Other differences in **trusting relationships**
+#### Άλλες διαφορές στις **σχέσεις εμπιστοσύνης**
 
-- A trust relationship can also be **transitive** (A trust B, B trust C, then A trust C) or **non-transitive**.
-- A trust relationship can be set up as **bidirectional trust** (both trust each other) or as **one-way trust** (only one of them trust the other).
+- Μια σχέση εμπιστοσύνης μπορεί επίσης να είναι **μεταβατική** (A εμπιστεύεται B, B εμπιστεύεται C, τότε A εμπιστεύεται C) ή **μη μεταβατική**.
+- Μια σχέση εμπιστοσύνης μπορεί να ρυθμιστεί ως **αμφίδρομη εμπιστοσύνη** (και οι δύο εμπιστεύονται ο ένας τον άλλο) ή ως **μονοκατεύθυνση εμπιστοσύνη** (μόνο ένας από αυτούς εμπιστεύεται τον άλλο).
 
-### Attack Path
+### Διαδρομή Επίθεσης
 
-1. **Enumerate** the trusting relationships
-2. Check if any **security principal** (user/group/computer) has **access** to resources of the **other domain**, maybe by ACE entries or by being in groups of the other domain. Look for **relationships across domains** (the trust was created for this probably).
-   1. kerberoast in this case could be another option.
-3. **Compromise** the **accounts** which can **pivot** through domains.
+1. **Καταγράψτε** τις σχέσεις εμπιστοσύνης
+2. Ελέγξτε αν οποιοδήποτε **ασφαλές κύριο** (χρήστης/ομάδα/υπολογιστής) έχει **πρόσβαση** σε πόρους του **άλλου τομέα**, ίσως μέσω εγγραφών ACE ή μέσω συμμετοχής σε ομάδες του άλλου τομέα. Αναζητήστε **σχέσεις μεταξύ τομέων** (η εμπιστοσύνη δημιουργήθηκε πιθανώς για αυτό).
+1. Το kerberoast σε αυτή την περίπτωση θα μπορούσε να είναι μια άλλη επιλογή.
+3. **Συμβιβάστε** τους **λογαριασμούς** που μπορούν να **μεταβούν** μέσω τομέων.
 
-Attackers with could access to resources in another domain through three primary mechanisms:
+Οι επιτιθέμενοι θα μπορούσαν να έχουν πρόσβαση σε πόρους σε άλλο τομέα μέσω τριών κύριων μηχανισμών:
 
-- **Local Group Membership**: Principals might be added to local groups on machines, such as the “Administrators” group on a server, granting them significant control over that machine.
-- **Foreign Domain Group Membership**: Principals can also be members of groups within the foreign domain. However, the effectiveness of this method depends on the nature of the trust and the scope of the group.
-- **Access Control Lists (ACLs)**: Principals might be specified in an **ACL**, particularly as entities in **ACEs** within a **DACL**, providing them access to specific resources. For those looking to dive deeper into the mechanics of ACLs, DACLs, and ACEs, the whitepaper titled “[An ACE Up The Sleeve](https://specterops.io/assets/resources/an_ace_up_the_sleeve.pdf)” is an invaluable resource.
+- **Μέλος Τοπικής Ομάδας**: Οι κύριοι μπορεί να προστεθούν σε τοπικές ομάδες σε μηχανές, όπως η ομάδα “Administrators” σε έναν διακομιστή, παρέχοντας τους σημαντικό έλεγχο πάνω σε αυτή τη μηχανή.
+- **Μέλος Ομάδας Ξένου Τομέα**: Οι κύριοι μπορούν επίσης να είναι μέλη ομάδων εντός του ξένου τομέα. Ωστόσο, η αποτελεσματικότητα αυτής της μεθόδου εξαρτάται από τη φύση της εμπιστοσύνης και την έκταση της ομάδας.
+- **Λίστες Ελέγχου Πρόσβασης (ACLs)**: Οι κύριοι μπορεί να καθορίζονται σε μια **ACL**, ιδιαίτερα ως οντότητες σε **ACEs** εντός μιας **DACL**, παρέχοντας τους πρόσβαση σε συγκεκριμένους πόρους. Για όσους επιθυμούν να εμβαθύνουν στους μηχανισμούς των ACLs, DACLs και ACEs, το λευκό έγγραφο με τίτλο “[An ACE Up The Sleeve](https://specterops.io/assets/resources/an_ace_up_the_sleeve.pdf)” είναι μια ανεκτίμητη πηγή.
 
-### Child-to-Parent forest privilege escalation
-
+### Κλιμάκωση Δικαιωμάτων Δάσους από Παιδί σε Γονέα
 ```
 Get-DomainTrust
 
@@ -572,10 +563,9 @@ TrustDirection  : Bidirectional       --> Trust direction (2ways in this case)
 WhenCreated     : 2/19/2021 1:28:00 PM
 WhenChanged     : 2/19/2021 1:28:00 PM
 ```
-
 > [!WARNING]
-> There are **2 trusted keys**, one for _Child --> Parent_ and another one for _Parent_ --> _Child_.\
-> You can the one used by the current domain them with:
+> Υπάρχουν **2 αξιόπιστα κλειδιά**, ένα για _Child --> Parent_ και ένα άλλο για _Parent_ --> _Child_.\
+> Μπορείτε να χρησιμοποιήσετε το κλειδί που χρησιμοποιείται από το τρέχον domain με:
 >
 > ```bash
 > Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.my.domain.local
@@ -584,42 +574,41 @@ WhenChanged     : 2/19/2021 1:28:00 PM
 
 #### SID-History Injection
 
-Escalate as Enterprise admin to the child/parent domain abusing the trust with SID-History injection:
+Αναβαθμίστε ως Enterprise admin στο child/parent domain εκμεταλλευόμενοι την εμπιστοσύνη με την ένεση SID-History:
 
 {{#ref}}
 sid-history-injection.md
 {{#endref}}
 
-#### Exploit writeable Configuration NC
+#### Εκμετάλλευση γράψιμου Configuration NC
 
-Understanding how the Configuration Naming Context (NC) can be exploited is crucial. The Configuration NC serves as a central repository for configuration data across a forest in Active Directory (AD) environments. This data is replicated to every Domain Controller (DC) within the forest, with writable DCs maintaining a writable copy of the Configuration NC. To exploit this, one must have **SYSTEM privileges on a DC**, preferably a child DC.
+Η κατανόηση του πώς μπορεί να εκμεταλλευτεί το Configuration Naming Context (NC) είναι κρίσιμη. Το Configuration NC λειτουργεί ως κεντρική αποθήκη για δεδομένα διαμόρφωσης σε ένα δάσος σε περιβάλλοντα Active Directory (AD). Αυτά τα δεδομένα αναπαράγονται σε κάθε Domain Controller (DC) εντός του δάσους, με τα writable DCs να διατηρούν μια γράψιμη αντίγραφο του Configuration NC. Για να εκμεταλλευτεί αυτό, πρέπει να έχετε **SYSTEM privileges σε ένα DC**, κατά προτίμηση σε ένα child DC.
 
-**Link GPO to root DC site**
+**Σύνδεση GPO με το root DC site**
 
-The Configuration NC's Sites container includes information about all domain-joined computers' sites within the AD forest. By operating with SYSTEM privileges on any DC, attackers can link GPOs to the root DC sites. This action potentially compromises the root domain by manipulating policies applied to these sites.
+Το Sites container του Configuration NC περιλαμβάνει πληροφορίες σχετικά με όλα τα domain-joined υπολογιστές εντός του AD δάσους. Λειτουργώντας με SYSTEM privileges σε οποιοδήποτε DC, οι επιτιθέμενοι μπορούν να συνδέσουν GPOs με τα root DC sites. Αυτή η ενέργεια ενδέχεται να θέσει σε κίνδυνο το root domain, χειραγωγώντας τις πολιτικές που εφαρμόζονται σε αυτά τα sites.
 
-For in-depth information, one might explore research on [Bypassing SID Filtering](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-4-bypass-sid-filtering-research).
+Για λεπτομερείς πληροφορίες, μπορείτε να εξερευνήσετε έρευνες σχετικά με [Bypassing SID Filtering](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-4-bypass-sid-filtering-research).
 
-**Compromise any gMSA in the forest**
+**Συμβιβασμός οποιουδήποτε gMSA στο δάσος**
 
-An attack vector involves targeting privileged gMSAs within the domain. The KDS Root key, essential for calculating gMSAs' passwords, is stored within the Configuration NC. With SYSTEM privileges on any DC, it's possible to access the KDS Root key and compute the passwords for any gMSA across the forest.
+Ένας επιθετικός παράγοντας περιλαμβάνει την στόχευση προνομιακών gMSAs εντός του domain. Το KDS Root key, που είναι απαραίτητο για τον υπολογισμό των κωδικών πρόσβασης των gMSAs, αποθηκεύεται στο Configuration NC. Με SYSTEM privileges σε οποιοδήποτε DC, είναι δυνατό να αποκτήσετε πρόσβαση στο KDS Root key και να υπολογίσετε τους κωδικούς πρόσβασης για οποιοδήποτε gMSA σε όλο το δάσος.
 
-Detailed analysis can be found in the discussion on [Golden gMSA Trust Attacks](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-5-golden-gmsa-trust-attack-from-child-to-parent).
+Λεπτομερής ανάλυση μπορεί να βρεθεί στη συζήτηση σχετικά με [Golden gMSA Trust Attacks](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-5-golden-gmsa-trust-attack-from-child-to-parent).
 
-**Schema change attack**
+**Επίθεση αλλαγής σχήματος**
 
-This method requires patience, waiting for the creation of new privileged AD objects. With SYSTEM privileges, an attacker can modify the AD Schema to grant any user complete control over all classes. This could lead to unauthorized access and control over newly created AD objects.
+Αυτή η μέθοδος απαιτεί υπομονή, περιμένοντας τη δημιουργία νέων προνομιακών AD αντικειμένων. Με SYSTEM privileges, ένας επιτιθέμενος μπορεί να τροποποιήσει το AD Schema για να παραχωρήσει σε οποιονδήποτε χρήστη πλήρη έλεγχο σε όλες τις κλάσεις. Αυτό θα μπορούσε να οδηγήσει σε μη εξουσιοδοτημένη πρόσβαση και έλεγχο σε νεοδημιουργημένα AD αντικείμενα.
 
-Further reading is available on [Schema Change Trust Attacks](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-6-schema-change-trust-attack-from-child-to-parent).
+Περισσότερη ανάγνωση είναι διαθέσιμη σχετικά με [Schema Change Trust Attacks](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-6-schema-change-trust-attack-from-child-to-parent).
 
-**From DA to EA with ADCS ESC5**
+**Από DA σε EA με ADCS ESC5**
 
-The ADCS ESC5 vulnerability targets control over Public Key Infrastructure (PKI) objects to create a certificate template that enables authentication as any user within the forest. As PKI objects reside in the Configuration NC, compromising a writable child DC enables the execution of ESC5 attacks.
+Η ευπάθεια ADCS ESC5 στοχεύει τον έλεγχο των αντικειμένων Δημόσιου Κλειδιού Υποδομής (PKI) για τη δημιουργία ενός προτύπου πιστοποιητικού που επιτρέπει την αυθεντικοποίηση ως οποιοσδήποτε χρήστης εντός του δάσους. Καθώς τα αντικείμενα PKI βρίσκονται στο Configuration NC, η εκμετάλλευση ενός writable child DC επιτρέπει την εκτέλεση επιθέσεων ESC5.
 
-More details on this can be read in [From DA to EA with ESC5](https://posts.specterops.io/from-da-to-ea-with-esc5-f9f045aa105c). In scenarios lacking ADCS, the attacker has the capability to set up the necessary components, as discussed in [Escalating from Child Domain Admins to Enterprise Admins](https://www.pkisolutions.com/escalating-from-child-domains-admins-to-enterprise-admins-in-5-minutes-by-abusing-ad-cs-a-follow-up/).
+Περισσότερες λεπτομέρειες σχετικά με αυτό μπορούν να διαβαστούν στο [From DA to EA with ESC5](https://posts.specterops.io/from-da-to-ea-with-esc5-f9f045aa105c). Σε σενάρια που λείπει το ADCS, ο επιτιθέμενος έχει τη δυνατότητα να ρυθμίσει τα απαραίτητα στοιχεία, όπως συζητείται στο [Escalating from Child Domain Admins to Enterprise Admins](https://www.pkisolutions.com/escalating-from-child-domains-admins-to-enterprise-admins-in-5-minutes-by-abusing-ad-cs-a-follow-up/).
 
-### External Forest Domain - One-Way (Inbound) or bidirectional
-
+### External Forest Domain - One-Way (Inbound) ή αμφίδρομο
 ```powershell
 Get-DomainTrust
 SourceName      : a.domain.local   --> Current domain
@@ -630,15 +619,13 @@ TrustDirection  : Inbound          --> Inboud trust
 WhenCreated     : 2/19/2021 10:50:56 PM
 WhenChanged     : 2/19/2021 10:50:56 PM
 ```
-
-In this scenario **your domain is trusted** by an external one giving you **undetermined permissions** over it. You will need to find **which principals of your domain have which access over the external domain** and then try to exploit it:
+Σε αυτό το σενάριο **το domain σας είναι αξιόπιστο** από ένα εξωτερικό, δίνοντάς σας **ακαθόριστες άδειες** πάνω σε αυτό. Θα χρειαστεί να βρείτε **ποιοι φορείς του domain σας έχουν ποια πρόσβαση στο εξωτερικό domain** και στη συνέχεια να προσπαθήσετε να το εκμεταλλευτείτε:
 
 {{#ref}}
 external-forest-domain-oneway-inbound.md
 {{#endref}}
 
-### External Forest Domain - One-Way (Outbound)
-
+### Εξωτερικό Δάσος Domain - Μονοκατεύθυνση (Εξαγωγή)
 ```powershell
 Get-DomainTrust -Domain current.local
 
@@ -650,75 +637,73 @@ TrustDirection  : Outbound        --> Outbound trust
 WhenCreated     : 2/19/2021 10:15:24 PM
 WhenChanged     : 2/19/2021 10:15:24 PM
 ```
+Σε αυτό το σενάριο **το domain σας** **εμπιστεύεται** κάποιες **privileges** σε έναν κύριο από **διαφορετικά domains**.
 
-In this scenario **your domain** is **trusting** some **privileges** to principal from a **different domains**.
-
-However, when a **domain is trusted** by the trusting domain, the trusted domain **creates a user** with a **predictable name** that uses as **password the trusted password**. Which means that it's possible to **access a user from the trusting domain to get inside the trusted one** to enumerate it and try to escalate more privileges:
+Ωστόσο, όταν ένα **domain είναι εμπιστευμένο** από το εμπιστευόμενο domain, το εμπιστευμένο domain **δημιουργεί έναν χρήστη** με ένα **προβλέψιμο όνομα** που χρησιμοποιεί ως **κωδικό τον εμπιστευμένο κωδικό**. Αυτό σημαίνει ότι είναι δυνατό να **προσεγγίσετε έναν χρήστη από το εμπιστευόμενο domain για να εισέλθετε στο εμπιστευμένο** για να τον καταγράψετε και να προσπαθήσετε να κλιμακώσετε περισσότερες privileges:
 
 {{#ref}}
 external-forest-domain-one-way-outbound.md
 {{#endref}}
 
-Another way to compromise the trusted domain is to find a [**SQL trusted link**](abusing-ad-mssql.md#mssql-trusted-links) created in the **opposite direction** of the domain trust (which isn't very common).
+Ένας άλλος τρόπος για να συμβιβαστεί το εμπιστευμένο domain είναι να βρείτε έναν [**SQL trusted link**](abusing-ad-mssql.md#mssql-trusted-links) που έχει δημιουργηθεί στην **αντίθετη κατεύθυνση** της εμπιστοσύνης του domain (το οποίο δεν είναι πολύ συνηθισμένο).
 
-Another way to compromise the trusted domain is to wait in a machine where a **user from the trusted domain can access** to login via **RDP**. Then, the attacker could inject code in the RDP session process and **access the origin domain of the victim** from there.\
-Moreover, if the **victim mounted his hard drive**, from the **RDP session** process the attacker could store **backdoors** in the **startup folder of the hard drive**. This technique is called **RDPInception.**
+Ένας άλλος τρόπος για να συμβιβαστεί το εμπιστευμένο domain είναι να περιμένετε σε μια μηχανή όπου ένας **χρήστης από το εμπιστευμένο domain μπορεί να έχει πρόσβαση** για να συνδεθεί μέσω **RDP**. Στη συνέχεια, ο επιτιθέμενος θα μπορούσε να εισάγει κώδικα στη διαδικασία συνεδρίας RDP και να **προσεγγίσει το αρχικό domain του θύματος** από εκεί.\
+Επιπλέον, αν το **θύμα έχει προσαρτήσει τον σκληρό του δίσκο**, από τη διαδικασία της **συνεδρίας RDP** ο επιτιθέμενος θα μπορούσε να αποθηκεύσει **backdoors** στον **φάκελο εκκίνησης του σκληρού δίσκου**. Αυτή η τεχνική ονομάζεται **RDPInception.**
 
 {{#ref}}
 rdp-sessions-abuse.md
 {{#endref}}
 
-### Domain trust abuse mitigation
+### Μείωση κακοποίησης εμπιστοσύνης domain
 
-### **SID Filtering:**
+### **Φιλτράρισμα SID:**
 
-- The risk of attacks leveraging the SID history attribute across forest trusts is mitigated by SID Filtering, which is activated by default on all inter-forest trusts. This is underpinned by the assumption that intra-forest trusts are secure, considering the forest, rather than the domain, as the security boundary as per Microsoft's stance.
-- However, there's a catch: SID filtering might disrupt applications and user access, leading to its occasional deactivation.
+- Ο κίνδυνος επιθέσεων που εκμεταλλεύονται το SID history attribute σε διασυνδέσεις δασών μειώνεται με το SID Filtering, το οποίο είναι ενεργοποιημένο από προεπιλογή σε όλες τις διασυνδέσεις μεταξύ δασών. Αυτό στηρίζεται στην υπόθεση ότι οι διασυνδέσεις εντός του δάσους είναι ασφαλείς, θεωρώντας το δάσος, αντί για το domain, ως το όριο ασφαλείας σύμφωνα με τη θέση της Microsoft.
+- Ωστόσο, υπάρχει μια παγίδα: το φιλτράρισμα SID μπορεί να διαταράξει τις εφαρμογές και την πρόσβαση των χρηστών, οδηγώντας σε περιστασιακή απενεργοποίησή του.
 
-### **Selective Authentication:**
+### **Επιλεκτική Αυθεντικοποίηση:**
 
-- For inter-forest trusts, employing Selective Authentication ensures that users from the two forests are not automatically authenticated. Instead, explicit permissions are required for users to access domains and servers within the trusting domain or forest.
-- It's important to note that these measures do not safeguard against the exploitation of the writable Configuration Naming Context (NC) or attacks on the trust account.
+- Για τις διασυνδέσεις μεταξύ δασών, η χρήση Επιλεκτικής Αυθεντικοποίησης διασφαλίζει ότι οι χρήστες από τα δύο δάση δεν αυθεντικοποιούνται αυτόματα. Αντίθετα, απαιτούνται ρητές άδειες για τους χρήστες να έχουν πρόσβαση σε domains και servers εντός του εμπιστευόμενου domain ή δάσους.
+- Είναι σημαντικό να σημειωθεί ότι αυτά τα μέτρα δεν προστατεύουν από την εκμετάλλευση του writable Configuration Naming Context (NC) ή επιθέσεις στον λογαριασμό εμπιστοσύνης.
 
-[**More information about domain trusts in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/child-domain-da-to-ea-in-parent-domain)
+[**Περισσότερες πληροφορίες σχετικά με τις εμπιστοσύνες domain στο ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/child-domain-da-to-ea-in-parent-domain)
 
 ## AD -> Azure & Azure -> AD
 
 {% embed url="https://cloud.hacktricks.xyz/pentesting-cloud/azure-security/az-lateral-movements/azure-ad-connect-hybrid-identity" %}
 
-## Some General Defenses
+## Ορισμένες Γενικές Άμυνες
 
-[**Learn more about how to protect credentials here.**](../stealing-credentials/credentials-protections.md)\\
+[**Μάθετε περισσότερα σχετικά με το πώς να προστατεύσετε τα credentials εδώ.**](../stealing-credentials/credentials-protections.md)\\
 
-### **Defensive Measures for Credential Protection**
+### **Αμυντικά Μέτρα για την Προστασία Credentials**
 
-- **Domain Admins Restrictions**: It is recommended that Domain Admins should only be allowed to login to Domain Controllers, avoiding their use on other hosts.
-- **Service Account Privileges**: Services should not be run with Domain Admin (DA) privileges to maintain security.
-- **Temporal Privilege Limitation**: For tasks requiring DA privileges, their duration should be limited. This can be achieved by: `Add-ADGroupMember -Identity ‘Domain Admins’ -Members newDA -MemberTimeToLive (New-TimeSpan -Minutes 20)`
+- **Περιορισμοί Domain Admins**: Συνιστάται οι Domain Admins να επιτρέπεται να συνδέονται μόνο σε Domain Controllers, αποφεύγοντας τη χρήση τους σε άλλους υπολογιστές.
+- **Privileges Λογαριασμού Υπηρεσίας**: Οι υπηρεσίες δεν θα πρέπει να εκτελούνται με privileges Domain Admin (DA) για να διατηρηθεί η ασφάλεια.
+- **Περιορισμός Χρόνου Privilege**: Για εργασίες που απαιτούν DA privileges, η διάρκεια τους θα πρέπει να περιορίζεται. Αυτό μπορεί να επιτευχθεί με: `Add-ADGroupMember -Identity ‘Domain Admins’ -Members newDA -MemberTimeToLive (New-TimeSpan -Minutes 20)`
 
-### **Implementing Deception Techniques**
+### **Εφαρμογή Τεχνικών Απάτης**
 
-- Implementing deception involves setting traps, like decoy users or computers, with features such as passwords that do not expire or are marked as Trusted for Delegation. A detailed approach includes creating users with specific rights or adding them to high privilege groups.
-- A practical example involves using tools like: `Create-DecoyUser -UserFirstName user -UserLastName manager-uncommon -Password Pass@123 | DeployUserDeception -UserFlag PasswordNeverExpires -GUID d07da11f-8a3d-42b6-b0aa-76c962be719a -Verbose`
-- More on deploying deception techniques can be found at [Deploy-Deception on GitHub](https://github.com/samratashok/Deploy-Deception).
+- Η εφαρμογή απάτης περιλαμβάνει τη δημιουργία παγίδων, όπως χρήστες ή υπολογιστές δόλωμα, με χαρακτηριστικά όπως κωδικοί που δεν λήγουν ή είναι επισημασμένοι ως Trusted for Delegation. Μια λεπτομερής προσέγγιση περιλαμβάνει τη δημιουργία χρηστών με συγκεκριμένα δικαιώματα ή την προσθήκη τους σε ομάδες υψηλών privileges.
+- Ένα πρακτικό παράδειγμα περιλαμβάνει τη χρήση εργαλείων όπως: `Create-DecoyUser -UserFirstName user -UserLastName manager-uncommon -Password Pass@123 | DeployUserDeception -UserFlag PasswordNeverExpires -GUID d07da11f-8a3d-42b6-b0aa-76c962be719a -Verbose`
+- Περισσότερα σχετικά με την ανάπτυξη τεχνικών απάτης μπορείτε να βρείτε στο [Deploy-Deception στο GitHub](https://github.com/samratashok/Deploy-Deception).
 
-### **Identifying Deception**
+### **Αναγνώριση Απάτης**
 
-- **For User Objects**: Suspicious indicators include atypical ObjectSID, infrequent logons, creation dates, and low bad password counts.
-- **General Indicators**: Comparing attributes of potential decoy objects with those of genuine ones can reveal inconsistencies. Tools like [HoneypotBuster](https://github.com/JavelinNetworks/HoneypotBuster) can assist in identifying such deceptions.
+- **Για Αντικείμενα Χρηστών**: Υποψίες δείκτες περιλαμβάνουν ασυνήθιστο ObjectSID, σπάνιες συνδέσεις, ημερομηνίες δημιουργίας και χαμηλούς αριθμούς κακών κωδικών.
+- **Γενικοί Δείκτες**: Η σύγκριση χαρακτηριστικών πιθανών αντικειμένων δόλωμα με αυτά των γνήσιων μπορεί να αποκαλύψει ασυνέπειες. Εργαλεία όπως το [HoneypotBuster](https://github.com/JavelinNetworks/HoneypotBuster) μπορούν να βοηθήσουν στην αναγνώριση τέτοιων απατών.
 
-### **Bypassing Detection Systems**
+### **Παράκαμψη Συστήματος Ανίχνευσης**
 
-- **Microsoft ATA Detection Bypass**:
-  - **User Enumeration**: Avoiding session enumeration on Domain Controllers to prevent ATA detection.
-  - **Ticket Impersonation**: Utilizing **aes** keys for ticket creation helps evade detection by not downgrading to NTLM.
-  - **DCSync Attacks**: Executing from a non-Domain Controller to avoid ATA detection is advised, as direct execution from a Domain Controller will trigger alerts.
+- **Παράκαμψη Ανίχνευσης Microsoft ATA**:
+- **Αναγνώριση Χρηστών**: Αποφυγή αναγνώρισης συνεδριών σε Domain Controllers για την αποφυγή ανίχνευσης από το ATA.
+- **Μίμηση Εισιτηρίων**: Η χρήση **aes** κλειδιών για τη δημιουργία εισιτηρίων βοηθά στην αποφυγή ανίχνευσης, αποφεύγοντας την υποβάθμιση σε NTLM.
+- **Επιθέσεις DCSync**: Συνιστάται η εκτέλεση από μη Domain Controller για την αποφυγή ανίχνευσης από το ATA, καθώς η άμεση εκτέλεση από έναν Domain Controller θα ενεργοποιήσει ειδοποιήσεις.
 
-## References
+## Αναφορές
 
 - [http://www.harmj0y.net/blog/redteaming/a-guide-to-attacking-domain-trusts/](http://www.harmj0y.net/blog/redteaming/a-guide-to-attacking-domain-trusts/)
 - [https://www.labofapenetrationtester.com/2018/10/deploy-deception.html](https://www.labofapenetrationtester.com/2018/10/deploy-deception.html)
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/child-domain-da-to-ea-in-parent-domain](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/child-domain-da-to-ea-in-parent-domain)
 
 {{#include ../../banners/hacktricks-training.md}}
-

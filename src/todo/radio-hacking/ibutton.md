@@ -4,43 +4,42 @@
 
 ## Intro
 
-iButton is a generic name for an electronic identification key packed in a **coin-shaped metal container**. It is also called **Dallas Touch** Memory or contact memory. Even though it is often wrongly referred to as a “magnetic” key, there is **nothing magnetic** in it. In fact, a full-fledged **microchip** operating on a digital protocol is hidden inside.
+Το iButton είναι ένα γενικό όνομα για ένα ηλεκτρονικό κλειδί ταυτοποίησης που είναι συσκευασμένο σε ένα **μεταλλικό δοχείο σε σχήμα νομίσματος**. Ονομάζεται επίσης **Dallas Touch** Memory ή επαφή μνήμης. Αν και συχνά αναφέρεται λανθασμένα ως “μαγνητικό” κλειδί, δεν υπάρχει **τίποτα μαγνητικό** σε αυτό. Στην πραγματικότητα, μέσα του κρύβεται ένα πλήρες **μικροτσίπ** που λειτουργεί με ψηφιακό πρωτόκολλο.
 
 <figure><img src="../../images/image (915).png" alt=""><figcaption></figcaption></figure>
 
-### What is iButton? <a href="#what-is-ibutton" id="what-is-ibutton"></a>
+### Τι είναι το iButton; <a href="#what-is-ibutton" id="what-is-ibutton"></a>
 
-Usually, iButton implies the physical form of the key and reader - a round coin with two contacts. For the frame surrounding it, there are lots of variations from the most common plastic holder with a hole to rings, pendants, etc.
+Συνήθως, το iButton υποδηλώνει τη φυσική μορφή του κλειδιού και του αναγνώστη - ένα στρογγυλό νόμισμα με δύο επαφές. Για το πλαίσιο που το περιβάλλει, υπάρχουν πολλές παραλλαγές από τον πιο κοινό πλαστικό θήκη με τρύπα μέχρι δαχτυλίδια, κρεμαστά κ.λπ.
 
 <figure><img src="../../images/image (1078).png" alt=""><figcaption></figcaption></figure>
 
-When the key reaches the reader, the **contacts come to touch** and the key is powered to **transmit** its ID. Sometimes the key is **not read** immediately because the **contact PSD of an intercom is larger** than it should be. So the outer contours of the key and the reader couldn't touch. If that's the case, you'll have to press the key over one of the walls of the reader.
+Όταν το κλειδί φτάσει στον αναγνώστη, οι **επαφές έρχονται σε επαφή** και το κλειδί τροφοδοτείται για να **μεταδώσει** την ταυτότητά του. Μερικές φορές το κλειδί **δεν διαβάζεται** αμέσως επειδή το **PSD επαφής ενός θυροτηλεφώνου είναι μεγαλύτερο** από ό,τι θα έπρεπε. Έτσι, οι εξωτερικές περιγράμματα του κλειδιού και του αναγνώστη δεν μπορούσαν να αγγίξουν. Αν συμβαίνει αυτό, θα πρέπει να πιέσετε το κλειδί πάνω σε έναν από τους τοίχους του αναγνώστη.
 
 <figure><img src="../../images/image (290).png" alt=""><figcaption></figcaption></figure>
 
-### **1-Wire protocol** <a href="#id-1-wire-protocol" id="id-1-wire-protocol"></a>
+### **Πρωτόκολλο 1-Wire** <a href="#id-1-wire-protocol" id="id-1-wire-protocol"></a>
 
-Dallas keys exchange data using the 1-wire protocol. With only one contact for data transfer (!!) in both directions, from master to slave and vice versa. The 1-wire protocol works according to the Master-Slave model. In this topology, the Master always initiates communication and the Slave follows its instructions.
+Τα κλειδιά Dallas ανταλλάσσουν δεδομένα χρησιμοποιώντας το πρωτόκολλο 1-wire. Με μόνο μία επαφή για τη μεταφορά δεδομένων (!!) και στις δύο κατευθύνσεις, από τον κύριο στον δούλο και αντίστροφα. Το πρωτόκολλο 1-wire λειτουργεί σύμφωνα με το μοντέλο Master-Slave. Σε αυτή την τοπολογία, ο Master πάντα ξεκινά την επικοινωνία και ο Slave ακολουθεί τις οδηγίες του.
 
-When the key (Slave) contacts the intercom (Master), the chip inside the key turns on, powered by the intercom, and the key is initialized. Following that the intercom requests the key ID. Next, we will look up this process in more detail.
+Όταν το κλειδί (Slave) έρχεται σε επαφή με το θυροτηλέφωνο (Master), το τσιπ μέσα στο κλειδί ενεργοποιείται, τροφοδοτούμενο από το θυροτηλέφωνο, και το κλειδί αρχικοποιείται. Ακολουθώντας αυτό, το θυροτηλέφωνο ζητά την ταυτότητα του κλειδιού. Στη συνέχεια, θα εξετάσουμε αυτή τη διαδικασία πιο λεπτομερώς.
 
-Flipper can work both in Master and Slave modes. In the key reading mode, Flipper acts as a reader this is to say it works as a Master. And in the key emulation mode, the flipper pretends to be a key, it is in the Slave mode.
+Το Flipper μπορεί να λειτουργεί τόσο σε λειτουργία Master όσο και σε λειτουργία Slave. Στη λειτουργία ανάγνωσης κλειδιού, το Flipper λειτουργεί ως αναγνώστης, δηλαδή λειτουργεί ως Master. Και στη λειτουργία προσομοίωσης κλειδιού, το Flipper προσποιείται ότι είναι ένα κλειδί, είναι σε λειτουργία Slave.
 
-### Dallas, Cyfral & Metakom keys
+### Κλειδιά Dallas, Cyfral & Metakom
 
-For information about how these keys works check the page [https://blog.flipperzero.one/taming-ibutton/](https://blog.flipperzero.one/taming-ibutton/)
+Για πληροφορίες σχετικά με το πώς λειτουργούν αυτά τα κλειδιά, ελέγξτε τη σελίδα [https://blog.flipperzero.one/taming-ibutton/](https://blog.flipperzero.one/taming-ibutton/)
 
-### Attacks
+### Επιθέσεις
 
-iButtons can be attacked with Flipper Zero:
+Τα iButtons μπορούν να επιτεθούν με το Flipper Zero:
 
 {{#ref}}
 flipper-zero/fz-ibutton.md
 {{#endref}}
 
-## References
+## Αναφορές
 
 - [https://blog.flipperzero.one/taming-ibutton/](https://blog.flipperzero.one/taming-ibutton/)
 
 {{#include ../../banners/hacktricks-training.md}}
-

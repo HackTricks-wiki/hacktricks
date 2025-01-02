@@ -1,57 +1,52 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-There are several blogs in the Internet which **highlight the dangers of leaving printers configured with LDAP with default/weak** logon credentials.\
-This is because an attacker could **trick the printer to authenticate against a rouge LDAP server** (typically a `nc -vv -l -p 444` is enough) and to capture the printer **credentials on clear-text**.
+Υπάρχουν αρκετά blogs στο Διαδίκτυο που **τονίζουν τους κινδύνους της διατήρησης εκτυπωτών ρυθμισμένων με LDAP με προεπιλεγμένα/αδύναμα** διαπιστευτήρια σύνδεσης.\
+Αυτό συμβαίνει επειδή ένας επιτιθέμενος θα μπορούσε να **παραπλανήσει τον εκτυπωτή να πιστοποιηθεί σε έναν κακόβουλο LDAP server** (συνήθως ένα `nc -vv -l -p 444` είναι αρκετό) και να καταγράψει τα **διαπιστευτήρια του εκτυπωτή σε καθαρό κείμενο**.
 
-Also, several printers will contains **logs with usernames** or could even be able to **download all usernames** from the Domain Controller.
+Επίσης, αρκετοί εκτυπωτές θα περιέχουν **αρχεία καταγραφής με ονόματα χρηστών** ή θα μπορούσαν ακόμη και να είναι σε θέση να **κατεβάσουν όλα τα ονόματα χρηστών** από τον Domain Controller.
 
-All this **sensitive information** and the common **lack of security** makes printers very interesting for attackers.
+Όλες αυτές οι **ευαίσθητες πληροφορίες** και η κοινή **έλλειψη ασφάλειας** καθιστούν τους εκτυπωτές πολύ ενδιαφέροντες για τους επιτιθέμενους.
 
-Some blogs about the topic:
+Ορισμένα blogs σχετικά με το θέμα:
 
 - [https://www.ceos3c.com/hacking/obtaining-domain-credentials-printer-netcat/](https://www.ceos3c.com/hacking/obtaining-domain-credentials-printer-netcat/)
 - [https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)
 
-## Printer Configuration
+## Ρύθμιση Εκτυπωτή
 
-- **Location**: The LDAP server list is found at: `Network > LDAP Setting > Setting Up LDAP`.
-- **Behavior**: The interface allows LDAP server modifications without re-entering credentials, aiming for user convenience but posing security risks.
-- **Exploit**: The exploit involves redirecting the LDAP server address to a controlled machine and leveraging the "Test Connection" feature to capture credentials.
+- **Τοποθεσία**: Η λίστα των LDAP servers βρίσκεται στο: `Network > LDAP Setting > Setting Up LDAP`.
+- **Συμπεριφορά**: Η διεπαφή επιτρέπει τροποποιήσεις στους LDAP servers χωρίς να απαιτείται εκ νέου εισαγωγή διαπιστευτηρίων, στοχεύοντας στην ευκολία του χρήστη αλλά θέτοντας σε κίνδυνο την ασφάλεια.
+- **Εκμετάλλευση**: Η εκμετάλλευση περιλαμβάνει την ανακατεύθυνση της διεύθυνσης του LDAP server σε έναν ελεγχόμενο υπολογιστή και την αξιοποίηση της δυνατότητας "Δοκιμή Σύνδεσης" για την καταγραφή διαπιστευτηρίων.
 
-## Capturing Credentials
+## Καταγραφή Διαπιστευτηρίων
 
-**For more detailed steps, refer to the original [source](https://grimhacker.com/2018/03/09/just-a-printer/).**
+**Για πιο λεπτομερή βήματα, ανατρέξτε στην αρχική [πηγή](https://grimhacker.com/2018/03/09/just-a-printer/).**
 
-### Method 1: Netcat Listener
+### Μέθοδος 1: Netcat Listener
 
-A simple netcat listener might suffice:
-
+Ένας απλός netcat listener μπορεί να είναι αρκετός:
 ```bash
 sudo nc -k -v -l -p 386
 ```
+Ωστόσο, η επιτυχία αυτής της μεθόδου ποικίλλει.
 
-However, this method's success varies.
+### Μέθοδος 2: Πλήρης LDAP Server με Slapd
 
-### Method 2: Full LDAP Server with Slapd
+Μια πιο αξιόπιστη προσέγγιση περιλαμβάνει τη ρύθμιση ενός πλήρους LDAP server, καθώς ο εκτυπωτής εκτελεί μια null bind ακολουθούμενη από ένα query πριν προσπαθήσει την πιστοποίηση των διαπιστευτηρίων.
 
-A more reliable approach involves setting up a full LDAP server because the printer performs a null bind followed by a query before attempting credential binding.
-
-1. **LDAP Server Setup**: The guide follows steps from [this source](https://www.server-world.info/en/note?os=Fedora_26&p=openldap).
-2. **Key Steps**:
-   - Install OpenLDAP.
-   - Configure admin password.
-   - Import basic schemas.
-   - Set domain name on LDAP DB.
-   - Configure LDAP TLS.
-3. **LDAP Service Execution**: Once set up, the LDAP service can be run using:
-
+1. **Ρύθμιση LDAP Server**: Ο οδηγός ακολουθεί βήματα από [this source](https://www.server-world.info/en/note?os=Fedora_26&p=openldap).
+2. **Κύρια Βήματα**:
+- Εγκατάσταση OpenLDAP.
+- Ρύθμιση κωδικού πρόσβασης διαχειριστή.
+- Εισαγωγή βασικών σχημάτων.
+- Ρύθμιση ονόματος τομέα στη βάση δεδομένων LDAP.
+- Ρύθμιση LDAP TLS.
+3. **Εκτέλεση Υπηρεσίας LDAP**: Μόλις ρυθμιστεί, η υπηρεσία LDAP μπορεί να εκτελείται χρησιμοποιώντας:
 ```bash
 slapd -d 2
 ```
-
-## References
+## Αναφορές
 
 - [https://grimhacker.com/2018/03/09/just-a-printer/](https://grimhacker.com/2018/03/09/just-a-printer/)
 
 {{#include ../../banners/hacktricks-training.md}}
-

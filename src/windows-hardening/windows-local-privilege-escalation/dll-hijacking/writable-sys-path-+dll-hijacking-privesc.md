@@ -2,84 +2,81 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Introduction
+## Εισαγωγή
 
-If you found that you can **write in a System Path folder** (note that this won't work if you can write in a User Path folder) it's possible that you could **escalate privileges** in the system.
+Αν διαπιστώσετε ότι μπορείτε να **γράψετε σε έναν φάκελο System Path** (σημειώστε ότι αυτό δεν θα λειτουργήσει αν μπορείτε να γράψετε σε έναν φάκελο User Path) είναι πιθανό να μπορείτε να **κλιμακώσετε τα δικαιώματα** στο σύστημα.
 
-In order to do that you can abuse a **Dll Hijacking** where you are going to **hijack a library being loaded** by a service or process with **more privileges** than yours, and because that service is loading a Dll that probably doesn't even exist in the entire system, it's going to try to load it from the System Path where you can write.
+Για να το κάνετε αυτό, μπορείτε να εκμεταλλευτείτε ένα **Dll Hijacking** όπου θα **παρακάμψετε μια βιβλιοθήκη που φορτώνεται** από μια υπηρεσία ή διαδικασία με **περισσότερα δικαιώματα** από εσάς, και επειδή αυτή η υπηρεσία φορτώνει μια Dll που πιθανώς δεν υπάρχει καν σε ολόκληρο το σύστημα, θα προσπαθήσει να την φορτώσει από το System Path όπου μπορείτε να γράψετε.
 
-For more info about **what is Dll Hijackig** check:
+Για περισσότερες πληροφορίες σχετικά με **τι είναι το Dll Hijacking** ελέγξτε:
 
 {{#ref}}
 ./
 {{#endref}}
 
-## Privesc with Dll Hijacking
+## Κλιμάκωση με Dll Hijacking
 
-### Finding a missing Dll
+### Εύρεση μιας ελλείπουσας Dll
 
-The first thing you need is to **identify a process** running with **more privileges** than you that is trying to **load a Dll from the System Path** you can write in.
+Το πρώτο πράγμα που χρειάζεστε είναι να **εντοπίσετε μια διαδικασία** που εκτελείται με **περισσότερα δικαιώματα** από εσάς και προσπαθεί να **φορτώσει μια Dll από το System Path** που μπορείτε να γράψετε.
 
-The problem in this cases is that probably thoses processes are already running. To find which Dlls are lacking the services you need to launch procmon as soon as possible (before processes are loaded). So, to find lacking .dlls do:
+Το πρόβλημα σε αυτές τις περιπτώσεις είναι ότι πιθανώς αυτές οι διαδικασίες εκτελούνται ήδη. Για να βρείτε ποιες Dlls λείπουν από τις υπηρεσίες, πρέπει να εκκινήσετε το procmon το συντομότερο δυνατό (πριν φορτωθούν οι διαδικασίες). Έτσι, για να βρείτε τις ελλείπουσες .dll, κάντε:
 
-- **Create** the folder `C:\privesc_hijacking` and add the path `C:\privesc_hijacking` to **System Path env variable**. You can do this **manually** or with **PS**:
-
+- **Δημιουργήστε** το φάκελο `C:\privesc_hijacking` και προσθέστε το μονοπάτι `C:\privesc_hijacking` στη **μεταβλητή περιβάλλοντος System Path**. Μπορείτε να το κάνετε αυτό **χειροκίνητα** ή με **PS**:
 ```powershell
 # Set the folder path to create and check events for
 $folderPath = "C:\privesc_hijacking"
 
 # Create the folder if it does not exist
 if (!(Test-Path $folderPath -PathType Container)) {
-    New-Item -ItemType Directory -Path $folderPath | Out-Null
+New-Item -ItemType Directory -Path $folderPath | Out-Null
 }
 
 # Set the folder path in the System environment variable PATH
 $envPath = [Environment]::GetEnvironmentVariable("PATH", "Machine")
 if ($envPath -notlike "*$folderPath*") {
-    $newPath = "$envPath;$folderPath"
-    [Environment]::SetEnvironmentVariable("PATH", $newPath, "Machine")
+$newPath = "$envPath;$folderPath"
+[Environment]::SetEnvironmentVariable("PATH", $newPath, "Machine")
 }
 ```
-
-- Launch **`procmon`** and go to **`Options`** --> **`Enable boot logging`** and press **`OK`** in the prompt.
-- Then, **reboot**. When the computer is restarted **`procmon`** will start **recording** events asap.
-- Once **Windows** is **started execute `procmon`** again, it'll tell you that it has been running and will **ask you if you want to store** the events in a file. Say **yes** and **store the events in a file**.
-- **After** the **file** is **generated**, **close** the opened **`procmon`** window and **open the events file**.
-- Add these **filters** and you will find all the Dlls that some **proccess tried to load** from the writable System Path folder:
+- Εκκινήστε **`procmon`** και πηγαίνετε στο **`Options`** --> **`Enable boot logging`** και πατήστε **`OK`** στο παράθυρο προειδοποίησης.
+- Στη συνέχεια, **επανεκκινήστε**. Όταν ο υπολογιστής επανεκκινήσει, το **`procmon`** θα αρχίσει να **καταγράφει** γεγονότα αμέσως.
+- Μόλις **ξεκινήσει το Windows**, εκτελέστε ξανά το **`procmon`**, θα σας πει ότι έχει τρέξει και θα **ρωτήσει αν θέλετε να αποθηκεύσετε** τα γεγονότα σε ένα αρχείο. Πείτε **ναι** και **αποθηκεύστε τα γεγονότα σε ένα αρχείο**.
+- **Αφού** το **αρχείο** έχει **δημιουργηθεί**, **κλείστε** το ανοιχτό παράθυρο **`procmon`** και **ανοίξτε το αρχείο γεγονότων**.
+- Προσθέστε αυτά τα **φίλτρα** και θα βρείτε όλα τα Dlls που κάποια **διαδικασία προσπάθησε να φορτώσει** από τον φάκελο Writable System Path:
 
 <figure><img src="../../../images/image (945).png" alt=""><figcaption></figcaption></figure>
 
-### Missed Dlls
+### Χαμένα Dlls
 
-Running this in a free **virtual (vmware) Windows 11 machine** I got these results:
+Τρέχοντας αυτό σε μια δωρεάν **εικονική (vmware) μηχανή Windows 11** πήρα αυτά τα αποτελέσματα:
 
 <figure><img src="../../../images/image (607).png" alt=""><figcaption></figcaption></figure>
 
-In this case the .exe are useless so ignore them, the missed DLLs where from:
+Σε αυτή την περίπτωση τα .exe είναι άχρηστα, οπότε αγνοήστε τα, τα χαμένα DLLs προέρχονταν από:
 
-| Service                         | Dll                | CMD line                                                             |
+| Υπηρεσία                         | Dll                | CMD γραμμή                                                             |
 | ------------------------------- | ------------------ | -------------------------------------------------------------------- |
 | Task Scheduler (Schedule)       | WptsExtensions.dll | `C:\Windows\system32\svchost.exe -k netsvcs -p -s Schedule`          |
 | Diagnostic Policy Service (DPS) | Unknown.DLL        | `C:\Windows\System32\svchost.exe -k LocalServiceNoNetwork -p -s DPS` |
 | ???                             | SharedRes.dll      | `C:\Windows\system32\svchost.exe -k UnistackSvcGroup`                |
 
-After finding this, I found this interesting blog post that also explains how to [**abuse WptsExtensions.dll for privesc**](https://juggernaut-sec.com/dll-hijacking/#Windows_10_Phantom_DLL_Hijacking_-_WptsExtensionsdll). Which is what we **are going to do now**.
+Αφού το βρήκα αυτό, βρήκα αυτή την ενδιαφέρουσα ανάρτηση blog που εξηγεί επίσης πώς να [**καταχραστείτε το WptsExtensions.dll για privesc**](https://juggernaut-sec.com/dll-hijacking/#Windows_10_Phantom_DLL_Hijacking_-_WptsExtensionsdll). Αυτό είναι που **θα κάνουμε τώρα**.
 
-### Exploitation
+### Εκμετάλλευση
 
-So, to **escalate privileges** we are going to hijack the library **WptsExtensions.dll**. Having the **path** and the **name** we just need to **generate the malicious dll**.
+Έτσι, για να **ανεβάσουμε δικαιώματα** θα καταχραστούμε τη βιβλιοθήκη **WptsExtensions.dll**. Έχοντας το **μονοπάτι** και το **όνομα** απλώς πρέπει να **δημιουργήσουμε το κακόβουλο dll**.
 
-You can [**try to use any of these examples**](./#creating-and-compiling-dlls). You could run payloads such as: get a rev shell, add a user, execute a beacon...
+Μπορείτε να [**δοκιμάσετε να χρησιμοποιήσετε οποιοδήποτε από αυτά τα παραδείγματα**](./#creating-and-compiling-dlls). Μπορείτε να εκτελέσετε payloads όπως: να αποκτήσετε ένα rev shell, να προσθέσετε έναν χρήστη, να εκτελέσετε ένα beacon...
 
 > [!WARNING]
-> Note that **not all the service are run** with **`NT AUTHORITY\SYSTEM`** some are also run with **`NT AUTHORITY\LOCAL SERVICE`** which has **less privileges** and you **won't be able to create a new user** abuse its permissions.\
-> However, that user has the **`seImpersonate`** privilege, so you can use the[ **potato suite to escalate privileges**](../roguepotato-and-printspoofer.md). So, in this case a rev shell is a better option that trying to create a user.
+> Σημειώστε ότι **όλες οι υπηρεσίες δεν εκτελούνται** με **`NT AUTHORITY\SYSTEM`** κάποιες εκτελούνται επίσης με **`NT AUTHORITY\LOCAL SERVICE`** που έχει **λιγότερα δικαιώματα** και δεν **θα μπορέσετε να δημιουργήσετε νέο χρήστη** εκμεταλλευόμενοι τα δικαιώματά του.\
+> Ωστόσο, αυτός ο χρήστης έχει το **`seImpersonate`** δικαίωμα, οπότε μπορείτε να χρησιμοποιήσετε το [**potato suite για να ανεβάσετε δικαιώματα**](../roguepotato-and-printspoofer.md). Έτσι, σε αυτή την περίπτωση ένα rev shell είναι καλύτερη επιλογή από το να προσπαθήσετε να δημιουργήσετε έναν χρήστη.
 
-At the moment of writing the **Task Scheduler** service is run with **Nt AUTHORITY\SYSTEM**.
+Κατά τη στιγμή που γράφω, η υπηρεσία **Task Scheduler** εκτελείται με **Nt AUTHORITY\SYSTEM**.
 
-Having **generated the malicious Dll** (_in my case I used x64 rev shell and I got a shell back but defender killed it because it was from msfvenom_), save it in the writable System Path with the name **WptsExtensions.dll** and **restart** the computer (or restart the service or do whatever it takes to rerun the affected service/program).
+Έχοντας **δημιουργήσει το κακόβουλο Dll** (_στην περίπτωσή μου χρησιμοποίησα x64 rev shell και πήρα ένα shell πίσω αλλά ο defender το σκότωσε γιατί ήταν από το msfvenom_), αποθηκεύστε το στο Writable System Path με το όνομα **WptsExtensions.dll** και **επανεκκινήστε** τον υπολογιστή (ή επανεκκινήστε την υπηρεσία ή κάντε ό,τι χρειάζεται για να επανεκκινήσετε την επηρεαζόμενη υπηρεσία/πρόγραμμα).
 
-When the service is re-started, the **dll should be loaded and executed** (you can **reuse** the **procmon** trick to check if the **library was loaded as expected**).
+Όταν η υπηρεσία επανεκκινήσει, το **dll θα πρέπει να φορτωθεί και να εκτελεστεί** (μπορείτε να **ξαναχρησιμοποιήσετε** το κόλπο **procmon** για να ελέγξετε αν η **βιβλιοθήκη φορτώθηκε όπως αναμενόταν**).
 
 {{#include ../../../banners/hacktricks-training.md}}
-

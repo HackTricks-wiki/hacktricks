@@ -1,47 +1,45 @@
-# Cookies Policy
+# Πολιτική Cookies
 
-Last updated: 02/04/2023
+Τελευταία ενημέρωση: 02/04/2023
 
-### Introduction
+### Εισαγωγή
 
-This Cookies Policy applies to the following websites owned and operated by HackTricks team ("HackTricks", "we", "us" or "our"):
+Αυτή η Πολιτική Cookies ισχύει για τις παρακάτω ιστοσελίδες που ανήκουν και λειτουργούν από την ομάδα HackTricks ("HackTricks", "εμείς", "μας" ή "δικό μας"):
 
 * hacktricks.xyz
 * [www.hacktricks.xyz](http://www.hacktricks.xyz/)
 * book.hacktricks.xyz
 * cloud.hacktricks.xyz
 
-By using any of these websites, you agree to the use of cookies in accordance with this Cookies Policy. If you do not agree, please disable cookies in your browser settings or refrain from using our websites.
+Χρησιμοποιώντας οποιαδήποτε από αυτές τις ιστοσελίδες, συμφωνείτε με τη χρήση cookies σύμφωνα με αυτή την Πολιτική Cookies. Εάν δεν συμφωνείτε, παρακαλώ απενεργοποιήστε τα cookies στις ρυθμίσεις του προγράμματος περιήγησής σας ή αποφύγετε να χρησιμοποιήσετε τις ιστοσελίδες μας.
 
-### What are cookies?
+### Τι είναι τα cookies;
 
-Cookies are small text files that are stored on your computer or mobile device when you visit a website. They are widely used to make websites work, improve their functionality, and provide a more personalized user experience.
+Τα cookies είναι μικρά αρχεία κειμένου που αποθηκεύονται στον υπολογιστή ή τη φορητή συσκευή σας όταν επισκέπτεστε μια ιστοσελίδα. Χρησιμοποιούνται ευρέως για να λειτουργούν οι ιστοσελίδες, να βελτιώνουν τη λειτουργικότητά τους και να παρέχουν μια πιο εξατομικευμένη εμπειρία χρήστη.
 
-### How we use cookies
+### Πώς χρησιμοποιούμε τα cookies
 
-We use cookies on our websites for the following purposes:
+Χρησιμοποιούμε cookies στις ιστοσελίδες μας για τους παρακάτω σκοπούς:
 
-1. Essential cookies: These cookies are necessary for the basic functionality of our websites, such as enabling user authentication, maintaining security, and remembering your preferences.
-2. Performance cookies: These cookies help us understand how visitors interact with our websites, by collecting and reporting information anonymously. This allows us to improve our website performance and user experience.
-3. Functionality cookies: These cookies enable our websites to remember choices you make, such as your language or region, to provide a more personalized experience.
-4. Targeting/advertising cookies: These cookies are used to deliver relevant ads and marketing communications based on your interests, browsing history, and interactions with our websites.
+1. Απαραίτητα cookies: Αυτά τα cookies είναι απαραίτητα για τη βασική λειτουργικότητα των ιστοσελίδων μας, όπως η ενεργοποίηση της αυθεντικοποίησης χρηστών, η διατήρηση της ασφάλειας και η απομνημόνευση των προτιμήσεών σας.
+2. Cookies απόδοσης: Αυτά τα cookies μας βοηθούν να κατανοήσουμε πώς οι επισκέπτες αλληλεπιδρούν με τις ιστοσελίδες μας, συλλέγοντας και αναφέροντας πληροφορίες ανώνυμα. Αυτό μας επιτρέπει να βελτιώσουμε την απόδοση της ιστοσελίδας μας και την εμπειρία του χρήστη.
+3. Cookies λειτουργικότητας: Αυτά τα cookies επιτρέπουν στις ιστοσελίδες μας να θυμούνται τις επιλογές που κάνετε, όπως η γλώσσα ή η περιοχή σας, για να παρέχουν μια πιο εξατομικευμένη εμπειρία.
+4. Cookies στόχευσης/διαφήμισης: Αυτά τα cookies χρησιμοποιούνται για την παράδοση σχετικών διαφημίσεων και επικοινωνιών μάρκετινγκ με βάση τα ενδιαφέροντά σας, το ιστορικό περιήγησης και τις αλληλεπιδράσεις σας με τις ιστοσελίδες μας.
 
-Moreover, the pages book.hacktricks.xyz and cloud.hacktricks.xyz are hosted in Gitbook. You can find more information about Gitbooks cookies in [https://gitbook-1652864889.teamtailor.com/cookie-policy](https://gitbook-1652864889.teamtailor.com/cookie-policy).
+Επιπλέον, οι σελίδες book.hacktricks.xyz και cloud.hacktricks.xyz φιλοξενούνται στο Gitbook. Μπορείτε να βρείτε περισσότερες πληροφορίες σχετικά με τα cookies του Gitbook στο [https://gitbook-1652864889.teamtailor.com/cookie-policy](https://gitbook-1652864889.teamtailor.com/cookie-policy).
 
-### Third-party cookies
+### Cookies τρίτων
 
-In addition to our own cookies, we may also use third-party cookies to report website usage statistics, deliver advertisements, and enable social media sharing buttons. The use of third-party cookies is subject to their respective privacy policies.
+Εκτός από τα δικά μας cookies, μπορεί επίσης να χρησιμοποιούμε cookies τρίτων για να αναφέρουμε στατιστικά χρήσης της ιστοσελίδας, να παραδίδουμε διαφημίσεις και να ενεργοποιούμε κουμπιά κοινοποίησης στα μέσα κοινωνικής δικτύωσης. Η χρήση cookies τρίτων υπόκειται στις αντίστοιχες πολιτικές απορρήτου τους.
 
-Managing cookies
+Διαχείριση cookies
 
-Most web browsers allow you to manage cookies through their settings. You can choose to block, delete, or limit the use of cookies on your device. However, please note that disabling cookies may affect the functionality and performance of our websites.
+Οι περισσότερες εφαρμογές περιήγησης ιστού σας επιτρέπουν να διαχειρίζεστε τα cookies μέσω των ρυθμίσεών τους. Μπορείτε να επιλέξετε να αποκλείσετε, να διαγράψετε ή να περιορίσετε τη χρήση cookies στη συσκευή σας. Ωστόσο, παρακαλώ σημειώστε ότι η απενεργοποίηση των cookies μπορεί να επηρεάσει τη λειτουργικότητα και την απόδοση των ιστοσελίδων μας.
 
-Changes to this Cookies Policy
+Αλλαγές σε αυτή την Πολιτική Cookies
 
-We may update this Cookies Policy from time to time to reflect changes in our practices or relevant laws. We encourage you to periodically review this page for the latest information on our cookie practices.
+Μπορεί να ενημερώνουμε αυτή την Πολιτική Cookies από καιρό σε καιρό για να αντικατοπτρίζουμε αλλαγές στις πρακτικές μας ή στους σχετικούς νόμους. Σας ενθαρρύνουμε να ελέγχετε περιοδικά αυτή τη σελίδα για τις τελευταίες πληροφορίες σχετικά με τις πρακτικές cookies μας.
 
-### Contact us
+### Επικοινωνήστε μαζί μας
 
-If you have any questions or concerns about this Cookies Policy, please contact us at [support@hacktricks.xyz](mailto:support@hacktricks.xyz)
-
-
+Εάν έχετε οποιαδήποτε ερώτηση ή ανησυχία σχετικά με αυτή την Πολιτική Cookies, παρακαλώ επικοινωνήστε μαζί μας στο [support@hacktricks.xyz](mailto:support@hacktricks.xyz)

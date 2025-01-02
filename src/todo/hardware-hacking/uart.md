@@ -4,82 +4,75 @@
 
 ## Basic Information
 
-UART is a serial protocol, which means it transfers data between components one bit at a time. In contrast, parallel communication protocols transmit data simultaneously through multiple channels. Common serial protocols include RS-232, I2C, SPI, CAN, Ethernet, HDMI, PCI Express, and USB.
+Το UART είναι ένα σειριακό πρωτόκολλο, που σημαίνει ότι μεταφέρει δεδομένα μεταξύ των συστατικών ένα bit τη φορά. Αντίθετα, τα παράλληλα πρωτόκολλα επικοινωνίας μεταδίδουν δεδομένα ταυτόχρονα μέσω πολλαπλών καναλιών. Κοινά σειριακά πρωτόκολλα περιλαμβάνουν τα RS-232, I2C, SPI, CAN, Ethernet, HDMI, PCI Express και USB.
 
-Generally, the line is held high (at a logical 1 value) while UART is in the idle state. Then, to signal the start of a data transfer, the transmitter sends a start bit to the receiver, during which the signal is held low (at a logical 0 value). Next, the transmitter sends five to eight data bits containing the actual message, followed by an optional parity bit and one or two stop bits (with a logical 1 value), depending on the configuration. The parity bit, used for error checking, is rarely seen in practice. The stop bit (or bits) signify the end of transmission.
+Γενικά, η γραμμή κρατείται υψηλή (σε λογική τιμή 1) ενώ το UART είναι σε κατάσταση αδράνειας. Στη συνέχεια, για να σηματοδοτήσει την αρχή μιας μεταφοράς δεδομένων, ο πομπός στέλνει ένα bit εκκίνησης στον δέκτη, κατά τη διάρκεια του οποίου το σήμα κρατείται χαμηλό (σε λογική τιμή 0). Στη συνέχεια, ο πομπός στέλνει πέντε έως οκτώ bits δεδομένων που περιέχουν το πραγματικό μήνυμα, ακολουθούμενα από ένα προαιρετικό bit παραλληλίας και ένα ή δύο bits σταματήματος (με λογική τιμή 1), ανάλογα με τη διαμόρφωση. Το bit παραλληλίας, που χρησιμοποιείται για έλεγχο σφαλμάτων, σπάνια παρατηρείται στην πράξη. Το bit σταματήματος (ή bits) σηματοδοτούν το τέλος της μετάδοσης.
 
-We call the most common configuration 8N1: eight data bits, no parity, and one stop bit. For example, if we wanted to send the character C, or 0x43 in ASCII, in an 8N1 UART configuration, we would send the following bits: 0 (the start bit); 0, 1, 0, 0, 0, 0, 1, 1 (the value of 0x43 in binary), and 0 (the stop bit).
+Ονομάζουμε την πιο κοινή διαμόρφωση 8N1: οκτώ bits δεδομένων, χωρίς παραλληλία και ένα bit σταματήματος. Για παράδειγμα, αν θέλαμε να στείλουμε τον χαρακτήρα C, ή 0x43 σε ASCII, σε μια διαμόρφωση UART 8N1, θα στέλναμε τα εξής bits: 0 (το bit εκκίνησης); 0, 1, 0, 0, 0, 0, 1, 1 (η τιμή του 0x43 σε δυαδικό), και 0 (το bit σταματήματος).
 
 ![](<../../images/image (764).png>)
 
-Hardware tools to communicate with UART:
+Εργαλεία υλικού για επικοινωνία με UART:
 
 - USB-to-serial adapter
-- Adapters with the CP2102 or PL2303 chips
-- Multipurpose tool such as: Bus Pirate, the Adafruit FT232H, the Shikra, or the Attify Badge
+- Adapters με τα τσιπ CP2102 ή PL2303
+- Πολυλειτουργικό εργαλείο όπως: Bus Pirate, το Adafruit FT232H, το Shikra ή το Attify Badge
 
 ### Identifying UART Ports
 
-UART has 4 ports: **TX**(Transmit), **RX**(Receive), **Vcc**(Voltage), and **GND**(Ground). You might be able to find 4 ports with the **`TX`** and **`RX`** letters **written** in the PCB. But if there is no indication, you might need to try to find them yourself using a **multimeter** or a **logic analyzer**.
+Το UART έχει 4 θύρες: **TX**(Transmit), **RX**(Receive), **Vcc**(Voltage), και **GND**(Ground). Μπορεί να μπορέσετε να βρείτε 4 θύρες με τα γράμματα **`TX`** και **`RX`** **γραμμένα** στην PCB. Αλλά αν δεν υπάρχει καμία ένδειξη, μπορεί να χρειαστεί να προσπαθήσετε να τις βρείτε μόνοι σας χρησιμοποιώντας ένα **πολυσύνθετο** ή ένα **λογικό αναλυτή**.
 
-With a **multimeter** and the device powered off:
+Με ένα **πολυσύνθετο** και τη συσκευή απενεργοποιημένη:
 
-- To identify the **GND** pin use the **Continuity Test** mode, place the back lead into ground and test with the red one until you hear a sound from the multimeter. Several GND pins can be found the PCB, so you might have found or not the one belonging to UART.
-- To identify the **VCC port**, set the **DC voltage mode** and set it up to 20 V of voltage. Black probe on ground and red probe on the pin. Power on the device. If the multimeter measures a constant voltage of either 3.3 V or 5 V, you’ve found the Vcc pin. If you get other voltages, retry with other ports.
-- To identify the **TX** **port**, **DC voltage mode** up to 20 V of voltage, black probe on ground, and red probe on the pin, and power on the device. If you find the voltage fluctuates for a few seconds and then stabilizes at the Vcc value, you’ve most likely found the TX port. This is because when powering on, it sends some debug data.
-- The **RX port** would be the closest one to the other 3, it has the lowest voltage fluctuation and lowest overall value of all the UART pins.
+- Για να προσδιορίσετε το **GND** pin χρησιμοποιήστε τη λειτουργία **Continuity Test**, τοποθετήστε το πίσω καλώδιο στο έδαφος και δοκιμάστε με το κόκκινο μέχρι να ακούσετε ήχο από το πολυσύνθετο. Μπορεί να βρείτε αρκετές θύρες GND στην PCB, οπότε μπορεί να έχετε βρει ή όχι αυτή που ανήκει στο UART.
+- Για να προσδιορίσετε τη θύρα **VCC**, ρυθμίστε τη λειτουργία **DC voltage** και ρυθμίστε την έως 20 V. Μαύρος αισθητήρας στο έδαφος και κόκκινος αισθητήρας στην πιν. Ενεργοποιήστε τη συσκευή. Αν το πολυσύνθετο μετράει μια σταθερή τάση είτε 3.3 V είτε 5 V, έχετε βρει το pin Vcc. Αν λάβετε άλλες τάσεις, δοκιμάστε με άλλες θύρες.
+- Για να προσδιορίσετε τη θύρα **TX**, ρυθμίστε τη λειτουργία **DC voltage** έως 20 V, μαύρος αισθητήρας στο έδαφος και κόκκινος αισθητήρας στην πιν, και ενεργοποιήστε τη συσκευή. Αν βρείτε ότι η τάση κυμαίνεται για μερικά δευτερόλεπτα και στη συνέχεια σταθεροποιείται στην τιμή Vcc, έχετε πιθανώς βρει τη θύρα TX. Αυτό συμβαίνει επειδή κατά την ενεργοποίηση, στέλνει κάποια δεδομένα αποσφαλμάτωσης.
+- Η θύρα **RX** θα είναι η πιο κοντινή στις άλλες 3, έχει τη χαμηλότερη διακύμανση τάσης και τη χαμηλότερη συνολική τιμή από όλα τα pins UART.
 
-You can confuse the TX and RX ports and nothing would happen, but if you confuses the GND and the VCC port you might fry the circuit.
+Μπορείτε να μπερδέψετε τις θύρες TX και RX και τίποτα δεν θα συμβεί, αλλά αν μπερδέψετε τη θύρα GND και τη θύρα VCC μπορεί να καταστρέψετε το κύκλωμα.
 
-In some target devices, the UART port is disabled by the manufacturer by disabling RX or TX or even both. In that case, it can be helpful to trace down the connections in the circuit board and finding some breakout point. A strong hint about confirming no detection of UART and breaking of the circuit is to check the device warranty. If the device has been shipped with some warranty, the manufacturer leaves some debug interfaces (in this case, UART) and hence, must have disconnected the UART and would attach it again while debugging. These breakout pins can be connected by soldering or jumper wires.
+Σε ορισμένες συσκευές στόχους, η θύρα UART είναι απενεργοποιημένη από τον κατασκευαστή απενεργοποιώντας το RX ή TX ή ακόμη και και τα δύο. Σε αυτή την περίπτωση, μπορεί να είναι χρήσιμο να παρακολουθήσετε τις συνδέσεις στην πλακέτα κυκλωμάτων και να βρείτε κάποιο σημείο αποσύνδεσης. Ένα ισχυρό στοιχείο για την επιβεβαίωση της μη ανίχνευσης του UART και της αποσύνδεσης του κυκλώματος είναι να ελέγξετε την εγγύηση της συσκευής. Αν η συσκευή έχει αποσταλεί με κάποια εγγύηση, ο κατασκευαστής αφήνει κάποιες διεπαφές αποσφαλμάτωσης (σε αυτή την περίπτωση, UART) και επομένως, πρέπει να έχει αποσυνδέσει το UART και θα το επανασυνδέσει κατά την αποσφαλμάτωση. Αυτές οι θύρες αποσύνδεσης μπορούν να συνδεθούν με συγκόλληση ή καλώδια jumper.
 
 ### Identifying the UART Baud Rate
 
-The easiest way to identify the correct baud rate is to look at the **TX pin’s output and try to read the data**. If the data you receive isn’t readable, switch to the next possible baud rate until the data becomes readable. You can use a USB-to-serial adapter or a multipurpose device like Bus Pirate to do this, paired with a helper script, such as [baudrate.py](https://github.com/devttys0/baudrate/). The most common baud rates are 9600, 38400, 19200, 57600, and 115200.
+Ο πιο εύκολος τρόπος για να προσδιορίσετε τη σωστή ταχύτητα baud είναι να κοιτάξετε την έξοδο του **TX pin** και να προσπαθήσετε να διαβάσετε τα δεδομένα. Αν τα δεδομένα που λαμβάνετε δεν είναι αναγνώσιμα, αλλάξτε στην επόμενη δυνατή ταχύτητα baud μέχρι τα δεδομένα να γίνουν αναγνώσιμα. Μπορείτε να χρησιμοποιήσετε έναν USB-to-serial adapter ή μια πολυλειτουργική συσκευή όπως το Bus Pirate για να το κάνετε αυτό, σε συνδυασμό με ένα βοηθητικό σενάριο, όπως το [baudrate.py](https://github.com/devttys0/baudrate/). Οι πιο κοινές ταχύτητες baud είναι 9600, 38400, 19200, 57600 και 115200.
 
 > [!CAUTION]
-> It's important to note that in this protocol you need to connect the TX of one device to the RX of the other!
+> Είναι σημαντικό να σημειωθεί ότι σε αυτό το πρωτόκολλο πρέπει να συνδέσετε το TX μιας συσκευής με το RX της άλλης!
 
 ## CP210X UART to TTY Adapter
 
-The CP210X Chip is used in a lot of prototyping boards like NodeMCU (with esp8266) for Serial Communication. These adapters are relatively inexpensive and can be used to connect to the UART interface of the target. The device has 5 pins: 5V, GND, RXD, TXD, 3.3V. Make sure to connect the voltage as supported by the target to avoid any damage. Finally connect the RXD pin of the Adapter to TXD of the target and TXD pin of the Adapter to RXD of the target.
+Το τσιπ CP210X χρησιμοποιείται σε πολλές πλακέτες πρωτοτύπων όπως το NodeMCU (με esp8266) για σειριακή επικοινωνία. Αυτοί οι αντάπτορες είναι σχετικά οικονομικοί και μπορούν να χρησιμοποιηθούν για να συνδεθούν με τη διεπαφή UART του στόχου. Η συσκευή έχει 5 pins: 5V, GND, RXD, TXD, 3.3V. Βεβαιωθείτε ότι συνδέετε την τάση όπως υποστηρίζεται από τον στόχο για να αποφύγετε οποιαδήποτε ζημιά. Τέλος, συνδέστε το RXD pin του αντάπτορα με το TXD του στόχου και το TXD pin του αντάπτορα με το RXD του στόχου.
 
-Incase the adapter is not detected, make sure that the CP210X drivers are installed in the host system. Once the adapter is detected and connected, tools like picocom, minicom or screen can be used.
+Σε περίπτωση που ο αντάπτορας δεν ανιχνεύεται, βεβαιωθείτε ότι οι οδηγοί CP210X είναι εγκατεστημένοι στο σύστημα υποδοχής. Μόλις ο αντάπτορας ανιχνευθεί και συνδεθεί, εργαλεία όπως το picocom, minicom ή screen μπορούν να χρησιμοποιηθούν.
 
-To list the devices connected to Linux/MacOS systems:
-
+Για να καταγράψετε τις συσκευές που είναι συνδεδεμένες σε συστήματα Linux/MacOS:
 ```
 ls /dev/
 ```
-
-For basic interaction with the UART interface, use the following command:
-
+Για βασική αλληλεπίδραση με τη διεπαφή UART, χρησιμοποιήστε την παρακάτω εντολή:
 ```
 picocom /dev/<adapter> --baud <baudrate>
 ```
-
-For minicom, use the following command to configure it:
-
+Για το minicom, χρησιμοποιήστε την παρακάτω εντολή για να το ρυθμίσετε:
 ```
 minicom -s
 ```
+Ρυθμίστε τις ρυθμίσεις όπως το baudrate και το όνομα της συσκευής στην επιλογή `Serial port setup`.
 
-Configure the settings such as baudrate and device name in the `Serial port setup` option.
+Αφού ολοκληρωθεί η ρύθμιση, χρησιμοποιήστε την εντολή `minicom` για να ξεκινήσετε να αποκτάτε την κονσόλα UART.
 
-After configuration, use the command `minicom` to start get the UART Console.
+## UART Via Arduino UNO R3 (Αφαιρούμενες Πλακέτες Chip Atmel 328p)
 
-## UART Via Arduino UNO R3 (Removable Atmel 328p Chip Boards)
+Σε περίπτωση που δεν είναι διαθέσιμοι προσαρμογείς UART Serial σε USB, το Arduino UNO R3 μπορεί να χρησιμοποιηθεί με μια γρήγορη παραλλαγή. Δεδομένου ότι το Arduino UNO R3 είναι συνήθως διαθέσιμο παντού, αυτό μπορεί να εξοικονομήσει πολύ χρόνο.
 
-Incase UART Serial to USB adapters are not available, Arduino UNO R3 can be used with a quick hack. Since Arduino UNO R3 is usually available anywhere, this can save a lot of time.
+Το Arduino UNO R3 διαθέτει έναν προσαρμογέα USB σε Serial ενσωματωμένο στην πλακέτα. Για να αποκτήσετε σύνδεση UART, απλώς αφαιρέστε το μικροελεγκτή Atmel 328p από την πλακέτα. Αυτή η παραλλαγή λειτουργεί σε παραλλαγές του Arduino UNO R3 που έχουν τον Atmel 328p μη κολλημένο στην πλακέτα (χρησιμοποιείται η SMD έκδοση). Συνδέστε την ακίδα RX του Arduino (Ψηφιακή Ακίδα 0) στην ακίδα TX της διεπαφής UART και την ακίδα TX του Arduino (Ψηφιακή Ακίδα 1) στην ακίδα RX της διεπαφής UART.
 
-Arduino UNO R3 has a USB to Serial adapter built on the board itself. To get UART connection, just plug out the Atmel 328p microcontroller chip from the board. This hack works on Arduino UNO R3 variants having the Atmel 328p not soldered on the board (SMD version is used in it). Connect the RX pin of Arduino (Digital Pin 0) to the TX pin of the UART Interface and TX pin of the Arduino (Digital Pin 1) to the RX pin of the UART interface.
-
-Finally, it is recommended to use Arduino IDE to get the Serial Console. In the `tools` section in the menu, select `Serial Console` option and set the baud rate as per the UART interface.
+Τέλος, συνιστάται να χρησιμοποιήσετε το Arduino IDE για να αποκτήσετε την κονσόλα Serial. Στην ενότητα `tools` του μενού, επιλέξτε την επιλογή `Serial Console` και ρυθμίστε το baud rate σύμφωνα με τη διεπαφή UART.
 
 ## Bus Pirate
 
-In this scenario we are going to sniff the UART communication of the Arduino that is sending all the prints of the program to the Serial Monitor.
-
+Σε αυτό το σενάριο θα καταγράψουμε την επικοινωνία UART του Arduino που στέλνει όλες τις εκτυπώσεις του προγράμματος στο Serial Monitor.
 ```bash
 # Check the modes
 UART>m
@@ -99,39 +92,39 @@ x. exit(without change)
 # Select UART
 (1)>3
 Set serial port speed: (bps)
- 1. 300
- 2. 1200
- 3. 2400
- 4. 4800
- 5. 9600
- 6. 19200
- 7. 38400
- 8. 57600
- 9. 115200
+1. 300
+2. 1200
+3. 2400
+4. 4800
+5. 9600
+6. 19200
+7. 38400
+8. 57600
+9. 115200
 10. BRG raw value
 
 # Select the speed the communication is occurring on (you BF all this until you find readable things)
 # Or you could later use the macro (4) to try to find the speed
 (1)>5
 Data bits and parity:
- 1. 8, NONE *default
- 2. 8, EVEN
- 3. 8, ODD
- 4. 9, NONE
+1. 8, NONE *default
+2. 8, EVEN
+3. 8, ODD
+4. 9, NONE
 
- # From now on pulse enter for default
+# From now on pulse enter for default
 (1)>
 Stop bits:
- 1. 1 *default
- 2. 2
+1. 1 *default
+2. 2
 (1)>
 Receive polarity:
- 1. Idle 1 *default
- 2. Idle 0
+1. Idle 1 *default
+2. Idle 0
 (1)>
 Select output type:
- 1. Open drain (H=Hi-Z, L=GND)
- 2. Normal (H=3.3V, L=GND)
+1. Open drain (H=Hi-Z, L=GND)
+2. Normal (H=3.3V, L=GND)
 
 (1)>
 Clutch disengaged!!!
@@ -151,36 +144,30 @@ Escritura inicial completada:
 AAA Hi Dreg! AAA
 waiting a few secs to repeat....
 ```
-
 ## Dumping Firmware with UART Console
 
-UART Console provides a great way to work with the underlying firmware in runtime environment. But when the UART Console access is read-only, it might introduce a lot of constrains. In many embedded devices, the firmware is stored in EEPROMs and executed in processors that have volatile memory. Hence, the firmware is kept read-only since the original firmware during manufacturing is inside the EEPROM itself and any new files would get lost due to volatile memory. Hence, dumping firmware is a valuable effort while working with embedded firmwares.
+Η κονσόλα UART παρέχει έναν εξαιρετικό τρόπο για να εργαστείτε με το υποκείμενο firmware σε περιβάλλον εκτέλεσης. Αλλά όταν η πρόσβαση στην κονσόλα UART είναι μόνο για ανάγνωση, μπορεί να εισάγει πολλούς περιορισμούς. Σε πολλές ενσωματωμένες συσκευές, το firmware αποθηκεύεται σε EEPROM και εκτελείται σε επεξεργαστές που έχουν μεταβλητή μνήμη. Έτσι, το firmware διατηρείται μόνο για ανάγνωση, καθώς το αρχικό firmware κατά την κατασκευή είναι μέσα στην EEPROM και οποιαδήποτε νέα αρχεία θα χαθούν λόγω της μεταβλητής μνήμης. Έτσι, η εξαγωγή firmware είναι μια πολύτιμη προσπάθεια κατά την εργασία με ενσωματωμένα firmwares.
 
-There are a lot of ways to do this and the SPI section covers methods to extract firmware directly from the EEPROM with various devices. Although, it is recommended to first try dumping firmware with UART since dumping firmware with physical devices and external interactions can be risky.
+Υπάρχουν πολλοί τρόποι για να το κάνετε αυτό και η ενότητα SPI καλύπτει μεθόδους για την εξαγωγή firmware απευθείας από την EEPROM με διάφορες συσκευές. Ωστόσο, συνιστάται πρώτα να δοκιμάσετε την εξαγωγή firmware με UART, καθώς η εξαγωγή firmware με φυσικές συσκευές και εξωτερικές αλληλεπιδράσεις μπορεί να είναι επικίνδυνη.
 
-Dumping firmware from UART Console requires first getting access to bootloaders. Many popular vendors make use of uboot (Universal Bootloader) as their bootloader to load Linux. Hence, getting access to uboot is necessary.
+Η εξαγωγή firmware από την κονσόλα UART απαιτεί πρώτα την πρόσβαση στους bootloaders. Πολλοί δημοφιλείς προμηθευτές χρησιμοποιούν το uboot (Universal Bootloader) ως bootloader τους για να φορτώσουν το Linux. Έτσι, η πρόσβαση στο uboot είναι απαραίτητη.
 
-To get access to boot bootloader, connect the UART port to the computer and use any of the Serial Console tools and keep the power supply to the device disconnected. Once the setup is ready, press the Enter Key and hold it. Finally, connect the power supply to the device and let it boot.
+Για να αποκτήσετε πρόσβαση στον bootloader, συνδέστε την θύρα UART στον υπολογιστή και χρησιμοποιήστε οποιοδήποτε από τα εργαλεία Serial Console και κρατήστε την τροφοδοσία της συσκευής αποσυνδεδεμένη. Μόλις η ρύθμιση είναι έτοιμη, πατήστε το πλήκτρο Enter και κρατήστε το. Τέλος, συνδέστε την τροφοδοσία στη συσκευή και αφήστε την να εκκινήσει.
 
-Doing this will interrupt uboot from loading and will provide a menu. It is recommended to understand uboot commands and using help menu to list them. This might be `help` command. Since different vendors use different configurations, it is necessary to understand each of them seperately.
+Κάνοντας αυτό θα διακόψει το uboot από το φόρτωμα και θα παρέχει ένα μενού. Συνιστάται να κατανοήσετε τις εντολές του uboot και να χρησιμοποιήσετε το μενού βοήθειας για να τις καταγράψετε. Αυτό μπορεί να είναι η εντολή `help`. Δεδομένου ότι διαφορετικοί προμηθευτές χρησιμοποιούν διαφορετικές ρυθμίσεις, είναι απαραίτητο να κατανοήσετε τον καθένα ξεχωριστά.
 
-Usually, the command to dump the firmware is:
-
+Συνήθως, η εντολή για την εξαγωγή του firmware είναι:
 ```
 md
 ```
+που σημαίνει "dump μνήμης". Αυτό θα εκτυπώσει τη μνήμη (Περιεχόμενο EEPROM) στην οθόνη. Συνιστάται να καταγράψετε την έξοδο της Σειριακής Κονσόλας πριν ξεκινήσετε τη διαδικασία για να καταγράψετε το dump μνήμης.
 
-which stands for "memory dump". This will dump the memory (EEPROM Content) on the screen. It is recommended to log the Serial Console output before starting the proceedure to capture the memory dump.
-
-Finally, just strip out all the unnecessary data from the log file and store the file as `filename.rom` and use binwalk to extract the contents:
-
+Τέλος, απλώς αφαιρέστε όλα τα περιττά δεδομένα από το αρχείο καταγραφής και αποθηκεύστε το αρχείο ως `filename.rom` και χρησιμοποιήστε το binwalk για να εξαγάγετε τα περιεχόμενα:
 ```
 binwalk -e <filename.rom>
 ```
+Αυτό θα καταγράψει τα πιθανά περιεχόμενα από το EEPROM σύμφωνα με τις υπογραφές που βρέθηκαν στο αρχείο hex.
 
-This will list the possible contents from the EEPROM as per the signatures found in the hex file.
-
-Although, it is necessary to note that it's not always the case that the uboot is unlocked even if it is being used. If the Enter Key doesn't do anything, check for different keys like Space Key, etc. If the bootloader is locked and does not get interrupted, this method would not work. To check if uboot is the bootloader for the device, check the output on the UART Console while booting of the device. It might mention uboot while booting.
+Ωστόσο, είναι απαραίτητο να σημειωθεί ότι δεν είναι πάντα η περίπτωση ότι το uboot είναι ξεκλείδωτο ακόμη και αν χρησιμοποιείται. Αν το Enter Key δεν κάνει τίποτα, ελέγξτε για διαφορετικά πλήκτρα όπως το Space Key, κ.λπ. Αν ο bootloader είναι κλειδωμένος και δεν διακόπτεται, αυτή η μέθοδος δεν θα λειτουργήσει. Για να ελέγξετε αν το uboot είναι ο bootloader για τη συσκευή, ελέγξτε την έξοδο στην UART Console κατά την εκκίνηση της συσκευής. Μπορεί να αναφέρει το uboot κατά την εκκίνηση.
 
 {{#include ../../banners/hacktricks-training.md}}
-
