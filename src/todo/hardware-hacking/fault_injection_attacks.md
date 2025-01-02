@@ -1,7 +1,5 @@
-# Fault Injection Attacks 
+# Fault Injection Attacks
 
-Fault injections attacks includes introducing external distrubance in electronic circuits to influence it's behaviour, resulting to disclose information or even bypass certian restrictions in the circuit. This attacks opens a lot of possibilities for attacking electronic circuits. This attack is also referred as glitching of electronic circuits.
+Hata enjeksiyon saldırıları, elektronik devrelerde dışsal rahatsızlıklar oluşturarak davranışlarını etkilemeyi içerir; bu da bilgilerin ifşasına veya devredeki belirli kısıtlamaların aşılmasına yol açar. Bu saldırılar, elektronik devrelere saldırmak için birçok olasılık sunar. Bu saldırıya ayrıca elektronik devrelerin glitching'i olarak da atıfta bulunulur.
 
-There are a lot of methods and mediums for injecting fault into an electronic circuit. 
-
-
+Elektronik bir devreye hata enjekte etmek için birçok yöntem ve ortam vardır.

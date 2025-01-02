@@ -2,163 +2,162 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-[**Cheat Engine**](https://www.cheatengine.org/downloads.php) is a useful program to find where important values are saved inside the memory of a running game and change them.\
-When you download and run it, you are **presented** with a **tutorial** of how to use the tool. If you want to learn how to use the tool it's highly recommended to complete it.
+[**Cheat Engine**](https://www.cheatengine.org/downloads.php) çalışan bir oyunun belleğinde önemli değerlerin nerede saklandığını bulmak ve bunları değiştirmek için yararlı bir programdır.\
+İndirdiğinizde ve çalıştırdığınızda, aracı nasıl kullanacağınızı gösteren bir **eğitim** ile **karşılaşırsınız**. Aracı nasıl kullanacağınızı öğrenmek istiyorsanız, bunu tamamlamanız şiddetle tavsiye edilir.
 
-## What are you searching?
+## Ne arıyorsunuz?
 
 ![](<../../images/image (762).png>)
 
-This tool is very useful to find **where some value** (usually a number) **is stored in the memory** of a program.\
-**Usually numbers** are stored in **4bytes** form, but you could also find them in **double** or **float** formats, or you may want to look for something **different from a number**. For that reason you need to be sure you **select** what you want to **search for**:
+Bu araç, bir programın belleğinde **bir değerin** (genellikle bir sayı) **nerede saklandığını bulmak için çok yararlıdır**.\
+**Genellikle sayılar** **4bayt** formatında saklanır, ancak bunları **double** veya **float** formatlarında da bulabilirsiniz veya **bir sayıdan farklı bir şey** aramak isteyebilirsiniz. Bu nedenle, neyi **arama** istediğinizi **seçtiğinizden** emin olmalısınız:
 
 ![](<../../images/image (324).png>)
 
-Also you can indicate **different** types of **searches**:
+Ayrıca **farklı** türde **arama** seçenekleri de belirtebilirsiniz:
 
 ![](<../../images/image (311).png>)
 
-You can also check the box to **stop the game while scanning the memory**:
+Belleği tararken **oyunu durdurmak için** kutucuğu işaretleyebilirsiniz:
 
 ![](<../../images/image (1052).png>)
 
-### Hotkeys
+### Kısayollar
 
-In _**Edit --> Settings --> Hotkeys**_ you can set different **hotkeys** for different purposes like **stopping** the **game** (which is quiet useful if at some point you want to scan the memory). Other options are available:
+_**Düzenle --> Ayarlar --> Kısayollar**_ bölümünde, **oyunu durdurma** gibi farklı amaçlar için farklı **kısayollar** ayarlayabilirsiniz (bu, belleği taramak istediğinizde oldukça kullanışlıdır). Diğer seçenekler de mevcuttur:
 
 ![](<../../images/image (864).png>)
 
-## Modifying the value
+## Değeri değiştirme
 
-Once you **found** where is the **value** you are **looking for** (more about this in the following steps) you can **modify it** double clicking it, then double clicking its value:
+Aradığınız **değerin** nerede olduğunu **bulduğunuzda** (bununla ilgili daha fazla bilgi sonraki adımlarda) değeri **değiştirmek için** üzerine çift tıklayarak, ardından değerine çift tıklayarak değiştirebilirsiniz:
 
 ![](<../../images/image (563).png>)
 
-And finally **marking the check** to get the modification done in the memory:
+Ve son olarak, bellekteki değişikliği gerçekleştirmek için **onay kutusunu işaretleyerek**:
 
 ![](<../../images/image (385).png>)
 
-The **change** to the **memory** will be immediately **applied** (note that until the game doesn't use this value again the value **won't be updated in the game**).
+Bellekteki **değişiklik** hemen **uygulanacaktır** (oyun bu değeri tekrar kullanmadığı sürece değer **oyunda güncellenmeyecektir**).
 
-## Searching the value
+## Değeri arama
 
-So, we are going to suppose that there is an important value (like the life of your user) that you want to improve, and you are looking for this value in the memory)
+Öyleyse, geliştirmek istediğiniz önemli bir değer (kullanıcınızın hayatı gibi) olduğunu varsayıyoruz ve bu değeri bellekte arıyorsunuz.
 
-### Through a known change
+### Bilinen bir değişim aracılığıyla
 
-Supposing you are looking for the value 100, you **perform a scan** searching for that value and you find a lot of coincidences:
+100 değerini aradığınızı varsayalım, bu değeri arayarak bir **tarama** yapıyorsunuz ve birçok eşleşme buluyorsunuz:
 
 ![](<../../images/image (108).png>)
 
-Then, you do something so that **value changes**, and you **stop** the game and **perform** a **next scan**:
+Sonra, **değerin değişmesi için** bir şey yapıyorsunuz ve oyunu **durdurup** **bir sonraki taramayı** yapıyorsunuz:
 
 ![](<../../images/image (684).png>)
 
-Cheat Engine will search for the **values** that **went from 100 to the new value**. Congrats, you **found** the **address** of the value you were looking for, you can now modify it.\
-&#xNAN;_&#x49;f you still have several values, do something to modify again that value, and perform another "next scan" to filter the addresses._
+Cheat Engine, **100'den yeni değere** geçen **değerleri** arayacaktır. Tebrikler, aradığınız değerin **adresini buldunuz**, şimdi bunu değiştirebilirsiniz.\
+&#xNAN;_Eğer hala birkaç değer varsa, o değeri tekrar değiştirmek için bir şey yapın ve adresleri filtrelemek için bir başka "sonraki tarama" gerçekleştirin._
 
-### Unknown Value, known change
+### Bilinmeyen Değer, bilinen değişim
 
-In the scenario you **don't know the value** but you know **how to make it change** (and even the value of the change) you can look for your number.
+Eğer **değeri bilmiyorsanız** ama **değeri nasıl değiştireceğinizi** biliyorsanız (ve hatta değişimin değerini) numaranızı arayabilirsiniz.
 
-So, start by performing a scan of type "**Unknown initial value**":
+Öyleyse, "**Bilinmeyen başlangıç değeri**" türünde bir tarama yaparak başlayın:
 
 ![](<../../images/image (890).png>)
 
-Then, make the value change, indicate **how** the **value** **changed** (in my case it was decreased by 1) and perform a **next scan**:
+Sonra, değeri değiştirin, **değerin** **nasıl değiştiğini** belirtin (benim durumumda 1 azaldı) ve **bir sonraki taramayı** gerçekleştirin:
 
 ![](<../../images/image (371).png>)
 
-You will be presented **all the values that were modified in the selected way**:
+Seçilen şekilde **değiştirilen tüm değerler** size sunulacaktır:
 
 ![](<../../images/image (569).png>)
 
-Once you have found your value, you can modify it.
+Değerinizi bulduğunuzda, onu değiştirebilirsiniz.
 
-Note that there are a **lot of possible changes** and you can do these **steps as much as you want** to filter the results:
+Birçok **mümkün değişim** olduğunu ve sonuçları filtrelemek için bu **adımları istediğiniz kadar** yapabileceğinizi unutmayın:
 
 ![](<../../images/image (574).png>)
 
-### Random Memory Address - Finding the code
+### Rastgele Bellek Adresi - Kodu Bulma
 
-Until know we learnt how to find an address storing a value, but it's highly probably that in **different executions of the game that address is in different places of the memory**. So lets find out how to always find that address.
+Şimdiye kadar bir değeri saklayan bir adresi bulmayı öğrendik, ancak **oyunun farklı çalıştırmalarında bu adresin bellekte farklı yerlerde olma olasılığı yüksektir**. Bu nedenle, bu adresi her zaman nasıl bulacağımızı öğrenelim.
 
-Using some of the mentioned tricks, find the address where your current game is storing the important value. Then (stopping the game if you whish) do a **right click** on the found **address** and select "**Find out what accesses this address**" or "**Find out what writes to this address**":
+Bahsedilen bazı ipuçlarını kullanarak, mevcut oyunun önemli değeri sakladığı adresi bulun. Sonra (isterseniz oyunu durdurarak) bulunan **adrese** sağ tıklayın ve "**Bu adrese neyin eriştiğini bul**" veya "**Bu adrese neyin yazdığını bul**" seçeneğini seçin:
 
 ![](<../../images/image (1067).png>)
 
-The **first option** is useful to know which **parts** of the **code** are **using** this **address** (which is useful for more things like **knowing where you can modify the code** of the game).\
-The **second option** is more **specific**, and will be more helpful in this case as we are interested in knowing **from where this value is being written**.
+**İlk seçenek**, bu **adresin** **kullanıldığı** **kodun** **hangi kısımlarını** bilmek için yararlıdır (bu, oyunun kodunu **nerede değiştirebileceğinizi** bilmek gibi daha fazla şey için yararlıdır).\
+**İkinci seçenek** daha **özeldir** ve bu durumda **değerin nereden yazıldığını** bilmekle ilgilendiğimiz için daha faydalı olacaktır.
 
-Once you have selected one of those options, the **debugger** will be **attached** to the program and a new **empty window** will appear. Now, **play** the **game** and **modify** that **value** (without restarting the game). The **window** should be **filled** with the **addresses** that are **modifying** the **value**:
+Bu seçeneklerden birini seçtikten sonra, **hata ayıklayıcı** programa **bağlanacak** ve yeni bir **boş pencere** açılacaktır. Şimdi, **oyunu oynayın** ve **değeri değiştirin** (oyunu yeniden başlatmadan). **Pencere**, **değeri değiştiren** **adreslerle** **doldurulmalıdır**:
 
 ![](<../../images/image (91).png>)
 
-Now that you found the address it's modifying the value you can **modify the code at your pleasure** (Cheat Engine allows you to modify it for NOPs real quick):
+Artık değeri değiştiren adresi bulduğunuza göre, kodu **istediğiniz gibi değiştirebilirsiniz** (Cheat Engine, bunu NOP'lar için hızlı bir şekilde değiştirmenize izin verir):
 
 ![](<../../images/image (1057).png>)
 
-So, you can now modify it so the code won't affect your number, or will always affect in a positive way.
+Artık kodu, sayınızı etkilemeyecek şekilde veya her zaman olumlu bir şekilde etkileyecek şekilde değiştirebilirsiniz.
 
-### Random Memory Address - Finding the pointer
+### Rastgele Bellek Adresi - İşaretçiyi Bulma
 
-Following the previous steps, find where the value you are interested is. Then, using "**Find out what writes to this address**" find out which address writes this value and double click on it to get the disassembly view:
+Önceki adımları takip ederek, ilgilendiğiniz değerin nerede olduğunu bulun. Sonra, "**Bu adrese neyin yazdığını bul**" seçeneğini kullanarak bu değeri yazan adresi bulun ve üzerine çift tıklayarak ayrıştırma görünümünü alın:
 
 ![](<../../images/image (1039).png>)
 
-Then, perform a new scan **searching for the hex value between "\[]"** (the value of $edx in this case):
+Sonra, **"\[]"** arasındaki hex değerini arayarak yeni bir tarama gerçekleştirin (bu durumda $edx'in değeri):
 
 ![](<../../images/image (994).png>)
 
-(_If several appear you usually need the smallest address one_)\
-Now, we have f**ound the pointer that will be modifying the value we are interested in**.
+(_Birden fazla görünüyorsa genellikle en küçük adres olanı almanız gerekir_)\
+Artık **ilgilendiğimiz değeri değiştirecek işaretçiyi bulduk**.
 
-Click on "**Add Address Manually**":
+"**Adres Ekle**" seçeneğine tıklayın:
 
 ![](<../../images/image (990).png>)
 
-Now, click on the "Pointer" check box and add the found address in the text box (in this scenario, the found address in the previous image was "Tutorial-i386.exe"+2426B0):
+Şimdi, "İşaretçi" onay kutusuna tıklayın ve metin kutusuna bulunan adresi ekleyin (bu senaryoda, önceki resimde bulunan adres "Tutorial-i386.exe"+2426B0 idi):
 
 ![](<../../images/image (392).png>)
 
-(Note how the first "Address" is automatically populated from the pointer address you introduce)
+(İlk "Adres" in, girdiğiniz işaretçi adresinden otomatik olarak doldurulduğuna dikkat edin)
 
-Click OK and a new pointer will be created:
+Tamam'a tıklayın ve yeni bir işaretçi oluşturulacaktır:
 
 ![](<../../images/image (308).png>)
 
-Now, every time you modifies that value you are **modifying the important value even if the memory address where the value is is different.**
+Artık bu değeri her değiştirdiğinizde, değerin bulunduğu bellek adresi farklı olsa bile **önemli değeri değiştiriyorsunuz.**
 
-### Code Injection
+### Kod Enjeksiyonu
 
-Code injection is a technique where you inject a piece of code into the target process, and then reroute the execution of code to go through your own written code (like giving you points instead of resting them).
+Kod enjeksiyonu, hedef işleme bir kod parçası enjekte etme ve ardından kodun yürütülmesini kendi yazdığınız koddan geçirecek şekilde yönlendirme tekniğidir (örneğin, size puan vermek yerine puanları azaltmak).
 
-So, imagine you have found the address that is subtracting 1 to the life of your player:
+Öyleyse, oyuncunuzun hayatından 1 çıkaran adresi bulduğunuzu hayal edin:
 
 ![](<../../images/image (203).png>)
 
-Click on Show disassembler to get the **disassemble code**.\
-Then, click **CTRL+a** to invoke the Auto assemble window and select _**Template --> Code Injection**_
+**Ayrıştırıcı kodu** almak için Ayrıştırıcıyı göster'e tıklayın.\
+Sonra, **CTRL+a** tuşlarına basarak Otomatik derleme penceresini açın ve _**Şablon --> Kod Enjeksiyonu**_ seçeneğini seçin:
 
 ![](<../../images/image (902).png>)
 
-Fill the **address of the instruction you want to modify** (this is usually autofilled):
+**Değiştirmek istediğiniz talimatın adresini** doldurun (bu genellikle otomatik olarak doldurulur):
 
 ![](<../../images/image (744).png>)
 
-A template will be generated:
+Bir şablon oluşturulacaktır:
 
 ![](<../../images/image (944).png>)
 
-So, insert your new assembly code in the "**newmem**" section and remove the original code from the "**originalcode**" if you don't want it to be executed\*\*.\*\* In this example the injected code will add 2 points instead of substracting 1:
+Bu nedenle, yeni assembly kodunuzu "**newmem**" bölümüne ekleyin ve **çalıştırılmasını istemiyorsanız** "**originalcode**" bölümündeki orijinal kodu kaldırın\*\*.\*\* Bu örnekte, enjekte edilen kod 1 çıkarmak yerine 2 puan ekleyecektir:
 
 ![](<../../images/image (521).png>)
 
-**Click on execute and so on and your code should be injected in the program changing the behaviour of the functionality!**
+**Uygula'ya tıklayın ve kodunuz programda enjekte edilerek işlevselliğin davranışını değiştirmelidir!**
 
-## **References**
+## **Referanslar**
 
-- **Cheat Engine tutorial, complete it to learn how to start with Cheat Engine**
+- **Cheat Engine eğitimi, Cheat Engine ile başlamayı öğrenmek için tamamlayın**
 
 {{#include ../../banners/hacktricks-training.md}}
-

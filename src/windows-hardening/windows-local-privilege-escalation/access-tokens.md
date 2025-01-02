@@ -1,13 +1,12 @@
-# Access Tokens
+# Erişim Jetonları
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Access Tokens
+## Erişim Jetonları
 
-Each **user logged** onto the system **holds an access token with security information** for that logon session. The system creates an access token when the user logs on. **Every process executed** on behalf of the user **has a copy of the access token**. The token identifies the user, the user's groups, and the user's privileges. A token also contains a logon SID (Security Identifier) that identifies the current logon session.
+Her **sisteme giriş yapmış kullanıcı**, o oturum için **güvenlik bilgileriyle bir erişim jetonu taşır**. Sistem, kullanıcı giriş yaptığında bir erişim jetonu oluşturur. **Kullanıcı adına yürütülen her işlem**, **erişim jetonunun bir kopyasına sahiptir**. Jeton, kullanıcıyı, kullanıcının gruplarını ve kullanıcının ayrıcalıklarını tanımlar. Bir jeton ayrıca, mevcut oturum açma işlemini tanımlayan bir oturum açma SID'si (Güvenlik Tanımlayıcısı) içerir.
 
-You can see this information executing `whoami /all`
-
+Bu bilgiyi `whoami /all` komutunu çalıştırarak görebilirsiniz.
 ```
 whoami /all
 
@@ -51,61 +50,55 @@ SeUndockPrivilege             Remove computer from docking station Disabled
 SeIncreaseWorkingSetPrivilege Increase a process working set       Disabled
 SeTimeZonePrivilege           Change the time zone                 Disabled
 ```
-
-or using _Process Explorer_ from Sysinternals (select process and access"Security" tab):
+veya Sysinternals'tan _Process Explorer_ kullanarak (işlemi seçin ve "Security" sekmesine erişin):
 
 ![](<../../images/image (772).png>)
 
-### Local administrator
+### Yerel yönetici
 
-When a local administrator logins, **two access tokens are created**: One with admin rights and other one with normal rights. **By default**, when this user executes a process the one with **regular** (non-administrator) **rights is used**. When this user tries to **execute** anything **as administrator** ("Run as Administrator" for example) the **UAC** will be used to ask for permission.\
-If you want to [**learn more about the UAC read this page**](../authentication-credentials-uac-and-efs/#uac)**.**
+Bir yerel yönetici oturum açtığında, **iki erişim belirteci oluşturulur**: Biri yönetici haklarıyla diğeri normal haklarla. **Varsayılan olarak**, bu kullanıcı bir işlem yürüttüğünde **normal** (yönetici olmayan) **haklara sahip olan** kullanılır. Bu kullanıcı **yönetici olarak** herhangi bir şeyi **çalıştırmaya** çalıştığında ("Yönetici olarak çalıştır" örneğin) **UAC** izin istemek için kullanılacaktır.\
+Eğer [**UAC hakkında daha fazla bilgi edinmek istiyorsanız bu sayfayı okuyun**](../authentication-credentials-uac-and-efs/#uac)**.**
 
-### Credentials user impersonation
+### Kimlik bilgileri kullanıcı taklidi
 
-If you have **valid credentials of any other user**, you can **create** a **new logon session** with those credentials :
-
+Eğer **herhangi bir başka kullanıcının geçerli kimlik bilgilerine** sahipseniz, bu kimlik bilgileriyle **yeni bir oturum açma** oturumu **oluşturabilirsiniz**:
 ```
 runas /user:domain\username cmd.exe
 ```
-
-The **access token** has also a **reference** of the logon sessions inside the **LSASS**, this is useful if the process needs to access some objects of the network.\
-You can launch a process that **uses different credentials for accessing network services** using:
-
+**Erişim belirteci**, **LSASS** içindeki oturum açma oturumlarının da bir **referansına** sahiptir, bu, işlemin ağın bazı nesnelerine erişmesi gerektiğinde faydalıdır.\
+Ağ hizmetlerine erişmek için **farklı kimlik bilgileri kullanan** bir işlem başlatabilirsiniz:
 ```
 runas /user:domain\username /netonly cmd.exe
 ```
+Bu, ağdaki nesnelere erişim için geçerli kimlik bilgilerine sahip olduğunuzda faydalıdır, ancak bu kimlik bilgileri mevcut ana bilgisayar içinde geçerli değildir çünkü yalnızca ağda kullanılacaktır (mevcut ana bilgisayarda mevcut kullanıcı ayrıcalıkları kullanılacaktır).
 
-This is useful if you have useful credentials to access objects in the network but those credentials aren't valid inside the current host as they are only going to be used in the network (in the current host your current user privileges will be used).
+### Token Türleri
 
-### Types of tokens
+İki tür token mevcuttur:
 
-There are two types of tokens available:
+- **Birincil Token**: Bir sürecin güvenlik kimlik bilgilerini temsil eder. Birincil tokenların oluşturulması ve süreçlerle ilişkilendirilmesi, ayrıcalık ayrımını vurgulayan yükseltilmiş ayrıcalıklar gerektiren eylemlerdir. Genellikle, bir kimlik doğrulama hizmeti token oluşturma ile sorumluyken, bir oturum açma hizmeti bunun kullanıcı işletim sistemi kabuğu ile ilişkilendirilmesini yönetir. Süreçlerin, oluşturulduklarında ebeveyn süreçlerinin birincil tokenını miras aldığını belirtmekte fayda var.
+- **Taklit Token**: Bir sunucu uygulamasının, güvenli nesnelere erişim için istemcinin kimliğini geçici olarak benimsemesini sağlar. Bu mekanizma dört işlem seviyesine ayrılmıştır:
+- **Anonim**: Sunucuya, tanımlanamayan bir kullanıcınınki gibi erişim izni verir.
+- **Kimlik Doğrulama**: Sunucunun, nesne erişimi için kullanmadan istemcinin kimliğini doğrulamasına olanak tanır.
+- **Taklit**: Sunucunun, istemcinin kimliği altında çalışmasını sağlar.
+- **Delege**: Taklit ile benzer, ancak sunucunun etkileşimde bulunduğu uzak sistemlere bu kimlik varsayımını genişletme yeteneğini içerir, kimlik bilgilerini korur.
 
-- **Primary Token**: It serves as a representation of a process's security credentials. The creation and association of primary tokens with processes are actions that require elevated privileges, emphasizing the principle of privilege separation. Typically, an authentication service is responsible for token creation, while a logon service handles its association with the user's operating system shell. It is worth noting that processes inherit the primary token of their parent process at creation.
-- **Impersonation Token**: Empowers a server application to adopt the client's identity temporarily for accessing secure objects. This mechanism is stratified into four levels of operation:
-  - **Anonymous**: Grants server access akin to that of an unidentified user.
-  - **Identification**: Allows the server to verify the client's identity without utilizing it for object access.
-  - **Impersonation**: Enables the server to operate under the client's identity.
-  - **Delegation**: Similar to Impersonation but includes the ability to extend this identity assumption to remote systems the server interacts with, ensuring credential preservation.
+#### Taklit Tokenlar
 
-#### Impersonate Tokens
+Metasploit'in _**incognito**_ modülünü kullanarak yeterli ayrıcalıklara sahipseniz, diğer **tokenları** kolayca **listeleyebilir** ve **taklit edebilirsiniz**. Bu, **diğer kullanıcıymış gibi hareket etmenizi** sağlamak için faydalı olabilir. Bu teknikle **ayrıcalıkları yükseltebilirsiniz**.
 
-Using the _**incognito**_ module of metasploit if you have enough privileges you can easily **list** and **impersonate** other **tokens**. This could be useful to perform **actions as if you where the other user**. You could also **escalate privileges** with this technique.
+### Token Ayrıcalıkları
 
-### Token Privileges
-
-Learn which **token privileges can be abused to escalate privileges:**
+Hangi **token ayrıcalıklarının ayrıcalıkları yükseltmek için kötüye kullanılabileceğini** öğrenin:
 
 {{#ref}}
 privilege-escalation-abusing-tokens.md
 {{#endref}}
 
-Take a look to [**all the possible token privileges and some definitions on this external page**](https://github.com/gtworek/Priv2Admin).
+[**tüm olası token ayrıcalıklarına ve bu dış sayfadaki bazı tanımlara**](https://github.com/gtworek/Priv2Admin) göz atın.
 
-## References
+## Referanslar
 
-Learn more about tokens in this tutorials: [https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa](https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa) and [https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)
+Tokenlar hakkında daha fazla bilgi edinmek için bu eğitimlere göz atın: [https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa](https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa) ve [https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)
 
 {{#include ../../banners/hacktricks-training.md}}
-

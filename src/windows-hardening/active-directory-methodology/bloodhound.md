@@ -1,98 +1,87 @@
-# BloodHound & Other AD Enum Tools
+# BloodHound & Diğer AD Enum Araçları
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## AD Explorer
 
-[AD Explorer](https://docs.microsoft.com/en-us/sysinternals/downloads/adexplorer) is from Sysinternal Suite:
+[AD Explorer](https://docs.microsoft.com/en-us/sysinternals/downloads/adexplorer) Sysinternal Suite'ten gelmektedir:
 
-> An advanced Active Directory (AD) viewer and editor. You can use AD Explorer to navigate an AD database easily, define favourite locations, view object properties, and attributes without opening dialog boxes, edit permissions, view an object's schema, and execute sophisticated searches that you can save and re-execute.
+> Gelişmiş bir Active Directory (AD) görüntüleyici ve düzenleyici. AD Explorer'ı kullanarak bir AD veritabanında kolayca gezinebilir, favori konumlar tanımlayabilir, nesne özelliklerini ve niteliklerini diyalog kutuları açmadan görüntüleyebilir, izinleri düzenleyebilir, bir nesnenin şemasını görüntüleyebilir ve kaydedip yeniden çalıştırabileceğiniz karmaşık aramalar gerçekleştirebilirsiniz.
 
-### Snapshots
+### Anlık Görüntüler
 
-AD Explorer can create snapshots of an AD so you can check it offline.\
-It can be used to discover vulns offline, or to compare different states of the AD DB across the time.
+AD Explorer, bir AD'nin anlık görüntülerini oluşturabilir, böylece çevrimdışı kontrol edebilirsiniz.\
+Çevrimdışı zafiyetleri keşfetmek veya AD DB'nin farklı durumlarını zaman içinde karşılaştırmak için kullanılabilir.
 
-You will be requires the username, password, and direction to connect (any AD user is required).
+Bağlanmak için kullanıcı adı, şifre ve yön gerekecektir (herhangi bir AD kullanıcısı gereklidir).
 
-To take a snapshot of AD, go to `File` --> `Create Snapshot` and enter a name for the snapshot.
+AD'nin anlık görüntüsünü almak için `File` --> `Create Snapshot` yolunu izleyin ve anlık görüntü için bir isim girin.
 
 ## ADRecon
 
-[**ADRecon**](https://github.com/adrecon/ADRecon) is a tool which extracts and combines various artefacts out of an AD environment. The information can be presented in a **specially formatted** Microsoft Excel **report** that includes summary views with metrics to facilitate analysis and provide a holistic picture of the current state of the target AD environment.
-
+[**ADRecon**](https://github.com/adrecon/ADRecon) bir AD ortamından çeşitli artefaktları çıkaran ve birleştiren bir araçtır. Bilgiler, analiz kolaylığı sağlamak ve hedef AD ortamının mevcut durumu hakkında bütünsel bir resim sunmak için metriklerle birlikte özet görünümler içeren **özel formatlanmış** Microsoft Excel **raporu** şeklinde sunulabilir.
 ```bash
 # Run it
 .\ADRecon.ps1
 ```
-
 ## BloodHound
 
 From [https://github.com/BloodHoundAD/BloodHound](https://github.com/BloodHoundAD/BloodHound)
 
-> BloodHound is a single page Javascript web application, built on top of [Linkurious](http://linkurio.us/), compiled with [Electron](http://electron.atom.io/), with a [Neo4j](https://neo4j.com/) database fed by a C# data collector.
+> BloodHound, [Linkurious](http://linkurio.us/) üzerine inşa edilmiş, [Electron](http://electron.atom.io/) ile derlenmiş, C# veri toplayıcı tarafından beslenen bir [Neo4j](https://neo4j.com/) veritabanına sahip tek sayfa Javascript web uygulamasıdır.
 
-BloodHound uses graph theory to reveal the hidden and often unintended relationships within an Active Directory or Azure environment. Attackers can use BloodHound to easily identify highly complex attack paths that would otherwise be impossible to quickly identify. Defenders can use BloodHound to identify and eliminate those same attack paths. Both blue and red teams can use BloodHound to easily gain a deeper understanding of privilege relationships in an Active Directory or Azure environment.
+BloodHound, bir Active Directory veya Azure ortamındaki gizli ve genellikle istenmeyen ilişkileri ortaya çıkarmak için grafik teorisini kullanır. Saldırganlar, BloodHound'u kullanarak, aksi takdirde hızlı bir şekilde tanımlanması imkansız olan son derece karmaşık saldırı yollarını kolayca belirleyebilirler. Savunucular, BloodHound'u kullanarak aynı saldırı yollarını tanımlayıp ortadan kaldırabilirler. Hem mavi hem de kırmızı takımlar, BloodHound'u kullanarak bir Active Directory veya Azure ortamındaki ayrıcalık ilişkilerini daha derinlemesine anlamak için kolayca faydalanabilirler.
 
-So, [Bloodhound ](https://github.com/BloodHoundAD/BloodHound)is an amazing tool which can enumerate a domain automatically, save all the information, find possible privilege escalation paths and show all the information using graphs.
+Bu nedenle, [Bloodhound ](https://github.com/BloodHoundAD/BloodHound) otomatik olarak bir alanı listeleyebilen, tüm bilgileri kaydedebilen, olası ayrıcalık yükseltme yollarını bulabilen ve tüm bilgileri grafikler kullanarak gösterebilen harika bir araçtır.
 
-Booldhound is composed of 2 main parts: **ingestors** and the **visualisation application**.
+BloodHound, 2 ana bölümden oluşur: **ingestors** ve **görselleştirme uygulaması**.
 
-The **ingestors** are used to **enumerate the domain and extract all the information** in a format that the visualisation application will understand.
+**Ingestors**, **alanı listelemek ve tüm bilgileri** görselleştirme uygulamasının anlayacağı bir formatta çıkarmak için kullanılır.
 
-The **visualisation application uses neo4j** to show how all the information is related and to show different ways to escalate privileges in the domain.
+**Görselleştirme uygulaması, tüm bilgilerin nasıl ilişkili olduğunu göstermek ve alandaki ayrıcalıkları yükseltmenin farklı yollarını göstermek için neo4j kullanır.**
 
-### Installation
+### Kurulum
 
-After the creation of BloodHound CE, the entire project was updated for ease of use with Docker. The easiest way to get started is to use its pre-configured Docker Compose configuration.
+BloodHound CE'nin oluşturulmasından sonra, tüm proje Docker ile kullanım kolaylığı için güncellendi. Başlamak için en kolay yol, önceden yapılandırılmış Docker Compose yapılandırmasını kullanmaktır.
 
-1. Install Docker Compose. This should be included with the [Docker Desktop](https://www.docker.com/products/docker-desktop/) installation.
-2. Run:
-
+1. Docker Compose'u kurun. Bu, [Docker Desktop](https://www.docker.com/products/docker-desktop/) kurulumu ile birlikte gelmelidir.
+2. Çalıştırın:
 ```
 curl -L https://ghst.ly/getbhce | docker compose -f - up
 ```
+3. Docker Compose'un terminal çıktısında rastgele oluşturulmuş şifreyi bulun.  
+4. Bir tarayıcıda http://localhost:8080/ui/login adresine gidin. admin kullanıcı adı ve günlüklerden rastgele oluşturulmuş şifre ile giriş yapın.  
 
-3. Locate the randomly generated password in the terminal output of Docker Compose.
-4. In a browser, navigate to http://localhost:8080/ui/login. Login with a username of admin and the randomly generated password from the logs.
+Bundan sonra rastgele oluşturulmuş şifreyi değiştirmeniz gerekecek ve ingestor'ları doğrudan indirebileceğiniz yeni arayüz hazır olacak.  
 
-After this you will need to change the randomly generated password and you will have the new interface ready, from which you can directly download the ingestors.
+### SharpHound  
 
-### SharpHound
-
-They have several options but if you want to run SharpHound from a PC joined to the domain, using your current user and extract all the information you can do:
-
+Birçok seçeneği var ama eğer alan adına katılmış bir PC'den SharpHound'u çalıştırmak ve mevcut kullanıcıyı kullanarak tüm bilgileri çıkarmak istiyorsanız:
 ```
 ./SharpHound.exe --CollectionMethods All
 Invoke-BloodHound -CollectionMethod All
 ```
+> **CollectionMethod** ve döngü oturumu hakkında daha fazla bilgi edinebilirsiniz [burada](https://support.bloodhoundenterprise.io/hc/en-us/articles/17481375424795-All-SharpHound-Community-Edition-Flags-Explained)
 
-> You can read more about **CollectionMethod** and loop session [here](https://support.bloodhoundenterprise.io/hc/en-us/articles/17481375424795-All-SharpHound-Community-Edition-Flags-Explained)
-
-If you wish to execute SharpHound using different credentials you can create a CMD netonly session and run SharpHound from there:
-
+Farklı kimlik bilgileri kullanarak SharpHound'u çalıştırmak isterseniz, bir CMD netonly oturumu oluşturabilir ve oradan SharpHound'u çalıştırabilirsiniz:
 ```
 runas /netonly /user:domain\user "powershell.exe -exec bypass"
 ```
-
-[**Learn more about Bloodhound in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-with-bloodhound-on-kali-linux)
+[**Bloodhound hakkında daha fazla bilgi edinin ired.team'de.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-with-bloodhound-on-kali-linux)
 
 ## Group3r
 
-[**Group3r**](https://github.com/Group3r/Group3r) is a tool to find **vulnerabilities** in Active Directory associated **Group Policy**. \
-You need to **run group3r** from a host inside the domain using **any domain user**.
-
+[**Group3r**](https://github.com/Group3r/Group3r), **Grup Politikası** ile ilişkili Active Directory'deki **açıkları** bulmak için bir araçtır. \
+**group3r'ı** alan içindeki bir hosttan **herhangi bir alan kullanıcısı** ile çalıştırmanız gerekir.
 ```bash
 group3r.exe -f <filepath-name.log>
 # -s sends results to stdin
 # -f send results to file
 ```
-
 ## PingCastle
 
-[**PingCastle**](https://www.pingcastle.com/documentation/) **evaluates the security posture of an AD environment** and provides a nice **report** with graphs.
+[**PingCastle**](https://www.pingcastle.com/documentation/) **AD ortamının güvenlik durumunu değerlendirir** ve güzel bir **rapor** ile grafikler sunar.
 
-To run it, can execute the binary `PingCastle.exe` and it will start an **interactive session** presenting a menu of options. The default option to use is **`healthcheck`** which will establish a baseline **overview** of the **domain**, and find **misconfigurations** and **vulnerabilities**.&#x20;
+Çalıştırmak için, `PingCastle.exe` ikili dosyasını çalıştırabilir ve seçeneklerin bir menüsünü sunan bir **etkileşimli oturum** başlatır. Kullanılacak varsayılan seçenek **`healthcheck`** olup, **alan** hakkında bir temel **genel bakış** oluşturacak ve **yanlış yapılandırmaları** ve **zayıflıkları** bulacaktır.&#x20;
 
 {{#include ../../banners/hacktricks-training.md}}
-

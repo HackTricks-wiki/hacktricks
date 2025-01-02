@@ -1,41 +1,40 @@
-# FZ - Infrared
+# FZ - Kızılötesi
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Intro <a href="#ir-signal-receiver-in-flipper-zero" id="ir-signal-receiver-in-flipper-zero"></a>
+## Giriş <a href="#ir-signal-receiver-in-flipper-zero" id="ir-signal-receiver-in-flipper-zero"></a>
 
-For more info about how Infrared works check:
+Kızılötesinin nasıl çalıştığı hakkında daha fazla bilgi için kontrol edin:
 
 {{#ref}}
 ../infrared.md
 {{#endref}}
 
-## IR Signal Receiver in Flipper Zero <a href="#ir-signal-receiver-in-flipper-zero" id="ir-signal-receiver-in-flipper-zero"></a>
+## Flipper Zero'daki IR Sinyal Alıcısı <a href="#ir-signal-receiver-in-flipper-zero" id="ir-signal-receiver-in-flipper-zero"></a>
 
-Flipper uses a digital IR signal receiver TSOP, which **allows intercepting signals from IR remotes**. There are some **smartphones** like Xiaomi, which also have an IR port, but keep in mind that **most of them can only transmit** signals and are **unable to receive** them.
+Flipper, **IR uzaktan kumandalardan sinyalleri yakalamayı** sağlayan dijital bir IR sinyal alıcısı TSOP kullanır. Xiaomi gibi bazı **akıllı telefonlar** da IR portuna sahiptir, ancak **çoğu yalnızca** sinyal iletebilir ve **almakta** başarısızdır.
 
-The Flipper infrared **receiver is quite sensitive**. You can even **catch the signal** while remaining **somewhere in between** the remote and the TV. Pointing the remote directly at Flipper's IR port is unnecessary. This comes in handy when someone is switching channels while standing near the TV, and both you and Flipper are some distance away.
+Flipper'ın kızılötesi **alıcı oldukça hassastır**. Uzaktan kumanda ile TV arasında **bir yerde kalırken bile sinyali yakalayabilirsiniz**. Uzaktan kumandayı doğrudan Flipper'ın IR portuna doğrultmak gereksizdir. Bu, birinin TV'nin yanında dururken kanalları değiştirmesi durumunda işe yarar; hem siz hem de Flipper bir mesafede olabilirsiniz.
 
-As the **decoding of the infrared** signal happens on the **software** side, Flipper Zero potentially supports the **reception and transmission of any IR remote codes**. In the case of **unknown** protocols which could not be recognized - it **records and plays back** the raw signal exactly as received.
+**Kızılötesi** sinyalin **çözülmesi** yazılım tarafında gerçekleştiğinden, Flipper Zero potansiyel olarak **herhangi bir IR uzaktan kumanda kodunun alımını ve iletimini** destekler. Tanınamayan **bilinmeyen** protokoller durumunda, **ham sinyali tam olarak alındığı gibi kaydeder ve tekrar oynatır**.
 
-## Actions
+## Eylemler
 
-### Universal Remotes
+### Evrensel Uzaktan Kumandalar
 
-Flipper Zero can be used as a **universal remote to control any TV, air conditioner, or media center**. In this mode, Flipper **bruteforces** all **known codes** of all supported manufacturers **according to the dictionary from the SD card**. You don't need to choose a particular remote to turn off a restaurant TV.
+Flipper Zero, **herhangi bir TV, klima veya medya merkezi** kontrol etmek için bir **evrensel uzaktan kumanda** olarak kullanılabilir. Bu modda, Flipper **SD karttaki sözlüğe göre** desteklenen tüm üreticilerin **bilinen kodlarını** **brute force** ile dener. Bir restoran TV'sini kapatmak için belirli bir uzaktan kumanda seçmenize gerek yoktur.
 
-It is enough to press the power button in the Universal Remote mode, and Flipper will **sequentially send "Power Off"** commands of all the TVs it knows: Sony, Samsung, Panasonic... and so on. When the TV receives its signal, it will react and turn off.
+Evrensel Uzaktan Kumanda modunda güç düğmesine basmak yeterlidir ve Flipper, bildiği tüm TV'lerin "Gücü Kapat" komutlarını **sırasıyla gönderecektir**: Sony, Samsung, Panasonic... ve devam eder. TV sinyalini aldığında, tepki verecek ve kapanacaktır.
 
-Such brute-force takes time. The larger the dictionary, the longer it will take to finish. It is impossible to find out which signal exactly the TV recognized since there is no feedback from the TV.
+Bu tür bir brute-force zaman alır. Sözlük ne kadar büyükse, tamamlanması o kadar uzun sürer. TV'nin tam olarak hangi sinyali tanıdığını bulmak imkansızdır çünkü TV'den geri bildirim yoktur.
 
-### Learn New Remote
+### Yeni Uzaktan Kumanda Öğrenme
 
-It's possible to **capture an infrared signal** with Flipper Zero. If it **finds the signal in the database** Flipper will automatically **know which device this is** and will let you interact with it.\
-If it doesn't, Flipper can **store** the **signal** and will allow you to **replay it**.
+Flipper Zero ile **kızılötesi bir sinyali yakalamak** mümkündür. Eğer **veritabanında sinyali bulursa**, Flipper otomatik olarak **bu cihazın ne olduğunu bilecektir** ve sizin onunla etkileşimde bulunmanıza izin verecektir.\
+Eğer bulamazsa, Flipper **sinyali saklayabilir** ve **tekrar oynatmanıza** izin verecektir.
 
-## References
+## Referanslar
 
 - [https://blog.flipperzero.one/infrared/](https://blog.flipperzero.one/infrared/)
 
 {{#include ../../../banners/hacktricks-training.md}}
-

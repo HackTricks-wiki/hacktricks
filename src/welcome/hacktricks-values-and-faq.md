@@ -1,146 +1,143 @@
-# HackTricks Values & FAQ
+# HackTricks Değerleri & SSS
 
 {{#include ../banners/hacktricks-training.md}}
 
-## HackTricks Values
+## HackTricks Değerleri
 
 > [!TIP]
-> These are the **values of the HackTricks Project**:
+> Bunlar **HackTricks Projesi'nin değerleri**:
 >
-> - Give **FREE** access to **EDUCATIONAL hacking** resources to **ALL** Internet.
->   - Hacking is about learning, and learning should be as free as possible.
->   - The purpose of this book is to serve as a comprehensive **educational resource**.
-> - **STORE** awesome **hacking** techniques that the community publishes giving the **ORIGINAL** **AUTHORS** all the **credits**.
->   - **We don't want the credit from other people**, we just want to store cool tricks for everyone.
->   - We also write **our own researches** in HackTricks.
->   - In several cases we will just write **in HackTricks a summary of the important parts** of the technique and will **encourage the lector to visit the original post** for more details.
-> - **ORGANIZE** all the hacking techniques in the book so it's **MORE ACCESSIBLE**
->   - The HackTricks team has dedicated thousands of hours for free **only to organize the content** so people can **learn faster**
+> - **TÜM** İnternet için **EĞİTİMSEL hacking** kaynaklarına **ÜCRETSİZ** erişim sağlamak.
+>   - Hacking öğrenmekle ilgilidir ve öğrenim mümkün olduğunca ücretsiz olmalıdır.
+>   - Bu kitabın amacı kapsamlı bir **eğitim kaynağı** olarak hizmet etmektir.
+> - Topluluğun yayınladığı harika **hacking** tekniklerini **ORİJİNAL** **YAZARLARA** tüm **kredileri** vererek **Saklamak**.
+>   - **Başka insanlardan kredi almak istemiyoruz**, sadece herkes için havalı numaraları saklamak istiyoruz.
+>   - HackTricks'te **kendi araştırmalarımızı** da yazıyoruz.
+>   - Birçok durumda, tekniğin önemli kısımlarının **HackTricks'te bir özetini** yazacağız ve **okuyucuyu daha fazla ayrıntı için orijinal gönderiyi ziyaret etmeye teşvik edeceğiz**.
+> - Kitaptaki tüm hacking tekniklerini **DÜZENLEMEK** böylece **DAHA ERİŞİLEBİLİR** hale getirmek.
+>   - HackTricks ekibi, insanların **daha hızlı öğrenebilmesi** için içeriği **sadece düzenlemek** amacıyla binlerce saat harcadı.
 
 <figure><img src="../images/hack tricks gif.gif" alt="" width="375"><figcaption></figcaption></figure>
 
-## HackTricks faq
+## HackTricks SSS
 
 > [!TIP]
 >
-> - **Thank you so much for these resources, how can I thank you?**
+> - **Bu kaynaklar için çok teşekkür ederim, size nasıl teşekkür edebilirim?**
 
-You can publicly thanks HackTricks teams for putting together all these resources publicly in a tweet mentioning [**@hacktricks_live**](https://twitter.com/hacktricks_live).\
-If you are specially grateful you can also [**sponsor the project here**](https://github.com/sponsors/carlospolop).\
-And don't forget to **give a star in the Github projects!** (Find the links below).
+Bu kaynakları bir araya getiren HackTricks ekiplerine [**@hacktricks_live**](https://twitter.com/hacktricks_live) şeklinde bir tweet atarak kamuya açık bir şekilde teşekkür edebilirsiniz.\
+Eğer özellikle minnettar iseniz, [**projeyi burada destekleyebilirsiniz**](https://github.com/sponsors/carlospolop).\
+Ve Github projelerine **bir yıldız vermeyi unutmayın!** (Aşağıdaki bağlantıları bulun).
 
 > [!TIP]
 >
-> - **How can I contribute to the project?**
+> - **Projeye nasıl katkıda bulunabilirim?**
 
-You can **share new tips and tricks with the community or fix bugs** you find in the books sending a **Pull Request** to the respective Github pages:
+Toplulukla **yeni ipuçları ve numaralar paylaşabilir veya kitaplarda bulduğunuz hataları düzeltebilirsiniz** ve ilgili Github sayfalarına **Pull Request** gönderebilirsiniz:
 
 - [https://github.com/carlospolop/hacktricks](https://github.com/carlospolop/hacktricks)
 - [https://github.com/carlospolop/hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)
 
-Don't forget to **give a star in the Github projects!**
+Github projelerine **bir yıldız vermeyi unutmayın!**
 
 > [!TIP]
 >
-> - **Can I copy some content from HackTricks and put it in my blog?**
+> - **HackTricks'ten bazı içerikleri kopyalayıp bloguma koyabilir miyim?**
 
-Yes, you can, but **don't forget to mention the specific link(s)** where the content was taken from.
+Evet, yapabilirsiniz, ancak **içeriğin alındığı belirli bağlantıları** belirtmeyi unutmayın.
 
 > [!TIP]
 >
-> - **How can I cite a page of HackTricks?**
+> - **HackTricks'in bir sayfasını nasıl alıntılayabilirim?**
 
-As long as the link **of** the page(s) were you took the information from appears it's enough.\
-If you need a bibtex you can use something like:
-
+Bilgiyi aldığınız sayfanın **bağlantısı** göründüğü sürece yeterlidir.\
+Bir bibtex'e ihtiyacınız varsa, şöyle bir şey kullanabilirsiniz:
 ```latex
 @misc{hacktricks-bibtexing,
-  author = {"HackTricks Team" or the Authors name of the specific page/trick},
-  title = {Title of the Specific Page},
-  year = {Year of Last Update (check it at the end of the page)},
-  url = {\url{https://book.hacktricks.xyz/specific-page}},
+author = {"HackTricks Team" or the Authors name of the specific page/trick},
+title = {Title of the Specific Page},
+year = {Year of Last Update (check it at the end of the page)},
+url = {\url{https://book.hacktricks.xyz/specific-page}},
 }
 ```
+> [!WARNING]
+>
+> - **HackTricks'i bloguma kopyalayabilir miyim?**
+
+**Bunu yapmanızı istemem**. Bu **kimseye fayda sağlamayacak** çünkü tüm **içerik zaten resmi HackTricks kitaplarında ücretsiz olarak mevcuttur**.
+
+Kaybolacağından korkuyorsanız, sadece Github'da fork edin veya indirin, dediğim gibi zaten ücretsiz.
 
 > [!WARNING]
 >
-> - **Can I copy all HackTricks in my blog?**
+> - **Neden sponsorlarınız var? HackTricks kitapları ticari amaçlar için mi?**
 
-**I would rather not**. Thats **not going to benefit anyone** as all the **content is already publicly available** in the official HackTricks books for free.
+İlk **HackTricks** **değeri**, **TÜM** dünyaya **ÜCRETSİZ** hacking eğitim kaynakları sunmaktır. HackTricks ekibi, bu içeriği sunmak için **binlerce saat** harcamıştır, tekrar, **ÜCRETSİZ**.
 
-If you fear that it will disappear, just fork it in Github or download it, as I said it's already free.
+Eğer HackTricks kitaplarının **ticari amaçlar** için yapıldığını düşünüyorsanız, **TAMAMEN YANLIŞ** düşünüyorsunuz.
 
-> [!WARNING]
->
-> - **Why do you have sponsors? Are HackTricks books for commercial purposes?**
+Sponsorlarımız var çünkü, tüm içerik **ÜCRETSİZ** olsa da, topluluğa **çalışmamızı takdir etme imkanı sunmak** istiyoruz. Bu nedenle, insanlara HackTricks'e [**Github sponsorları**](https://github.com/sponsors/carlospolop) aracılığıyla bağış yapma seçeneği sunuyoruz ve **ilgili siber güvenlik şirketleri** HackTricks'i sponsor olarak destekleyip kitapta **bazı reklamlar** bulundurabiliyor, bu **reklamlar** her zaman görünür yerlerde ama öğrenme sürecini **rahatsız etmeyecek** şekilde yerleştirilmektedir.
 
-The first **HackTricks** **value** is to offer **FREE** hacking educational resources to **ALL** the world. The HackTricks team has **dedicated thousands of hours** to offer this content, again, for **FREE**.
-
-If you think HackTricks books are made for **commercial purposes** you are **COMPLETELY WRONG**.
-
-We have sponsors because, even if all the content is FREE, we want to **offer the community the possibility of appreciating our work** if they want to. Therefore, we offer people the option to donate to HackTricks via [**Github sponsors**](https://github.com/sponsors/carlospolop), and **relevant cybersecurity companies** to sponsor HackTricks and to **have some ads** in the book being the **ads** always placed in places where make them **visible** but **doesn't disturb the learning** process if someone focus in the content.
-
-You won't find HackTricks filled with annoying ads like other blogs with much less content than HackTricks, because HackTricks is not made for commercial purposes.
+HackTricks'i, HackTricks'ten çok daha az içeriğe sahip diğer bloglar gibi rahatsız edici reklamlarla dolu bulamayacaksınız, çünkü HackTricks ticari amaçlar için yapılmamıştır.
 
 > [!CAUTION]
 >
-> - **What should I do if some HackTricks page is based on my blog post but it isn't referenced?**
+> - **Eğer bazı HackTricks sayfası blog yazıma dayanıyorsa ama referans verilmemişse ne yapmalıyım?**
 
-**We are very sorry. This shouldn't have happened**. Please, let us know via Github issues, Twitter, Discord... the link of the HackTricks page with the content and the link of your blog and **we will check it and add it ASAP**.
-
-> [!CAUTION]
->
-> - **What should I do if there is content from my blog in HackTricks and I don't want it there?**
-
-Note that having links to your page in HackTricks:
-
-- Improve your **SEO**
-- The content gets **translated to more than 15 languages** making possible for more people to access this content
-- **HackTricks encourages** people to **check your page** (several people has mentioned us that since some page of them is in HackTricks they receive more visits)
-
-However, If you still want the content of your blog to be removed from HackTricks just let us know and we will definitely **remove every link to your blog**, and any content based on it.
+**Çok üzgünüz. Bu olmamalıydı**. Lütfen, HackTricks sayfasının içeriği ile birlikte blogunuzun linkini Github sorunları, Twitter, Discord... aracılığıyla bize bildirin ve **bunu kontrol edip en kısa sürede ekleyeceğiz**.
 
 > [!CAUTION]
 >
-> - **What should I do if I find copy-pasted content in HackTricks?**
+> - **Eğer HackTricks'te blogumdan içerik varsa ve orada olmasını istemiyorsam ne yapmalıyım?**
 
-We always **give the original authors all the credits**. If you find a page with copy-pasted content without original source referenced, let us know and we will either **remove it**, **add the link before the text**, or **rewrite it adding the link**.
+HackTricks'te sayfanıza bağlantıların bulunmasının:
+
+- **SEO**'nuzu iyileştirdiğini
+- İçeriğin **15'ten fazla dile** çevrildiğini ve daha fazla insanın bu içeriğe erişim sağladığını
+- **HackTricks'in** insanları **sayfanızı kontrol etmeye** teşvik ettiğini (birçok kişi, HackTricks'te sayfalarının bulunmasının ardından daha fazla ziyaret aldıklarını belirtti)
+
+Ancak, eğer blogunuzun içeriğinin HackTricks'ten kaldırılmasını istiyorsanız, sadece bize bildirin ve kesinlikle **blogunuza olan her bağlantıyı** ve buna dayanan her içeriği **kaldıracağız**.
+
+> [!CAUTION]
+>
+> - **Eğer HackTricks'te kopyala-yapıştır içerik bulursam ne yapmalıyım?**
+
+Her zaman **orijinal yazarlara tüm kredileri veriyoruz**. Eğer orijinal kaynak belirtilmeden kopyala-yapıştır içerik içeren bir sayfa bulursanız, bize bildirin ve ya **kaldıracağız**, **metnin önüne bağlantıyı ekleyeceğiz**, ya da **bağlantıyı ekleyerek yeniden yazacağız**.
 
 ## LICENSE
 
-Copyright © All rights reserved unless otherwise specified.
+Copyright © Tüm hakları saklıdır, aksi belirtilmedikçe.
 
-#### License Summary:
+#### Lisans Özeti:
 
-- Attribution: You are free to:
-  - Share — copy and redistribute the material in any medium or format.
-  - Adapt — remix, transform, and build upon the material.
+- Atıf: Şu özgürlüklere sahipsiniz:
+- Paylaşma — materyali herhangi bir ortamda veya formatta kopyalayabilir ve yeniden dağıtabilirsiniz.
+- Uyarlama — materyali yeniden düzenleyebilir, dönüştürebilir ve üzerine inşa edebilirsiniz.
 
-#### Additional Terms:
+#### Ek Şartlar:
 
-- Third-Party Content: Some parts of this blog/book may include content from other sources, such as excerpts from other blogs or publications. The use of such content is done under the principles of fair use or with explicit permission from the respective copyright holders. Please refer to the original sources for specific licensing information regarding third-party content.
-- Authorship: The original content authored by HackTricks is subject to the terms of this license. You are encouraged to attribute this work to the author when sharing or adapting it.
+- Üçüncü Taraf İçeriği: Bu blog/kitabın bazı bölümleri, diğer bloglar veya yayınlardan alıntılar gibi diğer kaynaklardan içerik içerebilir. Bu tür içeriklerin kullanımı, adil kullanım ilkeleri çerçevesinde veya ilgili telif hakkı sahiplerinden açık izinle yapılmaktadır. Lütfen üçüncü taraf içeriği ile ilgili belirli lisans bilgileri için orijinal kaynaklara başvurun.
+- Yazarlık: HackTricks tarafından yazılan orijinal içerik, bu lisansın şartlarına tabidir. Bu çalışmayı paylaşırken veya uyarlarken yazara atıfta bulunmanız teşvik edilmektedir.
 
-#### Exemptions:
+#### Muafiyetler:
 
-- Commercial Use: For inquiries regarding commercial use of this content, please contact me.
+- Ticari Kullanım: Bu içeriğin ticari kullanımıyla ilgili sorular için lütfen benimle iletişime geçin.
 
-This license does not grant any trademark or branding rights in relation to the content. All trademarks and branding featured in this blog/book are the property of their respective owners.
+Bu lisans, içeriğe ilişkin herhangi bir ticari marka veya marka hakları vermez. Bu blog/kitapta yer alan tüm ticari markalar ve markalar, ilgili sahiplerinin mülkiyetindedir.
 
-**By accessing or using HackTricks, you agree to abide by the terms of this license. If you do not agree with these terms, please, do not access this website.**
+**HackTricks'e erişerek veya kullanarak, bu lisansın şartlarına uymayı kabul edersiniz. Bu şartlarla aynı fikirde değilseniz, lütfen bu web sitesine erişmeyin.**
 
-## **Disclaimer**
+## **Açıklama**
 
 > [!CAUTION]
-> This book, 'HackTricks,' is intended for educational and informational purposes only. The content within this book is provided on an 'as is' basis, and the authors and publishers make no representations or warranties of any kind, express or implied, about the completeness, accuracy, reliability, suitability, or availability of the information, products, services, or related graphics contained within this book. Any reliance you place on such information is therefore strictly at your own risk.
+> Bu kitap, 'HackTricks', yalnızca eğitim ve bilgilendirme amaçlıdır. Bu kitap içindeki içerik, 'olduğu gibi' esasına dayanmaktadır ve yazarlar ve yayıncılar, bu kitapta yer alan bilgilerin, ürünlerin, hizmetlerin veya ilgili grafiklerin tamlığı, doğruluğu, güvenilirliği, uygunluğu veya kullanılabilirliği hakkında herhangi bir türde, açık veya zımni, herhangi bir beyan veya garanti vermez. Bu tür bilgilere dayanarak yaptığınız herhangi bir güven, tamamen kendi riskinizdedir.
 >
-> The authors and publishers shall in no event be liable for any loss or damage, including without limitation, indirect or consequential loss or damage, or any loss or damage whatsoever arising from loss of data or profits arising out of, or in connection with, the use of this book.
+> Yazarlar ve yayıncılar, bu kitabın kullanımından kaynaklanan veya bununla bağlantılı olarak veri kaybı veya kar kaybı dahil ancak bunlarla sınırlı olmamak üzere, herhangi bir kayıp veya zarardan sorumlu tutulamaz.
 >
-> Furthermore, the techniques and tips described in this book are provided for educational and informational purposes only, and should not be used for any illegal or malicious activities. The authors and publishers do not condone or support any illegal or unethical activities, and any use of the information contained within this book is at the user's own risk and discretion.
+> Ayrıca, bu kitapta açıklanan teknikler ve ipuçları yalnızca eğitim ve bilgilendirme amaçlıdır ve herhangi bir yasa dışı veya kötü niyetli faaliyetler için kullanılmamalıdır. Yazarlar ve yayıncılar, herhangi bir yasa dışı veya etik olmayan faaliyetleri onaylamaz veya desteklemez ve bu kitapta yer alan bilgilerin herhangi bir kullanımı, kullanıcının kendi riskine ve takdirine bağlıdır.
 >
-> The user is solely responsible for any actions taken based on the information contained within this book, and should always seek professional advice and assistance when attempting to implement any of the techniques or tips described herein.
+> Kullanıcı, bu kitapta yer alan bilgilere dayanarak alınan herhangi bir eylemden tamamen sorumludur ve burada açıklanan teknikleri veya ipuçlarını uygulamaya çalışırken her zaman profesyonel tavsiye ve yardım almalıdır.
 >
-> By using this book, the user agrees to release the authors and publishers from any and all liability and responsibility for any damages, losses, or harm that may result from the use of this book or any of the information contained within it.
+> Bu kitabı kullanarak, kullanıcı, yazarları ve yayıncıları, bu kitabın kullanımından kaynaklanabilecek herhangi bir zarar, kayıp veya zarar için her türlü sorumluluktan muaf tutmayı kabul eder.
 
 {{#include ../banners/hacktricks-training.md}}
-

@@ -1,119 +1,107 @@
-# Windows Credentials Protections
+# Windows Kimlik Bilgileri Koruma
 
-## Credentials Protections
+## Kimlik Bilgileri Koruma
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## WDigest
 
-The [WDigest](<https://technet.microsoft.com/pt-pt/library/cc778868(v=ws.10).aspx?f=255&MSPPError=-2147217396>) protocol, introduced with Windows XP, is designed for authentication via the HTTP Protocol and is **enabled by default on Windows XP through Windows 8.0 and Windows Server 2003 to Windows Server 2012**. This default setting results in **plain-text password storage in LSASS** (Local Security Authority Subsystem Service). An attacker can use Mimikatz to **extract these credentials** by executing:
-
+[WDigest](<https://technet.microsoft.com/pt-pt/library/cc778868(v=ws.10).aspx?f=255&MSPPError=-2147217396>) protokolü, Windows XP ile tanıtılmıştır ve HTTP Protokolü aracılığıyla kimlik doğrulama için tasarlanmıştır ve **Windows XP'den Windows 8.0'a ve Windows Server 2003'ten Windows Server 2012'ye kadar varsayılan olarak etkindir**. Bu varsayılan ayar, **LSASS'ta düz metin şifre depolamasına** yol açar. Bir saldırgan, Mimikatz kullanarak **bu kimlik bilgilerini çıkarmak için** aşağıdaki komutu çalıştırabilir:
 ```bash
 sekurlsa::wdigest
 ```
-
-To **toggle this feature off or on**, the _**UseLogonCredential**_ and _**Negotiate**_ registry keys within _**HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\SecurityProviders\WDigest**_ must be set to "1". If these keys are **absent or set to "0"**, WDigest is **disabled**:
-
+Bu özelliği **açmak veya kapatmak için**, _**UseLogonCredential**_ ve _**Negotiate**_ kayıt anahtarları _**HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\SecurityProviders\WDigest**_ içinde "1" olarak ayarlanmalıdır. Eğer bu anahtarlar **yoksa veya "0" olarak ayarlanmışsa**, WDigest **devre dışı**dır:
 ```bash
 reg query HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest /v UseLogonCredential
 ```
+## LSA Koruması
 
-## LSA Protection
-
-Starting with **Windows 8.1**, Microsoft enhanced the security of LSA to **block unauthorized memory reads or code injections by untrusted processes**. This enhancement hinders the typical functioning of commands like `mimikatz.exe sekurlsa:logonpasswords`. To **enable this enhanced protection**, the _**RunAsPPL**_ value in _**HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA**_ should be adjusted to 1:
-
+**Windows 8.1** ile birlikte, Microsoft LSA'nın güvenliğini **güvensiz süreçler tarafından yetkisiz bellek okumalarını veya kod enjeksiyonlarını engelleyecek şekilde geliştirdi**. Bu geliştirme, `mimikatz.exe sekurlsa:logonpasswords` gibi komutların tipik işleyişini engeller. Bu **geliştirilmiş korumayı etkinleştirmek için**, _**HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA**_ içindeki _**RunAsPPL**_ değeri 1 olarak ayarlanmalıdır:
 ```
 reg query HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA /v RunAsPPL
 ```
-
 ### Bypass
 
-It is possible to bypass this protection using Mimikatz driver mimidrv.sys:
+Bu korumayı Mimikatz sürücüsü mimidrv.sys kullanarak atlamak mümkündür:
 
 ![](../../images/mimidrv.png)
 
 ## Credential Guard
 
-**Credential Guard**, a feature exclusive to **Windows 10 (Enterprise and Education editions)**, enhances the security of machine credentials using **Virtual Secure Mode (VSM)** and **Virtualization Based Security (VBS)**. It leverages CPU virtualization extensions to isolate key processes within a protected memory space, away from the main operating system's reach. This isolation ensures that even the kernel cannot access the memory in VSM, effectively safeguarding credentials from attacks like **pass-the-hash**. The **Local Security Authority (LSA)** operates within this secure environment as a trustlet, while the **LSASS** process in the main OS acts merely as a communicator with the VSM's LSA.
+**Credential Guard**, yalnızca **Windows 10 (Enterprise ve Education sürümleri)** için özel bir özellik olup, makine kimlik bilgilerinin güvenliğini **Virtual Secure Mode (VSM)** ve **Virtualization Based Security (VBS)** kullanarak artırır. CPU sanallaştırma uzantılarını kullanarak, ana işletim sisteminin erişiminden uzak, korumalı bir bellek alanında ana süreçleri izole eder. Bu izolasyon, çekirdek bile VSM'deki belleğe erişemediğinden, kimlik bilgilerini **pass-the-hash** gibi saldırılardan etkili bir şekilde korur. **Local Security Authority (LSA)** bu güvenli ortamda bir trustlet olarak çalışırken, ana işletim sistemindeki **LSASS** süreci yalnızca VSM'nin LSA'sı ile iletişim kuran bir aracı olarak görev yapar.
 
-By default, **Credential Guard** is not active and requires manual activation within an organization. It's critical for enhancing security against tools like **Mimikatz**, which are hindered in their ability to extract credentials. However, vulnerabilities can still be exploited through the addition of custom **Security Support Providers (SSP)** to capture credentials in clear text during login attempts.
+Varsayılan olarak, **Credential Guard** aktif değildir ve bir organizasyon içinde manuel olarak etkinleştirilmesi gerekir. **Mimikatz** gibi araçlara karşı güvenliği artırmak için kritik öneme sahiptir; bu araçlar, kimlik bilgilerini çıkarmada kısıtlanır. Ancak, özel **Security Support Providers (SSP)** eklenerek, giriş denemeleri sırasında kimlik bilgilerini düz metin olarak yakalamak için hala açıklar istismar edilebilir.
 
-To verify **Credential Guard**'s activation status, the registry key _**LsaCfgFlags**_ under _**HKLM\System\CurrentControlSet\Control\LSA**_ can be inspected. A value of "**1**" indicates activation with **UEFI lock**, "**2**" without lock, and "**0**" denotes it is not enabled. This registry check, while a strong indicator, is not the sole step for enabling Credential Guard. Detailed guidance and a PowerShell script for enabling this feature are available online.
-
+**Credential Guard**'ın etkinlik durumunu doğrulamak için, _**HKLM\System\CurrentControlSet\Control\LSA**_ altındaki kayıt defteri anahtarı _**LsaCfgFlags**_ incelenebilir. "**1**" değeri, **UEFI kilidi** ile etkinleştirildiğini, "**2**" kilitsiz olduğunu ve "**0**" ise etkinleştirilmediğini gösterir. Bu kayıt defteri kontrolü, güçlü bir gösterge olmasına rağmen, Credential Guard'ı etkinleştirmek için tek adım değildir. Bu özelliği etkinleştirmek için ayrıntılı kılavuz ve bir PowerShell betiği çevrimiçi olarak mevcuttur.
 ```powershell
 reg query HKLM\System\CurrentControlSet\Control\LSA /v LsaCfgFlags
 ```
+Kapsamlı bir anlayış ve **Credential Guard**'ı Windows 10'da etkinleştirme ile **Windows 11 Enterprise ve Education (sürüm 22H2)** uyumlu sistemlerde otomatik aktivasyonu hakkında talimatlar için [Microsoft'un belgelerine](https://docs.microsoft.com/en-us/windows/security/identity-protection/credential-guard/credential-guard-manage) göz atın.
 
-For a comprehensive understanding and instructions on enabling **Credential Guard** in Windows 10 and its automatic activation in compatible systems of **Windows 11 Enterprise and Education (version 22H2)**, visit [Microsoft's documentation](https://docs.microsoft.com/en-us/windows/security/identity-protection/credential-guard/credential-guard-manage).
+Kimlik bilgilerini yakalamak için özel SSP'lerin uygulanmasıyla ilgili daha fazla ayrıntı [bu kılavuzda](../active-directory-methodology/custom-ssp.md) sağlanmaktadır.
 
-Further details on implementing custom SSPs for credential capture are provided in [this guide](../active-directory-methodology/custom-ssp.md).
+## RDP RestrictedAdmin Modu
 
-## RDP RestrictedAdmin Mode
+**Windows 8.1 ve Windows Server 2012 R2**, _**RDP için Restricted Admin modu**_ dahil olmak üzere birkaç yeni güvenlik özelliği tanıttı. Bu mod, [**pass the hash**](https://blog.ahasayen.com/pass-the-hash/) saldırılarıyla ilişkili riskleri azaltarak güvenliği artırmak için tasarlanmıştır.
 
-**Windows 8.1 and Windows Server 2012 R2** introduced several new security features, including the _**Restricted Admin mode for RDP**_. This mode was designed to enhance security by mitigating the risks associated with [**pass the hash**](https://blog.ahasayen.com/pass-the-hash/) attacks.
+Geleneksel olarak, RDP aracılığıyla bir uzak bilgisayara bağlandığınızda, kimlik bilgileriniz hedef makinede saklanır. Bu, özellikle yükseltilmiş ayrıcalıklara sahip hesaplar kullanıldığında önemli bir güvenlik riski oluşturur. Ancak, _**Restricted Admin modu**_ ile bu risk önemli ölçüde azaltılmıştır.
 
-Traditionally, when connecting to a remote computer via RDP, your credentials are stored on the target machine. This poses a significant security risk, especially when using accounts with elevated privileges. However, with the introduction of _**Restricted Admin mode**_, this risk is substantially reduced.
+**mstsc.exe /RestrictedAdmin** komutunu kullanarak bir RDP bağlantısı başlatıldığında, uzak bilgisayara kimlik doğrulaması yapılırken kimlik bilgileriniz üzerinde saklanmaz. Bu yaklaşım, bir kötü amaçlı yazılım enfeksiyonu durumunda veya kötü niyetli bir kullanıcının uzak sunucuya erişim sağlaması durumunda, kimlik bilgilerinizin tehlikeye girmediğini garanti eder, çünkü sunucuda saklanmazlar.
 
-When initiating an RDP connection using the command **mstsc.exe /RestrictedAdmin**, authentication to the remote computer is performed without storing your credentials on it. This approach ensures that, in the event of a malware infection or if a malicious user gains access to the remote server, your credentials are not compromised, as they are not stored on the server.
+**Restricted Admin modu**'nda, RDP oturumundan ağ kaynaklarına erişim girişimleri kişisel kimlik bilgilerinizi kullanmaz; bunun yerine **makinenin kimliği** kullanılır.
 
-It's important to note that in **Restricted Admin mode**, attempts to access network resources from the RDP session will not use your personal credentials; instead, the **machine's identity** is used.
-
-This feature marks a significant step forward in securing remote desktop connections and protecting sensitive information from being exposed in case of a security breach.
+Bu özellik, uzak masaüstü bağlantılarını güvence altına almak ve hassas bilgilerin bir güvenlik ihlali durumunda ifşa edilmesini önlemek için önemli bir adım teşkil etmektedir.
 
 ![](../../images/RAM.png)
 
-For more detailed information on visit [this resource](https://blog.ahasayen.com/restricted-admin-mode-for-rdp/).
+Daha ayrıntılı bilgi için [bu kaynağa](https://blog.ahasayen.com/restricted-admin-mode-for-rdp/) göz atın.
 
-## Cached Credentials
+## Önbelleklenmiş Kimlik Bilgileri
 
-Windows secures **domain credentials** through the **Local Security Authority (LSA)**, supporting logon processes with security protocols like **Kerberos** and **NTLM**. A key feature of Windows is its capability to cache the **last ten domain logins** to ensure users can still access their computers even if the **domain controller is offline**—a boon for laptop users often away from their company's network.
+Windows, **domain kimlik bilgilerini** **Yerel Güvenlik Otoritesi (LSA)** aracılığıyla güvence altına alır ve **Kerberos** ve **NTLM** gibi güvenlik protokolleri ile oturum açma süreçlerini destekler. Windows'un önemli bir özelliği, **son on domain oturum açma** işlemini önbelleğe alma yeteneğidir; bu, kullanıcıların **domain denetleyicisi çevrimdışı olduğunda** bile bilgisayarlarına erişim sağlamalarını garanti eder—bu, sık sık şirket ağından uzakta olan dizüstü bilgisayar kullanıcıları için büyük bir avantajdır.
 
-The number of cached logins is adjustable via a specific **registry key or group policy**. To view or change this setting, the following command is utilized:
-
+Önbelleklenmiş oturum açma sayısı, belirli bir **kayıt defteri anahtarı veya grup politikası** aracılığıyla ayarlanabilir. Bu ayarı görüntülemek veya değiştirmek için aşağıdaki komut kullanılır:
 ```bash
 reg query "HKEY_LOCAL_MACHINE\SOFTWARE\MICROSOFT\WINDOWS NT\CURRENTVERSION\WINLOGON" /v CACHEDLOGONSCOUNT
 ```
+Bu önbelleğe alınmış kimlik bilgilerine erişim sıkı bir şekilde kontrol edilmektedir; yalnızca **SYSTEM** hesabı bunları görüntülemek için gerekli izinlere sahiptir. Bu bilgilere erişmesi gereken yöneticiler, SYSTEM kullanıcı ayrıcalıkları ile bunu yapmalıdır. Kimlik bilgileri şu konumda saklanmaktadır: `HKEY_LOCAL_MACHINE\SECURITY\Cache`
 
-Access to these cached credentials is tightly controlled, with only the **SYSTEM** account having the necessary permissions to view them. Administrators needing to access this information must do so with SYSTEM user privileges. The credentials are stored at: `HKEY_LOCAL_MACHINE\SECURITY\Cache`
+**Mimikatz**, bu önbelleğe alınmış kimlik bilgilerini `lsadump::cache` komutunu kullanarak çıkarmak için kullanılabilir.
 
-**Mimikatz** can be employed to extract these cached credentials using the command `lsadump::cache`.
+Daha fazla ayrıntı için, orijinal [kaynak](http://juggernaut.wikidot.com/cached-credentials) kapsamlı bilgi sağlamaktadır.
 
-For further details, the original [source](http://juggernaut.wikidot.com/cached-credentials) provides comprehensive information.
+## Korunan Kullanıcılar
 
-## Protected Users
+**Korunan Kullanıcılar grubu** üyeliği, kullanıcılar için birkaç güvenlik geliştirmesi sunarak kimlik bilgisi hırsızlığı ve kötüye kullanıma karşı daha yüksek koruma seviyeleri sağlar:
 
-Membership in the **Protected Users group** introduces several security enhancements for users, ensuring higher levels of protection against credential theft and misuse:
+- **Kimlik Bilgisi Delegasyonu (CredSSP)**: **Varsayılan kimlik bilgilerini devretmeye izin ver** Grup Politika ayarı etkin olsa bile, Korunan Kullanıcıların düz metin kimlik bilgileri önbelleğe alınmayacaktır.
+- **Windows Digest**: **Windows 8.1 ve Windows Server 2012 R2**'den itibaren, sistem Korunan Kullanıcıların düz metin kimlik bilgilerini, Windows Digest durumu ne olursa olsun önbelleğe almayacaktır.
+- **NTLM**: Sistem, Korunan Kullanıcıların düz metin kimlik bilgilerini veya NT tek yönlü fonksiyonlarını (NTOWF) önbelleğe almayacaktır.
+- **Kerberos**: Korunan Kullanıcılar için, Kerberos kimlik doğrulaması **DES** veya **RC4 anahtarları** oluşturmayacak, ayrıca düz metin kimlik bilgilerini veya ilk Ticket-Granting Ticket (TGT) edinimi sonrasındaki uzun vadeli anahtarları önbelleğe almayacaktır.
+- **Çevrimdışı Giriş**: Korunan Kullanıcılar için giriş veya kilidi açma sırasında önbelleğe alınmış bir doğrulayıcı oluşturulmayacak, bu da bu hesaplar için çevrimdışı girişin desteklenmediği anlamına gelmektedir.
 
-- **Credential Delegation (CredSSP)**: Even if the Group Policy setting for **Allow delegating default credentials** is enabled, plain text credentials of Protected Users will not be cached.
-- **Windows Digest**: Starting from **Windows 8.1 and Windows Server 2012 R2**, the system will not cache plain text credentials of Protected Users, regardless of the Windows Digest status.
-- **NTLM**: The system will not cache Protected Users' plain text credentials or NT one-way functions (NTOWF).
-- **Kerberos**: For Protected Users, Kerberos authentication will not generate **DES** or **RC4 keys**, nor will it cache plain text credentials or long-term keys beyond the initial Ticket-Granting Ticket (TGT) acquisition.
-- **Offline Sign-In**: Protected Users will not have a cached verifier created at sign-in or unlock, meaning offline sign-in is not supported for these accounts.
+Bu korumalar, **Korunan Kullanıcılar grubu** üyesi bir kullanıcının cihaza giriş yaptığı anda etkinleştirilir. Bu, çeşitli kimlik bilgisi ihlali yöntemlerine karşı koruma sağlamak için kritik güvenlik önlemlerinin alındığını garanti eder.
 
-These protections are activated the moment a user, who is a member of the **Protected Users group**, signs into the device. This ensures that critical security measures are in place to safeguard against various methods of credential compromise.
+Daha ayrıntılı bilgi için resmi [belgelere](https://docs.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/protected-users-security-group) başvurun.
 
-For more detailed information, consult the official [documentation](https://docs.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/protected-users-security-group).
-
-**Table from** [**the docs**](https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/appendix-c--protected-accounts-and-groups-in-active-directory)**.**
+**Tablo** [**belgelerden**](https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/appendix-c--protected-accounts-and-groups-in-active-directory)**.**
 
 | Windows Server 2003 RTM | Windows Server 2003 SP1+ | <p>Windows Server 2012,<br>Windows Server 2008 R2,<br>Windows Server 2008</p> | Windows Server 2016          |
 | ----------------------- | ------------------------ | ----------------------------------------------------------------------------- | ---------------------------- |
-| Account Operators       | Account Operators        | Account Operators                                                             | Account Operators            |
-| Administrator           | Administrator            | Administrator                                                                 | Administrator                |
-| Administrators          | Administrators           | Administrators                                                                | Administrators               |
-| Backup Operators        | Backup Operators         | Backup Operators                                                              | Backup Operators             |
-| Cert Publishers         |                          |                                                                               |                              |
-| Domain Admins           | Domain Admins            | Domain Admins                                                                 | Domain Admins                |
-| Domain Controllers      | Domain Controllers       | Domain Controllers                                                            | Domain Controllers           |
-| Enterprise Admins       | Enterprise Admins        | Enterprise Admins                                                             | Enterprise Admins            |
-|                         |                          |                                                                               | Enterprise Key Admins        |
-|                         |                          |                                                                               | Key Admins                   |
+| Hesap Operatörleri     | Hesap Operatörleri      | Hesap Operatörleri                                                           | Hesap Operatörleri          |
+| Yöneticiler            | Yöneticiler             | Yöneticiler                                                                  | Yöneticiler                 |
+| Yöneticiler            | Yöneticiler             | Yöneticiler                                                                  | Yöneticiler                 |
+| Yedek Operatörleri     | Yedek Operatörleri      | Yedek Operatörleri                                                           | Yedek Operatörleri          |
+| Sertifika Yayımcıları  |                          |                                                                               |                              |
+| Alan Yöneticileri      | Alan Yöneticileri       | Alan Yöneticileri                                                            | Alan Yöneticileri           |
+| Alan Denetleyicileri   | Alan Denetleyicileri    | Alan Denetleyicileri                                                         | Alan Denetleyicileri        |
+| Kurumsal Yöneticiler   | Kurumsal Yöneticiler    | Kurumsal Yöneticiler                                                         | Kurumsal Yöneticiler        |
+|                         |                          |                                                                               | Kurumsal Anahtar Yöneticileri|
+|                         |                          |                                                                               | Anahtar Yöneticileri        |
 | Krbtgt                  | Krbtgt                   | Krbtgt                                                                        | Krbtgt                       |
-| Print Operators         | Print Operators          | Print Operators                                                               | Print Operators              |
-|                         |                          | Read-only Domain Controllers                                                  | Read-only Domain Controllers |
-| Replicator              | Replicator               | Replicator                                                                    | Replicator                   |
-| Schema Admins           | Schema Admins            | Schema Admins                                                                 | Schema Admins                |
-| Server Operators        | Server Operators         | Server Operators                                                              | Server Operators             |
+| Yazdırma Operatörleri   | Yazdırma Operatörleri    | Yazdırma Operatörleri                                                         | Yazdırma Operatörleri       |
+|                         |                          | Salt okunur Alan Denetleyicileri                                             | Salt okunur Alan Denetleyicileri|
+| Çoğaltıcı              | Çoğaltıcı               | Çoğaltıcı                                                                    | Çoğaltıcı                   |
+| Şema Yöneticileri      | Şema Yöneticileri       | Şema Yöneticileri                                                            | Şema Yöneticileri           |
 
 {{#include ../../banners/hacktricks-training.md}}
-

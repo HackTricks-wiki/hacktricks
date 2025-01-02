@@ -1,52 +1,50 @@
 # Test LLMs
 
-## Run & train models locally
+## Modelleri yerel olarak çalıştırma ve eğitme
 
 ### [**Hugging Face Transformers**](https://github.com/huggingface/transformers)
 
-Hugging Face Transformers is one of the most popular open-source libraries for using, training, and deploying LLMs such as GPT, BERT, and many others. It offers a comprehensive ecosystem that includes pre-trained models, datasets, and seamless integration with the Hugging Face Hub for fine-tuning and deployment.
+Hugging Face Transformers, GPT, BERT ve birçok diğer LLM'yi kullanmak, eğitmek ve dağıtmak için en popüler açık kaynaklı kütüphanelerden biridir. Önceden eğitilmiş modeller, veri setleri ve ince ayar ile dağıtım için Hugging Face Hub ile sorunsuz entegrasyon içeren kapsamlı bir ekosistem sunar.
 
 ### [**LangChain**](https://github.com/langchain-ai/langchain)
 
-LangChain is a framework designed for building applications with LLMs. It allows developers to connect language models with external data sources, APIs, and databases. LangChain provides tools for advanced prompt engineering, managing conversation history, and integrating LLMs into complex workflows.
+LangChain, LLM'lerle uygulama geliştirmek için tasarlanmış bir çerçevedir. Geliştiricilerin dil modellerini harici veri kaynakları, API'ler ve veritabanları ile bağlamasına olanak tanır. LangChain, gelişmiş istem mühendisliği, konuşma geçmişini yönetme ve LLM'leri karmaşık iş akışlarına entegre etme için araçlar sağlar.
 
 ### [**LitGPT**](https://github.com/Lightning-AI/litgpt)
 
-LitGPT is a project developed by Lightning AI that leverages the Lightning framework to facilitate the training, fine-tuning, and deployment of GPT-based models. It integrates seamlessly with other Lightning AI tools, providing optimized workflows for handling large-scale language models with enhanced performance and scalability.
+LitGPT, Lightning AI tarafından geliştirilen ve GPT tabanlı modellerin eğitimi, ince ayarı ve dağıtımını kolaylaştırmak için Lightning çerçevesini kullanan bir projedir. Diğer Lightning AI araçlarıyla sorunsuz bir şekilde entegre olur ve büyük ölçekli dil modellerini geliştirilmiş performans ve ölçeklenebilirlikle yönetmek için optimize edilmiş iş akışları sunar.
 
 ### [**LitServe**](https://github.com/Lightning-AI/LitServe)
 
-**Description:**\
-LitServe is a deployment tool from Lightning AI designed for quickly and efficiently deploying AI models. It simplifies the integration of LLMs into real-time applications by providing scalable and optimized serving capabilities.
+**Açıklama:**\
+LitServe, AI modellerini hızlı ve verimli bir şekilde dağıtmak için tasarlanmış Lightning AI'dan bir dağıtım aracıdır. LLM'lerin gerçek zamanlı uygulamalara entegrasyonunu, ölçeklenebilir ve optimize edilmiş sunum yetenekleri sağlayarak basitleştirir.
 
 ### [**Axolotl**](https://github.com/axolotl-ai-cloud/axolotl)
 
-Axolotl is a cloud-based platform designed to streamline the deployment, scaling, and management of AI models, including LLMs. It offers features such as automated scaling, monitoring, and integration with various cloud services, making it easier to deploy models in production environments without extensive infrastructure management.
+Axolotl, LLM'ler de dahil olmak üzere AI modellerinin dağıtımını, ölçeklenmesini ve yönetimini kolaylaştırmak için tasarlanmış bulut tabanlı bir platformdur. Otomatik ölçeklendirme, izleme ve çeşitli bulut hizmetleriyle entegrasyon gibi özellikler sunarak, modellerin üretim ortamlarında kapsamlı altyapı yönetimi olmadan dağıtımını kolaylaştırır.
 
-## Try models online
+## Modelleri çevrimiçi deneme
 
 ### [**Hugging Face**](https://huggingface.co/)
 
-**Hugging Face** is a leading platform and community for machine learning, particularly known for its work in natural language processing (NLP). It provides tools, libraries, and resources that make it easier to develop, share, and deploy machine learning models.\
-It offers several sections like:
+**Hugging Face**, makine öğrenimi için önde gelen bir platform ve topluluktur, özellikle doğal dil işleme (NLP) alanındaki çalışmalarıyla tanınır. Makine öğrenimi modellerini geliştirmeyi, paylaşmayı ve dağıtmayı kolaylaştıran araçlar, kütüphaneler ve kaynaklar sunar.\
+Aşağıdaki gibi birkaç bölüm sunar:
 
-* **Models**: A vast repository of **pre-trained machine learning models** where users can browse, download, and integrate models for various tasks like text generation, translation, image recognition, and more.
-* **Datasets:** A comprehensive **collection of datasets** used for training and evaluating models. It facilitates easy access to diverse data sources, enabling users to find and utilize data for their specific machine learning projects.
-* **Spaces:** A platform for hosting and sharing **interactive machine learning applications** and demos. It allows developers to **showcase** their models in action, create user-friendly interfaces, and collaborate with others by sharing live demos.
+* **Modeller:** Kullanıcıların metin üretimi, çeviri, görüntü tanıma ve daha fazlası gibi çeşitli görevler için modelleri göz atabileceği, indirebileceği ve entegre edebileceği geniş bir **önceden eğitilmiş makine öğrenimi modelleri** deposu.
+* **Veri Setleri:** Modellerin eğitimi ve değerlendirilmesi için kullanılan kapsamlı bir **veri setleri koleksiyonu**. Kullanıcıların belirli makine öğrenimi projeleri için veri bulmasını ve kullanmasını kolaylaştıran çeşitli veri kaynaklarına erişimi sağlar.
+* **Alanlar:** **Etkileşimli makine öğrenimi uygulamaları** ve demoları barındırmak ve paylaşmak için bir platform. Geliştiricilerin modellerini eylemde sergilemesine, kullanıcı dostu arayüzler oluşturmasına ve canlı demolar paylaşarak başkalarıyla işbirliği yapmasına olanak tanır.
 
 ## [**TensorFlow Hub**](https://www.tensorflow.org/hub) **&** [**Kaggle**](https://www.kaggle.com/)
 
-**TensorFlow Hub** is a comprehensive repository of reusable machine learning modules developed by Google. It focuses on facilitating the sharing and deployment of machine learning models, especially those built with TensorFlow.
+**TensorFlow Hub**, Google tarafından geliştirilen yeniden kullanılabilir makine öğrenimi modüllerinin kapsamlı bir deposudur. Özellikle TensorFlow ile oluşturulan makine öğrenimi modellerinin paylaşımını ve dağıtımını kolaylaştırmaya odaklanır.
 
-* **Modules:** A vast collection of pre-trained models and model components where users can browse, download, and integrate modules for tasks such as image classification, text embedding, and more.
-* **Tutorials:** Step-by-step guides and examples which helps users understand how to implement and fine-tune models using TensorFlow Hub.
-* **Documentation:** Comprehensive guides and API references that assist developers in effectively utilizing the repository’s resources.
+* **Modüller:** Kullanıcıların görüntü sınıflandırması, metin gömme ve daha fazlası gibi görevler için modülleri göz atabileceği, indirebileceği ve entegre edebileceği geniş bir önceden eğitilmiş modeller ve model bileşenleri koleksiyonu.
+* **Eğitimler:** Kullanıcıların TensorFlow Hub kullanarak modelleri nasıl uygulayacaklarını ve ince ayar yapacaklarını anlamalarına yardımcı olan adım adım kılavuzlar ve örnekler.
+* **Dokümantasyon:** Geliştiricilerin depo kaynaklarını etkili bir şekilde kullanmalarına yardımcı olan kapsamlı kılavuzlar ve API referansları.
 
 ## [**Replicate**](https://replicate.com/home)
 
-**Replicate** is a platform that allows developers to run machine learning models in the cloud via a simple API. It focuses on making ML models easily accessible and deployable without the need for extensive infrastructure setup.
+**Replicate**, geliştiricilerin basit bir API aracılığıyla bulutta makine öğrenimi modellerini çalıştırmalarına olanak tanıyan bir platformdur. ML modellerini geniş altyapı kurulumu gerektirmeden kolayca erişilebilir ve dağıtılabilir hale getirmeye odaklanır.
 
-* **Models:** A repository of machine learning models contributed by the community which users can browse, try, and integrate models into their applications with minimal effort.
-* **API Access:** Simple APIs for running models the enable developers to deploy and scale models effortlessly within their own applications.
-
-
+* **Modeller:** Topluluk tarafından katkıda bulunulan makine öğrenimi modellerinin bir deposu; kullanıcıların göz atabileceği, deneyebileceği ve modelleri uygulamalarına minimal çaba ile entegre edebileceği.
+* **API Erişimi:** Geliştiricilerin kendi uygulamaları içinde modelleri zahmetsizce dağıtmasına ve ölçeklendirmesine olanak tanıyan basit API'ler.

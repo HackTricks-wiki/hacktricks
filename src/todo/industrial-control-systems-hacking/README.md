@@ -1,18 +1,15 @@
-# Industrial Control Systems Hacking 
+# Endüstriyel Kontrol Sistemleri Hacking
 
-## About this Section
+## Bu Bölüm Hakkında
 
-This section contains all about Industrial Control Systems including concepts as well as methodologies to hack them with various security issues that persists in them. 
+Bu bölüm, Endüstriyel Kontrol Sistemleri ile ilgili kavramlar ve bunları hacklemek için çeşitli güvenlik sorunlarıyla birlikte metodolojileri içermektedir.
 
-Industrial Control Systems are everywhere, since industries are vital for economic development of a nation. But these ICS are hard to update and lesser advancements are made in this field. Hence, finding security flaws is common here. Most of the protocols and standards used here where developed back in the 90's and have much lesser capabilities as compared to current attack scenarios. 
+Endüstriyel Kontrol Sistemleri her yerde bulunmaktadır, çünkü sanayiler bir ülkenin ekonomik gelişimi için hayati öneme sahiptir. Ancak bu ICS'lerin güncellenmesi zordur ve bu alanda daha az ilerleme kaydedilmiştir. Bu nedenle, güvenlik açıklarını bulmak burada yaygındır. Burada kullanılan çoğu protokol ve standart 90'larda geliştirilmiştir ve mevcut saldırı senaryolarına kıyasla çok daha az yeteneğe sahiptir.
 
-It has become important to secure these systems since damaging them can cost a lot and even lives at the worst case. To understand Industrial Contol Systems security, knowing the internals of them is necessary. 
+Bu sistemleri güvence altına almak önemli hale gelmiştir, çünkü bunlara zarar vermek çok maliyetli olabilir ve en kötü durumda hayatlara mal olabilir. Endüstriyel Kontrol Sistemleri güvenliğini anlamak için, bunların iç yapısını bilmek gereklidir.
 
-Since Industrial Control Systems are installed following set standards, knowing each components would help in interconnecting every other mechanisms in the control system. Installation of these devices like PLCs and SCADA systems is different is various industries, hence information gathering is critical. 
+Endüstriyel Kontrol Sistemleri belirli standartlara göre kurulduğundan, her bir bileşeni bilmek kontrol sistemindeki diğer mekanizmaları birbirine bağlamaya yardımcı olacaktır. Bu cihazların, örneğin PLC'ler ve SCADA sistemleri, kurulumu çeşitli sanayilerde farklılık göstermektedir, bu nedenle bilgi toplama kritik öneme sahiptir.
 
-Industrial Control Systems can be complicated at times and hence require a lot of patience to do anything. It's all about probing and reconnaissance before planning attacks and developing any exploits. 
+Endüstriyel Kontrol Sistemleri bazen karmaşık olabilir ve bu nedenle bir şeyler yapmak için çok fazla sabır gerektirir. Saldırı planlamadan ve herhangi bir istismar geliştirmeden önce keşif ve keşif yapmakla ilgilidir.
 
-These techniques can also be used to protect against attacks and blue teaming for industrial control systems. 
-
-
-
+Bu teknikler, endüstriyel kontrol sistemleri için saldırılara karşı koruma sağlamak ve mavi takım çalışması için de kullanılabilir.

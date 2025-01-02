@@ -4,53 +4,50 @@
 
 ## Unconstrained delegation
 
-This a feature that a Domain Administrator can set to any **Computer** inside the domain. Then, anytime a **user logins** onto the Computer, a **copy of the TGT** of that user is going to be **sent inside the TGS** provided by the DC **and saved in memory in LSASS**. So, if you have Administrator privileges on the machine, you will be able to **dump the tickets and impersonate the users** on any machine.
+Bu, bir Alan Yöneticisinin alan içindeki herhangi bir **Bilgisayar** için ayarlayabileceği bir özelliktir. Daha sonra, bir **kullanıcı Bilgisayara giriş yaptığında**, o kullanıcının **TGT'sinin bir kopyası** DC tarafından sağlanan **TGS'ye gönderilecek** ve **LSASS'ta bellekte saklanacaktır**. Bu nedenle, makinede Yönetici ayrıcalıklarınız varsa, **biletleri dökebilir ve kullanıcıları taklit edebilirsiniz**.
 
-So if a domain admin logins inside a Computer with "Unconstrained Delegation" feature activated, and you have local admin privileges inside that machine, you will be able to dump the ticket and impersonate the Domain Admin anywhere (domain privesc).
+Bu nedenle, "Unconstrained Delegation" özelliği etkinleştirilmiş bir Bilgisayara giriş yapan bir alan yöneticisi varsa ve o makinede yerel yönetici ayrıcalıklarınız varsa, bileti dökebilir ve Alan Yöneticisini her yerde taklit edebilirsiniz (alan privesc).
 
-You can **find Computer objects with this attribute** checking if the [userAccountControl](<https://msdn.microsoft.com/en-us/library/ms680832(v=vs.85).aspx>) attribute contains [ADS_UF_TRUSTED_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>). You can do this with an LDAP filter of ‘(userAccountControl:1.2.840.113556.1.4.803:=524288)’, which is what powerview does:
+Bu **özelliğe sahip Bilgisayar nesnelerini bulabilirsiniz**; [userAccountControl](<https://msdn.microsoft.com/en-us/library/ms680832(v=vs.85).aspx>) niteliğinin [ADS_UF_TRUSTED_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>) içerip içermediğini kontrol ederek. Bunu ‘(userAccountControl:1.2.840.113556.1.4.803:=524288)’ LDAP filtresi ile yapabilirsiniz; bu, powerview'ün yaptığıdır:
 
 <pre class="language-bash"><code class="lang-bash"># List unconstrained computers
 ## Powerview
-Get-NetComputer -Unconstrained #DCs always appear but aren't useful for privesc
+Get-NetComputer -Unconstrained #DC'ler her zaman görünür ama privesc için faydalı değildir
 <strong>## ADSearch
 </strong>ADSearch.exe --search "(&#x26;(objectCategory=computer)(userAccountControl:1.2.840.113556.1.4.803:=524288))" --attributes samaccountname,dnshostname,operatingsystem
 <strong># Export tickets with Mimikatz
 </strong>privilege::debug
-sekurlsa::tickets /export #Recommended way
-kerberos::list /export #Another way
+sekurlsa::tickets /export #Tavsiye edilen yol
+kerberos::list /export #Başka bir yol
 
 # Monitor logins and export new tickets
-.\Rubeus.exe monitor /targetuser:&#x3C;username> /interval:10 #Check every 10s for new TGTs</code></pre>
+.\Rubeus.exe monitor /targetuser:&#x3C;username> /interval:10 #Yeni TGT'ler için her 10 saniyede bir kontrol et</code></pre>
 
-Load the ticket of Administrator (or victim user) in memory with **Mimikatz** or **Rubeus for a** [**Pass the Ticket**](pass-the-ticket.md)**.**\
-More info: [https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/](https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/)\
-[**More information about Unconstrained delegation in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-unrestricted-kerberos-delegation)
+Yönetici (veya kurban kullanıcının) biletini bellekte **Mimikatz** veya **Rubeus ile** yükleyin [**Pass the Ticket**](pass-the-ticket.md)** için.**\
+Daha fazla bilgi: [https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/](https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/)\
+[**Unconstrained delegation hakkında daha fazla bilgi ired.team'de.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-unrestricted-kerberos-delegation)
 
 ### **Force Authentication**
 
-If an attacker is able to **compromise a computer allowed for "Unconstrained Delegation"**, he could **trick** a **Print server** to **automatically login** against it **saving a TGT** in the memory of the server.\
-Then, the attacker could perform a **Pass the Ticket attack to impersonate** the user Print server computer account.
+Eğer bir saldırgan "Unconstrained Delegation" için izin verilen bir bilgisayarı **ele geçirebilirse**, bir **Yazıcı sunucusunu** **otomatik olarak giriş yapmaya** **kandırabilir** ve bu da sunucunun belleğinde bir TGT **kaydedebilir**.\
+Daha sonra, saldırgan, kullanıcı Yazıcı sunucu bilgisayar hesabını taklit etmek için **Pass the Ticket saldırısı** gerçekleştirebilir.
 
-To make a print server login against any machine you can use [**SpoolSample**](https://github.com/leechristensen/SpoolSample):
-
+Bir yazıcı sunucusunun herhangi bir makineye giriş yapmasını sağlamak için [**SpoolSample**](https://github.com/leechristensen/SpoolSample) kullanabilirsiniz:
 ```bash
 .\SpoolSample.exe <printmachine> <unconstrinedmachine>
 ```
+Eğer TGT bir etki alanı denetleyicisinden geliyorsa, bir [**DCSync attack**](acl-persistence-abuse/#dcsync) gerçekleştirebilir ve DC'den tüm hash'leri elde edebilirsiniz.\
+[**Bu saldırı hakkında daha fazla bilgi ired.team'de.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-dc-print-server-and-kerberos-delegation)
 
-If the TGT if from a domain controller, you could perform a[ **DCSync attack**](acl-persistence-abuse/#dcsync) and obtain all the hashes from the DC.\
-[**More info about this attack in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-dc-print-server-and-kerberos-delegation)
-
-**Here are other ways to try to force an authentication:**
+**Kimlik doğrulamayı zorlamak için diğer yollar:**
 
 {{#ref}}
 printers-spooler-service-abuse.md
 {{#endref}}
 
-### Mitigation
+### Mitigasyon
 
-- Limit DA/Admin logins to specific services
-- Set "Account is sensitive and cannot be delegated" for privileged accounts.
+- DA/Admin oturum açmalarını belirli hizmetlerle sınırlayın
+- Ayrıcalıklı hesaplar için "Hesap hassastır ve devredilemez" ayarını yapın.
 
 {{#include ../../banners/hacktricks-training.md}}
-

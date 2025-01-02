@@ -6,51 +6,51 @@
 
 {% embed url="https://websec.nl/" %}
 
-## Intro
+## Giriş
 
-For more info about how 125kHz tags work check:
+125kHz etiketlerinin nasıl çalıştığı hakkında daha fazla bilgi için kontrol edin:
 
 {{#ref}}
 ../pentesting-rfid.md
 {{#endref}}
 
-## Actions
+## Eylemler
 
-For more info about these types of tags [**read this intro**](../pentesting-rfid.md#low-frequency-rfid-tags-125khz).
+Bu tür etiketler hakkında daha fazla bilgi için [**bu girişi okuyun**](../pentesting-rfid.md#low-frequency-rfid-tags-125khz).
 
-### Read
+### Oku
 
-Tries to **read** the card info. Then it can **emulate** them.
+Kart bilgisini **okumaya** çalışır. Sonra bunları **taklit** edebilir.
 
 > [!WARNING]
-> Note that some intercoms try to protect themselves from key duplication by sending a write command prior to reading. If the write succeeds, that tag is considered fake. When Flipper emulates RFID there is no way for the reader to distinguish it from the original one, so no such problems occur.
+> Bazı interkomların, okumadan önce bir yazma komutu göndererek anahtar kopyalamaktan kendilerini korumaya çalıştığını unutmayın. Yazma başarılı olursa, o etiket sahte olarak kabul edilir. Flipper RFID'yi taklit ettiğinde, okuyucunun bunu orijinalinden ayırt etmesi için bir yol yoktur, bu nedenle böyle bir sorun ortaya çıkmaz.
 
-### Add Manually
+### Manuel Ekle
 
-You can create **fake cards in Flipper Zero indicating the data** you manually and then emulate it.
+Verileri manuel olarak belirterek Flipper Zero'da **sahte kartlar oluşturabilirsiniz** ve ardından bunu taklit edebilirsiniz.
 
-#### IDs on cards
+#### Kartlardaki Kimlikler
 
-Some times, when you get a card you will find the ID (or part) of it written in the card visible.
+Bazen, bir kart aldığınızda, kartta görünür şekilde yazılı olan kimliği (veya bir kısmını) bulacaksınız.
 
 - **EM Marin**
 
-For example in this EM-Marin card in the physical card is possible to **read the last 3 of 5 bytes in clear**.\
-The other 2 can be brute-forced if you cannot read them from the card.
+Örneğin, bu EM-Marin kartında fiziksel kartta **son 3'ü 5 baytın açık bir şekilde okunması mümkündür**.\
+Diğer 2'si karttan okuyamazsanız brute-force ile bulunabilir.
 
 <figure><img src="../../../images/image (104).png" alt=""><figcaption></figcaption></figure>
 
 - **HID**
 
-Same happens in this HID card where only 2 out of 3 bytes can be found printed in the card
+Bu HID kartında da aynı durum geçerlidir; burada yalnızca 3 bayttan 2'si kartta basılı olarak bulunabilir.
 
 <figure><img src="../../../images/image (1014).png" alt=""><figcaption></figcaption></figure>
 
-### Emulate/Write
+### Taklit/Yaz
 
-After **copying** a card or **entering** the ID **manually** it's possible to **emulate** it with Flipper Zero or **write** it in a real card.
+Bir kartı **kopyaladıktan** veya kimliği **manuel olarak girdikten** sonra, bunu Flipper Zero ile **taklit etmek** veya gerçek bir karta **yazmak** mümkündür.
 
-## References
+## Referanslar
 
 - [https://blog.flipperzero.one/rfid/](https://blog.flipperzero.one/rfid/)
 
@@ -59,4 +59,3 @@ After **copying** a card or **entering** the ID **manually** it's possible to **
 {% embed url="https://websec.nl/" %}
 
 {{#include ../../../banners/hacktricks-training.md}}
-

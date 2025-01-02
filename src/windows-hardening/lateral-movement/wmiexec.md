@@ -2,19 +2,18 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## How It Works Explained
+## Nasıl Çalıştığı Açıklandı
 
-Processes can be opened on hosts where the username and either password or hash are known through the use of WMI. Commands are executed using WMI by Wmiexec, providing a semi-interactive shell experience.
+Kullanıcı adı ve ya şifre ya da hash bilinen hostlarda süreçler WMI kullanılarak açılabilir. Komutlar Wmiexec tarafından WMI kullanılarak yürütülür ve yarı etkileşimli bir shell deneyimi sunar.
 
-**dcomexec.py:** Utilizing different DCOM endpoints, this script offers a semi-interactive shell akin to wmiexec.py, specifically leveraging the ShellBrowserWindow DCOM object. It currently supports MMC20. Application, Shell Windows, and Shell Browser Window objects. (source: [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))
+**dcomexec.py:** Farklı DCOM uç noktalarını kullanarak, bu script wmiexec.py'ye benzer yarı etkileşimli bir shell sunar ve özellikle ShellBrowserWindow DCOM nesnesini kullanır. Şu anda MMC20, Uygulama, Shell Windows ve Shell Browser Window nesnelerini desteklemektedir. (kaynak: [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))
 
-## WMI Fundamentals
+## WMI Temelleri
 
 ### Namespace
 
-Structured in a directory-style hierarchy, WMI's top-level container is \root, under which additional directories, referred to as namespaces, are organized.
-Commands to list namespaces:
-
+Dizin tarzı bir hiyerarşi içinde yapılandırılmış olan WMI'nın en üst düzey konteyneri \root'tur, altında namespace olarak adlandırılan ek dizinler organize edilmiştir.  
+Namespace'leri listelemek için komutlar:
 ```bash
 # Retrieval of Root namespaces
 gwmi -namespace "root" -Class "__Namespace" | Select Name
@@ -25,36 +24,28 @@ Get-WmiObject -Class "__Namespace" -Namespace "Root" -List -Recurse 2> $null | s
 # Listing of namespaces within "root\cimv2"
 Get-WmiObject -Class "__Namespace" -Namespace "root\cimv2" -List -Recurse 2> $null | select __Namespace | sort __Namespace
 ```
-
-Classes within a namespace can be listed using:
-
+Bir ad alanı içindeki sınıflar şu şekilde listelenebilir:
 ```bash
 gwmwi -List -Recurse # Defaults to "root\cimv2" if no namespace specified
 gwmi -Namespace "root/microsoft" -List -Recurse
 ```
+### **Sınıflar**
 
-### **Classes**
-
-Knowing a WMI class name, such as win32_process, and the namespace it resides in is crucial for any WMI operation.
-Commands to list classes beginning with `win32`:
-
+Bir WMI sınıf adını, örneğin win32_process, ve bulunduğu ad alanını bilmek, herhangi bir WMI işlemi için çok önemlidir.  
+`win32` ile başlayan sınıfları listelemek için komutlar:
 ```bash
 Get-WmiObject -Recurse -List -class win32* | more # Defaults to "root\cimv2"
 gwmi -Namespace "root/microsoft" -List -Recurse -Class "MSFT_MpComput*"
 ```
-
-Invocation of a class:
-
+Bir sınıfın çağrılması:
 ```bash
 # Defaults to "root/cimv2" when namespace isn't specified
 Get-WmiObject -Class win32_share
 Get-WmiObject -Namespace "root/microsoft/windows/defender" -Class MSFT_MpComputerStatus
 ```
+### Yöntemler
 
-### Methods
-
-Methods, which are one or more executable functions of WMI classes, can be executed.
-
+WMI sınıflarının bir veya daha fazla yürütülebilir işlevi olan yöntemler çalıştırılabilir.
 ```bash
 # Class loading, method listing, and execution
 $c = [wmiclass]"win32_share"
@@ -66,13 +57,11 @@ $c.methods
 # Method listing and invocation
 Invoke-WmiMethod -Class win32_share -Name Create -ArgumentList @($null, "Description", $null, "Name", $null, "c:\share\path",0)
 ```
+## WMI Sayımı
 
-## WMI Enumeration
+### WMI Servis Durumu
 
-### WMI Service Status
-
-Commands to verify if the WMI service is operational:
-
+WMI servisinin çalışıp çalışmadığını doğrulamak için komutlar:
 ```bash
 # WMI service status check
 Get-Service Winmgmt
@@ -80,18 +69,14 @@ Get-Service Winmgmt
 # Via CMD
 net start | findstr "Instrumentation"
 ```
+### Sistem ve Süreç Bilgileri
 
-### System and Process Information
-
-Gathering system and process information through WMI:
-
+WMI aracılığıyla sistem ve süreç bilgilerini toplama:
 ```bash
 Get-WmiObject -ClassName win32_operatingsystem | select * | more
 Get-WmiObject win32_process | Select Name, Processid
 ```
-
-For attackers, WMI is a potent tool for enumerating sensitive data about systems or domains.
-
+Saldırganlar için WMI, sistemler veya alanlar hakkında hassas verileri listelemek için güçlü bir araçtır.
 ```bash
 wmic computerystem list full /format:list
 wmic process list /format:list
@@ -100,32 +85,26 @@ wmic useraccount list /format:list
 wmic group list /format:list
 wmic sysaccount list /format:list
 ```
+Uzak bir makinedeki yerel yöneticiler veya oturum açmış kullanıcılar gibi belirli bilgileri WMI üzerinden uzaktan sorgulamak, dikkatli komut yapısı ile mümkündür.
 
-Remote querying of WMI for specific information, such as local admins or logged-on users, is feasible with careful command construction.
+### **Manuel Uzaktan WMI Sorgulama**
 
-### **Manual Remote WMI Querying**
+Uzak bir makinedeki yerel yöneticilerin ve oturum açmış kullanıcıların gizli bir şekilde tanımlanması, belirli WMI sorguları aracılığıyla gerçekleştirilebilir. `wmic`, aynı zamanda bir metin dosyasından okuma yaparak birden fazla düğümde komutları aynı anda çalıştırmayı destekler.
 
-Stealthy identification of local admins on a remote machine and logged-on users can be achieved through specific WMI queries. `wmic` also supports reading from a text file to execute commands on multiple nodes simultaneously.
-
-To remotely execute a process over WMI, such as deploying an Empire agent, the following command structure is employed, with successful execution indicated by a return value of "0":
-
+WMI üzerinden bir işlemi uzaktan yürütmek için, örneğin bir Empire ajanı dağıtmak için, aşağıdaki komut yapısı kullanılır; başarılı bir yürütme, "0" döndürme değeri ile gösterilir:
 ```bash
 wmic /node:hostname /user:user path win32_process call create "empire launcher string here"
 ```
+Bu süreç, WMI'nin uzaktan yürütme ve sistem sayımı yeteneğini göstermekte, hem sistem yönetimi hem de penetrasyon testi için faydasını vurgulamaktadır.
 
-This process illustrates WMI's capability for remote execution and system enumeration, highlighting its utility for both system administration and penetration testing.
-
-## References
+## Referanslar
 
 - [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
 
-## Automatic Tools
+## Otomatik Araçlar
 
 - [**SharpLateral**](https://github.com/mertdas/SharpLateral):
-
 ```bash
 SharpLateral redwmi HOSTNAME C:\\Users\\Administrator\\Desktop\\malware.exe
 ```
-
 {{#include ../../banners/hacktricks-training.md}}
-

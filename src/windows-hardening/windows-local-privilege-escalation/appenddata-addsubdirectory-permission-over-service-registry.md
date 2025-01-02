@@ -1,29 +1,28 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-**The original post is** [**https://itm4n.github.io/windows-registry-rpceptmapper-eop/**](https://itm4n.github.io/windows-registry-rpceptmapper-eop/)
+**Orijinal gönderi** [**https://itm4n.github.io/windows-registry-rpceptmapper-eop/**](https://itm4n.github.io/windows-registry-rpceptmapper-eop/)
 
-## Summary
+## Özet
 
-Two registry keys were found to be writable by the current user:
+Mevcut kullanıcı tarafından yazılabilir iki kayıt defteri anahtarı bulundu:
 
 - **`HKLM\SYSTEM\CurrentControlSet\Services\Dnscache`**
 - **`HKLM\SYSTEM\CurrentControlSet\Services\RpcEptMapper`**
 
-It was suggested to check the permissions of the **RpcEptMapper** service using the **regedit GUI**, specifically the **Advanced Security Settings** window's **Effective Permissions** tab. This approach enables the assessment of granted permissions to specific users or groups without the need to examine each Access Control Entry (ACE) individually.
+**RpcEptMapper** hizmetinin izinlerini **regedit GUI** kullanarak kontrol etmenin önerildiği belirtildi, özellikle **Gelişmiş Güvenlik Ayarları** penceresinin **Geçerli İzinler** sekmesi. Bu yaklaşım, her Erişim Kontrol Girişi'ni (ACE) ayrı ayrı incelemeden belirli kullanıcılar veya gruplara verilen izinlerin değerlendirilmesini sağlar.
 
-A screenshot showed the permissions assigned to a low-privileged user, among which the **Create Subkey** permission was notable. This permission, also referred to as **AppendData/AddSubdirectory**, corresponds with the script's findings.
+Düşük ayrıcalıklı bir kullanıcıya atanan izinleri gösteren bir ekran görüntüsü, **Create Subkey** izninin dikkat çekici olduğunu ortaya koydu. Bu izin, **AppendData/AddSubdirectory** olarak da adlandırılmakta olup, scriptin bulgularıyla örtüşmektedir.
 
-The inability to modify certain values directly, yet the capability to create new subkeys, was noted. An example highlighted was an attempt to alter the **ImagePath** value, which resulted in an access denied message.
+Belirli değerleri doğrudan değiştirme yeteneğinin olmaması, ancak yeni alt anahtarlar oluşturma yeteneğinin bulunması kaydedildi. Öne çıkan bir örnek, **ImagePath** değerini değiştirme girişimiydi ve bu, erişim reddedildi mesajıyla sonuçlandı.
 
-Despite these limitations, a potential for privilege escalation was identified through the possibility of leveraging the **Performance** subkey within the **RpcEptMapper** service's registry structure, a subkey not present by default. This could enable DLL registration and performance monitoring.
+Bu sınırlamalara rağmen, **RpcEptMapper** hizmetinin kayıt defteri yapısında varsayılan olarak mevcut olmayan **Performance** alt anahtarını kullanma olasılığı ile ayrıcalık yükseltme potansiyeli belirlendi. Bu, DLL kaydı ve performans izleme imkanı sağlayabilir.
 
-Documentation on the **Performance** subkey and its utilization for performance monitoring was consulted, leading to the development of a proof-of-concept DLL. This DLL, demonstrating the implementation of **OpenPerfData**, **CollectPerfData**, and **ClosePerfData** functions, was tested via **rundll32**, confirming its operational success.
+**Performance** alt anahtarı ve performans izleme için kullanımı hakkında belgeler incelendi ve bir kanıt konsepti DLL'si geliştirildi. **OpenPerfData**, **CollectPerfData** ve **ClosePerfData** fonksiyonlarının uygulanmasını gösteren bu DLL, **rundll32** aracılığıyla test edildi ve başarılı bir şekilde çalıştığı doğrulandı.
 
-The goal was to coerce the **RPC Endpoint Mapper service** into loading the crafted Performance DLL. Observations revealed that executing WMI class queries related to Performance Data via PowerShell resulted in the creation of a log file, enabling the execution of arbitrary code under the **LOCAL SYSTEM** context, thus granting elevated privileges.
+Amaç, **RPC Endpoint Mapper hizmetini** oluşturulan Performans DLL'sini yüklemeye zorlamaktı. Gözlemler, PowerShell aracılığıyla Performans Verileri ile ilgili WMI sınıf sorgularının yürütülmesinin bir günlük dosyası oluşturduğunu ve böylece **LOCAL SYSTEM** bağlamında keyfi kod yürütülmesine olanak tanıdığını ortaya koydu, bu da yükseltilmiş ayrıcalıklar sağladı.
 
-The persistence and potential implications of this vulnerability were underscored, highlighting its relevance for post-exploitation strategies, lateral movement, and evasion of antivirus/EDR systems.
+Bu güvenlik açığının kalıcılığı ve potansiyel etkileri vurgulandı, post-exploitation stratejileri, yan hareket ve antivirüs/EDR sistemlerinden kaçınma ile ilgili önemine dikkat çekildi.
 
-Although the vulnerability was initially disclosed unintentionally through the script, it was emphasized that its exploitation is constrained to outdated Windows versions (e.g., **Windows 7 / Server 2008 R2**) and requires local access.
+Güvenlik açığının başlangıçta script aracılığıyla istemeden ifşa edildiği belirtilse de, istismarının eski Windows sürümleriyle (örneğin, **Windows 7 / Server 2008 R2**) sınırlı olduğu ve yerel erişim gerektirdiği vurgulandı.
 
 {{#include ../../banners/hacktricks-training.md}}
-

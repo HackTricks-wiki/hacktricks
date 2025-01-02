@@ -2,59 +2,56 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Temel Bilgiler
 
-SPI (Serial Peripheral Interface) is an Synchronous Serial Communication Protocol used in embedded systems for short distance communication between ICs (Integrated Circuits). SPI Communication Protocol makes use of the master-slave architecture which is orchastrated by the Clock and Chip Select Signal. A master-slave architecture consists of a master (usually a microprocessor) that manages external peripherals like EEPROM, sensors, control devices, etc. which are considered to be the slaves.
+SPI (Seri Peripheral Arayüzü), entegre devreler (IC'ler) arasında kısa mesafeli iletişim için gömülü sistemlerde kullanılan Senkron Seri İletişim Protokolüdür. SPI İletişim Protokolü, Saat ve Çip Seçim Sinyali tarafından yönetilen master-slave mimarisini kullanır. Bir master-slave mimarisi, EEPROM, sensörler, kontrol cihazları gibi harici çevresel birimleri yöneten bir master (genellikle bir mikroişlemci) içerir ve bunlar köle olarak kabul edilir.
 
-Multiple slaves can be connected to a master but slaves can't communicate with each other. Slaves are administrated by two pins, clock and chip select. As SPI is an synchronous communication protocol, the input and output pins follow the clock signals. The chip select is used by the master to select a slave and interact with it. When the chip select is high, the slave device is not selected whereas when it's low, the chip has been selected and the master would be interacting with the slave.
+Bir master'a birden fazla köle bağlanabilir, ancak köleler birbirleriyle iletişim kuramaz. Köleler, saat ve çip seçimi olmak üzere iki pin ile yönetilir. SPI senkron bir iletişim protokolü olduğundan, giriş ve çıkış pinleri saat sinyallerini takip eder. Çip seçimi, master tarafından bir köleyi seçmek ve onunla etkileşimde bulunmak için kullanılır. Çip seçimi yüksek olduğunda, köle cihaz seçilmezken, düşük olduğunda çip seçilmiş olur ve master köle ile etkileşimde bulunur.
 
-The MOSI (Master Out, Slave In) and MISO (Master In, Slave Out) are responsible for data sending and recieving data. Data is sent to the slave device through the MOSI pin while the chip select is held low. The input data contains instructions, memory addresses or data as per the datasheet of the slave device vendor. Upon a valid input, the MISO pin is responsible for transmitting data to the master. The output data is sent exactly at the next clock cycle after the input ends. The MISO pins transmits data till the data is fully transmitter or the master sets the chip select pin high (in that case, the slave would stop transmitting and master would not listen after that clock cycle).
+MOSI (Master Out, Slave In) ve MISO (Master In, Slave Out) veri gönderme ve alma işlemlerinden sorumludur. Veri, MOSI pini aracılığıyla köle cihaza gönderilirken çip seçimi düşük tutulur. Giriş verisi, köle cihaz tedarikçisinin veri sayfasına göre talimatlar, bellek adresleri veya veriler içerir. Geçerli bir girişte, MISO pini veriyi master'a iletmekten sorumludur. Çıkış verisi, giriş sona erdikten sonraki bir sonraki saat döngüsünde tam olarak gönderilir. MISO pinleri, veri tamamen iletilene kadar veri iletmeye devam eder veya master çip seçimi pinini yüksek ayarlarsa (bu durumda, köle iletmeyi durdurur ve master bu saat döngüsünden sonra dinlemez).
 
-## Dumping Firmware from EEPROMs
+## EEPROM'lerden Firmware Dökümü
 
-Dumping firmware can be useful for analysing the firmware and finding vulnerabilities in them. Often times, the firmware is not available on the internet or is irrelevant due to variations of factors like model number, version, etc. Hence, extracting the firmware directly from the physical device can be helpful to be specific while hunting for threats.
+Firmware dökümü, firmware'i analiz etmek ve içindeki zayıflıkları bulmak için yararlı olabilir. Çoğu zaman, firmware internet üzerinde mevcut değildir veya model numarası, versiyon gibi faktörlerin varyasyonları nedeniyle alakasızdır. Bu nedenle, tehditleri avlarken spesifik olmak için firmware'i doğrudan fiziksel cihazdan çıkarmak faydalı olabilir.
 
-Getting Serial Console can be helpful, but often times it happens that the files are read-only. This constrains the analysis due to various reasons. For example, a tools that are required to send and recieve packages would not be there in the firmware. So extracting the binaries to reverse engineer them is not feasible. Hence, having the whole firmware dumped on the system and extracting the binaries for analysis can be very helpful.
+Seri Konsol almak yararlı olabilir, ancak çoğu zaman dosyaların yalnızca okunabilir olduğu durumlarla karşılaşılır. Bu, çeşitli nedenlerden dolayı analizi kısıtlar. Örneğin, paketleri göndermek ve almak için gereken araçlar firmware'de bulunmayabilir. Bu nedenle, ikili dosyaları tersine mühendislik yapmak için çıkarmak mümkün değildir. Bu nedenle, sistemde tüm firmware'in dökülmesi ve analiz için ikili dosyaların çıkarılması çok faydalı olabilir.
 
-Also, during red reaming and getting physical access to devices, dumping the firmware can help on modifying the files or injecting malicious files and then reflashing them into the memory which could be helpful to implant a backdoor into the device. Hence, there are numerous possibilities that can be unlocked with firmware dumping.
+Ayrıca, kırmızı okuma sırasında ve cihazlara fiziksel erişim sağlarken, firmware dökümü dosyaları değiştirmeye veya kötü niyetli dosyalar eklemeye yardımcı olabilir ve ardından bunları belleğe yeniden yüklemek, cihazda bir arka kapı yerleştirmek için faydalı olabilir. Bu nedenle, firmware dökümü ile açılabilecek birçok olasılık vardır.
 
-### CH341A EEPROM Programmer and Reader
+### CH341A EEPROM Programlayıcı ve Okuyucu
 
-This device is an inexpensive tool for dumping firmwares from EEPROMs and also reflashing them with firmware files. This has been a popular choice for working with computer BIOS chips (which are just EEPROMs). This device connects over USB and needs minimal tools to get started. Also, it usually gets the task done quickly, so can be helpful in physical device access too.
+Bu cihaz, EEPROM'lerden firmware dökmek ve bunları firmware dosyalarıyla yeniden yüklemek için uygun fiyatlı bir araçtır. Bilgisayar BIOS yongaları (sadece EEPROM'ler) ile çalışmak için popüler bir seçim olmuştur. Bu cihaz USB üzerinden bağlanır ve başlamak için minimum araç gerektirir. Ayrıca, genellikle işi hızlı bir şekilde halleder, bu nedenle fiziksel cihaz erişiminde de faydalı olabilir.
 
 ![drawing](../../images/board_image_ch341a.jpg)
 
-Connect the EEPROM memory with the CH341a Programmer and plug the device into the computer. Incase the device is not getting detected, try installing drivers into the computer. Also, make sure that the EEPROM is connected in proper orientation (usually, place the VCC Pin in reverse orientation to the USB connector) or else, the software would not be able to detect the chip. Refer to the diagram if required:
+EEPROM belleğini CH341a Programlayıcı ile bağlayın ve cihazı bilgisayara takın. Cihaz algılanmıyorsa, bilgisayara sürücü yüklemeyi deneyin. Ayrıca, EEPROM'un doğru yönde bağlandığından emin olun (genellikle, VCC Pin'ini USB konektörüne ters yönde yerleştirin) aksi takdirde yazılım çipi algılayamaz. Gerekirse diyagrama bakın:
 
 ![drawing](../../images/connect_wires_ch341a.jpg) ![drawing](../../images/eeprom_plugged_ch341a.jpg)
 
-Finally, use softwares like flashrom, G-Flash (GUI), etc. for dumping the firmware. G-Flash is a minimal GUI tool is fast and detects the EEPROM automatically. This can be helpful in the firmware needs to be extracted quickly, without much tinkering with the documentation.
+Son olarak, firmware dökümü için flashrom, G-Flash (GUI) gibi yazılımlar kullanın. G-Flash, hızlı ve EEPROM'u otomatik olarak algılayan minimal bir GUI aracıdır. Bu, firmware'in hızlı bir şekilde çıkarılması gerektiğinde, belgelerle fazla uğraşmadan faydalı olabilir.
 
 ![drawing](../../images/connected_status_ch341a.jpg)
 
-After dumping the firmware, the analysis can be done on the binary files. Tools like strings, hexdump, xxd, binwalk, etc. can be used to extract a lot of information about the firmware as well as the whole file system too.
+Firmware döküldükten sonra, ikili dosyalar üzerinde analiz yapılabilir. Strings, hexdump, xxd, binwalk gibi araçlar, firmware hakkında ve tüm dosya sistemi hakkında çok fazla bilgi çıkarmak için kullanılabilir.
 
-To extract the contents from the firmware, binwalk can be used. Binwalk analyses for hex signatures and identifies the files in the binary file and is capabale of extracting them.
-
+Firmware'den içerik çıkarmak için binwalk kullanılabilir. Binwalk, hex imzalarını analiz eder ve ikili dosyadaki dosyaları tanımlar ve bunları çıkarmak için yeteneklidir.
 ```
 binwalk -e <filename>
 ```
-
-The can be .bin or .rom as per the tools and configurations used.
+Bu, kullanılan araçlar ve yapılandırmalara göre .bin veya .rom olabilir.
 
 > [!CAUTION]
-> Note that firmware extraction is a delicate process and requires a lot of patience. Any mishandling can potentially corrupt the firmware or even erase it completely and make the device unusable. It is recommended to study the specific device before attempting to extract the firmware.
+> Firmware çıkarımının hassas bir süreç olduğunu ve çok fazla sabır gerektirdiğini unutmayın. Herhangi bir yanlış işlem, firmware'i bozabilir veya tamamen silip cihazı kullanılamaz hale getirebilir. Firmware'i çıkarmaya çalışmadan önce belirli cihazı incelemeniz önerilir.
 
 ### Bus Pirate + flashrom
 
 ![](<../../images/image (910).png>)
 
-Note that even if the PINOUT of the Pirate Bus indicates pins for **MOSI** and **MISO** to connect to SPI however some SPIs may indicate pins as DI and DO. **MOSI -> DI, MISO -> DO**
+Pirate Bus'ın PINOUT'u **MOSI** ve **MISO** pinlerini SPI'ye bağlamak için gösterse de, bazı SPIs pinleri DI ve DO olarak gösterebilir. **MOSI -> DI, MISO -> DO**
 
 ![](<../../images/image (360).png>)
 
-In Windows or Linux you can use the program [**`flashrom`**](https://www.flashrom.org/Flashrom) to dump the content of the flash memory running something like:
-
+Windows veya Linux'ta, flash bellek içeriğini dökmek için [**`flashrom`**](https://www.flashrom.org/Flashrom) programını kullanabilirsiniz, şöyle bir şey çalıştırarak:
 ```bash
 # In this command we are indicating:
 # -VV Verbose
@@ -63,6 +60,4 @@ In Windows or Linux you can use the program [**`flashrom`**](https://www.flashro
 # -r <file> Image to save in the filesystem
 flashrom -VV -c "W25Q64.V" -p buspirate_spi:dev=COM3 -r flash_content.img
 ```
-
 {{#include ../../banners/hacktricks-training.md}}
-

@@ -2,7 +2,6 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-For information about [**WinRM read this page**](../../network-services-pentesting/5985-5986-pentesting-winrm.md).
+[**WinRM hakkında bilgi için bu sayfayı okuyun**](../../network-services-pentesting/5985-5986-pentesting-winrm.md).
 
 {{#include ../../banners/hacktricks-training.md}}
-

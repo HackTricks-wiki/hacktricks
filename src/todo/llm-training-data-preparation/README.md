@@ -1,99 +1,98 @@
-# LLM Training - Data Preparation
+# LLM Eğitimi - Veri Hazırlığı
 
-**These are my notes from the very recommended book** [**https://www.manning.com/books/build-a-large-language-model-from-scratch**](https://www.manning.com/books/build-a-large-language-model-from-scratch) **with some extra information.**
+**Bunlar, çok önerilen kitabımdan aldığım notlar** [**https://www.manning.com/books/build-a-large-language-model-from-scratch**](https://www.manning.com/books/build-a-large-language-model-from-scratch) **ve bazı ek bilgiler.**
 
-## Basic Information
+## Temel Bilgiler
 
-You should start by reading this post for some basic concepts you should know about:
+Bilmeniz gereken bazı temel kavramlar için bu gönderiyi okumaya başlamalısınız:
 
 {{#ref}}
 0.-basic-llm-concepts.md
 {{#endref}}
 
-## 1. Tokenization
+## 1. Tokenizasyon
 
 > [!TIP]
-> The goal of this initial phase is very simple: **Divide the input in tokens (ids) in some way that makes sense**.
+> Bu ilk aşamanın amacı çok basit: **Girdiyi mantıklı bir şekilde token'lara (kimliklere) ayırmak**.
 
 {{#ref}}
 1.-tokenizing.md
 {{#endref}}
 
-## 2. Data Sampling
+## 2. Veri Örnekleme
 
 > [!TIP]
-> The goal of this second phase is very simple: **Sample the input data and prepare it for the training phase usually by separating the dataset into sentences of a specific length and generating also the expected response.**
+> Bu ikinci aşamanın amacı çok basit: **Girdi verisini örneklemek ve genellikle belirli bir uzunluktaki cümlelere ayırarak eğitim aşamasına hazırlamak ve ayrıca beklenen yanıtı üretmek.**
 
 {{#ref}}
 2.-data-sampling.md
 {{#endref}}
 
-## 3. Token Embeddings
+## 3. Token Gömme
 
 > [!TIP]
-> The goal of this third phase is very simple: **Assign each of the previous tokens in the vocabulary a vector of the desired dimensions to train the model.** Each word in the vocabulary will a point in a space of X dimensions.\
-> Note that initially the position of each word in the space is just initialised "randomly" and these positions are trainable parameters (will be improved during the training).
+> Bu üçüncü aşamanın amacı çok basit: **Sözlükteki önceki her token'a modelin eğitimi için istenen boyutlarda bir vektör atamak.** Sözlükteki her kelime, X boyutlu bir uzayda bir nokta olacaktır.\
+> Başlangıçta her kelimenin uzaydaki konumu "rastgele" başlatılır ve bu konumlar eğitilebilir parametrelerdir (eğitim sırasında geliştirilecektir).
 >
-> Moreover, during the token embedding **another layer of embeddings is created** which represents (in this case) the **absolute possition of the word in the training sentence**. This way a word in different positions in the sentence will have a different representation (meaning).
+> Ayrıca, token gömme sırasında **gömme katmanının başka bir katmanı oluşturulur** ki bu da (bu durumda) **kelimenin eğitim cümlesindeki mutlak konumunu temsil eder.** Bu şekilde, cümledeki farklı konumlarda bir kelimenin farklı bir temsili (anlamı) olacaktır.
 
 {{#ref}}
 3.-token-embeddings.md
 {{#endref}}
 
-## 4. Attention Mechanisms
+## 4. Dikkat Mekanizmaları
 
 > [!TIP]
-> The goal of this fourth phase is very simple: **Apply some attetion mechanisms**. These are going to be a lot of **repeated layers** that are going to **capture the relation of a word in the vocabulary with its neighbours in the current sentence being used to train the LLM**.\
-> A lot of layers are used for this, so a lot of trainable parameters are going to be capturing this information.
+> Bu dördüncü aşamanın amacı çok basit: **Bazı dikkat mekanizmalarını uygulamak.** Bunlar, **sözlükteki bir kelimenin, LLM'yi eğitmek için kullanılan mevcut cümledeki komşularıyla olan ilişkisini yakalayacak çok sayıda tekrar eden katmanlar** olacaktır.\
+> Bunun için çok sayıda katman kullanılacak, bu nedenle çok sayıda eğitilebilir parametre bu bilgiyi yakalayacaktır.
 
 {{#ref}}
 4.-attention-mechanisms.md
 {{#endref}}
 
-## 5. LLM Architecture
+## 5. LLM Mimarisi
 
 > [!TIP]
-> The goal of this fifth phase is very simple: **Develop the architecture of the full LLM**. Put everything together, apply all the layers and create all the functions to generate text or transform text to IDs and backwards.
+> Bu beşinci aşamanın amacı çok basit: **Tam LLM'nin mimarisini geliştirmek.** Her şeyi bir araya getirin, tüm katmanları uygulayın ve metin oluşturmak veya metni kimliklere ve tersine dönüştürmek için tüm işlevleri oluşturun.
 >
-> This architecture will be used for both, training and predicting text after it was trained.
+> Bu mimari, hem eğitim hem de eğitimden sonra metin tahmin etmek için kullanılacaktır.
 
 {{#ref}}
 5.-llm-architecture.md
 {{#endref}}
 
-## 6. Pre-training & Loading models
+## 6. Ön Eğitim ve Modellerin Yüklenmesi
 
 > [!TIP]
-> The goal of this sixth phase is very simple: **Train the model from scratch**. For this the previous LLM architecture will be used with some loops going over the data sets using the defined loss functions and optimizer to train all the parameters of the model.
+> Bu altıncı aşamanın amacı çok basit: **Modeli sıfırdan eğitmek.** Bunun için önceki LLM mimarisi, tanımlı kayıp fonksiyonları ve optimizasyon kullanarak veri setleri üzerinde döngülerle tüm model parametrelerini eğitmek için kullanılacaktır.
 
 {{#ref}}
 6.-pre-training-and-loading-models.md
 {{#endref}}
 
-## 7.0. LoRA Improvements in fine-tuning
+## 7.0. İnce Ayar için LoRA İyileştirmeleri
 
 > [!TIP]
-> The use of **LoRA reduce a lot the computation** needed to **fine tune** already trained models.
+> **LoRA'nın kullanımı, zaten eğitilmiş modelleri ince ayar yapmak için gereken hesaplamayı büyük ölçüde azaltır.**
 
 {{#ref}}
 7.0.-lora-improvements-in-fine-tuning.md
 {{#endref}}
 
-## 7.1. Fine-Tuning for Classification
+## 7.1. Sınıflandırma için İnce Ayar
 
 > [!TIP]
-> The goal of this section is to show how to fine-tune an already pre-trained model so instead of generating new text the LLM will select give the **probabilities of the given text being categorized in each of the given categories** (like if a text is spam or not).
+> Bu bölümün amacı, zaten önceden eğitilmiş bir modeli ince ayar yapmayı göstermektir, böylece yeni metin oluşturmak yerine LLM, **verilen metnin her bir verilen kategoriye sınıflandırılma olasılıklarını** seçecektir (örneğin, bir metnin spam olup olmadığını).
 
 {{#ref}}
 7.1.-fine-tuning-for-classification.md
 {{#endref}}
 
-## 7.2. Fine-Tuning to follow instructions
+## 7.2. Talimatları Takip Etmek için İnce Ayar
 
 > [!TIP]
-> The goal of this section is to show how to **fine-tune an already pre-trained model to follow instructions** rather than just generating text, for example, responding to tasks as a chat bot.
+> Bu bölümün amacı, **metin oluşturmak yerine talimatları takip etmek için zaten önceden eğitilmiş bir modeli ince ayar yapmayı** göstermektir, örneğin, bir sohbet botu olarak görevlere yanıt vermek. 
 
 {{#ref}}
 7.2.-fine-tuning-to-follow-instructions.md
 {{#endref}}
-

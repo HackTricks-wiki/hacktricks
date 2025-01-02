@@ -1,57 +1,52 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-There are several blogs in the Internet which **highlight the dangers of leaving printers configured with LDAP with default/weak** logon credentials.\
-This is because an attacker could **trick the printer to authenticate against a rouge LDAP server** (typically a `nc -vv -l -p 444` is enough) and to capture the printer **credentials on clear-text**.
+İnternette, **varsayılan/zayıf** oturum açma kimlik bilgileriyle yapılandırılmış yazıcıların tehlikelerini **vurgulayan** birkaç blog bulunmaktadır.\
+Bu, bir saldırganın yazıcıyı **kötü niyetli bir LDAP sunucusuna kimlik doğrulaması yapmaya kandırabileceği** anlamına gelir (genellikle bir `nc -vv -l -p 444` yeterlidir) ve yazıcının **kimlik bilgilerini açık metin olarak** yakalayabilir.
 
-Also, several printers will contains **logs with usernames** or could even be able to **download all usernames** from the Domain Controller.
+Ayrıca, birçok yazıcı **kullanıcı adlarıyla günlükler** içerebilir veya hatta **Tüm kullanıcı adlarını** Domain Controller'dan indirebilir.
 
-All this **sensitive information** and the common **lack of security** makes printers very interesting for attackers.
+Tüm bu **hassas bilgiler** ve yaygın **güvenlik eksiklikleri**, yazıcıları saldırganlar için çok ilginç hale getirir.
 
-Some blogs about the topic:
+Konu hakkında bazı bloglar:
 
 - [https://www.ceos3c.com/hacking/obtaining-domain-credentials-printer-netcat/](https://www.ceos3c.com/hacking/obtaining-domain-credentials-printer-netcat/)
 - [https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)
 
-## Printer Configuration
+## Yazıcı Yapılandırması
 
-- **Location**: The LDAP server list is found at: `Network > LDAP Setting > Setting Up LDAP`.
-- **Behavior**: The interface allows LDAP server modifications without re-entering credentials, aiming for user convenience but posing security risks.
-- **Exploit**: The exploit involves redirecting the LDAP server address to a controlled machine and leveraging the "Test Connection" feature to capture credentials.
+- **Konum**: LDAP sunucu listesi şurada bulunur: `Network > LDAP Setting > Setting Up LDAP`.
+- **Davranış**: Arayüz, kimlik bilgilerini yeniden girmeden LDAP sunucu değişikliklerine izin verir, bu kullanıcı kolaylığı için tasarlanmıştır ancak güvenlik riskleri taşır.
+- **Sömürü**: Sömürü, LDAP sunucu adresini kontrol edilen bir makineye yönlendirmeyi ve kimlik bilgilerini yakalamak için "Bağlantıyı Test Et" özelliğini kullanmayı içerir.
 
-## Capturing Credentials
+## Kimlik Bilgilerini Yakalama
 
-**For more detailed steps, refer to the original [source](https://grimhacker.com/2018/03/09/just-a-printer/).**
+**Daha ayrıntılı adımlar için, orijinal [kaynağa](https://grimhacker.com/2018/03/09/just-a-printer/) bakın.**
 
-### Method 1: Netcat Listener
+### Yöntem 1: Netcat Dinleyici
 
-A simple netcat listener might suffice:
-
+Basit bir netcat dinleyici yeterli olabilir:
 ```bash
 sudo nc -k -v -l -p 386
 ```
+Ancak, bu yöntemin başarısı değişkenlik gösterir.
 
-However, this method's success varies.
+### Yöntem 2: Tam LDAP Sunucusu ile Slapd
 
-### Method 2: Full LDAP Server with Slapd
+Daha güvenilir bir yaklaşım, bir tam LDAP sunucusu kurmaktır çünkü yazıcı, kimlik bilgisi bağlamadan önce bir null bind ve ardından bir sorgu gerçekleştirir.
 
-A more reliable approach involves setting up a full LDAP server because the printer performs a null bind followed by a query before attempting credential binding.
-
-1. **LDAP Server Setup**: The guide follows steps from [this source](https://www.server-world.info/en/note?os=Fedora_26&p=openldap).
-2. **Key Steps**:
-   - Install OpenLDAP.
-   - Configure admin password.
-   - Import basic schemas.
-   - Set domain name on LDAP DB.
-   - Configure LDAP TLS.
-3. **LDAP Service Execution**: Once set up, the LDAP service can be run using:
-
+1. **LDAP Sunucu Kurulumu**: Kılavuz, [bu kaynaktan](https://www.server-world.info/en/note?os=Fedora_26&p=openldap) adımları takip eder.
+2. **Ana Adımlar**:
+- OpenLDAP'ı kurun.
+- Yönetici şifresini yapılandırın.
+- Temel şemaları içe aktarın.
+- LDAP DB üzerinde alan adını ayarlayın.
+- LDAP TLS'yi yapılandırın.
+3. **LDAP Servisi Çalıştırma**: Kurulduktan sonra, LDAP servisi şu şekilde çalıştırılabilir:
 ```bash
 slapd -d 2
 ```
-
-## References
+## Referanslar
 
 - [https://grimhacker.com/2018/03/09/just-a-printer/](https://grimhacker.com/2018/03/09/just-a-printer/)
 
 {{#include ../../banners/hacktricks-training.md}}
-

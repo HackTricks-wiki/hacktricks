@@ -1,53 +1,52 @@
-# Hardware Hacking
+# Donanım Hackleme
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## JTAG
 
-JTAG allows to perform a boundary scan. The boundary scan analyzes certain circuitry, including embedded boundary-scan cells and registers for each pin.
+JTAG, bir sınır taraması gerçekleştirmeyi sağlar. Sınır taraması, gömülü sınır tarama hücreleri ve her pin için kayıtlar da dahil olmak üzere belirli devreleri analiz eder.
 
-The JTAG standard defines **specific commands for conducting boundary scans**, including the following:
+JTAG standardı, **sınır taramaları gerçekleştirmek için belirli komutlar** tanımlar, bunlar arasında şunlar bulunur:
 
-- **BYPASS** allows you to test a specific chip without the overhead of passing through other chips.
-- **SAMPLE/PRELOAD** takes a sample of the data entering and leaving the device when it’s in its normal functioning mode.
-- **EXTEST** sets and reads pin states.
+- **BYPASS**, belirli bir çipi diğer çiplerden geçmeden test etmenizi sağlar.
+- **SAMPLE/PRELOAD**, cihaz normal çalışma modundayken giren ve çıkan verilerin bir örneğini alır.
+- **EXTEST**, pin durumlarını ayarlar ve okur.
 
-It can also support other commands such as:
+Ayrıca aşağıdaki gibi diğer komutları da destekleyebilir:
 
-- **IDCODE** for identifying a device
-- **INTEST** for the internal testing of the device
+- **IDCODE**, bir cihazı tanımlamak için
+- **INTEST**, cihazın iç testleri için
 
-You might come across these instructions when you use a tool like the JTAGulator.
+JTAGulator gibi bir araç kullandığınızda bu talimatlarla karşılaşabilirsiniz.
 
-### The Test Access Port
+### Test Erişim Noktası
 
-Boundary scans include tests of the four-wire **Test Access Port (TAP)**, a general-purpose port that provides **access to the JTAG test support** functions built into a component. TAP uses the following five signals:
+Sınır taramaları, dört telli **Test Erişim Noktası (TAP)** testlerini içerir; bu, bir bileşene entegre edilmiş **JTAG test destek** işlevlerine erişim sağlayan genel amaçlı bir porttur. TAP, aşağıdaki beş sinyali kullanır:
 
-- Test clock input (**TCK**) The TCK is the **clock** that defines how often the TAP controller will take a single action (in other words, jump to the next state in the state machine).
-- Test mode select (**TMS**) input TMS controls the **finite state machine**. On each beat of the clock, the device’s JTAG TAP controller checks the voltage on the TMS pin. If the voltage is below a certain threshold, the signal is considered low and interpreted as 0, whereas if the voltage is above a certain threshold, the signal is considered high and interpreted as 1.
-- Test data input (**TDI**) TDI is the pin that sends **data into the chip through the scan cells**. Each vendor is responsible for defining the communication protocol over this pin, because JTAG doesn’t define this.
-- Test data output (**TDO**) TDO is the pin that sends **data out of the chip**.
-- Test reset (**TRST**) input The optional TRST resets the finite state machine **to a known good state**. Alternatively, if the TMS is held at 1 for five consecutive clock cycles, it invokes a reset, the same way the TRST pin would, which is why TRST is optional.
+- Test saat girişi (**TCK**) TCK, TAP denetleyicisinin tek bir eylem gerçekleştireceği sıklığı tanımlayan **saat**'tir (diğer bir deyişle, durum makinesinde bir sonraki duruma geçiş yapar).
+- Test modu seçimi (**TMS**) girişi TMS, **sonlu durum makinesini** kontrol eder. Saatin her vuruşunda, cihazın JTAG TAP denetleyicisi TMS pinindeki voltajı kontrol eder. Voltaj belirli bir eşik değerinin altındaysa, sinyal düşük kabul edilir ve 0 olarak yorumlanır; voltaj belirli bir eşik değerinin üzerindeyse, sinyal yüksek kabul edilir ve 1 olarak yorumlanır.
+- Test veri girişi (**TDI**) TDI, **veriyi çipe tarama hücreleri aracılığıyla gönderen** pindir. Her satıcı, bu pin üzerinden iletişim protokolünü tanımlamaktan sorumludur, çünkü JTAG bunu tanımlamaz.
+- Test veri çıkışı (**TDO**) TDO, **veriyi çipten dışarı gönderen** pindir.
+- Test sıfırlama (**TRST**) girişi Opsiyonel TRST, sonlu durum makinesini **bilinen iyi bir duruma** sıfırlar. Alternatif olarak, TMS beş ardışık saat döngüsü boyunca 1'de tutulursa, TRST pininin yaptığı gibi bir sıfırlama tetikler; bu nedenle TRST opsiyoneldir.
 
-Sometimes you will be able to find those pins marked in the PCB. In other occasions you might need to **find them**.
+Bazen bu pinlerin PCB'de işaretlendiğini bulabilirsiniz. Diğer durumlarda, **bulmanız** gerekebilir.
 
-### Identifying JTAG pins
+### JTAG pinlerini tanımlama
 
-The fastest but most expensive way to detect JTAG ports is by using the **JTAGulator**, a device created specifically for this purpose (although it can **also detect UART pinouts**).
+JTAG portlarını tespit etmenin en hızlı ama en pahalı yolu, bu amaç için özel olarak oluşturulmuş bir cihaz olan **JTAGulator** kullanmaktır (bununla birlikte **UART pinout'larını da tespit edebilir**).
 
-It has **24 channels** you can connect to the boards pins. Then it performs a **BF attack** of all the possible combinations sending **IDCODE** and **BYPASS** boundary scan commands. If it receives a response, it displays the channel corresponding to each JTAG signal
+**24 kanala** sahiptir ve bu kanalları kartın pinlerine bağlayabilirsiniz. Ardından, **IDCODE** ve **BYPASS** sınır tarama komutlarını göndererek tüm olası kombinasyonların **BF saldırısını** gerçekleştirir. Bir yanıt alırsa, her JTAG sinyaline karşılık gelen kanalı görüntüler.
 
-A cheaper but much slower way of identifying JTAG pinouts is by using the [**JTAGenum**](https://github.com/cyphunk/JTAGenum/) loaded on an Arduino-compatible microcontroller.
+JTAG pinout'larını tanımlamanın daha ucuz ama çok daha yavaş bir yolu, bir Arduino uyumlu mikrodenetleyiciye yüklenmiş [**JTAGenum**](https://github.com/cyphunk/JTAGenum/) kullanmaktır.
 
-Using **JTAGenum**, you’d first **define the pins of the probing** device that you’ll use for the enumeration.You’d have to reference the device’s pinout diagram, and then connect these pins with the test points on your target device.
+**JTAGenum** kullanarak, önce **numune alma** cihazının pinlerini tanımlamanız gerekir. Cihazın pinout diyagramına atıfta bulunmanız ve ardından bu pinleri hedef cihazınızdaki test noktalarıyla bağlamanız gerekir.
 
-A **third way** to identify JTAG pins is by **inspecting the PCB** for one of the pinouts. In some cases, PCBs might conveniently provide the **Tag-Connect interface**, which is a clear indication that the board has a JTAG connector, too. You can see what that interface looks like at [https://www.tag-connect.com/info/](https://www.tag-connect.com/info/). Additionally, inspecting the **datasheets of the chipsets on the PCB** might reveal pinout diagrams that point to JTAG interfaces.
+JTAG pinlerini tanımlamanın **üçüncü yolu**, PCB'yi bir pinout için **incelemektir**. Bazı durumlarda, PCB'ler **Tag-Connect arayüzünü** sağlama kolaylığı gösterebilir; bu, kartın bir JTAG konektörüne sahip olduğunun açık bir göstergesidir. O arayüzün nasıl göründüğünü [https://www.tag-connect.com/info/](https://www.tag-connect.com/info/) adresinde görebilirsiniz. Ayrıca, PCB'deki çip setlerinin **veri sayfalarını** incelemek, JTAG arayüzlerine işaret eden pinout diyagramlarını ortaya çıkarabilir.
 
 ## SDW
 
-SWD is an ARM-specific protocol designed for debugging.
+SWD, hata ayıklama için tasarlanmış ARM'a özgü bir protokoldür.
 
-The SWD interface requires **two pins**: a bidirectional **SWDIO** signal, which is the equivalent of JTAG’s **TDI and TDO pins and a clock**, and **SWCLK**, which is the equivalent of **TCK** in JTAG. Many devices support the **Serial Wire or JTAG Debug Port (SWJ-DP)**, a combined JTAG and SWD interface that enables you to connect either a SWD or JTAG probe to the target.
+SWD arayüzü, **iki pin** gerektirir: JTAG’ın **TDI ve TDO pinlerine** eşdeğer olan iki yönlü **SWDIO** sinyali ve **TCK**'ya eşdeğer olan **SWCLK**. Birçok cihaz, hedefe ya bir SWD ya da JTAG probu bağlamanızı sağlayan birleşik bir JTAG ve SWD arayüzü olan **Seri Tel veya JTAG Hata Ayıklama Portu (SWJ-DP)**'yi destekler.
 
 {{#include ../../banners/hacktricks-training.md}}
-

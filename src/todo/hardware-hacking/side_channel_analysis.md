@@ -1,9 +1,7 @@
-# Side Channel Analysis Attacks 
+# Side Channel Analysis Attacks
 
-Side Channel Analysis Attacks refers to determining the information from a device or entity by some other channel or source that has an indirect influence on it and information can be extracted from it. This can be explained better with an example: 
+Side Channel Analysis Attacks, bir cihazdan veya varlıktan dolaylı bir etkiyle bilgi belirlemeyi ifade eder ve bu bilgiden çıkarım yapılabilir. Bu, bir örnekle daha iyi açıklanabilir:
 
-Analysing the vibrations in glass sheets which is near the sound source, but the sound source is not accessible. The vibrations in glass are influenced by the sound source and if monitored and analysed, the sound can be decoded and interpreted.
+Ses kaynağına yakın cam levhalardaki titreşimlerin analizi, ancak ses kaynağına erişim yok. Camdaki titreşimler ses kaynağından etkilenir ve izlenip analiz edilirse, ses çözümlenip yorumlanabilir.
 
-These attacks are very popular in case of leaking data such as private keys or finding operations in the processors. An electronic circuit is has a lot of channels from which, information is constantly leaked. Monitoring and analysing can be useful for diclosing a lot of information about the circuit and internals of it. 
-
-
+Bu saldırılar, özel anahtarlar gibi veri sızıntıları veya işlemcilerdeki işlemleri bulma durumlarında oldukça popülerdir. Bir elektronik devre, sürekli olarak bilgi sızdıran birçok kanala sahiptir. İzleme ve analiz, devre hakkında ve iç yapısı hakkında birçok bilginin ortaya çıkarılması için faydalı olabilir.

@@ -1,19 +1,18 @@
-# Word Macros
+# Word Makroları
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Junk Code
+### Gereksiz Kod
 
-It's very common to find **junk code that is never used** to make the reversing of the macro more difficult.\
-For example, in the following image you can see that and If that is never going to be true is used to execute some junk and useless code.
+Makronun tersine çevrilmesini zorlaştırmak için **asla kullanılmayan gereksiz kodlar** bulmak çok yaygındır.\
+Örneğin, aşağıdaki görüntüde, asla doğru olmayacak bir If ifadesinin bazı gereksiz ve işe yaramaz kodları çalıştırmak için kullanıldığını görebilirsiniz.
 
 ![](<../images/image (369).png>)
 
-### Macro Forms
+### Makro Formları
 
-Using the **GetObject** function it's possible to obtain data from forms of the macro. This can be used to difficult the analysis. The following is a photo of a macro form used to **hide data inside text boxes** (a text box can be hiding other text boxes):
+**GetObject** fonksiyonunu kullanarak makro formlarından veri elde etmek mümkündür. Bu, analizi zorlaştırmak için kullanılabilir. Aşağıda, **metin kutuları içinde verileri gizlemek için** kullanılan bir makro formunun fotoğrafı bulunmaktadır (bir metin kutusu diğer metin kutularını gizleyebilir):
 
 ![](<../images/image (344).png>)
 
 {{#include ../banners/hacktricks-training.md}}
-
