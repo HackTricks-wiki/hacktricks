@@ -1,25 +1,20 @@
-# Parola Spraying / Brute Force
+# Şifre Spraying / Brute Force
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-**Mobil Güvenlik** konusundaki uzmanlığınızı 8kSec Akademisi ile derinleştirin. Kendi hızınızda ilerleyerek iOS ve Android güvenliğini öğrenin ve sertifika kazanın:
+## **Şifre Spraying**
 
-{% embed url="https://academy.8ksec.io/" %}
+Birçok **geçerli kullanıcı adı** bulduktan sonra, her bir keşfedilen kullanıcı ile en **yaygın şifreleri** deneyebilirsiniz (ortamın şifre politikalarını göz önünde bulundurun).\
+**Varsayılan** olarak **minimum** **şifre** **uzunluğu** **7**'dir.
 
-## **Parola Spraying**
+Yaygın kullanıcı adı listeleri de faydalı olabilir: [https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames)
 
-Birçok **geçerli kullanıcı adı** bulduktan sonra, her bir keşfedilen kullanıcı ile en **yaygın parolaları** deneyebilirsiniz (ortamın parola politikasını göz önünde bulundurun).\
-**Varsayılan** olarak **minimum** **parola** **uzunluğu** **7**'dir.
+Birden fazla yanlış şifre denerseniz bazı hesapların **kilitlenebileceğini** unutmayın (varsayılan olarak 10'dan fazla).
 
-Yaygın kullanıcı adları listeleri de faydalı olabilir: [https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames)
+### Şifre politikasını öğrenme
 
-Birden fazla yanlış parola denerseniz bazı hesapları **kilitleyebileceğinizi** unutmayın (varsayılan olarak 10'dan fazla).
-
-### Parola politikasını öğrenin
-
-Bazı kullanıcı kimlik bilgilerine veya bir alan kullanıcısı olarak bir shell'e sahipseniz, **parola politikasını** **şu şekilde alabilirsiniz**:
+Bazı kullanıcı kimlik bilgilerine veya bir alan kullanıcısı olarak bir shell'e sahipseniz, **şifre politikasını** **şu şekilde alabilirsiniz**:
 ```bash
 # From Linux
 crackmapexec <IP> -u 'user' -p 'password' --pass-pol
@@ -82,7 +77,7 @@ done
 # check passwords for all users in current domain
 .\Rubeus.exe brute /passwords:<passwords_file> /outfile:<output_file>
 ```
-- [**Invoke-DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray/blob/master/DomainPasswordSpray.ps1) ile (Varsayılan olarak alan kullanıcılarını oluşturabilir ve alanın şifre politikasını alarak denemeleri buna göre sınırlayacaktır):
+- [**Invoke-DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray/blob/master/DomainPasswordSpray.ps1) ile (Varsayılan olarak alan kullanıcılarını oluşturabilir ve alanın şifre politikasını alır ve denemeleri buna göre sınırlar):
 ```powershell
 Invoke-DomainPasswordSpray -UserList .\users.txt -Password 123456 -Verbose
 ```
@@ -130,10 +125,5 @@ Bu araçlardan herhangi birini kullanmak için bir kullanıcı listesine ve bir 
 - [www.blackhillsinfosec.com/?p=5296](https://www.blackhillsinfosec.com/?p=5296)
 - [https://hunter2.gitbook.io/darthsidious/initial-access/password-spraying](https://hunter2.gitbook.io/darthsidious/initial-access/password-spraying)
 
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
-
-**Mobil Güvenlik** konusundaki uzmanlığınızı 8kSec Akademisi ile derinleştirin. Kendi hızınızda ilerleyerek iOS ve Android güvenliğini öğrenin ve sertifika kazanın:
-
-{% embed url="https://academy.8ksec.io/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

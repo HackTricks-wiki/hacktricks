@@ -2,31 +2,28 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 ## Giriş
 
-Kerberos "Double Hop" problemi, bir saldırganın **Kerberos kimlik doğrulamasını iki** **atlama** üzerinden kullanmaya çalıştığında ortaya çıkar, örneğin **PowerShell**/**WinRM** kullanarak.
+Kerberos "Double Hop" problemi, bir saldırganın **Kerberos kimlik doğrulamasını iki** **atlama** üzerinden kullanmaya çalıştığında ortaya çıkar; örneğin **PowerShell**/**WinRM** kullanarak.
 
-Bir **kimlik doğrulaması** **Kerberos** üzerinden gerçekleştiğinde, **kimlik bilgileri** **bellekte** **önbelleğe alınmaz.** Bu nedenle, mimikatz çalıştırırsanız, kullanıcı makinede süreçler çalıştırıyor olsa bile **kimlik bilgilerini bulamazsınız.**
+Bir **kimlik doğrulaması** **Kerberos** üzerinden gerçekleştiğinde, **kimlik bilgileri** **bellekte** **önbelleğe alınmaz.** Bu nedenle, eğer mimikatz çalıştırırsanız, kullanıcı makinede işlem çalıştırıyor olsa bile **kimlik bilgilerini bulamazsınız.**
 
 Bu, Kerberos ile bağlanırken izlenen adımlar nedeniyle olur:
 
 1. User1 kimlik bilgilerini sağlar ve **alan denetleyicisi** User1'e bir Kerberos **TGT** döner.
-2. User1, Server1'e **bağlanmak** için bir **hizmet bileti** talep etmek üzere **TGT** kullanır.
+2. User1, **Server1**'e bağlanmak için bir **hizmet bileti** talep etmek üzere **TGT**'yi kullanır.
 3. User1 **Server1**'e **bağlanır** ve **hizmet biletini** sağlar.
 4. **Server1**, User1'in kimlik bilgilerini veya User1'in **TGT**'sini **önbelleğe almaz.** Bu nedenle, User1 Server1'den ikinci bir sunucuya giriş yapmaya çalıştığında, **kimlik doğrulaması yapılamaz.**
 
 ### Sınırsız Delegasyon
 
-Eğer PC'de **sınırsız delegasyon** etkinleştirilmişse, bu durum gerçekleşmez çünkü **Sunucu**, ona erişen her kullanıcının **TGT**'sini **alır.** Dahası, sınırsız delegasyon kullanılıyorsa, muhtemelen **Alan Denetleyicisini** ele geçirebilirsiniz.\
+Eğer PC'de **sınırsız delegasyon** etkinleştirilmişse, bu durum gerçekleşmez çünkü **Sunucu**, ona erişen her kullanıcının **TGT**'sini **alır.** Dahası, sınırsız delegasyon kullanılıyorsa, muhtemelen **Alan Denetleyicisi'ni** ele geçirebilirsiniz.\
 [**Sınırsız delegasyon sayfasında daha fazla bilgi**](unconstrained-delegation.md).
 
 ### CredSSP
 
-Bu problemi önlemenin bir diğer yolu, [**belirgin şekilde güvensiz**](https://docs.microsoft.com/en-us/powershell/module/microsoft.wsman.management/enable-wsmancredssp?view=powershell-7) olan **Kimlik Bilgisi Güvenlik Destek Sağlayıcısı**dır. Microsoft'tan:
+Bu problemi önlemenin bir diğer yolu, [**özellikle güvensiz**](https://docs.microsoft.com/en-us/powershell/module/microsoft.wsman.management/enable-wsmancredssp?view=powershell-7) olan **Kimlik Bilgisi Güvenlik Destek Sağlayıcısı**dır. Microsoft'tan:
 
 > CredSSP kimlik doğrulaması, kullanıcı kimlik bilgilerini yerel bilgisayardan uzak bir bilgisayara devreder. Bu uygulama, uzak işlemin güvenlik riskini artırır. Uzak bilgisayar ele geçirilirse, kimlik bilgileri ona iletildiğinde, bu kimlik bilgileri ağ oturumunu kontrol etmek için kullanılabilir.
 
@@ -81,7 +78,7 @@ winrs -r:http://bizintel:5446 -u:ta\redsuit -p:2600leet hostname
 2. Zip dosyasını açın ve `Install-sshd.ps1` betiğini çalıştırın.
 3. Port 22'yi açmak için bir güvenlik duvarı kuralı ekleyin ve SSH hizmetlerinin çalıştığını doğrulayın.
 
-`Connection reset` hatalarını çözmek için, OpenSSH dizininde herkesin okuma ve yürütme erişimine izin vermek için izinlerin güncellenmesi gerekebilir.
+`Connection reset` hatalarını çözmek için, OpenSSH dizininde herkesin okuma ve çalıştırma erişimine izin vermek için izinlerin güncellenmesi gerekebilir.
 ```bash
 icacls.exe "C:\Users\redsuit\Documents\ssh\OpenSSH-Win64" /grant Everyone:RX /T
 ```
@@ -92,8 +89,5 @@ icacls.exe "C:\Users\redsuit\Documents\ssh\OpenSSH-Win64" /grant Everyone:RX /T
 - [https://learn.microsoft.com/en-gb/archive/blogs/sergey_babkins_blog/another-solution-to-multi-hop-powershell-remoting](https://learn.microsoft.com/en-gb/archive/blogs/sergey_babkins_blog/another-solution-to-multi-hop-powershell-remoting)
 - [https://4sysops.com/archives/solve-the-powershell-multi-hop-problem-without-using-credssp/](https://4sysops.com/archives/solve-the-powershell-multi-hop-problem-without-using-credssp/)
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

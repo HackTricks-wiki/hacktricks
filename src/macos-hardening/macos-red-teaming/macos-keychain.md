@@ -1,63 +1,62 @@
-# macOS Keychain
+# macOS Anahtarlık
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Main Keychains
+## Ana Anahtarlıklar
 
-- The **User Keychain** (`~/Library/Keychains/login.keychain-db`), which is used to store **user-specific credentials** like application passwords, internet passwords, user-generated certificates, network passwords, and user-generated public/private keys.
-- The **System Keychain** (`/Library/Keychains/System.keychain`), which stores **system-wide credentials** such as WiFi passwords, system root certificates, system private keys, and system application passwords.
-  - It's possible to find other components like certificates in `/System/Library/Keychains/*`
-- In **iOS** there is only one **Keychain** located in `/private/var/Keychains/`. This folder also contains databases for the `TrustStore`, certificates authorities (`caissuercache`) and OSCP entries (`ocspache`).
-  - Apps will be restricted in the keychain only to their private area based on their application identifier.
+- **Kullanıcı Anahtarlığı** (`~/Library/Keychains/login.keychain-db`), uygulama şifreleri, internet şifreleri, kullanıcı tarafından oluşturulan sertifikalar, ağ şifreleri ve kullanıcı tarafından oluşturulan açık/özel anahtarlar gibi **kullanıcıya özgü kimlik bilgilerini** saklamak için kullanılır.
+- **Sistem Anahtarlığı** (`/Library/Keychains/System.keychain`), WiFi şifreleri, sistem kök sertifikaları, sistem özel anahtarları ve sistem uygulama şifreleri gibi **sistem genelinde kimlik bilgilerini** saklar.
+- `/System/Library/Keychains/*` içinde sertifikalar gibi diğer bileşenleri bulmak mümkündür.
+- **iOS**'ta `/private/var/Keychains/` konumunda yalnızca bir **Anahtarlık** bulunmaktadır. Bu klasör ayrıca `TrustStore`, sertifika otoriteleri (`caissuercache`) ve OSCP girişleri (`ocspache`) için veritabanlarını içerir.
+- Uygulamalar, uygulama tanımlayıcılarına dayalı olarak anahtarlıkta yalnızca özel alanlarına erişimle kısıtlanacaktır.
 
-### Password Keychain Access
+### Şifre Anahtarlığı Erişimi
 
-These files, while they do not have inherent protection and can be **downloaded**, are encrypted and require the **user's plaintext password to be decrypted**. A tool like [**Chainbreaker**](https://github.com/n0fate/chainbreaker) could be used for decryption.
+Bu dosyalar, doğrudan koruma içermemelerine rağmen **indirilebilir**, şifrelenmiştir ve **şifresinin çözülmesi için kullanıcının düz metin şifresini** gerektirir. Şifre çözme için [**Chainbreaker**](https://github.com/n0fate/chainbreaker) gibi bir araç kullanılabilir.
 
-## Keychain Entries Protections
+## Anahtarlık Girişi Koruma
 
-### ACLs
+### ACL'ler
 
-Each entry in the keychain is governed by **Access Control Lists (ACLs)** which dictate who can perform various actions on the keychain entry, including:
+Anahtarlıkta her giriş, çeşitli eylemleri gerçekleştirebilecek kişileri belirleyen **Erişim Kontrol Listeleri (ACL'ler)** ile yönetilmektedir:
 
-- **ACLAuhtorizationExportClear**: Allows the holder to get the clear text of the secret.
-- **ACLAuhtorizationExportWrapped**: Allows the holder to get the clear text encrypted with another provided password.
-- **ACLAuhtorizationAny**: Allows the holder to perform any action.
+- **ACLAuhtorizationExportClear**: Sahip olanın sıfır metin gizliliğini almasına izin verir.
+- **ACLAuhtorizationExportWrapped**: Sahip olanın başka bir sağlanan şifre ile şifrelenmiş sıfır metin almasına izin verir.
+- **ACLAuhtorizationAny**: Sahip olanın herhangi bir eylemi gerçekleştirmesine izin verir.
 
-The ACLs are further accompanied by a **list of trusted applications** that can perform these actions without prompting. This could be:
+ACL'ler, bu eylemleri istem olmadan gerçekleştirebilecek **güvenilir uygulamalar listesi** ile birlikte gelir. Bu şunlar olabilir:
 
-- **N`il`** (no authorization required, **everyone is trusted**)
-- An **empty** list (**nobody** is trusted)
-- **List** of specific **applications**.
+- **N`il`** (yetki gerektirmeyen, **herkes güvenilir**)
+- **Boş** bir liste (**kimse** güvenilir değil)
+- Belirli **uygulamaların** **listesi**.
 
-Also the entry might contain the key **`ACLAuthorizationPartitionID`,** which is use to identify the **teamid, apple,** and **cdhash.**
+Ayrıca giriş, **`ACLAuthorizationPartitionID`** anahtarını içerebilir; bu, **teamid, apple** ve **cdhash**'i tanımlamak için kullanılır.
 
-- If the **teamid** is specified, then in order to **access the entry** value **withuot** a **prompt** the used application must have the **same teamid**.
-- If the **apple** is specified, then the app needs to be **signed** by **Apple**.
-- If the **cdhash** is indicated, then **app** must have the specific **cdhash**.
+- Eğer **teamid** belirtilmişse, **girişin** değerine **istem olmadan** erişmek için kullanılan uygulamanın **aynı teamid**'ye sahip olması gerekir.
+- Eğer **apple** belirtilmişse, uygulamanın **Apple** tarafından **imzalanmış** olması gerekir.
+- Eğer **cdhash** belirtilmişse, **uygulama** belirli bir **cdhash**'e sahip olmalıdır.
 
-### Creating a Keychain Entry
+### Anahtarlık Girişi Oluşturma
 
-When a **new** **entry** is created using **`Keychain Access.app`**, the following rules apply:
+Bir **yeni** **giriş** **`Keychain Access.app`** kullanılarak oluşturulduğunda, aşağıdaki kurallar geçerlidir:
 
-- All apps can encrypt.
-- **No apps** can export/decrypt (without prompting the user).
-- All apps can see the integrity check.
-- No apps can change ACLs.
-- The **partitionID** is set to **`apple`**.
+- Tüm uygulamalar şifreleyebilir.
+- **Hiçbir uygulama** dışa aktaramaz/şifre çözemez (kullanıcıyı istemeden).
+- Tüm uygulamalar bütünlük kontrolünü görebilir.
+- Hiçbir uygulama ACL'leri değiştiremez.
+- **partitionID** **`apple`** olarak ayarlanır.
 
-When an **application creates an entry in the keychain**, the rules are slightly different:
+Bir **uygulama anahtarlıkta bir giriş oluşturduğunda**, kurallar biraz farklıdır:
 
-- All apps can encrypt.
-- Only the **creating application** (or any other apps explicitly added) can export/decrypt (without prompting the user).
-- All apps can see the integrity check.
-- No apps can change the ACLs.
-- The **partitionID** is set to **`teamid:[teamID here]`**.
+- Tüm uygulamalar şifreleyebilir.
+- Sadece **oluşturan uygulama** (veya açıkça eklenen diğer uygulamalar) dışa aktarabilir/şifre çözebilir (kullanıcıyı istemeden).
+- Tüm uygulamalar bütünlük kontrolünü görebilir.
+- Hiçbir uygulama ACL'leri değiştiremez.
+- **partitionID** **`teamid:[teamID burada]`** olarak ayarlanır.
 
-## Accessing the Keychain
+## Anahtarlığa Erişim
 
 ### `security`
-
 ```bash
 # List keychains
 security list-keychains
@@ -74,60 +73,59 @@ security set-generic-password-parition-list -s "test service" -a "test acount" -
 # Dump specifically the user keychain
 security dump-keychain ~/Library/Keychains/login.keychain-db
 ```
-
-### APIs
+### API'ler
 
 > [!TIP]
-> The **keychain enumeration and dumping** of secrets that **won't generate a prompt** can be done with the tool [**LockSmith**](https://github.com/its-a-feature/LockSmith)
+> **Anahtar zinciri numaralandırma ve gizli bilgilerin dökümü** için **uyarı oluşturmayacak** olanlar, [**LockSmith**](https://github.com/its-a-feature/LockSmith) aracıyla yapılabilir.
 >
-> Other API endpoints can be found in [**SecKeyChain.h**](https://opensource.apple.com/source/libsecurity_keychain/libsecurity_keychain-55017/lib/SecKeychain.h.auto.html) source code.
+> Diğer API uç noktaları [**SecKeyChain.h**](https://opensource.apple.com/source/libsecurity_keychain/libsecurity_keychain-55017/lib/SecKeychain.h.auto.html) kaynak kodunda bulunabilir.
 
-List and get **info** about each keychain entry using the **Security Framework** or you could also check the Apple's open source cli tool [**security**](https://opensource.apple.com/source/Security/Security-59306.61.1/SecurityTool/macOS/security.c.auto.html)**.** Some API examples:
+Her anahtar zinciri girişi hakkında **bilgi** listeleyin ve alın, **Security Framework** kullanarak veya Apple'ın açık kaynak cli aracı [**security**](https://opensource.apple.com/source/Security/Security-59306.61.1/SecurityTool/macOS/security.c.auto.html)**'yi** kontrol edebilirsiniz. Bazı API örnekleri:
 
-- The API **`SecItemCopyMatching`** gives info about each entry and there are some attributes you can set when using it:
-  - **`kSecReturnData`**: If true, it will try to decrypt the data (set to false to avoid potential pop-ups)
-  - **`kSecReturnRef`**: Get also reference to keychain item (set to true in case later you see you can decrypt without pop-up)
-  - **`kSecReturnAttributes`**: Get metadata about entries
-  - **`kSecMatchLimit`**: How many results to return
-  - **`kSecClass`**: What kind of keychain entry
+- API **`SecItemCopyMatching`** her giriş hakkında bilgi verir ve kullanırken ayarlayabileceğiniz bazı özellikler vardır:
+- **`kSecReturnData`**: Eğer doğruysa, veriyi şifre çözmeye çalışır (potansiyel açılır pencereleri önlemek için yanlış olarak ayarlayın)
+- **`kSecReturnRef`**: Anahtar zinciri öğesine referans da alın (daha sonra açılır pencere olmadan şifre çözebileceğinizi görürseniz doğru olarak ayarlayın)
+- **`kSecReturnAttributes`**: Girişler hakkında meta verileri alın
+- **`kSecMatchLimit`**: Kaç sonuç döndürüleceği
+- **`kSecClass`**: Hangi tür anahtar zinciri girişi
 
-Get **ACLs** of each entry:
+Her girişin **ACL'lerini** alın:
 
-- With the API **`SecAccessCopyACLList`** you can get the **ACL for the keychain item**, and it will return a list of ACLs (like `ACLAuhtorizationExportClear` and the others previously mentioned) where each list has:
-  - Description
-  - **Trusted Application List**. This could be:
-    - An app: /Applications/Slack.app
-    - A binary: /usr/libexec/airportd
-    - A group: group://AirPort
+- API **`SecAccessCopyACLList`** ile **anahtar zinciri öğesi için ACL** alabilirsiniz ve bu, her liste için:
+- Açıklama
+- **Güvenilir Uygulama Listesi**. Bu şunlar olabilir:
+- Bir uygulama: /Applications/Slack.app
+- Bir ikili: /usr/libexec/airportd
+- Bir grup: group://AirPort
 
-Export the data:
+Verileri dışa aktarın:
 
-- The API **`SecKeychainItemCopyContent`** gets the plaintext
-- The API **`SecItemExport`** exports the keys and certificates but might have to set passwords to export the content encrypted
+- API **`SecKeychainItemCopyContent`** düz metni alır
+- API **`SecItemExport`** anahtarları ve sertifikaları dışa aktarır ancak içeriği şifreli olarak dışa aktarmak için şifre ayarlamanız gerekebilir
 
-And these are the **requirements** to be able to **export a secret without a prompt**:
+Ve bu, **uyarı olmadan bir gizli bilgiyi dışa aktarmak** için gereken **şartlardır**:
 
-- If **1+ trusted** apps listed:
-  - Need the appropriate **authorizations** (**`Nil`**, or be **part** of the allowed list of apps in the authorization to access the secret info)
-  - Need code signature to match **PartitionID**
-  - Need code signature to match that of one **trusted app** (or be a member of the right KeychainAccessGroup)
-- If **all applications trusted**:
-  - Need the appropriate **authorizations**
-  - Need code signature to match **PartitionID**
-    - If **no PartitionID**, then this isn't needed
+- Eğer **1+ güvenilir** uygulama listelenmişse:
+- Uygun **yetkilendirmelere** ihtiyaç vardır (**`Nil`**, veya gizli bilgiye erişim için yetkilendirme listesinde **yer almak**)
+- **PartitionID** ile eşleşen kod imzasına ihtiyaç vardır
+- Bir **güvenilir uygulama** ile eşleşen kod imzasına ihtiyaç vardır (veya doğru KeychainAccessGroup'un üyesi olmalısınız)
+- Eğer **tüm uygulamalar güvenilir** ise:
+- Uygun **yetkilendirmelere** ihtiyaç vardır
+- **PartitionID** ile eşleşen kod imzasına ihtiyaç vardır
+- Eğer **PartitionID** yoksa, bu gerekli değildir
 
 > [!CAUTION]
-> Therefore, if there is **1 application listed**, you need to **inject code in that application**.
+> Bu nedenle, eğer **1 uygulama listelenmişse**, o uygulamaya **kod enjekte etmeniz** gerekir.
 >
-> If **apple** is indicated in the **partitionID**, you could access it with **`osascript`** so anything that is trusting all applications with apple in the partitionID. **`Python`** could also be used for this.
+> Eğer **apple** **partitionID**'de belirtilmişse, **`osascript`** ile erişebilirsiniz, bu nedenle partitionID'de apple olan tüm uygulamalara güvenen herhangi bir şey. Bunun için **`Python`** da kullanılabilir.
 
-### Two additional attributes
+### İki ek özellik
 
-- **Invisible**: It's a boolean flag to **hide** the entry from the **UI** Keychain app
-- **General**: It's to store **metadata** (so it's NOT ENCRYPTED)
-  - Microsoft was storing in plain text all the refresh tokens to access sensitive endpoint.
+- **Görünmez**: Bu, girişi **UI** Anahtar Zinciri uygulamasından **gizlemek** için bir boolean bayraktır
+- **Genel**: **Meta verileri** depolamak içindir (yani ŞİFRELİ DEĞİLDİR)
+- Microsoft, hassas uç noktaya erişim için tüm yenileme jetonlarını düz metin olarak saklıyordu.
 
-## References
+## Referanslar
 
 - [**#OBTS v5.0: "Lock Picking the macOS Keychain" - Cody Thomas**](https://www.youtube.com/watch?v=jKE1ZW33JpY)
 

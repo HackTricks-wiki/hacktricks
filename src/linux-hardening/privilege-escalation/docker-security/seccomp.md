@@ -2,18 +2,17 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Temel Bilgiler
 
-**Seccomp**, standing for Secure Computing mode, is a security feature of the **Linux kernel designed to filter system calls**. It restricts processes to a limited set of system calls (`exit()`, `sigreturn()`, `read()`, and `write()` for already-open file descriptors). If a process tries to call anything else, it gets terminated by the kernel using SIGKILL or SIGSYS. This mechanism doesn't virtualize resources but isolates the process from them.
+**Seccomp**, Güvenli Hesaplama modu anlamına gelir, **sistem çağrılarını filtrelemek için tasarlanmış bir Linux çekirdek güvenlik özelliğidir**. Bu, süreçleri sınırlı bir sistem çağrısı setiyle (`exit()`, `sigreturn()`, `read()`, ve `write()` için zaten açık dosya tanımlayıcıları) kısıtlar. Eğer bir süreç başka bir şeyi çağırmaya çalışırsa, çekirdek tarafından SIGKILL veya SIGSYS ile sonlandırılır. Bu mekanizma kaynakları sanallaştırmaz, ancak süreci onlardan izole eder.
 
-There are two ways to activate seccomp: through the `prctl(2)` system call with `PR_SET_SECCOMP`, or for Linux kernels 3.17 and above, the `seccomp(2)` system call. The older method of enabling seccomp by writing to `/proc/self/seccomp` has been deprecated in favor of `prctl()`.
+Seccomp'ı etkinleştirmenin iki yolu vardır: `PR_SET_SECCOMP` ile `prctl(2)` sistem çağrısı veya Linux çekirdekleri 3.17 ve üzeri için `seccomp(2)` sistem çağrısı. `/proc/self/seccomp` dosyasına yazarak seccomp'ı etkinleştirmenin eski yöntemi, `prctl()` lehine kullanımdan kaldırılmıştır.
 
-An enhancement, **seccomp-bpf**, adds the capability to filter system calls with a customizable policy, using Berkeley Packet Filter (BPF) rules. This extension is leveraged by software such as OpenSSH, vsftpd, and the Chrome/Chromium browsers on Chrome OS and Linux for flexible and efficient syscall filtering, offering an alternative to the now unsupported systrace for Linux.
+Bir geliştirme olan **seccomp-bpf**, özelleştirilebilir bir politika ile sistem çağrılarını filtreleme yeteneği ekler ve Berkeley Paket Filtreleme (BPF) kurallarını kullanır. Bu uzantı, OpenSSH, vsftpd ve Chrome OS ile Linux'taki Chrome/Chromium tarayıcıları gibi yazılımlar tarafından esnek ve verimli syscall filtrelemesi için kullanılmaktadır ve artık desteklenmeyen systrace için bir alternatif sunmaktadır.
 
-### **Original/Strict Mode**
+### **Orijinal/Sıkı Mod**
 
-In this mode Seccomp **only allow the syscalls** `exit()`, `sigreturn()`, `read()` and `write()` to already-open file descriptors. If any other syscall is made, the process is killed using SIGKILL
-
+Bu modda Seccomp **yalnızca şu sistem çağrılarına izin verir**: `exit()`, `sigreturn()`, `read()` ve `write()` için zaten açık dosya tanımlayıcıları. Eğer başka bir sistem çağrısı yapılırsa, süreç SIGKILL ile öldürülür.
 ```c:seccomp_strict.c
 #include <fcntl.h>
 #include <stdio.h>
@@ -27,29 +26,27 @@ In this mode Seccomp **only allow the syscalls** `exit()`, `sigreturn()`, `read(
 
 int main(int argc, char **argv)
 {
-    int output = open("output.txt", O_WRONLY);
-    const char *val = "test";
+int output = open("output.txt", O_WRONLY);
+const char *val = "test";
 
-    //enables strict seccomp mode
-    printf("Calling prctl() to set seccomp strict mode...\n");
-    prctl(PR_SET_SECCOMP, SECCOMP_MODE_STRICT);
+//enables strict seccomp mode
+printf("Calling prctl() to set seccomp strict mode...\n");
+prctl(PR_SET_SECCOMP, SECCOMP_MODE_STRICT);
 
-    //This is allowed as the file was already opened
-    printf("Writing to an already open file...\n");
-    write(output, val, strlen(val)+1);
+//This is allowed as the file was already opened
+printf("Writing to an already open file...\n");
+write(output, val, strlen(val)+1);
 
-    //This isn't allowed
-    printf("Trying to open file for reading...\n");
-    int input = open("output.txt", O_RDONLY);
+//This isn't allowed
+printf("Trying to open file for reading...\n");
+int input = open("output.txt", O_RDONLY);
 
-    printf("You will not see this message--the process will be killed first\n");
+printf("You will not see this message--the process will be killed first\n");
 }
 ```
-
 ### Seccomp-bpf
 
-This mode allows **filtering of system calls using a configurable policy** implemented using Berkeley Packet Filter rules.
-
+Bu mod, **Berkeley Paket Filtreleme kuralları kullanılarak uygulanan yapılandırılabilir bir politika ile sistem çağrılarının filtrelenmesine** olanak tanır.
 ```c:seccomp_bpf.c
 #include <seccomp.h>
 #include <unistd.h>
@@ -60,99 +57,88 @@ This mode allows **filtering of system calls using a configurable policy** imple
 //gcc seccomp_bpf.c -o seccomp_bpf -lseccomp
 
 void main(void) {
-  /* initialize the libseccomp context */
-  scmp_filter_ctx ctx = seccomp_init(SCMP_ACT_KILL);
+/* initialize the libseccomp context */
+scmp_filter_ctx ctx = seccomp_init(SCMP_ACT_KILL);
 
-  /* allow exiting */
-  printf("Adding rule : Allow exit_group\n");
-  seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(exit_group), 0);
+/* allow exiting */
+printf("Adding rule : Allow exit_group\n");
+seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(exit_group), 0);
 
-  /* allow getting the current pid */
-  //printf("Adding rule : Allow getpid\n");
-  //seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(getpid), 0);
+/* allow getting the current pid */
+//printf("Adding rule : Allow getpid\n");
+//seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(getpid), 0);
 
-  printf("Adding rule : Deny getpid\n");
-  seccomp_rule_add(ctx, SCMP_ACT_ERRNO(EBADF), SCMP_SYS(getpid), 0);
-  /* allow changing data segment size, as required by glibc */
-  printf("Adding rule : Allow brk\n");
-  seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(brk), 0);
+printf("Adding rule : Deny getpid\n");
+seccomp_rule_add(ctx, SCMP_ACT_ERRNO(EBADF), SCMP_SYS(getpid), 0);
+/* allow changing data segment size, as required by glibc */
+printf("Adding rule : Allow brk\n");
+seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(brk), 0);
 
-  /* allow writing up to 512 bytes to fd 1 */
-  printf("Adding rule : Allow write upto 512 bytes to FD 1\n");
-  seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(write), 2,
-    SCMP_A0(SCMP_CMP_EQ, 1),
-    SCMP_A2(SCMP_CMP_LE, 512));
+/* allow writing up to 512 bytes to fd 1 */
+printf("Adding rule : Allow write upto 512 bytes to FD 1\n");
+seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(write), 2,
+SCMP_A0(SCMP_CMP_EQ, 1),
+SCMP_A2(SCMP_CMP_LE, 512));
 
-  /* if writing to any other fd, return -EBADF */
-  printf("Adding rule : Deny write to any FD except 1 \n");
-  seccomp_rule_add(ctx, SCMP_ACT_ERRNO(EBADF), SCMP_SYS(write), 1,
-    SCMP_A0(SCMP_CMP_NE, 1));
+/* if writing to any other fd, return -EBADF */
+printf("Adding rule : Deny write to any FD except 1 \n");
+seccomp_rule_add(ctx, SCMP_ACT_ERRNO(EBADF), SCMP_SYS(write), 1,
+SCMP_A0(SCMP_CMP_NE, 1));
 
-  /* load and enforce the filters */
-  printf("Load rules and enforce \n");
-  seccomp_load(ctx);
-  seccomp_release(ctx);
-  //Get the getpid is denied, a weird number will be returned like
-  //this process is -9
-  printf("this process is %d\n", getpid());
+/* load and enforce the filters */
+printf("Load rules and enforce \n");
+seccomp_load(ctx);
+seccomp_release(ctx);
+//Get the getpid is denied, a weird number will be returned like
+//this process is -9
+printf("this process is %d\n", getpid());
 }
 ```
+## Docker'da Seccomp
 
-## Seccomp in Docker
-
-**Seccomp-bpf** is supported by **Docker** to restrict the **syscalls** from the containers effectively decreasing the surface area. You can find the **syscalls blocked** by **default** in [https://docs.docker.com/engine/security/seccomp/](https://docs.docker.com/engine/security/seccomp/) and the **default seccomp profile** can be found here [https://github.com/moby/moby/blob/master/profiles/seccomp/default.json](https://github.com/moby/moby/blob/master/profiles/seccomp/default.json).\
-You can run a docker container with a **different seccomp** policy with:
-
+**Seccomp-bpf**, **Docker** tarafından konteynerlerden **syscall'ları** kısıtlamak için desteklenmektedir ve bu, yüzey alanını etkili bir şekilde azaltır. **Varsayılan** olarak **engellenen syscall'ları** [https://docs.docker.com/engine/security/seccomp/](https://docs.docker.com/engine/security/seccomp/) adresinde bulabilirsiniz ve **varsayılan seccomp profili** burada bulunmaktadır [https://github.com/moby/moby/blob/master/profiles/seccomp/default.json](https://github.com/moby/moby/blob/master/profiles/seccomp/default.json).\
+Farklı bir **seccomp** politikası ile bir docker konteyneri çalıştırabilirsiniz:
 ```bash
 docker run --rm \
-             -it \
-             --security-opt seccomp=/path/to/seccomp/profile.json \
-             hello-world
+-it \
+--security-opt seccomp=/path/to/seccomp/profile.json \
+hello-world
 ```
-
-If you want for example to **forbid** a container of executing some **syscall** like `uname` you could download the default profile from [https://github.com/moby/moby/blob/master/profiles/seccomp/default.json](https://github.com/moby/moby/blob/master/profiles/seccomp/default.json) and just **remove the `uname` string from the list**.\
-If you want to make sure that **some binary doesn't work inside a a docker container** you could use strace to list the syscalls the binary is using and then forbid them.\
-In the following example the **syscalls** of `uname` are discovered:
-
+Eğer bir konteynerin bazı **syscall**'leri, örneğin `uname`'i çalıştırmasını **yasaklamak** istiyorsanız, [https://github.com/moby/moby/blob/master/profiles/seccomp/default.json](https://github.com/moby/moby/blob/master/profiles/seccomp/default.json) adresinden varsayılan profili indirebilir ve sadece **listeden `uname` dizesini kaldırabilirsiniz**.\
+Eğer **bir ikili dosyanın bir docker konteyneri içinde çalışmadığından emin olmak** istiyorsanız, ikili dosyanın kullandığı syscalls'ları listelemek için strace kullanabilir ve ardından bunları yasaklayabilirsiniz.\
+Aşağıdaki örnekte `uname`'in **syscall**'leri keşfedilmektedir:
 ```bash
 docker run -it --security-opt seccomp=default.json modified-ubuntu strace uname
 ```
-
 > [!NOTE]
-> If you are using **Docker just to launch an application**, you can **profile** it with **`strace`** and **just allow the syscalls** it needs
+> Eğer **Docker'ı sadece bir uygulamayı başlatmak için kullanıyorsanız**, onu **`strace`** ile **profil oluşturabilir** ve ihtiyaç duyduğu sistem çağrılarına **sadece izin verebilirsiniz.**
 
-### Example Seccomp policy
+### Örnek Seccomp politikası
 
-[Example from here](https://sreeninet.wordpress.com/2016/03/06/docker-security-part-2docker-engine/)
+[Buradan örnek](https://sreeninet.wordpress.com/2016/03/06/docker-security-part-2docker-engine/)
 
-To illustrate Seccomp feature, let’s create a Seccomp profile disabling “chmod” system call as below.
-
+Seccomp özelliğini göstermek için, aşağıda "chmod" sistem çağrısını devre dışı bırakan bir Seccomp profili oluşturalım.
 ```json
 {
-  "defaultAction": "SCMP_ACT_ALLOW",
-  "syscalls": [
-    {
-      "name": "chmod",
-      "action": "SCMP_ACT_ERRNO"
-    }
-  ]
+"defaultAction": "SCMP_ACT_ALLOW",
+"syscalls": [
+{
+"name": "chmod",
+"action": "SCMP_ACT_ERRNO"
+}
+]
 }
 ```
-
-In the above profile, we have set default action to “allow” and created a black list to disable “chmod”. To be more secure, we can set default action to drop and create a white list to selectively enable system calls.\
-Following output shows the “chmod” call returning error because its disabled in the seccomp profile
-
+Yukarıdaki profilde, varsayılan eylemi "izin ver" olarak ayarladık ve "chmod"u devre dışı bırakmak için bir kara liste oluşturduk. Daha güvenli olmak için, varsayılan eylemi "düşür" olarak ayarlayabilir ve sistem çağrılarını seçici olarak etkinleştirmek için bir beyaz liste oluşturabiliriz.\
+Aşağıdaki çıktı, "chmod" çağrısının, seccomp profilinde devre dışı bırakıldığı için hata döndürdüğünü göstermektedir.
 ```bash
 $ docker run --rm -it --security-opt seccomp:/home/smakam14/seccomp/profile.json busybox chmod 400 /etc/hosts
 chmod: /etc/hosts: Operation not permitted
 ```
-
-Following output shows the “docker inspect” displaying the profile:
-
+Aşağıdaki çıktı, profilin görüntülenmesi için “docker inspect” komutunu göstermektedir:
 ```json
 "SecurityOpt": [
-  "seccomp:{\"defaultAction\":\"SCMP_ACT_ALLOW\",\"syscalls\":[{\"name\":\"chmod\",\"action\":\"SCMP_ACT_ERRNO\"}]}"
-  ]
+"seccomp:{\"defaultAction\":\"SCMP_ACT_ALLOW\",\"syscalls\":[{\"name\":\"chmod\",\"action\":\"SCMP_ACT_ERRNO\"}]}"
+]
 ```
-
 {{#include ../../../banners/hacktricks-training.md}}

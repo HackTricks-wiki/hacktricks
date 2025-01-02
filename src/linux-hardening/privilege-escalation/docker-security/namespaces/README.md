@@ -1,44 +1,44 @@
-# Namespaces
+# Ad Alanları
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-### **PID namespace**
+### **PID ad alanı**
 
 {{#ref}}
 pid-namespace.md
 {{#endref}}
 
-### **Mount namespace**
+### **Mount ad alanı**
 
 {{#ref}}
 mount-namespace.md
 {{#endref}}
 
-### **Network namespace**
+### **Ağ ad alanı**
 
 {{#ref}}
 network-namespace.md
 {{#endref}}
 
-### **IPC Namespace**
+### **IPC Ad Alanı**
 
 {{#ref}}
 ipc-namespace.md
 {{#endref}}
 
-### **UTS namespace**
+### **UTS ad alanı**
 
 {{#ref}}
 uts-namespace.md
 {{#endref}}
 
-### Time Namespace
+### Zaman Ad Alanı
 
 {{#ref}}
 time-namespace.md
 {{#endref}}
 
-### User namespace
+### Kullanıcı ad alanı
 
 {{#ref}}
 user-namespace.md

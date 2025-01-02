@@ -2,202 +2,146 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**To learn about macOS MDMs check:**
+**macOS MDM'leri hakkında bilgi almak için kontrol edin:**
 
 - [https://www.youtube.com/watch?v=ku8jZe-MHUU](https://www.youtube.com/watch?v=ku8jZe-MHUU)
 - [https://duo.com/labs/research/mdm-me-maybe](https://duo.com/labs/research/mdm-me-maybe)
 
-## Basics
+## Temel Bilgiler
 
-### **MDM (Mobile Device Management) Overview**
+### **MDM (Mobil Cihaz Yönetimi) Genel Bakış**
 
-[Mobile Device Management](https://en.wikipedia.org/wiki/Mobile_device_management) (MDM) is utilized for overseeing various end-user devices like smartphones, laptops, and tablets. Particularly for Apple's platforms (iOS, macOS, tvOS), it involves a set of specialized features, APIs, and practices. The operation of MDM hinges on a compatible MDM server, which is either commercially available or open-source, and must support the [MDM Protocol](https://developer.apple.com/enterprise/documentation/MDM-Protocol-Reference.pdf). Key points include:
+[Mobil Cihaz Yönetimi](https://en.wikipedia.org/wiki/Mobile_device_management) (MDM), akıllı telefonlar, dizüstü bilgisayarlar ve tabletler gibi çeşitli son kullanıcı cihazlarını yönetmek için kullanılır. Özellikle Apple'ın platformları (iOS, macOS, tvOS) için, özel özellikler, API'ler ve uygulamalar setini içerir. MDM'in çalışması, ya ticari olarak mevcut ya da açık kaynak olan uyumlu bir MDM sunucusuna dayanır ve [MDM Protokolü](https://developer.apple.com/enterprise/documentation/MDM-Protocol-Reference.pdf)'nü desteklemelidir. Ana noktalar şunlardır:
 
-- Centralized control over devices.
-- Dependence on an MDM server that adheres to the MDM protocol.
-- Capability of the MDM server to dispatch various commands to devices, for instance, remote data erasure or configuration installation.
+- Cihazlar üzerinde merkezi kontrol.
+- MDM protokolüne uyan bir MDM sunucusuna bağımlılık.
+- MDM sunucusunun cihazlara çeşitli komutlar gönderebilme yeteneği, örneğin, uzaktan veri silme veya yapılandırma yükleme.
 
-### **Basics of DEP (Device Enrollment Program)**
+### **DEP (Cihaz Kaydı Programı) Temelleri**
 
-The [Device Enrollment Program](https://www.apple.com/business/site/docs/DEP_Guide.pdf) (DEP) offered by Apple streamlines the integration of Mobile Device Management (MDM) by facilitating zero-touch configuration for iOS, macOS, and tvOS devices. DEP automates the enrollment process, allowing devices to be operational right out of the box, with minimal user or administrative intervention. Essential aspects include:
+Apple tarafından sunulan [Cihaz Kaydı Programı](https://www.apple.com/business/site/docs/DEP_Guide.pdf) (DEP), iOS, macOS ve tvOS cihazları için sıfırdan yapılandırma kolaylığı sağlayarak Mobil Cihaz Yönetimi (MDM) entegrasyonunu basitleştirir. DEP, cihazların kutudan çıkar çıkmaz çalışır hale gelmesini sağlayarak, minimum kullanıcı veya yönetici müdahalesi ile kayıt sürecini otomatikleştirir. Temel yönler şunlardır:
 
-- Enables devices to autonomously register with a pre-defined MDM server upon initial activation.
-- Primarily beneficial for brand-new devices, but also applicable for devices undergoing reconfiguration.
-- Facilitates a straightforward setup, making devices ready for organizational use swiftly.
+- Cihazların ilk etkinleştirme sırasında önceden tanımlanmış bir MDM sunucusuna otomatik olarak kaydolmasını sağlar.
+- Öncelikle yeni cihazlar için faydalıdır, ancak yeniden yapılandırma sürecindeki cihazlar için de geçerlidir.
+- Cihazların kurumsal kullanım için hızlı bir şekilde hazır hale gelmesini sağlayan basit bir kurulum sunar.
 
-### **Security Consideration**
+### **Güvenlik Dikkati**
 
-It's crucial to note that the ease of enrollment provided by DEP, while beneficial, can also pose security risks. If protective measures are not adequately enforced for MDM enrollment, attackers might exploit this streamlined process to register their device on the organization's MDM server, masquerading as a corporate device.
+DEP tarafından sağlanan kayıt kolaylığının faydalı olmasına rağmen, güvenlik riskleri de oluşturabileceğini belirtmek önemlidir. MDM kaydı için koruyucu önlemler yeterince uygulanmazsa, saldırganlar bu basitleştirilmiş süreci kullanarak kendi cihazlarını organizasyonun MDM sunucusuna kaydedebilir ve kurumsal bir cihaz gibi davranabilirler.
 
 > [!CAUTION]
-> **Security Alert**: Simplified DEP enrollment could potentially allow unauthorized device registration on the organization's MDM server if proper safeguards are not in place.
+> **Güvenlik Uyarısı**: Basitleştirilmiş DEP kaydı, uygun koruma önlemleri alınmadığı takdirde, organizasyonun MDM sunucusunda yetkisiz cihaz kaydına olanak tanıyabilir.
 
-### Basics What is SCEP (Simple Certificate Enrolment Protocol)?
+### Temel Bilgiler SCEP (Basit Sertifika Kaydı Protokolü) Nedir?
 
-- A relatively old protocol, created before TLS and HTTPS were widespread.
-- Gives clients a standardized way of sending a **Certificate Signing Request** (CSR) for the purpose of being granted a certificate. The client will ask the server to give him a signed certificate.
+- TLS ve HTTPS yaygınlaşmadan önce oluşturulmuş, nispeten eski bir protokoldür.
+- Müşterilere bir **Sertifika İmzalama Talebi** (CSR) gönderme konusunda standart bir yol sunar. Müşteri, sunucudan imzalı bir sertifika talep eder.
 
-### What are Configuration Profiles (aka mobileconfigs)?
+### Yapılandırma Profilleri (aka mobileconfigs) Nedir?
 
-- Apple’s official way of **setting/enforcing system configuration.**
-- File format that can contain multiple payloads.
-- Based on property lists (the XML kind).
-- “can be signed and encrypted to validate their origin, ensure their integrity, and protect their contents.” Basics — Page 70, iOS Security Guide, January 2018.
+- Apple’ın **sistem yapılandırmasını ayarlama/uygulama** için resmi yolu.
+- Birden fazla yük içerebilen dosya formatı.
+- Özellik listelerine (XML türü) dayanır.
+- “Kaynağını doğrulamak, bütünlüğünü sağlamak ve içeriğini korumak için imzalanabilir ve şifrelenebilir.” Temeller — Sayfa 70, iOS Güvenlik Kılavuzu, Ocak 2018.
 
-## Protocols
+## Protokoller
 
 ### MDM
 
-- Combination of APNs (**Apple server**s) + RESTful API (**MDM** **vendor** servers)
-- **Communication** occurs between a **device** and a server associated with a **device** **management** **product**
-- **Commands** delivered from the MDM to the device in **plist-encoded dictionaries**
-- All over **HTTPS**. MDM servers can be (and are usually) pinned.
-- Apple grants the MDM vendor an **APNs certificate** for authentication
+- APNs (**Apple sunucuları**) + RESTful API (**MDM** **satıcı** sunucuları) kombinasyonu
+- **İletişim**, bir **cihaz** ile bir **cihaz yönetim** **ürünü** ile ilişkili bir sunucu arasında gerçekleşir
+- **Komutlar**, MDM'den cihaza **plist kodlu sözlükler** şeklinde iletilir
+- Tüm iletişim **HTTPS** üzerinden gerçekleşir. MDM sunucuları genellikle (ve genellikle) pinlenmiştir.
+- Apple, MDM satıcısına kimlik doğrulama için bir **APNs sertifikası** verir
 
 ### DEP
 
-- **3 APIs**: 1 for resellers, 1 for MDM vendors, 1 for device identity (undocumented):
-  - The so-called [DEP "cloud service" API](https://developer.apple.com/enterprise/documentation/MDM-Protocol-Reference.pdf). This is used by MDM servers to associate DEP profiles with specific devices.
-  - The [DEP API used by Apple Authorized Resellers](https://applecareconnect.apple.com/api-docs/depuat/html/WSImpManual.html) to enroll devices, check enrollment status, and check transaction status.
-  - The undocumented private DEP API. This is used by Apple Devices to request their DEP profile. On macOS, the `cloudconfigurationd` binary is responsible for communicating over this API.
-- More modern and **JSON** based (vs. plist)
-- Apple grants an **OAuth token** to the MDM vendor
+- **3 API**: 1 satıcılar için, 1 MDM satıcıları için, 1 cihaz kimliği için (belgelendirilmemiş):
+- Sözde [DEP "bulut hizmeti" API'si](https://developer.apple.com/enterprise/documentation/MDM-Protocol-Reference.pdf). Bu, MDM sunucularının DEP profillerini belirli cihazlarla ilişkilendirmek için kullanılır.
+- Cihazları kaydetmek, kayıt durumunu kontrol etmek ve işlem durumunu kontrol etmek için Apple Yetkili Satıcıları tarafından kullanılan [DEP API'si](https://applecareconnect.apple.com/api-docs/depuat/html/WSImpManual.html).
+- Belgelendirilmemiş özel DEP API'si. Bu, Apple Cihazları tarafından DEP profillerini talep etmek için kullanılır. macOS'ta, `cloudconfigurationd` ikili dosyası bu API üzerinden iletişim kurmaktan sorumludur.
+- Daha modern ve **JSON** tabanlı (plist'e göre)
+- Apple, MDM satıcısına bir **OAuth token** verir
 
-**DEP "cloud service" API**
+**DEP "bulut hizmeti" API'si**
 
 - RESTful
-- sync device records from Apple to the MDM server
-- sync “DEP profiles” to Apple from the MDM server (delivered by Apple to the device later on)
-- A DEP “profile” contains:
-  - MDM vendor server URL
-  - Additional trusted certificates for server URL (optional pinning)
-  - Extra settings (e.g. which screens to skip in Setup Assistant)
+- Apple'dan MDM sunucusuna cihaz kayıtlarını senkronize eder
+- MDM sunucusundan Apple'a "DEP profilleri" senkronize eder (daha sonra cihazlara teslim edilir)
+- Bir DEP “profili” şunları içerir:
+- MDM satıcı sunucu URL'si
+- Sunucu URL'si için ek güvenilir sertifikalar (isteğe bağlı pinleme)
+- Ek ayarlar (örneğin, Kurulum Asistanı'nda hangi ekranların atlanacağı)
 
-## Serial Number
+## Seri Numarası
 
-Apple devices manufactured after 2010 generally have **12-character alphanumeric** serial numbers, with the **first three digits representing the manufacturing location**, the following **two** indicating the **year** and **week** of manufacture, the next **three** digits providing a **unique** **identifier**, and the **last** **four** digits representing the **model number**.
+2010'dan sonra üretilen Apple cihazları genellikle **12 karakterli alfanümerik** seri numaralarına sahiptir; **ilk üç haneli** kısım üretim yerini, sonraki **iki** haneli kısım **yıl** ve **hafta** bilgisini, sonraki **üç** haneli kısım ise **benzersiz** **tanımlayıcıyı** sağlar ve **son dört** haneli kısım **model numarasını** temsil eder.
 
 {{#ref}}
 macos-serial-number.md
 {{#endref}}
 
-## Steps for enrolment and management
+## Kayıt ve Yönetim Adımları
 
-1. Device record creation (Reseller, Apple): The record for the new device is created
-2. Device record assignment (Customer): The device is assigned to a MDM server
-3. Device record sync (MDM vendor): MDM sync the device records and push the DEP profiles to Apple
-4. DEP check-in (Device): Device gets his DEP profile
-5. Profile retrieval (Device)
-6. Profile installation (Device) a. incl. MDM, SCEP and root CA payloads
-7. MDM command issuance (Device)
+1. Cihaz kaydı oluşturma (Satıcı, Apple): Yeni cihaz için kayıt oluşturulur
+2. Cihaz kaydı atama (Müşteri): Cihaz bir MDM sunucusuna atanır
+3. Cihaz kaydı senkronizasyonu (MDM satıcısı): MDM, cihaz kayıtlarını senkronize eder ve DEP profillerini Apple'a iletir
+4. DEP kontrolü (Cihaz): Cihaz DEP profilini alır
+5. Profil alma (Cihaz)
+6. Profil yükleme (Cihaz) a. MDM, SCEP ve kök CA yüklerini içerir
+7. MDM komutunun verilmesi (Cihaz)
 
 ![](<../../../images/image (694).png>)
 
-The file `/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/System/Library/PrivateFrameworks/ConfigurationProfiles.framework/ConfigurationProfiles.tbd` exports functions that can be considered **high-level "steps"** of the enrolment process.
+Dosya `/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/System/Library/PrivateFrameworks/ConfigurationProfiles.framework/ConfigurationProfiles.tbd`, kayıt sürecinin **yüksek seviyeli "adımları"** olarak kabul edilebilecek işlevleri dışa aktarır.
 
-### Step 4: DEP check-in - Getting the Activation Record
+### Adım 4: DEP kontrolü - Aktivasyon Kaydını Alma
 
-This part of the process occurs when a **user boots a Mac for the first time** (or after a complete wipe)
+Bu süreç, bir **kullanıcının bir Mac'i ilk kez başlatması** (veya tamamen silme sonrası) sırasında gerçekleşir.
 
 ![](<../../../images/image (1044).png>)
 
-or when executing `sudo profiles show -type enrollment`
+veya `sudo profiles show -type enrollment` komutu çalıştırıldığında
 
-- Determine **whether device is DEP enabled**
-- Activation Record is the internal name for **DEP “profile”**
-- Begins as soon as the device is connected to Internet
-- Driven by **`CPFetchActivationRecord`**
-- Implemented by **`cloudconfigurationd`** via XPC. The **"Setup Assistant**" (when the device is firstly booted) or the **`profiles`** command will **contact this daemon** to retrieve the activation record.
-  - LaunchDaemon (always runs as root)
+- **Cihazın DEP etkin olup olmadığını belirleme**
+- Aktivasyon Kaydı, **DEP “profili”** için içsel bir isimdir
+- Cihaz internete bağlandığı anda başlar
+- **`CPFetchActivationRecord`** tarafından yönlendirilir
+- **`cloudconfigurationd`** tarafından XPC aracılığıyla uygulanır. **"Kurulum Asistanı"** (cihaz ilk kez başlatıldığında) veya **`profiles`** komutu, aktivasyon kaydını almak için bu daemon ile iletişim kurar.
+- LaunchDaemon (her zaman root olarak çalışır)
 
-It follows a few steps to get the Activation Record performed by **`MCTeslaConfigurationFetcher`**. This process uses an encryption called **Absinthe**
+Aktivasyon Kaydını almak için **`MCTeslaConfigurationFetcher`** tarafından gerçekleştirilen birkaç adım izlenir. Bu süreç, **Absinthe** adı verilen bir şifreleme kullanır.
 
-1. Retrieve **certificate**
-   1. GET [https://iprofiles.apple.com/resource/certificate.cer](https://iprofiles.apple.com/resource/certificate.cer)
-2. **Initialize** state from certificate (**`NACInit`**)
-   1. Uses various device-specific data (i.e. **Serial Number via `IOKit`**)
-3. Retrieve **session key**
-   1. POST [https://iprofiles.apple.com/session](https://iprofiles.apple.com/session)
-4. Establish the session (**`NACKeyEstablishment`**)
-5. Make the request
-   1. POST to [https://iprofiles.apple.com/macProfile](https://iprofiles.apple.com/macProfile) sending the data `{ "action": "RequestProfileConfiguration", "sn": "" }`
-   2. The JSON payload is encrypted using Absinthe (**`NACSign`**)
-   3. All requests over HTTPs, built-in root certificates are used
+1. **sertifika al**
+1. GET [https://iprofiles.apple.com/resource/certificate.cer](https://iprofiles.apple.com/resource/certificate.cer)
+2. **Durumu** sertifikadan başlat (**`NACInit`**)
+1. Çeşitli cihaz spesifik verileri kullanır (yani **Seri Numarası `IOKit` aracılığıyla**)
+3. **oturum anahtarını al**
+1. POST [https://iprofiles.apple.com/session](https://iprofiles.apple.com/session)
+4. Oturumu kur (**`NACKeyEstablishment`**)
+5. Talebi yap
+1. POST [https://iprofiles.apple.com/macProfile](https://iprofiles.apple.com/macProfile) adresine `{ "action": "RequestProfileConfiguration", "sn": "" }` verisini göndererek
+2. JSON yükü Absinthe ile şifrelenir (**`NACSign`**)
+3. Tüm talepler HTTPS üzerinden, yerleşik kök sertifikalar kullanılarak yapılır
 
 ![](<../../../images/image (566) (1).png>)
 
-The response is a JSON dictionary with some important data like:
+Yanıt, aşağıdaki gibi bazı önemli verileri içeren bir JSON sözlüğüdür:
 
-- **url**: URL of the MDM vendor host for the activation profile
-- **anchor-certs**: Array of DER certificates used as trusted anchors
+- **url**: Aktivasyon profili için MDM satıcısı ana bilgisayarının URL'si
+- **anchor-certs**: Güvenilir kökler olarak kullanılan DER sertifikalarının dizisi
 
-### **Step 5: Profile Retrieval**
+### **Adım 5: Profil Alma**
 
 ![](<../../../images/image (444).png>)
 
-- Request sent to **url provided in DEP profile**.
-- **Anchor certificates** are used to **evaluate trust** if provided.
-  - Reminder: the **anchor_certs** property of the DEP profile
-- **Request is a simple .plist** with device identification
-  - Examples: **UDID, OS version**.
-- CMS-signed, DER-encoded
-- Signed using the **device identity certificate (from APNS)**
-- **Certificate chain** includes expired **Apple iPhone Device CA**
+- **DEP profilinde sağlanan URL'ye** talep gönderilir.
+- **Köprü sertifikaları**, sağlanmışsa, **güven değerlendirmesi** için kullanılır.
+- Hatırlatma: **DEP profilinin anchor_certs** özelliği
+- **Talep, cihaz tanımlaması ile basit bir .plist**'tir
+- Örnekler: **UDID, OS versiyonu**.
+- CMS imzalı, DER kodlu
+- **Cihaz kimlik sertifikası (APNS'den)** kullanılarak imzalanmıştır.
+- **Sertifika zinciri**, süresi dolmuş **Apple iPhone Cihaz CA**'sını içerir.
 
-![](<../../../images/image (567) (1) (2) (2) (2) (2) (2) (2) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (2) (2).png>)
-
-### Step 6: Profile Installation
-
-- Once retrieved, **profile is stored on the system**
-- This step begins automatically (if in **setup assistant**)
-- Driven by **`CPInstallActivationProfile`**
-- Implemented by mdmclient over XPC
-  - LaunchDaemon (as root) or LaunchAgent (as user), depending on context
-- Configuration profiles have multiple payloads to install
-- Framework has a plugin-based architecture for installing profiles
-- Each payload type is associated with a plugin
-  - Can be XPC (in framework) or classic Cocoa (in ManagedClient.app)
-- Example:
-  - Certificate Payloads use CertificateService.xpc
-
-Typically, **activation profile** provided by an MDM vendor will **include the following payloads**:
-
-- `com.apple.mdm`: to **enroll** the device in MDM
-- `com.apple.security.scep`: to securely provide a **client certificate** to the device.
-- `com.apple.security.pem`: to **install trusted CA certificates** to the device’s System Keychain.
-- Installing the MDM payload equivalent to **MDM check-in in the documentation**
-- Payload **contains key properties**:
-- - MDM Check-In URL (**`CheckInURL`**)
-  - MDM Command Polling URL (**`ServerURL`**) + APNs topic to trigger it
-- To install MDM payload, request is sent to **`CheckInURL`**
-- Implemented in **`mdmclient`**
-- MDM payload can depend on other payloads
-- Allows **requests to be pinned to specific certificates**:
-  - Property: **`CheckInURLPinningCertificateUUIDs`**
-  - Property: **`ServerURLPinningCertificateUUIDs`**
-  - Delivered via PEM payload
-- Allows device to be attributed with an identity certificate:
-  - Property: IdentityCertificateUUID
-  - Delivered via SCEP payload
-
-### **Step 7: Listening for MDM commands**
-
-- After MDM check-in is complete, vendor can **issue push notifications using APNs**
-- Upon receipt, handled by **`mdmclient`**
-- To poll for MDM commands, request is sent to ServerURL
-- Makes use of previously installed MDM payload:
-  - **`ServerURLPinningCertificateUUIDs`** for pinning request
-  - **`IdentityCertificateUUID`** for TLS client certificate
-
-## Attacks
-
-### Enrolling Devices in Other Organisations
-
-As previously commented, in order to try to enrol a device into an organization **only a Serial Number belonging to that Organization is needed**. Once the device is enrolled, several organizations will install sensitive data on the new device: certificates, applications, WiFi passwords, VPN configurations [and so on](https://developer.apple.com/enterprise/documentation/Configuration-Profile-Reference.pdf).\
-Therefore, this could be a dangerous entrypoint for attackers if the enrolment process isn't correctly protected:
-
-{{#ref}}
-enrolling-devices-in-other-organisations.md
-{{#endref}}
-
-{{#include ../../../banners/hacktricks-training.md}}
+![](<../../../images/image (567) (1) (2) (2) (2) (2) (2) (2) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1)

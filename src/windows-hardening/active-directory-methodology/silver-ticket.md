@@ -2,15 +2,11 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/i3.png" alt=""><figcaption></figcaption></figure>
 
-**Bug bounty ipucu**: **Intigriti** için **kayıt olun**, **hackler tarafından, hackler için oluşturulmuş premium bir bug bounty platformu**! Bugün [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) adresinde bize katılın ve **$100,000**'a kadar ödüller kazanmaya başlayın!
-
-{% embed url="https://go.intigriti.com/hacktricks" %}
 
 ## Silver ticket
 
-**Silver Ticket** saldırısı, Active Directory (AD) ortamlarında hizmet biletlerinin istismarını içerir. Bu yöntem, bir Ticket Granting Service (TGS) bileti oluşturmak için **bir hizmet hesabının NTLM hash'ini elde etmeye** dayanır; bu, bir bilgisayar hesabı gibi bir hizmet hesabı olabilir. Bu sahte bilet ile bir saldırgan, genellikle yönetici ayrıcalıkları hedefleyerek, ağdaki belirli hizmetlere **herhangi bir kullanıcıyı taklit ederek** erişebilir. Biletleri sahtelemek için AES anahtarlarının kullanılmasının daha güvenli ve daha az tespit edilebilir olduğu vurgulanmaktadır.
+**Silver Ticket** saldırısı, Active Directory (AD) ortamlarında hizmet biletlerinin istismarını içerir. Bu yöntem, **bir hizmet hesabının NTLM hash'ini elde etmeye** dayanır, örneğin bir bilgisayar hesabı, bir Ticket Granting Service (TGS) bileti oluşturmak için. Bu sahte bilet ile bir saldırgan, ağdaki belirli hizmetlere erişebilir, **herhangi bir kullanıcıyı taklit ederek**, genellikle yönetici ayrıcalıkları elde etmeyi hedefler. Biletleri sahtelemek için AES anahtarlarının kullanılmasının daha güvenli ve daha az tespit edilebilir olduğu vurgulanmaktadır.
 
 Bilet oluşturma için, işletim sistemine bağlı olarak farklı araçlar kullanılmaktadır:
 
@@ -36,7 +32,7 @@ CIFS servisi, kurbanın dosya sistemine erişim için yaygın bir hedef olarak �
 
 ## Mevcut Hizmetler
 
-| Hizmet Türü                                | Hizmet Gümüş Biletleri                                                   |
+| Hizmet Türü                                | Hizmet Gümüş Biletler                                                    |
 | ------------------------------------------ | ------------------------------------------------------------------------ |
 | WMI                                        | <p>HOST</p><p>RPCSS</p>                                                |
 | PowerShell Uzak Bağlantı                  | <p>HOST</p><p>HTTP</p><p>İşletim sistemine bağlı olarak ayrıca:</p><p>WSMAN</p><p>RPCSS</p> |
@@ -75,7 +71,7 @@ Ayrıca, **psexec** kullanarak ana bilgisayar içinde bir shell elde edebilir ve
 ../lateral-movement/psexec-and-winexec.md
 {{#endref}}
 
-### HOST
+### ANA BİLGİSAYAR
 
 Bu izinle, uzak bilgisayarlarda zamanlanmış görevler oluşturabilir ve rastgele komutlar çalıştırabilirsiniz:
 ```bash
@@ -101,7 +97,7 @@ Invoke-WmiMethod win32_process -ComputerName $Computer -name create -argumentlis
 #You can also use wmic
 wmic remote.computer.local list full /format:list
 ```
-Daha fazla bilgi için **wmiexec** hakkında aşağıdaki sayfayı kontrol edin:
+Daha fazla **wmiexec hakkında bilgi** için aşağıdaki sayfayı ziyaret edin:
 
 {{#ref}}
 ../lateral-movement/wmiexec.md
@@ -138,11 +134,5 @@ mimikatz(commandline) # lsadump::dcsync /dc:pcdc.domain.local /domain:domain.loc
 {{#ref}}
 dcsync.md
 {{#endref}}
-
-<figure><img src="../../images/i3.png" alt=""><figcaption></figcaption></figure>
-
-**Hata ödülü ipucu**: **Intigriti'ye kaydolun**, **hackers tarafından, hackers için oluşturulmuş bir premium hata ödülü platformu**! Bugün [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) adresinde bize katılın ve **$100,000**'a kadar ödüller kazanmaya başlayın!
-
-{% embed url="https://go.intigriti.com/hacktricks" %}
 
 {{#include ../../banners/hacktricks-training.md}}

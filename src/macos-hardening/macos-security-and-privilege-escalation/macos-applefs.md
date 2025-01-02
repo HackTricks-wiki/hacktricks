@@ -2,33 +2,29 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Apple Propietary File System (APFS)
+## Apple'a Ait Dosya Sistemi (APFS)
 
-**Apple File System (APFS)** is a modern file system designed to supersede the Hierarchical File System Plus (HFS+). Its development was driven by the need for **improved performance, security, and efficiency**.
+**Apple Dosya Sistemi (APFS)**, Hiyerarşik Dosya Sistemi Artı (HFS+) yerine geçmek üzere tasarlanmış modern bir dosya sistemidir. Geliştirilmesi, **geliştirilmiş performans, güvenlik ve verimlilik** ihtiyacından kaynaklanmıştır.
 
-Some notable features of APFS include:
+APFS'nin bazı dikkat çekici özellikleri şunlardır:
 
-1. **Space Sharing**: APFS allows multiple volumes to **share the same underlying free storage** on a single physical device. This enables more efficient space utilization as the volumes can dynamically grow and shrink without the need for manual resizing or repartitioning.
-   1. This means, compared with traditional partitions in file disks, **that in APFS different partitions (volumes) shares all the disk space**, while a regular partition usually had a fixed size.
-2. **Snapshots**: APFS supports **creating snapshots**, which are **read-only**, point-in-time instances of the file system. Snapshots enable efficient backups and easy system rollbacks, as they consume minimal additional storage and can be quickly created or reverted.
-3. **Clones**: APFS can **create file or directory clones that share the same storage** as the original until either the clone or the original file is modified. This feature provides an efficient way to create copies of files or directories without duplicating the storage space.
-4. **Encryption**: APFS **natively supports full-disk encryption** as well as per-file and per-directory encryption, enhancing data security across different use cases.
-5. **Crash Protection**: APFS uses a **copy-on-write metadata scheme that ensures file system consistency** even in cases of sudden power loss or system crashes, reducing the risk of data corruption.
+1. **Alan Paylaşımı**: APFS, bir fiziksel cihazda **aynı temel boş depolamayı paylaşan birden fazla hacme** izin verir. Bu, hacimlerin manuel yeniden boyutlandırma veya yeniden bölümleme gerektirmeden dinamik olarak büyüyüp küçülmesiyle daha verimli alan kullanımını sağlar.
+1. Bu, dosya disklerindeki geleneksel bölümlerle karşılaştırıldığında, **APFS'de farklı bölümlerin (hacimlerin) tüm disk alanını paylaştığı** anlamına gelir; oysa normal bir bölüm genellikle sabit bir boyuta sahipti.
+2. **Anlık Görüntüler**: APFS, **okunabilir** olan, dosya sisteminin belirli bir zamandaki anlık görüntülerini **oluşturmayı** destekler. Anlık görüntüler, minimum ek depolama alanı tüketerek verimli yedeklemeler ve kolay sistem geri yüklemeleri sağlar ve hızlı bir şekilde oluşturulabilir veya geri alınabilir.
+3. **Klonlar**: APFS, **orijinal dosya veya dizinle aynı depolamayı paylaşan dosya veya dizin klonları oluşturabilir**; bu, ya klon ya da orijinal dosya değiştirilene kadar geçerlidir. Bu özellik, depolama alanını çoğaltmadan dosya veya dizinlerin kopyalarını oluşturmanın verimli bir yolunu sağlar.
+4. **Şifreleme**: APFS, **tam disk şifrelemesini** yanı sıra dosya ve dizin başına şifrelemeyi de yerel olarak destekleyerek, farklı kullanım senaryolarında veri güvenliğini artırır.
+5. **Çökme Koruması**: APFS, dosya sistemi tutarlılığını sağlamak için **kopyala-yaz metadata şemasını** kullanır; bu, ani güç kaybı veya sistem çökmesi durumlarında veri bozulma riskini azaltır.
 
-Overall, APFS offers a more modern, flexible, and efficient file system for Apple devices, with a focus on improved performance, reliability, and security.
-
+Genel olarak, APFS, Apple cihazları için daha modern, esnek ve verimli bir dosya sistemi sunar; geliştirilmiş performans, güvenilirlik ve güvenliğe odaklanmaktadır.
 ```bash
 diskutil list # Get overview of the APFS volumes
 ```
-
 ## Firmlinks
 
-The `Data` volume is mounted in **`/System/Volumes/Data`** (you can check this with `diskutil apfs list`).
+`Data` hacmi **`/System/Volumes/Data`** dizinine monte edilmiştir (bunu `diskutil apfs list` ile kontrol edebilirsiniz).
 
-The list of firmlinks can be found in the **`/usr/share/firmlinks`** file.
-
+Firmlinklerin listesi **`/usr/share/firmlinks`** dosyasında bulunabilir.
 ```bash
 
 ```
-
 {{#include ../../banners/hacktricks-training.md}}

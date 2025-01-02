@@ -2,15 +2,12 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 ## Temel Bilgiler
 
-Local Administrator Password Solution (LAPS), **yönetici şifreleri**nin **eşsiz, rastgele ve sık sık değiştirildiği** bir sistemi yönetmek için kullanılan bir araçtır ve bu şifreler alan katılımlı bilgisayarlara uygulanır. Bu şifreler, Active Directory içinde güvenli bir şekilde saklanır ve yalnızca Erişim Kontrol Listeleri (ACL'ler) aracılığıyla izin verilmiş kullanıcılara erişilebilir. İstemciden sunucuya şifre iletimlerinin güvenliği, **Kerberos sürüm 5** ve **Gelişmiş Şifreleme Standardı (AES)** kullanılarak sağlanır.
+Local Administrator Password Solution (LAPS), **yönetici şifreleri**nin **eşsiz, rastgele ve sık sık değiştirilen** bir şekilde alan adı ile bağlı bilgisayarlara uygulandığı bir sistemi yönetmek için kullanılan bir araçtır. Bu şifreler, Active Directory içinde güvenli bir şekilde saklanır ve yalnızca Erişim Kontrol Listeleri (ACL'ler) aracılığıyla izin verilmiş kullanıcılara erişilebilir. İstemciden sunucuya şifre iletimlerinin güvenliği, **Kerberos sürüm 5** ve **Gelişmiş Şifreleme Standardı (AES)** kullanılarak sağlanır.
 
-Alan bilgisayar nesnelerinde, LAPS'ın uygulanması, **`ms-mcs-AdmPwd`** ve **`ms-mcs-AdmPwdExpirationTime`** adında iki yeni niteliğin eklenmesiyle sonuçlanır. Bu nitelikler, sırasıyla **düz metin yönetici şifresini** ve **şifrenin sona erme zamanını** saklar.
+Alan adının bilgisayar nesnelerinde, LAPS'ın uygulanması iki yeni niteliğin eklenmesiyle sonuçlanır: **`ms-mcs-AdmPwd`** ve **`ms-mcs-AdmPwdExpirationTime`**. Bu nitelikler, sırasıyla **düz metin yönetici şifresini** ve **şifrenin son kullanma zamanını** saklar.
 
 ### Aktif olup olmadığını kontrol et
 ```bash
@@ -27,9 +24,9 @@ Get-DomainObject -SearchBase "LDAP://DC=sub,DC=domain,DC=local" | ? { $_."ms-mcs
 ```
 ### LAPS Parola Erişimi
 
-Ham LAPS politikasını `\\dc\SysVol\domain\Policies\{4A8A4E8E-929F-401A-95BD-A7D40E0976C8}\Machine\Registry.pol` adresinden **indirebilir** ve ardından bu dosyayı insan tarafından okunabilir formata dönüştürmek için [**GPRegistryPolicyParser**](https://github.com/PowerShell/GPRegistryPolicyParser) paketinden **`Parse-PolFile`** kullanılabilir.
+Ham LAPS politikasını `\\dc\SysVol\domain\Policies\{4A8A4E8E-929F-401A-95BD-A7D40E0976C8}\Machine\Registry.pol` adresinden **indirebilir** ve ardından bu dosyayı insan tarafından okunabilir bir formata dönüştürmek için [**GPRegistryPolicyParser**](https://github.com/PowerShell/GPRegistryPolicyParser) paketinden **`Parse-PolFile`** kullanılabilir.
 
-Ayrıca, erişim sağladığımız bir makinede yüklüyse **yerel LAPS PowerShell cmdlet'leri** de kullanılabilir:
+Ayrıca, erişim sağladığımız bir makinede yüklüyse **yerel LAPS PowerShell cmdlet'leri** kullanılabilir:
 ```powershell
 Get-Command *AdmPwd*
 
@@ -122,14 +119,11 @@ Set-DomainObject -Identity wkstn-2 -Set @{"ms-mcs-admpwdexpirationtime"="2326099
 
 LAPS'ın orijinal kaynak kodu [burada](https://github.com/GreyCorbel/admpwd) bulunabilir, bu nedenle kodda (örneğin `Main/AdmPwd.PS/Main.cs` içindeki `Get-AdmPwdPassword` yönteminde) bir arka kapı koymak mümkündür; bu, bir şekilde **yeni şifreleri dışarı sızdırabilir veya bir yere depolayabilir**.
 
-Sonra, yeni `AdmPwd.PS.dll` dosyasını derleyin ve `C:\Tools\admpwd\Main\AdmPwd.PS\bin\Debug\AdmPwd.PS.dll` konumuna yükleyin (ve değiştirme zamanını değiştirin).
+Sonra, yeni `AdmPwd.PS.dll` dosyasını derleyin ve bunu `C:\Tools\admpwd\Main\AdmPwd.PS\bin\Debug\AdmPwd.PS.dll` konumundaki makineye yükleyin (ve değiştirme zamanını değiştirin).
 
 ## Referanslar
 
 - [https://4sysops.com/archives/introduction-to-microsoft-laps-local-administrator-password-solution/](https://4sysops.com/archives/introduction-to-microsoft-laps-local-administrator-password-solution/)
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

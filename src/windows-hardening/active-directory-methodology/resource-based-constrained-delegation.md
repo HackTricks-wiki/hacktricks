@@ -2,38 +2,35 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 ## Kaynağa Dayalı Kısıtlı Delegasyonun Temelleri
 
-Bu, temel [Kısıtlı Delegasyon](constrained-delegation.md) ile benzerdir ancak **bir nesneye** **bir hizmete karşı herhangi bir kullanıcıyı taklit etme** izni vermek yerine, Kaynağa Dayalı Kısıtlı Delegasyon **nesnede** **ona karşı herhangi bir kullanıcıyı taklit edebilecek olanı** **belirler**.
+Bu, temel [Kısıtlı Delegasyon](constrained-delegation.md) ile benzerdir ancak **bir nesneye** **bir hizmete karşı herhangi bir kullanıcıyı taklit etme** izni vermek yerine, Kaynağa Dayalı Kısıtlı Delegasyon **nesne üzerinde herhangi bir kullanıcıyı taklit etme yetkisini belirler**.
 
-Bu durumda, kısıtlı nesne, ona karşı herhangi bir diğer kullanıcıyı taklit edebilecek kullanıcının adını içeren _**msDS-AllowedToActOnBehalfOfOtherIdentity**_ adlı bir niteliğe sahip olacaktır.
+Bu durumda, kısıtlı nesne, herhangi bir kullanıcıyı taklit edebilecek kullanıcının adını içeren _**msDS-AllowedToActOnBehalfOfOtherIdentity**_ adlı bir niteliğe sahip olacaktır.
 
 Bu Kısıtlı Delegasyonun diğer delegasyonlardan önemli bir farkı, **makine hesabı üzerinde yazma izinlerine sahip** herhangi bir kullanıcının (_GenericAll/GenericWrite/WriteDacl/WriteProperty/etc_) _**msDS-AllowedToActOnBehalfOfOtherIdentity**_ değerini ayarlayabilmesidir (Diğer Delegasyon türlerinde alan adı yöneticisi ayrıcalıkları gerekiyordu).
 
 ### Yeni Kavramlar
 
-Kısıtlı Delegasyonda, kullanıcının _userAccountControl_ değerindeki **`TrustedToAuthForDelegation`** bayrağının **S4U2Self** gerçekleştirmek için gerekli olduğu belirtilmişti. Ancak bu tamamen doğru değil.\
-Gerçek şu ki, o değer olmadan bile, eğer bir **hizmet** (bir SPN'e sahipseniz) iseniz, herhangi bir kullanıcıya karşı **S4U2Self** gerçekleştirebilirsiniz, ancak eğer **`TrustedToAuthForDelegation`** varsa, dönen TGS **İleri Yönlendirilebilir** olacak ve eğer o bayrağa sahip değilseniz, dönen TGS **İleri Yönlendirilebilir** **olmayacaktır**.
+Kısıtlı Delegasyonda, kullanıcının _userAccountControl_ değerinde **`TrustedToAuthForDelegation`** bayrağının **S4U2Self** gerçekleştirmek için gerekli olduğu belirtilmişti. Ancak bu tamamen doğru değildir.\
+Gerçek şu ki, o değer olmadan bile, eğer bir **hizmet** (bir SPN'e sahipseniz) iseniz, herhangi bir kullanıcıya karşı **S4U2Self** gerçekleştirebilirsiniz, ancak eğer **`TrustedToAuthForDelegation`** varsa, dönen TGS **İleri Yönlendirilebilir** olacak ve eğer o bayrağa sahip değilseniz, dönen TGS **İleri Yönlendirilemez** olacaktır.
 
-Ancak, **S4U2Proxy**'de kullanılan **TGS** **İleri Yönlendirilebilir DEĞİLSE**, temel bir **Kısıtlı Delegasyonu** kötüye kullanmaya çalışmak **çalışmayacaktır**. Ama eğer bir **Kaynağa Dayalı kısıtlı delegasyonu** istismar etmeye çalışıyorsanız, bu **çalışacaktır** (bu bir güvenlik açığı değil, görünüşe göre bir özelliktir).
+Ancak, **S4U2Proxy**'de kullanılan **TGS** **İleri Yönlendirilebilir DEĞİLSE**, temel bir **Kısıtlı Delegasyonu** kötüye kullanmaya çalışmak **çalışmayacaktır**. Ancak bir **Kaynağa Dayalı kısıtlı delegasyonu** istismar etmeye çalışıyorsanız, bu **çalışacaktır** (bu bir güvenlik açığı değil, görünüşe göre bir özelliktir).
 
 ### Saldırı Yapısı
 
-> Eğer bir **Bilgisayar** hesabı üzerinde **yazma eşdeğer ayrıcalıklarına** sahipseniz, o makinede **ayrılmış erişim** elde edebilirsiniz.
+> Eğer bir **Bilgisayar** hesabı üzerinde **eşdeğer yazma ayrıcalıklarına** sahipseniz, o makinede **ayrılmış erişim** elde edebilirsiniz.
 
-Saldırganın zaten **kurban bilgisayar üzerinde yazma eşdeğer ayrıcalıklarına** sahip olduğunu varsayalım.
+Saldırganın zaten **kurban bilgisayar üzerinde eşdeğer yazma ayrıcalıklarına** sahip olduğunu varsayalım.
 
-1. Saldırgan, bir **SPN**'ye sahip bir hesabı **ele geçirir** veya **oluşturur** (“Hizmet A”). Herhangi bir _Yönetici Kullanıcı_ özel bir ayrıcalığa sahip olmadan **10'a kadar Bilgisayar nesnesi** (**_MachineAccountQuota_**) **oluşturabilir** ve onlara bir **SPN** ayarlayabilir. Bu nedenle, saldırgan sadece bir Bilgisayar nesnesi oluşturup bir SPN ayarlayabilir.
-2. Saldırgan, kurban bilgisayar (ServiceB) üzerindeki **YAZMA ayrıcalığını** kötüye kullanarak **HizmetA'nın o kurban bilgisayar (ServiceB) üzerinde herhangi bir kullanıcıyı taklit etmesine izin verecek şekilde kaynak tabanlı kısıtlı delegasyonu yapılandırır**.
-3. Saldırgan, **Hizmet B'ye ayrıcalıklı erişimi olan bir kullanıcı** için Hizmet A'dan Hizmet B'ye **tam bir S4U saldırısı** (S4U2Self ve S4U2Proxy) gerçekleştirmek için Rubeus'u kullanır.
-   1. S4U2Self (ele geçirilen/oluşturulan SPN'den): **Yönetici için bana bir TGS iste** (İleri Yönlendirilebilir Değil).
-   2. S4U2Proxy: Önceki adımın **İleri Yönlendirilebilir olmayan TGS**'sini kullanarak **Yönetici**'den **kurban ana bilgisayara** bir **TGS** istemek.
-   3. İleri Yönlendirilebilir olmayan bir TGS kullanıyor olsanız bile, Kaynağa Dayalı kısıtlı delegasyonu istismar ettiğiniz için bu **çalışacaktır**.
-   4. Saldırgan, **bilet geçişi** yapabilir ve **kullanıcıyı taklit ederek** **kurban ServiceB'ye erişim** kazanabilir.
+1. Saldırgan, bir **SPN**'ye sahip bir hesabı **ele geçirir** veya **oluşturur** (“Hizmet A”). Herhangi bir _Yönetici Kullanıcı_ özel bir ayrıcalığa sahip olmadan **10'a kadar Bilgisayar nesnesi** (**_MachineAccountQuota_**) **oluşturabilir** ve bunlara bir **SPN** ayarlayabilir. Bu nedenle, saldırgan sadece bir Bilgisayar nesnesi oluşturup bir SPN ayarlayabilir.
+2. Saldırgan, kurban bilgisayar (ServiceB) üzerindeki **yazma ayrıcalığını** kötüye kullanarak **Kaynağa dayalı kısıtlı delegasyonu, ServiceA'nın o kurban bilgisayar (ServiceB) üzerinde herhangi bir kullanıcıyı taklit etmesine izin verecek şekilde** yapılandırır.
+3. Saldırgan, **Service B**'ye **ayrılmış erişime** sahip bir kullanıcı için **tam bir S4U saldırısı** (S4U2Self ve S4U2Proxy) gerçekleştirmek üzere Rubeus'u kullanır.
+1. S4U2Self (ele geçirilen/oluşturulan SPN'den): **Yönetici için bana bir TGS iste** (İleri Yönlendirilemez).
+2. S4U2Proxy: Önceki adımda **İleri Yönlendirilemez TGS**'yi kullanarak **kurban ana bilgisayara** **Yönetici**'den bir **TGS** talep et.
+3. İleri Yönlendirilemez bir TGS kullanıyor olsanız bile, Kaynağa dayalı kısıtlı delegasyonu istismar ettiğiniz için bu **çalışacaktır**.
+4. Saldırgan, **bilet geçişi** yapabilir ve kullanıcıyı **kurban ServiceB'ye erişim sağlamak için taklit edebilir**.
 
 Alan adının _**MachineAccountQuota**_ değerini kontrol etmek için şunu kullanabilirsiniz:
 ```powershell
@@ -43,7 +40,7 @@ Get-DomainObject -Identity "dc=domain,dc=local" -Domain domain.local | select Ma
 
 ### Bir Bilgisayar Nesnesi Oluşturma
 
-Bir bilgisayar nesnesini alan içinde [powermad](https://github.com/Kevin-Robertson/Powermad)**:** oluşturabilirsiniz.
+Bir alan içinde bir bilgisayar nesnesi oluşturmak için [powermad](https://github.com/Kevin-Robertson/Powermad)**:**
 ```powershell
 import-module powermad
 New-MachineAccount -MachineAccount SERVICEA -Password $(ConvertTo-SecureString '123456' -AsPlainText -Force) -Verbose
@@ -75,7 +72,7 @@ msds-allowedtoactonbehalfofotheridentity
 ```
 ### Tam bir S4U saldırısı gerçekleştirme
 
-Öncelikle, `123456` şifresi ile yeni bir Bilgisayar nesnesi oluşturduk, bu yüzden o şifrenin hash'ine ihtiyacımız var:
+Öncelikle, `123456` şifresiyle yeni bir Bilgisayar nesnesi oluşturduk, bu yüzden o şifrenin hash'ine ihtiyacımız var:
 ```bash
 .\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local
 ```
@@ -100,7 +97,7 @@ ls \\victim.domain.local\C$
 ```
 ### Farklı hizmet biletlerini kötüye kullanma
 
-[**mevcut hizmet biletlerini burada**](silver-ticket.md#available-services) öğrenin.
+[**mevcut hizmet biletlerini buradan öğrenin**](silver-ticket.md#available-services).
 
 ## Kerberos Hataları
 
@@ -110,7 +107,7 @@ ls \\victim.domain.local\C$
 - **`KDC_ERR_BADOPTION`**: Bu, şunları ifade edebilir:
   - Taklit etmeye çalıştığınız kullanıcı, istenen hizmete erişemiyor (çünkü onu taklit edemezsiniz veya yeterli ayrıcalıklara sahip değildir)
   - İstenen hizmet mevcut değil (eğer winrm için bir bilet isterseniz ama winrm çalışmıyorsa)
-  - Oluşturulan fakecomputer, savunmasız sunucu üzerindeki ayrıcalıklarını kaybetti ve bunları geri vermeniz gerekiyor.
+  - Oluşturulan fakecomputer, hedef sunucu üzerindeki ayrıcalıklarını kaybetmiştir ve bunları geri vermeniz gerekir.
 
 ## Referanslar
 
@@ -119,8 +116,5 @@ ls \\victim.domain.local\C$
 - [https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/resource-based-constrained-delegation-ad-computer-object-take-over-and-privilged-code-execution#modifying-target-computers-ad-object](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/resource-based-constrained-delegation-ad-computer-object-take-over-and-privilged-code-execution#modifying-target-computers-ad-object)
 - [https://stealthbits.com/blog/resource-based-constrained-delegation-abuse/](https://stealthbits.com/blog/resource-based-constrained-delegation-abuse/)
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

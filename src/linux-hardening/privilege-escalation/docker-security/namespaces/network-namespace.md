@@ -1,86 +1,76 @@
-# Network Namespace
+# Ağ Ad Alanı
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Temel Bilgiler
 
-A network namespace is a Linux kernel feature that provides isolation of the network stack, allowing **each network namespace to have its own independent network configuration**, interfaces, IP addresses, routing tables, and firewall rules. This isolation is useful in various scenarios, such as containerization, where each container should have its own network configuration, independent of other containers and the host system.
+Ağ ad alanı, **her ağ ad alanının kendi bağımsız ağ yapılandırmasına** sahip olmasını sağlayan, ağ yığınını izole eden bir Linux çekirdek özelliğidir; arayüzler, IP adresleri, yönlendirme tabloları ve güvenlik duvarı kuralları. Bu izolasyon, her konteynerin diğer konteynerlerden ve ana sistemden bağımsız olarak kendi ağ yapılandırmasına sahip olması gereken konteynerleştirme gibi çeşitli senaryolar için faydalıdır.
 
-### How it works:
+### Nasıl çalışır:
 
-1. When a new network namespace is created, it starts with a **completely isolated network stack**, with **no network interfaces** except for the loopback interface (lo). This means that processes running in the new network namespace cannot communicate with processes in other namespaces or the host system by default.
-2. **Virtual network interfaces**, such as veth pairs, can be created and moved between network namespaces. This allows for establishing network connectivity between namespaces or between a namespace and the host system. For example, one end of a veth pair can be placed in a container's network namespace, and the other end can be connected to a **bridge** or another network interface in the host namespace, providing network connectivity to the container.
-3. Network interfaces within a namespace can have their **own IP addresses, routing tables, and firewall rules**, independent of other namespaces. This allows processes in different network namespaces to have different network configurations and operate as if they are running on separate networked systems.
-4. Processes can move between namespaces using the `setns()` system call, or create new namespaces using the `unshare()` or `clone()` system calls with the `CLONE_NEWNET` flag. When a process moves to a new namespace or creates one, it will start using the network configuration and interfaces associated with that namespace.
+1. Yeni bir ağ ad alanı oluşturulduğunda, **tamamen izole bir ağ yığını** ile başlar; **loopback arayüzü** (lo) dışında **hiçbir ağ arayüzü** yoktur. Bu, yeni ağ ad alanında çalışan süreçlerin varsayılan olarak diğer ad alanlarındaki veya ana sistemdeki süreçlerle iletişim kuramayacağı anlamına gelir.
+2. **Sanal ağ arayüzleri**, örneğin veth çiftleri, oluşturulabilir ve ağ ad alanları arasında taşınabilir. Bu, ad alanları arasında veya bir ad alanı ile ana sistem arasında ağ bağlantısı kurmayı sağlar. Örneğin, bir veth çiftinin bir ucu bir konteynerin ağ ad alanında yer alabilir ve diğer ucu ana ad alanındaki bir **köprüye** veya başka bir ağ arayüzüne bağlanarak konteynere ağ bağlantısı sağlayabilir.
+3. Bir ad alanı içindeki ağ arayüzleri, diğer ad alanlarından bağımsız olarak **kendi IP adreslerine, yönlendirme tablolarına ve güvenlik duvarı kurallarına** sahip olabilir. Bu, farklı ağ ad alanlarındaki süreçlerin farklı ağ yapılandırmalarına sahip olmasını ve sanki ayrı ağ sistemlerinde çalışıyormuş gibi işlem yapmasını sağlar.
+4. Süreçler, `setns()` sistem çağrısını kullanarak ad alanları arasında hareket edebilir veya `CLONE_NEWNET` bayrağı ile `unshare()` veya `clone()` sistem çağrılarını kullanarak yeni ad alanları oluşturabilir. Bir süreç yeni bir ad alanına geçtiğinde veya bir tane oluşturduğunda, o ad alanıyla ilişkili ağ yapılandırmasını ve arayüzlerini kullanmaya başlayacaktır.
 
-## Lab:
+## Laboratuvar:
 
-### Create different Namespaces
+### Farklı Ad Alanları Oluşturma
 
 #### CLI
-
 ```bash
 sudo unshare -n [--mount-proc] /bin/bash
 # Run ifconfig or ip -a
 ```
-
-By mounting a new instance of the `/proc` filesystem if you use the param `--mount-proc`, you ensure that the new mount namespace has an **accurate and isolated view of the process information specific to that namespace**.
+Yeni bir `/proc` dosya sisteminin örneğini `--mount-proc` parametresi ile monte ederek, yeni montaj ad alanının **o ad alanına özgü süreç bilgilerini doğru ve izole bir şekilde görmesini** sağlarsınız.
 
 <details>
 
-<summary>Error: bash: fork: Cannot allocate memory</summary>
+<summary>Hata: bash: fork: Bellek tahsis edilemiyor</summary>
 
-When `unshare` is executed without the `-f` option, an error is encountered due to the way Linux handles new PID (Process ID) namespaces. The key details and the solution are outlined below:
+`unshare` komutu `-f` seçeneği olmadan çalıştırıldığında, Linux'un yeni PID (Process ID) ad alanlarını nasıl yönettiği nedeniyle bir hata ile karşılaşılır. Anahtar detaylar ve çözüm aşağıda özetlenmiştir:
 
-1. **Problem Explanation**:
+1. **Sorun Açıklaması**:
 
-   - The Linux kernel allows a process to create new namespaces using the `unshare` system call. However, the process that initiates the creation of a new PID namespace (referred to as the "unshare" process) does not enter the new namespace; only its child processes do.
-   - Running `%unshare -p /bin/bash%` starts `/bin/bash` in the same process as `unshare`. Consequently, `/bin/bash` and its child processes are in the original PID namespace.
-   - The first child process of `/bin/bash` in the new namespace becomes PID 1. When this process exits, it triggers the cleanup of the namespace if there are no other processes, as PID 1 has the special role of adopting orphan processes. The Linux kernel will then disable PID allocation in that namespace.
+- Linux çekirdeği, bir sürecin yeni ad alanları oluşturmasına `unshare` sistem çağrısı ile izin verir. Ancak, yeni bir PID ad alanı oluşturan süreç (bu süreç "unshare" süreci olarak adlandırılır) yeni ad alanına girmemektedir; yalnızca onun çocuk süreçleri girmektedir.
+- `%unshare -p /bin/bash%` komutu, `/bin/bash`'i `unshare` ile aynı süreçte başlatır. Sonuç olarak, `/bin/bash` ve onun çocuk süreçleri orijinal PID ad alanındadır.
+- Yeni ad alanındaki `/bin/bash`'in ilk çocuk süreci PID 1 olur. Bu süreç sona erdiğinde, başka süreç yoksa ad alanının temizlenmesini tetikler, çünkü PID 1, yetim süreçleri benimseme özel rolüne sahiptir. Linux çekirdeği, bu ad alanında PID tahsisini devre dışı bırakacaktır.
 
-2. **Consequence**:
+2. **Sonuç**:
 
-   - The exit of PID 1 in a new namespace leads to the cleaning of the `PIDNS_HASH_ADDING` flag. This results in the `alloc_pid` function failing to allocate a new PID when creating a new process, producing the "Cannot allocate memory" error.
+- Yeni bir ad alanındaki PID 1'in çıkışı, `PIDNS_HASH_ADDING` bayrağının temizlenmesine yol açar. Bu, yeni bir süreç oluşturulurken `alloc_pid` fonksiyonunun yeni bir PID tahsis edememesine neden olur ve "Bellek tahsis edilemiyor" hatasını üretir.
 
-3. **Solution**:
-   - The issue can be resolved by using the `-f` option with `unshare`. This option makes `unshare` fork a new process after creating the new PID namespace.
-   - Executing `%unshare -fp /bin/bash%` ensures that the `unshare` command itself becomes PID 1 in the new namespace. `/bin/bash` and its child processes are then safely contained within this new namespace, preventing the premature exit of PID 1 and allowing normal PID allocation.
+3. **Çözüm**:
+- Sorun, `unshare` ile `-f` seçeneğinin kullanılmasıyla çözülebilir. Bu seçenek, `unshare`'in yeni PID ad alanını oluşturduktan sonra yeni bir süreç fork etmesini sağlar.
+- `%unshare -fp /bin/bash%` komutunu çalıştırmak, `unshare` komutunun kendisinin yeni ad alanında PID 1 olmasını sağlar. `/bin/bash` ve onun çocuk süreçleri bu yeni ad alanında güvenli bir şekilde yer alır, PID 1'in erken çıkışını önler ve normal PID tahsisine izin verir.
 
-By ensuring that `unshare` runs with the `-f` flag, the new PID namespace is correctly maintained, allowing `/bin/bash` and its sub-processes to operate without encountering the memory allocation error.
+`unshare`'in `-f` bayrağı ile çalıştırılmasını sağlayarak, yeni PID ad alanının doğru bir şekilde korunmasını sağlarsınız, böylece `/bin/bash` ve alt süreçleri bellek tahsis hatası ile karşılaşmadan çalışabilir.
 
 </details>
 
 #### Docker
-
 ```bash
 docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 # Run ifconfig or ip -a
 ```
-
-### &#x20;Check which namespace is your process in
-
+### &#x20;Hangi ad alanında olduğunuzu kontrol edin
 ```bash
 ls -l /proc/self/ns/net
 lrwxrwxrwx 1 root root 0 Apr  4 20:30 /proc/self/ns/net -> 'net:[4026531840]'
 ```
-
-### Find all Network namespaces
-
+### Tüm Ağ ad alanlarını Bulun
 ```bash
 sudo find /proc -maxdepth 3 -type l -name net -exec readlink {} \; 2>/dev/null | sort -u | grep "net:"
 # Find the processes with an specific namespace
 sudo find /proc -maxdepth 3 -type l -name net -exec ls -l  {} \; 2>/dev/null | grep <ns-number>
 ```
-
-### Enter inside a Network namespace
-
+### Bir Ağ ad alanına girin
 ```bash
 nsenter -n TARGET_PID --pid /bin/bash
 ```
+Ayrıca, **başka bir işlem ad alanına yalnızca root iseniz girebilirsiniz**. Ve **başka bir ad alanına** **giremezsiniz** **onu işaret eden bir tanımlayıcı olmadan** (örneğin `/proc/self/ns/net`).
 
-Also, you can only **enter in another process namespace if you are root**. And you **cannot** **enter** in other namespace **without a descriptor** pointing to it (like `/proc/self/ns/net`).
-
-## References
+## Referanslar
 
 - [https://stackoverflow.com/questions/44666700/unshare-pid-bin-bash-fork-cannot-allocate-memory](https://stackoverflow.com/questions/44666700/unshare-pid-bin-bash-fork-cannot-allocate-memory)
 

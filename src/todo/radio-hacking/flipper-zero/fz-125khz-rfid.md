@@ -2,10 +2,6 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
-
 ## Giriş
 
 125kHz etiketlerinin nasıl çalıştığı hakkında daha fazla bilgi için kontrol edin:
@@ -20,14 +16,14 @@ Bu tür etiketler hakkında daha fazla bilgi için [**bu girişi okuyun**](../pe
 
 ### Oku
 
-Kart bilgisini **okumaya** çalışır. Sonra bunları **taklit** edebilir.
+Kart bilgilerini **okumaya** çalışır. Sonra bunları **taklit** edebilir.
 
 > [!WARNING]
-> Bazı interkomların, okumadan önce bir yazma komutu göndererek anahtar kopyalamaktan kendilerini korumaya çalıştığını unutmayın. Yazma başarılı olursa, o etiket sahte olarak kabul edilir. Flipper RFID'yi taklit ettiğinde, okuyucunun bunu orijinalinden ayırt etmesi için bir yol yoktur, bu nedenle böyle bir sorun ortaya çıkmaz.
+> Bazı interkomların, okumadan önce bir yazma komutu göndererek anahtar çoğaltımına karşı kendilerini korumaya çalıştığını unutmayın. Yazma başarılı olursa, o etiket sahte olarak kabul edilir. Flipper RFID'yi taklit ettiğinde, okuyucunun bunu orijinalinden ayırt etmesi için bir yolu yoktur, bu nedenle böyle bir sorun ortaya çıkmaz.
 
 ### Manuel Ekle
 
-Verileri manuel olarak belirterek Flipper Zero'da **sahte kartlar oluşturabilirsiniz** ve ardından bunu taklit edebilirsiniz.
+Flipper Zero'da **verileri belirterek sahte kartlar oluşturabilirsiniz** ve ardından bunu taklit edebilirsiniz.
 
 #### Kartlardaki Kimlikler
 
@@ -48,14 +44,10 @@ Bu HID kartında da aynı durum geçerlidir; burada yalnızca 3 bayttan 2'si kar
 
 ### Taklit/Yaz
 
-Bir kartı **kopyaladıktan** veya kimliği **manuel olarak girdikten** sonra, bunu Flipper Zero ile **taklit etmek** veya gerçek bir karta **yazmak** mümkündür.
+Bir kartı **kopyaladıktan** veya kimliği **manuel olarak** **girdikten** sonra, Flipper Zero ile bunu **taklit** etmek veya gerçek bir karta **yazmak** mümkündür.
 
 ## Referanslar
 
 - [https://blog.flipperzero.one/rfid/](https://blog.flipperzero.one/rfid/)
-
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../../../banners/hacktricks-training.md}}

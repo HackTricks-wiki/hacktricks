@@ -2,27 +2,20 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="/images/image (48).png" alt=""><figcaption></figcaption></figure>
+## Nasıl çalışırlar
 
-Dünyanın **en gelişmiş** topluluk araçlarıyla desteklenen **iş akışlarını** kolayca oluşturmak ve **otomatikleştirmek** için [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=command-injection) kullanın.\
-Bugün Erişim Alın:
+Süreç, aşağıdaki adımlarda özetlenmiştir ve hizmet ikili dosyalarının, SMB üzerinden hedef makinede uzaktan yürütme sağlamak için nasıl manipüle edildiğini göstermektedir:
 
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=command-injection" %}
-
-## Nasıl çalışır
-
-Hizmet ikili dosyalarının, SMB üzerinden hedef makinede uzaktan yürütme sağlamak için nasıl manipüle edildiğini gösteren adımlar aşağıda özetlenmiştir:
-
-1. **ADMIN$ paylaşımına bir hizmet ikili dosyasının kopyalanması** gerçekleştirilir.
+1. **Bir hizmet ikili dosyasının ADMIN$ paylaşımına SMB üzerinden kopyalanması** gerçekleştirilir.
 2. **Uzaktaki makinede bir hizmetin oluşturulması**, ikili dosyaya işaret edilerek yapılır.
 3. Hizmet **uzaktan başlatılır**.
 4. Çıkışta, hizmet **durdurulur ve ikili dosya silinir**.
 
 ### **PsExec'i Manuel Olarak Çalıştırma Süreci**
 
-Antivirüs tespitinden kaçınmak için Veil kullanılarak obfuscate edilmiş msfvenom ile oluşturulmuş bir yürütülebilir yük (payload) olan 'met8888.exe' adında bir dosya olduğu varsayılarak, aşağıdaki adımlar izlenir:
+Antivirüs tespitinden kaçınmak için msfvenom ile oluşturulmuş ve Veil kullanılarak obfuscate edilmiş bir yürütülebilir yük (met8888.exe olarak adlandırılmış), bir meterpreter reverse_http yükünü temsil eder, aşağıdaki adımlar izlenir:
 
-- **İkili dosyanın kopyalanması**: Yürütülebilir dosya, komut istemcisinden ADMIN$ paylaşımına kopyalanır, ancak dosya sistemi üzerinde gizli kalmak için herhangi bir yere yerleştirilebilir.
+- **İkili dosyanın kopyalanması**: Yürütülebilir dosya, bir komut istemcisinden ADMIN$ paylaşımına kopyalanır, ancak dosya sisteminde gizli kalmak için herhangi bir yere yerleştirilebilir.
 
 - **Bir hizmet oluşturma**: Windows `sc` komutunu kullanarak, uzaktan Windows hizmetlerini sorgulama, oluşturma ve silme imkanı sağlayan bir hizmet "meterpreter" adıyla yüklenen ikili dosyaya işaret edecek şekilde oluşturulur.
 
@@ -30,7 +23,7 @@ Antivirüs tespitinden kaçınmak için Veil kullanılarak obfuscate edilmiş ms
 
 Metasploit dinleyicisinin gözlemlenmesi, oturumun başarıyla başlatıldığını gösterecektir.
 
-[`sc` komutu hakkında daha fazla bilgi edinin](https://technet.microsoft.com/en-us/library/bb490995.aspx).
+[sc komutu hakkında daha fazla bilgi edinin](https://technet.microsoft.com/en-us/library/bb490995.aspx).
 
 Daha ayrıntılı adımları bulabilirsiniz: [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
 
@@ -42,11 +35,4 @@ Ayrıca [**SharpLateral**](https://github.com/mertdas/SharpLateral) kullanabilir
 ```
 SharpLateral.exe redexec HOSTNAME C:\\Users\\Administrator\\Desktop\\malware.exe.exe malware.exe ServiceName
 ```
-<figure><img src="/images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-Dünyanın **en gelişmiş** topluluk araçlarıyla desteklenen **iş akışlarını** kolayca oluşturmak ve **otomatikleştirmek** için [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=command-injection) kullanın.\
-Bugün Erişim Alın:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=command-injection" %}
-
 {{#include ../../banners/hacktricks-training.md}}

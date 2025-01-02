@@ -1,43 +1,43 @@
-# Abusing Docker Socket for Privilege Escalation
+# Docker Soketini İstismar Ederek Yetki Yükseltme
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-There are some occasions were you just have **access to the docker socket** and you want to use it to **escalate privileges**. Some actions might be very suspicious and you may want to avoid them, so here you can find different flags that can be useful to escalate privileges:
+Bazen sadece **docker soketine erişiminiz** vardır ve bunu **yetki yükseltmek** için kullanmak istersiniz. Bazı eylemler çok şüpheli olabilir ve bunlardan kaçınmak isteyebilirsiniz, bu nedenle burada yetki yükseltmek için faydalı olabilecek farklı bayraklar bulabilirsiniz:
 
-### Via mount
+### Mount Üzerinden
 
-You can **mount** different parts of the **filesystem** in a container running as root and **access** them.\
-You could also **abuse a mount to escalate privileges** inside the container.
+Farklı **dosya sistemi** parçalarını kök olarak çalışan bir konteynerde **mount** edebilir ve bunlara **erişebilirsiniz**.\
+Ayrıca konteyner içinde **yetki yükseltmek için bir mount'ı istismar edebilirsiniz**.
 
-- **`-v /:/host`** -> Mount the host filesystem in the container so you can **read the host filesystem.**
-  - If you want to **feel like you are in the host** but being on the container you could disable other defense mechanisms using flags like:
-    - `--privileged`
-    - `--cap-add=ALL`
-    - `--security-opt apparmor=unconfined`
-    - `--security-opt seccomp=unconfined`
-    - `-security-opt label:disable`
-    - `--pid=host`
-    - `--userns=host`
-    - `--uts=host`
-    - `--cgroupns=host`
-- \*\*`--device=/dev/sda1 --cap-add=SYS_ADMIN --security-opt apparmor=unconfined` \*\* -> This is similar to the previous method, but here we are **mounting the device disk**. Then, inside the container run `mount /dev/sda1 /mnt` and you can **access** the **host filesystem** in `/mnt`
-  - Run `fdisk -l` in the host to find the `</dev/sda1>` device to mount
-- **`-v /tmp:/host`** -> If for some reason you can **just mount some directory** from the host and you have access inside the host. Mount it and create a **`/bin/bash`** with **suid** in the mounted directory so you can **execute it from the host and escalate to root**.
+- **`-v /:/host`** -> Konteynerde ana bilgisayar dosya sistemini mount ederek **ana bilgisayar dosya sistemini okuyabilirsiniz.**
+- **Ana bilgisayarda olduğunuzu hissetmek** istiyorsanız ama konteynerdeyseniz, şunları kullanarak diğer savunma mekanizmalarını devre dışı bırakabilirsiniz:
+- `--privileged`
+- `--cap-add=ALL`
+- `--security-opt apparmor=unconfined`
+- `--security-opt seccomp=unconfined`
+- `-security-opt label:disable`
+- `--pid=host`
+- `--userns=host`
+- `--uts=host`
+- `--cgroupns=host`
+- \*\*`--device=/dev/sda1 --cap-add=SYS_ADMIN --security-opt apparmor=unconfined` \*\* -> Bu, önceki yönteme benzer, ancak burada **cihaz diskini mount ediyoruz**. Ardından, konteyner içinde `mount /dev/sda1 /mnt` komutunu çalıştırarak **/mnt** içinde **ana bilgisayar dosya sistemine erişebilirsiniz.**
+- Ana bilgisayarda `fdisk -l` komutunu çalıştırarak mount edilecek `</dev/sda1>` cihazını bulun.
+- **`-v /tmp:/host`** -> Eğer bir nedenle sadece ana bilgisayardan **bir dizini mount edebiliyorsanız** ve ana bilgisayarda erişiminiz varsa. Mount edin ve mount edilen dizinde **suid** ile bir **`/bin/bash`** oluşturun, böylece **ana bilgisayardan çalıştırabilir ve root'a yükselebilirsiniz.**
 
 > [!NOTE]
-> Note that maybe you cannot mount the folder `/tmp` but you can mount a **different writable folder**. You can find writable directories using: `find / -writable -type d 2>/dev/null`
+> Belki `/tmp` klasörünü mount edemeyeceğinizi, ancak **farklı bir yazılabilir klasörü** mount edebileceğinizi unutmayın. Yazılabilir dizinleri bulmak için: `find / -writable -type d 2>/dev/null` kullanabilirsiniz.
 >
-> **Note that not all the directories in a linux machine will support the suid bit!** In order to check which directories support the suid bit run `mount | grep -v "nosuid"` For example usually `/dev/shm` , `/run` , `/proc` , `/sys/fs/cgroup` and `/var/lib/lxcfs` don't support the suid bit.
+> **Unutmayın ki bir linux makinesindeki tüm dizinler suid bitini desteklemeyecektir!** Hangi dizinlerin suid bitini desteklediğini kontrol etmek için `mount | grep -v "nosuid"` komutunu çalıştırın. Örneğin genellikle `/dev/shm`, `/run`, `/proc`, `/sys/fs/cgroup` ve `/var/lib/lxcfs` suid bitini desteklemez.
 >
-> Note also that if you can **mount `/etc`** or any other folder **containing configuration files**, you may change them from the docker container as root in order to **abuse them in the host** and escalate privileges (maybe modifying `/etc/shadow`)
+> Ayrıca **`/etc`** veya **konfigürasyon dosyaları içeren** başka bir klasörü **mount edebiliyorsanız**, bunları docker konteynerinden root olarak değiştirip **ana bilgisayarda istismar edebilir** ve yetki yükseltebilirsiniz (belki `/etc/shadow` dosyasını değiştirerek).
 
-### Escaping from the container
+### Konteynerden Kaçış
 
-- **`--privileged`** -> With this flag you [remove all the isolation from the container](docker-privileged.md#what-affects). Check techniques to [escape from privileged containers as root](docker-breakout-privilege-escalation/#automatic-enumeration-and-escape).
-- **`--cap-add=<CAPABILITY/ALL> [--security-opt apparmor=unconfined] [--security-opt seccomp=unconfined] [-security-opt label:disable]`** -> To [escalate abusing capabilities](../linux-capabilities.md), **grant that capability to the container** and disable other protection methods that may prevent the exploit to work.
+- **`--privileged`** -> Bu bayrak ile [konteynerden tüm izolasyonu kaldırırsınız](docker-privileged.md#what-affects). [Köktan yetkili konteynerlerden kaçış tekniklerini](docker-breakout-privilege-escalation/#automatic-enumeration-and-escape) kontrol edin.
+- **`--cap-add=<CAPABILITY/ALL> [--security-opt apparmor=unconfined] [--security-opt seccomp=unconfined] [-security-opt label:disable]`** -> [yetki istismarını yükseltmek için](../linux-capabilities.md), **bu yetkiyi konteynere verin** ve istismarın çalışmasını engelleyebilecek diğer koruma yöntemlerini devre dışı bırakın.
 
 ### Curl
 
-In this page we have discussed ways to escalate privileges using docker flags, you can find **ways to abuse these methods using curl** command in the page:
+Bu sayfada docker bayraklarını kullanarak yetki yükseltme yollarını tartıştık, **curl** komutunu kullanarak bu yöntemleri istismar etmenin yollarını bulabilirsiniz:
 
 {{#include ../../../banners/hacktricks-training.md}}

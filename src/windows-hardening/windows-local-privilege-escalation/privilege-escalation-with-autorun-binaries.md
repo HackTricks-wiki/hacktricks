@@ -1,23 +1,19 @@
-# Autorun ile Yetki Yükseltme
+# Autorun Binaries ile Yetki Yükseltme
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/i3.png" alt=""><figcaption></figcaption></figure>
 
-**Hata ödülü ipucu**: **Intigriti** için **kaydolun**, **hackers tarafından, hackers için oluşturulmuş premium bir hata ödülü platformu**! Bugün [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) adresine katılın ve **$100,000**'a kadar ödüller kazanmaya başlayın!
-
-{% embed url="https://go.intigriti.com/hacktricks" %}
 
 ## WMIC
 
-**Wmic**, **başlangıçta** programları çalıştırmak için kullanılabilir. Hangi ikili dosyaların başlangıçta çalışacak şekilde programlandığını görmek için:
+**Wmic**, **başlangıçta** programları çalıştırmak için kullanılabilir. Başlangıçta çalışacak şekilde programlanmış olan ikili dosyaları görmek için:
 ```bash
 wmic startup get caption,command 2>nul & ^
 Get-CimInstance Win32_StartupCommand | select Name, command, Location, User | fl
 ```
-## Planlanmış Görevler
+## Zamanlanmış Görevler
 
-**Görevler**, **belirli bir sıklıkla** çalışacak şekilde planlanabilir. Hangi ikili dosyaların çalışacak şekilde planlandığını görmek için:
+**Görevler**, **belirli bir sıklıkla** çalışacak şekilde zamanlanabilir. Hangi ikili dosyaların çalışacak şekilde zamanlandığını görmek için:
 ```bash
 schtasks /query /fo TABLE /nh | findstr /v /i "disable deshab"
 schtasks /query /fo LIST 2>nul | findstr TaskName
@@ -78,7 +74,7 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 - `HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnceEx`
 - `HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunOnceEx`
 
-Windows Vista ve sonraki sürümlerde, **Run** ve **RunOnce** kayıt defteri anahtarları otomatik olarak oluşturulmaz. Bu anahtarlardaki girişler ya doğrudan programları başlatabilir ya da bunları bağımlılık olarak belirtebilir. Örneğin, bir DLL dosyasını oturum açıldığında yüklemek için, **RunOnceEx** kayıt defteri anahtarını "Depend" anahtarı ile birlikte kullanabilirsiniz. Bu, sistem başlangıcında "C:\temp\evil.dll" dosyasını çalıştırmak için bir kayıt defteri girişi ekleyerek gösterilmektedir:
+Windows Vista ve sonraki sürümlerde, **Run** ve **RunOnce** kayıt defteri anahtarları otomatik olarak oluşturulmaz. Bu anahtarlardaki girişler ya doğrudan programları başlatabilir ya da bunları bağımlılıklar olarak belirtebilir. Örneğin, bir DLL dosyasını oturum açıldığında yüklemek için, **RunOnceEx** kayıt defteri anahtarını "Depend" anahtarı ile birlikte kullanabilirsiniz. Bu, sistem başlangıcında "C:\temp\evil.dll" dosyasını çalıştırmak için bir kayıt defteri girişi ekleyerek gösterilmektedir:
 ```
 reg add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnceEx\\0001\\Depend /v 1 /d "C:\\temp\\evil.dll"
 ```
@@ -152,7 +148,7 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Wow6432Node\Microsoft\Windows\Ru
 **Başlangıç** klasörüne yerleştirilen kısayollar, kullanıcı oturumu açıldığında veya sistem yeniden başlatıldığında hizmetlerin veya uygulamaların otomatik olarak başlatılmasını tetikler. **Başlangıç** klasörünün konumu, hem **Yerel Makine** hem de **Geçerli Kullanıcı** kapsamları için kayıt defterinde tanımlanmıştır. Bu, belirtilen **Başlangıç** konumlarına eklenen her kısayolun, bağlantılı hizmetin veya programın oturum açma veya yeniden başlatma sürecinin ardından başlatılmasını sağlayacağı anlamına gelir; bu da programların otomatik olarak çalıştırılmasını planlamak için basit bir yöntemdir.
 
 > [!NOTE]
-> Eğer **HKLM** altında herhangi bir \[User] Shell Folder'ı üzerine yazabiliyorsanız, bunu kontrol ettiğiniz bir klasöre yönlendirebilir ve bir arka kapı yerleştirerek, bir kullanıcı sisteme giriş yaptığında bu arka kapının çalıştırılmasını sağlayabilirsiniz.
+> Eğer **HKLM** altında herhangi bir \[User] Shell Folder'ı üzerine yazabiliyorsanız, bunu kontrol ettiğiniz bir klasöre yönlendirebilir ve bir arka kapı yerleştirerek, bir kullanıcı sisteme giriş yaptığında bu arka kapının çalıştırılmasını sağlayarak ayrıcalıkları artırabilirsiniz.
 ```bash
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" /v "Common Startup"
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" /v "Common Startup"
@@ -192,21 +188,21 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\CurrentVersion
 ```
 ### AlternateShell
 
-### Güvenli Mod Komut İstemi Değiştirme
+### Güvenli Mod Komut İstemcisini Değiştirme
 
-Windows Kayıt Defteri'nde `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot` altında varsayılan olarak **`AlternateShell`** değeri `cmd.exe` olarak ayarlanmıştır. Bu, başlangıçta "Komut İstemi ile Güvenli Mod" seçeneğini seçtiğinizde (F8'e basarak) `cmd.exe`'nin kullanıldığı anlamına gelir. Ancak, bilgisayarınızı bu modda otomatik olarak başlatacak şekilde ayarlamak mümkündür, böylece F8'e basıp manuel olarak seçmenize gerek kalmaz.
+Windows Kayıt Defteri'nde `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot` altında varsayılan olarak **`AlternateShell`** değeri `cmd.exe` olarak ayarlanmıştır. Bu, başlangıçta "Komut İstemcisi ile Güvenli Mod" seçeneğini seçtiğinizde (F8 tuşuna basarak) `cmd.exe`'nin kullanıldığı anlamına gelir. Ancak, bilgisayarınızı F8'e basmadan ve manuel olarak seçmeden bu modda otomatik olarak başlatacak şekilde ayarlamak mümkündür.
 
-"Komut İstemi ile Güvenli Mod"da otomatik olarak başlatmak için bir önyükleme seçeneği oluşturma adımları:
+"Komut İstemcisi ile Güvenli Mod"da otomatik başlatma için bir önyükleme seçeneği oluşturma adımları:
 
-1. `boot.ini` dosyasının özelliklerini değiştirerek salt okunur, sistem ve gizli bayraklarını kaldırın: `attrib c:\boot.ini -r -s -h`
+1. `boot.ini` dosyasının özelliklerini yalnızca okunur, sistem ve gizli bayraklarını kaldıracak şekilde değiştirin: `attrib c:\boot.ini -r -s -h`
 2. `boot.ini` dosyasını düzenlemek için açın.
 3. Aşağıdaki gibi bir satır ekleyin: `multi(0)disk(0)rdisk(0)partition(1)\WINDOWS="Microsoft Windows XP Professional" /fastdetect /SAFEBOOT:MINIMAL(ALTERNATESHELL)`
 4. `boot.ini` dosyasındaki değişiklikleri kaydedin.
 5. Orijinal dosya özelliklerini yeniden uygulayın: `attrib c:\boot.ini +r +s +h`
 
-- **Sömürü 1:** **AlternateShell** kayıt defteri anahtarını değiştirmek, yetkisiz erişim için potansiyel olarak özel komut kabuğu kurulumu sağlar.
-- **Sömürü 2 (PATH Yazma İzinleri):** Sistem **PATH** değişkeninin herhangi bir bölümünde yazma izinlerine sahip olmak, özellikle `C:\Windows\system32`'den önce, özel bir `cmd.exe` çalıştırmanıza olanak tanır; bu, sistem Güvenli Mod'da başlatıldığında bir arka kapı olabilir.
-- **Sömürü 3 (PATH ve boot.ini Yazma İzinleri):** `boot.ini`'ye yazma erişimi, otomatik Güvenli Mod başlatmayı sağlar ve bir sonraki yeniden başlatmada yetkisiz erişimi kolaylaştırır.
+- **Exploit 1:** **AlternateShell** kayıt defteri anahtarını değiştirmek, yetkisiz erişim için potansiyel olarak özel komut kabuğu kurulumu sağlar.
+- **Exploit 2 (PATH Yazma İzinleri):** Sistem **PATH** değişkeninin herhangi bir bölümünde yazma izinlerine sahip olmak, özellikle `C:\Windows\system32`'den önce, özel bir `cmd.exe` çalıştırmanıza olanak tanır; bu, sistem Güvenli Modda başlatıldığında bir arka kapı olabilir.
+- **Exploit 3 (PATH ve boot.ini Yazma İzinleri):** `boot.ini`'ye yazma erişimi, otomatik Güvenli Mod başlatmayı sağlar ve bir sonraki yeniden başlatmada yetkisiz erişimi kolaylaştırır.
 
 Mevcut **AlternateShell** ayarını kontrol etmek için bu komutları kullanın:
 ```bash
@@ -247,16 +243,16 @@ reg query "HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components
 
 ### Tarayıcı Yardımcı Nesneleri (BHO'lar) Genel Bakış
 
-Tarayıcı Yardımcı Nesneleri (BHO'lar), Microsoft'un Internet Explorer'ına ek özellikler ekleyen DLL modülleridir. Her başlatmada Internet Explorer ve Windows Explorer'a yüklenirler. Ancak, **NoExplorer** anahtarını 1 olarak ayarlayarak yürütmeleri engellenebilir, bu da Windows Explorer örnekleriyle yüklenmelerini önler.
+Tarayıcı Yardımcı Nesneleri (BHO'lar), Microsoft'un Internet Explorer'ına ekstra özellikler ekleyen DLL modülleridir. Her başlatmada Internet Explorer ve Windows Gezgini'ne yüklenirler. Ancak, **NoExplorer** anahtarını 1 olarak ayarlayarak çalışmaları engellenebilir, bu da onların Windows Gezgini örnekleriyle yüklenmesini önler.
 
-BHO'lar, Windows 10 ile Internet Explorer 11 aracılığıyla uyumludur, ancak daha yeni Windows sürümlerinde varsayılan tarayıcı olan Microsoft Edge'de desteklenmezler.
+BHO'lar, Windows 10 ile Internet Explorer 11 aracılığıyla uyumludur ancak daha yeni Windows sürümlerinde varsayılan tarayıcı olan Microsoft Edge'de desteklenmez.
 
 Bir sistemde kayıtlı BHO'ları keşfetmek için aşağıdaki kayıt defteri anahtarlarını inceleyebilirsiniz:
 
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
 - `HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
 
-Her BHO, kayıt defterinde benzersiz bir tanımlayıcı olarak hizmet eden **CLSID** ile temsil edilir. Her CLSID hakkında ayrıntılı bilgi `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}` altında bulunabilir.
+Her BHO, kayıt defterinde benzersiz bir tanımlayıcı olarak **CLSID** ile temsil edilir. Her CLSID hakkında ayrıntılı bilgi `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}` altında bulunabilir.
 
 Kayıt defterinde BHO'ları sorgulamak için bu komutlar kullanılabilir:
 ```bash
@@ -297,7 +293,7 @@ HKLM\Software\Microsoft\Wow6432Node\Windows NT\CurrentVersion\Image File Executi
 ```
 ## SysInternals
 
-Not edin ki, autorun'ları bulabileceğiniz tüm siteler **zaten**[ **winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe) tarafından **arama yapılmıştır**. Ancak, **otomatik olarak çalıştırılan** dosyaların **daha kapsamlı bir listesi** için Sysinternals'tan [autoruns](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns) kullanabilirsiniz:
+Not edin ki, autorunları bulabileceğiniz tüm siteler **zaten**[ **winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe) tarafından **arama yapılmıştır**. Ancak, **otomatik olarak çalıştırılan** dosyaların **daha kapsamlı bir listesi** için Sysinternals'tan [autoruns](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns) kullanabilirsiniz:
 ```
 autorunsc.exe -m -nobanner -a * -ct /accepteula
 ```
@@ -312,10 +308,6 @@ autorunsc.exe -m -nobanner -a * -ct /accepteula
 - [https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
 - [https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell](https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell)
 
-<figure><img src="../../images/i3.png" alt=""><figcaption></figcaption></figure>
 
-**Hata ödülü ipucu**: **Intigriti** için **kayıt olun**, **hack'ler tarafından, hack'ler için oluşturulmuş bir premium hata ödülü platformu**! Bugün [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) adresine katılın ve **$100,000**'a kadar ödüller kazanmaya başlayın!
-
-{% embed url="https://go.intigriti.com/hacktricks" %}
 
 {{#include ../../banners/hacktricks-training.md}}

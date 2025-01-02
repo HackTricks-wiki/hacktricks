@@ -2,40 +2,39 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Temel Bilgiler
 
-Kernel extensions (Kexts) are **packages** with a **`.kext`** extension that are **loaded directly into the macOS kernel space**, providing additional functionality to the main operating system.
+Kernel uzantıları (Kexts), **macOS çekirdek alanına doğrudan yüklenen** ve ana işletim sistemine ek işlevsellik sağlayan **`.kext`** uzantısına sahip **paketlerdir**.
 
-### Requirements
+### Gereksinimler
 
-Obviously, this is so powerful that it is **complicated to load a kernel extension**. These are the **requirements** that a kernel extension must meet to be loaded:
+Açıkça, bu kadar güçlü olduğu için **bir kernel uzantısını yüklemek karmaşıktır**. Yüklenebilmesi için bir kernel uzantısının karşılaması gereken **gereksinimler** şunlardır:
 
-- When **entering recovery mode**, kernel **extensions must be allowed** to be loaded:
+- **Kurtarma moduna** girerken, kernel **uzantılarının yüklenmesine izin verilmelidir**:
 
 <figure><img src="../../../images/image (327).png" alt=""><figcaption></figcaption></figure>
 
-- The kernel extension must be **signed with a kernel code signing certificate**, which can only be **granted by Apple**. Who will review in detail the company and the reasons why it is needed.
-- The kernel extension must also be **notarized**, Apple will be able to check it for malware.
-- Then, the **root** user is the one who can **load the kernel extension** and the files inside the package must **belong to root**.
-- During the upload process, the package must be prepared in a **protected non-root location**: `/Library/StagedExtensions` (requires the `com.apple.rootless.storage.KernelExtensionManagement` grant).
-- Finally, when attempting to load it, the user will [**receive a confirmation request**](https://developer.apple.com/library/archive/technotes/tn2459/_index.html) and, if accepted, the computer must be **restarted** to load it.
+- Kernel uzantısı, yalnızca **Apple tarafından verilebilen** bir kernel kod imzalama sertifikası ile **imzalanmış olmalıdır**. Şirketin detaylı bir şekilde inceleneceği ve neden gerektiği.
+- Kernel uzantısı ayrıca **notarize edilmelidir**, Apple bunu kötü amaçlı yazılım için kontrol edebilecektir.
+- Ardından, **root** kullanıcısı kernel uzantısını **yükleyebilen** kişidir ve paket içindeki dosyalar **root'a ait olmalıdır**.
+- Yükleme sürecinde, paket **korumalı bir kök olmayan konumda** hazırlanmalıdır: `/Library/StagedExtensions` (bu, `com.apple.rootless.storage.KernelExtensionManagement` iznini gerektirir).
+- Son olarak, yüklemeye çalışırken, kullanıcı [**bir onay isteği alacaktır**](https://developer.apple.com/library/archive/technotes/tn2459/_index.html) ve kabul edilirse, bilgisayar **yeniden başlatılmalıdır**.
 
-### Loading process
+### Yükleme süreci
 
-In Catalina it was like this: It is interesting to note that the **verification** process occurs in **userland**. However, only applications with the **`com.apple.private.security.kext-management`** grant can **request the kernel to load an extension**: `kextcache`, `kextload`, `kextutil`, `kextd`, `syspolicyd`
+Catalina'da böyleydi: **Doğrulama** sürecinin **kullanıcı alanında** gerçekleştiğini belirtmek ilginçtir. Ancak, yalnızca **`com.apple.private.security.kext-management`** iznine sahip uygulamalar **çekirdekten bir uzantıyı yüklemesini isteyebilir**: `kextcache`, `kextload`, `kextutil`, `kextd`, `syspolicyd`
 
-1. **`kextutil`** cli **starts** the **verification** process for loading an extension
-   - It will talk to **`kextd`** by sending using a **Mach service**.
-2. **`kextd`** will check several things, such as the **signature**
-   - It will talk to **`syspolicyd`** to **check** if the extension can be **loaded**.
-3. **`syspolicyd`** will **prompt** the **user** if the extension has not been previously loaded.
-   - **`syspolicyd`** will report the result to **`kextd`**
-4. **`kextd`** will finally be able to **tell the kernel to load** the extension
+1. **`kextutil`** cli **bir uzantıyı yüklemek için** **doğrulama** sürecini **başlatır**
+- **`kextd`** ile bir **Mach servisi** kullanarak iletişim kuracaktır.
+2. **`kextd`** birkaç şeyi kontrol edecektir, örneğin **imzayı**
+- Uzantının **yüklenip yüklenemeyeceğini kontrol etmek için** **`syspolicyd`** ile iletişim kuracaktır.
+3. **`syspolicyd`**, uzantı daha önce yüklenmemişse **kullanıcıya** **soracaktır**.
+- **`syspolicyd`**, sonucu **`kextd`**'ye bildirecektir.
+4. **`kextd`** nihayetinde **çekirdeğe uzantıyı yüklemesini söyleyebilecektir**.
 
-If **`kextd`** is not available, **`kextutil`** can perform the same checks.
+Eğer **`kextd`** mevcut değilse, **`kextutil`** aynı kontrolleri gerçekleştirebilir.
 
-### Enumeration (loaded kexts)
-
+### Sayım (yüklenmiş kextler)
 ```bash
 # Get loaded kernel extensions
 kextstat
@@ -43,40 +42,38 @@ kextstat
 # Get dependencies of the kext number 22
 kextstat | grep " 22 " | cut -c2-5,50- | cut -d '(' -f1
 ```
-
 ## Kernelcache
 
 > [!CAUTION]
-> Even though the kernel extensions are expected to be in `/System/Library/Extensions/`, if you go to this folder you **won't find any binary**. This is because of the **kernelcache** and in order to reverse one `.kext` you need to find a way to obtain it.
+> `/System/Library/Extensions/` içinde kernel uzantılarının bulunması beklenmesine rağmen, bu klasöre giderseniz **hiçbir ikili dosya bulamayacaksınız**. Bunun nedeni **kernelcache**'dir ve bir `.kext` dosyasını tersine mühendislik yapmak için onu elde etmenin bir yolunu bulmanız gerekir.
 
-The **kernelcache** is a **pre-compiled and pre-linked version of the XNU kernel**, along with essential device **drivers** and **kernel extensions**. It's stored in a **compressed** format and gets decompressed into memory during the boot-up process. The kernelcache facilitates a **faster boot time** by having a ready-to-run version of the kernel and crucial drivers available, reducing the time and resources that would otherwise be spent on dynamically loading and linking these components at boot time.
+**Kernelcache**, **XNU çekirdeğinin önceden derlenmiş ve önceden bağlantılı bir versiyonudur**, ayrıca temel cihaz **sürücüleri** ve **kernel uzantıları** ile birlikte gelir. **Sıkıştırılmış** bir formatta depolanır ve önyükleme süreci sırasında belleğe açılır. Kernelcache, çekirdeğin ve kritik sürücülerin çalışmaya hazır bir versiyonunu bulundurarak **daha hızlı bir önyükleme süresi** sağlar; bu, bu bileşenlerin dinamik olarak yüklenmesi ve bağlanması için harcanacak zaman ve kaynakları azaltır.
 
-### Local Kerlnelcache
+### Yerel Kernelcache
 
-In iOS it's located in **`/System/Library/Caches/com.apple.kernelcaches/kernelcache`** in macOS you can find it with: **`find / -name "kernelcache" 2>/dev/null`** \
-In my case in macOS I found it in:
+iOS'ta **`/System/Library/Caches/com.apple.kernelcaches/kernelcache`** içinde bulunur, macOS'ta ise şunları kullanarak bulabilirsiniz: **`find / -name "kernelcache" 2>/dev/null`** \
+Benim durumumda macOS'ta şunu buldum:
 
 - `/System/Volumes/Preboot/1BAEB4B5-180B-4C46-BD53-51152B7D92DA/boot/DAD35E7BC0CDA79634C20BD1BD80678DFB510B2AAD3D25C1228BB34BCD0A711529D3D571C93E29E1D0C1264750FA043F/System/Library/Caches/com.apple.kernelcaches/kernelcache`
 
 #### IMG4
 
-The IMG4 file format is a container format used by Apple in its iOS and macOS devices for securely **storing and verifying firmware** components (like **kernelcache**). The IMG4 format includes a header and several tags which encapsulate different pieces of data including the actual payload (like a kernel or bootloader), a signature, and a set of manifest properties. The format supports cryptographic verification, allowing the device to confirm the authenticity and integrity of the firmware component before executing it.
+IMG4 dosya formatı, Apple tarafından iOS ve macOS cihazlarında **firmware** bileşenlerini güvenli bir şekilde **saklamak ve doğrulamak** için kullanılan bir konteyner formatıdır (örneğin **kernelcache**). IMG4 formatı, gerçek yük (örneğin bir çekirdek veya önyükleyici), bir imza ve bir dizi manifest özelliklerini kapsayan bir başlık ve birkaç etiket içerir. Format, cihazın firmware bileşeninin özgünlüğünü ve bütünlüğünü doğrulamasına olanak tanıyan kriptografik doğrulamayı destekler.
 
-It's usually composed of the following components:
+Genellikle aşağıdaki bileşenlerden oluşur:
 
 - **Payload (IM4P)**:
-  - Often compressed (LZFSE4, LZSS, …)
-  - Optionally encrypted
+- Genellikle sıkıştırılmıştır (LZFSE4, LZSS, …)
+- İsteğe bağlı olarak şifrelenmiş
 - **Manifest (IM4M)**:
-  - Contains Signature
-  - Additional Key/Value dictionary
+- İmza içerir
+- Ek Anahtar/Değer sözlüğü
 - **Restore Info (IM4R)**:
-  - Also known as APNonce
-  - Prevents replaying of some updates
-  - OPTIONAL: Usually this isn't found
+- APNonce olarak da bilinir
+- Bazı güncellemelerin tekrar oynatılmasını engeller
+- İSTEĞE BAĞLI: Genellikle bulunmaz
 
-Decompress the Kernelcache:
-
+Kernelcache'i açın:
 ```bash
 # img4tool (https://github.com/tihmstar/img4tool
 img4tool -e kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
@@ -84,49 +81,39 @@ img4tool -e kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
 # pyimg4 (https://github.com/m1stadev/PyIMG4)
 pyimg4 im4p extract -i kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
 ```
-
-### Download&#x20;
+### İndir
 
 - [**KernelDebugKit Github**](https://github.com/dortania/KdkSupportPkg/releases)
 
-In [https://github.com/dortania/KdkSupportPkg/releases](https://github.com/dortania/KdkSupportPkg/releases) it's possible to find all the kernel debug kits. You can download it, mount it, open it with [Suspicious Package](https://www.mothersruin.com/software/SuspiciousPackage/get.html) tool, access the **`.kext`** folder and **extract it**.
+[https://github.com/dortania/KdkSupportPkg/releases](https://github.com/dortania/KdkSupportPkg/releases) adresinde tüm kernel hata ayıklama kitlerini bulmak mümkündür. Bunu indirebilir, bağlayabilir, [Suspicious Package](https://www.mothersruin.com/software/SuspiciousPackage/get.html) aracıyla açabilir, **`.kext`** klasörüne erişebilir ve **çıkarabilirsiniz**.
 
-Check it for symbols with:
-
+Semboller için kontrol edin:
 ```bash
 nm -a ~/Downloads/Sandbox.kext/Contents/MacOS/Sandbox | wc -l
 ```
-
 - [**theapplewiki.com**](https://theapplewiki.com/wiki/Firmware/Mac/14.x)**,** [**ipsw.me**](https://ipsw.me/)**,** [**theiphonewiki.com**](https://www.theiphonewiki.com/)
 
-Sometime Apple releases **kernelcache** with **symbols**. You can download some firmwares with symbols by following links on those pages. The firmwares will contain the **kernelcache** among other files.
+Bazen Apple **kernelcache** ile **semboller** yayınlar. Bu sayfalardaki bağlantıları takip ederek sembollerle bazı firmware'leri indirebilirsiniz. Firmware'ler diğer dosyaların yanı sıra **kernelcache** içerecektir.
 
-To **extract** the files start by changing the extension from `.ipsw` to `.zip` and **unzip** it.
+Dosyaları **çıkarmak** için uzantıyı `.ipsw`'den `.zip`'e değiştirin ve **açın**.
 
-After extracting the firmware you will get a file like: **`kernelcache.release.iphone14`**. It's in **IMG4** format, you can extract the interesting info with:
+Firmware'i çıkardıktan sonra **`kernelcache.release.iphone14`** gibi bir dosya elde edeceksiniz. Bu **IMG4** formatındadır, ilginç bilgileri çıkarmak için:
 
 [**pyimg4**](https://github.com/m1stadev/PyIMG4)**:**
-
 ```bash
 pyimg4 im4p extract -i kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
 ```
-
 [**img4tool**](https://github.com/tihmstar/img4tool)**:**
-
 ```bash
 img4tool -e kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
 ```
+### Kernelcache'i İnceleme
 
-### Inspecting kernelcache
-
-Check if the kernelcache has symbols with
-
+Kernelcache'in sembollere sahip olup olmadığını kontrol edin.
 ```bash
 nm -a kernelcache.release.iphone14.e | wc -l
 ```
-
-With this we can now **extract all the extensions** or the **one you are interested in:**
-
+Bununla artık **tüm uzantıları** veya **ilginizi çeken uzantıyı** **çıkarabiliriz:**
 ```bash
 # List all extensions
 kextex -l kernelcache.release.iphone14.e
@@ -139,10 +126,9 @@ kextex_all kernelcache.release.iphone14.e
 # Check the extension for symbols
 nm -a binaries/com.apple.security.sandbox | wc -l
 ```
+## Hata Ayıklama
 
-## Debugging
-
-## Referencias
+## Referanslar
 
 - [https://www.makeuseof.com/how-to-enable-third-party-kernel-extensions-apple-silicon-mac/](https://www.makeuseof.com/how-to-enable-third-party-kernel-extensions-apple-silicon-mac/)
 - [https://www.youtube.com/watch?v=hGKOskSiaQo](https://www.youtube.com/watch?v=hGKOskSiaQo)

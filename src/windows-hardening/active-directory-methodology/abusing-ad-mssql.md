@@ -2,15 +2,12 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 ## **MSSQL Enumeration / Discovery**
 
 ### Python
 
-[MSSQLPwner](https://github.com/ScorpionesLabs/MSSqlPwner) aracı impacket üzerine kuruludur ve kerberos biletleri kullanarak kimlik doğrulama yapmayı ve bağlantı zincirleri üzerinden saldırı gerçekleştirmeyi sağlar.
+[MSSQLPwner](https://github.com/ScorpionesLabs/MSSqlPwner) aracı impacket üzerine kuruludur ve kerberos biletleri kullanarak kimlik doğrulama yapmayı ve bağlantı zincirleri aracılığıyla saldırı gerçekleştirmeyi sağlar.
 
 <figure><img src="https://raw.githubusercontent.com/ScorpionesLabs/MSSqlPwner/main/assets/interractive.png"></figure>
 ```shell
@@ -93,7 +90,7 @@ mssqlpwner corp.com/user:lab@192.168.1.65 -windows-auth interactive
 ---
 ###  Powershell
 
-Bu durumda powershell modülü [PowerUpSQL](https://github.com/NetSPI/PowerUpSQL) çok faydalıdır.
+Bu durumda [PowerUpSQL](https://github.com/NetSPI/PowerUpSQL) powershell modülü çok faydalıdır.
 ```powershell
 Import-Module .\PowerupSQL.psd1
 ````
@@ -161,7 +158,7 @@ Invoke-SQLOSCmd -Instance "srv.sub.domain.local,1433" -Command "whoami" -RawResu
 
 ## MSSQL Güvenilir Bağlantılar
 
-Eğer bir MSSQL örneği, farklı bir MSSQL örneği tarafından güvenilir (veritabanı bağlantısı) olarak kabul ediliyorsa. Kullanıcı güvenilir veritabanı üzerinde yetkilere sahipse, **güven ilişkisini kullanarak diğer örnekte de sorgular çalıştırabilecektir**. Bu güven ilişkileri zincirlenebilir ve bir noktada kullanıcı, komut çalıştırabileceği yanlış yapılandırılmış bir veritabanı bulabilir.
+Eğer bir MSSQL örneği başka bir MSSQL örneği tarafından güvenilir (veritabanı bağlantısı) olarak kabul ediliyorsa. Kullanıcı güvenilir veritabanı üzerinde yetkilere sahipse, **güven ilişkisini kullanarak diğer örnekte de sorgular çalıştırabilecektir**. Bu güven ilişkileri zincirlenebilir ve bir noktada kullanıcı, komut çalıştırabileceği yanlış yapılandırılmış bir veritabanı bulabilir.
 
 **Veritabanları arasındaki bağlantılar, orman güvenleri arasında bile çalışır.**
 
@@ -211,7 +208,7 @@ Metasploit'in yalnızca MSSQL'deki `openquery()` fonksiyonunu kötüye kullanmay
 
 **Linux**'tan **sqsh** ve **mssqlclient.py** ile bir MSSQL konsol kabuğu elde edebilirsiniz.
 
-**Windows**'tan da bağlantıları bulabilir ve komutları manuel olarak çalıştırabilirsiniz, **HeidiSQL** gibi bir **MSSQL istemcisi** kullanarak. 
+**Windows**'tan da bağlantıları bulabilir ve komutları manuel olarak çalıştırabilirsiniz, **MSSQL istemcisi gibi** [**HeidiSQL**](https://www.heidisql.com) kullanarak.
 
 _Windows kimlik doğrulaması ile giriş yapın:_
 
@@ -231,7 +228,7 @@ Bağlantı üzerinden sorguları çalıştırın (örnek: yeni erişilebilir ör
 select * from openquery("dcorp-sql1", 'select * from master..sysservers')
 ```
 > [!WARNING]
-> İki ve tek tırnakların nerede kullanıldığını kontrol edin, bu şekilde kullanmak önemlidir.
+> Çift ve tek tırnakların nerede kullanıldığını kontrol edin, bu şekilde kullanmak önemlidir.
 
 ![](<../../images/image (643).png>)
 
@@ -259,10 +256,6 @@ EXECUTE('EXECUTE(''sp_addsrvrolemember ''''hacker'''' , ''''sysadmin'''' '') AT 
 
 Birçok yazarın geliştirdiği bir strateji, bir SİSTEM hizmetini, saldırganın oluşturduğu sahte veya ortadaki adam hizmetine kimlik doğrulaması yapmaya zorlamaktır. Bu sahte hizmet, kimlik doğrulaması yapmaya çalışırken SİSTEM hizmetini taklit edebilir.
 
-[SweetPotato](https://github.com/CCob/SweetPotato) bu çeşitli tekniklerin bir koleksiyonunu içerir ve bunlar Beacon'un `execute-assembly` komutu aracılığıyla yürütülebilir.
-
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
+[SweetPotato](https://github.com/CCob/SweetPotato), Beacon'ın `execute-assembly` komutu aracılığıyla gerçekleştirilebilecek bu çeşitli tekniklerin bir derlemesini sunmaktadır.
 
 {{#include ../../banners/hacktricks-training.md}}

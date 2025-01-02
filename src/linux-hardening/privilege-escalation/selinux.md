@@ -1,13 +1,12 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-# SELinux in Containers
+# Konteynerlerde SELinux
 
-[Introduction and example from the redhat docs](https://www.redhat.com/sysadmin/privileged-flag-container-engines)
+[Redhat belgelerinden giriş ve örnek](https://www.redhat.com/sysadmin/privileged-flag-container-engines)
 
-[SELinux](https://www.redhat.com/en/blog/latest-container-exploit-runc-can-be-blocked-selinux) is a **labeling** **system**. Every **process** and every **file** system object has a **label**. SELinux policies define rules about what a **process label is allowed to do with all of the other labels** on the system.
+[SELinux](https://www.redhat.com/en/blog/latest-container-exploit-runc-can-be-blocked-selinux) bir **etiketleme** **sistemidir**. Her **işlem** ve her **dosya** sistemi nesnesinin bir **etiketi** vardır. SELinux politikaları, bir **işlem etiketinin sistemdeki diğer etiketlerle ne yapabileceğine dair kurallar tanımlar**.
 
-Container engines launch **container processes with a single confined SELinux label**, usually `container_t`, and then set the container inside of the container to be labeled `container_file_t`. The SELinux policy rules basically say that the **`container_t` processes can only read/write/execute files labeled `container_file_t`**. If a container process escapes the container and attempts to write to content on the host, the Linux kernel denies access and only allows the container process to write to content labeled `container_file_t`.
-
+Konteyner motorları, genellikle `container_t` olan **tek bir sınırlı SELinux etiketiyle konteyner işlemleri başlatır** ve ardından konteynerin içindeki dosyaların `container_file_t` olarak etiketlenmesini sağlar. SELinux politika kuralları, **`container_t` işlemlerinin yalnızca `container_file_t` olarak etiketlenmiş dosyaları okuyup/yazabileceğini/çalıştırabileceğini** belirtir. Eğer bir konteyner işlemi konteynerden kaçarsa ve ana makinedeki içeriğe yazmaya çalışırsa, Linux çekirdeği erişimi reddeder ve yalnızca konteyner işleminin `container_file_t` olarak etiketlenmiş içeriğe yazmasına izin verir.
 ```shell
 $ podman run -d fedora sleep 100
 d4194babf6b877c7100e79de92cd6717166f7302113018686cea650ea40bd7cb
@@ -15,9 +14,8 @@ $ podman top -l label
 LABEL
 system_u:system_r:container_t:s0:c647,c780
 ```
+# SELinux Kullanıcıları
 
-# SELinux Users
-
-There are SELinux users in addition to the regular Linux users. SELinux users are part of an SELinux policy. Each Linux user is mapped to a SELinux user as part of the policy. This allows Linux users to inherit the restrictions and security rules and mechanisms placed on SELinux users.
+Normal Linux kullanıcılarına ek olarak SELinux kullanıcıları da vardır. SELinux kullanıcıları bir SELinux politikasının parçasıdır. Her Linux kullanıcısı, politikanın bir parçası olarak bir SELinux kullanıcısına eşlenir. Bu, Linux kullanıcılarının SELinux kullanıcılarına uygulanan kısıtlamaları ve güvenlik kurallarını ve mekanizmalarını miras almasını sağlar.
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -2,14 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="/images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-Dünyanın **en gelişmiş** topluluk araçlarıyla desteklenen **iş akışlarını** kolayca oluşturmak ve **otomatikleştirmek** için [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=command-injection) kullanın.\
-Bugün Erişim Alın:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=command-injection" %}
-
-## Yönetim ayrıcalıklarına sahip iyi bilinen gruplar
+## Yönetim ayrıcalıklarına sahip Bilinen Gruplar
 
 - **Yönetici**
 - **Alan Yöneticileri**
@@ -43,7 +36,7 @@ Daha fazla bilgi için [ired.team](https://ired.team/offensive-security-experime
 
 ## AD Geri Dönüşüm Kutusu
 
-Bu gruba üyelik, silinmiş Active Directory nesnelerinin okunmasına izin verir, bu da hassas bilgileri ortaya çıkarabilir:
+Bu gruptaki üyelik, silinmiş Active Directory nesnelerinin okunmasına izin verir, bu da hassas bilgileri ortaya çıkarabilir:
 ```bash
 Get-ADObject -filter 'isDeleted -eq $true' -includeDeletedObjects -Properties *
 ```
@@ -53,7 +46,7 @@ DC üzerindeki dosyalara erişim, kullanıcı `Server Operators` grubunun bir pa
 
 ### Yetki Yükseltme
 
-Sysinternals'tan `PsService` veya `sc` kullanarak, hizmet izinlerini inceleyebilir ve değiştirebilirsiniz. Örneğin, `Server Operators` grubu belirli hizmetler üzerinde tam kontrol sahibidir, bu da keyfi komutların yürütülmesine ve yetki yükseltmeye olanak tanır:
+Sysinternals'tan `PsService` veya `sc` kullanarak, hizmet izinlerini inceleyebilir ve değiştirebilirsiniz. Örneğin, `Server Operators` grubu belirli hizmetler üzerinde tam kontrole sahiptir, bu da keyfi komutların yürütülmesine ve yetki yükseltmeye olanak tanır:
 ```cmd
 C:\> .\PsService.exe security AppReadiness
 ```
@@ -81,7 +74,7 @@ Import-Module .\SeBackupPrivilegeCmdLets.dll
 Set-SeBackupPrivilege
 Get-SeBackupPrivilege
 ```
-3. Kısıtlı dizinlerden dosyaları erişin ve kopyalayın, örneğin:
+3. Kısıtlı dizinlerden dosyalara erişim sağlayın ve kopyalayın, örneğin:
 ```bash
 dir C:\Users\Administrator\
 Copy-FileSeBackupPrivilege C:\Users\Administrator\report.pdf c:\temp\x.pdf -Overwrite
@@ -189,18 +182,18 @@ Get-WinEvent -LogName security | where { $_.ID -eq 4688 -and $_.Properties[8].Va
 ```
 ## Exchange Windows İzinleri
 
-Bu grup, alan nesnesi üzerindeki DACL'leri değiştirebilir ve potansiyel olarak DCSync ayrıcalıkları verebilir. Bu grubun istismar edilmesiyle ilgili ayrıcalık yükseltme teknikleri, Exchange-AD-Privesc GitHub deposunda ayrıntılı olarak açıklanmıştır.
+Bu grup, alan nesnesi üzerindeki DACL'leri değiştirebilir ve potansiyel olarak DCSync ayrıcalıkları verebilir. Bu grubu istismar eden ayrıcalık yükseltme teknikleri, Exchange-AD-Privesc GitHub deposunda ayrıntılı olarak açıklanmıştır.
 ```powershell
 # List members
 Get-NetGroupMember -Identity "Exchange Windows Permissions" -Recurse
 ```
 ## Hyper-V Yöneticileri
 
-Hyper-V Yöneticileri, sanallaştırılmış Etki Alanı Denetleyicileri üzerinde kontrol sağlamak için kullanılabilecek Hyper-V'ye tam erişime sahiptir. Bu, canlı DC'leri klonlamayı ve NTDS.dit dosyasından NTLM hash'lerini çıkarmayı içerir.
+Hyper-V Yöneticileri, sanallaştırılmış Alan Denetleyicileri üzerinde kontrol elde etmek için kullanılabilecek Hyper-V'ye tam erişime sahiptir. Bu, canlı DC'leri klonlamayı ve NTDS.dit dosyasından NTLM hash'lerini çıkarmayı içerir.
 
 ### Sömürü Örneği
 
-Firefox'un Mozilla Bakım Servisi, Hyper-V Yöneticileri tarafından SYSTEM olarak komutlar çalıştırmak için sömürülebilir. Bu, korumalı bir SYSTEM dosyasına sert bir bağlantı oluşturarak ve bunu kötü niyetli bir çalıştırılabilir dosya ile değiştirmeyi içerir:
+Firefox'un Mozilla Bakım Servisi, Hyper-V Yöneticileri tarafından SYSTEM olarak komutlar çalıştırmak için sömürülebilir. Bu, korunan bir SYSTEM dosyasına sert bir bağlantı oluşturarak ve bunu kötü niyetli bir çalıştırılabilir dosya ile değiştirmeyi içerir:
 ```bash
 # Take ownership and start the service
 takeown /F C:\Program Files (x86)\Mozilla Maintenance Service\maintenanceservice.exe
@@ -210,13 +203,13 @@ Not: Hard link istismarı, son Windows güncellemeleri ile azaltılmıştır.
 
 ## Organizasyon Yönetimi
 
-**Microsoft Exchange**'in kurulu olduğu ortamlarda, **Organizasyon Yönetimi** olarak bilinen özel bir grup önemli yetkilere sahiptir. Bu grup, **tüm etki alanı kullanıcılarının posta kutularına erişim** hakkına sahiptir ve **'Microsoft Exchange Güvenlik Grupları'** Organizasyonel Birimi (OU) üzerinde **tam kontrol** sağlar. Bu kontrol, ayrıcalık yükseltmesi için istismar edilebilecek **`Exchange Windows Permissions`** grubunu içerir.
+**Microsoft Exchange**'in kurulu olduğu ortamlarda, **Organizasyon Yönetimi** olarak bilinen özel bir grup önemli yetkilere sahiptir. Bu grup, **tüm alan kullanıcılarının posta kutularına erişim** hakkına sahiptir ve **'Microsoft Exchange Güvenlik Grupları'** Organizasyonel Birimi (OU) üzerinde **tam kontrol** sağlar. Bu kontrol, ayrıcalık yükseltmesi için istismar edilebilecek **`Exchange Windows Permissions`** grubunu içerir.
 
 ### Ayrıcalık İstismarı ve Komutlar
 
 #### Yazdırma Operatörleri
 
-**Yazdırma Operatörleri** grubunun üyeleri, **`SeLoadDriverPrivilege`** dahil olmak üzere birkaç ayrıcalıkla donatılmıştır; bu, onlara **bir Etki Alanı Denetleyicisi'ne yerel olarak giriş yapma**, onu kapatma ve yazıcıları yönetme yetkisi verir. Bu ayrıcalıkları istismar etmek için, özellikle **`SeLoadDriverPrivilege`** yükseltilmemiş bir bağlamda görünmüyorsa, Kullanıcı Hesabı Denetimi'ni (UAC) atlamak gereklidir.
+**Yazdırma Operatörleri** grubunun üyeleri, **`SeLoadDriverPrivilege`** dahil olmak üzere birkaç ayrıcalıkla donatılmıştır; bu, onlara **bir Alan Denetleyicisine yerel olarak giriş yapma**, onu kapatma ve yazıcıları yönetme yetkisi verir. Bu ayrıcalıkları istismar etmek için, özellikle **`SeLoadDriverPrivilege`** yükseltilmemiş bir bağlamda görünmüyorsa, Kullanıcı Hesabı Denetimi'ni (UAC) atlamak gereklidir.
 
 Bu grubun üyelerini listelemek için aşağıdaki PowerShell komutu kullanılır:
 ```powershell
@@ -226,7 +219,7 @@ Daha ayrıntılı istismar teknikleri için **`SeLoadDriverPrivilege`** ile ilgi
 
 #### Uzak Masaüstü Kullanıcıları
 
-Bu grubun üyelerine Uzak Masaüstü Protokolü (RDP) aracılığıyla PC'lere erişim izni verilir. Bu üyeleri listelemek için PowerShell komutları mevcuttur:
+Bu grubun üyelerine, Uzak Masaüstü Protokolü (RDP) aracılığıyla PC'lere erişim izni verilir. Bu üyeleri listelemek için PowerShell komutları mevcuttur:
 ```powershell
 Get-NetGroupMember -Identity "Remote Desktop Users" -Recurse
 Get-NetLocalGroupMember -ComputerName <pc name> -GroupName "Remote Desktop Users"
@@ -244,7 +237,7 @@ Get-NetLocalGroupMember -ComputerName <pc name> -GroupName "Remote Management Us
 
 #### Sunucu Operatörleri
 
-Bu grup, Yedekleme ve geri yükleme yetkileri, sistem saatini değiştirme ve sistemi kapatma dahil olmak üzere Etki Alanı Denetleyicileri üzerinde çeşitli yapılandırmalar gerçekleştirme izinlerine sahiptir. Üyeleri listelemek için verilen komut:
+Bu grup, Yedekleme ve geri yükleme ayrıcalıkları, sistem saatini değiştirme ve sistemi kapatma dahil olmak üzere Etki Alanı Denetleyicileri üzerinde çeşitli yapılandırmalar gerçekleştirme izinlerine sahiptir. Üyeleri listelemek için verilen komut:
 ```powershell
 Get-NetGroupMember -Identity "Server Operators" -Recurse
 ```
@@ -265,11 +258,5 @@ Get-NetGroupMember -Identity "Server Operators" -Recurse
 - [https://posts.specterops.io/a-red-teamers-guide-to-gpos-and-ous-f0d03976a31e](https://posts.specterops.io/a-red-teamers-guide-to-gpos-and-ous-f0d03976a31e)
 - [https://undocumented.ntinternals.net/index.html?page=UserMode%2FUndocumented%20Functions%2FExecutable%20Images%2FNtLoadDriver.html](https://undocumented.ntinternals.net/index.html?page=UserMode%2FUndocumented%20Functions%2FExecutable%20Images%2FNtLoadDriver.html)
 
-<figure><img src="/images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-[**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=command-injection) kullanarak dünyanın **en gelişmiş** topluluk araçlarıyla desteklenen **iş akışlarını** kolayca oluşturun ve **otomatikleştirin**.\
-Bugün Erişim Alın:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=command-injection" %}
 
 {{#include ../../banners/hacktricks-training.md}}

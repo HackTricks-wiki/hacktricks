@@ -1,8 +1,5 @@
 {{#include ../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 # BlueTeam
 
@@ -52,12 +49,12 @@
 - [https://github.com/hakluke/hakrawler](https://github.com/hakluke/hakrawler) : Varlıkları elde et
 - [https://github.com/izo30/google-dorker](https://github.com/izo30/google-dorker) : Google dorks
 - [https://github.com/sehno/Bug-bounty/blob/master/bugbounty_checklist.md](https://github.com/sehno/Bug-bounty/blob/master/bugbounty_checklist.md) : Web BugBounty kontrol listesi
-- [https://github.com/Naategh/dom-red](https://github.com/Naategh/dom-red) : Açık Yönlendirme'ye karşı bir alan listesini kontrol et
+- [https://github.com/Naategh/dom-red](https://github.com/Naategh/dom-red) : Bir alan listesini Open Redirection'a karşı kontrol et
 - [https://github.com/prodigysml/Dr.-Watson](https://github.com/prodigysml/Dr.-Watson) : Burp eklentisi, alanları, alt alanları ve IP'leri keşfetmek için çevrimdışı analiz
 - [https://github.com/hahwul/WebHackersWeapons](https://github.com/hahwul/WebHackersWeapons): Farklı araçların listesi
 - [https://github.com/gauravnarwani97/Trishul](https://github.com/gauravnarwani97/Trishul) : Açıkları bulmak için BurpSuite Eklentisi (SQLi, XSS, SSTI)
-- [https://github.com/fransr/postMessage-tracker](https://github.com/fransr/postMessage-tracker) : Post-mesaj fonksiyonlarını izlemek için Chrome uzantısı
-- [https://github.com/Quitten/Autorize](https://github.com/Quitten/Autorize) : Otomatik kimlik doğrulama testleri (çerezleri kaldır ve isteği göndermeye çalış)
+- [https://github.com/fransr/postMessage-tracker](https://github.com/fransr/postMessage-tracker) : Post-mesaj fonksiyonlarını izlemek için Chrome eklentisi
+- [https://github.com/Quitten/Autorize](https://github.com/Quitten/Autorize) : Otomatik kimlik doğrulama testleri (çerezleri kaldır ve isteği göndermeyi dene)
 - [https://github.com/pikpikcu/xrcross](https://github.com/pikpikcu/xrcross): XRCross, Penetrasyon / BugBounty testleri için bir Yeniden Yapılandırma, Tarayıcı ve araçtır. Bu araç (XSS|SSRF|CORS|SSTI|IDOR|RCE|LFI|SQLI) açıklarını test etmek için oluşturulmuştur.
 
 # Windows
@@ -67,14 +64,14 @@
 - [https://gist.github.com/netbiosX/ee35fcd3722e401a38136cff7b751d79](https://gist.github.com/netbiosX/ee35fcd3722e401a38136cff7b751d79) ([https://pentestlab.blog/2020/01/13/persistence-image-file-execution-options-injection/](https://pentestlab.blog/2020/01/13/persistence-image-file-execution-options-injection/)): Süreklilik
 - [https://github.com/odzhan/injection](https://github.com/odzhan/injection) : Windows Süreç Enjeksiyon teknikleri
 - [https://github.com/BankSecurity/Red_Team](https://github.com/BankSecurity/Red_Team) : Kırmızı Ekip betikleri
-- [https://github.com/l0ss/Grouper2](https://github.com/l0ss/Grouper2) : Aktif Dizin Grup Politikasında güvenlikle ilgili yanlış yapılandırmaları bul.
+- [https://github.com/l0ss/Grouper2](https://github.com/l0ss/Grouper2) : Active Directory Grup Politikasındaki güvenlikle ilgili yanlış yapılandırmaları bul.
 - [https://www.wietzebeukema.nl/blog/powershell-obfuscation-using-securestring](https://www.wietzebeukema.nl/blog/powershell-obfuscation-using-securestring) : Securestring obfuscation
 - [https://pentestlab.blog/2020/02/24/parent-pid-spoofing/](https://pentestlab.blog/2020/02/24/parent-pid-spoofing/) : Ebeveyn PID Sahteciliği
 - [https://github.com/the-xentropy/xencrypt](https://github.com/the-xentropy/xencrypt) : Powershell yüklerini şifrele
 - [https://shells.systems/introducing-ninja-c2-the-c2-built-for-stealth-red-team-operations/](https://shells.systems/introducing-ninja-c2-the-c2-built-for-stealth-red-team-operations/) : Gizli C2
 - [https://windows-internals.com/faxing-your-way-to-system/](https://windows-internals.com/faxing-your-way-to-system/) : Windows İç Yapıları hakkında bir dizi günlük
 - [https://bestestredteam.com/2018/10/02/tracking-pixel-in-microsoft-office-document/](https://bestestredteam.com/2018/10/02/tracking-pixel-in-microsoft-office-document/) : Bir belgenin kim tarafından açıldığını takip et
-- [https://github.com/Integration-IT/Active-Directory-Exploitation-Cheat-Sheet](https://github.com/Integration-IT/Active-Directory-Exploitation-Cheat-Sheet) : Aktif Dizin Kontrol Listesi
+- [https://github.com/Integration-IT/Active-Directory-Exploitation-Cheat-Sheet](https://github.com/Integration-IT/Active-Directory-Exploitation-Cheat-Sheet) : Active Directory Hile Sayfası
 
 # Firmware
 
@@ -116,11 +113,8 @@ Firmware emülasyonu: FIRMADYNE (https://github.com/firmadyne/firmadyne/) Linux 
 - [https://github.com/random-robbie/keywords/blob/master/keywords.txt](https://github.com/random-robbie/keywords/blob/master/keywords.txt) : Anahtar kelimeler
 - [https://github.com/ElevenPaths/HomePWN](https://github.com/ElevenPaths/HomePWN) : IoT'yi hackleme (Wifi, BLE, SSDP, MDNS)
 - [https://github.com/rackerlabs/scantron](https://github.com/rackerlabs/scantron) : taramayı otomatikleştirme
-- [https://github.com/doyensec/awesome-electronjs-hacking](https://github.com/doyensec/awesome-electronjs-hacking) : Bu liste, Electron.js güvenlik ile ilgili konuları kapsama amacındadır.
+- [https://github.com/doyensec/awesome-electronjs-hacking](https://github.com/doyensec/awesome-electronjs-hacking) : Bu liste Electron.js güvenlik ile ilgili konuları kapsamayı amaçlamaktadır.
 - [https://github.com/serain/bbrecon](https://github.com/serain/bbrecon) : BB programları hakkında bilgi
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../banners/hacktricks-training.md}}

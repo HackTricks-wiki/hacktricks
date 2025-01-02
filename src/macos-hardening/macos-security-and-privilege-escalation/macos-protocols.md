@@ -1,19 +1,18 @@
-# macOS Network Services & Protocols
+# macOS Ağ Hizmetleri ve Protokoller
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Remote Access Services
+## Uzaktan Erişim Hizmetleri
 
-These are the common macOS services to access them remotely.\
-You can enable/disable these services in `System Settings` --> `Sharing`
+Bunlar, uzaktan erişim için yaygın macOS hizmetleridir.\
+Bu hizmetleri `Sistem Ayarları` --> `Paylaşım` bölümünden etkinleştirebilir/devre dışı bırakabilirsiniz.
 
-- **VNC**, known as “Screen Sharing” (tcp:5900)
-- **SSH**, called “Remote Login” (tcp:22)
-- **Apple Remote Desktop** (ARD), or “Remote Management” (tcp:3283, tcp:5900)
-- **AppleEvent**, known as “Remote Apple Event” (tcp:3031)
+- **VNC**, “Ekran Paylaşımı” olarak bilinir (tcp:5900)
+- **SSH**, “Uzaktan Giriş” olarak adlandırılır (tcp:22)
+- **Apple Remote Desktop** (ARD), veya “Uzaktan Yönetim” (tcp:3283, tcp:5900)
+- **AppleEvent**, “Uzaktan Apple Olayı” olarak bilinir (tcp:3031)
 
-Check if any is enabled running:
-
+Herhangi birinin etkin olup olmadığını kontrol etmek için:
 ```bash
 rmMgmt=$(netstat -na | grep LISTEN | grep tcp46 | grep "*.3283" | wc -l);
 scrShrng=$(netstat -na | grep LISTEN | egrep 'tcp4|tcp6' | grep "*.5900" | wc -l);
@@ -23,103 +22,90 @@ rAE=$(netstat -na | grep LISTEN | egrep 'tcp4|tcp6' | grep "*.3031" | wc -l);
 bmM=$(netstat -na | grep LISTEN | egrep 'tcp4|tcp6' | grep "*.4488" | wc -l);
 printf "\nThe following services are OFF if '0', or ON otherwise:\nScreen Sharing: %s\nFile Sharing: %s\nRemote Login: %s\nRemote Mgmt: %s\nRemote Apple Events: %s\nBack to My Mac: %s\n\n" "$scrShrng" "$flShrng" "$rLgn" "$rmMgmt" "$rAE" "$bmM";
 ```
-
 ### Pentesting ARD
 
-Apple Remote Desktop (ARD) is an enhanced version of [Virtual Network Computing (VNC)](https://en.wikipedia.org/wiki/Virtual_Network_Computing) tailored for macOS, offering additional features. A notable vulnerability in ARD is its authentication method for the control screen password, which only uses the first 8 characters of the password, making it prone to [brute force attacks](https://thudinh.blogspot.com/2017/09/brute-forcing-passwords-with-thc-hydra.html) with tools like Hydra or [GoRedShell](https://github.com/ahhh/GoRedShell/), as there are no default rate limits.
+Apple Remote Desktop (ARD), macOS için özel olarak tasarlanmış, ek özellikler sunan [Virtual Network Computing (VNC)](https://en.wikipedia.org/wiki/Virtual_Network_Computing) 'nin geliştirilmiş bir versiyonudur. ARD'deki dikkat çekici bir zafiyet, kontrol ekranı şifresi için kullanılan kimlik doğrulama yöntemidir; bu yöntem yalnızca şifrenin ilk 8 karakterini kullanır, bu da onu [brute force attacks](https://thudinh.blogspot.com/2017/09/brute-forcing-passwords-with-thc-hydra.html) gibi Hydra veya [GoRedShell](https://github.com/ahhh/GoRedShell/) gibi araçlarla saldırılara karşı savunmasız hale getirir, çünkü varsayılan hız sınırlamaları yoktur.
 
-Vulnerable instances can be identified using **nmap**'s `vnc-info` script. Services supporting `VNC Authentication (2)` are especially susceptible to brute force attacks due to the 8-character password truncation.
+Zayıf noktaları olan örnekler, **nmap**'in `vnc-info` betiği kullanılarak tespit edilebilir. `VNC Authentication (2)`'yi destekleyen hizmetler, 8 karakterli şifre kısaltması nedeniyle brute force saldırılarına özellikle açıktır.
 
-To enable ARD for various administrative tasks like privilege escalation, GUI access, or user monitoring, use the following command:
-
+ARD'yi ayrıcalık yükseltme, GUI erişimi veya kullanıcı izleme gibi çeşitli yönetim görevleri için etkinleştirmek için aşağıdaki komutu kullanın:
 ```bash
 sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -allowAccessFor -allUsers -privs -all -clientopts -setmenuextra -menuextra yes
 ```
+ARD, gözlem, paylaşılan kontrol ve tam kontrol dahil olmak üzere çok yönlü kontrol seviyeleri sağlar ve oturumlar kullanıcı şifre değişikliklerinden sonra bile devam eder. Unix komutlarını doğrudan göndermeye ve bunları yönetici kullanıcılar için root olarak çalıştırmaya olanak tanır. Görev zamanlama ve Uzaktan Spotlight arama, birden fazla makine arasında hassas dosyalar için uzaktan, düşük etkili aramalar yapmayı kolaylaştıran dikkate değer özelliklerdir.
 
-ARD provides versatile control levels, including observation, shared control, and full control, with sessions persisting even after user password changes. It allows sending Unix commands directly, executing them as root for administrative users. Task scheduling and Remote Spotlight search are notable features, facilitating remote, low-impact searches for sensitive files across multiple machines.
+## Bonjour Protokolü
 
-## Bonjour Protocol
+Apple tarafından tasarlanan Bonjour, **aynı ağdaki cihazların birbirlerinin sunduğu hizmetleri tespit etmesine olanak tanır**. Rendezvous, **Zero Configuration** veya Zeroconf olarak da bilinen bu teknoloji, bir cihazın TCP/IP ağına katılmasını, **otomatik olarak bir IP adresi seçmesini** ve hizmetlerini diğer ağ cihazlarına yayınlamasını sağlar.
 
-Bonjour, an Apple-designed technology, allows **devices on the same network to detect each other's offered services**. Known also as Rendezvous, **Zero Configuration**, or Zeroconf, it enables a device to join a TCP/IP network, **automatically choose an IP address**, and broadcast its services to other network devices.
+Bonjour tarafından sağlanan Zero Configuration Networking, cihazların:
 
-Zero Configuration Networking, provided by Bonjour, ensures that devices can:
+- **Otomatik olarak bir IP Adresi almasını** sağlar, DHCP sunucusu yoksa bile.
+- **isimden-adrese çeviri** yapmasını, DNS sunucusu gerektirmeden gerçekleştirir.
+- Ağda mevcut olan **hizmetleri keşfetmesini** sağlar.
 
-- **Automatically obtain an IP Address** even in the absence of a DHCP server.
-- Perform **name-to-address translation** without requiring a DNS server.
-- **Discover services** available on the network.
+Bonjour kullanan cihazlar, kendilerine **169.254/16 aralığından bir IP adresi atar** ve ağdaki benzersizliğini doğrular. Mac'ler, bu alt ağ için bir yönlendirme tablosu girişi tutar, bu giriş `netstat -rn | grep 169` ile doğrulanabilir.
 
-Devices using Bonjour will assign themselves an **IP address from the 169.254/16 range** and verify its uniqueness on the network. Macs maintain a routing table entry for this subnet, verifiable via `netstat -rn | grep 169`.
+DNS için Bonjour, **Multicast DNS (mDNS) protokolünü** kullanır. mDNS, **port 5353/UDP** üzerinden çalışır ve **standart DNS sorgularını** kullanarak **multicast adresi 224.0.0.251**'yi hedef alır. Bu yaklaşım, ağdaki tüm dinleyen cihazların sorguları almasını ve yanıt vermesini sağlar, böylece kayıtlarını güncelleyebilirler.
 
-For DNS, Bonjour utilizes the **Multicast DNS (mDNS) protocol**. mDNS operates over **port 5353/UDP**, employing **standard DNS queries** but targeting the **multicast address 224.0.0.251**. This approach ensures that all listening devices on the network can receive and respond to the queries, facilitating the update of their records.
+Ağa katıldığında, her cihaz kendine bir isim seçer, genellikle **.local** ile biter ve bu isim, ana bilgisayar adından türetilmiş veya rastgele oluşturulmuş olabilir.
 
-Upon joining the network, each device self-selects a name, typically ending in **.local**, which may be derived from the hostname or randomly generated.
+Ağ içindeki hizmet keşfi, **DNS Hizmet Keşfi (DNS-SD)** ile kolaylaştırılır. DNS SRV kayıtlarının formatını kullanan DNS-SD, birden fazla hizmetin listelenmesini sağlamak için **DNS PTR kayıtlarını** kullanır. Belirli bir hizmet arayan bir istemci, `<Service>.<Domain>` için bir PTR kaydı talep eder ve eğer hizmet birden fazla ana bilgisayardan mevcutsa, `<Instance>.<Service>.<Domain>` formatında bir dizi PTR kaydı alır.
 
-Service discovery within the network is facilitated by **DNS Service Discovery (DNS-SD)**. Leveraging the format of DNS SRV records, DNS-SD uses **DNS PTR records** to enable the listing of multiple services. A client seeking a specific service will request a PTR record for `<Service>.<Domain>`, receiving in return a list of PTR records formatted as `<Instance>.<Service>.<Domain>` if the service is available from multiple hosts.
+`dns-sd` aracı, **ağ hizmetlerini keşfetmek ve tanıtmak için** kullanılabilir. İşte kullanımına dair bazı örnekler:
 
-The `dns-sd` utility can be employed for **discovering and advertising network services**. Here are some examples of its usage:
+### SSH Hizmetlerini Arama
 
-### Searching for SSH Services
-
-To search for SSH services on the network, the following command is used:
-
+Ağda SSH hizmetlerini aramak için aşağıdaki komut kullanılır:
 ```bash
 dns-sd -B _ssh._tcp
 ```
+Bu komut, \_ssh.\_tcp hizmetleri için tarama başlatır ve zaman damgası, bayraklar, arayüz, alan, hizmet türü ve örnek adı gibi ayrıntıları çıktılar. 
 
-This command initiates browsing for \_ssh.\_tcp services and outputs details such as timestamp, flags, interface, domain, service type, and instance name.
+### HTTP Hizmetini Duyurma
 
-### Advertising an HTTP Service
-
-To advertise an HTTP service, you can use:
-
+Bir HTTP hizmetini duyurmak için şunu kullanabilirsiniz:
 ```bash
 dns-sd -R "Index" _http._tcp . 80 path=/index.html
 ```
+Bu komut, `/index.html` yolu ile port 80'de "Index" adında bir HTTP hizmeti kaydeder.
 
-This command registers an HTTP service named "Index" on port 80 with a path of `/index.html`.
-
-To then search for HTTP services on the network:
-
+Daha sonra ağda HTTP hizmetlerini aramak için:
 ```bash
 dns-sd -B _http._tcp
 ```
+Bir hizmet başladığında, varlığını alt ağdaki tüm cihazlara çoklu yayın yaparak duyurur. Bu hizmetlerle ilgilenen cihazların istek göndermesine gerek yoktur, sadece bu duyuruları dinlemeleri yeterlidir.
 
-When a service starts, it announces its availability to all devices on the subnet by multicasting its presence. Devices interested in these services don't need to send requests but simply listen for these announcements.
+Daha kullanıcı dostu bir arayüz için, Apple App Store'da bulunan **Discovery - DNS-SD Browser** uygulaması, yerel ağınızdaki sunulan hizmetleri görselleştirebilir.
 
-For a more user-friendly interface, the **Discovery - DNS-SD Browser** app available on the Apple App Store can visualize the services offered on your local network.
-
-Alternatively, custom scripts can be written to browse and discover services using the `python-zeroconf` library. The [**python-zeroconf**](https://github.com/jstasiak/python-zeroconf) script demonstrates creating a service browser for `_http._tcp.local.` services, printing added or removed services:
-
+Alternatif olarak, `python-zeroconf` kütüphanesini kullanarak hizmetleri taramak ve keşfetmek için özel betikler yazılabilir. [**python-zeroconf**](https://github.com/jstasiak/python-zeroconf) betiği, `_http._tcp.local.` hizmetleri için bir hizmet tarayıcısı oluşturmayı gösterir ve eklenen veya kaldırılan hizmetleri yazdırır:
 ```python
 from zeroconf import ServiceBrowser, Zeroconf
 
 class MyListener:
 
-    def remove_service(self, zeroconf, type, name):
-        print("Service %s removed" % (name,))
+def remove_service(self, zeroconf, type, name):
+print("Service %s removed" % (name,))
 
-    def add_service(self, zeroconf, type, name):
-        info = zeroconf.get_service_info(type, name)
-        print("Service %s added, service info: %s" % (name, info))
+def add_service(self, zeroconf, type, name):
+info = zeroconf.get_service_info(type, name)
+print("Service %s added, service info: %s" % (name, info))
 
 zeroconf = Zeroconf()
 listener = MyListener()
 browser = ServiceBrowser(zeroconf, "_http._tcp.local.", listener)
 try:
-    input("Press enter to exit...\n\n")
+input("Press enter to exit...\n\n")
 finally:
-    zeroconf.close()
+zeroconf.close()
 ```
+### Bonjour'u Devre Dışı Bırakma
 
-### Disabling Bonjour
-
-If there are concerns about security or other reasons to disable Bonjour, it can be turned off using the following command:
-
+Eğer güvenlik endişeleri veya Bonjour'u devre dışı bırakmak için başka nedenler varsa, aşağıdaki komut kullanılarak kapatılabilir:
 ```bash
 sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.mDNSResponder.plist
 ```
-
-## References
+## Referanslar
 
 - [**The Mac Hacker's Handbook**](https://www.amazon.com/-/es/Charlie-Miller-ebook-dp-B004U7MUMU/dp/B004U7MUMU/ref=mt_other?_encoding=UTF8&me=&qid=)
 - [**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)

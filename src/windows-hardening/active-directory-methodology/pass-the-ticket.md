@@ -2,17 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Dünyanın **en gelişmiş** topluluk araçlarıyla desteklenen **iş akışlarını** kolayca oluşturmak ve **otomatikleştirmek** için [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=pass-the-ticket) kullanın.\
-Bugün Erişim Alın:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=pass-the-ticket" %}
-
 ## Pass The Ticket (PTT)
 
-**Pass The Ticket (PTT)** saldırı yönteminde, saldırganlar **bir kullanıcının kimlik doğrulama biletini** çalarlar, bunun yerine şifrelerini veya hash değerlerini almazlar. Bu çalınan bilet, **kullanıcıyı taklit etmek** için kullanılır ve bir ağ içindeki kaynaklara ve hizmetlere yetkisiz erişim sağlar.
+**Pass The Ticket (PTT)** saldırı yönteminde, saldırganlar **bir kullanıcının kimlik doğrulama biletini** çalarlar, bunun yerine şifrelerini veya hash değerlerini almazlar. Bu çalınan bilet, **kullanıcının kimliğini taklit etmek** için kullanılır ve bir ağ içindeki kaynaklara ve hizmetlere yetkisiz erişim sağlar.
 
 **Oku**:
 
@@ -47,13 +39,5 @@ klist #List tickets in cache to cehck that mimikatz has loaded the ticket
 ## Referanslar
 
 - [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
-
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Dünyanın **en gelişmiş** topluluk araçlarıyla desteklenen **iş akışlarını** kolayca oluşturmak ve **otomatikleştirmek** için [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=pass-the-ticket) kullanın.\
-Bugün Erişim Alın:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=pass-the-ticket" %}
 
 {{#include ../../banners/hacktricks-training.md}}

