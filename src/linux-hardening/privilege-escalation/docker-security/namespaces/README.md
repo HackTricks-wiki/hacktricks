@@ -1,44 +1,44 @@
-# Namespaces
+# Przestrzenie nazw
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-### **PID namespace**
+### **Przestrzeń nazw PID**
 
 {{#ref}}
 pid-namespace.md
 {{#endref}}
 
-### **Mount namespace**
+### **Przestrzeń nazw montowania**
 
 {{#ref}}
 mount-namespace.md
 {{#endref}}
 
-### **Network namespace**
+### **Przestrzeń nazw sieci**
 
 {{#ref}}
 network-namespace.md
 {{#endref}}
 
-### **IPC Namespace**
+### **Przestrzeń nazw IPC**
 
 {{#ref}}
 ipc-namespace.md
 {{#endref}}
 
-### **UTS namespace**
+### **Przestrzeń nazw UTS**
 
 {{#ref}}
 uts-namespace.md
 {{#endref}}
 
-### Time Namespace
+### Przestrzeń nazw czasu
 
 {{#ref}}
 time-namespace.md
 {{#endref}}
 
-### User namespace
+### Przestrzeń nazw użytkownika
 
 {{#ref}}
 user-namespace.md

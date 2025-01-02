@@ -1,13 +1,12 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-# SELinux in Containers
+# SELinux w kontenerach
 
-[Introduction and example from the redhat docs](https://www.redhat.com/sysadmin/privileged-flag-container-engines)
+[Wprowadzenie i przykład z dokumentacji redhat](https://www.redhat.com/sysadmin/privileged-flag-container-engines)
 
-[SELinux](https://www.redhat.com/en/blog/latest-container-exploit-runc-can-be-blocked-selinux) is a **labeling** **system**. Every **process** and every **file** system object has a **label**. SELinux policies define rules about what a **process label is allowed to do with all of the other labels** on the system.
+[SELinux](https://www.redhat.com/en/blog/latest-container-exploit-runc-can-be-blocked-selinux) to **system etykietowania**. Każdy **proces** i każdy obiekt systemu plików ma swoją **etykietę**. Polityki SELinux definiują zasady dotyczące tego, co **etykieta procesu może robić z innymi etykietami** w systemie.
 
-Container engines launch **container processes with a single confined SELinux label**, usually `container_t`, and then set the container inside of the container to be labeled `container_file_t`. The SELinux policy rules basically say that the **`container_t` processes can only read/write/execute files labeled `container_file_t`**. If a container process escapes the container and attempts to write to content on the host, the Linux kernel denies access and only allows the container process to write to content labeled `container_file_t`.
-
+Silniki kontenerów uruchamiają **procesy kontenerowe z jedną ograniczoną etykietą SELinux**, zazwyczaj `container_t`, a następnie ustawiają etykietę `container_file_t` dla zawartości wewnątrz kontenera. Zasady polityki SELinux zasadniczo mówią, że **procesy `container_t` mogą tylko odczytywać/zapisywać/wykonywać pliki oznaczone etykietą `container_file_t`**. Jeśli proces kontenera ucieknie z kontenera i spróbuje zapisać zawartość na hoście, jądro Linuxa odmawia dostępu i pozwala procesowi kontenera tylko na zapis do zawartości oznaczonej etykietą `container_file_t`.
 ```shell
 $ podman run -d fedora sleep 100
 d4194babf6b877c7100e79de92cd6717166f7302113018686cea650ea40bd7cb
@@ -15,9 +14,8 @@ $ podman top -l label
 LABEL
 system_u:system_r:container_t:s0:c647,c780
 ```
+# Użytkownicy SELinux
 
-# SELinux Users
-
-There are SELinux users in addition to the regular Linux users. SELinux users are part of an SELinux policy. Each Linux user is mapped to a SELinux user as part of the policy. This allows Linux users to inherit the restrictions and security rules and mechanisms placed on SELinux users.
+Istnieją użytkownicy SELinux oprócz zwykłych użytkowników Linuxa. Użytkownicy SELinux są częścią polityki SELinux. Każdy użytkownik Linuxa jest mapowany na użytkownika SELinux jako część polityki. Umożliwia to użytkownikom Linuxa dziedziczenie ograniczeń oraz zasad i mechanizmów bezpieczeństwa nałożonych na użytkowników SELinux.
 
 {{#include ../../banners/hacktricks-training.md}}

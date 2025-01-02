@@ -26,7 +26,7 @@ Możliwe jest **umieszczenie okna nad monitorem TCC**, aby użytkownik **zaakcep
 
 ### Żądanie TCC przez dowolną nazwę
 
-Napastnik może **tworzyć aplikacje o dowolnej nazwie** (np. Finder, Google Chrome...) w **`Info.plist`** i sprawić, aby żądała dostępu do chronionej lokalizacji TCC. Użytkownik pomyśli, że to legalna aplikacja żąda tego dostępu.\
+Napastnik może **tworzyć aplikacje z dowolną nazwą** (np. Finder, Google Chrome...) w **`Info.plist`** i sprawić, że będzie żądać dostępu do chronionej lokalizacji TCC. Użytkownik pomyśli, że to legalna aplikacja żąda tego dostępu.\
 Co więcej, możliwe jest **usunięcie legalnej aplikacji z Docka i umieszczenie na nim fałszywej**, więc gdy użytkownik kliknie na fałszywą (która może używać tego samego ikony), może wywołać legalną, poprosić o uprawnienia TCC i uruchomić złośliwe oprogramowanie, sprawiając, że użytkownik uwierzy, że to legalna aplikacja żądała dostępu.
 
 <figure><img src="https://lh7-us.googleusercontent.com/Sh-Z9qekS_fgIqnhPVSvBRmGpCXCpyuVuTw0x5DLAIxc2MZsSlzBOP7QFeGo_fjMeCJJBNh82f7RnewW1aWo8r--JEx9Pp29S17zdDmiyGgps1hH9AGR8v240m5jJM8k0hovp7lm8ZOrbzv-RC8NwzbB8w=s2048" alt="" width="375"><figcaption></figcaption></figure>
@@ -153,27 +153,27 @@ Notatki miały dostęp do lokalizacji chronionych przez TCC, ale gdy notatka jes
 
 Binarne `/usr/libexec/lsd` z biblioteką `libsecurity_translocate` miało uprawnienie `com.apple.private.nullfs_allow`, co pozwalało na utworzenie **nullfs** montażu i miało uprawnienie `com.apple.private.tcc.allow` z **`kTCCServiceSystemPolicyAllFiles`**, aby uzyskać dostęp do każdego pliku.
 
-Można było dodać atrybut kwarantanny do "Biblioteki", wywołać usługę XPC **`com.apple.security.translocation`**, a następnie mapować Bibliotekę do **`$TMPDIR/AppTranslocation/d/d/Library`**, gdzie wszystkie dokumenty w Bibliotece mogły być **dostępne**.
+Można było dodać atrybut kwarantanny do "Biblioteki", wywołać usługę XPC **`com.apple.security.translocation`** i wtedy mapowałoby Bibliotekę na **`$TMPDIR/AppTranslocation/d/d/Library`**, gdzie wszystkie dokumenty w Bibliotece mogły być **dostępne**.
 
 ### CVE-2023-38571 - Muzyka i TV <a href="#cve-2023-38571-a-macos-tcc-bypass-in-music-and-tv" id="cve-2023-38571-a-macos-tcc-bypass-in-music-and-tv"></a>
 
 **`Muzyka`** ma interesującą funkcję: Gdy jest uruchomiona, **importuje** pliki wrzucone do **`~/Music/Music/Media.localized/Automatically Add to Music.localized`** do "biblioteki multimedialnej" użytkownika. Ponadto wywołuje coś takiego jak: **`rename(a, b);`**, gdzie `a` i `b` to:
 
 - `a = "~/Music/Music/Media.localized/Automatically Add to Music.localized/myfile.mp3"`
-- `b = "~/Music/Music/Media.localized/Automatically Add to Music.localized/Not Added.localized/2023-09-25 11.06.28/myfile.mp3"`
+- `b = "~/Music/Music/Media.localized/Automatically Add to Music.localized/Not Added.localized/2023-09-25 11.06.28/myfile.mp3`
 
 To **`rename(a, b);`** zachowanie jest podatne na **Race Condition**, ponieważ możliwe jest umieszczenie w folderze `Automatically Add to Music.localized` fałszywego pliku **TCC.db**, a następnie, gdy nowy folder (b) jest tworzony, skopiowanie pliku, usunięcie go i skierowanie go do **`~/Library/Application Support/com.apple.TCC`**/.
 
 ### SQLITE_SQLLOG_DIR - CVE-2023-32422
 
-Jeśli **`SQLITE_SQLLOG_DIR="path/folder"`**, oznacza to zasadniczo, że **każda otwarta baza danych jest kopiowana do tej ścieżki**. W tym CVE kontrola ta została nadużyta do **zapisu** wewnątrz **bazy danych SQLite**, która ma być **otwarta przez proces z FDA bazą danych TCC**, a następnie nadużycie **`SQLITE_SQLLOG_DIR`** z **symlinkiem w nazwie pliku**, tak że gdy ta baza danych jest **otwarta**, użytkownik **TCC.db jest nadpisywany** otwartą.\
+Jeśli **`SQLITE_SQLLOG_DIR="path/folder"`**, oznacza to zasadniczo, że **każda otwarta baza danych jest kopiowana do tej ścieżki**. W tym CVE kontrola ta została nadużyta do **zapisu** wewnątrz **bazy danych SQLite**, która ma być **otwarta przez proces z FDA bazą danych TCC**, a następnie nadużycie **`SQLITE_SQLLOG_DIR`** z **symlinkiem w nazwie pliku**, aby gdy ta baza danych jest **otwarta**, użytkownik **TCC.db jest nadpisywany** otwartą.\
 **Więcej informacji** [**w opisie**](https://gergelykalman.com/sqlol-CVE-2023-32422-a-macos-tcc-bypass.html) **i**[ **w prezentacji**](https://www.youtube.com/watch?v=f1HA5QhLQ7Y&t=20548s).
 
 ### **SQLITE_AUTO_TRACE**
 
-Jeśli zmienna środowiskowa **`SQLITE_AUTO_TRACE`** jest ustawiona, biblioteka **`libsqlite3.dylib`** zacznie **rejestrować** wszystkie zapytania SQL. Wiele aplikacji używało tej biblioteki, więc możliwe było rejestrowanie wszystkich ich zapytań SQLite.
+Jeśli zmienna środowiskowa **`SQLITE_AUTO_TRACE`** jest ustawiona, biblioteka **`libsqlite3.dylib`** zacznie **rejestrować** wszystkie zapytania SQL. Wiele aplikacji korzystało z tej biblioteki, więc możliwe było rejestrowanie wszystkich ich zapytań SQLite.
 
-Kilka aplikacji Apple używało tej biblioteki do uzyskiwania dostępu do informacji chronionych przez TCC.
+Kilka aplikacji Apple korzystało z tej biblioteki, aby uzyskać dostęp do informacji chronionych przez TCC.
 ```bash
 # Set this env variable everywhere
 launchctl setenv SQLITE_AUTO_TRACE 1
@@ -184,7 +184,7 @@ Ta **zmienna środowiskowa jest używana przez framework `Metal`**, który jest 
 
 Ustawiając następujące: `MTL_DUMP_PIPELINES_TO_JSON_FILE="path/name"`. Jeśli `path` jest ważnym katalogiem, błąd zostanie wywołany i możemy użyć `fs_usage`, aby zobaczyć, co się dzieje w programie:
 
-- plik zostanie `open()`ed, nazwany `path/.dat.nosyncXXXX.XXXXXX` (X jest losowe)
+- plik zostanie `open()`ed, nazwany `path/.dat.nosyncXXXX.XXXXXX` (X jest losowy)
 - jeden lub więcej `write()` zapisze zawartość do pliku (nie kontrolujemy tego)
 - `path/.dat.nosyncXXXX.XXXXXX` zostanie `renamed()`d na `path/name`
 
@@ -193,7 +193,7 @@ To jest tymczasowe zapisanie pliku, po którym następuje **`rename(old, new)`**
 Nie jest to bezpieczne, ponieważ musi **rozwiązać stare i nowe ścieżki osobno**, co może zająć trochę czasu i może być podatne na warunki wyścigu. Więcej informacji można znaleźć w funkcji `xnu` `renameat_internal()`.
 
 > [!CAUTION]
-> Więc, zasadniczo, jeśli proces z uprawnieniami zmienia nazwę z folderu, który kontrolujesz, możesz uzyskać RCE i sprawić, że uzyska dostęp do innego pliku lub, jak w tym CVE, otworzyć plik, który utworzył aplikacja z uprawnieniami i przechować FD.
+> Więc, zasadniczo, jeśli proces z uprawnieniami zmienia nazwę z folderu, który kontrolujesz, możesz uzyskać RCE i sprawić, że uzyska dostęp do innego pliku lub, jak w tym CVE, otworzyć plik utworzony przez aplikację z uprawnieniami i przechować FD.
 >
 > Jeśli zmiana nazwy uzyskuje dostęp do folderu, który kontrolujesz, podczas gdy zmodyfikowałeś plik źródłowy lub masz do niego FD, zmieniasz plik docelowy (lub folder), aby wskazywał na symlink, więc możesz pisać, kiedy chcesz.
 
@@ -203,10 +203,10 @@ To był atak w tym CVE: Na przykład, aby nadpisać `TCC.db` użytkownika, może
 - utworzyć katalog `/Users/hacker/tmp/`
 - ustawić `MTL_DUMP_PIPELINES_TO_JSON_FILE=/Users/hacker/tmp/TCC.db`
 - wywołać błąd, uruchamiając `Music` z tą zmienną środowiskową
-- przechwycić `open()` `/Users/hacker/tmp/.dat.nosyncXXXX.XXXXXX` (X jest losowe)
+- przechwycić `open()` `/Users/hacker/tmp/.dat.nosyncXXXX.XXXXXX` (X jest losowy)
 - tutaj również `open()` ten plik do zapisu i trzymamy uchwyt do deskryptora pliku
 - atomowo zamienić `/Users/hacker/tmp` z `/Users/hacker/ourlink` **w pętli**
-- robimy to, aby zmaksymalizować nasze szanse na sukces, ponieważ okno wyścigu jest dość wąskie, ale przegrana w wyścigu ma znikome negatywne skutki
+- robimy to, aby zmaksymalizować nasze szanse na sukces, ponieważ okno wyścigu jest dość wąskie, ale przegranie wyścigu ma znikome negatywne skutki
 - poczekać chwilę
 - sprawdzić, czy mieliśmy szczęście
 - jeśli nie, uruchomić ponownie od początku
@@ -336,7 +336,7 @@ Executable=/Applications/Firefox.app/Contents/MacOS/firefox
 </dict>
 </plist>
 ```
-Dla uzyskania dodatkowych informacji na temat łatwego wykorzystania tego [**sprawdź oryginalny raport**](https://wojciechregula.blog/post/how-to-rob-a-firefox/).
+Aby uzyskać więcej informacji na temat łatwego wykorzystania tego [**sprawdź oryginalny raport**](https://wojciechregula.blog/post/how-to-rob-a-firefox/).
 
 ### CVE-2020-10006
 
@@ -378,11 +378,11 @@ launchctl load com.telegram.launcher.plist
 ```
 ## Poprzez otwarte wywołania
 
-Możliwe jest wywołanie **`open`** nawet w trybie sandbox.
+Możliwe jest wywołanie **`open`** nawet w trybie piaskownicy
 
 ### Skrypty terminala
 
-Jest to dość powszechne, aby przyznać terminalowi **Pełny dostęp do dysku (FDA)**, przynajmniej na komputerach używanych przez osoby z branży technologicznej. I możliwe jest wywołanie skryptów **`.terminal`** z jego użyciem.
+Jest to dość powszechne, aby przyznać terminalowi **Pełny dostęp do dysku (FDA)**, przynajmniej w komputerach używanych przez osoby techniczne. I możliwe jest wywołanie skryptów **`.terminal`** z jego użyciem.
 
 Skrypty **`.terminal`** to pliki plist, takie jak ten, z poleceniem do wykonania w kluczu **`CommandString`**:
 ```xml
@@ -442,7 +442,7 @@ Bardziej szczegółowe wyjaśnienie można [**znaleźć w oryginalnym raporcie**
 
 ### CVE-2021-1784 & CVE-2021-30808 - Montowanie nad plikiem TCC
 
-Nawet jeśli plik bazy danych TCC jest chroniony, możliwe było **zamontowanie nowego pliku TCC.db nad katalogiem**:
+Nawet jeśli plik bazy danych TCC jest chroniony, możliwe było **zamontowanie nowego pliku TCC.db** w tym katalogu:
 ```bash
 # CVE-2021-1784
 ## Mount over Library/Application\ Support/com.apple.TCC
@@ -465,6 +465,14 @@ os.system("hdiutil detach /tmp/mnt 1>/dev/null")
 ```
 Sprawdź **pełny exploit** w [**oryginalnym opisie**](https://theevilbit.github.io/posts/cve-2021-30808/).
 
+### CVE-2024-40855
+
+Jak wyjaśniono w [oryginalnym opisie](https://www.kandji.io/blog/macos-audit-story-part2), ten CVE wykorzystał `diskarbitrationd`.
+
+Funkcja `DADiskMountWithArgumentsCommon` z publicznego frameworka `DiskArbitration` przeprowadzała kontrole bezpieczeństwa. Jednak możliwe jest jej obejście poprzez bezpośrednie wywołanie `diskarbitrationd`, a tym samym użycie elementów `../` w ścieżce i symlinków.
+
+To pozwoliło atakującemu na wykonywanie dowolnych montażów w dowolnej lokalizacji, w tym nad bazą danych TCC z powodu uprawnienia `com.apple.private.security.storage-exempt.heritable` `diskarbitrationd`.
+
 ### asr
 
 Narzędzie **`/usr/sbin/asr`** pozwalało na skopiowanie całego dysku i zamontowanie go w innym miejscu, omijając zabezpieczenia TCC.
@@ -474,13 +482,13 @@ Narzędzie **`/usr/sbin/asr`** pozwalało na skopiowanie całego dysku i zamonto
 Istnieje trzecia baza danych TCC w **`/var/db/locationd/clients.plist`**, aby wskazać klientów, którzy mają **dostęp do usług lokalizacyjnych**.\
 Folder **`/var/db/locationd/` nie był chroniony przed montowaniem DMG**, więc możliwe było zamontowanie naszego własnego plist.
 
-## Przez aplikacje uruchamiane przy starcie
+## Poprzez aplikacje uruchamiane przy starcie
 
 {{#ref}}
 ../../../../macos-auto-start-locations.md
 {{#endref}}
 
-## Przez grep
+## Poprzez grep
 
 W kilku przypadkach pliki będą przechowywać wrażliwe informacje, takie jak e-maile, numery telefonów, wiadomości... w niechronionych lokalizacjach (co liczy się jako luka w Apple).
 

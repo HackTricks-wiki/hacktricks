@@ -2,22 +2,14 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="/images/pentest-tools.svg" alt=""><figcaption></figcaption></figure>
-
-**Uzyskaj perspektywę hakera na swoje aplikacje internetowe, sieć i chmurę**
-
-**Znajdź i zgłoś krytyczne, podatne na ataki luki z rzeczywistym wpływem na biznes.** Użyj naszych 20+ niestandardowych narzędzi, aby zmapować powierzchnię ataku, znaleźć problemy z bezpieczeństwem, które pozwalają na eskalację uprawnień, oraz użyj zautomatyzowanych exploitów do zbierania niezbędnych dowodów, przekształcając swoją ciężką pracę w przekonujące raporty.
-
-{% embed url="https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons" %}
-
 ## Jak to działa
 
 **Smbexec** to narzędzie używane do zdalnego wykonywania poleceń na systemach Windows, podobne do **Psexec**, ale unika umieszczania jakichkolwiek złośliwych plików na docelowym systemie.
 
 ### Kluczowe punkty dotyczące **SMBExec**
 
-- Działa poprzez tworzenie tymczasowej usługi (na przykład "BTOBTO") na docelowej maszynie w celu wykonywania poleceń za pomocą cmd.exe (%COMSPEC%), bez zrzucania jakichkolwiek binarnych plików.
-- Pomimo swojego dyskretnego podejścia, generuje logi zdarzeń dla każdego wykonanego polecenia, oferując formę nieinteraktywnego "shella".
+- Działa poprzez tworzenie tymczasowej usługi (na przykład "BTOBTO") na docelowej maszynie, aby wykonywać polecenia za pomocą cmd.exe (%COMSPEC%), bez zrzucania jakichkolwiek binarnych plików.
+- Pomimo swojego dyskretnego podejścia, generuje dzienniki zdarzeń dla każdego wykonanego polecenia, oferując formę nieinteraktywnego "shella".
 - Polecenie do połączenia za pomocą **Smbexec** wygląda tak:
 ```bash
 smbexec.py WORKGROUP/genericuser:genericpassword@10.10.10.10
@@ -25,7 +17,7 @@ smbexec.py WORKGROUP/genericuser:genericpassword@10.10.10.10
 ### Wykonywanie poleceń bez binariów
 
 - **Smbexec** umożliwia bezpośrednie wykonywanie poleceń za pomocą binPaths usługi, eliminując potrzebę fizycznych binariów na docelowym systemie.
-- Metoda ta jest przydatna do wykonywania jednorazowych poleceń na docelowym systemie Windows. Na przykład, połączenie jej z modułem `web_delivery` Metasploit pozwala na wykonanie odwrotnego ładunku Meterpreter skierowanego na PowerShell.
+- Metoda ta jest przydatna do wykonywania jednorazowych poleceń na docelowym systemie Windows. Na przykład, połączenie jej z modułem `web_delivery` Metasploit pozwala na wykonanie ładunku odwrotnego Meterpreter skierowanego na PowerShell.
 - Tworząc zdalną usługę na maszynie atakującego z binPath ustawionym na uruchomienie podanego polecenia przez cmd.exe, możliwe jest pomyślne wykonanie ładunku, osiągając callback i wykonanie ładunku z nasłuchiwaczem Metasploit, nawet jeśli wystąpią błędy odpowiedzi usługi.
 
 ### Przykład poleceń
@@ -41,12 +33,5 @@ Aby uzyskać więcej szczegółów, sprawdź [https://blog.ropnop.com/using-cred
 
 - [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
 
-<figure><img src="/images/pentest-tools.svg" alt=""><figcaption></figcaption></figure>
-
-**Uzyskaj perspektywę hakera na swoje aplikacje internetowe, sieć i chmurę**
-
-**Znajdź i zgłoś krytyczne, podatne na wykorzystanie luki, które mają rzeczywisty wpływ na biznes.** Użyj naszych 20+ niestandardowych narzędzi do mapowania powierzchni ataku, znajdowania problemów z bezpieczeństwem, które pozwalają na eskalację uprawnień, oraz użyj zautomatyzowanych exploitów do zbierania niezbędnych dowodów, przekształcając swoją ciężką pracę w przekonujące raporty.
-
-{% embed url="https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons" %}
 
 {{#include ../../banners/hacktricks-training.md}}

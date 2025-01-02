@@ -20,7 +20,7 @@ Uprawnienia w **katalogu**:
 - Jeden rodzic **właściciel katalogu** w ścieżce to **grupa użytkowników** z **dostępem do zapisu**
 - Grupa użytkowników ma **dostęp do zapisu** do **pliku**
 
-Przy dowolnej z powyższych kombinacji, atakujący mógłby **wstrzyknąć** **link symboliczny/twardy** w oczekiwanej ścieżce, aby uzyskać uprzywilejowany, dowolny zapis.
+Przy dowolnej z powyższych kombinacji, atakujący mógłby **wstrzyknąć** **link symboliczny/twardy** do oczekiwanej ścieżki, aby uzyskać uprzywilejowany, dowolny zapis.
 
 ### Folder root R+X Specjalny przypadek
 
@@ -30,9 +30,15 @@ Przykład w: [https://theevilbit.github.io/posts/exploiting_directory_permission
 
 ## Link symboliczny / Link twardy
 
+### Umożliwiony plik/folder
+
 Jeśli uprzywilejowany proces zapisuje dane w **pliku**, który mógłby być **kontrolowany** przez **użytkownika o niższych uprawnieniach**, lub który mógłby być **wcześniej utworzony** przez użytkownika o niższych uprawnieniach. Użytkownik mógłby po prostu **wskazać go na inny plik** za pomocą linku symbolicznego lub twardego, a uprzywilejowany proces zapisze w tym pliku.
 
 Sprawdź w innych sekcjach, gdzie atakujący mógłby **wykorzystać dowolny zapis do eskalacji uprawnień**.
+
+### Otwórz `O_NOFOLLOW`
+
+Flaga `O_NOFOLLOW` używana przez funkcję `open` nie będzie podążać za linkiem symbolicznym w ostatnim komponencie ścieżki, ale będzie podążać za resztą ścieżki. Prawidłowy sposób zapobiegania podążaniu za linkami symbolicznymi w ścieżce to użycie flagi `O_NOFOLLOW_ANY`.
 
 ## .fileloc
 
@@ -50,15 +56,19 @@ Przykład:
 </dict>
 </plist>
 ```
-## Arbitrary FD
+## Deskryptory plików
 
-Jeśli możesz sprawić, że **proces otworzy plik lub folder z wysokimi uprawnieniami**, możesz nadużyć **`crontab`**, aby otworzyć plik w `/etc/sudoers.d` z **`EDITOR=exploit.py`**, dzięki czemu `exploit.py` uzyska FD do pliku w `/etc/sudoers` i go nadużyje.
+### Wycieki FD (brak `O_CLOEXEC`)
 
-Na przykład: [https://youtu.be/f1HA5QhLQ7Y?t=21098](https://youtu.be/f1HA5QhLQ7Y?t=21098)
+Jeśli wywołanie `open` nie ma flagi `O_CLOEXEC`, deskryptor pliku zostanie odziedziczony przez proces potomny. Tak więc, jeśli proces z uprawnieniami otworzy plik z uprawnieniami i wykona proces kontrolowany przez atakującego, atakujący **odziedziczy FD do pliku z uprawnieniami**.
 
-## Avoid quarantine xattrs tricks
+Jeśli możesz sprawić, aby **proces otworzył plik lub folder z wysokimi uprawnieniami**, możesz nadużyć **`crontab`**, aby otworzyć plik w `/etc/sudoers.d` z **`EDITOR=exploit.py`**, dzięki czemu `exploit.py` uzyska FD do pliku w `/etc/sudoers` i go nadużyje.
 
-### Remove it
+Na przykład: [https://youtu.be/f1HA5QhLQ7Y?t=21098](https://youtu.be/f1HA5QhLQ7Y?t=21098), kod: https://github.com/gergelykalman/CVE-2023-32428-a-macOS-LPE-via-MallocStackLogging
+
+## Unikaj sztuczek z xattrs kwarantanny
+
+### Usuń to
 ```bash
 xattr -d com.apple.quarantine /path/to/file_or_app
 ```
@@ -142,7 +152,28 @@ Nie jest to naprawdę potrzebne, ale zostawiam to na wszelki wypadek:
 macos-xattr-acls-extra-stuff.md
 {{#endref}}
 
-## Ominięcie Podpisów Kodu
+## Ominięcie kontroli podpisów
+
+### Ominięcie kontroli binarnych platform
+
+Niektóre kontrole bezpieczeństwa sprawdzają, czy binarny plik jest **binarnym plikiem platformy**, na przykład, aby umożliwić połączenie z usługą XPC. Jednak, jak pokazano w omijaniu w https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/, możliwe jest ominięcie tej kontroli, uzyskując binarny plik platformy (tak jak /bin/ls) i wstrzykując exploit za pomocą dyld, używając zmiennej środowiskowej `DYLD_INSERT_LIBRARIES`.
+
+### Ominięcie flag `CS_REQUIRE_LV` i `CS_FORCED_LV`
+
+Możliwe jest, aby wykonywany binarny plik zmodyfikował swoje własne flagi, aby ominąć kontrole za pomocą kodu takiego jak:
+```c
+// Code from https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/
+int pid = getpid();
+NSString *exePath = NSProcessInfo.processInfo.arguments[0];
+
+uint32_t status = SecTaskGetCodeSignStatus(SecTaskCreateFromSelf(0));
+status |= 0x2000; // CS_REQUIRE_LV
+csops(pid, 9, &status, 4); // CS_OPS_SET_STATUS
+
+status = SecTaskGetCodeSignStatus(SecTaskCreateFromSelf(0));
+NSLog(@"=====Inject successfully into %d(%@), csflags=0x%x", pid, exePath, status);
+```
+## Ominięcie Podpisów Kodów
 
 Bundles zawierają plik **`_CodeSignature/CodeResources`**, który zawiera **hash** każdego pojedynczego **pliku** w **bundle**. Należy zauważyć, że hash CodeResources jest również **osadzony w wykonywalnym**, więc nie możemy tego zepsuć.
 
@@ -230,7 +261,7 @@ Możesz **sfałszować** wykonanie tego skryptu za pomocą: **`sudo periodic dai
 
 ### Demony
 
-Napisz dowolny **LaunchDaemon** jak **`/Library/LaunchDaemons/xyz.hacktricks.privesc.plist`** z plikiem plist wykonującym dowolny skrypt jak:
+Napisz dowolny **LaunchDaemon** jak **`/Library/LaunchDaemons/xyz.hacktricks.privesc.plist`** z plist wykonującym dowolny skrypt jak:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -247,21 +278,41 @@ Napisz dowolny **LaunchDaemon** jak **`/Library/LaunchDaemons/xyz.hacktricks.pri
 </dict>
 </plist>
 ```
-Wygeneruj skrypt `/Applications/Scripts/privesc.sh` z **komendami**, które chciałbyś uruchomić jako root.
+Just generate the script `/Applications/Scripts/privesc.sh` with the **commands** you would like to run as root.
 
-### Plik Sudoers
+### Sudoers File
 
-Jeśli masz **dowolny zapis**, możesz utworzyć plik w folderze **`/etc/sudoers.d/`**, przyznając sobie **uprawnienia sudo**.
+If you have **arbitrary write**, you could create a file inside the folder **`/etc/sudoers.d/`** granting yourself **sudo** privileges.
 
-### Pliki PATH
+### PATH files
 
-Plik **`/etc/paths`** jest jednym z głównych miejsc, które wypełniają zmienną środowiskową PATH. Musisz być root, aby go nadpisać, ale jeśli skrypt z **uprzywilejowanego procesu** wykonuje jakąś **komendę bez pełnej ścieżki**, możesz być w stanie **przejąć** ją, modyfikując ten plik.
+The file **`/etc/paths`** is one of the main places that populates the PATH env variable. You must be root to overwrite it, but if a script from **privileged process** is executing some **command without the full path**, you might be able to **hijack** it modifying this file.
 
-Możesz również pisać pliki w **`/etc/paths.d`**, aby załadować nowe foldery do zmiennej środowiskowej `PATH`.
+You can also write files in **`/etc/paths.d`** to load new folders into the `PATH` env variable.
 
-## Generowanie plików zapisywalnych jako inni użytkownicy
+### cups-files.conf
 
-To wygeneruje plik, który należy do roota i jest zapisywalny przez mnie ([**kod stąd**](https://github.com/gergelykalman/brew-lpe-via-periodic/blob/main/brew_lpe.sh)). To może również działać jako privesc:
+Ta technika została użyta w [this writeup](https://www.kandji.io/blog/macos-audit-story-part1).
+
+Create the file `/etc/cups/cups-files.conf` with the following content:
+```
+ErrorLog /etc/sudoers.d/lpe
+LogFilePerm 777
+<some junk>
+```
+To utworzy plik `/etc/sudoers.d/lpe` z uprawnieniami 777. Dodatkowy śmieć na końcu służy do wywołania utworzenia logu błędów.
+
+Następnie, zapisz w `/etc/sudoers.d/lpe` potrzebną konfigurację do eskalacji uprawnień, taką jak `%staff ALL=(ALL) NOPASSWD:ALL`.
+
+Następnie, zmodyfikuj plik `/etc/cups/cups-files.conf`, ponownie wskazując `LogFilePerm 700`, aby nowy plik sudoers stał się ważny, wywołując `cupsctl`.
+
+### Sandbox Escape
+
+Możliwe jest ucieczka z sandboxa macOS za pomocą FS arbitrary write. Dla niektórych przykładów sprawdź stronę [macOS Auto Start](../../../../macos-auto-start-locations.md), ale powszechnym przypadkiem jest zapisanie pliku preferencji Terminala w `~/Library/Preferences/com.apple.Terminal.plist`, który wykonuje polecenie przy starcie i wywołuje je za pomocą `open`.
+
+## Generate writable files as other users
+
+To wygeneruje plik, który należy do roota, a który jest zapisywalny przeze mnie ([**code from here**](https://github.com/gergelykalman/brew-lpe-via-periodic/blob/main/brew_lpe.sh)). To może również działać jako privesc:
 ```bash
 DIRNAME=/usr/local/etc/periodic/daily
 

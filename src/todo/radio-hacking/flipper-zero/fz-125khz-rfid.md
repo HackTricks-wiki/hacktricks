@@ -2,11 +2,8 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
 
-{% embed url="https://websec.nl/" %}
-
-## Intro
+## Wstęp
 
 Aby uzyskać więcej informacji na temat działania tagów 125kHz, sprawdź:
 
@@ -14,22 +11,22 @@ Aby uzyskać więcej informacji na temat działania tagów 125kHz, sprawdź:
 ../pentesting-rfid.md
 {{#endref}}
 
-## Actions
+## Akcje
 
 Aby uzyskać więcej informacji na temat tych typów tagów [**przeczytaj to wprowadzenie**](../pentesting-rfid.md#low-frequency-rfid-tags-125khz).
 
-### Read
+### Odczyt
 
 Próbuje **odczytać** informacje z karty. Następnie może ją **emulować**.
 
 > [!WARNING]
 > Zauważ, że niektóre domofony próbują chronić się przed duplikowaniem kluczy, wysyłając polecenie zapisu przed odczytem. Jeśli zapis się powiedzie, ten tag jest uważany za fałszywy. Gdy Flipper emuluje RFID, nie ma sposobu, aby czytnik odróżnił go od oryginału, więc takie problemy nie występują.
 
-### Add Manually
+### Dodaj ręcznie
 
 Możesz stworzyć **fałszywe karty w Flipper Zero, wskazując dane** ręcznie, a następnie je emulować.
 
-#### IDs on cards
+#### ID na kartach
 
 Czasami, gdy otrzymasz kartę, znajdziesz ID (lub jego część) napisane na widocznej stronie karty.
 
@@ -46,16 +43,13 @@ To samo dzieje się w tej karcie HID, gdzie tylko 2 z 3 bajtów można znaleźć
 
 <figure><img src="../../../images/image (1014).png" alt=""><figcaption></figcaption></figure>
 
-### Emulate/Write
+### Emuluj/Zapisz
 
-Po **skopiowaniu** karty lub **ręcznym wprowadzeniu** ID, możliwe jest **emulowanie** jej za pomocą Flipper Zero lub **zapisanie** jej na prawdziwej karcie.
+Po **skopiowaniu** karty lub **wprowadzeniu** ID **ręcznie** można ją **emulować** za pomocą Flipper Zero lub **zapisać** na prawdziwej karcie.
 
-## References
+## Odniesienia
 
 - [https://blog.flipperzero.one/rfid/](https://blog.flipperzero.one/rfid/)
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../../../banners/hacktricks-training.md}}

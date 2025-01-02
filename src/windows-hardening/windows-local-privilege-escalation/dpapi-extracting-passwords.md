@@ -2,15 +2,11 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
 
-​​[**RootedCON**](https://www.rootedcon.com/) to najważniejsze wydarzenie związane z cyberbezpieczeństwem w **Hiszpanii** i jedno z najważniejszych w **Europie**. Z **misją promowania wiedzy technicznej**, kongres ten jest gorącym punktem spotkań dla profesjonalistów z dziedziny technologii i cyberbezpieczeństwa w każdej dyscyplinie.
-
-{% embed url="https://www.rootedcon.com/" %}
 
 ## Czym jest DPAPI
 
-Data Protection API (DPAPI) jest głównie wykorzystywane w systemie operacyjnym Windows do **symmetric encryption of asymmetric private keys**, wykorzystując tajemnice użytkownika lub systemu jako istotne źródło entropii. Takie podejście upraszcza szyfrowanie dla programistów, umożliwiając im szyfrowanie danych za pomocą klucza pochodzącego z tajemnic logowania użytkownika lub, w przypadku szyfrowania systemowego, tajemnic uwierzytelniania domeny systemu, eliminując w ten sposób potrzebę zarządzania ochroną klucza szyfrującego przez programistów.
+Data Protection API (DPAPI) jest głównie wykorzystywane w systemie operacyjnym Windows do **symmetric encryption of asymmetric private keys**, wykorzystując tajemnice użytkownika lub systemu jako istotne źródło entropii. To podejście upraszcza szyfrowanie dla programistów, umożliwiając im szyfrowanie danych za pomocą klucza pochodzącego z tajemnic logowania użytkownika lub, w przypadku szyfrowania systemowego, tajemnic uwierzytelniania domeny systemu, eliminując w ten sposób potrzebę zarządzania ochroną klucza szyfrującego przez programistów.
 
 ### Chronione dane przez DPAPI
 
@@ -32,7 +28,7 @@ mimikatz vault::list
 ```
 ## Pliki poświadczeń
 
-Pliki **poświadczeń chronione** mogą znajdować się w:
+Pliki **poświadczeń chronionych** mogą znajdować się w:
 ```
 dir /a:h C:\Users\username\AppData\Local\Microsoft\Credentials\
 dir /a:h C:\Users\username\AppData\Roaming\Microsoft\Credentials\
@@ -68,7 +64,7 @@ To, jak wygląda zestaw kluczy głównych użytkownika:
 
 ![](<../../images/image (1121).png>)
 
-Zazwyczaj **każdy klucz główny to zaszyfrowany klucz symetryczny, który może odszyfrować inne treści**. Dlatego **wyodrębnienie** **zaszyfrowanego klucza głównego** jest interesujące, aby **odszyfrować** później **inne treści** zaszyfrowane tym kluczem.
+Zazwyczaj **każdy klucz główny to zaszyfrowany klucz symetryczny, który może odszyfrować inne treści**. Dlatego **wyodrębnienie** **zaszyfrowanego klucza głównego** jest interesujące, aby później **odszyfrować** **inne treści** zaszyfrowane tym kluczem.
 
 ### Wyodrębnij klucz główny i odszyfruj
 
@@ -80,27 +76,21 @@ Sprawdź post [https://www.ired.team/offensive-security/credential-access-and-cr
 
 ## HEKATOMB
 
-[**HEKATOMB**](https://github.com/Processus-Thief/HEKATOMB) to narzędzie, które automatyzuje wyodrębnianie wszystkich użytkowników i komputerów z katalogu LDAP oraz wyodrębnianie klucza zapasowego kontrolera domeny przez RPC. Skrypt następnie rozwiąże adresy IP wszystkich komputerów i wykona smbclient na wszystkich komputerach, aby odzyskać wszystkie obiekty DPAPI wszystkich użytkowników i odszyfrować wszystko za pomocą klucza zapasowego domeny.
+[**HEKATOMB**](https://github.com/Processus-Thief/HEKATOMB) to narzędzie, które automatyzuje wyodrębnianie wszystkich użytkowników i komputerów z katalogu LDAP oraz wyodrębnianie klucza zapasowego kontrolera domeny przez RPC. Skrypt następnie rozwiąże wszystkie adresy IP komputerów i wykona smbclient na wszystkich komputerach, aby odzyskać wszystkie obiekty DPAPI wszystkich użytkowników i odszyfrować wszystko za pomocą klucza zapasowego domeny.
 
 `python3 hekatomb.py -hashes :ed0052e5a66b1c8e942cc9481a50d56 DOMAIN.local/administrator@10.0.0.1 -debug -dnstcp`
 
-Z listy komputerów wyodrębnionych z LDAP możesz znaleźć każdą podsieć, nawet jeśli ich nie znałeś!
+Z wyodrębnioną listą komputerów z LDAP możesz znaleźć każdą podsieć, nawet jeśli ich nie znałeś!
 
 "Ponieważ prawa administratora domeny to za mało. Hakeruj je wszystkie."
 
 ## DonPAPI
 
-[**DonPAPI**](https://github.com/login-securite/DonPAPI) może automatycznie wyodrębniać sekrety chronione przez DPAPI.
+[**DonPAPI**](https://github.com/login-securite/DonPAPI) może automatycznie zrzucać sekrety chronione przez DPAPI.
 
 ## Referencje
 
 - [https://www.passcape.com/index.php?section=docsys\&cmd=details\&id=28#13](https://www.passcape.com/index.php?section=docsys&cmd=details&id=28#13)
 - [https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++](https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#using-dpapis-to-encrypt-decrypt-data-in-c)
-
-<figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
-
-[**RootedCON**](https://www.rootedcon.com/) to najważniejsze wydarzenie związane z cyberbezpieczeństwem w **Hiszpanii** i jedno z najważniejszych w **Europie**. Z **misją promowania wiedzy technicznej**, ten kongres jest gorącym punktem spotkań dla profesjonalistów technologii i cyberbezpieczeństwa w każdej dziedzinie.
-
-{% embed url="https://www.rootedcon.com/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

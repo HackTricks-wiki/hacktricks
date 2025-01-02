@@ -2,21 +2,14 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-Użyj [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks), aby łatwo budować i **automatyzować przepływy pracy** zasilane przez **najbardziej zaawansowane** narzędzia społecznościowe.\
-Uzyskaj dostęp już dziś:
-
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
-
 ## Polityka AppLocker
 
-Biała lista aplikacji to lista zatwierdzonych aplikacji lub plików wykonywalnych, które mogą być obecne i uruchamiane w systemie. Celem jest ochrona środowiska przed szkodliwym złośliwym oprogramowaniem i niezatwierdzonym oprogramowaniem, które nie odpowiada specyficznym potrzebom biznesowym organizacji.
+Lista dozwolonych aplikacji to lista zatwierdzonych aplikacji lub plików wykonywalnych, które mogą być obecne i uruchamiane w systemie. Celem jest ochrona środowiska przed szkodliwym oprogramowaniem i niezatwierdzonym oprogramowaniem, które nie odpowiada specyficznym potrzebom biznesowym organizacji.
 
 [AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) to **rozwiązanie do białej listy aplikacji** firmy Microsoft, które daje administratorom systemu kontrolę nad **tym, które aplikacje i pliki mogą uruchamiać użytkownicy**. Zapewnia **szczegółową kontrolę** nad plikami wykonywalnymi, skryptami, plikami instalacyjnymi Windows, DLL, aplikacjami pakietowymi i instalatorami aplikacji pakietowych.\
-Powszechną praktyką w organizacjach jest **blokowanie cmd.exe i PowerShell.exe** oraz zapisu do niektórych katalogów, **ale wszystko to można obejść**.
+Powszechną praktyką w organizacjach jest **blokowanie cmd.exe i PowerShell.exe** oraz zapisu do niektórych katalogów, **ale to wszystko można obejść**.
 
-### Sprawdź
+### Sprawdzenie
 
 Sprawdź, które pliki/rozszerzenia są na czarnej/białej liście:
 ```powershell
@@ -27,24 +20,24 @@ Get-AppLockerPolicy -Effective | select -ExpandProperty RuleCollections
 $a = Get-ApplockerPolicy -effective
 $a.rulecollections
 ```
-Ta ścieżka rejestru zawiera konfiguracje i polityki stosowane przez AppLocker, co umożliwia przeglądanie aktualnego zestawu reguł egzekwowanych w systemie:
+Ta ścieżka rejestru zawiera konfiguracje i polityki stosowane przez AppLocker, co umożliwia przeglądanie bieżącego zestawu reguł egzekwowanych w systemie:
 
 - `HKLM\Software\Policies\Microsoft\Windows\SrpV2`
 
 ### Ominięcie
 
-- Użyteczne **Foldery do zapisu** do ominięcia polityki AppLocker: Jeśli AppLocker pozwala na wykonywanie czegokolwiek w `C:\Windows\System32` lub `C:\Windows`, istnieją **foldery do zapisu**, które możesz wykorzystać do **ominięcia tego**.
+- Użyteczne **Foldery do zapisu** do ominięcia polityki AppLocker: Jeśli AppLocker zezwala na wykonywanie czegokolwiek w `C:\Windows\System32` lub `C:\Windows`, istnieją **foldery do zapisu**, które możesz wykorzystać do **ominięcia tego**.
 ```
 C:\Windows\System32\Microsoft\Crypto\RSA\MachineKeys
 C:\Windows\System32\spool\drivers\color
 C:\Windows\Tasks
 C:\windows\tracing
 ```
-- Powszechnie **ufne** [**"LOLBAS's"**](https://lolbas-project.github.io/) binaria mogą być również przydatne do obejścia AppLocker.
+- Powszechnie **ufne** [**"LOLBAS"**](https://lolbas-project.github.io/) binaria mogą być również przydatne do obejścia AppLocker.
 - **Źle napisane zasady mogą być również obejście**
 - Na przykład, **`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`**, możesz stworzyć **folder o nazwie `allowed`** gdziekolwiek, a będzie on dozwolony.
 - Organizacje często koncentrują się na **blokowaniu pliku wykonywalnego `%System32%\WindowsPowerShell\v1.0\powershell.exe`**, ale zapominają o **innych** [**lokacjach plików wykonywalnych PowerShell**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations) takich jak `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` lub `PowerShell_ISE.exe`.
-- **Wymuszanie DLL rzadko włączane** z powodu dodatkowego obciążenia, jakie może nałożyć na system, oraz ilości testów wymaganych do zapewnienia, że nic się nie zepsuje. Dlatego użycie **DLL jako tylnej furtki pomoże w obejściu AppLocker**.
+- **Wymuszanie DLL rzadko włączone** z powodu dodatkowego obciążenia, jakie może nałożyć na system, oraz ilości testów wymaganych do zapewnienia, że nic się nie zepsuje. Dlatego użycie **DLL jako tylnej furtki pomoże w obejściu AppLocker**.
 - Możesz użyć [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) lub [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick), aby **wykonać kod Powershell** w dowolnym procesie i obejść AppLocker. Więcej informacji znajdziesz tutaj: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
 
 ## Przechowywanie poświadczeń
@@ -72,7 +65,7 @@ LSA może zapisać na dysku niektóre poświadczenia:
 
 ### NTDS.dit
 
-To baza danych Active Directory. Jest obecna tylko w kontrolerach domeny.
+To jest baza danych Active Directory. Jest obecna tylko w kontrolerach domeny.
 
 ## Defender
 
@@ -119,14 +112,14 @@ EFS zabezpiecza pliki poprzez szyfrowanie, wykorzystując **klucz symetryczny** 
 
 Ta metoda szyfrowania umożliwia **przezroczysty dostęp** do zaszyfrowanych plików dla właściciela. Jednak samo zmienienie hasła właściciela i zalogowanie się nie pozwoli na odszyfrowanie.
 
-**Kluczowe wnioski**:
+**Kluczowe informacje**:
 
 - EFS używa symetrycznego FEK, szyfrowanego kluczem publicznym użytkownika.
 - Odszyfrowanie wykorzystuje klucz prywatny użytkownika do uzyskania dostępu do FEK.
 - Automatyczne odszyfrowanie występuje w określonych warunkach, takich jak kopiowanie do FAT32 lub transmisja sieciowa.
 - Zaszyfrowane pliki są dostępne dla właściciela bez dodatkowych kroków.
 
-### Sprawdź informacje o EFS
+### Sprawdź informacje EFS
 
 Sprawdź, czy **użytkownik** **korzystał** z tej **usługi**, sprawdzając, czy istnieje ta ścieżka: `C:\users\<username>\appdata\roaming\Microsoft\Protect`
 
@@ -151,7 +144,7 @@ Microsoft opracował **Group Managed Service Accounts (gMSA)**, aby uprościć z
 - **Zwiększone bezpieczeństwo**: Te konta są odporne na zablokowania i nie mogą być używane do interaktywnych logowań, co zwiększa ich bezpieczeństwo.
 - **Wsparcie dla wielu hostów**: gMSA mogą być udostępniane na wielu hostach, co czyni je idealnymi dla usług działających na wielu serwerach.
 - **Możliwość zadań zaplanowanych**: W przeciwieństwie do zarządzanych kont serwisowych, gMSA wspierają uruchamianie zadań zaplanowanych.
-- **Uproszczone zarządzanie SPN**: System automatycznie aktualizuje nazwę główną usługi (SPN) w przypadku zmian w szczegółach sAMaccount komputera lub nazwie DNS, upraszczając zarządzanie SPN.
+- **Uproszczone zarządzanie SPN**: System automatycznie aktualizuje nazwę główną usługi (SPN) w przypadku zmian w szczegółach sAMaccount komputera lub nazwie DNS, co upraszcza zarządzanie SPN.
 
 Hasła dla gMSA są przechowywane w właściwości LDAP _**msDS-ManagedPassword**_ i są automatycznie resetowane co 30 dni przez kontrolery domeny (DC). To hasło, zaszyfrowany blob danych znany jako [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e), może być odzyskane tylko przez upoważnionych administratorów i serwery, na których zainstalowane są gMSA, zapewniając bezpieczne środowisko. Aby uzyskać dostęp do tych informacji, wymagane jest zabezpieczone połączenie, takie jak LDAPS, lub połączenie musi być uwierzytelnione za pomocą 'Sealing & Secure'.
 
@@ -163,7 +156,7 @@ Możesz odczytać to hasło za pomocą [**GMSAPasswordReader**](https://github.c
 ```
 [**Znajdź więcej informacji w tym poście**](https://cube0x0.github.io/Relaying-for-gMSA/)
 
-Sprawdź także tę [stronę internetową](https://cube0x0.github.io/Relaying-for-gMSA/) na temat przeprowadzania **ataku NTLM relay** w celu **odczytania** **hasła** **gMSA**.
+Sprawdź także tę [stronę internetową](https://cube0x0.github.io/Relaying-for-gMSA/) na temat przeprowadzania **ataku relay NTLM** w celu **odczytania** **hasła** **gMSA**.
 
 ## LAPS
 
@@ -252,15 +245,5 @@ SSPI będzie odpowiedzialne za znalezienie odpowiedniego protokołu dla dwóch m
 {{#ref}}
 uac-user-account-control.md
 {{#endref}}
-
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Użyj [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks), aby łatwo budować i **automatyzować przepływy pracy** zasilane przez **najbardziej zaawansowane** narzędzia społecznościowe na świecie.\
-Uzyskaj dostęp już dziś:
-
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
-
----
 
 {{#include ../../banners/hacktricks-training.md}}

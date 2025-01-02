@@ -2,15 +2,11 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/i3.png" alt=""><figcaption></figcaption></figure>
 
-**Bug bounty tip**: **zarejestruj się** w **Intigriti**, premium **platformie bug bounty stworzonej przez hackerów, dla hackerów**! Dołącz do nas na [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) już dziś i zacznij zarabiać nagrody do **100 000 $**!
-
-{% embed url="https://go.intigriti.com/hacktricks" %}
 
 ## Silver ticket
 
-Atak **Silver Ticket** polega na wykorzystaniu biletów serwisowych w środowiskach Active Directory (AD). Metoda ta opiera się na **zdobyciu hasha NTLM konta serwisowego**, takiego jak konto komputera, aby sfałszować bilet Ticket Granting Service (TGS). Dzięki temu sfałszowanemu biletowi, atakujący może uzyskać dostęp do określonych usług w sieci, **podszywając się pod dowolnego użytkownika**, zazwyczaj dążąc do uzyskania uprawnień administracyjnych. Podkreśla się, że użycie kluczy AES do fałszowania biletów jest bardziej bezpieczne i mniej wykrywalne.
+Atak **Silver Ticket** polega na wykorzystaniu biletów serwisowych w środowiskach Active Directory (AD). Metoda ta opiera się na **zdobyciu hasha NTLM konta serwisowego**, takiego jak konto komputera, w celu sfałszowania biletu Ticket Granting Service (TGS). Dzięki temu sfałszowanemu biletowi, atakujący może uzyskać dostęp do określonych usług w sieci, **podszywając się pod dowolnego użytkownika**, zazwyczaj dążąc do uzyskania uprawnień administracyjnych. Podkreśla się, że użycie kluczy AES do fałszowania biletów jest bardziej bezpieczne i mniej wykrywalne.
 
 Do tworzenia biletów stosuje się różne narzędzia w zależności od systemu operacyjnego:
 
@@ -39,10 +35,10 @@ Usługa CIFS jest wyróżniana jako powszechny cel do uzyskania dostępu do syst
 | Typ usługi                                 | Usługa Silver Tickets                                                      |
 | ------------------------------------------ | -------------------------------------------------------------------------- |
 | WMI                                        | <p>HOST</p><p>RPCSS</p>                                                   |
-| PowerShell Remoting                        | <p>HOST</p><p>HTTP</p><p>W zależności od systemu operacyjnego również:</p><p>WSMAN</p><p>RPCSS</p> |
+| PowerShell Remoting                        | <p>HOST</p><p>HTTP</p><p>W zależności od systemu operacyjnego także:</p><p>WSMAN</p><p>RPCSS</p> |
 | WinRM                                      | <p>HOST</p><p>HTTP</p><p>W niektórych przypadkach możesz po prostu poprosić o: WINRM</p> |
 | Zaplanowane zadania                        | HOST                                                                      |
-| Udostępnianie plików w systemie Windows, również psexec | CIFS                                                                      |
+| Udostępnianie plików Windows, także psexec | CIFS                                                                      |
 | Operacje LDAP, w tym DCSync               | LDAP                                                                      |
 | Narzędzia do zdalnej administracji serwerów Windows | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                        |
 | Złote bilety                               | krbtgt                                                                    |
@@ -57,13 +53,13 @@ Używając **Rubeus**, możesz **poprosić o wszystkie** te bilety, używając p
 - 4634: Wylogowanie konta
 - 4672: Logowanie administratora
 
-## Wykorzystywanie biletów usług
+## Wykorzystywanie biletów usługowych
 
 W poniższych przykładach wyobraźmy sobie, że bilet został odzyskany, podszywając się pod konto administratora.
 
 ### CIFS
 
-Dzięki temu biletowi będziesz mógł uzyskać dostęp do folderów `C$` i `ADMIN$` za pośrednictwem **SMB** (jeśli są wystawione) i skopiować pliki do części zdalnego systemu plików, wykonując coś takiego:
+Dzięki temu biletowi będziesz mógł uzyskać dostęp do folderów `C$` i `ADMIN$` za pośrednictwem **SMB** (jeśli są wystawione) i skopiować pliki do części zdalnego systemu plików, po prostu robiąc coś takiego:
 ```bash
 dir \\vulnerable.computer\C$
 dir \\vulnerable.computer\ADMIN$
@@ -139,10 +135,6 @@ mimikatz(commandline) # lsadump::dcsync /dc:pcdc.domain.local /domain:domain.loc
 dcsync.md
 {{#endref}}
 
-<figure><img src="../../images/i3.png" alt=""><figcaption></figcaption></figure>
 
-**Wskazówka dotycząca bug bounty**: **zarejestruj się** w **Intigriti**, premium **platformie bug bounty stworzonej przez hackerów, dla hackerów**! Dołącz do nas na [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) już dziś i zacznij zarabiać nagrody do **100 000 $**!
-
-{% embed url="https://go.intigriti.com/hacktricks" %}
 
 {{#include ../../banners/hacktricks-training.md}}

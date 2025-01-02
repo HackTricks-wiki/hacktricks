@@ -1,12 +1,8 @@
-# Eskalacja uprawnień za pomocą Autoruns
+# Eskalacja uprawnień z Autoruns
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/i3.png" alt=""><figcaption></figcaption></figure>
 
-**Wskazówka dotycząca bug bounty**: **zarejestruj się** w **Intigriti**, premium **platformie bug bounty stworzonej przez hakerów, dla hakerów**! Dołącz do nas na [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) już dziś i zacznij zarabiać nagrody do **100 000 $**!
-
-{% embed url="https://go.intigriti.com/hacktricks" %}
 
 ## WMIC
 
@@ -28,9 +24,9 @@ Get-ScheduledTask | where {$_.TaskPath -notlike "\Microsoft*"} | ft TaskName,Tas
 #You can also write that content on a bat file that is being executed by a scheduled task
 schtasks /Create /RU "SYSTEM" /SC ONLOGON /TN "SchedPE" /TR "cmd /c net localgroup administrators user /add"
 ```
-## Foldery
+## Folder
 
-Wszystkie pliki wykonywalne znajdujące się w **folderach uruchamiania będą wykonywane przy starcie**. Typowe foldery uruchamiania to te wymienione poniżej, ale folder uruchamiania jest wskazany w rejestrze. [Przeczytaj to, aby dowiedzieć się gdzie.](privilege-escalation-with-autorun-binaries.md#startup-path)
+Wszystkie pliki binarne znajdujące się w **folderach uruchamiania będą wykonywane przy starcie**. Typowe foldery uruchamiania to te wymienione poniżej, ale folder uruchamiania jest wskazany w rejestrze. [Read this to learn where.](privilege-escalation-with-autorun-binaries.md#startup-path)
 ```bash
 dir /b "C:\Documents and Settings\All Users\Start Menu\Programs\Startup" 2>nul
 dir /b "C:\Documents and Settings\%username%\Start Menu\Programs\Startup" 2>nul
@@ -42,11 +38,11 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 ## Rejestr
 
 > [!NOTE]
-> [Uwaga stąd](https://answers.microsoft.com/en-us/windows/forum/all/delete-registry-key/d425ae37-9dcc-4867-b49c-723dcd15147f): Wpis rejestru **Wow6432Node** wskazuje, że używasz 64-bitowej wersji systemu Windows. System operacyjny używa tego klucza do wyświetlania oddzielnego widoku HKEY_LOCAL_MACHINE\SOFTWARE dla aplikacji 32-bitowych działających na 64-bitowych wersjach systemu Windows.
+> [Uwaga stąd](https://answers.microsoft.com/en-us/windows/forum/all/delete-registry-key/d425ae37-9dcc-4867-b49c-723dcd15147f): Wpis rejestru **Wow6432Node** wskazuje, że używasz 64-bitowej wersji systemu Windows. System operacyjny używa tego klucza, aby wyświetlić oddzielny widok HKEY_LOCAL_MACHINE\SOFTWARE dla aplikacji 32-bitowych działających na 64-bitowych wersjach systemu Windows.
 
 ### Uruchomienia
 
-**Powszechnie znane** wpisy rejestru AutoRun:
+**Powszechnie znane** rejestry AutoRun:
 
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\Run`
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\RunOnce`
@@ -60,7 +56,7 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 - `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Install\Software\Microsoft\Windows\CurrentVersion\Runonce`
 - `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Install\Software\Microsoft\Windows\CurrentVersion\RunonceEx`
 
-Klucze rejestru znane jako **Run** i **RunOnce** są zaprojektowane do automatycznego uruchamiania programów za każdym razem, gdy użytkownik loguje się do systemu. Wartość danych przypisana do klucza jest ograniczona do 260 znaków lub mniej.
+Klucze rejestru znane jako **Run** i **RunOnce** są zaprojektowane do automatycznego uruchamiania programów za każdym razem, gdy użytkownik loguje się do systemu. Linia poleceń przypisana jako wartość danych klucza jest ograniczona do 260 znaków lub mniej.
 
 **Uruchomienia usług** (mogą kontrolować automatyczne uruchamianie usług podczas rozruchu):
 
@@ -168,7 +164,7 @@ Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion
 
 `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon`
 
-Typowo klucz **Userinit** jest ustawiony na **userinit.exe**. Jednak jeśli ten klucz zostanie zmodyfikowany, określony plik wykonywalny również zostanie uruchomiony przez **Winlogon** po logowaniu użytkownika. Podobnie klucz **Shell** ma wskazywać na **explorer.exe**, który jest domyślnym powłoką dla systemu Windows.
+Typowo klucz **Userinit** jest ustawiony na **userinit.exe**. Jednakże, jeśli ten klucz zostanie zmodyfikowany, określony plik wykonywalny również zostanie uruchomiony przez **Winlogon** po logowaniu użytkownika. Podobnie, klucz **Shell** ma na celu wskazanie na **explorer.exe**, który jest domyślnym powłoką dla systemu Windows.
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "Userinit"
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "Shell"
@@ -176,7 +172,7 @@ Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVers
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon' -Name "Shell"
 ```
 > [!NOTE]
-> Jeśli możesz nadpisać wartość rejestru lub binarny plik, będziesz w stanie podnieść uprawnienia.
+> Jeśli możesz nadpisać wartość rejestru lub binarną, będziesz w stanie podnieść uprawnienia.
 
 ### Ustawienia polityki
 
@@ -202,10 +198,10 @@ Kroki do utworzenia opcji rozruchu dla automatycznego uruchamiania w "Trybie awa
 2. Otwórz `boot.ini` do edycji.
 3. Wstaw linię jak: `multi(0)disk(0)rdisk(0)partition(1)\WINDOWS="Microsoft Windows XP Professional" /fastdetect /SAFEBOOT:MINIMAL(ALTERNATESHELL)`
 4. Zapisz zmiany w `boot.ini`.
-5. Ponownie zastosuj oryginalne atrybuty pliku: `attrib c:\boot.ini +r +s +h`
+5. Przywróć oryginalne atrybuty pliku: `attrib c:\boot.ini +r +s +h`
 
 - **Eksploatacja 1:** Zmiana klucza rejestru **AlternateShell** pozwala na skonfigurowanie niestandardowego powłoki poleceń, co może prowadzić do nieautoryzowanego dostępu.
-- **Eksploatacja 2 (Uprawnienia do zapisu w PATH):** Posiadanie uprawnień do zapisu w dowolnej części zmiennej systemowej **PATH**, szczególnie przed `C:\Windows\system32`, pozwala na uruchomienie niestandardowego `cmd.exe`, co może być tylnym wejściem, jeśli system zostanie uruchomiony w trybie awaryjnym.
+- **Eksploatacja 2 (Uprawnienia do zapisu w PATH):** Posiadanie uprawnień do zapisu w dowolnej części zmiennej systemowej **PATH**, szczególnie przed `C:\Windows\system32`, pozwala na uruchomienie niestandardowego `cmd.exe`, który może być tylnym wejściem, jeśli system zostanie uruchomiony w trybie awaryjnym.
 - **Eksploatacja 3 (Uprawnienia do zapisu w PATH i boot.ini):** Dostęp do zapisu w `boot.ini` umożliwia automatyczne uruchamianie w trybie awaryjnym, co ułatwia nieautoryzowany dostęp przy następnym uruchomieniu.
 
 Aby sprawdzić bieżące ustawienie **AlternateShell**, użyj tych poleceń:
@@ -224,17 +220,17 @@ Active Setup jest zarządzany przez następujące klucze rejestru:
 - `HKCU\SOFTWARE\Microsoft\Active Setup\Installed Components`
 - `HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components`
 
-W obrębie tych kluczy istnieją różne podklucze, z których każdy odpowiada konkretnemu komponentowi. Kluczowe wartości, które są szczególnie interesujące, to:
+W obrębie tych kluczy istnieje wiele podkluczy, z których każdy odpowiada za konkretny komponent. Kluczowe wartości, które są szczególnie interesujące, to:
 
 - **IsInstalled:**
 - `0` oznacza, że polecenie komponentu nie zostanie wykonane.
 - `1` oznacza, że polecenie zostanie wykonane raz dla każdego użytkownika, co jest domyślnym zachowaniem, jeśli wartość `IsInstalled` jest nieobecna.
-- **StubPath:** Definiuje polecenie, które ma być wykonane przez Active Setup. Może to być dowolne poprawne polecenie wiersza poleceń, takie jak uruchomienie `notepad`.
+- **StubPath:** Definiuje polecenie, które ma być wykonane przez Active Setup. Może to być dowolna poprawna linia poleceń, na przykład uruchomienie `notepad`.
 
 **Wskazówki dotyczące bezpieczeństwa:**
 
 - Modyfikacja lub zapis do klucza, w którym **`IsInstalled`** jest ustawione na `"1"` z określonym **`StubPath`**, może prowadzić do nieautoryzowanego wykonania polecenia, potencjalnie w celu eskalacji uprawnień.
-- Zmiana pliku binarnego, do którego odnosi się jakakolwiek wartość **`StubPath`**, może również osiągnąć eskalację uprawnień, pod warunkiem posiadania wystarczających uprawnień.
+- Zmiana pliku binarnego, do którego odnosi się jakakolwiek wartość **`StubPath`**, również może osiągnąć eskalację uprawnień, pod warunkiem posiadania wystarczających uprawnień.
 
 Aby sprawdzić konfiguracje **`StubPath`** w komponentach Active Setup, można użyć następujących poleceń:
 ```bash
@@ -303,7 +299,7 @@ autorunsc.exe -m -nobanner -a * -ct /accepteula
 ```
 ## Więcej
 
-**Znajdź więcej Autoruns, takich jak rejestry w** [**https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2**](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
+**Znajdź więcej Autorunów, takich jak rejestry w** [**https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2**](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
 
 ## Odniesienia
 
@@ -312,10 +308,6 @@ autorunsc.exe -m -nobanner -a * -ct /accepteula
 - [https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
 - [https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell](https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell)
 
-<figure><img src="../../images/i3.png" alt=""><figcaption></figcaption></figure>
 
-**Wskazówka dotycząca bug bounty**: **zarejestruj się** w **Intigriti**, premium **platformie bug bounty stworzonej przez hackerów, dla hackerów**! Dołącz do nas na [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) już dziś i zacznij zarabiać nagrody do **100 000 USD**!
-
-{% embed url="https://go.intigriti.com/hacktricks" %}
 
 {{#include ../../banners/hacktricks-training.md}}

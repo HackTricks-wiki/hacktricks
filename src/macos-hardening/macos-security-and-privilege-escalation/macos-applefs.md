@@ -2,33 +2,29 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Apple Propietary File System (APFS)
+## Apple Proprietary File System (APFS)
 
-**Apple File System (APFS)** is a modern file system designed to supersede the Hierarchical File System Plus (HFS+). Its development was driven by the need for **improved performance, security, and efficiency**.
+**Apple File System (APFS)** to nowoczesny system plików zaprojektowany w celu zastąpienia Hierarchical File System Plus (HFS+). Jego rozwój był napędzany potrzebą **ulepszonej wydajności, bezpieczeństwa i efektywności**.
 
-Some notable features of APFS include:
+Niektóre istotne cechy APFS to:
 
-1. **Space Sharing**: APFS allows multiple volumes to **share the same underlying free storage** on a single physical device. This enables more efficient space utilization as the volumes can dynamically grow and shrink without the need for manual resizing or repartitioning.
-   1. This means, compared with traditional partitions in file disks, **that in APFS different partitions (volumes) shares all the disk space**, while a regular partition usually had a fixed size.
-2. **Snapshots**: APFS supports **creating snapshots**, which are **read-only**, point-in-time instances of the file system. Snapshots enable efficient backups and easy system rollbacks, as they consume minimal additional storage and can be quickly created or reverted.
-3. **Clones**: APFS can **create file or directory clones that share the same storage** as the original until either the clone or the original file is modified. This feature provides an efficient way to create copies of files or directories without duplicating the storage space.
-4. **Encryption**: APFS **natively supports full-disk encryption** as well as per-file and per-directory encryption, enhancing data security across different use cases.
-5. **Crash Protection**: APFS uses a **copy-on-write metadata scheme that ensures file system consistency** even in cases of sudden power loss or system crashes, reducing the risk of data corruption.
+1. **Współdzielenie przestrzeni**: APFS pozwala wielu woluminom na **współdzielenie tej samej podstawowej wolnej pamięci** na jednym fizycznym urządzeniu. Umożliwia to bardziej efektywne wykorzystanie przestrzeni, ponieważ woluminy mogą dynamicznie rosnąć i kurczyć się bez potrzeby ręcznego zmieniania rozmiaru lub ponownego partycjonowania.
+1. Oznacza to, w porównaniu do tradycyjnych partycji na dyskach plikowych, **że w APFS różne partycje (woluminy) dzielą całą przestrzeń dyskową**, podczas gdy zwykła partycja miała zazwyczaj stały rozmiar.
+2. **Migawki**: APFS obsługuje **tworzenie migawek**, które są **tylko do odczytu**, punktowymi instancjami systemu plików. Migawki umożliwiają efektywne tworzenie kopii zapasowych i łatwe przywracanie systemu, ponieważ zajmują minimalną dodatkową przestrzeń i mogą być szybko tworzone lub przywracane.
+3. **Klonowanie**: APFS może **tworzyć klony plików lub katalogów, które dzielą tę samą pamięć** co oryginał, aż do momentu, gdy klon lub oryginalny plik zostanie zmodyfikowany. Ta funkcja zapewnia efektywny sposób tworzenia kopii plików lub katalogów bez duplikowania przestrzeni pamięci.
+4. **Szyfrowanie**: APFS **natywnie obsługuje szyfrowanie całego dysku** oraz szyfrowanie na poziomie pliku i katalogu, co zwiększa bezpieczeństwo danych w różnych zastosowaniach.
+5. **Ochrona przed awarią**: APFS wykorzystuje **schemat metadanych copy-on-write, który zapewnia spójność systemu plików** nawet w przypadku nagłej utraty zasilania lub awarii systemu, zmniejszając ryzyko uszkodzenia danych.
 
-Overall, APFS offers a more modern, flexible, and efficient file system for Apple devices, with a focus on improved performance, reliability, and security.
-
+Ogólnie rzecz biorąc, APFS oferuje nowocześniejszy, elastyczniejszy i bardziej efektywny system plików dla urządzeń Apple, z naciskiem na ulepszoną wydajność, niezawodność i bezpieczeństwo.
 ```bash
 diskutil list # Get overview of the APFS volumes
 ```
-
 ## Firmlinks
 
-The `Data` volume is mounted in **`/System/Volumes/Data`** (you can check this with `diskutil apfs list`).
+Wolumin `Data` jest zamontowany w **`/System/Volumes/Data`** (możesz to sprawdzić za pomocą `diskutil apfs list`).
 
-The list of firmlinks can be found in the **`/usr/share/firmlinks`** file.
-
+Lista firmlinków znajduje się w pliku **`/usr/share/firmlinks`**.
 ```bash
 
 ```
-
 {{#include ../../banners/hacktricks-training.md}}

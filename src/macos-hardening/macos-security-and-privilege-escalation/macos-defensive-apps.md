@@ -1,19 +1,19 @@
-# macOS Defensive Apps
+# macOS Aplikacje Obronny
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Firewalls
+## Zapory
 
-- [**Little Snitch**](https://www.obdev.at/products/littlesnitch/index.html): It will monitor every connection made by each process. Depending on the mode (silent allow connections, silent deny connection and alert) it will **show you an alert** every time a new connection is stablished. It also has a very nice GUI to see all this information.
-- [**LuLu**](https://objective-see.org/products/lulu.html): Objective-See firewall. This is a basic firewall that will alert you for suspicious connections (it has a GUI but it isn't as fancy as the one of Little Snitch).
+- [**Little Snitch**](https://www.obdev.at/products/littlesnitch/index.html): Będzie monitorować każde połączenie nawiązane przez każdy proces. W zależności od trybu (ciche zezwolenie na połączenia, ciche odrzucenie połączenia i powiadomienie) **pokaże ci powiadomienie** za każdym razem, gdy nawiązywane jest nowe połączenie. Posiada również bardzo ładny interfejs graficzny do przeglądania wszystkich tych informacji.
+- [**LuLu**](https://objective-see.org/products/lulu.html): Zapora Objective-See. To podstawowa zapora, która powiadomi cię o podejrzanych połączeniach (ma interfejs graficzny, ale nie jest tak elegancki jak ten w Little Snitch).
 
-## Persistence detection
+## Wykrywanie utrzymywania
 
-- [**KnockKnock**](https://objective-see.org/products/knockknock.html): Objective-See application that will search in several locations where **malware could be persisting** (it's a one-shot tool, not a monitoring service).
-- [**BlockBlock**](https://objective-see.org/products/blockblock.html): Like KnockKnock by monitoring processes that generate persistence.
+- [**KnockKnock**](https://objective-see.org/products/knockknock.html): Aplikacja Objective-See, która przeszuka kilka lokalizacji, gdzie **złośliwe oprogramowanie może się utrzymywać** (to narzędzie jednorazowe, a nie usługa monitorująca).
+- [**BlockBlock**](https://objective-see.org/products/blockblock.html): Podobnie jak KnockKnock, monitorując procesy, które generują utrzymywanie.
 
-## Keyloggers detection
+## Wykrywanie keyloggerów
 
-- [**ReiKey**](https://objective-see.org/products/reikey.html): Objective-See application to find **keyloggers** that install keyboard "event taps"&#x20;
+- [**ReiKey**](https://objective-see.org/products/reikey.html): Aplikacja Objective-See do znajdowania **keyloggerów**, które instalują "event taps" na klawiaturze&#x20;
 
 {{#include ../../banners/hacktricks-training.md}}

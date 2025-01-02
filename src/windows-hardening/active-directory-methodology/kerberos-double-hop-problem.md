@@ -2,13 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
-
 ## Wprowadzenie
 
-Problem "podwójnego skoku" Kerberos pojawia się, gdy atakujący próbuje użyć **uwierzytelniania Kerberos przez dwa** **skoki**, na przykład używając **PowerShell**/**WinRM**.
+Problem "podwójnego skoku" Kerberos pojawia się, gdy atakujący próbuje użyć **uwierzytelniania Kerberos w dwóch** **skokach**, na przykład używając **PowerShell**/**WinRM**.
 
 Gdy następuje **uwierzytelnienie** przez **Kerberos**, **poświadczenia** **nie są** buforowane w **pamięci.** Dlatego, jeśli uruchomisz mimikatz, **nie znajdziesz poświadczeń** użytkownika na maszynie, nawet jeśli uruchamia on procesy.
 
@@ -21,7 +17,7 @@ Dzieje się tak, ponieważ podczas łączenia z Kerberos następują następują
 
 ### Nieograniczona delegacja
 
-Jeśli **nieograniczona delegacja** jest włączona na PC, to nie nastąpi, ponieważ **Serwer** **otrzyma** **TGT** każdego użytkownika, który uzyskuje do niego dostęp. Co więcej, jeśli używana jest nieograniczona delegacja, prawdopodobnie możesz **skompromentować kontroler domeny** z tego poziomu.\
+Jeśli **nieograniczona delegacja** jest włączona na PC, to nie nastąpi, ponieważ **Serwer** **otrzyma** **TGT** każdego użytkownika, który się do niego łączy. Co więcej, jeśli używana jest nieograniczona delegacja, prawdopodobnie możesz **skompromentować kontroler domeny** z tego poziomu.\
 [**Więcej informacji na stronie dotyczącej nieograniczonej delegacji**](unconstrained-delegation.md).
 
 ### CredSSP
@@ -51,7 +47,7 @@ Alternatywnie, sugeruje się nawiązanie sesji PS z pierwszym serwerem i uruchom
 
 ### Rejestracja konfiguracji PSSession
 
-Rozwiązanie na obejście problemu podwójnego skoku polega na użyciu `Register-PSSessionConfiguration` z `Enter-PSSession`. Ta metoda wymaga innego podejścia niż `evil-winrm` i pozwala na sesję, która nie cierpi z powodu ograniczenia podwójnego skoku.
+Rozwiązanie do obejścia problemu podwójnego skoku polega na użyciu `Register-PSSessionConfiguration` z `Enter-PSSession`. Ta metoda wymaga innego podejścia niż `evil-winrm` i pozwala na sesję, która nie cierpi z powodu ograniczenia podwójnego skoku.
 ```powershell
 Register-PSSessionConfiguration -Name doublehopsess -RunAsCredential domain_name\username
 Restart-Service WinRM
@@ -60,14 +56,14 @@ klist
 ```
 ### PortForwarding
 
-Dla lokalnych administratorów na pośrednim celu, przekierowanie portów umożliwia wysyłanie żądań do docelowego serwera. Używając `netsh`, można dodać regułę dla przekierowania portów, obok reguły zapory systemu Windows, aby zezwolić na przekierowany port.
+Dla lokalnych administratorów na pośrednim celu, przekierowanie portów pozwala na wysyłanie żądań do docelowego serwera. Używając `netsh`, można dodać regułę dla przekierowania portów, obok reguły zapory systemu Windows, aby zezwolić na przekierowany port.
 ```bash
 netsh interface portproxy add v4tov4 listenport=5446 listenaddress=10.35.8.17 connectport=5985 connectaddress=10.35.8.23
 netsh advfirewall firewall add rule name=fwd dir=in action=allow protocol=TCP localport=5446
 ```
 #### winrs.exe
 
-`winrs.exe` może być używany do przekazywania żądań WinRM, potencjalnie jako mniej wykrywalna opcja, jeśli monitorowanie PowerShell jest problemem. Poniższe polecenie demonstruje jego użycie:
+`winrs.exe` może być używany do przekazywania żądań WinRM, potencjalnie jako mniej wykrywalna opcja, jeśli monitorowanie PowerShell jest problemem. Poniższe polecenie ilustruje jego użycie:
 ```bash
 winrs -r:http://bizintel:5446 -u:ta\redsuit -p:2600leet hostname
 ```
@@ -92,8 +88,5 @@ icacls.exe "C:\Users\redsuit\Documents\ssh\OpenSSH-Win64" /grant Everyone:RX /T
 - [https://learn.microsoft.com/en-gb/archive/blogs/sergey_babkins_blog/another-solution-to-multi-hop-powershell-remoting](https://learn.microsoft.com/en-gb/archive/blogs/sergey_babkins_blog/another-solution-to-multi-hop-powershell-remoting)
 - [https://4sysops.com/archives/solve-the-powershell-multi-hop-problem-without-using-credssp/](https://4sysops.com/archives/solve-the-powershell-multi-hop-problem-without-using-credssp/)
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -2,9 +2,6 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 ## **MSSQL Enumeracja / Odkrywanie**
 
@@ -226,7 +223,7 @@ EXEC sp_linkedservers;
 
 #### Wykonaj zapytania w zaufanym linku
 
-Wykonaj zapytania przez link (przykład: znajdź więcej linków w nowo dostępnym instancji):
+Wykonaj zapytania przez link (przykład: znajdź więcej linków w nowej dostępnej instancji):
 ```sql
 select * from openquery("dcorp-sql1", 'select * from master..sysservers')
 ```
@@ -257,12 +254,9 @@ EXECUTE('EXECUTE(''sp_addsrvrolemember ''''hacker'''' , ''''sysadmin'''' '') AT 
 
 **Użytkownik lokalny MSSQL** zazwyczaj ma specjalny rodzaj uprawnienia nazywanego **`SeImpersonatePrivilege`**. Umożliwia to kontu "podszywanie się pod klienta po uwierzytelnieniu".
 
-Strategią, którą opracowało wielu autorów, jest zmuszenie usługi SYSTEM do uwierzytelnienia się w fałszywej lub atakującej usłudze, którą tworzy napastnik. Ta fałszywa usługa jest w stanie podszywać się pod usługę SYSTEM, gdy ta próbuje się uwierzytelnić.
+Strategią, którą opracowało wielu autorów, jest zmuszenie usługi SYSTEM do uwierzytelnienia się w fałszywej lub man-in-the-middle usłudze, którą tworzy atakujący. Ta fałszywa usługa jest w stanie podszywać się pod usługę SYSTEM, gdy ta próbuje się uwierzytelnić.
 
 [SweetPotato](https://github.com/CCob/SweetPotato) ma zbiór tych różnych technik, które można wykonać za pomocą polecenia `execute-assembly` Beacona.
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../../banners/hacktricks-training.md}}
