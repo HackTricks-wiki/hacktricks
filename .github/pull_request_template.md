@@ -1,9 +1,4 @@
-You can remove this content before sending the PR:
+## 归属
+我们重视您的知识，并鼓励您分享内容。请确保您仅上传您拥有或已获得原作者分享权限的内容（在您添加的文本中或您正在修改的页面末尾添加对作者的引用，或两者都添加）。 您对知识产权的尊重为每个人营造了一个值得信赖和合法的分享环境。
 
-## Attribution
-We value your knowledge and encourage you to share content. Please ensure that you only upload content that you own or that have permission to share it from the original author (adding a reference to the author in the added text or at the end of the page you are modifying or both). Your respect for intellectual property rights fosters a trustworthy and legal sharing environment for everyone.
-
-
-Thank you for contributing to HackTricks!
-
-
+感谢您为 HackTricks 的贡献！
