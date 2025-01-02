@@ -1,89 +1,88 @@
-# macOS Files, Folders, Binaries & Memory
+# macOS Αρχεία, Φάκελοι, Δυαδικά & Μνήμη
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## File hierarchy layout
+## Διάταξη ιεραρχίας αρχείων
 
-- **/Applications**: The installed apps should be here. All the users will be able to access them.
-- **/bin**: Command line binaries
-- **/cores**: If exists, it's used to store core dumps
-- **/dev**: Everything is treated as a file so you may see hardware devices stored here.
-- **/etc**: Configuration files
-- **/Library**: A lot of subdirectories and files related to preferences, caches and logs can be found here. A Library folder exists in root and on each user's directory.
-- **/private**: Undocumented but a lot of the mentioned folders are symbolic links to the private directory.
-- **/sbin**: Essential system binaries (related to administration)
-- **/System**: File fo making OS X run. You should find mostly only Apple specific files here (not third party).
-- **/tmp**: Files are deleted after 3 days (it's a soft link to /private/tmp)
-- **/Users**: Home directory for users.
-- **/usr**: Config and system binaries
-- **/var**: Log files
-- **/Volumes**: The mounted drives will apear here.
-- **/.vol**: Running `stat a.txt` you obtain something like `16777223 7545753 -rw-r--r-- 1 username wheel ...` where the first number is the id number of the volume where the file exists and the second one is the inode number. You can access the content of this file through /.vol/ with that information running `cat /.vol/16777223/7545753`
+- **/Applications**: Οι εγκατεστημένες εφαρμογές θα πρέπει να βρίσκονται εδώ. Όλοι οι χρήστες θα μπορούν να τις προσπελάσουν.
+- **/bin**: Δυαδικά αρχεία γραμμής εντολών
+- **/cores**: Αν υπάρχει, χρησιμοποιείται για την αποθήκευση core dumps
+- **/dev**: Όλα αντιμετωπίζονται ως αρχεία, οπότε μπορεί να δείτε υλικοτεχνικές συσκευές αποθηκευμένες εδώ.
+- **/etc**: Αρχεία ρυθμίσεων
+- **/Library**: Πολλοί υποφάκελοι και αρχεία που σχετίζονται με προτιμήσεις, cache και logs μπορούν να βρεθούν εδώ. Ένας φάκελος Library υπάρχει στη ρίζα και στον κατάλογο κάθε χρήστη.
+- **/private**: Μη τεκμηριωμένο αλλά πολλοί από τους αναφερόμενους φακέλους είναι συμβολικοί σύνδεσμοι προς τον ιδιωτικό κατάλογο.
+- **/sbin**: Βασικά συστήματα δυαδικών αρχείων (σχετικά με τη διαχείριση)
+- **/System**: Αρχεία για να τρέξει το OS X. Θα βρείτε κυρίως μόνο αρχεία συγκεκριμένα της Apple εδώ (όχι τρίτων).
+- **/tmp**: Τα αρχεία διαγράφονται μετά από 3 ημέρες (είναι ένας μαλακός σύνδεσμος προς /private/tmp)
+- **/Users**: Κατάλογος αρχικής για τους χρήστες.
+- **/usr**: Ρυθμίσεις και δυαδικά αρχεία συστήματος
+- **/var**: Αρχεία καταγραφής
+- **/Volumes**: Οι προσαρτημένοι δίσκοι θα εμφανίζονται εδώ.
+- **/.vol**: Εκτελώντας `stat a.txt` αποκτάτε κάτι σαν `16777223 7545753 -rw-r--r-- 1 username wheel ...` όπου ο πρώτος αριθμός είναι ο αριθμός ταυτότητας του τόμου όπου υπάρχει το αρχείο και ο δεύτερος είναι ο αριθμός inode. Μπορείτε να αποκτήσετε το περιεχόμενο αυτού του αρχείου μέσω /.vol/ με αυτές τις πληροφορίες εκτελώντας `cat /.vol/16777223/7545753`
 
-### Applications Folders
+### Φάκελοι Εφαρμογών
 
-- **System applications** are located under `/System/Applications`
-- **Installed** applications are usually installed in `/Applications` or in `~/Applications`
-- **Application data** can be found in `/Library/Application Support` for the applications running as root and `~/Library/Application Support` for applications running as the user.
-- Third-party applications **daemons** that **need to run as root** as usually located in `/Library/PrivilegedHelperTools/`
-- **Sandboxed** apps are mapped into the `~/Library/Containers` folder. Each app has a folder named according to the application’s bundle ID (`com.apple.Safari`).
-- The **kernel** is located in `/System/Library/Kernels/kernel`
-- **Apple's kernel extensions** are located in `/System/Library/Extensions`
-- **Third-party kernel extensions** are stored in `/Library/Extensions`
+- **Συστήματα εφαρμογών** βρίσκονται κάτω από `/System/Applications`
+- **Εγκατεστημένες** εφαρμογές συνήθως εγκαθίστανται σε `/Applications` ή σε `~/Applications`
+- **Δεδομένα εφαρμογών** μπορούν να βρεθούν σε `/Library/Application Support` για τις εφαρμογές που τρέχουν ως root και `~/Library/Application Support` για τις εφαρμογές που τρέχουν ως χρήστης.
+- Οι **daemons** τρίτων εφαρμογών που **χρειάζονται να τρέχουν ως root** συνήθως βρίσκονται σε `/Library/PrivilegedHelperTools/`
+- Οι **Sandboxed** εφαρμογές είναι χαρτογραφημένες στον φάκελο `~/Library/Containers`. Κάθε εφαρμογή έχει έναν φάκελο ονομασμένο σύμφωνα με το ID του bundle της εφαρμογής (`com.apple.Safari`).
+- Ο **kernel** βρίσκεται σε `/System/Library/Kernels/kernel`
+- Οι **επέκταση πυρήνα της Apple** βρίσκονται σε `/System/Library/Extensions`
+- Οι **επέκταση πυρήνα τρίτων** αποθηκεύονται σε `/Library/Extensions`
 
-### Files with Sensitive Information
+### Αρχεία με Ευαίσθητες Πληροφορίες
 
-MacOS stores information such as passwords in several places:
+Το macOS αποθηκεύει πληροφορίες όπως κωδικούς πρόσβασης σε πολλές θέσεις:
 
 {{#ref}}
 macos-sensitive-locations.md
 {{#endref}}
 
-### Vulnerable pkg installers
+### Ευάλωτοι εγκαταστάτες pkg
 
 {{#ref}}
 macos-installers-abuse.md
 {{#endref}}
 
-## OS X Specific Extensions
+## Ειδικές Επεκτάσεις OS X
 
-- **`.dmg`**: Apple Disk Image files are very frequent for installers.
-- **`.kext`**: It must follow a specific structure and it's the OS X version of a driver. (it's a bundle)
-- **`.plist`**: Also known as property list stores information in XML or binary format.
-  - Can be XML or binary. Binary ones can be read with:
-    - `defaults read config.plist`
-    - `/usr/libexec/PlistBuddy -c print config.plsit`
-    - `plutil -p ~/Library/Preferences/com.apple.screensaver.plist`
-    - `plutil -convert xml1 ~/Library/Preferences/com.apple.screensaver.plist -o -`
-    - `plutil -convert json ~/Library/Preferences/com.apple.screensaver.plist -o -`
-- **`.app`**: Apple applications that follows directory structure (It's a bundle).
-- **`.dylib`**: Dynamic libraries (like Windows DLL files)
-- **`.pkg`**: Are the same as xar (eXtensible Archive format). The installer command can be use to install the contents of these files.
-- **`.DS_Store`**: This file is on each directory, it saves the attributes and customisations of the directory.
-- **`.Spotlight-V100`**: This folder appears on the root directory of every volume on the system.
-- **`.metadata_never_index`**: If this file is at the root of a volume Spotlight won't index that volume.
-- **`.noindex`**: Files and folder with this extension won't be indexed by Spotlight.
-- **`.sdef`**: Files inside bundles specifying how it's possible to interact wth the application from an AppleScript.
+- **`.dmg`**: Τα αρχεία Apple Disk Image είναι πολύ συχνά για εγκαταστάτες.
+- **`.kext`**: Πρέπει να ακολουθεί μια συγκεκριμένη δομή και είναι η έκδοση OS X ενός οδηγού. (είναι ένα bundle)
+- **`.plist`**: Γνωστό και ως property list αποθηκεύει πληροφορίες σε XML ή δυαδική μορφή.
+- Μπορεί να είναι XML ή δυαδικό. Τα δυαδικά μπορούν να διαβαστούν με:
+- `defaults read config.plist`
+- `/usr/libexec/PlistBuddy -c print config.plsit`
+- `plutil -p ~/Library/Preferences/com.apple.screensaver.plist`
+- `plutil -convert xml1 ~/Library/Preferences/com.apple.screensaver.plist -o -`
+- `plutil -convert json ~/Library/Preferences/com.apple.screensaver.plist -o -`
+- **`.app`**: Εφαρμογές της Apple που ακολουθούν τη δομή καταλόγου (είναι ένα bundle).
+- **`.dylib`**: Δυναμικές βιβλιοθήκες (όπως τα αρχεία DLL των Windows)
+- **`.pkg`**: Είναι τα ίδια με xar (eXtensible Archive format). Η εντολή εγκατάστασης μπορεί να χρησιμοποιηθεί για να εγκαταστήσει το περιεχόμενο αυτών των αρχείων.
+- **`.DS_Store`**: Αυτό το αρχείο βρίσκεται σε κάθε κατάλογο, αποθηκεύει τα χαρακτηριστικά και τις προσαρμογές του καταλόγου.
+- **`.Spotlight-V100`**: Αυτός ο φάκελος εμφανίζεται στον ριζικό κατάλογο κάθε τόμου στο σύστημα.
+- **`.metadata_never_index`**: Αν αυτό το αρχείο βρίσκεται στη ρίζα ενός τόμου, το Spotlight δεν θα ευρετηριάσει αυτόν τον τόμο.
+- **`.noindex`**: Αρχεία και φάκελοι με αυτήν την επέκταση δεν θα ευρετηριαστούν από το Spotlight.
+- **`.sdef`**: Αρχεία μέσα σε bundles που καθορίζουν πώς είναι δυνατό να αλληλεπιδράσετε με την εφαρμογή από ένα AppleScript.
 
 ### macOS Bundles
 
-A bundle is a **directory** which **looks like an object in Finder** (a Bundle example are `*.app` files).
+Ένα bundle είναι ένας **κατάλογος** που **φαίνεται σαν αντικείμενο στο Finder** (ένα παράδειγμα Bundle είναι τα αρχεία `*.app`).
 
 {{#ref}}
 macos-bundles.md
 {{#endref}}
 
-## Dyld Shared Library Cache (SLC)
+## Cache Κοινής Βιβλιοθήκης Dyld (SLC)
 
-On macOS (and iOS) all system shared libraries, like frameworks and dylibs, are **combined into a single file**, called the **dyld shared cache**. This improved performance, since code can be loaded faster.
+Στο macOS (και iOS) όλες οι κοινές βιβλιοθήκες συστήματος, όπως τα frameworks και τα dylibs, είναι **συνδυασμένες σε ένα μόνο αρχείο**, που ονομάζεται **cache κοινής dyld**. Αυτό βελτίωσε την απόδοση, καθώς ο κώδικας μπορεί να φορτωθεί πιο γρήγορα.
 
-This is located in macOS in `/System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/` and in older versions you might be able to find the **shared cache** in **`/System/Library/dyld/`**.\
-In iOS you can find them in **`/System/Library/Caches/com.apple.dyld/`**.
+Αυτό βρίσκεται στο macOS στο `/System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/` και σε παλαιότερες εκδόσεις μπορεί να μπορείτε να βρείτε την **κοινή cache** σε **`/System/Library/dyld/`**.\
+Στο iOS μπορείτε να τα βρείτε σε **`/System/Library/Caches/com.apple.dyld/`**.
 
-Similar to the dyld shared cache, the kernel and the kernel extensions are also compiled into a kernel cache, which is loaded at boot time.
+Παρόμοια με την κοινή cache dyld, ο πυρήνας και οι επεκτάσεις πυρήνα είναι επίσης συμπιεσμένες σε μια cache πυρήνα, η οποία φορτώνεται κατά την εκκίνηση.
 
-In order to extract the libraries from the single file dylib shared cache it was possible to use the binary [dyld_shared_cache_util](https://www.mbsplugins.de/files/dyld_shared_cache_util-dyld-733.8.zip) which might not be working nowadays but you can also use [**dyldextractor**](https://github.com/arandomdev/dyldextractor):
-
+Για να εξαγάγετε τις βιβλιοθήκες από το ενιαίο αρχείο κοινής cache dylib, ήταν δυνατό να χρησιμοποιήσετε το δυαδικό [dyld_shared_cache_util](https://www.mbsplugins.de/files/dyld_shared_cache_util-dyld-733.8.zip) που μπορεί να μην λειτουργεί σήμερα, αλλά μπορείτε επίσης να χρησιμοποιήσετε [**dyldextractor**](https://github.com/arandomdev/dyldextractor):
 ```bash
 # dyld_shared_cache_util
 dyld_shared_cache_util -extract ~/shared_cache/ /System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/dyld_shared_cache_arm64e
@@ -93,119 +92,111 @@ dyldex -l [dyld_shared_cache_path] # List libraries
 dyldex_all [dyld_shared_cache_path] # Extract all
 # More options inside the readme
 ```
-
 > [!TIP]
-> Note that even if `dyld_shared_cache_util` tool doesn't work, you can pass the **shared dyld binary to Hopper** and Hopper will be able to identify all the libraries and let you **select which one** you want to investigate:
+> Σημειώστε ότι ακόμη και αν το εργαλείο `dyld_shared_cache_util` δεν λειτουργεί, μπορείτε να περάσετε το **shared dyld binary στο Hopper** και ο Hopper θα είναι σε θέση να αναγνωρίσει όλες τις βιβλιοθήκες και να σας επιτρέψει να **επιλέξετε ποια** θέλετε να ερευνήσετε:
 
 <figure><img src="../../../images/image (1152).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Some extractors won't work as dylibs are prelinked with hard coded addresses in therefore they might be jumping to unknown addresses
+Ορισμένοι extractor δεν θα λειτουργήσουν καθώς οι dylibs είναι προ-συνδεδεμένες με σκληρά κωδικοποιημένες διευθύνσεις και επομένως μπορεί να πηδούν σε άγνωστες διευθύνσεις.
 
 > [!TIP]
-> It's also possible to download the Shared Library Cache of other \*OS devices in macos by using an emulator in Xcode. They will be downloaded inside: ls `$HOME/Library/Developer/Xcode/<*>OS\ DeviceSupport/<version>/Symbols/System/Library/Caches/com.apple.dyld/`, like:`$HOME/Library/Developer/Xcode/iOS\ DeviceSupport/14.1\ (18A8395)/Symbols/System/Library/Caches/com.apple.dyld/dyld_shared_cache_arm64`
+> Είναι επίσης δυνατό να κατεβάσετε την Shared Library Cache άλλων \*OS συσκευών στο macos χρησιμοποιώντας έναν εξομοιωτή στο Xcode. Θα κατεβούν μέσα: ls `$HOME/Library/Developer/Xcode/<*>OS\ DeviceSupport/<version>/Symbols/System/Library/Caches/com.apple.dyld/`, όπως: `$HOME/Library/Developer/Xcode/iOS\ DeviceSupport/14.1\ (18A8395)/Symbols/System/Library/Caches/com.apple.dyld/dyld_shared_cache_arm64`
 
 ### Mapping SLC
 
-**`dyld`** uses the syscall **`shared_region_check_np`** to know if the SLC has been mapped (which returns the address) and **`shared_region_map_and_slide_np`** to map the SLC.
+**`dyld`** χρησιμοποιεί την syscall **`shared_region_check_np`** για να γνωρίζει αν το SLC έχει χαρτογραφηθεί (το οποίο επιστρέφει τη διεύθυνση) και **`shared_region_map_and_slide_np`** για να χαρτογραφήσει το SLC.
 
-Note that even if the SLC is slid on the first use, all the **processes** use the **same copy**, which **eliminated the ASLR** protection if the attacker was able to run processes in the system. This was actually exploited in the past and fixed with shared region pager.
+Σημειώστε ότι ακόμη και αν το SLC έχει μετατοπιστεί κατά την πρώτη χρήση, όλες οι **διεργασίες** χρησιμοποιούν την **ίδια αντίγραφο**, το οποίο **εξαλείφει την προστασία ASLR** αν ο επιτιθέμενος ήταν σε θέση να εκτελέσει διεργασίες στο σύστημα. Αυτό εκμεταλλεύτηκε στο παρελθόν και διορθώθηκε με τον shared region pager.
 
-Branch pools are little Mach-O dylibs that creates small spaces between image mappings making impossible to interpose the functions.
+Τα branch pools είναι μικρές Mach-O dylibs που δημιουργούν μικρούς χώρους μεταξύ των χαρτογραφήσεων εικόνας, καθιστώντας αδύνατο να παρεμβληθούν οι λειτουργίες.
 
 ### Override SLCs
 
-Using the the env variables:
+Χρησιμοποιώντας τις μεταβλητές περιβάλλοντος:
 
-- **`DYLD_DHARED_REGION=private DYLD_SHARED_CACHE_DIR=</path/dir> DYLD_SHARED_CACHE_DONT_VALIDATE=1`** -> This will allow to load a new shared library cache
-- **`DYLD_SHARED_CACHE_DIR=avoid`** and manually replace the libraries with symlinks to the shared cache with the real ones (you will need to extract them)
+- **`DYLD_DHARED_REGION=private DYLD_SHARED_CACHE_DIR=</path/dir> DYLD_SHARED_CACHE_DONT_VALIDATE=1`** -> Αυτό θα επιτρέψει τη φόρτωση μιας νέας shared library cache
+- **`DYLD_SHARED_CACHE_DIR=avoid`** και χειροκίνητα αντικαταστήστε τις βιβλιοθήκες με symlinks στη shared cache με τις πραγματικές (θα χρειαστεί να τις εξαγάγετε)
 
 ## Special File Permissions
 
 ### Folder permissions
 
-In a **folder**, **read** allows to **list it**, **write** allows to **delete** and **write** files on it, and **execute** allows to **traverse** the directory. So, for example, a user with **read permission over a file** inside a directory where he **doesn't have execute** permission **won't be able to read** the file.
+Σε έναν **φάκελο**, η **ανάγνωση** επιτρέπει να **τον καταγράφετε**, η **εγγραφή** επιτρέπει να **διαγράφετε** και να **εγγράφετε** αρχεία σε αυτόν, και η **εκτέλεση** επιτρέπει να **διασχίζετε** τον κατάλογο. Έτσι, για παράδειγμα, ένας χρήστης με **δικαίωμα ανάγνωσης σε ένα αρχείο** μέσα σε έναν κατάλογο όπου **δεν έχει δικαίωμα εκτέλεσης** **δεν θα μπορεί να διαβάσει** το αρχείο.
 
 ### Flag modifiers
 
-There are some flags that could be set in the files that will make file behave differently. You can **check the flags** of the files inside a directory with `ls -lO /path/directory`
+Υπάρχουν ορισμένες σημαίες που μπορούν να οριστούν στα αρχεία που θα κάνουν το αρχείο να συμπεριφέρεται διαφορετικά. Μπορείτε να **ελέγξετε τις σημαίες** των αρχείων μέσα σε έναν κατάλογο με `ls -lO /path/directory`
 
-- **`uchg`**: Known as **uchange** flag will **prevent any action** changing or deleting the **file**. To set it do: `chflags uchg file.txt`
-  - The root user could **remove the flag** and modify the file
-- **`restricted`**: This flag makes the file be **protected by SIP** (you cannot add this flag to a file).
-- **`Sticky bit`**: If a directory with sticky bit, **only** the **directories owner or root can remane or delete** files. Typically this is set on the /tmp directory to prevent ordinary users from deleting or moving other users’ files.
+- **`uchg`**: Γνωστή ως σημαία **uchange** θα **αποτρέψει οποιαδήποτε ενέργεια** αλλαγής ή διαγραφής του **αρχείου**. Για να την ορίσετε κάντε: `chflags uchg file.txt`
+- Ο χρήστης root θα μπορούσε να **αφαιρέσει τη σημαία** και να τροποποιήσει το αρχείο
+- **`restricted`**: Αυτή η σημαία καθιστά το αρχείο **προστατευμένο από SIP** (δεν μπορείτε να προσθέσετε αυτή τη σημαία σε ένα αρχείο).
+- **`Sticky bit`**: Αν ένας κατάλογος έχει sticky bit, **μόνο** ο **ιδιοκτήτης του καταλόγου ή ο root μπορεί να μετονομάσει ή να διαγράψει** αρχεία. Συνήθως αυτό ορίζεται στον κατάλογο /tmp για να αποτρέψει τους κανονικούς χρήστες από το να διαγράψουν ή να μετακινήσουν τα αρχεία άλλων χρηστών.
 
-All the flags can be found in the file `sys/stat.h` (find it using `mdfind stat.h | grep stat.h`) and are:
+Όλες οι σημαίες μπορούν να βρεθούν στο αρχείο `sys/stat.h` (βρείτε το χρησιμοποιώντας `mdfind stat.h | grep stat.h`) και είναι:
 
-- `UF_SETTABLE` 0x0000ffff: Mask of owner changeable flags.
-- `UF_NODUMP` 0x00000001: Do not dump file.
-- `UF_IMMUTABLE` 0x00000002: File may not be changed.
-- `UF_APPEND` 0x00000004: Writes to file may only append.
-- `UF_OPAQUE` 0x00000008: Directory is opaque wrt. union.
-- `UF_COMPRESSED` 0x00000020: File is compressed (some file-systems).
-- `UF_TRACKED` 0x00000040: No notifications for deletes/renames for files with this set.
-- `UF_DATAVAULT` 0x00000080: Entitlement required for reading and writing.
-- `UF_HIDDEN` 0x00008000: Hint that this item should not be displayed in a GUI.
-- `SF_SUPPORTED` 0x009f0000: Mask of superuser supported flags.
-- `SF_SETTABLE` 0x3fff0000: Mask of superuser changeable flags.
-- `SF_SYNTHETIC` 0xc0000000: Mask of system read-only synthetic flags.
-- `SF_ARCHIVED` 0x00010000: File is archived.
-- `SF_IMMUTABLE` 0x00020000: File may not be changed.
-- `SF_APPEND` 0x00040000: Writes to file may only append.
-- `SF_RESTRICTED` 0x00080000: Entitlement required for writing.
-- `SF_NOUNLINK` 0x00100000: Item may not be removed, renamed or mounted on.
-- `SF_FIRMLINK` 0x00800000: File is a firmlink.
-- `SF_DATALESS` 0x40000000: File is dataless object.
+- `UF_SETTABLE` 0x0000ffff: Μάσκα μεταβλητών που αλλάζουν από τον ιδιοκτήτη.
+- `UF_NODUMP` 0x00000001: Μην αποθηκεύετε το αρχείο.
+- `UF_IMMUTABLE` 0x00000002: Το αρχείο δεν μπορεί να αλλάξει.
+- `UF_APPEND` 0x00000004: Οι εγγραφές στο αρχείο μπορούν να προστίθενται μόνο.
+- `UF_OPAQUE` 0x00000008: Ο κατάλογος είναι αδιαφανής σε σχέση με την ένωση.
+- `UF_COMPRESSED` 0x00000020: Το αρχείο είναι συμπιεσμένο (ορισμένα συστήματα αρχείων).
+- `UF_TRACKED` 0x00000040: Καμία ειδοποίηση για διαγραφές/μετονομασίες για αρχεία με αυτή τη ρύθμιση.
+- `UF_DATAVAULT` 0x00000080: Απαιτείται δικαίωμα για ανάγνωση και εγγραφή.
+- `UF_HIDDEN` 0x00008000: Υπόδειξη ότι αυτό το στοιχείο δεν πρέπει να εμφανίζεται σε GUI.
+- `SF_SUPPORTED` 0x009f0000: Μάσκα υποστηριζόμενων σημαίων superuser.
+- `SF_SETTABLE` 0x3fff0000: Μάσκα μεταβλητών που αλλάζουν από superuser.
+- `SF_SYNTHETIC` 0xc0000000: Μάσκα συστημικών αναγνωρίσιμων σημαίων μόνο για ανάγνωση.
+- `SF_ARCHIVED` 0x00010000: Το αρχείο είναι αρχειοθετημένο.
+- `SF_IMMUTABLE` 0x00020000: Το αρχείο δεν μπορεί να αλλάξει.
+- `SF_APPEND` 0x00040000: Οι εγγραφές στο αρχείο μπορούν να προστίθενται μόνο.
+- `SF_RESTRICTED` 0x00080000: Απαιτείται δικαίωμα για εγγραφή.
+- `SF_NOUNLINK` 0x00100000: Το στοιχείο δεν μπορεί να αφαιρεθεί, να μετονομαστεί ή να προσαρτηθεί.
+- `SF_FIRMLINK` 0x00800000: Το αρχείο είναι firmlink.
+- `SF_DATALESS` 0x40000000: Το αρχείο είναι αντικείμενο χωρίς δεδομένα.
 
 ### **File ACLs**
 
-File **ACLs** contain **ACE** (Access Control Entries) where more **granular permissions** can be assigned to different users.
+Οι **ACLs** αρχείων περιέχουν **ACE** (Εγγραφές Ελέγχου Πρόσβασης) όπου μπορούν να ανατεθούν πιο **λεπτομερείς άδειες** σε διαφορετικούς χρήστες.
 
-It's possible to grant a **directory** these permissions: `list`, `search`, `add_file`, `add_subdirectory`, `delete_child`, `delete_child`.\
-Ans to a **file**: `read`, `write`, `append`, `execute`.
+Είναι δυνατόν να παραχωρήσετε σε έναν **κατάλογο** αυτές τις άδειες: `list`, `search`, `add_file`, `add_subdirectory`, `delete_child`, `delete_child`.\
+Και σε ένα **αρχείο**: `read`, `write`, `append`, `execute`.
 
-When the file contains ACLs you will **find a "+" when listing the permissions like in**:
-
+Όταν το αρχείο περιέχει ACLs θα **βρείτε ένα "+" κατά την καταγραφή των αδειών όπως σε**:
 ```bash
 ls -ld Movies
 drwx------+   7 username  staff     224 15 Apr 19:42 Movies
 ```
-
-You can **read the ACLs** of the file with:
-
+Μπορείτε να **διαβάσετε τα ACLs** του αρχείου με:
 ```bash
 ls -lde Movies
 drwx------+ 7 username  staff  224 15 Apr 19:42 Movies
- 0: group:everyone deny delete
+0: group:everyone deny delete
 ```
-
-You can find **all the files with ACLs** with (this is veeery slow):
-
+Μπορείτε να βρείτε **όλα τα αρχεία με ACLs** με (αυτό είναι πολύ αργό):
 ```bash
 ls -RAle / 2>/dev/null | grep -E -B1 "\d: "
 ```
-
 ### Extended Attributes
 
-Extended attributes have a name and any desired value, and can be seen using `ls -@` and manipulated using the `xattr` command. Some common extended attributes are:
+Οι εκτεταμένες ιδιότητες έχουν ένα όνομα και οποιαδήποτε επιθυμητή τιμή, και μπορούν να προβληθούν χρησιμοποιώντας `ls -@` και να τροποποιηθούν χρησιμοποιώντας την εντολή `xattr`. Ορισμένες κοινές εκτεταμένες ιδιότητες είναι:
 
-- `com.apple.resourceFork`: Resource fork compatibility. Also visible as `filename/..namedfork/rsrc`
-- `com.apple.quarantine`: MacOS: Gatekeeper quarantine mechanism (III/6)
-- `metadata:*`: MacOS: various metadata, such as `_backup_excludeItem`, or `kMD*`
-- `com.apple.lastuseddate` (#PS): Last file use date
-- `com.apple.FinderInfo`: MacOS: Finder information (e.g., color Tags)
-- `com.apple.TextEncoding`: Specifies text encoding of ASCII text files
-- `com.apple.logd.metadata`: Used by logd on files in `/var/db/diagnostics`
-- `com.apple.genstore.*`: Generational storage (`/.DocumentRevisions-V100` in root of filesystem)
-- `com.apple.rootless`: MacOS: Used by System Integrity Protection to label file (III/10)
-- `com.apple.uuidb.boot-uuid`: logd markings of boot epochs with unique UUID
-- `com.apple.decmpfs`: MacOS: Transparent file compression (II/7)
-- `com.apple.cprotect`: \*OS: Per-file encryption data (III/11)
-- `com.apple.installd.*`: \*OS: Metadata used by installd, e.g., `installType`, `uniqueInstallID`
+- `com.apple.resourceFork`: Συμβατότητα πόρου. Επίσης ορατό ως `filename/..namedfork/rsrc`
+- `com.apple.quarantine`: MacOS: Μηχανισμός καραντίνας Gatekeeper (III/6)
+- `metadata:*`: MacOS: διάφορα μεταδεδομένα, όπως `_backup_excludeItem`, ή `kMD*`
+- `com.apple.lastuseddate` (#PS): Η τελευταία ημερομηνία χρήσης αρχείου
+- `com.apple.FinderInfo`: MacOS: Πληροφορίες Finder (π.χ., χρωματικές ετικέτες)
+- `com.apple.TextEncoding`: Προσδιορίζει την κωδικοποίηση κειμένου των αρχείων ASCII
+- `com.apple.logd.metadata`: Χρησιμοποιείται από το logd σε αρχεία στο `/var/db/diagnostics`
+- `com.apple.genstore.*`: Γενετική αποθήκευση (`/.DocumentRevisions-V100` στη ρίζα του συστήματος αρχείων)
+- `com.apple.rootless`: MacOS: Χρησιμοποιείται από την Προστασία Ακεραιότητας Συστήματος για την επισήμανση αρχείου (III/10)
+- `com.apple.uuidb.boot-uuid`: Σημάνσεις logd των εποχών εκκίνησης με μοναδικό UUID
+- `com.apple.decmpfs`: MacOS: Διαφανής συμπίεση αρχείων (II/7)
+- `com.apple.cprotect`: \*OS: Δεδομένα κρυπτογράφησης ανά αρχείο (III/11)
+- `com.apple.installd.*`: \*OS: Μεταδεδομένα που χρησιμοποιούνται από το installd, π.χ., `installType`, `uniqueInstallID`
 
 ### Resource Forks | macOS ADS
 
-This is a way to obtain **Alternate Data Streams in MacOS** machines. You can save content inside an extended attribute called **com.apple.ResourceFork** inside a file by saving it in **file/..namedfork/rsrc**.
-
+Αυτή είναι μια μέθοδος για να αποκτήσετε **Εναλλακτικά Ρεύματα Δεδομένων σε μηχανές MacOS**. Μπορείτε να αποθηκεύσετε περιεχόμενο μέσα σε μια εκτεταμένη ιδιότητα που ονομάζεται **com.apple.ResourceFork** μέσα σε ένα αρχείο αποθηκεύοντάς το σε **file/..namedfork/rsrc**.
 ```bash
 echo "Hello" > a.txt
 echo "Hello Mac ADS" > a.txt/..namedfork/rsrc
@@ -216,24 +207,21 @@ com.apple.ResourceFork: Hello Mac ADS
 ls -l a.txt #The file length is still q
 -rw-r--r--@ 1 username  wheel  6 17 Jul 01:15 a.txt
 ```
-
-You can **find all the files containing this extended attribute** with:
-
+Μπορείτε να **βρείτε όλα τα αρχεία που περιέχουν αυτό το επεκταμένο χαρακτηριστικό** με:
 ```bash
 find / -type f -exec ls -ld {} \; 2>/dev/null | grep -E "[x\-]@ " | awk '{printf $9; printf "\n"}' | xargs -I {} xattr -lv {} | grep "com.apple.ResourceFork"
 ```
-
 ### decmpfs
 
-The extended attribute `com.apple.decmpfs` indicates that the file is stored encrypted, `ls -l` will report a **size of 0** and the compressed data is inside this attribute. Whenever the file is accessed it'll be decrypted in memory.
+Η επεκταμένη ιδιότητα `com.apple.decmpfs` υποδεικνύει ότι το αρχείο αποθηκεύεται κρυπτογραφημένο, το `ls -l` θα αναφέρει **μέγεθος 0** και τα συμπιεσμένα δεδομένα βρίσκονται μέσα σε αυτή την ιδιότητα. Όποτε το αρχείο προσπελάζεται, θα αποκρυπτογραφείται στη μνήμη.
 
-This attr can be seen with `ls -lO` indicated as compressed because compressed files are also tagged with the flag `UF_COMPRESSED`. If a compressed file is removed this flag with `chflags nocompressed </path/to/file>`, the system won't know that the file was compressed and therefore it won't be able to decompress and access the data (it will think that it's actually empty).
+Αυτή η ιδιότητα μπορεί να φαίνεται με το `ls -lO` υποδεικνύοντας ότι είναι συμπιεσμένο επειδή τα συμπιεσμένα αρχεία είναι επίσης επισημασμένα με τη σημαία `UF_COMPRESSED`. Αν ένα συμπιεσμένο αρχείο αφαιρεθεί αυτή η σημαία με `chflags nocompressed </path/to/file>`, το σύστημα δεν θα γνωρίζει ότι το αρχείο ήταν συμπιεσμένο και επομένως δεν θα μπορεί να αποσυμπιέσει και να προσπελάσει τα δεδομένα (θα νομίζει ότι είναι στην πραγματικότητα κενό).
 
-The tool afscexpand can be used to force decompress a dile.
+Το εργαλείο afscexpand μπορεί να χρησιμοποιηθεί για να αναγκάσει την αποσυμπίεση ενός αρχείου.
 
 ## **Universal binaries &** Mach-o Format
 
-Mac OS binaries usually are compiled as **universal binaries**. A **universal binary** can **support multiple architectures in the same file**.
+Τα δυαδικά αρχεία Mac OS συνήθως είναι συμπιεσμένα ως **universal binaries**. Ένα **universal binary** μπορεί να **υποστηρίζει πολλαπλές αρχιτεκτονικές στο ίδιο αρχείο**.
 
 {{#ref}}
 universal-binaries-and-mach-o-format.md
@@ -249,22 +237,22 @@ macos-memory-dumping.md
 
 ## Risk Category Files Mac OS
 
-The directory `/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/System` is where information about the **risk associated with different file extensions is stored**. This directory categorizes files into various risk levels, influencing how Safari handles these files upon download. The categories are as follows:
+Ο φάκελος `/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/System` είναι όπου αποθηκεύεται πληροφορία σχετικά με τον **κίνδυνο που σχετίζεται με διαφορετικές επεκτάσεις αρχείων**. Αυτός ο φάκελος κατηγοριοποιεί τα αρχεία σε διάφορα επίπεδα κινδύνου, επηρεάζοντας το πώς το Safari χειρίζεται αυτά τα αρχεία κατά τη λήψη τους. Οι κατηγορίες είναι οι εξής:
 
-- **LSRiskCategorySafe**: Files in this category are considered **completely safe**. Safari will automatically open these files after they are downloaded.
-- **LSRiskCategoryNeutral**: These files come with no warnings and are **not automatically opened** by Safari.
-- **LSRiskCategoryUnsafeExecutable**: Files under this category **trigger a warning** indicating that the file is an application. This serves as a security measure to alert the user.
-- **LSRiskCategoryMayContainUnsafeExecutable**: This category is for files, such as archives, that might contain an executable. Safari will **trigger a warning** unless it can verify that all contents are safe or neutral.
+- **LSRiskCategorySafe**: Τα αρχεία σε αυτή την κατηγορία θεωρούνται **εντελώς ασφαλή**. Το Safari θα ανοίξει αυτόματα αυτά τα αρχεία μετά τη λήψη τους.
+- **LSRiskCategoryNeutral**: Αυτά τα αρχεία δεν συνοδεύονται από προειδοποιήσεις και **δεν ανοίγονται αυτόματα** από το Safari.
+- **LSRiskCategoryUnsafeExecutable**: Τα αρχεία κάτω από αυτή την κατηγορία **προκαλούν μια προειδοποίηση** υποδεικνύοντας ότι το αρχείο είναι μια εφαρμογή. Αυτό λειτουργεί ως μέτρο ασφαλείας για να ειδοποιήσει τον χρήστη.
+- **LSRiskCategoryMayContainUnsafeExecutable**: Αυτή η κατηγορία είναι για αρχεία, όπως τα αρχεία αρχειοθέτησης, που μπορεί να περιέχουν μια εκτελέσιμη εφαρμογή. Το Safari θα **προκαλέσει μια προειδοποίηση** εκτός αν μπορεί να επαληθεύσει ότι όλα τα περιεχόμενα είναι ασφαλή ή ουδέτερα.
 
 ## Log files
 
-- **`$HOME/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV2`**: Contains information about downloaded files, like the URL from where they were downloaded.
-- **`/var/log/system.log`**: Main log of OSX systems. com.apple.syslogd.plist is responsible for the execution of syslogging (you can check if it's disabled looking for "com.apple.syslogd" in `launchctl list`.
-- **`/private/var/log/asl/*.asl`**: These are the Apple System Logs which may contain interesting information.
-- **`$HOME/Library/Preferences/com.apple.recentitems.plist`**: Stores recently accessed files and applications through "Finder".
-- **`$HOME/Library/Preferences/com.apple.loginitems.plsit`**: Stores items to launch upon system startup
-- **`$HOME/Library/Logs/DiskUtility.log`**: Log file for thee DiskUtility App (info about drives, including USBs)
-- **`/Library/Preferences/SystemConfiguration/com.apple.airport.preferences.plist`**: Data about wireless access points.
-- **`/private/var/db/launchd.db/com.apple.launchd/overrides.plist`**: List of daemons deactivated.
+- **`$HOME/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV2`**: Περιέχει πληροφορίες σχετικά με τα ληφθέντα αρχεία, όπως τη διεύθυνση URL από όπου λήφθηκαν.
+- **`/var/log/system.log`**: Κύριο αρχείο καταγραφής των συστημάτων OSX. Το com.apple.syslogd.plist είναι υπεύθυνο για την εκτέλεση της καταγραφής συστήματος (μπορείτε να ελέγξετε αν είναι απενεργοποιημένο αναζητώντας "com.apple.syslogd" στο `launchctl list`).
+- **`/private/var/log/asl/*.asl`**: Αυτά είναι τα Apple System Logs που μπορεί να περιέχουν ενδιαφέρουσες πληροφορίες.
+- **`$HOME/Library/Preferences/com.apple.recentitems.plist`**: Αποθηκεύει πρόσφατα προσπελάσιμα αρχεία και εφαρμογές μέσω του "Finder".
+- **`$HOME/Library/Preferences/com.apple.loginitems.plsit`**: Αποθηκεύει στοιχεία που θα εκκινούν κατά την εκκίνηση του συστήματος.
+- **`$HOME/Library/Logs/DiskUtility.log`**: Αρχείο καταγραφής για την εφαρμογή DiskUtility (πληροφορίες σχετικά με δίσκους, συμπεριλαμβανομένων των USB).
+- **`/Library/Preferences/SystemConfiguration/com.apple.airport.preferences.plist`**: Δεδομένα σχετικά με τα ασύρματα σημεία πρόσβασης.
+- **`/private/var/db/launchd.db/com.apple.launchd/overrides.plist`**: Λίστα με τους απενεργοποιημένους δαίμονες.
 
 {{#include ../../../banners/hacktricks-training.md}}

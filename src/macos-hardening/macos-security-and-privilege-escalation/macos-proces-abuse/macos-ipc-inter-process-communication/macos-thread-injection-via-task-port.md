@@ -9,168 +9,152 @@
 
 ## 1. Thread Hijacking
 
-Initially, the **`task_threads()`** function is invoked on the task port to obtain a thread list from the remote task. A thread is selected for hijacking. This approach diverges from conventional code injection methods as creating a new remote thread is prohibited due to the new mitigation blocking `thread_create_running()`.
+Αρχικά, η συνάρτηση **`task_threads()`** καλείται στην θύρα εργασίας για να αποκτήσει μια λίστα νημάτων από την απομακρυσμένη εργασία. Ένα νήμα επιλέγεται για hijacking. Αυτή η προσέγγιση αποκλίνει από τις συμβατικές μεθόδους έγχυσης κώδικα καθώς η δημιουργία ενός νέου απομακρυσμένου νήματος απαγορεύεται λόγω της νέας μείωσης που μπλοκάρει το `thread_create_running()`.
 
-To control the thread, **`thread_suspend()`** is called, halting its execution.
+Για να ελεγχθεί το νήμα, καλείται το **`thread_suspend()`**, σταματώντας την εκτέλεσή του.
 
-The only operations permitted on the remote thread involve **stopping** and **starting** it, **retrieving** and **modifying** its register values. Remote function calls are initiated by setting registers `x0` to `x7` to the **arguments**, configuring **`pc`** to target the desired function, and activating the thread. Ensuring the thread does not crash after the return necessitates detection of the return.
+Οι μόνοι επιτρεπόμενοι χειρισμοί στο απομακρυσμένο νήμα περιλαμβάνουν **σταμάτημα** και **εκκίνηση** αυτού, **ανάκτηση** και **τροποποίηση** των τιμών των καταχωρητών του. Οι απομακρυσμένες κλήσεις συναρτήσεων ξεκινούν με την ρύθμιση των καταχωρητών `x0` έως `x7` στις **παραμέτρους**, ρυθμίζοντας το **`pc`** για να στοχεύσει τη επιθυμητή συνάρτηση και ενεργοποιώντας το νήμα. Η διασφάλιση ότι το νήμα δεν θα καταρρεύσει μετά την επιστροφή απαιτεί ανίχνευση της επιστροφής.
 
-One strategy involves **registering an exception handler** for the remote thread using `thread_set_exception_ports()`, setting the `lr` register to an invalid address before the function call. This triggers an exception post-function execution, sending a message to the exception port, enabling state inspection of the thread to recover the return value. Alternatively, as adopted from Ian Beer’s triple_fetch exploit, `lr` is set to loop infinitely. The thread's registers are then continuously monitored until **`pc` points to that instruction**.
+Μια στρατηγική περιλαμβάνει **καταχώρηση ενός χειριστή εξαιρέσεων** για το απομακρυσμένο νήμα χρησιμοποιώντας το `thread_set_exception_ports()`, ρυθμίζοντας τον καταχωρητή `lr` σε μια μη έγκυρη διεύθυνση πριν από την κλήση της συνάρτησης. Αυτό προκαλεί μια εξαίρεση μετά την εκτέλεση της συνάρτησης, στέλνοντας ένα μήνυμα στην θύρα εξαίρεσης, επιτρέποντας την επιθεώρηση της κατάστασης του νήματος για την ανάκτηση της τιμής επιστροφής. Εναλλακτικά, όπως υιοθετήθηκε από την εκμετάλλευση triple_fetch του Ian Beer, το `lr` ρυθμίζεται να επαναλαμβάνεται άπειρα. Οι καταχωρητές του νήματος παρακολουθούνται συνεχώς μέχρι το **`pc` να δείχνει σε αυτή την εντολή**.
 
 ## 2. Mach ports for communication
 
-The subsequent phase involves establishing Mach ports to facilitate communication with the remote thread. These ports are instrumental in transferring arbitrary send and receive rights between tasks.
+Η επόμενη φάση περιλαμβάνει την εγκαθίδρυση Mach ports για να διευκολύνει την επικοινωνία με το απομακρυσμένο νήμα. Αυτές οι θύρες είναι καθοριστικές για τη μεταφορά αυθαίρετων δικαιωμάτων αποστολής και λήψης μεταξύ των εργασιών.
 
-For bidirectional communication, two Mach receive rights are created: one in the local and the other in the remote task. Subsequently, a send right for each port is transferred to the counterpart task, enabling message exchange.
+Για αμφίδρομη επικοινωνία, δημιουργούνται δύο δικαιώματα λήψης Mach: ένα στην τοπική και ένα στην απομακρυσμένη εργασία. Στη συνέχεια, ένα δικαίωμα αποστολής για κάθε θύρα μεταφέρεται στην αντίστοιχη εργασία, επιτρέποντας την ανταλλαγή μηνυμάτων.
 
-Focusing on the local port, the receive right is held by the local task. The port is created with `mach_port_allocate()`. The challenge lies in transferring a send right to this port into the remote task.
+Εστιάζοντας στην τοπική θύρα, το δικαίωμα λήψης κατέχεται από την τοπική εργασία. Η θύρα δημιουργείται με το `mach_port_allocate()`. Η πρόκληση έγκειται στη μεταφορά ενός δικαιώματος αποστολής σε αυτή τη θύρα στην απομακρυσμένη εργασία.
 
-A strategy involves leveraging `thread_set_special_port()` to place a send right to the local port in the remote thread’s `THREAD_KERNEL_PORT`. Then, the remote thread is instructed to call `mach_thread_self()` to retrieve the send right.
+Μια στρατηγική περιλαμβάνει την εκμετάλλευση του `thread_set_special_port()` για να τοποθετήσει ένα δικαίωμα αποστολής στην τοπική θύρα στην `THREAD_KERNEL_PORT` του απομακρυσμένου νήματος. Στη συνέχεια, το απομακρυσμένο νήμα καθοδηγείται να καλέσει το `mach_thread_self()` για να ανακτήσει το δικαίωμα αποστολής.
 
-For the remote port, the process is essentially reversed. The remote thread is directed to generate a Mach port via `mach_reply_port()` (as `mach_port_allocate()` is unsuitable due to its return mechanism). Upon port creation, `mach_port_insert_right()` is invoked in the remote thread to establish a send right. This right is then stashed in the kernel using `thread_set_special_port()`. Back in the local task, `thread_get_special_port()` is used on the remote thread to acquire a send right to the newly allocated Mach port in the remote task.
+Για την απομακρυσμένη θύρα, η διαδικασία είναι ουσιαστικά αντίστροφη. Το απομακρυσμένο νήμα καθοδηγείται να δημιουργήσει μια θύρα Mach μέσω του `mach_reply_port()` (καθώς το `mach_port_allocate()` δεν είναι κατάλληλο λόγω του μηχανισμού επιστροφής του). Μετά τη δημιουργία της θύρας, καλείται το `mach_port_insert_right()` στο απομακρυσμένο νήμα για να καθιερώσει ένα δικαίωμα αποστολής. Αυτό το δικαίωμα αποθηκεύεται στη μνήμη του πυρήνα χρησιμοποιώντας το `thread_set_special_port()`. Επιστρέφοντας στην τοπική εργασία, χρησιμοποιείται το `thread_get_special_port()` στο απομακρυσμένο νήμα για να αποκτήσει ένα δικαίωμα αποστολής στη νεοδημιουργημένη θύρα Mach στην απομακρυσμένη εργασία.
 
-Completion of these steps results in the establishment of Mach ports, laying the groundwork for bidirectional communication.
+Η ολοκλήρωση αυτών των βημάτων έχει ως αποτέλεσμα την εγκαθίδρυση Mach ports, θέτοντας τα θεμέλια για αμφίδρομη επικοινωνία.
 
 ## 3. Basic Memory Read/Write Primitives
 
-In this section, the focus is on utilizing the execute primitive to establish basic memory read and write primitives. These initial steps are crucial for gaining more control over the remote process, though the primitives at this stage won't serve many purposes. Soon, they will be upgraded to more advanced versions.
+Σε αυτή την ενότητα, η εστίαση είναι στη χρήση του εκτελέσιμου πρωτοκόλλου για την εγκαθίδρυση βασικών πρωτοκόλλων ανάγνωσης και εγγραφής μνήμης. Αυτά τα αρχικά βήματα είναι κρίσιμα για την απόκτηση περισσότερου ελέγχου πάνω στη απομακρυσμένη διαδικασία, αν και τα πρωτόκολλα σε αυτό το στάδιο δεν θα εξυπηρετήσουν πολλούς σκοπούς. Σύντομα, θα αναβαθμιστούν σε πιο προηγμένες εκδόσεις.
 
 ### Memory Reading and Writing Using Execute Primitive
 
-The goal is to perform memory reading and writing using specific functions. For reading memory, functions resembling the following structure are used:
-
+Ο στόχος είναι να εκτελούνται αναγνώσεις και εγγραφές μνήμης χρησιμοποιώντας συγκεκριμένες συναρτήσεις. Για την ανάγνωση μνήμης, χρησιμοποιούνται συναρτήσεις που μοιάζουν με την παρακάτω δομή:
 ```c
 uint64_t read_func(uint64_t *address) {
-    return *address;
+return *address;
 }
 ```
-
-And for writing to memory, functions similar to this structure are used:
-
+Και για την εγγραφή στη μνήμη, χρησιμοποιούνται συναρτήσεις παρόμοιες με αυτή τη δομή:
 ```c
 void write_func(uint64_t *address, uint64_t value) {
-    *address = value;
+*address = value;
 }
 ```
-
-These functions correspond to the given assembly instructions:
-
+Αυτές οι συναρτήσεις αντιστοιχούν στις δοθείσες εντολές assembly:
 ```
 _read_func:
-    ldr x0, [x0]
-    ret
+ldr x0, [x0]
+ret
 _write_func:
-    str x1, [x0]
-    ret
+str x1, [x0]
+ret
 ```
+### Αναγνώριση Κατάλληλων Συναρτήσεων
 
-### Identifying Suitable Functions
+Μια σάρωση κοινών βιβλιοθηκών αποκάλυψε κατάλληλους υποψηφίους για αυτές τις λειτουργίες:
 
-A scan of common libraries revealed appropriate candidates for these operations:
-
-1. **Reading Memory:**
-   The `property_getName()` function from the [Objective-C runtime library](https://opensource.apple.com/source/objc4/objc4-723/runtime/objc-runtime-new.mm.auto.html) is identified as a suitable function for reading memory. The function is outlined below:
-
+1. **Ανάγνωση Μνήμης:**
+Η συνάρτηση `property_getName()` από τη [βιβλιοθήκη χρόνου εκτέλεσης Objective-C](https://opensource.apple.com/source/objc4/objc4-723/runtime/objc-runtime-new.mm.auto.html) αναγνωρίζεται ως κατάλληλη συνάρτηση για την ανάγνωση μνήμης. Η συνάρτηση περιγράφεται παρακάτω:
 ```c
 const char *property_getName(objc_property_t prop) {
-      return prop->name;
+return prop->name;
 }
 ```
+Αυτή η συνάρτηση λειτουργεί αποτελεσματικά όπως η `read_func` επιστρέφοντας το πρώτο πεδίο του `objc_property_t`.
 
-This function effectively acts like the `read_func` by returning the first field of `objc_property_t`.
-
-2. **Writing Memory:**
-   Finding a pre-built function for writing memory is more challenging. However, the `_xpc_int64_set_value()` function from libxpc is a suitable candidate with the following disassembly:
-
+2. **Γράφοντας Μνήμη:**
+Η εύρεση μιας προ-κατασκευασμένης συνάρτησης για τη γραφή μνήμης είναι πιο δύσκολη. Ωστόσο, η συνάρτηση `_xpc_int64_set_value()` από τη libxpc είναι κατάλληλος υποψήφιος με την παρακάτω αποσυναρμολόγηση:
 ```c
 __xpc_int64_set_value:
-    str x1, [x0, #0x18]
-    ret
+str x1, [x0, #0x18]
+ret
 ```
-
-To perform a 64-bit write at a specific address, the remote call is structured as:
-
+Για να εκτελέσετε μια εγγραφή 64-bit σε μια συγκεκριμένη διεύθυνση, η απομακρυσμένη κλήση δομείται ως εξής:
 ```c
 _xpc_int64_set_value(address - 0x18, value)
 ```
+Με αυτές τις βασικές αρχές καθορισμένες, η σκηνή είναι έτοιμη για τη δημιουργία κοινής μνήμης, σημειώνοντας μια σημαντική πρόοδο στον έλεγχο της απομακρυσμένης διαδικασίας.
 
-With these primitives established, the stage is set for creating shared memory, marking a significant progression in controlling the remote process.
+## 4. Ρύθμιση Κοινής Μνήμης
 
-## 4. Shared Memory Setup
+Ο στόχος είναι να καθιερωθεί κοινή μνήμη μεταξύ τοπικών και απομακρυσμένων εργασιών, απλοποιώντας τη μεταφορά δεδομένων και διευκολύνοντας την κλήση συναρτήσεων με πολλαπλά επιχειρήματα. Η προσέγγιση περιλαμβάνει την αξιοποίηση του `libxpc` και του τύπου αντικειμένου `OS_xpc_shmem`, ο οποίος βασίζεται σε καταχωρίσεις μνήμης Mach.
 
-The objective is to establish shared memory between local and remote tasks, simplifying data transfer and facilitating the calling of functions with multiple arguments. The approach involves leveraging `libxpc` and its `OS_xpc_shmem` object type, which is built upon Mach memory entries.
+### Επισκόπηση Διαδικασίας:
 
-### Process Overview:
+1. **Κατανομή Μνήμης**:
 
-1. **Memory Allocation**:
+- Κατανομή της μνήμης για κοινή χρήση χρησιμοποιώντας `mach_vm_allocate()`.
+- Χρησιμοποιήστε το `xpc_shmem_create()` για να δημιουργήσετε ένα αντικείμενο `OS_xpc_shmem` για την κατανεμημένη περιοχή μνήμης. Αυτή η συνάρτηση θα διαχειριστεί τη δημιουργία της καταχώρισης μνήμης Mach και θα αποθηκεύσει το δικαίωμα αποστολής Mach στη θέση `0x18` του αντικειμένου `OS_xpc_shmem`.
 
-   - Allocate the memory for sharing using `mach_vm_allocate()`.
-   - Use `xpc_shmem_create()` to create an `OS_xpc_shmem` object for the allocated memory region. This function will manage the creation of the Mach memory entry and store the Mach send right at offset `0x18` of the `OS_xpc_shmem` object.
+2. **Δημιουργία Κοινής Μνήμης στην Απομακρυσμένη Διαδικασία**:
 
-2. **Creating Shared Memory in Remote Process**:
+- Κατανομή μνήμης για το αντικείμενο `OS_xpc_shmem` στην απομακρυσμένη διαδικασία με μια απομακρυσμένη κλήση στο `malloc()`.
+- Αντιγραφή των περιεχομένων του τοπικού αντικειμένου `OS_xpc_shmem` στην απομακρυσμένη διαδικασία. Ωστόσο, αυτή η αρχική αντιγραφή θα έχει λανθασμένα ονόματα καταχωρίσεων μνήμης Mach στη θέση `0x18`.
 
-   - Allocate memory for the `OS_xpc_shmem` object in the remote process with a remote call to `malloc()`.
-   - Copy the contents of the local `OS_xpc_shmem` object to the remote process. However, this initial copy will have incorrect Mach memory entry names at offset `0x18`.
+3. **Διόρθωση της Καταχώρισης Μνήμης Mach**:
 
-3. **Correcting the Mach Memory Entry**:
+- Χρησιμοποιήστε τη μέθοδο `thread_set_special_port()` για να εισάγετε ένα δικαίωμα αποστολής για την καταχώριση μνήμης Mach στην απομακρυσμένη εργασία.
+- Διορθώστε το πεδίο καταχώρισης μνήμης Mach στη θέση `0x18` αντικαθιστώντας το με το όνομα της απομακρυσμένης καταχώρισης μνήμης.
 
-   - Utilize the `thread_set_special_port()` method to insert a send right for the Mach memory entry into the remote task.
-   - Correct the Mach memory entry field at offset `0x18` by overwriting it with the remote memory entry's name.
+4. **Ολοκλήρωση Ρύθμισης Κοινής Μνήμης**:
+- Επικυρώστε το απομακρυσμένο αντικείμενο `OS_xpc_shmem`.
+- Καθιερώστε την κοινή μνήμη με μια απομακρυσμένη κλήση στο `xpc_shmem_remote()`.
 
-4. **Finalizing Shared Memory Setup**:
-   - Validate the remote `OS_xpc_shmem` object.
-   - Establish the shared memory mapping with a remote call to `xpc_shmem_remote()`.
+Ακολουθώντας αυτά τα βήματα, η κοινή μνήμη μεταξύ των τοπικών και απομακρυσμένων εργασιών θα ρυθμιστεί αποτελεσματικά, επιτρέποντας απλές μεταφορές δεδομένων και την εκτέλεση συναρτήσεων που απαιτούν πολλαπλά επιχειρήματα.
 
-By following these steps, shared memory between the local and remote tasks will be efficiently set up, allowing for straightforward data transfers and the execution of functions requiring multiple arguments.
+## Πρόσθετα Κωδικοποιημένα Αποσπάσματα
 
-## Additional Code Snippets
-
-For memory allocation and shared memory object creation:
-
+Για την κατανομή μνήμης και τη δημιουργία αντικειμένου κοινής μνήμης:
 ```c
 mach_vm_allocate();
 xpc_shmem_create();
 ```
-
-For creating and correcting the shared memory object in the remote process:
-
+Για τη δημιουργία και διόρθωση του αντικειμένου κοινής μνήμης στη απομακρυσμένη διαδικασία:
 ```c
 malloc(); // for allocating memory remotely
 thread_set_special_port(); // for inserting send right
 ```
+Θυμηθείτε να χειρίζεστε σωστά τις λεπτομέρειες των Mach ports και των ονομάτων εισόδου μνήμης για να διασφαλίσετε ότι η ρύθμιση της κοινής μνήμης λειτουργεί σωστά.
 
-Remember to handle the details of Mach ports and memory entry names correctly to ensure that the shared memory setup functions properly.
+## 5. Επίτευξη Πλήρους Ελέγχου
 
-## 5. Achieving Full Control
+Αφού καθορίσουμε με επιτυχία την κοινή μνήμη και αποκτήσουμε ικανότητες αυθαίρετης εκτέλεσης, έχουμε ουσιαστικά αποκτήσει πλήρη έλεγχο της στοχευμένης διαδικασίας. Οι βασικές λειτουργίες που επιτρέπουν αυτόν τον έλεγχο είναι:
 
-Upon successfully establishing shared memory and gaining arbitrary execution capabilities, we have essentially gained full control over the target process. The key functionalities enabling this control are:
+1. **Αυθαίρετες Λειτουργίες Μνήμης**:
 
-1. **Arbitrary Memory Operations**:
+- Εκτελέστε αυθαίρετες αναγνώσεις μνήμης καλώντας το `memcpy()` για να αντιγράψετε δεδομένα από την κοινή περιοχή.
+- Εκτελέστε αυθαίρετες εγγραφές μνήμης χρησιμοποιώντας το `memcpy()` για να μεταφέρετε δεδομένα στην κοινή περιοχή.
 
-   - Perform arbitrary memory reads by invoking `memcpy()` to copy data from the shared region.
-   - Execute arbitrary memory writes by using `memcpy()` to transfer data to the shared region.
+2. **Διαχείριση Κλήσεων Συναρτήσεων με Πολλαπλά Επιχειρήματα**:
 
-2. **Handling Function Calls with Multiple Arguments**:
+- Για συναρτήσεις που απαιτούν περισσότερα από 8 επιχειρήματα, τοποθετήστε τα επιπλέον επιχειρήματα στη στοίβα σύμφωνα με τη σύμβαση κλήσης.
 
-   - For functions requiring more than 8 arguments, arrange the additional arguments on the stack in compliance with the calling convention.
+3. **Μεταφορά Mach Port**:
 
-3. **Mach Port Transfer**:
+- Μεταφέρετε Mach ports μεταξύ διαδικασιών μέσω Mach μηνυμάτων μέσω προηγουμένως καθορισμένων ports.
 
-   - Transfer Mach ports between tasks through Mach messages via previously established ports.
+4. **Μεταφορά Περιγραφέα Αρχείου**:
+- Μεταφέρετε περιγραφείς αρχείων μεταξύ διαδικασιών χρησιμοποιώντας fileports, μια τεχνική που επισημαίνεται από τον Ian Beer στο `triple_fetch`.
 
-4. **File Descriptor Transfer**:
-   - Transfer file descriptors between processes using fileports, a technique highlighted by Ian Beer in `triple_fetch`.
+Αυτός ο ολοκληρωμένος έλεγχος είναι ενσωματωμένος στη βιβλιοθήκη [threadexec](https://github.com/bazad/threadexec), παρέχοντας μια λεπτομερή υλοποίηση και μια φιλική προς τον χρήστη API για αλληλεπίδραση με τη διαδικασία του θύματος.
 
-This comprehensive control is encapsulated within the [threadexec](https://github.com/bazad/threadexec) library, providing a detailed implementation and a user-friendly API for interaction with the victim process.
+## Σημαντικές Σκέψεις:
 
-## Important Considerations:
+- Διασφαλίστε τη σωστή χρήση του `memcpy()` για λειτουργίες ανάγνωσης/εγγραφής μνήμης για να διατηρήσετε τη σταθερότητα του συστήματος και την ακεραιότητα των δεδομένων.
+- Κατά τη μεταφορά Mach ports ή περιγραφέων αρχείων, ακολουθήστε τους σωστούς πρωτοκόλλους και χειριστείτε τους πόρους υπεύθυνα για να αποτρέψετε διαρροές ή μη προγραμματισμένη πρόσβαση.
 
-- Ensure proper use of `memcpy()` for memory read/write operations to maintain system stability and data integrity.
-- When transferring Mach ports or file descriptors, follow proper protocols and handle resources responsibly to prevent leaks or unintended access.
+Ακολουθώντας αυτές τις οδηγίες και χρησιμοποιώντας τη βιβλιοθήκη `threadexec`, μπορεί κανείς να διαχειριστεί και να αλληλεπιδράσει με διαδικασίες σε λεπτομερές επίπεδο, επιτυγχάνοντας πλήρη έλεγχο της στοχευμένης διαδικασίας.
 
-By adhering to these guidelines and utilizing the `threadexec` library, one can efficiently manage and interact with processes at a granular level, achieving full control over the target process.
-
-## References
+## Αναφορές
 
 - [https://bazad.github.io/2018/10/bypassing-platform-binary-task-threads/](https://bazad.github.io/2018/10/bypassing-platform-binary-task-threads/)
 

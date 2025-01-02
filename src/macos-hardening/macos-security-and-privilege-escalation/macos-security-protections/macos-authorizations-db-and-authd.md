@@ -4,32 +4,31 @@
 
 ## **Athorizarions DB**
 
-The database located in `/var/db/auth.db` is database used to store permissions to perform sensitive operations. These operations are performed completely in **user space** and are usually used by **XPC services** which need to check **if the calling client is authorized** to perform certain action checking this database.
+Η βάση δεδομένων που βρίσκεται στο `/var/db/auth.db` είναι η βάση δεδομένων που χρησιμοποιείται για την αποθήκευση αδειών για την εκτέλεση ευαίσθητων λειτουργιών. Αυτές οι λειτουργίες εκτελούνται εντελώς σε **user space** και συνήθως χρησιμοποιούνται από **XPC services** που χρειάζονται να ελέγξουν **αν ο καλών πελάτης είναι εξουσιοδοτημένος** να εκτελέσει συγκεκριμένη ενέργεια ελέγχοντας αυτή τη βάση δεδομένων.
 
-Initially this database is created from the content of `/System/Library/Security/authorization.plist`. Then, some services might add or modify this dataabse to add other permissions to it.
+Αρχικά, αυτή η βάση δεδομένων δημιουργείται από το περιεχόμενο του `/System/Library/Security/authorization.plist`. Στη συνέχεια, ορισμένες υπηρεσίες μπορεί να προσθέσουν ή να τροποποιήσουν αυτή τη βάση δεδομένων για να προσθέσουν άλλες άδειες σε αυτήν.
 
-The rules are stored in the `rules` table inside the database and contains the folliwing colmns:
+Οι κανόνες αποθηκεύονται στον πίνακα `rules` μέσα στη βάση δεδομένων και περιέχουν τις εξής στήλες:
 
-- **id**: A unique identifier for each rule, automatically incremented and serving as the primary key.
-- **name**: The unique name of the rule used to identify and reference it within the authorization system.
-- **type**: Specifies the type of the rule, restricted to values 1 or 2 to define its authorization logic.
-- **class**: Categorizes the rule into a specific class, ensuring it is a positive integer.
-  - "allow" for allow, "deny" for deny, "user" if the group property indicated a group which membership allows the access, "rule" indicates in an array a rule to be fulfilled, "evaluate-mechanisms" followed by a `mechanisms` array which are either builtins or a name of a bundle inside `/System/Library/CoreServices/SecurityAgentPlugins/` or /Library/Security//SecurityAgentPlugins
-- **group**: Indicates the user group associated with the rule for group-based authorization.
-- **kofn**: Represents the "k-of-n" parameter, determining how many subrules must be satisfied out of a total number.
-- **timeout**: Defines the duration in seconds before the authorization granted by the rule expires.
-- **flags**: Contains various flags that modify the behavior and characteristics of the rule.
-- **tries**: Limits the number of allowed authorization attempts to enhance security.
-- **version**: Tracks the version of the rule for version control and updates.
-- **created**: Records the timestamp when the rule was created for auditing purposes.
-- **modified**: Stores the timestamp of the last modification made to the rule.
-- **hash**: Holds a hash value of the rule to ensure its integrity and detect tampering.
-- **identifier**: Provides a unique string identifier, such as a UUID, for external references to the rule.
-- **requirement**: Contains serialized data defining the rule's specific authorization requirements and mechanisms.
-- **comment**: Offers a human-readable description or comment about the rule for documentation and clarity.
+- **id**: Ένας μοναδικός αναγνωριστικός αριθμός για κάθε κανόνα, αυτόματα αυξανόμενος και λειτουργώντας ως το κύριο κλειδί.
+- **name**: Το μοναδικό όνομα του κανόνα που χρησιμοποιείται για την αναγνώριση και αναφορά του μέσα στο σύστημα εξουσιοδότησης.
+- **type**: Προσδιορίζει τον τύπο του κανόνα, περιορισμένο σε τιμές 1 ή 2 για να καθορίσει τη λογική εξουσιοδότησής του.
+- **class**: Κατηγοριοποιεί τον κανόνα σε μια συγκεκριμένη κατηγορία, διασφαλίζοντας ότι είναι θετικός ακέραιος.
+- "allow" για επιτρεπόμενο, "deny" για απορριπτέο, "user" αν η ιδιότητα ομάδας υποδεικνύει μια ομάδα της οποίας η συμμετοχή επιτρέπει την πρόσβαση, "rule" υποδεικνύει σε έναν πίνακα έναν κανόνα που πρέπει να εκπληρωθεί, "evaluate-mechanisms" ακολουθούμενο από έναν πίνακα `mechanisms` που είναι είτε ενσωματωμένα είτε ένα όνομα ενός bundle μέσα στο `/System/Library/CoreServices/SecurityAgentPlugins/` ή /Library/Security//SecurityAgentPlugins
+- **group**: Υποδεικνύει την ομάδα χρηστών που σχετίζεται με τον κανόνα για εξουσιοδότηση βάσει ομάδας.
+- **kofn**: Αντιπροσωπεύει την παράμετρο "k-of-n", καθορίζοντας πόσοι υποκανόνες πρέπει να ικανοποιηθούν από τον συνολικό αριθμό.
+- **timeout**: Ορίζει τη διάρκεια σε δευτερόλεπτα πριν η εξουσιοδότηση που χορηγείται από τον κανόνα λήξει.
+- **flags**: Περιέχει διάφορες σημαίες που τροποποιούν τη συμπεριφορά και τα χαρακτηριστικά του κανόνα.
+- **tries**: Περιορίζει τον αριθμό των επιτρεπόμενων προσπαθειών εξουσιοδότησης για την ενίσχυση της ασφάλειας.
+- **version**: Παρακολουθεί την έκδοση του κανόνα για έλεγχο εκδόσεων και ενημερώσεις.
+- **created**: Καταγράφει την χρονική σήμανση όταν δημιουργήθηκε ο κανόνας για σκοπούς ελέγχου.
+- **modified**: Αποθηκεύει την χρονική σήμανση της τελευταίας τροποποίησης που έγινε στον κανόνα.
+- **hash**: Περιέχει μια τιμή hash του κανόνα για να διασφαλίσει την ακεραιότητά του και να ανιχνεύσει παραβιάσεις.
+- **identifier**: Παρέχει έναν μοναδικό αναγνωριστικό συμβολοσειράς, όπως ένα UUID, για εξωτερικές αναφορές στον κανόνα.
+- **requirement**: Περιέχει σειριοποιημένα δεδομένα που καθορίζουν τις συγκεκριμένες απαιτήσεις και μηχανισμούς εξουσιοδότησης του κανόνα.
+- **comment**: Προσφέρει μια περιγραφή ή σχόλιο που είναι κατανοητό από τον άνθρωπο σχετικά με τον κανόνα για τεκμηρίωση και σαφήνεια.
 
 ### Example
-
 ```bash
 # List by name and comments
 sudo sqlite3 /var/db/auth.db "select name, comment from rules"
@@ -40,50 +39,46 @@ security authorizationdb read com.apple.tcc.util.admin
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>class</key>
-	<string>rule</string>
-	<key>comment</key>
-	<string>For modification of TCC settings.</string>
-	<key>created</key>
-	<real>701369782.01043606</real>
-	<key>modified</key>
-	<real>701369782.01043606</real>
-	<key>rule</key>
-	<array>
-		<string>authenticate-admin-nonshared</string>
-	</array>
-	<key>version</key>
-	<integer>0</integer>
+<key>class</key>
+<string>rule</string>
+<key>comment</key>
+<string>For modification of TCC settings.</string>
+<key>created</key>
+<real>701369782.01043606</real>
+<key>modified</key>
+<real>701369782.01043606</real>
+<key>rule</key>
+<array>
+<string>authenticate-admin-nonshared</string>
+</array>
+<key>version</key>
+<integer>0</integer>
 </dict>
 </plist>
 ```
-
-Moreover in [https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/](https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/) it's possible to see the meaning of `authenticate-admin-nonshared`:
-
+Επιπλέον, στο [https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/](https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/) είναι δυνατή η προβολή της σημασίας του `authenticate-admin-nonshared`:
 ```json
 {
-  "allow-root": "false",
-  "authenticate-user": "true",
-  "class": "user",
-  "comment": "Authenticate as an administrator.",
-  "group": "admin",
-  "session-owner": "false",
-  "shared": "false",
-  "timeout": "30",
-  "tries": "10000",
-  "version": "1"
+"allow-root": "false",
+"authenticate-user": "true",
+"class": "user",
+"comment": "Authenticate as an administrator.",
+"group": "admin",
+"session-owner": "false",
+"shared": "false",
+"timeout": "30",
+"tries": "10000",
+"version": "1"
 }
 ```
-
 ## Authd
 
-It's a deamon that will receive requests to authorize clients to perform sensitive actions. It works as a XPC service defined inside the `XPCServices/` folder and use to write its logs in `/var/log/authd.log`.
+Είναι ένας δαίμονας που θα λαμβάνει αιτήματα για να εξουσιοδοτήσει πελάτες να εκτελούν ευαίσθητες ενέργειες. Λειτουργεί ως υπηρεσία XPC που ορίζεται μέσα στον φάκελο `XPCServices/` και χρησιμοποιεί για να γράφει τα αρχεία καταγραφής του στο `/var/log/authd.log`.
 
-Moreover using the security tool it's possible to test many `Security.framework` APIs. For example the `AuthorizationExecuteWithPrivileges` running: `security execute-with-privileges /bin/ls`
+Επιπλέον, χρησιμοποιώντας το εργαλείο ασφαλείας, είναι δυνατόν να δοκιμάσετε πολλές APIs του `Security.framework`. Για παράδειγμα, η `AuthorizationExecuteWithPrivileges` εκτελώντας: `security execute-with-privileges /bin/ls`
 
-That will fork and exec `/usr/libexec/security_authtrampoline /bin/ls` as root, which will ask for permissions in a prompt to execute ls as root:
+Αυτό θα δημιουργήσει και θα εκτελέσει το `/usr/libexec/security_authtrampoline /bin/ls` ως root, το οποίο θα ζητήσει άδειες σε ένα παράθυρο διαλόγου για να εκτελέσει το ls ως root:
 
 <figure><img src="../../../images/image (10).png" alt=""><figcaption></figcaption></figure>
 
 {{#include ../../../banners/hacktricks-training.md}}
-

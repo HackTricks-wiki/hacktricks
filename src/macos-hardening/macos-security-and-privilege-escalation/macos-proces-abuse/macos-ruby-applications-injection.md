@@ -4,30 +4,22 @@
 
 ## RUBYOPT
 
-Using this env variable it's possible to **add new params** to **ruby** whenever it gets executed. Although the param **`-e`** cannot be used to specify ruby code to execute, it's possible to use the params **`-I`** and **`-r`** to add a new folder to the libraries to load path and then **specify a library to load**.
+Χρησιμοποιώντας αυτήν την μεταβλητή περιβάλλοντος είναι δυνατόν να **προσθέσετε νέες παραμέτρους** στη **ruby** όποτε εκτελείται. Αν και η παράμετρος **`-e`** δεν μπορεί να χρησιμοποιηθεί για να καθορίσει τον κώδικα ruby προς εκτέλεση, είναι δυνατόν να χρησιμοποιηθούν οι παράμετροι **`-I`** και **`-r`** για να προστεθεί ένας νέος φάκελος στη διαδρομή φόρτωσης βιβλιοθηκών και στη συνέχεια **να καθορίσετε μια βιβλιοθήκη για φόρτωση**.
 
-Create the library **`inject.rb`** in **`/tmp`**:
-
+Δημιουργήστε τη βιβλιοθήκη **`inject.rb`** στο **`/tmp`**:
 ```ruby:inject.rb
 puts `whoami`
 ```
-
-Create anywahere a ruby script like:
-
+Δημιουργήστε οπουδήποτε ένα σενάριο ruby όπως:
 ```ruby:hello.rb
 puts 'Hello, World!'
 ```
-
-Then make an arbitrary ruby script load it with:
-
+Στη συνέχεια, κάντε ένα αυθαίρετο σενάριο ruby να το φορτώσει με:
 ```bash
 RUBYOPT="-I/tmp -rinject" ruby hello.rb
 ```
-
-Fun fact, it works even with param **`--disable-rubyopt`**:
-
+Διασκεδαστικό γεγονός, λειτουργεί ακόμη και με την παράμετρο **`--disable-rubyopt`**:
 ```bash
 RUBYOPT="-I/tmp -rinject" ruby hello.rb --disable-rubyopt
 ```
-
 {{#include ../../../banners/hacktricks-training.md}}

@@ -2,72 +2,72 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**For further detail about the technique check the original post from:** [**https://blog.xpnsec.com/dirtynib/**](https://blog.xpnsec.com/dirtynib/) and the following post by [**https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/**](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/)**.** Here is a summary:
+**Για περισσότερες λεπτομέρειες σχετικά με την τεχνική, ελέγξτε την αρχική ανάρτηση από:** [**https://blog.xpnsec.com/dirtynib/**](https://blog.xpnsec.com/dirtynib/) και την επόμενη ανάρτηση από [**https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/**](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/)**.** Ακολουθεί μια περίληψη:
 
-### What are Nib files
+### Τι είναι τα αρχεία Nib
 
-Nib (short for NeXT Interface Builder) files, part of Apple's development ecosystem, are intended for defining **UI elements** and their interactions in applications. They encompass serialized objects such as windows and buttons, and are loaded at runtime. Despite their ongoing usage, Apple now advocates for Storyboards for more comprehensive UI flow visualization.
+Τα αρχεία Nib (συντομογραφία του NeXT Interface Builder), μέρος του οικοσυστήματος ανάπτυξης της Apple, προορίζονται για τον καθορισμό **UI στοιχείων** και των αλληλεπιδράσεών τους σε εφαρμογές. Περιλαμβάνουν σειριοποιημένα αντικείμενα όπως παράθυρα και κουμπιά, και φορτώνονται κατά την εκτέλεση. Παρά τη συνεχιζόμενη χρήση τους, η Apple προτείνει πλέον τα Storyboards για πιο ολοκληρωμένη οπτικοποίηση ροής UI.
 
-The main Nib file is referenced in the value **`NSMainNibFile`** inside the `Info.plist` file of the application and is loaded by the function **`NSApplicationMain`** executed in the `main` function of the application.
+Το κύριο αρχείο Nib αναφέρεται στην τιμή **`NSMainNibFile`** μέσα στο αρχείο `Info.plist` της εφαρμογής και φορτώνεται από τη λειτουργία **`NSApplicationMain`** που εκτελείται στη λειτουργία `main` της εφαρμογής.
 
-### Dirty Nib Injection Process
+### Διαδικασία Εισαγωγής Dirty Nib
 
-#### Creating and Setting Up a NIB File
+#### Δημιουργία και Ρύθμιση ενός Αρχείου NIB
 
-1. **Initial Setup**:
-   - Create a new NIB file using XCode.
-   - Add an Object to the interface, setting its class to `NSAppleScript`.
-   - Configure the initial `source` property via User Defined Runtime Attributes.
-2. **Code Execution Gadget**:
-   - The setup facilitates running AppleScript on demand.
-   - Integrate a button to activate the `Apple Script` object, specifically triggering the `executeAndReturnError:` selector.
-3. **Testing**:
+1. **Αρχική Ρύθμιση**:
+- Δημιουργήστε ένα νέο αρχείο NIB χρησιμοποιώντας το XCode.
+- Προσθέστε ένα Αντικείμενο στην διεπαφή, ρυθμίζοντας την κλάση του σε `NSAppleScript`.
+- Ρυθμίστε την αρχική ιδιότητα `source` μέσω των Χαρακτηριστικών Χρόνου Εκτέλεσης που Ορίζονται από τον Χρήστη.
+2. **Gadget Εκτέλεσης Κώδικα**:
+- Η ρύθμιση διευκολύνει την εκτέλεση AppleScript κατόπιν αιτήματος.
+- Ενσωματώστε ένα κουμπί για να ενεργοποιήσετε το αντικείμενο `Apple Script`, ενεργοποιώντας συγκεκριμένα τον επιλεγέα `executeAndReturnError:`.
+3. **Δοκιμή**:
 
-   - A simple Apple Script for testing purposes:
+- Ένα απλό Apple Script για δοκιμαστικούς σκοπούς:
 
-     ```bash
-     set theDialogText to "PWND"
-     display dialog theDialogText
-     ```
+```bash
+set theDialogText to "PWND"
+display dialog theDialogText
+```
 
-   - Test by running in the XCode debugger and clicking the button.
+- Δοκιμάστε εκτελώντας το στον αποσφαλματωτή XCode και κάνοντας κλικ στο κουμπί.
 
-#### Targeting an Application (Example: Pages)
+#### Στοχοποίηση μιας Εφαρμογής (Παράδειγμα: Pages)
 
-1. **Preparation**:
-   - Copy the target app (e.g., Pages) into a separate directory (e.g., `/tmp/`).
-   - Initiate the app to sidestep Gatekeeper issues and cache it.
-2. **Overwriting NIB File**:
-   - Replace an existing NIB file (e.g., About Panel NIB) with the crafted DirtyNIB file.
-3. **Execution**:
-   - Trigger the execution by interacting with the app (e.g., selecting the `About` menu item).
+1. **Προετοιμασία**:
+- Αντιγράψτε την στοχοθετημένη εφαρμογή (π.χ., Pages) σε έναν ξεχωριστό φάκελο (π.χ., `/tmp/`).
+- Ξεκινήστε την εφαρμογή για να παρακάμψετε τα ζητήματα του Gatekeeper και να την αποθηκεύσετε στην κρυφή μνήμη.
+2. **Αντικατάσταση Αρχείου NIB**:
+- Αντικαταστήστε ένα υπάρχον αρχείο NIB (π.χ., About Panel NIB) με το κατασκευασμένο αρχείο DirtyNIB.
+3. **Εκτέλεση**:
+- Ενεργοποιήστε την εκτέλεση αλληλεπιδρώντας με την εφαρμογή (π.χ., επιλέγοντας το στοιχείο μενού `About`).
 
-#### Proof of Concept: Accessing User Data
+#### Απόδειξη της Έννοιας: Πρόσβαση σε Δεδομένα Χρήστη
 
-- Modify the AppleScript to access and extract user data, such as photos, without user consent.
+- Τροποποιήστε το AppleScript για να αποκτήσετε πρόσβαση και να εξάγετε δεδομένα χρήστη, όπως φωτογραφίες, χωρίς τη συγκατάθεση του χρήστη.
 
-### Code Sample: Malicious .xib File
+### Δείγμα Κώδικα: Κακόβουλο Αρχείο .xib
 
-- Access and review a [**sample of a malicious .xib file**](https://gist.github.com/xpn/16bfbe5a3f64fedfcc1822d0562636b4) that demonstrates executing arbitrary code.
+- Αποκτήστε πρόσβαση και αναθεωρήστε ένα [**δείγμα κακόβουλου αρχείου .xib**](https://gist.github.com/xpn/16bfbe5a3f64fedfcc1822d0562636b4) που δείχνει την εκτέλεση αυθαίρετου κώδικα.
 
-### Other Example
+### Άλλο Παράδειγμα
 
-In the post [https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/) you can find tutorial on how to create a dirty nib.&#x20;
+Στην ανάρτηση [https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/) μπορείτε να βρείτε οδηγίες για το πώς να δημιουργήσετε ένα dirty nib.&#x20;
 
-### Addressing Launch Constraints
+### Αντιμετώπιση Περιορισμών Εκκίνησης
 
-- Launch Constraints hinder app execution from unexpected locations (e.g., `/tmp`).
-- It's possible to identify apps not protected by Launch Constraints and target them for NIB file injection.
+- Οι Περιορισμοί Εκκίνησης εμποδίζουν την εκτέλεση εφαρμογών από απροσδόκητες τοποθεσίες (π.χ., `/tmp`).
+- Είναι δυνατόν να εντοπιστούν εφαρμογές που δεν προστατεύονται από Περιορισμούς Εκκίνησης και να στοχοποιηθούν για εισαγωγή αρχείου NIB.
 
-### Additional macOS Protections
+### Πρόσθετες Προστασίες macOS
 
-From macOS Sonoma onwards, modifications inside App bundles are restricted. However, earlier methods involved:
+Από το macOS Sonoma και μετά, οι τροποποιήσεις μέσα σε πακέτα εφαρμογών είναι περιορισμένες. Ωστόσο, οι προηγούμενες μέθοδοι περιλάμβαναν:
 
-1. Copying the app to a different location (e.g., `/tmp/`).
-2. Renaming directories within the app bundle to bypass initial protections.
-3. After running the app to register with Gatekeeper, modifying the app bundle (e.g., replacing MainMenu.nib with Dirty.nib).
-4. Renaming directories back and rerunning the app to execute the injected NIB file.
+1. Αντιγραφή της εφαρμογής σε διαφορετική τοποθεσία (π.χ., `/tmp/`).
+2. Μετονομασία φακέλων μέσα στο πακέτο εφαρμογής για να παρακαμφθούν οι αρχικές προστασίες.
+3. Μετά την εκτέλεση της εφαρμογής για να καταχωρηθεί με τον Gatekeeper, τροποποίηση του πακέτου εφαρμογής (π.χ., αντικατάσταση του MainMenu.nib με το Dirty.nib).
+4. Επαναφορά των φακέλων και επανεκτέλεση της εφαρμογής για να εκτελεστεί το εισαγόμενο αρχείο NIB.
 
-**Note**: Recent macOS updates have mitigated this exploit by preventing file modifications within app bundles post Gatekeeper caching, rendering the exploit ineffective.
+**Σημείωση**: Οι πρόσφατες ενημερώσεις του macOS έχουν μετριάσει αυτήν την εκμετάλλευση αποτρέποντας τις τροποποιήσεις αρχείων εντός των πακέτων εφαρμογών μετά την αποθήκευση στην κρυφή μνήμη του Gatekeeper, καθιστώντας την εκμετάλλευση αναποτελεσματική.
 
 {{#include ../../../banners/hacktricks-training.md}}

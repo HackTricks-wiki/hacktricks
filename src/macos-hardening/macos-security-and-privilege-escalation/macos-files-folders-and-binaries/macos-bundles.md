@@ -4,41 +4,41 @@
 
 ## Basic Information
 
-Bundles in macOS serve as containers for a variety of resources including applications, libraries, and other necessary files, making them appear as single objects in Finder, such as the familiar `*.app` files. The most commonly encountered bundle is the `.app` bundle, though other types like `.framework`, `.systemextension`, and `.kext` are also prevalent.
+Τα bundles στο macOS λειτουργούν ως δοχεία για μια ποικιλία πόρων, συμπεριλαμβανομένων εφαρμογών, βιβλιοθηκών και άλλων απαραίτητων αρχείων, κάνοντάς τα να εμφανίζονται ως ενιαία αντικείμενα στο Finder, όπως τα γνωστά αρχεία `*.app`. Το πιο συχνά συναντώμενο bundle είναι το `.app` bundle, αν και άλλοι τύποι όπως το `.framework`, `.systemextension` και `.kext` είναι επίσης διαδεδομένοι.
 
 ### Essential Components of a Bundle
 
-Within a bundle, particularly within the `<application>.app/Contents/` directory, a variety of important resources are housed:
+Μέσα σε ένα bundle, ιδιαίτερα μέσα στον φάκελο `<application>.app/Contents/`, φιλοξενούνται διάφοροι σημαντικοί πόροι:
 
-- **\_CodeSignature**: This directory stores code-signing details vital for verifying the integrity of the application. You can inspect the code-signing information using commands like: %%%bash openssl dgst -binary -sha1 /Applications/Safari.app/Contents/Resources/Assets.car | openssl base64 %%%
-- **MacOS**: Contains the executable binary of the application that runs upon user interaction.
-- **Resources**: A repository for the application's user interface components including images, documents, and interface descriptions (nib/xib files).
-- **Info.plist**: Acts as the application's main configuration file, crucial for the system to recognize and interact with the application appropriately.
+- **\_CodeSignature**: Αυτός ο φάκελος αποθηκεύει λεπτομέρειες υπογραφής κώδικα που είναι ζωτικής σημασίας για την επαλήθευση της ακεραιότητας της εφαρμογής. Μπορείτε να ελέγξετε τις πληροφορίες υπογραφής κώδικα χρησιμοποιώντας εντολές όπως: %%%bash openssl dgst -binary -sha1 /Applications/Safari.app/Contents/Resources/Assets.car | openssl base64 %%%
+- **MacOS**: Περιέχει το εκτελέσιμο δυαδικό αρχείο της εφαρμογής που εκτελείται κατά την αλληλεπίδραση του χρήστη.
+- **Resources**: Ένας αποθηκευτικός χώρος για τα στοιχεία διεπαφής χρήστη της εφαρμογής, συμπεριλαμβανομένων εικόνων, εγγράφων και περιγραφών διεπαφής (nib/xib αρχεία).
+- **Info.plist**: Λειτουργεί ως το κύριο αρχείο ρύθμισης της εφαρμογής, κρίσιμο για το σύστημα ώστε να αναγνωρίζει και να αλληλεπιδρά με την εφαρμογή κατάλληλα.
 
 #### Important Keys in Info.plist
 
-The `Info.plist` file is a cornerstone for application configuration, containing keys such as:
+Το αρχείο `Info.plist` είναι θεμέλιο για τη ρύθμιση της εφαρμογής, περιέχοντας κλειδιά όπως:
 
-- **CFBundleExecutable**: Specifies the name of the main executable file located in the `Contents/MacOS` directory.
-- **CFBundleIdentifier**: Provides a global identifier for the application, used extensively by macOS for application management.
-- **LSMinimumSystemVersion**: Indicates the minimum version of macOS required for the application to run.
+- **CFBundleExecutable**: Προσδιορίζει το όνομα του κύριου εκτελέσιμου αρχείου που βρίσκεται στον φάκελο `Contents/MacOS`.
+- **CFBundleIdentifier**: Παρέχει έναν παγκόσμιο αναγνωριστικό για την εφαρμογή, που χρησιμοποιείται εκτενώς από το macOS για τη διαχείριση εφαρμογών.
+- **LSMinimumSystemVersion**: Υποδεικνύει την ελάχιστη έκδοση του macOS που απαιτείται για να εκτελείται η εφαρμογή.
 
 ### Exploring Bundles
 
-To explore the contents of a bundle, such as `Safari.app`, the following command can be used: `bash ls -lR /Applications/Safari.app/Contents`
+Για να εξερευνήσετε το περιεχόμενο ενός bundle, όπως το `Safari.app`, μπορεί να χρησιμοποιηθεί η εξής εντολή: `bash ls -lR /Applications/Safari.app/Contents`
 
-This exploration reveals directories like `_CodeSignature`, `MacOS`, `Resources`, and files like `Info.plist`, each serving a unique purpose from securing the application to defining its user interface and operational parameters.
+Αυτή η εξερεύνηση αποκαλύπτει φακέλους όπως `_CodeSignature`, `MacOS`, `Resources`, και αρχεία όπως το `Info.plist`, καθένα από τα οποία εξυπηρετεί μια μοναδική σκοπιμότητα από την ασφάλιση της εφαρμογής μέχρι τον καθορισμό της διεπαφής χρήστη και των παραμέτρων λειτουργίας.
 
 #### Additional Bundle Directories
 
-Beyond the common directories, bundles may also include:
+Πέρα από τους κοινούς φακέλους, τα bundles μπορεί επίσης να περιλαμβάνουν:
 
-- **Frameworks**: Contains bundled frameworks used by the application. Frameworks are like dylibs with extra resources.
-- **PlugIns**: A directory for plug-ins and extensions that enhance the application's capabilities.
-- **XPCServices**: Holds XPC services used by the application for out-of-process communication.
+- **Frameworks**: Περιέχει bundled frameworks που χρησιμοποιούνται από την εφαρμογή. Τα frameworks είναι σαν τα dylibs με επιπλέον πόρους.
+- **PlugIns**: Ένας φάκελος για plug-ins και επεκτάσεις που ενισχύουν τις δυνατότητες της εφαρμογής.
+- **XPCServices**: Περιέχει XPC υπηρεσίες που χρησιμοποιούνται από την εφαρμογή για επικοινωνία εκτός διαδικασίας.
 
-This structure ensures that all necessary components are encapsulated within the bundle, facilitating a modular and secure application environment.
+Αυτή η δομή διασφαλίζει ότι όλα τα απαραίτητα στοιχεία είναι ενσωματωμένα μέσα στο bundle, διευκολύνοντας ένα αρθρωτό και ασφαλές περιβάλλον εφαρμογής.
 
-For more detailed information on `Info.plist` keys and their meanings, the Apple developer documentation provides extensive resources: [Apple Info.plist Key Reference](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html).
+Για περισσότερες λεπτομέρειες σχετικά με τα κλειδιά του `Info.plist` και τις σημασίες τους, η τεκμηρίωση προγραμματιστών της Apple παρέχει εκτενείς πόρους: [Apple Info.plist Key Reference](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html).
 
 {{#include ../../../banners/hacktricks-training.md}}

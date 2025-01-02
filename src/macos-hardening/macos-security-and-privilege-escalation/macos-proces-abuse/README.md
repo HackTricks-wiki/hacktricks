@@ -4,184 +4,180 @@
 
 ## Processes Basic Information
 
-A process is an instance of a running executable, however processes doesn't run code, these are threads. Therefore **processes are just containers for running threads** providing the memory, descriptors, ports, permissions...
+Μια διαδικασία είναι μια περίπτωση ενός εκτελέσιμου που τρέχει, ωστόσο οι διαδικασίες δεν εκτελούν κώδικα, αυτές είναι νήματα. Επομένως, **οι διαδικασίες είναι απλώς δοχεία για τρέχοντα νήματα** παρέχοντας τη μνήμη, τους περιγραφείς, τις θύρες, τις άδειες...
 
-Traditionally, processes where started within other processes (except PID 1) by calling **`fork`** which would create a exact copy of the current process and then the **child process** would generally call **`execve`** to load the new executable and run it. Then, **`vfork`** was introduced to make this process faster without any memory copying.\
-Then **`posix_spawn`** was introduced combining **`vfork`** and **`execve`** in one call and accepting flags:
+Παραδοσιακά, οι διαδικασίες ξεκινούσαν μέσα σε άλλες διαδικασίες (εκτός από το PID 1) καλώντας **`fork`** που θα δημιουργούσε μια ακριβή αντιγραφή της τρέχουσας διαδικασίας και στη συνέχεια η **παιδική διαδικασία** θα καλούσε γενικά **`execve`** για να φορτώσει το νέο εκτελέσιμο και να το εκτελέσει. Στη συνέχεια, εισήχθη το **`vfork`** για να επιταχύνει αυτή τη διαδικασία χωρίς καμία αντιγραφή μνήμης.\
+Στη συνέχεια, εισήχθη το **`posix_spawn`** συνδυάζοντας **`vfork`** και **`execve`** σε μία κλήση και αποδεχόμενο σημαίες:
 
-- `POSIX_SPAWN_RESETIDS`: Reset effective ids to real ids
-- `POSIX_SPAWN_SETPGROUP`: Set process group affiliation
-- `POSUX_SPAWN_SETSIGDEF`: Set signal default behaviour
-- `POSIX_SPAWN_SETSIGMASK`: Set signal mask
-- `POSIX_SPAWN_SETEXEC`: Exec in the same process (like `execve` with more options)
-- `POSIX_SPAWN_START_SUSPENDED`: Start suspended
-- `_POSIX_SPAWN_DISABLE_ASLR`: Start without ASLR
-- `_POSIX_SPAWN_NANO_ALLOCATOR:` Use libmalloc's Nano allocator
-- `_POSIX_SPAWN_ALLOW_DATA_EXEC:` Allow `rwx` on data segments
-- `POSIX_SPAWN_CLOEXEC_DEFAULT`: Close all file descriptions on exec(2) by default
-- `_POSIX_SPAWN_HIGH_BITS_ASLR:` Randomize high bits of ASLR slide
+- `POSIX_SPAWN_RESETIDS`: Επαναφορά των αποτελεσματικών ταυτοτήτων στις πραγματικές ταυτότητες
+- `POSIX_SPAWN_SETPGROUP`: Ορισμός συσχέτισης ομάδας διαδικασιών
+- `POSUX_SPAWN_SETSIGDEF`: Ορισμός της προεπιλεγμένης συμπεριφοράς σήματος
+- `POSIX_SPAWN_SETSIGMASK`: Ορισμός μάσκας σήματος
+- `POSIX_SPAWN_SETEXEC`: Εκτέλεση στην ίδια διαδικασία (όπως το `execve` με περισσότερες επιλογές)
+- `POSIX_SPAWN_START_SUSPENDED`: Έναρξη σε αναστολή
+- `_POSIX_SPAWN_DISABLE_ASLR`: Έναρξη χωρίς ASLR
+- `_POSIX_SPAWN_NANO_ALLOCATOR:` Χρήση του Nano allocator της libmalloc
+- `_POSIX_SPAWN_ALLOW_DATA_EXEC:` Επιτρέπεται το `rwx` σε τμήματα δεδομένων
+- `POSIX_SPAWN_CLOEXEC_DEFAULT`: Κλείσιμο όλων των περιγραφών αρχείων κατά την εκτέλεση (2) από προεπιλογή
+- `_POSIX_SPAWN_HIGH_BITS_ASLR:` Τυχαία τα υψηλά bits της μετατόπισης ASLR
 
-Moreover, `posix_spawn` allows to specify an array of **`posix_spawnattr`** that controls some aspects of the spawned process, and **`posix_spawn_file_actions`** to modify the state of the descriptors.
+Επιπλέον, το `posix_spawn` επιτρέπει τον καθορισμό ενός πίνακα **`posix_spawnattr`** που ελέγχει ορισμένες πτυχές της διαδικασίας που δημιουργείται, και **`posix_spawn_file_actions`** για να τροποποιήσει την κατάσταση των περιγραφέων.
 
-When a process dies it send the **return code to the parent process** (if the parent died, the new parent is PID 1) with the signal `SIGCHLD`. The parent needs to get this value calling `wait4()` or `waitid()` and until that happen the child stays in a zombie state where it's still listed but doesn't consume resources.
+Όταν μια διαδικασία πεθαίνει, στέλνει τον **κωδικό επιστροφής στην γονική διαδικασία** (αν η γονική διαδικασία έχει πεθάνει, η νέα γονική διαδικασία είναι το PID 1) με το σήμα `SIGCHLD`. Η γονική διαδικασία πρέπει να αποκτήσει αυτή την τιμή καλώντας `wait4()` ή `waitid()` και μέχρι να συμβεί αυτό, η παιδική διαδικασία παραμένει σε κατάσταση ζόμπι όπου είναι ακόμα καταχωρημένη αλλά δεν καταναλώνει πόρους.
 
 ### PIDs
 
-PIDs, process identifiers, identifies a uniq process. In XNU the **PIDs** are of **64bits** increasing monotonically and **never wrap** (to avoid abuses).
+Τα PIDs, ταυτοποιητές διαδικασιών, προσδιορίζουν μια μοναδική διαδικασία. Στο XNU, οι **PIDs** είναι **64bit** και αυξάνονται μονοτονικά και **ποτέ δεν επαναλαμβάνονται** (για να αποφεύγονται οι καταχρήσεις).
 
 ### Process Groups, Sessions & Coalations
 
-**Processes** can be inserted in **groups** to make it easier to handle them. For example, commands in a shell script will be in the same process group so it's possible to **signal them together** using kill for example.\
-It's also possible to **group processes in sessions**. When a process starts a session (`setsid(2)`), the children processes are set inside the session, unless they start their own session.
+**Διαδικασίες** μπορούν να εισαχθούν σε **ομάδες** για να διευκολυνθεί η διαχείρισή τους. Για παράδειγμα, οι εντολές σε ένα script shell θα είναι στην ίδια ομάδα διαδικασιών, έτσι είναι δυνατή η **σήμανση τους μαζί** χρησιμοποιώντας kill για παράδειγμα.\
+Είναι επίσης δυνατή η **ομαδοποίηση διαδικασιών σε συνεδρίες**. Όταν μια διαδικασία ξεκινά μια συνεδρία (`setsid(2)`), οι παιδικές διαδικασίες τοποθετούνται μέσα στη συνεδρία, εκτός αν ξεκινήσουν τη δική τους συνεδρία.
 
-Coalition is another waya to group processes in Darwin. A process joining a coalation allows it to access pool resources, sharing a ledger or facing Jetsam. Coalations have different roles: Leader, XPC service, Extension.
+Η συμμαχία είναι ένας άλλος τρόπος ομαδοποίησης διαδικασιών στο Darwin. Μια διαδικασία που συμμετέχει σε μια συμμαχία της επιτρέπει να έχει πρόσβαση σε πόρους πισίνας, μοιράζοντας ένα βιβλίο ή αντιμετωπίζοντας το Jetsam. Οι συμμαχίες έχουν διαφορετικούς ρόλους: Ηγέτης, Υπηρεσία XPC, Επέκταση.
 
 ### Credentials & Personae
 
-Each process with hold **credentials** that **identify its privileges** in the system. Each process will have one primary `uid` and one primary `gid` (although might belong to several groups).\
-It's also possible to change the user and group id if the binary has the `setuid/setgid` bit.\
-There are several functions to **set new uids/gids**.
+Κάθε διαδικασία διατηρεί **διαπιστευτήρια** που **προσδιορίζουν τα προνόμιά** της στο σύστημα. Κάθε διαδικασία θα έχει μία κύρια `uid` και μία κύρια `gid` (αν και μπορεί να ανήκει σε πολλές ομάδες).\
+Είναι επίσης δυνατή η αλλαγή του αναγνωριστικού χρήστη και ομάδας αν το δυαδικό αρχείο έχει το bit `setuid/setgid`.\
+Υπάρχουν πολλές συναρτήσεις για **ορισμό νέων uids/gids**.
 
-The syscall **`persona`** provides an **alternate** set of **credentials**. Adopting a persona assumes its uid, gid and group memberships **at one**. In the [**source code**](https://github.com/apple/darwin-xnu/blob/main/bsd/sys/persona.h) it's possible to find the struct:
-
+Η syscall **`persona`** παρέχει ένα **εναλλακτικό** σύνολο **διαπιστευτηρίων**. Η υιοθέτηση μιας προσωπικότητας υποθέτει την `uid`, `gid` και τις συμμετοχές ομάδας **ταυτόχρονα**. Στον [**κώδικα πηγής**](https://github.com/apple/darwin-xnu/blob/main/bsd/sys/persona.h) είναι δυνατή η εύρεση της δομής:
 ```c
 struct kpersona_info { uint32_t persona_info_version;
-    uid_t    persona_id; /* overlaps with UID */
-    int      persona_type;
-    gid_t    persona_gid;
-    uint32_t persona_ngroups;
-    gid_t    persona_groups[NGROUPS];
-    uid_t    persona_gmuid;
-    char     persona_name[MAXLOGNAME + 1];
+uid_t    persona_id; /* overlaps with UID */
+int      persona_type;
+gid_t    persona_gid;
+uint32_t persona_ngroups;
+gid_t    persona_groups[NGROUPS];
+uid_t    persona_gmuid;
+char     persona_name[MAXLOGNAME + 1];
 
-    /* TODO: MAC policies?! */
+/* TODO: MAC policies?! */
 }
 ```
+## Βασικές Πληροφορίες για τα Νήματα
 
-## Threads Basic Information
+1. **POSIX Νήματα (pthreads):** Το macOS υποστηρίζει τα POSIX νήματα (`pthreads`), τα οποία είναι μέρος ενός τυπικού API νημάτων για C/C++. Η υλοποίηση των pthreads στο macOS βρίσκεται στο `/usr/lib/system/libsystem_pthread.dylib`, που προέρχεται από το δημόσια διαθέσιμο έργο `libpthread`. Αυτή η βιβλιοθήκη παρέχει τις απαραίτητες συναρτήσεις για τη δημιουργία και διαχείριση νημάτων.
+2. **Δημιουργία Νημάτων:** Η συνάρτηση `pthread_create()` χρησιμοποιείται για τη δημιουργία νέων νημάτων. Εσωτερικά, αυτή η συνάρτηση καλεί τη `bsdthread_create()`, η οποία είναι μια χαμηλού επιπέδου κλήση συστήματος συγκεκριμένη για τον πυρήνα XNU (τον πυρήνα στον οποίο βασίζεται το macOS). Αυτή η κλήση συστήματος παίρνει διάφορες σημαίες που προέρχονται από το `pthread_attr` (χαρακτηριστικά) που καθορίζουν τη συμπεριφορά του νήματος, συμπεριλαμβανομένων των πολιτικών προγραμματισμού και του μεγέθους στοίβας.
+- **Προεπιλεγμένο Μέγεθος Στοίβας:** Το προεπιλεγμένο μέγεθος στοίβας για νέα νήματα είναι 512 KB, το οποίο είναι επαρκές για τυπικές λειτουργίες αλλά μπορεί να προσαρμοστεί μέσω των χαρακτηριστικών του νήματος αν χρειάζεται περισσότερος ή λιγότερος χώρος.
+3. **Αρχικοποίηση Νημάτων:** Η συνάρτηση `__pthread_init()` είναι κρίσιμη κατά τη ρύθμιση του νήματος, χρησιμοποιώντας το επιχείρημα `env[]` για να αναλύσει τις μεταβλητές περιβάλλοντος που μπορεί να περιλαμβάνουν λεπτομέρειες σχετικά με την τοποθεσία και το μέγεθος της στοίβας.
 
-1. **POSIX Threads (pthreads):** macOS supports POSIX threads (`pthreads`), which are part of a standard threading API for C/C++. The implementation of pthreads in macOS is found in `/usr/lib/system/libsystem_pthread.dylib`, which comes from the publicly available `libpthread` project. This library provides the necessary functions to create and manage threads.
-2. **Creating Threads:** The `pthread_create()` function is used to create new threads. Internally, this function calls `bsdthread_create()`, which is a lower-level system call specific to the XNU kernel (the kernel macOS is based on). This system call takes various flags derived from `pthread_attr` (attributes) that specify thread behavior, including scheduling policies and stack size.
-   - **Default Stack Size:** The default stack size for new threads is 512 KB, which is sufficient for typical operations but can be adjusted via thread attributes if more or less space is needed.
-3. **Thread Initialization:** The `__pthread_init()` function is crucial during thread setup, utilizing the `env[]` argument to parse environment variables that can include details about the stack's location and size.
+#### Τερματισμός Νημάτων στο macOS
 
-#### Thread Termination in macOS
+1. **Έξοδος Νημάτων:** Τα νήματα τερματίζονται συνήθως καλώντας τη `pthread_exit()`. Αυτή η συνάρτηση επιτρέπει σε ένα νήμα να εξέλθει καθαρά, εκτελώντας την απαραίτητη καθαριότητα και επιτρέποντας στο νήμα να στείλει μια τιμή επιστροφής πίσω σε οποιουσδήποτε συμμετέχοντες.
+2. **Καθαριότητα Νημάτων:** Κατά την κλήση της `pthread_exit()`, καλείται η συνάρτηση `pthread_terminate()`, η οποία χειρίζεται την αφαίρεση όλων των σχετικών δομών νήματος. Αποδεσμεύει τις θύρες νήματος Mach (Mach είναι το υποσύστημα επικοινωνίας στον πυρήνα XNU) και καλεί τη `bsdthread_terminate`, μια κλήση συστήματος που αφαιρεί τις δομές επιπέδου πυρήνα που σχετίζονται με το νήμα.
 
-1. **Exiting Threads:** Threads are typically terminated by calling `pthread_exit()`. This function allows a thread to exit cleanly, performing necessary cleanup and allowing the thread to send a return value back to any joiners.
-2. **Thread Cleanup:** Upon calling `pthread_exit()`, the function `pthread_terminate()` is invoked, which handles the removal of all associated thread structures. It deallocates Mach thread ports (Mach is the communication subsystem in the XNU kernel) and calls `bsdthread_terminate`, a syscall that removes the kernel-level structures associated with the thread.
+#### Μηχανισμοί Συγχρονισμού
 
-#### Synchronization Mechanisms
-
-To manage access to shared resources and avoid race conditions, macOS provides several synchronization primitives. These are critical in multi-threading environments to ensure data integrity and system stability:
+Για να διαχειριστεί την πρόσβαση σε κοινόχρηστους πόρους και να αποφευχθούν οι συνθήκες αγώνα, το macOS παρέχει αρκετές πρωτογενείς συγχρονισμού. Αυτές είναι κρίσιμες σε περιβάλλοντα πολλαπλών νημάτων για να διασφαλιστεί η ακεραιότητα των δεδομένων και η σταθερότητα του συστήματος:
 
 1. **Mutexes:**
-   - **Regular Mutex (Signature: 0x4D555458):** Standard mutex with a memory footprint of 60 bytes (56 bytes for the mutex and 4 bytes for the signature).
-   - **Fast Mutex (Signature: 0x4d55545A):** Similar to a regular mutex but optimized for faster operations, also 60 bytes in size.
-2. **Condition Variables:**
-   - Used for waiting for certain conditions to occur, with a size of 44 bytes (40 bytes plus a 4-byte signature).
-   - **Condition Variable Attributes (Signature: 0x434e4441):** Configuration attributes for condition variables, sized at 12 bytes.
-3. **Once Variable (Signature: 0x4f4e4345):**
-   - Ensures that a piece of initialization code is executed only once. Its size is 12 bytes.
-4. **Read-Write Locks:**
-   - Allows multiple readers or one writer at a time, facilitating efficient access to shared data.
-   - **Read Write Lock (Signature: 0x52574c4b):** Sized at 196 bytes.
-   - **Read Write Lock Attributes (Signature: 0x52574c41):** Attributes for read-write locks, 20 bytes in size.
+- **Κανονικός Mutex (Υπογραφή: 0x4D555458):** Τυπικός mutex με αποτύπωμα μνήμης 60 bytes (56 bytes για τον mutex και 4 bytes για την υπογραφή).
+- **Γρήγορος Mutex (Υπογραφή: 0x4d55545A):** Παρόμοιος με έναν κανονικό mutex αλλά βελτιστοποιημένος για ταχύτερες λειτουργίες, επίσης 60 bytes σε μέγεθος.
+2. **Μεταβλητές Συνθηκών:**
+- Χρησιμοποιούνται για να περιμένουν να συμβούν ορισμένες συνθήκες, με μέγεθος 44 bytes (40 bytes συν 4 bytes υπογραφή).
+- **Χαρακτηριστικά Μεταβλητών Συνθηκών (Υπογραφή: 0x434e4441):** Χαρακτηριστικά ρύθμισης για μεταβλητές συνθηκών, μεγέθους 12 bytes.
+3. **Once Variable (Υπογραφή: 0x4f4e4345):**
+- Διασφαλίζει ότι ένα κομμάτι κώδικα αρχικοποίησης εκτελείται μόνο μία φορά. Το μέγεθός του είναι 12 bytes.
+4. **Κλειδώματα Ανάγνωσης-Εγγραφής:**
+- Επιτρέπει σε πολλούς αναγνώστες ή έναν συγγραφέα ταυτόχρονα, διευκολύνοντας την αποδοτική πρόσβαση σε κοινά δεδομένα.
+- **Κλείδωμα Ανάγνωσης-Εγγραφής (Υπογραφή: 0x52574c4b):** Μεγέθους 196 bytes.
+- **Χαρακτηριστικά Κλειδώματος Ανάγνωσης-Εγγραφής (Υπογραφή: 0x52574c41):** Χαρακτηριστικά για κλειδώματα ανάγνωσης-εγγραφής, 20 bytes σε μέγεθος.
 
 > [!TIP]
-> The last 4 bytes of those objects are used to deetct overflows.
+> Τα τελευταία 4 bytes αυτών των αντικειμένων χρησιμοποιούνται για την ανίχνευση υπερχειλίσεων.
 
-### Thread Local Variables (TLV)
+### Τοπικές Μεταβλητές Νημάτων (TLV)
 
-**Thread Local Variables (TLV)** in the context of Mach-O files (the format for executables in macOS) are used to declare variables that are specific to **each thread** in a multi-threaded application. This ensures that each thread has its own separate instance of a variable, providing a way to avoid conflicts and maintain data integrity without needing explicit synchronization mechanisms like mutexes.
+**Τοπικές Μεταβλητές Νημάτων (TLV)** στο πλαίσιο των αρχείων Mach-O (η μορφή για εκτελέσιμα στο macOS) χρησιμοποιούνται για να δηλώσουν μεταβλητές που είναι συγκεκριμένες για **κάθε νήμα** σε μια εφαρμογή πολλαπλών νημάτων. Αυτό διασφαλίζει ότι κάθε νήμα έχει τη δική του ξεχωριστή παρουσία μιας μεταβλητής, παρέχοντας έναν τρόπο να αποφευχθούν οι συγκρούσεις και να διατηρηθεί η ακεραιότητα των δεδομένων χωρίς να χρειάζονται ρητοί μηχανισμοί συγχρονισμού όπως οι mutexes.
 
-In C and related languages, you can declare a thread-local variable using the **`__thread`** keyword. Here’s how it works in your example:
-
+Στη C και σε σχετικές γλώσσες, μπορείτε να δηλώσετε μια τοπική μεταβλητή νήματος χρησιμοποιώντας τη λέξη-κλειδί **`__thread`**. Να πώς λειτουργεί στο παράδειγμά σας:
 ```c
 cCopy code__thread int tlv_var;
 
 void main (int argc, char **argv){
-    tlv_var = 10;
+tlv_var = 10;
 }
 ```
+Αυτό το απόσπασμα ορίζει το `tlv_var` ως μια μεταβλητή τοπική στο νήμα. Κάθε νήμα που εκτελεί αυτόν τον κώδικα θα έχει τη δική του `tlv_var`, και οι αλλαγές που κάνει ένα νήμα στη `tlv_var` δεν θα επηρεάσουν τη `tlv_var` σε άλλο νήμα.
 
-This snippet defines `tlv_var` as a thread-local variable. Each thread running this code will have its own `tlv_var`, and changes one thread makes to `tlv_var` will not affect `tlv_var` in another thread.
+Στο δυαδικό Mach-O, τα δεδομένα που σχετίζονται με τις τοπικές μεταβλητές νήματος οργανώνονται σε συγκεκριμένες ενότητες:
 
-In the Mach-O binary, the data related to thread local variables is organized into specific sections:
+- **`__DATA.__thread_vars`**: Αυτή η ενότητα περιέχει τα μεταδεδομένα σχετικά με τις τοπικές μεταβλητές νήματος, όπως τους τύπους τους και την κατάσταση αρχικοποίησης.
+- **`__DATA.__thread_bss`**: Αυτή η ενότητα χρησιμοποιείται για τις τοπικές μεταβλητές νήματος που δεν έχουν αρχικοποιηθεί ρητά. Είναι ένα μέρος της μνήμης που έχει διατεθεί για δεδομένα που έχουν αρχικοποιηθεί σε μηδέν.
 
-- **`__DATA.__thread_vars`**: This section contains the metadata about the thread-local variables, like their types and initialization status.
-- **`__DATA.__thread_bss`**: This section is used for thread-local variables that are not explicitly initialized. It's a part of memory set aside for zero-initialized data.
+Το Mach-O παρέχει επίσης μια συγκεκριμένη API που ονομάζεται **`tlv_atexit`** για τη διαχείριση των τοπικών μεταβλητών νήματος όταν ένα νήμα εξέρχεται. Αυτή η API σας επιτρέπει να **καταχωρείτε καταστροφείς**—ειδικές συναρτήσεις που καθαρίζουν τα τοπικά δεδομένα νήματος όταν ένα νήμα τερματίζει.
 
-Mach-O also provides a specific API called **`tlv_atexit`** to manage thread-local variables when a thread exits. This API allows you to **register destructors**—special functions that clean up thread-local data when a thread terminates.
+### Προτεραιότητες Νημάτων
 
-### Threading Priorities
+Η κατανόηση των προτεραιοτήτων νημάτων περιλαμβάνει την εξέταση του πώς το λειτουργικό σύστημα αποφασίζει ποια νήματα θα εκτελούνται και πότε. Αυτή η απόφαση επηρεάζεται από το επίπεδο προτεραιότητας που έχει ανατεθεί σε κάθε νήμα. Στα macOS και σε συστήματα παρόμοια με το Unix, αυτό διαχειρίζεται χρησιμοποιώντας έννοιες όπως το `nice`, `renice` και τις κλάσεις Ποιότητας Υπηρεσίας (QoS).
 
-Understanding thread priorities involves looking at how the operating system decides which threads to run and when. This decision is influenced by the priority level assigned to each thread. In macOS and Unix-like systems, this is handled using concepts like `nice`, `renice`, and Quality of Service (QoS) classes.
-
-#### Nice and Renice
+#### Nice και Renice
 
 1. **Nice:**
-   - The `nice` value of a process is a number that affects its priority. Every process has a nice value ranging from -20 (the highest priority) to 19 (the lowest priority). The default nice value when a process is created is typically 0.
-   - A lower nice value (closer to -20) makes a process more "selfish," giving it more CPU time compared to other processes with higher nice values.
+- Η τιμή `nice` μιας διαδικασίας είναι ένας αριθμός που επηρεάζει την προτεραιότητά της. Κάθε διαδικασία έχει μια τιμή nice που κυμαίνεται από -20 (η υψηλότερη προτεραιότητα) έως 19 (η χαμηλότερη προτεραιότητα). Η προεπιλεγμένη τιμή nice όταν δημιουργείται μια διαδικασία είναι συνήθως 0.
+- Μια χαμηλότερη τιμή nice (πιο κοντά στο -20) καθιστά μια διαδικασία πιο "εγωιστική", δίνοντάς της περισσότερο χρόνο CPU σε σύγκριση με άλλες διαδικασίες με υψηλότερες τιμές nice.
 2. **Renice:**
-   - `renice` is a command used to change the nice value of an already running process. This can be used to dynamically adjust the priority of processes, either increasing or decreasing their CPU time allocation based on new nice values.
-   - For example, if a process needs more CPU resources temporarily, you might lower its nice value using `renice`.
+- Το `renice` είναι μια εντολή που χρησιμοποιείται για να αλλάξει την τιμή nice μιας ήδη εκτελούμενης διαδικασίας. Αυτό μπορεί να χρησιμοποιηθεί για να προσαρμόσει δυναμικά την προτεραιότητα των διαδικασιών, είτε αυξάνοντας είτε μειώνοντας την κατανομή χρόνου CPU τους με βάση νέες τιμές nice.
+- Για παράδειγμα, αν μια διαδικασία χρειάζεται περισσότερους πόρους CPU προσωρινά, μπορείτε να μειώσετε την τιμή nice της χρησιμοποιώντας το `renice`.
 
-#### Quality of Service (QoS) Classes
+#### Κλάσεις Ποιότητας Υπηρεσίας (QoS)
 
-QoS classes are a more modern approach to handling thread priorities, particularly in systems like macOS that support **Grand Central Dispatch (GCD)**. QoS classes allow developers to **categorize** work into different levels based on their importance or urgency. macOS manages thread prioritization automatically based on these QoS classes:
+Οι κλάσεις QoS είναι μια πιο σύγχρονη προσέγγιση για τη διαχείριση των προτεραιοτήτων νημάτων, ιδιαίτερα σε συστήματα όπως το macOS που υποστηρίζουν **Grand Central Dispatch (GCD)**. Οι κλάσεις QoS επιτρέπουν στους προγραμματιστές να **κατηγοριοποιούν** τη δουλειά σε διαφορετικά επίπεδα με βάση τη σημασία ή την επείγουσα ανάγκη τους. Το macOS διαχειρίζεται την προτεραιοποίηση νημάτων αυτόματα με βάση αυτές τις κλάσεις QoS:
 
-1. **User Interactive:**
-   - This class is for tasks that are currently interacting with the user or require immediate results to provide a good user experience. These tasks are given the highest priority to keep the interface responsive (e.g., animations or event handling).
-2. **User Initiated:**
-   - Tasks that the user initiates and expects immediate results, such as opening a document or clicking a button that requires computations. These are high priority but below user interactive.
-3. **Utility:**
-   - These tasks are long-running and typically show a progress indicator (e.g., downloading files, importing data). They are lower in priority than user-initiated tasks and do not need to finish immediately.
-4. **Background:**
-   - This class is for tasks that operate in the background and are not visible to the user. These can be tasks like indexing, syncing, or backups. They have the lowest priority and minimal impact on system performance.
+1. **Αλληλεπίδραση Χρήστη:**
+- Αυτή η κλάση είναι για εργασίες που αλληλεπιδρούν αυτή τη στιγμή με τον χρήστη ή απαιτούν άμεσα αποτελέσματα για να παρέχουν καλή εμπειρία χρήστη. Αυτές οι εργασίες έχουν την υψηλότερη προτεραιότητα για να διατηρούν την διεπαφή ανταγωνιστική (π.χ., κινούμενα σχέδια ή χειρισμός γεγονότων).
+2. **Πρωτοβουλία Χρήστη:**
+- Εργασίες που ξεκινά ο χρήστης και αναμένει άμεσα αποτελέσματα, όπως το άνοιγμα ενός εγγράφου ή το κλικ σε ένα κουμπί που απαιτεί υπολογισμούς. Αυτές είναι υψηλής προτεραιότητας αλλά κάτω από την αλληλεπίδραση χρήστη.
+3. **Χρήση:**
+- Αυτές οι εργασίες είναι μακροχρόνιες και συνήθως εμφανίζουν έναν δείκτη προόδου (π.χ., λήψη αρχείων, εισαγωγή δεδομένων). Είναι χαμηλότερης προτεραιότητας από τις εργασίες που ξεκινούν οι χρήστες και δεν χρειάζεται να ολοκληρωθούν άμεσα.
+4. **Υπόβαθρο:**
+- Αυτή η κλάση είναι για εργασίες που λειτουργούν στο παρασκήνιο και δεν είναι ορατές στον χρήστη. Αυτές μπορεί να είναι εργασίες όπως η ευρετηρίαση, η συγχρονισμός ή τα αντίγραφα ασφαλείας. Έχουν την χαμηλότερη προτεραιότητα και ελάχιστη επίδραση στην απόδοση του συστήματος.
 
-Using QoS classes, developers do not need to manage the exact priority numbers but rather focus on the nature of the task, and the system optimizes the CPU resources accordingly.
+Χρησιμοποιώντας τις κλάσεις QoS, οι προγραμματιστές δεν χρειάζεται να διαχειρίζονται τους ακριβείς αριθμούς προτεραιότητας αλλά να επικεντρώνονται στη φύση της εργασίας, και το σύστημα βελτιστοποιεί τους πόρους CPU αναλόγως.
 
-Moreover, there are different **thread scheduling policies** that flows to specify a set of scheduling parameters that the scheduler will take into consideration. This can be done using `thread_policy_[set/get]`. This might be useful in race condition attacks.
+Επιπλέον, υπάρχουν διαφορετικές **πολιτικές προγραμματισμού νημάτων** που ρέουν για να καθορίσουν ένα σύνολο παραμέτρων προγραμματισμού που ο προγραμματιστής θα λάβει υπόψη. Αυτό μπορεί να γίνει χρησιμοποιώντας `thread_policy_[set/get]`. Αυτό μπορεί να είναι χρήσιμο σε επιθέσεις συνθήκης αγώνα.
 
-## MacOS Process Abuse
+## Κατάχρηση Διαδικασιών MacOS
 
-MacOS, like any other operating system, provides a variety of methods and mechanisms for **processes to interact, communicate, and share data**. While these techniques are essential for efficient system functioning, they can also be abused by threat actors to **perform malicious activities**.
+Το MacOS, όπως κάθε άλλο λειτουργικό σύστημα, παρέχει μια ποικιλία μεθόδων και μηχανισμών για **τις διαδικασίες να αλληλεπιδρούν, να επικοινωνούν και να μοιράζονται δεδομένα**. Ενώ αυτές οι τεχνικές είναι απαραίτητες για την αποδοτική λειτουργία του συστήματος, μπορούν επίσης να καταχραστούν από απειλητικούς παράγοντες για να **εκτελέσουν κακόβουλες δραστηριότητες**.
 
-### Library Injection
+### Εισαγωγή Βιβλιοθηκών
 
-Library Injection is a technique wherein an attacker **forces a process to load a malicious library**. Once injected, the library runs in the context of the target process, providing the attacker with the same permissions and access as the process.
+Η Εισαγωγή Βιβλιοθηκών είναι μια τεχνική όπου ένας επιτιθέμενος **αναγκάζει μια διαδικασία να φορτώσει μια κακόβουλη βιβλιοθήκη**. Μόλις εισαχθεί, η βιβλιοθήκη εκτελείται στο πλαίσιο της στοχοθετημένης διαδικασίας, παρέχοντας στον επιτιθέμενο τις ίδιες άδειες και πρόσβαση με τη διαδικασία.
 
 {{#ref}}
 macos-library-injection/
 {{#endref}}
 
-### Function Hooking
+### Hooking Συναρτήσεων
 
-Function Hooking involves **intercepting function calls** or messages within a software code. By hooking functions, an attacker can **modify the behavior** of a process, observe sensitive data, or even gain control over the execution flow.
+Το Hooking Συναρτήσεων περιλαμβάνει **παρεμβολές σε κλήσεις συναρτήσεων** ή μηνύματα εντός ενός κώδικα λογισμικού. Με το hooking συναρτήσεων, ένας επιτιθέμενος μπορεί να **τροποποιήσει τη συμπεριφορά** μιας διαδικασίας, να παρακολουθήσει ευαίσθητα δεδομένα ή ακόμη και να αποκτήσει έλεγχο της ροής εκτέλεσης.
 
 {{#ref}}
 macos-function-hooking.md
 {{#endref}}
 
-### Inter Process Communication
+### Επικοινωνία Μεταξύ Διαδικασιών
 
-Inter Process Communication (IPC) refers to different methods by which separate processes **share and exchange data**. While IPC is fundamental for many legitimate applications, it can also be misused to subvert process isolation, leak sensitive information, or perform unauthorized actions.
+Η Επικοινωνία Μεταξύ Διαδικασιών (IPC) αναφέρεται σε διάφορες μεθόδους με τις οποίες ξεχωριστές διαδικασίες **μοιράζονται και ανταλλάσσουν δεδομένα**. Ενώ η IPC είναι θεμελιώδης για πολλές νόμιμες εφαρμογές, μπορεί επίσης να καταχραστεί για να υπονομεύσει την απομόνωση διαδικασιών, να διαρρεύσει ευαίσθητες πληροφορίες ή να εκτελέσει μη εξουσιοδοτημένες ενέργειες.
 
 {{#ref}}
 macos-ipc-inter-process-communication/
 {{#endref}}
 
-### Electron Applications Injection
+### Εισαγωγή Εφαρμογών Electron
 
-Electron applications executed with specific env variables could be vulnerable to process injection:
+Οι εφαρμογές Electron που εκτελούνται με συγκεκριμένες μεταβλητές περιβάλλοντος θα μπορούσαν να είναι ευάλωτες σε εισαγωγή διαδικασίας:
 
 {{#ref}}
 macos-electron-applications-injection.md
 {{#endref}}
 
-### Chromium Injection
+### Εισαγωγή Chromium
 
-It's possible to use the flags `--load-extension` and `--use-fake-ui-for-media-stream` to perform a **man in the browser attack** allowing to steal keystrokes, traffic, cookies, inject scripts in pages...:
+Είναι δυνατόν να χρησιμοποιηθούν οι σημαίες `--load-extension` και `--use-fake-ui-for-media-stream` για να εκτελέσετε μια **επίθεση man in the browser** επιτρέποντας την κλοπή πληκτρολογήσεων, κυκλοφορίας, cookies, την εισαγωγή scripts σε σελίδες...:
 
 {{#ref}}
 macos-chromium-injection.md
@@ -189,56 +185,56 @@ macos-chromium-injection.md
 
 ### Dirty NIB
 
-NIB files **define user interface (UI) elements** and their interactions within an application. However, they can **execute arbitrary commands** and **Gatekeeper doesn't stop** an already executed application from being executed if a **NIB file is modified**. Therefore, they could be used to make arbitrary programs execute arbitrary commands:
+Τα αρχεία NIB **ορίζουν στοιχεία διεπαφής χρήστη (UI)** και τις αλληλεπιδράσεις τους εντός μιας εφαρμογής. Ωστόσο, μπορούν να **εκτελούν αυθαίρετες εντολές** και **ο Gatekeeper δεν σταματά** μια ήδη εκτελούμενη εφαρμογή από το να εκτελείται αν ένα **αρχείο NIB έχει τροποποιηθεί**. Επομένως, θα μπορούσαν να χρησιμοποιηθούν για να κάνουν αυθαίρετα προγράμματα να εκτελούν αυθαίρετες εντολές:
 
 {{#ref}}
 macos-dirty-nib.md
 {{#endref}}
 
-### Java Applications Injection
+### Εισαγωγή Εφαρμογών Java
 
-It's possible to abuse certain java capabilities (like the **`_JAVA_OPTS`** env variable) to make a java application execute **arbitrary code/commands**.
+Είναι δυνατόν να καταχραστεί ορισμένες δυνατότητες java (όπως η **`_JAVA_OPTS`** μεταβλητή περιβάλλοντος) για να κάνει μια εφαρμογή java να εκτελεί **αυθαίρετο κώδικα/εντολές**.
 
 {{#ref}}
 macos-java-apps-injection.md
 {{#endref}}
 
-### .Net Applications Injection
+### Εισαγωγή Εφαρμογών .Net
 
-It's possible to inject code into .Net applications by **abusing the .Net debugging functionality** (not protected by macOS protections such as runtime hardening).
+Είναι δυνατόν να εισαχθεί κώδικας σε εφαρμογές .Net καταχρώντας τη **λειτουργικότητα αποσφαλμάτωσης .Net** (όχι προστατευμένη από τις προστασίες macOS όπως η σκληροποίηση χρόνου εκτέλεσης).
 
 {{#ref}}
 macos-.net-applications-injection.md
 {{#endref}}
 
-### Perl Injection
+### Εισαγωγή Perl
 
-Check different options to make a Perl script execute arbitrary code in:
+Ελέγξτε διάφορες επιλογές για να κάνετε ένα σενάριο Perl να εκτελεί αυθαίρετο κώδικα στο:
 
 {{#ref}}
 macos-perl-applications-injection.md
 {{#endref}}
 
-### Ruby Injection
+### Εισαγωγή Ruby
 
-I't also possible to abuse ruby env variables to make arbitrary scripts execute arbitrary code:
+Είναι επίσης δυνατόν να καταχραστεί η μεταβλητή περιβάλλοντος ruby για να εκτελούνται αυθαίρετα scripts:
 
 {{#ref}}
 macos-ruby-applications-injection.md
 {{#endref}}
 
-### Python Injection
+### Εισαγωγή Python
 
-If the environment variable **`PYTHONINSPECT`** is set, the python process will drop into a python cli once it's finished. It's also possible to use **`PYTHONSTARTUP`** to indicate a python script to execute at the beginning of an interactive session.\
-However, note that **`PYTHONSTARTUP`** script won't be executed when **`PYTHONINSPECT`** creates the interactive session.
+Αν η μεταβλητή περιβάλλοντος **`PYTHONINSPECT`** είναι ρυθμισμένη, η διαδικασία python θα εισέλθει σε μια CLI python μόλις ολοκληρωθεί. Είναι επίσης δυνατόν να χρησιμοποιηθεί το **`PYTHONSTARTUP`** για να υποδείξει ένα σενάριο python που θα εκτελείται στην αρχή μιας διαδραστικής συνεδρίας.\
+Ωστόσο, σημειώστε ότι το σενάριο **`PYTHONSTARTUP`** δεν θα εκτελείται όταν το **`PYTHONINSPECT`** δημιουργεί τη διαδραστική συνεδρία.
 
-Other env variables such as **`PYTHONPATH`** and **`PYTHONHOME`** could also be useful to make a python command execute arbitrary code.
+Άλλες μεταβλητές περιβάλλοντος όπως **`PYTHONPATH`** και **`PYTHONHOME`** θα μπορούσαν επίσης να είναι χρήσιμες για να κάνουν μια εντολή python να εκτελεί αυθαίρετο κώδικα.
 
-Note that executables compiled with **`pyinstaller`** won't use these environmental variables even if they are running using an embedded python.
+Σημειώστε ότι τα εκτελέσιμα αρχεία που έχουν μεταγλωττιστεί με **`pyinstaller`** δεν θα χρησιμοποιούν αυτές τις μεταβλητές περιβάλλοντος ακόμη και αν εκτελούνται χρησιμοποιώντας μια ενσωματωμένη python.
 
 > [!CAUTION]
-> Overall I couldn't find a way to make python execute arbitrary code abusing environment variables.\
-> However, most of the people install pyhton using **Hombrew**, which will install pyhton in a **writable location** for the default admin user. You can hijack it with something like:
+> Γενικά δεν μπόρεσα να βρω έναν τρόπο να κάνω την python να εκτελεί αυθαίρετο κώδικα καταχρώντας τις μεταβλητές περιβάλλοντος.\
+> Ωστόσο, οι περισσότεροι άνθρωποι εγκαθιστούν την python χρησιμοποιώντας **Hombrew**, το οποίο θα εγκαταστήσει την python σε μια **γραφτή τοποθεσία** για τον προεπιλεγμένο διαχειριστή χρήστη. Μπορείτε να την καταλάβετε με κάτι τέτοιο:
 >
 > ```bash
 > mv /opt/homebrew/bin/python3 /opt/homebrew/bin/python3.old
@@ -250,26 +246,26 @@ Note that executables compiled with **`pyinstaller`** won't use these environmen
 > chmod +x /opt/homebrew/bin/python3
 > ```
 >
-> Even **root** will run this code when running python.
+> Ακόμη και **root** θα εκτελέσει αυτόν τον κώδικα όταν εκτελεί python.
 
-## Detection
+## Ανίχνευση
 
 ### Shield
 
-[**Shield**](https://theevilbit.github.io/shield/) ([**Github**](https://github.com/theevilbit/Shield)) is an open source application that can **detect and block process injection** actions:
+[**Shield**](https://theevilbit.github.io/shield/) ([**Github**](https://github.com/theevilbit/Shield)) είναι μια εφαρμογή ανοιχτού κώδικα που μπορεί να **ανιχνεύσει και να αποκλείσει ενέργειες εισαγωγής διαδικασίας**:
 
-- Using **Environmental Variables**: It will monitor the presence of any of the following environmental variables: **`DYLD_INSERT_LIBRARIES`**, **`CFNETWORK_LIBRARY_PATH`**, **`RAWCAMERA_BUNDLE_PATH`** and **`ELECTRON_RUN_AS_NODE`**
-- Using **`task_for_pid`** calls: To find when one process wants to get the **task port of another** which allows to inject code in the process.
-- **Electron apps params**: Someone can use **`--inspect`**, **`--inspect-brk`** and **`--remote-debugging-port`** command line argument to start an Electron app in debugging mode, and thus inject code to it.
-- Using **symlinks** or **hardlinks**: Typically the most common abuse is to **place a link with our user privileges**, and **point it to a higher privilege** location. The detection is very simple for both hardlink and symlinks. If the process creating the link has a **different privilege level** than the target file, we create an **alert**. Unfortunately in the case of symlinks blocking is not possible, as we don’t have information about the destination of the link prior creation. This is a limitation of Apple’s EndpointSecuriy framework.
+- Χρησιμοποιώντας **Μεταβλητές Περιβάλλοντος**: Θα παρακολουθεί την παρουσία οποιασδήποτε από τις παρακάτω μεταβλητές περιβάλλοντος: **`DYLD_INSERT_LIBRARIES`**, **`CFNETWORK_LIBRARY_PATH`**, **`RAWCAMERA_BUNDLE_PATH`** και **`ELECTRON_RUN_AS_NODE`**
+- Χρησιμοποιώντας κλήσεις **`task_for_pid`**: Για να βρει πότε μια διαδικασία θέλει να αποκτήσει το **task port μιας άλλης** που επιτρέπει την εισαγωγή κώδικα στη διαδικασία.
+- **Παράμετροι εφαρμογών Electron**: Κάποιος μπορεί να χρησιμοποιήσει τα **`--inspect`**, **`--inspect-brk`** και **`--remote-debugging-port`** επιχειρήματα γραμμής εντολών για να ξεκινήσει μια εφαρμογή Electron σε λειτουργία αποσφαλμάτωσης, και έτσι να εισάγει κώδικα σε αυτήν.
+- Χρησιμοποιώντας **συμβολικούς συνδέσμους** ή **σκληρούς συνδέσμους**: Συνήθως η πιο κοινή κατάχρηση είναι να **τοποθετήσετε έναν σύνδεσμο με τα δικαιώματα του χρήστη μας**, και **να τον δείξετε σε μια τοποθεσία υψηλότερης άδειας**. Η ανίχνευση είναι πολύ απλή και για τους σκληρούς και για τους συμβολικούς συνδέσμους. Αν η διαδικασία που δημιουργεί τον σύνδεσμο έχει **διαφορετικό επίπεδο άδειας** από το αρχείο στόχο, δημιουργούμε μια **ειδοποίηση**. Δυστυχώς, στην περίπτωση των συμβολικών συνδέσμων, η απαγόρευση δεν είναι δυνατή, καθώς δεν έχουμε πληροφορίες σχετικά με τον προορισμό του συνδέσμου πριν από τη δημιουργία του. Αυτή είναι μια περιοριστική του πλαισίου EndpointSecuriy της Apple.
 
-### Calls made by other processes
+### Κλήσεις που γίνονται από άλλες διαδικασίες
 
-In [**this blog post**](https://knight.sc/reverse%20engineering/2019/04/15/detecting-task-modifications.html) you can find how it's possible to use the function **`task_name_for_pid`** to get information about other **processes injecting code in a process** and then getting information about that other process.
+Στο [**αυτό το blog post**](https://knight.sc/reverse%20engineering/2019/04/15/detecting-task-modifications.html) μπορείτε να βρείτε πώς είναι δυνατόν να χρησιμοποιήσετε τη συνάρτηση **`task_name_for_pid`** για να αποκτήσετε πληροφορίες σχετικά με άλλες **διαδικασίες που εισάγουν κώδικα σε μια διαδικασία** και στη συνέχεια να αποκτήσετε πληροφορίες σχετικά με αυτήν την άλλη διαδικασία.
 
-Note that to call that function you need to be **the same uid** as the one running the process or **root** (and it returns info about the process, not a way to inject code).
+Σημειώστε ότι για να καλέσετε αυτή τη συνάρτηση πρέπει να είστε **ο ίδιος uid** με αυτόν που εκτελεί τη διαδικασία ή **root** (και επιστρέφει πληροφορίες σχετικά με τη διαδικασία, όχι έναν τρόπο να εισάγετε κώδικα).
 
-## References
+## Αναφορές
 
 - [https://theevilbit.github.io/shield/](https://theevilbit.github.io/shield/)
 - [https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f)

@@ -4,76 +4,71 @@
 
 ## Basic Information
 
-The real **entrypoint** of a Mach-o binary is the dynamic linked, defined in `LC_LOAD_DYLINKER` usually is `/usr/lib/dyld`.
+Η πραγματική **είσοδος** ενός Mach-o δυαδικού είναι ο δυναμικά συνδεδεμένος, ο οποίος ορίζεται στο `LC_LOAD_DYLINKER` και συνήθως είναι το `/usr/lib/dyld`.
 
-This linker will need to locate all the executables libraries, map them in memory and link all the non-lazy libraries. Only after this process, the entry-point of the binary will be executed.
+Αυτός ο σύνδεσμος θα χρειαστεί να εντοπίσει όλες τις εκτελέσιμες βιβλιοθήκες, να τις χαρτογραφήσει στη μνήμη και να συνδέσει όλες τις μη-τεμπέλικες βιβλιοθήκες. Μόνο μετά από αυτή τη διαδικασία, θα εκτελεστεί το σημείο εισόδου του δυαδικού.
 
-Of course, **`dyld`** doesn't have any dependencies (it uses syscalls and libSystem excerpts).
+Φυσικά, **`dyld`** δεν έχει καμία εξάρτηση (χρησιμοποιεί syscalls και αποσπάσματα libSystem).
 
 > [!CAUTION]
-> If this linker contains any vulnerability, as it's being executed before executing any binary (even highly privileged ones), it would be possible to **escalate privileges**.
+> Εάν αυτός ο σύνδεσμος περιέχει οποιαδήποτε ευπάθεια, καθώς εκτελείται πριν από την εκτέλεση οποιουδήποτε δυαδικού (ακόμα και πολύ προνομιούχων), θα ήταν δυνατό να **κλιμακωθούν τα προνόμια**.
 
 ### Flow
 
-Dyld will be loaded by **`dyldboostrap::start`**, which will also load things such as the **stack canary**. This is because this function will receive in its **`apple`** argument vector this and other **sensitive** **values**.
+Το Dyld θα φορτωθεί από **`dyldboostrap::start`**, το οποίο θα φορτώσει επίσης πράγματα όπως το **stack canary**. Αυτό συμβαίνει επειδή αυτή η συνάρτηση θα λάβει στο **`apple`** όρισμα της το vector και άλλες **ευαίσθητες** **τιμές**.
 
-**`dyls::_main()`** is the entry point of dyld and it's first task is to run `configureProcessRestrictions()`, which usually restricts **`DYLD_*`** environment variables explained in:
+**`dyls::_main()`** είναι το σημείο εισόδου του dyld και η πρώτη του εργασία είναι να εκτελέσει το `configureProcessRestrictions()`, το οποίο συνήθως περιορίζει τις **`DYLD_*`** μεταβλητές περιβάλλοντος που εξηγούνται σε:
 
 {{#ref}}
 ./
 {{#endref}}
 
-Then, it maps the dyld shared cache which prelinks all the important system libraries and then it maps the libraries the binary depends on and continues recursively until all the needed libraries are loaded. Therefore:
+Στη συνέχεια, χαρτογραφεί την κοινή μνήμη dyld που προσυνδέει όλες τις σημαντικές βιβλιοθήκες συστήματος και στη συνέχεια χαρτογραφεί τις βιβλιοθήκες από τις οποίες εξαρτάται το δυαδικό και συνεχίζει αναδρομικά μέχρι να φορτωθούν όλες οι απαραίτητες βιβλιοθήκες. Επομένως:
 
-1. it start loading inserted libraries with `DYLD_INSERT_LIBRARIES` (if allowed)
-2. Then the shared cached ones
-3. Then the imported ones
-   1. &#x20;Then continue importing libraries recursively
+1. αρχίζει να φορτώνει τις εισαχθείσες βιβλιοθήκες με `DYLD_INSERT_LIBRARIES` (αν επιτρέπεται)
+2. Στη συνέχεια τις κοινές που έχουν αποθηκευτεί
+3. Στη συνέχεια τις εισαγόμενες
+1. &#x20;Στη συνέχεια συνεχίζει να εισάγει βιβλιοθήκες αναδρομικά
 
-Once all are loaded the **initialisers** of these libraries are run. These are coded using **`__attribute__((constructor))`** defined in the `LC_ROUTINES[_64]` (now deprecated) or by pointer in a section flagged with `S_MOD_INIT_FUNC_POINTERS` (usually: **`__DATA.__MOD_INIT_FUNC`**).
+Μόλις φορτωθούν όλες, εκτελούνται οι **αρχικοποιητές** αυτών των βιβλιοθηκών. Αυτές είναι κωδικοποιημένες χρησιμοποιώντας **`__attribute__((constructor))`** που ορίζεται στο `LC_ROUTINES[_64]` (τώρα αποσυρμένο) ή μέσω δείκτη σε μια ενότητα που έχει σημαία με `S_MOD_INIT_FUNC_POINTERS` (συνήθως: **`__DATA.__MOD_INIT_FUNC`**).
 
-Terminators are coded with **`__attribute__((destructor))`** and are located in a section flagged with `S_MOD_TERM_FUNC_POINTERS` (**`__DATA.__mod_term_func`**).
+Οι τερματιστές είναι κωδικοποιημένοι με **`__attribute__((destructor))`** και βρίσκονται σε μια ενότητα που έχει σημαία με `S_MOD_TERM_FUNC_POINTERS` (**`__DATA.__mod_term_func`**).
 
 ### Stubs
 
-All binaries sin macOS are dynamically linked. Therefore, they contain some stubs sections that helps the binary to jump to the correct code in different machines and context. It's dyld when the binary is executed the brain that needs to resolve these addresses (at least the non-lazy ones).
+Όλα τα δυαδικά αρχεία στο macOS είναι δυναμικά συνδεδεμένα. Επομένως, περιέχουν κάποιες ενότητες stub που βοηθούν το δυαδικό να πηδήξει στον σωστό κώδικα σε διαφορετικές μηχανές και συμφραζόμενα. Είναι το dyld όταν εκτελείται το δυαδικό που χρειάζεται να επιλύσει αυτές τις διευθύνσεις (τουλάχιστον τις μη-τεμπέλικες).
 
-Som stub sections in the binary:
+Ορισμένες ενότητες stub στο δυαδικό:
 
-- **`__TEXT.__[auth_]stubs`**: Pointers from `__DATA` sections
-- **`__TEXT.__stub_helper`**: Small code invoking dynamic linking with info on the function to call
-- **`__DATA.__[auth_]got`**: Global Offset Table (addresses to imported functions, when resolved, (bound during load time as it's marked with flag `S_NON_LAZY_SYMBOL_POINTERS`)
-- **`__DATA.__nl_symbol_ptr`**: Non-lazy symbol pointers (bound during load time as it's marked with flag `S_NON_LAZY_SYMBOL_POINTERS`)
-- **`__DATA.__la_symbol_ptr`**: Lazy symbols pointers (bound on first access)
+- **`__TEXT.__[auth_]stubs`**: Δείκτες από τις ενότητες `__DATA`
+- **`__TEXT.__stub_helper`**: Μικρός κώδικας που καλεί τη δυναμική σύνδεση με πληροφορίες για τη συνάρτηση που θα καλέσει
+- **`__DATA.__[auth_]got`**: Παγκόσμιος Πίνακας Μεταθέσεων (διευθύνσεις σε εισαγόμενες συναρτήσεις, όταν επιλυθούν, (δεσμευμένες κατά τη διάρκεια του χρόνου φόρτωσης καθώς είναι σημασμένες με τη σημαία `S_NON_LAZY_SYMBOL_POINTERS`)
+- **`__DATA.__nl_symbol_ptr`**: Δείκτες μη-τεμπέλικων συμβόλων (δεσμευμένοι κατά τη διάρκεια του χρόνου φόρτωσης καθώς είναι σημασμένοι με τη σημαία `S_NON_LAZY_SYMBOL_POINTERS`)
+- **`__DATA.__la_symbol_ptr`**: Δείκτες τεμπέλικων συμβόλων (δεσμευμένοι κατά την πρώτη πρόσβαση)
 
 > [!WARNING]
-> Note that the pointers with the prefix "auth\_" are using one in-process encryption key to protect it (PAC). Moreover, It's possible to use the arm64 instruction `BLRA[A/B]` to verify the pointer before following it. And the RETA\[A/B] can be used instead of a RET address.\
-> Actually, the code in **`__TEXT.__auth_stubs`** will use **`braa`** instead of **`bl`** to call the requested function to authenticate the pointer.
+> Σημειώστε ότι οι δείκτες με το πρόθεμα "auth\_" χρησιμοποιούν ένα κλειδί κρυπτογράφησης εντός της διαδικασίας για να το προστατεύσουν (PAC). Επιπλέον, είναι δυνατό να χρησιμοποιηθεί η εντολή arm64 `BLRA[A/B]` για να επαληθευτεί ο δείκτης πριν τον ακολουθήσετε. Και η RETA\[A/B] μπορεί να χρησιμοποιηθεί αντί για μια διεύθυνση RET.\
+> Στην πραγματικότητα, ο κώδικας στο **`__TEXT.__auth_stubs`** θα χρησιμοποιήσει **`braa`** αντί για **`bl`** για να καλέσει τη ζητούμενη συνάρτηση για να πιστοποιήσει τον δείκτη.
 >
-> Also note that current dyld versions load **everything as non-lazy**.
+> Επίσης, σημειώστε ότι οι τρέχουσες εκδόσεις του dyld φορτώνουν **όλα ως μη-τεμπέλικα**.
 
 ### Finding lazy symbols
-
 ```c
 //gcc load.c -o load
 #include <stdio.h>
 int main (int argc, char **argv, char **envp, char **apple)
 {
-    printf("Hi\n");
+printf("Hi\n");
 }
 ```
-
-Interesting disassembly part:
-
+Ενδιαφέρον μέρος αποσυναρμολόγησης:
 ```armasm
 ; objdump -d ./load
 100003f7c: 90000000    	adrp	x0, 0x100003000 <_main+0x1c>
 100003f80: 913e9000    	add	x0, x0, #4004
 100003f84: 94000005    	bl	0x100003f98 <_printf+0x100003f98>
 ```
-
-It's possible to see that the jump to call printf is going to **`__TEXT.__stubs`**:
-
+Είναι δυνατόν να δούμε ότι η μετάβαση στην κλήση του printf πηγαίνει στο **`__TEXT.__stubs`**:
 ```bash
 objdump --section-headers ./load
 
@@ -81,15 +76,13 @@ objdump --section-headers ./load
 
 Sections:
 Idx Name          Size     VMA              Type
-  0 __text        00000038 0000000100003f60 TEXT
-  1 __stubs       0000000c 0000000100003f98 TEXT
-  2 __cstring     00000004 0000000100003fa4 DATA
-  3 __unwind_info 00000058 0000000100003fa8 DATA
-  4 __got         00000008 0000000100004000 DATA
+0 __text        00000038 0000000100003f60 TEXT
+1 __stubs       0000000c 0000000100003f98 TEXT
+2 __cstring     00000004 0000000100003fa4 DATA
+3 __unwind_info 00000058 0000000100003fa8 DATA
+4 __got         00000008 0000000100004000 DATA
 ```
-
-In the disassemble of the **`__stubs`** section:
-
+Στη διάσπαση της ενότητας **`__stubs`**:
 ```bash
 objdump -d --section=__stubs ./load
 
@@ -102,35 +95,31 @@ Disassembly of section __TEXT,__stubs:
 100003f9c: f9400210    	ldr	x16, [x16]
 100003fa0: d61f0200    	br	x16
 ```
+μπορείτε να δείτε ότι **πηδάμε στη διεύθυνση του GOT**, η οποία σε αυτή την περίπτωση επιλύεται μη-τεμπέλικα και θα περιέχει τη διεύθυνση της συνάρτησης printf.
 
-you can see that we are **jumping to the address of the GOT**, which in this case is resolved non-lazy and will contain the address of the printf function.
-
-In other situations instead of directly jumping to the GOT, it could jump to **`__DATA.__la_symbol_ptr`** which will load a value that represents the function that it's trying to load, then jump to **`__TEXT.__stub_helper`** which jumps the **`__DATA.__nl_symbol_ptr`** which contains the address of **`dyld_stub_binder`** which takes as parameters the number of the function and an address.\
-This last function, after finding the address of the searched function writes it in the corresponding location in **`__TEXT.__stub_helper`** to avoid doing lookups in the future.
+Σε άλλες καταστάσεις, αντί να πηδήξει απευθείας στο GOT, θα μπορούσε να πηδήξει στο **`__DATA.__la_symbol_ptr`** το οποίο θα φορτώσει μια τιμή που αντιπροσωπεύει τη συνάρτηση που προσπαθεί να φορτώσει, και στη συνέχεια να πηδήξει στο **`__TEXT.__stub_helper`** το οποίο πηδά στο **`__DATA.__nl_symbol_ptr`** που περιέχει τη διεύθυνση του **`dyld_stub_binder`** που παίρνει ως παραμέτρους τον αριθμό της συνάρτησης και μια διεύθυνση.\
+Αυτή η τελευταία συνάρτηση, αφού βρει τη διεύθυνση της αναζητούμενης συνάρτησης, την γράφει στην αντίστοιχη τοποθεσία στο **`__TEXT.__stub_helper`** για να αποφευχθούν οι αναζητήσεις στο μέλλον.
 
 > [!TIP]
-> However notice taht current dyld versions load everything as non-lazy.
+> Ωστόσο, σημειώστε ότι οι τρέχουσες εκδόσεις του dyld φορτώνουν τα πάντα ως μη-τεμπέλικα.
 
 #### Dyld opcodes
 
-Finally, **`dyld_stub_binder`** needs to find the indicated function and write it in the proper address to not search for it again. To do so it uses opcodes (a finite state machine) within dyld.
+Τέλος, ο **`dyld_stub_binder`** χρειάζεται να βρει τη δηλωμένη συνάρτηση και να την γράψει στη σωστή διεύθυνση για να μην την αναζητήσει ξανά. Για να το κάνει αυτό, χρησιμοποιεί opcodes (μια πεπερασμένη μηχανή καταστάσεων) μέσα στο dyld.
 
 ## apple\[] argument vector
 
-In macOS the main function receives actually 4 arguments instead of 3. The fourth is called apple and each entry is in the form `key=value`. For example:
-
+Στο macOS, η κύρια συνάρτηση δέχεται στην πραγματικότητα 4 παραμέτρους αντί για 3. Η τέταρτη ονομάζεται apple και κάθε είσοδος είναι στη μορφή `key=value`. Για παράδειγμα:
 ```c
 // gcc apple.c -o apple
 #include <stdio.h>
 int main (int argc, char **argv, char **envp, char **apple)
 {
-    for (int i=0; apple[i]; i++)
-        printf("%d: %s\n", i, apple[i])
+for (int i=0; apple[i]; i++)
+printf("%d: %s\n", i, apple[i])
 }
 ```
-
-Result:
-
+Αποτέλεσμα:
 ```
 0: executable_path=./a
 1:
@@ -145,16 +134,15 @@ Result:
 10: arm64e_abi=os
 11: th_port=
 ```
-
 > [!TIP]
-> By the time these values reaches the main function, sensitive information has already been removed from them or it would have been a data leak.
+> Μέχρι τη στιγμή που αυτές οι τιμές φτάνουν στη βασική συνάρτηση, ευαίσθητες πληροφορίες έχουν ήδη αφαιρεθεί από αυτές ή θα είχε υπάρξει διαρροή δεδομένων.
 
-it's possible to see all these interesting values debugging before getting into main with:
+είναι δυνατόν να δούμε όλες αυτές τις ενδιαφέρουσες τιμές αποσφαλμάτωσης πριν μπούμε στη βασική συνάρτηση με:
 
 <pre><code>lldb ./apple
 
 <strong>(lldb) target create "./a"
-</strong>Current executable set to '/tmp/a' (arm64).
+</strong>Η τρέχουσα εκτελέσιμη ρύθμιση είναι '/tmp/a' (arm64).
 (lldb) process launch -s
 [..]
 
@@ -192,18 +180,17 @@ it's possible to see all these interesting values debugging before getting into 
 
 ## dyld_all_image_infos
 
-This is a structure exported by dyld with information about the dyld state which can be found in the [**source code**](https://opensource.apple.com/source/dyld/dyld-852.2/include/mach-o/dyld_images.h.auto.html) with information like the version, pointer to dyld_image_info array, to dyld_image_notifier, if proc is detached from shared cache, if libSystem initializer was called, pointer to dyls's own Mach header, pointer to dyld version string...
+Αυτή είναι μια δομή που εξάγεται από το dyld με πληροφορίες σχετικά με την κατάσταση του dyld που μπορεί να βρεθεί στον [**κώδικα πηγής**](https://opensource.apple.com/source/dyld/dyld-852.2/include/mach-o/dyld_images.h.auto.html) με πληροφορίες όπως η έκδοση, δείκτης στον πίνακα dyld_image_info, στον dyld_image_notifier, αν η διαδικασία είναι αποσυνδεδεμένη από την κοινή μνήμη, αν κλήθηκε ο αρχικοποιητής libSystem, δείκτης στην κεφαλίδα Mach του dyls, δείκτης στη συμβολοσειρά έκδοσης dyld...
 
 ## dyld env variables
 
 ### debug dyld
 
-Interesting env variables that helps to understand what is dyld doing:
+Ενδιαφέρουσες μεταβλητές περιβάλλοντος που βοηθούν στην κατανόηση του τι κάνει το dyld:
 
 - **DYLD_PRINT_LIBRARIES**
 
-Check each library that is loaded:
-
+Ελέγξτε κάθε βιβλιοθήκη που φορτώνεται:
 ```
 DYLD_PRINT_LIBRARIES=1 ./apple
 dyld[19948]: <9F848759-9AB8-3BD2-96A1-C069DC1FFD43> /private/tmp/a
@@ -219,11 +206,9 @@ dyld[19948]: <F7CE9486-FFF5-3CB8-B26F-75811EF4283A> /usr/lib/system/libkeymgr.dy
 dyld[19948]: <1A7038EC-EE49-35AE-8A3C-C311083795FB> /usr/lib/system/libmacho.dylib
 [...]
 ```
-
 - **DYLD_PRINT_SEGMENTS**
 
-Check how is each library loaded:
-
+Ελέγξτε πώς φορτώνεται κάθε βιβλιοθήκη:
 ```
 DYLD_PRINT_SEGMENTS=1 ./apple
 dyld[21147]: re-using existing shared cache (/System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/dyld_shared_cache_arm64e):
@@ -258,60 +243,52 @@ dyld[21147]:   __AUTH_CONST (rw.) 0x0001DDE014D0->0x0001DDE015A8
 dyld[21147]:     __LINKEDIT (r..) 0x000239574000->0x000270BE4000
 [...]
 ```
-
 - **DYLD_PRINT_INITIALIZERS**
 
-Print when each library initializer is running:
-
+Εκτυπώνει πότε εκτελείται κάθε αρχικοποιητής βιβλιοθήκης:
 ```
 DYLD_PRINT_INITIALIZERS=1 ./apple
 dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
 [...]
 ```
+### Άλλα
 
-### Others
+- `DYLD_BIND_AT_LAUNCH`: Οι καθυστερημένες συνδέσεις επιλύονται με τις μη καθυστερημένες
+- `DYLD_DISABLE_PREFETCH`: Απενεργοποίηση της προφόρτωσης περιεχομένου \_\_DATA και \_\_LINKEDIT
+- `DYLD_FORCE_FLAT_NAMESPACE`: Συνδέσεις ενός επιπέδου
+- `DYLD_[FRAMEWORK/LIBRARY]_PATH | DYLD_FALLBACK_[FRAMEWORK/LIBRARY]_PATH | DYLD_VERSIONED_[FRAMEWORK/LIBRARY]_PATH`: Διαδρομές επίλυσης
+- `DYLD_INSERT_LIBRARIES`: Φόρτωση μιας συγκεκριμένης βιβλιοθήκης
+- `DYLD_PRINT_TO_FILE`: Γράψτε την αποσφαλμάτωση dyld σε ένα αρχείο
+- `DYLD_PRINT_APIS`: Εκτύπωση κλήσεων API libdyld
+- `DYLD_PRINT_APIS_APP`: Εκτύπωση κλήσεων API libdyld που έγιναν από το κύριο
+- `DYLD_PRINT_BINDINGS`: Εκτύπωση συμβόλων κατά την σύνδεση
+- `DYLD_WEAK_BINDINGS`: Μόνο εκτύπωση αδύναμων συμβόλων κατά την σύνδεση
+- `DYLD_PRINT_CODE_SIGNATURES`: Εκτύπωση λειτουργιών καταχώρισης υπογραφής κώδικα
+- `DYLD_PRINT_DOFS`: Εκτύπωση τμημάτων μορφής αντικειμένου D-Trace καθώς φορτώνονται
+- `DYLD_PRINT_ENV`: Εκτύπωση του περιβάλλοντος που βλέπει το dyld
+- `DYLD_PRINT_INTERPOSTING`: Εκτύπωση λειτουργιών διαμεσολάβησης
+- `DYLD_PRINT_LIBRARIES`: Εκτύπωση των βιβλιοθηκών που φορτώθηκαν
+- `DYLD_PRINT_OPTS`: Εκτύπωση επιλογών φόρτωσης
+- `DYLD_REBASING`: Εκτύπωση λειτουργιών επανασύνδεσης συμβόλων
+- `DYLD_RPATHS`: Εκτύπωση επεκτάσεων του @rpath
+- `DYLD_PRINT_SEGMENTS`: Εκτύπωση χαρτογραφήσεων τμημάτων Mach-O
+- `DYLD_PRINT_STATISTICS`: Εκτύπωση στατιστικών χρόνου
+- `DYLD_PRINT_STATISTICS_DETAILS`: Εκτύπωση λεπτομερών στατιστικών χρόνου
+- `DYLD_PRINT_WARNINGS`: Εκτύπωση μηνυμάτων προειδοποίησης
+- `DYLD_SHARED_CACHE_DIR`: Διαδρομή για χρήση για την κρυφή μνήμη κοινής βιβλιοθήκης
+- `DYLD_SHARED_REGION`: "χρήση", "ιδιωτική", "αποφυγή"
+- `DYLD_USE_CLOSURES`: Ενεργοποίηση κλεισίματος
 
-- `DYLD_BIND_AT_LAUNCH`: Lazy bindings are resolved with non lazy ones
-- `DYLD_DISABLE_PREFETCH`: DIsable pre-fetching of \_\_DATA and \_\_LINKEDIT content
-- `DYLD_FORCE_FLAT_NAMESPACE`: Single-level bindings
-- `DYLD_[FRAMEWORK/LIBRARY]_PATH | DYLD_FALLBACK_[FRAMEWORK/LIBRARY]_PATH | DYLD_VERSIONED_[FRAMEWORK/LIBRARY]_PATH`: Resolution paths
-- `DYLD_INSERT_LIBRARIES`: Load an specifc library
-- `DYLD_PRINT_TO_FILE`: Write dyld debug in a file
-- `DYLD_PRINT_APIS`: Print libdyld API calls
-- `DYLD_PRINT_APIS_APP`: Print libdyld API calls made by main
-- `DYLD_PRINT_BINDINGS`: Print symbols when bound
-- `DYLD_WEAK_BINDINGS`: Only print weak symbols when bound
-- `DYLD_PRINT_CODE_SIGNATURES`: Print code signature registration operations
-- `DYLD_PRINT_DOFS`: Print D-Trace object format sections as loaded
-- `DYLD_PRINT_ENV`: Print env seen by dyld
-- `DYLD_PRINT_INTERPOSTING`: Print interposting operations
-- `DYLD_PRINT_LIBRARIES`: Print librearies loaded
-- `DYLD_PRINT_OPTS`: Print load options
-- `DYLD_REBASING`: Print symbol rebasing operations
-- `DYLD_RPATHS`: Print expansions of @rpath
-- `DYLD_PRINT_SEGMENTS`: Print mappings of Mach-O segments
-- `DYLD_PRINT_STATISTICS`: Print timing statistics
-- `DYLD_PRINT_STATISTICS_DETAILS`: Print detailed timing statistics
-- `DYLD_PRINT_WARNINGS`: Print warning messages
-- `DYLD_SHARED_CACHE_DIR`: Path to use for shared library cache
-- `DYLD_SHARED_REGION`: "use", "private", "avoid"
-- `DYLD_USE_CLOSURES`: Enable closures
-
-It's possible to find more with someting like:
-
+Είναι δυνατόν να βρείτε περισσότερα με κάτι σαν:
 ```bash
 strings /usr/lib/dyld | grep "^DYLD_" | sort -u
 ```
-
-Or downloading the dyld project from [https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz) and running inside the folder:
-
+Ή κατεβάζοντας το έργο dyld από [https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz) και εκτελώντας μέσα στον φάκελο:
 ```bash
 find . -type f | xargs grep strcmp| grep key,\ \" | cut -d'"' -f2 | sort -u
 ```
+## Αναφορές
 
-## References
-
-- [**\*OS Internals, Volume I: User Mode. By Jonathan Levin**](https://www.amazon.com/MacOS-iOS-Internals-User-Mode/dp/099105556X)
+- [**\*OS Internals, Volume I: User Mode. Από τον Jonathan Levin**](https://www.amazon.com/MacOS-iOS-Internals-User-Mode/dp/099105556X)
 
 {{#include ../../../../banners/hacktricks-training.md}}
-

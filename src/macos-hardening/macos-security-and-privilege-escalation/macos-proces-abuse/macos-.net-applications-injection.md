@@ -2,39 +2,36 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**This is a summary of the post [https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/](https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/). Check it for further details!**
+**Αυτή είναι μια περίληψη της ανάρτησης [https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/](https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/). Ελέγξτε την για περισσότερες λεπτομέρειες!**
 
 ## .NET Core Debugging <a href="#net-core-debugging" id="net-core-debugging"></a>
 
 ### **Establishing a Debugging Session** <a href="#net-core-debugging" id="net-core-debugging"></a>
 
-The handling of communication between debugger and debuggee in .NET is managed by [**dbgtransportsession.cpp**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp). This component sets up two named pipes per .NET process as seen in [dbgtransportsession.cpp#L127](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L127), which are initiated via [twowaypipe.cpp#L27](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/debug-pal/unix/twowaypipe.cpp#L27). These pipes are suffixed with **`-in`** and **`-out`**.
+Η διαχείριση της επικοινωνίας μεταξύ του debugger και του debuggee στο .NET γίνεται από το [**dbgtransportsession.cpp**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp). Αυτό το συστατικό ρυθμίζει δύο ονομαστικούς σωλήνες ανά διαδικασία .NET όπως φαίνεται στο [dbgtransportsession.cpp#L127](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L127), οι οποίοι ξεκινούν μέσω του [twowaypipe.cpp#L27](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/debug-pal/unix/twowaypipe.cpp#L27). Αυτοί οι σωλήνες έχουν το επίθημα **`-in`** και **`-out`**.
 
-By visiting the user's **`$TMPDIR`**, one can find debugging FIFOs available for debugging .Net applications.
+Επισκεπτόμενος το **`$TMPDIR`** του χρήστη, μπορεί κανείς να βρει διαθέσιμα FIFOs αποσφαλμάτωσης για εφαρμογές .Net.
 
-[**DbgTransportSession::TransportWorker**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L1259) is responsible for managing communication from a debugger. To initiate a new debugging session, a debugger must send a message via the `out` pipe starting with a `MessageHeader` struct, detailed in the .NET source code:
-
+[**DbgTransportSession::TransportWorker**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L1259) είναι υπεύθυνος για τη διαχείριση της επικοινωνίας από έναν debugger. Για να ξεκινήσει μια νέα συνεδρία αποσφαλμάτωσης, ένας debugger πρέπει να στείλει ένα μήνυμα μέσω του σωλήνα `out` που ξεκινά με μια δομή `MessageHeader`, λεπτομερώς στον πηγαίο κώδικα .NET:
 ```c
 struct MessageHeader {
-    MessageType   m_eType;        // Message type
-    DWORD         m_cbDataBlock;  // Size of following data block (can be zero)
-    DWORD         m_dwId;         // Message ID from sender
-    DWORD         m_dwReplyId;    // Reply-to Message ID
-    DWORD         m_dwLastSeenId; // Last seen Message ID by sender
-    DWORD         m_dwReserved;   // Reserved for future (initialize to zero)
-        union {
-            struct {
-                DWORD         m_dwMajorVersion;   // Requested/accepted protocol version
-                DWORD         m_dwMinorVersion;
-            } VersionInfo;
-          ...
-        } TypeSpecificData;
-    BYTE          m_sMustBeZero[8];
+MessageType   m_eType;        // Message type
+DWORD         m_cbDataBlock;  // Size of following data block (can be zero)
+DWORD         m_dwId;         // Message ID from sender
+DWORD         m_dwReplyId;    // Reply-to Message ID
+DWORD         m_dwLastSeenId; // Last seen Message ID by sender
+DWORD         m_dwReserved;   // Reserved for future (initialize to zero)
+union {
+struct {
+DWORD         m_dwMajorVersion;   // Requested/accepted protocol version
+DWORD         m_dwMinorVersion;
+} VersionInfo;
+...
+} TypeSpecificData;
+BYTE          m_sMustBeZero[8];
 }
 ```
-
-To request a new session, this struct is populated as follows, setting the message type to `MT_SessionRequest` and the protocol version to the current version:
-
+Για να ζητήσετε μια νέα συνεδρία, αυτή η δομή συμπληρώνεται ως εξής, ορίζοντας τον τύπο μηνύματος σε `MT_SessionRequest` και την έκδοση πρωτοκόλλου στην τρέχουσα έκδοση:
 ```c
 static const DWORD kCurrentMajorVersion = 2;
 static const DWORD kCurrentMinorVersion = 0;
@@ -45,25 +42,19 @@ sSendHeader.TypeSpecificData.VersionInfo.m_dwMajorVersion = kCurrentMajorVersion
 sSendHeader.TypeSpecificData.VersionInfo.m_dwMinorVersion = kCurrentMinorVersion;
 sSendHeader.m_cbDataBlock = sizeof(SessionRequestData);
 ```
-
-This header is then sent over to the target using the `write` syscall, followed by the `sessionRequestData` struct containing a GUID for the session:
-
+Αυτή η κεφαλίδα αποστέλλεται στη συνέχεια στον στόχο χρησιμοποιώντας την κλήση συστήματος `write`, ακολουθούμενη από τη δομή `sessionRequestData` που περιέχει ένα GUID για τη συνεδρία:
 ```c
 write(wr, &sSendHeader, sizeof(MessageHeader));
 memset(&sDataBlock.m_sSessionID, 9, sizeof(SessionRequestData));
 write(wr, &sDataBlock, sizeof(SessionRequestData));
 ```
-
-A read operation on the `out` pipe confirms the success or failure of the debugging session establishment:
-
+Μια λειτουργία ανάγνωσης στον σωλήνα `out` επιβεβαιώνει την επιτυχία ή την αποτυχία της εγκαθίδρυσης της συνεδρίας αποσφαλμάτωσης:
 ```c
 read(rd, &sReceiveHeader, sizeof(MessageHeader));
 ```
+## Ανάγνωση Μνήμης
 
-## Reading Memory
-
-Once a debugging session is established, memory can be read using the [`MT_ReadMemory`](https://github.com/dotnet/runtime/blob/f3a45a91441cf938765bafc795cbf4885cad8800/src/coreclr/src/debug/shared/dbgtransportsession.cpp#L1896) message type. The function readMemory is detailed, performing the necessary steps to send a read request and retrieve the response:
-
+Μόλις καθοριστεί μια συνεδρία αποσφαλμάτωσης, η μνήμη μπορεί να διαβαστεί χρησιμοποιώντας τον τύπο μηνύματος [`MT_ReadMemory`](https://github.com/dotnet/runtime/blob/f3a45a91441cf938765bafc795cbf4885cad8800/src/coreclr/src/debug/shared/dbgtransportsession.cpp#L1896). Η συνάρτηση readMemory περιγράφεται λεπτομερώς, εκτελώντας τα απαραίτητα βήματα για να στείλει ένα αίτημα ανάγνωσης και να ανακτήσει την απάντηση:
 ```c
 bool readMemory(void *addr, int len, unsigned char **output) {
 // Allocation and initialization
@@ -75,13 +66,11 @@ bool readMemory(void *addr, int len, unsigned char **output) {
 return true;
 }
 ```
+Η πλήρης απόδειξη της έννοιας (POC) είναι διαθέσιμη [εδώ](https://gist.github.com/xpn/95eefc14918998853f6e0ab48d9f7b0b).
 
-The complete proof of concept (POC) is available [here](https://gist.github.com/xpn/95eefc14918998853f6e0ab48d9f7b0b).
+## Γράφοντας Μνήμη
 
-## Writing Memory
-
-Similarly, memory can be written using the `writeMemory` function. The process involves setting the message type to `MT_WriteMemory`, specifying the address and length of the data, and then sending the data:
-
+Ομοίως, η μνήμη μπορεί να γραφτεί χρησιμοποιώντας τη λειτουργία `writeMemory`. Η διαδικασία περιλαμβάνει την ρύθμιση του τύπου μηνύματος σε `MT_WriteMemory`, καθορίζοντας τη διεύθυνση και το μήκος των δεδομένων, και στη συνέχεια στέλνοντας τα δεδομένα:
 ```c
 bool writeMemory(void *addr, int len, unsigned char *input) {
 // Increment IDs, set message type, and specify memory location
@@ -93,27 +82,24 @@ bool writeMemory(void *addr, int len, unsigned char *input) {
 return true;
 }
 ```
+Η σχετική POC είναι διαθέσιμη [εδώ](https://gist.github.com/xpn/7c3040a7398808747e158a25745380a5).
 
-The associated POC is available [here](https://gist.github.com/xpn/7c3040a7398808747e158a25745380a5).
+## .NET Core Εκτέλεση Κώδικα <a href="#net-core-code-execution" id="net-core-code-execution"></a>
 
-## .NET Core Code Execution <a href="#net-core-code-execution" id="net-core-code-execution"></a>
-
-To execute code, one needs to identify a memory region with rwx permissions, which can be done using vmmap -pages:
-
+Για να εκτελέσετε κώδικα, πρέπει να εντοπίσετε μια περιοχή μνήμης με άδειες rwx, κάτι που μπορεί να γίνει χρησιμοποιώντας vmmap -pages:
 ```bash
 vmmap -pages [pid]
 vmmap -pages 35829 | grep "rwx/rwx"
 ```
+Η τοποθέτηση ενός σημείου για την επαναγραφή ενός δείκτη συνάρτησης είναι απαραίτητη, και στο .NET Core, αυτό μπορεί να γίνει στοχεύοντας τον **Dynamic Function Table (DFT)**. Αυτός ο πίνακας, που περιγράφεται στο [`jithelpers.h`](https://github.com/dotnet/runtime/blob/6072e4d3a7a2a1493f514cdf4be75a3d56580e84/src/coreclr/src/inc/jithelpers.h), χρησιμοποιείται από το runtime για τις βοηθητικές συναρτήσεις JIT compilation.
 
-Locating a place to overwrite a function pointer is necessary, and in .NET Core, this can be done by targeting the **Dynamic Function Table (DFT)**. This table, detailed in [`jithelpers.h`](https://github.com/dotnet/runtime/blob/6072e4d3a7a2a1493f514cdf4be75a3d56580e84/src/coreclr/src/inc/jithelpers.h), is used by the runtime for JIT compilation helper functions.
+Για συστήματα x64, η αναζήτηση υπογραφών μπορεί να χρησιμοποιηθεί για να βρει μια αναφορά στο σύμβολο `_hlpDynamicFuncTable` στο `libcorclr.dll`.
 
-For x64 systems, signature hunting can be used to find a reference to the symbol `_hlpDynamicFuncTable` in `libcorclr.dll`.
+Η συνάρτηση debugger `MT_GetDCB` παρέχει χρήσιμες πληροφορίες, συμπεριλαμβανομένης της διεύθυνσης μιας βοηθητικής συνάρτησης, `m_helperRemoteStartAddr`, που υποδεικνύει την τοποθεσία του `libcorclr.dll` στη μνήμη της διαδικασίας. Αυτή η διεύθυνση χρησιμοποιείται στη συνέχεια για να ξεκινήσει μια αναζήτηση για το DFT και να επαναγραφεί ένας δείκτης συνάρτησης με τη διεύθυνση του shellcode.
 
-The `MT_GetDCB` debugger function provides useful information, including the address of a helper function, `m_helperRemoteStartAddr`, indicating the location of `libcorclr.dll` in the process memory. This address is then used to start a search for the DFT and overwrite a function pointer with the shellcode's address.
+Ο πλήρης κώδικας POC για την ένεση στο PowerShell είναι προσβάσιμος [εδώ](https://gist.github.com/xpn/b427998c8b3924ab1d63c89d273734b6).
 
-The full POC code for injection into PowerShell is accessible [here](https://gist.github.com/xpn/b427998c8b3924ab1d63c89d273734b6).
-
-## References
+## Αναφορές
 
 - [https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/](https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/)
 

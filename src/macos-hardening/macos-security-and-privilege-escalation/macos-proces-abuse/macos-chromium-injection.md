@@ -4,15 +4,15 @@
 
 ## Basic Information
 
-Chromium-based browsers like Google Chrome, Microsoft Edge, Brave, and others. These browsers are built on the Chromium open-source project, which means they share a common base and, therefore, have similar functionalities and developer options.
+Οι περιηγητές που βασίζονται στο Chromium, όπως το Google Chrome, το Microsoft Edge, το Brave και άλλοι. Αυτοί οι περιηγητές είναι χτισμένοι πάνω στο έργο ανοιχτού κώδικα Chromium, που σημαίνει ότι μοιράζονται μια κοινή βάση και, επομένως, έχουν παρόμοιες λειτουργίες και επιλογές προγραμματιστή.
 
 #### `--load-extension` Flag
 
-The `--load-extension` flag is used when starting a Chromium-based browser from the command line or a script. This flag allows to **automatically load one or more extensions** into the browser upon startup.
+Η σημαία `--load-extension` χρησιμοποιείται κατά την εκκίνηση ενός περιηγητή που βασίζεται στο Chromium από τη γραμμή εντολών ή ένα σενάριο. Αυτή η σημαία επιτρέπει να **φορτωθεί αυτόματα μία ή περισσότερες επεκτάσεις** στον περιηγητή κατά την εκκίνηση.
 
 #### `--use-fake-ui-for-media-stream` Flag
 
-The `--use-fake-ui-for-media-stream` flag is another command-line option that can be used to start Chromium-based browsers. This flag is designed to **bypass the normal user prompts that ask for permission to access media streams from the camera and microphone**. When this flag is used, the browser automatically grants permission to any website or application that requests access to the camera or microphone.
+Η σημαία `--use-fake-ui-for-media-stream` είναι μια άλλη επιλογή γραμμής εντολών που μπορεί να χρησιμοποιηθεί για να ξεκινήσει περιηγητές που βασίζονται στο Chromium. Αυτή η σημαία έχει σχεδιαστεί για να **παρακάμπτει τις κανονικές προτροπές χρήστη που ζητούν άδεια για πρόσβαση σε ροές μέσων από την κάμερα και το μικρόφωνο**. Όταν χρησιμοποιείται αυτή η σημαία, ο περιηγητής χορηγεί αυτόματα άδεια σε οποιαδήποτε ιστοσελίδα ή εφαρμογή ζητά πρόσβαση στην κάμερα ή το μικρόφωνο.
 
 ### Tools
 
@@ -20,15 +20,13 @@ The `--use-fake-ui-for-media-stream` flag is another command-line option that ca
 - [https://github.com/breakpointHQ/VOODOO](https://github.com/breakpointHQ/VOODOO)
 
 ### Example
-
 ```bash
 # Intercept traffic
 voodoo intercept -b chrome
 ```
+Βρείτε περισσότερα παραδείγματα στους συνδέσμους εργαλείων
 
-Find more examples in the tools links
-
-## References
+## Αναφορές
 
 - [https://twitter.com/RonMasas/status/1758106347222995007](https://twitter.com/RonMasas/status/1758106347222995007)
 

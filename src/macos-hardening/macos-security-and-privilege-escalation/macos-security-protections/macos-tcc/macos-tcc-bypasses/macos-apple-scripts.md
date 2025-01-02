@@ -4,32 +4,27 @@
 
 ## Apple Scripts
 
-It's a scripting language used for task automation **interacting with remote processes**. It makes pretty easy to **ask other processes to perform some actions**. **Malware** may abuse these features to abuse functions exported by other processes.\
-For example, a malware could **inject arbitrary JS code in browser opened pages**. Or **auto click** some allow permissions requested to the user;
-
+Είναι μια γλώσσα scripting που χρησιμοποιείται για την αυτοματοποίηση εργασιών **αλληλεπιδρώντας με απομακρυσμένες διαδικασίες**. Διευκολύνει πολύ το **να ζητάμε από άλλες διαδικασίες να εκτελούν κάποιες ενέργειες**. **Malware** μπορεί να εκμεταλλευτεί αυτές τις δυνατότητες για να εκμεταλλευτεί τις λειτουργίες που εξάγονται από άλλες διαδικασίες.\
+Για παράδειγμα, ένα malware θα μπορούσε να **εισάγει αυθαίρετο JS κώδικα σε ανοιγμένες σελίδες του προγράμματος περιήγησης**. Ή να **κάνει αυτόματη κλικ** σε κάποιες άδειες που ζητούνται από τον χρήστη;
 ```applescript
 tell window 1 of process "SecurityAgent"
-     click button "Always Allow" of group 1
+click button "Always Allow" of group 1
 end tell
 ```
+Εδώ έχετε μερικά παραδείγματα: [https://github.com/abbeycode/AppleScripts](https://github.com/abbeycode/AppleScripts)\
+Βρείτε περισσότερες πληροφορίες σχετικά με το malware χρησιμοποιώντας applescripts [**εδώ**](https://www.sentinelone.com/blog/how-offensive-actors-use-applescript-for-attacking-macos/).
 
-Here you have some examples: [https://github.com/abbeycode/AppleScripts](https://github.com/abbeycode/AppleScripts)\
-Find more info about malware using applescripts [**here**](https://www.sentinelone.com/blog/how-offensive-actors-use-applescript-for-attacking-macos/).
+Τα Apple scripts μπορεί να είναι εύκολα "**συμπιεσμένα**". Αυτές οι εκδόσεις μπορούν να είναι εύκολα "**αποσυμπιεσμένες**" με το `osadecompile`
 
-Apple scripts may be easily "**compiled**". These versions can be easily "**decompiled**" with `osadecompile`
-
-However, this scripts can also be **exported as "Read only"** (via the "Export..." option):
+Ωστόσο, αυτά τα scripts μπορούν επίσης να **εξαχθούν ως "Μόνο για ανάγνωση"** (μέσω της επιλογής "Εξαγωγή..."):
 
 <figure><img src="https://github.com/carlospolop/hacktricks/raw/master/images/image%20(556).png" alt=""><figcaption></figcaption></figure>
-
 ```
 file mal.scpt
 mal.scpt: AppleScript compiled
 ```
+και σε αυτή την περίπτωση το περιεχόμενο δεν μπορεί να αποσυμπιεστεί ακόμη και με το `osadecompile`
 
-and tin this case the content cannot be decompiled even with `osadecompile`
-
-However, there are still some tools that can be used to understand this kind of executables, [**read this research for more info**](https://labs.sentinelone.com/fade-dead-adventures-in-reversing-malicious-run-only-applescripts/)). The tool [**applescript-disassembler**](https://github.com/Jinmo/applescript-disassembler) with [**aevt_decompile**](https://github.com/SentineLabs/aevt_decompile) will be very useful to understand how the script works.
+Ωστόσο, υπάρχουν ακόμα μερικά εργαλεία που μπορούν να χρησιμοποιηθούν για να κατανοήσουν αυτούς τους τύπους εκτελέσιμων, [**διαβάστε αυτή την έρευνα για περισσότερες πληροφορίες**](https://labs.sentinelone.com/fade-dead-adventures-in-reversing-malicious-run-only-applescripts/)). Το εργαλείο [**applescript-disassembler**](https://github.com/Jinmo/applescript-disassembler) με το [**aevt_decompile**](https://github.com/SentineLabs/aevt_decompile) θα είναι πολύ χρήσιμο για να κατανοήσετε πώς λειτουργεί το σενάριο.
 
 {{#include ../../../../../banners/hacktricks-training.md}}
-
