@@ -105,7 +105,7 @@ jobs:
 
       # Build the mdBook
       - name: Build mdBook
-        run: mdbook build
+        run: MDBOOK_BOOK__LANGUAGE=$BRANCH mdbook build
       
       # Login in AWs
       - name: Configure AWS credentials using OIDC

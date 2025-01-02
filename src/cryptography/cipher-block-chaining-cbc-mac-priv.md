@@ -53,3 +53,5 @@ Now, if you can control the IV, you can change the first Byte of the IV so **IV\
 More information in [https://en.wikipedia.org/wiki/CBC-MAC](https://en.wikipedia.org/wiki/CBC-MAC)
 
 {{#include ../banners/hacktricks-training.md}}
+
+

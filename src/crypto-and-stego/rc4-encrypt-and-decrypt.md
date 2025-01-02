@@ -9,3 +9,5 @@ If you can encrypt a known plaintext you can also extract the password. More ref
 {% embed url="https://0xrick.github.io/hack-the-box/kryptos/" %}
 
 {{#include ../banners/hacktricks-training.md}}
+
+

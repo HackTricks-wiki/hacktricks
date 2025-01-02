@@ -2,12 +2,6 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/image (2).png" alt=""><figcaption></figcaption></figure>
-
-Deepen your expertise in **Mobile Security** with 8kSec Academy. Master iOS and Android security through our self-paced courses and get certified:
-
-{% embed url="https://academy.8ksec.io/" %}
-
 ## Full TTY
 
 Note that the shell you set in the `SHELL` variable **must** be **listed inside** _**/etc/shells**_ or `The value for the SHELL variable was not found in the /etc/shells file This incident has been reported`. Also, note that the next snippets only work in bash. If you're in a zsh, change to a bash before obtaining the shell by running `bash`.
@@ -112,10 +106,6 @@ If for some reason you cannot obtain a full TTY you **still can interact with pr
 expect -c 'spawn sudo -S cat "/root/root.txt";expect "*password*";send "<THE_PASSWORD_OF_THE_USER>";send "\r\n";interact'
 ```
 
-<figure><img src="../../images/image (2).png" alt=""><figcaption></figcaption></figure>
-
-Deepen your expertise in **Mobile Security** with 8kSec Academy. Master iOS and Android security through our self-paced courses and get certified:
-
-{% embed url="https://academy.8ksec.io/" %}
-
 {{#include ../../banners/hacktricks-training.md}}
+
+

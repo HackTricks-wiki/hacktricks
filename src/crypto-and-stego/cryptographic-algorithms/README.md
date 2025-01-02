@@ -183,3 +183,5 @@ Check **3 comparisons to recognise it**:
 ![](<../../images/image (430).png>)
 
 {{#include ../../banners/hacktricks-training.md}}
+
+

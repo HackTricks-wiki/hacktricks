@@ -19,3 +19,5 @@ It's crucial to note that password-protected zip files **do not encrypt filename
 - [https://michael-myers.github.io/blog/categories/ctf/](https://michael-myers.github.io/blog/categories/ctf/)
 
 {{#include ../../../banners/hacktricks-training.md}}
+
+

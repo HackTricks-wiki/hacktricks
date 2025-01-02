@@ -4,9 +4,6 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 ## Generic Windows Artifacts
 
@@ -507,8 +504,7 @@ EventID 6005 indicates system startup, while EventID 6006 marks shutdown.
 
 Security EventID 1102 signals the deletion of logs, a critical event for forensic analysis.
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../../../banners/hacktricks-training.md}}
+
+

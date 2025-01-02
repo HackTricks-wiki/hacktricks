@@ -2,14 +2,6 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-<figure><img src="../../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=browser-artifacts) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=browser-artifacts" %}
-
 ## Browsers Artifacts <a href="#id-3def" id="id-3def"></a>
 
 Browser artifacts include various types of data stored by web browsers, such as navigation history, bookmarks, and cache data. These artifacts are kept in specific folders within the operating system, differing in location and name across browsers, yet generally storing similar data types.
@@ -169,12 +161,7 @@ These paths and commands are crucial for accessing and understanding the browsin
 - [https://books.google.com/books?id=jfMqCgAAQBAJ\&pg=PA128\&lpg=PA128\&dq=%22This+file](https://books.google.com/books?id=jfMqCgAAQBAJ&pg=PA128&lpg=PA128&dq=%22This+file)
 - **Book: OS X Incident Response: Scripting and Analysis By Jaron Bradley pag 123**
 
-<figure><img src="../../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=browser-artifacts) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=browser-artifacts" %}
 
 {{#include ../../../banners/hacktricks-training.md}}
+
+

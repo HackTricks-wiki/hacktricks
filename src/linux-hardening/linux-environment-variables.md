@@ -122,3 +122,5 @@ One background job, one stopped and last command didn't finish correctly:
 ![](<../images/image (715).png>)
 
 {{#include ../banners/hacktricks-training.md}}
+
+

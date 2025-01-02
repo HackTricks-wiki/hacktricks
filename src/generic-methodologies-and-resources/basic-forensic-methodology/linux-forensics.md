@@ -1,13 +1,5 @@
 # Linux Forensics
 
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=linux-forensics) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=linux-forensics" %}
-
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Initial Information Gathering
@@ -150,14 +142,6 @@ icat -i raw -f ext4 disk.img 16
 ThisisTheMasterSecret
 ```
 
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=linux-forensics) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=linux-forensics" %}
-
 ## Search for known Malware
 
 ### Modified System Files
@@ -199,14 +183,6 @@ find /sbin/ –exec rpm -qf {} \; | grep "is not"
 # Find exacuable files
 find / -type f -executable | grep <something>
 ```
-
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=linux-forensics) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=linux-forensics" %}
 
 ## Recover Deleted Running Binaries
 
@@ -343,14 +319,6 @@ usbrip ids search --pid 0002 --vid 0e0f #Search for pid AND vid
 
 More examples and info inside the github: [https://github.com/snovvcrash/usbrip](https://github.com/snovvcrash/usbrip)
 
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=linux-forensics) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=linux-forensics" %}
-
 ## Review User Accounts and Logon Activities
 
 Examine the _**/etc/passwd**_, _**/etc/shadow**_ and **security logs** for unusual names or accounts created and or used in close proximity to known unauthorized events. Also, check possible sudo brute-force attacks.\
@@ -429,10 +397,5 @@ git diff --no-index --diff-filter=D path/to/old_version/ path/to/new_version/
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
 
-\
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=linux-forensics) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
 
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=linux-forensics" %}

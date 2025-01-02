@@ -2,11 +2,6 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
-
-Deepen your expertise in **Mobile Security** with 8kSec Academy. Master iOS and Android security through our self-paced courses and get certified:
-
-{% embed url="https://academy.8ksec.io/" %}
 
 ## Container modification
 
@@ -122,10 +117,7 @@ Note that when you run a docker container inside a host **you can see the proces
 
 Therefore (as root) you can **dump the memory of the processes** from the host and search for **credentials** just [**like in the following example**](../../linux-hardening/privilege-escalation/#process-memory).
 
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
-
-Deepen your expertise in **Mobile Security** with 8kSec Academy. Master iOS and Android security through our self-paced courses and get certified:
-
-{% embed url="https://academy.8ksec.io/" %}
 
 {{#include ../../banners/hacktricks-training.md}}
+
+

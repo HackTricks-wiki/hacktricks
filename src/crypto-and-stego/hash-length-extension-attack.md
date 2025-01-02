@@ -36,3 +36,5 @@ If an attacker wants to append the string "append" he can:
 You can find this attack good explained in [https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks](https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)
 
 {{#include ../banners/hacktricks-training.md}}
+
+

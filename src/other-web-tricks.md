@@ -2,13 +2,6 @@
 
 {{#include ./banners/hacktricks-training.md}}
 
-<figure><img src="/images/pentest-tools.svg" alt=""><figcaption></figcaption></figure>
-
-**Get a hacker's perspective on your web apps, network, and cloud**
-
-**Find and report critical, exploitable vulnerabilities with real business impact.** Use our 20+ custom tools to map the attack surface, find security issues that let you escalate privileges, and use automated exploits to collect essential evidence, turning your hard work into persuasive reports.
-
-{% embed url="https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons" %}
 
 ### Host header
 
@@ -41,12 +34,7 @@ Developers might forget to disable various debugging options in the production e
 
 ![Image for post](https://miro.medium.com/max/1330/1*wDFRADTOd9Tj63xucenvAA.png)
 
-<figure><img src="/images/pentest-tools.svg" alt=""><figcaption></figcaption></figure>
-
-**Get a hacker's perspective on your web apps, network, and cloud**
-
-**Find and report critical, exploitable vulnerabilities with real business impact.** Use our 20+ custom tools to map the attack surface, find security issues that let you escalate privileges, and use automated exploits to collect essential evidence, turning your hard work into persuasive reports.
-
-{% embed url="https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons" %}
 
 {{#include ./banners/hacktricks-training.md}}
+
+

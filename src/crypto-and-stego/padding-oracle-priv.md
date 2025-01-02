@@ -2,8 +2,6 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-{% embed url="https://websec.nl/" %}
-
 ## CBC - Cipher Block Chaining
 
 In CBC mode the **previous encrypted block is used as IV** to XOR with the next block:
@@ -107,6 +105,7 @@ But if you BF the padding (using padbuster for example) you manage to get anothe
 
 - [https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation)
 
-{% embed url="https://websec.nl/" %}
 
 {{#include ../banners/hacktricks-training.md}}
+
+

@@ -2,11 +2,6 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-<figure><img src="../../../images/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
-
-If you are interested in **hacking career** and hack the unhackable - **we are hiring!** (_fluent polish written and spoken required_).
-
-{% embed url="https://www.stmcyber.com/careers" %}
 
 ## Videos
 
@@ -115,10 +110,7 @@ If there is **no `read-only/no-exec`** protections you could abuse your reverse 
 
 You can find **examples** on how to **exploit some RCE vulnerabilities** to get scripting languages **reverse shells** and execute binaries from memory in [**https://github.com/carlospolop/DistrolessRCE**](https://github.com/carlospolop/DistrolessRCE).
 
-<figure><img src="../../../images/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
-
-If you are interested in **hacking career** and hack the unhackable - **we are hiring!** (_fluent polish written and spoken required_).
-
-{% embed url="https://www.stmcyber.com/careers" %}
 
 {{#include ../../../banners/hacktricks-training.md}}
+
+

@@ -1,8 +1,5 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 # Timestamps
 
@@ -152,8 +149,7 @@ It's also possible to modify the configuration of which files are going to be co
 
 - `fsutil usn deletejournal /d c:`
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../../banners/hacktricks-training.md}}
+
+

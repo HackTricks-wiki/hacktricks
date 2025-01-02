@@ -1,13 +1,5 @@
 # Brute Force - CheatSheet
 
-<figure><img src="../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=brute-force) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=brute-force" %}
-
 {{#include ../banners/hacktricks-training.md}}
 
 ## Default Credentials
@@ -95,14 +87,6 @@ Finished in 0.920s.
 - [**https://github.com/fssecur3/fuzzlists**](https://github.com/fssecur3/fuzzlists)
 - [**https://hashkiller.io/listmanager**](https://hashkiller.io/listmanager)
 - [**https://github.com/Karanxa/Bug-Bounty-Wordlists**](https://github.com/Karanxa/Bug-Bounty-Wordlists)
-
-<figure><img src="../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=brute-force) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=brute-force" %}
 
 ## Services
 
@@ -551,13 +535,6 @@ set PASS_FILE /usr/share/metasploit-framework/data/wordlists/passwords.lst
 crackmapexec winrm <IP> -d <Domain Name> -u usernames.txt -p passwords.txt
 ```
 
-<figure><img src="../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=brute-force) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=brute-force" %}
 
 ## Local
 
@@ -754,14 +731,6 @@ zip -r file.xls .
 crackpkcs12 -d /usr/share/wordlists/rockyou.txt ./cert.pfx
 ```
 
-<figure><img src="../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=brute-force) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=brute-force" %}
-
 ## Tools
 
 **Hash examples:** [https://openwall.info/wiki/john/sample-hashes](https://openwall.info/wiki/john/sample-hashes)
@@ -905,10 +874,4 @@ Cracking Common Application Hashes
 
 {{#include ../banners/hacktricks-training.md}}
 
-<figure><img src="../images/image (48).png" alt=""><figcaption></figcaption></figure>
 
-\
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=brute-force) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=brute-force" %}

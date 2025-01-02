@@ -2,11 +2,6 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
-
-If you are interested in **hacking career** and hack the unhackable - **we are hiring!** (_fluent polish written and spoken required_).
-
-{% embed url="https://www.stmcyber.com/careers" %}
 
 ## Assets discoveries
 
@@ -204,10 +199,7 @@ Check for some [domain takeover](../../pentesting-web/domain-subdomain-takeover.
 If you find any **domain with an IP different** from the ones you already found in the assets discovery, you should perform a **basic vulnerability scan** (using Nessus or OpenVAS) and some [**port scan**](../pentesting-network/#discovering-hosts-from-the-outside) with **nmap/masscan/shodan**. Depending on which services are running you can find in **this book some tricks to "attack" them**.\
 &#xNAN;_&#x4E;ote that sometimes the domain is hosted inside an IP that is not controlled by the client, so it's not in the scope, be careful._
 
-<img src="../../images/i3.png" alt="" data-size="original">\
-**Bug bounty tip**: **sign up** for **Intigriti**, a premium **bug bounty platform created by hackers, for hackers**! Join us at [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) today, and start earning bounties up to **$100,000**!
 
-{% embed url="https://go.intigriti.com/hacktricks" %}
 
 ## Subdomains
 
@@ -716,10 +708,7 @@ There are several tools out there that will perform part of the proposed actions
 
 - All free courses of [**@Jhaddix**](https://twitter.com/Jhaddix) like [**The Bug Hunter's Methodology v4.0 - Recon Edition**](https://www.youtube.com/watch?v=p4JgIu1mceI)
 
-<figure><img src="../../images/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
-
-If you are interested in **hacking career** and hack the unhackable - **we are hiring!** (_fluent polish written and spoken required_).
-
-{% embed url="https://www.stmcyber.com/careers" %}
 
 {{#include ../../banners/hacktricks-training.md}}
+
+

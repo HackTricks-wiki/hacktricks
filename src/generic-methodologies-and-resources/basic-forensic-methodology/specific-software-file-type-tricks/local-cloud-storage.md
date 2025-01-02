@@ -2,13 +2,6 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-<figure><img src="../../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=local-cloud-storage) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=local-cloud-storage" %}
 
 ## OneDrive
 
@@ -103,12 +96,6 @@ Other tables inside this database contain more interesting information:
 - **deleted_fields**: Dropbox deleted files
 - **date_added**
 
-<figure><img src="../../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=local-cloud-storage) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=local-cloud-storage" %}
-
 {{#include ../../../banners/hacktricks-training.md}}
+
+

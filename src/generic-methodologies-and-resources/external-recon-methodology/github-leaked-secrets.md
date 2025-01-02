@@ -2,10 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<img src="../../images/i3.png" alt="" data-size="original">\
-**Bug bounty tip**: **sign up** for **Intigriti**, a premium **bug bounty platform created by hackers, for hackers**! Join us at [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) today, and start earning bounties up to **$100,000**!
 
-{% embed url="https://go.intigriti.com/hacktricks" %}
 
 Now that we have built the list of assets of our scope it's time to search for some OSINT low-hanging fruits.
 
@@ -312,3 +309,5 @@ AWS SECRET
 ```
 
 {{#include ../../banners/hacktricks-training.md}}
+
+

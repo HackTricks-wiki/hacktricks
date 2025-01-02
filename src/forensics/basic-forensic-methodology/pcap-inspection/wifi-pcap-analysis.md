@@ -39,3 +39,5 @@ Edit --> Preferences --> Protocols --> IEEE 802.11--> Edit
 ![](<../../../images/image (426).png>)
 
 {{#include ../../../banners/hacktricks-training.md}}
+
+

@@ -502,3 +502,5 @@ EventID 6005 indicates system startup, while EventID 6006 marks shutdown.
 Security EventID 1102 signals the deletion of logs, a critical event for forensic analysis.
 
 {{#include ../../../banners/hacktricks-training.md}}
+
+

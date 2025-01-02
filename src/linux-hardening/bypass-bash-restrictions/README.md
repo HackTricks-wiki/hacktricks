@@ -2,14 +2,6 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=bypass-bash-restrictions) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=bypass-bash-restrictions" %}
-
 ## Common Limitations Bypasses
 
 ### Reverse Shell
@@ -353,14 +345,8 @@ bypass-fs-protections-read-only-no-exec-distroless/
 - [https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Command%20Injection#exploits)
 - [https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet](https://github.com/Bo0oM/WAF-bypass-Cheat-Sheet)
 - [https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0](https://medium.com/secjuice/web-application-firewall-waf-evasion-techniques-2-125995f3e7b0)
-- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secjuice.com/web-application-firewall-waf-evasion/)
-
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=bypass-bash-restrictions) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=bypass-bash-restrictions" %}
+- [https://www.secjuice.com/web-application-firewall-waf-evasion/](https://www.secju
 
 {{#include ../../banners/hacktricks-training.md}}
+
+

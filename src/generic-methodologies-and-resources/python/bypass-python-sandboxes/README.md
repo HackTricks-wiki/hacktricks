@@ -2,13 +2,6 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-<figure><img src="../../../images/pentest-tools.svg" alt=""><figcaption></figcaption></figure>
-
-**Get a hacker's perspective on your web apps, network, and cloud**
-
-**Find and report critical, exploitable vulnerabilities with real business impact.** Use our 20+ custom tools to map the attack surface, find security issues that let you escalate privileges, and use automated exploits to collect essential evidence, turning your hard work into persuasive reports.
-
-{% embed url="https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons" %}
 
 These are some tricks to bypass python sandbox protections and execute arbitrary commands.
 
@@ -1152,12 +1145,7 @@ will be bypassed
 - [https://nedbatchelder.com/blog/201206/eval_really_is_dangerous.html](https://nedbatchelder.com/blog/201206/eval_really_is_dangerous.html)
 - [https://infosecwriteups.com/how-assertions-can-get-you-hacked-da22c84fb8f6](https://infosecwriteups.com/how-assertions-can-get-you-hacked-da22c84fb8f6)
 
-<figure><img src="../../../images/pentest-tools.svg" alt=""><figcaption></figcaption></figure>
-
-**Get a hacker's perspective on your web apps, network, and cloud**
-
-**Find and report critical, exploitable vulnerabilities with real business impact.** Use our 20+ custom tools to map the attack surface, find security issues that let you escalate privileges, and use automated exploits to collect essential evidence, turning your hard work into persuasive reports.
-
-{% embed url="https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons" %}
 
 {{#include ../../../banners/hacktricks-training.md}}
+
+
