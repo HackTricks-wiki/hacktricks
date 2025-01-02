@@ -4,95 +4,84 @@
 
 ## AD Explorer
 
-[AD Explorer](https://docs.microsoft.com/en-us/sysinternals/downloads/adexplorer) is from Sysinternal Suite:
+[AD Explorer](https://docs.microsoft.com/en-us/sysinternals/downloads/adexplorer) は Sysinternal Suite の一部です：
 
-> An advanced Active Directory (AD) viewer and editor. You can use AD Explorer to navigate an AD database easily, define favourite locations, view object properties, and attributes without opening dialog boxes, edit permissions, view an object's schema, and execute sophisticated searches that you can save and re-execute.
+> 高度な Active Directory (AD) ビューアおよびエディタです。AD Explorer を使用すると、AD データベースを簡単にナビゲートし、お気に入りの場所を定義し、ダイアログボックスを開かずにオブジェクトのプロパティや属性を表示し、権限を編集し、オブジェクトのスキーマを表示し、保存して再実行できる高度な検索を実行できます。
 
 ### Snapshots
 
-AD Explorer can create snapshots of an AD so you can check it offline.\
-It can be used to discover vulns offline, or to compare different states of the AD DB across the time.
+AD Explorer は AD のスナップショットを作成できるため、オフラインで確認できます。\
+オフラインで脆弱性を発見したり、時間を通じて AD DB の異なる状態を比較したりするために使用できます。
 
-You will be requires the username, password, and direction to connect (any AD user is required).
+接続するためには、ユーザー名、パスワード、および接続先のディレクションが必要です（任意の AD ユーザーが必要です）。
 
-To take a snapshot of AD, go to `File` --> `Create Snapshot` and enter a name for the snapshot.
+AD のスナップショットを取得するには、`File` --> `Create Snapshot` に移動し、スナップショットの名前を入力します。
 
 ## ADRecon
 
-[**ADRecon**](https://github.com/adrecon/ADRecon) is a tool which extracts and combines various artefacts out of an AD environment. The information can be presented in a **specially formatted** Microsoft Excel **report** that includes summary views with metrics to facilitate analysis and provide a holistic picture of the current state of the target AD environment.
-
+[**ADRecon**](https://github.com/adrecon/ADRecon) は、AD 環境からさまざまなアーティファクトを抽出して結合するツールです。この情報は、分析を容易にし、ターゲット AD 環境の現在の状態の全体像を提供するためのメトリックを含む要約ビューを含む **特別にフォーマットされた** Microsoft Excel **レポート** で提示できます。
 ```bash
 # Run it
 .\ADRecon.ps1
 ```
-
 ## BloodHound
 
 From [https://github.com/BloodHoundAD/BloodHound](https://github.com/BloodHoundAD/BloodHound)
 
-> BloodHound is a single page Javascript web application, built on top of [Linkurious](http://linkurio.us/), compiled with [Electron](http://electron.atom.io/), with a [Neo4j](https://neo4j.com/) database fed by a C# data collector.
+> BloodHoundは、[Linkurious](http://linkurio.us/)の上に構築された単一ページのJavascriptウェブアプリケーションで、[Electron](http://electron.atom.io/)でコンパイルされ、C#データコレクターによって供給される[Neo4j](https://neo4j.com/)データベースを持っています。
 
-BloodHound uses graph theory to reveal the hidden and often unintended relationships within an Active Directory or Azure environment. Attackers can use BloodHound to easily identify highly complex attack paths that would otherwise be impossible to quickly identify. Defenders can use BloodHound to identify and eliminate those same attack paths. Both blue and red teams can use BloodHound to easily gain a deeper understanding of privilege relationships in an Active Directory or Azure environment.
+BloodHoundは、グラフ理論を使用して、Active DirectoryまたはAzure環境内の隠れた、しばしば意図しない関係を明らかにします。攻撃者はBloodHoundを使用して、迅速に特定することが不可能な非常に複雑な攻撃経路を簡単に特定できます。防御者はBloodHoundを使用して、同じ攻撃経路を特定し排除することができます。ブルーチームとレッドチームの両方がBloodHoundを使用して、Active DirectoryまたはAzure環境における特権関係をより深く理解することができます。
 
-So, [Bloodhound ](https://github.com/BloodHoundAD/BloodHound)is an amazing tool which can enumerate a domain automatically, save all the information, find possible privilege escalation paths and show all the information using graphs.
+したがって、[Bloodhound](https://github.com/BloodHoundAD/BloodHound)は、ドメインを自動的に列挙し、すべての情報を保存し、可能な特権昇格経路を見つけ、グラフを使用してすべての情報を表示する素晴らしいツールです。
 
-Booldhound is composed of 2 main parts: **ingestors** and the **visualisation application**.
+BloodHoundは、**ingestors**と**visualisation application**の2つの主要な部分で構成されています。
 
-The **ingestors** are used to **enumerate the domain and extract all the information** in a format that the visualisation application will understand.
+**ingestors**は、**ドメインを列挙し、視覚化アプリケーションが理解できる形式で情報を抽出するために使用されます**。
 
-The **visualisation application uses neo4j** to show how all the information is related and to show different ways to escalate privileges in the domain.
+**visualisation applicationはneo4jを使用して**、すべての情報がどのように関連しているかを示し、ドメイン内で特権を昇格させるさまざまな方法を示します。
 
 ### Installation
 
-After the creation of BloodHound CE, the entire project was updated for ease of use with Docker. The easiest way to get started is to use its pre-configured Docker Compose configuration.
+BloodHound CEの作成後、プロジェクト全体がDockerを使用しやすく更新されました。始める最も簡単な方法は、事前に構成されたDocker Compose構成を使用することです。
 
-1. Install Docker Compose. This should be included with the [Docker Desktop](https://www.docker.com/products/docker-desktop/) installation.
-2. Run:
-
+1. Docker Composeをインストールします。これは[Docker Desktop](https://www.docker.com/products/docker-desktop/)のインストールに含まれているはずです。
+2. 実行します:
 ```
 curl -L https://ghst.ly/getbhce | docker compose -f - up
 ```
+3. Docker Composeのターミナル出力にあるランダムに生成されたパスワードを見つけます。
+4. ブラウザでhttp://localhost:8080/ui/loginに移動します。ユーザー名にadminを入力し、ログからのランダムに生成されたパスワードでログインします。
 
-3. Locate the randomly generated password in the terminal output of Docker Compose.
-4. In a browser, navigate to http://localhost:8080/ui/login. Login with a username of admin and the randomly generated password from the logs.
-
-After this you will need to change the randomly generated password and you will have the new interface ready, from which you can directly download the ingestors.
+その後、ランダムに生成されたパスワードを変更する必要があり、新しいインターフェースが準備されます。そこから直接イングestorをダウンロードできます。
 
 ### SharpHound
 
-They have several options but if you want to run SharpHound from a PC joined to the domain, using your current user and extract all the information you can do:
-
+いくつかのオプションがありますが、ドメインに参加しているPCからSharpHoundを実行し、現在のユーザーを使用してすべての情報を抽出したい場合は、次のようにできます：
 ```
 ./SharpHound.exe --CollectionMethods All
 Invoke-BloodHound -CollectionMethod All
 ```
+> **CollectionMethod** とループセッションについては、[こちら](https://support.bloodhoundenterprise.io/hc/en-us/articles/17481375424795-All-SharpHound-Community-Edition-Flags-Explained)で詳しく読むことができます。
 
-> You can read more about **CollectionMethod** and loop session [here](https://support.bloodhoundenterprise.io/hc/en-us/articles/17481375424795-All-SharpHound-Community-Edition-Flags-Explained)
-
-If you wish to execute SharpHound using different credentials you can create a CMD netonly session and run SharpHound from there:
-
+異なる資格情報を使用してSharpHoundを実行したい場合は、CMD netonlyセッションを作成し、そこからSharpHoundを実行できます：
 ```
 runas /netonly /user:domain\user "powershell.exe -exec bypass"
 ```
-
-[**Learn more about Bloodhound in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-with-bloodhound-on-kali-linux)
+[**Bloodhoundについて詳しく学ぶには、ired.teamをご覧ください。**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-with-bloodhound-on-kali-linux)
 
 ## Group3r
 
-[**Group3r**](https://github.com/Group3r/Group3r) is a tool to find **vulnerabilities** in Active Directory associated **Group Policy**. \
-You need to **run group3r** from a host inside the domain using **any domain user**.
-
+[**Group3r**](https://github.com/Group3r/Group3r) は、**グループポリシー**に関連するActive Directoryの**脆弱性**を見つけるためのツールです。 \
+**任意のドメインユーザー**を使用して、ドメイン内のホストから**group3rを実行する**必要があります。
 ```bash
 group3r.exe -f <filepath-name.log>
 # -s sends results to stdin
 # -f send results to file
 ```
-
 ## PingCastle
 
-[**PingCastle**](https://www.pingcastle.com/documentation/) **evaluates the security posture of an AD environment** and provides a nice **report** with graphs.
+[**PingCastle**](https://www.pingcastle.com/documentation/) **はAD環境のセキュリティ姿勢を評価**し、グラフ付きの素晴らしい**レポート**を提供します。
 
-To run it, can execute the binary `PingCastle.exe` and it will start an **interactive session** presenting a menu of options. The default option to use is **`healthcheck`** which will establish a baseline **overview** of the **domain**, and find **misconfigurations** and **vulnerabilities**.&#x20;
+実行するには、バイナリ`PingCastle.exe`を実行すると、オプションのメニューを表示する**インタラクティブセッション**が開始されます。使用するデフォルトオプションは**`healthcheck`**で、**ドメイン**の**概要**を確立し、**誤設定**や**脆弱性**を見つけます。&#x20;
 
 {{#include ../../banners/hacktricks-training.md}}
-

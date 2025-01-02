@@ -1,13 +1,12 @@
-# External Forest Domain - One-Way (Outbound)
+# 外部フォレストドメイン - 一方向（アウトバウンド）
 
 {{#include ../../banners/hacktricks-training.md}}
 
-In this scenario **your domain** is **trusting** some **privileges** to principal from a **different domains**.
+このシナリオでは、**あなたのドメイン**が**異なるドメイン**のプリンシパルに**特権**を**信頼**しています。
 
-## Enumeration
+## 列挙
 
-### Outbound Trust
-
+### アウトバウンドトラスト
 ```powershell
 # Notice Outbound trust
 Get-DomainTrust
@@ -29,56 +28,46 @@ MemberName              : S-1-5-21-1028541967-2937615241-1935644758-1115
 MemberDistinguishedName : CN=S-1-5-21-1028541967-2937615241-1935644758-1115,CN=ForeignSecurityPrincipals,DC=DOMAIN,DC=LOCAL
 ## Note how the members aren't from the current domain (ConvertFrom-SID won't work)
 ```
-
 ## Trust Account Attack
 
-A security vulnerability exists when a trust relationship is established between two domains, identified here as domain **A** and domain **B**, where domain **B** extends its trust to domain **A**. In this setup, a special account is created in domain **A** for domain **B**, which plays a crucial role in the authentication process between the two domains. This account, associated with domain **B**, is utilized for encrypting tickets for accessing services across the domains.
+セキュリティの脆弱性は、ドメイン **A** とドメイン **B** の間に信頼関係が確立されるときに存在します。ここで、ドメイン **B** はドメイン **A** に対して信頼を拡張します。この設定では、ドメイン **B** のためにドメイン **A** に特別なアカウントが作成され、これは2つのドメイン間の認証プロセスにおいて重要な役割を果たします。このアカウントはドメイン **B** に関連付けられており、ドメイン間でサービスにアクセスするためのチケットを暗号化するために使用されます。
 
-The critical aspect to understand here is that the password and hash of this special account can be extracted from a Domain Controller in domain **A** using a command line tool. The command to perform this action is:
-
+ここで理解すべき重要な点は、この特別なアカウントのパスワードとハッシュが、コマンドラインツールを使用してドメイン **A** のドメインコントローラーから抽出できるということです。このアクションを実行するためのコマンドは次のとおりです:
 ```powershell
 Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.my.domain.local
 ```
+この抽出は、名前の後に**$**が付いたアカウントがアクティブで、ドメイン**A**の「Domain Users」グループに属しているため、可能です。これにより、このグループに関連付けられた権限を継承します。これにより、個人はこのアカウントの資格情報を使用してドメイン**A**に対して認証できます。
 
-This extraction is possible because the account, identified with a **$** after its name, is active and belongs to the "Domain Users" group of domain **A**, thereby inheriting permissions associated with this group. This allows individuals to authenticate against domain **A** using the credentials of this account.
+**警告:** この状況を利用して、ユーザーとしてドメイン**A**に足場を築くことが可能ですが、権限は限られています。しかし、このアクセスはドメイン**A**での列挙を行うには十分です。
 
-**Warning:** It is feasible to leverage this situation to gain a foothold in domain **A** as a user, albeit with limited permissions. However, this access is sufficient to perform enumeration on domain **A**.
-
-In a scenario where `ext.local` is the trusting domain and `root.local` is the trusted domain, a user account named `EXT$` would be created within `root.local`. Through specific tools, it is possible to dump the Kerberos trust keys, revealing the credentials of `EXT$` in `root.local`. The command to achieve this is:
-
+`ext.local`が信頼するドメインで、`root.local`が信頼されたドメインであるシナリオでは、`root.local`内に`EXT$`という名前のユーザーアカウントが作成されます。特定のツールを使用することで、Kerberos信頼キーをダンプし、`root.local`内の`EXT$`の資格情報を明らかにすることができます。これを達成するためのコマンドは次のとおりです:
 ```bash
 lsadump::trust /patch
 ```
-
-Following this, one could use the extracted RC4 key to authenticate as `root.local\EXT$` within `root.local` using another tool command:
-
+これに続いて、別のツールコマンドを使用して `root.local` 内で `root.local\EXT$` として認証するために抽出された RC4 キーを使用することができます:
 ```bash
 .\Rubeus.exe asktgt /user:EXT$ /domain:root.local /rc4:<RC4> /dc:dc.root.local /ptt
 ```
-
-This authentication step opens up the possibility to enumerate and even exploit services within `root.local`, such as performing a Kerberoast attack to extract service account credentials using:
-
+この認証ステップは、`root.local` 内のサービスを列挙し、さらには悪用する可能性を開きます。たとえば、次のコマンドを使用してサービスアカウントの資格情報を抽出する Kerberoast 攻撃を実行することができます。
 ```bash
 .\Rubeus.exe kerberoast /user:svc_sql /domain:root.local /dc:dc.root.local
 ```
+### 明文の信頼パスワードの収集
 
-### Gathering cleartext trust password
+前のフローでは、**明文パスワード**の代わりに信頼ハッシュが使用されました（これは**mimikatzによってダンプされました**）。
 
-In the previous flow it was used the trust hash instead of the **clear text password** (that was also **dumped by mimikatz**).
-
-The cleartext password can be obtained by converting the \[ CLEAR ] output from mimikatz from hexadecimal and removing null bytes ‘\x00’:
+明文パスワードは、mimikatzの\[ CLEAR \]出力を16進数から変換し、ヌルバイト‘\x00’を削除することで取得できます：
 
 ![](<../../images/image (938).png>)
 
-Sometimes when creating a trust relationship, a password must be typed in by the user for the trust. In this demonstration, the key is the original trust password and therefore human readable. As the key cycles (30 days), the cleartext will not be human-readable but technically still usable.
+信頼関係を作成する際に、ユーザーが信頼のためにパスワードを入力する必要がある場合があります。このデモでは、キーは元の信頼パスワードであり、したがって人間が読めるものです。キーがサイクルする（30日）と、明文は人間が読めないものになりますが、技術的には依然として使用可能です。
 
-The cleartext password can be used to perform regular authentication as the trust account, an alternative to requesting a TGT using the Kerberos secret key of the trust account. Here, querying root.local from ext.local for members of Domain Admins:
+明文パスワードは、信頼アカウントとして通常の認証を行うために使用でき、信頼アカウントのKerberos秘密鍵を使用してTGTを要求する代替手段となります。ここでは、ext.localからroot.localに対してDomain Adminsのメンバーをクエリしています：
 
 ![](<../../images/image (792).png>)
 
-## References
+## 参考文献
 
 - [https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-7-trust-account-attack-from-trusting-to-trusted](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-7-trust-account-attack-from-trusting-to-trusted)
 
 {{#include ../../banners/hacktricks-training.md}}
-

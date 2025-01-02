@@ -1,128 +1,127 @@
-# Online Platforms with API
+# APIを持つオンラインプラットフォーム
 
 {{#include ../banners/hacktricks-training.md}}
 
 ## [ProjectHoneypot](https://www.projecthoneypot.org/)
 
-You can ask if an IP is related to suspicious/malicious activities. Completely free.
+IPが疑わしい/悪意のある活動に関連しているかどうかを確認できます。完全に無料です。
 
 ## [**BotScout**](http://botscout.com/api.htm)
 
-Check if the IP address is related to a bot that register accounts. It can also check usernames and emails. Initially free.
+IPアドレスがアカウントを登録するボットに関連しているかどうかを確認します。ユーザー名やメールアドレスも確認できます。最初は無料です。
 
 ## [Hunter](https://hunter.io/)
 
-Find and verify emails.\
-Some free API requests free, for more you need to pay.\
-Commercial?
+メールを見つけて確認します。\
+一部のAPIリクエストは無料ですが、より多くのリクエストには支払いが必要です。\
+商業用？
 
 ## [AlientVault](https://otx.alienvault.com/api)
 
-Find Malicious activities related to IPs and Domains. Free.
+IPやドメインに関連する悪意のある活動を見つけます。無料です。
 
 ## [Clearbit](https://dashboard.clearbit.com/)
 
-Find related personal data to a email (profiles on other platforms), domain (basic company info ,mails and people working) and companies (get company info from mail).\
-You need to pay to access all the possibilities.\
-Commercial?
+メールに関連する個人データ（他のプラットフォームのプロフィール）、ドメイン（基本的な会社情報、メール、従業員）および会社（メールから会社情報を取得）を見つけます。\
+すべての機能にアクセスするには支払いが必要です。\
+商業用？
 
 ## [BuiltWith](https://builtwith.com/)
 
-Technologies used by webs. Expensive...\
-Commercial?
+ウェブサイトで使用されている技術。高価です...\
+商業用？
 
 ## [Fraudguard](https://fraudguard.io/)
 
-Check if a host (domain or IP) is related with suspicious/malicious activities. Have some free API access.\
-Commercial?
+ホスト（ドメインまたはIP）が疑わしい/悪意のある活動に関連しているかどうかを確認します。いくつかの無料APIアクセスがあります。\
+商業用？
 
 ## [FortiGuard](https://fortiguard.com/)
 
-Check if a host (domain or IP) is related with suspicious/malicious activities. Have some free API access.
+ホスト（ドメインまたはIP）が疑わしい/悪意のある活動に関連しているかどうかを確認します。いくつかの無料APIアクセスがあります。
 
 ## [SpamCop](https://www.spamcop.net/)
 
-Indicates if host is related to spam activity. Have some free API access.
+ホストがスパム活動に関連しているかどうかを示します。いくつかの無料APIアクセスがあります。
 
 ## [mywot](https://www.mywot.com/)
 
-Based on opinions and other metrics get if a domain is related with suspicious/malicious information.
+意見や他の指標に基づいて、ドメインが疑わしい/悪意のある情報に関連しているかどうかを取得します。
 
 ## [ipinfo](https://ipinfo.io/)
 
-Obtains basic info from an IP address. You can test up to 100K/month.
+IPアドレスから基本情報を取得します。月に最大100Kまでテストできます。
 
 ## [securitytrails](https://securitytrails.com/app/account)
 
-This platform give information about domains and IP addresses like domains inside an IP or inside a domain server, domains owned by an email (find related domains), IP history of domains (find the host behind CloudFlare), all domains using a nameserver....\
-You have some free access.
+このプラットフォームは、IP内のドメインやドメインサーバー内のドメイン、メールに関連するドメイン（関連するドメインを見つける）、ドメインのIP履歴（CloudFlareの背後にあるホストを見つける）、すべてのドメインが使用しているネームサーバーなどの情報を提供します。\
+いくつかの無料アクセスがあります。
 
 ## [fullcontact](https://www.fullcontact.com/)
 
-Allows to search by email, domain or company name and retrieve "personal" information related. It can also verify emails. There is some free access.
+メール、ドメイン、会社名で検索し、関連する「個人」情報を取得します。メールの確認もできます。いくつかの無料アクセスがあります。
 
 ## [RiskIQ](https://www.spiderfoot.net/documentation/)
 
-A lot of information from domains and IPs even in the free/community version.
+ドメインやIPに関する多くの情報があり、無料/コミュニティ版でも利用可能です。
 
 ## [\_IntelligenceX](https://intelx.io/)
 
-Search Domains, IPs and emails and get info from dumps. Have some free access.
+ドメイン、IP、メールを検索し、ダンプから情報を取得します。いくつかの無料アクセスがあります。
 
 ## [IBM X-Force Exchange](https://exchange.xforce.ibmcloud.com/)
 
-Search by IP and gather information related to suspicions activities. There is some free access.
+IPで検索し、疑わしい活動に関連する情報を収集します。いくつかの無料アクセスがあります。
 
 ## [Greynoise](https://viz.greynoise.io/)
 
-Search by IP or IP range and get information about IPs scanning the Internet. 15 days free access.
+IPまたはIP範囲で検索し、インターネットをスキャンしているIPに関する情報を取得します。15日間の無料アクセスがあります。
 
 ## [Shodan](https://www.shodan.io/)
 
-Get scan information of an IP address. Have some free api access.
+IPアドレスのスキャン情報を取得します。いくつかの無料APIアクセスがあります。
 
 ## [Censys](https://censys.io/)
 
-Very similar to shodan
+Shodanに非常に似ています。
 
 ## [buckets.grayhatwarfare.com](https://buckets.grayhatwarfare.com/)
 
-Find open S3 buckets searching by keyword.
+キーワードで検索してオープンなS3バケットを見つけます。
 
 ## [Dehashed](https://www.dehashed.com/data)
 
-Find leaked credentials of emails and even domains\
-Commercial?
+メールやドメインの漏洩した資格情報を見つけます。\
+商業用？
 
 ## [psbdmp](https://psbdmp.ws/)
 
-Search pastebins where a email appeared. Commercial?
+メールが表示されたペーストビンを検索します。商業用？
 
 ## [emailrep.io](https://emailrep.io/key)
 
-Get reputation of a mail. Commercial?
+メールの評判を取得します。商業用？
 
 ## [ghostproject](https://ghostproject.fr/)
 
-Get passwords from leaked emails. Commercial?
+漏洩したメールからパスワードを取得します。商業用？
 
 ## [Binaryedge](https://www.binaryedge.io/)
 
-Obtain interesting info from IPs
+IPから興味深い情報を取得します。
 
 ## [haveibeenpwned](https://haveibeenpwned.com/)
 
-Search by domain and email and get if it was pwned and passwords. Commercial?
+ドメインやメールで検索し、それが侵害されたかどうかとパスワードを取得します。商業用？
 
 ### [IP2Location.io](https://www.ip2location.io/)
 
-It detects IP geolocation, data center, ASN and even VPN information. It offers free 30K queries per month.
+IPのジオロケーション、データセンター、ASN、さらにはVPN情報を検出します。月に30Kの無料クエリを提供します。
 
-[https://dnsdumpster.com/](https://dnsdumpster.com/)(in a commercial tool?)
+[https://dnsdumpster.com/](https://dnsdumpster.com/)(商業ツール内？)
 
-[https://www.netcraft.com/](https://www.netcraft.com/) (in a commercial tool?)
+[https://www.netcraft.com/](https://www.netcraft.com/) (商業ツール内？)
 
-[https://www.nmmapper.com/sys/tools/subdomainfinder/](https://www.nmmapper.com/) (in a commercial tool?)
+[https://www.nmmapper.com/sys/tools/subdomainfinder/](https://www.nmmapper.com/) (商業ツール内？)
 
 {{#include ../banners/hacktricks-training.md}}
-

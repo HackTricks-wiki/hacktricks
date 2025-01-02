@@ -2,59 +2,56 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Basic Information
+## 基本情報
 
-SPI (Serial Peripheral Interface) is an Synchronous Serial Communication Protocol used in embedded systems for short distance communication between ICs (Integrated Circuits). SPI Communication Protocol makes use of the master-slave architecture which is orchastrated by the Clock and Chip Select Signal. A master-slave architecture consists of a master (usually a microprocessor) that manages external peripherals like EEPROM, sensors, control devices, etc. which are considered to be the slaves.
+SPI (Serial Peripheral Interface) は、IC (Integrated Circuits) 間の短距離通信に使用される同期シリアル通信プロトコルです。SPI通信プロトコルは、クロックとチップセレクト信号によって調整されるマスター-スレーブアーキテクチャを利用します。マスター-スレーブアーキテクチャは、EEPROM、センサー、制御デバイスなどの外部周辺機器を管理するマスター（通常はマイクロプロセッサ）で構成され、これらはスレーブと見なされます。
 
-Multiple slaves can be connected to a master but slaves can't communicate with each other. Slaves are administrated by two pins, clock and chip select. As SPI is an synchronous communication protocol, the input and output pins follow the clock signals. The chip select is used by the master to select a slave and interact with it. When the chip select is high, the slave device is not selected whereas when it's low, the chip has been selected and the master would be interacting with the slave.
+複数のスレーブがマスターに接続できますが、スレーブ同士は通信できません。スレーブは、クロックとチップセレクトの2つのピンによって管理されます。SPIは同期通信プロトコルであるため、入力ピンと出力ピンはクロック信号に従います。チップセレクトは、マスターがスレーブを選択して相互作用するために使用されます。チップセレクトが高いと、スレーブデバイスは選択されず、低いと、チップが選択され、マスターがスレーブと相互作用します。
 
-The MOSI (Master Out, Slave In) and MISO (Master In, Slave Out) are responsible for data sending and recieving data. Data is sent to the slave device through the MOSI pin while the chip select is held low. The input data contains instructions, memory addresses or data as per the datasheet of the slave device vendor. Upon a valid input, the MISO pin is responsible for transmitting data to the master. The output data is sent exactly at the next clock cycle after the input ends. The MISO pins transmits data till the data is fully transmitter or the master sets the chip select pin high (in that case, the slave would stop transmitting and master would not listen after that clock cycle).
+MOSI (Master Out, Slave In) と MISO (Master In, Slave Out) は、データの送信と受信を担当します。データは、MOSIピンを通じてスレーブデバイスに送信され、チップセレクトが低く保たれます。入力データには、スレーブデバイスベンダーのデータシートに従った命令、メモリアドレス、またはデータが含まれます。有効な入力があると、MISOピンはマスターにデータを送信します。出力データは、入力が終了した後の次のクロックサイクルで送信されます。MISOピンは、データが完全に送信されるまで、またはマスターがチップセレクトピンを高く設定するまでデータを送信します（その場合、スレーブは送信を停止し、マスターはそのクロックサイクルの後は聞きません）。
 
-## Dumping Firmware from EEPROMs
+## EEPROMからのファームウェアダンプ
 
-Dumping firmware can be useful for analysing the firmware and finding vulnerabilities in them. Often times, the firmware is not available on the internet or is irrelevant due to variations of factors like model number, version, etc. Hence, extracting the firmware directly from the physical device can be helpful to be specific while hunting for threats.
+ファームウェアのダンプは、ファームウェアを分析し、脆弱性を見つけるのに役立ちます。多くの場合、ファームウェアはインターネット上で入手できないか、モデル番号、バージョンなどの要因の変動により無関係です。したがって、物理デバイスから直接ファームウェアを抽出することは、脅威を特定する際に役立ちます。
 
-Getting Serial Console can be helpful, but often times it happens that the files are read-only. This constrains the analysis due to various reasons. For example, a tools that are required to send and recieve packages would not be there in the firmware. So extracting the binaries to reverse engineer them is not feasible. Hence, having the whole firmware dumped on the system and extracting the binaries for analysis can be very helpful.
+シリアルコンソールを取得することは役立ちますが、ファイルが読み取り専用であることがよくあります。これにより、さまざまな理由から分析が制約されます。たとえば、パッケージを送受信するために必要なツールがファームウェアに存在しない場合があります。したがって、バイナリを抽出して逆アセンブルすることは実行可能ではありません。したがって、システムにファームウェア全体をダンプし、分析のためにバイナリを抽出することは非常に役立ちます。
 
-Also, during red reaming and getting physical access to devices, dumping the firmware can help on modifying the files or injecting malicious files and then reflashing them into the memory which could be helpful to implant a backdoor into the device. Hence, there are numerous possibilities that can be unlocked with firmware dumping.
+また、レッドチーミング中やデバイスへの物理アクセスを取得する際に、ファームウェアをダンプすることで、ファイルを変更したり、悪意のあるファイルを注入したりして、それをメモリに再フラッシュすることができ、デバイスにバックドアを埋め込むのに役立ちます。したがって、ファームウェアダンプによって解放される可能性は無数にあります。
 
-### CH341A EEPROM Programmer and Reader
+### CH341A EEPROMプログラマーおよびリーダー
 
-This device is an inexpensive tool for dumping firmwares from EEPROMs and also reflashing them with firmware files. This has been a popular choice for working with computer BIOS chips (which are just EEPROMs). This device connects over USB and needs minimal tools to get started. Also, it usually gets the task done quickly, so can be helpful in physical device access too.
+このデバイスは、EEPROMからファームウェアをダンプし、ファームウェアファイルで再フラッシュするための手頃なツールです。これは、コンピュータのBIOSチップ（これもEEPROMです）で作業するための人気の選択肢です。このデバイスはUSB経由で接続され、開始するために最小限のツールが必要です。また、通常は迅速に作業を完了するため、物理デバイスへのアクセスにも役立ちます。
 
 ![drawing](../../images/board_image_ch341a.jpg)
 
-Connect the EEPROM memory with the CH341a Programmer and plug the device into the computer. Incase the device is not getting detected, try installing drivers into the computer. Also, make sure that the EEPROM is connected in proper orientation (usually, place the VCC Pin in reverse orientation to the USB connector) or else, the software would not be able to detect the chip. Refer to the diagram if required:
+EEPROMメモリをCH341aプログラマーに接続し、デバイスをコンピュータに接続します。デバイスが検出されない場合は、コンピュータにドライバーをインストールしてみてください。また、EEPROMが正しい向きで接続されていることを確認してください（通常、VCCピンをUSBコネクタに対して逆向きに配置します）。そうしないと、ソフトウェアがチップを検出できません。必要に応じて図を参照してください：
 
 ![drawing](../../images/connect_wires_ch341a.jpg) ![drawing](../../images/eeprom_plugged_ch341a.jpg)
 
-Finally, use softwares like flashrom, G-Flash (GUI), etc. for dumping the firmware. G-Flash is a minimal GUI tool is fast and detects the EEPROM automatically. This can be helpful in the firmware needs to be extracted quickly, without much tinkering with the documentation.
+最後に、flashrom、G-Flash (GUI) などのソフトウェアを使用してファームウェアをダンプします。G-Flashは、最小限のGUIツールで、迅速でEEPROMを自動的に検出します。これは、ファームウェアを迅速に抽出する必要がある場合に役立ち、文書をあまりいじることなく行えます。
 
 ![drawing](../../images/connected_status_ch341a.jpg)
 
-After dumping the firmware, the analysis can be done on the binary files. Tools like strings, hexdump, xxd, binwalk, etc. can be used to extract a lot of information about the firmware as well as the whole file system too.
+ファームウェアをダンプした後、バイナリファイルの分析を行うことができます。strings、hexdump、xxd、binwalkなどのツールを使用して、ファームウェアやファイルシステム全体に関する多くの情報を抽出できます。
 
-To extract the contents from the firmware, binwalk can be used. Binwalk analyses for hex signatures and identifies the files in the binary file and is capabale of extracting them.
-
+ファームウェアからの内容を抽出するには、binwalkを使用できます。Binwalkは、16進数の署名を分析し、バイナリファイル内のファイルを特定し、それらを抽出することができます。
 ```
 binwalk -e <filename>
 ```
-
-The can be .bin or .rom as per the tools and configurations used.
+このファイルは、使用されるツールや構成に応じて .bin または .rom である可能性があります。
 
 > [!CAUTION]
-> Note that firmware extraction is a delicate process and requires a lot of patience. Any mishandling can potentially corrupt the firmware or even erase it completely and make the device unusable. It is recommended to study the specific device before attempting to extract the firmware.
+> ファームウェアの抽出は繊細なプロセスであり、多くの忍耐が必要です。取り扱いを誤ると、ファームウェアが破損したり、完全に消去されてデバイスが使用できなくなる可能性があります。ファームウェアを抽出する前に、特定のデバイスを研究することをお勧めします。
 
 ### Bus Pirate + flashrom
 
 ![](<../../images/image (910).png>)
 
-Note that even if the PINOUT of the Pirate Bus indicates pins for **MOSI** and **MISO** to connect to SPI however some SPIs may indicate pins as DI and DO. **MOSI -> DI, MISO -> DO**
+Pirate Bus の PINOUT が **MOSI** と **MISO** に接続するためのピンを示していても、いくつかの SPI はピンを DI と DO として示す場合があります。 **MOSI -> DI, MISO -> DO**
 
 ![](<../../images/image (360).png>)
 
-In Windows or Linux you can use the program [**`flashrom`**](https://www.flashrom.org/Flashrom) to dump the content of the flash memory running something like:
-
+Windows または Linux では、プログラム [**`flashrom`**](https://www.flashrom.org/Flashrom) を使用して、次のようにフラッシュメモリの内容をダンプできます:
 ```bash
 # In this command we are indicating:
 # -VV Verbose
@@ -63,6 +60,4 @@ In Windows or Linux you can use the program [**`flashrom`**](https://www.flashro
 # -r <file> Image to save in the filesystem
 flashrom -VV -c "W25Q64.V" -p buspirate_spi:dev=COM3 -r flash_content.img
 ```
-
 {{#include ../../banners/hacktricks-training.md}}
-

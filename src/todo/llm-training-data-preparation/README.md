@@ -1,99 +1,98 @@
-# LLM Training - Data Preparation
+# LLMトレーニング - データ準備
 
-**These are my notes from the very recommended book** [**https://www.manning.com/books/build-a-large-language-model-from-scratch**](https://www.manning.com/books/build-a-large-language-model-from-scratch) **with some extra information.**
+**これは非常に推奨される本** [**https://www.manning.com/books/build-a-large-language-model-from-scratch**](https://www.manning.com/books/build-a-large-language-model-from-scratch) **からの私のノートで、いくつかの追加情報が含まれています。**
 
-## Basic Information
+## 基本情報
 
-You should start by reading this post for some basic concepts you should know about:
+まず、知っておくべき基本概念についてこの投稿を読むべきです：
 
 {{#ref}}
 0.-basic-llm-concepts.md
 {{#endref}}
 
-## 1. Tokenization
+## 1. トークン化
 
 > [!TIP]
-> The goal of this initial phase is very simple: **Divide the input in tokens (ids) in some way that makes sense**.
+> この初期段階の目標は非常にシンプルです：**入力を意味のある方法でトークン（ID）に分割すること**。
 
 {{#ref}}
 1.-tokenizing.md
 {{#endref}}
 
-## 2. Data Sampling
+## 2. データサンプリング
 
 > [!TIP]
-> The goal of this second phase is very simple: **Sample the input data and prepare it for the training phase usually by separating the dataset into sentences of a specific length and generating also the expected response.**
+> この第二段階の目標は非常にシンプルです：**入力データをサンプリングし、通常は特定の長さの文にデータセットを分け、期待される応答も生成することでトレーニング段階の準備をすること**。
 
 {{#ref}}
 2.-data-sampling.md
 {{#endref}}
 
-## 3. Token Embeddings
+## 3. トークン埋め込み
 
 > [!TIP]
-> The goal of this third phase is very simple: **Assign each of the previous tokens in the vocabulary a vector of the desired dimensions to train the model.** Each word in the vocabulary will a point in a space of X dimensions.\
-> Note that initially the position of each word in the space is just initialised "randomly" and these positions are trainable parameters (will be improved during the training).
+> この第三段階の目標は非常にシンプルです：**語彙内の各トークンに対して、モデルをトレーニングするために必要な次元のベクトルを割り当てること**。語彙内の各単語はX次元の空間内の点になります。\
+> 最初は、空間内の各単語の位置は「ランダムに」初期化され、これらの位置はトレーニング中に改善されるトレーニング可能なパラメータです。
 >
-> Moreover, during the token embedding **another layer of embeddings is created** which represents (in this case) the **absolute possition of the word in the training sentence**. This way a word in different positions in the sentence will have a different representation (meaning).
+> さらに、トークン埋め込み中に**別の埋め込み層が作成され**、これは（この場合）**トレーニング文内の単語の絶対位置を表します**。このように、文内の異なる位置にある単語は異なる表現（意味）を持ちます。
 
 {{#ref}}
 3.-token-embeddings.md
 {{#endref}}
 
-## 4. Attention Mechanisms
+## 4. アテンションメカニズム
 
 > [!TIP]
-> The goal of this fourth phase is very simple: **Apply some attetion mechanisms**. These are going to be a lot of **repeated layers** that are going to **capture the relation of a word in the vocabulary with its neighbours in the current sentence being used to train the LLM**.\
-> A lot of layers are used for this, so a lot of trainable parameters are going to be capturing this information.
+> この第四段階の目標は非常にシンプルです：**いくつかのアテンションメカニズムを適用すること**。これらは、**語彙内の単語と現在トレーニングに使用されている文内の隣接単語との関係を捉えるための多くの**繰り返し層**になります。\
+> これには多くの層が使用されるため、多くのトレーニング可能なパラメータがこの情報を捉えることになります。
 
 {{#ref}}
 4.-attention-mechanisms.md
 {{#endref}}
 
-## 5. LLM Architecture
+## 5. LLMアーキテクチャ
 
 > [!TIP]
-> The goal of this fifth phase is very simple: **Develop the architecture of the full LLM**. Put everything together, apply all the layers and create all the functions to generate text or transform text to IDs and backwards.
+> この第五段階の目標は非常にシンプルです：**完全なLLMのアーキテクチャを開発すること**。すべてをまとめ、すべての層を適用し、テキストを生成したり、テキストをIDに変換したり逆にするためのすべての関数を作成します。
 >
-> This architecture will be used for both, training and predicting text after it was trained.
+> このアーキテクチャは、トレーニング後のテキストのトレーニングと予測の両方に使用されます。
 
 {{#ref}}
 5.-llm-architecture.md
 {{#endref}}
 
-## 6. Pre-training & Loading models
+## 6. プレトレーニングとモデルの読み込み
 
 > [!TIP]
-> The goal of this sixth phase is very simple: **Train the model from scratch**. For this the previous LLM architecture will be used with some loops going over the data sets using the defined loss functions and optimizer to train all the parameters of the model.
+> この第六段階の目標は非常にシンプルです：**モデルをゼロからトレーニングすること**。これには、定義された損失関数とオプティマイザを使用して、モデルのすべてのパラメータをトレーニングするためにデータセットをループする前のLLMアーキテクチャが使用されます。
 
 {{#ref}}
 6.-pre-training-and-loading-models.md
 {{#endref}}
 
-## 7.0. LoRA Improvements in fine-tuning
+## 7.0. LoRAによるファインチューニングの改善
 
 > [!TIP]
-> The use of **LoRA reduce a lot the computation** needed to **fine tune** already trained models.
+> **LoRAの使用は、すでにトレーニングされたモデルをファインチューニングするために必要な計算を大幅に削減します**。
 
 {{#ref}}
 7.0.-lora-improvements-in-fine-tuning.md
 {{#endref}}
 
-## 7.1. Fine-Tuning for Classification
+## 7.1. 分類のためのファインチューニング
 
 > [!TIP]
-> The goal of this section is to show how to fine-tune an already pre-trained model so instead of generating new text the LLM will select give the **probabilities of the given text being categorized in each of the given categories** (like if a text is spam or not).
+> このセクションの目標は、すでにプレトレーニングされたモデルをファインチューニングする方法を示すことです。新しいテキストを生成するのではなく、LLMが**与えられたテキストが各カテゴリに分類される確率を選択すること**（例えば、テキストがスパムかどうか）です。
 
 {{#ref}}
 7.1.-fine-tuning-for-classification.md
 {{#endref}}
 
-## 7.2. Fine-Tuning to follow instructions
+## 7.2. 指示に従うためのファインチューニング
 
 > [!TIP]
-> The goal of this section is to show how to **fine-tune an already pre-trained model to follow instructions** rather than just generating text, for example, responding to tasks as a chat bot.
+> このセクションの目標は、**テキストを生成するだけでなく、指示に従うためにすでにプレトレーニングされたモデルをファインチューニングする方法を示すこと**です。例えば、チャットボットとしてタスクに応答することです。
 
 {{#ref}}
 7.2.-fine-tuning-to-follow-instructions.md
 {{#endref}}
-

@@ -2,83 +2,82 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Basic overview
+## 基本概要
 
-**Active Directory** serves as a foundational technology, enabling **network administrators** to efficiently create and manage **domains**, **users**, and **objects** within a network. It is engineered to scale, facilitating the organization of an extensive number of users into manageable **groups** and **subgroups**, while controlling **access rights** at various levels.
+**Active Directory**は、**ネットワーク管理者**がネットワーク内で**ドメイン**、**ユーザー**、および**オブジェクト**を効率的に作成および管理できる基盤技術として機能します。これはスケーラブルに設計されており、大規模なユーザーを管理可能な**グループ**および**サブグループ**に整理し、さまざまなレベルで**アクセス権**を制御します。
 
-The structure of **Active Directory** is comprised of three primary layers: **domains**, **trees**, and **forests**. A **domain** encompasses a collection of objects, such as **users** or **devices**, sharing a common database. **Trees** are groups of these domains linked by a shared structure, and a **forest** represents the collection of multiple trees, interconnected through **trust relationships**, forming the uppermost layer of the organizational structure. Specific **access** and **communication rights** can be designated at each of these levels.
+**Active Directory**の構造は、**ドメイン**、**ツリー**、および**フォレスト**の3つの主要な層で構成されています。**ドメイン**は、共通のデータベースを共有する**ユーザー**や**デバイス**などのオブジェクトのコレクションを含みます。**ツリー**は、共有構造によってリンクされたこれらのドメインのグループであり、**フォレスト**は、**信頼関係**を通じて相互接続された複数のツリーのコレクションを表し、組織構造の最上層を形成します。特定の**アクセス**および**通信権**は、これらの各レベルで指定できます。
 
-Key concepts within **Active Directory** include:
+**Active Directory**内の主要な概念には以下が含まれます：
 
-1. **Directory** – Houses all information pertaining to Active Directory objects.
-2. **Object** – Denotes entities within the directory, including **users**, **groups**, or **shared folders**.
-3. **Domain** – Serves as a container for directory objects, with the capability for multiple domains to coexist within a **forest**, each maintaining its own object collection.
-4. **Tree** – A grouping of domains that share a common root domain.
-5. **Forest** – The pinnacle of organizational structure in Active Directory, composed of several trees with **trust relationships** among them.
+1. **ディレクトリ** – Active Directoryオブジェクトに関するすべての情報を保持します。
+2. **オブジェクト** – ディレクトリ内のエンティティを示し、**ユーザー**、**グループ**、または**共有フォルダー**を含みます。
+3. **ドメイン** – ディレクトリオブジェクトのコンテナとして機能し、複数のドメインが**フォレスト**内で共存でき、それぞれが独自のオブジェクトコレクションを維持します。
+4. **ツリー** – 共通のルートドメインを共有するドメインのグループです。
+5. **フォレスト** – Active Directoryにおける組織構造の頂点であり、**信頼関係**を持ついくつかのツリーで構成されています。
 
-**Active Directory Domain Services (AD DS)** encompasses a range of services critical for the centralized management and communication within a network. These services comprise:
+**Active Directory Domain Services (AD DS)**は、ネットワーク内での集中管理および通信に不可欠な一連のサービスを含みます。これらのサービスには以下が含まれます：
 
-1. **Domain Services** – Centralizes data storage and manages interactions between **users** and **domains**, including **authentication** and **search** functionalities.
-2. **Certificate Services** – Oversees the creation, distribution, and management of secure **digital certificates**.
-3. **Lightweight Directory Services** – Supports directory-enabled applications through the **LDAP protocol**.
-4. **Directory Federation Services** – Provides **single-sign-on** capabilities to authenticate users across multiple web applications in a single session.
-5. **Rights Management** – Assists in safeguarding copyright material by regulating its unauthorized distribution and use.
-6. **DNS Service** – Crucial for the resolution of **domain names**.
+1. **ドメインサービス** – データストレージを集中化し、**ユーザー**と**ドメイン**間の相互作用を管理し、**認証**および**検索**機能を含みます。
+2. **証明書サービス** – 安全な**デジタル証明書**の作成、配布、および管理を監督します。
+3. **軽量ディレクトリサービス** – **LDAPプロトコル**を通じてディレクトリ対応アプリケーションをサポートします。
+4. **ディレクトリ連携サービス** – 複数のWebアプリケーションでのユーザー認証を単一セッションで行う**シングルサインオン**機能を提供します。
+5. **権利管理** – 著作権資料を保護し、その無断配布および使用を規制するのを支援します。
+6. **DNSサービス** – **ドメイン名**の解決に重要です。
 
-For a more detailed explanation check: [**TechTerms - Active Directory Definition**](https://techterms.com/definition/active_directory)
+詳細な説明については、[**TechTerms - Active Directory Definition**](https://techterms.com/definition/active_directory)を確認してください。
 
-### **Kerberos Authentication**
+### **Kerberos認証**
 
-To learn how to **attack an AD** you need to **understand** really good the **Kerberos authentication process**.\
-[**Read this page if you still don't know how it works.**](kerberos-authentication.md)
+**ADを攻撃する**方法を学ぶには、**Kerberos認証プロセス**を非常によく**理解する**必要があります。\
+[**まだその仕組みがわからない場合はこのページを読んでください。**](kerberos-authentication.md)
 
-## Cheat Sheet
+## チートシート
 
-You can take a lot to [https://wadcoms.github.io/](https://wadcoms.github.io) to have a quick view of which commands you can run to enumerate/exploit an AD.
+[https://wadcoms.github.io/](https://wadcoms.github.io)にアクセスして、ADを列挙/悪用するために実行できるコマンドの概要を確認できます。
 
-## Recon Active Directory (No creds/sessions)
+## Recon Active Directory (クレデンシャル/セッションなし)
 
-If you just have access to an AD environment but you don't have any credentials/sessions you could:
+AD環境にアクセスできるが、クレデンシャル/セッションがない場合は、次のことができます：
 
-- **Pentest the network:**
-  - Scan the network, find machines and open ports and try to **exploit vulnerabilities** or **extract credentials** from them (for example, [printers could be very interesting targets](ad-information-in-printers.md).
-  - Enumerating DNS could give information about key servers in the domain as web, printers, shares, vpn, media, etc.
-    - `gobuster dns -d domain.local -t 25 -w /opt/Seclist/Discovery/DNS/subdomain-top2000.txt`
-  - Take a look to the General [**Pentesting Methodology**](../../generic-methodologies-and-resources/pentesting-methodology.md) to find more information about how to do this.
-- **Check for null and Guest access on smb services** (this won't work on modern Windows versions):
-  - `enum4linux -a -u "" -p "" <DC IP> && enum4linux -a -u "guest" -p "" <DC IP>`
-  - `smbmap -u "" -p "" -P 445 -H <DC IP> && smbmap -u "guest" -p "" -P 445 -H <DC IP>`
-  - `smbclient -U '%' -L //<DC IP> && smbclient -U 'guest%' -L //`
-  - A more detailed guide on how to enumerate a SMB server can be found here:
+- **ネットワークのペンテスト:**
+- ネットワークをスキャンし、マシンやオープンポートを見つけ、**脆弱性を悪用**したり、そこから**クレデンシャルを抽出**したりします（例えば、[プリンターは非常に興味深いターゲットになる可能性があります](ad-information-in-printers.md)）。
+- DNSを列挙することで、ドメイン内の主要なサーバーに関する情報を得ることができます。ウェブ、プリンター、共有、VPN、メディアなど。
+- `gobuster dns -d domain.local -t 25 -w /opt/Seclist/Discovery/DNS/subdomain-top2000.txt`
+- 一般的な[**ペンテスト手法**](../../generic-methodologies-and-resources/pentesting-methodology.md)を確認して、これを行う方法についての詳細情報を見つけてください。
+- **smbサービスでのnullおよびGuestアクセスを確認**（これは最新のWindowsバージョンでは機能しません）：
+- `enum4linux -a -u "" -p "" <DC IP> && enum4linux -a -u "guest" -p "" <DC IP>`
+- `smbmap -u "" -p "" -P 445 -H <DC IP> && smbmap -u "guest" -p "" -P 445 -H <DC IP>`
+- `smbclient -U '%' -L //<DC IP> && smbclient -U 'guest%' -L //`
+- SMBサーバーを列挙する方法についての詳細なガイドはここにあります：
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-smb/
 {{#endref}}
 
-- **Enumerate Ldap**
-  - `nmap -n -sV --script "ldap* and not brute" -p 389 <DC IP>`
-  - A more detailed guide on how to enumerate LDAP can be found here (pay **special attention to the anonymous access**):
+- **Ldapを列挙**
+- `nmap -n -sV --script "ldap* and not brute" -p 389 <DC IP>`
+- LDAPを列挙する方法についての詳細なガイドはここにあります（**匿名アクセスに特に注意してください**）：
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-ldap.md
 {{#endref}}
 
-- **Poison the network**
-  - Gather credentials [**impersonating services with Responder**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md)
-  - Access host by [**abusing the relay attack**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack)
-  - Gather credentials **exposing** [**fake UPnP services with evil-S**](../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md)[**SDP**](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)
+- **ネットワークを毒する**
+- [**Responderを使用してサービスを偽装してクレデンシャルを収集**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md)
+- [**リレー攻撃を悪用してホストにアクセス**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack)
+- [**悪意のあるUPnPサービスを公開してクレデンシャルを収集**](../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md)[**SDP**](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)
 - [**OSINT**](https://book.hacktricks.xyz/external-recon-methodology):
-  - Extract usernames/names from internal documents, social media, services (mainly web) inside the domain environments and also from the publicly available.
-  - If you find the complete names of company workers, you could try different AD **username conventions (**[**read this**](https://activedirectorypro.com/active-directory-user-naming-convention/)). The most common conventions are: _NameSurname_, _Name.Surname_, _NamSur_ (3letters of each), _Nam.Sur_, _NSurname_, _N.Surname_, _SurnameName_, _Surname.Name_, _SurnameN_, _Surname.N_, 3 _random letters and 3 random numbers_ (abc123).
-  - Tools:
-    - [w0Tx/generate-ad-username](https://github.com/w0Tx/generate-ad-username)
-    - [urbanadventurer/username-anarchy](https://github.com/urbanadventurer/username-anarchy)
+- 内部文書、ソーシャルメディア、サービス（主にウェブ）からユーザー名/名前を抽出し、公開されている情報からも収集します。
+- 会社の従業員の完全な名前が見つかった場合、さまざまなAD **ユーザー名の規則**を試すことができます（[**これを読む**](https://activedirectorypro.com/active-directory-user-naming-convention/)）。最も一般的な規則は：_NameSurname_、_Name.Surname_、_NamSur_（各3文字）、_Nam.Sur_、_NSurname_、_N.Surname_、_SurnameName_、_Surname.Name_、_SurnameN_、_Surname.N_、3 _ランダムな文字と3つのランダムな数字_（abc123）です。
+- ツール：
+- [w0Tx/generate-ad-username](https://github.com/w0Tx/generate-ad-username)
+- [urbanadventurer/username-anarchy](https://github.com/urbanadventurer/username-anarchy)
 
-### User enumeration
+### ユーザー列挙
 
-- **Anonymous SMB/LDAP enum:** Check the [**pentesting SMB**](../../network-services-pentesting/pentesting-smb/) and [**pentesting LDAP**](../../network-services-pentesting/pentesting-ldap.md) pages.
-- **Kerbrute enum**: When an **invalid username is requested** the server will respond using the **Kerberos error** code _KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN_, allowing us to determine that the username was invalid. **Valid usernames** will illicit either the **TGT in a AS-REP** response or the error _KRB5KDC_ERR_PREAUTH_REQUIRED_, indicating that the user is required to perform pre-authentication.
-
+- **匿名SMB/LDAP列挙:** [**ペンテストSMB**](../../network-services-pentesting/pentesting-smb/)および[**ペンテストLDAP**](../../network-services-pentesting/pentesting-ldap.md)ページを確認してください。
+- **Kerbrute列挙**: **無効なユーザー名が要求される**と、サーバーは**Kerberosエラー**コード_KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN_を使用して応答し、ユーザー名が無効であることを判断できます。**有効なユーザー名**は、**AS-REP**応答で**TGT**を引き起こすか、エラー_KRB5KDC_ERR_PREAUTH_REQUIRED_を示し、ユーザーが事前認証を行う必要があることを示します。
 ```bash
 ./kerbrute_linux_amd64 userenum -d lab.ropnop.com --dc 10.10.10.10 usernames.txt #From https://github.com/ropnop/kerbrute/releases
 
@@ -89,11 +88,9 @@ msf> use auxiliary/gather/kerberos_enumusers
 
 crackmapexec smb dominio.es  -u '' -p '' --users | awk '{print $4}' | uniq
 ```
+- **OWA (Outlook Web Access) サーバー**
 
-- **OWA (Outlook Web Access) Server**
-
-If you found one of these servers in the network you can also perform **user enumeration against it**. For example, you could use the tool [**MailSniper**](https://github.com/dafthack/MailSniper):
-
+ネットワーク内でこれらのサーバーの1つを見つけた場合、**ユーザー列挙を実行することもできます**。例えば、ツール [**MailSniper**](https://github.com/dafthack/MailSniper) を使用することができます：
 ```bash
 ipmo C:\Tools\MailSniper\MailSniper.ps1
 # Get info about the domain
@@ -105,102 +102,76 @@ Invoke-PasswordSprayOWA -ExchHostname [ip] -UserList .\valid.txt -Password Summe
 # Get addresses list from the compromised mail
 Get-GlobalAddressList -ExchHostname [ip] -UserName [domain]\[username] -Password Summer2021 -OutFile gal.txt
 ```
-
 > [!WARNING]
-> You can find lists of usernames in [**this github repo**](https://github.com/danielmiessler/SecLists/tree/master/Usernames/Names) \*\*\*\* and this one ([**statistically-likely-usernames**](https://github.com/insidetrust/statistically-likely-usernames)).
+> ユーザー名のリストは[**このgithubリポジトリ**](https://github.com/danielmiessler/SecLists/tree/master/Usernames/Names) \*\*\*\*やこのリポジトリ（[**statistically-likely-usernames**](https://github.com/insidetrust/statistically-likely-usernames)）で見つけることができます。
 >
-> However, you should have the **name of the people working on the company** from the recon step you should have performed before this. With the name and surname you could used the script [**namemash.py**](https://gist.github.com/superkojiman/11076951) to generate potential valid usernames.
+> ただし、事前に実施したリコンステップから**会社で働いている人々の名前**を持っている必要があります。名前と姓があれば、スクリプト[**namemash.py**](https://gist.github.com/superkojiman/11076951)を使用して、潜在的な有効なユーザー名を生成できます。
 
-### Knowing one or several usernames
+### 1つまたは複数のユーザー名を知っている場合
 
-Ok, so you know you have already a valid username but no passwords... Then try:
+さて、有効なユーザー名はすでに知っているが、パスワードはない... それなら試してみてください：
 
-- [**ASREPRoast**](asreproast.md): If a user **doesn't have** the attribute _DONT_REQ_PREAUTH_ you can **request a AS_REP message** for that user that will contain some data encrypted by a derivation of the password of the user.
-- [**Password Spraying**](password-spraying.md): Let's try the most **common passwords** with each of the discovered users, maybe some user is using a bad password (keep in mind the password policy!).
-  - Note that you can also **spray OWA servers** to try to get access to the users mail servers.
+- [**ASREPRoast**](asreproast.md): ユーザーが**_DONT_REQ_PREAUTH_**属性を持っていない場合、そのユーザーのために**AS_REPメッセージを要求**でき、ユーザーのパスワードの派生によって暗号化されたデータが含まれます。
+- [**Password Spraying**](password-spraying.md): 発見した各ユーザーに対して最も**一般的なパスワード**を試してみましょう。もしかしたら、誰かが悪いパスワードを使用しているかもしれません（パスワードポリシーに注意してください！）。
+- OWAサーバーを**スプレー**して、ユーザーのメールサーバーへのアクセスを試みることもできます。
 
 {{#ref}}
 password-spraying.md
 {{#endref}}
 
-### LLMNR/NBT-NS Poisoning
+### LLMNR/NBT-NS ポイズニング
 
-You might be able to **obtain** some challenge **hashes** to crack **poisoning** some protocols of the **network**:
+ネットワークの**プロトコルをポイズニング**することで、いくつかのチャレンジ**ハッシュ**を**取得**できるかもしれません：
 
 {{#ref}}
 ../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md
 {{#endref}}
 
-### NTML Relay
+### NTML リレー
 
-If you have managed to enumerate the active directory you will have **more emails and a better understanding of the network**. You might be able to to force NTML [**relay attacks**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack) \*\*\*\* to get access to the AD env.
+アクティブディレクトリを列挙できた場合、**より多くのメールとネットワークの理解が得られます**。NTMLの[**リレー攻撃**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack) \*\*\*\*を強制してAD環境にアクセスできるかもしれません。
 
-### Steal NTLM Creds
+### NTLM クレデンシャルの盗難
 
-If you can **access other PCs or shares** with the **null or guest user** you could **place files** (like a SCF file) that if somehow accessed will t**rigger an NTML authentication against you** so you can **steal** the **NTLM challenge** to crack it:
+**nullまたはゲストユーザー**で他のPCや共有に**アクセス**できる場合、**ファイルを配置**（SCFファイルなど）して、何らかの形でアクセスされると、**あなたに対してNTML認証をトリガー**し、**NTLMチャレンジを盗む**ことができます：
 
 {{#ref}}
 ../ntlm/places-to-steal-ntlm-creds.md
 {{#endref}}
 
-## Enumerating Active Directory WITH credentials/session
+## 認証情報/セッションを使用したアクティブディレクトリの列挙
 
-For this phase you need to have **compromised the credentials or a session of a valid domain account.** If you have some valid credentials or a shell as a domain user, **you should remember that the options given before are still options to compromise other users**.
+このフェーズでは、**有効なドメインアカウントの認証情報またはセッションを侵害している必要があります。** 有効な認証情報またはドメインユーザーとしてのシェルがある場合、**前に示したオプションは他のユーザーを侵害するためのオプションとして依然として有効です**。
 
-Before start the authenticated enumeration you should know what is the **Kerberos double hop problem.**
+認証された列挙を開始する前に、**Kerberosダブルホップ問題**が何であるかを知っておく必要があります。
 
 {{#ref}}
 kerberos-double-hop-problem.md
 {{#endref}}
 
-### Enumeration
+### 列挙
 
-Having compromised an account is a **big step to start compromising the whole domain**, because you are going to be able to start the **Active Directory Enumeration:**
+アカウントを侵害することは、**ドメイン全体を侵害するための大きなステップ**です。なぜなら、**アクティブディレクトリの列挙を開始できるからです**：
 
-Regarding [**ASREPRoast**](asreproast.md) you can now find every possible vulnerable user, and regarding [**Password Spraying**](password-spraying.md) you can get a **list of all the usernames** and try the password of the compromised account, empty passwords and new promising passwords.
+[**ASREPRoast**](asreproast.md)に関しては、今やすべての可能な脆弱なユーザーを見つけることができ、[**Password Spraying**](password-spraying.md)に関しては、**すべてのユーザー名のリスト**を取得し、侵害されたアカウントのパスワード、空のパスワード、新しい有望なパスワードを試すことができます。
 
-- You could use the [**CMD to perform a basic recon**](../basic-cmd-for-pentesters.md#domain-info)
-- You can also use [**powershell for recon**](../basic-powershell-for-pentesters/) which will be stealthier
-- You ca also [**use powerview**](../basic-powershell-for-pentesters/powerview.md) to extract more detailed information
-- Another amazing tool for recon in an active directory is [**BloodHound**](bloodhound.md). It is **not very stealthy** (depending on the collection methods you use), but **if you don't care** about that, you should totally give it a try. Find where users can RDP, find path to other groups, etc.
-  - **Other automated AD enumeration tools are:** [**AD Explorer**](bloodhound.md#ad-explorer)**,** [**ADRecon**](bloodhound.md#adrecon)**,** [**Group3r**](bloodhound.md#group3r)**,** [**PingCastle**](bloodhound.md#pingcastle)**.**
-- [**DNS records of the AD**](ad-dns-records.md) as they might contain interesting information.
-- A **tool with GUI** that you can use to enumerate the directory is **AdExplorer.exe** from **SysInternal** Suite.
-- You can also search in the LDAP database with **ldapsearch** to look for credentials in fields _userPassword_ & _unixUserPassword_, or even for _Description_. cf. [Password in AD User comment on PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#password-in-ad-user-comment) for other methods.
-- If you are using **Linux**, you could also enumerate the domain using [**pywerview**](https://github.com/the-useless-one/pywerview).
-- You could also try automated tools as:
-  - [**tomcarver16/ADSearch**](https://github.com/tomcarver16/ADSearch)
-  - [**61106960/adPEAS**](https://github.com/61106960/adPEAS)
-- **Extracting all domain users**
+- [**CMDを使用して基本的なリコンを実行**](../basic-cmd-for-pentesters.md#domain-info)できます。
+- [**PowerShellを使用してリコンを実行**](../basic-powershell-for-pentesters/)することもでき、よりステルス性があります。
+- [**PowerViewを使用**](../basic-powershell-for-pentesters/powerview.md)して、より詳細な情報を抽出できます。
+- アクティブディレクトリのリコンに最適なツールは[**BloodHound**](bloodhound.md)です。これは**あまりステルス性がありません**（使用する収集方法によります）が、**それを気にしないのであれば**、ぜひ試してみてください。ユーザーがRDPできる場所を見つけたり、他のグループへのパスを見つけたりします。
+- **他の自動化されたAD列挙ツールは：** [**AD Explorer**](bloodhound.md#ad-explorer)**,** [**ADRecon**](bloodhound.md#adrecon)**,** [**Group3r**](bloodhound.md#group3r)**,** [**PingCastle**](bloodhound.md#pingcastle)**.**
+- [**ADのDNSレコード**](ad-dns-records.md)は、興味深い情報を含んでいるかもしれません。
+- ディレクトリを列挙するために使用できる**GUIツール**は、**SysInternal**スイートの**AdExplorer.exe**です。
+- **ldapsearch**を使用してLDAPデータベースを検索し、_userPassword_および_unixUserPassword_フィールドや、_Description_を探すことができます。cf. [PayloadsAllTheThingsのADユーザーコメントのパスワード](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#password-in-ad-user-comment)で他の方法を確認してください。
+- **Linux**を使用している場合、[**pywerview**](https://github.com/the-useless-one/pywerview)を使用してドメインを列挙することもできます。
+- 自動化ツールを試すこともできます：
+- [**tomcarver16/ADSearch**](https://github.com/tomcarver16/ADSearch)
+- [**61106960/adPEAS**](https://github.com/61106960/adPEAS)
+- **すべてのドメインユーザーの抽出**
 
-  It's very easy to obtain all the domain usernames from Windows (`net user /domain` ,`Get-DomainUser` or `wmic useraccount get name,sid`). In Linux, you can use: `GetADUsers.py -all -dc-ip 10.10.10.110 domain.com/username` or `enum4linux -a -u "user" -p "password" <DC IP>`
+Windowsからすべてのドメインユーザー名を取得するのは非常に簡単です（`net user /domain`、`Get-DomainUser`または`wmic useraccount get name,sid`）。Linuxでは、`GetADUsers.py -all -dc-ip 10.10.10.110 domain.com/username`または`enum4linux -a -u "user" -p "password" <DC IP>`を使用できます。
 
-> Even if this Enumeration section looks small this is the most important part of all. Access the links (mainly the one of cmd, powershell, powerview and BloodHound), learn how to enumerate a domain and practice until you feel comfortable. During an assessment, this will be the key moment to find your way to DA or to decide that nothing can be done.
-
-### Kerberoast
-
-Kerberoasting involves obtaining **TGS tickets** used by services tied to user accounts and cracking their encryption—which is based on user passwords—**offline**.
-
-More about this in:
-
-{{#ref}}
-kerberoast.md
-{{#endref}}
-
-### Remote connexion (RDP, SSH, FTP, Win-RM, etc)
-
-Once you have obtained some credentials you could check if you have access to any **machine**. For that matter, you could use **CrackMapExec** to attempt connecting on several servers with different protocols, accordingly to your ports scans.
-
-### Local Privilege Escalation
-
-If you have compromised credentials or a session as a regular domain user and you have **access** with this user to **any machine in the domain** you should try to find your way to **escalate privileges locally and looting for credentials**. This is because only with local administrator privileges you will be able to **dump hashes of other users** in memory (LSASS) and locally (SAM).
-
-There is a complete page in this book about [**local privilege escalation in Windows**](../windows-local-privilege-escalation/) and a [**checklist**](../checklist-windows-privilege-escalation.md). Also, don't forget to use [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite).
-
-### Current Session Tickets
-
-It's very **unlikely** that you will find **tickets** in the current user **giving you permission to access** unexpected resources, but you could check:
-
+> この列挙セクションは小さく見えるかもしれませんが、これはすべての中で最も重要な部分です。リンクにアクセスし（特にcmd、powershell、powerview、BloodH
 ```bash
 ## List all tickets (if not admin, only current user tickets)
 .\Rubeus.exe triage
@@ -208,20 +179,19 @@ It's very **unlikely** that you will find **tickets** in the current user **givi
 .\Rubeus.exe dump /service:krbtgt /luid:<luid> /nowrap
 [IO.File]::WriteAllBytes("ticket.kirbi", [Convert]::FromBase64String("<BASE64_TICKET>"))
 ```
-
 ### NTML Relay
 
-If you have managed to enumerate the active directory you will have **more emails and a better understanding of the network**. You might be able to to force NTML [**relay attacks**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack)**.**
+アクティブディレクトリを列挙できた場合、**より多くのメールとネットワークの理解が得られます**。NTML [**リレー攻撃**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack)**を強制することができるかもしれません。**
 
-### **Looks for Creds in Computer Shares**
+### **コンピュータ共有内のクレデンシャルを探す**
 
-Now that you have some basic credentials you should check if you can **find** any **interesting files being shared inside the AD**. You could do that manually but it's a very boring repetitive task (and more if you find hundreds of docs you need to check).
+基本的なクレデンシャルを持っているので、**AD内で共有されている興味深いファイルを見つける**ことができるか確認してください。手動で行うこともできますが、非常に退屈で繰り返しの作業です（特に確認する必要のある数百のドキュメントを見つけた場合はなおさらです）。
 
-[**Follow this link to learn about tools you could use.**](../../network-services-pentesting/pentesting-smb/#domain-shared-folders-search)
+[**使用できるツールについて学ぶにはこのリンクをフォローしてください。**](../../network-services-pentesting/pentesting-smb/#domain-shared-folders-search)
 
-### Steal NTLM Creds
+### NTLMクレデンシャルの盗難
 
-If you can **access other PCs or shares** you could **place files** (like a SCF file) that if somehow accessed will t**rigger an NTML authentication against you** so you can **steal** the **NTLM challenge** to crack it:
+他のPCや共有に**アクセスできる**場合、**ファイル**（SCFファイルなど）を**配置する**ことができ、何らかの形でアクセスされると、**あなたに対してNTML認証をトリガー**し、**NTLMチャレンジを盗む**ことができます：
 
 {{#ref}}
 ../ntlm/places-to-steal-ntlm-creds.md
@@ -229,114 +199,112 @@ If you can **access other PCs or shares** you could **place files** (like a SCF 
 
 ### CVE-2021-1675/CVE-2021-34527 PrintNightmare
 
-This vulnerability allowed any authenticated user to **compromise the domain controller**.
+この脆弱性により、認証されたユーザーは**ドメインコントローラーを侵害**することができました。
 
 {{#ref}}
 printnightmare.md
 {{#endref}}
 
-## Privilege escalation on Active Directory WITH privileged credentials/session
+## 特権クレデンシャル/セッションを使用したActive Directoryの特権昇格
 
-**For the following techniques a regular domain user is not enough, you need some special privileges/credentials to perform these attacks.**
+**以下の技術には、通常のドメインユーザーでは不十分で、これらの攻撃を実行するために特別な特権/クレデンシャルが必要です。**
 
-### Hash extraction
+### ハッシュ抽出
 
-Hopefully you have managed to **compromise some local admin** account using [AsRepRoast](asreproast.md), [Password Spraying](password-spraying.md), [Kerberoast](kerberoast.md), [Responder](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md) including relaying, [EvilSSDP](../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md), [escalating privileges locally](../windows-local-privilege-escalation/).\
-Then, its time to dump all the hashes in memory and locally.\
-[**Read this page about different ways to obtain the hashes.**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/active-directory-methodology/broken-reference/README.md)
+幸運にも、[AsRepRoast](asreproast.md)、[Password Spraying](password-spraying.md)、[Kerberoast](kerberoast.md)、[Responder](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md)を含むリレー、[EvilSSDP](../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md)、[ローカルでの特権昇格](../windows-local-privilege-escalation/)を使用して**ローカル管理者**アカウントを**侵害**できたことを願っています。\
+次に、メモリとローカルのすべてのハッシュをダンプする時です。\
+[**ハッシュを取得するさまざまな方法についてこのページをお読みください。**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/active-directory-methodology/broken-reference/README.md)
 
-### Pass the Hash
+### パス・ザ・ハッシュ
 
-**Once you have the hash of a user**, you can use it to **impersonate** it.\
-You need to use some **tool** that will **perform** the **NTLM authentication using** that **hash**, **or** you could create a new **sessionlogon** and **inject** that **hash** inside the **LSASS**, so when any **NTLM authentication is performed**, that **hash will be used.** The last option is what mimikatz does.\
-[**Read this page for more information.**](../ntlm/#pass-the-hash)
+**ユーザーのハッシュを取得したら、**それを使用して**そのユーザーを偽装**できます。\
+その**ハッシュ**を使用して**NTLM認証を実行する**ツールを使用する必要があります。**または**、新しい**sessionlogon**を作成し、その**ハッシュ**を**LSASS**内に**注入**することができます。これにより、**NTLM認証が実行されると、その**ハッシュが使用されます。**最後のオプションはmimikatzが行うことです。\
+[**詳細についてはこのページをお読みください。**](../ntlm/#pass-the-hash)
 
-### Over Pass the Hash/Pass the Key
+### オーバーパス・ザ・ハッシュ/パス・ザ・キー
 
-This attack aims to **use the user NTLM hash to request Kerberos tickets**, as an alternative to the common Pass The Hash over NTLM protocol. Therefore, this could be especially **useful in networks where NTLM protocol is disabled** and only **Kerberos is allowed** as authentication protocol.
+この攻撃は、**ユーザーのNTLMハッシュを使用してKerberosチケットを要求する**ことを目的としています。これは、一般的なNTLMプロトコルのパス・ザ・ハッシュの代替手段です。したがって、これは特に**NTLMプロトコルが無効**で、**Kerberosのみが認証プロトコルとして許可されているネットワーク**で**役立つ**可能性があります。
 
 {{#ref}}
 over-pass-the-hash-pass-the-key.md
 {{#endref}}
 
-### Pass the Ticket
+### パス・ザ・チケット
 
-In the **Pass The Ticket (PTT)** attack method, attackers **steal a user's authentication ticket** instead of their password or hash values. This stolen ticket is then used to **impersonate the user**, gaining unauthorized access to resources and services within a network.
+**パス・ザ・チケット（PTT）**攻撃手法では、攻撃者は**ユーザーの認証チケットを盗む**代わりに、パスワードやハッシュ値を盗みます。この盗まれたチケットは、その後**ユーザーを偽装**するために使用され、ネットワーク内のリソースやサービスへの不正アクセスを得ることができます。
 
 {{#ref}}
 pass-the-ticket.md
 {{#endref}}
 
-### Credentials Reuse
+### クレデンシャルの再利用
 
-If you have the **hash** or **password** of a **local administrato**r you should try to **login locally** to other **PCs** with it.
-
+**ローカル管理者**の**ハッシュ**または**パスワード**を持っている場合は、それを使用して他の**PCにローカルでログイン**してみてください。
 ```bash
 # Local Auth Spray (once you found some local admin pass or hash)
 ## --local-auth flag indicate to only try 1 time per machine
 crackmapexec smb --local-auth 10.10.10.10/23 -u administrator -H 10298e182387f9cab376ecd08491764a0 | grep +
 ```
-
 > [!WARNING]
-> Note that this is quite **noisy** and **LAPS** would **mitigate** it.
+> 注意してください、これは非常に**騒がしい**ものであり、**LAPS**がこれを**軽減**します。
 
-### MSSQL Abuse & Trusted Links
+### MSSQLの悪用と信頼されたリンク
 
-If a user has privileges to **access MSSQL instances**, he could be able to use it to **execute commands** in the MSSQL host (if running as SA), **steal** the NetNTLM **hash** or even perform a **relay** **attack**.\
-Also, if a MSSQL instance is trusted (database link) by a different MSSQL instance. If the user has privileges over the trusted database, he is going to be able to **use the trust relationship to execute queries also in the other instance**. These trusts can be chained and at some point the user might be able to find a misconfigured database where he can execute commands.\
-**The links between databases work even across forest trusts.**
+ユーザーが**MSSQLインスタンスにアクセスする権限**を持っている場合、MSSQLホストで**コマンドを実行**したり（SAとして実行されている場合）、NetNTLMの**ハッシュ**を**盗む**ことができるか、さらには**リレー攻撃**を行うことができます。\
+また、MSSQLインスタンスが別のMSSQLインスタンスによって信頼されている場合、信頼されたデータベースに対する権限を持つユーザーは、**信頼関係を利用して他のインスタンスでもクエリを実行**できるようになります。これらの信頼は連鎖することができ、ユーザーはコマンドを実行できる誤って構成されたデータベースを見つけることができるかもしれません。\
+**データベース間のリンクは、フォレストの信頼を越えても機能します。**
 
 {{#ref}}
 abusing-ad-mssql.md
 {{#endref}}
 
-### Unconstrained Delegation
+### 制約のない委任
 
-If you find any Computer object with the attribute [ADS_UF_TRUSTED_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>) and you have domain privileges in the computer, you will be able to dump TGTs from memory of every users that logins onto the computer.\
-So, if a **Domain Admin logins onto the computer**, you will be able to dump his TGT and impersonate him using [Pass the Ticket](pass-the-ticket.md).\
-Thanks to constrained delegation you could even **automatically compromise a Print Server** (hopefully it will be a DC).
+[ADS_UF_TRUSTED_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>)属性を持つコンピュータオブジェクトを見つけ、コンピュータにドメイン権限がある場合、コンピュータにログインするすべてのユーザーのメモリからTGTをダンプすることができます。\
+したがって、**ドメイン管理者がコンピュータにログインすると**、そのTGTをダンプして[Pass the Ticket](pass-the-ticket.md)を使用して彼を偽装することができます。\
+制約のある委任のおかげで、**プリントサーバーを自動的に侵害**することさえ可能です（できればDCであることを願っています）。
 
 {{#ref}}
 unconstrained-delegation.md
 {{#endref}}
 
-### Constrained Delegation
+### 制約された委任
 
-If a user or computer is allowed for "Constrained Delegation" it will be able to **impersonate any user to access some services in a computer**.\
-Then, if you **compromise the hash** of this user/computer you will be able to **impersonate any user** (even domain admins) to access some services.
+ユーザーまたはコンピュータが「制約された委任」を許可されている場合、**コンピュータ内のいくつかのサービスにアクセスするために任意のユーザーを偽装**することができます。\
+その後、**このユーザー/コンピュータのハッシュを侵害**すると、**任意のユーザー**（ドメイン管理者を含む）を偽装していくつかのサービスにアクセスすることができます。
 
 {{#ref}}
 constrained-delegation.md
 {{#endref}}
 
-### Resourced-based Constrain Delegation
+### リソースベースの制約された委任
 
-Having **WRITE** privilege on an Active Directory object of a remote computer enables the attainment of code execution with **elevated privileges**:
+リモートコンピュータのActive Directoryオブジェクトに対して**WRITE**権限を持つことは、**昇格された権限**でのコード実行を可能にします：
 
 {{#ref}}
 resource-based-constrained-delegation.md
 {{#endref}}
 
-### ACLs Abuse
+### ACLの悪用
 
-The compromised user could have some **interesting privileges over some domain objects** that could let you **move** laterally/**escalate** privileges.
+侵害されたユーザーは、**ドメインオブジェクトのいくつかに対して興味深い権限**を持っている可能性があり、これにより**横移動**や**権限の昇格**が可能になります。
 
 {{#ref}}
 acl-persistence-abuse/
 {{#endref}}
 
-### Printer Spooler service abuse
+### プリンタースプーラーサービスの悪用
 
-Discovering a **Spool service listening** within the domain can be **abused** to **acquire new credentials** and **escalate privileges**.
+ドメイン内で**スプールサービスがリスニング**していることを発見することは、**新しい資格情報を取得**し、**権限を昇格**させるために**悪用**される可能性があります。
 
 {{#ref}}
 printers-spooler-service-abuse.md
 {{#endref}}
 
-### Third party sessions abuse
+### サードパーティセッションの悪用
 
-If **other users** **access** the **compromised** machine, it's possible to **gather credentials from memory** and even **inject beacons in their processes** to impersonate them.\
-Usually users will access the system via RDP, so here you have how to performa couple of attacks over third party RDP sessions:
+**他のユーザー**が**侵害された**マシンに**アクセス**すると、メモリから**資格情報を収集**し、彼らのプロセスに**ビーコンを注入**して彼らを偽装することが可能です。\
+通常、ユーザーはRDPを介してシステムにアクセスするため、ここではサードパーティのRDPセッションに対していくつかの攻撃を実行する方法を示します：
 
 {{#ref}}
 rdp-sessions-abuse.md
@@ -344,145 +312,145 @@ rdp-sessions-abuse.md
 
 ### LAPS
 
-**LAPS** provides a system for managing the **local Administrator password** on domain-joined computers, ensuring it's **randomized**, unique, and frequently **changed**. These passwords are stored in Active Directory and access is controlled through ACLs to authorized users only. With sufficient permissions to access these passwords, pivoting to other computers becomes possible.
+**LAPS**は、ドメインに参加しているコンピュータ上の**ローカル管理者パスワード**を管理するためのシステムを提供し、それが**ランダム化**され、ユニークで、頻繁に**変更**されることを保証します。これらのパスワードはActive Directoryに保存され、ACLを通じて認可されたユーザーのみがアクセスできるように制御されます。これらのパスワードにアクセスするための十分な権限があれば、他のコンピュータにピボットすることが可能になります。
 
 {{#ref}}
 laps.md
 {{#endref}}
 
-### Certificate Theft
+### 証明書の盗難
 
-**Gathering certificates** from the compromised machine could be a way to escalate privileges inside the environment:
+**侵害されたマシンから証明書を収集**することは、環境内で権限を昇格させる方法となる可能性があります：
 
 {{#ref}}
 ad-certificates/certificate-theft.md
 {{#endref}}
 
-### Certificate Templates Abuse
+### 証明書テンプレートの悪用
 
-If **vulnerable templates** are configured it's possible to abuse them to escalate privileges:
+**脆弱なテンプレート**が構成されている場合、それを悪用して権限を昇格させることが可能です：
 
 {{#ref}}
 ad-certificates/domain-escalation.md
 {{#endref}}
 
-## Post-exploitation with high privilege account
+## 高権限アカウントによるポストエクスプロイト
 
-### Dumping Domain Credentials
+### ドメイン資格情報のダンプ
 
-Once you get **Domain Admin** or even better **Enterprise Admin** privileges, you can **dump** the **domain database**: _ntds.dit_.
+**ドメイン管理者**またはさらに良い**エンタープライズ管理者**の権限を取得すると、**ドメインデータベース**を**ダンプ**できます：_ntds.dit_。
 
-[**More information about DCSync attack can be found here**](dcsync.md).
+[**DCSync攻撃に関する詳細情報はここにあります**](dcsync.md)。
 
-[**More information about how to steal the NTDS.dit can be found here**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/active-directory-methodology/broken-reference/README.md)
+[**NTDS.ditを盗む方法に関する詳細情報はここにあります**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/active-directory-methodology/broken-reference/README.md)
 
-### Privesc as Persistence
+### プライバシー昇格としての持続性
 
-Some of the techniques discussed before can be used for persistence.\
-For example you could:
+前述のいくつかの技術は持続性に使用できます。\
+例えば、次のことができます：
 
-- Make users vulnerable to [**Kerberoast**](kerberoast.md)
+- ユーザーを[**Kerberoast**](kerberoast.md)に対して脆弱にする
 
-  ```powershell
-  Set-DomainObject -Identity <username> -Set @{serviceprincipalname="fake/NOTHING"}r
-  ```
+```powershell
+Set-DomainObject -Identity <username> -Set @{serviceprincipalname="fake/NOTHING"}r
+```
 
-- Make users vulnerable to [**ASREPRoast**](asreproast.md)
+- ユーザーを[**ASREPRoast**](asreproast.md)に対して脆弱にする
 
-  ```powershell
-  Set-DomainObject -Identity <username> -XOR @{UserAccountControl=4194304}
-  ```
+```powershell
+Set-DomainObject -Identity <username> -XOR @{UserAccountControl=4194304}
+```
 
-- Grant [**DCSync**](./#dcsync) privileges to a user
+- ユーザーに[**DCSync**](./#dcsync)権限を付与する
 
-  ```powershell
-  Add-DomainObjectAcl -TargetIdentity "DC=SUB,DC=DOMAIN,DC=LOCAL" -PrincipalIdentity bfarmer -Rights DCSync
-  ```
+```powershell
+Add-DomainObjectAcl -TargetIdentity "DC=SUB,DC=DOMAIN,DC=LOCAL" -PrincipalIdentity bfarmer -Rights DCSync
+```
 
-### Silver Ticket
+### シルバーチケット
 
-The **Silver Ticket attack** creates a **legitimate Ticket Granting Service (TGS) ticket** for a specific service by using the **NTLM hash** (for instance, the **hash of the PC account**). This method is employed to **access the service privileges**.
+**シルバーチケット攻撃**は、特定のサービスのために**正当なチケットグラントサービス（TGS）チケット**を**NTLMハッシュ**（例えば、**PCアカウントのハッシュ**）を使用して作成します。この方法は、**サービス権限にアクセス**するために使用されます。
 
 {{#ref}}
 silver-ticket.md
 {{#endref}}
 
-### Golden Ticket
+### ゴールデンチケット
 
-A **Golden Ticket attack** involves an attacker gaining access to the **NTLM hash of the krbtgt account** in an Active Directory (AD) environment. This account is special because it's used to sign all **Ticket Granting Tickets (TGTs)**, which are essential for authenticating within the AD network.
+**ゴールデンチケット攻撃**は、攻撃者がActive Directory（AD）環境内の**krbtgtアカウントのNTLMハッシュ**にアクセスすることを含みます。このアカウントは特別で、すべての**チケットグラントチケット（TGT）**に署名するために使用され、ADネットワーク内での認証に不可欠です。
 
-Once the attacker obtains this hash, they can create **TGTs** for any account they choose (Silver ticket attack).
+攻撃者がこのハッシュを取得すると、任意のアカウントのために**TGT**を作成することができます（シルバーチケット攻撃）。
 
 {{#ref}}
 golden-ticket.md
 {{#endref}}
 
-### Diamond Ticket
+### ダイヤモンドチケット
 
-These are like golden tickets forged in a way that **bypasses common golden tickets detection mechanisms.**
+これらは、**一般的なゴールデンチケット検出メカニズムを回避する方法で偽造されたゴールデンチケットのようなものです。**
 
 {{#ref}}
 diamond-ticket.md
 {{#endref}}
 
-### **Certificates Account Persistence**
+### **証明書アカウントの持続性**
 
-**Having certificates of an account or being able to request them** is a very good way to be able to persist in the users account (even if he changes the password):
+**アカウントの証明書を持っているか、要求できること**は、ユーザーアカウントに持続するための非常に良い方法です（たとえ彼がパスワードを変更しても）：
 
 {{#ref}}
 ad-certificates/account-persistence.md
 {{#endref}}
 
-### **Certificates Domain Persistence**
+### **証明書ドメインの持続性**
 
-**Using certificates is also possible to persist with high privileges inside the domain:**
+**証明書を使用することは、ドメイン内で高い権限を持って持続することも可能です：**
 
 {{#ref}}
 ad-certificates/domain-persistence.md
 {{#endref}}
 
-### AdminSDHolder Group
+### AdminSDHolderグループ
 
-The **AdminSDHolder** object in Active Directory ensures the security of **privileged groups** (like Domain Admins and Enterprise Admins) by applying a standard **Access Control List (ACL)** across these groups to prevent unauthorized changes. However, this feature can be exploited; if an attacker modifies the AdminSDHolder's ACL to give full access to a regular user, that user gains extensive control over all privileged groups. This security measure, meant to protect, can thus backfire, allowing unwarranted access unless closely monitored.
+Active Directoryの**AdminSDHolder**オブジェクトは、**特権グループ**（ドメイン管理者やエンタープライズ管理者など）のセキュリティを確保するために、これらのグループ全体に標準の**アクセス制御リスト（ACL）**を適用して、無許可の変更を防ぎます。しかし、この機能は悪用される可能性があります。攻撃者がAdminSDHolderのACLを変更して通常のユーザーに完全なアクセスを与えると、そのユーザーはすべての特権グループに対して広範な制御を得ることになります。このセキュリティ対策は保護を目的としていますが、厳重に監視されない限り、逆効果をもたらす可能性があります。
 
-[**More information about AdminDSHolder Group here.**](privileged-groups-and-token-privileges.md#adminsdholder-group)
+[**AdminDSHolderグループに関する詳細情報はここにあります。**](privileged-groups-and-token-privileges.md#adminsdholder-group)
 
-### DSRM Credentials
+### DSRM資格情報
 
-Inside every **Domain Controller (DC)**, a **local administrator** account exists. By obtaining admin rights on such a machine, the local Administrator hash can be extracted using **mimikatz**. Following this, a registry modification is necessary to **enable the use of this password**, allowing for remote access to the local Administrator account.
+すべての**ドメインコントローラー（DC）**内には、**ローカル管理者**アカウントが存在します。このようなマシンで管理者権限を取得することで、**mimikatz**を使用してローカル管理者のハッシュを抽出できます。その後、このパスワードを**使用できるようにするためのレジストリ変更**が必要で、ローカル管理者アカウントへのリモートアクセスを可能にします。
 
 {{#ref}}
 dsrm-credentials.md
 {{#endref}}
 
-### ACL Persistence
+### ACL持続性
 
-You could **give** some **special permissions** to a **user** over some specific domain objects that will let the user **escalate privileges in the future**.
+特定のドメインオブジェクトに対して**ユーザーに特別な権限**を**与える**ことで、そのユーザーが将来的に**権限を昇格**させることができるようになります。
 
 {{#ref}}
 acl-persistence-abuse/
 {{#endref}}
 
-### Security Descriptors
+### セキュリティ記述子
 
-The **security descriptors** are used to **store** the **permissions** an **object** have **over** an **object**. If you can just **make** a **little change** in the **security descriptor** of an object, you can obtain very interesting privileges over that object without needing to be member of a privileged group.
+**セキュリティ記述子**は、**オブジェクト**が**オブジェクト**に対して持つ**権限**を**保存**するために使用されます。オブジェクトの**セキュリティ記述子**に**少し変更**を加えることができれば、特権グループのメンバーである必要なく、そのオブジェクトに対して非常に興味深い権限を取得できます。
 
 {{#ref}}
 security-descriptors.md
 {{#endref}}
 
-### Skeleton Key
+### スケルトンキー
 
-Alter **LSASS** in memory to establish a **universal password**, granting access to all domain accounts.
+**LSASS**をメモリ内で変更して、すべてのドメインアカウントにアクセスを許可する**ユニバーサルパスワード**を確立します。
 
 {{#ref}}
 skeleton-key.md
 {{#endref}}
 
-### Custom SSP
+### カスタムSSP
 
-[Learn what is a SSP (Security Support Provider) here.](../authentication-credentials-uac-and-efs/#security-support-provider-interface-sspi)\
-You can create you **own SSP** to **capture** in **clear text** the **credentials** used to access the machine.\\
+[SSP（セキュリティサポートプロバイダー）とは何かをここで学びます。](../authentication-credentials-uac-and-efs/#security-support-provider-interface-sspi)\
+自分の**SSP**を作成して、マシンにアクセスするために使用される**資格情報**を**平文**で**キャプチャ**することができます。\\
 
 {{#ref}}
 custom-ssp.md
@@ -490,77 +458,76 @@ custom-ssp.md
 
 ### DCShadow
 
-It registers a **new Domain Controller** in the AD and uses it to **push attributes** (SIDHistory, SPNs...) on specified objects **without** leaving any **logs** regarding the **modifications**. You **need DA** privileges and be inside the **root domain**.\
-Note that if you use wrong data, pretty ugly logs will appear.
+ADに**新しいドメインコントローラー**を登録し、指定されたオブジェクトに**属性**（SIDHistory、SPNs...）を**プッシュ**するために使用しますが、**変更**に関する**ログ**を残さずに行います。**DA**権限が必要で、**ルートドメイン**内にいる必要があります。\
+不正なデータを使用すると、非常に醜いログが表示されることに注意してください。
 
 {{#ref}}
 dcshadow.md
 {{#endref}}
 
-### LAPS Persistence
+### LAPS持続性
 
-Previously we have discussed about how to escalate privileges if you have **enough permission to read LAPS passwords**. However, these passwords can also be used to **maintain persistence**.\
-Check:
+以前に、**LAPSパスワードを読み取るための十分な権限がある場合に権限を昇格させる方法**について説明しました。しかし、これらのパスワードは**持続性を維持するためにも使用**できます。\
+確認してください：
 
 {{#ref}}
 laps.md
 {{#endref}}
 
-## Forest Privilege Escalation - Domain Trusts
+## フォレスト権限昇格 - ドメイン信頼
 
-Microsoft views the **Forest** as the security boundary. This implies that **compromising a single domain could potentially lead to the entire Forest being compromised**.
+Microsoftは**フォレスト**をセキュリティ境界と見なしています。これは、**単一のドメインを侵害することが、フォレスト全体が侵害される可能性があることを意味します**。
 
-### Basic Information
+### 基本情報
 
-A [**domain trust**](<http://technet.microsoft.com/en-us/library/cc759554(v=ws.10).aspx>) is a security mechanism that enables a user from one **domain** to access resources in another **domain**. It essentially creates a linkage between the authentication systems of the two domains, allowing authentication verifications to flow seamlessly. When domains set up a trust, they exchange and retain specific **keys** within their **Domain Controllers (DCs)**, which are crucial to the trust's integrity.
+[**ドメイン信頼**](<http://technet.microsoft.com/en-us/library/cc759554(v=ws.10).aspx>)は、ある**ドメイン**のユーザーが別の**ドメイン**のリソースにアクセスできるようにするセキュリティメカニズムです。これは、2つのドメインの認証システム間にリンクを作成し、認証確認がシームレスに流れることを可能にします。ドメインが信頼を設定すると、特定の**キー**を**ドメインコントローラー（DC）**内で交換し保持します。これは信頼の整合性にとって重要です。
 
-In a typical scenario, if a user intends to access a service in a **trusted domain**, they must first request a special ticket known as an **inter-realm TGT** from their own domain's DC. This TGT is encrypted with a shared **key** that both domains have agreed upon. The user then presents this TGT to the **DC of the trusted domain** to get a service ticket (**TGS**). Upon successful validation of the inter-realm TGT by the trusted domain's DC, it issues a TGS, granting the user access to the service.
+典型的なシナリオでは、ユーザーが**信頼されたドメイン**のサービスにアクセスしようとする場合、最初に自分のドメインのDCから**インターレルムTGT**と呼ばれる特別なチケットを要求する必要があります。このTGTは、両方のドメインが合意した共有**キー**で暗号化されています。ユーザーはこのTGTを**信頼されたドメインのDC**に提示してサービスチケット（**TGS**）を取得します。信頼されたドメインのDCによってインターレルムTGTが正常に検証されると、TGSが発行され、ユーザーはサービスにアクセスできるようになります。
 
-**Steps**:
+**手順**：
 
-1. A **client computer** in **Domain 1** starts the process by using its **NTLM hash** to request a **Ticket Granting Ticket (TGT)** from its **Domain Controller (DC1)**.
-2. DC1 issues a new TGT if the client is authenticated successfully.
-3. The client then requests an **inter-realm TGT** from DC1, which is needed to access resources in **Domain 2**.
-4. The inter-realm TGT is encrypted with a **trust key** shared between DC1 and DC2 as part of the two-way domain trust.
-5. The client takes the inter-realm TGT to **Domain 2's Domain Controller (DC2)**.
-6. DC2 verifies the inter-realm TGT using its shared trust key and, if valid, issues a **Ticket Granting Service (TGS)** for the server in Domain 2 the client wants to access.
-7. Finally, the client presents this TGS to the server, which is encrypted with the server’s account hash, to get access to the service in Domain 2.
+1. **ドメイン1**の**クライアントコンピュータ**が、**ドメインコントローラー（DC1）**から**チケットグラントチケット（TGT）**を要求するプロセスを開始します。
+2. クライアントが正常に認証されると、DC1は新しいTGTを発行します。
+3. クライアントは次に、**ドメイン2**のリソースにアクセスするために必要な**インターレルムTGT**をDC1に要求します。
+4. インターレルムTGTは、DC1とDC2の間で共有された**信頼キー**で暗号化されています。
+5. クライアントはインターレルムTGTを**ドメイン2のドメインコントローラー（DC2）**に持っていきます。
+6. DC2は、共有された信頼キーを使用してインターレルムTGTを検証し、有効であれば、クライアントがアクセスしたいドメイン2のサーバーのために**チケットグラントサービス（TGS）**を発行します。
+7. 最後に、クライアントはこのTGSをサーバーに提示し、サーバーのアカウントハッシュで暗号化されているため、ドメイン2のサービスにアクセスします。
 
-### Different trusts
+### 異なる信頼
 
-It's important to notice that **a trust can be 1 way or 2 ways**. In the 2 ways options, both domains will trust each other, but in the **1 way** trust relation one of the domains will be the **trusted** and the other the **trusting** domain. In the last case, **you will only be able to access resources inside the trusting domain from the trusted one**.
+**信頼は1方向または2方向**であることに注意することが重要です。2方向のオプションでは、両方のドメインが互いに信頼しますが、**1方向**の信頼関係では、一方のドメインが**信頼された**ドメインであり、もう一方が**信頼する**ドメインです。この場合、**信頼されたドメインから信頼するドメイン内のリソースにのみアクセスできる**ことになります。
 
-If Domain A trusts Domain B, A is the trusting domain and B ins the trusted one. Moreover, in **Domain A**, this would be an **Outbound trust**; and in **Domain B**, this would be an **Inbound trust**.
+ドメインAがドメインBを信頼している場合、Aは信頼するドメインであり、Bは信頼されたドメインです。さらに、**ドメインA**では、これは**アウトバウンド信頼**となり、**ドメインB**では、これは**インバウンド信頼**となります。
 
-**Different trusting relationships**
+**異なる信頼関係**
 
-- **Parent-Child Trusts**: This is a common setup within the same forest, where a child domain automatically has a two-way transitive trust with its parent domain. Essentially, this means that authentication requests can flow seamlessly between the parent and the child.
-- **Cross-link Trusts**: Referred to as "shortcut trusts," these are established between child domains to expedite referral processes. In complex forests, authentication referrals typically have to travel up to the forest root and then down to the target domain. By creating cross-links, the journey is shortened, which is especially beneficial in geographically dispersed environments.
-- **External Trusts**: These are set up between different, unrelated domains and are non-transitive by nature. According to [Microsoft's documentation](<https://technet.microsoft.com/en-us/library/cc773178(v=ws.10).aspx>), external trusts are useful for accessing resources in a domain outside of the current forest that isn't connected by a forest trust. Security is bolstered through SID filtering with external trusts.
-- **Tree-root Trusts**: These trusts are automatically established between the forest root domain and a newly added tree root. While not commonly encountered, tree-root trusts are important for adding new domain trees to a forest, enabling them to maintain a unique domain name and ensuring two-way transitivity. More information can be found in [Microsoft's guide](<https://technet.microsoft.com/en-us/library/cc773178(v=ws.10).aspx>).
-- **Forest Trusts**: This type of trust is a two-way transitive trust between two forest root domains, also enforcing SID filtering to enhance security measures.
-- **MIT Trusts**: These trusts are established with non-Windows, [RFC4120-compliant](https://tools.ietf.org/html/rfc4120) Kerberos domains. MIT trusts are a bit more specialized and cater to environments requiring integration with Kerberos-based systems outside the Windows ecosystem.
+- **親子信頼**：これは同じフォレスト内で一般的な設定であり、子ドメインは自動的に親ドメインとの双方向の推移的信頼を持ちます。基本的に、これは認証要求が親と子の間でシームレスに流れることを意味します。
+- **クロスリンク信頼**：これは「ショートカット信頼」と呼ばれ、子ドメイン間で確立され、参照プロセスを迅速化します。複雑なフォレストでは、認証参照は通常、フォレストルートまで上昇し、ターゲットドメインまで下降する必要があります。クロスリンクを作成することで、旅が短縮され、特に地理的に分散した環境で有益です。
+- **外部信頼**：これは異なる無関係なドメイン間で設定され、非推移的です。Microsoftの文書によると、外部信頼は、現在のフォレスト外のドメインのリソースにアクセスするために便利であり、フォレスト信頼によって接続されていないドメインに対して有用です。外部信頼ではSIDフィルタリングを通じてセキュリティが強化されます。
+- **ツリー根信頼**：これらの信頼は、フォレストルートドメインと新しく追加されたツリー根の間で自動的に確立されます。一般的には遭遇しませんが、ツリー根信頼は新しいドメインツリーをフォレストに追加するために重要であり、ユニークなドメイン名を維持し、双方向の推移性を確保します。詳細情報はMicrosoftのガイドで確認できます。
+- **フォレスト信頼**：このタイプの信頼は、2つのフォレストルートドメイン間の双方向推移的信頼であり、セキュリティ対策を強化するためにSIDフィルタリングを強制します。
+- **MIT信頼**：これらの信頼は、非Windowsの[RFC4120準拠](https://tools.ietf.org/html/rfc4120)のKerberosドメインとの間で確立されます。MIT信頼は、Windowsエコシステム外のKerberosベースのシステムとの統合を必要とする環境に特化しています。
 
-#### Other differences in **trusting relationships**
+#### **信頼関係の他の違い**
 
-- A trust relationship can also be **transitive** (A trust B, B trust C, then A trust C) or **non-transitive**.
-- A trust relationship can be set up as **bidirectional trust** (both trust each other) or as **one-way trust** (only one of them trust the other).
+- 信頼関係は**推移的**（AがBを信頼し、BがCを信頼する場合、AはCを信頼する）または**非推移的**にすることができます。
+- 信頼関係は**双方向信頼**（両方が互いに信頼する）または**一方向信頼**（一方だけが他方を信頼する）として設定できます。
 
-### Attack Path
+### 攻撃パス
 
-1. **Enumerate** the trusting relationships
-2. Check if any **security principal** (user/group/computer) has **access** to resources of the **other domain**, maybe by ACE entries or by being in groups of the other domain. Look for **relationships across domains** (the trust was created for this probably).
-   1. kerberoast in this case could be another option.
-3. **Compromise** the **accounts** which can **pivot** through domains.
+1. **信頼関係を列挙**する
+2. どの**セキュリティプリンシパル**（ユーザー/グループ/コンピュータ）が**他のドメインのリソースにアクセス**できるかを確認します。おそらくACEエントリや他のドメインのグループにいることによって。**ドメイン間の関係**を探します（このために信頼が作成された可能性があります）。
+1. この場合、kerberoastが別のオプションになる可能性があります。
+3. **アカウントを侵害**し、ドメインを**ピボット**することができます。
 
-Attackers with could access to resources in another domain through three primary mechanisms:
+攻撃者は、他のドメインのリソースにアクセスするために、主に3つのメカニズムを使用できます：
 
-- **Local Group Membership**: Principals might be added to local groups on machines, such as the “Administrators” group on a server, granting them significant control over that machine.
-- **Foreign Domain Group Membership**: Principals can also be members of groups within the foreign domain. However, the effectiveness of this method depends on the nature of the trust and the scope of the group.
-- **Access Control Lists (ACLs)**: Principals might be specified in an **ACL**, particularly as entities in **ACEs** within a **DACL**, providing them access to specific resources. For those looking to dive deeper into the mechanics of ACLs, DACLs, and ACEs, the whitepaper titled “[An ACE Up The Sleeve](https://specterops.io/assets/resources/an_ace_up_the_sleeve.pdf)” is an invaluable resource.
+- **ローカルグループメンバーシップ**：プリンシパルは、サーバーの「Administrators」グループなどのマシンのローカルグループに追加されることがあり、そのマシンに対して重要な制御を与えます。
+- **外国ドメイングループメンバーシップ**：プリンシパルは、外国ドメイン内のグループのメンバーでもあります。ただし、この方法の効果は、信頼の性質とグループの範囲に依存します。
+- **アクセス制御リスト（ACL）**：プリンシパルは、特定のリソースへのアクセスを提供する**ACL**内の**ACE**のエンティティとして指定されることがあります。ACL、DACL、およびACEのメカニズムに深く入りたい方には、ホワイトペーパー「[An ACE Up The Sleeve](https://specterops.io/assets/resources/an_ace_up_the_sleeve.pdf)」が貴重なリソースです。
 
-### Child-to-Parent forest privilege escalation
-
+### 子から親へのフォレスト権限昇格
 ```
 Get-DomainTrust
 
@@ -572,10 +539,9 @@ TrustDirection  : Bidirectional       --> Trust direction (2ways in this case)
 WhenCreated     : 2/19/2021 1:28:00 PM
 WhenChanged     : 2/19/2021 1:28:00 PM
 ```
-
 > [!WARNING]
-> There are **2 trusted keys**, one for _Child --> Parent_ and another one for _Parent_ --> _Child_.\
-> You can the one used by the current domain them with:
+> **2つの信頼されたキー**があります。1つは_Child --> Parent_用、もう1つは_Parent_ --> _Child_用です。\
+> 現在のドメインで使用されているものを次のコマンドで確認できます：
 >
 > ```bash
 > Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.my.domain.local
@@ -584,42 +550,41 @@ WhenChanged     : 2/19/2021 1:28:00 PM
 
 #### SID-History Injection
 
-Escalate as Enterprise admin to the child/parent domain abusing the trust with SID-History injection:
+SID-Historyインジェクションを悪用して、子/親ドメインにエンタープライズ管理者として昇格します：
 
 {{#ref}}
 sid-history-injection.md
 {{#endref}}
 
-#### Exploit writeable Configuration NC
+#### 書き込み可能なConfiguration NCの悪用
 
-Understanding how the Configuration Naming Context (NC) can be exploited is crucial. The Configuration NC serves as a central repository for configuration data across a forest in Active Directory (AD) environments. This data is replicated to every Domain Controller (DC) within the forest, with writable DCs maintaining a writable copy of the Configuration NC. To exploit this, one must have **SYSTEM privileges on a DC**, preferably a child DC.
+Configuration Naming Context (NC)がどのように悪用されるかを理解することは重要です。Configuration NCは、Active Directory (AD)環境内のフォレスト全体の構成データの中央リポジトリとして機能します。このデータはフォレスト内のすべてのドメインコントローラー (DC) に複製され、書き込み可能なDCはConfiguration NCの書き込み可能なコピーを保持します。これを悪用するには、**DC上でSYSTEM権限を持つ必要があります**。できれば子DCが望ましいです。
 
-**Link GPO to root DC site**
+**GPOをルートDCサイトにリンク**
 
-The Configuration NC's Sites container includes information about all domain-joined computers' sites within the AD forest. By operating with SYSTEM privileges on any DC, attackers can link GPOs to the root DC sites. This action potentially compromises the root domain by manipulating policies applied to these sites.
+Configuration NCのSitesコンテナには、ADフォレスト内のすべてのドメイン参加コンピュータのサイトに関する情報が含まれています。任意のDCでSYSTEM権限を持って操作することで、攻撃者はGPOをルートDCサイトにリンクできます。このアクションは、これらのサイトに適用されるポリシーを操作することによって、ルートドメインを危険にさらす可能性があります。
 
-For in-depth information, one might explore research on [Bypassing SID Filtering](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-4-bypass-sid-filtering-research).
+詳細情報については、[SIDフィルタリングのバイパス](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-4-bypass-sid-filtering-research)に関する研究を参照してください。
 
-**Compromise any gMSA in the forest**
+**フォレスト内の任意のgMSAを危険にさらす**
 
-An attack vector involves targeting privileged gMSAs within the domain. The KDS Root key, essential for calculating gMSAs' passwords, is stored within the Configuration NC. With SYSTEM privileges on any DC, it's possible to access the KDS Root key and compute the passwords for any gMSA across the forest.
+攻撃ベクトルは、ドメイン内の特権gMSAをターゲットにすることです。gMSAのパスワードを計算するために必要なKDS Rootキーは、Configuration NC内に保存されています。任意のDCでSYSTEM権限を持つことで、KDS Rootキーにアクセスし、フォレスト内の任意のgMSAのパスワードを計算することが可能です。
 
-Detailed analysis can be found in the discussion on [Golden gMSA Trust Attacks](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-5-golden-gmsa-trust-attack-from-child-to-parent).
+詳細な分析は、[Golden gMSA Trust Attacks](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-5-golden-gmsa-trust-attack-from-child-to-parent)の議論で見つけることができます。
 
-**Schema change attack**
+**スキーマ変更攻撃**
 
-This method requires patience, waiting for the creation of new privileged AD objects. With SYSTEM privileges, an attacker can modify the AD Schema to grant any user complete control over all classes. This could lead to unauthorized access and control over newly created AD objects.
+この方法は、新しい特権ADオブジェクトの作成を待つ忍耐が必要です。SYSTEM権限を持つ攻撃者は、ADスキーマを変更して、任意のユーザーにすべてのクラスに対する完全な制御を付与できます。これにより、新しく作成されたADオブジェクトへの不正アクセスと制御が可能になる可能性があります。
 
-Further reading is available on [Schema Change Trust Attacks](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-6-schema-change-trust-attack-from-child-to-parent).
+さらなる読み物は、[スキーマ変更信頼攻撃](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-6-schema-change-trust-attack-from-child-to-parent)で利用可能です。
 
-**From DA to EA with ADCS ESC5**
+**ADCS ESC5を使用したDAからEAへの昇格**
 
-The ADCS ESC5 vulnerability targets control over Public Key Infrastructure (PKI) objects to create a certificate template that enables authentication as any user within the forest. As PKI objects reside in the Configuration NC, compromising a writable child DC enables the execution of ESC5 attacks.
+ADCS ESC5の脆弱性は、フォレスト内の任意のユーザーとして認証を可能にする証明書テンプレートを作成するために、公開鍵基盤 (PKI) オブジェクトの制御をターゲットにしています。PKIオブジェクトはConfiguration NCに存在するため、書き込み可能な子DCを危険にさらすことでESC5攻撃を実行できます。
 
-More details on this can be read in [From DA to EA with ESC5](https://posts.specterops.io/from-da-to-ea-with-esc5-f9f045aa105c). In scenarios lacking ADCS, the attacker has the capability to set up the necessary components, as discussed in [Escalating from Child Domain Admins to Enterprise Admins](https://www.pkisolutions.com/escalating-from-child-domains-admins-to-enterprise-admins-in-5-minutes-by-abusing-ad-cs-a-follow-up/).
+これに関する詳細は、[DAからEAへのESC5](https://posts.specterops.io/from-da-to-ea-with-esc5-f9f045aa105c)で読むことができます。ADCSがないシナリオでは、攻撃者は必要なコンポーネントを設定する能力を持ち、[子ドメイン管理者からエンタープライズ管理者への昇格](https://www.pkisolutions.com/escalating-from-child-domains-admins-to-enterprise-admins-in-5-minutes-by-abusing-ad-cs-a-follow-up/)で議論されています。
 
-### External Forest Domain - One-Way (Inbound) or bidirectional
-
+### 外部フォレストドメイン - 一方向（インバウンド）または双方向
 ```powershell
 Get-DomainTrust
 SourceName      : a.domain.local   --> Current domain
@@ -630,15 +595,13 @@ TrustDirection  : Inbound          --> Inboud trust
 WhenCreated     : 2/19/2021 10:50:56 PM
 WhenChanged     : 2/19/2021 10:50:56 PM
 ```
-
-In this scenario **your domain is trusted** by an external one giving you **undetermined permissions** over it. You will need to find **which principals of your domain have which access over the external domain** and then try to exploit it:
+このシナリオでは、**あなたのドメインが外部のドメインによって信頼されています**。これにより、**不明な権限**が与えられます。あなたは、**あなたのドメインのどのプリンシパルが外部ドメインに対してどのようなアクセス権を持っているかを見つけ**、それを悪用しようとする必要があります：
 
 {{#ref}}
 external-forest-domain-oneway-inbound.md
 {{#endref}}
 
-### External Forest Domain - One-Way (Outbound)
-
+### 外部フォレストドメイン - 一方向（アウトバウンド）
 ```powershell
 Get-DomainTrust -Domain current.local
 
@@ -650,75 +613,73 @@ TrustDirection  : Outbound        --> Outbound trust
 WhenCreated     : 2/19/2021 10:15:24 PM
 WhenChanged     : 2/19/2021 10:15:24 PM
 ```
+このシナリオでは、**あなたのドメイン**が**異なるドメイン**のプリンシパルに**特権**を**信頼**しています。
 
-In this scenario **your domain** is **trusting** some **privileges** to principal from a **different domains**.
-
-However, when a **domain is trusted** by the trusting domain, the trusted domain **creates a user** with a **predictable name** that uses as **password the trusted password**. Which means that it's possible to **access a user from the trusting domain to get inside the trusted one** to enumerate it and try to escalate more privileges:
+しかし、**ドメインが信頼される**と、信頼されたドメインは**予測可能な名前**の**ユーザーを作成**し、**信頼されたパスワード**を**パスワード**として使用します。これは、**信頼するドメインのユーザーにアクセスして信頼されたドメインに入る**ことが可能であり、それを列挙してさらに特権を昇格させることができることを意味します：
 
 {{#ref}}
 external-forest-domain-one-way-outbound.md
 {{#endref}}
 
-Another way to compromise the trusted domain is to find a [**SQL trusted link**](abusing-ad-mssql.md#mssql-trusted-links) created in the **opposite direction** of the domain trust (which isn't very common).
+信頼されたドメインを侵害する別の方法は、ドメイン信頼の**反対方向**に作成された[**SQL信頼リンク**](abusing-ad-mssql.md#mssql-trusted-links)を見つけることです（これはあまり一般的ではありません）。
 
-Another way to compromise the trusted domain is to wait in a machine where a **user from the trusted domain can access** to login via **RDP**. Then, the attacker could inject code in the RDP session process and **access the origin domain of the victim** from there.\
-Moreover, if the **victim mounted his hard drive**, from the **RDP session** process the attacker could store **backdoors** in the **startup folder of the hard drive**. This technique is called **RDPInception.**
+信頼されたドメインを侵害する別の方法は、**信頼されたドメインのユーザーがアクセスできる**マシンで待機し、**RDP**を介してログインすることです。次に、攻撃者はRDPセッションプロセスにコードを注入し、そこから**被害者の元のドメインにアクセス**することができます。\
+さらに、**被害者がハードドライブをマウントしている場合**、攻撃者は**RDPセッション**プロセスから**ハードドライブのスタートアップフォルダー**に**バックドア**を保存することができます。この技術は**RDPInception**と呼ばれます。
 
 {{#ref}}
 rdp-sessions-abuse.md
 {{#endref}}
 
-### Domain trust abuse mitigation
+### ドメイン信頼の悪用緩和
 
-### **SID Filtering:**
+### **SIDフィルタリング：**
 
-- The risk of attacks leveraging the SID history attribute across forest trusts is mitigated by SID Filtering, which is activated by default on all inter-forest trusts. This is underpinned by the assumption that intra-forest trusts are secure, considering the forest, rather than the domain, as the security boundary as per Microsoft's stance.
-- However, there's a catch: SID filtering might disrupt applications and user access, leading to its occasional deactivation.
+- フォレスト信頼を越えたSID履歴属性を利用した攻撃のリスクは、SIDフィルタリングによって緩和され、これはすべてのインターフォレスト信頼でデフォルトで有効になっています。これは、マイクロソフトの見解に従い、フォレストをセキュリティ境界と見なすことから、イントラフォレスト信頼が安全であるという前提に基づいています。
+- しかし、注意点があります：SIDフィルタリングはアプリケーションやユーザーアクセスを妨げる可能性があり、そのため時折無効にされることがあります。
 
-### **Selective Authentication:**
+### **選択的認証：**
 
-- For inter-forest trusts, employing Selective Authentication ensures that users from the two forests are not automatically authenticated. Instead, explicit permissions are required for users to access domains and servers within the trusting domain or forest.
-- It's important to note that these measures do not safeguard against the exploitation of the writable Configuration Naming Context (NC) or attacks on the trust account.
+- インターフォレスト信頼の場合、選択的認証を使用することで、2つのフォレストのユーザーが自動的に認証されないようにします。代わりに、信頼するドメインまたはフォレスト内のドメインやサーバーにアクセスするためには明示的な権限が必要です。
+- これらの対策は、書き込み可能な構成名コンテキスト（NC）の悪用や信頼アカウントへの攻撃から保護するものではないことに注意が必要です。
 
-[**More information about domain trusts in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/child-domain-da-to-ea-in-parent-domain)
+[**ired.teamのドメイン信頼に関する詳細情報。**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/child-domain-da-to-ea-in-parent-domain)
 
 ## AD -> Azure & Azure -> AD
 
 {% embed url="https://cloud.hacktricks.xyz/pentesting-cloud/azure-security/az-lateral-movements/azure-ad-connect-hybrid-identity" %}
 
-## Some General Defenses
+## 一般的な防御策
 
-[**Learn more about how to protect credentials here.**](../stealing-credentials/credentials-protections.md)\\
+[**ここで資格情報を保護する方法について詳しく学ぶ。**](../stealing-credentials/credentials-protections.md)\\
 
-### **Defensive Measures for Credential Protection**
+### **資格情報保護のための防御策**
 
-- **Domain Admins Restrictions**: It is recommended that Domain Admins should only be allowed to login to Domain Controllers, avoiding their use on other hosts.
-- **Service Account Privileges**: Services should not be run with Domain Admin (DA) privileges to maintain security.
-- **Temporal Privilege Limitation**: For tasks requiring DA privileges, their duration should be limited. This can be achieved by: `Add-ADGroupMember -Identity ‘Domain Admins’ -Members newDA -MemberTimeToLive (New-TimeSpan -Minutes 20)`
+- **ドメイン管理者の制限**：ドメイン管理者はドメインコントローラーにのみログインできるようにし、他のホストでの使用を避けることが推奨されます。
+- **サービスアカウントの特権**：サービスはセキュリティを維持するためにドメイン管理者（DA）特権で実行されるべきではありません。
+- **一時的特権制限**：DA特権を必要とするタスクについては、その期間を制限する必要があります。これは次のように実現できます：`Add-ADGroupMember -Identity ‘Domain Admins’ -Members newDA -MemberTimeToLive (New-TimeSpan -Minutes 20)`
 
-### **Implementing Deception Techniques**
+### **欺瞞技術の実装**
 
-- Implementing deception involves setting traps, like decoy users or computers, with features such as passwords that do not expire or are marked as Trusted for Delegation. A detailed approach includes creating users with specific rights or adding them to high privilege groups.
-- A practical example involves using tools like: `Create-DecoyUser -UserFirstName user -UserLastName manager-uncommon -Password Pass@123 | DeployUserDeception -UserFlag PasswordNeverExpires -GUID d07da11f-8a3d-42b6-b0aa-76c962be719a -Verbose`
-- More on deploying deception techniques can be found at [Deploy-Deception on GitHub](https://github.com/samratashok/Deploy-Deception).
+- 欺瞞を実装するには、パスワードが期限切れにならないか、委任のために信頼されているとマークされたデコイユーザーやコンピュータのような罠を設定します。詳細なアプローチには、特定の権利を持つユーザーを作成するか、高特権グループに追加することが含まれます。
+- 実用的な例として、次のようなツールを使用します：`Create-DecoyUser -UserFirstName user -UserLastName manager-uncommon -Password Pass@123 | DeployUserDeception -UserFlag PasswordNeverExpires -GUID d07da11f-8a3d-42b6-b0aa-76c962be719a -Verbose`
+- 欺瞞技術の展開に関する詳細は、[Deploy-Deception on GitHub](https://github.com/samratashok/Deploy-Deception)で確認できます。
 
-### **Identifying Deception**
+### **欺瞞の特定**
 
-- **For User Objects**: Suspicious indicators include atypical ObjectSID, infrequent logons, creation dates, and low bad password counts.
-- **General Indicators**: Comparing attributes of potential decoy objects with those of genuine ones can reveal inconsistencies. Tools like [HoneypotBuster](https://github.com/JavelinNetworks/HoneypotBuster) can assist in identifying such deceptions.
+- **ユーザーオブジェクトの場合**：疑わしい指標には、異常なObjectSID、まれなログオン、作成日、低い不正パスワードカウントが含まれます。
+- **一般的な指標**：潜在的なデコイオブジェクトの属性を本物のものと比較することで不一致を明らかにできます。[HoneypotBuster](https://github.com/JavelinNetworks/HoneypotBuster)のようなツールは、こうした欺瞞を特定するのに役立ちます。
 
-### **Bypassing Detection Systems**
+### **検出システムの回避**
 
-- **Microsoft ATA Detection Bypass**:
-  - **User Enumeration**: Avoiding session enumeration on Domain Controllers to prevent ATA detection.
-  - **Ticket Impersonation**: Utilizing **aes** keys for ticket creation helps evade detection by not downgrading to NTLM.
-  - **DCSync Attacks**: Executing from a non-Domain Controller to avoid ATA detection is advised, as direct execution from a Domain Controller will trigger alerts.
+- **Microsoft ATA検出回避**：
+- **ユーザー列挙**：ドメインコントローラーでのセッション列挙を避け、ATA検出を防ぎます。
+- **チケットの偽装**：チケット作成に**aes**キーを利用することで、NTLMにダウングレードせずに検出を回避します。
+- **DCSync攻撃**：ATA検出を避けるために、ドメインコントローラーから直接実行するのではなく、非ドメインコントローラーから実行することが推奨されます。
 
-## References
+## 参考文献
 
 - [http://www.harmj0y.net/blog/redteaming/a-guide-to-attacking-domain-trusts/](http://www.harmj0y.net/blog/redteaming/a-guide-to-attacking-domain-trusts/)
 - [https://www.labofapenetrationtester.com/2018/10/deploy-deception.html](https://www.labofapenetrationtester.com/2018/10/deploy-deception.html)
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/child-domain-da-to-ea-in-parent-domain](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/child-domain-da-to-ea-in-parent-domain)
 
 {{#include ../../banners/hacktricks-training.md}}
-

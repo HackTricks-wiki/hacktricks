@@ -4,35 +4,35 @@
 
 ## Intro
 
-iButton is a generic name for an electronic identification key packed in a **coin-shaped metal container**. It is also called **Dallas Touch** Memory or contact memory. Even though it is often wrongly referred to as a “magnetic” key, there is **nothing magnetic** in it. In fact, a full-fledged **microchip** operating on a digital protocol is hidden inside.
+iButtonは、**コイン型の金属容器**に詰め込まれた電子識別キーの一般的な名称です。これは**Dallas Touch** Memoryまたは接触メモリとも呼ばれます。しばしば「磁気」キーと誤って呼ばれますが、実際には**磁気的なものは何もありません**。実際には、デジタルプロトコルで動作する**マイクロチップ**が内部に隠されています。
 
 <figure><img src="../../images/image (915).png" alt=""><figcaption></figcaption></figure>
 
 ### What is iButton? <a href="#what-is-ibutton" id="what-is-ibutton"></a>
 
-Usually, iButton implies the physical form of the key and reader - a round coin with two contacts. For the frame surrounding it, there are lots of variations from the most common plastic holder with a hole to rings, pendants, etc.
+通常、iButtonはキーとリーダーの物理的な形状を指し、2つの接点を持つ丸いコインです。その周囲のフレームには、最も一般的な穴のあるプラスチックホルダーからリング、ペンダントなど、さまざまなバリエーションがあります。
 
 <figure><img src="../../images/image (1078).png" alt=""><figcaption></figcaption></figure>
 
-When the key reaches the reader, the **contacts come to touch** and the key is powered to **transmit** its ID. Sometimes the key is **not read** immediately because the **contact PSD of an intercom is larger** than it should be. So the outer contours of the key and the reader couldn't touch. If that's the case, you'll have to press the key over one of the walls of the reader.
+キーがリーダーに到達すると、**接点が接触し**、キーが**IDを送信するために電源が入ります**。時には、**インターホンの接触PSDが大きすぎる**ため、キーが**すぐに読み取られない**ことがあります。そのため、キーとリーダーの外形が接触できない場合があります。その場合は、リーダーの壁の1つの上にキーを押し付ける必要があります。
 
 <figure><img src="../../images/image (290).png" alt=""><figcaption></figcaption></figure>
 
 ### **1-Wire protocol** <a href="#id-1-wire-protocol" id="id-1-wire-protocol"></a>
 
-Dallas keys exchange data using the 1-wire protocol. With only one contact for data transfer (!!) in both directions, from master to slave and vice versa. The 1-wire protocol works according to the Master-Slave model. In this topology, the Master always initiates communication and the Slave follows its instructions.
+Dallasキーは1-wireプロトコルを使用してデータを交換します。データ転送のための接点は1つだけで、両方向（マスターからスレーブ、そしてその逆）で機能します。1-wireプロトコルはマスター-スレーブモデルに従って動作します。このトポロジーでは、マスターが常に通信を開始し、スレーブがその指示に従います。
 
-When the key (Slave) contacts the intercom (Master), the chip inside the key turns on, powered by the intercom, and the key is initialized. Following that the intercom requests the key ID. Next, we will look up this process in more detail.
+キー（スレーブ）がインターホン（マスター）に接触すると、キー内部のチップが起動し、インターホンによって電源が供給され、キーが初期化されます。その後、インターホンがキーIDを要求します。次に、このプロセスをより詳細に見ていきます。
 
-Flipper can work both in Master and Slave modes. In the key reading mode, Flipper acts as a reader this is to say it works as a Master. And in the key emulation mode, the flipper pretends to be a key, it is in the Slave mode.
+Flipperはマスターとスレーブの両方のモードで動作できます。キー読み取りモードでは、Flipperはリーダーとして機能し、つまりマスターとして動作します。そして、キーエミュレーションモードでは、Flipperはキーのふりをし、スレーブモードにあります。
 
 ### Dallas, Cyfral & Metakom keys
 
-For information about how these keys works check the page [https://blog.flipperzero.one/taming-ibutton/](https://blog.flipperzero.one/taming-ibutton/)
+これらのキーの動作についての情報は、ページ[https://blog.flipperzero.one/taming-ibutton/](https://blog.flipperzero.one/taming-ibutton/)を確認してください。
 
 ### Attacks
 
-iButtons can be attacked with Flipper Zero:
+iButtonsはFlipper Zeroで攻撃できます：
 
 {{#ref}}
 flipper-zero/fz-ibutton.md
@@ -43,4 +43,3 @@ flipper-zero/fz-ibutton.md
 - [https://blog.flipperzero.one/taming-ibutton/](https://blog.flipperzero.one/taming-ibutton/)
 
 {{#include ../../banners/hacktricks-training.md}}
-

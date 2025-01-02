@@ -2,18 +2,17 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Attacking RFID Systems with Proxmark3
+## Proxmark3を使用したRFIDシステムの攻撃
 
-The first thing you need to do is to have a [**Proxmark3**](https://proxmark.com) and [**install the software and it's dependencie**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux)[**s**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux).
+最初に必要なのは[**Proxmark3**](https://proxmark.com)を持っていて、[**ソフトウェアとその依存関係をインストールすること**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux)[**s**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux)です。
 
-### Attacking MIFARE Classic 1KB
+### MIFARE Classic 1KBの攻撃
 
-It has **16 sectors**, each of them has **4 blocks** and each block contains **16B**. The UID is in sector 0 block 0 (and can't be altered).\
-To access each sector you need **2 keys** (**A** and **B**) which are stored in **block 3 of each sector** (sector trailer). The sector trailer also stores the **access bits** that give the **read and write** permissions on **each block** using the 2 keys.\
-2 keys are useful to give permissions to read if you know the first one and write if you know the second one (for example).
+**16セクター**があり、それぞれに**4ブロック**があり、各ブロックには**16B**が含まれています。UIDはセクター0のブロック0にあり（変更できません）。\
+各セクターにアクセスするには、**2つのキー**（**A**と**B**）が必要で、これらは**各セクターのブロック3**（セクタートレーラー）に保存されています。セクタートレーラーは、**各ブロック**に対する**読み取りおよび書き込み**権限を与える**アクセスビット**も保存しています。\
+2つのキーは、最初のキーを知っていれば読み取り権限を与え、2番目のキーを知っていれば書き込み権限を与えるのに役立ちます（例えば）。
 
-Several attacks can be performed
-
+いくつかの攻撃が実行できます。
 ```bash
 proxmark3> hf mf #List attacks
 
@@ -32,34 +31,28 @@ proxmark3> hf mf eset 01 000102030405060708090a0b0c0d0e0f # Write those bytes to
 proxmark3> hf mf eget 01 # Read block 1
 proxmark3> hf mf wrbl 01 B FFFFFFFFFFFF 000102030405060708090a0b0c0d0e0f # Write to the card
 ```
+Proxmark3は、**タグとリーダー間の通信を傍受**して機密データを探すなど、他のアクションを実行することができます。このカードでは、通信をスニッフィングし、使用されているキーを計算することができます。なぜなら、**使用される暗号操作が弱いため**、平文と暗号文を知っていれば計算できるからです（`mfkey64`ツール）。
 
-The Proxmark3 allows to perform other actions like **eavesdropping** a **Tag to Reader communication** to try to find sensitive data. In this card you could just sniff the communication with and calculate the used key because the **cryptographic operations used are weak** and knowing the plain and cipher text you can calculate it (`mfkey64` tool).
+### 生のコマンド
 
-### Raw Commands
-
-IoT systems sometimes use **nonbranded or noncommercial tags**. In this case, you can use Proxmark3 to send custom **raw commands to the tags**.
-
+IoTシステムは時々**ブランドなしまたは商業用でないタグ**を使用します。この場合、Proxmark3を使用してタグにカスタム**生のコマンドを送信**することができます。
 ```bash
 proxmark3> hf search UID : 80 55 4b 6c ATQA : 00 04
 SAK : 08 [2]
 TYPE : NXP MIFARE CLASSIC 1k | Plus 2k SL1
-  proprietary non iso14443-4 card found, RATS not supported
-  No chinese magic backdoor command detected
-  Prng detection: WEAK
-  Valid ISO14443A Tag Found - Quiting Search
+proprietary non iso14443-4 card found, RATS not supported
+No chinese magic backdoor command detected
+Prng detection: WEAK
+Valid ISO14443A Tag Found - Quiting Search
 ```
+この情報を使って、カードに関する情報やそれとの通信方法を調べることができます。Proxmark3は、次のような生のコマンドを送信することを可能にします: `hf 14a raw -p -b 7 26`
 
-With this information you could try to search information about the card and about the way to communicate with it. Proxmark3 allows to send raw commands like: `hf 14a raw -p -b 7 26`
+### スクリプト
 
-### Scripts
-
-The Proxmark3 software comes with a preloaded list of **automation scripts** that you can use to perform simple tasks. To retrieve the full list, use the `script list` command. Next, use the `script run` command, followed by the script’s name:
-
+Proxmark3ソフトウェアには、簡単なタスクを実行するために使用できる**自動化スクリプト**のプリロードされたリストが付属しています。完全なリストを取得するには、`script list`コマンドを使用します。次に、`script run`コマンドを使用し、スクリプトの名前を続けて入力します:
 ```
 proxmark3> script run mfkeys
 ```
-
-You can create a script to **fuzz tag readers**, so copying the data of a **valid card** just write a **Lua script** that **randomize** one or more random **bytes** and check if the **reader crashes** with any iteration.
+**タグリーダーをファズする**スクリプトを作成できます。したがって、**有効なカード**のデータをコピーするには、1つ以上のランダムな**バイト**を**ランダム化**し、任意の反復で**リーダーがクラッシュする**かどうかを確認する**Luaスクリプト**を書くだけです。
 
 {{#include ../../banners/hacktricks-training.md}}
-

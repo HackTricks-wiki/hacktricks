@@ -1,9 +1,8 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
-Part of this cheatsheet is based on the [angr documentation](https://docs.angr.io/_/downloads/en/stable/pdf/).
+このチートシートの一部は[angr documentation](https://docs.angr.io/_/downloads/en/stable/pdf/)に基づいています。
 
-# Installation
-
+# インストール
 ```bash
 sudo apt-get install python3-dev libffi-dev build-essential
 python3 -m pip install --user virtualenv
@@ -11,9 +10,7 @@ python3 -m venv ang
 source ang/bin/activate
 pip install angr
 ```
-
-# Basic Actions
-
+# 基本的なアクション
 ```python
 import angr
 import monkeyhex # this will format numerical results in hexadecimal
@@ -31,11 +28,9 @@ proj.filename #Get filename "/bin/true"
 #Usually you won't need to use them but you could
 angr.Project('examples/fauxware/fauxware', main_opts={'backend': 'blob', 'arch': 'i386'}, lib_opts={'libc.so.6': {'backend': 'elf'}})
 ```
+# 読み込まれたおよびメインオブジェクト情報
 
-# Loaded and Main object information
-
-## Loaded Data
-
+## 読み込まれたデータ
 ```python
 #LOADED DATA
 proj.loader #<Loaded true, maps [0x400000:0x5004000]>
@@ -45,22 +40,20 @@ proj.loader.all_objects #All loaded
 proj.loader.shared_objects #Loaded binaries
 """
 OrderedDict([('true', <ELF Object true, maps [0x400000:0x40a377]>),
-             ('libc.so.6',
-              <ELF Object libc-2.31.so, maps [0x500000:0x6c4507]>),
-             ('ld-linux-x86-64.so.2',
-              <ELF Object ld-2.31.so, maps [0x700000:0x72c177]>),
-             ('extern-address space',
-              <ExternObject Object cle##externs, maps [0x800000:0x87ffff]>),
-             ('cle##tls',
-              <ELFTLSObjectV2 Object cle##tls, maps [0x900000:0x91500f]>)])
+('libc.so.6',
+<ELF Object libc-2.31.so, maps [0x500000:0x6c4507]>),
+('ld-linux-x86-64.so.2',
+<ELF Object ld-2.31.so, maps [0x700000:0x72c177]>),
+('extern-address space',
+<ExternObject Object cle##externs, maps [0x800000:0x87ffff]>),
+('cle##tls',
+<ELFTLSObjectV2 Object cle##tls, maps [0x900000:0x91500f]>)])
 """
 proj.loader.all_elf_objects #Get all ELF objects loaded (Linux)
 proj.loader.all_pe_objects #Get all binaries loaded (Windows)
 proj.loader.find_object_containing(0x400000)#Get object loaded in an address "<ELF Object fauxware, maps [0x400000:0x60105f]>"
 ```
-
-## Main Object
-
+## メインオブジェクト
 ```python
 #Main Object (main binary loaded)
 obj = proj.loader.main_object #<ELF Object true, maps [0x400000:0x60721f]>
@@ -74,9 +67,7 @@ obj.find_section_containing(obj.entry) #Get section by address
 obj.plt['strcmp'] #Get plt address of a funcion (0x400550)
 obj.reverse_plt[0x400550] #Get function from plt address ('strcmp')
 ```
-
-## Symbols and Relocations
-
+## シンボルと再配置
 ```python
 strcmp = proj.loader.find_symbol('strcmp') #<Symbol "strcmp" in libc.so.6 at 0x1089cd0>
 
@@ -93,9 +84,7 @@ main_strcmp.is_export #False
 main_strcmp.is_import #True
 main_strcmp.resolvedby #<Symbol "strcmp" in libc.so.6 at 0x1089cd0>
 ```
-
-## Blocks
-
+## ブロック
 ```python
 #Blocks
 block = proj.factory.block(proj.entry) #Get the block of the entrypoint fo the binary
@@ -103,11 +92,9 @@ block.pp() #Print disassembly of the block
 block.instructions #"0xb" Get number of instructions
 block.instruction_addrs #Get instructions addresses "[0x401670, 0x401672, 0x401675, 0x401676, 0x401679, 0x40167d, 0x40167e, 0x40167f, 0x401686, 0x40168d, 0x401694]"
 ```
+# 動的解析
 
-# Dynamic Analysis
-
-## Simulation Manager, States
-
+## シミュレーションマネージャー、状態
 ```python
 #Live States
 #This is useful to modify content in a live analysis
@@ -130,15 +117,13 @@ simgr = proj.factory.simulation_manager(state) #Start
 simgr.step() #Execute one step
 simgr.active[0].regs.rip #Get RIP from the last state
 ```
+## 関数の呼び出し
 
-## Calling functions
+- `entry_state` と `full_init_state` に `args` を通じて引数のリストを渡し、`env` を通じて環境変数の辞書を渡すことができます。これらの構造内の値は文字列またはビットベクタであり、シミュレーションされた実行の引数と環境として状態にシリアライズされます。デフォルトの `args` は空のリストなので、分析しているプログラムが少なくとも `argv[0]` を見つけることを期待している場合は、常にそれを提供する必要があります！
+- `argc` をシンボリックにしたい場合は、`entry_state` と `full_init_state` コンストラクタにシンボリックビットベクタを `argc` として渡すことができます。ただし、注意が必要です：これを行う場合、`argc` の値が `args` に渡した引数の数より大きくならないように、結果の状態に制約を追加する必要があります。
+- コールステートを使用するには、`.call_state(addr, arg1, arg2, ...)` で呼び出す必要があります。ここで `addr` は呼び出したい関数のアドレスで、`argN` はその関数への N 番目の引数であり、Python の整数、文字列、配列、またはビットベクタのいずれかです。メモリを割り当ててオブジェクトへのポインタを実際に渡したい場合は、`PointerWrapper` でラップする必要があります。つまり、`angr.PointerWrapper("point to me!")` のようにします。この API の結果は少し予測不可能ですが、改善に取り組んでいます。
 
-- You can pass a list of arguments through `args` and a dictionary of environment variables through `env` into `entry_state` and `full_init_state`. The values in these structures can be strings or bitvectors, and will be serialized into the state as the arguments and environment to the simulated execution. The default `args` is an empty list, so if the program you're analyzing expects to find at least an `argv[0]`, you should always provide that!
-- If you'd like to have `argc` be symbolic, you can pass a symbolic bitvector as `argc` to the `entry_state` and `full_init_state` constructors. Be careful, though: if you do this, you should also add a constraint to the resulting state that your value for argc cannot be larger than the number of args you passed into `args`.
-- To use the call state, you should call it with `.call_state(addr, arg1, arg2, ...)`, where `addr` is the address of the function you want to call and `argN` is the Nth argument to that function, either as a python integer, string, or array, or a bitvector. If you want to have memory allocated and actually pass in a pointer to an object, you should wrap it in an PointerWrapper, i.e. `angr.PointerWrapper("point to me!")`. The results of this API can be a little unpredictable, but we're working on it.
-
-## BitVectors
-
+## ビットベクタ
 ```python
 #BitVectors
 state = proj.factory.entry_state()
@@ -147,9 +132,7 @@ state.solver.eval(bv) #Convert BV to python int
 bv.zero_extend(30) #Will add 30 zeros on the left of the bitvector
 bv.sign_extend(30) #Will add 30 zeros or ones on the left of the BV extending the sign
 ```
-
-## Symbolic BitVectors & Constraints
-
+## シンボリックビットベクターと制約
 ```python
 x = state.solver.BVS("x", 64) #Symbolic variable BV of length 64
 y = state.solver.BVS("y", 64)
@@ -183,9 +166,7 @@ solver.eval_exact(expression, n) #n solutions to the given expression, throwing 
 solver.min(expression) #minimum possible solution to the given expression.
 solver.max(expression) #maximum possible solution to the given expression.
 ```
-
-## Hooking
-
+## フック
 ```python
 >>> stub_func = angr.SIM_PROCEDURES['stubs']['ReturnUnconstrained'] # this is a CLASS
 >>> proj.hook(0x10000, stub_func())  # hook with an instance of the class
@@ -203,10 +184,8 @@ True
 >>> proj.is_hooked(0x20000)
 True
 ```
+さらに、`proj.hook_symbol(name, hook)`を使用して、最初の引数としてシンボルの名前を提供することで、シンボルが存在するアドレスをフックできます。
 
-Furthermore, you can use `proj.hook_symbol(name, hook)`, providing the name of a symbol as the first argument, to hook the address where the symbol lives
-
-# Examples
+# 例
 
 {{#include ../../../banners/hacktricks-training.md}}
-

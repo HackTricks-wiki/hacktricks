@@ -1,53 +1,52 @@
-# Hardware Hacking
+# ハードウェアハッキング
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## JTAG
 
-JTAG allows to perform a boundary scan. The boundary scan analyzes certain circuitry, including embedded boundary-scan cells and registers for each pin.
+JTAGは境界スキャンを実行することを可能にします。境界スキャンは、埋め込まれた境界スキャンセルや各ピンのレジスタを含む特定の回路を分析します。
 
-The JTAG standard defines **specific commands for conducting boundary scans**, including the following:
+JTAG標準は、以下を含む**境界スキャンを実施するための特定のコマンド**を定義しています：
 
-- **BYPASS** allows you to test a specific chip without the overhead of passing through other chips.
-- **SAMPLE/PRELOAD** takes a sample of the data entering and leaving the device when it’s in its normal functioning mode.
-- **EXTEST** sets and reads pin states.
+- **BYPASS**は、他のチップを通過するオーバーヘッドなしで特定のチップをテストすることを可能にします。
+- **SAMPLE/PRELOAD**は、デバイスが通常の動作モードにあるときに出入りするデータのサンプルを取得します。
+- **EXTEST**は、ピンの状態を設定および読み取ります。
 
-It can also support other commands such as:
+他にも以下のようなコマンドをサポートすることができます：
 
-- **IDCODE** for identifying a device
-- **INTEST** for the internal testing of the device
+- **IDCODE**はデバイスを識別するためのもの
+- **INTEST**はデバイスの内部テスト用
 
-You might come across these instructions when you use a tool like the JTAGulator.
+JTAGulatorのようなツールを使用すると、これらの命令に出くわすことがあります。
 
-### The Test Access Port
+### テストアクセスポート
 
-Boundary scans include tests of the four-wire **Test Access Port (TAP)**, a general-purpose port that provides **access to the JTAG test support** functions built into a component. TAP uses the following five signals:
+境界スキャンには、一般的なポートである**テストアクセスポート（TAP）**の4線テストが含まれ、コンポーネントに組み込まれた**JTAGテストサポート**機能へのアクセスを提供します。TAPは以下の5つの信号を使用します：
 
-- Test clock input (**TCK**) The TCK is the **clock** that defines how often the TAP controller will take a single action (in other words, jump to the next state in the state machine).
-- Test mode select (**TMS**) input TMS controls the **finite state machine**. On each beat of the clock, the device’s JTAG TAP controller checks the voltage on the TMS pin. If the voltage is below a certain threshold, the signal is considered low and interpreted as 0, whereas if the voltage is above a certain threshold, the signal is considered high and interpreted as 1.
-- Test data input (**TDI**) TDI is the pin that sends **data into the chip through the scan cells**. Each vendor is responsible for defining the communication protocol over this pin, because JTAG doesn’t define this.
-- Test data output (**TDO**) TDO is the pin that sends **data out of the chip**.
-- Test reset (**TRST**) input The optional TRST resets the finite state machine **to a known good state**. Alternatively, if the TMS is held at 1 for five consecutive clock cycles, it invokes a reset, the same way the TRST pin would, which is why TRST is optional.
+- テストクロック入力（**TCK**） TCKは、TAPコントローラーが単一のアクションを実行する頻度を定義する**クロック**です（言い換えれば、状態機械の次の状態にジャンプします）。
+- テストモード選択（**TMS**）入力 TMSは**有限状態機械**を制御します。クロックの各ビートで、デバイスのJTAG TAPコントローラーはTMSピンの電圧をチェックします。電圧が特定の閾値を下回ると、信号は低と見なされ0として解釈され、電圧が特定の閾値を上回ると、信号は高と見なされ1として解釈されます。
+- テストデータ入力（**TDI**） TDIは、**スキャンセルを通じてチップにデータを送信する**ピンです。JTAGはこのピンを介した通信プロトコルを定義していないため、各ベンダーがこのプロトコルを定義する責任があります。
+- テストデータ出力（**TDO**） TDOは、**チップからデータを送信する**ピンです。
+- テストリセット（**TRST**）入力 オプションのTRSTは、有限状態機械を**既知の良好な状態にリセット**します。代わりに、TMSが5回連続して1に保持されると、TRSTピンと同様にリセットが呼び出されるため、TRSTはオプションです。
 
-Sometimes you will be able to find those pins marked in the PCB. In other occasions you might need to **find them**.
+時には、PCBにマークされたこれらのピンを見つけることができるでしょう。他の場合には、**それらを見つける**必要があるかもしれません。
 
-### Identifying JTAG pins
+### JTAGピンの特定
 
-The fastest but most expensive way to detect JTAG ports is by using the **JTAGulator**, a device created specifically for this purpose (although it can **also detect UART pinouts**).
+JTAGポートを検出する最も速いが最も高価な方法は、**JTAGulator**を使用することです。このデバイスはこの目的のために特別に作成されました（ただし、**UARTピンアウトも検出できます**）。
 
-It has **24 channels** you can connect to the boards pins. Then it performs a **BF attack** of all the possible combinations sending **IDCODE** and **BYPASS** boundary scan commands. If it receives a response, it displays the channel corresponding to each JTAG signal
+それは、ボードのピンに接続できる**24チャンネル**を持っています。次に、すべての可能な組み合わせの**BF攻撃**を実行し、**IDCODE**および**BYPASS**境界スキャンコマンドを送信します。応答を受け取ると、各JTAG信号に対応するチャンネルを表示します。
 
-A cheaper but much slower way of identifying JTAG pinouts is by using the [**JTAGenum**](https://github.com/cyphunk/JTAGenum/) loaded on an Arduino-compatible microcontroller.
+より安価ですが、はるかに遅いJTAGピンアウトを特定する方法は、Arduino互換のマイクロコントローラーにロードされた[**JTAGenum**](https://github.com/cyphunk/JTAGenum/)を使用することです。
 
-Using **JTAGenum**, you’d first **define the pins of the probing** device that you’ll use for the enumeration.You’d have to reference the device’s pinout diagram, and then connect these pins with the test points on your target device.
+**JTAGenum**を使用する場合、最初に列挙に使用するプロービングデバイスのピンを**定義**します。デバイスのピンアウト図を参照し、これらのピンをターゲットデバイスのテストポイントに接続する必要があります。
 
-A **third way** to identify JTAG pins is by **inspecting the PCB** for one of the pinouts. In some cases, PCBs might conveniently provide the **Tag-Connect interface**, which is a clear indication that the board has a JTAG connector, too. You can see what that interface looks like at [https://www.tag-connect.com/info/](https://www.tag-connect.com/info/). Additionally, inspecting the **datasheets of the chipsets on the PCB** might reveal pinout diagrams that point to JTAG interfaces.
+JTAGピンを特定する**第三の方法**は、**PCBを検査**してピンアウトの1つを探すことです。場合によっては、PCBが便利に**Tag-Connectインターフェース**を提供していることがあり、これはボードにJTAGコネクタがある明確な指標です。そのインターフェースがどのように見えるかは[https://www.tag-connect.com/info/](https://www.tag-connect.com/info/)で確認できます。さらに、PCB上のチップセットの**データシートを検査**することで、JTAGインターフェースを指し示すピンアウト図が明らかになるかもしれません。
 
 ## SDW
 
-SWD is an ARM-specific protocol designed for debugging.
+SWDはデバッグ用に設計されたARM特有のプロトコルです。
 
-The SWD interface requires **two pins**: a bidirectional **SWDIO** signal, which is the equivalent of JTAG’s **TDI and TDO pins and a clock**, and **SWCLK**, which is the equivalent of **TCK** in JTAG. Many devices support the **Serial Wire or JTAG Debug Port (SWJ-DP)**, a combined JTAG and SWD interface that enables you to connect either a SWD or JTAG probe to the target.
+SWDインターフェースは**2つのピン**を必要とします：双方向の**SWDIO**信号、これはJTAGの**TDIおよびTDOピン**とクロックに相当し、**SWCLK**はJTAGの**TCK**に相当します。多くのデバイスは、ターゲットにSWDまたはJTAGプローブを接続できる**シリアルワイヤまたはJTAGデバッグポート（SWJ-DP）**をサポートしています。
 
 {{#include ../../banners/hacktricks-training.md}}
-

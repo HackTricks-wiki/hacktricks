@@ -1,21 +1,20 @@
-# Diamond Ticket
+# ダイヤモンドチケット
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Diamond Ticket
+## ダイヤモンドチケット
 
-**Like a golden ticket**, a diamond ticket is a TGT which can be used to **access any service as any user**. A golden ticket is forged completely offline, encrypted with the krbtgt hash of that domain, and then passed into a logon session for use. Because domain controllers don't track TGTs it (or they) have legitimately issued, they will happily accept TGTs that are encrypted with its own krbtgt hash.
+**ゴールデンチケットのように**、ダイヤモンドチケットは**任意のユーザーとして任意のサービスにアクセスするために使用できるTGT**です。ゴールデンチケットは完全にオフラインで作成され、そのドメインのkrbtgtハッシュで暗号化され、ログオンセッションに渡されて使用されます。ドメインコントローラーは、正当に発行されたTGTを追跡しないため、自身のkrbtgtハッシュで暗号化されたTGTを喜んで受け入れます。
 
-There are two common techniques to detect the use of golden tickets:
+ゴールデンチケットの使用を検出するための一般的な2つの技術があります：
 
-- Look for TGS-REQs that have no corresponding AS-REQ.
-- Look for TGTs that have silly values, such as Mimikatz's default 10-year lifetime.
+- 対応するAS-REQがないTGS-REQを探す。
+- Mimikatzのデフォルトの10年の有効期限のような、ばかげた値を持つTGTを探す。
 
-A **diamond ticket** is made by **modifying the fields of a legitimate TGT that was issued by a DC**. This is achieved by **requesting** a **TGT**, **decrypting** it with the domain's krbtgt hash, **modifying** the desired fields of the ticket, then **re-encrypting it**. This **overcomes the two aforementioned shortcomings** of a golden ticket because:
+**ダイヤモンドチケット**は、**DCによって発行された正当なTGTのフィールドを変更することによって作成されます**。これは、**TGTを要求し**、ドメインのkrbtgtハッシュで**復号化し**、チケットの希望するフィールドを**変更し**、その後**再暗号化する**ことによって達成されます。これは、ゴールデンチケットの前述の2つの欠点を**克服します**：
 
-- TGS-REQs will have a preceding AS-REQ.
-- The TGT was issued by a DC which means it will have all the correct details from the domain's Kerberos policy. Even though these can be accurately forged in a golden ticket, it's more complex and open to mistakes.
-
+- TGS-REQには前にAS-REQがあります。
+- TGTはDCによって発行されたため、ドメインのKerberosポリシーからのすべての正しい詳細を持っています。これらはゴールデンチケットで正確に偽造することができますが、より複雑でミスが起こりやすいです。
 ```bash
 # Get user RID
 powershell Get-DomainUser -Identity <username> -Properties objectsid
@@ -28,6 +27,4 @@ powershell Get-DomainUser -Identity <username> -Properties objectsid
 # /groups are the desired group RIDs (512 being Domain Admins).
 # /krbkey is the krbtgt AES256 hash.
 ```
-
 {{#include ../../banners/hacktricks-training.md}}
-

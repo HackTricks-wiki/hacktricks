@@ -1,57 +1,52 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-There are several blogs in the Internet which **highlight the dangers of leaving printers configured with LDAP with default/weak** logon credentials.\
-This is because an attacker could **trick the printer to authenticate against a rouge LDAP server** (typically a `nc -vv -l -p 444` is enough) and to capture the printer **credentials on clear-text**.
+インターネット上には、**デフォルト/弱い**ログイン資格情報でLDAPが設定されたプリンターの危険性を**強調する**ブログがいくつかあります。\
+これは、攻撃者がプリンターを**不正なLDAPサーバーに対して認証させる**ことができるためです（通常、`nc -vv -l -p 444`で十分です）し、プリンターの**資格情報を平文でキャプチャ**することができます。
 
-Also, several printers will contains **logs with usernames** or could even be able to **download all usernames** from the Domain Controller.
+また、いくつかのプリンターには**ユーザー名を含むログ**があり、ドメインコントローラーから**すべてのユーザー名をダウンロード**できる場合もあります。
 
-All this **sensitive information** and the common **lack of security** makes printers very interesting for attackers.
+これらの**機密情報**と一般的な**セキュリティの欠如**は、攻撃者にとってプリンターを非常に興味深いものにします。
 
-Some blogs about the topic:
+このトピックに関するいくつかのブログ：
 
 - [https://www.ceos3c.com/hacking/obtaining-domain-credentials-printer-netcat/](https://www.ceos3c.com/hacking/obtaining-domain-credentials-printer-netcat/)
 - [https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)
 
-## Printer Configuration
+## プリンター設定
 
-- **Location**: The LDAP server list is found at: `Network > LDAP Setting > Setting Up LDAP`.
-- **Behavior**: The interface allows LDAP server modifications without re-entering credentials, aiming for user convenience but posing security risks.
-- **Exploit**: The exploit involves redirecting the LDAP server address to a controlled machine and leveraging the "Test Connection" feature to capture credentials.
+- **場所**: LDAPサーバーのリストは、`Network > LDAP Setting > Setting Up LDAP`にあります。
+- **動作**: インターフェースは、資格情報を再入力せずにLDAPサーバーの変更を許可し、ユーザーの利便性を目指していますが、セキュリティリスクを引き起こします。
+- **エクスプロイト**: エクスプロイトは、LDAPサーバーのアドレスを制御されたマシンにリダイレクトし、「接続テスト」機能を利用して資格情報をキャプチャすることを含みます。
 
-## Capturing Credentials
+## 資格情報のキャプチャ
 
-**For more detailed steps, refer to the original [source](https://grimhacker.com/2018/03/09/just-a-printer/).**
+**詳細な手順については、元の[ソース](https://grimhacker.com/2018/03/09/just-a-printer/)を参照してください。**
 
-### Method 1: Netcat Listener
+### 方法1: Netcatリスナー
 
-A simple netcat listener might suffice:
-
+シンプルなnetcatリスナーで十分かもしれません：
 ```bash
 sudo nc -k -v -l -p 386
 ```
+しかし、この方法の成功は異なります。
 
-However, this method's success varies.
+### 方法 2: Slapd を使用したフル LDAP サーバー
 
-### Method 2: Full LDAP Server with Slapd
+より信頼性の高いアプローチは、フル LDAP サーバーを設定することです。なぜなら、プリンターは資格情報バインディングを試みる前に、ヌルバインドを実行し、その後クエリを行うからです。
 
-A more reliable approach involves setting up a full LDAP server because the printer performs a null bind followed by a query before attempting credential binding.
-
-1. **LDAP Server Setup**: The guide follows steps from [this source](https://www.server-world.info/en/note?os=Fedora_26&p=openldap).
-2. **Key Steps**:
-   - Install OpenLDAP.
-   - Configure admin password.
-   - Import basic schemas.
-   - Set domain name on LDAP DB.
-   - Configure LDAP TLS.
-3. **LDAP Service Execution**: Once set up, the LDAP service can be run using:
-
+1. **LDAP サーバーのセットアップ**: ガイドは [このソース](https://www.server-world.info/en/note?os=Fedora_26&p=openldap) の手順に従います。
+2. **重要なステップ**:
+- OpenLDAP をインストールします。
+- 管理者パスワードを設定します。
+- 基本スキーマをインポートします。
+- LDAP DB にドメイン名を設定します。
+- LDAP TLS を構成します。
+3. **LDAP サービスの実行**: セットアップが完了したら、LDAP サービスは次のように実行できます:
 ```bash
 slapd -d 2
 ```
-
-## References
+## 参考文献
 
 - [https://grimhacker.com/2018/03/09/just-a-printer/](https://grimhacker.com/2018/03/09/just-a-printer/)
 
 {{#include ../../banners/hacktricks-training.md}}
-

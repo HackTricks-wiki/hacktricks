@@ -1,17 +1,16 @@
-# Low-Power Wide Area Network
+# 低電力広域ネットワーク
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Introduction
+## はじめに
 
-**Low-Power Wide Area Network** (LPWAN) is a group of wireless, low-power, wide area network technologies designed for **long-range communications** at a low bit rate.\
-They can reach more than **six miles** and their **batteries** can last up to **20 years**.
+**低電力広域ネットワーク** (LPWAN) は、**長距離通信**のために設計された無線の低電力広域ネットワーク技術のグループです。\
+これらは**6マイル**以上の距離に到達でき、**バッテリー**は最大で**20年**持続します。
 
-Long Range (**LoRa**) it’s popular in multiple countries and has an open source specification called **LoRaWAN**.
+ロングレンジ (**LoRa**) は複数の国で人気があり、**LoRaWAN**というオープンソースの仕様があります。
 
-### LPWAN, LoRa, and LoRaWAN
+### LPWAN、LoRa、およびLoRaWAN
 
 [https://github.com/IOActive/laf](https://github.com/IOActive/laf)
 
 {{#include ../banners/hacktricks-training.md}}
-

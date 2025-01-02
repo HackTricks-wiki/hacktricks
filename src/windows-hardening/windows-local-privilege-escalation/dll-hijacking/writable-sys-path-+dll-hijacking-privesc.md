@@ -4,11 +4,11 @@
 
 ## Introduction
 
-If you found that you can **write in a System Path folder** (note that this won't work if you can write in a User Path folder) it's possible that you could **escalate privileges** in the system.
+もしあなたが**システムパスフォルダーに書き込むことができる**ことを発見した場合（ユーザーパスフォルダーに書き込むことができる場合は機能しないことに注意）、システム内で**特権を昇格させる**ことができる可能性があります。
 
-In order to do that you can abuse a **Dll Hijacking** where you are going to **hijack a library being loaded** by a service or process with **more privileges** than yours, and because that service is loading a Dll that probably doesn't even exist in the entire system, it's going to try to load it from the System Path where you can write.
+そのためには、**Dll Hijacking**を悪用することができ、あなたよりも**より多くの特権**を持つサービスやプロセスによって**読み込まれるライブラリをハイジャック**することになります。そして、そのサービスがおそらくシステム全体に存在しないDllを読み込もうとしているため、あなたが書き込むことができるシステムパスからそれを読み込もうとします。
 
-For more info about **what is Dll Hijackig** check:
+**Dll Hijackingとは何か**についての詳細は、以下を確認してください：
 
 {{#ref}}
 ./
@@ -16,70 +16,67 @@ For more info about **what is Dll Hijackig** check:
 
 ## Privesc with Dll Hijacking
 
-### Finding a missing Dll
+### 欠落しているDllの特定
 
-The first thing you need is to **identify a process** running with **more privileges** than you that is trying to **load a Dll from the System Path** you can write in.
+最初に必要なのは、**あなたよりも多くの特権**を持つプロセスを**特定する**ことで、そのプロセスがあなたが書き込むことができるシステムパスから**Dllを読み込もうとしている**必要があります。
 
-The problem in this cases is that probably thoses processes are already running. To find which Dlls are lacking the services you need to launch procmon as soon as possible (before processes are loaded). So, to find lacking .dlls do:
+この場合の問題は、おそらくそれらのプロセスがすでに実行中であることです。どのDllがサービスに欠けているかを見つけるために、プロセスが読み込まれる前にできるだけ早くprocmonを起動する必要があります。したがって、欠落している.dllを見つけるために、次のことを行います：
 
-- **Create** the folder `C:\privesc_hijacking` and add the path `C:\privesc_hijacking` to **System Path env variable**. You can do this **manually** or with **PS**:
-
+- **フォルダー** `C:\privesc_hijacking` を作成し、**システムパス環境変数**にパス `C:\privesc_hijacking` を追加します。これを**手動**または**PS**で行うことができます：
 ```powershell
 # Set the folder path to create and check events for
 $folderPath = "C:\privesc_hijacking"
 
 # Create the folder if it does not exist
 if (!(Test-Path $folderPath -PathType Container)) {
-    New-Item -ItemType Directory -Path $folderPath | Out-Null
+New-Item -ItemType Directory -Path $folderPath | Out-Null
 }
 
 # Set the folder path in the System environment variable PATH
 $envPath = [Environment]::GetEnvironmentVariable("PATH", "Machine")
 if ($envPath -notlike "*$folderPath*") {
-    $newPath = "$envPath;$folderPath"
-    [Environment]::SetEnvironmentVariable("PATH", $newPath, "Machine")
+$newPath = "$envPath;$folderPath"
+[Environment]::SetEnvironmentVariable("PATH", $newPath, "Machine")
 }
 ```
-
-- Launch **`procmon`** and go to **`Options`** --> **`Enable boot logging`** and press **`OK`** in the prompt.
-- Then, **reboot**. When the computer is restarted **`procmon`** will start **recording** events asap.
-- Once **Windows** is **started execute `procmon`** again, it'll tell you that it has been running and will **ask you if you want to store** the events in a file. Say **yes** and **store the events in a file**.
-- **After** the **file** is **generated**, **close** the opened **`procmon`** window and **open the events file**.
-- Add these **filters** and you will find all the Dlls that some **proccess tried to load** from the writable System Path folder:
+- **`procmon`** を起動し、**`Options`** --> **`Enable boot logging`** に移動し、プロンプトで **`OK`** を押します。
+- その後、**再起動**します。コンピュータが再起動すると、**`procmon`** はすぐにイベントの **記録**を開始します。
+- **Windows** が **起動したら `procmon`** を再度実行します。実行中であることが表示され、イベントをファイルに保存するかどうか尋ねられます。**はい**と答え、**イベントをファイルに保存**します。
+- **ファイル**が **生成されたら**、開いている **`procmon`** ウィンドウを **閉じ**、**イベントファイル**を **開き**ます。
+- これらの **フィルター**を追加すると、書き込み可能なシステムパスフォルダーからいくつかの **プロセスが読み込もうとした**すべてのDllが見つかります：
 
 <figure><img src="../../../images/image (945).png" alt=""><figcaption></figcaption></figure>
 
-### Missed Dlls
+### 見逃したDlls
 
-Running this in a free **virtual (vmware) Windows 11 machine** I got these results:
+無料の **仮想（vmware）Windows 11マシン**でこれを実行したところ、次の結果が得られました：
 
 <figure><img src="../../../images/image (607).png" alt=""><figcaption></figcaption></figure>
 
-In this case the .exe are useless so ignore them, the missed DLLs where from:
+この場合、.exeは無駄なので無視してください。見逃したDLLは次のものでした：
 
-| Service                         | Dll                | CMD line                                                             |
-| ------------------------------- | ------------------ | -------------------------------------------------------------------- |
-| Task Scheduler (Schedule)       | WptsExtensions.dll | `C:\Windows\system32\svchost.exe -k netsvcs -p -s Schedule`          |
-| Diagnostic Policy Service (DPS) | Unknown.DLL        | `C:\Windows\System32\svchost.exe -k LocalServiceNoNetwork -p -s DPS` |
-| ???                             | SharedRes.dll      | `C:\Windows\system32\svchost.exe -k UnistackSvcGroup`                |
+| サービス                           | Dll                | CMDライン                                                             |
+| ---------------------------------- | ------------------ | -------------------------------------------------------------------- |
+| タスクスケジューラ (Schedule)     | WptsExtensions.dll | `C:\Windows\system32\svchost.exe -k netsvcs -p -s Schedule`          |
+| 診断ポリシーサービス (DPS)        | Unknown.DLL        | `C:\Windows\System32\svchost.exe -k LocalServiceNoNetwork -p -s DPS` |
+| ???                                | SharedRes.dll      | `C:\Windows\system32\svchost.exe -k UnistackSvcGroup`                |
 
-After finding this, I found this interesting blog post that also explains how to [**abuse WptsExtensions.dll for privesc**](https://juggernaut-sec.com/dll-hijacking/#Windows_10_Phantom_DLL_Hijacking_-_WptsExtensionsdll). Which is what we **are going to do now**.
+これを見つけた後、[**WptsExtensions.dllを悪用する方法**](https://juggernaut-sec.com/dll-hijacking/#Windows_10_Phantom_DLL_Hijacking_-_WptsExtensionsdll)を説明している興味深いブログ記事を見つけました。これが今から **行うこと**です。
 
-### Exploitation
+### 悪用
 
-So, to **escalate privileges** we are going to hijack the library **WptsExtensions.dll**. Having the **path** and the **name** we just need to **generate the malicious dll**.
+したがって、**特権を昇格**させるために、ライブラリ **WptsExtensions.dll** をハイジャックします。**パス**と**名前**がわかれば、悪意のあるdllを**生成**するだけです。
 
-You can [**try to use any of these examples**](./#creating-and-compiling-dlls). You could run payloads such as: get a rev shell, add a user, execute a beacon...
+[**これらの例のいずれかを使用してみることができます**](./#creating-and-compiling-dlls)。リバースシェルを取得したり、ユーザーを追加したり、ビーコンを実行したりするペイロードを実行できます...
 
 > [!WARNING]
-> Note that **not all the service are run** with **`NT AUTHORITY\SYSTEM`** some are also run with **`NT AUTHORITY\LOCAL SERVICE`** which has **less privileges** and you **won't be able to create a new user** abuse its permissions.\
-> However, that user has the **`seImpersonate`** privilege, so you can use the[ **potato suite to escalate privileges**](../roguepotato-and-printspoofer.md). So, in this case a rev shell is a better option that trying to create a user.
+> すべてのサービスが **`NT AUTHORITY\SYSTEM`** で実行されているわけではなく、一部は **`NT AUTHORITY\LOCAL SERVICE`** で実行されており、**権限が少ない**ため、新しいユーザーを作成することはできません。\
+> ただし、そのユーザーには **`seImpersonate`** 権限があるため、[**ポテトスイートを使用して特権を昇格**](../roguepotato-and-printspoofer.md)できます。この場合、リバースシェルはユーザーを作成しようとするよりも良い選択です。
 
-At the moment of writing the **Task Scheduler** service is run with **Nt AUTHORITY\SYSTEM**.
+執筆時点で、**タスクスケジューラ**サービスは **Nt AUTHORITY\SYSTEM** で実行されています。
 
-Having **generated the malicious Dll** (_in my case I used x64 rev shell and I got a shell back but defender killed it because it was from msfvenom_), save it in the writable System Path with the name **WptsExtensions.dll** and **restart** the computer (or restart the service or do whatever it takes to rerun the affected service/program).
+**悪意のあるDllを生成した後**（私の場合はx64リバースシェルを使用し、シェルを取得しましたが、defenderがmsfvenomからのものであるため、それを殺しました）、書き込み可能なシステムパスに **WptsExtensions.dll** という名前で保存し、コンピュータを **再起動**します（またはサービスを再起動するか、影響を受けたサービス/プログラムを再実行するために必要なことを行います）。
 
-When the service is re-started, the **dll should be loaded and executed** (you can **reuse** the **procmon** trick to check if the **library was loaded as expected**).
+サービスが再起動されると、**dllが読み込まれ、実行されるはずです**（**procmon**トリックを再利用して、**ライブラリが期待通りに読み込まれたかどうかを確認できます）。
 
 {{#include ../../../banners/hacktricks-training.md}}
-

@@ -1,10 +1,9 @@
-# Named Pipe Client Impersonation
+# 名前付きパイプクライアントの偽装
 
-## Named Pipe Client Impersonation
-
-{{#include ../../banners/hacktricks-training.md}}
-
-Check: [**https://ired.team/offensive-security/privilege-escalation/windows-namedpipes-privilege-escalation**](https://ired.team/offensive-security/privilege-escalation/windows-namedpipes-privilege-escalation)
+## 名前付きパイプクライアントの偽装
 
 {{#include ../../banners/hacktricks-training.md}}
 
+チェック: [**https://ired.team/offensive-security/privilege-escalation/windows-namedpipes-privilege-escalation**](https://ired.team/offensive-security/privilege-escalation/windows-namedpipes-privilege-escalation)
+
+{{#include ../../banners/hacktricks-training.md}}

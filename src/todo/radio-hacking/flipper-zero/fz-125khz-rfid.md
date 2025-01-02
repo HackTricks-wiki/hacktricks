@@ -6,51 +6,51 @@
 
 {% embed url="https://websec.nl/" %}
 
-## Intro
+## はじめに
 
-For more info about how 125kHz tags work check:
+125kHzタグの動作についての詳細は、以下を確認してください：
 
 {{#ref}}
 ../pentesting-rfid.md
 {{#endref}}
 
-## Actions
+## アクション
 
-For more info about these types of tags [**read this intro**](../pentesting-rfid.md#low-frequency-rfid-tags-125khz).
+これらのタイプのタグについての詳細は、[**このイントロを読む**](../pentesting-rfid.md#low-frequency-rfid-tags-125khz)で確認できます。
 
-### Read
+### 読み取り
 
-Tries to **read** the card info. Then it can **emulate** them.
+カード情報を**読み取る**ことを試みます。その後、**エミュレート**できます。
 
 > [!WARNING]
-> Note that some intercoms try to protect themselves from key duplication by sending a write command prior to reading. If the write succeeds, that tag is considered fake. When Flipper emulates RFID there is no way for the reader to distinguish it from the original one, so no such problems occur.
+> 一部のインターホンは、読み取り前に書き込みコマンドを送信することでキーの複製から自分自身を保護しようとします。書き込みが成功すると、そのタグは偽物と見なされます。FlipperがRFIDをエミュレートする際、リーダーは元のものと区別する方法がないため、そのような問題は発生しません。
 
-### Add Manually
+### 手動で追加
 
-You can create **fake cards in Flipper Zero indicating the data** you manually and then emulate it.
+**手動でデータを指定してFlipper Zeroに偽カードを作成**し、その後エミュレートできます。
 
-#### IDs on cards
+#### カードのID
 
-Some times, when you get a card you will find the ID (or part) of it written in the card visible.
+カードを取得すると、ID（またはその一部）がカードに表示されていることがあります。
 
 - **EM Marin**
 
-For example in this EM-Marin card in the physical card is possible to **read the last 3 of 5 bytes in clear**.\
-The other 2 can be brute-forced if you cannot read them from the card.
+例えば、このEM-Marinカードでは、物理カードの最後の3バイトのうちの5バイトを**クリアで読み取る**ことが可能です。\
+他の2バイトは、カードから読み取れない場合はブルートフォースで解読できます。
 
 <figure><img src="../../../images/image (104).png" alt=""><figcaption></figcaption></figure>
 
 - **HID**
 
-Same happens in this HID card where only 2 out of 3 bytes can be found printed in the card
+このHIDカードでも同様に、3バイトのうちの2バイトのみがカードに印刷されています。
 
 <figure><img src="../../../images/image (1014).png" alt=""><figcaption></figcaption></figure>
 
-### Emulate/Write
+### エミュレート/書き込み
 
-After **copying** a card or **entering** the ID **manually** it's possible to **emulate** it with Flipper Zero or **write** it in a real card.
+カードを**コピー**したり、IDを**手動で入力**した後、Flipper Zeroで**エミュレート**したり、実際のカードに**書き込む**ことが可能です。
 
-## References
+## 参考文献
 
 - [https://blog.flipperzero.one/rfid/](https://blog.flipperzero.one/rfid/)
 
@@ -59,4 +59,3 @@ After **copying** a card or **entering** the ID **manually** it's possible to **
 {% embed url="https://websec.nl/" %}
 
 {{#include ../../../banners/hacktricks-training.md}}
-

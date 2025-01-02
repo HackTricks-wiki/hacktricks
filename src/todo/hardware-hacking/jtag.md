@@ -4,24 +4,23 @@
 
 ## JTAGenum
 
-[**JTAGenum** ](https://github.com/cyphunk/JTAGenum)is a tool can be used with a Raspberry PI or an Arduino to find to try JTAG pins from an unknown chip.\
-In the **Arduino**, connect the **pins from 2 to 11 to 10pins potentially belonging to a JTAG**. Load the program in the Arduino and it will try to bruteforce all the pins to find if any pins belongs to JTAG and which one is each.\
-In the **Raspberry PI** you can only use **pins from 1 to 6** (6pins, so you will go slower testing each potential JTAG pin).
+[**JTAGenum** ](https://github.com/cyphunk/JTAGenum)は、Raspberry PIまたはArduinoを使用して、未知のチップからJTAGピンを見つけるために使用できるツールです。\
+**Arduino**では、**2から11のピンをJTAGに属する可能性のある10ピンに接続**します。プログラムをArduinoにロードすると、すべてのピンをブルートフォースして、JTAGに属するピンがあるかどうか、どのピンがそれに該当するかを確認します。\
+**Raspberry PI**では、**1から6のピンのみを使用**できます（6ピンなので、各潜在的なJTAGピンをテストするのが遅くなります）。
 
 ### Arduino
 
-In Arduino, after connecting the cables (pin 2 to 11 to JTAG pins and Arduino GND to the baseboard GND), **load the JTAGenum program in Arduino** and in the Serial Monitor send a **`h`** (command for help) and you should see the help:
+Arduinoでは、ケーブルを接続した後（ピン2から11をJTAGピンに、Arduino GNDをベースボードGNDに接続）、**ArduinoにJTAGenumプログラムをロード**し、シリアルモニターで**`h`**（ヘルプコマンド）を送信すると、ヘルプが表示されます：
 
 ![](<../../images/image (939).png>)
 
 ![](<../../images/image (578).png>)
 
-Configure **"No line ending" and 115200baud**.\
-Send the command s to start scanning:
+**「No line ending」と115200baudを設定**します。\
+スキャンを開始するためにコマンドsを送信します：
 
 ![](<../../images/image (774).png>)
 
-If you are contacting a JTAG, you will find one or several **lines starting by FOUND!** indicating the pins of JTAG.
+JTAGに接続している場合、**FOUND!**で始まる1つまたは複数の**行が表示され、JTAGのピンを示します**。
 
 {{#include ../../banners/hacktricks-training.md}}
-

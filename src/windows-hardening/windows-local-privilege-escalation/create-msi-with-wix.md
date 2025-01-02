@@ -1,13 +1,12 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-# Creating Malicious MSI and Getting Root
+# 悪意のあるMSIの作成とルートの取得
 
-The creation of the MSI installer will be done using wixtools, specifically [wixtools](http://wixtoolset.org) will be utilized. It is worth mentioning that alternative MSI builders were attempted, but they were not successful in this particular case.
+MSIインストーラーの作成はwixtoolsを使用して行われ、特に[wixtools](http://wixtoolset.org)が利用されます。代替のMSIビルダーも試みられましたが、この特定のケースでは成功しませんでした。
 
-For a comprehensive understanding of wix MSI usage examples, it is advisable to consult [this page](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with). Here, you can find various examples that demonstrate the usage of wix MSI.
+wix MSIの使用例を包括的に理解するためには、[このページ](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with)を参照することをお勧めします。ここでは、wix MSIの使用を示すさまざまな例を見つけることができます。
 
-The aim is to generate an MSI that will execute the lnk file. In order to achieve this, the following XML code could be employed ([xml from here](https://0xrick.github.io/hack-the-box/ethereal/#Creating-Malicious-msi-and-getting-root)):
-
+目的は、lnkファイルを実行するMSIを生成することです。これを達成するために、以下のXMLコードを使用することができます（[xmlはこちらから](https://0xrick.github.io/hack-the-box/ethereal/#Creating-Malicious-msi-and-getting-root)）：
 ```markup
 <?xml version="1.0"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
@@ -39,32 +38,26 @@ fail_here
 </Product>
 </Wix>
 ```
+Package要素には、InstallerVersionやCompressedなどの属性が含まれており、インストーラーのバージョンを指定し、パッケージが圧縮されているかどうかを示します。
 
-It is important to note that the Package element contains attributes such as InstallerVersion and Compressed, specifying the version of the installer and indicating whether the package is compressed or not, respectively.
-
-The creation process involves utilizing candle.exe, a tool from wixtools, to generate a wixobject from msi.xml. The following command should be executed:
-
+作成プロセスでは、wixtoolsのツールであるcandle.exeを利用して、msi.xmlからwixobjectを生成します。次のコマンドを実行する必要があります:
 ```
 candle.exe -out C:\tem\wix C:\tmp\Ethereal\msi.xml
 ```
+さらに、投稿にはコマンドとその出力を示す画像が提供されていることに言及する価値があります。視覚的なガイダンスとして参照できます。
 
-Additionally, it is worth mentioning that an image is provided in the post, which depicts the command and its output. You can refer to it for visual guidance.
-
-Furthermore, light.exe, another tool from wixtools, will be employed to create the MSI file from the wixobject. The command to be executed is as follows:
-
+さらに、wixtoolsの別のツールであるlight.exeがwixobjectからMSIファイルを作成するために使用されます。実行されるコマンドは次のとおりです：
 ```
 light.exe -out C:\tm\Ethereal\rick.msi C:\tmp\wix
 ```
+前のコマンドと同様に、コマンドとその出力を示す画像が投稿に含まれています。
 
-Similar to the previous command, an image is included in the post illustrating the command and its output.
+この要約は貴重な情報を提供することを目的としていますが、より包括的な詳細と正確な指示については元の投稿を参照することをお勧めします。
 
-Please note that while this summary aims to provide valuable information, it is recommended to refer to the original post for more comprehensive details and accurate instructions.
-
-## References
+## 参考文献
 
 - [https://0xrick.github.io/hack-the-box/ethereal/#Creating-Malicious-msi-and-getting-root](https://0xrick.github.io/hack-the-box/ethereal/#Creating-Malicious-msi-and-getting-root)
 - [https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with)
-  [wixtools](http://wixtoolset.org)
+[wixtools](http://wixtoolset.org)
 
 {{#include ../../banners/hacktricks-training.md}}
-

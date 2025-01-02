@@ -1,7 +1,5 @@
-# Fault Injection Attacks 
+# フォルトインジェクション攻撃
 
-Fault injections attacks includes introducing external distrubance in electronic circuits to influence it's behaviour, resulting to disclose information or even bypass certian restrictions in the circuit. This attacks opens a lot of possibilities for attacking electronic circuits. This attack is also referred as glitching of electronic circuits.
+フォルトインジェクション攻撃は、電子回路に外部の干渉を導入してその動作に影響を与え、情報を開示したり、回路内の特定の制限を回避したりすることを含みます。この攻撃は、電子回路に対する攻撃の多くの可能性を開きます。この攻撃は、電子回路のグリッチングとも呼ばれます。
 
-There are a lot of methods and mediums for injecting fault into an electronic circuit. 
-
-
+電子回路にフォルトを注入するための方法や手段はたくさんあります。

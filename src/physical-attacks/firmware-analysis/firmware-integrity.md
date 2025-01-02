@@ -1,36 +1,35 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-## Firmware Integrity
+## ファームウェアの整合性
 
-The **custom firmware and/or compiled binaries can be uploaded to exploit integrity or signature verification flaws**. The following steps can be followed for backdoor bind shell compilation:
+**カスタムファームウェアおよび/またはコンパイルされたバイナリは、整合性または署名検証の欠陥を悪用するためにアップロードできます**。バックドアバインドシェルのコンパイルには以下の手順を実行できます：
 
-1. The firmware can be extracted using firmware-mod-kit (FMK).
-2. The target firmware architecture and endianness should be identified.
-3. A cross compiler can be built using Buildroot or other suitable methods for the environment.
-4. The backdoor can be built using the cross compiler.
-5. The backdoor can be copied to the extracted firmware /usr/bin directory.
-6. The appropriate QEMU binary can be copied to the extracted firmware rootfs.
-7. The backdoor can be emulated using chroot and QEMU.
-8. The backdoor can be accessed via netcat.
-9. The QEMU binary should be removed from the extracted firmware rootfs.
-10. The modified firmware can be repackaged using FMK.
-11. The backdoored firmware can be tested by emulating it with firmware analysis toolkit (FAT) and connecting to the target backdoor IP and port using netcat.
+1. ファームウェアはfirmware-mod-kit (FMK)を使用して抽出できます。
+2. 対象のファームウェアアーキテクチャとエンディアンネスを特定する必要があります。
+3. 環境に適した方法でBuildrootを使用してクロスコンパイラを構築できます。
+4. クロスコンパイラを使用してバックドアを構築できます。
+5. バックドアは抽出されたファームウェアの/usr/binディレクトリにコピーできます。
+6. 適切なQEMUバイナリは抽出されたファームウェアのrootfsにコピーできます。
+7. chrootとQEMUを使用してバックドアをエミュレートできます。
+8. netcatを介してバックドアにアクセスできます。
+9. QEMUバイナリは抽出されたファームウェアのrootfsから削除する必要があります。
+10. 修正されたファームウェアはFMKを使用して再パッケージ化できます。
+11. バックドア付きファームウェアは、ファームウェア分析ツールキット（FAT）を使用してエミュレートし、netcatを使用してターゲットバックドアのIPとポートに接続することでテストできます。
 
-If a root shell has already been obtained through dynamic analysis, bootloader manipulation, or hardware security testing, precompiled malicious binaries such as implants or reverse shells can be executed. Automated payload/implant tools like the Metasploit framework and 'msfvenom' can be leveraged using the following steps:
+動的分析、ブートローダー操作、またはハードウェアセキュリティテストを通じてルートシェルがすでに取得されている場合、インプラントやリバースシェルなどの事前コンパイルされた悪意のあるバイナリを実行できます。Metasploitフレームワークや'msfvenom'のような自動化されたペイロード/インプラントツールは、以下の手順を使用して活用できます：
 
-1. The target firmware architecture and endianness should be identified.
-2. Msfvenom can be used to specify the target payload, attacker host IP, listening port number, filetype, architecture, platform, and the output file.
-3. The payload can be transferred to the compromised device and ensured that it has execution permissions.
-4. Metasploit can be prepared to handle incoming requests by starting msfconsole and configuring the settings according to the payload.
-5. The meterpreter reverse shell can be executed on the compromised device.
-6. Meterpreter sessions can be monitored as they open.
-7. Post-exploitation activities can be performed.
+1. 対象のファームウェアアーキテクチャとエンディアンネスを特定する必要があります。
+2. Msfvenomを使用して、ターゲットペイロード、攻撃者ホストIP、リスニングポート番号、ファイルタイプ、アーキテクチャ、プラットフォーム、および出力ファイルを指定できます。
+3. ペイロードは侵害されたデバイスに転送され、実行権限があることを確認します。
+4. Metasploitはmsfconsoleを起動し、ペイロードに応じて設定を構成することで、受信リクエストを処理する準備をします。
+5. Meterpreterリバースシェルは侵害されたデバイスで実行できます。
+6. Meterpreterセッションは開くときに監視できます。
+7. ポストエクスプロイト活動を実行できます。
 
-If possible, vulnerabilities within startup scripts can be exploited to gain persistent access to a device across reboots. These vulnerabilities arise when startup scripts reference, [symbolically link](https://www.chromium.org/chromium-os/chromiumos-design-docs/hardening-against-malicious-stateful-data), or depend on code located in untrusted mounted locations such as SD cards and flash volumes used for storing data outside of root filesystems.
+可能であれば、起動スクリプト内の脆弱性を悪用して、再起動を通じてデバイスへの持続的なアクセスを取得できます。これらの脆弱性は、起動スクリプトが信頼できないマウントされた場所（SDカードやルートファイルシステムの外にデータを保存するために使用されるフラッシュボリュームなど）にあるコードを参照、[シンボリックリンク](https://www.chromium.org/chromium-os/chromiumos-design-docs/hardening-against-malicious-stateful-data)または依存する場合に発生します。
 
-## References
+## 参考文献
 
-- For further information check [https://scriptingxss.gitbook.io/firmware-security-testing-methodology/](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
+- 詳細情報は[https://scriptingxss.gitbook.io/firmware-security-testing-methodology/](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)を確認してください。
 
 {{#include ../../banners/hacktricks-training.md}}
-

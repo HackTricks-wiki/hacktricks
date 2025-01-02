@@ -4,23 +4,23 @@
 
 ### Host header
 
-Several times the back-end trust the **Host header** to perform some actions. For example, it could use its value as the **domain to send a password reset**. So when you receive an email with a link to reset your password, the domain being used is the one you put in the Host header.Then, you can request the password reset of other users and change the domain to one controlled by you to steal their password reset codes. [WriteUp](https://medium.com/nassec-cybersecurity-writeups/how-i-was-able-to-take-over-any-users-account-with-host-header-injection-546fff6d0f2).
+バックエンドは、いくつかのアクションを実行するために**Host header**を信頼することがあります。たとえば、その値を**パスワードリセットを送信するドメイン**として使用することがあります。したがって、パスワードをリセットするためのリンクが含まれたメールを受け取ったとき、使用されるドメインはHost headerに入力したものです。その後、他のユーザーのパスワードリセットを要求し、ドメインをあなたが制御するものに変更して、彼らのパスワードリセットコードを盗むことができます。[WriteUp](https://medium.com/nassec-cybersecurity-writeups/how-i-was-able-to-take-over-any-users-account-with-host-header-injection-546fff6d0f2).
 
 > [!WARNING]
-> Note that it's possible that you don't even need to wait for the user to click on the reset password link to get the token, as maybe even **spam filters or other intermediary devices/bots will click on it to analyze it**.
+> ユーザーがリセットパスワードリンクをクリックするのを待つ必要がない可能性があることに注意してください。おそらく**スパムフィルターや他の中間デバイス/ボットがそれをクリックして分析するでしょう**。
 
 ### Session booleans
 
-Some times when you complete some verification correctly the back-end will **just add a boolean with the value "True" to a security attribute your session**. Then, a different endpoint will know if you successfully passed that check.\
-However, if you **pass the check** and your sessions is granted that "True" value in the security attribute, you can try to **access other resources** that **depends on the same attribute** but that you **shouldn't have permissions** to access. [WriteUp](https://medium.com/@ozguralp/a-less-known-attack-vector-second-order-idor-attacks-14468009781a).
+時々、いくつかの検証を正しく完了すると、バックエンドは**セキュリティ属性に「True」という値のブール値を追加するだけです**。その後、別のエンドポイントは、そのチェックに成功したかどうかを知ることができます。\
+しかし、もしあなたが**チェックに合格し**、セッションがそのセキュリティ属性に「True」値を付与された場合、**同じ属性に依存する他のリソースにアクセスしようとすることができますが、アクセスする権限はないはずです**。[WriteUp](https://medium.com/@ozguralp/a-less-known-attack-vector-second-order-idor-attacks-14468009781a).
 
 ### Register functionality
 
-Try to register as an already existent user. Try also using equivalent characters (dots, lots of spaces and Unicode).
+既存のユーザーとして登録を試みてください。また、同等の文字（ドット、たくさんのスペース、Unicode）を使用してみてください。
 
 ### Takeover emails
 
-Register an email, before confirming it change the email, then, if the new confirmation email is sent to the first registered email,you can takeover any email. Or if you can enable the second email confirming the firt one, you can also takeover any account.
+メールを登録し、確認する前にメールを変更します。次に、新しい確認メールが最初に登録されたメールに送信される場合、任意のメールを乗っ取ることができます。また、最初のメールを確認するために2番目のメールを有効にできる場合も、任意のアカウントを乗っ取ることができます。
 
 ### Access Internal servicedesk of companies using atlassian
 
@@ -28,9 +28,8 @@ Register an email, before confirming it change the email, then, if the new confi
 
 ### TRACE method
 
-Developers might forget to disable various debugging options in the production environment. For example, the HTTP `TRACE` method is designed for diagnostic purposes. If enabled, the web server will respond to requests that use the `TRACE` method by echoing in the response the exact request that was received. This behaviour is often harmless, but occasionally leads to information disclosure, such as the name of internal authentication headers that may be appended to requests by reverse proxies.![Image for post](https://miro.medium.com/max/60/1*wDFRADTOd9Tj63xucenvAA.png?q=20)
+開発者は、プロダクション環境でさまざまなデバッグオプションを無効にするのを忘れることがあります。たとえば、HTTP `TRACE`メソッドは診断目的で設計されています。これが有効になっている場合、Webサーバーは`TRACE`メソッドを使用したリクエストに対して、受信した正確なリクエストを応答にエコーして応答します。この動作は通常無害ですが、時折、リバースプロキシによってリクエストに追加される内部認証ヘッダーの名前など、情報漏洩につながることがあります。![Image for post](https://miro.medium.com/max/60/1*wDFRADTOd9Tj63xucenvAA.png?q=20)
 
 ![Image for post](https://miro.medium.com/max/1330/1*wDFRADTOd9Tj63xucenvAA.png)
 
 {{#include ../banners/hacktricks-training.md}}
-

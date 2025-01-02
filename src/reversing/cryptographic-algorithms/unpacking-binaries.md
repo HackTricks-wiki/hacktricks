@@ -1,25 +1,23 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-# Identifying packed binaries
+# パックされたバイナリの識別
 
-- **lack of strings**: It's common to find that packed binaries doesn't have almost any string
-- A lot of **unused strings**: Also, when a malware is using some kind of commercial packer it's common to find a lot of strings without cross-references. Even if these strings exist that doesn't mean that the binary isn't packed.
-- You can also use some tools to try to find which packer was used to pack a binary:
-  - [PEiD](http://www.softpedia.com/get/Programming/Packers-Crypters-Protectors/PEiD-updated.shtml)
-  - [Exeinfo PE](http://www.softpedia.com/get/Programming/Packers-Crypters-Protectors/ExEinfo-PE.shtml)
-  - [Language 2000](http://farrokhi.net/language/)
+- **文字列の欠如**: パックされたバイナリにはほとんど文字列がないことが一般的です。
+- **未使用の文字列**: また、マルウェアが商業用パッカーを使用している場合、相互参照のない多くの文字列が見つかることが一般的です。これらの文字列が存在しても、バイナリがパックされていないことを意味するわけではありません。
+- バイナリをパックするために使用されたパッカーを特定するために、いくつかのツールを使用することもできます：
+- [PEiD](http://www.softpedia.com/get/Programming/Packers-Crypters-Protectors/PEiD-updated.shtml)
+- [Exeinfo PE](http://www.softpedia.com/get/Programming/Packers-Crypters-Protectors/ExEinfo-PE.shtml)
+- [Language 2000](http://farrokhi.net/language/)
 
-# Basic Recommendations
+# 基本的な推奨事項
 
-- **Start** analysing the packed binary **from the bottom in IDA and move up**. Unpackers exit once the unpacked code exit so it's unlikely that the unpacker passes execution to the unpacked code at the start.
-- Search for **JMP's** or **CALLs** to **registers** or **regions** of **memory**. Also search for **functions pushing arguments and an address direction and then calling `retn`**, because the return of the function in that case may call the address just pushed to the stack before calling it.
-- Put a **breakpoint** on `VirtualAlloc` as this allocates space in memory where the program can write unpacked code. The "run to user code" or use F8 to **get to value inside EAX** after executing the function and "**follow that address in dump**". You never know if that is the region where the unpacked code is going to be saved.
-  - **`VirtualAlloc`** with the value "**40**" as an argument means Read+Write+Execute (some code that needs execution is going to be copied here).
-- **While unpacking** code it's normal to find **several calls** to **arithmetic operations** and functions like **`memcopy`** or **`Virtual`**`Alloc`. If you find yourself in a function that apparently only perform arithmetic operations and maybe some `memcopy` , the recommendation is to try to **find the end of the function** (maybe a JMP or call to some register) **or** at least the **call to the last function** and run to then as the code isn't interesting.
-- While unpacking code **note** whenever you **change memory region** as a memory region change may indicate the **starting of the unpacking code**. You can easily dump a memory region using Process Hacker (process --> properties --> memory).
-- While trying to unpack code a good way to **know if you are already working with the unpacked code** (so you can just dump it) is to **check the strings of the binary**. If at some point you perform a jump (maybe changing the memory region) and you notice that **a lot more strings where added**, then you can know **you are working with the unpacked code**.\
-  However, if the packer already contains a lot of strings you can see how many strings contains the word "http" and see if this number increases.
-- When you dump an executable from a region of memory you can fix some headers using [PE-bear](https://github.com/hasherezade/pe-bear-releases/releases).
+- **IDAでパックされたバイナリを下から上に**分析し始めます。アンパッカーはアンパックされたコードが終了すると終了するため、アンパッカーが最初にアンパックされたコードに実行を渡すことは考えにくいです。
+- **レジスタ**や**メモリ**の**領域**への**JMP**や**CALL**を検索します。また、**引数とアドレスをプッシュしてから`retn`を呼び出す関数**を検索します。なぜなら、その場合、関数の戻り値がスタックにプッシュされたアドレスを呼び出す可能性があるからです。
+- `VirtualAlloc`に**ブレークポイント**を設定します。これはプログラムがアンパックされたコードを書き込むためのメモリ内のスペースを割り当てます。「ユーザーコードまで実行」するか、F8を使用して**関数を実行した後にEAX内の値を取得**します。そして「**ダンプ内のそのアドレスを追跡**」します。アンパックされたコードが保存される領域であるかもしれないので、そこがどこか分かりません。
+- **`VirtualAlloc`**に**「40」**という値を引数として渡すことは、読み取り+書き込み+実行を意味します（ここに実行が必要なコードがコピーされる予定です）。
+- コードを**アンパックしている間**、**算術演算**や**`memcopy`**や**`Virtual`**`Alloc`のような関数への**いくつかの呼び出し**を見つけるのは普通です。もし算術演算のみを行っている関数にいる場合、またはおそらくいくつかの`memcopy`を行っている場合、**関数の終わりを見つける**（おそらくレジスタへのJMPまたは呼び出し）**か**、少なくとも**最後の関数への呼び出しを見つけて実行する**ことをお勧めします。なぜなら、そのコードは興味深くないからです。
+- コードをアンパックしている間、**メモリ領域が変更された**場合は注意してください。メモリ領域の変更は**アンパックコードの開始**を示す可能性があります。Process Hackerを使用してメモリ領域を簡単にダンプできます（プロセス --> プロパティ --> メモリ）。
+- コードをアンパックしようとしているとき、**アンパックされたコードで作業しているかどうかを知る良い方法**（そのため、単にダンプできます）は、**バイナリの文字列を確認すること**です。もしある時点でジャンプを行い（おそらくメモリ領域を変更して）、**はるかに多くの文字列が追加された**ことに気づいた場合、**アンパックされたコードで作業している**ことがわかります。しかし、パッカーにすでに多くの文字列が含まれている場合は、「http」という単語を含む文字列の数を確認し、この数が増加するかどうかを確認できます。
+- メモリの領域から実行可能ファイルをダンプするとき、[PE-bear](https://github.com/hasherezade/pe-bear-releases/releases)を使用していくつかのヘッダーを修正できます。
 
 {{#include ../../banners/hacktricks-training.md}}
-

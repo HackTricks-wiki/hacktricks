@@ -4,7 +4,7 @@
 
 ## Intro
 
-For more info about what is an iButton check:
+iButtonについての詳細は以下を参照してください:
 
 {{#ref}}
 ../ibutton.md
@@ -12,7 +12,7 @@ For more info about what is an iButton check:
 
 ## Design
 
-The **blue** part of the following imageis how you would need to **put the real iButton** so the Flipper can **read it.** The **green** part is how you need to **touch the reader** with the Flipper zero to **correctly emulate an iButton**.
+以下の画像の**青**い部分は、Flipperが**読み取るために本物のiButtonを**置く必要がある場所です。**緑**の部分は、Flipper zeroで**iButtonを正しくエミュレートするためにリーダーに**触れる必要がある場所です。
 
 <figure><img src="../../../images/image (565).png" alt=""><figcaption></figcaption></figure>
 
@@ -20,18 +20,18 @@ The **blue** part of the following imageis how you would need to **put the real 
 
 ### Read
 
-In Read Mode Flipper is waiting for the iButton key to touch and is able to digest any of three types of keys: **Dallas, Cyfral, and Metakom**. Flipper will **figure out the type of the key itself**. The name of the key protocol will be displayed on the screen above the ID number.
+リードモードでは、FlipperはiButtonキーが触れるのを待っており、**Dallas、Cyfral、Metakom**の3種類のキーを処理できます。Flipperは**キーのタイプを自動的に判断します**。キーのプロトコル名はID番号の上に表示されます。
 
 ### Add manually
 
-It's possible to **add manually** an iButton of type: **Dallas, Cyfral, and Metakom**
+**手動で**iButtonを追加することが可能です: **Dallas、Cyfral、Metakom**
 
 ### **Emulate**
 
-It's possible to **emulate** saved iButtons (read or manually added).
+保存されたiButton（読み取りまたは手動追加）を**エミュレート**することが可能です。
 
 > [!NOTE]
-> If you cannot make the expected contacts of the Flipper Zero touch the reader you can **use the external GPIO:**
+> Flipper Zeroの期待される接触がリーダーに触れない場合は、**外部GPIOを使用できます:**
 
 <figure><img src="../../../images/image (138).png" alt=""><figcaption></figcaption></figure>
 
@@ -40,4 +40,3 @@ It's possible to **emulate** saved iButtons (read or manually added).
 - [https://blog.flipperzero.one/taming-ibutton/](https://blog.flipperzero.one/taming-ibutton/)
 
 {{#include ../../../banners/hacktricks-training.md}}
-

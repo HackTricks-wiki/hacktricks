@@ -1,18 +1,15 @@
-# Industrial Control Systems Hacking 
+# Industrial Control Systems Hacking
 
 ## About this Section
 
-This section contains all about Industrial Control Systems including concepts as well as methodologies to hack them with various security issues that persists in them. 
+このセクションでは、産業用制御システムに関するすべての情報、概念、およびさまざまなセキュリティ問題を含むハッキング手法について説明します。
 
-Industrial Control Systems are everywhere, since industries are vital for economic development of a nation. But these ICS are hard to update and lesser advancements are made in this field. Hence, finding security flaws is common here. Most of the protocols and standards used here where developed back in the 90's and have much lesser capabilities as compared to current attack scenarios. 
+産業用制御システムは至る所に存在し、産業は国家の経済発展にとって重要です。しかし、これらのICSは更新が難しく、この分野での進展は少ないです。そのため、セキュリティの欠陥を見つけることは一般的です。ここで使用されるプロトコルや標準のほとんどは90年代に開発されており、現在の攻撃シナリオと比較して能力がはるかに低いです。
 
-It has become important to secure these systems since damaging them can cost a lot and even lives at the worst case. To understand Industrial Contol Systems security, knowing the internals of them is necessary. 
+これらのシステムを保護することが重要になってきています。損傷を与えることは多大なコストを伴い、最悪の場合は命に関わることもあります。産業用制御システムのセキュリティを理解するためには、その内部を知ることが必要です。
 
-Since Industrial Control Systems are installed following set standards, knowing each components would help in interconnecting every other mechanisms in the control system. Installation of these devices like PLCs and SCADA systems is different is various industries, hence information gathering is critical. 
+産業用制御システムは、定められた標準に従って設置されるため、各コンポーネントを知ることは、制御システム内の他のメカニズムを相互接続するのに役立ちます。PLCやSCADAシステムなどのデバイスの設置は、さまざまな産業で異なるため、情報収集が重要です。
 
-Industrial Control Systems can be complicated at times and hence require a lot of patience to do anything. It's all about probing and reconnaissance before planning attacks and developing any exploits. 
+産業用制御システムは時に複雑であり、何かを行うには多くの忍耐が必要です。攻撃を計画し、エクスプロイトを開発する前に、すべてはプロービングと偵察に関することです。
 
-These techniques can also be used to protect against attacks and blue teaming for industrial control systems. 
-
-
-
+これらの手法は、攻撃から保護するためや、産業用制御システムのブルーチーミングにも使用できます。

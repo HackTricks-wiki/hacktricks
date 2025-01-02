@@ -1,56 +1,45 @@
-# AD CS Account Persistence
+# AD CS アカウント持続性
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**This is a small summary of the machine persistence chapters of the awesome research from [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)**
+**これは、[https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf) の素晴らしい研究のマシン持続性章の小さな要約です。**
 
-## **Understanding Active User Credential Theft with Certificates – PERSIST1**
+## **証明書を使用したアクティブユーザー資格情報の盗難の理解 – PERSIST1**
 
-In a scenario where a certificate that allows domain authentication can be requested by a user, an attacker has the opportunity to **request** and **steal** this certificate to **maintain persistence** on a network. By default, the `User` template in Active Directory allows such requests, though it may sometimes be disabled.
+ドメイン認証を許可する証明書がユーザーによって要求できるシナリオでは、攻撃者はこの証明書を**要求**し、**盗む**機会があり、ネットワーク上で**持続性を維持**することができます。デフォルトでは、Active Directoryの`User`テンプレートはそのような要求を許可しますが、時には無効にされることもあります。
 
-Using a tool named [**Certify**](https://github.com/GhostPack/Certify), one can search for valid certificates that enable persistent access:
-
+[**Certify**](https://github.com/GhostPack/Certify)というツールを使用すると、持続的なアクセスを可能にする有効な証明書を検索できます：
 ```bash
 Certify.exe find /clientauth
 ```
+証明書の力は、その証明書が属する**ユーザーとして認証する**能力にあることが強調されています。パスワードの変更に関係なく、証明書が**有効**である限りです。
 
-It's highlighted that a certificate's power lies in its ability to **authenticate as the user** it belongs to, regardless of any password changes, as long as the certificate remains **valid**.
-
-Certificates can be requested through a graphical interface using `certmgr.msc` or through the command line with `certreq.exe`. With **Certify**, the process to request a certificate is simplified as follows:
-
+証明書は、`certmgr.msc`を使用したグラフィカルインターフェースまたは`certreq.exe`を使用したコマンドラインを通じて要求できます。**Certify**を使用すると、証明書を要求するプロセスは次のように簡素化されます：
 ```bash
 Certify.exe request /ca:CA-SERVER\CA-NAME /template:TEMPLATE-NAME
 ```
-
-Upon successful request, a certificate along with its private key is generated in `.pem` format. To convert this into a `.pfx` file, which is usable on Windows systems, the following command is utilized:
-
+成功したリクエストにより、証明書とその秘密鍵が `.pem` 形式で生成されます。これをWindowsシステムで使用可能な `.pfx` ファイルに変換するには、次のコマンドが使用されます：
 ```bash
 openssl pkcs12 -in cert.pem -keyex -CSP "Microsoft Enhanced Cryptographic Provider v1.0" -export -out cert.pfx
 ```
-
-The `.pfx` file can then be uploaded to a target system and used with a tool called [**Rubeus**](https://github.com/GhostPack/Rubeus) to request a Ticket Granting Ticket (TGT) for the user, extending the attacker's access for as long as the certificate is **valid** (typically one year):
-
+`.pfx`ファイルはターゲットシステムにアップロードされ、[**Rubeus**](https://github.com/GhostPack/Rubeus)というツールを使用してユーザーのチケットグラントチケット（TGT）を要求するために使用され、攻撃者のアクセスを証明書が**有効**である限り（通常は1年）延長します：
 ```bash
 Rubeus.exe asktgt /user:harmj0y /certificate:C:\Temp\cert.pfx /password:CertPass!
 ```
+重要な警告があります。この技術は、**THEFT5** セクションで概説されている別の方法と組み合わせることで、攻撃者がローカル セキュリティ権限サブシステム サービス (LSASS) と対話することなく、アカウントの **NTLM ハッシュ** を持続的に取得できることを示しています。これにより、非特権コンテキストから、長期的な資格情報の窃取に対してよりステルスな方法が提供されます。
 
-An important warning is shared about how this technique, combined with another method outlined in the **THEFT5** section, allows an attacker to persistently obtain an account’s **NTLM hash** without interacting with the Local Security Authority Subsystem Service (LSASS), and from a non-elevated context, providing a stealthier method for long-term credential theft.
+## **証明書を使用したマシンの持続性の獲得 - PERSIST2**
 
-## **Gaining Machine Persistence with Certificates - PERSIST2**
-
-Another method involves enrolling a compromised system’s machine account for a certificate, utilizing the default `Machine` template which allows such actions. If an attacker gains elevated privileges on a system, they can use the **SYSTEM** account to request certificates, providing a form of **persistence**:
-
+別の方法は、妥協されたシステムのマシン アカウントを証明書に登録することを含み、デフォルトの `Machine` テンプレートを利用してそのようなアクションを許可します。攻撃者がシステム上で特権を取得すると、**SYSTEM** アカウントを使用して証明書を要求でき、**持続性**の一形態を提供します。
 ```bash
 Certify.exe request /ca:dc.theshire.local/theshire-DC-CA /template:Machine /machine
 ```
+このアクセスにより、攻撃者はマシンアカウントとして**Kerberos**に認証し、**S4U2Self**を利用してホスト上の任意のサービスのKerberosサービスチケットを取得でき、実質的に攻撃者にマシンへの持続的なアクセスを付与します。
 
-This access enables the attacker to authenticate to **Kerberos** as the machine account and utilize **S4U2Self** to obtain Kerberos service tickets for any service on the host, effectively granting the attacker persistent access to the machine.
+## **証明書の更新による持続性の拡張 - PERSIST3**
 
-## **Extending Persistence Through Certificate Renewal - PERSIST3**
+最後に議論される方法は、証明書テンプレートの**有効性**と**更新期間**を利用することです。証明書が期限切れになる前に**更新**することで、攻撃者は追加のチケット登録を必要とせずにActive Directoryへの認証を維持でき、これにより証明書認証局（CA）サーバーに痕跡を残すことがありません。
 
-The final method discussed involves leveraging the **validity** and **renewal periods** of certificate templates. By **renewing** a certificate before its expiration, an attacker can maintain authentication to Active Directory without the need for additional ticket enrolments, which could leave traces on the Certificate Authority (CA) server.
-
-This approach allows for an **extended persistence** method, minimizing the risk of detection through fewer interactions with the CA server and avoiding the generation of artifacts that could alert administrators to the intrusion.
+このアプローチは、CAサーバーとの相互作用を最小限に抑え、管理者に侵入を警告する可能性のあるアーティファクトの生成を回避することで、**持続性の拡張**方法を可能にします。
 
 {{#include ../../../banners/hacktricks-training.md}}
-

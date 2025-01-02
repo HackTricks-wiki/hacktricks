@@ -2,163 +2,162 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-[**Cheat Engine**](https://www.cheatengine.org/downloads.php) is a useful program to find where important values are saved inside the memory of a running game and change them.\
-When you download and run it, you are **presented** with a **tutorial** of how to use the tool. If you want to learn how to use the tool it's highly recommended to complete it.
+[**Cheat Engine**](https://www.cheatengine.org/downloads.php) は、実行中のゲームのメモリ内に重要な値がどこに保存されているかを見つけて変更するための便利なプログラムです。\
+ダウンロードして実行すると、ツールの使い方の**チュートリアル**が**表示**されます。ツールの使い方を学びたい場合は、これを完了することを強くお勧めします。
 
-## What are you searching?
+## 何を検索していますか？
 
 ![](<../../images/image (762).png>)
 
-This tool is very useful to find **where some value** (usually a number) **is stored in the memory** of a program.\
-**Usually numbers** are stored in **4bytes** form, but you could also find them in **double** or **float** formats, or you may want to look for something **different from a number**. For that reason you need to be sure you **select** what you want to **search for**:
+このツールは、プログラムのメモリ内に**どこにある値**（通常は数値）が保存されているかを見つけるのに非常に便利です。\
+**通常、数値**は**4バイト**形式で保存されますが、**ダブル**や**フロート**形式で見つかることもありますし、**数値以外の何か**を探すこともあるかもしれません。そのため、**検索したいものを選択**することを確認する必要があります：
 
 ![](<../../images/image (324).png>)
 
-Also you can indicate **different** types of **searches**:
+また、**異なる**タイプの**検索**を指定することもできます：
 
 ![](<../../images/image (311).png>)
 
-You can also check the box to **stop the game while scanning the memory**:
+メモリをスキャンしている間に**ゲームを停止する**ためのチェックボックスをオンにすることもできます：
 
 ![](<../../images/image (1052).png>)
 
-### Hotkeys
+### ホットキー
 
-In _**Edit --> Settings --> Hotkeys**_ you can set different **hotkeys** for different purposes like **stopping** the **game** (which is quiet useful if at some point you want to scan the memory). Other options are available:
+_**Edit --> Settings --> Hotkeys**_ では、**ゲームを停止する**などの目的のために異なる**ホットキー**を設定できます（これは、メモリをスキャンしたいときに非常に便利です）。他のオプションも利用可能です：
 
 ![](<../../images/image (864).png>)
 
-## Modifying the value
+## 値の変更
 
-Once you **found** where is the **value** you are **looking for** (more about this in the following steps) you can **modify it** double clicking it, then double clicking its value:
+探している**値**がどこにあるかを**見つけたら**（このことについては次のステップで詳しく説明します）、それを**ダブルクリック**して、次にその値を**ダブルクリック**することで**変更**できます：
 
 ![](<../../images/image (563).png>)
 
-And finally **marking the check** to get the modification done in the memory:
+最後に、メモリ内で変更を行うために**チェックを入れる**：
 
 ![](<../../images/image (385).png>)
 
-The **change** to the **memory** will be immediately **applied** (note that until the game doesn't use this value again the value **won't be updated in the game**).
+**メモリ**への**変更**はすぐに**適用**されます（ゲームがこの値を再度使用するまで、値は**ゲーム内で更新されません**）。
 
-## Searching the value
+## 値の検索
 
-So, we are going to suppose that there is an important value (like the life of your user) that you want to improve, and you are looking for this value in the memory)
+重要な値（ユーザーのライフなど）を改善したいと仮定し、その値をメモリ内で探しているとします。
 
-### Through a known change
+### 既知の変更による検索
 
-Supposing you are looking for the value 100, you **perform a scan** searching for that value and you find a lot of coincidences:
+値100を探していると仮定し、その値を検索するために**スキャンを実行**すると、多くの一致が見つかります：
 
 ![](<../../images/image (108).png>)
 
-Then, you do something so that **value changes**, and you **stop** the game and **perform** a **next scan**:
+次に、**値が変更される**ようなことを行い、ゲームを**停止**して**次のスキャンを実行**します：
 
 ![](<../../images/image (684).png>)
 
-Cheat Engine will search for the **values** that **went from 100 to the new value**. Congrats, you **found** the **address** of the value you were looking for, you can now modify it.\
-&#xNAN;_&#x49;f you still have several values, do something to modify again that value, and perform another "next scan" to filter the addresses._
+Cheat Engineは、**100から新しい値に変わった**値を検索します。おめでとうございます、探していた**値のアドレス**を**見つけました**。これで、値を変更できます。\
+&#xNAN;_まだいくつかの値がある場合は、その値を再度変更するために何かを行い、もう一度「次のスキャン」を実行してアドレスをフィルタリングします。_
 
-### Unknown Value, known change
+### 不明な値、既知の変更
 
-In the scenario you **don't know the value** but you know **how to make it change** (and even the value of the change) you can look for your number.
+値が**わからない**が、**どのように変更するか**（変更の値も含む）を知っている場合は、数値を探すことができます。
 
-So, start by performing a scan of type "**Unknown initial value**":
+まず、**不明な初期値**のタイプのスキャンを実行します：
 
 ![](<../../images/image (890).png>)
 
-Then, make the value change, indicate **how** the **value** **changed** (in my case it was decreased by 1) and perform a **next scan**:
+次に、値を変更し、**どのように**その**値が変更されたか**を示し（私の場合は1減少しました）、**次のスキャンを実行**します：
 
 ![](<../../images/image (371).png>)
 
-You will be presented **all the values that were modified in the selected way**:
+選択した方法で**変更されたすべての値**が表示されます：
 
 ![](<../../images/image (569).png>)
 
-Once you have found your value, you can modify it.
+値を見つけたら、それを変更できます。
 
-Note that there are a **lot of possible changes** and you can do these **steps as much as you want** to filter the results:
+**多くの可能な変更**があり、結果をフィルタリングするためにこれらの**ステップを何度でも行うことができます**：
 
 ![](<../../images/image (574).png>)
 
-### Random Memory Address - Finding the code
+### ランダムメモリアドレス - コードの発見
 
-Until know we learnt how to find an address storing a value, but it's highly probably that in **different executions of the game that address is in different places of the memory**. So lets find out how to always find that address.
+これまで、値を保存しているアドレスを見つける方法を学びましたが、**ゲームの異なる実行でそのアドレスがメモリの異なる場所にある可能性が高い**です。では、そのアドレスを常に見つける方法を見つけましょう。
 
-Using some of the mentioned tricks, find the address where your current game is storing the important value. Then (stopping the game if you whish) do a **right click** on the found **address** and select "**Find out what accesses this address**" or "**Find out what writes to this address**":
+前述のトリックのいくつかを使用して、現在のゲームが重要な値を保存しているアドレスを見つけます。次に（ゲームを停止しても構いません）、見つけた**アドレス**を右クリックし、**「このアドレスにアクセスするものを見つける」**または**「このアドレスに書き込むものを見つける」**を選択します：
 
 ![](<../../images/image (1067).png>)
 
-The **first option** is useful to know which **parts** of the **code** are **using** this **address** (which is useful for more things like **knowing where you can modify the code** of the game).\
-The **second option** is more **specific**, and will be more helpful in this case as we are interested in knowing **from where this value is being written**.
+**最初のオプション**は、この**アドレス**を**使用している**コードの**部分**を知るのに役立ちます（これは、ゲームのコードを**変更できる場所を知る**のに役立ちます）。\
+**2番目のオプション**はより**具体的**で、**この値がどこから書き込まれているか**を知るのに役立ちます。
 
-Once you have selected one of those options, the **debugger** will be **attached** to the program and a new **empty window** will appear. Now, **play** the **game** and **modify** that **value** (without restarting the game). The **window** should be **filled** with the **addresses** that are **modifying** the **value**:
+これらのオプションのいずれかを選択すると、**デバッガ**がプログラムに**接続**され、新しい**空のウィンドウ**が表示されます。今、**ゲームをプレイ**して、その**値を変更**します（ゲームを再起動せずに）。**ウィンドウ**は、**値を変更しているアドレス**で**埋まる**はずです：
 
 ![](<../../images/image (91).png>)
 
-Now that you found the address it's modifying the value you can **modify the code at your pleasure** (Cheat Engine allows you to modify it for NOPs real quick):
+アドレスを見つけたら、その値を**自由にコードを変更**できます（Cheat Engineでは、NOPにすぐに変更できます）：
 
 ![](<../../images/image (1057).png>)
 
-So, you can now modify it so the code won't affect your number, or will always affect in a positive way.
+これで、コードがあなたの数値に影響を与えないように変更することができますし、常にプラスの影響を与えるようにすることもできます。
 
-### Random Memory Address - Finding the pointer
+### ランダムメモリアドレス - ポインタの発見
 
-Following the previous steps, find where the value you are interested is. Then, using "**Find out what writes to this address**" find out which address writes this value and double click on it to get the disassembly view:
+前のステップに従って、興味のある値がどこにあるかを見つけます。次に、**「このアドレスに書き込むものを見つける」**を使用して、この値を書き込むアドレスを見つけ、ダブルクリックしてディスアセンブリビューを取得します：
 
 ![](<../../images/image (1039).png>)
 
-Then, perform a new scan **searching for the hex value between "\[]"** (the value of $edx in this case):
+次に、**"\[]"の間の16進数値を検索**する新しいスキャンを実行します（この場合は$edxの値）：
 
 ![](<../../images/image (994).png>)
 
-(_If several appear you usually need the smallest address one_)\
-Now, we have f**ound the pointer that will be modifying the value we are interested in**.
+（いくつかが表示される場合は、通常、最小のアドレスのものが必要です）\
+これで、**興味のある値を変更するポインタを見つけました**。
 
-Click on "**Add Address Manually**":
+**「アドレスを手動で追加」**をクリックします：
 
 ![](<../../images/image (990).png>)
 
-Now, click on the "Pointer" check box and add the found address in the text box (in this scenario, the found address in the previous image was "Tutorial-i386.exe"+2426B0):
+次に、**ポインタ**のチェックボックスをクリックし、テキストボックスに見つけたアドレスを追加します（このシナリオでは、前の画像で見つけたアドレスは「Tutorial-i386.exe」+2426B0でした）：
 
 ![](<../../images/image (392).png>)
 
-(Note how the first "Address" is automatically populated from the pointer address you introduce)
+（最初の「アドレス」は、入力したポインタアドレスから自動的に入力されることに注意してください）
 
-Click OK and a new pointer will be created:
+OKをクリックすると、新しいポインタが作成されます：
 
 ![](<../../images/image (308).png>)
 
-Now, every time you modifies that value you are **modifying the important value even if the memory address where the value is is different.**
+これで、その値を変更するたびに、**値があるメモリアドレスが異なっていても重要な値を変更しています**。
 
-### Code Injection
+### コードインジェクション
 
-Code injection is a technique where you inject a piece of code into the target process, and then reroute the execution of code to go through your own written code (like giving you points instead of resting them).
+コードインジェクションは、ターゲットプロセスにコードの一部を注入し、その後、コードの実行を自分が書いたコードを通過させる技術です（たとえば、ポイントを減らす代わりに与えるなど）。
 
-So, imagine you have found the address that is subtracting 1 to the life of your player:
+したがって、プレイヤーのライフから1を引いているアドレスを見つけたと想像してください：
 
 ![](<../../images/image (203).png>)
 
-Click on Show disassembler to get the **disassemble code**.\
-Then, click **CTRL+a** to invoke the Auto assemble window and select _**Template --> Code Injection**_
+**ディスアセンブラを表示**をクリックして、**ディスアセンブルコード**を取得します。\
+次に、**CTRL+a**をクリックしてオートアセンブルウィンドウを呼び出し、_**Template --> Code Injection**_を選択します。
 
 ![](<../../images/image (902).png>)
 
-Fill the **address of the instruction you want to modify** (this is usually autofilled):
+**変更したい命令のアドレス**を入力します（通常は自動的に入力されます）：
 
 ![](<../../images/image (744).png>)
 
-A template will be generated:
+テンプレートが生成されます：
 
 ![](<../../images/image (944).png>)
 
-So, insert your new assembly code in the "**newmem**" section and remove the original code from the "**originalcode**" if you don't want it to be executed\*\*.\*\* In this example the injected code will add 2 points instead of substracting 1:
+したがって、**newmem**セクションに新しいアセンブリコードを挿入し、**originalcode**から元のコードを削除します（実行したくない場合）。この例では、注入されたコードは1を引く代わりに2ポイントを追加します：
 
 ![](<../../images/image (521).png>)
 
-**Click on execute and so on and your code should be injected in the program changing the behaviour of the functionality!**
+**実行をクリックすると、あなたのコードがプログラムに注入され、機能の動作が変更されるはずです！**
 
-## **References**
+## **参考文献**
 
-- **Cheat Engine tutorial, complete it to learn how to start with Cheat Engine**
+- **Cheat Engineチュートリアル、Cheat Engineを始めるために完了してください**
 
 {{#include ../../banners/hacktricks-training.md}}
-

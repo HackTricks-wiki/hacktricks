@@ -1,13 +1,12 @@
-# Access Tokens
+# アクセストークン
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Access Tokens
+## アクセストークン
 
-Each **user logged** onto the system **holds an access token with security information** for that logon session. The system creates an access token when the user logs on. **Every process executed** on behalf of the user **has a copy of the access token**. The token identifies the user, the user's groups, and the user's privileges. A token also contains a logon SID (Security Identifier) that identifies the current logon session.
+各**システムにログインしているユーザー**は、そのログオンセッションの**セキュリティ情報を持つアクセストークンを保持しています**。システムはユーザーがログインするときにアクセストークンを作成します。**ユーザーのために実行されるすべてのプロセス**は**アクセストークンのコピーを持っています**。トークンはユーザー、ユーザーのグループ、およびユーザーの特権を識別します。トークンには、現在のログオンセッションを識別するログオンSID（セキュリティ識別子）も含まれています。
 
-You can see this information executing `whoami /all`
-
+この情報は`whoami /all`を実行することで確認できます。
 ```
 whoami /all
 
@@ -51,61 +50,55 @@ SeUndockPrivilege             Remove computer from docking station Disabled
 SeIncreaseWorkingSetPrivilege Increase a process working set       Disabled
 SeTimeZonePrivilege           Change the time zone                 Disabled
 ```
-
-or using _Process Explorer_ from Sysinternals (select process and access"Security" tab):
+または、Sysinternalsの _Process Explorer_ を使用して（プロセスを選択し、「セキュリティ」タブにアクセス）：
 
 ![](<../../images/image (772).png>)
 
-### Local administrator
+### ローカル管理者
 
-When a local administrator logins, **two access tokens are created**: One with admin rights and other one with normal rights. **By default**, when this user executes a process the one with **regular** (non-administrator) **rights is used**. When this user tries to **execute** anything **as administrator** ("Run as Administrator" for example) the **UAC** will be used to ask for permission.\
-If you want to [**learn more about the UAC read this page**](../authentication-credentials-uac-and-efs/#uac)**.**
+ローカル管理者がログインすると、**2つのアクセス トークンが作成されます**: 1つは管理者権限付き、もう1つは通常の権限付きです。**デフォルトでは**、このユーザーがプロセスを実行するとき、**通常の**（非管理者）**権限が使用されます**。このユーザーが**管理者として**何かを**実行**しようとすると（例えば「管理者として実行」）、**UAC**が許可を求めるために使用されます。\
+**UACについてさらに学びたい場合は、このページをお読みください** [**こちら**](../authentication-credentials-uac-and-efs/#uac)**。**
 
-### Credentials user impersonation
+### 資格情報のユーザーなりすまし
 
-If you have **valid credentials of any other user**, you can **create** a **new logon session** with those credentials :
-
+他のユーザーの**有効な資格情報**がある場合、その資格情報を使用して**新しいログオン セッションを作成**できます：
 ```
 runas /user:domain\username cmd.exe
 ```
-
-The **access token** has also a **reference** of the logon sessions inside the **LSASS**, this is useful if the process needs to access some objects of the network.\
-You can launch a process that **uses different credentials for accessing network services** using:
-
+**アクセス トークン**には、**LSASS**内のログオン セッションの**参照**も含まれています。これは、プロセスがネットワークのいくつかのオブジェクトにアクセスする必要がある場合に便利です。\
+ネットワーク サービスにアクセスするために**異なる資格情報を使用する**プロセスを起動するには、次のようにします:
 ```
 runas /user:domain\username /netonly cmd.exe
 ```
+これは、ネットワーク内のオブジェクトにアクセスするための有用な資格情報を持っているが、その資格情報が現在のホスト内では無効である場合に役立ちます（現在のホストでは、現在のユーザー権限が使用されます）。
 
-This is useful if you have useful credentials to access objects in the network but those credentials aren't valid inside the current host as they are only going to be used in the network (in the current host your current user privileges will be used).
+### トークンの種類
 
-### Types of tokens
+利用可能なトークンには2種類あります：
 
-There are two types of tokens available:
+- **プライマリートークン**：プロセスのセキュリティ資格情報の表現として機能します。プライマリートークンの作成とプロセスとの関連付けは、特権の分離の原則を強調するために、昇格された権限を必要とするアクションです。通常、トークンの作成は認証サービスが担当し、ログオンサービスがユーザーのオペレーティングシステムシェルとの関連付けを処理します。プロセスは作成時に親プロセスのプライマリートークンを継承することに注意する価値があります。
+- **インパーソネーショントークン**：サーバーアプリケーションがクライアントのアイデンティティを一時的に採用して安全なオブジェクトにアクセスできるようにします。このメカニズムは、4つの操作レベルに階層化されています：
+  - **匿名**：識別されていないユーザーと同様のサーバーアクセスを付与します。
+  - **識別**：サーバーがオブジェクトアクセスに利用せずにクライアントのアイデンティティを確認できるようにします。
+  - **インパーソネーション**：サーバーがクライアントのアイデンティティの下で操作できるようにします。
+  - **委任**：インパーソネーションに似ていますが、サーバーが相互作用するリモートシステムにこのアイデンティティの仮定を拡張する能力を含み、資格情報の保持を確保します。
 
-- **Primary Token**: It serves as a representation of a process's security credentials. The creation and association of primary tokens with processes are actions that require elevated privileges, emphasizing the principle of privilege separation. Typically, an authentication service is responsible for token creation, while a logon service handles its association with the user's operating system shell. It is worth noting that processes inherit the primary token of their parent process at creation.
-- **Impersonation Token**: Empowers a server application to adopt the client's identity temporarily for accessing secure objects. This mechanism is stratified into four levels of operation:
-  - **Anonymous**: Grants server access akin to that of an unidentified user.
-  - **Identification**: Allows the server to verify the client's identity without utilizing it for object access.
-  - **Impersonation**: Enables the server to operate under the client's identity.
-  - **Delegation**: Similar to Impersonation but includes the ability to extend this identity assumption to remote systems the server interacts with, ensuring credential preservation.
+#### インパーソネートトークン
 
-#### Impersonate Tokens
+metasploitの_**incognito**_モジュールを使用すると、十分な権限があれば、他の**トークン**を簡単に**リスト**および**インパーソネート**できます。これは、**他のユーザーのように行動するため**に役立つ可能性があります。この技術を使用して**権限を昇格**させることもできます。
 
-Using the _**incognito**_ module of metasploit if you have enough privileges you can easily **list** and **impersonate** other **tokens**. This could be useful to perform **actions as if you where the other user**. You could also **escalate privileges** with this technique.
+### トークンの権限
 
-### Token Privileges
-
-Learn which **token privileges can be abused to escalate privileges:**
+**権限を昇格させるために悪用できるトークンの権限を学びましょう：**
 
 {{#ref}}
 privilege-escalation-abusing-tokens.md
 {{#endref}}
 
-Take a look to [**all the possible token privileges and some definitions on this external page**](https://github.com/gtworek/Priv2Admin).
+[**すべての可能なトークンの権限とこの外部ページのいくつかの定義を確認してください**](https://github.com/gtworek/Priv2Admin)。
 
-## References
+## 参考文献
 
-Learn more about tokens in this tutorials: [https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa](https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa) and [https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)
+トークンについての詳細は、次のチュートリアルを参照してください：[https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa](https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa) および [https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)
 
 {{#include ../../banners/hacktricks-training.md}}
-

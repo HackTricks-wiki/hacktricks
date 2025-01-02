@@ -1,199 +1,198 @@
-# Radio
+# ラジオ
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## SigDigger
 
-[**SigDigger** ](https://github.com/BatchDrake/SigDigger)is a free digital signal analyzer for GNU/Linux and macOS, designed to extract information of unknown radio signals. It supports a variety of SDR devices through SoapySDR, and allows adjustable demodulation of FSK, PSK and ASK signals, decode analog video, analyze bursty signals and listen to analog voice channels (all in real time).
+[**SigDigger** ](https://github.com/BatchDrake/SigDigger)は、未知の無線信号の情報を抽出するために設計された、GNU/LinuxおよびmacOS用の無料デジタル信号アナライザーです。SoapySDRを介してさまざまなSDRデバイスをサポートし、FSK、PSK、ASK信号の調整可能な復調、アナログビデオのデコード、バースト信号の分析、アナログ音声チャンネルの聴取（すべてリアルタイムで）を可能にします。
 
-### Basic Config
+### 基本設定
 
-After installing there are a few things that you could consider configuring.\
-In settings (the second tab button) you can select the **SDR device** or **select a file** to read and which frequency to syntonise and the Sample rate (recommended to up to 2.56Msps if your PC support it)\\
+インストール後、設定を考慮するいくつかの項目があります。\
+設定（2番目のタブボタン）では、**SDRデバイス**を選択するか、**ファイルを選択**して読み取り、同調する周波数とサンプルレート（PCがサポートしている場合は最大2.56Mspsを推奨）を設定できます。\\
 
 ![](<../../images/image (245).png>)
 
-In the GUI behaviour it's recommended to enable a few things if your PC support it:
+GUIの動作では、PCがサポートしている場合は、いくつかの項目を有効にすることをお勧めします：
 
 ![](<../../images/image (472).png>)
 
 > [!NOTE]
-> If you realise that your PC is not capturing things try to disable OpenGL and lowering the sample rate.
+> PCが信号をキャプチャしていない場合は、OpenGLを無効にし、サンプルレートを下げてみてください。
 
-### Uses
+### 使用法
 
-- Just to **capture some time of a signal and analyze it** just maintain the button "Push to capture" as long as you need.
+- **信号の一部をキャプチャして分析する**には、「Push to capture」ボタンを必要なだけ押し続けてください。
 
 ![](<../../images/image (960).png>)
 
-- The **Tuner** of SigDigger helps to **capture better signals** (but it can also degrade them). Ideally start with 0 and keep **making it bigger until** you find the **noise** introduce is **bigger** than the **improvement of the signal** you need).
+- SigDiggerの**チューナー**は、**より良い信号をキャプチャする**のに役立ちます（ただし、信号を劣化させることもあります）。理想的には0から始めて、**信号の改善よりも**ノイズの**増加が大きくなるまで**大きくしていきます。
 
 ![](<../../images/image (1099).png>)
 
-### Synchronize with radio channel
+### 無線チャンネルとの同期
 
-With [**SigDigger** ](https://github.com/BatchDrake/SigDigger)synchronize with the channel you want to hear, configure "Baseband audio preview" option, configure the bandwith to get all the info being sent and then set the Tuner to the level before the noise is really starting to increase:
+[**SigDigger** ](https://github.com/BatchDrake/SigDigger)を使用して、聞きたいチャンネルと同期し、「Baseband audio preview」オプションを設定し、送信されるすべての情報を取得するための帯域幅を設定し、ノイズが本当に増加し始める前のレベルにチューナーを設定します：
 
 ![](<../../images/image (585).png>)
 
-## Interesting tricks
+## 興味深いトリック
 
-- When a device is sending bursts of information, usually the **first part is going to be a preamble** so you **don't** need to **worry** if you **don't find information** in there **or if there are some errors** there.
-- In frames of information you usually should **find different frames well aligned between them**:
+- デバイスが情報のバーストを送信しているとき、通常、**最初の部分はプレアンブル**になるため、そこに**情報が見つからない場合やエラーがある場合**は**心配する必要はありません**。
+- 情報のフレームでは、通常、**異なるフレームが互いにうまく整列している**はずです：
 
 ![](<../../images/image (1076).png>)
 
 ![](<../../images/image (597).png>)
 
-- **After recovering the bits you might need to process them someway**. For example, in Manchester codification a up+down will be a 1 or 0 and a down+up will be the other one. So pairs of 1s and 0s (ups and downs) will be a real 1 or a real 0.
-- Even if a signal is using Manchester codification (it's impossible to find more than two 0s or 1s in a row), you might **find several 1s or 0s together in the preamble**!
+- **ビットを回復した後、何らかの方法で処理する必要があるかもしれません**。たとえば、マンチェスター符号化では、上+下は1または0、下+上はもう一方になります。したがって、1と0のペア（上昇と下降）は、実際の1または実際の0になります。
+- 信号がマンチェスター符号化を使用している場合（連続して2つ以上の0または1を見つけることは不可能です）、**プレアンブル内で複数の1または0を見つけることができるかもしれません**！
 
-### Uncovering modulation type with IQ
+### IQを使用した変調タイプの解明
 
-There are 3 ways to store information in signals: Modulating the **amplitude**, **frequency** or **phase**.\
-If you are checking a signal there are different ways to try to figure out what is being used to store information (fin more ways below) but a good one is to check the IQ graph.
+信号に情報を格納する方法は3つあります：**振幅**、**周波数**、または**位相**を変調します。\
+信号をチェックしている場合、情報を格納するために何が使用されているかを特定するためのさまざまな方法があります（以下に他の方法があります）が、良い方法の1つはIQグラフを確認することです。
 
 ![](<../../images/image (788).png>)
 
-- **Detecting AM**: If in the IQ graph appears for example **2 circles** (probably one in 0 and other in a different amplitude), it could means that this is an AM signal. This is because in the IQ graph the distance between the 0 and the circle is the amplitude of the signal, so it's easy to visualize different amplitudes being used.
-- **Detecting PM**: Like in the previous image, if you find small circles not related between them it probably means that a phase modulation is used. This is because in the IQ graph, the angle between the point and the 0,0 is the phase of the signal, so that means that 4 different phases are used.
-  - Note that if the information is hidden in the fact that a phase is changed and not in the phase itself, you won't see different phases clearly differentiated.
-- **Detecting FM**: IQ doesn't have a field to identify frequencies (distance to centre is amplitude and angle is phase).\
-  Therefore, to identify FM, you should **only see basically a circle** in this graph.\
-  Moreover, a different frequency is "represented" by the IQ graph by a **speed acceleration across the circle** (so in SysDigger selecting the signal the IQ graph is populated, if you find an acceleration or change of direction in the created circle it could mean that this is FM):
+- **AMの検出**：IQグラフに**2つの円**（おそらく1つは0、もう1つは異なる振幅にある）が表示される場合、これはAM信号である可能性があります。これは、IQグラフで0と円の間の距離が信号の振幅であるため、異なる振幅が使用されているのを視覚化しやすいからです。
+- **PMの検出**：前の画像のように、互いに関連しない小さな円を見つけた場合、位相変調が使用されている可能性があります。これは、IQグラフで点と0,0の間の角度が信号の位相であるため、4つの異なる位相が使用されていることを意味します。
+- 情報が位相の変化に隠されていて、位相自体には隠されていない場合、異なる位相が明確に区別されることはありません。
+- **FMの検出**：IQには周波数を識別するためのフィールドがありません（中心からの距離は振幅で、角度は位相です）。\
+したがって、FMを識別するには、このグラフで**基本的に円だけを見る必要があります**。\
+さらに、異なる周波数はIQグラフによって**円を横切る速度の加速**で「表現」されます（したがって、SysDiggerで信号を選択するとIQグラフが生成され、生成された円の加速や方向の変化が見つかると、これはFMである可能性があります）：
 
-## AM Example
+## AMの例
 
 {% file src="../../images/sigdigger_20220308_165547Z_2560000_433500000_float32_iq.raw" %}
 
-### Uncovering AM
+### AMの解明
 
-#### Checking the envelope
+#### エンベロープの確認
 
-Checking AM info with [**SigDigger** ](https://github.com/BatchDrake/SigDigger)and just looking at the **envelop** you can see different clear amplitude levels. The used signal is sending pulses with information in AM, this is how one pulse looks like:
+[**SigDigger** ](https://github.com/BatchDrake/SigDigger)を使用してAM情報を確認し、**エンベロープ**を見ていると、異なる明確な振幅レベルが見えます。使用されている信号は、AMで情報を送信するパルスを送信しており、1つのパルスは次のようになります：
 
 ![](<../../images/image (590).png>)
 
-And this is how part of the symbol looks like with the waveform:
+そして、波形を持つシンボルの一部は次のようになります：
 
 ![](<../../images/image (734).png>)
 
-#### Checking the Histogram
+#### ヒストグラムの確認
 
-You can **select the whole signal** where information is located, select **Amplitude** mode and **Selection** and click on **Histogram.** You can observer that 2 clear levels are only found
+情報がある信号全体を**選択**し、**振幅**モードと**選択**を選択して**ヒストグラム**をクリックします。2つの明確なレベルだけが見つかることが観察できます。
 
 ![](<../../images/image (264).png>)
 
-For example, if you select Frequency instead of Amplitude in this AM signal you find just 1 frequency (no way information modulated in frequency is just using 1 freq).
+たとえば、このAM信号で振幅の代わりに周波数を選択すると、1つの周波数しか見つかりません（周波数で変調された情報が1つの周波数だけを使用していることはありません）。
 
 ![](<../../images/image (732).png>)
 
-If you find a lot of frequencies potentially this won't be a FM, probably the signal frequency was just modified because of the channel.
+多くの周波数が見つかる場合、これはFMではない可能性が高く、信号の周波数はチャンネルの影響で変更された可能性があります。
 
-#### With IQ
+#### IQを使用して
 
-In this example you can see how there is a **big circle** but also **a lot of points in the centre.**
+この例では、**大きな円**があることがわかりますが、**中心に多くの点もあります**。
 
 ![](<../../images/image (222).png>)
 
-### Get Symbol Rate
+### シンボルレートの取得
 
-#### With one symbol
+#### 1つのシンボルで
 
-Select the smallest symbol you can find (so you are sure it's just 1) and check the "Selection freq". I this case it would be 1.013kHz (so 1kHz).
+見つけられる最小のシンボルを選択し（それが1つだけであることを確認）、"Selection freq"を確認します。この場合、1.013kHz（つまり1kHz）になります。
 
 ![](<../../images/image (78).png>)
 
-#### With a group of symbols
+#### シンボルのグループで
 
-You can also indicate the number of symbols you are going to select and SigDigger will calculate the frequency of 1 symbol (the more symbols selected the better probably). In this scenario I selected 10 symbols and the "Selection freq" is 1.004 Khz:
+選択するシンボルの数を指定することもでき、SigDiggerは1つのシンボルの周波数を計算します（選択するシンボルが多いほど、より良い結果が得られる可能性があります）。このシナリオでは、10個のシンボルを選択し、"Selection freq"は1.004 kHzです：
 
 ![](<../../images/image (1008).png>)
 
-### Get Bits
+### ビットの取得
 
-Having found this is an **AM modulated** signal and the **symbol rate** (and knowing that in this case something up means 1 and something down means 0), it's very easy to **obtain the bits** encoded in the signal. So, select the signal with info and configure the sampling and decision and press sample (check that **Amplitude** is selected, the discovered **Symbol rate** is configured and the **Gadner clock recovery** is selected):
+これは**AM変調**信号であり、**シンボルレート**が見つかり（この場合、何かが上昇すると1、何かが下降すると0を意味することを知っているため）、信号にエンコードされた**ビットを取得する**のは非常に簡単です。したがって、情報のある信号を選択し、サンプリングと決定を設定してサンプルを押します（**振幅**が選択されていること、発見された**シンボルレート**が設定されていること、**Gadnerクロック回復**が選択されていることを確認してください）：
 
 ![](<../../images/image (965).png>)
 
-- **Sync to selection intervals** means that if you previously selected intervals to find the symbol rate, that symbol rate will be used.
-- **Manual** means that the indicated symbol rate is going to be used
-- In **Fixed interval selection** you indicate the number of intervals that should be selected and it calculates the symbol rate from it
-- **Gadner clock recovery** is usually the best option, but you still need to indicate some approximate symbol rate.
+- **選択間隔に同期**は、以前にシンボルレートを見つけるために選択した間隔が使用されることを意味します。
+- **手動**は、指定されたシンボルレートが使用されることを意味します。
+- **固定間隔選択**では、選択する必要がある間隔の数を指定し、それに基づいてシンボルレートを計算します。
+- **Gadnerクロック回復**は通常最良のオプションですが、いくつかの近似シンボルレートを指定する必要があります。
 
-Pressing sample this appears:
+サンプルを押すと、次のようになります：
 
 ![](<../../images/image (644).png>)
 
-Now, to make SigDigger understand **where is the range** of the level carrying information you need to click on the **lower level** and maintain clicked until the biggest level:
+次に、SigDiggerに**情報を持つレベルの範囲**を理解させるために、**下位レベル**をクリックし、最大レベルまでクリックを維持する必要があります：
 
 ![](<../../images/image (439).png>)
 
-If there would have been for example **4 different levels of amplitude**, you should have need to configure the **Bits per symbol to 2** and select from the smallest to the biggest.
+たとえば、**4つの異なる振幅レベル**があった場合、**シンボルあたりのビットを2に設定**し、最小から最大まで選択する必要があります。
 
-Finally **increasing** the **Zoom** and **changing the Row size** you can see the bits (and you can select all and copy to get all the bits):
+最後に、**ズームを増やし**、**行のサイズを変更することで**ビットを確認できます（すべてを選択してコピーしてすべてのビットを取得できます）：
 
 ![](<../../images/image (276).png>)
 
-If the signal has more than 1 bit per symbol (for example 2), SigDigger has **no way to know which symbol is** 00, 01, 10, 11, so it will use different **grey scales** the represent each (and if you copy the bits it will use **numbers from 0 to 3**, you will need to treat them).
+信号がシンボルあたり1ビット以上（たとえば2ビット）を持っている場合、SigDiggerには**どのシンボルが**00、01、10、11であるかを知る方法がないため、異なる**グレースケール**を使用してそれぞれを表現します（ビットをコピーすると、**0から3の数字**を使用しますので、処理が必要です）。
 
-Also, use **codifications** such as **Manchester**, and **up+down** can be **1 or 0** and an down+up can be a 1 or 0. In those cases you need to **treat the obtained ups (1) and downs (0)** to substitute the pairs of 01 or 10 as 0s or 1s.
+また、**符号化**として**マンチェスター**を使用し、**上+下**は**1または0**、**下+上**は1または0になることがあります。その場合、取得した上昇（1）と下降（0）を処理して、01または10のペアを0または1に置き換える必要があります。
 
-## FM Example
+## FMの例
 
 {% file src="../../images/sigdigger_20220308_170858Z_2560000_433500000_float32_iq.raw" %}
 
-### Uncovering FM
+### FMの解明
 
-#### Checking the frequencies and waveform
+#### 周波数と波形の確認
 
-Signal example sending information modulated in FM:
+FMで変調された情報を送信する信号の例：
 
 ![](<../../images/image (725).png>)
 
-In the previous image you can observe pretty good that **2 frequencies are used** but if you **observe** the **waveform** you might n**ot be able to identify correctly the 2 different frequencies**:
+前の画像では、**2つの周波数が使用されている**ことがかなりよく観察できますが、**波形**を観察すると、**2つの異なる周波数を正しく識別できないかもしれません**：
 
 ![](<../../images/image (717).png>)
 
-This is because I capture the signal in booth frequencies, therefore one is approximately the other in negative:
+これは、両方の周波数で信号をキャプチャしたため、1つは負の近似であるためです：
 
 ![](<../../images/image (942).png>)
 
-If the synchronized frequency is **closer to one frequency than to the other** you can easily see the 2 different frequencies:
+同期された周波数が**1つの周波数に近い場合**、2つの異なる周波数を簡単に見ることができます：
 
 ![](<../../images/image (422).png>)
 
 ![](<../../images/image (488).png>)
 
-#### Checking the histogram
+#### ヒストグラムの確認
 
-Checking the frequency histogram of the signal with information you can easily see 2 different signals:
+情報を持つ信号の周波数ヒストグラムを確認すると、2つの異なる信号を簡単に見ることができます：
 
 ![](<../../images/image (871).png>)
 
-In this case if you check the **Amplitude histogram** you will find **only one amplitude**, so it **cannot be AM** (if you find a lot of amplitudes it might be because the signal has been losing power along the channel):
+この場合、**振幅ヒストグラム**を確認すると、**1つの振幅**しか見つからないため、**AMではない**ことがわかります（多くの振幅が見つかる場合、信号がチャンネルに沿って電力を失っている可能性があります）：
 
 ![](<../../images/image (817).png>)
 
-And this is would be phase histogram (which makes very clear the signal is not modulated in phase):
+そして、これは位相ヒストグラムになります（信号が位相で変調されていないことを非常に明確に示します）：
 
 ![](<../../images/image (996).png>)
 
-#### With IQ
+#### IQを使用して
 
-IQ doesn't have a field to identify frequencies (distance to centre is amplitude and angle is phase).\
-Therefore, to identify FM, you should **only see basically a circle** in this graph.\
-Moreover, a different frequency is "represented" by the IQ graph by a **speed acceleration across the circle** (so in SysDigger selecting the signal the IQ graph is populated, if you find an acceleration or change of direction in the created circle it could mean that this is FM):
+IQには周波数を識別するためのフィールドがありません（中心からの距離は振幅で、角度は位相です）。\
+したがって、FMを識別するには、このグラフで**基本的に円だけを見る必要があります**。\
+さらに、異なる周波数はIQグラフによって**円を横切る速度の加速**で「表現」されます（したがって、SysDiggerで信号を選択するとIQグラフが生成され、生成された円の加速や方向の変化が見つかると、これはFMである可能性があります）：
 
 ![](<../../images/image (81).png>)
 
-### Get Symbol Rate
+### シンボルレートの取得
 
-You can use the **same technique as the one used in the AM example** to get the symbol rate once you have found the frequencies carrying symbols.
+シンボルを運ぶ周波数を見つけたら、**AMの例で使用したのと同じ技術**を使用してシンボルレートを取得できます。
 
-### Get Bits
+### ビットの取得
 
-You can use the **same technique as the one used in the AM example** to get the bits once you have **found the signal is modulated in frequency** and the **symbol rate**.
+周波数で変調されている信号を**見つけた後**、**AMの例で使用したのと同じ技術**を使用してビットを取得できます。
 
 {{#include ../../banners/hacktricks-training.md}}
-

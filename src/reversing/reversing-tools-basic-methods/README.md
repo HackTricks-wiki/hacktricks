@@ -1,118 +1,108 @@
-# Reversing Tools & Basic Methods
+# リバースツールと基本的な手法
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## ImGui Based Reversing tools
+## ImGuiベースのリバースツール
 
-Software:
+ソフトウェア:
 
 - ReverseKit: [https://github.com/zer0condition/ReverseKit](https://github.com/zer0condition/ReverseKit)
 
-## Wasm decompiler / Wat compiler
+## Wasmデコンパイラ / Watコンパイラ
 
-Online:
+オンライン:
 
-- Use [https://webassembly.github.io/wabt/demo/wasm2wat/index.html](https://webassembly.github.io/wabt/demo/wasm2wat/index.html) to **decompile** from wasm (binary) to wat (clear text)
-- Use [https://webassembly.github.io/wabt/demo/wat2wasm/](https://webassembly.github.io/wabt/demo/wat2wasm/) to **compile** from wat to wasm
-- you can also try to use [https://wwwg.github.io/web-wasmdec/](https://wwwg.github.io/web-wasmdec/) to decompile
+- [https://webassembly.github.io/wabt/demo/wasm2wat/index.html](https://webassembly.github.io/wabt/demo/wasm2wat/index.html)を使用して、**wasm**（バイナリ）から**wat**（クリアテキスト）に**デコンパイル**します。
+- [https://webassembly.github.io/wabt/demo/wat2wasm/](https://webassembly.github.io/wabt/demo/wat2wasm/)を使用して、**wat**から**wasm**に**コンパイル**します。
+- [https://wwwg.github.io/web-wasmdec/](https://wwwg.github.io/web-wasmdec/)を使用してデコンパイルすることもできます。
 
-Software:
+ソフトウェア:
 
 - [https://www.pnfsoftware.com/jeb/demo](https://www.pnfsoftware.com/jeb/demo)
 - [https://github.com/wwwg/wasmdec](https://github.com/wwwg/wasmdec)
 
-## .NET decompiler
+## .NETデコンパイラ
 
 ### [dotPeek](https://www.jetbrains.com/decompiler/)
 
-dotPeek is a decompiler that **decompiles and examines multiple formats**, including **libraries** (.dll), **Windows metadata file**s (.winmd), and **executables** (.exe). Once decompiled, an assembly can be saved as a Visual Studio project (.csproj).
+dotPeekは、**ライブラリ**（.dll）、**Windowsメタデータファイル**（.winmd）、および**実行可能ファイル**（.exe）を含む**複数のフォーマットをデコンパイルおよび検査**するデコンパイラです。デコンパイルされた後、アセンブリはVisual Studioプロジェクト（.csproj）として保存できます。
 
-The merit here is that if a lost source code requires restoration from a legacy assembly, this action can save time. Further, dotPeek provides handy navigation throughout the decompiled code, making it one of the perfect tools for **Xamarin algorithm analysis.**
+ここでの利点は、失われたソースコードをレガシーアセンブリから復元する必要がある場合、このアクションが時間を節約できることです。さらに、dotPeekはデコンパイルされたコード全体を便利にナビゲートできるため、**Xamarinアルゴリズム分析**に最適なツールの1つです。
 
 ### [.NET Reflector](https://www.red-gate.com/products/reflector/)
 
-With a comprehensive add-in model and an API that extends the tool to suit your exact needs, .NET reflector saves time and simplifies development. Let's take a look at the plethora of reverse engineering services this tool provides:
+包括的なアドインモデルと、ツールを正確なニーズに合わせて拡張するAPIを備えた.NET Reflectorは、時間を節約し、開発を簡素化します。このツールが提供する逆コンパイルサービスの豊富さを見てみましょう：
 
-- Provides an insight into how the data flows through a library or component
-- Provides insight into the implementation and usage of .NET languages and frameworks
-- Finds undocumented and unexposed functionality to get more out of the APIs and technologies used.
-- Finds dependencies and different assemblies
-- Tracks down the exact location of errors in your code, third-party components, and libraries.
-- Debugs into the source of all the .NET code you work with.
+- ライブラリやコンポーネントを通じてデータがどのように流れるかの洞察を提供します。
+- .NET言語やフレームワークの実装と使用に関する洞察を提供します。
+- 使用されているAPIや技術からより多くの機能を引き出すために、文書化されていない機能や公開されていない機能を見つけます。
+- 依存関係や異なるアセンブリを見つけます。
+- コード、サードパーティコンポーネント、およびライブラリ内のエラーの正確な場所を追跡します。
+- あなたが扱うすべての.NETコードのソースをデバッグします。
 
 ### [ILSpy](https://github.com/icsharpcode/ILSpy) & [dnSpy](https://github.com/dnSpy/dnSpy/releases)
 
-[ILSpy plugin for Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode): You can have it in any OS (you can install it directly from VSCode, no need to download the git. Click on **Extensions** and **search ILSpy**).\
-If you need to **decompile**, **modify** and **recompile** again you can use [**dnSpy**](https://github.com/dnSpy/dnSpy/releases) or an actively maintained fork of it, [**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases). (**Right Click -> Modify Method** to change something inside a function).
+[Visual Studio Code用ILSpyプラグイン](https://github.com/icsharpcode/ilspy-vscode): どのOSでも使用できます（VSCodeから直接インストールできます。gitをダウンロードする必要はありません。**拡張機能**をクリックし、**ILSpy**を検索します）。\
+**デコンパイル**、**修正**、および再**コンパイル**する必要がある場合は、[**dnSpy**](https://github.com/dnSpy/dnSpy/releases)またはそのアクティブにメンテナンスされているフォークである[**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases)を使用できます。（**右クリック -> メソッドを修正**して関数内の何かを変更します）。
 
-### DNSpy Logging
+### DNSpyロギング
 
-In order to make **DNSpy log some information in a file**, you could use this snippet:
-
+**DNSpyがファイルに情報をログする**ために、このスニペットを使用できます：
 ```cs
 using System.IO;
 path = "C:\\inetpub\\temp\\MyTest2.txt";
 File.AppendAllText(path, "Password: " + password + "\n");
 ```
+### DNSpy デバッグ
 
-### DNSpy Debugging
+DNSpy を使用してコードをデバッグするには、次の手順を実行する必要があります。
 
-In order to debug code using DNSpy you need to:
-
-First, change the **Assembly attributes** related to **debugging**:
+まず、**デバッグ**に関連する **Assembly 属性** を変更します：
 
 ![](<../../images/image (973).png>)
-
-From:
-
 ```aspnet
 [assembly: Debuggable(DebuggableAttribute.DebuggingModes.IgnoreSymbolStoreSequencePoints)]
 ```
-
-To:
-
+翻訳する内容が提供されていません。翻訳が必要なテキストを提供してください。
 ```
 [assembly: Debuggable(DebuggableAttribute.DebuggingModes.Default |
 DebuggableAttribute.DebuggingModes.DisableOptimizations |
 DebuggableAttribute.DebuggingModes.IgnoreSymbolStoreSequencePoints |
 DebuggableAttribute.DebuggingModes.EnableEditAndContinue)]
 ```
-
-And click on **compile**:
+そして、**compile**をクリックします：
 
 ![](<../../images/image (314) (1).png>)
 
-Then save the new file via _**File >> Save module...**_:
+次に、_**File >> Save module...**_を介して新しいファイルを保存します：
 
 ![](<../../images/image (602).png>)
 
-This is necessary because if you don't do this, at **runtime** several **optimisations** will be applied to the code and it could be possible that while debugging a **break-point is never hit** or some **variables don't exist**.
+これは必要です。なぜなら、これを行わないと、**runtime**中にいくつかの**optimisations**がコードに適用され、デバッグ中に**break-pointが決してヒットしない**か、いくつかの**variablesが存在しない**可能性があるからです。
 
-Then, if your .NET application is being **run** by **IIS** you can **restart** it with:
-
+次に、.NETアプリケーションが**IIS**によって**run**されている場合は、次のコマンドで**restart**できます：
 ```
 iisreset /noforce
 ```
-
-Then, in order to start debugging you should close all the opened files and inside the **Debug Tab** select **Attach to Process...**:
+すべての開いているファイルを閉じて、**Debug Tab**内で**Attach to Process...**を選択します：
 
 ![](<../../images/image (318).png>)
 
-Then select **w3wp.exe** to attach to the **IIS server** and click **attach**:
+次に、**IIS server**にアタッチするために**w3wp.exe**を選択し、**attach**をクリックします：
 
 ![](<../../images/image (113).png>)
 
-Now that we are debugging the process, it's time to stop it and load all the modules. First click on _Debug >> Break All_ and then click on _**Debug >> Windows >> Modules**_:
+プロセスのデバッグを開始したので、実行を停止してすべてのモジュールをロードする時間です。まず、_Debug >> Break All_をクリックし、次に_**Debug >> Windows >> Modules**_をクリックします：
 
 ![](<../../images/image (132).png>)
 
 ![](<../../images/image (834).png>)
 
-Click any module on **Modules** and select **Open All Modules**:
+**Modules**の任意のモジュールをクリックし、**Open All Modules**を選択します：
 
 ![](<../../images/image (922).png>)
 
-Right click any module in **Assembly Explorer** and click **Sort Assemblies**:
+**Assembly Explorer**の任意のモジュールを右クリックし、**Sort Assemblies**をクリックします：
 
 ![](<../../images/image (339).png>)
 
@@ -125,44 +115,44 @@ Right click any module in **Assembly Explorer** and click **Sort Assemblies**:
 
 ### Using IDA
 
-- **Load rundll32** (64bits in C:\Windows\System32\rundll32.exe and 32 bits in C:\Windows\SysWOW64\rundll32.exe)
-- Select **Windbg** debugger
-- Select "**Suspend on library load/unload**"
+- **Load rundll32** (64ビットはC:\Windows\System32\rundll32.exe、32ビットはC:\Windows\SysWOW64\rundll32.exe)
+- **Windbg**デバッガを選択
+- "**Suspend on library load/unload**"を選択
 
 ![](<../../images/image (868).png>)
 
-- Configure the **parameters** of the execution putting the **path to the DLL** and the function that you want to call:
+- 実行の**parameters**を設定し、**DLLのパス**と呼び出したい関数を指定します：
 
 ![](<../../images/image (704).png>)
 
-Then, when you start debugging **the execution will be stopped when each DLL is loaded**, then, when rundll32 load your DLL the execution will be stopped.
+次に、デバッグを開始すると、**各DLLがロードされると実行が停止します**。その後、rundll32があなたのDLLをロードすると、実行が停止します。
 
-But, how can you get to the code of the DLL that was lodaded? Using this method, I don't know how.
+しかし、ロードされたDLLのコードにどうやってアクセスできますか？この方法では、私はわかりません。
 
 ### Using x64dbg/x32dbg
 
-- **Load rundll32** (64bits in C:\Windows\System32\rundll32.exe and 32 bits in C:\Windows\SysWOW64\rundll32.exe)
-- **Change the Command Line** ( _File --> Change Command Line_ ) and set the path of the dll and the function that you want to call, for example: "C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii_2.dll",DLLMain
-- Change _Options --> Settings_ and select "**DLL Entry**".
-- Then **start the execution**, the debugger will stop at each dll main, at some point you will **stop in the dll Entry of your dll**. From there, just search for the points where you want to put a breakpoint.
+- **Load rundll32** (64ビットはC:\Windows\System32\rundll32.exe、32ビットはC:\Windows\SysWOW64\rundll32.exe)
+- **Command Lineを変更** (_File --> Change Command Line_)し、DLLのパスと呼び出したい関数を設定します。例えば："C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii_2.dll",DLLMain
+- _Options --> Settings_を変更し、**DLL Entry**を選択します。
+- その後、**実行を開始**します。デバッガは各DLLのメインで停止し、ある時点で**あなたのDLLのDLL Entryで停止します**。そこから、ブレークポイントを設定したいポイントを検索します。
 
-Notice that when the execution is stopped by any reason in win64dbg you can see **in which code you are** looking in the **top of the win64dbg window**:
+実行が何らかの理由でwin64dbgで停止した場合、**win64dbgウィンドウの上部**で**どのコードを見ているか**を確認できます：
 
 ![](<../../images/image (842).png>)
 
-Then, looking to this ca see when the execution was stopped in the dll you want to debug.
+これにより、デバッグしたいDLLで実行が停止したときに確認できます。
 
 ## GUI Apps / Videogames
 
-[**Cheat Engine**](https://www.cheatengine.org/downloads.php) is a useful program to find where important values are saved inside the memory of a running game and change them. More info in:
+[**Cheat Engine**](https://www.cheatengine.org/downloads.php)は、実行中のゲームのメモリ内に重要な値が保存されている場所を見つけて変更するのに役立つプログラムです。詳細は以下を参照してください：
 
 {{#ref}}
 cheat-engine.md
 {{#endref}}
 
-[**PiNCE**](https://github.com/korcankaraokcu/PINCE) is a front-end/reverse engineering tool for the GNU Project Debugger (GDB), focused on games. However, it can be used for any reverse-engineering related stuff
+[**PiNCE**](https://github.com/korcankaraokcu/PINCE)は、GNU Project Debugger (GDB)のフロントエンド/リバースエンジニアリングツールで、ゲームに特化しています。ただし、リバースエンジニアリングに関連する任意の作業にも使用できます。
 
-[**Decompiler Explorer**](https://dogbolt.org/) is a web front-end to a number of decompilers. This web service lets you compare the output of different decompilers on small executables.
+[**Decompiler Explorer**](https://dogbolt.org/)は、いくつかのデコンパイラへのウェブフロントエンドです。このウェブサービスを使用すると、小さな実行可能ファイルに対する異なるデコンパイラの出力を比較できます。
 
 ## ARM & MIPS
 
@@ -172,11 +162,11 @@ cheat-engine.md
 
 ### Debugging a shellcode with blobrunner
 
-[**Blobrunner**](https://github.com/OALabs/BlobRunner) will **allocate** the **shellcode** inside a space of memory, will **indicate** you the **memory address** were the shellcode was allocated and will **stop** the execution.\
-Then, you need to **attach a debugger** (Ida or x64dbg) to the process and put a **breakpoint the indicated memory address** and **resume** the execution. This way you will be debugging the shellcode.
+[**Blobrunner**](https://github.com/OALabs/BlobRunner)は、**shellcode**をメモリのスペース内に**割り当て**、**shellcode**が割り当てられた**メモリアドレス**を**示し**、実行を**停止**します。\
+その後、プロセスに**デバッガ**（Idaまたはx64dbg）をアタッチし、**指定されたメモリアドレスにブレークポイントを設定**し、実行を**再開**します。これにより、shellcodeのデバッグが行えます。
 
-The releases github page contains zips containing the compiled releases: [https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
-You can find a slightly modified version of Blobrunner in the following link. In order to compile it just **create a C/C++ project in Visual Studio Code, copy and paste the code and build it**.
+リリースのGitHubページには、コンパイルされたリリースを含むzipファイルがあります：[https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
+以下のリンクにBlobrunnerのわずかに修正されたバージョンがあります。コンパイルするには、**Visual Studio CodeでC/C++プロジェクトを作成し、コードをコピー＆ペーストしてビルド**します。
 
 {{#ref}}
 blobrunner.md
@@ -184,35 +174,34 @@ blobrunner.md
 
 ### Debugging a shellcode with jmp2it
 
-[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4)is very similar to blobrunner. It will **allocate** the **shellcode** inside a space of memory, and start an **eternal loop**. You then need to **attach the debugger** to the process, **play start wait 2-5 secs and press stop** and you will find yourself inside the **eternal loop**. Jump to the next instruction of the eternal loop as it will be a call to the shellcode, and finally you will find yourself executing the shellcode.
+[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4)は、blobrunnerに非常に似ています。**shellcode**をメモリのスペース内に**割り当て**、**永続ループ**を開始します。その後、プロセスに**デバッガをアタッチ**し、**再生を開始して2-5秒待ち、停止を押す**と、**永続ループ**内に入ります。永続ループの次の命令にジャンプすると、それはshellcodeへの呼び出しになります。最終的に、shellcodeを実行している自分を見つけることができます。
 
 ![](<../../images/image (509).png>)
 
-You can download a compiled version of [jmp2it inside the releases page](https://github.com/adamkramer/jmp2it/releases/).
+コンパイルされたバージョンは、[リリースページ](https://github.com/adamkramer/jmp2it/releases/)からダウンロードできます。
 
 ### Debugging shellcode using Cutter
 
-[**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0) is the GUI of radare. Using cutter you can emulate the shellcode and inspect it dynamically.
+[**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0)は、radareのGUIです。Cutterを使用すると、shellcodeをエミュレートし、動的に検査できます。
 
-Note that Cutter allows you to "Open File" and "Open Shellcode". In my case when I opened the shellcode as a file it decompiled it correctly, but when I opened it as a shellcode it didn't:
+Cutterは「ファイルを開く」と「shellcodeを開く」を許可します。私の場合、shellcodeをファイルとして開くと正しくデコンパイルされましたが、shellcodeとして開くとそうではありませんでした：
 
 ![](<../../images/image (562).png>)
 
-In order to start the emulation in the place you want to, set a bp there and apparently cutter will automatically start the emulation from there:
+エミュレーションを開始したい場所にbpを設定すると、Cutterは自動的にそこからエミュレーションを開始します：
 
 ![](<../../images/image (589).png>)
 
 ![](<../../images/image (387).png>)
 
-You can see the stack for example inside a hex dump:
+例えば、16進ダンプ内でスタックを見ることができます：
 
 ![](<../../images/image (186).png>)
 
 ### Deobfuscating shellcode and getting executed functions
 
-You should try [**scdbg**](http://sandsprite.com/blogs/index.php?uid=7&pid=152).\
-It will tell you things like **which functions** is the shellcode using and if the shellcode is **decoding** itself in memory.
-
+[**scdbg**](http://sandsprite.com/blogs/index.php?uid=7&pid=152)を試してみるべきです。\
+それは、**どの関数**がshellcodeで使用されているか、またshellcodeが**メモリ内で自分自身をデコード**しているかどうかを教えてくれます。
 ```bash
 scdbg.exe -f shellcode # Get info
 scdbg.exe -f shellcode -r #show analysis report at end of run
@@ -221,67 +210,64 @@ scdbg.exe -f shellcode -d #Dump decoded shellcode
 scdbg.exe -f shellcode /findsc #Find offset where starts
 scdbg.exe -f shellcode /foff 0x0000004D #Start the executing in that offset
 ```
-
-scDbg also counts with a graphical launcher where you can select the options you want and execute the shellcode
+scDbgには、選択したオプションを選んでシェルコードを実行できるグラフィカルランチャーもあります。
 
 ![](<../../images/image (258).png>)
 
-The **Create Dump** option will dump the final shellcode if any change is done to the shellcode dynamically in memory (useful to download the decoded shellcode). The **start offset** can be useful to start the shellcode at a specific offset. The **Debug Shell** option is useful to debug the shellcode using the scDbg terminal (however I find any of the options explained before better for this matter as you will be able to use Ida or x64dbg).
+**Create Dump**オプションは、メモリ内でシェルコードに動的に変更が加えられた場合に最終的なシェルコードをダンプします（デコードされたシェルコードをダウンロードするのに便利です）。**start offset**は、特定のオフセットでシェルコードを開始するのに役立ちます。**Debug Shell**オプションは、scDbgターミナルを使用してシェルコードをデバッグするのに便利ですが、Idaやx64dbgを使用できるため、前述のオプションの方がこの目的には適していると思います。
 
-### Disassembling using CyberChef
+### CyberChefを使用した逆アセンブル
 
-Upload your shellcode file as input and use the following recipe to decompile it: [https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)](<https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)>)
+シェルコードファイルを入力としてアップロードし、次のレシピを使用して逆コンパイルします: [https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)](<https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)>)
 
 ## [Movfuscator](https://github.com/xoreaxeaxeax/movfuscator)
 
-This obfuscator **modifies all the instructions for `mov`**(yeah, really cool). It also uses interruptions to change executions flows. For more information about how does it works:
+この難読化ツールは、**すべての`mov`命令を修正します**（本当にクールです）。実行フローを変更するために割り込みも使用します。どのように機能するかについての詳細は以下を参照してください:
 
 - [https://www.youtube.com/watch?v=2VF_wPkiBJY](https://www.youtube.com/watch?v=2VF_wPkiBJY)
 - [https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas_2015_the_movfuscator.pdf](https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas_2015_the_movfuscator.pdf)
 
-If you are lucky [demovfuscator](https://github.com/kirschju/demovfuscator) will deofuscate the binary. It has several dependencies
-
+運が良ければ、[demovfuscator](https://github.com/kirschju/demovfuscator)がバイナリをデオブfuscateします。いくつかの依存関係があります。
 ```
 apt-get install libcapstone-dev
 apt-get install libz3-dev
 ```
+そして[keystoneをインストール](https://github.com/keystone-engine/keystone/blob/master/docs/COMPILE-NIX.md)します（`apt-get install cmake; mkdir build; cd build; ../make-share.sh; make install`）
 
-And [install keystone](https://github.com/keystone-engine/keystone/blob/master/docs/COMPILE-NIX.md) (`apt-get install cmake; mkdir build; cd build; ../make-share.sh; make install`)
-
-If you are playing a **CTF, this workaround to find the flag** could be very useful: [https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html](https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html)
+**CTFをプレイしている場合、このフラグを見つけるためのこの回避策**は非常に役立つかもしれません: [https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html](https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html)
 
 ## Rust
 
-To find the **entry point** search the functions by `::main` like in:
+**エントリーポイント**を見つけるには、`::main`で関数を検索します:
 
 ![](<../../images/image (1080).png>)
 
-In this case the binary was called authenticator, so it's pretty obvious that this is the interesting main function.\
-Having the **name** of the **functions** being called, search for them on the **Internet** to learn about their **inputs** and **outputs**.
+この場合、バイナリはauthenticatorと呼ばれていたので、これは興味深いメイン関数であることは明らかです。\
+呼び出されている**関数**の**名前**を持っているので、**インターネット**でそれらを検索して**入力**と**出力**について学びます。
 
 ## **Delphi**
 
-For Delphi compiled binaries you can use [https://github.com/crypto2011/IDR](https://github.com/crypto2011/IDR)
+Delphiでコンパイルされたバイナリには、[https://github.com/crypto2011/IDR](https://github.com/crypto2011/IDR)を使用できます。
 
-If you have to reverse a Delphi binary I would suggest you to use the IDA plugin [https://github.com/Coldzer0/IDA-For-Delphi](https://github.com/Coldzer0/IDA-For-Delphi)
+Delphiバイナリをリバースする必要がある場合は、IDAプラグイン[https://github.com/Coldzer0/IDA-For-Delphi](https://github.com/Coldzer0/IDA-For-Delphi)を使用することをお勧めします。
 
-Just press **ATL+f7** (import python plugin in IDA) and select the python plugin.
+**ATL+f7**を押して（IDAにPythonプラグインをインポート）Pythonプラグインを選択します。
 
-This plugin will execute the binary and resolve function names dynamically at the start of the debugging. After starting the debugging press again the Start button (the green one or f9) and a breakpoint will hit in the beginning of the real code.
+このプラグインは、バイナリを実行し、デバッグの開始時に関数名を動的に解決します。デバッグを開始した後、再度スタートボタン（緑のボタンまたはf9）を押すと、実際のコードの最初にブレークポイントがヒットします。
 
-It is also very interesting because if you press a button in the graphic application the debugger will stop in the function executed by that bottom.
+また、グラフィックアプリケーションでボタンを押すと、デバッガーはそのボタンによって実行された関数で停止するため、非常に興味深いです。
 
 ## Golang
 
-If you have to reverse a Golang binary I would suggest you to use the IDA plugin [https://github.com/sibears/IDAGolangHelper](https://github.com/sibears/IDAGolangHelper)
+Golangバイナリをリバースする必要がある場合は、IDAプラグイン[https://github.com/sibears/IDAGolangHelper](https://github.com/sibears/IDAGolangHelper)を使用することをお勧めします。
 
-Just press **ATL+f7** (import python plugin in IDA) and select the python plugin.
+**ATL+f7**を押して（IDAにPythonプラグインをインポート）Pythonプラグインを選択します。
 
-This will resolve the names of the functions.
+これにより、関数の名前が解決されます。
 
-## Compiled Python
+## コンパイルされたPython
 
-In this page you can find how to get the python code from an ELF/EXE python compiled binary:
+このページでは、ELF/EXE PythonコンパイルバイナリからPythonコードを取得する方法を見つけることができます:
 
 {{#ref}}
 ../../generic-methodologies-and-resources/basic-forensic-methodology/specific-software-file-type-tricks/.pyc.md
@@ -289,19 +275,18 @@ In this page you can find how to get the python code from an ELF/EXE python comp
 
 ## GBA - Game Body Advance
 
-If you get the **binary** of a GBA game you can use different tools to **emulate** and **debug** it:
+GBAゲームの**バイナリ**を取得した場合、さまざまなツールを使用して**エミュレート**および**デバッグ**できます:
 
-- [**no$gba**](https://problemkaputt.de/gba.htm) (_Download the debug version_) - Contains a debugger with interface
-- [**mgba** ](https://mgba.io)- Contains a CLI debugger
-- [**gba-ghidra-loader**](https://github.com/pudii/gba-ghidra-loader) - Ghidra plugin
-- [**GhidraGBA**](https://github.com/SiD3W4y/GhidraGBA) - Ghidra plugin
+- [**no$gba**](https://problemkaputt.de/gba.htm) (_デバッグ版をダウンロード_) - インターフェースを持つデバッガーを含む
+- [**mgba** ](https://mgba.io) - CLIデバッガーを含む
+- [**gba-ghidra-loader**](https://github.com/pudii/gba-ghidra-loader) - Ghidraプラグイン
+- [**GhidraGBA**](https://github.com/SiD3W4y/GhidraGBA) - Ghidraプラグイン
 
-In [**no$gba**](https://problemkaputt.de/gba.htm), in _**Options --> Emulation Setup --> Controls**_\*\* \*\* you can see how to press the Game Boy Advance **buttons**
+[**no$gba**](https://problemkaputt.de/gba.htm)の_**Options --> Emulation Setup --> Controls**_\*\* \*\*では、Game Boy Advanceの**ボタン**を押す方法を確認できます。
 
 ![](<../../images/image (581).png>)
 
-When pressed, each **key has a value** to identify it:
-
+押すと、各**キーには識別するための値**があります:
 ```
 A = 1
 B = 2
@@ -314,100 +299,92 @@ DOWN = 128
 R = 256
 L = 256
 ```
-
-So, in this kind of program, the interesting part will be **how the program treats the user input**. In the address **0x4000130** you will find the commonly found function: **KEYINPUT**.
+この種のプログラムでは、興味深い部分は**プログラムがユーザー入力をどのように処理するか**です。アドレス**0x4000130**には、一般的に見られる関数**KEYINPUT**があります。
 
 ![](<../../images/image (447).png>)
 
-In the previous image you can find that the function is called from **FUN_080015a8** (addresses: _0x080015fa_ and _0x080017ac_).
+前の画像では、関数が**FUN_080015a8**から呼び出されているのがわかります（アドレス: _0x080015fa_ と _0x080017ac_）。
 
-In that function, after some init operations (without any importance):
-
+その関数では、いくつかの初期化操作の後（重要ではない）:
 ```c
 void FUN_080015a8(void)
 
 {
-  ushort uVar1;
-  undefined4 uVar2;
-  undefined4 uVar3;
-  ushort uVar4;
-  int iVar5;
-  ushort *puVar6;
-  undefined *local_2c;
+ushort uVar1;
+undefined4 uVar2;
+undefined4 uVar3;
+ushort uVar4;
+int iVar5;
+ushort *puVar6;
+undefined *local_2c;
 
-  DISPCNT = 0x1140;
-  FUN_08000a74();
-  FUN_08000ce4(1);
-  DISPCNT = 0x404;
-  FUN_08000dd0(&DAT_02009584,0x6000000,&DAT_030000dc);
-  FUN_08000354(&DAT_030000dc,0x3c);
-  uVar4 = DAT_030004d8;
+DISPCNT = 0x1140;
+FUN_08000a74();
+FUN_08000ce4(1);
+DISPCNT = 0x404;
+FUN_08000dd0(&DAT_02009584,0x6000000,&DAT_030000dc);
+FUN_08000354(&DAT_030000dc,0x3c);
+uVar4 = DAT_030004d8;
 ```
-
-It's found this code:
-
+このコードが見つかりました：
 ```c
-  do {
-    DAT_030004da = uVar4; //This is the last key pressed
-    DAT_030004d8 = KEYINPUT | 0xfc00;
-    puVar6 = &DAT_0200b03c;
-    uVar4 = DAT_030004d8;
-    do {
-      uVar2 = DAT_030004dc;
-      uVar1 = *puVar6;
-      if ((uVar1 & DAT_030004da & ~uVar4) != 0) {
+do {
+DAT_030004da = uVar4; //This is the last key pressed
+DAT_030004d8 = KEYINPUT | 0xfc00;
+puVar6 = &DAT_0200b03c;
+uVar4 = DAT_030004d8;
+do {
+uVar2 = DAT_030004dc;
+uVar1 = *puVar6;
+if ((uVar1 & DAT_030004da & ~uVar4) != 0) {
 ```
-
-The last if is checking **`uVar4`** is in the **last Keys** and not is the current key, also called letting go off a button (current key is stored in **`uVar1`**).
-
+最後のifは**`uVar4`**が**最後のキー**にあり、現在のキーではないことを確認しています。現在のキーは**`uVar1`**に保存されています。
 ```c
-        if (uVar1 == 4) {
-          DAT_030000d4 = 0;
-          uVar3 = FUN_08001c24(DAT_030004dc);
-          FUN_08001868(uVar2,0,uVar3);
-          DAT_05000000 = 0x1483;
-          FUN_08001844(&DAT_0200ba18);
-          FUN_08001844(&DAT_0200ba20,&DAT_0200ba40);
-          DAT_030000d8 = 0;
-          uVar4 = DAT_030004d8;
-        }
-        else {
-          if (uVar1 == 8) {
-            if (DAT_030000d8 == 0xf3) {
-              DISPCNT = 0x404;
-              FUN_08000dd0(&DAT_02008aac,0x6000000,&DAT_030000dc);
-              FUN_08000354(&DAT_030000dc,0x3c);
-              uVar4 = DAT_030004d8;
-            }
-          }
-          else {
-            if (DAT_030000d4 < 8) {
-              DAT_030000d4 = DAT_030000d4 + 1;
-              FUN_08000864();
-              if (uVar1 == 0x10) {
-                DAT_030000d8 = DAT_030000d8 + 0x3a;
+if (uVar1 == 4) {
+DAT_030000d4 = 0;
+uVar3 = FUN_08001c24(DAT_030004dc);
+FUN_08001868(uVar2,0,uVar3);
+DAT_05000000 = 0x1483;
+FUN_08001844(&DAT_0200ba18);
+FUN_08001844(&DAT_0200ba20,&DAT_0200ba40);
+DAT_030000d8 = 0;
+uVar4 = DAT_030004d8;
+}
+else {
+if (uVar1 == 8) {
+if (DAT_030000d8 == 0xf3) {
+DISPCNT = 0x404;
+FUN_08000dd0(&DAT_02008aac,0x6000000,&DAT_030000dc);
+FUN_08000354(&DAT_030000dc,0x3c);
+uVar4 = DAT_030004d8;
+}
+}
+else {
+if (DAT_030000d4 < 8) {
+DAT_030000d4 = DAT_030000d4 + 1;
+FUN_08000864();
+if (uVar1 == 0x10) {
+DAT_030000d8 = DAT_030000d8 + 0x3a;
 ```
+前のコードでは、**uVar1**（**押されたボタンの値**が格納されている場所）をいくつかの値と比較しています：
 
-In the previous code you can see that we are comparing **uVar1** (the place where the **value of the pressed button** is) with some values:
+- 最初に、**値4**（**SELECT**ボタン）と比較されています：このチャレンジでは、このボタンは画面をクリアします。
+- 次に、**値8**（**START**ボタン）と比較されています：このチャレンジでは、コードがフラグを取得するのに有効かどうかを確認します。
+- この場合、変数**`DAT_030000d8`**は0xf3と比較され、値が同じであればいくつかのコードが実行されます。
+- その他のケースでは、いくつかのcont（`DAT_030000d4`）がチェックされます。これは、コードに入った直後に1を加算するためcontです。\
+**8未満**の場合、**`DAT_030000d8`**に値を**加算する**ことが行われます（基本的には、contが8未満の間、押されたキーの値をこの変数に加算しています）。
 
-- First, it's compared with the **value 4** (**SELECT** button): In the challenge this button clears the screen
-- Then, it's comparing it with the **value 8** (**START** button): In the challenge this checks is the code is valid to get the flag.
-  - In this case the var **`DAT_030000d8`** is compared with 0xf3 and if the value is the same some code is executed.
-- In any other cases, some cont (`DAT_030000d4`) is checked. It's a cont because it's adding 1 right after entering in the code.\
-  **I**f less than 8 something that involves **adding** values to \*\*`DAT_030000d8` \*\* is done (basically it's adding the values of the keys pressed in this variable as long as the cont is less than 8).
+したがって、このチャレンジでは、ボタンの値を知っている必要があり、**結果の合計が0xf3になるように、長さが8未満の組み合わせを押す必要があります。**
 
-So, in this challenge, knowing the values of the buttons, you needed to **press a combination with a length smaller than 8 that the resulting addition is 0xf3.**
-
-**Reference for this tutorial:** [**https://exp.codes/Nostalgia/**](https://exp.codes/Nostalgia/)
+**このチュートリアルの参考文献：** [**https://exp.codes/Nostalgia/**](https://exp.codes/Nostalgia/)
 
 ## Game Boy
 
 {% embed url="https://www.youtube.com/watch?v=VVbRe7wr3G4" %}
 
-## Courses
+## コース
 
 - [https://github.com/0xZ0F/Z0FCourse_ReverseEngineering](https://github.com/0xZ0F/Z0FCourse_ReverseEngineering)
-- [https://github.com/malrev/ABD](https://github.com/malrev/ABD) (Binary deobfuscation)
+- [https://github.com/malrev/ABD](https://github.com/malrev/ABD)（バイナリの難読化解除）
 
 {{#include ../../banners/hacktricks-training.md}}
-

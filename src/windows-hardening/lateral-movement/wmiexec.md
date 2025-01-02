@@ -2,19 +2,18 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## How It Works Explained
+## 仕組みの説明
 
-Processes can be opened on hosts where the username and either password or hash are known through the use of WMI. Commands are executed using WMI by Wmiexec, providing a semi-interactive shell experience.
+ユーザー名とパスワードまたはハッシュが知られているホスト上でプロセスを開くことができます。WMIを使用してコマンドが実行され、Wmiexecによってセミインタラクティブなシェル体験が提供されます。
 
-**dcomexec.py:** Utilizing different DCOM endpoints, this script offers a semi-interactive shell akin to wmiexec.py, specifically leveraging the ShellBrowserWindow DCOM object. It currently supports MMC20. Application, Shell Windows, and Shell Browser Window objects. (source: [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))
+**dcomexec.py:** 異なるDCOMエンドポイントを利用して、このスクリプトはwmiexec.pyに似たセミインタラクティブなシェルを提供し、特にShellBrowserWindow DCOMオブジェクトを活用しています。現在、MMC20、アプリケーション、シェルウィンドウ、およびシェルブラウザウィンドウオブジェクトをサポートしています。(source: [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))
 
-## WMI Fundamentals
+## WMIの基本
 
-### Namespace
+### 名前空間
 
-Structured in a directory-style hierarchy, WMI's top-level container is \root, under which additional directories, referred to as namespaces, are organized.
-Commands to list namespaces:
-
+ディレクトリスタイルの階層で構成されており、WMIの最上位コンテナは\rootで、その下に名前空間と呼ばれる追加のディレクトリが整理されています。
+名前空間をリストするためのコマンド:
 ```bash
 # Retrieval of Root namespaces
 gwmi -namespace "root" -Class "__Namespace" | Select Name
@@ -25,36 +24,28 @@ Get-WmiObject -Class "__Namespace" -Namespace "Root" -List -Recurse 2> $null | s
 # Listing of namespaces within "root\cimv2"
 Get-WmiObject -Class "__Namespace" -Namespace "root\cimv2" -List -Recurse 2> $null | select __Namespace | sort __Namespace
 ```
-
-Classes within a namespace can be listed using:
-
+名前空間内のクラスは、次のようにリストできます:
 ```bash
 gwmwi -List -Recurse # Defaults to "root\cimv2" if no namespace specified
 gwmi -Namespace "root/microsoft" -List -Recurse
 ```
+### **クラス**
 
-### **Classes**
-
-Knowing a WMI class name, such as win32_process, and the namespace it resides in is crucial for any WMI operation.
-Commands to list classes beginning with `win32`:
-
+WMIクラス名（例：win32_process）とその存在する名前空間を知ることは、すべてのWMI操作において重要です。  
+`win32`で始まるクラスをリストするコマンド：
 ```bash
 Get-WmiObject -Recurse -List -class win32* | more # Defaults to "root\cimv2"
 gwmi -Namespace "root/microsoft" -List -Recurse -Class "MSFT_MpComput*"
 ```
-
-Invocation of a class:
-
+クラスの呼び出し:
 ```bash
 # Defaults to "root/cimv2" when namespace isn't specified
 Get-WmiObject -Class win32_share
 Get-WmiObject -Namespace "root/microsoft/windows/defender" -Class MSFT_MpComputerStatus
 ```
+### 方法
 
-### Methods
-
-Methods, which are one or more executable functions of WMI classes, can be executed.
-
+メソッドは、WMI クラスの 1 つ以上の実行可能な関数であり、実行できます。
 ```bash
 # Class loading, method listing, and execution
 $c = [wmiclass]"win32_share"
@@ -66,13 +57,11 @@ $c.methods
 # Method listing and invocation
 Invoke-WmiMethod -Class win32_share -Name Create -ArgumentList @($null, "Description", $null, "Name", $null, "c:\share\path",0)
 ```
+## WMI列挙
 
-## WMI Enumeration
+### WMIサービスの状態
 
-### WMI Service Status
-
-Commands to verify if the WMI service is operational:
-
+WMIサービスが稼働しているか確認するためのコマンド:
 ```bash
 # WMI service status check
 Get-Service Winmgmt
@@ -80,18 +69,14 @@ Get-Service Winmgmt
 # Via CMD
 net start | findstr "Instrumentation"
 ```
+### システムおよびプロセス情報
 
-### System and Process Information
-
-Gathering system and process information through WMI:
-
+WMIを通じてシステムおよびプロセス情報を収集する：
 ```bash
 Get-WmiObject -ClassName win32_operatingsystem | select * | more
 Get-WmiObject win32_process | Select Name, Processid
 ```
-
-For attackers, WMI is a potent tool for enumerating sensitive data about systems or domains.
-
+攻撃者にとって、WMIはシステムやドメインに関する機密データを列挙するための強力なツールです。
 ```bash
 wmic computerystem list full /format:list
 wmic process list /format:list
@@ -100,20 +85,17 @@ wmic useraccount list /format:list
 wmic group list /format:list
 wmic sysaccount list /format:list
 ```
+WMIを使用して特定の情報、例えばローカル管理者やログオンユーザーをリモートで照会することは、慎重なコマンド構築によって実現可能です。
 
-Remote querying of WMI for specific information, such as local admins or logged-on users, is feasible with careful command construction.
+### **手動リモートWMI照会**
 
-### **Manual Remote WMI Querying**
+リモートマシン上のローカル管理者やログオンユーザーを stealthy に特定することは、特定のWMIクエリを通じて達成できます。`wmic`は、複数のノードでコマンドを同時に実行するためにテキストファイルからの読み取りもサポートしています。
 
-Stealthy identification of local admins on a remote machine and logged-on users can be achieved through specific WMI queries. `wmic` also supports reading from a text file to execute commands on multiple nodes simultaneously.
-
-To remotely execute a process over WMI, such as deploying an Empire agent, the following command structure is employed, with successful execution indicated by a return value of "0":
-
+WMIを介してプロセスをリモートで実行するためには、Empireエージェントを展開するなど、以下のコマンド構造が使用され、成功した実行は戻り値「0」で示されます。
 ```bash
 wmic /node:hostname /user:user path win32_process call create "empire launcher string here"
 ```
-
-This process illustrates WMI's capability for remote execution and system enumeration, highlighting its utility for both system administration and penetration testing.
+このプロセスは、リモート実行とシステム列挙のためのWMIの能力を示しており、システム管理とペネトレーションテストの両方におけるその有用性を強調しています。
 
 ## References
 
@@ -122,10 +104,7 @@ This process illustrates WMI's capability for remote execution and system enumer
 ## Automatic Tools
 
 - [**SharpLateral**](https://github.com/mertdas/SharpLateral):
-
 ```bash
 SharpLateral redwmi HOSTNAME C:\\Users\\Administrator\\Desktop\\malware.exe
 ```
-
 {{#include ../../banners/hacktricks-training.md}}
-

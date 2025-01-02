@@ -2,84 +2,77 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Basic Information
+## 基本情報
 
-UART is a serial protocol, which means it transfers data between components one bit at a time. In contrast, parallel communication protocols transmit data simultaneously through multiple channels. Common serial protocols include RS-232, I2C, SPI, CAN, Ethernet, HDMI, PCI Express, and USB.
+UARTはシリアルプロトコルであり、コンポーネント間でデータを1ビットずつ転送します。対照的に、パラレル通信プロトコルは複数のチャネルを通じてデータを同時に転送します。一般的なシリアルプロトコルにはRS-232、I2C、SPI、CAN、Ethernet、HDMI、PCI Express、USBがあります。
 
-Generally, the line is held high (at a logical 1 value) while UART is in the idle state. Then, to signal the start of a data transfer, the transmitter sends a start bit to the receiver, during which the signal is held low (at a logical 0 value). Next, the transmitter sends five to eight data bits containing the actual message, followed by an optional parity bit and one or two stop bits (with a logical 1 value), depending on the configuration. The parity bit, used for error checking, is rarely seen in practice. The stop bit (or bits) signify the end of transmission.
+一般的に、UARTがアイドル状態のとき、ラインは高い状態（論理1の値）に保たれます。次に、データ転送の開始を示すために、送信者は受信者にスタートビットを送信し、その間、信号は低い状態（論理0の値）に保たれます。次に、送信者は実際のメッセージを含む5から8ビットのデータを送信し、オプションのパリティビットと1または2のストップビット（論理1の値）を続けます。エラーチェックに使用されるパリティビットは、実際にはほとんど見られません。ストップビットは、送信の終了を示します。
 
-We call the most common configuration 8N1: eight data bits, no parity, and one stop bit. For example, if we wanted to send the character C, or 0x43 in ASCII, in an 8N1 UART configuration, we would send the following bits: 0 (the start bit); 0, 1, 0, 0, 0, 0, 1, 1 (the value of 0x43 in binary), and 0 (the stop bit).
+最も一般的な構成を8N1と呼びます：8ビットのデータ、パリティなし、1つのストップビット。たとえば、Cという文字、またはASCIIで0x43を8N1 UART構成で送信したい場合、次のビットを送信します：0（スタートビット）；0、1、0、0、0、0、1、1（0x43のバイナリ値）、および0（ストップビット）。
 
 ![](<../../images/image (764).png>)
 
-Hardware tools to communicate with UART:
+UARTと通信するためのハードウェアツール：
 
-- USB-to-serial adapter
-- Adapters with the CP2102 or PL2303 chips
-- Multipurpose tool such as: Bus Pirate, the Adafruit FT232H, the Shikra, or the Attify Badge
+- USB-to-serialアダプタ
+- CP2102またはPL2303チップを搭載したアダプタ
+- Bus Pirate、Adafruit FT232H、Shikra、またはAttify Badgeなどの多目的ツール
 
-### Identifying UART Ports
+### UARTポートの特定
 
-UART has 4 ports: **TX**(Transmit), **RX**(Receive), **Vcc**(Voltage), and **GND**(Ground). You might be able to find 4 ports with the **`TX`** and **`RX`** letters **written** in the PCB. But if there is no indication, you might need to try to find them yourself using a **multimeter** or a **logic analyzer**.
+UARTには4つのポートがあります：**TX**（送信）、**RX**（受信）、**Vcc**（電圧）、および**GND**（グラウンド）。PCBに**`TX`**および**`RX`**の文字が**書かれている**4つのポートを見つけることができるかもしれません。しかし、表示がない場合は、**マルチメーター**や**ロジックアナライザー**を使用して自分で見つける必要があるかもしれません。
 
-With a **multimeter** and the device powered off:
+**マルチメーター**を使用し、デバイスの電源を切った状態で：
 
-- To identify the **GND** pin use the **Continuity Test** mode, place the back lead into ground and test with the red one until you hear a sound from the multimeter. Several GND pins can be found the PCB, so you might have found or not the one belonging to UART.
-- To identify the **VCC port**, set the **DC voltage mode** and set it up to 20 V of voltage. Black probe on ground and red probe on the pin. Power on the device. If the multimeter measures a constant voltage of either 3.3 V or 5 V, you’ve found the Vcc pin. If you get other voltages, retry with other ports.
-- To identify the **TX** **port**, **DC voltage mode** up to 20 V of voltage, black probe on ground, and red probe on the pin, and power on the device. If you find the voltage fluctuates for a few seconds and then stabilizes at the Vcc value, you’ve most likely found the TX port. This is because when powering on, it sends some debug data.
-- The **RX port** would be the closest one to the other 3, it has the lowest voltage fluctuation and lowest overall value of all the UART pins.
+- **GND**ピンを特定するには、**連続性テスト**モードを使用し、バックリードをグラウンドに置き、赤いリードでテストして、マルチメーターから音が聞こえるまで続けます。PCBには複数のGNDピンがあるため、UARTに属するものを見つけたかどうかはわかりません。
+- **VCCポート**を特定するには、**DC電圧モード**に設定し、20Vの電圧に設定します。黒いプローブをグラウンドに、赤いプローブをピンに置き、デバイスの電源を入れます。マルチメーターが3.3Vまたは5Vの一定の電圧を測定した場合、Vccピンを見つけたことになります。他の電圧が得られた場合は、他のポートで再試行します。
+- **TX** **ポート**を特定するには、**DC電圧モード**を20Vに設定し、黒いプローブをグラウンドに、赤いプローブをピンに置き、デバイスの電源を入れます。電圧が数秒間変動し、その後Vcc値で安定する場合、TXポートを見つけた可能性が高いです。これは、電源を入れるとデバッグデータを送信するためです。
+- **RXポート**は他の3つに最も近く、電圧変動が最も少なく、すべてのUARTピンの中で最も低い全体的な値を持っています。
 
-You can confuse the TX and RX ports and nothing would happen, but if you confuses the GND and the VCC port you might fry the circuit.
+TXポートとRXポートを混同しても何も起こりませんが、GNDとVCCポートを混同すると回路が壊れる可能性があります。
 
-In some target devices, the UART port is disabled by the manufacturer by disabling RX or TX or even both. In that case, it can be helpful to trace down the connections in the circuit board and finding some breakout point. A strong hint about confirming no detection of UART and breaking of the circuit is to check the device warranty. If the device has been shipped with some warranty, the manufacturer leaves some debug interfaces (in this case, UART) and hence, must have disconnected the UART and would attach it again while debugging. These breakout pins can be connected by soldering or jumper wires.
+一部のターゲットデバイスでは、製造元によってRXまたはTX、または両方が無効にされている場合があります。その場合、回路基板内の接続を追跡し、ブレークアウトポイントを見つけることが役立ちます。UARTの検出が確認できず、回路が切断されていることを示す強い手がかりは、デバイスの保証を確認することです。デバイスが保証付きで出荷されている場合、製造元はデバッグインターフェース（この場合はUART）を残しており、したがって、UARTを切断し、デバッグ中に再接続する必要があります。これらのブレークアウトピンは、はんだ付けまたはジャンパーワイヤーで接続できます。
 
-### Identifying the UART Baud Rate
+### UARTボーレートの特定
 
-The easiest way to identify the correct baud rate is to look at the **TX pin’s output and try to read the data**. If the data you receive isn’t readable, switch to the next possible baud rate until the data becomes readable. You can use a USB-to-serial adapter or a multipurpose device like Bus Pirate to do this, paired with a helper script, such as [baudrate.py](https://github.com/devttys0/baudrate/). The most common baud rates are 9600, 38400, 19200, 57600, and 115200.
+正しいボーレートを特定する最も簡単な方法は、**TXピンの出力を見てデータを読み取る**ことです。受信したデータが読み取れない場合は、データが読み取れるまで次の可能なボーレートに切り替えます。これを行うには、USB-to-serialアダプタやBus Pirateのような多目的デバイスを使用し、[baudrate.py](https://github.com/devttys0/baudrate/)のようなヘルパースクリプトと組み合わせます。最も一般的なボーレートは9600、38400、19200、57600、115200です。
 
 > [!CAUTION]
-> It's important to note that in this protocol you need to connect the TX of one device to the RX of the other!
+> このプロトコルでは、1つのデバイスのTXを他のデバイスのRXに接続する必要があることに注意してください！
 
-## CP210X UART to TTY Adapter
+## CP210X UART to TTYアダプタ
 
-The CP210X Chip is used in a lot of prototyping boards like NodeMCU (with esp8266) for Serial Communication. These adapters are relatively inexpensive and can be used to connect to the UART interface of the target. The device has 5 pins: 5V, GND, RXD, TXD, 3.3V. Make sure to connect the voltage as supported by the target to avoid any damage. Finally connect the RXD pin of the Adapter to TXD of the target and TXD pin of the Adapter to RXD of the target.
+CP210Xチップは、NodeMCU（esp8266搭載）などの多くのプロトタイピングボードでシリアル通信に使用されます。これらのアダプタは比較的安価で、ターゲットのUARTインターフェースに接続するために使用できます。デバイスには5つのピンがあります：5V、GND、RXD、TXD、3.3V。ターゲットがサポートする電圧に接続して、損傷を避けてください。最後に、アダプタのRXDピンをターゲットのTXDに、アダプタのTXDピンをターゲットのRXDに接続します。
 
-Incase the adapter is not detected, make sure that the CP210X drivers are installed in the host system. Once the adapter is detected and connected, tools like picocom, minicom or screen can be used.
+アダプタが検出されない場合は、ホストシステムにCP210Xドライバーがインストールされていることを確認してください。アダプタが検出されて接続されると、picocom、minicom、またはscreenなどのツールを使用できます。
 
-To list the devices connected to Linux/MacOS systems:
-
+Linux/MacOSシステムに接続されているデバイスをリストするには：
 ```
 ls /dev/
 ```
-
-For basic interaction with the UART interface, use the following command:
-
+UARTインターフェースとの基本的なインタラクションには、次のコマンドを使用します：
 ```
 picocom /dev/<adapter> --baud <baudrate>
 ```
-
-For minicom, use the following command to configure it:
-
+minicomの設定には、次のコマンドを使用します：
 ```
 minicom -s
 ```
+`Serial port setup`オプションでボーレートやデバイス名などの設定を構成します。
 
-Configure the settings such as baudrate and device name in the `Serial port setup` option.
+構成後、`minicom`コマンドを使用してUARTコンソールを起動します。
 
-After configuration, use the command `minicom` to start get the UART Console.
+## Arduino UNO R3を介したUART（取り外し可能なAtmel 328pチップボード）
 
-## UART Via Arduino UNO R3 (Removable Atmel 328p Chip Boards)
+UARTシリアルからUSBアダプタが利用できない場合、Arduino UNO R3を使用して簡単なハックを行うことができます。Arduino UNO R3は通常どこでも入手可能なため、これにより多くの時間を節約できます。
 
-Incase UART Serial to USB adapters are not available, Arduino UNO R3 can be used with a quick hack. Since Arduino UNO R3 is usually available anywhere, this can save a lot of time.
+Arduino UNO R3には、ボード自体にUSBからシリアルへのアダプタが組み込まれています。UART接続を得るには、ボードからAtmel 328pマイクロコントローラーチップを抜き出すだけです。このハックは、Atmel 328pがボードにハンダ付けされていないArduino UNO R3のバリアント（SMDバージョンが使用されています）で機能します。ArduinoのRXピン（デジタルピン0）をUARTインターフェースのTXピンに接続し、ArduinoのTXピン（デジタルピン1）をUARTインターフェースのRXピンに接続します。
 
-Arduino UNO R3 has a USB to Serial adapter built on the board itself. To get UART connection, just plug out the Atmel 328p microcontroller chip from the board. This hack works on Arduino UNO R3 variants having the Atmel 328p not soldered on the board (SMD version is used in it). Connect the RX pin of Arduino (Digital Pin 0) to the TX pin of the UART Interface and TX pin of the Arduino (Digital Pin 1) to the RX pin of the UART interface.
-
-Finally, it is recommended to use Arduino IDE to get the Serial Console. In the `tools` section in the menu, select `Serial Console` option and set the baud rate as per the UART interface.
+最後に、シリアルコンソールを取得するためにArduino IDEを使用することをお勧めします。メニューの`tools`セクションで`Serial Console`オプションを選択し、UARTインターフェースに応じてボーレートを設定します。
 
 ## Bus Pirate
 
-In this scenario we are going to sniff the UART communication of the Arduino that is sending all the prints of the program to the Serial Monitor.
-
+このシナリオでは、プログラムのすべての印刷をシリアルモニターに送信しているArduinoのUART通信をスニッフィングします。
 ```bash
 # Check the modes
 UART>m
@@ -99,39 +92,39 @@ x. exit(without change)
 # Select UART
 (1)>3
 Set serial port speed: (bps)
- 1. 300
- 2. 1200
- 3. 2400
- 4. 4800
- 5. 9600
- 6. 19200
- 7. 38400
- 8. 57600
- 9. 115200
+1. 300
+2. 1200
+3. 2400
+4. 4800
+5. 9600
+6. 19200
+7. 38400
+8. 57600
+9. 115200
 10. BRG raw value
 
 # Select the speed the communication is occurring on (you BF all this until you find readable things)
 # Or you could later use the macro (4) to try to find the speed
 (1)>5
 Data bits and parity:
- 1. 8, NONE *default
- 2. 8, EVEN
- 3. 8, ODD
- 4. 9, NONE
+1. 8, NONE *default
+2. 8, EVEN
+3. 8, ODD
+4. 9, NONE
 
- # From now on pulse enter for default
+# From now on pulse enter for default
 (1)>
 Stop bits:
- 1. 1 *default
- 2. 2
+1. 1 *default
+2. 2
 (1)>
 Receive polarity:
- 1. Idle 1 *default
- 2. Idle 0
+1. Idle 1 *default
+2. Idle 0
 (1)>
 Select output type:
- 1. Open drain (H=Hi-Z, L=GND)
- 2. Normal (H=3.3V, L=GND)
+1. Open drain (H=Hi-Z, L=GND)
+2. Normal (H=3.3V, L=GND)
 
 (1)>
 Clutch disengaged!!!
@@ -151,36 +144,30 @@ Escritura inicial completada:
 AAA Hi Dreg! AAA
 waiting a few secs to repeat....
 ```
+## UARTコンソールを使用したファームウェアのダンプ
 
-## Dumping Firmware with UART Console
+UARTコンソールは、ランタイム環境で基盤となるファームウェアを操作するための優れた方法を提供します。しかし、UARTコンソールのアクセスが読み取り専用の場合、多くの制約が生じる可能性があります。多くの組み込みデバイスでは、ファームウェアはEEPROMに保存され、揮発性メモリを持つプロセッサで実行されます。したがって、元のファームウェアは製造時にEEPROM自体にあり、新しいファイルは揮発性メモリのために失われるため、ファームウェアは読み取り専用のままにされます。したがって、組み込みファームウェアを扱う際にファームウェアをダンプすることは貴重な努力です。
 
-UART Console provides a great way to work with the underlying firmware in runtime environment. But when the UART Console access is read-only, it might introduce a lot of constrains. In many embedded devices, the firmware is stored in EEPROMs and executed in processors that have volatile memory. Hence, the firmware is kept read-only since the original firmware during manufacturing is inside the EEPROM itself and any new files would get lost due to volatile memory. Hence, dumping firmware is a valuable effort while working with embedded firmwares.
+これを行う方法はいくつかあり、SPIセクションではさまざまなデバイスを使用してEEPROMから直接ファームウェアを抽出する方法を説明しています。ただし、物理デバイスや外部インタラクションを使用してファームウェアをダンプすることはリスクがあるため、最初にUARTを使用してファームウェアをダンプすることをお勧めします。
 
-There are a lot of ways to do this and the SPI section covers methods to extract firmware directly from the EEPROM with various devices. Although, it is recommended to first try dumping firmware with UART since dumping firmware with physical devices and external interactions can be risky.
+UARTコンソールからファームウェアをダンプするには、まずブートローダーにアクセスする必要があります。多くの人気ベンダーは、Linuxをロードするためのブートローダーとしてuboot（ユニバーサルブートローダー）を使用しています。したがって、ubootにアクセスすることが必要です。
 
-Dumping firmware from UART Console requires first getting access to bootloaders. Many popular vendors make use of uboot (Universal Bootloader) as their bootloader to load Linux. Hence, getting access to uboot is necessary.
+ブートローダーにアクセスするには、UARTポートをコンピュータに接続し、任意のシリアルコンソールツールを使用し、デバイスへの電源供給を切断します。セットアップが完了したら、Enterキーを押して保持します。最後に、デバイスに電源を接続し、ブートさせます。
 
-To get access to boot bootloader, connect the UART port to the computer and use any of the Serial Console tools and keep the power supply to the device disconnected. Once the setup is ready, press the Enter Key and hold it. Finally, connect the power supply to the device and let it boot.
+これを行うと、ubootのロードが中断され、メニューが表示されます。ubootコマンドを理解し、ヘルプメニューを使用してそれらをリストすることをお勧めします。これが`help`コマンドである可能性があります。異なるベンダーが異なる構成を使用しているため、それぞれを個別に理解することが必要です。
 
-Doing this will interrupt uboot from loading and will provide a menu. It is recommended to understand uboot commands and using help menu to list them. This might be `help` command. Since different vendors use different configurations, it is necessary to understand each of them seperately.
-
-Usually, the command to dump the firmware is:
-
+通常、ファームウェアをダンプするためのコマンドは次のとおりです：
 ```
 md
 ```
+"メモリダンプ"を意味します。これにより、メモリ（EEPROMコンテンツ）が画面にダンプされます。メモリダンプをキャプチャするために、手順を開始する前にシリアルコンソールの出力をログに記録することをお勧めします。
 
-which stands for "memory dump". This will dump the memory (EEPROM Content) on the screen. It is recommended to log the Serial Console output before starting the proceedure to capture the memory dump.
-
-Finally, just strip out all the unnecessary data from the log file and store the file as `filename.rom` and use binwalk to extract the contents:
-
+最後に、ログファイルから不要なデータをすべて削除し、ファイルを`filename.rom`として保存し、binwalkを使用して内容を抽出します：
 ```
 binwalk -e <filename.rom>
 ```
+この内容は、HEXファイルに見つかった署名に基づいて、EEPROMからの可能な内容をリストします。
 
-This will list the possible contents from the EEPROM as per the signatures found in the hex file.
-
-Although, it is necessary to note that it's not always the case that the uboot is unlocked even if it is being used. If the Enter Key doesn't do anything, check for different keys like Space Key, etc. If the bootloader is locked and does not get interrupted, this method would not work. To check if uboot is the bootloader for the device, check the output on the UART Console while booting of the device. It might mention uboot while booting.
+ただし、使用されている場合でも、ubootがアンロックされているとは限らないことに注意する必要があります。Enterキーが何も反応しない場合は、Spaceキーなどの異なるキーを確認してください。ブートローダーがロックされていて中断されない場合、この方法は機能しません。ubootがデバイスのブートローダーであるかどうかを確認するには、デバイスのブート中にUARTコンソールの出力を確認してください。ブート中にubootが表示されるかもしれません。
 
 {{#include ../../banners/hacktricks-training.md}}
-

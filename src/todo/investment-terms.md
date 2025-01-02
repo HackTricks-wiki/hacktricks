@@ -1,70 +1,68 @@
-# Investment Terms
+# 投資用語
 
-## Spot
+## スポット
 
-This is the most basic way to do some trading. You can **indicate the amount of the asset and the price** that you want to buy or sell, and whenever that price is reached the operation is done.
+これは取引を行う最も基本的な方法です。**購入または販売したい資産の量と価格**を指定でき、その価格に達したときに取引が行われます。
 
-Usually you can also use the **current market price** in order to perform the transaction as fast as possible to the current price.
+通常、**現在の市場価格**を使用して、できるだけ早く取引を行うこともできます。
 
-**Stop Loss - Limit**: You can also indicate amount and the price of the assets to buy or sell while also indicating a lower price to buy or sell in case it's reached (to stop losses).
+**ストップロス - リミット**: 購入または販売する資産の量と価格を指定し、損失を止めるために達した場合の購入または販売のための低い価格も指定できます。
 
-## Futures
+## 先物
 
-A future is a contract where 2 parts comes to an agreement to **acquire something in the future at a fixed price**. For example to sell 1 bitcoin in 6 months at 70.000$.
+先物は、2つの当事者が**将来の固定価格で何かを取得することに合意する契約**です。例えば、6か月後に1ビットコインを70,000ドルで販売することです。
 
-Obviously if by 6 months the bitcoin value is 80.000$ the seller part loses money and the buying part earns it. If in 6 months the bitcoin value is 60.000$, the opposite happens.
+当然、6か月後にビットコインの価値が80,000ドルになった場合、売り手は損失を被り、買い手は利益を得ます。6か月後にビットコインの価値が60,000ドルになった場合、逆のことが起こります。
 
-However, this is interesting for example for business which are generating a product and need to have the security that thy will be able to sell it at a price to pay the costs. Or business which want to assure fixed prices in the future for something eve if higher.
+しかし、これは製品を生産しているビジネスにとって、コストを支払うための価格で販売できるという保証が必要な場合に興味深いです。また、将来の何かのために固定価格を確保したいビジネスにも適しています。
 
-Although in exchanges this is usually used to try to make a profit.
+ただし、取引所では通常、利益を得るために使用されます。
 
-* Notice that a "Long position" means that someone if betting that a price is going to increase
-* While a "short position" means that someone if betting that a price is going to go down
+* 「ロングポジション」とは、誰かが価格が上昇することに賭けていることを意味します。
+* 「ショートポジション」とは、誰かが価格が下落することに賭けていることを意味します。
 
-### Hedging With Futures <a href="#mntl-sc-block_7-0" id="mntl-sc-block_7-0"></a>
+### 先物によるヘッジ <a href="#mntl-sc-block_7-0" id="mntl-sc-block_7-0"></a>
 
-If a fund manager is afraid that some stocks are going to go down he might take a short position over some assets like bitcoins or S\&P 500 futures contracts. This would be similar to buying or having some assets and create a contract of selling those at a future time at a bigger price.&#x20;
+ファンドマネージャーが株価が下がることを恐れている場合、ビットコインやS&P 500先物契約などの資産に対してショートポジションを取ることがあります。これは、資産を購入または保有し、それを将来のより高い価格で販売する契約を作成することに似ています。
 
-In case the price goes down the fund manager will earn benefits because he will sell the assets at a bigger price. If the price of the assets goes up the manager won't earn that benefit but he will still keep his assets.
+価格が下がった場合、ファンドマネージャーは資産をより高い価格で販売することで利益を得ます。資産の価格が上がった場合、マネージャーはその利益を得ることはありませんが、資産は保持します。
 
-### Perpetual Futures
+### 永続的先物
 
-**These are "futures" that will last indefinitely** (without an ending contract date). It's very common to find them for example in crypto exchanges where you can go in an out of futures based on the price of cryptos.
+**これは「先物」で、無期限に続くものです**（終了契約日がありません）。暗号取引所などで、暗号の価格に基づいて先物に出入りできることが非常に一般的です。
 
-Notice that in these cases the benefits and lose can be in real time, if the price increases 1% you win a 1%, if the price decreases 1%, you will lose it.
+これらの場合、利益と損失はリアルタイムで発生することに注意してください。価格が1%上昇すれば1%の利益、価格が1%下がればその分の損失を被ります。
 
-### Futures with Leverage
+### レバレッジ付き先物
 
-**Leverage** allows you to control a larger position in the market with a smaller amount of money. It basically allows you to "bet" much more money than you have risking only the money that you actually have.
+**レバレッジ**は、少ない金額で市場での大きなポジションをコントロールできるようにします。基本的には、実際に持っているお金だけをリスクにさらしながら、はるかに多くのお金を「賭ける」ことを可能にします。
 
-For example, if you open a future position in the BTC/USDT with 100$ a 50x leverage this means that if the price is increased 1%, then you would be winning 1x50 = 50% of your initial investment (50$). And therefore you will have 150$.\
-However, if the price decreases 1%, you will lost 50% of your funds (59$ in this case). And if the price decreases 2% you will lose all your bet (2x50 = 100%).
+例えば、100ドルで50倍のレバレッジを使ってBTC/USDTの先物ポジションを開くと、価格が1%上昇すれば、初期投資の1x50 = 50%（50ドル）の利益を得ることになります。したがって、150ドルになります。\
+しかし、価格が1%下がると、資金の50%（この場合59ドル）を失います。価格が2%下がると、全額を失います（2x50 = 100%）。
 
-Therefore, leveraging allows to control the amount of money you bet while increasing the winnings and loses.
+したがって、レバレッジを使用すると、賭ける金額をコントロールしながら、利益と損失を増やすことができます。
 
-## Differences Futures & Options
+## 先物とオプションの違い
 
-The main difference between futures and options is that the contract is optional for the buyer: He can decide to execute it or not (usually he will only if he will benefit for it). The seller must sell if the buyer wants to use the option.\
-However, the buyer will be paying some fee to the seller for opening the option (so the seller, who is taking more risk aparently, starts earning some money).
+先物とオプションの主な違いは、契約が買い手にとってオプションであることです：彼はそれを実行するかどうかを決定できます（通常、利益がある場合のみ実行します）。売り手は、買い手がオプションを使用したい場合、販売しなければなりません。\
+ただし、買い手はオプションを開くために売り手に手数料を支払う必要があります（したがって、リスクを取っている売り手は、いくらかの利益を得ることになります）。
 
-### 1. **Obligation vs. Right:**
+### 1. **義務 vs. 権利:**
 
-* **Futures:** When you buy or sell a futures contract, you're entering a **binding agreement** to buy or sell an asset at a specific price on a future date. Both the buyer and the seller are **obligated** to fulfill the contract at expiration (unless the contract is closed before then).
-* **Options:** With options, you have the **right, but not the obligation**, to buy (in the case of a **call option**) or sell (in the case of a **put option**) an asset at a specific price before or at a certain expiration date. The **buyer** has the option to execute, while the **seller** is obligated to fulfill the trade if the buyer decides to exercise the option.
+* **先物:** 先物契約を購入または販売する際、特定の日に特定の価格で資産を購入または販売する**拘束力のある契約**に入ります。買い手と売り手の両方が、契約の満了時に契約を履行する**義務**があります（契約がその前に閉じられない限り）。
+* **オプション:** オプションでは、特定の価格で資産を購入（**コールオプション**の場合）または販売（**プットオプション**の場合）する**権利はあるが義務はない**ということです。**買い手**は実行するオプションを持ち、**売り手**は買い手がオプションを行使することを決定した場合、取引を履行する義務があります。
 
-### 2. **Risk:**
+### 2. **リスク:**
 
-* **Futures:** Both the buyer and the seller take on **unlimited risk** because they are obligated to complete the contract. The risk is the difference between the agreed-upon price and the market price at the expiration date.
-* **Options:** The buyer’s risk is limited to the **premium** paid to purchase the option. If the market doesn't move in favor of the option holder, they can simply let the option expire. However, the **seller** (writer) of the option has unlimited risk if the market moves significantly against them.
+* **先物:** 買い手と売り手の両方が**無制限のリスク**を負います。リスクは、合意された価格と満了日の市場価格の差です。
+* **オプション:** 買い手のリスクは、オプションを購入するために支払った**プレミアム**に制限されます。市場がオプション保有者に有利に動かない場合、彼らは単にオプションを失効させることができます。ただし、オプションの**売り手**（ライター）は、市場が大きく不利に動いた場合、無制限のリスクを負います。
 
-### 3. **Cost:**
+### 3. **コスト:**
 
-* **Futures:** There is no upfront cost beyond the margin required to hold the position, as the buyer and seller are both obligated to complete the trade.
-* **Options:** The buyer must pay an **option premium** upfront for the right to exercise the option. This premium is essentially the cost of the option.
+* **先物:** ポジションを保持するために必要なマージンを超える前払いコストはありません。買い手と売り手の両方が取引を完了する義務があるためです。
+* **オプション:** 買い手は、オプションを行使する権利のために**オプションプレミアム**を前払いする必要があります。このプレミアムは、オプションのコストに相当します。
 
-### 4. **Profit Potential:**
+### 4. **利益の可能性:**
 
-* **Futures:** The profit or loss is based on the difference between the market price at expiration and the agreed-upon price in the contract.
-* **Options:** The buyer profits when the market moves favorably beyond the strike price by more than the premium paid. The seller profits by keeping the premium if the option is not exercised.
-
-
+* **先物:** 利益または損失は、満了時の市場価格と契約で合意された価格の差に基づいています。
+* **オプション:** 買い手は、市場がプレミアムを超えてストライク価格を有利に動いたときに利益を得ます。売り手は、オプションが行使されない場合、プレミアムを保持することで利益を得ます。
