@@ -4,8 +4,7 @@
 
 ## Bus Pirate
 
-To test a Bus Pirate is working, connect +5V with VPU and 3.3V with ADC and access the bus pirate (Using Tera Term for example) and use the command `~`:
-
+Bus Pirate के काम करने की जांच करने के लिए, +5V को VPU से और 3.3V को ADC से जोड़ें और बस पायरेट तक पहुँचें (उदाहरण के लिए Tera Term का उपयोग करते हुए) और कमांड `~` का उपयोग करें:
 ```bash
 # Use command
 HiZ>~
@@ -44,20 +43,18 @@ Any key to exit
 #Press space
 Found 0 errors.
 ```
+जैसा कि आप पिछले कमांड लाइन में देख सकते हैं, इसमें कहा गया था कि 0 त्रुटियाँ मिलीं। यह जानना बहुत उपयोगी है कि यह काम कर रहा है, इसे खरीदने के बाद या फर्मवेयर फ्लैश करने के बाद।
 
-As you can see in the previous command line it said that it found 0 errors. This is very useful to know it's working after buying it or after flashing a firmware.
-
-To connect with the bus pirate you can follow the docs:
+बस पायरेट से कनेक्ट करने के लिए आप दस्तावेज़ों का पालन कर सकते हैं:
 
 ![](<../../images/image (484).png>)
 
-In this case I'm going to connect to an EPROM: ATMEL901 24C256 PU27:
+इस मामले में मैं एक EPROM: ATMEL901 24C256 PU27 से कनेक्ट करने जा रहा हूँ:
 
 ![](<../../images/image (964).png>)
 
-To talk with bus pirate I used Tera Term connected to the pirate bus COM port with a Setup --> Serial Port --> Speed of 115200.\
-In the following communication you can find how to prepare the bus pirate to talk I2C and how to write and read from the memory (Comments appear using "#", don't expect that part in the communication):
-
+बस पायरेट से बात करने के लिए मैंने Tera Term का उपयोग किया, जो पायरेट बस COM पोर्ट से कनेक्ट किया गया था, सेटअप --> सीरियल पोर्ट --> 115200 की गति के साथ।\
+निम्नलिखित संचार में आप देख सकते हैं कि बस पायरेट को I2C से बात करने के लिए कैसे तैयार किया जाए और मेमोरी से पढ़ने और लिखने का तरीका (टिप्पणियाँ "#" का उपयोग करके दिखाई देती हैं, संचार में उस भाग की अपेक्षा न करें):
 ```bash
 # Check communication with buspirate
 i
@@ -94,16 +91,16 @@ x. exit(without change)
 # Select I2C
 (1)>4
 I2C mode:
- 1. Software
- 2. Hardware
+1. Software
+2. Hardware
 
 # Select Software mode
 (1)>1
 Set speed:
- 1. ~5kHz
- 2. ~50kHz
- 3. ~100kHz
- 4. ~240kHz
+1. ~5kHz
+2. ~50kHz
+3. ~100kHz
+4. ~240kHz
 
 # Select communication spped
 (1)> 2
@@ -118,9 +115,9 @@ Clutch engaged!!!
 
 # Get macros
 I2C>(0)
- 0.Macro menu
- 1.7bit address search
- 2.I2C sniffer
+0.Macro menu
+1.7bit address search
+2.I2C sniffer
 
 #Get addresses of slaves connected
 I2C>(1)
@@ -156,13 +153,11 @@ WRITE: 0xA1 ACK
 READ: 0x42  ACK 0x42  ACK 0x42  ACK 0x20  ACK 0x48  ACK 0x69  ACK 0x20  ACK 0x44  ACK 0x72  ACK 0x65  ACK 0x67  ACK 0x21  ACK 0x20  ACK 0x41  ACK 0x41  ACK 0x41  ACK 0x00  ACK 0xFF  ACK 0xFF  ACK 0xFF
 NACK
 ```
-
 ### Sniffer
 
-In this scenario we are going to sniff the I2C communication between the arduino and the previous EPROM, you just need to communicate both devices and then connect the bus pirate to the SCL, SDA and GND pins:
+इस परिदृश्य में, हम Arduino और पिछले EPROM के बीच I2C संचार को स्निफ़ करने जा रहे हैं, आपको बस दोनों उपकरणों के बीच संचार करना है और फिर बस पायरेट को SCL, SDA और GND पिनों से कनेक्ट करना है:
 
 ![](<../../images/image (166).png>)
-
 ```bash
 I2C>m
 1. HiZ
@@ -180,15 +175,15 @@ x. exit(without change)
 
 (1)>4
 I2C mode:
- 1. Software
- 2. Hardware
+1. Software
+2. Hardware
 
 (1)>1
 Set speed:
- 1. ~5kHz
- 2. ~50kHz
- 3. ~100kHz
- 4. ~240kHz
+1. ~5kHz
+2. ~50kHz
+3. ~100kHz
+4. ~240kHz
 
 (1)>1
 Clutch disengaged!!!
@@ -208,6 +203,4 @@ Sniffer
 Any key to exit
 [0xA0+0x00+0x69+0x41+0x41+0x41+0x20+0x48+0x69+0x20+0x44+0x72+0x65+0x67+0x21+0x20+0x41+0x41+0x41+0x00+]
 ```
-
 {{#include ../../banners/hacktricks-training.md}}
-

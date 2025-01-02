@@ -1,13 +1,12 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-Very basically, this tool will help us to find values for variables that need to satisfy some conditions and calculating them by hand will be so annoying. Therefore, you can indicate to Z3 the conditions the variables need to satisfy and it will find some values (if possible).
+बहुत बुनियादी रूप से, यह उपकरण हमें उन चर के लिए मान खोजने में मदद करेगा जिन्हें कुछ शर्तों को संतुष्ट करना है और उन्हें हाथ से गणना करना बहुत परेशान करने वाला होगा। इसलिए, आप Z3 को उन शर्तों को बता सकते हैं जिन्हें चर को संतुष्ट करना है और यह कुछ मान खोज लेगा (यदि संभव हो)।
 
-**Some texts and examples are extracted from [https://ericpony.github.io/z3py-tutorial/guide-examples.htm](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)**
+**कुछ पाठ और उदाहरण [https://ericpony.github.io/z3py-tutorial/guide-examples.htm](https://ericpony.github.io/z3py-tutorial/guide-examples.htm) से निकाले गए हैं**
 
-# Basic Operations
+# बुनियादी संचालन
 
-## Booleans/And/Or/Not
-
+## बूलियन/और/या/नहीं
 ```python
 #pip3 install z3-solver
 from z3 import *
@@ -22,9 +21,7 @@ s.add(And(Or(x,y,Not(z)),y))
 s.check() #If response is "sat" then the model is satifable, if "unsat" something is wrong
 print(s.model()) #Print valid values to satisfy the model
 ```
-
-## Ints/Simplify/Reals
-
+## इंट्स/सरलीकरण/वास्तविक
 ```python
 from z3 import *
 
@@ -44,9 +41,7 @@ print(solve(r1**2 + r2**2 == 3, r1**3 == 2))
 set_option(precision=30)
 print(solve(r1**2 + r2**2 == 3, r1**3 == 2))
 ```
-
-## Printing Model
-
+## मॉडल प्रिंट करना
 ```python
 from z3 import *
 
@@ -58,13 +53,11 @@ s.check()
 m = s.model()
 print ("x = %s" % m[x])
 for d in m.decls():
-    print("%s = %s" % (d.name(), m[d]))
+print("%s = %s" % (d.name(), m[d]))
 ```
+# मशीन अंकगणित
 
-# Machine Arithmetic
-
-Modern CPUs and main-stream programming languages use arithmetic over **fixed-size bit-vectors**. Machine arithmetic is available in Z3Py as **Bit-Vectors**.
-
+आधुनिक CPU और मुख्यधारा की प्रोग्रामिंग भाषाएँ **फिक्स्ड-साइज़ बिट-वेक्टर** पर अंकगणित का उपयोग करती हैं। मशीन अंकगणित Z3Py में **बिट-वेक्टर** के रूप में उपलब्ध है।
 ```python
 from z3 import *
 
@@ -79,11 +72,9 @@ a = BitVecVal(-1, 32)
 b = BitVecVal(65535, 32)
 print(simplify(a == b)) #This is False
 ```
-
 ## Signed/Unsigned Numbers
 
-Z3 provides special signed versions of arithmetical operations where it makes a difference whether the **bit-vector is treated as signed or unsigned**. In Z3Py, the operators **<, <=, >, >=, /, % and >>** correspond to the **signed** versions. The corresponding **unsigned** operators are **ULT, ULE, UGT, UGE, UDiv, URem and LShR.**
-
+Z3 विशेष साइन किए गए गणितीय संचालन के संस्करण प्रदान करता है जहाँ यह महत्वपूर्ण है कि **बिट-वेक्टर को साइन किया गया या अनसाइन किया गया माना जाए**। Z3Py में, ऑपरेटर **<, <=, >, >=, /, % और >>** **साइन किए गए** संस्करणों के अनुरूप हैं। संबंधित **अनसाइन** ऑपरेटर **ULT, ULE, UGT, UGE, UDiv, URem और LShR** हैं।
 ```python
 from z3 import *
 
@@ -101,13 +92,11 @@ solve(x < 0)
 # using unsigned version of <
 solve(ULT(x, 0))
 ```
-
 ## Functions
 
-**Interpreted functio**ns such as arithmetic where the **function +** has a **fixed standard interpretation** (it adds two numbers). **Uninterpreted functions** and constants are **maximally flexible**; they allow **any interpretation** that is **consistent** with the **constraints** over the function or constant.
+**व्याख्यायित कार्य** जैसे अंकगणित जहां **कार्य +** का एक **स्थिर मानक व्याख्या** है (यह दो संख्याओं को जोड़ता है)। **अव्याख्यायित कार्य** और स्थिरांक **अधिकतम लचीले** होते हैं; वे **किसी भी व्याख्या** की अनुमति देते हैं जो कार्य या स्थिरांक पर **प्रतिबंधों** के साथ **संगत** हो।
 
-Example: f applied twice to x results in x again, but f applied once to x is different from x.
-
+उदाहरण: x पर दो बार लागू किया गया f फिर से x में परिणाम देता है, लेकिन x पर एक बार लागू किया गया f x से भिन्न है।
 ```python
 from z3 import *
 
@@ -126,64 +115,60 @@ s.add(f(x) == 4) #Find the value that generates 4 as response
 s.check()
 print(m.model())
 ```
+# उदाहरण
 
-# Examples
-
-## Sudoku solver
-
+## सुडोकू हल करने वाला
 ```python
 # 9x9 matrix of integer variables
 X = [ [ Int("x_%s_%s" % (i+1, j+1)) for j in range(9) ]
-      for i in range(9) ]
+for i in range(9) ]
 
 # each cell contains a value in {1, ..., 9}
 cells_c  = [ And(1 <= X[i][j], X[i][j] <= 9)
-             for i in range(9) for j in range(9) ]
+for i in range(9) for j in range(9) ]
 
 # each row contains a digit at most once
 rows_c   = [ Distinct(X[i]) for i in range(9) ]
 
 # each column contains a digit at most once
 cols_c   = [ Distinct([ X[i][j] for i in range(9) ])
-             for j in range(9) ]
+for j in range(9) ]
 
 # each 3x3 square contains a digit at most once
 sq_c     = [ Distinct([ X[3*i0 + i][3*j0 + j]
-                        for i in range(3) for j in range(3) ])
-             for i0 in range(3) for j0 in range(3) ]
+for i in range(3) for j in range(3) ])
+for i0 in range(3) for j0 in range(3) ]
 
 sudoku_c = cells_c + rows_c + cols_c + sq_c
 
 # sudoku instance, we use '0' for empty cells
 instance = ((0,0,0,0,9,4,0,3,0),
-            (0,0,0,5,1,0,0,0,7),
-            (0,8,9,0,0,0,0,4,0),
-            (0,0,0,0,0,0,2,0,8),
-            (0,6,0,2,0,1,0,5,0),
-            (1,0,2,0,0,0,0,0,0),
-            (0,7,0,0,0,0,5,2,0),
-            (9,0,0,0,6,5,0,0,0),
-            (0,4,0,9,7,0,0,0,0))
+(0,0,0,5,1,0,0,0,7),
+(0,8,9,0,0,0,0,4,0),
+(0,0,0,0,0,0,2,0,8),
+(0,6,0,2,0,1,0,5,0),
+(1,0,2,0,0,0,0,0,0),
+(0,7,0,0,0,0,5,2,0),
+(9,0,0,0,6,5,0,0,0),
+(0,4,0,9,7,0,0,0,0))
 
 instance_c = [ If(instance[i][j] == 0,
-                  True,
-                  X[i][j] == instance[i][j])
-               for i in range(9) for j in range(9) ]
+True,
+X[i][j] == instance[i][j])
+for i in range(9) for j in range(9) ]
 
 s = Solver()
 s.add(sudoku_c + instance_c)
 if s.check() == sat:
-    m = s.model()
-    r = [ [ m.evaluate(X[i][j]) for j in range(9) ]
-          for i in range(9) ]
-    print_matrix(r)
+m = s.model()
+r = [ [ m.evaluate(X[i][j]) for j in range(9) ]
+for i in range(9) ]
+print_matrix(r)
 else:
-    print "failed to solve"
+print "failed to solve"
 ```
-
-## References
+## संदर्भ
 
 - [https://ericpony.github.io/z3py-tutorial/guide-examples.htm](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)
 
 {{#include ../../banners/hacktricks-training.md}}
-

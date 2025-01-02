@@ -4,55 +4,54 @@
 
 ## BIOS Password Recovery and System Security
 
-**Resetting the BIOS** can be achieved in several ways. Most motherboards include a **battery** that, when removed for around **30 minutes**, will reset the BIOS settings, including the password. Alternatively, a **jumper on the motherboard** can be adjusted to reset these settings by connecting specific pins.
+**BIOS को रीसेट करना** कई तरीकों से किया जा सकता है। अधिकांश मदरबोर्ड में एक **बैटरी** होती है, जिसे लगभग **30 मिनट** के लिए हटाने पर BIOS सेटिंग्स, जिसमें पासवर्ड भी शामिल है, रीसेट हो जाती हैं। वैकल्पिक रूप से, **मदरबोर्ड पर एक जंपर** को विशेष पिनों को जोड़कर इन सेटिंग्स को रीसेट करने के लिए समायोजित किया जा सकता है।
 
-For situations where hardware adjustments are not possible or practical, **software tools** offer a solution. Running a system from a **Live CD/USB** with distributions like **Kali Linux** provides access to tools like **_killCmos_** and **_CmosPWD_**, which can assist in BIOS password recovery.
+उन स्थितियों के लिए जहां हार्डवेयर समायोजन संभव या व्यावहारिक नहीं हैं, **सॉफ़्टवेयर टूल** एक समाधान प्रदान करते हैं। **Kali Linux** जैसी वितरणों के साथ **Live CD/USB** से सिस्टम चलाने पर **_killCmos_** और **_CmosPWD_** जैसे टूल्स तक पहुंच मिलती है, जो BIOS पासवर्ड रिकवरी में मदद कर सकते हैं।
 
-In cases where the BIOS password is unknown, entering it incorrectly **three times** will typically result in an error code. This code can be used on websites like [https://bios-pw.org](https://bios-pw.org) to potentially retrieve a usable password.
+यदि BIOS पासवर्ड अज्ञात है, तो इसे गलत तरीके से **तीन बार** दर्ज करने पर आमतौर पर एक त्रुटि कोड प्राप्त होता है। इस कोड का उपयोग [https://bios-pw.org](https://bios-pw.org) जैसी वेबसाइटों पर एक उपयोगी पासवर्ड प्राप्त करने के लिए किया जा सकता है।
 
 ### UEFI Security
 
-For modern systems using **UEFI** instead of traditional BIOS, the tool **chipsec** can be utilized to analyze and modify UEFI settings, including the disabling of **Secure Boot**. This can be accomplished with the following command:
+आधुनिक सिस्टम के लिए जो पारंपरिक BIOS के बजाय **UEFI** का उपयोग करते हैं, टूल **chipsec** का उपयोग UEFI सेटिंग्स का विश्लेषण और संशोधन करने के लिए किया जा सकता है, जिसमें **Secure Boot** को अक्षम करना शामिल है। इसे निम्नलिखित कमांड के साथ पूरा किया जा सकता है:
 
 `python chipsec_main.py -module exploits.secure.boot.pk`
 
 ### RAM Analysis and Cold Boot Attacks
 
-RAM retains data briefly after power is cut, usually for **1 to 2 minutes**. This persistence can be extended to **10 minutes** by applying cold substances, such as liquid nitrogen. During this extended period, a **memory dump** can be created using tools like **dd.exe** and **volatility** for analysis.
+RAM पावर कटने के बाद थोड़े समय के लिए डेटा बनाए रखता है, आमतौर पर **1 से 2 मिनट**। इस स्थिरता को ठंडी सामग्री, जैसे तरल नाइट्रोजन, लगाकर **10 मिनट** तक बढ़ाया जा सकता है। इस विस्तारित अवधि के दौरान, विश्लेषण के लिए **dd.exe** और **volatility** जैसे टूल्स का उपयोग करके एक **मेमोरी डंप** बनाया जा सकता है।
 
 ### Direct Memory Access (DMA) Attacks
 
-**INCEPTION** is a tool designed for **physical memory manipulation** through DMA, compatible with interfaces like **FireWire** and **Thunderbolt**. It allows for bypassing login procedures by patching memory to accept any password. However, it's ineffective against **Windows 10** systems.
+**INCEPTION** एक टूल है जो **फिजिकल मेमोरी मैनिपुलेशन** के लिए DMA के माध्यम से डिज़ाइन किया गया है, जो **FireWire** और **Thunderbolt** जैसी इंटरफेस के साथ संगत है। यह किसी भी पासवर्ड को स्वीकार करने के लिए मेमोरी को पैच करके लॉगिन प्रक्रियाओं को बायपास करने की अनुमति देता है। हालाँकि, यह **Windows 10** सिस्टम के खिलाफ प्रभावी नहीं है।
 
 ### Live CD/USB for System Access
 
-Changing system binaries like **_sethc.exe_** or **_Utilman.exe_** with a copy of **_cmd.exe_** can provide a command prompt with system privileges. Tools such as **chntpw** can be used to edit the **SAM** file of a Windows installation, allowing password changes.
+**_sethc.exe_** या **_Utilman.exe_** जैसे सिस्टम बाइनरी को **_cmd.exe_** की एक प्रति के साथ बदलने से सिस्टम विशेषाधिकारों के साथ एक कमांड प्रॉम्प्ट प्राप्त किया जा सकता है। **chntpw** जैसे टूल का उपयोग Windows इंस्टॉलेशन की **SAM** फ़ाइल को संपादित करने के लिए किया जा सकता है, जिससे पासवर्ड परिवर्तन की अनुमति मिलती है।
 
-**Kon-Boot** is a tool that facilitates logging into Windows systems without knowing the password by temporarily modifying the Windows kernel or UEFI. More information can be found at [https://www.raymond.cc](https://www.raymond.cc/blog/login-to-windows-administrator-and-linux-root-account-without-knowing-or-changing-current-password/).
+**Kon-Boot** एक टूल है जो बिना पासवर्ड जाने Windows सिस्टम में लॉगिन करने की सुविधा प्रदान करता है, जो अस्थायी रूप से Windows कर्नेल या UEFI को संशोधित करता है। अधिक जानकारी [https://www.raymond.cc](https://www.raymond.cc/blog/login-to-windows-administrator-and-linux-root-account-without-knowing-or-changing-current-password/) पर मिल सकती है।
 
 ### Handling Windows Security Features
 
 #### Boot and Recovery Shortcuts
 
-- **Supr**: Access BIOS settings.
-- **F8**: Enter Recovery mode.
-- Pressing **Shift** after the Windows banner can bypass autologon.
+- **Supr**: BIOS सेटिंग्स तक पहुंचें।
+- **F8**: रिकवरी मोड में प्रवेश करें।
+- Windows बैनर के बाद **Shift** दबाने से ऑटो लॉगिन बायपास हो सकता है।
 
 #### BAD USB Devices
 
-Devices like **Rubber Ducky** and **Teensyduino** serve as platforms for creating **bad USB** devices, capable of executing predefined payloads when connected to a target computer.
+**Rubber Ducky** और **Teensyduino** जैसे उपकरण **bad USB** उपकरण बनाने के लिए प्लेटफार्मों के रूप में कार्य करते हैं, जो लक्षित कंप्यूटर से जुड़े होने पर पूर्वनिर्धारित पेलोड को निष्पादित करने में सक्षम होते हैं।
 
 #### Volume Shadow Copy
 
-Administrator privileges allow for the creation of copies of sensitive files, including the **SAM** file, through PowerShell.
+व्यवस्थापक विशेषाधिकार संवेदनशील फ़ाइलों की प्रतियों को बनाने की अनुमति देते हैं, जिसमें PowerShell के माध्यम से **SAM** फ़ाइल शामिल है।
 
 ### Bypassing BitLocker Encryption
 
-BitLocker encryption can potentially be bypassed if the **recovery password** is found within a memory dump file (**MEMORY.DMP**). Tools like **Elcomsoft Forensic Disk Decryptor** or **Passware Kit Forensic** can be utilized for this purpose.
+BitLocker एन्क्रिप्शन को संभावित रूप से बायपास किया जा सकता है यदि **रिकवरी पासवर्ड** एक मेमोरी डंप फ़ाइल (**MEMORY.DMP**) में पाया जाता है। इस उद्देश्य के लिए **Elcomsoft Forensic Disk Decryptor** या **Passware Kit Forensic** जैसे टूल का उपयोग किया जा सकता है।
 
 ### Social Engineering for Recovery Key Addition
 
-A new BitLocker recovery key can be added through social engineering tactics, convincing a user to execute a command that adds a new recovery key composed of zeros, thereby simplifying the decryption process.
+एक नया BitLocker रिकवरी कुंजी सामाजिक इंजीनियरिंग तकनीकों के माध्यम से जोड़ी जा सकती है, एक उपयोगकर्ता को एक कमांड निष्पादित करने के लिए मनाकर जो शून्य से बनी एक नई रिकवरी कुंजी जोड़ता है, जिससे डिक्रिप्शन प्रक्रिया को सरल बनाया जा सके।
 
 {{#include ../banners/hacktricks-training.md}}
-

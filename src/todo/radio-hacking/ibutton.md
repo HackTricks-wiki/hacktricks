@@ -4,35 +4,35 @@
 
 ## Intro
 
-iButton is a generic name for an electronic identification key packed in a **coin-shaped metal container**. It is also called **Dallas Touch** Memory or contact memory. Even though it is often wrongly referred to as a “magnetic” key, there is **nothing magnetic** in it. In fact, a full-fledged **microchip** operating on a digital protocol is hidden inside.
+iButton एक सामान्य नाम है जो एक इलेक्ट्रॉनिक पहचान कुंजी के लिए है जो एक **सिक्का के आकार के धातु के कंटेनर** में पैक की गई है। इसे **Dallas Touch** Memory या संपर्क मेमोरी भी कहा जाता है। हालांकि इसे अक्सर “चुंबकीय” कुंजी के रूप में गलत तरीके से संदर्भित किया जाता है, इसमें **कुछ भी चुंबकीय** नहीं है। वास्तव में, इसके अंदर एक पूर्ण विकसित **माइक्रोचिप** है जो एक डिजिटल प्रोटोकॉल पर काम करती है।
 
 <figure><img src="../../images/image (915).png" alt=""><figcaption></figcaption></figure>
 
 ### What is iButton? <a href="#what-is-ibutton" id="what-is-ibutton"></a>
 
-Usually, iButton implies the physical form of the key and reader - a round coin with two contacts. For the frame surrounding it, there are lots of variations from the most common plastic holder with a hole to rings, pendants, etc.
+आमतौर पर, iButton कुंजी और रीडर के भौतिक रूप को संदर्भित करता है - एक गोल सिक्का जिसमें दो संपर्क होते हैं। इसके चारों ओर के फ्रेम के लिए, सबसे सामान्य प्लास्टिक धारक से लेकर छिद्र, अंगूठियों, लटकन आदि के कई रूप हैं।
 
 <figure><img src="../../images/image (1078).png" alt=""><figcaption></figcaption></figure>
 
-When the key reaches the reader, the **contacts come to touch** and the key is powered to **transmit** its ID. Sometimes the key is **not read** immediately because the **contact PSD of an intercom is larger** than it should be. So the outer contours of the key and the reader couldn't touch. If that's the case, you'll have to press the key over one of the walls of the reader.
+जब कुंजी रीडर तक पहुँचती है, तो **संपर्क आपस में छूते हैं** और कुंजी **अपना ID** भेजने के लिए सक्रिय होती है। कभी-कभी कुंजी तुरंत **नहीं पढ़ी जाती** क्योंकि **इंटरकॉम का संपर्क PSD** जितना होना चाहिए उससे बड़ा होता है। इसलिए कुंजी और रीडर के बाहरी आकृतियाँ छू नहीं पातीं। यदि ऐसा है, तो आपको रीडर की दीवारों में से एक पर कुंजी को दबाना होगा।
 
 <figure><img src="../../images/image (290).png" alt=""><figcaption></figcaption></figure>
 
 ### **1-Wire protocol** <a href="#id-1-wire-protocol" id="id-1-wire-protocol"></a>
 
-Dallas keys exchange data using the 1-wire protocol. With only one contact for data transfer (!!) in both directions, from master to slave and vice versa. The 1-wire protocol works according to the Master-Slave model. In this topology, the Master always initiates communication and the Slave follows its instructions.
+Dallas कुंजी 1-wire प्रोटोकॉल का उपयोग करके डेटा का आदान-प्रदान करती हैं। डेटा ट्रांसफर के लिए केवल एक संपर्क (!!) दोनों दिशाओं में, मास्टर से दास और इसके विपरीत। 1-wire प्रोटोकॉल मास्टर-दास मॉडल के अनुसार काम करता है। इस टोपोलॉजी में, मास्टर हमेशा संचार शुरू करता है और दास इसके निर्देशों का पालन करता है।
 
-When the key (Slave) contacts the intercom (Master), the chip inside the key turns on, powered by the intercom, and the key is initialized. Following that the intercom requests the key ID. Next, we will look up this process in more detail.
+जब कुंजी (दास) इंटरकॉम (मास्टर) से संपर्क करती है, तो कुंजी के अंदर की चिप चालू हो जाती है, इंटरकॉम द्वारा संचालित होती है, और कुंजी प्रारंभ की जाती है। इसके बाद इंटरकॉम कुंजी ID का अनुरोध करता है। अगला, हम इस प्रक्रिया को अधिक विस्तार से देखेंगे।
 
-Flipper can work both in Master and Slave modes. In the key reading mode, Flipper acts as a reader this is to say it works as a Master. And in the key emulation mode, the flipper pretends to be a key, it is in the Slave mode.
+Flipper मास्टर और दास दोनों मोड में काम कर सकता है। कुंजी पढ़ने के मोड में, Flipper एक रीडर के रूप में कार्य करता है, यानी यह मास्टर के रूप में काम करता है। और कुंजी अनुकरण मोड में, फ्लिपर एक कुंजी होने का नाटक करता है, यह दास मोड में है।
 
 ### Dallas, Cyfral & Metakom keys
 
-For information about how these keys works check the page [https://blog.flipperzero.one/taming-ibutton/](https://blog.flipperzero.one/taming-ibutton/)
+इन कुंजियों के काम करने के तरीके के बारे में जानकारी के लिए पृष्ठ देखें [https://blog.flipperzero.one/taming-ibutton/](https://blog.flipperzero.one/taming-ibutton/)
 
 ### Attacks
 
-iButtons can be attacked with Flipper Zero:
+iButtons पर Flipper Zero के साथ हमला किया जा सकता है:
 
 {{#ref}}
 flipper-zero/fz-ibutton.md
@@ -43,4 +43,3 @@ flipper-zero/fz-ibutton.md
 - [https://blog.flipperzero.one/taming-ibutton/](https://blog.flipperzero.one/taming-ibutton/)
 
 {{#include ../../banners/hacktricks-training.md}}
-

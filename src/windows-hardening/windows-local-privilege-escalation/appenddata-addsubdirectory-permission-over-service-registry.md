@@ -1,29 +1,28 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-**The original post is** [**https://itm4n.github.io/windows-registry-rpceptmapper-eop/**](https://itm4n.github.io/windows-registry-rpceptmapper-eop/)
+**मूल पोस्ट है** [**https://itm4n.github.io/windows-registry-rpceptmapper-eop/**](https://itm4n.github.io/windows-registry-rpceptmapper-eop/)
 
-## Summary
+## सारांश
 
-Two registry keys were found to be writable by the current user:
+दो रजिस्ट्री कुंजी वर्तमान उपयोगकर्ता द्वारा लिखने योग्य पाई गईं:
 
 - **`HKLM\SYSTEM\CurrentControlSet\Services\Dnscache`**
 - **`HKLM\SYSTEM\CurrentControlSet\Services\RpcEptMapper`**
 
-It was suggested to check the permissions of the **RpcEptMapper** service using the **regedit GUI**, specifically the **Advanced Security Settings** window's **Effective Permissions** tab. This approach enables the assessment of granted permissions to specific users or groups without the need to examine each Access Control Entry (ACE) individually.
+**RpcEptMapper** सेवा की अनुमतियों की जांच करने के लिए **regedit GUI** का उपयोग करने का सुझाव दिया गया, विशेष रूप से **Advanced Security Settings** विंडो के **Effective Permissions** टैब का। यह दृष्टिकोण विशिष्ट उपयोगकर्ताओं या समूहों को दी गई अनुमतियों का आकलन करने की अनुमति देता है बिना प्रत्येक Access Control Entry (ACE) की व्यक्तिगत रूप से जांच किए।
 
-A screenshot showed the permissions assigned to a low-privileged user, among which the **Create Subkey** permission was notable. This permission, also referred to as **AppendData/AddSubdirectory**, corresponds with the script's findings.
+एक स्क्रीनशॉट में एक कम विशेषाधिकार प्राप्त उपयोगकर्ता को सौंपे गए अनुमतियों को दिखाया गया, जिनमें **Create Subkey** अनुमति उल्लेखनीय थी। इस अनुमति को **AppendData/AddSubdirectory** के रूप में भी संदर्भित किया गया, जो स्क्रिप्ट के निष्कर्षों के साथ मेल खाती है।
 
-The inability to modify certain values directly, yet the capability to create new subkeys, was noted. An example highlighted was an attempt to alter the **ImagePath** value, which resulted in an access denied message.
+कुछ मानों को सीधे संशोधित करने में असमर्थता, फिर भी नए सबकीज़ बनाने की क्षमता को नोट किया गया। एक उदाहरण के रूप में **ImagePath** मान को बदलने का प्रयास उजागर किया गया, जिसके परिणामस्वरूप एक एक्सेस अस्वीकृत संदेश मिला।
 
-Despite these limitations, a potential for privilege escalation was identified through the possibility of leveraging the **Performance** subkey within the **RpcEptMapper** service's registry structure, a subkey not present by default. This could enable DLL registration and performance monitoring.
+इन सीमाओं के बावजूद, **RpcEptMapper** सेवा की रजिस्ट्री संरचना के भीतर **Performance** सबकीज़ का लाभ उठाने की संभावना के माध्यम से विशेषाधिकार वृद्धि की संभावना पहचानी गई, जो डिफ़ॉल्ट रूप से मौजूद नहीं है। इससे DLL पंजीकरण और प्रदर्शन निगरानी सक्षम हो सकती है।
 
-Documentation on the **Performance** subkey and its utilization for performance monitoring was consulted, leading to the development of a proof-of-concept DLL. This DLL, demonstrating the implementation of **OpenPerfData**, **CollectPerfData**, and **ClosePerfData** functions, was tested via **rundll32**, confirming its operational success.
+**Performance** सबकीज़ और इसके प्रदर्शन निगरानी के लिए उपयोग पर दस्तावेज़ीकरण की समीक्षा की गई, जिससे एक प्रमाण-की-धारणा DLL का विकास हुआ। इस DLL ने **OpenPerfData**, **CollectPerfData**, और **ClosePerfData** कार्यों के कार्यान्वयन को प्रदर्शित किया, जिसे **rundll32** के माध्यम से परीक्षण किया गया, जिससे इसकी संचालन सफलता की पुष्टि हुई।
 
-The goal was to coerce the **RPC Endpoint Mapper service** into loading the crafted Performance DLL. Observations revealed that executing WMI class queries related to Performance Data via PowerShell resulted in the creation of a log file, enabling the execution of arbitrary code under the **LOCAL SYSTEM** context, thus granting elevated privileges.
+लक्ष्य **RPC Endpoint Mapper सेवा** को तैयार किए गए Performance DLL को लोड करने के लिए मजबूर करना था। अवलोकनों ने दिखाया कि PowerShell के माध्यम से प्रदर्शन डेटा से संबंधित WMI वर्ग प्रश्नों को निष्पादित करने से एक लॉग फ़ाइल का निर्माण हुआ, जिससे **LOCAL SYSTEM** संदर्भ के तहत मनमाने कोड को निष्पादित करने की अनुमति मिली, इस प्रकार उच्च विशेषाधिकार प्राप्त हुए।
 
-The persistence and potential implications of this vulnerability were underscored, highlighting its relevance for post-exploitation strategies, lateral movement, and evasion of antivirus/EDR systems.
+इस भेद्यता की स्थिरता और संभावित प्रभावों को रेखांकित किया गया, इसके पोस्ट-एक्सप्लोइटेशन रणनीतियों, पार्श्व आंदोलन, और एंटीवायरस/EDR सिस्टम से बचने की प्रासंगिकता को उजागर किया गया।
 
-Although the vulnerability was initially disclosed unintentionally through the script, it was emphasized that its exploitation is constrained to outdated Windows versions (e.g., **Windows 7 / Server 2008 R2**) and requires local access.
+हालांकि भेद्यता को प्रारंभ में स्क्रिप्ट के माध्यम से अनजाने में प्रकट किया गया, यह जोर दिया गया कि इसका शोषण पुराने Windows संस्करणों (जैसे, **Windows 7 / Server 2008 R2**) तक सीमित है और स्थानीय पहुंच की आवश्यकता है।
 
 {{#include ../../banners/hacktricks-training.md}}
-

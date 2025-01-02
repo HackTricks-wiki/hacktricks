@@ -4,7 +4,7 @@
 
 ## Intro
 
-For more info about what is an iButton check:
+iButton क्या है इसके बारे में अधिक जानकारी के लिए देखें:
 
 {{#ref}}
 ../ibutton.md
@@ -12,7 +12,7 @@ For more info about what is an iButton check:
 
 ## Design
 
-The **blue** part of the following imageis how you would need to **put the real iButton** so the Flipper can **read it.** The **green** part is how you need to **touch the reader** with the Flipper zero to **correctly emulate an iButton**.
+निम्नलिखित छवि का **नीला** भाग वह है जहाँ आपको **वास्तविक iButton** को **रखना** होगा ताकि Flipper इसे **पढ़ सके।** **हरा** भाग वह है जहाँ आपको **Flipper zero के साथ रीडर को छूना** होगा ताकि **iButton को सही तरीके से अनुकरण** किया जा सके।
 
 <figure><img src="../../../images/image (565).png" alt=""><figcaption></figcaption></figure>
 
@@ -20,18 +20,18 @@ The **blue** part of the following imageis how you would need to **put the real 
 
 ### Read
 
-In Read Mode Flipper is waiting for the iButton key to touch and is able to digest any of three types of keys: **Dallas, Cyfral, and Metakom**. Flipper will **figure out the type of the key itself**. The name of the key protocol will be displayed on the screen above the ID number.
+Read Mode में Flipper iButton कुंजी के छूने का इंतजार कर रहा है और तीन प्रकार की कुंजियों: **Dallas, Cyfral, और Metakom** में से किसी को भी समझने में सक्षम है। Flipper **कुंजी के प्रकार का पता खुद लगाएगा।** कुंजी प्रोटोकॉल का नाम ID संख्या के ऊपर स्क्रीन पर प्रदर्शित होगा।
 
 ### Add manually
 
-It's possible to **add manually** an iButton of type: **Dallas, Cyfral, and Metakom**
+यह **हाथ से जोड़ना** संभव है एक iButton प्रकार: **Dallas, Cyfral, और Metakom**
 
 ### **Emulate**
 
-It's possible to **emulate** saved iButtons (read or manually added).
+यह **अनुकरण** करना संभव है सहेजे गए iButtons (पढ़े गए या हाथ से जोड़े गए)।
 
 > [!NOTE]
-> If you cannot make the expected contacts of the Flipper Zero touch the reader you can **use the external GPIO:**
+> यदि आप Flipper Zero के अपेक्षित संपर्कों को रीडर को छूने में असमर्थ हैं, तो आप **बाहरी GPIO का उपयोग कर सकते हैं:**
 
 <figure><img src="../../../images/image (138).png" alt=""><figcaption></figcaption></figure>
 
@@ -40,4 +40,3 @@ It's possible to **emulate** saved iButtons (read or manually added).
 - [https://blog.flipperzero.one/taming-ibutton/](https://blog.flipperzero.one/taming-ibutton/)
 
 {{#include ../../../banners/hacktricks-training.md}}
-

@@ -4,40 +4,37 @@
 
 {% embed url="https://websec.nl/" %}
 
-## How do they work
+## ये कैसे काम करते हैं
 
-The process is outlined in the steps below, illustrating how service binaries are manipulated to achieve remote execution on a target machine via SMB:
+प्रक्रिया नीचे दिए गए चरणों में स्पष्ट की गई है, जो दिखाती है कि सेवा बाइनरी को लक्षित मशीन पर SMB के माध्यम से दूरस्थ निष्पादन प्राप्त करने के लिए कैसे हेरफेर किया जाता है:
 
-1. **Copying of a service binary to the ADMIN$ share over SMB** is performed.
-2. **Creation of a service on the remote machine** is done by pointing to the binary.
-3. The service is **started remotely**.
-4. Upon exit, the service is **stopped, and the binary is deleted**.
+1. **ADMIN$ शेयर पर SMB के माध्यम से सेवा बाइनरी की कॉपी** की जाती है।
+2. **दूरस्थ मशीन पर एक सेवा का निर्माण** बाइनरी की ओर इशारा करके किया जाता है।
+3. सेवा **दूरस्थ रूप से शुरू की जाती है**।
+4. बाहर निकलने पर, सेवा **रोक दी जाती है, और बाइनरी को हटा दिया जाता है**।
 
-### **Process of Manually Executing PsExec**
+### **PsExec को मैन्युअल रूप से निष्पादित करने की प्रक्रिया**
 
-Assuming there is an executable payload (created with msfvenom and obfuscated using Veil to evade antivirus detection), named 'met8888.exe', representing a meterpreter reverse_http payload, the following steps are taken:
+मान लेते हैं कि एक निष्पादन योग्य पेलोड (जो msfvenom के साथ बनाया गया है और एंटीवायरस पहचान से बचने के लिए Veil का उपयोग करके छिपाया गया है), जिसका नाम 'met8888.exe' है, जो एक मीटरप्रीटर रिवर्स_http पेलोड का प्रतिनिधित्व करता है, निम्नलिखित चरण उठाए जाते हैं:
 
-- **Copying the binary**: The executable is copied to the ADMIN$ share from a command prompt, though it may be placed anywhere on the filesystem to remain concealed.
-- **Creating a service**: Utilizing the Windows `sc` command, which allows for querying, creating, and deleting Windows services remotely, a service named "meterpreter" is created to point to the uploaded binary.
-- **Starting the service**: The final step involves starting the service, which will likely result in a "time-out" error due to the binary not being a genuine service binary and failing to return the expected response code. This error is inconsequential as the primary goal is the binary's execution.
+- **बाइनरी की कॉपी करना**: निष्पादन योग्य को कमांड प्रॉम्प्ट से ADMIN$ शेयर में कॉपी किया जाता है, हालांकि इसे फ़ाइल सिस्टम पर कहीं भी रखा जा सकता है ताकि यह छिपा रहे।
+- **एक सेवा बनाना**: Windows `sc` कमांड का उपयोग करते हुए, जो दूरस्थ रूप से Windows सेवाओं को क्वेरी, बनाने और हटाने की अनुमति देता है, "meterpreter" नामक एक सेवा बनाई जाती है जो अपलोड की गई बाइनरी की ओर इशारा करती है।
+- **सेवा शुरू करना**: अंतिम चरण में सेवा को शुरू करना शामिल है, जो संभवतः "टाइम-आउट" त्रुटि का परिणाम देगा क्योंकि बाइनरी एक वास्तविक सेवा बाइनरी नहीं है और अपेक्षित प्रतिक्रिया कोड लौटाने में विफल रहती है। यह त्रुटि महत्वहीन है क्योंकि प्राथमिक लक्ष्य बाइनरी का निष्पादन है।
 
-Observation of the Metasploit listener will reveal that the session has been initiated successfully.
+Metasploit श्रोता का अवलोकन करने पर पता चलेगा कि सत्र सफलतापूर्वक आरंभ किया गया है।
 
 [Learn more about the `sc` command](https://technet.microsoft.com/en-us/library/bb490995.aspx).
 
 Find moe detailed steps in: [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
 
-**You could also use the Windows Sysinternals binary PsExec.exe:**
+**आप Windows Sysinternals बाइनरी PsExec.exe का भी उपयोग कर सकते हैं:**
 
 ![](<../../images/image (928).png>)
 
-You could also use [**SharpLateral**](https://github.com/mertdas/SharpLateral):
-
+आप [**SharpLateral**](https://github.com/mertdas/SharpLateral) का भी उपयोग कर सकते हैं:
 ```
 SharpLateral.exe redexec HOSTNAME C:\\Users\\Administrator\\Desktop\\malware.exe.exe malware.exe ServiceName
 ```
-
 {% embed url="https://websec.nl/" %}
 
 {{#include ../../banners/hacktricks-training.md}}
-

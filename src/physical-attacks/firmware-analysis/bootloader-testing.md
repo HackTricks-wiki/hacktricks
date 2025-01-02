@@ -1,53 +1,52 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-The following steps are recommended for modifying device startup configurations and bootloaders like U-boot:
+डिवाइस स्टार्टअप कॉन्फ़िगरेशन और बूटलोडर्स जैसे U-boot को संशोधित करने के लिए निम्नलिखित चरणों की सिफारिश की जाती है:
 
-1. **Access Bootloader's Interpreter Shell**:
+1. **बूटलोडर के इंटरप्रेटर शेल तक पहुँचें**:
 
-   - During boot, press "0", space, or other identified "magic codes" to access the bootloader's interpreter shell.
+- बूट के दौरान, बूटलोडर के इंटरप्रेटर शेल तक पहुँचने के लिए "0", स्पेस, या अन्य पहचाने गए "जादुई कोड" दबाएँ।
 
-2. **Modify Boot Arguments**:
+2. **बूट आर्गुमेंट्स को संशोधित करें**:
 
-   - Execute the following commands to append '`init=/bin/sh`' to the boot arguments, allowing execution of a shell command:
-     %%%
-     #printenv
-     #setenv bootargs=console=ttyS0,115200 mem=63M root=/dev/mtdblock3 mtdparts=sflash:<partitiionInfo> rootfstype=<fstype> hasEeprom=0 5srst=0 init=/bin/sh
-     #saveenv
-     #boot
-     %%%
+- बूट आर्गुमेंट्स में '`init=/bin/sh`' जोड़ने के लिए निम्नलिखित कमांड्स निष्पादित करें, जिससे शेल कमांड का निष्पादन संभव हो सके:
+%%%
+#printenv
+#setenv bootargs=console=ttyS0,115200 mem=63M root=/dev/mtdblock3 mtdparts=sflash:<partitiionInfo> rootfstype=<fstype> hasEeprom=0 5srst=0 init=/bin/sh
+#saveenv
+#boot
+%%%
 
-3. **Setup TFTP Server**:
+3. **TFTP सर्वर सेटअप करें**:
 
-   - Configure a TFTP server to load images over a local network:
-     %%%
-     #setenv ipaddr 192.168.2.2 #local IP of the device
-     #setenv serverip 192.168.2.1 #TFTP server IP
-     #saveenv
-     #reset
-     #ping 192.168.2.1 #check network access
-     #tftp ${loadaddr} uImage-3.6.35 #loadaddr takes the address to load the file into and the filename of the image on the TFTP server
-     %%%
+- स्थानीय नेटवर्क पर इमेज लोड करने के लिए एक TFTP सर्वर कॉन्फ़िगर करें:
+%%%
+#setenv ipaddr 192.168.2.2 #डिवाइस का स्थानीय IP
+#setenv serverip 192.168.2.1 #TFTP सर्वर IP
+#saveenv
+#reset
+#ping 192.168.2.1 #नेटवर्क एक्सेस की जाँच करें
+#tftp ${loadaddr} uImage-3.6.35 #loadaddr फ़ाइल को लोड करने के लिए पता लेता है और TFTP सर्वर पर इमेज का फ़ाइल नाम
+%%%
 
-4. **Utilize `ubootwrite.py`**:
+4. **`ubootwrite.py` का उपयोग करें**:
 
-   - Use `ubootwrite.py` to write the U-boot image and push a modified firmware to gain root access.
+- रूट एक्सेस प्राप्त करने के लिए U-boot इमेज लिखने और संशोधित फर्मवेयर को पुश करने के लिए `ubootwrite.py` का उपयोग करें।
 
-5. **Check Debug Features**:
+5. **डिबग सुविधाओं की जाँच करें**:
 
-   - Verify if debug features like verbose logging, loading arbitrary kernels, or booting from untrusted sources are enabled.
+- यह सत्यापित करें कि क्या डिबग सुविधाएँ जैसे विस्तृत लॉगिंग, मनमाने कर्नेल लोड करना, या अविश्वसनीय स्रोतों से बूट करना सक्षम हैं।
 
-6. **Cautionary Hardware Interference**:
+6. **सावधानीपूर्वक हार्डवेयर हस्तक्षेप**:
 
-   - Be cautious when connecting one pin to ground and interacting with SPI or NAND flash chips during the device boot-up sequence, particularly before the kernel decompresses. Consult the NAND flash chip's datasheet before shorting pins.
+- डिवाइस बूट-अप अनुक्रम के दौरान एक पिन को ग्राउंड से जोड़ने और SPI या NAND फ्लैश चिप्स के साथ बातचीत करते समय सावधान रहें, विशेष रूप से कर्नेल के डिकंप्रेस होने से पहले। पिन को शॉर्ट करने से पहले NAND फ्लैश चिप के डेटा शीट की जांच करें।
 
-7. **Configure Rogue DHCP Server**:
-   - Set up a rogue DHCP server with malicious parameters for a device to ingest during a PXE boot. Utilize tools like Metasploit's (MSF) DHCP auxiliary server. Modify the 'FILENAME' parameter with command injection commands such as `'a";/bin/sh;#'` to test input validation for device startup procedures.
+7. **रोग DHCP सर्वर कॉन्फ़िगर करें**:
+- PXE बूट के दौरान डिवाइस द्वारा ग्रहण करने के लिए दुर्भावनापूर्ण पैरामीटर के साथ एक रोग DHCP सर्वर सेट करें। Metasploit के (MSF) DHCP सहायक सर्वर जैसे उपकरणों का उपयोग करें। डिवाइस स्टार्टअप प्रक्रियाओं के लिए इनपुट मान्यता का परीक्षण करने के लिए कमांड इंजेक्शन कमांड जैसे `'a";/bin/sh;#'` के साथ 'FILENAME' पैरामीटर को संशोधित करें।
 
-**Note**: The steps involving physical interaction with device pins (\*marked with asterisks) should be approached with extreme caution to avoid damaging the device.
+**नोट**: डिवाइस पिन के साथ भौतिक इंटरैक्शन से संबंधित चरणों (\*तारों के साथ चिह्नित) को डिवाइस को नुकसान से बचाने के लिए अत्यधिक सावधानी के साथ किया जाना चाहिए।
 
-## References
+## संदर्भ
 
 - [https://scriptingxss.gitbook.io/firmware-security-testing-methodology/](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
 
 {{#include ../../banners/hacktricks-training.md}}
-

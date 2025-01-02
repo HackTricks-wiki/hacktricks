@@ -1,14 +1,13 @@
-# Stealing Sensitive Information Disclosure from a Web
+# संवेदनशील जानकारी का खुलासा चोरी करना एक वेब से
 
 {{#include ../banners/hacktricks-training.md}}
 
-If at some point you find a **web page that presents you sensitive information based on your session**: Maybe it's reflecting cookies, or printing or CC details or any other sensitive information, you may try to steal it.\
-Here I present you the main ways to can try to achieve it:
+यदि किसी बिंदु पर आप एक **वेब पृष्ठ पाते हैं जो आपके सत्र के आधार पर आपको संवेदनशील जानकारी प्रस्तुत करता है**: शायद यह कुकीज़ को दर्शा रहा है, या प्रिंटिंग या CC विवरण या कोई अन्य संवेदनशील जानकारी, तो आप इसे चुराने की कोशिश कर सकते हैं।\
+यहां मैं आपको इसे प्राप्त करने के मुख्य तरीकों को प्रस्तुत करता हूं:
 
-- [**CORS bypass**](../pentesting-web/cors-bypass.md): If you can bypass CORS headers you will be able to steal the information performing Ajax request for a malicious page.
-- [**XSS**](../pentesting-web/xss-cross-site-scripting/): If you find a XSS vulnerability on the page you may be able to abuse it to steal the information.
-- [**Danging Markup**](../pentesting-web/dangling-markup-html-scriptless-injection/): If you cannot inject XSS tags you still may be able to steal the info using other regular HTML tags.
-- [**Clickjaking**](../pentesting-web/clickjacking.md): If there is no protection against this attack, you may be able to trick the user into sending you the sensitive data (an example [here](https://medium.com/bugbountywriteup/apache-example-servlet-leads-to-61a2720cac20)).
+- [**CORS बायपास**](../pentesting-web/cors-bypass.md): यदि आप CORS हेडर को बायपास कर सकते हैं तो आप एक दुर्भावनापूर्ण पृष्ठ के लिए Ajax अनुरोध करते हुए जानकारी चुराने में सक्षम होंगे।
+- [**XSS**](../pentesting-web/xss-cross-site-scripting/): यदि आप पृष्ठ पर XSS भेद्यता पाते हैं तो आप इसे जानकारी चुराने के लिए दुरुपयोग कर सकते हैं।
+- [**Danging Markup**](../pentesting-web/dangling-markup-html-scriptless-injection/): यदि आप XSS टैग इंजेक्ट नहीं कर सकते हैं तो भी आप अन्य सामान्य HTML टैग का उपयोग करके जानकारी चुराने में सक्षम हो सकते हैं।
+- [**Clickjaking**](../pentesting-web/clickjacking.md): यदि इस हमले के खिलाफ कोई सुरक्षा नहीं है, तो आप उपयोगकर्ता को संवेदनशील डेटा भेजने के लिए धोखा देने में सक्षम हो सकते हैं (एक उदाहरण [यहां](https://medium.com/bugbountywriteup/apache-example-servlet-leads-to-61a2720cac20))।
 
 {{#include ../banners/hacktricks-training.md}}
-

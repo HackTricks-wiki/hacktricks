@@ -1,186 +1,185 @@
-# Cryptographic/Compression Algorithms
+# क्रिप्टोग्राफिक/संपीड़न एल्गोरिदम
 
-## Cryptographic/Compression Algorithms
+## क्रिप्टोग्राफिक/संपीड़न एल्गोरिदम
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Identifying Algorithms
+## एल्गोरिदम की पहचान करना
 
-If you ends in a code **using shift rights and lefts, xors and several arithmetic operations** it's highly possible that it's the implementation of a **cryptographic algorithm**. Here it's going to be showed some ways to **identify the algorithm that it's used without needing to reverse each step**.
+यदि आप एक कोड में **शिफ्ट दाएं और बाएं, XOR और कई अंकगणितीय संचालन** का उपयोग करते हैं, तो यह बहुत संभव है कि यह एक **क्रिप्टोग्राफिक एल्गोरिदम** का कार्यान्वयन है। यहाँ कुछ तरीके दिखाए जाएंगे **जिससे आप बिना प्रत्येक चरण को उलटने की आवश्यकता के एल्गोरिदम की पहचान कर सकते हैं**।
 
-### API functions
+### एपीआई फ़ंक्शन
 
 **CryptDeriveKey**
 
-If this function is used, you can find which **algorithm is being used** checking the value of the second parameter:
+यदि यह फ़ंक्शन उपयोग किया गया है, तो आप दूसरे पैरामीटर के मान की जांच करके यह पता लगा सकते हैं कि **कौन सा एल्गोरिदम उपयोग किया जा रहा है**:
 
 ![](<../../images/image (375) (1) (1) (1) (1).png>)
 
-Check here the table of possible algorithms and their assigned values: [https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id](https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id)
+संभावित एल्गोरिदम और उनके असाइन किए गए मानों की तालिका यहाँ देखें: [https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id](https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id)
 
 **RtlCompressBuffer/RtlDecompressBuffer**
 
-Compresses and decompresses a given buffer of data.
+एक दिए गए डेटा बफर को संकुचित और अनसंकुचित करता है।
 
 **CryptAcquireContext**
 
-From [the docs](https://learn.microsoft.com/en-us/windows/win32/api/wincrypt/nf-wincrypt-cryptacquirecontexta): The **CryptAcquireContext** function is used to acquire a handle to a particular key container within a particular cryptographic service provider (CSP). **This returned handle is used in calls to CryptoAPI** functions that use the selected CSP.
+[दस्तावेज़ों से](https://learn.microsoft.com/en-us/windows/win32/api/wincrypt/nf-wincrypt-cryptacquirecontexta): **CryptAcquireContext** फ़ंक्शन का उपयोग एक विशेष कुंजी कंटेनर के लिए हैंडल प्राप्त करने के लिए किया जाता है जो एक विशेष क्रिप्टोग्राफिक सेवा प्रदाता (CSP) के भीतर है। **यह लौटाया गया हैंडल उन CryptoAPI** फ़ंक्शंस में उपयोग किया जाता है जो चयनित CSP का उपयोग करते हैं।
 
 **CryptCreateHash**
 
-Initiates the hashing of a stream of data. If this function is used, you can find which **algorithm is being used** checking the value of the second parameter:
+डेटा के एक स्ट्रीम का हैशिंग शुरू करता है। यदि यह फ़ंक्शन उपयोग किया गया है, तो आप दूसरे पैरामीटर के मान की जांच करके यह पता लगा सकते हैं कि **कौन सा एल्गोरिदम उपयोग किया जा रहा है**:
 
 ![](<../../images/image (376).png>)
 
 \
-Check here the table of possible algorithms and their assigned values: [https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id](https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id)
+संभावित एल्गोरिदम और उनके असाइन किए गए मानों की तालिका यहाँ देखें: [https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id](https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id)
 
-### Code constants
+### कोड स्थिरांक
 
-Sometimes it's really easy to identify an algorithm thanks to the fact that it needs to use a special and unique value.
+कभी-कभी एक एल्गोरिदम की पहचान करना वास्तव में आसान होता है क्योंकि इसे एक विशेष और अद्वितीय मान का उपयोग करना आवश्यक होता है।
 
 ![](<../../images/image (370).png>)
 
-If you search for the first constant in Google this is what you get:
+यदि आप Google में पहले स्थिरांक की खोज करते हैं, तो आपको यह मिलता है:
 
 ![](<../../images/image (371).png>)
 
-Therefore, you can assume that the decompiled function is a **sha256 calculator.**\
-You can search any of the other constants and you will obtain (probably) the same result.
+इसलिए, आप मान सकते हैं कि डिकंपाइल किया गया फ़ंक्शन एक **sha256 कैलकुलेटर है।**\
+आप अन्य स्थिरांकों में से किसी की भी खोज कर सकते हैं और आपको (संभवतः) वही परिणाम प्राप्त होगा।
 
-### data info
+### डेटा जानकारी
 
-If the code doesn't have any significant constant it may be **loading information from the .data section**.\
-You can access that data, **group the first dword** and search for it in google as we have done in the section before:
+यदि कोड में कोई महत्वपूर्ण स्थिरांक नहीं है, तो यह **.data सेक्शन से जानकारी लोड कर रहा हो सकता है**।\
+आप उस डेटा तक पहुँच सकते हैं, **पहले DWORD को समूहित करें** और इसे Google में खोजें जैसा कि हमने पिछले अनुभाग में किया था:
 
 ![](<../../images/image (372).png>)
 
-In this case, if you look for **0xA56363C6** you can find that it's related to the **tables of the AES algorithm**.
+इस मामले में, यदि आप **0xA56363C6** की खोज करते हैं, तो आप देख सकते हैं कि यह **AES एल्गोरिदम की तालिकाओं** से संबंधित है।
 
-## RC4 **(Symmetric Crypt)**
+## RC4 **(समानांतर क्रिप्ट)**
 
-### Characteristics
+### विशेषताएँ
 
-It's composed of 3 main parts:
+यह 3 मुख्य भागों में विभाजित है:
 
-- **Initialization stage/**: Creates a **table of values from 0x00 to 0xFF** (256bytes in total, 0x100). This table is commonly call **Substitution Box** (or SBox).
-- **Scrambling stage**: Will **loop through the table** crated before (loop of 0x100 iterations, again) creating modifying each value with **semi-random** bytes. In order to create this semi-random bytes, the RC4 **key is used**. RC4 **keys** can be **between 1 and 256 bytes in length**, however it is usually recommended that it is above 5 bytes. Commonly, RC4 keys are 16 bytes in length.
-- **XOR stage**: Finally, the plain-text or cyphertext is **XORed with the values created before**. The function to encrypt and decrypt is the same. For this, a **loop through the created 256 bytes** will be performed as many times as necessary. This is usually recognized in a decompiled code with a **%256 (mod 256)**.
+- **आरंभिक चरण/**: 0x00 से 0xFF तक के **मानों की तालिका बनाता है** (कुल 256 बाइट, 0x100)। इस तालिका को सामान्यतः **सब्स्टिट्यूशन बॉक्स** (या SBox) कहा जाता है।
+- **स्क्रैम्बलिंग चरण**: पहले बनाई गई तालिका के माध्यम से **लूप करेगा** (0x100 पुनरावृत्तियों का लूप, फिर से) प्रत्येक मान को **सेमी-रैंडम** बाइट्स के साथ संशोधित करेगा। इन सेमी-रैंडम बाइट्स को बनाने के लिए, RC4 **कुंजी का उपयोग किया जाता है**। RC4 **कुंजी** की लंबाई **1 से 256 बाइट** के बीच हो सकती है, हालाँकि आमतौर पर इसे 5 बाइट से अधिक होना अनुशंसित है। सामान्यतः, RC4 कुंजी 16 बाइट लंबी होती है।
+- **XOR चरण**: अंततः, प्लेन-टेक्स्ट या सिफरटेक्स्ट को **पहले बनाए गए मानों के साथ XOR किया जाता है**। एन्क्रिप्ट और डिक्रिप्ट करने के लिए फ़ंक्शन वही होता है। इसके लिए, **बनाए गए 256 बाइट्स के माध्यम से लूप किया जाएगा** जितनी बार आवश्यक हो। इसे आमतौर पर डिकंपाइल किए गए कोड में **%256 (mod 256)** के साथ पहचाना जाता है।
 
 > [!NOTE]
-> **In order to identify a RC4 in a disassembly/decompiled code you can check for 2 loops of size 0x100 (with the use of a key) and then a XOR of the input data with the 256 values created before in the 2 loops probably using a %256 (mod 256)**
+> **डिस्सेम्बली/डिकंपाइल किए गए कोड में RC4 की पहचान करने के लिए आप 0x100 के आकार के 2 लूप की जांच कर सकते हैं (कुंजी के उपयोग के साथ) और फिर इन 2 लूप में पहले बनाए गए 256 मानों के साथ इनपुट डेटा का XOR संभवतः %256 (mod 256) का उपयोग करते हुए।**
 
-### **Initialization stage/Substitution Box:** (Note the number 256 used as counter and how a 0 is written in each place of the 256 chars)
+### **आरंभिक चरण/सब्स्टिट्यूशन बॉक्स:** (गिनती के रूप में उपयोग किए गए 256 संख्या और 256 वर्णों के प्रत्येक स्थान पर 0 कैसे लिखा गया है, इसे नोट करें)
 
 ![](<../../images/image (377).png>)
 
-### **Scrambling Stage:**
+### **स्क्रैम्बलिंग चरण:**
 
 ![](<../../images/image (378).png>)
 
-### **XOR Stage:**
+### **XOR चरण:**
 
 ![](<../../images/image (379).png>)
 
-## **AES (Symmetric Crypt)**
+## **AES (समानांतर क्रिप्ट)**
 
-### **Characteristics**
+### **विशेषताएँ**
 
-- Use of **substitution boxes and lookup tables**
-  - It's possible to **distinguish AES thanks to the use of specific lookup table values** (constants). _Note that the **constant** can be **stored** in the binary **or created**_ _**dynamically**._
-- The **encryption key** must be **divisible** by **16** (usually 32B) and usually an **IV** of 16B is used.
+- **सब्स्टिट्यूशन बॉक्स और लुकअप तालिकाओं** का उपयोग
+- यह संभव है कि **विशिष्ट लुकअप तालिका मानों** (स्थिरांक) के उपयोग के कारण AES को **पहचाना जा सके**। _ध्यान दें कि **स्थिरांक** को **बाइनरी में** _या_ _**डायनामिकली**_ _**स्टोर** किया जा सकता है।_
+- **एन्क्रिप्शन कुंजी** को **16** से **भाग दिया जाना चाहिए** (आमतौर पर 32B) और आमतौर पर 16B का **IV** उपयोग किया जाता है।
 
-### SBox constants
+### SBox स्थिरांक
 
 ![](<../../images/image (380).png>)
 
-## Serpent **(Symmetric Crypt)**
+## सर्पेंट **(समानांतर क्रिप्ट)**
 
-### Characteristics
+### विशेषताएँ
 
-- It's rare to find some malware using it but there are examples (Ursnif)
-- Simple to determine if an algorithm is Serpent or not based on it's length (extremely long function)
+- इसे उपयोग करने वाले कुछ मैलवेयर को खोजना दुर्लभ है लेकिन इसके उदाहरण हैं (Ursnif)
+- इसकी लंबाई (अत्यधिक लंबा फ़ंक्शन) के आधार पर यह निर्धारित करना सरल है कि एल्गोरिदम सर्पेंट है या नहीं।
 
-### Identifying
+### पहचानना
 
-In the following image notice how the constant **0x9E3779B9** is used (note that this constant is also used by other crypto algorithms like **TEA** -Tiny Encryption Algorithm).\
-Also note the **size of the loop** (**132**) and the **number of XOR operations** in the **disassembly** instructions and in the **code** example:
+अगली छवि में ध्यान दें कि स्थिरांक **0x9E3779B9** का उपयोग किया गया है (ध्यान दें कि यह स्थिरांक अन्य क्रिप्टो एल्गोरिदम जैसे **TEA** -Tiny Encryption Algorithm द्वारा भी उपयोग किया जाता है)।\
+लूप के **आकार** (**132**) और **डिस्सेम्बली** निर्देशों और **कोड** उदाहरण में XOR संचालन की **संख्या** को भी नोट करें:
 
 ![](<../../images/image (381).png>)
 
-As it was mentioned before, this code can be visualized inside any decompiler as a **very long function** as there **aren't jumps** inside of it. The decompiled code can look like the following:
+जैसा कि पहले उल्लेख किया गया था, इस कोड को किसी भी डिकंपाइलर के अंदर **एक बहुत लंबे फ़ंक्शन** के रूप में देखा जा सकता है क्योंकि इसके अंदर **कोई कूद** नहीं होते हैं। डिकंपाइल किया गया कोड निम्नलिखित की तरह दिख सकता है:
 
 ![](<../../images/image (382).png>)
 
-Therefore, it's possible to identify this algorithm checking the **magic number** and the **initial XORs**, seeing a **very long function** and **comparing** some **instructions** of the long function **with an implementation** (like the shift left by 7 and the rotate left by 22).
+इसलिए, इस एल्गोरिदम की पहचान करना संभव है **जादुई संख्या** और **प्रारंभिक XORs** की जांच करके, **एक बहुत लंबे फ़ंक्शन** को देखकर और **कुछ निर्देशों** की तुलना करके **एक कार्यान्वयन** (जैसे 7 द्वारा बाएं शिफ्ट और 22 द्वारा बाएं घुमाना) के साथ।
 
-## RSA **(Asymmetric Crypt)**
+## RSA **(असमानांतर क्रिप्ट)**
 
-### Characteristics
+### विशेषताएँ
 
-- More complex than symmetric algorithms
-- There are no constants! (custom implementation are difficult to determine)
-- KANAL (a crypto analyzer) fails to show hints on RSA ad it relies on constants.
+- समानांतर एल्गोरिदम की तुलना में अधिक जटिल
+- कोई स्थिरांक नहीं! (कस्टम कार्यान्वयन को निर्धारित करना कठिन है)
+- KANAL (एक क्रिप्टो विश्लेषक) RSA पर संकेत दिखाने में विफल रहता है क्योंकि यह स्थिरांकों पर निर्भर करता है।
 
-### Identifying by comparisons
+### तुलना द्वारा पहचानना
 
 ![](<../../images/image (383).png>)
 
-- In line 11 (left) there is a `+7) >> 3` which is the same as in line 35 (right): `+7) / 8`
-- Line 12 (left) is checking if `modulus_len < 0x040` and in line 36 (right) it's checking if `inputLen+11 > modulusLen`
+- लाइन 11 (बाएं) में `+7) >> 3` है जो लाइन 35 (दाएं) में समान है: `+7) / 8`
+- लाइन 12 (बाएं) यह जांच रही है कि `modulus_len < 0x040` और लाइन 36 (दाएं) यह जांच रही है कि `inputLen+11 > modulusLen`
 
-## MD5 & SHA (hash)
+## MD5 & SHA (हैश)
 
-### Characteristics
+### विशेषताएँ
 
-- 3 functions: Init, Update, Final
-- Similar initialize functions
+- 3 फ़ंक्शन: Init, Update, Final
+- समान प्रारंभिक फ़ंक्शन
 
-### Identify
+### पहचानें
 
 **Init**
 
-You can identify both of them checking the constants. Note that the sha_init has 1 constant that MD5 doesn't have:
+आप स्थिरांकों की जांच करके दोनों की पहचान कर सकते हैं। ध्यान दें कि sha_init में 1 स्थिरांक है जो MD5 में नहीं है:
 
 ![](<../../images/image (385).png>)
 
-**MD5 Transform**
+**MD5 ट्रांसफॉर्म**
 
-Note the use of more constants
+अधिक स्थिरांकों के उपयोग को नोट करें
 
 ![](<../../images/image (253) (1) (1) (1).png>)
 
-## CRC (hash)
+## CRC (हैश)
 
-- Smaller and more efficient as it's function is to find accidental changes in data
-- Uses lookup tables (so you can identify constants)
+- छोटा और अधिक कुशल क्योंकि इसका कार्य डेटा में आकस्मिक परिवर्तनों को खोजना है
+- लुकअप तालिकाओं का उपयोग करता है (इसलिए आप स्थिरांकों की पहचान कर सकते हैं)
 
-### Identify
+### पहचानें
 
-Check **lookup table constants**:
+**लुकअप तालिका स्थिरांक** की जांच करें:
 
 ![](<../../images/image (387).png>)
 
-A CRC hash algorithm looks like:
+एक CRC हैश एल्गोरिदम इस तरह दिखता है:
 
 ![](<../../images/image (386).png>)
 
-## APLib (Compression)
+## APLib (संपीड़न)
 
-### Characteristics
+### विशेषताएँ
 
-- Not recognizable constants
-- You can try to write the algorithm in python and search for similar things online
+- पहचानने योग्य स्थिरांक नहीं
+- आप एल्गोरिदम को पायथन में लिखने और ऑनलाइन समान चीजों की खोज करने का प्रयास कर सकते हैं
 
-### Identify
+### पहचानें
 
-The graph is quiet large:
+ग्राफ़ काफी बड़ा है:
 
 ![](<../../images/image (207) (2) (1).png>)
 
-Check **3 comparisons to recognise it**:
+इसे पहचानने के लिए **3 तुलना** की जांच करें:
 
 ![](<../../images/image (384).png>)
 
 {{#include ../../banners/hacktricks-training.md}}
-

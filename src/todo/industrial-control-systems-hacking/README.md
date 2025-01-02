@@ -1,18 +1,15 @@
-# Industrial Control Systems Hacking 
+# Industrial Control Systems Hacking
 
 ## About this Section
 
-This section contains all about Industrial Control Systems including concepts as well as methodologies to hack them with various security issues that persists in them. 
+यह अनुभाग औद्योगिक नियंत्रण प्रणालियों के बारे में सभी जानकारी प्रदान करता है, जिसमें अवधारणाएँ और विभिन्न सुरक्षा मुद्दों के साथ उन्हें हैक करने की विधियाँ शामिल हैं।
 
-Industrial Control Systems are everywhere, since industries are vital for economic development of a nation. But these ICS are hard to update and lesser advancements are made in this field. Hence, finding security flaws is common here. Most of the protocols and standards used here where developed back in the 90's and have much lesser capabilities as compared to current attack scenarios. 
+औद्योगिक नियंत्रण प्रणालियाँ हर जगह हैं, क्योंकि उद्योग एक राष्ट्र के आर्थिक विकास के लिए महत्वपूर्ण हैं। लेकिन ये ICS अपडेट करना कठिन हैं और इस क्षेत्र में कम प्रगति हुई है। इसलिए, सुरक्षा खामियों को खोजना यहाँ सामान्य है। यहाँ उपयोग किए जाने वाले अधिकांश प्रोटोकॉल और मानक 90 के दशक में विकसित किए गए थे और वर्तमान हमले के परिदृश्यों की तुलना में बहुत कम क्षमताएँ हैं।
 
-It has become important to secure these systems since damaging them can cost a lot and even lives at the worst case. To understand Industrial Contol Systems security, knowing the internals of them is necessary. 
+इन प्रणालियों को सुरक्षित करना महत्वपूर्ण हो गया है क्योंकि उन्हें नुकसान पहुँचाने से बहुत लागत आ सकती है और सबसे खराब स्थिति में जीवन भी जा सकता है। औद्योगिक नियंत्रण प्रणालियों की सुरक्षा को समझने के लिए, उनके आंतरिक कार्यों को जानना आवश्यक है।
 
-Since Industrial Control Systems are installed following set standards, knowing each components would help in interconnecting every other mechanisms in the control system. Installation of these devices like PLCs and SCADA systems is different is various industries, hence information gathering is critical. 
+चूंकि औद्योगिक नियंत्रण प्रणालियाँ निर्धारित मानकों का पालन करते हुए स्थापित की जाती हैं, प्रत्येक घटक को जानना नियंत्रण प्रणाली में अन्य तंत्रों को आपस में जोड़ने में मदद करेगा। इन उपकरणों जैसे PLCs और SCADA प्रणालियों की स्थापना विभिन्न उद्योगों में भिन्न होती है, इसलिए जानकारी एकत्र करना महत्वपूर्ण है।
 
-Industrial Control Systems can be complicated at times and hence require a lot of patience to do anything. It's all about probing and reconnaissance before planning attacks and developing any exploits. 
+औद्योगिक नियंत्रण प्रणालियाँ कभी-कभी जटिल हो सकती हैं और इसलिए कुछ भी करने के लिए बहुत धैर्य की आवश्यकता होती है। यह हमलों की योजना बनाने और किसी भी शोषण को विकसित करने से पहले जांच और अन्वेषण के बारे में है।
 
-These techniques can also be used to protect against attacks and blue teaming for industrial control systems. 
-
-
-
+इन तकनीकों का उपयोग हमलों के खिलाफ सुरक्षा और औद्योगिक नियंत्रण प्रणालियों के लिए नीली टीमिंग के लिए भी किया जा सकता है।

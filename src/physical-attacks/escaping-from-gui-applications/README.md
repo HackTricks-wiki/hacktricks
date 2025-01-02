@@ -1,47 +1,47 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-# Check for possible actions inside the GUI application
+# GUI एप्लिकेशन के अंदर संभावित क्रियाओं की जांच करें
 
-**Common Dialogs** are those options of **saving a file**, **opening a file**, selecting a font, a color... Most of them will **offer a full Explorer functionality**. This means that you will be able to access Explorer functionalities if you can access these options:
+**सामान्य संवाद** वे विकल्प हैं जो **फाइल को सहेजने**, **फाइल खोलने**, एक फ़ॉन्ट, एक रंग चुनने... से संबंधित हैं। इनमें से अधिकांश **पूर्ण एक्सप्लोरर कार्यक्षमता** प्रदान करेंगे। इसका मतलब है कि यदि आप इन विकल्पों तक पहुँच सकते हैं, तो आप एक्सप्लोरर कार्यक्षमताओं तक पहुँच सकते हैं:
 
-- Close/Close as
-- Open/Open with
-- Print
-- Export/Import
-- Search
-- Scan
+- बंद करें/बंद करें जैसे
+- खोलें/खोलें के साथ
+- प्रिंट करें
+- निर्यात/आयात
+- खोजें
+- स्कैन करें
 
-You should check if you can:
+आपको यह जांचना चाहिए कि क्या आप:
 
-- Modify or create new files
-- Create symbolic links
-- Get access to restricted areas
-- Execute other apps
+- फ़ाइलों को संशोधित या नई फ़ाइलें बना सकते हैं
+- प्रतीकात्मक लिंक बना सकते हैं
+- प्रतिबंधित क्षेत्रों तक पहुँच प्राप्त कर सकते हैं
+- अन्य ऐप्स को निष्पादित कर सकते हैं
 
-## Command Execution
+## कमांड निष्पादन
 
-Maybe **using a `Open with`** option\*\* you can open/execute some kind of shell.
+शायद **`Open with`** विकल्प का उपयोग करके आप किसी प्रकार का शेल खोल/निष्पादित कर सकते हैं।
 
-### Windows
+### विंडोज
 
-For example _cmd.exe, command.com, Powershell/Powershell ISE, mmc.exe, at.exe, taskschd.msc..._ find more binaries that can be used to execute commands (and perform unexpected actions) here: [https://lolbas-project.github.io/](https://lolbas-project.github.io)
+उदाहरण के लिए _cmd.exe, command.com, Powershell/Powershell ISE, mmc.exe, at.exe, taskschd.msc..._ यहाँ और अधिक बाइनरी खोजें जो कमांड निष्पादित करने (और अप्रत्याशित क्रियाएँ करने) के लिए उपयोग की जा सकती हैं: [https://lolbas-project.github.io/](https://lolbas-project.github.io)
 
 ### \*NIX \_\_
 
-_bash, sh, zsh..._ More here: [https://gtfobins.github.io/](https://gtfobins.github.io)
+_bash, sh, zsh..._ यहाँ अधिक: [https://gtfobins.github.io/](https://gtfobins.github.io)
 
-# Windows
+# विंडोज
 
-## Bypassing path restrictions
+## पथ प्रतिबंधों को बायपास करना
 
-- **Environment variables**: There are a lot of environment variables that are pointing to some path
-- **Other protocols**: _about:, data:, ftp:, file:, mailto:, news:, res:, telnet:, view-source:_
-- **Symbolic links**
-- **Shortcuts**: CTRL+N (open new session), CTRL+R (Execute Commands), CTRL+SHIFT+ESC (Task Manager), Windows+E (open explorer), CTRL-B, CTRL-I (Favourites), CTRL-H (History), CTRL-L, CTRL-O (File/Open Dialog), CTRL-P (Print Dialog), CTRL-S (Save As)
-  - Hidden Administrative menu: CTRL-ALT-F8, CTRL-ESC-F9
-- **Shell URIs**: _shell:Administrative Tools, shell:DocumentsLibrary, shell:Librariesshell:UserProfiles, shell:Personal, shell:SearchHomeFolder, shell:Systemshell:NetworkPlacesFolder, shell:SendTo, shell:UsersProfiles, shell:Common Administrative Tools, shell:MyComputerFolder, shell:InternetFolder_
-- **UNC paths**: Paths to connect to shared folders. You should try to connect to the C$ of the local machine ("\\\127.0.0.1\c$\Windows\System32")
-  - **More UNC paths:**
+- **पर्यावरण चर**: कई पर्यावरण चर हैं जो कुछ पथ की ओर इशारा कर रहे हैं
+- **अन्य प्रोटोकॉल**: _about:, data:, ftp:, file:, mailto:, news:, res:, telnet:, view-source:_
+- **प्रतीकात्मक लिंक**
+- **शॉर्टकट**: CTRL+N (नई सत्र खोलें), CTRL+R (कमांड निष्पादित करें), CTRL+SHIFT+ESC (कार्य प्रबंधक), Windows+E (एक्सप्लोरर खोलें), CTRL-B, CTRL-I (पसंदीदा), CTRL-H (इतिहास), CTRL-L, CTRL-O (फाइल/खोलें संवाद), CTRL-P (प्रिंट संवाद), CTRL-S (जैसे सहेजें)
+- छिपा हुआ प्रशासनिक मेनू: CTRL-ALT-F8, CTRL-ESC-F9
+- **शेल यूआरआई**: _shell:Administrative Tools, shell:DocumentsLibrary, shell:Librariesshell:UserProfiles, shell:Personal, shell:SearchHomeFolder, shell:Systemshell:NetworkPlacesFolder, shell:SendTo, shell:UsersProfiles, shell:Common Administrative Tools, shell:MyComputerFolder, shell:InternetFolder_
+- **UNC पथ**: साझा फ़ोल्डरों से कनेक्ट करने के लिए पथ। आपको स्थानीय मशीन के C$ से कनेक्ट करने का प्रयास करना चाहिए ("\\\127.0.0.1\c$\Windows\System32")
+- **अधिक UNC पथ:**
 
 | UNC                       | UNC            | UNC                  |
 | ------------------------- | -------------- | -------------------- |
@@ -55,13 +55,13 @@ _bash, sh, zsh..._ More here: [https://gtfobins.github.io/](https://gtfobins.git
 | %TMP%                     | %USERDOMAIN%   | %USERNAME%           |
 | %USERPROFILE%             | %WINDIR%       |                      |
 
-## Download Your Binaries
+## अपने बाइनरी डाउनलोड करें
 
-Console: [https://sourceforge.net/projects/console/](https://sourceforge.net/projects/console/)\
-Explorer: [https://sourceforge.net/projects/explorerplus/files/Explorer%2B%2B/](https://sourceforge.net/projects/explorerplus/files/Explorer%2B%2B/)\
-Registry editor: [https://sourceforge.net/projects/uberregedit/](https://sourceforge.net/projects/uberregedit/)
+कंसोल: [https://sourceforge.net/projects/console/](https://sourceforge.net/projects/console/)\
+एक्सप्लोरर: [https://sourceforge.net/projects/explorerplus/files/Explorer%2B%2B/](https://sourceforge.net/projects/explorerplus/files/Explorer%2B%2B/)\
+रजिस्ट्री संपादक: [https://sourceforge.net/projects/uberregedit/](https://sourceforge.net/projects/uberregedit/)
 
-## Accessing filesystem from the browser
+## ब्राउज़र से फ़ाइल सिस्टम तक पहुँच
 
 | PATH                | PATH              | PATH               | PATH                |
 | ------------------- | ----------------- | ------------------ | ------------------- |
@@ -73,47 +73,47 @@ Registry editor: [https://sourceforge.net/projects/uberregedit/](https://sourcef
 | %TEMP%              | %SYSTEMDRIVE%     | %SYSTEMROOT%       | %APPDATA%           |
 | %HOMEDRIVE%         | %HOMESHARE        |                    | <p><br></p>         |
 
-## ShortCuts
+## शॉर्टकट
 
-- Sticky Keys – Press SHIFT 5 times
-- Mouse Keys – SHIFT+ALT+NUMLOCK
-- High Contrast – SHIFT+ALT+PRINTSCN
-- Toggle Keys – Hold NUMLOCK for 5 seconds
-- Filter Keys – Hold right SHIFT for 12 seconds
-- WINDOWS+F1 – Windows Search
-- WINDOWS+D – Show Desktop
-- WINDOWS+E – Launch Windows Explorer
-- WINDOWS+R – Run
-- WINDOWS+U – Ease of Access Centre
-- WINDOWS+F – Search
-- SHIFT+F10 – Context Menu
-- CTRL+SHIFT+ESC – Task Manager
-- CTRL+ALT+DEL – Splash screen on newer Windows versions
-- F1 – Help F3 – Search
-- F6 – Address Bar
-- F11 – Toggle full screen within Internet Explorer
-- CTRL+H – Internet Explorer History
-- CTRL+T – Internet Explorer – New Tab
-- CTRL+N – Internet Explorer – New Page
-- CTRL+O – Open File
-- CTRL+S – Save CTRL+N – New RDP / Citrix
+- स्टिकी कीज़ – SHIFT को 5 बार दबाएँ
+- माउस कीज़ – SHIFT+ALT+NUMLOCK
+- उच्च विपरीत – SHIFT+ALT+PRINTSCN
+- टॉगल कीज़ – NUMLOCK को 5 सेकंड के लिए दबाए रखें
+- फ़िल्टर कीज़ – दाएँ SHIFT को 12 सेकंड के लिए दबाए रखें
+- WINDOWS+F1 – विंडोज़ खोज
+- WINDOWS+D – डेस्कटॉप दिखाएँ
+- WINDOWS+E – विंडोज़ एक्सप्लोरर लॉन्च करें
+- WINDOWS+R – रन
+- WINDOWS+U – एक्सेस सेंटर
+- WINDOWS+F – खोजें
+- SHIFT+F10 – संदर्भ मेनू
+- CTRL+SHIFT+ESC – कार्य प्रबंधक
+- CTRL+ALT+DEL – नए विंडोज़ संस्करणों पर स्प्लैश स्क्रीन
+- F1 – मदद F3 – खोजें
+- F6 – पता बार
+- F11 – इंटरनेट एक्सप्लोरर में पूर्ण स्क्रीन टॉगल करें
+- CTRL+H – इंटरनेट एक्सप्लोरर इतिहास
+- CTRL+T – इंटरनेट एक्सप्लोरर – नया टैब
+- CTRL+N – इंटरनेट एक्सप्लोरर – नया पृष्ठ
+- CTRL+O – फ़ाइल खोलें
+- CTRL+S – सहेजें CTRL+N – नया RDP / Citrix
 
-## Swipes
+## स्वाइप
 
-- Swipe from the left side to the right to see all open Windows, minimizing the KIOSK app and accessing the whole OS directly;
-- Swipe from the right side to the left to open Action Center, minimizing the KIOSK app and accessing the whole OS directly;
-- Swipe in from the top edge to make the title bar visible for an app opened in full screen mode;
-- Swipe up from the bottom to show the taskbar in a full screen app.
+- बाईं ओर से दाईं ओर स्वाइप करें सभी खुले विंडोज़ देखने के लिए, KIOSK ऐप को कम करना और सीधे पूरे OS तक पहुँच प्राप्त करना;
+- दाईं ओर से बाईं ओर स्वाइप करें एक्शन सेंटर खोलने के लिए, KIOSK ऐप को कम करना और सीधे पूरे OS तक पहुँच प्राप्त करना;
+- शीर्ष किनारे से स्वाइप करें ताकि पूर्ण स्क्रीन मोड में खोले गए ऐप के लिए शीर्ष पट्टी दिखाई दे;
+- नीचे से ऊपर की ओर स्वाइप करें ताकि पूर्ण स्क्रीन ऐप में कार्य पट्टी दिखाई दे।
 
-## Internet Explorer Tricks
+## इंटरनेट एक्सप्लोरर ट्रिक्स
 
-### 'Image Toolbar'
+### 'इमेज टूलबार'
 
-It's a toolbar that appears on the top-left of image when it's clicked. You will be able to Save, Print, Mailto, Open "My Pictures" in Explorer. The Kiosk needs to be using Internet Explorer.
+यह एक टूलबार है जो इमेज पर क्लिक करने पर शीर्ष-बाएँ पर दिखाई देता है। आप सहेजने, प्रिंट करने, मेल करने, एक्सप्लोरर में "मेरी तस्वीरें" खोलने में सक्षम होंगे। Kiosk को इंटरनेट एक्सप्लोरर का उपयोग करना होगा।
 
-### Shell Protocol
+### शेल प्रोटोकॉल
 
-Type this URLs to obtain an Explorer view:
+एक्सप्लोरर दृश्य प्राप्त करने के लिए ये यूआरएल टाइप करें:
 
 - `shell:Administrative Tools`
 - `shell:DocumentsLibrary`
@@ -132,141 +132,141 @@ Type this URLs to obtain an Explorer view:
 - `Shell:System`
 - `Shell:ControlPanelFolder`
 - `Shell:Windows`
-- `shell:::{21EC2020-3AEA-1069-A2DD-08002B30309D}` --> Control Panel
-- `shell:::{20D04FE0-3AEA-1069-A2D8-08002B30309D}` --> My Computer
-- `shell:::{{208D2C60-3AEA-1069-A2D7-08002B30309D}}` --> My Network Places
-- `shell:::{871C5380-42A0-1069-A2EA-08002B30309D}` --> Internet Explorer
+- `shell:::{21EC2020-3AEA-1069-A2DD-08002B30309D}` --> नियंत्रण कक्ष
+- `shell:::{20D04FE0-3AEA-1069-A2D8-08002B30309D}` --> मेरा कंप्यूटर
+- `shell:::{{208D2C60-3AEA-1069-A2D7-08002B30309D}}` --> मेरे नेटवर्क स्थान
+- `shell:::{871C5380-42A0-1069-A2EA-08002B30309D}` --> इंटरनेट एक्सप्लोरर
 
-## Show File Extensions
+## फ़ाइल एक्सटेंशन दिखाएँ
 
-Check this page for more information: [https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml](https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml)
+अधिक जानकारी के लिए इस पृष्ठ की जांच करें: [https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml](https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml)
 
-# Browsers tricks
+# ब्राउज़र्स ट्रिक्स
 
-Backup iKat versions:
+iKat संस्करणों का बैकअप:
 
 [http://swin.es/k/](http://swin.es/k/)\
 [http://www.ikat.kronicd.net/](http://www.ikat.kronicd.net)\
 
-Create a common dialog using JavaScript and access file explorer: `document.write('<input/type=file>')`  
-Source: https://medium.com/@Rend_/give-me-a-browser-ill-give-you-a-shell-de19811defa0
+जावास्क्रिप्ट का उपयोग करके एक सामान्य संवाद बनाएं और फ़ाइल एक्सप्लोरर तक पहुँचें: `document.write('<input/type=file>')`
+स्रोत: https://medium.com/@Rend_/give-me-a-browser-ill-give-you-a-shell-de19811defa0
 
-# iPad
+# आईपैड
 
-## Gestures and bottoms
+## इशारे और बटन
 
-- Swipe up with four (or five) fingers / Double-tap Home button: To view the multitask view and change App
+- चार (या पांच) उंगलियों के साथ ऊपर स्वाइप करें / होम बटन को डबल-टैप करें: मल्टीटास्क दृश्य देखने और ऐप बदलने के लिए
 
-- Swipe one way or another with four or five fingers: In order to change to the next/last App
+- चार या पांच उंगलियों के साथ एक दिशा में स्वाइप करें: अगले/पिछले ऐप में बदलने के लिए
 
-- Pinch the screen with five fingers / Touch Home button / Swipe up with 1 finger from the bottom of the screen in a quick motion to the up: To access Home
+- पांच उंगलियों के साथ स्क्रीन को चुटकी लें / होम बटन को छूएं / स्क्रीन के नीचे से 1 उंगली को तेजी से ऊपर की ओर स्वाइप करें: होम तक पहुँचने के लिए
 
-- Swipe one finger from the bottom of the screen just 1-2 inches (slow): The dock will appear
+- स्क्रीन के नीचे से 1-2 इंच (धीरे) एक उंगली से स्वाइप करें: डॉक दिखाई देगा
 
-- Swipe down from the top of the display with 1 finger: To view your notifications
+- स्क्रीन के शीर्ष से 1 उंगली के साथ नीचे स्वाइप करें: अपनी सूचनाएँ देखने के लिए
 
-- Swipe down with 1 finger the top-right corner of the screen: To see iPad Pro's control centre
+- स्क्रीन के शीर्ष-दाएँ कोने से 1 उंगली के साथ नीचे स्वाइप करें: iPad Pro का नियंत्रण केंद्र देखने के लिए
 
-- Swipe 1 finger from the left of the screen 1-2 inches: To see Today view
+- स्क्रीन के बाएँ से 1-2 इंच के लिए 1 उंगली के साथ स्वाइप करें: आज का दृश्य देखने के लिए
 
-- Swipe fast 1 finger from the centre of the screen to the right or left: To change to next/last App
+- स्क्रीन के केंद्र से दाईं या बाईं ओर तेज़ी से 1 उंगली के साथ स्वाइप करें: अगले/पिछले ऐप में बदलने के लिए
 
-- Press and hold the On/**Off**/Sleep button at the upper-right corner of the **iPad +** Move the Slide to **power off** slider all the way to the right: To power off
+- **iPad के ऊपरी-दाएँ कोने पर ऑन/**ऑफ**/स्लीप बटन को दबाएँ** और **पावर ऑफ** स्लाइडर को दाएँ तक खींचें: पावर ऑफ करने के लिए
 
-- Press the On/**Off**/Sleep button at the upper-right corner of the **iPad and the Home button for a few second**: To force a hard power off
+- **iPad के ऊपरी-दाएँ कोने पर ऑन/**ऑफ**/स्लीप बटन और होम बटन को कुछ सेकंड के लिए दबाएँ**: हार्ड पावर ऑफ करने के लिए
 
-- Press the On/**Off**/Sleep button at the upper-right corner of the **iPad and the Home button quickly**: To take a screenshot that will pop up in the lower left of the display. Press both buttons at the same time very briefly as if you hold them a few seconds a hard power off will be performed.
+- **iPad के ऊपरी-दाएँ कोने पर ऑन/**ऑफ**/स्लीप बटन और होम बटन को जल्दी दबाएँ**: एक स्क्रीनशॉट लेने के लिए जो डिस्प्ले के निचले बाएँ में पॉप अप होगा। दोनों बटन को एक साथ बहुत संक्षेप में दबाएँ जैसे कि यदि आप उन्हें कुछ सेकंड के लिए दबाए रखते हैं तो एक हार्ड पावर ऑफ किया जाएगा।
 
-## Shortcuts
+## शॉर्टकट
 
-You should have an iPad keyboard or a USB keyboard adaptor. Only shortcuts that could help escaping from the application will be shown here.
+आपके पास एक iPad कीबोर्ड या USB कीबोर्ड एडाप्टर होना चाहिए। केवल वे शॉर्टकट जो ऐप से भागने में मदद कर सकते हैं, यहाँ दिखाए जाएंगे।
 
 | Key | Name         |
 | --- | ------------ |
-| ⌘   | Command      |
-| ⌥   | Option (Alt) |
-| ⇧   | Shift        |
-| ↩   | Return       |
-| ⇥   | Tab          |
-| ^   | Control      |
-| ←   | Left Arrow   |
-| →   | Right Arrow  |
-| ↑   | Up Arrow     |
-| ↓   | Down Arrow   |
+| ⌘   | कमांड      |
+| ⌥   | विकल्प (Alt) |
+| ⇧   | शिफ्ट        |
+| ↩   | रिटर्न       |
+| ⇥   | टैब          |
+| ^   | नियंत्रण      |
+| ←   | बाएँ तीर   |
+| →   | दाएँ तीर  |
+| ↑   | ऊपर तीर     |
+| ↓   | नीचे तीर   |
 
-### System shortcuts
+### सिस्टम शॉर्टकट
 
-These shortcuts are for the visual settings and sound settings, depending on the use of the iPad.
+ये शॉर्टकट दृश्य सेटिंग्स और ध्वनि सेटिंग्स के लिए हैं, जो iPad के उपयोग पर निर्भर करते हैं।
 
-| Shortcut | Action                                                                         |
+| शॉर्टकट | क्रिया                                                                         |
 | -------- | ------------------------------------------------------------------------------ |
-| F1       | Dim Sscreen                                                                    |
-| F2       | Brighten screen                                                                |
-| F7       | Back one song                                                                  |
-| F8       | Play/pause                                                                     |
-| F9       | Skip song                                                                      |
-| F10      | Mute                                                                           |
-| F11      | Decrease volume                                                                |
-| F12      | Increase volume                                                                |
-| ⌘ Space  | Display a list of available languages; to choose one, tap the space bar again. |
+| F1       | स्क्रीन को मंद करें                                                            |
+| F2       | स्क्रीन को उज्ज्वल करें                                                         |
+| F7       | एक गाना पीछे करें                                                              |
+| F8       | चलाएँ/रोकें                                                                   |
+| F9       | गाना छोड़ें                                                                    |
+| F10      | म्यूट                                                                           |
+| F11      | ध्वनि को कम करें                                                               |
+| F12      | ध्वनि को बढ़ाएँ                                                               |
+| ⌘ Space  | उपलब्ध भाषाओं की सूची प्रदर्शित करें; एक चुनने के लिए, फिर से स्पेस बार दबाएँ। |
 
-### iPad navigation
+### iPad नेविगेशन
 
-| Shortcut                                           | Action                                                  |
+| शॉर्टकट                                           | क्रिया                                                  |
 | -------------------------------------------------- | ------------------------------------------------------- |
-| ⌘H                                                 | Go to Home                                              |
-| ⌘⇧H (Command-Shift-H)                              | Go to Home                                              |
-| ⌘ (Space)                                          | Open Spotlight                                          |
-| ⌘⇥ (Command-Tab)                                   | List last ten used apps                                 |
-| ⌘\~                                                | Go t the last App                                       |
-| ⌘⇧3 (Command-Shift-3)                              | Screenshot (hovers in bottom left to save or act on it) |
-| ⌘⇧4                                                | Screenshot and open it in the editor                    |
-| Press and hold ⌘                                   | List of shortcuts available for the App                 |
-| ⌘⌥D (Command-Option/Alt-D)                         | Brings up the dock                                      |
-| ^⌥H (Control-Option-H)                             | Home button                                             |
-| ^⌥H H (Control-Option-H-H)                         | Show multitask bar                                      |
-| ^⌥I (Control-Option-i)                             | Item chooser                                            |
-| Escape                                             | Back button                                             |
-| → (Right arrow)                                    | Next item                                               |
-| ← (Left arrow)                                     | Previous item                                           |
-| ↑↓ (Up arrow, Down arrow)                          | Simultaneously tap selected item                        |
-| ⌥ ↓ (Option-Down arrow)                            | Scroll down                                             |
-| ⌥↑ (Option-Up arrow)                               | Scroll up                                               |
-| ⌥← or ⌥→ (Option-Left arrow or Option-Right arrow) | Scroll left or right                                    |
-| ^⌥S (Control-Option-S)                             | Turn VoiceOver speech on or off                         |
-| ⌘⇧⇥ (Command-Shift-Tab)                            | Switch to the previous app                              |
-| ⌘⇥ (Command-Tab)                                   | Switch back to the original app                         |
-| ←+→, then Option + ← or Option+→                   | Navigate through Dock                                   |
+| ⌘H                                                 | होम पर जाएँ                                            |
+| ⌘⇧H (कमांड-शिफ्ट-H)                              | होम पर जाएँ                                            |
+| ⌘ (स्पेस)                                         | स्पॉटलाइट खोलें                                       |
+| ⌘⇥ (कमांड-टैब)                                   | पिछले दस उपयोग किए गए ऐप्स की सूची                    |
+| ⌘\~                                                | अंतिम ऐप पर जाएँ                                       |
+| ⌘⇧3 (कमांड-शिफ्ट-3)                              | स्क्रीनशॉट (नीचे बाएँ में सहेजने या उस पर कार्य करने के लिए) |
+| ⌘⇧4                                                | स्क्रीनशॉट और इसे संपादक में खोलें                    |
+| ⌘ को दबाए रखें                                   | ऐप के लिए उपलब्ध शॉर्टकट की सूची                      |
+| ⌘⌥D (कमांड-ऑप्शन/Alt-D)                         | डॉक लाएगा                                            |
+| ^⌥H (कंट्रोल-ऑप्शन-H)                             | होम बटन                                             |
+| ^⌥H H (कंट्रोल-ऑप्शन-H-H)                         | मल्टीटास्क बार दिखाएँ                                  |
+| ^⌥I (कंट्रोल-ऑप्शन-i)                             | आइटम चयनकर्ता                                        |
+| Escape                                             | वापस बटन                                             |
+| → (दाएँ तीर)                                    | अगला आइटम                                           |
+| ← (बाएँ तीर)                                     | पिछला आइटम                                           |
+| ↑↓ (ऊपर तीर, नीचे तीर)                          | चयनित आइटम पर एक साथ टैप करें                        |
+| ⌥ ↓ (विकल्प-नीचे तीर)                            | नीचे स्क्रॉल करें                                     |
+| ⌥↑ (विकल्प-ऊपर तीर)                               | ऊपर स्क्रॉल करें                                       |
+| ⌥← या ⌥→ (विकल्प-बाएँ तीर या विकल्प-दाएँ तीर) | बाएँ या दाएँ स्क्रॉल करें                              |
+| ^⌥S (कंट्रोल-ऑप्शन-S)                             | वॉयसओवर स्पीच को चालू या बंद करें                     |
+| ⌘⇧⇥ (कमांड-शिफ्ट-टैब)                            | पिछले ऐप पर स्विच करें                                |
+| ⌘⇥ (कमांड-टैब)                                   | मूल ऐप पर वापस स्विच करें                             |
+| ←+→, फिर विकल्प + ← या विकल्प+→                   | डॉक के माध्यम से नेविगेट करें                         |
 
-### Safari shortcuts
+### सफारी शॉर्टकट
 
-| Shortcut                | Action                                           |
+| शॉर्टकट                | क्रिया                                           |
 | ----------------------- | ------------------------------------------------ |
-| ⌘L (Command-L)          | Open Location                                    |
-| ⌘T                      | Open a new tab                                   |
-| ⌘W                      | Close the current tab                            |
-| ⌘R                      | Refresh the current tab                          |
-| ⌘.                      | Stop loading the current tab                     |
-| ^⇥                      | Switch to the next tab                           |
-| ^⇧⇥ (Control-Shift-Tab) | Move to the previous tab                         |
-| ⌘L                      | Select the text input/URL field to modify it     |
-| ⌘⇧T (Command-Shift-T)   | Open last closed tab (can be used several times) |
-| ⌘\[                     | Goes back one page in your browsing history      |
-| ⌘]                      | Goes forward one page in your browsing history   |
-| ⌘⇧R                     | Activate Reader Mode                             |
+| ⌘L (कमांड-L)          | स्थान खोलें                                     |
+| ⌘T                      | एक नया टैब खोलें                               |
+| ⌘W                      | वर्तमान टैब बंद करें                            |
+| ⌘R                      | वर्तमान टैब को ताज़ा करें                       |
+| ⌘.                      | वर्तमान टैब को लोड करना रोकें                   |
+| ^⇥                      | अगले टैब पर स्विच करें                          |
+| ^⇧⇥ (कंट्रोल-शिफ्ट-टैब) | पिछले टैब पर जाएँ                              |
+| ⌘L                      | टेक्स्ट इनपुट/यूआरएल फ़ील्ड को संशोधित करने के लिए चुनें |
+| ⌘⇧T (कमांड-शिफ्ट-T)   | अंतिम बंद किए गए टैब को खोलें (कई बार उपयोग किया जा सकता है) |
+| ⌘\[                     | आपके ब्राउज़िंग इतिहास में एक पृष्ठ पीछे जाएँ   |
+| ⌘]                      | आपके ब्राउज़िंग इतिहास में एक पृष्ठ आगे जाएँ    |
+| ⌘⇧R                     | रीडर मोड सक्रिय करें                             |
 
-### Mail shortcuts
+### मेल शॉर्टकट
 
-| Shortcut                   | Action                       |
+| शॉर्टकट                   | क्रिया                       |
 | -------------------------- | ---------------------------- |
-| ⌘L                         | Open Location                |
-| ⌘T                         | Open a new tab               |
-| ⌘W                         | Close the current tab        |
-| ⌘R                         | Refresh the current tab      |
-| ⌘.                         | Stop loading the current tab |
-| ⌘⌥F (Command-Option/Alt-F) | Search in your mailbox       |
+| ⌘L                         | स्थान खोलें                |
+| ⌘T                         | एक नया टैब खोलें           |
+| ⌘W                         | वर्तमान टैब बंद करें        |
+| ⌘R                         | वर्तमान टैब को ताज़ा करें   |
+| ⌘.                         | वर्तमान टैब को लोड करना रोकें |
+| ⌘⌥F (कमांड-ऑप्शन/Alt-F) | आपके मेलबॉक्स में खोजें     |
 
-# References
+# संदर्भ
 
 - [https://www.macworld.com/article/2975857/6-only-for-ipad-gestures-you-need-to-know.html](https://www.macworld.com/article/2975857/6-only-for-ipad-gestures-you-need-to-know.html)
 - [https://www.tomsguide.com/us/ipad-shortcuts,news-18205.html](https://www.tomsguide.com/us/ipad-shortcuts,news-18205.html)
@@ -274,4 +274,3 @@ These shortcuts are for the visual settings and sound settings, depending on the
 - [http://www.iphonehacks.com/2018/03/ipad-keyboard-shortcuts.html](http://www.iphonehacks.com/2018/03/ipad-keyboard-shortcuts.html)
 
 {{#include ../../banners/hacktricks-training.md}}
-

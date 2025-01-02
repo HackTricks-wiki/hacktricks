@@ -1,36 +1,35 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-## Firmware Integrity
+## फर्मवेयर अखंडता
 
-The **custom firmware and/or compiled binaries can be uploaded to exploit integrity or signature verification flaws**. The following steps can be followed for backdoor bind shell compilation:
+**कस्टम फर्मवेयर और/या संकलित बाइनरी को अखंडता या हस्ताक्षर सत्यापन दोषों का लाभ उठाने के लिए अपलोड किया जा सकता है**। बैकडोर बाइंड शेल संकलन के लिए निम्नलिखित चरणों का पालन किया जा सकता है:
 
-1. The firmware can be extracted using firmware-mod-kit (FMK).
-2. The target firmware architecture and endianness should be identified.
-3. A cross compiler can be built using Buildroot or other suitable methods for the environment.
-4. The backdoor can be built using the cross compiler.
-5. The backdoor can be copied to the extracted firmware /usr/bin directory.
-6. The appropriate QEMU binary can be copied to the extracted firmware rootfs.
-7. The backdoor can be emulated using chroot and QEMU.
-8. The backdoor can be accessed via netcat.
-9. The QEMU binary should be removed from the extracted firmware rootfs.
-10. The modified firmware can be repackaged using FMK.
-11. The backdoored firmware can be tested by emulating it with firmware analysis toolkit (FAT) and connecting to the target backdoor IP and port using netcat.
+1. फर्मवेयर को firmware-mod-kit (FMK) का उपयोग करके निकाला जा सकता है।
+2. लक्षित फर्मवेयर आर्किटेक्चर और एंडियननेस की पहचान की जानी चाहिए।
+3. Buildroot या पर्यावरण के लिए अन्य उपयुक्त विधियों का उपयोग करके एक क्रॉस कंपाइलर बनाया जा सकता है।
+4. बैकडोर को क्रॉस कंपाइलर का उपयोग करके बनाया जा सकता है।
+5. बैकडोर को निकाले गए फर्मवेयर /usr/bin निर्देशिका में कॉपी किया जा सकता है।
+6. उपयुक्त QEMU बाइनरी को निकाले गए फर्मवेयर rootfs में कॉपी किया जा सकता है।
+7. बैकडोर को chroot और QEMU का उपयोग करके अनुकरण किया जा सकता है।
+8. बैकडोर को नेटकैट के माध्यम से एक्सेस किया जा सकता है।
+9. QEMU बाइनरी को निकाले गए फर्मवेयर rootfs से हटा दिया जाना चाहिए।
+10. संशोधित फर्मवेयर को FMK का उपयोग करके फिर से पैकेज किया जा सकता है।
+11. बैकडोर फर्मवेयर का परीक्षण फर्मवेयर विश्लेषण टूलकिट (FAT) के साथ अनुकरण करके और लक्षित बैकडोर IP और पोर्ट से नेटकैट का उपयोग करके कनेक्ट करके किया जा सकता है।
 
-If a root shell has already been obtained through dynamic analysis, bootloader manipulation, or hardware security testing, precompiled malicious binaries such as implants or reverse shells can be executed. Automated payload/implant tools like the Metasploit framework and 'msfvenom' can be leveraged using the following steps:
+यदि गतिशील विश्लेषण, बूटलोडर हेरफेर, या हार्डवेयर सुरक्षा परीक्षण के माध्यम से पहले से ही एक रूट शेल प्राप्त किया गया है, तो इम्प्लांट या रिवर्स शेल जैसे पूर्व-संकलित दुर्भावनापूर्ण बाइनरी को निष्पादित किया जा सकता है। स्वचालित पेलोड/इम्प्लांट उपकरण जैसे Metasploit फ्रेमवर्क और 'msfvenom' का उपयोग निम्नलिखित चरणों का पालन करके किया जा सकता है:
 
-1. The target firmware architecture and endianness should be identified.
-2. Msfvenom can be used to specify the target payload, attacker host IP, listening port number, filetype, architecture, platform, and the output file.
-3. The payload can be transferred to the compromised device and ensured that it has execution permissions.
-4. Metasploit can be prepared to handle incoming requests by starting msfconsole and configuring the settings according to the payload.
-5. The meterpreter reverse shell can be executed on the compromised device.
-6. Meterpreter sessions can be monitored as they open.
-7. Post-exploitation activities can be performed.
+1. लक्षित फर्मवेयर आर्किटेक्चर और एंडियननेस की पहचान की जानी चाहिए।
+2. Msfvenom का उपयोग लक्षित पेलोड, हमलावर होस्ट IP, सुनने वाले पोर्ट नंबर, फ़ाइल प्रकार, आर्किटेक्चर, प्लेटफ़ॉर्म, और आउटपुट फ़ाइल को निर्दिष्ट करने के लिए किया जा सकता है।
+3. पेलोड को समझौता किए गए डिवाइस पर स्थानांतरित किया जा सकता है और सुनिश्चित किया जा सकता है कि इसके पास निष्पादन अनुमतियाँ हैं।
+4. Metasploit को आने वाले अनुरोधों को संभालने के लिए msfconsole शुरू करके और पेलोड के अनुसार सेटिंग्स को कॉन्फ़िगर करके तैयार किया जा सकता है।
+5. समझौता किए गए डिवाइस पर मीटरप्रीटर रिवर्स शेल को निष्पादित किया जा सकता है।
+6. मीटरप्रीटर सत्रों की निगरानी की जा सकती है जैसे ही वे खुलते हैं।
+7. पोस्ट-एक्सप्लॉइटेशन गतिविधियाँ की जा सकती हैं।
 
-If possible, vulnerabilities within startup scripts can be exploited to gain persistent access to a device across reboots. These vulnerabilities arise when startup scripts reference, [symbolically link](https://www.chromium.org/chromium-os/chromiumos-design-docs/hardening-against-malicious-stateful-data), or depend on code located in untrusted mounted locations such as SD cards and flash volumes used for storing data outside of root filesystems.
+यदि संभव हो, तो स्टार्टअप स्क्रिप्ट में कमजोरियों का लाभ उठाकर रिबूट के दौरान डिवाइस तक निरंतर पहुंच प्राप्त की जा सकती है। ये कमजोरियाँ तब उत्पन्न होती हैं जब स्टार्टअप स्क्रिप्ट संदर्भित करती हैं, [सांकेतिक लिंक](https://www.chromium.org/chromium-os/chromiumos-design-docs/hardening-against-malicious-stateful-data) करती हैं, या अनट्रस्टेड माउंटेड स्थानों जैसे SD कार्ड और डेटा को रूट फ़ाइल सिस्टम के बाहर संग्रहीत करने के लिए उपयोग किए जाने वाले फ्लैश वॉल्यूम में स्थित कोड पर निर्भर करती हैं।
 
-## References
+## संदर्भ
 
-- For further information check [https://scriptingxss.gitbook.io/firmware-security-testing-methodology/](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
+- आगे की जानकारी के लिए देखें [https://scriptingxss.gitbook.io/firmware-security-testing-methodology/](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
 
 {{#include ../../banners/hacktricks-training.md}}
-

@@ -4,10 +4,9 @@
 
 ## Access Tokens
 
-Each **user logged** onto the system **holds an access token with security information** for that logon session. The system creates an access token when the user logs on. **Every process executed** on behalf of the user **has a copy of the access token**. The token identifies the user, the user's groups, and the user's privileges. A token also contains a logon SID (Security Identifier) that identifies the current logon session.
+प्रत्येक **उपयोगकर्ता जो** सिस्टम पर **लॉग इन है, उसके पास उस लॉगिन सत्र के लिए सुरक्षा जानकारी के साथ एक एक्सेस टोकन होता है**। जब उपयोगकर्ता लॉग इन करता है, तो सिस्टम एक एक्सेस टोकन बनाता है। **प्रत्येक प्रक्रिया जो** उपयोगकर्ता की ओर से **निष्पादित होती है, उसके पास एक्सेस टोकन की एक प्रति होती है**। टोकन उपयोगकर्ता, उपयोगकर्ता के समूहों और उपयोगकर्ता के विशेषाधिकारों की पहचान करता है। एक टोकन में एक लॉगिन SID (सुरक्षा पहचानकर्ता) भी होता है जो वर्तमान लॉगिन सत्र की पहचान करता है।
 
-You can see this information executing `whoami /all`
-
+आप इस जानकारी को `whoami /all` चलाकर देख सकते हैं।
 ```
 whoami /all
 
@@ -51,61 +50,55 @@ SeUndockPrivilege             Remove computer from docking station Disabled
 SeIncreaseWorkingSetPrivilege Increase a process working set       Disabled
 SeTimeZonePrivilege           Change the time zone                 Disabled
 ```
-
-or using _Process Explorer_ from Sysinternals (select process and access"Security" tab):
+या _Process Explorer_ का उपयोग करके Sysinternals से (प्रक्रिया का चयन करें और "सुरक्षा" टैब तक पहुँचें):
 
 ![](<../../images/image (772).png>)
 
-### Local administrator
+### स्थानीय व्यवस्थापक
 
-When a local administrator logins, **two access tokens are created**: One with admin rights and other one with normal rights. **By default**, when this user executes a process the one with **regular** (non-administrator) **rights is used**. When this user tries to **execute** anything **as administrator** ("Run as Administrator" for example) the **UAC** will be used to ask for permission.\
-If you want to [**learn more about the UAC read this page**](../authentication-credentials-uac-and-efs/#uac)**.**
+जब एक स्थानीय व्यवस्थापक लॉगिन करता है, **दो एक्सेस टोकन बनाए जाते हैं**: एक व्यवस्थापक अधिकारों के साथ और दूसरा सामान्य अधिकारों के साथ। **डिफ़ॉल्ट रूप से**, जब यह उपयोगकर्ता एक प्रक्रिया निष्पादित करता है, तो **सामान्य** (गैर-व्यवस्थापक) **अधिकारों वाला** टोकन उपयोग किया जाता है। जब यह उपयोगकर्ता **व्यवस्थापक के रूप में** कुछ **निष्पादित** करने की कोशिश करता है ("व्यवस्थापक के रूप में चलाएँ" उदाहरण के लिए) तो **UAC** अनुमति मांगने के लिए उपयोग किया जाएगा।\
+यदि आप [**UAC के बारे में अधिक जानना चाहते हैं, तो इस पृष्ठ को पढ़ें**](../authentication-credentials-uac-and-efs/#uac)**.**
 
-### Credentials user impersonation
+### क्रेडेंशियल्स उपयोगकर्ता अनुकरण
 
-If you have **valid credentials of any other user**, you can **create** a **new logon session** with those credentials :
-
+यदि आपके पास **किसी अन्य उपयोगकर्ता के वैध क्रेडेंशियल्स** हैं, तो आप उन क्रेडेंशियल्स के साथ **एक नया लॉगिन सत्र** **बना सकते हैं**:
 ```
 runas /user:domain\username cmd.exe
 ```
-
-The **access token** has also a **reference** of the logon sessions inside the **LSASS**, this is useful if the process needs to access some objects of the network.\
-You can launch a process that **uses different credentials for accessing network services** using:
-
+**एक्सेस टोकन** में **LSASS** के अंदर लॉगिन सत्रों का भी **संदर्भ** होता है, यह उपयोगी है यदि प्रक्रिया को नेटवर्क के कुछ ऑब्जेक्ट्स तक पहुंचने की आवश्यकता है।\
+आप एक प्रक्रिया लॉन्च कर सकते हैं जो **नेटवर्क सेवाओं तक पहुंचने के लिए विभिन्न क्रेडेंशियल्स का उपयोग करती है**:
 ```
 runas /user:domain\username /netonly cmd.exe
 ```
+यह उपयोगी है यदि आपके पास नेटवर्क में वस्तुओं तक पहुँचने के लिए उपयोगी क्रेडेंशियल्स हैं लेकिन वे क्रेडेंशियल्स वर्तमान होस्ट के अंदर मान्य नहीं हैं क्योंकि वे केवल नेटवर्क में उपयोग किए जाने वाले हैं (वर्तमान होस्ट में आपके वर्तमान उपयोगकर्ता विशेषाधिकारों का उपयोग किया जाएगा)।
 
-This is useful if you have useful credentials to access objects in the network but those credentials aren't valid inside the current host as they are only going to be used in the network (in the current host your current user privileges will be used).
+### टोकन के प्रकार
 
-### Types of tokens
+दो प्रकार के टोकन उपलब्ध हैं:
 
-There are two types of tokens available:
+- **प्राथमिक टोकन**: यह एक प्रक्रिया के सुरक्षा क्रेडेंशियल्स का प्रतिनिधित्व करता है। प्रक्रियाओं के साथ प्राथमिक टोकनों का निर्माण और संघनन ऐसे कार्य हैं जो उच्च विशेषाधिकार की आवश्यकता होती है, जो विशेषाधिकार विभाजन के सिद्धांत को उजागर करता है। आमतौर पर, टोकन निर्माण के लिए एक प्रमाणीकरण सेवा जिम्मेदार होती है, जबकि एक लॉगिन सेवा इसे उपयोगकर्ता के ऑपरेटिंग सिस्टम शेल के साथ संघनित करती है। यह ध्यान देने योग्य है कि प्रक्रियाएँ अपने माता-पिता की प्रक्रिया का प्राथमिक टोकन निर्माण के समय विरासत में लेती हैं।
+- **प्रतिनिधित्व टोकन**: एक सर्वर एप्लिकेशन को सुरक्षित वस्तुओं तक पहुँचने के लिए ग्राहक की पहचान को अस्थायी रूप से अपनाने की शक्ति देता है। यह तंत्र चार स्तरों में विभाजित है:
+- **गुमनाम**: एक अज्ञात उपयोगकर्ता के समान सर्वर पहुँच प्रदान करता है।
+- **पहचान**: सर्वर को ग्राहक की पहचान की पुष्टि करने की अनुमति देता है बिना इसे वस्तु पहुँच के लिए उपयोग किए।
+- **प्रतिनिधित्व**: सर्वर को ग्राहक की पहचान के तहत कार्य करने में सक्षम बनाता है।
+- **प्रतिनिधित्व**: प्रतिनिधित्व के समान लेकिन इसमें इस पहचान को दूरस्थ प्रणालियों तक विस्तारित करने की क्षमता शामिल है जिनके साथ सर्वर बातचीत करता है, जिससे क्रेडेंशियल संरक्षण सुनिश्चित होता है।
 
-- **Primary Token**: It serves as a representation of a process's security credentials. The creation and association of primary tokens with processes are actions that require elevated privileges, emphasizing the principle of privilege separation. Typically, an authentication service is responsible for token creation, while a logon service handles its association with the user's operating system shell. It is worth noting that processes inherit the primary token of their parent process at creation.
-- **Impersonation Token**: Empowers a server application to adopt the client's identity temporarily for accessing secure objects. This mechanism is stratified into four levels of operation:
-  - **Anonymous**: Grants server access akin to that of an unidentified user.
-  - **Identification**: Allows the server to verify the client's identity without utilizing it for object access.
-  - **Impersonation**: Enables the server to operate under the client's identity.
-  - **Delegation**: Similar to Impersonation but includes the ability to extend this identity assumption to remote systems the server interacts with, ensuring credential preservation.
+#### प्रतिनिधित्व टोकन
 
-#### Impersonate Tokens
+यदि आपके पास पर्याप्त विशेषाधिकार हैं तो आप _**incognito**_ मॉड्यूल का उपयोग करके अन्य **टोकनों** को आसानी से **सूचीबद्ध** और **प्रतिनिधित्व** कर सकते हैं। यह **अन्य उपयोगकर्ता के रूप में कार्य करने** के लिए उपयोगी हो सकता है। आप इस तकनीक के साथ **विशेषाधिकार बढ़ा** भी सकते हैं।
 
-Using the _**incognito**_ module of metasploit if you have enough privileges you can easily **list** and **impersonate** other **tokens**. This could be useful to perform **actions as if you where the other user**. You could also **escalate privileges** with this technique.
+### टोकन विशेषाधिकार
 
-### Token Privileges
-
-Learn which **token privileges can be abused to escalate privileges:**
+जानें कि कौन से **टोकन विशेषाधिकारों का दुरुपयोग करके विशेषाधिकार बढ़ाए जा सकते हैं:**
 
 {{#ref}}
 privilege-escalation-abusing-tokens.md
 {{#endref}}
 
-Take a look to [**all the possible token privileges and some definitions on this external page**](https://github.com/gtworek/Priv2Admin).
+[**सभी संभावित टोकन विशेषाधिकारों और कुछ परिभाषाओं के लिए इस बाहरी पृष्ठ पर नज़र डालें**](https://github.com/gtworek/Priv2Admin)।
 
-## References
+## संदर्भ
 
-Learn more about tokens in this tutorials: [https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa](https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa) and [https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)
+इन ट्यूटोरियल में टोकनों के बारे में अधिक जानें: [https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa](https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa) और [https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)
 
 {{#include ../../banners/hacktricks-training.md}}
-

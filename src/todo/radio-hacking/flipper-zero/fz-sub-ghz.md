@@ -4,13 +4,13 @@
 
 ## Intro <a href="#kfpn7" id="kfpn7"></a>
 
-Flipper Zero can **receive and transmit radio frequencies in the range of 300-928 MHz** with its built-in module, which can read, save, and emulate remote controls. These controls are used for interaction with gates, barriers, radio locks, remote control switches, wireless doorbells, smart lights, and more. Flipper Zero can help you to learn if your security is compromised.
+Flipper Zero **300-928 MHz** की रेंज में रेडियो फ्रीक्वेंसी को **प्राप्त और प्रसारित** कर सकता है, जिसमें एक अंतर्निहित मॉड्यूल है, जो रिमोट कंट्रोल को पढ़, सहेज और अनुकरण कर सकता है। ये नियंत्रण गेट, बैरियर्स, रेडियो ताले, रिमोट कंट्रोल स्विच, वायरलेस डोरबेल, स्मार्ट लाइट और अधिक के साथ इंटरैक्शन के लिए उपयोग किए जाते हैं। Flipper Zero आपको यह जानने में मदद कर सकता है कि आपकी सुरक्षा से समझौता किया गया है या नहीं।
 
 <figure><img src="../../../images/image (714).png" alt=""><figcaption></figcaption></figure>
 
 ## Sub-GHz hardware <a href="#kfpn7" id="kfpn7"></a>
 
-Flipper Zero has a built-in sub-1 GHz module based on a [﻿](https://www.st.com/en/nfc/st25r3916.html#overview)﻿[CC1101 chip](https://www.ti.com/lit/ds/symlink/cc1101.pdf) and a radio antenna (the maximum range is 50 meters). Both the CC1101 chip and the antenna are designed to operate at frequencies in the 300-348 MHz, 387-464 MHz, and 779-928 MHz bands.
+Flipper Zero में एक अंतर्निहित सब-1 GHz मॉड्यूल है जो [﻿](https://www.st.com/en/nfc/st25r3916.html#overview)﻿[CC1101 चिप](https://www.ti.com/lit/ds/symlink/cc1101.pdf) पर आधारित है और एक रेडियो एंटीना है (अधिकतम रेंज 50 मीटर है)। CC1101 चिप और एंटीना दोनों को 300-348 MHz, 387-464 MHz, और 779-928 MHz बैंड में फ्रीक्वेंसी पर काम करने के लिए डिज़ाइन किया गया है।
 
 <figure><img src="../../../images/image (923).png" alt=""><figcaption></figcaption></figure>
 
@@ -19,87 +19,86 @@ Flipper Zero has a built-in sub-1 GHz module based on a [﻿](https://www.st.com
 ### Frequency Analyser
 
 > [!NOTE]
-> How to find which frequency is the remote using
+> यह पता लगाने के लिए कि रिमोट कौन सी फ्रीक्वेंसी का उपयोग कर रहा है
 
-When analysing, Flipper Zero is scanning signals strength (RSSI) at all the frequencies available in frequency configuration. Flipper Zero displays the frequency with the highest RSSI value, with signal strength higher than -90 [dBm](https://en.wikipedia.org/wiki/DBm).
+विश्लेषण करते समय, Flipper Zero उपलब्ध सभी फ्रीक्वेंसियों पर सिग्नल स्ट्रेंथ (RSSI) को स्कैन कर रहा है। Flipper Zero सबसे उच्च RSSI मान के साथ फ्रीक्वेंसी को प्रदर्शित करता है, जिसमें सिग्नल स्ट्रेंथ -90 [dBm](https://en.wikipedia.org/wiki/DBm) से अधिक है।
 
-To determine the remote's frequency, do the following:
+रिमोट की फ्रीक्वेंसी निर्धारित करने के लिए, निम्नलिखित करें:
 
-1. Place the remote control very close to the left of Flipper Zero.
-2. Go to **Main Menu** **→ Sub-GHz**.
-3. Select **Frequency Analyzer**, then press and hold the button on the remote control you want to analyze.
-4. Review the frequency value on the screen.
+1. रिमोट कंट्रोल को Flipper Zero के बाईं ओर बहुत करीब रखें।
+2. **मुख्य मेनू** **→ Sub-GHz** पर जाएं।
+3. **फ्रीक्वेंसी एनालाइज़र** का चयन करें, फिर उस रिमोट कंट्रोल पर बटन दबाएं और दबाए रखें जिसे आप विश्लेषित करना चाहते हैं।
+4. स्क्रीन पर फ्रीक्वेंसी मान की समीक्षा करें।
 
 ### Read
 
 > [!NOTE]
-> Find info about the frequency used (also another way to find which frequency is used)
+> उपयोग की गई फ्रीक्वेंसी के बारे में जानकारी प्राप्त करें (कौन सी फ्रीक्वेंसी का उपयोग किया जा रहा है यह जानने का एक और तरीका)
 
-The **Read** option **listens on the configured frequency** on the indicated modulation: 433.92 AM by default. If **something is found** when reading, **info is given** in the screen. This info could be use to replicate the signal in the future.
+**Read** विकल्प **निर्धारित फ्रीक्वेंसी** पर सुनता है: डिफ़ॉल्ट रूप से 433.92 AM। यदि पढ़ते समय **कुछ पाया जाता है**, तो **जानकारी स्क्रीन पर दी जाती है**। इस जानकारी का उपयोग भविष्य में सिग्नल को दोहराने के लिए किया जा सकता है।
 
-While Read is in use, it's possible to press the **left button** and **configure it**.\
-At this moment it has **4 modulations** (AM270, AM650, FM328 and FM476), and **several relevant frequencies** stored:
+जब Read का उपयोग किया जा रहा है, तो **बाईं बटन** को दबाकर **इसे कॉन्फ़िगर करना** संभव है।\
+इस समय इसमें **4 मॉड्यूलेशन** (AM270, AM650, FM328 और FM476) और **कई प्रासंगिक फ्रीक्वेंसियाँ** संग्रहीत हैं:
 
 <figure><img src="../../../images/image (947).png" alt=""><figcaption></figcaption></figure>
 
-You can set **any that interests you**, however, if you are **not sure which frequency** could be the one used by the remote you have, **set Hopping to ON** (Off by default), and press the button several times until Flipper captures it and give you the info you need to set the frequency.
+आप **कोई भी सेट कर सकते हैं जो आपको रुचिकर हो**, हालाँकि, यदि आप **निश्चित नहीं हैं कि कौन सी फ्रीक्वेंसी** रिमोट द्वारा उपयोग की जा रही है, तो **हॉपिंग को ON सेट करें** (डिफ़ॉल्ट रूप से OFF), और बटन को कई बार दबाएं जब तक Flipper इसे कैप्चर न कर ले और आपको फ्रीक्वेंसी सेट करने के लिए आवश्यक जानकारी न दे।
 
 > [!CAUTION]
-> Switching between frequencies takes some time, therefore signals transmitted at the time of switching can be missed. For better signal reception, set a fixed frequency determined by Frequency Analyzer.
+> फ्रीक्वेंसियों के बीच स्विच करने में कुछ समय लगता है, इसलिए स्विचिंग के समय भेजे गए सिग्नल छूट सकते हैं। बेहतर सिग्नल रिसेप्शन के लिए, फ्रीक्वेंसी एनालाइज़र द्वारा निर्धारित एक निश्चित फ्रीक्वेंसी सेट करें।
 
 ### **Read Raw**
 
 > [!NOTE]
-> Steal (and replay) a signal in the configured frequency
+> निर्धारित फ्रीक्वेंसी पर एक सिग्नल चुराएं (और दोहराएं)
 
-The **Read Raw** option **records signals** send in the listening frequency. This can be used to **steal** a signal and **repeat** it.
+**Read Raw** विकल्प **सिग्नल रिकॉर्ड करता है** जो सुनने वाली फ्रीक्वेंसी में भेजे जाते हैं। इसका उपयोग **सिग्नल चुराने** और **दोहराने** के लिए किया जा सकता है।
 
-By default **Read Raw is also in 433.92 in AM650**, but if with the Read option you found that the signal that interest you is in a **different frequency/modulation, you can also modify that** pressing left (while inside the Read Raw option).
+डिफ़ॉल्ट रूप से **Read Raw भी 433.92 AM650 में है**, लेकिन यदि Read विकल्प के साथ आप पाते हैं कि जो सिग्नल आपको रुचिकर है वह **विभिन्न फ्रीक्वेंसी/मॉड्यूलेशन में है, तो आप उसे भी संशोधित कर सकते हैं** बाईं ओर दबाकर (जब Read Raw विकल्प के अंदर हों)।
 
 ### Brute-Force
 
-If you know the protocol used for example by the garage door it's possible to g**enerate all the codes and send them with the Flipper Zero.** This is an example that support general common types of garages: [**https://github.com/tobiabocchi/flipperzero-bruteforce**](https://github.com/tobiabocchi/flipperzero-bruteforce)
+यदि आप जानते हैं कि उदाहरण के लिए गैरेज दरवाजे के लिए कौन सा प्रोटोकॉल उपयोग किया गया है, तो यह संभव है कि **सभी कोड उत्पन्न करें और उन्हें Flipper Zero के साथ भेजें।** यह सामान्य प्रकार के गैरेज का समर्थन करने वाला एक उदाहरण है: [**https://github.com/tobiabocchi/flipperzero-bruteforce**](https://github.com/tobiabocchi/flipperzero-bruteforce)
 
 ### Add Manually
 
 > [!NOTE]
-> Add signals from a configured list of protocols
+> प्रोटोकॉल की एक निर्धारित सूची से सिग्नल जोड़ें
 
-#### List of [supported protocols](https://docs.flipperzero.one/sub-ghz/add-new-remote) <a href="#id-3iglu" id="id-3iglu"></a>
+#### [समर्थित प्रोटोकॉलों की सूची](https://docs.flipperzero.one/sub-ghz/add-new-remote) <a href="#id-3iglu" id="id-3iglu"></a>
 
-| Princeton_433 (works with the majority of static code systems) | 433.92 | Static  |
+| Princeton_433 (अधिकांश स्थिर कोड सिस्टम के साथ काम करता है) | 433.92 | स्थिर  |
 | -------------------------------------------------------------- | ------ | ------- |
-| Nice Flo 12bit_433                                             | 433.92 | Static  |
-| Nice Flo 24bit_433                                             | 433.92 | Static  |
-| CAME 12bit_433                                                 | 433.92 | Static  |
-| CAME 24bit_433                                                 | 433.92 | Static  |
-| Linear_300                                                     | 300.00 | Static  |
-| CAME TWEE                                                      | 433.92 | Static  |
-| Gate TX_433                                                    | 433.92 | Static  |
-| DoorHan_315                                                    | 315.00 | Dynamic |
-| DoorHan_433                                                    | 433.92 | Dynamic |
-| LiftMaster_315                                                 | 315.00 | Dynamic |
-| LiftMaster_390                                                 | 390.00 | Dynamic |
-| Security+2.0_310                                               | 310.00 | Dynamic |
-| Security+2.0_315                                               | 315.00 | Dynamic |
-| Security+2.0_390                                               | 390.00 | Dynamic |
+| Nice Flo 12bit_433                                             | 433.92 | स्थिर  |
+| Nice Flo 24bit_433                                             | 433.92 | स्थिर  |
+| CAME 12bit_433                                                 | 433.92 | स्थिर  |
+| CAME 24bit_433                                                 | 433.92 | स्थिर  |
+| Linear_300                                                     | 300.00 | स्थिर  |
+| CAME TWEE                                                      | 433.92 | स्थिर  |
+| Gate TX_433                                                    | 433.92 | स्थिर  |
+| DoorHan_315                                                    | 315.00 | गतिशील |
+| DoorHan_433                                                    | 433.92 | गतिशील |
+| LiftMaster_315                                                 | 315.00 | गतिशील |
+| LiftMaster_390                                                 | 390.00 | गतिशील |
+| Security+2.0_310                                               | 310.00 | गतिशील |
+| Security+2.0_315                                               | 315.00 | गतिशील |
+| Security+2.0_390                                               | 390.00 | गतिशील |
 
-### Supported Sub-GHz vendors
+### समर्थित Sub-GHz विक्रेता
 
-Check the list in [https://docs.flipperzero.one/sub-ghz/supported-vendors](https://docs.flipperzero.one/sub-ghz/supported-vendors)
+[https://docs.flipperzero.one/sub-ghz/supported-vendors](https://docs.flipperzero.one/sub-ghz/supported-vendors) में सूची देखें
 
-### Supported Frequencies by region
+### क्षेत्र द्वारा समर्थित फ्रीक्वेंसियाँ
 
-Check the list in [https://docs.flipperzero.one/sub-ghz/frequencies](https://docs.flipperzero.one/sub-ghz/frequencies)
+[https://docs.flipperzero.one/sub-ghz/frequencies](https://docs.flipperzero.one/sub-ghz/frequencies) में सूची देखें
 
 ### Test
 
 > [!NOTE]
-> Get dBms of the saved frequencies
+> सहेजी गई फ्रीक्वेंसियों के dBms प्राप्त करें
 
 ## Reference
 
 - [https://docs.flipperzero.one/sub-ghz](https://docs.flipperzero.one/sub-ghz)
 
 {{#include ../../../banners/hacktricks-training.md}}
-

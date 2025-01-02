@@ -2,69 +2,67 @@
 
 ## Spot
 
-This is the most basic way to do some trading. You can **indicate the amount of the asset and the price** that you want to buy or sell, and whenever that price is reached the operation is done.
+यह व्यापार करने का सबसे बुनियादी तरीका है। आप **संपत्ति की मात्रा और कीमत** को इंगित कर सकते हैं जिसे आप खरीदना या बेचना चाहते हैं, और जब भी वह कीमत पहुंचती है, ऑपरेशन पूरा हो जाता है।
 
-Usually you can also use the **current market price** in order to perform the transaction as fast as possible to the current price.
+आमतौर पर आप **वर्तमान बाजार मूल्य** का उपयोग करके लेनदेन को वर्तमान मूल्य के अनुसार जितनी जल्दी हो सके पूरा कर सकते हैं।
 
-**Stop Loss - Limit**: You can also indicate amount and the price of the assets to buy or sell while also indicating a lower price to buy or sell in case it's reached (to stop losses).
+**स्टॉप लॉस - लिमिट**: आप संपत्तियों की मात्रा और कीमत को खरीदने या बेचने के लिए इंगित कर सकते हैं जबकि आप एक निचली कीमत को भी इंगित कर सकते हैं जिसे खरीदने या बेचने के लिए पहुंचने पर (नुकसान रोकने के लिए)।
 
 ## Futures
 
-A future is a contract where 2 parts comes to an agreement to **acquire something in the future at a fixed price**. For example to sell 1 bitcoin in 6 months at 70.000$.
+फ्यूचर एक अनुबंध है जहां 2 पक्ष एक निश्चित कीमत पर **भविष्य में कुछ प्राप्त करने के लिए सहमत होते हैं**। उदाहरण के लिए, 6 महीने में 70,000$ में 1 बिटकॉइन बेचना।
 
-Obviously if by 6 months the bitcoin value is 80.000$ the seller part loses money and the buying part earns it. If in 6 months the bitcoin value is 60.000$, the opposite happens.
+स्पष्ट है कि यदि 6 महीने में बिटकॉइन का मूल्य 80,000$ है तो विक्रेता पक्ष को नुकसान होता है और खरीदार पक्ष को लाभ होता है। यदि 6 महीने में बिटकॉइन का मूल्य 60,000$ है, तो इसके विपरीत होता है।
 
-However, this is interesting for example for business which are generating a product and need to have the security that thy will be able to sell it at a price to pay the costs. Or business which want to assure fixed prices in the future for something eve if higher.
+हालांकि, यह उदाहरण के लिए उन व्यवसायों के लिए दिलचस्प है जो एक उत्पाद उत्पन्न कर रहे हैं और उन्हें यह सुनिश्चित करने की आवश्यकता है कि वे इसे लागतों को चुकाने के लिए एक कीमत पर बेच सकेंगे। या व्यवसाय जो भविष्य में किसी चीज के लिए निश्चित कीमतों की गारंटी देना चाहते हैं, भले ही वह अधिक हो।
 
-Although in exchanges this is usually used to try to make a profit.
+हालांकि, एक्सचेंज में इसका उपयोग आमतौर पर लाभ कमाने के लिए किया जाता है।
 
-* Notice that a "Long position" means that someone if betting that a price is going to increase
-* While a "short position" means that someone if betting that a price is going to go down
+* ध्यान दें कि "लॉन्ग पोजीशन" का मतलब है कि कोई व्यक्ति यह शर्त लगा रहा है कि कीमत बढ़ने वाली है
+* जबकि "शॉर्ट पोजीशन" का मतलब है कि कोई व्यक्ति यह शर्त लगा रहा है कि कीमत गिरने वाली है
 
 ### Hedging With Futures <a href="#mntl-sc-block_7-0" id="mntl-sc-block_7-0"></a>
 
-If a fund manager is afraid that some stocks are going to go down he might take a short position over some assets like bitcoins or S\&P 500 futures contracts. This would be similar to buying or having some assets and create a contract of selling those at a future time at a bigger price.&#x20;
+यदि एक फंड प्रबंधक को डर है कि कुछ स्टॉक्स गिरने वाले हैं, तो वह बिटकॉइन या S&P 500 फ्यूचर्स अनुबंधों जैसे कुछ संपत्तियों पर शॉर्ट पोजीशन ले सकता है। यह कुछ संपत्तियों को खरीदने या रखने और भविष्य में एक बड़े मूल्य पर उन्हें बेचने के अनुबंध बनाने के समान होगा।&#x20;
 
-In case the price goes down the fund manager will earn benefits because he will sell the assets at a bigger price. If the price of the assets goes up the manager won't earn that benefit but he will still keep his assets.
+यदि कीमत गिरती है तो फंड प्रबंधक लाभ कमाएगा क्योंकि वह संपत्तियों को एक बड़े मूल्य पर बेचेगा। यदि संपत्तियों की कीमत बढ़ती है तो प्रबंधक उस लाभ को नहीं कमाएगा लेकिन वह अपनी संपत्तियों को बनाए रखेगा।
 
 ### Perpetual Futures
 
-**These are "futures" that will last indefinitely** (without an ending contract date). It's very common to find them for example in crypto exchanges where you can go in an out of futures based on the price of cryptos.
+**ये "फ्यूचर्स" हैं जो अनिश्चितकाल तक चलेंगे** (बिना समाप्ति अनुबंध तिथि के)। इन्हें उदाहरण के लिए क्रिप्टो एक्सचेंजों में पाना बहुत सामान्य है जहां आप क्रिप्टो की कीमत के आधार पर फ्यूचर्स में प्रवेश और निकास कर सकते हैं।
 
-Notice that in these cases the benefits and lose can be in real time, if the price increases 1% you win a 1%, if the price decreases 1%, you will lose it.
+ध्यान दें कि इन मामलों में लाभ और हानि वास्तविक समय में हो सकती है, यदि कीमत 1% बढ़ती है तो आप 1% जीतते हैं, यदि कीमत 1% घटती है, तो आप इसे खो देंगे।
 
 ### Futures with Leverage
 
-**Leverage** allows you to control a larger position in the market with a smaller amount of money. It basically allows you to "bet" much more money than you have risking only the money that you actually have.
+**लेवरेज** आपको बाजार में एक बड़े पोजीशन को छोटे पैसे के साथ नियंत्रित करने की अनुमति देता है। यह मूल रूप से आपको "शर्त" लगाने की अनुमति देता है कि आपके पास जो पैसा है उससे कहीं अधिक पैसा है, केवल उस पैसे को जोखिम में डालते हुए जो आपके पास वास्तव में है।
 
-For example, if you open a future position in the BTC/USDT with 100$ a 50x leverage this means that if the price is increased 1%, then you would be winning 1x50 = 50% of your initial investment (50$). And therefore you will have 150$.\
-However, if the price decreases 1%, you will lost 50% of your funds (59$ in this case). And if the price decreases 2% you will lose all your bet (2x50 = 100%).
+उदाहरण के लिए, यदि आप BTC/USDT में 100$ के साथ 50x लेवरेज के साथ एक फ्यूचर पोजीशन खोलते हैं, तो इसका मतलब है कि यदि कीमत 1% बढ़ती है, तो आप अपने प्रारंभिक निवेश (50$) का 1x50 = 50% जीतेंगे। और इसलिए आपके पास 150$ होंगे।\
+हालांकि, यदि कीमत 1% घटती है, तो आप अपने फंड का 50% खो देंगे (इस मामले में 59$)। और यदि कीमत 2% घटती है, तो आप अपनी सभी शर्त खो देंगे (2x50 = 100%)।
 
-Therefore, leveraging allows to control the amount of money you bet while increasing the winnings and loses.
+इसलिए, लेवरेज आपको उस पैसे की मात्रा को नियंत्रित करने की अनुमति देता है जिसे आप शर्त लगाते हैं जबकि जीत और हानि को बढ़ाते हैं।
 
 ## Differences Futures & Options
 
-The main difference between futures and options is that the contract is optional for the buyer: He can decide to execute it or not (usually he will only if he will benefit for it). The seller must sell if the buyer wants to use the option.\
-However, the buyer will be paying some fee to the seller for opening the option (so the seller, who is taking more risk aparently, starts earning some money).
+फ्यूचर्स और ऑप्शंस के बीच मुख्य अंतर यह है कि अनुबंध खरीदार के लिए वैकल्पिक है: वह इसे निष्पादित करने का निर्णय ले सकता है या नहीं (आमतौर पर वह केवल तभी करेगा जब उसे इसका लाभ होगा)। विक्रेता को बेचना होगा यदि खरीदार विकल्प का उपयोग करना चाहता है।\
+हालांकि, खरीदार विकल्प खोलने के लिए विक्रेता को कुछ शुल्क का भुगतान करेगा (इसलिए विक्रेता, जो स्पष्ट रूप से अधिक जोखिम ले रहा है, कुछ पैसे कमाना शुरू करता है)।
 
 ### 1. **Obligation vs. Right:**
 
-* **Futures:** When you buy or sell a futures contract, you're entering a **binding agreement** to buy or sell an asset at a specific price on a future date. Both the buyer and the seller are **obligated** to fulfill the contract at expiration (unless the contract is closed before then).
-* **Options:** With options, you have the **right, but not the obligation**, to buy (in the case of a **call option**) or sell (in the case of a **put option**) an asset at a specific price before or at a certain expiration date. The **buyer** has the option to execute, while the **seller** is obligated to fulfill the trade if the buyer decides to exercise the option.
+* **Futures:** जब आप एक फ्यूचर्स अनुबंध खरीदते या बेचते हैं, तो आप एक **बाध्यकारी अनुबंध** में प्रवेश कर रहे हैं कि आप एक निश्चित तारीख पर एक निश्चित कीमत पर एक संपत्ति खरीदेंगे या बेचेंगे। खरीदार और विक्रेता दोनों अनुबंध की समाप्ति पर इसे पूरा करने के लिए **बाध्य हैं** (जब तक अनुबंध पहले बंद नहीं किया जाता)।
+* **Options:** विकल्पों के साथ, आपके पास एक निश्चित कीमत पर एक संपत्ति खरीदने (एक **कॉल ऑप्शन** के मामले में) या बेचने (एक **पुट ऑप्शन** के मामले में) का **अधिकार, लेकिन बाध्यता नहीं** है, एक निश्चित समाप्ति तिथि से पहले या उसी पर। **खरीदार** के पास निष्पादित करने का विकल्प है, जबकि **विक्रेता** को व्यापार को पूरा करने के लिए बाध्य किया जाता है यदि खरीदार विकल्प का उपयोग करने का निर्णय लेता है।
 
 ### 2. **Risk:**
 
-* **Futures:** Both the buyer and the seller take on **unlimited risk** because they are obligated to complete the contract. The risk is the difference between the agreed-upon price and the market price at the expiration date.
-* **Options:** The buyer’s risk is limited to the **premium** paid to purchase the option. If the market doesn't move in favor of the option holder, they can simply let the option expire. However, the **seller** (writer) of the option has unlimited risk if the market moves significantly against them.
+* **Futures:** खरीदार और विक्रेता दोनों **असीमित जोखिम** लेते हैं क्योंकि वे अनुबंध को पूरा करने के लिए बाध्य होते हैं। जोखिम वह अंतर है जो सहमत मूल्य और समाप्ति तिथि पर बाजार मूल्य के बीच होता है।
+* **Options:** खरीदार का जोखिम उस **प्रीमियम** तक सीमित है जो विकल्प खरीदने के लिए भुगतान किया गया है। यदि बाजार विकल्प धारक के पक्ष में नहीं बढ़ता है, तो वे बस विकल्प को समाप्त होने दे सकते हैं। हालांकि, विकल्प का **विक्रेता** (लेखक) के पास असीमित जोखिम होता है यदि बाजार उनके खिलाफ काफी बढ़ता है।
 
 ### 3. **Cost:**
 
-* **Futures:** There is no upfront cost beyond the margin required to hold the position, as the buyer and seller are both obligated to complete the trade.
-* **Options:** The buyer must pay an **option premium** upfront for the right to exercise the option. This premium is essentially the cost of the option.
+* **Futures:** पोजीशन को बनाए रखने के लिए आवश्यक मार्जिन के अलावा कोई अग्रिम लागत नहीं होती है, क्योंकि खरीदार और विक्रेता दोनों व्यापार को पूरा करने के लिए बाध्य होते हैं।
+* **Options:** खरीदार को विकल्प का उपयोग करने के अधिकार के लिए अग्रिम में एक **विकल्प प्रीमियम** का भुगतान करना होता है। यह प्रीमियम मूल रूप से विकल्प की लागत है।
 
 ### 4. **Profit Potential:**
 
-* **Futures:** The profit or loss is based on the difference between the market price at expiration and the agreed-upon price in the contract.
-* **Options:** The buyer profits when the market moves favorably beyond the strike price by more than the premium paid. The seller profits by keeping the premium if the option is not exercised.
-
-
+* **Futures:** लाभ या हानि समाप्ति पर बाजार मूल्य और अनुबंध में सहमत मूल्य के बीच के अंतर पर आधारित होती है।
+* **Options:** खरीदार तब लाभ कमाता है जब बाजार स्ट्राइक मूल्य से अधिक प्रीमियम के भुगतान से अनुकूलता से बढ़ता है। विक्रेता प्रीमियम को रखकर लाभ कमाता है यदि विकल्प का उपयोग नहीं किया जाता है।

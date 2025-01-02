@@ -2,12 +2,12 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Download the free version app from [https://www.exemsi.com/documentation/getting-started/](https://www.exemsi.com/download/), execute it and wrap the "malicious" binary on it.\
-Note that you can wrap a "**.bat**" if you **just** want to **execute** **command lines (instead of cmd.exe select the .bat file)**
+[https://www.exemsi.com/documentation/getting-started/](https://www.exemsi.com/download/) से मुफ्त संस्करण ऐप डाउनलोड करें, इसे चलाएं और "malicious" बाइनरी को इसके ऊपर लपेटें।\
+ध्यान दें कि आप "**.bat**" को लपेट सकते हैं यदि आप **केवल** **कमांड लाइनों को निष्पादित** करना चाहते हैं (cmd.exe के बजाय .bat फ़ाइल का चयन करें)
 
 ![](<../../images/image (417).png>)
 
-And this is the most important part of the configuration:
+और यह कॉन्फ़िगरेशन का सबसे महत्वपूर्ण भाग है:
 
 ![](<../../images/image (312).png>)
 
@@ -15,9 +15,8 @@ And this is the most important part of the configuration:
 
 ![](<../../images/image (1072).png>)
 
-(Please, note that if you try to pack your own binary you will be able to modify these values)
+(कृपया ध्यान दें कि यदि आप अपनी खुद की बाइनरी को पैक करने की कोशिश करते हैं तो आप इन मूल्यों को संशोधित कर सकेंगे)
 
-From here just click on **next buttons** and the last **build button and your installer/wrapper will be generated.**
+यहां से बस **next buttons** पर क्लिक करें और अंतिम **build button और आपका installer/wrapper उत्पन्न होगा।**
 
 {{#include ../../banners/hacktricks-training.md}}
-

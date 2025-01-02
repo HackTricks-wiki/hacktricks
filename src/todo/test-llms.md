@@ -4,49 +4,47 @@
 
 ### [**Hugging Face Transformers**](https://github.com/huggingface/transformers)
 
-Hugging Face Transformers is one of the most popular open-source libraries for using, training, and deploying LLMs such as GPT, BERT, and many others. It offers a comprehensive ecosystem that includes pre-trained models, datasets, and seamless integration with the Hugging Face Hub for fine-tuning and deployment.
+Hugging Face Transformers सबसे लोकप्रिय ओपन-सोर्स लाइब्रेरी में से एक है जिसका उपयोग, प्रशिक्षण और LLMs जैसे GPT, BERT, और कई अन्य को तैनात करने के लिए किया जाता है। यह पूर्व-प्रशिक्षित मॉडलों, डेटासेट्स, और फाइन-ट्यूनिंग और तैनाती के लिए Hugging Face Hub के साथ सहज एकीकरण सहित एक व्यापक पारिस्थितिकी तंत्र प्रदान करता है।
 
 ### [**LangChain**](https://github.com/langchain-ai/langchain)
 
-LangChain is a framework designed for building applications with LLMs. It allows developers to connect language models with external data sources, APIs, and databases. LangChain provides tools for advanced prompt engineering, managing conversation history, and integrating LLMs into complex workflows.
+LangChain एक ढांचा है जिसे LLMs के साथ अनुप्रयोग बनाने के लिए डिज़ाइन किया गया है। यह डेवलपर्स को भाषा मॉडलों को बाहरी डेटा स्रोतों, APIs, और डेटाबेस के साथ जोड़ने की अनुमति देता है। LangChain उन्नत प्रॉम्प्ट इंजीनियरिंग, बातचीत के इतिहास को प्रबंधित करने, और जटिल कार्यप्रवाहों में LLMs को एकीकृत करने के लिए उपकरण प्रदान करता है।
 
 ### [**LitGPT**](https://github.com/Lightning-AI/litgpt)
 
-LitGPT is a project developed by Lightning AI that leverages the Lightning framework to facilitate the training, fine-tuning, and deployment of GPT-based models. It integrates seamlessly with other Lightning AI tools, providing optimized workflows for handling large-scale language models with enhanced performance and scalability.
+LitGPT एक प्रोजेक्ट है जिसे Lightning AI द्वारा विकसित किया गया है जो GPT-आधारित मॉडलों के प्रशिक्षण, फाइन-ट्यूनिंग, और तैनाती को सुविधाजनक बनाने के लिए Lightning ढांचे का लाभ उठाता है। यह अन्य Lightning AI उपकरणों के साथ सहजता से एकीकृत होता है, जो बड़े पैमाने पर भाषा मॉडलों को बेहतर प्रदर्शन और स्केलेबिलिटी के साथ संभालने के लिए अनुकूलित कार्यप्रवाह प्रदान करता है।
 
 ### [**LitServe**](https://github.com/Lightning-AI/LitServe)
 
-**Description:**\
-LitServe is a deployment tool from Lightning AI designed for quickly and efficiently deploying AI models. It simplifies the integration of LLMs into real-time applications by providing scalable and optimized serving capabilities.
+**विवरण:**\
+LitServe Lightning AI से एक तैनाती उपकरण है जिसे AI मॉडलों को तेजी से और कुशलता से तैनात करने के लिए डिज़ाइन किया गया है। यह LLMs को वास्तविक समय के अनुप्रयोगों में एकीकृत करने को सरल बनाता है, स्केलेबल और अनुकूलित सेवा क्षमताओं को प्रदान करता है।
 
 ### [**Axolotl**](https://github.com/axolotl-ai-cloud/axolotl)
 
-Axolotl is a cloud-based platform designed to streamline the deployment, scaling, and management of AI models, including LLMs. It offers features such as automated scaling, monitoring, and integration with various cloud services, making it easier to deploy models in production environments without extensive infrastructure management.
+Axolotl एक क्लाउड-आधारित प्लेटफ़ॉर्म है जिसे AI मॉडलों, जिसमें LLMs शामिल हैं, की तैनाती, स्केलिंग, और प्रबंधन को सरल बनाने के लिए डिज़ाइन किया गया है। यह स्वचालित स्केलिंग, निगरानी, और विभिन्न क्लाउड सेवाओं के साथ एकीकरण जैसी सुविधाएँ प्रदान करता है, जिससे उत्पादन वातावरण में मॉडलों को तैनात करना आसान हो जाता है बिना विस्तृत अवसंरचना प्रबंधन के।
 
 ## Try models online
 
 ### [**Hugging Face**](https://huggingface.co/)
 
-**Hugging Face** is a leading platform and community for machine learning, particularly known for its work in natural language processing (NLP). It provides tools, libraries, and resources that make it easier to develop, share, and deploy machine learning models.\
-It offers several sections like:
+**Hugging Face** मशीन लर्निंग के लिए एक प्रमुख प्लेटफ़ॉर्म और समुदाय है, विशेष रूप से प्राकृतिक भाषा प्रसंस्करण (NLP) में इसके काम के लिए जाना जाता है। यह उपकरण, लाइब्रेरी, और संसाधन प्रदान करता है जो मशीन लर्निंग मॉडलों को विकसित करने, साझा करने, और तैनात करने को आसान बनाते हैं।\
+यह कई अनुभाग प्रदान करता है जैसे:
 
-* **Models**: A vast repository of **pre-trained machine learning models** where users can browse, download, and integrate models for various tasks like text generation, translation, image recognition, and more.
-* **Datasets:** A comprehensive **collection of datasets** used for training and evaluating models. It facilitates easy access to diverse data sources, enabling users to find and utilize data for their specific machine learning projects.
-* **Spaces:** A platform for hosting and sharing **interactive machine learning applications** and demos. It allows developers to **showcase** their models in action, create user-friendly interfaces, and collaborate with others by sharing live demos.
+* **Models**: **पूर्व-प्रशिक्षित मशीन लर्निंग मॉडलों** का एक विशाल भंडार जहाँ उपयोगकर्ता विभिन्न कार्यों जैसे पाठ उत्पादन, अनुवाद, छवि पहचान, और अधिक के लिए मॉडलों को ब्राउज़, डाउनलोड, और एकीकृत कर सकते हैं।
+* **Datasets:** प्रशिक्षण और मॉडल का मूल्यांकन करने के लिए उपयोग की जाने वाली **डेटासेट्स का एक व्यापक संग्रह**। यह विविध डेटा स्रोतों तक आसान पहुँच की सुविधा प्रदान करता है, जिससे उपयोगकर्ता अपने विशिष्ट मशीन लर्निंग परियोजनाओं के लिए डेटा खोज और उपयोग कर सकते हैं।
+* **Spaces:** **इंटरएक्टिव मशीन लर्निंग अनुप्रयोगों** और डेमो को होस्ट और साझा करने के लिए एक प्लेटफ़ॉर्म। यह डेवलपर्स को अपने मॉडलों को क्रियान्वित करने, उपयोगकर्ता-अनुकूल इंटरफेस बनाने, और दूसरों के साथ सहयोग करने की अनुमति देता है।
 
 ## [**TensorFlow Hub**](https://www.tensorflow.org/hub) **&** [**Kaggle**](https://www.kaggle.com/)
 
-**TensorFlow Hub** is a comprehensive repository of reusable machine learning modules developed by Google. It focuses on facilitating the sharing and deployment of machine learning models, especially those built with TensorFlow.
+**TensorFlow Hub** पुन: उपयोग योग्य मशीन लर्निंग मॉड्यूल का एक व्यापक भंडार है जिसे Google द्वारा विकसित किया गया है। यह मशीन लर्निंग मॉडलों के साझा करने और तैनाती को सुविधाजनक बनाने पर केंद्रित है, विशेष रूप से उन मॉडलों पर जो TensorFlow के साथ बनाए गए हैं।
 
-* **Modules:** A vast collection of pre-trained models and model components where users can browse, download, and integrate modules for tasks such as image classification, text embedding, and more.
-* **Tutorials:** Step-by-step guides and examples which helps users understand how to implement and fine-tune models using TensorFlow Hub.
-* **Documentation:** Comprehensive guides and API references that assist developers in effectively utilizing the repository’s resources.
+* **Modules:** पूर्व-प्रशिक्षित मॉडलों और मॉडल घटकों का एक विशाल संग्रह जहाँ उपयोगकर्ता छवि वर्गीकरण, पाठ एम्बेडिंग, और अधिक जैसे कार्यों के लिए मॉड्यूल को ब्राउज़, डाउनलोड, और एकीकृत कर सकते हैं।
+* **Tutorials:** चरण-दर-चरण गाइड और उदाहरण जो उपयोगकर्ताओं को TensorFlow Hub का उपयोग करके मॉडलों को लागू करने और फाइन-ट्यून करने में मदद करते हैं।
+* **Documentation:** व्यापक गाइड और API संदर्भ जो डेवलपर्स को भंडार के संसाधनों का प्रभावी ढंग से उपयोग करने में सहायता करते हैं।
 
 ## [**Replicate**](https://replicate.com/home)
 
-**Replicate** is a platform that allows developers to run machine learning models in the cloud via a simple API. It focuses on making ML models easily accessible and deployable without the need for extensive infrastructure setup.
+**Replicate** एक प्लेटफ़ॉर्म है जो डेवलपर्स को सरल API के माध्यम से क्लाउड में मशीन लर्निंग मॉडलों को चलाने की अनुमति देता है। यह ML मॉडलों को आसानी से सुलभ और तैनात करने पर केंद्रित है बिना विस्तृत अवसंरचना सेटअप की आवश्यकता के।
 
-* **Models:** A repository of machine learning models contributed by the community which users can browse, try, and integrate models into their applications with minimal effort.
-* **API Access:** Simple APIs for running models the enable developers to deploy and scale models effortlessly within their own applications.
-
-
+* **Models:** मशीन लर्निंग मॉडलों का एक भंडार जो समुदाय द्वारा योगदान किया गया है जहाँ उपयोगकर्ता मॉडलों को ब्राउज़, आज़मा सकते हैं, और न्यूनतम प्रयास के साथ अपने अनुप्रयोगों में एकीकृत कर सकते हैं।
+* **API Access:** मॉडलों को चलाने के लिए सरल APIs जो डेवलपर्स को अपने अनुप्रयोगों के भीतर मॉडलों को आसानी से तैनात और स्केल करने में सक्षम बनाते हैं।

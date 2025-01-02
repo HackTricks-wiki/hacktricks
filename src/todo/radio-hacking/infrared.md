@@ -4,71 +4,71 @@
 
 ## How the Infrared Works <a href="#how-the-infrared-port-works" id="how-the-infrared-port-works"></a>
 
-**Infrared light is invisible to humans**. IR wavelength is from **0.7 to 1000 microns**. Household remotes use an IR signal for data transmission and operate in the wavelength range of 0.75..1.4 microns. A microcontroller in the remote makes an infrared LED blink with a specific frequency, turning the digital signal into an IR signal.
+**इन्फ्रारेड प्रकाश मनुष्यों के लिए अदृश्य है**। IR तरंग दैर्ध्य **0.7 से 1000 माइक्रोन** के बीच है। घरेलू रिमोट डेटा ट्रांसमिशन के लिए IR सिग्नल का उपयोग करते हैं और 0.75..1.4 माइक्रोन के तरंग दैर्ध्य रेंज में काम करते हैं। रिमोट में एक माइक्रोकंट्रोलर एक इन्फ्रारेड LED को एक विशिष्ट आवृत्ति के साथ चमकाता है, डिजिटल सिग्नल को IR सिग्नल में बदलता है।
 
-To receive IR signals a **photoreceiver** is used. It **converts IR light into voltage pulses**, which are already **digital signals**. Usually, there is a **dark light filter inside the receiver**, which lets **only the desired wavelength through** and cuts out noise.
+IR सिग्नल प्राप्त करने के लिए एक **फोटो रिसीवर** का उपयोग किया जाता है। यह **IR प्रकाश को वोल्टेज पल्स में परिवर्तित करता है**, जो पहले से ही **डिजिटल सिग्नल** होते हैं। आमतौर पर, रिसीवर के अंदर एक **डार्क लाइट फ़िल्टर** होता है, जो **केवल इच्छित तरंग दैर्ध्य को पारित करता है** और शोर को काटता है।
 
 ### Variety of IR Protocols <a href="#variety-of-ir-protocols" id="variety-of-ir-protocols"></a>
 
-IR protocols differ in 3 factors:
+IR प्रोटोकॉल 3 कारकों में भिन्न होते हैं:
 
-- bit encoding
-- data structure
-- carrier frequency — often in range 36..38 kHz
+- बिट एन्कोडिंग
+- डेटा संरचना
+- कैरियर आवृत्ति — अक्सर 36..38 kHz के रेंज में
 
 #### Bit encoding ways <a href="#bit-encoding-ways" id="bit-encoding-ways"></a>
 
-**1. Pulse Distance Encoding**
+**1. पल्स डिस्टेंस एन्कोडिंग**
 
-Bits are encoded by modulating the duration of the space between pulses. The width of the pulse itself is constant.
+बिट्स को पल्स के बीच की जगह की अवधि को मॉड्यूलेट करके एन्कोड किया जाता है। पल्स की चौड़ाई स्वयं स्थिर होती है।
 
 <figure><img src="../../images/image (295).png" alt=""><figcaption></figcaption></figure>
 
-**2. Pulse Width Encoding**
+**2. पल्स चौड़ाई एन्कोडिंग**
 
-Bits are encoded by modulation of the pulse width. The width of space after pulse burst is constant.
+बिट्स को पल्स चौड़ाई के मॉड्यूलेशन द्वारा एन्कोड किया जाता है। पल्स बर्स्ट के बाद की जगह की चौड़ाई स्थिर होती है।
 
 <figure><img src="../../images/image (282).png" alt=""><figcaption></figcaption></figure>
 
-**3. Phase Encoding**
+**3. फेज़ एन्कोडिंग**
 
-It is also known as Manchester encoding. The logical value is defined by the polarity of the transition between pulse burst and space. "Space to pulse burst" denotes logic "0", "pulse burst to space" denotes logic "1".
+इसे मैनचेस्टर एन्कोडिंग के रूप में भी जाना जाता है। तार्किक मान पल्स बर्स्ट और जगह के बीच के संक्रमण की ध्रुवता द्वारा परिभाषित किया जाता है। "जगह से पल्स बर्स्ट" तार्किक "0" को दर्शाता है, "पल्स बर्स्ट से जगह" तार्किक "1" को दर्शाता है।
 
 <figure><img src="../../images/image (634).png" alt=""><figcaption></figcaption></figure>
 
-**4. Combination of previous ones and other exotics**
+**4. पिछले वाले और अन्य विशेषताओं का संयोजन**
 
 > [!NOTE]
-> There are IR protocols that are **trying to become universal** for several types of devices. The most famous ones are RC5 and NEC. Unfortunately, the most famous **does not mean the most common**. In my environment, I met just two NEC remotes and no RC5 ones.
+> कुछ IR प्रोटोकॉल हैं जो **कई प्रकार के उपकरणों के लिए सार्वभौमिक बनने की कोशिश कर रहे हैं**। सबसे प्रसिद्ध RC5 और NEC हैं। दुर्भाग्यवश, सबसे प्रसिद्ध **का मतलब सबसे सामान्य नहीं है**। मेरे वातावरण में, मैंने केवल दो NEC रिमोट देखे और कोई RC5 नहीं।
 >
-> Manufacturers love to use their own unique IR protocols, even within the same range of devices (for example, TV-boxes). Therefore, remotes from different companies and sometimes from different models from the same company, are unable to work with other devices of the same type.
+> निर्माता अपने अद्वितीय IR प्रोटोकॉल का उपयोग करना पसंद करते हैं, यहां तक कि समान उपकरणों की रेंज के भीतर (उदाहरण के लिए, टीवी-बॉक्स)। इसलिए, विभिन्न कंपनियों के रिमोट और कभी-कभी एक ही कंपनी के विभिन्न मॉडलों के रिमोट, समान प्रकार के अन्य उपकरणों के साथ काम नहीं कर पाते हैं।
 
 ### Exploring an IR signal
 
-The most reliable way to see how the remote IR signal looks like is to use an oscilloscope. It does not demodulate or invert the received signal, it is just displayed "as is". This is useful for testing and debugging. I will show the expected signal on the example of the NEC IR protocol.
+रिमोट IR सिग्नल को देखने का सबसे विश्वसनीय तरीका एक ऑस्सिलोस्कोप का उपयोग करना है। यह प्राप्त सिग्नल को डेमॉड्यूलेट या इनवर्ट नहीं करता, यह बस "जैसा है" प्रदर्शित करता है। यह परीक्षण और डिबगिंग के लिए उपयोगी है। मैं NEC IR प्रोटोकॉल के उदाहरण पर अपेक्षित सिग्नल दिखाऊंगा।
 
 <figure><img src="../../images/image (235).png" alt=""><figcaption></figcaption></figure>
 
-Usually, there is a preamble at the beginning of an encoded packet. This allows the receiver to determine the level of gain and background. There are also protocols without preamble, for example, Sharp.
+आम तौर पर, एक एन्कोडेड पैकेट की शुरुआत में एक प्रीएंबल होता है। यह रिसीवर को लाभ और पृष्ठभूमि के स्तर को निर्धारित करने की अनुमति देता है। कुछ प्रोटोकॉल बिना प्रीएंबल के होते हैं, उदाहरण के लिए, शार्प।
 
-Then data is transmitted. The structure, preamble, and bit encoding method are determined by the specific protocol.
+फिर डेटा भेजा जाता है। संरचना, प्रीएंबल, और बिट एन्कोडिंग विधि विशिष्ट प्रोटोकॉल द्वारा निर्धारित की जाती है।
 
-**NEC IR protocol** contains a short command and a repeat code, which is sent while the button is pressed. Both the command and the repeat code have the same preamble at the beginning.
+**NEC IR प्रोटोकॉल** में एक छोटा कमांड और एक पुनरावृत्ति कोड होता है, जो बटन दबाए जाने पर भेजा जाता है। कमांड और पुनरावृत्ति कोड दोनों की शुरुआत में समान प्रीएंबल होती है।
 
-NEC **command**, in addition to the preamble, consists of an address byte and a command-number byte, by which the device understands what needs to be performed. Address and command-number bytes are duplicated with inverse values, to check the integrity of the transmission. There is an additional stop bit at the end of the command.
+NEC **कमांड**, प्रीएंबल के अलावा, एक पता बाइट और एक कमांड-नंबर बाइट से मिलकर बनता है, जिसके द्वारा उपकरण समझता है कि क्या करना है। पता और कमांड-नंबर बाइट्स को विपरीत मानों के साथ डुप्लिकेट किया जाता है, ताकि ट्रांसमिशन की अखंडता की जांच की जा सके। कमांड के अंत में एक अतिरिक्त स्टॉप बिट होता है।
 
-The **repeat code** has a "1" after the preamble, which is a stop bit.
+**पुनरावृत्ति कोड** में प्रीएंबल के बाद "1" होता है, जो एक स्टॉप बिट है।
 
-For **logic "0" and "1"** NEC uses Pulse Distance Encoding: first, a pulse burst is transmitted after which there is a pause, its length sets the value of the bit.
+**तार्किक "0" और "1"** के लिए NEC पल्स डिस्टेंस एन्कोडिंग का उपयोग करता है: पहले, एक पल्स बर्स्ट भेजा जाता है जिसके बाद एक विराम होता है, इसकी लंबाई बिट के मान को निर्धारित करती है।
 
 ### Air Conditioners
 
-Unlike other remotes, **air conditioners do not transmit just the code of the pressed button**. They also **transmit all the information** when a button is pressed to assure that the **air conditioned machine and the remote are synchronised**.\
-This will avoid that a machine set as 20ºC is increased to 21ºC with one remote, and then when another remote, which still has the temperature as 20ºC, is used to increase more the temperature, it will "increase" it to 21ºC (and not to 22ºC thinking it's in 21ºC).
+अन्य रिमोट के विपरीत, **एयर कंडीशनर केवल दबाए गए बटन का कोड नहीं भेजते**। वे बटन दबाए जाने पर **सभी जानकारी भेजते हैं** ताकि यह सुनिश्चित हो सके कि **एयर कंडीशनिंग मशीन और रिमोट समन्वयित हैं**।\
+यह सुनिश्चित करेगा कि 20ºC पर सेट की गई मशीन को एक रिमोट से 21ºC पर नहीं बढ़ाया जाएगा, और फिर जब दूसरे रिमोट का उपयोग किया जाएगा, जो अभी भी 20ºC पर है, तो तापमान को और बढ़ाने पर यह "21ºC" (और 22ºC नहीं) पर "बढ़ाएगा"।
 
 ### Attacks
 
-You can attack Infrared with Flipper Zero:
+आप Flipper Zero के साथ इन्फ्रारेड पर हमला कर सकते हैं:
 
 {{#ref}}
 flipper-zero/fz-infrared.md
@@ -79,4 +79,3 @@ flipper-zero/fz-infrared.md
 - [https://blog.flipperzero.one/infrared/](https://blog.flipperzero.one/infrared/)
 
 {{#include ../../banners/hacktricks-training.md}}
-

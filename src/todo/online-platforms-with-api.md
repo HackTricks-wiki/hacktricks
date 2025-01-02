@@ -1,128 +1,127 @@
-# Online Platforms with API
+# ऑनलाइन प्लेटफार्म जिनके पास API है
 
 {{#include ../banners/hacktricks-training.md}}
 
 ## [ProjectHoneypot](https://www.projecthoneypot.org/)
 
-You can ask if an IP is related to suspicious/malicious activities. Completely free.
+आप पूछ सकते हैं कि क्या एक IP संदिग्ध/दुष्ट गतिविधियों से संबंधित है। पूरी तरह से मुफ्त।
 
 ## [**BotScout**](http://botscout.com/api.htm)
 
-Check if the IP address is related to a bot that register accounts. It can also check usernames and emails. Initially free.
+जांचें कि क्या IP पता एक बॉट से संबंधित है जो खाते पंजीकृत करता है। यह उपयोगकर्ता नाम और ईमेल भी जांच सकता है। प्रारंभ में मुफ्त।
 
 ## [Hunter](https://hunter.io/)
 
-Find and verify emails.\
-Some free API requests free, for more you need to pay.\
-Commercial?
+ईमेल खोजें और सत्यापित करें।\
+कुछ मुफ्त API अनुरोध हैं, अधिक के लिए आपको भुगतान करना होगा।\
+व्यावसायिक?
 
 ## [AlientVault](https://otx.alienvault.com/api)
 
-Find Malicious activities related to IPs and Domains. Free.
+IPs और डोमेन से संबंधित दुष्ट गतिविधियों को खोजें। मुफ्त।
 
 ## [Clearbit](https://dashboard.clearbit.com/)
 
-Find related personal data to a email (profiles on other platforms), domain (basic company info ,mails and people working) and companies (get company info from mail).\
-You need to pay to access all the possibilities.\
-Commercial?
+ईमेल (अन्य प्लेटफार्मों पर प्रोफाइल), डोमेन (बुनियादी कंपनी जानकारी, ईमेल और काम करने वाले लोग) और कंपनियों (ईमेल से कंपनी की जानकारी प्राप्त करें) से संबंधित व्यक्तिगत डेटा खोजें।\
+सभी संभावनाओं तक पहुंचने के लिए आपको भुगतान करना होगा।\
+व्यावसायिक?
 
 ## [BuiltWith](https://builtwith.com/)
 
-Technologies used by webs. Expensive...\
-Commercial?
+वेबसाइटों द्वारा उपयोग की जाने वाली तकनीकें। महंगा...\
+व्यावसायिक?
 
 ## [Fraudguard](https://fraudguard.io/)
 
-Check if a host (domain or IP) is related with suspicious/malicious activities. Have some free API access.\
-Commercial?
+जांचें कि क्या एक होस्ट (डोमेन या IP) संदिग्ध/दुष्ट गतिविधियों से संबंधित है। कुछ मुफ्त API एक्सेस है।\
+व्यावसायिक?
 
 ## [FortiGuard](https://fortiguard.com/)
 
-Check if a host (domain or IP) is related with suspicious/malicious activities. Have some free API access.
+जांचें कि क्या एक होस्ट (डोमेन या IP) संदिग्ध/दुष्ट गतिविधियों से संबंधित है। कुछ मुफ्त API एक्सेस है।
 
 ## [SpamCop](https://www.spamcop.net/)
 
-Indicates if host is related to spam activity. Have some free API access.
+संकेत करता है कि क्या होस्ट स्पैम गतिविधि से संबंधित है। कुछ मुफ्त API एक्सेस है।
 
 ## [mywot](https://www.mywot.com/)
 
-Based on opinions and other metrics get if a domain is related with suspicious/malicious information.
+राय और अन्य मैट्रिक्स के आधार पर पता करें कि क्या एक डोमेन संदिग्ध/दुष्ट जानकारी से संबंधित है।
 
 ## [ipinfo](https://ipinfo.io/)
 
-Obtains basic info from an IP address. You can test up to 100K/month.
+एक IP पते से बुनियादी जानकारी प्राप्त करें। आप प्रति माह 100K तक परीक्षण कर सकते हैं।
 
 ## [securitytrails](https://securitytrails.com/app/account)
 
-This platform give information about domains and IP addresses like domains inside an IP or inside a domain server, domains owned by an email (find related domains), IP history of domains (find the host behind CloudFlare), all domains using a nameserver....\
-You have some free access.
+यह प्लेटफार्म डोमेन और IP पते के बारे में जानकारी देता है जैसे कि एक IP के अंदर या एक डोमेन सर्वर के अंदर डोमेन, एक ईमेल द्वारा स्वामित्व वाले डोमेन (संबंधित डोमेन खोजें), डोमेन का IP इतिहास (CloudFlare के पीछे के होस्ट को खोजें), सभी डोमेन जो एक नाम सर्वर का उपयोग कर रहे हैं....\
+आपके पास कुछ मुफ्त एक्सेस है।
 
 ## [fullcontact](https://www.fullcontact.com/)
 
-Allows to search by email, domain or company name and retrieve "personal" information related. It can also verify emails. There is some free access.
+ईमेल, डोमेन या कंपनी के नाम से खोजने और संबंधित "व्यक्तिगत" जानकारी प्राप्त करने की अनुमति देता है। यह ईमेल भी सत्यापित कर सकता है। कुछ मुफ्त एक्सेस है।
 
 ## [RiskIQ](https://www.spiderfoot.net/documentation/)
 
-A lot of information from domains and IPs even in the free/community version.
+डोमेन और IPs से बहुत सारी जानकारी, यहां तक कि मुफ्त/समुदाय संस्करण में भी।
 
 ## [\_IntelligenceX](https://intelx.io/)
 
-Search Domains, IPs and emails and get info from dumps. Have some free access.
+डोमेन, IPs और ईमेल खोजें और डंप से जानकारी प्राप्त करें। कुछ मुफ्त एक्सेस है।
 
 ## [IBM X-Force Exchange](https://exchange.xforce.ibmcloud.com/)
 
-Search by IP and gather information related to suspicions activities. There is some free access.
+IP द्वारा खोजें और संदिग्ध गतिविधियों से संबंधित जानकारी एकत्र करें। कुछ मुफ्त एक्सेस है।
 
 ## [Greynoise](https://viz.greynoise.io/)
 
-Search by IP or IP range and get information about IPs scanning the Internet. 15 days free access.
+IP या IP रेंज द्वारा खोजें और इंटरनेट को स्कैन कर रहे IPs के बारे में जानकारी प्राप्त करें। 15 दिनों का मुफ्त एक्सेस।
 
 ## [Shodan](https://www.shodan.io/)
 
-Get scan information of an IP address. Have some free api access.
+एक IP पते की स्कैन जानकारी प्राप्त करें। कुछ मुफ्त API एक्सेस है।
 
 ## [Censys](https://censys.io/)
 
-Very similar to shodan
+शोडन के समान बहुत।
 
 ## [buckets.grayhatwarfare.com](https://buckets.grayhatwarfare.com/)
 
-Find open S3 buckets searching by keyword.
+कीवर्ड द्वारा खोजकर खुले S3 बकेट खोजें।
 
 ## [Dehashed](https://www.dehashed.com/data)
 
-Find leaked credentials of emails and even domains\
-Commercial?
+ईमेल और यहां तक कि डोमेन के लीक हुए क्रेडेंशियल्स खोजें।\
+व्यावसायिक?
 
 ## [psbdmp](https://psbdmp.ws/)
 
-Search pastebins where a email appeared. Commercial?
+जहां एक ईमेल प्रकट हुआ वहां पेस्टबिन खोजें। व्यावसायिक?
 
 ## [emailrep.io](https://emailrep.io/key)
 
-Get reputation of a mail. Commercial?
+एक मेल की प्रतिष्ठा प्राप्त करें। व्यावसायिक?
 
 ## [ghostproject](https://ghostproject.fr/)
 
-Get passwords from leaked emails. Commercial?
+लीक हुए ईमेल से पासवर्ड प्राप्त करें। व्यावसायिक?
 
 ## [Binaryedge](https://www.binaryedge.io/)
 
-Obtain interesting info from IPs
+IPs से दिलचस्प जानकारी प्राप्त करें।
 
 ## [haveibeenpwned](https://haveibeenpwned.com/)
 
-Search by domain and email and get if it was pwned and passwords. Commercial?
+डोमेन और ईमेल द्वारा खोजें और पता करें कि क्या इसे प्वंड किया गया था और पासवर्ड। व्यावसायिक?
 
 ### [IP2Location.io](https://www.ip2location.io/)
 
-It detects IP geolocation, data center, ASN and even VPN information. It offers free 30K queries per month.
+यह IP भू-स्थान, डेटा सेंटर, ASN और यहां तक कि VPN जानकारी का पता लगाता है। यह प्रति माह 30K मुफ्त क्वेरी प्रदान करता है।
 
-[https://dnsdumpster.com/](https://dnsdumpster.com/)(in a commercial tool?)
+[https://dnsdumpster.com/](https://dnsdumpster.com/)(क्या यह एक व्यावसायिक उपकरण है?)
 
-[https://www.netcraft.com/](https://www.netcraft.com/) (in a commercial tool?)
+[https://www.netcraft.com/](https://www.netcraft.com/) (क्या यह एक व्यावसायिक उपकरण है?)
 
-[https://www.nmmapper.com/sys/tools/subdomainfinder/](https://www.nmmapper.com/) (in a commercial tool?)
+[https://www.nmmapper.com/sys/tools/subdomainfinder/](https://www.nmmapper.com/) (क्या यह एक व्यावसायिक उपकरण है?)
 
 {{#include ../banners/hacktricks-training.md}}
-

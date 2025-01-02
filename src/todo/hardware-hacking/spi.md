@@ -4,57 +4,54 @@
 
 ## Basic Information
 
-SPI (Serial Peripheral Interface) is an Synchronous Serial Communication Protocol used in embedded systems for short distance communication between ICs (Integrated Circuits). SPI Communication Protocol makes use of the master-slave architecture which is orchastrated by the Clock and Chip Select Signal. A master-slave architecture consists of a master (usually a microprocessor) that manages external peripherals like EEPROM, sensors, control devices, etc. which are considered to be the slaves.
+SPI (Serial Peripheral Interface) एक समकालिक श्रृंखला संचार प्रोटोकॉल है जो एम्बेडेड सिस्टम में ICs (इंटीग्रेटेड सर्किट) के बीच छोटे दूरी के संचार के लिए उपयोग किया जाता है। SPI संचार प्रोटोकॉल मास्टर-गुलाम आर्किटेक्चर का उपयोग करता है जिसे घड़ी और चिप चयन सिग्नल द्वारा संचालित किया जाता है। एक मास्टर-गुलाम आर्किटेक्चर में एक मास्टर (आमतौर पर एक माइक्रोप्रोसेसर) होता है जो EEPROM, सेंसर, नियंत्रण उपकरण आदि जैसे बाहरी परिधीयों का प्रबंधन करता है, जिन्हें गुलाम माना जाता है।
 
-Multiple slaves can be connected to a master but slaves can't communicate with each other. Slaves are administrated by two pins, clock and chip select. As SPI is an synchronous communication protocol, the input and output pins follow the clock signals. The chip select is used by the master to select a slave and interact with it. When the chip select is high, the slave device is not selected whereas when it's low, the chip has been selected and the master would be interacting with the slave.
+कई गुलामों को एक मास्टर से जोड़ा जा सकता है लेकिन गुलाम एक-दूसरे के साथ संचार नहीं कर सकते। गुलामों का प्रबंधन दो पिनों, घड़ी और चिप चयन द्वारा किया जाता है। चूंकि SPI एक समकालिक संचार प्रोटोकॉल है, इनपुट और आउटपुट पिन घड़ी के सिग्नल का पालन करते हैं। चिप चयन का उपयोग मास्टर द्वारा एक गुलाम का चयन करने और उसके साथ बातचीत करने के लिए किया जाता है। जब चिप चयन उच्च होता है, तो गुलाम उपकरण का चयन नहीं किया जाता है जबकि जब यह निम्न होता है, तो चिप का चयन किया गया है और मास्टर गुलाम के साथ बातचीत करेगा।
 
-The MOSI (Master Out, Slave In) and MISO (Master In, Slave Out) are responsible for data sending and recieving data. Data is sent to the slave device through the MOSI pin while the chip select is held low. The input data contains instructions, memory addresses or data as per the datasheet of the slave device vendor. Upon a valid input, the MISO pin is responsible for transmitting data to the master. The output data is sent exactly at the next clock cycle after the input ends. The MISO pins transmits data till the data is fully transmitter or the master sets the chip select pin high (in that case, the slave would stop transmitting and master would not listen after that clock cycle).
+MOSI (मास्टर आउट, गुलाम इन) और MISO (मास्टर इन, गुलाम आउट) डेटा भेजने और प्राप्त करने के लिए जिम्मेदार होते हैं। डेटा को MOSI पिन के माध्यम से गुलाम उपकरण को भेजा जाता है जबकि चिप चयन को निम्न रखा जाता है। इनपुट डेटा में निर्देश, मेमोरी पते या गुलाम उपकरण विक्रेता के डेटा शीट के अनुसार डेटा होता है। एक मान्य इनपुट पर, MISO पिन मास्टर को डेटा प्रसारित करने के लिए जिम्मेदार होता है। आउटपुट डेटा ठीक अगले घड़ी चक्र में भेजा जाता है जब इनपुट समाप्त होता है। MISO पिन डेटा को तब तक प्रसारित करता है जब तक डेटा पूरी तरह से प्रसारित नहीं हो जाता या मास्टर चिप चयन पिन को उच्च सेट नहीं करता (इस मामले में, गुलाम प्रसारण बंद कर देगा और मास्टर उस घड़ी चक्र के बाद सुन नहीं पाएगा)।
 
 ## Dumping Firmware from EEPROMs
 
-Dumping firmware can be useful for analysing the firmware and finding vulnerabilities in them. Often times, the firmware is not available on the internet or is irrelevant due to variations of factors like model number, version, etc. Hence, extracting the firmware directly from the physical device can be helpful to be specific while hunting for threats.
+फर्मवेयर को डंप करना फर्मवेयर का विश्लेषण करने और उनमें कमजोरियों को खोजने के लिए उपयोगी हो सकता है। अक्सर, फर्मवेयर इंटरनेट पर उपलब्ध नहीं होता है या मॉडल नंबर, संस्करण आदि जैसे कारकों के भिन्नताओं के कारण अप्रासंगिक होता है। इसलिए, खतरे की खोज करते समय विशिष्ट होने के लिए भौतिक उपकरण से सीधे फर्मवेयर निकालना सहायक हो सकता है।
 
-Getting Serial Console can be helpful, but often times it happens that the files are read-only. This constrains the analysis due to various reasons. For example, a tools that are required to send and recieve packages would not be there in the firmware. So extracting the binaries to reverse engineer them is not feasible. Hence, having the whole firmware dumped on the system and extracting the binaries for analysis can be very helpful.
+सीरियल कंसोल प्राप्त करना सहायक हो सकता है, लेकिन अक्सर ऐसा होता है कि फ़ाइलें केवल पढ़ने के लिए होती हैं। यह विभिन्न कारणों से विश्लेषण को सीमित करता है। उदाहरण के लिए, पैकेज भेजने और प्राप्त करने के लिए आवश्यक उपकरण फर्मवेयर में नहीं होंगे। इसलिए, उन्हें रिवर्स इंजीनियर करने के लिए बाइनरी निकालना व्यवहार्य नहीं है। इसलिए, सिस्टम पर पूरा फर्मवेयर डंप करना और विश्लेषण के लिए बाइनरी निकालना बहुत सहायक हो सकता है।
 
-Also, during red reaming and getting physical access to devices, dumping the firmware can help on modifying the files or injecting malicious files and then reflashing them into the memory which could be helpful to implant a backdoor into the device. Hence, there are numerous possibilities that can be unlocked with firmware dumping.
+इसके अलावा, रेड रिमिंग के दौरान और उपकरणों तक भौतिक पहुंच प्राप्त करने के दौरान, फर्मवेयर को डंप करना फ़ाइलों को संशोधित करने या दुर्भावनापूर्ण फ़ाइलों को इंजेक्ट करने में मदद कर सकता है और फिर उन्हें मेमोरी में फिर से फ्लैश करना जो उपकरण में एक बैकडोर लगाने में सहायक हो सकता है। इसलिए, फर्मवेयर डंपिंग के साथ कई संभावनाएँ खोली जा सकती हैं।
 
 ### CH341A EEPROM Programmer and Reader
 
-This device is an inexpensive tool for dumping firmwares from EEPROMs and also reflashing them with firmware files. This has been a popular choice for working with computer BIOS chips (which are just EEPROMs). This device connects over USB and needs minimal tools to get started. Also, it usually gets the task done quickly, so can be helpful in physical device access too.
+यह उपकरण EEPROMs से फर्मवेयर डंप करने और उन्हें फर्मवेयर फ़ाइलों के साथ फिर से फ्लैश करने के लिए एक सस्ता उपकरण है। यह कंप्यूटर BIOS चिप्स (जो केवल EEPROMs हैं) के साथ काम करने के लिए एक लोकप्रिय विकल्प रहा है। यह उपकरण USB के माध्यम से कनेक्ट होता है और शुरू करने के लिए न्यूनतम उपकरणों की आवश्यकता होती है। इसके अलावा, यह आमतौर पर कार्य को जल्दी पूरा करता है, इसलिए भौतिक उपकरणों की पहुंच में भी सहायक हो सकता है।
 
 ![drawing](../../images/board_image_ch341a.jpg)
 
-Connect the EEPROM memory with the CH341a Programmer and plug the device into the computer. Incase the device is not getting detected, try installing drivers into the computer. Also, make sure that the EEPROM is connected in proper orientation (usually, place the VCC Pin in reverse orientation to the USB connector) or else, the software would not be able to detect the chip. Refer to the diagram if required:
+CH341a प्रोग्रामर के साथ EEPROM मेमोरी को कनेक्ट करें और उपकरण को कंप्यूटर में प्लग करें। यदि उपकरण का पता नहीं चल रहा है, तो कंप्यूटर में ड्राइवर स्थापित करने का प्रयास करें। इसके अलावा, सुनिश्चित करें कि EEPROM सही दिशा में कनेक्ट किया गया है (आमतौर पर, VCC पिन को USB कनेक्टर के विपरीत दिशा में रखें) अन्यथा, सॉफ़्टवेयर चिप का पता नहीं लगा पाएगा। यदि आवश्यक हो तो चित्र का संदर्भ लें:
 
 ![drawing](../../images/connect_wires_ch341a.jpg) ![drawing](../../images/eeprom_plugged_ch341a.jpg)
 
-Finally, use softwares like flashrom, G-Flash (GUI), etc. for dumping the firmware. G-Flash is a minimal GUI tool is fast and detects the EEPROM automatically. This can be helpful in the firmware needs to be extracted quickly, without much tinkering with the documentation.
+अंत में, फर्मवेयर को डंप करने के लिए flashrom, G-Flash (GUI) आदि जैसे सॉफ़्टवेयर का उपयोग करें। G-Flash एक न्यूनतम GUI उपकरण है जो तेज है और स्वचालित रूप से EEPROM का पता लगाता है। यह तब सहायक हो सकता है जब फर्मवेयर को जल्दी निकाला जाना हो, बिना दस्तावेज़ीकरण के साथ अधिक छेड़छाड़ किए।
 
 ![drawing](../../images/connected_status_ch341a.jpg)
 
-After dumping the firmware, the analysis can be done on the binary files. Tools like strings, hexdump, xxd, binwalk, etc. can be used to extract a lot of information about the firmware as well as the whole file system too.
+फर्मवेयर को डंप करने के बाद, बाइनरी फ़ाइलों पर विश्लेषण किया जा सकता है। strings, hexdump, xxd, binwalk आदि जैसे उपकरणों का उपयोग फर्मवेयर के बारे में और साथ ही पूरे फ़ाइल सिस्टम के बारे में बहुत सारी जानकारी निकालने के लिए किया जा सकता है।
 
-To extract the contents from the firmware, binwalk can be used. Binwalk analyses for hex signatures and identifies the files in the binary file and is capabale of extracting them.
-
+फर्मवेयर से सामग्री निकालने के लिए, binwalk का उपयोग किया जा सकता है। Binwalk हेक्स सिग्नेचर के लिए विश्लेषण करता है और बाइनरी फ़ाइल में फ़ाइलों की पहचान करता है और उन्हें निकालने में सक्षम है।
 ```
 binwalk -e <filename>
 ```
-
-The can be .bin or .rom as per the tools and configurations used.
+यह .bin या .rom हो सकता है, जो उपकरणों और कॉन्फ़िगरेशन के अनुसार है।
 
 > [!CAUTION]
-> Note that firmware extraction is a delicate process and requires a lot of patience. Any mishandling can potentially corrupt the firmware or even erase it completely and make the device unusable. It is recommended to study the specific device before attempting to extract the firmware.
+> ध्यान दें कि फर्मवेयर निकासी एक नाजुक प्रक्रिया है और इसके लिए बहुत धैर्य की आवश्यकता होती है। किसी भी गलत हैंडलिंग से फर्मवेयर भ्रष्ट हो सकता है या यहां तक कि इसे पूरी तरह से मिटा सकता है और डिवाइस को अनुपयोगी बना सकता है। फर्मवेयर निकालने का प्रयास करने से पहले विशेष डिवाइस का अध्ययन करना अनुशंसित है।
 
 ### Bus Pirate + flashrom
 
 ![](<../../images/image (910).png>)
 
-Note that even if the PINOUT of the Pirate Bus indicates pins for **MOSI** and **MISO** to connect to SPI however some SPIs may indicate pins as DI and DO. **MOSI -> DI, MISO -> DO**
+ध्यान दें कि भले ही Pirate Bus का PINOUT SPI से कनेक्ट करने के लिए **MOSI** और **MISO** के लिए पिन दिखाता है, कुछ SPIs पिन को DI और DO के रूप में दिखा सकते हैं। **MOSI -> DI, MISO -> DO**
 
 ![](<../../images/image (360).png>)
 
-In Windows or Linux you can use the program [**`flashrom`**](https://www.flashrom.org/Flashrom) to dump the content of the flash memory running something like:
-
+Windows या Linux में आप [**`flashrom`**](https://www.flashrom.org/Flashrom) प्रोग्राम का उपयोग करके फ्लैश मेमोरी की सामग्री को डंप करने के लिए कुछ इस तरह चला सकते हैं:
 ```bash
 # In this command we are indicating:
 # -VV Verbose
@@ -63,6 +60,4 @@ In Windows or Linux you can use the program [**`flashrom`**](https://www.flashro
 # -r <file> Image to save in the filesystem
 flashrom -VV -c "W25Q64.V" -p buspirate_spi:dev=COM3 -r flash_content.img
 ```
-
 {{#include ../../banners/hacktricks-training.md}}
-

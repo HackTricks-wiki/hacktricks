@@ -4,34 +4,34 @@
 
 ## Garage Doors
 
-Garage door openers typically operate at frequencies in the 300-190 MHz range, with the most common frequencies being 300 MHz, 310 MHz, 315 MHz, and 390 MHz. This frequency range is commonly used for garage door openers because it is less crowded than other frequency bands and is less likely to experience interference from other devices.
+गैरेज दरवाजे के ओपनर आमतौर पर 300-190 मेगाहर्ट्ज की आवृत्तियों पर काम करते हैं, जिनमें सबसे सामान्य आवृत्तियाँ 300 मेगाहर्ट्ज, 310 मेगाहर्ट्ज, 315 मेगाहर्ट्ज, और 390 मेगाहर्ट्ज हैं। यह आवृत्ति रेंज गैरेज दरवाजे के ओपनर के लिए सामान्यतः उपयोग की जाती है क्योंकि यह अन्य आवृत्ति बैंड की तुलना में कम भीड़भाड़ वाली होती है और अन्य उपकरणों से हस्तक्षेप का अनुभव करने की संभावना कम होती है।
 
 ## Car Doors
 
-Most car key fobs operate on either **315 MHz or 433 MHz**. These are both radio frequencies, and they are used in a variety of different applications. The main difference between the two frequencies is that 433 MHz has a longer range than 315 MHz. This means that 433 MHz is better for applications that require a longer range, such as remote keyless entry.\
-In Europe 433.92MHz is commonly used and in U.S. and Japan it's the 315MHz.
+अधिकांश कार की चाबी के फॉब्स **315 मेगाहर्ट्ज या 433 मेगाहर्ट्ज** पर काम करते हैं। ये दोनों रेडियो आवृत्तियाँ हैं, और इन्हें विभिन्न अनुप्रयोगों में उपयोग किया जाता है। दोनों आवृत्तियों के बीच मुख्य अंतर यह है कि 433 मेगाहर्ट्ज की रेंज 315 मेगाहर्ट्ज से लंबी होती है। इसका मतलब है कि 433 मेगाहर्ट्ज उन अनुप्रयोगों के लिए बेहतर है जिन्हें लंबी रेंज की आवश्यकता होती है, जैसे कि रिमोट कीलेस एंट्री।\
+यूरोप में 433.92 मेगाहर्ट्ज सामान्यतः उपयोग किया जाता है और अमेरिका और जापान में यह 315 मेगाहर्ट्ज है।
 
 ## **Brute-force Attack**
 
 <figure><img src="../../images/image (1084).png" alt=""><figcaption></figcaption></figure>
 
-If instead of sending each code 5 times (sent like this to make sure the receiver gets it) so just send it once, the time is reduced to 6mins:
+यदि प्रत्येक कोड को 5 बार भेजने के बजाय (इसे इस तरह भेजा जाता है ताकि रिसीवर इसे प्राप्त कर सके) केवल एक बार भेजा जाए, तो समय 6 मिनट तक कम हो जाता है:
 
 <figure><img src="../../images/image (622).png" alt=""><figcaption></figcaption></figure>
 
-and if you **remove the 2 ms waiting** period between signals you can **reduce the time to 3minutes.**
+और यदि आप **सिग्नल के बीच 2 मिलीसेकंड की प्रतीक्षा** अवधि को हटा देते हैं तो आप **समय को 3 मिनट तक कम कर सकते हैं।**
 
-Moreover, by using the De Bruijn Sequence (a way to reduce the number of bits needed to send all the potential binary numbers to burteforce) this **time is reduced just to 8 seconds**:
+इसके अलावा, De Bruijn Sequence का उपयोग करके (यह सभी संभावित बाइनरी नंबरों को ब्रूटफोर्स करने के लिए भेजने के लिए आवश्यक बिट्स की संख्या को कम करने का एक तरीका है) यह **समय केवल 8 सेकंड तक कम हो जाता है**:
 
 <figure><img src="../../images/image (583).png" alt=""><figcaption></figcaption></figure>
 
-Example of this attack was implemented in [https://github.com/samyk/opensesame](https://github.com/samyk/opensesame)
+इस हमले का उदाहरण [https://github.com/samyk/opensesame](https://github.com/samyk/opensesame) में लागू किया गया था।
 
-Requiring **a preamble will avoid the De Bruijn Sequence** optimization and **rolling codes will prevent this attack** (supposing the code is long enough to not be bruteforceable).
+**एक प्रीएंबल की आवश्यकता De Bruijn Sequence** ऑप्टिमाइजेशन से बचाएगी और **रोलिंग कोड इस हमले को रोकेंगे** (मानते हुए कि कोड इतना लंबा है कि इसे ब्रूटफोर्स नहीं किया जा सकता)।
 
 ## Sub-GHz Attack
 
-To attack these signals with Flipper Zero check:
+इन सिग्नल पर Flipper Zero के साथ हमला करने के लिए जांचें:
 
 {{#ref}}
 flipper-zero/fz-sub-ghz.md
@@ -39,43 +39,43 @@ flipper-zero/fz-sub-ghz.md
 
 ## Rolling Codes Protection
 
-Automatic garage door openers typically use a wireless remote control to open and close the garage door. The remote control **sends a radio frequency (RF) signal** to the garage door opener, which activates the motor to open or close the door.
+स्वचालित गैरेज दरवाजे के ओपनर आमतौर पर गैरेज दरवाजे को खोलने और बंद करने के लिए एक वायरलेस रिमोट कंट्रोल का उपयोग करते हैं। रिमोट कंट्रोल **गैरेज दरवाजे के ओपनर को एक रेडियो आवृत्ति (RF) सिग्नल** भेजता है, जो दरवाजे को खोलने या बंद करने के लिए मोटर को सक्रिय करता है।
 
-It is possible for someone to use a device known as a code grabber to intercept the RF signal and record it for later use. This is known as a **replay attack**. To prevent this type of attack, many modern garage door openers use a more secure encryption method known as a **rolling code** system.
+किसी के लिए RF सिग्नल को इंटरसेप्ट करने और इसे बाद में उपयोग के लिए रिकॉर्ड करने के लिए एक डिवाइस का उपयोग करना संभव है, जिसे **रिप्ले अटैक** कहा जाता है। इस प्रकार के हमले को रोकने के लिए, कई आधुनिक गैरेज दरवाजे के ओपनर एक अधिक सुरक्षित एन्क्रिप्शन विधि का उपयोग करते हैं जिसे **रोलिंग कोड** प्रणाली कहा जाता है।
 
-The **RF signal is typically transmitted using a rolling code**, which means that the code changes with each use. This makes it **difficult** for someone to **intercept** the signal and **use** it to gain **unauthorised** access to the garage.
+**RF सिग्नल आमतौर पर एक रोलिंग कोड का उपयोग करके प्रसारित किया जाता है**, जिसका अर्थ है कि कोड हर उपयोग के साथ बदलता है। यह किसी के लिए सिग्नल को **इंटरसेप्ट** करना और गैरेज में **अनधिकृत** पहुंच प्राप्त करने के लिए **उसे उपयोग** करना **कठिन** बनाता है।
 
-In a rolling code system, the remote control and the garage door opener have a **shared algorithm** that **generates a new code** every time the remote is used. The garage door opener will only respond to the **correct code**, making it much more difficult for someone to gain unauthorised access to the garage just by capturing a code.
+रोलिंग कोड प्रणाली में, रिमोट कंट्रोल और गैरेज दरवाजे का ओपनर एक **साझा एल्गोरिदम** रखते हैं जो हर बार रिमोट के उपयोग पर **एक नया कोड उत्पन्न** करता है। गैरेज दरवाजे का ओपनर केवल **सही कोड** पर प्रतिक्रिया करेगा, जिससे किसी के लिए केवल कोड कैप्चर करके गैरेज में अनधिकृत पहुंच प्राप्त करना बहुत अधिक कठिन हो जाता है।
 
 ### **Missing Link Attack**
 
-Basically, you listen for the button and **capture the signal whilst the remote is out of range** of the device (say the car or garage). You then move to the device and **use the captured code to open it**.
+बुनियादी रूप से, आप बटन के लिए सुनते हैं और **जब रिमोट डिवाइस (जैसे कार या गैरेज) की रेंज से बाहर होता है तब सिग्नल को कैप्चर करते हैं**। फिर आप डिवाइस के पास जाते हैं और **कैप्चर किए गए कोड का उपयोग करके इसे खोलते हैं**।
 
 ### Full Link Jamming Attack
 
-An attacker could **jam the signal near the vehicle or receive**r so the **receiver cannot actually ‘hear’ the code**, and once that is happening you can simply **capture and replay** the code when you have stopped jamming.
+एक हमलावर **वाहन या रिसीवर के पास सिग्नल को जाम कर सकता है** ताकि **रिसीवर वास्तव में कोड को ‘सुन’ न सके**, और जब ऐसा हो रहा हो, तो आप बस **कोड को कैप्चर और रिप्ले** कर सकते हैं जब आप जाम करना बंद कर दें।
 
-The victim at some point will use the **keys to lock the car**, but then the attack will have **recorded enough "close door" codes** that hopefully could be resent to open the door (a **change of frequency might be needed** as there are cars that use the same codes to open and close but listens for both commands in different frequencies).
+शिकार किसी समय **कार को लॉक करने के लिए चाबियाँ** का उपयोग करेगा, लेकिन फिर हमले ने **पर्याप्त "दरवाजा बंद" कोड रिकॉर्ड कर लिए होंगे** जिन्हें उम्मीद है कि दरवाजा खोलने के लिए फिर से भेजा जा सकता है (एक **आवृत्ति में परिवर्तन की आवश्यकता हो सकती है** क्योंकि कुछ कारें दरवाजे को खोलने और बंद करने के लिए समान कोड का उपयोग करती हैं लेकिन विभिन्न आवृत्तियों में दोनों कमांड सुनती हैं)।
 
 > [!WARNING]
-> **Jamming works**, but it's noticeable as if the **person locking the car simply tests the doors** to ensure they are locked they would notice the car unlocked. Additionally if they were aware of such attacks they could even listen to the fact that the doors never made the lock **sound** or the cars **lights** never flashed when they pressed the ‘lock’ button.
+> **जाम करना काम करता है**, लेकिन यह ध्यान देने योग्य है क्योंकि यदि **व्यक्ति कार को लॉक करने के लिए दरवाजों का परीक्षण करता है** ताकि यह सुनिश्चित हो सके कि वे लॉक हैं, तो वे देखेंगे कि कार अनलॉक है। इसके अलावा, यदि वे ऐसे हमलों के बारे में जानते हैं, तो वे यह भी सुन सकते हैं कि दरवाजों ने कभी लॉक **ध्वनि** नहीं बनाई या कारों के **लाइट्स** कभी फ्लैश नहीं हुए जब उन्होंने ‘लॉक’ बटन दबाया।
 
 ### **Code Grabbing Attack ( aka ‘RollJam’ )**
 
-This is a more **stealth Jamming technique**. The attacker will jam the signal, so when the victim tries to lock the door it won't work, but the attacker will **record this code**. Then, the victim will **try to lock the car again** pressing the button and the car will **record this second code**.\
-Instantly after this the **attacker can send the first code** and the **car will lock** (victim will think the second press closed it). Then, the attacker will be able to **send the second stolen code to open** the car (supposing that a **"close car" code can also be used to open it**). A change of frequency might be needed (as there are cars that use the same codes to open and close but listens for both commands in different frequencies).
+यह एक अधिक **गुप्त जामिंग तकनीक** है। हमलावर सिग्नल को जाम करेगा, इसलिए जब शिकार दरवाजे को लॉक करने की कोशिश करेगा, तो यह काम नहीं करेगा, लेकिन हमलावर **इस कोड को रिकॉर्ड करेगा**। फिर, शिकार **फिर से कार को लॉक करने की कोशिश करेगा** बटन दबाकर और कार **इस दूसरे कोड को रिकॉर्ड करेगी**।\
+इसके तुरंत बाद **हमलावर पहले कोड को भेज सकता है** और **कार लॉक हो जाएगी** (शिकार को लगेगा कि दूसरे प्रेस ने इसे बंद कर दिया)। फिर, हमलावर **कार को खोलने के लिए दूसरे चुराए गए कोड को भेजने में सक्षम होगा** (मानते हुए कि **"कार बंद" कोड का उपयोग इसे खोलने के लिए भी किया जा सकता है**)। एक आवृत्ति में परिवर्तन की आवश्यकता हो सकती है (क्योंकि कुछ कारें दरवाजे को खोलने और बंद करने के लिए समान कोड का उपयोग करती हैं लेकिन विभिन्न आवृत्तियों में दोनों कमांड सुनती हैं)।
 
-The attacker can **jam the car receiver and not his receiver** because if the car receiver is listening in for example a 1MHz broadband, the attacker won't **jam** the exact frequency used by the remote but **a close one in that spectrum** while the **attackers receiver will be listening in a smaller range** where he can listen the remote signal **without the jam signal**.
+हमलावर **कार रिसीवर को जाम कर सकता है और अपने रिसीवर को नहीं** क्योंकि यदि कार रिसीवर उदाहरण के लिए 1 मेगाहर्ट्ज ब्रॉडबैंड पर सुन रहा है, तो हमलावर **रिमोट द्वारा उपयोग की जाने वाली सटीक आवृत्ति को जाम नहीं करेगा** बल्कि **उस स्पेक्ट्रम में एक निकटतम आवृत्ति** को जाम करेगा जबकि **हमलावर का रिसीवर एक छोटे रेंज में सुन रहा होगा** जहां वह रिमोट सिग्नल को **जाम सिग्नल के बिना** सुन सकता है।
 
 > [!WARNING]
-> Other implementations seen in specifications show that the **rolling code is a portion** of the total code sent. Ie the code sent is a **24 bit key** where the first **12 are the rolling code**, the **second 8 are the command** (such as lock or unlock) and the last 4 is the **checksum**. Vehicles implementing this type are also naturally susceptible as the attacker merely needs to replace the rolling code segment to be able to **use any rolling code on both frequencies**.
+> अन्य कार्यान्वयन जो विनिर्देशों में देखे गए हैं, दिखाते हैं कि **रोलिंग कोड कुल कोड का एक भाग** है जो भेजा गया है। यानी भेजा गया कोड एक **24 बिट कुंजी** है जहां पहले **12 रोलिंग कोड** हैं, **दूसरे 8 कमांड** (जैसे लॉक या अनलॉक) हैं और अंतिम 4 **चेकसम** हैं। इस प्रकार को लागू करने वाले वाहन स्वाभाविक रूप से संवेदनशील होते हैं क्योंकि हमलावर को केवल रोलिंग कोड खंड को बदलने की आवश्यकता होती है ताकि वह **दोनों आवृत्तियों पर किसी भी रोलिंग कोड का उपयोग कर सके**।
 
 > [!CAUTION]
-> Note that if the victim sends a third code while the attacker is sending the first one, the first and second code will be invalidated.
+> ध्यान दें कि यदि शिकार पहले कोड को भेजते समय तीसरा कोड भेजता है, तो पहला और दूसरा कोड अमान्य हो जाएंगे।
 
 ### Alarm Sounding Jamming Attack
 
-Testing against an aftermarket rolling code system installed on a car, **sending the same code twice** immediately **activated the alarm** and immobiliser providing a unique **denial of service** opportunity. Ironically the means of **disabling the alarm** and immobiliser was to **press** the **remote**, providing an attacker with the ability to **continually perform DoS attack**. Or mix this attack with the **previous one to obtain more codes** as the victim would like to stop the attack asap.
+एक कार पर स्थापित एक आफ्टरमार्केट रोलिंग कोड प्रणाली के खिलाफ परीक्षण करते समय, **एक ही कोड को दो बार भेजने** से तुरंत **अलार्म** और इमोबिलाइज़र सक्रिय हो गया, जिससे एक अद्वितीय **सेवा से इनकार** का अवसर मिला। विडंबना यह है कि **अलार्म** और इमोबिलाइज़र को **निष्क्रिय** करने का तरीका **रिमोट** को **दबाना** था, जिससे हमलावर को **लगातार DoS हमले** करने की क्षमता मिल गई। या इस हमले को **पिछले एक के साथ मिलाकर अधिक कोड प्राप्त करें** क्योंकि शिकार जल्द से जल्द हमले को रोकना चाहेगा।
 
 ## References
 
@@ -85,4 +85,3 @@ Testing against an aftermarket rolling code system installed on a car, **sending
 - [https://hackaday.io/project/164566-how-to-hack-a-car/details](https://hackaday.io/project/164566-how-to-hack-a-car/details)
 
 {{#include ../../banners/hacktricks-training.md}}
-

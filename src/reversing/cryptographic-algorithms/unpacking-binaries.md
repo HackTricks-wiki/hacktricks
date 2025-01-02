@@ -1,25 +1,24 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-# Identifying packed binaries
+# पैक किए गए बाइनरी की पहचान करना
 
-- **lack of strings**: It's common to find that packed binaries doesn't have almost any string
-- A lot of **unused strings**: Also, when a malware is using some kind of commercial packer it's common to find a lot of strings without cross-references. Even if these strings exist that doesn't mean that the binary isn't packed.
-- You can also use some tools to try to find which packer was used to pack a binary:
-  - [PEiD](http://www.softpedia.com/get/Programming/Packers-Crypters-Protectors/PEiD-updated.shtml)
-  - [Exeinfo PE](http://www.softpedia.com/get/Programming/Packers-Crypters-Protectors/ExEinfo-PE.shtml)
-  - [Language 2000](http://farrokhi.net/language/)
+- **स्ट्रिंग्स की कमी**: यह सामान्य है कि पैक किए गए बाइनरी में लगभग कोई स्ट्रिंग नहीं होती है।
+- बहुत सारी **अप्रयुक्त स्ट्रिंग्स**: इसके अलावा, जब कोई मैलवेयर किसी प्रकार के व्यावसायिक पैकर का उपयोग कर रहा होता है, तो बिना क्रॉस-रेफरेंस के बहुत सारी स्ट्रिंग्स मिलना सामान्य है। भले ही ये स्ट्रिंग्स मौजूद हों, इसका मतलब यह नहीं है कि बाइनरी पैक नहीं है।
+- आप यह पता लगाने के लिए कुछ टूल्स का उपयोग कर सकते हैं कि बाइनरी को पैक करने के लिए कौन सा पैकर उपयोग किया गया था:
+- [PEiD](http://www.softpedia.com/get/Programming/Packers-Crypters-Protectors/PEiD-updated.shtml)
+- [Exeinfo PE](http://www.softpedia.com/get/Programming/Packers-Crypters-Protectors/ExEinfo-PE.shtml)
+- [Language 2000](http://farrokhi.net/language/)
 
-# Basic Recommendations
+# बुनियादी सिफारिशें
 
-- **Start** analysing the packed binary **from the bottom in IDA and move up**. Unpackers exit once the unpacked code exit so it's unlikely that the unpacker passes execution to the unpacked code at the start.
-- Search for **JMP's** or **CALLs** to **registers** or **regions** of **memory**. Also search for **functions pushing arguments and an address direction and then calling `retn`**, because the return of the function in that case may call the address just pushed to the stack before calling it.
-- Put a **breakpoint** on `VirtualAlloc` as this allocates space in memory where the program can write unpacked code. The "run to user code" or use F8 to **get to value inside EAX** after executing the function and "**follow that address in dump**". You never know if that is the region where the unpacked code is going to be saved.
-  - **`VirtualAlloc`** with the value "**40**" as an argument means Read+Write+Execute (some code that needs execution is going to be copied here).
-- **While unpacking** code it's normal to find **several calls** to **arithmetic operations** and functions like **`memcopy`** or **`Virtual`**`Alloc`. If you find yourself in a function that apparently only perform arithmetic operations and maybe some `memcopy` , the recommendation is to try to **find the end of the function** (maybe a JMP or call to some register) **or** at least the **call to the last function** and run to then as the code isn't interesting.
-- While unpacking code **note** whenever you **change memory region** as a memory region change may indicate the **starting of the unpacking code**. You can easily dump a memory region using Process Hacker (process --> properties --> memory).
-- While trying to unpack code a good way to **know if you are already working with the unpacked code** (so you can just dump it) is to **check the strings of the binary**. If at some point you perform a jump (maybe changing the memory region) and you notice that **a lot more strings where added**, then you can know **you are working with the unpacked code**.\
-  However, if the packer already contains a lot of strings you can see how many strings contains the word "http" and see if this number increases.
-- When you dump an executable from a region of memory you can fix some headers using [PE-bear](https://github.com/hasherezade/pe-bear-releases/releases).
+- पैक किए गए बाइनरी का **विश्लेषण IDA में नीचे से शुरू करें और ऊपर की ओर बढ़ें**। अनपैकर्स तब समाप्त होते हैं जब अनपैक किया गया कोड समाप्त होता है, इसलिए यह संभावना नहीं है कि अनपैकर शुरू में अनपैक किए गए कोड को निष्पादन सौंपता है।
+- **JMP's** या **CALLs** के लिए **रजिस्टर** या **मेमोरी** के **क्षेत्रों** की खोज करें। इसके अलावा, **फंक्शंस जो तर्कों और एक पते की दिशा को धक्का देते हैं और फिर `retn` को कॉल करते हैं** के लिए खोजें, क्योंकि उस मामले में फंक्शन की वापसी उस पते को कॉल कर सकती है जो स्टैक में धकेला गया था।
+- `VirtualAlloc` पर एक **ब्रेकपॉइंट** लगाएं क्योंकि यह मेमोरी में स्थान आवंटित करता है जहां प्रोग्राम अनपैक किया गया कोड लिख सकता है। "यूजर कोड पर चलाएं" या F8 का उपयोग करें ताकि **फंक्शन को निष्पादित करने के बाद EAX के अंदर मान प्राप्त करें** और "**डंप में उस पते का पालन करें**"। आप कभी नहीं जानते कि क्या यह वह क्षेत्र है जहां अनपैक किया गया कोड सहेजा जाएगा।
+- **`VirtualAlloc`** के साथ मान "**40**" एक तर्क के रूप में पढ़ें + लिखें + निष्पादित करें (कुछ कोड जिसे निष्पादन की आवश्यकता है, यहां कॉपी किया जाएगा)।
+- **कोड को अनपैक करते समय** यह सामान्य है कि **गणितीय संचालन** और **`memcopy`** या **`Virtual`**`Alloc` जैसी फ़ंक्शंस के लिए **कई कॉल** मिलें। यदि आप किसी फ़ंक्शन में हैं जो स्पष्ट रूप से केवल गणितीय संचालन करता है और शायद कुछ `memcopy` करता है, तो सिफारिश है कि आप **फ़ंक्शन के अंत को खोजने की कोशिश करें** (शायद किसी रजिस्टर पर JMP या कॉल) **या** कम से कम **अंतिम फ़ंक्शन को कॉल करें** और फिर चलाएं क्योंकि कोड दिलचस्प नहीं है।
+- कोड को अनपैक करते समय **ध्यान दें** जब भी आप **मेमोरी क्षेत्र बदलते हैं** क्योंकि मेमोरी क्षेत्र में परिवर्तन **अनपैकिंग कोड की शुरुआत** को इंगित कर सकता है। आप Process Hacker का उपयोग करके आसानी से मेमोरी क्षेत्र को डंप कर सकते हैं (प्रक्रिया --> गुण --> मेमोरी)।
+- कोड को अनपैक करने की कोशिश करते समय यह जानने का एक अच्छा तरीका है कि **क्या आप पहले से ही अनपैक किए गए कोड के साथ काम कर रहे हैं** (ताकि आप इसे केवल डंप कर सकें) यह है कि **बाइनरी की स्ट्रिंग्स की जांच करें**। यदि किसी बिंदु पर आप एक जंप करते हैं (शायद मेमोरी क्षेत्र बदलते हुए) और आप देखते हैं कि **बहुत सारी और स्ट्रिंग्स जोड़ी गई हैं**, तो आप जान सकते हैं कि **आप अनपैक किए गए कोड के साथ काम कर रहे हैं**।\
+हालांकि, यदि पैकर में पहले से ही बहुत सारी स्ट्रिंग्स हैं, तो आप देख सकते हैं कि कितनी स्ट्रिंग्स में "http" शब्द है और देखें कि क्या यह संख्या बढ़ती है।
+- जब आप मेमोरी के एक क्षेत्र से एक निष्पादन योग्य को डंप करते हैं, तो आप कुछ हेडर को [PE-bear](https://github.com/hasherezade/pe-bear-releases/releases) का उपयोग करके ठीक कर सकते हैं।
 
 {{#include ../../banners/hacktricks-training.md}}
-

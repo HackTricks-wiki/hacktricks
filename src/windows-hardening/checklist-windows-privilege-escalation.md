@@ -1,115 +1,114 @@
-# Checklist - Local Windows Privilege Escalation
+# चेकलिस्ट - स्थानीय Windows विशेषाधिकार वृद्धि
 
 {{#include ../banners/hacktricks-training.md}}
 
-### **Best tool to look for Windows local privilege escalation vectors:** [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)
+### **Windows स्थानीय विशेषाधिकार वृद्धि वेक्टर के लिए सबसे अच्छा उपकरण:** [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)
 
-### [System Info](windows-local-privilege-escalation/#system-info)
+### [सिस्टम जानकारी](windows-local-privilege-escalation/#system-info)
 
-- [ ] Obtain [**System information**](windows-local-privilege-escalation/#system-info)
-- [ ] Search for **kernel** [**exploits using scripts**](windows-local-privilege-escalation/#version-exploits)
-- [ ] Use **Google to search** for kernel **exploits**
-- [ ] Use **searchsploit to search** for kernel **exploits**
-- [ ] Interesting info in [**env vars**](windows-local-privilege-escalation/#environment)?
-- [ ] Passwords in [**PowerShell history**](windows-local-privilege-escalation/#powershell-history)?
-- [ ] Interesting info in [**Internet settings**](windows-local-privilege-escalation/#internet-settings)?
-- [ ] [**Drives**](windows-local-privilege-escalation/#drives)?
-- [ ] [**WSUS exploit**](windows-local-privilege-escalation/#wsus)?
+- [ ] [**सिस्टम जानकारी**](windows-local-privilege-escalation/#system-info) प्राप्त करें
+- [ ] **कर्नेल** [**शोषणों के लिए स्क्रिप्ट का उपयोग करें**](windows-local-privilege-escalation/#version-exploits)
+- [ ] कर्नेल **शोषणों के लिए Google का उपयोग करें**
+- [ ] कर्नेल **शोषणों के लिए searchsploit का उपयोग करें**
+- [ ] [**env vars**](windows-local-privilege-escalation/#environment) में दिलचस्प जानकारी?
+- [ ] [**PowerShell इतिहास**](windows-local-privilege-escalation/#powershell-history) में पासवर्ड?
+- [ ] [**इंटरनेट सेटिंग्स**](windows-local-privilege-escalation/#internet-settings) में दिलचस्प जानकारी?
+- [ ] [**ड्राइव**](windows-local-privilege-escalation/#drives)?
+- [ ] [**WSUS शोषण**](windows-local-privilege-escalation/#wsus)?
 - [ ] [**AlwaysInstallElevated**](windows-local-privilege-escalation/#alwaysinstallelevated)?
 
-### [Logging/AV enumeration](windows-local-privilege-escalation/#enumeration)
+### [लॉगिंग/AV एन्यूमरेशन](windows-local-privilege-escalation/#enumeration)
 
-- [ ] Check [**Audit** ](windows-local-privilege-escalation/#audit-settings)and [**WEF** ](windows-local-privilege-escalation/#wef)settings
-- [ ] Check [**LAPS**](windows-local-privilege-escalation/#laps)
-- [ ] Check if [**WDigest** ](windows-local-privilege-escalation/#wdigest)is active
-- [ ] [**LSA Protection**](windows-local-privilege-escalation/#lsa-protection)?
-- [ ] [**Credentials Guard**](windows-local-privilege-escalation/#credentials-guard)[?](windows-local-privilege-escalation/#cached-credentials)
-- [ ] [**Cached Credentials**](windows-local-privilege-escalation/#cached-credentials)?
-- [ ] Check if any [**AV**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/windows-av-bypass/README.md)
-- [ ] [**AppLocker Policy**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/authentication-credentials-uac-and-efs/README.md#applocker-policy)?
+- [ ] [**ऑडिट** ](windows-local-privilege-escalation/#audit-settings) और [**WEF** ](windows-local-privilege-escalation/#wef) सेटिंग्स की जांच करें
+- [ ] [**LAPS**](windows-local-privilege-escalation/#laps) की जांच करें
+- [ ] जांचें कि [**WDigest** ](windows-local-privilege-escalation/#wdigest) सक्रिय है या नहीं
+- [ ] [**LSA सुरक्षा**](windows-local-privilege-escalation/#lsa-protection)?
+- [ ] [**क्रेडेंशियल्स गार्ड**](windows-local-privilege-escalation/#credentials-guard)[?](windows-local-privilege-escalation/#cached-credentials)
+- [ ] [**कैश किए गए क्रेडेंशियल्स**](windows-local-privilege-escalation/#cached-credentials)?
+- [ ] क्या कोई [**AV**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/windows-av-bypass/README.md) है
+- [ ] [**AppLocker नीति**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/authentication-credentials-uac-and-efs/README.md#applocker-policy)?
 - [ ] [**UAC**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/authentication-credentials-uac-and-efs/uac-user-account-control/README.md)
-- [ ] [**User Privileges**](windows-local-privilege-escalation/#users-and-groups)
-- [ ] Check [**current** user **privileges**](windows-local-privilege-escalation/#users-and-groups)
-- [ ] Are you [**member of any privileged group**](windows-local-privilege-escalation/#privileged-groups)?
-- [ ] Check if you have [any of these tokens enabled](windows-local-privilege-escalation/#token-manipulation): **SeImpersonatePrivilege, SeAssignPrimaryPrivilege, SeTcbPrivilege, SeBackupPrivilege, SeRestorePrivilege, SeCreateTokenPrivilege, SeLoadDriverPrivilege, SeTakeOwnershipPrivilege, SeDebugPrivilege** ?
-- [ ] [**Users Sessions**](windows-local-privilege-escalation/#logged-users-sessions)?
-- [ ] Check[ **users homes**](windows-local-privilege-escalation/#home-folders) (access?)
-- [ ] Check [**Password Policy**](windows-local-privilege-escalation/#password-policy)
-- [ ] What is[ **inside the Clipboard**](windows-local-privilege-escalation/#get-the-content-of-the-clipboard)?
+- [ ] [**उपयोगकर्ता विशेषाधिकार**](windows-local-privilege-escalation/#users-and-groups)
+- [ ] [**वर्तमान** उपयोगकर्ता **विशेषाधिकार**](windows-local-privilege-escalation/#users-and-groups) की जांच करें
+- [ ] क्या आप [**किसी विशेषाधिकार प्राप्त समूह के सदस्य हैं**](windows-local-privilege-escalation/#privileged-groups)?
+- [ ] क्या आपके पास [इनमें से कोई टोकन सक्षम है](windows-local-privilege-escalation/#token-manipulation): **SeImpersonatePrivilege, SeAssignPrimaryPrivilege, SeTcbPrivilege, SeBackupPrivilege, SeRestorePrivilege, SeCreateTokenPrivilege, SeLoadDriverPrivilege, SeTakeOwnershipPrivilege, SeDebugPrivilege** ?
+- [ ] [**उपयोगकर्ता सत्र**](windows-local-privilege-escalation/#logged-users-sessions)?
+- [ ] [**उपयोगकर्ताओं के घरों**](windows-local-privilege-escalation/#home-folders) की जांच करें (पहुँच?)
+- [ ] [**पासवर्ड नीति**](windows-local-privilege-escalation/#password-policy) की जांच करें
+- [ ] [**क्लिपबोर्ड के अंदर**](windows-local-privilege-escalation/#get-the-content-of-the-clipboard) क्या है?
 
-### [Network](windows-local-privilege-escalation/#network)
+### [नेटवर्क](windows-local-privilege-escalation/#network)
 
-- [ ] Check **current** [**network** **information**](windows-local-privilege-escalation/#network)
-- [ ] Check **hidden local services** restricted to the outside
+- [ ] **वर्तमान** [**नेटवर्क** **जानकारी**](windows-local-privilege-escalation/#network) की जांच करें
+- [ ] **छिपी हुई स्थानीय सेवाओं** की जांच करें जो बाहर से प्रतिबंधित हैं
 
-### [Running Processes](windows-local-privilege-escalation/#running-processes)
+### [चल रहे प्रक्रियाएँ](windows-local-privilege-escalation/#running-processes)
 
-- [ ] Processes binaries [**file and folders permissions**](windows-local-privilege-escalation/#file-and-folder-permissions)
-- [ ] [**Memory Password mining**](windows-local-privilege-escalation/#memory-password-mining)
-- [ ] [**Insecure GUI apps**](windows-local-privilege-escalation/#insecure-gui-apps)
-- [ ] Steal credentials with **interesting processes** via `ProcDump.exe` ? (firefox, chrome, etc ...)
+- [ ] प्रक्रियाओं के बाइनरी [**फाइल और फ़ोल्डर अनुमतियाँ**](windows-local-privilege-escalation/#file-and-folder-permissions)
+- [ ] [**मेमोरी पासवर्ड खनन**](windows-local-privilege-escalation/#memory-password-mining)
+- [ ] [**असुरक्षित GUI ऐप्स**](windows-local-privilege-escalation/#insecure-gui-apps)
+- [ ] क्या आप `ProcDump.exe` के माध्यम से **दिलचस्प प्रक्रियाओं** के साथ क्रेडेंशियल चुरा सकते हैं? (फायरफॉक्स, क्रोम, आदि ...)
 
-### [Services](windows-local-privilege-escalation/#services)
+### [सेवाएँ](windows-local-privilege-escalation/#services)
 
-- [ ] [Can you **modify any service**?](windows-local-privilege-escalation/#permissions)
-- [ ] [Can you **modify** the **binary** that is **executed** by any **service**?](windows-local-privilege-escalation/#modify-service-binary-path)
-- [ ] [Can you **modify** the **registry** of any **service**?](windows-local-privilege-escalation/#services-registry-modify-permissions)
-- [ ] [Can you take advantage of any **unquoted service** binary **path**?](windows-local-privilege-escalation/#unquoted-service-paths)
+- [ ] [क्या आप **किसी सेवा को संशोधित कर सकते हैं**?](windows-local-privilege-escalation/#permissions)
+- [ ] [क्या आप **किसी सेवा द्वारा निष्पादित** **बाइनरी** को **संशोधित कर सकते हैं**?](windows-local-privilege-escalation/#modify-service-binary-path)
+- [ ] [क्या आप किसी **सेवा** के **रजिस्ट्री** को **संशोधित कर सकते हैं**?](windows-local-privilege-escalation/#services-registry-modify-permissions)
+- [ ] [क्या आप किसी **अनकोटित सेवा** बाइनरी **पथ** का लाभ उठा सकते हैं?](windows-local-privilege-escalation/#unquoted-service-paths)
 
-### [**Applications**](windows-local-privilege-escalation/#applications)
+### [**ऐप्लिकेशन**](windows-local-privilege-escalation/#applications)
 
-- [ ] **Write** [**permissions on installed applications**](windows-local-privilege-escalation/#write-permissions)
-- [ ] [**Startup Applications**](windows-local-privilege-escalation/#run-at-startup)
-- [ ] **Vulnerable** [**Drivers**](windows-local-privilege-escalation/#drivers)
+- [ ] **स्थापित ऐप्लिकेशन पर** [**लिखने** की अनुमतियाँ](windows-local-privilege-escalation/#write-permissions)
+- [ ] [**स्टार्टअप ऐप्लिकेशन**](windows-local-privilege-escalation/#run-at-startup)
+- [ ] **कमजोर** [**ड्राइवर**](windows-local-privilege-escalation/#drivers)
 
-### [DLL Hijacking](windows-local-privilege-escalation/#path-dll-hijacking)
+### [DLL हाईजैकिंग](windows-local-privilege-escalation/#path-dll-hijacking)
 
-- [ ] Can you **write in any folder inside PATH**?
-- [ ] Is there any known service binary that **tries to load any non-existant DLL**?
-- [ ] Can you **write** in any **binaries folder**?
+- [ ] क्या आप **PATH के अंदर किसी फ़ोल्डर में लिख सकते हैं**?
+- [ ] क्या कोई ज्ञात सेवा बाइनरी है जो **किसी गैर-मौजूद DLL को लोड करने की कोशिश करती है**?
+- [ ] क्या आप **किसी बाइनरी फ़ोल्डर में लिख सकते हैं**?
 
-### [Network](windows-local-privilege-escalation/#network)
+### [नेटवर्क](windows-local-privilege-escalation/#network)
 
-- [ ] Enumerate the network (shares, interfaces, routes, neighbours, ...)
-- [ ] Take a special look at network services listening on localhost (127.0.0.1)
+- [ ] नेटवर्क का एन्यूमरेशन करें (शेयर, इंटरफेस, मार्ग, पड़ोसी, ...)
+- [ ] लोकलहोस्ट (127.0.0.1) पर सुनने वाली नेटवर्क सेवाओं पर विशेष ध्यान दें
 
-### [Windows Credentials](windows-local-privilege-escalation/#windows-credentials)
+### [Windows क्रेडेंशियल्स](windows-local-privilege-escalation/#windows-credentials)
 
-- [ ] [**Winlogon** ](windows-local-privilege-escalation/#winlogon-credentials)credentials
-- [ ] [**Windows Vault**](windows-local-privilege-escalation/#credentials-manager-windows-vault) credentials that you could use?
-- [ ] Interesting [**DPAPI credentials**](windows-local-privilege-escalation/#dpapi)?
-- [ ] Passwords of saved [**Wifi networks**](windows-local-privilege-escalation/#wifi)?
-- [ ] Interesting info in [**saved RDP Connections**](windows-local-privilege-escalation/#saved-rdp-connections)?
-- [ ] Passwords in [**recently run commands**](windows-local-privilege-escalation/#recently-run-commands)?
-- [ ] [**Remote Desktop Credentials Manager**](windows-local-privilege-escalation/#remote-desktop-credential-manager) passwords?
-- [ ] [**AppCmd.exe** exists](windows-local-privilege-escalation/#appcmd-exe)? Credentials?
-- [ ] [**SCClient.exe**](windows-local-privilege-escalation/#scclient-sccm)? DLL Side Loading?
+- [ ] [**Winlogon** ](windows-local-privilege-escalation/#winlogon-credentials) क्रेडेंशियल्स
+- [ ] [**Windows वॉल्ट**](windows-local-privilege-escalation/#credentials-manager-windows-vault) क्रेडेंशियल्स जो आप उपयोग कर सकते हैं?
+- [ ] दिलचस्प [**DPAPI क्रेडेंशियल्स**](windows-local-privilege-escalation/#dpapi)?
+- [ ] [**Wifi नेटवर्क**](windows-local-privilege-escalation/#wifi) के पासवर्ड?
+- [ ] [**सहेजे गए RDP कनेक्शन**](windows-local-privilege-escalation/#saved-rdp-connections) में दिलचस्प जानकारी?
+- [ ] [**हाल ही में चलाए गए कमांड**](windows-local-privilege-escalation/#recently-run-commands) में पासवर्ड?
+- [ ] [**रिमोट डेस्कटॉप क्रेडेंशियल मैनेजर**](windows-local-privilege-escalation/#remote-desktop-credential-manager) पासवर्ड?
+- [ ] [**AppCmd.exe** मौजूद है](windows-local-privilege-escalation/#appcmd-exe)? क्रेडेंशियल्स?
+- [ ] [**SCClient.exe**](windows-local-privilege-escalation/#scclient-sccm)? DLL साइड लोडिंग?
 
-### [Files and Registry (Credentials)](windows-local-privilege-escalation/#files-and-registry-credentials)
+### [फाइलें और रजिस्ट्री (क्रेडेंशियल्स)](windows-local-privilege-escalation/#files-and-registry-credentials)
 
-- [ ] **Putty:** [**Creds**](windows-local-privilege-escalation/#putty-creds) **and** [**SSH host keys**](windows-local-privilege-escalation/#putty-ssh-host-keys)
-- [ ] [**SSH keys in registry**](windows-local-privilege-escalation/#ssh-keys-in-registry)?
-- [ ] Passwords in [**unattended files**](windows-local-privilege-escalation/#unattended-files)?
-- [ ] Any [**SAM & SYSTEM**](windows-local-privilege-escalation/#sam-and-system-backups) backup?
-- [ ] [**Cloud credentials**](windows-local-privilege-escalation/#cloud-credentials)?
-- [ ] [**McAfee SiteList.xml**](windows-local-privilege-escalation/#mcafee-sitelist.xml) file?
-- [ ] [**Cached GPP Password**](windows-local-privilege-escalation/#cached-gpp-pasword)?
-- [ ] Password in [**IIS Web config file**](windows-local-privilege-escalation/#iis-web-config)?
-- [ ] Interesting info in [**web** **logs**](windows-local-privilege-escalation/#logs)?
-- [ ] Do you want to [**ask for credentials**](windows-local-privilege-escalation/#ask-for-credentials) to the user?
-- [ ] Interesting [**files inside the Recycle Bin**](windows-local-privilege-escalation/#credentials-in-the-recyclebin)?
-- [ ] Other [**registry containing credentials**](windows-local-privilege-escalation/#inside-the-registry)?
-- [ ] Inside [**Browser data**](windows-local-privilege-escalation/#browsers-history) (dbs, history, bookmarks, ...)?
-- [ ] [**Generic password search**](windows-local-privilege-escalation/#generic-password-search-in-files-and-registry) in files and registry
-- [ ] [**Tools**](windows-local-privilege-escalation/#tools-that-search-for-passwords) to automatically search for passwords
+- [ ] **Putty:** [**क्रेड्स**](windows-local-privilege-escalation/#putty-creds) **और** [**SSH होस्ट कुंजी**](windows-local-privilege-escalation/#putty-ssh-host-keys)
+- [ ] [**रजिस्ट्री में SSH कुंजी**](windows-local-privilege-escalation/#ssh-keys-in-registry)?
+- [ ] [**अनटेंडेड फाइलों**](windows-local-privilege-escalation/#unattended-files) में पासवर्ड?
+- [ ] कोई [**SAM & SYSTEM**](windows-local-privilege-escalation/#sam-and-system-backups) बैकअप?
+- [ ] [**क्लाउड क्रेडेंशियल्स**](windows-local-privilege-escalation/#cloud-credentials)?
+- [ ] [**McAfee SiteList.xml**](windows-local-privilege-escalation/#mcafee-sitelist.xml) फ़ाइल?
+- [ ] [**कैश किए गए GPP पासवर्ड**](windows-local-privilege-escalation/#cached-gpp-pasword)?
+- [ ] [**IIS वेब कॉन्फ़िग फ़ाइल**](windows-local-privilege-escalation/#iis-web-config) में पासवर्ड?
+- [ ] [**वेब** **लॉग्स**](windows-local-privilege-escalation/#logs) में दिलचस्प जानकारी?
+- [ ] क्या आप [**उपयोगकर्ता से क्रेडेंशियल्स**](windows-local-privilege-escalation/#ask-for-credentials) मांगना चाहते हैं?
+- [ ] [**रीसाइक्लिंग बिन के अंदर दिलचस्प फाइलें**](windows-local-privilege-escalation/#credentials-in-the-recyclebin)?
+- [ ] अन्य [**रजिस्ट्री जिसमें क्रेडेंशियल्स हैं**](windows-local-privilege-escalation/#inside-the-registry)?
+- [ ] [**ब्राउज़र डेटा के अंदर**](windows-local-privilege-escalation/#browsers-history) (dbs, इतिहास, बुकमार्क, ...)?
+- [ ] [**फाइलों और रजिस्ट्री में सामान्य पासवर्ड खोज**](windows-local-privilege-escalation/#generic-password-search-in-files-and-registry)
+- [ ] पासवर्ड के लिए स्वचालित रूप से खोजने के लिए [**उपकरण**](windows-local-privilege-escalation/#tools-that-search-for-passwords)
 
-### [Leaked Handlers](windows-local-privilege-escalation/#leaked-handlers)
+### [लीक हुए हैंडलर्स](windows-local-privilege-escalation/#leaked-handlers)
 
-- [ ] Have you access to any handler of a process run by administrator?
+- [ ] क्या आपके पास किसी प्रक्रिया के हैंडलर तक पहुंच है जो व्यवस्थापक द्वारा चलायी जाती है?
 
-### [Pipe Client Impersonation](windows-local-privilege-escalation/#named-pipe-client-impersonation)
+### [पाइप क्लाइंट अनुकरण](windows-local-privilege-escalation/#named-pipe-client-impersonation)
 
-- [ ] Check if you can abuse it
+- [ ] जांचें कि क्या आप इसका दुरुपयोग कर सकते हैं
 
 {{#include ../banners/hacktricks-training.md}}
-
