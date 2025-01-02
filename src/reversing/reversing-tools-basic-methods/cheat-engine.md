@@ -2,163 +2,162 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-[**Cheat Engine**](https://www.cheatengine.org/downloads.php) is a useful program to find where important values are saved inside the memory of a running game and change them.\
-When you download and run it, you are **presented** with a **tutorial** of how to use the tool. If you want to learn how to use the tool it's highly recommended to complete it.
+[**Cheat Engine**](https://www.cheatengine.org/downloads.php) è un programma utile per trovare dove vengono salvati valori importanti nella memoria di un gioco in esecuzione e modificarli.\
+Quando lo scarichi e lo esegui, ti viene **presentato** un **tutorial** su come utilizzare lo strumento. Se vuoi imparare a usare lo strumento, è altamente consigliato completarlo.
 
-## What are you searching?
+## Cosa stai cercando?
 
 ![](<../../images/image (762).png>)
 
-This tool is very useful to find **where some value** (usually a number) **is stored in the memory** of a program.\
-**Usually numbers** are stored in **4bytes** form, but you could also find them in **double** or **float** formats, or you may want to look for something **different from a number**. For that reason you need to be sure you **select** what you want to **search for**:
+Questo strumento è molto utile per trovare **dove alcuni valori** (di solito un numero) **sono memorizzati nella memoria** di un programma.\
+**Di solito i numeri** sono memorizzati in forma di **4byte**, ma potresti anche trovarli in formati **double** o **float**, o potresti voler cercare qualcosa **di diverso da un numero**. Per questo motivo devi essere sicuro di **selezionare** ciò che vuoi **cercare**:
 
 ![](<../../images/image (324).png>)
 
-Also you can indicate **different** types of **searches**:
+Puoi anche indicare **diversi** tipi di **ricerche**:
 
 ![](<../../images/image (311).png>)
 
-You can also check the box to **stop the game while scanning the memory**:
+Puoi anche spuntare la casella per **fermare il gioco mentre scansiona la memoria**:
 
 ![](<../../images/image (1052).png>)
 
-### Hotkeys
+### Tasti di scelta rapida
 
-In _**Edit --> Settings --> Hotkeys**_ you can set different **hotkeys** for different purposes like **stopping** the **game** (which is quiet useful if at some point you want to scan the memory). Other options are available:
+In _**Modifica --> Impostazioni --> Tasti di scelta rapida**_ puoi impostare diversi **tasti di scelta rapida** per diversi scopi, come **fermare** il **gioco** (che è molto utile se a un certo punto vuoi scansionare la memoria). Sono disponibili altre opzioni:
 
 ![](<../../images/image (864).png>)
 
-## Modifying the value
+## Modificare il valore
 
-Once you **found** where is the **value** you are **looking for** (more about this in the following steps) you can **modify it** double clicking it, then double clicking its value:
+Una volta che hai **trovato** dove si trova il **valore** che stai **cercando** (di più su questo nei passaggi successivi), puoi **modificarlo** facendo doppio clic su di esso, quindi facendo doppio clic sul suo valore:
 
 ![](<../../images/image (563).png>)
 
-And finally **marking the check** to get the modification done in the memory:
+E infine **spuntando la casella** per applicare la modifica nella memoria:
 
 ![](<../../images/image (385).png>)
 
-The **change** to the **memory** will be immediately **applied** (note that until the game doesn't use this value again the value **won't be updated in the game**).
+La **modifica** alla **memoria** sarà immediatamente **applicata** (nota che finché il gioco non utilizza di nuovo questo valore, il valore **non verrà aggiornato nel gioco**).
 
-## Searching the value
+## Cercare il valore
 
-So, we are going to suppose that there is an important value (like the life of your user) that you want to improve, and you are looking for this value in the memory)
+Quindi, supponiamo che ci sia un valore importante (come la vita del tuo utente) che vuoi migliorare, e stai cercando questo valore nella memoria.
 
-### Through a known change
+### Attraverso un cambiamento noto
 
-Supposing you are looking for the value 100, you **perform a scan** searching for that value and you find a lot of coincidences:
+Supponendo che tu stia cercando il valore 100, **esegui una scansione** cercando quel valore e trovi molte coincidenze:
 
 ![](<../../images/image (108).png>)
 
-Then, you do something so that **value changes**, and you **stop** the game and **perform** a **next scan**:
+Poi, fai qualcosa affinché **il valore cambi**, e **ferma** il gioco e **esegui** una **scansione successiva**:
 
 ![](<../../images/image (684).png>)
 
-Cheat Engine will search for the **values** that **went from 100 to the new value**. Congrats, you **found** the **address** of the value you were looking for, you can now modify it.\
-&#xNAN;_&#x49;f you still have several values, do something to modify again that value, and perform another "next scan" to filter the addresses._
+Cheat Engine cercherà i **valori** che **sono passati da 100 al nuovo valore**. Congratulazioni, hai **trovato** l'**indirizzo** del valore che stavi cercando, ora puoi modificarlo.\
+&#xNAN;_Se hai ancora diversi valori, fai qualcosa per modificare di nuovo quel valore e esegui un'altra "scansione successiva" per filtrare gli indirizzi._
 
-### Unknown Value, known change
+### Valore sconosciuto, cambiamento noto
 
-In the scenario you **don't know the value** but you know **how to make it change** (and even the value of the change) you can look for your number.
+Nello scenario in cui **non conosci il valore** ma sai **come farlo cambiare** (e persino il valore del cambiamento), puoi cercare il tuo numero.
 
-So, start by performing a scan of type "**Unknown initial value**":
+Quindi, inizia eseguendo una scansione di tipo "**Valore iniziale sconosciuto**":
 
 ![](<../../images/image (890).png>)
 
-Then, make the value change, indicate **how** the **value** **changed** (in my case it was decreased by 1) and perform a **next scan**:
+Poi, fai cambiare il valore, indica **come** il **valore** **è cambiato** (nel mio caso è diminuito di 1) ed esegui una **scansione successiva**:
 
 ![](<../../images/image (371).png>)
 
-You will be presented **all the values that were modified in the selected way**:
+Ti verranno presentati **tutti i valori che sono stati modificati nel modo selezionato**:
 
 ![](<../../images/image (569).png>)
 
-Once you have found your value, you can modify it.
+Una volta trovato il tuo valore, puoi modificarlo.
 
-Note that there are a **lot of possible changes** and you can do these **steps as much as you want** to filter the results:
+Nota che ci sono **molti possibili cambiamenti** e puoi fare questi **passaggi quante più volte vuoi** per filtrare i risultati:
 
 ![](<../../images/image (574).png>)
 
-### Random Memory Address - Finding the code
+### Indirizzo di memoria casuale - Trovare il codice
 
-Until know we learnt how to find an address storing a value, but it's highly probably that in **different executions of the game that address is in different places of the memory**. So lets find out how to always find that address.
+Fino ad ora abbiamo imparato come trovare un indirizzo che memorizza un valore, ma è altamente probabile che in **diverse esecuzioni del gioco quell'indirizzo si trovi in posti diversi della memoria**. Quindi scopriamo come trovare sempre quell'indirizzo.
 
-Using some of the mentioned tricks, find the address where your current game is storing the important value. Then (stopping the game if you whish) do a **right click** on the found **address** and select "**Find out what accesses this address**" or "**Find out what writes to this address**":
+Utilizzando alcuni dei trucchi menzionati, trova l'indirizzo dove il tuo gioco attuale sta memorizzando il valore importante. Poi (ferma il gioco se lo desideri) fai **clic destro** sull'**indirizzo** trovato e seleziona "**Scopri cosa accede a questo indirizzo**" o "**Scopri cosa scrive a questo indirizzo**":
 
 ![](<../../images/image (1067).png>)
 
-The **first option** is useful to know which **parts** of the **code** are **using** this **address** (which is useful for more things like **knowing where you can modify the code** of the game).\
-The **second option** is more **specific**, and will be more helpful in this case as we are interested in knowing **from where this value is being written**.
+La **prima opzione** è utile per sapere quali **parti** del **codice** stanno **utilizzando** questo **indirizzo** (che è utile per altre cose come **sapere dove puoi modificare il codice** del gioco).\
+La **seconda opzione** è più **specifica** e sarà più utile in questo caso poiché siamo interessati a sapere **da dove questo valore viene scritto**.
 
-Once you have selected one of those options, the **debugger** will be **attached** to the program and a new **empty window** will appear. Now, **play** the **game** and **modify** that **value** (without restarting the game). The **window** should be **filled** with the **addresses** that are **modifying** the **value**:
+Una volta selezionata una di queste opzioni, il **debugger** sarà **collegato** al programma e apparirà una nuova **finestra vuota**. Ora, **gioca** al **gioco** e **modifica** quel **valore** (senza riavviare il gioco). La **finestra** dovrebbe essere **riempita** con gli **indirizzi** che stanno **modificando** il **valore**:
 
 ![](<../../images/image (91).png>)
 
-Now that you found the address it's modifying the value you can **modify the code at your pleasure** (Cheat Engine allows you to modify it for NOPs real quick):
+Ora che hai trovato l'indirizzo che modifica il valore, puoi **modificare il codice a tuo piacimento** (Cheat Engine ti consente di modificarlo rapidamente in NOP):
 
 ![](<../../images/image (1057).png>)
 
-So, you can now modify it so the code won't affect your number, or will always affect in a positive way.
+Quindi, ora puoi modificarlo affinché il codice non influisca sul tuo numero, o influisca sempre in modo positivo.
 
-### Random Memory Address - Finding the pointer
+### Indirizzo di memoria casuale - Trovare il puntatore
 
-Following the previous steps, find where the value you are interested is. Then, using "**Find out what writes to this address**" find out which address writes this value and double click on it to get the disassembly view:
+Seguendo i passaggi precedenti, trova dove si trova il valore che ti interessa. Poi, utilizzando "**Scopri cosa scrive a questo indirizzo**", scopri quale indirizzo scrive questo valore e fai doppio clic su di esso per ottenere la vista di disassemblaggio:
 
 ![](<../../images/image (1039).png>)
 
-Then, perform a new scan **searching for the hex value between "\[]"** (the value of $edx in this case):
+Poi, esegui una nuova scansione **cercando il valore esadecimale tra "\[]"** (il valore di $edx in questo caso):
 
 ![](<../../images/image (994).png>)
 
-(_If several appear you usually need the smallest address one_)\
-Now, we have f**ound the pointer that will be modifying the value we are interested in**.
+(_Se ne appaiono diversi, di solito hai bisogno di quello con l'indirizzo più piccolo_)\
+Ora, abbiamo **trovato il puntatore che modificherà il valore che ci interessa**.
 
-Click on "**Add Address Manually**":
+Fai clic su "**Aggiungi indirizzo manualmente**":
 
 ![](<../../images/image (990).png>)
 
-Now, click on the "Pointer" check box and add the found address in the text box (in this scenario, the found address in the previous image was "Tutorial-i386.exe"+2426B0):
+Ora, fai clic sulla casella di controllo "Puntatore" e aggiungi l'indirizzo trovato nella casella di testo (in questo scenario, l'indirizzo trovato nell'immagine precedente era "Tutorial-i386.exe"+2426B0):
 
 ![](<../../images/image (392).png>)
 
-(Note how the first "Address" is automatically populated from the pointer address you introduce)
+(Nota come il primo "Indirizzo" è automaticamente popolato dall'indirizzo del puntatore che introduci)
 
-Click OK and a new pointer will be created:
+Fai clic su OK e verrà creato un nuovo puntatore:
 
 ![](<../../images/image (308).png>)
 
-Now, every time you modifies that value you are **modifying the important value even if the memory address where the value is is different.**
+Ora, ogni volta che modifichi quel valore, stai **modificando il valore importante anche se l'indirizzo di memoria dove si trova il valore è diverso.**
 
-### Code Injection
+### Iniezione di codice
 
-Code injection is a technique where you inject a piece of code into the target process, and then reroute the execution of code to go through your own written code (like giving you points instead of resting them).
+L'iniezione di codice è una tecnica in cui inietti un pezzo di codice nel processo target e poi reindirizzi l'esecuzione del codice per passare attraverso il tuo codice scritto (come darti punti invece di sottrarli).
 
-So, imagine you have found the address that is subtracting 1 to the life of your player:
+Quindi, immagina di aver trovato l'indirizzo che sottrae 1 dalla vita del tuo giocatore:
 
 ![](<../../images/image (203).png>)
 
-Click on Show disassembler to get the **disassemble code**.\
-Then, click **CTRL+a** to invoke the Auto assemble window and select _**Template --> Code Injection**_
+Fai clic su Mostra disassemblatore per ottenere il **codice disassemblato**.\
+Poi, fai clic su **CTRL+a** per invocare la finestra di Auto assemble e seleziona _**Modello --> Iniezione di codice**_
 
 ![](<../../images/image (902).png>)
 
-Fill the **address of the instruction you want to modify** (this is usually autofilled):
+Compila l'**indirizzo dell'istruzione che vuoi modificare** (questo di solito viene autofillato):
 
 ![](<../../images/image (744).png>)
 
-A template will be generated:
+Verrà generato un modello:
 
 ![](<../../images/image (944).png>)
 
-So, insert your new assembly code in the "**newmem**" section and remove the original code from the "**originalcode**" if you don't want it to be executed\*\*.\*\* In this example the injected code will add 2 points instead of substracting 1:
+Quindi, inserisci il tuo nuovo codice assembly nella sezione "**newmem**" e rimuovi il codice originale dalla sezione "**originalcode**" se non vuoi che venga eseguito\*\*.\*\* In questo esempio, il codice iniettato aggiungerà 2 punti invece di sottrarre 1:
 
 ![](<../../images/image (521).png>)
 
-**Click on execute and so on and your code should be injected in the program changing the behaviour of the functionality!**
+**Fai clic su esegui e così via e il tuo codice dovrebbe essere iniettato nel programma cambiando il comportamento della funzionalità!**
 
-## **References**
+## **Riferimenti**
 
-- **Cheat Engine tutorial, complete it to learn how to start with Cheat Engine**
+- **Tutorial di Cheat Engine, completalo per imparare a iniziare con Cheat Engine**
 
 {{#include ../../banners/hacktricks-training.md}}
-

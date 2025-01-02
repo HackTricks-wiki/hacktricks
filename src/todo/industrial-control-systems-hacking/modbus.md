@@ -1,35 +1,31 @@
-# The Modbus Protocol 
+# Il Protocollo Modbus
 
-## Introduction to Modbus Protocol 
+## Introduzione al Protocollo Modbus
 
-The Modbus protocol is a widely used protocol in Industrial Automation and Control Systems. Modbus allows communication between various devices such as programmable logic controllers (PLCs), sensors, actuators, and other industrial devices. Understanding the Modbus Protocol is essential since this is the single most used communication protocol in the ICS and has a lot of potential attack surface for sniffing and even injecting commands into PLCs.
+Il protocollo Modbus è un protocollo ampiamente utilizzato nell'Automazione Industriale e nei Sistemi di Controllo. Modbus consente la comunicazione tra vari dispositivi come controllori logici programmabili (PLC), sensori, attuatori e altri dispositivi industriali. Comprendere il Protocollo Modbus è essenziale poiché è il protocollo di comunicazione più utilizzato negli ICS e presenta una grande superficie di attacco potenziale per il sniffing e persino l'iniezione di comandi nei PLC.
 
-Here, concepts are stated point-wise providing context of the protcol and it's nature of operation. The biggest challenge in ICS system security is the cost of implementation and upgradation. These protocols and standards where designed in the early 80s and 90s which are still widely used. Since an industry has a lot of devices and connections, upgrading devices is very difficult, which provides hackers with an edge of dealing with outdated protocols. Attacks on Modbus is like practically unevitable since it is going to be used without upgradation is it's operation is critical to the industry. 
+Qui, i concetti sono espressi in modo puntuale fornendo il contesto del protocollo e la sua natura operativa. La maggiore sfida nella sicurezza dei sistemi ICS è il costo di implementazione e aggiornamento. Questi protocolli e standard sono stati progettati all'inizio degli anni '80 e '90 e sono ancora ampiamente utilizzati. Poiché un'industria ha molti dispositivi e connessioni, aggiornare i dispositivi è molto difficile, il che fornisce ai hacker un vantaggio nel trattare protocolli obsoleti. Gli attacchi a Modbus sono praticamente inevitabili poiché verrà utilizzato senza aggiornamenti, essendo la sua operazione critica per l'industria.
 
-## The Client-Server Architecture
+## L'Architettura Client-Server
 
-Modbus Protocol is typically used as in Client Server Architecture where a master device (client) initiates communication with one or more slave devices (servers). This is also referred to as Master-Slave architecture, which is widely used in electronics and IoT with SPI, I2C, etc. 
+Il Protocollo Modbus è tipicamente utilizzato in un'Architettura Client-Server in cui un dispositivo master (client) avvia la comunicazione con uno o più dispositivi slave (server). Questo è anche noto come architettura Master-Slave, ampiamente utilizzata in elettronica e IoT con SPI, I2C, ecc.
 
-## Serial and Etherent Versions
+## Versioni Seriali ed Ethernet
 
-Modbus Protocol is designed for both, Serial Communication as well as Ethernet Communications. The Serial Communication is widely used in legacy systems while modern devices support Ethernet which offers high data rates and is more suitable for modern industrial networks. 
+Il Protocollo Modbus è progettato sia per la Comunicazione Seriale che per le Comunicazioni Ethernet. La Comunicazione Seriale è ampiamente utilizzata nei sistemi legacy, mentre i dispositivi moderni supportano Ethernet, che offre alte velocità di trasmissione dati ed è più adatto per le reti industriali moderne.
 
-## Data Representation 
+## Rappresentazione dei Dati
 
-Data is transmitted in Modbus protocol as ASCII or Binary, although the binary format is used due to it's compactibility with older devices. 
+I dati vengono trasmessi nel protocollo Modbus come ASCII o Binario, sebbene il formato binario sia utilizzato per la sua compatibilità con i dispositivi più vecchi.
 
-## Function Codes 
+## Codici Funzione
 
- ModBus Protocol works with transmission of specific function codes that are used to operate the PLCs and various control devices. This portion is important to undertstand since replay attacks can be done by retransmitting function codes. Legacy devices do not support any encryption towards data transmission and usually have long wires which connect them, which results to tampering of these wires and capturing/injected data. 
+Il Protocollo ModBus funziona con la trasmissione di codici funzione specifici che vengono utilizzati per operare i PLC e vari dispositivi di controllo. Questa parte è importante da comprendere poiché gli attacchi di replay possono essere effettuati ritrasmettendo i codici funzione. I dispositivi legacy non supportano alcuna crittografia per la trasmissione dei dati e di solito hanno cavi lunghi che li collegano, il che porta a manomissioni di questi cavi e alla cattura/iniezione di dati.
 
- ## Addressing of Modbus 
+## Indirizzamento di Modbus
 
-Each device in the network has some unique address which is essential for communication between devices. Protocols like Modbus RTU, Modbus TCP, etc. are used to implement addressing and serves like a transport layer to the data transmission. The data that is transferred is in the Modbus protocol format that contains the message.
+Ogni dispositivo nella rete ha un indirizzo unico che è essenziale per la comunicazione tra i dispositivi. Protocolli come Modbus RTU, Modbus TCP, ecc. vengono utilizzati per implementare l'indirizzamento e fungono da livello di trasporto per la trasmissione dei dati. I dati trasferiti sono nel formato del protocollo Modbus che contiene il messaggio.
 
-Furthermore, Modbus also implements error checks to ensure the integrity of the transmitted data. But most of al, Modbus is a Open Standard and anyone can implement it in their devices. This made this protocol to go on global standard and it's widespread in the industrial automation industry. 
+Inoltre, Modbus implementa anche controlli di errore per garantire l'integrità dei dati trasmessi. Ma soprattutto, Modbus è uno Standard Aperto e chiunque può implementarlo nei propri dispositivi. Questo ha reso questo protocollo uno standard globale ed è ampiamente diffuso nell'industria dell'automazione industriale.
 
-Due to it's large scale use and lack of upgradations, attacking Modbus provides a significant advantage with it's attack surface. ICS is highly dependent on communication between devices and any attacks made on them can be dangerous for the operation of the industrial systems. Attacks like replay, data injection, data sniffing and leaking, Denial of Service, data forgery, etc. can be carried out if the medium of transmission is identified by the attacker. 
-
-
-
-
+A causa del suo ampio utilizzo e della mancanza di aggiornamenti, attaccare Modbus fornisce un vantaggio significativo con la sua superficie di attacco. Gli ICS dipendono fortemente dalla comunicazione tra i dispositivi e qualsiasi attacco effettuato su di essi può essere pericoloso per il funzionamento dei sistemi industriali. Attacchi come replay, iniezione di dati, sniffing di dati e leaking, Denial of Service, falsificazione di dati, ecc. possono essere effettuati se il mezzo di trasmissione è identificato dall'attaccante.

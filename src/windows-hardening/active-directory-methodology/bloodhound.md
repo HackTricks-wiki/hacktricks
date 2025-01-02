@@ -4,95 +4,84 @@
 
 ## AD Explorer
 
-[AD Explorer](https://docs.microsoft.com/en-us/sysinternals/downloads/adexplorer) is from Sysinternal Suite:
+[AD Explorer](https://docs.microsoft.com/en-us/sysinternals/downloads/adexplorer) è parte della Sysinternal Suite:
 
-> An advanced Active Directory (AD) viewer and editor. You can use AD Explorer to navigate an AD database easily, define favourite locations, view object properties, and attributes without opening dialog boxes, edit permissions, view an object's schema, and execute sophisticated searches that you can save and re-execute.
+> Un visualizzatore e editor avanzato di Active Directory (AD). Puoi utilizzare AD Explorer per navigare facilmente in un database AD, definire posizioni preferite, visualizzare proprietà e attributi degli oggetti senza aprire finestre di dialogo, modificare permessi, visualizzare uno schema di oggetto ed eseguire ricerche sofisticate che puoi salvare e rieseguire.
 
 ### Snapshots
 
-AD Explorer can create snapshots of an AD so you can check it offline.\
-It can be used to discover vulns offline, or to compare different states of the AD DB across the time.
+AD Explorer può creare snapshot di un AD in modo da poterlo controllare offline.\
+Può essere utilizzato per scoprire vulnerabilità offline o per confrontare diversi stati del database AD nel tempo.
 
-You will be requires the username, password, and direction to connect (any AD user is required).
+Ti verranno richiesti il nome utente, la password e la direzione per connetterti (è richiesto qualsiasi utente AD).
 
-To take a snapshot of AD, go to `File` --> `Create Snapshot` and enter a name for the snapshot.
+Per prendere uno snapshot di AD, vai su `File` --> `Create Snapshot` e inserisci un nome per lo snapshot.
 
 ## ADRecon
 
-[**ADRecon**](https://github.com/adrecon/ADRecon) is a tool which extracts and combines various artefacts out of an AD environment. The information can be presented in a **specially formatted** Microsoft Excel **report** that includes summary views with metrics to facilitate analysis and provide a holistic picture of the current state of the target AD environment.
-
+[**ADRecon**](https://github.com/adrecon/ADRecon) è uno strumento che estrae e combina vari artefatti da un ambiente AD. Le informazioni possono essere presentate in un **report** Microsoft Excel **formattato in modo speciale** che include viste riassuntive con metriche per facilitare l'analisi e fornire un quadro olistico dello stato attuale dell'ambiente AD target.
 ```bash
 # Run it
 .\ADRecon.ps1
 ```
-
 ## BloodHound
 
 From [https://github.com/BloodHoundAD/BloodHound](https://github.com/BloodHoundAD/BloodHound)
 
-> BloodHound is a single page Javascript web application, built on top of [Linkurious](http://linkurio.us/), compiled with [Electron](http://electron.atom.io/), with a [Neo4j](https://neo4j.com/) database fed by a C# data collector.
+> BloodHound è un'applicazione web Javascript a pagina singola, costruita su [Linkurious](http://linkurio.us/), compilata con [Electron](http://electron.atom.io/), con un database [Neo4j](https://neo4j.com/) alimentato da un raccoglitore di dati C#.
 
-BloodHound uses graph theory to reveal the hidden and often unintended relationships within an Active Directory or Azure environment. Attackers can use BloodHound to easily identify highly complex attack paths that would otherwise be impossible to quickly identify. Defenders can use BloodHound to identify and eliminate those same attack paths. Both blue and red teams can use BloodHound to easily gain a deeper understanding of privilege relationships in an Active Directory or Azure environment.
+BloodHound utilizza la teoria dei grafi per rivelare le relazioni nascoste e spesso non intenzionali all'interno di un ambiente Active Directory o Azure. Gli attaccanti possono utilizzare BloodHound per identificare facilmente percorsi di attacco altamente complessi che altrimenti sarebbero impossibili da identificare rapidamente. I difensori possono utilizzare BloodHound per identificare ed eliminare quegli stessi percorsi di attacco. Sia i team blue che red possono utilizzare BloodHound per ottenere facilmente una comprensione più profonda delle relazioni di privilegio in un ambiente Active Directory o Azure.
 
-So, [Bloodhound ](https://github.com/BloodHoundAD/BloodHound)is an amazing tool which can enumerate a domain automatically, save all the information, find possible privilege escalation paths and show all the information using graphs.
+Quindi, [Bloodhound ](https://github.com/BloodHoundAD/BloodHound)è uno strumento straordinario che può enumerare automaticamente un dominio, salvare tutte le informazioni, trovare possibili percorsi di escalation dei privilegi e mostrare tutte le informazioni utilizzando grafici.
 
-Booldhound is composed of 2 main parts: **ingestors** and the **visualisation application**.
+Bloodhound è composto da 2 parti principali: **ingestors** e l'**applicazione di visualizzazione**.
 
-The **ingestors** are used to **enumerate the domain and extract all the information** in a format that the visualisation application will understand.
+Gli **ingestors** vengono utilizzati per **enumerare il dominio ed estrarre tutte le informazioni** in un formato che l'applicazione di visualizzazione comprenderà.
 
-The **visualisation application uses neo4j** to show how all the information is related and to show different ways to escalate privileges in the domain.
+L'**applicazione di visualizzazione utilizza neo4j** per mostrare come tutte le informazioni siano correlate e per mostrare diversi modi per escalare i privilegi nel dominio.
 
-### Installation
+### Installazione
 
-After the creation of BloodHound CE, the entire project was updated for ease of use with Docker. The easiest way to get started is to use its pre-configured Docker Compose configuration.
+Dopo la creazione di BloodHound CE, l'intero progetto è stato aggiornato per facilitare l'uso con Docker. Il modo più semplice per iniziare è utilizzare la sua configurazione Docker Compose preconfigurata.
 
-1. Install Docker Compose. This should be included with the [Docker Desktop](https://www.docker.com/products/docker-desktop/) installation.
-2. Run:
-
+1. Installa Docker Compose. Questo dovrebbe essere incluso con l'installazione di [Docker Desktop](https://www.docker.com/products/docker-desktop/).
+2. Esegui:
 ```
 curl -L https://ghst.ly/getbhce | docker compose -f - up
 ```
+3. Trova la password generata casualmente nell'output del terminale di Docker Compose.  
+4. In un browser, vai su http://localhost:8080/ui/login. Accedi con un nome utente di admin e la password generata casualmente dai log.
 
-3. Locate the randomly generated password in the terminal output of Docker Compose.
-4. In a browser, navigate to http://localhost:8080/ui/login. Login with a username of admin and the randomly generated password from the logs.
-
-After this you will need to change the randomly generated password and you will have the new interface ready, from which you can directly download the ingestors.
+Dopo questo, dovrai cambiare la password generata casualmente e avrai l'interfaccia nuova pronta, da cui puoi scaricare direttamente gli ingestors.
 
 ### SharpHound
 
-They have several options but if you want to run SharpHound from a PC joined to the domain, using your current user and extract all the information you can do:
-
+Hanno diverse opzioni, ma se vuoi eseguire SharpHound da un PC unito al dominio, utilizzando il tuo utente attuale e estrarre tutte le informazioni, puoi fare:
 ```
 ./SharpHound.exe --CollectionMethods All
 Invoke-BloodHound -CollectionMethod All
 ```
+> Puoi leggere di più su **CollectionMethod** e sulla sessione loop [qui](https://support.bloodhoundenterprise.io/hc/en-us/articles/17481375424795-All-SharpHound-Community-Edition-Flags-Explained)
 
-> You can read more about **CollectionMethod** and loop session [here](https://support.bloodhoundenterprise.io/hc/en-us/articles/17481375424795-All-SharpHound-Community-Edition-Flags-Explained)
-
-If you wish to execute SharpHound using different credentials you can create a CMD netonly session and run SharpHound from there:
-
+Se desideri eseguire SharpHound utilizzando credenziali diverse, puoi creare una sessione CMD netonly ed eseguire SharpHound da lì:
 ```
 runas /netonly /user:domain\user "powershell.exe -exec bypass"
 ```
-
-[**Learn more about Bloodhound in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-with-bloodhound-on-kali-linux)
+[**Scopri di più su Bloodhound in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-with-bloodhound-on-kali-linux)
 
 ## Group3r
 
-[**Group3r**](https://github.com/Group3r/Group3r) is a tool to find **vulnerabilities** in Active Directory associated **Group Policy**. \
-You need to **run group3r** from a host inside the domain using **any domain user**.
-
+[**Group3r**](https://github.com/Group3r/Group3r) è uno strumento per trovare **vulnerabilità** in Active Directory associate a **Group Policy**. \
+Devi **eseguire group3r** da un host all'interno del dominio utilizzando **qualsiasi utente del dominio**.
 ```bash
 group3r.exe -f <filepath-name.log>
 # -s sends results to stdin
 # -f send results to file
 ```
-
 ## PingCastle
 
-[**PingCastle**](https://www.pingcastle.com/documentation/) **evaluates the security posture of an AD environment** and provides a nice **report** with graphs.
+[**PingCastle**](https://www.pingcastle.com/documentation/) **valuta la postura di sicurezza di un ambiente AD** e fornisce un bel **report** con grafici.
 
-To run it, can execute the binary `PingCastle.exe` and it will start an **interactive session** presenting a menu of options. The default option to use is **`healthcheck`** which will establish a baseline **overview** of the **domain**, and find **misconfigurations** and **vulnerabilities**.&#x20;
+Per eseguirlo, puoi eseguire il binario `PingCastle.exe` e inizierà una **sessione interattiva** presentando un menu di opzioni. L'opzione predefinita da utilizzare è **`healthcheck`** che stabilirà una **panoramica** di base del **dominio**, e troverà **misconfigurazioni** e **vulnerabilità**.&#x20;
 
 {{#include ../../banners/hacktricks-training.md}}
-

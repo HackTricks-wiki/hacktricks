@@ -1,47 +1,45 @@
 # Cookies Policy
 
-Last updated: 02/04/2023
+Ultimo aggiornamento: 02/04/2023
 
-### Introduction
+### Introduzione
 
-This Cookies Policy applies to the following websites owned and operated by HackTricks team ("HackTricks", "we", "us" or "our"):
+Questa Cookies Policy si applica ai seguenti siti web di proprietà e gestiti dal team di HackTricks ("HackTricks", "noi", "ci" o "nostro"):
 
 * hacktricks.xyz
 * [www.hacktricks.xyz](http://www.hacktricks.xyz/)
 * book.hacktricks.xyz
 * cloud.hacktricks.xyz
 
-By using any of these websites, you agree to the use of cookies in accordance with this Cookies Policy. If you do not agree, please disable cookies in your browser settings or refrain from using our websites.
+Utilizzando uno di questi siti web, accetti l'uso dei cookie in conformità con questa Cookies Policy. Se non sei d'accordo, ti preghiamo di disabilitare i cookie nelle impostazioni del tuo browser o di astenerti dall'utilizzare i nostri siti web.
 
-### What are cookies?
+### Cosa sono i cookie?
 
-Cookies are small text files that are stored on your computer or mobile device when you visit a website. They are widely used to make websites work, improve their functionality, and provide a more personalized user experience.
+I cookie sono piccoli file di testo che vengono memorizzati sul tuo computer o dispositivo mobile quando visiti un sito web. Sono ampiamente utilizzati per far funzionare i siti web, migliorare la loro funzionalità e fornire un'esperienza utente più personalizzata.
 
-### How we use cookies
+### Come utilizziamo i cookie
 
-We use cookies on our websites for the following purposes:
+Utilizziamo i cookie sui nostri siti web per i seguenti scopi:
 
-1. Essential cookies: These cookies are necessary for the basic functionality of our websites, such as enabling user authentication, maintaining security, and remembering your preferences.
-2. Performance cookies: These cookies help us understand how visitors interact with our websites, by collecting and reporting information anonymously. This allows us to improve our website performance and user experience.
-3. Functionality cookies: These cookies enable our websites to remember choices you make, such as your language or region, to provide a more personalized experience.
-4. Targeting/advertising cookies: These cookies are used to deliver relevant ads and marketing communications based on your interests, browsing history, and interactions with our websites.
+1. Cookie essenziali: Questi cookie sono necessari per la funzionalità di base dei nostri siti web, come abilitare l'autenticazione degli utenti, mantenere la sicurezza e ricordare le tue preferenze.
+2. Cookie di prestazione: Questi cookie ci aiutano a capire come i visitatori interagiscono con i nostri siti web, raccogliendo e riportando informazioni in modo anonimo. Questo ci consente di migliorare le prestazioni del nostro sito web e l'esperienza utente.
+3. Cookie di funzionalità: Questi cookie consentono ai nostri siti web di ricordare le scelte che fai, come la tua lingua o regione, per fornire un'esperienza più personalizzata.
+4. Cookie di targeting/pubblicità: Questi cookie vengono utilizzati per fornire annunci pertinenti e comunicazioni di marketing basate sui tuoi interessi, sulla tua cronologia di navigazione e sulle interazioni con i nostri siti web.
 
-Moreover, the pages book.hacktricks.xyz and cloud.hacktricks.xyz are hosted in Gitbook. You can find more information about Gitbooks cookies in [https://gitbook-1652864889.teamtailor.com/cookie-policy](https://gitbook-1652864889.teamtailor.com/cookie-policy).
+Inoltre, le pagine book.hacktricks.xyz e cloud.hacktricks.xyz sono ospitate su Gitbook. Puoi trovare ulteriori informazioni sui cookie di Gitbook in [https://gitbook-1652864889.teamtailor.com/cookie-policy](https://gitbook-1652864889.teamtailor.com/cookie-policy).
 
-### Third-party cookies
+### Cookie di terze parti
 
-In addition to our own cookies, we may also use third-party cookies to report website usage statistics, deliver advertisements, and enable social media sharing buttons. The use of third-party cookies is subject to their respective privacy policies.
+Oltre ai nostri cookie, potremmo anche utilizzare cookie di terze parti per riportare statistiche sull'uso del sito web, fornire pubblicità e abilitare i pulsanti di condivisione sui social media. L'uso dei cookie di terze parti è soggetto alle rispettive politiche sulla privacy.
 
-Managing cookies
+Gestione dei cookie
 
-Most web browsers allow you to manage cookies through their settings. You can choose to block, delete, or limit the use of cookies on your device. However, please note that disabling cookies may affect the functionality and performance of our websites.
+La maggior parte dei browser web consente di gestire i cookie tramite le loro impostazioni. Puoi scegliere di bloccare, eliminare o limitare l'uso dei cookie sul tuo dispositivo. Tuttavia, ti preghiamo di notare che disabilitare i cookie potrebbe influire sulla funzionalità e sulle prestazioni dei nostri siti web.
 
-Changes to this Cookies Policy
+Modifiche a questa Cookies Policy
 
-We may update this Cookies Policy from time to time to reflect changes in our practices or relevant laws. We encourage you to periodically review this page for the latest information on our cookie practices.
+Potremmo aggiornare questa Cookies Policy di tanto in tanto per riflettere cambiamenti nelle nostre pratiche o nelle leggi pertinenti. Ti incoraggiamo a rivedere periodicamente questa pagina per le ultime informazioni sulle nostre pratiche relative ai cookie.
 
-### Contact us
+### Contattaci
 
-If you have any questions or concerns about this Cookies Policy, please contact us at [support@hacktricks.xyz](mailto:support@hacktricks.xyz)
-
-
+Se hai domande o preoccupazioni riguardo a questa Cookies Policy, ti preghiamo di contattarci a [support@hacktricks.xyz](mailto:support@hacktricks.xyz)

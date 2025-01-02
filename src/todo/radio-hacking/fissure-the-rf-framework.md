@@ -1,14 +1,14 @@
-# FISSURE - The RF Framework
+# FISSURE - Il Framework RF
 
-**Frequency Independent SDR-based Signal Understanding and Reverse Engineering**
+**Comprensione e Ingegneria Inversa dei Segnali SDR Indipendenti dalla Frequenza**
 
-FISSURE is an open-source RF and reverse engineering framework designed for all skill levels with hooks for signal detection and classification, protocol discovery, attack execution, IQ manipulation, vulnerability analysis, automation, and AI/ML. The framework was built to promote the rapid integration of software modules, radios, protocols, signal data, scripts, flow graphs, reference material, and third-party tools. FISSURE is a workflow enabler that keeps software in one location and allows teams to effortlessly get up to speed while sharing the same proven baseline configuration for specific Linux distributions.
+FISSURE è un framework open-source RF e di ingegneria inversa progettato per tutti i livelli di abilità, con hook per la rilevazione e classificazione dei segnali, scoperta dei protocolli, esecuzione degli attacchi, manipolazione IQ, analisi delle vulnerabilità, automazione e AI/ML. Il framework è stato costruito per promuovere l'integrazione rapida di moduli software, radio, protocolli, dati di segnale, script, grafi di flusso, materiale di riferimento e strumenti di terze parti. FISSURE è un abilitante del flusso di lavoro che mantiene il software in un'unica posizione e consente ai team di mettersi rapidamente al passo mentre condividono la stessa configurazione di base collaudata per specifiche distribuzioni Linux.
 
-The framework and tools included with FISSURE are designed to detect the presence of RF energy, understand the characteristics of a signal, collect and analyze samples, develop transmit and/or injection techniques, and craft custom payloads or messages. FISSURE contains a growing library of protocol and signal information to assist in identification, packet crafting, and fuzzing. Online archive capabilities exist to download signal files and build playlists to simulate traffic and test systems.
+Il framework e gli strumenti inclusi in FISSURE sono progettati per rilevare la presenza di energia RF, comprendere le caratteristiche di un segnale, raccogliere e analizzare campioni, sviluppare tecniche di trasmissione e/o iniezione e creare payload o messaggi personalizzati. FISSURE contiene una libreria in crescita di informazioni su protocolli e segnali per assistere nell'identificazione, creazione di pacchetti e fuzzing. Esistono capacità di archiviazione online per scaricare file di segnale e costruire playlist per simulare il traffico e testare i sistemi.
 
-The friendly Python codebase and user interface allows beginners to quickly learn about popular tools and techniques involving RF and reverse engineering. Educators in cybersecurity and engineering can take advantage of the built-in material or utilize the framework to demonstrate their own real-world applications. Developers and researchers can use FISSURE for their daily tasks or to expose their cutting-edge solutions to a wider audience. As awareness and usage of FISSURE grows in the community, so will the extent of its capabilities and the breadth of the technology it encompasses.
+Il codice Python amichevole e l'interfaccia utente consentono ai principianti di apprendere rapidamente strumenti e tecniche popolari riguardanti RF e ingegneria inversa. Gli educatori in cybersecurity e ingegneria possono sfruttare il materiale integrato o utilizzare il framework per dimostrare le proprie applicazioni nel mondo reale. Sviluppatori e ricercatori possono utilizzare FISSURE per le loro attività quotidiane o per esporre le loro soluzioni all'avanguardia a un pubblico più ampio. Man mano che la consapevolezza e l'uso di FISSURE crescono nella comunità, così farà l'estensione delle sue capacità e l'ampiezza della tecnologia che comprende.
 
-**Additional Information**
+**Informazioni Aggiuntive**
 
 * [AIS Page](https://www.ainfosec.com/technologies/fissure/)
 * [GRCon22 Slides](https://events.gnuradio.org/event/18/contributions/246/attachments/84/164/FISSURE\_Poore\_GRCon22.pdf)
@@ -16,13 +16,13 @@ The friendly Python codebase and user interface allows beginners to quickly lear
 * [GRCon22 Video](https://www.youtube.com/watch?v=1f2umEKhJvE)
 * [Hack Chat Transcript](https://hackaday.io/event/187076-rf-hacking-hack-chat/log/212136-hack-chat-transcript-part-1)
 
-## Getting Started
+## Iniziare
 
-**Supported**
+**Supportato**
 
-There are three branches within FISSURE to make file navigation easier and reduce code redundancy. The Python2\_maint-3.7 branch contains a codebase built around Python2, PyQt4, and GNU Radio 3.7; the Python3\_maint-3.8 branch is built around Python3, PyQt5, and GNU Radio 3.8; and the Python3\_maint-3.10 branch is built around Python3, PyQt5, and GNU Radio 3.10.
+Ci sono tre rami all'interno di FISSURE per rendere più facile la navigazione nei file e ridurre la ridondanza del codice. Il ramo Python2\_maint-3.7 contiene una base di codice costruita attorno a Python2, PyQt4 e GNU Radio 3.7; il ramo Python3\_maint-3.8 è costruito attorno a Python3, PyQt5 e GNU Radio 3.8; e il ramo Python3\_maint-3.10 è costruito attorno a Python3, PyQt5 e GNU Radio 3.10.
 
-|   Operating System   |   FISSURE Branch   |
+|   Sistema Operativo   |   Ramo FISSURE   |
 | :------------------: | :----------------: |
 |  Ubuntu 18.04 (x64)  | Python2\_maint-3.7 |
 | Ubuntu 18.04.5 (x64) | Python2\_maint-3.7 |
@@ -31,19 +31,18 @@ There are three branches within FISSURE to make file navigation easier and reduc
 | Ubuntu 20.04.4 (x64) | Python3\_maint-3.8 |
 |  KDE neon 5.25 (x64) | Python3\_maint-3.8 |
 
-**In-Progress (beta)**
+**In Corso (beta)**
 
-These operating systems are still in beta status. They are under development and several features are known to be missing. Items in the installer might conflict with existing programs or fail to install until the status is removed.
+Questi sistemi operativi sono ancora in stato beta. Sono in fase di sviluppo e diverse funzionalità sono note per mancare. Gli elementi nell'installer potrebbero entrare in conflitto con programmi esistenti o non installarsi fino a quando lo stato non viene rimosso.
 
-|     Operating System     |    FISSURE Branch   |
+|     Sistema Operativo     |    Ramo FISSURE   |
 | :----------------------: | :-----------------: |
 | DragonOS Focal (x86\_64) |  Python3\_maint-3.8 |
 |    Ubuntu 22.04 (x64)    | Python3\_maint-3.10 |
 
-Note: Certain software tools do not work for every OS. Refer to [Software And Conflicts](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Help/Markdown/SoftwareAndConflicts.md)
+Nota: Alcuni strumenti software non funzionano per ogni OS. Fare riferimento a [Software And Conflicts](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Help/Markdown/SoftwareAndConflicts.md)
 
-**Installation**
-
+**Installazione**
 ```
 git clone https://github.com/ainfosec/FISSURE.git
 cd FISSURE
@@ -51,32 +50,29 @@ git checkout <Python2_maint-3.7> or <Python3_maint-3.8> or <Python3_maint-3.10>
 git submodule update --init
 ./install
 ```
+Questo installerà le dipendenze software di PyQt necessarie per avviare le interfacce di installazione se non vengono trovate.
 
-This will install PyQt software dependencies required to launch the installation GUIs if they are not found.
-
-Next, select the option that best matches your operating system (should be detected automatically if your OS matches an option).
+Successivamente, seleziona l'opzione che meglio corrisponde al tuo sistema operativo (dovrebbe essere rilevato automaticamente se il tuo OS corrisponde a un'opzione).
 
 |                                          Python2\_maint-3.7                                          |                                          Python3\_maint-3.8                                          |                                          Python3\_maint-3.10                                         |
 | :--------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------: |
 | ![install1b](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/install1b.png) | ![install1a](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/install1a.png) | ![install1c](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/install1c.png) |
 
-It is recommended to install FISSURE on a clean operating system to avoid existing conflicts. Select all the recommended checkboxes (Default button) to avoid errors while operating the various tools within FISSURE. There will be multiple prompts throughout the installation, mostly asking for elevated permissions and user names. If an item contains a "Verify" section at the end, the installer will run the command that follows and highlight the checkbox item green or red depending on if any errors are produced by the command. Checked items without a "Verify" section will remain black following the installation.
+Si consiglia di installare FISSURE su un sistema operativo pulito per evitare conflitti esistenti. Seleziona tutte le caselle di controllo consigliate (pulsante predefinito) per evitare errori durante l'operazione dei vari strumenti all'interno di FISSURE. Ci saranno più richieste durante l'installazione, principalmente per autorizzazioni elevate e nomi utente. Se un elemento contiene una sezione "Verifica" alla fine, l'installer eseguirà il comando che segue e evidenzierà l'elemento della casella di controllo in verde o rosso a seconda che vengano prodotti errori dal comando. Gli elementi selezionati senza una sezione "Verifica" rimarranno neri dopo l'installazione.
 
 ![install2](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/install2.png)
 
-**Usage**
+**Utilizzo**
 
-Open a terminal and enter:
-
+Apri un terminale e inserisci:
 ```
 fissure
 ```
+Riferirsi al menu di aiuto di FISSURE per ulteriori dettagli sull'uso.
 
-Refer to the FISSURE Help menu for more details on usage.
+## Dettagli
 
-## Details
-
-**Components**
+**Componenti**
 
 * Dashboard
 * Central Hub (HIPRFISR)
@@ -86,101 +82,99 @@ Refer to the FISSURE Help menu for more details on usage.
 
 ![components](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/components.png)
 
-**Capabilities**
+**Capacità**
 
-| ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/detector.png)_**Signal Detector**_ | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/iq.png)_**IQ Manipulation**_      | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/library.png)_**Signal Lookup**_          | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/pd.png)_**Pattern Recognition**_ |
+| ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/detector.png)_**Rilevatore di Segnali**_ | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/iq.png)_**Manipolazione IQ**_      | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/library.png)_**Ricerca Segnali**_          | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/pd.png)_**Riconoscimento Modelli**_ |
 | --------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/attack.png)_**Attacks**_           | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/fuzzing.png)_**Fuzzing**_         | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/archive.png)_**Signal Playlists**_       | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/gallery.png)_**Image Gallery**_  |
-| ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/packet.png)_**Packet Crafting**_   | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/scapy.png)_**Scapy Integration**_ | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/crc\_calculator.png)_**CRC Calculator**_ | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/log.png)_**Logging**_            |
+| ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/attack.png)_**Attacchi**_           | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/fuzzing.png)_**Fuzzing**_         | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/archive.png)_**Playlist di Segnali**_       | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/gallery.png)_**Galleria Immagini**_  |
+| ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/packet.png)_**Creazione Pacchetti**_   | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/scapy.png)_**Integrazione Scapy**_ | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/crc\_calculator.png)_**Calcolatore CRC**_ | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/log.png)_**Registrazione**_            |
 
 **Hardware**
 
-The following is a list of "supported" hardware with varying levels of integration:
+Di seguito è riportato un elenco di hardware "supportato" con vari livelli di integrazione:
 
 * USRP: X3xx, B2xx, B20xmini, USRP2, N2xx
 * HackRF
 * RTL2832U
-* 802.11 Adapters
+* Adattatori 802.11
 * LimeSDR
 * bladeRF, bladeRF 2.0 micro
 * Open Sniffer
 * PlutoSDR
 
-## Lessons
+## Lezioni
 
-FISSURE comes with several helpful guides to become familiar with different technologies and techniques. Many include steps for using various tools that are integrated into FISSURE.
+FISSURE viene fornito con diverse guide utili per familiarizzare con diverse tecnologie e tecniche. Molte includono passaggi per utilizzare vari strumenti integrati in FISSURE.
 
-* [Lesson1: OpenBTS](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson1\_OpenBTS.md)
-* [Lesson2: Lua Dissectors](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson2\_LuaDissectors.md)
-* [Lesson3: Sound eXchange](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson3\_Sound\_eXchange.md)
-* [Lesson4: ESP Boards](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson4\_ESP\_Boards.md)
-* [Lesson5: Radiosonde Tracking](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson5\_Radiosonde\_Tracking.md)
-* [Lesson6: RFID](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson6\_RFID.md)
-* [Lesson7: Data Types](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson7\_Data\_Types.md)
-* [Lesson8: Custom GNU Radio Blocks](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson8\_Custom\_GNU\_Radio\_Blocks.md)
-* [Lesson9: TPMS](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson9\_TPMS.md)
-* [Lesson10: Ham Radio Exams](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson10\_Ham\_Radio\_Exams.md)
-* [Lesson11: Wi-Fi Tools](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson11\_WiFi\_Tools.md)
+* [Lezione1: OpenBTS](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson1\_OpenBTS.md)
+* [Lezione2: Lua Dissectors](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson2\_LuaDissectors.md)
+* [Lezione3: Sound eXchange](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson3\_Sound\_eXchange.md)
+* [Lezione4: Schede ESP](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson4\_ESP\_Boards.md)
+* [Lezione5: Tracciamento Radiosonde](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson5\_Radiosonde\_Tracking.md)
+* [Lezione6: RFID](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson6\_RFID.md)
+* [Lezione7: Tipi di Dati](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson7\_Data\_Types.md)
+* [Lezione8: Blocchi GNU Radio Personalizzati](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson8\_Custom\_GNU\_Radio\_Blocks.md)
+* [Lezione9: TPMS](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson9\_TPMS.md)
+* [Lezione10: Esami Radioamatoriali](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson10\_Ham\_Radio\_Exams.md)
+* [Lezione11: Strumenti Wi-Fi](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson11\_WiFi\_Tools.md)
 
 ## Roadmap
 
-* [ ] Add more hardware types, RF protocols, signal parameters, analysis tools
-* [ ] Support more operating systems
-* [ ] Develop class material around FISSURE (RF Attacks, Wi-Fi, GNU Radio, PyQt, etc.)
-* [ ] Create a signal conditioner, feature extractor, and signal classifier with selectable AI/ML techniques
-* [ ] Implement recursive demodulation mechanisms for producing a bitstream from unknown signals
-* [ ] Transition the main FISSURE components to a generic sensor node deployment scheme
+* [ ] Aggiungere più tipi di hardware, protocolli RF, parametri di segnale, strumenti di analisi
+* [ ] Supportare più sistemi operativi
+* [ ] Sviluppare materiale didattico attorno a FISSURE (Attacchi RF, Wi-Fi, GNU Radio, PyQt, ecc.)
+* [ ] Creare un condizionatore di segnale, estrattore di caratteristiche e classificatore di segnale con tecniche AI/ML selezionabili
+* [ ] Implementare meccanismi di demodulazione ricorsiva per produrre un bitstream da segnali sconosciuti
+* [ ] Trasferire i principali componenti di FISSURE a uno schema di distribuzione di nodi sensori generici
 
-## Contributing
+## Contribuire
 
-Suggestions for improving FISSURE are strongly encouraged. Leave a comment in the [Discussions](https://github.com/ainfosec/FISSURE/discussions) page or in the Discord Server if you have any thoughts regarding the following:
+Suggerimenti per migliorare FISSURE sono fortemente incoraggiati. Lascia un commento nella pagina [Discussioni](https://github.com/ainfosec/FISSURE/discussions) o nel server Discord se hai pensieri riguardo ai seguenti argomenti:
 
-* New feature suggestions and design changes
-* Software tools with installation steps
-* New lessons or additional material for existing lessons
-* RF protocols of interest
-* More hardware and SDR types for integration
-* IQ analysis scripts in Python
-* Installation corrections and improvements
+* Suggerimenti per nuove funzionalità e modifiche di design
+* Strumenti software con passaggi di installazione
+* Nuove lezioni o materiale aggiuntivo per lezioni esistenti
+* Protocolli RF di interesse
+* Maggiore hardware e tipi di SDR per integrazione
+* Script di analisi IQ in Python
+* Correzioni e miglioramenti di installazione
 
-Contributions to improve FISSURE are crucial to expediting its development. Any contributions you make are greatly appreciated. If you wish to contribute through code development, please fork the repo and create a pull request:
+Le contribuzioni per migliorare FISSURE sono cruciali per accelerare il suo sviluppo. Qualsiasi contributo che fai è molto apprezzato. Se desideri contribuire attraverso lo sviluppo di codice, per favore fork il repo e crea una pull request:
 
-1. Fork the project
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a pull request
+1. Fork il progetto
+2. Crea il tuo branch di funzionalità (`git checkout -b feature/AmazingFeature`)
+3. Commetti le tue modifiche (`git commit -m 'Aggiungi qualche AmazingFeature'`)
+4. Push al branch (`git push origin feature/AmazingFeature`)
+5. Apri una pull request
 
-Creating [Issues](https://github.com/ainfosec/FISSURE/issues) to bring attention to bugs is also welcomed.
+Creare [Issues](https://github.com/ainfosec/FISSURE/issues) per portare attenzione a bug è anche benvenuto.
 
-## Collaborating
+## Collaborare
 
-Contact Assured Information Security, Inc. (AIS) Business Development to propose and formalize any FISSURE collaboration opportunities–whether that is through dedicating time towards integrating your software, having the talented people at AIS develop solutions for your technical challenges, or integrating FISSURE into other platforms/applications.
+Contatta Assured Information Security, Inc. (AIS) Business Development per proporre e formalizzare eventuali opportunità di collaborazione su FISSURE, sia dedicando tempo all'integrazione del tuo software, sia facendo sviluppare soluzioni per le tue sfide tecniche dalle persone talentuose di AIS, o integrando FISSURE in altre piattaforme/applicazioni.
 
-## License
+## Licenza
 
 GPL-3.0
 
-For license details, see LICENSE file.
+Per i dettagli sulla licenza, vedere il file LICENSE.
 
-## Contact
+## Contatto
 
-Join the Discord Server: [https://discord.gg/JZDs5sgxcG](https://discord.gg/JZDs5sgxcG)
+Unisciti al server Discord: [https://discord.gg/JZDs5sgxcG](https://discord.gg/JZDs5sgxcG)
 
-Follow on Twitter: [@FissureRF](https://twitter.com/fissurerf), [@AinfoSec](https://twitter.com/ainfosec)
+Segui su Twitter: [@FissureRF](https://twitter.com/fissurerf), [@AinfoSec](https://twitter.com/ainfosec)
 
 Chris Poore - Assured Information Security, Inc. - poorec@ainfosec.com
 
 Business Development - Assured Information Security, Inc. - bd@ainfosec.com
 
-## Credits
+## Crediti
 
-We acknowledge and are grateful to these developers:
+Riconosciamo e siamo grati a questi sviluppatori:
 
-[Credits](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/CREDITS.md)
+[Crediti](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/CREDITS.md)
 
-## Acknowledgments
+## Riconoscimenti
 
-Special thanks to Dr. Samuel Mantravadi and Joseph Reith for their contributions to this project.
-
-
+Un ringraziamento speciale a Dr. Samuel Mantravadi e Joseph Reith per i loro contributi a questo progetto.

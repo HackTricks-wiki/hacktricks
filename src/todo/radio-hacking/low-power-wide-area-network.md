@@ -1,17 +1,16 @@
-# Low-Power Wide Area Network
+# Rete a Larga Area a Basso Consumo
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Introduction
+## Introduzione
 
-**Low-Power Wide Area Network** (LPWAN) is a group of wireless, low-power, wide area network technologies designed for **long-range communications** at a low bit rate.\
-They can reach more than **six miles** and their **batteries** can last up to **20 years**.
+**Rete a Larga Area a Basso Consumo** (LPWAN) è un gruppo di tecnologie di rete wireless, a basso consumo, progettate per **comunicazioni a lungo raggio** a bassa velocità di trasmissione.\
+Possono raggiungere più di **sei miglia** e le loro **batterie** possono durare fino a **20 anni**.
 
-Long Range (**LoRa**) it’s popular in multiple countries and has an open source specification called **LoRaWAN**.
+Long Range (**LoRa**) è popolare in diversi paesi e ha una specifica open source chiamata **LoRaWAN**.
 
-### LPWAN, LoRa, and LoRaWAN
+### LPWAN, LoRa e LoRaWAN
 
 [https://github.com/IOActive/laf](https://github.com/IOActive/laf)
 
 {{#include ../../banners/hacktricks-training.md}}
-

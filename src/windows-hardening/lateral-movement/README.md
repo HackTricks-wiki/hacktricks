@@ -1,8 +1,8 @@
-# Lateral Movement
+# Movimento Laterale
 
 {{#include ../../banners/hacktricks-training.md}}
 
-There are different different ways to execute commands in external systems, here you can find the explanations on how the main Windows lateral movements techniques work:
+Ci sono diversi modi per eseguire comandi in sistemi esterni, qui puoi trovare le spiegazioni su come funzionano le principali tecniche di movimento laterale in Windows:
 
 - [**PsExec**](psexec-and-winexec.md)
 - [**SmbExec**](smbexec.md)
@@ -15,4 +15,3 @@ There are different different ways to execute commands in external systems, here
 - [**Pass the AzureAD Certificate**](https://cloud.hacktricks.xyz/pentesting-cloud/azure-security/az-lateral-movements/az-pass-the-certificate) (cloud)
 
 {{#include ../../banners/hacktricks-training.md}}
-

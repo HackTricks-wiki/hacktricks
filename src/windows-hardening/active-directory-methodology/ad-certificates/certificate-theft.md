@@ -2,12 +2,11 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**This is a small summary of the Theft chapters of the awesome research from [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)**
+**Questo è un piccolo riassunto dei capitoli sul furto delle certificazioni della fantastica ricerca di [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)**
 
-## What can I do with a certificate
+## Cosa posso fare con un certificato
 
-Before checking how to steal the certificates here you have some info about how to find what the certificate is useful for:
-
+Prima di controllare come rubare i certificati, qui hai alcune informazioni su come scoprire a cosa serve il certificato:
 ```powershell
 # Powershell
 $CertPath = "C:\path\to\cert.pfx"
@@ -19,35 +18,33 @@ $Cert.EnhancedKeyUsageList
 # cmd
 certutil.exe -dump -v cert.pfx
 ```
+## Esportazione dei certificati utilizzando le Crypto API – THEFT1
 
-## Exporting Certificates Using the Crypto APIs – THEFT1
+In una **sessione desktop interattiva**, estrarre un certificato utente o macchina, insieme alla chiave privata, può essere facilmente fatto, particolarmente se la **chiave privata è esportabile**. Questo può essere realizzato navigando al certificato in `certmgr.msc`, facendo clic destro su di esso e selezionando `All Tasks → Export` per generare un file .pfx protetto da password.
 
-In an **interactive desktop session**, extracting a user or machine certificate, along with the private key, can be easily done, particularly if the **private key is exportable**. This can be achieved by navigating to the certificate in `certmgr.msc`, right-clicking on it, and selecting `All Tasks → Export` to generate a password-protected .pfx file.
+Per un **approccio programmatico**, sono disponibili strumenti come il cmdlet PowerShell `ExportPfxCertificate` o progetti come [TheWover’s CertStealer C# project](https://github.com/TheWover/CertStealer). Questi utilizzano la **Microsoft CryptoAPI** (CAPI) o la Cryptography API: Next Generation (CNG) per interagire con il negozio di certificati. Queste API forniscono una gamma di servizi crittografici, inclusi quelli necessari per la memorizzazione e l'autenticazione dei certificati.
 
-For a **programmatic approach**, tools such as the PowerShell `ExportPfxCertificate` cmdlet or projects like [TheWover’s CertStealer C# project](https://github.com/TheWover/CertStealer) are available. These utilize the **Microsoft CryptoAPI** (CAPI) or the Cryptography API: Next Generation (CNG) to interact with the certificate store. These APIs provide a range of cryptographic services, including those necessary for certificate storage and authentication.
+Tuttavia, se una chiave privata è impostata come non esportabile, sia CAPI che CNG normalmente bloccheranno l'estrazione di tali certificati. Per bypassare questa restrizione, possono essere impiegati strumenti come **Mimikatz**. Mimikatz offre comandi `crypto::capi` e `crypto::cng` per patchare le rispettive API, consentendo l'esportazione delle chiavi private. In particolare, `crypto::capi` patcha il CAPI all'interno del processo corrente, mentre `crypto::cng` mira alla memoria di **lsass.exe** per la patch.
 
-However, if a private key is set as non-exportable, both CAPI and CNG will normally block the extraction of such certificates. To bypass this restriction, tools like **Mimikatz** can be employed. Mimikatz offers `crypto::capi` and `crypto::cng` commands to patch the respective APIs, allowing for the exportation of private keys. Specifically, `crypto::capi` patches the CAPI within the current process, while `crypto::cng` targets the memory of **lsass.exe** for patching.
+## Furto di certificati utente tramite DPAPI – THEFT2
 
-## User Certificate Theft via DPAPI – THEFT2
-
-More info about DPAPI in:
+Maggiori informazioni su DPAPI in:
 
 {{#ref}}
 ../../windows-local-privilege-escalation/dpapi-extracting-passwords.md
 {{#endref}}
 
-In Windows, **certificate private keys are safeguarded by DPAPI**. It's crucial to recognize that the **storage locations for user and machine private keys** are distinct, and the file structures vary depending on the cryptographic API utilized by the operating system. **SharpDPAPI** is a tool that can navigate these differences automatically when decrypting the DPAPI blobs.
+In Windows, **le chiavi private dei certificati sono protette da DPAPI**. È fondamentale riconoscere che le **posizioni di archiviazione per le chiavi private utente e macchina** sono distinte, e le strutture dei file variano a seconda dell'API crittografica utilizzata dal sistema operativo. **SharpDPAPI** è uno strumento che può navigare automaticamente queste differenze durante la decrittazione dei blob DPAPI.
 
-**User certificates** are predominantly housed in the registry under `HKEY_CURRENT_USER\SOFTWARE\Microsoft\SystemCertificates`, but some can also be found in the directory `%APPDATA%\Microsoft\SystemCertificates\My\Certificates`. The corresponding **private keys** for these certificates are typically stored in `%APPDATA%\Microsoft\Crypto\RSA\User SID\` for **CAPI** keys and `%APPDATA%\Microsoft\Crypto\Keys\` for **CNG** keys.
+I **certificati utente** sono prevalentemente ospitati nel registro sotto `HKEY_CURRENT_USER\SOFTWARE\Microsoft\SystemCertificates`, ma alcuni possono anche essere trovati nella directory `%APPDATA%\Microsoft\SystemCertificates\My\Certificates`. Le corrispondenti **chiavi private** per questi certificati sono tipicamente memorizzate in `%APPDATA%\Microsoft\Crypto\RSA\User SID\` per le chiavi **CAPI** e `%APPDATA%\Microsoft\Crypto\Keys\` per le chiavi **CNG**.
 
-To **extract a certificate and its associated private key**, the process involves:
+Per **estrarre un certificato e la sua chiave privata associata**, il processo prevede:
 
-1. **Selecting the target certificate** from the user’s store and retrieving its key store name.
-2. **Locating the required DPAPI masterkey** to decrypt the corresponding private key.
-3. **Decrypting the private key** by utilizing the plaintext DPAPI masterkey.
+1. **Selezionare il certificato target** dal negozio dell'utente e recuperare il suo nome del negozio delle chiavi.
+2. **Localizzare la masterkey DPAPI necessaria** per decrittare la corrispondente chiave privata.
+3. **Decrittare la chiave privata** utilizzando la masterkey DPAPI in chiaro.
 
-For **acquiring the plaintext DPAPI masterkey**, the following approaches can be used:
-
+Per **acquisire la masterkey DPAPI in chiaro**, possono essere utilizzati i seguenti approcci:
 ```bash
 # With mimikatz, when running in the user's context
 dpapi::masterkey /in:"C:\PATH\TO\KEY" /rpc
@@ -55,9 +52,7 @@ dpapi::masterkey /in:"C:\PATH\TO\KEY" /rpc
 # With mimikatz, if the user's password is known
 dpapi::masterkey /in:"C:\PATH\TO\KEY" /sid:accountSid /password:PASS
 ```
-
-To streamline the decryption of masterkey files and private key files, the `certificates` command from [**SharpDPAPI**](https://github.com/GhostPack/SharpDPAPI) proves beneficial. It accepts `/pvk`, `/mkfile`, `/password`, or `{GUID}:KEY` as arguments to decrypt the private keys and linked certificates, subsequently generating a `.pem` file.
-
+Per semplificare la decrittazione dei file masterkey e dei file di chiavi private, il comando `certificates` di [**SharpDPAPI**](https://github.com/GhostPack/SharpDPAPI) si rivela utile. Accetta come argomenti `/pvk`, `/mkfile`, `/password` o `{GUID}:KEY` per decrittare le chiavi private e i certificati collegati, generando successivamente un file `.pem`.
 ```bash
 # Decrypting using SharpDPAPI
 SharpDPAPI.exe certificates /mkfile:C:\temp\mkeys.txt
@@ -65,28 +60,26 @@ SharpDPAPI.exe certificates /mkfile:C:\temp\mkeys.txt
 # Converting .pem to .pfx
 openssl pkcs12 -in cert.pem -keyex -CSP "Microsoft Enhanced Cryptographic Provider v1.0" -export -out cert.pfx
 ```
+## Furto di Certificati di Macchina tramite DPAPI – THEFT3
 
-## Machine Certificate Theft via DPAPI – THEFT3
+I certificati di macchina memorizzati da Windows nel registro a `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\SystemCertificates` e le chiavi private associate situate in `%ALLUSERSPROFILE%\Application Data\Microsoft\Crypto\RSA\MachineKeys` (per CAPI) e `%ALLUSERSPROFILE%\Application Data\Microsoft\Crypto\Keys` (per CNG) sono crittografati utilizzando le chiavi master DPAPI della macchina. Queste chiavi non possono essere decrittografate con la chiave di backup DPAPI del dominio; invece, è necessaria la **segreto LSA DPAPI_SYSTEM**, a cui può accedere solo l'utente SYSTEM.
 
-Machine certificates stored by Windows in the registry at `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\SystemCertificates` and the associated private keys located in `%ALLUSERSPROFILE%\Application Data\Microsoft\Crypto\RSA\MachineKeys` (for CAPI) and `%ALLUSERSPROFILE%\Application Data\Microsoft\Crypto\Keys` (for CNG) are encrypted using the machine's DPAPI master keys. These keys cannot be decrypted with the domain’s DPAPI backup key; instead, the **DPAPI_SYSTEM LSA secret**, which only the SYSTEM user can access, is required.
+La decrittografia manuale può essere ottenuta eseguendo il comando `lsadump::secrets` in **Mimikatz** per estrarre il segreto LSA DPAPI_SYSTEM, e successivamente utilizzando questa chiave per decrittografare le chiavi master della macchina. In alternativa, il comando `crypto::certificates /export /systemstore:LOCAL_MACHINE` di Mimikatz può essere utilizzato dopo aver patchato CAPI/CNG come descritto in precedenza.
 
-Manual decryption can be achieved by executing the `lsadump::secrets` command in **Mimikatz** to extract the DPAPI_SYSTEM LSA secret, and subsequently using this key to decrypt the machine masterkeys. Alternatively, Mimikatz’s `crypto::certificates /export /systemstore:LOCAL_MACHINE` command can be used after patching CAPI/CNG as previously described.
+**SharpDPAPI** offre un approccio più automatizzato con il suo comando certificati. Quando il flag `/machine` è utilizzato con permessi elevati, si eleva a SYSTEM, estrae il segreto LSA DPAPI_SYSTEM, lo utilizza per decrittografare le chiavi master DPAPI della macchina e poi impiega queste chiavi in chiaro come tabella di ricerca per decrittografare eventuali chiavi private dei certificati di macchina.
 
-**SharpDPAPI** offers a more automated approach with its certificates command. When the `/machine` flag is used with elevated permissions, it escalates to SYSTEM, dumps the DPAPI_SYSTEM LSA secret, uses it to decrypt the machine DPAPI masterkeys, and then employs these plaintext keys as a lookup table to decrypt any machine certificate private keys.
+## Trovare File di Certificati – THEFT4
 
-## Finding Certificate Files – THEFT4
+I certificati si trovano a volte direttamente all'interno del filesystem, come nelle condivisioni di file o nella cartella Download. I tipi di file di certificati più comunemente incontrati mirati verso ambienti Windows sono i file `.pfx` e `.p12`. Anche se meno frequentemente, appaiono anche file con estensioni `.pkcs12` e `.pem`. Ulteriori estensioni di file relative ai certificati degne di nota includono:
 
-Certificates are sometimes found directly within the filesystem, such as in file shares or the Downloads folder. The most commonly encountered types of certificate files targeted towards Windows environments are `.pfx` and `.p12` files. Though less frequently, files with extensions `.pkcs12` and `.pem` also appear. Additional noteworthy certificate-related file extensions include:
+- `.key` per chiavi private,
+- `.crt`/`.cer` per certificati solo,
+- `.csr` per Richieste di Firma di Certificati, che non contengono certificati o chiavi private,
+- `.jks`/`.keystore`/`.keys` per Java Keystores, che possono contenere certificati insieme a chiavi private utilizzate da applicazioni Java.
 
-- `.key` for private keys,
-- `.crt`/`.cer` for certificates only,
-- `.csr` for Certificate Signing Requests, which do not contain certificates or private keys,
-- `.jks`/`.keystore`/`.keys` for Java Keystores, which may hold certificates along with private keys utilized by Java applications.
+Questi file possono essere cercati utilizzando PowerShell o il prompt dei comandi cercando le estensioni menzionate.
 
-These files can be searched for using PowerShell or the command prompt by looking for the mentioned extensions.
-
-In cases where a PKCS#12 certificate file is found and it is protected by a password, the extraction of a hash is possible through the use of `pfx2john.py`, available at [fossies.org](https://fossies.org/dox/john-1.9.0-jumbo-1/pfx2john_8py_source.html). Subsequently, JohnTheRipper can be employed to attempt to crack the password.
-
+Nei casi in cui venga trovato un file di certificato PKCS#12 e sia protetto da una password, l'estrazione di un hash è possibile tramite l'uso di `pfx2john.py`, disponibile su [fossies.org](https://fossies.org/dox/john-1.9.0-jumbo-1/pfx2john_8py_source.html). Successivamente, JohnTheRipper può essere impiegato per tentare di decifrare la password.
 ```powershell
 # Example command to search for certificate files in PowerShell
 Get-ChildItem -Recurse -Path C:\Users\ -Include *.pfx, *.p12, *.pkcs12, *.pem, *.key, *.crt, *.cer, *.csr, *.jks, *.keystore, *.keys
@@ -97,22 +90,18 @@ pfx2john.py certificate.pfx > hash.txt
 # Command to crack the hash with JohnTheRipper
 john --wordlist=passwords.txt hash.txt
 ```
-
 ## NTLM Credential Theft via PKINIT – THEFT5
 
-The given content explains a method for NTLM credential theft via PKINIT, specifically through the theft method labeled as THEFT5. Here's a re-explanation in passive voice, with the content anonymized and summarized where applicable:
+Il contenuto fornito spiega un metodo per il furto delle credenziali NTLM tramite PKINIT, specificamente attraverso il metodo di furto etichettato come THEFT5. Ecco una rielaborazione in forma passiva, con il contenuto anonimizzato e riassunto dove applicabile:
 
-To support NTLM authentication [MS-NLMP] for applications that do not facilitate Kerberos authentication, the KDC is designed to return the user's NTLM one-way function (OWF) within the privilege attribute certificate (PAC), specifically in the `PAC_CREDENTIAL_INFO` buffer, when PKCA is utilized. Consequently, should an account authenticate and secure a Ticket-Granting Ticket (TGT) via PKINIT, a mechanism is inherently provided which enables the current host to extract the NTLM hash from the TGT to uphold legacy authentication protocols. This process entails the decryption of the `PAC_CREDENTIAL_DATA` structure, which is essentially an NDR serialized depiction of the NTLM plaintext.
+Per supportare l'autenticazione NTLM [MS-NLMP] per applicazioni che non facilitano l'autenticazione Kerberos, il KDC è progettato per restituire la funzione unidirezionale (OWF) NTLM dell'utente all'interno del certificato di attributo di privilegio (PAC), specificamente nel buffer `PAC_CREDENTIAL_INFO`, quando viene utilizzato PKCA. Di conseguenza, se un account si autentica e ottiene un Ticket-Granting Ticket (TGT) tramite PKINIT, viene fornito un meccanismo che consente all'host attuale di estrarre l'hash NTLM dal TGT per mantenere i protocolli di autenticazione legacy. Questo processo comporta la decrittazione della struttura `PAC_CREDENTIAL_DATA`, che è essenzialmente una rappresentazione serializzata NDR del testo in chiaro NTLM.
 
-The utility **Kekeo**, accessible at [https://github.com/gentilkiwi/kekeo](https://github.com/gentilkiwi/kekeo), is mentioned as capable of requesting a TGT containing this specific data, thereby facilitating the retrieval of the user's NTLM. The command utilized for this purpose is as follows:
-
+L'utilità **Kekeo**, accessibile su [https://github.com/gentilkiwi/kekeo](https://github.com/gentilkiwi/kekeo), è menzionata come capace di richiedere un TGT contenente questi dati specifici, facilitando così il recupero dell'NTLM dell'utente. Il comando utilizzato per questo scopo è il seguente:
 ```bash
 tgt::pac /caname:generic-DC-CA /subject:genericUser /castore:current_user /domain:domain.local
 ```
+Inoltre, si nota che Kekeo può elaborare certificati protetti da smartcard, a condizione che il pin possa essere recuperato, con riferimento a [https://github.com/CCob/PinSwipe](https://github.com/CCob/PinSwipe). La stessa capacità è indicata come supportata da **Rubeus**, disponibile su [https://github.com/GhostPack/Rubeus](https://github.com/GhostPack/Rubeus).
 
-Additionally, it is noted that Kekeo can process smartcard-protected certificates, given the pin can be retrieved, with reference made to [https://github.com/CCob/PinSwipe](https://github.com/CCob/PinSwipe). The same capability is indicated to be supported by **Rubeus**, available at [https://github.com/GhostPack/Rubeus](https://github.com/GhostPack/Rubeus).
-
-This explanation encapsulates the process and tools involved in NTLM credential theft via PKINIT, focusing on the retrieval of NTLM hashes through TGT obtained using PKINIT, and the utilities that facilitate this process.
+Questa spiegazione racchiude il processo e gli strumenti coinvolti nel furto di credenziali NTLM tramite PKINIT, concentrandosi sul recupero degli hash NTLM attraverso il TGT ottenuto utilizzando PKINIT e le utility che facilitano questo processo.
 
 {{#include ../../../banners/hacktricks-training.md}}
-

