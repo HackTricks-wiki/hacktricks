@@ -1,18 +1,17 @@
 {{#include ./banners/hacktricks-training.md}}
 
-# Basic Payloads
+# Payloads Básicos
 
-- **Simple List:** Just a list containing an entry in each line
-- **Runtime File:** A list read in runtime (not loaded in memory). For supporting big lists.
-- **Case Modification:** Apply some changes to a list of strings(No change, to lower, to UPPER, to Proper name - First capitalized and the rest to lower-, to Proper Name -First capitalized an the rest remains the same-.
-- **Numbers:** Generate numbers from X to Y using Z step or randomly.
-- **Brute Forcer:** Character set, min & max length.
+- **Lista Simples:** Apenas uma lista contendo uma entrada em cada linha
+- **Arquivo em Tempo de Execução:** Uma lista lida em tempo de execução (não carregada na memória). Para suportar listas grandes.
+- **Modificação de Caso:** Aplique algumas mudanças a uma lista de strings (Sem mudança, para minúsculas, para MAIÚSCULAS, para Nome Próprio - Primeiro capitalizado e o resto em minúsculas-, para Nome Próprio - Primeiro capitalizado e o resto permanece o mesmo-).
+- **Números:** Gere números de X a Y usando Z passos ou aleatoriamente.
+- **Força Bruta:** Conjunto de caracteres, comprimento mínimo e máximo.
 
-[https://github.com/0xC01DF00D/Collabfiltrator](https://github.com/0xC01DF00D/Collabfiltrator) : Payload to execute commands and grab the output via DNS requests to burpcollab.
+[https://github.com/0xC01DF00D/Collabfiltrator](https://github.com/0xC01DF00D/Collabfiltrator) : Payload para executar comandos e capturar a saída via solicitações DNS para burpcollab.
 
 {% embed url="https://medium.com/@ArtsSEC/burp-suite-exporter-462531be24e" %}
 
 [https://github.com/h3xstream/http-script-generator](https://github.com/h3xstream/http-script-generator)
 
 {{#include ./banners/hacktricks-training.md}}
-
