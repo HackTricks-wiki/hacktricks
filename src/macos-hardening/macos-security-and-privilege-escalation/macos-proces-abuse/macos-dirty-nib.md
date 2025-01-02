@@ -2,72 +2,72 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**For further detail about the technique check the original post from:** [**https://blog.xpnsec.com/dirtynib/**](https://blog.xpnsec.com/dirtynib/) and the following post by [**https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/**](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/)**.** Here is a summary:
+**この技術の詳細については、次の元の投稿を確認してください:** [**https://blog.xpnsec.com/dirtynib/**](https://blog.xpnsec.com/dirtynib/) および次の投稿 [**https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/**](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/)**.** ここに要約があります:
 
-### What are Nib files
+### Nibファイルとは
 
-Nib (short for NeXT Interface Builder) files, part of Apple's development ecosystem, are intended for defining **UI elements** and their interactions in applications. They encompass serialized objects such as windows and buttons, and are loaded at runtime. Despite their ongoing usage, Apple now advocates for Storyboards for more comprehensive UI flow visualization.
+Nib（NeXT Interface Builderの略）ファイルは、Appleの開発エコシステムの一部であり、アプリケーション内の**UI要素**とその相互作用を定義するために使用されます。これらはウィンドウやボタンなどのシリアライズされたオブジェクトを含み、ランタイムで読み込まれます。現在も使用されていますが、Appleはより包括的なUIフローの視覚化のためにStoryboardを推奨しています。
 
-The main Nib file is referenced in the value **`NSMainNibFile`** inside the `Info.plist` file of the application and is loaded by the function **`NSApplicationMain`** executed in the `main` function of the application.
+主要なNibファイルは、アプリケーションの`Info.plist`ファイル内の**`NSMainNibFile`**の値で参照され、アプリケーションの`main`関数で実行される**`NSApplicationMain`**関数によって読み込まれます。
 
-### Dirty Nib Injection Process
+### Dirty Nibインジェクションプロセス
 
-#### Creating and Setting Up a NIB File
+#### NIBファイルの作成と設定
 
-1. **Initial Setup**:
-   - Create a new NIB file using XCode.
-   - Add an Object to the interface, setting its class to `NSAppleScript`.
-   - Configure the initial `source` property via User Defined Runtime Attributes.
-2. **Code Execution Gadget**:
-   - The setup facilitates running AppleScript on demand.
-   - Integrate a button to activate the `Apple Script` object, specifically triggering the `executeAndReturnError:` selector.
-3. **Testing**:
+1. **初期設定**:
+- XCodeを使用して新しいNIBファイルを作成します。
+- インターフェースにオブジェクトを追加し、そのクラスを`NSAppleScript`に設定します。
+- ユーザー定義のランタイム属性を介して初期の`source`プロパティを設定します。
+2. **コード実行ガジェット**:
+- この設定により、必要に応じてAppleScriptを実行できます。
+- `Apple Script`オブジェクトをアクティブにするボタンを統合し、特に`executeAndReturnError:`セレクタをトリガーします。
+3. **テスト**:
 
-   - A simple Apple Script for testing purposes:
+- テスト用のシンプルなApple Script:
 
-     ```bash
-     set theDialogText to "PWND"
-     display dialog theDialogText
-     ```
+```bash
+set theDialogText to "PWND"
+display dialog theDialogText
+```
 
-   - Test by running in the XCode debugger and clicking the button.
+- XCodeデバッガーで実行し、ボタンをクリックしてテストします。
 
-#### Targeting an Application (Example: Pages)
+#### アプリケーションのターゲット（例：Pages）
 
-1. **Preparation**:
-   - Copy the target app (e.g., Pages) into a separate directory (e.g., `/tmp/`).
-   - Initiate the app to sidestep Gatekeeper issues and cache it.
-2. **Overwriting NIB File**:
-   - Replace an existing NIB file (e.g., About Panel NIB) with the crafted DirtyNIB file.
-3. **Execution**:
-   - Trigger the execution by interacting with the app (e.g., selecting the `About` menu item).
+1. **準備**:
+- ターゲットアプリ（例：Pages）を別のディレクトリ（例：`/tmp/`）にコピーします。
+- Gatekeeperの問題を回避し、アプリをキャッシュするために起動します。
+2. **NIBファイルの上書き**:
+- 既存のNIBファイル（例：About Panel NIB）を作成したDirtyNIBファイルで置き換えます。
+3. **実行**:
+- アプリと対話して実行をトリガーします（例：`About`メニュー項目を選択）。
 
-#### Proof of Concept: Accessing User Data
+#### 概念実証：ユーザーデータへのアクセス
 
-- Modify the AppleScript to access and extract user data, such as photos, without user consent.
+- AppleScriptを修正して、ユーザーの同意なしに写真などのユーザーデータにアクセスし、抽出します。
 
-### Code Sample: Malicious .xib File
+### コードサンプル：悪意のある .xib ファイル
 
-- Access and review a [**sample of a malicious .xib file**](https://gist.github.com/xpn/16bfbe5a3f64fedfcc1822d0562636b4) that demonstrates executing arbitrary code.
+- 任意のコードを実行することを示す[**悪意のある .xib ファイルのサンプル**](https://gist.github.com/xpn/16bfbe5a3f64fedfcc1822d0562636b4)にアクセスして確認します。
 
-### Other Example
+### その他の例
 
-In the post [https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/) you can find tutorial on how to create a dirty nib.&#x20;
+投稿[https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/)では、ダーティニブの作成方法に関するチュートリアルを見つけることができます。&#x20;
 
-### Addressing Launch Constraints
+### 起動制約への対処
 
-- Launch Constraints hinder app execution from unexpected locations (e.g., `/tmp`).
-- It's possible to identify apps not protected by Launch Constraints and target them for NIB file injection.
+- 起動制約は、予期しない場所（例：`/tmp`）からのアプリの実行を妨げます。
+- 起動制約によって保護されていないアプリを特定し、NIBファイルのインジェクションをターゲットにすることが可能です。
 
-### Additional macOS Protections
+### 追加のmacOS保護
 
-From macOS Sonoma onwards, modifications inside App bundles are restricted. However, earlier methods involved:
+macOS Sonoma以降、アプリバンドル内の変更が制限されています。ただし、以前の方法には以下が含まれていました：
 
-1. Copying the app to a different location (e.g., `/tmp/`).
-2. Renaming directories within the app bundle to bypass initial protections.
-3. After running the app to register with Gatekeeper, modifying the app bundle (e.g., replacing MainMenu.nib with Dirty.nib).
-4. Renaming directories back and rerunning the app to execute the injected NIB file.
+1. アプリを別の場所（例：`/tmp/`）にコピーします。
+2. 初期の保護を回避するためにアプリバンドル内のディレクトリの名前を変更します。
+3. Gatekeeperに登録するためにアプリを実行した後、アプリバンドルを変更します（例：MainMenu.nibをDirty.nibに置き換えます）。
+4. ディレクトリの名前を元に戻し、アプリを再実行してインジェクトされたNIBファイルを実行します。
 
-**Note**: Recent macOS updates have mitigated this exploit by preventing file modifications within app bundles post Gatekeeper caching, rendering the exploit ineffective.
+**注意**: 最近のmacOSの更新により、Gatekeeperキャッシュ後にアプリバンドル内のファイル変更が防止され、この脆弱性が無効化されました。
 
 {{#include ../../../banners/hacktricks-training.md}}

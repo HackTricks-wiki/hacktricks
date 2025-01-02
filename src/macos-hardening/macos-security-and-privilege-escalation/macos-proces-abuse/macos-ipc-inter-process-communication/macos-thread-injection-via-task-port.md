@@ -9,168 +9,152 @@
 
 ## 1. Thread Hijacking
 
-Initially, the **`task_threads()`** function is invoked on the task port to obtain a thread list from the remote task. A thread is selected for hijacking. This approach diverges from conventional code injection methods as creating a new remote thread is prohibited due to the new mitigation blocking `thread_create_running()`.
+最初に、**`task_threads()`** 関数がタスクポートで呼び出され、リモートタスクからスレッドリストを取得します。ハイジャックするためのスレッドが選択されます。このアプローチは、`thread_create_running()`によって新しいリモートスレッドの作成が禁止されているため、従来のコードインジェクション手法とは異なります。
 
-To control the thread, **`thread_suspend()`** is called, halting its execution.
+スレッドを制御するために、**`thread_suspend()`** が呼び出され、その実行が停止します。
 
-The only operations permitted on the remote thread involve **stopping** and **starting** it, **retrieving** and **modifying** its register values. Remote function calls are initiated by setting registers `x0` to `x7` to the **arguments**, configuring **`pc`** to target the desired function, and activating the thread. Ensuring the thread does not crash after the return necessitates detection of the return.
+リモートスレッドで許可される唯一の操作は、**停止**と**開始**、**レジスタ値の取得**と**変更**です。リモート関数呼び出しは、レジスタ `x0` から `x7` に**引数**を設定し、**`pc`** をターゲット関数に設定し、スレッドをアクティブにすることで開始されます。戻り値の後にスレッドがクラッシュしないようにするためには、戻りを検出する必要があります。
 
-One strategy involves **registering an exception handler** for the remote thread using `thread_set_exception_ports()`, setting the `lr` register to an invalid address before the function call. This triggers an exception post-function execution, sending a message to the exception port, enabling state inspection of the thread to recover the return value. Alternatively, as adopted from Ian Beer’s triple_fetch exploit, `lr` is set to loop infinitely. The thread's registers are then continuously monitored until **`pc` points to that instruction**.
+1つの戦略は、`thread_set_exception_ports()`を使用してリモートスレッドのために**例外ハンドラを登録する**ことです。関数呼び出しの前に `lr` レジスタを無効なアドレスに設定します。これにより、関数実行後に例外がトリガーされ、例外ポートにメッセージが送信され、スレッドの状態を検査して戻り値を回復できるようになります。あるいは、Ian Beerのトリプルフェッチエクスプロイトから採用された方法として、`lr` を無限ループに設定します。スレッドのレジスタは、**`pc` がその命令を指すまで**継続的に監視されます。
 
 ## 2. Mach ports for communication
 
-The subsequent phase involves establishing Mach ports to facilitate communication with the remote thread. These ports are instrumental in transferring arbitrary send and receive rights between tasks.
+次の段階では、リモートスレッドとの通信を促進するためにMachポートを確立します。これらのポートは、タスク間で任意の送信および受信権を転送するのに重要です。
 
-For bidirectional communication, two Mach receive rights are created: one in the local and the other in the remote task. Subsequently, a send right for each port is transferred to the counterpart task, enabling message exchange.
+双方向通信のために、ローカルタスクとリモートタスクの2つのMach受信権が作成されます。その後、各ポートの送信権が対となるタスクに転送され、メッセージの交換が可能になります。
 
-Focusing on the local port, the receive right is held by the local task. The port is created with `mach_port_allocate()`. The challenge lies in transferring a send right to this port into the remote task.
+ローカルポートに焦点を当てると、受信権はローカルタスクによって保持されます。ポートは `mach_port_allocate()` で作成されます。このポートに送信権をリモートタスクに転送することが課題となります。
 
-A strategy involves leveraging `thread_set_special_port()` to place a send right to the local port in the remote thread’s `THREAD_KERNEL_PORT`. Then, the remote thread is instructed to call `mach_thread_self()` to retrieve the send right.
+戦略の1つは、`thread_set_special_port()`を利用して、リモートスレッドの `THREAD_KERNEL_PORT` にローカルポートへの送信権を配置することです。その後、リモートスレッドに `mach_thread_self()` を呼び出して送信権を取得させます。
 
-For the remote port, the process is essentially reversed. The remote thread is directed to generate a Mach port via `mach_reply_port()` (as `mach_port_allocate()` is unsuitable due to its return mechanism). Upon port creation, `mach_port_insert_right()` is invoked in the remote thread to establish a send right. This right is then stashed in the kernel using `thread_set_special_port()`. Back in the local task, `thread_get_special_port()` is used on the remote thread to acquire a send right to the newly allocated Mach port in the remote task.
+リモートポートについては、プロセスが基本的に逆になります。リモートスレッドに `mach_reply_port()` を介してMachポートを生成させます（`mach_port_allocate()`はその返却メカニズムのため不適切です）。ポートが作成されると、`mach_port_insert_right()` がリモートスレッドで呼び出され、送信権が確立されます。この権利はその後、`thread_set_special_port()`を使用してカーネルに保存されます。ローカルタスクに戻ると、`thread_get_special_port()`をリモートスレッドで使用して、リモートタスクに新しく割り当てられたMachポートへの送信権を取得します。
 
-Completion of these steps results in the establishment of Mach ports, laying the groundwork for bidirectional communication.
+これらのステップを完了すると、Machポートが確立され、双方向通信の基盤が整います。
 
 ## 3. Basic Memory Read/Write Primitives
 
-In this section, the focus is on utilizing the execute primitive to establish basic memory read and write primitives. These initial steps are crucial for gaining more control over the remote process, though the primitives at this stage won't serve many purposes. Soon, they will be upgraded to more advanced versions.
+このセクションでは、基本的なメモリの読み書きプリミティブを確立するために実行プリミティブを利用することに焦点を当てます。これらの初期ステップは、リモートプロセスに対するより多くの制御を得るために重要ですが、この段階でのプリミティブはあまり役に立ちません。すぐに、より高度なバージョンにアップグレードされます。
 
 ### Memory Reading and Writing Using Execute Primitive
 
-The goal is to perform memory reading and writing using specific functions. For reading memory, functions resembling the following structure are used:
-
+目的は、特定の関数を使用してメモリの読み書きを行うことです。メモリを読み取るためには、以下の構造に似た関数が使用されます:
 ```c
 uint64_t read_func(uint64_t *address) {
-    return *address;
+return *address;
 }
 ```
-
-And for writing to memory, functions similar to this structure are used:
-
+メモリへの書き込みには、この構造に似た関数が使用されます:
 ```c
 void write_func(uint64_t *address, uint64_t value) {
-    *address = value;
+*address = value;
 }
 ```
-
-These functions correspond to the given assembly instructions:
-
+これらの関数は、指定されたアセンブリ命令に対応しています：
 ```
 _read_func:
-    ldr x0, [x0]
-    ret
+ldr x0, [x0]
+ret
 _write_func:
-    str x1, [x0]
-    ret
+str x1, [x0]
+ret
 ```
+### 適切な関数の特定
 
-### Identifying Suitable Functions
+一般的なライブラリのスキャンにより、これらの操作に適した候補が明らかになりました：
 
-A scan of common libraries revealed appropriate candidates for these operations:
-
-1. **Reading Memory:**
-   The `property_getName()` function from the [Objective-C runtime library](https://opensource.apple.com/source/objc4/objc4-723/runtime/objc-runtime-new.mm.auto.html) is identified as a suitable function for reading memory. The function is outlined below:
-
+1. **メモリの読み取り:**
+`property_getName()` 関数は、[Objective-C ランタイムライブラリ](https://opensource.apple.com/source/objc4/objc4-723/runtime/objc-runtime-new.mm.auto.html)からメモリを読み取るための適切な関数として特定されました。関数の概要は以下の通りです：
 ```c
 const char *property_getName(objc_property_t prop) {
-      return prop->name;
+return prop->name;
 }
 ```
+この関数は、`objc_property_t`の最初のフィールドを返すことによって、実質的に`read_func`のように機能します。
 
-This function effectively acts like the `read_func` by returning the first field of `objc_property_t`.
-
-2. **Writing Memory:**
-   Finding a pre-built function for writing memory is more challenging. However, the `_xpc_int64_set_value()` function from libxpc is a suitable candidate with the following disassembly:
-
+2. **メモリの書き込み:**
+メモリを書き込むための事前構築された関数を見つけることは、より困難です。しかし、libxpcの`_xpc_int64_set_value()`関数は、以下の逆アセンブルを持つ適切な候補です:
 ```c
 __xpc_int64_set_value:
-    str x1, [x0, #0x18]
-    ret
+str x1, [x0, #0x18]
+ret
 ```
-
-To perform a 64-bit write at a specific address, the remote call is structured as:
-
+特定のアドレスに64ビットの書き込みを行うには、リモートコールは次のように構成されます:
 ```c
 _xpc_int64_set_value(address - 0x18, value)
 ```
+これらのプリミティブが確立されると、共有メモリを作成するためのステージが整い、リモートプロセスの制御において重要な進展が見られます。
 
-With these primitives established, the stage is set for creating shared memory, marking a significant progression in controlling the remote process.
+## 4. 共有メモリの設定
 
-## 4. Shared Memory Setup
+目的は、ローカルタスクとリモートタスク間で共有メモリを確立し、データ転送を簡素化し、複数の引数を持つ関数の呼び出しを容易にすることです。このアプローチは、`libxpc`とその`OS_xpc_shmem`オブジェクトタイプを活用し、Machメモリエントリに基づいています。
 
-The objective is to establish shared memory between local and remote tasks, simplifying data transfer and facilitating the calling of functions with multiple arguments. The approach involves leveraging `libxpc` and its `OS_xpc_shmem` object type, which is built upon Mach memory entries.
+### プロセスの概要：
 
-### Process Overview:
+1. **メモリの割り当て**：
 
-1. **Memory Allocation**:
+- `mach_vm_allocate()`を使用して共有用のメモリを割り当てます。
+- `xpc_shmem_create()`を使用して、割り当てたメモリ領域のための`OS_xpc_shmem`オブジェクトを作成します。この関数は、Machメモリエントリの作成を管理し、`OS_xpc_shmem`オブジェクトのオフセット`0x18`にMach送信権を格納します。
 
-   - Allocate the memory for sharing using `mach_vm_allocate()`.
-   - Use `xpc_shmem_create()` to create an `OS_xpc_shmem` object for the allocated memory region. This function will manage the creation of the Mach memory entry and store the Mach send right at offset `0x18` of the `OS_xpc_shmem` object.
+2. **リモートプロセスでの共有メモリの作成**：
 
-2. **Creating Shared Memory in Remote Process**:
+- リモートプロセスで`malloc()`へのリモート呼び出しを使用して`OS_xpc_shmem`オブジェクトのためのメモリを割り当てます。
+- ローカルの`OS_xpc_shmem`オブジェクトの内容をリモートプロセスにコピーします。ただし、この初期コピーはオフセット`0x18`で不正なMachメモリエントリ名を持っています。
 
-   - Allocate memory for the `OS_xpc_shmem` object in the remote process with a remote call to `malloc()`.
-   - Copy the contents of the local `OS_xpc_shmem` object to the remote process. However, this initial copy will have incorrect Mach memory entry names at offset `0x18`.
+3. **Machメモリエントリの修正**：
 
-3. **Correcting the Mach Memory Entry**:
+- `thread_set_special_port()`メソッドを利用して、リモートタスクにMachメモリエントリの送信権を挿入します。
+- リモートメモリエントリの名前でオフセット`0x18`のMachメモリエントリフィールドを上書きして修正します。
 
-   - Utilize the `thread_set_special_port()` method to insert a send right for the Mach memory entry into the remote task.
-   - Correct the Mach memory entry field at offset `0x18` by overwriting it with the remote memory entry's name.
+4. **共有メモリ設定の最終化**：
+- リモートの`OS_xpc_shmem`オブジェクトを検証します。
+- `xpc_shmem_remote()`へのリモート呼び出しで共有メモリマッピングを確立します。
 
-4. **Finalizing Shared Memory Setup**:
-   - Validate the remote `OS_xpc_shmem` object.
-   - Establish the shared memory mapping with a remote call to `xpc_shmem_remote()`.
+これらの手順に従うことで、ローカルタスクとリモートタスク間の共有メモリが効率的に設定され、データ転送が簡単になり、複数の引数を必要とする関数の実行が可能になります。
 
-By following these steps, shared memory between the local and remote tasks will be efficiently set up, allowing for straightforward data transfers and the execution of functions requiring multiple arguments.
+## 追加のコードスニペット
 
-## Additional Code Snippets
-
-For memory allocation and shared memory object creation:
-
+メモリの割り当てと共有メモリオブジェクトの作成について：
 ```c
 mach_vm_allocate();
 xpc_shmem_create();
 ```
-
-For creating and correcting the shared memory object in the remote process:
-
+リモートプロセス内の共有メモリオブジェクトを作成および修正するには：
 ```c
 malloc(); // for allocating memory remotely
 thread_set_special_port(); // for inserting send right
 ```
+Machポートとメモリエントリ名の詳細を正しく処理して、共有メモリのセットアップが適切に機能するようにしてください。
 
-Remember to handle the details of Mach ports and memory entry names correctly to ensure that the shared memory setup functions properly.
+## 5. 完全な制御の達成
 
-## 5. Achieving Full Control
+共有メモリを確立し、任意の実行能力を獲得することに成功すると、実質的にターゲットプロセスに対する完全な制御を得たことになります。この制御を可能にする主要な機能は次のとおりです。
 
-Upon successfully establishing shared memory and gaining arbitrary execution capabilities, we have essentially gained full control over the target process. The key functionalities enabling this control are:
+1. **任意のメモリ操作**:
 
-1. **Arbitrary Memory Operations**:
+- `memcpy()`を呼び出して共有領域からデータをコピーすることで、任意のメモリ読み取りを実行します。
+- `memcpy()`を使用して共有領域にデータを転送することで、任意のメモリ書き込みを実行します。
 
-   - Perform arbitrary memory reads by invoking `memcpy()` to copy data from the shared region.
-   - Execute arbitrary memory writes by using `memcpy()` to transfer data to the shared region.
+2. **複数の引数を持つ関数呼び出しの処理**:
 
-2. **Handling Function Calls with Multiple Arguments**:
+- 8つ以上の引数を必要とする関数の場合、呼び出し規約に従って追加の引数をスタックに配置します。
 
-   - For functions requiring more than 8 arguments, arrange the additional arguments on the stack in compliance with the calling convention.
+3. **Machポートの転送**:
 
-3. **Mach Port Transfer**:
+- 以前に確立されたポートを介してMachメッセージを通じてタスク間でMachポートを転送します。
 
-   - Transfer Mach ports between tasks through Mach messages via previously established ports.
+4. **ファイルディスクリプタの転送**:
+- Ian Beerが`triple_fetch`で強調した技術を使用して、ファイルポートを介してプロセス間でファイルディスクリプタを転送します。
 
-4. **File Descriptor Transfer**:
-   - Transfer file descriptors between processes using fileports, a technique highlighted by Ian Beer in `triple_fetch`.
+この包括的な制御は、[threadexec](https://github.com/bazad/threadexec)ライブラリにカプセル化されており、被害者プロセスとのインタラクションのための詳細な実装とユーザーフレンドリーなAPIを提供します。
 
-This comprehensive control is encapsulated within the [threadexec](https://github.com/bazad/threadexec) library, providing a detailed implementation and a user-friendly API for interaction with the victim process.
+## 重要な考慮事項:
 
-## Important Considerations:
+- システムの安定性とデータの整合性を維持するために、メモリの読み取り/書き込み操作に`memcpy()`を適切に使用してください。
+- Machポートやファイルディスクリプタを転送する際は、適切なプロトコルに従い、リソースを責任を持って処理して、リークや意図しないアクセスを防いでください。
 
-- Ensure proper use of `memcpy()` for memory read/write operations to maintain system stability and data integrity.
-- When transferring Mach ports or file descriptors, follow proper protocols and handle resources responsibly to prevent leaks or unintended access.
+これらのガイドラインに従い、`threadexec`ライブラリを利用することで、プロセスを効率的に管理し、詳細なレベルでインタラクションを行い、ターゲットプロセスに対する完全な制御を達成できます。
 
-By adhering to these guidelines and utilizing the `threadexec` library, one can efficiently manage and interact with processes at a granular level, achieving full control over the target process.
-
-## References
+## 参考文献
 
 - [https://bazad.github.io/2018/10/bypassing-platform-binary-task-threads/](https://bazad.github.io/2018/10/bypassing-platform-binary-task-threads/)
 

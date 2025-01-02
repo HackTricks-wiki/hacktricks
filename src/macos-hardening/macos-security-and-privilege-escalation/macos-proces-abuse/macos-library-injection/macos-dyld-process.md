@@ -2,78 +2,73 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## 基本情報
 
-The real **entrypoint** of a Mach-o binary is the dynamic linked, defined in `LC_LOAD_DYLINKER` usually is `/usr/lib/dyld`.
+Mach-o バイナリの実際の **entrypoint** は動的リンクされており、`LC_LOAD_DYLINKER` で定義されており、通常は `/usr/lib/dyld` です。
 
-This linker will need to locate all the executables libraries, map them in memory and link all the non-lazy libraries. Only after this process, the entry-point of the binary will be executed.
+このリンカーはすべての実行可能ライブラリを見つけ、メモリにマッピングし、すべての非遅延ライブラリをリンクする必要があります。このプロセスの後にのみ、バイナリのエントリポイントが実行されます。
 
-Of course, **`dyld`** doesn't have any dependencies (it uses syscalls and libSystem excerpts).
+もちろん、**`dyld`** には依存関係はありません（syscalls と libSystem の抜粋を使用します）。
 
 > [!CAUTION]
-> If this linker contains any vulnerability, as it's being executed before executing any binary (even highly privileged ones), it would be possible to **escalate privileges**.
+> このリンカーに脆弱性が含まれている場合、バイナリ（特権の高いものも含む）を実行する前に実行されるため、**特権昇格**が可能になります。
 
-### Flow
+### フロー
 
-Dyld will be loaded by **`dyldboostrap::start`**, which will also load things such as the **stack canary**. This is because this function will receive in its **`apple`** argument vector this and other **sensitive** **values**.
+Dyld は **`dyldboostrap::start`** によってロードされ、**スタックカナリア** などのものもロードされます。これは、この関数が **`apple`** 引数ベクターにこの他の **機密** **値** を受け取るためです。
 
-**`dyls::_main()`** is the entry point of dyld and it's first task is to run `configureProcessRestrictions()`, which usually restricts **`DYLD_*`** environment variables explained in:
+**`dyls::_main()`** は dyld のエントリポイントであり、最初のタスクは `configureProcessRestrictions()` を実行することです。これは通常、以下で説明されている **`DYLD_*`** 環境変数を制限します。
 
 {{#ref}}
 ./
 {{#endref}}
 
-Then, it maps the dyld shared cache which prelinks all the important system libraries and then it maps the libraries the binary depends on and continues recursively until all the needed libraries are loaded. Therefore:
+次に、dyld 共有キャッシュをマッピングし、すべての重要なシステムライブラリを事前リンクし、次にバイナリが依存するライブラリをマッピングし、すべての必要なライブラリがロードされるまで再帰的に続けます。したがって：
 
-1. it start loading inserted libraries with `DYLD_INSERT_LIBRARIES` (if allowed)
-2. Then the shared cached ones
-3. Then the imported ones
-   1. &#x20;Then continue importing libraries recursively
+1. `DYLD_INSERT_LIBRARIES` で挿入されたライブラリのロードを開始します（許可されている場合）
+2. 次に、共有キャッシュされたもの
+3. 次に、インポートされたもの
+1. &#x20;次に、ライブラリを再帰的にインポートし続けます
 
-Once all are loaded the **initialisers** of these libraries are run. These are coded using **`__attribute__((constructor))`** defined in the `LC_ROUTINES[_64]` (now deprecated) or by pointer in a section flagged with `S_MOD_INIT_FUNC_POINTERS` (usually: **`__DATA.__MOD_INIT_FUNC`**).
+すべてがロードされると、これらのライブラリの **初期化子** が実行されます。これらは、`LC_ROUTINES[_64]`（現在は非推奨）で定義された **`__attribute__((constructor))`** を使用してコーディングされるか、`S_MOD_INIT_FUNC_POINTERS` フラグが付けられたセクション内のポインタによってコーディングされます（通常は **`__DATA.__MOD_INIT_FUNC`**）。
 
-Terminators are coded with **`__attribute__((destructor))`** and are located in a section flagged with `S_MOD_TERM_FUNC_POINTERS` (**`__DATA.__mod_term_func`**).
+終了子は **`__attribute__((destructor))`** でコーディングされ、`S_MOD_TERM_FUNC_POINTERS` フラグが付けられたセクションにあります（**`__DATA.__mod_term_func`**）。
 
-### Stubs
+### スタブ
 
-All binaries sin macOS are dynamically linked. Therefore, they contain some stubs sections that helps the binary to jump to the correct code in different machines and context. It's dyld when the binary is executed the brain that needs to resolve these addresses (at least the non-lazy ones).
+macOS のすべてのバイナリは動的にリンクされています。したがって、異なるマシンやコンテキストでバイナリが正しいコードにジャンプするのを助けるスタブセクションが含まれています。バイナリが実行されるとき、これらのアドレスを解決する必要があるのは dyld です（少なくとも非遅延のもの）。
 
-Som stub sections in the binary:
+バイナリ内のスタブセクション：
 
-- **`__TEXT.__[auth_]stubs`**: Pointers from `__DATA` sections
-- **`__TEXT.__stub_helper`**: Small code invoking dynamic linking with info on the function to call
-- **`__DATA.__[auth_]got`**: Global Offset Table (addresses to imported functions, when resolved, (bound during load time as it's marked with flag `S_NON_LAZY_SYMBOL_POINTERS`)
-- **`__DATA.__nl_symbol_ptr`**: Non-lazy symbol pointers (bound during load time as it's marked with flag `S_NON_LAZY_SYMBOL_POINTERS`)
-- **`__DATA.__la_symbol_ptr`**: Lazy symbols pointers (bound on first access)
+- **`__TEXT.__[auth_]stubs`**: `__DATA` セクションからのポインタ
+- **`__TEXT.__stub_helper`**: 呼び出す関数に関する情報を持つ動的リンクを呼び出す小さなコード
+- **`__DATA.__[auth_]got`**: グローバルオフセットテーブル（インポートされた関数へのアドレス、解決されたとき、（ロード時にバインドされるため、フラグ `S_NON_LAZY_SYMBOL_POINTERS` でマークされます）
+- **`__DATA.__nl_symbol_ptr`**: 非遅延シンボルポインタ（ロード時にバインドされるため、フラグ `S_NON_LAZY_SYMBOL_POINTERS` でマークされます）
+- **`__DATA.__la_symbol_ptr`**: 遅延シンボルポインタ（最初のアクセス時にバインドされます）
 
 > [!WARNING]
-> Note that the pointers with the prefix "auth\_" are using one in-process encryption key to protect it (PAC). Moreover, It's possible to use the arm64 instruction `BLRA[A/B]` to verify the pointer before following it. And the RETA\[A/B] can be used instead of a RET address.\
-> Actually, the code in **`__TEXT.__auth_stubs`** will use **`braa`** instead of **`bl`** to call the requested function to authenticate the pointer.
+> "auth\_" プレフィックスの付いたポインタは、保護のためにプロセス内暗号化キーを使用しています（PAC）。さらに、ポインタを追跡する前に検証するために arm64 命令 `BLRA[A/B]` を使用することが可能です。そして、RETA\[A/B] は RET アドレスの代わりに使用できます。\
+> 実際、**`__TEXT.__auth_stubs`** 内のコードは、ポインタを認証するために要求された関数を呼び出すために **`braa`** を使用します。
 >
-> Also note that current dyld versions load **everything as non-lazy**.
+> また、現在の dyld バージョンは **すべてを非遅延** としてロードします。
 
-### Finding lazy symbols
-
+### 遅延シンボルの検索
 ```c
 //gcc load.c -o load
 #include <stdio.h>
 int main (int argc, char **argv, char **envp, char **apple)
 {
-    printf("Hi\n");
+printf("Hi\n");
 }
 ```
-
-Interesting disassembly part:
-
+興味深い逆アセンブル部分:
 ```armasm
 ; objdump -d ./load
 100003f7c: 90000000    	adrp	x0, 0x100003000 <_main+0x1c>
 100003f80: 913e9000    	add	x0, x0, #4004
 100003f84: 94000005    	bl	0x100003f98 <_printf+0x100003f98>
 ```
-
-It's possible to see that the jump to call printf is going to **`__TEXT.__stubs`**:
-
+`printf`を呼び出すためのジャンプが**`__TEXT.__stubs`**に向かっていることがわかります。
 ```bash
 objdump --section-headers ./load
 
@@ -81,15 +76,13 @@ objdump --section-headers ./load
 
 Sections:
 Idx Name          Size     VMA              Type
-  0 __text        00000038 0000000100003f60 TEXT
-  1 __stubs       0000000c 0000000100003f98 TEXT
-  2 __cstring     00000004 0000000100003fa4 DATA
-  3 __unwind_info 00000058 0000000100003fa8 DATA
-  4 __got         00000008 0000000100004000 DATA
+0 __text        00000038 0000000100003f60 TEXT
+1 __stubs       0000000c 0000000100003f98 TEXT
+2 __cstring     00000004 0000000100003fa4 DATA
+3 __unwind_info 00000058 0000000100003fa8 DATA
+4 __got         00000008 0000000100004000 DATA
 ```
-
-In the disassemble of the **`__stubs`** section:
-
+**`__stubs`** セクションの逆アセンブルで:
 ```bash
 objdump -d --section=__stubs ./load
 
@@ -102,35 +95,31 @@ Disassembly of section __TEXT,__stubs:
 100003f9c: f9400210    	ldr	x16, [x16]
 100003fa0: d61f0200    	br	x16
 ```
+あなたは**GOTのアドレスにジャンプしている**ことがわかります。この場合、非遅延で解決され、printf関数のアドレスが含まれます。
 
-you can see that we are **jumping to the address of the GOT**, which in this case is resolved non-lazy and will contain the address of the printf function.
-
-In other situations instead of directly jumping to the GOT, it could jump to **`__DATA.__la_symbol_ptr`** which will load a value that represents the function that it's trying to load, then jump to **`__TEXT.__stub_helper`** which jumps the **`__DATA.__nl_symbol_ptr`** which contains the address of **`dyld_stub_binder`** which takes as parameters the number of the function and an address.\
-This last function, after finding the address of the searched function writes it in the corresponding location in **`__TEXT.__stub_helper`** to avoid doing lookups in the future.
+他の状況では、直接GOTにジャンプする代わりに、**`__DATA.__la_symbol_ptr`**にジャンプすることがあり、これは読み込もうとしている関数を表す値をロードし、その後**`__TEXT.__stub_helper`**にジャンプします。これが**`__DATA.__nl_symbol_ptr`**にジャンプし、**`dyld_stub_binder`**のアドレスを含みます。この関数は、関数の番号とアドレスをパラメータとして受け取ります。\
+この最後の関数は、検索された関数のアドレスを見つけた後、それを**`__TEXT.__stub_helper`**の対応する場所に書き込み、将来のルックアップを避けます。
 
 > [!TIP]
-> However notice taht current dyld versions load everything as non-lazy.
+> ただし、現在のdyldバージョンはすべてを非遅延でロードすることに注意してください。
 
-#### Dyld opcodes
+#### Dyldオペコード
 
-Finally, **`dyld_stub_binder`** needs to find the indicated function and write it in the proper address to not search for it again. To do so it uses opcodes (a finite state machine) within dyld.
+最後に、**`dyld_stub_binder`**は指定された関数を見つけて、再度検索しないように適切なアドレスに書き込む必要があります。そのために、dyld内でオペコード（有限状態機械）を使用します。
 
-## apple\[] argument vector
+## apple\[] 引数ベクター
 
-In macOS the main function receives actually 4 arguments instead of 3. The fourth is called apple and each entry is in the form `key=value`. For example:
-
+macOSでは、main関数は実際には3つの引数の代わりに4つの引数を受け取ります。4つ目はappleと呼ばれ、各エントリは`key=value`の形式です。例えば：
 ```c
 // gcc apple.c -o apple
 #include <stdio.h>
 int main (int argc, char **argv, char **envp, char **apple)
 {
-    for (int i=0; apple[i]; i++)
-        printf("%d: %s\n", i, apple[i])
+for (int i=0; apple[i]; i++)
+printf("%d: %s\n", i, apple[i])
 }
 ```
-
-Result:
-
+結果:
 ```
 0: executable_path=./a
 1:
@@ -145,16 +134,15 @@ Result:
 10: arm64e_abi=os
 11: th_port=
 ```
-
 > [!TIP]
-> By the time these values reaches the main function, sensitive information has already been removed from them or it would have been a data leak.
+> これらの値がメイン関数に到達する頃には、機密情報はすでに削除されているか、データ漏洩が発生しているでしょう。
 
-it's possible to see all these interesting values debugging before getting into main with:
+メインに入る前にデバッグしてこれらの興味深い値をすべて見ることができます：
 
 <pre><code>lldb ./apple
 
 <strong>(lldb) target create "./a"
-</strong>Current executable set to '/tmp/a' (arm64).
+</strong>現在の実行可能ファイルは '/tmp/a' (arm64) に設定されています。
 (lldb) process launch -s
 [..]
 
@@ -192,18 +180,17 @@ it's possible to see all these interesting values debugging before getting into 
 
 ## dyld_all_image_infos
 
-This is a structure exported by dyld with information about the dyld state which can be found in the [**source code**](https://opensource.apple.com/source/dyld/dyld-852.2/include/mach-o/dyld_images.h.auto.html) with information like the version, pointer to dyld_image_info array, to dyld_image_notifier, if proc is detached from shared cache, if libSystem initializer was called, pointer to dyls's own Mach header, pointer to dyld version string...
+これは、dyldの状態に関する情報を持つ構造体で、[**ソースコード**](https://opensource.apple.com/source/dyld/dyld-852.2/include/mach-o/dyld_images.h.auto.html)で見つけることができ、バージョン、dyld_image_info配列へのポインタ、dyld_image_notifier、プロセスが共有キャッシュから切り離されているかどうか、libSystem初期化子が呼び出されたかどうか、dyls自身のMachヘッダーへのポインタ、dyldバージョン文字列へのポインタなどの情報が含まれています...
 
 ## dyld env variables
 
 ### debug dyld
 
-Interesting env variables that helps to understand what is dyld doing:
+dyldが何をしているのかを理解するのに役立つ興味深い環境変数：
 
 - **DYLD_PRINT_LIBRARIES**
 
-Check each library that is loaded:
-
+読み込まれた各ライブラリを確認します：
 ```
 DYLD_PRINT_LIBRARIES=1 ./apple
 dyld[19948]: <9F848759-9AB8-3BD2-96A1-C069DC1FFD43> /private/tmp/a
@@ -219,11 +206,9 @@ dyld[19948]: <F7CE9486-FFF5-3CB8-B26F-75811EF4283A> /usr/lib/system/libkeymgr.dy
 dyld[19948]: <1A7038EC-EE49-35AE-8A3C-C311083795FB> /usr/lib/system/libmacho.dylib
 [...]
 ```
-
 - **DYLD_PRINT_SEGMENTS**
 
-Check how is each library loaded:
-
+各ライブラリがどのように読み込まれているかを確認します:
 ```
 DYLD_PRINT_SEGMENTS=1 ./apple
 dyld[21147]: re-using existing shared cache (/System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/dyld_shared_cache_arm64e):
@@ -258,60 +243,52 @@ dyld[21147]:   __AUTH_CONST (rw.) 0x0001DDE014D0->0x0001DDE015A8
 dyld[21147]:     __LINKEDIT (r..) 0x000239574000->0x000270BE4000
 [...]
 ```
-
 - **DYLD_PRINT_INITIALIZERS**
 
-Print when each library initializer is running:
-
+各ライブラリの初期化子が実行されるときに印刷します:
 ```
 DYLD_PRINT_INITIALIZERS=1 ./apple
 dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
 [...]
 ```
+### その他
 
-### Others
-
-- `DYLD_BIND_AT_LAUNCH`: Lazy bindings are resolved with non lazy ones
-- `DYLD_DISABLE_PREFETCH`: DIsable pre-fetching of \_\_DATA and \_\_LINKEDIT content
-- `DYLD_FORCE_FLAT_NAMESPACE`: Single-level bindings
-- `DYLD_[FRAMEWORK/LIBRARY]_PATH | DYLD_FALLBACK_[FRAMEWORK/LIBRARY]_PATH | DYLD_VERSIONED_[FRAMEWORK/LIBRARY]_PATH`: Resolution paths
-- `DYLD_INSERT_LIBRARIES`: Load an specifc library
-- `DYLD_PRINT_TO_FILE`: Write dyld debug in a file
-- `DYLD_PRINT_APIS`: Print libdyld API calls
-- `DYLD_PRINT_APIS_APP`: Print libdyld API calls made by main
-- `DYLD_PRINT_BINDINGS`: Print symbols when bound
-- `DYLD_WEAK_BINDINGS`: Only print weak symbols when bound
-- `DYLD_PRINT_CODE_SIGNATURES`: Print code signature registration operations
-- `DYLD_PRINT_DOFS`: Print D-Trace object format sections as loaded
-- `DYLD_PRINT_ENV`: Print env seen by dyld
-- `DYLD_PRINT_INTERPOSTING`: Print interposting operations
-- `DYLD_PRINT_LIBRARIES`: Print librearies loaded
-- `DYLD_PRINT_OPTS`: Print load options
-- `DYLD_REBASING`: Print symbol rebasing operations
-- `DYLD_RPATHS`: Print expansions of @rpath
-- `DYLD_PRINT_SEGMENTS`: Print mappings of Mach-O segments
-- `DYLD_PRINT_STATISTICS`: Print timing statistics
-- `DYLD_PRINT_STATISTICS_DETAILS`: Print detailed timing statistics
-- `DYLD_PRINT_WARNINGS`: Print warning messages
-- `DYLD_SHARED_CACHE_DIR`: Path to use for shared library cache
+- `DYLD_BIND_AT_LAUNCH`: レイジーバインディングが非レイジーなものと解決される
+- `DYLD_DISABLE_PREFETCH`: \_\_DATA と \_\_LINKEDIT コンテンツのプリフェッチを無効にする
+- `DYLD_FORCE_FLAT_NAMESPACE`: 単一レベルのバインディング
+- `DYLD_[FRAMEWORK/LIBRARY]_PATH | DYLD_FALLBACK_[FRAMEWORK/LIBRARY]_PATH | DYLD_VERSIONED_[FRAMEWORK/LIBRARY]_PATH`: 解決パス
+- `DYLD_INSERT_LIBRARIES`: 特定のライブラリをロードする
+- `DYLD_PRINT_TO_FILE`: dyld デバッグをファイルに書き込む
+- `DYLD_PRINT_APIS`: libdyld API コールを印刷する
+- `DYLD_PRINT_APIS_APP`: main によって行われた libdyld API コールを印刷する
+- `DYLD_PRINT_BINDINGS`: バインドされたときにシンボルを印刷する
+- `DYLD_WEAK_BINDINGS`: バインドされたときに弱いシンボルのみを印刷する
+- `DYLD_PRINT_CODE_SIGNATURES`: コード署名登録操作を印刷する
+- `DYLD_PRINT_DOFS`: 読み込まれた D-Trace オブジェクト形式セクションを印刷する
+- `DYLD_PRINT_ENV`: dyld によって見られた環境を印刷する
+- `DYLD_PRINT_INTERPOSTING`: インターポスティング操作を印刷する
+- `DYLD_PRINT_LIBRARIES`: 読み込まれたライブラリを印刷する
+- `DYLD_PRINT_OPTS`: ロードオプションを印刷する
+- `DYLD_REBASING`: シンボルのリベース操作を印刷する
+- `DYLD_RPATHS`: @rpath の展開を印刷する
+- `DYLD_PRINT_SEGMENTS`: Mach-O セグメントのマッピングを印刷する
+- `DYLD_PRINT_STATISTICS`: タイミング統計を印刷する
+- `DYLD_PRINT_STATISTICS_DETAILS`: 詳細なタイミング統計を印刷する
+- `DYLD_PRINT_WARNINGS`: 警告メッセージを印刷する
+- `DYLD_SHARED_CACHE_DIR`: 共有ライブラリキャッシュに使用するパス
 - `DYLD_SHARED_REGION`: "use", "private", "avoid"
-- `DYLD_USE_CLOSURES`: Enable closures
+- `DYLD_USE_CLOSURES`: クロージャを有効にする
 
-It's possible to find more with someting like:
-
+何かを使ってさらに見つけることができます:
 ```bash
 strings /usr/lib/dyld | grep "^DYLD_" | sort -u
 ```
-
-Or downloading the dyld project from [https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz) and running inside the folder:
-
+または、[https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz) から dyld プロジェクトをダウンロードし、フォルダー内で実行します:
 ```bash
 find . -type f | xargs grep strcmp| grep key,\ \" | cut -d'"' -f2 | sort -u
 ```
-
-## References
+## 参考文献
 
 - [**\*OS Internals, Volume I: User Mode. By Jonathan Levin**](https://www.amazon.com/MacOS-iOS-Internals-User-Mode/dp/099105556X)
 
 {{#include ../../../../banners/hacktricks-training.md}}
-

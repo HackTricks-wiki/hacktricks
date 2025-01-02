@@ -4,50 +4,49 @@
 
 ### Word Sandbox bypass via Launch Agents
 
-The application uses a **custom Sandbox** using the entitlement **`com.apple.security.temporary-exception.sbpl`** and this custom sandbox allows to write files anywhere as long as the filename started with `~$`: `(require-any (require-all (vnode-type REGULAR-FILE) (regex #"(^|/)~$[^/]+$")))`
+アプリケーションは、権限 **`com.apple.security.temporary-exception.sbpl`** を使用した **カスタムサンドボックス** を使用しており、このカスタムサンドボックスでは、ファイル名が `~$` で始まる限り、どこにでもファイルを書き込むことができます: `(require-any (require-all (vnode-type REGULAR-FILE) (regex #"(^|/)~$[^/]+$")))`
 
-Therefore, escaping was as easy as **writing a `plist`** LaunchAgent in `~/Library/LaunchAgents/~$escape.plist`.
+したがって、エスケープは **`plist`** LaunchAgent を `~/Library/LaunchAgents/~$escape.plist` に書き込むことと同じくらい簡単でした。
 
-Check the [**original report here**](https://www.mdsec.co.uk/2018/08/escaping-the-sandbox-microsoft-office-on-macos/).
+[**元のレポートはこちら**](https://www.mdsec.co.uk/2018/08/escaping-the-sandbox-microsoft-office-on-macos/)を確認してください。
 
 ### Word Sandbox bypass via Login Items and zip
 
-Remember that from the first escape, Word can write arbitrary files whose name start with `~$` although after the patch of the previous vuln it wasn't possible to write in `/Library/Application Scripts` or in `/Library/LaunchAgents`.
+最初のエスケープから、Word は `~$` で始まる任意のファイルを書き込むことができることを覚えておいてください。ただし、前の脆弱性のパッチ後は `/Library/Application Scripts` や `/Library/LaunchAgents` に書き込むことはできませんでした。
 
-It was discovered that from within the sandbox it's possible to create a **Login Item** (apps that will be executed when the user logs in). However, these apps **won't execute unless** they are **notarized** and it's **not possible to add args** (so you cannot just run a reverse shell using **`bash`**).
+サンドボックス内から **Login Item**（ユーザーがログインしたときに実行されるアプリ）を作成できることが発見されました。ただし、これらのアプリは **ノータライズされていない限り** 実行されず、**引数を追加することはできません**（したがって、**`bash`** を使用してリバースシェルを実行することはできません）。
 
-From the previous Sandbox bypass, Microsoft disabled the option to write files in `~/Library/LaunchAgents`. However, it was discovered that if you put a **zip file as a Login Item** the `Archive Utility` will just **unzip** it on its current location. So, because by default the folder `LaunchAgents` from `~/Library` is not created, it was possible to **zip a plist in `LaunchAgents/~$escape.plist`** and **place** the zip file in **`~/Library`** so when decompress it will reach the persistence destination.
+前のサンドボックスバイパスから、Microsoft は `~/Library/LaunchAgents` にファイルを書き込むオプションを無効にしました。しかし、**Login Item** として **zip ファイル** を置くと、`Archive Utility` はその現在の場所に **解凍** します。したがって、デフォルトでは `~/Library` の `LaunchAgents` フォルダーが作成されないため、**`LaunchAgents/~$escape.plist`** に plist を **zip** し、**`~/Library`** に zip ファイルを **配置** することで、解凍時に永続性のある場所に到達することができました。
 
-Check the [**original report here**](https://objective-see.org/blog/blog_0x4B.html).
+[**元のレポートはこちら**](https://objective-see.org/blog/blog_0x4B.html)を確認してください。
 
 ### Word Sandbox bypass via Login Items and .zshenv
 
-(Remember that from the first escape, Word can write arbitrary files whose name start with `~$`).
+（最初のエスケープから、Word は `~$` で始まる任意のファイルを書き込むことができることを覚えておいてください）。
 
-However, the previous technique had a limitation, if the folder **`~/Library/LaunchAgents`** exists because some other software created it, it would fail. So a different Login Items chain was discovered for this.
+ただし、前の技術には制限があり、**`~/Library/LaunchAgents`** フォルダーが他のソフトウェアによって作成されている場合、失敗します。したがって、これに対する別の Login Items チェーンが発見されました。
 
-An attacker could create the the files **`.bash_profile`** and **`.zshenv`** with the payload to execute and then zip them and **write the zip in the victims** user folder: **`~/~$escape.zip`**.
+攻撃者は **`.bash_profile`** と **`.zshenv`** というファイルを作成し、実行するペイロードを含めてから、それらを zip し、**被害者の** ユーザーフォルダーに **`~/~$escape.zip`** として書き込みます。
 
-Then, add the zip file to the **Login Items** and then the **`Terminal`** app. When the user relogins, the zip file would be uncompressed in the users file, overwriting **`.bash_profile`** and **`.zshenv`** and therefore, the terminal will execute one of these files (depending if bash or zsh is used).
+次に、zip ファイルを **Login Items** に追加し、**`Terminal`** アプリを追加します。ユーザーが再ログインすると、zip ファイルはユーザーファイルに解凍され、**`.bash_profile`** と **`.zshenv`** を上書きし、そのためターミナルはこれらのファイルのいずれかを実行します（bash または zsh が使用されるかによって異なります）。
 
-Check the [**original report here**](https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c).
+[**元のレポートはこちら**](https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c)を確認してください。
 
 ### Word Sandbox Bypass with Open and env variables
 
-From sandboxed processes it's still possible to invoke other processes using the **`open`** utility. Moreover, these processes will run **within their own sandbox**.
+サンドボックス化されたプロセスからは、**`open`** ユーティリティを使用して他のプロセスを呼び出すことがまだ可能です。さらに、これらのプロセスは **自分自身のサンドボックス内** で実行されます。
 
-It was discovered that the open utility has the **`--env`** option to run an app with **specific env** variables. Therefore, it was possible to create the **`.zshenv` file** within a folder **inside** the **sandbox** and the use `open` with `--env` setting the **`HOME` variable** to that folder opening that `Terminal` app, which will execute the `.zshenv` file (for some reason it was also needed to set the variable `__OSINSTALL_ENVIROMENT`).
+open ユーティリティには、**特定の env** 変数でアプリを実行するための **`--env`** オプションがあることが発見されました。したがって、**サンドボックス内のフォルダー** に **`.zshenv` ファイル** を作成し、`--env` を使用して **`HOME` 変数** をそのフォルダーに設定し、その `Terminal` アプリを開くことができ、これにより `.zshenv` ファイルが実行されます（理由は不明ですが、`__OSINSTALL_ENVIROMENT` 変数を設定する必要もありました）。
 
-Check the [**original report here**](https://perception-point.io/blog/technical-analysis-of-cve-2021-30864/).
+[**元のレポートはこちら**](https://perception-point.io/blog/technical-analysis-of-cve-2021-30864/)を確認してください。
 
 ### Word Sandbox Bypass with Open and stdin
 
-The **`open`** utility also supported the **`--stdin`** param (and after the previous bypass it was no longer possible to use `--env`).
+**`open`** ユーティリティは、**`--stdin`** パラメータもサポートしていました（前のバイパス後は `--env` を使用することはできなくなりました）。
 
-The thing is that even if **`python`** was signed by Apple, it **won't execute** a script with the **`quarantine`** attribute. However, it was possible to pass it a script from stdin so it won't check if it was quarantined or not:&#x20;
+問題は、**`python`** が Apple によって署名されていても、**`quarantine`** 属性を持つスクリプトは **実行されない** ということです。しかし、stdin からスクリプトを渡すことができたため、クアランティンされているかどうかをチェックしませんでした:&#x20;
 
-1. Drop a **`~$exploit.py`** file with arbitrary Python commands.
-2. Run _open_ **`–stdin='~$exploit.py' -a Python`**, which runs the Python app with our dropped file serving as its standard input. Python happily runs our code, and since it’s a child process of _launchd_, it isn’t bound to Word’s sandbox rules.
+1. 任意の Python コマンドを含む **`~$exploit.py`** ファイルをドロップします。
+2. _open_ **`–stdin='~$exploit.py' -a Python`** を実行し、Python アプリを標準入力としてドロップしたファイルで実行します。Python は喜んで私たちのコードを実行し、これは _launchd_ の子プロセスであるため、Word のサンドボックスルールに束縛されません。
 
 {{#include ../../../../../banners/hacktricks-training.md}}
-

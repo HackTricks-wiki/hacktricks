@@ -2,33 +2,31 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## 基本情報
 
-Chromium-based browsers like Google Chrome, Microsoft Edge, Brave, and others. These browsers are built on the Chromium open-source project, which means they share a common base and, therefore, have similar functionalities and developer options.
+Chromiumベースのブラウザ、例えばGoogle Chrome、Microsoft Edge、Braveなどがあります。これらのブラウザはChromiumオープンソースプロジェクトに基づいて構築されているため、共通の基盤を共有し、したがって、類似の機能や開発者オプションを持っています。
 
-#### `--load-extension` Flag
+#### `--load-extension` フラグ
 
-The `--load-extension` flag is used when starting a Chromium-based browser from the command line or a script. This flag allows to **automatically load one or more extensions** into the browser upon startup.
+`--load-extension` フラグは、コマンドラインまたはスクリプトからChromiumベースのブラウザを起動する際に使用されます。このフラグは、**ブラウザの起動時に1つ以上の拡張機能を自動的に読み込む**ことを可能にします。
 
-#### `--use-fake-ui-for-media-stream` Flag
+#### `--use-fake-ui-for-media-stream` フラグ
 
-The `--use-fake-ui-for-media-stream` flag is another command-line option that can be used to start Chromium-based browsers. This flag is designed to **bypass the normal user prompts that ask for permission to access media streams from the camera and microphone**. When this flag is used, the browser automatically grants permission to any website or application that requests access to the camera or microphone.
+`--use-fake-ui-for-media-stream` フラグは、Chromiumベースのブラウザを起動するために使用できる別のコマンドラインオプションです。このフラグは、**カメラやマイクからのメディアストリームへのアクセス許可を求める通常のユーザープロンプトをバイパスする**ように設計されています。このフラグが使用されると、ブラウザはカメラやマイクへのアクセスを要求する任意のウェブサイトやアプリケーションに自動的に許可を与えます。
 
-### Tools
+### ツール
 
 - [https://github.com/breakpointHQ/snoop](https://github.com/breakpointHQ/snoop)
 - [https://github.com/breakpointHQ/VOODOO](https://github.com/breakpointHQ/VOODOO)
 
-### Example
-
+### 例
 ```bash
 # Intercept traffic
 voodoo intercept -b chrome
 ```
+ツールリンクでさらに例を見つけてください
 
-Find more examples in the tools links
-
-## References
+## 参考文献
 
 - [https://twitter.com/RonMasas/status/1758106347222995007](https://twitter.com/RonMasas/status/1758106347222995007)
 

@@ -1,60 +1,57 @@
-# macOS XPC Connecting Process Check
+# macOS XPC 接続プロセスチェック
 
 {{#include ../../../../../../banners/hacktricks-training.md}}
 
-## XPC Connecting Process Check
+## XPC 接続プロセスチェック
 
-When a connection is stablished to an XPC service, the server will check if the connection is allowed. These are the checks it would usually perform:
+XPCサービスへの接続が確立されると、サーバーは接続が許可されているかどうかを確認します。通常、以下のチェックが行われます：
 
-1. Check if the connecting **process is signed with an Apple-signed** certificate (only given out by Apple).
-   - If this **isn't verified**, an attacker could create a **fake certificate** to match any other check.
-2. Check if the connecting process is signed with the **organization’s certificate**, (team ID verification).
-   - If this **isn't verified**, **any developer certificate** from Apple can be used for signing, and connect to the service.
-3. Check if the connecting process **contains a proper bundle ID**.
-   - If this **isn't verified**, any tool **signed by the same org** could be used to interact with the XPC service.
-4. (4 or 5) Check if the connecting process has a **proper software version number**.
-   - If this **isn't verified,** an old, insecure clients, vulnerable to process injection could be used to connect to the XPC service even with the other checks in place.
-5. (4 or 5) Check if the connecting process has hardened runtime without dangerous entitlements (like the ones that allows to load arbitrary libraries or use DYLD env vars)
-   1. If this **isn't verified,** the client might be **vulnerable to code injection**
-6. Check if the connecting process has an **entitlement** that allows it to connect to the service. This is applicable for Apple binaries.
-7. The **verification** must be **based** on the connecting **client’s audit token** **instead** of its process ID (**PID**) since the former prevents **PID reuse attacks**.
-   - Developers **rarely use the audit token** API call since it’s **private**, so Apple could **change** at any time. Additionally, private API usage is not allowed in Mac App Store apps.
-     - If the method **`processIdentifier`** is used, it might be vulnerable
-     - **`xpc_dictionary_get_audit_token`** should be used instead of **`xpc_connection_get_audit_token`**, as the latest could also be [vulnerable in certain situations](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/).
+1. 接続している**プロセスがApple署名の**証明書で署名されているか確認します（Appleからのみ発行されます）。
+- これが**確認されない場合**、攻撃者は**偽の証明書**を作成して他のチェックに合致させることができます。
+2. 接続しているプロセスが**組織の証明書**で署名されているか確認します（チームIDの確認）。
+- これが**確認されない場合**、Appleの**任意の開発者証明書**が署名に使用され、サービスに接続できます。
+3. 接続しているプロセスが**適切なバンドルID**を含んでいるか確認します。
+- これが**確認されない場合**、同じ組織によって**署名された任意のツール**がXPCサービスと対話するために使用される可能性があります。
+4. (4または5) 接続しているプロセスが**適切なソフトウェアバージョン番号**を持っているか確認します。
+- これが**確認されない場合**、古い、脆弱なクライアントがプロセスインジェクションに対して脆弱であり、他のチェックが行われていてもXPCサービスに接続される可能性があります。
+5. (4または5) 接続しているプロセスが危険な権限のない**ハードンされたランタイム**を持っているか確認します（任意のライブラリを読み込むことを許可するものやDYLD環境変数を使用するものなど）。
+1. これが**確認されない場合**、クライアントは**コードインジェクションに対して脆弱**かもしれません。
+6. 接続しているプロセスがサービスに接続することを許可する**権限**を持っているか確認します。これはAppleのバイナリに適用されます。
+7. **検証**は接続している**クライアントの監査トークン**に**基づく**べきであり、そのプロセスID（**PID**）ではなく、前者は**PID再利用攻撃**を防ぎます。
+- 開発者は**監査トークン**API呼び出しを**ほとんど使用しない**ため、これは**プライベート**であり、Appleはいつでも**変更**できる可能性があります。さらに、プライベートAPIの使用はMac App Storeアプリでは許可されていません。
+- メソッド**`processIdentifier`**が使用される場合、脆弱である可能性があります。
+- **`xpc_dictionary_get_audit_token`**は**`xpc_connection_get_audit_token`**の代わりに使用されるべきであり、後者は特定の状況で[脆弱である可能性があります](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/)。
 
-### Communication Attacks
+### コミュニケーション攻撃
 
-For more information about the PID reuse attack check:
+PID再利用攻撃に関する詳細は以下を確認してください：
 
 {{#ref}}
 macos-pid-reuse.md
 {{#endref}}
 
-For more information **`xpc_connection_get_audit_token`** attack check:
+**`xpc_connection_get_audit_token`**攻撃に関する詳細は以下を確認してください：
 
 {{#ref}}
 macos-xpc_connection_get_audit_token-attack.md
 {{#endref}}
 
-### Trustcache - Downgrade Attacks Prevention
+### Trustcache - ダウングレード攻撃防止
 
-Trustcache is a defensive method introduced in Apple Silicon machines that stores a database of CDHSAH of Apple binaries so only allowed non modified binaries can be executed. Which prevent the execution of downgrade versions.
+TrustcacheはApple Siliconマシンで導入された防御方法で、AppleのバイナリのCDHSAHのデータベースを保存し、許可された非修正バイナリのみが実行されるようにします。これにより、ダウングレードバージョンの実行が防止されます。
 
-### Code Examples
+### コード例
 
-The server will implement this **verification** in a function called **`shouldAcceptNewConnection`**.
-
+サーバーはこの**検証**を**`shouldAcceptNewConnection`**という関数で実装します。
 ```objectivec
 - (BOOL)listener:(NSXPCListener *)listener shouldAcceptNewConnection:(NSXPCConnection *)newConnection {
-    //Check connection
-    return YES;
+//Check connection
+return YES;
 }
 ```
+オブジェクト NSXPCConnection には **private** プロパティ **`auditToken`** （使用すべきだが変更される可能性があるもの）と **public** プロパティ **`processIdentifier`** （使用すべきでないもの）があります。
 
-The object NSXPCConnection has a **private** property **`auditToken`** (the one that should be used but could change) and a the **public** property **`processIdentifier`** (the one that shouldn't be used).
-
-The connecting process could be verified with something like:
-
+接続プロセスは次のようなもので確認できます:
 ```objectivec
 [...]
 SecRequirementRef requirementRef = NULL;
@@ -74,9 +71,7 @@ SecCodeCheckValidity(code, kSecCSDefaultFlags, requirementRef);
 SecTaskRef taskRef = SecTaskCreateWithAuditToken(NULL, ((ExtendedNSXPCConnection*)newConnection).auditToken);
 SecTaskValidateForRequirement(taskRef, (__bridge CFStringRef)(requirementString))
 ```
-
-If a developer doesn't want to check the version of the client, he could check that the client is not vulnerable to process injection at least:
-
+もし開発者がクライアントのバージョンを確認したくない場合、少なくともクライアントがプロセスインジェクションに対して脆弱でないことを確認することができます:
 ```objectivec
 [...]
 CFDictionaryRef csInfo = NULL;
@@ -88,9 +83,7 @@ const uint32_t cs_restrict = 0x800;    // Prevent debugging
 const uint32_t cs_require_lv = 0x2000; // Library Validation
 const uint32_t cs_runtime = 0x10000;   // hardened runtime
 if ((csFlags & (cs_hard | cs_require_lv)) {
-    return Yes; // Accept connection
+return Yes; // Accept connection
 }
 ```
-
 {{#include ../../../../../../banners/hacktricks-training.md}}
-

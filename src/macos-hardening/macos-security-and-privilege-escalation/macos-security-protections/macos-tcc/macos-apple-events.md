@@ -2,22 +2,21 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## 基本情報
 
-**Apple Events** are a feature in Apple's macOS that allows applications to communicate with each other. They are part of the **Apple Event Manager**, which is a component of the macOS operating system responsible for handling interprocess communication. This system enables one application to send a message to another application to request that it perform a particular operation, like opening a file, retrieving data, or executing a command.
+**Apple Events** は、アプリケーションが互いに通信することを可能にする、Apple の macOS の機能です。これは、プロセス間通信を処理する macOS オペレーティングシステムのコンポーネントである **Apple Event Manager** の一部です。このシステムにより、あるアプリケーションが別のアプリケーションにメッセージを送信し、ファイルを開く、データを取得する、またはコマンドを実行するなどの特定の操作を実行するよう要求できます。
 
-The mina daemon is `/System/Library/CoreServices/appleeventsd` which registers the service `com.apple.coreservices.appleevents`.
+mina デーモンは `/System/Library/CoreServices/appleeventsd` で、サービス `com.apple.coreservices.appleevents` を登録します。
 
-Every application that can receive events will checking with this daemon providing its Apple Event Mach Port. And when an app wants to send an event to to it, the app will request this port from the daemon.
+イベントを受信できるすべてのアプリケーションは、このデーモンに自分の Apple Event Mach Port を提供して確認します。そして、アプリがイベントを送信したい場合、アプリはデーモンからこのポートを要求します。
 
-Sandboxed applications requires privileges like `allow appleevent-send` and `(allow mach-lookup (global-name "com.apple.coreservices.appleevents))` in order to be able to send events. Noten that entitlements like `com.apple.security.temporary-exception.apple-events` could restrict who have access to send events which will need entitlements like `com.apple.private.appleevents`.
+サンドボックス化されたアプリケーションは、イベントを送信できるようにするために `allow appleevent-send` や `(allow mach-lookup (global-name "com.apple.coreservices.appleevents))` のような権限が必要です。`com.apple.security.temporary-exception.apple-events` のような権限は、イベントを送信するアクセスを制限する可能性があり、`com.apple.private.appleevents` のような権限が必要になります。
 
 > [!TIP]
-> It's possible to use the env variable **`AEDebugSends`** in order to log informtion about the message sent:
+> メッセージ送信に関する情報をログに記録するために、env 変数 **`AEDebugSends`** を使用することが可能です：
 >
 > ```bash
 > AEDebugSends=1 osascript -e 'tell application "iTerm" to activate'
 > ```
 
 {{#include ../../../../banners/hacktricks-training.md}}
-

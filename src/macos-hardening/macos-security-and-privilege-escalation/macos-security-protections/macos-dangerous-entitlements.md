@@ -3,145 +3,141 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
 > [!WARNING]
-> Note that entitlements starting with **`com.apple`** are not available to third-parties, only Apple can grant them.
+> **`com.apple`** で始まる権限は第三者には利用できず、Appleのみが付与できます。
 
 ## High
 
 ### `com.apple.rootless.install.heritable`
 
-The entitlement **`com.apple.rootless.install.heritable`** allows to **bypass SIP**. Check [this for more info](macos-sip.md#com.apple.rootless.install.heritable).
+権限 **`com.apple.rootless.install.heritable`** は **SIPをバイパス** することを許可します。詳細は [こちらを確認してください](macos-sip.md#com.apple.rootless.install.heritable)。
 
 ### **`com.apple.rootless.install`**
 
-The entitlement **`com.apple.rootless.install`** allows to **bypass SIP**. Check[ this for more info](macos-sip.md#com.apple.rootless.install).
+権限 **`com.apple.rootless.install`** は **SIPをバイパス** することを許可します。詳細は [こちらを確認してください](macos-sip.md#com.apple.rootless.install)。
 
-### **`com.apple.system-task-ports` (previously called `task_for_pid-allow`)**
+### **`com.apple.system-task-ports` (以前は `task_for_pid-allow` と呼ばれていました)**
 
-This entitlement allows to get the **task port for any** process, except the kernel. Check [**this for more info**](../macos-proces-abuse/macos-ipc-inter-process-communication/).
+この権限は、カーネルを除く **任意の** プロセスの **タスクポートを取得** することを許可します。詳細は [**こちらを確認してください**](../macos-proces-abuse/macos-ipc-inter-process-communication/)。
 
 ### `com.apple.security.get-task-allow`
 
-This entitlement allows other processes with the **`com.apple.security.cs.debugger`** entitlement to get the task port of the process run by the binary with this entitlement and **inject code on it**. Check [**this for more info**](../macos-proces-abuse/macos-ipc-inter-process-communication/).
+この権限は、**`com.apple.security.cs.debugger`** 権限を持つ他のプロセスが、この権限を持つバイナリによって実行されるプロセスのタスクポートを取得し、**コードを注入する** ことを許可します。詳細は [**こちらを確認してください**](../macos-proces-abuse/macos-ipc-inter-process-communication/)。
 
 ### `com.apple.security.cs.debugger`
 
-Apps with the Debugging Tool Entitlement can call `task_for_pid()` to retrieve a valid task port for unsigned and third-party apps with the `Get Task Allow` entitlement set to `true`. However, even with the debugging tool entitlement, a debugger **can’t get the task ports** of processes that **don’t have the `Get Task Allow` entitlement**, and that are therefore protected by System Integrity Protection. Check [**this for more info**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_debugger).
+デバッグツール権限を持つアプリは、`task_for_pid()` を呼び出して、`Get Task Allow` 権限が `true` に設定された署名されていないおよび第三者のアプリの有効なタスクポートを取得できます。しかし、デバッグツール権限があっても、デバッガは **`Get Task Allow` 権限を持たない** プロセスのタスクポートを取得できず、それらはシステム整合性保護によって保護されています。詳細は [**こちらを確認してください**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_debugger)。
 
 ### `com.apple.security.cs.disable-library-validation`
 
-This entitlement allows to **load frameworks, plug-ins, or libraries without being either signed by Apple or signed with the same Team ID** as the main executable, so an attacker could abuse some arbitrary library load to inject code. Check [**this for more info**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-library-validation).
+この権限は、**Appleによって署名されていないか、メイン実行可能ファイルと同じチームIDで署名されていないフレームワーク、プラグイン、またはライブラリをロードすることを許可します**。これにより、攻撃者は任意のライブラリのロードを悪用してコードを注入する可能性があります。詳細は [**こちらを確認してください**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-library-validation)。
 
 ### `com.apple.private.security.clear-library-validation`
 
-This entitlement is very similar to **`com.apple.security.cs.disable-library-validation`** but **instead** of **directly disabling** library validation, it allows the process to **call a `csops` system call to disable it**.\
-Check [**this for more info**](https://theevilbit.github.io/posts/com.apple.private.security.clear-library-validation/).
+この権限は **`com.apple.security.cs.disable-library-validation`** と非常に似ていますが、**ライブラリの検証を直接無効にするのではなく**、プロセスが **`csops` システムコールを呼び出して無効にすることを許可します**。\
+詳細は [**こちらを確認してください**](https://theevilbit.github.io/posts/com.apple.private.security.clear-library-validation/)。
 
 ### `com.apple.security.cs.allow-dyld-environment-variables`
 
-This entitlement allows to **use DYLD environment variables** that could be used to inject libraries and code. Check [**this for more info**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-dyld-environment-variables).
+この権限は、**ライブラリやコードを注入するために使用される可能性のあるDYLD環境変数を使用することを許可します**。詳細は [**こちらを確認してください**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-dyld-environment-variables)。
 
-### `com.apple.private.tcc.manager` or `com.apple.rootless.storage`.`TCC`
+### `com.apple.private.tcc.manager` または `com.apple.rootless.storage`.`TCC`
 
-[**According to this blog**](https://objective-see.org/blog/blog_0x4C.html) **and** [**this blog**](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/), these entitlements allows to **modify** the **TCC** database.
+[**このブログによると**](https://objective-see.org/blog/blog_0x4C.html) **および** [**このブログによると**](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/)、これらの権限は **TCC** データベースを **変更** することを許可します。
 
-### **`system.install.apple-software`** and **`system.install.apple-software.standar-user`**
+### **`system.install.apple-software`** および **`system.install.apple-software.standar-user`**
 
-These entitlements allows to **install software without asking for permissions** to the user, which can be helpful for a **privilege escalation**.
+これらの権限は、ユーザーに許可を求めることなく **ソフトウェアをインストールする** ことを許可します。これは **特権昇格** に役立つ可能性があります。
 
 ### `com.apple.private.security.kext-management`
 
-Entitlement needed to ask the **kernel to load a kernel extension**.
+カーネルにカーネル拡張をロードするように要求するために必要な権限です。
 
 ### **`com.apple.private.icloud-account-access`**
 
-The entitlement **`com.apple.private.icloud-account-access`** it's possible to communicate with **`com.apple.iCloudHelper`** XPC service which will **provide iCloud tokens**.
+権限 **`com.apple.private.icloud-account-access`** により、**`com.apple.iCloudHelper`** XPCサービスと通信することが可能で、**iCloudトークンを提供** します。
 
-**iMovie** and **Garageband** had this entitlement.
+**iMovie** と **Garageband** はこの権限を持っていました。
 
-For more **information** about the exploit to **get icloud tokens** from that entitlement check the talk: [**#OBTS v5.0: "What Happens on your Mac, Stays on Apple's iCloud?!" - Wojciech Regula**](https://www.youtube.com/watch?v=_6e2LhmxVc0)
+この権限から **iCloudトークンを取得する** ためのエクスプロイトに関する詳細は、トークを確認してください: [**#OBTS v5.0: "What Happens on your Mac, Stays on Apple's iCloud?!" - Wojciech Regula**](https://www.youtube.com/watch?v=_6e2LhmxVc0)
 
 ### `com.apple.private.tcc.manager.check-by-audit-token`
 
-TODO: I don't know what this allows to do
+TODO: これが何を許可するのかはわかりません
 
 ### `com.apple.private.apfs.revert-to-snapshot`
 
-TODO: In [**this report**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **is mentioned that this could be used to** update the SSV-protected contents after a reboot. If you know how it send a PR please!
+TODO: [**このレポート**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) では、再起動後にSSV保護されたコンテンツを更新するために使用できる可能性があると述べられています。方法がわかる方はPRを送ってください！
 
 ### `com.apple.private.apfs.create-sealed-snapshot`
 
-TODO: In [**this report**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) **is mentioned that this could be used to** update the SSV-protected contents after a reboot. If you know how it send a PR please!
+TODO: [**このレポート**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) では、再起動後にSSV保護されたコンテンツを更新するために使用できる可能性があると述べられています。方法がわかる方はPRを送ってください！
 
 ### `keychain-access-groups`
 
-This entitlement list **keychain** groups the application has access to:
-
+この権限リストは、アプリケーションがアクセスできる **キーチェーン** グループを示します:
 ```xml
 <key>keychain-access-groups</key>
 <array>
-        <string>ichat</string>
-        <string>apple</string>
-        <string>appleaccount</string>
-        <string>InternetAccounts</string>
-        <string>IMCore</string>
+<string>ichat</string>
+<string>apple</string>
+<string>appleaccount</string>
+<string>InternetAccounts</string>
+<string>IMCore</string>
 </array>
 ```
-
 ### **`kTCCServiceSystemPolicyAllFiles`**
 
-Gives **Full Disk Access** permissions, one of the TCC highest permissions you can have.
+**フルディスクアクセス** 権限を付与します。これは、持つことができる TCC の最高権限の一つです。
 
 ### **`kTCCServiceAppleEvents`**
 
-Allows the app to send events to other applications that are commonly used for **automating tasks**. Controlling other apps, it can abuse the permissions granted to these other apps.
+アプリが一般的に **タスクを自動化** するために他のアプリケーションにイベントを送信することを許可します。他のアプリを制御することで、これらの他のアプリに付与された権限を悪用することができます。
 
-Like making them ask the user for its password:
-
+例えば、ユーザーにパスワードを要求させることができます：
 ```bash
 osascript -e 'tell app "App Store" to activate' -e 'tell app "App Store" to activate' -e 'tell app "App Store" to display dialog "App Store requires your password to continue." & return & return default answer "" with icon 1 with hidden answer with title "App Store Alert"'
 ```
-
-Or making them perform **arbitrary actions**.
+または、**任意のアクション**を実行させること。
 
 ### **`kTCCServiceEndpointSecurityClient`**
 
-Allows, among other permissions, to **write the users TCC database**.
+他の権限の中で、**ユーザーのTCCデータベースに書き込む**ことを許可します。
 
 ### **`kTCCServiceSystemPolicySysAdminFiles`**
 
-Allows to **change** the **`NFSHomeDirectory`** attribute of a user that changes his home folder path and therefore allows to **bypass TCC**.
+ユーザーの**`NFSHomeDirectory`**属性を**変更**することを許可し、これによりホームフォルダのパスを変更し、**TCCをバイパス**することができます。
 
 ### **`kTCCServiceSystemPolicyAppBundles`**
 
-Allow to modify files inside apps bundle (inside app.app), which is **disallowed by default**.
+アプリバンドル内のファイル（app.app内）を変更することを許可しますが、これは**デフォルトでは禁止されています**。
 
 <figure><img src="../../../images/image (31).png" alt=""><figcaption></figcaption></figure>
 
-It's possible to check who has this access in _System Settings_ > _Privacy & Security_ > _App Management._
+このアクセス権を持つユーザーを確認するには、_システム設定_ > _プライバシーとセキュリティ_ > _アプリ管理_を確認してください。
 
 ### `kTCCServiceAccessibility`
 
-The process will be able to **abuse the macOS accessibility features**, Which means that for example he will be able to press keystrokes. SO he could request access to control an app like Finder and approve the dialog with this permission.
+プロセスは**macOSのアクセシビリティ機能を悪用する**ことができ、例えばキー入力を押すことができるようになります。したがって、Finderのようなアプリを制御するためのアクセスを要求し、この権限でダイアログを承認することができます。
 
-## Medium
+## 中程度
 
 ### `com.apple.security.cs.allow-jit`
 
-This entitlement allows to **create memory that is writable and executable** by passing the `MAP_JIT` flag to the `mmap()` system function. Check [**this for more info**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-jit).
+この権限は、`mmap()`システム関数に`MAP_JIT`フラグを渡すことで、**書き込み可能かつ実行可能なメモリを作成する**ことを許可します。詳細については[**こちらを確認してください**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-jit)。
 
 ### `com.apple.security.cs.allow-unsigned-executable-memory`
 
-This entitlement allows to **override or patch C code**, use the long-deprecated **`NSCreateObjectFileImageFromMemory`** (which is fundamentally insecure), or use the **DVDPlayback** framework. Check [**this for more info**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-unsigned-executable-memory).
+この権限は、**Cコードをオーバーライドまたはパッチする**ことを許可し、長い間非推奨の**`NSCreateObjectFileImageFromMemory`**（根本的に安全でない）を使用するか、**DVDPlayback**フレームワークを使用することを許可します。詳細については[**こちらを確認してください**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-unsigned-executable-memory)。
 
 > [!CAUTION]
-> Including this entitlement exposes your app to common vulnerabilities in memory-unsafe code languages. Carefully consider whether your app needs this exception.
+> この権限を含めると、メモリ安全でないコード言語における一般的な脆弱性にアプリがさらされます。この例外がアプリに必要かどうかを慎重に検討してください。
 
 ### `com.apple.security.cs.disable-executable-page-protection`
 
-This entitlement allows to **modify sections of its own executable files** on disk to forcefully exit. Check [**this for more info**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-executable-page-protection).
+この権限は、**ディスク上の自分の実行可能ファイルのセクションを変更する**ことを許可し、強制的に終了させることができます。詳細については[**こちらを確認してください**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-executable-page-protection)。
 
 > [!CAUTION]
-> The Disable Executable Memory Protection Entitlement is an extreme entitlement that removes a fundamental security protection from your app, making it possible for an attacker to rewrite your app’s executable code without detection. Prefer narrower entitlements if possible.
+> 実行可能メモリ保護を無効にする権限は、アプリから基本的なセキュリティ保護を取り除く極端な権限であり、攻撃者が検出されることなくアプリの実行可能コードを書き換えることを可能にします。可能であれば、より狭い権限を優先してください。
 
 ### `com.apple.security.cs.allow-relative-library-loads`
 
@@ -149,24 +145,19 @@ TODO
 
 ### `com.apple.private.nullfs_allow`
 
-This entitlement allows to mount a nullfs file system (forbidden by default). Tool: [**mount_nullfs**](https://github.com/JamaicanMoose/mount_nullfs/tree/master).
+この権限は、nullfsファイルシステムをマウントすることを許可します（デフォルトでは禁止されています）。ツール: [**mount_nullfs**](https://github.com/JamaicanMoose/mount_nullfs/tree/master)。
 
 ### `kTCCServiceAll`
 
-According to this blogpost, this TCC permission usually found in the form:
-
+このブログ投稿によると、このTCC権限は通常次の形式で見つかります:
 ```
 [Key] com.apple.private.tcc.allow-prompting
-	[Value]
-		[Array]
-			[String] kTCCServiceAll
+[Value]
+[Array]
+[String] kTCCServiceAll
 ```
-
-Allow the process to **ask for all the TCC permissions**.
+プロセスに**すべてのTCC権限を要求させる**。
 
 ### **`kTCCServicePostEvent`**
 
 {{#include ../../../banners/hacktricks-training.md}}
-
-</details>
-
