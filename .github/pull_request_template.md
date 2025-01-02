@@ -1,9 +1,4 @@
-You can remove this content before sending the PR:
-
 ## Attribution
-We value your knowledge and encourage you to share content. Please ensure that you only upload content that you own or that have permission to share it from the original author (adding a reference to the author in the added text or at the end of the page you are modifying or both). Your respect for intellectual property rights fosters a trustworthy and legal sharing environment for everyone.
+Cenimy Twoją wiedzę i zachęcamy do dzielenia się treściami. Proszę upewnić się, że przesyłasz tylko treści, które posiadasz lub na które masz pozwolenie od oryginalnego autora (dodając odniesienie do autora w dodanym tekście lub na końcu strony, którą modyfikujesz, lub w obu miejscach). Twój szacunek dla praw własności intelektualnej sprzyja zaufanemu i legalnemu środowisku dzielenia się dla wszystkich.
 
-
-Thank you for contributing to HackTricks!
-
-
+Dziękujemy za wkład w HackTricks!
