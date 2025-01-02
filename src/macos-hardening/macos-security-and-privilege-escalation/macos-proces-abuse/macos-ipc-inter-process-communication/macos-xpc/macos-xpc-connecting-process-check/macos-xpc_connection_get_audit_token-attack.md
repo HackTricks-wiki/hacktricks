@@ -1,126 +1,125 @@
-# macOS xpc_connection_get_audit_token Attack
+# macOS xpc_connection_get_audit_token Aanval
 
 {{#include ../../../../../../banners/hacktricks-training.md}}
 
-**For further information check the original post:** [**https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/**](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/). This is a summary:
+**Vir verdere inligting, kyk die oorspronklike pos:** [**https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/**](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/). Dit is 'n opsomming:
 
-## Mach Messages Basic Info
+## Mach Berigte Basiese Inligting
 
-If you don't know what Mach Messages are start checking this page:
+As jy nie weet wat Mach Berigte is nie, begin om hierdie bladsy te kyk:
 
 {{#ref}}
 ../../
 {{#endref}}
 
-For the moment remember that ([definition from here](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing)):\
-Mach messages are sent over a _mach port_, which is a **single receiver, multiple sender communication** channel built into the mach kernel. **Multiple processes can send messages** to a mach port, but at any point **only a single process can read from it**. Just like file descriptors and sockets, mach ports are allocated and managed by the kernel and processes only see an integer, which they can use to indicate to the kernel which of their mach ports they want to use.
+Vir die oomblik onthou dat ([definisie van hier](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing)):\
+Mach berigte word oor 'n _mach poort_ gestuur, wat 'n **enkele ontvanger, meerdere sender kommunikasie** kanaal is wat in die mach-kern ingebou is. **Meerdere prosesse kan berigte** na 'n mach poort stuur, maar op enige tydstip **kan slegs 'n enkele proses dit lees**. Net soos lêer beskrywings en sokkets, word mach poorte toegeken en bestuur deur die kern en prosesse sien slegs 'n heelgetal, wat hulle kan gebruik om aan die kern aan te dui watter van hul mach poorte hulle wil gebruik.
 
-## XPC Connection
+## XPC Verbinding
 
-If you don't know how a XPC connection is established check:
+As jy nie weet hoe 'n XPC verbinding gevestig word nie, kyk:
 
 {{#ref}}
 ../
 {{#endref}}
 
-## Vuln Summary
+## Kwetsbaarheid Opsomming
 
-What is interesting for you to know is that **XPC’s abstraction is a one-to-one connection**, but it is based on top of a technology which **can have multiple senders, so:**
+Wat interessant is om te weet, is dat **XPC se abstraksie 'n een-tot-een verbinding is**, maar dit is gebaseer op 'n tegnologie wat **meerdere senders kan hê, so:**
 
-- Mach ports are single receiver, **multiple sender**.
-- An XPC connection’s audit token is the audit token of **copied from the most recently received message**.
-- Obtaining the **audit token** of an XPC connection is critical to many **security checks**.
+- Mach poorte is enkele ontvanger, **meerdere sender**.
+- 'n XPC verbinding se audit token is die audit token van **gekopieer van die mees onlangs ontvangde boodskap**.
+- Om die **audit token** van 'n XPC verbinding te verkry, is krities vir baie **veiligheidskontroles**.
 
-Although the previous situation sounds promising there are some scenarios where this is not going to cause problems ([from here](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing)):
+Alhoewel die vorige situasie belowend klink, is daar sommige scenario's waar dit nie probleme gaan veroorsaak nie ([van hier](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing)):
 
-- Audit tokens are often used for an authorization check to decide whether to accept a connection. As this happens using a message to the service port, there is **no connection established yet**. More messages on this port will just be handled as additional connection requests. So any **checks before accepting a connection are not vulnerable** (this also means that within `-listener:shouldAcceptNewConnection:` the audit token is safe). We are therefore **looking for XPC connections that verify specific actions**.
-- XPC event handlers are handled synchronously. This means that the event handler for one message must be completed before calling it for the next one, even on concurrent dispatch queues. So inside an **XPC event handler the audit token can not be overwritten** by other normal (non-reply!) messages.
+- Audit tokens word dikwels gebruik vir 'n outorisering kontrole om te besluit of 'n verbinding aanvaar moet word. Aangesien dit gebeur deur 'n boodskap na die dienspoort, is daar **nog geen verbinding gevestig nie**. Meer boodskappe op hierdie poort sal net hanteer word as addisionele verbindingsversoeke. So enige **kontroles voor die aanvaarding van 'n verbinding is nie kwesbaar nie** (dit beteken ook dat binne `-listener:shouldAcceptNewConnection:` die audit token veilig is). Ons is dus **op soek na XPC verbindings wat spesifieke aksies verifieer**.
+- XPC gebeurtenis hanteerders word sinchronies hanteer. Dit beteken dat die gebeurtenis hanteerder vir een boodskap voltooi moet wees voordat dit vir die volgende een aangeroep kan word, selfs op gelyktydige afleweringsrye. So binne 'n **XPC gebeurtenis hanteerder kan die audit token nie oorgeskryf word** deur ander normale (nie-antwoorde!) boodskappe nie.
 
-Two different methods this might be exploitable:
+Twee verskillende metodes wat dalk uitgebuit kan word:
 
 1. Variant1:
-   - **Exploit** **connects** to service **A** and service **B**
-     - Service **B** can call a **privileged functionality** in service A that the user cannot
-   - Service **A** calls **`xpc_connection_get_audit_token`** while _**not**_ inside the **event handler** for a connection in a **`dispatch_async`**.
-     - So a **different** message could **overwrite the Audit Token** because it's being dispatched asynchronously outside of the event handler.
-   - The exploit passes to **service B the SEND right to service A**.
-     - So svc **B** will be actually **sending** the **messages** to service **A**.
-   - The **exploit** tries to **call** the **privileged action.** In a RC svc **A** **checks** the authorization of this **action** while **svc B overwrote the Audit token** (giving the exploit access to call the privileged action).
+- **Eksploiteer** **verbinde** na diens **A** en diens **B**
+- Diens **B** kan 'n **bevoorregte funksionaliteit** in diens A aanroep wat die gebruiker nie kan nie
+- Diens **A** roep **`xpc_connection_get_audit_token`** aan terwyl _**nie**_ binne die **gebeurtenis hanteerder** vir 'n verbinding in 'n **`dispatch_async`**.
+- So 'n **ander** boodskap kan die **Audit Token oorgeskryf** omdat dit asynchrone gestuur word buite die gebeurtenis hanteerder.
+- Die eksploiteer gee aan **diens B die SEND reg na diens A**.
+- So diens **B** sal eintlik **boodskappe** na diens **A** **stuur**.
+- Die **eksploiteer** probeer om die **bevoorregte aksie aan te roep.** In 'n RC diens **A** **kontroleer** die outorisering van hierdie **aksie** terwyl **diens B die Audit token oorgeskryf het** (wat die eksploiteer toegang gee om die bevoorregte aksie aan te roep).
 2. Variant 2:
-   - Service **B** can call a **privileged functionality** in service A that the user cannot
-   - Exploit connects with **service A** which **sends** the exploit a **message expecting a response** in a specific **replay** **port**.
-   - Exploit sends **service** B a message passing **that reply port**.
-   - When service **B replies**, it s**ends the message to service A**, **while** the **exploit** sends a different **message to service A** trying to **reach a privileged functionality** and expecting that the reply from service B will overwrite the Audit token in the perfect moment (Race Condition).
+- Diens **B** kan 'n **bevoorregte funksionaliteit** in diens A aanroep wat die gebruiker nie kan nie
+- Eksploiteer verbind met **diens A** wat **boodskap stuur** na die eksploiteer met 'n **boodskap wat 'n antwoord verwag** in 'n spesifieke **herhalings** **poort**.
+- Eksploiteer stuur **diens** B 'n boodskap wat **daardie herhalingspoort** oorplaas.
+- Wanneer diens **B antwoord**, dit **stuur die boodskap na diens A**, **terwyl** die **eksploiteer** 'n ander **boodskap na diens A** stuur wat probeer om 'n **bevoorregte funksionaliteit** te bereik en verwag dat die antwoord van diens B die Audit token op die perfekte oomblik sal oorgeskryf (Race Condition).
 
-## Variant 1: calling xpc_connection_get_audit_token outside of an event handler <a href="#variant-1-calling-xpc_connection_get_audit_token-outside-of-an-event-handler" id="variant-1-calling-xpc_connection_get_audit_token-outside-of-an-event-handler"></a>
+## Variant 1: roep xpc_connection_get_audit_token aan buite 'n gebeurtenis hanteerder <a href="#variant-1-calling-xpc_connection_get_audit_token-outside-of-an-event-handler" id="variant-1-calling-xpc_connection_get_audit_token-outside-of-an-event-handler"></a>
 
 Scenario:
 
-- Two mach services **`A`** and **`B`** that we can both connect to (based on the sandbox profile and the authorization checks before accepting the connection).
-- _**A**_ must have an **authorization check** for a specific action that **`B`** can pass (but our app can’t).
-  - For example, if B has some **entitlements** or is running as **root**, it might allow him to ask A to perform a privileged action.
-- For this authorization check, **`A`** obtains the audit token asynchronously, for example by calling `xpc_connection_get_audit_token` from **`dispatch_async`**.
+- Twee mach dienste **`A`** en **`B`** waartoe ons albei kan verbind (gebaseer op die sandbox profiel en die outorisering kontroles voor die aanvaarding van die verbinding).
+- _**A**_ moet 'n **outorisering kontrole** hê vir 'n spesifieke aksie wat **`B`** kan deurgee (maar ons app kan nie).
+- Byvoorbeeld, as B sekere **regte** het of as **root** loop, kan dit hom toelaat om A te vra om 'n bevoorregte aksie uit te voer.
+- Vir hierdie outorisering kontrole, **`A`** verkry die audit token asynchrone, byvoorbeeld deur `xpc_connection_get_audit_token` aan te roep vanaf **`dispatch_async`**.
 
 > [!CAUTION]
-> In this case an attacker could trigger a **Race Condition** making a **exploit** that **asks A to perform an action** several times while making **B send messages to `A`**. When the RC is **successful**, the **audit token** of **B** will be copied in memory **while** the request of our **exploit** is being **handled** by A, giving it **access to the privilege action only B could request**.
+> In hierdie geval kan 'n aanvaller 'n **Race Condition** aktiveer wat 'n **eksploiteer** wat **A vra om 'n aksie** verskeie kere uit te voer terwyl **B boodskappe na `A`** stuur. Wanneer die RC **suksesvol** is, sal die **audit token** van **B** in geheue gekopieer word **terwyl** die versoek van ons **eksploiteer** hanteer word deur A, wat dit **toegang gee tot die bevoorregte aksie wat slegs B kon aanvra**.
 
-This happened with **`A`** as `smd` and **`B`** as `diagnosticd`. The function [`SMJobBless`](https://developer.apple.com/documentation/servicemanagement/1431078-smjobbless?language=objc) from smb an be used to install a new privileged helper toot (as **root**). If a **process running as root contact** **smd**, no other checks will be performed.
+Dit het gebeur met **`A`** as `smd` en **`B`** as `diagnosticd`. Die funksie [`SMJobBless`](https://developer.apple.com/documentation/servicemanagement/1431078-smjobbless?language=objc) van smb kan gebruik word om 'n nuwe bevoorregte helper gereedskap te installeer (as **root**). As 'n **proses wat as root loop** **smd** kontak, sal geen ander kontroles uitgevoer word nie.
 
-Therefore, the service **B** is **`diagnosticd`** because it runs as **root** and can be used to **monitor** a process, so once monitoring has started, it will **send multiple messages per second.**
+Daarom is die diens **B** **`diagnosticd`** omdat dit as **root** loop en gebruik kan word om 'n proses te **monitor**, so sodra monitering begin het, sal dit **meerdere boodskappe per sekonde stuur.**
 
-To perform the attack:
+Om die aanval uit te voer:
 
-1. Initiate a **connection** to the service named `smd` using the standard XPC protocol.
-2. Form a secondary **connection** to `diagnosticd`. Contrary to normal procedure, rather than creating and sending two new mach ports, the client port send right is substituted with a duplicate of the **send right** associated with the `smd` connection.
-3. As a result, XPC messages can be dispatched to `diagnosticd`, but responses from `diagnosticd` are rerouted to `smd`. To `smd`, it appears as though the messages from both the user and `diagnosticd` are originating from the same connection.
+1. Begin 'n **verbinding** na die diens genaamd `smd` met behulp van die standaard XPC protokol.
+2. Vorm 'n sekondêre **verbinding** na `diagnosticd`. In teenstelling met die normale prosedure, eerder as om twee nuwe mach poorte te skep en te stuur, word die kliëntpoort stuurregte vervang met 'n duplikaat van die **stuurreg** geassosieer met die `smd` verbinding.
+3. As gevolg hiervan kan XPC boodskappe na `diagnosticd` gestuur word, maar antwoorde van `diagnosticd` word hergeroute na `smd`. Vir `smd` lyk dit asof die boodskappe van beide die gebruiker en `diagnosticd` afkomstig is van dieselfde verbinding.
 
-![Image depicting the exploit process](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/exploit.png)
+![Beeld wat die eksploiteer proses uitbeeld](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/exploit.png)
 
-4. The next step involves instructing `diagnosticd` to initiate monitoring of a chosen process (potentially the user's own). Concurrently, a flood of routine 1004 messages is sent to `smd`. The intent here is to install a tool with elevated privileges.
-5. This action triggers a race condition within the `handle_bless` function. The timing is critical: the `xpc_connection_get_pid` function call must return the PID of the user's process (as the privileged tool resides in the user's app bundle). However, the `xpc_connection_get_audit_token` function, specifically within the `connection_is_authorized` subroutine, must reference the audit token belonging to `diagnosticd`.
+4. Die volgende stap behels om `diagnosticd` te instrueer om monitering van 'n gekose proses (potensieel die gebruiker se eie) te begin. Gelyktydig word 'n vloed van roetine 1004 boodskappe na `smd` gestuur. Die bedoeling hier is om 'n gereedskap met verhoogde regte te installeer.
+5. Hierdie aksie aktiveer 'n race condition binne die `handle_bless` funksie. Die tydsberekening is krities: die `xpc_connection_get_pid` funksie-aanroep moet die PID van die gebruiker se proses teruggee (aangesien die bevoorregte gereedskap in die gebruiker se app bundel is). Maar die `xpc_connection_get_audit_token` funksie, spesifiek binne die `connection_is_authorized` subroutine, moet die audit token wat aan `diagnosticd` behoort, verwys.
 
-## Variant 2: reply forwarding
+## Variant 2: antwoord herleiding
 
-In an XPC (Cross-Process Communication) environment, although event handlers don't execute concurrently, the handling of reply messages has a unique behavior. Specifically, two distinct methods exist for sending messages that expect a reply:
+In 'n XPC (Cross-Process Communication) omgewing, alhoewel gebeurtenis hanteerders nie gelyktydig uitvoer nie, het die hantering van antwoord boodskappe 'n unieke gedrag. Spesifiek bestaan daar twee verskillende metodes om boodskappe te stuur wat 'n antwoord verwag:
 
-1. **`xpc_connection_send_message_with_reply`**: Here, the XPC message is received and processed on a designated queue.
-2. **`xpc_connection_send_message_with_reply_sync`**: Conversely, in this method, the XPC message is received and processed on the current dispatch queue.
+1. **`xpc_connection_send_message_with_reply`**: Hier word die XPC boodskap ontvang en verwerk op 'n aangewese ry.
+2. **`xpc_connection_send_message_with_reply_sync`**: Omgekeerd, in hierdie metode, word die XPC boodskap ontvang en verwerk op die huidige afleweringsry.
 
-This distinction is crucial because it allows for the possibility of **reply packets being parsed concurrently with the execution of an XPC event handler**. Notably, while `_xpc_connection_set_creds` does implement locking to safeguard against the partial overwrite of the audit token, it does not extend this protection to the entire connection object. Consequently, this creates a vulnerability where the audit token can be replaced during the interval between the parsing of a packet and the execution of its event handler.
+Hierdie onderskeid is belangrik omdat dit die moontlikheid toelaat van **antwoord pakkette wat gelyktydig geparseer word met die uitvoering van 'n XPC gebeurtenis hanteerder**. Opmerklik is dat terwyl `_xpc_connection_set_creds` wel vergrendeling implementeer om te beskerm teen die gedeeltelike oorgeskryf van die audit token, strek dit nie hierdie beskerming na die hele verbinding objek nie. Gevolglik skep dit 'n kwesbaarheid waar die audit token vervang kan word gedurende die interval tussen die parsing van 'n pakket en die uitvoering van sy gebeurtenis hanteerder.
 
-To exploit this vulnerability, the following setup is required:
+Om hierdie kwesbaarheid uit te buit, is die volgende opstelling nodig:
 
-- Two mach services, referred to as **`A`** and **`B`**, both of which can establish a connection.
-- Service **`A`** should include an authorization check for a specific action that only **`B`** can perform (the user's application cannot).
-- Service **`A`** should send a message that anticipates a reply.
-- The user can send a message to **`B`** that it will respond to.
+- Twee mach dienste, genoem **`A`** en **`B`**, wat albei 'n verbinding kan vestig.
+- Diens **`A`** moet 'n outorisering kontrole insluit vir 'n spesifieke aksie wat slegs **`B`** kan uitvoer (die gebruiker se toepassing kan nie).
+- Diens **`A`** moet 'n boodskap stuur wat 'n antwoord verwag.
+- Die gebruiker kan 'n boodskap na **`B`** stuur wat dit sal antwoord.
 
-The exploitation process involves the following steps:
+Die eksploitasie proses behels die volgende stappe:
 
-1. Wait for service **`A`** to send a message that expects a reply.
-2. Instead of replying directly to **`A`**, the reply port is hijacked and used to send a message to service **`B`**.
-3. Subsequently, a message involving the forbidden action is dispatched, with the expectation that it will be processed concurrently with the reply from **`B`**.
+1. Wag vir diens **`A`** om 'n boodskap te stuur wat 'n antwoord verwag.
+2. In plaas daarvan om direk aan **`A`** te antwoord, word die antwoordpoort gekaap en gebruik om 'n boodskap na diens **`B`** te stuur.
+3. Vervolgens word 'n boodskap wat die verbode aksie behels, gestuur, met die verwagting dat dit gelyktydig verwerk sal word met die antwoord van **`B`**.
 
-Below is a visual representation of the described attack scenario:
+Hieronder is 'n visuele voorstelling van die beskryfde aanval scenario:
 
 !\[https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/variant2.png]\(../../../../../../images/image (1) (1) (1) (1) (1) (1) (1).png)
 
 <figure><img src="../../../../../../images/image (33).png" alt="https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/variant2.png" width="563"><figcaption></figcaption></figure>
 
-## Discovery Problems
+## Ontdekking Probleme
 
-- **Difficulties in Locating Instances**: Searching for instances of `xpc_connection_get_audit_token` usage was challenging, both statically and dynamically.
-- **Methodology**: Frida was employed to hook the `xpc_connection_get_audit_token` function, filtering calls not originating from event handlers. However, this method was limited to the hooked process and required active usage.
-- **Analysis Tooling**: Tools like IDA/Ghidra were used for examining reachable mach services, but the process was time-consuming, complicated by calls involving the dyld shared cache.
-- **Scripting Limitations**: Attempts to script the analysis for calls to `xpc_connection_get_audit_token` from `dispatch_async` blocks were hindered by complexities in parsing blocks and interactions with the dyld shared cache.
+- **Moeilikhede om Voorbeelde te Vind**: Soek na voorbeelde van `xpc_connection_get_audit_token` gebruik was uitdagend, beide staties en dinamies.
+- **Metodologie**: Frida is gebruik om die `xpc_connection_get_audit_token` funksie te haak, wat oproepe gefilter het wat nie van gebeurtenis hanteerders afkomstig was nie. Hierdie metode was egter beperk tot die gehaakte proses en het aktiewe gebruik vereis.
+- **Analise Gereedskap**: Gereedskap soos IDA/Ghidra is gebruik om bereikbare mach dienste te ondersoek, maar die proses was tydrowend, bemoeilik deur oproepe wat die dyld gedeelde kas betrek.
+- **Scripting Beperkings**: Pogings om die analise te script vir oproepe na `xpc_connection_get_audit_token` van `dispatch_async` blokke is belemmer deur kompleksiteite in die parsing van blokke en interaksies met die dyld gedeelde kas.
 
-## The fix <a href="#the-fix" id="the-fix"></a>
+## Die regstelling <a href="#the-fix" id="the-fix"></a>
 
-- **Reported Issues**: A report was submitted to Apple detailing the general and specific issues found within `smd`.
-- **Apple's Response**: Apple addressed the issue in `smd` by substituting `xpc_connection_get_audit_token` with `xpc_dictionary_get_audit_token`.
-- **Nature of the Fix**: The `xpc_dictionary_get_audit_token` function is considered secure as it retrieves the audit token directly from the mach message tied to the received XPC message. However, it's not part of the public API, similar to `xpc_connection_get_audit_token`.
-- **Absence of a Broader Fix**: It remains unclear why Apple didn't implement a more comprehensive fix, such as discarding messages not aligning with the saved audit token of the connection. The possibility of legitimate audit token changes in certain scenarios (e.g., `setuid` usage) might be a factor.
-- **Current Status**: The issue persists in iOS 17 and macOS 14, posing a challenge for those seeking to identify and understand it.
+- **Gerapporteerde Probleme**: 'n Verslag is ingedien by Apple wat die algemene en spesifieke probleme wat in `smd` gevind is, uiteengesit het.
+- **Apple se Antwoord**: Apple het die probleem in `smd` aangespreek deur `xpc_connection_get_audit_token` te vervang met `xpc_dictionary_get_audit_token`.
+- **Natuur van die Regstelling**: Die `xpc_dictionary_get_audit_token` funksie word beskou as veilig aangesien dit die audit token direk van die mach boodskap wat aan die ontvangde XPC boodskap gekoppel is, verkry. Dit is egter nie deel van die publieke API nie, soortgelyk aan `xpc_connection_get_audit_token`.
+- **Afwesigheid van 'n Breër Regstelling**: Dit bly onduidelik waarom Apple nie 'n meer omvattende regstelling geïmplementeer het nie, soos om boodskappe wat nie ooreenstem met die gestoor audit token van die verbinding nie, te verwerp. Die moontlikheid van legitieme audit token veranderinge in sekere scenario's (bv. `setuid` gebruik) mag 'n faktor wees.
+- **Huidige Status**: Die probleem bestaan voort in iOS 17 en macOS 14, wat 'n uitdaging bied vir diegene wat probeer om dit te identifiseer en te verstaan.
 
 {{#include ../../../../../../banners/hacktricks-training.md}}
-

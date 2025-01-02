@@ -1,410 +1,392 @@
-# macOS Universal binaries & Mach-O Format
+# macOS Universele binêre & Mach-O Formaat
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Basiese Inligting
 
-Mac OS binaries usually are compiled as **universal binaries**. A **universal binary** can **support multiple architectures in the same file**.
+Mac OS binêre word gewoonlik saamgestel as **universele binêre**. 'n **universale binêre** kan **meerdere argitekture in dieselfde lêer ondersteun**.
 
-These binaries follows the **Mach-O structure** which is basically compased of:
+Hierdie binêre volg die **Mach-O struktuur** wat basies bestaan uit:
 
-- Header
-- Load Commands
+- Kop
+- Laai Opdragte
 - Data
 
 ![https://alexdremov.me/content/images/2022/10/6XLCD.gif](<../../../images/image (470).png>)
 
-## Fat Header
+## Vet Kop
 
-Search for the file with: `mdfind fat.h | grep -i mach-o | grep -E "fat.h$"`
+Soek vir die lêer met: `mdfind fat.h | grep -i mach-o | grep -E "fat.h$"`
 
 <pre class="language-c"><code class="lang-c"><strong>#define FAT_MAGIC	0xcafebabe
 </strong><strong>#define FAT_CIGAM	0xbebafeca	/* NXSwapLong(FAT_MAGIC) */
 </strong>
 struct fat_header {
-<strong>	uint32_t	magic;		/* FAT_MAGIC or FAT_MAGIC_64 */
-</strong><strong>	uint32_t	nfat_arch;	/* number of structs that follow */
+<strong>	uint32_t	magic;		/* FAT_MAGIC of FAT_MAGIC_64 */
+</strong><strong>	uint32_t	nfat_arch;	/* aantal strukture wat volg */
 </strong>};
 
 struct fat_arch {
-	cpu_type_t	cputype;	/* cpu specifier (int) */
-	cpu_subtype_t	cpusubtype;	/* machine specifier (int) */
-	uint32_t	offset;		/* file offset to this object file */
-	uint32_t	size;		/* size of this object file */
-	uint32_t	align;		/* alignment as a power of 2 */
+cpu_type_t	cputype;	/* cpu spesifiseerder (int) */
+cpu_subtype_t	cpusubtype;	/* masjien spesifiseerder (int) */
+uint32_t	offset;		/* lêer offset na hierdie objek lêer */
+uint32_t	size;		/* grootte van hierdie objek lêer */
+uint32_t	align;		/* uitlijning as 'n mag van 2 */
 };
 </code></pre>
 
-The header has the **magic** bytes followed by the **number** of **archs** the file **contains** (`nfat_arch`) and each arch will have a `fat_arch` struct.
+Die kop het die **magiese** bytes gevolg deur die **aantal** **argitekture** wat die lêer **bevat** (`nfat_arch`) en elke argitektuur sal 'n `fat_arch` struktuur hê.
 
-Check it with:
+Kontroleer dit met:
 
 <pre class="language-shell-session"><code class="lang-shell-session">% file /bin/ls
-/bin/ls: Mach-O universal binary with 2 architectures: [x86_64:Mach-O 64-bit executable x86_64] [arm64e:Mach-O 64-bit executable arm64e]
-/bin/ls (for architecture x86_64):	Mach-O 64-bit executable x86_64
-/bin/ls (for architecture arm64e):	Mach-O 64-bit executable arm64e
+/bin/ls: Mach-O universele binêre met 2 argitekture: [x86_64:Mach-O 64-bit uitvoerbare x86_64] [arm64e:Mach-O 64-bit uitvoerbare arm64e]
+/bin/ls (vir argitektuur x86_64):	Mach-O 64-bit uitvoerbare x86_64
+/bin/ls (vir argitektuur arm64e):	Mach-O 64-bit uitvoerbare arm64e
 
 % otool -f -v /bin/ls
-Fat headers
+Vet koppe
 fat_magic FAT_MAGIC
 <strong>nfat_arch 2
-</strong><strong>architecture x86_64
+</strong><strong>argitektuur x86_64
 </strong>    cputype CPU_TYPE_X86_64
-    cpusubtype CPU_SUBTYPE_X86_64_ALL
-    capabilities 0x0
+cpusubtype CPU_SUBTYPE_X86_64_ALL
+capabilities 0x0
 <strong>    offset 16384
-</strong><strong>    size 72896
-</strong>    align 2^14 (16384)
-<strong>architecture arm64e
+</strong><strong>    grootte 72896
+</strong>    uitlijning 2^14 (16384)
+<strong>argitektuur arm64e
 </strong>    cputype CPU_TYPE_ARM64
-    cpusubtype CPU_SUBTYPE_ARM64E
-    capabilities PTR_AUTH_VERSION USERSPACE 0
+cpusubtype CPU_SUBTYPE_ARM64E
+capabilities PTR_AUTH_VERSION USERSPACE 0
 <strong>    offset 98304
-</strong><strong>    size 88816
-</strong>    align 2^14 (16384)
+</strong><strong>    grootte 88816
+</strong>    uitlijning 2^14 (16384)
 </code></pre>
 
-or using the [Mach-O View](https://sourceforge.net/projects/machoview/) tool:
+of deur die [Mach-O View](https://sourceforge.net/projects/machoview/) hulpmiddel te gebruik:
 
 <figure><img src="../../../images/image (1094).png" alt=""><figcaption></figcaption></figure>
 
-As you may be thinking usually a universal binary compiled for 2 architectures **doubles the size** of one compiled for just 1 arch.
+Soos jy dalk dink, verdubbel 'n universele binêre wat vir 2 argitekture saamgestel is gewoonlik die grootte van een wat net vir 1 argitektuur saamgestel is.
 
-## **Mach-O Header**
+## **Mach-O Kop**
 
-The header contains basic information about the file, such as magic bytes to identify it as a Mach-O file and information about the target architecture. You can find it in: `mdfind loader.h | grep -i mach-o | grep -E "loader.h$"`
-
+Die kop bevat basiese inligting oor die lêer, soos magiese bytes om dit as 'n Mach-O lêer te identifiseer en inligting oor die teikenargitektuur. Jy kan dit vind in: `mdfind loader.h | grep -i mach-o | grep -E "loader.h$"`
 ```c
 #define	MH_MAGIC	0xfeedface	/* the mach magic number */
 #define MH_CIGAM	0xcefaedfe	/* NXSwapInt(MH_MAGIC) */
 struct mach_header {
-	uint32_t	magic;		/* mach magic number identifier */
-	cpu_type_t	cputype;	/* cpu specifier (e.g. I386) */
-	cpu_subtype_t	cpusubtype;	/* machine specifier */
-	uint32_t	filetype;	/* type of file (usage and alignment for the file) */
-	uint32_t	ncmds;		/* number of load commands */
-	uint32_t	sizeofcmds;	/* the size of all the load commands */
-	uint32_t	flags;		/* flags */
+uint32_t	magic;		/* mach magic number identifier */
+cpu_type_t	cputype;	/* cpu specifier (e.g. I386) */
+cpu_subtype_t	cpusubtype;	/* machine specifier */
+uint32_t	filetype;	/* type of file (usage and alignment for the file) */
+uint32_t	ncmds;		/* number of load commands */
+uint32_t	sizeofcmds;	/* the size of all the load commands */
+uint32_t	flags;		/* flags */
 };
 
 #define MH_MAGIC_64 0xfeedfacf /* the 64-bit mach magic number */
 #define MH_CIGAM_64 0xcffaedfe /* NXSwapInt(MH_MAGIC_64) */
 struct mach_header_64 {
-	uint32_t	magic;		/* mach magic number identifier */
-	int32_t		cputype;	/* cpu specifier */
-	int32_t		cpusubtype;	/* machine specifier */
-	uint32_t	filetype;	/* type of file */
-	uint32_t	ncmds;		/* number of load commands */
-	uint32_t	sizeofcmds;	/* the size of all the load commands */
-	uint32_t	flags;		/* flags */
-	uint32_t	reserved;	/* reserved */
+uint32_t	magic;		/* mach magic number identifier */
+int32_t		cputype;	/* cpu specifier */
+int32_t		cpusubtype;	/* machine specifier */
+uint32_t	filetype;	/* type of file */
+uint32_t	ncmds;		/* number of load commands */
+uint32_t	sizeofcmds;	/* the size of all the load commands */
+uint32_t	flags;		/* flags */
+uint32_t	reserved;	/* reserved */
 };
 ```
+### Mach-O Lêertipes
 
-### Mach-O File Types
+Daar is verskillende lêertipes, jy kan hulle gedefinieer vind in die [**bronkode byvoorbeeld hier**](https://opensource.apple.com/source/xnu/xnu-2050.18.24/EXTERNAL_HEADERS/mach-o/loader.h). Die belangrikste is:
 
-There are different file types, you can find them defined in the [**source code for example here**](https://opensource.apple.com/source/xnu/xnu-2050.18.24/EXTERNAL_HEADERS/mach-o/loader.h). The most important ones are:
-
-- `MH_OBJECT`: Relocatable object file (intermediate products of compilation, not executables yet).
-- `MH_EXECUTE`: Executable files.
-- `MH_FVMLIB`: Fixed VM library file.
-- `MH_CORE`: Code Dumps
-- `MH_PRELOAD`: Preloaded executable file (no longer supported in XNU)
-- `MH_DYLIB`: Dynamic Libraries
-- `MH_DYLINKER`: Dynamic Linker
-- `MH_BUNDLE`: "Plugin files". Generated using -bundle in gcc and explicitly loaded by `NSBundle` or `dlopen`.
-- `MH_DYSM`: Companion `.dSym` file (file with symbols for debugging).
-- `MH_KEXT_BUNDLE`: Kernel Extensions.
-
+- `MH_OBJECT`: Herlokasiebare objeklêer (tussenprodukte van kompilasie, nog nie uitvoerbaar nie).
+- `MH_EXECUTE`: Uitvoerbare lêers.
+- `MH_FVMLIB`: Vaste VM-biblioteeklêer.
+- `MH_CORE`: Kode-dumps
+- `MH_PRELOAD`: Vooraf gelaaide uitvoerbare lêer (nie meer ondersteun in XNU nie)
+- `MH_DYLIB`: Dinamiese biblioteke
+- `MH_DYLINKER`: Dinamiese skakelaar
+- `MH_BUNDLE`: "Pluginlêers". Genereer met -bundle in gcc en eksplisiet gelaai deur `NSBundle` of `dlopen`.
+- `MH_DYSM`: Metgesel `.dSym` lêer (lêer met simbole vir foutopsporing).
+- `MH_KEXT_BUNDLE`: Kernel-uitbreidings.
 ```bash
 # Checking the mac header of a binary
 otool -arch arm64e -hv /bin/ls
 Mach header
-      magic  cputype cpusubtype  caps    filetype ncmds sizeofcmds      flags
+magic  cputype cpusubtype  caps    filetype ncmds sizeofcmds      flags
 MH_MAGIC_64    ARM64          E USR00     EXECUTE    19       1728   NOUNDEFS DYLDLINK TWOLEVEL PIE
 ```
-
-Or using [Mach-O View](https://sourceforge.net/projects/machoview/):
+Of deur [Mach-O View](https://sourceforge.net/projects/machoview/) te gebruik:
 
 <figure><img src="../../../images/image (1133).png" alt=""><figcaption></figcaption></figure>
 
-## **Mach-O Flags**
+## **Mach-O Vlaggies**
 
-The source code also defines several flags useful for loading libraries:
+Die bronkode definieer ook verskeie vlaggies wat nuttig is vir die laai van biblioteke:
 
-- `MH_NOUNDEFS`: No undefined references (fully linked)
-- `MH_DYLDLINK`: Dyld linking
-- `MH_PREBOUND`: Dynamic references prebound.
-- `MH_SPLIT_SEGS`: File splits r/o and r/w segments.
-- `MH_WEAK_DEFINES`: Binary has weak defined symbols
-- `MH_BINDS_TO_WEAK`: Binary uses weak symbols
-- `MH_ALLOW_STACK_EXECUTION`: Make the stack executable
-- `MH_NO_REEXPORTED_DYLIBS`: Library not LC_REEXPORT commands
-- `MH_PIE`: Position Independent Executable
-- `MH_HAS_TLV_DESCRIPTORS`: There is a section with thread local variables
-- `MH_NO_HEAP_EXECUTION`: No execution for heap/data pages
-- `MH_HAS_OBJC`: Binary has oBject-C sections
-- `MH_SIM_SUPPORT`: Simulator support
-- `MH_DYLIB_IN_CACHE`: Used on dylibs/frameworks in shared library cache.
+- `MH_NOUNDEFS`: Geen ongedefinieerde verwysings nie (volledig gekoppel)
+- `MH_DYLDLINK`: Dyld-koppeling
+- `MH_PREBOUND`: Dinamiese verwysings vooraf gekoppel.
+- `MH_SPLIT_SEGS`: Lêer verdeel r/o en r/w segmente.
+- `MH_WEAK_DEFINES`: Binêre het swak gedefinieerde simbole
+- `MH_BINDS_TO_WEAK`: Binêre gebruik swak simbole
+- `MH_ALLOW_STACK_EXECUTION`: Maak die stapel uitvoerbaar
+- `MH_NO_REEXPORTED_DYLIBS`: Biblioteek het nie LC_REEXPORT opdragte nie
+- `MH_PIE`: Posisie Onafhanklike Uitvoerbare
+- `MH_HAS_TLV_DESCRIPTORS`: Daar is 'n afdeling met draad plaaslike veranderlikes
+- `MH_NO_HEAP_EXECUTION`: Geen uitvoering vir heap/data bladsye nie
+- `MH_HAS_OBJC`: Binêre het oBject-C afdelings
+- `MH_SIM_SUPPORT`: Simulator ondersteuning
+- `MH_DYLIB_IN_CACHE`: Gebruik op dylibs/raamwerke in gedeelde biblioteek kas.
 
-## **Mach-O Load commands**
+## **Mach-O Laai opdragte**
 
-The **file's layout in memory** is specified here, detailing the **symbol table's location**, the context of the main thread at execution start, and the required **shared libraries**. Instructions are provided to the dynamic loader **(dyld)** on the binary's loading process into memory.
+Die **lêer se uitleg in geheue** word hier gespesifiseer, wat die **simbol tabel se ligging**, die konteks van die hoofdraad by uitvoering begin, en die vereiste **gedeelde biblioteke** detail. Instruksies word aan die dinamiese laaier **(dyld)** gegee oor die binêre se laai proses in geheue.
 
-The uses the **load_command** structure, defined in the mentioned **`loader.h`**:
-
+Die gebruik die **load_command** struktuur, gedefinieer in die genoemde **`loader.h`**:
 ```objectivec
 struct load_command {
-        uint32_t cmd;           /* type of load command */
-        uint32_t cmdsize;       /* total size of command in bytes */
+uint32_t cmd;           /* type of load command */
+uint32_t cmdsize;       /* total size of command in bytes */
 };
 ```
-
-There are about **50 different types of load commands** that the system handles differently. The most common ones are: `LC_SEGMENT_64`, `LC_LOAD_DYLINKER`, `LC_MAIN`, `LC_LOAD_DYLIB`, and `LC_CODE_SIGNATURE`.
+Daar is ongeveer **50 verskillende tipes laaiopdragte** wat die stelsel anders hanteer. Die mees algemene is: `LC_SEGMENT_64`, `LC_LOAD_DYLINKER`, `LC_MAIN`, `LC_LOAD_DYLIB`, en `LC_CODE_SIGNATURE`.
 
 ### **LC_SEGMENT/LC_SEGMENT_64**
 
 > [!TIP]
-> Basically, this type of Load Command define **how to load the \_\_TEXT** (executable code) **and \_\_DATA** (data for the process) **segments** according to the **offsets indicated in the Data section** when the binary is executed.
+> Basies definieer hierdie tipe Laaiopdrag **hoe om die \_\_TEXT** (uitvoerbare kode) **en \_\_DATA** (data vir die proses) **segmente** te laai volgens die **offsets wat in die Data afdeling aangedui word** wanneer die binêre uitgevoer word.
 
-These commands **define segments** that are **mapped** into the **virtual memory space** of a process when it is executed.
+Hierdie opdragte **definieer segmente** wat in die **virtuele geheue ruimte** van 'n proses gemap word wanneer dit uitgevoer word.
 
-There are **different types** of segments, such as the **\_\_TEXT** segment, which holds the executable code of a program, and the **\_\_DATA** segment, which contains data used by the process. These **segments are located in the data section** of the Mach-O file.
+Daar is **verskillende tipes** segmente, soos die **\_\_TEXT** segment, wat die uitvoerbare kode van 'n program bevat, en die **\_\_DATA** segment, wat data bevat wat deur die proses gebruik word. Hierdie **segmente is geleë in die data afdeling** van die Mach-O lêer.
 
-**Each segment** can be further **divided** into multiple **sections**. The **load command structure** contains **information** about **these sections** within the respective segment.
+**Elke segment** kan verder in meerdere **afdelings** **verdeeld** word. Die **laaiopdragstruktuur** bevat **inligting** oor **hierdie afdelings** binne die onderskeie segment.
 
-In the header first you find the **segment header**:
+In die kop vind jy eers die **segmentkop**:
 
-<pre class="language-c"><code class="lang-c">struct segment_command_64 { /* for 64-bit architectures */
-	uint32_t	cmd;		/* LC_SEGMENT_64 */
-	uint32_t	cmdsize;	/* includes sizeof section_64 structs */
-	char		segname[16];	/* segment name */
-	uint64_t	vmaddr;		/* memory address of this segment */
-	uint64_t	vmsize;		/* memory size of this segment */
-	uint64_t	fileoff;	/* file offset of this segment */
-	uint64_t	filesize;	/* amount to map from the file */
-	int32_t		maxprot;	/* maximum VM protection */
-	int32_t		initprot;	/* initial VM protection */
-<strong>	uint32_t	nsects;		/* number of sections in segment */
-</strong>	uint32_t	flags;		/* flags */
+<pre class="language-c"><code class="lang-c">struct segment_command_64 { /* vir 64-bis argitekture */
+uint32_t	cmd;		/* LC_SEGMENT_64 */
+uint32_t	cmdsize;	/* sluit sizeof section_64 strukture in */
+char		segname[16];	/* segmentnaam */
+uint64_t	vmaddr;		/* geheueadres van hierdie segment */
+uint64_t	vmsize;		/* geheuegrootte van hierdie segment */
+uint64_t	fileoff;	/* lêer offset van hierdie segment */
+uint64_t	filesize;	/* hoeveelheid om van die lêer te map */
+int32_t		maxprot;	/* maksimum VM-beskerming */
+int32_t		initprot;	/* aanvanklike VM-beskerming */
+<strong>	uint32_t	nsects;		/* aantal afdelings in segment */
+</strong>	uint32_t	flags;		/* vlae */
 };
 </code></pre>
 
-Example of segment header:
+Voorbeeld van segmentkop:
 
 <figure><img src="../../../images/image (1126).png" alt=""><figcaption></figcaption></figure>
 
-This header defines the **number of sections whose headers appear after** it:
-
+Hierdie kop definieer die **aantal afdelings waarvan die koppe na** dit verskyn:
 ```c
 struct section_64 { /* for 64-bit architectures */
-	char		sectname[16];	/* name of this section */
-	char		segname[16];	/* segment this section goes in */
-	uint64_t	addr;		/* memory address of this section */
-	uint64_t	size;		/* size in bytes of this section */
-	uint32_t	offset;		/* file offset of this section */
-	uint32_t	align;		/* section alignment (power of 2) */
-	uint32_t	reloff;		/* file offset of relocation entries */
-	uint32_t	nreloc;		/* number of relocation entries */
-	uint32_t	flags;		/* flags (section type and attributes)*/
-	uint32_t	reserved1;	/* reserved (for offset or index) */
-	uint32_t	reserved2;	/* reserved (for count or sizeof) */
-	uint32_t	reserved3;	/* reserved */
+char		sectname[16];	/* name of this section */
+char		segname[16];	/* segment this section goes in */
+uint64_t	addr;		/* memory address of this section */
+uint64_t	size;		/* size in bytes of this section */
+uint32_t	offset;		/* file offset of this section */
+uint32_t	align;		/* section alignment (power of 2) */
+uint32_t	reloff;		/* file offset of relocation entries */
+uint32_t	nreloc;		/* number of relocation entries */
+uint32_t	flags;		/* flags (section type and attributes)*/
+uint32_t	reserved1;	/* reserved (for offset or index) */
+uint32_t	reserved2;	/* reserved (for count or sizeof) */
+uint32_t	reserved3;	/* reserved */
 };
 ```
-
-Example of **section header**:
+Voorbeeld van **afdelingskop**:
 
 <figure><img src="../../../images/image (1108).png" alt=""><figcaption></figcaption></figure>
 
-If you **add** the **section offset** (0x37DC) + the **offset** where the **arch starts**, in this case `0x18000` --> `0x37DC + 0x18000 = 0x1B7DC`
+As jy die **afdelingsoffset** (0x37DC) + die **offset** waar die **argitektuur begin**, in hierdie geval `0x18000` --> `0x37DC + 0x18000 = 0x1B7DC`
 
 <figure><img src="../../../images/image (701).png" alt=""><figcaption></figcaption></figure>
 
-It's also possible to get **headers information** from the **command line** with:
-
+Dit is ook moontlik om **kopinligting** van die **opdraglyn** te verkry met:
 ```bash
 otool -lv /bin/ls
 ```
+Algemene segmente wat deur hierdie cmd gelaai word:
 
-Common segments loaded by this cmd:
+- **`__PAGEZERO`:** Dit gee die kernel opdrag om die **adres nul** te **kaart**, sodat dit **nie gelees, geskryf of uitgevoer kan word** nie. Die maxprot en minprot veranderlikes in die struktuur is op nul gestel om aan te dui dat daar **geen lees-skrif-uitvoer regte op hierdie bladsy is**.
+- Hierdie toewysing is belangrik om **NULL pointer dereference kwesbaarhede te verminder**. Dit is omdat XNU 'n harde bladsy nul afdwing wat verseker dat die eerste bladsy (slegs die eerste) van geheue ontoeganklik is (behalwe in i386). 'n Binêre kan aan hierdie vereistes voldoen deur 'n klein \_\_PAGEZERO te skep (met die `-pagezero_size`) om die eerste 4k te dek en die res van die 32-bit geheue in beide gebruiker- en kernelmodus toeganklik te hê.
+- **`__TEXT`**: Bevat **uitvoerbare** **kode** met **lees** en **uitvoer** toestemmings (geen skryfbare)**.** Algemene afdelings van hierdie segment:
+- `__text`: Gecompileerde binêre kode
+- `__const`: Konstant data (slegs lees)
+- `__[c/u/os_log]string`: C, Unicode of os logs string konstantes
+- `__stubs` en `__stubs_helper`: Betrokke tydens die dinamiese biblioteek laai proses
+- `__unwind_info`: Stapel ontrafel data.
+- Let daarop dat al hierdie inhoud onderteken is, maar ook as uitvoerbaar gemerk is (wat meer opsies vir die uitbuiting van afdelings skep wat nie noodwendig hierdie voorreg benodig nie, soos string toegewyde afdelings).
+- **`__DATA`**: Bevat data wat **leesbaar** en **skryfbaar** is (geen uitvoerbare)**.**
+- `__got:` Globale Offset Tabel
+- `__nl_symbol_ptr`: Nie lui (bind by laai) simbool pointer
+- `__la_symbol_ptr`: Lui (bind by gebruik) simbool pointer
+- `__const`: Moet lees-slegs data wees (nie regtig nie)
+- `__cfstring`: CoreFoundation strings
+- `__data`: Globale veranderlikes (wat geinitialiseer is)
+- `__bss`: Statiese veranderlikes (wat nie geinitialiseer is nie)
+- `__objc_*` (\_\_objc_classlist, \_\_objc_protolist, ens): Inligting wat deur die Objective-C runtime gebruik word
+- **`__DATA_CONST`**: \_\_DATA.\_\_const is nie gewaarborg om konstant te wees (skryf toestemmings) nie, en ander pointers en die GOT ook nie. Hierdie afdeling maak `__const`, sommige inisialisators en die GOT tabel (sodra dit opgelos is) **lees slegs** met behulp van `mprotect`.
+- **`__LINKEDIT`**: Bevat inligting vir die linker (dyld) soos simbool, string, en herlokasie tabel inskrywings. Dit is 'n generiese houer vir inhoud wat nie in `__TEXT` of `__DATA` is nie en sy inhoud word in ander laaiopdragte beskryf.
+- dyld inligting: Rebase, Nie-lui/lui/swak binding opcodes en uitvoer info
+- Funksies begin: Tabel van begin adresse van funksies
+- Data In Kode: Data-eilande in \_\_text
+- Simbool Tabel: Simbole in binêr
+- Indirekte Simbool Tabel: Pointer/stub simbole
+- String Tabel
+- Kode Handtekening
+- **`__OBJC`**: Bevat inligting wat deur die Objective-C runtime gebruik word. Alhoewel hierdie inligting ook in die \_\_DATA segment gevind kan word, binne verskeie in \_\_objc\_\* afdelings.
+- **`__RESTRICT`**: 'n Segment sonder inhoud met 'n enkele afdeling genaamd **`__restrict`** (ook leeg) wat verseker dat wanneer die binêre uitgevoer word, dit DYLD omgewingsveranderlikes sal ignoreer.
 
-- **`__PAGEZERO`:** It instructs the kernel to **map** the **address zero** so it **cannot be read from, written to, or executed**. The maxprot and minprot variables in the structure are set to zero to indicate there are **no read-write-execute rights on this page**.
-  - This allocation is important to **mitigate NULL pointer dereference vulnerabilities**. This is because XNU enforces a hard page zero that ensures the first page (only the first) of memory is innaccesible (except in i386). A binary could fulfil this requirements by crafting a small \_\_PAGEZERO (using the `-pagezero_size`) to cover the first 4k and having the rest of 32bit memory accessible in both user and kernel mode.
-- **`__TEXT`**: Contains **executable** **code** with **read** and **execute** permissions (no writable)**.** Common sections of this segment:
-  - `__text`: Compiled binary code
-  - `__const`: Constant data (read only)
-  - `__[c/u/os_log]string`: C, Unicode or os logs string constants
-  - `__stubs` and `__stubs_helper`: Involved during the dynamic library loading process
-  - `__unwind_info`: Stack unwind data.
-  - Note that all this content is signed but also marked as executable (creating more options for exploitation of sections that doesn't necessarily need this privilege, like string dedicated sections).
-- **`__DATA`**: Contains data that is **readable** and **writable** (no executable)**.**
-  - `__got:` Global Offset Table
-  - `__nl_symbol_ptr`: Non lazy (bind at load) symbol pointer
-  - `__la_symbol_ptr`: Lazy (bind on use) symbol pointer
-  - `__const`: Should be read-only data (not really)
-  - `__cfstring`: CoreFoundation strings
-  - `__data`: Global variables (that have been initialized)
-  - `__bss`: Static variables (that have not been initialized)
-  - `__objc_*` (\_\_objc_classlist, \_\_objc_protolist, etc): Information used by the Objective-C runtime
-- **`__DATA_CONST`**: \_\_DATA.\_\_const is not guaranteed to be constant (write permissions), nor are other pointers and the GOT. This section makes `__const`, some initializers and the GOT table (once resolved) **read only** using `mprotect`.
-- **`__LINKEDIT`**: Contains information for the linker (dyld) such as, symbol, string, and relocation table entries. It' a generic container for contents that are neither in `__TEXT` or `__DATA` and its content is decribed in other load commands.
-  - dyld information: Rebase, Non-lazy/lazy/weak binding opcodes and export info
-  - Functions starts: Table of start addresses of functions
-  - Data In Code: Data islands in \_\_text
-  - SYmbol Table: Symbols in binary
-  - Indirect Symbol Table: Pointer/stub symbols
-  - String Table
-  - Code Signature
-- **`__OBJC`**: Contains information used by the Objective-C runtime. Though this information might also be found in the \_\_DATA segment, within various in \_\_objc\_\* sections.
-- **`__RESTRICT`**: A segment without content with a single section called **`__restrict`** (also empty) that ensures that when running the binary, it will ignore DYLD environmental variables.
+Soos dit moontlik was om in die kode te sien, **ondersteun segmente ook vlae** (alhoewel hulle nie baie gebruik word nie):
 
-As it was possible to see in the code, **segments also support flags** (although they aren't used very much):
-
-- `SG_HIGHVM`: Core only (not used)
-- `SG_FVMLIB`: Not used
-- `SG_NORELOC`: Segment has no relocation
-- `SG_PROTECTED_VERSION_1`: Encryption. Used for example by Finder to encrypt text `__TEXT` segment.
+- `SG_HIGHVM`: Slegs kern (nie gebruik nie)
+- `SG_FVMLIB`: Nie gebruik nie
+- `SG_NORELOC`: Segment het geen herlokasie nie
+- `SG_PROTECTED_VERSION_1`: Enkripsie. Gebruik byvoorbeeld deur Finder om teks in die `__TEXT` segment te enkripteer.
 
 ### **`LC_UNIXTHREAD/LC_MAIN`**
 
-**`LC_MAIN`** contains the entrypoint in the **entryoff attribute.** At load time, **dyld** simply **adds** this value to the (in-memory) **base of the binary**, then **jumps** to this instruction to start execution of the binary’s code.
+**`LC_MAIN`** bevat die toegangspunt in die **entryoff attribuut.** Tydens laai, **dyld** voeg eenvoudig **hierdie waarde** by die (in-geheue) **basis van die binêre**, en dan **spring** dit na hierdie instruksie om die uitvoering van die binêre se kode te begin.
 
-**`LC_UNIXTHREAD`** contains the values the register must have when starting the main thread. This was already deprecated but **`dyld`** still uses it. It's possible to see the vlaues of the registers set by this with:
-
+**`LC_UNIXTHREAD`** bevat die waardes wat die register moet hê wanneer die hoofdraad begin. Dit is reeds verouderd, maar **`dyld`** gebruik dit steeds. Dit is moontlik om die waardes van die registers wat deur hierdie gestel is, te sien met:
 ```bash
 otool -l /usr/lib/dyld
 [...]
 Load command 13
-        cmd LC_UNIXTHREAD
-    cmdsize 288
-     flavor ARM_THREAD_STATE64
-      count ARM_THREAD_STATE64_COUNT
-	    x0  0x0000000000000000 x1  0x0000000000000000 x2  0x0000000000000000
-	    x3  0x0000000000000000 x4  0x0000000000000000 x5  0x0000000000000000
-	    x6  0x0000000000000000 x7  0x0000000000000000 x8  0x0000000000000000
-	    x9  0x0000000000000000 x10 0x0000000000000000 x11 0x0000000000000000
-	    x12 0x0000000000000000 x13 0x0000000000000000 x14 0x0000000000000000
-	    x15 0x0000000000000000 x16 0x0000000000000000 x17 0x0000000000000000
-	    x18 0x0000000000000000 x19 0x0000000000000000 x20 0x0000000000000000
-	    x21 0x0000000000000000 x22 0x0000000000000000 x23 0x0000000000000000
-	    x24 0x0000000000000000 x25 0x0000000000000000 x26 0x0000000000000000
-	    x27 0x0000000000000000 x28 0x0000000000000000  fp 0x0000000000000000
-	     lr 0x0000000000000000 sp  0x0000000000000000  pc 0x0000000000004b70
-	   cpsr 0x00000000
+cmd LC_UNIXTHREAD
+cmdsize 288
+flavor ARM_THREAD_STATE64
+count ARM_THREAD_STATE64_COUNT
+x0  0x0000000000000000 x1  0x0000000000000000 x2  0x0000000000000000
+x3  0x0000000000000000 x4  0x0000000000000000 x5  0x0000000000000000
+x6  0x0000000000000000 x7  0x0000000000000000 x8  0x0000000000000000
+x9  0x0000000000000000 x10 0x0000000000000000 x11 0x0000000000000000
+x12 0x0000000000000000 x13 0x0000000000000000 x14 0x0000000000000000
+x15 0x0000000000000000 x16 0x0000000000000000 x17 0x0000000000000000
+x18 0x0000000000000000 x19 0x0000000000000000 x20 0x0000000000000000
+x21 0x0000000000000000 x22 0x0000000000000000 x23 0x0000000000000000
+x24 0x0000000000000000 x25 0x0000000000000000 x26 0x0000000000000000
+x27 0x0000000000000000 x28 0x0000000000000000  fp 0x0000000000000000
+lr 0x0000000000000000 sp  0x0000000000000000  pc 0x0000000000004b70
+cpsr 0x00000000
 
 [...]
 ```
-
 ### **`LC_CODE_SIGNATURE`**
 
-Contains information about the **code signature of the Macho-O file**. It only contains an **offset** that **points** to the **signature blob**. This is typically at the very end of the file.\
-However, you can find some information about this section in [**this blog post**](https://davedelong.com/blog/2018/01/10/reading-your-own-entitlements/) and this [**gists**](https://gist.github.com/carlospolop/ef26f8eb9fafd4bc22e69e1a32b81da4).
+Bevat inligting oor die **kodehandtekening van die Macho-O-lêer**. Dit bevat slegs 'n **offset** wat na die **handtekening blob** **wys**. Dit is tipies aan die einde van die lêer.\
+U kan egter 'n paar inligting oor hierdie afdeling vind in [**hierdie blogpos**](https://davedelong.com/blog/2018/01/10/reading-your-own-entitlements/) en hierdie [**gists**](https://gist.github.com/carlospolop/ef26f8eb9fafd4bc22e69e1a32b81da4).
 
 ### **`LC_ENCRYPTION_INFO[_64]`**
 
-Support for binary encryption. However, of course, if an attacker manages to compromise the process, he will be able to dump the memory unencrypted.
+Ondersteuning vir binêre versleuteling. Dit is egter, natuurlik, as 'n aanvaller daarin slaag om die proses te kompromitteer, sal hy in staat wees om die geheue onversleuteld te dump.
 
 ### **`LC_LOAD_DYLINKER`**
 
-Contains the **path to the dynamic linker executable** that maps shared libraries into the process address space. The **value is always set to `/usr/lib/dyld`**. It’s important to note that in macOS, dylib mapping happens in **user mode**, not in kernel mode.
+Bevat die **pad na die dinamiese linker uitvoerbare lêer** wat gedeelde biblioteke in die prosesadresruimte in kaart bring. Die **waarde is altyd ingestel op `/usr/lib/dyld`**. Dit is belangrik om te noem dat in macOS, dylib-mapping in **gebruikermodus** plaasvind, nie in kernmodus nie.
 
 ### **`LC_IDENT`**
 
-Obsolete but when configured to geenrate dumps on panic, a Mach-O core dump is created and the kernel version is set in the `LC_IDENT` command.
+Verouderd, maar wanneer dit gekonfigureer is om dumps op paniek te genereer, word 'n Mach-O kern dump geskep en die kern weergawe word in die `LC_IDENT` opdrag ingestel.
 
 ### **`LC_UUID`**
 
-Random UUID. It's useful for anything directly but XNU caches it with the rest of the process info. It can be used in crash reports.
+Ewekansige UUID. Dit is nuttig vir enigiets direk, maar XNU kas dit saam met die res van die prosesinligting. Dit kan in ongelukverslae gebruik word.
 
 ### **`LC_DYLD_ENVIRONMENT`**
 
-Allows to indicate environment variables to the dyld beforenthe process is executed. This can be vary dangerous as it can allow to execute arbitrary code inside the process so this load command is only used in dyld build with `#define SUPPORT_LC_DYLD_ENVIRONMENT` and further restricts processing only to variables of the form `DYLD_..._PATH` specifying load paths.
+Stel in staat om omgewingsveranderlikes aan die dyld aan te dui voordat die proses uitgevoer word. Dit kan baie gevaarlik wees aangesien dit die uitvoering van arbitrêre kode binne die proses kan toelaat, so hierdie laai-opdrag word slegs in dyld-bou met `#define SUPPORT_LC_DYLD_ENVIRONMENT` gebruik en beperk die verwerking verder slegs tot veranderlikes van die vorm `DYLD_..._PATH` wat laai-pade spesifiseer.
 
 ### **`LC_LOAD_DYLIB`**
 
-This load command describes a **dynamic** **library** dependency which **instructs** the **loader** (dyld) to **load and link said library**. There is a `LC_LOAD_DYLIB` load command **for each library** that the Mach-O binary requires.
+Hierdie laai-opdrag beskryf 'n **dinamiese** **biblioteek** afhanklikheid wat die **laaier** (dyld) **instruer** om die **gesê biblioteek te laai en te koppel**. Daar is 'n `LC_LOAD_DYLIB` laai-opdrag **vir elke biblioteek** wat die Mach-O binêre benodig.
 
-- This load command is a structure of type **`dylib_command`** (which contains a struct dylib, describing the actual dependent dynamic library):
-
+- Hierdie laai-opdrag is 'n struktuur van tipe **`dylib_command`** (wat 'n struct dylib bevat, wat die werklike afhanklike dinamiese biblioteek beskryf):
 ```objectivec
 struct dylib_command {
-        uint32_t        cmd;            /* LC_LOAD_{,WEAK_}DYLIB */
-        uint32_t        cmdsize;        /* includes pathname string */
-        struct dylib    dylib;          /* the library identification */
+uint32_t        cmd;            /* LC_LOAD_{,WEAK_}DYLIB */
+uint32_t        cmdsize;        /* includes pathname string */
+struct dylib    dylib;          /* the library identification */
 };
 
 struct dylib {
-    union lc_str  name;                 /* library's path name */
-    uint32_t timestamp;                 /* library's build time stamp */
-    uint32_t current_version;           /* library's current version number */
-    uint32_t compatibility_version;     /* library's compatibility vers number*/
+union lc_str  name;                 /* library's path name */
+uint32_t timestamp;                 /* library's build time stamp */
+uint32_t current_version;           /* library's current version number */
+uint32_t compatibility_version;     /* library's compatibility vers number*/
 };
 ```
-
 ![](<../../../images/image (486).png>)
 
-You could also get this info from the cli with:
-
+Jy kan ook hierdie inligting van die cli kry met:
 ```bash
 otool -L /bin/ls
 /bin/ls:
-	/usr/lib/libutil.dylib (compatibility version 1.0.0, current version 1.0.0)
-	/usr/lib/libncurses.5.4.dylib (compatibility version 5.4.0, current version 5.4.0)
-	/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1319.0.0)
+/usr/lib/libutil.dylib (compatibility version 1.0.0, current version 1.0.0)
+/usr/lib/libncurses.5.4.dylib (compatibility version 5.4.0, current version 5.4.0)
+/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1319.0.0)
 ```
+Sommige potensiële malware-verwante biblioteke is:
 
-Some potential malware related libraries are:
-
-- **DiskArbitration**: Monitoring USB drives
-- **AVFoundation:** Capture audio and video
-- **CoreWLAN**: Wifi scans.
+- **DiskArbitration**: Monitering van USB skyfies
+- **AVFoundation:** Opname van audio en video
+- **CoreWLAN**: Wifi skandering.
 
 > [!NOTE]
-> A Mach-O binary can contain one or **more** **constructors**, that will be **executed** **before** the address specified in **LC_MAIN**.\
-> The offsets of any constructors are held in the **\_\_mod_init_func** section of the **\_\_DATA_CONST** segment.
+> 'n Mach-O binêre kan een of **meer** **konstruktors** bevat, wat **uitgevoer** sal word **voor** die adres wat in **LC_MAIN** gespesifiseer is.\
+> Die offsets van enige konstruktors word in die **\_\_mod_init_func** afdeling van die **\_\_DATA_CONST** segment gehou.
 
 ## **Mach-O Data**
 
-At the core of the file lies the data region, which is composed of several segments as defined in the load-commands region. **A variety of data sections can be housed within each segment**, with each section **holding code or data** specific to a type.
+In die kern van die lêer lê die datastreek, wat uit verskeie segmente bestaan soos gedefinieer in die laai-opdragte streek. **'n Verskeidenheid dataseksies kan binne elke segment gehuisves word**, met elke afdeling **wat kode of data** spesifiek vir 'n tipe hou.
 
 > [!TIP]
-> The data is basically the part containing all the **information** that is loaded by the load commands **LC_SEGMENTS_64**
+> Die data is basies die deel wat al die **inligting** bevat wat deur die laai-opdragte **LC_SEGMENTS_64** gelaai word.
 
 ![https://www.oreilly.com/api/v2/epubs/9781785883378/files/graphics/B05055_02_38.jpg](<../../../images/image (507) (3).png>)
 
-This includes:
+Dit sluit in:
 
-- **Function table:** Which holds information about the program functions.
-- **Symbol table**: Which contains information about the external function used by the binary
-- It could also contain internal function, variable names as well and more.
+- **Funksietabel:** Wat inligting oor die programfunksies hou.
+- **Simboltabel**: Wat inligting bevat oor die eksterne funksie wat deur die binêre gebruik word
+- Dit kan ook interne funksie, veranderlike name sowel as meer bevat.
 
-To check it you could use the [**Mach-O View**](https://sourceforge.net/projects/machoview/) tool:
+Om dit te kontroleer kan jy die [**Mach-O View**](https://sourceforge.net/projects/machoview/) hulpmiddel gebruik:
 
 <figure><img src="../../../images/image (1120).png" alt=""><figcaption></figcaption></figure>
 
-Or from the cli:
-
+Of vanaf die cli:
 ```bash
 size -m /bin/ls
 ```
-
-## Objetive-C Common Sections
+## Objetive-C Algemene Afdelings
 
 In `__TEXT` segment (r-x):
 
-- `__objc_classname`: Class names (strings)
-- `__objc_methname`: Method names (strings)
-- `__objc_methtype`: Method types (strings)
+- `__objc_classname`: Klasname (strings)
+- `__objc_methname`: Metode name (strings)
+- `__objc_methtype`: Metode tipes (strings)
 
 In `__DATA` segment (rw-):
 
-- `__objc_classlist`: Pointers to all Objetive-C classes
-- `__objc_nlclslist`: Pointers to Non-Lazy Objective-C classes
-- `__objc_catlist`: Pointer to Categories
-- `__objc_nlcatlist`: Pointer to Non-Lazy Categories
-- `__objc_protolist`: Protocols list
-- `__objc_const`: Constant data
+- `__objc_classlist`: Pointers na alle Objetive-C klasse
+- `__objc_nlclslist`: Pointers na Non-Lazy Objective-C klasse
+- `__objc_catlist`: Pointer na Kategories
+- `__objc_nlcatlist`: Pointer na Non-Lazy Kategories
+- `__objc_protolist`: Protokolle lys
+- `__objc_const`: Konstant data
 - `__objc_imageinfo`, `__objc_selrefs`, `objc__protorefs`...
 
 ## Swift

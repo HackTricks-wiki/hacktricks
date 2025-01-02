@@ -2,43 +2,43 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Basiese Inligting
 
-Bundles in macOS serve as containers for a variety of resources including applications, libraries, and other necessary files, making them appear as single objects in Finder, such as the familiar `*.app` files. The most commonly encountered bundle is the `.app` bundle, though other types like `.framework`, `.systemextension`, and `.kext` are also prevalent.
+Bundles in macOS dien as houers vir 'n verskeidenheid hulpbronne, insluitend toepassings, biblioteke en ander nodige lêers, wat hulle as enkele voorwerpe in Finder laat verskyn, soos die bekende `*.app` lêers. Die mees algemene bundle is die `.app` bundle, hoewel ander tipes soos `.framework`, `.systemextension`, en `.kext` ook algemeen voorkom.
 
-### Essential Components of a Bundle
+### Essensiële Komponente van 'n Bundle
 
-Within a bundle, particularly within the `<application>.app/Contents/` directory, a variety of important resources are housed:
+Binne 'n bundle, veral binne die `<application>.app/Contents/` gids, is 'n verskeidenheid belangrike hulpbronne gehuisves:
 
-- **\_CodeSignature**: This directory stores code-signing details vital for verifying the integrity of the application. You can inspect the code-signing information using commands like: %%%bash openssl dgst -binary -sha1 /Applications/Safari.app/Contents/Resources/Assets.car | openssl base64 %%%
-- **MacOS**: Contains the executable binary of the application that runs upon user interaction.
-- **Resources**: A repository for the application's user interface components including images, documents, and interface descriptions (nib/xib files).
-- **Info.plist**: Acts as the application's main configuration file, crucial for the system to recognize and interact with the application appropriately.
+- **\_CodeSignature**: Hierdie gids stoor kode-handtekening besonderhede wat noodsaaklik is om die integriteit van die toepassing te verifieer. Jy kan die kode-handtekening inligting inspekteer met opdragte soos: %%%bash openssl dgst -binary -sha1 /Applications/Safari.app/Contents/Resources/Assets.car | openssl base64 %%%
+- **MacOS**: Bevat die uitvoerbare binêre van die toepassing wat loop wanneer die gebruiker interaksie het.
+- **Resources**: 'n Bewaarplek vir die toepassing se gebruikerskoppelvlak komponente, insluitend beelde, dokumente, en koppelvlak beskrywings (nib/xib lêers).
+- **Info.plist**: Dien as die toepassing se hoofkonfigurasielêer, wat noodsaaklik is vir die stelsel om die toepassing korrek te herken en mee te kommunikeer.
 
-#### Important Keys in Info.plist
+#### Belangrike Sleutels in Info.plist
 
-The `Info.plist` file is a cornerstone for application configuration, containing keys such as:
+Die `Info.plist` lêer is 'n hoeksteen vir toepassing konfigurasie, wat sleutels soos die volgende bevat:
 
-- **CFBundleExecutable**: Specifies the name of the main executable file located in the `Contents/MacOS` directory.
-- **CFBundleIdentifier**: Provides a global identifier for the application, used extensively by macOS for application management.
-- **LSMinimumSystemVersion**: Indicates the minimum version of macOS required for the application to run.
+- **CFBundleExecutable**: Gee die naam van die hoof uitvoerbare lêer wat in die `Contents/MacOS` gids geleë is.
+- **CFBundleIdentifier**: Verskaf 'n globale identifiseerder vir die toepassing, wat wyd deur macOS vir toepassing bestuur gebruik word.
+- **LSMinimumSystemVersion**: Dui die minimum weergawe van macOS aan wat benodig word vir die toepassing om te loop.
 
-### Exploring Bundles
+### Verken Bundles
 
-To explore the contents of a bundle, such as `Safari.app`, the following command can be used: `bash ls -lR /Applications/Safari.app/Contents`
+Om die inhoud van 'n bundle, soos `Safari.app`, te verken, kan die volgende opdrag gebruik word: `bash ls -lR /Applications/Safari.app/Contents`
 
-This exploration reveals directories like `_CodeSignature`, `MacOS`, `Resources`, and files like `Info.plist`, each serving a unique purpose from securing the application to defining its user interface and operational parameters.
+Hierdie verkenning onthul gidse soos `_CodeSignature`, `MacOS`, `Resources`, en lêers soos `Info.plist`, elk wat 'n unieke doel dien van die beveiliging van die toepassing tot die definisie van sy gebruikerskoppelvlak en operasionele parameters.
 
-#### Additional Bundle Directories
+#### Addisionele Bundle Gidse
 
-Beyond the common directories, bundles may also include:
+Benewens die algemene gidse, kan bundles ook insluit:
 
-- **Frameworks**: Contains bundled frameworks used by the application. Frameworks are like dylibs with extra resources.
-- **PlugIns**: A directory for plug-ins and extensions that enhance the application's capabilities.
-- **XPCServices**: Holds XPC services used by the application for out-of-process communication.
+- **Frameworks**: Bevat gebundelde frameworks wat deur die toepassing gebruik word. Frameworks is soos dylibs met ekstra hulpbronne.
+- **PlugIns**: 'n Gids vir plug-ins en uitbreidings wat die toepassing se vermoëns verbeter.
+- **XPCServices**: Hou XPC dienste wat deur die toepassing gebruik word vir buite-proses kommunikasie.
 
-This structure ensures that all necessary components are encapsulated within the bundle, facilitating a modular and secure application environment.
+Hierdie struktuur verseker dat alle nodige komponente binne die bundle ingesluit is, wat 'n modulaire en veilige toepassing omgewing fasiliteer.
 
-For more detailed information on `Info.plist` keys and their meanings, the Apple developer documentation provides extensive resources: [Apple Info.plist Key Reference](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html).
+Vir meer gedetailleerde inligting oor `Info.plist` sleutels en hul betekenisse, bied die Apple ontwikkelaar dokumentasie uitgebreide hulpbronne: [Apple Info.plist Key Reference](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html).
 
 {{#include ../../../banners/hacktricks-training.md}}

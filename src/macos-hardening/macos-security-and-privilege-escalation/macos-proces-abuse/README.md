@@ -1,187 +1,183 @@
-# macOS Process Abuse
+# macOS Proses Misbruik
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Processes Basic Information
+## Basiese Inligting oor Prosesse
 
-A process is an instance of a running executable, however processes doesn't run code, these are threads. Therefore **processes are just containers for running threads** providing the memory, descriptors, ports, permissions...
+'n Proses is 'n instansie van 'n lopende uitvoerbare, egter prosesse voer nie kode uit nie, dit is drade. Daarom **is prosesse net houers vir lopende drade** wat die geheue, beskrywings, poorte, toestemmings...
 
-Traditionally, processes where started within other processes (except PID 1) by calling **`fork`** which would create a exact copy of the current process and then the **child process** would generally call **`execve`** to load the new executable and run it. Then, **`vfork`** was introduced to make this process faster without any memory copying.\
-Then **`posix_spawn`** was introduced combining **`vfork`** and **`execve`** in one call and accepting flags:
+Tradisioneel is prosesse binne ander prosesse (behalwe PID 1) begin deur **`fork`** aan te roep wat 'n presiese kopie van die huidige proses sou skep en dan sou die **kind proses** gewoonlik **`execve`** aanroep om die nuwe uitvoerbare te laai en dit uit te voer. Toe is **`vfork`** bekendgestel om hierdie proses vinniger te maak sonder enige geheue-kopie.\
+Toe is **`posix_spawn`** bekendgestel wat **`vfork`** en **`execve`** in een oproep kombineer en vlaggies aanvaar:
 
-- `POSIX_SPAWN_RESETIDS`: Reset effective ids to real ids
-- `POSIX_SPAWN_SETPGROUP`: Set process group affiliation
-- `POSUX_SPAWN_SETSIGDEF`: Set signal default behaviour
-- `POSIX_SPAWN_SETSIGMASK`: Set signal mask
-- `POSIX_SPAWN_SETEXEC`: Exec in the same process (like `execve` with more options)
-- `POSIX_SPAWN_START_SUSPENDED`: Start suspended
-- `_POSIX_SPAWN_DISABLE_ASLR`: Start without ASLR
-- `_POSIX_SPAWN_NANO_ALLOCATOR:` Use libmalloc's Nano allocator
-- `_POSIX_SPAWN_ALLOW_DATA_EXEC:` Allow `rwx` on data segments
-- `POSIX_SPAWN_CLOEXEC_DEFAULT`: Close all file descriptions on exec(2) by default
-- `_POSIX_SPAWN_HIGH_BITS_ASLR:` Randomize high bits of ASLR slide
+- `POSIX_SPAWN_RESETIDS`: Herstel effektiewe id's na werklike id's
+- `POSIX_SPAWN_SETPGROUP`: Stel prosesgroep affiliasie
+- `POSUX_SPAWN_SETSIGDEF`: Stel sein standaard gedrag
+- `POSIX_SPAWN_SETSIGMASK`: Stel seinmasker
+- `POSIX_SPAWN_SETEXEC`: Exec in dieselfde proses (soos `execve` met meer opsies)
+- `POSIX_SPAWN_START_SUSPENDED`: Begin gesuspend
+- `_POSIX_SPAWN_DISABLE_ASLR`: Begin sonder ASLR
+- `_POSIX_SPAWN_NANO_ALLOCATOR:` Gebruik libmalloc se Nano allokator
+- `_POSIX_SPAWN_ALLOW_DATA_EXEC:` Laat `rwx` op datasegmente toe
+- `POSIX_SPAWN_CLOEXEC_DEFAULT`: Sluit alle lêer beskrywings op exec(2) standaard
+- `_POSIX_SPAWN_HIGH_BITS_ASLR:` Randomiseer hoë bits van ASLR gly
 
-Moreover, `posix_spawn` allows to specify an array of **`posix_spawnattr`** that controls some aspects of the spawned process, and **`posix_spawn_file_actions`** to modify the state of the descriptors.
+Boonop laat `posix_spawn` toe om 'n reeks van **`posix_spawnattr`** te spesifiseer wat sommige aspekte van die gespaande proses beheer, en **`posix_spawn_file_actions`** om die toestand van die beskrywings te verander.
 
-When a process dies it send the **return code to the parent process** (if the parent died, the new parent is PID 1) with the signal `SIGCHLD`. The parent needs to get this value calling `wait4()` or `waitid()` and until that happen the child stays in a zombie state where it's still listed but doesn't consume resources.
+Wanneer 'n proses sterf, stuur dit die **terugkode na die ouer proses** (as die ouer gesterf het, is die nuwe ouer PID 1) met die sein `SIGCHLD`. Die ouer moet hierdie waarde kry deur `wait4()` of `waitid()` aan te roep en totdat dit gebeur, bly die kind in 'n zombie toestand waar dit steeds gelys word maar nie hulpbronne verbruik nie.
 
-### PIDs
+### PID's
 
-PIDs, process identifiers, identifies a uniq process. In XNU the **PIDs** are of **64bits** increasing monotonically and **never wrap** (to avoid abuses).
+PID's, prosesidentifiseerders, identifiseer 'n unieke proses. In XNU is die **PID's** van **64bits** wat monotonies toeneem en **nooit wrap** (om misbruik te voorkom).
 
-### Process Groups, Sessions & Coalations
+### Prosesgroepe, Sessies & Koalisies
 
-**Processes** can be inserted in **groups** to make it easier to handle them. For example, commands in a shell script will be in the same process group so it's possible to **signal them together** using kill for example.\
-It's also possible to **group processes in sessions**. When a process starts a session (`setsid(2)`), the children processes are set inside the session, unless they start their own session.
+**Prosesse** kan in **groepe** ingevoeg word om dit makliker te maak om hulle te hanteer. Byvoorbeeld, opdragte in 'n skaal script sal in dieselfde prosesgroep wees sodat dit moontlik is om **hulle saam te sein** met behulp van kill byvoorbeeld.\
+Dit is ook moontlik om **prosesse in sessies te groepeer**. Wanneer 'n proses 'n sessie begin (`setsid(2)`), word die kindprosesse binne die sessie geplaas, tensy hulle hul eie sessie begin.
 
-Coalition is another waya to group processes in Darwin. A process joining a coalation allows it to access pool resources, sharing a ledger or facing Jetsam. Coalations have different roles: Leader, XPC service, Extension.
+Koalisie is 'n ander manier om prosesse in Darwin te groepeer. 'n Proses wat by 'n koalisie aansluit, laat dit toe om poel hulpbronne te benader, 'n grootboek te deel of Jetsam te konfronteer. Koalisies het verskillende rolle: Leier, XPC diens, Uitbreiding.
 
-### Credentials & Personae
+### Kredensiale & Persone
 
-Each process with hold **credentials** that **identify its privileges** in the system. Each process will have one primary `uid` and one primary `gid` (although might belong to several groups).\
-It's also possible to change the user and group id if the binary has the `setuid/setgid` bit.\
-There are several functions to **set new uids/gids**.
+Elke proses hou **kredensiale** wat **sy voorregte** in die stelsel identifiseer. Elke proses sal een primêre `uid` en een primêre `gid` hê (alhoewel dit aan verskeie groepe mag behoort).\
+Dit is ook moontlik om die gebruiker en groep id te verander as die binêre die `setuid/setgid` bit het.\
+Daar is verskeie funksies om **nuwe uids/gidses in te stel**.
 
-The syscall **`persona`** provides an **alternate** set of **credentials**. Adopting a persona assumes its uid, gid and group memberships **at one**. In the [**source code**](https://github.com/apple/darwin-xnu/blob/main/bsd/sys/persona.h) it's possible to find the struct:
-
+Die syscall **`persona`** bied 'n **alternatiewe** stel van **kredensiale**. Om 'n persona aan te neem, neem dit sy uid, gid en groep lidmaatskappe **tegelyk** aan. In die [**bron kode**](https://github.com/apple/darwin-xnu/blob/main/bsd/sys/persona.h) is dit moontlik om die struktuur te vind:
 ```c
 struct kpersona_info { uint32_t persona_info_version;
-    uid_t    persona_id; /* overlaps with UID */
-    int      persona_type;
-    gid_t    persona_gid;
-    uint32_t persona_ngroups;
-    gid_t    persona_groups[NGROUPS];
-    uid_t    persona_gmuid;
-    char     persona_name[MAXLOGNAME + 1];
+uid_t    persona_id; /* overlaps with UID */
+int      persona_type;
+gid_t    persona_gid;
+uint32_t persona_ngroups;
+gid_t    persona_groups[NGROUPS];
+uid_t    persona_gmuid;
+char     persona_name[MAXLOGNAME + 1];
 
-    /* TODO: MAC policies?! */
+/* TODO: MAC policies?! */
 }
 ```
+## Draad Basiese Inligting
 
-## Threads Basic Information
+1. **POSIX Draad (pthreads):** macOS ondersteun POSIX drade (`pthreads`), wat deel is van 'n standaard threading API vir C/C++. Die implementering van pthreads in macOS is te vind in `/usr/lib/system/libsystem_pthread.dylib`, wat afkomstig is van die publiek beskikbare `libpthread` projek. Hierdie biblioteek bied die nodige funksies om drade te skep en te bestuur.
+2. **Drade Skep:** Die `pthread_create()` funksie word gebruik om nuwe drade te skep. Intern roep hierdie funksie `bsdthread_create()` aan, wat 'n laer vlak stelselaanroep is wat spesifiek is vir die XNU-kern (die kern waarop macOS gebaseer is). Hierdie stelselaanroep neem verskeie vlae afgeleide van `pthread_attr` (atribute) wat die gedrag van die draad spesifiseer, insluitend skeduleringbeleide en stapelgrootte.
+- **Standaard Stapelgrootte:** Die standaard stapelgrootte vir nuwe drade is 512 KB, wat voldoende is vir tipiese operasies, maar kan aangepas word via draadatribute indien meer of minder spasie benodig word.
+3. **Draad Inisialiserings:** Die `__pthread_init()` funksie is van kardinale belang tydens draadopstelling, wat die `env[]` argument gebruik om omgewing veranderlikes te ontleed wat besonderhede oor die stapel se ligging en grootte kan insluit.
 
-1. **POSIX Threads (pthreads):** macOS supports POSIX threads (`pthreads`), which are part of a standard threading API for C/C++. The implementation of pthreads in macOS is found in `/usr/lib/system/libsystem_pthread.dylib`, which comes from the publicly available `libpthread` project. This library provides the necessary functions to create and manage threads.
-2. **Creating Threads:** The `pthread_create()` function is used to create new threads. Internally, this function calls `bsdthread_create()`, which is a lower-level system call specific to the XNU kernel (the kernel macOS is based on). This system call takes various flags derived from `pthread_attr` (attributes) that specify thread behavior, including scheduling policies and stack size.
-   - **Default Stack Size:** The default stack size for new threads is 512 KB, which is sufficient for typical operations but can be adjusted via thread attributes if more or less space is needed.
-3. **Thread Initialization:** The `__pthread_init()` function is crucial during thread setup, utilizing the `env[]` argument to parse environment variables that can include details about the stack's location and size.
+#### Draad Beëindiging in macOS
 
-#### Thread Termination in macOS
+1. **Drade Verlaat:** Drade word tipies beëindig deur `pthread_exit()` aan te roep. Hierdie funksie laat 'n draad toe om skoon te verlaat, die nodige opruiming te doen en die draad toe te laat om 'n terugkeerwaarde aan enige joiners te stuur.
+2. **Draad Opruiming:** By die aanroep van `pthread_exit()`, word die funksie `pthread_terminate()` aangeroep, wat die verwydering van alle geassosieerde draadstrukture hanteer. Dit deallokeer Mach draadpoorte (Mach is die kommunikasiesubstelsel in die XNU-kern) en roep `bsdthread_terminate` aan, 'n stelselaanroep wat die kernvlak strukture geassosieer met die draad verwyder.
 
-1. **Exiting Threads:** Threads are typically terminated by calling `pthread_exit()`. This function allows a thread to exit cleanly, performing necessary cleanup and allowing the thread to send a return value back to any joiners.
-2. **Thread Cleanup:** Upon calling `pthread_exit()`, the function `pthread_terminate()` is invoked, which handles the removal of all associated thread structures. It deallocates Mach thread ports (Mach is the communication subsystem in the XNU kernel) and calls `bsdthread_terminate`, a syscall that removes the kernel-level structures associated with the thread.
+#### Sinchronisasie Meganismes
 
-#### Synchronization Mechanisms
-
-To manage access to shared resources and avoid race conditions, macOS provides several synchronization primitives. These are critical in multi-threading environments to ensure data integrity and system stability:
+Om toegang tot gedeelde hulpbronne te bestuur en wedren toestande te vermy, bied macOS verskeie sinchronisasie primitiewe. Hierdie is krities in multi-draad omgewings om data integriteit en stelsels stabiliteit te verseker:
 
 1. **Mutexes:**
-   - **Regular Mutex (Signature: 0x4D555458):** Standard mutex with a memory footprint of 60 bytes (56 bytes for the mutex and 4 bytes for the signature).
-   - **Fast Mutex (Signature: 0x4d55545A):** Similar to a regular mutex but optimized for faster operations, also 60 bytes in size.
-2. **Condition Variables:**
-   - Used for waiting for certain conditions to occur, with a size of 44 bytes (40 bytes plus a 4-byte signature).
-   - **Condition Variable Attributes (Signature: 0x434e4441):** Configuration attributes for condition variables, sized at 12 bytes.
-3. **Once Variable (Signature: 0x4f4e4345):**
-   - Ensures that a piece of initialization code is executed only once. Its size is 12 bytes.
-4. **Read-Write Locks:**
-   - Allows multiple readers or one writer at a time, facilitating efficient access to shared data.
-   - **Read Write Lock (Signature: 0x52574c4b):** Sized at 196 bytes.
-   - **Read Write Lock Attributes (Signature: 0x52574c41):** Attributes for read-write locks, 20 bytes in size.
+- **Reguliere Mutex (Handtekening: 0x4D555458):** Standaard mutex met 'n geheue voetspoor van 60 bytes (56 bytes vir die mutex en 4 bytes vir die handtekening).
+- **Vinnige Mutex (Handtekening: 0x4d55545A):** Soortgelyk aan 'n regulêre mutex maar geoptimaliseer vir vinniger operasies, ook 60 bytes in grootte.
+2. **Toestand Veranderlikes:**
+- Gebruike om te wag vir sekere toestande om voor te kom, met 'n grootte van 44 bytes (40 bytes plus 'n 4-byte handtekening).
+- **Toestand Veranderlike Atributen (Handtekening: 0x434e4441):** Konfigurasie-atri bute vir toestand veranderlikes, grootte van 12 bytes.
+3. **Eens Veranderlike (Handtekening: 0x4f4e4345):**
+- Verseker dat 'n stuk inisialiseringskode slegs een keer uitgevoer word. Die grootte is 12 bytes.
+4. **Lees-Skryf Slotte:**
+- Laat verskeie lesers of een skrywer op 'n slag toe, wat doeltreffende toegang tot gedeelde data fasiliteer.
+- **Lees Skryf Slot (Handtekening: 0x52574c4b):** Grootte van 196 bytes.
+- **Lees Skryf Slot Atributen (Handtekening: 0x52574c41):** Atributen vir lees-skryf slotte, 20 bytes in grootte.
 
 > [!TIP]
-> The last 4 bytes of those objects are used to deetct overflows.
+> Die laaste 4 bytes van daardie objekte word gebruik om oorgange te detecteer.
 
-### Thread Local Variables (TLV)
+### Draad Plaaslike Veranderlikes (TLV)
 
-**Thread Local Variables (TLV)** in the context of Mach-O files (the format for executables in macOS) are used to declare variables that are specific to **each thread** in a multi-threaded application. This ensures that each thread has its own separate instance of a variable, providing a way to avoid conflicts and maintain data integrity without needing explicit synchronization mechanisms like mutexes.
+**Draad Plaaslike Veranderlikes (TLV)** in die konteks van Mach-O lêers (die formaat vir uitvoerbare lêers in macOS) word gebruik om veranderlikes te verklaar wat spesifiek is vir **elke draad** in 'n multi-draad toepassing. Dit verseker dat elke draad sy eie aparte instansie van 'n veranderlike het, wat 'n manier bied om konflikte te vermy en data integriteit te handhaaf sonder om eksplisiete sinchronisasie meganismes soos mutexes te benodig.
 
-In C and related languages, you can declare a thread-local variable using the **`__thread`** keyword. Here’s how it works in your example:
-
+In C en verwante tale kan jy 'n draad-lokale veranderlike verklaar met die **`__thread`** sleutelwoord. Hier is hoe dit in jou voorbeeld werk:
 ```c
 cCopy code__thread int tlv_var;
 
 void main (int argc, char **argv){
-    tlv_var = 10;
+tlv_var = 10;
 }
 ```
+Dit snippet definieer `tlv_var` as 'n thread-lokale veranderlike. Elke thread wat hierdie kode uitvoer, sal sy eie `tlv_var` hê, en veranderinge wat een thread aan `tlv_var` maak, sal nie `tlv_var` in 'n ander thread beïnvloed nie.
 
-This snippet defines `tlv_var` as a thread-local variable. Each thread running this code will have its own `tlv_var`, and changes one thread makes to `tlv_var` will not affect `tlv_var` in another thread.
+In die Mach-O binêre, is die data wat verband hou met thread-lokale veranderlikes georganiseer in spesifieke afdelings:
 
-In the Mach-O binary, the data related to thread local variables is organized into specific sections:
+- **`__DATA.__thread_vars`**: Hierdie afdeling bevat die metadata oor die thread-lokale veranderlikes, soos hul tipes en inisialisasiestatus.
+- **`__DATA.__thread_bss`**: Hierdie afdeling word gebruik vir thread-lokale veranderlikes wat nie eksplisiet geinisialiseer is nie. Dit is 'n deel van geheue wat gereserveer is vir nul-geinisialiseerde data.
 
-- **`__DATA.__thread_vars`**: This section contains the metadata about the thread-local variables, like their types and initialization status.
-- **`__DATA.__thread_bss`**: This section is used for thread-local variables that are not explicitly initialized. It's a part of memory set aside for zero-initialized data.
+Mach-O bied ook 'n spesifieke API genaamd **`tlv_atexit`** om thread-lokale veranderlikes te bestuur wanneer 'n thread verlaat. Hierdie API laat jou toe om **destructors** te **registreer**—spesiale funksies wat thread-lokale data skoonmaak wanneer 'n thread beëindig.
 
-Mach-O also provides a specific API called **`tlv_atexit`** to manage thread-local variables when a thread exits. This API allows you to **register destructors**—special functions that clean up thread-local data when a thread terminates.
+### Thread Prioriteite
 
-### Threading Priorities
+Om thread prioriteite te verstaan, behels dit om te kyk na hoe die bedryfstelsel besluit watter threads om te laat loop en wanneer. Hierdie besluit word beïnvloed deur die prioriteitsvlak wat aan elke thread toegeken word. In macOS en Unix-agtige stelsels, word dit hanteer met konsepte soos `nice`, `renice`, en Quality of Service (QoS) klasse.
 
-Understanding thread priorities involves looking at how the operating system decides which threads to run and when. This decision is influenced by the priority level assigned to each thread. In macOS and Unix-like systems, this is handled using concepts like `nice`, `renice`, and Quality of Service (QoS) classes.
-
-#### Nice and Renice
+#### Nice en Renice
 
 1. **Nice:**
-   - The `nice` value of a process is a number that affects its priority. Every process has a nice value ranging from -20 (the highest priority) to 19 (the lowest priority). The default nice value when a process is created is typically 0.
-   - A lower nice value (closer to -20) makes a process more "selfish," giving it more CPU time compared to other processes with higher nice values.
+- Die `nice` waarde van 'n proses is 'n nommer wat sy prioriteit beïnvloed. Elke proses het 'n nice waarde wat wissel van -20 (die hoogste prioriteit) tot 19 (die laagste prioriteit). Die standaard nice waarde wanneer 'n proses geskep word, is tipies 0.
+- 'n Laer nice waarde (naby -20) maak 'n proses meer "selfsugtig," wat dit meer CPU tyd gee in vergelyking met ander prosesse met hoër nice waardes.
 2. **Renice:**
-   - `renice` is a command used to change the nice value of an already running process. This can be used to dynamically adjust the priority of processes, either increasing or decreasing their CPU time allocation based on new nice values.
-   - For example, if a process needs more CPU resources temporarily, you might lower its nice value using `renice`.
+- `renice` is 'n opdrag wat gebruik word om die nice waarde van 'n reeds lopende proses te verander. Dit kan gebruik word om die prioriteit van prosesse dinamies aan te pas, hetsy om hul CPU tyd toewysing te verhoog of te verlaag op grond van nuwe nice waardes.
+- Byvoorbeeld, as 'n proses tydelik meer CPU hulpbronne benodig, kan jy sy nice waarde verlaag met `renice`.
 
-#### Quality of Service (QoS) Classes
+#### Quality of Service (QoS) Klasse
 
-QoS classes are a more modern approach to handling thread priorities, particularly in systems like macOS that support **Grand Central Dispatch (GCD)**. QoS classes allow developers to **categorize** work into different levels based on their importance or urgency. macOS manages thread prioritization automatically based on these QoS classes:
+QoS klasse is 'n meer moderne benadering tot die hantering van thread prioriteite, veral in stelsels soos macOS wat **Grand Central Dispatch (GCD)** ondersteun. QoS klasse laat ontwikkelaars toe om werk in verskillende vlakke te **kategoriseer** op grond van hul belangrikheid of dringendheid. macOS bestuur thread prioritisering outomaties op grond van hierdie QoS klasse:
 
 1. **User Interactive:**
-   - This class is for tasks that are currently interacting with the user or require immediate results to provide a good user experience. These tasks are given the highest priority to keep the interface responsive (e.g., animations or event handling).
+- Hierdie klas is vir take wat tans met die gebruiker interaksie het of onmiddellike resultate benodig om 'n goeie gebruikerservaring te bied. Hierdie take word die hoogste prioriteit gegee om die koppelvlak responsief te hou (bv. animasies of gebeurtenis hantering).
 2. **User Initiated:**
-   - Tasks that the user initiates and expects immediate results, such as opening a document or clicking a button that requires computations. These are high priority but below user interactive.
+- Take wat die gebruiker inisieer en onmiddellike resultate verwag, soos om 'n dokument te open of op 'n knoppie te klik wat berekeninge benodig. Hierdie is hoë prioriteit maar onder gebruikers interaktiewe.
 3. **Utility:**
-   - These tasks are long-running and typically show a progress indicator (e.g., downloading files, importing data). They are lower in priority than user-initiated tasks and do not need to finish immediately.
+- Hierdie take is langlopende en toon tipies 'n vordering aanduiding (bv. lêers aflaai, data invoer). Hulle is laer in prioriteit as gebruiker-geïnisieerde take en hoef nie onmiddellik te voltooi nie.
 4. **Background:**
-   - This class is for tasks that operate in the background and are not visible to the user. These can be tasks like indexing, syncing, or backups. They have the lowest priority and minimal impact on system performance.
+- Hierdie klas is vir take wat in die agtergrond werk en nie sigbaar is vir die gebruiker nie. Dit kan take wees soos indeksering, sinkronisering, of rugsteun. Hulle het die laagste prioriteit en minimale impak op stelsels se prestasie.
 
-Using QoS classes, developers do not need to manage the exact priority numbers but rather focus on the nature of the task, and the system optimizes the CPU resources accordingly.
+Deur QoS klasse te gebruik, hoef ontwikkelaars nie die presiese prioriteitsnommers te bestuur nie, maar eerder te fokus op die aard van die taak, en die stelsel optimaliseer die CPU hulpbronne dienooreenkomstig.
 
-Moreover, there are different **thread scheduling policies** that flows to specify a set of scheduling parameters that the scheduler will take into consideration. This can be done using `thread_policy_[set/get]`. This might be useful in race condition attacks.
+Boonop is daar verskillende **thread skedulering beleid** wat vloei om 'n stel skeduleringsparameters te spesifiseer wat die skeduler in ag sal neem. Dit kan gedoen word met `thread_policy_[set/get]`. Dit kan nuttig wees in wedlooptoestand aanvalle.
 
-## MacOS Process Abuse
+## MacOS Proses Misbruik
 
-MacOS, like any other operating system, provides a variety of methods and mechanisms for **processes to interact, communicate, and share data**. While these techniques are essential for efficient system functioning, they can also be abused by threat actors to **perform malicious activities**.
+MacOS, soos enige ander bedryfstelsel, bied 'n verskeidenheid metodes en meganismes vir **prosesse om te interaksie, kommunikeer, en data te deel**. Terwyl hierdie tegnieke noodsaaklik is vir doeltreffende stelselfunksionering, kan dit ook misbruik word deur bedreigingsakteurs om **kwaadwillige aktiwiteite** uit te voer.
 
-### Library Injection
+### Biblioteek Inspuiting
 
-Library Injection is a technique wherein an attacker **forces a process to load a malicious library**. Once injected, the library runs in the context of the target process, providing the attacker with the same permissions and access as the process.
+Biblioteek Inspuiting is 'n tegniek waarin 'n aanvaller **'n proses dwing om 'n kwaadwillige biblioteek te laai**. Sodra dit ingespuit is, loop die biblioteek in die konteks van die teiken proses, wat die aanvaller dieselfde toestemmings en toegang gee as die proses.
 
 {{#ref}}
 macos-library-injection/
 {{#endref}}
 
-### Function Hooking
+### Funksie Haak
 
-Function Hooking involves **intercepting function calls** or messages within a software code. By hooking functions, an attacker can **modify the behavior** of a process, observe sensitive data, or even gain control over the execution flow.
+Funksie Haak behels **om funksie-oproepe** of boodskappe binne 'n sagtewarekode te onderskep. Deur funksies te haak, kan 'n aanvaller die **gedrag** van 'n proses **wysig**, sensitiewe data waarneem, of selfs beheer oor die uitvoeringsvloei verkry.
 
 {{#ref}}
 macos-function-hooking.md
 {{#endref}}
 
-### Inter Process Communication
+### Inter Proses Kommunikasie
 
-Inter Process Communication (IPC) refers to different methods by which separate processes **share and exchange data**. While IPC is fundamental for many legitimate applications, it can also be misused to subvert process isolation, leak sensitive information, or perform unauthorized actions.
+Inter Proses Kommunikasie (IPC) verwys na verskillende metodes waardeur aparte prosesse **data deel en uitruil**. Terwyl IPC fundamenteel is vir baie wettige toepassings, kan dit ook misbruik word om proses isolasie te ondermyn, sensitiewe inligting te lek, of ongeoorloofde aksies uit te voer.
 
 {{#ref}}
 macos-ipc-inter-process-communication/
 {{#endref}}
 
-### Electron Applications Injection
+### Electron Toepassings Inspuiting
 
-Electron applications executed with specific env variables could be vulnerable to process injection:
+Electron toepassings wat met spesifieke omgewing veranderlikes uitgevoer word, kan kwesbaar wees vir proses inspuiting:
 
 {{#ref}}
 macos-electron-applications-injection.md
 {{#endref}}
 
-### Chromium Injection
+### Chromium Inspuiting
 
-It's possible to use the flags `--load-extension` and `--use-fake-ui-for-media-stream` to perform a **man in the browser attack** allowing to steal keystrokes, traffic, cookies, inject scripts in pages...:
+Dit is moontlik om die vlae `--load-extension` en `--use-fake-ui-for-media-stream` te gebruik om 'n **man in the browser aanval** uit te voer wat toelaat om toetsaanslagte, verkeer, koekies, en skripte in bladsye te steel...:
 
 {{#ref}}
 macos-chromium-injection.md
@@ -189,87 +185,87 @@ macos-chromium-injection.md
 
 ### Dirty NIB
 
-NIB files **define user interface (UI) elements** and their interactions within an application. However, they can **execute arbitrary commands** and **Gatekeeper doesn't stop** an already executed application from being executed if a **NIB file is modified**. Therefore, they could be used to make arbitrary programs execute arbitrary commands:
+NIB lêers **definieer gebruikerskoppelvlak (UI) elemente** en hul interaksies binne 'n toepassing. Dit kan egter **arbitraire opdragte uitvoer** en **Gatekeeper stop nie** 'n reeds uitgevoerde toepassing om uitgevoer te word as 'n **NIB lêer gewysig word** nie. Daarom kan dit gebruik word om arbitraire programme arbitraire opdragte te laat uitvoer:
 
 {{#ref}}
 macos-dirty-nib.md
 {{#endref}}
 
-### Java Applications Injection
+### Java Toepassings Inspuiting
 
-It's possible to abuse certain java capabilities (like the **`_JAVA_OPTS`** env variable) to make a java application execute **arbitrary code/commands**.
+Dit is moontlik om sekere java vermoëns (soos die **`_JAVA_OPTS`** omgewing veranderlike) te misbruik om 'n java toepassing **arbitraire kode/opdragte** te laat uitvoer.
 
 {{#ref}}
 macos-java-apps-injection.md
 {{#endref}}
 
-### .Net Applications Injection
+### .Net Toepassings Inspuiting
 
-It's possible to inject code into .Net applications by **abusing the .Net debugging functionality** (not protected by macOS protections such as runtime hardening).
+Dit is moontlik om kode in .Net toepassings in te spuit deur **die .Net foutopsporing funksionaliteit te misbruik** (nie beskerm deur macOS beskermings soos runtime hardening nie).
 
 {{#ref}}
 macos-.net-applications-injection.md
 {{#endref}}
 
-### Perl Injection
+### Perl Inspuiting
 
-Check different options to make a Perl script execute arbitrary code in:
+Kyk na verskillende opsies om 'n Perl skrip arbitraire kode te laat uitvoer in:
 
 {{#ref}}
 macos-perl-applications-injection.md
 {{#endref}}
 
-### Ruby Injection
+### Ruby Inspuiting
 
-I't also possible to abuse ruby env variables to make arbitrary scripts execute arbitrary code:
+Dit is ook moontlik om ruby omgewing veranderlikes te misbruik om arbitraire skripte arbitraire kode te laat uitvoer:
 
 {{#ref}}
 macos-ruby-applications-injection.md
 {{#endref}}
 
-### Python Injection
+### Python Inspuiting
 
-If the environment variable **`PYTHONINSPECT`** is set, the python process will drop into a python cli once it's finished. It's also possible to use **`PYTHONSTARTUP`** to indicate a python script to execute at the beginning of an interactive session.\
-However, note that **`PYTHONSTARTUP`** script won't be executed when **`PYTHONINSPECT`** creates the interactive session.
+As die omgewing veranderlike **`PYTHONINSPECT`** gestel is, sal die python proses in 'n python cli val sodra dit klaar is. Dit is ook moontlik om **`PYTHONSTARTUP`** te gebruik om 'n python skrip aan te dui wat aan die begin van 'n interaktiewe sessie uitgevoer moet word.\
+Let egter daarop dat die **`PYTHONSTARTUP`** skrip nie uitgevoer sal word wanneer **`PYTHONINSPECT`** die interaktiewe sessie skep nie.
 
-Other env variables such as **`PYTHONPATH`** and **`PYTHONHOME`** could also be useful to make a python command execute arbitrary code.
+Ander omgewing veranderlikes soos **`PYTHONPATH`** en **`PYTHONHOME`** kan ook nuttig wees om 'n python opdrag arbitraire kode te laat uitvoer.
 
-Note that executables compiled with **`pyinstaller`** won't use these environmental variables even if they are running using an embedded python.
+Let daarop dat uitvoerbare lêers wat met **`pyinstaller`** gecompileer is, nie hierdie omgewingsveranderlikes sal gebruik nie, selfs al loop hulle met 'n ingebedde python.
 
 > [!CAUTION]
-> Overall I couldn't find a way to make python execute arbitrary code abusing environment variables.\
-> However, most of the people install pyhton using **Hombrew**, which will install pyhton in a **writable location** for the default admin user. You can hijack it with something like:
+> Oor die algemeen kon ek nie 'n manier vind om python arbitraire kode uit te voer deur omgewing veranderlikes te misbruik nie.\
+> Die meeste mense installeer egter python met **Hombrew**, wat python in 'n **skryfbare ligging** vir die standaard admin gebruiker sal installeer. Jy kan dit oorneem met iets soos:
 >
 > ```bash
 > mv /opt/homebrew/bin/python3 /opt/homebrew/bin/python3.old
 > cat > /opt/homebrew/bin/python3 <<EOF
 > #!/bin/bash
-> # Extra hijack code
+> # Ekstra oorname kode
 > /opt/homebrew/bin/python3.old "$@"
 > EOF
 > chmod +x /opt/homebrew/bin/python3
 > ```
 >
-> Even **root** will run this code when running python.
+> Selfs **root** sal hierdie kode uitvoer wanneer python uitgevoer word.
 
-## Detection
+## Opsporing
 
 ### Shield
 
-[**Shield**](https://theevilbit.github.io/shield/) ([**Github**](https://github.com/theevilbit/Shield)) is an open source application that can **detect and block process injection** actions:
+[**Shield**](https://theevilbit.github.io/shield/) ([**Github**](https://github.com/theevilbit/Shield)) is 'n oopbron toepassing wat kan **opspoor en blokkeer proses inspuiting** aksies:
 
-- Using **Environmental Variables**: It will monitor the presence of any of the following environmental variables: **`DYLD_INSERT_LIBRARIES`**, **`CFNETWORK_LIBRARY_PATH`**, **`RAWCAMERA_BUNDLE_PATH`** and **`ELECTRON_RUN_AS_NODE`**
-- Using **`task_for_pid`** calls: To find when one process wants to get the **task port of another** which allows to inject code in the process.
-- **Electron apps params**: Someone can use **`--inspect`**, **`--inspect-brk`** and **`--remote-debugging-port`** command line argument to start an Electron app in debugging mode, and thus inject code to it.
-- Using **symlinks** or **hardlinks**: Typically the most common abuse is to **place a link with our user privileges**, and **point it to a higher privilege** location. The detection is very simple for both hardlink and symlinks. If the process creating the link has a **different privilege level** than the target file, we create an **alert**. Unfortunately in the case of symlinks blocking is not possible, as we don’t have information about the destination of the link prior creation. This is a limitation of Apple’s EndpointSecuriy framework.
+- Deur **Omgewing Veranderlikes**: Dit sal die teenwoordigheid van enige van die volgende omgewing veranderlikes monitor: **`DYLD_INSERT_LIBRARIES`**, **`CFNETWORK_LIBRARY_PATH`**, **`RAWCAMERA_BUNDLE_PATH`** en **`ELECTRON_RUN_AS_NODE`**
+- Deur **`task_for_pid`** oproepe: Om te vind wanneer een proses die **taakpoort van 'n ander** wil kry wat toelaat om kode in die proses in te spuit.
+- **Electron apps parameters**: Iemand kan **`--inspect`**, **`--inspect-brk`** en **`--remote-debugging-port`** opdraglyn argument gebruik om 'n Electron app in foutopsporing modus te begin, en dus kode daarin in te spuit.
+- Deur **symlinks** of **hardlinks**: Tipies is die mees algemene misbruik om **'n skakel met ons gebruikersprivileges te plaas**, en **dit na 'n hoër privilige** ligging te wys. Die opsporing is baie eenvoudig vir beide hardlink en symlinks. As die proses wat die skakel skep 'n **verskillende privilige vlak** het as die teiken lêer, skep ons 'n **waarskuwing**. Ongelukkig is dit in die geval van symlinks nie moontlik om te blokkeer nie, aangesien ons nie inligting oor die bestemming van die skakel voor die skepping het nie. Dit is 'n beperking van Apple se EndpointSecurity raamwerk.
 
-### Calls made by other processes
+### Oproepe gemaak deur ander prosesse
 
-In [**this blog post**](https://knight.sc/reverse%20engineering/2019/04/15/detecting-task-modifications.html) you can find how it's possible to use the function **`task_name_for_pid`** to get information about other **processes injecting code in a process** and then getting information about that other process.
+In [**hierdie blogpos**](https://knight.sc/reverse%20engineering/2019/04/15/detecting-task-modifications.html) kan jy vind hoe dit moontlik is om die funksie **`task_name_for_pid`** te gebruik om inligting oor ander **prosesse wat kode in 'n proses inspuit** te verkry en dan inligting oor daardie ander proses te verkry.
 
-Note that to call that function you need to be **the same uid** as the one running the process or **root** (and it returns info about the process, not a way to inject code).
+Let daarop dat om daardie funksie aan te roep, jy moet **die selfde uid** wees as die een wat die proses uitvoer of **root** (en dit keer inligting oor die proses terug, nie 'n manier om kode in te spuit nie).
 
-## References
+## Verwysings
 
 - [https://theevilbit.github.io/shield/](https://theevilbit.github.io/shield/)
 - [https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f)

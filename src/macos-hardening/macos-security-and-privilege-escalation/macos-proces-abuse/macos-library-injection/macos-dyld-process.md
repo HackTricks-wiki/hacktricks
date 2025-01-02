@@ -1,79 +1,74 @@
-# macOS Dyld Process
+# macOS Dyld Proses
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Basiese Inligting
 
-The real **entrypoint** of a Mach-o binary is the dynamic linked, defined in `LC_LOAD_DYLINKER` usually is `/usr/lib/dyld`.
+Die werklike **toegangspunt** van 'n Mach-o binêre is die dinamies gekoppelde, gedefinieer in `LC_LOAD_DYLINKER` gewoonlik is `/usr/lib/dyld`.
 
-This linker will need to locate all the executables libraries, map them in memory and link all the non-lazy libraries. Only after this process, the entry-point of the binary will be executed.
+Hierdie skakelaar sal al die uitvoerbare biblioteke moet vind, hulle in geheue kaart en al die nie-lui biblioteke skakel. Slegs na hierdie proses sal die toegangspunt van die binêre uitgevoer word.
 
-Of course, **`dyld`** doesn't have any dependencies (it uses syscalls and libSystem excerpts).
+Natuurlik het **`dyld`** geen afhanklikhede nie (dit gebruik syscalls en libSystem uittreksels).
 
 > [!CAUTION]
-> If this linker contains any vulnerability, as it's being executed before executing any binary (even highly privileged ones), it would be possible to **escalate privileges**.
+> As hierdie skakelaar enige kwesbaarheid bevat, soos dit uitgevoer word voordat enige binêre uitgevoer word (selfs hoogs bevoorregte), sal dit moontlik wees om **bevoegdhede te verhoog**.
 
-### Flow
+### Stroom
 
-Dyld will be loaded by **`dyldboostrap::start`**, which will also load things such as the **stack canary**. This is because this function will receive in its **`apple`** argument vector this and other **sensitive** **values**.
+Dyld sal gelaai word deur **`dyldboostrap::start`**, wat ook dinge soos die **stapel kanarie** sal laai. Dit is omdat hierdie funksie in sy **`apple`** argument vektor hierdie en ander **sensitiewe** **waardes** sal ontvang.
 
-**`dyls::_main()`** is the entry point of dyld and it's first task is to run `configureProcessRestrictions()`, which usually restricts **`DYLD_*`** environment variables explained in:
+**`dyls::_main()`** is die toegangspunt van dyld en sy eerste taak is om `configureProcessRestrictions()` uit te voer, wat gewoonlik **`DYLD_*`** omgewing veranderlikes beperk soos verduidelik in:
 
 {{#ref}}
 ./
 {{#endref}}
 
-Then, it maps the dyld shared cache which prelinks all the important system libraries and then it maps the libraries the binary depends on and continues recursively until all the needed libraries are loaded. Therefore:
+Dan, dit kaart die dyld gedeelde kas wat al die belangrike stelselsbiblioteke vooraf verbind en dan kaart dit die biblioteke waarop die binêre afhanklik is en gaan voort om rekursief voort te gaan totdat al die nodige biblioteke gelaai is. Daarom:
 
-1. it start loading inserted libraries with `DYLD_INSERT_LIBRARIES` (if allowed)
-2. Then the shared cached ones
-3. Then the imported ones
-   1. &#x20;Then continue importing libraries recursively
+1. dit begin om ingevoegde biblioteke met `DYLD_INSERT_LIBRARIES` te laai (indien toegelaat)
+2. Dan die gedeelde kas biblioteke
+3. Dan die geïmporteerde biblioteke
+1. &#x20;Dan voort om biblioteke rekursief te invoer
 
-Once all are loaded the **initialisers** of these libraries are run. These are coded using **`__attribute__((constructor))`** defined in the `LC_ROUTINES[_64]` (now deprecated) or by pointer in a section flagged with `S_MOD_INIT_FUNC_POINTERS` (usually: **`__DATA.__MOD_INIT_FUNC`**).
+Sodra alles gelaai is, word die **beginers** van hierdie biblioteke uitgevoer. Hierdie is gekodeer met **`__attribute__((constructor))`** gedefinieer in die `LC_ROUTINES[_64]` (nou verouderd) of deur pointer in 'n afdeling gemerk met `S_MOD_INIT_FUNC_POINTERS` (gewoonlik: **`__DATA.__MOD_INIT_FUNC`**).
 
-Terminators are coded with **`__attribute__((destructor))`** and are located in a section flagged with `S_MOD_TERM_FUNC_POINTERS` (**`__DATA.__mod_term_func`**).
+Terminators is gekodeer met **`__attribute__((destructor))`** en is geleë in 'n afdeling gemerk met `S_MOD_TERM_FUNC_POINTERS` (**`__DATA.__mod_term_func`**).
 
 ### Stubs
 
-All binaries sin macOS are dynamically linked. Therefore, they contain some stubs sections that helps the binary to jump to the correct code in different machines and context. It's dyld when the binary is executed the brain that needs to resolve these addresses (at least the non-lazy ones).
+Alle binêre in macOS is dinamies gekoppel. Daarom bevat hulle sommige stub afdelings wat die binêre help om na die korrekte kode in verskillende masjiene en kontekste te spring. Dit is dyld wanneer die binêre uitgevoer word die brein wat hierdie adresse moet oplos (ten minste die nie-luies).
 
-Som stub sections in the binary:
+Sommige stub afdelings in die binêre:
 
-- **`__TEXT.__[auth_]stubs`**: Pointers from `__DATA` sections
-- **`__TEXT.__stub_helper`**: Small code invoking dynamic linking with info on the function to call
-- **`__DATA.__[auth_]got`**: Global Offset Table (addresses to imported functions, when resolved, (bound during load time as it's marked with flag `S_NON_LAZY_SYMBOL_POINTERS`)
-- **`__DATA.__nl_symbol_ptr`**: Non-lazy symbol pointers (bound during load time as it's marked with flag `S_NON_LAZY_SYMBOL_POINTERS`)
-- **`__DATA.__la_symbol_ptr`**: Lazy symbols pointers (bound on first access)
+- **`__TEXT.__[auth_]stubs`**: Pointers van `__DATA` afdelings
+- **`__TEXT.__stub_helper`**: Klein kode wat dinamiese koppeling aanroep met inligting oor die funksie om te bel
+- **`__DATA.__[auth_]got`**: Globale Offset Tabel (adresse na geïmporteerde funksies, wanneer opgelos, (gebind tydens laai tyd soos dit gemerk is met vlag `S_NON_LAZY_SYMBOL_POINTERS`)
+- **`__DATA.__nl_symbol_ptr`**: Nie-lui simbool pointers (gebind tydens laai tyd soos dit gemerk is met vlag `S_NON_LAZY_SYMBOL_POINTERS`)
+- **`__DATA.__la_symbol_ptr`**: Lui simbool pointers (gebind op eerste toegang)
 
 > [!WARNING]
-> Note that the pointers with the prefix "auth\_" are using one in-process encryption key to protect it (PAC). Moreover, It's possible to use the arm64 instruction `BLRA[A/B]` to verify the pointer before following it. And the RETA\[A/B] can be used instead of a RET address.\
-> Actually, the code in **`__TEXT.__auth_stubs`** will use **`braa`** instead of **`bl`** to call the requested function to authenticate the pointer.
+> Let daarop dat die pointers met die voorvoegsel "auth\_" een in-proses enkripsiesleutel gebruik om dit te beskerm (PAC). Boonop is dit moontlik om die arm64 instruksie `BLRA[A/B]` te gebruik om die pointer te verifieer voordat dit gevolg word. En die RETA\[A/B] kan gebruik word in plaas van 'n RET adres.\
+> Trouens, die kode in **`__TEXT.__auth_stubs`** sal **`braa`** gebruik in plaas van **`bl`** om die aangevraagde funksie aan te roep om die pointer te verifieer.
 >
-> Also note that current dyld versions load **everything as non-lazy**.
+> Let ook daarop dat huidige dyld weergawes **alles as nie-lui** laai.
 
-### Finding lazy symbols
-
+### Vind lui simbole
 ```c
 //gcc load.c -o load
 #include <stdio.h>
 int main (int argc, char **argv, char **envp, char **apple)
 {
-    printf("Hi\n");
+printf("Hi\n");
 }
 ```
-
-Interesting disassembly part:
-
+Interessante ontbinding deel:
 ```armasm
 ; objdump -d ./load
 100003f7c: 90000000    	adrp	x0, 0x100003000 <_main+0x1c>
 100003f80: 913e9000    	add	x0, x0, #4004
 100003f84: 94000005    	bl	0x100003f98 <_printf+0x100003f98>
 ```
-
-It's possible to see that the jump to call printf is going to **`__TEXT.__stubs`**:
-
+Dit is moontlik om te sien dat die sprong na die oproep van printf gaan na **`__TEXT.__stubs`**:
 ```bash
 objdump --section-headers ./load
 
@@ -81,15 +76,13 @@ objdump --section-headers ./load
 
 Sections:
 Idx Name          Size     VMA              Type
-  0 __text        00000038 0000000100003f60 TEXT
-  1 __stubs       0000000c 0000000100003f98 TEXT
-  2 __cstring     00000004 0000000100003fa4 DATA
-  3 __unwind_info 00000058 0000000100003fa8 DATA
-  4 __got         00000008 0000000100004000 DATA
+0 __text        00000038 0000000100003f60 TEXT
+1 __stubs       0000000c 0000000100003f98 TEXT
+2 __cstring     00000004 0000000100003fa4 DATA
+3 __unwind_info 00000058 0000000100003fa8 DATA
+4 __got         00000008 0000000100004000 DATA
 ```
-
-In the disassemble of the **`__stubs`** section:
-
+In die ontbinding van die **`__stubs`** afdeling:
 ```bash
 objdump -d --section=__stubs ./load
 
@@ -102,35 +95,31 @@ Disassembly of section __TEXT,__stubs:
 100003f9c: f9400210    	ldr	x16, [x16]
 100003fa0: d61f0200    	br	x16
 ```
+jy kan sien dat ons **na die adres van die GOT spring**, wat in hierdie geval nie-lui opgelos word en die adres van die printf-funksie sal bevat.
 
-you can see that we are **jumping to the address of the GOT**, which in this case is resolved non-lazy and will contain the address of the printf function.
-
-In other situations instead of directly jumping to the GOT, it could jump to **`__DATA.__la_symbol_ptr`** which will load a value that represents the function that it's trying to load, then jump to **`__TEXT.__stub_helper`** which jumps the **`__DATA.__nl_symbol_ptr`** which contains the address of **`dyld_stub_binder`** which takes as parameters the number of the function and an address.\
-This last function, after finding the address of the searched function writes it in the corresponding location in **`__TEXT.__stub_helper`** to avoid doing lookups in the future.
+In ander situasies, in plaas daarvan om direk na die GOT te spring, kan dit spring na **`__DATA.__la_symbol_ptr`** wat 'n waarde sal laai wat die funksie verteenwoordig wat dit probeer laai, dan spring na **`__TEXT.__stub_helper`** wat na **`__DATA.__nl_symbol_ptr`** spring wat die adres van **`dyld_stub_binder`** bevat wat die nommer van die funksie en 'n adres as parameters neem.\
+Hierdie laaste funksie, nadat dit die adres van die gesoekte funksie gevind het, skryf dit in die ooreenstemmende plek in **`__TEXT.__stub_helper`** om te verhoed dat daar in die toekoms opsoekings gedoen word.
 
 > [!TIP]
-> However notice taht current dyld versions load everything as non-lazy.
+> Let egter daarop dat huidige dyld weergawes alles as nie-lui laai.
 
 #### Dyld opcodes
 
-Finally, **`dyld_stub_binder`** needs to find the indicated function and write it in the proper address to not search for it again. To do so it uses opcodes (a finite state machine) within dyld.
+Laastens, **`dyld_stub_binder`** moet die aangeduide funksie vind en dit in die regte adres skryf om nie weer daarna te soek nie. Om dit te doen, gebruik dit opcodes (’n eindige toestand masjien) binne dyld.
 
-## apple\[] argument vector
+## apple\[] argument vektor
 
-In macOS the main function receives actually 4 arguments instead of 3. The fourth is called apple and each entry is in the form `key=value`. For example:
-
+In macOS ontvang die hoof funksie eintlik 4 argumente in plaas van 3. Die vierde word appel genoem en elke invoer is in die vorm `key=value`. Byvoorbeeld:
 ```c
 // gcc apple.c -o apple
 #include <stdio.h>
 int main (int argc, char **argv, char **envp, char **apple)
 {
-    for (int i=0; apple[i]; i++)
-        printf("%d: %s\n", i, apple[i])
+for (int i=0; apple[i]; i++)
+printf("%d: %s\n", i, apple[i])
 }
 ```
-
 Result:
-
 ```
 0: executable_path=./a
 1:
@@ -145,16 +134,15 @@ Result:
 10: arm64e_abi=os
 11: th_port=
 ```
-
 > [!TIP]
-> By the time these values reaches the main function, sensitive information has already been removed from them or it would have been a data leak.
+> Teen die tyd dat hierdie waardes die hooffunksie bereik, is sensitiewe inligting reeds uit hulle verwyder of dit sou 'n datalek gewees het.
 
-it's possible to see all these interesting values debugging before getting into main with:
+dit is moontlik om al hierdie interessante waardes te sien terwyl jy debugg voordat jy in die hooffunksie kom met:
 
 <pre><code>lldb ./apple
 
 <strong>(lldb) target create "./a"
-</strong>Current executable set to '/tmp/a' (arm64).
+</strong>Huidige uitvoerbare stel na '/tmp/a' (arm64).
 (lldb) process launch -s
 [..]
 
@@ -192,18 +180,17 @@ it's possible to see all these interesting values debugging before getting into 
 
 ## dyld_all_image_infos
 
-This is a structure exported by dyld with information about the dyld state which can be found in the [**source code**](https://opensource.apple.com/source/dyld/dyld-852.2/include/mach-o/dyld_images.h.auto.html) with information like the version, pointer to dyld_image_info array, to dyld_image_notifier, if proc is detached from shared cache, if libSystem initializer was called, pointer to dyls's own Mach header, pointer to dyld version string...
+Dit is 'n struktuur wat deur dyld uitgevoer word met inligting oor die dyld toestand wat in die [**source code**](https://opensource.apple.com/source/dyld/dyld-852.2/include/mach-o/dyld_images.h.auto.html) gevind kan word met inligting soos die weergawe, wysiger na dyld_image_info array, na dyld_image_notifier, of proc van die gedeelde kas afgehaal is, of libSystem inisialisator aangeroep is, wysiger na dyls se eie Mach kop, wysiger na dyld weergawe string...
 
 ## dyld env variables
 
 ### debug dyld
 
-Interesting env variables that helps to understand what is dyld doing:
+Interessante omgewing veranderlikes wat help om te verstaan wat dyld doen:
 
 - **DYLD_PRINT_LIBRARIES**
 
-Check each library that is loaded:
-
+Kontroleer elke biblioteek wat gelaai word:
 ```
 DYLD_PRINT_LIBRARIES=1 ./apple
 dyld[19948]: <9F848759-9AB8-3BD2-96A1-C069DC1FFD43> /private/tmp/a
@@ -219,11 +206,9 @@ dyld[19948]: <F7CE9486-FFF5-3CB8-B26F-75811EF4283A> /usr/lib/system/libkeymgr.dy
 dyld[19948]: <1A7038EC-EE49-35AE-8A3C-C311083795FB> /usr/lib/system/libmacho.dylib
 [...]
 ```
-
 - **DYLD_PRINT_SEGMENTS**
 
-Check how is each library loaded:
-
+Kyk hoe elke biblioteek gelaai word:
 ```
 DYLD_PRINT_SEGMENTS=1 ./apple
 dyld[21147]: re-using existing shared cache (/System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/dyld_shared_cache_arm64e):
@@ -258,60 +243,52 @@ dyld[21147]:   __AUTH_CONST (rw.) 0x0001DDE014D0->0x0001DDE015A8
 dyld[21147]:     __LINKEDIT (r..) 0x000239574000->0x000270BE4000
 [...]
 ```
-
 - **DYLD_PRINT_INITIALIZERS**
 
-Print when each library initializer is running:
-
+Druk wanneer elke biblioteek-initialiseerder loop:
 ```
 DYLD_PRINT_INITIALIZERS=1 ./apple
 dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
 [...]
 ```
+### Ander
 
-### Others
+- `DYLD_BIND_AT_LAUNCH`: Luie bindings word met nie-luie bindings opgelos
+- `DYLD_DISABLE_PREFETCH`: Deaktiveer pre-fetching van \_\_DATA en \_\_LINKEDIT inhoud
+- `DYLD_FORCE_FLAT_NAMESPACE`: Enkelvlak bindings
+- `DYLD_[FRAMEWORK/LIBRARY]_PATH | DYLD_FALLBACK_[FRAMEWORK/LIBRARY]_PATH | DYLD_VERSIONED_[FRAMEWORK/LIBRARY]_PATH`: Oplossingspade
+- `DYLD_INSERT_LIBRARIES`: Laai 'n spesifieke biblioteek
+- `DYLD_PRINT_TO_FILE`: Skryf dyld foutopsporing in 'n lêer
+- `DYLD_PRINT_APIS`: Druk libdyld API-oproepe
+- `DYLD_PRINT_APIS_APP`: Druk libdyld API-oproepe gemaak deur hoof
+- `DYLD_PRINT_BINDINGS`: Druk simbole wanneer gebind
+- `DYLD_WEAK_BINDINGS`: Druk slegs swak simbole wanneer gebind
+- `DYLD_PRINT_CODE_SIGNATURES`: Druk kodehandtekening registrasie operasies
+- `DYLD_PRINT_DOFS`: Druk D-Trace objekformaat afdelings soos gelaai
+- `DYLD_PRINT_ENV`: Druk omgewing gesien deur dyld
+- `DYLD_PRINT_INTERPOSTING`: Druk interposting operasies
+- `DYLD_PRINT_LIBRARIES`: Druk biblioteke gelaai
+- `DYLD_PRINT_OPTS`: Druk laai opsies
+- `DYLD_REBASING`: Druk simbool herbasering operasies
+- `DYLD_RPATHS`: Druk uitbreidings van @rpath
+- `DYLD_PRINT_SEGMENTS`: Druk toewysings van Mach-O segmente
+- `DYLD_PRINT_STATISTICS`: Druk tydstatistieke
+- `DYLD_PRINT_STATISTICS_DETAILS`: Druk gedetailleerde tydstatistieke
+- `DYLD_PRINT_WARNINGS`: Druk waarskuwingboodskappe
+- `DYLD_SHARED_CACHE_DIR`: Pad om te gebruik vir gedeelde biblioteek kas
+- `DYLD_SHARED_REGION`: "gebruik", "privaat", "vermy"
+- `DYLD_USE_CLOSURES`: Aktiveer sluitings
 
-- `DYLD_BIND_AT_LAUNCH`: Lazy bindings are resolved with non lazy ones
-- `DYLD_DISABLE_PREFETCH`: DIsable pre-fetching of \_\_DATA and \_\_LINKEDIT content
-- `DYLD_FORCE_FLAT_NAMESPACE`: Single-level bindings
-- `DYLD_[FRAMEWORK/LIBRARY]_PATH | DYLD_FALLBACK_[FRAMEWORK/LIBRARY]_PATH | DYLD_VERSIONED_[FRAMEWORK/LIBRARY]_PATH`: Resolution paths
-- `DYLD_INSERT_LIBRARIES`: Load an specifc library
-- `DYLD_PRINT_TO_FILE`: Write dyld debug in a file
-- `DYLD_PRINT_APIS`: Print libdyld API calls
-- `DYLD_PRINT_APIS_APP`: Print libdyld API calls made by main
-- `DYLD_PRINT_BINDINGS`: Print symbols when bound
-- `DYLD_WEAK_BINDINGS`: Only print weak symbols when bound
-- `DYLD_PRINT_CODE_SIGNATURES`: Print code signature registration operations
-- `DYLD_PRINT_DOFS`: Print D-Trace object format sections as loaded
-- `DYLD_PRINT_ENV`: Print env seen by dyld
-- `DYLD_PRINT_INTERPOSTING`: Print interposting operations
-- `DYLD_PRINT_LIBRARIES`: Print librearies loaded
-- `DYLD_PRINT_OPTS`: Print load options
-- `DYLD_REBASING`: Print symbol rebasing operations
-- `DYLD_RPATHS`: Print expansions of @rpath
-- `DYLD_PRINT_SEGMENTS`: Print mappings of Mach-O segments
-- `DYLD_PRINT_STATISTICS`: Print timing statistics
-- `DYLD_PRINT_STATISTICS_DETAILS`: Print detailed timing statistics
-- `DYLD_PRINT_WARNINGS`: Print warning messages
-- `DYLD_SHARED_CACHE_DIR`: Path to use for shared library cache
-- `DYLD_SHARED_REGION`: "use", "private", "avoid"
-- `DYLD_USE_CLOSURES`: Enable closures
-
-It's possible to find more with someting like:
-
+Dit is moontlik om meer te vind met iets soos:
 ```bash
 strings /usr/lib/dyld | grep "^DYLD_" | sort -u
 ```
-
-Or downloading the dyld project from [https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz) and running inside the folder:
-
+Of laai die dyld-projek af van [https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz) en voer dit binne die gids uit:
 ```bash
 find . -type f | xargs grep strcmp| grep key,\ \" | cut -d'"' -f2 | sort -u
 ```
+## Verwysings
 
-## References
-
-- [**\*OS Internals, Volume I: User Mode. By Jonathan Levin**](https://www.amazon.com/MacOS-iOS-Internals-User-Mode/dp/099105556X)
+- [**\*OS Internals, Volume I: User Mode. Deur Jonathan Levin**](https://www.amazon.com/MacOS-iOS-Internals-User-Mode/dp/099105556X)
 
 {{#include ../../../../banners/hacktricks-training.md}}
-

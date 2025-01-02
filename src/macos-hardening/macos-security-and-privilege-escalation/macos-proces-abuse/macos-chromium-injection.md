@@ -2,33 +2,31 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Basiese Inligting
 
-Chromium-based browsers like Google Chrome, Microsoft Edge, Brave, and others. These browsers are built on the Chromium open-source project, which means they share a common base and, therefore, have similar functionalities and developer options.
+Chromium-gebaseerde blaaiers soos Google Chrome, Microsoft Edge, Brave, en ander. Hierdie blaaiers is gebou op die Chromium open-source projek, wat beteken dat hulle 'n gemeenskaplike basis deel en, gevolglik, soortgelyke funksies en ontwikkelaar opsies het.
 
-#### `--load-extension` Flag
+#### `--load-extension` Vlag
 
-The `--load-extension` flag is used when starting a Chromium-based browser from the command line or a script. This flag allows to **automatically load one or more extensions** into the browser upon startup.
+Die `--load-extension` vlag word gebruik wanneer 'n Chromium-gebaseerde blaier vanaf die opdraglyn of 'n skrif begin word. Hierdie vlag stel in staat om **een of meer uitbreidings outomaties in die blaier te laai** by opstart.
 
-#### `--use-fake-ui-for-media-stream` Flag
+#### `--use-fake-ui-for-media-stream` Vlag
 
-The `--use-fake-ui-for-media-stream` flag is another command-line option that can be used to start Chromium-based browsers. This flag is designed to **bypass the normal user prompts that ask for permission to access media streams from the camera and microphone**. When this flag is used, the browser automatically grants permission to any website or application that requests access to the camera or microphone.
+Die `--use-fake-ui-for-media-stream` vlag is 'n ander opdraglyn opsie wat gebruik kan word om Chromium-gebaseerde blaaiers te begin. Hierdie vlag is ontwerp om **die normale gebruikersprompt te omseil wat toestemming vra om toegang tot media strome van die kamera en mikrofoon te verkry**. Wanneer hierdie vlag gebruik word, gee die blaier outomaties toestemming aan enige webwerf of toepassing wat toegang tot die kamera of mikrofoon vra.
 
-### Tools
+### Gereedskap
 
 - [https://github.com/breakpointHQ/snoop](https://github.com/breakpointHQ/snoop)
 - [https://github.com/breakpointHQ/VOODOO](https://github.com/breakpointHQ/VOODOO)
 
-### Example
-
+### Voorbeeld
 ```bash
 # Intercept traffic
 voodoo intercept -b chrome
 ```
+Vind meer voorbeelde in die hulpmiddel skakels
 
-Find more examples in the tools links
-
-## References
+## Verwysings
 
 - [https://twitter.com/RonMasas/status/1758106347222995007](https://twitter.com/RonMasas/status/1758106347222995007)
 

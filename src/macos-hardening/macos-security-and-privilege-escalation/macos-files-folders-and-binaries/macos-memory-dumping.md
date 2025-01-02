@@ -1,31 +1,30 @@
-# macOS Memory Dumping
+# macOS Geheue Dumping
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Memory Artifacts
+## Geheue Artefakte
 
-### Swap Files
+### Swap Lêers
 
-Swap files, such as `/private/var/vm/swapfile0`, serve as **caches when the physical memory is full**. When there's no more room in physical memory, its data is transferred to a swap file and then brought back to physical memory as needed. Multiple swap files might be present, with names like swapfile0, swapfile1, and so on.
+Swap lêers, soos `/private/var/vm/swapfile0`, dien as **kas wanneer die fisiese geheue vol is**. Wanneer daar nie meer plek in fisiese geheue is nie, word die data na 'n swap lêer oorgedra en dan terug na fisiese geheue gebring soos nodig. Meerdere swap lêers mag teenwoordig wees, met name soos swapfile0, swapfile1, en so aan.
 
-### Hibernate Image
+### Hiberneer Beeld
 
-The file located at `/private/var/vm/sleepimage` is crucial during **hibernation mode**. **Data from memory is stored in this file when OS X hibernates**. Upon waking the computer, the system retrieves memory data from this file, allowing the user to continue where they left off.
+Die lêer geleë by `/private/var/vm/sleepimage` is van kardinale belang tydens **hibernasie modus**. **Data van geheue word in hierdie lêer gestoor wanneer OS X hiberneer**. By die wakkermaak van die rekenaar, haal die stelsel geheue data uit hierdie lêer, wat die gebruiker toelaat om voort te gaan waar hulle opgehou het.
 
-It's worth noting that on modern MacOS systems, this file is typically encrypted for security reasons, making recovery difficult.
+Dit is die moeite werd om te noem dat op moderne MacOS stelsels, hierdie lêer tipies versleuteld is vir sekuriteitsredes, wat herstel moeilik maak.
 
-- To check if encryption is enabled for the sleepimage, the command `sysctl vm.swapusage` can be run. This will show if the file is encrypted.
+- Om te kontroleer of versleuteling geaktiveer is vir die sleepimage, kan die opdrag `sysctl vm.swapusage` uitgevoer word. Dit sal wys of die lêer versleuteld is.
 
-### Memory Pressure Logs
+### Geheue Druk Logs
 
-Another important memory-related file in MacOS systems is the **memory pressure log**. These logs are located in `/var/log` and contain detailed information about the system's memory usage and pressure events. They can be particularly useful for diagnosing memory-related issues or understanding how the system manages memory over time.
+Nog 'n belangrike geheue-verwante lêer in MacOS stelsels is die **geheue druk log**. Hierdie logs is geleë in `/var/log` en bevat gedetailleerde inligting oor die stelsel se geheue gebruik en druk gebeurtenisse. Hulle kan veral nuttig wees om geheue-verwante probleme te diagnoseer of te verstaan hoe die stelsel geheue oor tyd bestuur.
 
-## Dumping memory with osxpmem
+## Dumping geheue met osxpmem
 
-In order to dump the memory in a MacOS machine you can use [**osxpmem**](https://github.com/google/rekall/releases/download/v1.5.1/osxpmem-2.1.post4.zip).
+Om die geheue in 'n MacOS masjien te dump, kan jy [**osxpmem**](https://github.com/google/rekall/releases/download/v1.5.1/osxpmem-2.1.post4.zip) gebruik.
 
-**Note**: The following instructions will only work for Macs with Intel architecture. This tool is now archived and the last release was in 2017. The binary downloaded using the instructions below targets Intel chips as Apple Silicon wasn't around in 2017. It may be possible to compile the binary for arm64 architecture but you'll have to try for yourself.
-
+**Let wel**: Die volgende instruksies sal slegs werk vir Macs met Intel argitektuur. Hierdie hulpmiddel is nou geargiveer en die laaste vrystelling was in 2017. Die binêre wat afgelaai is met die onderstaande instruksies teiken Intel skyfies aangesien Apple Silicon nie in 2017 beskikbaar was nie. Dit mag moontlik wees om die binêre vir arm64 argitektuur te compileer, maar jy sal self moet probeer.
 ```bash
 #Dump raw format
 sudo osxpmem.app/osxpmem --format raw -o /tmp/dump_mem
@@ -33,23 +32,18 @@ sudo osxpmem.app/osxpmem --format raw -o /tmp/dump_mem
 #Dump aff4 format
 sudo osxpmem.app/osxpmem -o /tmp/dump_mem.aff4
 ```
-
-If you find this error: `osxpmem.app/MacPmem.kext failed to load - (libkern/kext) authentication failure (file ownership/permissions); check the system/kernel logs for errors or try kextutil(8)` You can fix it doing:
-
+As jy hierdie fout vind: `osxpmem.app/MacPmem.kext kon nie laai nie - (libkern/kext) verifikasiefout (lêer eienaarskap/toestemmings); kyk na die stelsel/kernel logs vir foute of probeer kextutil(8)` kan jy dit regmaak deur:
 ```bash
 sudo cp -r osxpmem.app/MacPmem.kext "/tmp/"
 sudo kextutil "/tmp/MacPmem.kext"
 #Allow the kext in "Security & Privacy --> General"
 sudo osxpmem.app/osxpmem --format raw -o /tmp/dump_mem
 ```
+**Ander foute** kan reggestel word deur **die laai van die kext toe te laat** in "Sekuriteit & Privaatheid --> Algemeen", net **laat** dit toe.
 
-**Other errors** might be fixed by **allowing the load of the kext** in "Security & Privacy --> General", just **allow** it.
-
-You can also use this **oneliner** to download the application, load the kext and dump the memory:
-
+Jy kan ook hierdie **oneliner** gebruik om die toepassing af te laai, die kext te laai en die geheue te dump:
 ```bash
 sudo su
 cd /tmp; wget https://github.com/google/rekall/releases/download/v1.5.1/osxpmem-2.1.post4.zip; unzip osxpmem-2.1.post4.zip; chown -R root:wheel osxpmem.app/MacPmem.kext; kextload osxpmem.app/MacPmem.kext; osxpmem.app/osxpmem --format raw -o /tmp/dump_mem
 ```
-
 {{#include ../../../banners/hacktricks-training.md}}
