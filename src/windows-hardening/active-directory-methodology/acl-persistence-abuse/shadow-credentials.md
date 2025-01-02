@@ -4,58 +4,54 @@
 
 ## Intro <a href="#3f17" id="3f17"></a>
 
-**Check the original post for [all the information about this technique](https://posts.specterops.io/shadow-credentials-abusing-key-trust-account-mapping-for-takeover-8ee1a53566ab).**
+**Sprawdź oryginalny post, aby uzyskać [wszystkie informacje na temat tej techniki](https://posts.specterops.io/shadow-credentials-abusing-key-trust-account-mapping-for-takeover-8ee1a53566ab).**
 
-As **summary**: if you can write to the **msDS-KeyCredentialLink** property of a user/computer, you can retrieve the **NT hash of that object**.
+Jako **podsumowanie**: jeśli możesz zapisać do właściwości **msDS-KeyCredentialLink** użytkownika/komputera, możesz odzyskać **NT hash tego obiektu**.
 
-In the post, a method is outlined for setting up **public-private key authentication credentials** to acquire a unique **Service Ticket** that includes the target's NTLM hash. This process involves the encrypted NTLM_SUPPLEMENTAL_CREDENTIAL within the Privilege Attribute Certificate (PAC), which can be decrypted.
+W poście opisano metodę ustawienia **uwierzytelniania za pomocą klucza publicznego-prywatnego**, aby uzyskać unikalny **Service Ticket**, który zawiera hash NTLM celu. Proces ten obejmuje zaszyfrowane NTLM_SUPPLEMENTAL_CREDENTIAL w Certyfikacie Atrybutów Uprawnień (PAC), który można odszyfrować.
 
-### Requirements
+### Wymagania
 
-To apply this technique, certain conditions must be met:
+Aby zastosować tę technikę, muszą być spełnione określone warunki:
 
-- A minimum of one Windows Server 2016 Domain Controller is needed.
-- The Domain Controller must have a server authentication digital certificate installed.
-- The Active Directory must be at the Windows Server 2016 Functional Level.
-- An account with delegated rights to modify the msDS-KeyCredentialLink attribute of the target object is required.
+- Wymagany jest co najmniej jeden kontroler domeny Windows Server 2016.
+- Kontroler domeny musi mieć zainstalowany cyfrowy certyfikat uwierzytelniania serwera.
+- Active Directory musi być na poziomie funkcjonalnym Windows Server 2016.
+- Wymagane jest konto z delegowanymi uprawnieniami do modyfikacji atrybutu msDS-KeyCredentialLink obiektu docelowego.
 
-## Abuse
+## Nadużycie
 
-The abuse of Key Trust for computer objects encompasses steps beyond obtaining a Ticket Granting Ticket (TGT) and the NTLM hash. The options include:
+Nadużycie Key Trust dla obiektów komputerowych obejmuje kroki wykraczające poza uzyskanie Ticket Granting Ticket (TGT) i hasha NTLM. Opcje obejmują:
 
-1. Creating an **RC4 silver ticket** to act as privileged users on the intended host.
-2. Using the TGT with **S4U2Self** for impersonation of **privileged users**, necessitating alterations to the Service Ticket to add a service class to the service name.
+1. Utworzenie **RC4 silver ticket**, aby działać jako uprzywilejowani użytkownicy na zamierzonym hoście.
+2. Użycie TGT z **S4U2Self** do impersonacji **uprzywilejowanych użytkowników**, co wymaga zmian w Service Ticket, aby dodać klasę usługi do nazwy usługi.
 
-A significant advantage of Key Trust abuse is its limitation to the attacker-generated private key, avoiding delegation to potentially vulnerable accounts and not requiring the creation of a computer account, which could be challenging to remove.
+Znaczną zaletą nadużycia Key Trust jest jego ograniczenie do prywatnego klucza generowanego przez atakującego, unikając delegacji do potencjalnie wrażliwych kont i nie wymagając tworzenia konta komputerowego, co może być trudne do usunięcia.
 
-## Tools
+## Narzędzia
 
 ### [**Whisker**](https://github.com/eladshamir/Whisker)
 
-It's based on DSInternals providing a C# interface for this attack. Whisker and its Python counterpart, **pyWhisker**, enable manipulation of the `msDS-KeyCredentialLink` attribute to gain control over Active Directory accounts. These tools support various operations like adding, listing, removing, and clearing key credentials from the target object.
+Opiera się na DSInternals, zapewniając interfejs C# do tego ataku. Whisker i jego odpowiednik w Pythonie, **pyWhisker**, umożliwiają manipulację atrybutem `msDS-KeyCredentialLink`, aby uzyskać kontrolę nad kontami Active Directory. Narzędzia te wspierają różne operacje, takie jak dodawanie, wyświetlanie, usuwanie i czyszczenie poświadczeń klucza z obiektu docelowego.
 
-**Whisker** functions include:
+Funkcje **Whisker** obejmują:
 
-- **Add**: Generates a key pair and adds a key credential.
-- **List**: Displays all key credential entries.
-- **Remove**: Deletes a specified key credential.
-- **Clear**: Erases all key credentials, potentially disrupting legitimate WHfB usage.
-
+- **Add**: Generuje parę kluczy i dodaje poświadczenie klucza.
+- **List**: Wyświetla wszystkie wpisy poświadczeń klucza.
+- **Remove**: Usuwa określone poświadczenie klucza.
+- **Clear**: Usuwa wszystkie poświadczenia klucza, potencjalnie zakłócając legalne użycie WHfB.
 ```shell
 Whisker.exe add /target:computername$ /domain:constoso.local /dc:dc1.contoso.local /path:C:\path\to\file.pfx /password:P@ssword1
 ```
-
 ### [pyWhisker](https://github.com/ShutdownRepo/pywhisker)
 
-It extends Whisker functionality to **UNIX-based systems**, leveraging Impacket and PyDSInternals for comprehensive exploitation capabilities, including listing, adding, and removing KeyCredentials, as well as importing and exporting them in JSON format.
-
+Rozszerza funkcjonalność Whisker do **systemów opartych na UNIX**, wykorzystując Impacket i PyDSInternals do kompleksowych możliwości eksploatacji, w tym listowania, dodawania i usuwania KeyCredentials, a także importowania i eksportowania ich w formacie JSON.
 ```shell
 python3 pywhisker.py -d "domain.local" -u "user1" -p "complexpassword" --target "user2" --action "list"
 ```
-
 ### [ShadowSpray](https://github.com/Dec0ne/ShadowSpray/)
 
-ShadowSpray aims to **exploit GenericWrite/GenericAll permissions that wide user groups may have over domain objects** to apply ShadowCredentials broadly. It entails logging into the domain, verifying the domain's functional level, enumerating domain objects, and attempting to add KeyCredentials for TGT acquisition and NT hash revelation. Cleanup options and recursive exploitation tactics enhance its utility.
+ShadowSpray ma na celu **wykorzystanie uprawnień GenericWrite/GenericAll, które szerokie grupy użytkowników mogą mieć nad obiektami domeny**, aby szeroko stosować ShadowCredentials. Obejmuje to logowanie do domeny, weryfikację poziomu funkcjonalnego domeny, enumerację obiektów domeny oraz próbę dodania KeyCredentials w celu uzyskania TGT i ujawnienia NT hash. Opcje czyszczenia i taktyki rekurencyjnego wykorzystywania zwiększają jego użyteczność.
 
 ## References
 
@@ -65,4 +61,3 @@ ShadowSpray aims to **exploit GenericWrite/GenericAll permissions that wide user
 - [https://github.com/ShutdownRepo/pywhisker](https://github.com/ShutdownRepo/pywhisker)
 
 {{#include ../../../banners/hacktricks-training.md}}
-

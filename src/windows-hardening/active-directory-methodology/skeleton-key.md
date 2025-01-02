@@ -2,31 +2,30 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Skeleton Key Attack
+## Atak Skeleton Key
 
-The **Skeleton Key attack** is a sophisticated technique that allows attackers to **bypass Active Directory authentication** by **injecting a master password** into the domain controller. This enables the attacker to **authenticate as any user** without their password, effectively **granting them unrestricted access** to the domain.
+Atak **Skeleton Key** to zaawansowana technika, która pozwala atakującym na **obejście uwierzytelniania Active Directory** poprzez **wstrzyknięcie hasła głównego** do kontrolera domeny. Umożliwia to atakującemu **uwierzytelnienie się jako dowolny użytkownik** bez jego hasła, skutecznie **przyznając mu nieograniczony dostęp** do domeny.
 
-It can be performed using [Mimikatz](https://github.com/gentilkiwi/mimikatz). To carry out this attack, **Domain Admin rights are prerequisite**, and the attacker must target each domain controller to ensure a comprehensive breach. However, the attack's effect is temporary, as **restarting the domain controller eradicates the malware**, necessitating a reimplementation for sustained access.
+Można go przeprowadzić za pomocą [Mimikatz](https://github.com/gentilkiwi/mimikatz). Aby zrealizować ten atak, **wymagane są uprawnienia administratora domeny**, a atakujący musi celować w każdy kontroler domeny, aby zapewnić kompleksowe naruszenie. Jednak efekt ataku jest tymczasowy, ponieważ **ponowne uruchomienie kontrolera domeny eliminuje złośliwe oprogramowanie**, co wymaga ponownej implementacji dla utrzymania dostępu.
 
-**Executing the attack** requires a single command: `misc::skeleton`.
+**Wykonanie ataku** wymaga jednego polecenia: `misc::skeleton`.
 
-## Mitigations
+## Środki zaradcze
 
-Mitigation strategies against such attacks include monitoring for specific event IDs that indicate the installation of services or the use of sensitive privileges. Specifically, looking for System Event ID 7045 or Security Event ID 4673 can reveal suspicious activities. Additionally, running `lsass.exe` as a protected process can significantly hinder attackers' efforts, as this requires them to employ a kernel mode driver, increasing the attack's complexity.
+Strategie łagodzenia skutków takich ataków obejmują monitorowanie konkretnych identyfikatorów zdarzeń, które wskazują na instalację usług lub użycie wrażliwych uprawnień. W szczególności, poszukiwanie identyfikatora zdarzenia systemowego 7045 lub identyfikatora zdarzenia zabezpieczeń 4673 może ujawnić podejrzane działania. Dodatkowo, uruchomienie `lsass.exe` jako chronionego procesu może znacznie utrudnić działania atakujących, ponieważ wymaga to od nich użycia sterownika w trybie jądra, co zwiększa złożoność ataku.
 
-Here are the PowerShell commands to enhance security measures:
+Oto polecenia PowerShell, aby wzmocnić środki bezpieczeństwa:
 
-- To detect the installation of suspicious services, use: `Get-WinEvent -FilterHashtable @{Logname='System';ID=7045} | ?{$_.message -like "*Kernel Mode Driver*"}`
+- Aby wykryć instalację podejrzanych usług, użyj: `Get-WinEvent -FilterHashtable @{Logname='System';ID=7045} | ?{$_.message -like "*Kernel Mode Driver*"}`
 
-- Specifically, to detect Mimikatz's driver, the following command can be utilized: `Get-WinEvent -FilterHashtable @{Logname='System';ID=7045} | ?{$_.message -like "*Kernel Mode Driver*" -and $_.message -like "*mimidrv*"}`
+- W szczególności, aby wykryć sterownik Mimikatz, można wykorzystać następujące polecenie: `Get-WinEvent -FilterHashtable @{Logname='System';ID=7045} | ?{$_.message -like "*Kernel Mode Driver*" -and $_.message -like "*mimidrv*"}`
 
-- To fortify `lsass.exe`, enabling it as a protected process is recommended: `New-ItemProperty HKLM:\SYSTEM\CurrentControlSet\Control\Lsa -Name RunAsPPL -Value 1 -Verbose`
+- Aby wzmocnić `lsass.exe`, zaleca się włączenie go jako chronionego procesu: `New-ItemProperty HKLM:\SYSTEM\CurrentControlSet\Control\Lsa -Name RunAsPPL -Value 1 -Verbose`
 
-Verification after a system reboot is crucial to ensure that the protective measures have been successfully applied. This is achievable through: `Get-WinEvent -FilterHashtable @{Logname='System';ID=12} | ?{$_.message -like "*protected process*`
+Weryfikacja po ponownym uruchomieniu systemu jest kluczowa, aby upewnić się, że środki ochronne zostały pomyślnie zastosowane. Można to osiągnąć poprzez: `Get-WinEvent -FilterHashtable @{Logname='System';ID=12} | ?{$_.message -like "*protected process*`
 
-## References
+## Odniesienia
 
 - [https://blog.netwrix.com/2022/11/29/skeleton-key-attack-active-directory/](https://blog.netwrix.com/2022/11/29/skeleton-key-attack-active-directory/)
 
 {{#include ../../banners/hacktricks-training.md}}
-

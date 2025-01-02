@@ -1,7 +1,5 @@
-# Fault Injection Attacks 
+# Ataki wstrzyknięcia błędów
 
-Fault injections attacks includes introducing external distrubance in electronic circuits to influence it's behaviour, resulting to disclose information or even bypass certian restrictions in the circuit. This attacks opens a lot of possibilities for attacking electronic circuits. This attack is also referred as glitching of electronic circuits.
+Ataki wstrzyknięcia błędów polegają na wprowadzeniu zewnętrznych zakłóceń w obwodach elektronicznych, aby wpłynąć na ich zachowanie, co prowadzi do ujawnienia informacji lub nawet ominięcia pewnych ograniczeń w obwodzie. Ataki te otwierają wiele możliwości atakowania obwodów elektronicznych. Atak ten jest również określany jako glitching obwodów elektronicznych.
 
-There are a lot of methods and mediums for injecting fault into an electronic circuit. 
-
-
+Istnieje wiele metod i środków do wstrzykiwania błędów w obwód elektroniczny.

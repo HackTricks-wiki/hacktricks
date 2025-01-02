@@ -2,81 +2,80 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## How the Infrared Works <a href="#how-the-infrared-port-works" id="how-the-infrared-port-works"></a>
+## Jak działa podczerwień <a href="#how-the-infrared-port-works" id="how-the-infrared-port-works"></a>
 
-**Infrared light is invisible to humans**. IR wavelength is from **0.7 to 1000 microns**. Household remotes use an IR signal for data transmission and operate in the wavelength range of 0.75..1.4 microns. A microcontroller in the remote makes an infrared LED blink with a specific frequency, turning the digital signal into an IR signal.
+**Światło podczerwone jest niewidoczne dla ludzi**. Długość fali IR wynosi od **0,7 do 1000 mikronów**. Piloty domowe używają sygnału IR do transmisji danych i działają w zakresie długości fal od 0,75 do 1,4 mikronów. Mikrokontroler w pilocie sprawia, że dioda LED podczerwieni miga z określoną częstotliwością, przekształcając sygnał cyfrowy w sygnał IR.
 
-To receive IR signals a **photoreceiver** is used. It **converts IR light into voltage pulses**, which are already **digital signals**. Usually, there is a **dark light filter inside the receiver**, which lets **only the desired wavelength through** and cuts out noise.
+Aby odbierać sygnały IR, używa się **fotoreceptora**. On **przekształca światło IR w impulsy napięciowe**, które są już **sygnałami cyfrowymi**. Zwykle wewnątrz odbiornika znajduje się **filtr ciemnego światła**, który przepuszcza **tylko pożądaną długość fali** i eliminuje szumy.
 
-### Variety of IR Protocols <a href="#variety-of-ir-protocols" id="variety-of-ir-protocols"></a>
+### Różnorodność protokołów IR <a href="#variety-of-ir-protocols" id="variety-of-ir-protocols"></a>
 
-IR protocols differ in 3 factors:
+Protokoły IR różnią się w 3 czynnikach:
 
-- bit encoding
-- data structure
-- carrier frequency — often in range 36..38 kHz
+- kodowanie bitów
+- struktura danych
+- częstotliwość nośna — często w zakresie 36..38 kHz
 
-#### Bit encoding ways <a href="#bit-encoding-ways" id="bit-encoding-ways"></a>
+#### Sposoby kodowania bitów <a href="#bit-encoding-ways" id="bit-encoding-ways"></a>
 
-**1. Pulse Distance Encoding**
+**1. Kodowanie odległości impulsów**
 
-Bits are encoded by modulating the duration of the space between pulses. The width of the pulse itself is constant.
+Bity są kodowane przez modulację czasu trwania przestrzeni między impulsami. Szerokość samego impulsu jest stała.
 
 <figure><img src="../../images/image (295).png" alt=""><figcaption></figcaption></figure>
 
-**2. Pulse Width Encoding**
+**2. Kodowanie szerokości impulsów**
 
-Bits are encoded by modulation of the pulse width. The width of space after pulse burst is constant.
+Bity są kodowane przez modulację szerokości impulsu. Szerokość przestrzeni po wybuchu impulsu jest stała.
 
 <figure><img src="../../images/image (282).png" alt=""><figcaption></figcaption></figure>
 
-**3. Phase Encoding**
+**3. Kodowanie fazowe**
 
-It is also known as Manchester encoding. The logical value is defined by the polarity of the transition between pulse burst and space. "Space to pulse burst" denotes logic "0", "pulse burst to space" denotes logic "1".
+Jest również znane jako kodowanie Manchester. Wartość logiczna jest definiowana przez polaryzację przejścia między wybuchem impulsu a przestrzenią. "Przestrzeń do wybuchu impulsu" oznacza logikę "0", "wybuch impulsu do przestrzeni" oznacza logikę "1".
 
 <figure><img src="../../images/image (634).png" alt=""><figcaption></figcaption></figure>
 
-**4. Combination of previous ones and other exotics**
+**4. Kombinacja poprzednich i inne egzotyki**
 
 > [!NOTE]
-> There are IR protocols that are **trying to become universal** for several types of devices. The most famous ones are RC5 and NEC. Unfortunately, the most famous **does not mean the most common**. In my environment, I met just two NEC remotes and no RC5 ones.
+> Istnieją protokoły IR, które **próbują stać się uniwersalne** dla kilku typów urządzeń. Najbardziej znane to RC5 i NEC. Niestety, najbardziej znane **nie oznacza najbardziej powszechne**. W moim otoczeniu spotkałem tylko dwa piloty NEC i żadnego RC5.
 >
-> Manufacturers love to use their own unique IR protocols, even within the same range of devices (for example, TV-boxes). Therefore, remotes from different companies and sometimes from different models from the same company, are unable to work with other devices of the same type.
+> Producenci uwielbiają używać swoich unikalnych protokołów IR, nawet w obrębie tej samej grupy urządzeń (na przykład, dekodery TV). Dlatego piloty z różnych firm, a czasem z różnych modeli tej samej firmy, nie są w stanie współpracować z innymi urządzeniami tego samego typu.
 
-### Exploring an IR signal
+### Badanie sygnału IR
 
-The most reliable way to see how the remote IR signal looks like is to use an oscilloscope. It does not demodulate or invert the received signal, it is just displayed "as is". This is useful for testing and debugging. I will show the expected signal on the example of the NEC IR protocol.
+Najbardziej niezawodnym sposobem na zobaczenie, jak wygląda sygnał IR z pilota, jest użycie oscyloskopu. Nie demoduluje ani nie odwraca odebranego sygnału, jest po prostu wyświetlany "tak jak jest". To jest przydatne do testowania i debugowania. Pokażę oczekiwany sygnał na przykładzie protokołu IR NEC.
 
 <figure><img src="../../images/image (235).png" alt=""><figcaption></figcaption></figure>
 
-Usually, there is a preamble at the beginning of an encoded packet. This allows the receiver to determine the level of gain and background. There are also protocols without preamble, for example, Sharp.
+Zwykle na początku zakodowanego pakietu znajduje się preambuła. Umożliwia to odbiornikowi określenie poziomu wzmocnienia i tła. Istnieją również protokoły bez preambuły, na przykład Sharp.
 
-Then data is transmitted. The structure, preamble, and bit encoding method are determined by the specific protocol.
+Następnie przesyłane są dane. Struktura, preambuła i metoda kodowania bitów są określane przez konkretny protokół.
 
-**NEC IR protocol** contains a short command and a repeat code, which is sent while the button is pressed. Both the command and the repeat code have the same preamble at the beginning.
+**Protokół IR NEC** zawiera krótki kod komendy i kod powtórzenia, który jest wysyłany podczas przytrzymywania przycisku. Zarówno kod komendy, jak i kod powtórzenia mają tę samą preambułę na początku.
 
-NEC **command**, in addition to the preamble, consists of an address byte and a command-number byte, by which the device understands what needs to be performed. Address and command-number bytes are duplicated with inverse values, to check the integrity of the transmission. There is an additional stop bit at the end of the command.
+Kod **komendy NEC**, oprócz preambuły, składa się z bajtu adresu i bajtu numeru komendy, dzięki którym urządzenie rozumie, co należy wykonać. Bajty adresu i numeru komendy są powielane z odwrotnymi wartościami, aby sprawdzić integralność transmisji. Na końcu komendy znajduje się dodatkowy bit stopu.
 
-The **repeat code** has a "1" after the preamble, which is a stop bit.
+Kod **powtórzenia** ma "1" po preambule, co jest bitem stopu.
 
-For **logic "0" and "1"** NEC uses Pulse Distance Encoding: first, a pulse burst is transmitted after which there is a pause, its length sets the value of the bit.
+Dla **logiki "0" i "1"** NEC używa kodowania odległości impulsów: najpierw przesyłany jest wybuch impulsu, po którym następuje pauza, której długość określa wartość bitu.
 
-### Air Conditioners
+### Klimatyzatory
 
-Unlike other remotes, **air conditioners do not transmit just the code of the pressed button**. They also **transmit all the information** when a button is pressed to assure that the **air conditioned machine and the remote are synchronised**.\
-This will avoid that a machine set as 20ºC is increased to 21ºC with one remote, and then when another remote, which still has the temperature as 20ºC, is used to increase more the temperature, it will "increase" it to 21ºC (and not to 22ºC thinking it's in 21ºC).
+W przeciwieństwie do innych pilotów, **klimatyzatory nie przesyłają tylko kodu naciśniętego przycisku**. Przesyłają również **wszystkie informacje**, gdy przycisk jest naciśnięty, aby zapewnić, że **urządzenie klimatyzacyjne i pilot są zsynchronizowane**.\
+To zapobiegnie sytuacji, w której urządzenie ustawione na 20ºC zostanie zwiększone do 21ºC za pomocą jednego pilota, a następnie, gdy użyty zostanie inny pilot, który nadal ma temperaturę 20ºC, temperatura zostanie "zwiększona" do 21ºC (a nie do 22ºC, myśląc, że jest w 21ºC).
 
-### Attacks
+### Ataki
 
-You can attack Infrared with Flipper Zero:
+Możesz zaatakować podczerwień za pomocą Flipper Zero:
 
 {{#ref}}
 flipper-zero/fz-infrared.md
 {{#endref}}
 
-## References
+## Odniesienia
 
 - [https://blog.flipperzero.one/infrared/](https://blog.flipperzero.one/infrared/)
 
 {{#include ../../banners/hacktricks-training.md}}
-

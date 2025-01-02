@@ -1,18 +1,15 @@
-# Industrial Control Systems Hacking 
+# Hacking systemów kontrolnych
 
-## About this Section
+## O tej sekcji
 
-This section contains all about Industrial Control Systems including concepts as well as methodologies to hack them with various security issues that persists in them. 
+Ta sekcja zawiera wszystko na temat systemów kontrolnych, w tym koncepcje oraz metodologie ich hackowania z różnymi problemami bezpieczeństwa, które w nich występują.
 
-Industrial Control Systems are everywhere, since industries are vital for economic development of a nation. But these ICS are hard to update and lesser advancements are made in this field. Hence, finding security flaws is common here. Most of the protocols and standards used here where developed back in the 90's and have much lesser capabilities as compared to current attack scenarios. 
+Systemy kontrolne są wszędzie, ponieważ przemysł jest kluczowy dla rozwoju gospodarczego kraju. Jednak te ICS są trudne do aktualizacji, a postępy w tej dziedzinie są ograniczone. Dlatego znajdowanie luk w zabezpieczeniach jest tutaj powszechne. Większość protokołów i standardów używanych tutaj została opracowana w latach 90-tych i ma znacznie mniejsze możliwości w porównaniu do obecnych scenariuszy ataków.
 
-It has become important to secure these systems since damaging them can cost a lot and even lives at the worst case. To understand Industrial Contol Systems security, knowing the internals of them is necessary. 
+Zabezpieczenie tych systemów stało się ważne, ponieważ ich uszkodzenie może kosztować dużo, a w najgorszym przypadku nawet życie. Aby zrozumieć bezpieczeństwo systemów kontrolnych, konieczne jest poznanie ich wnętrza.
 
-Since Industrial Control Systems are installed following set standards, knowing each components would help in interconnecting every other mechanisms in the control system. Installation of these devices like PLCs and SCADA systems is different is various industries, hence information gathering is critical. 
+Ponieważ systemy kontrolne są instalowane zgodnie z ustalonymi standardami, znajomość każdego komponentu pomoże w połączeniu wszystkich innych mechanizmów w systemie kontrolnym. Instalacja tych urządzeń, takich jak PLC i systemy SCADA, różni się w różnych branżach, dlatego zbieranie informacji jest kluczowe.
 
-Industrial Control Systems can be complicated at times and hence require a lot of patience to do anything. It's all about probing and reconnaissance before planning attacks and developing any exploits. 
+Systemy kontrolne mogą być czasami skomplikowane, dlatego wymagają dużo cierpliwości, aby cokolwiek zrobić. Chodzi o badanie i rozpoznanie przed planowaniem ataków i opracowywaniem jakichkolwiek exploitów.
 
-These techniques can also be used to protect against attacks and blue teaming for industrial control systems. 
-
-
-
+Te techniki mogą być również używane do ochrony przed atakami i blue teaming dla systemów kontrolnych.

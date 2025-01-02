@@ -2,84 +2,77 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Podstawowe informacje
 
-UART is a serial protocol, which means it transfers data between components one bit at a time. In contrast, parallel communication protocols transmit data simultaneously through multiple channels. Common serial protocols include RS-232, I2C, SPI, CAN, Ethernet, HDMI, PCI Express, and USB.
+UART to protokół szeregowy, co oznacza, że przesyła dane między komponentami jeden bit na raz. W przeciwieństwie do tego, protokoły komunikacji równoległej przesyłają dane jednocześnie przez wiele kanałów. Do powszechnych protokołów szeregowych należą RS-232, I2C, SPI, CAN, Ethernet, HDMI, PCI Express i USB.
 
-Generally, the line is held high (at a logical 1 value) while UART is in the idle state. Then, to signal the start of a data transfer, the transmitter sends a start bit to the receiver, during which the signal is held low (at a logical 0 value). Next, the transmitter sends five to eight data bits containing the actual message, followed by an optional parity bit and one or two stop bits (with a logical 1 value), depending on the configuration. The parity bit, used for error checking, is rarely seen in practice. The stop bit (or bits) signify the end of transmission.
+Ogólnie rzecz biorąc, linia jest utrzymywana w stanie wysokim (na wartości logicznej 1), gdy UART jest w stanie bezczynności. Następnie, aby sygnalizować początek transferu danych, nadajnik wysyła bit startowy do odbiornika, podczas którego sygnał jest utrzymywany w stanie niskim (na wartości logicznej 0). Następnie nadajnik wysyła od pięciu do ośmiu bitów danych zawierających rzeczywistą wiadomość, po czym następuje opcjonalny bit parzystości i jeden lub dwa bity stopu (z wartością logiczną 1), w zależności od konfiguracji. Bit parzystości, używany do sprawdzania błędów, rzadko występuje w praktyce. Bit stopu (lub bity) oznaczają koniec transmisji.
 
-We call the most common configuration 8N1: eight data bits, no parity, and one stop bit. For example, if we wanted to send the character C, or 0x43 in ASCII, in an 8N1 UART configuration, we would send the following bits: 0 (the start bit); 0, 1, 0, 0, 0, 0, 1, 1 (the value of 0x43 in binary), and 0 (the stop bit).
+Najczęściej spotykaną konfigurację nazywamy 8N1: osiem bitów danych, brak parzystości i jeden bit stopu. Na przykład, jeśli chcielibyśmy wysłać znak C, czyli 0x43 w ASCII, w konfiguracji UART 8N1, wysłalibyśmy następujące bity: 0 (bit startowy); 0, 1, 0, 0, 0, 0, 1, 1 (wartość 0x43 w systemie binarnym) i 0 (bit stopu).
 
 ![](<../../images/image (764).png>)
 
-Hardware tools to communicate with UART:
+Narzędzia sprzętowe do komunikacji z UART:
 
-- USB-to-serial adapter
-- Adapters with the CP2102 or PL2303 chips
-- Multipurpose tool such as: Bus Pirate, the Adafruit FT232H, the Shikra, or the Attify Badge
+- adapter USB-do-szeregowego
+- adaptery z chipami CP2102 lub PL2303
+- wielofunkczne narzędzie, takie jak: Bus Pirate, Adafruit FT232H, Shikra lub Attify Badge
 
-### Identifying UART Ports
+### Identyfikacja portów UART
 
-UART has 4 ports: **TX**(Transmit), **RX**(Receive), **Vcc**(Voltage), and **GND**(Ground). You might be able to find 4 ports with the **`TX`** and **`RX`** letters **written** in the PCB. But if there is no indication, you might need to try to find them yourself using a **multimeter** or a **logic analyzer**.
+UART ma 4 porty: **TX**(Transmit), **RX**(Receive), **Vcc**(Voltage) i **GND**(Ground). Możesz być w stanie znaleźć 4 porty z literami **`TX`** i **`RX`** **napisanymi** na PCB. Ale jeśli nie ma żadnych wskazówek, możesz potrzebować spróbować znaleźć je samodzielnie, używając **multimetru** lub **analizatora logicznego**.
 
-With a **multimeter** and the device powered off:
+Z **multimetrem** i urządzeniem wyłączonym:
 
-- To identify the **GND** pin use the **Continuity Test** mode, place the back lead into ground and test with the red one until you hear a sound from the multimeter. Several GND pins can be found the PCB, so you might have found or not the one belonging to UART.
-- To identify the **VCC port**, set the **DC voltage mode** and set it up to 20 V of voltage. Black probe on ground and red probe on the pin. Power on the device. If the multimeter measures a constant voltage of either 3.3 V or 5 V, you’ve found the Vcc pin. If you get other voltages, retry with other ports.
-- To identify the **TX** **port**, **DC voltage mode** up to 20 V of voltage, black probe on ground, and red probe on the pin, and power on the device. If you find the voltage fluctuates for a few seconds and then stabilizes at the Vcc value, you’ve most likely found the TX port. This is because when powering on, it sends some debug data.
-- The **RX port** would be the closest one to the other 3, it has the lowest voltage fluctuation and lowest overall value of all the UART pins.
+- Aby zidentyfikować pin **GND**, użyj trybu **Testu Ciągłości**, umieść czarny przewód w ziemi i testuj czerwonym, aż usłyszysz dźwięk z multimetru. Na PCB można znaleźć kilka pinów GND, więc możesz znaleźć lub nie ten, który należy do UART.
+- Aby zidentyfikować port **VCC**, ustaw tryb **DC voltage** i ustaw go na 20 V. Czarny przewód na ziemi, a czerwony na pinie. Włącz urządzenie. Jeśli multimetr mierzy stałe napięcie 3.3 V lub 5 V, znalazłeś pin Vcc. Jeśli otrzymasz inne napięcia, spróbuj z innymi portami.
+- Aby zidentyfikować port **TX**, ustaw tryb **DC voltage** na 20 V, czarny przewód na ziemi, a czerwony na pinie, i włącz urządzenie. Jeśli znajdziesz, że napięcie waha się przez kilka sekund, a następnie stabilizuje się na wartości Vcc, najprawdopodobniej znalazłeś port TX. Dzieje się tak, ponieważ podczas włączania wysyła pewne dane debugowania.
+- Port **RX** będzie najbliższy pozostałym 3, ma najmniejsze wahania napięcia i najniższą ogólną wartość ze wszystkich pinów UART.
 
-You can confuse the TX and RX ports and nothing would happen, but if you confuses the GND and the VCC port you might fry the circuit.
+Możesz pomylić porty TX i RX i nic się nie stanie, ale jeśli pomylisz porty GND i VCC, możesz uszkodzić obwód.
 
-In some target devices, the UART port is disabled by the manufacturer by disabling RX or TX or even both. In that case, it can be helpful to trace down the connections in the circuit board and finding some breakout point. A strong hint about confirming no detection of UART and breaking of the circuit is to check the device warranty. If the device has been shipped with some warranty, the manufacturer leaves some debug interfaces (in this case, UART) and hence, must have disconnected the UART and would attach it again while debugging. These breakout pins can be connected by soldering or jumper wires.
+W niektórych urządzeniach docelowych port UART jest wyłączany przez producenta poprzez wyłączenie RX lub TX lub nawet obu. W takim przypadku może być pomocne prześledzenie połączeń na płytce drukowanej i znalezienie punktu wyjścia. Silnym wskazaniem na potwierdzenie braku wykrycia UART i przerwania obwodu jest sprawdzenie gwarancji urządzenia. Jeśli urządzenie zostało wysłane z jakąś gwarancją, producent pozostawia pewne interfejsy debugowania (w tym przypadku UART) i dlatego musiał odłączyć UART i ponownie go podłączyć podczas debugowania. Te piny wyjściowe można połączyć przez lutowanie lub przewody zworkowe.
 
-### Identifying the UART Baud Rate
+### Identyfikacja prędkości baud UART
 
-The easiest way to identify the correct baud rate is to look at the **TX pin’s output and try to read the data**. If the data you receive isn’t readable, switch to the next possible baud rate until the data becomes readable. You can use a USB-to-serial adapter or a multipurpose device like Bus Pirate to do this, paired with a helper script, such as [baudrate.py](https://github.com/devttys0/baudrate/). The most common baud rates are 9600, 38400, 19200, 57600, and 115200.
+Najłatwiejszym sposobem na zidentyfikowanie odpowiedniej prędkości baud jest spojrzenie na **wyjście pinu TX i próba odczytania danych**. Jeśli dane, które otrzymujesz, nie są czytelne, przełącz się na następną możliwą prędkość baud, aż dane staną się czytelne. Możesz użyć adaptera USB-do-szeregowego lub wielofunkcyjnego urządzenia, takiego jak Bus Pirate, aby to zrobić, w połączeniu z pomocnym skryptem, takim jak [baudrate.py](https://github.com/devttys0/baudrate/). Najczęściej spotykane prędkości baud to 9600, 38400, 19200, 57600 i 115200.
 
 > [!CAUTION]
-> It's important to note that in this protocol you need to connect the TX of one device to the RX of the other!
+> Ważne jest, aby zauważyć, że w tym protokole musisz połączyć TX jednego urządzenia z RX drugiego!
 
-## CP210X UART to TTY Adapter
+## Adapter CP210X UART do TTY
 
-The CP210X Chip is used in a lot of prototyping boards like NodeMCU (with esp8266) for Serial Communication. These adapters are relatively inexpensive and can be used to connect to the UART interface of the target. The device has 5 pins: 5V, GND, RXD, TXD, 3.3V. Make sure to connect the voltage as supported by the target to avoid any damage. Finally connect the RXD pin of the Adapter to TXD of the target and TXD pin of the Adapter to RXD of the target.
+Chip CP210X jest używany w wielu płytkach prototypowych, takich jak NodeMCU (z esp8266) do komunikacji szeregowej. Te adaptery są stosunkowo niedrogie i mogą być używane do łączenia z interfejsem UART docelowego urządzenia. Urządzenie ma 5 pinów: 5V, GND, RXD, TXD, 3.3V. Upewnij się, że podłączasz napięcie zgodnie z wymaganiami docelowego urządzenia, aby uniknąć uszkodzeń. Na koniec podłącz pin RXD adaptera do TXD docelowego urządzenia, a pin TXD adaptera do RXD docelowego urządzenia.
 
-Incase the adapter is not detected, make sure that the CP210X drivers are installed in the host system. Once the adapter is detected and connected, tools like picocom, minicom or screen can be used.
+W przypadku, gdy adapter nie jest wykrywany, upewnij się, że sterowniki CP210X są zainstalowane w systemie gospodarza. Gdy adapter zostanie wykryty i podłączony, można używać narzędzi takich jak picocom, minicom lub screen.
 
-To list the devices connected to Linux/MacOS systems:
-
+Aby wylistować urządzenia podłączone do systemów Linux/MacOS:
 ```
 ls /dev/
 ```
-
-For basic interaction with the UART interface, use the following command:
-
+Aby uzyskać podstawową interakcję z interfejsem UART, użyj następującego polecenia:
 ```
 picocom /dev/<adapter> --baud <baudrate>
 ```
-
-For minicom, use the following command to configure it:
-
+Aby skonfigurować minicom, użyj następującego polecenia:
 ```
 minicom -s
 ```
+Skonfiguruj ustawienia, takie jak baudrate i nazwa urządzenia w opcji `Serial port setup`.
 
-Configure the settings such as baudrate and device name in the `Serial port setup` option.
+Po konfiguracji użyj polecenia `minicom`, aby uruchomić konsolę UART.
 
-After configuration, use the command `minicom` to start get the UART Console.
+## UART przez Arduino UNO R3 (wymienny chip Atmel 328p)
 
-## UART Via Arduino UNO R3 (Removable Atmel 328p Chip Boards)
+W przypadku braku adapterów UART Serial do USB, Arduino UNO R3 można użyć z szybkim hackiem. Ponieważ Arduino UNO R3 jest zazwyczaj dostępne wszędzie, może to zaoszczędzić dużo czasu.
 
-Incase UART Serial to USB adapters are not available, Arduino UNO R3 can be used with a quick hack. Since Arduino UNO R3 is usually available anywhere, this can save a lot of time.
+Arduino UNO R3 ma wbudowany adapter USB do Serial na samej płycie. Aby uzyskać połączenie UART, wystarczy wyjąć chip mikrokontrolera Atmel 328p z płyty. Ten hack działa na wariantach Arduino UNO R3, w których Atmel 328p nie jest przylutowany do płyty (używana jest wersja SMD). Podłącz pin RX Arduino (pin cyfrowy 0) do pinu TX interfejsu UART i pin TX Arduino (pin cyfrowy 1) do pinu RX interfejsu UART.
 
-Arduino UNO R3 has a USB to Serial adapter built on the board itself. To get UART connection, just plug out the Atmel 328p microcontroller chip from the board. This hack works on Arduino UNO R3 variants having the Atmel 328p not soldered on the board (SMD version is used in it). Connect the RX pin of Arduino (Digital Pin 0) to the TX pin of the UART Interface and TX pin of the Arduino (Digital Pin 1) to the RX pin of the UART interface.
-
-Finally, it is recommended to use Arduino IDE to get the Serial Console. In the `tools` section in the menu, select `Serial Console` option and set the baud rate as per the UART interface.
+Na koniec zaleca się użycie Arduino IDE, aby uzyskać konsolę szeregową. W sekcji `tools` w menu wybierz opcję `Serial Console` i ustaw baud rate zgodnie z interfejsem UART.
 
 ## Bus Pirate
 
-In this scenario we are going to sniff the UART communication of the Arduino that is sending all the prints of the program to the Serial Monitor.
-
+W tym scenariuszu zamierzamy podsłuchiwać komunikację UART Arduino, które wysyła wszystkie wydruki programu do Serial Monitor.
 ```bash
 # Check the modes
 UART>m
@@ -99,39 +92,39 @@ x. exit(without change)
 # Select UART
 (1)>3
 Set serial port speed: (bps)
- 1. 300
- 2. 1200
- 3. 2400
- 4. 4800
- 5. 9600
- 6. 19200
- 7. 38400
- 8. 57600
- 9. 115200
+1. 300
+2. 1200
+3. 2400
+4. 4800
+5. 9600
+6. 19200
+7. 38400
+8. 57600
+9. 115200
 10. BRG raw value
 
 # Select the speed the communication is occurring on (you BF all this until you find readable things)
 # Or you could later use the macro (4) to try to find the speed
 (1)>5
 Data bits and parity:
- 1. 8, NONE *default
- 2. 8, EVEN
- 3. 8, ODD
- 4. 9, NONE
+1. 8, NONE *default
+2. 8, EVEN
+3. 8, ODD
+4. 9, NONE
 
- # From now on pulse enter for default
+# From now on pulse enter for default
 (1)>
 Stop bits:
- 1. 1 *default
- 2. 2
+1. 1 *default
+2. 2
 (1)>
 Receive polarity:
- 1. Idle 1 *default
- 2. Idle 0
+1. Idle 1 *default
+2. Idle 0
 (1)>
 Select output type:
- 1. Open drain (H=Hi-Z, L=GND)
- 2. Normal (H=3.3V, L=GND)
+1. Open drain (H=Hi-Z, L=GND)
+2. Normal (H=3.3V, L=GND)
 
 (1)>
 Clutch disengaged!!!
@@ -151,36 +144,30 @@ Escritura inicial completada:
 AAA Hi Dreg! AAA
 waiting a few secs to repeat....
 ```
+## Zrzut oprogramowania układowego za pomocą konsoli UART
 
-## Dumping Firmware with UART Console
+Konsola UART zapewnia doskonały sposób na pracę z podstawowym oprogramowaniem układowym w środowisku uruchomieniowym. Jednak gdy dostęp do konsoli UART jest tylko do odczytu, może to wprowadzać wiele ograniczeń. W wielu urządzeniach wbudowanych oprogramowanie układowe jest przechowywane w EEPROM i wykonywane w procesorach, które mają pamięć ulotną. Dlatego oprogramowanie układowe jest utrzymywane w trybie tylko do odczytu, ponieważ oryginalne oprogramowanie układowe podczas produkcji znajduje się w samym EEPROM, a wszelkie nowe pliki mogłyby zostać utracone z powodu pamięci ulotnej. Dlatego zrzut oprogramowania układowego jest cennym wysiłkiem podczas pracy z wbudowanym oprogramowaniem układowym.
 
-UART Console provides a great way to work with the underlying firmware in runtime environment. But when the UART Console access is read-only, it might introduce a lot of constrains. In many embedded devices, the firmware is stored in EEPROMs and executed in processors that have volatile memory. Hence, the firmware is kept read-only since the original firmware during manufacturing is inside the EEPROM itself and any new files would get lost due to volatile memory. Hence, dumping firmware is a valuable effort while working with embedded firmwares.
+Istnieje wiele sposobów, aby to zrobić, a sekcja SPI obejmuje metody ekstrakcji oprogramowania układowego bezpośrednio z EEPROM za pomocą różnych urządzeń. Zaleca się jednak najpierw spróbować zrzutu oprogramowania układowego za pomocą UART, ponieważ zrzut oprogramowania układowego za pomocą urządzeń fizycznych i interakcji zewnętrznych może być ryzykowny.
 
-There are a lot of ways to do this and the SPI section covers methods to extract firmware directly from the EEPROM with various devices. Although, it is recommended to first try dumping firmware with UART since dumping firmware with physical devices and external interactions can be risky.
+Zrzut oprogramowania układowego z konsoli UART wymaga najpierw uzyskania dostępu do bootloaderów. Wiele popularnych dostawców korzysta z uboot (Universal Bootloader) jako swojego bootloadera do ładowania systemu Linux. Dlatego uzyskanie dostępu do uboot jest konieczne.
 
-Dumping firmware from UART Console requires first getting access to bootloaders. Many popular vendors make use of uboot (Universal Bootloader) as their bootloader to load Linux. Hence, getting access to uboot is necessary.
+Aby uzyskać dostęp do bootloadera, podłącz port UART do komputera i użyj dowolnego narzędzia konsoli szeregowej, a zasilanie urządzenia powinno być odłączone. Gdy konfiguracja jest gotowa, naciśnij klawisz Enter i przytrzymaj go. Na koniec podłącz zasilanie do urządzenia i pozwól mu się uruchomić.
 
-To get access to boot bootloader, connect the UART port to the computer and use any of the Serial Console tools and keep the power supply to the device disconnected. Once the setup is ready, press the Enter Key and hold it. Finally, connect the power supply to the device and let it boot.
+Zrobienie tego przerwie ładowanie uboot i wyświetli menu. Zaleca się zrozumienie poleceń uboot i użycie menu pomocy do ich wylistowania. Może to być polecenie `help`. Ponieważ różni dostawcy używają różnych konfiguracji, konieczne jest zrozumienie każdej z nich osobno.
 
-Doing this will interrupt uboot from loading and will provide a menu. It is recommended to understand uboot commands and using help menu to list them. This might be `help` command. Since different vendors use different configurations, it is necessary to understand each of them seperately.
-
-Usually, the command to dump the firmware is:
-
+Zazwyczaj polecenie do zrzutu oprogramowania układowego to:
 ```
 md
 ```
+które oznacza "zrzut pamięci". To zrzuci pamięć (zawartość EEPROM) na ekran. Zaleca się zapisanie wyjścia z konsoli szeregowej przed rozpoczęciem procedury, aby uchwycić zrzut pamięci.
 
-which stands for "memory dump". This will dump the memory (EEPROM Content) on the screen. It is recommended to log the Serial Console output before starting the proceedure to capture the memory dump.
-
-Finally, just strip out all the unnecessary data from the log file and store the file as `filename.rom` and use binwalk to extract the contents:
-
+Na koniec po prostu usuń wszystkie niepotrzebne dane z pliku dziennika i zapisz plik jako `filename.rom`, a następnie użyj binwalk, aby wyodrębnić zawartość:
 ```
 binwalk -e <filename.rom>
 ```
+To będzie lista możliwych zawartości z EEPROM zgodnie z podpisami znalezionymi w pliku hex.
 
-This will list the possible contents from the EEPROM as per the signatures found in the hex file.
-
-Although, it is necessary to note that it's not always the case that the uboot is unlocked even if it is being used. If the Enter Key doesn't do anything, check for different keys like Space Key, etc. If the bootloader is locked and does not get interrupted, this method would not work. To check if uboot is the bootloader for the device, check the output on the UART Console while booting of the device. It might mention uboot while booting.
+Należy jednak zauważyć, że nie zawsze uboot jest odblokowany, nawet jeśli jest używany. Jeśli klawisz Enter nie działa, sprawdź inne klawisze, takie jak klawisz Spacji itp. Jeśli bootloader jest zablokowany i nie zostanie przerwany, ta metoda nie zadziała. Aby sprawdzić, czy uboot jest bootloaderem dla urządzenia, sprawdź wyjście na konsoli UART podczas uruchamiania urządzenia. Może wspominać o uboot podczas uruchamiania.
 
 {{#include ../../banners/hacktricks-training.md}}
-

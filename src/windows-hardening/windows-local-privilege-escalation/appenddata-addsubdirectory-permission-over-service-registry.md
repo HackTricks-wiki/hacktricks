@@ -1,29 +1,28 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-**The original post is** [**https://itm4n.github.io/windows-registry-rpceptmapper-eop/**](https://itm4n.github.io/windows-registry-rpceptmapper-eop/)
+**Oryginalny post to** [**https://itm4n.github.io/windows-registry-rpceptmapper-eop/**](https://itm4n.github.io/windows-registry-rpceptmapper-eop/)
 
-## Summary
+## Podsumowanie
 
-Two registry keys were found to be writable by the current user:
+Znaleziono dwa klucze rejestru, które były zapisywalne przez bieżącego użytkownika:
 
 - **`HKLM\SYSTEM\CurrentControlSet\Services\Dnscache`**
 - **`HKLM\SYSTEM\CurrentControlSet\Services\RpcEptMapper`**
 
-It was suggested to check the permissions of the **RpcEptMapper** service using the **regedit GUI**, specifically the **Advanced Security Settings** window's **Effective Permissions** tab. This approach enables the assessment of granted permissions to specific users or groups without the need to examine each Access Control Entry (ACE) individually.
+Zasugerowano sprawdzenie uprawnień usługi **RpcEptMapper** za pomocą **regedit GUI**, szczególnie zakładki **Efektywne uprawnienia** w oknie **Zaawansowane ustawienia zabezpieczeń**. Takie podejście umożliwia ocenę przyznanych uprawnień dla konkretnych użytkowników lub grup bez potrzeby badania każdego wpisu kontroli dostępu (ACE) z osobna.
 
-A screenshot showed the permissions assigned to a low-privileged user, among which the **Create Subkey** permission was notable. This permission, also referred to as **AppendData/AddSubdirectory**, corresponds with the script's findings.
+Zrzut ekranu pokazał uprawnienia przypisane użytkownikowi o niskich uprawnieniach, wśród których wyróżniało się uprawnienie **Utwórz podklucz**. To uprawnienie, znane również jako **AppendData/AddSubdirectory**, odpowiada ustaleniom skryptu.
 
-The inability to modify certain values directly, yet the capability to create new subkeys, was noted. An example highlighted was an attempt to alter the **ImagePath** value, which resulted in an access denied message.
+Zauważono niemożność bezpośredniej modyfikacji niektórych wartości, ale możliwość tworzenia nowych podkluczy. Przykładem była próba zmiany wartości **ImagePath**, która zakończyła się komunikatem o odmowie dostępu.
 
-Despite these limitations, a potential for privilege escalation was identified through the possibility of leveraging the **Performance** subkey within the **RpcEptMapper** service's registry structure, a subkey not present by default. This could enable DLL registration and performance monitoring.
+Pomimo tych ograniczeń, zidentyfikowano potencjał do eskalacji uprawnień poprzez możliwość wykorzystania podklucza **Performance** w strukturze rejestru usługi **RpcEptMapper**, podklucza, który nie jest obecny domyślnie. Może to umożliwić rejestrację DLL i monitorowanie wydajności.
 
-Documentation on the **Performance** subkey and its utilization for performance monitoring was consulted, leading to the development of a proof-of-concept DLL. This DLL, demonstrating the implementation of **OpenPerfData**, **CollectPerfData**, and **ClosePerfData** functions, was tested via **rundll32**, confirming its operational success.
+Skonsultowano dokumentację na temat podklucza **Performance** i jego wykorzystania do monitorowania wydajności, co doprowadziło do opracowania dowodu koncepcji DLL. Ta DLL, demonstrująca implementację funkcji **OpenPerfData**, **CollectPerfData** i **ClosePerfData**, została przetestowana za pomocą **rundll32**, potwierdzając jej operacyjną skuteczność.
 
-The goal was to coerce the **RPC Endpoint Mapper service** into loading the crafted Performance DLL. Observations revealed that executing WMI class queries related to Performance Data via PowerShell resulted in the creation of a log file, enabling the execution of arbitrary code under the **LOCAL SYSTEM** context, thus granting elevated privileges.
+Celem było zmuszenie **usługi RPC Endpoint Mapper** do załadowania stworzonych DLL do wydajności. Obserwacje ujawniły, że wykonywanie zapytań klas WMI związanych z danymi wydajnościowymi za pomocą PowerShell skutkowało utworzeniem pliku dziennika, co umożliwiło wykonanie dowolnego kodu w kontekście **LOCAL SYSTEM**, przyznając tym samym podwyższone uprawnienia.
 
-The persistence and potential implications of this vulnerability were underscored, highlighting its relevance for post-exploitation strategies, lateral movement, and evasion of antivirus/EDR systems.
+Podkreślono trwałość i potencjalne implikacje tej luki, zwracając uwagę na jej znaczenie dla strategii poeksploatacyjnych, ruchu lateralnego oraz unikania systemów antywirusowych/EDR.
 
-Although the vulnerability was initially disclosed unintentionally through the script, it was emphasized that its exploitation is constrained to outdated Windows versions (e.g., **Windows 7 / Server 2008 R2**) and requires local access.
+Chociaż luka została początkowo ujawniona przypadkowo za pomocą skryptu, podkreślono, że jej wykorzystanie jest ograniczone do przestarzałych wersji Windows (np. **Windows 7 / Server 2008 R2**) i wymaga dostępu lokalnego.
 
 {{#include ../../banners/hacktricks-training.md}}
-

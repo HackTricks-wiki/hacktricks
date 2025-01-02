@@ -4,50 +4,49 @@
 
 ## JTAG
 
-JTAG allows to perform a boundary scan. The boundary scan analyzes certain circuitry, including embedded boundary-scan cells and registers for each pin.
+JTAG pozwala na przeprowadzenie skanowania granic. Skanowanie granic analizuje określone obwody, w tym wbudowane komórki skanowania granic i rejestry dla każdego pinu.
 
-The JTAG standard defines **specific commands for conducting boundary scans**, including the following:
+Standard JTAG definiuje **specyficzne polecenia do przeprowadzania skanowania granic**, w tym następujące:
 
-- **BYPASS** allows you to test a specific chip without the overhead of passing through other chips.
-- **SAMPLE/PRELOAD** takes a sample of the data entering and leaving the device when it’s in its normal functioning mode.
-- **EXTEST** sets and reads pin states.
+- **BYPASS** pozwala na testowanie konkretnego układu bez obciążenia przechodzenia przez inne układy.
+- **SAMPLE/PRELOAD** pobiera próbkę danych wchodzących i wychodzących z urządzenia, gdy działa w normalnym trybie.
+- **EXTEST** ustawia i odczytuje stany pinów.
 
-It can also support other commands such as:
+Może również wspierać inne polecenia, takie jak:
 
-- **IDCODE** for identifying a device
-- **INTEST** for the internal testing of the device
+- **IDCODE** do identyfikacji urządzenia
+- **INTEST** do wewnętrznego testowania urządzenia
 
-You might come across these instructions when you use a tool like the JTAGulator.
+Możesz natknąć się na te instrukcje, gdy używasz narzędzia takiego jak JTAGulator.
 
 ### The Test Access Port
 
-Boundary scans include tests of the four-wire **Test Access Port (TAP)**, a general-purpose port that provides **access to the JTAG test support** functions built into a component. TAP uses the following five signals:
+Skanowanie granic obejmuje testy czteroprzewodowego **Test Access Port (TAP)**, uniwersalnego portu, który zapewnia **dostęp do funkcji wsparcia testów JTAG** wbudowanych w komponent. TAP używa następujących pięciu sygnałów:
 
-- Test clock input (**TCK**) The TCK is the **clock** that defines how often the TAP controller will take a single action (in other words, jump to the next state in the state machine).
-- Test mode select (**TMS**) input TMS controls the **finite state machine**. On each beat of the clock, the device’s JTAG TAP controller checks the voltage on the TMS pin. If the voltage is below a certain threshold, the signal is considered low and interpreted as 0, whereas if the voltage is above a certain threshold, the signal is considered high and interpreted as 1.
-- Test data input (**TDI**) TDI is the pin that sends **data into the chip through the scan cells**. Each vendor is responsible for defining the communication protocol over this pin, because JTAG doesn’t define this.
-- Test data output (**TDO**) TDO is the pin that sends **data out of the chip**.
-- Test reset (**TRST**) input The optional TRST resets the finite state machine **to a known good state**. Alternatively, if the TMS is held at 1 for five consecutive clock cycles, it invokes a reset, the same way the TRST pin would, which is why TRST is optional.
+- Wejście zegara testowego (**TCK**) TCK to **zegarek**, który definiuje, jak często kontroler TAP podejmie pojedynczą akcję (innymi słowy, przejdzie do następnego stanu w maszynie stanów).
+- Wejście wyboru trybu testowego (**TMS**) TMS kontroluje **maszynę stanów skończonych**. Przy każdym uderzeniu zegara kontroler TAP JTAG urządzenia sprawdza napięcie na pinie TMS. Jeśli napięcie jest poniżej określonego progu, sygnał jest uważany za niski i interpretowany jako 0, natomiast jeśli napięcie jest powyżej określonego progu, sygnał jest uważany za wysoki i interpretowany jako 1.
+- Wejście danych testowych (**TDI**) TDI to pin, który wysyła **dane do układu przez komórki skanowania**. Każdy producent jest odpowiedzialny za zdefiniowanie protokołu komunikacyjnego przez ten pin, ponieważ JTAG tego nie definiuje.
+- Wyjście danych testowych (**TDO**) TDO to pin, który wysyła **dane z układu**.
+- Wejście resetu testowego (**TRST**) Opcjonalny TRST resetuje maszynę stanów skończonych **do znanego dobrego stanu**. Alternatywnie, jeśli TMS jest utrzymywany na poziomie 1 przez pięć kolejnych cykli zegara, wywołuje reset, w ten sam sposób, w jaki zrobiłby to pin TRST, dlatego TRST jest opcjonalny.
 
-Sometimes you will be able to find those pins marked in the PCB. In other occasions you might need to **find them**.
+Czasami będziesz mógł znaleźć te piny oznaczone na PCB. W innych przypadkach możesz potrzebować **je znaleźć**.
 
 ### Identifying JTAG pins
 
-The fastest but most expensive way to detect JTAG ports is by using the **JTAGulator**, a device created specifically for this purpose (although it can **also detect UART pinouts**).
+Naj szybszym, ale najdroższym sposobem na wykrycie portów JTAG jest użycie **JTAGulator**, urządzenia stworzonego specjalnie do tego celu (chociaż może **również wykrywać pinouty UART**).
 
-It has **24 channels** you can connect to the boards pins. Then it performs a **BF attack** of all the possible combinations sending **IDCODE** and **BYPASS** boundary scan commands. If it receives a response, it displays the channel corresponding to each JTAG signal
+Ma **24 kanały**, które możesz podłączyć do pinów płyty. Następnie przeprowadza **atak BF** wszystkich możliwych kombinacji, wysyłając polecenia skanowania granic **IDCODE** i **BYPASS**. Jeśli otrzyma odpowiedź, wyświetla kanał odpowiadający każdemu sygnałowi JTAG.
 
-A cheaper but much slower way of identifying JTAG pinouts is by using the [**JTAGenum**](https://github.com/cyphunk/JTAGenum/) loaded on an Arduino-compatible microcontroller.
+Tańszym, ale znacznie wolniejszym sposobem identyfikacji pinów JTAG jest użycie [**JTAGenum**](https://github.com/cyphunk/JTAGenum/) załadowanego na mikrokontrolerze kompatybilnym z Arduino.
 
-Using **JTAGenum**, you’d first **define the pins of the probing** device that you’ll use for the enumeration.You’d have to reference the device’s pinout diagram, and then connect these pins with the test points on your target device.
+Używając **JTAGenum**, najpierw **zdefiniujesz piny urządzenia sondy**, które będziesz używać do enumeracji. Musisz odwołać się do diagramu pinów urządzenia, a następnie połączyć te piny z punktami testowymi na docelowym urządzeniu.
 
-A **third way** to identify JTAG pins is by **inspecting the PCB** for one of the pinouts. In some cases, PCBs might conveniently provide the **Tag-Connect interface**, which is a clear indication that the board has a JTAG connector, too. You can see what that interface looks like at [https://www.tag-connect.com/info/](https://www.tag-connect.com/info/). Additionally, inspecting the **datasheets of the chipsets on the PCB** might reveal pinout diagrams that point to JTAG interfaces.
+**Trzecim sposobem** identyfikacji pinów JTAG jest **inspekcja PCB** w poszukiwaniu jednego z pinoutów. W niektórych przypadkach PCB mogą wygodnie zapewniać **interfejs Tag-Connect**, co jest wyraźnym wskazaniem, że płyta ma również złącze JTAG. Możesz zobaczyć, jak ten interfejs wygląda na [https://www.tag-connect.com/info/](https://www.tag-connect.com/info/). Dodatkowo, inspekcja **kart katalogowych chipsetów na PCB** może ujawnić diagramy pinów wskazujące na interfejsy JTAG.
 
 ## SDW
 
-SWD is an ARM-specific protocol designed for debugging.
+SWD to protokół specyficzny dla ARM zaprojektowany do debugowania.
 
-The SWD interface requires **two pins**: a bidirectional **SWDIO** signal, which is the equivalent of JTAG’s **TDI and TDO pins and a clock**, and **SWCLK**, which is the equivalent of **TCK** in JTAG. Many devices support the **Serial Wire or JTAG Debug Port (SWJ-DP)**, a combined JTAG and SWD interface that enables you to connect either a SWD or JTAG probe to the target.
+Interfejs SWD wymaga **dwóch pinów**: dwukierunkowego sygnału **SWDIO**, który jest odpowiednikiem pinów **TDI i TDO JTAG** oraz zegara, i **SWCLK**, który jest odpowiednikiem **TCK** w JTAG. Wiele urządzeń wspiera **Serial Wire lub JTAG Debug Port (SWJ-DP)**, połączony interfejs JTAG i SWD, który umożliwia podłączenie sondy SWD lub JTAG do celu.
 
 {{#include ../../banners/hacktricks-training.md}}
-

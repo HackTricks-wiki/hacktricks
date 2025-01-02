@@ -1,115 +1,111 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-# Wasm Decompilation and Wat Compilation Guide
+# Przewodnik po dekompilacji Wasm i kompilacji Wat
 
-In the realm of **WebAssembly**, tools for **decompiling** and **compiling** are essential for developers. This guide introduces some online resources and software for handling **Wasm (WebAssembly binary)** and **Wat (WebAssembly text)** files.
+W dziedzinie **WebAssembly** narzędzia do **dekompilacji** i **kompilacji** są niezbędne dla programistów. Ten przewodnik wprowadza niektóre zasoby online i oprogramowanie do obsługi plików **Wasm (WebAssembly binary)** i **Wat (WebAssembly text)**.
 
-## Online Tools
+## Narzędzia online
 
-- To **decompile** Wasm to Wat, the tool available at [Wabt's wasm2wat demo](https://webassembly.github.io/wabt/demo/wasm2wat/index.html) comes in handy.
-- For **compiling** Wat back to Wasm, [Wabt's wat2wasm demo](https://webassembly.github.io/wabt/demo/wat2wasm/) serves the purpose.
-- Another decompilation option can be found at [web-wasmdec](https://wwwg.github.io/web-wasmdec/).
+- Aby **dekompilować** Wasm do Wat, przydatne jest narzędzie dostępne w [demonstracji wasm2wat Wabt](https://webassembly.github.io/wabt/demo/wasm2wat/index.html).
+- Do **kompilacji** Wat z powrotem do Wasm służy [demonstracja wat2wasm Wabt](https://webassembly.github.io/wabt/demo/wat2wasm/).
+- Inną opcję dekompilacji można znaleźć w [web-wasmdec](https://wwwg.github.io/web-wasmdec/).
 
-## Software Solutions
+## Rozwiązania programowe
 
-- For a more robust solution, [JEB by PNF Software](https://www.pnfsoftware.com/jeb/demo) offers extensive features.
-- The open-source project [wasmdec](https://github.com/wwwg/wasmdec) is also available for decompilation tasks.
+- Dla bardziej zaawansowanego rozwiązania, [JEB od PNF Software](https://www.pnfsoftware.com/jeb/demo) oferuje rozbudowane funkcje.
+- Otwarty projekt [wasmdec](https://github.com/wwwg/wasmdec) jest również dostępny do zadań dekompilacji.
 
-# .Net Decompilation Resources
+# Zasoby do dekompilacji .Net
 
-Decompiling .Net assemblies can be accomplished with tools such as:
+Dekompilacja zestawów .Net może być realizowana za pomocą narzędzi takich jak:
 
-- [ILSpy](https://github.com/icsharpcode/ILSpy), which also offers a [plugin for Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode), allowing cross-platform usage.
-- For tasks involving **decompilation**, **modification**, and **recompilation**, [dnSpy](https://github.com/0xd4d/dnSpy/releases) is highly recommended. **Right-clicking** a method and choosing **Modify Method** enables code changes.
-- [JetBrains' dotPeek](https://www.jetbrains.com/es-es/decompiler/) is another alternative for decompiling .Net assemblies.
+- [ILSpy](https://github.com/icsharpcode/ILSpy), które oferuje również [wtyczkę do Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode), umożliwiającą użycie na różnych platformach.
+- Do zadań związanych z **dekompilacją**, **modyfikacją** i **rekompilacją** zaleca się [dnSpy](https://github.com/0xd4d/dnSpy/releases). **Kliknięcie prawym przyciskiem** na metodzie i wybranie **Modify Method** umożliwia zmiany w kodzie.
+- [dotPeek od JetBrains](https://www.jetbrains.com/es-es/decompiler/) to kolejna alternatywa do dekompilacji zestawów .Net.
 
-## Enhancing Debugging and Logging with DNSpy
+## Ulepszanie debugowania i logowania z DNSpy
 
-### DNSpy Logging
+### Logowanie DNSpy
 
-To log information to a file using DNSpy, incorporate the following .Net code snippet:
+Aby logować informacje do pliku za pomocą DNSpy, wprowadź następujący fragment kodu .Net:
 
 %%%cpp
 using System.IO;
 path = "C:\\inetpub\\temp\\MyTest2.txt";
-File.AppendAllText(path, "Password: " + password + "\n");
+File.AppendAllText(path, "Hasło: " + password + "\n");
 %%%
 
-### DNSpy Debugging
+### Debugowanie DNSpy
 
-For effective debugging with DNSpy, a sequence of steps is recommended to adjust **Assembly attributes** for debugging, ensuring that optimizations that could hinder debugging are disabled. This process includes changing the `DebuggableAttribute` settings, recompiling the assembly, and saving the changes.
+Aby skutecznie debugować z DNSpy, zaleca się sekwencję kroków w celu dostosowania **atrybutów Assembly** do debugowania, zapewniając, że optymalizacje, które mogą utrudniać debugowanie, są wyłączone. Proces ten obejmuje zmianę ustawień `DebuggableAttribute`, rekompilację zestawu i zapisanie zmian.
 
-Moreover, to debug a .Net application run by **IIS**, executing `iisreset /noforce` restarts IIS. To attach DNSpy to the IIS process for debugging, the guide instructs on selecting the **w3wp.exe** process within DNSpy and starting the debugging session.
+Ponadto, aby debugować aplikację .Net uruchamianą przez **IIS**, wykonanie `iisreset /noforce` restartuje IIS. Aby dołączyć DNSpy do procesu IIS w celu debugowania, przewodnik instruuje, aby wybrać proces **w3wp.exe** w DNSpy i rozpocząć sesję debugowania.
 
-For a comprehensive view of loaded modules during debugging, accessing the **Modules** window in DNSpy is advised, followed by opening all modules and sorting assemblies for easier navigation and debugging.
+Aby uzyskać pełny widok załadowanych modułów podczas debugowania, zaleca się dostęp do okna **Modules** w DNSpy, a następnie otwarcie wszystkich modułów i posortowanie zestawów dla łatwiejszej nawigacji i debugowania.
 
-This guide encapsulates the essence of WebAssembly and .Net decompilation, offering a pathway for developers to navigate these tasks with ease.
+Ten przewodnik podsumowuje istotę dekompilacji WebAssembly i .Net, oferując ścieżkę dla programistów do łatwego poruszania się po tych zadaniach.
 
-## **Java Decompiler**
+## **Dekompilator Java**
 
-To decompile Java bytecode, these tools can be very helpful:
+Aby dekompilować bajtkod Java, te narzędzia mogą być bardzo pomocne:
 
 - [jadx](https://github.com/skylot/jadx)
 - [JD-GUI](https://github.com/java-decompiler/jd-gui/releases)
 
-## **Debugging DLLs**
+## **Debugowanie DLL**
 
-### Using IDA
+### Używając IDA
 
-- **Rundll32** is loaded from specific paths for 64-bit and 32-bit versions.
-- **Windbg** is selected as the debugger with the option to suspend on library load/unload enabled.
-- Execution parameters include the DLL path and function name. This setup halts execution upon each DLL's loading.
+- **Rundll32** jest ładowany z określonych ścieżek dla wersji 64-bitowych i 32-bitowych.
+- **Windbg** jest wybierany jako debugger z włączoną opcją wstrzymywania przy ładowaniu/wyładowywaniu biblioteki.
+- Parametry wykonania obejmują ścieżkę DLL i nazwę funkcji. Ta konfiguracja zatrzymuje wykonanie przy każdym ładowaniu DLL.
 
-### Using x64dbg/x32dbg
+### Używając x64dbg/x32dbg
 
-- Similar to IDA, **rundll32** is loaded with command line modifications to specify the DLL and function.
-- Settings are adjusted to break on DLL entry, allowing breakpoint setting at the desired DLL entry point.
+- Podobnie jak w IDA, **rundll32** jest ładowany z modyfikacjami wiersza poleceń, aby określić DLL i funkcję.
+- Ustawienia są dostosowywane, aby przerwać przy wejściu DLL, co pozwala na ustawienie punktu przerwania w żądanym punkcie wejścia DLL.
 
-### Images
+### Obrazy
 
-- Execution stopping points and configurations are illustrated through screenshots.
+- Punkty zatrzymania wykonania i konfiguracje są ilustrowane za pomocą zrzutów ekranu.
 
 ## **ARM & MIPS**
 
-- For emulation, [arm_now](https://github.com/nongiach/arm_now) is a useful resource.
+- Do emulacji, [arm_now](https://github.com/nongiach/arm_now) jest przydatnym zasobem.
 
 ## **Shellcodes**
 
-### Debugging Techniques
+### Techniki debugowania
 
-- **Blobrunner** and **jmp2it** are tools for allocating shellcodes in memory and debugging them with Ida or x64dbg.
-  - Blobrunner [releases](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)
-  - jmp2it [compiled version](https://github.com/adamkramer/jmp2it/releases/)
-- **Cutter** offers GUI-based shellcode emulation and inspection, highlighting differences in shellcode handling as a file versus direct shellcode.
+- **Blobrunner** i **jmp2it** to narzędzia do alokacji shellcodów w pamięci i debugowania ich za pomocą Ida lub x64dbg.
+- Blobrunner [wydania](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)
+- jmp2it [skompilowana wersja](https://github.com/adamkramer/jmp2it/releases/)
+- **Cutter** oferuje emulację shellcode w oparciu o GUI i inspekcję, podkreślając różnice w obsłudze shellcode jako pliku w porównaniu do bezpośredniego shellcode.
 
-### Deobfuscation and Analysis
+### Deobfuskacja i analiza
 
-- **scdbg** provides insights into shellcode functions and deobfuscation capabilities.
-  %%%bash
-  scdbg.exe -f shellcode # Basic info
-  scdbg.exe -f shellcode -r # Analysis report
-  scdbg.exe -f shellcode -i -r # Interactive hooks
-  scdbg.exe -f shellcode -d # Dump decoded shellcode
-  scdbg.exe -f shellcode /findsc # Find start offset
-  scdbg.exe -f shellcode /foff 0x0000004D # Execute from offset
-  %%%
+- **scdbg** dostarcza informacji na temat funkcji shellcode i możliwości deobfuskacji.
+%%%bash
+scdbg.exe -f shellcode # Podstawowe informacje
+scdbg.exe -f shellcode -r # Raport analizy
+scdbg.exe -f shellcode -i -r # Interaktywne haki
+scdbg.exe -f shellcode -d # Zrzut zdekodowanego shellcode
+scdbg.exe -f shellcode /findsc # Znajdź offset startowy
+scdbg.exe -f shellcode /foff 0x0000004D # Wykonaj z offsetu
+%%%
 
-- **CyberChef** for disassembling shellcode: [CyberChef recipe](https://gchq.github.io/CyberChef/#recipe=To_Hex%28'Space',0%29Disassemble_x86%28'32','Full%20x86%20architecture',16,0,true,true%29)
+- **CyberChef** do deasemblacji shellcode: [przepis CyberChef](https://gchq.github.io/CyberChef/#recipe=To_Hex%28'Space',0%29Disassemble_x86%28'32','Full%20x86%20architecture',16,0,true,true%29)
 
 ## **Movfuscator**
 
-- An obfuscator that replaces all instructions with `mov`.
-- Useful resources include a [YouTube explanation](https://www.youtube.com/watch?v=2VF_wPkiBJY) and [PDF slides](https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas_2015_the_movfuscator.pdf).
-- **demovfuscator** might reverse movfuscator's obfuscation, requiring dependencies like `libcapstone-dev` and `libz3-dev`, and installing [keystone](https://github.com/keystone-engine/keystone/blob/master/docs/COMPILE-NIX.md).
+- Obfuskator, który zastępuje wszystkie instrukcje `mov`.
+- Przydatne zasoby to [wyjaśnienie na YouTube](https://www.youtube.com/watch?v=2VF_wPkiBJY) oraz [slajdy PDF](https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas_2015_the_movfuscator.pdf).
+- **demovfuscator** może odwrócić obfuskację movfuscatora, wymagając zależności takich jak `libcapstone-dev` i `libz3-dev`, oraz instalacji [keystone](https://github.com/keystone-engine/keystone/blob/master/docs/COMPILE-NIX.md).
 
 ## **Delphi**
 
-- For Delphi binaries, [IDR](https://github.com/crypto2011/IDR) is recommended.
+- Dla binarnych plików Delphi, zaleca się [IDR](https://github.com/crypto2011/IDR).
 
-# Courses
+# Kursy
 
-- [https://github.com/0xZ0F/Z0FCourse_ReverseEngineering](https://github.com/0xZ0F/Z0FCourse_ReverseEngineering)
-- [https://github.com/malrev/ABD](https://github.com/malrev/ABD) \(Binary deobfuscation\)
-
-{{#include ../../banners/hacktricks-training.md}}
-
+- [https://github.com/

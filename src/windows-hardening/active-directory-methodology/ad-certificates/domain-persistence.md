@@ -2,29 +2,26 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**This is a summary of the domain persistence techniques shared in [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)**. Check it for further details.
+**To jest podsumowanie technik utrzymywania domeny przedstawionych w [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)**. Sprawdź to, aby uzyskać więcej szczegółów.
 
-## Forging Certificates with Stolen CA Certificates - DPERSIST1
+## Fałszowanie certyfikatów za pomocą skradzionych certyfikatów CA - DPERSIST1
 
-How can you tell that a certificate is a CA certificate?
+Jak można stwierdzić, że certyfikat jest certyfikatem CA?
 
-It can be determined that a certificate is a CA certificate if several conditions are met:
+Można ustalić, że certyfikat jest certyfikatem CA, jeśli spełnione są następujące warunki:
 
-- The certificate is stored on the CA server, with its private key secured by the machine's DPAPI, or by hardware such as a TPM/HSM if the operating system supports it.
-- Both the Issuer and Subject fields of the certificate match the distinguished name of the CA.
-- A "CA Version" extension is present in the CA certificates exclusively.
-- The certificate lacks Extended Key Usage (EKU) fields.
+- Certyfikat jest przechowywany na serwerze CA, a jego klucz prywatny jest zabezpieczony przez DPAPI maszyny lub przez sprzęt, taki jak TPM/HSM, jeśli system operacyjny to wspiera.
+- Pola Issuer i Subject certyfikatu odpowiadają wyróżnionej nazwie CA.
+- W certyfikatach CA obecne jest rozszerzenie "CA Version" wyłącznie.
+- Certyfikat nie zawiera pól Extended Key Usage (EKU).
 
-To extract the private key of this certificate, the `certsrv.msc` tool on the CA server is the supported method via the built-in GUI. Nonetheless, this certificate does not differ from others stored within the system; thus, methods such as the [THEFT2 technique](certificate-theft.md#user-certificate-theft-via-dpapi-theft2) can be applied for extraction.
+Aby wyodrębnić klucz prywatny tego certyfikatu, narzędzie `certsrv.msc` na serwerze CA jest wspieraną metodą za pośrednictwem wbudowanego GUI. Niemniej jednak, ten certyfikat nie różni się od innych przechowywanych w systemie; dlatego można zastosować metody takie jak [THEFT2 technique](certificate-theft.md#user-certificate-theft-via-dpapi-theft2) do jego wyodrębnienia.
 
-The certificate and private key can also be obtained using Certipy with the following command:
-
+Certyfikat i klucz prywatny można również uzyskać za pomocą Certipy, używając następującego polecenia:
 ```bash
 certipy ca 'corp.local/administrator@ca.corp.local' -hashes :123123.. -backup
 ```
-
-Upon acquiring the CA certificate and its private key in `.pfx` format, tools like [ForgeCert](https://github.com/GhostPack/ForgeCert) can be utilized to generate valid certificates:
-
+Po zdobyciu certyfikatu CA i jego klucza prywatnego w formacie `.pfx`, można wykorzystać narzędzia takie jak [ForgeCert](https://github.com/GhostPack/ForgeCert) do generowania ważnych certyfikatów:
 ```bash
 # Generating a new certificate with ForgeCert
 ForgeCert.exe --CaCertPath ca.pfx --CaCertPassword Password123! --Subject "CN=User" --SubjectAltName localadmin@theshire.local --NewCertPath localadmin.pfx --NewCertPassword Password123!
@@ -38,31 +35,29 @@ Rubeus.exe asktgt /user:localdomain /certificate:C:\ForgeCert\localadmin.pfx /pa
 # Authenticating using the new certificate with certipy
 certipy auth -pfx administrator_forged.pfx -dc-ip 172.16.126.128
 ```
-
 > [!WARNING]
-> The user targeted for certificate forgery must be active and capable of authenticating in Active Directory for the process to succeed. Forging a certificate for special accounts like krbtgt is ineffective.
+> Użytkownik, który jest celem fałszowania certyfikatu, musi być aktywny i zdolny do uwierzytelnienia w Active Directory, aby proces zakończył się sukcesem. Fałszowanie certyfikatu dla specjalnych kont, takich jak krbtgt, jest nieskuteczne.
 
-This forged certificate will be **valid** until the end date specified and as **long as the root CA certificate is valid** (usually from 5 to **10+ years**). It's also valid for **machines**, so combined with **S4U2Self**, an attacker can **maintain persistence on any domain machine** for as long as the CA certificate is valid.\
-Moreover, the **certificates generated** with this method **cannot be revoked** as CA is not aware of them.
+Ten fałszywy certyfikat będzie **ważny** do daty końcowej określonej i **tak długo, jak certyfikat CA jest ważny** (zwykle od 5 do **10+ lat**). Jest również ważny dla **maszyn**, więc w połączeniu z **S4U2Self**, atakujący może **utrzymać trwałość na dowolnej maszynie w domenie** tak długo, jak certyfikat CA jest ważny.\
+Ponadto, **certyfikaty generowane** tą metodą **nie mogą być unieważnione**, ponieważ CA nie jest ich świadoma.
 
-## Trusting Rogue CA Certificates - DPERSIST2
+## Zaufanie do fałszywych certyfikatów CA - DPERSIST2
 
-The `NTAuthCertificates` object is defined to contain one or more **CA certificates** within its `cacertificate` attribute, which Active Directory (AD) utilizes. The verification process by the **domain controller** involves checking the `NTAuthCertificates` object for an entry matching the **CA specified** in the Issuer field of the authenticating **certificate**. Authentication proceeds if a match is found.
+Obiekt `NTAuthCertificates` jest zdefiniowany jako zawierający jeden lub więcej **certyfikatów CA** w swoim atrybucie `cacertificate`, z którego korzysta Active Directory (AD). Proces weryfikacji przez **kontroler domeny** polega na sprawdzeniu obiektu `NTAuthCertificates` pod kątem wpisu odpowiadającego **CA określonemu** w polu Wydawca autoryzującego **certyfikatu**. Uwierzytelnianie postępuje, jeśli znaleziono dopasowanie.
 
-A self-signed CA certificate can be added to the `NTAuthCertificates` object by an attacker, provided they have control over this AD object. Normally, only members of the **Enterprise Admin** group, along with **Domain Admins** or **Administrators** in the **forest root’s domain**, are granted permission to modify this object. They can edit the `NTAuthCertificates` object using `certutil.exe` with the command `certutil.exe -dspublish -f C:\Temp\CERT.crt NTAuthCA126`, or by employing the [**PKI Health Tool**](https://docs.microsoft.com/en-us/troubleshoot/windows-server/windows-security/import-third-party-ca-to-enterprise-ntauth-store#method-1---import-a-certificate-by-using-the-pki-health-tool).
+Certyfikat CA podpisany samodzielnie może być dodany do obiektu `NTAuthCertificates` przez atakującego, pod warunkiem, że ma kontrolę nad tym obiektem AD. Zwykle tylko członkowie grupy **Enterprise Admin**, wraz z **Domain Admins** lub **Administratorami** w **domenie głównej lasu**, mają uprawnienia do modyfikacji tego obiektu. Mogą edytować obiekt `NTAuthCertificates` za pomocą `certutil.exe` z poleceniem `certutil.exe -dspublish -f C:\Temp\CERT.crt NTAuthCA126`, lub korzystając z [**PKI Health Tool**](https://docs.microsoft.com/en-us/troubleshoot/windows-server/windows-security/import-third-party-ca-to-enterprise-ntauth-store#method-1---import-a-certificate-by-using-the-pki-health-tool).
 
-This capability is especially relevant when used in conjunction with a previously outlined method involving ForgeCert to dynamically generate certificates.
+Ta zdolność jest szczególnie istotna, gdy jest używana w połączeniu z wcześniej opisanym sposobem wykorzystania ForgeCert do dynamicznego generowania certyfikatów.
 
-## Malicious Misconfiguration - DPERSIST3
+## Złośliwa niewłaściwa konfiguracja - DPERSIST3
 
-Opportunities for **persistence** through **security descriptor modifications of AD CS** components are plentiful. Modifications described in the "[Domain Escalation](domain-escalation.md)" section can be maliciously implemented by an attacker with elevated access. This includes the addition of "control rights" (e.g., WriteOwner/WriteDACL/etc.) to sensitive components such as:
+Możliwości **trwałości** poprzez **modyfikacje deskryptora zabezpieczeń komponentów AD CS** są liczne. Modyfikacje opisane w sekcji "[Domain Escalation](domain-escalation.md)" mogą być złośliwie wdrażane przez atakującego z podwyższonym dostępem. Obejmuje to dodanie "praw kontrolnych" (np. WriteOwner/WriteDACL/etc.) do wrażliwych komponentów, takich jak:
 
-- The **CA server’s AD computer** object
-- The **CA server’s RPC/DCOM server**
-- Any **descendant AD object or container** in **`CN=Public Key Services,CN=Services,CN=Configuration,DC=<DOMAIN>,DC=<COM>`** (for instance, the Certificate Templates container, Certification Authorities container, the NTAuthCertificates object, etc.)
-- **AD groups delegated rights to control AD CS** by default or by the organization (such as the built-in Cert Publishers group and any of its members)
+- Obiekt komputera AD **serwera CA**
+- **Serwer RPC/DCOM serwera CA**
+- Dowolny **obiekt lub kontener AD potomny** w **`CN=Public Key Services,CN=Services,CN=Configuration,DC=<DOMAIN>,DC=<COM>`** (na przykład kontener szablonów certyfikatów, kontener autorytetów certyfikacji, obiekt NTAuthCertificates itd.)
+- **Grupy AD, którym przyznano prawa do kontrolowania AD CS** domyślnie lub przez organizację (takie jak wbudowana grupa Cert Publishers i wszyscy jej członkowie)
 
-An example of malicious implementation would involve an attacker, who has **elevated permissions** in the domain, adding the **`WriteOwner`** permission to the default **`User`** certificate template, with the attacker being the principal for the right. To exploit this, the attacker would first change the ownership of the **`User`** template to themselves. Following this, the **`mspki-certificate-name-flag`** would be set to **1** on the template to enable **`ENROLLEE_SUPPLIES_SUBJECT`**, allowing a user to provide a Subject Alternative Name in the request. Subsequently, the attacker could **enroll** using the **template**, choosing a **domain administrator** name as an alternative name, and utilize the acquired certificate for authentication as the DA.
+Przykład złośliwej implementacji obejmowałby atakującego, który ma **podwyższone uprawnienia** w domenie, dodającego uprawnienie **`WriteOwner`** do domyślnego szablonu certyfikatu **`User`**, przy czym atakujący byłby głównym uprawnionym do tego prawa. Aby to wykorzystać, atakujący najpierw zmieniłby własność szablonu **`User`** na siebie. Następnie, **`mspki-certificate-name-flag`** zostałby ustawiony na **1** w szablonie, aby włączyć **`ENROLLEE_SUPPLIES_SUBJECT`**, co pozwala użytkownikowi dostarczyć nazwę alternatywną w żądaniu. Następnie atakujący mógłby **zarejestrować** się, korzystając z **szablonu**, wybierając nazwę **administrator domeny** jako nazwę alternatywną, i wykorzystać uzyskany certyfikat do uwierzytelnienia jako DA.
 
 {{#include ../../../banners/hacktricks-training.md}}
-
