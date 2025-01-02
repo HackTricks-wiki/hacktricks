@@ -2,17 +2,10 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="/images/pentest-tools.svg" alt=""><figcaption></figcaption></figure>
-
-**Αποκτήστε την προοπτική ενός χάκερ για τις εφαρμογές ιστού, το δίκτυο και το cloud σας**
-
-**Βρείτε και αναφέρετε κρίσιμες, εκμεταλλεύσιμες ευπάθειες με πραγματικό επιχειρηματικό αντίκτυπο.** Χρησιμοποιήστε τα 20+ προσαρμοσμένα εργαλεία μας για να χαρτογραφήσετε την επιφάνεια επίθεσης, να βρείτε ζητήματα ασφαλείας που σας επιτρέπουν να κλιμακώσετε τα προνόμια και να χρησιμοποιήσετε αυτοματοποιημένες εκμεταλλεύσεις για να συλλέξετε βασικά αποδεικτικά στοιχεία, μετατρέποντας τη σκληρή δουλειά σας σε πειστικές αναφορές.
-
-{% embed url="https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons" %}
 
 ## Πώς Λειτουργεί
 
-**Smbexec** είναι ένα εργαλείο που χρησιμοποιείται για απομακρυσμένη εκτέλεση εντολών σε συστήματα Windows, παρόμοιο με το **Psexec**, αλλά αποφεύγει να τοποθετήσει οποιαδήποτε κακόβουλα αρχεία στο σύστημα-στόχο.
+**Smbexec** είναι ένα εργαλείο που χρησιμοποιείται για απομακρυσμένη εκτέλεση εντολών σε συστήματα Windows, παρόμοιο με το **Psexec**, αλλά αποφεύγει την τοποθέτηση κακόβουλων αρχείων στο σύστημα-στόχο.
 
 ### Κύρια Σημεία σχετικά με το **SMBExec**
 
@@ -25,8 +18,8 @@ smbexec.py WORKGROUP/genericuser:genericpassword@10.10.10.10
 ### Εκτέλεση Εντολών Χωρίς Δυαδικά
 
 - **Smbexec** επιτρέπει την άμεση εκτέλεση εντολών μέσω των binPaths υπηρεσίας, εξαλείφοντας την ανάγκη για φυσικά δυαδικά στον στόχο.
-- Αυτή η μέθοδος είναι χρήσιμη για την εκτέλεση εντολών μίας φοράς σε έναν στόχο Windows. Για παράδειγμα, η σύνδεση της με το module `web_delivery` του Metasploit επιτρέπει την εκτέλεση ενός payload reverse Meterpreter που στοχεύει το PowerShell.
-- Δημιουργώντας μια απομακρυσμένη υπηρεσία στη μηχανή του επιτιθέμενου με το binPath ρυθμισμένο να εκτελεί την παρεχόμενη εντολή μέσω του cmd.exe, είναι δυνατόν να εκτελεστεί το payload με επιτυχία, επιτυγχάνοντας callback και εκτέλεση payload με τον listener του Metasploit, ακόμη και αν προκύψουν σφάλματα απόκρισης υπηρεσίας.
+- Αυτή η μέθοδος είναι χρήσιμη για την εκτέλεση εντολών μίας φοράς σε έναν στόχο Windows. Για παράδειγμα, η σύνδεση της με το module `web_delivery` του Metasploit επιτρέπει την εκτέλεση ενός PowerShell-στοχευμένου αντίστροφου Meterpreter payload.
+- Δημιουργώντας μια απομακρυσμένη υπηρεσία στη μηχανή του επιτιθέμενου με το binPath ρυθμισμένο να εκτελεί την παρεχόμενη εντολή μέσω του cmd.exe, είναι δυνατό να εκτελεστεί επιτυχώς το payload, επιτυγχάνοντας callback και εκτέλεση payload με τον listener του Metasploit, ακόμη και αν προκύψουν σφάλματα απόκρισης υπηρεσίας.
 
 ### Παράδειγμα Εντολών
 
@@ -35,18 +28,11 @@ smbexec.py WORKGROUP/genericuser:genericpassword@10.10.10.10
 sc create [ServiceName] binPath= "cmd.exe /c [PayloadCommand]"
 sc start [ServiceName]
 ```
-Για περισσότερες λεπτομέρειες, ελέγξτε [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
+Για περισσότερες λεπτομέρειες ελέγξτε [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
 
 ## Αναφορές
 
 - [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
 
-<figure><img src="/images/pentest-tools.svg" alt=""><figcaption></figcaption></figure>
-
-**Αποκτήστε την προοπτική ενός χάκερ για τις εφαρμογές ιστού, το δίκτυο και το cloud σας**
-
-**Βρείτε και αναφέρετε κρίσιμες, εκμεταλλεύσιμες ευπάθειες με πραγματικό επιχειρηματικό αντίκτυπο.** Χρησιμοποιήστε τα 20+ προσαρμοσμένα εργαλεία μας για να χαρτογραφήσετε την επιφάνεια επίθεσης, να βρείτε ζητήματα ασφαλείας που σας επιτρέπουν να κλιμακώσετε τα δικαιώματα και να χρησιμοποιήσετε αυτοματοποιημένες εκμεταλλεύσεις για να συλλέξετε βασικά αποδεικτικά στοιχεία, μετατρέποντας τη σκληρή δουλειά σας σε πειστικές αναφορές.
-
-{% embed url="https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons" %}
 
 {{#include ../../banners/hacktricks-training.md}}

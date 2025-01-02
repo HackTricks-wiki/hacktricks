@@ -4,16 +4,15 @@
 
 ## Basic Information
 
-**Linux Control Groups**, or **cgroups**, are a feature of the Linux kernel that allows the allocation, limitation, and prioritization of system resources like CPU, memory, and disk I/O among process groups. They offer a mechanism for **managing and isolating the resource usage** of process collections, beneficial for purposes such as resource limitation, workload isolation, and resource prioritization among different process groups.
+**Linux Control Groups**, ή **cgroups**, είναι μια δυνατότητα του πυρήνα Linux που επιτρέπει την κατανομή, τον περιορισμό και την προτεραιοποίηση των πόρων του συστήματος όπως CPU, μνήμη και δίσκος I/O μεταξύ ομάδων διεργασιών. Προσφέρουν έναν μηχανισμό για **τη διαχείριση και την απομόνωση της χρήσης πόρων** συλλογών διεργασιών, ωφέλιμο για σκοπούς όπως ο περιορισμός πόρων, η απομόνωση φορτίου εργασίας και η προτεραιοποίηση πόρων μεταξύ διαφορετικών ομάδων διεργασιών.
 
-There are **two versions of cgroups**: version 1 and version 2. Both can be used concurrently on a system. The primary distinction is that **cgroups version 2** introduces a **hierarchical, tree-like structure**, enabling more nuanced and detailed resource distribution among process groups. Additionally, version 2 brings various enhancements, including:
+Υπάρχουν **δύο εκδόσεις cgroups**: η έκδοση 1 και η έκδοση 2. Και οι δύο μπορούν να χρησιμοποιηθούν ταυτόχρονα σε ένα σύστημα. Η κύρια διάκριση είναι ότι **η έκδοση cgroups 2** εισάγει μια **ιεραρχική, δένδρο-όπως δομή**, επιτρέποντας πιο λεπτομερή και λεπτομερή κατανομή πόρων μεταξύ ομάδων διεργασιών. Επιπλέον, η έκδοση 2 φέρνει διάφορες βελτιώσεις, συμπεριλαμβανομένων:
 
-In addition to the new hierarchical organization, cgroups version 2 also introduced **several other changes and improvements**, such as support for **new resource controllers**, better support for legacy applications, and improved performance.
+Εκτός από τη νέα ιεραρχική οργάνωση, η έκδοση cgroups 2 εισήγαγε επίσης **πολλές άλλες αλλαγές και βελτιώσεις**, όπως υποστήριξη για **νέους ελεγκτές πόρων**, καλύτερη υποστήριξη για κληρονομημένες εφαρμογές και βελτιωμένη απόδοση.
 
-Overall, cgroups **version 2 offers more features and better performance** than version 1, but the latter may still be used in certain scenarios where compatibility with older systems is a concern.
+Συνολικά, η **έκδοση cgroups 2 προσφέρει περισσότερες δυνατότητες και καλύτερη απόδοση** από την έκδοση 1, αλλά η τελευταία μπορεί να χρησιμοποιηθεί σε ορισμένα σενάρια όπου η συμβατότητα με παλαιότερα συστήματα είναι ανησυχία.
 
-You can list the v1 and v2 cgroups for any process by looking at its cgroup file in /proc/\<pid>. You can start by looking at your shell’s cgroups with this command:
-
+Μπορείτε να καταγράψετε τις ομάδες cgroups v1 και v2 για οποιαδήποτε διεργασία κοιτάζοντας το αρχείο cgroup της στο /proc/\<pid>. Μπορείτε να ξεκινήσετε κοιτάζοντας τις ομάδες cgroups του shell σας με αυτή την εντολή:
 ```shell-session
 $ cat /proc/self/cgroup
 12:rdma:/
@@ -28,60 +27,53 @@ $ cat /proc/self/cgroup
 1:name=systemd:/user.slice/user-1000.slice/session-2.scope
 0::/user.slice/user-1000.slice/session-2.scope
 ```
+Η δομή εξόδου είναι ως εξής:
 
-The output structure is as follows:
+- **Αριθμοί 2–12**: cgroups v1, με κάθε γραμμή να αντιπροσωπεύει ένα διαφορετικό cgroup. Οι ελεγκτές για αυτά καθορίζονται δίπλα στον αριθμό.
+- **Αριθμός 1**: Επίσης cgroups v1, αλλά αποκλειστικά για σκοπούς διαχείρισης (ορισμένο από, π.χ., systemd), και δεν έχει ελεγκτή.
+- **Αριθμός 0**: Αντιπροσωπεύει cgroups v2. Δεν αναφέρονται ελεγκτές, και αυτή η γραμμή είναι αποκλειστική σε συστήματα που εκτελούν μόνο cgroups v2.
+- Οι **ονομασίες είναι ιεραρχικές**, που μοιάζουν με διαδρομές αρχείων, υποδεικνύοντας τη δομή και τη σχέση μεταξύ διαφορετικών cgroups.
+- **Ονομασίες όπως /user.slice ή /system.slice** καθορίζουν την κατηγοριοποίηση των cgroups, με το user.slice συνήθως για συνεδρίες σύνδεσης που διαχειρίζεται το systemd και το system.slice για υπηρεσίες συστήματος.
 
-- **Numbers 2–12**: cgroups v1, with each line representing a different cgroup. Controllers for these are specified adjacent to the number.
-- **Number 1**: Also cgroups v1, but solely for management purposes (set by, e.g., systemd), and lacks a controller.
-- **Number 0**: Represents cgroups v2. No controllers are listed, and this line is exclusive on systems only running cgroups v2.
-- The **names are hierarchical**, resembling file paths, indicating the structure and relationship between different cgroups.
-- **Names like /user.slice or /system.slice** specify the categorization of cgroups, with user.slice typically for login sessions managed by systemd and system.slice for system services.
+### Προβολή cgroups
 
-### Viewing cgroups
-
-The filesystem is typically utilized for accessing **cgroups**, diverging from the Unix system call interface traditionally used for kernel interactions. To investigate a shell's cgroup configuration, one should examine the **/proc/self/cgroup** file, which reveals the shell's cgroup. Then, by navigating to the **/sys/fs/cgroup** (or **`/sys/fs/cgroup/unified`**) directory and locating a directory that shares the cgroup's name, one can observe various settings and resource usage information pertinent to the cgroup.
+Το σύστημα αρχείων χρησιμοποιείται συνήθως για την πρόσβαση σε **cgroups**, αποκλίνουσα από τη διεπαφή κλήσεων συστήματος Unix που χρησιμοποιείται παραδοσιακά για αλληλεπιδράσεις με τον πυρήνα. Για να εξετάσετε τη διαμόρφωση cgroup ενός shell, θα πρέπει να ελέγξετε το αρχείο **/proc/self/cgroup**, το οποίο αποκαλύπτει το cgroup του shell. Στη συνέχεια, πλοηγούμενοι στον κατάλογο **/sys/fs/cgroup** (ή **`/sys/fs/cgroup/unified`**) και εντοπίζοντας έναν κατάλογο που μοιράζεται το όνομα του cgroup, μπορεί κανείς να παρατηρήσει διάφορες ρυθμίσεις και πληροφορίες χρήσης πόρων σχετικές με το cgroup.
 
 ![Cgroup Filesystem](<../../../images/image (1128).png>)
 
-The key interface files for cgroups are prefixed with **cgroup**. The **cgroup.procs** file, which can be viewed with standard commands like cat, lists the processes within the cgroup. Another file, **cgroup.threads**, includes thread information.
+Τα κύρια αρχεία διεπαφής για τα cgroups έχουν πρόθεμα **cgroup**. Το αρχείο **cgroup.procs**, το οποίο μπορεί να προβληθεί με τυπικές εντολές όπως cat, απαριθμεί τις διαδικασίες εντός του cgroup. Ένα άλλο αρχείο, **cgroup.threads**, περιλαμβάνει πληροφορίες για τα νήματα.
 
 ![Cgroup Procs](<../../../images/image (281).png>)
 
-Cgroups managing shells typically encompass two controllers that regulate memory usage and process count. To interact with a controller, files bearing the controller's prefix should be consulted. For instance, **pids.current** would be referenced to ascertain the count of threads in the cgroup.
+Τα cgroups που διαχειρίζονται shells συνήθως περιλαμβάνουν δύο ελεγκτές που ρυθμίζουν τη χρήση μνήμης και τον αριθμό διαδικασιών. Για να αλληλεπιδράσετε με έναν ελεγκτή, θα πρέπει να συμβουλευτείτε αρχεία που φέρουν το πρόθεμα του ελεγκτή. Για παράδειγμα, το **pids.current** θα αναφερόταν για να προσδιορίσει τον αριθμό των νημάτων στο cgroup.
 
 ![Cgroup Memory](<../../../images/image (677).png>)
 
-The indication of **max** in a value suggests the absence of a specific limit for the cgroup. However, due to the hierarchical nature of cgroups, limits might be imposed by a cgroup at a lower level in the directory hierarchy.
+Η ένδειξη **max** σε μια τιμή υποδηλώνει την απουσία συγκεκριμένου ορίου για το cgroup. Ωστόσο, λόγω της ιεραρχικής φύσης των cgroups, όρια μπορεί να επιβληθούν από ένα cgroup σε χαμηλότερο επίπεδο στην ιεραρχία καταλόγων.
 
-### Manipulating and Creating cgroups
+### Χειρισμός και Δημιουργία cgroups
 
-Processes are assigned to cgroups by **writing their Process ID (PID) to the `cgroup.procs` file**. This requires root privileges. For instance, to add a process:
-
+Οι διαδικασίες ανατίθενται σε cgroups **γράφοντας το Αναγνωριστικό Διαδικασίας (PID) στο αρχείο `cgroup.procs`**. Αυτό απαιτεί δικαιώματα root. Για παράδειγμα, για να προσθέσετε μια διαδικασία:
 ```bash
 echo [pid] > cgroup.procs
 ```
-
-Similarly, **modifying cgroup attributes, like setting a PID limit**, is done by writing the desired value to the relevant file. To set a maximum of 3,000 PIDs for a cgroup:
-
+Ομοίως, **η τροποποίηση των χαρακτηριστικών cgroup, όπως η ρύθμιση ενός ορίου PID**, γίνεται γράφοντας την επιθυμητή τιμή στο σχετικό αρχείο. Για να ορίσετε ένα μέγιστο 3.000 PIDs για ένα cgroup:
 ```bash
 echo 3000 > pids.max
 ```
+**Η δημιουργία νέων cgroups** περιλαμβάνει τη δημιουργία ενός νέου υποκαταλόγου μέσα στην ιεραρχία cgroup, που προκαλεί τον πυρήνα να δημιουργήσει αυτόματα τα απαραίτητα αρχεία διεπαφής. Αν και τα cgroups χωρίς ενεργές διεργασίες μπορούν να αφαιρεθούν με το `rmdir`, να είστε προσεκτικοί με ορισμένους περιορισμούς:
 
-**Creating new cgroups** involves making a new subdirectory within the cgroup hierarchy, which prompts the kernel to automatically generate necessary interface files. Though cgroups without active processes can be removed with `rmdir`, be aware of certain constraints:
-
-- **Processes can only be placed in leaf cgroups** (i.e., the most nested ones in a hierarchy).
-- **A cgroup cannot possess a controller absent in its parent**.
-- **Controllers for child cgroups must be explicitly declared** in the `cgroup.subtree_control` file. For example, to enable CPU and PID controllers in a child cgroup:
-
+- **Οι διεργασίες μπορούν να τοποθετηθούν μόνο σε leaf cgroups** (δηλαδή, τα πιο εσωτερικά στην ιεραρχία).
+- **Ένα cgroup δεν μπορεί να έχει έναν ελεγκτή που να απουσιάζει από τον γονέα του**.
+- **Οι ελεγκτές για τα child cgroups πρέπει να δηλώνονται ρητά** στο αρχείο `cgroup.subtree_control`. Για παράδειγμα, για να ενεργοποιήσετε τους ελεγκτές CPU και PID σε ένα child cgroup:
 ```bash
 echo "+cpu +pids" > cgroup.subtree_control
 ```
+Ο **root cgroup** είναι μια εξαίρεση σε αυτούς τους κανόνες, επιτρέποντας άμεση τοποθέτηση διαδικασιών. Αυτό μπορεί να χρησιμοποιηθεί για την αφαίρεση διαδικασιών από τη διαχείριση του systemd.
 
-The **root cgroup** is an exception to these rules, allowing direct process placement. This can be used to remove processes from systemd management.
+**Η παρακολούθηση της χρήσης CPU** εντός ενός cgroup είναι δυνατή μέσω του αρχείου `cpu.stat`, το οποίο εμφανίζει τον συνολικό χρόνο CPU που καταναλώθηκε, χρήσιμο για την παρακολούθηση της χρήσης σε υποδιαδικασίες μιας υπηρεσίας:
 
-**Monitoring CPU usage** within a cgroup is possible through the `cpu.stat` file, displaying total CPU time consumed, helpful for tracking usage across a service's subprocesses:
-
-<figure><img src="../../../images/image (908).png" alt=""><figcaption><p>CPU usage statistics as shown in the cpu.stat file</p></figcaption></figure>
+<figure><img src="../../../images/image (908).png" alt=""><figcaption><p>Στατιστικά χρήσης CPU όπως εμφανίζονται στο αρχείο cpu.stat</p></figcaption></figure>
 
 ## References
 

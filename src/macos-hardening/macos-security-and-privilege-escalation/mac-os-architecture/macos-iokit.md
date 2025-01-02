@@ -4,16 +4,15 @@
 
 ## Basic Information
 
-The I/O Kit is an open-source, object-oriented **device-driver framework** in the XNU kernel, handles **dynamically loaded device drivers**. It allows modular code to be added to the kernel on-the-fly, supporting diverse hardware.
+Το I/O Kit είναι ένα ανοιχτού κώδικα, αντικειμενοστραφές **πλαίσιο οδηγών συσκευών** στον πυρήνα XNU, που διαχειρίζεται **δυναμικά φορτωμένους οδηγούς συσκευών**. Επιτρέπει την προσθήκη αρθρωτού κώδικα στον πυρήνα εν κινήσει, υποστηρίζοντας ποικιλία υλικού.
 
-IOKit drivers will basically **export functions from the kernel**. These function parameter **types** are **predefined** and are verified. Moreover, similar to XPC, IOKit is just another layer on **top of Mach messages**.
+Οι οδηγοί IOKit θα **εξάγουν βασικά συναρτήσεις από τον πυρήνα**. Οι παράμετροι **τύποι** αυτών των συναρτήσεων είναι **προκαθορισμένοι** και επαληθεύονται. Επιπλέον, παρόμοια με το XPC, το IOKit είναι απλώς ένα άλλο επίπεδο **πάνω από τα μηνύματα Mach**.
 
-**IOKit XNU kernel code** is opensourced by Apple in [https://github.com/apple-oss-distributions/xnu/tree/main/iokit](https://github.com/apple-oss-distributions/xnu/tree/main/iokit). Moreover, the user space IOKit components are also opensource [https://github.com/opensource-apple/IOKitUser](https://github.com/opensource-apple/IOKitUser).
+Ο **κώδικας IOKit XNU** είναι ανοιχτού κώδικα από την Apple στο [https://github.com/apple-oss-distributions/xnu/tree/main/iokit](https://github.com/apple-oss-distributions/xnu/tree/main/iokit). Επιπλέον, τα στοιχεία IOKit του χώρου χρηστών είναι επίσης ανοιχτού κώδικα [https://github.com/opensource-apple/IOKitUser](https://github.com/opensource-apple/IOKitUser).
 
-However, **no IOKit drivers** are opensource. Anyway, from time to time a release of a driver might come with symbols that makes it easier to debug it. Check how to [**get the driver extensions from the firmware here**](./#ipsw)**.**
+Ωστόσο, **κανένας οδηγός IOKit** δεν είναι ανοιχτού κώδικα. Ούτως ή άλλως, από καιρό σε καιρό μια έκδοση ενός οδηγού μπορεί να συνοδεύεται από σύμβολα που διευκολύνουν την αποσφαλμάτωσή του. Δείτε πώς να [**πάρετε τις επεκτάσεις οδηγών από το firmware εδώ**](./#ipsw)**.**
 
-It's written in **C++**. You can get demangled C++ symbols with:
-
+Είναι γραμμένο σε **C++**. Μπορείτε να αποκτήσετε αποσυμβολισμένα σύμβολα C++ με:
 ```bash
 # Get demangled symbols
 nm -C com.apple.driver.AppleJPEGDriver
@@ -23,210 +22,193 @@ c++filt
 __ZN16IOUserClient202222dispatchExternalMethodEjP31IOExternalMethodArgumentsOpaquePK28IOExternalMethodDispatch2022mP8OSObjectPv
 IOUserClient2022::dispatchExternalMethod(unsigned int, IOExternalMethodArgumentsOpaque*, IOExternalMethodDispatch2022 const*, unsigned long, OSObject*, void*)
 ```
-
 > [!CAUTION]
-> IOKit **exposed functions** could perform **additional security checks** when a client tries to call a function but note that the apps are usually **limited** by the **sandbox** to which IOKit functions they can interact with.
+> IOKit **εκτεθειμένες συναρτήσεις** θα μπορούσαν να εκτελούν **επιπλέον ελέγχους ασφαλείας** όταν ένας πελάτης προσπαθεί να καλέσει μια συνάρτηση, αλλά σημειώστε ότι οι εφαρμογές είναι συνήθως **περιορισμένες** από το **sandbox** με το οποίο μπορούν να αλληλεπιδρούν οι συναρτήσεις IOKit.
 
-## Drivers
+## Οδηγοί
 
-In macOS they are located in:
+Στο macOS βρίσκονται σε:
 
 - **`/System/Library/Extensions`**
-  - KEXT files built into the OS X operating system.
+- Αρχεία KEXT ενσωματωμένα στο λειτουργικό σύστημα OS X.
 - **`/Library/Extensions`**
-  - KEXT files installed by 3rd party software
+- Αρχεία KEXT που εγκαθίστανται από λογισμικό τρίτων
 
-In iOS they are located in:
+Στο iOS βρίσκονται σε:
 
 - **`/System/Library/Extensions`**
-
 ```bash
 #Use kextstat to print the loaded drivers
 kextstat
 Executing: /usr/bin/kmutil showloaded
 No variant specified, falling back to release
 Index Refs Address            Size       Wired      Name (Version) UUID <Linked Against>
-    1  142 0                  0          0          com.apple.kpi.bsd (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
-    2   11 0                  0          0          com.apple.kpi.dsep (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
-    3  170 0                  0          0          com.apple.kpi.iokit (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
-    4    0 0                  0          0          com.apple.kpi.kasan (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
-    5  175 0                  0          0          com.apple.kpi.libkern (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
-    6  154 0                  0          0          com.apple.kpi.mach (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
-    7   88 0                  0          0          com.apple.kpi.private (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
-    8  106 0                  0          0          com.apple.kpi.unsupported (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
-    9    2 0xffffff8003317000 0xe000     0xe000     com.apple.kec.Libm (1) 6C1342CC-1D74-3D0F-BC43-97D5AD38200A <5>
-   10   12 0xffffff8003544000 0x92000    0x92000    com.apple.kec.corecrypto (11.1) F5F1255F-6552-3CF4-A9DB-D60EFDEB4A9A <8 7 6 5 3 1>
+1  142 0                  0          0          com.apple.kpi.bsd (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
+2   11 0                  0          0          com.apple.kpi.dsep (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
+3  170 0                  0          0          com.apple.kpi.iokit (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
+4    0 0                  0          0          com.apple.kpi.kasan (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
+5  175 0                  0          0          com.apple.kpi.libkern (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
+6  154 0                  0          0          com.apple.kpi.mach (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
+7   88 0                  0          0          com.apple.kpi.private (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
+8  106 0                  0          0          com.apple.kpi.unsupported (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
+9    2 0xffffff8003317000 0xe000     0xe000     com.apple.kec.Libm (1) 6C1342CC-1D74-3D0F-BC43-97D5AD38200A <5>
+10   12 0xffffff8003544000 0x92000    0x92000    com.apple.kec.corecrypto (11.1) F5F1255F-6552-3CF4-A9DB-D60EFDEB4A9A <8 7 6 5 3 1>
 ```
+Μέχρι τον αριθμό 9, οι αναφερόμενοι οδηγοί είναι **φορτωμένοι στη διεύθυνση 0**. Αυτό σημαίνει ότι αυτοί δεν είναι πραγματικοί οδηγοί αλλά **μέρος του πυρήνα και δεν μπορούν να αποφορτωθούν**.
 
-Until the number 9 the listed drivers are **loaded in the address 0**. This means that those aren't real drivers but **part of the kernel and they cannot be unloaded**.
-
-In order to find specific extensions you can use:
-
+Για να βρείτε συγκεκριμένες επεκτάσεις, μπορείτε να χρησιμοποιήσετε:
 ```bash
 kextfind -bundle-id com.apple.iokit.IOReportFamily #Search by full bundle-id
 kextfind -bundle-id -substring IOR #Search by substring in bundle-id
 ```
-
-To load and unload kernel extensions do:
-
+Για να φορτώσετε και να ξεφορτώσετε επεκτάσεις πυρήνα, κάντε:
 ```bash
 kextload com.apple.iokit.IOReportFamily
 kextunload com.apple.iokit.IOReportFamily
 ```
-
 ## IORegistry
 
-The **IORegistry** is a crucial part of the IOKit framework in macOS and iOS which serves as a database for representing the system's hardware configuration and state. It's a **hierarchical collection of objects that represent all the hardware and drivers** loaded on the system, and their relationships to each other.
+Το **IORegistry** είναι ένα κρίσιμο μέρος του πλαισίου IOKit στο macOS και iOS που λειτουργεί ως βάση δεδομένων για την αναπαράσταση της υλικής διαμόρφωσης και κατάστασης του συστήματος. Είναι μια **ιεραρχική συλλογή αντικειμένων που αναπαριστούν όλο το υλικό και τους οδηγούς** που έχουν φορτωθεί στο σύστημα, καθώς και τις σχέσεις τους μεταξύ τους.
 
-You can get the IORegistry using the cli **`ioreg`** to inspect it from the console (specially useful for iOS).
-
+Μπορείτε να αποκτήσετε το IORegistry χρησιμοποιώντας το cli **`ioreg`** για να το επιθεωρήσετε από την κονσόλα (ιδιαίτερα χρήσιμο για το iOS).
 ```bash
 ioreg -l #List all
 ioreg -w 0 #Not cut lines
 ioreg -p <plane> #Check other plane
 ```
-
-You could download **`IORegistryExplorer`** from **Xcode Additional Tools** from [**https://developer.apple.com/download/all/**](https://developer.apple.com/download/all/) and inspect the **macOS IORegistry** through a **graphical** interface.
+Μπορείτε να κατεβάσετε **`IORegistryExplorer`** από τα **Xcode Additional Tools** από [**https://developer.apple.com/download/all/**](https://developer.apple.com/download/all/) και να εξετάσετε το **macOS IORegistry** μέσω μιας **γραφικής** διεπαφής.
 
 <figure><img src="../../../images/image (1167).png" alt="" width="563"><figcaption></figcaption></figure>
 
-In IORegistryExplorer, "planes" are used to organize and display the relationships between different objects in the IORegistry. Each plane represents a specific type of relationship or a particular view of the system's hardware and driver configuration. Here are some of the common planes you might encounter in IORegistryExplorer:
+Στο IORegistryExplorer, οι "planes" χρησιμοποιούνται για να οργανώσουν και να εμφανίσουν τις σχέσεις μεταξύ διαφορετικών αντικειμένων στο IORegistry. Κάθε plane αντιπροσωπεύει έναν συγκεκριμένο τύπο σχέσης ή μια συγκεκριμένη άποψη της υλικού και της διαμόρφωσης των οδηγών του συστήματος. Ακολουθούν μερικοί από τους κοινούς planes που μπορεί να συναντήσετε στο IORegistryExplorer:
 
-1. **IOService Plane**: This is the most general plane, displaying the service objects that represent drivers and nubs (communication channels between drivers). It shows the provider-client relationships between these objects.
-2. **IODeviceTree Plane**: This plane represents the physical connections between devices as they are attached to the system. It is often used to visualize the hierarchy of devices connected via buses like USB or PCI.
-3. **IOPower Plane**: Displays objects and their relationships in terms of power management. It can show which objects are affecting the power state of others, useful for debugging power-related issues.
-4. **IOUSB Plane**: Specifically focused on USB devices and their relationships, showing the hierarchy of USB hubs and connected devices.
-5. **IOAudio Plane**: This plane is for representing audio devices and their relationships within the system.
+1. **IOService Plane**: Αυτός είναι ο πιο γενικός plane, που εμφανίζει τα αντικείμενα υπηρεσίας που αντιπροσωπεύουν οδηγούς και nubs (κανάλια επικοινωνίας μεταξύ οδηγών). Δείχνει τις σχέσεις παρόχου-πελάτη μεταξύ αυτών των αντικειμένων.
+2. **IODeviceTree Plane**: Αυτός ο plane αντιπροσωπεύει τις φυσικές συνδέσεις μεταξύ συσκευών καθώς συνδέονται στο σύστημα. Χρησιμοποιείται συχνά για να οπτικοποιήσει την ιεραρχία των συσκευών που συνδέονται μέσω λεωφόρων όπως USB ή PCI.
+3. **IOPower Plane**: Εμφανίζει αντικείμενα και τις σχέσεις τους σε όρους διαχείρισης ενέργειας. Μπορεί να δείξει ποια αντικείμενα επηρεάζουν την κατάσταση ενέργειας άλλων, χρήσιμο για την αποσφαλμάτωση προβλημάτων που σχετίζονται με την ενέργεια.
+4. **IOUSB Plane**: Ειδικά επικεντρωμένος σε συσκευές USB και τις σχέσεις τους, δείχνοντας την ιεραρχία των USB hubs και των συνδεδεμένων συσκευών.
+5. **IOAudio Plane**: Αυτός ο plane είναι για την αναπαράσταση συσκευών ήχου και των σχέσεών τους εντός του συστήματος.
 6. ...
 
 ## Driver Comm Code Example
 
-The following code connects to the IOKit service `"YourServiceNameHere"` and calls the function inside the selector 0. For it:
+Ο παρακάτω κώδικας συνδέεται με την υπηρεσία IOKit `"YourServiceNameHere"` και καλεί τη λειτουργία μέσα στον επιλεγέα 0. Για αυτό:
 
-- it first calls **`IOServiceMatching`** and **`IOServiceGetMatchingServices`** to get the service.
-- It then establish a connection calling **`IOServiceOpen`**.
-- And it finally calls a function with **`IOConnectCallScalarMethod`** indicating the selector 0 (the selector is the number the function you want to call has assigned).
-
+- πρώτα καλεί **`IOServiceMatching`** και **`IOServiceGetMatchingServices`** για να αποκτήσει την υπηρεσία.
+- Στη συνέχεια, καθορίζει μια σύνδεση καλώντας **`IOServiceOpen`**.
+- Και τελικά καλεί μια λειτουργία με **`IOConnectCallScalarMethod`** υποδεικνύοντας τον επιλεγέα 0 (ο επιλεγέας είναι ο αριθμός που έχει ανατεθεί στη λειτουργία που θέλετε να καλέσετε).
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <IOKit/IOKitLib.h>
 
 int main(int argc, const char * argv[]) {
-    @autoreleasepool {
-        // Get a reference to the service using its name
-        CFMutableDictionaryRef matchingDict = IOServiceMatching("YourServiceNameHere");
-        if (matchingDict == NULL) {
-            NSLog(@"Failed to create matching dictionary");
-            return -1;
-        }
+@autoreleasepool {
+// Get a reference to the service using its name
+CFMutableDictionaryRef matchingDict = IOServiceMatching("YourServiceNameHere");
+if (matchingDict == NULL) {
+NSLog(@"Failed to create matching dictionary");
+return -1;
+}
 
-        // Obtain an iterator over all matching services
-        io_iterator_t iter;
-        kern_return_t kr = IOServiceGetMatchingServices(kIOMasterPortDefault, matchingDict, &iter);
-        if (kr != KERN_SUCCESS) {
-            NSLog(@"Failed to get matching services");
-            return -1;
-        }
+// Obtain an iterator over all matching services
+io_iterator_t iter;
+kern_return_t kr = IOServiceGetMatchingServices(kIOMasterPortDefault, matchingDict, &iter);
+if (kr != KERN_SUCCESS) {
+NSLog(@"Failed to get matching services");
+return -1;
+}
 
-        // Get a reference to the first service (assuming it exists)
-        io_service_t service = IOIteratorNext(iter);
-        if (!service) {
-            NSLog(@"No matching service found");
-            IOObjectRelease(iter);
-            return -1;
-        }
+// Get a reference to the first service (assuming it exists)
+io_service_t service = IOIteratorNext(iter);
+if (!service) {
+NSLog(@"No matching service found");
+IOObjectRelease(iter);
+return -1;
+}
 
-        // Open a connection to the service
-        io_connect_t connect;
-        kr = IOServiceOpen(service, mach_task_self(), 0, &connect);
-        if (kr != KERN_SUCCESS) {
-            NSLog(@"Failed to open service");
-            IOObjectRelease(service);
-            IOObjectRelease(iter);
-            return -1;
-        }
+// Open a connection to the service
+io_connect_t connect;
+kr = IOServiceOpen(service, mach_task_self(), 0, &connect);
+if (kr != KERN_SUCCESS) {
+NSLog(@"Failed to open service");
+IOObjectRelease(service);
+IOObjectRelease(iter);
+return -1;
+}
 
-        // Call a method on the service
-        // Assume the method has a selector of 0, and takes no arguments
-        kr = IOConnectCallScalarMethod(connect, 0, NULL, 0, NULL, NULL);
-        if (kr != KERN_SUCCESS) {
-            NSLog(@"Failed to call method");
-        }
+// Call a method on the service
+// Assume the method has a selector of 0, and takes no arguments
+kr = IOConnectCallScalarMethod(connect, 0, NULL, 0, NULL, NULL);
+if (kr != KERN_SUCCESS) {
+NSLog(@"Failed to call method");
+}
 
-        // Cleanup
-        IOServiceClose(connect);
-        IOObjectRelease(service);
-        IOObjectRelease(iter);
-    }
-    return 0;
+// Cleanup
+IOServiceClose(connect);
+IOObjectRelease(service);
+IOObjectRelease(iter);
+}
+return 0;
 }
 ```
+Υπάρχουν **άλλες** συναρτήσεις που μπορούν να χρησιμοποιηθούν για να καλέσουν τις συναρτήσεις IOKit εκτός από **`IOConnectCallScalarMethod`** όπως **`IOConnectCallMethod`**, **`IOConnectCallStructMethod`**...
 
-There are **other** functions that can be used to call IOKit functions apart of **`IOConnectCallScalarMethod`** like **`IOConnectCallMethod`**, **`IOConnectCallStructMethod`**...
+## Αντιστροφή σημείου εισόδου οδηγού
 
-## Reversing driver entrypoint
+Μπορείτε να τα αποκτήσετε αυτά για παράδειγμα από μια [**εικόνα firmware (ipsw)**](./#ipsw). Στη συνέχεια, φορτώστε την στον αγαπημένο σας αποσυμπιεστή.
 
-You could obtain these for example from a [**firmware image (ipsw)**](./#ipsw). Then, load it into your favourite decompiler.
-
-You could start decompiling the **`externalMethod`** function as this is the driver function that will be receiving the call and calling the correct function:
+Μπορείτε να ξεκινήσετε την αποσυμπίεση της συνάρτησης **`externalMethod`** καθώς αυτή είναι η συνάρτηση του οδηγού που θα δέχεται την κλήση και θα καλεί τη σωστή συνάρτηση:
 
 <figure><img src="../../../images/image (1168).png" alt="" width="315"><figcaption></figcaption></figure>
 
 <figure><img src="../../../images/image (1169).png" alt=""><figcaption></figcaption></figure>
 
-That awful call demagled means:
-
+Αυτή η απαίσια κλήση αποκαταστάθηκε σημαίνει:
 ```cpp
 IOUserClient2022::dispatchExternalMethod(unsigned int, IOExternalMethodArgumentsOpaque*, IOExternalMethodDispatch2022 const*, unsigned long, OSObject*, void*)
 ```
-
-Note how in the previous definition the **`self`** param is missed, the good definition would be:
-
+Σημειώστε πώς στην προηγούμενη ορισμό λείπει η παράμετρος **`self`**, η καλή ορισμός θα ήταν:
 ```cpp
 IOUserClient2022::dispatchExternalMethod(self, unsigned int, IOExternalMethodArgumentsOpaque*, IOExternalMethodDispatch2022 const*, unsigned long, OSObject*, void*)
 ```
-
-Actually, you can find the real definition in [https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/Kernel/IOUserClient.cpp#L6388](https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/Kernel/IOUserClient.cpp#L6388):
-
+Στην πραγματικότητα, μπορείτε να βρείτε τον πραγματικό ορισμό στο [https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/Kernel/IOUserClient.cpp#L6388](https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/Kernel/IOUserClient.cpp#L6388):
 ```cpp
 IOUserClient2022::dispatchExternalMethod(uint32_t selector, IOExternalMethodArgumentsOpaque *arguments,
-    const IOExternalMethodDispatch2022 dispatchArray[], size_t dispatchArrayCount,
-    OSObject * target, void * reference)
+const IOExternalMethodDispatch2022 dispatchArray[], size_t dispatchArrayCount,
+OSObject * target, void * reference)
 ```
-
-With this info you can rewrite Ctrl+Right -> `Edit function signature` and set the known types:
+Με αυτές τις πληροφορίες μπορείτε να ξαναγράψετε Ctrl+Right -> `Edit function signature` και να ορίσετε τους γνωστούς τύπους:
 
 <figure><img src="../../../images/image (1174).png" alt=""><figcaption></figcaption></figure>
 
-The new decompiled code will look like:
+Ο νέος αποσυμπιεσμένος κώδικας θα φαίνεται έτσι:
 
 <figure><img src="../../../images/image (1175).png" alt=""><figcaption></figcaption></figure>
 
-For the next step we need to have defined the **`IOExternalMethodDispatch2022`** struct. It's opensource in [https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176](https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176), you could define it:
+Για το επόμενο βήμα πρέπει να έχουμε ορίσει τη δομή **`IOExternalMethodDispatch2022`**. Είναι ανοιχτού κώδικα στο [https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176](https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176), μπορείτε να το ορίσετε:
 
 <figure><img src="../../../images/image (1170).png" alt=""><figcaption></figcaption></figure>
 
-Now, following the `(IOExternalMethodDispatch2022 *)&sIOExternalMethodArray` you can see a lot of data:
+Τώρα, ακολουθώντας το `(IOExternalMethodDispatch2022 *)&sIOExternalMethodArray` μπορείτε να δείτε πολλά δεδομένα:
 
 <figure><img src="../../../images/image (1176).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Change the Data Type to **`IOExternalMethodDispatch2022:`**
+Αλλάξτε τον Τύπο Δεδομένων σε **`IOExternalMethodDispatch2022:`**
 
 <figure><img src="../../../images/image (1177).png" alt="" width="375"><figcaption></figcaption></figure>
 
-after the change:
+μετά την αλλαγή:
 
 <figure><img src="../../../images/image (1179).png" alt="" width="563"><figcaption></figcaption></figure>
 
-And as we now in there we have an **array of 7 elements** (check the final decompiled code), click to create an array of 7 elements:
+Και όπως γνωρίζουμε εκεί έχουμε ένα **array 7 στοιχείων** (ελέγξτε τον τελικό αποσυμπιεσμένο κώδικα), κάντε κλικ για να δημιουργήσετε ένα array 7 στοιχείων:
 
 <figure><img src="../../../images/image (1180).png" alt="" width="563"><figcaption></figcaption></figure>
 
-After the array is created you can see all the exported functions:
+Αφού δημιουργηθεί το array μπορείτε να δείτε όλες τις εξαγόμενες συναρτήσεις:
 
 <figure><img src="../../../images/image (1181).png" alt=""><figcaption></figcaption></figure>
 
 > [!TIP]
-> If you remember, to **call** an **exported** function from user space we don't need to call the name of the function, but the **selector number**. Here you can see that the selector **0** is the function **`initializeDecoder`**, the selector **1** is **`startDecoder`**, the selector **2** **`initializeEncoder`**...
+> Αν θυμάστε, για να **καλέσουμε** μια **εξαγόμενη** συνάρτηση από τον χώρο χρήστη δεν χρειάζεται να καλέσουμε το όνομα της συνάρτησης, αλλά τον **αριθμό επιλεγέα**. Εδώ μπορείτε να δείτε ότι ο επιλεγέας **0** είναι η συνάρτηση **`initializeDecoder`**, ο επιλεγέας **1** είναι **`startDecoder`**, ο επιλεγέας **2** **`initializeEncoder`**...
 
 {{#include ../../../banners/hacktricks-training.md}}

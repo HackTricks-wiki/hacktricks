@@ -4,100 +4,85 @@
 
 ## Basic Information
 
-A user namespace is a Linux kernel feature that **provides isolation of user and group ID mappings**, allowing each user namespace to have its **own set of user and group IDs**. This isolation enables processes running in different user namespaces to **have different privileges and ownership**, even if they share the same user and group IDs numerically.
+Ένα user namespace είναι μια δυνατότητα του πυρήνα Linux που **παρέχει απομόνωση των αναγνωριστικών χρηστών και ομάδων**, επιτρέποντας σε κάθε user namespace να έχει το **δικό του σύνολο αναγνωριστικών χρηστών και ομάδων**. Αυτή η απομόνωση επιτρέπει σε διαδικασίες που εκτελούνται σε διαφορετικά user namespaces να **έχουν διαφορετικά προνόμια και ιδιοκτησία**, ακόμη και αν μοιράζονται τα ίδια αναγνωριστικά χρηστών και ομάδων αριθμητικά.
 
-User namespaces are particularly useful in containerization, where each container should have its own independent set of user and group IDs, allowing for better security and isolation between containers and the host system.
+Τα user namespaces είναι ιδιαίτερα χρήσιμα στην κοντεντοποίηση, όπου κάθε κοντέινερ θα πρέπει να έχει το δικό του ανεξάρτητο σύνολο αναγνωριστικών χρηστών και ομάδων, επιτρέποντας καλύτερη ασφάλεια και απομόνωση μεταξύ των κοντεϊνερ και του συστήματος φιλοξενίας.
 
 ### How it works:
 
-1. When a new user namespace is created, it **starts with an empty set of user and group ID mappings**. This means that any process running in the new user namespace will **initially have no privileges outside of the namespace**.
-2. ID mappings can be established between the user and group IDs in the new namespace and those in the parent (or host) namespace. This **allows processes in the new namespace to have privileges and ownership corresponding to user and group IDs in the parent namespace**. However, the ID mappings can be restricted to specific ranges and subsets of IDs, allowing for fine-grained control over the privileges granted to processes in the new namespace.
-3. Within a user namespace, **processes can have full root privileges (UID 0) for operations inside the namespace**, while still having limited privileges outside the namespace. This allows **containers to run with root-like capabilities within their own namespace without having full root privileges on the host system**.
-4. Processes can move between namespaces using the `setns()` system call or create new namespaces using the `unshare()` or `clone()` system calls with the `CLONE_NEWUSER` flag. When a process moves to a new namespace or creates one, it will start using the user and group ID mappings associated with that namespace.
+1. Όταν δημιουργείται ένα νέο user namespace, **ξεκινά με ένα κενό σύνολο αναγνωριστικών χρηστών και ομάδων**. Αυτό σημαίνει ότι οποιαδήποτε διαδικασία εκτελείται στο νέο user namespace θα **έχει αρχικά κανένα προνόμιο εκτός του namespace**.
+2. Τα αναγνωριστικά μπορούν να καθοριστούν μεταξύ των αναγνωριστικών χρηστών και ομάδων στο νέο namespace και εκείνων στο γονικό (ή κεντρικό) namespace. Αυτό **επιτρέπει στις διαδικασίες στο νέο namespace να έχουν προνόμια και ιδιοκτησία που αντιστοιχούν σε αναγνωριστικά χρηστών και ομάδων στο γονικό namespace**. Ωστόσο, τα αναγνωριστικά μπορούν να περιοριστούν σε συγκεκριμένα εύρη και υποσύνολα αναγνωριστικών, επιτρέποντας λεπτομερή έλεγχο των προνομίων που χορηγούνται σε διαδικασίες στο νέο namespace.
+3. Μέσα σε ένα user namespace, **οι διαδικασίες μπορούν να έχουν πλήρη προνόμια root (UID 0) για λειτουργίες μέσα στο namespace**, ενώ εξακολουθούν να έχουν περιορισμένα προνόμια εκτός του namespace. Αυτό επιτρέπει **στα κοντέινερ να εκτελούνται με ικανότητες παρόμοιες με του root μέσα στο δικό τους namespace χωρίς να έχουν πλήρη προνόμια root στο σύστημα φιλοξενίας**.
+4. Οι διαδικασίες μπορούν να μετακινούνται μεταξύ namespaces χρησιμοποιώντας την κλήση συστήματος `setns()` ή να δημιουργούν νέα namespaces χρησιμοποιώντας τις κλήσεις συστήματος `unshare()` ή `clone()` με την σημαία `CLONE_NEWUSER`. Όταν μια διαδικασία μετακινείται σε ένα νέο namespace ή δημιουργεί ένα, θα αρχίσει να χρησιμοποιεί τα αναγνωριστικά χρηστών και ομάδων που σχετίζονται με αυτό το namespace.
 
 ## Lab:
 
 ### Create different Namespaces
 
 #### CLI
-
 ```bash
 sudo unshare -U [--mount-proc] /bin/bash
 ```
-
-By mounting a new instance of the `/proc` filesystem if you use the param `--mount-proc`, you ensure that the new mount namespace has an **accurate and isolated view of the process information specific to that namespace**.
+Με την τοποθέτηση μιας νέας παρουσίας του συστήματος αρχείων `/proc` αν χρησιμοποιήσετε την παράμετρο `--mount-proc`, διασφαλίζετε ότι το νέο mount namespace έχει μια **ακριβή και απομονωμένη άποψη των πληροφοριών διαδικασίας που είναι συγκεκριμένες για αυτό το namespace**.
 
 <details>
 
-<summary>Error: bash: fork: Cannot allocate memory</summary>
+<summary>Σφάλμα: bash: fork: Cannot allocate memory</summary>
 
-When `unshare` is executed without the `-f` option, an error is encountered due to the way Linux handles new PID (Process ID) namespaces. The key details and the solution are outlined below:
+Όταν εκτελείται το `unshare` χωρίς την επιλογή `-f`, προκύπτει ένα σφάλμα λόγω του τρόπου που το Linux χειρίζεται τα νέα PID (Process ID) namespaces. Οι βασικές λεπτομέρειες και η λύση περιγράφονται παρακάτω:
 
-1. **Problem Explanation**:
+1. **Εξήγηση Προβλήματος**:
 
-   - The Linux kernel allows a process to create new namespaces using the `unshare` system call. However, the process that initiates the creation of a new PID namespace (referred to as the "unshare" process) does not enter the new namespace; only its child processes do.
-   - Running `%unshare -p /bin/bash%` starts `/bin/bash` in the same process as `unshare`. Consequently, `/bin/bash` and its child processes are in the original PID namespace.
-   - The first child process of `/bin/bash` in the new namespace becomes PID 1. When this process exits, it triggers the cleanup of the namespace if there are no other processes, as PID 1 has the special role of adopting orphan processes. The Linux kernel will then disable PID allocation in that namespace.
+- Ο πυρήνας του Linux επιτρέπει σε μια διαδικασία να δημιουργήσει νέα namespaces χρησιμοποιώντας την κλήση συστήματος `unshare`. Ωστόσο, η διαδικασία που ξεκινά τη δημιουργία ενός νέου PID namespace (αναφερόμενη ως η διαδικασία "unshare") δεν εισέρχεται στο νέο namespace; μόνο οι παιδικές της διαδικασίες το κάνουν.
+- Η εκτέλεση `%unshare -p /bin/bash%` ξεκινά το `/bin/bash` στην ίδια διαδικασία με το `unshare`. Ως εκ τούτου, το `/bin/bash` και οι παιδικές του διαδικασίες βρίσκονται στο αρχικό PID namespace.
+- Η πρώτη παιδική διαδικασία του `/bin/bash` στο νέο namespace γίνεται PID 1. Όταν αυτή η διαδικασία τερματίσει, ενεργοποιεί την καθαριότητα του namespace αν δεν υπάρχουν άλλες διαδικασίες, καθώς το PID 1 έχει τον ειδικό ρόλο της υιοθέτησης ορφανών διαδικασιών. Ο πυρήνας του Linux θα απενεργοποιήσει στη συνέχεια την κατανομή PID σε αυτό το namespace.
 
-2. **Consequence**:
+2. **Συνέπεια**:
 
-   - The exit of PID 1 in a new namespace leads to the cleaning of the `PIDNS_HASH_ADDING` flag. This results in the `alloc_pid` function failing to allocate a new PID when creating a new process, producing the "Cannot allocate memory" error.
+- Η έξοδος του PID 1 σε ένα νέο namespace οδηγεί στον καθαρισμό της σημαίας `PIDNS_HASH_ADDING`. Αυτό έχει ως αποτέλεσμα τη αποτυχία της συνάρτησης `alloc_pid` να κατανοήσει ένα νέο PID κατά τη δημιουργία μιας νέας διαδικασίας, παράγοντας το σφάλμα "Cannot allocate memory".
 
-3. **Solution**:
-   - The issue can be resolved by using the `-f` option with `unshare`. This option makes `unshare` fork a new process after creating the new PID namespace.
-   - Executing `%unshare -fp /bin/bash%` ensures that the `unshare` command itself becomes PID 1 in the new namespace. `/bin/bash` and its child processes are then safely contained within this new namespace, preventing the premature exit of PID 1 and allowing normal PID allocation.
+3. **Λύση**:
+- Το πρόβλημα μπορεί να επιλυθεί χρησιμοποιώντας την επιλογή `-f` με το `unshare`. Αυτή η επιλογή κάνει το `unshare` να δημιουργήσει μια νέα διαδικασία μετά τη δημιουργία του νέου PID namespace.
+- Η εκτέλεση `%unshare -fp /bin/bash%` διασφαλίζει ότι η εντολή `unshare` γίνεται PID 1 στο νέο namespace. Το `/bin/bash` και οι παιδικές του διαδικασίες είναι στη συνέχεια ασφαλώς περιορισμένες μέσα σε αυτό το νέο namespace, αποτρέποντας την πρόωρη έξοδο του PID 1 και επιτρέποντας την κανονική κατανομή PID.
 
-By ensuring that `unshare` runs with the `-f` flag, the new PID namespace is correctly maintained, allowing `/bin/bash` and its sub-processes to operate without encountering the memory allocation error.
+Διασφαλίζοντας ότι το `unshare` εκτελείται με την επιλογή `-f`, το νέο PID namespace διατηρείται σωστά, επιτρέποντας στο `/bin/bash` και τις υπο-διαδικασίες του να λειτουργούν χωρίς να αντιμετωπίζουν το σφάλμα κατανομής μνήμης.
 
 </details>
 
 #### Docker
-
 ```bash
 docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 ```
+Για να χρησιμοποιήσετε το user namespace, ο Docker daemon πρέπει να ξεκινήσει με **`--userns-remap=default`** (Στο ubuntu 14.04, αυτό μπορεί να γίνει τροποποιώντας το `/etc/default/docker` και στη συνέχεια εκτελώντας `sudo service docker restart`)
 
-To use user namespace, Docker daemon needs to be started with **`--userns-remap=default`**(In ubuntu 14.04, this can be done by modifying `/etc/default/docker` and then executing `sudo service docker restart`)
-
-### &#x20;Check which namespace is your process in
-
+### &#x20;Ελέγξτε σε ποιο namespace βρίσκεται η διαδικασία σας
 ```bash
 ls -l /proc/self/ns/user
 lrwxrwxrwx 1 root root 0 Apr  4 20:57 /proc/self/ns/user -> 'user:[4026531837]'
 ```
-
-It's possible to check the user map from the docker container with:
-
+Είναι δυνατόν να ελέγξετε τον χάρτη χρηστών από το κοντέινερ docker με:
 ```bash
 cat /proc/self/uid_map
-         0          0 4294967295  --> Root is root in host
-         0     231072      65536  --> Root is 231072 userid in host
+0          0 4294967295  --> Root is root in host
+0     231072      65536  --> Root is 231072 userid in host
 ```
-
-Or from the host with:
-
+Ή από τον κεντρικό υπολογιστή με:
 ```bash
 cat /proc/<pid>/uid_map
 ```
-
-### Find all User namespaces
-
+### Βρείτε όλα τα User namespaces
 ```bash
 sudo find /proc -maxdepth 3 -type l -name user -exec readlink {} \; 2>/dev/null | sort -u
 # Find the processes with an specific namespace
 sudo find /proc -maxdepth 3 -type l -name user -exec ls -l  {} \; 2>/dev/null | grep <ns-number>
 ```
-
-### Enter inside a User namespace
-
+### Είσοδος σε ένα User namespace
 ```bash
 nsenter -U TARGET_PID --pid /bin/bash
 ```
+Επίσης, μπορείτε να **μπείτε σε άλλη διαδικασία namespace μόνο αν είστε root**. Και **δεν μπορείτε** να **μπείτε** σε άλλη namespace **χωρίς έναν περιγραφέα** που να δείχνει σε αυτήν (όπως το `/proc/self/ns/user`).
 
-Also, you can only **enter in another process namespace if you are root**. And you **cannot** **enter** in other namespace **without a descriptor** pointing to it (like `/proc/self/ns/user`).
-
-### Create new User namespace (with mappings)
-
+### Δημιουργία νέου User namespace (με mappings)
 ```bash
 unshare -U [--map-user=<uid>|<name>] [--map-group=<gid>|<name>] [--map-root-user] [--map-current-user]
 ```
@@ -111,16 +96,14 @@ nobody@ip-172-31-28-169:/home/ubuntu$ #Check how the user is nobody
 ps -ef | grep bash # The user inside the host is still root, not nobody
 root       27756   27755  0 21:11 pts/10   00:00:00 /bin/bash
 ```
+### Ανάκτηση Δυνατοτήτων
 
-### Recovering Capabilities
+Στην περίπτωση των namespaces χρηστών, **όταν δημιουργείται ένα νέο namespace χρηστών, η διαδικασία που εισέρχεται στο namespace αποκτά ένα πλήρες σύνολο δυνατοτήτων εντός αυτού του namespace**. Αυτές οι δυνατότητες επιτρέπουν στη διαδικασία να εκτελεί προνομιακές λειτουργίες όπως **mounting** **filesystems**, δημιουργία συσκευών ή αλλαγή ιδιοκτησίας αρχείων, αλλά **μόνο εντός του πλαισίου του namespace χρήστη της**.
 
-In the case of user namespaces, **when a new user namespace is created, the process that enters the namespace is granted a full set of capabilities within that namespace**. These capabilities allow the process to perform privileged operations such as **mounting** **filesystems**, creating devices, or changing ownership of files, but **only within the context of its user namespace**.
-
-For example, when you have the `CAP_SYS_ADMIN` capability within a user namespace, you can perform operations that typically require this capability, like mounting filesystems, but only within the context of your user namespace. Any operations you perform with this capability won't affect the host system or other namespaces.
+Για παράδειγμα, όταν έχετε τη δυνατότητα `CAP_SYS_ADMIN` εντός ενός namespace χρηστών, μπορείτε να εκτελείτε λειτουργίες που συνήθως απαιτούν αυτή τη δυνατότητα, όπως το mounting filesystems, αλλά μόνο εντός του πλαισίου του namespace χρήστη σας. Οποιεσδήποτε λειτουργίες εκτελείτε με αυτή τη δυνατότητα δεν θα επηρεάσουν το σύστημα φιλοξενίας ή άλλα namespaces.
 
 > [!WARNING]
-> Therefore, even if getting a new process inside a new User namespace **will give you all the capabilities back** (CapEff: 000001ffffffffff), you actually can **only use the ones related to the namespace** (mount for example) but not every one. So, this on its own is not enough to escape from a Docker container.
-
+> Επομένως, ακόμη και αν η απόκτηση μιας νέας διαδικασίας μέσα σε ένα νέο namespace Χρήστη **θα σας δώσει όλες τις δυνατότητες πίσω** (CapEff: 000001ffffffffff), στην πραγματικότητα μπορείτε **μόνο να χρησιμοποιήσετε αυτές που σχετίζονται με το namespace** (mount για παράδειγμα) αλλά όχι όλες. Έτσι, αυτό από μόνο του δεν είναι αρκετό για να ξεφύγετε από ένα Docker container.
 ```bash
 # There are the syscalls that are filtered after changing User namespace with:
 unshare -UmCpf  bash
@@ -144,5 +127,4 @@ Probando: 0x139 . . . Error
 Probando: 0x140 . . . Error
 Probando: 0x141 . . . Error
 ```
-
 {{#include ../../../../banners/hacktricks-training.md}}

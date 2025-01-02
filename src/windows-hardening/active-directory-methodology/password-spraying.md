@@ -2,11 +2,6 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
-
-Εμβαθύνετε την εμπειρία σας στην **Ασφάλεια Κινητών** με την 8kSec Academy. Εξασκηθείτε στην ασφάλεια iOS και Android μέσω των αυτορυθμιζόμενων μαθημάτων μας και αποκτήστε πιστοποίηση:
-
-{% embed url="https://academy.8ksec.io/" %}
 
 ## **Password Spraying**
 
@@ -19,7 +14,7 @@
 
 ### Get password policy
 
-Αν έχετε κάποια διαπιστευτήρια χρήστη ή ένα shell ως χρήστης τομέα μπορείτε να **πάρετε την πολιτική κωδικών πρόσβασης με**:
+Αν έχετε κάποια διαπιστευτήρια χρήστη ή ένα shell ως χρήστης τομέα, μπορείτε να **πάρετε την πολιτική κωδικών πρόσβασης με**:
 ```bash
 # From Linux
 crackmapexec <IP> -u 'user' -p 'password' --pass-pol
@@ -74,7 +69,7 @@ done
 ```
 #### Από Windows
 
-- Με την έκδοση του [Rubeus](https://github.com/Zer1t0/Rubeus) με το brute module:
+- Με την έκδοση του [Rubeus](https://github.com/Zer1t0/Rubeus) που περιέχει το brute module:
 ```bash
 # with a list of users
 .\Rubeus.exe brute /users:<users_file> /passwords:<passwords_file> /domain:<domain_name> /outfile:<output_file>
@@ -130,10 +125,5 @@ legba kerberos --target 127.0.0.1 --username admin --password wordlists/password
 - [www.blackhillsinfosec.com/?p=5296](https://www.blackhillsinfosec.com/?p=5296)
 - [https://hunter2.gitbook.io/darthsidious/initial-access/password-spraying](https://hunter2.gitbook.io/darthsidious/initial-access/password-spraying)
 
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
-
-Εμβαθύνετε την εμπειρία σας στην **Ασφάλεια Κινητών** με την 8kSec Academy. Κατακτήστε την ασφάλεια iOS και Android μέσω των αυτορυθμιζόμενων μαθημάτων μας και αποκτήστε πιστοποίηση:
-
-{% embed url="https://academy.8ksec.io/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

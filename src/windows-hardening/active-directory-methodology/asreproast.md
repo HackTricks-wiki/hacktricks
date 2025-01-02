@@ -2,30 +2,15 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/image (3).png" alt=""><figcaption></figcaption></figure>
-
-Join [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server to communicate with experienced hackers and bug bounty hunters!
-
-**Hacking Insights**\
-Engage with content that delves into the thrill and challenges of hacking
-
-**Real-Time Hack News**\
-Keep up-to-date with fast-paced hacking world through real-time news and insights
-
-**Latest Announcements**\
-Stay informed with the newest bug bounties launching and crucial platform updates
-
-**Join us on** [**Discord**](https://discord.com/invite/N3FrSbmwdy) and start collaborating with top hackers today!
-
 ## ASREPRoast
 
-ASREPRoast είναι μια επίθεση ασφαλείας που εκμεταλλεύεται χρήστες που δεν διαθέτουν το **Kerberos pre-authentication required attribute**. Ουσιαστικά, αυτή η ευπάθεια επιτρέπει στους επιτιθέμενους να ζητούν πιστοποίηση για έναν χρήστη από τον Domain Controller (DC) χωρίς να χρειάζεται ο κωδικός πρόσβασης του χρήστη. Ο DC στη συνέχεια απαντά με ένα μήνυμα κρυπτογραφημένο με το κλειδί που προέρχεται από τον κωδικό πρόσβασης του χρήστη, το οποίο οι επιτιθέμενοι μπορούν να προσπαθήσουν να σπάσουν εκτός σύνδεσης για να ανακαλύψουν τον κωδικό πρόσβασης του χρήστη.
+Το ASREPRoast είναι μια επίθεση ασφαλείας που εκμεταλλεύεται χρήστες που δεν διαθέτουν το **απαιτούμενο χαρακτηριστικό προ-αυθεντικοποίησης Kerberos**. Ουσιαστικά, αυτή η ευπάθεια επιτρέπει στους επιτιθέμενους να ζητούν αυθεντικοποίηση για έναν χρήστη από τον Domain Controller (DC) χωρίς να χρειάζεται ο κωδικός πρόσβασης του χρήστη. Ο DC στη συνέχεια απαντά με ένα μήνυμα κρυπτογραφημένο με το κλειδί που προέρχεται από τον κωδικό πρόσβασης του χρήστη, το οποίο οι επιτιθέμενοι μπορούν να προσπαθήσουν να σπάσουν εκτός σύνδεσης για να ανακαλύψουν τον κωδικό πρόσβασης του χρήστη.
 
 Οι κύριες απαιτήσεις για αυτή την επίθεση είναι:
 
-- **Έλλειψη Kerberos pre-authentication**: Οι στοχοθετημένοι χρήστες δεν πρέπει να έχουν ενεργοποιημένο αυτό το χαρακτηριστικό ασφαλείας.
+- **Έλλειψη προ-αυθεντικοποίησης Kerberos**: Οι στοχοθετημένοι χρήστες δεν πρέπει να έχουν ενεργοποιημένο αυτό το χαρακτηριστικό ασφαλείας.
 - **Σύνδεση με τον Domain Controller (DC)**: Οι επιτιθέμενοι χρειάζονται πρόσβαση στον DC για να στείλουν αιτήματα και να λάβουν κρυπτογραφημένα μηνύματα.
-- **Προαιρετικός λογαριασμός τομέα**: Η ύπαρξη λογαριασμού τομέα επιτρέπει στους επιτιθέμενους να εντοπίζουν πιο αποτελεσματικά ευάλωτους χρήστες μέσω LDAP queries. Χωρίς έναν τέτοιο λογαριασμό, οι επιτιθέμενοι πρέπει να μαντέψουν τα ονόματα χρηστών.
+- **Προαιρετικός λογαριασμός τομέα**: Η ύπαρξη λογαριασμού τομέα επιτρέπει στους επιτιθέμενους να εντοπίζουν πιο αποτελεσματικά ευάλωτους χρήστες μέσω LDAP ερωτημάτων. Χωρίς έναν τέτοιο λογαριασμό, οι επιτιθέμενοι πρέπει να μαντέψουν τα ονόματα χρηστών.
 
 #### Enumerating vulnerable users (need domain credentials)
 ```bash:Using Windows
@@ -48,7 +33,7 @@ python GetNPUsers.py jurassic.park/triceratops:Sh4rpH0rns -request -format hashc
 Get-ASREPHash -Username VPN114user -verbose #From ASREPRoast.ps1 (https://github.com/HarmJ0y/ASREPRoast)
 ```
 > [!WARNING]
-> Η AS-REP Roasting με το Rubeus θα δημιουργήσει ένα 4768 με τύπο κρυπτογράφησης 0x17 και τύπο προαυθεντικοποίησης 0.
+> Η AS-REP Roasting με το Rubeus θα δημιουργήσει ένα 4768 με τύπο κρυπτογράφησης 0x17 και τύπο προαυτοποίησης 0.
 
 ### Cracking
 ```bash
@@ -84,20 +69,5 @@ ASRepCatcher listen
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/as-rep-roasting-using-rubeus-and-hashcat](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/as-rep-roasting-using-rubeus-and-hashcat)
 
 ---
-
-<figure><img src="../../images/image (3).png" alt=""><figcaption></figcaption></figure>
-
-Συμμετάσχετε στον [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server για να επικοινωνήσετε με έμπειρους χάκερ και κυνηγούς bug bounty!
-
-**Επιγνώσεις Χάκινγκ**\
-Ασχοληθείτε με περιεχόμενο που εξερευνά τη συγκίνηση και τις προκλήσεις του hacking
-
-**Νέα Χάκινγκ σε Πραγματικό Χρόνο**\
-Μείνετε ενημερωμένοι με τον ταχύτατο κόσμο του hacking μέσω ειδήσεων και επιγνώσεων σε πραγματικό χρόνο
-
-**Τελευταίες Ανακοινώσεις**\
-Μείνετε ενημερωμένοι με τις πιο πρόσφατες εκκινήσεις bug bounty και κρίσιμες ενημερώσεις πλατφόρμας
-
-**Συμμετάσχετε μαζί μας στο** [**Discord**](https://discord.com/invite/N3FrSbmwdy) και ξεκινήστε να συνεργάζεστε με κορυφαίους χάκερ σήμερα!
 
 {{#include ../../banners/hacktricks-training.md}}

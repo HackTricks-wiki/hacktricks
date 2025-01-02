@@ -1,44 +1,44 @@
-# Namespaces
+# Ονόματα Χώρων
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-### **PID namespace**
+### **Χώρος PID**
 
 {{#ref}}
 pid-namespace.md
 {{#endref}}
 
-### **Mount namespace**
+### **Χώρος Mount**
 
 {{#ref}}
 mount-namespace.md
 {{#endref}}
 
-### **Network namespace**
+### **Χώρος Δικτύου**
 
 {{#ref}}
 network-namespace.md
 {{#endref}}
 
-### **IPC Namespace**
+### **Χώρος IPC**
 
 {{#ref}}
 ipc-namespace.md
 {{#endref}}
 
-### **UTS namespace**
+### **Χώρος UTS**
 
 {{#ref}}
 uts-namespace.md
 {{#endref}}
 
-### Time Namespace
+### Χώρος Χρόνου
 
 {{#ref}}
 time-namespace.md
 {{#endref}}
 
-### User namespace
+### Χώρος Χρήστη
 
 {{#ref}}
 user-namespace.md

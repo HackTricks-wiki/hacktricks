@@ -2,33 +2,29 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Apple Propietary File System (APFS)
+## Apple Proprietary File System (APFS)
 
-**Apple File System (APFS)** is a modern file system designed to supersede the Hierarchical File System Plus (HFS+). Its development was driven by the need for **improved performance, security, and efficiency**.
+**Apple File System (APFS)** είναι ένα σύγχρονο σύστημα αρχείων που έχει σχεδιαστεί για να αντικαταστήσει το Hierarchical File System Plus (HFS+). Η ανάπτυξή του καθοδηγήθηκε από την ανάγκη για **βελτιωμένη απόδοση, ασφάλεια και αποδοτικότητα**.
 
-Some notable features of APFS include:
+Ορισμένα αξιοσημείωτα χαρακτηριστικά του APFS περιλαμβάνουν:
 
-1. **Space Sharing**: APFS allows multiple volumes to **share the same underlying free storage** on a single physical device. This enables more efficient space utilization as the volumes can dynamically grow and shrink without the need for manual resizing or repartitioning.
-   1. This means, compared with traditional partitions in file disks, **that in APFS different partitions (volumes) shares all the disk space**, while a regular partition usually had a fixed size.
-2. **Snapshots**: APFS supports **creating snapshots**, which are **read-only**, point-in-time instances of the file system. Snapshots enable efficient backups and easy system rollbacks, as they consume minimal additional storage and can be quickly created or reverted.
-3. **Clones**: APFS can **create file or directory clones that share the same storage** as the original until either the clone or the original file is modified. This feature provides an efficient way to create copies of files or directories without duplicating the storage space.
-4. **Encryption**: APFS **natively supports full-disk encryption** as well as per-file and per-directory encryption, enhancing data security across different use cases.
-5. **Crash Protection**: APFS uses a **copy-on-write metadata scheme that ensures file system consistency** even in cases of sudden power loss or system crashes, reducing the risk of data corruption.
+1. **Κοινοποίηση Χώρου**: Το APFS επιτρέπει σε πολλαπλούς τόμους να **μοιράζονται την ίδια υποκείμενη ελεύθερη αποθήκευση** σε μια φυσική συσκευή. Αυτό επιτρέπει πιο αποδοτική χρήση του χώρου, καθώς οι τόμοι μπορούν να αναπτύσσονται και να συρρικνώνονται δυναμικά χωρίς την ανάγκη χειροκίνητης αλλαγής μεγέθους ή επανακατανομής.
+1. Αυτό σημαίνει, σε σύγκριση με τις παραδοσιακές κατανομές σε δίσκους αρχείων, **ότι στο APFS διαφορετικές κατανομές (τόμοι) μοιράζονται όλο το χώρο του δίσκου**, ενώ μια κανονική κατανομή είχε συνήθως σταθερό μέγεθος.
+2. **Στιγμιότυπα**: Το APFS υποστηρίζει **δημιουργία στιγμιότυπων**, τα οποία είναι **μόνο για ανάγνωση**, στιγμές του συστήματος αρχείων. Τα στιγμιότυπα επιτρέπουν αποδοτικά αντίγραφα ασφαλείας και εύκολες ανακλήσεις συστήματος, καθώς καταναλώνουν ελάχιστο επιπλέον χώρο αποθήκευσης και μπορούν να δημιουργηθούν ή να αναιρεθούν γρήγορα.
+3. **Κλώνοι**: Το APFS μπορεί να **δημιουργήσει κλώνους αρχείων ή καταλόγων που μοιράζονται την ίδια αποθήκευση** με το πρωτότυπο μέχρι να τροποποιηθεί είτε ο κλώνος είτε το πρωτότυπο αρχείο. Αυτή η δυνατότητα παρέχει έναν αποδοτικό τρόπο δημιουργίας αντιγράφων αρχείων ή καταλόγων χωρίς να διπλασιάζεται ο χώρος αποθήκευσης.
+4. **Κρυπτογράφηση**: Το APFS **υποστηρίζει εγγενώς την κρυπτογράφηση πλήρους δίσκου** καθώς και κρυπτογράφηση ανά αρχείο και ανά κατάλογο, ενισχύοντας την ασφάλεια των δεδομένων σε διάφορες περιπτώσεις χρήσης.
+5. **Προστασία από Κρασάρισμα**: Το APFS χρησιμοποιεί ένα **σχέδιο μεταδεδομένων copy-on-write που διασφαλίζει τη συνέπεια του συστήματος αρχείων** ακόμη και σε περιπτώσεις ξαφνικής απώλειας ρεύματος ή κρασάρισμα συστήματος, μειώνοντας τον κίνδυνο διαφθοράς δεδομένων.
 
-Overall, APFS offers a more modern, flexible, and efficient file system for Apple devices, with a focus on improved performance, reliability, and security.
-
+Συνολικά, το APFS προσφέρει ένα πιο σύγχρονο, ευέλικτο και αποδοτικό σύστημα αρχείων για τις συσκευές Apple, με έμφαση στη βελτιωμένη απόδοση, αξιοπιστία και ασφάλεια.
 ```bash
 diskutil list # Get overview of the APFS volumes
 ```
-
 ## Firmlinks
 
-The `Data` volume is mounted in **`/System/Volumes/Data`** (you can check this with `diskutil apfs list`).
+Ο όγκος `Data` είναι προσαρτημένος στο **`/System/Volumes/Data`** (μπορείτε να το ελέγξετε με το `diskutil apfs list`).
 
-The list of firmlinks can be found in the **`/usr/share/firmlinks`** file.
-
+Η λίστα των firmlinks μπορεί να βρεθεί στο αρχείο **`/usr/share/firmlinks`**.
 ```bash
 
 ```
-
 {{#include ../../banners/hacktricks-training.md}}

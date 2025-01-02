@@ -2,12 +2,6 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/i3.png" alt=""><figcaption></figcaption></figure>
-
-**Bug bounty tip**: **εγγραφείτε** στο **Intigriti**, μια premium **πλατφόρμα bug bounty που δημιουργήθηκε από hackers, για hackers**! Ελάτε μαζί μας στο [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) σήμερα, και αρχίστε να κερδίζετε βραβεία έως **$100,000**!
-
-{% embed url="https://go.intigriti.com/hacktricks" %}
-
 ## WMIC
 
 **Wmic** μπορεί να χρησιμοποιηθεί για να εκτελεί προγράμματα κατά την **εκκίνηση**. Δείτε ποια binaries είναι προγραμματισμένα να εκτελούνται κατά την εκκίνηση με:
@@ -30,7 +24,7 @@ schtasks /Create /RU "SYSTEM" /SC ONLOGON /TN "SchedPE" /TR "cmd /c net localgro
 ```
 ## Φάκελοι
 
-Όλα τα εκτελέσιμα αρχεία που βρίσκονται στους **φακέλους Εκκίνησης θα εκτελούνται κατά την εκκίνηση**. Οι κοινές φάσεις εκκίνησης είναι αυτές που αναφέρονται στη συνέχεια, αλλά ο φάκελος εκκίνησης υποδεικνύεται στο μητρώο. [Read this to learn where.](privilege-escalation-with-autorun-binaries.md#startup-path)
+Όλα τα εκτελέσιμα αρχεία που βρίσκονται στους **φακέλους Εκκίνησης θα εκτελούνται κατά την εκκίνηση**. Οι κοινές φάκελοι εκκίνησης είναι αυτοί που αναφέρονται στη συνέχεια, αλλά ο φάκελος εκκίνησης υποδεικνύεται στο μητρώο. [Read this to learn where.](privilege-escalation-with-autorun-binaries.md#startup-path)
 ```bash
 dir /b "C:\Documents and Settings\All Users\Start Menu\Programs\Startup" 2>nul
 dir /b "C:\Documents and Settings\%username%\Start Menu\Programs\Startup" 2>nul
@@ -83,10 +77,10 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 reg add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnceEx\\0001\\Depend /v 1 /d "C:\\temp\\evil.dll"
 ```
 > [!NOTE]
-> **Εκμετάλλευση 1**: Αν μπορείτε να γράψετε μέσα σε οποιοδήποτε από τα αναφερόμενα μητρώα μέσα στο **HKLM**, μπορείτε να κλιμακώσετε τα προνόμια όταν συνδεθεί ένας διαφορετικός χρήστης.
+> **Εκμετάλλευση 1**: Αν μπορείτε να γράψετε μέσα σε οποιοδήποτε από τα αναφερόμενα μητρώα μέσα στο **HKLM**, μπορείτε να κλιμακώσετε τα δικαιώματα όταν συνδεθεί ένας διαφορετικός χρήστης.
 
 > [!NOTE]
-> **Εκμετάλλευση 2**: Αν μπορείτε να αντικαταστήσετε οποιοδήποτε από τα δυαδικά αρχεία που αναφέρονται σε οποιοδήποτε από τα μητρώα μέσα στο **HKLM**, μπορείτε να τροποποιήσετε αυτό το δυαδικό αρχείο με μια πίσω πόρτα όταν συνδεθεί ένας διαφορετικός χρήστης και να κλιμακώσετε τα προνόμια.
+> **Εκμετάλλευση 2**: Αν μπορείτε να αντικαταστήσετε οποιοδήποτε από τα δυαδικά αρχεία που αναφέρονται σε οποιοδήποτε από τα μητρώα μέσα στο **HKLM**, μπορείτε να τροποποιήσετε αυτό το δυαδικό αρχείο με μια πίσω πόρτα όταν συνδεθεί ένας διαφορετικός χρήστης και να κλιμακώσετε τα δικαιώματα.
 ```bash
 #CMD
 reg query HKLM\Software\Microsoft\Windows\CurrentVersion\Run
@@ -247,18 +241,18 @@ reg query "HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components
 
 ### Overview of Browser Helper Objects (BHOs)
 
-Τα Browser Helper Objects (BHOs) είναι DLL modules που προσθέτουν επιπλέον δυνατότητες στον Internet Explorer της Microsoft. Φορτώνονται στον Internet Explorer και τον Windows Explorer σε κάθε εκκίνηση. Ωστόσο, η εκτέλεσή τους μπορεί να αποκλειστεί ρυθμίζοντας το **NoExplorer** key σε 1, αποτρέποντάς τα από το να φορτωθούν με τις περιπτώσεις του Windows Explorer.
+Τα Browser Helper Objects (BHOs) είναι DLL modules που προσθέτουν επιπλέον δυνατότητες στον Internet Explorer της Microsoft. Φορτώνονται στον Internet Explorer και τον Windows Explorer σε κάθε εκκίνηση. Ωστόσο, η εκτέλεσή τους μπορεί να αποκλειστεί ρυθμίζοντας το **NoExplorer** key σε 1, αποτρέποντας την φόρτωσή τους με τις περιπτώσεις του Windows Explorer.
 
-Τα BHOs είναι συμβατά με τα Windows 10 μέσω του Internet Explorer 11 αλλά δεν υποστηρίζονται στο Microsoft Edge, τον προεπιλεγμένο περιηγητή σε νεότερες εκδόσεις των Windows.
+Τα BHOs είναι συμβατά με τα Windows 10 μέσω του Internet Explorer 11 αλλά δεν υποστηρίζονται στον Microsoft Edge, τον προεπιλεγμένο περιηγητή σε νεότερες εκδόσεις των Windows.
 
-Για να εξερευνήσετε τα BHOs που είναι καταχωρημένα σε ένα σύστημα, μπορείτε να ελέγξετε τα εξής κλειδιά μητρώου:
+Για να εξερευνήσετε τα BHOs που είναι καταχωρημένα σε ένα σύστημα, μπορείτε να ελέγξετε τα παρακάτω κλειδιά μητρώου:
 
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
 - `HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
 
 Κάθε BHO εκπροσωπείται από το **CLSID** του στο μητρώο, που λειτουργεί ως μοναδικός αναγνωριστικός αριθμός. Λεπτομερείς πληροφορίες σχετικά με κάθε CLSID μπορούν να βρεθούν κάτω από `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`.
 
-Για την αναζήτηση BHOs στο μητρώο, μπορούν να χρησιμοποιηθούν οι εξής εντολές:
+Για την ερώτηση BHOs στο μητρώο, μπορούν να χρησιμοποιηθούν οι παρακάτω εντολές:
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects" /s
 reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects" /s
@@ -280,7 +274,7 @@ reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows NT\CurrentVersion\Font Dr
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Font Drivers'
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows NT\CurrentVersion\Font Drivers'
 ```
-### Άνοιγμα Εντολής
+### Ανοιχτή Εντολή
 
 - `HKLM\SOFTWARE\Classes\htmlfile\shell\open\command`
 - `HKLM\SOFTWARE\Wow6432Node\Classes\htmlfile\shell\open\command`
@@ -297,7 +291,7 @@ HKLM\Software\Microsoft\Wow6432Node\Windows NT\CurrentVersion\Image File Executi
 ```
 ## SysInternals
 
-Σημειώστε ότι όλοι οι ιστότοποι όπου μπορείτε να βρείτε autoruns έχουν **ήδη ερευνηθεί από** [**winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe). Ωστόσο, για μια **πιο ολοκληρωμένη λίστα με αυτόματα εκτελούμενα** αρχεία μπορείτε να χρησιμοποιήσετε [autoruns](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns) από τα sysinternals:
+Σημειώστε ότι όλοι οι ιστότοποι όπου μπορείτε να βρείτε autoruns έχουν **ήδη ερευνηθεί από**[ **winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe). Ωστόσο, για μια **πιο ολοκληρωμένη λίστα με αυτόματα εκτελούμενα** αρχεία μπορείτε να χρησιμοποιήσετε [autoruns ](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns)από τα sysinternals:
 ```
 autorunsc.exe -m -nobanner -a * -ct /accepteula
 ```
@@ -312,10 +306,6 @@ autorunsc.exe -m -nobanner -a * -ct /accepteula
 - [https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
 - [https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell](https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell)
 
-<figure><img src="../../images/i3.png" alt=""><figcaption></figcaption></figure>
 
-**Συμβουλή bug bounty**: **εγγραφείτε** στο **Intigriti**, μια premium **πλατφόρμα bug bounty που δημιουργήθηκε από hackers, για hackers**! Ελάτε μαζί μας στο [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) σήμερα, και αρχίστε να κερδίζετε βραβεία έως **$100,000**!
-
-{% embed url="https://go.intigriti.com/hacktricks" %}
 
 {{#include ../../banners/hacktricks-training.md}}

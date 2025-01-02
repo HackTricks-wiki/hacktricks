@@ -2,11 +2,8 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
 
-{% embed url="https://websec.nl/" %}
-
-## Βασικές Αρχές της Resource-based Constrained Delegation
+## Basics of Resource-based Constrained Delegation
 
 Αυτό είναι παρόμοιο με την βασική [Constrained Delegation](constrained-delegation.md) αλλά **αντί** να δίνει δικαιώματα σε ένα **αντικείμενο** να **παριστάνει οποιονδήποτε χρήστη απέναντι σε μια υπηρεσία**. Η Resource-based Constrained Delegation **ορίζει** στο **αντικείμενο ποιος μπορεί να παριστάνει οποιονδήποτε χρήστη απέναντι σε αυτό**.
 
@@ -14,26 +11,26 @@
 
 Μια άλλη σημαντική διαφορά από αυτή την Constrained Delegation σε άλλες delegations είναι ότι οποιοσδήποτε χρήστης με **δικαιώματα εγγραφής σε έναν λογαριασμό μηχανής** (_GenericAll/GenericWrite/WriteDacl/WriteProperty κ.λπ.) μπορεί να ορίσει το _**msDS-AllowedToActOnBehalfOfOtherIdentity**_ (Στις άλλες μορφές Delegation χρειάζεστε δικαιώματα διαχειριστή τομέα).
 
-### Νέες Έννοιες
+### New Concepts
 
-Επιστρέφοντας στην Constrained Delegation, είχε αναφερθεί ότι η **`TrustedToAuthForDelegation`** σημαία μέσα στην τιμή _userAccountControl_ του χρήστη είναι απαραίτητη για να εκτελέσετε ένα **S4U2Self.** Αλλά αυτό δεν είναι εντελώς αλήθεια.\
-Η πραγματικότητα είναι ότι ακόμη και χωρίς αυτή την τιμή, μπορείτε να εκτελέσετε ένα **S4U2Self** απέναντι σε οποιονδήποτε χρήστη αν είστε μια **υπηρεσία** (έχετε ένα SPN) αλλά, αν έχετε **`TrustedToAuthForDelegation`** το επιστρεφόμενο TGS θα είναι **Forwardable** και αν **δεν έχετε** αυτή τη σημαία το επιστρεφόμενο TGS **δεν θα** είναι **Forwardable**.
+Πίσω στην Constrained Delegation είχε αναφερθεί ότι η **`TrustedToAuthForDelegation`** σημαία μέσα στην τιμή _userAccountControl_ του χρήστη είναι απαραίτητη για να εκτελέσετε ένα **S4U2Self.** Αλλά αυτό δεν είναι εντελώς αλήθεια.\
+Η πραγματικότητα είναι ότι ακόμα και χωρίς αυτή την τιμή, μπορείτε να εκτελέσετε ένα **S4U2Self** απέναντι σε οποιονδήποτε χρήστη αν είστε μια **υπηρεσία** (έχετε ένα SPN) αλλά, αν έχετε **`TrustedToAuthForDelegation`** το επιστρεφόμενο TGS θα είναι **Forwardable** και αν **δεν έχετε** αυτή τη σημαία το επιστρεφόμενο TGS **δεν θα** είναι **Forwardable**.
 
-Ωστόσο, αν το **TGS** που χρησιμοποιείται στο **S4U2Proxy** **ΔΕΝ είναι Forwardable** προσπαθώντας να εκμεταλλευτείτε μια **βασική Constrain Delegation** δεν **θα λειτουργήσει**. Αλλά αν προσπαθείτε να εκμεταλλευτείτε μια **Resource-Based constrain delegation, θα λειτουργήσει** (αυτό δεν είναι ευπάθεια, είναι χαρακτηριστικό, προφανώς).
+Ωστόσο, αν το **TGS** που χρησιμοποιείται στο **S4U2Proxy** είναι **NOT Forwardable** προσπαθώντας να εκμεταλλευτείτε μια **βασική Constrain Delegation** δεν **θα λειτουργήσει**. Αλλά αν προσπαθείτε να εκμεταλλευτείτε μια **Resource-Based constrain delegation, θα λειτουργήσει** (αυτό δεν είναι ευπάθεια, είναι χαρακτηριστικό, προφανώς).
 
-### Δομή Επίθεσης
+### Attack structure
 
-> Αν έχετε **ισοδύναμα δικαιώματα εγγραφής** σε έναν **λογαριασμό Υπολογιστή** μπορείτε να αποκτήσετε **προνομιακή πρόσβαση** σε αυτή τη μηχανή.
+> Αν έχετε **δικαιώματα εγγραφής ισοδύναμα** σε έναν **λογαριασμό Υπολογιστή** μπορείτε να αποκτήσετε **προνομιακή πρόσβαση** σε αυτή τη μηχανή.
 
-Ας υποθέσουμε ότι ο επιτιθέμενος έχει ήδη **ισοδύναμα δικαιώματα εγγραφής πάνω στον υπολογιστή του θύματος**.
+Υποθέστε ότι ο επιτιθέμενος έχει ήδη **δικαιώματα εγγραφής ισοδύναμα πάνω στον υπολογιστή θύμα**.
 
-1. Ο επιτιθέμενος **παραβιάζει** έναν λογαριασμό που έχει ένα **SPN** ή **δημιουργεί έναν** (“Υπηρεσία A”). Σημειώστε ότι **οποιοσδήποτε** _Διαχειριστής Χρήστης_ χωρίς καμία άλλη ειδική προνόμια μπορεί να **δημιουργήσει** μέχρι 10 **Αντικείμενα Υπολογιστή (**_**MachineAccountQuota**_**)** και να τους ορίσει ένα **SPN**. Έτσι, ο επιτιθέμενος μπορεί απλά να δημιουργήσει ένα αντικείμενο υπολογιστή και να ορίσει ένα SPN.
-2. Ο επιτιθέμενος **καταχράται το δικαίωμα ΕΓΓΡΑΦΗΣ** πάνω στον υπολογιστή του θύματος (ΥπηρεσίαB) για να ρυθμίσει **resource-based constrained delegation ώστε να επιτρέψει στην ΥπηρεσίαA να παριστάνει οποιονδήποτε χρήστη** απέναντι σε αυτόν τον υπολογιστή του θύματος (ΥπηρεσίαB).
-3. Ο επιτιθέμενος χρησιμοποιεί το Rubeus για να εκτελέσει μια **πλήρη επίθεση S4U** (S4U2Self και S4U2Proxy) από την Υπηρεσία A στην Υπηρεσία B για έναν χρήστη **με προνομιακή πρόσβαση στην Υπηρεσία B**.
-1. S4U2Self (από τον λογαριασμό SPN που παραβιάστηκε/δημιουργήθηκε): Ζητήστε ένα **TGS του Διαχειριστή για μένα** (Όχι Forwardable).
-2. S4U2Proxy: Χρησιμοποιήστε το **όχι Forwardable TGS** του προηγούμενου βήματος για να ζητήσετε ένα **TGS** από τον **Διαχειριστή** προς τον **υπολογιστή θύμα**.
-3. Ακόμη και αν χρησιμοποιείτε ένα όχι Forwardable TGS, καθώς εκμεταλλεύεστε την Resource-based constrained delegation, θα λειτουργήσει.
-4. Ο επιτιθέμενος μπορεί να **περάσει το εισιτήριο** και να **παριστάνει** τον χρήστη για να αποκτήσει **πρόσβαση στην ΥπηρεσίαB του θύματος**.
+1. Ο επιτιθέμενος **παραβιάζει** έναν λογαριασμό που έχει ένα **SPN** ή **δημιουργεί έναν** (“Service A”). Σημειώστε ότι **οποιοσδήποτε** _Admin User_ χωρίς καμία άλλη ειδική προνόμια μπορεί να **δημιουργήσει** μέχρι 10 **Computer objects (**_**MachineAccountQuota**_**)** και να τους ορίσει ένα **SPN**. Έτσι, ο επιτιθέμενος μπορεί απλά να δημιουργήσει ένα αντικείμενο υπολογιστή και να ορίσει ένα SPN.
+2. Ο επιτιθέμενος **καταχράται το δικαίωμα ΕΓΓΡΑΦΗΣ** πάνω στον υπολογιστή θύμα (ServiceB) για να ρυθμίσει **resource-based constrained delegation ώστε να επιτρέπει στο ServiceA να παριστάνει οποιονδήποτε χρήστη** απέναντι σε αυτόν τον υπολογιστή θύμα (ServiceB).
+3. Ο επιτιθέμενος χρησιμοποιεί το Rubeus για να εκτελέσει μια **πλήρη επίθεση S4U** (S4U2Self και S4U2Proxy) από το Service A στο Service B για έναν χρήστη **με προνομιακή πρόσβαση στο Service B**.
+1. S4U2Self (από τον λογαριασμό SPN που παραβιάστηκε/δημιουργήθηκε): Ζητήστε ένα **TGS του Administrator για μένα** (Not Forwardable).
+2. S4U2Proxy: Χρησιμοποιήστε το **όχι Forwardable TGS** του βήματος πριν για να ζητήσετε ένα **TGS** από τον **Administrator** προς τον **υπολογιστή θύμα**.
+3. Ακόμα και αν χρησιμοποιείτε ένα όχι Forwardable TGS, καθώς εκμεταλλεύεστε την Resource-based constrained delegation, θα λειτουργήσει.
+4. Ο επιτιθέμενος μπορεί να **περάσει το εισιτήριο** και να **παριστάνει** τον χρήστη για να αποκτήσει **πρόσβαση στην υπηρεσία θύμα ServiceB**.
 
 Για να ελέγξετε το _**MachineAccountQuota**_ του τομέα μπορείτε να χρησιμοποιήσετε:
 ```powershell
@@ -93,24 +90,24 @@ rubeus.exe s4u /user:FAKECOMPUTER$ /aes256:<AES 256 hash> /impersonateuser:admin
 
 ### Accessing
 
-Η τελευταία γραμμή εντολών θα εκτελέσει την **πλήρη επίθεση S4U και θα εισάγει το TGS** από τον Administrator στον θύμα host στη **μνήμη**.\
+Η τελευταία γραμμή εντολών θα εκτελέσει την **πλήρη επίθεση S4U και θα εισάγει το TGS** από τον Administrator στον θύμα υπολογιστή στη **μνήμη**.\
 Σε αυτό το παράδειγμα ζητήθηκε ένα TGS για την υπηρεσία **CIFS** από τον Administrator, οπότε θα μπορείτε να έχετε πρόσβαση στο **C$**:
 ```bash
 ls \\victim.domain.local\C$
 ```
-### Κατάχρηση διαφόρων υπηρεσιών
+### Κατάχρηση διαφόρων υπηρεσιών εισιτηρίων
 
 Μάθετε για τα [**διαθέσιμα εισιτήρια υπηρεσιών εδώ**](silver-ticket.md#available-services).
 
 ## Σφάλματα Kerberos
 
-- **`KDC_ERR_ETYPE_NOTSUPP`**: Αυτό σημαίνει ότι το kerberos είναι ρυθμισμένο να μην χρησιμοποιεί DES ή RC4 και παρέχετε μόνο το hash RC4. Παρέχετε στο Rubeus τουλάχιστον το hash AES256 (ή απλά παρέχετε τα hashes rc4, aes128 και aes256). Παράδειγμα: `[Rubeus.Program]::MainString("s4u /user:FAKECOMPUTER /aes256:CC648CF0F809EE1AA25C52E963AC0487E87AC32B1F71ACC5304C73BF566268DA /aes128:5FC3D06ED6E8EA2C9BB9CC301EA37AD4 /rc4:EF266C6B963C0BB683941032008AD47F /impersonateuser:Administrator /msdsspn:CIFS/M3DC.M3C.LOCAL /ptt".split())`
+- **`KDC_ERR_ETYPE_NOTSUPP`**: Αυτό σημαίνει ότι το kerberos είναι ρυθμισμένο να μην χρησιμοποιεί DES ή RC4 και παρέχετε μόνο το hash RC4. Παρέχετε στο Rubeus τουλάχιστον το hash AES256 (ή απλά παρέχετε του τα hashes rc4, aes128 και aes256). Παράδειγμα: `[Rubeus.Program]::MainString("s4u /user:FAKECOMPUTER /aes256:CC648CF0F809EE1AA25C52E963AC0487E87AC32B1F71ACC5304C73BF566268DA /aes128:5FC3D06ED6E8EA2C9BB9CC301EA37AD4 /rc4:EF266C6B963C0BB683941032008AD47F /impersonateuser:Administrator /msdsspn:CIFS/M3DC.M3C.LOCAL /ptt".split())`
 - **`KRB_AP_ERR_SKEW`**: Αυτό σημαίνει ότι η ώρα του τρέχοντος υπολογιστή είναι διαφορετική από αυτή του DC και το kerberos δεν λειτουργεί σωστά.
 - **`preauth_failed`**: Αυτό σημαίνει ότι το δεδομένο όνομα χρήστη + hashes δεν λειτουργούν για είσοδο. Μπορεί να έχετε ξεχάσει να βάλετε το "$" μέσα στο όνομα χρήστη κατά την παραγωγή των hashes (`.\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local`)
 - **`KDC_ERR_BADOPTION`**: Αυτό μπορεί να σημαίνει:
   - Ο χρήστης που προσπαθείτε να μιμηθείτε δεν μπορεί να έχει πρόσβαση στην επιθυμητή υπηρεσία (επειδή δεν μπορείτε να τον μιμηθείτε ή επειδή δεν έχει αρκετά δικαιώματα)
   - Η ζητούμενη υπηρεσία δεν υπάρχει (αν ζητήσετε ένα εισιτήριο για winrm αλλά το winrm δεν εκτελείται)
-  - Ο ψεύτικος υπολογιστής που δημιουργήθηκε έχει χάσει τα δικαιώματά του πάνω στον ευάλωτο διακομιστή και πρέπει να τα επαναφέρετε.
+  - Ο ψεύτικος υπολογιστής που δημιουργήθηκε έχει χάσει τα δικαιώματά του πάνω στον ευάλωτο διακομιστή και πρέπει να τα επιστρέψετε.
 
 ## Αναφορές
 
@@ -119,8 +116,5 @@ ls \\victim.domain.local\C$
 - [https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/resource-based-constrained-delegation-ad-computer-object-take-over-and-privilged-code-execution#modifying-target-computers-ad-object](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/resource-based-constrained-delegation-ad-computer-object-take-over-and-privilged-code-execution#modifying-target-computers-ad-object)
 - [https://stealthbits.com/blog/resource-based-constrained-delegation-abuse/](https://stealthbits.com/blog/resource-based-constrained-delegation-abuse/)
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

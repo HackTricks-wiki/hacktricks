@@ -2,13 +2,10 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 ## Overpass The Hash/Pass The Key (PTK)
 
-Η επίθεση **Overpass The Hash/Pass The Key (PTK)** έχει σχεδιαστεί για περιβάλλοντα όπου το παραδοσιακό πρωτόκολλο NTLM είναι περιορισμένο και η αυθεντικοποίηση Kerberos έχει προτεραιότητα. Αυτή η επίθεση εκμεταλλεύεται το NTLM hash ή τα κλειδιά AES ενός χρήστη για να ζητήσει Kerberos tickets, επιτρέποντας μη εξουσιοδοτημένη πρόσβαση σε πόρους εντός ενός δικτύου.
+Η επίθεση **Overpass The Hash/Pass The Key (PTK)** έχει σχεδιαστεί για περιβάλλοντα όπου το παραδοσιακό πρωτόκολλο NTLM είναι περιορισμένο και η αυθεντικοποίηση Kerberos έχει προτεραιότητα. Αυτή η επίθεση εκμεταλλεύεται το NTLM hash ή τα κλειδιά AES ενός χρήστη για να ζητήσει εισιτήρια Kerberos, επιτρέποντας μη εξουσιοδοτημένη πρόσβαση σε πόρους εντός ενός δικτύου.
 
 Για να εκτελεστεί αυτή η επίθεση, το αρχικό βήμα περιλαμβάνει την απόκτηση του NTLM hash ή του κωδικού πρόσβασης του λογαριασμού του στοχευμένου χρήστη. Αφού εξασφαλιστεί αυτή η πληροφορία, μπορεί να αποκτηθεί ένα Ticket Granting Ticket (TGT) για τον λογαριασμό, επιτρέποντας στον επιτιθέμενο να έχει πρόσβαση σε υπηρεσίες ή μηχανές στις οποίες ο χρήστης έχει δικαιώματα.
 
@@ -37,8 +34,5 @@ python psexec.py jurassic.park/velociraptor@labwws02.jurassic.park -k -no-pass
 
 - [https://www.tarlogic.com/es/blog/como-atacar-kerberos/](https://www.tarlogic.com/es/blog/como-atacar-kerberos/)
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

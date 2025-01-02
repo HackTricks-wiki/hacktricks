@@ -4,16 +4,16 @@
 
 ## Firewalls
 
-- [**Little Snitch**](https://www.obdev.at/products/littlesnitch/index.html): It will monitor every connection made by each process. Depending on the mode (silent allow connections, silent deny connection and alert) it will **show you an alert** every time a new connection is stablished. It also has a very nice GUI to see all this information.
-- [**LuLu**](https://objective-see.org/products/lulu.html): Objective-See firewall. This is a basic firewall that will alert you for suspicious connections (it has a GUI but it isn't as fancy as the one of Little Snitch).
+- [**Little Snitch**](https://www.obdev.at/products/littlesnitch/index.html): Θα παρακολουθεί κάθε σύνδεση που γίνεται από κάθε διαδικασία. Ανάλογα με τη λειτουργία (σιωπηλή επιτρεπόμενη σύνδεση, σιωπηλή άρνηση σύνδεσης και ειδοποίηση) θα **σας δείξει μια ειδοποίηση** κάθε φορά που καθορίζεται μια νέα σύνδεση. Έχει επίσης μια πολύ ωραία διεπαφή χρήστη για να δείτε όλες αυτές τις πληροφορίες.
+- [**LuLu**](https://objective-see.org/products/lulu.html): Τείχος προστασίας Objective-See. Αυτό είναι ένα βασικό τείχος προστασίας που θα σας ειδοποιεί για ύποπτες συνδέσεις (έχει διεπαφή χρήστη αλλά δεν είναι τόσο εντυπωσιακή όσο αυτή του Little Snitch).
 
 ## Persistence detection
 
-- [**KnockKnock**](https://objective-see.org/products/knockknock.html): Objective-See application that will search in several locations where **malware could be persisting** (it's a one-shot tool, not a monitoring service).
-- [**BlockBlock**](https://objective-see.org/products/blockblock.html): Like KnockKnock by monitoring processes that generate persistence.
+- [**KnockKnock**](https://objective-see.org/products/knockknock.html): Εφαρμογή Objective-See που θα αναζητήσει σε πολλές τοποθεσίες όπου **το κακόβουλο λογισμικό θα μπορούσε να επιμένει** (είναι ένα εργαλείο μιας χρήσης, όχι υπηρεσία παρακολούθησης).
+- [**BlockBlock**](https://objective-see.org/products/blockblock.html): Όπως το KnockKnock παρακολουθώντας διαδικασίες που δημιουργούν επιμονή.
 
 ## Keyloggers detection
 
-- [**ReiKey**](https://objective-see.org/products/reikey.html): Objective-See application to find **keyloggers** that install keyboard "event taps"&#x20;
+- [**ReiKey**](https://objective-see.org/products/reikey.html): Εφαρμογή Objective-See για να βρείτε **keyloggers** που εγκαθιστούν "event taps" πληκτρολογίου&#x20;
 
 {{#include ../../banners/hacktricks-training.md}}

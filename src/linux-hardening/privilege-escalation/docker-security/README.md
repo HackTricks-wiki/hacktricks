@@ -2,56 +2,45 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-<figure><img src="../../../images/image (48).png" alt=""><figcaption></figcaption></figure>
+## **Βασική Ασφάλεια Docker Engine**
 
-\
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=docker-security) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=docker-security" %}
-
-## **Basic Docker Engine Security**
-
-The **Docker engine** employs the Linux kernel's **Namespaces** and **Cgroups** to isolate containers, offering a basic layer of security. Additional protection is provided through **Capabilities dropping**, **Seccomp**, and **SELinux/AppArmor**, enhancing container isolation. An **auth plugin** can further restrict user actions.
+Ο **Docker engine** χρησιμοποιεί τα **Namespaces** και **Cgroups** του πυρήνα Linux για να απομονώσει τα κοντέινερ, προσφέροντας ένα βασικό επίπεδο ασφάλειας. Επιπλέον προστασία παρέχεται μέσω της **Αφαίρεσης Δυνατοτήτων**, **Seccomp**, και **SELinux/AppArmor**, ενισχύοντας την απομόνωση των κοντέινερ. Ένα **auth plugin** μπορεί να περιορίσει περαιτέρω τις ενέργειες των χρηστών.
 
 ![Docker Security](https://sreeninet.files.wordpress.com/2016/03/dockersec1.png)
 
-### Secure Access to Docker Engine
+### Ασφαλής Πρόσβαση στον Docker Engine
 
-The Docker engine can be accessed either locally via a Unix socket or remotely using HTTP. For remote access, it's essential to employ HTTPS and **TLS** to ensure confidentiality, integrity, and authentication.
+Ο Docker engine μπορεί να προσπελαστεί είτε τοπικά μέσω ενός Unix socket είτε απομακρυσμένα χρησιμοποιώντας HTTP. Για απομακρυσμένη πρόσβαση, είναι απαραίτητο να χρησιμοποιούνται HTTPS και **TLS** για να διασφαλιστεί η εμπιστευτικότητα, η ακεραιότητα και η αυθεντικοποίηση.
 
-The Docker engine, by default, listens on the Unix socket at `unix:///var/run/docker.sock`. On Ubuntu systems, Docker's startup options are defined in `/etc/default/docker`. To enable remote access to the Docker API and client, expose the Docker daemon over an HTTP socket by adding the following settings:
-
+Ο Docker engine, από προεπιλογή, ακούει στο Unix socket στο `unix:///var/run/docker.sock`. Στα συστήματα Ubuntu, οι επιλογές εκκίνησης του Docker ορίζονται στο `/etc/default/docker`. Για να επιτρέψετε απομακρυσμένη πρόσβαση στο Docker API και τον πελάτη, εκθέστε τον Docker daemon μέσω ενός HTTP socket προσθέτοντας τις παρακάτω ρυθμίσεις:
 ```bash
 DOCKER_OPTS="-D -H unix:///var/run/docker.sock -H tcp://192.168.56.101:2376"
 sudo service docker restart
 ```
+Ωστόσο, η έκθεση του Docker daemon μέσω HTTP δεν συνιστάται λόγω ανησυχιών ασφαλείας. Είναι σκόπιμο να ασφαλίσετε τις συνδέσεις χρησιμοποιώντας HTTPS. Υπάρχουν δύο κύριες προσεγγίσεις για την ασφάλιση της σύνδεσης:
 
-However, exposing the Docker daemon over HTTP is not recommended due to security concerns. It's advisable to secure connections using HTTPS. There are two main approaches to securing the connection:
+1. Ο πελάτης επαληθεύει την ταυτότητα του διακομιστή.
+2. Και ο πελάτης και ο διακομιστής αλληλοεπιβεβαιώνουν την ταυτότητα ο ένας του άλλου.
 
-1. The client verifies the server's identity.
-2. Both the client and server mutually authenticate each other's identity.
+Τα πιστοποιητικά χρησιμοποιούνται για να επιβεβαιώσουν την ταυτότητα ενός διακομιστή. Για λεπτομερείς παραδείγματα και των δύο μεθόδων, ανατρέξτε σε [**αυτήν την οδηγία**](https://sreeninet.wordpress.com/2016/03/06/docker-security-part-3engine-access/).
 
-Certificates are utilized to confirm a server's identity. For detailed examples of both methods, refer to [**this guide**](https://sreeninet.wordpress.com/2016/03/06/docker-security-part-3engine-access/).
+### Ασφάλεια Εικόνων Κοντέινερ
 
-### Security of Container Images
+Οι εικόνες κοντέινερ μπορούν να αποθηκευτούν είτε σε ιδιωτικά είτε σε δημόσια αποθετήρια. Το Docker προσφέρει πολλές επιλογές αποθήκευσης για εικόνες κοντέινερ:
 
-Container images can be stored in either private or public repositories. Docker offers several storage options for container images:
+- [**Docker Hub**](https://hub.docker.com): Μια δημόσια υπηρεσία μητρώου από το Docker.
+- [**Docker Registry**](https://github.com/docker/distribution): Ένα έργο ανοιχτού κώδικα που επιτρέπει στους χρήστες να φιλοξενούν το δικό τους μητρώο.
+- [**Docker Trusted Registry**](https://www.docker.com/docker-trusted-registry): Η εμπορική προσφορά μητρώου του Docker, που διαθέτει αυθεντικοποίηση χρηστών με βάση ρόλους και ενσωμάτωση με υπηρεσίες καταλόγου LDAP.
 
-- [**Docker Hub**](https://hub.docker.com): A public registry service from Docker.
-- [**Docker Registry**](https://github.com/docker/distribution): An open-source project allowing users to host their own registry.
-- [**Docker Trusted Registry**](https://www.docker.com/docker-trusted-registry): Docker's commercial registry offering, featuring role-based user authentication and integration with LDAP directory services.
+### Σάρωση Εικόνας
 
-### Image Scanning
+Τα κοντέινερ μπορεί να έχουν **ευπάθειες ασφαλείας** είτε λόγω της βασικής εικόνας είτε λόγω του λογισμικού που είναι εγκατεστημένο πάνω από τη βασική εικόνα. Το Docker εργάζεται σε ένα έργο που ονομάζεται **Nautilus** που εκτελεί σάρωση ασφαλείας των Κοντέινερ και καταγράφει τις ευπάθειες. Το Nautilus λειτουργεί συγκρίνοντας κάθε επίπεδο εικόνας Κοντέινερ με το μητρώο ευπαθειών για να εντοπίσει τα κενά ασφαλείας.
 
-Containers can have **security vulnerabilities** either because of the base image or because of the software installed on top of the base image. Docker is working on a project called **Nautilus** that does security scan of Containers and lists the vulnerabilities. Nautilus works by comparing the each Container image layer with vulnerability repository to identify security holes.
-
-For more [**information read this**](https://docs.docker.com/engine/scan/).
+Για περισσότερες [**πληροφορίες διαβάστε αυτό**](https://docs.docker.com/engine/scan/).
 
 - **`docker scan`**
 
-The **`docker scan`** command allows you to scan existing Docker images using the image name or ID. For example, run the following command to scan the hello-world image:
-
+Η εντολή **`docker scan`** σας επιτρέπει να σαρώσετε υπάρχουσες εικόνες Docker χρησιμοποιώντας το όνομα ή το ID της εικόνας. Για παράδειγμα, εκτελέστε την παρακάτω εντολή για να σαρώσετε την εικόνα hello-world:
 ```bash
 docker scan hello-world
 
@@ -67,103 +56,82 @@ Licenses:          enabled
 
 Note that we do not currently have vulnerability data for your image.
 ```
-
 - [**`trivy`**](https://github.com/aquasecurity/trivy)
-
 ```bash
 trivy -q -f json <container_name>:<tag>
 ```
-
 - [**`snyk`**](https://docs.snyk.io/snyk-cli/getting-started-with-the-cli)
-
 ```bash
 snyk container test <image> --json-file-output=<output file> --severity-threshold=high
 ```
-
 - [**`clair-scanner`**](https://github.com/arminc/clair-scanner)
-
 ```bash
 clair-scanner -w example-alpine.yaml --ip YOUR_LOCAL_IP alpine:3.5
 ```
+### Υπογραφή Εικόνας Docker
 
-### Docker Image Signing
+Η υπογραφή εικόνας Docker διασφαλίζει την ασφάλεια και την ακεραιότητα των εικόνων που χρησιμοποιούνται σε κοντέινερ. Ακολουθεί μια συνοπτική εξήγηση:
 
-Docker image signing ensures the security and integrity of images used in containers. Here's a condensed explanation:
+- **Docker Content Trust** χρησιμοποιεί το έργο Notary, βασισμένο στο The Update Framework (TUF), για τη διαχείριση της υπογραφής εικόνας. Για περισσότερες πληροφορίες, δείτε το [Notary](https://github.com/docker/notary) και το [TUF](https://theupdateframework.github.io).
+- Για να ενεργοποιήσετε την εμπιστοσύνη περιεχομένου Docker, ρυθμίστε `export DOCKER_CONTENT_TRUST=1`. Αυτή η δυνατότητα είναι απενεργοποιημένη από προεπιλογή στην έκδοση Docker 1.10 και μεταγενέστερες.
+- Με αυτή τη δυνατότητα ενεργοποιημένη, μόνο υπογεγραμμένες εικόνες μπορούν να ληφθούν. Η αρχική μεταφόρτωση εικόνας απαιτεί τη ρύθμιση κωδικών πρόσβασης για τα κλειδιά root και tagging, με το Docker να υποστηρίζει επίσης Yubikey για αυξημένη ασφάλεια. Περισσότερες λεπτομέρειες μπορείτε να βρείτε [εδώ](https://blog.docker.com/2015/11/docker-content-trust-yubikey/).
+- Η προσπάθεια λήψης μιας μη υπογεγραμμένης εικόνας με ενεργοποιημένη την εμπιστοσύνη περιεχομένου έχει ως αποτέλεσμα ένα σφάλμα "No trust data for latest".
+- Για τις μεταφορτώσεις εικόνας μετά την πρώτη, το Docker ζητά τον κωδικό πρόσβασης του κλειδιού αποθετηρίου για να υπογράψει την εικόνα.
 
-- **Docker Content Trust** utilizes the Notary project, based on The Update Framework (TUF), to manage image signing. For more info, see [Notary](https://github.com/docker/notary) and [TUF](https://theupdateframework.github.io).
-- To activate Docker content trust, set `export DOCKER_CONTENT_TRUST=1`. This feature is off by default in Docker version 1.10 and later.
-- With this feature enabled, only signed images can be downloaded. Initial image push requires setting passphrases for the root and tagging keys, with Docker also supporting Yubikey for enhanced security. More details can be found [here](https://blog.docker.com/2015/11/docker-content-trust-yubikey/).
-- Attempting to pull an unsigned image with content trust enabled results in a "No trust data for latest" error.
-- For image pushes after the first, Docker asks for the repository key's passphrase to sign the image.
-
-To back up your private keys, use the command:
-
+Για να δημιουργήσετε αντίγραφα ασφαλείας των ιδιωτικών σας κλειδιών, χρησιμοποιήστε την εντολή:
 ```bash
 tar -zcvf private_keys_backup.tar.gz ~/.docker/trust/private
 ```
+Όταν αλλάζετε Docker hosts, είναι απαραίτητο να μεταφέρετε τα κλειδιά root και repository για να διατηρήσετε τη λειτουργία.
 
-When switching Docker hosts, it's necessary to move the root and repository keys to maintain operations.
-
----
-
-<figure><img src="../../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=docker-security) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=docker-security" %}
-
-## Containers Security Features
+## Χαρακτηριστικά Ασφαλείας Κοντέινερ
 
 <details>
 
-<summary>Summary of Container Security Features</summary>
+<summary>Περίληψη Χαρακτηριστικών Ασφαλείας Κοντέινερ</summary>
 
-**Main Process Isolation Features**
+**Κύρια Χαρακτηριστικά Απομόνωσης Διαδικασιών**
 
-In containerized environments, isolating projects and their processes is paramount for security and resource management. Here's a simplified explanation of key concepts:
+Σε περιβάλλοντα κοντέινερ, η απομόνωση έργων και των διαδικασιών τους είναι πρωταρχικής σημασίας για την ασφάλεια και τη διαχείριση πόρων. Ακολουθεί μια απλοποιημένη εξήγηση βασικών εννοιών:
 
 **Namespaces**
 
-- **Purpose**: Ensure isolation of resources like processes, network, and filesystems. Particularly in Docker, namespaces keep a container's processes separate from the host and other containers.
-- **Usage of `unshare`**: The `unshare` command (or the underlying syscall) is utilized to create new namespaces, providing an added layer of isolation. However, while Kubernetes doesn't inherently block this, Docker does.
-- **Limitation**: Creating new namespaces doesn't allow a process to revert to the host's default namespaces. To penetrate the host namespaces, one would typically require access to the host's `/proc` directory, using `nsenter` for entry.
+- **Σκοπός**: Διασφαλίζει την απομόνωση πόρων όπως διαδικασίες, δίκτυο και συστήματα αρχείων. Ιδιαίτερα στο Docker, τα namespaces κρατούν τις διαδικασίες ενός κοντέινερ ξεχωριστές από τον host και άλλα κοντέινερ.
+- **Χρήση του `unshare`**: Η εντολή `unshare` (ή η υποκείμενη syscall) χρησιμοποιείται για τη δημιουργία νέων namespaces, παρέχοντας ένα επιπλέον επίπεδο απομόνωσης. Ωστόσο, ενώ το Kubernetes δεν μπλοκάρει εγγενώς αυτό, το Docker το κάνει.
+- **Περιορισμός**: Η δημιουργία νέων namespaces δεν επιτρέπει σε μια διαδικασία να επιστρέψει στα προεπιλεγμένα namespaces του host. Για να διεισδύσει στα namespaces του host, συνήθως απαιτείται πρόσβαση στον κατάλογο `/proc` του host, χρησιμοποιώντας το `nsenter` για είσοδο.
 
 **Control Groups (CGroups)**
 
-- **Function**: Primarily used for allocating resources among processes.
-- **Security Aspect**: CGroups themselves don't offer isolation security, except for the `release_agent` feature, which, if misconfigured, could potentially be exploited for unauthorized access.
+- **Λειτουργία**: Χρησιμοποιούνται κυρίως για την κατανομή πόρων μεταξύ διαδικασιών.
+- **Πτυχή Ασφαλείας**: Τα CGroups από μόνα τους δεν προσφέρουν ασφάλεια απομόνωσης, εκτός από τη δυνατότητα `release_agent`, η οποία, αν είναι κακώς ρυθμισμένη, θα μπορούσε ενδεχομένως να εκμεταλλευτεί για μη εξουσιοδοτημένη πρόσβαση.
 
 **Capability Drop**
 
-- **Importance**: It's a crucial security feature for process isolation.
-- **Functionality**: It restricts the actions a root process can perform by dropping certain capabilities. Even if a process runs with root privileges, lacking the necessary capabilities prevents it from executing privileged actions, as the syscalls will fail due to insufficient permissions.
+- **Σημασία**: Είναι ένα κρίσιμο χαρακτηριστικό ασφαλείας για την απομόνωση διαδικασιών.
+- **Λειτουργικότητα**: Περιορίζει τις ενέργειες που μπορεί να εκτελέσει μια διαδικασία root απορρίπτοντας ορισμένες δυνατότητες. Ακόμα και αν μια διαδικασία εκτελείται με δικαιώματα root, η έλλειψη των απαραίτητων δυνατοτήτων την εμποδίζει να εκτελεί προνομιακές ενέργειες, καθώς οι syscalls θα αποτύχουν λόγω ανεπαρκών δικαιωμάτων.
 
-These are the **remaining capabilities** after the process drop the others:
-
+Αυτές είναι οι **υπόλοιπες δυνατότητες** μετά την απόρριψη των άλλων:
 ```
 Current: cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_net_raw,cap_sys_chroot,cap_mknod,cap_audit_write,cap_setfcap=ep
 ```
-
 **Seccomp**
 
-It's enabled by default in Docker. It helps to **limit even more the syscalls** that the process can call.\
-The **default Docker Seccomp profile** can be found in [https://github.com/moby/moby/blob/master/profiles/seccomp/default.json](https://github.com/moby/moby/blob/master/profiles/seccomp/default.json)
+Είναι ενεργοποιημένο από προεπιλογή στο Docker. Βοηθά να **περιορίσει ακόμη περισσότερο τις syscalls** που μπορεί να καλέσει η διαδικασία.\
+Το **προφίλ Seccomp Docker προεπιλογής** μπορεί να βρεθεί στο [https://github.com/moby/moby/blob/master/profiles/seccomp/default.json](https://github.com/moby/moby/blob/master/profiles/seccomp/default.json)
 
 **AppArmor**
 
-Docker has a template that you can activate: [https://github.com/moby/moby/tree/master/profiles/apparmor](https://github.com/moby/moby/tree/master/profiles/apparmor)
+Το Docker έχει ένα πρότυπο που μπορείτε να ενεργοποιήσετε: [https://github.com/moby/moby/tree/master/profiles/apparmor](https://github.com/moby/moby/tree/master/profiles/apparmor)
 
-This will allow to reduce capabilities, syscalls, access to files and folders...
+Αυτό θα επιτρέψει τη μείωση των δυνατοτήτων, των syscalls, της πρόσβασης σε αρχεία και φακέλους...
 
 </details>
 
 ### Namespaces
 
-**Namespaces** are a feature of the Linux kernel that **partitions kernel resources** such that one set of **processes** **sees** one set of **resources** while **another** set of **processes** sees a **different** set of resources. The feature works by having the same namespace for a set of resources and processes, but those namespaces refer to distinct resources. Resources may exist in multiple spaces.
+**Namespaces** είναι μια δυνατότητα του πυρήνα Linux που **διαχωρίζει τους πόρους του πυρήνα** έτσι ώστε ένα σύνολο **διαδικασιών** **να βλέπει** ένα σύνολο **πόρων** ενώ **ένα άλλο** σύνολο **διαδικασιών** βλέπει ένα **διαφορετικό** σύνολο πόρων. Η δυνατότητα λειτουργεί με το να έχει τον ίδιο namespace για ένα σύνολο πόρων και διαδικασιών, αλλά αυτοί οι namespaces αναφέρονται σε διακριτούς πόρους. Οι πόροι μπορεί να υπάρχουν σε πολλαπλούς χώρους.
 
-Docker makes use of the following Linux kernel Namespaces to achieve Container isolation:
+Το Docker χρησιμοποιεί τους παρακάτω Namespaces του πυρήνα Linux για να επιτύχει την απομόνωση των κοντέινερ:
 
 - pid namespace
 - mount namespace
@@ -171,7 +139,7 @@ Docker makes use of the following Linux kernel Namespaces to achieve Container i
 - ipc namespace
 - UTS namespace
 
-For **more information about the namespaces** check the following page:
+Για **περισσότερες πληροφορίες σχετικά με τους namespaces** ελέγξτε την παρακάτω σελίδα:
 
 {{#ref}}
 namespaces/
@@ -179,62 +147,58 @@ namespaces/
 
 ### cgroups
 
-Linux kernel feature **cgroups** provides capability to **restrict resources like cpu, memory, io, network bandwidth among** a set of processes. Docker allows to create Containers using cgroup feature which allows for resource control for the specific Container.\
-Following is a Container created with user space memory limited to 500m, kernel memory limited to 50m, cpu share to 512, blkioweight to 400. CPU share is a ratio that controls Container’s CPU usage. It has a default value of 1024 and range between 0 and 1024. If three Containers have the same CPU share of 1024, each Container can take upto 33% of CPU in case of CPU resource contention. blkio-weight is a ratio that controls Container’s IO. It has a default value of 500 and range between 10 and 1000.
-
+Η δυνατότητα του πυρήνα Linux **cgroups** παρέχει τη δυνατότητα να **περιορίσει τους πόρους όπως cpu, μνήμη, io, εύρος ζώνης δικτύου μεταξύ** ενός συνόλου διαδικασιών. Το Docker επιτρέπει τη δημιουργία Κοντέινερ χρησιμοποιώντας τη δυνατότητα cgroup που επιτρέπει τον έλεγχο των πόρων για το συγκεκριμένο Κοντέινερ.\
+Ακολουθεί ένα Κοντέινερ που δημιουργήθηκε με περιορισμένη μνήμη χώρου χρήστη στα 500m, περιορισμένη μνήμη πυρήνα στα 50m, μερίδιο cpu στα 512, blkioweight στα 400. Το μερίδιο CPU είναι μια αναλογία που ελέγχει τη χρήση CPU του Κοντέινερ. Έχει μια προεπιλεγμένη τιμή 1024 και εύρος μεταξύ 0 και 1024. Εάν τρία Κοντέινερ έχουν το ίδιο μερίδιο CPU 1024, κάθε Κοντέινερ μπορεί να καταναλώσει έως και 33% της CPU σε περίπτωση διαγωνισμού πόρων CPU. Το blkio-weight είναι μια αναλογία που ελέγχει το IO του Κοντέινερ. Έχει μια προεπιλεγμένη τιμή 500 και εύρος μεταξύ 10 και 1000.
 ```
 docker run -it -m 500M --kernel-memory 50M --cpu-shares 512 --blkio-weight 400 --name ubuntu1 ubuntu bash
 ```
-
-To get the cgroup of a container you can do:
-
+Για να αποκτήσετε το cgroup ενός κοντέινερ, μπορείτε να κάνετε:
 ```bash
 docker run -dt --rm denial sleep 1234 #Run a large sleep inside a Debian container
 ps -ef | grep 1234 #Get info about the sleep process
 ls -l /proc/<PID>/ns #Get the Group and the namespaces (some may be uniq to the hosts and some may be shred with it)
 ```
-
-For more information check:
+Για περισσότερες πληροφορίες ελέγξτε:
 
 {{#ref}}
 cgroups.md
 {{#endref}}
 
-### Capabilities
+### Δυνατότητες
 
-Capabilities allow **finer control for the capabilities that can be allowed** for root user. Docker uses the Linux kernel capability feature to **limit the operations that can be done inside a Container** irrespective of the type of user.
+Οι δυνατότητες επιτρέπουν **πιο λεπτομερή έλεγχο για τις δυνατότητες που μπορούν να επιτραπούν** για τον χρήστη root. Το Docker χρησιμοποιεί τη δυνατότητα του πυρήνα Linux για να **περιορίσει τις λειτουργίες που μπορούν να γίνουν μέσα σε ένα Container** ανεξαρτήτως του τύπου του χρήστη.
 
-When a docker container is run, the **process drops sensitive capabilities that the proccess could use to escape from the isolation**. This try to assure that the proccess won't be able to perform sensitive actions and escape:
+Όταν εκτελείται ένα docker container, η **διαδικασία απορρίπτει ευαίσθητες δυνατότητες που θα μπορούσε να χρησιμοποιήσει για να ξεφύγει από την απομόνωση**. Αυτό προσπαθεί να διασφαλίσει ότι η διαδικασία δεν θα είναι σε θέση να εκτελέσει ευαίσθητες ενέργειες και να ξεφύγει:
 
 {{#ref}}
 ../linux-capabilities.md
 {{#endref}}
 
-### Seccomp in Docker
+### Seccomp στο Docker
 
-This is a security feature that allows Docker to **limit the syscalls** that can be used inside the container:
+Αυτή είναι μια λειτουργία ασφαλείας που επιτρέπει στο Docker να **περιορίσει τις syscalls** που μπορούν να χρησιμοποιηθούν μέσα στο container:
 
 {{#ref}}
 seccomp.md
 {{#endref}}
 
-### AppArmor in Docker
+### AppArmor στο Docker
 
-**AppArmor** is a kernel enhancement to confine **containers** to a **limited** set of **resources** with **per-program profiles**.:
+**AppArmor** είναι μια βελτίωση του πυρήνα για να περιορίσει **containers** σε ένα **περιορισμένο** σύνολο **πόρων** με **προφίλ ανά πρόγραμμα**.:
 
 {{#ref}}
 apparmor.md
 {{#endref}}
 
-### SELinux in Docker
+### SELinux στο Docker
 
-- **Labeling System**: SELinux assigns a unique label to every process and filesystem object.
-- **Policy Enforcement**: It enforces security policies that define what actions a process label can perform on other labels within the system.
-- **Container Process Labels**: When container engines initiate container processes, they are typically assigned a confined SELinux label, commonly `container_t`.
-- **File Labeling within Containers**: Files within the container are usually labeled as `container_file_t`.
-- **Policy Rules**: The SELinux policy primarily ensures that processes with the `container_t` label can only interact (read, write, execute) with files labeled as `container_file_t`.
+- **Σύστημα Ετικετών**: Το SELinux ανα assigns μια μοναδική ετικέτα σε κάθε διαδικασία και αντικείμενο συστήματος αρχείων.
+- **Επιβολή Πολιτικής**: Επιβάλλει πολιτικές ασφαλείας που καθορίζουν ποιες ενέργειες μπορεί να εκτελέσει μια ετικέτα διαδικασίας σε άλλες ετικέτες εντός του συστήματος.
+- **Ετικέτες Διαδικασιών Container**: Όταν οι μηχανές container ξεκινούν διαδικασίες container, συνήθως τους ανατίθεται μια περιορισμένη ετικέτα SELinux, συνήθως `container_t`.
+- **Ετικετοποίηση Αρχείων μέσα σε Containers**: Τα αρχεία μέσα στο container συνήθως ετικετοποιούνται ως `container_file_t`.
+- **Κανόνες Πολιτικής**: Η πολιτική SELinux διασφαλίζει κυρίως ότι οι διαδικασίες με την ετικέτα `container_t` μπορούν να αλληλεπιδρούν μόνο (να διαβάζουν, να γράφουν, να εκτελούν) με αρχεία που ετικετοποιούνται ως `container_file_t`.
 
-This mechanism ensures that even if a process within a container is compromised, it's confined to interacting only with objects that have the corresponding labels, significantly limiting the potential damage from such compromises.
+Αυτός ο μηχανισμός διασφαλίζει ότι ακόμη και αν μια διαδικασία μέσα σε ένα container παραβιαστεί, περιορίζεται να αλληλεπιδρά μόνο με αντικείμενα που έχουν τις αντίστοιχες ετικέτες, περιορίζοντας σημαντικά τη δυνητική ζημιά από τέτοιες παραβιάσεις.
 
 {{#ref}}
 ../selinux.md
@@ -242,23 +206,22 @@ This mechanism ensures that even if a process within a container is compromised,
 
 ### AuthZ & AuthN
 
-In Docker, an authorization plugin plays a crucial role in security by deciding whether to allow or block requests to the Docker daemon. This decision is made by examining two key contexts:
+Στο Docker, ένα πρόσθετο εξουσιοδότησης παίζει κρίσιμο ρόλο στην ασφάλεια αποφασίζοντας αν θα επιτρέψει ή θα αποκλείσει αιτήματα προς τον daemon του Docker. Αυτή η απόφαση λαμβάνεται εξετάζοντας δύο βασικά συμφραζόμενα:
 
-- **Authentication Context**: This includes comprehensive information about the user, such as who they are and how they've authenticated themselves.
-- **Command Context**: This comprises all pertinent data related to the request being made.
+- **Συμφραζόμενα Αυθεντικοποίησης**: Αυτό περιλαμβάνει λεπτομερείς πληροφορίες σχετικά με τον χρήστη, όπως ποιος είναι και πώς έχει αυθεντικοποιηθεί.
+- **Συμφραζόμενα Εντολής**: Αυτό περιλαμβάνει όλα τα σχετικά δεδομένα που σχετίζονται με το αίτημα που υποβάλλεται.
 
-These contexts help ensure that only legitimate requests from authenticated users are processed, enhancing the security of Docker operations.
+Αυτά τα συμφραζόμενα βοηθούν να διασφαλιστεί ότι μόνο νόμιμα αιτήματα από αυθεντικοποιημένους χρήστες επεξεργάζονται, ενισχύοντας την ασφάλεια των λειτουργιών του Docker.
 
 {{#ref}}
 authz-and-authn-docker-access-authorization-plugin.md
 {{#endref}}
 
-## DoS from a container
+## DoS από ένα container
 
-If you are not properly limiting the resources a container can use, a compromised container could DoS the host where it's running.
+Εάν δεν περιορίζετε σωστά τους πόρους που μπορεί να χρησιμοποιήσει ένα container, ένα παραβιασμένο container θα μπορούσε να προκαλέσει DoS στον κεντρικό υπολογιστή όπου εκτελείται.
 
 - CPU DoS
-
 ```bash
 # stress-ng
 sudo apt-get install -y stress-ng && stress-ng --vm 1 --vm-bytes 1G --verify -t 5m
@@ -266,18 +229,15 @@ sudo apt-get install -y stress-ng && stress-ng --vm 1 --vm-bytes 1G --verify -t 
 # While loop
 docker run -d --name malicious-container -c 512 busybox sh -c 'while true; do :; done'
 ```
-
-- Bandwidth DoS
-
+- DoS εύρους ζώνης
 ```bash
 nc -lvp 4444 >/dev/null & while true; do cat /dev/urandom | nc <target IP> 4444; done
 ```
-
-## Interesting Docker Flags
+## Ενδιαφέροντα Flags Docker
 
 ### --privileged flag
 
-In the following page you can learn **what does the `--privileged` flag imply**:
+Στην παρακάτω σελίδα μπορείτε να μάθετε **τι υποδηλώνει το flag `--privileged`**:
 
 {{#ref}}
 docker-privileged.md
@@ -287,16 +247,13 @@ docker-privileged.md
 
 #### no-new-privileges
 
-If you are running a container where an attacker manages to get access as a low privilege user. If you have a **miss-configured suid binary**, the attacker may abuse it and **escalate privileges inside** the container. Which, may allow him to escape from it.
+Εάν εκτελείτε ένα κοντέινερ όπου ένας επιτιθέμενος καταφέρνει να αποκτήσει πρόσβαση ως χρήστης χαμηλών δικαιωμάτων. Εάν έχετε μια **κακώς ρυθμισμένη δυαδική suid**, ο επιτιθέμενος μπορεί να την εκμεταλλευτεί και να **κλιμακώσει τα δικαιώματα μέσα** στο κοντέινερ. Αυτό μπορεί να του επιτρέψει να διαφύγει από αυτό.
 
-Running the container with the **`no-new-privileges`** option enabled will **prevent this kind of privilege escalation**.
-
+Η εκτέλεση του κοντέινερ με την επιλογή **`no-new-privileges`** ενεργοποιημένη θα **αποτρέψει αυτόν τον τύπο κλιμάκωσης δικαιωμάτων**.
 ```
 docker run -it --security-opt=no-new-privileges:true nonewpriv
 ```
-
-#### Other
-
+#### Άλλα
 ```bash
 #You can manually add/drop capabilities with
 --cap-add
@@ -311,82 +268,77 @@ docker run -it --security-opt=no-new-privileges:true nonewpriv
 # You can manually disable selinux in docker with
 --security-opt label:disable
 ```
+Για περισσότερες επιλογές **`--security-opt`** ελέγξτε: [https://docs.docker.com/engine/reference/run/#security-configuration](https://docs.docker.com/engine/reference/run/#security-configuration)
 
-For more **`--security-opt`** options check: [https://docs.docker.com/engine/reference/run/#security-configuration](https://docs.docker.com/engine/reference/run/#security-configuration)
+## Άλλες Σημαντικές Σκέψεις Ασφαλείας
 
-## Other Security Considerations
+### Διαχείριση Μυστικών: Καλές Πρακτικές
 
-### Managing Secrets: Best Practices
+Είναι κρίσιμο να αποφεύγεται η ενσωμάτωση μυστικών απευθείας σε εικόνες Docker ή η χρήση μεταβλητών περιβάλλοντος, καθώς αυτές οι μέθοδοι εκθέτουν τις ευαίσθητες πληροφορίες σας σε οποιονδήποτε έχει πρόσβαση στο κοντέινερ μέσω εντολών όπως `docker inspect` ή `exec`.
 
-It's crucial to avoid embedding secrets directly in Docker images or using environment variables, as these methods expose your sensitive information to anyone with access to the container through commands like `docker inspect` or `exec`.
+**Docker volumes** είναι μια πιο ασφαλής εναλλακτική, που συνιστάται για την πρόσβαση σε ευαίσθητες πληροφορίες. Μπορούν να χρησιμοποιηθούν ως προσωρινό σύστημα αρχείων στη μνήμη, μειώνοντας τους κινδύνους που σχετίζονται με το `docker inspect` και την καταγραφή. Ωστόσο, οι χρήστες root και αυτοί με πρόσβαση `exec` στο κοντέινερ μπορεί να έχουν ακόμα πρόσβαση στα μυστικά.
 
-**Docker volumes** are a safer alternative, recommended for accessing sensitive information. They can be utilized as a temporary filesystem in memory, mitigating the risks associated with `docker inspect` and logging. However, root users and those with `exec` access to the container might still access the secrets.
+**Docker secrets** προσφέρουν μια ακόμη πιο ασφαλή μέθοδο για τη διαχείριση ευαίσθητων πληροφοριών. Για περιπτώσεις που απαιτούν μυστικά κατά τη διάρκεια της φάσης κατασκευής της εικόνας, το **BuildKit** προσφέρει μια αποδοτική λύση με υποστήριξη για μυστικά κατά την κατασκευή, βελτιώνοντας την ταχύτητα κατασκευής και παρέχοντας επιπλέον δυνατότητες.
 
-**Docker secrets** offer an even more secure method for handling sensitive information. For instances requiring secrets during the image build phase, **BuildKit** presents an efficient solution with support for build-time secrets, enhancing build speed and providing additional features.
+Για να αξιοποιήσετε το BuildKit, μπορεί να ενεργοποιηθεί με τρεις τρόπους:
 
-To leverage BuildKit, it can be activated in three ways:
+1. Μέσω μιας μεταβλητής περιβάλλοντος: `export DOCKER_BUILDKIT=1`
+2. Προσθέτοντας πρόθεμα στις εντολές: `DOCKER_BUILDKIT=1 docker build .`
+3. Ενεργοποιώντας το από προεπιλογή στη ρύθμιση Docker: `{ "features": { "buildkit": true } }`, ακολουθούμενο από επανεκκίνηση του Docker.
 
-1. Through an environment variable: `export DOCKER_BUILDKIT=1`
-2. By prefixing commands: `DOCKER_BUILDKIT=1 docker build .`
-3. By enabling it by default in the Docker configuration: `{ "features": { "buildkit": true } }`, followed by a Docker restart.
-
-BuildKit allows for the use of build-time secrets with the `--secret` option, ensuring these secrets are not included in the image build cache or the final image, using a command like:
-
+Το BuildKit επιτρέπει τη χρήση μυστικών κατά την κατασκευή με την επιλογή `--secret`, διασφαλίζοντας ότι αυτά τα μυστικά δεν περιλαμβάνονται στην κρυφή μνήμη κατασκευής της εικόνας ή στην τελική εικόνα, χρησιμοποιώντας μια εντολή όπως:
 ```bash
 docker build --secret my_key=my_value ,src=path/to/my_secret_file .
 ```
-
-For secrets needed in a running container, **Docker Compose and Kubernetes** offer robust solutions. Docker Compose utilizes a `secrets` key in the service definition for specifying secret files, as shown in a `docker-compose.yml` example:
-
+Για τα μυστικά που απαιτούνται σε ένα τρέχον κοντέινερ, **Docker Compose και Kubernetes** προσφέρουν ισχυρές λύσεις. Το Docker Compose χρησιμοποιεί ένα κλειδί `secrets` στον ορισμό υπηρεσίας για να καθορίσει τα αρχεία μυστικών, όπως φαίνεται σε ένα παράδειγμα `docker-compose.yml`:
 ```yaml
 version: "3.7"
 services:
-  my_service:
-    image: centos:7
-    entrypoint: "cat /run/secrets/my_secret"
-    secrets:
-      - my_secret
+my_service:
+image: centos:7
+entrypoint: "cat /run/secrets/my_secret"
 secrets:
-  my_secret:
-    file: ./my_secret_file.txt
+- my_secret
+secrets:
+my_secret:
+file: ./my_secret_file.txt
 ```
+Αυτή η ρύθμιση επιτρέπει τη χρήση μυστικών κατά την εκκίνηση υπηρεσιών με το Docker Compose.
 
-This configuration allows for the use of secrets when starting services with Docker Compose.
-
-In Kubernetes environments, secrets are natively supported and can be further managed with tools like [Helm-Secrets](https://github.com/futuresimple/helm-secrets). Kubernetes' Role Based Access Controls (RBAC) enhances secret management security, similar to Docker Enterprise.
+Σε περιβάλλοντα Kubernetes, τα μυστικά υποστηρίζονται εγγενώς και μπορούν να διαχειριστούν περαιτέρω με εργαλεία όπως το [Helm-Secrets](https://github.com/futuresimple/helm-secrets). Οι Ρόλοι Βασισμένοι σε Ελέγχους Πρόσβασης (RBAC) του Kubernetes ενισχύουν την ασφάλεια διαχείρισης μυστικών, παρόμοια με το Docker Enterprise.
 
 ### gVisor
 
-**gVisor** is an application kernel, written in Go, that implements a substantial portion of the Linux system surface. It includes an [Open Container Initiative (OCI)](https://www.opencontainers.org) runtime called `runsc` that provides an **isolation boundary between the application and the host kernel**. The `runsc` runtime integrates with Docker and Kubernetes, making it simple to run sandboxed containers.
+**gVisor** είναι ένας πυρήνας εφαρμογής, γραμμένος σε Go, που υλοποιεί ένα σημαντικό μέρος της επιφάνειας του συστήματος Linux. Περιλαμβάνει ένα [Open Container Initiative (OCI)](https://www.opencontainers.org) runtime που ονομάζεται `runsc` και παρέχει ένα **όριο απομόνωσης μεταξύ της εφαρμογής και του πυρήνα του host**. Το runtime `runsc` ενσωματώνεται με το Docker και το Kubernetes, διευκολύνοντας την εκτέλεση sandboxed containers.
 
 {% embed url="https://github.com/google/gvisor" %}
 
 ### Kata Containers
 
-**Kata Containers** is an open source community working to build a secure container runtime with lightweight virtual machines that feel and perform like containers, but provide **stronger workload isolation using hardware virtualization** technology as a second layer of defense.
+**Kata Containers** είναι μια κοινότητα ανοιχτού κώδικα που εργάζεται για την κατασκευή ενός ασφαλούς runtime κοντέινερ με ελαφριές εικονικές μηχανές που αισθάνονται και αποδίδουν όπως τα κοντέινερ, αλλά παρέχουν **ισχυρότερη απομόνωση φόρτου εργασίας χρησιμοποιώντας τεχνολογία εικονικοποίησης υλικού** ως δεύτερη γραμμή άμυνας.
 
 {% embed url="https://katacontainers.io/" %}
 
-### Summary Tips
+### Συμβουλές Περίληψης
 
-- **Do not use the `--privileged` flag or mount a** [**Docker socket inside the container**](https://raesene.github.io/blog/2016/03/06/The-Dangers-Of-Docker.sock/)**.** The docker socket allows for spawning containers, so it is an easy way to take full control of the host, for example, by running another container with the `--privileged` flag.
-- Do **not run as root inside the container. Use a** [**different user**](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#user) **and** [**user namespaces**](https://docs.docker.com/engine/security/userns-remap/)**.** The root in the container is the same as on host unless remapped with user namespaces. It is only lightly restricted by, primarily, Linux namespaces, capabilities, and cgroups.
-- [**Drop all capabilities**](https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities) **(`--cap-drop=all`) and enable only those that are required** (`--cap-add=...`). Many of workloads don’t need any capabilities and adding them increases the scope of a potential attack.
-- [**Use the “no-new-privileges” security option**](https://raesene.github.io/blog/2019/06/01/docker-capabilities-and-no-new-privs/) to prevent processes from gaining more privileges, for example through suid binaries.
-- [**Limit resources available to the container**](https://docs.docker.com/engine/reference/run/#runtime-constraints-on-resources)**.** Resource limits can protect the machine from denial of service attacks.
-- **Adjust** [**seccomp**](https://docs.docker.com/engine/security/seccomp/)**,** [**AppArmor**](https://docs.docker.com/engine/security/apparmor/) **(or SELinux)** profiles to restrict the actions and syscalls available for the container to the minimum required.
-- **Use** [**official docker images**](https://docs.docker.com/docker-hub/official_images/) **and require signatures** or build your own based on them. Don’t inherit or use [backdoored](https://arstechnica.com/information-technology/2018/06/backdoored-images-downloaded-5-million-times-finally-removed-from-docker-hub/) images. Also store root keys, passphrase in a safe place. Docker has plans to manage keys with UCP.
-- **Regularly** **rebuild** your images to **apply security patches to the host an images.**
-- Manage your **secrets wisely** so it's difficult to the attacker to access them.
-- If you **exposes the docker daemon use HTTPS** with client & server authentication.
-- In your Dockerfile, **favor COPY instead of ADD**. ADD automatically extracts zipped files and can copy files from URLs. COPY doesn’t have these capabilities. Whenever possible, avoid using ADD so you aren’t susceptible to attacks through remote URLs and Zip files.
-- Have **separate containers for each micro-s**ervice
-- **Don’t put ssh** inside container, “docker exec” can be used to ssh to Container.
-- Have **smaller** container **images**
+- **Μην χρησιμοποιείτε τη σημαία `--privileged` ή να τοποθετείτε ένα** [**Docker socket μέσα στο κοντέινερ**](https://raesene.github.io/blog/2016/03/06/The-Dangers-Of-Docker.sock/)**.** Το docker socket επιτρέπει τη δημιουργία κοντέινερ, οπότε είναι ένας εύκολος τρόπος να αποκτήσετε πλήρη έλεγχο του host, για παράδειγμα, εκτελώντας ένα άλλο κοντέινερ με τη σημαία `--privileged`.
+- **Μην εκτελείτε ως root μέσα στο κοντέινερ. Χρησιμοποιήστε έναν** [**διαφορετικό χρήστη**](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#user) **και** [**user namespaces**](https://docs.docker.com/engine/security/userns-remap/)**.** Ο root στο κοντέινερ είναι ο ίδιος με αυτόν στον host εκτός αν ανακατανεμηθεί με user namespaces. Είναι μόνο ελαφρώς περιορισμένος από, κυρίως, Linux namespaces, δυνατότητες και cgroups.
+- [**Αφαιρέστε όλες τις δυνατότητες**](https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities) **(`--cap-drop=all`) και ενεργοποιήστε μόνο αυτές που απαιτούνται** (`--cap-add=...`). Πολλές από τις φόρτους εργασίας δεν χρειάζονται καμία δυνατότητα και η προσθήκη τους αυξάνει την έκταση μιας πιθανής επίθεσης.
+- [**Χρησιμοποιήστε την επιλογή ασφαλείας “no-new-privileges”**](https://raesene.github.io/blog/2019/06/01/docker-capabilities-and-no-new-privs/) για να αποτρέψετε τις διαδικασίες από το να αποκτούν περισσότερες δυνατότητες, για παράδειγμα μέσω suid binaries.
+- [**Περιορίστε τους πόρους που είναι διαθέσιμοι στο κοντέινερ**](https://docs.docker.com/engine/reference/run/#runtime-constraints-on-resources)**.** Οι περιορισμοί πόρων μπορούν να προστατεύσουν τη μηχανή από επιθέσεις άρνησης υπηρεσίας.
+- **Ρυθμίστε** [**seccomp**](https://docs.docker.com/engine/security/seccomp/)**,** [**AppArmor**](https://docs.docker.com/engine/security/apparmor/) **(ή SELinux)** προφίλ για να περιορίσετε τις ενέργειες και τις syscalls που είναι διαθέσιμες για το κοντέινερ στο ελάχιστο που απαιτείται.
+- **Χρησιμοποιήστε** [**επίσημες εικόνες docker**](https://docs.docker.com/docker-hub/official_images/) **και απαιτήστε υπογραφές** ή κατασκευάστε τις δικές σας βασισμένες σε αυτές. Μην κληρονομείτε ή χρησιμοποιείτε [backdoored](https://arstechnica.com/information-technology/2018/06/backdoored-images-downloaded-5-million-times-finally-removed-from-docker-hub/) εικόνες. Αποθηκεύστε επίσης τα κλειδιά root, τη φράση πρόσβασης σε ασφαλές μέρος. Το Docker έχει σχέδια να διαχειρίζεται τα κλειδιά με το UCP.
+- **Ανακατασκευάστε τακτικά** τις εικόνες σας για να **εφαρμόσετε ενημερώσεις ασφαλείας στον host και τις εικόνες.**
+- Διαχειριστείτε τα **μυστικά σας σοφά** ώστε να είναι δύσκολο για τον επιτιθέμενο να τα αποκτήσει.
+- Εάν **εκθέτετε τον docker daemon χρησιμοποιήστε HTTPS** με πιστοποίηση πελάτη και διακομιστή.
+- Στο Dockerfile σας, **προτιμήστε το COPY αντί για το ADD**. Το ADD εξάγει αυτόματα αρχεία zip και μπορεί να αντιγράψει αρχεία από URLs. Το COPY δεν έχει αυτές τις δυνατότητες. Όποτε είναι δυνατόν, αποφύγετε τη χρήση του ADD ώστε να μην είστε ευάλωτοι σε επιθέσεις μέσω απομακρυσμένων URLs και αρχείων Zip.
+- Έχετε **χωριστά κοντέινερ για κάθε μικρο-υπηρεσία**
+- **Μην βάζετε ssh** μέσα στο κοντέινερ, το “docker exec” μπορεί να χρησιμοποιηθεί για ssh στο Κοντέινερ.
+- Έχετε **μικρότερες** εικόνες κοντέινερ
 
 ## Docker Breakout / Privilege Escalation
 
-If you are **inside a docker container** or you have access to a user in the **docker group**, you could try to **escape and escalate privileges**:
+Εάν είστε **μέσα σε ένα κοντέινερ docker** ή έχετε πρόσβαση σε έναν χρήστη στην **ομάδα docker**, μπορείτε να προσπαθήσετε να **διαφύγετε και να κλιμακώσετε τα προνόμια**:
 
 {{#ref}}
 docker-breakout-privilege-escalation/
@@ -394,7 +346,7 @@ docker-breakout-privilege-escalation/
 
 ## Docker Authentication Plugin Bypass
 
-If you have access to the docker socket or have access to a user in the **docker group but your actions are being limited by a docker auth plugin**, check if you can **bypass it:**
+Εάν έχετε πρόσβαση στο docker socket ή έχετε πρόσβαση σε έναν χρήστη στην **ομάδα docker αλλά οι ενέργειές σας περιορίζονται από ένα docker auth plugin**, ελέγξτε αν μπορείτε να **παρακάμψετε αυτό:**
 
 {{#ref}}
 authz-and-authn-docker-access-authorization-plugin.md
@@ -402,10 +354,10 @@ authz-and-authn-docker-access-authorization-plugin.md
 
 ## Hardening Docker
 
-- The tool [**docker-bench-security**](https://github.com/docker/docker-bench-security) is a script that checks for dozens of common best-practices around deploying Docker containers in production. The tests are all automated, and are based on the [CIS Docker Benchmark v1.3.1](https://www.cisecurity.org/benchmark/docker/).\
-  You need to run the tool from the host running docker or from a container with enough privileges. Find out **how to run it in the README:** [**https://github.com/docker/docker-bench-security**](https://github.com/docker/docker-bench-security).
+- Το εργαλείο [**docker-bench-security**](https://github.com/docker/docker-bench-security) είναι ένα σενάριο που ελέγχει δεκάδες κοινές βέλτιστες πρακτικές γύρω από την ανάπτυξη κοντέινερ Docker σε παραγωγή. Οι δοκιμές είναι όλες αυτοματοποιημένες και βασίζονται στο [CIS Docker Benchmark v1.3.1](https://www.cisecurity.org/benchmark/docker/).\
+Πρέπει να εκτελέσετε το εργαλείο από τον host που εκτελεί το docker ή από ένα κοντέινερ με αρκετά προνόμια. Βρείτε **πώς να το εκτελέσετε στο README:** [**https://github.com/docker/docker-bench-security**](https://github.com/docker/docker-bench-security).
 
-## References
+## Αναφορές
 
 - [https://blog.trailofbits.com/2019/07/19/understanding-docker-container-escapes/](https://blog.trailofbits.com/2019/07/19/understanding-docker-container-escapes/)
 - [https://twitter.com/\_fel1x/status/1151487051986087936](https://twitter.com/_fel1x/status/1151487051986087936)
@@ -421,12 +373,5 @@ authz-and-authn-docker-access-authorization-plugin.md
 - [https://towardsdatascience.com/top-20-docker-security-tips-81c41dd06f57](https://towardsdatascience.com/top-20-docker-security-tips-81c41dd06f57)
 - [https://resources.experfy.com/bigdata-cloud/top-20-docker-security-tips/](https://resources.experfy.com/bigdata-cloud/top-20-docker-security-tips/)
 
-<figure><img src="../../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=docker-security) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=docker-security" %}
 
 {{#include ../../../banners/hacktricks-training.md}}

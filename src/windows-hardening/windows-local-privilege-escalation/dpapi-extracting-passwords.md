@@ -2,23 +2,19 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
 
-​​[**RootedCON**](https://www.rootedcon.com/) είναι η πιο σχετική εκδήλωση κυβερνοασφάλειας στην **Ισπανία** και μία από τις πιο σημαντικές στην **Ευρώπη**. Με **αποστολή την προώθηση της τεχνικής γνώσης**, αυτό το συνέδριο είναι ένα καυτό σημείο συνάντησης για επαγγελματίες της τεχνολογίας και της κυβερνοασφάλειας σε κάθε πειθαρχία.
-
-{% embed url="https://www.rootedcon.com/" %}
 
 ## Τι είναι το DPAPI
 
-Η API Προστασίας Δεδομένων (DPAPI) χρησιμοποιείται κυρίως στο λειτουργικό σύστημα Windows για **συμμετρική κρυπτογράφηση ασύμμετρων ιδιωτικών κλειδιών**, αξιοποιώντας είτε μυστικά χρήστη είτε συστήματος ως σημαντική πηγή εντροπίας. Αυτή η προσέγγιση απλοποιεί την κρυπτογράφηση για τους προγραμματιστές, επιτρέποντάς τους να κρυπτογραφούν δεδομένα χρησιμοποιώντας ένα κλειδί που προέρχεται από τα μυστικά σύνδεσης του χρήστη ή, για την κρυπτογράφηση του συστήματος, τα μυστικά αυθεντικοποίησης του τομέα του συστήματος, αποφεύγοντας έτσι την ανάγκη οι προγραμματιστές να διαχειρίζονται την προστασία του κλειδιού κρυπτογράφησης οι ίδιοι.
+Η API Προστασίας Δεδομένων (DPAPI) χρησιμοποιείται κυρίως στο λειτουργικό σύστημα Windows για την **συμμετρική κρυπτογράφηση ασύμμετρων ιδιωτικών κλειδιών**, εκμεταλλευόμενη είτε μυστικά χρήστη είτε μυστικά συστήματος ως σημαντική πηγή εντροπίας. Αυτή η προσέγγιση απλοποιεί την κρυπτογράφηση για τους προγραμματιστές, επιτρέποντάς τους να κρυπτογραφούν δεδομένα χρησιμοποιώντας ένα κλειδί που προέρχεται από τα μυστικά σύνδεσης του χρήστη ή, για την κρυπτογράφηση του συστήματος, τα μυστικά αυθεντικοποίησης του τομέα του συστήματος, αποφεύγοντας έτσι την ανάγκη οι προγραμματιστές να διαχειρίζονται την προστασία του κλειδιού κρυπτογράφησης οι ίδιοι.
 
 ### Προστατευμένα Δεδομένα από το DPAPI
 
 Μεταξύ των προσωπικών δεδομένων που προστατεύονται από το DPAPI είναι:
 
 - Κωδικοί πρόσβασης και δεδομένα αυτόματης συμπλήρωσης του Internet Explorer και του Google Chrome
-- Κωδικοί πρόσβασης email και εσωτερικών λογαριασμών FTP για εφαρμογές όπως το Outlook και το Windows Mail
-- Κωδικοί πρόσβασης για κοινόχρηστα φακέλους, πόρους, ασύρματα δίκτυα και Windows Vault, συμπεριλαμβανομένων των κλειδιών κρυπτογράφησης
+- Κωδικοί πρόσβασης για λογαριασμούς ηλεκτρονικού ταχυδρομείου και εσωτερικούς λογαριασμούς FTP για εφαρμογές όπως το Outlook και το Windows Mail
+- Κωδικοί πρόσβασης για κοινόχρηστους φακέλους, πόρους, ασύρματα δίκτυα και Windows Vault, συμπεριλαμβανομένων των κλειδιών κρυπτογράφησης
 - Κωδικοί πρόσβασης για απομακρυσμένες συνδέσεις επιφάνειας εργασίας, .NET Passport και ιδιωτικά κλειδιά για διάφορους σκοπούς κρυπτογράφησης και αυθεντικοποίησης
 - Κωδικοί πρόσβασης δικτύου που διαχειρίζεται ο Credential Manager και προσωπικά δεδομένα σε εφαρμογές που χρησιμοποιούν το CryptProtectData, όπως το Skype, το MSN messenger και άλλα
 
@@ -30,7 +26,7 @@ vaultcmd /listcreds:"Windows Credentials" /all
 # From mimikatz
 mimikatz vault::list
 ```
-## Αρχεία Διαπιστευτηρίων
+## Credential Files
 
 Τα **αρχεία διαπιστευτηρίων που προστατεύονται** θα μπορούσαν να βρίσκονται σε:
 ```
@@ -84,7 +80,7 @@ Get-ChildItem -Hidden C:\Users\USER\AppData\Local\Microsoft\Protect\{SID}
 
 `python3 hekatomb.py -hashes :ed0052e5a66b1c8e942cc9481a50d56 DOMAIN.local/administrator@10.0.0.1 -debug -dnstcp`
 
-Με τη λίστα υπολογιστών που εξήχθη από το LDAP μπορείτε να βρείτε κάθε υποδίκτυο ακόμα και αν δεν τα γνωρίζατε!
+Με τη λίστα υπολογιστών που εξήχθη από το LDAP μπορείτε να βρείτε κάθε υποδίκτυο ακόμη και αν δεν τα γνωρίζατε!
 
 "Επειδή τα δικαιώματα Domain Admin δεν είναι αρκετά. Χακάρετε τα όλα."
 
@@ -96,11 +92,5 @@ Get-ChildItem -Hidden C:\Users\USER\AppData\Local\Microsoft\Protect\{SID}
 
 - [https://www.passcape.com/index.php?section=docsys\&cmd=details\&id=28#13](https://www.passcape.com/index.php?section=docsys&cmd=details&id=28#13)
 - [https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++](https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#using-dpapis-to-encrypt-decrypt-data-in-c)
-
-<figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
-
-[**RootedCON**](https://www.rootedcon.com/) είναι η πιο σχετική εκδήλωση κυβερνοασφάλειας στην **Ισπανία** και μία από τις πιο σημαντικές στην **Ευρώπη**. Με **αποστολή την προώθηση της τεχνικής γνώσης**, αυτό το συνέδριο είναι ένα καυτό σημείο συνάντησης για επαγγελματίες τεχνολογίας και κυβερνοασφάλειας σε κάθε πειθαρχία.
-
-{% embed url="https://www.rootedcon.com/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

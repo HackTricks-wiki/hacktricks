@@ -2,17 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Χρησιμοποιήστε [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=pass-the-ticket) για να δημιουργήσετε και να **αυτοματοποιήσετε ροές εργασίας** με τη βοήθεια των **πιο προηγμένων** εργαλείων της κοινότητας.\
-Αποκτήστε πρόσβαση σήμερα:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=pass-the-ticket" %}
-
 ## Pass The Ticket (PTT)
 
-Στη μέθοδο επίθεσης **Pass The Ticket (PTT)**, οι επιτιθέμενοι **κλέβουν το εισιτήριο αυθεντικοποίησης ενός χρήστη** αντί για τον κωδικό πρόσβασης ή τις τιμές hash. Αυτό το κλεμμένο εισιτήριο χρησιμοποιείται στη συνέχεια για να **παριστάνει τον χρήστη**, αποκτώντας μη εξουσιοδοτημένη πρόσβαση σε πόρους και υπηρεσίες εντός ενός δικτύου.
+Στη μέθοδο επίθεσης **Pass The Ticket (PTT)**, οι επιτιθέμενοι **κλέβουν το εισιτήριο αυθεντικοποίησης ενός χρήστη** αντί για τον κωδικό πρόσβασης ή τις τιμές hash του. Αυτό το κλεμμένο εισιτήριο χρησιμοποιείται στη συνέχεια για να **παριστάνει τον χρήστη**, αποκτώντας μη εξουσιοδοτημένη πρόσβαση σε πόρους και υπηρεσίες εντός ενός δικτύου.
 
 **Διαβάστε**:
 
@@ -47,13 +39,5 @@ klist #List tickets in cache to cehck that mimikatz has loaded the ticket
 ## Αναφορές
 
 - [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
-
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Χρησιμοποιήστε [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=pass-the-ticket) για να δημιουργήσετε και να **αυτοματοποιήσετε ροές εργασίας** που υποστηρίζονται από τα **πιο προηγμένα** εργαλεία της κοινότητας.\
-Αποκτήστε Πρόσβαση Σήμερα:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=pass-the-ticket" %}
 
 {{#include ../../banners/hacktricks-training.md}}

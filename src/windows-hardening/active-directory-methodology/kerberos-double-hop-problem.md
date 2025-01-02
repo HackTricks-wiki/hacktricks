@@ -2,9 +2,6 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 ## Εισαγωγή
 
@@ -15,22 +12,22 @@
 Αυτό συμβαίνει επειδή όταν συνδέεστε με Kerberos, αυτά είναι τα βήματα:
 
 1. Ο Χρήστης1 παρέχει credentials και ο **domain controller** επιστρέφει ένα Kerberos **TGT** στον Χρήστη1.
-2. Ο Χρήστης1 χρησιμοποιεί το **TGT** για να ζητήσει ένα **service ticket** για να **συνδεθεί** με τον Server1.
-3. Ο Χρήστης1 **συνδέεται** με τον **Server1** και παρέχει το **service ticket**.
+2. Ο Χρήστης1 χρησιμοποιεί το **TGT** για να ζητήσει ένα **service ticket** για να **connect** στον Server1.
+3. Ο Χρήστης1 **connects** στον **Server1** και παρέχει το **service ticket**.
 4. Ο **Server1** **δεν** έχει **credentials** του Χρήστη1 αποθηκευμένα ή το **TGT** του Χρήστη1. Επομένως, όταν ο Χρήστης1 από τον Server1 προσπαθεί να συνδεθεί σε έναν δεύτερο server, **δεν μπορεί να αυθεντικοποιηθεί**.
 
 ### Απεριόριστη Αντιπροσώπευση
 
-Εάν είναι ενεργοποιημένη η **unconstrained delegation** στον υπολογιστή, αυτό δεν θα συμβεί καθώς ο **Server** θα **λάβει** ένα **TGT** κάθε χρήστη που τον προσπελάσει. Επιπλέον, αν χρησιμοποιηθεί η απεριόριστη αντιπροσώπευση, πιθανώς μπορείτε να **συμβιβάσετε τον Domain Controller** από αυτό.\
+Αν είναι ενεργοποιημένη η **unconstrained delegation** στον υπολογιστή, αυτό δεν θα συμβεί καθώς ο **Server** θα **get** ένα **TGT** κάθε χρήστη που τον προσπελάσει. Επιπλέον, αν χρησιμοποιηθεί η απεριόριστη αντιπροσώπευση, πιθανώς μπορείτε να **compromise the Domain Controller** από αυτό.\
 [**Περισσότερες πληροφορίες στη σελίδα της απεριόριστης αντιπροσώπευσης**](unconstrained-delegation.md).
 
 ### CredSSP
 
-Ένας άλλος τρόπος για να αποφευχθεί αυτό το πρόβλημα, το οποίο είναι [**ιδιαίτερα ανασφαλής**](https://docs.microsoft.com/en-us/powershell/module/microsoft.wsman.management/enable-wsmancredssp?view=powershell-7), είναι ο **Credential Security Support Provider**. Από τη Microsoft:
+Ένας άλλος τρόπος για να αποφευχθεί αυτό το πρόβλημα, το οποίο είναι [**ιδιαίτερα ανασφαλές**](https://docs.microsoft.com/en-us/powershell/module/microsoft.wsman.management/enable-wsmancredssp?view=powershell-7), είναι ο **Credential Security Support Provider**. Από τη Microsoft:
 
-> Η αυθεντικοποίηση CredSSP αντιπροσωπεύει τα credentials του χρήστη από τον τοπικό υπολογιστή σε έναν απομακρυσμένο υπολογιστή. Αυτή η πρακτική αυξάνει τον κίνδυνο ασφαλείας της απομακρυσμένης λειτουργίας. Εάν ο απομακρυσμένος υπολογιστής συμβιβαστεί, όταν τα credentials μεταφέρονται σε αυτόν, τα credentials μπορούν να χρησιμοποιηθούν για τον έλεγχο της δικτυακής συνεδρίας.
+> Η αυθεντικοποίηση CredSSP αντιπροσωπεύει τα credentials του χρήστη από τον τοπικό υπολογιστή σε έναν απομακρυσμένο υπολογιστή. Αυτή η πρακτική αυξάνει τον κίνδυνο ασφαλείας της απομακρυσμένης λειτουργίας. Αν ο απομακρυσμένος υπολογιστής παραβιαστεί, όταν τα credentials μεταφέρονται σε αυτόν, τα credentials μπορούν να χρησιμοποιηθούν για τον έλεγχο της δικτυακής συνεδρίας.
 
-Συνιστάται έντονα να είναι απενεργοποιημένο το **CredSSP** σε παραγωγικά συστήματα, ευαίσθητα δίκτυα και παρόμοια περιβάλλοντα λόγω ανησυχιών ασφαλείας. Για να προσδιορίσετε εάν είναι ενεργοποιημένο το **CredSSP**, μπορεί να εκτελεστεί η εντολή `Get-WSManCredSSP`. Αυτή η εντολή επιτρέπει τον **έλεγχο της κατάστασης του CredSSP** και μπορεί να εκτελεστεί ακόμη και απομακρυσμένα, εφόσον είναι ενεργοποιημένο το **WinRM**.
+Συνιστάται έντονα να είναι απενεργοποιημένο το **CredSSP** σε παραγωγικά συστήματα, ευαίσθητα δίκτυα και παρόμοια περιβάλλοντα λόγω ανησυχιών ασφαλείας. Για να προσδιορίσετε αν είναι ενεργοποιημένο το **CredSSP**, μπορεί να εκτελεστεί η εντολή `Get-WSManCredSSP`. Αυτή η εντολή επιτρέπει τον **έλεγχο της κατάστασης του CredSSP** και μπορεί να εκτελεστεί ακόμη και απομακρυσμένα, εφόσον είναι ενεργοποιημένο το **WinRM**.
 ```powershell
 Invoke-Command -ComputerName bizintel -Credential ta\redsuit -ScriptBlock {
 Get-WSManCredSSP
@@ -49,7 +46,7 @@ Invoke-Command -ComputerName secdev -Credential $cred -ScriptBlock {hostname}
 ```
 Εναλλακτικά, προτείνεται η δημιουργία μιας PS-Session με τον πρώτο διακομιστή και η εκτέλεση του `Invoke-Command` χρησιμοποιώντας το `$cred` για την κεντρικοποίηση των εργασιών.
 
-### Καταχώρηση Ρύθμισης PSSession
+### Εγγραφή Ρύθμισης PSSession
 
 Μια λύση για την παράκαμψη του προβλήματος διπλού άλματος περιλαμβάνει τη χρήση του `Register-PSSessionConfiguration` με το `Enter-PSSession`. Αυτή η μέθοδος απαιτεί μια διαφορετική προσέγγιση από το `evil-winrm` και επιτρέπει μια συνεδρία που δεν υποφέρει από τον περιορισμό του διπλού άλματος.
 ```powershell
@@ -81,7 +78,7 @@ winrs -r:http://bizintel:5446 -u:ta\redsuit -p:2600leet hostname
 2. Αποσυμπιέστε και εκτελέστε το σενάριο `Install-sshd.ps1`.
 3. Προσθέστε έναν κανόνα τείχους προστασίας για να ανοίξετε την πόρτα 22 και επαληθεύστε ότι οι υπηρεσίες SSH εκτελούνται.
 
-Για να επιλυθούν τα σφάλματα `Connection reset`, οι άδειες ενδέχεται να χρειαστεί να ενημερωθούν για να επιτρέπουν σε όλους την πρόσβαση ανάγνωσης και εκτέλεσης στον κατάλογο OpenSSH.
+Για να επιλυθούν τα σφάλματα `Connection reset`, οι άδειες ενδέχεται να χρειαστεί να ενημερωθούν ώστε να επιτρέπουν σε όλους πρόσβαση ανάγνωσης και εκτέλεσης στον κατάλογο OpenSSH.
 ```bash
 icacls.exe "C:\Users\redsuit\Documents\ssh\OpenSSH-Win64" /grant Everyone:RX /T
 ```
@@ -92,8 +89,5 @@ icacls.exe "C:\Users\redsuit\Documents\ssh\OpenSSH-Win64" /grant Everyone:RX /T
 - [https://learn.microsoft.com/en-gb/archive/blogs/sergey_babkins_blog/another-solution-to-multi-hop-powershell-remoting](https://learn.microsoft.com/en-gb/archive/blogs/sergey_babkins_blog/another-solution-to-multi-hop-powershell-remoting)
 - [https://4sysops.com/archives/solve-the-powershell-multi-hop-problem-without-using-credssp/](https://4sysops.com/archives/solve-the-powershell-multi-hop-problem-without-using-credssp/)
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

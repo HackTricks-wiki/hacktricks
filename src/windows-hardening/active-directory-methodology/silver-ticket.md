@@ -2,15 +2,11 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/i3.png" alt=""><figcaption></figcaption></figure>
 
-**Bug bounty tip**: **εγγραφείτε** στο **Intigriti**, μια premium **πλατφόρμα bug bounty που δημιουργήθηκε από hackers, για hackers**! Ελάτε μαζί μας στο [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) σήμερα, και αρχίστε να κερδίζετε βραβεία έως **$100,000**!
-
-{% embed url="https://go.intigriti.com/hacktricks" %}
 
 ## Silver ticket
 
-Η επίθεση **Silver Ticket** περιλαμβάνει την εκμετάλλευση υπηρεσιακών εισιτηρίων σε περιβάλλοντα Active Directory (AD). Αυτή η μέθοδος βασίζεται στην **απόκτηση του NTLM hash ενός λογαριασμού υπηρεσίας**, όπως ένας λογαριασμός υπολογιστή, για να πλαστογραφηθεί ένα Ticket Granting Service (TGS) ticket. Με αυτό το πλαστογραφημένο εισιτήριο, ένας επιτιθέμενος μπορεί να έχει πρόσβαση σε συγκεκριμένες υπηρεσίες στο δίκτυο, **υποδυόμενος οποιονδήποτε χρήστη**, συνήθως στοχεύοντας σε διοικητικά δικαιώματα. Τονίζεται ότι η χρήση κλειδιών AES για την πλαστογράφηση εισιτηρίων είναι πιο ασφαλής και λιγότερο ανιχνεύσιμη.
+Η επίθεση **Silver Ticket** περιλαμβάνει την εκμετάλλευση των εισιτηρίων υπηρεσιών σε περιβάλλοντα Active Directory (AD). Αυτή η μέθοδος βασίζεται στην **απόκτηση του NTLM hash ενός λογαριασμού υπηρεσίας**, όπως ένας λογαριασμός υπολογιστή, για να κατασκευαστεί ένα εισιτήριο Ticket Granting Service (TGS). Με αυτό το πλαστό εισιτήριο, ένας επιτιθέμενος μπορεί να έχει πρόσβαση σε συγκεκριμένες υπηρεσίες στο δίκτυο, **υποδυόμενος οποιονδήποτε χρήστη**, συνήθως στοχεύοντας σε διοικητικά δικαιώματα. Τονίζεται ότι η χρήση κλειδιών AES για την κατασκευή εισιτηρίων είναι πιο ασφαλής και λιγότερο ανιχνεύσιμη.
 
 Για την κατασκευή εισιτηρίων, χρησιμοποιούνται διάφορα εργαλεία ανάλογα με το λειτουργικό σύστημα:
 
@@ -36,16 +32,16 @@ mimikatz.exe "kerberos::ptt <TICKET_FILE>"
 
 ## Διαθέσιμες Υπηρεσίες
 
-| Τύπος Υπηρεσίας                            | Υπηρεσία Silver Tickets                                                  |
-| ------------------------------------------ | ----------------------------------------------------------------------- |
-| WMI                                        | <p>HOST</p><p>RPCSS</p>                                               |
+| Τύπος Υπηρεσίας                            | Υπηρεσία Silver Tickets                                                   |
+| ------------------------------------------ | ------------------------------------------------------------------------- |
+| WMI                                        | <p>HOST</p><p>RPCSS</p>                                                 |
 | PowerShell Remoting                        | <p>HOST</p><p>HTTP</p><p>Ανάλογα με το OS επίσης:</p><p>WSMAN</p><p>RPCSS</p> |
 | WinRM                                      | <p>HOST</p><p>HTTP</p><p>Σε ορισμένες περιπτώσεις μπορείτε απλώς να ζητήσετε: WINRM</p> |
-| Προγραμματισμένα Καθήκοντα                | HOST                                                                  |
-| Κοινή Χρήση Αρχείων Windows, επίσης psexec | CIFS                                                                  |
-| Λειτουργίες LDAP, συμπεριλαμβανομένου του DCSync | LDAP                                                                  |
-| Εργαλεία Διαχείρισης Απομακρυσμένου Διακομιστή Windows | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                    |
-| Χρυσά Εισιτήρια                            | krbtgt                                                                |
+| Προγραμματισμένα Καθήκοντα                | HOST                                                                     |
+| Κοινή Χρήση Αρχείων Windows, επίσης psexec | CIFS                                                                     |
+| Λειτουργίες LDAP, συμπεριλαμβανομένου του DCSync | LDAP                                                                     |
+| Εργαλεία Διαχείρισης Απομακρυσμένου Διακομιστή Windows | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                       |
+| Χρυσά Εισιτήρια                            | krbtgt                                                                   |
 
 Χρησιμοποιώντας **Rubeus** μπορείτε να **ζητήσετε όλα** αυτά τα εισιτήρια χρησιμοποιώντας την παράμετρο:
 
@@ -101,7 +97,7 @@ Invoke-WmiMethod win32_process -ComputerName $Computer -name create -argumentlis
 #You can also use wmic
 wmic remote.computer.local list full /format:list
 ```
-Βρείτε **περισσότερες πληροφορίες σχετικά με το wmiexec** στη παρακάτω σελίδα:
+Βρείτε **περισσότερες πληροφορίες σχετικά με το wmiexec** στη σελίδα που ακολουθεί:
 
 {{#ref}}
 ../lateral-movement/wmiexec.md
@@ -124,7 +120,7 @@ New-PSSession -Name PSC -ComputerName the.computer.name; Enter-PSSession PSC
 
 ### LDAP
 
-Με αυτό το δικαίωμα μπορείτε να εξάγετε τη βάση δεδομένων του DC χρησιμοποιώντας **DCSync**:
+Με αυτό το προνόμιο μπορείτε να εξάγετε τη βάση δεδομένων του DC χρησιμοποιώντας **DCSync**:
 ```
 mimikatz(commandline) # lsadump::dcsync /dc:pcdc.domain.local /domain:domain.local /user:krbtgt
 ```
@@ -139,10 +135,6 @@ mimikatz(commandline) # lsadump::dcsync /dc:pcdc.domain.local /domain:domain.loc
 dcsync.md
 {{#endref}}
 
-<figure><img src="../../images/i3.png" alt=""><figcaption></figcaption></figure>
 
-**Συμβουλή για bug bounty**: **εγγραφείτε** στο **Intigriti**, μια premium **πλατφόρμα bug bounty που δημιουργήθηκε από hackers, για hackers**! Ελάτε μαζί μας στο [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) σήμερα, και αρχίστε να κερδίζετε βραβεία έως **$100,000**!
-
-{% embed url="https://go.intigriti.com/hacktricks" %}
 
 {{#include ../../banners/hacktricks-training.md}}

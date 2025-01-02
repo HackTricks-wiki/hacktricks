@@ -1,19 +1,18 @@
-# macOS Network Services & Protocols
+# macOS Υπηρεσίες Δικτύου & Πρωτόκολλα
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Remote Access Services
+## Υπηρεσίες Απομακρυσμένης Πρόσβασης
 
-These are the common macOS services to access them remotely.\
-You can enable/disable these services in `System Settings` --> `Sharing`
+Αυτές είναι οι κοινές υπηρεσίες macOS για απομακρυσμένη πρόσβαση σε αυτές.\
+Μπορείτε να ενεργοποιήσετε/απενεργοποιήσετε αυτές τις υπηρεσίες στις `Ρυθμίσεις Συστήματος` --> `Κοινή Χρήση`
 
-- **VNC**, known as “Screen Sharing” (tcp:5900)
-- **SSH**, called “Remote Login” (tcp:22)
-- **Apple Remote Desktop** (ARD), or “Remote Management” (tcp:3283, tcp:5900)
-- **AppleEvent**, known as “Remote Apple Event” (tcp:3031)
+- **VNC**, γνωστό ως “Κοινή Χρήση Οθόνης” (tcp:5900)
+- **SSH**, που ονομάζεται “Απομακρυσμένη Σύνδεση” (tcp:22)
+- **Apple Remote Desktop** (ARD), ή “Απομακρυσμένη Διαχείριση” (tcp:3283, tcp:5900)
+- **AppleEvent**, γνωστό ως “Απομακρυσμένο Apple Event” (tcp:3031)
 
-Check if any is enabled running:
-
+Ελέγξτε αν κάποια είναι ενεργοποιημένη εκτελώντας:
 ```bash
 rmMgmt=$(netstat -na | grep LISTEN | grep tcp46 | grep "*.3283" | wc -l);
 scrShrng=$(netstat -na | grep LISTEN | egrep 'tcp4|tcp6' | grep "*.5900" | wc -l);
@@ -23,105 +22,92 @@ rAE=$(netstat -na | grep LISTEN | egrep 'tcp4|tcp6' | grep "*.3031" | wc -l);
 bmM=$(netstat -na | grep LISTEN | egrep 'tcp4|tcp6' | grep "*.4488" | wc -l);
 printf "\nThe following services are OFF if '0', or ON otherwise:\nScreen Sharing: %s\nFile Sharing: %s\nRemote Login: %s\nRemote Mgmt: %s\nRemote Apple Events: %s\nBack to My Mac: %s\n\n" "$scrShrng" "$flShrng" "$rLgn" "$rmMgmt" "$rAE" "$bmM";
 ```
-
 ### Pentesting ARD
 
-Apple Remote Desktop (ARD) is an enhanced version of [Virtual Network Computing (VNC)](https://en.wikipedia.org/wiki/Virtual_Network_Computing) tailored for macOS, offering additional features. A notable vulnerability in ARD is its authentication method for the control screen password, which only uses the first 8 characters of the password, making it prone to [brute force attacks](https://thudinh.blogspot.com/2017/09/brute-forcing-passwords-with-thc-hydra.html) with tools like Hydra or [GoRedShell](https://github.com/ahhh/GoRedShell/), as there are no default rate limits.
+Apple Remote Desktop (ARD) είναι μια ενισχυμένη έκδοση του [Virtual Network Computing (VNC)](https://en.wikipedia.org/wiki/Virtual_Network_Computing) προσαρμοσμένη για macOS, προσφέροντας επιπλέον δυνατότητες. Μια αξιοσημείωτη ευπάθεια στο ARD είναι η μέθοδος αυθεντικοποίησης για τον κωδικό πρόσβασης της οθόνης ελέγχου, η οποία χρησιμοποιεί μόνο τους πρώτους 8 χαρακτήρες του κωδικού πρόσβασης, καθιστώντας την επιρρεπή σε [brute force attacks](https://thudinh.blogspot.com/2017/09/brute-forcing-passwords-with-thc-hydra.html) με εργαλεία όπως το Hydra ή το [GoRedShell](https://github.com/ahhh/GoRedShell/), καθώς δεν υπάρχουν προεπιλεγμένα όρια ρυθμού.
 
-Vulnerable instances can be identified using **nmap**'s `vnc-info` script. Services supporting `VNC Authentication (2)` are especially susceptible to brute force attacks due to the 8-character password truncation.
+Οι ευάλωτες περιπτώσεις μπορούν να εντοπιστούν χρησιμοποιώντας το σενάριο `vnc-info` του **nmap**. Υπηρεσίες που υποστηρίζουν `VNC Authentication (2)` είναι ιδιαίτερα ευάλωτες σε επιθέσεις brute force λόγω της περικοπής του κωδικού πρόσβασης σε 8 χαρακτήρες.
 
-To enable ARD for various administrative tasks like privilege escalation, GUI access, or user monitoring, use the following command:
-
+Για να ενεργοποιήσετε το ARD για διάφορες διοικητικές εργασίες όπως η κλιμάκωση προνομίων, η πρόσβαση GUI ή η παρακολούθηση χρηστών, χρησιμοποιήστε την παρακάτω εντολή:
 ```bash
 sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -allowAccessFor -allUsers -privs -all -clientopts -setmenuextra -menuextra yes
 ```
+ARD παρέχει ευέλικτα επίπεδα ελέγχου, συμπεριλαμβανομένης της παρακολούθησης, του κοινόχρηστου ελέγχου και του πλήρους ελέγχου, με τις συνεδρίες να παραμένουν ενεργές ακόμη και μετά από αλλαγές κωδικού πρόσβασης χρήστη. Επιτρέπει την αποστολή εντολών Unix απευθείας, εκτελώντας τις ως root για διαχειριστικούς χρήστες. Ο προγραμματισμός εργασιών και η απομακρυσμένη αναζήτηση Spotlight είναι αξιοσημείωτα χαρακτηριστικά, διευκολύνοντας απομακρυσμένες, χαμηλής επίπτωσης αναζητήσεις ευαίσθητων αρχείων σε πολλές μηχανές.
 
-ARD provides versatile control levels, including observation, shared control, and full control, with sessions persisting even after user password changes. It allows sending Unix commands directly, executing them as root for administrative users. Task scheduling and Remote Spotlight search are notable features, facilitating remote, low-impact searches for sensitive files across multiple machines.
+## Πρωτόκολλο Bonjour
 
-## Bonjour Protocol
+Το Bonjour, μια τεχνολογία σχεδιασμένη από την Apple, επιτρέπει **στις συσκευές στο ίδιο δίκτυο να ανιχνεύουν τις προσφερόμενες υπηρεσίες η μία της άλλης**. Γνωστό επίσης ως Rendezvous, **Zero Configuration**, ή Zeroconf, επιτρέπει σε μια συσκευή να ενταχθεί σε ένα δίκτυο TCP/IP, **να επιλέξει αυτόματα μια διεύθυνση IP**, και να εκπέμπει τις υπηρεσίες της σε άλλες συσκευές του δικτύου.
 
-Bonjour, an Apple-designed technology, allows **devices on the same network to detect each other's offered services**. Known also as Rendezvous, **Zero Configuration**, or Zeroconf, it enables a device to join a TCP/IP network, **automatically choose an IP address**, and broadcast its services to other network devices.
+Η Δικτύωση Χωρίς Ρυθμίσεις, που παρέχεται από το Bonjour, διασφαλίζει ότι οι συσκευές μπορούν να:
 
-Zero Configuration Networking, provided by Bonjour, ensures that devices can:
+- **Αποκτούν αυτόματα μια Διεύθυνση IP** ακόμη και στην απουσία διακομιστή DHCP.
+- Εκτελούν **μετάφραση ονόματος σε διεύθυνση** χωρίς να απαιτείται διακομιστής DNS.
+- **Ανακαλύπτουν υπηρεσίες** διαθέσιμες στο δίκτυο.
 
-- **Automatically obtain an IP Address** even in the absence of a DHCP server.
-- Perform **name-to-address translation** without requiring a DNS server.
-- **Discover services** available on the network.
+Οι συσκευές που χρησιμοποιούν το Bonjour θα αναθέσουν στον εαυτό τους μια **διεύθυνση IP από το εύρος 169.254/16** και θα επαληθεύσουν την μοναδικότητά της στο δίκτυο. Οι Macs διατηρούν μια καταχώρηση πίνακα δρομολόγησης για αυτό το υποδίκτυο, που μπορεί να επαληθευτεί μέσω `netstat -rn | grep 169`.
 
-Devices using Bonjour will assign themselves an **IP address from the 169.254/16 range** and verify its uniqueness on the network. Macs maintain a routing table entry for this subnet, verifiable via `netstat -rn | grep 169`.
+Για το DNS, το Bonjour χρησιμοποιεί το **πρωτόκολλο Multicast DNS (mDNS)**. Το mDNS λειτουργεί μέσω **θύρας 5353/UDP**, χρησιμοποιώντας **τυπικά ερωτήματα DNS** αλλά στοχεύοντας στη **διεύθυνση multicast 224.0.0.251**. Αυτή η προσέγγιση διασφαλίζει ότι όλες οι συσκευές που ακούν στο δίκτυο μπορούν να λάβουν και να απαντήσουν στα ερωτήματα, διευκολύνοντας την ενημέρωση των καταχωρήσεών τους.
 
-For DNS, Bonjour utilizes the **Multicast DNS (mDNS) protocol**. mDNS operates over **port 5353/UDP**, employing **standard DNS queries** but targeting the **multicast address 224.0.0.251**. This approach ensures that all listening devices on the network can receive and respond to the queries, facilitating the update of their records.
+Κατά την ένταξή τους στο δίκτυο, κάθε συσκευή επιλέγει αυτόματα ένα όνομα, που συνήθως τελειώνει σε **.local**, το οποίο μπορεί να προέρχεται από το όνομα υπολογιστή ή να είναι τυχαία παραγόμενο.
 
-Upon joining the network, each device self-selects a name, typically ending in **.local**, which may be derived from the hostname or randomly generated.
+Η ανακάλυψη υπηρεσιών εντός του δικτύου διευκολύνεται από το **DNS Service Discovery (DNS-SD)**. Εκμεταλλευόμενο τη μορφή των καταχωρήσεων DNS SRV, το DNS-SD χρησιμοποιεί **καταχωρήσεις DNS PTR** για να επιτρέψει την καταχώρηση πολλαπλών υπηρεσιών. Ένας πελάτης που αναζητά μια συγκεκριμένη υπηρεσία θα ζητήσει μια καταχώρηση PTR για `<Service>.<Domain>`, λαμβάνοντας σε αντάλλαγμα μια λίστα καταχωρήσεων PTR μορφοποιημένων ως `<Instance>.<Service>.<Domain>` αν η υπηρεσία είναι διαθέσιμη από πολλούς διακομιστές.
 
-Service discovery within the network is facilitated by **DNS Service Discovery (DNS-SD)**. Leveraging the format of DNS SRV records, DNS-SD uses **DNS PTR records** to enable the listing of multiple services. A client seeking a specific service will request a PTR record for `<Service>.<Domain>`, receiving in return a list of PTR records formatted as `<Instance>.<Service>.<Domain>` if the service is available from multiple hosts.
+Το εργαλείο `dns-sd` μπορεί να χρησιμοποιηθεί για **την ανακάλυψη και διαφήμιση δικτυακών υπηρεσιών**. Ακολουθούν μερικά παραδείγματα χρήσης του:
 
-The `dns-sd` utility can be employed for **discovering and advertising network services**. Here are some examples of its usage:
+### Αναζητώντας Υπηρεσίες SSH
 
-### Searching for SSH Services
-
-To search for SSH services on the network, the following command is used:
-
+Για να αναζητήσετε υπηρεσίες SSH στο δίκτυο, χρησιμοποιείται η εξής εντολή:
 ```bash
 dns-sd -B _ssh._tcp
 ```
+Αυτή η εντολή ξεκινά την αναζήτηση για υπηρεσίες \_ssh.\_tcp και εξάγει λεπτομέρειες όπως χρονική σήμανση, σημαίες, διεπαφή, τομέα, τύπο υπηρεσίας και όνομα στιγμής.
 
-This command initiates browsing for \_ssh.\_tcp services and outputs details such as timestamp, flags, interface, domain, service type, and instance name.
+### Διαφήμιση μιας Υπηρεσίας HTTP
 
-### Advertising an HTTP Service
-
-To advertise an HTTP service, you can use:
-
+Για να διαφημίσετε μια υπηρεσία HTTP, μπορείτε να χρησιμοποιήσετε:
 ```bash
 dns-sd -R "Index" _http._tcp . 80 path=/index.html
 ```
+Αυτή η εντολή καταχωρεί μια υπηρεσία HTTP με το όνομα "Index" στη θύρα 80 με διαδρομή `/index.html`.
 
-This command registers an HTTP service named "Index" on port 80 with a path of `/index.html`.
-
-To then search for HTTP services on the network:
-
+Για να αναζητήσετε υπηρεσίες HTTP στο δίκτυο:
 ```bash
 dns-sd -B _http._tcp
 ```
+Όταν μια υπηρεσία ξεκινά, ανακοινώνει τη διαθεσιμότητά της σε όλες τις συσκευές στο υποδίκτυο μέσω multicast της παρουσίας της. Οι συσκευές που ενδιαφέρονται για αυτές τις υπηρεσίες δεν χρειάζεται να στείλουν αιτήματα, αλλά απλώς να ακούσουν αυτές τις ανακοινώσεις.
 
-When a service starts, it announces its availability to all devices on the subnet by multicasting its presence. Devices interested in these services don't need to send requests but simply listen for these announcements.
+Για μια πιο φιλική προς τον χρήστη διεπαφή, η εφαρμογή **Discovery - DNS-SD Browser** που είναι διαθέσιμη στο Apple App Store μπορεί να οπτικοποιήσει τις υπηρεσίες που προσφέρονται στο τοπικό σας δίκτυο.
 
-For a more user-friendly interface, the **Discovery - DNS-SD Browser** app available on the Apple App Store can visualize the services offered on your local network.
-
-Alternatively, custom scripts can be written to browse and discover services using the `python-zeroconf` library. The [**python-zeroconf**](https://github.com/jstasiak/python-zeroconf) script demonstrates creating a service browser for `_http._tcp.local.` services, printing added or removed services:
-
+Εναλλακτικά, μπορούν να γραφούν προσαρμοσμένα σενάρια για να περιηγηθούν και να ανακαλύψουν υπηρεσίες χρησιμοποιώντας τη βιβλιοθήκη `python-zeroconf`. Το [**python-zeroconf**](https://github.com/jstasiak/python-zeroconf) σενάριο δείχνει πώς να δημιουργήσετε έναν περιηγητή υπηρεσιών για τις υπηρεσίες `_http._tcp.local.`, εκτυπώνοντας τις προστιθέμενες ή αφαιρεθείσες υπηρεσίες:
 ```python
 from zeroconf import ServiceBrowser, Zeroconf
 
 class MyListener:
 
-    def remove_service(self, zeroconf, type, name):
-        print("Service %s removed" % (name,))
+def remove_service(self, zeroconf, type, name):
+print("Service %s removed" % (name,))
 
-    def add_service(self, zeroconf, type, name):
-        info = zeroconf.get_service_info(type, name)
-        print("Service %s added, service info: %s" % (name, info))
+def add_service(self, zeroconf, type, name):
+info = zeroconf.get_service_info(type, name)
+print("Service %s added, service info: %s" % (name, info))
 
 zeroconf = Zeroconf()
 listener = MyListener()
 browser = ServiceBrowser(zeroconf, "_http._tcp.local.", listener)
 try:
-    input("Press enter to exit...\n\n")
+input("Press enter to exit...\n\n")
 finally:
-    zeroconf.close()
+zeroconf.close()
 ```
+### Απενεργοποίηση Bonjour
 
-### Disabling Bonjour
-
-If there are concerns about security or other reasons to disable Bonjour, it can be turned off using the following command:
-
+Εάν υπάρχουν ανησυχίες σχετικά με την ασφάλεια ή άλλοι λόγοι για να απενεργοποιηθεί το Bonjour, μπορεί να απενεργοποιηθεί χρησιμοποιώντας την παρακάτω εντολή:
 ```bash
 sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.mDNSResponder.plist
 ```
+## Αναφορές
 
-## References
-
-- [**The Mac Hacker's Handbook**](https://www.amazon.com/-/es/Charlie-Miller-ebook-dp-B004U7MUMU/dp/B004U7MUMU/ref=mt_other?_encoding=UTF8&me=&qid=)
+- [**Το Χειρόγραφο του Χάκερ Mac**](https://www.amazon.com/-/es/Charlie-Miller-ebook-dp-B004U7MUMU/dp/B004U7MUMU/ref=mt_other?_encoding=UTF8&me=&qid=)
 - [**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)
 - [**https://lockboxx.blogspot.com/2019/07/macos-red-teaming-206-ard-apple-remote.html**](https://lockboxx.blogspot.com/2019/07/macos-red-teaming-206-ard-apple-remote.html)
 

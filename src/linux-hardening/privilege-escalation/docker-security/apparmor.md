@@ -4,29 +4,28 @@
 
 ## Basic Information
 
-AppArmor is a **kernel enhancement designed to restrict the resources available to programs through per-program profiles**, effectively implementing Mandatory Access Control (MAC) by tying access control attributes directly to programs instead of users. This system operates by **loading profiles into the kernel**, usually during boot, and these profiles dictate what resources a program can access, such as network connections, raw socket access, and file permissions.
+Το AppArmor είναι μια **βελτίωση του πυρήνα που έχει σχεδιαστεί για να περιορίζει τους πόρους που είναι διαθέσιμοι σε προγράμματα μέσω προφίλ ανά πρόγραμμα**, εφαρμόζοντας αποτελεσματικά τον Υποχρεωτικό Έλεγχο Πρόσβασης (MAC) συνδέοντας τα χαρακτηριστικά ελέγχου πρόσβασης απευθείας σε προγράμματα αντί για χρήστες. Αυτό το σύστημα λειτουργεί με **φόρτωση προφίλ στον πυρήνα**, συνήθως κατά την εκκίνηση, και αυτά τα προφίλ καθορίζουν ποιους πόρους μπορεί να έχει πρόσβαση ένα πρόγραμμα, όπως συνδέσεις δικτύου, πρόσβαση σε ακατέργαστους υποδοχείς και άδειες αρχείων.
 
-There are two operational modes for AppArmor profiles:
+Υπάρχουν δύο λειτουργικά modes για τα προφίλ του AppArmor:
 
-- **Enforcement Mode**: This mode actively enforces the policies defined within the profile, blocking actions that violate these policies and logging any attempts to breach them through systems like syslog or auditd.
-- **Complain Mode**: Unlike enforcement mode, complain mode does not block actions that go against the profile's policies. Instead, it logs these attempts as policy violations without enforcing restrictions.
+- **Enforcement Mode**: Αυτό το mode επιβάλλει ενεργά τις πολιτικές που ορίζονται μέσα στο προφίλ, αποκλείοντας ενέργειες που παραβιάζουν αυτές τις πολιτικές και καταγράφοντας οποιαδήποτε προσπάθεια παραβίασης τους μέσω συστημάτων όπως το syslog ή το auditd.
+- **Complain Mode**: Σε αντίθεση με το enforcement mode, το complain mode δεν αποκλείει ενέργειες που αντιβαίνουν στις πολιτικές του προφίλ. Αντίθετα, καταγράφει αυτές τις προσπάθειες ως παραβιάσεις πολιτικής χωρίς να επιβάλλει περιορισμούς.
 
 ### Components of AppArmor
 
-- **Kernel Module**: Responsible for the enforcement of policies.
-- **Policies**: Specify the rules and restrictions for program behavior and resource access.
-- **Parser**: Loads policies into the kernel for enforcement or reporting.
-- **Utilities**: These are user-mode programs that provide an interface for interacting with and managing AppArmor.
+- **Kernel Module**: Υπεύθυνο για την επιβολή πολιτικών.
+- **Policies**: Καθορίζουν τους κανόνες και τους περιορισμούς για τη συμπεριφορά του προγράμματος και την πρόσβαση στους πόρους.
+- **Parser**: Φορτώνει πολιτικές στον πυρήνα για επιβολή ή αναφορά.
+- **Utilities**: Αυτά είναι προγράμματα σε λειτουργία χρήστη που παρέχουν μια διεπαφή για αλληλεπίδραση και διαχείριση του AppArmor.
 
 ### Profiles path
 
-Apparmor profiles are usually saved in _**/etc/apparmor.d/**_\
-With `sudo aa-status` you will be able to list the binaries that are restricted by some profile. If you can change the char "/" for a dot of the path of each listed binary and you will obtain the name of the apparmor profile inside the mentioned folder.
+Τα προφίλ του AppArmor αποθηκεύονται συνήθως στο _**/etc/apparmor.d/**_\
+Με το `sudo aa-status` θα μπορείτε να καταγράψετε τα δυαδικά αρχεία που περιορίζονται από κάποιο προφίλ. Αν αλλάξετε το χαρακτήρα "/" με μια τελεία στο μονοπάτι κάθε καταγεγραμμένου δυαδικού αρχείου, θα αποκτήσετε το όνομα του προφίλ του AppArmor μέσα στον αναφερόμενο φάκελο.
 
-For example, a **apparmor** profile for _/usr/bin/man_ will be located in _/etc/apparmor.d/usr.bin.man_
+Για παράδειγμα, ένα **apparmor** προφίλ για _/usr/bin/man_ θα βρίσκεται στο _/etc/apparmor.d/usr.bin.man_
 
 ### Commands
-
 ```bash
 aa-status     #check the current status
 aa-enforce    #set profile to enforce mode (from disable or complain)
@@ -36,47 +35,41 @@ aa-genprof    #generate a new profile
 aa-logprof    #used to change the policy when the binary/program is changed
 aa-mergeprof  #used to merge the policies
 ```
+## Δημιουργία προφίλ
 
-## Creating a profile
-
-- In order to indicate the affected executable, **absolute paths and wildcards** are allowed (for file globbing) for specifying files.
-- To indicate the access the binary will have over **files** the following **access controls** can be used:
-  - **r** (read)
-  - **w** (write)
-  - **m** (memory map as executable)
-  - **k** (file locking)
-  - **l** (creation hard links)
-  - **ix** (to execute another program with the new program inheriting policy)
-  - **Px** (execute under another profile, after cleaning the environment)
-  - **Cx** (execute under a child profile, after cleaning the environment)
-  - **Ux** (execute unconfined, after cleaning the environment)
-- **Variables** can be defined in the profiles and can be manipulated from outside the profile. For example: @{PROC} and @{HOME} (add #include \<tunables/global> to the profile file)
-- **Deny rules are supported to override allow rules**.
+- Για να υποδείξετε το επηρεαζόμενο εκτελέσιμο, επιτρέπονται **απόλυτες διαδρομές και wildcard** για τον καθορισμό αρχείων.
+- Για να υποδείξετε την πρόσβαση που θα έχει το δυαδικό αρχείο σε **αρχεία**, μπορούν να χρησιμοποιηθούν οι εξής **έλεγχοι πρόσβασης**:
+- **r** (ανάγνωση)
+- **w** (εγγραφή)
+- **m** (χάρτης μνήμης ως εκτελέσιμο)
+- **k** (κλείδωμα αρχείων)
+- **l** (δημιουργία σκληρών συνδέσμων)
+- **ix** (για να εκτελέσετε ένα άλλο πρόγραμμα με την πολιτική του νέου προγράμματος να κληρονομείται)
+- **Px** (εκτέλεση υπό άλλο προφίλ, μετά τον καθαρισμό του περιβάλλοντος)
+- **Cx** (εκτέλεση υπό ένα παιδικό προφίλ, μετά τον καθαρισμό του περιβάλλοντος)
+- **Ux** (εκτέλεση χωρίς περιορισμούς, μετά τον καθαρισμό του περιβάλλοντος)
+- **Μεταβλητές** μπορούν να οριστούν στα προφίλ και μπορούν να χειριστούν από έξω από το προφίλ. Για παράδειγμα: @{PROC} και @{HOME} (προσθέστε #include \<tunables/global> στο αρχείο προφίλ)
+- **Οι κανόνες άρνησης υποστηρίζονται για να παρακάμψουν τους κανόνες επιτρεπόμενης πρόσβασης**.
 
 ### aa-genprof
 
-To easily start creating a profile apparmor can help you. It's possible to make **apparmor inspect the actions performed by a binary and then let you decide which actions you want to allow or deny**.\
-You just need to run:
-
+Για να ξεκινήσετε εύκολα τη δημιουργία ενός προφίλ, το apparmor μπορεί να σας βοηθήσει. Είναι δυνατόν να **επιτρέψετε στο apparmor να ελέγξει τις ενέργειες που εκτελεί ένα δυαδικό αρχείο και στη συνέχεια να σας αφήσει να αποφασίσετε ποιες ενέργειες θέλετε να επιτρέψετε ή να αρνηθείτε**.\
+Απλώς χρειάζεται να εκτελέσετε:
 ```bash
 sudo aa-genprof /path/to/binary
 ```
-
-Then, in a different console perform all the actions that the binary will usually perform:
-
+Στη συνέχεια, σε μια διαφορετική κονσόλα εκτελέστε όλες τις ενέργειες που θα εκτελεί συνήθως το δυαδικό αρχείο:
 ```bash
 /path/to/binary -a dosomething
 ```
-
-Then, in the first console press "**s**" and then in the recorded actions indicate if you want to ignore, allow, or whatever. When you have finished press "**f**" and the new profile will be created in _/etc/apparmor.d/path.to.binary_
+Στη συνέχεια, στην πρώτη κονσόλα πατήστε "**s**" και στη συνέχεια στις καταγεγραμμένες ενέργειες υποδείξτε αν θέλετε να αγνοήσετε, να επιτρέψετε ή οτιδήποτε άλλο. Όταν τελειώσετε πατήστε "**f**" και το νέο προφίλ θα δημιουργηθεί στο _/etc/apparmor.d/path.to.binary_
 
 > [!NOTE]
-> Using the arrow keys you can select what you want to allow/deny/whatever
+> Χρησιμοποιώντας τα πλήκτρα βέλους μπορείτε να επιλέξετε τι θέλετε να επιτρέψετε/αρνηθείτε/οτιδήποτε άλλο
 
 ### aa-easyprof
 
-You can also create a template of an apparmor profile of a binary with:
-
+Μπορείτε επίσης να δημιουργήσετε ένα πρότυπο ενός προφίλ apparmor ενός δυαδικού με:
 ```bash
 sudo aa-easyprof /path/to/binary
 # vim:syntax=apparmor
@@ -90,40 +83,34 @@ sudo aa-easyprof /path/to/binary
 # No template variables specified
 
 "/path/to/binary" {
-  #include <abstractions/base>
+#include <abstractions/base>
 
-  # No abstractions specified
+# No abstractions specified
 
-  # No policy groups specified
+# No policy groups specified
 
-  # No read paths specified
+# No read paths specified
 
-  # No write paths specified
+# No write paths specified
 }
 ```
-
 > [!NOTE]
-> Note that by default in a created profile nothing is allowed, so everything is denied. You will need to add lines like `/etc/passwd r,` to allow the binary read `/etc/passwd` for example.
+> Σημειώστε ότι από προεπιλογή σε ένα δημιουργημένο προφίλ δεν επιτρέπεται τίποτα, οπότε όλα απορρίπτονται. Θα χρειαστεί να προσθέσετε γραμμές όπως `/etc/passwd r,` για να επιτρέψετε την ανάγνωση του δυαδικού αρχείου `/etc/passwd`, για παράδειγμα.
 
-You can then **enforce** the new profile with
-
+Μπορείτε στη συνέχεια να **επιβάλετε** το νέο προφίλ με
 ```bash
 sudo apparmor_parser -a /etc/apparmor.d/path.to.binary
 ```
+### Τροποποίηση ενός προφίλ από τα αρχεία καταγραφής
 
-### Modifying a profile from logs
-
-The following tool will read the logs and ask the user if he wants to permit some of the detected forbidden actions:
-
+Το παρακάτω εργαλείο θα διαβάσει τα αρχεία καταγραφής και θα ρωτήσει τον χρήστη αν θέλει να επιτρέψει ορισμένες από τις ανιχνευθείσες απαγορευμένες ενέργειες:
 ```bash
 sudo aa-logprof
 ```
-
 > [!NOTE]
-> Using the arrow keys you can select what you want to allow/deny/whatever
+> Χρησιμοποιώντας τα πλήκτρα βέλους μπορείτε να επιλέξετε τι θέλετε να επιτρέψετε/αρνηθείτε/οτιδήποτε
 
-### Managing a Profile
-
+### Διαχείριση ενός Προφίλ
 ```bash
 #Main profile management commands
 apparmor_parser -a /etc/apparmor.d/profile.name #Load a new profile in enforce mode
@@ -131,18 +118,14 @@ apparmor_parser -C /etc/apparmor.d/profile.name #Load a new profile in complain 
 apparmor_parser -r /etc/apparmor.d/profile.name #Replace existing profile
 apparmor_parser -R /etc/apparmor.d/profile.name #Remove profile
 ```
-
 ## Logs
 
-Example of **AUDIT** and **DENIED** logs from _/var/log/audit/audit.log_ of the executable **`service_bin`**:
-
+Παράδειγμα **AUDIT** και **DENIED** logs από το _/var/log/audit/audit.log_ του εκτελέσιμου **`service_bin`**:
 ```bash
 type=AVC msg=audit(1610061880.392:286): apparmor="AUDIT" operation="getattr" profile="/bin/rcat" name="/dev/pts/1" pid=954 comm="service_bin" requested_mask="r" fsuid=1000 ouid=1000
 type=AVC msg=audit(1610061880.392:287): apparmor="DENIED" operation="open" profile="/bin/rcat" name="/etc/hosts" pid=954 comm="service_bin" requested_mask="r" denied_mask="r" fsuid=1000 ouid=0
 ```
-
-You can also get this information using:
-
+Μπορείτε επίσης να αποκτήσετε αυτές τις πληροφορίες χρησιμοποιώντας:
 ```bash
 sudo aa-notify -s 1 -v
 Profile: /bin/service_bin
@@ -160,126 +143,104 @@ Logfile: /var/log/audit/audit.log
 AppArmor denials: 2 (since Wed Jan  6 23:51:08 2021)
 For more information, please see: https://wiki.ubuntu.com/DebuggingApparmor
 ```
-
 ## Apparmor in Docker
 
-Note how the profile **docker-profile** of docker is loaded by default:
-
+Σημειώστε πώς το προφίλ **docker-profile** του docker φορτώνεται από προεπιλογή:
 ```bash
 sudo aa-status
 apparmor module is loaded.
 50 profiles are loaded.
 13 profiles are in enforce mode.
-   /sbin/dhclient
-   /usr/bin/lxc-start
-   /usr/lib/NetworkManager/nm-dhcp-client.action
-   /usr/lib/NetworkManager/nm-dhcp-helper
-   /usr/lib/chromium-browser/chromium-browser//browser_java
-   /usr/lib/chromium-browser/chromium-browser//browser_openjdk
-   /usr/lib/chromium-browser/chromium-browser//sanitized_helper
-   /usr/lib/connman/scripts/dhclient-script
-   docker-default
+/sbin/dhclient
+/usr/bin/lxc-start
+/usr/lib/NetworkManager/nm-dhcp-client.action
+/usr/lib/NetworkManager/nm-dhcp-helper
+/usr/lib/chromium-browser/chromium-browser//browser_java
+/usr/lib/chromium-browser/chromium-browser//browser_openjdk
+/usr/lib/chromium-browser/chromium-browser//sanitized_helper
+/usr/lib/connman/scripts/dhclient-script
+docker-default
 ```
+Από προεπιλογή, το **προφίλ docker-default του Apparmor** δημιουργείται από [https://github.com/moby/moby/tree/master/profiles/apparmor](https://github.com/moby/moby/tree/master/profiles/apparmor)
 
-By default **Apparmor docker-default profile** is generated from [https://github.com/moby/moby/tree/master/profiles/apparmor](https://github.com/moby/moby/tree/master/profiles/apparmor)
+**Περίληψη προφίλ docker-default**:
 
-**docker-default profile Summary**:
+- **Πρόσβαση** σε όλο το **δικτύωμα**
+- **Καμία ικανότητα** δεν έχει οριστεί (Ωστόσο, κάποιες ικανότητες θα προέρχονται από την συμπερίληψη βασικών κανόνων, δηλαδή #include \<abstractions/base>)
+- **Εγγραφή** σε οποιοδήποτε **/proc** αρχείο **δεν επιτρέπεται**
+- Άλλες **υποκαταλόγους**/**αρχεία** του /**proc** και /**sys** έχουν **αρνηθεί** πρόσβαση σε ανάγνωση/εγγραφή/κλείδωμα/σύνδεση/εκτέλεση
+- **Τοποθέτηση** **δεν επιτρέπεται**
+- **Ptrace** μπορεί να εκτελείται μόνο σε μια διαδικασία που περιορίζεται από το **ίδιο προφίλ apparmor**
 
-- **Access** to all **networking**
-- **No capability** is defined (However, some capabilities will come from including basic base rules i.e. #include \<abstractions/base> )
-- **Writing** to any **/proc** file is **not allowed**
-- Other **subdirectories**/**files** of /**proc** and /**sys** are **denied** read/write/lock/link/execute access
-- **Mount** is **not allowed**
-- **Ptrace** can only be run on a process that is confined by **same apparmor profile**
-
-Once you **run a docker container** you should see the following output:
-
+Μόλις **εκτελέσετε ένα docker container**, θα πρέπει να δείτε την παρακάτω έξοδο:
 ```bash
 1 processes are in enforce mode.
-   docker-default (825)
+docker-default (825)
 ```
-
-Note that **apparmor will even block capabilities privileges** granted to the container by default. For example, it will be able to **block permission to write inside /proc even if the SYS_ADMIN capability is granted** because by default docker apparmor profile denies this access:
-
+Σημειώστε ότι το **apparmor θα μπλοκάρει ακόμη και τις δυνατότητες προνομίων** που χορηγούνται στο κοντέινερ από προεπιλογή. Για παράδειγμα, θα είναι σε θέση να **μπλοκάρει την άδεια εγγραφής μέσα στο /proc ακόμη και αν η δυνατότητα SYS_ADMIN έχει χορηγηθεί** επειδή από προεπιλογή το προφίλ apparmor του docker αρνείται αυτή την πρόσβαση:
 ```bash
 docker run -it --cap-add SYS_ADMIN --security-opt seccomp=unconfined ubuntu /bin/bash
 echo "" > /proc/stat
 sh: 1: cannot create /proc/stat: Permission denied
 ```
-
-You need to **disable apparmor** to bypass its restrictions:
-
+Πρέπει να **απενεργοποιήσετε το apparmor** για να παρακάμψετε τους περιορισμούς του:
 ```bash
 docker run -it --cap-add SYS_ADMIN --security-opt seccomp=unconfined --security-opt apparmor=unconfined ubuntu /bin/bash
 ```
+Σημειώστε ότι από προεπιλογή το **AppArmor** θα **απαγορεύει επίσης στο κοντέινερ να προσαρτήσει** φακέλους από το εσωτερικό ακόμη και με ικανότητα SYS_ADMIN.
 
-Note that by default **AppArmor** will also **forbid the container to mount** folders from the inside even with SYS_ADMIN capability.
+Σημειώστε ότι μπορείτε να **προσθέσετε/αφαιρέσετε** **ικανότητες** στο docker κοντέινερ (αυτό θα είναι ακόμα περιορισμένο από μεθόδους προστασίας όπως το **AppArmor** και το **Seccomp**):
 
-Note that you can **add/remove** **capabilities** to the docker container (this will be still restricted by protection methods like **AppArmor** and **Seccomp**):
-
-- `--cap-add=SYS_ADMIN` give `SYS_ADMIN` cap
-- `--cap-add=ALL` give all caps
-- `--cap-drop=ALL --cap-add=SYS_PTRACE` drop all caps and only give `SYS_PTRACE`
+- `--cap-add=SYS_ADMIN` δίνει ικανότητα `SYS_ADMIN`
+- `--cap-add=ALL` δίνει όλες τις ικανότητες
+- `--cap-drop=ALL --cap-add=SYS_PTRACE` αφαιρεί όλες τις ικανότητες και δίνει μόνο `SYS_PTRACE`
 
 > [!NOTE]
-> Usually, when you **find** that you have a **privileged capability** available **inside** a **docker** container **but** some part of the **exploit isn't working**, this will be because docker **apparmor will be preventing it**.
+> Συνήθως, όταν **ανακαλύπτετε** ότι έχετε μια **προνομιακή ικανότητα** διαθέσιμη **μέσα** σε ένα **docker** κοντέινερ **αλλά** κάποιο μέρος της **εκμετάλλευσης δεν λειτουργεί**, αυτό θα είναι επειδή το docker **το apparmor θα το αποτρέπει**.
 
-### Example
+### Παράδειγμα
 
-(Example from [**here**](https://sreeninet.wordpress.com/2016/03/06/docker-security-part-2docker-engine/))
+(Παράδειγμα από [**εδώ**](https://sreeninet.wordpress.com/2016/03/06/docker-security-part-2docker-engine/))
 
-To illustrate AppArmor functionality, I created a new Docker profile “mydocker” with the following line added:
-
+Για να απεικονίσω τη λειτουργικότητα του AppArmor, δημιούργησα ένα νέο προφίλ Docker “mydocker” με την παρακάτω γραμμή προστιθέμενη:
 ```
 deny /etc/* w,   # deny write for all files directly in /etc (not in a subdir)
 ```
-
-To activate the profile, we need to do the following:
-
+Για να ενεργοποιήσουμε το προφίλ, πρέπει να κάνουμε τα εξής:
 ```
 sudo apparmor_parser -r -W mydocker
 ```
-
-To list the profiles, we can do the following command. The command below is listing my new AppArmor profile.
-
+Για να καταγράψουμε τα προφίλ, μπορούμε να εκτελέσουμε την παρακάτω εντολή. Η παρακάτω εντολή καταγράφει το νέο μου προφίλ AppArmor.
 ```
 $ sudo apparmor_status  | grep mydocker
-   mydocker
+mydocker
 ```
-
-As shown below, we get error when trying to change “/etc/” since AppArmor profile is preventing write access to “/etc”.
-
+Όπως φαίνεται παρακάτω, λαμβάνουμε σφάλμα όταν προσπαθούμε να αλλάξουμε το “/etc/” καθώς το προφίλ AppArmor εμποδίζει την πρόσβαση εγγραφής στο “/etc”.
 ```
 $ docker run --rm -it --security-opt apparmor:mydocker -v ~/haproxy:/localhost busybox chmod 400 /etc/hostname
 chmod: /etc/hostname: Permission denied
 ```
-
 ### AppArmor Docker Bypass1
 
-You can find which **apparmor profile is running a container** using:
-
+Μπορείτε να βρείτε ποιο **προφίλ apparmor εκτελεί ένα κοντέινερ** χρησιμοποιώντας:
 ```bash
 docker inspect 9d622d73a614 | grep lowpriv
-        "AppArmorProfile": "lowpriv",
-                "apparmor=lowpriv"
+"AppArmorProfile": "lowpriv",
+"apparmor=lowpriv"
 ```
-
-Then, you can run the following line to **find the exact profile being used**:
-
+Στη συνέχεια, μπορείτε να εκτελέσετε την παρακάτω γραμμή για να **βρείτε το ακριβές προφίλ που χρησιμοποιείται**:
 ```bash
 find /etc/apparmor.d/ -name "*lowpriv*" -maxdepth 1 2>/dev/null
 ```
-
-In the weird case you can **modify the apparmor docker profile and reload it.** You could remove the restrictions and "bypass" them.
+Σε περίπτωση που μπορείτε να **τροποποιήσετε το προφίλ apparmor docker και να το επαναφορτώσετε.** Μπορείτε να αφαιρέσετε τους περιορισμούς και να τους "παρακάμψετε".
 
 ### AppArmor Docker Bypass2
 
-**AppArmor is path based**, this means that even if it might be **protecting** files inside a directory like **`/proc`** if you can **configure how the container is going to be run**, you could **mount** the proc directory of the host inside **`/host/proc`** and it **won't be protected by AppArmor anymore**.
+**Το AppArmor είναι βασισμένο σε διαδρομές**, αυτό σημαίνει ότι ακόμη και αν μπορεί να **προστατεύει** αρχεία μέσα σε έναν φάκελο όπως **`/proc`**, αν μπορείτε να **ρυθμίσετε πώς θα εκτελείται το κοντέινερ**, μπορείτε να **τοποθετήσετε** τον φάκελο proc του host μέσα σε **`/host/proc`** και **δεν θα προστατεύεται πλέον από το AppArmor**.
 
 ### AppArmor Shebang Bypass
 
-In [**this bug**](https://bugs.launchpad.net/apparmor/+bug/1911431) you can see an example of how **even if you are preventing perl to be run with certain resources**, if you just create a a shell script **specifying** in the first line **`#!/usr/bin/perl`** and you **execute the file directly**, you will be able to execute whatever you want. E.g.:
-
+Στο [**αυτό το σφάλμα**](https://bugs.launchpad.net/apparmor/+bug/1911431) μπορείτε να δείτε ένα παράδειγμα του πώς **ακόμη και αν αποτρέπετε την εκτέλεση του perl με ορισμένους πόρους**, αν απλώς δημιουργήσετε ένα shell script **καθορίζοντας** στην πρώτη γραμμή **`#!/usr/bin/perl`** και **εκτελέσετε το αρχείο απευθείας**, θα μπορείτε να εκτελέσετε ό,τι θέλετε. Π.χ.:
 ```perl
 echo '#!/usr/bin/perl
 use POSIX qw(strftime);
@@ -289,5 +250,4 @@ exec "/bin/sh"' > /tmp/test.pl
 chmod +x /tmp/test.pl
 /tmp/test.pl
 ```
-
 {{#include ../../../banners/hacktricks-training.md}}

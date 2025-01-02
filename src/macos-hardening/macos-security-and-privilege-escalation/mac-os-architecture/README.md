@@ -4,36 +4,36 @@
 
 ## XNU Kernel
 
-The **core of macOS is XNU**, which stands for "X is Not Unix". This kernel is fundamentally composed of the **Mach microkerne**l (to be discussed later), **and** elements from Berkeley Software Distribution (**BSD**). XNU also provides a platform for **kernel drivers via a system called the I/O Kit**. The XNU kernel is part of the Darwin open source project, which means **its source code is freely accessible**.
+Ο **πυρήνας του macOS είναι ο XNU**, που σημαίνει "X is Not Unix". Αυτός ο πυρήνας αποτελείται θεμελιωδώς από τον **Mach μικροπυρήνα** (θα συζητηθεί αργότερα), **και** στοιχεία από την Berkeley Software Distribution (**BSD**). Ο XNU παρέχει επίσης μια πλατφόρμα για **οδηγούς πυρήνα μέσω ενός συστήματος που ονομάζεται I/O Kit**. Ο πυρήνας XNU είναι μέρος του ανοιχτού κώδικα έργου Darwin, που σημαίνει ότι **ο πηγαίος κώδικας του είναι ελεύθερα προσβάσιμος**.
 
-From a perspective of a security researcher or a Unix developer, **macOS** can feel quite **similar** to a **FreeBSD** system with an elegant GUI and a host of custom applications. Most applications developed for BSD will compile and run on macOS without needing modifications, as the command-line tools familiar to Unix users are all present in macOS. However, because the XNU kernel incorporates Mach, there are some significant differences between a traditional Unix-like system and macOS, and these differences might cause potential issues or provide unique advantages.
+Από την προοπτική ενός ερευνητή ασφαλείας ή ενός προγραμματιστή Unix, το **macOS** μπορεί να φαίνεται αρκετά **παρόμοιο** με ένα σύστημα **FreeBSD** με μια κομψή GUI και μια σειρά από προσαρμοσμένες εφαρμογές. Οι περισσότερες εφαρμογές που αναπτύσσονται για BSD θα μεταγλωττιστούν και θα εκτελούνται στο macOS χωρίς να χρειάζονται τροποποιήσεις, καθώς τα εργαλεία γραμμής εντολών που είναι οικεία στους χρήστες Unix είναι όλα παρόντα στο macOS. Ωστόσο, επειδή ο πυρήνας XNU ενσωματώνει τον Mach, υπάρχουν κάποιες σημαντικές διαφορές μεταξύ ενός παραδοσιακού συστήματος παρόμοιου με Unix και του macOS, και αυτές οι διαφορές μπορεί να προκαλέσουν πιθανά προβλήματα ή να προσφέρουν μοναδικά πλεονεκτήματα.
 
-Open source version of XNU: [https://opensource.apple.com/source/xnu/](https://opensource.apple.com/source/xnu/)
+Ανοιχτός κώδικας έκδοση του XNU: [https://opensource.apple.com/source/xnu/](https://opensource.apple.com/source/xnu/)
 
 ### Mach
 
-Mach is a **microkernel** designed to be **UNIX-compatible**. One of its key design principles was to **minimize** the amount of **code** running in the **kernel** space and instead allow many typical kernel functions, such as file system, networking, and I/O, to **run as user-level tasks**.
+Ο Mach είναι ένας **μικροπυρήνας** σχεδιασμένος να είναι **συμβατός με UNIX**. ΈPrinciple του σχεδιασμού του ήταν να **ελαχιστοποιήσει** την ποσότητα του **κώδικα** που εκτελείται στον **χώρο πυρήνα** και αντίθετα να επιτρέπει πολλές τυπικές λειτουργίες του πυρήνα, όπως το σύστημα αρχείων, το δίκτυο και το I/O, να **εκτελούνται ως εργασίες επιπέδου χρήστη**.
 
-In XNU, Mach is **responsible for many of the critical low-level operations** a kernel typically handles, such as processor scheduling, multitasking, and virtual memory management.
+Στον XNU, ο Mach είναι **υπεύθυνος για πολλές από τις κρίσιμες χαμηλού επιπέδου λειτουργίες** που συνήθως χειρίζεται ένας πυρήνας, όπως ο προγραμματισμός επεξεργαστή, η πολυδιεργασία και η διαχείριση εικονικής μνήμης.
 
 ### BSD
 
-The XNU **kernel** also **incorporates** a significant amount of code derived from the **FreeBSD** project. This code **runs as part of the kernel along with Mach**, in the same address space. However, the FreeBSD code within XNU may differ substantially from the original FreeBSD code because modifications were required to ensure its compatibility with Mach. FreeBSD contributes to many kernel operations including:
+Ο πυρήνας XNU **ενσωματώνει** επίσης μια σημαντική ποσότητα κώδικα που προέρχεται από το έργο **FreeBSD**. Αυτός ο κώδικας **εκτελείται ως μέρος του πυρήνα μαζί με τον Mach**, στον ίδιο χώρο διευθύνσεων. Ωστόσο, ο κώδικας FreeBSD μέσα στον XNU μπορεί να διαφέρει σημαντικά από τον αρχικό κώδικα FreeBSD επειδή απαιτήθηκαν τροποποιήσεις για να διασφαλιστεί η συμβατότητά του με τον Mach. Το FreeBSD συμβάλλει σε πολλές λειτουργίες του πυρήνα, συμπεριλαμβανομένων:
 
-- Process management
-- Signal handling
-- Basic security mechanisms, including user and group management
-- System call infrastructure
-- TCP/IP stack and sockets
-- Firewall and packet filtering
+- Διαχείριση διεργασιών
+- Διαχείριση σημάτων
+- Βασικοί μηχανισμοί ασφαλείας, συμπεριλαμβανομένης της διαχείρισης χρηστών και ομάδων
+- Υποδομή κλήσεων συστήματος
+- Στοίβα TCP/IP και υποδοχές
+- Τείχος προστασίας και φιλτράρισμα πακέτων
 
-Understanding the interaction between BSD and Mach can be complex, due to their different conceptual frameworks. For instance, BSD uses processes as its fundamental executing unit, while Mach operates based on threads. This discrepancy is reconciled in XNU by **associating each BSD process with a Mach task** that contains exactly one Mach thread. When BSD's fork() system call is used, the BSD code within the kernel uses Mach functions to create a task and a thread structure.
+Η κατανόηση της αλληλεπίδρασης μεταξύ BSD και Mach μπορεί να είναι περίπλοκη, λόγω των διαφορετικών εννοιολογικών πλαισίων τους. Για παράδειγμα, το BSD χρησιμοποιεί διεργασίες ως τη θεμελιώδη μονάδα εκτέλεσης του, ενώ ο Mach λειτουργεί με βάση τα νήματα. Αυτή η διαφορά συμφιλιώνεται στον XNU με την **συσχέτιση κάθε διεργασίας BSD με μια εργασία Mach** που περιέχει ακριβώς ένα νήμα Mach. Όταν χρησιμοποιείται η κλήση συστήματος fork() του BSD, ο κώδικας BSD μέσα στον πυρήνα χρησιμοποιεί τις λειτουργίες Mach για να δημιουργήσει μια εργασία και μια δομή νήματος.
 
-Moreover, **Mach and BSD each maintain different security models**: **Mach's** security model is based on **port rights**, whereas BSD's security model operates based on **process ownership**. Disparities between these two models have occasionally resulted in local privilege-escalation vulnerabilities. Apart from typical system calls, there are also **Mach traps that allow user-space programs to interact with the kernel**. These different elements together form the multifaceted, hybrid architecture of the macOS kernel.
+Επιπλέον, **ο Mach και το BSD διατηρούν διαφορετικά μοντέλα ασφαλείας**: το μοντέλο ασφαλείας του **Mach** βασίζεται στα **δικαιώματα θυρών**, ενώ το μοντέλο ασφαλείας του BSD λειτουργεί με βάση την **ιδιοκτησία διεργασίας**. Οι διαφορές μεταξύ αυτών των δύο μοντέλων έχουν κατά καιρούς οδηγήσει σε τοπικές ευπάθειες ανύψωσης προνομίων. Εκτός από τις τυπικές κλήσεις συστήματος, υπάρχουν επίσης **παγίδες Mach που επιτρέπουν στα προγράμματα χώρου χρήστη να αλληλεπιδρούν με τον πυρήνα**. Αυτά τα διαφορετικά στοιχεία μαζί σχηματίζουν την πολύπλευρη, υβριδική αρχιτεκτονική του πυρήνα macOS.
 
 ### I/O Kit - Drivers
 
-The I/O Kit is an open-source, object-oriented **device-driver framework** in the XNU kernel, handles **dynamically loaded device drivers**. It allows modular code to be added to the kernel on-the-fly, supporting diverse hardware.
+Το I/O Kit είναι ένα ανοιχτού κώδικα, αντικειμενοστραφές **πλαίσιο οδηγών συσκευών** στον πυρήνα XNU, που χειρίζεται **δυναμικά φορτωμένους οδηγούς συσκευών**. Επιτρέπει την προσθήκη αρθρωτού κώδικα στον πυρήνα εν κινήσει, υποστηρίζοντας ποικιλία υλικού.
 
 {{#ref}}
 macos-iokit.md
@@ -47,9 +47,9 @@ macos-iokit.md
 
 ## macOS Kernel Extensions
 
-macOS is **super restrictive to load Kernel Extensions** (.kext) because of the high privileges that code will run with. Actually, by default is virtually impossible (unless a bypass is found).
+Το macOS είναι **πολύ περιοριστικό για τη φόρτωση Επεκτάσεων Πυρήνα** (.kext) λόγω των υψηλών προνομίων με τα οποία θα εκτελείται ο κώδικας. Στην πραγματικότητα, από προεπιλογή είναι σχεδόν αδύνατο (εκτός αν βρεθεί μια παράκαμψη).
 
-In the following page you can also see how to recover the `.kext` that macOS loads inside its **kernelcache**:
+Στην επόμενη σελίδα μπορείτε επίσης να δείτε πώς να ανακτήσετε το `.kext` που φορτώνει το macOS μέσα στο **kernelcache** του:
 
 {{#ref}}
 macos-kernel-extensions.md
@@ -57,7 +57,7 @@ macos-kernel-extensions.md
 
 ### macOS System Extensions
 
-Instead of using Kernel Extensions macOS created the System Extensions, which offers in user level APIs to interact with the kernel. This way, developers can avoid to use kernel extensions.
+Αντί να χρησιμοποιεί Επεκτάσεις Πυρήνα, το macOS δημιούργησε τις Επεκτάσεις Συστήματος, οι οποίες προσφέρουν APIs επιπέδου χρήστη για αλληλεπίδραση με τον πυρήνα. Με αυτόν τον τρόπο, οι προγραμματιστές μπορούν να αποφύγουν τη χρήση επεκτάσεων πυρήνα.
 
 {{#ref}}
 macos-system-extensions.md

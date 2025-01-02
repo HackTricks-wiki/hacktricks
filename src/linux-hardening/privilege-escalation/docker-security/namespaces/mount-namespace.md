@@ -4,68 +4,61 @@
 
 ## Basic Information
 
-A mount namespace is a Linux kernel feature that provides isolation of the file system mount points seen by a group of processes. Each mount namespace has its own set of file system mount points, and **changes to the mount points in one namespace do not affect other namespaces**. This means that processes running in different mount namespaces can have different views of the file system hierarchy.
+Ένα mount namespace είναι μια δυνατότητα του πυρήνα Linux που παρέχει απομόνωση των σημείων προσάρτησης του συστήματος αρχείων που βλέπει μια ομάδα διεργασιών. Κάθε mount namespace έχει το δικό του σύνολο σημείων προσάρτησης του συστήματος αρχείων, και **οι αλλαγές στα σημεία προσάρτησης σε ένα namespace δεν επηρεάζουν άλλα namespaces**. Αυτό σημαίνει ότι οι διεργασίες που εκτελούνται σε διαφορετικά mount namespaces μπορούν να έχουν διαφορετικές απόψεις της ιεραρχίας του συστήματος αρχείων.
 
-Mount namespaces are particularly useful in containerization, where each container should have its own file system and configuration, isolated from other containers and the host system.
+Τα mount namespaces είναι ιδιαίτερα χρήσιμα στην κοντεντοποίηση, όπου κάθε κοντέινερ θα πρέπει να έχει το δικό του σύστημα αρχείων και ρύθμιση, απομονωμένο από άλλα κοντέινερ και το σύστημα φιλοξενίας.
 
 ### How it works:
 
-1. When a new mount namespace is created, it is initialized with a **copy of the mount points from its parent namespace**. This means that, at creation, the new namespace shares the same view of the file system as its parent. However, any subsequent changes to the mount points within the namespace will not affect the parent or other namespaces.
-2. When a process modifies a mount point within its namespace, such as mounting or unmounting a file system, the **change is local to that namespace** and does not affect other namespaces. This allows each namespace to have its own independent file system hierarchy.
-3. Processes can move between namespaces using the `setns()` system call, or create new namespaces using the `unshare()` or `clone()` system calls with the `CLONE_NEWNS` flag. When a process moves to a new namespace or creates one, it will start using the mount points associated with that namespace.
-4. **File descriptors and inodes are shared across namespaces**, meaning that if a process in one namespace has an open file descriptor pointing to a file, it can **pass that file descriptor** to a process in another namespace, and **both processes will access the same file**. However, the file's path may not be the same in both namespaces due to differences in mount points.
+1. Όταν δημιουργείται ένα νέο mount namespace, αρχικοποιείται με μια **αντίγραφο των σημείων προσάρτησης από το γονικό namespace**. Αυτό σημαίνει ότι, κατά τη δημιουργία, το νέο namespace μοιράζεται την ίδια άποψη του συστήματος αρχείων με το γονικό του. Ωστόσο, οποιεσδήποτε επακόλουθες αλλαγές στα σημεία προσάρτησης εντός του namespace δεν θα επηρεάσουν το γονικό ή άλλα namespaces.
+2. Όταν μια διεργασία τροποποιεί ένα σημείο προσάρτησης εντός του namespace της, όπως η προσάρτηση ή η αποσύνδεση ενός συστήματος αρχείων, η **αλλαγή είναι τοπική σε εκείνο το namespace** και δεν επηρεάζει άλλα namespaces. Αυτό επιτρέπει σε κάθε namespace να έχει τη δική του ανεξάρτητη ιεραρχία συστήματος αρχείων.
+3. Οι διεργασίες μπορούν να μετακινηθούν μεταξύ namespaces χρησιμοποιώντας την κλήση συστήματος `setns()`, ή να δημιουργήσουν νέα namespaces χρησιμοποιώντας τις κλήσεις συστήματος `unshare()` ή `clone()` με την σημαία `CLONE_NEWNS`. Όταν μια διεργασία μετακινείται σε ένα νέο namespace ή δημιουργεί ένα, θα αρχίσει να χρησιμοποιεί τα σημεία προσάρτησης που σχετίζονται με εκείνο το namespace.
+4. **Οι περιγραφείς αρχείων και οι inodes μοιράζονται μεταξύ namespaces**, πράγμα που σημαίνει ότι αν μια διεργασία σε ένα namespace έχει έναν ανοιχτό περιγραφέα αρχείου που δείχνει σε ένα αρχείο, μπορεί να **περάσει αυτόν τον περιγραφέα αρχείου** σε μια διεργασία σε άλλο namespace, και **και οι δύο διεργασίες θα έχουν πρόσβαση στο ίδιο αρχείο**. Ωστόσο, η διαδρομή του αρχείου μπορεί να μην είναι η ίδια και στα δύο namespaces λόγω διαφορών στα σημεία προσάρτησης.
 
 ## Lab:
 
 ### Create different Namespaces
 
 #### CLI
-
 ```bash
 sudo unshare -m [--mount-proc] /bin/bash
 ```
-
-By mounting a new instance of the `/proc` filesystem if you use the param `--mount-proc`, you ensure that the new mount namespace has an **accurate and isolated view of the process information specific to that namespace**.
+Με την τοποθέτηση μιας νέας παρουσίας του συστήματος αρχείων `/proc` αν χρησιμοποιήσετε την παράμετρο `--mount-proc`, διασφαλίζετε ότι το νέο mount namespace έχει μια **ακριβή και απομονωμένη άποψη των πληροφοριών διαδικασίας που είναι συγκεκριμένες για αυτό το namespace**.
 
 <details>
 
-<summary>Error: bash: fork: Cannot allocate memory</summary>
+<summary>Σφάλμα: bash: fork: Cannot allocate memory</summary>
 
-When `unshare` is executed without the `-f` option, an error is encountered due to the way Linux handles new PID (Process ID) namespaces. The key details and the solution are outlined below:
+Όταν εκτελείται το `unshare` χωρίς την επιλογή `-f`, προκύπτει ένα σφάλμα λόγω του τρόπου που το Linux χειρίζεται τα νέα PID (Process ID) namespaces. Οι βασικές λεπτομέρειες και η λύση περιγράφονται παρακάτω:
 
-1. **Problem Explanation**:
+1. **Εξήγηση Προβλήματος**:
 
-   - The Linux kernel allows a process to create new namespaces using the `unshare` system call. However, the process that initiates the creation of a new PID namespace (referred to as the "unshare" process) does not enter the new namespace; only its child processes do.
-   - Running `%unshare -p /bin/bash%` starts `/bin/bash` in the same process as `unshare`. Consequently, `/bin/bash` and its child processes are in the original PID namespace.
-   - The first child process of `/bin/bash` in the new namespace becomes PID 1. When this process exits, it triggers the cleanup of the namespace if there are no other processes, as PID 1 has the special role of adopting orphan processes. The Linux kernel will then disable PID allocation in that namespace.
+- Ο πυρήνας του Linux επιτρέπει σε μια διαδικασία να δημιουργεί νέα namespaces χρησιμοποιώντας την κλήση συστήματος `unshare`. Ωστόσο, η διαδικασία που ξεκινά τη δημιουργία ενός νέου PID namespace (αναφερόμενη ως η διαδικασία "unshare") δεν εισέρχεται στο νέο namespace; μόνο οι παιδικές της διαδικασίες το κάνουν.
+- Η εκτέλεση `%unshare -p /bin/bash%` ξεκινά το `/bin/bash` στην ίδια διαδικασία με το `unshare`. Κατά συνέπεια, το `/bin/bash` και οι παιδικές του διαδικασίες βρίσκονται στο αρχικό PID namespace.
+- Η πρώτη παιδική διαδικασία του `/bin/bash` στο νέο namespace γίνεται PID 1. Όταν αυτή η διαδικασία τερματίσει, ενεργοποιεί την καθαριότητα του namespace αν δεν υπάρχουν άλλες διαδικασίες, καθώς το PID 1 έχει τον ειδικό ρόλο της υιοθέτησης ορφανών διαδικασιών. Ο πυρήνας του Linux θα απενεργοποιήσει στη συνέχεια την κατανομή PID σε αυτό το namespace.
 
-2. **Consequence**:
+2. **Συνέπεια**:
 
-   - The exit of PID 1 in a new namespace leads to the cleaning of the `PIDNS_HASH_ADDING` flag. This results in the `alloc_pid` function failing to allocate a new PID when creating a new process, producing the "Cannot allocate memory" error.
+- Η έξοδος του PID 1 σε ένα νέο namespace οδηγεί στον καθαρισμό της σημαίας `PIDNS_HASH_ADDING`. Αυτό έχει ως αποτέλεσμα τη αποτυχία της συνάρτησης `alloc_pid` να κατανεμηθεί ένα νέο PID κατά τη δημιουργία μιας νέας διαδικασίας, παράγοντας το σφάλμα "Cannot allocate memory".
 
-3. **Solution**:
-   - The issue can be resolved by using the `-f` option with `unshare`. This option makes `unshare` fork a new process after creating the new PID namespace.
-   - Executing `%unshare -fp /bin/bash%` ensures that the `unshare` command itself becomes PID 1 in the new namespace. `/bin/bash` and its child processes are then safely contained within this new namespace, preventing the premature exit of PID 1 and allowing normal PID allocation.
+3. **Λύση**:
+- Το πρόβλημα μπορεί να επιλυθεί χρησιμοποιώντας την επιλογή `-f` με το `unshare`. Αυτή η επιλογή κάνει το `unshare` να δημιουργήσει μια νέα διαδικασία μετά τη δημιουργία του νέου PID namespace.
+- Η εκτέλεση `%unshare -fp /bin/bash%` διασφαλίζει ότι η εντολή `unshare` γίνεται PID 1 στο νέο namespace. Το `/bin/bash` και οι παιδικές του διαδικασίες είναι τότε ασφαλώς περιορισμένες μέσα σε αυτό το νέο namespace, αποτρέποντας την πρόωρη έξοδο του PID 1 και επιτρέποντας την κανονική κατανομή PID.
 
-By ensuring that `unshare` runs with the `-f` flag, the new PID namespace is correctly maintained, allowing `/bin/bash` and its sub-processes to operate without encountering the memory allocation error.
+Διασφαλίζοντας ότι το `unshare` εκτελείται με την επιλογή `-f`, το νέο PID namespace διατηρείται σωστά, επιτρέποντας στο `/bin/bash` και τις υπο-διαδικασίες του να λειτουργούν χωρίς να αντιμετωπίζουν το σφάλμα κατανομής μνήμης.
 
 </details>
 
 #### Docker
-
 ```bash
 docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 ```
-
-### &#x20;Check which namespace is your process in
-
+### &#x20;Ελέγξτε σε ποιο namespace βρίσκεται η διαδικασία σας
 ```bash
 ls -l /proc/self/ns/mnt
 lrwxrwxrwx 1 root root 0 Apr  4 20:30 /proc/self/ns/mnt -> 'mnt:[4026531841]'
 ```
-
-### Find all Mount namespaces
-
+### Βρείτε όλα τα Mount namespaces
 ```bash
 sudo find /proc -maxdepth 3 -type l -name mnt -exec readlink {} \; 2>/dev/null | sort -u
 # Find the processes with an specific namespace
@@ -75,19 +68,15 @@ sudo find /proc -maxdepth 3 -type l -name mnt -exec ls -l  {} \; 2>/dev/null | g
 ```bash
 findmnt
 ```
-
-### Enter inside a Mount namespace
-
+### Είσοδος σε ένα Mount namespace
 ```bash
 nsenter -m TARGET_PID --pid /bin/bash
 ```
+Επίσης, μπορείτε να **μπείτε σε άλλη διαδικασία namespace μόνο αν είστε root**. Και **δεν μπορείτε** να **μπείτε** σε άλλο namespace **χωρίς έναν περιγραφέα** που να δείχνει σε αυτό (όπως το `/proc/self/ns/mnt`).
 
-Also, you can only **enter in another process namespace if you are root**. And you **cannot** **enter** in other namespace **without a descriptor** pointing to it (like `/proc/self/ns/mnt`).
-
-Because new mounts are only accessible within the namespace it's possible that a namespace contains sensitive information that can only be accessible from it.
+Επειδή οι νέες προσβάσεις είναι προσβάσιμες μόνο εντός του namespace, είναι πιθανό ένα namespace να περιέχει ευαίσθητες πληροφορίες που μπορούν να είναι προσβάσιμες μόνο από αυτό.
 
 ### Mount something
-
 ```bash
 # Generate new mount ns
 unshare -m /bin/bash
@@ -127,8 +116,7 @@ systemd-private-3d87c249e8a84451994ad692609cd4b6-systemd-timesyncd.service-FAnDq
 vmware-root_662-2689143848
 
 ```
-
-## References
+## Αναφορές
 
 - [https://stackoverflow.com/questions/44666700/unshare-pid-bin-bash-fork-cannot-allocate-memory](https://stackoverflow.com/questions/44666700/unshare-pid-bin-bash-fork-cannot-allocate-memory)
 - [https://unix.stackexchange.com/questions/464033/understanding-how-mount-namespaces-work-in-linux](https://unix.stackexchange.com/questions/464033/understanding-how-mount-namespaces-work-in-linux)

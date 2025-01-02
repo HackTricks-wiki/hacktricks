@@ -2,199 +2,199 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**To learn about macOS MDMs check:**
+**Για να μάθετε για τα macOS MDMs, ελέγξτε:**
 
 - [https://www.youtube.com/watch?v=ku8jZe-MHUU](https://www.youtube.com/watch?v=ku8jZe-MHUU)
 - [https://duo.com/labs/research/mdm-me-maybe](https://duo.com/labs/research/mdm-me-maybe)
 
-## Basics
+## Βασικά
 
-### **MDM (Mobile Device Management) Overview**
+### **Επισκόπηση MDM (Διαχείριση Κινητών Συσκευών)**
 
-[Mobile Device Management](https://en.wikipedia.org/wiki/Mobile_device_management) (MDM) is utilized for overseeing various end-user devices like smartphones, laptops, and tablets. Particularly for Apple's platforms (iOS, macOS, tvOS), it involves a set of specialized features, APIs, and practices. The operation of MDM hinges on a compatible MDM server, which is either commercially available or open-source, and must support the [MDM Protocol](https://developer.apple.com/enterprise/documentation/MDM-Protocol-Reference.pdf). Key points include:
+[Διαχείριση Κινητών Συσκευών](https://en.wikipedia.org/wiki/Mobile_device_management) (MDM) χρησιμοποιείται για την εποπτεία διαφόρων συσκευών τελικού χρήστη όπως smartphones, laptops και tablets. Ιδιαίτερα για τις πλατφόρμες της Apple (iOS, macOS, tvOS), περιλαμβάνει ένα σύνολο εξειδικευμένων χαρακτηριστικών, APIs και πρακτικών. Η λειτουργία του MDM εξαρτάται από έναν συμβατό διακομιστή MDM, ο οποίος είναι είτε εμπορικά διαθέσιμος είτε ανοιχτού κώδικα, και πρέπει να υποστηρίζει το [Πρωτόκολλο MDM](https://developer.apple.com/enterprise/documentation/MDM-Protocol-Reference.pdf). Σημαντικά σημεία περιλαμβάνουν:
 
-- Centralized control over devices.
-- Dependence on an MDM server that adheres to the MDM protocol.
-- Capability of the MDM server to dispatch various commands to devices, for instance, remote data erasure or configuration installation.
+- Κεντρικός έλεγχος των συσκευών.
+- Εξάρτηση από έναν διακομιστή MDM που συμμορφώνεται με το πρωτόκολλο MDM.
+- Ικανότητα του διακομιστή MDM να αποστέλλει διάφορες εντολές στις συσκευές, για παράδειγμα, απομακρυσμένη διαγραφή δεδομένων ή εγκατάσταση ρυθμίσεων.
 
-### **Basics of DEP (Device Enrollment Program)**
+### **Βασικά του DEP (Πρόγραμμα Εγγραφής Συσκευών)**
 
-The [Device Enrollment Program](https://www.apple.com/business/site/docs/DEP_Guide.pdf) (DEP) offered by Apple streamlines the integration of Mobile Device Management (MDM) by facilitating zero-touch configuration for iOS, macOS, and tvOS devices. DEP automates the enrollment process, allowing devices to be operational right out of the box, with minimal user or administrative intervention. Essential aspects include:
+Το [Πρόγραμμα Εγγραφής Συσκευών](https://www.apple.com/business/site/docs/DEP_Guide.pdf) (DEP) που προσφέρει η Apple απλοποιεί την ενσωμάτωση της Διαχείρισης Κινητών Συσκευών (MDM) διευκολύνοντας τη ρύθμιση χωρίς επαφή για συσκευές iOS, macOS και tvOS. Το DEP αυτοματοποιεί τη διαδικασία εγγραφής, επιτρέποντας στις συσκευές να είναι λειτουργικές αμέσως μόλις ανοίξουν, με ελάχιστη παρέμβαση από τον χρήστη ή τον διαχειριστή. Βασικά στοιχεία περιλαμβάνουν:
 
-- Enables devices to autonomously register with a pre-defined MDM server upon initial activation.
-- Primarily beneficial for brand-new devices, but also applicable for devices undergoing reconfiguration.
-- Facilitates a straightforward setup, making devices ready for organizational use swiftly.
+- Δίνει τη δυνατότητα στις συσκευές να εγγράφονται αυτόματα σε έναν προκαθορισμένο διακομιστή MDM κατά την αρχική ενεργοποίηση.
+- Κυρίως ωφέλιμο για καινούργιες συσκευές, αλλά εφαρμόσιμο και για συσκευές που επαναρυθμίζονται.
+- Διευκολύνει μια απλή ρύθμιση, κάνοντάς τις συσκευές έτοιμες για οργανωτική χρήση γρήγορα.
 
-### **Security Consideration**
+### **Σκέψη Ασφαλείας**
 
-It's crucial to note that the ease of enrollment provided by DEP, while beneficial, can also pose security risks. If protective measures are not adequately enforced for MDM enrollment, attackers might exploit this streamlined process to register their device on the organization's MDM server, masquerading as a corporate device.
+Είναι κρίσιμο να σημειωθεί ότι η ευκολία εγγραφής που παρέχει το DEP, αν και ωφέλιμη, μπορεί επίσης να θέσει σε κίνδυνο την ασφάλεια. Εάν τα προστατευτικά μέτρα δεν επιβληθούν επαρκώς για την εγγραφή MDM, οι επιτιθέμενοι μπορεί να εκμεταλλευτούν αυτή τη διαδικασία για να εγγραφούν στη συσκευή τους στον διακομιστή MDM της οργάνωσης, προσποιούμενοι ότι είναι εταιρική συσκευή.
 
 > [!CAUTION]
-> **Security Alert**: Simplified DEP enrollment could potentially allow unauthorized device registration on the organization's MDM server if proper safeguards are not in place.
+> **Ειδοποίηση Ασφαλείας**: Η απλοποιημένη εγγραφή DEP θα μπορούσε ενδεχομένως να επιτρέψει την μη εξουσιοδοτημένη εγγραφή συσκευών στον διακομιστή MDM της οργάνωσης εάν δεν υπάρχουν κατάλληλες προστασίες.
 
-### Basics What is SCEP (Simple Certificate Enrolment Protocol)?
+### Βασικά Τι είναι το SCEP (Πρωτόκολλο Απλής Εγγραφής Πιστοποιητικών);
 
-- A relatively old protocol, created before TLS and HTTPS were widespread.
-- Gives clients a standardized way of sending a **Certificate Signing Request** (CSR) for the purpose of being granted a certificate. The client will ask the server to give him a signed certificate.
+- Ένα σχετικά παλιό πρωτόκολλο, που δημιουργήθηκε πριν γίνουν ευρέως διαδεδομένα τα TLS και HTTPS.
+- Δίνει στους πελάτες έναν τυποποιημένο τρόπο αποστολής ενός **Αιτήματος Υπογραφής Πιστοποιητικού** (CSR) με σκοπό την απόκτηση ενός πιστοποιητικού. Ο πελάτης θα ζητήσει από τον διακομιστή να του δώσει ένα υπογεγραμμένο πιστοποιητικό.
 
-### What are Configuration Profiles (aka mobileconfigs)?
+### Τι είναι τα Προφίλ Ρυθμίσεων (aka mobileconfigs);
 
-- Apple’s official way of **setting/enforcing system configuration.**
-- File format that can contain multiple payloads.
-- Based on property lists (the XML kind).
-- “can be signed and encrypted to validate their origin, ensure their integrity, and protect their contents.” Basics — Page 70, iOS Security Guide, January 2018.
+- Ο επίσημος τρόπος της Apple για **ρύθμιση/επιβολή συστήματος ρυθμίσεων.**
+- Μορφή αρχείου που μπορεί να περιέχει πολλαπλά payloads.
+- Βασισμένο σε λίστες ιδιοτήτων (του XML τύπου).
+- “μπορεί να υπογραφεί και να κρυπτογραφηθεί για να επιβεβαιώσει την προέλευση τους, να διασφαλίσει την ακεραιότητά τους και να προστατεύσει το περιεχόμενό τους.” Βασικά — Σελίδα 70, Οδηγός Ασφαλείας iOS, Ιανουάριος 2018.
 
-## Protocols
+## Πρωτόκολλα
 
 ### MDM
 
-- Combination of APNs (**Apple server**s) + RESTful API (**MDM** **vendor** servers)
-- **Communication** occurs between a **device** and a server associated with a **device** **management** **product**
-- **Commands** delivered from the MDM to the device in **plist-encoded dictionaries**
-- All over **HTTPS**. MDM servers can be (and are usually) pinned.
-- Apple grants the MDM vendor an **APNs certificate** for authentication
+- Συνδυασμός APNs (**Apple server**s) + RESTful API (**MDM** **vendor** servers)
+- **Επικοινωνία** συμβαίνει μεταξύ μιας **συσκευής** και ενός διακομιστή που σχετίζεται με ένα **προϊόν** **διαχείρισης** **συσκευών**
+- **Εντολές** παραδίδονται από το MDM στη συσκευή σε **plist-encoded dictionaries**
+- Όλα μέσω **HTTPS**. Οι διακομιστές MDM μπορούν να είναι (και συνήθως είναι) pinned.
+- Η Apple παρέχει στον προμηθευτή MDM ένα **πιστοποιητικό APNs** για αυθεντικοποίηση
 
 ### DEP
 
-- **3 APIs**: 1 for resellers, 1 for MDM vendors, 1 for device identity (undocumented):
-  - The so-called [DEP "cloud service" API](https://developer.apple.com/enterprise/documentation/MDM-Protocol-Reference.pdf). This is used by MDM servers to associate DEP profiles with specific devices.
-  - The [DEP API used by Apple Authorized Resellers](https://applecareconnect.apple.com/api-docs/depuat/html/WSImpManual.html) to enroll devices, check enrollment status, and check transaction status.
-  - The undocumented private DEP API. This is used by Apple Devices to request their DEP profile. On macOS, the `cloudconfigurationd` binary is responsible for communicating over this API.
-- More modern and **JSON** based (vs. plist)
-- Apple grants an **OAuth token** to the MDM vendor
+- **3 APIs**: 1 για μεταπωλητές, 1 για προμηθευτές MDM, 1 για ταυτότητα συσκευής (μη τεκμηριωμένο):
+- Ο λεγόμενος [DEP "cloud service" API](https://developer.apple.com/enterprise/documentation/MDM-Protocol-Reference.pdf). Αυτό χρησιμοποιείται από τους διακομιστές MDM για να συσχετίσουν τα προφίλ DEP με συγκεκριμένες συσκευές.
+- Το [DEP API που χρησιμοποιείται από τους Εξουσιοδοτημένους Μεταπωλητές της Apple](https://applecareconnect.apple.com/api-docs/depuat/html/WSImpManual.html) για να εγγράψουν συσκευές, να ελέγξουν την κατάσταση εγγραφής και να ελέγξουν την κατάσταση συναλλαγής.
+- Το μη τεκμηριωμένο ιδιωτικό DEP API. Αυτό χρησιμοποιείται από τις Συσκευές Apple για να ζητήσουν το προφίλ DEP τους. Στο macOS, το δυαδικό `cloudconfigurationd` είναι υπεύθυνο για την επικοινωνία μέσω αυτού του API.
+- Πιο σύγχρονο και **JSON** βασισμένο (σε σχέση με plist)
+- Η Apple παρέχει ένα **OAuth token** στον προμηθευτή MDM
 
 **DEP "cloud service" API**
 
 - RESTful
-- sync device records from Apple to the MDM server
-- sync “DEP profiles” to Apple from the MDM server (delivered by Apple to the device later on)
-- A DEP “profile” contains:
-  - MDM vendor server URL
-  - Additional trusted certificates for server URL (optional pinning)
-  - Extra settings (e.g. which screens to skip in Setup Assistant)
+- συγχρονίζει τις εγγραφές συσκευών από την Apple στον διακομιστή MDM
+- συγχρονίζει τα “DEP profiles” στην Apple από τον διακομιστή MDM (παραδίδεται από την Apple στη συσκευή αργότερα)
+- Ένα DEP “profile” περιέχει:
+- URL διακομιστή προμηθευτή MDM
+- Πρόσθετα αξιόπιστα πιστοποιητικά για το URL του διακομιστή (προαιρετική pinning)
+- Επιπλέον ρυθμίσεις (π.χ. ποιες οθόνες να παραλειφθούν στον Βοηθό Ρύθμισης)
 
-## Serial Number
+## Αριθμός Σειράς
 
-Apple devices manufactured after 2010 generally have **12-character alphanumeric** serial numbers, with the **first three digits representing the manufacturing location**, the following **two** indicating the **year** and **week** of manufacture, the next **three** digits providing a **unique** **identifier**, and the **last** **four** digits representing the **model number**.
+Οι συσκευές Apple που κατασκευάστηκαν μετά το 2010 γενικά έχουν **12-χαρακτήρων αλφαριθμητικούς** αριθμούς σειράς, με τα **πρώτα τρία ψηφία να αντιπροσωπεύουν την τοποθεσία κατασκευής**, τα επόμενα **δύο** να υποδεικνύουν το **έτος** και την **εβδομάδα** κατασκευής, τα επόμενα **τρία** ψηφία να παρέχουν έναν **μοναδικό** **αναγνωριστικό**, και τα **τελευταία** **τέσσερα** ψηφία να αντιπροσωπεύουν τον **αριθμό μοντέλου**.
 
 {{#ref}}
 macos-serial-number.md
 {{#endref}}
 
-## Steps for enrolment and management
+## Βήματα για εγγραφή και διαχείριση
 
-1. Device record creation (Reseller, Apple): The record for the new device is created
-2. Device record assignment (Customer): The device is assigned to a MDM server
-3. Device record sync (MDM vendor): MDM sync the device records and push the DEP profiles to Apple
-4. DEP check-in (Device): Device gets his DEP profile
-5. Profile retrieval (Device)
-6. Profile installation (Device) a. incl. MDM, SCEP and root CA payloads
-7. MDM command issuance (Device)
+1. Δημιουργία εγγραφής συσκευής (Μεταπωλητής, Apple): Δημιουργείται η εγγραφή για τη νέα συσκευή
+2. Ανάθεση εγγραφής συσκευής (Πελάτης): Η συσκευή ανατίθεται σε έναν διακομιστή MDM
+3. Συγχρονισμός εγγραφής συσκευής (Προμηθευτής MDM): Ο MDM συγχρονίζει τις εγγραφές συσκευών και σπρώχνει τα προφίλ DEP στην Apple
+4. Έλεγχος DEP (Συσκευή): Η συσκευή αποκτά το προφίλ DEP της
+5. Ανάκτηση προφίλ (Συσκευή)
+6. Εγκατάσταση προφίλ (Συσκευή) α. συμπεριλαμβανομένων των payloads MDM, SCEP και root CA
+7. Έκδοση εντολής MDM (Συσκευή)
 
 ![](<../../../images/image (694).png>)
 
-The file `/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/System/Library/PrivateFrameworks/ConfigurationProfiles.framework/ConfigurationProfiles.tbd` exports functions that can be considered **high-level "steps"** of the enrolment process.
+Το αρχείο `/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/System/Library/PrivateFrameworks/ConfigurationProfiles.framework/ConfigurationProfiles.tbd` εξάγει λειτουργίες που μπορούν να θεωρηθούν **υψηλού επιπέδου "βήματα"** της διαδικασίας εγγραφής.
 
-### Step 4: DEP check-in - Getting the Activation Record
+### Βήμα 4: Έλεγχος DEP - Λήψη του Ενεργοποιητικού Αρχείου
 
-This part of the process occurs when a **user boots a Mac for the first time** (or after a complete wipe)
+Αυτό το μέρος της διαδικασίας συμβαίνει όταν ένας **χρήστης εκκινεί ένα Mac για πρώτη φορά** (ή μετά από μια πλήρη διαγραφή)
 
 ![](<../../../images/image (1044).png>)
 
-or when executing `sudo profiles show -type enrollment`
+ή όταν εκτελείται `sudo profiles show -type enrollment`
 
-- Determine **whether device is DEP enabled**
-- Activation Record is the internal name for **DEP “profile”**
-- Begins as soon as the device is connected to Internet
-- Driven by **`CPFetchActivationRecord`**
-- Implemented by **`cloudconfigurationd`** via XPC. The **"Setup Assistant**" (when the device is firstly booted) or the **`profiles`** command will **contact this daemon** to retrieve the activation record.
-  - LaunchDaemon (always runs as root)
+- Καθορίστε **αν η συσκευή είναι ενεργοποιημένη για DEP**
+- Το Ενεργοποιητικό Αρχείο είναι το εσωτερικό όνομα για το **DEP “profile”**
+- Ξεκινά μόλις η συσκευή συνδεθεί στο Διαδίκτυο
+- Οδηγείται από **`CPFetchActivationRecord`**
+- Υλοποιείται από **`cloudconfigurationd`** μέσω XPC. Ο **"Βοηθός Ρύθμισης"** (όταν η συσκευή εκκινείται για πρώτη φορά) ή η εντολή **`profiles`** θα **επικοινωνήσει με αυτόν τον δαίμονα** για να ανακτήσει το ενεργοποιητικό αρχείο.
+- LaunchDaemon (τρέχει πάντα ως root)
 
-It follows a few steps to get the Activation Record performed by **`MCTeslaConfigurationFetcher`**. This process uses an encryption called **Absinthe**
+Ακολουθεί μερικά βήματα για να αποκτήσει το Ενεργοποιητικό Αρχείο που εκτελείται από **`MCTeslaConfigurationFetcher`**. Αυτή η διαδικασία χρησιμοποιεί μια κρυπτογράφηση που ονομάζεται **Absinthe**
 
-1. Retrieve **certificate**
-   1. GET [https://iprofiles.apple.com/resource/certificate.cer](https://iprofiles.apple.com/resource/certificate.cer)
-2. **Initialize** state from certificate (**`NACInit`**)
-   1. Uses various device-specific data (i.e. **Serial Number via `IOKit`**)
-3. Retrieve **session key**
-   1. POST [https://iprofiles.apple.com/session](https://iprofiles.apple.com/session)
-4. Establish the session (**`NACKeyEstablishment`**)
-5. Make the request
-   1. POST to [https://iprofiles.apple.com/macProfile](https://iprofiles.apple.com/macProfile) sending the data `{ "action": "RequestProfileConfiguration", "sn": "" }`
-   2. The JSON payload is encrypted using Absinthe (**`NACSign`**)
-   3. All requests over HTTPs, built-in root certificates are used
+1. Ανάκτηση **πιστοποιητικού**
+1. GET [https://iprofiles.apple.com/resource/certificate.cer](https://iprofiles.apple.com/resource/certificate.cer)
+2. **Αρχικοποίηση** κατάστασης από το πιστοποιητικό (**`NACInit`**)
+1. Χρησιμοποιεί διάφορα δεδομένα που σχετίζονται με τη συσκευή (δηλαδή **Αριθμός Σειράς μέσω `IOKit`**)
+3. Ανάκτηση **κλειδιού συνεδρίας**
+1. POST [https://iprofiles.apple.com/session](https://iprofiles.apple.com/session)
+4. Δημιουργία της συνεδρίας (**`NACKeyEstablishment`**)
+5. Κάντε το αίτημα
+1. POST στο [https://iprofiles.apple.com/macProfile](https://iprofiles.apple.com/macProfile) στέλνοντας τα δεδομένα `{ "action": "RequestProfileConfiguration", "sn": "" }`
+2. Το JSON payload κρυπτογραφείται χρησιμοποιώντας Absinthe (**`NACSign`**)
+3. Όλα τα αιτήματα μέσω HTTPs, χρησιμοποιούνται ενσωματωμένα root πιστοποιητικά
 
 ![](<../../../images/image (566) (1).png>)
 
-The response is a JSON dictionary with some important data like:
+Η απάντηση είναι ένα JSON λεξικό με ορισμένα σημαντικά δεδομένα όπως:
 
-- **url**: URL of the MDM vendor host for the activation profile
-- **anchor-certs**: Array of DER certificates used as trusted anchors
+- **url**: URL του διακομιστή προμηθευτή MDM για το ενεργοποιητικό προφίλ
+- **anchor-certs**: Πίνακας DER πιστοποιητικών που χρησιμοποιούνται ως αξιόπιστοι άγκυρες
 
-### **Step 5: Profile Retrieval**
+### **Βήμα 5: Ανάκτηση Προφίλ**
 
 ![](<../../../images/image (444).png>)
 
-- Request sent to **url provided in DEP profile**.
-- **Anchor certificates** are used to **evaluate trust** if provided.
-  - Reminder: the **anchor_certs** property of the DEP profile
-- **Request is a simple .plist** with device identification
-  - Examples: **UDID, OS version**.
-- CMS-signed, DER-encoded
-- Signed using the **device identity certificate (from APNS)**
-- **Certificate chain** includes expired **Apple iPhone Device CA**
+- Αίτημα που αποστέλλεται στο **url που παρέχεται στο DEP profile**.
+- **Πιστοποιητικά άγκυρας** χρησιμοποιούνται για **αξιολόγηση εμπιστοσύνης** εάν παρέχονται.
+- Υπενθύμιση: η **property anchor_certs** του DEP profile
+- **Το αίτημα είναι ένα απλό .plist** με αναγνώριση συσκευής
+- Παραδείγματα: **UDID, έκδοση OS**.
+- CMS-υπογεγραμμένο, DER-κωδικοποιημένο
+- Υπογεγραμμένο χρησιμοποιώντας το **πιστοποιητικό ταυτότητας συσκευής (από APNS)**
+- Η **αλυσίδα πιστοποιητικών** περιλαμβάνει ληγμένο **Apple iPhone Device CA**
 
-![](<../../../images/image (567) (1) (2) (2) (2) (2) (2) (2) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (2) (2).png>)
+![](<../../../images/image (567) (1) (2) (2) (2) (2) (2) (2) (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (2) (2).png>)
 
-### Step 6: Profile Installation
+### Βήμα 6: Εγκατάσταση Προφίλ
 
-- Once retrieved, **profile is stored on the system**
-- This step begins automatically (if in **setup assistant**)
-- Driven by **`CPInstallActivationProfile`**
-- Implemented by mdmclient over XPC
-  - LaunchDaemon (as root) or LaunchAgent (as user), depending on context
-- Configuration profiles have multiple payloads to install
-- Framework has a plugin-based architecture for installing profiles
-- Each payload type is associated with a plugin
-  - Can be XPC (in framework) or classic Cocoa (in ManagedClient.app)
-- Example:
-  - Certificate Payloads use CertificateService.xpc
+- Μόλις ανακτηθεί, **το προφίλ αποθηκεύεται στο σύστημα**
+- Αυτό το βήμα ξεκινά αυτόματα (εάν είναι στον **βοηθό ρύθμισης**)
+- Οδηγείται από **`CPInstallActivationProfile`**
+- Υλοποιείται από το mdmclient μέσω XPC
+- LaunchDaemon (ως root) ή LaunchAgent (ως χρήστης), ανάλογα με το πλαίσιο
+- Τα προφίλ ρυθμίσεων έχουν πολλαπλά payloads προς εγκατάσταση
+- Το πλαίσιο έχει αρχιτεκτονική βασισμένη σε plugins για την εγκατάσταση προφίλ
+- Κάθε τύπος payload σχετίζεται με ένα plugin
+- Μπορεί να είναι XPC (στο πλαίσιο) ή κλασικό Cocoa (στο ManagedClient.app)
+- Παράδειγμα:
+- Τα Payloads Πιστοποιητικών χρησιμοποιούν CertificateService.xpc
 
-Typically, **activation profile** provided by an MDM vendor will **include the following payloads**:
+Συνήθως, το **ενεργοποιητικό προφίλ** που παρέχεται από έναν προμηθευτή MDM θα **περιλαμβάνει τα εξής payloads**:
 
-- `com.apple.mdm`: to **enroll** the device in MDM
-- `com.apple.security.scep`: to securely provide a **client certificate** to the device.
-- `com.apple.security.pem`: to **install trusted CA certificates** to the device’s System Keychain.
-- Installing the MDM payload equivalent to **MDM check-in in the documentation**
-- Payload **contains key properties**:
-- - MDM Check-In URL (**`CheckInURL`**)
-  - MDM Command Polling URL (**`ServerURL`**) + APNs topic to trigger it
-- To install MDM payload, request is sent to **`CheckInURL`**
-- Implemented in **`mdmclient`**
-- MDM payload can depend on other payloads
-- Allows **requests to be pinned to specific certificates**:
-  - Property: **`CheckInURLPinningCertificateUUIDs`**
-  - Property: **`ServerURLPinningCertificateUUIDs`**
-  - Delivered via PEM payload
-- Allows device to be attributed with an identity certificate:
-  - Property: IdentityCertificateUUID
-  - Delivered via SCEP payload
+- `com.apple.mdm`: για **εγγραφή** της συσκευής στο MDM
+- `com.apple.security.scep`: για την ασφαλή παροχή ενός **πιστοποιητικού πελάτη** στη συσκευή.
+- `com.apple.security.pem`: για **εγκατάσταση αξιόπιστων CA πιστοποιητικών** στο Keychain του συστήματος της συσκευής.
+- Η εγκατάσταση του payload MDM ισοδυναμεί με **έλεγχο MDM στην τεκμηρίωση**
+- Το payload **περιέχει βασικές ιδιότητες**:
+- - URL Ελέγχου MDM (**`CheckInURL`**)
+- URL Πολυάριθμων Εντολών MDM (**`ServerURL`**) + θέμα APNs για την ενεργοποίησή του
+- Για να εγκατασταθεί το payload MDM, το αίτημα αποστέλλεται στο **`CheckInURL`**
+- Υλοποιείται στο **`mdmclient`**
+- Το payload MDM μπορεί να εξαρτάται από άλλα payloads
+- Επιτρέπει **αιτήματα να είναι pinned σε συγκεκριμένα πιστοποιητικά**:
+- Ιδιότητα: **`CheckInURLPinningCertificateUUIDs`**
+- Ιδιότητα: **`ServerURLPinningCertificateUUIDs`**
+- Παρέχεται μέσω payload PEM
+- Επιτρέπει στη συσκευή να αποδοθεί με ένα πιστοποιητικό ταυτότητας:
+- Ιδιότητα: IdentityCertificateUUID
+- Παρέχεται μέσω payload SCEP
 
-### **Step 7: Listening for MDM commands**
+### **Βήμα 7: Ακρόαση για εντολές MDM**
 
-- After MDM check-in is complete, vendor can **issue push notifications using APNs**
-- Upon receipt, handled by **`mdmclient`**
-- To poll for MDM commands, request is sent to ServerURL
-- Makes use of previously installed MDM payload:
-  - **`ServerURLPinningCertificateUUIDs`** for pinning request
-  - **`IdentityCertificateUUID`** for TLS client certificate
+- Αφού ολοκληρωθεί ο έλεγχος MDM, ο προμηθευτής μπορεί να **εκδώσει ειδοποιήσεις push χρησιμοποιώντας APNs**
+- Κατά την παραλαβή, διαχειρίζεται από το **`mdmclient`**
+- Για να ελέγξει τις εντολές MDM, το αίτημα αποστέλλεται στο ServerURL
+- Χρησιμοποιεί το προηγουμένως εγκατεστημένο payload MDM:
+- **`ServerURLPinningCertificateUUIDs`** για pinning του αιτήματος
+- **`IdentityCertificateUUID`** για το πιστοποιητικό πελάτη TLS
 
-## Attacks
+## Επιθέσεις
 
-### Enrolling Devices in Other Organisations
+### Εγγραφή Συσκευών σε Άλλες Οργανώσεις
 
-As previously commented, in order to try to enrol a device into an organization **only a Serial Number belonging to that Organization is needed**. Once the device is enrolled, several organizations will install sensitive data on the new device: certificates, applications, WiFi passwords, VPN configurations [and so on](https://developer.apple.com/enterprise/documentation/Configuration-Profile-Reference.pdf).\
-Therefore, this could be a dangerous entrypoint for attackers if the enrolment process isn't correctly protected:
+Όπως έχει σχολιαστεί προηγουμένως, προκειμένου να προσπαθήσετε να εγγράψετε μια συσκευή σε μια οργάνωση **χρειάζεται μόνο ένας Αριθμός Σειράς που ανήκει σε αυτή την Οργάνωση**. Μόλις η συσκευή εγγραφεί, πολλές οργανώσεις θα εγκαταστήσουν ευαίσθητα δεδομένα στη νέα συσκευή: πιστοποιητικά, εφαρμογές, κωδικούς πρόσβασης WiFi, ρυθμίσεις VPN [και ούτω καθεξής](https://developer.apple.com/enterprise/documentation/Configuration-Profile-Reference.pdf).\
+Επομένως, αυτό θα μπορούσε να είναι ένα επικίνδυνο σημείο εισόδου για τους επιτιθέμενους εάν η διαδικασία εγγραφής δεν προστατεύεται σωστά:
 
 {{#ref}}
 enrolling-devices-in-other-organisations.md

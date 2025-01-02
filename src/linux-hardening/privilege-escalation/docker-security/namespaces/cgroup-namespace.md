@@ -4,17 +4,17 @@
 
 ## Basic Information
 
-A cgroup namespace is a Linux kernel feature that provides **isolation of cgroup hierarchies for processes running within a namespace**. Cgroups, short for **control groups**, are a kernel feature that allows organizing processes into hierarchical groups to manage and enforce **limits on system resources** like CPU, memory, and I/O.
+Ένα cgroup namespace είναι μια δυνατότητα του πυρήνα Linux που παρέχει **απομόνωση των ιεραρχιών cgroup για διαδικασίες που εκτελούνται εντός ενός namespace**. Τα cgroups, συντομογραφία για **control groups**, είναι μια δυνατότητα του πυρήνα που επιτρέπει την οργάνωση διαδικασιών σε ιεραρχικές ομάδες για τη διαχείριση και επιβολή **ορίων στους πόρους του συστήματος** όπως CPU, μνήμη και I/O.
 
-While cgroup namespaces are not a separate namespace type like the others we discussed earlier (PID, mount, network, etc.), they are related to the concept of namespace isolation. **Cgroup namespaces virtualize the view of the cgroup hierarchy**, so that processes running within a cgroup namespace have a different view of the hierarchy compared to processes running in the host or other namespaces.
+Ενώ τα cgroup namespaces δεν είναι ένας ξεχωριστός τύπος namespace όπως οι άλλοι που συζητήσαμε νωρίτερα (PID, mount, network, κ.λπ.), σχετίζονται με την έννοια της απομόνωσης namespace. **Τα cgroup namespaces εικονικοποιούν την άποψη της ιεραρχίας cgroup**, έτσι ώστε οι διαδικασίες που εκτελούνται εντός ενός cgroup namespace να έχουν μια διαφορετική άποψη της ιεραρχίας σε σύγκριση με τις διαδικασίες που εκτελούνται στον κεντρικό υπολογιστή ή σε άλλα namespaces.
 
 ### How it works:
 
-1. When a new cgroup namespace is created, **it starts with a view of the cgroup hierarchy based on the cgroup of the creating process**. This means that processes running in the new cgroup namespace will only see a subset of the entire cgroup hierarchy, limited to the cgroup subtree rooted at the creating process's cgroup.
-2. Processes within a cgroup namespace will **see their own cgroup as the root of the hierarchy**. This means that, from the perspective of processes inside the namespace, their own cgroup appears as the root, and they cannot see or access cgroups outside of their own subtree.
-3. Cgroup namespaces do not directly provide isolation of resources; **they only provide isolation of the cgroup hierarchy view**. **Resource control and isolation are still enforced by the cgroup** subsystems (e.g., cpu, memory, etc.) themselves.
+1. Όταν δημιουργείται ένα νέο cgroup namespace, **ξεκινά με μια άποψη της ιεραρχίας cgroup βασισμένη στην cgroup της διαδικασίας που το δημιουργεί**. Αυτό σημαίνει ότι οι διαδικασίες που εκτελούνται στο νέο cgroup namespace θα βλέπουν μόνο ένα υποσύνολο της συνολικής ιεραρχίας cgroup, περιορισμένο στην υποδένδρο cgroup που έχει ρίζα την cgroup της διαδικασίας που το δημιουργεί.
+2. Οι διαδικασίες εντός ενός cgroup namespace θα **βλέπουν τη δική τους cgroup ως τη ρίζα της ιεραρχίας**. Αυτό σημαίνει ότι, από την προοπτική των διαδικασιών μέσα στο namespace, η δική τους cgroup εμφανίζεται ως η ρίζα, και δεν μπορούν να δουν ή να έχουν πρόσβαση σε cgroups εκτός του δικού τους υποδένδρου.
+3. Τα cgroup namespaces δεν παρέχουν άμεση απομόνωση πόρων; **παρέχουν μόνο απομόνωση της άποψης της ιεραρχίας cgroup**. **Ο έλεγχος και η απομόνωση πόρων επιβάλλονται ακόμα από τα ίδια τα υποσυστήματα cgroup** (π.χ., cpu, μνήμη, κ.λπ.).
 
-For more information about CGroups check:
+Για περισσότερες πληροφορίες σχετικά με τα CGroups ελέγξτε:
 
 {{#ref}}
 ../cgroups.md
@@ -25,67 +25,57 @@ For more information about CGroups check:
 ### Create different Namespaces
 
 #### CLI
-
 ```bash
 sudo unshare -C [--mount-proc] /bin/bash
 ```
-
-By mounting a new instance of the `/proc` filesystem if you use the param `--mount-proc`, you ensure that the new mount namespace has an **accurate and isolated view of the process information specific to that namespace**.
+Με την τοποθέτηση μιας νέας παρουσίας του συστήματος αρχείων `/proc` αν χρησιμοποιήσετε την παράμετρο `--mount-proc`, διασφαλίζετε ότι η νέα mount namespace έχει μια **ακριβή και απομονωμένη άποψη των πληροφοριών διαδικασίας που είναι συγκεκριμένες για αυτή τη namespace**.
 
 <details>
 
-<summary>Error: bash: fork: Cannot allocate memory</summary>
+<summary>Σφάλμα: bash: fork: Cannot allocate memory</summary>
 
-When `unshare` is executed without the `-f` option, an error is encountered due to the way Linux handles new PID (Process ID) namespaces. The key details and the solution are outlined below:
+Όταν εκτελείται το `unshare` χωρίς την επιλογή `-f`, προκύπτει ένα σφάλμα λόγω του τρόπου που το Linux χειρίζεται τις νέες PID (Process ID) namespaces. Οι βασικές λεπτομέρειες και η λύση περιγράφονται παρακάτω:
 
-1. **Problem Explanation**:
+1. **Εξήγηση Προβλήματος**:
 
-   - The Linux kernel allows a process to create new namespaces using the `unshare` system call. However, the process that initiates the creation of a new PID namespace (referred to as the "unshare" process) does not enter the new namespace; only its child processes do.
-   - Running `%unshare -p /bin/bash%` starts `/bin/bash` in the same process as `unshare`. Consequently, `/bin/bash` and its child processes are in the original PID namespace.
-   - The first child process of `/bin/bash` in the new namespace becomes PID 1. When this process exits, it triggers the cleanup of the namespace if there are no other processes, as PID 1 has the special role of adopting orphan processes. The Linux kernel will then disable PID allocation in that namespace.
+- Ο πυρήνας του Linux επιτρέπει σε μια διαδικασία να δημιουργεί νέες namespaces χρησιμοποιώντας την κλήση συστήματος `unshare`. Ωστόσο, η διαδικασία που ξεκινά τη δημιουργία μιας νέας PID namespace (αναφερόμενη ως η διαδικασία "unshare") δεν εισέρχεται στη νέα namespace; μόνο οι παιδικές της διαδικασίες το κάνουν.
+- Η εκτέλεση `%unshare -p /bin/bash%` ξεκινά το `/bin/bash` στην ίδια διαδικασία με το `unshare`. Ως εκ τούτου, το `/bin/bash` και οι παιδικές του διαδικασίες βρίσκονται στην αρχική PID namespace.
+- Η πρώτη παιδική διαδικασία του `/bin/bash` στη νέα namespace γίνεται PID 1. Όταν αυτή η διαδικασία τερματίσει, ενεργοποιεί την καθαριότητα της namespace αν δεν υπάρχουν άλλες διαδικασίες, καθώς το PID 1 έχει τον ειδικό ρόλο της υιοθέτησης ορφανών διαδικασιών. Ο πυρήνας του Linux θα απενεργοποιήσει στη συνέχεια την κατανομή PID σε αυτή τη namespace.
 
-2. **Consequence**:
+2. **Συνέπεια**:
 
-   - The exit of PID 1 in a new namespace leads to the cleaning of the `PIDNS_HASH_ADDING` flag. This results in the `alloc_pid` function failing to allocate a new PID when creating a new process, producing the "Cannot allocate memory" error.
+- Η έξοδος του PID 1 σε μια νέα namespace οδηγεί στον καθαρισμό της σημαίας `PIDNS_HASH_ADDING`. Αυτό έχει ως αποτέλεσμα τη αποτυχία της συνάρτησης `alloc_pid` να κατανοήσει ένα νέο PID κατά τη δημιουργία μιας νέας διαδικασίας, παράγοντας το σφάλμα "Cannot allocate memory".
 
-3. **Solution**:
-   - The issue can be resolved by using the `-f` option with `unshare`. This option makes `unshare` fork a new process after creating the new PID namespace.
-   - Executing `%unshare -fp /bin/bash%` ensures that the `unshare` command itself becomes PID 1 in the new namespace. `/bin/bash` and its child processes are then safely contained within this new namespace, preventing the premature exit of PID 1 and allowing normal PID allocation.
+3. **Λύση**:
+- Το πρόβλημα μπορεί να επιλυθεί χρησιμοποιώντας την επιλογή `-f` με το `unshare`. Αυτή η επιλογή κάνει το `unshare` να δημιουργήσει μια νέα διαδικασία μετά τη δημιουργία της νέας PID namespace.
+- Η εκτέλεση `%unshare -fp /bin/bash%` διασφαλίζει ότι η εντολή `unshare` γίνεται PID 1 στη νέα namespace. Το `/bin/bash` και οι παιδικές του διαδικασίες είναι στη συνέχεια ασφαλώς περιορισμένες μέσα σε αυτή τη νέα namespace, αποτρέποντας την πρόωρη έξοδο του PID 1 και επιτρέποντας την κανονική κατανομή PID.
 
-By ensuring that `unshare` runs with the `-f` flag, the new PID namespace is correctly maintained, allowing `/bin/bash` and its sub-processes to operate without encountering the memory allocation error.
+Διασφαλίζοντας ότι το `unshare` εκτελείται με την επιλογή `-f`, η νέα PID namespace διατηρείται σωστά, επιτρέποντας στο `/bin/bash` και τις υπο-διαδικασίες του να λειτουργούν χωρίς να αντιμετωπίζουν το σφάλμα κατανομής μνήμης.
 
 </details>
 
 #### Docker
-
 ```bash
 docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 ```
-
-### &#x20;Check which namespace is your process in
-
+### &#x20;Ελέγξτε σε ποιο namespace βρίσκεται η διαδικασία σας
 ```bash
 ls -l /proc/self/ns/cgroup
 lrwxrwxrwx 1 root root 0 Apr  4 21:19 /proc/self/ns/cgroup -> 'cgroup:[4026531835]'
 ```
-
-### Find all CGroup namespaces
-
+### Βρείτε όλα τα CGroup namespaces
 ```bash
 sudo find /proc -maxdepth 3 -type l -name cgroup -exec readlink {} \; 2>/dev/null | sort -u
 # Find the processes with an specific namespace
 sudo find /proc -maxdepth 3 -type l -name cgroup -exec ls -l  {} \; 2>/dev/null | grep <ns-number>
 ```
-
-### Enter inside an CGroup namespace
-
+### Είσοδος σε ένα namespace CGroup
 ```bash
 nsenter -C TARGET_PID --pid /bin/bash
 ```
+Επίσης, μπορείτε να **μπείτε σε άλλο namespace διαδικασίας μόνο αν είστε root**. Και **δεν μπορείτε** να **μπείτε** σε άλλο namespace **χωρίς έναν περιγραφέα** που να δείχνει σε αυτό (όπως το `/proc/self/ns/cgroup`).
 
-Also, you can only **enter in another process namespace if you are root**. And you **cannot** **enter** in other namespace **without a descriptor** pointing to it (like `/proc/self/ns/cgroup`).
-
-## References
+## Αναφορές
 
 - [https://stackoverflow.com/questions/44666700/unshare-pid-bin-bash-fork-cannot-allocate-memory](https://stackoverflow.com/questions/44666700/unshare-pid-bin-bash-fork-cannot-allocate-memory)
 
