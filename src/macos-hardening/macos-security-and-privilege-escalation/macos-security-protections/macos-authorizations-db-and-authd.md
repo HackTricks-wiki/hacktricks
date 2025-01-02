@@ -2,34 +2,33 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## **Athorizarions DB**
+## **Banco de Dados de Autorizações**
 
-The database located in `/var/db/auth.db` is database used to store permissions to perform sensitive operations. These operations are performed completely in **user space** and are usually used by **XPC services** which need to check **if the calling client is authorized** to perform certain action checking this database.
+O banco de dados localizado em `/var/db/auth.db` é um banco de dados usado para armazenar permissões para realizar operações sensíveis. Essas operações são realizadas completamente no **espaço do usuário** e geralmente são usadas por **serviços XPC** que precisam verificar **se o cliente chamador está autorizado** a realizar determinada ação verificando este banco de dados.
 
-Initially this database is created from the content of `/System/Library/Security/authorization.plist`. Then, some services might add or modify this dataabse to add other permissions to it.
+Inicialmente, este banco de dados é criado a partir do conteúdo de `/System/Library/Security/authorization.plist`. Em seguida, alguns serviços podem adicionar ou modificar este banco de dados para adicionar outras permissões a ele.
 
-The rules are stored in the `rules` table inside the database and contains the folliwing colmns:
+As regras são armazenadas na tabela `rules` dentro do banco de dados e contêm as seguintes colunas:
 
-- **id**: A unique identifier for each rule, automatically incremented and serving as the primary key.
-- **name**: The unique name of the rule used to identify and reference it within the authorization system.
-- **type**: Specifies the type of the rule, restricted to values 1 or 2 to define its authorization logic.
-- **class**: Categorizes the rule into a specific class, ensuring it is a positive integer.
-  - "allow" for allow, "deny" for deny, "user" if the group property indicated a group which membership allows the access, "rule" indicates in an array a rule to be fulfilled, "evaluate-mechanisms" followed by a `mechanisms` array which are either builtins or a name of a bundle inside `/System/Library/CoreServices/SecurityAgentPlugins/` or /Library/Security//SecurityAgentPlugins
-- **group**: Indicates the user group associated with the rule for group-based authorization.
-- **kofn**: Represents the "k-of-n" parameter, determining how many subrules must be satisfied out of a total number.
-- **timeout**: Defines the duration in seconds before the authorization granted by the rule expires.
-- **flags**: Contains various flags that modify the behavior and characteristics of the rule.
-- **tries**: Limits the number of allowed authorization attempts to enhance security.
-- **version**: Tracks the version of the rule for version control and updates.
-- **created**: Records the timestamp when the rule was created for auditing purposes.
-- **modified**: Stores the timestamp of the last modification made to the rule.
-- **hash**: Holds a hash value of the rule to ensure its integrity and detect tampering.
-- **identifier**: Provides a unique string identifier, such as a UUID, for external references to the rule.
-- **requirement**: Contains serialized data defining the rule's specific authorization requirements and mechanisms.
-- **comment**: Offers a human-readable description or comment about the rule for documentation and clarity.
+- **id**: Um identificador único para cada regra, automaticamente incrementado e servindo como chave primária.
+- **name**: O nome único da regra usado para identificá-la e referenciá-la dentro do sistema de autorização.
+- **type**: Especifica o tipo da regra, restrito aos valores 1 ou 2 para definir sua lógica de autorização.
+- **class**: Categoriza a regra em uma classe específica, garantindo que seja um número inteiro positivo.
+- "allow" para permitir, "deny" para negar, "user" se a propriedade do grupo indicar um grupo cuja membresia permite o acesso, "rule" indica em um array uma regra a ser cumprida, "evaluate-mechanisms" seguido por um array `mechanisms` que são ou embutidos ou um nome de um pacote dentro de `/System/Library/CoreServices/SecurityAgentPlugins/` ou /Library/Security//SecurityAgentPlugins
+- **group**: Indica o grupo de usuários associado à regra para autorização baseada em grupo.
+- **kofn**: Representa o parâmetro "k-of-n", determinando quantas sub-regras devem ser satisfeitas de um número total.
+- **timeout**: Define a duração em segundos antes que a autorização concedida pela regra expire.
+- **flags**: Contém várias flags que modificam o comportamento e as características da regra.
+- **tries**: Limita o número de tentativas de autorização permitidas para aumentar a segurança.
+- **version**: Rastreia a versão da regra para controle de versão e atualizações.
+- **created**: Registra o timestamp quando a regra foi criada para fins de auditoria.
+- **modified**: Armazena o timestamp da última modificação feita na regra.
+- **hash**: Contém um valor hash da regra para garantir sua integridade e detectar adulterações.
+- **identifier**: Fornece um identificador de string único, como um UUID, para referências externas à regra.
+- **requirement**: Contém dados serializados definindo os requisitos e mecanismos específicos de autorização da regra.
+- **comment**: Oferece uma descrição ou comentário legível por humanos sobre a regra para documentação e clareza.
 
-### Example
-
+### Exemplo
 ```bash
 # List by name and comments
 sudo sqlite3 /var/db/auth.db "select name, comment from rules"
@@ -40,50 +39,46 @@ security authorizationdb read com.apple.tcc.util.admin
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>class</key>
-	<string>rule</string>
-	<key>comment</key>
-	<string>For modification of TCC settings.</string>
-	<key>created</key>
-	<real>701369782.01043606</real>
-	<key>modified</key>
-	<real>701369782.01043606</real>
-	<key>rule</key>
-	<array>
-		<string>authenticate-admin-nonshared</string>
-	</array>
-	<key>version</key>
-	<integer>0</integer>
+<key>class</key>
+<string>rule</string>
+<key>comment</key>
+<string>For modification of TCC settings.</string>
+<key>created</key>
+<real>701369782.01043606</real>
+<key>modified</key>
+<real>701369782.01043606</real>
+<key>rule</key>
+<array>
+<string>authenticate-admin-nonshared</string>
+</array>
+<key>version</key>
+<integer>0</integer>
 </dict>
 </plist>
 ```
-
-Moreover in [https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/](https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/) it's possible to see the meaning of `authenticate-admin-nonshared`:
-
+Além disso, em [https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/](https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/) é possível ver o significado de `authenticate-admin-nonshared`:
 ```json
 {
-  "allow-root": "false",
-  "authenticate-user": "true",
-  "class": "user",
-  "comment": "Authenticate as an administrator.",
-  "group": "admin",
-  "session-owner": "false",
-  "shared": "false",
-  "timeout": "30",
-  "tries": "10000",
-  "version": "1"
+"allow-root": "false",
+"authenticate-user": "true",
+"class": "user",
+"comment": "Authenticate as an administrator.",
+"group": "admin",
+"session-owner": "false",
+"shared": "false",
+"timeout": "30",
+"tries": "10000",
+"version": "1"
 }
 ```
-
 ## Authd
 
-It's a deamon that will receive requests to authorize clients to perform sensitive actions. It works as a XPC service defined inside the `XPCServices/` folder and use to write its logs in `/var/log/authd.log`.
+É um daemon que receberá solicitações para autorizar clientes a realizar ações sensíveis. Funciona como um serviço XPC definido dentro da pasta `XPCServices/` e costuma gravar seus logs em `/var/log/authd.log`.
 
-Moreover using the security tool it's possible to test many `Security.framework` APIs. For example the `AuthorizationExecuteWithPrivileges` running: `security execute-with-privileges /bin/ls`
+Além disso, usando a ferramenta de segurança, é possível testar muitas APIs do `Security.framework`. Por exemplo, o `AuthorizationExecuteWithPrivileges` executando: `security execute-with-privileges /bin/ls`
 
-That will fork and exec `/usr/libexec/security_authtrampoline /bin/ls` as root, which will ask for permissions in a prompt to execute ls as root:
+Isso irá fork e exec `/usr/libexec/security_authtrampoline /bin/ls` como root, que pedirá permissões em um prompt para executar ls como root:
 
 <figure><img src="../../../images/image (10).png" alt=""><figcaption></figcaption></figure>
 
 {{#include ../../../banners/hacktricks-training.md}}
-
