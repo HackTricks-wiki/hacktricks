@@ -128,3 +128,4 @@ certutil -v -dstemplate
 
 {{#include ../../../banners/hacktricks-training.md}}
 
+

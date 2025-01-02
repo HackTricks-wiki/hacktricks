@@ -116,3 +116,4 @@ This explanation encapsulates the process and tools involved in NTLM credential 
 
 {{#include ../../../banners/hacktricks-training.md}}
 
+

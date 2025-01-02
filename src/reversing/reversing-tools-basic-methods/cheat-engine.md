@@ -162,3 +162,4 @@ So, insert your new assembly code in the "**newmem**" section and remove the ori
 
 {{#include ../../banners/hacktricks-training.md}}
 
+

@@ -1619,3 +1619,4 @@ C:\Windows\microsoft.net\framework\v4.0.30319\MSBuild.exe -version #Compile the 
 
 {{#include ../../banners/hacktricks-training.md}}
 
+

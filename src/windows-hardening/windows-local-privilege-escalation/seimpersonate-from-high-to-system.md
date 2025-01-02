@@ -179,3 +179,4 @@ Inside that process "Administrators" can "Read Memory" and "Read Permissions" wh
 
 {{#include ../../banners/hacktricks-training.md}}
 
+

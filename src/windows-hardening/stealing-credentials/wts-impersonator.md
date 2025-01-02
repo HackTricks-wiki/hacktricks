@@ -49,3 +49,4 @@ WTSEnumerateSessionsA → WTSQuerySessionInformationA → WTSQueryUserToken → 
 
 {{#include ../../banners/hacktricks-training.md}}
 
+

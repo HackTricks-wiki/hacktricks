@@ -60,3 +60,4 @@ After **copying** a card or **entering** the ID **manually** it's possible to **
 
 {{#include ../../../banners/hacktricks-training.md}}
 
+

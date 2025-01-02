@@ -129,3 +129,4 @@ SharpLateral redwmi HOSTNAME C:\\Users\\Administrator\\Desktop\\malware.exe
 
 {{#include ../../banners/hacktricks-training.md}}
 
+

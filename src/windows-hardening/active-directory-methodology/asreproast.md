@@ -112,3 +112,4 @@ Stay informed with the newest bug bounties launching and crucial platform update
 
 {{#include ../../banners/hacktricks-training.md}}
 
+

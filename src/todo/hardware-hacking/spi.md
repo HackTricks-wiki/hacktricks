@@ -66,3 +66,4 @@ flashrom -VV -c "W25Q64.V" -p buspirate_spi:dev=COM3 -r flash_content.img
 
 {{#include ../../banners/hacktricks-training.md}}
 
+
