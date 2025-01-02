@@ -2,27 +2,21 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
-
-​​[**RootedCON**](https://www.rootedcon.com/) 是 **西班牙** 最相关的网络安全事件，也是 **欧洲** 最重要的事件之一。该大会的 **使命是促进技术知识**，是各个学科的技术和网络安全专业人士的热烈交流平台。
-
-{% embed url="https://www.rootedcon.com/" %}
-
 ## 什么是 DPAPI
 
-数据保护 API (DPAPI) 主要用于 Windows 操作系统中 **对非对称私钥进行对称加密**，利用用户或系统秘密作为重要的熵来源。这种方法通过允许开发人员使用从用户登录秘密派生的密钥进行数据加密，或在系统加密中使用系统的域认证秘密，从而简化了加密过程，避免了开发人员自己管理加密密钥保护的需要。
+数据保护 API (DPAPI) 主要用于 Windows 操作系统中，用于 **对称加密非对称私钥**，利用用户或系统秘密作为重要的熵来源。这种方法简化了开发人员的加密工作，使他们能够使用从用户登录秘密派生的密钥进行数据加密，或者在系统加密中使用系统的域认证秘密，从而免去开发人员自己管理加密密钥保护的需要。
 
 ### DPAPI 保护的数据
 
 DPAPI 保护的个人数据包括：
 
 - Internet Explorer 和 Google Chrome 的密码和自动完成数据
-- Outlook 和 Windows Mail 等应用程序的电子邮件和内部 FTP 账户密码
+- 应用程序（如 Outlook 和 Windows Mail）的电子邮件和内部 FTP 账户密码
 - 共享文件夹、资源、无线网络和 Windows Vault 的密码，包括加密密钥
 - 远程桌面连接、.NET Passport 和各种加密和认证目的的私钥密码
 - 由凭据管理器管理的网络密码以及使用 CryptProtectData 的应用程序中的个人数据，如 Skype、MSN messenger 等
 
-## 列表 Vault
+## List Vault
 ```bash
 # From cmd
 vaultcmd /listcreds:"Windows Credentials" /all
@@ -80,7 +74,7 @@ Get-ChildItem -Hidden C:\Users\USER\AppData\Local\Microsoft\Protect\{SID}
 
 ## HEKATOMB
 
-[**HEKATOMB**](https://github.com/Processus-Thief/HEKATOMB) 是一个自动提取LDAP目录中所有用户和计算机的工具，并通过RPC提取域控制器备份密钥。然后，脚本将解析所有计算机的IP地址，并在所有计算机上执行smbclient以检索所有用户的DPAPI blob，并使用域备份密钥解密所有内容。
+[**HEKATOMB**](https://github.com/Processus-Thief/HEKATOMB) 是一个自动提取LDAP目录中所有用户和计算机以及通过RPC提取域控制器备份密钥的工具。该脚本将解析所有计算机的IP地址，并在所有计算机上执行smbclient以检索所有用户的所有DPAPI blob，并使用域备份密钥解密所有内容。
 
 `python3 hekatomb.py -hashes :ed0052e5a66b1c8e942cc9481a50d56 DOMAIN.local/administrator@10.0.0.1 -debug -dnstcp`
 
@@ -96,11 +90,5 @@ Get-ChildItem -Hidden C:\Users\USER\AppData\Local\Microsoft\Protect\{SID}
 
 - [https://www.passcape.com/index.php?section=docsys\&cmd=details\&id=28#13](https://www.passcape.com/index.php?section=docsys&cmd=details&id=28#13)
 - [https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++](https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#using-dpapis-to-encrypt-decrypt-data-in-c)
-
-<figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
-
-[**RootedCON**](https://www.rootedcon.com/) 是**西班牙**最相关的网络安全事件之一，也是**欧洲**最重要的事件之一。该大会**旨在促进技术知识**，是各个学科技术和网络安全专业人士的一个热烈的交流点。
-
-{% embed url="https://www.rootedcon.com/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

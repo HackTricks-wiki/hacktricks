@@ -2,19 +2,12 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-使用 [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) 轻松构建和 **自动化工作流程**，由世界上 **最先进** 的社区工具提供支持。\
-立即获取访问权限：
-
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
-
 ## AppLocker Policy
 
-应用程序白名单是一个经过批准的软件应用程序或可执行文件的列表，这些程序被允许在系统上存在和运行。其目标是保护环境免受有害恶意软件和不符合组织特定业务需求的未批准软件的影响。
+应用程序白名单是一个经过批准的软件应用程序或可执行文件的列表，这些软件被允许在系统上存在和运行。其目标是保护环境免受有害恶意软件和不符合组织特定业务需求的未批准软件的影响。
 
-[AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) 是微软的 **应用程序白名单解决方案**，为系统管理员提供对 **用户可以运行哪些应用程序和文件** 的控制。它提供对可执行文件、脚本、Windows 安装程序文件、DLL、打包应用程序和打包应用程序安装程序的 **细粒度控制**。\
-组织通常会 **阻止 cmd.exe 和 PowerShell.exe** 以及对某些目录的写入访问，**但这一切都可以被绕过**。
+[AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) 是微软的 **应用程序白名单解决方案**，为系统管理员提供了对 **用户可以运行哪些应用程序和文件** 的控制。它提供了对可执行文件、脚本、Windows 安装程序文件、DLL、打包应用程序和打包应用程序安装程序的 **细粒度控制**。\
+组织通常会 **阻止 cmd.exe 和 PowerShell.exe** 以及对某些目录的写访问，**但这一切都可以被绕过**。
 
 ### Check
 
@@ -55,9 +48,9 @@ C:\windows\tracing
 
 ### 本地安全机构 (LSA) - LSASS
 
-**凭据**（哈希）被 **保存** 在此子系统的 **内存** 中，以实现单点登录。\
+**凭据**（哈希）被 **保存** 在此子系统的 **内存** 中，以实现单点登录的目的。\
 **LSA** 管理本地 **安全策略**（密码策略、用户权限...）、**身份验证**、**访问令牌**...\
-LSA 将是 **检查** 提供的凭据的 **SAM** 文件（用于本地登录）并与 **域控制器** 进行通信以验证域用户。
+LSA 将是 **检查** 提供的凭据是否在 **SAM** 文件中（用于本地登录）并与 **域控制器** 进行身份验证的。
 
 **凭据** 被 **保存** 在 **进程 LSASS** 中：Kerberos 票证、NT 和 LM 哈希、易于解密的密码。
 
@@ -76,7 +69,7 @@ LSA 可能会在磁盘上保存一些凭据：
 
 ## Defender
 
-[**Microsoft Defender**](https://en.wikipedia.org/wiki/Microsoft_Defender) 是 Windows 10 和 Windows 11 以及 Windows Server 版本中可用的防病毒软件。它 **阻止** 常见的渗透测试工具，如 **`WinPEAS`**。但是，有方法可以 **绕过这些保护**。
+[**Microsoft Defender**](https://en.wikipedia.org/wiki/Microsoft_Defender) 是 Windows 10 和 Windows 11 以及 Windows Server 版本中可用的防病毒软件。它 **阻止** 常见的渗透测试工具，如 **`WinPEAS`**。然而，有一些方法可以 **绕过这些保护**。
 
 ### 检查
 
@@ -110,7 +103,7 @@ sc query windefend
 ```
 ## 加密文件系统 (EFS)
 
-EFS 通过加密保护文件，使用称为 **文件加密密钥 (FEK)** 的 **对称密钥**。该密钥使用用户的 **公钥** 进行加密，并存储在加密文件的 $EFS **替代数据流** 中。当需要解密时，使用用户数字证书的相应 **私钥** 从 $EFS 流中解密 FEK。更多详细信息可以在 [这里](https://en.wikipedia.org/wiki/Encrypting_File_System) 找到。
+EFS 通过加密保护文件，使用称为 **文件加密密钥 (FEK)** 的 **对称密钥**。该密钥使用用户的 **公钥** 进行加密，并存储在加密文件的 $EFS **替代数据流** 中。当需要解密时，使用用户数字证书的相应 **私钥** 从 $EFS 流中解密 FEK。更多细节可以在 [这里](https://en.wikipedia.org/wiki/Encrypting_File_System) 找到。
 
 **无需用户启动的解密场景** 包括：
 
@@ -137,9 +130,9 @@ EFS 通过加密保护文件，使用称为 **文件加密密钥 (FEK)** 的 **�
 
 #### 成为权限系统
 
-这种方式要求 **受害者用户** 在主机内 **运行** 一个 **进程**。如果是这种情况，使用 `meterpreter` 会话可以模拟用户进程的令牌（`impersonate_token` 来自 `incognito`）。或者您可以直接 `migrate` 到用户的进程。
+这种方式要求 **受害者用户** 在主机内 **运行** 一个 **进程**。如果是这种情况，使用 `meterpreter` 会话可以模拟用户进程的令牌 (`impersonate_token` 来自 `incognito`)。或者您可以直接 `migrate` 到用户的进程。
 
-#### 知道用户密码
+#### 知道用户的密码
 
 {% embed url="https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files" %}
 
@@ -187,7 +180,7 @@ $ExecutionContext.SessionState.LanguageMode
 #Easy bypass
 Powershell -version 2
 ```
-在当前的Windows中，绕过方法将不起作用，但您可以使用[ **PSByPassCLM**](https://github.com/padovah4ck/PSByPassCLM)。\
+在当前的Windows中，绕过方法将无法工作，但您可以使用[ **PSByPassCLM**](https://github.com/padovah4ck/PSByPassCLM)。\
 **要编译它，您可能需要** **_添加引用_** -> _浏览_ -> _浏览_ -> 添加 `C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0\31bf3856ad364e35\System.Management.Automation.dll` 并**将项目更改为 .Net4.5**。
 
 #### 直接绕过：
@@ -222,7 +215,7 @@ Powershell -command "Write-Host 'My voice is my passport, verify me.'"
 9º Use EncodeCommand
 $command = "Write-Host 'My voice is my passport, verify me.'" $bytes = [System.Text.Encoding]::Unicode.GetBytes($command) $encodedCommand = [Convert]::ToBase64String($bytes) powershell.exe -EncodedCommand $encodedCommand
 ```
-更多信息可以在 [这里](https://blog.netspi.com/15-ways-to-bypass-the-powershell-execution-policy/) 找到
+更多信息可以在 [这里](https://blog.netspi.com/15-ways-to-bypass-the-powershell-execution-policy/) 找到。
 
 ## 安全支持提供者接口 (SSPI)
 
@@ -252,15 +245,5 @@ SSPI 将负责为想要通信的两台机器找到合适的协议。首选方法
 {{#ref}}
 uac-user-account-control.md
 {{#endref}}
-
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-使用 [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) 轻松构建和 **自动化工作流程**，由世界上 **最先进** 的社区工具提供支持。\
-立即获取访问权限：
-
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
-
----
 
 {{#include ../../banners/hacktricks-training.md}}

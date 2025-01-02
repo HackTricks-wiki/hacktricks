@@ -2,13 +2,10 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 ## 基本信息
 
-Local Administrator Password Solution (LAPS) 是一个用于管理系统的工具，其中 **管理员密码** 是 **唯一的、随机生成的，并且经常更改**，适用于加入域的计算机。这些密码安全地存储在 Active Directory 中，仅对通过访问控制列表 (ACL) 获得权限的用户可访问。客户端到服务器的密码传输安全性通过使用 **Kerberos 版本 5** 和 **高级加密标准 (AES)** 得到保障。
+Local Administrator Password Solution (LAPS) 是一个用于管理系统的工具，其中 **管理员密码** 是 **唯一的、随机生成的，并且经常更改**，适用于加入域的计算机。这些密码安全地存储在 Active Directory 中，仅对通过访问控制列表 (ACL) 授予权限的用户可访问。通过使用 **Kerberos 版本 5** 和 **高级加密标准 (AES)** 确保从客户端到服务器的密码传输安全。
 
 在域的计算机对象中，LAPS 的实施导致添加两个新属性：**`ms-mcs-AdmPwd`** 和 **`ms-mcs-AdmPwdExpirationTime`**。这些属性分别存储 **明文管理员密码** 和 **其过期时间**。
 
@@ -62,7 +59,7 @@ Get-DomainObject -Identity wkstn-2 -Properties ms-Mcs-AdmPwd
 
 [LAPSToolkit](https://github.com/leoloobeek/LAPSToolkit) 通过多个功能促进了 LAPS 的枚举。\
 其中之一是解析 **`ExtendedRights`** 以获取 **所有启用 LAPS 的计算机。** 这将显示 **专门被委派读取 LAPS 密码的组，** 这些组通常是受保护组中的用户。\
-一个 **已将计算机** 加入域的 **帐户** 在该主机上获得 `All Extended Rights`，而这个权限赋予 **帐户** 读取 **密码** 的能力。枚举可能会显示一个可以在主机上读取 LAPS 密码的用户帐户。这可以帮助我们 **针对特定的 AD 用户**，他们可以读取 LAPS 密码。
+一个 **已将计算机** 加入域的 **帐户** 会获得该主机的 `All Extended Rights`，而这个权限赋予 **帐户** 读取 **密码** 的能力。枚举可能会显示一个可以在主机上读取 LAPS 密码的用户帐户。这可以帮助我们 **针对特定的 AD 用户**，他们可以读取 LAPS 密码。
 ```powershell
 # Get groups that can read passwords
 Find-LAPSDelegatedGroups
@@ -120,7 +117,7 @@ Set-DomainObject -Identity wkstn-2 -Set @{"ms-mcs-admpwdexpirationtime"="2326099
 
 ### 后门
 
-LAPS 的原始源代码可以在 [这里](https://github.com/GreyCorbel/admpwd) 找到，因此可以在代码中放置一个后门（例如在 `Main/AdmPwd.PS/Main.cs` 中的 `Get-AdmPwdPassword` 方法内），以某种方式 **提取新密码或将其存储在某处**。
+LAPS 的原始源代码可以在 [这里](https://github.com/GreyCorbel/admpwd) 找到，因此可以在代码中放置一个后门（例如在 `Main/AdmPwd.PS/Main.cs` 中的 `Get-AdmPwdPassword` 方法内），以某种方式 **外泄新密码或将其存储在某处**。
 
 然后，只需编译新的 `AdmPwd.PS.dll` 并将其上传到机器中的 `C:\Tools\admpwd\Main\AdmPwd.PS\bin\Debug\AdmPwd.PS.dll`（并更改修改时间）。
 
@@ -128,8 +125,5 @@ LAPS 的原始源代码可以在 [这里](https://github.com/GreyCorbel/admpwd) 
 
 - [https://4sysops.com/archives/introduction-to-microsoft-laps-local-administrator-password-solution/](https://4sysops.com/archives/introduction-to-microsoft-laps-local-administrator-password-solution/)
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

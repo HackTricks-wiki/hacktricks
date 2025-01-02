@@ -2,18 +2,17 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## 基本信息
 
-**Linux Control Groups**, or **cgroups**, are a feature of the Linux kernel that allows the allocation, limitation, and prioritization of system resources like CPU, memory, and disk I/O among process groups. They offer a mechanism for **managing and isolating the resource usage** of process collections, beneficial for purposes such as resource limitation, workload isolation, and resource prioritization among different process groups.
+**Linux 控制组**，或称 **cgroups**，是 Linux 内核的一个特性，允许在进程组之间分配、限制和优先处理系统资源，如 CPU、内存和磁盘 I/O。它们提供了一种 **管理和隔离资源使用** 的机制，适用于资源限制、工作负载隔离和不同进程组之间的资源优先级等目的。
 
-There are **two versions of cgroups**: version 1 and version 2. Both can be used concurrently on a system. The primary distinction is that **cgroups version 2** introduces a **hierarchical, tree-like structure**, enabling more nuanced and detailed resource distribution among process groups. Additionally, version 2 brings various enhancements, including:
+**cgroups 有两个版本**：版本 1 和版本 2。两者可以在系统上同时使用。主要区别在于 **cgroups 版本 2** 引入了 **层次化的树状结构**，使得在进程组之间进行更细致和详细的资源分配成为可能。此外，版本 2 还带来了各种增强功能，包括：
 
-In addition to the new hierarchical organization, cgroups version 2 also introduced **several other changes and improvements**, such as support for **new resource controllers**, better support for legacy applications, and improved performance.
+除了新的层次化组织，cgroups 版本 2 还引入了 **其他几个变化和改进**，例如对 **新资源控制器** 的支持、更好的遗留应用程序支持和性能提升。
 
-Overall, cgroups **version 2 offers more features and better performance** than version 1, but the latter may still be used in certain scenarios where compatibility with older systems is a concern.
+总体而言，cgroups **版本 2 提供了更多功能和更好的性能**，但在某些需要与旧系统兼容的场景中，仍然可以使用版本 1。
 
-You can list the v1 and v2 cgroups for any process by looking at its cgroup file in /proc/\<pid>. You can start by looking at your shell’s cgroups with this command:
-
+您可以通过查看 /proc/\<pid> 中的 cgroup 文件来列出任何进程的 v1 和 v2 cgroups。您可以通过以下命令开始查看您 shell 的 cgroups：
 ```shell-session
 $ cat /proc/self/cgroup
 12:rdma:/
@@ -28,60 +27,53 @@ $ cat /proc/self/cgroup
 1:name=systemd:/user.slice/user-1000.slice/session-2.scope
 0::/user.slice/user-1000.slice/session-2.scope
 ```
+输出结构如下：
 
-The output structure is as follows:
+- **数字 2–12**：cgroups v1，每行代表一个不同的 cgroup。控制器在数字旁边指定。
+- **数字 1**：也是 cgroups v1，但仅用于管理目的（由例如 systemd 设置），并且没有控制器。
+- **数字 0**：表示 cgroups v2。没有列出控制器，这一行仅在仅运行 cgroups v2 的系统上存在。
+- **名称是层次结构的**，类似于文件路径，指示不同 cgroups 之间的结构和关系。
+- **像 /user.slice 或 /system.slice 的名称** 指定 cgroups 的分类，user.slice 通常用于由 systemd 管理的登录会话，而 system.slice 用于系统服务。
 
-- **Numbers 2–12**: cgroups v1, with each line representing a different cgroup. Controllers for these are specified adjacent to the number.
-- **Number 1**: Also cgroups v1, but solely for management purposes (set by, e.g., systemd), and lacks a controller.
-- **Number 0**: Represents cgroups v2. No controllers are listed, and this line is exclusive on systems only running cgroups v2.
-- The **names are hierarchical**, resembling file paths, indicating the structure and relationship between different cgroups.
-- **Names like /user.slice or /system.slice** specify the categorization of cgroups, with user.slice typically for login sessions managed by systemd and system.slice for system services.
+### 查看 cgroups
 
-### Viewing cgroups
+文件系统通常用于访问 **cgroups**，与传统用于内核交互的 Unix 系统调用接口不同。要调查 shell 的 cgroup 配置，应检查 **/proc/self/cgroup** 文件，该文件显示 shell 的 cgroup。然后，通过导航到 **/sys/fs/cgroup**（或 **`/sys/fs/cgroup/unified`**）目录并找到一个与 cgroup 名称相同的目录，可以观察与 cgroup 相关的各种设置和资源使用信息。
 
-The filesystem is typically utilized for accessing **cgroups**, diverging from the Unix system call interface traditionally used for kernel interactions. To investigate a shell's cgroup configuration, one should examine the **/proc/self/cgroup** file, which reveals the shell's cgroup. Then, by navigating to the **/sys/fs/cgroup** (or **`/sys/fs/cgroup/unified`**) directory and locating a directory that shares the cgroup's name, one can observe various settings and resource usage information pertinent to the cgroup.
+![Cgroup 文件系统](<../../../images/image (1128).png>)
 
-![Cgroup Filesystem](<../../../images/image (1128).png>)
+cgroups 的关键接口文件以 **cgroup** 为前缀。**cgroup.procs** 文件可以使用标准命令如 cat 查看，列出 cgroup 中的进程。另一个文件 **cgroup.threads** 包含线程信息。
 
-The key interface files for cgroups are prefixed with **cgroup**. The **cgroup.procs** file, which can be viewed with standard commands like cat, lists the processes within the cgroup. Another file, **cgroup.threads**, includes thread information.
+![Cgroup 进程](<../../../images/image (281).png>)
 
-![Cgroup Procs](<../../../images/image (281).png>)
+管理 shell 的 cgroups 通常包含两个控制器，用于调节内存使用和进程数量。要与控制器交互，应参考带有控制器前缀的文件。例如，**pids.current** 将被引用以确定 cgroup 中的线程数量。
 
-Cgroups managing shells typically encompass two controllers that regulate memory usage and process count. To interact with a controller, files bearing the controller's prefix should be consulted. For instance, **pids.current** would be referenced to ascertain the count of threads in the cgroup.
+![Cgroup 内存](<../../../images/image (677).png>)
 
-![Cgroup Memory](<../../../images/image (677).png>)
+值中 **max** 的指示表明 cgroup 没有特定限制。然而，由于 cgroups 的层次结构，限制可能由目录层次结构中较低级别的 cgroup 强加。
 
-The indication of **max** in a value suggests the absence of a specific limit for the cgroup. However, due to the hierarchical nature of cgroups, limits might be imposed by a cgroup at a lower level in the directory hierarchy.
+### 操作和创建 cgroups
 
-### Manipulating and Creating cgroups
-
-Processes are assigned to cgroups by **writing their Process ID (PID) to the `cgroup.procs` file**. This requires root privileges. For instance, to add a process:
-
+通过 **将其进程 ID (PID) 写入 `cgroup.procs` 文件** 将进程分配给 cgroups。这需要 root 权限。例如，要添加一个进程：
 ```bash
 echo [pid] > cgroup.procs
 ```
-
-Similarly, **modifying cgroup attributes, like setting a PID limit**, is done by writing the desired value to the relevant file. To set a maximum of 3,000 PIDs for a cgroup:
-
+同样，**修改 cgroup 属性，例如设置 PID 限制**，是通过将所需值写入相关文件来完成的。要为 cgroup 设置最多 3,000 个 PID：
 ```bash
 echo 3000 > pids.max
 ```
+**创建新的 cgroups** 涉及在 cgroup 层次结构中创建一个新的子目录，这会提示内核自动生成必要的接口文件。尽管没有活动进程的 cgroups 可以使用 `rmdir` 删除，但要注意某些限制：
 
-**Creating new cgroups** involves making a new subdirectory within the cgroup hierarchy, which prompts the kernel to automatically generate necessary interface files. Though cgroups without active processes can be removed with `rmdir`, be aware of certain constraints:
-
-- **Processes can only be placed in leaf cgroups** (i.e., the most nested ones in a hierarchy).
-- **A cgroup cannot possess a controller absent in its parent**.
-- **Controllers for child cgroups must be explicitly declared** in the `cgroup.subtree_control` file. For example, to enable CPU and PID controllers in a child cgroup:
-
+- **进程只能放置在叶子 cgroups 中**（即层次结构中最嵌套的那些）。
+- **一个 cgroup 不能拥有其父级中缺失的控制器**。
+- **子 cgroups 的控制器必须在 `cgroup.subtree_control` 文件中显式声明**。例如，要在子 cgroup 中启用 CPU 和 PID 控制器：
 ```bash
 echo "+cpu +pids" > cgroup.subtree_control
 ```
+**root cgroup** 是这些规则的一个例外，允许直接放置进程。这可以用来将进程从 systemd 管理中移除。
 
-The **root cgroup** is an exception to these rules, allowing direct process placement. This can be used to remove processes from systemd management.
+在 cgroup 中 **监控 CPU 使用情况** 可以通过 `cpu.stat` 文件实现，该文件显示总的 CPU 时间消耗，有助于跟踪服务的子进程的使用情况：
 
-**Monitoring CPU usage** within a cgroup is possible through the `cpu.stat` file, displaying total CPU time consumed, helpful for tracking usage across a service's subprocesses:
-
-<figure><img src="../../../images/image (908).png" alt=""><figcaption><p>CPU usage statistics as shown in the cpu.stat file</p></figcaption></figure>
+<figure><img src="../../../images/image (908).png" alt=""><figcaption><p>cpu.stat 文件中显示的 CPU 使用统计信息</p></figcaption></figure>
 
 ## References
 

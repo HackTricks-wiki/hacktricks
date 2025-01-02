@@ -2,182 +2,175 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Basic Information
+## 基本信息
 
-**Grand Central Dispatch (GCD),** also known as **libdispatch** (`libdispatch.dyld`), is available in both macOS and iOS. It's a technology developed by Apple to optimize application support for concurrent (multithreaded) execution on multicore hardware.
+**Grand Central Dispatch (GCD)**，也称为 **libdispatch** (`libdispatch.dyld`)，在 macOS 和 iOS 中均可用。它是苹果公司开发的一项技术，旨在优化应用程序对多核硬件上并发（多线程）执行的支持。
 
-**GCD** provides and manages **FIFO queues** to which your application can **submit tasks** in the form of **block objects**. Blocks submitted to dispatch queues are **executed on a pool of threads** fully managed by the system. GCD automatically creates threads for executing the tasks in the dispatch queues and schedules those tasks to run on the available cores.
+**GCD** 提供并管理 **FIFO 队列**，您的应用程序可以将任务以 **块对象** 的形式 **提交**。提交到调度队列的块将在系统完全管理的线程池上 **执行**。GCD 自动创建线程以执行调度队列中的任务，并安排这些任务在可用核心上运行。
 
 > [!TIP]
-> In summary, to execute code in **parallel**, processes can send **blocks of code to GCD**, which will take care of their execution. Therefore, processes don't create new threads; **GCD executes the given code with its own pool of threads** (which might increase or decrease as necessary).
+> 总之，为了 **并行** 执行代码，进程可以将 **代码块发送到 GCD**，GCD 将负责它们的执行。因此，进程不创建新线程；**GCD 使用其自己的线程池执行给定的代码**（线程池可能根据需要增加或减少）。
 
-This is very helpful to manage parallel execution successfully, greatly reducing the number of threads processes create and optimising the parallel execution. This is ideal for tasks that require **great parallelism** (brute-forcing?) or for tasks that shouldn't block the main thread: For example, the main thread on iOS handles UI interactions, so any other functionality that could make the app hang (searching, accessing a web, reading a file...) is managed this way.
+这对于成功管理并行执行非常有帮助，极大地减少了进程创建的线程数量，并优化了并行执行。这对于需要 **高度并行性**（暴力破解？）的任务或不应阻塞主线程的任务是理想的：例如，iOS 上的主线程处理 UI 交互，因此任何可能导致应用程序挂起的其他功能（搜索、访问网络、读取文件等）都是以这种方式管理的。
 
-### Blocks
+### 块
 
-A block is a **self contained section of code** (like a function with arguments returning a value) and can also specify bound variables.\
-However, at compiler level blocks doesn't exist, they are `os_object`s. Each of these objects is formed by two structures:
+块是一个 **自包含的代码段**（像一个带参数返回值的函数），也可以指定绑定变量。\
+然而，在编译器级别，块并不存在，它们是 `os_object`。每个对象由两个结构组成：
 
-- **block literal**:&#x20;
-  - It starts by the **`isa`** field, pointing to the block's class:
-    - `NSConcreteGlobalBlock` (blocks from `__DATA.__const`)
-    - `NSConcreteMallocBlock` (blocks in the heap)
-    - `NSConcreateStackBlock` (blocks in stack)
-  - It has **`flags`** (indicating fields present in the block descriptor) and some reserved bytes
-  - The function pointer to call
-  - A pointer to the block descriptor
-  - Block imported variables (if any)
-- **block descriptor**: It's size depends on the data that is present (as indicated in the previous flags)
-  - It has some reserved bytes
-  - The size of it
-  - It'll usually have a pointer to an Objective-C style signature to know how much space is needed for the params (flag `BLOCK_HAS_SIGNATURE`)
-  - If variables are referenced, this block will also have pointers to a copy helper (copying the value at the begining) and dispose helper (freeing it).
+- **块字面量**：&#x20;
+- 它以 **`isa`** 字段开始，指向块的类：
+- `NSConcreteGlobalBlock`（来自 `__DATA.__const` 的块）
+- `NSConcreteMallocBlock`（堆中的块）
+- `NSConcreateStackBlock`（栈中的块）
+- 它有 **`flags`**（指示块描述符中存在的字段）和一些保留字节
+- 调用的函数指针
+- 指向块描述符的指针
+- 导入的块变量（如果有）
+- **块描述符**：其大小取决于存在的数据（如前面标志所示）
+- 它有一些保留字节
+- 它的大小
+- 通常会有一个指向 Objective-C 风格签名的指针，以了解参数所需的空间（标志 `BLOCK_HAS_SIGNATURE`）
+- 如果引用了变量，则该块还将有指向复制助手（在开始时复制值）和处置助手（释放它）的指针。
 
-### Queues
+### 队列
 
-A dispatch queue is a named object providing FIFO ordering of blocks for executions.
+调度队列是一个命名对象，提供块的 FIFO 执行顺序。
 
-Blocks a set in queues to be executed, and these support 2 modes: `DISPATCH_QUEUE_SERIAL` and `DISPATCH_QUEUE_CONCURRENT`. Of course the **serial** one **won't have race condition** problems as a block won't be executed until the previous one has finished. But **the other type of queue might have it**.
+块被设置在队列中以供执行，这些队列支持两种模式：`DISPATCH_QUEUE_SERIAL` 和 `DISPATCH_QUEUE_CONCURRENT`。当然，**串行**队列 **不会有竞争条件** 问题，因为块不会在前一个块完成之前执行。但 **另一种类型的队列可能会有**。
 
-Default queues:
+默认队列：
 
-- `.main-thread`: From `dispatch_get_main_queue()`
-- `.libdispatch-manager`: GCD's queue manager
-- `.root.libdispatch-manager`: GCD's queue manager
-- `.root.maintenance-qos`: Lowest priority tasks
+- `.main-thread`: 来自 `dispatch_get_main_queue()`
+- `.libdispatch-manager`: GCD 的队列管理器
+- `.root.libdispatch-manager`: GCD 的队列管理器
+- `.root.maintenance-qos`: 最低优先级任务
 - `.root.maintenance-qos.overcommit`
-- `.root.background-qos`: Available as `DISPATCH_QUEUE_PRIORITY_BACKGROUND`
+- `.root.background-qos`: 可用作 `DISPATCH_QUEUE_PRIORITY_BACKGROUND`
 - `.root.background-qos.overcommit`
-- `.root.utility-qos`: Available as `DISPATCH_QUEUE_PRIORITY_NON_INTERACTIVE`
+- `.root.utility-qos`: 可用作 `DISPATCH_QUEUE_PRIORITY_NON_INTERACTIVE`
 - `.root.utility-qos.overcommit`
-- `.root.default-qos`: Available as `DISPATCH_QUEUE_PRIORITY_DEFAULT`
+- `.root.default-qos`: 可用作 `DISPATCH_QUEUE_PRIORITY_DEFAULT`
 - `.root.background-qos.overcommit`
-- `.root.user-initiated-qos`: Available as `DISPATCH_QUEUE_PRIORITY_HIGH`
+- `.root.user-initiated-qos`: 可用作 `DISPATCH_QUEUE_PRIORITY_HIGH`
 - `.root.background-qos.overcommit`
-- `.root.user-interactive-qos`: Highest priority
+- `.root.user-interactive-qos`: 最高优先级
 - `.root.background-qos.overcommit`
 
-Notice that it will be the system who decides **which threads handle which queues at each time** (multiple threads might work in the same queue or the same thread might work in different queues at some point)
+请注意，系统将决定 **每次哪个线程处理哪个队列**（多个线程可能在同一队列中工作，或者同一线程可能在某些时刻在不同队列中工作）
 
-#### Attributtes
+#### 属性
 
-When creating a queue with **`dispatch_queue_create`** the third argument is a `dispatch_queue_attr_t`, which usually is either `DISPATCH_QUEUE_SERIAL` (which is actually NULL) or `DISPATCH_QUEUE_CONCURRENT` which is a pointer to a `dispatch_queue_attr_t` struct which allow to control some parameters of the queue.
+使用 **`dispatch_queue_create`** 创建队列时，第三个参数是 `dispatch_queue_attr_t`，通常是 `DISPATCH_QUEUE_SERIAL`（实际上是 NULL）或 `DISPATCH_QUEUE_CONCURRENT`，这是指向 `dispatch_queue_attr_t` 结构的指针，允许控制队列的一些参数。
 
-### Dispatch objects
+### 调度对象
 
-There are several objects that libdispatch uses and queues and blocks are just 2 of them. It's possible to create these objects with `dispatch_object_create`:
+libdispatch 使用多个对象，队列和块只是其中两个。可以使用 `dispatch_object_create` 创建这些对象：
 
 - `block`
-- `data`: Data blocks
-- `group`: Group of blocks
-- `io`: Async I/O requests
-- `mach`: Mach ports
-- `mach_msg`: Mach messages
-- `pthread_root_queue`:A queue with a pthread thread pool and not workqueues
+- `data`: 数据块
+- `group`: 块组
+- `io`: 异步 I/O 请求
+- `mach`: Mach 端口
+- `mach_msg`: Mach 消息
+- `pthread_root_queue`: 带有 pthread 线程池的队列，而不是工作队列
 - `queue`
 - `semaphore`
-- `source`: Event source
+- `source`: 事件源
 
 ## Objective-C
 
-In Objetive-C there are different functions to send a block to be executed in parallel:
+在 Objective-C 中，有不同的函数可以将块发送到并行执行：
 
-- [**dispatch_async**](https://developer.apple.com/documentation/dispatch/1453057-dispatch_async): Submits a block for asynchronous execution on a dispatch queue and returns immediately.
-- [**dispatch_sync**](https://developer.apple.com/documentation/dispatch/1452870-dispatch_sync): Submits a block object for execution and returns after that block finishes executing.
-- [**dispatch_once**](https://developer.apple.com/documentation/dispatch/1447169-dispatch_once): Executes a block object only once for the lifetime of an application.
-- [**dispatch_async_and_wait**](https://developer.apple.com/documentation/dispatch/3191901-dispatch_async_and_wait): Submits a work item for execution and returns only after it finishes executing. Unlike [**`dispatch_sync`**](https://developer.apple.com/documentation/dispatch/1452870-dispatch_sync), this function respects all attributes of the queue when it executes the block.
+- [**dispatch_async**](https://developer.apple.com/documentation/dispatch/1453057-dispatch_async): 提交一个块以在调度队列上异步执行，并立即返回。
+- [**dispatch_sync**](https://developer.apple.com/documentation/dispatch/1452870-dispatch_sync): 提交一个块对象以执行，并在该块完成执行后返回。
+- [**dispatch_once**](https://developer.apple.com/documentation/dispatch/1447169-dispatch_once): 在应用程序的生命周期内仅执行一次块对象。
+- [**dispatch_async_and_wait**](https://developer.apple.com/documentation/dispatch/3191901-dispatch_async_and_wait): 提交一个工作项以执行，并仅在其完成执行后返回。与 [**`dispatch_sync`**](https://developer.apple.com/documentation/dispatch/1452870-dispatch_sync) 不同，此函数在执行块时尊重队列的所有属性。
 
-These functions expect these parameters: [**`dispatch_queue_t`**](https://developer.apple.com/documentation/dispatch/dispatch_queue_t) **`queue,`** [**`dispatch_block_t`**](https://developer.apple.com/documentation/dispatch/dispatch_block_t) **`block`**
+这些函数期望这些参数：[**`dispatch_queue_t`**](https://developer.apple.com/documentation/dispatch/dispatch_queue_t) **`queue,`** [**`dispatch_block_t`**](https://developer.apple.com/documentation/dispatch/dispatch_block_t) **`block`**
 
-This is the **struct of a Block**:
-
+这是 **块的结构**：
 ```c
 struct Block {
-   void *isa; // NSConcreteStackBlock,...
-   int flags;
-   int reserved;
-   void *invoke;
-   struct BlockDescriptor *descriptor;
-   // captured variables go here
+void *isa; // NSConcreteStackBlock,...
+int flags;
+int reserved;
+void *invoke;
+struct BlockDescriptor *descriptor;
+// captured variables go here
 };
 ```
-
-And this is an example to use **parallelism** with **`dispatch_async`**:
-
+这是一个使用 **parallelism** 和 **`dispatch_async`** 的示例：
 ```objectivec
 #import <Foundation/Foundation.h>
 
 // Define a block
 void (^backgroundTask)(void) = ^{
-    // Code to be executed in the background
-    for (int i = 0; i < 10; i++) {
-        NSLog(@"Background task %d", i);
-        sleep(1);  // Simulate a long-running task
-    }
+// Code to be executed in the background
+for (int i = 0; i < 10; i++) {
+NSLog(@"Background task %d", i);
+sleep(1);  // Simulate a long-running task
+}
 };
 
 int main(int argc, const char * argv[]) {
-    @autoreleasepool {
-        // Create a dispatch queue
-        dispatch_queue_t backgroundQueue = dispatch_queue_create("com.example.backgroundQueue", NULL);
+@autoreleasepool {
+// Create a dispatch queue
+dispatch_queue_t backgroundQueue = dispatch_queue_create("com.example.backgroundQueue", NULL);
 
-        // Submit the block to the queue for asynchronous execution
-        dispatch_async(backgroundQueue, backgroundTask);
+// Submit the block to the queue for asynchronous execution
+dispatch_async(backgroundQueue, backgroundTask);
 
-        // Continue with other work on the main queue or thread
-        for (int i = 0; i < 10; i++) {
-            NSLog(@"Main task %d", i);
-            sleep(1);  // Simulate a long-running task
-        }
-    }
-    return 0;
+// Continue with other work on the main queue or thread
+for (int i = 0; i < 10; i++) {
+NSLog(@"Main task %d", i);
+sleep(1);  // Simulate a long-running task
+}
+}
+return 0;
 }
 ```
-
 ## Swift
 
-**`libswiftDispatch`** is a library that provides **Swift bindings** to the Grand Central Dispatch (GCD) framework which is originally written in C.\
-The **`libswiftDispatch`** library wraps the C GCD APIs in a more Swift-friendly interface, making it easier and more intuitive for Swift developers to work with GCD.
+**`libswiftDispatch`** 是一个库，提供 **Swift 绑定** 到最初用 C 编写的 Grand Central Dispatch (GCD) 框架。\
+**`libswiftDispatch`** 库将 C GCD API 封装在一个更适合 Swift 的接口中，使 Swift 开发者更容易和直观地使用 GCD。
 
 - **`DispatchQueue.global().sync{ ... }`**
 - **`DispatchQueue.global().async{ ... }`**
 - **`let onceToken = DispatchOnce(); onceToken.perform { ... }`**
 - **`async await`**
-  - **`var (data, response) = await URLSession.shared.data(from: URL(string: "https://api.example.com/getData"))`**
+- **`var (data, response) = await URLSession.shared.data(from: URL(string: "https://api.example.com/getData"))`**
 
-**Code example**:
-
+**代码示例**:
 ```swift
 import Foundation
 
 // Define a closure (the Swift equivalent of a block)
 let backgroundTask: () -> Void = {
-    for i in 0..<10 {
-        print("Background task \(i)")
-        sleep(1)  // Simulate a long-running task
-    }
+for i in 0..<10 {
+print("Background task \(i)")
+sleep(1)  // Simulate a long-running task
+}
 }
 
 // Entry point
 autoreleasepool {
-    // Create a dispatch queue
-    let backgroundQueue = DispatchQueue(label: "com.example.backgroundQueue")
+// Create a dispatch queue
+let backgroundQueue = DispatchQueue(label: "com.example.backgroundQueue")
 
-    // Submit the closure to the queue for asynchronous execution
-    backgroundQueue.async(execute: backgroundTask)
+// Submit the closure to the queue for asynchronous execution
+backgroundQueue.async(execute: backgroundTask)
 
-    // Continue with other work on the main queue
-    for i in 0..<10 {
-        print("Main task \(i)")
-        sleep(1)  // Simulate a long-running task
-    }
+// Continue with other work on the main queue
+for i in 0..<10 {
+print("Main task \(i)")
+sleep(1)  // Simulate a long-running task
+}
 }
 ```
-
 ## Frida
 
-The following Frida script can be used to **hook into several `dispatch`** functions and extract the queue name, the backtrace and the block: [**https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js**](https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js)
-
+以下 Frida 脚本可用于 **hook 进入多个 `dispatch`** 函数并提取队列名称、回溯和块: [**https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js**](https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js)
 ```bash
 frida -U <prog_name> -l libdispatch.js
 
@@ -190,12 +183,11 @@ Backtrace:
 0x19e3a57fc UIKitCore!+[UIGraphicsRenderer _destroyCGContext:withRenderer:]
 [...]
 ```
-
 ## Ghidra
 
-Currently Ghidra doesn't understand neither the ObjectiveC **`dispatch_block_t`** structure, neither the **`swift_dispatch_block`** one.
+目前 Ghidra 既不理解 ObjectiveC **`dispatch_block_t`** 结构，也不理解 **`swift_dispatch_block`** 结构。
 
-So if you want it to understand them, you could just **declare them**:
+所以如果你想让它理解这些结构，你可以**声明它们**：
 
 <figure><img src="../../images/image (1160).png" alt="" width="563"><figcaption></figcaption></figure>
 
@@ -203,18 +195,18 @@ So if you want it to understand them, you could just **declare them**:
 
 <figure><img src="../../images/image (1163).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Then, find a place in the code where they are **used**:
+然后，找到代码中**使用**它们的地方：
 
 > [!TIP]
-> Note all of references made to "block" to understand how you could figure out that the struct is being used.
+> 注意所有提到“block”的引用，以理解你如何能够判断该结构正在被使用。
 
 <figure><img src="../../images/image (1164).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Right click on the variable -> Retype Variable and select in this case **`swift_dispatch_block`**:
+右键单击变量 -> 重新输入变量，并在这种情况下选择 **`swift_dispatch_block`**：
 
 <figure><img src="../../images/image (1165).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Ghidra will automatically rewrite everything:
+Ghidra 会自动重写所有内容：
 
 <figure><img src="../../images/image (1166).png" alt="" width="563"><figcaption></figcaption></figure>
 

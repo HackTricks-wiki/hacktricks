@@ -1,13 +1,5 @@
 # DCSync
 
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-使用 [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=dcsync) 轻松构建和 **自动化工作流程**，由世界上 **最先进** 的社区工具提供支持。\
-立即获取访问权限：
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=dcsync" %}
-
 {{#include ../../banners/hacktricks-training.md}}
 
 ## DCSync
@@ -16,8 +8,8 @@
 
 **关于 DCSync 的重要说明：**
 
-- **DCSync 攻击模拟域控制器的行为，并请求其他域控制器使用目录复制服务远程协议 (MS-DRSR) 复制信息**。由于 MS-DRSR 是 Active Directory 的有效且必要的功能，因此无法关闭或禁用。
-- 默认情况下，只有 **域管理员、企业管理员、管理员和域控制器** 组具有所需的权限。
+- **DCSync 攻击模拟域控制器的行为，并请求其他域控制器复制信息**，使用目录复制服务远程协议 (MS-DRSR)。由于 MS-DRSR 是 Active Directory 的有效且必要的功能，因此无法关闭或禁用。
+- 默认情况下，只有 **Domain Admins、Enterprise Admins、Administrators 和 Domain Controllers** 组拥有所需的权限。
 - 如果任何帐户密码以可逆加密存储，Mimikatz 中提供了一个选项可以以明文返回密码。
 
 ### Enumeration
@@ -61,7 +53,7 @@ Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveG
 
 - 安全事件 ID 4662（对象的审计策略必须启用）– 对一个对象执行了操作
 - 安全事件 ID 5136（对象的审计策略必须启用）– 目录服务对象已被修改
-- 安全事件 ID 4670（对象的审计策略必须启用）– 对象的权限已更改
+- 安全事件 ID 4670（对象的审计策略必须启用）– 对象的权限已被更改
 - AD ACL 扫描器 - 创建和比较 ACL 的创建报告。 [https://github.com/canix1/ADACLScanner](https://github.com/canix1/ADACLScanner)
 
 ## 参考文献
@@ -70,11 +62,3 @@ Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveG
 - [https://yojimbosecurity.ninja/dcsync/](https://yojimbosecurity.ninja/dcsync/)
 
 {{#include ../../banners/hacktricks-training.md}}
-
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-使用 [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=dcsync) 轻松构建和 **自动化工作流程**，由世界上 **最先进** 的社区工具提供支持。\
-今天就获取访问权限：
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=dcsync" %}

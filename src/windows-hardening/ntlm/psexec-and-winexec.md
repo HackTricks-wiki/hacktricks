@@ -2,16 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="/images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-使用 [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=command-injection) 轻松构建和 **自动化工作流程**，由世界上 **最先进** 的社区工具提供支持。\
-立即获取访问权限：
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=command-injection" %}
-
 ## 它们是如何工作的
 
-该过程在以下步骤中概述，说明如何操纵服务二进制文件以通过 SMB 在目标机器上实现远程执行：
+该过程在以下步骤中概述，说明如何通过 SMB 操纵服务二进制文件以实现对目标机器的远程执行：
 
 1. **通过 SMB 复制服务二进制文件到 ADMIN$ 共享**。
 2. **在远程机器上创建服务**，指向该二进制文件。
@@ -32,7 +25,7 @@
 
 [了解更多关于 `sc` 命令的信息](https://technet.microsoft.com/en-us/library/bb490995.aspx)。
 
-在此查找更详细的步骤: [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
+在这里找到更详细的步骤: [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
 
 **您还可以使用 Windows Sysinternals 二进制文件 PsExec.exe：**
 
@@ -42,11 +35,4 @@
 ```
 SharpLateral.exe redexec HOSTNAME C:\\Users\\Administrator\\Desktop\\malware.exe.exe malware.exe ServiceName
 ```
-<figure><img src="/images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-使用 [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=command-injection) 轻松构建和 **自动化工作流程**，由世界上 **最先进** 的社区工具提供支持。\
-立即获取访问权限：
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=command-injection" %}
-
 {{#include ../../banners/hacktricks-training.md}}

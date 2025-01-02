@@ -2,29 +2,29 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## What is Distroless
+## 什么是 Distroless
 
-A distroless container is a type of container that **contains only the necessary dependencies to run a specific application**, without any additional software or tools that are not required. These containers are designed to be as **lightweight** and **secure** as possible, and they aim to **minimize the attack surface** by removing any unnecessary components.
+Distroless 容器是一种只包含 **运行特定应用程序所需的必要依赖项** 的容器，不包含任何不必要的软件或工具。这些容器旨在尽可能 **轻量** 和 **安全**，并旨在通过移除任何不必要的组件来 **最小化攻击面**。
 
-Distroless containers are often used in **production environments where security and reliability are paramount**.
+Distroless 容器通常用于 **安全性和可靠性至关重要的生产环境**。
 
-Some **examples** of **distroless containers** are:
+一些 **distroless 容器的例子** 包括：
 
-- Provided by **Google**: [https://console.cloud.google.com/gcr/images/distroless/GLOBAL](https://console.cloud.google.com/gcr/images/distroless/GLOBAL)
-- Provided by **Chainguard**: [https://github.com/chainguard-images/images/tree/main/images](https://github.com/chainguard-images/images/tree/main/images)
+- 由 **Google** 提供: [https://console.cloud.google.com/gcr/images/distroless/GLOBAL](https://console.cloud.google.com/gcr/images/distroless/GLOBAL)
+- 由 **Chainguard** 提供: [https://github.com/chainguard-images/images/tree/main/images](https://github.com/chainguard-images/images/tree/main/images)
 
-## Weaponizing Distroless
+## 武器化 Distroless
 
-The goal of weaponize a distroless container is to be able to **execute arbitrary binaries and payloads even with the limitations** implied by **distroless** (lack of common binaries in the system) and also protections commonly found in containers such as **read-only** or **no-execute** in `/dev/shm`.
+武器化 distroless 容器的目标是能够 **执行任意二进制文件和有效负载，即使在 distroless 所暗示的限制下**（系统中缺乏常见的二进制文件），以及容器中常见的保护措施，如 **只读** 或 **不可执行** 在 `/dev/shm` 中。
 
-### Through memory
+### 通过内存
 
-Coming at some point of 2023...
+将在 2023 年的某个时候...
 
-### Via Existing binaries
+### 通过现有二进制文件
 
 #### openssl
 
-\***\*[**In this post,**](https://www.form3.tech/engineering/content/exploiting-distroless-images) it is explained that the binary **`openssl`** is frequently found in these containers, potentially because it's **needed\*\* by the software that is going to be running inside the container.
+\***\*[**在这篇文章中，**](https://www.form3.tech/engineering/content/exploiting-distroless-images) 解释了二进制文件 **`openssl`** 经常出现在这些容器中，可能是因为它是 **软件所需的**，该软件将在容器内运行。
 
 {{#include ../../../banners/hacktricks-training.md}}

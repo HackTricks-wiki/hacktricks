@@ -1,12 +1,6 @@
-# 利用 Autoruns 提权
+# 使用 Autoruns 提权
 
 {{#include ../../banners/hacktricks-training.md}}
-
-<figure><img src="../../images/i3.png" alt=""><figcaption></figcaption></figure>
-
-**漏洞赏金提示**：**注册** **Intigriti**，一个由黑客为黑客创建的高级**漏洞赏金平台**！今天就加入我们，访问 [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks)，开始赚取高达 **$100,000** 的赏金！
-
-{% embed url="https://go.intigriti.com/hacktricks" %}
 
 ## WMIC
 
@@ -15,7 +9,7 @@
 wmic startup get caption,command 2>nul & ^
 Get-CimInstance Win32_StartupCommand | select Name, command, Location, User | fl
 ```
-## 定时任务
+## 计划任务
 
 **任务**可以按**特定频率**安排运行。查看哪些二进制文件被安排运行：
 ```bash
@@ -30,7 +24,7 @@ schtasks /Create /RU "SYSTEM" /SC ONLOGON /TN "SchedPE" /TR "cmd /c net localgro
 ```
 ## 文件夹
 
-所有位于 **启动文件夹中的二进制文件将在启动时执行**。常见的启动文件夹如下所列，但启动文件夹在注册表中指示。[阅读此内容以了解位置。](privilege-escalation-with-autorun-binaries.md#startup-path)
+所有位于 **启动文件夹** 的二进制文件将在启动时执行。常见的启动文件夹如下所列，但启动文件夹在注册表中指示。[阅读此以了解更多信息。](privilege-escalation-with-autorun-binaries.md#startup-path)
 ```bash
 dir /b "C:\Documents and Settings\All Users\Start Menu\Programs\Startup" 2>nul
 dir /b "C:\Documents and Settings\%username%\Start Menu\Programs\Startup" 2>nul
@@ -46,7 +40,7 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 
 ### 运行
 
-**常见的** AutoRun 注册表：
+**通常称为** AutoRun 注册表：
 
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\Run`
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\RunOnce`
@@ -78,15 +72,15 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 - `HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnceEx`
 - `HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunOnceEx`
 
-在 Windows Vista 及更高版本中，**Run** 和 **RunOnce** 注册表键不会自动生成。这些键中的条目可以直接启动程序或将其指定为依赖项。例如，要在登录时加载 DLL 文件，可以使用 **RunOnceEx** 注册表键以及一个 "Depend" 键。这通过添加一个注册表项来演示，在系统启动期间执行 "C:\temp\evil.dll"：
+在 Windows Vista 及更高版本中，**Run** 和 **RunOnce** 注册表键不会自动生成。这些键中的条目可以直接启动程序或将其指定为依赖项。例如，要在登录时加载 DLL 文件，可以使用 **RunOnceEx** 注册表键以及一个 "Depend" 键。这通过添加一个注册表项来演示在系统启动期间执行 "C:\temp\evil.dll"：
 ```
 reg add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnceEx\\0001\\Depend /v 1 /d "C:\\temp\\evil.dll"
 ```
 > [!NOTE]
-> **Exploit 1**: 如果您可以在 **HKLM** 中的任何提到的注册表项内写入，则当其他用户登录时，您可以提升权限。
+> **利用 1**：如果您可以在 **HKLM** 中的任何提到的注册表项内写入，则当其他用户登录时，您可以提升权限。
 
 > [!NOTE]
-> **Exploit 2**: 如果您可以覆盖 **HKLM** 中任何注册表项上指示的任何二进制文件，则当其他用户登录时，您可以用后门修改该二进制文件并提升权限。
+> **利用 2**：如果您可以覆盖 **HKLM** 中任何注册表项上指示的任何二进制文件，则当其他用户登录时，您可以用后门修改该二进制文件并提升权限。
 ```bash
 #CMD
 reg query HKLM\Software\Microsoft\Windows\CurrentVersion\Run
@@ -149,7 +143,7 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Wow6432Node\Microsoft\Windows\Ru
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders`
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders`
 
-放置在 **启动** 文件夹中的快捷方式将在用户登录或系统重启时自动触发服务或应用程序启动。 **启动** 文件夹的位置在注册表中为 **本地计算机** 和 **当前用户** 范围定义。这意味着添加到这些指定 **启动** 位置的任何快捷方式都将确保链接的服务或程序在登录或重启过程后启动，从而成为自动调度程序运行的简单方法。
+放置在 **启动** 文件夹中的快捷方式将在用户登录或系统重启时自动触发服务或应用程序启动。**启动** 文件夹的位置在注册表中为 **本地计算机** 和 **当前用户** 范围定义。这意味着添加到这些指定 **启动** 位置的任何快捷方式都将确保链接的服务或程序在登录或重启过程后启动，从而成为自动调度程序运行的简单方法。
 
 > [!NOTE]
 > 如果您可以覆盖 **HKLM** 下的任何 \[User] Shell Folder，您将能够将其指向由您控制的文件夹，并放置一个后门，该后门将在用户登录系统时执行，从而提升权限。
@@ -198,15 +192,15 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\CurrentVersion
 
 创建自动在“带命令提示符的安全模式”中启动的启动选项的步骤：
 
-1. 更改 `boot.ini` 文件的属性以移除只读、系统和隐藏标志：`attrib c:\boot.ini -r -s -h`
+1. 更改 `boot.ini` 文件的属性以移除只读、系统和隐藏标志： `attrib c:\boot.ini -r -s -h`
 2. 打开 `boot.ini` 进行编辑。
-3. 插入一行，如：`multi(0)disk(0)rdisk(0)partition(1)\WINDOWS="Microsoft Windows XP Professional" /fastdetect /SAFEBOOT:MINIMAL(ALTERNATESHELL)`
+3. 插入一行，如： `multi(0)disk(0)rdisk(0)partition(1)\WINDOWS="Microsoft Windows XP Professional" /fastdetect /SAFEBOOT:MINIMAL(ALTERNATESHELL)`
 4. 保存对 `boot.ini` 的更改。
-5. 重新应用原始文件属性：`attrib c:\boot.ini +r +s +h`
+5. 重新应用原始文件属性： `attrib c:\boot.ini +r +s +h`
 
 - **Exploit 1:** 更改 **AlternateShell** 注册表项允许自定义命令 shell 设置，可能用于未经授权的访问。
-- **Exploit 2 (PATH 写权限):** 对系统 **PATH** 变量的任何部分具有写权限，特别是在 `C:\Windows\system32` 之前，允许你执行自定义的 `cmd.exe`，如果系统在安全模式下启动，这可能是一个后门。
-- **Exploit 3 (PATH 和 boot.ini 写权限):** 对 `boot.ini` 的写访问使得自动安全模式启动成为可能，从而在下次重启时促进未经授权的访问。
+- **Exploit 2 (PATH 写权限):** 对系统 **PATH** 变量的任何部分具有写权限，特别是在 `C:\Windows\system32` 之前，可以执行自定义 `cmd.exe`，如果系统在安全模式下启动，这可能是一个后门。
+- **Exploit 3 (PATH 和 boot.ini 写权限):** 对 `boot.ini` 的写访问权限使得自动安全模式启动成为可能，从而在下次重启时促进未经授权的访问。
 
 要检查当前的 **AlternateShell** 设置，请使用以下命令：
 ```bash
@@ -215,7 +209,7 @@ Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Co
 ```
 ### 已安装组件
 
-Active Setup 是 Windows 中的一个功能，它**在桌面环境完全加载之前启动**。它优先执行某些命令，这些命令必须在用户登录继续之前完成。此过程甚至在其他启动项（例如 Run 或 RunOnce 注册表部分中的项）被触发之前发生。
+Active Setup 是 Windows 中的一个功能，它**在桌面环境完全加载之前启动**。它优先执行某些命令，这些命令必须在用户登录之前完成。此过程甚至在其他启动项（例如 Run 或 RunOnce 注册表部分中的项）被触发之前发生。
 
 Active Setup 通过以下注册表键进行管理：
 
@@ -233,7 +227,7 @@ Active Setup 通过以下注册表键进行管理：
 
 **安全洞察：**
 
-- 修改或写入 **`IsInstalled`** 设置为 `"1"` 的键，并具有特定的 **`StubPath`** 可能导致未经授权的命令执行，可能用于权限提升。
+- 修改或写入 **`IsInstalled`** 设置为 `"1"` 的键，并指定 **`StubPath`** 可能导致未经授权的命令执行，从而可能导致权限提升。
 - 更改任何 **`StubPath`** 值中引用的二进制文件也可能实现权限提升，前提是具有足够的权限。
 
 要检查 Active Setup 组件中的 **`StubPath`** 配置，可以使用以下命令：
@@ -249,7 +243,7 @@ reg query "HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components
 
 浏览器助手对象 (BHO) 是 DLL 模块，为微软的 Internet Explorer 添加额外功能。它们在每次启动时加载到 Internet Explorer 和 Windows Explorer 中。然而，可以通过将 **NoExplorer** 键设置为 1 来阻止它们的执行，从而防止它们与 Windows Explorer 实例一起加载。
 
-BHO 通过 Internet Explorer 11 与 Windows 10 兼容，但在较新版本的 Windows 中的默认浏览器 Microsoft Edge 中不受支持。
+BHO 通过 Internet Explorer 11 与 Windows 10 兼容，但在 Microsoft Edge（新版本 Windows 的默认浏览器）中不受支持。
 
 要探索系统上注册的 BHO，可以检查以下注册表键：
 
@@ -268,7 +262,7 @@ reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\B
 - `HKLM\Software\Microsoft\Internet Explorer\Extensions`
 - `HKLM\Software\Wow6432Node\Microsoft\Internet Explorer\Extensions`
 
-请注意，注册表将为每个 dll 包含 1 个新的注册表项，并由 **CLSID** 表示。您可以在 `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}` 中找到 CLSID 信息。
+注意，注册表将为每个 dll 包含 1 个新的注册表项，并由 **CLSID** 表示。您可以在 `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}` 中找到 CLSID 信息。
 
 ### 字体驱动程序
 
@@ -297,13 +291,13 @@ HKLM\Software\Microsoft\Wow6432Node\Windows NT\CurrentVersion\Image File Executi
 ```
 ## SysInternals
 
-请注意，您可以找到 autoruns 的所有站点 **已经被**[ **winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe) 搜索过。然而，对于 **更全面的自动执行** 文件列表，您可以使用来自 Sysinternals 的 [autoruns ](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns)：
+请注意，您可以找到 autoruns 的所有站点 **已经被**[ **winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe) 搜索过。然而，对于 **更全面的自动执行** 文件列表，您可以使用来自 Sysinternals 的 [autoruns](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns)：
 ```
 autorunsc.exe -m -nobanner -a * -ct /accepteula
 ```
 ## 更多
 
-**在** [**https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2**](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2) **中找到更多类似的 Autoruns 注册表**
+**在** [**https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2**](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2) **中找到更多类似的 Autoruns，如注册表项**
 
 ## 参考文献
 
@@ -312,10 +306,6 @@ autorunsc.exe -m -nobanner -a * -ct /accepteula
 - [https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
 - [https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell](https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell)
 
-<figure><img src="../../images/i3.png" alt=""><figcaption></figcaption></figure>
 
-**漏洞赏金提示**：**注册** **Intigriti**，一个由黑客为黑客创建的高级**漏洞赏金平台**！今天就加入我们，访问 [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks)，开始赚取高达 **$100,000** 的赏金！
-
-{% embed url="https://go.intigriti.com/hacktricks" %}
 
 {{#include ../../banners/hacktricks-training.md}}

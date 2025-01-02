@@ -2,31 +2,30 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## 基本信息
 
-AppArmor is a **kernel enhancement designed to restrict the resources available to programs through per-program profiles**, effectively implementing Mandatory Access Control (MAC) by tying access control attributes directly to programs instead of users. This system operates by **loading profiles into the kernel**, usually during boot, and these profiles dictate what resources a program can access, such as network connections, raw socket access, and file permissions.
+AppArmor 是一个 **内核增强，旨在通过每个程序的配置文件限制程序可用的资源**，有效地通过将访问控制属性直接与程序而非用户绑定来实现强制访问控制 (MAC)。该系统通过 **将配置文件加载到内核中** 来运行，通常在启动时，这些配置文件规定了程序可以访问的资源，例如网络连接、原始套接字访问和文件权限。
 
-There are two operational modes for AppArmor profiles:
+AppArmor 配置文件有两种操作模式：
 
-- **Enforcement Mode**: This mode actively enforces the policies defined within the profile, blocking actions that violate these policies and logging any attempts to breach them through systems like syslog or auditd.
-- **Complain Mode**: Unlike enforcement mode, complain mode does not block actions that go against the profile's policies. Instead, it logs these attempts as policy violations without enforcing restrictions.
+- **强制模式**：此模式积极执行配置文件中定义的策略，阻止违反这些政策的操作，并通过 syslog 或 auditd 等系统记录任何试图违反的行为。
+- **投诉模式**：与强制模式不同，投诉模式不会阻止违反配置文件政策的操作。相反，它将这些尝试记录为政策违规，而不执行限制。
 
-### Components of AppArmor
+### AppArmor 的组件
 
-- **Kernel Module**: Responsible for the enforcement of policies.
-- **Policies**: Specify the rules and restrictions for program behavior and resource access.
-- **Parser**: Loads policies into the kernel for enforcement or reporting.
-- **Utilities**: These are user-mode programs that provide an interface for interacting with and managing AppArmor.
+- **内核模块**：负责政策的执行。
+- **政策**：指定程序行为和资源访问的规则和限制。
+- **解析器**：将政策加载到内核中以进行执行或报告。
+- **实用程序**：这些是用户模式程序，提供与 AppArmor 交互和管理的接口。
 
-### Profiles path
+### 配置文件路径
 
-Apparmor profiles are usually saved in _**/etc/apparmor.d/**_\
-With `sudo aa-status` you will be able to list the binaries that are restricted by some profile. If you can change the char "/" for a dot of the path of each listed binary and you will obtain the name of the apparmor profile inside the mentioned folder.
+Apparmor 配置文件通常保存在 _**/etc/apparmor.d/**_\
+使用 `sudo aa-status`，您将能够列出受某些配置文件限制的二进制文件。如果您将每个列出二进制文件路径中的字符 "/" 更改为点，您将获得提到的文件夹内的 apparmor 配置文件名称。
 
-For example, a **apparmor** profile for _/usr/bin/man_ will be located in _/etc/apparmor.d/usr.bin.man_
+例如，**apparmor** 配置文件对于 _/usr/bin/man_ 将位于 _/etc/apparmor.d/usr.bin.man_
 
-### Commands
-
+### 命令
 ```bash
 aa-status     #check the current status
 aa-enforce    #set profile to enforce mode (from disable or complain)
@@ -36,47 +35,41 @@ aa-genprof    #generate a new profile
 aa-logprof    #used to change the policy when the binary/program is changed
 aa-mergeprof  #used to merge the policies
 ```
+## 创建配置文件
 
-## Creating a profile
-
-- In order to indicate the affected executable, **absolute paths and wildcards** are allowed (for file globbing) for specifying files.
-- To indicate the access the binary will have over **files** the following **access controls** can be used:
-  - **r** (read)
-  - **w** (write)
-  - **m** (memory map as executable)
-  - **k** (file locking)
-  - **l** (creation hard links)
-  - **ix** (to execute another program with the new program inheriting policy)
-  - **Px** (execute under another profile, after cleaning the environment)
-  - **Cx** (execute under a child profile, after cleaning the environment)
-  - **Ux** (execute unconfined, after cleaning the environment)
-- **Variables** can be defined in the profiles and can be manipulated from outside the profile. For example: @{PROC} and @{HOME} (add #include \<tunables/global> to the profile file)
-- **Deny rules are supported to override allow rules**.
+- 为了指示受影响的可执行文件，**绝对路径和通配符**被允许用于指定文件。
+- 要指示二进制文件对**文件**的访问，可以使用以下**访问控制**：
+- **r** (读取)
+- **w** (写入)
+- **m** (将内存映射为可执行)
+- **k** (文件锁定)
+- **l** (创建硬链接)
+- **ix** (执行另一个程序，新程序继承策略)
+- **Px** (在另一个配置文件下执行，清理环境后)
+- **Cx** (在子配置文件下执行，清理环境后)
+- **Ux** (在无约束下执行，清理环境后)
+- **变量**可以在配置文件中定义，并可以从配置文件外部进行操作。例如：@{PROC} 和 @{HOME} (将 #include \<tunables/global> 添加到配置文件)
+- **支持拒绝规则以覆盖允许规则**。
 
 ### aa-genprof
 
-To easily start creating a profile apparmor can help you. It's possible to make **apparmor inspect the actions performed by a binary and then let you decide which actions you want to allow or deny**.\
-You just need to run:
-
+要轻松开始创建配置文件，apparmor 可以帮助您。可以让**apparmor 检查二进制文件执行的操作，然后让您决定要允许或拒绝哪些操作**。\
+您只需运行：
 ```bash
 sudo aa-genprof /path/to/binary
 ```
-
-Then, in a different console perform all the actions that the binary will usually perform:
-
+然后，在另一个控制台中执行二进制文件通常会执行的所有操作：
 ```bash
 /path/to/binary -a dosomething
 ```
-
-Then, in the first console press "**s**" and then in the recorded actions indicate if you want to ignore, allow, or whatever. When you have finished press "**f**" and the new profile will be created in _/etc/apparmor.d/path.to.binary_
+然后，在第一个控制台中按“**s**”，然后在记录的操作中指示您想要忽略、允许或其他。当您完成后按“**f**”，新配置文件将创建在 _/etc/apparmor.d/path.to.binary_
 
 > [!NOTE]
-> Using the arrow keys you can select what you want to allow/deny/whatever
+> 使用箭头键可以选择您想要允许/拒绝/其他的内容
 
 ### aa-easyprof
 
-You can also create a template of an apparmor profile of a binary with:
-
+您还可以使用以下命令创建二进制文件的 apparmor 配置文件模板：
 ```bash
 sudo aa-easyprof /path/to/binary
 # vim:syntax=apparmor
@@ -90,40 +83,34 @@ sudo aa-easyprof /path/to/binary
 # No template variables specified
 
 "/path/to/binary" {
-  #include <abstractions/base>
+#include <abstractions/base>
 
-  # No abstractions specified
+# No abstractions specified
 
-  # No policy groups specified
+# No policy groups specified
 
-  # No read paths specified
+# No read paths specified
 
-  # No write paths specified
+# No write paths specified
 }
 ```
-
 > [!NOTE]
-> Note that by default in a created profile nothing is allowed, so everything is denied. You will need to add lines like `/etc/passwd r,` to allow the binary read `/etc/passwd` for example.
+> 请注意，在创建的配置文件中，默认情况下不允许任何操作，因此所有操作都被拒绝。您需要添加类似 `/etc/passwd r,` 的行，以允许二进制文件读取 `/etc/passwd`，例如。
 
-You can then **enforce** the new profile with
-
+您可以然后 **enforce** 新的配置文件，使用
 ```bash
 sudo apparmor_parser -a /etc/apparmor.d/path.to.binary
 ```
+### 从日志修改配置文件
 
-### Modifying a profile from logs
-
-The following tool will read the logs and ask the user if he wants to permit some of the detected forbidden actions:
-
+以下工具将读取日志并询问用户是否要允许某些检测到的禁止操作：
 ```bash
 sudo aa-logprof
 ```
-
 > [!NOTE]
-> Using the arrow keys you can select what you want to allow/deny/whatever
+> 使用箭头键可以选择您想要允许/拒绝/其他的内容
 
-### Managing a Profile
-
+### 管理配置文件
 ```bash
 #Main profile management commands
 apparmor_parser -a /etc/apparmor.d/profile.name #Load a new profile in enforce mode
@@ -131,18 +118,14 @@ apparmor_parser -C /etc/apparmor.d/profile.name #Load a new profile in complain 
 apparmor_parser -r /etc/apparmor.d/profile.name #Replace existing profile
 apparmor_parser -R /etc/apparmor.d/profile.name #Remove profile
 ```
+## 日志
 
-## Logs
-
-Example of **AUDIT** and **DENIED** logs from _/var/log/audit/audit.log_ of the executable **`service_bin`**:
-
+示例 **AUDIT** 和 **DENIED** 日志来自 _/var/log/audit/audit.log_ 的可执行文件 **`service_bin`**：
 ```bash
 type=AVC msg=audit(1610061880.392:286): apparmor="AUDIT" operation="getattr" profile="/bin/rcat" name="/dev/pts/1" pid=954 comm="service_bin" requested_mask="r" fsuid=1000 ouid=1000
 type=AVC msg=audit(1610061880.392:287): apparmor="DENIED" operation="open" profile="/bin/rcat" name="/etc/hosts" pid=954 comm="service_bin" requested_mask="r" denied_mask="r" fsuid=1000 ouid=0
 ```
-
-You can also get this information using:
-
+您还可以使用以下方法获取此信息：
 ```bash
 sudo aa-notify -s 1 -v
 Profile: /bin/service_bin
@@ -160,126 +143,104 @@ Logfile: /var/log/audit/audit.log
 AppArmor denials: 2 (since Wed Jan  6 23:51:08 2021)
 For more information, please see: https://wiki.ubuntu.com/DebuggingApparmor
 ```
-
 ## Apparmor in Docker
 
-Note how the profile **docker-profile** of docker is loaded by default:
-
+注意 **docker-profile** 的配置文件是默认加载的：
 ```bash
 sudo aa-status
 apparmor module is loaded.
 50 profiles are loaded.
 13 profiles are in enforce mode.
-   /sbin/dhclient
-   /usr/bin/lxc-start
-   /usr/lib/NetworkManager/nm-dhcp-client.action
-   /usr/lib/NetworkManager/nm-dhcp-helper
-   /usr/lib/chromium-browser/chromium-browser//browser_java
-   /usr/lib/chromium-browser/chromium-browser//browser_openjdk
-   /usr/lib/chromium-browser/chromium-browser//sanitized_helper
-   /usr/lib/connman/scripts/dhclient-script
-   docker-default
+/sbin/dhclient
+/usr/bin/lxc-start
+/usr/lib/NetworkManager/nm-dhcp-client.action
+/usr/lib/NetworkManager/nm-dhcp-helper
+/usr/lib/chromium-browser/chromium-browser//browser_java
+/usr/lib/chromium-browser/chromium-browser//browser_openjdk
+/usr/lib/chromium-browser/chromium-browser//sanitized_helper
+/usr/lib/connman/scripts/dhclient-script
+docker-default
 ```
+默认情况下，**Apparmor docker-default 配置文件**是从 [https://github.com/moby/moby/tree/master/profiles/apparmor](https://github.com/moby/moby/tree/master/profiles/apparmor) 生成的。
 
-By default **Apparmor docker-default profile** is generated from [https://github.com/moby/moby/tree/master/profiles/apparmor](https://github.com/moby/moby/tree/master/profiles/apparmor)
+**docker-default 配置文件摘要**：
 
-**docker-default profile Summary**:
+- **访问**所有**网络**
+- **未定义能力**（但是，一些能力将来自包含基本基础规则，即 #include \<abstractions/base>）
+- **写入**任何**/proc** 文件**不允许**
+- 其他**/proc**和**/sys**的**子目录**/**文件**被**拒绝**读/写/锁/链接/执行访问
+- **挂载****不允许**
+- **Ptrace**只能在被**相同 apparmor 配置文件**限制的进程上运行
 
-- **Access** to all **networking**
-- **No capability** is defined (However, some capabilities will come from including basic base rules i.e. #include \<abstractions/base> )
-- **Writing** to any **/proc** file is **not allowed**
-- Other **subdirectories**/**files** of /**proc** and /**sys** are **denied** read/write/lock/link/execute access
-- **Mount** is **not allowed**
-- **Ptrace** can only be run on a process that is confined by **same apparmor profile**
-
-Once you **run a docker container** you should see the following output:
-
+一旦你**运行一个 docker 容器**，你应该看到以下输出：
 ```bash
 1 processes are in enforce mode.
-   docker-default (825)
+docker-default (825)
 ```
-
-Note that **apparmor will even block capabilities privileges** granted to the container by default. For example, it will be able to **block permission to write inside /proc even if the SYS_ADMIN capability is granted** because by default docker apparmor profile denies this access:
-
+注意，**apparmor 甚至会阻止默认情况下授予容器的能力特权**。例如，它将能够**阻止写入 /proc 的权限，即使授予了 SYS_ADMIN 能力**，因为默认情况下 docker apparmor 配置文件拒绝此访问：
 ```bash
 docker run -it --cap-add SYS_ADMIN --security-opt seccomp=unconfined ubuntu /bin/bash
 echo "" > /proc/stat
 sh: 1: cannot create /proc/stat: Permission denied
 ```
-
-You need to **disable apparmor** to bypass its restrictions:
-
+您需要**禁用 apparmor**以绕过其限制：
 ```bash
 docker run -it --cap-add SYS_ADMIN --security-opt seccomp=unconfined --security-opt apparmor=unconfined ubuntu /bin/bash
 ```
+请注意，默认情况下，**AppArmor** 还会 **禁止容器从内部挂载** 文件夹，即使具有 SYS_ADMIN 能力。
 
-Note that by default **AppArmor** will also **forbid the container to mount** folders from the inside even with SYS_ADMIN capability.
+请注意，您可以 **添加/删除** **能力** 到 docker 容器（这仍然会受到 **AppArmor** 和 **Seccomp** 等保护方法的限制）：
 
-Note that you can **add/remove** **capabilities** to the docker container (this will be still restricted by protection methods like **AppArmor** and **Seccomp**):
-
-- `--cap-add=SYS_ADMIN` give `SYS_ADMIN` cap
-- `--cap-add=ALL` give all caps
-- `--cap-drop=ALL --cap-add=SYS_PTRACE` drop all caps and only give `SYS_PTRACE`
+- `--cap-add=SYS_ADMIN` 给予 `SYS_ADMIN` 能力
+- `--cap-add=ALL` 给予所有能力
+- `--cap-drop=ALL --cap-add=SYS_PTRACE` 删除所有能力，仅给予 `SYS_PTRACE`
 
 > [!NOTE]
-> Usually, when you **find** that you have a **privileged capability** available **inside** a **docker** container **but** some part of the **exploit isn't working**, this will be because docker **apparmor will be preventing it**.
+> 通常，当您 **发现** 在 **docker** 容器 **内部** 有一个 **特权能力** 可用 **但** 某些部分的 **利用没有工作** 时，这将是因为 docker **apparmor 会阻止它**。
 
-### Example
+### 示例
 
-(Example from [**here**](https://sreeninet.wordpress.com/2016/03/06/docker-security-part-2docker-engine/))
+（示例来自 [**这里**](https://sreeninet.wordpress.com/2016/03/06/docker-security-part-2docker-engine/)）
 
-To illustrate AppArmor functionality, I created a new Docker profile “mydocker” with the following line added:
-
+为了说明 AppArmor 的功能，我创建了一个新的 Docker 配置文件 “mydocker”，并添加了以下行：
 ```
 deny /etc/* w,   # deny write for all files directly in /etc (not in a subdir)
 ```
-
-To activate the profile, we need to do the following:
-
+要激活配置文件，我们需要执行以下操作：
 ```
 sudo apparmor_parser -r -W mydocker
 ```
-
-To list the profiles, we can do the following command. The command below is listing my new AppArmor profile.
-
+要列出配置文件，我们可以执行以下命令。下面的命令列出了我新的 AppArmor 配置文件。
 ```
 $ sudo apparmor_status  | grep mydocker
-   mydocker
+mydocker
 ```
-
-As shown below, we get error when trying to change “/etc/” since AppArmor profile is preventing write access to “/etc”.
-
+如下面所示，当尝试更改“/etc/”时，我们会遇到错误，因为 AppArmor 配置文件阻止对“/etc”的写入访问。
 ```
 $ docker run --rm -it --security-opt apparmor:mydocker -v ~/haproxy:/localhost busybox chmod 400 /etc/hostname
 chmod: /etc/hostname: Permission denied
 ```
-
 ### AppArmor Docker Bypass1
 
-You can find which **apparmor profile is running a container** using:
-
+您可以使用以下命令找到**正在运行容器的 apparmor 配置文件**：
 ```bash
 docker inspect 9d622d73a614 | grep lowpriv
-        "AppArmorProfile": "lowpriv",
-                "apparmor=lowpriv"
+"AppArmorProfile": "lowpriv",
+"apparmor=lowpriv"
 ```
-
-Then, you can run the following line to **find the exact profile being used**:
-
+然后，您可以运行以下命令来**查找正在使用的确切配置文件**：
 ```bash
 find /etc/apparmor.d/ -name "*lowpriv*" -maxdepth 1 2>/dev/null
 ```
-
-In the weird case you can **modify the apparmor docker profile and reload it.** You could remove the restrictions and "bypass" them.
+在奇怪的情况下，你可以**修改 apparmor docker 配置文件并重新加载它。** 你可以删除限制并“绕过”它们。
 
 ### AppArmor Docker Bypass2
 
-**AppArmor is path based**, this means that even if it might be **protecting** files inside a directory like **`/proc`** if you can **configure how the container is going to be run**, you could **mount** the proc directory of the host inside **`/host/proc`** and it **won't be protected by AppArmor anymore**.
+**AppArmor 是基于路径的，** 这意味着即使它可能在保护像 **`/proc`** 这样的目录中的文件，如果你可以**配置容器的运行方式，** 你可以**挂载**主机的 proc 目录到 **`/host/proc`**，并且它**将不再受到 AppArmor 的保护**。
 
 ### AppArmor Shebang Bypass
 
-In [**this bug**](https://bugs.launchpad.net/apparmor/+bug/1911431) you can see an example of how **even if you are preventing perl to be run with certain resources**, if you just create a a shell script **specifying** in the first line **`#!/usr/bin/perl`** and you **execute the file directly**, you will be able to execute whatever you want. E.g.:
-
+在 [**这个漏洞**](https://bugs.launchpad.net/apparmor/+bug/1911431) 中，你可以看到一个例子，说明**即使你正在防止 perl 使用某些资源运行，** 如果你只需创建一个 shell 脚本**在第一行指定** **`#!/usr/bin/perl`** 并且你**直接执行该文件，** 你将能够执行你想要的任何内容。例如：
 ```perl
 echo '#!/usr/bin/perl
 use POSIX qw(strftime);
@@ -289,5 +250,4 @@ exec "/bin/sh"' > /tmp/test.pl
 chmod +x /tmp/test.pl
 /tmp/test.pl
 ```
-
 {{#include ../../../banners/hacktricks-training.md}}

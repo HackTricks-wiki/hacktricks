@@ -2,16 +2,14 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-{% embed url="https://websec.nl/" %}
-
 ## 它们是如何工作的
 
-该过程在以下步骤中概述，说明如何通过 SMB 操纵服务二进制文件以实现对目标机器的远程执行：
+该过程在以下步骤中概述，说明如何操纵服务二进制文件以通过 SMB 在目标机器上实现远程执行：
 
 1. **通过 SMB 复制服务二进制文件到 ADMIN$ 共享**。
 2. **在远程机器上创建服务**，指向该二进制文件。
 3. 服务被 **远程启动**。
-4. 退出时，服务被 **停止，二进制文件被删除**。
+4. 退出时，服务被 **停止，并删除二进制文件**。
 
 ### **手动执行 PsExec 的过程**
 
@@ -25,16 +23,14 @@
 
 [了解更多关于 `sc` 命令的信息](https://technet.microsoft.com/en-us/library/bb490995.aspx)。
 
-在这里找到更详细的步骤: [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
+在此处找到更详细的步骤: [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
 
 **您还可以使用 Windows Sysinternals 二进制文件 PsExec.exe：**
 
 ![](<../../images/image (928).png>)
 
 您还可以使用 [**SharpLateral**](https://github.com/mertdas/SharpLateral)：
-```
+```bash
 SharpLateral.exe redexec HOSTNAME C:\\Users\\Administrator\\Desktop\\malware.exe.exe malware.exe ServiceName
 ```
-{% embed url="https://websec.nl/" %}
-
 {{#include ../../banners/hacktricks-training.md}}

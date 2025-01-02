@@ -1,19 +1,19 @@
-# macOS Defensive Apps
+# macOS 防御应用
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Firewalls
+## 防火墙
 
-- [**Little Snitch**](https://www.obdev.at/products/littlesnitch/index.html): It will monitor every connection made by each process. Depending on the mode (silent allow connections, silent deny connection and alert) it will **show you an alert** every time a new connection is stablished. It also has a very nice GUI to see all this information.
-- [**LuLu**](https://objective-see.org/products/lulu.html): Objective-See firewall. This is a basic firewall that will alert you for suspicious connections (it has a GUI but it isn't as fancy as the one of Little Snitch).
+- [**Little Snitch**](https://www.obdev.at/products/littlesnitch/index.html): 它将监控每个进程所建立的每个连接。根据模式（静默允许连接、静默拒绝连接和警报），每当建立新连接时，它将**向您显示警报**。它还有一个非常好的图形用户界面来查看所有这些信息。
+- [**LuLu**](https://objective-see.org/products/lulu.html): Objective-See 防火墙。这是一个基本的防火墙，会对可疑连接发出警报（它有一个图形用户界面，但没有 Little Snitch 的那么花哨）。
 
-## Persistence detection
+## 持久性检测
 
-- [**KnockKnock**](https://objective-see.org/products/knockknock.html): Objective-See application that will search in several locations where **malware could be persisting** (it's a one-shot tool, not a monitoring service).
-- [**BlockBlock**](https://objective-see.org/products/blockblock.html): Like KnockKnock by monitoring processes that generate persistence.
+- [**KnockKnock**](https://objective-see.org/products/knockknock.html): Objective-See 应用程序，将在多个位置搜索**恶意软件可能存在的地方**（这是一个一次性工具，而不是监控服务）。
+- [**BlockBlock**](https://objective-see.org/products/blockblock.html): 像 KnockKnock 一样，通过监控生成持久性的进程。
 
-## Keyloggers detection
+## 键盘记录器检测
 
-- [**ReiKey**](https://objective-see.org/products/reikey.html): Objective-See application to find **keyloggers** that install keyboard "event taps"&#x20;
+- [**ReiKey**](https://objective-see.org/products/reikey.html): Objective-See 应用程序，用于查找安装键盘“事件捕获”的**键盘记录器**&#x20;
 
 {{#include ../../banners/hacktricks-training.md}}

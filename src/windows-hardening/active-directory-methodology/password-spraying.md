@@ -2,24 +2,18 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
-
-通过8kSec Academy深化您在**移动安全**方面的专业知识。通过我们的自学课程掌握iOS和Android安全并获得认证：
-
-{% embed url="https://academy.8ksec.io/" %}
-
 ## **密码喷洒**
 
-一旦您找到了几个**有效的用户名**，您可以尝试每个发现的用户的最**常见密码**（请记住环境的密码策略）。\
-默认情况下，**最小** **密码** **长度**为**7**。
+一旦你找到了几个 **有效的用户名**，你可以尝试最 **常见的密码**（请记住环境的密码策略）与每个发现的用户。\
+默认情况下，**最小** **密码** **长度** 为 **7**。
 
 常见用户名的列表也可能有用：[https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames)
 
-请注意，如果您尝试多个错误密码，您**可能会锁定某些账户**（默认情况下超过10次）。
+请注意，如果你尝试多个错误密码，**可能会锁定某些账户**（默认情况下超过 10 次）。
 
 ### 获取密码策略
 
-如果您拥有一些用户凭据或作为域用户的shell，您可以**获取密码策略**：
+如果你有一些用户凭据或作为域用户的 shell，你可以 **通过以下方式获取密码策略**：
 ```bash
 # From Linux
 crackmapexec <IP> -u 'user' -p 'password' --pass-pol
@@ -96,7 +90,7 @@ legba kerberos --target 127.0.0.1 --username admin --password wordlists/password
 ```
 ## Outlook Web Access
 
-有多种工具可以进行**密码喷洒 Outlook**。
+有多种工具用于**密码喷洒 Outlook**。
 
 - 使用 [MSF Owa_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_login/)
 - 使用 [MSF Owa_ews_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_ews_login/)
@@ -130,10 +124,5 @@ legba kerberos --target 127.0.0.1 --username admin --password wordlists/password
 - [www.blackhillsinfosec.com/?p=5296](https://www.blackhillsinfosec.com/?p=5296)
 - [https://hunter2.gitbook.io/darthsidious/initial-access/password-spraying](https://hunter2.gitbook.io/darthsidious/initial-access/password-spraying)
 
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
-
-深入了解 **移动安全**，加入 8kSec 学院。通过我们的自学课程掌握 iOS 和 Android 安全，并获得认证：
-
-{% embed url="https://academy.8ksec.io/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

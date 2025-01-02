@@ -5,24 +5,21 @@
 ## Objective-C
 
 > [!CAUTION]
-> Note that programs written in Objective-C **retain** their class declarations **when** **compiled** into [Mach-O binaries](macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md). Such class declarations **include** the name and type of:
+> 请注意，用 Objective-C 编写的程序在编译成 [Mach-O binaries](macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md) 时 **保留** 其类声明。这些类声明 **包括** 的信息有：
 
-- The class
-- The class methods
-- The class instance variables
+- 类名
+- 类方法
+- 类实例变量
 
-You can get this information using [**class-dump**](https://github.com/nygard/class-dump):
-
+您可以使用 [**class-dump**](https://github.com/nygard/class-dump) 获取这些信息：
 ```bash
 class-dump Kindle.app
 ```
+请注意，这些名称可能会被混淆，以使二进制文件的逆向工程更加困难。
 
-Note that this names could be obfuscated to make the reversing of the binary more difficult.
+## 类、方法和对象
 
-## Classes, Methods & Objects
-
-### Interface, Properties & Methods
-
+### 接口、属性和方法
 ```objectivec
 // Declare the interface of the class
 @interface MyVehicle : NSObject
@@ -37,29 +34,25 @@ Note that this names could be obfuscated to make the reversing of the binary mor
 
 @end
 ```
-
-### **Class**
-
+### **类**
 ```objectivec
 @implementation MyVehicle : NSObject
 
 // No need to indicate the properties, only define methods
 
 - (void)startEngine {
-    NSLog(@"Engine started");
+NSLog(@"Engine started");
 }
 
 - (void)addWheels:(int)value {
-    self.numberOfWheels += value;
+self.numberOfWheels += value;
 }
 
 @end
 ```
+### **对象与调用方法**
 
-### **Object & Call Method**
-
-To create an instance of a class the **`alloc`** method is called which **allocate memory** for each **property** and **zero** those allocations. Then **`init`** is called, which **initilize the properties** to the **required values**.
-
+要创建一个类的实例，调用 **`alloc`** 方法，该方法 **为每个属性分配内存** 并 **将这些分配置为零**。然后调用 **`init`**，该方法 **将属性初始化为所需的值**。
 ```objectivec
 // Something like this:
 MyVehicle *newVehicle = [[MyVehicle alloc] init];
@@ -71,19 +64,15 @@ MyVehicle *newVehicle = [MyVehicle new];
 // [myClassInstance nameOfTheMethodFirstParam:param1 secondParam:param2]
 [newVehicle addWheels:4];
 ```
+### **类方法**
 
-### **Class Methods**
-
-Class methods are defined with the **plus sign** (+) not the hyphen (-) that is used with instance methods. Like the **NSString** class method **`stringWithString`**:
-
+类方法是用 **加号** (+) 定义的，而不是用于实例方法的连字符 (-)。例如 **NSString** 类方法 **`stringWithString`**:
 ```objectivec
 + (id)stringWithString:(NSString *)aString;
 ```
-
 ### Setter & Getter
 
-To **set** & **get** properties, you could do it with a **dot notation** or like if you were **calling a method**:
-
+要**设置**和**获取**属性，您可以使用**点表示法**或像**调用方法**一样：
 ```objectivec
 // Set
 newVehicle.numberOfWheels = 2;
@@ -93,24 +82,20 @@ newVehicle.numberOfWheels = 2;
 NSLog(@"Number of wheels: %i", newVehicle.numberOfWheels);
 NSLog(@"Number of wheels: %i", [newVehicle numberOfWheels]);
 ```
+### **实例变量**
 
-### **Instance Variables**
-
-Alternatively to setter & getter methods you can use instance variables. These variables have the same name as the properties but starting with a "\_":
-
+除了 setter 和 getter 方法，你可以使用实例变量。这些变量与属性同名，但以 "_" 开头：
 ```objectivec
 - (void)makeLongTruck {
-    _numberOfWheels = +10000;
-    NSLog(@"Number of wheels: %i", self.numberOfLeaves);
+_numberOfWheels = +10000;
+NSLog(@"Number of wheels: %i", self.numberOfLeaves);
 }
 ```
+### 协议
 
-### Protocols
+协议是一组方法声明（没有属性）。实现协议的类实现声明的方法。
 
-Protocols are set of method declarations (without properties). A class that implements a protocol implement the declared methods.
-
-There are 2 types of methods: **mandatory** and **optional**. By **default** a method is **mandatory** (but you can also indicate it with a **`@required`** tag). To indicate that a method is optional use **`@optional`**.
-
+方法有两种类型：**必需**和**可选**。默认情况下，方法是**必需**的（但您也可以使用**`@required`**标签来指示）。要指示方法是可选的，请使用**`@optional`**。
 ```objectivec
 @protocol myNewProtocol
 - (void) method1; //mandatory
@@ -120,9 +105,7 @@ There are 2 types of methods: **mandatory** and **optional**. By **default** a m
 - (void) method3; //optional
 @end
 ```
-
-### All together
-
+### 一起
 ```objectivec
 // gcc -framework Foundation test_obj.m -o test_obj
 #import <Foundation/Foundation.h>
@@ -148,50 +131,44 @@ There are 2 types of methods: **mandatory** and **optional**. By **default** a m
 @implementation MyVehicle : NSObject
 
 - (void)startEngine {
-    NSLog(@"Engine started");
+NSLog(@"Engine started");
 }
 
 - (void)addWheels:(int)value {
-    self.numberOfWheels += value;
+self.numberOfWheels += value;
 }
 
 - (void)makeLongTruck {
-    _numberOfWheels = +10000;
-    NSLog(@"Number of wheels: %i", self.numberOfWheels);
+_numberOfWheels = +10000;
+NSLog(@"Number of wheels: %i", self.numberOfWheels);
 }
 
 @end
 
 int main() {
-    MyVehicle* mySuperCar = [MyVehicle new];
-    [mySuperCar startEngine];
-    mySuperCar.numberOfWheels = 4;
-    NSLog(@"Number of wheels: %i", mySuperCar.numberOfWheels);
-    [mySuperCar setNumberOfWheels:3];
-    NSLog(@"Number of wheels: %i", mySuperCar.numberOfWheels);
-    [mySuperCar makeLongTruck];
+MyVehicle* mySuperCar = [MyVehicle new];
+[mySuperCar startEngine];
+mySuperCar.numberOfWheels = 4;
+NSLog(@"Number of wheels: %i", mySuperCar.numberOfWheels);
+[mySuperCar setNumberOfWheels:3];
+NSLog(@"Number of wheels: %i", mySuperCar.numberOfWheels);
+[mySuperCar makeLongTruck];
 }
 ```
+### 基本类
 
-### Basic Classes
-
-#### String
-
+#### 字符串
 ```objectivec
 // NSString
 NSString *bookTitle = @"The Catcher in the Rye";
 NSString *bookAuthor = [[NSString alloc] initWithCString:"J.D. Salinger" encoding:NSUTF8StringEncoding];
 NSString *bookPublicationYear = [NSString stringWithCString:"1951" encoding:NSUTF8StringEncoding];
 ```
-
-Basic classes are **immutable**, so to append a string to an existing one a **new NSString needs to be created**.
-
+基本类是**不可变的**，因此要将一个字符串附加到现有字符串上，**需要创建一个新的 NSString**。
 ```objectivec
 NSString *bookDescription = [NSString stringWithFormat:@"%@ by %@ was published in %@", bookTitle, bookAuthor, bookPublicationYear];
 ```
-
-Or you could also use a **mutable** string class:
-
+或者你也可以使用一个**可变**字符串类：
 ```objectivec
 NSMutableString *mutableString = [NSMutableString stringWithString:@"The book "];
 [mutableString appendString:bookTitle];
@@ -200,9 +177,7 @@ NSMutableString *mutableString = [NSMutableString stringWithString:@"The book "]
 [mutableString appendString:@" and published in "];
 [mutableString appendString:bookPublicationYear];
 ```
-
-#### Number
-
+#### 数字
 ```objectivec
 // character literals.
 NSNumber *theLetterZ = @'Z'; // equivalent to [NSNumber numberWithChar:'Z']
@@ -221,9 +196,7 @@ NSNumber *piDouble = @3.1415926535; // equivalent to [NSNumber numberWithDouble:
 NSNumber *yesNumber = @YES; // equivalent to [NSNumber numberWithBool:YES]
 NSNumber *noNumber = @NO; // equivalent to [NSNumber numberWithBool:NO]
 ```
-
-#### Array, Sets & Dictionary
-
+#### 数组、集合和字典
 ```objectivec
 // Inmutable arrays
 NSArray *colorsArray1 = [NSArray arrayWithObjects:@"red", @"green", @"blue", nil];
@@ -250,18 +223,18 @@ NSMutableSet *mutFruitsSet = [NSMutableSet setWithObjects:@"apple", @"banana", @
 
 // Dictionary
 NSDictionary *fruitColorsDictionary = @{
-    @"apple" : @"red",
-    @"banana" : @"yellow",
-    @"orange" : @"orange",
-    @"grape" : @"purple"
+@"apple" : @"red",
+@"banana" : @"yellow",
+@"orange" : @"orange",
+@"grape" : @"purple"
 };
 
 // In dictionaryWithObjectsAndKeys you specify the value and then the key:
 NSDictionary *fruitColorsDictionary2 = [NSDictionary dictionaryWithObjectsAndKeys:
-    @"red", @"apple",
-    @"yellow", @"banana",
-    @"orange", @"orange",
-    @"purple", @"grape",
+@"red", @"apple",
+@"yellow", @"banana",
+@"orange", @"orange",
+@"purple", @"grape",
 nil];
 
 // Mutable dictionary
@@ -269,80 +242,71 @@ NSMutableDictionary *mutFruitColorsDictionary = [NSMutableDictionary dictionaryW
 [mutFruitColorsDictionary setObject:@"green" forKey:@"apple"];
 [mutFruitColorsDictionary removeObjectForKey:@"grape"];
 ```
-
 ### Blocks
 
-Blocks are **functions that behaves as objects** so they can be passed to functions or **stored** in **arrays** or **dictionaries**. Also, they can **represent a value if they are given values** so it's similar to lambdas.
-
+Blocks 是 **作为对象行为的函数**，因此可以传递给函数或 **存储** 在 **数组** 或 **字典** 中。此外，如果给定值，它们可以 **表示一个值**，因此类似于 lambdas。
 ```objectivec
 returnType (^blockName)(argumentType1, argumentType2, ...) = ^(argumentType1 param1, argumentType2 param2, ...){
-    //Perform operations here
+//Perform operations here
 };
 
 // For example
 
 int (^suma)(int, int) = ^(int a, int b){
-    return a+b;
+return a+b;
 };
 NSLog(@"3+4 = %d", suma(3,4));
 ```
-
-It's also possible to **define a block type to be used as a parameter** in functions:
-
+也可以**定义一个块类型作为函数中的参数**：
 ```objectivec
 // Define the block type
 typedef void (^callbackLogger)(void);
 
 // Create a bloack with the block type
 callbackLogger myLogger = ^{
-    NSLog(@"%@", @"This is my block");
+NSLog(@"%@", @"This is my block");
 };
 
 // Use it inside a function as a param
 void genericLogger(callbackLogger blockParam) {
-    NSLog(@"%@", @"This is my function");
-    blockParam();
+NSLog(@"%@", @"This is my function");
+blockParam();
 }
 genericLogger(myLogger);
 
 // Call it inline
 genericLogger(^{
-    NSLog(@"%@", @"This is my second block");
+NSLog(@"%@", @"This is my second block");
 });
 ```
-
-### Files
-
+### 文件
 ```objectivec
 // Manager to manage files
 NSFileManager *fileManager = [NSFileManager defaultManager];
 
 // Check if file exists:
 if ([fileManager fileExistsAtPath:@"/path/to/file.txt" ] == YES) {
-    NSLog (@"File exists");
+NSLog (@"File exists");
 }
 
 // copy files
 if ([fileManager copyItemAtPath: @"/path/to/file1.txt" toPath: @"/path/to/file2.txt" error:nil] == YES) {
-    NSLog (@"Copy successful");
+NSLog (@"Copy successful");
 }
 
 // Check if the content of 2 files match
 if ([fileManager contentsEqualAtPath:@"/path/to/file1.txt" andPath:@"/path/to/file2.txt"] == YES) {
-    NSLog (@"File contents match");
+NSLog (@"File contents match");
 }
 
 // Delete file
 if ([fileManager removeItemAtPath:@"/path/to/file1.txt" error:nil]) {
-    NSLog(@"Removed successfully");
+NSLog(@"Removed successfully");
 }
 ```
-
-It's also possible to manage files **using `NSURL` objects instead of `NSString`** objects. The method names are similar, but **with `URL` instead of `Path`**.
-
+也可以使用 **`NSURL` 对象而不是 `NSString` 对象** 来管理文件。方法名称类似，但 **使用 `URL` 而不是 `Path`**。
 ```objectivec
 
 
 ```
-
 {{#include ../../banners/hacktricks-training.md}}

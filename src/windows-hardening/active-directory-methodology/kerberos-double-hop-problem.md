@@ -2,13 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
+## Introduction
 
-{% embed url="https://websec.nl/" %}
-
-## 介绍
-
-Kerberos "双跳" 问题出现在攻击者试图在两个跳之间使用 **Kerberos 认证** 时，例如使用 **PowerShell**/**WinRM**。
+Kerberos "Double Hop" 问题出现在攻击者试图在两个跳跃中使用 **Kerberos 认证** 时，例如使用 **PowerShell**/**WinRM**。
 
 当通过 **Kerberos** 进行 **认证** 时，**凭据** **不会** 被缓存到 **内存** 中。因此，如果你运行 mimikatz，你 **不会找到用户的凭据** 在机器上，即使他正在运行进程。
 
@@ -19,16 +15,16 @@ Kerberos "双跳" 问题出现在攻击者试图在两个跳之间使用 **Kerbe
 3. User1 **连接** 到 **Server1** 并提供 **服务票据**。
 4. **Server1** **没有** 缓存 User1 的 **凭据** 或 User1 的 **TGT**。因此，当 User1 从 Server1 尝试登录到第二台服务器时，他 **无法进行认证**。
 
-### 不受限制的委派
+### Unconstrained Delegation
 
-如果在 PC 上启用了 **不受限制的委派**，则不会发生这种情况，因为 **服务器** 将 **获取** 每个访问它的用户的 **TGT**。此外，如果使用不受限制的委派，你可能可以 **从中妥协域控制器**。\
-[**更多信息请参见不受限制的委派页面**](unconstrained-delegation.md)。
+如果在 PC 上启用了 **unconstrained delegation**，则不会发生这种情况，因为 **Server** 将 **获取** 每个访问它的用户的 **TGT**。此外，如果使用了不受限制的委托，你可能会 **妥协域控制器**。\
+[**更多信息请参见不受限制的委托页面**](unconstrained-delegation.md)。
 
 ### CredSSP
 
-另一种避免此问题的方法是 [**显著不安全**](https://docs.microsoft.com/en-us/powershell/module/microsoft.wsman.management/enable-wsmancredssp?view=powershell-7) 的 **凭据安全支持提供程序**。来自微软的说明：
+另一种避免此问题的方法是 [**显著不安全**](https://docs.microsoft.com/en-us/powershell/module/microsoft.wsman.management/enable-wsmancredssp?view=powershell-7) 的 **凭据安全支持提供程序**。来自 Microsoft 的说明：
 
-> CredSSP 认证将用户凭据从本地计算机委派到远程计算机。这种做法增加了远程操作的安全风险。如果远程计算机被攻破，当凭据被传递给它时，这些凭据可以用于控制网络会话。
+> CredSSP 认证将用户凭据从本地计算机委托到远程计算机。这种做法增加了远程操作的安全风险。如果远程计算机被攻破，当凭据被传递给它时，这些凭据可以用于控制网络会话。
 
 由于安全问题，强烈建议在生产系统、敏感网络和类似环境中禁用 **CredSSP**。要确定 **CredSSP** 是否启用，可以运行 `Get-WSManCredSSP` 命令。此命令允许 **检查 CredSSP 状态**，并且可以在启用 **WinRM** 的情况下远程执行。
 ```powershell
@@ -47,11 +43,11 @@ Invoke-Command -ComputerName bizintel -Credential $cred -ScriptBlock {
 Invoke-Command -ComputerName secdev -Credential $cred -ScriptBlock {hostname}
 }
 ```
-另外，建议与第一个服务器建立 PS-Session，并使用 `$cred` 运行 `Invoke-Command` 来集中任务。
+另外，建议与第一个服务器建立 PS-Session 并使用 `$cred` 运行 `Invoke-Command` 来集中任务。
 
 ### 注册 PSSession 配置
 
-绕过双跳问题的解决方案涉及使用 `Register-PSSessionConfiguration` 和 `Enter-PSSession`。这种方法需要与 `evil-winrm` 不同的方式，并允许创建不受双跳限制的会话。
+绕过双跳问题的解决方案涉及使用 `Register-PSSessionConfiguration` 和 `Enter-PSSession`。这种方法需要与 `evil-winrm` 不同的方法，并允许一个不受双跳限制的会话。
 ```powershell
 Register-PSSessionConfiguration -Name doublehopsess -RunAsCredential domain_name\username
 Restart-Service WinRM
@@ -85,15 +81,12 @@ winrs -r:http://bizintel:5446 -u:ta\redsuit -p:2600leet hostname
 ```bash
 icacls.exe "C:\Users\redsuit\Documents\ssh\OpenSSH-Win64" /grant Everyone:RX /T
 ```
-## 参考文献
+## 参考
 
 - [https://techcommunity.microsoft.com/t5/ask-the-directory-services-team/understanding-kerberos-double-hop/ba-p/395463?lightbox-message-images-395463=102145i720503211E78AC20](https://techcommunity.microsoft.com/t5/ask-the-directory-services-team/understanding-kerberos-double-hop/ba-p/395463?lightbox-message-images-395463=102145i720503211E78AC20)
 - [https://posts.slayerlabs.com/double-hop/](https://posts.slayerlabs.com/double-hop/)
 - [https://learn.microsoft.com/en-gb/archive/blogs/sergey_babkins_blog/another-solution-to-multi-hop-powershell-remoting](https://learn.microsoft.com/en-gb/archive/blogs/sergey_babkins_blog/another-solution-to-multi-hop-powershell-remoting)
 - [https://4sysops.com/archives/solve-the-powershell-multi-hop-problem-without-using-credssp/](https://4sysops.com/archives/solve-the-powershell-multi-hop-problem-without-using-credssp/)
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

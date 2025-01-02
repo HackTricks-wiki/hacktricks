@@ -1,53 +1,53 @@
-# Enrolling Devices in Other Organisations
+# 在其他组织中注册设备
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Intro
+## 介绍
 
-As [**previously commented**](./#what-is-mdm-mobile-device-management)**,** in order to try to enrol a device into an organization **only a Serial Number belonging to that Organization is needed**. Once the device is enrolled, several organizations will install sensitive data on the new device: certificates, applications, WiFi passwords, VPN configurations [and so on](https://developer.apple.com/enterprise/documentation/Configuration-Profile-Reference.pdf).\
-Therefore, this could be a dangerous entrypoint for attackers if the enrolment process isn't correctly protected.
+正如[**之前提到的**](./#what-is-mdm-mobile-device-management)**，**为了尝试将设备注册到一个组织中**只需要该组织的序列号**。一旦设备注册，多个组织将会在新设备上安装敏感数据：证书、应用程序、WiFi 密码、VPN 配置[等等](https://developer.apple.com/enterprise/documentation/Configuration-Profile-Reference.pdf)。\
+因此，如果注册过程没有得到正确保护，这可能成为攻击者的危险入口。
 
-**The following is a summary of the research [https://duo.com/labs/research/mdm-me-maybe](https://duo.com/labs/research/mdm-me-maybe). Check it for further technical details!**
+**以下是研究的摘要[https://duo.com/labs/research/mdm-me-maybe](https://duo.com/labs/research/mdm-me-maybe)。请查看以获取更多技术细节！**
 
-## Overview of DEP and MDM Binary Analysis
+## DEP 和 MDM 二进制分析概述
 
-This research delves into the binaries associated with the Device Enrollment Program (DEP) and Mobile Device Management (MDM) on macOS. Key components include:
+本研究深入探讨了与 macOS 上的设备注册程序（DEP）和移动设备管理（MDM）相关的二进制文件。关键组件包括：
 
-- **`mdmclient`**: Communicates with MDM servers and triggers DEP check-ins on macOS versions before 10.13.4.
-- **`profiles`**: Manages Configuration Profiles, and triggers DEP check-ins on macOS versions 10.13.4 and later.
-- **`cloudconfigurationd`**: Manages DEP API communications and retrieves Device Enrollment profiles.
+- **`mdmclient`**：与 MDM 服务器通信，并在 macOS 10.13.4 之前的版本上触发 DEP 检查。
+- **`profiles`**：管理配置文件，并在 macOS 10.13.4 及更高版本上触发 DEP 检查。
+- **`cloudconfigurationd`**：管理 DEP API 通信并检索设备注册配置文件。
 
-DEP check-ins utilize the `CPFetchActivationRecord` and `CPGetActivationRecord` functions from the private Configuration Profiles framework to fetch the Activation Record, with `CPFetchActivationRecord` coordinating with `cloudconfigurationd` through XPC.
+DEP 检查利用私有配置文件框架中的 `CPFetchActivationRecord` 和 `CPGetActivationRecord` 函数来获取激活记录，`CPFetchActivationRecord` 通过 XPC 与 `cloudconfigurationd` 协调。
 
-## Tesla Protocol and Absinthe Scheme Reverse Engineering
+## 特斯拉协议和 Absinthe 方案逆向工程
 
-The DEP check-in involves `cloudconfigurationd` sending an encrypted, signed JSON payload to _iprofiles.apple.com/macProfile_. The payload includes the device's serial number and the action "RequestProfileConfiguration". The encryption scheme used is referred to internally as "Absinthe". Unraveling this scheme is complex and involves numerous steps, which led to exploring alternative methods for inserting arbitrary serial numbers in the Activation Record request.
+DEP 检查涉及 `cloudconfigurationd` 向 _iprofiles.apple.com/macProfile_ 发送加密的签名 JSON 负载。负载包括设备的序列号和操作 "RequestProfileConfiguration"。所使用的加密方案在内部称为 "Absinthe"。解开这个方案是复杂的，涉及多个步骤，这导致探索替代方法以在激活记录请求中插入任意序列号。
 
-## Proxying DEP Requests
+## 代理 DEP 请求
 
-Attempts to intercept and modify DEP requests to _iprofiles.apple.com_ using tools like Charles Proxy were hindered by payload encryption and SSL/TLS security measures. However, enabling the `MCCloudConfigAcceptAnyHTTPSCertificate` configuration allows bypassing the server certificate validation, although the payload's encrypted nature still prevents modification of the serial number without the decryption key.
+使用 Charles Proxy 等工具拦截和修改对 _iprofiles.apple.com_ 的 DEP 请求的尝试受到负载加密和 SSL/TLS 安全措施的阻碍。然而，启用 `MCCloudConfigAcceptAnyHTTPSCertificate` 配置可以绕过服务器证书验证，尽管负载的加密性质仍然阻止在没有解密密钥的情况下修改序列号。
 
-## Instrumenting System Binaries Interacting with DEP
+## 对与 DEP 交互的系统二进制文件进行插桩
 
-Instrumenting system binaries like `cloudconfigurationd` requires disabling System Integrity Protection (SIP) on macOS. With SIP disabled, tools like LLDB can be used to attach to system processes and potentially modify the serial number used in DEP API interactions. This method is preferable as it avoids the complexities of entitlements and code signing.
+对系统二进制文件如 `cloudconfigurationd` 进行插桩需要在 macOS 上禁用系统完整性保护（SIP）。禁用 SIP 后，可以使用 LLDB 等工具附加到系统进程，并可能修改在 DEP API 交互中使用的序列号。这种方法更可取，因为它避免了权限和代码签名的复杂性。
 
-**Exploiting Binary Instrumentation:**
-Modifying the DEP request payload before JSON serialization in `cloudconfigurationd` proved effective. The process involved:
+**利用二进制插桩：**
+在 `cloudconfigurationd` 中 JSON 序列化之前修改 DEP 请求负载被证明是有效的。该过程涉及：
 
-1. Attaching LLDB to `cloudconfigurationd`.
-2. Locating the point where the system serial number is fetched.
-3. Injecting an arbitrary serial number into the memory before the payload is encrypted and sent.
+1. 将 LLDB 附加到 `cloudconfigurationd`。
+2. 找到获取系统序列号的点。
+3. 在负载被加密并发送之前，将任意序列号注入内存中。
 
-This method allowed for retrieving complete DEP profiles for arbitrary serial numbers, demonstrating a potential vulnerability.
+这种方法允许检索任意序列号的完整 DEP 配置文件，展示了潜在的漏洞。
 
-### Automating Instrumentation with Python
+### 使用 Python 自动化插桩
 
-The exploitation process was automated using Python with the LLDB API, making it feasible to programmatically inject arbitrary serial numbers and retrieve corresponding DEP profiles.
+利用 Python 和 LLDB API 自动化了利用过程，使得可以以编程方式注入任意序列号并检索相应的 DEP 配置文件。
 
-### Potential Impacts of DEP and MDM Vulnerabilities
+### DEP 和 MDM 漏洞的潜在影响
 
-The research highlighted significant security concerns:
+研究突出了重大的安全隐患：
 
-1. **Information Disclosure**: By providing a DEP-registered serial number, sensitive organizational information contained in the DEP profile can be retrieved.
+1. **信息泄露**：通过提供一个 DEP 注册的序列号，可以检索 DEP 配置文件中包含的敏感组织信息。
 
 {{#include ../../../banners/hacktricks-training.md}}

@@ -2,24 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/image (3).png" alt=""><figcaption></figcaption></figure>
-
-加入 [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) 服务器，与经验丰富的黑客和漏洞赏金猎人交流！
-
-**黑客洞察**\
-参与深入探讨黑客的刺激与挑战的内容
-
-**实时黑客新闻**\
-通过实时新闻和见解，跟上快速变化的黑客世界
-
-**最新公告**\
-了解最新的漏洞赏金计划和重要平台更新
-
-**加入我们** [**Discord**](https://discord.com/invite/N3FrSbmwdy)，今天就开始与顶级黑客合作吧！
-
 ## ASREPRoast
 
-ASREPRoast 是一种安全攻击，利用缺乏 **Kerberos 预身份验证所需属性** 的用户。基本上，这个漏洞允许攻击者向域控制器 (DC) 请求用户的身份验证，而无需用户的密码。然后，DC 会用用户的密码派生密钥加密的消息进行响应，攻击者可以尝试离线破解以发现用户的密码。
+ASREPRoast 是一种安全攻击，利用缺乏 **Kerberos 预身份验证所需属性** 的用户。基本上，这个漏洞允许攻击者向域控制器 (DC) 请求用户的身份验证，而无需用户的密码。然后，DC 会以用户的密码派生密钥加密的消息进行响应，攻击者可以尝试离线破解以发现用户的密码。
 
 此攻击的主要要求是：
 
@@ -48,7 +33,7 @@ python GetNPUsers.py jurassic.park/triceratops:Sh4rpH0rns -request -format hashc
 Get-ASREPHash -Username VPN114user -verbose #From ASREPRoast.ps1 (https://github.com/HarmJ0y/ASREPRoast)
 ```
 > [!WARNING]
-> 使用 Rubeus 进行 AS-REP Roasting 将生成一个 4768，加密类型为 0x17，预身份验证类型为 0。
+> 使用 Rubeus 进行 AS-REP Roasting 将生成一个 4768，加密类型为 0x17，预认证类型为 0。
 
 ### 破解
 ```bash
@@ -84,20 +69,5 @@ ASRepCatcher listen
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/as-rep-roasting-using-rubeus-and-hashcat](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/as-rep-roasting-using-rubeus-and-hashcat)
 
 ---
-
-<figure><img src="../../images/image (3).png" alt=""><figcaption></figcaption></figure>
-
-加入 [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) 服务器，与经验丰富的黑客和漏洞赏金猎人交流！
-
-**黑客洞察**\
-参与深入探讨黑客的刺激与挑战的内容
-
-**实时黑客新闻**\
-通过实时新闻和见解，跟上快速变化的黑客世界
-
-**最新公告**\
-了解最新的漏洞赏金发布和重要平台更新
-
-**加入我们** [**Discord**](https://discord.com/invite/N3FrSbmwdy)，今天就开始与顶尖黑客合作吧！
 
 {{#include ../../banners/hacktricks-training.md}}

