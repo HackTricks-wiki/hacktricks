@@ -1,15 +1,12 @@
 {{#include ../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 # BlueTeam
 
 - [https://github.com/yarox24/attack_monitor](https://github.com/yarox24/attack_monitor)
 - [https://capsule8.com/blog/dont-get-kicked-out-a-tale-of-rootkits-and-other-backdoors/](https://capsule8.com/blog/dont-get-kicked-out-a-tale-of-rootkits-and-other-backdoors/)
 - [https://github.com/ION28/BLUESPAWN](https://github.com/ION28/BLUESPAWN)
-- [https://github.com/PaperMtn/lil-pwny](https://github.com/PaperMtn/lil-pwny) : Перевірте розкриті акаунти
+- [https://github.com/PaperMtn/lil-pwny](https://github.com/PaperMtn/lil-pwny) : Перевірка розкритих акаунтів
 - [https://github.com/rabobank-cdc/DeTTECT](https://github.com/rabobank-cdc/DeTTECT)
 
 # OSINT
@@ -42,17 +39,17 @@
 - [https://github.com/spinkham/skipfish](https://github.com/spinkham/skipfish)
 - [https://github.com/blark/aiodnsbrute](https://github.com/blark/aiodnsbrute) : Брутфорс доменних імен асинхронно
 - [https://crt.sh/?q=%.yahoo.com](https://crt.sh/?q=%.yahoo.com) : Брутфорс піддоменів
-- [https://github.com/tomnomnom/httprobe](https://github.com/tomnomnom/httprobe): Перевірте, чи доступні веб-сервери в домені
+- [https://github.com/tomnomnom/httprobe](https://github.com/tomnomnom/httprobe): Перевірка доступності веб-серверів у домені
 - [https://github.com/aboul3la/Sublist3r](https://github.com/aboul3la/Sublist3r) : Виявлення піддоменів
 - [https://github.com/gwen001/github-search/blob/master/github-subdomains.py](https://github.com/gwen001/github-search/blob/master/github-subdomains.py) : Виявлення піддоменів у github
 - [https://github.com/robertdavidgraham/masscan](https://github.com/robertdavidgraham/masscan) : Швидке сканування портів
 - [https://github.com/Threezh1/JSFinder](https://github.com/Threezh1/JSFinder) : Піддомени та URL-адреси з JS-файлів на веб-сайті
 - [https://github.com/C1h2e1/MyFuzzingDict](https://github.com/C1h2e1/MyFuzzingDict) : Словник веб-файлів
 - [https://github.com/TypeError/Bookmarks/blob/master/README.md](https://github.com/TypeError/Bookmarks/blob/master/README.md) : BurpExtension для уникнення десятків вкладок повторювача
-- [https://github.com/hakluke/hakrawler](https://github.com/hakluke/hakrawler) : Отримати активи
+- [https://github.com/hakluke/hakrawler](https://github.com/hakluke/hakrawler) : Отримання активів
 - [https://github.com/izo30/google-dorker](https://github.com/izo30/google-dorker) : Google dorks
 - [https://github.com/sehno/Bug-bounty/blob/master/bugbounty_checklist.md](https://github.com/sehno/Bug-bounty/blob/master/bugbounty_checklist.md) : Чек-лист веб BugBounty
-- [https://github.com/Naategh/dom-red](https://github.com/Naategh/dom-red) : Перевірте список доменів на відкриту редирекцію
+- [https://github.com/Naategh/dom-red](https://github.com/Naategh/dom-red) : Перевірка списку доменів на відкриту редирекцію
 - [https://github.com/prodigysml/Dr.-Watson](https://github.com/prodigysml/Dr.-Watson) : Плагін Burp, офлайн-аналіз для виявлення доменів, піддоменів та IP-адрес
 - [https://github.com/hahwul/WebHackersWeapons](https://github.com/hahwul/WebHackersWeapons): Список різних інструментів
 - [https://github.com/gauravnarwani97/Trishul](https://github.com/gauravnarwani97/Trishul) : Плагін BurpSuite для виявлення вразливостей (SQLi, XSS, SSTI)
@@ -67,12 +64,12 @@
 - [https://gist.github.com/netbiosX/ee35fcd3722e401a38136cff7b751d79](https://gist.github.com/netbiosX/ee35fcd3722e401a38136cff7b751d79) ([https://pentestlab.blog/2020/01/13/persistence-image-file-execution-options-injection/](https://pentestlab.blog/2020/01/13/persistence-image-file-execution-options-injection/)): Персистентність
 - [https://github.com/odzhan/injection](https://github.com/odzhan/injection) : Техніки ін'єкції процесів Windows
 - [https://github.com/BankSecurity/Red_Team](https://github.com/BankSecurity/Red_Team) : Скрипти Red Team
-- [https://github.com/l0ss/Grouper2](https://github.com/l0ss/Grouper2) : знаходження помилок конфігурації, пов'язаних із безпекою, у політиці груп Active Directory.
+- [https://github.com/l0ss/Grouper2](https://github.com/l0ss/Grouper2) : знаходження помилок конфігурації безпеки в політиці груп Active Directory.
 - [https://www.wietzebeukema.nl/blog/powershell-obfuscation-using-securestring](https://www.wietzebeukema.nl/blog/powershell-obfuscation-using-securestring) : Обфускація Securestring
 - [https://pentestlab.blog/2020/02/24/parent-pid-spoofing/](https://pentestlab.blog/2020/02/24/parent-pid-spoofing/) : Підробка PID батька
-- [https://github.com/the-xentropy/xencrypt](https://github.com/the-xentropy/xencrypt) : Шифрування навантажень Powershell
+- [https://github.com/the-xentropy/xencrypt](https://github.com/the-xentropy/xencrypt) : Шифрування Powershell payloads
 - [https://shells.systems/introducing-ninja-c2-the-c2-built-for-stealth-red-team-operations/](https://shells.systems/introducing-ninja-c2-the-c2-built-for-stealth-red-team-operations/) : Стелс C2
-- [https://windows-internals.com/faxing-your-way-to-system/](https://windows-internals.com/faxing-your-way-to-system/) : Серія журналів про внутрішні системи Windows
+- [https://windows-internals.com/faxing-your-way-to-system/](https://windows-internals.com/faxing-your-way-to-system/) : Серія журналів про Windows Internals
 - [https://bestestredteam.com/2018/10/02/tracking-pixel-in-microsoft-office-document/](https://bestestredteam.com/2018/10/02/tracking-pixel-in-microsoft-office-document/) : Відстеження, хто відкриває документ
 - [https://github.com/Integration-IT/Active-Directory-Exploitation-Cheat-Sheet](https://github.com/Integration-IT/Active-Directory-Exploitation-Cheat-Sheet) : Чек-лист Active Directory
 
@@ -112,15 +109,12 @@
 - Linux rootkit: [https://github.com/aesophor/satanic-rootkit](https://github.com/aesophor/satanic-rootkit)
 - [https://theia-ide.org/](https://theia-ide.org) : Онлайн IDE
 - [https://github.com/nahamsec/Resources-for-Beginner-Bug-Bounty-Hunters/](https://github.com/nahamsec/Resources-for-Beginner-Bug-Bounty-Hunters/) : Ресурси для початку роботи з BugBounties
-- [https://medium.com/macoclock/jailbreak-and-stuff-kickstart-tools-and-techniques-for-ios-application-pentesting-6fa53a3987ab](https://medium.com/macoclock/jailbreak-and-stuff-kickstart-tools-and-techniques-for-ios-application-pentesting-6fa53a3987ab) : Інструменти pentesting для IOS
+- [https://medium.com/macoclock/jailbreak-and-stuff-kickstart-tools-and-techniques-for-ios-application-pentesting-6fa53a3987ab](https://medium.com/macoclock/jailbreak-and-stuff-kickstart-tools-and-techniques-for-ios-application-pentesting-6fa53a3987ab) : Інструменти для тестування iOS
 - [https://github.com/random-robbie/keywords/blob/master/keywords.txt](https://github.com/random-robbie/keywords/blob/master/keywords.txt) : Ключові слова
 - [https://github.com/ElevenPaths/HomePWN](https://github.com/ElevenPaths/HomePWN) : Хакінг IoT (Wifi, BLE, SSDP, MDNS)
 - [https://github.com/rackerlabs/scantron](https://github.com/rackerlabs/scantron) : автоматизація сканування
-- [https://github.com/doyensec/awesome-electronjs-hacking](https://github.com/doyensec/awesome-electronjs-hacking) : Цей список має на меті охопити теми, пов'язані з безпекою Electron.js.
+- [https://github.com/doyensec/awesome-electronjs-hacking](https://github.com/doyensec/awesome-electronjs-hacking) : Цей список має на меті охопити теми безпеки, пов'язані з Electron.js.
 - [https://github.com/serain/bbrecon](https://github.com/serain/bbrecon) : Інформація про програми BB
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../banners/hacktricks-training.md}}

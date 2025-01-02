@@ -2,15 +2,11 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
 
-​​[**RootedCON**](https://www.rootedcon.com/) є найважливішою подією в сфері кібербезпеки в **Іспанії** та однією з найважливіших в **Європі**. З **метою просування технічних знань**, цей конгрес є гарячою точкою зустрічі для професіоналів у сфері технологій та кібербезпеки в усіх дисциплінах.
-
-{% embed url="https://www.rootedcon.com/" %}
 
 ## Що таке DPAPI
 
-API захисту даних (DPAPI) в основному використовується в операційній системі Windows для **симетричного шифрування асиметричних приватних ключів**, використовуючи або секрети користувача, або системи як значне джерело ентропії. Цей підхід спрощує шифрування для розробників, дозволяючи їм шифрувати дані, використовуючи ключ, отриманий з секретів входу користувача або, для системного шифрування, секретів аутентифікації домену системи, таким чином усуваючи необхідність для розробників управляти захистом ключа шифрування самостійно.
+API захисту даних (DPAPI) в основному використовується в операційній системі Windows для **симетричного шифрування асиметричних приватних ключів**, використовуючи або секрети користувача, або системні секрети як значне джерело ентропії. Цей підхід спрощує шифрування для розробників, дозволяючи їм шифрувати дані, використовуючи ключ, отриманий з секретів входу користувача або, для системного шифрування, секретів аутентифікації домену системи, таким чином усуваючи необхідність для розробників управляти захистом ключа шифрування самостійно.
 
 ### Захищені Дані за допомогою DPAPI
 
@@ -64,15 +60,15 @@ Get-ChildItem -Hidden C:\Users\USER\AppData\Local\Microsoft\Protect\
 Get-ChildItem -Hidden C:\Users\USER\AppData\Roaming\Microsoft\Protect\{SID}
 Get-ChildItem -Hidden C:\Users\USER\AppData\Local\Microsoft\Protect\{SID}
 ```
-Це те, як виглядає кілька Master Keys користувача:
+Ось як виглядає набір Master Keys користувача:
 
 ![](<../../images/image (1121).png>)
 
-Зазвичай **кожен master key є зашифрованим симетричним ключем, який може розшифрувати інший вміст**. Тому **екстракція** **зашифрованого Master Key** є цікавою для того, щоб **розшифрувати** пізніше той **інший вміст**, зашифрований з його допомогою.
+Зазвичай **кожен master key є зашифрованим симетричним ключем, який може розшифрувати інший контент**. Тому **екстракція** **зашифрованого Master Key** є цікавою для того, щоб **розшифрувати** пізніше той **інший контент**, зашифрований з його допомогою.
 
 ### Екстракція master key та розшифровка
 
-Перевірте пост [https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++](https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#extracting-dpapi-backup-keys-with-domain-admin) для прикладу того, як екстрактувати master key та розшифрувати його.
+Перегляньте пост [https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++](https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#extracting-dpapi-backup-keys-with-domain-admin) для прикладу того, як екстрактувати master key та розшифрувати його.
 
 ## SharpDPAPI
 
@@ -80,13 +76,13 @@ Get-ChildItem -Hidden C:\Users\USER\AppData\Local\Microsoft\Protect\{SID}
 
 ## HEKATOMB
 
-[**HEKATOMB**](https://github.com/Processus-Thief/HEKATOMB) є інструментом, який автоматизує екстракцію всіх користувачів та комп'ютерів з LDAP каталогу та екстракцію резервного ключа контролера домену через RPC. Скрипт потім вирішить всі IP-адреси комп'ютерів і виконає smbclient на всіх комп'ютерах, щоб отримати всі DPAPI блоби всіх користувачів та розшифрувати все з резервним ключем домену.
+[**HEKATOMB**](https://github.com/Processus-Thief/HEKATOMB) є інструментом, який автоматизує екстракцію всіх користувачів та комп'ютерів з LDAP каталогу та екстракцію резервного ключа контролера домену через RPC. Скрипт потім визначить всі IP-адреси комп'ютерів і виконає smbclient на всіх комп'ютерах, щоб отримати всі DPAPI блоби всіх користувачів та розшифрувати все з резервним ключем домену.
 
 `python3 hekatomb.py -hashes :ed0052e5a66b1c8e942cc9481a50d56 DOMAIN.local/administrator@10.0.0.1 -debug -dnstcp`
 
 З екстрактованим списком комп'ютерів з LDAP ви можете знайти кожну підмережу, навіть якщо ви не знали про них!
 
-"Тому що прав адміністратора домену недостатньо. Хакніть їх усіх."
+"Тому що прав адміністратора домену недостатньо. Зламайте їх усіх."
 
 ## DonPAPI
 
@@ -96,11 +92,5 @@ Get-ChildItem -Hidden C:\Users\USER\AppData\Local\Microsoft\Protect\{SID}
 
 - [https://www.passcape.com/index.php?section=docsys\&cmd=details\&id=28#13](https://www.passcape.com/index.php?section=docsys&cmd=details&id=28#13)
 - [https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++](https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#using-dpapis-to-encrypt-decrypt-data-in-c)
-
-<figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
-
-[**RootedCON**](https://www.rootedcon.com/) є найважливішою подією в галузі кібербезпеки в **Іспанії** та однією з найважливіших в **Європі**. З **метою просування технічних знань**, цей конгрес є гарячою точкою зустрічі для професіоналів у галузі технологій та кібербезпеки в кожній дисципліні.
-
-{% embed url="https://www.rootedcon.com/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

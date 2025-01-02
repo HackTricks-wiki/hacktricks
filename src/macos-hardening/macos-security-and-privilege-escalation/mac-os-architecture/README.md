@@ -4,68 +4,68 @@
 
 ## XNU Kernel
 
-The **core of macOS is XNU**, which stands for "X is Not Unix". This kernel is fundamentally composed of the **Mach microkerne**l (to be discussed later), **and** elements from Berkeley Software Distribution (**BSD**). XNU also provides a platform for **kernel drivers via a system called the I/O Kit**. The XNU kernel is part of the Darwin open source project, which means **its source code is freely accessible**.
+**Ядро macOS - це XNU**, що означає "X is Not Unix". Це ядро в основному складається з **Mach мікроядра** (про яке буде сказано пізніше) **та** елементів з Berkeley Software Distribution (**BSD**). XNU також забезпечує платформу для **драйверів ядра через систему, звану I/O Kit**. Ядро XNU є частиною проекту з відкритим вихідним кодом Darwin, що означає, що **його вихідний код є вільно доступним**.
 
-From a perspective of a security researcher or a Unix developer, **macOS** can feel quite **similar** to a **FreeBSD** system with an elegant GUI and a host of custom applications. Most applications developed for BSD will compile and run on macOS without needing modifications, as the command-line tools familiar to Unix users are all present in macOS. However, because the XNU kernel incorporates Mach, there are some significant differences between a traditional Unix-like system and macOS, and these differences might cause potential issues or provide unique advantages.
+З точки зору дослідника безпеки або розробника Unix, **macOS** може здаватися досить **схожим** на систему **FreeBSD** з елегантним графічним інтерфейсом і безліччю спеціальних додатків. Більшість додатків, розроблених для BSD, будуть компілюватися та працювати на macOS без необхідності модифікацій, оскільки командні інструменти, знайомі користувачам Unix, присутні в macOS. Однак, оскільки ядро XNU включає Mach, існують деякі суттєві відмінності між традиційною системою, подібною до Unix, і macOS, і ці відмінності можуть викликати потенційні проблеми або надавати унікальні переваги.
 
-Open source version of XNU: [https://opensource.apple.com/source/xnu/](https://opensource.apple.com/source/xnu/)
+Відкрита версія XNU: [https://opensource.apple.com/source/xnu/](https://opensource.apple.com/source/xnu/)
 
 ### Mach
 
-Mach is a **microkernel** designed to be **UNIX-compatible**. One of its key design principles was to **minimize** the amount of **code** running in the **kernel** space and instead allow many typical kernel functions, such as file system, networking, and I/O, to **run as user-level tasks**.
+Mach - це **мікроядро**, розроблене для **сумісності з UNIX**. Одним з його ключових принципів дизайну було **мінімізувати** кількість **коду**, що виконується в **ядровому** просторі, і замість цього дозволити багатьом типовим функціям ядра, таким як файлові системи, мережеві з'єднання та I/O, **виконуватися як завдання на рівні користувача**.
 
-In XNU, Mach is **responsible for many of the critical low-level operations** a kernel typically handles, such as processor scheduling, multitasking, and virtual memory management.
+У XNU Mach **відповідає за багато критично важливих низькорівневих операцій**, які зазвичай обробляє ядро, таких як планування процесора, багатозадачність та управління віртуальною пам'яттю.
 
 ### BSD
 
-The XNU **kernel** also **incorporates** a significant amount of code derived from the **FreeBSD** project. This code **runs as part of the kernel along with Mach**, in the same address space. However, the FreeBSD code within XNU may differ substantially from the original FreeBSD code because modifications were required to ensure its compatibility with Mach. FreeBSD contributes to many kernel operations including:
+Ядро XNU також **включає** значну кількість коду, отриманого з проекту **FreeBSD**. Цей код **виконується як частина ядра разом з Mach**, в одному адресному просторі. Однак код FreeBSD в XNU може суттєво відрізнятися від оригінального коду FreeBSD, оскільки були потрібні модифікації для забезпечення його сумісності з Mach. FreeBSD сприяє багатьом операціям ядра, включаючи:
 
-- Process management
-- Signal handling
-- Basic security mechanisms, including user and group management
-- System call infrastructure
-- TCP/IP stack and sockets
-- Firewall and packet filtering
+- Управління процесами
+- Обробка сигналів
+- Основні механізми безпеки, включаючи управління користувачами та групами
+- Інфраструктура системних викликів
+- Стек TCP/IP та сокети
+- Брандмауер та фільтрація пакетів
 
-Understanding the interaction between BSD and Mach can be complex, due to their different conceptual frameworks. For instance, BSD uses processes as its fundamental executing unit, while Mach operates based on threads. This discrepancy is reconciled in XNU by **associating each BSD process with a Mach task** that contains exactly one Mach thread. When BSD's fork() system call is used, the BSD code within the kernel uses Mach functions to create a task and a thread structure.
+Розуміння взаємодії між BSD та Mach може бути складним через їх різні концептуальні рамки. Наприклад, BSD використовує процеси як свою основну одиницю виконання, тоді як Mach працює на основі потоків. Ця розбіжність узгоджується в XNU шляхом **асоціювання кожного процесу BSD з завданням Mach**, яке містить точно один потік Mach. Коли використовується системний виклик fork() у BSD, код BSD в ядрі використовує функції Mach для створення структури завдання та потоку.
 
-Moreover, **Mach and BSD each maintain different security models**: **Mach's** security model is based on **port rights**, whereas BSD's security model operates based on **process ownership**. Disparities between these two models have occasionally resulted in local privilege-escalation vulnerabilities. Apart from typical system calls, there are also **Mach traps that allow user-space programs to interact with the kernel**. These different elements together form the multifaceted, hybrid architecture of the macOS kernel.
+Більше того, **Mach і BSD кожен підтримує різні моделі безпеки**: **модель безпеки Mach** базується на **правах портів**, тоді як модель безпеки BSD працює на основі **власності процесів**. Різниці між цими двома моделями іноді призводили до вразливостей підвищення локальних привілеїв. Окрім типових системних викликів, також існують **Mach traps, які дозволяють програмам користувацького простору взаємодіяти з ядром**. Ці різні елементи разом формують багатогранну, гібридну архітектуру ядра macOS.
 
-### I/O Kit - Drivers
+### I/O Kit - Драйвери
 
-The I/O Kit is an open-source, object-oriented **device-driver framework** in the XNU kernel, handles **dynamically loaded device drivers**. It allows modular code to be added to the kernel on-the-fly, supporting diverse hardware.
+I/O Kit - це відкритий, об'єктно-орієнтований **фреймворк драйверів пристроїв** в ядрі XNU, який обробляє **динамічно завантажені драйвери пристроїв**. Це дозволяє модульному коду бути доданим до ядра на льоту, підтримуючи різноманітне апаратне забезпечення.
 
 {{#ref}}
 macos-iokit.md
 {{#endref}}
 
-### IPC - Inter Process Communication
+### IPC - Міжпроцесна комунікація
 
 {{#ref}}
 ../macos-proces-abuse/macos-ipc-inter-process-communication/
 {{#endref}}
 
-## macOS Kernel Extensions
+## Розширення ядра macOS
 
-macOS is **super restrictive to load Kernel Extensions** (.kext) because of the high privileges that code will run with. Actually, by default is virtually impossible (unless a bypass is found).
+macOS є **надзвичайно обмеженим для завантаження розширень ядра** (.kext) через високі привілеї, з якими буде виконуватися код. Насправді, за замовчуванням це практично неможливо (якщо не знайдено обхід).
 
-In the following page you can also see how to recover the `.kext` that macOS loads inside its **kernelcache**:
+На наступній сторінці ви також можете побачити, як відновити `.kext`, які macOS завантажує всередині свого **kernelcache**:
 
 {{#ref}}
 macos-kernel-extensions.md
 {{#endref}}
 
-### macOS System Extensions
+### Розширення системи macOS
 
-Instead of using Kernel Extensions macOS created the System Extensions, which offers in user level APIs to interact with the kernel. This way, developers can avoid to use kernel extensions.
+Замість використання розширень ядра macOS створила розширення системи, які пропонують API на рівні користувача для взаємодії з ядром. Таким чином, розробники можуть уникнути використання розширень ядра.
 
 {{#ref}}
 macos-system-extensions.md
 {{#endref}}
 
-## References
+## Посилання
 
-- [**The Mac Hacker's Handbook**](https://www.amazon.com/-/es/Charlie-Miller-ebook-dp-B004U7MUMU/dp/B004U7MUMU/ref=mt_other?_encoding=UTF8&me=&qid=)
+- [**Посібник хакера Mac**](https://www.amazon.com/-/es/Charlie-Miller-ebook-dp-B004U7MUMU/dp/B004U7MUMU/ref=mt_other?_encoding=UTF8&me=&qid=)
 - [**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)
 
 {{#include ../../../banners/hacktricks-training.md}}

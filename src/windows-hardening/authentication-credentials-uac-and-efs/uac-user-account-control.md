@@ -2,16 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-Використовуйте [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) для легкого створення та **автоматизації робочих процесів**, що працюють на основі **найсучасніших** інструментів спільноти.\
-Отримайте доступ сьогодні:
-
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
-
 ## UAC
 
-[Контроль облікових записів користувачів (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) - це функція, яка дозволяє **запит на згоду для підвищених дій**. Додатки мають різні рівні `integrity`, і програма з **високим рівнем** може виконувати завдання, які **можуть потенційно скомпрометувати систему**. Коли UAC увімкнено, програми та завдання завжди **виконуються в контексті безпеки облікового запису, що не є адміністратором**, якщо адміністратор явно не надає цим програмам/завданням доступ на рівні адміністратора для виконання. Це зручна функція, яка захищає адміністраторів від ненавмисних змін, але не вважається межою безпеки.
+[Контроль облікових записів користувачів (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) - це функція, яка дозволяє **запит на згоду для підвищених дій**. Додатки мають різні рівні `integrity`, і програма з **високим рівнем** може виконувати завдання, які **можуть потенційно скомпрометувати систему**. Коли UAC увімкнено, додатки та завдання завжди **виконуються в контексті безпеки облікового запису, що не є адміністратором**, якщо адміністратор явно не надає цим додаткам/завданням доступ на рівні адміністратора для виконання. Це зручна функція, яка захищає адміністраторів від ненавмисних змін, але не вважається межою безпеки.
 
 Для отримання додаткової інформації про рівні цілісності:
 
@@ -19,21 +12,21 @@
 ../windows-local-privilege-escalation/integrity-levels.md
 {{#endref}}
 
-Коли UAC активовано, користувачу-адміністратору надаються 2 токени: стандартний ключ користувача для виконання звичайних дій на звичайному рівні та один з адміністративними привілеями.
+Коли UAC активовано, адміністратору надаються 2 токени: стандартний ключ користувача для виконання звичайних дій на звичайному рівні та один з адміністративними привілеями.
 
 Ця [сторінка](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) детально обговорює, як працює UAC, включаючи процес входу, досвід користувача та архітектуру UAC. Адміністратори можуть використовувати політики безпеки для налаштування роботи UAC, специфічної для їхньої організації на локальному рівні (використовуючи secpol.msc) або налаштовувати та розгортати через об'єкти групової політики (GPO) в середовищі домену Active Directory. Різні налаштування обговорюються детально [тут](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings). Існує 10 налаштувань групової політики, які можна встановити для UAC. Наступна таблиця надає додаткові деталі:
 
 | Налаштування групової політики                                                                                                                                                                                                                                                                                                                                                           | Ключ реєстру                | Налаштування за замовчуванням                                  |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------- | -------------------------------------------------------------- |
 | [Контроль облікових записів користувачів: Режим затвердження адміністратора для вбудованого облікового запису адміністратора](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-admin-approval-mode-for-the-built-in-administrator-account)                                                     | FilterAdministratorToken    | Вимкнено                                                     |
-| [Контроль облікових записів користувачів: Дозволити програмам UIAccess запитувати підвищення без використання захищеного робочого столу](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-allow-uiaccess-applications-to-prompt-for-elevation-without-using-the-secure-desktop) | EnableUIADesktopToggle      | Вимкнено                                                     |
+| [Контроль облікових записів користувачів: Дозволити UIAccess додаткам запитувати підвищення без використання безпечного робочого столу](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-allow-uiaccess-applications-to-prompt-for-elevation-without-using-the-secure-desktop) | EnableUIADesktopToggle      | Вимкнено                                                     |
 | [Контроль облікових записів користувачів: Поведінка запиту на підвищення для адміністраторів у режимі затвердження адміністратора](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-behavior-of-the-elevation-prompt-for-administrators-in-admin-approval-mode)                     | ConsentPromptBehaviorAdmin  | Запит на згоду для не-Windows бінарних файлів                  |
-| [Контроль облікових записів користувачів: Поведінка запиту на підвищення для стандартних користувачів](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-behavior-of-the-elevation-prompt-for-standard-users)                                                                   | ConsentPromptBehaviorUser   | Запит на облікові дані на захищеному робочому столі                 |
-| [Контроль облікових записів користувачів: Виявлення установок програм і запит на підвищення](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-detect-application-installations-and-prompt-for-elevation)                                                       | EnableInstallerDetection    | Увімкнено (за замовчуванням для домашніх) Вимкнено (за замовчуванням для підприємств) |
+| [Контроль облікових записів користувачів: Поведінка запиту на підвищення для стандартних користувачів](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-behavior-of-the-elevation-prompt-for-standard-users)                                                                   | ConsentPromptBehaviorUser   | Запит на облікові дані на безпечному робочому столі                 |
+| [Контроль облікових записів користувачів: Виявлення установок додатків і запит на підвищення](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-detect-application-installations-and-prompt-for-elevation)                                                       | EnableInstallerDetection    | Увімкнено (за замовчуванням для домашніх) Вимкнено (за замовчуванням для підприємств) |
 | [Контроль облікових записів користувачів: Підвищувати лише виконувані файли, які підписані та перевірені](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-only-elevate-executables-that-are-signed-and-validated)                                                             | ValidateAdminCodeSignatures | Вимкнено                                                     |
-| [Контроль облікових записів користувачів: Підвищувати лише програми UIAccess, які встановлені в захищених місцях](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-only-elevate-uiaccess-applications-that-are-installed-in-secure-locations)                       | EnableSecureUIAPaths        | Увімкнено                                                      |
+| [Контроль облікових записів користувачів: Підвищувати лише UIAccess додатки, які встановлені в безпечних місцях](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-only-elevate-uiaccess-applications-that-are-installed-in-secure-locations)                       | EnableSecureUIAPaths        | Увімкнено                                                      |
 | [Контроль облікових записів користувачів: Запускати всіх адміністраторів у режимі затвердження адміністратора](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-run-all-administrators-in-admin-approval-mode)                                                                               | EnableLUA                   | Увімкнено                                                      |
-| [Контроль облікових записів користувачів: Перейти на захищений робочий стіл під час запиту на підвищення](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-switch-to-the-secure-desktop-when-prompting-for-elevation)                                                       | PromptOnSecureDesktop       | Увімкнено                                                      |
+| [Контроль облікових записів користувачів: Перейти на безпечний робочий стіл під час запиту на підвищення](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-switch-to-the-secure-desktop-when-prompting-for-elevation)                                                       | PromptOnSecureDesktop       | Увімкнено                                                      |
 | [Контроль облікових записів користувачів: Віртуалізувати помилки запису файлів і реєстру в місцях для кожного користувача](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-group-policy-and-registry-key-settings#user-account-control-virtualize-file-and-registry-write-failures-to-per-user-locations)                                       | EnableVirtualization        | Увімкнено                                                      |
 
 ### Теорія обходу UAC
@@ -67,13 +60,13 @@ ConsentPromptBehaviorAdmin    REG_DWORD    0x5
 - Якщо **`2`** (**Завжди повідомляти мене**) UAC завжди запитуватиме підтвердження у адміністратора, коли він намагається виконати щось з високими привілеями (на Secure Desktop)
 - Якщо **`3`**, як `1`, але не обов'язково на Secure Desktop
 - Якщо **`4`**, як `2`, але не обов'язково на Secure Desktop
-- Якщо **`5`** (**за замовчуванням**), він запитуватиме у адміністратора підтвердження для запуску не Windows бінарних файлів з високими привілеями
+- якщо **`5`**(**за замовчуванням**) він запитуватиме адміністратора підтвердити запуск не Windows бінарних файлів з високими привілеями
 
 Тоді вам потрібно звернути увагу на значення **`LocalAccountTokenFilterPolicy`**\
 Якщо значення **`0`**, тоді лише користувач **RID 500** (**вбудований адміністратор**) може виконувати **адміністративні завдання без UAC**, а якщо `1`, **всі облікові записи в групі "Administrators"** можуть це робити.
 
 І, нарешті, зверніть увагу на значення ключа **`FilterAdministratorToken`**\
-Якщо **`0`** (за замовчуванням), **вбудований обліковий запис адміністратора може** виконувати віддалені адміністративні завдання, а якщо **`1`**, вбудований обліковий запис адміністратора **не може** виконувати віддалені адміністративні завдання, якщо `LocalAccountTokenFilterPolicy` не встановлено на `1`.
+Якщо **`0`**(за замовчуванням), **вбудований обліковий запис адміністратора може** виконувати віддалені адміністративні завдання, а якщо **`1`**, вбудований обліковий запис адміністратора **не може** виконувати віддалені адміністративні завдання, якщо `LocalAccountTokenFilterPolicy` не встановлено на `1`.
 
 #### Резюме
 
@@ -146,8 +139,8 @@ runasadmin uac-cmstplua powershell.exe -nop -w hidden -c "IEX ((new-object net.w
 
 ### Вразливості обходу UAC
 
-[**UACME** ](https://github.com/hfiref0x/UACME), що є **компіляцією** кількох вразливостей обходу UAC. Зверніть увагу, що вам потрібно буде **скомпілювати UACME за допомогою visual studio або msbuild**. Компіляція створить кілька виконуваних файлів (як-от `Source\Akagi\outout\x64\Debug\Akagi.exe`), вам потрібно знати, **який з них вам потрібен.**\
-Вам слід **бути обережними**, оскільки деякі обходи можуть **викликати інші програми**, які **попередять** **користувача** про те, що щось відбувається.
+[**UACME** ](https://github.com/hfiref0x/UACME), що є **компіляцією** кількох вразливостей обходу UAC. Зверніть увагу, що вам потрібно буде **скомпілювати UACME за допомогою visual studio або msbuild**. Компіляція створить кілька виконуваних файлів (як `Source\Akagi\outout\x64\Debug\Akagi.exe`), вам потрібно знати, **який з них вам потрібен.**\
+Вам слід **бути обережними**, оскільки деякі обходи можуть **викликати деякі інші програми**, які **попередять** **користувача** про те, що щось відбувається.
 
 UACME має **версію збірки, з якої почали працювати кожна техніка**. Ви можете шукати техніку, що впливає на ваші версії:
 ```
@@ -183,22 +176,15 @@ Major  Minor  Build  Revision
 
 Якщо ви подивитеся на **UACME**, ви помітите, що **більшість обходів UAC зловживають вразливістю Dll Hijacking** (в основному записуючи шкідливий dll у _C:\Windows\System32_). [Прочитайте це, щоб дізнатися, як знайти вразливість Dll Hijacking](../windows-local-privilege-escalation/dll-hijacking/).
 
-1. Знайдіть двійковий файл, який буде **автоелевуватися** (перевірте, що при виконанні він працює на високому рівні цілісності).
+1. Знайдіть двійковий файл, який **авто підвищує** (перевірте, що при виконанні він працює на високому рівні цілісності).
 2. За допомогою procmon знайдіть події "**NAME NOT FOUND**", які можуть бути вразливими до **DLL Hijacking**.
 3. Вам, ймовірно, потрібно буде **записати** DLL у деякі **захищені шляхи** (як C:\Windows\System32), де у вас немає прав на запис. Ви можете обійти це, використовуючи:
    1. **wusa.exe**: Windows 7, 8 і 8.1. Це дозволяє витягувати вміст CAB-файлу в захищені шляхи (оскільки цей інструмент виконується з високим рівнем цілісності).
    2. **IFileOperation**: Windows 10.
-4. Підготуйте **скрипт** для копіювання вашого DLL у захищений шлях і виконання вразливого та автоелевованого двійкового файлу.
+4. Підготуйте **скрипт** для копіювання вашого DLL у захищений шлях і виконання вразливого та авто підвищеного двійкового файлу.
 
 ### Інша техніка обходу UAC
 
-Складається з спостереження, чи **автоелевований двійковий файл** намагається **читати** з **реєстру** **ім'я/шлях** **двійкового файлу** або **команди**, що підлягає **виконанню** (це більш цікаво, якщо двійковий файл шукає цю інформацію в **HKCU**).
-
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-Використовуйте [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks), щоб легко створювати та **автоматизувати робочі процеси**, підтримувані **найсучаснішими** інструментами спільноти.\
-Отримайте доступ сьогодні:
-
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
+Складається з спостереження, чи **авто підвищений двійковий файл** намагається **читати** з **реєстру** **ім'я/шлях** **двійкового файлу** або **команди**, що підлягає **виконанню** (це більш цікаво, якщо двійковий файл шукає цю інформацію в **HKCU**).
 
 {{#include ../../banners/hacktricks-training.md}}

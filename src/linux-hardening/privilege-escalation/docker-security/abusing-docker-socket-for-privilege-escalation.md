@@ -1,43 +1,43 @@
-# Abusing Docker Socket for Privilege Escalation
+# Зловживання сокетом Docker для ескалації привілеїв
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-There are some occasions were you just have **access to the docker socket** and you want to use it to **escalate privileges**. Some actions might be very suspicious and you may want to avoid them, so here you can find different flags that can be useful to escalate privileges:
+Існують випадки, коли у вас є **доступ до сокета docker** і ви хочете використовувати його для **ескалації привілеїв**. Деякі дії можуть бути дуже підозрілими, і ви можете захотіти їх уникнути, тому тут ви можете знайти різні прапорці, які можуть бути корисними для ескалації привілеїв:
 
-### Via mount
+### Через монтування
 
-You can **mount** different parts of the **filesystem** in a container running as root and **access** them.\
-You could also **abuse a mount to escalate privileges** inside the container.
+Ви можете **монтувати** різні частини **файлової системи** в контейнері, що працює під root, і **доступатися** до них.\
+Ви також можете **зловживати монтуванням для ескалації привілеїв** всередині контейнера.
 
-- **`-v /:/host`** -> Mount the host filesystem in the container so you can **read the host filesystem.**
-  - If you want to **feel like you are in the host** but being on the container you could disable other defense mechanisms using flags like:
-    - `--privileged`
-    - `--cap-add=ALL`
-    - `--security-opt apparmor=unconfined`
-    - `--security-opt seccomp=unconfined`
-    - `-security-opt label:disable`
-    - `--pid=host`
-    - `--userns=host`
-    - `--uts=host`
-    - `--cgroupns=host`
-- \*\*`--device=/dev/sda1 --cap-add=SYS_ADMIN --security-opt apparmor=unconfined` \*\* -> This is similar to the previous method, but here we are **mounting the device disk**. Then, inside the container run `mount /dev/sda1 /mnt` and you can **access** the **host filesystem** in `/mnt`
-  - Run `fdisk -l` in the host to find the `</dev/sda1>` device to mount
-- **`-v /tmp:/host`** -> If for some reason you can **just mount some directory** from the host and you have access inside the host. Mount it and create a **`/bin/bash`** with **suid** in the mounted directory so you can **execute it from the host and escalate to root**.
+- **`-v /:/host`** -> Монтуйте файлову систему хоста в контейнер, щоб ви могли **читати файлову систему хоста.**
+- Якщо ви хочете **відчувати себе на хості**, але бути в контейнері, ви можете вимкнути інші механізми захисту, використовуючи прапорці, такі як:
+- `--privileged`
+- `--cap-add=ALL`
+- `--security-opt apparmor=unconfined`
+- `--security-opt seccomp=unconfined`
+- `-security-opt label:disable`
+- `--pid=host`
+- `--userns=host`
+- `--uts=host`
+- `--cgroupns=host`
+- \*\*`--device=/dev/sda1 --cap-add=SYS_ADMIN --security-opt apparmor=unconfined` \*\* -> Це схоже на попередній метод, але тут ми **монтуємо диск пристрою**. Потім, всередині контейнера запустіть `mount /dev/sda1 /mnt`, і ви можете **доступатися** до **файлової системи хоста** в `/mnt`
+- Запустіть `fdisk -l` на хості, щоб знайти пристрій `</dev/sda1>` для монтування
+- **`-v /tmp:/host`** -> Якщо з якоїсь причини ви можете **просто змонтувати якусь директорію** з хоста і у вас є доступ всередині хоста. Змонтируйте її і створіть **`/bin/bash`** з **suid** в змонтованій директорії, щоб ви могли **виконати його з хоста і ескалувати до root**.
 
 > [!NOTE]
-> Note that maybe you cannot mount the folder `/tmp` but you can mount a **different writable folder**. You can find writable directories using: `find / -writable -type d 2>/dev/null`
+> Зверніть увагу, що, можливо, ви не можете змонтувати папку `/tmp`, але ви можете змонтувати **іншу записувану папку**. Ви можете знайти записувані директорії, використовуючи: `find / -writable -type d 2>/dev/null`
 >
-> **Note that not all the directories in a linux machine will support the suid bit!** In order to check which directories support the suid bit run `mount | grep -v "nosuid"` For example usually `/dev/shm` , `/run` , `/proc` , `/sys/fs/cgroup` and `/var/lib/lxcfs` don't support the suid bit.
+> **Зверніть увагу, що не всі директорії в linux машині підтримують суід біт!** Щоб перевірити, які директорії підтримують суід біт, запустіть `mount | grep -v "nosuid"` Наприклад, зазвичай `/dev/shm`, `/run`, `/proc`, `/sys/fs/cgroup` і `/var/lib/lxcfs` не підтримують суід біт.
 >
-> Note also that if you can **mount `/etc`** or any other folder **containing configuration files**, you may change them from the docker container as root in order to **abuse them in the host** and escalate privileges (maybe modifying `/etc/shadow`)
+> Також зверніть увагу, що якщо ви можете **монтувати `/etc`** або будь-яку іншу папку **з конфігураційними файлами**, ви можете змінювати їх з контейнера docker як root, щоб **зловживати ними на хості** і ескалувати привілеї (можливо, модифікуючи `/etc/shadow`)
 
-### Escaping from the container
+### Втеча з контейнера
 
-- **`--privileged`** -> With this flag you [remove all the isolation from the container](docker-privileged.md#what-affects). Check techniques to [escape from privileged containers as root](docker-breakout-privilege-escalation/#automatic-enumeration-and-escape).
-- **`--cap-add=<CAPABILITY/ALL> [--security-opt apparmor=unconfined] [--security-opt seccomp=unconfined] [-security-opt label:disable]`** -> To [escalate abusing capabilities](../linux-capabilities.md), **grant that capability to the container** and disable other protection methods that may prevent the exploit to work.
+- **`--privileged`** -> З цим прапорцем ви [усуваєте всю ізоляцію з контейнера](docker-privileged.md#what-affects). Перевірте техніки, щоб [втекти з привілейованих контейнерів як root](docker-breakout-privilege-escalation/#automatic-enumeration-and-escape).
+- **`--cap-add=<CAPABILITY/ALL> [--security-opt apparmor=unconfined] [--security-opt seccomp=unconfined] [-security-opt label:disable]`** -> Щоб [ескалувати, зловживаючи можливостями](../linux-capabilities.md), **надайте цю можливість контейнеру** і вимкніть інші методи захисту, які можуть заважати експлуатації.
 
 ### Curl
 
-In this page we have discussed ways to escalate privileges using docker flags, you can find **ways to abuse these methods using curl** command in the page:
+На цій сторінці ми обговорили способи ескалації привілеїв, використовуючи прапорці docker, ви можете знайти **способи зловживати цими методами, використовуючи команду curl** на сторінці:
 
 {{#include ../../../banners/hacktricks-training.md}}

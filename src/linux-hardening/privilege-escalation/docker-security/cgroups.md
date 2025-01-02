@@ -4,16 +4,15 @@
 
 ## Basic Information
 
-**Linux Control Groups**, or **cgroups**, are a feature of the Linux kernel that allows the allocation, limitation, and prioritization of system resources like CPU, memory, and disk I/O among process groups. They offer a mechanism for **managing and isolating the resource usage** of process collections, beneficial for purposes such as resource limitation, workload isolation, and resource prioritization among different process groups.
+**Linux Control Groups**, або **cgroups**, є функцією ядра Linux, яка дозволяє виділяти, обмежувати та пріоритизувати системні ресурси, такі як ЦП, пам'ять та дисковий ввід/вивід серед груп процесів. Вони пропонують механізм для **управління та ізоляції використання ресурсів** колекціями процесів, що корисно для таких цілей, як обмеження ресурсів, ізоляція навантаження та пріоритизація ресурсів серед різних груп процесів.
 
-There are **two versions of cgroups**: version 1 and version 2. Both can be used concurrently on a system. The primary distinction is that **cgroups version 2** introduces a **hierarchical, tree-like structure**, enabling more nuanced and detailed resource distribution among process groups. Additionally, version 2 brings various enhancements, including:
+Існує **дві версії cgroups**: версія 1 та версія 2. Обидві можуть використовуватися одночасно в системі. Основна відмінність полягає в тому, що **cgroups версії 2** вводить **ієрархічну, деревоподібну структуру**, що дозволяє більш тонке та детальне розподілення ресурсів серед груп процесів. Крім того, версія 2 приносить різні покращення, включаючи:
 
-In addition to the new hierarchical organization, cgroups version 2 also introduced **several other changes and improvements**, such as support for **new resource controllers**, better support for legacy applications, and improved performance.
+На додаток до нової ієрархічної організації, cgroups версії 2 також ввела **кілька інших змін та покращень**, таких як підтримка **нових контролерів ресурсів**, краща підтримка застарілих додатків та покращена продуктивність.
 
-Overall, cgroups **version 2 offers more features and better performance** than version 1, but the latter may still be used in certain scenarios where compatibility with older systems is a concern.
+В цілому, cgroups **версія 2 пропонує більше функцій та кращу продуктивність** порівняно з версією 1, але остання все ще може використовуватися в певних сценаріях, де важлива сумісність зі старими системами.
 
-You can list the v1 and v2 cgroups for any process by looking at its cgroup file in /proc/\<pid>. You can start by looking at your shell’s cgroups with this command:
-
+Ви можете перерахувати cgroups v1 та v2 для будь-якого процесу, переглянувши його файл cgroup у /proc/\<pid>. Ви можете почати з перегляду cgroups вашої оболонки за допомогою цієї команди:
 ```shell-session
 $ cat /proc/self/cgroup
 12:rdma:/
@@ -28,60 +27,53 @@ $ cat /proc/self/cgroup
 1:name=systemd:/user.slice/user-1000.slice/session-2.scope
 0::/user.slice/user-1000.slice/session-2.scope
 ```
+Структура виходу виглядає наступним чином:
 
-The output structure is as follows:
+- **Числа 2–12**: cgroups v1, кожен рядок представляє різний cgroup. Контролери для них вказані поруч з номером.
+- **Число 1**: Також cgroups v1, але виключно для управлінських цілей (встановлений, наприклад, systemd) і не має контролера.
+- **Число 0**: Представляє cgroups v2. Контролери не вказані, і цей рядок є ексклюзивним для систем, які працюють лише з cgroups v2.
+- **Імена є ієрархічними**, нагадують файлові шляхи, вказуючи на структуру та взаємозв'язок між різними cgroups.
+- **Імена на кшталт /user.slice або /system.slice** вказують на категоризацію cgroups, при цьому user.slice зазвичай призначений для сеансів входу, які керуються systemd, а system.slice для системних служб.
 
-- **Numbers 2–12**: cgroups v1, with each line representing a different cgroup. Controllers for these are specified adjacent to the number.
-- **Number 1**: Also cgroups v1, but solely for management purposes (set by, e.g., systemd), and lacks a controller.
-- **Number 0**: Represents cgroups v2. No controllers are listed, and this line is exclusive on systems only running cgroups v2.
-- The **names are hierarchical**, resembling file paths, indicating the structure and relationship between different cgroups.
-- **Names like /user.slice or /system.slice** specify the categorization of cgroups, with user.slice typically for login sessions managed by systemd and system.slice for system services.
+### Перегляд cgroups
 
-### Viewing cgroups
-
-The filesystem is typically utilized for accessing **cgroups**, diverging from the Unix system call interface traditionally used for kernel interactions. To investigate a shell's cgroup configuration, one should examine the **/proc/self/cgroup** file, which reveals the shell's cgroup. Then, by navigating to the **/sys/fs/cgroup** (or **`/sys/fs/cgroup/unified`**) directory and locating a directory that shares the cgroup's name, one can observe various settings and resource usage information pertinent to the cgroup.
+Файлова система зазвичай використовується для доступу до **cgroups**, відхиляючись від інтерфейсу системних викликів Unix, традиційно використовуваного для взаємодії з ядром. Щоб дослідити конфігурацію cgroup оболонки, слід перевірити файл **/proc/self/cgroup**, який показує cgroup оболонки. Потім, перейшовши до каталогу **/sys/fs/cgroup** (або **`/sys/fs/cgroup/unified`**) і знайти каталог, що має таку ж назву, можна спостерігати різні налаштування та інформацію про використання ресурсів, що стосується cgroup.
 
 ![Cgroup Filesystem](<../../../images/image (1128).png>)
 
-The key interface files for cgroups are prefixed with **cgroup**. The **cgroup.procs** file, which can be viewed with standard commands like cat, lists the processes within the cgroup. Another file, **cgroup.threads**, includes thread information.
+Ключові інтерфейсні файли для cgroups мають префікс **cgroup**. Файл **cgroup.procs**, який можна переглянути за допомогою стандартних команд, таких як cat, перераховує процеси в cgroup. Інший файл, **cgroup.threads**, містить інформацію про потоки.
 
 ![Cgroup Procs](<../../../images/image (281).png>)
 
-Cgroups managing shells typically encompass two controllers that regulate memory usage and process count. To interact with a controller, files bearing the controller's prefix should be consulted. For instance, **pids.current** would be referenced to ascertain the count of threads in the cgroup.
+Cgroups, що керують оболонками, зазвичай охоплюють два контролери, які регулюють використання пам'яті та кількість процесів. Щоб взаємодіяти з контролером, слід звертатися до файлів з префіксом контролера. Наприклад, **pids.current** буде використано для визначення кількості потоків у cgroup.
 
 ![Cgroup Memory](<../../../images/image (677).png>)
 
-The indication of **max** in a value suggests the absence of a specific limit for the cgroup. However, due to the hierarchical nature of cgroups, limits might be imposed by a cgroup at a lower level in the directory hierarchy.
+Вказівка **max** у значенні свідчить про відсутність конкретного обмеження для cgroup. Однак, через ієрархічну природу cgroups, обмеження можуть бути накладені cgroup на нижчому рівні в ієрархії каталогів.
 
-### Manipulating and Creating cgroups
+### Маніпулювання та створення cgroups
 
-Processes are assigned to cgroups by **writing their Process ID (PID) to the `cgroup.procs` file**. This requires root privileges. For instance, to add a process:
-
+Процеси призначаються cgroups шляхом **запису їх ідентифікатора процесу (PID) у файл `cgroup.procs`**. Це вимагає прав root. Наприклад, щоб додати процес:
 ```bash
 echo [pid] > cgroup.procs
 ```
-
-Similarly, **modifying cgroup attributes, like setting a PID limit**, is done by writing the desired value to the relevant file. To set a maximum of 3,000 PIDs for a cgroup:
-
+Аналогічно, **модифікація атрибутів cgroup, таких як встановлення обмеження PID**, виконується шляхом запису бажаного значення у відповідний файл. Щоб встановити максимальну кількість 3,000 PID для cgroup:
 ```bash
 echo 3000 > pids.max
 ```
+**Створення нових cgroups** передбачає створення нового підкаталогу в ієрархії cgroup, що спонукає ядро автоматично генерувати необхідні файли інтерфейсу. Хоча cgroups без активних процесів можна видалити за допомогою `rmdir`, будьте обережні з певними обмеженнями:
 
-**Creating new cgroups** involves making a new subdirectory within the cgroup hierarchy, which prompts the kernel to automatically generate necessary interface files. Though cgroups without active processes can be removed with `rmdir`, be aware of certain constraints:
-
-- **Processes can only be placed in leaf cgroups** (i.e., the most nested ones in a hierarchy).
-- **A cgroup cannot possess a controller absent in its parent**.
-- **Controllers for child cgroups must be explicitly declared** in the `cgroup.subtree_control` file. For example, to enable CPU and PID controllers in a child cgroup:
-
+- **Процеси можуть бути розміщені лише в листових cgroups** (тобто, найбільш вкладених у ієрархії).
+- **Cgroup не може мати контролера, відсутнього в його батьківському**.
+- **Контролери для дочірніх cgroups повинні бути явно оголошені** у файлі `cgroup.subtree_control`. Наприклад, щоб увімкнути контролери CPU та PID у дочірньому cgroup:
 ```bash
 echo "+cpu +pids" > cgroup.subtree_control
 ```
+**root cgroup** є винятком з цих правил, дозволяючи пряме розміщення процесів. Це можна використовувати для видалення процесів з управління systemd.
 
-The **root cgroup** is an exception to these rules, allowing direct process placement. This can be used to remove processes from systemd management.
+**Моніторинг використання CPU** в межах cgroup можливий через файл `cpu.stat`, який відображає загальний час використання CPU, що корисно для відстеження використання серед підпроцесів служби:
 
-**Monitoring CPU usage** within a cgroup is possible through the `cpu.stat` file, displaying total CPU time consumed, helpful for tracking usage across a service's subprocesses:
-
-<figure><img src="../../../images/image (908).png" alt=""><figcaption><p>CPU usage statistics as shown in the cpu.stat file</p></figcaption></figure>
+<figure><img src="../../../images/image (908).png" alt=""><figcaption><p>Статистика використання CPU, як показано у файлі cpu.stat</p></figcaption></figure>
 
 ## References
 

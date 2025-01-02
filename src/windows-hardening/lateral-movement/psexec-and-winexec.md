@@ -2,11 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-{% embed url="https://websec.nl/" %}
-
 ## Як вони працюють
 
-Процес описаний у наступних кроках, що ілюструють, як маніпулюються бінарні файли служб для досягнення віддаленого виконання на цільовій машині через SMB:
+Процес описаний у наступних кроках, ілюструючи, як маніпулюються бінарні файли служб для досягнення віддаленого виконання на цільовій машині через SMB:
 
 1. **Копіювання бінарного файлу служби до спільного доступу ADMIN$ через SMB** виконується.
 2. **Створення служби на віддаленій машині** здійснюється шляхом вказівки на бінарний файл.
@@ -32,9 +30,7 @@
 ![](<../../images/image (928).png>)
 
 Ви також можете використовувати [**SharpLateral**](https://github.com/mertdas/SharpLateral):
-```
+```bash
 SharpLateral.exe redexec HOSTNAME C:\\Users\\Administrator\\Desktop\\malware.exe.exe malware.exe ServiceName
 ```
-{% embed url="https://websec.nl/" %}
-
 {{#include ../../banners/hacktricks-training.md}}

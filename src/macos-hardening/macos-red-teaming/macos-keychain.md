@@ -4,60 +4,59 @@
 
 ## Main Keychains
 
-- The **User Keychain** (`~/Library/Keychains/login.keychain-db`), which is used to store **user-specific credentials** like application passwords, internet passwords, user-generated certificates, network passwords, and user-generated public/private keys.
-- The **System Keychain** (`/Library/Keychains/System.keychain`), which stores **system-wide credentials** such as WiFi passwords, system root certificates, system private keys, and system application passwords.
-  - It's possible to find other components like certificates in `/System/Library/Keychains/*`
-- In **iOS** there is only one **Keychain** located in `/private/var/Keychains/`. This folder also contains databases for the `TrustStore`, certificates authorities (`caissuercache`) and OSCP entries (`ocspache`).
-  - Apps will be restricted in the keychain only to their private area based on their application identifier.
+- **Ключниця користувача** (`~/Library/Keychains/login.keychain-db`), яка використовується для зберігання **облікових даних, специфічних для користувача**, таких як паролі додатків, паролі в Інтернеті, сертифікати, створені користувачем, паролі мережі та публічні/приватні ключі, створені користувачем.
+- **Системна ключниця** (`/Library/Keychains/System.keychain`), яка зберігає **системні облікові дані**, такі як паролі WiFi, кореневі сертифікати системи, приватні ключі системи та паролі додатків системи.
+- Можна знайти інші компоненти, такі як сертифікати, у `/System/Library/Keychains/*`
+- У **iOS** є лише одна **ключниця**, розташована в `/private/var/Keychains/`. Ця папка також містить бази даних для `TrustStore`, органів сертифікації (`caissuercache`) та записів OSCP (`ocspache`).
+- Додатки будуть обмежені в ключниці лише до їх приватної області на основі їх ідентифікатора додатка.
 
-### Password Keychain Access
+### Доступ до ключниці паролів
 
-These files, while they do not have inherent protection and can be **downloaded**, are encrypted and require the **user's plaintext password to be decrypted**. A tool like [**Chainbreaker**](https://github.com/n0fate/chainbreaker) could be used for decryption.
+Ці файли, хоча й не мають вбудованого захисту і можуть бути **завантажені**, зашифровані і вимагають **плоского пароля користувача для розшифровки**. Інструмент, такий як [**Chainbreaker**](https://github.com/n0fate/chainbreaker), може бути використаний для розшифровки.
 
-## Keychain Entries Protections
+## Захист записів ключниці
 
 ### ACLs
 
-Each entry in the keychain is governed by **Access Control Lists (ACLs)** which dictate who can perform various actions on the keychain entry, including:
+Кожен запис у ключниці регулюється **Списками контролю доступу (ACLs)**, які визначають, хто може виконувати різні дії над записом ключниці, включаючи:
 
-- **ACLAuhtorizationExportClear**: Allows the holder to get the clear text of the secret.
-- **ACLAuhtorizationExportWrapped**: Allows the holder to get the clear text encrypted with another provided password.
-- **ACLAuhtorizationAny**: Allows the holder to perform any action.
+- **ACLAuhtorizationExportClear**: Дозволяє власнику отримати відкритий текст секрету.
+- **ACLAuhtorizationExportWrapped**: Дозволяє власнику отримати відкритий текст, зашифрований іншим наданим паролем.
+- **ACLAuhtorizationAny**: Дозволяє власнику виконувати будь-яку дію.
 
-The ACLs are further accompanied by a **list of trusted applications** that can perform these actions without prompting. This could be:
+ACL супроводжуються **списком довірених додатків**, які можуть виконувати ці дії без запиту. Це може бути:
 
-- **N`il`** (no authorization required, **everyone is trusted**)
-- An **empty** list (**nobody** is trusted)
-- **List** of specific **applications**.
+- **N`il`** (необхідна авторизація, **всі довірені**)
+- **порожній** список (**ніхто** не довірений)
+- **Список** конкретних **додатків**.
 
-Also the entry might contain the key **`ACLAuthorizationPartitionID`,** which is use to identify the **teamid, apple,** and **cdhash.**
+Також запис може містити ключ **`ACLAuthorizationPartitionID`,** який використовується для ідентифікації **teamid, apple,** та **cdhash.**
 
-- If the **teamid** is specified, then in order to **access the entry** value **withuot** a **prompt** the used application must have the **same teamid**.
-- If the **apple** is specified, then the app needs to be **signed** by **Apple**.
-- If the **cdhash** is indicated, then **app** must have the specific **cdhash**.
+- Якщо **teamid** вказано, то для **доступу до значення запису** **без** **запиту** використовуваний додаток повинен мати **той же teamid**.
+- Якщо **apple** вказано, то додаток повинен бути **підписаний** **Apple**.
+- Якщо **cdhash** вказано, то **додаток** повинен мати конкретний **cdhash**.
 
-### Creating a Keychain Entry
+### Створення запису в ключниці
 
-When a **new** **entry** is created using **`Keychain Access.app`**, the following rules apply:
+Коли **новий** **запис** створюється за допомогою **`Keychain Access.app`**, застосовуються такі правила:
 
-- All apps can encrypt.
-- **No apps** can export/decrypt (without prompting the user).
-- All apps can see the integrity check.
-- No apps can change ACLs.
-- The **partitionID** is set to **`apple`**.
+- Усі додатки можуть шифрувати.
+- **Жоден додаток** не може експортувати/розшифровувати (без запиту користувача).
+- Усі додатки можуть бачити перевірку цілісності.
+- Жоден додаток не може змінювати ACLs.
+- **partitionID** встановлюється на **`apple`**.
 
-When an **application creates an entry in the keychain**, the rules are slightly different:
+Коли **додаток створює запис у ключниці**, правила трохи інші:
 
-- All apps can encrypt.
-- Only the **creating application** (or any other apps explicitly added) can export/decrypt (without prompting the user).
-- All apps can see the integrity check.
-- No apps can change the ACLs.
-- The **partitionID** is set to **`teamid:[teamID here]`**.
+- Усі додатки можуть шифрувати.
+- Тільки **додаток, що створює**, (або будь-які інші додатки, які явно додані) можуть експортувати/розшифровувати (без запиту користувача).
+- Усі додатки можуть бачити перевірку цілісності.
+- Жоден додаток не може змінювати ACLs.
+- **partitionID** встановлюється на **`teamid:[teamID here]`**.
 
-## Accessing the Keychain
+## Доступ до ключниці
 
 ### `security`
-
 ```bash
 # List keychains
 security list-keychains
@@ -74,58 +73,57 @@ security set-generic-password-parition-list -s "test service" -a "test acount" -
 # Dump specifically the user keychain
 security dump-keychain ~/Library/Keychains/login.keychain-db
 ```
-
 ### APIs
 
 > [!TIP]
-> The **keychain enumeration and dumping** of secrets that **won't generate a prompt** can be done with the tool [**LockSmith**](https://github.com/its-a-feature/LockSmith)
+> Перерахунок та вивантаження секретів з **keychain**, які **не викликають запит**, можна виконати за допомогою інструмента [**LockSmith**](https://github.com/its-a-feature/LockSmith)
 >
-> Other API endpoints can be found in [**SecKeyChain.h**](https://opensource.apple.com/source/libsecurity_keychain/libsecurity_keychain-55017/lib/SecKeychain.h.auto.html) source code.
+> Інші кінцеві точки API можна знайти в [**SecKeyChain.h**](https://opensource.apple.com/source/libsecurity_keychain/libsecurity_keychain-55017/lib/SecKeychain.h.auto.html) вихідному коді.
 
-List and get **info** about each keychain entry using the **Security Framework** or you could also check the Apple's open source cli tool [**security**](https://opensource.apple.com/source/Security/Security-59306.61.1/SecurityTool/macOS/security.c.auto.html)**.** Some API examples:
+Список та отримання **інформації** про кожен запис у keychain за допомогою **Security Framework** або ви також можете перевірити відкритий CLI інструмент Apple [**security**](https://opensource.apple.com/source/Security/Security-59306.61.1/SecurityTool/macOS/security.c.auto.html)**.** Деякі приклади API:
 
-- The API **`SecItemCopyMatching`** gives info about each entry and there are some attributes you can set when using it:
-  - **`kSecReturnData`**: If true, it will try to decrypt the data (set to false to avoid potential pop-ups)
-  - **`kSecReturnRef`**: Get also reference to keychain item (set to true in case later you see you can decrypt without pop-up)
-  - **`kSecReturnAttributes`**: Get metadata about entries
-  - **`kSecMatchLimit`**: How many results to return
-  - **`kSecClass`**: What kind of keychain entry
+- API **`SecItemCopyMatching`** надає інформацію про кожен запис, і є кілька атрибутів, які ви можете встановити при його використанні:
+- **`kSecReturnData`**: Якщо true, він спробує розшифрувати дані (встановіть false, щоб уникнути потенційних спливаючих вікон)
+- **`kSecReturnRef`**: Отримати також посилання на елемент keychain (встановіть true, якщо пізніше ви побачите, що можете розшифрувати без спливаючого вікна)
+- **`kSecReturnAttributes`**: Отримати метадані про записи
+- **`kSecMatchLimit`**: Скільки результатів повернути
+- **`kSecClass`**: Який тип запису в keychain
 
-Get **ACLs** of each entry:
+Отримати **ACL** кожного запису:
 
-- With the API **`SecAccessCopyACLList`** you can get the **ACL for the keychain item**, and it will return a list of ACLs (like `ACLAuhtorizationExportClear` and the others previously mentioned) where each list has:
-  - Description
-  - **Trusted Application List**. This could be:
-    - An app: /Applications/Slack.app
-    - A binary: /usr/libexec/airportd
-    - A group: group://AirPort
+- За допомогою API **`SecAccessCopyACLList`** ви можете отримати **ACL для елемента keychain**, і він поверне список ACL (таких як `ACLAuhtorizationExportClear` та інші, згадані раніше), де кожен список має:
+- Опис
+- **Список довірених додатків**. Це може бути:
+- Додаток: /Applications/Slack.app
+- Бінарний файл: /usr/libexec/airportd
+- Група: group://AirPort
 
-Export the data:
+Експортувати дані:
 
-- The API **`SecKeychainItemCopyContent`** gets the plaintext
-- The API **`SecItemExport`** exports the keys and certificates but might have to set passwords to export the content encrypted
+- API **`SecKeychainItemCopyContent`** отримує відкритий текст
+- API **`SecItemExport`** експортує ключі та сертифікати, але може знадобитися встановити паролі для експорту вмісту в зашифрованому вигляді
 
-And these are the **requirements** to be able to **export a secret without a prompt**:
+І це є **вимоги** для того, щоб **експортувати секрет без запиту**:
 
-- If **1+ trusted** apps listed:
-  - Need the appropriate **authorizations** (**`Nil`**, or be **part** of the allowed list of apps in the authorization to access the secret info)
-  - Need code signature to match **PartitionID**
-  - Need code signature to match that of one **trusted app** (or be a member of the right KeychainAccessGroup)
-- If **all applications trusted**:
-  - Need the appropriate **authorizations**
-  - Need code signature to match **PartitionID**
-    - If **no PartitionID**, then this isn't needed
+- Якщо **1+ довірених** додатків у списку:
+- Потрібні відповідні **авторизації** (**`Nil`**, або бути **частиною** дозволеного списку додатків для доступу до секретної інформації)
+- Потрібен код підпису, щоб відповідати **PartitionID**
+- Потрібен код підпису, щоб відповідати одному **довіреному додатку** (або бути членом правильного KeychainAccessGroup)
+- Якщо **всі додатки довірені**:
+- Потрібні відповідні **авторизації**
+- Потрібен код підпису, щоб відповідати **PartitionID**
+- Якщо **немає PartitionID**, тоді це не потрібно
 
 > [!CAUTION]
-> Therefore, if there is **1 application listed**, you need to **inject code in that application**.
+> Отже, якщо є **1 додаток у списку**, вам потрібно **впровадити код у цей додаток**.
 >
-> If **apple** is indicated in the **partitionID**, you could access it with **`osascript`** so anything that is trusting all applications with apple in the partitionID. **`Python`** could also be used for this.
+> Якщо **apple** вказано в **partitionID**, ви можете отримати доступ до нього за допомогою **`osascript`**, тому все, що довіряє всім додаткам з apple в partitionID. **`Python`** також можна використовувати для цього.
 
-### Two additional attributes
+### Два додаткові атрибути
 
-- **Invisible**: It's a boolean flag to **hide** the entry from the **UI** Keychain app
-- **General**: It's to store **metadata** (so it's NOT ENCRYPTED)
-  - Microsoft was storing in plain text all the refresh tokens to access sensitive endpoint.
+- **Invisible**: Це булевий прапорець для **приховування** запису з **UI** додатку Keychain
+- **General**: Це для зберігання **метаданих** (тому це НЕ ЗАШИФРОВАНО)
+- Microsoft зберігав у відкритому тексті всі токени оновлення для доступу до чутливих кінцевих точок.
 
 ## References
 

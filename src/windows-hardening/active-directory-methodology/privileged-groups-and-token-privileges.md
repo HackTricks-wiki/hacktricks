@@ -2,13 +2,6 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="/images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-Використовуйте [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=command-injection) для легкого створення та **автоматизації робочих процесів**, підтримуваних **найсучаснішими** інструментами спільноти.\
-Отримайте доступ сьогодні:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=command-injection" %}
-
 ## Відомі групи з адміністративними привілеями
 
 - **Адміністратори**
@@ -17,7 +10,7 @@
 
 ## Оператори облікових записів
 
-Ця група має право створювати облікові записи та групи, які не є адміністраторами в домені. Крім того, вона дозволяє локальний вхід до контролера домену (DC).
+Ця група має право створювати облікові записи та групи, які не є адміністраторами домену. Крім того, вона дозволяє локальний вхід до Контролера домену (DC).
 
 Щоб визначити членів цієї групи, виконується наступна команда:
 ```powershell
@@ -61,7 +54,7 @@ C:\> .\PsService.exe security AppReadiness
 
 ## Backup Operators
 
-Членство в групі `Backup Operators` надає доступ до файлової системи `DC01` завдяки привілеям `SeBackup` та `SeRestore`. Ці привілеї дозволяють проходження по папках, їх перелік та копіювання файлів, навіть без явних дозволів, використовуючи прапорець `FILE_FLAG_BACKUP_SEMANTICS`. Для цього процесу необхідно використовувати специфічні скрипти.
+Членство в групі `Backup Operators` надає доступ до файлової системи `DC01` завдяки привілеям `SeBackup` та `SeRestore`. Ці привілеї дозволяють проходження через папки, їх перелік та копіювання файлів, навіть без явних дозволів, використовуючи прапорець `FILE_FLAG_BACKUP_SEMANTICS`. Для цього процесу необхідно використовувати специфічні скрипти.
 
 Щоб перерахувати членів групи, виконайте:
 ```powershell
@@ -69,7 +62,7 @@ Get-NetGroupMember -Identity "Backup Operators" -Recurse
 ```
 ### Локальна атака
 
-Щоб використати ці привілеї локально, застосовуються наступні кроки:
+Щоб використовувати ці привілеї локально, застосовуються наступні кроки:
 
 1. Імпортуйте необхідні бібліотеки:
 ```bash
@@ -165,7 +158,7 @@ system("C:\\Windows\\System32\\net.exe group \"Domain Admins\" Hacker /add /doma
 // Generate DLL with msfvenom
 msfvenom -p windows/x64/exec cmd='net group "domain admins" <username> /add /domain' -f dll -o adduser.dll
 ```
-Перезапуск служби DNS (який може вимагати додаткових дозволів) є необхідним для завантаження DLL:
+Перезапуск служби DNS (що може вимагати додаткових дозволів) необхідний для завантаження DLL:
 ```csharp
 sc.exe \\dc01 stop dns
 sc.exe \\dc01 start dns
@@ -174,7 +167,7 @@ sc.exe \\dc01 start dns
 
 #### Mimilib.dll
 
-Також можливо використовувати mimilib.dll для виконання команд, модифікуючи його для виконання конкретних команд або реверсних шелів. [Перегляньте цей пост](https://www.labofapenetrationtester.com/2017/05/abusing-dnsadmins-privilege-for-escalation-in-active-directory.html) для отримання додаткової інформації.
+Також можливо використовувати mimilib.dll для виконання команд, модифікуючи його для виконання конкретних команд або реверсних шелів. [Перевірте цей пост](https://www.labofapenetrationtester.com/2017/05/abusing-dnsadmins-privilege-for-escalation-in-active-directory.html) для отримання додаткової інформації.
 
 ### WPAD запис для MitM
 
@@ -200,7 +193,7 @@ Hyper-V Адміністратори мають повний доступ до H
 
 ### Приклад експлуатації
 
-Службу обслуговування Mozilla Firefox можна експлуатувати Hyper-V Адміністраторами для виконання команд від імені SYSTEM. Це передбачає створення жорсткого посилання на захищений файл SYSTEM і заміну його на шкідливий виконуваний файл:
+Службу обслуговування Mozilla Firefox можна експлуатувати адміністраторами Hyper-V для виконання команд від імені SYSTEM. Це передбачає створення жорсткого посилання на захищений файл SYSTEM і заміну його на шкідливий виконуваний файл:
 ```bash
 # Take ownership and start the service
 takeown /F C:\Program Files (x86)\Mozilla Maintenance Service\maintenanceservice.exe
@@ -233,7 +226,7 @@ Get-NetLocalGroupMember -ComputerName <pc name> -GroupName "Remote Desktop Users
 ```
 Додаткову інформацію про експлуатацію RDP можна знайти в спеціалізованих ресурсах для пентестингу.
 
-#### Користувачі віддаленого управління
+#### Користувачі віддаленого керування
 
 Члени можуть отримувати доступ до ПК через **Windows Remote Management (WinRM)**. Перерахування цих членів досягається через:
 ```powershell
@@ -265,11 +258,5 @@ Get-NetGroupMember -Identity "Server Operators" -Recurse
 - [https://posts.specterops.io/a-red-teamers-guide-to-gpos-and-ous-f0d03976a31e](https://posts.specterops.io/a-red-teamers-guide-to-gpos-and-ous-f0d03976a31e)
 - [https://undocumented.ntinternals.net/index.html?page=UserMode%2FUndocumented%20Functions%2FExecutable%20Images%2FNtLoadDriver.html](https://undocumented.ntinternals.net/index.html?page=UserMode%2FUndocumented%20Functions%2FExecutable%20Images%2FNtLoadDriver.html)
 
-<figure><img src="/images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-Використовуйте [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=command-injection), щоб легко створювати та **автоматизувати робочі процеси**, підтримувані **найсучаснішими** інструментами спільноти.\
-Отримайте доступ сьогодні:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=command-injection" %}
 
 {{#include ../../banners/hacktricks-training.md}}

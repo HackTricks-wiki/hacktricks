@@ -4,16 +4,15 @@
 
 ## Remote Access Services
 
-These are the common macOS services to access them remotely.\
-You can enable/disable these services in `System Settings` --> `Sharing`
+Це загальні служби macOS для віддаленого доступу до них.\
+Ви можете увімкнути/вимкнути ці служби в `System Settings` --> `Sharing`
 
-- **VNC**, known as “Screen Sharing” (tcp:5900)
-- **SSH**, called “Remote Login” (tcp:22)
-- **Apple Remote Desktop** (ARD), or “Remote Management” (tcp:3283, tcp:5900)
-- **AppleEvent**, known as “Remote Apple Event” (tcp:3031)
+- **VNC**, відомий як “Screen Sharing” (tcp:5900)
+- **SSH**, називається “Remote Login” (tcp:22)
+- **Apple Remote Desktop** (ARD), або “Remote Management” (tcp:3283, tcp:5900)
+- **AppleEvent**, відомий як “Remote Apple Event” (tcp:3031)
 
-Check if any is enabled running:
-
+Перевірте, чи будь-яка з них увімкнена, запустивши:
 ```bash
 rmMgmt=$(netstat -na | grep LISTEN | grep tcp46 | grep "*.3283" | wc -l);
 scrShrng=$(netstat -na | grep LISTEN | egrep 'tcp4|tcp6' | grep "*.5900" | wc -l);
@@ -23,103 +22,90 @@ rAE=$(netstat -na | grep LISTEN | egrep 'tcp4|tcp6' | grep "*.3031" | wc -l);
 bmM=$(netstat -na | grep LISTEN | egrep 'tcp4|tcp6' | grep "*.4488" | wc -l);
 printf "\nThe following services are OFF if '0', or ON otherwise:\nScreen Sharing: %s\nFile Sharing: %s\nRemote Login: %s\nRemote Mgmt: %s\nRemote Apple Events: %s\nBack to My Mac: %s\n\n" "$scrShrng" "$flShrng" "$rLgn" "$rmMgmt" "$rAE" "$bmM";
 ```
-
 ### Pentesting ARD
 
-Apple Remote Desktop (ARD) is an enhanced version of [Virtual Network Computing (VNC)](https://en.wikipedia.org/wiki/Virtual_Network_Computing) tailored for macOS, offering additional features. A notable vulnerability in ARD is its authentication method for the control screen password, which only uses the first 8 characters of the password, making it prone to [brute force attacks](https://thudinh.blogspot.com/2017/09/brute-forcing-passwords-with-thc-hydra.html) with tools like Hydra or [GoRedShell](https://github.com/ahhh/GoRedShell/), as there are no default rate limits.
+Apple Remote Desktop (ARD) є покращеною версією [Virtual Network Computing (VNC)](https://en.wikipedia.org/wiki/Virtual_Network_Computing), адаптованою для macOS, що пропонує додаткові функції. Помітною вразливістю в ARD є його метод аутентифікації для пароля контролю екрану, який використовує лише перші 8 символів пароля, що робить його вразливим до [brute force attacks](https://thudinh.blogspot.com/2017/09/brute-forcing-passwords-with-thc-hydra.html) за допомогою інструментів, таких як Hydra або [GoRedShell](https://github.com/ahhh/GoRedShell/), оскільки немає стандартних обмежень швидкості.
 
-Vulnerable instances can be identified using **nmap**'s `vnc-info` script. Services supporting `VNC Authentication (2)` are especially susceptible to brute force attacks due to the 8-character password truncation.
+Вразливі екземпляри можна виявити за допомогою скрипта `vnc-info` від **nmap**. Сервіси, що підтримують `VNC Authentication (2)`, особливо схильні до атак методом грубої сили через обрізання пароля до 8 символів.
 
-To enable ARD for various administrative tasks like privilege escalation, GUI access, or user monitoring, use the following command:
-
+Щоб увімкнути ARD для різних адміністративних завдань, таких як підвищення привілеїв, доступ до GUI або моніторинг користувачів, використовуйте наступну команду:
 ```bash
 sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -allowAccessFor -allUsers -privs -all -clientopts -setmenuextra -menuextra yes
 ```
-
-ARD provides versatile control levels, including observation, shared control, and full control, with sessions persisting even after user password changes. It allows sending Unix commands directly, executing them as root for administrative users. Task scheduling and Remote Spotlight search are notable features, facilitating remote, low-impact searches for sensitive files across multiple machines.
+ARD надає різноманітні рівні контролю, включаючи спостереження, спільний контроль та повний контроль, з сесіями, які зберігаються навіть після зміни пароля користувача. Це дозволяє надсилати команди Unix безпосередньо, виконуючи їх від імені root для адміністративних користувачів. Планування завдань та пошук Remote Spotlight є помітними функціями, які полегшують віддалений, маловпливовий пошук чутливих файлів на кількох машинах.
 
 ## Bonjour Protocol
 
-Bonjour, an Apple-designed technology, allows **devices on the same network to detect each other's offered services**. Known also as Rendezvous, **Zero Configuration**, or Zeroconf, it enables a device to join a TCP/IP network, **automatically choose an IP address**, and broadcast its services to other network devices.
+Bonjour, технологія, розроблена Apple, дозволяє **пристроям в одній мережі виявляти послуги, які вони пропонують**. Відомий також як Rendezvous, **Zero Configuration** або Zeroconf, він дозволяє пристрою приєднуватися до TCP/IP мережі, **автоматично вибирати IP-адресу** та транслювати свої послуги іншим мережевим пристроям.
 
-Zero Configuration Networking, provided by Bonjour, ensures that devices can:
+Zero Configuration Networking, що надається Bonjour, забезпечує, щоб пристрої могли:
 
-- **Automatically obtain an IP Address** even in the absence of a DHCP server.
-- Perform **name-to-address translation** without requiring a DNS server.
-- **Discover services** available on the network.
+- **Автоматично отримувати IP-адресу** навіть за відсутності DHCP-сервера.
+- Виконувати **переклад імен на адреси** без необхідності в DNS-сервері.
+- **Виявляти послуги**, доступні в мережі.
 
-Devices using Bonjour will assign themselves an **IP address from the 169.254/16 range** and verify its uniqueness on the network. Macs maintain a routing table entry for this subnet, verifiable via `netstat -rn | grep 169`.
+Пристрої, що використовують Bonjour, призначать собі **IP-адресу з діапазону 169.254/16** та перевірять її унікальність у мережі. Macs підтримують запис маршрутизації для цієї підмережі, що можна перевірити за допомогою `netstat -rn | grep 169`.
 
-For DNS, Bonjour utilizes the **Multicast DNS (mDNS) protocol**. mDNS operates over **port 5353/UDP**, employing **standard DNS queries** but targeting the **multicast address 224.0.0.251**. This approach ensures that all listening devices on the network can receive and respond to the queries, facilitating the update of their records.
+Для DNS Bonjour використовує **протокол Multicast DNS (mDNS)**. mDNS працює через **порт 5353/UDP**, використовуючи **стандартні DNS-запити**, але націлюючись на **мульткаст-адресу 224.0.0.251**. Цей підхід забезпечує, щоб усі прослуховуючі пристрої в мережі могли отримувати та відповідати на запити, полегшуючи оновлення своїх записів.
 
-Upon joining the network, each device self-selects a name, typically ending in **.local**, which may be derived from the hostname or randomly generated.
+При приєднанні до мережі кожен пристрій самостійно вибирає ім'я, яке зазвичай закінчується на **.local**, що може бути похідним від імені хоста або випадково згенерованим.
 
-Service discovery within the network is facilitated by **DNS Service Discovery (DNS-SD)**. Leveraging the format of DNS SRV records, DNS-SD uses **DNS PTR records** to enable the listing of multiple services. A client seeking a specific service will request a PTR record for `<Service>.<Domain>`, receiving in return a list of PTR records formatted as `<Instance>.<Service>.<Domain>` if the service is available from multiple hosts.
+Виявлення послуг у мережі полегшується за допомогою **DNS Service Discovery (DNS-SD)**. Використовуючи формат DNS SRV записів, DNS-SD використовує **DNS PTR записи** для можливості переліку кількох послуг. Клієнт, що шукає конкретну послугу, запитуватиме PTR запис для `<Service>.<Domain>`, отримуючи у відповідь список PTR записів у форматі `<Instance>.<Service>.<Domain>`, якщо послуга доступна з кількох хостів.
 
-The `dns-sd` utility can be employed for **discovering and advertising network services**. Here are some examples of its usage:
+Утиліта `dns-sd` може бути використана для **виявлення та реклами мережевих послуг**. Ось кілька прикладів її використання:
 
 ### Searching for SSH Services
 
-To search for SSH services on the network, the following command is used:
-
+Щоб шукати SSH послуги в мережі, використовується наступна команда:
 ```bash
 dns-sd -B _ssh._tcp
 ```
+Ця команда ініціює перегляд для \_ssh.\_tcp сервісів і виводить деталі, такі як мітка часу, прапори, інтерфейс, домен, тип сервісу та ім'я екземпляра.
 
-This command initiates browsing for \_ssh.\_tcp services and outputs details such as timestamp, flags, interface, domain, service type, and instance name.
+### Реклама HTTP Сервісу
 
-### Advertising an HTTP Service
-
-To advertise an HTTP service, you can use:
-
+Щоб рекламувати HTTP сервіс, ви можете використовувати:
 ```bash
 dns-sd -R "Index" _http._tcp . 80 path=/index.html
 ```
+Ця команда реєструє HTTP-сервіс з назвою "Index" на порту 80 з шляхом `/index.html`.
 
-This command registers an HTTP service named "Index" on port 80 with a path of `/index.html`.
-
-To then search for HTTP services on the network:
-
+Щоб потім шукати HTTP-сервіси в мережі:
 ```bash
 dns-sd -B _http._tcp
 ```
+Коли служба запускається, вона оголошує про свою доступність для всіх пристроїв у підмережі, мультикастуючи свою присутність. Пристрої, зацікавлені в цих службах, не повинні надсилати запити, а просто слухати ці оголошення.
 
-When a service starts, it announces its availability to all devices on the subnet by multicasting its presence. Devices interested in these services don't need to send requests but simply listen for these announcements.
+Для більш зручного інтерфейсу додаток **Discovery - DNS-SD Browser**, доступний в Apple App Store, може візуалізувати служби, що пропонуються у вашій локальній мережі.
 
-For a more user-friendly interface, the **Discovery - DNS-SD Browser** app available on the Apple App Store can visualize the services offered on your local network.
-
-Alternatively, custom scripts can be written to browse and discover services using the `python-zeroconf` library. The [**python-zeroconf**](https://github.com/jstasiak/python-zeroconf) script demonstrates creating a service browser for `_http._tcp.local.` services, printing added or removed services:
-
+Альтернативно, можна написати власні скрипти для перегляду та виявлення служб, використовуючи бібліотеку `python-zeroconf`. Скрипт [**python-zeroconf**](https://github.com/jstasiak/python-zeroconf) демонструє створення браузера служб для `_http._tcp.local.`, виводячи додані або видалені служби:
 ```python
 from zeroconf import ServiceBrowser, Zeroconf
 
 class MyListener:
 
-    def remove_service(self, zeroconf, type, name):
-        print("Service %s removed" % (name,))
+def remove_service(self, zeroconf, type, name):
+print("Service %s removed" % (name,))
 
-    def add_service(self, zeroconf, type, name):
-        info = zeroconf.get_service_info(type, name)
-        print("Service %s added, service info: %s" % (name, info))
+def add_service(self, zeroconf, type, name):
+info = zeroconf.get_service_info(type, name)
+print("Service %s added, service info: %s" % (name, info))
 
 zeroconf = Zeroconf()
 listener = MyListener()
 browser = ServiceBrowser(zeroconf, "_http._tcp.local.", listener)
 try:
-    input("Press enter to exit...\n\n")
+input("Press enter to exit...\n\n")
 finally:
-    zeroconf.close()
+zeroconf.close()
 ```
+### Вимкнення Bonjour
 
-### Disabling Bonjour
-
-If there are concerns about security or other reasons to disable Bonjour, it can be turned off using the following command:
-
+Якщо є занепокоєння щодо безпеки або інші причини для вимкнення Bonjour, його можна вимкнути за допомогою наступної команди:
 ```bash
 sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.mDNSResponder.plist
 ```
-
-## References
+## Посилання
 
 - [**The Mac Hacker's Handbook**](https://www.amazon.com/-/es/Charlie-Miller-ebook-dp-B004U7MUMU/dp/B004U7MUMU/ref=mt_other?_encoding=UTF8&me=&qid=)
 - [**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)

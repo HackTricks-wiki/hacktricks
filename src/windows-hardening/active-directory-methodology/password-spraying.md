@@ -2,24 +2,19 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
-
-Поглибте свої знання в **Mobile Security** з 8kSec Academy. Опануйте безпеку iOS та Android через наші курси з самостійним навчанням та отримайте сертифікат:
-
-{% embed url="https://academy.8ksec.io/" %}
 
 ## **Password Spraying**
 
-Якщо ви знайшли кілька **дійсних імен користувачів**, ви можете спробувати найпоширеніші **паролі** (пам'ятайте про політику паролів у середовищі) для кожного з виявлених користувачів.\
+Якщо ви знайшли кілька **дійсних імен користувачів**, ви можете спробувати найпоширеніші **паролі** (майте на увазі політику паролів у середовищі) з кожним з виявлених користувачів.\
 За **замовчуванням** **мінімальна** **довжина** **пароля** становить **7**.
 
 Списки поширених імен користувачів також можуть бути корисними: [https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames)
 
 Зверніть увагу, що ви **можете заблокувати деякі облікові записи, якщо спробуєте кілька неправильних паролів** (за замовчуванням більше 10).
 
-### Отримати політику паролів
+### Get password policy
 
-Якщо у вас є облікові дані користувача або оболонка як доменний користувач, ви можете **отримати політику паролів за допомогою**:
+Якщо у вас є облікові дані користувача або оболонка як доменного користувача, ви можете **отримати політику паролів за допомогою**:
 ```bash
 # From Linux
 crackmapexec <IP> -u 'user' -p 'password' --pass-pol
@@ -100,7 +95,7 @@ legba kerberos --target 127.0.0.1 --username admin --password wordlists/password
 
 - З [MSF Owa_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_login/)
 - з [MSF Owa_ews_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_ews_login/)
-- З [Ruler](https://github.com/sensepost/ruler) (надійний!)
+- З [Ruler](https://github.com/sensepost/ruler) (надійно!)
 - З [DomainPasswordSpray](https://github.com/dafthack/DomainPasswordSpray) (Powershell)
 - З [MailSniper](https://github.com/dafthack/MailSniper) (Powershell)
 
@@ -130,10 +125,5 @@ legba kerberos --target 127.0.0.1 --username admin --password wordlists/password
 - [www.blackhillsinfosec.com/?p=5296](https://www.blackhillsinfosec.com/?p=5296)
 - [https://hunter2.gitbook.io/darthsidious/initial-access/password-spraying](https://hunter2.gitbook.io/darthsidious/initial-access/password-spraying)
 
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
-
-Поглибте свої знання в **Mobile Security** з 8kSec Academy. Опануйте безпеку iOS та Android через наші курси з самостійним навчанням та отримайте сертифікат:
-
-{% embed url="https://academy.8ksec.io/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

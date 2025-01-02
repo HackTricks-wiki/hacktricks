@@ -4,80 +4,78 @@
 
 ## System Extensions / Endpoint Security Framework
 
-Unlike Kernel Extensions, **System Extensions run in user space** instead of kernel space, reducing the risk of a system crash due to extension malfunction.
+На відміну від Kernel Extensions, **System Extensions працюють у просторі користувача** замість простору ядра, що зменшує ризик аварійної зупинки системи через несправність розширення.
 
 <figure><img src="../../../images/image (606).png" alt="https://knight.sc/images/system-extension-internals-1.png"><figcaption></figcaption></figure>
 
-There are three types of system extensions: **DriverKit** Extensions, **Network** Extensions, and **Endpoint Security** Extensions.
+Існує три типи системних розширень: **DriverKit** Extensions, **Network** Extensions та **Endpoint Security** Extensions.
 
 ### **DriverKit Extensions**
 
-DriverKit is a replacement for kernel extensions that **provide hardware support**. It allows device drivers (like USB, Serial, NIC, and HID drivers) to run in user space rather than kernel space. The DriverKit framework includes **user space versions of certain I/O Kit classes**, and the kernel forwards normal I/O Kit events to user space, offering a safer environment for these drivers to run.
+DriverKit є заміною для kernel extensions, які **надають апаратну підтримку**. Він дозволяє драйверам пристроїв (таким як USB, Serial, NIC та HID драйвери) працювати в просторі користувача, а не в просторі ядра. Фреймворк DriverKit включає **версії певних класів I/O Kit для простору користувача**, а ядро пересилає звичайні події I/O Kit у простір користувача, пропонуючи безпечніше середовище для роботи цих драйверів.
 
 ### **Network Extensions**
 
-Network Extensions provide the ability to customize network behaviors. There are several types of Network Extensions:
+Network Extensions надають можливість налаштовувати мережеву поведінку. Існує кілька типів Network Extensions:
 
-- **App Proxy**: This is used for creating a VPN client that implements a flow-oriented, custom VPN protocol. This means it handles network traffic based on connections (or flows) rather than individual packets.
-- **Packet Tunnel**: This is used for creating a VPN client that implements a packet-oriented, custom VPN protocol. This means it handles network traffic based on individual packets.
-- **Filter Data**: This is used for filtering network "flows". It can monitor or modify network data at the flow level.
-- **Filter Packet**: This is used for filtering individual network packets. It can monitor or modify network data at the packet level.
-- **DNS Proxy**: This is used for creating a custom DNS provider. It can be used to monitor or modify DNS requests and responses.
+- **App Proxy**: Використовується для створення VPN-клієнта, який реалізує орієнтований на потоки, кастомний VPN-протокол. Це означає, що він обробляє мережевий трафік на основі з'єднань (або потоків), а не окремих пакетів.
+- **Packet Tunnel**: Використовується для створення VPN-клієнта, який реалізує орієнтований на пакети, кастомний VPN-протокол. Це означає, що він обробляє мережевий трафік на основі окремих пакетів.
+- **Filter Data**: Використовується для фільтрації мережевих "потоків". Він може моніторити або змінювати мережеві дані на рівні потоку.
+- **Filter Packet**: Використовується для фільтрації окремих мережевих пакетів. Він може моніторити або змінювати мережеві дані на рівні пакета.
+- **DNS Proxy**: Використовується для створення кастомного DNS-провайдера. Може використовуватися для моніторингу або зміни DNS-запитів і відповідей.
 
 ## Endpoint Security Framework
 
-Endpoint Security is a framework provided by Apple in macOS that provides a set of APIs for system security. It's intended for use by **security vendors and developers to build products that can monitor and control system activity** to identify and protect against malicious activity.
+Endpoint Security - це фреймворк, наданий Apple в macOS, який забезпечує набір API для системної безпеки. Він призначений для використання **постачальниками безпеки та розробниками для створення продуктів, які можуть моніторити та контролювати системну активність** для виявлення та захисту від шкідливої активності.
 
-This framework provides a **collection of APIs to monitor and control system activity**, such as process executions, file system events, network and kernel events.
+Цей фреймворк надає **збірку API для моніторингу та контролю системної активності**, такої як виконання процесів, події файлової системи, мережеві та ядрові події.
 
-The core of this framework is implemented in the kernel, as a Kernel Extension (KEXT) located at **`/System/Library/Extensions/EndpointSecurity.kext`**. This KEXT is made up of several key components:
+Ядро цього фреймворку реалізовано в ядрі, як Kernel Extension (KEXT), розташоване за **`/System/Library/Extensions/EndpointSecurity.kext`**. Цей KEXT складається з кількох ключових компонентів:
 
-- **EndpointSecurityDriver**: This acts as the "entry point" for the kernel extension. It's the main point of interaction between the OS and the Endpoint Security framework.
-- **EndpointSecurityEventManager**: This component is responsible for implementing kernel hooks. Kernel hooks allow the framework to monitor system events by intercepting system calls.
-- **EndpointSecurityClientManager**: This manages the communication with user space clients, keeping track of which clients are connected and need to receive event notifications.
-- **EndpointSecurityMessageManager**: This sends messages and event notifications to user space clients.
+- **EndpointSecurityDriver**: Діє як "точка входу" для розширення ядра. Це основна точка взаємодії між ОС та фреймворком Endpoint Security.
+- **EndpointSecurityEventManager**: Цей компонент відповідає за реалізацію ядрових хуків. Ядрові хуки дозволяють фреймворку моніторити системні події, перехоплюючи системні виклики.
+- **EndpointSecurityClientManager**: Це управляє зв'язком з клієнтами простору користувача, відстежуючи, які клієнти підключені та потребують отримання сповіщень про події.
+- **EndpointSecurityMessageManager**: Це надсилає повідомлення та сповіщення про події клієнтам простору користувача.
 
-The events that the Endpoint Security framework can monitor are categorized into:
+Події, які фреймворк Endpoint Security може моніторити, класифікуються на:
 
-- File events
-- Process events
-- Socket events
-- Kernel events (such as loading/unloading a kernel extension or opening an I/O Kit device)
+- Події файлів
+- Події процесів
+- Події сокетів
+- Ядрові події (такі як завантаження/вивантаження розширення ядра або відкриття пристрою I/O Kit)
 
-### Endpoint Security Framework Architecture
+### Архітектура фреймворку Endpoint Security
 
 <figure><img src="../../../images/image (1068).png" alt="https://www.youtube.com/watch?v=jaVkpM1UqOs"><figcaption></figcaption></figure>
 
-**User-space communication** with the Endpoint Security framework happens through the IOUserClient class. Two different subclasses are used, depending on the type of caller:
+**Зв'язок у просторі користувача** з фреймворком Endpoint Security відбувається через клас IOUserClient. Використовуються два різні підкласи, залежно від типу виклику:
 
-- **EndpointSecurityDriverClient**: This requires the `com.apple.private.endpoint-security.manager` entitlement, which is only held by the system process `endpointsecurityd`.
-- **EndpointSecurityExternalClient**: This requires the `com.apple.developer.endpoint-security.client` entitlement. This would typically be used by third-party security software that needs to interact with the Endpoint Security framework.
+- **EndpointSecurityDriverClient**: Це вимагає права `com.apple.private.endpoint-security.manager`, яке має лише системний процес `endpointsecurityd`.
+- **EndpointSecurityExternalClient**: Це вимагає права `com.apple.developer.endpoint-security.client`. Це зазвичай використовуватиметься стороннім програмним забезпеченням безпеки, яке потребує взаємодії з фреймворком Endpoint Security.
 
-The Endpoint Security Extensions:**`libEndpointSecurity.dylib`** is the C library that system extensions use to communicate with the kernel. This library uses the I/O Kit (`IOKit`) to communicate with the Endpoint Security KEXT.
+Розширення Endpoint Security:**`libEndpointSecurity.dylib`** є C-бібліотекою, яку системні розширення використовують для зв'язку з ядром. Ця бібліотека використовує I/O Kit (`IOKit`) для зв'язку з KEXT Endpoint Security.
 
-**`endpointsecurityd`** is a key system daemon involved in managing and launching endpoint security system extensions, particularly during the early boot process. **Only system extensions** marked with **`NSEndpointSecurityEarlyBoot`** in their `Info.plist` file receive this early boot treatment.
+**`endpointsecurityd`** є ключовим системним демоном, який бере участь в управлінні та запуску системних розширень безпеки кінцевих точок, особливо під час раннього процесу завантаження. **Тільки системні розширення**, позначені **`NSEndpointSecurityEarlyBoot`** у їхньому файлі `Info.plist`, отримують це раннє завантаження.
 
-Another system daemon, **`sysextd`**, **validates system extensions** and moves them into the proper system locations. It then asks the relevant daemon to load the extension. The **`SystemExtensions.framework`** is responsible for activating and deactivating system extensions.
+Ще один системний демон, **`sysextd`**, **перевіряє системні розширення** та переміщує їх у відповідні системні місця. Потім він запитує відповідний демон, щоб завантажити розширення. **`SystemExtensions.framework`** відповідає за активацію та деактивацію системних розширень.
 
-## Bypassing ESF
+## Обхід ESF
 
-ESF is used by security tools that will try to detect a red teamer, so any information about how this could be avoided sounds interesting.
+ESF використовується інструментами безпеки, які намагатимуться виявити червону команду, тому будь-яка інформація про те, як цього можна уникнути, звучить цікаво.
 
 ### CVE-2021-30965
 
-The thing is that the security application needs to have **Full Disk Access permissions**. So if an attacker could remove that, he could prevent the software from running:
-
+Справа в тому, що безпекова програма повинна мати **дозволи на повний доступ до диска**. Тож, якщо зловмисник зможе це видалити, він зможе запобігти запуску програмного забезпечення:
 ```bash
 tccutil reset All
 ```
+Для **додаткової інформації** про цей обхід та пов'язані з ним, перегляньте доповідь [#OBTS v5.0: "Ахіллесова п'ята EndpointSecurity" - Фіцл Чаба](https://www.youtube.com/watch?v=lQO7tvNCoTI)
 
-For **more information** about this bypass and related ones check the talk [#OBTS v5.0: "The Achilles Heel of EndpointSecurity" - Fitzl Csaba](https://www.youtube.com/watch?v=lQO7tvNCoTI)
+В кінці це було виправлено, надавши новий дозвіл **`kTCCServiceEndpointSecurityClient`** безпековому додатку, керованому **`tccd`**, щоб `tccutil` не очищав його дозволи, що заважає йому працювати.
 
-At the end this was fixed by giving the new permission **`kTCCServiceEndpointSecurityClient`** to the security app managed by **`tccd`** so `tccutil` won't clear its permissions preventing it from running.
+## Посилання
 
-## References
-
-- [**OBTS v3.0: "Endpoint Security & Insecurity" - Scott Knight**](https://www.youtube.com/watch?v=jaVkpM1UqOs)
+- [**OBTS v3.0: "Безпека та небезпека Endpoint" - Скотт Найт**](https://www.youtube.com/watch?v=jaVkpM1UqOs)
 - [**https://knight.sc/reverse%20engineering/2019/08/24/system-extension-internals.html**](https://knight.sc/reverse%20engineering/2019/08/24/system-extension-internals.html)
 
 {{#include ../../../banners/hacktricks-training.md}}

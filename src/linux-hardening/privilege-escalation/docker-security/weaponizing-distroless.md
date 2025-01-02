@@ -1,30 +1,30 @@
-# Weaponizing Distroless
+# Зброя Distroless
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## What is Distroless
+## Що таке Distroless
 
-A distroless container is a type of container that **contains only the necessary dependencies to run a specific application**, without any additional software or tools that are not required. These containers are designed to be as **lightweight** and **secure** as possible, and they aim to **minimize the attack surface** by removing any unnecessary components.
+Контейнер distroless - це тип контейнера, який **містить лише необхідні залежності для запуску конкретного застосунку**, без будь-якого додаткового програмного забезпечення або інструментів, які не є необхідними. Ці контейнери розроблені, щоб бути **легкими** та **безпечними** наскільки це можливо, і вони прагнуть **мінімізувати поверхню атаки**, видаляючи будь-які непотрібні компоненти.
 
-Distroless containers are often used in **production environments where security and reliability are paramount**.
+Контейнери distroless часто використовуються в **виробничих середовищах, де безпека та надійність є найважливішими**.
 
-Some **examples** of **distroless containers** are:
+Деякі **приклади** **контейнерів distroless**:
 
-- Provided by **Google**: [https://console.cloud.google.com/gcr/images/distroless/GLOBAL](https://console.cloud.google.com/gcr/images/distroless/GLOBAL)
-- Provided by **Chainguard**: [https://github.com/chainguard-images/images/tree/main/images](https://github.com/chainguard-images/images/tree/main/images)
+- Надано **Google**: [https://console.cloud.google.com/gcr/images/distroless/GLOBAL](https://console.cloud.google.com/gcr/images/distroless/GLOBAL)
+- Надано **Chainguard**: [https://github.com/chainguard-images/images/tree/main/images](https://github.com/chainguard-images/images/tree/main/images)
 
-## Weaponizing Distroless
+## Зброя Distroless
 
-The goal of weaponize a distroless container is to be able to **execute arbitrary binaries and payloads even with the limitations** implied by **distroless** (lack of common binaries in the system) and also protections commonly found in containers such as **read-only** or **no-execute** in `/dev/shm`.
+Мета озброєння контейнера distroless полягає в тому, щоб мати можливість **виконувати довільні бінарні файли та корисні навантаження, навіть з обмеженнями**, які накладає **distroless** (відсутність загальних бінарних файлів у системі), а також захистами, які зазвичай зустрічаються в контейнерах, такими як **тільки для читання** або **без виконання** в `/dev/shm`.
 
-### Through memory
+### Через пам'ять
 
-Coming at some point of 2023...
+Приблизно в якийсь момент 2023 року...
 
-### Via Existing binaries
+### Через існуючі бінарні файли
 
 #### openssl
 
-\***\*[**In this post,**](https://www.form3.tech/engineering/content/exploiting-distroless-images) it is explained that the binary **`openssl`** is frequently found in these containers, potentially because it's **needed\*\* by the software that is going to be running inside the container.
+\***\*[**У цьому пості,**](https://www.form3.tech/engineering/content/exploiting-distroless-images) пояснюється, що бінарний файл **`openssl`** часто зустрічається в цих контейнерах, можливо, тому що він **потрібен\*\* програмному забезпеченню, яке буде працювати всередині контейнера.
 
 {{#include ../../../banners/hacktricks-training.md}}

@@ -2,40 +2,39 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Основна інформація
 
-Kernel extensions (Kexts) are **packages** with a **`.kext`** extension that are **loaded directly into the macOS kernel space**, providing additional functionality to the main operating system.
+Kernel extensions (Kexts) — це **пакети** з розширенням **`.kext`**, які **завантажуються безпосередньо в простір ядра macOS**, надаючи додаткову функціональність основній операційній системі.
 
-### Requirements
+### Вимоги
 
-Obviously, this is so powerful that it is **complicated to load a kernel extension**. These are the **requirements** that a kernel extension must meet to be loaded:
+Очевидно, що це настільки потужно, що **завантажити розширення ядра** є **складним**. Ось **вимоги**, які повинні бути виконані для завантаження розширення ядра:
 
-- When **entering recovery mode**, kernel **extensions must be allowed** to be loaded:
+- Коли **входите в режим відновлення**, розширення ядра **повинні бути дозволені** для завантаження:
 
 <figure><img src="../../../images/image (327).png" alt=""><figcaption></figcaption></figure>
 
-- The kernel extension must be **signed with a kernel code signing certificate**, which can only be **granted by Apple**. Who will review in detail the company and the reasons why it is needed.
-- The kernel extension must also be **notarized**, Apple will be able to check it for malware.
-- Then, the **root** user is the one who can **load the kernel extension** and the files inside the package must **belong to root**.
-- During the upload process, the package must be prepared in a **protected non-root location**: `/Library/StagedExtensions` (requires the `com.apple.rootless.storage.KernelExtensionManagement` grant).
-- Finally, when attempting to load it, the user will [**receive a confirmation request**](https://developer.apple.com/library/archive/technotes/tn2459/_index.html) and, if accepted, the computer must be **restarted** to load it.
+- Розширення ядра повинно бути **підписане сертифікатом підпису коду ядра**, який може бути **наданий тільки Apple**. Хто детально розгляне компанію та причини, чому це необхідно.
+- Розширення ядра також повинно бути **нотаризоване**, Apple зможе перевірити його на наявність шкідливого ПЗ.
+- Потім, **кореневий** користувач є тим, хто може **завантажити розширення ядра**, а файли всередині пакета повинні **належати кореню**.
+- Під час процесу завантаження пакет повинен бути підготовлений у **захищеному місці, що не є кореневим**: `/Library/StagedExtensions` (вимагає надання `com.apple.rootless.storage.KernelExtensionManagement`).
+- Нарешті, при спробі завантажити його, користувач [**отримає запит на підтвердження**](https://developer.apple.com/library/archive/technotes/tn2459/_index.html) і, якщо буде прийнято, комп'ютер повинен бути **перезавантажений** для його завантаження.
 
-### Loading process
+### Процес завантаження
 
-In Catalina it was like this: It is interesting to note that the **verification** process occurs in **userland**. However, only applications with the **`com.apple.private.security.kext-management`** grant can **request the kernel to load an extension**: `kextcache`, `kextload`, `kextutil`, `kextd`, `syspolicyd`
+У Catalina це виглядало так: Цікаво відзначити, що процес **перевірки** відбувається в **userland**. Однак тільки програми з наданням **`com.apple.private.security.kext-management`** можуть **запитувати у ядра завантажити розширення**: `kextcache`, `kextload`, `kextutil`, `kextd`, `syspolicyd`
 
-1. **`kextutil`** cli **starts** the **verification** process for loading an extension
-   - It will talk to **`kextd`** by sending using a **Mach service**.
-2. **`kextd`** will check several things, such as the **signature**
-   - It will talk to **`syspolicyd`** to **check** if the extension can be **loaded**.
-3. **`syspolicyd`** will **prompt** the **user** if the extension has not been previously loaded.
-   - **`syspolicyd`** will report the result to **`kextd`**
-4. **`kextd`** will finally be able to **tell the kernel to load** the extension
+1. **`kextutil`** cli **починає** процес **перевірки** для завантаження розширення
+- Він спілкуватиметься з **`kextd`**, використовуючи **Mach service**.
+2. **`kextd`** перевірить кілька речей, таких як **підпис**
+- Він спілкуватиметься з **`syspolicyd`**, щоб **перевірити**, чи може розширення бути **завантаженим**.
+3. **`syspolicyd`** **запитає** **користувача**, якщо розширення не було завантажено раніше.
+- **`syspolicyd`** повідомить результат **`kextd`**
+4. **`kextd`** нарешті зможе **сказати ядру завантажити** розширення
 
-If **`kextd`** is not available, **`kextutil`** can perform the same checks.
+Якщо **`kextd`** недоступний, **`kextutil`** може виконати ті ж перевірки.
 
-### Enumeration (loaded kexts)
-
+### Перерахування (завантажені kexts)
 ```bash
 # Get loaded kernel extensions
 kextstat
@@ -43,40 +42,38 @@ kextstat
 # Get dependencies of the kext number 22
 kextstat | grep " 22 " | cut -c2-5,50- | cut -d '(' -f1
 ```
-
 ## Kernelcache
 
 > [!CAUTION]
-> Even though the kernel extensions are expected to be in `/System/Library/Extensions/`, if you go to this folder you **won't find any binary**. This is because of the **kernelcache** and in order to reverse one `.kext` you need to find a way to obtain it.
+> Навіть якщо очікується, що розширення ядра будуть у `/System/Library/Extensions/`, якщо ви зайдете в цю папку, ви **не знайдете жодного бінарного файлу**. Це пов'язано з **kernelcache**, і для того, щоб зворотно інженерити один `.kext`, вам потрібно знайти спосіб його отримати.
 
-The **kernelcache** is a **pre-compiled and pre-linked version of the XNU kernel**, along with essential device **drivers** and **kernel extensions**. It's stored in a **compressed** format and gets decompressed into memory during the boot-up process. The kernelcache facilitates a **faster boot time** by having a ready-to-run version of the kernel and crucial drivers available, reducing the time and resources that would otherwise be spent on dynamically loading and linking these components at boot time.
+**Kernelcache** - це **попередньо скомпільована та попередньо зв'язана версія ядра XNU**, разом з основними **драйверами** та **розширеннями ядра**. Він зберігається у **сжатому** форматі і розпаковується в пам'ять під час процесу завантаження. Kernelcache сприяє **швидшому часу завантаження**, маючи готову до запуску версію ядра та важливих драйверів, що зменшує час і ресурси, які інакше витрачалися б на динамічне завантаження та зв'язування цих компонентів під час завантаження.
 
 ### Local Kerlnelcache
 
-In iOS it's located in **`/System/Library/Caches/com.apple.kernelcaches/kernelcache`** in macOS you can find it with: **`find / -name "kernelcache" 2>/dev/null`** \
-In my case in macOS I found it in:
+В iOS він знаходиться у **`/System/Library/Caches/com.apple.kernelcaches/kernelcache`**, в macOS ви можете знайти його за допомогою: **`find / -name "kernelcache" 2>/dev/null`** \
+У моєму випадку в macOS я знайшов його в:
 
 - `/System/Volumes/Preboot/1BAEB4B5-180B-4C46-BD53-51152B7D92DA/boot/DAD35E7BC0CDA79634C20BD1BD80678DFB510B2AAD3D25C1228BB34BCD0A711529D3D571C93E29E1D0C1264750FA043F/System/Library/Caches/com.apple.kernelcaches/kernelcache`
 
 #### IMG4
 
-The IMG4 file format is a container format used by Apple in its iOS and macOS devices for securely **storing and verifying firmware** components (like **kernelcache**). The IMG4 format includes a header and several tags which encapsulate different pieces of data including the actual payload (like a kernel or bootloader), a signature, and a set of manifest properties. The format supports cryptographic verification, allowing the device to confirm the authenticity and integrity of the firmware component before executing it.
+Формат файлу IMG4 - це контейнерний формат, який використовується Apple в його пристроях iOS та macOS для безпечного **зберігання та перевірки компонентів прошивки** (як-от **kernelcache**). Формат IMG4 включає заголовок і кілька тегів, які інкапсулюють різні частини даних, включаючи фактичний корисний вантаж (як-от ядро або завантажувач), підпис та набір властивостей маніфесту. Формат підтримує криптографічну перевірку, що дозволяє пристрою підтверджувати автентичність та цілісність компонента прошивки перед його виконанням.
 
-It's usually composed of the following components:
+Зазвичай він складається з наступних компонентів:
 
 - **Payload (IM4P)**:
-  - Often compressed (LZFSE4, LZSS, …)
-  - Optionally encrypted
+- Часто стиснутий (LZFSE4, LZSS, …)
+- За бажанням зашифрований
 - **Manifest (IM4M)**:
-  - Contains Signature
-  - Additional Key/Value dictionary
+- Містить підпис
+- Додатковий словник ключ/значення
 - **Restore Info (IM4R)**:
-  - Also known as APNonce
-  - Prevents replaying of some updates
-  - OPTIONAL: Usually this isn't found
+- Відомий також як APNonce
+- Запобігає повторному використанню деяких оновлень
+- OPTIONAL: Зазвичай це не знаходиться
 
-Decompress the Kernelcache:
-
+Розпакуйте Kernelcache:
 ```bash
 # img4tool (https://github.com/tihmstar/img4tool
 img4tool -e kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
@@ -84,49 +81,39 @@ img4tool -e kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
 # pyimg4 (https://github.com/m1stadev/PyIMG4)
 pyimg4 im4p extract -i kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
 ```
-
-### Download&#x20;
+### Завантажити&#x20;
 
 - [**KernelDebugKit Github**](https://github.com/dortania/KdkSupportPkg/releases)
 
-In [https://github.com/dortania/KdkSupportPkg/releases](https://github.com/dortania/KdkSupportPkg/releases) it's possible to find all the kernel debug kits. You can download it, mount it, open it with [Suspicious Package](https://www.mothersruin.com/software/SuspiciousPackage/get.html) tool, access the **`.kext`** folder and **extract it**.
+У [https://github.com/dortania/KdkSupportPkg/releases](https://github.com/dortania/KdkSupportPkg/releases) можна знайти всі набори для налагодження ядра. Ви можете завантажити його, змонтувати, відкрити за допомогою інструменту [Suspicious Package](https://www.mothersruin.com/software/SuspiciousPackage/get.html), отримати доступ до папки **`.kext`** та **екстрактувати** її.
 
-Check it for symbols with:
-
+Перевірте його на наявність символів за допомогою:
 ```bash
 nm -a ~/Downloads/Sandbox.kext/Contents/MacOS/Sandbox | wc -l
 ```
-
 - [**theapplewiki.com**](https://theapplewiki.com/wiki/Firmware/Mac/14.x)**,** [**ipsw.me**](https://ipsw.me/)**,** [**theiphonewiki.com**](https://www.theiphonewiki.com/)
 
-Sometime Apple releases **kernelcache** with **symbols**. You can download some firmwares with symbols by following links on those pages. The firmwares will contain the **kernelcache** among other files.
+Іноді Apple випускає **kernelcache** з **symbols**. Ви можете завантажити деякі прошивки з символами, перейшовши за посиланнями на цих сторінках. Прошивки міститимуть **kernelcache** серед інших файлів.
 
-To **extract** the files start by changing the extension from `.ipsw` to `.zip` and **unzip** it.
+Щоб **extract** файли, почніть з зміни розширення з `.ipsw` на `.zip` і **unzip** його.
 
-After extracting the firmware you will get a file like: **`kernelcache.release.iphone14`**. It's in **IMG4** format, you can extract the interesting info with:
+Після витягування прошивки ви отримаєте файл на кшталт: **`kernelcache.release.iphone14`**. Він у форматі **IMG4**, ви можете витягти цікаву інформацію за допомогою:
 
 [**pyimg4**](https://github.com/m1stadev/PyIMG4)**:**
-
 ```bash
 pyimg4 im4p extract -i kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
 ```
-
 [**img4tool**](https://github.com/tihmstar/img4tool)**:**
-
 ```bash
 img4tool -e kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
 ```
+### Інспекція kernelcache
 
-### Inspecting kernelcache
-
-Check if the kernelcache has symbols with
-
+Перевірте, чи має kernelcache символи з
 ```bash
 nm -a kernelcache.release.iphone14.e | wc -l
 ```
-
-With this we can now **extract all the extensions** or the **one you are interested in:**
-
+З цим ми тепер можемо **витягти всі розширення** або **те, яке вас цікавить:**
 ```bash
 # List all extensions
 kextex -l kernelcache.release.iphone14.e
@@ -139,10 +126,9 @@ kextex_all kernelcache.release.iphone14.e
 # Check the extension for symbols
 nm -a binaries/com.apple.security.sandbox | wc -l
 ```
+## Налагодження
 
-## Debugging
-
-## Referencias
+## Посилання
 
 - [https://www.makeuseof.com/how-to-enable-third-party-kernel-extensions-apple-silicon-mac/](https://www.makeuseof.com/how-to-enable-third-party-kernel-extensions-apple-silicon-mac/)
 - [https://www.youtube.com/watch?v=hGKOskSiaQo](https://www.youtube.com/watch?v=hGKOskSiaQo)
