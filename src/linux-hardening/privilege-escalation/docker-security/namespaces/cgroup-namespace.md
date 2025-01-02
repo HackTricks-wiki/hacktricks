@@ -2,90 +2,80 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Basiese Inligting
 
-A cgroup namespace is a Linux kernel feature that provides **isolation of cgroup hierarchies for processes running within a namespace**. Cgroups, short for **control groups**, are a kernel feature that allows organizing processes into hierarchical groups to manage and enforce **limits on system resources** like CPU, memory, and I/O.
+'n cgroup namespace is 'n Linux-kernfunksie wat **isolatie van cgroup hiërargieë vir prosesse wat binne 'n namespace loop** bied. Cgroups, kort vir **kontrole groepe**, is 'n kernfunksie wat toelaat om prosesse in hiërargiese groepe te organiseer om **grense op stelselhulpbronne** soos CPU, geheue en I/O te bestuur en af te dwing.
 
-While cgroup namespaces are not a separate namespace type like the others we discussed earlier (PID, mount, network, etc.), they are related to the concept of namespace isolation. **Cgroup namespaces virtualize the view of the cgroup hierarchy**, so that processes running within a cgroup namespace have a different view of the hierarchy compared to processes running in the host or other namespaces.
+Terwyl cgroup namespaces nie 'n aparte namespace tipe is soos die ander wat ons vroeër bespreek het nie (PID, mount, netwerk, ens.), is hulle verwant aan die konsep van namespace isolasie. **Cgroup namespaces virtualiseer die siening van die cgroup hiërargie**, sodat prosesse wat binne 'n cgroup namespace loop 'n ander siening van die hiërargie het in vergelyking met prosesse wat in die gasheer of ander namespaces loop.
 
-### How it works:
+### Hoe dit werk:
 
-1. When a new cgroup namespace is created, **it starts with a view of the cgroup hierarchy based on the cgroup of the creating process**. This means that processes running in the new cgroup namespace will only see a subset of the entire cgroup hierarchy, limited to the cgroup subtree rooted at the creating process's cgroup.
-2. Processes within a cgroup namespace will **see their own cgroup as the root of the hierarchy**. This means that, from the perspective of processes inside the namespace, their own cgroup appears as the root, and they cannot see or access cgroups outside of their own subtree.
-3. Cgroup namespaces do not directly provide isolation of resources; **they only provide isolation of the cgroup hierarchy view**. **Resource control and isolation are still enforced by the cgroup** subsystems (e.g., cpu, memory, etc.) themselves.
+1. Wanneer 'n nuwe cgroup namespace geskep word, **begin dit met 'n siening van die cgroup hiërargie gebaseer op die cgroup van die skepende proses**. Dit beteken dat prosesse wat in die nuwe cgroup namespace loop slegs 'n subset van die hele cgroup hiërargie sal sien, beperk tot die cgroup subboom wat gegrond is op die skepende proses se cgroup.
+2. Prosesse binne 'n cgroup namespace sal **hulle eie cgroup as die wortel van die hiërargie sien**. Dit beteken dat, vanuit die perspektief van prosesse binne die namespace, hulle eie cgroup as die wortel verskyn, en hulle kan nie cgroups buite hul eie subboom sien of toegang daartoe kry nie.
+3. Cgroup namespaces bied nie direk isolasie van hulpbronne nie; **hulle bied slegs isolasie van die cgroup hiërargie siening**. **Hulpbronbeheer en isolasie word steeds afgedwing deur die cgroup** subsisteme (bv., cpu, geheue, ens.) self.
 
-For more information about CGroups check:
+Vir meer inligting oor CGroups kyk:
 
 {{#ref}}
 ../cgroups.md
 {{#endref}}
 
-## Lab:
+## Laboratorium:
 
-### Create different Namespaces
+### Skep verskillende Namespaces
 
 #### CLI
-
 ```bash
 sudo unshare -C [--mount-proc] /bin/bash
 ```
-
-By mounting a new instance of the `/proc` filesystem if you use the param `--mount-proc`, you ensure that the new mount namespace has an **accurate and isolated view of the process information specific to that namespace**.
+Deur 'n nuwe instansie van die `/proc` lêerstelsel te monteer as jy die parameter `--mount-proc` gebruik, verseker jy dat die nuwe monteernaamruimte 'n **akkurate en geïsoleerde siening van die prosesinligting spesifiek vir daardie naamruimte** het.
 
 <details>
 
-<summary>Error: bash: fork: Cannot allocate memory</summary>
+<summary>Fout: bash: fork: Kan nie geheue toewys nie</summary>
 
-When `unshare` is executed without the `-f` option, an error is encountered due to the way Linux handles new PID (Process ID) namespaces. The key details and the solution are outlined below:
+Wanneer `unshare` sonder die `-f` opsie uitgevoer word, word 'n fout ondervind weens die manier waarop Linux nuwe PID (Proses ID) naamruimtes hanteer. Die sleutelbesonderhede en die oplossing word hieronder uiteengesit:
 
-1. **Problem Explanation**:
+1. **Probleemverklaring**:
 
-   - The Linux kernel allows a process to create new namespaces using the `unshare` system call. However, the process that initiates the creation of a new PID namespace (referred to as the "unshare" process) does not enter the new namespace; only its child processes do.
-   - Running `%unshare -p /bin/bash%` starts `/bin/bash` in the same process as `unshare`. Consequently, `/bin/bash` and its child processes are in the original PID namespace.
-   - The first child process of `/bin/bash` in the new namespace becomes PID 1. When this process exits, it triggers the cleanup of the namespace if there are no other processes, as PID 1 has the special role of adopting orphan processes. The Linux kernel will then disable PID allocation in that namespace.
+- Die Linux-kern laat 'n proses toe om nuwe naamruimtes te skep met die `unshare` stelselaanroep. Die proses wat die skepping van 'n nuwe PID naamruimte inisieer (genoem die "unshare" proses) gaan egter nie in die nuwe naamruimte in nie; slegs sy kindproses gaan.
+- Die uitvoering van `%unshare -p /bin/bash%` begin `/bin/bash` in dieselfde proses as `unshare`. Gevolglik is `/bin/bash` en sy kindproses in die oorspronklike PID naamruimte.
+- Die eerste kindproses van `/bin/bash` in die nuwe naamruimte word PID 1. Wanneer hierdie proses verlaat, aktiveer dit die opruiming van die naamruimte as daar geen ander prosesse is nie, aangesien PID 1 die spesiale rol het om weeskindprosesse aan te neem. Die Linux-kern sal dan PID-toewysing in daardie naamruimte deaktiveer.
 
-2. **Consequence**:
+2. **Gevolg**:
 
-   - The exit of PID 1 in a new namespace leads to the cleaning of the `PIDNS_HASH_ADDING` flag. This results in the `alloc_pid` function failing to allocate a new PID when creating a new process, producing the "Cannot allocate memory" error.
+- Die uitgang van PID 1 in 'n nuwe naamruimte lei tot die opruiming van die `PIDNS_HASH_ADDING` vlag. Dit lei tot die `alloc_pid` funksie wat misluk om 'n nuwe PID toe te wys wanneer 'n nuwe proses geskep word, wat die "Kan nie geheue toewys nie" fout veroorsaak.
 
-3. **Solution**:
-   - The issue can be resolved by using the `-f` option with `unshare`. This option makes `unshare` fork a new process after creating the new PID namespace.
-   - Executing `%unshare -fp /bin/bash%` ensures that the `unshare` command itself becomes PID 1 in the new namespace. `/bin/bash` and its child processes are then safely contained within this new namespace, preventing the premature exit of PID 1 and allowing normal PID allocation.
+3. **Oplossing**:
+- Die probleem kan opgelos word deur die `-f` opsie saam met `unshare` te gebruik. Hierdie opsie maak dat `unshare` 'n nuwe proses fork nadat die nuwe PID naamruimte geskep is.
+- Die uitvoering van `%unshare -fp /bin/bash%` verseker dat die `unshare` opdrag self PID 1 in die nuwe naamruimte word. `/bin/bash` en sy kindproses is dan veilig binne hierdie nuwe naamruimte, wat die voortydige uitgang van PID 1 voorkom en normale PID-toewysing toelaat.
 
-By ensuring that `unshare` runs with the `-f` flag, the new PID namespace is correctly maintained, allowing `/bin/bash` and its sub-processes to operate without encountering the memory allocation error.
+Deur te verseker dat `unshare` met die `-f` vlag loop, word die nuwe PID naamruimte korrek gehandhaaf, wat toelaat dat `/bin/bash` en sy sub-prosesse kan werk sonder om die geheue toewysing fout te ondervind.
 
 </details>
 
 #### Docker
-
 ```bash
 docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 ```
-
-### &#x20;Check which namespace is your process in
-
+### &#x20;Kontroleer in watter naamruimte jou proses is
 ```bash
 ls -l /proc/self/ns/cgroup
 lrwxrwxrwx 1 root root 0 Apr  4 21:19 /proc/self/ns/cgroup -> 'cgroup:[4026531835]'
 ```
-
-### Find all CGroup namespaces
-
+### Vind alle CGroup name ruimtes
 ```bash
 sudo find /proc -maxdepth 3 -type l -name cgroup -exec readlink {} \; 2>/dev/null | sort -u
 # Find the processes with an specific namespace
 sudo find /proc -maxdepth 3 -type l -name cgroup -exec ls -l  {} \; 2>/dev/null | grep <ns-number>
 ```
-
-### Enter inside an CGroup namespace
-
+### Gaan binne 'n CGroup-namespace in
 ```bash
 nsenter -C TARGET_PID --pid /bin/bash
 ```
+Ook, jy kan slegs **in 'n ander prosesnaamruimte ingaan as jy root is**. En jy **kan nie** **ingaan** in 'n ander naamruimte **sonder 'n beskrywer** wat daarna verwys nie (soos `/proc/self/ns/cgroup`).
 
-Also, you can only **enter in another process namespace if you are root**. And you **cannot** **enter** in other namespace **without a descriptor** pointing to it (like `/proc/self/ns/cgroup`).
-
-## References
+## Verwysings
 
 - [https://stackoverflow.com/questions/44666700/unshare-pid-bin-bash-fork-cannot-allocate-memory](https://stackoverflow.com/questions/44666700/unshare-pid-bin-bash-fork-cannot-allocate-memory)
 

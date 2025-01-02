@@ -2,12 +2,11 @@
 
 # SELinux in Containers
 
-[Introduction and example from the redhat docs](https://www.redhat.com/sysadmin/privileged-flag-container-engines)
+[Inleiding en voorbeeld uit die redhat dokumentasie](https://www.redhat.com/sysadmin/privileged-flag-container-engines)
 
-[SELinux](https://www.redhat.com/en/blog/latest-container-exploit-runc-can-be-blocked-selinux) is a **labeling** **system**. Every **process** and every **file** system object has a **label**. SELinux policies define rules about what a **process label is allowed to do with all of the other labels** on the system.
+[SELinux](https://www.redhat.com/en/blog/latest-container-exploit-runc-can-be-blocked-selinux) is 'n **etikettering** **stelsel**. Elke **proses** en elke **lêer** stelselaanwyser het 'n **etiket**. SELinux-beleide definieer reëls oor wat 'n **proses etiket mag doen met al die ander etikette** op die stelsel.
 
-Container engines launch **container processes with a single confined SELinux label**, usually `container_t`, and then set the container inside of the container to be labeled `container_file_t`. The SELinux policy rules basically say that the **`container_t` processes can only read/write/execute files labeled `container_file_t`**. If a container process escapes the container and attempts to write to content on the host, the Linux kernel denies access and only allows the container process to write to content labeled `container_file_t`.
-
+Container enjinse begin **container prosesse met 'n enkele beperkte SELinux etiket**, gewoonlik `container_t`, en stel dan die container binne die container in om geëtiketteer te word as `container_file_t`. Die SELinux-beleid reëls sê basies dat die **`container_t` prosesse slegs lêers geëtiketteer as `container_file_t` kan lees/skryf/uitvoer**. As 'n container proses die container ontsnap en probeer om na inhoud op die gasheer te skryf, weier die Linux-kern toegang en laat slegs die container proses toe om na inhoud geëtiketteer as `container_file_t` te skryf.
 ```shell
 $ podman run -d fedora sleep 100
 d4194babf6b877c7100e79de92cd6717166f7302113018686cea650ea40bd7cb
@@ -15,9 +14,8 @@ $ podman top -l label
 LABEL
 system_u:system_r:container_t:s0:c647,c780
 ```
+# SELinux Gebruikers
 
-# SELinux Users
-
-There are SELinux users in addition to the regular Linux users. SELinux users are part of an SELinux policy. Each Linux user is mapped to a SELinux user as part of the policy. This allows Linux users to inherit the restrictions and security rules and mechanisms placed on SELinux users.
+Daar is SELinux gebruikers benewens die gewone Linux gebruikers. SELinux gebruikers is deel van 'n SELinux beleid. Elke Linux gebruiker is aan 'n SELinux gebruiker gekoppel as deel van die beleid. Dit stel Linux gebruikers in staat om die beperkings en sekuriteitsreëls en -meganismes wat op SELinux gebruikers geplaas is, te erf.
 
 {{#include ../../banners/hacktricks-training.md}}

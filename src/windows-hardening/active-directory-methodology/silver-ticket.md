@@ -2,15 +2,11 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/i3.png" alt=""><figcaption></figcaption></figure>
 
-**Bug bounty tip**: **meld aan** by **Intigriti**, 'n premium **bug bounty platform geskep deur hackers, vir hackers**! Sluit vandag by ons aan by [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) en begin verdien bounties tot **$100,000**!
-
-{% embed url="https://go.intigriti.com/hacktricks" %}
 
 ## Silver ticket
 
-Die **Silver Ticket** aanval behels die uitbuiting van dienskaartjies in Active Directory (AD) omgewings. Hierdie metode is gebaseer op **die verkryging van die NTLM-hash van 'n diensrekening**, soos 'n rekenaarrekening, om 'n Ticket Granting Service (TGS) kaartjie te vervals. Met hierdie vervalste kaartjie kan 'n aanvaller toegang verkry tot spesifieke dienste op die netwerk, **om enige gebruiker na te boots**, tipies met die doel om administratiewe voorregte te verkry. Dit word beklemtoon dat die gebruik van AES-sleutels vir die vervalsing van kaartjies veiliger en minder opspoorbaar is.
+Die **Silver Ticket** aanval behels die uitbuiting van dienskaartjies in Active Directory (AD) omgewings. Hierdie metode staat op **die verkryging van die NTLM-hash van 'n diensrekening**, soos 'n rekenaarrekening, om 'n Ticket Granting Service (TGS) kaartjie te vervals. Met hierdie vervalste kaartjie kan 'n aanvaller toegang verkry tot spesifieke dienste op die netwerk, **om enige gebruiker na te boots**, tipies met die doel om administratiewe regte te verkry. Dit word beklemtoon dat die gebruik van AES-sleutels vir die vervalsing van kaartjies veiliger en minder opspoorbaar is.
 
 Vir kaartjie-ontwerp word verskillende gereedskap gebruik, gebaseer op die bedryfstelsel:
 
@@ -32,20 +28,20 @@ mimikatz.exe "kerberos::ptt <TICKET_FILE>"
 # Obtain a shell
 .\PsExec.exe -accepteula \\<TARGET> cmd
 ```
-Die CIFS-diens word uitgelig as 'n algemene teiken om toegang tot die slagoffer se lêerstelsel te verkry, maar ander dienste soos HOST en RPCSS kan ook uitgebuit word vir take en WMI-vrae.
+Die CIFS-diens word beklemtoon as 'n algemene teiken om toegang tot die slagoffer se lêerstelsel te verkry, maar ander dienste soos HOST en RPCSS kan ook uitgebuit word vir take en WMI-vrae.
 
 ## Beskikbare Dienste
 
-| Diens Tipe                                 | Diens Silver Tickets                                                      |
-| ------------------------------------------ | ------------------------------------------------------------------------- |
-| WMI                                        | <p>HOST</p><p>RPCSS</p>                                                 |
+| Diens Tipe                                 | Diens Silver Tickets                                                       |
+| ------------------------------------------ | -------------------------------------------------------------------------- |
+| WMI                                        | <p>HOST</p><p>RPCSS</p>                                                  |
 | PowerShell Remoting                        | <p>HOST</p><p>HTTP</p><p>Afhangende van OS ook:</p><p>WSMAN</p><p>RPCSS</p> |
 | WinRM                                      | <p>HOST</p><p>HTTP</p><p>In sommige gevalle kan jy net vra vir: WINRM</p> |
-| Geplande Take                              | HOST                                                                    |
-| Windows Lêer Deel, ook psexec             | CIFS                                                                    |
-| LDAP operasies, ingesluit DCSync          | LDAP                                                                    |
-| Windows Remote Server Administrasie Gereedskap | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                      |
-| Goue Tickets                               | krbtgt                                                                |
+| Geplande Take                              | HOST                                                                     |
+| Windows Lêer Deel, ook psexec              | CIFS                                                                     |
+| LDAP operasies, ingesluit DCSync          | LDAP                                                                     |
+| Windows Remote Server Administrasie Hulpmiddels | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                       |
+| Goue Tickets                               | krbtgt                                                                   |
 
 Met **Rubeus** kan jy **vra vir al** hierdie kaarte met die parameter:
 
@@ -59,11 +55,11 @@ Met **Rubeus** kan jy **vra vir al** hierdie kaarte met die parameter:
 
 ## Misbruik van Diens kaarte
 
-In die volgende voorbeelde kom ons veronderstel dat die kaart verkry is deur die administrateurrekening te verpersoonlik.
+In die volgende voorbeelde kom ons veronderstel dat die kaart verkry is deur die administrateur rekening na te volg.
 
 ### CIFS
 
-Met hierdie kaart sal jy in staat wees om toegang te verkry tot die `C$` en `ADMIN$` gids via **SMB** (as hulle blootgestel is) en lêers na 'n deel van die afstand lêerstelsel te kopieer deur net iets soos te doen:
+Met hierdie kaart sal jy in staat wees om toegang tot die `C$` en `ADMIN$` gids via **SMB** te verkry (as hulle blootgestel is) en lêers na 'n deel van die afstand lêerstelsel te kopieer deur net iets soos te doen:
 ```bash
 dir \\vulnerable.computer\C$
 dir \\vulnerable.computer\ADMIN$
@@ -139,10 +135,6 @@ mimikatz(commandline) # lsadump::dcsync /dc:pcdc.domain.local /domain:domain.loc
 dcsync.md
 {{#endref}}
 
-<figure><img src="../../images/i3.png" alt=""><figcaption></figcaption></figure>
 
-**Bug bounty wenk**: **meld aan** by **Intigriti**, 'n premium **bug bounty platform geskep deur hackers, vir hackers**! Sluit by ons aan by [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) vandag, en begin verdien bounties tot **$100,000**!
-
-{% embed url="https://go.intigriti.com/hacktricks" %}
 
 {{#include ../../banners/hacktricks-training.md}}

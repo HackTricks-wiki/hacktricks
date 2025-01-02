@@ -2,11 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/i3.png" alt=""><figcaption></figcaption></figure>
 
-**Bug bounty tip**: **meld aan** by **Intigriti**, 'n premium **bug bounty platform geskep deur hackers, vir hackers**! Sluit vandag by ons aan by [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) en begin verdien bounties tot **$100,000**!
-
-{% embed url="https://go.intigriti.com/hacktricks" %}
 
 ## WMIC
 
@@ -42,7 +38,7 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 ## Registrasie
 
 > [!NOTE]
-> [Nota hier](https://answers.microsoft.com/en-us/windows/forum/all/delete-registry-key/d425ae37-9dcc-4867-b49c-723dcd15147f): Die **Wow6432Node** registrasie-invoer dui aan dat jy 'n 64-bis Windows weergawe gebruik. Die bedryfstelsel gebruik hierdie sleutel om 'n aparte weergawe van HKEY_LOCAL_MACHINE\SOFTWARE vir 32-bis toepassings wat op 64-bis Windows weergawes loop, te vertoon.
+> [Nota van hier](https://answers.microsoft.com/en-us/windows/forum/all/delete-registry-key/d425ae37-9dcc-4867-b49c-723dcd15147f): Die **Wow6432Node** registrasie-invoer dui aan dat jy 'n 64-bis Windows weergawe gebruik. Die bedryfstelsel gebruik hierdie sleutel om 'n aparte weergawe van HKEY_LOCAL_MACHINE\SOFTWARE vir 32-bis toepassings wat op 64-bis Windows weergawes loop, te vertoon.
 
 ### Loop
 
@@ -60,7 +56,7 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 - `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Install\Software\Microsoft\Windows\CurrentVersion\Runonce`
 - `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Install\Software\Microsoft\Windows\CurrentVersion\RunonceEx`
 
-Registrasie sleutels bekend as **Run** en **RunOnce** is ontwerp om programme outomaties uit te voer elke keer wanneer 'n gebruiker in die stelsel aanmeld. Die opdraglyn wat aan 'n sleutel se datavalue toegeken word, is beperk tot 260 karakters of minder.
+Registrasie sleutels bekend as **Run** en **RunOnce** is ontwerp om programme outomaties uit te voer elke keer wanneer 'n gebruiker in die stelsel aanmeld. Die opdraglyn wat as 'n sleutel se datavalue toegeken word, is beperk tot 260 karakters of minder.
 
 **Diens loop** (kan outomatiese opstart van dienste tydens opstart beheer):
 
@@ -78,7 +74,7 @@ Registrasie sleutels bekend as **Run** en **RunOnce** is ontwerp om programme ou
 - `HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnceEx`
 - `HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunOnceEx`
 
-Op Windows Vista en later weergawes, word die **Run** en **RunOnce** registrasie sleutels nie outomaties gegenereer nie. Invoere in hierdie sleutels kan of direkte programme begin of hulle as afhanklikhede spesifiseer. Byvoorbeeld, om 'n DLL-lêer by aanmelding te laai, kan 'n mens die **RunOnceEx** registrasie sleutel saam met 'n "Depend" sleutel gebruik. Dit word demonstreer deur 'n registrasie-invoer by te voeg om "C:\temp\evil.dll" tydens die stelsels opstart uit te voer:
+Op Windows Vista en later weergawes, word die **Run** en **RunOnce** registrasie sleutels nie outomaties gegenereer nie. Invoere in hierdie sleutels kan of direkte programme begin of hulle as afhanklikhede spesifiseer. Byvoorbeeld, om 'n DLL-lêer by aanmelding te laai, kan 'n mens die **RunOnceEx** registrasie sleutel saam met 'n "Depend" sleutel gebruik. Dit word demonstreer deur 'n registrasie-invoer by te voeg om "C:\temp\evil.dll" tydens die stelselaanloop uit te voer:
 ```
 reg add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnceEx\\0001\\Depend /v 1 /d "C:\\temp\\evil.dll"
 ```
@@ -149,10 +145,10 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Wow6432Node\Microsoft\Windows\Ru
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders`
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders`
 
-Kortpaaie wat in die **Startup**-map geplaas word, sal outomaties dienste of toepassings aktiveer om te begin tydens gebruikersaanmelding of stelselhervatting. Die ligging van die **Startup**-map is in die register gedefinieer vir beide die **Local Machine** en **Current User** skope. Dit beteken dat enige kortpad wat by hierdie gespesifiseerde **Startup**-liggings gevoeg word, sal verseker dat die gekoppelde diens of program begin na die aanmeld- of herlaai-proses, wat dit 'n eenvoudige metode maak om programme outomaties te skeduleer.
+Kortpaaie wat in die **Startup** gids geplaas word, sal outomaties dienste of toepassings aktiveer om te begin tydens gebruikersaanmelding of stelselhervatting. Die ligging van die **Startup** gids is in die register gedefinieer vir beide die **Local Machine** en **Current User** skope. Dit beteken enige kortpad wat by hierdie gespesifiseerde **Startup** plekke gevoeg word, sal verseker dat die gekoppelde diens of program begin na die aanmeld- of herlaai-proses, wat dit 'n eenvoudige metode maak om programme outomaties te skeduleer.
 
 > [!NOTE]
-> As jy enige \[User] Shell Folder onder **HKLM** kan oorskryf, sal jy in staat wees om dit na 'n gids wat deur jou beheer word, te wys en 'n backdoor te plaas wat uitgevoer sal word wanneer 'n gebruiker in die stelsel aanmeld, wat privaathede sal verhoog.
+> As jy enige \[User] Shell Folder onder **HKLM** kan oorskryf, sal jy in staat wees om dit na 'n gids wat deur jou beheer word, te wys en 'n backdoor te plaas wat uitgevoer sal word wanneer 'n gebruiker in die stelsel aanmeld, wat voorregte sal verhoog.
 ```bash
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" /v "Common Startup"
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" /v "Common Startup"
@@ -168,7 +164,7 @@ Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion
 
 `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon`
 
-Tipies is die **Userinit** sleutel op **userinit.exe** gestel. As hierdie sleutel egter gewysig word, sal die gespesifiseerde uitvoerbare lêer ook deur **Winlogon** begin word wanneer die gebruiker aanmeld. Op soortgelyke wyse is die **Shell** sleutel bedoel om na **explorer.exe** te verwys, wat die standaard skulp vir Windows is.
+Tipies is die **Userinit** sleutel op **userinit.exe** gestel. As hierdie sleutel egter gewysig word, sal die gespesifiseerde uitvoerbare lêer ook deur **Winlogon** begin word wanneer die gebruiker aanmeld. Op soortgelyke wyse is die **Shell** sleutel bedoel om na **explorer.exe** te verwys, wat die standaard dop vir Windows is.
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "Userinit"
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "Shell"
@@ -198,13 +194,13 @@ In die Windows Register onder `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot`, 
 
 Stappe om 'n opstartopsie te skep vir outomatiese begin in "Veilige Modus met Opdragprompt":
 
-1. Verander eienskappe van die `boot.ini` lêer om lees-slegs, stelsel, en verborge vlae te verwyder: `attrib c:\boot.ini -r -s -h`
+1. Verander eienskappe van die `boot.ini` lêer om lees-slegs, stelsels, en verborge vlae te verwyder: `attrib c:\boot.ini -r -s -h`
 2. Maak `boot.ini` oop vir redigering.
 3. Voeg 'n lyn in soos: `multi(0)disk(0)rdisk(0)partition(1)\WINDOWS="Microsoft Windows XP Professional" /fastdetect /SAFEBOOT:MINIMAL(ALTERNATESHELL)`
 4. Stoor veranderinge aan `boot.ini`.
-5. Herstel die oorspronklike lêereienskap: `attrib c:\boot.ini +r +s +h`
+5. Herstel die oorspronklike lêer eienskappe: `attrib c:\boot.ini +r +s +h`
 
-- **Exploit 1:** Die verandering van die **AlternateShell** register sleutel laat 'n pasgemaakte opdragskil opstelling toe, moontlik vir ongeoorloofde toegang.
+- **Exploit 1:** Die verandering van die **AlternateShell** register sleutel laat vir 'n pasgemaakte opdragskil opstelling toe, moontlik vir ongeoorloofde toegang.
 - **Exploit 2 (PATH Skryf Toestemmings):** Om skryftoestemmings te hê na enige deel van die stelsel **PATH** veranderlike, veral voor `C:\Windows\system32`, laat jou toe om 'n pasgemaakte `cmd.exe` uit te voer, wat 'n agterdeur kan wees as die stelsel in Veilige Modus begin.
 - **Exploit 3 (PATH en boot.ini Skryf Toestemmings):** Skryf toegang tot `boot.ini` stel outomatiese Veilige Modus opstart in staat, wat ongeoorloofde toegang op die volgende herbegin vergemaklik.
 
@@ -224,7 +220,7 @@ Active Setup word bestuur deur die volgende registriesleutels:
 - `HKCU\SOFTWARE\Microsoft\Active Setup\Installed Components`
 - `HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components`
 
-Binne hierdie sleutels bestaan verskeie subsleutels, elk wat ooreenstem met 'n spesifieke komponent. Sleutelwaardes van besondere belang sluit in:
+Binne hierdie sleutels bestaan verskeie subsleutels, elk wat ooreenstem met 'n spesifieke komponent. Sleutelwaardes van spesifieke belang sluit in:
 
 - **IsInstalled:**
 - `0` dui aan dat die komponent se opdrag nie sal uitvoer nie.
@@ -234,20 +230,20 @@ Binne hierdie sleutels bestaan verskeie subsleutels, elk wat ooreenstem met 'n s
 **Sekuriteitsinsigte:**
 
 - Om 'n sleutel te wysig of na 'n sleutel te skryf waar **`IsInstalled`** op `"1"` gestel is met 'n spesifieke **`StubPath`** kan lei tot ongeoorloofde opdraguitvoering, moontlik vir privilige-escalasie.
-- Om die binêre lêer wat in enige **`StubPath`** waarde verwys, te verander kan ook privilige-escalasie bereik, gegewe voldoende regte.
+- Om die binêre lêer wat in enige **`StubPath`** waarde verwys, te verander kan ook privilige-escalasie bereik, gegewe voldoende toestemmings.
 
-Om die **`StubPath`** konfigurasies oor Active Setup komponente te ondersoek, kan hierdie opdragte gebruik word:
+Om die **`StubPath`** konfigurasies oor Active Setup komponente te inspekteer, kan hierdie opdragte gebruik word:
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Active Setup\Installed Components" /s /v StubPath
 reg query "HKCU\SOFTWARE\Microsoft\Active Setup\Installed Components" /s /v StubPath
 reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components" /s /v StubPath
 reg query "HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components" /s /v StubPath
 ```
-### Blaaier Helper Objekte
+### Bladsy Helper Objekte
 
-### Oorsig van Blaaier Helper Objekte (BHOs)
+### Oorsig van Bladsy Helper Objekte (BHOs)
 
-Blaaier Helper Objekte (BHOs) is DLL-modules wat ekstra funksies by Microsoft se Internet Explorer voeg. Hulle laai in Internet Explorer en Windows Explorer by elke begin. Tog kan hul uitvoering geblokkeer word deur die **NoExplorer** sleutel op 1 te stel, wat voorkom dat hulle saam met Windows Explorer instansies laai.
+Bladsy Helper Objekte (BHOs) is DLL-modules wat ekstra funksies by Microsoft se Internet Explorer voeg. Hulle laai in Internet Explorer en Windows Explorer by elke begin. Tog kan hul uitvoering geblokkeer word deur die **NoExplorer** sleutel op 1 te stel, wat voorkom dat hulle saam met Windows Explorer instansies laai.
 
 BHOs is versoenbaar met Windows 10 via Internet Explorer 11, maar word nie ondersteun in Microsoft Edge, die standaardblaaier in nuwer weergawes van Windows nie.
 
@@ -312,10 +308,6 @@ autorunsc.exe -m -nobanner -a * -ct /accepteula
 - [https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
 - [https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell](https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell)
 
-<figure><img src="../../images/i3.png" alt=""><figcaption></figcaption></figure>
 
-**Bug bounty wenk**: **meld aan** by **Intigriti**, 'n premium **bug bounty platform geskep deur hackers, vir hackers**! Sluit vandag by ons aan by [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) en begin om bounties tot **$100,000** te verdien!
-
-{% embed url="https://go.intigriti.com/hacktricks" %}
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -2,70 +2,63 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Basiese Inligting
 
-A mount namespace is a Linux kernel feature that provides isolation of the file system mount points seen by a group of processes. Each mount namespace has its own set of file system mount points, and **changes to the mount points in one namespace do not affect other namespaces**. This means that processes running in different mount namespaces can have different views of the file system hierarchy.
+'n Mount namespace is 'n Linux-kernfunksie wat isolasie van die lêerstelsel se monteerpunte bied wat deur 'n groep prosesse gesien word. Elke mount namespace het sy eie stel lêerstelsel monteerpunte, en **veranderinge aan die monteerpunte in een namespace beïnvloed nie ander namespaces nie**. Dit beteken dat prosesse wat in verskillende mount namespaces loop, verskillende uitsigte van die lêerstelsel hiërargie kan hê.
 
-Mount namespaces are particularly useful in containerization, where each container should have its own file system and configuration, isolated from other containers and the host system.
+Mount namespaces is veral nuttig in containerisering, waar elke container sy eie lêerstelsel en konfigurasie moet hê, geïsoleer van ander containers en die gasheerstelsel.
 
-### How it works:
+### Hoe dit werk:
 
-1. When a new mount namespace is created, it is initialized with a **copy of the mount points from its parent namespace**. This means that, at creation, the new namespace shares the same view of the file system as its parent. However, any subsequent changes to the mount points within the namespace will not affect the parent or other namespaces.
-2. When a process modifies a mount point within its namespace, such as mounting or unmounting a file system, the **change is local to that namespace** and does not affect other namespaces. This allows each namespace to have its own independent file system hierarchy.
-3. Processes can move between namespaces using the `setns()` system call, or create new namespaces using the `unshare()` or `clone()` system calls with the `CLONE_NEWNS` flag. When a process moves to a new namespace or creates one, it will start using the mount points associated with that namespace.
-4. **File descriptors and inodes are shared across namespaces**, meaning that if a process in one namespace has an open file descriptor pointing to a file, it can **pass that file descriptor** to a process in another namespace, and **both processes will access the same file**. However, the file's path may not be the same in both namespaces due to differences in mount points.
+1. Wanneer 'n nuwe mount namespace geskep word, word dit geïnitialiseer met 'n **kopie van die monteerpunte van sy ouer namespace**. Dit beteken dat, by die skepping, die nuwe namespace dieselfde uitsig van die lêerstelsel as sy ouer deel. egter, enige daaropvolgende veranderinge aan die monteerpunte binne die namespace sal nie die ouer of ander namespaces beïnvloed nie.
+2. Wanneer 'n proses 'n monteerpunt binne sy namespace wysig, soos om 'n lêerstelsel te monteer of te demonteer, is die **verandering plaaslik tot daardie namespace** en beïnvloed nie ander namespaces nie. Dit laat elke namespace toe om sy eie onafhanklike lêerstelsel hiërargie te hê.
+3. Prosesse kan tussen namespaces beweeg met die `setns()` stelselskakel, of nuwe namespaces skep met die `unshare()` of `clone()` stelselskakels met die `CLONE_NEWNS` vlag. Wanneer 'n proses na 'n nuwe namespace beweeg of een skep, sal dit begin om die monteerpunte wat met daardie namespace geassosieer is, te gebruik.
+4. **Lêerdeskriptoren en inodes word oor namespaces gedeel**, wat beteken dat as 'n proses in een namespace 'n oop lêerdeskriptor het wat na 'n lêer wys, kan dit **daardie lêerdeskriptor** aan 'n proses in 'n ander namespace oorhandig, en **albei prosesse sal dieselfde lêer benader**. egter, die lêer se pad mag nie dieselfde wees in beide namespaces nie weens verskille in monteerpunte.
 
-## Lab:
+## Laboratorium:
 
-### Create different Namespaces
+### Skep verskillende Namespaces
 
 #### CLI
-
 ```bash
 sudo unshare -m [--mount-proc] /bin/bash
 ```
-
-By mounting a new instance of the `/proc` filesystem if you use the param `--mount-proc`, you ensure that the new mount namespace has an **accurate and isolated view of the process information specific to that namespace**.
+Deur 'n nuwe instansie van die `/proc` lêerstelsel te monteer as jy die parameter `--mount-proc` gebruik, verseker jy dat die nuwe monteernaamruimte 'n **akkurate en geïsoleerde siening van die prosesinligting spesifiek vir daardie naamruimte** het.
 
 <details>
 
-<summary>Error: bash: fork: Cannot allocate memory</summary>
+<summary>Fout: bash: fork: Kan nie geheue toewys nie</summary>
 
-When `unshare` is executed without the `-f` option, an error is encountered due to the way Linux handles new PID (Process ID) namespaces. The key details and the solution are outlined below:
+Wanneer `unshare` sonder die `-f` opsie uitgevoer word, word 'n fout ondervind weens die manier waarop Linux nuwe PID (Proses ID) naamruimtes hanteer. Die sleutelbesonderhede en die oplossing word hieronder uiteengesit:
 
-1. **Problem Explanation**:
+1. **Probleemverklaring**:
 
-   - The Linux kernel allows a process to create new namespaces using the `unshare` system call. However, the process that initiates the creation of a new PID namespace (referred to as the "unshare" process) does not enter the new namespace; only its child processes do.
-   - Running `%unshare -p /bin/bash%` starts `/bin/bash` in the same process as `unshare`. Consequently, `/bin/bash` and its child processes are in the original PID namespace.
-   - The first child process of `/bin/bash` in the new namespace becomes PID 1. When this process exits, it triggers the cleanup of the namespace if there are no other processes, as PID 1 has the special role of adopting orphan processes. The Linux kernel will then disable PID allocation in that namespace.
+- Die Linux-kern laat 'n proses toe om nuwe naamruimtes te skep met behulp van die `unshare` stelselaanroep. Die proses wat die skepping van 'n nuwe PID naamruimte inisieer (genoem die "unshare" proses) gaan egter nie in die nuwe naamruimte in nie; slegs sy kindproses gaan.
+- Die uitvoering van `%unshare -p /bin/bash%` begin `/bin/bash` in dieselfde proses as `unshare`. Gevolglik is `/bin/bash` en sy kindproses in die oorspronklike PID naamruimte.
+- Die eerste kindproses van `/bin/bash` in die nuwe naamruimte word PID 1. Wanneer hierdie proses verlaat, veroorsaak dit die opruiming van die naamruimte as daar geen ander prosesse is nie, aangesien PID 1 die spesiale rol het om weeskindprosesse aan te neem. Die Linux-kern sal dan PID-toewysing in daardie naamruimte deaktiveer.
 
-2. **Consequence**:
+2. **Gevolg**:
 
-   - The exit of PID 1 in a new namespace leads to the cleaning of the `PIDNS_HASH_ADDING` flag. This results in the `alloc_pid` function failing to allocate a new PID when creating a new process, producing the "Cannot allocate memory" error.
+- Die uitgang van PID 1 in 'n nuwe naamruimte lei tot die opruiming van die `PIDNS_HASH_ADDING` vlag. Dit lei tot die `alloc_pid` funksie wat misluk om 'n nuwe PID toe te wys wanneer 'n nuwe proses geskep word, wat die "Kan nie geheue toewys nie" fout veroorsaak.
 
-3. **Solution**:
-   - The issue can be resolved by using the `-f` option with `unshare`. This option makes `unshare` fork a new process after creating the new PID namespace.
-   - Executing `%unshare -fp /bin/bash%` ensures that the `unshare` command itself becomes PID 1 in the new namespace. `/bin/bash` and its child processes are then safely contained within this new namespace, preventing the premature exit of PID 1 and allowing normal PID allocation.
+3. **Oplossing**:
+- Die probleem kan opgelos word deur die `-f` opsie saam met `unshare` te gebruik. Hierdie opsie maak dat `unshare` 'n nuwe proses fork nadat die nuwe PID naamruimte geskep is.
+- Die uitvoering van `%unshare -fp /bin/bash%` verseker dat die `unshare` opdrag self PID 1 in die nuwe naamruimte word. `/bin/bash` en sy kindproses is dan veilig binne hierdie nuwe naamruimte, wat die voortydige uitgang van PID 1 voorkom en normale PID-toewysing toelaat.
 
-By ensuring that `unshare` runs with the `-f` flag, the new PID namespace is correctly maintained, allowing `/bin/bash` and its sub-processes to operate without encountering the memory allocation error.
+Deur te verseker dat `unshare` met die `-f` vlag loop, word die nuwe PID naamruimte korrek gehandhaaf, wat toelaat dat `/bin/bash` en sy sub-prosesse kan werk sonder om die geheue toewysing fout te ondervind.
 
 </details>
 
 #### Docker
-
 ```bash
 docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 ```
-
-### &#x20;Check which namespace is your process in
-
+### &#x20;Kontroleer in watter naamruimte jou proses is
 ```bash
 ls -l /proc/self/ns/mnt
 lrwxrwxrwx 1 root root 0 Apr  4 20:30 /proc/self/ns/mnt -> 'mnt:[4026531841]'
 ```
-
-### Find all Mount namespaces
-
+### Vind alle Mount namespaces
 ```bash
 sudo find /proc -maxdepth 3 -type l -name mnt -exec readlink {} \; 2>/dev/null | sort -u
 # Find the processes with an specific namespace
@@ -75,19 +68,15 @@ sudo find /proc -maxdepth 3 -type l -name mnt -exec ls -l  {} \; 2>/dev/null | g
 ```bash
 findmnt
 ```
-
-### Enter inside a Mount namespace
-
+### Gaan binne 'n Mount namespace in
 ```bash
 nsenter -m TARGET_PID --pid /bin/bash
 ```
+Ook, jy kan slegs **in 'n ander prosesnaamruimte ingaan as jy root is**. En jy **kan nie** **ingaan** in 'n ander naamruimte **sonder 'n beskrywer** wat daarna verwys nie (soos `/proc/self/ns/mnt`).
 
-Also, you can only **enter in another process namespace if you are root**. And you **cannot** **enter** in other namespace **without a descriptor** pointing to it (like `/proc/self/ns/mnt`).
+Omdat nuwe monte slegs binne die naamruimte toeganklik is, is dit moontlik dat 'n naamruimte sensitiewe inligting bevat wat slegs daaruit toeganklik is.
 
-Because new mounts are only accessible within the namespace it's possible that a namespace contains sensitive information that can only be accessible from it.
-
-### Mount something
-
+### Monteer iets
 ```bash
 # Generate new mount ns
 unshare -m /bin/bash
@@ -127,8 +116,7 @@ systemd-private-3d87c249e8a84451994ad692609cd4b6-systemd-timesyncd.service-FAnDq
 vmware-root_662-2689143848
 
 ```
-
-## References
+## Verwysings
 
 - [https://stackoverflow.com/questions/44666700/unshare-pid-bin-bash-fork-cannot-allocate-memory](https://stackoverflow.com/questions/44666700/unshare-pid-bin-bash-fork-cannot-allocate-memory)
 - [https://unix.stackexchange.com/questions/464033/understanding-how-mount-namespaces-work-in-linux](https://unix.stackexchange.com/questions/464033/understanding-how-mount-namespaces-work-in-linux)

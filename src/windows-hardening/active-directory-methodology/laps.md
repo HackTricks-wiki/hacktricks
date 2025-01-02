@@ -2,15 +2,12 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 ## Basiese Inligting
 
-Local Administrator Password Solution (LAPS) is 'n hulpmiddel wat gebruik word om 'n stelsel te bestuur waar **administrateur wagwoorde**, wat **uniek, ewekansig, en gereeld verander** word, toegepas word op domein-verbonden rekenaars. Hierdie wagwoorde word veilig binne Active Directory gestoor en is slegs toeganklik vir gebruikers wat toestemming ontvang het deur middel van Access Control Lists (ACLs). Die sekuriteit van die wagwoord oordragte van die kliënt na die bediener word verseker deur die gebruik van **Kerberos weergawe 5** en **Advanced Encryption Standard (AES)**.
+Local Administrator Password Solution (LAPS) is 'n hulpmiddel wat gebruik word om 'n stelsel te bestuur waar **administrateur wagwoorde**, wat **uniek, ewekansig, en gereeld verander** word, toegepas word op domein-verbonden rekenaars. Hierdie wagwoorde word veilig binne Active Directory gestoor en is slegs toeganklik vir gebruikers wat toestemming ontvang het deur middel van Toegangsbeheerlijste (ACLs). Die sekuriteit van die wagwoord oordragte van die kliënt na die bediener word verseker deur die gebruik van **Kerberos weergawe 5** en **Advanced Encryption Standard (AES)**.
 
-In die domein se rekenaarobjekte, lei die implementering van LAPS tot die toevoeging van twee nuwe eienskappe: **`ms-mcs-AdmPwd`** en **`ms-mcs-AdmPwdExpirationTime`**. Hierdie eienskappe stoor die **plank teks administrateur wagwoord** en **sy vervaldatum**, onderskeidelik.
+In die domein se rekenaarobjekte, lei die implementering van LAPS tot die toevoeging van twee nuwe eienskappe: **`ms-mcs-AdmPwd`** en **`ms-mcs-AdmPwdExpirationTime`**. Hierdie eienskappe stoor die **planktekst administrateur wagwoord** en **sy vervaldatum**, onderskeidelik.
 
 ### Kontroleer of geaktiveer
 ```bash
@@ -61,7 +58,7 @@ Get-DomainObject -Identity wkstn-2 -Properties ms-Mcs-AdmPwd
 ### LAPSToolkit
 
 Die [LAPSToolkit](https://github.com/leoloobeek/LAPSToolkit) fasiliteer die enumerasie van LAPS met verskeie funksies.\
-Een is om **`ExtendedRights`** te parse vir **alle rekenaars met LAPS geaktiveer.** Dit sal **groepe** spesifiek **gedelegeer om LAPS wagwoorde te lees**, wat dikwels gebruikers in beskermde groepe is.\
+Een is om **`ExtendedRights`** te parse vir **alle rekenaars met LAPS geaktiveer.** Dit sal **groepe** spesifiek **toegewy aan die lees van LAPS wagwoorde** toon, wat dikwels gebruikers in beskermde groepe is.\
 'n **rekening** wat **'n rekenaar** aan 'n domein aangesluit het, ontvang `All Extended Rights` oor daardie gasheer, en hierdie reg gee die **rekening** die vermoë om **wagwoorde te lees**. Enumerasie kan 'n gebruikersrekening toon wat die LAPS wagwoord op 'n gasheer kan lees. Dit kan ons help om **spesifieke AD gebruikers** te teiken wat LAPS wagwoorde kan lees.
 ```powershell
 # Get groups that can read passwords
@@ -88,11 +85,11 @@ DC01.DOMAIN_NAME.LOCAL      j&gR+A(s976Rf% 12/10/2022 13:24:41
 ```
 ## **Dumping LAPS Passwords With Crackmapexec**
 
-As daar geen toegang tot 'n powershell is nie, kan jy hierdie voorreg op afstand misbruik deur LDAP deur gebruik te maak van
+As daar geen toegang tot 'n powershell is nie, kan jy hierdie voorreg op afstand misbruik deur LDAP deur te gebruik
 ```
 crackmapexec ldap 10.10.10.10 -u user -p password --kdcHost 10.10.10.10 -M laps
 ```
-Dit sal al die wagwoorde dump wat die gebruiker kan lees, wat jou toelaat om 'n beter voet aan die grond te kry met 'n ander gebruiker.
+Dit sal al die wagwoorde wat die gebruiker kan lees, dump, wat jou toelaat om 'n beter voet aan die grond te kry met 'n ander gebruiker.
 
 ## ** Gebruik LAPS Wagwoord **
 ```
@@ -118,18 +115,15 @@ Set-DomainObject -Identity wkstn-2 -Set @{"ms-mcs-admpwdexpirationtime"="2326099
 > [!WARNING]
 > Die wagwoord sal steeds teruggestel word as 'n **admin** die **`Reset-AdmPwdPassword`** cmdlet gebruik; of as **Moet nie wagwoordvervaltyd langer as wat deur beleid vereis word toelaat nie** geaktiveer is in die LAPS GPO.
 
-### Agterdeur
+### Backdoor
 
-Die oorspronklike bronkode vir LAPS kan [hier gevind word](https://github.com/GreyCorbel/admpwd), daarom is dit moontlik om 'n agterdeur in die kode te plaas (binne die `Get-AdmPwdPassword` metode in `Main/AdmPwd.PS/Main.cs` byvoorbeeld) wat op een of ander manier **nuwe wagwoorde sal uitbring of dit êrens sal stoor**.
+Die oorspronklike bronkode vir LAPS kan [hier](https://github.com/GreyCorbel/admpwd) gevind word, daarom is dit moontlik om 'n backdoor in die kode te plaas (binne die `Get-AdmPwdPassword` metode in `Main/AdmPwd.PS/Main.cs` byvoorbeeld) wat op een of ander manier **nuwe wagwoorde sal uitbring of dit êrens sal stoor**.
 
 Dan, compileer net die nuwe `AdmPwd.PS.dll` en laai dit op na die masjien in `C:\Tools\admpwd\Main\AdmPwd.PS\bin\Debug\AdmPwd.PS.dll` (en verander die wysigingstyd).
 
-## Verwysings
+## References
 
 - [https://4sysops.com/archives/introduction-to-microsoft-laps-local-administrator-password-solution/](https://4sysops.com/archives/introduction-to-microsoft-laps-local-administrator-password-solution/)
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

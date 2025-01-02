@@ -1,19 +1,18 @@
-# macOS Network Services & Protocols
+# macOS Netwerkdienste & Protokolle
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Remote Access Services
+## Afgeleë Toegang Dienste
 
-These are the common macOS services to access them remotely.\
-You can enable/disable these services in `System Settings` --> `Sharing`
+Dit is die algemene macOS dienste om hulle afgeleë te benader.\
+Jy kan hierdie dienste in `Stelselsinstellings` --> `Deel`
 
-- **VNC**, known as “Screen Sharing” (tcp:5900)
-- **SSH**, called “Remote Login” (tcp:22)
-- **Apple Remote Desktop** (ARD), or “Remote Management” (tcp:3283, tcp:5900)
-- **AppleEvent**, known as “Remote Apple Event” (tcp:3031)
+- **VNC**, bekend as “Skermdeling” (tcp:5900)
+- **SSH**, genoem “Afgeleë Aanmelding” (tcp:22)
+- **Apple Remote Desktop** (ARD), of “Afgeleë Bestuur” (tcp:3283, tcp:5900)
+- **AppleEvent**, bekend as “Afgeleë Apple Gebeurtenis” (tcp:3031)
 
-Check if any is enabled running:
-
+Kontroleer of enige geaktiveer is deur te loop:
 ```bash
 rmMgmt=$(netstat -na | grep LISTEN | grep tcp46 | grep "*.3283" | wc -l);
 scrShrng=$(netstat -na | grep LISTEN | egrep 'tcp4|tcp6' | grep "*.5900" | wc -l);
@@ -23,105 +22,92 @@ rAE=$(netstat -na | grep LISTEN | egrep 'tcp4|tcp6' | grep "*.3031" | wc -l);
 bmM=$(netstat -na | grep LISTEN | egrep 'tcp4|tcp6' | grep "*.4488" | wc -l);
 printf "\nThe following services are OFF if '0', or ON otherwise:\nScreen Sharing: %s\nFile Sharing: %s\nRemote Login: %s\nRemote Mgmt: %s\nRemote Apple Events: %s\nBack to My Mac: %s\n\n" "$scrShrng" "$flShrng" "$rLgn" "$rmMgmt" "$rAE" "$bmM";
 ```
-
 ### Pentesting ARD
 
-Apple Remote Desktop (ARD) is an enhanced version of [Virtual Network Computing (VNC)](https://en.wikipedia.org/wiki/Virtual_Network_Computing) tailored for macOS, offering additional features. A notable vulnerability in ARD is its authentication method for the control screen password, which only uses the first 8 characters of the password, making it prone to [brute force attacks](https://thudinh.blogspot.com/2017/09/brute-forcing-passwords-with-thc-hydra.html) with tools like Hydra or [GoRedShell](https://github.com/ahhh/GoRedShell/), as there are no default rate limits.
+Apple Remote Desktop (ARD) is 'n verbeterde weergawe van [Virtual Network Computing (VNC)](https://en.wikipedia.org/wiki/Virtual_Network_Computing) wat vir macOS aangepas is, en bied addisionele funksies. 'n Opmerkelijke kwesbaarheid in ARD is sy outentikasie metode vir die kontrole skerm wagwoord, wat slegs die eerste 8 karakters van die wagwoord gebruik, wat dit geneig maak tot [brute force attacks](https://thudinh.blogspot.com/2017/09/brute-forcing-passwords-with-thc-hydra.html) met gereedskap soos Hydra of [GoRedShell](https://github.com/ahhh/GoRedShell/), aangesien daar geen standaard koersbeperkings is nie.
 
-Vulnerable instances can be identified using **nmap**'s `vnc-info` script. Services supporting `VNC Authentication (2)` are especially susceptible to brute force attacks due to the 8-character password truncation.
+Kwetsbare instansies kan geïdentifiseer word met **nmap**'s `vnc-info` skrip. Dienste wat `VNC Authentication (2)` ondersteun, is veral kwesbaar vir brute force-aanvalle weens die 8-karakter wagwoord afkorting.
 
-To enable ARD for various administrative tasks like privilege escalation, GUI access, or user monitoring, use the following command:
-
+Om ARD in te skakel vir verskeie administratiewe take soos privilige eskalasie, GUI-toegang, of gebruikersmonitering, gebruik die volgende opdrag:
 ```bash
 sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -allowAccessFor -allUsers -privs -all -clientopts -setmenuextra -menuextra yes
 ```
+ARD bied veelsydige kontrole vlakke, insluitend waaksaamheid, gedeelde beheer, en volle beheer, met sessies wat voortduur selfs na gebruikerswagwoord veranderinge. Dit stel die stuur van Unix-opdragte direk moontlik, wat as root uitgevoer word vir administratiewe gebruikers. Taakbeplanning en Remote Spotlight soektog is noemenswaardige kenmerke, wat afgeleë, lae-impak soektogte na sensitiewe lêers oor verskeie masjiene fasiliteer.
 
-ARD provides versatile control levels, including observation, shared control, and full control, with sessions persisting even after user password changes. It allows sending Unix commands directly, executing them as root for administrative users. Task scheduling and Remote Spotlight search are notable features, facilitating remote, low-impact searches for sensitive files across multiple machines.
+## Bonjour Protokol
 
-## Bonjour Protocol
+Bonjour, 'n Apple-ontwerpte tegnologie, stel **toestelle op dieselfde netwerk in staat om mekaar se aangebied dienste te ontdek**. Ook bekend as Rendezvous, **Zero Configuration**, of Zeroconf, stel dit 'n toestel in staat om by 'n TCP/IP-netwerk aan te sluit, **automaties 'n IP-adres te kies**, en sy dienste aan ander netwerktoestelle te broadcast.
 
-Bonjour, an Apple-designed technology, allows **devices on the same network to detect each other's offered services**. Known also as Rendezvous, **Zero Configuration**, or Zeroconf, it enables a device to join a TCP/IP network, **automatically choose an IP address**, and broadcast its services to other network devices.
+Zero Configuration Networking, wat deur Bonjour verskaf word, verseker dat toestelle kan:
 
-Zero Configuration Networking, provided by Bonjour, ensures that devices can:
+- **Automaties 'n IP-adres verkry** selfs in die afwesigheid van 'n DHCP-bediener.
+- **Naam-naar-adres vertaling** uitvoer sonder om 'n DNS-bediener te vereis.
+- **Dienste** beskikbaar op die netwerk ontdek.
 
-- **Automatically obtain an IP Address** even in the absence of a DHCP server.
-- Perform **name-to-address translation** without requiring a DNS server.
-- **Discover services** available on the network.
+Toestelle wat Bonjour gebruik, sal vir hulleself 'n **IP-adres uit die 169.254/16 reeks toewys** en die uniekheid daarvan op die netwerk verifieer. Macs hou 'n routeringstabelinvoer vir hierdie subnet, wat verifieer kan word via `netstat -rn | grep 169`.
 
-Devices using Bonjour will assign themselves an **IP address from the 169.254/16 range** and verify its uniqueness on the network. Macs maintain a routing table entry for this subnet, verifiable via `netstat -rn | grep 169`.
+Vir DNS gebruik Bonjour die **Multicast DNS (mDNS) protokol**. mDNS werk oor **poort 5353/UDP**, wat **standaard DNS-vrae** gebruik maar teiken die **multicast adres 224.0.0.251**. Hierdie benadering verseker dat alle luisterende toestelle op die netwerk die vrae kan ontvang en daarop kan reageer, wat die opdatering van hul rekords fasiliteer.
 
-For DNS, Bonjour utilizes the **Multicast DNS (mDNS) protocol**. mDNS operates over **port 5353/UDP**, employing **standard DNS queries** but targeting the **multicast address 224.0.0.251**. This approach ensures that all listening devices on the network can receive and respond to the queries, facilitating the update of their records.
+By die aansluiting by die netwerk, kies elke toestel self 'n naam, wat tipies eindig op **.local**, wat afgelei kan wees van die gasheernaam of ewekansig gegenereer kan word.
 
-Upon joining the network, each device self-selects a name, typically ending in **.local**, which may be derived from the hostname or randomly generated.
+Dienste ontdekking binne die netwerk word gefasiliteer deur **DNS Service Discovery (DNS-SD)**. Deur die formaat van DNS SRV rekords te benut, gebruik DNS-SD **DNS PTR rekords** om die lys van verskeie dienste moontlik te maak. 'n Kliënt wat 'n spesifieke diens soek, sal 'n PTR rekord vir `<Service>.<Domain>` aan vra, en in ruil 'n lys van PTR rekords ontvang wat geformateer is as `<Instance>.<Service>.<Domain>` indien die diens beskikbaar is vanaf verskeie gasheers.
 
-Service discovery within the network is facilitated by **DNS Service Discovery (DNS-SD)**. Leveraging the format of DNS SRV records, DNS-SD uses **DNS PTR records** to enable the listing of multiple services. A client seeking a specific service will request a PTR record for `<Service>.<Domain>`, receiving in return a list of PTR records formatted as `<Instance>.<Service>.<Domain>` if the service is available from multiple hosts.
+Die `dns-sd` nut kan gebruik word vir **die ontdekking en advertering van netwerkdienste**. Hier is 'n paar voorbeelde van sy gebruik:
 
-The `dns-sd` utility can be employed for **discovering and advertising network services**. Here are some examples of its usage:
+### Soek na SSH Dienste
 
-### Searching for SSH Services
-
-To search for SSH services on the network, the following command is used:
-
+Om na SSH dienste op die netwerk te soek, word die volgende opdrag gebruik:
 ```bash
 dns-sd -B _ssh._tcp
 ```
+Hierdie opdrag begin om te soek na \_ssh.\_tcp dienste en gee besonderhede soos tydstempel, vlae, koppelvlak, domein, dienste tipe, en instansie naam.
 
-This command initiates browsing for \_ssh.\_tcp services and outputs details such as timestamp, flags, interface, domain, service type, and instance name.
+### Advertering van 'n HTTP Diens
 
-### Advertising an HTTP Service
-
-To advertise an HTTP service, you can use:
-
+Om 'n HTTP diens te adverteer, kan jy gebruik maak van:
 ```bash
 dns-sd -R "Index" _http._tcp . 80 path=/index.html
 ```
+Hierdie opdrag registreer 'n HTTP-diens genaamd "Index" op poort 80 met 'n pad van `/index.html`.
 
-This command registers an HTTP service named "Index" on port 80 with a path of `/index.html`.
-
-To then search for HTTP services on the network:
-
+Om dan vir HTTP-dienste op die netwerk te soek:
 ```bash
 dns-sd -B _http._tcp
 ```
+Wanneer 'n diens begin, kondig dit sy beskikbaarheid aan alle toestelle op die subnet aan deur sy teenwoordigheid te multicast. Toestelle wat in hierdie dienste belangstel, hoef nie versoeke te stuur nie, maar luister eenvoudig na hierdie aankondigings.
 
-When a service starts, it announces its availability to all devices on the subnet by multicasting its presence. Devices interested in these services don't need to send requests but simply listen for these announcements.
+Vir 'n meer gebruikersvriendelike koppelvlak kan die **Discovery - DNS-SD Browser** app beskikbaar op die Apple App Store die dienste wat op jou plaaslike netwerk aangebied word, visualiseer.
 
-For a more user-friendly interface, the **Discovery - DNS-SD Browser** app available on the Apple App Store can visualize the services offered on your local network.
-
-Alternatively, custom scripts can be written to browse and discover services using the `python-zeroconf` library. The [**python-zeroconf**](https://github.com/jstasiak/python-zeroconf) script demonstrates creating a service browser for `_http._tcp.local.` services, printing added or removed services:
-
+Alternatiewelik kan pasgemaakte skripte geskryf word om dienste te blaai en te ontdek met behulp van die `python-zeroconf` biblioteek. Die [**python-zeroconf**](https://github.com/jstasiak/python-zeroconf) skrip demonstreer die skep van 'n diensblaaier vir `_http._tcp.local.` dienste, wat bygevoegde of verwyderde dienste druk:
 ```python
 from zeroconf import ServiceBrowser, Zeroconf
 
 class MyListener:
 
-    def remove_service(self, zeroconf, type, name):
-        print("Service %s removed" % (name,))
+def remove_service(self, zeroconf, type, name):
+print("Service %s removed" % (name,))
 
-    def add_service(self, zeroconf, type, name):
-        info = zeroconf.get_service_info(type, name)
-        print("Service %s added, service info: %s" % (name, info))
+def add_service(self, zeroconf, type, name):
+info = zeroconf.get_service_info(type, name)
+print("Service %s added, service info: %s" % (name, info))
 
 zeroconf = Zeroconf()
 listener = MyListener()
 browser = ServiceBrowser(zeroconf, "_http._tcp.local.", listener)
 try:
-    input("Press enter to exit...\n\n")
+input("Press enter to exit...\n\n")
 finally:
-    zeroconf.close()
+zeroconf.close()
 ```
+### Deaktiveer Bonjour
 
-### Disabling Bonjour
-
-If there are concerns about security or other reasons to disable Bonjour, it can be turned off using the following command:
-
+As daar bekommernisse oor sekuriteit is of ander redes om Bonjour te deaktiveer, kan dit met die volgende opdrag afgeskakel word:
 ```bash
 sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.mDNSResponder.plist
 ```
+## Verwysings
 
-## References
-
-- [**The Mac Hacker's Handbook**](https://www.amazon.com/-/es/Charlie-Miller-ebook-dp-B004U7MUMU/dp/B004U7MUMU/ref=mt_other?_encoding=UTF8&me=&qid=)
+- [**Die Mac Hacker se Handboek**](https://www.amazon.com/-/es/Charlie-Miller-ebook-dp-B004U7MUMU/dp/B004U7MUMU/ref=mt_other?_encoding=UTF8&me=&qid=)
 - [**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)
 - [**https://lockboxx.blogspot.com/2019/07/macos-red-teaming-206-ard-apple-remote.html**](https://lockboxx.blogspot.com/2019/07/macos-red-teaming-206-ard-apple-remote.html)
 

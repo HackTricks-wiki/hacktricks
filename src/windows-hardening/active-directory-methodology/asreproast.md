@@ -2,30 +2,15 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/image (3).png" alt=""><figcaption></figcaption></figure>
-
-Sluit aan by [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) bediener om met ervare hackers en bug bounty jagters te kommunikeer!
-
-**Hacking Inligting**\
-Betrek met inhoud wat die opwinding en uitdagings van hacking ondersoek
-
-**Regstyds Hack Nuus**\
-Bly op hoogte van die vinnig bewegende hacking wêreld deur regstydse nuus en insigte
-
-**Laaste Aankondigings**\
-Bly ingelig oor die nuutste bug bounties wat bekendgestel word en belangrike platform opdaterings
-
-**Sluit by ons aan op** [**Discord**](https://discord.com/invite/N3FrSbmwdy) en begin vandag saamwerk met top hackers!
-
 ## ASREPRoast
 
-ASREPRoast is 'n sekuriteitsaanval wat gebruikers teiken wat die **Kerberos voor-sertifisering vereiste attribuut** ontbreek. Essensieel laat hierdie kwesbaarheid aanvallers toe om sertifisering vir 'n gebruiker van die Domeinbeheerder (DC) aan te vra sonder om die gebruiker se wagwoord te benodig. Die DC antwoord dan met 'n boodskap wat versleuteld is met die gebruiker se wagwoord-afgeleide sleutel, wat aanvallers kan probeer om offline te kraak om die gebruiker se wagwoord te ontdek.
+ASREPRoast is 'n sekuriteitsaanval wat gebruikers teiken wat die **Kerberos pre-authentication vereiste attribuut** ontbreek. Essensieel stel hierdie kwesbaarheid aanvallers in staat om 'n versoek vir verifikasie vir 'n gebruiker van die Domeinbeheerder (DC) te doen sonder om die gebruiker se wagwoord te benodig. Die DC antwoord dan met 'n boodskap wat geënkripteer is met die gebruiker se wagwoord-afgeleide sleutel, wat aanvallers kan probeer om offline te kraak om die gebruiker se wagwoord te ontdek.
 
 Die hoofvereistes vir hierdie aanval is:
 
-- **Ontbreking van Kerberos voor-sertifisering**: Teiken gebruikers moet nie hierdie sekuriteitskenmerk geaktiveer hê nie.
-- **Verbinding met die Domeinbeheerder (DC)**: Aanvallers het toegang tot die DC nodig om versoeke te stuur en versleutelde boodskappe te ontvang.
-- **Opsionele domeinrekening**: Om 'n domeinrekening te hê, stel aanvallers in staat om kwesbare gebruikers meer doeltreffend te identifiseer deur LDAP-navrae. Sonder so 'n rekening moet aanvallers gebruikersname raai.
+- **Ontbreking van Kerberos pre-authentication**: Teiken gebruikers moet nie hierdie sekuriteitskenmerk geaktiveer hê nie.
+- **Verbinding met die Domeinbeheerder (DC)**: Aanvallers het toegang tot die DC nodig om versoeke te stuur en geënkripteerde boodskappe te ontvang.
+- **Opsionele domeinrekening**: Om 'n domeinrekening te hê, stel aanvallers in staat om kwesbare gebruikers meer doeltreffend te identifiseer deur middel van LDAP-navrae. Sonder so 'n rekening moet aanvallers gebruikersname raai.
 
 #### Enumerating vulnerable users (need domain credentials)
 ```bash:Using Windows
@@ -84,20 +69,5 @@ ASRepCatcher listen
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/as-rep-roasting-using-rubeus-and-hashcat](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/as-rep-roasting-using-rubeus-and-hashcat)
 
 ---
-
-<figure><img src="../../images/image (3).png" alt=""><figcaption></figcaption></figure>
-
-Sluit aan by [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) bediener om met ervare hackers en bug bounty jagters te kommunikeer!
-
-**Hacking Inligting**\
-Betrek met inhoud wat die opwinding en uitdagings van hacking ondersoek
-
-**Regte-Tyd Hack Nuus**\
-Bly op hoogte van die vinnig bewegende hacking wêreld deur middel van regte-tyd nuus en insigte
-
-**Laaste Aankondigings**\
-Bly ingelig oor die nuutste bug bounties wat bekendgestel word en belangrike platform opdaterings
-
-**Sluit by ons aan op** [**Discord**](https://discord.com/invite/N3FrSbmwdy) en begin vandag saamwerk met top hackers!
 
 {{#include ../../banners/hacktricks-training.md}}

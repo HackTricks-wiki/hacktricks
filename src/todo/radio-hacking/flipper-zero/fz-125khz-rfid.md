@@ -2,9 +2,6 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 ## Intro
 
@@ -23,11 +20,11 @@ Vir meer inligting oor hierdie tipes etikette [**lees hierdie inleiding**](../pe
 Probeer om die **kaartinligting** te **lees**. Dan kan dit **emuleer** word.
 
 > [!WARNING]
-> Let daarop dat sommige interkoms probeer om hulself te beskerm teen sleutelduplisering deur 'n skryfopdrag te stuur voordat hulle lees. As die skryf suksesvol is, word daardie etiket as vals beskou. Wanneer Flipper RFID emuleer, is daar geen manier vir die leser om dit van die oorspronklike te onderskei nie, so sulke probleme ontstaan nie.
+> Let daarop dat sommige interkoms probeer om hulself te beskerm teen sleutelduplisering deur 'n skryfopdrag te stuur voordat hulle lees. As die skryf slaag, word daardie etiket as vals beskou. Wanneer Flipper RFID emuleer, is daar geen manier vir die leser om dit van die oorspronklike te onderskei nie, so sulke probleme ontstaan nie.
 
 ### Add Manually
 
-Jy kan **valse kaarte in Flipper Zero skep wat die data** aandui wat jy handmatig invoer en dit dan emuleer.
+Jy kan **vals kaarte in Flipper Zero skep wat die data** aandui wat jy handmatig invoer en dit dan emuleer.
 
 #### IDs on cards
 
@@ -42,20 +39,17 @@ Die ander 2 kan brute-forced word as jy dit nie van die kaart kan lees nie.
 
 - **HID**
 
-Dieselfde gebeur in hierdie HID-kaart waar slegs 2 van die 3 bytes op die kaart gedruk kan word.
+Dieselfde gebeur in hierdie HID kaart waar slegs 2 van 3 bytes op die kaart gedruk kan word.
 
 <figure><img src="../../../images/image (1014).png" alt=""><figcaption></figcaption></figure>
 
 ### Emulate/Write
 
-Na **kopieer** van 'n kaart of **invoer** van die ID **handmatig** is dit moontlik om dit met Flipper Zero te **emuleer** of dit in 'n werklike kaart te **skryf**.
+Na **kopieer** van 'n kaart of **invoer** van die ID **handmatig** is dit moontlik om dit met Flipper Zero te **emuleer** of dit op 'n werklike kaart te **skryf**.
 
 ## References
 
 - [https://blog.flipperzero.one/rfid/](https://blog.flipperzero.one/rfid/)
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../../../banners/hacktricks-training.md}}

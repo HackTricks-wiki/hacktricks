@@ -1,33 +1,18 @@
-# macOS Security & Privilege Escalation
+# macOS Sekuriteit & Privilege Escalering
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/image (3).png" alt=""><figcaption></figcaption></figure>
+## Basiese MacOS
 
-Join [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server to communicate with experienced hackers and bug bounty hunters!
+As jy nie bekend is met macOS nie, moet jy begin om die basiese beginsels van macOS te leer:
 
-**Hacking Insights**\
-Engage with content that delves into the thrill and challenges of hacking
-
-**Real-Time Hack News**\
-Keep up-to-date with fast-paced hacking world through real-time news and insights
-
-**Latest Announcements**\
-Stay informed with the newest bug bounties launching and crucial platform updates
-
-**Join us on** [**Discord**](https://discord.com/invite/N3FrSbmwdy) and start collaborating with top hackers today!
-
-## Basic MacOS
-
-If you are not familiar with macOS, you should start learning the basics of macOS:
-
-- Special macOS **files & permissions:**
+- Spesiale macOS **lêers & toestemmings:**
 
 {{#ref}}
 macos-files-folders-and-binaries/
 {{#endref}}
 
-- Common macOS **users**
+- Algemene macOS **gebruikers**
 
 {{#ref}}
 macos-users.md
@@ -39,112 +24,97 @@ macos-users.md
 macos-applefs.md
 {{#endref}}
 
-- The **architecture** of the k**ernel**
+- Die **argitektuur** van die k**ernel**
 
 {{#ref}}
 mac-os-architecture/
 {{#endref}}
 
-- Common macOS n**etwork services & protocols**
+- Algemene macOS n**etwerkdienste & protokolle**
 
 {{#ref}}
 macos-protocols.md
 {{#endref}}
 
 - **Opensource** macOS: [https://opensource.apple.com/](https://opensource.apple.com/)
-  - To download a `tar.gz` change a URL such as [https://opensource.apple.com/**source**/dyld/](https://opensource.apple.com/source/dyld/) to [https://opensource.apple.com/**tarballs**/dyld/**dyld-852.2.tar.gz**](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz)
+- Om 'n `tar.gz` af te laai, verander 'n URL soos [https://opensource.apple.com/**source**/dyld/](https://opensource.apple.com/source/dyld/) na [https://opensource.apple.com/**tarballs**/dyld/**dyld-852.2.tar.gz**](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz)
 
 ### MacOS MDM
 
-In companies **macOS** systems are highly probably going to be **managed with a MDM**. Therefore, from the perspective of an attacker is interesting to know **how that works**:
+In maatskappye **macOS** stelsels gaan hoogs waarskynlik **bestuur word met 'n MDM**. Daarom is dit vanuit die perspektief van 'n aanvaller interessant om te weet **hoe dit werk**:
 
 {{#ref}}
 ../macos-red-teaming/macos-mdm/
 {{#endref}}
 
-### MacOS - Inspecting, Debugging and Fuzzing
+### MacOS - Inspekteer, Debugeer en Fuzz
 
 {{#ref}}
 macos-apps-inspecting-debugging-and-fuzzing/
 {{#endref}}
 
-## MacOS Security Protections
+## MacOS Sekuriteit Beskermings
 
 {{#ref}}
 macos-security-protections/
 {{#endref}}
 
-## Attack Surface
+## Aanvaloppervlak
 
-### File Permissions
+### Lêertoestemmings
 
-If a **process running as root writes** a file that can be controlled by a user, the user could abuse this to **escalate privileges**.\
-This could occur in the following situations:
+As 'n **proses wat as root loop 'n lêer skryf** wat deur 'n gebruiker beheer kan word, kan die gebruiker dit misbruik om **privileges te verhoog**.\
+Dit kan in die volgende situasies gebeur:
 
-- File used was already created by a user (owned by the user)
-- File used is writable by the user because of a group
-- File used is inside a directory owned by the user (the user could create the file)
-- File used is inside a directory owned by root but user has write access over it because of a group (the user could create the file)
+- Lêer wat gebruik is, is reeds deur 'n gebruiker geskep (besit deur die gebruiker)
+- Lêer wat gebruik word, is skryfbaar deur die gebruiker weens 'n groep
+- Lêer wat gebruik word, is binne 'n gids besit deur die gebruiker (die gebruiker kan die lêer skep)
+- Lêer wat gebruik word, is binne 'n gids besit deur root, maar die gebruiker het skryftoegang daaroor weens 'n groep (die gebruiker kan die lêer skep)
 
-Being able to **create a file** that is going to be **used by root**, allows a user to **take advantage of its content** or even create **symlinks/hardlinks** to point it to another place.
+In staat wees om 'n **lêer te skep** wat gaan wees **gebruik deur root**, laat 'n gebruiker toe om **voordeel te trek uit sy inhoud** of selfs **simboliese skakels/hardlinks** te skep om dit na 'n ander plek te wys.
 
-For this kind of vulnerabilities don't forget to **check vulnerable `.pkg` installers**:
+Vir hierdie tipe kwesbaarhede, moenie vergeet om **kwesbare `.pkg` installers** te **kontroleer** nie:
 
 {{#ref}}
 macos-files-folders-and-binaries/macos-installers-abuse.md
 {{#endref}}
 
-### File Extension & URL scheme app handlers
+### Lêeruitbreiding & URL skema app hanteerders
 
-Weird apps registered by file extensions could be abused and different applications can be register to open specific protocols
+Vreemde apps wat deur lêeruitbreidings geregistreer is, kan misbruik word en verskillende toepassings kan geregistreer word om spesifieke protokolle te open
 
 {{#ref}}
 macos-file-extension-apps.md
 {{#endref}}
 
-## macOS TCC / SIP Privilege Escalation
+## macOS TCC / SIP Privilege Escalering
 
-In macOS **applications and binaries can have permissions** to access folders or settings that make them more privileged than others.
+In macOS **toepassings en lêers kan toestemmings hê** om toegang te verkry tot gidse of instellings wat hulle meer bevoorregte maak as ander.
 
-Therefore, an attacker that wants to successfully compromise a macOS machine will need to **escalate its TCC privileges** (or even **bypass SIP**, depending on his needs).
+Daarom sal 'n aanvaller wat 'n macOS masjien suksesvol wil kompromitteer, moet **sy TCC privileges verhoog** (of selfs **SIP omseil**, afhangende van sy behoeftes).
 
-These privileges are usually given in the form of **entitlements** the application is signed with, or the application might requested some accesses and after the **user approving them** they can be found in the **TCC databases**. Another way a process can obtain these privileges is by being a **child of a process** with those **privileges** as they are usually **inherited**.
+Hierdie privileges word gewoonlik gegee in die vorm van **regte** waarmee die toepassing onderteken is, of die toepassing mag sekere toegang versoek het en nadat die **gebruiker dit goedgekeur het**, kan dit in die **TCC databasisse** gevind word. 'n Ander manier waarop 'n proses hierdie privileges kan verkry, is deur 'n **kind van 'n proses** met daardie **privileges** te wees, aangesien dit gewoonlik **geërf** word.
 
-Follow these links to find different was to [**escalate privileges in TCC**](macos-security-protections/macos-tcc/#tcc-privesc-and-bypasses), to [**bypass TCC**](macos-security-protections/macos-tcc/macos-tcc-bypasses/) and how in the past [**SIP has been bypassed**](macos-security-protections/macos-sip.md#sip-bypasses).
+Volg hierdie skakels om verskillende maniere te vind om [**privileges in TCC te verhoog**](macos-security-protections/macos-tcc/#tcc-privesc-and-bypasses), om [**TCC te omseil**](macos-security-protections/macos-tcc/macos-tcc-bypasses/) en hoe in die verlede [**SIP omseil is**](macos-security-protections/macos-sip.md#sip-bypasses).
 
-## macOS Traditional Privilege Escalation
+## macOS Tradisionele Privilege Escalering
 
-Of course from a red teams perspective you should be also interested in escalating to root. Check the following post for some hints:
+Natuurlik moet jy ook belangstel om na root te verhoog vanuit 'n rooi span perspektief. Kyk na die volgende pos vir 'n paar wenke:
 
 {{#ref}}
 macos-privilege-escalation.md
 {{#endref}}
 
-## macOS Compliance
+## macOS Nakoming
 
 - [https://github.com/usnistgov/macos_security](https://github.com/usnistgov/macos_security)
 
-## References
+## Verwysings
 
 - [**OS X Incident Response: Scripting and Analysis**](https://www.amazon.com/OS-Incident-Response-Scripting-Analysis-ebook/dp/B01FHOHHVS)
 - [**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)
 - [**https://github.com/NicolasGrimonpont/Cheatsheet**](https://github.com/NicolasGrimonpont/Cheatsheet)
 - [**https://assets.sentinelone.com/c/sentinal-one-mac-os-?x=FvGtLJ**](https://assets.sentinelone.com/c/sentinal-one-mac-os-?x=FvGtLJ)
 - [**https://www.youtube.com/watch?v=vMGiplQtjTY**](https://www.youtube.com/watch?v=vMGiplQtjTY)
-
-<figure><img src="../../images/image (3).png" alt=""><figcaption></figcaption></figure>
-
-Join [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server to communicate with experienced hackers and bug bounty hunters!
-
-**Hacking Insights**\
-Engage with content that delves into the thrill and challenges of hacking
-
-**Real-Time Hack News**\
-Keep up-to-date with fast-paced hacking world through real-time news and insights
-
-**Latest Announcements**\
-Stay informed with the newest bug bounties launching and crucial platform updates
-
-**Join us on** [**Discord**](https://discord.com/invite/N3FrSbmwdy) and start collaborating with top hackers today!
 
 {{#include ../../banners/hacktricks-training.md}}

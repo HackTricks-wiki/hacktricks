@@ -1,30 +1,30 @@
-# Weaponizing Distroless
+# Wapen van Distroless
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## What is Distroless
+## Wat is Distroless
 
-A distroless container is a type of container that **contains only the necessary dependencies to run a specific application**, without any additional software or tools that are not required. These containers are designed to be as **lightweight** and **secure** as possible, and they aim to **minimize the attack surface** by removing any unnecessary components.
+'n Distroless-container is 'n tipe container wat **slegs die nodige afhanklikhede bevat om 'n spesifieke toepassing te laat loop**, sonder enige addisionele sagteware of gereedskap wat nie benodig word nie. Hierdie containers is ontwerp om so **liggewig** en **veilig** as moontlik te wees, en hulle poog om die **aanvaloppervlak te minimaliseer** deur enige onnodige komponente te verwyder.
 
-Distroless containers are often used in **production environments where security and reliability are paramount**.
+Distroless-containers word dikwels in **produksie-omgewings waar veiligheid en betroubaarheid van die grootste belang is** gebruik.
 
-Some **examples** of **distroless containers** are:
+Sommige **voorbeelde** van **distroless-containers** is:
 
-- Provided by **Google**: [https://console.cloud.google.com/gcr/images/distroless/GLOBAL](https://console.cloud.google.com/gcr/images/distroless/GLOBAL)
-- Provided by **Chainguard**: [https://github.com/chainguard-images/images/tree/main/images](https://github.com/chainguard-images/images/tree/main/images)
+- Verskaf deur **Google**: [https://console.cloud.google.com/gcr/images/distroless/GLOBAL](https://console.cloud.google.com/gcr/images/distroless/GLOBAL)
+- Verskaf deur **Chainguard**: [https://github.com/chainguard-images/images/tree/main/images](https://github.com/chainguard-images/images/tree/main/images)
 
-## Weaponizing Distroless
+## Wapen van Distroless
 
-The goal of weaponize a distroless container is to be able to **execute arbitrary binaries and payloads even with the limitations** implied by **distroless** (lack of common binaries in the system) and also protections commonly found in containers such as **read-only** or **no-execute** in `/dev/shm`.
+Die doel van die wapen van 'n distroless-container is om in staat te wees om **arbitraire binaire en payloads uit te voer selfs met die beperkings** wat deur **distroless** geïmpliseer word (gebrek aan algemene binaire in die stelsel) en ook beskermings wat algemeen in containers voorkom soos **lees-slegs** of **geen-uitvoering** in `/dev/shm`.
 
-### Through memory
+### Deur geheue
 
-Coming at some point of 2023...
+Kom op 'n sekere punt in 2023...
 
-### Via Existing binaries
+### Via Bestaande binaire
 
 #### openssl
 
-\***\*[**In this post,**](https://www.form3.tech/engineering/content/exploiting-distroless-images) it is explained that the binary **`openssl`** is frequently found in these containers, potentially because it's **needed\*\* by the software that is going to be running inside the container.
+\***\*[**In hierdie pos,**](https://www.form3.tech/engineering/content/exploiting-distroless-images) word verduidelik dat die binaire **`openssl`** gereeld in hierdie containers gevind word, moontlik omdat dit **benodig\*\* word deur die sagteware wat binne die container gaan loop.
 
 {{#include ../../../banners/hacktricks-training.md}}

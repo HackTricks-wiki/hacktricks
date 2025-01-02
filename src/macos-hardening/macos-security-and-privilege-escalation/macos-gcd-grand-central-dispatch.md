@@ -2,182 +2,175 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Basiese Inligting
 
-**Grand Central Dispatch (GCD),** also known as **libdispatch** (`libdispatch.dyld`), is available in both macOS and iOS. It's a technology developed by Apple to optimize application support for concurrent (multithreaded) execution on multicore hardware.
+**Grand Central Dispatch (GCD),** ook bekend as **libdispatch** (`libdispatch.dyld`), is beskikbaar in beide macOS en iOS. Dit is 'n tegnologie wat deur Apple ontwikkel is om toepassingsondersteuning vir gelyktydige (multithreaded) uitvoering op veelkern-hardware te optimaliseer.
 
-**GCD** provides and manages **FIFO queues** to which your application can **submit tasks** in the form of **block objects**. Blocks submitted to dispatch queues are **executed on a pool of threads** fully managed by the system. GCD automatically creates threads for executing the tasks in the dispatch queues and schedules those tasks to run on the available cores.
+**GCD** bied en bestuur **FIFO-rye** waaraan jou toepassing **take** in die vorm van **blokobjekte** kan **indien**. Blokke wat aan afleweringsrye ingedien word, word **uitgevoer op 'n poel van drade** wat volledig deur die stelsel bestuur word. GCD skep outomaties drade om die take in die afleweringsrye uit te voer en skeduleer daardie take om op die beskikbare kerne te loop.
 
 > [!TIP]
-> In summary, to execute code in **parallel**, processes can send **blocks of code to GCD**, which will take care of their execution. Therefore, processes don't create new threads; **GCD executes the given code with its own pool of threads** (which might increase or decrease as necessary).
+> In samevatting, om kode in **parallel** uit te voer, kan prosesse **blokke van kode na GCD** stuur, wat sorg vir hul uitvoering. Daarom skep prosesse nie nuwe drade nie; **GCD voer die gegewe kode uit met sy eie poel van drade** (wat kan toeneem of afneem soos nodig).
 
-This is very helpful to manage parallel execution successfully, greatly reducing the number of threads processes create and optimising the parallel execution. This is ideal for tasks that require **great parallelism** (brute-forcing?) or for tasks that shouldn't block the main thread: For example, the main thread on iOS handles UI interactions, so any other functionality that could make the app hang (searching, accessing a web, reading a file...) is managed this way.
+Dit is baie nuttig om parallelle uitvoering suksesvol te bestuur, wat die aantal drade wat prosesse skep, aansienlik verminder en die parallelle uitvoering optimaliseer. Dit is ideaal vir take wat **groot parallelisme** vereis (brute-forcing?) of vir take wat nie die hoofdraad moet blokkeer nie: Byvoorbeeld, die hoofdraad op iOS hanteer UI-interaksies, so enige ander funksionaliteit wat die toepassing kan laat hang (soek, toegang tot 'n web, lees 'n lêer...) word op hierdie manier bestuur.
 
-### Blocks
+### Blokke
 
-A block is a **self contained section of code** (like a function with arguments returning a value) and can also specify bound variables.\
-However, at compiler level blocks doesn't exist, they are `os_object`s. Each of these objects is formed by two structures:
+'n Blok is 'n **self-ingegronde afdeling van kode** (soos 'n funksie met argumente wat 'n waarde teruggee) en kan ook gebonde veranderlikes spesifiseer.\
+E however, op kompilervlak bestaan blokke nie, hulle is `os_object`s. Elke van hierdie objekten is gevorm deur twee strukture:
 
-- **block literal**:&#x20;
-  - It starts by the **`isa`** field, pointing to the block's class:
-    - `NSConcreteGlobalBlock` (blocks from `__DATA.__const`)
-    - `NSConcreteMallocBlock` (blocks in the heap)
-    - `NSConcreateStackBlock` (blocks in stack)
-  - It has **`flags`** (indicating fields present in the block descriptor) and some reserved bytes
-  - The function pointer to call
-  - A pointer to the block descriptor
-  - Block imported variables (if any)
-- **block descriptor**: It's size depends on the data that is present (as indicated in the previous flags)
-  - It has some reserved bytes
-  - The size of it
-  - It'll usually have a pointer to an Objective-C style signature to know how much space is needed for the params (flag `BLOCK_HAS_SIGNATURE`)
-  - If variables are referenced, this block will also have pointers to a copy helper (copying the value at the begining) and dispose helper (freeing it).
+- **blok letterlik**:&#x20;
+- Dit begin met die **`isa`** veld, wat na die blok se klas wys:
+- `NSConcreteGlobalBlock` (blokke van `__DATA.__const`)
+- `NSConcreteMallocBlock` (blokke in die heap)
+- `NSConcreateStackBlock` (blokke in die stapel)
+- Dit het **`flags`** (wat velde in die blokbeskrywer aandui) en 'n paar gereserveerde bytes
+- Die funksie-aanwyser om aan te roep
+- 'n Aanwyser na die blokbeskrywer
+- Blok ingevoerde veranderlikes (indien enige)
+- **blok beskrywer**: Die grootte hang af van die data wat teenwoordig is (soos aangedui in die vorige vlae)
+- Dit het 'n paar gereserveerde bytes
+- Die grootte daarvan
+- Dit sal gewoonlik 'n aanwyser na 'n Objective-C styl handtekening hê om te weet hoeveel ruimte vir die params benodig word (vlag `BLOCK_HAS_SIGNATURE`)
+- As veranderlikes verwys word, sal hierdie blok ook aanwysers na 'n kopie-hulpbron (wat die waarde aan die begin kopieer) en 'n ontslag-hulpbron (wat dit vrymaak) hê.
 
-### Queues
+### Rye
 
-A dispatch queue is a named object providing FIFO ordering of blocks for executions.
+'n Afleweringsry is 'n benoemde objek wat FIFO-ordening van blokke vir uitvoerings bied.
 
-Blocks a set in queues to be executed, and these support 2 modes: `DISPATCH_QUEUE_SERIAL` and `DISPATCH_QUEUE_CONCURRENT`. Of course the **serial** one **won't have race condition** problems as a block won't be executed until the previous one has finished. But **the other type of queue might have it**.
+Blokke word in rye gestel om uitgevoer te word, en hierdie ondersteun 2 modi: `DISPATCH_QUEUE_SERIAL` en `DISPATCH_QUEUE_CONCURRENT`. Natuurlik sal die **serial** een **nie race condition** probleme hê nie, aangesien 'n blok nie uitgevoer sal word totdat die vorige een klaar is nie. Maar **die ander tipe ry mag dit hê**.
 
-Default queues:
+Standaard rye:
 
-- `.main-thread`: From `dispatch_get_main_queue()`
-- `.libdispatch-manager`: GCD's queue manager
-- `.root.libdispatch-manager`: GCD's queue manager
-- `.root.maintenance-qos`: Lowest priority tasks
+- `.main-thread`: Van `dispatch_get_main_queue()`
+- `.libdispatch-manager`: GCD se rybestuurder
+- `.root.libdispatch-manager`: GCD se rybestuurder
+- `.root.maintenance-qos`: Laaste prioriteit take
 - `.root.maintenance-qos.overcommit`
-- `.root.background-qos`: Available as `DISPATCH_QUEUE_PRIORITY_BACKGROUND`
+- `.root.background-qos`: Beskikbaar as `DISPATCH_QUEUE_PRIORITY_BACKGROUND`
 - `.root.background-qos.overcommit`
-- `.root.utility-qos`: Available as `DISPATCH_QUEUE_PRIORITY_NON_INTERACTIVE`
+- `.root.utility-qos`: Beskikbaar as `DISPATCH_QUEUE_PRIORITY_NON_INTERACTIVE`
 - `.root.utility-qos.overcommit`
-- `.root.default-qos`: Available as `DISPATCH_QUEUE_PRIORITY_DEFAULT`
+- `.root.default-qos`: Beskikbaar as `DISPATCH_QUEUE_PRIORITY_DEFAULT`
 - `.root.background-qos.overcommit`
-- `.root.user-initiated-qos`: Available as `DISPATCH_QUEUE_PRIORITY_HIGH`
+- `.root.user-initiated-qos`: Beskikbaar as `DISPATCH_QUEUE_PRIORITY_HIGH`
 - `.root.background-qos.overcommit`
-- `.root.user-interactive-qos`: Highest priority
+- `.root.user-interactive-qos`: Hoogste prioriteit
 - `.root.background-qos.overcommit`
 
-Notice that it will be the system who decides **which threads handle which queues at each time** (multiple threads might work in the same queue or the same thread might work in different queues at some point)
+Let daarop dat dit die stelsel sal wees wat besluit **watter drade watter rye op elke tydstip hanteer** (meervoudige drade mag in dieselfde ry werk of dieselfde draad mag op verskillende rye op 'n sekere tyd werk)
 
-#### Attributtes
+#### Attributte
 
-When creating a queue with **`dispatch_queue_create`** the third argument is a `dispatch_queue_attr_t`, which usually is either `DISPATCH_QUEUE_SERIAL` (which is actually NULL) or `DISPATCH_QUEUE_CONCURRENT` which is a pointer to a `dispatch_queue_attr_t` struct which allow to control some parameters of the queue.
+Wanneer 'n ry geskep word met **`dispatch_queue_create`** is die derde argument 'n `dispatch_queue_attr_t`, wat gewoonlik of `DISPATCH_QUEUE_SERIAL` (wat eintlik NULL is) of `DISPATCH_QUEUE_CONCURRENT` is wat 'n aanwyser na 'n `dispatch_queue_attr_t` struktuur is wat toelaat om sommige parameters van die ry te beheer.
 
-### Dispatch objects
+### Afleweringsobjekte
 
-There are several objects that libdispatch uses and queues and blocks are just 2 of them. It's possible to create these objects with `dispatch_object_create`:
+Daar is verskeie objekte wat libdispatch gebruik en rye en blokke is net 2 daarvan. Dit is moontlik om hierdie objekten te skep met `dispatch_object_create`:
 
-- `block`
-- `data`: Data blocks
-- `group`: Group of blocks
-- `io`: Async I/O requests
-- `mach`: Mach ports
-- `mach_msg`: Mach messages
-- `pthread_root_queue`:A queue with a pthread thread pool and not workqueues
-- `queue`
+- `blok`
+- `data`: Data blokke
+- `groep`: Groep van blokke
+- `io`: Async I/O versoeke
+- `mach`: Mach poorte
+- `mach_msg`: Mach boodskappe
+- `pthread_root_queue`: 'n ry met 'n pthread draadpoel en nie werkrye nie
+- `ry`
 - `semaphore`
-- `source`: Event source
+- `bron`: Gebeurtenisbron
 
 ## Objective-C
 
-In Objetive-C there are different functions to send a block to be executed in parallel:
+In Objective-C is daar verskillende funksies om 'n blok te stuur om parallel uitgevoer te word:
 
-- [**dispatch_async**](https://developer.apple.com/documentation/dispatch/1453057-dispatch_async): Submits a block for asynchronous execution on a dispatch queue and returns immediately.
-- [**dispatch_sync**](https://developer.apple.com/documentation/dispatch/1452870-dispatch_sync): Submits a block object for execution and returns after that block finishes executing.
-- [**dispatch_once**](https://developer.apple.com/documentation/dispatch/1447169-dispatch_once): Executes a block object only once for the lifetime of an application.
-- [**dispatch_async_and_wait**](https://developer.apple.com/documentation/dispatch/3191901-dispatch_async_and_wait): Submits a work item for execution and returns only after it finishes executing. Unlike [**`dispatch_sync`**](https://developer.apple.com/documentation/dispatch/1452870-dispatch_sync), this function respects all attributes of the queue when it executes the block.
+- [**dispatch_async**](https://developer.apple.com/documentation/dispatch/1453057-dispatch_async): Dien 'n blok in vir asynchrone uitvoering op 'n afleweringsry en keer onmiddellik terug.
+- [**dispatch_sync**](https://developer.apple.com/documentation/dispatch/1452870-dispatch_sync): Dien 'n blokobjek in vir uitvoering en keer terug nadat daardie blok klaar is met uitvoer.
+- [**dispatch_once**](https://developer.apple.com/documentation/dispatch/1447169-dispatch_once): Voer 'n blokobjek slegs een keer uit vir die leeftyd van 'n toepassing.
+- [**dispatch_async_and_wait**](https://developer.apple.com/documentation/dispatch/3191901-dispatch_async_and_wait): Dien 'n werksitem in vir uitvoering en keer terug slegs nadat dit klaar is met uitvoer. Anders as [**`dispatch_sync`**](https://developer.apple.com/documentation/dispatch/1452870-dispatch_sync), respekteer hierdie funksie al die attributen van die ry wanneer dit die blok uitvoer.
 
-These functions expect these parameters: [**`dispatch_queue_t`**](https://developer.apple.com/documentation/dispatch/dispatch_queue_t) **`queue,`** [**`dispatch_block_t`**](https://developer.apple.com/documentation/dispatch/dispatch_block_t) **`block`**
+Hierdie funksies verwag hierdie parameters: [**`dispatch_queue_t`**](https://developer.apple.com/documentation/dispatch/dispatch_queue_t) **`ry,`** [**`dispatch_block_t`**](https://developer.apple.com/documentation/dispatch/dispatch_block_t) **`blok`**
 
-This is the **struct of a Block**:
-
+Dit is die **struktuur van 'n Blok**:
 ```c
 struct Block {
-   void *isa; // NSConcreteStackBlock,...
-   int flags;
-   int reserved;
-   void *invoke;
-   struct BlockDescriptor *descriptor;
-   // captured variables go here
+void *isa; // NSConcreteStackBlock,...
+int flags;
+int reserved;
+void *invoke;
+struct BlockDescriptor *descriptor;
+// captured variables go here
 };
 ```
-
-And this is an example to use **parallelism** with **`dispatch_async`**:
-
+En dit is 'n voorbeeld om **parallelisme** te gebruik met **`dispatch_async`**:
 ```objectivec
 #import <Foundation/Foundation.h>
 
 // Define a block
 void (^backgroundTask)(void) = ^{
-    // Code to be executed in the background
-    for (int i = 0; i < 10; i++) {
-        NSLog(@"Background task %d", i);
-        sleep(1);  // Simulate a long-running task
-    }
+// Code to be executed in the background
+for (int i = 0; i < 10; i++) {
+NSLog(@"Background task %d", i);
+sleep(1);  // Simulate a long-running task
+}
 };
 
 int main(int argc, const char * argv[]) {
-    @autoreleasepool {
-        // Create a dispatch queue
-        dispatch_queue_t backgroundQueue = dispatch_queue_create("com.example.backgroundQueue", NULL);
+@autoreleasepool {
+// Create a dispatch queue
+dispatch_queue_t backgroundQueue = dispatch_queue_create("com.example.backgroundQueue", NULL);
 
-        // Submit the block to the queue for asynchronous execution
-        dispatch_async(backgroundQueue, backgroundTask);
+// Submit the block to the queue for asynchronous execution
+dispatch_async(backgroundQueue, backgroundTask);
 
-        // Continue with other work on the main queue or thread
-        for (int i = 0; i < 10; i++) {
-            NSLog(@"Main task %d", i);
-            sleep(1);  // Simulate a long-running task
-        }
-    }
-    return 0;
+// Continue with other work on the main queue or thread
+for (int i = 0; i < 10; i++) {
+NSLog(@"Main task %d", i);
+sleep(1);  // Simulate a long-running task
+}
+}
+return 0;
 }
 ```
-
 ## Swift
 
-**`libswiftDispatch`** is a library that provides **Swift bindings** to the Grand Central Dispatch (GCD) framework which is originally written in C.\
-The **`libswiftDispatch`** library wraps the C GCD APIs in a more Swift-friendly interface, making it easier and more intuitive for Swift developers to work with GCD.
+**`libswiftDispatch`** is 'n biblioteek wat **Swift bindings** aan die Grand Central Dispatch (GCD) raamwerk bied wat oorspronklik in C geskryf is.\
+Die **`libswiftDispatch`** biblioteek verpak die C GCD APIs in 'n meer Swift-vriendelike koppelvlak, wat dit makliker en meer intuïtief maak vir Swift-ontwikkelaars om met GCD te werk.
 
 - **`DispatchQueue.global().sync{ ... }`**
 - **`DispatchQueue.global().async{ ... }`**
 - **`let onceToken = DispatchOnce(); onceToken.perform { ... }`**
 - **`async await`**
-  - **`var (data, response) = await URLSession.shared.data(from: URL(string: "https://api.example.com/getData"))`**
+- **`var (data, response) = await URLSession.shared.data(from: URL(string: "https://api.example.com/getData"))`**
 
-**Code example**:
-
+**Code voorbeeld**:
 ```swift
 import Foundation
 
 // Define a closure (the Swift equivalent of a block)
 let backgroundTask: () -> Void = {
-    for i in 0..<10 {
-        print("Background task \(i)")
-        sleep(1)  // Simulate a long-running task
-    }
+for i in 0..<10 {
+print("Background task \(i)")
+sleep(1)  // Simulate a long-running task
+}
 }
 
 // Entry point
 autoreleasepool {
-    // Create a dispatch queue
-    let backgroundQueue = DispatchQueue(label: "com.example.backgroundQueue")
+// Create a dispatch queue
+let backgroundQueue = DispatchQueue(label: "com.example.backgroundQueue")
 
-    // Submit the closure to the queue for asynchronous execution
-    backgroundQueue.async(execute: backgroundTask)
+// Submit the closure to the queue for asynchronous execution
+backgroundQueue.async(execute: backgroundTask)
 
-    // Continue with other work on the main queue
-    for i in 0..<10 {
-        print("Main task \(i)")
-        sleep(1)  // Simulate a long-running task
-    }
+// Continue with other work on the main queue
+for i in 0..<10 {
+print("Main task \(i)")
+sleep(1)  // Simulate a long-running task
+}
 }
 ```
-
 ## Frida
 
-The following Frida script can be used to **hook into several `dispatch`** functions and extract the queue name, the backtrace and the block: [**https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js**](https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js)
-
+Die volgende Frida-skrip kan gebruik word om **in verskeie `dispatch`** funksies te **hook** en die wachtrynaam, die terugspoor en die blok te onttrek: [**https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js**](https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js)
 ```bash
 frida -U <prog_name> -l libdispatch.js
 
@@ -190,12 +183,11 @@ Backtrace:
 0x19e3a57fc UIKitCore!+[UIGraphicsRenderer _destroyCGContext:withRenderer:]
 [...]
 ```
-
 ## Ghidra
 
-Currently Ghidra doesn't understand neither the ObjectiveC **`dispatch_block_t`** structure, neither the **`swift_dispatch_block`** one.
+Tans verstaan Ghidra nie die ObjectiveC **`dispatch_block_t`** struktuur nie, en ook nie die **`swift_dispatch_block`** een nie.
 
-So if you want it to understand them, you could just **declare them**:
+So as jy wil hê dit moet hulle verstaan, kan jy net **dit verklaar**:
 
 <figure><img src="../../images/image (1160).png" alt="" width="563"><figcaption></figcaption></figure>
 
@@ -203,18 +195,18 @@ So if you want it to understand them, you could just **declare them**:
 
 <figure><img src="../../images/image (1163).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Then, find a place in the code where they are **used**:
+Vind dan 'n plek in die kode waar hulle **gebruik** word:
 
 > [!TIP]
-> Note all of references made to "block" to understand how you could figure out that the struct is being used.
+> Let op al die verwysings na "block" om te verstaan hoe jy kan agterkom dat die struktuur gebruik word.
 
 <figure><img src="../../images/image (1164).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Right click on the variable -> Retype Variable and select in this case **`swift_dispatch_block`**:
+Regsklik op die veranderlike -> Her tipe veranderlike en kies in hierdie geval **`swift_dispatch_block`**:
 
 <figure><img src="../../images/image (1165).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Ghidra will automatically rewrite everything:
+Ghidra sal outomaties alles herskryf:
 
 <figure><img src="../../images/image (1166).png" alt="" width="563"><figcaption></figcaption></figure>
 

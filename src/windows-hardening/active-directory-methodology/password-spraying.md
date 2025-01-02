@@ -1,25 +1,20 @@
-# Wagtwoord Spuit / Brute Force
+# Wachtwoord Spuiting / Brute Force
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-Verdiep jou kundigheid in **Mobiele Sekuriteit** met 8kSec Akademie. Meester iOS en Android sekuriteit deur ons self-gebaseerde kursusse en kry gesertifiseer:
-
-{% embed url="https://academy.8ksec.io/" %}
-
-## **Wagtwoord Spuit**
+## **Wachtwoord Spuiting**
 
 Sodra jy verskeie **geldige gebruikersname** gevind het, kan jy die mees **gewone wagwoorde** probeer (hou die wagwoordbeleid van die omgewing in gedagte) met elkeen van die ontdekte gebruikers.\
-Volgens **standaard** is die **minimum** **wagwoord** **lengte** **7**.
+Deur **standaard** is die **minimum** **wagwoord** **lengte** **7**.
 
 Lyste van algemene gebruikersname kan ook nuttig wees: [https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames)
 
-Let daarop dat jy **sekere rekeninge kan sluit as jy verskeie verkeerde wagwoorde probeer** (volgens standaard meer as 10).
+Let daarop dat jy **sekere rekeninge kan sluit as jy verskeie verkeerde wagwoorde probeer** (deur standaard meer as 10).
 
 ### Kry wagwoordbeleid
 
-As jy 'n paar gebruikersakkrediteer of 'n shell as 'n domein gebruiker het, kan jy **die wagwoordbeleid kry met**:
+As jy 'n paar gebruikersakkrediteer of 'n shell as 'n domeingebruiker het, kan jy **die wagwoordbeleid kry met**:
 ```bash
 # From Linux
 crackmapexec <IP> -u 'user' -p 'password' --pass-pol
@@ -82,7 +77,7 @@ done
 # check passwords for all users in current domain
 .\Rubeus.exe brute /passwords:<passwords_file> /outfile:<output_file>
 ```
-- Met [**Invoke-DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray/blob/master/DomainPasswordSpray.ps1) (Dit kan gebruikers uit die domein genereer per standaard en dit sal die wagwoordbeleid van die domein kry en pogings volgens dit beperk):
+- Met [**Invoke-DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray/blob/master/DomainPasswordSpray.ps1) (Dit kan gebruikers uit die domein genereer volgens die verstek en dit sal die wagwoordbeleid van die domein kry en pogings volgens dit beperk):
 ```powershell
 Invoke-DomainPasswordSpray -UserList .\users.txt -Password 123456 -Verbose
 ```
@@ -130,10 +125,5 @@ Om enige van hierdie gereedskap te gebruik, benodig jy 'n gebruikerslys en 'n wa
 - [www.blackhillsinfosec.com/?p=5296](https://www.blackhillsinfosec.com/?p=5296)
 - [https://hunter2.gitbook.io/darthsidious/initial-access/password-spraying](https://hunter2.gitbook.io/darthsidious/initial-access/password-spraying)
 
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
-
-Verdiep jou kundigheid in **Mobiele Sekuriteit** met 8kSec Akademie. Meester iOS en Android sekuriteit deur ons self-gebaseerde kursusse en kry sertifisering:
-
-{% embed url="https://academy.8ksec.io/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

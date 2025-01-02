@@ -1,19 +1,12 @@
-# Windows Veiligheidsbeheer
+# Windows Veiligheid Beheer
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-Gebruik [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) om maklik **werkvloeiens** te bou en te **automate** wat aangedryf word deur die wêreld se **meest gevorderde** gemeenskapstoestelle.\
-Kry Toegang Vandag:
-
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
-
 ## AppLocker Beleid
 
-'n Aansoek witlys is 'n lys van goedgekeurde sagtewaretoepassings of uitvoerbare lêers wat toegelaat word om teenwoordig te wees en op 'n stelsel te loop. Die doel is om die omgewing te beskerm teen skadelike malware en ongekeurde sagteware wat nie ooreenstem met die spesifieke besigheidsbehoeftes van 'n organisasie nie.
+'n Aansoek witlys is 'n lys van goedgekeurde sagtewaretoepassings of uitvoerbare lêers wat toegelaat word om teenwoordig te wees en op 'n stelsel te loop. Die doel is om die omgewing te beskerm teen skadelike malware en nie-goedgekeurde sagteware wat nie ooreenstem met die spesifieke besigheidsbehoeftes van 'n organisasie nie.
 
-[AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) is Microsoft se **aansoek witlys oplossing** en gee stelselsadministrateurs beheer oor **watter toepassings en lêers gebruikers kan uitvoer**. Dit bied **fynbeheer** oor uitvoerbare lêers, skripte, Windows-installer lêers, DLL's, verpakte toepassings, en verpakte toepassingsinstalleerders.\
+[AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) is Microsoft se **aansoek witlys oplossing** en gee stelselsadministrateurs beheer oor **watter aansoeke en lêers gebruikers kan uitvoer**. Dit bied **fynbeheer** oor uitvoerbare lêers, skripte, Windows-installer lêers, DLL's, verpakte aansoeke, en verpakte aansoek-installeerders.\
 Dit is algemeen dat organisasies **cmd.exe en PowerShell.exe** blokkeer en skrywe toegang tot sekere gidse, **maar dit kan alles omseil word**.
 
 ### Kontroleer
@@ -55,7 +48,7 @@ Plaaslike kredensiale is teenwoordig in hierdie lêer, die wagwoorde is gehasht.
 
 ### Plaaslike Sekuriteitsowerheid (LSA) - LSASS
 
-Die **kredensiale** (gehasht) word **gestoor** in die **geheue** van hierdie subsisteem vir Enkelteken-redes.\
+Die **kredensiale** (gehasht) word **gestoor** in die **geheue** van hierdie subsisteem vir Enkelteken-in redes.\
 **LSA** bestuur die plaaslike **sekuriteitsbeleid** (wagwoordbeleid, gebruikersregte...), **verifikasie**, **toegangstokens**...\
 LSA sal die een wees wat die **kredensiale** in die **SAM** lêer (vir 'n plaaslike aanmelding) sal **kontroleer** en met die **domeinbeheerder** sal **praat** om 'n domein gebruiker te verifieer.
 
@@ -65,14 +58,14 @@ Die **kredensiale** word **gestoor** binne die **proses LSASS**: Kerberos kaartj
 
 LSA kan sommige kredensiale op skyf stoor:
 
-- Wagwoord van die rekenaarrekening van die Aktiewe Directory (onbereikbare domeinbeheerder).
+- Wagwoord van die rekenaarrekening van die Aktiewe Gids (onbereikbare domeinbeheerder).
 - Wagwoorde van die rekeninge van Windows dienste
 - Wagwoorde vir geskeduleerde take
 - Meer (wagwoord van IIS toepassings...)
 
 ### NTDS.dit
 
-Dit is die databasis van die Aktiewe Directory. Dit is slegs teenwoordig in Domein Beheerders.
+Dit is die databasis van die Aktiewe Gids. Dit is slegs teenwoordig in Domein Beheerders.
 
 ## Defender
 
@@ -110,12 +103,12 @@ sc query windefend
 ```
 ## Encrypted File System (EFS)
 
-EFS beveilig lêers deur middel van versleuteling, wat 'n **simmetriese sleutel** gebruik wat bekend staan as die **File Encryption Key (FEK)**. Hierdie sleutel word versleuteld met die gebruiker se **publieke sleutel** en gestoor binne die versleutelde lêer se $EFS **alternatiewe datastroom**. Wanneer ontsleuteling nodig is, word die ooreenstemmende **privaat sleutel** van die gebruiker se digitale sertifikaat gebruik om die FEK uit die $EFS-stroom te ontsleutel. Meer besonderhede kan [hier](https://en.wikipedia.org/wiki/Encrypting_File_System) gevind word.
+EFS beveilig lêers deur middel van versleuteling, wat 'n **simmetriese sleutel** gebruik wat bekend staan as die **File Encryption Key (FEK)**. Hierdie sleutel word versleuteld met die gebruiker se **publieke sleutel** en gestoor binne die versleutelde lêer se $EFS **alternatiewe datastroom**. Wanneer ontsleuteling nodig is, word die ooreenstemmende **privaat sleutel** van die gebruiker se digitale sertifikaat gebruik om die FEK uit die $EFS-stroom te ontsleutel. Meer besonderhede kan gevind word [hier](https://en.wikipedia.org/wiki/Encrypting_File_System).
 
 **Ontsleuteling scenario's sonder gebruiker inisiatief** sluit in:
 
-- Wanneer lêers of vouers na 'n nie-EFS lêerstelsel, soos [FAT32](https://en.wikipedia.org/wiki/File_Allocation_Table), verskuif word, word hulle outomaties ontsleutel.
-- Versleutelde lêers wat oor die netwerk via die SMB/CIFS-protokol gestuur word, word voor oordrag ontsleutel.
+- Wanneer lêers of vouers na 'n nie-EFS lêerstelsel, soos [FAT32](https://en.wikipedia.org/wiki/File_Allocation_Table), verskuif word, word hulle outomaties ontsleuteld.
+- Versleutelde lêers wat oor die netwerk via die SMB/CIFS-protokol gestuur word, word voor oordrag ontsleuteld.
 
 Hierdie versleutelingmetode stel **deursigtige toegang** tot versleutelde lêers vir die eienaar in staat. Dit is egter nie moontlik om eenvoudig die eienaar se wagwoord te verander en in te log om ontsleuteling toe te laat nie.
 
@@ -137,7 +130,7 @@ Jy kan ook `cipher /e` en `cipher /d` binne 'n vouer gebruik om **te versleutel*
 
 #### Being Authority System
 
-Hierdie metode vereis dat die **slagoffer gebruiker** 'n **proses** binne die gasheer **uitvoer**. As dit die geval is, kan jy met 'n `meterpreter` sessie die token van die gebruiker se proses naboots (`impersonate_token` van `incognito`). Of jy kan net `migrate` na die gebruiker se proses.
+Hierdie metode vereis dat die **slagoffer gebruiker** 'n **proses** binne die gasheer **uitvoer**. As dit die geval is, kan jy met 'n `meterpreter` sessie die token van die gebruiker se proses naboots (`impersonate_token` van `incognito`). Of jy kan eenvoudig `migrate` na die gebruiker se proses.
 
 #### Knowing the users password
 
@@ -149,7 +142,7 @@ Microsoft het **Group Managed Service Accounts (gMSA)** ontwikkel om die bestuur
 
 - **Outomatiese Wagwoordbestuur**: gMSA's gebruik 'n komplekse, 240-karakter wagwoord wat outomaties verander volgens domein of rekenaarbeleid. Hierdie proses word deur Microsoft se Key Distribution Service (KDC) hanteer, wat die behoefte aan handmatige wagwoordopdaterings uitskakel.
 - **Verbeterde Sekuriteit**: Hierdie rekeninge is immuun teen vergrendeling en kan nie vir interaktiewe aanmeldings gebruik word nie, wat hul sekuriteit verbeter.
-- **Meervoudige Gasheerondersteuning**: gMSA's kan oor verskeie gasheers gedeel word, wat hulle ideaal maak vir dienste wat op verskeie bedieners loop.
+- **Meervoudige Gasheerondersteuning**: gMSA's kan oor verskeie gashere gedeel word, wat hulle ideaal maak vir dienste wat op verskeie bedieners loop.
 - **Geplande Taakvermoë**: Anders as bestuurde diensrekeninge, ondersteun gMSA's die uitvoering van geplande take.
 - **Vereenvoudigde SPN-bestuur**: Die stelsel werk outomaties die Service Principal Name (SPN) by wanneer daar veranderinge aan die rekenaar se sAMaccount besonderhede of DNS-naam is, wat SPN-bestuur vereenvoudig.
 
@@ -167,7 +160,7 @@ Kyk ook na hierdie [webblad](https://cube0x0.github.io/Relaying-for-gMSA/) oor h
 
 ## LAPS
 
-Die **Local Administrator Password Solution (LAPS)**, beskikbaar vir aflaai van [Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899), stel die bestuur van plaaslike Administrateur wagwoorde in staat. Hierdie wagwoorde, wat **ewekansig**, uniek, en **gereeld verander** word, word sentraal in Active Directory gestoor. Toegang tot hierdie wagwoorde is beperk deur ACLs aan gemagtigde gebruikers. Met voldoende toestemmings wat toegeken word, word die vermoë om plaaslike admin wagwoorde te lees, verskaf.
+Die **Local Administrator Password Solution (LAPS)**, beskikbaar vir aflaai van [Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899), stel die bestuur van plaaslike Administrateur wagwoorde in staat. Hierdie wagwoorde, wat **ewekansig**, uniek, en **gereeld verander** word, word sentraal in Active Directory gestoor. Toegang tot hierdie wagwoorde is beperk deur ACLs tot gemagtigde gebruikers. Met voldoende toestemmings wat toegeken word, word die vermoë om plaaslike admin wagwoorde te lees, verskaf.
 
 {{#ref}}
 ../active-directory-methodology/laps.md
@@ -222,7 +215,7 @@ Powershell -command "Write-Host 'My voice is my passport, verify me.'"
 9º Use EncodeCommand
 $command = "Write-Host 'My voice is my passport, verify me.'" $bytes = [System.Text.Encoding]::Unicode.GetBytes($command) $encodedCommand = [Convert]::ToBase64String($bytes) powershell.exe -EncodedCommand $encodedCommand
 ```
-Meer kan gevind word [hier](https://blog.netspi.com/15-ways-to-bypass-the-powershell-execution-policy/)
+Meer kan [hier](https://blog.netspi.com/15-ways-to-bypass-the-powershell-execution-policy/) gevind word.
 
 ## Security Support Provider Interface (SSPI)
 
@@ -245,22 +238,12 @@ Die SSPI sal verantwoordelik wees vir die vind van die toepaslike protokol vir t
 
 #### Die onderhandeling kan verskeie metodes of slegs een bied.
 
-## UAC - Gebruikersrekeningbeheer
+## UAC - User Account Control
 
-[Gebruikersrekeningbeheer (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) is 'n kenmerk wat 'n **toestemmingsprompt vir verhoogde aktiwiteite** moontlik maak.
+[User Account Control (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) is 'n kenmerk wat 'n **toestemmingsprompt vir verhoogde aktiwiteite** moontlik maak.
 
 {{#ref}}
 uac-user-account-control.md
 {{#endref}}
-
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Gebruik [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) om maklik te bou en **werkvloei te outomatiseer** wat aangedryf word deur die wêreld se **mees gevorderde** gemeenskapstoestelle.\
-Kry Toegang Vandag:
-
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
-
----
 
 {{#include ../../banners/hacktricks-training.md}}

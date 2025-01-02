@@ -2,15 +2,12 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 ## Basiese beginsels van Hulpbron-gebaseerde Beperkte Afvaardiging
 
-Dit is soortgelyk aan die basiese [Beperkte Afvaardiging](constrained-delegation.md) maar **in plaas daarvan** om toestemmings aan 'n **objek** te gee om **enige gebruiker teen 'n diens te verteenwoordig**. Hulpbron-gebaseerde Beperkte Afvaardiging **stel** in **die objek wat in staat is om enige gebruiker teen hom te verteenwoordig**.
+Dit is soortgelyk aan die basiese [Beperkte Afvaardiging](constrained-delegation.md) maar **in plaas daarvan** om toestemmings aan 'n **objek** te gee om **enige gebruiker teen 'n diens te verteenwoordig**. Hulpbron-gebaseerde Beperkte Afvaardiging **stel** in **die objek wie in staat is om enige gebruiker teen dit te verteenwoordig**.
 
-In hierdie geval sal die beperkte objek 'n attribuut hê genaamd _**msDS-AllowedToActOnBehalfOfOtherIdentity**_ met die naam van die gebruiker wat enige ander gebruiker teen hom kan verteenwoordig.
+In hierdie geval sal die beperkte objek 'n attribuut hê genaamd _**msDS-AllowedToActOnBehalfOfOtherIdentity**_ met die naam van die gebruiker wat enige ander gebruiker teen dit kan verteenwoordig.
 
 Nog 'n belangrike verskil van hierdie Beperkte Afvaardiging teenoor die ander afvaardigings is dat enige gebruiker met **skryftoestemmings oor 'n masjienrekening** (_GenericAll/GenericWrite/WriteDacl/WriteProperty/etc_) die _**msDS-AllowedToActOnBehalfOfOtherIdentity**_ kan stel (In die ander vorme van Afvaardiging het jy domein admin regte nodig gehad).
 
@@ -27,13 +24,13 @@ As die **TGS** wat in **S4U2Proxy** gebruik word **NIE Forwardable** is nie, sal
 
 Neem aan dat die aanvaller reeds **skrywequivalente regte oor die slagoffer rekenaar** het.
 
-1. Die aanvaller **kompromitteer** 'n rekening wat 'n **SPN** het of **skep een** (“Diens A”). Let daarop dat **enige** _Admin Gebruiker_ sonder enige ander spesiale regte tot 10 **Rekenaarobjekte** (**_**MachineAccountQuota**_**) kan **skep** en hulle 'n **SPN** kan stel. So die aanvaller kan net 'n Rekenaarobjek skep en 'n SPN stel.
+1. Die aanvaller **kompromitteer** 'n rekening wat 'n **SPN** het of **skep een** (“Diens A”). Let daarop dat **enige** _Admin Gebruiker_ sonder enige ander spesiale regte tot **10 Rekenaarobjekte** (_**MachineAccountQuota**_) kan **skep** en hulle 'n **SPN** kan stel. So die aanvaller kan net 'n Rekenaarobjek skep en 'n SPN stel.
 2. Die aanvaller **misbruik sy SKRYF regte** oor die slagoffer rekenaar (DiensB) om **hulpbron-gebaseerde beperkte afvaardiging te konfigureer om DiensA toe te laat om enige gebruiker** teen daardie slagoffer rekenaar (DiensB) te verteenwoordig.
 3. Die aanvaller gebruik Rubeus om 'n **volledige S4U-aanval** (S4U2Self en S4U2Proxy) van Diens A na Diens B vir 'n gebruiker **met bevoorregte toegang tot Diens B** uit te voer.
-1. S4U2Self (van die SPN gekompromitteerde/geskepte rekening): Vra vir 'n **TGS van Administrateur na my** (Nie Forwardable).
+1. S4U2Self (van die SPN gecompromitteerde/geskepte rekening): Vra vir 'n **TGS van Administrateur na my** (Nie Forwardable).
 2. S4U2Proxy: Gebruik die **nie Forwardable TGS** van die vorige stap om vir 'n **TGS** van **Administrateur** na die **slagoffer gasheer** te vra.
 3. Selfs al gebruik jy 'n nie Forwardable TGS, aangesien jy Hulpbron-gebaseerde beperkte afvaardiging ontgin, sal dit werk.
-4. Die aanvaller kan **pass-the-ticket** en **verteenwoordig** die gebruiker om **toegang tot die slagoffer DiensB** te verkry.
+4. Die aanvaller kan **die kaartjie oorgee** en **die gebruiker verteenwoordig** om **toegang tot die slagoffer DiensB** te verkry.
 
 Om die _**MachineAccountQuota**_ van die domein te kontroleer, kan jy gebruik:
 ```powershell
@@ -53,7 +50,7 @@ Get-DomainComputer SERVICEA
 ```
 ### Konfigurasie van R**esource-gebaseerde Beperkte Afvaardiging**
 
-**Gebruik van die activedirectory PowerShell-module**
+**Gebruik van activedirectory PowerShell-module**
 ```powershell
 Set-ADComputer $targetComputer -PrincipalsAllowedToDelegateToAccount SERVICEA$ #Assing delegation privileges
 Get-ADComputer $targetComputer -Properties PrincipalsAllowedToDelegateToAccount #Check that it worked
@@ -75,7 +72,7 @@ msds-allowedtoactonbehalfofotheridentity
 ```
 ### Voer 'n volledige S4U-aanval uit
 
-Eerst het ons die nuwe rekenaarobjek met die wagwoord `123456` geskep, so ons het die hash van daardie wagwoord nodig:
+Eerst het, het ons die nuwe Rekenaar objek met die wagwoord `123456` geskep, so ons het die hash van daardie wagwoord nodig:
 ```bash
 .\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local
 ```
@@ -89,7 +86,7 @@ U kan meer kaartjies genereer deur net een keer te vra met die `/altservice` par
 rubeus.exe s4u /user:FAKECOMPUTER$ /aes256:<AES 256 hash> /impersonateuser:administrator /msdsspn:cifs/victim.domain.local /altservice:krbtgt,cifs,host,http,winrm,RPCSS,wsman,ldap /domain:domain.local /ptt
 ```
 > [!CAUTION]
-> Let op dat gebruikers 'n attribuut het genaamd "**Kan nie gedelegeer word nie**". As 'n gebruiker hierdie attribuut op Waar het, sal jy nie in staat wees om hom te verpersoonlik nie. Hierdie eienskap kan binne bloodhound gesien word.
+> Let daarop dat gebruikers 'n attribuut het genaamd "**Kan nie gedelegeer word nie**". As 'n gebruiker hierdie attribuut op Waar het, sal jy nie in staat wees om hom na te volg nie. Hierdie eienskap kan binne bloodhound gesien word.
 
 ### Toegang
 
@@ -110,7 +107,7 @@ Leer oor die [**beskikbare dienskaartjies hier**](silver-ticket.md#available-ser
 - **`KDC_ERR_BADOPTION`**: Dit kan beteken:
   - Die gebruiker wat jy probeer om te verteenwoordig kan nie toegang tot die verlangde diens verkry nie (omdat jy dit nie kan verteenwoordig nie of omdat dit nie genoeg bevoegdhede het nie)
   - Die gevraagde diens bestaan nie (as jy vir 'n kaartjie vir winrm vra maar winrm nie loop nie)
-  - Die fakecomputer wat geskep is het sy bevoegdhede oor die kwesbare bediener verloor en jy moet dit teruggee.
+  - Die fakecomputer wat geskep is, het sy bevoegdhede oor die kwesbare bediener verloor en jy moet dit teruggee.
 
 ## Verwysings
 
@@ -118,9 +115,5 @@ Leer oor die [**beskikbare dienskaartjies hier**](silver-ticket.md#available-ser
 - [https://www.harmj0y.net/blog/redteaming/another-word-on-delegation/](https://www.harmj0y.net/blog/redteaming/another-word-on-delegation/)
 - [https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/resource-based-constrained-delegation-ad-computer-object-take-over-and-privilged-code-execution#modifying-target-computers-ad-object](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/resource-based-constrained-delegation-ad-computer-object-take-over-and-privilged-code-execution#modifying-target-computers-ad-object)
 - [https://stealthbits.com/blog/resource-based-constrained-delegation-abuse/](https://stealthbits.com/blog/resource-based-constrained-delegation-abuse/)
-
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

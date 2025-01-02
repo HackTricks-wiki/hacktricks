@@ -1,13 +1,5 @@
 # DCSync
 
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Gebruik [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=dcsync) om maklik **werkvloei** te bou en te **automate** wat aangedryf word deur die wêreld se **mees gevorderde** gemeenskapstoestelle.\
-Kry Toegang Vandag:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=dcsync" %}
-
 {{#include ../../banners/hacktricks-training.md}}
 
 ## DCSync
@@ -18,11 +10,11 @@ Die **DCSync** toestemming impliseer dat jy hierdie toestemmings oor die domein 
 
 - Die **DCSync-aanval simuleer die gedrag van 'n Domeinbeheerder en vra ander Domeinbeheerders om inligting te repliseer** met behulp van die Directory Replication Service Remote Protocol (MS-DRSR). Omdat MS-DRSR 'n geldige en noodsaaklike funksie van Active Directory is, kan dit nie afgeskakel of gedeaktiveer word nie.
 - Standaard het slegs **Domein Administrators, Enterprise Administrators, Administrators, en Domeinbeheerders** groepe die vereiste voorregte.
-- As enige rekeningwagwoorde met omkeerbare kodering gestoor word, is daar 'n opsie beskikbaar in Mimikatz om die wagwoord in duidelike teks terug te gee.
+- As enige rekening wagwoorde met omkeerbare kodering gestoor word, is daar 'n opsie beskikbaar in Mimikatz om die wagwoord in duidelike teks terug te gee.
 
 ### Enumeration
 
-Kyk wie hierdie toestemmings het met `powerview`:
+Kontroleer wie hierdie toestemmings het met behulp van `powerview`:
 ```powershell
 Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveGUIDs | ?{($_.ObjectType -match 'replication-get') -or ($_.ActiveDirectoryRights -match 'GenericAll') -or ($_.ActiveDirectoryRights -match 'WriteDacl')}
 ```
@@ -70,11 +62,3 @@ Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveG
 - [https://yojimbosecurity.ninja/dcsync/](https://yojimbosecurity.ninja/dcsync/)
 
 {{#include ../../banners/hacktricks-training.md}}
-
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Gebruik [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=dcsync) om maklik te bou en **werkvloei** te **automate** wat deur die wêreld se **mees gevorderde** gemeenskapstoestelle aangedryf word.\
-Kry Toegang Vandag:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=dcsync" %}

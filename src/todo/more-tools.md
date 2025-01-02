@@ -1,8 +1,5 @@
 {{#include ../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 # BlueTeam
 
@@ -47,7 +44,7 @@
 - [https://github.com/gwen001/github-search/blob/master/github-subdomains.py](https://github.com/gwen001/github-search/blob/master/github-subdomains.py) : Subdomein ontdekking in github
 - [https://github.com/robertdavidgraham/masscan](https://github.com/robertdavidgraham/masscan) : Vinning port skandering
 - [https://github.com/Threezh1/JSFinder](https://github.com/Threezh1/JSFinder) : Subdomeine en URL's uit JS-lêers in 'n web
-- [https://github.com/C1h2e1/MyFuzzingDict](https://github.com/C1h2e1/MyFuzzingDict) : Web lêers woordelys
+- [https://github.com/C1h2e1/MyFuzzingDict](https://github.com/C1h2e1/MyFuzzingDict) : Web lêers woordeboek
 - [https://github.com/TypeError/Bookmarks/blob/master/README.md](https://github.com/TypeError/Bookmarks/blob/master/README.md) : BurpExtension om dosyne herhaler oortjies te vermy
 - [https://github.com/hakluke/hakrawler](https://github.com/hakluke/hakrawler) : Verkry bates
 - [https://github.com/izo30/google-dorker](https://github.com/izo30/google-dorker) : Google dorks
@@ -67,14 +64,14 @@
 - [https://gist.github.com/netbiosX/ee35fcd3722e401a38136cff7b751d79](https://gist.github.com/netbiosX/ee35fcd3722e401a38136cff7b751d79) ([https://pentestlab.blog/2020/01/13/persistence-image-file-execution-options-injection/](https://pentestlab.blog/2020/01/13/persistence-image-file-execution-options-injection/)): Volharding
 - [https://github.com/odzhan/injection](https://github.com/odzhan/injection) : Windows Proses Inspuitings tegnieke
 - [https://github.com/BankSecurity/Red_Team](https://github.com/BankSecurity/Red_Team) : Rooi Span skripte
-- [https://github.com/l0ss/Grouper2](https://github.com/l0ss/Grouper2) : vind sekuriteitsverwante miskonfigurasies in Aktiewe Gidsbeleid.
+- [https://github.com/l0ss/Grouper2](https://github.com/l0ss/Grouper2) : vind sekuriteitsverwante misconfigurasies in Active Directory Groep Beleid.
 - [https://www.wietzebeukema.nl/blog/powershell-obfuscation-using-securestring](https://www.wietzebeukema.nl/blog/powershell-obfuscation-using-securestring) : Securestring obfuskering
 - [https://pentestlab.blog/2020/02/24/parent-pid-spoofing/](https://pentestlab.blog/2020/02/24/parent-pid-spoofing/) : Ouers PID Spoofing
 - [https://github.com/the-xentropy/xencrypt](https://github.com/the-xentropy/xencrypt) : Enkripteer Powershell payloads
 - [https://shells.systems/introducing-ninja-c2-the-c2-built-for-stealth-red-team-operations/](https://shells.systems/introducing-ninja-c2-the-c2-built-for-stealth-red-team-operations/) : Stealth C2
 - [https://windows-internals.com/faxing-your-way-to-system/](https://windows-internals.com/faxing-your-way-to-system/) : Reeks van logs oor Windows Internals
 - [https://bestestredteam.com/2018/10/02/tracking-pixel-in-microsoft-office-document/](https://bestestredteam.com/2018/10/02/tracking-pixel-in-microsoft-office-document/) : Volg wie 'n dokument oopmaak
-- [https://github.com/Integration-IT/Active-Directory-Exploitation-Cheat-Sheet](https://github.com/Integration-IT/Active-Directory-Exploitation-Cheat-Sheet) : Aktiewe Gids Cheat Sheet
+- [https://github.com/Integration-IT/Active-Directory-Exploitation-Cheat-Sheet](https://github.com/Integration-IT/Active-Directory-Exploitation-Cheat-Sheet) : Active Directory Cheat Sheet
 
 # Firmware
 
@@ -95,9 +92,9 @@ Hier is 'n firmware met kwesbaarhede om te analiseer: [https://github.com/script
 
 en hier is die metodologie owasp om firmware te analiseer: [https://github.com/scriptingxss/owasp-fstm](https://github.com/scriptingxss/owasp-fstm)
 
-Firmware emulering: FIRMADYNE (https://github.com/firmadyne/firmadyne/) is 'n platform vir die outomatisering van die emulering en dinamiese analise van Linux-gebaseerde firmware.
+Firmware emulatie: FIRMADYNE (https://github.com/firmadyne/firmadyne/) is 'n platform vir die outomatisering van die emulatie en dinamiese analise van Linux-gebaseerde firmware.
 
-# ANDER
+# OTHER
 
 - [https://twitter.com/HackAndDo/status/1202695084543791117](https://twitter.com/HackAndDo/status/1202695084543791117)
 - [https://github.com/weev3/LKWA](https://github.com/weev3/LKWA)
@@ -105,7 +102,7 @@ Firmware emulering: FIRMADYNE (https://github.com/firmadyne/firmadyne/) is 'n pl
 - [https://github.com/skelsec/jackdaw](https://github.com/skelsec/jackdaw)
 - [https://github.com/CoatiSoftware/Sourcetrail](https://github.com/CoatiSoftware/Sourcetrail) : Statiese kode analise
 - [https://www.hackerdecabecera.com/2019/12/blectf-capture-flag-en-formato-hardware.html](https://www.hackerdecabecera.com/2019/12/blectf-capture-flag-en-formato-hardware.html) : Bluetooth LE CTF
-- [https://github.com/skeeto/endlessh](https://github.com/skeeto/endlessh) : SSH tarpit wat stadig 'n eindelose banner stuur.
+- [https://github.com/skeeto/endlessh](https://github.com/skeeto/endlessh) : SSH tarpit wat stadig 'n eindelose banier stuur.
 - AWS en Cloud gereedskap: [https://github.com/toniblyx/my-arsenal-of-aws-security-tools](https://github.com/toniblyx/my-arsenal-of-aws-security-tools)
 - IFS (Interplanetary File System) vir phishing: [https://www.trustwave.com/en-us/resources/blogs/spiderlabs-blog/using-the-interplanetary-file-system-for-offensive-operations/](https://www.trustwave.com/en-us/resources/blogs/spiderlabs-blog/using-the-interplanetary-file-system-for-offensive-operations/)
 - IP rotasie dienste: [https://medium.com/@lokeshdlk77/how-to-rotate-ip-address-in-brute-force-attack-e66407259212](https://medium.com/@lokeshdlk77/how-to-rotate-ip-address-in-brute-force-attack-e66407259212)
@@ -119,8 +116,5 @@ Firmware emulering: FIRMADYNE (https://github.com/firmadyne/firmadyne/) is 'n pl
 - [https://github.com/doyensec/awesome-electronjs-hacking](https://github.com/doyensec/awesome-electronjs-hacking) : Hierdie lys is daarop gemik om Electron.js sekuriteitsverwante onderwerpe te dek.
 - [https://github.com/serain/bbrecon](https://github.com/serain/bbrecon) : Inligting oor BB programme
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../banners/hacktricks-training.md}}

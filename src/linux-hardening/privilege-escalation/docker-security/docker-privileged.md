@@ -2,28 +2,25 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## What Affects
+## Wat beïnvloed
 
-When you run a container as privileged these are the protections you are disabling:
+Wanneer jy 'n houer as bevoorregte uitvoer, is dit die beskermings wat jy deaktiveer:
 
-### Mount /dev
+### Monteer /dev
 
-In a privileged container, all the **devices can be accessed in `/dev/`**. Therefore you can **escape** by **mounting** the disk of the host.
+In 'n bevoorregte houer kan alle **toestelle in `/dev/`** toeganklik wees. Daarom kan jy **ontsnap** deur die skyf van die gasheer te **monteer**.
 
 {{#tabs}}
 {{#tab name="Inside default container"}}
-
 ```bash
 # docker run --rm -it alpine sh
 ls /dev
 console  fd       mqueue   ptmx     random   stderr   stdout   urandom
 core     full     null     pts      shm      stdin    tty      zero
 ```
-
 {{#endtab}}
 
-{{#tab name="Inside Privileged Container"}}
-
+{{#tab name="Binne Bevoorregte Houer"}}
 ```bash
 # docker run --rm --privileged -it alpine sh
 ls /dev
@@ -33,17 +30,15 @@ core             mqueue           ptmx             stdin            tty26       
 cpu              nbd0             pts              stdout           tty27            tty47            ttyS0
 [...]
 ```
-
 {{#endtab}}
 {{#endtabs}}
 
-### Read-only kernel file systems
+### Lees-alleen kern lêerstelsels
 
-Kernel file systems provide a mechanism for a process to modify the behavior of the kernel. However, when it comes to container processes, we want to prevent them from making any changes to the kernel. Therefore, we mount kernel file systems as **read-only** within the container, ensuring that the container processes cannot modify the kernel.
+Kern lêerstelsels bied 'n meganisme vir 'n proses om die gedrag van die kern te verander. egter, wanneer dit by houerprosesse kom, wil ons voorkom dat hulle enige veranderinge aan die kern aanbring. Daarom monteer ons kern lêerstelsels as **lees-alleen** binne die houer, wat verseker dat die houerprosesse nie die kern kan verander nie.
 
 {{#tabs}}
-{{#tab name="Inside default container"}}
-
+{{#tab name="Binne standaard houer"}}
 ```bash
 # docker run --rm -it alpine sh
 mount | grep '(ro'
@@ -52,28 +47,24 @@ cpuset on /sys/fs/cgroup/cpuset type cgroup (ro,nosuid,nodev,noexec,relatime,cpu
 cpu on /sys/fs/cgroup/cpu type cgroup (ro,nosuid,nodev,noexec,relatime,cpu)
 cpuacct on /sys/fs/cgroup/cpuacct type cgroup (ro,nosuid,nodev,noexec,relatime,cpuacct)
 ```
-
 {{#endtab}}
 
-{{#tab name="Inside Privileged Container"}}
-
+{{#tab name="Binne Bevoorregte Houer"}}
 ```bash
 # docker run --rm --privileged -it alpine sh
 mount  | grep '(ro'
 ```
-
 {{#endtab}}
 {{#endtabs}}
 
-### Masking over kernel file systems
+### Maskering oor kernlêerstelsels
 
-The **/proc** file system is selectively writable but for security, certain parts are shielded from write and read access by overlaying them with **tmpfs**, ensuring container processes can't access sensitive areas.
+Die **/proc** lêerstelsel is selektief skryfbaar, maar vir sekuriteit is sekere dele beskerm teen skryf- en leestoegang deur dit met **tmpfs** te oorlaai, wat verseker dat houerprosesse nie toegang tot sensitiewe areas het nie.
 
-> [!NOTE] > **tmpfs** is a file system that stores all the files in virtual memory. tmpfs doesn't create any files on your hard drive. So if you unmount a tmpfs file system, all the files residing in it are lost for ever.
+> [!NOTE] > **tmpfs** is 'n lêerstelsel wat al die lêers in virtuele geheue stoor. tmpfs skep nie enige lêers op jou hardeskyf nie. So as jy 'n tmpfs-lêerstelsel ontkoppel, gaan al die lêers wat daarin is vir altyd verlore.
 
 {{#tabs}}
 {{#tab name="Inside default container"}}
-
 ```bash
 # docker run --rm -it alpine sh
 mount  | grep /proc.*tmpfs
@@ -81,30 +72,26 @@ tmpfs on /proc/acpi type tmpfs (ro,relatime)
 tmpfs on /proc/kcore type tmpfs (rw,nosuid,size=65536k,mode=755)
 tmpfs on /proc/keys type tmpfs (rw,nosuid,size=65536k,mode=755)
 ```
-
 {{#endtab}}
 
-{{#tab name="Inside Privileged Container"}}
-
+{{#tab name="Binne Bevoorregte Houer"}}
 ```bash
 # docker run --rm --privileged -it alpine sh
 mount  | grep /proc.*tmpfs
 ```
-
 {{#endtab}}
 {{#endtabs}}
 
-### Linux capabilities
+### Linux vermoëns
 
-Container engines launch the containers with a **limited number of capabilities** to control what goes on inside of the container by default. **Privileged** ones have **all** the **capabilities** accesible. To learn about capabilities read:
+Container enjinse begin die houers met 'n **beperkte aantal vermoëns** om te beheer wat binne die houer gebeur per standaard. **Bevoorregte** houers het **alle** die **vermoëns** beskikbaar. Om meer oor vermoëns te leer, lees:
 
 {{#ref}}
 ../linux-capabilities.md
 {{#endref}}
 
 {{#tabs}}
-{{#tab name="Inside default container"}}
-
+{{#tab name="Binne standaard houer"}}
 ```bash
 # docker run --rm -it alpine sh
 apk add -U libcap; capsh --print
@@ -113,11 +100,9 @@ Current: cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,ca
 Bounding set =cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_net_raw,cap_sys_chroot,cap_mknod,cap_audit_write,cap_setfcap
 [...]
 ```
-
 {{#endtab}}
 
-{{#tab name="Inside Privileged Container"}}
-
+{{#tab name="Binne Bevoorregte Houer"}}
 ```bash
 # docker run --rm --privileged -it alpine sh
 apk add -U libcap; capsh --print
@@ -126,15 +111,14 @@ Current: =eip cap_perfmon,cap_bpf,cap_checkpoint_restore-eip
 Bounding set =cap_chown,cap_dac_override,cap_dac_read_search,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_linux_immutable,cap_net_bind_service,cap_net_broadcast,cap_net_admin,cap_net_raw,cap_ipc_lock,cap_ipc_owner,cap_sys_module,cap_sys_rawio,cap_sys_chroot,cap_sys_ptrace,cap_sys_pacct,cap_sys_admin,cap_sys_boot,cap_sys_nice,cap_sys_resource,cap_sys_time,cap_sys_tty_config,cap_mknod,cap_lease,cap_audit_write,cap_audit_control,cap_setfcap,cap_mac_override,cap_mac_admin,cap_syslog,cap_wake_alarm,cap_block_suspend,cap_audit_read
 [...]
 ```
-
 {{#endtab}}
 {{#endtabs}}
 
-You can manipulate the capabilities available to a container without running in `--privileged` mode by using the `--cap-add` and `--cap-drop` flags.
+Jy kan die vermoëns wat beskikbaar is vir 'n houer manipuleer sonder om in `--privileged` modus te loop deur die `--cap-add` en `--cap-drop` vlae te gebruik.
 
 ### Seccomp
 
-**Seccomp** is useful to **limit** the **syscalls** a container can call. A default seccomp profile is enabled by default when running docker containers, but in privileged mode it is disabled. Learn more about Seccomp here:
+**Seccomp** is nuttig om die **syscalls** wat 'n houer kan aanroep te **beperk**. 'n Standaard seccomp-profiel is standaard geaktiveer wanneer docker-houers loop, maar in privilige-modus is dit gedeaktiveer. Leer meer oor Seccomp hier:
 
 {{#ref}}
 seccomp.md
@@ -142,100 +126,86 @@ seccomp.md
 
 {{#tabs}}
 {{#tab name="Inside default container"}}
-
 ```bash
 # docker run --rm -it alpine sh
 grep Seccomp /proc/1/status
 Seccomp:	2
 Seccomp_filters:	1
 ```
-
 {{#endtab}}
 
-{{#tab name="Inside Privileged Container"}}
-
+{{#tab name="Binne Bevoorregte Houer"}}
 ```bash
 # docker run --rm --privileged -it alpine sh
 grep Seccomp /proc/1/status
 Seccomp:	0
 Seccomp_filters:	0
 ```
-
 {{#endtab}}
 {{#endtabs}}
-
 ```bash
 # You can manually disable seccomp in docker with
 --security-opt seccomp=unconfined
 ```
-
-Also, note that when Docker (or other CRIs) are used in a **Kubernetes** cluster, the **seccomp filter is disabled by default**
+Ook, let op dat wanneer Docker (of ander CRI's) in 'n **Kubernetes** kluster gebruik word, die **seccomp-filter is standaard gedeaktiveer**.
 
 ### AppArmor
 
-**AppArmor** is a kernel enhancement to confine **containers** to a **limited** set of **resources** with **per-program profiles**. When you run with the `--privileged` flag, this protection is disabled.
+**AppArmor** is 'n kernverbetering om **houers** tot 'n **beperkte** stel **hulpbronne** met **per-program profiele** te beperk. Wanneer jy met die `--privileged` vlag loop, is hierdie beskerming gedeaktiveer.
 
 {{#ref}}
 apparmor.md
 {{#endref}}
-
 ```bash
 # You can manually disable seccomp in docker with
 --security-opt apparmor=unconfined
 ```
-
 ### SELinux
 
-Running a container with the `--privileged` flag disables **SELinux labels**, causing it to inherit the label of the container engine, typically `unconfined`, granting full access similar to the container engine. In rootless mode, it uses `container_runtime_t`, while in root mode, `spc_t` is applied.
+Die uitvoering van 'n houer met die `--privileged` vlag deaktiveer **SELinux etikette**, wat veroorsaak dat dit die etiket van die houer enjin erf, tipies `unconfined`, wat volle toegang toelaat soortgelyk aan die houer enjin. In rootless modus, gebruik dit `container_runtime_t`, terwyl in root modus, `spc_t` toegepas word.
 
 {{#ref}}
 ../selinux.md
 {{#endref}}
-
 ```bash
 # You can manually disable selinux in docker with
 --security-opt label:disable
 ```
-
-## What Doesn't Affect
+## Wat Nie Beïnvloed Word Nie
 
 ### Namespaces
 
-Namespaces are **NOT affected** by the `--privileged` flag. Even though they don't have the security constraints enabled, they **do not see all of the processes on the system or the host network, for example**. Users can disable individual namespaces by using the **`--pid=host`, `--net=host`, `--ipc=host`, `--uts=host`** container engines flags.
+Namespaces word **NIE beïnvloed** deur die `--privileged` vlag. Alhoewel hulle nie die sekuriteitsbeperkings geaktiveer het nie, **sien hulle nie al die prosesse op die stelsel of die gasheer netwerk nie, byvoorbeeld**. Gebruikers kan individuele namespaces deaktiveer deur die **`--pid=host`, `--net=host`, `--ipc=host`, `--uts=host`** houer enjin vlae te gebruik.
 
 {{#tabs}}
 {{#tab name="Inside default privileged container"}}
-
 ```bash
 # docker run --rm --privileged -it alpine sh
 ps -ef
 PID   USER     TIME  COMMAND
-    1 root      0:00 sh
-   18 root      0:00 ps -ef
+1 root      0:00 sh
+18 root      0:00 ps -ef
 ```
-
 {{#endtab}}
 
-{{#tab name="Inside --pid=host Container"}}
-
+{{#tab name="Binne --pid=host Container"}}
 ```bash
 # docker run --rm --privileged --pid=host -it alpine sh
 ps -ef
 PID   USER     TIME  COMMAND
-    1 root      0:03 /sbin/init
-    2 root      0:00 [kthreadd]
-    3 root      0:00 [rcu_gp]ount | grep /proc.*tmpfs
+1 root      0:03 /sbin/init
+2 root      0:00 [kthreadd]
+3 root      0:00 [rcu_gp]ount | grep /proc.*tmpfs
 [...]
 ```
-
 {{#endtab}}
 {{#endtabs}}
 
-### User namespace
+### Gebruiker naamruimte
 
-**By default, container engines don't utilize user namespaces, except for rootless containers**, which require them for file system mounting and using multiple UIDs. User namespaces, integral for rootless containers, cannot be disabled and significantly enhance security by restricting privileges.
+**Standaard gebruik container enjin nie gebruiker naamruimtes nie, behalwe vir rootlose houers**, wat dit benodig vir lêerstelsel montering en die gebruik van verskeie UID's. Gebruiker naamruimtes, wat noodsaaklik is vir rootlose houers, kan nie gedeaktiveer word nie en verbeter sekuriteit aansienlik deur voorregte te beperk.
 
-## References
+## Verwysings
 
 - [https://www.redhat.com/sysadmin/privileged-flag-container-engines](https://www.redhat.com/sysadmin/privileged-flag-container-engines)
 

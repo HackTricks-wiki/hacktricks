@@ -1,40 +1,40 @@
-# macOS Serial Number
+# macOS Serienommer
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Basiese Inligting
 
-Apple devices post-2010 have serial numbers consisting of **12 alphanumeric characters**, each segment conveying specific information:
+Apple-toestelle na 2010 het serienommers wat bestaan uit **12 alfanumeriese karakters**, elke segment wat spesifieke inligting oordra:
 
-- **First 3 Characters**: Indicate the **manufacturing location**.
-- **Characters 4 & 5**: Denote the **year and week of manufacture**.
-- **Characters 6 to 8**: Serve as a **unique identifier** for each device.
-- **Last 4 Characters**: Specify the **model number**.
+- **Eerste 3 Karakters**: Dui die **produksie ligging** aan.
+- **Karakter 4 & 5**: Gee die **jaar en week van vervaardiging** aan.
+- **Karakter 6 tot 8**: Dien as 'n **unieke identifiseerder** vir elke toestel.
+- **Laaste 4 Karakters**: Spesifiseer die **modelnommer**.
 
-For instance, the serial number **C02L13ECF8J2** follows this structure.
+Byvoorbeeld, die serienommer **C02L13ECF8J2** volg hierdie struktuur.
 
-### **Manufacturing Locations (First 3 Characters)**
+### **Produksie Ligging (Eerste 3 Karakters)**
 
-Certain codes represent specific factories:
+Sekere kodes verteenwoordig spesifieke fabrieke:
 
-- **FC, F, XA/XB/QP/G8**: Various locations in the USA.
-- **RN**: Mexico.
-- **CK**: Cork, Ireland.
-- **VM**: Foxconn, Czech Republic.
-- **SG/E**: Singapore.
-- **MB**: Malaysia.
+- **FC, F, XA/XB/QP/G8**: Verskeie plekke in die VSA.
+- **RN**: Mexiko.
+- **CK**: Cork, Ierland.
+- **VM**: Foxconn, Tsjeggië.
+- **SG/E**: Singapoer.
+- **MB**: Maleisië.
 - **PT/CY**: Korea.
 - **EE/QT/UV**: Taiwan.
-- **FK/F1/F2, W8, DL/DM, DN, YM/7J, 1C/4H/WQ/F7**: Different locations in China.
-- **C0, C3, C7**: Specific cities in China.
-- **RM**: Refurbished devices.
+- **FK/F1/F2, W8, DL/DM, DN, YM/7J, 1C/4H/WQ/F7**: Verskillende plekke in China.
+- **C0, C3, C7**: Spesifieke stede in China.
+- **RM**: Gerenoveerde toestelle.
 
-### **Year of Manufacturing (4th Character)**
+### **Jaar van Vervaardiging (4de Karakter)**
 
-This character varies from 'C' (representing the first half of 2010) to 'Z' (second half of 2019), with different letters indicating different half-year periods.
+Hierdie karakter wissel van 'C' (wat die eerste helfte van 2010 verteenwoordig) tot 'Z' (tweede helfte van 2019), met verskillende letters wat verskillende helfjaarperiodes aandui.
 
-### **Week of Manufacturing (5th Character)**
+### **Week van Vervaardiging (5de Karakter)**
 
-Digits 1-9 correspond to weeks 1-9. Letters C-Y (excluding vowels and 'S') represent weeks 10-27. For the second half of the year, 26 is added to this number.
+Cijfers 1-9 kom ooreen met weke 1-9. Letters C-Y (uitgesluit vokale en 'S') verteenwoordig weke 10-27. Vir die tweede helfte van die jaar, word 26 by hierdie nommer opgetel.
 
 {{#include ../../../banners/hacktricks-training.md}}
