@@ -12,12 +12,12 @@ You define **launch environment and library constraints** in constraint dictiona
 
 There are 4 types of constraints:
 
-- **Self Constraints**: Constrains applied to the **running** binary.
-- **Parent Process**: Constraints applied to the **parent of the process** (for example **`launchd`** running a XP service)
-- **Responsible Constraints**: Constraints applied to the **process calling the service** in a XPC communication
-- **Library load constraints**: Use library load constraints to selectively describe code that can be loaded
+- **Self Constraints**: Ograničenja primenjena na **pokrenuti** binarni fajl.
+- **Parent Process**: Ograničenja primenjena na **roditeljski proces** (na primer **`launchd`** koji pokreće XP servis)
+- **Responsible Constraints**: Ograničenja primenjena na **proces koji poziva servis** u XPC komunikaciji
+- **Library load constraints**: Koristite ograničenja učitavanja biblioteka da selektivno opišete kod koji može biti učitan
 
-So when a process tries to launch another process — by calling `execve(_:_:_:)` or `posix_spawn(_:_:_:_:_:_:)` — the operating system checks that the **executable** file **satisfies** its **own self constraint**. It also checks that the **parent** **process’s** executable **satisfies** the executable’s **parent constraint**, and that the **responsible** **process’s** executable **satisfies the executable’s responsible process constrain**t. If any of these launch constraints aren’t satisfied, the operating system doesn’t run the program.
+So when a process tries to launch another process — by calling `execve(_:_:_:)` or `posix_spawn(_:_:_:_:_:_:)` — the operating system checks that the **executable** file **satisfies** its **own self constraint**. It also checks that the **parent** **process’s** executable **satisfies** the executable’s **parent constraint**, and that the **responsible** **process’s** executable **satisfies the executable’s responsible process constraint**. If any of these launch constraints aren’t satisfied, the operating system doesn’t run the program.
 
 If when loading a library any part of the **library constraint isn’t true**, your process **doesn’t load** the library.
 
@@ -31,9 +31,9 @@ The[ **facts that a LC can use are documented**](https://developer.apple.com/doc
 - is-sip-protected: A Boolean value that indicates whether the executable must be a file protected by System Integrity Protection (SIP).
 - `on-authorized-authapfs-volume:` A Boolean value that indicates whether the operating system loaded the executable from an authorized, authenticated APFS volume.
 - `on-authorized-authapfs-volume`: A Boolean value that indicates whether the operating system loaded the executable from an authorized, authenticated APFS volume.
-  - Cryptexes volume
+- Cryptexes volume
 - `on-system-volume:`A Boolean value that indicates whether the operating system loaded the executable from the currently-booted system volume.
-  - Inside /System...
+- Inside /System...
 - ...
 
 When an Apple binary is signed it **assigns it to a LC category** inside the **trust cache**.
@@ -42,51 +42,46 @@ When an Apple binary is signed it **assigns it to a LC category** inside the **t
 - Current **LC categories (macOS 14** - Somona) have been reversed and their [**descriptions can be found here**](https://gist.github.com/theevilbit/a6fef1e0397425a334d064f7b6e1be53).
 
 For example Category 1 is:
-
 ```
 Category 1:
-        Self Constraint: (on-authorized-authapfs-volume || on-system-volume) && launch-type == 1 && validation-category == 1
-        Parent Constraint: is-init-proc
+Self Constraint: (on-authorized-authapfs-volume || on-system-volume) && launch-type == 1 && validation-category == 1
+Parent Constraint: is-init-proc
 ```
-
-- `(on-authorized-authapfs-volume || on-system-volume)`: Must be in System or Cryptexes volume.
-- `launch-type == 1`: Must be a system service (plist in LaunchDaemons).
-- `validation-category == 1`: An operating system executable.
+- `(on-authorized-authapfs-volume || on-system-volume)`: Mora biti u System ili Cryptexes volumenu.
+- `launch-type == 1`: Mora biti sistemska usluga (plist u LaunchDaemons).
+- `validation-category == 1`: Izvršna datoteka operativnog sistema.
 - `is-init-proc`: Launchd
 
 ### Reversing LC Categories
 
-You have more information [**about it in here**](https://theevilbit.github.io/posts/launch_constraints_deep_dive/#reversing-constraints), but basically, They are defined in **AMFI (AppleMobileFileIntegrity)**, so you need to download the Kernel Development Kit to get the **KEXT**. The symbols starting with **`kConstraintCategory`** are the **interesting** ones. Extracting them you will get a DER (ASN.1) encoded stream that you will need to decode with [ASN.1 Decoder](https://holtstrom.com/michael/tools/asn1decoder.php) or the python-asn1 library and its `dump.py` script, [andrivet/python-asn1](https://github.com/andrivet/python-asn1/tree/master) which will give you a more understandable string.
+Imate više informacija [**o tome ovde**](https://theevilbit.github.io/posts/launch_constraints_deep_dive/#reversing-constraints), ali u suštini, one su definisane u **AMFI (AppleMobileFileIntegrity)**, tako da treba da preuzmete Kernel Development Kit da biste dobili **KEXT**. Simboli koji počinju sa **`kConstraintCategory`** su **zanimljivi**. Ekstrakcijom njih dobićete DER (ASN.1) kodirani tok koji ćete morati da dekodirate sa [ASN.1 Decoder](https://holtstrom.com/michael/tools/asn1decoder.php) ili python-asn1 bibliotekom i njenim `dump.py` skriptom, [andrivet/python-asn1](https://github.com/andrivet/python-asn1/tree/master) koja će vam dati razumljiviji string.
 
 ## Environment Constraints
 
-These are the Launch Constraints set configured in **third party applications**. The developer can select the **facts** and **logical operands to use** in his application to restrict the access to itself.
+Ovo su Launch Constraints postavljeni u **aplikacijama trećih strana**. Razvijač može odabrati **činjenice** i **logičke operatore koje će koristiti** u svojoj aplikaciji da bi ograničio pristup sebi.
 
-It's possible to enumerate the Environment Constraints of an application with:
-
+Moguće je enumerisati Environment Constraints aplikacije sa:
 ```bash
 codesign -d -vvvv app.app
 ```
-
 ## Trust Caches
 
-In **macOS** there are a few trust caches:
+U **macOS** postoji nekoliko trust cache-a:
 
 - **`/System/Volumes/Preboot/*/boot/*/usr/standalone/firmware/FUD/BaseSystemTrustCache.img4`**
 - **`/System/Volumes/Preboot/*/boot/*/usr/standalone/firmware/FUD/StaticTrustCache.img4`**
 - **`/System/Library/Security/OSLaunchPolicyData`**
 
-And in iOS it looks like it's in **`/usr/standalone/firmware/FUD/StaticTrustCache.img4`**.
+A u iOS izgleda da se nalazi u **`/usr/standalone/firmware/FUD/StaticTrustCache.img4`**.
 
 > [!WARNING]
-> On macOS running on Apple Silicon devices, if an Apple signed binary is not in the trust cache, AMFI will refuse to load it.
+> Na macOS-u koji radi na Apple Silicon uređajima, ako Apple potpisani binarni fajl nije u trust cache-u, AMFI će odbiti da ga učita.
 
 ### Enumerating Trust Caches
 
-The previous trust cache files are in format **IMG4** and **IM4P**, being IM4P the payload section of a IMG4 format.
+Prethodni trust cache fajlovi su u formatu **IMG4** i **IM4P**, pri čemu je IM4P deo sa payload-om formata IMG4.
 
-You can use [**pyimg4**](https://github.com/m1stadev/PyIMG4) to extract the payload of databases:
-
+Možete koristiti [**pyimg4**](https://github.com/m1stadev/PyIMG4) za ekstrakciju payload-a iz baza:
 ```bash
 # Installation
 python3 -m pip install pyimg4
@@ -102,11 +97,9 @@ pyimg4 im4p extract -i /tmp/StaticTrustCache.im4p -o /tmp/StaticTrustCache.data
 
 pyimg4 im4p extract -i /System/Library/Security/OSLaunchPolicyData -o /tmp/OSLaunchPolicyData.data
 ```
+(Druga opcija bi mogla biti korišćenje alata [**img4tool**](https://github.com/tihmstar/img4tool), koji će raditi čak i na M1, čak i ako je verzija stara, i za x86_64 ako ga instalirate na pravim mestima).
 
-(Another option could be to use the tool [**img4tool**](https://github.com/tihmstar/img4tool), which will run even in M1 even if the release is old and for x86_64 if you install it in the proper locations).
-
-Now you can use the tool [**trustcache**](https://github.com/CRKatri/trustcache) to get the information in a readable format:
-
+Sada možete koristiti alat [**trustcache**](https://github.com/CRKatri/trustcache) da dobijete informacije u čitljivom formatu:
 ```bash
 # Install
 wget https://github.com/CRKatri/trustcache/releases/download/v2.0/trustcache_macos_arm64
@@ -130,45 +123,42 @@ entry count = 969
 01e6934cb8833314ea29640c3f633d740fc187f2 [none] [2] [2]
 020bf8c388deaef2740d98223f3d2238b08bab56 [none] [2] [3]
 ```
-
-The trust cache follows the following structure, so The **LC category is the 4th column**
-
+Keš poverenja prati sledeću strukturu, tako da je **LC kategorija 4. kolona**
 ```c
 struct trust_cache_entry2 {
-	uint8_t cdhash[CS_CDHASH_LEN];
-	uint8_t hash_type;
-	uint8_t flags;
-	uint8_t constraintCategory;
-	uint8_t reserved0;
+uint8_t cdhash[CS_CDHASH_LEN];
+uint8_t hash_type;
+uint8_t flags;
+uint8_t constraintCategory;
+uint8_t reserved0;
 } __attribute__((__packed__));
 ```
+Zatim, možete koristiti skriptu kao što je [**ova**](https://gist.github.com/xpn/66dc3597acd48a4c31f5f77c3cc62f30) za ekstrakciju podataka.
 
-Then, you could use a script such as [**this one**](https://gist.github.com/xpn/66dc3597acd48a4c31f5f77c3cc62f30) to extract data.
+Na osnovu tih podataka možete proveriti aplikacije sa **vrednošću launch constraints `0`**, koje su one koje nisu ograničene ([**proverite ovde**](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056) šta svaka vrednost predstavlja).
 
-From that data you can check the Apps with a **launch constraints value of `0`** , which are the ones that aren't constrained ([**check here**](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056) for what each value is).
+## Mitigacije napada
 
-## Attack Mitigations
+Launch Constrains bi umanjili nekoliko starih napada **osiguravajući da proces neće biti izvršen u neočekivanim uslovima:** Na primer, iz neočekivanih lokacija ili da bude pozvan od neočekivanog roditeljskog procesa (ako samo launchd treba da ga pokrene).
 
-Launch Constrains would have mitigated several old attacks by **making sure that the process won't be executed in unexpected conditions:** For example from unexpected locations or being invoked by an unexpected parent process (if only launchd should be launching it)
+Pored toga, Launch Constraints takođe **umanjuju napade na smanjenje nivoa sigurnosti.**
 
-Moreover, Launch Constraints also **mitigates downgrade attacks.**
+Međutim, oni **ne umanjuju uobičajene XPC** zloupotrebe, **Electron** injekcije koda ili **dylib injekcije** bez validacije biblioteka (osim ako su ID-ovi timova koji mogu učitati biblioteke poznati).
 
-However, they **don't mitigate common XPC** abuses, **Electron** code injections or **dylib injections** without library validation (unless the team IDs that can load libraries are known).
+### XPC Daemon Zaštita
 
-### XPC Daemon Protection
+U Sonoma izdanju, značajna tačka je **konfiguracija odgovornosti** XPC servisnog daemona. XPC servis je odgovoran za sebe, za razliku od povezane klijentske aplikacije koja je odgovorna. Ovo je dokumentovano u izveštaju o povratnim informacijama FB13206884. Ova postavka može izgledati kao greška, jer omogućava određene interakcije sa XPC servisom:
 
-In the Sonoma release, a notable point is the daemon XPC service's **responsibility configuration**. The XPC service is accountable for itself, as opposed to the connecting client being responsible. This is documented in the feedback report FB13206884. This setup might seem flawed, as it allows certain interactions with the XPC service:
+- **Pokretanje XPC Servisa**: Ako se smatra greškom, ova postavka ne dozvoljava pokretanje XPC servisa putem koda napadača.
+- **Povezivanje sa Aktivnim Servisom**: Ako je XPC servis već pokrenut (moguće aktiviran njegovom originalnom aplikacijom), nema prepreka za povezivanje sa njim.
 
-- **Launching the XPC Service**: If assumed to be a bug, this setup does not permit initiating the XPC service through attacker code.
-- **Connecting to an Active Service**: If the XPC service is already running (possibly activated by its original application), there are no barriers to connecting to it.
+Iako implementacija ograničenja na XPC servis može biti korisna **sužavanjem prozora za potencijalne napade**, to ne rešava primarnu zabrinutost. Osiguranje sigurnosti XPC servisa fundamentalno zahteva **efikasnu validaciju povezane klijentske aplikacije**. Ovo ostaje jedini način da se ojača sigurnost servisa. Takođe, vredi napomenuti da je pomenuta konfiguracija odgovornosti trenutno operativna, što možda nije u skladu sa predviđenim dizajnom.
 
-While implementing constraints on the XPC service might be beneficial by **narrowing the window for potential attacks**, it doesn't address the primary concern. Ensuring the security of the XPC service fundamentally requires **validating the connecting client effectively**. This remains the sole method to fortify the service's security. Also, it's worth noting that the mentioned responsibility configuration is currently operational, which might not align with the intended design.
+### Electron Zaštita
 
-### Electron Protection
+Čak i ako je potrebno da aplikacija bude **otvorena putem LaunchService** (u roditeljskim ograničenjima). To se može postići korišćenjem **`open`** (koji može postaviti env varijable) ili korišćenjem **Launch Services API** (gde se mogu naznačiti env varijable).
 
-Even if it's required that the application has to be **opened by LaunchService** (in the parents constraints). This can be achieved using **`open`** (which can set env variables) or using the **Launch Services API** (where env variables can be indicated).
-
-## References
+## Reference
 
 - [https://youtu.be/f1HA5QhLQ7Y?t=24146](https://youtu.be/f1HA5QhLQ7Y?t=24146)
 - [https://theevilbit.github.io/posts/launch_constraints_deep_dive/](https://theevilbit.github.io/posts/launch_constraints_deep_dive/)
@@ -176,4 +166,3 @@ Even if it's required that the application has to be **opened by LaunchService**
 - [https://developer.apple.com/videos/play/wwdc2023/10266/](https://developer.apple.com/videos/play/wwdc2023/10266/)
 
 {{#include ../../../banners/hacktricks-training.md}}
-

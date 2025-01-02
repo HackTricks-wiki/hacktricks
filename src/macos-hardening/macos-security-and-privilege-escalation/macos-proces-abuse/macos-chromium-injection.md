@@ -2,33 +2,31 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Osnovne Informacije
 
-Chromium-based browsers like Google Chrome, Microsoft Edge, Brave, and others. These browsers are built on the Chromium open-source project, which means they share a common base and, therefore, have similar functionalities and developer options.
+Browserski programi zasnovani na Chromium-u, kao što su Google Chrome, Microsoft Edge, Brave i drugi. Ovi pregledači su izgrađeni na Chromium open-source projektu, što znači da dele zajedničku osnovu i, stoga, imaju slične funkcionalnosti i opcije za programere.
 
-#### `--load-extension` Flag
+#### `--load-extension` Zastavica
 
-The `--load-extension` flag is used when starting a Chromium-based browser from the command line or a script. This flag allows to **automatically load one or more extensions** into the browser upon startup.
+Zastavica `--load-extension` se koristi prilikom pokretanja pregledača zasnovanog na Chromium-u iz komandne linije ili skripte. Ova zastavica omogućava **automatsko učitavanje jedne ili više ekstenzija** u pregledač prilikom pokretanja.
 
-#### `--use-fake-ui-for-media-stream` Flag
+#### `--use-fake-ui-for-media-stream` Zastavica
 
-The `--use-fake-ui-for-media-stream` flag is another command-line option that can be used to start Chromium-based browsers. This flag is designed to **bypass the normal user prompts that ask for permission to access media streams from the camera and microphone**. When this flag is used, the browser automatically grants permission to any website or application that requests access to the camera or microphone.
+Zastavica `--use-fake-ui-for-media-stream` je još jedna opcija komandne linije koja se može koristiti za pokretanje pregledača zasnovanih na Chromium-u. Ova zastavica je dizajnirana da **obiđe normalne korisničke poruke koje traže dozvolu za pristup medijskim tokovima sa kamere i mikrofona**. Kada se ova zastavica koristi, pregledač automatski odobrava pristup bilo kojoj veb stranici ili aplikaciji koja traži pristup kameri ili mikrofonu.
 
-### Tools
+### Alati
 
 - [https://github.com/breakpointHQ/snoop](https://github.com/breakpointHQ/snoop)
 - [https://github.com/breakpointHQ/VOODOO](https://github.com/breakpointHQ/VOODOO)
 
-### Example
-
+### Primer
 ```bash
 # Intercept traffic
 voodoo intercept -b chrome
 ```
+Pronađite više primera u linkovima alata
 
-Find more examples in the tools links
-
-## References
+## Reference
 
 - [https://twitter.com/RonMasas/status/1758106347222995007](https://twitter.com/RonMasas/status/1758106347222995007)
 

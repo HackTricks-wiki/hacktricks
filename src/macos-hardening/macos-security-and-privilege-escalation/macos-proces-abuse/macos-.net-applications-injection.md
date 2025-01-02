@@ -2,39 +2,36 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**This is a summary of the post [https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/](https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/). Check it for further details!**
+**Ovo je sažetak posta [https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/](https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/). Proverite za više detalja!**
 
 ## .NET Core Debugging <a href="#net-core-debugging" id="net-core-debugging"></a>
 
-### **Establishing a Debugging Session** <a href="#net-core-debugging" id="net-core-debugging"></a>
+### **Usmeravanje Debugging Sesije** <a href="#net-core-debugging" id="net-core-debugging"></a>
 
-The handling of communication between debugger and debuggee in .NET is managed by [**dbgtransportsession.cpp**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp). This component sets up two named pipes per .NET process as seen in [dbgtransportsession.cpp#L127](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L127), which are initiated via [twowaypipe.cpp#L27](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/debug-pal/unix/twowaypipe.cpp#L27). These pipes are suffixed with **`-in`** and **`-out`**.
+Upravljanje komunikacijom između debagera i debuggee u .NET-u se vrši putem [**dbgtransportsession.cpp**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp). Ova komponenta postavlja dve imenovane cevi po .NET procesu kao što je prikazano u [dbgtransportsession.cpp#L127](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L127), koje se iniciraju putem [twowaypipe.cpp#L27](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/debug-pal/unix/twowaypipe.cpp#L27). Ove cevi su sa sufiksima **`-in`** i **`-out`**.
 
-By visiting the user's **`$TMPDIR`**, one can find debugging FIFOs available for debugging .Net applications.
+Posetom korisnikovom **`$TMPDIR`**, mogu se pronaći debugging FIFO-ovi dostupni za debugging .Net aplikacija.
 
-[**DbgTransportSession::TransportWorker**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L1259) is responsible for managing communication from a debugger. To initiate a new debugging session, a debugger must send a message via the `out` pipe starting with a `MessageHeader` struct, detailed in the .NET source code:
-
+[**DbgTransportSession::TransportWorker**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L1259) je odgovoran za upravljanje komunikacijom iz debagera. Da bi se započela nova debugging sesija, debager mora poslati poruku putem `out` cevi koja počinje sa `MessageHeader` strukturom, detaljno opisano u .NET izvoru:
 ```c
 struct MessageHeader {
-    MessageType   m_eType;        // Message type
-    DWORD         m_cbDataBlock;  // Size of following data block (can be zero)
-    DWORD         m_dwId;         // Message ID from sender
-    DWORD         m_dwReplyId;    // Reply-to Message ID
-    DWORD         m_dwLastSeenId; // Last seen Message ID by sender
-    DWORD         m_dwReserved;   // Reserved for future (initialize to zero)
-        union {
-            struct {
-                DWORD         m_dwMajorVersion;   // Requested/accepted protocol version
-                DWORD         m_dwMinorVersion;
-            } VersionInfo;
-          ...
-        } TypeSpecificData;
-    BYTE          m_sMustBeZero[8];
+MessageType   m_eType;        // Message type
+DWORD         m_cbDataBlock;  // Size of following data block (can be zero)
+DWORD         m_dwId;         // Message ID from sender
+DWORD         m_dwReplyId;    // Reply-to Message ID
+DWORD         m_dwLastSeenId; // Last seen Message ID by sender
+DWORD         m_dwReserved;   // Reserved for future (initialize to zero)
+union {
+struct {
+DWORD         m_dwMajorVersion;   // Requested/accepted protocol version
+DWORD         m_dwMinorVersion;
+} VersionInfo;
+...
+} TypeSpecificData;
+BYTE          m_sMustBeZero[8];
 }
 ```
-
-To request a new session, this struct is populated as follows, setting the message type to `MT_SessionRequest` and the protocol version to the current version:
-
+Da biste zatražili novu sesiju, ova struktura se popunjava na sledeći način, postavljajući tip poruke na `MT_SessionRequest` i verziju protokola na trenutnu verziju:
 ```c
 static const DWORD kCurrentMajorVersion = 2;
 static const DWORD kCurrentMinorVersion = 0;
@@ -45,25 +42,19 @@ sSendHeader.TypeSpecificData.VersionInfo.m_dwMajorVersion = kCurrentMajorVersion
 sSendHeader.TypeSpecificData.VersionInfo.m_dwMinorVersion = kCurrentMinorVersion;
 sSendHeader.m_cbDataBlock = sizeof(SessionRequestData);
 ```
-
-This header is then sent over to the target using the `write` syscall, followed by the `sessionRequestData` struct containing a GUID for the session:
-
+Ova glava se zatim šalje cilju koristeći `write` syscall, praćena `sessionRequestData` strukturom koja sadrži GUID za sesiju:
 ```c
 write(wr, &sSendHeader, sizeof(MessageHeader));
 memset(&sDataBlock.m_sSessionID, 9, sizeof(SessionRequestData));
 write(wr, &sDataBlock, sizeof(SessionRequestData));
 ```
-
-A read operation on the `out` pipe confirms the success or failure of the debugging session establishment:
-
+Operacija čitanja na `out` cevi potvrđuje uspeh ili neuspeh uspostavljanja sesije debagovanja:
 ```c
 read(rd, &sReceiveHeader, sizeof(MessageHeader));
 ```
+## Čitanje Memorije
 
-## Reading Memory
-
-Once a debugging session is established, memory can be read using the [`MT_ReadMemory`](https://github.com/dotnet/runtime/blob/f3a45a91441cf938765bafc795cbf4885cad8800/src/coreclr/src/debug/shared/dbgtransportsession.cpp#L1896) message type. The function readMemory is detailed, performing the necessary steps to send a read request and retrieve the response:
-
+Kada je sesija debagovanja uspostavljena, memorija se može čitati koristeći [`MT_ReadMemory`](https://github.com/dotnet/runtime/blob/f3a45a91441cf938765bafc795cbf4885cad8800/src/coreclr/src/debug/shared/dbgtransportsession.cpp#L1896) tip poruke. Funkcija readMemory je detaljno opisana, obavljajući neophodne korake za slanje zahteva za čitanje i preuzimanje odgovora:
 ```c
 bool readMemory(void *addr, int len, unsigned char **output) {
 // Allocation and initialization
@@ -75,13 +66,11 @@ bool readMemory(void *addr, int len, unsigned char **output) {
 return true;
 }
 ```
+Potpuni dokaz koncepta (POC) je dostupan [ovde](https://gist.github.com/xpn/95eefc14918998853f6e0ab48d9f7b0b).
 
-The complete proof of concept (POC) is available [here](https://gist.github.com/xpn/95eefc14918998853f6e0ab48d9f7b0b).
+## Pisanje u Memoriju
 
-## Writing Memory
-
-Similarly, memory can be written using the `writeMemory` function. The process involves setting the message type to `MT_WriteMemory`, specifying the address and length of the data, and then sending the data:
-
+Slično tome, memorija se može pisati koristeći funkciju `writeMemory`. Proces uključuje postavljanje tipa poruke na `MT_WriteMemory`, određivanje adrese i dužine podataka, a zatim slanje podataka:
 ```c
 bool writeMemory(void *addr, int len, unsigned char *input) {
 // Increment IDs, set message type, and specify memory location
@@ -93,25 +82,22 @@ bool writeMemory(void *addr, int len, unsigned char *input) {
 return true;
 }
 ```
+Povezani POC je dostupan [ovde](https://gist.github.com/xpn/7c3040a7398808747e158a25745380a5).
 
-The associated POC is available [here](https://gist.github.com/xpn/7c3040a7398808747e158a25745380a5).
+## .NET Core Izvršavanje Koda <a href="#net-core-code-execution" id="net-core-code-execution"></a>
 
-## .NET Core Code Execution <a href="#net-core-code-execution" id="net-core-code-execution"></a>
-
-To execute code, one needs to identify a memory region with rwx permissions, which can be done using vmmap -pages:
-
+Da bi se izvršio kod, potrebno je identifikovati memorijsku oblast sa rwx dozvolama, što se može uraditi koristeći vmmap -pages:
 ```bash
 vmmap -pages [pid]
 vmmap -pages 35829 | grep "rwx/rwx"
 ```
+Lociranje mesta za prepisivanje pokazivača funkcije je neophodno, a u .NET Core, to se može uraditi ciljanjem na **Dynamic Function Table (DFT)**. Ova tabela, detaljno opisana u [`jithelpers.h`](https://github.com/dotnet/runtime/blob/6072e4d3a7a2a1493f514cdf4be75a3d56580e84/src/coreclr/src/inc/jithelpers.h), koristi se od strane runtime-a za JIT kompajlaciju pomoćnih funkcija.
 
-Locating a place to overwrite a function pointer is necessary, and in .NET Core, this can be done by targeting the **Dynamic Function Table (DFT)**. This table, detailed in [`jithelpers.h`](https://github.com/dotnet/runtime/blob/6072e4d3a7a2a1493f514cdf4be75a3d56580e84/src/coreclr/src/inc/jithelpers.h), is used by the runtime for JIT compilation helper functions.
+Za x64 sisteme, pretraživanje potpisa može se koristiti za pronalaženje reference na simbol `_hlpDynamicFuncTable` u `libcorclr.dll`.
 
-For x64 systems, signature hunting can be used to find a reference to the symbol `_hlpDynamicFuncTable` in `libcorclr.dll`.
+Debugger funkcija `MT_GetDCB` pruža korisne informacije, uključujući adresu pomoćne funkcije, `m_helperRemoteStartAddr`, koja ukazuje na lokaciju `libcorclr.dll` u memoriji procesa. Ova adresa se zatim koristi za započinjanje pretrage za DFT i prepisivanje pokazivača funkcije sa adresom shellcode-a.
 
-The `MT_GetDCB` debugger function provides useful information, including the address of a helper function, `m_helperRemoteStartAddr`, indicating the location of `libcorclr.dll` in the process memory. This address is then used to start a search for the DFT and overwrite a function pointer with the shellcode's address.
-
-The full POC code for injection into PowerShell is accessible [here](https://gist.github.com/xpn/b427998c8b3924ab1d63c89d273734b6).
+Puni POC kod za injekciju u PowerShell je dostupan [ovde](https://gist.github.com/xpn/b427998c8b3924ab1d63c89d273734b6).
 
 ## References
 

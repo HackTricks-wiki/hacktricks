@@ -2,72 +2,72 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**For further detail about the technique check the original post from:** [**https://blog.xpnsec.com/dirtynib/**](https://blog.xpnsec.com/dirtynib/) and the following post by [**https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/**](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/)**.** Here is a summary:
+**Za više detalja o tehnici pogledajte originalni post sa:** [**https://blog.xpnsec.com/dirtynib/**](https://blog.xpnsec.com/dirtynib/) i sledeći post od [**https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/**](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/)**.** Evo sažetak:
 
-### What are Nib files
+### Šta su Nib datoteke
 
-Nib (short for NeXT Interface Builder) files, part of Apple's development ecosystem, are intended for defining **UI elements** and their interactions in applications. They encompass serialized objects such as windows and buttons, and are loaded at runtime. Despite their ongoing usage, Apple now advocates for Storyboards for more comprehensive UI flow visualization.
+Nib (skraćeno od NeXT Interface Builder) datoteke, deo Apple-ovog razvojnog ekosistema, namenjene su definisanju **UI elemenata** i njihovih interakcija u aplikacijama. One obuhvataju serijalizovane objekte kao što su prozori i dugmad, i učitavaju se u vreme izvođenja. I pored njihove stalne upotrebe, Apple sada preporučuje Storyboards za sveobuhvatniju vizualizaciju UI toka.
 
-The main Nib file is referenced in the value **`NSMainNibFile`** inside the `Info.plist` file of the application and is loaded by the function **`NSApplicationMain`** executed in the `main` function of the application.
+Glavna Nib datoteka se poziva u vrednosti **`NSMainNibFile`** unutar `Info.plist` datoteke aplikacije i učitava je funkcija **`NSApplicationMain`** koja se izvršava u `main` funkciji aplikacije.
 
-### Dirty Nib Injection Process
+### Dirty Nib Proces Injekcije
 
-#### Creating and Setting Up a NIB File
+#### Kreiranje i Postavljanje NIB Datoteke
 
-1. **Initial Setup**:
-   - Create a new NIB file using XCode.
-   - Add an Object to the interface, setting its class to `NSAppleScript`.
-   - Configure the initial `source` property via User Defined Runtime Attributes.
-2. **Code Execution Gadget**:
-   - The setup facilitates running AppleScript on demand.
-   - Integrate a button to activate the `Apple Script` object, specifically triggering the `executeAndReturnError:` selector.
-3. **Testing**:
+1. **Početna Postavka**:
+- Kreirajte novu NIB datoteku koristeći XCode.
+- Dodajte objekat u interfejs, postavljajući njegovu klasu na `NSAppleScript`.
+- Konfigurišite početnu `source` svojstvo putem User Defined Runtime Attributes.
+2. **Gadget za Izvršavanje Koda**:
+- Postavka omogućava pokretanje AppleScript-a na zahtev.
+- Integrisati dugme za aktiviranje `Apple Script` objekta, posebno pokrećući `executeAndReturnError:` selektor.
+3. **Testiranje**:
 
-   - A simple Apple Script for testing purposes:
+- Jednostavan Apple Script za testiranje:
 
-     ```bash
-     set theDialogText to "PWND"
-     display dialog theDialogText
-     ```
+```bash
+set theDialogText to "PWND"
+display dialog theDialogText
+```
 
-   - Test by running in the XCode debugger and clicking the button.
+- Testirajte pokretanjem u XCode debageru i klikom na dugme.
 
-#### Targeting an Application (Example: Pages)
+#### Ciljanje Aplikacije (Primer: Pages)
 
-1. **Preparation**:
-   - Copy the target app (e.g., Pages) into a separate directory (e.g., `/tmp/`).
-   - Initiate the app to sidestep Gatekeeper issues and cache it.
-2. **Overwriting NIB File**:
-   - Replace an existing NIB file (e.g., About Panel NIB) with the crafted DirtyNIB file.
-3. **Execution**:
-   - Trigger the execution by interacting with the app (e.g., selecting the `About` menu item).
+1. **Priprema**:
+- Kopirajte ciljan app (npr. Pages) u poseban direktorijum (npr. `/tmp/`).
+- Pokrenite aplikaciju da biste izbegli probleme sa Gatekeeper-om i keširali je.
+2. **Prepisivanje NIB Datoteke**:
+- Zamenite postojeću NIB datoteku (npr. About Panel NIB) sa kreiranom DirtyNIB datotekom.
+3. **Izvršavanje**:
+- Pokrenite izvršavanje interakcijom sa aplikacijom (npr. odabirom `About` menija).
 
-#### Proof of Concept: Accessing User Data
+#### Dokaz Koncepta: Pristupanje Korisničkim Podacima
 
-- Modify the AppleScript to access and extract user data, such as photos, without user consent.
+- Izmenite AppleScript da pristupi i izvuče korisničke podatke, kao što su fotografije, bez pristanka korisnika.
 
-### Code Sample: Malicious .xib File
+### Uzorak Koda: Maliciozna .xib Datoteka
 
-- Access and review a [**sample of a malicious .xib file**](https://gist.github.com/xpn/16bfbe5a3f64fedfcc1822d0562636b4) that demonstrates executing arbitrary code.
+- Pristupite i pregledajte [**uzorak maliciozne .xib datoteke**](https://gist.github.com/xpn/16bfbe5a3f64fedfcc1822d0562636b4) koja demonstrira izvršavanje proizvoljnog koda.
 
-### Other Example
+### Drugi Primer
 
-In the post [https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/) you can find tutorial on how to create a dirty nib.&#x20;
+U postu [https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/) možete pronaći tutorijal o tome kako kreirati dirty nib.&#x20;
 
-### Addressing Launch Constraints
+### Rešavanje Ograničenja Pokretanja
 
-- Launch Constraints hinder app execution from unexpected locations (e.g., `/tmp`).
-- It's possible to identify apps not protected by Launch Constraints and target them for NIB file injection.
+- Ograničenja pokretanja ometaju izvršavanje aplikacija iz neočekivanih lokacija (npr. `/tmp`).
+- Moguće je identifikovati aplikacije koje nisu zaštićene Ograničenjima pokretanja i ciljati ih za NIB datoteku injekciju.
 
-### Additional macOS Protections
+### Dodatne macOS Zaštite
 
-From macOS Sonoma onwards, modifications inside App bundles are restricted. However, earlier methods involved:
+Od macOS Sonoma nadalje, modifikacije unutar App bundle-a su ograničene. Međutim, ranije metode su uključivale:
 
-1. Copying the app to a different location (e.g., `/tmp/`).
-2. Renaming directories within the app bundle to bypass initial protections.
-3. After running the app to register with Gatekeeper, modifying the app bundle (e.g., replacing MainMenu.nib with Dirty.nib).
-4. Renaming directories back and rerunning the app to execute the injected NIB file.
+1. Kopiranje aplikacije na drugo mesto (npr. `/tmp/`).
+2. Preimenovanje direktorijuma unutar app bundle-a kako bi se zaobišle početne zaštite.
+3. Nakon pokretanja aplikacije da se registruje sa Gatekeeper-om, modifikovanje app bundle-a (npr. zamenjivanje MainMenu.nib sa Dirty.nib).
+4. Ponovno preimenovanje direktorijuma i ponovo pokretanje aplikacije da izvrši injektovanu NIB datoteku.
 
-**Note**: Recent macOS updates have mitigated this exploit by preventing file modifications within app bundles post Gatekeeper caching, rendering the exploit ineffective.
+**Napomena**: Nedavne macOS nadogradnje su ublažile ovu eksploataciju sprečavanjem modifikacija datoteka unutar app bundle-a nakon keširanja Gatekeeper-a, čineći eksploataciju neefikasnom.
 
 {{#include ../../../banners/hacktricks-training.md}}

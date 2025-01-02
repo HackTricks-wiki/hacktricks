@@ -9,168 +9,152 @@
 
 ## 1. Thread Hijacking
 
-Initially, the **`task_threads()`** function is invoked on the task port to obtain a thread list from the remote task. A thread is selected for hijacking. This approach diverges from conventional code injection methods as creating a new remote thread is prohibited due to the new mitigation blocking `thread_create_running()`.
+U početku, **`task_threads()`** funkcija se poziva na task portu da bi se dobila lista niti iz udaljenog taska. Niti se bira za preuzimanje. Ovaj pristup se razlikuje od konvencionalnih metoda injekcije koda jer je kreiranje nove udaljene niti zabranjeno zbog nove mitigacije koja blokira `thread_create_running()`.
 
-To control the thread, **`thread_suspend()`** is called, halting its execution.
+Da bi se kontrolisala nit, poziva se **`thread_suspend()`**, zaustavljajući njeno izvršavanje.
 
-The only operations permitted on the remote thread involve **stopping** and **starting** it, **retrieving** and **modifying** its register values. Remote function calls are initiated by setting registers `x0` to `x7` to the **arguments**, configuring **`pc`** to target the desired function, and activating the thread. Ensuring the thread does not crash after the return necessitates detection of the return.
+Jedine operacije dozvoljene na udaljenoj niti uključuju **zaustavljanje** i **pokretanje** nje, **dobijanje** i **modifikovanje** njenih registarskih vrednosti. Udaljeni pozivi funkcija se iniciraju postavljanjem registara `x0` do `x7` na **argumente**, konfigurišući **`pc`** da cilja željenu funkciju, i aktivirajući nit. Osiguranje da nit ne sruši nakon povratka zahteva detekciju povratka.
 
-One strategy involves **registering an exception handler** for the remote thread using `thread_set_exception_ports()`, setting the `lr` register to an invalid address before the function call. This triggers an exception post-function execution, sending a message to the exception port, enabling state inspection of the thread to recover the return value. Alternatively, as adopted from Ian Beer’s triple_fetch exploit, `lr` is set to loop infinitely. The thread's registers are then continuously monitored until **`pc` points to that instruction**.
+Jedna strategija uključuje **registraciju handler-a za izuzetke** za udaljenu nit koristeći `thread_set_exception_ports()`, postavljajući `lr` registar na nevažeću adresu pre poziva funkcije. Ovo pokreće izuzetak nakon izvršenja funkcije, šaljući poruku na port izuzetaka, omogućavajući inspekciju stanja niti da se povrati povratna vrednost. Alternativno, kao što je preuzeto iz Ian Beer-ovog triple_fetch exploit-a, `lr` se postavlja da se beskonačno ponavlja. Registri niti se zatim kontinuirano prate dok **`pc` ne ukazuje na tu instrukciju**.
 
 ## 2. Mach ports for communication
 
-The subsequent phase involves establishing Mach ports to facilitate communication with the remote thread. These ports are instrumental in transferring arbitrary send and receive rights between tasks.
+Sledeća faza uključuje uspostavljanje Mach portova za olakšavanje komunikacije sa udaljenom niti. Ovi portovi su ključni za prenos proizvoljnih prava slanja i primanja između taskova.
 
-For bidirectional communication, two Mach receive rights are created: one in the local and the other in the remote task. Subsequently, a send right for each port is transferred to the counterpart task, enabling message exchange.
+Za dvosmernu komunikaciju, kreiraju se dva Mach prava primanja: jedno u lokalnom i drugo u udaljenom tasku. Nakon toga, pravo slanja za svaki port se prenosi u odgovarajući task, omogućavajući razmenu poruka.
 
-Focusing on the local port, the receive right is held by the local task. The port is created with `mach_port_allocate()`. The challenge lies in transferring a send right to this port into the remote task.
+Fokusirajući se na lokalni port, pravo primanja drži lokalni task. Port se kreira sa `mach_port_allocate()`. Izazov leži u prenosu prava slanja na ovaj port u udaljeni task.
 
-A strategy involves leveraging `thread_set_special_port()` to place a send right to the local port in the remote thread’s `THREAD_KERNEL_PORT`. Then, the remote thread is instructed to call `mach_thread_self()` to retrieve the send right.
+Strategija uključuje korišćenje `thread_set_special_port()` da se postavi pravo slanja na lokalni port u `THREAD_KERNEL_PORT` udaljene niti. Zatim, udaljena nit se upućuje da pozove `mach_thread_self()` da bi dobila pravo slanja.
 
-For the remote port, the process is essentially reversed. The remote thread is directed to generate a Mach port via `mach_reply_port()` (as `mach_port_allocate()` is unsuitable due to its return mechanism). Upon port creation, `mach_port_insert_right()` is invoked in the remote thread to establish a send right. This right is then stashed in the kernel using `thread_set_special_port()`. Back in the local task, `thread_get_special_port()` is used on the remote thread to acquire a send right to the newly allocated Mach port in the remote task.
+Za udaljeni port, proces se suštinski obrće. Udaljena nit se usmerava da generiše Mach port putem `mach_reply_port()` (jer `mach_port_allocate()` nije prikladan zbog svog mehanizma vraćanja). Nakon kreiranja porta, `mach_port_insert_right()` se poziva u udaljenoj niti da uspostavi pravo slanja. Ovo pravo se zatim čuva u kernelu koristeći `thread_set_special_port()`. Ponovo u lokalnom tasku, `thread_get_special_port()` se koristi na udaljenoj niti da bi se steklo pravo slanja na novokreirani Mach port u udaljenom tasku.
 
-Completion of these steps results in the establishment of Mach ports, laying the groundwork for bidirectional communication.
+Završetak ovih koraka rezultira uspostavljanjem Mach portova, postavljajući temelje za dvosmernu komunikaciju.
 
 ## 3. Basic Memory Read/Write Primitives
 
-In this section, the focus is on utilizing the execute primitive to establish basic memory read and write primitives. These initial steps are crucial for gaining more control over the remote process, though the primitives at this stage won't serve many purposes. Soon, they will be upgraded to more advanced versions.
+U ovom odeljku, fokus je na korišćenju izvršnog primitiva za uspostavljanje osnovnih primitiva za čitanje i pisanje u memoriju. Ovi inicijalni koraci su ključni za sticanje veće kontrole nad udaljenim procesom, iako primitivni u ovoj fazi neće služiti mnogim svrhama. Ubrzo će biti unapređeni na naprednije verzije.
 
 ### Memory Reading and Writing Using Execute Primitive
 
-The goal is to perform memory reading and writing using specific functions. For reading memory, functions resembling the following structure are used:
-
+Cilj je izvršiti čitanje i pisanje u memoriju koristeći specifične funkcije. Za čitanje memorije koriste se funkcije koje podsećaju na sledeću strukturu:
 ```c
 uint64_t read_func(uint64_t *address) {
-    return *address;
+return *address;
 }
 ```
-
-And for writing to memory, functions similar to this structure are used:
-
+I za pisanje u memoriju koriste se funkcije slične ovoj strukturi:
 ```c
 void write_func(uint64_t *address, uint64_t value) {
-    *address = value;
+*address = value;
 }
 ```
-
-These functions correspond to the given assembly instructions:
-
+Ove funkcije odgovaraju datim asembler instrukcijama:
 ```
 _read_func:
-    ldr x0, [x0]
-    ret
+ldr x0, [x0]
+ret
 _write_func:
-    str x1, [x0]
-    ret
+str x1, [x0]
+ret
 ```
+### Identifikacija Pogodnih Funkcija
 
-### Identifying Suitable Functions
+Skener zajedničkih biblioteka otkrio je odgovarajuće kandidate za ove operacije:
 
-A scan of common libraries revealed appropriate candidates for these operations:
-
-1. **Reading Memory:**
-   The `property_getName()` function from the [Objective-C runtime library](https://opensource.apple.com/source/objc4/objc4-723/runtime/objc-runtime-new.mm.auto.html) is identified as a suitable function for reading memory. The function is outlined below:
-
+1. **Čitanje Memorije:**
+Funkcija `property_getName()` iz [Objective-C runtime biblioteke](https://opensource.apple.com/source/objc4/objc4-723/runtime/objc-runtime-new.mm.auto.html) je identifikovana kao pogodna funkcija za čitanje memorije. Funkcija je opisana u nastavku:
 ```c
 const char *property_getName(objc_property_t prop) {
-      return prop->name;
+return prop->name;
 }
 ```
+Ova funkcija efikasno deluje kao `read_func` vraćajući prvo polje `objc_property_t`.
 
-This function effectively acts like the `read_func` by returning the first field of `objc_property_t`.
-
-2. **Writing Memory:**
-   Finding a pre-built function for writing memory is more challenging. However, the `_xpc_int64_set_value()` function from libxpc is a suitable candidate with the following disassembly:
-
+2. **Pisanje u Memoriju:**
+Pronalaženje unapred izgrađene funkcije za pisanje u memoriju je izazovnije. Međutim, funkcija `_xpc_int64_set_value()` iz libxpc je odgovarajući kandidat sa sledećom disasembly:
 ```c
 __xpc_int64_set_value:
-    str x1, [x0, #0x18]
-    ret
+str x1, [x0, #0x18]
+ret
 ```
-
-To perform a 64-bit write at a specific address, the remote call is structured as:
-
+Da biste izvršili 64-bitno pisanje na specifičnu adresu, daleki poziv se strukturira kao:
 ```c
 _xpc_int64_set_value(address - 0x18, value)
 ```
+Sa ovim postavljenim primitivima, scena je postavljena za kreiranje deljene memorije, što predstavlja značajan napredak u kontroli udaljenog procesa.
 
-With these primitives established, the stage is set for creating shared memory, marking a significant progression in controlling the remote process.
+## 4. Postavljanje Deljene Memorije
 
-## 4. Shared Memory Setup
+Cilj je uspostaviti deljenu memoriju između lokalnih i udaljenih zadataka, pojednostavljujući prenos podataka i olakšavajući pozivanje funkcija sa više argumenata. Pristup uključuje korišćenje `libxpc` i njegovog `OS_xpc_shmem` tipa objekta, koji se zasniva na Mach memorijskim unosima.
 
-The objective is to establish shared memory between local and remote tasks, simplifying data transfer and facilitating the calling of functions with multiple arguments. The approach involves leveraging `libxpc` and its `OS_xpc_shmem` object type, which is built upon Mach memory entries.
+### Pregled Procesa:
 
-### Process Overview:
+1. **Alokacija Memorije**:
 
-1. **Memory Allocation**:
+- Alocirajte memoriju za deljenje koristeći `mach_vm_allocate()`.
+- Koristite `xpc_shmem_create()` za kreiranje `OS_xpc_shmem` objekta za alociranu memorijsku oblast. Ova funkcija će upravljati kreiranjem Mach memorijskog unosa i čuvati Mach send pravo na offsetu `0x18` objekta `OS_xpc_shmem`.
 
-   - Allocate the memory for sharing using `mach_vm_allocate()`.
-   - Use `xpc_shmem_create()` to create an `OS_xpc_shmem` object for the allocated memory region. This function will manage the creation of the Mach memory entry and store the Mach send right at offset `0x18` of the `OS_xpc_shmem` object.
+2. **Kreiranje Deljene Memorije u Udaljenom Procesu**:
 
-2. **Creating Shared Memory in Remote Process**:
+- Alocirajte memoriju za `OS_xpc_shmem` objekat u udaljenom procesu sa udaljenim pozivom na `malloc()`.
+- Kopirajte sadržaj lokalnog `OS_xpc_shmem` objekta u udaljeni proces. Međutim, ova inicijalna kopija će imati netačne nazive Mach memorijskih unosa na offsetu `0x18`.
 
-   - Allocate memory for the `OS_xpc_shmem` object in the remote process with a remote call to `malloc()`.
-   - Copy the contents of the local `OS_xpc_shmem` object to the remote process. However, this initial copy will have incorrect Mach memory entry names at offset `0x18`.
+3. **Ispravljanje Mach Memorijskog Unosa**:
 
-3. **Correcting the Mach Memory Entry**:
+- Iskoristite metodu `thread_set_special_port()` da umetnete send pravo za Mach memorijski unos u udaljeni zadatak.
+- Ispravite polje Mach memorijskog unosa na offsetu `0x18` prepisivanjem sa imenom udaljenog memorijskog unosa.
 
-   - Utilize the `thread_set_special_port()` method to insert a send right for the Mach memory entry into the remote task.
-   - Correct the Mach memory entry field at offset `0x18` by overwriting it with the remote memory entry's name.
+4. **Finalizacija Postavljanja Deljene Memorije**:
+- Validirajte udaljeni `OS_xpc_shmem` objekat.
+- Uspostavite mapiranje deljene memorije sa udaljenim pozivom na `xpc_shmem_remote()`.
 
-4. **Finalizing Shared Memory Setup**:
-   - Validate the remote `OS_xpc_shmem` object.
-   - Establish the shared memory mapping with a remote call to `xpc_shmem_remote()`.
+Prateći ove korake, deljena memorija između lokalnih i udaljenih zadataka biće efikasno postavljena, omogućavajući jednostavne prenose podataka i izvršavanje funkcija koje zahtevaju više argumenata.
 
-By following these steps, shared memory between the local and remote tasks will be efficiently set up, allowing for straightforward data transfers and the execution of functions requiring multiple arguments.
+## Dodatni Kodni Snippets
 
-## Additional Code Snippets
-
-For memory allocation and shared memory object creation:
-
+Za alokaciju memorije i kreiranje objekta deljene memorije:
 ```c
 mach_vm_allocate();
 xpc_shmem_create();
 ```
-
-For creating and correcting the shared memory object in the remote process:
-
+Za kreiranje i ispravljanje objekta deljene memorije u udaljenom procesu:
 ```c
 malloc(); // for allocating memory remotely
 thread_set_special_port(); // for inserting send right
 ```
+Zapamtite da pravilno obradite detalje Mach portova i imena ulaza u memoriju kako biste osigurali da podešavanje deljene memorije funkcioniše ispravno.
 
-Remember to handle the details of Mach ports and memory entry names correctly to ensure that the shared memory setup functions properly.
+## 5. Postizanje Potpunog Kontrola
 
-## 5. Achieving Full Control
+Nakon uspešnog uspostavljanja deljene memorije i sticanja sposobnosti proizvoljnog izvršavanja, suštinski smo stekli potpunu kontrolu nad ciljnim procesom. Ključne funkcionalnosti koje omogućavaju ovu kontrolu su:
 
-Upon successfully establishing shared memory and gaining arbitrary execution capabilities, we have essentially gained full control over the target process. The key functionalities enabling this control are:
+1. **Proizvoljne Operacije sa Memorijom**:
 
-1. **Arbitrary Memory Operations**:
+- Izvršite proizvoljna čitanja iz memorije pozivajući `memcpy()` da kopira podatke iz deljene oblasti.
+- Izvršite proizvoljna pisanja u memoriju koristeći `memcpy()` za prenos podataka u deljenu oblast.
 
-   - Perform arbitrary memory reads by invoking `memcpy()` to copy data from the shared region.
-   - Execute arbitrary memory writes by using `memcpy()` to transfer data to the shared region.
+2. **Obrada Poziva Funkcija sa Više Argumenta**:
 
-2. **Handling Function Calls with Multiple Arguments**:
+- Za funkcije koje zahtevaju više od 8 argumenata, rasporedite dodatne argumente na steku u skladu sa konvencijom pozivanja.
 
-   - For functions requiring more than 8 arguments, arrange the additional arguments on the stack in compliance with the calling convention.
+3. **Prenos Mach Portova**:
 
-3. **Mach Port Transfer**:
+- Prenesite Mach portove između zadataka putem Mach poruka preko prethodno uspostavljenih portova.
 
-   - Transfer Mach ports between tasks through Mach messages via previously established ports.
+4. **Prenos Fajl Deskriptora**:
+- Prenesite fajl deskriptore između procesa koristeći fileports, tehniku koju je istakao Ian Beer u `triple_fetch`.
 
-4. **File Descriptor Transfer**:
-   - Transfer file descriptors between processes using fileports, a technique highlighted by Ian Beer in `triple_fetch`.
+Ova sveobuhvatna kontrola je obuhvaćena unutar [threadexec](https://github.com/bazad/threadexec) biblioteke, koja pruža detaljnu implementaciju i korisnički prijateljski API za interakciju sa procesom žrtve.
 
-This comprehensive control is encapsulated within the [threadexec](https://github.com/bazad/threadexec) library, providing a detailed implementation and a user-friendly API for interaction with the victim process.
+## Važne Napomene:
 
-## Important Considerations:
+- Osigurajte pravilnu upotrebu `memcpy()` za operacije čitanja/pisanja u memoriju kako biste održali stabilnost sistema i integritet podataka.
+- Prilikom prenosa Mach portova ili fajl deskriptora, pridržavajte se pravilnih protokola i odgovorno rukujte resursima kako biste sprečili curenje ili nepredviđeni pristup.
 
-- Ensure proper use of `memcpy()` for memory read/write operations to maintain system stability and data integrity.
-- When transferring Mach ports or file descriptors, follow proper protocols and handle resources responsibly to prevent leaks or unintended access.
+Pridržavanjem ovih smernica i korišćenjem `threadexec` biblioteke, može se efikasno upravljati i interagovati sa procesima na granularnom nivou, postižući potpunu kontrolu nad ciljnim procesom.
 
-By adhering to these guidelines and utilizing the `threadexec` library, one can efficiently manage and interact with processes at a granular level, achieving full control over the target process.
-
-## References
+## Reference
 
 - [https://bazad.github.io/2018/10/bypassing-platform-binary-task-threads/](https://bazad.github.io/2018/10/bypassing-platform-binary-task-threads/)
 
