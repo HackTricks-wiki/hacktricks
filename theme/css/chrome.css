@@ -83,6 +83,13 @@ body.sidebar-visible #menu-bar {
     }
 }
 
+.right-buttons .icons {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    column-gap: 0.5rem;
+}
+
 .icon-button {
     border: none;
     background: var(--bg);
@@ -139,10 +146,13 @@ body.sidebar-visible #menu-bar {
 
 /* Collapse Menu Popup */
 
+#menubar-collapse-toggle {
+    position: relative;
+}
 #menubar-collapse-popup {
     position: absolute;
-    right: 30px;
-    top: var(--menu-bar-height);
+    right: 0px;
+    top: 35px;
     z-index: 105;
     border-radius: 5px;
     font-size: 14px;
@@ -172,6 +182,44 @@ body.sidebar-visible #menu-bar {
     background-color: var(--theme-hover);
 }
 
+/* Languages Menu Popup */
+#menubar-languages-toggle {
+    position: relative;
+}
+
+#menubar-languages-popup {
+    position: absolute;
+    right: 0px;
+    top: 35px;
+    z-index: 105;
+    border-radius: 5px;
+    font-size: 14px;
+    color: var(--fg);
+    background: var(--bg);
+    border: 1px solid var(--table-border-color);
+    margin: 0;
+    padding: 0px;
+    display: none;
+    flex-direction: column;
+    max-height: 300px;
+    width: 150px;
+    overflow: scroll;
+}
+#menubar-languages-popup .menu-bar-link {
+    border: 0;
+    margin: 0;
+    padding: 8px 20px;
+    line-height: 25px;
+    white-space: nowrap;
+    text-align: start;
+    cursor: pointer;
+    color: inherit;
+    background: inherit;
+    font-size: inherit;
+}
+#menubar-languages-popup .menu-bar-link:hover {
+    background-color: var(--theme-hover);
+}
 
 .left-buttons {
     display: flex;
