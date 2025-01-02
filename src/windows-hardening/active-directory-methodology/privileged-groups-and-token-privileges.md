@@ -2,14 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="/images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-Usa [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=command-injection) per costruire e **automatizzare flussi di lavoro** alimentati dagli **strumenti** della comunità **più avanzati** al mondo.\
-Ottieni accesso oggi:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=command-injection" %}
-
-## Gruppi Ben Noti con privilegi di amministrazione
+## Gruppi Noti con privilegi di amministrazione
 
 - **Amministratori**
 - **Amministratori di Dominio**
@@ -17,7 +10,7 @@ Ottieni accesso oggi:
 
 ## Operatori di Account
 
-Questo gruppo è autorizzato a creare account e gruppi che non sono amministratori nel dominio. Inoltre, consente il login locale al Domain Controller (DC).
+Questo gruppo ha il potere di creare account e gruppi che non sono amministratori nel dominio. Inoltre, consente il login locale al Domain Controller (DC).
 
 Per identificare i membri di questo gruppo, viene eseguito il seguente comando:
 ```powershell
@@ -37,7 +30,7 @@ Get-NetGroupMember -Identity "AdminSDHolder" -Recurse
 Add-DomainObjectAcl -TargetIdentity 'CN=AdminSDHolder,CN=System,DC=testlab,DC=local' -PrincipalIdentity matt -Rights All
 Get-ObjectAcl -SamAccountName "Domain Admins" -ResolveGUIDs | ?{$_.IdentityReference -match 'spotless'}
 ```
-Uno script è disponibile per accelerare il processo di ripristino: [Invoke-ADSDPropagation.ps1](https://github.com/edemilliere/ADSI/blob/master/Invoke-ADSDPropagation.ps1).
+È disponibile uno script per accelerare il processo di ripristino: [Invoke-ADSDPropagation.ps1](https://github.com/edemilliere/ADSI/blob/master/Invoke-ADSDPropagation.ps1).
 
 Per ulteriori dettagli, visita [ired.team](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/how-to-abuse-and-backdoor-adminsdholder-to-obtain-domain-admin-persistence).
 
@@ -109,7 +102,7 @@ exit
 ```cmd
 Copy-FileSeBackupPrivilege E:\Windows\NTDS\ntds.dit C:\Tools\ntds.dit
 ```
-In alternativa, usa `robocopy` per la copia dei file:
+In alternativa, usa `robocopy` per copiare file:
 ```cmd
 robocopy /B F:\Windows\NTDS .\ntds ntds.dit
 ```
@@ -137,7 +130,7 @@ Per una dimostrazione pratica, vedere [DEMO VIDEO WITH IPPSEC](https://www.youtu
 
 ## DnsAdmins
 
-I membri del gruppo **DnsAdmins** possono sfruttare i loro privilegi per caricare una DLL arbitraria con privilegi di SYSTEM su un server DNS, spesso ospitato su Domain Controllers. Questa capacità consente un potenziale di sfruttamento significativo.
+I membri del gruppo **DnsAdmins** possono sfruttare i loro privilegi per caricare una DLL arbitraria con privilegi SYSTEM su un server DNS, spesso ospitato su Domain Controllers. Questa capacità consente un potenziale di sfruttamento significativo.
 
 Per elencare i membri del gruppo DnsAdmins, usa:
 ```powershell
@@ -178,7 +171,7 @@ Per ulteriori dettagli su questo vettore di attacco, fare riferimento a ired.tea
 
 ### Record WPAD per MitM
 
-DnsAdmins possono manipolare i record DNS per eseguire attacchi Man-in-the-Middle (MitM) creando un record WPAD dopo aver disabilitato l'elenco globale di blocco delle query. Strumenti come Responder o Inveigh possono essere utilizzati per spoofing e cattura del traffico di rete.
+I DnsAdmins possono manipolare i record DNS per eseguire attacchi Man-in-the-Middle (MitM) creando un record WPAD dopo aver disabilitato l'elenco globale di blocco delle query. Strumenti come Responder o Inveigh possono essere utilizzati per spoofing e cattura del traffico di rete.
 
 ### Lettori di Log degli Eventi
 I membri possono accedere ai log degli eventi, trovando potenzialmente informazioni sensibili come password in chiaro o dettagli sull'esecuzione di comandi:
@@ -189,14 +182,14 @@ Get-WinEvent -LogName security | where { $_.ID -eq 4688 -and $_.Properties[8].Va
 ```
 ## Permessi di Windows di Exchange
 
-Questo gruppo può modificare i DACL sul oggetto di dominio, potenzialmente concedendo privilegi DCSync. Le tecniche per l'escalation dei privilegi che sfruttano questo gruppo sono dettagliate nel repository GitHub Exchange-AD-Privesc.
+Questo gruppo può modificare i DACL sui oggetti di dominio, potenzialmente concedendo privilegi DCSync. Le tecniche per l'escalation dei privilegi che sfruttano questo gruppo sono dettagliate nel repository GitHub Exchange-AD-Privesc.
 ```powershell
 # List members
 Get-NetGroupMember -Identity "Exchange Windows Permissions" -Recurse
 ```
 ## Hyper-V Administrators
 
-Gli Hyper-V Administrators hanno accesso completo a Hyper-V, che può essere sfruttato per ottenere il controllo sui Domain Controllers virtualizzati. Questo include la clonazione di DC live ed estraendo gli hash NTLM dal file NTDS.dit.
+Gli Hyper-V Administrators hanno accesso completo a Hyper-V, che può essere sfruttato per ottenere il controllo sui Domain Controllers virtualizzati. Questo include il clonaggio di DC live ed estraendo gli hash NTLM dal file NTDS.dit.
 
 ### Esempio di Sfruttamento
 
@@ -265,11 +258,5 @@ Get-NetGroupMember -Identity "Server Operators" -Recurse
 - [https://posts.specterops.io/a-red-teamers-guide-to-gpos-and-ous-f0d03976a31e](https://posts.specterops.io/a-red-teamers-guide-to-gpos-and-ous-f0d03976a31e)
 - [https://undocumented.ntinternals.net/index.html?page=UserMode%2FUndocumented%20Functions%2FExecutable%20Images%2FNtLoadDriver.html](https://undocumented.ntinternals.net/index.html?page=UserMode%2FUndocumented%20Functions%2FExecutable%20Images%2FNtLoadDriver.html)
 
-<figure><img src="/images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-Usa [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=command-injection) per costruire e **automatizzare flussi di lavoro** alimentati dagli **strumenti** della comunità **più avanzati** al mondo.\
-Ottieni accesso oggi:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=command-injection" %}
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,12 +1,8 @@
-# Privilege Escalation with Autoruns
+# Elevazione dei privilegi con Autoruns
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/i3.png" alt=""><figcaption></figcaption></figure>
 
-**Bug bounty tip**: **iscriviti** a **Intigriti**, una premium **bug bounty platform creata da hacker, per hacker**! Unisciti a noi su [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) oggi, e inizia a guadagnare bounty fino a **$100,000**!
-
-{% embed url="https://go.intigriti.com/hacktricks" %}
 
 ## WMIC
 
@@ -30,7 +26,7 @@ schtasks /Create /RU "SYSTEM" /SC ONLOGON /TN "SchedPE" /TR "cmd /c net localgro
 ```
 ## Cartelle
 
-Tutti i binari situati nelle **cartelle di avvio verranno eseguiti all'avvio**. Le comuni cartelle di avvio sono quelle elencate di seguito, ma la cartella di avvio è indicata nel registro. [Read this to learn where.](privilege-escalation-with-autorun-binaries.md#startup-path)
+Tutti i binari situati nelle **cartelle di avvio verranno eseguiti all'avvio**. Le cartelle di avvio comuni sono quelle elencate di seguito, ma la cartella di avvio è indicata nel registro. [Read this to learn where.](privilege-escalation-with-autorun-binaries.md#startup-path)
 ```bash
 dir /b "C:\Documents and Settings\All Users\Start Menu\Programs\Startup" 2>nul
 dir /b "C:\Documents and Settings\%username%\Start Menu\Programs\Startup" 2>nul
@@ -86,7 +82,7 @@ reg add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnceEx\\0001\\Dep
 > **Exploit 1**: Se puoi scrivere all'interno di uno dei registri menzionati in **HKLM**, puoi elevare i privilegi quando un altro utente accede.
 
 > [!NOTE]
-> **Exploit 2**: Se puoi sovrascrivere uno dei binari indicati in uno dei registri all'interno di **HKLM**, puoi modificare quel binario con una backdoor quando un altro utente accede ed elevare i privilegi.
+> **Exploit 2**: Se puoi sovrascrivere uno dei binari indicati in uno dei registri in **HKLM**, puoi modificare quel binario con una backdoor quando un altro utente accede ed elevare i privilegi.
 ```bash
 #CMD
 reg query HKLM\Software\Microsoft\Windows\CurrentVersion\Run
@@ -149,7 +145,7 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Wow6432Node\Microsoft\Windows\Ru
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders`
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders`
 
-I collegamenti posizionati nella cartella **Startup** attiveranno automaticamente servizi o applicazioni all'avvio dell'utente o al riavvio del sistema. La posizione della cartella **Startup** è definita nel registro sia per l'ambito **Local Machine** che per l'**Current User**. Ciò significa che qualsiasi collegamento aggiunto a queste posizioni **Startup** specificate garantirà che il servizio o il programma collegato si avvii dopo il processo di accesso o riavvio, rendendolo un metodo semplice per programmare l'esecuzione automatica dei programmi.
+I collegamenti posizionati nella cartella **Startup** attiveranno automaticamente servizi o applicazioni all'accesso dell'utente o al riavvio del sistema. La posizione della cartella **Startup** è definita nel registro sia per l'ambito **Local Machine** che per l'ambito **Current User**. Ciò significa che qualsiasi collegamento aggiunto a queste posizioni **Startup** specificate garantirà che il servizio o il programma collegato si avvii dopo il processo di accesso o riavvio, rendendolo un metodo semplice per pianificare l'esecuzione automatica dei programmi.
 
 > [!NOTE]
 > Se puoi sovrascrivere qualsiasi \[User] Shell Folder sotto **HKLM**, sarai in grado di puntarlo a una cartella controllata da te e posizionare una backdoor che verrà eseguita ogni volta che un utente accede al sistema, aumentando i privilegi.
@@ -204,7 +200,7 @@ Passaggi per creare un'opzione di avvio per avviarsi automaticamente in "Modalit
 4. Salva le modifiche a `boot.ini`.
 5. Ripristina gli attributi originali del file: `attrib c:\boot.ini +r +s +h`
 
-- **Exploit 1:** Modificare la chiave di registro **AlternateShell** consente di configurare un shell di comando personalizzata, potenzialmente per accesso non autorizzato.
+- **Exploit 1:** Modificare la chiave di registro **AlternateShell** consente di configurare una shell di comando personalizzata, potenzialmente per accesso non autorizzato.
 - **Exploit 2 (Permessi di Scrittura nel PATH):** Avere permessi di scrittura su qualsiasi parte della variabile di sistema **PATH**, specialmente prima di `C:\Windows\system32`, consente di eseguire un `cmd.exe` personalizzato, che potrebbe essere una backdoor se il sistema viene avviato in Modalità Provvisoria.
 - **Exploit 3 (Permessi di Scrittura nel PATH e boot.ini):** L'accesso in scrittura a `boot.ini` consente l'avvio automatico in Modalità Provvisoria, facilitando l'accesso non autorizzato al successivo riavvio.
 
@@ -249,7 +245,7 @@ reg query "HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components
 
 I Browser Helper Objects (BHO) sono moduli DLL che aggiungono funzionalità extra a Microsoft Internet Explorer. Si caricano in Internet Explorer e Windows Explorer ad ogni avvio. Tuttavia, la loro esecuzione può essere bloccata impostando la chiave **NoExplorer** a 1, impedendo loro di caricarsi con le istanze di Windows Explorer.
 
-I BHO sono compatibili con Windows 10 tramite Internet Explorer 11, ma non sono supportati in Microsoft Edge, il browser predefinito nelle versioni più recenti di Windows.
+I BHO sono compatibili con Windows 10 tramite Internet Explorer 11 ma non sono supportati in Microsoft Edge, il browser predefinito nelle versioni più recenti di Windows.
 
 Per esplorare i BHO registrati su un sistema, puoi ispezionare le seguenti chiavi di registro:
 
@@ -312,10 +308,6 @@ autorunsc.exe -m -nobanner -a * -ct /accepteula
 - [https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
 - [https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell](https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell)
 
-<figure><img src="../../images/i3.png" alt=""><figcaption></figcaption></figure>
 
-**Bug bounty tip**: **iscriviti** a **Intigriti**, una premium **bug bounty platform creata da hacker, per hacker**! Unisciti a noi su [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) oggi, e inizia a guadagnare ricompense fino a **$100,000**!
-
-{% embed url="https://go.intigriti.com/hacktricks" %}
 
 {{#include ../../banners/hacktricks-training.md}}

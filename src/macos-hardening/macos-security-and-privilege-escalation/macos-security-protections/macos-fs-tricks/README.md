@@ -7,9 +7,9 @@
 Permessi in una **directory**:
 
 - **read** - puoi **enumerare** le voci della directory
-- **write** - puoi **cancellare/scrivere** **file** nella directory e puoi **cancellare cartelle vuote**.
-- Ma non puoi **cancellare/modificare cartelle non vuote** a meno che tu non abbia permessi di scrittura su di essa.
-- Non puoi **modificare il nome di una cartella** a meno che tu non sia il proprietario.
+- **write** - puoi **eliminare/scrivere** **file** nella directory e puoi **eliminare cartelle vuote**.
+- Ma **non puoi eliminare/modificare cartelle non vuote** a meno che tu non abbia permessi di scrittura su di essa.
+- **Non puoi modificare il nome di una cartella** a meno che tu non sia il proprietario.
 - **execute** - ti è **consentito di attraversare** la directory - se non hai questo diritto, non puoi accedere a nessun file al suo interno, né in alcuna sottodirectory.
 
 ### Combinazioni Pericolose
@@ -18,7 +18,7 @@ Permessi in una **directory**:
 
 - Un **proprietario della directory** genitore nel percorso è l'utente
 - Un **proprietario della directory** genitore nel percorso è un **gruppo di utenti** con **accesso in scrittura**
-- Un **gruppo di utenti** ha accesso **in scrittura** al **file**
+- Un **gruppo di utenti** ha **accesso in scrittura** al **file**
 
 Con una delle combinazioni precedenti, un attaccante potrebbe **iniettare** un **link simbolico/duro** nel percorso previsto per ottenere una scrittura arbitraria privilegiata.
 
@@ -28,11 +28,17 @@ Se ci sono file in una **directory** dove **solo root ha accesso R+X**, questi *
 
 Esempio in: [https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions](https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions)
 
-## Link simbolico / Link duro
+## Link Simbolico / Link Duro
+
+### File/cartella permissivi
 
 Se un processo privilegiato sta scrivendo dati in un **file** che potrebbe essere **controllato** da un **utente con privilegi inferiori**, o che potrebbe essere **stato precedentemente creato** da un utente con privilegi inferiori. L'utente potrebbe semplicemente **puntarlo a un altro file** tramite un link simbolico o duro, e il processo privilegiato scriverà su quel file.
 
 Controlla nelle altre sezioni dove un attaccante potrebbe **sfruttare una scrittura arbitraria per elevare i privilegi**.
+
+### Open `O_NOFOLLOW`
+
+Il flag `O_NOFOLLOW` quando utilizzato dalla funzione `open` non seguirà un symlink nell'ultimo componente del percorso, ma seguirà il resto del percorso. Il modo corretto per prevenire il seguire symlink nel percorso è utilizzare il flag `O_NOFOLLOW_ANY`.
 
 ## .fileloc
 
@@ -50,15 +56,19 @@ Esempio:
 </dict>
 </plist>
 ```
-## FD Arbitrario
+## File Descriptors
 
-Se puoi far **aprire a un processo un file o una cartella con privilegi elevati**, puoi abusare di **`crontab`** per aprire un file in `/etc/sudoers.d` con **`EDITOR=exploit.py`**, in modo che `exploit.py` ottenga il FD del file all'interno di `/etc/sudoers` e lo sfrutti.
+### Leak FD (no `O_CLOEXEC`)
 
-Ad esempio: [https://youtu.be/f1HA5QhLQ7Y?t=21098](https://youtu.be/f1HA5QhLQ7Y?t=21098)
+Se una chiamata a `open` non ha il flag `O_CLOEXEC`, il file descriptor sarà ereditato dal processo figlio. Quindi, se un processo privilegiato apre un file privilegiato ed esegue un processo controllato dall'attaccante, l'attaccante **erediterà il FD sul file privilegiato**.
 
-## Evita i trucchi xattrs di quarantena
+Se riesci a far **aprire a un processo un file o una cartella con privilegi elevati**, puoi abusare di **`crontab`** per aprire un file in `/etc/sudoers.d` con **`EDITOR=exploit.py`**, in modo che `exploit.py` ottenga il FD al file all'interno di `/etc/sudoers` e lo abusi.
 
-### Rimuovilo
+Ad esempio: [https://youtu.be/f1HA5QhLQ7Y?t=21098](https://youtu.be/f1HA5QhLQ7Y?t=21098), codice: https://github.com/gergelykalman/CVE-2023-32428-a-macOS-LPE-via-MallocStackLogging
+
+## Avoid quarantine xattrs tricks
+
+### Remove it
 ```bash
 xattr -d com.apple.quarantine /path/to/file_or_app
 ```
@@ -114,7 +124,7 @@ Il formato di file **AppleDouble** copia un file inclusi i suoi ACE.
 
 Nel [**codice sorgente**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html) è possibile vedere che la rappresentazione testuale dell'ACL memorizzata all'interno dell'xattr chiamato **`com.apple.acl.text`** verrà impostata come ACL nel file decompresso. Quindi, se hai compresso un'applicazione in un file zip con formato di file **AppleDouble** con un ACL che impedisce ad altri xattrs di essere scritti... l'xattr di quarantena non è stato impostato nell'applicazione:
 
-Controlla il [**report originale**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) per ulteriori informazioni.
+Controlla il [**rapporto originale**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) per ulteriori informazioni.
 
 Per replicare questo, dobbiamo prima ottenere la stringa acl corretta:
 ```bash
@@ -136,13 +146,34 @@ ls -le test
 ```
 (Note that even if this works the sandbox write the quarantine xattr before)
 
-Non è davvero necessario, ma lo lascio lì giusto per caso:
+Non è davvero necessario, ma lo lascio lì giusto in caso:
 
 {{#ref}}
 macos-xattr-acls-extra-stuff.md
 {{#endref}}
 
-## Bypassare le firme del codice
+## Bypass dei controlli di firma
+
+### Bypass dei controlli dei binari di piattaforma
+
+Al alcuni controlli di sicurezza verificano se il binario è un **binario di piattaforma**, ad esempio per consentire la connessione a un servizio XPC. Tuttavia, come esposto in un bypass in https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/, è possibile aggirare questo controllo ottenendo un binario di piattaforma (come /bin/ls) e iniettando l'exploit tramite dyld utilizzando una variabile d'ambiente `DYLD_INSERT_LIBRARIES`.
+
+### Bypass dei flag `CS_REQUIRE_LV` e `CS_FORCED_LV`
+
+È possibile per un binario in esecuzione modificare i propri flag per aggirare i controlli con un codice come:
+```c
+// Code from https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/
+int pid = getpid();
+NSString *exePath = NSProcessInfo.processInfo.arguments[0];
+
+uint32_t status = SecTaskGetCodeSignStatus(SecTaskCreateFromSelf(0));
+status |= 0x2000; // CS_REQUIRE_LV
+csops(pid, 9, &status, 4); // CS_OPS_SET_STATUS
+
+status = SecTaskGetCodeSignStatus(SecTaskCreateFromSelf(0));
+NSLog(@"=====Inject successfully into %d(%@), csflags=0x%x", pid, exePath, status);
+```
+## Bypass Code Signatures
 
 I bundle contengono il file **`_CodeSignature/CodeResources`** che contiene l'**hash** di ogni singolo **file** nel **bundle**. Nota che l'hash di CodeResources è anche **incorporato nell'eseguibile**, quindi non possiamo modificarlo.
 
@@ -217,7 +248,7 @@ hdiutil detach /private/tmp/mnt 1>/dev/null
 # You can also create a dmg from an app using:
 hdiutil create -srcfolder justsome.app justsome.dmg
 ```
-Di solito, macOS monta il disco comunicando con il servizio Mach `com.apple.DiskArbitrarion.diskarbitrariond` (fornito da `/usr/libexec/diskarbitrationd`). Se si aggiunge il parametro `-d` al file plist di LaunchDaemons e si riavvia, memorizzerà i log in `/var/log/diskarbitrationd.log`.\
+Di solito, macOS monta i dischi comunicando con il servizio Mach `com.apple.DiskArbitrarion.diskarbitrariond` (fornito da `/usr/libexec/diskarbitrationd`). Se si aggiunge il parametro `-d` al file plist di LaunchDaemons e si riavvia, memorizzerà i log in `/var/log/diskarbitrationd.log`.\
 Tuttavia, è possibile utilizzare strumenti come `hdik` e `hdiutil` per comunicare direttamente con il kext `com.apple.driver.DiskImages`.
 
 ## Scritture Arbitrari
@@ -249,19 +280,39 @@ Scrivi un **LaunchDaemon** arbitrario come **`/Library/LaunchDaemons/xyz.hacktri
 ```
 Genera semplicemente lo script `/Applications/Scripts/privesc.sh` con i **comandi** che desideri eseguire come root.
 
-### File Sudoers
+### Sudoers File
 
 Se hai **scrittura arbitraria**, potresti creare un file all'interno della cartella **`/etc/sudoers.d/`** concedendoti privilegi **sudo**.
 
-### File PATH
+### PATH files
 
 Il file **`/etc/paths`** è uno dei principali luoghi che popola la variabile d'ambiente PATH. Devi essere root per sovrascriverlo, ma se uno script di un **processo privilegiato** sta eseguendo un **comando senza il percorso completo**, potresti essere in grado di **dirottarlo** modificando questo file.
 
 Puoi anche scrivere file in **`/etc/paths.d`** per caricare nuove cartelle nella variabile d'ambiente `PATH`.
 
+### cups-files.conf
+
+Questa tecnica è stata utilizzata in [questo writeup](https://www.kandji.io/blog/macos-audit-story-part1).
+
+Crea il file `/etc/cups/cups-files.conf` con il seguente contenuto:
+```
+ErrorLog /etc/sudoers.d/lpe
+LogFilePerm 777
+<some junk>
+```
+Questo creerà il file `/etc/sudoers.d/lpe` con permessi 777. La spazzatura extra alla fine serve a innescare la creazione del log degli errori.
+
+Poi, scrivi in `/etc/sudoers.d/lpe` la configurazione necessaria per elevare i privilegi come `%staff ALL=(ALL) NOPASSWD:ALL`.
+
+Poi, modifica di nuovo il file `/etc/cups/cups-files.conf` indicando `LogFilePerm 700` in modo che il nuovo file sudoers diventi valido invocando `cupsctl`.
+
+### Sandbox Escape
+
+È possibile sfuggire alla sandbox di macOS con una scrittura arbitraria su FS. Per alcuni esempi, controlla la pagina [macOS Auto Start](../../../../macos-auto-start-locations.md), ma uno comune è scrivere un file di preferenze del Terminale in `~/Library/Preferences/com.apple.Terminal.plist` che esegue un comando all'avvio e chiamarlo usando `open`.
+
 ## Genera file scrivibili come altri utenti
 
-Questo genererà un file che appartiene a root e che è scrivibile da me ([**codice da qui**](https://github.com/gergelykalman/brew-lpe-via-periodic/blob/main/brew_lpe.sh)). Questo potrebbe anche funzionare come privesc:
+Questo genererà un file che appartiene a root e che è scrivibile da me ([**codice da qui**](https://github.com/gergelykalman/brew-lpe-via-periodic/blob/main/brew_lpe.sh)). Questo potrebbe funzionare anche come privesc:
 ```bash
 DIRNAME=/usr/local/etc/periodic/daily
 

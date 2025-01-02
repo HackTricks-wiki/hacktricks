@@ -2,26 +2,22 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
-
 ## Introduzione
 
 Il problema del "Double Hop" di Kerberos si presenta quando un attaccante tenta di utilizzare **l'autenticazione Kerberos attraverso due** **hops**, ad esempio utilizzando **PowerShell**/**WinRM**.
 
-Quando si verifica un'**autenticazione** tramite **Kerberos**, le **credenziali** **non** vengono memorizzate in **memoria.** Pertanto, se esegui mimikatz **non troverai le credenziali** dell'utente nella macchina anche se sta eseguendo processi.
+Quando si verifica un'**autenticazione** tramite **Kerberos**, le **credenziali** **non vengono** memorizzate in **memoria.** Pertanto, se esegui mimikatz non **troverai le credenziali** dell'utente nella macchina anche se sta eseguendo processi.
 
 Questo accade perché, quando ci si connette con Kerberos, questi sono i passaggi:
 
 1. User1 fornisce le credenziali e il **domain controller** restituisce un **TGT** Kerberos a User1.
 2. User1 utilizza il **TGT** per richiedere un **service ticket** per **connettersi** a Server1.
 3. User1 **si connette** a **Server1** e fornisce il **service ticket**.
-4. **Server1** **non** ha le **credenziali** di User1 memorizzate o il **TGT** di User1. Pertanto, quando User1 da Server1 cerca di accedere a un secondo server, **non è in grado di autenticarsi**.
+4. **Server1** **non ha** le **credenziali** di User1 memorizzate o il **TGT** di User1. Pertanto, quando User1 da Server1 cerca di accedere a un secondo server, non è **in grado di autenticarsi**.
 
 ### Delegazione Non Vincolata
 
-Se la **delegazione non vincolata** è abilitata nel PC, questo non accadrà poiché il **Server** otterrà un **TGT** di ogni utente che vi accede. Inoltre, se viene utilizzata la delegazione non vincolata, probabilmente puoi **compromettere il Domain Controller** da esso.\
+Se la **delegazione non vincolata** è abilitata nel PC, questo non accadrà poiché il **Server** **otterrà** un **TGT** di ogni utente che vi accede. Inoltre, se viene utilizzata la delegazione non vincolata, probabilmente puoi **compromettere il Domain Controller** da esso.\
 [**Ulteriori informazioni nella pagina sulla delegazione non vincolata**](unconstrained-delegation.md).
 
 ### CredSSP
@@ -77,8 +73,8 @@ L'installazione di OpenSSH sul primo server consente una soluzione per il proble
 
 #### Passaggi per l'installazione di OpenSSH
 
-1. Scarica e sposta l'ultima versione di OpenSSH in formato zip sul server di destinazione.
-2. Estrai e esegui lo script `Install-sshd.ps1`.
+1. Scarica e sposta l'ultima versione zip di OpenSSH sul server di destinazione.
+2. Decomprimi ed esegui lo script `Install-sshd.ps1`.
 3. Aggiungi una regola del firewall per aprire la porta 22 e verifica che i servizi SSH siano in esecuzione.
 
 Per risolvere gli errori `Connection reset`, potrebbe essere necessario aggiornare i permessi per consentire a tutti l'accesso in lettura ed esecuzione sulla directory di OpenSSH.
@@ -92,8 +88,5 @@ icacls.exe "C:\Users\redsuit\Documents\ssh\OpenSSH-Win64" /grant Everyone:RX /T
 - [https://learn.microsoft.com/en-gb/archive/blogs/sergey_babkins_blog/another-solution-to-multi-hop-powershell-remoting](https://learn.microsoft.com/en-gb/archive/blogs/sergey_babkins_blog/another-solution-to-multi-hop-powershell-remoting)
 - [https://4sysops.com/archives/solve-the-powershell-multi-hop-problem-without-using-credssp/](https://4sysops.com/archives/solve-the-powershell-multi-hop-problem-without-using-credssp/)
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -2,30 +2,15 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/image (3).png" alt=""><figcaption></figcaption></figure>
-
-Unisciti al [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server per comunicare con hacker esperti e cacciatori di bug bounty!
-
-**Hacking Insights**\
-Interagisci con contenuti che approfondiscono l'emozione e le sfide dell'hacking
-
-**Real-Time Hack News**\
-Rimani aggiornato con il mondo dell'hacking in rapida evoluzione attraverso notizie e approfondimenti in tempo reale
-
-**Latest Announcements**\
-Rimani informato sulle nuove bug bounty in arrivo e sugli aggiornamenti cruciali della piattaforma
-
-**Unisciti a noi su** [**Discord**](https://discord.com/invite/N3FrSbmwdy) e inizia a collaborare con i migliori hacker oggi stesso!
-
 ## ASREPRoast
 
-ASREPRoast è un attacco di sicurezza che sfrutta gli utenti che mancano dell'**attributo richiesto di pre-autenticazione Kerberos**. Fondamentalmente, questa vulnerabilità consente agli attaccanti di richiedere l'autenticazione per un utente dal Domain Controller (DC) senza bisogno della password dell'utente. Il DC risponde quindi con un messaggio crittografato con la chiave derivata dalla password dell'utente, che gli attaccanti possono tentare di decifrare offline per scoprire la password dell'utente.
+ASREPRoast è un attacco di sicurezza che sfrutta gli utenti che non hanno l'**attributo richiesto di pre-autenticazione Kerberos**. Fondamentalmente, questa vulnerabilità consente agli attaccanti di richiedere l'autenticazione per un utente dal Domain Controller (DC) senza bisogno della password dell'utente. Il DC risponde quindi con un messaggio crittografato con la chiave derivata dalla password dell'utente, che gli attaccanti possono tentare di decifrare offline per scoprire la password dell'utente.
 
 I principali requisiti per questo attacco sono:
 
 - **Mancanza di pre-autenticazione Kerberos**: Gli utenti target non devono avere questa funzionalità di sicurezza abilitata.
 - **Connessione al Domain Controller (DC)**: Gli attaccanti hanno bisogno di accesso al DC per inviare richieste e ricevere messaggi crittografati.
-- **Account di dominio opzionale**: Avere un account di dominio consente agli attaccanti di identificare più efficientemente gli utenti vulnerabili attraverso query LDAP. Senza un tale account, gli attaccanti devono indovinare i nomi utente.
+- **Account di dominio opzionale**: Avere un account di dominio consente agli attaccanti di identificare più efficientemente gli utenti vulnerabili tramite query LDAP. Senza un tale account, gli attaccanti devono indovinare i nomi utente.
 
 #### Enumerare gli utenti vulnerabili (necessita credenziali di dominio)
 ```bash:Using Windows
@@ -84,20 +69,5 @@ ASRepCatcher listen
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/as-rep-roasting-using-rubeus-and-hashcat](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/as-rep-roasting-using-rubeus-and-hashcat)
 
 ---
-
-<figure><img src="../../images/image (3).png" alt=""><figcaption></figcaption></figure>
-
-Unisciti al server [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) per comunicare con hacker esperti e cacciatori di bug bounty!
-
-**Approfondimenti sul hacking**\
-Interagisci con contenuti che esplorano l'emozione e le sfide dell'hacking
-
-**Notizie di hacking in tempo reale**\
-Rimani aggiornato con il mondo frenetico dell'hacking attraverso notizie e approfondimenti in tempo reale
-
-**Ultimi annunci**\
-Rimani informato sulle nuove bug bounty in arrivo e sugli aggiornamenti cruciali della piattaforma
-
-**Unisciti a noi su** [**Discord**](https://discord.com/invite/N3FrSbmwdy) e inizia a collaborare con i migliori hacker oggi stesso!
 
 {{#include ../../banners/hacktricks-training.md}}

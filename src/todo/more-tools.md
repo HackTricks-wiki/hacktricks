@@ -1,8 +1,5 @@
 {{#include ../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 # BlueTeam
 
@@ -48,33 +45,33 @@
 - [https://github.com/robertdavidgraham/masscan](https://github.com/robertdavidgraham/masscan) : Scansione rapida delle porte
 - [https://github.com/Threezh1/JSFinder](https://github.com/Threezh1/JSFinder) : Sottodomini e URL da file JS in un web
 - [https://github.com/C1h2e1/MyFuzzingDict](https://github.com/C1h2e1/MyFuzzingDict) : Dizionario di file web
-- [https://github.com/TypeError/Bookmarks/blob/master/README.md](https://github.com/TypeError/Bookmarks/blob/master/README.md) : BurpExtension per evitare dozzine di schede ripetitore
+- [https://github.com/TypeError/Bookmarks/blob/master/README.md](https://github.com/TypeError/Bookmarks/blob/master/README.md) : BurpExtension per evitare dozzine di schede ripetute
 - [https://github.com/hakluke/hakrawler](https://github.com/hakluke/hakrawler) : Ottieni risorse
 - [https://github.com/izo30/google-dorker](https://github.com/izo30/google-dorker) : Google dorks
-- [https://github.com/sehno/Bug-bounty/blob/master/bugbounty_checklist.md](https://github.com/sehno/Bug-bounty/blob/master/bugbounty_checklist.md) : Checklist per Web BugBounty
+- [https://github.com/sehno/Bug-bounty/blob/master/bugbounty_checklist.md](https://github.com/sehno/Bug-bounty/blob/master/bugbounty_checklist.md) : Checklist per BugBounty web
 - [https://github.com/Naategh/dom-red](https://github.com/Naategh/dom-red) : Controlla un elenco di domini contro Open Redirection
 - [https://github.com/prodigysml/Dr.-Watson](https://github.com/prodigysml/Dr.-Watson) : Plugin Burp, analisi offline per scoprire domini, sottodomini e IP
 - [https://github.com/hahwul/WebHackersWeapons](https://github.com/hahwul/WebHackersWeapons): Elenco di diversi strumenti
 - [https://github.com/gauravnarwani97/Trishul](https://github.com/gauravnarwani97/Trishul) : Plugin BurpSuite per trovare vulnerabilità (SQLi, XSS, SSTI)
-- [https://github.com/fransr/postMessage-tracker](https://github.com/fransr/postMessage-tracker) : Estensione Chrome per tracciare le funzioni dei post-messaggi
+- [https://github.com/fransr/postMessage-tracker](https://github.com/fransr/postMessage-tracker) : Estensione Chrome per tracciare le funzioni di post-messaggi
 - [https://github.com/Quitten/Autorize](https://github.com/Quitten/Autorize) : Test automatici di autenticazione (rimuovi i cookie e prova a inviare la richiesta)
-- [https://github.com/pikpikcu/xrcross](https://github.com/pikpikcu/xrcross): XRCross è una Ricostruzione, Scanner e uno strumento per test di penetrazione / BugBounty. Questo strumento è stato costruito per testare vulnerabilità (XSS|SSRF|CORS|SSTI|IDOR|RCE|LFI|SQLI)
+- [https://github.com/pikpikcu/xrcross](https://github.com/pikpikcu/xrcross): XRCross è uno strumento di ricostruzione, scanner e per test di penetrazione / BugBounty. Questo strumento è stato costruito per testare vulnerabilità (XSS|SSRF|CORS|SSTI|IDOR|RCE|LFI|SQLI)
 
 # Windows
 
 - [https://github.com/Mr-Un1k0d3r/PoisonHandler](https://github.com/Mr-Un1k0d3r/PoisonHandler) : Movimenti laterali
 - [https://freddiebarrsmith.com/trix/trix.html](https://freddiebarrsmith.com/trix/trix.html) : LOL bins
 - [https://gist.github.com/netbiosX/ee35fcd3722e401a38136cff7b751d79](https://gist.github.com/netbiosX/ee35fcd3722e401a38136cff7b751d79) ([https://pentestlab.blog/2020/01/13/persistence-image-file-execution-options-injection/](https://pentestlab.blog/2020/01/13/persistence-image-file-execution-options-injection/)): Persistenza
-- [https://github.com/odzhan/injection](https://github.com/odzhan/injection) : Tecniche di iniezione di processo Windows
-- [https://github.com/BankSecurity/Red_Team](https://github.com/BankSecurity/Red_Team) : Script Red Team
+- [https://github.com/odzhan/injection](https://github.com/odzhan/injection) : Tecniche di iniezione di processi Windows
+- [https://github.com/BankSecurity/Red_Team](https://github.com/BankSecurity/Red_Team) : Script per Red Team
 - [https://github.com/l0ss/Grouper2](https://github.com/l0ss/Grouper2) : trova configurazioni errate relative alla sicurezza in Active Directory Group Policy.
-- [https://www.wietzebeukema.nl/blog/powershell-obfuscation-using-securestring](https://www.wietzebeukema.nl/blog/powershell-obfuscation-using-securestring) : Offuscamento Securestring
-- [https://pentestlab.blog/2020/02/24/parent-pid-spoofing/](https://pentestlab.blog/2020/02/24/parent-pid-spoofing/) : Spoofing PID genitore
+- [https://www.wietzebeukema.nl/blog/powershell-obfuscation-using-securestring](https://www.wietzebeukema.nl/blog/powershell-obfuscation-using-securestring) : Offuscamento di Securestring
+- [https://pentestlab.blog/2020/02/24/parent-pid-spoofing/](https://pentestlab.blog/2020/02/24/parent-pid-spoofing/) : Spoofing del PID genitore
 - [https://github.com/the-xentropy/xencrypt](https://github.com/the-xentropy/xencrypt) : Cripta i payload di Powershell
 - [https://shells.systems/introducing-ninja-c2-the-c2-built-for-stealth-red-team-operations/](https://shells.systems/introducing-ninja-c2-the-c2-built-for-stealth-red-team-operations/) : C2 stealth
-- [https://windows-internals.com/faxing-your-way-to-system/](https://windows-internals.com/faxing-your-way-to-system/) : Serie di log sui Windows Internals
+- [https://windows-internals.com/faxing-your-way-to-system/](https://windows-internals.com/faxing-your-way-to-system/) : Serie di log su Windows Internals
 - [https://bestestredteam.com/2018/10/02/tracking-pixel-in-microsoft-office-document/](https://bestestredteam.com/2018/10/02/tracking-pixel-in-microsoft-office-document/) : Traccia chi apre un documento
-- [https://github.com/Integration-IT/Active-Directory-Exploitation-Cheat-Sheet](https://github.com/Integration-IT/Active-Directory-Exploitation-Cheat-Sheet) : Cheat Sheet di Active Directory
+- [https://github.com/Integration-IT/Active-Directory-Exploitation-Cheat-Sheet](https://github.com/Integration-IT/Active-Directory-Exploitation-Cheat-Sheet) : Cheat Sheet per Active Directory
 
 # Firmware
 
@@ -93,11 +90,11 @@ Come estrarre firmware se non lo troviamo online: [https://www.youtube.com/watch
 
 Ecco un firmware con vulnerabilità da analizzare: [https://github.com/scriptingxss/IoTGoat](https://github.com/scriptingxss/IoTGoat)
 
-e qui la metodologia owasp per analizzare firmware: [https://github.com/scriptingxss/owasp-fstm](https://github.com/scriptingxss/owasp-fstm)
+E qui la metodologia OWASP per analizzare firmware: [https://github.com/scriptingxss/owasp-fstm](https://github.com/scriptingxss/owasp-fstm)
 
-Emulazione firmware: FIRMADYNE (https://github.com/firmadyne/firmadyne/) è una piattaforma per automatizzare l'emulazione e l'analisi dinamica di firmware basati su Linux.
+Emulazione del firmware: FIRMADYNE (https://github.com/firmadyne/firmadyne/) è una piattaforma per automatizzare l'emulazione e l'analisi dinamica del firmware basato su Linux.
 
-# ALTRO
+# OTHER
 
 - [https://twitter.com/HackAndDo/status/1202695084543791117](https://twitter.com/HackAndDo/status/1202695084543791117)
 - [https://github.com/weev3/LKWA](https://github.com/weev3/LKWA)
@@ -116,11 +113,8 @@ Emulazione firmware: FIRMADYNE (https://github.com/firmadyne/firmadyne/) è una 
 - [https://github.com/random-robbie/keywords/blob/master/keywords.txt](https://github.com/random-robbie/keywords/blob/master/keywords.txt) : Parole chiave
 - [https://github.com/ElevenPaths/HomePWN](https://github.com/ElevenPaths/HomePWN) : Hacking IoT (Wifi, BLE, SSDP, MDNS)
 - [https://github.com/rackerlabs/scantron](https://github.com/rackerlabs/scantron) : automazione della scansione
-- [https://github.com/doyensec/awesome-electronjs-hacking](https://github.com/doyensec/awesome-electronjs-hacking) : Questa lista mira a coprire argomenti di sicurezza relativi a Electron.js.
+- [https://github.com/doyensec/awesome-electronjs-hacking](https://github.com/doyensec/awesome-electronjs-hacking) : Questo elenco mira a coprire argomenti di sicurezza relativi a Electron.js.
 - [https://github.com/serain/bbrecon](https://github.com/serain/bbrecon) : Info sui programmi BB
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../banners/hacktricks-training.md}}

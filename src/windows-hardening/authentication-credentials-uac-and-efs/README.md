@@ -2,23 +2,16 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-Usa [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) per costruire e **automatizzare flussi di lavoro** facilmente, alimentati dagli **strumenti comunitari più avanzati** al mondo.\
-Accedi Oggi:
-
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
-
 ## Politica di AppLocker
 
-Una whitelist di applicazioni è un elenco di applicazioni software o eseguibili approvati che sono autorizzati a essere presenti e a funzionare su un sistema. L'obiettivo è proteggere l'ambiente da malware dannoso e software non approvato che non si allinea con le specifiche esigenze aziendali di un'organizzazione.
+Un elenco di applicazioni approvate è un elenco di applicazioni software o eseguibili approvati che sono autorizzati a essere presenti e a funzionare su un sistema. L'obiettivo è proteggere l'ambiente da malware dannoso e software non approvato che non si allinea con le specifiche esigenze aziendali di un'organizzazione.
 
-[AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) è la **soluzione di whitelisting delle applicazioni** di Microsoft e offre agli amministratori di sistema il controllo su **quali applicazioni e file gli utenti possono eseguire**. Fornisce un **controllo granulare** su eseguibili, script, file di installazione di Windows, DLL, app confezionate e installatori di app confezionate.\
+[AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) è la **soluzione di whitelisting delle applicazioni** di Microsoft e offre agli amministratori di sistema il controllo su **quali applicazioni e file gli utenti possono eseguire**. Fornisce **controllo granulare** su eseguibili, script, file di installazione di Windows, DLL, app confezionate e installatori di app confezionate.\
 È comune per le organizzazioni **bloccare cmd.exe e PowerShell.exe** e l'accesso in scrittura a determinate directory, **ma tutto questo può essere aggirato**.
 
 ### Controllo
 
-Controlla quali file/estensioni sono nella blacklist/nella whitelist:
+Controlla quali file/estensioni sono nella lista nera/bianca:
 ```powershell
 Get-ApplockerPolicy -Effective -xml
 
@@ -122,8 +115,8 @@ Questo metodo di crittografia consente un **accesso trasparente** ai file critto
 **Punti chiave**:
 
 - EFS utilizza una FEK simmetrica, crittografata con la chiave pubblica dell'utente.
-- La decrittazione impiega la chiave privata dell'utente per accedere alla FEK.
-- La decrittazione automatica avviene in determinate condizioni, come la copia su FAT32 o la trasmissione in rete.
+- La decrittazione utilizza la chiave privata dell'utente per accedere alla FEK.
+- La decrittazione automatica avviene in determinate condizioni, come il copia su FAT32 o la trasmissione in rete.
 - I file crittografati sono accessibili al proprietario senza passaggi aggiuntivi.
 
 ### Controlla le informazioni EFS
@@ -175,7 +168,7 @@ La **Local Administrator Password Solution (LAPS)**, disponibile per il download
 
 ## PS Constrained Language Mode
 
-PowerShell [**Constrained Language Mode**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **limita molte delle funzionalità** necessarie per utilizzare PowerShell in modo efficace, come il blocco degli oggetti COM, consentendo solo tipi .NET approvati, flussi di lavoro basati su XAML, classi PowerShell e altro ancora.
+PowerShell [**Constrained Language Mode**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **blocca molte delle funzionalità** necessarie per utilizzare PowerShell in modo efficace, come il blocco degli oggetti COM, consentendo solo tipi .NET approvati, flussi di lavoro basati su XAML, classi PowerShell e altro ancora.
 
 ### **Controlla**
 ```powershell
@@ -188,7 +181,7 @@ $ExecutionContext.SessionState.LanguageMode
 Powershell -version 2
 ```
 In Windows attuale, quel bypass non funzionerà, ma puoi usare [**PSByPassCLM**](https://github.com/padovah4ck/PSByPassCLM).\
-**Per compilarlo potresti aver bisogno** **di** _**Aggiungere un Riferimento**_ -> _Sfoglia_ -> _Sfoglia_ -> aggiungi `C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0\31bf3856ad364e35\System.Management.Automation.dll` e **cambiare il progetto a .Net4.5**.
+**Per compilarlo potresti aver bisogno** **di** _**Aggiungere un Riferimento**_ -> _Sfoglia_ -> _Sfoglia_ -> aggiungi `C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0\31bf3856ad364e35\System.Management.Automation.dll` e **cambiare il progetto in .Net4.5**.
 
 #### Bypass diretto:
 ```bash
@@ -252,15 +245,5 @@ L'SSPI sarà responsabile della ricerca del protocollo adeguato per due macchine
 {{#ref}}
 uac-user-account-control.md
 {{#endref}}
-
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Usa [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) per costruire e **automatizzare flussi di lavoro** alimentati dagli **strumenti comunitari più avanzati** al mondo.\
-Accedi oggi:
-
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
-
----
 
 {{#include ../../banners/hacktricks-training.md}}

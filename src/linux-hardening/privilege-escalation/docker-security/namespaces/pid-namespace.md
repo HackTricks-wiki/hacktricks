@@ -2,89 +2,79 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Informazioni di base
 
-The PID (Process IDentifier) namespace is a feature in the Linux kernel that provides process isolation by enabling a group of processes to have their own set of unique PIDs, separate from the PIDs in other namespaces. This is particularly useful in containerization, where process isolation is essential for security and resource management.
+Il namespace PID (Process IDentifier) è una funzionalità nel kernel Linux che fornisce isolamento dei processi consentendo a un gruppo di processi di avere il proprio insieme di PID unici, separati dai PID in altri namespace. Questo è particolarmente utile nella containerizzazione, dove l'isolamento dei processi è essenziale per la sicurezza e la gestione delle risorse.
 
-When a new PID namespace is created, the first process in that namespace is assigned PID 1. This process becomes the "init" process of the new namespace and is responsible for managing other processes within the namespace. Each subsequent process created within the namespace will have a unique PID within that namespace, and these PIDs will be independent of PIDs in other namespaces.
+Quando viene creato un nuovo namespace PID, il primo processo in quel namespace viene assegnato il PID 1. Questo processo diventa il processo "init" del nuovo namespace ed è responsabile della gestione degli altri processi all'interno del namespace. Ogni processo successivo creato all'interno del namespace avrà un PID unico all'interno di quel namespace, e questi PID saranno indipendenti dai PID in altri namespace.
 
-From the perspective of a process within a PID namespace, it can only see other processes in the same namespace. It is not aware of processes in other namespaces, and it cannot interact with them using traditional process management tools (e.g., `kill`, `wait`, etc.). This provides a level of isolation that helps prevent processes from interfering with one another.
+Dal punto di vista di un processo all'interno di un namespace PID, può vedere solo altri processi nello stesso namespace. Non è a conoscenza dei processi in altri namespace e non può interagire con essi utilizzando strumenti di gestione dei processi tradizionali (ad es., `kill`, `wait`, ecc.). Questo fornisce un livello di isolamento che aiuta a prevenire l'interferenza tra i processi.
 
-### How it works:
+### Come funziona:
 
-1. When a new process is created (e.g., by using the `clone()` system call), the process can be assigned to a new or existing PID namespace. **If a new namespace is created, the process becomes the "init" process of that namespace**.
-2. The **kernel** maintains a **mapping between the PIDs in the new namespace and the corresponding PIDs** in the parent namespace (i.e., the namespace from which the new namespace was created). This mapping **allows the kernel to translate PIDs when necessary**, such as when sending signals between processes in different namespaces.
-3. **Processes within a PID namespace can only see and interact with other processes in the same namespace**. They are not aware of processes in other namespaces, and their PIDs are unique within their namespace.
-4. When a **PID namespace is destroyed** (e.g., when the "init" process of the namespace exits), **all processes within that namespace are terminated**. This ensures that all resources associated with the namespace are properly cleaned up.
+1. Quando viene creato un nuovo processo (ad es., utilizzando la chiamata di sistema `clone()`), il processo può essere assegnato a un nuovo namespace PID o a uno esistente. **Se viene creato un nuovo namespace, il processo diventa il processo "init" di quel namespace**.
+2. Il **kernel** mantiene una **mappatura tra i PID nel nuovo namespace e i PID corrispondenti** nel namespace padre (cioè, il namespace da cui è stato creato il nuovo namespace). Questa mappatura **consente al kernel di tradurre i PID quando necessario**, ad esempio quando si inviano segnali tra processi in diversi namespace.
+3. **I processi all'interno di un namespace PID possono vedere e interagire solo con altri processi nello stesso namespace**. Non sono a conoscenza dei processi in altri namespace e i loro PID sono unici all'interno del loro namespace.
+4. Quando un **namespace PID viene distrutto** (ad es., quando il processo "init" del namespace termina), **tutti i processi all'interno di quel namespace vengono terminati**. Questo garantisce che tutte le risorse associate al namespace vengano pulite correttamente.
 
 ## Lab:
 
-### Create different Namespaces
+### Crea diversi Namespace
 
 #### CLI
-
 ```bash
 sudo unshare -pf --mount-proc /bin/bash
 ```
-
 <details>
 
-<summary>Error: bash: fork: Cannot allocate memory</summary>
+<summary>Errore: bash: fork: Impossibile allocare memoria</summary>
 
-When `unshare` is executed without the `-f` option, an error is encountered due to the way Linux handles new PID (Process ID) namespaces. The key details and the solution are outlined below:
+Quando `unshare` viene eseguito senza l'opzione `-f`, si verifica un errore a causa del modo in cui Linux gestisce i nuovi namespace PID (Process ID). I dettagli chiave e la soluzione sono delineati di seguito:
 
-1. **Problem Explanation**:
+1. **Spiegazione del Problema**:
 
-   - The Linux kernel allows a process to create new namespaces using the `unshare` system call. However, the process that initiates the creation of a new PID namespace (referred to as the "unshare" process) does not enter the new namespace; only its child processes do.
-   - Running `%unshare -p /bin/bash%` starts `/bin/bash` in the same process as `unshare`. Consequently, `/bin/bash` and its child processes are in the original PID namespace.
-   - The first child process of `/bin/bash` in the new namespace becomes PID 1. When this process exits, it triggers the cleanup of the namespace if there are no other processes, as PID 1 has the special role of adopting orphan processes. The Linux kernel will then disable PID allocation in that namespace.
+- Il kernel Linux consente a un processo di creare nuovi namespace utilizzando la chiamata di sistema `unshare`. Tuttavia, il processo che avvia la creazione di un nuovo namespace PID (chiamato "processo unshare") non entra nel nuovo namespace; solo i suoi processi figli lo fanno.
+- Eseguire `%unshare -p /bin/bash%` avvia `/bin/bash` nello stesso processo di `unshare`. Di conseguenza, `/bin/bash` e i suoi processi figli si trovano nel namespace PID originale.
+- Il primo processo figlio di `/bin/bash` nel nuovo namespace diventa PID 1. Quando questo processo termina, attiva la pulizia del namespace se non ci sono altri processi, poiché PID 1 ha il ruolo speciale di adottare processi orfani. Il kernel Linux disabiliterà quindi l'allocazione PID in quel namespace.
 
-2. **Consequence**:
+2. **Conseguenza**:
 
-   - The exit of PID 1 in a new namespace leads to the cleaning of the `PIDNS_HASH_ADDING` flag. This results in the `alloc_pid` function failing to allocate a new PID when creating a new process, producing the "Cannot allocate memory" error.
+- L'uscita di PID 1 in un nuovo namespace porta alla pulizia del flag `PIDNS_HASH_ADDING`. Questo provoca il fallimento della funzione `alloc_pid` nell'allocare un nuovo PID durante la creazione di un nuovo processo, producendo l'errore "Impossibile allocare memoria".
 
-3. **Solution**:
-   - The issue can be resolved by using the `-f` option with `unshare`. This option makes `unshare` fork a new process after creating the new PID namespace.
-   - Executing `%unshare -fp /bin/bash%` ensures that the `unshare` command itself becomes PID 1 in the new namespace. `/bin/bash` and its child processes are then safely contained within this new namespace, preventing the premature exit of PID 1 and allowing normal PID allocation.
+3. **Soluzione**:
+- Il problema può essere risolto utilizzando l'opzione `-f` con `unshare`. Questa opzione fa sì che `unshare` fork un nuovo processo dopo aver creato il nuovo namespace PID.
+- Eseguire `%unshare -fp /bin/bash%` garantisce che il comando `unshare` stesso diventi PID 1 nel nuovo namespace. `/bin/bash` e i suoi processi figli sono quindi contenuti in modo sicuro all'interno di questo nuovo namespace, prevenendo l'uscita prematura di PID 1 e consentendo l'allocazione normale dei PID.
 
-By ensuring that `unshare` runs with the `-f` flag, the new PID namespace is correctly maintained, allowing `/bin/bash` and its sub-processes to operate without encountering the memory allocation error.
+Assicurandosi che `unshare` venga eseguito con il flag `-f`, il nuovo namespace PID viene mantenuto correttamente, consentendo a `/bin/bash` e ai suoi subprocessi di operare senza incontrare l'errore di allocazione della memoria.
 
 </details>
 
-By mounting a new instance of the `/proc` filesystem if you use the param `--mount-proc`, you ensure that the new mount namespace has an **accurate and isolated view of the process information specific to that namespace**.
+Montando una nuova istanza del filesystem `/proc` se utilizzi il parametro `--mount-proc`, garantisci che il nuovo namespace di mount abbia una **visione accurata e isolata delle informazioni sui processi specifiche per quel namespace**.
 
 #### Docker
-
 ```bash
 docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 ```
-
-### &#x20;Check which namespace are your process in
-
+### &#x20;Controlla in quale namespace si trova il tuo processo
 ```bash
 ls -l /proc/self/ns/pid
 lrwxrwxrwx 1 root root 0 Apr  3 18:45 /proc/self/ns/pid -> 'pid:[4026532412]'
 ```
-
-### Find all PID namespaces
-
+### Trova tutti i namespace PID
 ```bash
 sudo find /proc -maxdepth 3 -type l -name pid -exec readlink {} \; 2>/dev/null | sort -u
 ```
+Nota che l'utente root del namespace PID iniziale (predefinito) può vedere tutti i processi, anche quelli in nuovi spazi dei PID, ecco perché possiamo vedere tutti i namespace PID.
 
-Note that the root use from the initial (default) PID namespace can see all the processes, even the ones in new PID names paces, thats why we can see all the PID namespaces.
-
-### Enter inside a PID namespace
-
+### Entrare all'interno di un namespace PID
 ```bash
 nsenter -t TARGET_PID --pid /bin/bash
 ```
+Quando entri in un namespace PID dal namespace predefinito, sarai comunque in grado di vedere tutti i processi. E il processo di quel namespace PID sarà in grado di vedere il nuovo bash nel namespace PID.
 
-When you enter inside a PID namespace from the default namespace, you will still be able to see all the processes. And the process from that PID ns will be able to see the new bash on the PID ns.
+Inoltre, puoi **entrare in un altro namespace PID di processo solo se sei root**. E **non puoi** **entrare** in un altro namespace **senza un descrittore** che punti ad esso (come `/proc/self/ns/pid`)
 
-Also, you can only **enter in another process PID namespace if you are root**. And you **cannot** **enter** in other namespace **without a descriptor** pointing to it (like `/proc/self/ns/pid`)
-
-## References
+## Riferimenti
 
 - [https://stackoverflow.com/questions/44666700/unshare-pid-bin-bash-fork-cannot-allocate-memory](https://stackoverflow.com/questions/44666700/unshare-pid-bin-bash-fork-cannot-allocate-memory)
 

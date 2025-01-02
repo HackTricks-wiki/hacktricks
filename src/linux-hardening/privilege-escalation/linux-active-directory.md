@@ -2,19 +2,17 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-{% embed url="https://websec.nl/" %}
+Una macchina linux può essere presente anche all'interno di un ambiente Active Directory.
 
-A linux machine can also be present inside an Active Directory environment.
+Una macchina linux in un AD potrebbe **memorizzare diversi ticket CCACHE all'interno di file. Questi ticket possono essere utilizzati e abusati come qualsiasi altro ticket kerberos**. Per leggere questi ticket è necessario essere l'utente proprietario del ticket o **root** all'interno della macchina.
 
-A linux machine in an AD might be **storing different CCACHE tickets inside files. This tickets can be used and abused as any other kerberos ticket**. In order to read this tickets you will need to be the user owner of the ticket or **root** inside the machine.
+## Enumerazione
 
-## Enumeration
+### Enumerazione AD da linux
 
-### AD enumeration from linux
+Se hai accesso a un AD in linux (o bash in Windows) puoi provare [https://github.com/lefayjey/linWinPwn](https://github.com/lefayjey/linWinPwn) per enumerare l'AD.
 
-If you have access over an AD in linux (or bash in Windows) you can try [https://github.com/lefayjey/linWinPwn](https://github.com/lefayjey/linWinPwn) to enumerate the AD.
-
-You can also check the following page to learn **other ways to enumerate AD from linux**:
+Puoi anche controllare la seguente pagina per apprendere **altri modi per enumerare l'AD da linux**:
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-ldap.md
@@ -22,28 +20,27 @@ You can also check the following page to learn **other ways to enumerate AD from
 
 ### FreeIPA
 
-FreeIPA is an open-source **alternative** to Microsoft Windows **Active Directory**, mainly for **Unix** environments. It combines a complete **LDAP directory** with an MIT **Kerberos** Key Distribution Center for management akin to Active Directory. Utilizing the Dogtag **Certificate System** for CA & RA certificate management, it supports **multi-factor** authentication, including smartcards. SSSD is integrated for Unix authentication processes. Learn more about it in:
+FreeIPA è un **alternativa** open-source a Microsoft Windows **Active Directory**, principalmente per ambienti **Unix**. Combina un **directory LDAP** completo con un MIT **Kerberos** Key Distribution Center per la gestione simile a Active Directory. Utilizzando il Dogtag **Certificate System** per la gestione dei certificati CA & RA, supporta l'autenticazione **multi-fattore**, inclusi i smartcard. SSSD è integrato per i processi di autenticazione Unix. Scopri di più in:
 
 {{#ref}}
 ../freeipa-pentesting.md
 {{#endref}}
 
-## Playing with tickets
+## Giocare con i ticket
 
 ### Pass The Ticket
 
-In this page you are going to find different places were you could **find kerberos tickets inside a linux host**, in the following page you can learn how to transform this CCache tickets formats to Kirbi (the format you need to use in Windows) and also how to perform a PTT attack:
+In questa pagina troverai diversi luoghi dove potresti **trovare ticket kerberos all'interno di un host linux**, nella pagina seguente puoi apprendere come trasformare questi formati di ticket CCache in Kirbi (il formato che devi usare in Windows) e anche come eseguire un attacco PTT:
 
 {{#ref}}
 ../../windows-hardening/active-directory-methodology/pass-the-ticket.md
 {{#endref}}
 
-### CCACHE ticket reuse from /tmp
+### Riutilizzo del ticket CCACHE da /tmp
 
-CCACHE files are binary formats for **storing Kerberos credentials** are typically stored with 600 permissions in `/tmp`. These files can be identified by their **name format, `krb5cc_%{uid}`,** correlating to the user's UID. For authentication ticket verification, the **environment variable `KRB5CCNAME`** should be set to the path of the desired ticket file, enabling its reuse.
+I file CCACHE sono formati binari per **memorizzare le credenziali Kerberos** e sono tipicamente memorizzati con permessi 600 in `/tmp`. Questi file possono essere identificati dal loro **formato di nome, `krb5cc_%{uid}`,** correlato all'UID dell'utente. Per la verifica del ticket di autenticazione, la **variabile di ambiente `KRB5CCNAME`** deve essere impostata sul percorso del file ticket desiderato, consentendone il riutilizzo.
 
-List the current ticket used for authentication with `env | grep KRB5CCNAME`. The format is portable and the ticket can be **reused by setting the environment variable** with `export KRB5CCNAME=/tmp/ticket.ccache`. Kerberos ticket name format is `krb5cc_%{uid}` where uid is the user UID.
-
+Elenca il ticket attualmente utilizzato per l'autenticazione con `env | grep KRB5CCNAME`. Il formato è portatile e il ticket può essere **riutilizzato impostando la variabile di ambiente** con `export KRB5CCNAME=/tmp/ticket.ccache`. Il formato del nome del ticket Kerberos è `krb5cc_%{uid}` dove uid è l'UID dell'utente.
 ```bash
 # Find tickets
 ls /tmp/ | grep krb5cc
@@ -52,79 +49,62 @@ krb5cc_1000
 # Prepare to use it
 export KRB5CCNAME=/tmp/krb5cc_1000
 ```
+### Riutilizzo del ticket CCACHE dalla keyring
 
-### CCACHE ticket reuse from keyring
+**I ticket Kerberos memorizzati nella memoria di un processo possono essere estratti**, in particolare quando la protezione ptrace della macchina è disabilitata (`/proc/sys/kernel/yama/ptrace_scope`). Uno strumento utile per questo scopo si trova su [https://github.com/TarlogicSecurity/tickey](https://github.com/TarlogicSecurity/tickey), che facilita l'estrazione iniettando nelle sessioni e dumpando i ticket in `/tmp`.
 
-**Kerberos tickets stored in a process's memory can be extracted**, particularly when the machine's ptrace protection is disabled (`/proc/sys/kernel/yama/ptrace_scope`). A useful tool for this purpose is found at [https://github.com/TarlogicSecurity/tickey](https://github.com/TarlogicSecurity/tickey), which facilitates the extraction by injecting into sessions and dumping tickets into `/tmp`.
-
-To configure and use this tool, the steps below are followed:
-
+Per configurare e utilizzare questo strumento, si seguono i seguenti passaggi:
 ```bash
 git clone https://github.com/TarlogicSecurity/tickey
 cd tickey/tickey
 make CONF=Release
 /tmp/tickey -i
 ```
+Questa procedura tenterà di iniettare in varie sessioni, indicando il successo memorizzando i ticket estratti in `/tmp` con una convenzione di denominazione di `__krb_UID.ccache`.
 
-This procedure will attempt to inject into various sessions, indicating success by storing extracted tickets in `/tmp` with a naming convention of `__krb_UID.ccache`.
+### Riutilizzo del ticket CCACHE da SSSD KCM
 
-### CCACHE ticket reuse from SSSD KCM
+SSSD mantiene una copia del database nel percorso `/var/lib/sss/secrets/secrets.ldb`. La chiave corrispondente è memorizzata come file nascosto nel percorso `/var/lib/sss/secrets/.secrets.mkey`. Per impostazione predefinita, la chiave è leggibile solo se si dispone di permessi **root**.
 
-SSSD maintains a copy of the database at the path `/var/lib/sss/secrets/secrets.ldb`. The corresponding key is stored as a hidden file at the path `/var/lib/sss/secrets/.secrets.mkey`. By default, the key is only readable if you have **root** permissions.
-
-Invoking \*\*`SSSDKCMExtractor` \*\* with the --database and --key parameters will parse the database and **decrypt the secrets**.
-
+Invocando \*\*`SSSDKCMExtractor` \*\* con i parametri --database e --key si analizzerà il database e si **decrypteranno i segreti**.
 ```bash
 git clone https://github.com/fireeye/SSSDKCMExtractor
 python3 SSSDKCMExtractor.py --database secrets.ldb --key secrets.mkey
 ```
+Il **blob della cache delle credenziali Kerberos può essere convertito in un file Kerberos CCache** utilizzabile che può essere passato a Mimikatz/Rubeus.
 
-The **credential cache Kerberos blob can be converted into a usable Kerberos CCache** file that can be passed to Mimikatz/Rubeus.
-
-### CCACHE ticket reuse from keytab
-
+### Riutilizzo del ticket CCACHE da keytab
 ```bash
 git clone https://github.com/its-a-feature/KeytabParser
 python KeytabParser.py /etc/krb5.keytab
 klist -k /etc/krb5.keytab
 ```
+### Estrai account da /etc/krb5.keytab
 
-### Extract accounts from /etc/krb5.keytab
+Le chiavi degli account di servizio, essenziali per i servizi che operano con privilegi di root, sono archiviate in modo sicuro nei file **`/etc/krb5.keytab`**. Queste chiavi, simili a password per i servizi, richiedono una stretta riservatezza.
 
-Service account keys, essential for services operating with root privileges, are securely stored in **`/etc/krb5.keytab`** files. These keys, akin to passwords for services, demand strict confidentiality.
-
-To inspect the keytab file's contents, **`klist`** can be employed. The tool is designed to display key details, including the **NT Hash** for user authentication, particularly when the key type is identified as 23.
-
+Per ispezionare il contenuto del file keytab, si può utilizzare **`klist`**. Lo strumento è progettato per visualizzare i dettagli delle chiavi, inclusa la **NT Hash** per l'autenticazione degli utenti, in particolare quando il tipo di chiave è identificato come 23.
 ```bash
 klist.exe -t -K -e -k FILE:C:/Path/to/your/krb5.keytab
 # Output includes service principal details and the NT Hash
 ```
-
-For Linux users, **`KeyTabExtract`** offers functionality to extract the RC4 HMAC hash, which can be leveraged for NTLM hash reuse.
-
+Per gli utenti Linux, **`KeyTabExtract`** offre funzionalità per estrarre l'hash RC4 HMAC, che può essere utilizzato per il riutilizzo dell'hash NTLM.
 ```bash
 python3 keytabextract.py krb5.keytab
 # Expected output varies based on hash availability
 ```
-
-On macOS, **`bifrost`** serves as a tool for keytab file analysis.
-
+Su macOS, **`bifrost`** funge da strumento per l'analisi dei file keytab.
 ```bash
 ./bifrost -action dump -source keytab -path /path/to/your/file
 ```
-
-Utilizing the extracted account and hash information, connections to servers can be established using tools like **`crackmapexec`**.
-
+Utilizzando le informazioni sull'account e sull'hash estratte, è possibile stabilire connessioni ai server utilizzando strumenti come **`crackmapexec`**.
 ```bash
 crackmapexec 10.XXX.XXX.XXX -u 'ServiceAccount$' -H "HashPlaceholder" -d "YourDOMAIN"
 ```
-
-## References
+## Riferimenti
 
 - [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
 - [https://github.com/TarlogicSecurity/tickey](https://github.com/TarlogicSecurity/tickey)
 - [https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#linux-active-directory](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#linux-active-directory)
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

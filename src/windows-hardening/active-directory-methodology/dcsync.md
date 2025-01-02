@@ -1,13 +1,5 @@
 # DCSync
 
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Usa [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=dcsync) per costruire e **automatizzare flussi di lavoro** alimentati dagli **strumenti comunitari più avanzati** al mondo.\
-Accedi oggi:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=dcsync" %}
-
 {{#include ../../banners/hacktricks-training.md}}
 
 ## DCSync
@@ -16,8 +8,8 @@ Il permesso **DCSync** implica avere questi permessi sul dominio stesso: **DS-Re
 
 **Note Importanti su DCSync:**
 
-- L'**attacco DCSync simula il comportamento di un Domain Controller e chiede ad altri Domain Controller di replicare informazioni** utilizzando il Protocollo di Servizio di Replica Directory Remota (MS-DRSR). Poiché MS-DRSR è una funzione valida e necessaria di Active Directory, non può essere disattivata o disabilitata.
-- Per impostazione predefinita, solo i gruppi **Domain Admins, Enterprise Admins, Administrators e Domain Controllers** hanno i privilegi richiesti.
+- L'**attacco DCSync simula il comportamento di un Domain Controller e chiede ad altri Domain Controller di replicare informazioni** utilizzando il Directory Replication Service Remote Protocol (MS-DRSR). Poiché MS-DRSR è una funzione valida e necessaria di Active Directory, non può essere disattivata o disabilitata.
+- Per impostazione predefinita solo i gruppi **Domain Admins, Enterprise Admins, Administrators e Domain Controllers** hanno i privilegi richiesti.
 - Se le password di qualsiasi account sono memorizzate con crittografia reversibile, è disponibile un'opzione in Mimikatz per restituire la password in chiaro.
 
 ### Enumerazione
@@ -70,11 +62,3 @@ Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveG
 - [https://yojimbosecurity.ninja/dcsync/](https://yojimbosecurity.ninja/dcsync/)
 
 {{#include ../../banners/hacktricks-training.md}}
-
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Usa [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=dcsync) per costruire e **automatizzare flussi di lavoro** facilmente, alimentati dagli **strumenti** della comunità **più avanzati** al mondo.\
-Ottieni accesso oggi:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=dcsync" %}

@@ -2,15 +2,11 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/i3.png" alt=""><figcaption></figcaption></figure>
 
-**Bug bounty tip**: **iscriviti** a **Intigriti**, una premium **bug bounty platform creata da hacker, per hacker**! Unisciti a noi su [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) oggi, e inizia a guadagnare bounty fino a **$100,000**!
-
-{% embed url="https://go.intigriti.com/hacktricks" %}
 
 ## Silver ticket
 
-L'attacco **Silver Ticket** comporta lo sfruttamento dei ticket di servizio negli ambienti Active Directory (AD). Questo metodo si basa su **acquisire l'hash NTLM di un account di servizio**, come un account computer, per forgiare un ticket di Ticket Granting Service (TGS). Con questo ticket falsificato, un attaccante può accedere a servizi specifici sulla rete, **impersonando qualsiasi utente**, tipicamente puntando a privilegi amministrativi. Si sottolinea che l'uso di chiavi AES per forgiare ticket è più sicuro e meno rilevabile.
+L'attacco **Silver Ticket** comporta lo sfruttamento dei ticket di servizio negli ambienti Active Directory (AD). Questo metodo si basa su **acquisire l'hash NTLM di un account di servizio**, come un account computer, per forgiare un ticket del Ticket Granting Service (TGS). Con questo ticket falsificato, un attaccante può accedere a servizi specifici sulla rete, **impersonando qualsiasi utente**, tipicamente puntando a privilegi amministrativi. Si sottolinea che l'uso di chiavi AES per forgiare ticket è più sicuro e meno rilevabile.
 
 Per la creazione di ticket, vengono impiegati diversi strumenti in base al sistema operativo:
 
@@ -63,7 +59,7 @@ Negli esempi seguenti immaginiamo che il biglietto venga recuperato impersonando
 
 ### CIFS
 
-Con questo biglietto sarai in grado di accedere alle cartelle `C$` e `ADMIN$` tramite **SMB** (se sono esposte) e copiare file in una parte del file system remoto semplicemente facendo qualcosa come:
+Con questo biglietto sarai in grado di accedere alla cartella `C$` e `ADMIN$` tramite **SMB** (se sono esposte) e copiare file in una parte del file system remoto semplicemente facendo qualcosa come:
 ```bash
 dir \\vulnerable.computer\C$
 dir \\vulnerable.computer\ADMIN$
@@ -113,7 +109,7 @@ Con l'accesso winrm a un computer puoi **accedervi** e persino ottenere un Power
 ```bash
 New-PSSession -Name PSC -ComputerName the.computer.name; Enter-PSSession PSC
 ```
-Controlla la seguente pagina per apprendere **altri modi per connettersi a un host remoto utilizzando winrm**:
+Controlla la seguente pagina per apprendere **ulteriori modi per connettersi a un host remoto utilizzando winrm**:
 
 {{#ref}}
 ../lateral-movement/winrm.md
@@ -139,10 +135,6 @@ mimikatz(commandline) # lsadump::dcsync /dc:pcdc.domain.local /domain:domain.loc
 dcsync.md
 {{#endref}}
 
-<figure><img src="../../images/i3.png" alt=""><figcaption></figcaption></figure>
 
-**Suggerimento per il bug bounty**: **iscriviti** a **Intigriti**, una premium **piattaforma di bug bounty creata da hacker, per hacker**! Unisciti a noi su [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) oggi, e inizia a guadagnare bounty fino a **$100,000**!
-
-{% embed url="https://go.intigriti.com/hacktricks" %}
 
 {{#include ../../banners/hacktricks-training.md}}
