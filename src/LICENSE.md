@@ -1,173 +1,170 @@
 {{#include ./banners/hacktricks-training.md}}
 
-<a rel="license" href="https://creativecommons.org/licenses/by-nc/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://licensebuttons.net/l/by-nc/4.0/88x31.png" /></a><br>Copyright © Carlos Polop 2021. Except where otherwise specified (the external information copied into the book belongs to the original authors), the text on <a href="https://github.com/carlospolop/hacktricks">HACK TRICKS</a> by Carlos Polop is licensed under the <a href="https://creativecommons.org/licenses/by-nc/4.0/">Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)</a>.
+<a rel="license" href="https://creativecommons.org/licenses/by-nc/4.0/"><img alt="Ліцензія Creative Commons" style="border-width:0" src="https://licensebuttons.net/l/by-nc/4.0/88x31.png" /></a><br>Авторські права © Carlos Polop 2021. За винятком випадків, коли зазначено інше (зовнішня інформація, скопійована в книгу, належить оригінальним авторам), текст на <a href="https://github.com/carlospolop/hacktricks">HACK TRICKS</a> від Carlos Polop ліцензовано відповідно до <a href="https://creativecommons.org/licenses/by-nc/4.0/">Ліцензії Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)</a>.
 
-License: Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)<br>
-Human Readable License: https://creativecommons.org/licenses/by-nc/4.0/<br>
-Complete Legal Terms: https://creativecommons.org/licenses/by-nc/4.0/legalcode<br>
-Formatting: https://github.com/jmatsushita/Creative-Commons-4.0-Markdown/blob/master/licenses/by-nc.markdown<br>
+Ліцензія: Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)<br>
+Ліцензія, що читається людьми: https://creativecommons.org/licenses/by-nc/4.0/<br>
+Повні юридичні умови: https://creativecommons.org/licenses/by-nc/4.0/legalcode<br>
+Форматування: https://github.com/jmatsushita/Creative-Commons-4.0-Markdown/blob/master/licenses/by-nc.markdown<br>
 
 # creative commons
 
 # Attribution-NonCommercial 4.0 International
 
-Creative Commons Corporation (“Creative Commons”) is not a law firm and does not provide legal services or legal advice. Distribution of Creative Commons public licenses does not create a lawyer-client or other relationship. Creative Commons makes its licenses and related information available on an “as-is” basis. Creative Commons gives no warranties regarding its licenses, any material licensed under their terms and conditions, or any related information. Creative Commons disclaims all liability for damages resulting from their use to the fullest extent possible.
+Creative Commons Corporation (“Creative Commons”) не є юридичною фірмою і не надає юридичних послуг або юридичних консультацій. Розповсюдження публічних ліцензій Creative Commons не створює відносин адвокат-клієнт або інших відносин. Creative Commons надає свої ліцензії та супутню інформацію на основі "як є". Creative Commons не надає жодних гарантій щодо своїх ліцензій, будь-якого матеріалу, ліцензованого відповідно до їхніх умов, або будь-якої супутньої інформації. Creative Commons відмовляється від усієї відповідальності за збитки, що виникають внаслідок їх використання в максимально можливій мірі.
 
-## Using Creative Commons Public Licenses
+## Використання публічних ліцензій Creative Commons
 
-Creative Commons public licenses provide a standard set of terms and conditions that creators and other rights holders may use to share original works of authorship and other material subject to copyright and certain other rights specified in the public license below. The following considerations are for informational purposes only, are not exhaustive, and do not form part of our licenses.
+Публічні ліцензії Creative Commons надають стандартний набір умов, які творці та інші правовласники можуть використовувати для поширення оригінальних творів авторства та іншого матеріалу, що підлягає авторському праву та певним іншим правам, зазначеним у публічній ліцензії нижче. Наступні міркування є лише для інформаційних цілей, не є вичерпними і не є частиною наших ліцензій.
 
-- **Considerations for licensors:** Our public licenses are intended for use by those authorized to give the public permission to use material in ways otherwise restricted by copyright and certain other rights. Our licenses are irrevocable. Licensors should read and understand the terms and conditions of the license they choose before applying it. Licensors should also secure all rights necessary before applying our licenses so that the public can reuse the material as expected. Licensors should clearly mark any material not subject to the license. This includes other CC-licensed material, or material used under an exception or limitation to copyright. [More considerations for licensors](http://wiki.creativecommons.org/Considerations_for_licensors_and_licensees#Considerations_for_licensors).
+- **Міркування для ліцензіарів:** Наші публічні ліцензії призначені для використання тими, хто уповноважений надавати публіці дозвіл на використання матеріалу в способах, які інакше обмежені авторським правом та певними іншими правами. Наші ліцензії є безвідкличними. Ліцензіари повинні прочитати та зрозуміти умови ліцензії, яку вони обирають, перед її застосуванням. Ліцензіари також повинні забезпечити всі права, необхідні перед застосуванням наших ліцензій, щоб публіка могла повторно використовувати матеріал, як очікується. Ліцензіари повинні чітко позначити будь-який матеріал, що не підлягає ліцензії. Це включає інший матеріал з ліцензією CC або матеріал, що використовується відповідно до винятку або обмеження авторського права. [Більше міркувань для ліцензіарів](http://wiki.creativecommons.org/Considerations_for_licensors_and_licensees#Considerations_for_licensors).
 
-- **Considerations for the public:** By using one of our public licenses, a licensor grants the public permission to use the licensed material under specified terms and conditions. If the licensor’s permission is not necessary for any reason–for example, because of any applicable exception or limitation to copyright–then that use is not regulated by the license. Our licenses grant only permissions under copyright and certain other rights that a licensor has authority to grant. Use of the licensed material may still be restricted for other reasons, including because others have copyright or other rights in the material. A licensor may make special requests, such as asking that all changes be marked or described. Although not required by our licenses, you are encouraged to respect those requests where reasonable. [More considerations for the public](http://wiki.creativecommons.org/Considerations_for_licensors_and_licensees#Considerations_for_licensees).
+- **Міркування для публіки:** Використовуючи одну з наших публічних ліцензій, ліцензіар надає публіці дозвіл на використання ліцензованого матеріалу відповідно до зазначених умов. Якщо дозвіл ліцензіара не є необхідним з будь-якої причини – наприклад, через будь-який застосовний виняток або обмеження авторського права – тоді це використання не регулюється ліцензією. Наші ліцензії надають лише дозволи відповідно до авторського права та певних інших прав, які ліцензіар має право надавати. Використання ліцензованого матеріалу може все ще бути обмеженим з інших причин, включаючи те, що інші мають авторські або інші права на матеріал. Ліцензіар може робити спеціальні запити, такі як прохання про те, щоб усі зміни були позначені або описані. Хоча це не є обов'язковим за нашими ліцензіями, вам рекомендується поважати ці запити, де це розумно. [Більше міркувань для публіки](http://wiki.creativecommons.org/Considerations_for_licensors_and_licensees#Considerations_for_licensees).
 
-# Creative Commons Attribution-NonCommercial 4.0 International Public License
+# Публічна ліцензія Creative Commons Attribution-NonCommercial 4.0 International
 
-By exercising the Licensed Rights (defined below), You accept and agree to be bound by the terms and conditions of this Creative Commons Attribution-NonCommercial 4.0 International Public License ("Public License"). To the extent this Public License may be interpreted as a contract, You are granted the Licensed Rights in consideration of Your acceptance of these terms and conditions, and the Licensor grants You such rights in consideration of benefits the Licensor receives from making the Licensed Material available under these terms and conditions.
+Використовуючи Ліцензовані Права (визначені нижче), Ви приймаєте і погоджуєтеся дотримуватися умов цієї Публічної ліцензії Creative Commons Attribution-NonCommercial 4.0 International ("Публічна ліцензія"). В тій мірі, в якій ця Публічна ліцензія може бути інтерпретована як контракт, Вам надаються Ліцензовані Права в обмін на Ваше прийняття цих умов, а Ліцензіар надає Вам такі права в обмін на вигоди, які Ліцензіар отримує від надання Ліцензованого Матеріалу відповідно до цих умов.
 
-## Section 1 – Definitions.
+## Розділ 1 – Визначення.
 
-a. **Adapted Material** means material subject to Copyright and Similar Rights that is derived from or based upon the Licensed Material and in which the Licensed Material is translated, altered, arranged, transformed, or otherwise modified in a manner requiring permission under the Copyright and Similar Rights held by the Licensor. For purposes of this Public License, where the Licensed Material is a musical work, performance, or sound recording, Adapted Material is always produced where the Licensed Material is synched in timed relation with a moving image.
+a. **Адаптований Матеріал** означає матеріал, що підлягає авторському праву та подібним правам, який походить з Ліцензованого Матеріалу або базується на ньому, і в якому Ліцензований Матеріал перекладено, змінено, упорядковано, перетворено або іншим чином модифіковано в спосіб, що вимагає дозволу відповідно до авторського права та подібних прав, що належать Ліцензіару. Для цілей цієї Публічної ліцензії, коли Ліцензований Матеріал є музичним твором, виконанням або звуковим записом, Адаптований Матеріал завжди виробляється, коли Ліцензований Матеріал синхронізується в часовому відношенні з рухомим зображенням.
 
-b. **Adapter's License** means the license You apply to Your Copyright and Similar Rights in Your contributions to Adapted Material in accordance with the terms and conditions of this Public License.
+b. **Ліцензія Адаптера** означає ліцензію, яку Ви застосовуєте до Ваших авторських прав та подібних прав у Ваших внесках до Адаптованого Матеріалу відповідно до умов цієї Публічної ліцензії.
 
-c. **Copyright and Similar Rights** means copyright and/or similar rights closely related to copyright including, without limitation, performance, broadcast, sound recording, and Sui Generis Database Rights, without regard to how the rights are labeled or categorized. For purposes of this Public License, the rights specified in Section 2(b)(1)-(2) are not Copyright and Similar Rights.
+c. **Авторське право та подібні права** означає авторське право та/або подібні права, тісно пов'язані з авторським правом, включаючи, без обмежень, виконання, трансляцію, звуковий запис та права Sui Generis на бази даних, незалежно від того, як ці права позначені або класифіковані. Для цілей цієї Публічної ліцензії права, зазначені в Розділі 2(b)(1)-(2), не є авторським правом та подібними правами.
 
-d. **Effective Technological Measures** means those measures that, in the absence of proper authority, may not be circumvented under laws fulfilling obligations under Article 11 of the WIPO Copyright Treaty adopted on December 20, 1996, and/or similar international agreements.
+d. **Ефективні технологічні заходи** означають ті заходи, які, за відсутності належної влади, не можуть бути обійдені відповідно до законів, що виконують зобов'язання відповідно до статті 11 Договору про авторське право ВОІП, прийнятого 20 грудня 1996 року, та/або подібних міжнародних угод.
 
-e. **Exceptions and Limitations** means fair use, fair dealing, and/or any other exception or limitation to Copyright and Similar Rights that applies to Your use of the Licensed Material.
+e. **Винятки та обмеження** означають добросовісне використання, добросовісну угоду та/або будь-який інший виняток або обмеження авторського права та подібних прав, що застосовуються до Вашого використання Ліцензованого Матеріалу.
 
-f. **Licensed Material** means the artistic or literary work, database, or other material to which the Licensor applied this Public License.
+f. **Ліцензований Матеріал** означає художній або літературний твір, базу даних або інший матеріал, до якого Ліцензіар застосував цю Публічну ліцензію.
 
-g. **Licensed Rights** means the rights granted to You subject to the terms and conditions of this Public License, which are limited to all Copyright and Similar Rights that apply to Your use of the Licensed Material and that the Licensor has authority to license.
+g. **Ліцензовані Права** означають права, надані Вам відповідно до умов цієї Публічної ліцензії, які обмежуються всіма авторськими правами та подібними правами, що застосовуються до Вашого використання Ліцензованого Матеріалу і які Ліцензіар має право ліцензувати.
 
-h. **Licensor** means the individual(s) or entity(ies) granting rights under this Public License.
+h. **Ліцензіар** означає особу(и) або організацію(ї), що надає права відповідно до цієї Публічної ліцензії.
 
-i. **NonCommercial** means not primarily intended for or directed towards commercial advantage or monetary compensation. For purposes of this Public License, the exchange of the Licensed Material for other material subject to Copyright and Similar Rights by digital file-sharing or similar means is NonCommercial provided there is no payment of monetary compensation in connection with the exchange.
+i. **НеКомерційний** означає, що не призначений переважно для або не спрямований на комерційну вигоду або грошову компенсацію. Для цілей цієї Публічної ліцензії обмін Ліцензованим Матеріалом на інший матеріал, що підлягає авторському праву та подібним правам, шляхом цифрового обміну файлами або подібними засобами є НеКомерційним, за умови, що немає виплати грошової компенсації у зв'язку з обміном.
 
-j. **Share** means to provide material to the public by any means or process that requires permission under the Licensed Rights, such as reproduction, public display, public performance, distribution, dissemination, communication, or importation, and to make material available to the public including in ways that members of the public may access the material from a place and at a time individually chosen by them.
+j. **Поділитися** означає надати матеріал публіці будь-якими засобами або процесами, які вимагають дозволу відповідно до Ліцензованих Прав, такими як відтворення, публічне відображення, публічне виконання, розподіл, розповсюдження, комунікація або імпорт, і зробити матеріал доступним для публіки, включаючи способи, якими члени публіки можуть отримати доступ до матеріалу з місця та в час, обраний ними.
 
-k. **Sui Generis Database Rights** means rights other than copyright resulting from Directive 96/9/EC of the European Parliament and of the Council of 11 March 1996 on the legal protection of databases, as amended and/or succeeded, as well as other essentially equivalent rights anywhere in the world.
+k. **Права Sui Generis на бази даних** означають права, відмінні від авторського права, що виникають внаслідок Директиви 96/9/ЄС Європейського парламенту та Ради від 11 березня 1996 року про правову охорону баз даних, з поправками та/або наступними змінами, а також інші еквівалентні права в будь-якій точці світу.
 
-l. **You** means the individual or entity exercising the Licensed Rights under this Public License. Your has a corresponding meaning.
+l. **Ви** означає особу або організацію, що здійснює Ліцензовані Права відповідно до цієї Публічної ліцензії. Ваш має відповідне значення.
 
-## Section 2 – Scope.
+## Розділ 2 – Обсяг.
 
-a. **_License grant._**
+a. **_Надання ліцензії._**
 
-1.  Subject to the terms and conditions of this Public License, the Licensor hereby grants You a worldwide, royalty-free, non-sublicensable, non-exclusive, irrevocable license to exercise the Licensed Rights in the Licensed Material to:
+1.  Згідно з умовами цієї Публічної ліцензії, Ліцензіар цим надає Вам всесвітню, безкоштовну, не підлягаючу субліцензуванню, неексклюзивну, безвідкличну ліцензію на здійснення Ліцензованих Прав у Ліцензованому Матеріалі для:
 
-A. reproduce and Share the Licensed Material, in whole or in part, for NonCommercial purposes only; and
+A. відтворення та Поділу Ліцензованого Матеріалу, повністю або частково, лише для НеКомерційних цілей; та
 
-B. produce, reproduce, and Share Adapted Material for NonCommercial purposes only.
+B. виробництва, відтворення та Поділу Адаптованого Матеріалу лише для НеКомерційних цілей.
 
-2.  **Exceptions and Limitations.** For the avoidance of doubt, where Exceptions and Limitations apply to Your use, this Public License does not apply, and You do not need to comply with its terms and conditions.
-3.  **Term.** The term of this Public License is specified in Section 6(a).
+2.  **Винятки та обмеження.** Для уникнення сумнівів, де Винятки та Обмеження застосовуються до Вашого використання, ця Публічна ліцензія не застосовується, і Вам не потрібно дотримуватися її умов.
+3.  **Термін.** Термін цієї Публічної ліцензії зазначено в Розділі 6(a).
 
-4.  **Media and formats; technical modifications allowed.** The Licensor authorizes You to exercise the Licensed Rights in all media and formats whether now known or hereafter created, and to make technical modifications necessary to do so. The Licensor waives and/or agrees not to assert any right or authority to forbid You from making technical modifications necessary to exercise the Licensed Rights, including technical modifications necessary to circumvent Effective Technological Measures. For purposes of this Public License, simply making modifications authorized by this Section 2(a)(4) never produces Adapted Material.
-5.  **Downstream recipients.**
+4.  **Медіа та формати; технічні модифікації дозволені.** Ліцензіар уповноважує Вас здійснювати Ліцензовані Права в усіх медіа та форматах, які зараз відомі або будуть створені в майбутньому, і вносити технічні модифікації, необхідні для цього. Ліцензіар відмовляється від і/або погоджується не стверджувати жодного права або повноваження заборонити Вам вносити технічні модифікації, необхідні для здійснення Ліцензованих Прав, включаючи технічні модифікації, необхідні для обходу Ефективних Технологічних Заходів. Для цілей цієї Публічної ліцензії просте внесення модифікацій, дозволених цим Розділом 2(a)(4), ніколи не виробляє Адаптований Матеріал.
+5.  **Отримувачі нижнього рівня.**
 
-A. **Offer from the Licensor – Licensed Material.** Every recipient of the Licensed Material automatically receives an offer from the Licensor to exercise the Licensed Rights under the terms and conditions of this Public License.
+A. **Пропозиція від Ліцензіара – Ліцензований Матеріал.** Кожен отримувач Ліцензованого Матеріалу автоматично отримує пропозицію від Ліцензіара на здійснення Ліцензованих Прав відповідно до умов цієї Публічної ліцензії.
 
-B. **No downstream restrictions.** You may not offer or impose any additional or different terms or conditions on, or apply any Effective Technological Measures to, the Licensed Material if doing so restricts exercise of the Licensed Rights by any recipient of the Licensed Material.
+B. **Без обмежень для нижнього рівня.** Ви не можете пропонувати або накладати будь-які додаткові або інші умови на Ліцензований Матеріал, якщо це обмежує здійснення Ліцензованих Прав будь-яким отримувачем Ліцензованого Матеріалу.
 
-6.  **No endorsement.** Nothing in this Public License constitutes or may be construed as permission to assert or imply that You are, or that Your use of the Licensed Material is, connected with, or sponsored, endorsed, or granted official status by, the Licensor or others designated to receive attribution as provided in Section 3(a)(1)(A)(i).
+6.  **Без підтвердження.** Нічого в цій Публічній ліцензії не становить або не може бути витлумачено як дозвіл стверджувати або натякати на те, що Ви є, або що Ваше використання Ліцензованого Матеріалу пов'язане з, або спонсороване, підтверджене або надане офіційний статус Ліцензіаром або іншими особами, призначеними для отримання атрибуції, як зазначено в Розділі 3(a)(1)(A)(i).
 
-b. **_Other rights._**
+b. **_Інші права._**
 
-1.  Moral rights, such as the right of integrity, are not licensed under this Public License, nor are publicity, privacy, and/or other similar personality rights; however, to the extent possible, the Licensor waives and/or agrees not to assert any such rights held by the Licensor to the limited extent necessary to allow You to exercise the Licensed Rights, but not otherwise.
+1.  Моральні права, такі як право на цілісність, не ліцензуються відповідно до цієї Публічної ліцензії, так само як і права на публічність, приватність та/або інші подібні особистісні права; однак, наскільки це можливо, Ліцензіар відмовляється від і/або погоджується не стверджувати жодних таких прав, що належать Ліцензіару, в обмеженій мірі, необхідній для того, щоб дозволити Вам здійснювати Ліцензовані Права, але не інакше.
 
-2.  Patent and trademark rights are not licensed under this Public License.
+2.  Патентні та торговельні права не ліцензуються відповідно до цієї Публічної ліцензії.
 
-3.  To the extent possible, the Licensor waives any right to collect royalties from You for the exercise of the Licensed Rights, whether directly or through a collecting society under any voluntary or waivable statutory or compulsory licensing scheme. In all other cases the Licensor expressly reserves any right to collect such royalties, including when the Licensed Material is used other than for NonCommercial purposes.
+3.  Наскільки це можливо, Ліцензіар відмовляється від будь-якого права на стягнення роялті з Вас за здійснення Ліцензованих Прав, безпосередньо або через колекційну організацію відповідно до будь-якої добровільної або відмовної статутної або обов'язкової ліцензійної схеми. У всіх інших випадках Ліцензіар прямо залишає за собою будь-яке право на стягнення таких роялті, включаючи випадки, коли Ліцензований Матеріал використовується не для НеКомерційних цілей.
 
-## Section 3 – License Conditions.
+## Розділ 3 – Умови ліцензії.
 
-Your exercise of the Licensed Rights is expressly made subject to the following conditions.
+Ваше здійснення Ліцензованих Прав прямо підлягає наступним умовам.
 
-a. **_Attribution._**
+a. **_Атрибуція._**
 
-1.  If You Share the Licensed Material (including in modified form), You must:
+1.  Якщо Ви Поділяєте Ліцензований Матеріал (включаючи в модифікованій формі), Ви повинні:
 
-A. retain the following if it is supplied by the Licensor with the Licensed Material:
+A. зберегти наступне, якщо це надано Ліцензіаром разом з Ліцензованим Матеріалом:
 
-i. identification of the creator(s) of the Licensed Material and any others designated to receive attribution, in any reasonable manner requested by the Licensor (including by pseudonym if designated);
+i. ідентифікацію творця(ів) Ліцензованого Матеріалу та будь-кого іншого, призначеного для отримання атрибуції, у будь-який розумний спосіб, запитаний Ліцензіаром (включаючи псевдонім, якщо призначено);
 
-ii. a copyright notice;
+ii. повідомлення про авторське право;
 
-iii. a notice that refers to this Public License;
+iii. повідомлення, що посилається на цю Публічну ліцензію;
 
-iv. a notice that refers to the disclaimer of warranties;
+iv. повідомлення, що посилається на відмову від гарантій;
 
-v. a URI or hyperlink to the Licensed Material to the extent reasonably practicable;
+v. URI або гіперпосилання на Ліцензований Матеріал, наскільки це розумно;
 
-B. indicate if You modified the Licensed Material and retain an indication of any previous modifications; and
+B. вказати, якщо Ви модифікували Ліцензований Матеріал, і зберегти вказівку на будь-які попередні модифікації; та
 
-C. indicate the Licensed Material is licensed under this Public License, and include the text of, or the URI or hyperlink to, this Public License.
+C. вказати, що Ліцензований Матеріал ліцензовано відповідно до цієї Публічної ліцензії, і включити текст або URI або гіперпосилання на цю Публічну ліцензію.
 
-2.  You may satisfy the conditions in Section 3(a)(1) in any reasonable manner based on the medium, means, and context in which You Share the Licensed Material. For example, it may be reasonable to satisfy the conditions by providing a URI or hyperlink to a resource that includes the required information.
+2.  Ви можете задовольнити умови в Розділі 3(a)(1) будь-яким розумним способом, виходячи з медіа, засобів і контексту, в якому Ви Поділяєте Ліцензований Матеріал. Наприклад, може бути розумно задовольнити умови, надаючи URI або гіперпосилання на ресурс, що містить необхідну інформацію.
 
-3.  If requested by the Licensor, You must remove any of the information required by Section 3(a)(1)(A) to the extent reasonably practicable.
+3.  Якщо Ліцензіар запитує, Ви повинні видалити будь-яку з інформації, вимаганої Розділом 3(a)(1)(A), наскільки це розумно.
 
-4.  If You Share Adapted Material You produce, the Adapter's License You apply must not prevent recipients of the Adapted Material from complying with this Public License.
+4.  Якщо Ви Поділяєте Адаптований Матеріал, який Ви виробляєте, Ліцензія Адаптера, яку Ви застосовуєте, не повинна заважати отримувачам Адаптованого Матеріалу дотримуватися цієї Публічної ліцензії.
 
-## Section 4 – Sui Generis Database Rights.
+## Розділ 4 – Права Sui Generis на бази даних.
 
-Where the Licensed Rights include Sui Generis Database Rights that apply to Your use of the Licensed Material:
+Коли Ліцензовані Права включають Права Sui Generis на бази даних, що застосовуються до Вашого використання Ліцензованого Матеріалу:
 
-a. for the avoidance of doubt, Section 2(a)(1) grants You the right to extract, reuse, reproduce, and Share all or a substantial portion of the contents of the database for NonCommercial purposes only;
+a. для уникнення сумнівів, Розділ 2(a)(1) надає Вам право витягувати, повторно використовувати, відтворювати та Поділитися всіма або значною частиною вмісту бази даних лише для НеКомерційних цілей;
 
-b. if You include all or a substantial portion of the database contents in a database in which You have Sui Generis Database Rights, then the database in which You have Sui Generis Database Rights (but not its individual contents) is Adapted Material; and
+b. якщо Ви включаєте всі або значну частину вмісту бази даних у базу даних, в якій Ви маєте Права Sui Generis на бази даних, тоді база даних, в якій Ви маєте Права Sui Generis на бази даних (але не її окремі вмісти), є Адаптованим Матеріалом; та
 
-c. You must comply with the conditions in Section 3(a) if You Share all or a substantial portion of the contents of the database.
+c. Ви повинні дотримуватися умов у Розділі 3(a), якщо Ви Поділяєте всі або значну частину вмісту бази даних.
 
-For the avoidance of doubt, this Section 4 supplements and does not replace Your obligations under this Public License where the Licensed Rights include other Copyright and Similar Rights.
+Для уникнення сумнівів, цей Розділ 4 доповнює і не замінює Ваші зобов'язання відповідно до цієї Публічної ліцензії, де Ліцензовані Права включають інші авторські права та подібні права.
 
-## Section 5 – Disclaimer of Warranties and Limitation of Liability.
+## Розділ 5 – Відмова від гарантій та обмеження відповідальності.
 
-a. **Unless otherwise separately undertaken by the Licensor, to the extent possible, the Licensor offers the Licensed Material as-is and as-available, and makes no representations or warranties of any kind concerning the Licensed Material, whether express, implied, statutory, or other. This includes, without limitation, warranties of title, merchantability, fitness for a particular purpose, non-infringement, absence of latent or other defects, accuracy, or the presence or absence of errors, whether or not known or discoverable. Where disclaimers of warranties are not allowed in full or in part, this disclaimer may not apply to You.**
+a. **Якщо не зазначено окремо Ліцензіаром, наскільки це можливо, Ліцензіар пропонує Ліцензований Матеріал "як є" і "як доступно", і не робить жодних заяв або гарантій будь-якого роду щодо Ліцензованого Матеріалу, будь то явні, імпліцитні, статутні або інші. Це включає, без обмежень, гарантії права власності, товарності, придатності для певної мети, ненарушення, відсутності прихованих або інших дефектів, точності або наявності чи відсутності помилок, незалежно від того, відомі вони чи відкриті. У випадках, коли відмови від гарантій не дозволені повністю або частково, ця відмова може не застосовуватися до Вас.**
 
-b. **To the extent possible, in no event will the Licensor be liable to You on any legal theory (including, without limitation, negligence) or otherwise for any direct, special, indirect, incidental, consequential, punitive, exemplary, or other losses, costs, expenses, or damages arising out of this Public License or use of the Licensed Material, even if the Licensor has been advised of the possibility of such losses, costs, expenses, or damages. Where a limitation of liability is not allowed in full or in part, this limitation may not apply to You.**
+b. **Наскільки це можливо, в жодному випадку Ліцензіар не несе відповідальності перед Вами за будь-якою юридичною теорією (включаючи, без обмежень, недбалість) або іншим чином за будь-які прямі, спеціальні, непрямі, випадкові, наслідкові, покарання, зразкові або інші збитки, витрати, витрати або збитки, що виникають внаслідок цієї Публічної ліцензії або використання Ліцензованого Матеріалу, навіть якщо Ліцензіар був попереджений про можливість таких збитків, витрат, витрат або збитків. У випадках, коли обмеження відповідальності не дозволені повністю або частково, це обмеження може не застосовуватися до Вас.**
 
-c. The disclaimer of warranties and limitation of liability provided above shall be interpreted in a manner that, to the extent possible, most closely approximates an absolute disclaimer and waiver of all liability.
+c. Відмова від гарантій та обмеження відповідальності, зазначені вище, повинні тлумачитися таким чином, щоб, наскільки це можливо, найбільш близько наближатися до абсолютної відмови та відмови від усієї відповідальності.
 
-## Section 6 – Term and Termination.
+## Розділ 6 – Термін та припинення.
 
-a. This Public License applies for the term of the Copyright and Similar Rights licensed here. However, if You fail to comply with this Public License, then Your rights under this Public License terminate automatically.
+a. Ця Публічна ліцензія застосовується на термін авторських прав та подібних прав, ліцензованих тут. Однак, якщо Ви не дотримуєтеся цієї Публічної ліцензії, тоді Ваші права відповідно до цієї Публічної ліцензії автоматично припиняються.
 
-b. Where Your right to use the Licensed Material has terminated under Section 6(a), it reinstates:
+b. Коли Ваше право на використання Ліцензованого Матеріалу припинилося відповідно до Розділу 6(a), воно відновлюється:
 
-1.  automatically as of the date the violation is cured, provided it is cured within 30 days of Your discovery of the violation; or
+1.  автоматично з дати, коли порушення усунено, за умови, що воно усунене протягом 30 днів з моменту Вашого виявлення порушення; або
 
-2.  upon express reinstatement by the Licensor.
+2.  за явним відновленням Ліцензіара.
 
-For the avoidance of doubt, this Section 6(b) does not affect any right the Licensor may have to seek remedies for Your violations of this Public License.
+Для уникнення сумнівів, цей Розділ 6(b) не впливає на будь-яке право, яке Ліцензіар може мати на пошук засобів правового захисту за Ваші порушення цієї Публічної ліцензії.
 
-c. For the avoidance of doubt, the Licensor may also offer the Licensed Material under separate terms or conditions or stop distributing the Licensed Material at any time; however, doing so will not terminate this Public License.
+c. Для уникнення сумнівів, Ліцензіар також може пропонувати Ліцензований Матеріал на окремих умовах або припинити розповсюдження Ліцензованого Матеріалу в будь-який час; однак, це не призведе до припинення цієї Публічної ліцензії.
 
-d. Sections 1, 5, 6, 7, and 8 survive termination of this Public License.
+d. Розділи 1, 5, 6, 7 та 8 залишаються в силі після припинення цієї Публічної ліцензії.
 
-## Section 7 – Other Terms and Conditions.
+## Розділ 7 – Інші умови та положення.
 
-a. The Licensor shall not be bound by any additional or different terms or conditions communicated by You unless expressly agreed.
+a. Ліцензіар не буде зобов'язаний дотримуватися будь-яких додаткових або інших умов, повідомлених Вами, якщо це не погоджено явно.
 
-b. Any arrangements, understandings, or agreements regarding the Licensed Material not stated herein are separate from and independent of the terms and conditions of this Public License.
+b. Будь-які угоди, розуміння або домовленості щодо Ліцензованого Матеріалу, не зазначені тут, є окремими та незалежними від умов цієї Публічної ліцензії.
 
-## Section 8 – Interpretation.
+## Розділ 8 – Тлумачення.
 
-a. For the avoidance of doubt, this Public License does not, and shall not be interpreted to, reduce, limit, restrict, or impose conditions on any use of the Licensed Material that could lawfully be made without permission under this Public License.
+a. Для уникнення сумнівів, ця Публічна ліцензія не зменшує, не обмежує, не накладає обмеження або умови на будь-яке використання Ліцензованого Матеріалу, яке може бути законно здійснене без дозволу відповідно до цієї Публічної ліцензії.
 
-b. To the extent possible, if any provision of this Public License is deemed unenforceable, it shall be automatically reformed to the minimum extent necessary to make it enforceable. If the provision cannot be reformed, it shall be severed from this Public License without affecting the enforceability of the remaining terms and conditions.
+b. Наскільки це можливо, якщо будь-яке положення цієї Публічної ліцензії вважається таким, що не підлягає виконанню, воно автоматично реформується до мінімальної міри, необхідної для того, щоб зробити його виконуваним. Якщо положення не може бути реформоване, воно буде відокремлене від цієї Публічної ліцензії без впливу на виконуваність інших умов.
 
-c. No term or condition of this Public License will be waived and no failure to comply consented to unless expressly agreed to by the Licensor.
+c. Жоден термін або умова цієї Публічної ліцензії не буде відмовлено, і жодне невиконання не буде погоджено, якщо це не буде явно погоджено Ліцензіаром.
 
-d. Nothing in this Public License constitutes or may be interpreted as a limitation upon, or waiver of, any privileges and immunities that apply to the Licensor or You, including from the legal processes of any jurisdiction or authority.
-
+d. Нічого в цій Публічній ліцензії не становить або не може бути витлумачено як обмеження або відмова від будь-яких привілеїв та імунітетів, що застосовуються до Ліцензіара або Вас, включаючи від юридичних процесів будь-якої юрисдикції або влади.
 ```
 Creative Commons is not a party to its public licenses. Notwithstanding, Creative Commons may elect to apply one of its public licenses to material it publishes and in those instances will be considered the “Licensor.” Except for the limited purpose of indicating that material is shared under a Creative Commons public license or as otherwise permitted by the Creative Commons policies published at [creativecommons.org/policies](http://creativecommons.org/policies), Creative Commons does not authorize the use of the trademark “Creative Commons” or any other trademark or logo of Creative Commons without its prior written consent including, without limitation, in connection with any unauthorized modifications to any of its public licenses or any other arrangements, understandings, or agreements concerning use of licensed material. For the avoidance of doubt, this paragraph does not form part of the public licenses.
 
 Creative Commons may be contacted at [creativecommons.org](http://creativecommons.org/).
 ```
-
 {{#include ./banners/hacktricks-training.md}}
-

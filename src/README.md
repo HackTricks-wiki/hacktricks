@@ -4,28 +4,28 @@ Reading time: {{ #reading_time }}
 
 <figure><img src="images/hacktricks.gif" alt=""><figcaption></figcaption></figure>
 
-_Hacktricks logos & motion design by_ [_@ppiernacho_](https://www.instagram.com/ppieranacho/)_._
+_Hacktricks логотипи та анімаційний дизайн від_ [_@ppiernacho_](https://www.instagram.com/ppieranacho/)_._
 
 > [!TIP]
-> **Welcome to the wiki where you will find each hacking trick/technique/whatever I have learnt from CTFs, real life apps, reading researches, and news.**
+> **Ласкаво просимо до вікі, де ви знайдете кожен хакерський трюк/техніку/що завгодно, що я навчився з CTF, реальних додатків, читання досліджень та новин.**
 
-To get started follow this page where you will find the **typical flow** that **you should follow when pentesting** one or more **machines:**
+Щоб почати, слідуйте цій сторінці, де ви знайдете **типовий процес**, який **вам слід дотримуватися під час пентестингу** одного або кількох **машин:**
 
 {{#ref}}
 generic-methodologies-and-resources/pentesting-methodology.md
 {{#endref}}
 
-## Corporate Sponsors
+## Корпоративні спонсори
 
 ### [STM Cyber](https://www.stmcyber.com)
 
 <figure><img src="images/stm (1).png" alt=""><figcaption></figcaption></figure>
 
-[**STM Cyber**](https://www.stmcyber.com) is a great cybersecurity company whose slogan is **HACK THE UNHACKABLE**. They perform their own research and develop their own hacking tools to **offer several valuable cybersecurity services** like pentesting, Red teams and training.
+[**STM Cyber**](https://www.stmcyber.com) - це чудова компанія з кібербезпеки, чий слоган - **HACK THE UNHACKABLE**. Вони проводять власні дослідження та розробляють власні хакерські інструменти, щоб **пропонувати кілька цінних послуг з кібербезпеки**, таких як пентестинг, червоні команди та навчання.
 
-You can check their **blog** in [**https://blog.stmcyber.com**](https://blog.stmcyber.com)
+Ви можете перевірити їхній **блог** на [**https://blog.stmcyber.com**](https://blog.stmcyber.com)
 
-**STM Cyber** also support cybersecurity open source projects like HackTricks :)
+**STM Cyber** також підтримує проекти з відкритим кодом у сфері кібербезпеки, такі як HackTricks :)
 
 ---
 
@@ -33,7 +33,7 @@ You can check their **blog** in [**https://blog.stmcyber.com**](https://blog.stm
 
 <figure><img src="images/image (45).png" alt=""><figcaption></figcaption></figure>
 
-[**RootedCON**](https://www.rootedcon.com) is the most relevant cybersecurity event in **Spain** and one of the most important in **Europe**. With **the mission of promoting technical knowledge**, this congress is a boiling meeting point for technology and cybersecurity professionals in every discipline.
+[**RootedCON**](https://www.rootedcon.com) - це найважливіша подія з кібербезпеки в **Іспанії** та одна з найважливіших в **Європі**. З **метою просування технічних знань** цей конгрес є гарячою точкою зустрічі для професіоналів у сфері технологій та кібербезпеки в усіх дисциплінах.
 
 {% embed url="https://www.rootedcon.com/" %}
 
@@ -43,9 +43,9 @@ You can check their **blog** in [**https://blog.stmcyber.com**](https://blog.stm
 
 <figure><img src="images/image (47).png" alt=""><figcaption></figcaption></figure>
 
-**Intigriti** is the **Europe's #1** ethical hacking and **bug bounty platform.**
+**Intigriti** - це **перша в Європі** платформа етичного хакінгу та **баг-бонті.**
 
-**Bug bounty tip**: **sign up** for **Intigriti**, a premium **bug bounty platform created by hackers, for hackers**! Join us at [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) today, and start earning bounties up to **$100,000**!
+**Порада щодо баг-бонті**: **зареєструйтеся** на **Intigriti**, преміум **платформі баг-бонті, створеній хакерами для хакерів**! Приєднуйтесь до нас на [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) сьогодні та почніть заробляти винагороди до **$100,000**!
 
 {% embed url="https://go.intigriti.com/hacktricks" %}
 
@@ -56,9 +56,9 @@ You can check their **blog** in [**https://blog.stmcyber.com**](https://blog.stm
 <figure><img src="images/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.
+Використовуйте [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks), щоб легко створювати та **автоматизувати робочі процеси**, підтримувані найсучаснішими інструментами спільноти.
 
-Get Access Today:
+Отримайте доступ сьогодні:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
@@ -68,23 +68,23 @@ Get Access Today:
 
 <figure><img src="images/image (3).png" alt=""><figcaption></figcaption></figure>
 
-Join [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server to communicate with experienced hackers and bug bounty hunters!
+Приєднуйтесь до сервера [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy), щоб спілкуватися з досвідченими хакерами та мисливцями за багами!
 
-- **Hacking Insights:** Engage with content that delves into the thrill and challenges of hacking
-- **Real-Time Hack News:** Keep up-to-date with fast-paced hacking world through real-time news and insights
-- **Latest Announcements:** Stay informed with the newest bug bounties launching and crucial platform updates
+- **Інсайти з хакінгу:** Залучайтеся до контенту, який занурюється в захоплення та виклики хакінгу
+- **Новини про хакінг в реальному часі:** Слідкуйте за швидкоплинним світом хакінгу через новини та інсайти в реальному часі
+- **Останні оголошення:** Будьте в курсі нових баг-бонті та важливих оновлень платформи
 
-**Join us on** [**Discord**](https://discord.com/invite/N3FrSbmwdy) and start collaborating with top hackers today!
+**Приєднуйтесь до нас на** [**Discord**](https://discord.com/invite/N3FrSbmwdy) та почніть співпрацювати з провідними хакерами сьогодні!
 
 ---
 
-### [Pentest-Tools.com](https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons) - The essential penetration testing toolkit
+### [Pentest-Tools.com](https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons) - Необхідний набір інструментів для пентестингу
 
 <figure><img src="images/pentest-tools.svg" alt=""><figcaption></figcaption></figure>
 
-**Get a hacker's perspective on your web apps, network, and cloud**
+**Отримайте перспективу хакера на свої веб-додатки, мережу та хмару**
 
-**Find and report critical, exploitable vulnerabilities with real business impact.** Use our 20+ custom tools to map the attack surface, find security issues that let you escalate privileges, and use automated exploits to collect essential evidence, turning your hard work into persuasive reports.
+**Знайдіть і повідомте про критичні, експлуатовані вразливості з реальним бізнес-імпактом.** Використовуйте наші 20+ спеціальних інструментів для картографування атакуючої поверхні, знаходження проблем безпеки, які дозволяють вам підвищувати привілеї, і використовуйте автоматизовані експлойти для збору важливих доказів, перетворюючи вашу важку працю на переконливі звіти.
 
 {% embed url="https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons" %}
 
@@ -94,22 +94,22 @@ Join [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server to 
 
 <figure><img src="images/image (1254).png" alt=""><figcaption></figcaption></figure>
 
-**SerpApi** offers fast and easy real-time APIs to **access search engine results**. They scrape search engines, handle proxies, solve captchas, and parse all rich structured data for you.
+**SerpApi** пропонує швидкі та прості API в реальному часі для **доступу до результатів пошукових систем**. Вони збирають дані з пошукових систем, обробляють проксі, вирішують капчі та аналізують всі багаті структуровані дані для вас.
 
-A subscription to one of SerpApi’s plans includes access to over 50 different APIs for scraping different search engines, including Google, Bing, Baidu, Yahoo, Yandex, and more.\
-Unlike other providers, **SerpApi doesn’t just scrape organic results**. SerpApi responses consistently include all ads, inline images and videos, knowledge graphs, and other elements and features present in the search results.
+Підписка на один з планів SerpApi включає доступ до понад 50 різних API для збору даних з різних пошукових систем, включаючи Google, Bing, Baidu, Yahoo, Yandex та інші.\
+На відміну від інших постачальників, **SerpApi не просто збирає органічні результати**. Відповіді SerpApi постійно включають всі оголошення, вбудовані зображення та відео, графіки знань та інші елементи та функції, присутні в результатах пошуку.
 
-Current SerpApi customers include **Apple, Shopify, and GrubHub**.\
-For more information check out their [**blog**](https://serpapi.com/blog/)**,** or try an example in their [**playground**](https://serpapi.com/playground)**.**\
-You can **create a free account** [**here**](https://serpapi.com/users/sign_up)**.**
+Серед поточних клієнтів SerpApi - **Apple, Shopify та GrubHub**.\
+Для отримання додаткової інформації перегляньте їхній [**блог**](https://serpapi.com/blog/)**,** або спробуйте приклад у їхньому [**плейграунді**](https://serpapi.com/playground)**.**\
+Ви можете **створити безкоштовний обліковий запис** [**тут**](https://serpapi.com/users/sign_up)**.**
 
 ---
 
-### 8kSec Academy – In-Depth Mobile Security Courses
+### 8kSec Academy – Глибокі курси з мобільної безпеки
 
 <figure><img src="images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-Learn the technologies and skills required to perform vulnerability research, penetration testing, and reverse engineering to protect mobile applications and devices. **Master iOS and Android security** through our on-demand courses and **get certified**:
+Вивчайте технології та навички, необхідні для проведення досліджень вразливостей, пентестингу та реверс-інжинірингу для захисту мобільних додатків та пристроїв. **Опануйте безпеку iOS та Android** через наші курси на вимогу та **отримайте сертифікат**:
 
 {% embed url="https://academy.8ksec.io/" %}
 
@@ -119,25 +119,25 @@ Learn the technologies and skills required to perform vulnerability research, pe
 
 <figure><img src="images/websec (1).svg" alt=""><figcaption></figcaption></figure>
 
-[**WebSec**](https://websec.nl) is a professional cybersecurity company based in **Amsterdam** which helps **protecting** businesses **all over the world** against the latest cybersecurity threats by providing **offensive-security services** with a **modern** approach.
+[**WebSec**](https://websec.nl) - це професійна компанія з кібербезпеки, що базується в **Амстердамі**, яка допомагає **захищати** бізнеси **по всьому світу** від останніх загроз кібербезпеки, надаючи **послуги з наступальної безпеки** з **сучасним** підходом.
 
-WebSec is an **all-in-one security company** which means they do it all; Pentesting, **Security** Audits, Awareness Trainings, Phishing Campagnes, Code Review, Exploit Development, Security Experts Outsourcing and much more.
+WebSec - це **все-в-одному компанія з безпеки**, що означає, що вони роблять все; Пентестинг, **Аудити** безпеки, Тренінги з обізнаності, Фішингові кампанії, Огляд коду, Розробка експлойтів, Аутсорсинг експертів з безпеки та багато іншого.
 
-Another cool thing about WebSec is that unlike the industry average WebSec is **very confident in their skills**, to such an extent that they **guarantee the best quality results**, it states on their website "**If we can't hack it, You don't pay it!**". For more info take a look at their [**website**](https://websec.nl/en/) and [**blog**](https://websec.nl/blog/)!
+Ще одна цікава річ про WebSec полягає в тому, що на відміну від середньої по галузі, WebSec **дуже впевнена у своїх навичках**, настільки, що вони **гарантують найкращі результати якості**, на їхньому сайті зазначено: "**Якщо ми не можемо зламати це, ви не платите!**". Для отримання додаткової інформації ознайомтеся з їхнім [**сайтом**](https://websec.nl/en/) та [**блогом**](https://websec.nl/blog/)!
 
-In addition to the above WebSec is also a **committed supporter of HackTricks.**
+На додаток до вищезазначеного, WebSec також є **відданим прихильником HackTricks.**
 
 {% embed url="https://www.youtube.com/watch?v=Zq2JycGDCPM" %}
 
-## License & Disclaimer
+## Ліцензія та відмова від відповідальності
 
-Check them in:
+Перевірте їх у:
 
 {{#ref}}
 welcome/hacktricks-values-and-faq.md
 {{#endref}}
 
-## Github Stats
+## Статистика Github
 
 ![HackTricks Github Stats](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
 
