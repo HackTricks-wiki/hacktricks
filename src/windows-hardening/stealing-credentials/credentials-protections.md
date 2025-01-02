@@ -1,100 +1,90 @@
-# Windows Credentials Protections
+# Protecciones de Credenciales de Windows
 
-## Credentials Protections
+## Protecciones de Credenciales
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## WDigest
 
-The [WDigest](<https://technet.microsoft.com/pt-pt/library/cc778868(v=ws.10).aspx?f=255&MSPPError=-2147217396>) protocol, introduced with Windows XP, is designed for authentication via the HTTP Protocol and is **enabled by default on Windows XP through Windows 8.0 and Windows Server 2003 to Windows Server 2012**. This default setting results in **plain-text password storage in LSASS** (Local Security Authority Subsystem Service). An attacker can use Mimikatz to **extract these credentials** by executing:
-
+El protocolo [WDigest](<https://technet.microsoft.com/pt-pt/library/cc778868(v=ws.10).aspx?f=255&MSPPError=-2147217396>), introducido con Windows XP, está diseñado para la autenticación a través del Protocolo HTTP y está **habilitado por defecto en Windows XP hasta Windows 8.0 y Windows Server 2003 hasta Windows Server 2012**. Esta configuración predeterminada resulta en **almacenamiento de contraseñas en texto plano en LSASS** (Servicio de Subsistema de Autoridad de Seguridad Local). Un atacante puede usar Mimikatz para **extraer estas credenciales** ejecutando:
 ```bash
 sekurlsa::wdigest
 ```
-
-To **toggle this feature off or on**, the _**UseLogonCredential**_ and _**Negotiate**_ registry keys within _**HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\SecurityProviders\WDigest**_ must be set to "1". If these keys are **absent or set to "0"**, WDigest is **disabled**:
-
+Para **activar o desactivar esta función**, las claves de registro _**UseLogonCredential**_ y _**Negotiate**_ dentro de _**HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\SecurityProviders\WDigest**_ deben estar configuradas en "1". Si estas claves están **ausentes o configuradas en "0"**, WDigest está **deshabilitado**:
 ```bash
 reg query HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest /v UseLogonCredential
 ```
+## Protección de LSA
 
-## LSA Protection
-
-Starting with **Windows 8.1**, Microsoft enhanced the security of LSA to **block unauthorized memory reads or code injections by untrusted processes**. This enhancement hinders the typical functioning of commands like `mimikatz.exe sekurlsa:logonpasswords`. To **enable this enhanced protection**, the _**RunAsPPL**_ value in _**HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA**_ should be adjusted to 1:
-
+A partir de **Windows 8.1**, Microsoft mejoró la seguridad de LSA para **bloquear lecturas de memoria no autorizadas o inyecciones de código por procesos no confiables**. Esta mejora obstaculiza el funcionamiento típico de comandos como `mimikatz.exe sekurlsa:logonpasswords`. Para **habilitar esta protección mejorada**, el valor _**RunAsPPL**_ en _**HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA**_ debe ajustarse a 1:
 ```
 reg query HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA /v RunAsPPL
 ```
-
 ### Bypass
 
-It is possible to bypass this protection using Mimikatz driver mimidrv.sys:
+Es posible eludir esta protección utilizando el controlador de Mimikatz mimidrv.sys:
 
 ![](../../images/mimidrv.png)
 
 ## Credential Guard
 
-**Credential Guard**, a feature exclusive to **Windows 10 (Enterprise and Education editions)**, enhances the security of machine credentials using **Virtual Secure Mode (VSM)** and **Virtualization Based Security (VBS)**. It leverages CPU virtualization extensions to isolate key processes within a protected memory space, away from the main operating system's reach. This isolation ensures that even the kernel cannot access the memory in VSM, effectively safeguarding credentials from attacks like **pass-the-hash**. The **Local Security Authority (LSA)** operates within this secure environment as a trustlet, while the **LSASS** process in the main OS acts merely as a communicator with the VSM's LSA.
+**Credential Guard**, una característica exclusiva de **Windows 10 (ediciones Enterprise y Education)**, mejora la seguridad de las credenciales de la máquina utilizando **Virtual Secure Mode (VSM)** y **Virtualization Based Security (VBS)**. Aprovecha las extensiones de virtualización de la CPU para aislar procesos clave dentro de un espacio de memoria protegido, lejos del alcance del sistema operativo principal. Este aislamiento asegura que incluso el kernel no pueda acceder a la memoria en VSM, protegiendo efectivamente las credenciales de ataques como **pass-the-hash**. La **Local Security Authority (LSA)** opera dentro de este entorno seguro como un trustlet, mientras que el proceso **LSASS** en el sistema operativo principal actúa meramente como un comunicador con la LSA de VSM.
 
-By default, **Credential Guard** is not active and requires manual activation within an organization. It's critical for enhancing security against tools like **Mimikatz**, which are hindered in their ability to extract credentials. However, vulnerabilities can still be exploited through the addition of custom **Security Support Providers (SSP)** to capture credentials in clear text during login attempts.
+Por defecto, **Credential Guard** no está activo y requiere activación manual dentro de una organización. Es crítico para mejorar la seguridad contra herramientas como **Mimikatz**, que se ven obstaculizadas en su capacidad para extraer credenciales. Sin embargo, las vulnerabilidades aún pueden ser explotadas mediante la adición de **Security Support Providers (SSP)** personalizados para capturar credenciales en texto claro durante los intentos de inicio de sesión.
 
-To verify **Credential Guard**'s activation status, the registry key _**LsaCfgFlags**_ under _**HKLM\System\CurrentControlSet\Control\LSA**_ can be inspected. A value of "**1**" indicates activation with **UEFI lock**, "**2**" without lock, and "**0**" denotes it is not enabled. This registry check, while a strong indicator, is not the sole step for enabling Credential Guard. Detailed guidance and a PowerShell script for enabling this feature are available online.
-
+Para verificar el estado de activación de **Credential Guard**, se puede inspeccionar la clave del registro _**LsaCfgFlags**_ bajo _**HKLM\System\CurrentControlSet\Control\LSA**_. Un valor de "**1**" indica activación con **UEFI lock**, "**2**" sin bloqueo, y "**0**" denota que no está habilitado. Esta verificación del registro, aunque es un fuerte indicador, no es el único paso para habilitar Credential Guard. Se dispone de orientación detallada y un script de PowerShell para habilitar esta característica en línea.
 ```powershell
 reg query HKLM\System\CurrentControlSet\Control\LSA /v LsaCfgFlags
 ```
+Para una comprensión completa e instrucciones sobre cómo habilitar **Credential Guard** en Windows 10 y su activación automática en sistemas compatibles de **Windows 11 Enterprise y Education (versión 22H2)**, visita [la documentación de Microsoft](https://docs.microsoft.com/en-us/windows/security/identity-protection/credential-guard/credential-guard-manage).
 
-For a comprehensive understanding and instructions on enabling **Credential Guard** in Windows 10 and its automatic activation in compatible systems of **Windows 11 Enterprise and Education (version 22H2)**, visit [Microsoft's documentation](https://docs.microsoft.com/en-us/windows/security/identity-protection/credential-guard/credential-guard-manage).
+Se proporcionan más detalles sobre la implementación de SSPs personalizados para la captura de credenciales en [esta guía](../active-directory-methodology/custom-ssp.md).
 
-Further details on implementing custom SSPs for credential capture are provided in [this guide](../active-directory-methodology/custom-ssp.md).
+## Modo RestrictedAdmin de RDP
 
-## RDP RestrictedAdmin Mode
+**Windows 8.1 y Windows Server 2012 R2** introdujeron varias nuevas características de seguridad, incluido el _**modo Restricted Admin para RDP**_. Este modo fue diseñado para mejorar la seguridad al mitigar los riesgos asociados con [**pass the hash**](https://blog.ahasayen.com/pass-the-hash/) ataques.
 
-**Windows 8.1 and Windows Server 2012 R2** introduced several new security features, including the _**Restricted Admin mode for RDP**_. This mode was designed to enhance security by mitigating the risks associated with [**pass the hash**](https://blog.ahasayen.com/pass-the-hash/) attacks.
+Tradicionalmente, al conectarse a una computadora remota a través de RDP, sus credenciales se almacenan en la máquina objetivo. Esto representa un riesgo de seguridad significativo, especialmente al usar cuentas con privilegios elevados. Sin embargo, con la introducción del _**modo Restricted Admin**_, este riesgo se reduce sustancialmente.
 
-Traditionally, when connecting to a remote computer via RDP, your credentials are stored on the target machine. This poses a significant security risk, especially when using accounts with elevated privileges. However, with the introduction of _**Restricted Admin mode**_, this risk is substantially reduced.
+Al iniciar una conexión RDP utilizando el comando **mstsc.exe /RestrictedAdmin**, la autenticación a la computadora remota se realiza sin almacenar sus credenciales en ella. Este enfoque asegura que, en caso de una infección de malware o si un usuario malicioso obtiene acceso al servidor remoto, sus credenciales no se vean comprometidas, ya que no están almacenadas en el servidor.
 
-When initiating an RDP connection using the command **mstsc.exe /RestrictedAdmin**, authentication to the remote computer is performed without storing your credentials on it. This approach ensures that, in the event of a malware infection or if a malicious user gains access to the remote server, your credentials are not compromised, as they are not stored on the server.
+Es importante tener en cuenta que en **modo Restricted Admin**, los intentos de acceder a recursos de red desde la sesión RDP no utilizarán sus credenciales personales; en su lugar, se utiliza la **identidad de la máquina**.
 
-It's important to note that in **Restricted Admin mode**, attempts to access network resources from the RDP session will not use your personal credentials; instead, the **machine's identity** is used.
-
-This feature marks a significant step forward in securing remote desktop connections and protecting sensitive information from being exposed in case of a security breach.
+Esta característica marca un avance significativo en la seguridad de las conexiones de escritorio remoto y en la protección de información sensible de ser expuesta en caso de una violación de seguridad.
 
 ![](../../images/RAM.png)
 
-For more detailed information on visit [this resource](https://blog.ahasayen.com/restricted-admin-mode-for-rdp/).
+Para obtener más información detallada, visita [este recurso](https://blog.ahasayen.com/restricted-admin-mode-for-rdp/).
 
-## Cached Credentials
+## Credenciales en caché
 
-Windows secures **domain credentials** through the **Local Security Authority (LSA)**, supporting logon processes with security protocols like **Kerberos** and **NTLM**. A key feature of Windows is its capability to cache the **last ten domain logins** to ensure users can still access their computers even if the **domain controller is offline**—a boon for laptop users often away from their company's network.
+Windows asegura **credenciales de dominio** a través de la **Autoridad de Seguridad Local (LSA)**, apoyando procesos de inicio de sesión con protocolos de seguridad como **Kerberos** y **NTLM**. Una característica clave de Windows es su capacidad para almacenar en caché los **últimos diez inicios de sesión de dominio** para garantizar que los usuarios aún puedan acceder a sus computadoras incluso si el **controlador de dominio está fuera de línea**—una ventaja para los usuarios de laptops que a menudo están fuera de la red de su empresa.
 
-The number of cached logins is adjustable via a specific **registry key or group policy**. To view or change this setting, the following command is utilized:
-
+El número de inicios de sesión en caché es ajustable a través de una **clave de registro o política de grupo** específica. Para ver o cambiar esta configuración, se utiliza el siguiente comando:
 ```bash
 reg query "HKEY_LOCAL_MACHINE\SOFTWARE\MICROSOFT\WINDOWS NT\CURRENTVERSION\WINLOGON" /v CACHEDLOGONSCOUNT
 ```
+El acceso a estas credenciales en caché está estrictamente controlado, con solo la cuenta **SYSTEM** teniendo los permisos necesarios para verlas. Los administradores que necesiten acceder a esta información deben hacerlo con privilegios de usuario SYSTEM. Las credenciales se almacenan en: `HKEY_LOCAL_MACHINE\SECURITY\Cache`
 
-Access to these cached credentials is tightly controlled, with only the **SYSTEM** account having the necessary permissions to view them. Administrators needing to access this information must do so with SYSTEM user privileges. The credentials are stored at: `HKEY_LOCAL_MACHINE\SECURITY\Cache`
+**Mimikatz** se puede emplear para extraer estas credenciales en caché utilizando el comando `lsadump::cache`.
 
-**Mimikatz** can be employed to extract these cached credentials using the command `lsadump::cache`.
+Para más detalles, la [fuente](http://juggernaut.wikidot.com/cached-credentials) original proporciona información completa.
 
-For further details, the original [source](http://juggernaut.wikidot.com/cached-credentials) provides comprehensive information.
+## Usuarios Protegidos
 
-## Protected Users
+La membresía en el **grupo de Usuarios Protegidos** introduce varias mejoras de seguridad para los usuarios, asegurando niveles más altos de protección contra el robo y el uso indebido de credenciales:
 
-Membership in the **Protected Users group** introduces several security enhancements for users, ensuring higher levels of protection against credential theft and misuse:
+- **Delegación de Credenciales (CredSSP)**: Incluso si la configuración de Directiva de Grupo para **Permitir delegar credenciales predeterminadas** está habilitada, las credenciales en texto plano de los Usuarios Protegidos no se almacenarán en caché.
+- **Windows Digest**: A partir de **Windows 8.1 y Windows Server 2012 R2**, el sistema no almacenará en caché las credenciales en texto plano de los Usuarios Protegidos, independientemente del estado de Windows Digest.
+- **NTLM**: El sistema no almacenará en caché las credenciales en texto plano de los Usuarios Protegidos ni funciones unidireccionales NT (NTOWF).
+- **Kerberos**: Para los Usuarios Protegidos, la autenticación Kerberos no generará **claves DES** o **RC4**, ni almacenará en caché credenciales en texto plano o claves a largo plazo más allá de la adquisición inicial del Ticket-Granting Ticket (TGT).
+- **Inicio de Sesión Offline**: Los Usuarios Protegidos no tendrán un verificador en caché creado al iniciar sesión o desbloquear, lo que significa que el inicio de sesión offline no es compatible con estas cuentas.
 
-- **Credential Delegation (CredSSP)**: Even if the Group Policy setting for **Allow delegating default credentials** is enabled, plain text credentials of Protected Users will not be cached.
-- **Windows Digest**: Starting from **Windows 8.1 and Windows Server 2012 R2**, the system will not cache plain text credentials of Protected Users, regardless of the Windows Digest status.
-- **NTLM**: The system will not cache Protected Users' plain text credentials or NT one-way functions (NTOWF).
-- **Kerberos**: For Protected Users, Kerberos authentication will not generate **DES** or **RC4 keys**, nor will it cache plain text credentials or long-term keys beyond the initial Ticket-Granting Ticket (TGT) acquisition.
-- **Offline Sign-In**: Protected Users will not have a cached verifier created at sign-in or unlock, meaning offline sign-in is not supported for these accounts.
+Estas protecciones se activan en el momento en que un usuario, que es miembro del **grupo de Usuarios Protegidos**, inicia sesión en el dispositivo. Esto asegura que se implementen medidas de seguridad críticas para proteger contra varios métodos de compromiso de credenciales.
 
-These protections are activated the moment a user, who is a member of the **Protected Users group**, signs into the device. This ensures that critical security measures are in place to safeguard against various methods of credential compromise.
+Para obtener información más detallada, consulte la [documentación](https://docs.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/protected-users-security-group) oficial.
 
-For more detailed information, consult the official [documentation](https://docs.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/protected-users-security-group).
-
-**Table from** [**the docs**](https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/appendix-c--protected-accounts-and-groups-in-active-directory)**.**
+**Tabla de** [**los docs**](https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/appendix-c--protected-accounts-and-groups-in-active-directory)**.**
 
 | Windows Server 2003 RTM | Windows Server 2003 SP1+ | <p>Windows Server 2012,<br>Windows Server 2008 R2,<br>Windows Server 2008</p> | Windows Server 2016          |
 | ----------------------- | ------------------------ | ----------------------------------------------------------------------------- | ---------------------------- |
@@ -116,4 +106,3 @@ For more detailed information, consult the official [documentation](https://docs
 | Server Operators        | Server Operators         | Server Operators                                                              | Server Operators             |
 
 {{#include ../../banners/hacktricks-training.md}}
-

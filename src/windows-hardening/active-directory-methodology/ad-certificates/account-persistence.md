@@ -2,55 +2,44 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**This is a small summary of the machine persistence chapters of the awesome research from [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)**
+**Este es un pequeño resumen de los capítulos de persistencia de máquina de la increíble investigación de [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)**
 
-## **Understanding Active User Credential Theft with Certificates – PERSIST1**
+## **Entendiendo el robo de credenciales de usuario activas con certificados – PERSIST1**
 
-In a scenario where a certificate that allows domain authentication can be requested by a user, an attacker has the opportunity to **request** and **steal** this certificate to **maintain persistence** on a network. By default, the `User` template in Active Directory allows such requests, though it may sometimes be disabled.
+En un escenario donde un usuario puede solicitar un certificado que permite la autenticación de dominio, un atacante tiene la oportunidad de **solicitar** y **robar** este certificado para **mantener persistencia** en una red. Por defecto, la plantilla `User` en Active Directory permite tales solicitudes, aunque a veces puede estar deshabilitada.
 
-Using a tool named [**Certify**](https://github.com/GhostPack/Certify), one can search for valid certificates that enable persistent access:
-
+Usando una herramienta llamada [**Certify**](https://github.com/GhostPack/Certify), se puede buscar certificados válidos que habiliten el acceso persistente:
 ```bash
 Certify.exe find /clientauth
 ```
+Se destaca que el poder de un certificado radica en su capacidad para **autenticar como el usuario** al que pertenece, independientemente de cualquier cambio de contraseña, siempre que el certificado permanezca **válido**.
 
-It's highlighted that a certificate's power lies in its ability to **authenticate as the user** it belongs to, regardless of any password changes, as long as the certificate remains **valid**.
-
-Certificates can be requested through a graphical interface using `certmgr.msc` or through the command line with `certreq.exe`. With **Certify**, the process to request a certificate is simplified as follows:
-
+Los certificados se pueden solicitar a través de una interfaz gráfica utilizando `certmgr.msc` o a través de la línea de comandos con `certreq.exe`. Con **Certify**, el proceso para solicitar un certificado se simplifica de la siguiente manera:
 ```bash
 Certify.exe request /ca:CA-SERVER\CA-NAME /template:TEMPLATE-NAME
 ```
-
-Upon successful request, a certificate along with its private key is generated in `.pem` format. To convert this into a `.pfx` file, which is usable on Windows systems, the following command is utilized:
-
+Al realizar una solicitud exitosa, se genera un certificado junto con su clave privada en formato `.pem`. Para convertir esto en un archivo `.pfx`, que es utilizable en sistemas Windows, se utiliza el siguiente comando:
 ```bash
 openssl pkcs12 -in cert.pem -keyex -CSP "Microsoft Enhanced Cryptographic Provider v1.0" -export -out cert.pfx
 ```
-
-The `.pfx` file can then be uploaded to a target system and used with a tool called [**Rubeus**](https://github.com/GhostPack/Rubeus) to request a Ticket Granting Ticket (TGT) for the user, extending the attacker's access for as long as the certificate is **valid** (typically one year):
-
+El archivo `.pfx` puede ser subido a un sistema objetivo y utilizado con una herramienta llamada [**Rubeus**](https://github.com/GhostPack/Rubeus) para solicitar un Ticket Granting Ticket (TGT) para el usuario, extendiendo el acceso del atacante mientras el certificado sea **válido** (típicamente un año):
 ```bash
 Rubeus.exe asktgt /user:harmj0y /certificate:C:\Temp\cert.pfx /password:CertPass!
 ```
+Una advertencia importante se comparte sobre cómo esta técnica, combinada con otro método descrito en la sección **THEFT5**, permite a un atacante obtener de manera persistente el **NTLM hash** de una cuenta sin interactuar con el Local Security Authority Subsystem Service (LSASS), y desde un contexto no elevado, proporcionando un método más sigiloso para el robo de credenciales a largo plazo.
 
-An important warning is shared about how this technique, combined with another method outlined in the **THEFT5** section, allows an attacker to persistently obtain an account’s **NTLM hash** without interacting with the Local Security Authority Subsystem Service (LSASS), and from a non-elevated context, providing a stealthier method for long-term credential theft.
+## **Ganar Persistencia en la Máquina con Certificados - PERSIST2**
 
-## **Gaining Machine Persistence with Certificates - PERSIST2**
-
-Another method involves enrolling a compromised system’s machine account for a certificate, utilizing the default `Machine` template which allows such actions. If an attacker gains elevated privileges on a system, they can use the **SYSTEM** account to request certificates, providing a form of **persistence**:
-
+Otro método implica inscribir la cuenta de máquina de un sistema comprometido para un certificado, utilizando la plantilla `Machine` predeterminada que permite tales acciones. Si un atacante obtiene privilegios elevados en un sistema, puede usar la cuenta **SYSTEM** para solicitar certificados, proporcionando una forma de **persistencia**:
 ```bash
 Certify.exe request /ca:dc.theshire.local/theshire-DC-CA /template:Machine /machine
 ```
+Este acceso permite al atacante autenticarse en **Kerberos** como la cuenta de máquina y utilizar **S4U2Self** para obtener tickets de servicio de Kerberos para cualquier servicio en el host, otorgando efectivamente al atacante acceso persistente a la máquina.
 
-This access enables the attacker to authenticate to **Kerberos** as the machine account and utilize **S4U2Self** to obtain Kerberos service tickets for any service on the host, effectively granting the attacker persistent access to the machine.
+## **Extensión de la Persistencia a Través de la Renovación de Certificados - PERSIST3**
 
-## **Extending Persistence Through Certificate Renewal - PERSIST3**
+El método final discutido implica aprovechar los **períodos de validez** y **renovación** de las plantillas de certificados. Al **renovar** un certificado antes de su expiración, un atacante puede mantener la autenticación en Active Directory sin necesidad de inscripciones adicionales de tickets, lo que podría dejar rastros en el servidor de la Autoridad de Certificación (CA).
 
-The final method discussed involves leveraging the **validity** and **renewal periods** of certificate templates. By **renewing** a certificate before its expiration, an attacker can maintain authentication to Active Directory without the need for additional ticket enrolments, which could leave traces on the Certificate Authority (CA) server.
-
-This approach allows for an **extended persistence** method, minimizing the risk of detection through fewer interactions with the CA server and avoiding the generation of artifacts that could alert administrators to the intrusion.
+Este enfoque permite un método de **persistencia extendida**, minimizando el riesgo de detección a través de menos interacciones con el servidor CA y evitando la generación de artefactos que podrían alertar a los administradores sobre la intrusión.
 
 {{#include ../../../banners/hacktricks-training.md}}
-

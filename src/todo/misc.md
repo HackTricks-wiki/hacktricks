@@ -1,61 +1,57 @@
 {{#include ../banners/hacktricks-training.md}}
 
-In a ping response TTL:\
+En una respuesta de ping TTL:\
 127 = Windows\
 254 = Cisco\
-Lo demás,algunlinux
+Lo demás, algún linux
 
 $1$- md5\
-$2$or $2a$ - Blowfish\
+$2$o $2a$ - Blowfish\
 $5$- sha256\
 $6$- sha512
 
-If you do not know what is behind a service, try to make and HTTP GET request.
+Si no sabes qué hay detrás de un servicio, intenta hacer una solicitud HTTP GET.
 
-**UDP Scans**\
+**Escaneos UDP**\
 nc -nv -u -z -w 1 \<IP> 160-16
 
-An empty UDP packet is sent to a specific port. If the UDP port is open, no reply is sent back from the target machine. If the UDP port is closed, an ICMP port unreachable packet should be sent back from the target machine.\
+Se envía un paquete UDP vacío a un puerto específico. Si el puerto UDP está abierto, no se envía respuesta desde la máquina objetivo. Si el puerto UDP está cerrado, se debería enviar un paquete ICMP de puerto inalcanzable desde la máquina objetivo.\
 
-UDP port scanning is often unreliable, as firewalls and routers may drop ICMP\
- packets. This can lead to false positives in your scan, and you will regularly see\
- UDP port scans showing all UDP ports open on a scanned machine.\
- o Most port scanners do not scan all available ports, and usually have a preset list\
- of “interesting ports” that are scanned.
+El escaneo de puertos UDP a menudo es poco confiable, ya que los firewalls y routers pueden descartar paquetes ICMP.\
+Esto puede llevar a falsos positivos en tu escaneo, y regularmente verás\
+escaneos de puertos UDP mostrando todos los puertos UDP abiertos en una máquina escaneada.\
+o La mayoría de los escáneres de puertos no escanean todos los puertos disponibles, y generalmente tienen una lista preestablecida de “puertos interesantes” que se escanean.
 
-# CTF - Tricks
+# CTF - Trucos
 
-In **Windows** use **Winzip** to search for files.\
-**Alternate data Streams**: _dir /r | find ":$DATA"_\
-
+En **Windows** usa **Winzip** para buscar archivos.\
+**Flujos de datos alternativos**: _dir /r | find ":$DATA"_\
 ```
 binwalk --dd=".*" <file> #Extract everything
 binwalk -M -e -d=10000 suspicious.pdf #Extract, look inside extracted files and continue extracing (depth of 10000)
 ```
-
-## Crypto
+## Cripto
 
 **featherduster**\
 
 **Basae64**(6—>8) —> 0...9, a...z, A…Z,+,/\
 **Base32**(5 —>8) —> A…Z, 2…7\
 **Base85** (Ascii85, 7—>8) —> 0...9, a...z, A...Z, ., -, :, +, =, ^, !, /, \*, ?, &, <, >, (, ), \[, ], {, }, @, %, $, #\
-**Uuencode** --> Start with "_begin \<mode> \<filename>_" and weird chars\
-**Xxencoding** --> Start with "_begin \<mode> \<filename>_" and B64\
+**Uuencode** --> Comienza con "_begin \<mode> \<filename>_" y caracteres extraños\
+**Xxencoding** --> Comienza con "_begin \<mode> \<filename>_" y B64\
 \
-**Vigenere** (frequency analysis) —> [https://www.guballa.de/vigenere-solver](https://www.guballa.de/vigenere-solver)\
-**Scytale** (offset of characters) —> [https://www.dcode.fr/scytale-cipher](https://www.dcode.fr/scytale-cipher)
+**Vigenere** (análisis de frecuencia) —> [https://www.guballa.de/vigenere-solver](https://www.guballa.de/vigenere-solver)\
+**Scytale** (desplazamiento de caracteres) —> [https://www.dcode.fr/scytale-cipher](https://www.dcode.fr/scytale-cipher)
 
 **25x25 = QR**
 
 factordb.com\
 rsatool
 
-Snow --> Hide messages using spaces and tabs
+Snow --> Ocultar mensajes usando espacios y tabulaciones
 
-# Characters
+# Caracteres
 
-%E2%80%AE => RTL Character (writes payloads backwards)
+%E2%80%AE => Carácter RTL (escribe cargas útiles al revés)
 
 {{#include ../banners/hacktricks-training.md}}
-

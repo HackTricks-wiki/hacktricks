@@ -4,24 +4,23 @@
 
 ## JTAGenum
 
-[**JTAGenum** ](https://github.com/cyphunk/JTAGenum)is a tool can be used with a Raspberry PI or an Arduino to find to try JTAG pins from an unknown chip.\
-In the **Arduino**, connect the **pins from 2 to 11 to 10pins potentially belonging to a JTAG**. Load the program in the Arduino and it will try to bruteforce all the pins to find if any pins belongs to JTAG and which one is each.\
-In the **Raspberry PI** you can only use **pins from 1 to 6** (6pins, so you will go slower testing each potential JTAG pin).
+[**JTAGenum** ](https://github.com/cyphunk/JTAGenum) es una herramienta que se puede usar con un Raspberry PI o un Arduino para intentar encontrar los pines JTAG de un chip desconocido.\
+En el **Arduino**, conecta los **pines del 2 al 11 a 10 pines que potencialmente pertenecen a un JTAG**. Carga el programa en el Arduino y intentará hacer un ataque de fuerza bruta a todos los pines para encontrar si alguno pertenece a JTAG y cuál es cada uno.\
+En el **Raspberry PI** solo puedes usar **pines del 1 al 6** (6 pines, por lo que irás más lento probando cada pin JTAG potencial).
 
 ### Arduino
 
-In Arduino, after connecting the cables (pin 2 to 11 to JTAG pins and Arduino GND to the baseboard GND), **load the JTAGenum program in Arduino** and in the Serial Monitor send a **`h`** (command for help) and you should see the help:
+En Arduino, después de conectar los cables (pin 2 a 11 a los pines JTAG y GND de Arduino a GND de la placa base), **carga el programa JTAGenum en Arduino** y en el Monitor Serial envía un **`h`** (comando para ayuda) y deberías ver la ayuda:
 
 ![](<../../images/image (939).png>)
 
 ![](<../../images/image (578).png>)
 
-Configure **"No line ending" and 115200baud**.\
-Send the command s to start scanning:
+Configura **"Sin final de línea" y 115200baud**.\
+Envía el comando s para comenzar a escanear:
 
 ![](<../../images/image (774).png>)
 
-If you are contacting a JTAG, you will find one or several **lines starting by FOUND!** indicating the pins of JTAG.
+Si estás contactando un JTAG, encontrarás una o varias **líneas que comienzan con FOUND!** indicando los pines de JTAG.
 
 {{#include ../../banners/hacktricks-training.md}}
-

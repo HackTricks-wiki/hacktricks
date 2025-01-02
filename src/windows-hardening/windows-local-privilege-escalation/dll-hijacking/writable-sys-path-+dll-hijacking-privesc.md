@@ -2,84 +2,81 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Introduction
+## Introducción
 
-If you found that you can **write in a System Path folder** (note that this won't work if you can write in a User Path folder) it's possible that you could **escalate privileges** in the system.
+Si descubres que puedes **escribir en una carpeta de System Path** (ten en cuenta que esto no funcionará si puedes escribir en una carpeta de User Path), es posible que puedas **escalar privilegios** en el sistema.
 
-In order to do that you can abuse a **Dll Hijacking** where you are going to **hijack a library being loaded** by a service or process with **more privileges** than yours, and because that service is loading a Dll that probably doesn't even exist in the entire system, it's going to try to load it from the System Path where you can write.
+Para hacer esto, puedes abusar de un **Dll Hijacking** donde vas a **secuestrar una biblioteca que está siendo cargada** por un servicio o proceso con **más privilegios** que los tuyos, y debido a que ese servicio está cargando una Dll que probablemente ni siquiera existe en todo el sistema, intentará cargarla desde el System Path donde puedes escribir.
 
-For more info about **what is Dll Hijackig** check:
+Para más información sobre **qué es Dll Hijacking**, consulta:
 
 {{#ref}}
 ./
 {{#endref}}
 
-## Privesc with Dll Hijacking
+## Privesc con Dll Hijacking
 
-### Finding a missing Dll
+### Encontrar una Dll faltante
 
-The first thing you need is to **identify a process** running with **more privileges** than you that is trying to **load a Dll from the System Path** you can write in.
+Lo primero que necesitas es **identificar un proceso** que se esté ejecutando con **más privilegios** que tú y que esté intentando **cargar una Dll desde el System Path** en el que puedes escribir.
 
-The problem in this cases is that probably thoses processes are already running. To find which Dlls are lacking the services you need to launch procmon as soon as possible (before processes are loaded). So, to find lacking .dlls do:
+El problema en estos casos es que probablemente esos procesos ya estén en ejecución. Para encontrar qué Dlls faltan, necesitas lanzar procmon lo antes posible (antes de que se carguen los procesos). Así que, para encontrar .dlls faltantes, haz lo siguiente:
 
-- **Create** the folder `C:\privesc_hijacking` and add the path `C:\privesc_hijacking` to **System Path env variable**. You can do this **manually** or with **PS**:
-
+- **Crea** la carpeta `C:\privesc_hijacking` y agrega la ruta `C:\privesc_hijacking` a la **variable de entorno System Path**. Puedes hacer esto **manualmente** o con **PS**:
 ```powershell
 # Set the folder path to create and check events for
 $folderPath = "C:\privesc_hijacking"
 
 # Create the folder if it does not exist
 if (!(Test-Path $folderPath -PathType Container)) {
-    New-Item -ItemType Directory -Path $folderPath | Out-Null
+New-Item -ItemType Directory -Path $folderPath | Out-Null
 }
 
 # Set the folder path in the System environment variable PATH
 $envPath = [Environment]::GetEnvironmentVariable("PATH", "Machine")
 if ($envPath -notlike "*$folderPath*") {
-    $newPath = "$envPath;$folderPath"
-    [Environment]::SetEnvironmentVariable("PATH", $newPath, "Machine")
+$newPath = "$envPath;$folderPath"
+[Environment]::SetEnvironmentVariable("PATH", $newPath, "Machine")
 }
 ```
-
-- Launch **`procmon`** and go to **`Options`** --> **`Enable boot logging`** and press **`OK`** in the prompt.
-- Then, **reboot**. When the computer is restarted **`procmon`** will start **recording** events asap.
-- Once **Windows** is **started execute `procmon`** again, it'll tell you that it has been running and will **ask you if you want to store** the events in a file. Say **yes** and **store the events in a file**.
-- **After** the **file** is **generated**, **close** the opened **`procmon`** window and **open the events file**.
-- Add these **filters** and you will find all the Dlls that some **proccess tried to load** from the writable System Path folder:
+- Inicie **`procmon`** y vaya a **`Options`** --> **`Enable boot logging`** y presione **`OK`** en el aviso.
+- Luego, **reinicie**. Cuando la computadora se reinicie, **`procmon`** comenzará a **grabar** eventos lo antes posible.
+- Una vez que **Windows** esté **iniciado, ejecute `procmon`** nuevamente, le dirá que ha estado funcionando y le **preguntará si desea almacenar** los eventos en un archivo. Diga **sí** y **almacene los eventos en un archivo**.
+- **Después** de que se **genere el archivo**, **cierre** la ventana de **`procmon`** abierta y **abra el archivo de eventos**.
+- Agregue estos **filtros** y encontrará todos los Dlls que algún **proceso intentó cargar** desde la carpeta de System Path escribible:
 
 <figure><img src="../../../images/image (945).png" alt=""><figcaption></figcaption></figure>
 
-### Missed Dlls
+### Dlls Perdidas
 
-Running this in a free **virtual (vmware) Windows 11 machine** I got these results:
+Ejecutando esto en una **máquina virtual (vmware) Windows 11** gratuita, obtuve estos resultados:
 
 <figure><img src="../../../images/image (607).png" alt=""><figcaption></figcaption></figure>
 
-In this case the .exe are useless so ignore them, the missed DLLs where from:
+En este caso, los .exe son inútiles, así que ignórelos, los DLLs perdidos eran de:
 
-| Service                         | Dll                | CMD line                                                             |
-| ------------------------------- | ------------------ | -------------------------------------------------------------------- |
-| Task Scheduler (Schedule)       | WptsExtensions.dll | `C:\Windows\system32\svchost.exe -k netsvcs -p -s Schedule`          |
-| Diagnostic Policy Service (DPS) | Unknown.DLL        | `C:\Windows\System32\svchost.exe -k LocalServiceNoNetwork -p -s DPS` |
-| ???                             | SharedRes.dll      | `C:\Windows\system32\svchost.exe -k UnistackSvcGroup`                |
+| Servicio                         | Dll                | Línea de CMD                                                        |
+| ------------------------------- | ------------------ | ------------------------------------------------------------------ |
+| Programador de tareas (Schedule) | WptsExtensions.dll | `C:\Windows\system32\svchost.exe -k netsvcs -p -s Schedule`       |
+| Servicio de política de diagnóstico (DPS) | Unknown.DLL        | `C:\Windows\System32\svchost.exe -k LocalServiceNoNetwork -p -s DPS` |
+| ???                             | SharedRes.dll      | `C:\Windows\system32\svchost.exe -k UnistackSvcGroup`             |
 
-After finding this, I found this interesting blog post that also explains how to [**abuse WptsExtensions.dll for privesc**](https://juggernaut-sec.com/dll-hijacking/#Windows_10_Phantom_DLL_Hijacking_-_WptsExtensionsdll). Which is what we **are going to do now**.
+Después de encontrar esto, encontré esta interesante publicación de blog que también explica cómo [**abusar de WptsExtensions.dll para privesc**](https://juggernaut-sec.com/dll-hijacking/#Windows_10_Phantom_DLL_Hijacking_-_WptsExtensionsdll). Que es lo que **vamos a hacer ahora**.
 
-### Exploitation
+### Explotación
 
-So, to **escalate privileges** we are going to hijack the library **WptsExtensions.dll**. Having the **path** and the **name** we just need to **generate the malicious dll**.
+Entonces, para **escalar privilegios**, vamos a secuestrar la biblioteca **WptsExtensions.dll**. Teniendo la **ruta** y el **nombre**, solo necesitamos **generar el dll malicioso**.
 
-You can [**try to use any of these examples**](./#creating-and-compiling-dlls). You could run payloads such as: get a rev shell, add a user, execute a beacon...
+Puede [**intentar usar cualquiera de estos ejemplos**](./#creating-and-compiling-dlls). Podría ejecutar cargas útiles como: obtener un rev shell, agregar un usuario, ejecutar un beacon...
 
 > [!WARNING]
-> Note that **not all the service are run** with **`NT AUTHORITY\SYSTEM`** some are also run with **`NT AUTHORITY\LOCAL SERVICE`** which has **less privileges** and you **won't be able to create a new user** abuse its permissions.\
-> However, that user has the **`seImpersonate`** privilege, so you can use the[ **potato suite to escalate privileges**](../roguepotato-and-printspoofer.md). So, in this case a rev shell is a better option that trying to create a user.
+> Tenga en cuenta que **no todos los servicios se ejecutan** con **`NT AUTHORITY\SYSTEM`**, algunos también se ejecutan con **`NT AUTHORITY\LOCAL SERVICE`**, que tiene **menos privilegios** y **no podrá crear un nuevo usuario** abusando de sus permisos.\
+> Sin embargo, ese usuario tiene el privilegio **`seImpersonate`**, por lo que puede usar la [**potato suite para escalar privilegios**](../roguepotato-and-printspoofer.md). Así que, en este caso, un rev shell es una mejor opción que intentar crear un usuario.
 
-At the moment of writing the **Task Scheduler** service is run with **Nt AUTHORITY\SYSTEM**.
+En el momento de escribir, el servicio de **Programador de tareas** se ejecuta con **Nt AUTHORITY\SYSTEM**.
 
-Having **generated the malicious Dll** (_in my case I used x64 rev shell and I got a shell back but defender killed it because it was from msfvenom_), save it in the writable System Path with the name **WptsExtensions.dll** and **restart** the computer (or restart the service or do whatever it takes to rerun the affected service/program).
+Habiendo **generado el Dll malicioso** (_en mi caso usé un rev shell x64 y obtuve un shell de vuelta, pero defender lo eliminó porque era de msfvenom_), guárdelo en la ruta de sistema escribible con el nombre **WptsExtensions.dll** y **reinicie** la computadora (o reinicie el servicio o haga lo que sea necesario para volver a ejecutar el servicio/programa afectado).
 
-When the service is re-started, the **dll should be loaded and executed** (you can **reuse** the **procmon** trick to check if the **library was loaded as expected**).
+Cuando el servicio se reinicie, el **dll debería ser cargado y ejecutado** (puede **reutilizar** el truco de **procmon** para verificar si la **biblioteca se cargó como se esperaba**).
 
 {{#include ../../../banners/hacktricks-training.md}}
-

