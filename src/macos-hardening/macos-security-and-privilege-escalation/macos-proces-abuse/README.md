@@ -1,275 +1,271 @@
-# macOS Process Abuse
+# macOS 프로세스 남용
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Processes Basic Information
+## 프로세스 기본 정보
 
-A process is an instance of a running executable, however processes doesn't run code, these are threads. Therefore **processes are just containers for running threads** providing the memory, descriptors, ports, permissions...
+프로세스는 실행 중인 실행 파일의 인스턴스이지만, 프로세스는 코드를 실행하지 않고, 이는 스레드입니다. 따라서 **프로세스는 실행 중인 스레드를 위한 컨테이너일 뿐입니다** 메모리, 설명자, 포트, 권한 등을 제공합니다...
 
-Traditionally, processes where started within other processes (except PID 1) by calling **`fork`** which would create a exact copy of the current process and then the **child process** would generally call **`execve`** to load the new executable and run it. Then, **`vfork`** was introduced to make this process faster without any memory copying.\
-Then **`posix_spawn`** was introduced combining **`vfork`** and **`execve`** in one call and accepting flags:
+전통적으로, 프로세스는 **`fork`**를 호출하여 다른 프로세스 내에서 시작되었으며, 이는 현재 프로세스의 정확한 복사본을 생성하고, **자식 프로세스**는 일반적으로 **`execve`**를 호출하여 새로운 실행 파일을 로드하고 실행합니다. 그런 다음, **`vfork`**가 도입되어 메모리 복사 없이 이 프로세스를 더 빠르게 만들었습니다.\
+그 후 **`posix_spawn`**이 도입되어 **`vfork`**와 **`execve`**를 하나의 호출로 결합하고 플래그를 수용했습니다:
 
-- `POSIX_SPAWN_RESETIDS`: Reset effective ids to real ids
-- `POSIX_SPAWN_SETPGROUP`: Set process group affiliation
-- `POSUX_SPAWN_SETSIGDEF`: Set signal default behaviour
-- `POSIX_SPAWN_SETSIGMASK`: Set signal mask
-- `POSIX_SPAWN_SETEXEC`: Exec in the same process (like `execve` with more options)
-- `POSIX_SPAWN_START_SUSPENDED`: Start suspended
-- `_POSIX_SPAWN_DISABLE_ASLR`: Start without ASLR
-- `_POSIX_SPAWN_NANO_ALLOCATOR:` Use libmalloc's Nano allocator
-- `_POSIX_SPAWN_ALLOW_DATA_EXEC:` Allow `rwx` on data segments
-- `POSIX_SPAWN_CLOEXEC_DEFAULT`: Close all file descriptions on exec(2) by default
-- `_POSIX_SPAWN_HIGH_BITS_ASLR:` Randomize high bits of ASLR slide
+- `POSIX_SPAWN_RESETIDS`: 유효 ID를 실제 ID로 재설정
+- `POSIX_SPAWN_SETPGROUP`: 프로세스 그룹 소속 설정
+- `POSUX_SPAWN_SETSIGDEF`: 신호 기본 동작 설정
+- `POSIX_SPAWN_SETSIGMASK`: 신호 마스크 설정
+- `POSIX_SPAWN_SETEXEC`: 동일한 프로세스에서 exec (더 많은 옵션이 있는 `execve`와 유사)
+- `POSIX_SPAWN_START_SUSPENDED`: 시작 시 일시 중지
+- `_POSIX_SPAWN_DISABLE_ASLR`: ASLR 없이 시작
+- `_POSIX_SPAWN_NANO_ALLOCATOR:` libmalloc의 Nano 할당기 사용
+- `_POSIX_SPAWN_ALLOW_DATA_EXEC:` 데이터 세그먼트에서 `rwx` 허용
+- `POSIX_SPAWN_CLOEXEC_DEFAULT`: exec(2)에서 기본적으로 모든 파일 설명자 닫기
+- `_POSIX_SPAWN_HIGH_BITS_ASLR:` ASLR 슬라이드의 높은 비트 무작위화
 
-Moreover, `posix_spawn` allows to specify an array of **`posix_spawnattr`** that controls some aspects of the spawned process, and **`posix_spawn_file_actions`** to modify the state of the descriptors.
+게다가, `posix_spawn`은 생성된 프로세스의 일부 측면을 제어하는 **`posix_spawnattr`** 배열을 지정할 수 있으며, 설명자의 상태를 수정하기 위해 **`posix_spawn_file_actions`**를 사용할 수 있습니다.
 
-When a process dies it send the **return code to the parent process** (if the parent died, the new parent is PID 1) with the signal `SIGCHLD`. The parent needs to get this value calling `wait4()` or `waitid()` and until that happen the child stays in a zombie state where it's still listed but doesn't consume resources.
+프로세스가 종료되면 **부모 프로세스에 반환 코드를 전송**합니다 (부모가 종료된 경우 새로운 부모는 PID 1) 신호 `SIGCHLD`와 함께. 부모는 `wait4()` 또는 `waitid()`를 호출하여 이 값을 가져와야 하며, 그때까지 자식은 좀비 상태에 머물며 여전히 나열되지만 자원을 소모하지 않습니다.
 
 ### PIDs
 
-PIDs, process identifiers, identifies a uniq process. In XNU the **PIDs** are of **64bits** increasing monotonically and **never wrap** (to avoid abuses).
+PID, 프로세스 식별자는 고유한 프로세스를 식별합니다. XNU에서 **PIDs**는 **64비트**로 단조롭게 증가하며 **절대 랩핑되지 않습니다** (남용 방지를 위해).
 
-### Process Groups, Sessions & Coalations
+### 프로세스 그룹, 세션 및 연합
 
-**Processes** can be inserted in **groups** to make it easier to handle them. For example, commands in a shell script will be in the same process group so it's possible to **signal them together** using kill for example.\
-It's also possible to **group processes in sessions**. When a process starts a session (`setsid(2)`), the children processes are set inside the session, unless they start their own session.
+**프로세스**는 **그룹**에 삽입되어 처리하기 쉽게 만들 수 있습니다. 예를 들어, 셸 스크립트의 명령은 동일한 프로세스 그룹에 있으므로 kill을 사용하여 **함께 신호를 보낼 수 있습니다**.\
+또한 **세션에 프로세스를 그룹화**할 수 있습니다. 프로세스가 세션을 시작하면 (`setsid(2)`), 자식 프로세스는 자신의 세션을 시작하지 않는 한 세션 내에 설정됩니다.
 
-Coalition is another waya to group processes in Darwin. A process joining a coalation allows it to access pool resources, sharing a ledger or facing Jetsam. Coalations have different roles: Leader, XPC service, Extension.
+연합은 Darwin에서 프로세스를 그룹화하는 또 다른 방법입니다. 연합에 가입한 프로세스는 풀 리소스에 접근할 수 있으며, 원장 공유 또는 Jetsam에 직면할 수 있습니다. 연합은 다양한 역할을 가집니다: 리더, XPC 서비스, 확장.
 
-### Credentials & Personae
+### 자격 증명 및 페르소나
 
-Each process with hold **credentials** that **identify its privileges** in the system. Each process will have one primary `uid` and one primary `gid` (although might belong to several groups).\
-It's also possible to change the user and group id if the binary has the `setuid/setgid` bit.\
-There are several functions to **set new uids/gids**.
+각 프로세스는 시스템에서 **권한을 식별하는 자격 증명**을 보유합니다. 각 프로세스는 하나의 기본 `uid`와 하나의 기본 `gid`를 가지며 (여러 그룹에 속할 수 있음).\
+이진 파일이 `setuid/setgid` 비트를 가지고 있다면 사용자 및 그룹 ID를 변경할 수도 있습니다.\
+새로운 uids/gids를 **설정하는 여러 함수**가 있습니다.
 
-The syscall **`persona`** provides an **alternate** set of **credentials**. Adopting a persona assumes its uid, gid and group memberships **at one**. In the [**source code**](https://github.com/apple/darwin-xnu/blob/main/bsd/sys/persona.h) it's possible to find the struct:
-
+시스템 호출 **`persona`**는 **대체** 자격 증명 세트를 제공합니다. 페르소나를 채택하면 해당 uid, gid 및 그룹 멤버십을 **한 번에** 가정합니다. [**소스 코드**](https://github.com/apple/darwin-xnu/blob/main/bsd/sys/persona.h)에서 구조체를 찾을 수 있습니다:
 ```c
 struct kpersona_info { uint32_t persona_info_version;
-    uid_t    persona_id; /* overlaps with UID */
-    int      persona_type;
-    gid_t    persona_gid;
-    uint32_t persona_ngroups;
-    gid_t    persona_groups[NGROUPS];
-    uid_t    persona_gmuid;
-    char     persona_name[MAXLOGNAME + 1];
+uid_t    persona_id; /* overlaps with UID */
+int      persona_type;
+gid_t    persona_gid;
+uint32_t persona_ngroups;
+gid_t    persona_groups[NGROUPS];
+uid_t    persona_gmuid;
+char     persona_name[MAXLOGNAME + 1];
 
-    /* TODO: MAC policies?! */
+/* TODO: MAC policies?! */
 }
 ```
+## 스레드 기본 정보
 
-## Threads Basic Information
+1. **POSIX 스레드 (pthreads):** macOS는 C/C++의 표준 스레딩 API의 일부인 POSIX 스레드(`pthreads`)를 지원합니다. macOS의 pthreads 구현은 `/usr/lib/system/libsystem_pthread.dylib`에 있으며, 이는 공개적으로 사용 가능한 `libpthread` 프로젝트에서 가져온 것입니다. 이 라이브러리는 스레드를 생성하고 관리하는 데 필요한 기능을 제공합니다.
+2. **스레드 생성:** `pthread_create()` 함수는 새로운 스레드를 생성하는 데 사용됩니다. 내부적으로 이 함수는 XNU 커널(즉, macOS가 기반으로 하는 커널)에 특정한 저수준 시스템 호출인 `bsdthread_create()`를 호출합니다. 이 시스템 호출은 스레드 동작을 지정하는 `pthread_attr`(속성)에서 파생된 다양한 플래그를 사용합니다. 여기에는 스케줄링 정책과 스택 크기가 포함됩니다.
+- **기본 스택 크기:** 새로운 스레드의 기본 스택 크기는 512 KB로, 일반적인 작업에는 충분하지만 더 많은 공간이 필요할 경우 스레드 속성을 통해 조정할 수 있습니다.
+3. **스레드 초기화:** `__pthread_init()` 함수는 스레드 설정 중에 중요하며, `env[]` 인수를 사용하여 스택의 위치와 크기에 대한 세부 정보를 포함할 수 있는 환경 변수를 구문 분석합니다.
 
-1. **POSIX Threads (pthreads):** macOS supports POSIX threads (`pthreads`), which are part of a standard threading API for C/C++. The implementation of pthreads in macOS is found in `/usr/lib/system/libsystem_pthread.dylib`, which comes from the publicly available `libpthread` project. This library provides the necessary functions to create and manage threads.
-2. **Creating Threads:** The `pthread_create()` function is used to create new threads. Internally, this function calls `bsdthread_create()`, which is a lower-level system call specific to the XNU kernel (the kernel macOS is based on). This system call takes various flags derived from `pthread_attr` (attributes) that specify thread behavior, including scheduling policies and stack size.
-   - **Default Stack Size:** The default stack size for new threads is 512 KB, which is sufficient for typical operations but can be adjusted via thread attributes if more or less space is needed.
-3. **Thread Initialization:** The `__pthread_init()` function is crucial during thread setup, utilizing the `env[]` argument to parse environment variables that can include details about the stack's location and size.
+#### macOS에서의 스레드 종료
 
-#### Thread Termination in macOS
+1. **스레드 종료:** 스레드는 일반적으로 `pthread_exit()`를 호출하여 종료됩니다. 이 함수는 스레드가 깔끔하게 종료되도록 하며, 필요한 정리를 수행하고 스레드가 모든 조인자에게 반환 값을 보낼 수 있도록 합니다.
+2. **스레드 정리:** `pthread_exit()`를 호출하면 `pthread_terminate()` 함수가 호출되어 모든 관련 스레드 구조를 제거합니다. 이 함수는 Mach 스레드 포트를 해제하고(Mach는 XNU 커널의 통신 하위 시스템) 스레드와 관련된 커널 수준 구조를 제거하는 시스템 호출인 `bsdthread_terminate`를 호출합니다.
 
-1. **Exiting Threads:** Threads are typically terminated by calling `pthread_exit()`. This function allows a thread to exit cleanly, performing necessary cleanup and allowing the thread to send a return value back to any joiners.
-2. **Thread Cleanup:** Upon calling `pthread_exit()`, the function `pthread_terminate()` is invoked, which handles the removal of all associated thread structures. It deallocates Mach thread ports (Mach is the communication subsystem in the XNU kernel) and calls `bsdthread_terminate`, a syscall that removes the kernel-level structures associated with the thread.
+#### 동기화 메커니즘
 
-#### Synchronization Mechanisms
+공유 리소스에 대한 접근을 관리하고 경쟁 조건을 피하기 위해 macOS는 여러 동기화 원시를 제공합니다. 이는 데이터 무결성과 시스템 안정성을 보장하기 위해 다중 스레딩 환경에서 중요합니다:
 
-To manage access to shared resources and avoid race conditions, macOS provides several synchronization primitives. These are critical in multi-threading environments to ensure data integrity and system stability:
-
-1. **Mutexes:**
-   - **Regular Mutex (Signature: 0x4D555458):** Standard mutex with a memory footprint of 60 bytes (56 bytes for the mutex and 4 bytes for the signature).
-   - **Fast Mutex (Signature: 0x4d55545A):** Similar to a regular mutex but optimized for faster operations, also 60 bytes in size.
-2. **Condition Variables:**
-   - Used for waiting for certain conditions to occur, with a size of 44 bytes (40 bytes plus a 4-byte signature).
-   - **Condition Variable Attributes (Signature: 0x434e4441):** Configuration attributes for condition variables, sized at 12 bytes.
-3. **Once Variable (Signature: 0x4f4e4345):**
-   - Ensures that a piece of initialization code is executed only once. Its size is 12 bytes.
-4. **Read-Write Locks:**
-   - Allows multiple readers or one writer at a time, facilitating efficient access to shared data.
-   - **Read Write Lock (Signature: 0x52574c4b):** Sized at 196 bytes.
-   - **Read Write Lock Attributes (Signature: 0x52574c41):** Attributes for read-write locks, 20 bytes in size.
+1. **뮤텍스:**
+- **정상 뮤텍스 (서명: 0x4D555458):** 메모리 풋프린트가 60바이트(뮤텍스 56바이트 + 서명 4바이트)인 표준 뮤텍스입니다.
+- **빠른 뮤텍스 (서명: 0x4d55545A):** 정상 뮤텍스와 유사하지만 더 빠른 작업을 위해 최적화된 것으로, 크기는 60바이트입니다.
+2. **조건 변수:**
+- 특정 조건이 발생할 때까지 대기하는 데 사용되며, 크기는 44바이트(40바이트 + 4바이트 서명)입니다.
+- **조건 변수 속성 (서명: 0x434e4441):** 조건 변수의 구성 속성으로, 크기는 12바이트입니다.
+3. **한 번 변수 (서명: 0x4f4e4345):**
+- 초기화 코드가 한 번만 실행되도록 보장합니다. 크기는 12바이트입니다.
+4. **읽기-쓰기 잠금:**
+- 여러 독자가 동시에 또는 한 명의 작성자가 동시에 접근할 수 있도록 하여 공유 데이터에 대한 효율적인 접근을 촉진합니다.
+- **읽기 쓰기 잠금 (서명: 0x52574c4b):** 크기는 196바이트입니다.
+- **읽기 쓰기 잠금 속성 (서명: 0x52574c41):** 읽기-쓰기 잠금의 속성으로, 크기는 20바이트입니다.
 
 > [!TIP]
-> The last 4 bytes of those objects are used to deetct overflows.
+> 이러한 객체의 마지막 4바이트는 오버플로우를 감지하는 데 사용됩니다.
 
-### Thread Local Variables (TLV)
+### 스레드 로컬 변수 (TLV)
 
-**Thread Local Variables (TLV)** in the context of Mach-O files (the format for executables in macOS) are used to declare variables that are specific to **each thread** in a multi-threaded application. This ensures that each thread has its own separate instance of a variable, providing a way to avoid conflicts and maintain data integrity without needing explicit synchronization mechanisms like mutexes.
+**스레드 로컬 변수 (TLV)**는 Mach-O 파일(즉, macOS의 실행 파일 형식) 맥락에서 다중 스레드 애플리케이션의 **각 스레드**에 특정한 변수를 선언하는 데 사용됩니다. 이는 각 스레드가 변수의 별도 인스턴스를 가지도록 하여 충돌을 피하고 뮤텍스와 같은 명시적 동기화 메커니즘 없이 데이터 무결성을 유지할 수 있는 방법을 제공합니다.
 
-In C and related languages, you can declare a thread-local variable using the **`__thread`** keyword. Here’s how it works in your example:
-
+C 및 관련 언어에서는 **`__thread`** 키워드를 사용하여 스레드 로컬 변수를 선언할 수 있습니다. 다음은 예제에서 작동하는 방식입니다:
 ```c
 cCopy code__thread int tlv_var;
 
 void main (int argc, char **argv){
-    tlv_var = 10;
+tlv_var = 10;
 }
 ```
+이 스니펫은 `tlv_var`를 스레드 로컬 변수로 정의합니다. 이 코드를 실행하는 각 스레드는 자신의 `tlv_var`를 가지며, 한 스레드가 `tlv_var`에 가한 변경은 다른 스레드의 `tlv_var`에 영향을 미치지 않습니다.
 
-This snippet defines `tlv_var` as a thread-local variable. Each thread running this code will have its own `tlv_var`, and changes one thread makes to `tlv_var` will not affect `tlv_var` in another thread.
+Mach-O 바이너리에서 스레드 로컬 변수와 관련된 데이터는 특정 섹션으로 구성됩니다:
 
-In the Mach-O binary, the data related to thread local variables is organized into specific sections:
+- **`__DATA.__thread_vars`**: 이 섹션은 스레드 로컬 변수에 대한 메타데이터, 즉 변수의 유형과 초기화 상태를 포함합니다.
+- **`__DATA.__thread_bss`**: 이 섹션은 명시적으로 초기화되지 않은 스레드 로컬 변수에 사용됩니다. 이는 제로 초기화된 데이터에 할당된 메모리의 일부입니다.
 
-- **`__DATA.__thread_vars`**: This section contains the metadata about the thread-local variables, like their types and initialization status.
-- **`__DATA.__thread_bss`**: This section is used for thread-local variables that are not explicitly initialized. It's a part of memory set aside for zero-initialized data.
+Mach-O는 스레드가 종료될 때 스레드 로컬 변수를 관리하기 위해 **`tlv_atexit`**라는 특정 API를 제공합니다. 이 API를 사용하면 스레드가 종료될 때 스레드 로컬 데이터를 정리하는 **소멸자**를 등록할 수 있습니다.
 
-Mach-O also provides a specific API called **`tlv_atexit`** to manage thread-local variables when a thread exits. This API allows you to **register destructors**—special functions that clean up thread-local data when a thread terminates.
+### 스레드 우선순위
 
-### Threading Priorities
+스레드 우선순위를 이해하려면 운영 체제가 어떤 스레드를 언제 실행할지를 결정하는 방식을 살펴봐야 합니다. 이 결정은 각 스레드에 할당된 우선순위 수준에 의해 영향을 받습니다. macOS 및 유닉스 계열 시스템에서는 `nice`, `renice`, QoS(서비스 품질) 클래스와 같은 개념을 사용하여 이를 처리합니다.
 
-Understanding thread priorities involves looking at how the operating system decides which threads to run and when. This decision is influenced by the priority level assigned to each thread. In macOS and Unix-like systems, this is handled using concepts like `nice`, `renice`, and Quality of Service (QoS) classes.
-
-#### Nice and Renice
+#### Nice와 Renice
 
 1. **Nice:**
-   - The `nice` value of a process is a number that affects its priority. Every process has a nice value ranging from -20 (the highest priority) to 19 (the lowest priority). The default nice value when a process is created is typically 0.
-   - A lower nice value (closer to -20) makes a process more "selfish," giving it more CPU time compared to other processes with higher nice values.
+- 프로세스의 `nice` 값은 우선순위에 영향을 미치는 숫자입니다. 모든 프로세스는 -20(가장 높은 우선순위)에서 19(가장 낮은 우선순위)까지의 nice 값을 가집니다. 프로세스가 생성될 때 기본 nice 값은 일반적으로 0입니다.
+- 낮은 nice 값( -20에 가까운)은 프로세스를 더 "이기적"으로 만들어, 더 높은 nice 값을 가진 다른 프로세스에 비해 더 많은 CPU 시간을 부여합니다.
 2. **Renice:**
-   - `renice` is a command used to change the nice value of an already running process. This can be used to dynamically adjust the priority of processes, either increasing or decreasing their CPU time allocation based on new nice values.
-   - For example, if a process needs more CPU resources temporarily, you might lower its nice value using `renice`.
+- `renice`는 이미 실행 중인 프로세스의 nice 값을 변경하는 데 사용되는 명령입니다. 이는 프로세스의 우선순위를 동적으로 조정하는 데 사용될 수 있으며, 새로운 nice 값에 따라 CPU 시간 할당을 증가시키거나 감소시킬 수 있습니다.
+- 예를 들어, 프로세스가 일시적으로 더 많은 CPU 리소스가 필요하다면 `renice`를 사용하여 nice 값을 낮출 수 있습니다.
 
-#### Quality of Service (QoS) Classes
+#### 서비스 품질(QoS) 클래스
 
-QoS classes are a more modern approach to handling thread priorities, particularly in systems like macOS that support **Grand Central Dispatch (GCD)**. QoS classes allow developers to **categorize** work into different levels based on their importance or urgency. macOS manages thread prioritization automatically based on these QoS classes:
+QoS 클래스는 특히 **Grand Central Dispatch (GCD)**를 지원하는 macOS와 같은 시스템에서 스레드 우선순위를 처리하는 보다 현대적인 접근 방식입니다. QoS 클래스는 개발자가 작업의 중요성이나 긴급성에 따라 다양한 수준으로 작업을 **분류**할 수 있게 합니다. macOS는 이러한 QoS 클래스를 기반으로 스레드 우선순위를 자동으로 관리합니다:
 
-1. **User Interactive:**
-   - This class is for tasks that are currently interacting with the user or require immediate results to provide a good user experience. These tasks are given the highest priority to keep the interface responsive (e.g., animations or event handling).
-2. **User Initiated:**
-   - Tasks that the user initiates and expects immediate results, such as opening a document or clicking a button that requires computations. These are high priority but below user interactive.
-3. **Utility:**
-   - These tasks are long-running and typically show a progress indicator (e.g., downloading files, importing data). They are lower in priority than user-initiated tasks and do not need to finish immediately.
-4. **Background:**
-   - This class is for tasks that operate in the background and are not visible to the user. These can be tasks like indexing, syncing, or backups. They have the lowest priority and minimal impact on system performance.
+1. **사용자 상호작용:**
+- 이 클래스는 현재 사용자와 상호작용 중이거나 좋은 사용자 경험을 제공하기 위해 즉각적인 결과가 필요한 작업을 위한 것입니다. 이러한 작업은 인터페이스를 반응적으로 유지하기 위해 가장 높은 우선순위를 부여받습니다(예: 애니메이션 또는 이벤트 처리).
+2. **사용자 시작:**
+- 사용자가 시작하고 즉각적인 결과를 기대하는 작업으로, 문서를 열거나 계산이 필요한 버튼을 클릭하는 것과 같은 작업입니다. 이들은 높은 우선순위를 가지지만 사용자 상호작용보다는 낮습니다.
+3. **유틸리티:**
+- 이러한 작업은 장기 실행되며 일반적으로 진행 표시기를 표시합니다(예: 파일 다운로드, 데이터 가져오기). 이들은 사용자 시작 작업보다 우선순위가 낮으며 즉시 완료될 필요는 없습니다.
+4. **백그라운드:**
+- 이 클래스는 백그라운드에서 작동하며 사용자에게는 보이지 않는 작업을 위한 것입니다. 이러한 작업은 인덱싱, 동기화 또는 백업과 같은 작업일 수 있습니다. 이들은 가장 낮은 우선순위를 가지며 시스템 성능에 미치는 영향이 최소화됩니다.
 
-Using QoS classes, developers do not need to manage the exact priority numbers but rather focus on the nature of the task, and the system optimizes the CPU resources accordingly.
+QoS 클래스를 사용하면 개발자는 정확한 우선순위 숫자를 관리할 필요가 없으며, 작업의 성격에 집중하고 시스템이 CPU 리소스를 최적화하도록 할 수 있습니다.
 
-Moreover, there are different **thread scheduling policies** that flows to specify a set of scheduling parameters that the scheduler will take into consideration. This can be done using `thread_policy_[set/get]`. This might be useful in race condition attacks.
+또한, 스레드 스케줄링 정책이 다르게 흐르며 스케줄러가 고려할 스케줄링 매개변수 집합을 지정할 수 있습니다. 이는 `thread_policy_[set/get]`를 사용하여 수행할 수 있습니다. 이는 경쟁 조건 공격에서 유용할 수 있습니다.
 
-## MacOS Process Abuse
+## MacOS 프로세스 남용
 
-MacOS, like any other operating system, provides a variety of methods and mechanisms for **processes to interact, communicate, and share data**. While these techniques are essential for efficient system functioning, they can also be abused by threat actors to **perform malicious activities**.
+MacOS는 다른 운영 체제와 마찬가지로 **프로세스가 상호 작용하고, 통신하며, 데이터를 공유하는** 다양한 방법과 메커니즘을 제공합니다. 이러한 기술은 효율적인 시스템 기능에 필수적이지만, 위협 행위자에 의해 **악의적인 활동을 수행하는 데 남용될 수 있습니다.**
 
-### Library Injection
+### 라이브러리 주입
 
-Library Injection is a technique wherein an attacker **forces a process to load a malicious library**. Once injected, the library runs in the context of the target process, providing the attacker with the same permissions and access as the process.
+라이브러리 주입은 공격자가 **프로세스가 악성 라이브러리를 로드하도록 강제하는** 기술입니다. 주입된 후, 라이브러리는 대상 프로세스의 컨텍스트에서 실행되어 공격자에게 프로세스와 동일한 권한과 접근을 제공합니다.
 
 {{#ref}}
 macos-library-injection/
 {{#endref}}
 
-### Function Hooking
+### 함수 후킹
 
-Function Hooking involves **intercepting function calls** or messages within a software code. By hooking functions, an attacker can **modify the behavior** of a process, observe sensitive data, or even gain control over the execution flow.
+함수 후킹은 소프트웨어 코드 내에서 **함수 호출** 또는 메시지를 **가로채는** 것을 포함합니다. 함수를 후킹함으로써 공격자는 프로세스의 **동작을 수정**하거나 민감한 데이터를 관찰하거나 실행 흐름을 제어할 수 있습니다.
 
 {{#ref}}
 macos-function-hooking.md
 {{#endref}}
 
-### Inter Process Communication
+### 프로세스 간 통신
 
-Inter Process Communication (IPC) refers to different methods by which separate processes **share and exchange data**. While IPC is fundamental for many legitimate applications, it can also be misused to subvert process isolation, leak sensitive information, or perform unauthorized actions.
+프로세스 간 통신(IPC)은 별도의 프로세스가 **데이터를 공유하고 교환하는** 다양한 방법을 나타냅니다. IPC는 많은 합법적인 애플리케이션에 필수적이지만, 프로세스 격리를 무너뜨리거나 민감한 정보를 유출하거나 무단 작업을 수행하는 데 남용될 수 있습니다.
 
 {{#ref}}
 macos-ipc-inter-process-communication/
 {{#endref}}
 
-### Electron Applications Injection
+### Electron 애플리케이션 주입
 
-Electron applications executed with specific env variables could be vulnerable to process injection:
+특정 환경 변수를 사용하여 실행된 Electron 애플리케이션은 프로세스 주입에 취약할 수 있습니다:
 
 {{#ref}}
 macos-electron-applications-injection.md
 {{#endref}}
 
-### Chromium Injection
+### Chromium 주입
 
-It's possible to use the flags `--load-extension` and `--use-fake-ui-for-media-stream` to perform a **man in the browser attack** allowing to steal keystrokes, traffic, cookies, inject scripts in pages...:
+`--load-extension` 및 `--use-fake-ui-for-media-stream` 플래그를 사용하여 **브라우저 내 공격**을 수행할 수 있으며, 이를 통해 키 입력, 트래픽, 쿠키를 훔치거나 페이지에 스크립트를 주입할 수 있습니다:
 
 {{#ref}}
 macos-chromium-injection.md
 {{#endref}}
 
-### Dirty NIB
+### 더러운 NIB
 
-NIB files **define user interface (UI) elements** and their interactions within an application. However, they can **execute arbitrary commands** and **Gatekeeper doesn't stop** an already executed application from being executed if a **NIB file is modified**. Therefore, they could be used to make arbitrary programs execute arbitrary commands:
+NIB 파일은 **사용자 인터페이스(UI) 요소**와 애플리케이션 내에서의 상호작용을 정의합니다. 그러나 이들은 **임의의 명령을 실행할 수 있으며** **Gatekeeper는** 수정된 **NIB 파일**이 이미 실행된 애플리케이션을 실행하는 것을 막지 않습니다. 따라서 이들은 임의의 프로그램이 임의의 명령을 실행하도록 만드는 데 사용될 수 있습니다:
 
 {{#ref}}
 macos-dirty-nib.md
 {{#endref}}
 
-### Java Applications Injection
+### Java 애플리케이션 주입
 
-It's possible to abuse certain java capabilities (like the **`_JAVA_OPTS`** env variable) to make a java application execute **arbitrary code/commands**.
+특정 Java 기능(예: **`_JAVA_OPTS`** 환경 변수)을 남용하여 Java 애플리케이션이 **임의의 코드/명령을 실행하도록** 만들 수 있습니다.
 
 {{#ref}}
 macos-java-apps-injection.md
 {{#endref}}
 
-### .Net Applications Injection
+### .Net 애플리케이션 주입
 
-It's possible to inject code into .Net applications by **abusing the .Net debugging functionality** (not protected by macOS protections such as runtime hardening).
+**.Net 디버깅 기능**을 남용하여 .Net 애플리케이션에 코드를 주입할 수 있습니다(이는 macOS 보호(런타임 강화)로 보호되지 않음).
 
 {{#ref}}
 macos-.net-applications-injection.md
 {{#endref}}
 
-### Perl Injection
+### Perl 주입
 
-Check different options to make a Perl script execute arbitrary code in:
+Perl 스크립트가 임의의 코드를 실행하도록 만드는 다양한 옵션을 확인하십시오:
 
 {{#ref}}
 macos-perl-applications-injection.md
 {{#endref}}
 
-### Ruby Injection
+### Ruby 주입
 
-I't also possible to abuse ruby env variables to make arbitrary scripts execute arbitrary code:
+Ruby 환경 변수를 남용하여 임의의 스크립트가 임의의 코드를 실행하도록 만들 수 있습니다:
 
 {{#ref}}
 macos-ruby-applications-injection.md
 {{#endref}}
 
-### Python Injection
+### Python 주입
 
-If the environment variable **`PYTHONINSPECT`** is set, the python process will drop into a python cli once it's finished. It's also possible to use **`PYTHONSTARTUP`** to indicate a python script to execute at the beginning of an interactive session.\
-However, note that **`PYTHONSTARTUP`** script won't be executed when **`PYTHONINSPECT`** creates the interactive session.
+환경 변수 **`PYTHONINSPECT`**가 설정되면 Python 프로세스는 완료되면 Python CLI로 떨어집니다. 또한 **`PYTHONSTARTUP`**을 사용하여 대화형 세션 시작 시 실행할 Python 스크립트를 지정할 수 있습니다.\
+그러나 **`PYTHONINSPECT`**가 대화형 세션을 생성할 때 **`PYTHONSTARTUP`** 스크립트는 실행되지 않습니다.
 
-Other env variables such as **`PYTHONPATH`** and **`PYTHONHOME`** could also be useful to make a python command execute arbitrary code.
+**`PYTHONPATH`** 및 **`PYTHONHOME`**과 같은 다른 환경 변수도 Python 명령이 임의의 코드를 실행하도록 만드는 데 유용할 수 있습니다.
 
-Note that executables compiled with **`pyinstaller`** won't use these environmental variables even if they are running using an embedded python.
+**`pyinstaller`**로 컴파일된 실행 파일은 내장 Python을 사용하더라도 이러한 환경 변수를 사용하지 않습니다.
 
 > [!CAUTION]
-> Overall I couldn't find a way to make python execute arbitrary code abusing environment variables.\
-> However, most of the people install pyhton using **Hombrew**, which will install pyhton in a **writable location** for the default admin user. You can hijack it with something like:
+> 전반적으로 환경 변수를 남용하여 Python이 임의의 코드를 실행하도록 만드는 방법을 찾을 수 없었습니다.\
+> 그러나 대부분의 사람들은 **Homebrew**를 사용하여 Python을 설치하며, 이는 기본 관리자 사용자에게 **쓰기 가능한 위치**에 Python을 설치합니다. 다음과 같은 방법으로 이를 탈취할 수 있습니다:
 >
 > ```bash
 > mv /opt/homebrew/bin/python3 /opt/homebrew/bin/python3.old
 > cat > /opt/homebrew/bin/python3 <<EOF
 > #!/bin/bash
-> # Extra hijack code
+> # 추가 탈취 코드
 > /opt/homebrew/bin/python3.old "$@"
 > EOF
 > chmod +x /opt/homebrew/bin/python3
 > ```
 >
-> Even **root** will run this code when running python.
+> 심지어 **root**도 Python을 실행할 때 이 코드를 실행합니다.
 
-## Detection
+## 탐지
 
 ### Shield
 
-[**Shield**](https://theevilbit.github.io/shield/) ([**Github**](https://github.com/theevilbit/Shield)) is an open source application that can **detect and block process injection** actions:
+[**Shield**](https://theevilbit.github.io/shield/) ([**Github**](https://github.com/theevilbit/Shield))는 **프로세스 주입** 작업을 **탐지하고 차단할 수 있는** 오픈 소스 애플리케이션입니다:
 
-- Using **Environmental Variables**: It will monitor the presence of any of the following environmental variables: **`DYLD_INSERT_LIBRARIES`**, **`CFNETWORK_LIBRARY_PATH`**, **`RAWCAMERA_BUNDLE_PATH`** and **`ELECTRON_RUN_AS_NODE`**
-- Using **`task_for_pid`** calls: To find when one process wants to get the **task port of another** which allows to inject code in the process.
-- **Electron apps params**: Someone can use **`--inspect`**, **`--inspect-brk`** and **`--remote-debugging-port`** command line argument to start an Electron app in debugging mode, and thus inject code to it.
-- Using **symlinks** or **hardlinks**: Typically the most common abuse is to **place a link with our user privileges**, and **point it to a higher privilege** location. The detection is very simple for both hardlink and symlinks. If the process creating the link has a **different privilege level** than the target file, we create an **alert**. Unfortunately in the case of symlinks blocking is not possible, as we don’t have information about the destination of the link prior creation. This is a limitation of Apple’s EndpointSecuriy framework.
+- **환경 변수 사용**: 다음 환경 변수 중 하나의 존재를 모니터링합니다: **`DYLD_INSERT_LIBRARIES`**, **`CFNETWORK_LIBRARY_PATH`**, **`RAWCAMERA_BUNDLE_PATH`** 및 **`ELECTRON_RUN_AS_NODE`**
+- **`task_for_pid`** 호출 사용: 한 프로세스가 다른 프로세스의 **작업 포트**를 얻으려 할 때를 찾습니다. 이는 프로세스에 코드를 주입할 수 있게 합니다.
+- **Electron 앱 매개변수**: 누군가 **`--inspect`**, **`--inspect-brk`** 및 **`--remote-debugging-port`** 명령줄 인수를 사용하여 디버깅 모드에서 Electron 앱을 시작하고, 따라서 코드 주입을 할 수 있습니다.
+- **심볼릭 링크** 또는 **하드 링크** 사용: 일반적으로 가장 흔한 남용은 **우리 사용자 권한으로 링크를 생성하고**, **더 높은 권한** 위치를 가리키는 것입니다. 탐지는 하드 링크와 심볼릭 링크 모두에 대해 매우 간단합니다. 링크를 생성하는 프로세스의 **권한 수준**이 대상 파일과 다르면 **경고**를 생성합니다. 불행히도 심볼릭 링크의 경우, 생성 전에 링크의 목적지에 대한 정보가 없기 때문에 차단이 불가능합니다. 이는 Apple의 EndpointSecurity 프레임워크의 한계입니다.
 
-### Calls made by other processes
+### 다른 프로세스에서 수행된 호출
 
-In [**this blog post**](https://knight.sc/reverse%20engineering/2019/04/15/detecting-task-modifications.html) you can find how it's possible to use the function **`task_name_for_pid`** to get information about other **processes injecting code in a process** and then getting information about that other process.
+[**이 블로그 게시물**](https://knight.sc/reverse%20engineering/2019/04/15/detecting-task-modifications.html)에서 **`task_name_for_pid`** 함수를 사용하여 다른 **프로세스가 프로세스에 코드를 주입하는** 방법과 그 다른 프로세스에 대한 정보를 얻는 방법을 찾을 수 있습니다.
 
-Note that to call that function you need to be **the same uid** as the one running the process or **root** (and it returns info about the process, not a way to inject code).
+이 함수를 호출하려면 **프로세스를 실행하는 것과 동일한 uid**여야 하거나 **root**여야 합니다(그리고 이 함수는 프로세스에 대한 정보를 반환하며, 코드를 주입하는 방법은 아닙니다).
 
-## References
+## 참고자료
 
 - [https://theevilbit.github.io/shield/](https://theevilbit.github.io/shield/)
 - [https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f)
