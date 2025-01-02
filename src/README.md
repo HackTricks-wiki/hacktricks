@@ -1,31 +1,31 @@
 # HackTricks
 
-Reading time: {{ #reading_time }}
+Lesezeit: {{ #reading_time }}
 
 <figure><img src="images/hacktricks.gif" alt=""><figcaption></figcaption></figure>
 
-_Hacktricks logos & motion design by_ [_@ppiernacho_](https://www.instagram.com/ppieranacho/)_._
+_Hacktricks Logos & Motion Design von_ [_@ppiernacho_](https://www.instagram.com/ppieranacho/)_._
 
 > [!TIP]
-> **Welcome to the wiki where you will find each hacking trick/technique/whatever I have learnt from CTFs, real life apps, reading researches, and news.**
+> **Willkommen im Wiki, wo Sie jeden Hacking-Trick/Technik/was auch immer finden, was ich aus CTFs, realen Anwendungen, Forschungsarbeiten und Nachrichten gelernt habe.**
 
-To get started follow this page where you will find the **typical flow** that **you should follow when pentesting** one or more **machines:**
+Um zu beginnen, folgen Sie dieser Seite, wo Sie den **typischen Ablauf** finden, den **Sie beim Pentesting** von einem oder mehreren **Maschinen befolgen sollten:**
 
 {{#ref}}
 generic-methodologies-and-resources/pentesting-methodology.md
 {{#endref}}
 
-## Corporate Sponsors
+## Unternehmenssponsoren
 
 ### [STM Cyber](https://www.stmcyber.com)
 
 <figure><img src="images/stm (1).png" alt=""><figcaption></figcaption></figure>
 
-[**STM Cyber**](https://www.stmcyber.com) is a great cybersecurity company whose slogan is **HACK THE UNHACKABLE**. They perform their own research and develop their own hacking tools to **offer several valuable cybersecurity services** like pentesting, Red teams and training.
+[**STM Cyber**](https://www.stmcyber.com) ist ein großartiges Cybersicherheitsunternehmen, dessen Slogan **HACK THE UNHACKABLE** lautet. Sie führen eigene Forschungen durch und entwickeln eigene Hacking-Tools, um **verschiedene wertvolle Cybersicherheitsdienste** wie Pentesting, Red Teams und Schulungen anzubieten.
 
-You can check their **blog** in [**https://blog.stmcyber.com**](https://blog.stmcyber.com)
+Sie können ihren **Blog** unter [**https://blog.stmcyber.com**](https://blog.stmcyber.com) einsehen.
 
-**STM Cyber** also support cybersecurity open source projects like HackTricks :)
+**STM Cyber** unterstützt auch Open-Source-Projekte im Bereich Cybersicherheit wie HackTricks :)
 
 ---
 
@@ -33,7 +33,7 @@ You can check their **blog** in [**https://blog.stmcyber.com**](https://blog.stm
 
 <figure><img src="images/image (45).png" alt=""><figcaption></figcaption></figure>
 
-[**RootedCON**](https://www.rootedcon.com) is the most relevant cybersecurity event in **Spain** and one of the most important in **Europe**. With **the mission of promoting technical knowledge**, this congress is a boiling meeting point for technology and cybersecurity professionals in every discipline.
+[**RootedCON**](https://www.rootedcon.com) ist die relevanteste Cybersicherheitsveranstaltung in **Spanien** und eine der wichtigsten in **Europa**. Mit **der Mission, technisches Wissen zu fördern**, ist dieser Kongress ein brodelnder Treffpunkt für Technologie- und Cybersicherheitsexperten in jeder Disziplin.
 
 {% embed url="https://www.rootedcon.com/" %}
 
@@ -43,9 +43,9 @@ You can check their **blog** in [**https://blog.stmcyber.com**](https://blog.stm
 
 <figure><img src="images/image (47).png" alt=""><figcaption></figcaption></figure>
 
-**Intigriti** is the **Europe's #1** ethical hacking and **bug bounty platform.**
+**Intigriti** ist die **Nummer 1** Plattform für ethisches Hacking und **Bug Bounty in Europa.**
 
-**Bug bounty tip**: **sign up** for **Intigriti**, a premium **bug bounty platform created by hackers, for hackers**! Join us at [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) today, and start earning bounties up to **$100,000**!
+**Bug Bounty Tipp**: **Melden Sie sich an** für **Intigriti**, eine Premium-**Bug Bounty-Plattform, die von Hackern für Hacker** erstellt wurde! Treten Sie uns heute bei unter [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) und beginnen Sie, Belohnungen von bis zu **100.000 $** zu verdienen!
 
 {% embed url="https://go.intigriti.com/hacktricks" %}
 
@@ -56,9 +56,9 @@ You can check their **blog** in [**https://blog.stmcyber.com**](https://blog.stm
 <figure><img src="images/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.
+Verwenden Sie [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks), um einfach **Workflows** zu erstellen und zu **automatisieren**, die von den **fortschrittlichsten** Community-Tools der Welt unterstützt werden.
 
-Get Access Today:
+Zugriff heute erhalten:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
@@ -68,23 +68,23 @@ Get Access Today:
 
 <figure><img src="images/image (3).png" alt=""><figcaption></figcaption></figure>
 
-Join [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server to communicate with experienced hackers and bug bounty hunters!
+Treten Sie dem [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) Server bei, um mit erfahrenen Hackern und Bug Bounty-Jägern zu kommunizieren!
 
-- **Hacking Insights:** Engage with content that delves into the thrill and challenges of hacking
-- **Real-Time Hack News:** Keep up-to-date with fast-paced hacking world through real-time news and insights
-- **Latest Announcements:** Stay informed with the newest bug bounties launching and crucial platform updates
+- **Hacking Einblicke:** Engagieren Sie sich mit Inhalten, die in die Aufregung und Herausforderungen des Hackens eintauchen
+- **Echtzeit-Hack-Nachrichten:** Bleiben Sie auf dem Laufenden mit der schnelllebigen Hack-Welt durch Echtzeit-Nachrichten und Einblicke
+- **Neueste Ankündigungen:** Bleiben Sie informiert über die neuesten Bug Bounties und wichtige Plattform-Updates
 
-**Join us on** [**Discord**](https://discord.com/invite/N3FrSbmwdy) and start collaborating with top hackers today!
+**Treten Sie uns auf** [**Discord**](https://discord.com/invite/N3FrSbmwdy) bei und beginnen Sie noch heute mit der Zusammenarbeit mit Top-Hackern!
 
 ---
 
-### [Pentest-Tools.com](https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons) - The essential penetration testing toolkit
+### [Pentest-Tools.com](https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons) - Das essentielle Toolkit für Penetrationstests
 
 <figure><img src="images/pentest-tools.svg" alt=""><figcaption></figcaption></figure>
 
-**Get a hacker's perspective on your web apps, network, and cloud**
+**Erhalten Sie die Perspektive eines Hackers auf Ihre Webanwendungen, Netzwerke und Cloud**
 
-**Find and report critical, exploitable vulnerabilities with real business impact.** Use our 20+ custom tools to map the attack surface, find security issues that let you escalate privileges, and use automated exploits to collect essential evidence, turning your hard work into persuasive reports.
+**Finden und melden Sie kritische, ausnutzbare Schwachstellen mit echtem Geschäftsauswirkungen.** Verwenden Sie unsere 20+ benutzerdefinierten Tools, um die Angriffsfläche zu kartieren, Sicherheitsprobleme zu finden, die Ihnen ermöglichen, Berechtigungen zu eskalieren, und automatisierte Exploits zu verwenden, um wesentliche Beweise zu sammeln, die Ihre harte Arbeit in überzeugende Berichte verwandeln.
 
 {% embed url="https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons" %}
 
@@ -94,22 +94,22 @@ Join [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server to 
 
 <figure><img src="images/image (1254).png" alt=""><figcaption></figcaption></figure>
 
-**SerpApi** offers fast and easy real-time APIs to **access search engine results**. They scrape search engines, handle proxies, solve captchas, and parse all rich structured data for you.
+**SerpApi** bietet schnelle und einfache Echtzeit-APIs, um **auf Suchmaschinenergebnisse** zuzugreifen. Sie scrapen Suchmaschinen, verwalten Proxys, lösen Captchas und parsen alle strukturierten Daten für Sie.
 
-A subscription to one of SerpApi’s plans includes access to over 50 different APIs for scraping different search engines, including Google, Bing, Baidu, Yahoo, Yandex, and more.\
-Unlike other providers, **SerpApi doesn’t just scrape organic results**. SerpApi responses consistently include all ads, inline images and videos, knowledge graphs, and other elements and features present in the search results.
+Ein Abonnement eines der SerpApi-Pläne umfasst den Zugriff auf über 50 verschiedene APIs zum Scrapen verschiedener Suchmaschinen, einschließlich Google, Bing, Baidu, Yahoo, Yandex und mehr.\
+Im Gegensatz zu anderen Anbietern **scrapt SerpApi nicht nur organische Ergebnisse**. Die Antworten von SerpApi enthalten konsequent alle Anzeigen, Inline-Bilder und Videos, Wissensgraphen und andere Elemente und Funktionen, die in den Suchergebnissen vorhanden sind.
 
-Current SerpApi customers include **Apple, Shopify, and GrubHub**.\
-For more information check out their [**blog**](https://serpapi.com/blog/)**,** or try an example in their [**playground**](https://serpapi.com/playground)**.**\
-You can **create a free account** [**here**](https://serpapi.com/users/sign_up)**.**
+Aktuelle SerpApi-Kunden sind **Apple, Shopify und GrubHub**.\
+Für weitere Informationen besuchen Sie ihren [**Blog**](https://serpapi.com/blog/)**,** oder probieren Sie ein Beispiel in ihrem [**Playground**](https://serpapi.com/playground)**.**\
+Sie können **hier ein kostenloses Konto erstellen** [**hier**](https://serpapi.com/users/sign_up)**.**
 
 ---
 
-### 8kSec Academy – In-Depth Mobile Security Courses
+### 8kSec Academy – Vertiefende Mobile Security Kurse
 
 <figure><img src="images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-Learn the technologies and skills required to perform vulnerability research, penetration testing, and reverse engineering to protect mobile applications and devices. **Master iOS and Android security** through our on-demand courses and **get certified**:
+Lernen Sie die Technologien und Fähigkeiten, die erforderlich sind, um Schwachstellenforschung, Penetrationstests und Reverse Engineering durchzuführen, um mobile Anwendungen und Geräte zu schützen. **Meistern Sie die Sicherheit von iOS und Android** durch unsere On-Demand-Kurse und **lassen Sie sich zertifizieren**:
 
 {% embed url="https://academy.8ksec.io/" %}
 
@@ -119,26 +119,26 @@ Learn the technologies and skills required to perform vulnerability research, pe
 
 <figure><img src="images/websec (1).svg" alt=""><figcaption></figcaption></figure>
 
-[**WebSec**](https://websec.nl) is a professional cybersecurity company based in **Amsterdam** which helps **protecting** businesses **all over the world** against the latest cybersecurity threats by providing **offensive-security services** with a **modern** approach.
+[**WebSec**](https://websec.nl) ist ein professionelles Cybersicherheitsunternehmen mit Sitz in **Amsterdam**, das **Unternehmen auf der ganzen Welt** hilft, sich gegen die neuesten Cybersicherheitsbedrohungen zu schützen, indem es **offensive Sicherheitsdienste** mit einem **modernen** Ansatz anbietet.
 
-WebSec is an **all-in-one security company** which means they do it all; Pentesting, **Security** Audits, Awareness Trainings, Phishing Campagnes, Code Review, Exploit Development, Security Experts Outsourcing and much more.
+WebSec ist ein **All-in-One-Sicherheitsunternehmen**, was bedeutet, dass sie alles anbieten; Pentesting, **Sicherheits**-Audits, Awareness-Trainings, Phishing-Kampagnen, Code-Überprüfungen, Exploit-Entwicklung, Outsourcing von Sicherheitsexperten und vieles mehr.
 
-Another cool thing about WebSec is that unlike the industry average WebSec is **very confident in their skills**, to such an extent that they **guarantee the best quality results**, it states on their website "**If we can't hack it, You don't pay it!**". For more info take a look at their [**website**](https://websec.nl/en/) and [**blog**](https://websec.nl/blog/)!
+Eine weitere coole Sache an WebSec ist, dass sie im Gegensatz zum Branchendurchschnitt **sehr zuversichtlich in ihre Fähigkeiten sind**, so sehr, dass sie **die besten Qualitätsresultate garantieren**. Auf ihrer Website steht: "**Wenn wir es nicht hacken können, zahlen Sie nicht!**". Für weitere Informationen werfen Sie einen Blick auf ihre [**Website**](https://websec.nl/en/) und [**Blog**](https://websec.nl/blog/)!
 
-In addition to the above WebSec is also a **committed supporter of HackTricks.**
+Zusätzlich zu den oben genannten ist WebSec auch ein **engagierter Unterstützer von HackTricks.**
 
 {% embed url="https://www.youtube.com/watch?v=Zq2JycGDCPM" %}
 
-## License & Disclaimer
+## Lizenz & Haftungsausschluss
 
-Check them in:
+Überprüfen Sie sie in:
 
 {{#ref}}
 welcome/hacktricks-values-and-faq.md
 {{#endref}}
 
-## Github Stats
+## Github Statistiken
 
-![HackTricks Github Stats](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
+![HackTricks Github Statistiken](https://repobeats.axiom.co/api/embed/68f8746802bcf1c8462e889e6e9302d4384f164b.svg)
 
 {{#include ./banners/hacktricks-training.md}}
