@@ -2,25 +2,18 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="/images/image (48).png" alt=""><figcaption></figcaption></figure>
+## Comment ça fonctionne
 
-Utilisez [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=command-injection) pour construire et **automatiser des flux de travail** facilement grâce aux **outils communautaires les plus avancés** au monde.\
-Obtenez l'accès aujourd'hui :
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=command-injection" %}
-
-## Comment ils fonctionnent
-
-Le processus est décrit dans les étapes ci-dessous, illustrant comment les binaires de service sont manipulés pour obtenir une exécution à distance sur une machine cible via SMB :
+Le processus est décrit dans les étapes ci-dessous, illustrant comment les binaires de service sont manipulés pour réaliser une exécution à distance sur une machine cible via SMB :
 
 1. **La copie d'un binaire de service sur le partage ADMIN$ via SMB** est effectuée.
 2. **La création d'un service sur la machine distante** est réalisée en pointant vers le binaire.
 3. Le service est **démarré à distance**.
-4. À la sortie, le service est **arrêté et le binaire est supprimé**.
+4. À la sortie, le service est **arrêté, et le binaire est supprimé**.
 
 ### **Processus d'exécution manuelle de PsExec**
 
-En supposant qu'il existe un payload exécutable (créé avec msfvenom et obfusqué à l'aide de Veil pour échapper à la détection antivirus), nommé 'met8888.exe', représentant un payload meterpreter reverse_http, les étapes suivantes sont suivies :
+En supposant qu'il y ait un payload exécutable (créé avec msfvenom et obfusqué à l'aide de Veil pour échapper à la détection antivirus), nommé 'met8888.exe', représentant un payload meterpreter reverse_http, les étapes suivantes sont suivies :
 
 - **Copie du binaire** : L'exécutable est copié sur le partage ADMIN$ depuis une invite de commande, bien qu'il puisse être placé n'importe où sur le système de fichiers pour rester dissimulé.
 
@@ -42,11 +35,4 @@ Vous pouvez également utiliser [**SharpLateral**](https://github.com/mertdas/Sh
 ```
 SharpLateral.exe redexec HOSTNAME C:\\Users\\Administrator\\Desktop\\malware.exe.exe malware.exe ServiceName
 ```
-<figure><img src="/images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-Utilisez [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=command-injection) pour créer et **automatiser des flux de travail** facilement grâce aux **outils communautaires les plus avancés** au monde.\
-Obtenez l'accès aujourd'hui :
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=command-injection" %}
-
 {{#include ../../banners/hacktricks-training.md}}

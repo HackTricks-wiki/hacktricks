@@ -2,19 +2,12 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="/images/pentest-tools.svg" alt=""><figcaption></figcaption></figure>
-
-**Obtenez la perspective d'un hacker sur vos applications web, votre réseau et votre cloud**
-
-**Trouvez et signalez des vulnérabilités critiques et exploitables ayant un impact commercial réel.** Utilisez nos plus de 20 outils personnalisés pour cartographier la surface d'attaque, trouver des problèmes de sécurité qui vous permettent d'escalader les privilèges, et utilisez des exploits automatisés pour collecter des preuves essentielles, transformant votre travail acharné en rapports convaincants.
-
-{% embed url="https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons" %}
 
 ## Comment ça fonctionne
 
 **Smbexec** est un outil utilisé pour l'exécution de commandes à distance sur des systèmes Windows, similaire à **Psexec**, mais il évite de placer des fichiers malveillants sur le système cible.
 
-### Points clés sur **SMBExec**
+### Points clés concernant **SMBExec**
 
 - Il fonctionne en créant un service temporaire (par exemple, "BTOBTO") sur la machine cible pour exécuter des commandes via cmd.exe (%COMSPEC%), sans déposer de binaires.
 - Malgré son approche furtive, il génère des journaux d'événements pour chaque commande exécutée, offrant une forme de "shell" non interactif.
@@ -41,12 +34,5 @@ Pour plus de détails, consultez [https://blog.ropnop.com/using-credentials-to-o
 
 - [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
 
-<figure><img src="/images/pentest-tools.svg" alt=""><figcaption></figcaption></figure>
-
-**Obtenez la perspective d'un hacker sur vos applications web, votre réseau et votre cloud**
-
-**Trouvez et signalez des vulnérabilités critiques et exploitables ayant un impact commercial réel.** Utilisez nos 20+ outils personnalisés pour cartographier la surface d'attaque, trouver des problèmes de sécurité qui vous permettent d'escalader les privilèges, et utilisez des exploits automatisés pour collecter des preuves essentielles, transformant votre travail acharné en rapports convaincants.
-
-{% embed url="https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons" %}
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -20,7 +20,7 @@ L'**attribut étendu `com.apple.macl`** est ajouté au nouveau **fichier** pour 
 
 ### TCC ClickJacking
 
-Il est possible de **mettre une fenêtre au-dessus de l'invite TCC** pour faire en sorte que l'utilisateur **l'accepte** sans s'en rendre compte. Vous pouvez trouver un PoC dans [**TCC-ClickJacking**](https://github.com/breakpointHQ/TCC-ClickJacking)**.**
+Il est possible de **mettre une fenêtre sur l'invite TCC** pour faire en sorte que l'utilisateur **l'accepte** sans s'en rendre compte. Vous pouvez trouver un PoC dans [**TCC-ClickJacking**](https://github.com/breakpointHQ/TCC-ClickJacking)**.**
 
 <figure><img src="broken-reference" alt=""><figcaption><p><a href="https://github.com/breakpointHQ/TCC-ClickJacking/raw/main/resources/clickjacking.jpg">https://github.com/breakpointHQ/TCC-ClickJacking/raw/main/resources/clickjacking.jpg</a></p></figcaption></figure>
 
@@ -62,7 +62,7 @@ L'attribution **`com.apple.private.icloud-account-access`** permet de communique
 
 **iMovie** et **Garageband** avaient cette attribution et d'autres qui le permettaient.
 
-Pour plus **d'informations** sur l'exploit pour **obtenir des jetons iCloud** à partir de cette attribution, consultez la conférence : [**#OBTS v5.0: "What Happens on your Mac, Stays on Apple's iCloud?!" - Wojciech Regula**](https://www.youtube.com/watch?v=_6e2LhmxVc0)
+Pour plus **d'informations** sur l'exploit pour **obtenir des jetons iCloud** à partir de cette attribution, consultez la conférence : [**#OBTS v5.0 : "What Happens on your Mac, Stays on Apple's iCloud?!" - Wojciech Regula**](https://www.youtube.com/watch?v=_6e2LhmxVc0)
 
 ### kTCCServiceAppleEvents / Automation
 
@@ -98,7 +98,7 @@ osascript iterm.script
 ```
 #### Sur Finder
 
-Ou si une application a accès à Finder, cela pourrait être un script comme celui-ci :
+Ou si une application a accès à Finder, elle pourrait utiliser un script comme celui-ci :
 ```applescript
 set a_user to do shell script "logname"
 tell application "Finder"
@@ -112,7 +112,7 @@ do shell script "rm " & POSIX path of (copyFile as alias)
 
 ### CVE-2020–9934 - TCC <a href="#c19b" id="c19b"></a>
 
-Le **daemon tccd** de l'espace utilisateur utilisait la variable **`HOME`** **env** pour accéder à la base de données des utilisateurs TCC depuis : **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`**
+Le **daemon tccd** de l'espace utilisateur utilise la variable d'environnement **`HOME`** pour accéder à la base de données des utilisateurs TCC depuis : **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`**
 
 Selon [ce post Stack Exchange](https://stackoverflow.com/questions/135688/setting-environment-variables-on-os-x/3756686#3756686) et parce que le daemon TCC s'exécute via `launchd` dans le domaine de l'utilisateur actuel, il est possible de **contrôler toutes les variables d'environnement** qui lui sont passées.\
 Ainsi, un **attaquant pourrait définir la variable d'environnement `$HOME`** dans **`launchctl`** pour pointer vers un **répertoire contrôlé**, **redémarrer** le **daemon TCC**, puis **modifier directement la base de données TCC** pour se donner **tous les droits TCC disponibles** sans jamais demander à l'utilisateur final.\
@@ -145,7 +145,7 @@ $> ls ~/Documents
 ```
 ### CVE-2021-30761 - Notes
 
-Notes avait accès à des emplacements protégés par TCC, mais lorsqu'une note est créée, elle est **créée dans un emplacement non protégé**. Ainsi, vous pourriez demander à Notes de copier un fichier protégé dans une note (donc dans un emplacement non protégé) et ensuite accéder au fichier :
+Notes avait accès aux emplacements protégés par TCC, mais lorsqu'une note est créée, elle est **créée dans un emplacement non protégé**. Ainsi, vous pourriez demander à Notes de copier un fichier protégé dans une note (donc dans un emplacement non protégé) et ensuite accéder au fichier :
 
 <figure><img src="../../../../../images/image (476).png" alt=""><figcaption></figcaption></figure>
 
@@ -167,7 +167,7 @@ Ce **`rename(a, b);`** comportement est vulnérable à une **Race Condition**, c
 ### SQLITE_SQLLOG_DIR - CVE-2023-32422
 
 Si **`SQLITE_SQLLOG_DIR="path/folder"`** signifie essentiellement que **toute base de données ouverte est copiée à ce chemin**. Dans ce CVE, ce contrôle a été abusé pour **écrire** à l'intérieur d'une **base de données SQLite** qui va être **ouverte par un processus avec FDA la base de données TCC**, puis abuser de **`SQLITE_SQLLOG_DIR`** avec un **symlink dans le nom de fichier** afin que lorsque cette base de données est **ouverte**, l'utilisateur **TCC.db est écrasé** avec celle ouverte.\
-**Plus d'infos** [**dans le writeup**](https://gergelykalman.com/sqlol-CVE-2023-32422-a-macos-tcc-bypass.html) **et**[ **dans la talk**](https://www.youtube.com/watch?v=f1HA5QhLQ7Y&t=20548s).
+**More info** [**in the writeup**](https://gergelykalman.com/sqlol-CVE-2023-32422-a-macos-tcc-bypass.html) **and**[ **in the talk**](https://www.youtube.com/watch?v=f1HA5QhLQ7Y&t=20548s).
 
 ### **SQLITE_AUTO_TRACE**
 
@@ -180,7 +180,7 @@ launchctl setenv SQLITE_AUTO_TRACE 1
 ```
 ### MTL_DUMP_PIPELINES_TO_JSON_FILE - CVE-2023-32407
 
-Cette **variable d'environnement est utilisée par le cadre `Metal`** qui est une dépendance à divers programmes, notamment `Music`, qui a FDA.
+Cette **variable d'environnement est utilisée par le cadre `Metal`** qui est une dépendance pour divers programmes, notamment `Music`, qui a FDA.
 
 En définissant ce qui suit : `MTL_DUMP_PIPELINES_TO_JSON_FILE="path/name"`. Si `path` est un répertoire valide, le bug se déclenchera et nous pouvons utiliser `fs_usage` pour voir ce qui se passe dans le programme :
 
@@ -204,7 +204,7 @@ C'était l'attaque dans le CVE : Par exemple, pour écraser le `TCC.db` de l'uti
 - définir `MTL_DUMP_PIPELINES_TO_JSON_FILE=/Users/hacker/tmp/TCC.db`
 - déclencher le bug en exécutant `Music` avec cette variable d'environnement
 - attraper le `open()` de `/Users/hacker/tmp/.dat.nosyncXXXX.XXXXXX` (X est aléatoire)
-- ici nous `open()` également ce fichier pour écrire, et nous nous accrochons au descripteur de fichier
+- ici nous `open()` également ce fichier pour écrire, et nous conservons le descripteur de fichier
 - échanger atomiquement `/Users/hacker/tmp` avec `/Users/hacker/ourlink` **dans une boucle**
 - nous faisons cela pour maximiser nos chances de succès car la fenêtre de course est assez mince, mais perdre la course a un inconvénient négligeable
 - attendre un peu
@@ -240,7 +240,7 @@ Le **premier POC** utilise [**dsexport**](https://www.unix.com/man-page/osx/1/ds
 2. Plantez un faux fichier _TCC.db_ avec l'accès requis et le blob _csreq_.
 3. Exportez l'entrée des services d'annuaire de l'utilisateur avec [**dsexport**](https://www.unix.com/man-page/osx/1/dsexport/).
 4. Modifiez l'entrée des services d'annuaire pour changer le répertoire personnel de l'utilisateur.
-5. Importez l'entrée modifiée des services d'annuaire avec [**dsimport**](https://www.unix.com/man-page/osx/1/dsimport/).
+5. Importez l'entrée des services d'annuaire modifiée avec [**dsimport**](https://www.unix.com/man-page/osx/1/dsimport/).
 6. Arrêtez le _tccd_ de l'utilisateur et redémarrez le processus.
 
 Le deuxième POC a utilisé **`/usr/libexec/configd`** qui avait `com.apple.private.tcc.allow` avec la valeur `kTCCServiceSystemPolicySysAdminFiles`.\
@@ -336,7 +336,7 @@ Executable=/Applications/Firefox.app/Contents/MacOS/firefox
 </dict>
 </plist>
 ```
-Pour plus d'informations sur la façon d'exploiter facilement cela [**consultez le rapport original**](https://wojciechregula.blog/post/how-to-rob-a-firefox/).
+Pour plus d'informations sur la façon d'exploiter facilement cela, [**consultez le rapport original**](https://wojciechregula.blog/post/how-to-rob-a-firefox/).
 
 ### CVE-2020-10006
 
@@ -344,7 +344,7 @@ Le binaire `/system/Library/Filesystems/acfs.fs/Contents/bin/xsanctl` avait les 
 
 ### CVE-2023-26818 - Telegram
 
-Telegram avait les autorisations **`com.apple.security.cs.allow-dyld-environment-variables`** et **`com.apple.security.cs.disable-library-validation`**, il était donc possible d'en abuser pour **accéder à ses permissions** comme l'enregistrement avec la caméra. Vous pouvez [**trouver le payload dans le writeup**](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/).
+Telegram avait les autorisations **`com.apple.security.cs.allow-dyld-environment-variables`** et **`com.apple.security.cs.disable-library-validation`**, il était donc possible d'en abuser pour **accéder à ses permissions**, comme l'enregistrement avec la caméra. Vous pouvez [**trouver le payload dans le writeup**](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/).
 
 Notez comment utiliser la variable d'environnement pour charger une bibliothèque, un **plist personnalisé** a été créé pour injecter cette bibliothèque et **`launchctl`** a été utilisé pour la lancer :
 ```xml
@@ -402,7 +402,7 @@ Les scripts **`.terminal`** sont des fichiers plist comme celui-ci avec la comma
 </dict>
 </plist>
 ```
-Une application pourrait écrire un script de terminal dans un emplacement tel que /tmp et le lancer avec une commande telle que :
+Une application pourrait écrire un script terminal dans un emplacement tel que /tmp et le lancer avec une commande telle que :
 ```objectivec
 // Write plist in /tmp/tcc.terminal
 [...]
@@ -465,6 +465,14 @@ os.system("hdiutil detach /tmp/mnt 1>/dev/null")
 ```
 Vérifiez l'**exploitation complète** dans le [**rapport original**](https://theevilbit.github.io/posts/cve-2021-30808/).
 
+### CVE-2024-40855
+
+Comme expliqué dans le [rapport original](https://www.kandji.io/blog/macos-audit-story-part2), ce CVE a abusé de `diskarbitrationd`.
+
+La fonction `DADiskMountWithArgumentsCommon` du framework public `DiskArbitration` effectuait les vérifications de sécurité. Cependant, il est possible de contourner cela en appelant directement `diskarbitrationd` et donc d'utiliser des éléments `../` dans le chemin et des liens symboliques.
+
+Cela a permis à un attaquant de faire des montages arbitraires à n'importe quel endroit, y compris sur la base de données TCC en raison de l'attribution `com.apple.private.security.storage-exempt.heritable` de `diskarbitrationd`.
+
 ### asr
 
 L'outil **`/usr/sbin/asr`** permettait de copier l'ensemble du disque et de le monter à un autre endroit en contournant les protections TCC.
@@ -472,7 +480,7 @@ L'outil **`/usr/sbin/asr`** permettait de copier l'ensemble du disque et de le m
 ### Services de localisation
 
 Il existe une troisième base de données TCC dans **`/var/db/locationd/clients.plist`** pour indiquer les clients autorisés à **accéder aux services de localisation**.\
-Le dossier **`/var/db/locationd/` n'était pas protégé contre le montage DMG**, il était donc possible de monter notre propre plist.
+Le dossier **`/var/db/locationd/` n'était pas protégé contre le montage DMG** donc il était possible de monter notre propre plist.
 
 ## Par les applications de démarrage
 

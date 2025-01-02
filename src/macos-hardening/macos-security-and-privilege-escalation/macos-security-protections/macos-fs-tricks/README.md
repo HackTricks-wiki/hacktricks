@@ -14,13 +14,13 @@ Permissions dans un **répertoire** :
 
 ### Combinaisons dangereuses
 
-**Comment écraser un fichier/dossier appartenant à root**, mais :
+**Comment écraser un fichier/dossier possédé par root**, mais :
 
 - Un **propriétaire de répertoire parent** dans le chemin est l'utilisateur
 - Un **propriétaire de répertoire parent** dans le chemin est un **groupe d'utilisateurs** avec **accès en écriture**
 - Un **groupe d'utilisateurs** a un accès **en écriture** au **fichier**
 
-Avec l'une des combinaisons précédentes, un attaquant pourrait **injecter** un **lien sym/hard** vers le chemin attendu pour obtenir un écriture arbitraire privilégiée.
+Avec l'une des combinaisons précédentes, un attaquant pourrait **injecter** un **lien sym/hard** vers le chemin attendu pour obtenir une écriture arbitraire privilégiée.
 
 ### Cas spécial du dossier root R+X
 
@@ -30,9 +30,15 @@ Exemple dans : [https://theevilbit.github.io/posts/exploiting_directory_permissi
 
 ## Lien symbolique / Lien dur
 
+### Fichier/dossier permissif
+
 Si un processus privilégié écrit des données dans un **fichier** qui pourrait être **contrôlé** par un **utilisateur de moindre privilège**, ou qui pourrait avoir été **précédemment créé** par un utilisateur de moindre privilège. L'utilisateur pourrait simplement **le pointer vers un autre fichier** via un lien symbolique ou dur, et le processus privilégié écrira sur ce fichier.
 
 Vérifiez dans les autres sections où un attaquant pourrait **abuser d'une écriture arbitraire pour élever les privilèges**.
+
+### Ouvert `O_NOFOLLOW`
+
+Le drapeau `O_NOFOLLOW` lorsqu'il est utilisé par la fonction `open` ne suivra pas un lien symbolique dans le dernier composant du chemin, mais il suivra le reste du chemin. La bonne façon d'empêcher le suivi des liens symboliques dans le chemin est d'utiliser le drapeau `O_NOFOLLOW_ANY`.
 
 ## .fileloc
 
@@ -50,15 +56,19 @@ Exemple :
 </dict>
 </plist>
 ```
-## FD arbitraire
+## Descripteurs de fichiers
 
-Si vous pouvez faire en sorte qu'un **processus ouvre un fichier ou un dossier avec des privilèges élevés**, vous pouvez abuser de **`crontab`** pour ouvrir un fichier dans `/etc/sudoers.d` avec **`EDITOR=exploit.py`**, de sorte que `exploit.py` obtiendra le FD du fichier à l'intérieur de `/etc/sudoers` et en abusant de celui-ci.
+### Fuite FD (pas de `O_CLOEXEC`)
 
-Par exemple : [https://youtu.be/f1HA5QhLQ7Y?t=21098](https://youtu.be/f1HA5QhLQ7Y?t=21098)
+Si un appel à `open` n'a pas le drapeau `O_CLOEXEC`, le descripteur de fichier sera hérité par le processus enfant. Donc, si un processus privilégié ouvre un fichier privilégié et exécute un processus contrôlé par l'attaquant, l'attaquant **héritera le FD sur le fichier privilégié**.
+
+Si vous pouvez faire en sorte qu'un **processus ouvre un fichier ou un dossier avec des privilèges élevés**, vous pouvez abuser de **`crontab`** pour ouvrir un fichier dans `/etc/sudoers.d` avec **`EDITOR=exploit.py`**, de sorte que `exploit.py` obtiendra le FD vers le fichier à l'intérieur de `/etc/sudoers` et en abusant de celui-ci.
+
+Par exemple : [https://youtu.be/f1HA5QhLQ7Y?t=21098](https://youtu.be/f1HA5QhLQ7Y?t=21098), code : https://github.com/gergelykalman/CVE-2023-32428-a-macOS-LPE-via-MallocStackLogging
 
 ## Éviter les astuces xattrs de quarantaine
 
-### Supprimer cela
+### Supprimer
 ```bash
 xattr -d com.apple.quarantine /path/to/file_or_app
 ```
@@ -87,7 +97,7 @@ xattr: [Errno 1] Operation not permitted: '/tmp/mnt/lol'
 ```
 ### writeextattr ACL
 
-Cette ACL empêche l'ajout de `xattrs` au fichier.
+Cette ACL empêche d'ajouter des `xattrs` au fichier.
 ```bash
 rm -rf /tmp/test*
 echo test >/tmp/test
@@ -112,7 +122,7 @@ ls -le /tmp/test
 
 Le format de fichier **AppleDouble** copie un fichier y compris ses ACEs.
 
-Dans le [**code source**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html), il est possible de voir que la représentation textuelle de l'ACL stockée à l'intérieur de l'xattr appelé **`com.apple.acl.text`** va être définie comme ACL dans le fichier décompressé. Donc, si vous avez compressé une application dans un fichier zip avec le format de fichier **AppleDouble** avec une ACL qui empêche d'autres xattrs d'être écrits dessus... l'xattr de quarantaine n'a pas été défini dans l'application :
+Dans le [**code source**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html), il est possible de voir que la représentation textuelle de l'ACL stockée à l'intérieur de l'xattr appelé **`com.apple.acl.text`** va être définie comme ACL dans le fichier décompressé. Donc, si vous avez compressé une application dans un fichier zip avec le format de fichier **AppleDouble** avec une ACL qui empêche d'autres xattrs d'y être écrits... l'xattr de quarantaine n'a pas été défini dans l'application :
 
 Vérifiez le [**rapport original**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) pour plus d'informations.
 
@@ -142,7 +152,28 @@ Pas vraiment nécessaire mais je le laisse là juste au cas où :
 macos-xattr-acls-extra-stuff.md
 {{#endref}}
 
-## Contourner les signatures de code
+## Contourner les vérifications de signature
+
+### Contourner les vérifications des binaires de la plateforme
+
+Certaines vérifications de sécurité vérifient si le binaire est un **binaire de plateforme**, par exemple pour permettre de se connecter à un service XPC. Cependant, comme exposé dans un contournement sur https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/, il est possible de contourner cette vérification en obtenant un binaire de plateforme (comme /bin/ls) et d'injecter l'exploit via dyld en utilisant une variable d'environnement `DYLD_INSERT_LIBRARIES`.
+
+### Contourner les drapeaux `CS_REQUIRE_LV` et `CS_FORCED_LV`
+
+Il est possible pour un binaire en cours d'exécution de modifier ses propres drapeaux pour contourner les vérifications avec un code tel que :
+```c
+// Code from https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/
+int pid = getpid();
+NSString *exePath = NSProcessInfo.processInfo.arguments[0];
+
+uint32_t status = SecTaskGetCodeSignStatus(SecTaskCreateFromSelf(0));
+status |= 0x2000; // CS_REQUIRE_LV
+csops(pid, 9, &status, 4); // CS_OPS_SET_STATUS
+
+status = SecTaskGetCodeSignStatus(SecTaskCreateFromSelf(0));
+NSLog(@"=====Inject successfully into %d(%@), csflags=0x%x", pid, exePath, status);
+```
+## Contournement des signatures de code
 
 Les bundles contiennent le fichier **`_CodeSignature/CodeResources`** qui contient le **hash** de chaque **fichier** dans le **bundle**. Notez que le hash de CodeResources est également **intégré dans l'exécutable**, donc nous ne pouvons pas y toucher non plus.
 
@@ -258,6 +289,26 @@ Si vous avez **écriture arbitraire**, vous pourriez créer un fichier dans le d
 Le fichier **`/etc/paths`** est l'un des principaux endroits qui peuplent la variable d'environnement PATH. Vous devez être root pour le remplacer, mais si un script d'un **processus privilégié** exécute une **commande sans le chemin complet**, vous pourriez être en mesure de **détourner** cela en modifiant ce fichier.
 
 Vous pouvez également écrire des fichiers dans **`/etc/paths.d`** pour charger de nouveaux dossiers dans la variable d'environnement `PATH`.
+
+### cups-files.conf
+
+Cette technique a été utilisée dans [cet article](https://www.kandji.io/blog/macos-audit-story-part1).
+
+Créez le fichier `/etc/cups/cups-files.conf` avec le contenu suivant :
+```
+ErrorLog /etc/sudoers.d/lpe
+LogFilePerm 777
+<some junk>
+```
+Cela créera le fichier `/etc/sudoers.d/lpe` avec des permissions 777. Le surplus à la fin sert à déclencher la création du journal d'erreurs.
+
+Ensuite, écrivez dans `/etc/sudoers.d/lpe` la configuration nécessaire pour escalader les privilèges comme `%staff ALL=(ALL) NOPASSWD:ALL`.
+
+Puis, modifiez à nouveau le fichier `/etc/cups/cups-files.conf` en indiquant `LogFilePerm 700` afin que le nouveau fichier sudoers devienne valide en invoquant `cupsctl`.
+
+### Évasion du Sandbox
+
+Il est possible d'échapper au sandbox macOS avec un écriture arbitraire sur le FS. Pour quelques exemples, consultez la page [macOS Auto Start](../../../../macos-auto-start-locations.md) mais un cas courant est d'écrire un fichier de préférences Terminal dans `~/Library/Preferences/com.apple.Terminal.plist` qui exécute une commande au démarrage et de l'appeler en utilisant `open`.
 
 ## Générer des fichiers écrits par d'autres utilisateurs
 

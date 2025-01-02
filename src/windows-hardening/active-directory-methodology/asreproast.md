@@ -2,21 +2,6 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/image (3).png" alt=""><figcaption></figcaption></figure>
-
-Rejoignez le serveur [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) pour communiquer avec des hackers expérimentés et des chasseurs de bugs !
-
-**Aperçus sur le hacking**\
-Engagez-vous avec du contenu qui explore le frisson et les défis du hacking
-
-**Actualités de hacking en temps réel**\
-Restez à jour avec le monde du hacking en rapide évolution grâce à des nouvelles et des aperçus en temps réel
-
-**Dernières annonces**\
-Restez informé des nouvelles primes de bugs lancées et des mises à jour cruciales de la plateforme
-
-**Rejoignez-nous sur** [**Discord**](https://discord.com/invite/N3FrSbmwdy) et commencez à collaborer avec les meilleurs hackers dès aujourd'hui !
-
 ## ASREPRoast
 
 ASREPRoast est une attaque de sécurité qui exploite les utilisateurs qui manquent de l'**attribut requis de pré-authentification Kerberos**. Essentiellement, cette vulnérabilité permet aux attaquants de demander l'authentification d'un utilisateur auprès du Contrôleur de Domaine (DC) sans avoir besoin du mot de passe de l'utilisateur. Le DC répond alors avec un message chiffré avec la clé dérivée du mot de passe de l'utilisateur, que les attaquants peuvent tenter de craquer hors ligne pour découvrir le mot de passe de l'utilisateur.
@@ -24,7 +9,7 @@ ASREPRoast est une attaque de sécurité qui exploite les utilisateurs qui manqu
 Les principales exigences pour cette attaque sont :
 
 - **Absence de pré-authentification Kerberos** : Les utilisateurs cibles ne doivent pas avoir cette fonctionnalité de sécurité activée.
-- **Connexion au Contrôleur de Domaine (DC)** : Les attaquants ont besoin d'accéder au DC pour envoyer des demandes et recevoir des messages chiffrés.
+- **Connexion au Contrôleur de Domaine (DC)** : Les attaquants ont besoin d'un accès au DC pour envoyer des demandes et recevoir des messages chiffrés.
 - **Compte de domaine optionnel** : Avoir un compte de domaine permet aux attaquants d'identifier plus efficacement les utilisateurs vulnérables via des requêtes LDAP. Sans un tel compte, les attaquants doivent deviner les noms d'utilisateur.
 
 #### Énumération des utilisateurs vulnérables (besoin d'identifiants de domaine)
@@ -84,20 +69,5 @@ ASRepCatcher listen
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/as-rep-roasting-using-rubeus-and-hashcat](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/as-rep-roasting-using-rubeus-and-hashcat)
 
 ---
-
-<figure><img src="../../images/image (3).png" alt=""><figcaption></figcaption></figure>
-
-Rejoignez le serveur [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) pour communiquer avec des hackers expérimentés et des chasseurs de bugs !
-
-**Aperçus sur le hacking**\
-Engagez-vous avec du contenu qui explore le frisson et les défis du hacking
-
-**Actualités de hacking en temps réel**\
-Restez à jour avec le monde du hacking en rapide évolution grâce à des nouvelles et des aperçus en temps réel
-
-**Dernières annonces**\
-Restez informé des nouvelles primes de bugs lancées et des mises à jour cruciales de la plateforme
-
-**Rejoignez-nous sur** [**Discord**](https://discord.com/invite/N3FrSbmwdy) et commencez à collaborer avec les meilleurs hackers dès aujourd'hui !
 
 {{#include ../../banners/hacktricks-training.md}}

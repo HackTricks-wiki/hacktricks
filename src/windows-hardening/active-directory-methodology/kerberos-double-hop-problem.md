@@ -1,32 +1,28 @@
-# Problème du Double Hop Kerberos
+# Problème de Double Hop Kerberos
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
-
 ## Introduction
 
-Le problème du "Double Hop" Kerberos apparaît lorsqu'un attaquant tente d'utiliser **l'authentification Kerberos à travers deux** **hops**, par exemple en utilisant **PowerShell**/**WinRM**.
+Le problème de "Double Hop" Kerberos apparaît lorsqu'un attaquant tente d'utiliser **l'authentification Kerberos à travers deux** **hops**, par exemple en utilisant **PowerShell**/**WinRM**.
 
 Lorsque **l'authentification** se produit via **Kerberos**, **les identifiants** **ne sont pas** mis en cache dans **la mémoire.** Par conséquent, si vous exécutez mimikatz, vous **ne trouverez pas les identifiants** de l'utilisateur sur la machine même s'il exécute des processus.
 
-Ceci est dû au fait que lors de la connexion avec Kerberos, voici les étapes :
+C'est parce que lors de la connexion avec Kerberos, voici les étapes :
 
-1. L'utilisateur1 fournit des identifiants et le **contrôleur de domaine** renvoie un **TGT** Kerberos à l'utilisateur1.
-2. L'utilisateur1 utilise le **TGT** pour demander un **ticket de service** pour **se connecter** à Server1.
-3. L'utilisateur1 **se connecte** à **Server1** et fournit le **ticket de service**.
-4. **Server1** **n'a pas** les **identifiants** de l'utilisateur1 mis en cache ni le **TGT** de l'utilisateur1. Par conséquent, lorsque l'utilisateur1 de Server1 essaie de se connecter à un deuxième serveur, il **n'est pas en mesure de s'authentifier**.
+1. User1 fournit des identifiants et le **contrôleur de domaine** renvoie un **TGT** Kerberos à User1.
+2. User1 utilise le **TGT** pour demander un **ticket de service** pour **se connecter** à Server1.
+3. User1 **se connecte** à **Server1** et fournit le **ticket de service**.
+4. **Server1** **n'a pas** les **identifiants** de User1 mis en cache ni le **TGT** de User1. Par conséquent, lorsque User1 de Server1 essaie de se connecter à un deuxième serveur, il **n'est pas en mesure de s'authentifier**.
 
 ### Délégation non contrainte
 
-Si la **délégation non contrainte** est activée sur le PC, cela ne se produira pas car le **Serveur** obtiendra un **TGT** de chaque utilisateur y accédant. De plus, si la délégation non contrainte est utilisée, vous pouvez probablement **compromettre le contrôleur de domaine** à partir de cela.\
+Si la **délégation non contrainte** est activée sur le PC, cela ne se produira pas car le **Serveur** obtiendra un **TGT** de chaque utilisateur y accédant. De plus, si la délégation non contrainte est utilisée, vous pouvez probablement **compromettre le Contrôleur de Domaine** à partir de cela.\
 [**Plus d'infos sur la page de délégation non contrainte**](unconstrained-delegation.md).
 
 ### CredSSP
 
-Une autre façon d'éviter ce problème qui est [**notablement peu sécurisé**](https://docs.microsoft.com/en-us/powershell/module/microsoft.wsman.management/enable-wsmancredssp?view=powershell-7) est le **Provider de Support de Sécurité des Identifiants**. De Microsoft :
+Une autre façon d'éviter ce problème qui est [**notablement peu sécurisé**](https://docs.microsoft.com/en-us/powershell/module/microsoft.wsman.management/enable-wsmancredssp?view=powershell-7) est le **Fournisseur de Support de Sécurité des Identifiants**. De Microsoft :
 
 > L'authentification CredSSP délègue les identifiants de l'utilisateur de l'ordinateur local à un ordinateur distant. Cette pratique augmente le risque de sécurité de l'opération distante. Si l'ordinateur distant est compromis, lorsque les identifiants lui sont transmis, les identifiants peuvent être utilisés pour contrôler la session réseau.
 
@@ -40,7 +36,7 @@ Get-WSManCredSSP
 
 ### Invoke Command
 
-Pour résoudre le problème du double saut, une méthode impliquant un `Invoke-Command` imbriqué est présentée. Cela ne résout pas le problème directement mais offre une solution de contournement sans nécessiter de configurations spéciales. L'approche permet d'exécuter une commande (`hostname`) sur un serveur secondaire via une commande PowerShell exécutée depuis une machine d'attaque initiale ou à travers une PS-Session précédemment établie avec le premier serveur. Voici comment cela se fait :
+Pour résoudre le problème du double saut, une méthode impliquant un `Invoke-Command` imbriqué est présentée. Cela ne résout pas le problème directement mais offre une solution de contournement sans nécessiter de configurations spéciales. L'approche permet d'exécuter une commande (`hostname`) sur un serveur secondaire via une commande PowerShell exécutée depuis une machine d'attaque initiale ou à travers une PS-Session précédemment établie avec le premier serveur. Voici comment cela fonctionne :
 ```powershell
 $cred = Get-Credential ta\redsuit
 Invoke-Command -ComputerName bizintel -Credential $cred -ScriptBlock {
@@ -92,8 +88,5 @@ icacls.exe "C:\Users\redsuit\Documents\ssh\OpenSSH-Win64" /grant Everyone:RX /T
 - [https://learn.microsoft.com/en-gb/archive/blogs/sergey_babkins_blog/another-solution-to-multi-hop-powershell-remoting](https://learn.microsoft.com/en-gb/archive/blogs/sergey_babkins_blog/another-solution-to-multi-hop-powershell-remoting)
 - [https://4sysops.com/archives/solve-the-powershell-multi-hop-problem-without-using-credssp/](https://4sysops.com/archives/solve-the-powershell-multi-hop-problem-without-using-credssp/)
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

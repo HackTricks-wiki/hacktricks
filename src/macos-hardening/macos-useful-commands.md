@@ -1,15 +1,14 @@
-# macOS Useful Commands
+# Commandes utiles macOS
 
 {{#include ../banners/hacktricks-training.md}}
 
-### MacOS Automatic Enumeration Tools
+### Outils d'énumération automatique MacOS
 
 - **MacPEAS**: [https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS)
 - **Metasploit**: [https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb](https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb)
 - **SwiftBelt**: [https://github.com/cedowens/SwiftBelt](https://github.com/cedowens/SwiftBelt)
 
-### Specific MacOS Commands
-
+### Commandes spécifiques MacOS
 ```bash
 #System info
 date
@@ -111,25 +110,21 @@ sudo launchctl load -w /System/Library/LaunchDaemons/ssh.plist (enable ssh)
 sudo launchctl unload /System/Library/LaunchDaemons/ssh.plist (disable ssh)
 #Start apache
 sudo apachectl (start|status|restart|stop)
- ##Web folder: /Library/WebServer/Documents/
+##Web folder: /Library/WebServer/Documents/
 #Remove DNS cache
 dscacheutil -flushcache
 sudo killall -HUP mDNSResponder
 ```
+### Logiciels et services installés
 
-### Installed Software & Services
-
-Check for **suspicious** applications installed and **privileges** over the.installed resources:
-
+Vérifiez les applications **suspectes** installées et les **privilèges** sur les ressources installées :
 ```
 system_profiler SPApplicationsDataType #Installed Apps
 system_profiler SPFrameworksDataType #Instaled framework
 lsappinfo list #Installed Apps
 launchctl list #Services
 ```
-
-### User Processes
-
+### Processus Utilisateur
 ```bash
 # will print all the running services under that particular user domain.
 launchctl print gui/<users UID>
@@ -140,10 +135,9 @@ launchctl print system
 # will print detailed information about the specific launch agent. And if it’s not running or you’ve mistyped, you will get some output with a non-zero exit code: Could not find service “com.company.launchagent.label” in domain for login
 launchctl print gui/<user's UID>/com.company.launchagent.label
 ```
+### Créer un utilisateur
 
-### Create a user
-
-Without prompts
+Sans invites
 
 <figure><img src="../images/image (79).png" alt=""><figcaption></figcaption></figure>
 

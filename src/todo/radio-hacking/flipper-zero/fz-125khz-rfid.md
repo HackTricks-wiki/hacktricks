@@ -2,9 +2,6 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 ## Intro
 
@@ -20,18 +17,18 @@ Pour plus d'informations sur ces types de tags [**lisez cette introduction**](..
 
 ### Read
 
-Essaie de **lire** les informations de la carte. Ensuite, il peut **émuler** celles-ci.
+Essaye de **lire** les informations de la carte. Ensuite, il peut **l'imiter**.
 
 > [!WARNING]
-> Notez que certains interphones essaient de se protéger contre la duplication de clés en envoyant une commande d'écriture avant de lire. Si l'écriture réussit, ce tag est considéré comme faux. Lorsque Flipper émule RFID, il n'y a aucun moyen pour le lecteur de le distinguer de l'original, donc aucun problème de ce type ne se produit.
+> Notez que certains interphones essaient de se protéger contre la duplication de clés en envoyant une commande d'écriture avant de lire. Si l'écriture réussit, ce tag est considéré comme faux. Lorsque Flipper imite RFID, il n'y a aucun moyen pour le lecteur de le distinguer de l'original, donc aucun problème de ce type ne se produit.
 
 ### Add Manually
 
-Vous pouvez créer des **cartes fausses dans Flipper Zero en indiquant les données** manuellement, puis les émuler.
+Vous pouvez créer des **cartes fausses dans Flipper Zero en indiquant les données** manuellement, puis les imiter.
 
 #### IDs on cards
 
-Parfois, lorsque vous obtenez une carte, vous trouverez l'ID (ou une partie) écrit sur la carte de manière visible.
+Parfois, lorsque vous obtenez une carte, vous trouverez l'ID (ou une partie) écrit sur la carte visible.
 
 - **EM Marin**
 
@@ -42,20 +39,17 @@ Les 2 autres peuvent être brute-forcés si vous ne pouvez pas les lire sur la c
 
 - **HID**
 
-Il en va de même pour cette carte HID où seuls 2 des 3 octets peuvent être trouvés imprimés sur la carte.
+Il en va de même pour cette carte HID où seulement 2 des 3 octets peuvent être trouvés imprimés sur la carte.
 
 <figure><img src="../../../images/image (1014).png" alt=""><figcaption></figcaption></figure>
 
 ### Emulate/Write
 
-Après **avoir copié** une carte ou **avoir entré** l'ID **manuellement**, il est possible de **l'émuler** avec Flipper Zero ou de **l'écrire** sur une carte réelle.
+Après avoir **copié** une carte ou **saisi** l'ID **manuellement**, il est possible de **l'imiter** avec Flipper Zero ou de **l'écrire** sur une carte réelle.
 
 ## References
 
 - [https://blog.flipperzero.one/rfid/](https://blog.flipperzero.one/rfid/)
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../../../banners/hacktricks-training.md}}

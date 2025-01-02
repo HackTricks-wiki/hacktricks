@@ -1,103 +1,88 @@
-# User Namespace
+# Espace Utilisateur
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Informations de Base
 
-A user namespace is a Linux kernel feature that **provides isolation of user and group ID mappings**, allowing each user namespace to have its **own set of user and group IDs**. This isolation enables processes running in different user namespaces to **have different privileges and ownership**, even if they share the same user and group IDs numerically.
+Un espace utilisateur est une fonctionnalité du noyau Linux qui **fournit une isolation des mappages d'ID utilisateur et de groupe**, permettant à chaque espace utilisateur d'avoir son **propre ensemble d'ID utilisateur et de groupe**. Cette isolation permet aux processus s'exécutant dans différents espaces utilisateurs d'**avoir des privilèges et une propriété différents**, même s'ils partagent les mêmes ID utilisateur et de groupe numériquement.
 
-User namespaces are particularly useful in containerization, where each container should have its own independent set of user and group IDs, allowing for better security and isolation between containers and the host system.
+Les espaces utilisateurs sont particulièrement utiles dans la conteneurisation, où chaque conteneur doit avoir son propre ensemble indépendant d'ID utilisateur et de groupe, permettant une meilleure sécurité et isolation entre les conteneurs et le système hôte.
 
-### How it works:
+### Comment ça fonctionne :
 
-1. When a new user namespace is created, it **starts with an empty set of user and group ID mappings**. This means that any process running in the new user namespace will **initially have no privileges outside of the namespace**.
-2. ID mappings can be established between the user and group IDs in the new namespace and those in the parent (or host) namespace. This **allows processes in the new namespace to have privileges and ownership corresponding to user and group IDs in the parent namespace**. However, the ID mappings can be restricted to specific ranges and subsets of IDs, allowing for fine-grained control over the privileges granted to processes in the new namespace.
-3. Within a user namespace, **processes can have full root privileges (UID 0) for operations inside the namespace**, while still having limited privileges outside the namespace. This allows **containers to run with root-like capabilities within their own namespace without having full root privileges on the host system**.
-4. Processes can move between namespaces using the `setns()` system call or create new namespaces using the `unshare()` or `clone()` system calls with the `CLONE_NEWUSER` flag. When a process moves to a new namespace or creates one, it will start using the user and group ID mappings associated with that namespace.
+1. Lorsqu'un nouvel espace utilisateur est créé, il **commence avec un ensemble vide de mappages d'ID utilisateur et de groupe**. Cela signifie que tout processus s'exécutant dans le nouvel espace utilisateur **n'a initialement aucun privilège en dehors de l'espace**.
+2. Des mappages d'ID peuvent être établis entre les ID utilisateur et de groupe dans le nouvel espace et ceux dans l'espace parent (ou hôte). Cela **permet aux processus dans le nouvel espace d'avoir des privilèges et une propriété correspondant aux ID utilisateur et de groupe dans l'espace parent**. Cependant, les mappages d'ID peuvent être restreints à des plages et sous-ensembles spécifiques d'ID, permettant un contrôle précis sur les privilèges accordés aux processus dans le nouvel espace.
+3. Dans un espace utilisateur, **les processus peuvent avoir des privilèges root complets (UID 0) pour les opérations à l'intérieur de l'espace**, tout en ayant des privilèges limités en dehors de l'espace. Cela permet **aux conteneurs de fonctionner avec des capacités similaires à celles de root dans leur propre espace sans avoir de privilèges root complets sur le système hôte**.
+4. Les processus peuvent se déplacer entre les espaces en utilisant l'appel système `setns()` ou créer de nouveaux espaces en utilisant les appels système `unshare()` ou `clone()` avec le drapeau `CLONE_NEWUSER`. Lorsqu'un processus se déplace vers un nouvel espace ou en crée un, il commencera à utiliser les mappages d'ID utilisateur et de groupe associés à cet espace.
 
-## Lab:
+## Laboratoire :
 
-### Create different Namespaces
+### Créer différents Espaces
 
 #### CLI
-
 ```bash
 sudo unshare -U [--mount-proc] /bin/bash
 ```
-
-By mounting a new instance of the `/proc` filesystem if you use the param `--mount-proc`, you ensure that the new mount namespace has an **accurate and isolated view of the process information specific to that namespace**.
+En montant une nouvelle instance du système de fichiers `/proc` si vous utilisez le paramètre `--mount-proc`, vous vous assurez que le nouveau namespace de montage a une **vue précise et isolée des informations sur les processus spécifiques à ce namespace**.
 
 <details>
 
-<summary>Error: bash: fork: Cannot allocate memory</summary>
+<summary>Erreur : bash : fork : Impossible d'allouer de la mémoire</summary>
 
-When `unshare` is executed without the `-f` option, an error is encountered due to the way Linux handles new PID (Process ID) namespaces. The key details and the solution are outlined below:
+Lorsque `unshare` est exécuté sans l'option `-f`, une erreur est rencontrée en raison de la façon dont Linux gère les nouveaux namespaces PID (Process ID). Les détails clés et la solution sont décrits ci-dessous :
 
-1. **Problem Explanation**:
+1. **Explication du problème** :
 
-   - The Linux kernel allows a process to create new namespaces using the `unshare` system call. However, the process that initiates the creation of a new PID namespace (referred to as the "unshare" process) does not enter the new namespace; only its child processes do.
-   - Running `%unshare -p /bin/bash%` starts `/bin/bash` in the same process as `unshare`. Consequently, `/bin/bash` and its child processes are in the original PID namespace.
-   - The first child process of `/bin/bash` in the new namespace becomes PID 1. When this process exits, it triggers the cleanup of the namespace if there are no other processes, as PID 1 has the special role of adopting orphan processes. The Linux kernel will then disable PID allocation in that namespace.
+- Le noyau Linux permet à un processus de créer de nouveaux namespaces en utilisant l'appel système `unshare`. Cependant, le processus qui initie la création d'un nouveau namespace PID (appelé le processus "unshare") n'entre pas dans le nouveau namespace ; seuls ses processus enfants le font.
+- L'exécution de `%unshare -p /bin/bash%` démarre `/bin/bash` dans le même processus que `unshare`. Par conséquent, `/bin/bash` et ses processus enfants se trouvent dans l'espace de noms PID d'origine.
+- Le premier processus enfant de `/bin/bash` dans le nouveau namespace devient PID 1. Lorsque ce processus se termine, il déclenche le nettoyage du namespace s'il n'y a pas d'autres processus, car PID 1 a le rôle spécial d'adopter les processus orphelins. Le noyau Linux désactivera alors l'allocation de PID dans ce namespace.
 
-2. **Consequence**:
+2. **Conséquence** :
 
-   - The exit of PID 1 in a new namespace leads to the cleaning of the `PIDNS_HASH_ADDING` flag. This results in the `alloc_pid` function failing to allocate a new PID when creating a new process, producing the "Cannot allocate memory" error.
+- La sortie de PID 1 dans un nouveau namespace entraîne le nettoyage du drapeau `PIDNS_HASH_ADDING`. Cela entraîne l'échec de la fonction `alloc_pid` à allouer un nouveau PID lors de la création d'un nouveau processus, produisant l'erreur "Impossible d'allouer de la mémoire".
 
-3. **Solution**:
-   - The issue can be resolved by using the `-f` option with `unshare`. This option makes `unshare` fork a new process after creating the new PID namespace.
-   - Executing `%unshare -fp /bin/bash%` ensures that the `unshare` command itself becomes PID 1 in the new namespace. `/bin/bash` and its child processes are then safely contained within this new namespace, preventing the premature exit of PID 1 and allowing normal PID allocation.
+3. **Solution** :
+- Le problème peut être résolu en utilisant l'option `-f` avec `unshare`. Cette option permet à `unshare` de forker un nouveau processus après avoir créé le nouveau namespace PID.
+- L'exécution de `%unshare -fp /bin/bash%` garantit que la commande `unshare` elle-même devient PID 1 dans le nouveau namespace. `/bin/bash` et ses processus enfants sont alors en toute sécurité contenus dans ce nouveau namespace, empêchant la sortie prématurée de PID 1 et permettant une allocation normale de PID.
 
-By ensuring that `unshare` runs with the `-f` flag, the new PID namespace is correctly maintained, allowing `/bin/bash` and its sub-processes to operate without encountering the memory allocation error.
+En veillant à ce que `unshare` s'exécute avec le drapeau `-f`, le nouveau namespace PID est correctement maintenu, permettant à `/bin/bash` et à ses sous-processus de fonctionner sans rencontrer l'erreur d'allocation de mémoire.
 
 </details>
 
 #### Docker
-
 ```bash
 docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 ```
+Pour utiliser l'espace de noms utilisateur, le démon Docker doit être démarré avec **`--userns-remap=default`** (Dans Ubuntu 14.04, cela peut être fait en modifiant `/etc/default/docker` puis en exécutant `sudo service docker restart`)
 
-To use user namespace, Docker daemon needs to be started with **`--userns-remap=default`**(In ubuntu 14.04, this can be done by modifying `/etc/default/docker` and then executing `sudo service docker restart`)
-
-### &#x20;Check which namespace is your process in
-
+### &#x20;Vérifiez dans quel espace de noms se trouve votre processus
 ```bash
 ls -l /proc/self/ns/user
 lrwxrwxrwx 1 root root 0 Apr  4 20:57 /proc/self/ns/user -> 'user:[4026531837]'
 ```
-
-It's possible to check the user map from the docker container with:
-
+Il est possible de vérifier la carte des utilisateurs depuis le conteneur docker avec :
 ```bash
 cat /proc/self/uid_map
-         0          0 4294967295  --> Root is root in host
-         0     231072      65536  --> Root is 231072 userid in host
+0          0 4294967295  --> Root is root in host
+0     231072      65536  --> Root is 231072 userid in host
 ```
-
-Or from the host with:
-
+Ou depuis l'hôte avec :
 ```bash
 cat /proc/<pid>/uid_map
 ```
-
-### Find all User namespaces
-
+### Trouver tous les espaces de noms utilisateur
 ```bash
 sudo find /proc -maxdepth 3 -type l -name user -exec readlink {} \; 2>/dev/null | sort -u
 # Find the processes with an specific namespace
 sudo find /proc -maxdepth 3 -type l -name user -exec ls -l  {} \; 2>/dev/null | grep <ns-number>
 ```
-
-### Enter inside a User namespace
-
+### Entrez dans un espace de noms utilisateur
 ```bash
 nsenter -U TARGET_PID --pid /bin/bash
 ```
+Aussi, vous ne pouvez **entrer dans un autre espace de noms de processus que si vous êtes root**. Et vous **ne pouvez pas** **entrer** dans un autre espace de noms **sans un descripteur** pointant vers celui-ci (comme `/proc/self/ns/user`).
 
-Also, you can only **enter in another process namespace if you are root**. And you **cannot** **enter** in other namespace **without a descriptor** pointing to it (like `/proc/self/ns/user`).
-
-### Create new User namespace (with mappings)
-
+### Créer un nouvel espace de noms utilisateur (avec des mappages)
 ```bash
 unshare -U [--map-user=<uid>|<name>] [--map-group=<gid>|<name>] [--map-root-user] [--map-current-user]
 ```
@@ -111,16 +96,14 @@ nobody@ip-172-31-28-169:/home/ubuntu$ #Check how the user is nobody
 ps -ef | grep bash # The user inside the host is still root, not nobody
 root       27756   27755  0 21:11 pts/10   00:00:00 /bin/bash
 ```
+### Récupération des capacités
 
-### Recovering Capabilities
+Dans le cas des espaces de noms utilisateurs, **lorsqu'un nouvel espace de noms utilisateur est créé, le processus qui entre dans l'espace de noms se voit accorder un ensemble complet de capacités au sein de cet espace de noms**. Ces capacités permettent au processus d'effectuer des opérations privilégiées telles que **le montage** **de systèmes de fichiers**, la création de périphériques ou le changement de propriété des fichiers, mais **uniquement dans le contexte de son espace de noms utilisateur**.
 
-In the case of user namespaces, **when a new user namespace is created, the process that enters the namespace is granted a full set of capabilities within that namespace**. These capabilities allow the process to perform privileged operations such as **mounting** **filesystems**, creating devices, or changing ownership of files, but **only within the context of its user namespace**.
-
-For example, when you have the `CAP_SYS_ADMIN` capability within a user namespace, you can perform operations that typically require this capability, like mounting filesystems, but only within the context of your user namespace. Any operations you perform with this capability won't affect the host system or other namespaces.
+Par exemple, lorsque vous avez la capacité `CAP_SYS_ADMIN` au sein d'un espace de noms utilisateur, vous pouvez effectuer des opérations qui nécessitent généralement cette capacité, comme le montage de systèmes de fichiers, mais uniquement dans le contexte de votre espace de noms utilisateur. Toute opération que vous effectuez avec cette capacité n'affectera pas le système hôte ou d'autres espaces de noms.
 
 > [!WARNING]
-> Therefore, even if getting a new process inside a new User namespace **will give you all the capabilities back** (CapEff: 000001ffffffffff), you actually can **only use the ones related to the namespace** (mount for example) but not every one. So, this on its own is not enough to escape from a Docker container.
-
+> Par conséquent, même si obtenir un nouveau processus à l'intérieur d'un nouvel espace de noms utilisateur **vous donnera toutes les capacités de retour** (CapEff: 000001ffffffffff), vous pouvez en réalité **utiliser uniquement celles liées à l'espace de noms** (montage par exemple) mais pas toutes. Donc, cela en soi n'est pas suffisant pour échapper à un conteneur Docker.
 ```bash
 # There are the syscalls that are filtered after changing User namespace with:
 unshare -UmCpf  bash
@@ -144,5 +127,4 @@ Probando: 0x139 . . . Error
 Probando: 0x140 . . . Error
 Probando: 0x141 . . . Error
 ```
-
 {{#include ../../../../banners/hacktricks-training.md}}

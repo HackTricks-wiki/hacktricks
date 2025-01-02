@@ -2,181 +2,173 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-<figure><img src="../../../..https:/pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
+L'exposition de `/proc` et `/sys` sans une isolation appropriée des espaces de noms introduit des risques de sécurité significatifs, y compris l'augmentation de la surface d'attaque et la divulgation d'informations. Ces répertoires contiennent des fichiers sensibles qui, s'ils sont mal configurés ou accessibles par un utilisateur non autorisé, peuvent conduire à une évasion de conteneur, à une modification de l'hôte ou fournir des informations aidant à d'autres attaques. Par exemple, le montage incorrect de `-v /proc:/host/proc` peut contourner la protection AppArmor en raison de sa nature basée sur le chemin, laissant `/host/proc` non protégé.
 
-{% embed url="https://websec.nl/" %}
+**Vous pouvez trouver plus de détails sur chaque vulnérabilité potentielle dans** [**https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts**](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)**.**
 
-The exposure of `/proc` and `/sys` without proper namespace isolation introduces significant security risks, including attack surface enlargement and information disclosure. These directories contain sensitive files that, if misconfigured or accessed by an unauthorized user, can lead to container escape, host modification, or provide information aiding further attacks. For instance, incorrectly mounting `-v /proc:/host/proc` can bypass AppArmor protection due to its path-based nature, leaving `/host/proc` unprotected.
-
-**You can find further details of each potential vuln in** [**https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts**](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)**.**
-
-## procfs Vulnerabilities
+## Vulnérabilités procfs
 
 ### `/proc/sys`
 
-This directory permits access to modify kernel variables, usually via `sysctl(2)`, and contains several subdirectories of concern:
+Ce répertoire permet d'accéder à la modification des variables du noyau, généralement via `sysctl(2)`, et contient plusieurs sous-répertoires préoccupants :
 
 #### **`/proc/sys/kernel/core_pattern`**
 
-- Described in [core(5)](https://man7.org/linux/man-pages/man5/core.5.html).
-- Allows defining a program to execute on core-file generation with the first 128 bytes as arguments. This can lead to code execution if the file begins with a pipe `|`.
-- **Testing and Exploitation Example**:
+- Décrit dans [core(5)](https://man7.org/linux/man-pages/man5/core.5.html).
+- Permet de définir un programme à exécuter lors de la génération d'un fichier core avec les 128 premiers octets comme arguments. Cela peut conduire à une exécution de code si le fichier commence par un pipe `|`.
+- **Exemple de test et d'exploitation** :
 
-  ```bash
-  [ -w /proc/sys/kernel/core_pattern ] && echo Yes # Test write access
-  cd /proc/sys/kernel
-  echo "|$overlay/shell.sh" > core_pattern # Set custom handler
-  sleep 5 && ./crash & # Trigger handler
-  ```
+```bash
+[ -w /proc/sys/kernel/core_pattern ] && echo Yes # Tester l'accès en écriture
+cd /proc/sys/kernel
+echo "|$overlay/shell.sh" > core_pattern # Définir un gestionnaire personnalisé
+sleep 5 && ./crash & # Déclencher le gestionnaire
+```
 
 #### **`/proc/sys/kernel/modprobe`**
 
-- Detailed in [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
-- Contains the path to the kernel module loader, invoked for loading kernel modules.
-- **Checking Access Example**:
+- Détails dans [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
+- Contient le chemin vers le chargeur de modules du noyau, invoqué pour charger des modules du noyau.
+- **Exemple de vérification d'accès** :
 
-  ```bash
-  ls -l $(cat /proc/sys/kernel/modprobe) # Check access to modprobe
-  ```
+```bash
+ls -l $(cat /proc/sys/kernel/modprobe) # Vérifier l'accès à modprobe
+```
 
 #### **`/proc/sys/vm/panic_on_oom`**
 
-- Referenced in [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
-- A global flag that controls whether the kernel panics or invokes the OOM killer when an OOM condition occurs.
+- Référencé dans [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
+- Un drapeau global qui contrôle si le noyau panique ou invoque le tueur OOM lorsqu'une condition OOM se produit.
 
 #### **`/proc/sys/fs`**
 
-- As per [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html), contains options and information about the file system.
-- Write access can enable various denial-of-service attacks against the host.
+- Selon [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html), contient des options et des informations sur le système de fichiers.
+- L'accès en écriture peut permettre divers attaques par déni de service contre l'hôte.
 
 #### **`/proc/sys/fs/binfmt_misc`**
 
-- Allows registering interpreters for non-native binary formats based on their magic number.
-- Can lead to privilege escalation or root shell access if `/proc/sys/fs/binfmt_misc/register` is writable.
-- Relevant exploit and explanation:
-  - [Poor man's rootkit via binfmt_misc](https://github.com/toffan/binfmt_misc)
-  - In-depth tutorial: [Video link](https://www.youtube.com/watch?v=WBC7hhgMvQQ)
+- Permet d'enregistrer des interprètes pour des formats binaires non natifs en fonction de leur numéro magique.
+- Peut conduire à une élévation de privilèges ou à un accès shell root si `/proc/sys/fs/binfmt_misc/register` est accessible en écriture.
+- Exploit pertinent et explication :
+- [Poor man's rootkit via binfmt_misc](https://github.com/toffan/binfmt_misc)
+- Tutoriel approfondi : [Video link](https://www.youtube.com/watch?v=WBC7hhgMvQQ)
 
-### Others in `/proc`
+### Autres dans `/proc`
 
 #### **`/proc/config.gz`**
 
-- May reveal the kernel configuration if `CONFIG_IKCONFIG_PROC` is enabled.
-- Useful for attackers to identify vulnerabilities in the running kernel.
+- Peut révéler la configuration du noyau si `CONFIG_IKCONFIG_PROC` est activé.
+- Utile pour les attaquants pour identifier les vulnérabilités dans le noyau en cours d'exécution.
 
 #### **`/proc/sysrq-trigger`**
 
-- Allows invoking Sysrq commands, potentially causing immediate system reboots or other critical actions.
-- **Rebooting Host Example**:
+- Permet d'invoquer des commandes Sysrq, pouvant provoquer des redémarrages immédiats du système ou d'autres actions critiques.
+- **Exemple de redémarrage de l'hôte** :
 
-  ```bash
-  echo b > /proc/sysrq-trigger # Reboots the host
-  ```
+```bash
+echo b > /proc/sysrq-trigger # Redémarre l'hôte
+```
 
 #### **`/proc/kmsg`**
 
-- Exposes kernel ring buffer messages.
-- Can aid in kernel exploits, address leaks, and provide sensitive system information.
+- Expose les messages du tampon de noyau.
+- Peut aider dans les exploits du noyau, les fuites d'adresses et fournir des informations sensibles sur le système.
 
 #### **`/proc/kallsyms`**
 
-- Lists kernel exported symbols and their addresses.
-- Essential for kernel exploit development, especially for overcoming KASLR.
-- Address information is restricted with `kptr_restrict` set to `1` or `2`.
-- Details in [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
+- Liste les symboles exportés par le noyau et leurs adresses.
+- Essentiel pour le développement d'exploits du noyau, en particulier pour surmonter KASLR.
+- Les informations d'adresse sont restreintes avec `kptr_restrict` réglé sur `1` ou `2`.
+- Détails dans [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
 
 #### **`/proc/[pid]/mem`**
 
-- Interfaces with the kernel memory device `/dev/mem`.
-- Historically vulnerable to privilege escalation attacks.
-- More on [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
+- Interface avec le périphérique de mémoire du noyau `/dev/mem`.
+- Historiquement vulnérable aux attaques d'élévation de privilèges.
+- Plus d'informations sur [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
 
 #### **`/proc/kcore`**
 
-- Represents the system's physical memory in ELF core format.
-- Reading can leak host system and other containers' memory contents.
-- Large file size can lead to reading issues or software crashes.
-- Detailed usage in [Dumping /proc/kcore in 2019](https://schlafwandler.github.io/posts/dumping-/proc/kcore/).
+- Représente la mémoire physique du système au format ELF core.
+- La lecture peut divulguer le contenu de la mémoire du système hôte et d'autres conteneurs.
+- La grande taille du fichier peut entraîner des problèmes de lecture ou des plantages de logiciels.
+- Utilisation détaillée dans [Dumping /proc/kcore in 2019](https://schlafwandler.github.io/posts/dumping-/proc/kcore/).
 
 #### **`/proc/kmem`**
 
-- Alternate interface for `/dev/kmem`, representing kernel virtual memory.
-- Allows reading and writing, hence direct modification of kernel memory.
+- Interface alternative pour `/dev/kmem`, représentant la mémoire virtuelle du noyau.
+- Permet la lecture et l'écriture, donc la modification directe de la mémoire du noyau.
 
 #### **`/proc/mem`**
 
-- Alternate interface for `/dev/mem`, representing physical memory.
-- Allows reading and writing, modification of all memory requires resolving virtual to physical addresses.
+- Interface alternative pour `/dev/mem`, représentant la mémoire physique.
+- Permet la lecture et l'écriture, la modification de toute la mémoire nécessite de résoudre les adresses virtuelles en adresses physiques.
 
 #### **`/proc/sched_debug`**
 
-- Returns process scheduling information, bypassing PID namespace protections.
-- Exposes process names, IDs, and cgroup identifiers.
+- Renvoie des informations sur la planification des processus, contournant les protections de l'espace de noms PID.
+- Expose les noms de processus, les ID et les identifiants de cgroup.
 
 #### **`/proc/[pid]/mountinfo`**
 
-- Provides information about mount points in the process's mount namespace.
-- Exposes the location of the container `rootfs` or image.
+- Fournit des informations sur les points de montage dans l'espace de noms de montage du processus.
+- Expose l'emplacement du `rootfs` ou de l'image du conteneur.
 
-### `/sys` Vulnerabilities
+### Vulnérabilités `/sys`
 
 #### **`/sys/kernel/uevent_helper`**
 
-- Used for handling kernel device `uevents`.
-- Writing to `/sys/kernel/uevent_helper` can execute arbitrary scripts upon `uevent` triggers.
-- **Example for Exploitation**: %%%bash
+- Utilisé pour gérer les `uevents` des périphériques du noyau.
+- Écrire dans `/sys/kernel/uevent_helper` peut exécuter des scripts arbitraires lors des déclenchements d'`uevent`.
+- **Exemple d'exploitation** : %%%bash
 
-  #### Creates a payload
+#### Crée une charge utile
 
-  echo "#!/bin/sh" > /evil-helper echo "ps > /output" >> /evil-helper chmod +x /evil-helper
+echo "#!/bin/sh" > /evil-helper echo "ps > /output" >> /evil-helper chmod +x /evil-helper
 
-  #### Finds host path from OverlayFS mount for container
+#### Trouve le chemin de l'hôte à partir du montage OverlayFS pour le conteneur
 
-  host*path=$(sed -n 's/.*\perdir=(\[^,]\_).\*/\1/p' /etc/mtab)
+host*path=$(sed -n 's/.*\perdir=(\[^,]\_).\*/\1/p' /etc/mtab)
 
-  #### Sets uevent_helper to malicious helper
+#### Définit uevent_helper sur l'assistant malveillant
 
-  echo "$host_path/evil-helper" > /sys/kernel/uevent_helper
+echo "$host_path/evil-helper" > /sys/kernel/uevent_helper
 
-  #### Triggers a uevent
+#### Déclenche un uevent
 
-  echo change > /sys/class/mem/null/uevent
+echo change > /sys/class/mem/null/uevent
 
-  #### Reads the output
+#### Lit la sortie
 
-  cat /output %%%
+cat /output %%%
 
 #### **`/sys/class/thermal`**
 
-- Controls temperature settings, potentially causing DoS attacks or physical damage.
+- Contrôle les paramètres de température, pouvant causer des attaques DoS ou des dommages physiques.
 
 #### **`/sys/kernel/vmcoreinfo`**
 
-- Leaks kernel addresses, potentially compromising KASLR.
+- Fuit des adresses du noyau, compromettant potentiellement KASLR.
 
 #### **`/sys/kernel/security`**
 
-- Houses `securityfs` interface, allowing configuration of Linux Security Modules like AppArmor.
-- Access might enable a container to disable its MAC system.
+- Contient l'interface `securityfs`, permettant la configuration des modules de sécurité Linux comme AppArmor.
+- L'accès pourrait permettre à un conteneur de désactiver son système MAC.
 
-#### **`/sys/firmware/efi/vars` and `/sys/firmware/efi/efivars`**
+#### **`/sys/firmware/efi/vars` et `/sys/firmware/efi/efivars`**
 
-- Exposes interfaces for interacting with EFI variables in NVRAM.
-- Misconfiguration or exploitation can lead to bricked laptops or unbootable host machines.
+- Expose des interfaces pour interagir avec les variables EFI dans NVRAM.
+- Une mauvaise configuration ou exploitation peut conduire à des ordinateurs portables brisés ou à des machines hôtes non amorçables.
 
 #### **`/sys/kernel/debug`**
 
-- `debugfs` offers a "no rules" debugging interface to the kernel.
-- History of security issues due to its unrestricted nature.
+- `debugfs` offre une interface de débogage "sans règles" au noyau.
+- Historique de problèmes de sécurité en raison de sa nature non restreinte.
 
-### References
+### Références
 
 - [https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)
 - [Understanding and Hardening Linux Containers](https://research.nccgroup.com/wp-content/uploads/2020/07/ncc_group_understanding_hardening_linux_containers-1-1.pdf)
 - [Abusing Privileged and Unprivileged Linux Containers](https://www.nccgroup.com/globalassets/our-research/us/whitepapers/2016/june/container_whitepaper.pdf)
-
-<figure><img src="../../../..https:/pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../../../../banners/hacktricks-training.md}}

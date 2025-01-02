@@ -1,44 +1,44 @@
-# Namespaces
+# Espaces de noms
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-### **PID namespace**
+### **Espace de noms PID**
 
 {{#ref}}
 pid-namespace.md
 {{#endref}}
 
-### **Mount namespace**
+### **Espace de noms de montage**
 
 {{#ref}}
 mount-namespace.md
 {{#endref}}
 
-### **Network namespace**
+### **Espace de noms réseau**
 
 {{#ref}}
 network-namespace.md
 {{#endref}}
 
-### **IPC Namespace**
+### **Espace de noms IPC**
 
 {{#ref}}
 ipc-namespace.md
 {{#endref}}
 
-### **UTS namespace**
+### **Espace de noms UTS**
 
 {{#ref}}
 uts-namespace.md
 {{#endref}}
 
-### Time Namespace
+### Espace de noms temporel
 
 {{#ref}}
 time-namespace.md
 {{#endref}}
 
-### User namespace
+### Espace de noms utilisateur
 
 {{#ref}}
 user-namespace.md

@@ -1,8 +1,5 @@
 {{#include ../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 # BlueTeam
 
@@ -58,7 +55,7 @@
 - [https://github.com/gauravnarwani97/Trishul](https://github.com/gauravnarwani97/Trishul) : Plugin BurpSuite pour trouver des vulnérabilités (SQLi, XSS, SSTI)
 - [https://github.com/fransr/postMessage-tracker](https://github.com/fransr/postMessage-tracker) : Extension Chrome pour suivre les fonctions de messages post
 - [https://github.com/Quitten/Autorize](https://github.com/Quitten/Autorize) : Tests d'authentification automatiques (supprimer les cookies et essayer d'envoyer la requête)
-- [https://github.com/pikpikcu/xrcross](https://github.com/pikpikcu/xrcross): XRCross est un outil de Reconstruction, Scanner, et pour les tests de pénétration / BugBounty. Cet outil a été construit pour tester les vulnérabilités (XSS|SSRF|CORS|SSTI|IDOR|RCE|LFI|SQLI)
+- [https://github.com/pikpikcu/xrcross](https://github.com/pikpikcu/xrcross): XRCross est un outil de reconstruction, scanner et un outil pour les tests de pénétration / BugBounty. Cet outil a été construit pour tester les vulnérabilités (XSS|SSRF|CORS|SSTI|IDOR|RCE|LFI|SQLI)
 
 # Windows
 
@@ -67,18 +64,18 @@
 - [https://gist.github.com/netbiosX/ee35fcd3722e401a38136cff7b751d79](https://gist.github.com/netbiosX/ee35fcd3722e401a38136cff7b751d79) ([https://pentestlab.blog/2020/01/13/persistence-image-file-execution-options-injection/](https://pentestlab.blog/2020/01/13/persistence-image-file-execution-options-injection/)): Persistance
 - [https://github.com/odzhan/injection](https://github.com/odzhan/injection) : Techniques d'injection de processus Windows
 - [https://github.com/BankSecurity/Red_Team](https://github.com/BankSecurity/Red_Team) : Scripts de l'équipe rouge
-- [https://github.com/l0ss/Grouper2](https://github.com/l0ss/Grouper2) : trouver des configurations incorrectes liées à la sécurité dans la stratégie de groupe Active Directory.
+- [https://github.com/l0ss/Grouper2](https://github.com/l0ss/Grouper2) : Trouver des configurations incorrectes liées à la sécurité dans la stratégie de groupe Active Directory.
 - [https://www.wietzebeukema.nl/blog/powershell-obfuscation-using-securestring](https://www.wietzebeukema.nl/blog/powershell-obfuscation-using-securestring) : Obfuscation de Securestring
 - [https://pentestlab.blog/2020/02/24/parent-pid-spoofing/](https://pentestlab.blog/2020/02/24/parent-pid-spoofing/) : Spoofing de PID parent
 - [https://github.com/the-xentropy/xencrypt](https://github.com/the-xentropy/xencrypt) : Chiffrer les charges utiles Powershell
 - [https://shells.systems/introducing-ninja-c2-the-c2-built-for-stealth-red-team-operations/](https://shells.systems/introducing-ninja-c2-the-c2-built-for-stealth-red-team-operations/) : C2 furtif
-- [https://windows-internals.com/faxing-your-way-to-system/](https://windows-internals.com/faxing-your-way-to-system/) : Série de journaux sur les Internals de Windows
+- [https://windows-internals.com/faxing-your-way-to-system/](https://windows-internals.com/faxing-your-way-to-system/) : Série de journaux sur les internals de Windows
 - [https://bestestredteam.com/2018/10/02/tracking-pixel-in-microsoft-office-document/](https://bestestredteam.com/2018/10/02/tracking-pixel-in-microsoft-office-document/) : Suivre qui ouvre un document
 - [https://github.com/Integration-IT/Active-Directory-Exploitation-Cheat-Sheet](https://github.com/Integration-IT/Active-Directory-Exploitation-Cheat-Sheet) : Fiche de triche Active Directory
 
 # Firmware
 
-Outils que je vois qui peuvent être intéressants pour analyser des firmwares (automatiques) :
+Outils que je vois qui peuvent être intéressants pour analyser les firmwares (automatiques) :
 
 - [https://github.com/craigz28/firmwalker](https://github.com/craigz28/firmwalker)
 - [https://github.com/fkie-cad/FACT_core](https://github.com/fkie-cad/FACT_core)
@@ -93,11 +90,11 @@ Comment extraire le firmware si nous ne le trouvons pas en ligne : [https://www.
 
 Voici un firmware avec des vulnérabilités à analyser : [https://github.com/scriptingxss/IoTGoat](https://github.com/scriptingxss/IoTGoat)
 
-et par ici la méthodologie owasp pour analyser le firmware : [https://github.com/scriptingxss/owasp-fstm](https://github.com/scriptingxss/owasp-fstm)
+et par ici la méthodologie OWASP pour analyser le firmware : [https://github.com/scriptingxss/owasp-fstm](https://github.com/scriptingxss/owasp-fstm)
 
-Émulation de firmware : FIRMADYNE (https://github.com/firmadyne/firmadyne/) est une plateforme pour automatiser l'émulation et l'analyse dynamique de firmwares basés sur Linux.
+Émulation de firmware : FIRMADYNE (https://github.com/firmadyne/firmadyne/) est une plateforme pour automatiser l'émulation et l'analyse dynamique des firmwares basés sur Linux.
 
-# AUTRE
+# OTHER
 
 - [https://twitter.com/HackAndDo/status/1202695084543791117](https://twitter.com/HackAndDo/status/1202695084543791117)
 - [https://github.com/weev3/LKWA](https://github.com/weev3/LKWA)
@@ -108,7 +105,7 @@ et par ici la méthodologie owasp pour analyser le firmware : [https://github.co
 - [https://github.com/skeeto/endlessh](https://github.com/skeeto/endlessh) : SSH tarpit qui envoie lentement une bannière sans fin.
 - AWS et outils Cloud : [https://github.com/toniblyx/my-arsenal-of-aws-security-tools](https://github.com/toniblyx/my-arsenal-of-aws-security-tools)
 - IFS (Interplanetary File System) pour le phishing : [https://www.trustwave.com/en-us/resources/blogs/spiderlabs-blog/using-the-interplanetary-file-system-for-offensive-operations/](https://www.trustwave.com/en-us/resources/blogs/spiderlabs-blog/using-the-interplanetary-file-system-for-offensive-operations/)
-- Services de rotation d'IP : [https://medium.com/@lokeshdlk77/how-to-rotate-ip-address-in-brute-force-attack-e66407259212](https://medium.com/@lokeshdlk77/how-to-rotate-ip-address-in-brute-force-attack-e66407259212)
+- Services de rotation IP : [https://medium.com/@lokeshdlk77/how-to-rotate-ip-address-in-brute-force-attack-e66407259212](https://medium.com/@lokeshdlk77/how-to-rotate-ip-address-in-brute-force-attack-e66407259212)
 - Rootkit Linux : [https://github.com/aesophor/satanic-rootkit](https://github.com/aesophor/satanic-rootkit)
 - [https://theia-ide.org/](https://theia-ide.org) : IDE en ligne
 - [https://github.com/nahamsec/Resources-for-Beginner-Bug-Bounty-Hunters/](https://github.com/nahamsec/Resources-for-Beginner-Bug-Bounty-Hunters/) : Ressources pour commencer sur BugBounties
@@ -119,8 +116,5 @@ et par ici la méthodologie owasp pour analyser le firmware : [https://github.co
 - [https://github.com/doyensec/awesome-electronjs-hacking](https://github.com/doyensec/awesome-electronjs-hacking) : Cette liste vise à couvrir les sujets de sécurité liés à Electron.js.
 - [https://github.com/serain/bbrecon](https://github.com/serain/bbrecon) : Infos sur les programmes BB
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../banners/hacktricks-training.md}}

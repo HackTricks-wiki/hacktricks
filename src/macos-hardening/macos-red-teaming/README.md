@@ -2,109 +2,98 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="/images/pentest-tools.svg" alt=""><figcaption></figcaption></figure>
 
-**Get a hacker's perspective on your web apps, network, and cloud**
-
-**Find and report critical, exploitable vulnerabilities with real business impact.** Use our 20+ custom tools to map the attack surface, find security issues that let you escalate privileges, and use automated exploits to collect essential evidence, turning your hard work into persuasive reports.
-
-{% embed url="https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons" %}
-
-## Abusing MDMs
+## Abus des MDM
 
 - JAMF Pro: `jamf checkJSSConnection`
 - Kandji
 
-If you manage to **compromise admin credentials** to access the management platform, you can **potentially compromise all the computers** by distributing your malware in the machines.
+Si vous parvenez à **compromettre les identifiants administratifs** pour accéder à la plateforme de gestion, vous pouvez **potentiellement compromettre tous les ordinateurs** en distribuant votre malware sur les machines.
 
-For red teaming in MacOS environments it's highly recommended to have some understanding of how the MDMs work:
+Pour le red teaming dans les environnements MacOS, il est fortement recommandé d'avoir une certaine compréhension du fonctionnement des MDM :
 
 {{#ref}}
 macos-mdm/
 {{#endref}}
 
-### Using MDM as a C2
+### Utiliser MDM comme C2
 
-A MDM will have permission to install, query or remove profiles, install applications, create local admin accounts, set firmware password, change the FileVault key...
+Un MDM aura la permission d'installer, de consulter ou de supprimer des profils, d'installer des applications, de créer des comptes administratifs locaux, de définir un mot de passe firmware, de changer la clé FileVault...
 
-In order to run your own MDM you need to **your CSR signed by a vendor** which you could try to get with [**https://mdmcert.download/**](https://mdmcert.download/). And to run your own MDM for Apple devices you could use [**MicroMDM**](https://github.com/micromdm/micromdm).
+Pour exécuter votre propre MDM, vous devez **faire signer votre CSR par un fournisseur** que vous pourriez essayer d'obtenir avec [**https://mdmcert.download/**](https://mdmcert.download/). Et pour exécuter votre propre MDM pour les appareils Apple, vous pourriez utiliser [**MicroMDM**](https://github.com/micromdm/micromdm).
 
-However, to install an application in an enrolled device, you still need it to be signed by a developer account... however, upon MDM enrolment the **device adds the SSL cert of the MDM as a trusted CA**, so you can now sign anything.
+Cependant, pour installer une application sur un appareil inscrit, vous devez toujours qu'elle soit signée par un compte développeur... cependant, lors de l'inscription au MDM, le **dispositif ajoute le certificat SSL du MDM comme CA de confiance**, vous pouvez donc maintenant signer n'importe quoi.
 
-To enrol the device in a MDM you. need to install a **`mobileconfig`** file as root, which could be delivered via a **pkg** file (you could compress it in zip and when downloaded from safari it will be decompressed).
+Pour inscrire le dispositif dans un MDM, vous devez installer un fichier **`mobileconfig`** en tant que root, qui pourrait être livré via un fichier **pkg** (vous pourriez le compresser en zip et lorsqu'il est téléchargé depuis Safari, il sera décompressé).
 
-**Mythic agent Orthrus** uses this technique.
+**L'agent Mythic Orthrus** utilise cette technique.
 
-### Abusing JAMF PRO
+### Abus de JAMF PRO
 
-JAMF can run **custom scripts** (scripts developed by the sysadmin), **native payloads** (local account creation, set EFI password, file/process monitoring...) and **MDM** (device configurations, device certificates...).
+JAMF peut exécuter **des scripts personnalisés** (scripts développés par l'administrateur système), **des charges utiles natives** (création de compte local, définition de mot de passe EFI, surveillance de fichiers/processus...) et **MDM** (configurations de dispositifs, certificats de dispositifs...).
 
-#### JAMF self-enrolment
+#### Auto-inscription JAMF
 
-Go to a page such as `https://<company-name>.jamfcloud.com/enroll/` to see if they have **self-enrolment enabled**. If they have it might **ask for credentials to access**.
+Allez sur une page telle que `https://<company-name>.jamfcloud.com/enroll/` pour voir s'ils ont **l'auto-inscription activée**. S'ils l'ont, cela pourrait **demander des identifiants pour accéder**.
 
-You could use the script [**JamfSniper.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfSniper.py) to perform a password spraying attack.
+Vous pourriez utiliser le script [**JamfSniper.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfSniper.py) pour effectuer une attaque par pulvérisation de mots de passe.
 
-Moreover, after finding proper credentials you could be able to brute-force other usernames with the next form:
+De plus, après avoir trouvé des identifiants appropriés, vous pourriez être en mesure de forcer d'autres noms d'utilisateur avec le formulaire suivant :
 
 ![](<../../images/image (107).png>)
 
-#### JAMF device Authentication
+#### Authentification des dispositifs JAMF
 
 <figure><img src="../../images/image (167).png" alt=""><figcaption></figcaption></figure>
 
-The **`jamf`** binary contained the secret to open the keychain which at the time of the discovery was **shared** among everybody and it was: **`jk23ucnq91jfu9aj`**.\
-Moreover, jamf **persist** as a **LaunchDaemon** in **`/Library/LaunchAgents/com.jamf.management.agent.plist`**
+Le binaire **`jamf`** contenait le secret pour ouvrir le trousseau qui, au moment de la découverte, était **partagé** entre tout le monde et c'était : **`jk23ucnq91jfu9aj`**.\
+De plus, jamf **persiste** en tant que **LaunchDaemon** dans **`/Library/LaunchAgents/com.jamf.management.agent.plist`**
 
-#### JAMF Device Takeover
+#### Prise de contrôle des dispositifs JAMF
 
-The **JSS** (Jamf Software Server) **URL** that **`jamf`** will use is located in **`/Library/Preferences/com.jamfsoftware.jamf.plist`**.\
-This file basically contains the URL:
-
+L'**URL** **JSS** (Jamf Software Server) que **`jamf`** utilisera se trouve dans **`/Library/Preferences/com.jamfsoftware.jamf.plist`**.\
+Ce fichier contient essentiellement l'URL :
 ```bash
 plutil -convert xml1 -o - /Library/Preferences/com.jamfsoftware.jamf.plist
 
 [...]
-	<key>is_virtual_machine</key>
-	<false/>
-	<key>jss_url</key>
-	<string>https://halbornasd.jamfcloud.com/</string>
-	<key>last_management_framework_change_id</key>
-	<integer>4</integer>
+<key>is_virtual_machine</key>
+<false/>
+<key>jss_url</key>
+<string>https://halbornasd.jamfcloud.com/</string>
+<key>last_management_framework_change_id</key>
+<integer>4</integer>
 [...]
 ```
-
-So, an attacker could drop a malicious package (`pkg`) that **overwrites this file** when installed setting the **URL to a Mythic C2 listener from a Typhon agent** to now be able to abuse JAMF as C2.
-
+Ainsi, un attaquant pourrait déposer un paquet malveillant (`pkg`) qui **écrase ce fichier** lors de l'installation en définissant l'**URL vers un écouteur Mythic C2 d'un agent Typhon** pour pouvoir maintenant abuser de JAMF en tant que C2.
 ```bash
 # After changing the URL you could wait for it to be reloaded or execute:
 sudo jamf policy -id 0
 
 # TODO: There is an ID, maybe it's possible to have the real jamf connection and another one to the C2
 ```
+#### Usurpation de JAMF
 
-#### JAMF Impersonation
+Pour **usurper la communication** entre un appareil et JMF, vous avez besoin de :
 
-In order to **impersonate the communication** between a device and JMF you need:
+- Le **UUID** de l'appareil : `ioreg -d2 -c IOPlatformExpertDevice | awk -F" '/IOPlatformUUID/{print $(NF-1)}'`
+- Le **trousseau JAMF** de : `/Library/Application\ Support/Jamf/JAMF.keychain` qui contient le certificat de l'appareil
 
-- The **UUID** of the device: `ioreg -d2 -c IOPlatformExpertDevice | awk -F" '/IOPlatformUUID/{print $(NF-1)}'`
-- The **JAMF keychain** from: `/Library/Application\ Support/Jamf/JAMF.keychain` which contains the device certificate
+Avec ces informations, **créez une VM** avec le **UUID** matériel **volé** et avec **SIP désactivé**, déposez le **trousseau JAMF,** **accrochez** l'agent Jamf et volez ses informations.
 
-With this information, **create a VM** with the **stolen** Hardware **UUID** and with **SIP disabled**, drop the **JAMF keychain,** **hook** the Jamf **agent** and steal its information.
-
-#### Secrets stealing
+#### Vol de secrets
 
 <figure><img src="../../images/image (1025).png" alt=""><figcaption><p>a</p></figcaption></figure>
 
-You could also monitor the location `/Library/Application Support/Jamf/tmp/` for the **custom scripts** admins might want to execute via Jamf as they are **placed here, executed and removed**. These scripts **might contain credentials**.
+Vous pouvez également surveiller l'emplacement `/Library/Application Support/Jamf/tmp/` pour les **scripts personnalisés** que les administrateurs pourraient vouloir exécuter via Jamf, car ils sont **placés ici, exécutés et supprimés**. Ces scripts **pourraient contenir des identifiants**.
 
-However, **credentials** might be passed tho these scripts as **parameters**, so you would need to monitor `ps aux | grep -i jamf` (without even being root).
+Cependant, les **identifiants** pourraient être passés à ces scripts en tant que **paramètres**, donc vous devrez surveiller `ps aux | grep -i jamf` (sans même être root).
 
-The script [**JamfExplorer.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfExplorer.py) can listen for new files being added and new process arguments.
+Le script [**JamfExplorer.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfExplorer.py) peut écouter les nouveaux fichiers ajoutés et les nouveaux arguments de processus.
 
-### macOS Remote Access
+### Accès à distance macOS
 
-And also about **MacOS** "special" **network** **protocols**:
+Et aussi sur les **protocoles** **réseau** **"spéciaux"** de **MacOS** :
 
 {{#ref}}
 ../macos-security-and-privilege-escalation/macos-protocols.md
@@ -112,7 +101,7 @@ And also about **MacOS** "special" **network** **protocols**:
 
 ## Active Directory
 
-In some occasions you will find that the **MacOS computer is connected to an AD**. In this scenario you should try to **enumerate** the active directory as you are use to it. Find some **help** in the following pages:
+Dans certaines occasions, vous constaterez que l'**ordinateur MacOS est connecté à un AD**. Dans ce scénario, vous devriez essayer de **énumérer** l'annuaire actif comme vous en avez l'habitude. Trouvez de l'**aide** dans les pages suivantes :
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-ldap.md
@@ -126,41 +115,36 @@ In some occasions you will find that the **MacOS computer is connected to an AD*
 ../../network-services-pentesting/pentesting-kerberos-88/
 {{#endref}}
 
-Some **local MacOS tool** that may also help you is `dscl`:
-
+Un **outil local MacOS** qui peut également vous aider est `dscl` :
 ```bash
 dscl "/Active Directory/[Domain]/All Domains" ls /
 ```
+Aussi, il existe des outils préparés pour MacOS afin d'énumérer automatiquement l'AD et de jouer avec kerberos :
 
-Also there are some tools prepared for MacOS to automatically enumerate the AD and play with kerberos:
+- [**Machound**](https://github.com/XMCyber/MacHound) : MacHound est une extension de l'outil d'audit Bloodhound permettant de collecter et d'ingérer des relations Active Directory sur des hôtes MacOS.
+- [**Bifrost**](https://github.com/its-a-feature/bifrost) : Bifrost est un projet Objective-C conçu pour interagir avec les API Heimdal krb5 sur macOS. L'objectif du projet est de permettre de meilleurs tests de sécurité autour de Kerberos sur les appareils macOS en utilisant des API natives sans nécessiter d'autres frameworks ou packages sur la cible.
+- [**Orchard**](https://github.com/its-a-feature/Orchard) : Outil JavaScript pour l'automatisation (JXA) pour faire de l'énumération Active Directory.
 
-- [**Machound**](https://github.com/XMCyber/MacHound): MacHound is an extension to the Bloodhound audting tool allowing collecting and ingesting of Active Directory relationships on MacOS hosts.
-- [**Bifrost**](https://github.com/its-a-feature/bifrost): Bifrost is an Objective-C project designed to interact with the Heimdal krb5 APIs on macOS. The goal of the project is to enable better security testing around Kerberos on macOS devices using native APIs without requiring any other framework or packages on the target.
-- [**Orchard**](https://github.com/its-a-feature/Orchard): JavaScript for Automation (JXA) tool to do Active Directory enumeration.
-
-### Domain Information
-
+### Informations sur le domaine
 ```bash
 echo show com.apple.opendirectoryd.ActiveDirectory | scutil
 ```
+### Utilisateurs
 
-### Users
+Les trois types d'utilisateurs MacOS sont :
 
-The three types of MacOS users are:
+- **Utilisateurs Locaux** — Gérés par le service OpenDirectory local, ils ne sont en aucun cas connectés à l'Active Directory.
+- **Utilisateurs Réseau** — Utilisateurs Active Directory volatils qui nécessitent une connexion au serveur DC pour s'authentifier.
+- **Utilisateurs Mobiles** — Utilisateurs Active Directory avec une sauvegarde locale de leurs identifiants et fichiers.
 
-- **Local Users** — Managed by the local OpenDirectory service, they aren’t connected in any way to the Active Directory.
-- **Network Users** — Volatile Active Directory users who require a connection to the DC server to authenticate.
-- **Mobile Users** — Active Directory users with a local backup for their credentials and files.
+Les informations locales sur les utilisateurs et les groupes sont stockées dans le dossier _/var/db/dslocal/nodes/Default._\
+Par exemple, les informations sur l'utilisateur appelé _mark_ sont stockées dans _/var/db/dslocal/nodes/Default/users/mark.plist_ et les informations sur le groupe _admin_ se trouvent dans _/var/db/dslocal/nodes/Default/groups/admin.plist_.
 
-The local information about users and groups is stored in in the folder _/var/db/dslocal/nodes/Default._\
-For example, the info about user called _mark_ is stored in _/var/db/dslocal/nodes/Default/users/mark.plist_ and the info about the group _admin_ is in _/var/db/dslocal/nodes/Default/groups/admin.plist_.
+En plus d'utiliser les bords HasSession et AdminTo, **MacHound ajoute trois nouveaux bords** à la base de données Bloodhound :
 
-In addition to using the HasSession and AdminTo edges, **MacHound adds three new edges** to the Bloodhound database:
-
-- **CanSSH** - entity allowed to SSH to host
-- **CanVNC** - entity allowed to VNC to host
-- **CanAE** - entity allowed to execute AppleEvent scripts on host
-
+- **CanSSH** - entité autorisée à SSH vers l'hôte
+- **CanVNC** - entité autorisée à VNC vers l'hôte
+- **CanAE** - entité autorisée à exécuter des scripts AppleEvent sur l'hôte
 ```bash
 #User enumeration
 dscl . ls /Users
@@ -182,71 +166,60 @@ dscl "/Active Directory/TEST/All Domains" read "/Groups/[groupname]"
 #Domain Information
 dsconfigad -show
 ```
+Plus d'infos dans [https://its-a-feature.github.io/posts/2018/01/Active-Directory-Discovery-with-a-Mac/](https://its-a-feature.github.io/posts/2018/01/Active-Directory-Discovery-with-a-Mac/)
 
-More info in [https://its-a-feature.github.io/posts/2018/01/Active-Directory-Discovery-with-a-Mac/](https://its-a-feature.github.io/posts/2018/01/Active-Directory-Discovery-with-a-Mac/)
+### Mot de passe de l'ordinateur$
 
-### Computer$ password
-
-Get passwords using:
-
+Obtenez des mots de passe en utilisant :
 ```bash
 bifrost --action askhash --username [name] --password [password] --domain [domain]
 ```
-
-It's possible to access the **`Computer$`** password inside the System keychain.
+Il est possible d'accéder au mot de passe **`Computer$`** dans le trousseau de clés Système.
 
 ### Over-Pass-The-Hash
 
-Get a TGT for an specific user and service:
-
+Obtenez un TGT pour un utilisateur et un service spécifiques :
 ```bash
 bifrost --action asktgt --username [user] --domain [domain.com] \
-       --hash [hash] --enctype [enctype] --keytab [/path/to/keytab]
+--hash [hash] --enctype [enctype] --keytab [/path/to/keytab]
 ```
-
-Once the TGT is gathered, it's possible to inject it in the current session with:
-
+Une fois le TGT récupéré, il est possible de l'injecter dans la session actuelle avec :
 ```bash
 bifrost --action asktgt --username test_lab_admin \
-       --hash CF59D3256B62EE655F6430B0F80701EE05A0885B8B52E9C2480154AFA62E78 \
-       --enctype aes256 --domain test.lab.local
+--hash CF59D3256B62EE655F6430B0F80701EE05A0885B8B52E9C2480154AFA62E78 \
+--enctype aes256 --domain test.lab.local
 ```
-
 ### Kerberoasting
-
 ```bash
 bifrost --action asktgs --spn [service] --domain [domain.com] \
-       --username [user] --hash [hash] --enctype [enctype]
+--username [user] --hash [hash] --enctype [enctype]
 ```
-
-With obtained service tickets it's possible to try to access shares in other computers:
-
+Avec les tickets de service obtenus, il est possible d'essayer d'accéder aux partages sur d'autres ordinateurs :
 ```bash
 smbutil view //computer.fqdn
 mount -t smbfs //server/folder /local/mount/point
 ```
+## Accéder au Trousseau
 
-## Accessing the Keychain
-
-The Keychain highly probably contains sensitive information that if accessed without generating a prompt could help to move forward a red team exercise:
+Le Trousseau contient très probablement des informations sensibles qui, si elles sont accessibles sans générer une invite, pourraient aider à faire avancer un exercice de red team :
 
 {{#ref}}
 macos-keychain.md
 {{#endref}}
 
-## External Services
+## Services Externes
 
-MacOS Red Teaming is different from a regular Windows Red Teaming as usually **MacOS is integrated with several external platforms directly**. A common configuration of MacOS is to access to the computer using **OneLogin synchronised credentials, and accessing several external services** (like github, aws...) via OneLogin.
+Le Red Teaming MacOS est différent d'un Red Teaming Windows classique car généralement **MacOS est intégré à plusieurs plateformes externes directement**. Une configuration courante de MacOS consiste à accéder à l'ordinateur en utilisant **des identifiants synchronisés OneLogin et à accéder à plusieurs services externes** (comme github, aws...) via OneLogin.
 
-## Misc Red Team techniques
+## Techniques Diverses de Red Team
 
 ### Safari
 
-When a file is downloaded in Safari, if its a "safe" file, it will be **automatically opened**. So for example, if you **download a zip**, it will be automatically decompressed:
+Lorsqu'un fichier est téléchargé dans Safari, s'il s'agit d'un fichier "sûr", il sera **ouvert automatiquement**. Par exemple, si vous **téléchargez un zip**, il sera automatiquement décompressé :
 
 <figure><img src="../../images/image (226).png" alt=""><figcaption></figcaption></figure>
 
-## References
+## Références
 
 - [**https://www.youtube.com/watch?v=IiMladUbL6E**](https://www.youtube.com/watch?v=IiMladUbL6E)
 - [**https://medium.com/xm-cyber/introducing-machound-a-solution-to-macos-active-directory-based-attacks-2a425f0a22b6**](https://medium.com/xm-cyber/introducing-machound-a-solution-to-macos-active-directory-based-attacks-2a425f0a22b6)
@@ -254,12 +227,5 @@ When a file is downloaded in Safari, if its a "safe" file, it will be **automati
 - [**Come to the Dark Side, We Have Apples: Turning macOS Management Evil**](https://www.youtube.com/watch?v=pOQOh07eMxY)
 - [**OBTS v3.0: "An Attackers Perspective on Jamf Configurations" - Luke Roberts / Calum Hall**](https://www.youtube.com/watch?v=ju1IYWUv4ZA)
 
-<figure><img src="/images/pentest-tools.svg" alt=""><figcaption></figcaption></figure>
-
-**Get a hacker's perspective on your web apps, network, and cloud**
-
-**Find and report critical, exploitable vulnerabilities with real business impact.** Use our 20+ custom tools to map the attack surface, find security issues that let you escalate privileges, and use automated exploits to collect essential evidence, turning your hard work into persuasive reports.
-
-{% embed url="https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons" %}
 
 {{#include ../../banners/hacktricks-training.md}}

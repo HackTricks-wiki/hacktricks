@@ -2,10 +2,6 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
-
 ## Gatekeeper
 
 **Gatekeeper** est une fonctionnalité de sécurité développée pour les systèmes d'exploitation Mac, conçue pour garantir que les utilisateurs **n'exécutent que des logiciels de confiance** sur leurs systèmes. Elle fonctionne en **validant les logiciels** qu'un utilisateur télécharge et tente d'ouvrir à partir de **sources extérieures à l'App Store**, comme une application, un plug-in ou un package d'installation.
@@ -49,11 +45,11 @@ codesign -s <cert-name-keychain> toolsdemo
 ```
 ### Notarisation
 
-Le processus de notarisation d'Apple sert de protection supplémentaire pour protéger les utilisateurs contre les logiciels potentiellement nuisibles. Il implique que le **développeur soumette son application à l'examen** par **le service de notarisation d'Apple**, qui ne doit pas être confondu avec l'examen des applications. Ce service est un **système automatisé** qui scrute le logiciel soumis à la recherche de **contenu malveillant** et de tout problème potentiel lié à la signature du code.
+Le processus de notarisation d'Apple sert de protection supplémentaire pour protéger les utilisateurs contre les logiciels potentiellement nuisibles. Il implique que le **développeur soumette son application pour examen** par le **Service de Notariat d'Apple**, qui ne doit pas être confondu avec l'App Review. Ce service est un **système automatisé** qui scrute le logiciel soumis à la recherche de **contenu malveillant** et de tout problème potentiel avec la signature du code.
 
-Si le logiciel **réussit** cette inspection sans soulever de préoccupations, le service de notarisation génère un ticket de notarisation. Le développeur est ensuite tenu de **joindre ce ticket à son logiciel**, un processus connu sous le nom de 'stapling.' De plus, le ticket de notarisation est également publié en ligne où Gatekeeper, la technologie de sécurité d'Apple, peut y accéder.
+Si le logiciel **passe** cette inspection sans soulever de préoccupations, le Service de Notariat génère un ticket de notarisation. Le développeur est ensuite tenu de **joindre ce ticket à son logiciel**, un processus connu sous le nom de 'stapling.' De plus, le ticket de notarisation est également publié en ligne où Gatekeeper, la technologie de sécurité d'Apple, peut y accéder.
 
-Lors de la première installation ou exécution du logiciel par l'utilisateur, l'existence du ticket de notarisation - qu'il soit attaché à l'exécutable ou trouvé en ligne - **informe Gatekeeper que le logiciel a été notarié par Apple**. En conséquence, Gatekeeper affiche un message descriptif dans la boîte de dialogue de lancement initiale, indiquant que le logiciel a été soumis à des vérifications pour contenu malveillant par Apple. Ce processus renforce ainsi la confiance des utilisateurs dans la sécurité du logiciel qu'ils installent ou exécutent sur leurs systèmes.
+Lors de la première installation ou exécution du logiciel par l'utilisateur, l'existence du ticket de notarisation - qu'il soit attaché à l'exécutable ou trouvé en ligne - **informe Gatekeeper que le logiciel a été notarié par Apple**. En conséquence, Gatekeeper affiche un message descriptif dans la boîte de dialogue de lancement initial, indiquant que le logiciel a subi des vérifications pour contenu malveillant par Apple. Ce processus renforce ainsi la confiance des utilisateurs dans la sécurité du logiciel qu'ils installent ou exécutent sur leurs systèmes.
 
 ### spctl & syspolicyd
 
@@ -91,7 +87,7 @@ anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] exists an
 **`syspolicyd`** expose également un serveur XPC avec différentes opérations comme `assess`, `update`, `record` et `cancel` qui sont également accessibles via les API **`SecAssessment*`** de **`Security.framework`** et **`xpctl`** communique en fait avec **`syspolicyd`** via XPC.
 
 Notez comment la première règle se termine par "**App Store**" et la deuxième par "**Developer ID**" et que dans l'image précédente, il était **activé pour exécuter des applications du App Store et des développeurs identifiés**.\
-Si vous **modifiez** ce paramètre pour App Store, les "**règles Notarized Developer ID" disparaîtront**.
+Si vous **modifiez** ce paramètre pour App Store, les "**règles de Developer ID notarié" disparaîtront**.
 
 Il existe également des milliers de règles de **type GKE** :
 ```bash
@@ -122,7 +118,7 @@ spctl --master-disable
 spctl --global-enable
 spctl --master-enable
 ```
-Lorsqu'il est complètement activé, une nouvelle option apparaîtra :
+Lorsque complètement activé, une nouvelle option apparaîtra :
 
 <figure><img src="../../../images/image (1151).png" alt=""><figcaption></figcaption></figure>
 
@@ -273,7 +269,7 @@ Et trouvez tous les fichiers mis en quarantaine avec :
 ```bash
 find / -exec ls -ld {} \; 2>/dev/null | grep -E "[x\-]@ " | awk '{printf $9; printf "\n"}' | xargs -I {} xattr -lv {} | grep "com.apple.quarantine"
 ```
-Les informations de quarantaine sont également stockées dans une base de données centrale gérée par LaunchServices dans **`~/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV2`**, ce qui permet à l'interface graphique d'obtenir des données sur les origines des fichiers. De plus, cela peut être écrasé par des applications qui pourraient être intéressées à cacher leurs origines. De plus, cela peut être fait à partir des API de LaunchServices.
+Les informations de quarantaine sont également stockées dans une base de données centrale gérée par LaunchServices dans **`~/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV2`** qui permet à l'interface graphique d'obtenir des données sur les origines des fichiers. De plus, cela peut être écrasé par des applications qui pourraient être intéressées à cacher leurs origines. De plus, cela peut être fait à partir des API de LaunchServices.
 
 #### **libquarantine.dylb**
 
@@ -324,27 +320,7 @@ Cependant, cela n'est plus possible car macOS **empêche la modification des fic
 
 ## Contournements de Gatekeeper
 
-Tout moyen de contourner Gatekeeper (réussir à faire télécharger quelque chose par l'utilisateur et à l'exécuter lorsque Gatekeeper devrait l'interdire) est considéré comme une vulnérabilité dans macOS. Voici quelques CVE attribués à des techniques qui ont permis de contourner Gatekeeper dans le passé :
-
-### [CVE-2021-1810](https://labs.withsecure.com/publications/the-discovery-of-cve-2021-1810)
-
-Il a été observé que si l'**Archive Utility** est utilisé pour l'extraction, les fichiers avec des **chemins dépassant 886 caractères** ne reçoivent pas l'attribut étendu com.apple.quarantine. Cette situation permet involontairement à ces fichiers de **contourner les** vérifications de sécurité de Gatekeeper.
-
-Consultez le [**rapport original**](https://labs.withsecure.com/publications/the-discovery-of-cve-2021-1810) pour plus d'informations.
-
-### [CVE-2021-30990](https://ronmasas.com/posts/bypass-macos-gatekeeper)
-
-Lorsqu'une application est créée avec **Automator**, les informations sur ce dont elle a besoin pour s'exécuter se trouvent dans `application.app/Contents/document.wflow` et non dans l'exécutable. L'exécutable est juste un binaire Automator générique appelé **Automator Application Stub**.
-
-Par conséquent, vous pourriez faire en sorte que `application.app/Contents/MacOS/Automator\ Application\ Stub` **pointe avec un lien symbolique vers un autre Automator Application Stub à l'intérieur du système** et il exécutera ce qui se trouve dans `document.wflow` (votre script) **sans déclencher Gatekeeper** car l'exécutable réel n'a pas l'attribut xattr de quarantaine.
-
-Exemple d'emplacement attendu : `/System/Library/CoreServices/Automator\ Application\ Stub.app/Contents/MacOS/Automator\ Application\ Stub`
-
-Consultez le [**rapport original**](https://ronmasas.com/posts/bypass-macos-gatekeeper) pour plus d'informations.
-
-### [CVE-2022-22616](https://www.jamf.com/blog/jamf-threat-labs-safari-vuln-gatekeeper-bypass/)
-
-Dans ce contournement, un fichier zip a été créé avec une application commençant à se compresser à partir de `application.app/Contents` au lieu de `application.app`. Par conséquent, l'**attribut de quarantaine** a été appliqué à tous les **fichiers de `application.app/Contents`** mais **pas à `application.app`**, ce qui était ce que Gatekeeper vérifiait, donc Gatekeeper a été contourné car lorsque `application.app` a été déclenché, il **n'avait pas l'attribut de quarantaine.**
+Tout moyen de contourner Gatekeeper (réussir à faire télécharger quelque chose par l'utilisateur et à l'exécuter lorsque Gatekeeper devrait l'interdire) est considéré comme une vulnérabilité dans macOS. Voici
 ```bash
 zip -r test.app/Contents test.zip
 ```
@@ -401,7 +377,7 @@ aa archive -d test/ -o test.aar
 
 # If you downloaded the resulting test.aar and decompress it, the file test/._a won't have a quarantitne attribute
 ```
-Être capable de créer un fichier qui n'aura pas l'attribut de quarantaine a permis de **contourner Gatekeeper.** L'astuce consistait à **créer une application de fichier DMG** en utilisant la convention de nommage AppleDouble (la commencer par `._`) et à créer un **fichier visible en tant que lien symbolique vers ce fichier caché** sans l'attribut de quarantaine.\
+Être capable de créer un fichier qui n'aura pas l'attribut de quarantaine a permis de **contourner Gatekeeper.** L'astuce consistait à **créer une application de fichier DMG** en utilisant la convention de nom AppleDouble (la commencer par `._`) et à créer un **fichier visible en tant que lien symbolique vers ce fichier caché** sans l'attribut de quarantaine.\
 Lorsque le **fichier dmg est exécuté**, comme il n'a pas d'attribut de quarantaine, il **contournera Gatekeeper.**
 ```bash
 # Create an app bundle with the backdoor an call it app.app
@@ -431,8 +407,5 @@ aa archive -d s/ -o app.aar
 
 Dans un bundle ".app", si l'attribut xattr de quarantaine n'est pas ajouté, lors de son exécution **Gatekeeper ne sera pas déclenché**.
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../../../banners/hacktricks-training.md}}

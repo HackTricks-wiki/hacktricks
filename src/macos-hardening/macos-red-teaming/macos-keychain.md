@@ -4,60 +4,59 @@
 
 ## Main Keychains
 
-- The **User Keychain** (`~/Library/Keychains/login.keychain-db`), which is used to store **user-specific credentials** like application passwords, internet passwords, user-generated certificates, network passwords, and user-generated public/private keys.
-- The **System Keychain** (`/Library/Keychains/System.keychain`), which stores **system-wide credentials** such as WiFi passwords, system root certificates, system private keys, and system application passwords.
-  - It's possible to find other components like certificates in `/System/Library/Keychains/*`
-- In **iOS** there is only one **Keychain** located in `/private/var/Keychains/`. This folder also contains databases for the `TrustStore`, certificates authorities (`caissuercache`) and OSCP entries (`ocspache`).
-  - Apps will be restricted in the keychain only to their private area based on their application identifier.
+- Le **User Keychain** (`~/Library/Keychains/login.keychain-db`), qui est utilisé pour stocker des **identifiants spécifiques à l'utilisateur** comme des mots de passe d'application, des mots de passe internet, des certificats générés par l'utilisateur, des mots de passe réseau et des clés publiques/privées générées par l'utilisateur.
+- Le **System Keychain** (`/Library/Keychains/System.keychain`), qui stocke des **identifiants à l'échelle du système** tels que des mots de passe WiFi, des certificats racine du système, des clés privées du système et des mots de passe d'application du système.
+- Il est possible de trouver d'autres composants comme des certificats dans `/System/Library/Keychains/*`
+- Dans **iOS**, il n'y a qu'un seul **Keychain** situé dans `/private/var/Keychains/`. Ce dossier contient également des bases de données pour le `TrustStore`, les autorités de certification (`caissuercache`) et les entrées OSCP (`ocspache`).
+- Les applications seront restreintes dans le keychain uniquement à leur zone privée en fonction de leur identifiant d'application.
 
 ### Password Keychain Access
 
-These files, while they do not have inherent protection and can be **downloaded**, are encrypted and require the **user's plaintext password to be decrypted**. A tool like [**Chainbreaker**](https://github.com/n0fate/chainbreaker) could be used for decryption.
+Ces fichiers, bien qu'ils n'aient pas de protection inhérente et puissent être **téléchargés**, sont chiffrés et nécessitent le **mot de passe en clair de l'utilisateur pour être déchiffrés**. Un outil comme [**Chainbreaker**](https://github.com/n0fate/chainbreaker) pourrait être utilisé pour le déchiffrement.
 
 ## Keychain Entries Protections
 
 ### ACLs
 
-Each entry in the keychain is governed by **Access Control Lists (ACLs)** which dictate who can perform various actions on the keychain entry, including:
+Chaque entrée dans le keychain est régie par des **Access Control Lists (ACLs)** qui dictent qui peut effectuer diverses actions sur l'entrée du keychain, y compris :
 
-- **ACLAuhtorizationExportClear**: Allows the holder to get the clear text of the secret.
-- **ACLAuhtorizationExportWrapped**: Allows the holder to get the clear text encrypted with another provided password.
-- **ACLAuhtorizationAny**: Allows the holder to perform any action.
+- **ACLAuhtorizationExportClear** : Permet au titulaire d'obtenir le texte clair du secret.
+- **ACLAuhtorizationExportWrapped** : Permet au titulaire d'obtenir le texte clair chiffré avec un autre mot de passe fourni.
+- **ACLAuhtorizationAny** : Permet au titulaire d'effectuer n'importe quelle action.
 
-The ACLs are further accompanied by a **list of trusted applications** that can perform these actions without prompting. This could be:
+Les ACLs sont également accompagnées d'une **liste d'applications de confiance** qui peuvent effectuer ces actions sans demande. Cela pourrait être :
 
-- **N`il`** (no authorization required, **everyone is trusted**)
-- An **empty** list (**nobody** is trusted)
-- **List** of specific **applications**.
+- **N`il`** (aucune autorisation requise, **tout le monde est de confiance**)
+- Une **liste vide** (**personne** n'est de confiance)
+- **Liste** d'**applications** spécifiques.
 
-Also the entry might contain the key **`ACLAuthorizationPartitionID`,** which is use to identify the **teamid, apple,** and **cdhash.**
+De plus, l'entrée peut contenir la clé **`ACLAuthorizationPartitionID`,** qui est utilisée pour identifier le **teamid, apple,** et **cdhash.**
 
-- If the **teamid** is specified, then in order to **access the entry** value **withuot** a **prompt** the used application must have the **same teamid**.
-- If the **apple** is specified, then the app needs to be **signed** by **Apple**.
-- If the **cdhash** is indicated, then **app** must have the specific **cdhash**.
+- Si le **teamid** est spécifié, alors pour **accéder à la valeur de l'entrée** **sans** **demande**, l'application utilisée doit avoir le **même teamid**.
+- Si le **apple** est spécifié, alors l'application doit être **signée** par **Apple**.
+- Si le **cdhash** est indiqué, alors l'**app** doit avoir le **cdhash** spécifique.
 
 ### Creating a Keychain Entry
 
-When a **new** **entry** is created using **`Keychain Access.app`**, the following rules apply:
+Lorsque **une nouvelle** **entrée** est créée en utilisant **`Keychain Access.app`**, les règles suivantes s'appliquent :
 
-- All apps can encrypt.
-- **No apps** can export/decrypt (without prompting the user).
-- All apps can see the integrity check.
-- No apps can change ACLs.
-- The **partitionID** is set to **`apple`**.
+- Toutes les applications peuvent chiffrer.
+- **Aucune application** ne peut exporter/déchiffrer (sans demander à l'utilisateur).
+- Toutes les applications peuvent voir le contrôle d'intégrité.
+- Aucune application ne peut changer les ACLs.
+- Le **partitionID** est défini sur **`apple`**.
 
-When an **application creates an entry in the keychain**, the rules are slightly different:
+Lorsque **une application crée une entrée dans le keychain**, les règles sont légèrement différentes :
 
-- All apps can encrypt.
-- Only the **creating application** (or any other apps explicitly added) can export/decrypt (without prompting the user).
-- All apps can see the integrity check.
-- No apps can change the ACLs.
-- The **partitionID** is set to **`teamid:[teamID here]`**.
+- Toutes les applications peuvent chiffrer.
+- Seule l'**application créatrice** (ou toute autre application explicitement ajoutée) peut exporter/déchiffrer (sans demander à l'utilisateur).
+- Toutes les applications peuvent voir le contrôle d'intégrité.
+- Aucune application ne peut changer les ACLs.
+- Le **partitionID** est défini sur **`teamid:[teamID ici]`**.
 
 ## Accessing the Keychain
 
 ### `security`
-
 ```bash
 # List keychains
 security list-keychains
@@ -74,58 +73,57 @@ security set-generic-password-parition-list -s "test service" -a "test acount" -
 # Dump specifically the user keychain
 security dump-keychain ~/Library/Keychains/login.keychain-db
 ```
-
 ### APIs
 
 > [!TIP]
-> The **keychain enumeration and dumping** of secrets that **won't generate a prompt** can be done with the tool [**LockSmith**](https://github.com/its-a-feature/LockSmith)
+> L'**énumération et l'extraction** de secrets du **trousseau** qui **ne générera pas d'invite** peuvent être effectuées avec l'outil [**LockSmith**](https://github.com/its-a-feature/LockSmith)
 >
-> Other API endpoints can be found in [**SecKeyChain.h**](https://opensource.apple.com/source/libsecurity_keychain/libsecurity_keychain-55017/lib/SecKeychain.h.auto.html) source code.
+> D'autres points de terminaison API peuvent être trouvés dans le code source de [**SecKeyChain.h**](https://opensource.apple.com/source/libsecurity_keychain/libsecurity_keychain-55017/lib/SecKeychain.h.auto.html).
 
-List and get **info** about each keychain entry using the **Security Framework** or you could also check the Apple's open source cli tool [**security**](https://opensource.apple.com/source/Security/Security-59306.61.1/SecurityTool/macOS/security.c.auto.html)**.** Some API examples:
+Listez et obtenez des **informations** sur chaque entrée du trousseau en utilisant le **Security Framework** ou vous pouvez également vérifier l'outil cli open source d'Apple [**security**](https://opensource.apple.com/source/Security/Security-59306.61.1/SecurityTool/macOS/security.c.auto.html)**.** Quelques exemples d'API :
 
-- The API **`SecItemCopyMatching`** gives info about each entry and there are some attributes you can set when using it:
-  - **`kSecReturnData`**: If true, it will try to decrypt the data (set to false to avoid potential pop-ups)
-  - **`kSecReturnRef`**: Get also reference to keychain item (set to true in case later you see you can decrypt without pop-up)
-  - **`kSecReturnAttributes`**: Get metadata about entries
-  - **`kSecMatchLimit`**: How many results to return
-  - **`kSecClass`**: What kind of keychain entry
+- L'API **`SecItemCopyMatching`** fournit des informations sur chaque entrée et il y a certains attributs que vous pouvez définir lors de son utilisation :
+- **`kSecReturnData`** : Si vrai, il essaiera de déchiffrer les données (définir sur faux pour éviter les pop-ups potentiels)
+- **`kSecReturnRef`** : Obtenez également une référence à l'élément du trousseau (définir sur vrai au cas où vous verriez plus tard que vous pouvez déchiffrer sans pop-up)
+- **`kSecReturnAttributes`** : Obtenez des métadonnées sur les entrées
+- **`kSecMatchLimit`** : Combien de résultats retourner
+- **`kSecClass`** : Quel type d'entrée de trousseau
 
-Get **ACLs** of each entry:
+Obtenez les **ACL** de chaque entrée :
 
-- With the API **`SecAccessCopyACLList`** you can get the **ACL for the keychain item**, and it will return a list of ACLs (like `ACLAuhtorizationExportClear` and the others previously mentioned) where each list has:
-  - Description
-  - **Trusted Application List**. This could be:
-    - An app: /Applications/Slack.app
-    - A binary: /usr/libexec/airportd
-    - A group: group://AirPort
+- Avec l'API **`SecAccessCopyACLList`**, vous pouvez obtenir l'**ACL pour l'élément du trousseau**, et cela renverra une liste d'ACL (comme `ACLAuhtorizationExportClear` et les autres mentionnés précédemment) où chaque liste a :
+- Description
+- **Liste des applications de confiance**. Cela pourrait être :
+- Une application : /Applications/Slack.app
+- Un binaire : /usr/libexec/airportd
+- Un groupe : group://AirPort
 
-Export the data:
+Exportez les données :
 
-- The API **`SecKeychainItemCopyContent`** gets the plaintext
-- The API **`SecItemExport`** exports the keys and certificates but might have to set passwords to export the content encrypted
+- L'API **`SecKeychainItemCopyContent`** obtient le texte en clair
+- L'API **`SecItemExport`** exporte les clés et certificats mais peut nécessiter de définir des mots de passe pour exporter le contenu chiffré
 
-And these are the **requirements** to be able to **export a secret without a prompt**:
+Et voici les **exigences** pour pouvoir **exporter un secret sans invite** :
 
-- If **1+ trusted** apps listed:
-  - Need the appropriate **authorizations** (**`Nil`**, or be **part** of the allowed list of apps in the authorization to access the secret info)
-  - Need code signature to match **PartitionID**
-  - Need code signature to match that of one **trusted app** (or be a member of the right KeychainAccessGroup)
-- If **all applications trusted**:
-  - Need the appropriate **authorizations**
-  - Need code signature to match **PartitionID**
-    - If **no PartitionID**, then this isn't needed
+- Si **1+ applications de confiance** listées :
+- Besoin des **autorisations** appropriées (**`Nil`**, ou faire **partie** de la liste autorisée d'applications dans l'autorisation d'accès aux informations secrètes)
+- Besoin que la signature de code corresponde au **PartitionID**
+- Besoin que la signature de code corresponde à celle d'une **application de confiance** (ou faire partie du bon KeychainAccessGroup)
+- Si **toutes les applications sont de confiance** :
+- Besoin des **autorisations** appropriées
+- Besoin que la signature de code corresponde au **PartitionID**
+- Si **pas de PartitionID**, alors cela n'est pas nécessaire
 
 > [!CAUTION]
-> Therefore, if there is **1 application listed**, you need to **inject code in that application**.
+> Par conséquent, s'il y a **1 application listée**, vous devez **injecter du code dans cette application**.
 >
-> If **apple** is indicated in the **partitionID**, you could access it with **`osascript`** so anything that is trusting all applications with apple in the partitionID. **`Python`** could also be used for this.
+> Si **apple** est indiqué dans le **partitionID**, vous pourriez y accéder avec **`osascript`** donc tout ce qui fait confiance à toutes les applications avec apple dans le partitionID. **`Python`** pourrait également être utilisé pour cela.
 
-### Two additional attributes
+### Deux attributs supplémentaires
 
-- **Invisible**: It's a boolean flag to **hide** the entry from the **UI** Keychain app
-- **General**: It's to store **metadata** (so it's NOT ENCRYPTED)
-  - Microsoft was storing in plain text all the refresh tokens to access sensitive endpoint.
+- **Invisible** : C'est un drapeau booléen pour **cacher** l'entrée de l'application **UI** du trousseau
+- **General** : C'est pour stocker des **métadonnées** (donc ce n'est PAS CHIFFRÉ)
+- Microsoft stockait en texte clair tous les jetons de rafraîchissement pour accéder à des points de terminaison sensibles.
 
 ## References
 

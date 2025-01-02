@@ -2,14 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="/images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-Utilisez [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=command-injection) pour créer et **automatiser des flux de travail** facilement grâce aux **outils communautaires les plus avancés** au monde.\
-Obtenez l'accès aujourd'hui :
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=command-injection" %}
-
-## Groupes Bien Connus avec des privilèges d'administration
+## Groupes Bien Connus avec des Privilèges d'Administration
 
 - **Administrateurs**
 - **Administrateurs de Domaine**
@@ -23,7 +16,7 @@ Pour identifier les membres de ce groupe, la commande suivante est exécutée :
 ```powershell
 Get-NetGroupMember -Identity "Account Operators" -Recurse
 ```
-Ajouter de nouveaux utilisateurs est autorisé, ainsi que la connexion locale à DC01.
+L'ajout de nouveaux utilisateurs est autorisé, ainsi que la connexion locale à DC01.
 
 ## Groupe AdminSDHolder
 
@@ -67,7 +60,7 @@ Pour lister les membres du groupe, exécutez :
 ```powershell
 Get-NetGroupMember -Identity "Backup Operators" -Recurse
 ```
-### Attaque locale
+### Attaque Locale
 
 Pour tirer parti de ces privilèges localement, les étapes suivantes sont employées :
 
@@ -88,7 +81,7 @@ Copy-FileSeBackupPrivilege C:\Users\Administrator\report.pdf c:\temp\x.pdf -Over
 ```
 ### AD Attack
 
-Un accès direct au système de fichiers du contrôleur de domaine permet le vol de la base de données `NTDS.dit`, qui contient tous les hachages NTLM pour les utilisateurs et les ordinateurs du domaine.
+L'accès direct au système de fichiers du contrôleur de domaine permet le vol de la base de données `NTDS.dit`, qui contient tous les hachages NTLM pour les utilisateurs et les ordinateurs du domaine.
 
 #### Using diskshadow.exe
 
@@ -133,7 +126,7 @@ wbadmin get versions
 echo "Y" | wbadmin start recovery -version:<date-time> -itemtype:file -items:c:\windows\ntds\ntds.dit -recoverytarget:C:\ -notrestoreacl
 ```
 
-Pour une démonstration pratique, voir [VIDÉO DE DÉMO AVEC IPPSEC](https://www.youtube.com/watch?v=IfCysW0Od8w&t=2610s).
+Pour une démonstration pratique, voir [VIDÉO DE DÉMONSTRATION AVEC IPPSEC](https://www.youtube.com/watch?v=IfCysW0Od8w&t=2610s).
 
 ## DnsAdmins
 
@@ -174,14 +167,14 @@ Pour plus de détails sur ce vecteur d'attaque, référez-vous à ired.team.
 
 #### Mimilib.dll
 
-Il est également possible d'utiliser mimilib.dll pour l'exécution de commandes, en le modifiant pour exécuter des commandes spécifiques ou des shells inversés. [Consultez ce post](https://www.labofapenetrationtester.com/2017/05/abusing-dnsadmins-privilege-for-escalation-in-active-directory.html) pour plus d'informations.
+Il est également possible d'utiliser mimilib.dll pour l'exécution de commandes, en le modifiant pour exécuter des commandes spécifiques ou des shells inversés. [Check this post](https://www.labofapenetrationtester.com/2017/05/abusing-dnsadmins-privilege-for-escalation-in-active-directory.html) pour plus d'informations.
 
 ### Enregistrement WPAD pour MitM
 
 Les DnsAdmins peuvent manipuler les enregistrements DNS pour effectuer des attaques Man-in-the-Middle (MitM) en créant un enregistrement WPAD après avoir désactivé la liste de blocage des requêtes globales. Des outils comme Responder ou Inveigh peuvent être utilisés pour usurper et capturer le trafic réseau.
 
 ### Lecteurs de journaux d'événements
-Les membres peuvent accéder aux journaux d'événements, trouvant potentiellement des informations sensibles telles que des mots de passe en clair ou des détails d'exécution de commandes :
+Les membres peuvent accéder aux journaux d'événements, trouvant potentiellement des informations sensibles telles que des mots de passe en texte clair ou des détails d'exécution de commandes :
 ```powershell
 # Get members and search logs for sensitive information
 Get-NetGroupMember -Identity "Event Log Readers" -Recurse
@@ -189,7 +182,7 @@ Get-WinEvent -LogName security | where { $_.ID -eq 4688 -and $_.Properties[8].Va
 ```
 ## Permissions Windows d'Exchange
 
-Ce groupe peut modifier les DACL sur l'objet de domaine, accordant potentiellement des privilèges DCSync. Les techniques d'escalade de privilèges exploitant ce groupe sont détaillées dans le dépôt GitHub Exchange-AD-Privesc.
+Ce groupe peut modifier les DACL sur l'objet de domaine, ce qui peut potentiellement accorder des privilèges DCSync. Les techniques d'escalade de privilèges exploitant ce groupe sont détaillées dans le dépôt GitHub Exchange-AD-Privesc.
 ```powershell
 # List members
 Get-NetGroupMember -Identity "Exchange Windows Permissions" -Recurse
@@ -210,13 +203,13 @@ Note : L'exploitation des liens durs a été atténuée dans les mises à jour r
 
 ## Gestion de l'organisation
 
-Dans les environnements où **Microsoft Exchange** est déployé, un groupe spécial connu sous le nom de **Gestion de l'organisation** détient des capacités significatives. Ce groupe a le privilège d'**accéder aux boîtes aux lettres de tous les utilisateurs du domaine** et maintient **un contrôle total sur l'Unité Organisationnelle (OU) 'Groupes de sécurité Microsoft Exchange'**. Ce contrôle inclut le groupe **`Exchange Windows Permissions`**, qui peut être exploité pour l'escalade de privilèges.
+Dans les environnements où **Microsoft Exchange** est déployé, un groupe spécial connu sous le nom de **Gestion de l'organisation** détient des capacités significatives. Ce groupe a le privilège d'**accéder aux boîtes aux lettres de tous les utilisateurs du domaine** et maintient **un contrôle total sur l'Unité d'Organisation 'Groupes de sécurité Microsoft Exchange'**. Ce contrôle inclut le groupe **`Exchange Windows Permissions`**, qui peut être exploité pour l'escalade de privilèges.
 
 ### Exploitation des privilèges et commandes
 
 #### Opérateurs d'impression
 
-Les membres du groupe **Opérateurs d'impression** sont dotés de plusieurs privilèges, y compris le **`SeLoadDriverPrivilege`**, qui leur permet de **se connecter localement à un contrôleur de domaine**, de l'éteindre et de gérer les imprimantes. Pour exploiter ces privilèges, surtout si **`SeLoadDriverPrivilege`** n'est pas visible dans un contexte non élevé, il est nécessaire de contourner le Contrôle de Compte Utilisateur (UAC).
+Les membres du groupe **Opérateurs d'impression** sont dotés de plusieurs privilèges, y compris le **`SeLoadDriverPrivilege`**, qui leur permet de **se connecter localement à un contrôleur de domaine**, de l'éteindre et de gérer les imprimantes. Pour exploiter ces privilèges, surtout si **`SeLoadDriverPrivilege`** n'est pas visible dans un contexte non élevé, il est nécessaire de contourner le Contrôle de compte d'utilisateur (UAC).
 
 Pour lister les membres de ce groupe, la commande PowerShell suivante est utilisée :
 ```powershell
@@ -265,11 +258,5 @@ Get-NetGroupMember -Identity "Server Operators" -Recurse
 - [https://posts.specterops.io/a-red-teamers-guide-to-gpos-and-ous-f0d03976a31e](https://posts.specterops.io/a-red-teamers-guide-to-gpos-and-ous-f0d03976a31e)
 - [https://undocumented.ntinternals.net/index.html?page=UserMode%2FUndocumented%20Functions%2FExecutable%20Images%2FNtLoadDriver.html](https://undocumented.ntinternals.net/index.html?page=UserMode%2FUndocumented%20Functions%2FExecutable%20Images%2FNtLoadDriver.html)
 
-<figure><img src="/images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-Utilisez [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=command-injection) pour créer facilement et **automatiser des flux de travail** alimentés par les **outils communautaires les plus avancés** au monde.\
-Obtenez un accès aujourd'hui :
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=command-injection" %}
 
 {{#include ../../banners/hacktricks-training.md}}

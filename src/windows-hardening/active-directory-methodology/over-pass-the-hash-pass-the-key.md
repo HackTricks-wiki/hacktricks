@@ -2,15 +2,12 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 ## Overpass The Hash/Pass The Key (PTK)
 
-L'attaque **Overpass The Hash/Pass The Key (PTK)** est conçue pour des environnements où le protocole NTLM traditionnel est restreint, et où l'authentification Kerberos prend le pas. Cette attaque exploite le hachage NTLM ou les clés AES d'un utilisateur pour solliciter des tickets Kerberos, permettant un accès non autorisé aux ressources au sein d'un réseau.
+L'attaque **Overpass The Hash/Pass The Key (PTK)** est conçue pour des environnements où le protocole NTLM traditionnel est restreint, et l'authentification Kerberos prend le pas. Cette attaque exploite le hash NTLM ou les clés AES d'un utilisateur pour solliciter des tickets Kerberos, permettant un accès non autorisé aux ressources au sein d'un réseau.
 
-Pour exécuter cette attaque, la première étape consiste à acquérir le hachage NTLM ou le mot de passe du compte de l'utilisateur ciblé. Une fois cette information sécurisée, un Ticket Granting Ticket (TGT) pour le compte peut être obtenu, permettant à l'attaquant d'accéder aux services ou machines auxquels l'utilisateur a des permissions.
+Pour exécuter cette attaque, la première étape consiste à acquérir le hash NTLM ou le mot de passe du compte de l'utilisateur ciblé. Une fois cette information sécurisée, un Ticket Granting Ticket (TGT) pour le compte peut être obtenu, permettant à l'attaquant d'accéder aux services ou machines auxquels l'utilisateur a des permissions.
 
 Le processus peut être initié avec les commandes suivantes :
 ```bash
@@ -37,8 +34,5 @@ Pour se conformer à la sécurité opérationnelle et utiliser AES256, la comman
 
 - [https://www.tarlogic.com/es/blog/como-atacar-kerberos/](https://www.tarlogic.com/es/blog/como-atacar-kerberos/)
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

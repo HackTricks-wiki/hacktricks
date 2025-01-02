@@ -2,21 +2,15 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
-
-Approfondissez votre expertise en **Mobile Security** avec 8kSec Academy. Maîtrisez la sécurité iOS et Android grâce à nos cours à votre rythme et obtenez une certification :
-
-{% embed url="https://academy.8ksec.io/" %}
-
 **Cette page est basée sur une de [adsecurity.org](https://adsecurity.org/?page_id=1821)**. Consultez l'original pour plus d'infos !
 
 ## LM et mots de passe en clair en mémoire
 
 Depuis Windows 8.1 et Windows Server 2012 R2, des mesures significatives ont été mises en œuvre pour protéger contre le vol de credentials :
 
-- **Les hachages LM et les mots de passe en clair** ne sont plus stockés en mémoire pour améliorer la sécurité. Un paramètre de registre spécifique, _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_ doit être configuré avec une valeur DWORD de `0` pour désactiver l'authentification Digest, garantissant que les mots de passe "en clair" ne sont pas mis en cache dans LSASS.
+- **Les hachages LM et les mots de passe en clair** ne sont plus stockés en mémoire pour améliorer la sécurité. Un paramètre de registre spécifique, _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_, doit être configuré avec une valeur DWORD de `0` pour désactiver l'authentification Digest, garantissant que les mots de passe "en clair" ne sont pas mis en cache dans LSASS.
 
-- **La protection LSA** est introduite pour protéger le processus de l'Autorité de Sécurité Locale (LSA) contre la lecture non autorisée de la mémoire et l'injection de code. Cela est réalisé en marquant LSASS comme un processus protégé. L'activation de la protection LSA implique :
+- **La protection LSA** est introduite pour protéger le processus de l'Autorité de Sécurité Locale (LSA) contre la lecture non autorisée de la mémoire et l'injection de code. Cela est réalisé en marquant le LSASS comme un processus protégé. L'activation de la protection LSA implique :
 1. Modifier le registre à _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa_ en définissant `RunAsPPL` à `dword:00000001`.
 2. Mettre en œuvre un objet de stratégie de groupe (GPO) qui impose ce changement de registre sur les appareils gérés.
 
@@ -191,7 +185,7 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 
 ### Services Terminal
 
-- **TS::MultiRDP** : Autoriser plusieurs sessions RDP.
+- **TS::MultiRDP** : Permettre plusieurs sessions RDP.
 
 - `mimikatz "ts::multirdp" exit`
 
@@ -200,13 +194,8 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 
 ### Coffre-fort
 
-- Extraire des mots de passe du Coffre-fort Windows.
+- Extraire des mots de passe du Windows Vault.
 - `mimikatz "vault::cred /patch" exit`
 
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
-
-Approfondissez votre expertise en **Sécurité Mobile** avec 8kSec Academy. Maîtrisez la sécurité iOS et Android grâce à nos cours à votre rythme et obtenez une certification :
-
-{% embed url="https://academy.8ksec.io/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,12 +1,8 @@
-# Escalade de privilèges avec Autoruns
+# Élévation de privilèges avec Autoruns
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/i3.png" alt=""><figcaption></figcaption></figure>
 
-**Astuce bug bounty** : **inscrivez-vous** sur **Intigriti**, une plateforme de **bug bounty premium créée par des hackers, pour des hackers** ! Rejoignez-nous sur [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) aujourd'hui, et commencez à gagner des primes allant jusqu'à **100 000 $** !
-
-{% embed url="https://go.intigriti.com/hacktricks" %}
 
 ## WMIC
 
@@ -42,11 +38,11 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 ## Registre
 
 > [!NOTE]
-> [Note from here](https://answers.microsoft.com/en-us/windows/forum/all/delete-registry-key/d425ae37-9dcc-4867-b49c-723dcd15147f) : L'entrée de registre **Wow6432Node** indique que vous exécutez une version 64 bits de Windows. Le système d'exploitation utilise cette clé pour afficher une vue séparée de HKEY_LOCAL_MACHINE\SOFTWARE pour les applications 32 bits qui s'exécutent sur des versions 64 bits de Windows.
+> [Note from ici](https://answers.microsoft.com/en-us/windows/forum/all/delete-registry-key/d425ae37-9dcc-4867-b49c-723dcd15147f) : L'entrée de registre **Wow6432Node** indique que vous exécutez une version 64 bits de Windows. Le système d'exploitation utilise cette clé pour afficher une vue séparée de HKEY_LOCAL_MACHINE\SOFTWARE pour les applications 32 bits qui s'exécutent sur des versions Windows 64 bits.
 
 ### Exécutions
 
-**Registre AutoRun** communément connu :
+**Connu sous le nom de** registre AutoRun :
 
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\Run`
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\RunOnce`
@@ -149,7 +145,7 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Wow6432Node\Microsoft\Windows\Ru
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders`
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders`
 
-Les raccourcis placés dans le dossier **Démarrage** déclencheront automatiquement le lancement de services ou d'applications lors de la connexion de l'utilisateur ou du redémarrage du système. L'emplacement du dossier **Démarrage** est défini dans le registre pour les portées **Local Machine** et **Current User**. Cela signifie que tout raccourci ajouté à ces emplacements **Démarrage** spécifiés garantira que le service ou le programme lié démarre après le processus de connexion ou de redémarrage, ce qui en fait une méthode simple pour planifier l'exécution automatique des programmes.
+Les raccourcis placés dans le dossier **Démarrage** déclencheront automatiquement des services ou des applications lors de la connexion de l'utilisateur ou du redémarrage du système. L'emplacement du dossier **Démarrage** est défini dans le registre pour les portées **Machine locale** et **Utilisateur actuel**. Cela signifie que tout raccourci ajouté à ces emplacements **Démarrage** spécifiés garantira que le service ou le programme lié démarre après le processus de connexion ou de redémarrage, ce qui en fait une méthode simple pour planifier l'exécution automatique des programmes.
 
 > [!NOTE]
 > Si vous pouvez écraser n'importe quel \[User] Shell Folder sous **HKLM**, vous pourrez le pointer vers un dossier contrôlé par vous et placer une porte dérobée qui sera exécutée chaque fois qu'un utilisateur se connecte au système, augmentant ainsi les privilèges.
@@ -194,14 +190,14 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\CurrentVersion
 
 ### Changer l'invite de commande en mode sans échec
 
-Dans le Registre Windows sous `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot`, il y a une valeur **`AlternateShell`** définie par défaut sur `cmd.exe`. Cela signifie que lorsque vous choisissez "Mode sans échec avec invite de commande" au démarrage (en appuyant sur F8), `cmd.exe` est utilisé. Cependant, il est possible de configurer votre ordinateur pour qu'il démarre automatiquement en ce mode sans avoir besoin d'appuyer sur F8 et de le sélectionner manuellement.
+Dans le Registre Windows sous `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot`, il y a une valeur **`AlternateShell`** définie par défaut sur `cmd.exe`. Cela signifie que lorsque vous choisissez "Mode sans échec avec invite de commande" au démarrage (en appuyant sur F8), `cmd.exe` est utilisé. Mais, il est possible de configurer votre ordinateur pour démarrer automatiquement en ce mode sans avoir besoin d'appuyer sur F8 et de le sélectionner manuellement.
 
 Étapes pour créer une option de démarrage pour démarrer automatiquement en "Mode sans échec avec invite de commande" :
 
 1. Changez les attributs du fichier `boot.ini` pour supprimer les drapeaux de lecture seule, système et caché : `attrib c:\boot.ini -r -s -h`
 2. Ouvrez `boot.ini` pour modification.
 3. Insérez une ligne comme : `multi(0)disk(0)rdisk(0)partition(1)\WINDOWS="Microsoft Windows XP Professional" /fastdetect /SAFEBOOT:MINIMAL(ALTERNATESHELL)`
-4. Enregistrez les modifications dans `boot.ini`.
+4. Enregistrez les modifications apportées à `boot.ini`.
 5. Réappliquez les attributs de fichier d'origine : `attrib c:\boot.ini +r +s +h`
 
 - **Exploit 1 :** Changer la clé de registre **AlternateShell** permet de configurer un shell de commande personnalisé, potentiellement pour un accès non autorisé.
@@ -224,7 +220,7 @@ Active Setup est géré à travers les clés de registre suivantes :
 - `HKCU\SOFTWARE\Microsoft\Active Setup\Installed Components`
 - `HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components`
 
-Dans ces clés, divers sous-clés existent, chacune correspondant à un composant spécifique. Les valeurs clés d'un intérêt particulier incluent :
+Au sein de ces clés, divers sous-clés existent, chacune correspondant à un composant spécifique. Les valeurs clés d'un intérêt particulier incluent :
 
 - **IsInstalled :**
 - `0` indique que la commande du composant ne s'exécutera pas.
@@ -247,7 +243,7 @@ reg query "HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components
 
 ### Aperçu des Objets d'Aide au Navigateur (BHO)
 
-Les Objets d'Aide au Navigateur (BHO) sont des modules DLL qui ajoutent des fonctionnalités supplémentaires à Internet Explorer de Microsoft. Ils se chargent dans Internet Explorer et l'Explorateur Windows à chaque démarrage. Cependant, leur exécution peut être bloquée en définissant la clé **NoExplorer** à 1, les empêchant de se charger avec les instances de l'Explorateur Windows.
+Les Objets d'Aide au Navigateur (BHO) sont des modules DLL qui ajoutent des fonctionnalités supplémentaires à Internet Explorer de Microsoft. Ils se chargent dans Internet Explorer et Windows Explorer à chaque démarrage. Cependant, leur exécution peut être bloquée en définissant la clé **NoExplorer** à 1, les empêchant de se charger avec les instances de Windows Explorer.
 
 Les BHO sont compatibles avec Windows 10 via Internet Explorer 11 mais ne sont pas pris en charge dans Microsoft Edge, le navigateur par défaut dans les versions plus récentes de Windows.
 
@@ -297,13 +293,13 @@ HKLM\Software\Microsoft\Wow6432Node\Windows NT\CurrentVersion\Image File Executi
 ```
 ## SysInternals
 
-Notez que tous les sites où vous pouvez trouver des autoruns ont **déjà été recherchés par** [**winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe). Cependant, pour une **liste plus complète des fichiers auto-exécutés**, vous pourriez utiliser [autoruns](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns) de Sysinternals :
+Notez que tous les sites où vous pouvez trouver des autoruns sont **déjà recherchés par** [**winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe). Cependant, pour une **liste plus complète des fichiers auto-exécutés**, vous pourriez utiliser [autoruns](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns) de Sysinternals :
 ```
 autorunsc.exe -m -nobanner -a * -ct /accepteula
 ```
 ## Plus
 
-**Trouvez plus d'Autoruns comme les enregistrements dans** [**https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2**](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
+**Trouvez plus d'Autoruns comme des enregistrements dans** [**https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2**](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
 
 ## Références
 
@@ -312,10 +308,6 @@ autorunsc.exe -m -nobanner -a * -ct /accepteula
 - [https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
 - [https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell](https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell)
 
-<figure><img src="../../images/i3.png" alt=""><figcaption></figcaption></figure>
 
-**Conseil de bug bounty** : **inscrivez-vous** sur **Intigriti**, une plateforme de **bug bounty premium créée par des hackers, pour des hackers** ! Rejoignez-nous sur [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) aujourd'hui, et commencez à gagner des primes allant jusqu'à **100 000 $** !
-
-{% embed url="https://go.intigriti.com/hacktricks" %}
 
 {{#include ../../banners/hacktricks-training.md}}
