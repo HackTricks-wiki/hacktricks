@@ -1,41 +1,40 @@
-# FZ - Infrared
+# FZ - Інфрачервоний
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Intro <a href="#ir-signal-receiver-in-flipper-zero" id="ir-signal-receiver-in-flipper-zero"></a>
+## Вступ <a href="#ir-signal-receiver-in-flipper-zero" id="ir-signal-receiver-in-flipper-zero"></a>
 
-For more info about how Infrared works check:
+Для отримання додаткової інформації про те, як працює інфрачервоний, перегляньте:
 
 {{#ref}}
 ../infrared.md
 {{#endref}}
 
-## IR Signal Receiver in Flipper Zero <a href="#ir-signal-receiver-in-flipper-zero" id="ir-signal-receiver-in-flipper-zero"></a>
+## ІЧ-приймач у Flipper Zero <a href="#ir-signal-receiver-in-flipper-zero" id="ir-signal-receiver-in-flipper-zero"></a>
 
-Flipper uses a digital IR signal receiver TSOP, which **allows intercepting signals from IR remotes**. There are some **smartphones** like Xiaomi, which also have an IR port, but keep in mind that **most of them can only transmit** signals and are **unable to receive** them.
+Flipper використовує цифровий ІЧ-приймач TSOP, який **дозволяє перехоплювати сигнали від ІЧ-пультів**. Є деякі **смартфони**, такі як Xiaomi, які також мають ІЧ-порт, але майте на увазі, що **більшість з них можуть лише передавати** сигнали і **не здатні їх приймати**.
 
-The Flipper infrared **receiver is quite sensitive**. You can even **catch the signal** while remaining **somewhere in between** the remote and the TV. Pointing the remote directly at Flipper's IR port is unnecessary. This comes in handy when someone is switching channels while standing near the TV, and both you and Flipper are some distance away.
+Інфрачервоний **приймач Flipper досить чутливий**. Ви навіть можете **піймати сигнал**, залишаючись **десь посередині** між пультом і телевізором. Направляти пульт безпосередньо на ІЧ-порт Flipper не обов'язково. Це стане в нагоді, коли хтось переключає канали, стоячи біля телевізора, а ви і Flipper знаходитесь на певній відстані.
 
-As the **decoding of the infrared** signal happens on the **software** side, Flipper Zero potentially supports the **reception and transmission of any IR remote codes**. In the case of **unknown** protocols which could not be recognized - it **records and plays back** the raw signal exactly as received.
+Оскільки **декодування інфрачервоного** сигналу відбувається на **програмному** рівні, Flipper Zero потенційно підтримує **прийом і передачу будь-яких ІЧ-кодів пультів**. У випадку **невідомих** протоколів, які не можуть бути розпізнані - він **записує і відтворює** сирий сигнал точно так, як його отримано.
 
-## Actions
+## Дії
 
-### Universal Remotes
+### Універсальні пульти
 
-Flipper Zero can be used as a **universal remote to control any TV, air conditioner, or media center**. In this mode, Flipper **bruteforces** all **known codes** of all supported manufacturers **according to the dictionary from the SD card**. You don't need to choose a particular remote to turn off a restaurant TV.
+Flipper Zero може використовуватися як **універсальний пульт для керування будь-яким телевізором, кондиціонером або медіацентром**. У цьому режимі Flipper **брутфорсить** всі **відомі коди** всіх підтримуваних виробників **згідно з словником з SD-карти**. Вам не потрібно вибирати конкретний пульт, щоб вимкнути телевізор у ресторані.
 
-It is enough to press the power button in the Universal Remote mode, and Flipper will **sequentially send "Power Off"** commands of all the TVs it knows: Sony, Samsung, Panasonic... and so on. When the TV receives its signal, it will react and turn off.
+Досить натиснути кнопку живлення в режимі універсального пульта, і Flipper **послідовно надішле команди "Вимкнути живлення"** всіх телевізорів, які він знає: Sony, Samsung, Panasonic... і так далі. Коли телевізор отримає свій сигнал, він відреагує і вимкнеться.
 
-Such brute-force takes time. The larger the dictionary, the longer it will take to finish. It is impossible to find out which signal exactly the TV recognized since there is no feedback from the TV.
+Такий брутфорс займає час. Чим більший словник, тим довше це займе. Неможливо дізнатися, який саме сигнал телевізор розпізнав, оскільки немає зворотного зв'язку від телевізора.
 
-### Learn New Remote
+### Навчити новий пульт
 
-It's possible to **capture an infrared signal** with Flipper Zero. If it **finds the signal in the database** Flipper will automatically **know which device this is** and will let you interact with it.\
-If it doesn't, Flipper can **store** the **signal** and will allow you to **replay it**.
+Можливо **захопити інфрачервоний сигнал** за допомогою Flipper Zero. Якщо він **знайде сигнал у базі даних**, Flipper автоматично **знатиме, який це пристрій** і дозволить вам взаємодіяти з ним.\
+Якщо ні, Flipper може **зберегти** **сигнал** і дозволить вам **відтворити його**.
 
-## References
+## Посилання
 
 - [https://blog.flipperzero.one/infrared/](https://blog.flipperzero.one/infrared/)
 
 {{#include ../../../banners/hacktricks-training.md}}
-

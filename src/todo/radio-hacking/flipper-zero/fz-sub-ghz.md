@@ -4,13 +4,13 @@
 
 ## Intro <a href="#kfpn7" id="kfpn7"></a>
 
-Flipper Zero can **receive and transmit radio frequencies in the range of 300-928 MHz** with its built-in module, which can read, save, and emulate remote controls. These controls are used for interaction with gates, barriers, radio locks, remote control switches, wireless doorbells, smart lights, and more. Flipper Zero can help you to learn if your security is compromised.
+Flipper Zero може **приймати та передавати радіочастоти в діапазоні 300-928 МГц** за допомогою вбудованого модуля, який може читати, зберігати та емулювати пульти дистанційного керування. Ці пульти використовуються для взаємодії з воротами, бар'єрами, радіозамками, пультами дистанційного керування, бездротовими дзвінками, розумними лампами та іншим. Flipper Zero може допомогти вам дізнатися, чи ваша безпека скомпрометована.
 
 <figure><img src="../../../images/image (714).png" alt=""><figcaption></figcaption></figure>
 
 ## Sub-GHz hardware <a href="#kfpn7" id="kfpn7"></a>
 
-Flipper Zero has a built-in sub-1 GHz module based on a [﻿](https://www.st.com/en/nfc/st25r3916.html#overview)﻿[CC1101 chip](https://www.ti.com/lit/ds/symlink/cc1101.pdf) and a radio antenna (the maximum range is 50 meters). Both the CC1101 chip and the antenna are designed to operate at frequencies in the 300-348 MHz, 387-464 MHz, and 779-928 MHz bands.
+Flipper Zero має вбудований модуль суб-1 ГГц на основі [﻿](https://www.st.com/en/nfc/st25r3916.html#overview)﻿[чіпа CC1101](https://www.ti.com/lit/ds/symlink/cc1101.pdf) та радіоантену (максимальна дальність - 50 метрів). Як чіп CC1101, так і антена призначені для роботи на частотах у діапазонах 300-348 МГц, 387-464 МГц та 779-928 МГц.
 
 <figure><img src="../../../images/image (923).png" alt=""><figcaption></figcaption></figure>
 
@@ -19,87 +19,86 @@ Flipper Zero has a built-in sub-1 GHz module based on a [﻿](https://www.st.com
 ### Frequency Analyser
 
 > [!NOTE]
-> How to find which frequency is the remote using
+> Як дізнатися, яка частота використовується пультом
 
-When analysing, Flipper Zero is scanning signals strength (RSSI) at all the frequencies available in frequency configuration. Flipper Zero displays the frequency with the highest RSSI value, with signal strength higher than -90 [dBm](https://en.wikipedia.org/wiki/DBm).
+Під час аналізу Flipper Zero сканує силу сигналів (RSSI) на всіх частотах, доступних у конфігурації частот. Flipper Zero відображає частоту з найвищим значенням RSSI, зі силою сигналу вище -90 [dBm](https://en.wikipedia.org/wiki/DBm).
 
-To determine the remote's frequency, do the following:
+Щоб визначити частоту пульта, виконайте наступні дії:
 
-1. Place the remote control very close to the left of Flipper Zero.
-2. Go to **Main Menu** **→ Sub-GHz**.
-3. Select **Frequency Analyzer**, then press and hold the button on the remote control you want to analyze.
-4. Review the frequency value on the screen.
+1. Розмістіть пульт дуже близько до лівої частини Flipper Zero.
+2. Перейдіть до **Головне меню** **→ Sub-GHz**.
+3. Виберіть **Аналізатор частот**, потім натисніть і утримуйте кнопку на пульті, який ви хочете проаналізувати.
+4. Перегляньте значення частоти на екрані.
 
 ### Read
 
 > [!NOTE]
-> Find info about the frequency used (also another way to find which frequency is used)
+> Знайдіть інформацію про використану частоту (також інший спосіб дізнатися, яка частота використовується)
 
-The **Read** option **listens on the configured frequency** on the indicated modulation: 433.92 AM by default. If **something is found** when reading, **info is given** in the screen. This info could be use to replicate the signal in the future.
+Опція **Read** **слухає на налаштованій частоті** на вказаній модуляції: 433.92 AM за замовчуванням. Якщо **щось знайдено** під час читання, **інформація надається** на екрані. Цю інформацію можна використовувати для повторення сигналу в майбутньому.
 
-While Read is in use, it's possible to press the **left button** and **configure it**.\
-At this moment it has **4 modulations** (AM270, AM650, FM328 and FM476), and **several relevant frequencies** stored:
+Під час використання Read можна натиснути **ліву кнопку** та **налаштувати її**.\
+На даний момент є **4 модуляції** (AM270, AM650, FM328 та FM476), а також **кілька відповідних частот**, збережених:
 
 <figure><img src="../../../images/image (947).png" alt=""><figcaption></figcaption></figure>
 
-You can set **any that interests you**, however, if you are **not sure which frequency** could be the one used by the remote you have, **set Hopping to ON** (Off by default), and press the button several times until Flipper captures it and give you the info you need to set the frequency.
+Ви можете встановити **будь-яку, яка вас цікавить**, однак, якщо ви **не впевнені, яка частота** може бути використана вашим пультом, **встановіть Hopping на ON** (вимкнено за замовчуванням) і натискайте кнопку кілька разів, поки Flipper не захопить її і не надасть вам інформацію, необхідну для налаштування частоти.
 
 > [!CAUTION]
-> Switching between frequencies takes some time, therefore signals transmitted at the time of switching can be missed. For better signal reception, set a fixed frequency determined by Frequency Analyzer.
+> Перемикання між частотами займає деякий час, тому сигнали, що передаються під час перемикання, можуть бути пропущені. Для кращого прийому сигналу встановіть фіксовану частоту, визначену Аналізатором частот.
 
 ### **Read Raw**
 
 > [!NOTE]
-> Steal (and replay) a signal in the configured frequency
+> Вкрасти (та повторити) сигнал на налаштованій частоті
 
-The **Read Raw** option **records signals** send in the listening frequency. This can be used to **steal** a signal and **repeat** it.
+Опція **Read Raw** **записує сигнали**, що надсилаються на слуханій частоті. Це можна використовувати для **вкрадання** сигналу та **повторення** його.
 
-By default **Read Raw is also in 433.92 in AM650**, but if with the Read option you found that the signal that interest you is in a **different frequency/modulation, you can also modify that** pressing left (while inside the Read Raw option).
+За замовчуванням **Read Raw також на 433.92 в AM650**, але якщо з опцією Read ви виявили, що сигнал, який вас цікавить, на **іншій частоті/модуляції, ви також можете змінити це**, натискаючи ліву кнопку (під час перебування в опції Read Raw).
 
 ### Brute-Force
 
-If you know the protocol used for example by the garage door it's possible to g**enerate all the codes and send them with the Flipper Zero.** This is an example that support general common types of garages: [**https://github.com/tobiabocchi/flipperzero-bruteforce**](https://github.com/tobiabocchi/flipperzero-bruteforce)
+Якщо ви знаєте протокол, який використовується, наприклад, гаражними воротами, можна **згенерувати всі коди та надіслати їх за допомогою Flipper Zero.** Це приклад, який підтримує загальні типи гаражів: [**https://github.com/tobiabocchi/flipperzero-bruteforce**](https://github.com/tobiabocchi/flipperzero-bruteforce)
 
 ### Add Manually
 
 > [!NOTE]
-> Add signals from a configured list of protocols
+> Додати сигнали з налаштованого списку протоколів
 
-#### List of [supported protocols](https://docs.flipperzero.one/sub-ghz/add-new-remote) <a href="#id-3iglu" id="id-3iglu"></a>
+#### Список [підтримуваних протоколів](https://docs.flipperzero.one/sub-ghz/add-new-remote) <a href="#id-3iglu" id="id-3iglu"></a>
 
-| Princeton_433 (works with the majority of static code systems) | 433.92 | Static  |
+| Princeton_433 (працює з більшістю систем статичного коду) | 433.92 | Статичний  |
 | -------------------------------------------------------------- | ------ | ------- |
-| Nice Flo 12bit_433                                             | 433.92 | Static  |
-| Nice Flo 24bit_433                                             | 433.92 | Static  |
-| CAME 12bit_433                                                 | 433.92 | Static  |
-| CAME 24bit_433                                                 | 433.92 | Static  |
-| Linear_300                                                     | 300.00 | Static  |
-| CAME TWEE                                                      | 433.92 | Static  |
-| Gate TX_433                                                    | 433.92 | Static  |
-| DoorHan_315                                                    | 315.00 | Dynamic |
-| DoorHan_433                                                    | 433.92 | Dynamic |
-| LiftMaster_315                                                 | 315.00 | Dynamic |
-| LiftMaster_390                                                 | 390.00 | Dynamic |
-| Security+2.0_310                                               | 310.00 | Dynamic |
-| Security+2.0_315                                               | 315.00 | Dynamic |
-| Security+2.0_390                                               | 390.00 | Dynamic |
+| Nice Flo 12bit_433                                             | 433.92 | Статичний  |
+| Nice Flo 24bit_433                                             | 433.92 | Статичний  |
+| CAME 12bit_433                                                 | 433.92 | Статичний  |
+| CAME 24bit_433                                                 | 433.92 | Статичний  |
+| Linear_300                                                     | 300.00 | Статичний  |
+| CAME TWEE                                                      | 433.92 | Статичний  |
+| Gate TX_433                                                    | 433.92 | Статичний  |
+| DoorHan_315                                                    | 315.00 | Динамічний |
+| DoorHan_433                                                    | 433.92 | Динамічний |
+| LiftMaster_315                                                 | 315.00 | Динамічний |
+| LiftMaster_390                                                 | 390.00 | Динамічний |
+| Security+2.0_310                                               | 310.00 | Динамічний |
+| Security+2.0_315                                               | 315.00 | Динамічний |
+| Security+2.0_390                                               | 390.00 | Динамічний |
 
 ### Supported Sub-GHz vendors
 
-Check the list in [https://docs.flipperzero.one/sub-ghz/supported-vendors](https://docs.flipperzero.one/sub-ghz/supported-vendors)
+Перевірте список на [https://docs.flipperzero.one/sub-ghz/supported-vendors](https://docs.flipperzero.one/sub-ghz/supported-vendors)
 
 ### Supported Frequencies by region
 
-Check the list in [https://docs.flipperzero.one/sub-ghz/frequencies](https://docs.flipperzero.one/sub-ghz/frequencies)
+Перевірте список на [https://docs.flipperzero.one/sub-ghz/frequencies](https://docs.flipperzero.one/sub-ghz/frequencies)
 
 ### Test
 
 > [!NOTE]
-> Get dBms of the saved frequencies
+> Отримати dBms збережених частот
 
 ## Reference
 
 - [https://docs.flipperzero.one/sub-ghz](https://docs.flipperzero.one/sub-ghz)
 
 {{#include ../../../banners/hacktricks-training.md}}
-

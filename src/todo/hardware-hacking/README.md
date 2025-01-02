@@ -1,53 +1,52 @@
-# Hardware Hacking
+# Хардварне Хакерство
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## JTAG
 
-JTAG allows to perform a boundary scan. The boundary scan analyzes certain circuitry, including embedded boundary-scan cells and registers for each pin.
+JTAG дозволяє виконувати сканування меж. Сканування меж аналізує певні електронні схеми, включаючи вбудовані клітини та регістри сканування для кожного контакту.
 
-The JTAG standard defines **specific commands for conducting boundary scans**, including the following:
+Стандарт JTAG визначає **конкретні команди для проведення сканування меж**, включаючи наступні:
 
-- **BYPASS** allows you to test a specific chip without the overhead of passing through other chips.
-- **SAMPLE/PRELOAD** takes a sample of the data entering and leaving the device when it’s in its normal functioning mode.
-- **EXTEST** sets and reads pin states.
+- **BYPASS** дозволяє тестувати конкретний чіп без накладних витрат на проходження через інші чіпи.
+- **SAMPLE/PRELOAD** бере зразок даних, що входять і виходять з пристрою, коли він працює в нормальному режимі.
+- **EXTEST** встановлює та читає стани контактів.
 
-It can also support other commands such as:
+Він також може підтримувати інші команди, такі як:
 
-- **IDCODE** for identifying a device
-- **INTEST** for the internal testing of the device
+- **IDCODE** для ідентифікації пристрою
+- **INTEST** для внутрішнього тестування пристрою
 
-You might come across these instructions when you use a tool like the JTAGulator.
+Ви можете натрапити на ці інструкції, коли використовуєте інструмент, такий як JTAGulator.
 
-### The Test Access Port
+### Порт доступу до тестування
 
-Boundary scans include tests of the four-wire **Test Access Port (TAP)**, a general-purpose port that provides **access to the JTAG test support** functions built into a component. TAP uses the following five signals:
+Сканування меж включає тести чотирьохпровідного **Порту доступу до тестування (TAP)**, загального призначення, який забезпечує **доступ до функцій підтримки тестування JTAG**, вбудованих у компонент. TAP використовує наступні п'ять сигналів:
 
-- Test clock input (**TCK**) The TCK is the **clock** that defines how often the TAP controller will take a single action (in other words, jump to the next state in the state machine).
-- Test mode select (**TMS**) input TMS controls the **finite state machine**. On each beat of the clock, the device’s JTAG TAP controller checks the voltage on the TMS pin. If the voltage is below a certain threshold, the signal is considered low and interpreted as 0, whereas if the voltage is above a certain threshold, the signal is considered high and interpreted as 1.
-- Test data input (**TDI**) TDI is the pin that sends **data into the chip through the scan cells**. Each vendor is responsible for defining the communication protocol over this pin, because JTAG doesn’t define this.
-- Test data output (**TDO**) TDO is the pin that sends **data out of the chip**.
-- Test reset (**TRST**) input The optional TRST resets the finite state machine **to a known good state**. Alternatively, if the TMS is held at 1 for five consecutive clock cycles, it invokes a reset, the same way the TRST pin would, which is why TRST is optional.
+- Вхід тактового сигналу тестування (**TCK**) TCK є **тактовим сигналом**, який визначає, як часто контролер TAP буде виконувати одну дію (іншими словами, переходити до наступного стану в автоматі станів).
+- Вхід вибору режиму тестування (**TMS**) TMS контролює **кінцевий автомат станів**. На кожному тактовому імпульсі контролер JTAG TAP пристрою перевіряє напругу на контакті TMS. Якщо напруга нижча за певний поріг, сигнал вважається низьким і інтерпретується як 0, тоді як якщо напруга вища за певний поріг, сигнал вважається високим і інтерпретується як 1.
+- Вхід даних тестування (**TDI**) TDI є контактом, який надсилає **дані в чіп через клітини сканування**. Кожен виробник відповідає за визначення протоколу зв'язку через цей контакт, оскільки JTAG цього не визначає.
+- Вихід даних тестування (**TDO**) TDO є контактом, який надсилає **дані з чіпа**.
+- Вхід скидання тестування (**TRST**) Додатковий TRST скидає кінцевий автомат станів **в відомий хороший стан**. Альтернативно, якщо TMS утримується на 1 протягом п'яти послідовних тактових циклів, це викликає скидання, так само, як і контакт TRST, тому TRST є необов'язковим.
 
-Sometimes you will be able to find those pins marked in the PCB. In other occasions you might need to **find them**.
+Іноді ви зможете знайти ці контакти, позначені на PCB. В інших випадках вам може знадобитися **знайти їх**.
 
-### Identifying JTAG pins
+### Ідентифікація контактів JTAG
 
-The fastest but most expensive way to detect JTAG ports is by using the **JTAGulator**, a device created specifically for this purpose (although it can **also detect UART pinouts**).
+Найшвидший, але найдорожчий спосіб виявлення портів JTAG - це використання **JTAGulator**, пристрою, створеного спеціально для цієї мети (хоча він **також може виявляти UART виводи**).
 
-It has **24 channels** you can connect to the boards pins. Then it performs a **BF attack** of all the possible combinations sending **IDCODE** and **BYPASS** boundary scan commands. If it receives a response, it displays the channel corresponding to each JTAG signal
+Він має **24 канали**, які ви можете підключити до контактів плат. Потім він виконує **BF-атаку** всіх можливих комбінацій, надсилаючи команди сканування меж **IDCODE** та **BYPASS**. Якщо він отримує відповідь, він відображає канал, що відповідає кожному сигналу JTAG.
 
-A cheaper but much slower way of identifying JTAG pinouts is by using the [**JTAGenum**](https://github.com/cyphunk/JTAGenum/) loaded on an Arduino-compatible microcontroller.
+Дешевший, але набагато повільніший спосіб ідентифікації виводів JTAG - це використання [**JTAGenum**](https://github.com/cyphunk/JTAGenum/), завантаженого на мікроконтролер, сумісний з Arduino.
 
-Using **JTAGenum**, you’d first **define the pins of the probing** device that you’ll use for the enumeration.You’d have to reference the device’s pinout diagram, and then connect these pins with the test points on your target device.
+Використовуючи **JTAGenum**, спочатку вам потрібно **визначити контакти пристрою для проби**, які ви будете використовувати для перерахунку. Вам потрібно буде посилатися на діаграму виводів пристрою, а потім підключити ці контакти до тестових точок на вашому цільовому пристрої.
 
-A **third way** to identify JTAG pins is by **inspecting the PCB** for one of the pinouts. In some cases, PCBs might conveniently provide the **Tag-Connect interface**, which is a clear indication that the board has a JTAG connector, too. You can see what that interface looks like at [https://www.tag-connect.com/info/](https://www.tag-connect.com/info/). Additionally, inspecting the **datasheets of the chipsets on the PCB** might reveal pinout diagrams that point to JTAG interfaces.
+**Третій спосіб** ідентифікації контактів JTAG - це **огляд PCB** на наявність одного з виводів. У деяких випадках PCB можуть зручно надавати **інтерфейс Tag-Connect**, що є чітким показником того, що плата також має роз'єм JTAG. Ви можете побачити, як виглядає цей інтерфейс на [https://www.tag-connect.com/info/](https://www.tag-connect.com/info/). Крім того, огляд **технічних характеристик чіпсетів на PCB** може виявити діаграми виводів, які вказують на інтерфейси JTAG.
 
 ## SDW
 
-SWD is an ARM-specific protocol designed for debugging.
+SWD - це специфічний для ARM протокол, призначений для налагодження.
 
-The SWD interface requires **two pins**: a bidirectional **SWDIO** signal, which is the equivalent of JTAG’s **TDI and TDO pins and a clock**, and **SWCLK**, which is the equivalent of **TCK** in JTAG. Many devices support the **Serial Wire or JTAG Debug Port (SWJ-DP)**, a combined JTAG and SWD interface that enables you to connect either a SWD or JTAG probe to the target.
+Інтерфейс SWD вимагає **двох контактів**: двонаправлений **SWDIO** сигнал, який є еквівалентом контактів JTAG **TDI та TDO**, та тактовий сигнал **SWCLK**, який є еквівалентом **TCK** в JTAG. Багато пристроїв підтримують **Порт налагодження серійного проводу або JTAG (SWJ-DP)**, комбінований інтерфейс JTAG та SWD, який дозволяє підключати або зонд SWD, або JTAG до цілі. 
 
 {{#include ../../banners/hacktricks-training.md}}
-

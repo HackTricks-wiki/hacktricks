@@ -1,18 +1,15 @@
-# Industrial Control Systems Hacking 
+# Хакінг промислових контрольних систем
 
-## About this Section
+## Про цей розділ
 
-This section contains all about Industrial Control Systems including concepts as well as methodologies to hack them with various security issues that persists in them. 
+Цей розділ містить всю інформацію про промислові контрольні системи, включаючи концепції, а також методології їх хакінгу з різними проблемами безпеки, які в них існують.
 
-Industrial Control Systems are everywhere, since industries are vital for economic development of a nation. But these ICS are hard to update and lesser advancements are made in this field. Hence, finding security flaws is common here. Most of the protocols and standards used here where developed back in the 90's and have much lesser capabilities as compared to current attack scenarios. 
+Промислові контрольні системи є всюди, оскільки промисловість є життєво важливою для економічного розвитку нації. Але ці ICS важко оновлювати, і в цій галузі зроблено менше досягнень. Отже, виявлення вразливостей безпеки є звичайним явищем. Більшість протоколів і стандартів, що використовуються тут, були розроблені ще в 90-х роках і мають значно менші можливості в порівнянні з сучасними сценаріями атак.
 
-It has become important to secure these systems since damaging them can cost a lot and even lives at the worst case. To understand Industrial Contol Systems security, knowing the internals of them is necessary. 
+Стає важливим захистити ці системи, оскільки їх пошкодження може коштувати багато і навіть забрати життя в найгіршому випадку. Щоб зрозуміти безпеку промислових контрольних систем, необхідно знати їх внутрішню структуру.
 
-Since Industrial Control Systems are installed following set standards, knowing each components would help in interconnecting every other mechanisms in the control system. Installation of these devices like PLCs and SCADA systems is different is various industries, hence information gathering is critical. 
+Оскільки промислові контрольні системи встановлюються відповідно до встановлених стандартів, знання кожного компонента допоможе в з'єднанні всіх інших механізмів у контрольній системі. Встановлення таких пристроїв, як PLC та SCADA системи, відрізняється в різних галузях, тому збір інформації є критично важливим.
 
-Industrial Control Systems can be complicated at times and hence require a lot of patience to do anything. It's all about probing and reconnaissance before planning attacks and developing any exploits. 
+Промислові контрольні системи можуть бути складними, і тому вимагають багато терпіння для виконання будь-яких дій. Все зводиться до дослідження та розвідки перед плануванням атак і розробкою будь-яких експлойтів.
 
-These techniques can also be used to protect against attacks and blue teaming for industrial control systems. 
-
-
-
+Ці техніки також можуть бути використані для захисту від атак і блакитного командування для промислових контрольних систем.

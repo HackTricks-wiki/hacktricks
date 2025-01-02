@@ -1,61 +1,58 @@
 {{#include ../banners/hacktricks-training.md}}
 
-In a ping response TTL:\
+У відповіді ping TTL:\
 127 = Windows\
 254 = Cisco\
-Lo demás,algunlinux
+Інше, якийсь linux
 
 $1$- md5\
 $2$or $2a$ - Blowfish\
 $5$- sha256\
 $6$- sha512
 
-If you do not know what is behind a service, try to make and HTTP GET request.
+Якщо ви не знаєте, що стоїть за сервісом, спробуйте зробити HTTP GET запит.
 
-**UDP Scans**\
+**UDP Сканування**\
 nc -nv -u -z -w 1 \<IP> 160-16
 
-An empty UDP packet is sent to a specific port. If the UDP port is open, no reply is sent back from the target machine. If the UDP port is closed, an ICMP port unreachable packet should be sent back from the target machine.\
+Порожній UDP пакет надсилається на конкретний порт. Якщо UDP порт відкритий, відповідь не надсилається з цільової машини. Якщо UDP порт закритий, з цільової машини має бути надіслано пакет ICMP "порт недоступний".\
 
-UDP port scanning is often unreliable, as firewalls and routers may drop ICMP\
- packets. This can lead to false positives in your scan, and you will regularly see\
- UDP port scans showing all UDP ports open on a scanned machine.\
- o Most port scanners do not scan all available ports, and usually have a preset list\
- of “interesting ports” that are scanned.
+Сканування UDP портів часто ненадійне, оскільки брандмауери та маршрутизатори можуть відкидати пакети ICMP.\
+Це може призвести до хибнопозитивних результатів у вашому скануванні, і ви регулярно будете бачити,\
+що сканування UDP портів показує всі UDP порти відкритими на сканованій машині.\
+Більшість сканерів портів не сканують всі доступні порти і зазвичай мають попередньо встановлений список\
+"цікавих портів", які скануються.
 
-# CTF - Tricks
+# CTF - Трюки
 
-In **Windows** use **Winzip** to search for files.\
-**Alternate data Streams**: _dir /r | find ":$DATA"_\
-
+У **Windows** використовуйте **Winzip** для пошуку файлів.\
+**Альтернативні потоки даних**: _dir /r | find ":$DATA"_\
 ```
 binwalk --dd=".*" <file> #Extract everything
 binwalk -M -e -d=10000 suspicious.pdf #Extract, look inside extracted files and continue extracing (depth of 10000)
 ```
-
-## Crypto
+## Крипто
 
 **featherduster**\
 
 **Basae64**(6—>8) —> 0...9, a...z, A…Z,+,/\
 **Base32**(5 —>8) —> A…Z, 2…7\
 **Base85** (Ascii85, 7—>8) —> 0...9, a...z, A...Z, ., -, :, +, =, ^, !, /, \*, ?, &, <, >, (, ), \[, ], {, }, @, %, $, #\
-**Uuencode** --> Start with "_begin \<mode> \<filename>_" and weird chars\
-**Xxencoding** --> Start with "_begin \<mode> \<filename>_" and B64\
+**Uuencode** --> Починається з "_begin \<mode> \<filename>_" і дивних символів\
+**Xxencoding** --> Починається з "_begin \<mode> \<filename>_" і B64\
 \
-**Vigenere** (frequency analysis) —> [https://www.guballa.de/vigenere-solver](https://www.guballa.de/vigenere-solver)\
-**Scytale** (offset of characters) —> [https://www.dcode.fr/scytale-cipher](https://www.dcode.fr/scytale-cipher)
+**Vigenere** (аналіз частот) —> [https://www.guballa.de/vigenere-solver](https://www.guballa.de/vigenere-solver)\
+**Scytale** (зсув символів) —> [https://www.dcode.fr/scytale-cipher](https://www.dcode.fr/scytale-cipher)
 
 **25x25 = QR**
 
 factordb.com\
 rsatool
 
-Snow --> Hide messages using spaces and tabs
+Snow --> Сховати повідомлення, використовуючи пробіли та табуляції
 
-# Characters
+# Символи
 
-%E2%80%AE => RTL Character (writes payloads backwards)
+%E2%80%AE => RTL символ (пише пейлоади задом наперед)
 
 {{#include ../banners/hacktricks-training.md}}
-

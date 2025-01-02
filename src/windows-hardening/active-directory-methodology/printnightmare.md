@@ -2,7 +2,6 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-**Check this awesome blog post about PrintNightmare in 2024: [https://www.hackingarticles.in/understanding-printnightmare-vulnerability/](https://www.hackingarticles.in/understanding-printnightmare-vulnerability/)**
+**Перегляньте цей чудовий блог-пост про PrintNightmare у 2024 році: [https://www.hackingarticles.in/understanding-printnightmare-vulnerability/](https://www.hackingarticles.in/understanding-printnightmare-vulnerability/)**
 
 {{#include ../../banners/hacktricks-training.md}}
-

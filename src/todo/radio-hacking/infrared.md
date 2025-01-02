@@ -1,82 +1,81 @@
-# Infrared
+# Інфрачервоний
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## How the Infrared Works <a href="#how-the-infrared-port-works" id="how-the-infrared-port-works"></a>
+## Як працює інфрачервоний <a href="#how-the-infrared-port-works" id="how-the-infrared-port-works"></a>
 
-**Infrared light is invisible to humans**. IR wavelength is from **0.7 to 1000 microns**. Household remotes use an IR signal for data transmission and operate in the wavelength range of 0.75..1.4 microns. A microcontroller in the remote makes an infrared LED blink with a specific frequency, turning the digital signal into an IR signal.
+**Інфрачервоне світло невидиме для людей**. Довжина хвилі ІЧ становить **від 0.7 до 1000 мікрон**. Пульт дистанційного керування використовує ІЧ сигнал для передачі даних і працює в діапазоні довжин хвиль 0.75..1.4 мікрон. Мікроконтролер у пульті змушує інфрачервоний світлодіод блимати з певною частотою, перетворюючи цифровий сигнал в ІЧ сигнал.
 
-To receive IR signals a **photoreceiver** is used. It **converts IR light into voltage pulses**, which are already **digital signals**. Usually, there is a **dark light filter inside the receiver**, which lets **only the desired wavelength through** and cuts out noise.
+Для прийому ІЧ сигналів використовується **фотоприймач**. Він **перетворює ІЧ світло в імпульси напруги**, які вже є **цифровими сигналами**. Зазвичай, у **приймачі є фільтр темного світла**, який пропускає **тільки бажану довжину хвилі** і відсікає шум.
 
-### Variety of IR Protocols <a href="#variety-of-ir-protocols" id="variety-of-ir-protocols"></a>
+### Різноманітність ІЧ протоколів <a href="#variety-of-ir-protocols" id="variety-of-ir-protocols"></a>
 
-IR protocols differ in 3 factors:
+ІЧ протоколи відрізняються за 3 факторами:
 
-- bit encoding
-- data structure
-- carrier frequency — often in range 36..38 kHz
+- кодування бітів
+- структура даних
+- несуча частота — часто в діапазоні 36..38 кГц
 
-#### Bit encoding ways <a href="#bit-encoding-ways" id="bit-encoding-ways"></a>
+#### Способи кодування бітів <a href="#bit-encoding-ways" id="bit-encoding-ways"></a>
 
-**1. Pulse Distance Encoding**
+**1. Кодування відстані імпульсів**
 
-Bits are encoded by modulating the duration of the space between pulses. The width of the pulse itself is constant.
+Біти кодуються шляхом модуляції тривалості простору між імпульсами. Ширина самого імпульсу є сталою.
 
 <figure><img src="../../images/image (295).png" alt=""><figcaption></figcaption></figure>
 
-**2. Pulse Width Encoding**
+**2. Кодування ширини імпульсів**
 
-Bits are encoded by modulation of the pulse width. The width of space after pulse burst is constant.
+Біти кодуються шляхом модуляції ширини імпульсу. Ширина простору після сплеску імпульсу є сталою.
 
 <figure><img src="../../images/image (282).png" alt=""><figcaption></figcaption></figure>
 
-**3. Phase Encoding**
+**3. Фазове кодування**
 
-It is also known as Manchester encoding. The logical value is defined by the polarity of the transition between pulse burst and space. "Space to pulse burst" denotes logic "0", "pulse burst to space" denotes logic "1".
+Це також відоме як кодування Манчестера. Логічне значення визначається полярністю переходу між сплеском імпульсу та простором. "Простір до сплеску імпульсу" позначає логіку "0", "сплеск імпульсу до простору" позначає логіку "1".
 
 <figure><img src="../../images/image (634).png" alt=""><figcaption></figcaption></figure>
 
-**4. Combination of previous ones and other exotics**
+**4. Комбінація попередніх та інших екзотичних**
 
 > [!NOTE]
-> There are IR protocols that are **trying to become universal** for several types of devices. The most famous ones are RC5 and NEC. Unfortunately, the most famous **does not mean the most common**. In my environment, I met just two NEC remotes and no RC5 ones.
+> Існують ІЧ протоколи, які **намагаються стати універсальними** для кількох типів пристроїв. Найвідоміші з них — RC5 та NEC. На жаль, найвідоміше **не означає найпоширеніше**. У моєму оточенні я зустрів лише два пульти NEC і жодного RC5.
 >
-> Manufacturers love to use their own unique IR protocols, even within the same range of devices (for example, TV-boxes). Therefore, remotes from different companies and sometimes from different models from the same company, are unable to work with other devices of the same type.
+> Виробники люблять використовувати свої унікальні ІЧ протоколи, навіть у межах одного і того ж діапазону пристроїв (наприклад, ТВ-бокси). Тому пульти від різних компаній і іноді від різних моделей однієї компанії не можуть працювати з іншими пристроями того ж типу.
 
-### Exploring an IR signal
+### Дослідження ІЧ сигналу
 
-The most reliable way to see how the remote IR signal looks like is to use an oscilloscope. It does not demodulate or invert the received signal, it is just displayed "as is". This is useful for testing and debugging. I will show the expected signal on the example of the NEC IR protocol.
+Найнадійніший спосіб побачити, як виглядає ІЧ сигнал пульта, — це використовувати осцилограф. Він не демодулює і не інвертує отриманий сигнал, він просто відображається "як є". Це корисно для тестування та налагодження. Я покажу очікуваний сигнал на прикладі протоколу NEC.
 
 <figure><img src="../../images/image (235).png" alt=""><figcaption></figcaption></figure>
 
-Usually, there is a preamble at the beginning of an encoded packet. This allows the receiver to determine the level of gain and background. There are also protocols without preamble, for example, Sharp.
+Зазвичай на початку закодованого пакета є преамбула. Це дозволяє приймачеві визначити рівень підсилення та фоновий шум. Існують також протоколи без преамбули, наприклад, Sharp.
 
-Then data is transmitted. The structure, preamble, and bit encoding method are determined by the specific protocol.
+Потім передаються дані. Структура, преамбула та метод кодування бітів визначаються конкретним протоколом.
 
-**NEC IR protocol** contains a short command and a repeat code, which is sent while the button is pressed. Both the command and the repeat code have the same preamble at the beginning.
+**Протокол NEC** містить коротку команду та код повторення, який надсилається під час натискання кнопки. Як команда, так і код повторення мають однакову преамбулу на початку.
 
-NEC **command**, in addition to the preamble, consists of an address byte and a command-number byte, by which the device understands what needs to be performed. Address and command-number bytes are duplicated with inverse values, to check the integrity of the transmission. There is an additional stop bit at the end of the command.
+**Команда NEC**, крім преамбули, складається з байта адреси та байта номера команди, за яким пристрій розуміє, що потрібно виконати. Байти адреси та номера команди дублюються з інверсними значеннями, щоб перевірити цілісність передачі. В кінці команди є додатковий стоп-біт.
 
-The **repeat code** has a "1" after the preamble, which is a stop bit.
+**Код повторення** має "1" після преамбули, що є стоп-бітом.
 
-For **logic "0" and "1"** NEC uses Pulse Distance Encoding: first, a pulse burst is transmitted after which there is a pause, its length sets the value of the bit.
+Для **логіки "0" та "1"** NEC використовує кодування відстані імпульсів: спочатку передається сплеск імпульсу, після якого йде пауза, довжина якої задає значення біта.
 
-### Air Conditioners
+### Кондиціонери
 
-Unlike other remotes, **air conditioners do not transmit just the code of the pressed button**. They also **transmit all the information** when a button is pressed to assure that the **air conditioned machine and the remote are synchronised**.\
-This will avoid that a machine set as 20ºC is increased to 21ºC with one remote, and then when another remote, which still has the temperature as 20ºC, is used to increase more the temperature, it will "increase" it to 21ºC (and not to 22ºC thinking it's in 21ºC).
+На відміну від інших пультів, **кондиціонери не передають лише код натиснутої кнопки**. Вони також **передають всю інформацію**, коли кнопка натискається, щоб забезпечити, що **кондиціонер і пульт синхронізовані**.\
+Це дозволить уникнути ситуації, коли машина, налаштована на 20ºC, підвищується до 21ºC з одного пульта, а потім, коли використовується інший пульт, який все ще має температуру 20ºC, температура підвищується до 21ºC (а не до 22ºC, вважаючи, що вона на 21ºC).
 
-### Attacks
+### Атаки
 
-You can attack Infrared with Flipper Zero:
+Ви можете атакувати інфрачервоний з Flipper Zero:
 
 {{#ref}}
 flipper-zero/fz-infrared.md
 {{#endref}}
 
-## References
+## Посилання
 
 - [https://blog.flipperzero.one/infrared/](https://blog.flipperzero.one/infrared/)
 
 {{#include ../../banners/hacktricks-training.md}}
-

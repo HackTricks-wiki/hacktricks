@@ -1,46 +1,43 @@
-# Integrity Levels
+# Рівні цілісності
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Integrity Levels
+## Рівні цілісності
 
-In Windows Vista and later versions, all protected items come with an **integrity level** tag. This setup mostly assigns a "medium" integrity level to files and registry keys, except for certain folders and files that Internet Explorer 7 can write to at a low integrity level. The default behavior is for processes initiated by standard users to have a medium integrity level, whereas services typically operate at a system integrity level. A high-integrity label safeguards the root directory.
+У Windows Vista та пізніших версіях усі захищені елементи мають тег **рівня цілісності**. Це налаштування в основному призначає "середній" рівень цілісності для файлів і ключів реєстру, за винятком певних папок і файлів, до яких Internet Explorer 7 може записувати на низькому рівні цілісності. За замовчуванням процеси, ініційовані стандартними користувачами, мають середній рівень цілісності, тоді як служби зазвичай працюють на рівні системи. Мітка високої цілісності захищає кореневий каталог.
 
-A key rule is that objects can't be modified by processes with a lower integrity level than the object's level. The integrity levels are:
+Ключове правило полягає в тому, що об'єкти не можуть бути змінені процесами з нижчим рівнем цілісності, ніж рівень об'єкта. Рівні цілісності:
 
-- **Untrusted**: This level is for processes with anonymous logins. %%%Example: Chrome%%%
-- **Low**: Mainly for internet interactions, especially in Internet Explorer's Protected Mode, affecting associated files and processes, and certain folders like the **Temporary Internet Folder**. Low integrity processes face significant restrictions, including no registry write access and limited user profile write access.
-- **Medium**: The default level for most activities, assigned to standard users and objects without specific integrity levels. Even members of the Administrators group operate at this level by default.
-- **High**: Reserved for administrators, allowing them to modify objects at lower integrity levels, including those at the high level itself.
-- **System**: The highest operational level for the Windows kernel and core services, out of reach even for administrators, ensuring protection of vital system functions.
-- **Installer**: A unique level that stands above all others, enabling objects at this level to uninstall any other object.
+- **Ненадійний**: Цей рівень призначений для процесів з анонімними входами. %%%Приклад: Chrome%%%
+- **Низький**: Головним чином для взаємодії з Інтернетом, особливо в захищеному режимі Internet Explorer, що впливає на пов'язані файли та процеси, а також на певні папки, такі як **Тимчасова папка Інтернету**. Процеси з низькою цілісністю стикаються з суттєвими обмеженнями, включаючи відсутність доступу на запис у реєстр і обмежений доступ на запис у профіль користувача.
+- **Середній**: Рівень за замовчуванням для більшості дій, призначений стандартним користувачам та об'єктам без специфічних рівнів цілісності. Навіть члени групи адміністраторів за замовчуванням працюють на цьому рівні.
+- **Високий**: Зарезервований для адміністраторів, що дозволяє їм змінювати об'єкти на нижчих рівнях цілісності, включаючи ті, що на високому рівні.
+- **Система**: Найвищий операційний рівень для ядра Windows та основних служб, недоступний навіть для адміністраторів, що забезпечує захист життєво важливих системних функцій.
+- **Встановлювач**: Унікальний рівень, що перевищує всі інші, що дозволяє об'єктам на цьому рівні видаляти будь-який інший об'єкт.
 
-You can get the integrity level of a process using **Process Explorer** from **Sysinternals**, accessing the **properties** of the process and viewing the "**Security**" tab:
+Ви можете отримати рівень цілісності процесу, використовуючи **Process Explorer** від **Sysinternals**, отримавши доступ до **властивостей** процесу та переглянувши вкладку "**Безпека**":
 
 ![](<../../images/image (824).png>)
 
-You can also get your **current integrity level** using `whoami /groups`
+Ви також можете отримати свій **поточний рівень цілісності**, використовуючи `whoami /groups`
 
 ![](<../../images/image (325).png>)
 
-### Integrity Levels in File-system
+### Рівні цілісності в файловій системі
 
-A object inside the file-system may need an **minimum integrity level requirement** and if a process doesn't have this integrity process it won't be able to interact with it.\
-For example, lets **create a regular from a regular user console file and check the permissions**:
-
+Об'єкт у файловій системі може вимагати **мінімального рівня цілісності**, і якщо процес не має цього рівня цілісності, він не зможе взаємодіяти з ним.\
+Наприклад, давайте **створимо файл з консольного сеансу звичайного користувача та перевіримо дозволи**:
 ```
 echo asd >asd.txt
 icacls asd.txt
 asd.txt BUILTIN\Administrators:(I)(F)
-        DESKTOP-IDJHTKP\user:(I)(F)
-        NT AUTHORITY\SYSTEM:(I)(F)
-        NT AUTHORITY\INTERACTIVE:(I)(M,DC)
-        NT AUTHORITY\SERVICE:(I)(M,DC)
-        NT AUTHORITY\BATCH:(I)(M,DC)
+DESKTOP-IDJHTKP\user:(I)(F)
+NT AUTHORITY\SYSTEM:(I)(F)
+NT AUTHORITY\INTERACTIVE:(I)(M,DC)
+NT AUTHORITY\SERVICE:(I)(M,DC)
+NT AUTHORITY\BATCH:(I)(M,DC)
 ```
-
-Now, lets assign a minimum integrity level of **High** to the file. This **must be done from a console** running as **administrator** as a **regular console** will be running in Medium Integrity level and **won't be allowed** to assign High Integrity level to an object:
-
+Тепер давайте призначимо мінімальний рівень цілісності **Високий** для файлу. Це **повинно бути зроблено з консолі**, що працює як **адміністратор**, оскільки **звичайна консоль** працюватиме на середньому рівні цілісності і **не буде дозволено** призначити високий рівень цілісності об'єкту:
 ```
 icacls asd.txt /setintegritylevel(oi)(ci) High
 processed file: asd.txt
@@ -48,16 +45,14 @@ Successfully processed 1 files; Failed processing 0 files
 
 C:\Users\Public>icacls asd.txt
 asd.txt BUILTIN\Administrators:(I)(F)
-        DESKTOP-IDJHTKP\user:(I)(F)
-        NT AUTHORITY\SYSTEM:(I)(F)
-        NT AUTHORITY\INTERACTIVE:(I)(M,DC)
-        NT AUTHORITY\SERVICE:(I)(M,DC)
-        NT AUTHORITY\BATCH:(I)(M,DC)
-        Mandatory Label\High Mandatory Level:(NW)
+DESKTOP-IDJHTKP\user:(I)(F)
+NT AUTHORITY\SYSTEM:(I)(F)
+NT AUTHORITY\INTERACTIVE:(I)(M,DC)
+NT AUTHORITY\SERVICE:(I)(M,DC)
+NT AUTHORITY\BATCH:(I)(M,DC)
+Mandatory Label\High Mandatory Level:(NW)
 ```
-
-This is where things get interesting. You can see that the user `DESKTOP-IDJHTKP\user` has **FULL privileges** over the file (indeed this was the user that created the file), however, due to the minimum integrity level implemented he won't be able to modify the file anymore unless he is running inside a High Integrity Level (note that he will be able to read it):
-
+Це місце, де все стає цікавим. Ви можете побачити, що користувач `DESKTOP-IDJHTKP\user` має **ПОВНІ привілеї** над файлом (насправді це був користувач, який створив файл), однак, через мінімальний рівень цілісності, який було впроваджено, він більше не зможе змінювати файл, якщо не працює в межах Високого Рівня Цілісності (зауважте, що він зможе його читати):
 ```
 echo 1234 > asd.txt
 Access is denied.
@@ -66,35 +61,31 @@ del asd.txt
 C:\Users\Public\asd.txt
 Access is denied.
 ```
-
 > [!NOTE]
-> **Therefore, when a file has a minimum integrity level, in order to modify it you need to be running at least in that integrity level.**
+> **Отже, коли файл має мінімальний рівень цілісності, для його модифікації вам потрібно працювати принаймні на цьому рівні цілісності.**
 
-### Integrity Levels in Binaries
+### Рівні цілісності в бінарних файлах
 
-I made a copy of `cmd.exe` in `C:\Windows\System32\cmd-low.exe` and set it an **integrity level of low from an administrator console:**
-
+Я зробив копію `cmd.exe` в `C:\Windows\System32\cmd-low.exe` і встановив йому **рівень цілісності низький з консолі адміністратора:**
 ```
 icacls C:\Windows\System32\cmd-low.exe
 C:\Windows\System32\cmd-low.exe NT AUTHORITY\SYSTEM:(I)(F)
-                                BUILTIN\Administrators:(I)(F)
-                                BUILTIN\Users:(I)(RX)
-                                APPLICATION PACKAGE AUTHORITY\ALL APPLICATION PACKAGES:(I)(RX)
-                                APPLICATION PACKAGE AUTHORITY\ALL RESTRICTED APP PACKAGES:(I)(RX)
-                                Mandatory Label\Low Mandatory Level:(NW)
+BUILTIN\Administrators:(I)(F)
+BUILTIN\Users:(I)(RX)
+APPLICATION PACKAGE AUTHORITY\ALL APPLICATION PACKAGES:(I)(RX)
+APPLICATION PACKAGE AUTHORITY\ALL RESTRICTED APP PACKAGES:(I)(RX)
+Mandatory Label\Low Mandatory Level:(NW)
 ```
-
-Now, when I run `cmd-low.exe` it will **run under a low-integrity level** instead of a medium one:
+Тепер, коли я запускаю `cmd-low.exe`, він буде **запускатися з низьким рівнем цілісності** замість середнього:
 
 ![](<../../images/image (313).png>)
 
-For curious people, if you assign high integrity level to a binary (`icacls C:\Windows\System32\cmd-high.exe /setintegritylevel high`) it won't run with high integrity level automatically (if you invoke it from a medium integrity level --by default-- it will run under a medium integrity level).
+Для цікавих людей, якщо ви призначите високий рівень цілісності бінарному файлу (`icacls C:\Windows\System32\cmd-high.exe /setintegritylevel high`), він не буде автоматично запускатися з високим рівнем цілісності (якщо ви викликаєте його з середнього рівня цілісності -- за замовчуванням -- він буде запускатися з середнім рівнем цілісності).
 
-### Integrity Levels in Processes
+### Рівні цілісності в процесах
 
-Not all files and folders have a minimum integrity level, **but all processes are running under an integrity level**. And similar to what happened with the file-system, **if a process wants to write inside another process it must have at least the same integrity level**. This means that a process with low integrity level can’t open a handle with full access to a process with medium integrity level.
+Не всі файли та папки мають мінімальний рівень цілісності, **але всі процеси працюють під рівнем цілісності**. І подібно до того, що сталося з файловою системою, **якщо процес хоче записати всередину іншого процесу, він повинен мати принаймні той же рівень цілісності**. Це означає, що процес з низьким рівнем цілісності не може відкрити дескриптор з повним доступом до процесу з середнім рівнем цілісності.
 
-Due to the restrictions commented in this and the previous section, from a security point of view, it's always **recommended to run a process in the lower level of integrity possible**.
+З огляду на обмеження, про які йдеться в цьому та попередньому розділах, з точки зору безпеки завжди **рекомендується запускати процес на найнижчому можливому рівні цілісності**.
 
 {{#include ../../banners/hacktricks-training.md}}
-

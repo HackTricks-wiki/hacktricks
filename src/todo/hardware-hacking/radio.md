@@ -1,199 +1,198 @@
-# Radio
+# Радіо
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## SigDigger
 
-[**SigDigger** ](https://github.com/BatchDrake/SigDigger)is a free digital signal analyzer for GNU/Linux and macOS, designed to extract information of unknown radio signals. It supports a variety of SDR devices through SoapySDR, and allows adjustable demodulation of FSK, PSK and ASK signals, decode analog video, analyze bursty signals and listen to analog voice channels (all in real time).
+[**SigDigger** ](https://github.com/BatchDrake/SigDigger) є безкоштовним аналізатором цифрових сигналів для GNU/Linux та macOS, призначеним для витягування інформації з невідомих радіосигналів. Він підтримує різноманітні SDR пристрої через SoapySDR і дозволяє регулювати демодуляцію FSK, PSK та ASK сигналів, декодувати аналогове відео, аналізувати сплески сигналів та слухати аналогові голосові канали (все в реальному часі).
 
-### Basic Config
+### Основна конфігурація
 
-After installing there are a few things that you could consider configuring.\
-In settings (the second tab button) you can select the **SDR device** or **select a file** to read and which frequency to syntonise and the Sample rate (recommended to up to 2.56Msps if your PC support it)\\
+Після встановлення є кілька речей, які ви можете розглянути для налаштування.\
+У налаштуваннях (друга кнопка вкладки) ви можете вибрати **SDR пристрій** або **вибрати файл** для читання та частоту для синхронізації, а також частоту дискретизації (рекомендується до 2.56Msps, якщо ваш ПК це підтримує)\\
 
 ![](<../../images/image (245).png>)
 
-In the GUI behaviour it's recommended to enable a few things if your PC support it:
+У поведінці GUI рекомендується активувати кілька речей, якщо ваш ПК це підтримує:
 
 ![](<../../images/image (472).png>)
 
 > [!NOTE]
-> If you realise that your PC is not capturing things try to disable OpenGL and lowering the sample rate.
+> Якщо ви помітили, що ваш ПК не захоплює сигнали, спробуйте вимкнути OpenGL і знизити частоту дискретизації.
 
-### Uses
+### Використання
 
-- Just to **capture some time of a signal and analyze it** just maintain the button "Push to capture" as long as you need.
+- Просто **захопіть деякий час сигналу та проаналізуйте його**, утримуючи кнопку "Push to capture" стільки, скільки потрібно.
 
 ![](<../../images/image (960).png>)
 
-- The **Tuner** of SigDigger helps to **capture better signals** (but it can also degrade them). Ideally start with 0 and keep **making it bigger until** you find the **noise** introduce is **bigger** than the **improvement of the signal** you need).
+- **Тюнер** SigDigger допомагає **захоплювати кращі сигнали** (але він також може їх погіршити). Ідеально почати з 0 і продовжувати **збільшувати**, поки **шум**, що вводиться, не стане **більшим**, ніж **покращення сигналу**, яке вам потрібно).
 
 ![](<../../images/image (1099).png>)
 
-### Synchronize with radio channel
+### Синхронізація з радіоканалом
 
-With [**SigDigger** ](https://github.com/BatchDrake/SigDigger)synchronize with the channel you want to hear, configure "Baseband audio preview" option, configure the bandwith to get all the info being sent and then set the Tuner to the level before the noise is really starting to increase:
+З [**SigDigger** ](https://github.com/BatchDrake/SigDigger)синхронізуйтеся з каналом, який ви хочете почути, налаштуйте опцію "Baseband audio preview", налаштуйте ширину смуги, щоб отримати всю інформацію, що надсилається, а потім встановіть Тюнер на рівень, перед тим як шум почне дійсно зростати:
 
 ![](<../../images/image (585).png>)
 
-## Interesting tricks
+## Цікаві трюки
 
-- When a device is sending bursts of information, usually the **first part is going to be a preamble** so you **don't** need to **worry** if you **don't find information** in there **or if there are some errors** there.
-- In frames of information you usually should **find different frames well aligned between them**:
+- Коли пристрій надсилає сплески інформації, зазвичай **перша частина буде преамбулою**, тому вам **не потрібно** **турбуватися**, якщо ви **не знайдете інформацію** там **або якщо там є деякі помилки**.
+- У кадрах інформації ви зазвичай повинні **знайти різні кадри, добре вирівняні між собою**:
 
 ![](<../../images/image (1076).png>)
 
 ![](<../../images/image (597).png>)
 
-- **After recovering the bits you might need to process them someway**. For example, in Manchester codification a up+down will be a 1 or 0 and a down+up will be the other one. So pairs of 1s and 0s (ups and downs) will be a real 1 or a real 0.
-- Even if a signal is using Manchester codification (it's impossible to find more than two 0s or 1s in a row), you might **find several 1s or 0s together in the preamble**!
+- **Після відновлення бітів вам, можливо, потрібно буде обробити їх якимось чином**. Наприклад, у манчестерській кодуванні up+down буде 1 або 0, а down+up буде іншим. Таким чином, пари 1s і 0s (ups і downs) будуть реальним 1 або реальним 0.
+- Навіть якщо сигнал використовує манчестерську кодування (неможливо знайти більше двох 0s або 1s підряд), ви можете **знайти кілька 1s або 0s разом у преамбулі**!
 
-### Uncovering modulation type with IQ
+### Виявлення типу модуляції з IQ
 
-There are 3 ways to store information in signals: Modulating the **amplitude**, **frequency** or **phase**.\
-If you are checking a signal there are different ways to try to figure out what is being used to store information (fin more ways below) but a good one is to check the IQ graph.
+Існує 3 способи зберігати інформацію в сигналах: модуляція **амплітуди**, **частоти** або **фази**.\
+Якщо ви перевіряєте сигнал, є різні способи спробувати з'ясувати, що використовується для зберігання інформації (знайдіть більше способів нижче), але хороший спосіб - перевірити графік IQ.
 
 ![](<../../images/image (788).png>)
 
-- **Detecting AM**: If in the IQ graph appears for example **2 circles** (probably one in 0 and other in a different amplitude), it could means that this is an AM signal. This is because in the IQ graph the distance between the 0 and the circle is the amplitude of the signal, so it's easy to visualize different amplitudes being used.
-- **Detecting PM**: Like in the previous image, if you find small circles not related between them it probably means that a phase modulation is used. This is because in the IQ graph, the angle between the point and the 0,0 is the phase of the signal, so that means that 4 different phases are used.
-  - Note that if the information is hidden in the fact that a phase is changed and not in the phase itself, you won't see different phases clearly differentiated.
-- **Detecting FM**: IQ doesn't have a field to identify frequencies (distance to centre is amplitude and angle is phase).\
-  Therefore, to identify FM, you should **only see basically a circle** in this graph.\
-  Moreover, a different frequency is "represented" by the IQ graph by a **speed acceleration across the circle** (so in SysDigger selecting the signal the IQ graph is populated, if you find an acceleration or change of direction in the created circle it could mean that this is FM):
+- **Виявлення AM**: Якщо на графіку IQ з'являються, наприклад, **2 кола** (можливо, одне в 0 і інше на іншій амплітуді), це може означати, що це AM сигнал. Це тому, що на графіку IQ відстань між 0 і колом - це амплітуда сигналу, тому легко візуалізувати різні амплітуди, що використовуються.
+- **Виявлення PM**: Як на попередньому зображенні, якщо ви знайдете маленькі кола, не пов'язані між собою, це, ймовірно, означає, що використовується фазова модуляція. Це тому, що на графіку IQ кут між точкою та 0,0 - це фаза сигналу, тому це означає, що використовуються 4 різні фази.
+- Зверніть увагу, що якщо інформація прихована в тому, що фаза змінюється, а не в самій фазі, ви не побачите чітко різні фази.
+- **Виявлення FM**: IQ не має поля для ідентифікації частот (відстань до центру - це амплітуда, а кут - це фаза).\
+Тому, щоб ідентифікувати FM, ви повинні **лише бачити в основному коло** на цьому графіку.\
+Більше того, інша частота "представляється" графіком IQ через **прискорення швидкості по колу** (тому в SysDigger, вибираючи сигнал, графік IQ заповнюється, якщо ви знайдете прискорення або зміну напрямку в створеному колі, це може означати, що це FM):
 
-## AM Example
+## Приклад AM
 
 {% file src="../../images/sigdigger_20220308_165547Z_2560000_433500000_float32_iq.raw" %}
 
-### Uncovering AM
+### Виявлення AM
 
-#### Checking the envelope
+#### Перевірка обгортки
 
-Checking AM info with [**SigDigger** ](https://github.com/BatchDrake/SigDigger)and just looking at the **envelop** you can see different clear amplitude levels. The used signal is sending pulses with information in AM, this is how one pulse looks like:
+Перевіряючи AM інформацію з [**SigDigger** ](https://github.com/BatchDrake/SigDigger)і просто дивлячись на **обгортку**, ви можете побачити різні чіткі рівні амплітуди. Використовуваний сигнал надсилає імпульси з інформацією в AM, ось як виглядає один імпульс:
 
 ![](<../../images/image (590).png>)
 
-And this is how part of the symbol looks like with the waveform:
+А ось як виглядає частина символу з формою хвилі:
 
 ![](<../../images/image (734).png>)
 
-#### Checking the Histogram
+#### Перевірка гістограми
 
-You can **select the whole signal** where information is located, select **Amplitude** mode and **Selection** and click on **Histogram.** You can observer that 2 clear levels are only found
+Ви можете **вибрати весь сигнал**, де знаходиться інформація, вибрати режим **Амплітуда** та **Вибір** і натиснути на **Гістограму**. Ви можете спостерігати, що 2 чіткі рівні лише знайдені
 
 ![](<../../images/image (264).png>)
 
-For example, if you select Frequency instead of Amplitude in this AM signal you find just 1 frequency (no way information modulated in frequency is just using 1 freq).
+Наприклад, якщо ви виберете Частоту замість Амплітуди в цьому AM сигналі, ви знайдете лише 1 частоту (немає способу, щоб інформація, модуляція в частоті, використовувала лише 1 частоту).
 
 ![](<../../images/image (732).png>)
 
-If you find a lot of frequencies potentially this won't be a FM, probably the signal frequency was just modified because of the channel.
+Якщо ви знайдете багато частот, це, ймовірно, не буде FM, можливо, частота сигналу просто була змінена через канал.
 
-#### With IQ
+#### З IQ
 
-In this example you can see how there is a **big circle** but also **a lot of points in the centre.**
+У цьому прикладі ви можете побачити, як є **велике коло**, але також **багато точок у центрі**.
 
 ![](<../../images/image (222).png>)
 
-### Get Symbol Rate
+### Отримати символічну частоту
 
-#### With one symbol
+#### З одним символом
 
-Select the smallest symbol you can find (so you are sure it's just 1) and check the "Selection freq". I this case it would be 1.013kHz (so 1kHz).
+Виберіть найменший символ, який ви можете знайти (щоб ви були впевнені, що це лише 1) і перевірте "Вибір частоти". У цьому випадку це буде 1.013kHz (тобто 1kHz).
 
 ![](<../../images/image (78).png>)
 
-#### With a group of symbols
+#### З групою символів
 
-You can also indicate the number of symbols you are going to select and SigDigger will calculate the frequency of 1 symbol (the more symbols selected the better probably). In this scenario I selected 10 symbols and the "Selection freq" is 1.004 Khz:
+Ви також можете вказати кількість символів, які ви збираєтеся вибрати, і SigDigger розрахує частоту 1 символу (чим більше символів вибрано, тим краще, ймовірно). У цьому сценарії я вибрав 10 символів, і "Вибір частоти" становить 1.004 Khz:
 
 ![](<../../images/image (1008).png>)
 
-### Get Bits
+### Отримати біти
 
-Having found this is an **AM modulated** signal and the **symbol rate** (and knowing that in this case something up means 1 and something down means 0), it's very easy to **obtain the bits** encoded in the signal. So, select the signal with info and configure the sampling and decision and press sample (check that **Amplitude** is selected, the discovered **Symbol rate** is configured and the **Gadner clock recovery** is selected):
+Знайшовши, що це **AM модуляційний** сигнал і **символічна частота** (і знаючи, що в цьому випадку щось up означає 1, а щось down означає 0), дуже легко **отримати біти**, закодовані в сигналі. Отже, виберіть сигнал з інформацією та налаштуйте дискретизацію та рішення, а потім натисніть зразок (перевірте, що **Амплітуда** вибрана, виявлена **Символічна частота** налаштована, а **Gadner clock recovery** вибрана):
 
 ![](<../../images/image (965).png>)
 
-- **Sync to selection intervals** means that if you previously selected intervals to find the symbol rate, that symbol rate will be used.
-- **Manual** means that the indicated symbol rate is going to be used
-- In **Fixed interval selection** you indicate the number of intervals that should be selected and it calculates the symbol rate from it
-- **Gadner clock recovery** is usually the best option, but you still need to indicate some approximate symbol rate.
+- **Синхронізація з вибраними інтервалами** означає, що якщо ви раніше вибрали інтервали для знаходження символічної частоти, ця символічна частота буде використана.
+- **Ручний** означає, що вказана символічна частота буде використана
+- У **Виборі фіксованого інтервалу** ви вказуєте кількість інтервалів, які повинні бути вибрані, і вона розраховує символічну частоту з цього
+- **Gadner clock recovery** зазвичай є найкращим варіантом, але вам все ще потрібно вказати приблизну символічну частоту.
 
-Pressing sample this appears:
+Натискаючи зразок, з'являється це:
 
 ![](<../../images/image (644).png>)
 
-Now, to make SigDigger understand **where is the range** of the level carrying information you need to click on the **lower level** and maintain clicked until the biggest level:
+Тепер, щоб змусити SigDigger зрозуміти **де знаходиться діапазон** рівня, що несе інформацію, вам потрібно натиснути на **нижній рівень** і утримувати натиснутим до найбільшого рівня:
 
 ![](<../../images/image (439).png>)
 
-If there would have been for example **4 different levels of amplitude**, you should have need to configure the **Bits per symbol to 2** and select from the smallest to the biggest.
+Якщо б, наприклад, було **4 різні рівні амплітуди**, вам потрібно було б налаштувати **Біти на символ 2** і вибрати від найменшого до найбільшого.
 
-Finally **increasing** the **Zoom** and **changing the Row size** you can see the bits (and you can select all and copy to get all the bits):
+Нарешті, **збільшуючи** **Масштаб** і **змінюючи розмір рядка**, ви можете побачити біти (і ви можете вибрати все та скопіювати, щоб отримати всі біти):
 
 ![](<../../images/image (276).png>)
 
-If the signal has more than 1 bit per symbol (for example 2), SigDigger has **no way to know which symbol is** 00, 01, 10, 11, so it will use different **grey scales** the represent each (and if you copy the bits it will use **numbers from 0 to 3**, you will need to treat them).
+Якщо сигнал має більше ніж 1 біт на символ (наприклад, 2), SigDigger **не має способу знати, який символ є** 00, 01, 10, 11, тому він використовуватиме різні **сірі відтінки**, щоб представити кожен (і якщо ви скопіюєте біти, він використовуватиме **числа від 0 до 3**, вам потрібно буде їх обробити).
 
-Also, use **codifications** such as **Manchester**, and **up+down** can be **1 or 0** and an down+up can be a 1 or 0. In those cases you need to **treat the obtained ups (1) and downs (0)** to substitute the pairs of 01 or 10 as 0s or 1s.
+Також використовуйте **кодування**, такі як **Манчестер**, і **up+down** може бути **1 або 0**, а down+up може бути 1 або 0. У таких випадках вам потрібно **обробити отримані ups (1) і downs (0)**, щоб замінити пари 01 або 10 на 0s або 1s.
 
-## FM Example
+## Приклад FM
 
 {% file src="../../images/sigdigger_20220308_170858Z_2560000_433500000_float32_iq.raw" %}
 
-### Uncovering FM
+### Виявлення FM
 
-#### Checking the frequencies and waveform
+#### Перевірка частот і форми хвилі
 
-Signal example sending information modulated in FM:
+Приклад сигналу, що надсилає інформацію, модуляцію в FM:
 
 ![](<../../images/image (725).png>)
 
-In the previous image you can observe pretty good that **2 frequencies are used** but if you **observe** the **waveform** you might n**ot be able to identify correctly the 2 different frequencies**:
+На попередньому зображенні ви можете досить добре спостерігати, що **використовується 2 частоти**, але якщо ви **спостерігаєте** за **формою хвилі**, ви, можливо, **не зможете правильно ідентифікувати 2 різні частоти**:
 
 ![](<../../images/image (717).png>)
 
-This is because I capture the signal in booth frequencies, therefore one is approximately the other in negative:
+Це тому, що я захопив сигнал на обох частотах, тому одна приблизно є негативною іншої:
 
 ![](<../../images/image (942).png>)
 
-If the synchronized frequency is **closer to one frequency than to the other** you can easily see the 2 different frequencies:
+Якщо синхронізована частота **ближча до однієї частоти, ніж до іншої**, ви можете легко побачити 2 різні частоти:
 
 ![](<../../images/image (422).png>)
 
 ![](<../../images/image (488).png>)
 
-#### Checking the histogram
+#### Перевірка гістограми
 
-Checking the frequency histogram of the signal with information you can easily see 2 different signals:
+Перевіряючи частотну гістограму сигналу з інформацією, ви можете легко побачити 2 різні сигнали:
 
 ![](<../../images/image (871).png>)
 
-In this case if you check the **Amplitude histogram** you will find **only one amplitude**, so it **cannot be AM** (if you find a lot of amplitudes it might be because the signal has been losing power along the channel):
+У цьому випадку, якщо ви перевірите **Гістограму амплітуди**, ви знайдете **лише одну амплітуду**, тому це **не може бути AM** (якщо ви знайдете багато амплітуд, це може бути через те, що сигнал втратив потужність по каналу):
 
 ![](<../../images/image (817).png>)
 
-And this is would be phase histogram (which makes very clear the signal is not modulated in phase):
+А це була б гістограма фази (яка чітко показує, що сигнал не модуляційний у фазі):
 
 ![](<../../images/image (996).png>)
 
-#### With IQ
+#### З IQ
 
-IQ doesn't have a field to identify frequencies (distance to centre is amplitude and angle is phase).\
-Therefore, to identify FM, you should **only see basically a circle** in this graph.\
-Moreover, a different frequency is "represented" by the IQ graph by a **speed acceleration across the circle** (so in SysDigger selecting the signal the IQ graph is populated, if you find an acceleration or change of direction in the created circle it could mean that this is FM):
+IQ не має поля для ідентифікації частот (відстань до центру - це амплітуда, а кут - це фаза).\
+Тому, щоб ідентифікувати FM, ви повинні **лише бачити в основному коло** на цьому графіку.\
+Більше того, інша частота "представляється" графіком IQ через **прискорення швидкості по колу** (тому в SysDigger, вибираючи сигнал, графік IQ заповнюється, якщо ви знайдете прискорення або зміну напрямку в створеному колі, це може означати, що це FM):
 
 ![](<../../images/image (81).png>)
 
-### Get Symbol Rate
+### Отримати символічну частоту
 
-You can use the **same technique as the one used in the AM example** to get the symbol rate once you have found the frequencies carrying symbols.
+Ви можете використовувати **ту ж техніку, що і в прикладі AM**, щоб отримати символічну частоту, як тільки ви знайдете частоти, що несуть символи.
 
-### Get Bits
+### Отримати біти
 
-You can use the **same technique as the one used in the AM example** to get the bits once you have **found the signal is modulated in frequency** and the **symbol rate**.
+Ви можете використовувати **ту ж техніку, що і в прикладі AM**, щоб отримати біти, як тільки ви **знайдете, що сигнал модуляційний у частоті** і **символічна частота**.
 
 {{#include ../../banners/hacktricks-training.md}}
-

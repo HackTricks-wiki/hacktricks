@@ -1,146 +1,143 @@
-# HackTricks Values & FAQ
+# HackTricks Значення та FAQ
 
 {{#include ../banners/hacktricks-training.md}}
 
-## HackTricks Values
+## Значення HackTricks
 
 > [!TIP]
-> These are the **values of the HackTricks Project**:
+> Це **значення проекту HackTricks**:
 >
-> - Give **FREE** access to **EDUCATIONAL hacking** resources to **ALL** Internet.
->   - Hacking is about learning, and learning should be as free as possible.
->   - The purpose of this book is to serve as a comprehensive **educational resource**.
-> - **STORE** awesome **hacking** techniques that the community publishes giving the **ORIGINAL** **AUTHORS** all the **credits**.
->   - **We don't want the credit from other people**, we just want to store cool tricks for everyone.
->   - We also write **our own researches** in HackTricks.
->   - In several cases we will just write **in HackTricks a summary of the important parts** of the technique and will **encourage the lector to visit the original post** for more details.
-> - **ORGANIZE** all the hacking techniques in the book so it's **MORE ACCESSIBLE**
->   - The HackTricks team has dedicated thousands of hours for free **only to organize the content** so people can **learn faster**
+> - Надати **БЕЗКОШТОВНИЙ** доступ до **ОСВІТНІХ хакерських** ресурсів **ВСІМ** в Інтернеті.
+>   - Хакерство - це навчання, а навчання має бути якомога більш безкоштовним.
+>   - Мета цієї книги - слугувати всебічним **освітнім ресурсом**.
+> - **ЗБЕРІГАТИ** чудові **хакерські** техніки, які публікує спільнота, надаючи **ОРИГІНАЛЬНИМ** **АВТОРАМ** всі **кредити**.
+>   - **Ми не хочемо кредиту від інших людей**, ми просто хочемо зберігати класні трюки для всіх.
+>   - Ми також пишемо **свої власні дослідження** в HackTricks.
+>   - У кількох випадках ми просто напишемо **в HackTricks резюме важливих частин** техніки і **заохочуватимемо читача відвідати оригінальний пост** для отримання додаткових деталей.
+> - **ОРГАНІЗУВАТИ** всі хакерські техніки в книзі, щоб вони були **БІЛЬШ ДОСТУПНІМИ**
+>   - Команда HackTricks присвятила тисячі годин безкоштовно **тільки для організації контенту**, щоб люди могли **навчатися швидше**
 
 <figure><img src="../images/hack tricks gif.gif" alt="" width="375"><figcaption></figcaption></figure>
 
-## HackTricks faq
+## FAQ HackTricks
 
 > [!TIP]
 >
-> - **Thank you so much for these resources, how can I thank you?**
+> - **Дуже дякую за ці ресурси, як я можу вас подякувати?**
 
-You can publicly thanks HackTricks teams for putting together all these resources publicly in a tweet mentioning [**@hacktricks_live**](https://twitter.com/hacktricks_live).\
-If you are specially grateful you can also [**sponsor the project here**](https://github.com/sponsors/carlospolop).\
-And don't forget to **give a star in the Github projects!** (Find the links below).
+Ви можете публічно подякувати командам HackTricks за те, що зібрали всі ці ресурси публічно в твітті, згадуючи [**@hacktricks_live**](https://twitter.com/hacktricks_live).\
+Якщо ви особливо вдячні, ви також можете [**підтримати проект тут**](https://github.com/sponsors/carlospolop).\
+І не забудьте **поставити зірку в проектах Github!** (Знайдіть посилання нижче).
 
 > [!TIP]
 >
-> - **How can I contribute to the project?**
+> - **Як я можу внести свій внесок у проект?**
 
-You can **share new tips and tricks with the community or fix bugs** you find in the books sending a **Pull Request** to the respective Github pages:
+Ви можете **поділитися новими порадами та трюками зі спільнотою або виправити помилки**, які ви знайдете в книгах, надіславши **Pull Request** на відповідні сторінки Github:
 
 - [https://github.com/carlospolop/hacktricks](https://github.com/carlospolop/hacktricks)
 - [https://github.com/carlospolop/hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)
 
-Don't forget to **give a star in the Github projects!**
+Не забудьте **поставити зірку в проектах Github!**
 
 > [!TIP]
 >
-> - **Can I copy some content from HackTricks and put it in my blog?**
+> - **Чи можу я скопіювати деякий контент з HackTricks і розмістити його в своєму блозі?**
 
-Yes, you can, but **don't forget to mention the specific link(s)** where the content was taken from.
+Так, ви можете, але **не забудьте згадати конкретне посилання(я),** звідки був взятий контент.
 
 > [!TIP]
 >
-> - **How can I cite a page of HackTricks?**
+> - **Як я можу цитувати сторінку HackTricks?**
 
-As long as the link **of** the page(s) were you took the information from appears it's enough.\
-If you need a bibtex you can use something like:
-
+Досить, щоб з'явилося посилання **на** сторінку(і), звідки ви взяли інформацію.\
+Якщо вам потрібен bibtex, ви можете використовувати щось на кшталт:
 ```latex
 @misc{hacktricks-bibtexing,
-  author = {"HackTricks Team" or the Authors name of the specific page/trick},
-  title = {Title of the Specific Page},
-  year = {Year of Last Update (check it at the end of the page)},
-  url = {\url{https://book.hacktricks.xyz/specific-page}},
+author = {"HackTricks Team" or the Authors name of the specific page/trick},
+title = {Title of the Specific Page},
+year = {Year of Last Update (check it at the end of the page)},
+url = {\url{https://book.hacktricks.xyz/specific-page}},
 }
 ```
+> [!WARNING]
+>
+> - **Чи можу я скопіювати всі HackTricks у свій блог?**
+
+**Я б не хотів**. Це **не принесе користі нікому**, оскільки весь **контент вже доступний публічно** в офіційних книгах HackTricks безкоштовно.
+
+Якщо ви боїтеся, що це зникне, просто форкніть його в Github або завантажте, як я вже сказав, це вже безкоштовно.
 
 > [!WARNING]
 >
-> - **Can I copy all HackTricks in my blog?**
+> - **Чому у вас є спонсори? Чи є книги HackTricks комерційними?**
 
-**I would rather not**. Thats **not going to benefit anyone** as all the **content is already publicly available** in the official HackTricks books for free.
+Перша **цінність HackTricks** полягає в тому, щоб запропонувати **БЕЗКОШТОВНІ** освітні ресурси з хакінгу **ВСІМ** у світі. Команда HackTricks **присвятила тисячі годин** для надання цього контенту, знову ж таки, **БЕЗКОШТОВНО**.
 
-If you fear that it will disappear, just fork it in Github or download it, as I said it's already free.
+Якщо ви вважаєте, що книги HackTricks створені для **комерційних цілей**, ви **ЦІЛКОМ ПОМИЛЯЄТЕСЬ**.
 
-> [!WARNING]
->
-> - **Why do you have sponsors? Are HackTricks books for commercial purposes?**
+У нас є спонсори, тому що, навіть якщо весь контент БЕЗКОШТОВНИЙ, ми хочемо **надати спільноті можливість оцінити нашу роботу**, якщо вони цього хочуть. Тому ми пропонуємо людям можливість донатити HackTricks через [**Github sponsors**](https://github.com/sponsors/carlospolop), а також **відповідним компаніям з кібербезпеки** спонсорувати HackTricks і **мати деякі оголошення** в книзі, при цьому **оголошення** завжди розміщуються в місцях, де вони **видимі**, але **не заважають процесу навчання**, якщо хтось зосереджується на контенті.
 
-The first **HackTricks** **value** is to offer **FREE** hacking educational resources to **ALL** the world. The HackTricks team has **dedicated thousands of hours** to offer this content, again, for **FREE**.
-
-If you think HackTricks books are made for **commercial purposes** you are **COMPLETELY WRONG**.
-
-We have sponsors because, even if all the content is FREE, we want to **offer the community the possibility of appreciating our work** if they want to. Therefore, we offer people the option to donate to HackTricks via [**Github sponsors**](https://github.com/sponsors/carlospolop), and **relevant cybersecurity companies** to sponsor HackTricks and to **have some ads** in the book being the **ads** always placed in places where make them **visible** but **doesn't disturb the learning** process if someone focus in the content.
-
-You won't find HackTricks filled with annoying ads like other blogs with much less content than HackTricks, because HackTricks is not made for commercial purposes.
+Ви не знайдете HackTricks, заповнені набридливими оголошеннями, як інші блоги з набагато меншою кількістю контенту, оскільки HackTricks не створено для комерційних цілей.
 
 > [!CAUTION]
 >
-> - **What should I do if some HackTricks page is based on my blog post but it isn't referenced?**
+> - **Що мені робити, якщо якась сторінка HackTricks базується на моєму блозі, але не згадана?**
 
-**We are very sorry. This shouldn't have happened**. Please, let us know via Github issues, Twitter, Discord... the link of the HackTricks page with the content and the link of your blog and **we will check it and add it ASAP**.
-
-> [!CAUTION]
->
-> - **What should I do if there is content from my blog in HackTricks and I don't want it there?**
-
-Note that having links to your page in HackTricks:
-
-- Improve your **SEO**
-- The content gets **translated to more than 15 languages** making possible for more people to access this content
-- **HackTricks encourages** people to **check your page** (several people has mentioned us that since some page of them is in HackTricks they receive more visits)
-
-However, If you still want the content of your blog to be removed from HackTricks just let us know and we will definitely **remove every link to your blog**, and any content based on it.
+**Нам дуже шкода. Це не повинно було статися**. Будь ласка, дайте нам знати через Github issues, Twitter, Discord... посилання на сторінку HackTricks з контентом і посилання на ваш блог, і **ми перевіримо це і додамо якомога швидше**.
 
 > [!CAUTION]
 >
-> - **What should I do if I find copy-pasted content in HackTricks?**
+> - **Що мені робити, якщо в HackTricks є контент з мого блогу, і я не хочу, щоб він там був?**
 
-We always **give the original authors all the credits**. If you find a page with copy-pasted content without original source referenced, let us know and we will either **remove it**, **add the link before the text**, or **rewrite it adding the link**.
+Зверніть увагу, що наявність посилань на вашу сторінку в HackTricks:
+
+- Покращує ваше **SEO**
+- Контент **перекладається на більше ніж 15 мов**, що дозволяє більшій кількості людей отримати доступ до цього контенту
+- **HackTricks заохочує** людей **перевіряти вашу сторінку** (декілька людей згадували нам, що з моменту, коли їхня сторінка з'явилася в HackTricks, вони отримують більше відвідувань)
+
+Однак, якщо ви все ще хочете, щоб контент вашого блогу був видалений з HackTricks, просто дайте нам знати, і ми обов'язково **видалимо всі посилання на ваш блог** та будь-який контент, заснований на ньому.
+
+> [!CAUTION]
+>
+> - **Що мені робити, якщо я знайду скопійований контент у HackTricks?**
+
+Ми завжди **надаємо оригінальним авторам всі кредити**. Якщо ви знайдете сторінку зі скопійованим контентом без згадування оригінального джерела, дайте нам знати, і ми або **видалимо це**, **додамо посилання перед текстом**, або **перепишемо, додавши посилання**.
 
 ## LICENSE
 
-Copyright © All rights reserved unless otherwise specified.
+Copyright © Усі права захищені, якщо не вказано інше.
 
-#### License Summary:
+#### Підсумок ліцензії:
 
-- Attribution: You are free to:
-  - Share — copy and redistribute the material in any medium or format.
-  - Adapt — remix, transform, and build upon the material.
+- Attribution: Ви вільні:
+- Share — копіювати та розповсюджувати матеріал у будь-якому середовищі або форматі.
+- Adapt — реміксувати, трансформувати та розвивати матеріал.
 
-#### Additional Terms:
+#### Додаткові умови:
 
-- Third-Party Content: Some parts of this blog/book may include content from other sources, such as excerpts from other blogs or publications. The use of such content is done under the principles of fair use or with explicit permission from the respective copyright holders. Please refer to the original sources for specific licensing information regarding third-party content.
-- Authorship: The original content authored by HackTricks is subject to the terms of this license. You are encouraged to attribute this work to the author when sharing or adapting it.
+- Третій контент: Деякі частини цього блогу/книги можуть містити контент з інших джерел, таких як уривки з інших блогів або публікацій. Використання такого контенту здійснюється відповідно до принципів добросовісного використання або з явним дозволом відповідних правовласників. Будь ласка, зверніться до оригінальних джерел для отримання конкретної інформації про ліцензування щодо контенту третіх сторін.
+- Авторство: Оригінальний контент, створений HackTricks, підлягає умовам цієї ліцензії. Вам рекомендується вказувати це творіння автору при його поширенні або адаптації.
 
-#### Exemptions:
+#### Винятки:
 
-- Commercial Use: For inquiries regarding commercial use of this content, please contact me.
+- Комерційне використання: Для запитів щодо комерційного використання цього контенту, будь ласка, зв'яжіться зі мною.
 
-This license does not grant any trademark or branding rights in relation to the content. All trademarks and branding featured in this blog/book are the property of their respective owners.
+Ця ліцензія не надає жодних прав на товарні знаки або брендинг у відношенні до контенту. Усі товарні знаки та брендинг, представлені в цьому блозі/книзі, є власністю відповідних власників.
 
-**By accessing or using HackTricks, you agree to abide by the terms of this license. If you do not agree with these terms, please, do not access this website.**
+**Відкриваючи або використовуючи HackTricks, ви погоджуєтеся дотримуватися умов цієї ліцензії. Якщо ви не погоджуєтеся з цими умовами, будь ласка, не відкривайте цей веб-сайт.**
 
-## **Disclaimer**
+## **Відмова від відповідальності**
 
 > [!CAUTION]
-> This book, 'HackTricks,' is intended for educational and informational purposes only. The content within this book is provided on an 'as is' basis, and the authors and publishers make no representations or warranties of any kind, express or implied, about the completeness, accuracy, reliability, suitability, or availability of the information, products, services, or related graphics contained within this book. Any reliance you place on such information is therefore strictly at your own risk.
+> Ця книга, 'HackTricks', призначена лише для освітніх та інформаційних цілей. Контент у цій книзі надається на основі 'як є', і автори та видавці не роблять жодних заяв або гарантій будь-якого роду, явних або неявних, щодо повноти, точності, надійності, придатності або доступності інформації, продуктів, послуг або супутніх графіків, що містяться в цій книзі. Будь-яка залежність, яку ви покладете на таку інформацію, є строго на ваш власний ризик.
 >
-> The authors and publishers shall in no event be liable for any loss or damage, including without limitation, indirect or consequential loss or damage, or any loss or damage whatsoever arising from loss of data or profits arising out of, or in connection with, the use of this book.
+> Автори та видавці не несуть жодної відповідальності за будь-які втрати або збитки, включаючи, без обмежень, непрямі або наслідкові втрати або збитки, або будь-які втрати або збитки, що виникають внаслідок втрати даних або прибутків, що виникають з, або у зв'язку з використанням цієї книги.
 >
-> Furthermore, the techniques and tips described in this book are provided for educational and informational purposes only, and should not be used for any illegal or malicious activities. The authors and publishers do not condone or support any illegal or unethical activities, and any use of the information contained within this book is at the user's own risk and discretion.
+> Крім того, техніки та поради, описані в цій книзі, надаються лише для освітніх та інформаційних цілей і не повинні використовуватися для будь-якої незаконної або зловмисної діяльності. Автори та видавці не схвалюють і не підтримують жодну незаконну або неетичну діяльність, і будь-яке використання інформації, що міститься в цій книзі, є на ваш власний ризик і на ваш розсуд.
 >
-> The user is solely responsible for any actions taken based on the information contained within this book, and should always seek professional advice and assistance when attempting to implement any of the techniques or tips described herein.
+> Користувач несе повну відповідальність за будь-які дії, вжиті на основі інформації, що міститься в цій книзі, і завжди повинен звертатися за професійною порадою та допомогою, намагаючись реалізувати будь-які з технік або порад, описаних тут.
 >
-> By using this book, the user agrees to release the authors and publishers from any and all liability and responsibility for any damages, losses, or harm that may result from the use of this book or any of the information contained within it.
+> Використовуючи цю книгу, користувач погоджується звільнити авторів та видавців від будь-якої відповідальності та відповідальності за будь-які збитки, втрати або шкоду, які можуть виникнути внаслідок використання цієї книги або будь-якої інформації, що міститься в ній.
 
 {{#include ../banners/hacktricks-training.md}}
-

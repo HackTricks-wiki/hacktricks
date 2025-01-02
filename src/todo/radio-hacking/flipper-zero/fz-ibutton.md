@@ -2,42 +2,41 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Intro
+## Вступ
 
-For more info about what is an iButton check:
+Для отримання додаткової інформації про те, що таке iButton, дивіться:
 
 {{#ref}}
 ../ibutton.md
 {{#endref}}
 
-## Design
+## Дизайн
 
-The **blue** part of the following imageis how you would need to **put the real iButton** so the Flipper can **read it.** The **green** part is how you need to **touch the reader** with the Flipper zero to **correctly emulate an iButton**.
+**Синя** частина наступного зображення - це те, як вам потрібно **поставити справжній iButton**, щоб Flipper міг **зчитати його.** **Зелена** частина - це те, як вам потрібно **доторкнутися до зчитувача** з Flipper zero, щоб **правильно емуляувати iButton**.
 
 <figure><img src="../../../images/image (565).png" alt=""><figcaption></figcaption></figure>
 
-## Actions
+## Дії
 
-### Read
+### Зчитування
 
-In Read Mode Flipper is waiting for the iButton key to touch and is able to digest any of three types of keys: **Dallas, Cyfral, and Metakom**. Flipper will **figure out the type of the key itself**. The name of the key protocol will be displayed on the screen above the ID number.
+У режимі зчитування Flipper чекає, поки ключ iButton доторкнеться, і може обробляти будь-який з трьох типів ключів: **Dallas, Cyfral, і Metakom**. Flipper **визначить тип ключа самостійно**. Назва протоколу ключа буде відображена на екрані над номером ID.
 
-### Add manually
+### Додати вручну
 
-It's possible to **add manually** an iButton of type: **Dallas, Cyfral, and Metakom**
+Можна **додати вручну** iButton типу: **Dallas, Cyfral, і Metakom**
 
-### **Emulate**
+### **Емуляція**
 
-It's possible to **emulate** saved iButtons (read or manually added).
+Можна **емуляувати** збережені iButtons (зчитані або додані вручну).
 
 > [!NOTE]
-> If you cannot make the expected contacts of the Flipper Zero touch the reader you can **use the external GPIO:**
+> Якщо ви не можете зробити очікувані контакти Flipper Zero, щоб доторкнутися до зчитувача, ви можете **використати зовнішній GPIO:**
 
 <figure><img src="../../../images/image (138).png" alt=""><figcaption></figcaption></figure>
 
-## References
+## Посилання
 
 - [https://blog.flipperzero.one/taming-ibutton/](https://blog.flipperzero.one/taming-ibutton/)
 
 {{#include ../../../banners/hacktricks-training.md}}
-

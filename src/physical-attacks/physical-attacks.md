@@ -1,58 +1,57 @@
-# Physical Attacks
+# Фізичні атаки
 
 {{#include ../banners/hacktricks-training.md}}
 
-## BIOS Password Recovery and System Security
+## Відновлення пароля BIOS та безпека системи
 
-**Resetting the BIOS** can be achieved in several ways. Most motherboards include a **battery** that, when removed for around **30 minutes**, will reset the BIOS settings, including the password. Alternatively, a **jumper on the motherboard** can be adjusted to reset these settings by connecting specific pins.
+**Скидання BIOS** можна здійснити кількома способами. Більшість материнських плат містять **батарею**, яка, якщо її зняти на приблизно **30 хвилин**, скине налаштування BIOS, включаючи пароль. Альтернативно, **перемичка на материнській платі** може бути налаштована для скидання цих налаштувань шляхом з'єднання певних контактів.
 
-For situations where hardware adjustments are not possible or practical, **software tools** offer a solution. Running a system from a **Live CD/USB** with distributions like **Kali Linux** provides access to tools like **_killCmos_** and **_CmosPWD_**, which can assist in BIOS password recovery.
+У ситуаціях, коли апаратні зміни неможливі або не практичні, **програмні інструменти** пропонують рішення. Запуск системи з **Live CD/USB** з дистрибутивами, такими як **Kali Linux**, надає доступ до інструментів, таких як **_killCmos_** та **_CmosPWD_**, які можуть допомогти у відновленні пароля BIOS.
 
-In cases where the BIOS password is unknown, entering it incorrectly **three times** will typically result in an error code. This code can be used on websites like [https://bios-pw.org](https://bios-pw.org) to potentially retrieve a usable password.
+У випадках, коли пароль BIOS невідомий, неправильне введення його **три рази** зазвичай призводить до коду помилки. Цей код можна використовувати на веб-сайтах, таких як [https://bios-pw.org](https://bios-pw.org), щоб потенційно отримати придатний пароль.
 
-### UEFI Security
+### Безпека UEFI
 
-For modern systems using **UEFI** instead of traditional BIOS, the tool **chipsec** can be utilized to analyze and modify UEFI settings, including the disabling of **Secure Boot**. This can be accomplished with the following command:
+Для сучасних систем, що використовують **UEFI** замість традиційного BIOS, інструмент **chipsec** може бути використаний для аналізу та зміни налаштувань UEFI, включаючи вимкнення **Secure Boot**. Це можна зробити за допомогою наступної команди:
 
 `python chipsec_main.py -module exploits.secure.boot.pk`
 
-### RAM Analysis and Cold Boot Attacks
+### Аналіз RAM та атаки холодного старту
 
-RAM retains data briefly after power is cut, usually for **1 to 2 minutes**. This persistence can be extended to **10 minutes** by applying cold substances, such as liquid nitrogen. During this extended period, a **memory dump** can be created using tools like **dd.exe** and **volatility** for analysis.
+RAM зберігає дані короткий час після відключення живлення, зазвичай протягом **1-2 хвилин**. Цю тривалість можна продовжити до **10 хвилин**, застосовуючи холодні речовини, такі як рідкий азот. Протягом цього розширеного періоду можна створити **дамп пам'яті** за допомогою інструментів, таких як **dd.exe** та **volatility** для аналізу.
 
-### Direct Memory Access (DMA) Attacks
+### Атаки прямого доступу до пам'яті (DMA)
 
-**INCEPTION** is a tool designed for **physical memory manipulation** through DMA, compatible with interfaces like **FireWire** and **Thunderbolt**. It allows for bypassing login procedures by patching memory to accept any password. However, it's ineffective against **Windows 10** systems.
+**INCEPTION** - це інструмент, призначений для **фізичної маніпуляції пам'яттю** через DMA, сумісний з інтерфейсами, такими як **FireWire** та **Thunderbolt**. Він дозволяє обійти процедури входу, патчуючи пам'ять для прийняття будь-якого пароля. Однак він неефективний проти систем **Windows 10**.
 
-### Live CD/USB for System Access
+### Live CD/USB для доступу до системи
 
-Changing system binaries like **_sethc.exe_** or **_Utilman.exe_** with a copy of **_cmd.exe_** can provide a command prompt with system privileges. Tools such as **chntpw** can be used to edit the **SAM** file of a Windows installation, allowing password changes.
+Зміна системних бінарних файлів, таких як **_sethc.exe_** або **_Utilman.exe_**, на копію **_cmd.exe_** може надати командний рядок з системними привілеями. Інструменти, такі як **chntpw**, можна використовувати для редагування файлу **SAM** Windows-інсталяції, що дозволяє змінювати паролі.
 
-**Kon-Boot** is a tool that facilitates logging into Windows systems without knowing the password by temporarily modifying the Windows kernel or UEFI. More information can be found at [https://www.raymond.cc](https://www.raymond.cc/blog/login-to-windows-administrator-and-linux-root-account-without-knowing-or-changing-current-password/).
+**Kon-Boot** - це інструмент, який полегшує вхід у системи Windows без знання пароля, тимчасово модифікуючи ядро Windows або UEFI. Більше інформації можна знайти на [https://www.raymond.cc](https://www.raymond.cc/blog/login-to-windows-administrator-and-linux-root-account-without-knowing-or-changing-current-password/).
 
-### Handling Windows Security Features
+### Обробка функцій безпеки Windows
 
-#### Boot and Recovery Shortcuts
+#### Скорочення для завантаження та відновлення
 
-- **Supr**: Access BIOS settings.
-- **F8**: Enter Recovery mode.
-- Pressing **Shift** after the Windows banner can bypass autologon.
+- **Supr**: Доступ до налаштувань BIOS.
+- **F8**: Вхід у режим відновлення.
+- Натискання **Shift** після банера Windows може обійти автологін.
 
-#### BAD USB Devices
+#### BAD USB пристрої
 
-Devices like **Rubber Ducky** and **Teensyduino** serve as platforms for creating **bad USB** devices, capable of executing predefined payloads when connected to a target computer.
+Пристрої, такі як **Rubber Ducky** та **Teensyduino**, слугують платформами для створення **поганих USB** пристроїв, здатних виконувати попередньо визначені корисні навантаження при підключенні до цільового комп'ютера.
 
-#### Volume Shadow Copy
+#### Копія тіней томів
 
-Administrator privileges allow for the creation of copies of sensitive files, including the **SAM** file, through PowerShell.
+Привілеї адміністратора дозволяють створювати копії чутливих файлів, включаючи файл **SAM**, через PowerShell.
 
-### Bypassing BitLocker Encryption
+### Обхід шифрування BitLocker
 
-BitLocker encryption can potentially be bypassed if the **recovery password** is found within a memory dump file (**MEMORY.DMP**). Tools like **Elcomsoft Forensic Disk Decryptor** or **Passware Kit Forensic** can be utilized for this purpose.
+Шифрування BitLocker може бути потенційно обійдено, якщо **відновлювальний пароль** знайдено в дампі пам'яті (**MEMORY.DMP**). Для цього можна використовувати інструменти, такі як **Elcomsoft Forensic Disk Decryptor** або **Passware Kit Forensic**.
 
-### Social Engineering for Recovery Key Addition
+### Соціальна інженерія для додавання ключа відновлення
 
-A new BitLocker recovery key can be added through social engineering tactics, convincing a user to execute a command that adds a new recovery key composed of zeros, thereby simplifying the decryption process.
+Новий ключ відновлення BitLocker можна додати за допомогою тактик соціальної інженерії, переконуючи користувача виконати команду, яка додає новий ключ відновлення, що складається з нулів, спрощуючи процес розшифровки.
 
 {{#include ../banners/hacktricks-training.md}}
-

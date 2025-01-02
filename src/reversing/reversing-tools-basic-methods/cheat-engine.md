@@ -2,163 +2,162 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-[**Cheat Engine**](https://www.cheatengine.org/downloads.php) is a useful program to find where important values are saved inside the memory of a running game and change them.\
-When you download and run it, you are **presented** with a **tutorial** of how to use the tool. If you want to learn how to use the tool it's highly recommended to complete it.
+[**Cheat Engine**](https://www.cheatengine.org/downloads.php) - це корисна програма для знаходження місць, де важливі значення зберігаються в пам'яті запущеної гри, та їх зміни.\
+Коли ви завантажите та запустите її, вам буде **представлено** **посібник** з використання цього інструменту. Якщо ви хочете навчитися користуватися інструментом, настійно рекомендується його завершити.
 
-## What are you searching?
+## Що ви шукаєте?
 
 ![](<../../images/image (762).png>)
 
-This tool is very useful to find **where some value** (usually a number) **is stored in the memory** of a program.\
-**Usually numbers** are stored in **4bytes** form, but you could also find them in **double** or **float** formats, or you may want to look for something **different from a number**. For that reason you need to be sure you **select** what you want to **search for**:
+Цей інструмент дуже корисний для знаходження **місця, де деяке значення** (зазвичай число) **зберігається в пам'яті** програми.\
+**Зазвичай числа** зберігаються у **4байтовій** формі, але ви також можете знайти їх у **подвійних** або **плаваючих** форматах, або ви можете шукати щось **інше, ніж число**. З цієї причини вам потрібно бути впевненим, що ви **вибрали** те, що хочете **шукати**:
 
 ![](<../../images/image (324).png>)
 
-Also you can indicate **different** types of **searches**:
+Також ви можете вказати **різні** типи **пошуків**:
 
 ![](<../../images/image (311).png>)
 
-You can also check the box to **stop the game while scanning the memory**:
+Ви також можете відзначити поле, щоб **зупинити гру під час сканування пам'яті**:
 
 ![](<../../images/image (1052).png>)
 
-### Hotkeys
+### Гарячі клавіші
 
-In _**Edit --> Settings --> Hotkeys**_ you can set different **hotkeys** for different purposes like **stopping** the **game** (which is quiet useful if at some point you want to scan the memory). Other options are available:
+У _**Edit --> Settings --> Hotkeys**_ ви можете встановити різні **гарячі клавіші** для різних цілей, таких як **зупинка** **гри** (що досить корисно, якщо в якийсь момент ви хочете просканувати пам'ять). Доступні інші опції:
 
 ![](<../../images/image (864).png>)
 
-## Modifying the value
+## Зміна значення
 
-Once you **found** where is the **value** you are **looking for** (more about this in the following steps) you can **modify it** double clicking it, then double clicking its value:
+Якщо ви **знайшли**, де знаходиться **значення**, яке ви **шукаєте** (більше про це в наступних кроках), ви можете **змінити його**, двічі клацнувши на ньому, а потім двічі клацнувши на його значенні:
 
 ![](<../../images/image (563).png>)
 
-And finally **marking the check** to get the modification done in the memory:
+І нарешті **позначивши галочку**, щоб внести зміни в пам'ять:
 
 ![](<../../images/image (385).png>)
 
-The **change** to the **memory** will be immediately **applied** (note that until the game doesn't use this value again the value **won't be updated in the game**).
+**Зміна** в **пам'яті** буде негайно **застосована** (зверніть увагу, що поки гра не використовує це значення знову, значення **не буде оновлено в грі**).
 
-## Searching the value
+## Пошук значення
 
-So, we are going to suppose that there is an important value (like the life of your user) that you want to improve, and you are looking for this value in the memory)
+Отже, ми будемо припускати, що є важливе значення (наприклад, життя вашого користувача), яке ви хочете покращити, і ви шукаєте це значення в пам'яті)
 
-### Through a known change
+### Через відоме зміна
 
-Supposing you are looking for the value 100, you **perform a scan** searching for that value and you find a lot of coincidences:
+Припустимо, ви шукаєте значення 100, ви **виконуєте сканування**, шукаючи це значення, і знаходите багато збігів:
 
 ![](<../../images/image (108).png>)
 
-Then, you do something so that **value changes**, and you **stop** the game and **perform** a **next scan**:
+Потім ви робите щось, щоб **значення змінилося**, і ви **зупиняєте** гру та **виконуєте** **наступне сканування**:
 
 ![](<../../images/image (684).png>)
 
-Cheat Engine will search for the **values** that **went from 100 to the new value**. Congrats, you **found** the **address** of the value you were looking for, you can now modify it.\
-&#xNAN;_&#x49;f you still have several values, do something to modify again that value, and perform another "next scan" to filter the addresses._
+Cheat Engine буде шукати **значення**, які **змінилися з 100 на нове значення**. Вітаємо, ви **знайшли** **адресу** значення, яке шукали, тепер ви можете його змінити.\
+&#xNAN;_&#x49;f у вас все ще є кілька значень, зробіть щось, щоб знову змінити це значення, і виконайте ще одне "наступне сканування", щоб відфільтрувати адреси._
 
-### Unknown Value, known change
+### Невідоме значення, відоме зміна
 
-In the scenario you **don't know the value** but you know **how to make it change** (and even the value of the change) you can look for your number.
+У сценарії, коли ви **не знаєте значення**, але знаєте, **як його змінити** (і навіть значення зміни), ви можете шукати своє число.
 
-So, start by performing a scan of type "**Unknown initial value**":
+Отже, почніть з виконання сканування типу "**Невідоме початкове значення**":
 
 ![](<../../images/image (890).png>)
 
-Then, make the value change, indicate **how** the **value** **changed** (in my case it was decreased by 1) and perform a **next scan**:
+Потім змініть значення, вкажіть, **як** **значення** **змінилося** (в моєму випадку воно зменшилося на 1) і виконайте **наступне сканування**:
 
 ![](<../../images/image (371).png>)
 
-You will be presented **all the values that were modified in the selected way**:
+Вам буде представлено **всі значення, які були змінені обраним способом**:
 
 ![](<../../images/image (569).png>)
 
-Once you have found your value, you can modify it.
+Коли ви знайдете своє значення, ви можете його змінити.
 
-Note that there are a **lot of possible changes** and you can do these **steps as much as you want** to filter the results:
+Зверніть увагу, що є **багато можливих змін**, і ви можете виконувати ці **кроки стільки, скільки хочете**, щоб відфільтрувати результати:
 
 ![](<../../images/image (574).png>)
 
-### Random Memory Address - Finding the code
+### Випадкова адреса пам'яті - Знаходження коду
 
-Until know we learnt how to find an address storing a value, but it's highly probably that in **different executions of the game that address is in different places of the memory**. So lets find out how to always find that address.
+До цього моменту ми навчилися знаходити адресу, що зберігає значення, але ймовірно, що в **різних виконаннях гри ця адреса знаходиться в різних місцях пам'яті**. Тож давайте дізнаємося, як завжди знаходити цю адресу.
 
-Using some of the mentioned tricks, find the address where your current game is storing the important value. Then (stopping the game if you whish) do a **right click** on the found **address** and select "**Find out what accesses this address**" or "**Find out what writes to this address**":
+Використовуючи деякі з згаданих трюків, знайдіть адресу, де ваша поточна гра зберігає важливе значення. Потім (зупинивши гру, якщо хочете) клацніть правою кнопкою миші на знайденій **адресі** та виберіть "**Дізнатися, що отримує доступ до цієї адреси**" або "**Дізнатися, що записує в цю адресу**":
 
 ![](<../../images/image (1067).png>)
 
-The **first option** is useful to know which **parts** of the **code** are **using** this **address** (which is useful for more things like **knowing where you can modify the code** of the game).\
-The **second option** is more **specific**, and will be more helpful in this case as we are interested in knowing **from where this value is being written**.
+**Перша опція** корисна для того, щоб дізнатися, які **частини** **коду** **використовують** цю **адресу** (що корисно для багатьох інших речей, таких як **знати, де ви можете змінити код** гри).\
+**Друга опція** є більш **конкретною** і буде більш корисною в цьому випадку, оскільки нас цікавить, **звідки це значення записується**.
 
-Once you have selected one of those options, the **debugger** will be **attached** to the program and a new **empty window** will appear. Now, **play** the **game** and **modify** that **value** (without restarting the game). The **window** should be **filled** with the **addresses** that are **modifying** the **value**:
+Після того, як ви виберете одну з цих опцій, **дебагер** буде **прикріплений** до програми, і з'явиться нове **порожнє вікно**. Тепер, **грайте** в **гру** та **змінюйте** це **значення** (без перезапуску гри). **Вікно** повинно бути **заповнене** **адресами**, які **змінюють** **значення**:
 
 ![](<../../images/image (91).png>)
 
-Now that you found the address it's modifying the value you can **modify the code at your pleasure** (Cheat Engine allows you to modify it for NOPs real quick):
+Тепер, коли ви знайшли адресу, яка змінює значення, ви можете **змінити код на свій розсуд** (Cheat Engine дозволяє вам швидко змінювати його на NOP):
 
 ![](<../../images/image (1057).png>)
 
-So, you can now modify it so the code won't affect your number, or will always affect in a positive way.
+Отже, ви можете змінити його так, щоб код не впливав на ваше число, або завжди впливав позитивно.
 
-### Random Memory Address - Finding the pointer
+### Випадкова адреса пам'яті - Знаходження вказівника
 
-Following the previous steps, find where the value you are interested is. Then, using "**Find out what writes to this address**" find out which address writes this value and double click on it to get the disassembly view:
+Слідуючи попереднім крокам, знайдіть, де знаходиться значення, яке вас цікавить. Потім, використовуючи "**Дізнатися, що записує в цю адресу**", дізнайтеся, яка адреса записує це значення, і двічі клацніть на ньому, щоб отримати вигляд дизасемблера:
 
 ![](<../../images/image (1039).png>)
 
-Then, perform a new scan **searching for the hex value between "\[]"** (the value of $edx in this case):
+Потім виконайте нове сканування, **шукаючи шістнадцяткове значення між "\[]"** (значення $edx у цьому випадку):
 
 ![](<../../images/image (994).png>)
 
-(_If several appear you usually need the smallest address one_)\
-Now, we have f**ound the pointer that will be modifying the value we are interested in**.
+(_Якщо з'явиться кілька, зазвичай вам потрібна найменша адреса_)\
+Тепер ми **знайшли вказівник, який буде змінювати значення, яке нас цікавить**.
 
-Click on "**Add Address Manually**":
+Клацніть на "**Додати адресу вручну**":
 
 ![](<../../images/image (990).png>)
 
-Now, click on the "Pointer" check box and add the found address in the text box (in this scenario, the found address in the previous image was "Tutorial-i386.exe"+2426B0):
+Тепер клацніть на поле "Вказівник" і додайте знайдену адресу в текстове поле (в цьому сценарії знайдена адреса на попередньому зображенні була "Tutorial-i386.exe"+2426B0):
 
 ![](<../../images/image (392).png>)
 
-(Note how the first "Address" is automatically populated from the pointer address you introduce)
+(Зверніть увагу, що перша "Адреса" автоматично заповнюється з адреси вказівника, яку ви вводите)
 
-Click OK and a new pointer will be created:
+Клацніть OK, і буде створено новий вказівник:
 
 ![](<../../images/image (308).png>)
 
-Now, every time you modifies that value you are **modifying the important value even if the memory address where the value is is different.**
+Тепер, щоразу, коли ви змінюєте це значення, ви **змінюєте важливе значення, навіть якщо адреса пам'яті, де знаходиться значення, інша.**
 
-### Code Injection
+### Ін'єкція коду
 
-Code injection is a technique where you inject a piece of code into the target process, and then reroute the execution of code to go through your own written code (like giving you points instead of resting them).
+Ін'єкція коду - це техніка, коли ви вставляєте шматок коду в цільовий процес, а потім перенаправляєте виконання коду, щоб пройти через ваш власний написаний код (наприклад, надаючи вам бали замість їх зменшення).
 
-So, imagine you have found the address that is subtracting 1 to the life of your player:
+Отже, уявіть, що ви знайшли адресу, яка віднімає 1 від життя вашого гравця:
 
 ![](<../../images/image (203).png>)
 
-Click on Show disassembler to get the **disassemble code**.\
-Then, click **CTRL+a** to invoke the Auto assemble window and select _**Template --> Code Injection**_
+Клацніть на Показати дизасемблер, щоб отримати **дизасембльований код**.\
+Потім натисніть **CTRL+a**, щоб викликати вікно Авто збірки та виберіть _**Шаблон --> Ін'єкція коду**_
 
 ![](<../../images/image (902).png>)
 
-Fill the **address of the instruction you want to modify** (this is usually autofilled):
+Заповніть **адресу інструкції, яку ви хочете змінити** (це зазвичай заповнюється автоматично):
 
 ![](<../../images/image (744).png>)
 
-A template will be generated:
+Шаблон буде згенеровано:
 
 ![](<../../images/image (944).png>)
 
-So, insert your new assembly code in the "**newmem**" section and remove the original code from the "**originalcode**" if you don't want it to be executed\*\*.\*\* In this example the injected code will add 2 points instead of substracting 1:
+Отже, вставте свій новий асемблерний код у секцію "**newmem**" і видаліть оригінальний код з секції "**originalcode**", якщо не хочете, щоб він виконувався\*\*.\*\* У цьому прикладі ін'єкційний код додасть 2 бали замість того, щоб віднімати 1:
 
 ![](<../../images/image (521).png>)
 
-**Click on execute and so on and your code should be injected in the program changing the behaviour of the functionality!**
+**Натисніть на виконати, і ваш код повинен бути ін'єктований у програму, змінюючи поведінку функціональності!**
 
-## **References**
+## **Посилання**
 
-- **Cheat Engine tutorial, complete it to learn how to start with Cheat Engine**
+- **Посібник Cheat Engine, заверште його, щоб дізнатися, як почати працювати з Cheat Engine**
 
 {{#include ../../banners/hacktricks-training.md}}
-

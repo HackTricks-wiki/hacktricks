@@ -4,34 +4,34 @@
 
 ## Garage Doors
 
-Garage door openers typically operate at frequencies in the 300-190 MHz range, with the most common frequencies being 300 MHz, 310 MHz, 315 MHz, and 390 MHz. This frequency range is commonly used for garage door openers because it is less crowded than other frequency bands and is less likely to experience interference from other devices.
+Відкривачі гаражних дверей зазвичай працюють на частотах в діапазоні 300-190 МГц, причому найпоширенішими частотами є 300 МГц, 310 МГц, 315 МГц та 390 МГц. Цей діапазон частот зазвичай використовується для відкривачів гаражних дверей, оскільки він менш переповнений, ніж інші частотні діапазони, і менш імовірно, що він зазнає перешкод від інших пристроїв.
 
 ## Car Doors
 
-Most car key fobs operate on either **315 MHz or 433 MHz**. These are both radio frequencies, and they are used in a variety of different applications. The main difference between the two frequencies is that 433 MHz has a longer range than 315 MHz. This means that 433 MHz is better for applications that require a longer range, such as remote keyless entry.\
-In Europe 433.92MHz is commonly used and in U.S. and Japan it's the 315MHz.
+Більшість автомобільних ключів працюють на **315 МГц або 433 МГц**. Це обидві радіочастоти, які використовуються в різних застосуваннях. Основна різниця між двома частотами полягає в тому, що 433 МГц має більший діапазон, ніж 315 МГц. Це означає, що 433 МГц краще підходить для застосувань, які вимагають більшого діапазону, таких як дистанційний безключовий доступ.\
+В Європі зазвичай використовується 433.92 МГц, а в США та Японії - 315 МГц.
 
 ## **Brute-force Attack**
 
 <figure><img src="../../images/image (1084).png" alt=""><figcaption></figcaption></figure>
 
-If instead of sending each code 5 times (sent like this to make sure the receiver gets it) so just send it once, the time is reduced to 6mins:
+Якщо замість того, щоб надсилати кожен код 5 разів (надсилається так, щоб переконатися, що приймач його отримує), надіслати його лише один раз, час зменшується до 6 хвилин:
 
 <figure><img src="../../images/image (622).png" alt=""><figcaption></figcaption></figure>
 
-and if you **remove the 2 ms waiting** period between signals you can **reduce the time to 3minutes.**
+і якщо ви **видалите 2 мс очікування** між сигналами, ви можете **зменшити час до 3 хвилин.**
 
-Moreover, by using the De Bruijn Sequence (a way to reduce the number of bits needed to send all the potential binary numbers to burteforce) this **time is reduced just to 8 seconds**:
+Більше того, використовуючи послідовність Де Брюйна (спосіб зменшити кількість бітів, необхідних для надсилання всіх потенційних двійкових чисел для брутфорсу), цей **час зменшується до 8 секунд**:
 
 <figure><img src="../../images/image (583).png" alt=""><figcaption></figcaption></figure>
 
-Example of this attack was implemented in [https://github.com/samyk/opensesame](https://github.com/samyk/opensesame)
+Приклад цього нападу був реалізований у [https://github.com/samyk/opensesame](https://github.com/samyk/opensesame)
 
-Requiring **a preamble will avoid the De Bruijn Sequence** optimization and **rolling codes will prevent this attack** (supposing the code is long enough to not be bruteforceable).
+Вимога **премпла уникне оптимізації послідовності Де Брюйна** і **кодові зміни запобігатимуть цьому нападу** (припускаючи, що код достатньо довгий, щоб не піддаватися брутфорсу).
 
 ## Sub-GHz Attack
 
-To attack these signals with Flipper Zero check:
+Щоб атакувати ці сигнали за допомогою Flipper Zero, перевірте:
 
 {{#ref}}
 flipper-zero/fz-sub-ghz.md
@@ -39,43 +39,43 @@ flipper-zero/fz-sub-ghz.md
 
 ## Rolling Codes Protection
 
-Automatic garage door openers typically use a wireless remote control to open and close the garage door. The remote control **sends a radio frequency (RF) signal** to the garage door opener, which activates the motor to open or close the door.
+Автоматичні відкривачі гаражних дверей зазвичай використовують бездротовий пульт для відкриття та закриття гаражних дверей. Пульт **надсилає радіочастотний (RF) сигнал** до відкривача гаражних дверей, який активує мотор для відкриття або закриття дверей.
 
-It is possible for someone to use a device known as a code grabber to intercept the RF signal and record it for later use. This is known as a **replay attack**. To prevent this type of attack, many modern garage door openers use a more secure encryption method known as a **rolling code** system.
+Існує можливість, що хтось використовує пристрій, відомий як кодовий захоплювач, щоб перехопити RF сигнал і записати його для подальшого використання. Це відомо як **атака повтору**. Щоб запобігти такій атаці, багато сучасних відкривачів гаражних дверей використовують більш безпечний метод шифрування, відомий як **система змінних кодів**.
 
-The **RF signal is typically transmitted using a rolling code**, which means that the code changes with each use. This makes it **difficult** for someone to **intercept** the signal and **use** it to gain **unauthorised** access to the garage.
+**RF сигнал зазвичай передається за допомогою змінного коду**, що означає, що код змінюється з кожним використанням. Це ускладнює **перехоплення** сигналу і **використання** його для отримання **неавторизованого** доступу до гаража.
 
-In a rolling code system, the remote control and the garage door opener have a **shared algorithm** that **generates a new code** every time the remote is used. The garage door opener will only respond to the **correct code**, making it much more difficult for someone to gain unauthorised access to the garage just by capturing a code.
+У системі змінних кодів пульт і відкривач гаражних дверей мають **спільний алгоритм**, який **генерує новий код** щоразу, коли пульт використовується. Відкривач гаражних дверей реагуватиме лише на **правильний код**, що ускладнює отримання неавторизованого доступу до гаража лише шляхом захоплення коду.
 
 ### **Missing Link Attack**
 
-Basically, you listen for the button and **capture the signal whilst the remote is out of range** of the device (say the car or garage). You then move to the device and **use the captured code to open it**.
+В основному, ви слухаєте кнопку і **захоплюєте сигнал, поки пульт поза зоною дії** пристрою (скажімо, автомобіля або гаража). Потім ви переходите до пристрою і **використовуєте захоплений код, щоб його відкрити**.
 
 ### Full Link Jamming Attack
 
-An attacker could **jam the signal near the vehicle or receive**r so the **receiver cannot actually ‘hear’ the code**, and once that is happening you can simply **capture and replay** the code when you have stopped jamming.
+Зловмисник може **глушити сигнал поблизу автомобіля або приймача**, так що **приймач насправді не може "почути" код**, і коли це відбувається, ви можете просто **захопити і повторити** код, коли ви зупинили глушіння.
 
-The victim at some point will use the **keys to lock the car**, but then the attack will have **recorded enough "close door" codes** that hopefully could be resent to open the door (a **change of frequency might be needed** as there are cars that use the same codes to open and close but listens for both commands in different frequencies).
+Жертва в якийсь момент використає **ключі, щоб заблокувати автомобіль**, але потім атака **запише достатньо "кодів закриття дверей"**, які, сподіваюся, можуть бути повторно надіслані, щоб відкрити двері (можливо, знадобиться **зміна частоти**, оскільки є автомобілі, які використовують ті ж коди для відкриття та закриття, але слухають обидва команди на різних частотах).
 
 > [!WARNING]
-> **Jamming works**, but it's noticeable as if the **person locking the car simply tests the doors** to ensure they are locked they would notice the car unlocked. Additionally if they were aware of such attacks they could even listen to the fact that the doors never made the lock **sound** or the cars **lights** never flashed when they pressed the ‘lock’ button.
+> **Глушіння працює**, але це помітно, оскільки якщо **особа, що закриває автомобіль, просто перевіряє двері**, щоб переконатися, що вони заблоковані, вона помітить, що автомобіль не заблокований. Крім того, якщо вони були б обізнані про такі атаки, вони могли б навіть почути, що двері ніколи не видавали **звуку** блокування або **вогні** автомобіля ніколи не спалахували, коли вони натискали кнопку "блокування".
 
 ### **Code Grabbing Attack ( aka ‘RollJam’ )**
 
-This is a more **stealth Jamming technique**. The attacker will jam the signal, so when the victim tries to lock the door it won't work, but the attacker will **record this code**. Then, the victim will **try to lock the car again** pressing the button and the car will **record this second code**.\
-Instantly after this the **attacker can send the first code** and the **car will lock** (victim will think the second press closed it). Then, the attacker will be able to **send the second stolen code to open** the car (supposing that a **"close car" code can also be used to open it**). A change of frequency might be needed (as there are cars that use the same codes to open and close but listens for both commands in different frequencies).
+Це більш **прихована техніка глушіння**. Зловмисник буде глушити сигнал, тому, коли жертва намагається заблокувати двері, це не спрацює, але зловмисник **запише цей код**. Потім жертва **знову спробує заблокувати автомобіль**, натискаючи кнопку, і автомобіль **запише цей другий код**.\
+Миттєво після цього **зловмисник може надіслати перший код**, і **автомобіль заблокується** (жертва подумає, що другий натиск закрив його). Потім зловмисник зможе **надіслати другий вкрадений код, щоб відкрити** автомобіль (припускаючи, що **код "закриття автомобіля" також може бути використаний для його відкриття**). Може знадобитися зміна частоти (оскільки є автомобілі, які використовують ті ж коди для відкриття та закриття, але слухають обидва команди на різних частотах).
 
-The attacker can **jam the car receiver and not his receiver** because if the car receiver is listening in for example a 1MHz broadband, the attacker won't **jam** the exact frequency used by the remote but **a close one in that spectrum** while the **attackers receiver will be listening in a smaller range** where he can listen the remote signal **without the jam signal**.
+Зловмисник може **глушити приймач автомобіля, а не свій приймач**, оскільки якщо приймач автомобіля слухає, наприклад, на 1 МГц широкосмуговому, зловмисник не буде **глушити** точну частоту, що використовується пультом, а **близьку в цьому спектрі**, в той час як **приймач зловмисника буде слухати в меншому діапазоні**, де він може слухати сигнал пульта **без сигналу глушіння**.
 
 > [!WARNING]
-> Other implementations seen in specifications show that the **rolling code is a portion** of the total code sent. Ie the code sent is a **24 bit key** where the first **12 are the rolling code**, the **second 8 are the command** (such as lock or unlock) and the last 4 is the **checksum**. Vehicles implementing this type are also naturally susceptible as the attacker merely needs to replace the rolling code segment to be able to **use any rolling code on both frequencies**.
+> Інші реалізації, що спостерігаються в специфікаціях, показують, що **змінний код є частиною** загального коду, що надсилається. Тобто надісланий код є **24-бітним ключем**, де перші **12 - це змінний код**, **другі 8 - це команда** (така як блокування або розблокування), а останні 4 - це **контрольна сума**. Автомобілі, які реалізують цей тип, також природно вразливі, оскільки зловмиснику просто потрібно замінити сегмент змінного коду, щоб мати можливість **використовувати будь-який змінний код на обох частотах**.
 
 > [!CAUTION]
-> Note that if the victim sends a third code while the attacker is sending the first one, the first and second code will be invalidated.
+> Зверніть увагу, що якщо жертва надішле третій код, поки зловмисник надсилає перший, перший і другий код будуть недійсними.
 
 ### Alarm Sounding Jamming Attack
 
-Testing against an aftermarket rolling code system installed on a car, **sending the same code twice** immediately **activated the alarm** and immobiliser providing a unique **denial of service** opportunity. Ironically the means of **disabling the alarm** and immobiliser was to **press** the **remote**, providing an attacker with the ability to **continually perform DoS attack**. Or mix this attack with the **previous one to obtain more codes** as the victim would like to stop the attack asap.
+Тестуючи проти системи змінних кодів, встановленої на автомобілі, **надсилання одного й того ж коду двічі** негайно **активувало сигналізацію** та іммобілізатор, надаючи унікальну **можливість відмови в обслуговуванні**. Іронічно, засобом **відключення сигналізації** та іммобілізатора було **натискання** на **пульт**, що надає зловмиснику можливість **постійно виконувати атаку DoS**. Або змішати цю атаку з **попередньою, щоб отримати більше кодів**, оскільки жертва хотіла б якомога швидше зупинити атаку.
 
 ## References
 
@@ -85,4 +85,3 @@ Testing against an aftermarket rolling code system installed on a car, **sending
 - [https://hackaday.io/project/164566-how-to-hack-a-car/details](https://hackaday.io/project/164566-how-to-hack-a-car/details)
 
 {{#include ../../banners/hacktricks-training.md}}
-

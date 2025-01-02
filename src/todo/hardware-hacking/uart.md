@@ -2,84 +2,77 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Основна інформація
 
-UART is a serial protocol, which means it transfers data between components one bit at a time. In contrast, parallel communication protocols transmit data simultaneously through multiple channels. Common serial protocols include RS-232, I2C, SPI, CAN, Ethernet, HDMI, PCI Express, and USB.
+UART - це серійний протокол, що означає, що він передає дані між компонентами по одному біту за раз. На відміну від цього, паралельні комунікаційні протоколи передають дані одночасно через кілька каналів. Загальновживані серійні протоколи включають RS-232, I2C, SPI, CAN, Ethernet, HDMI, PCI Express та USB.
 
-Generally, the line is held high (at a logical 1 value) while UART is in the idle state. Then, to signal the start of a data transfer, the transmitter sends a start bit to the receiver, during which the signal is held low (at a logical 0 value). Next, the transmitter sends five to eight data bits containing the actual message, followed by an optional parity bit and one or two stop bits (with a logical 1 value), depending on the configuration. The parity bit, used for error checking, is rarely seen in practice. The stop bit (or bits) signify the end of transmission.
+Зазвичай лінія утримується на високому рівні (на логічному значенні 1), поки UART знаходиться в стані простою. Потім, щоб сигналізувати про початок передачі даних, передавач надсилає стартовий біт приймачеві, під час якого сигнал утримується на низькому рівні (на логічному значенні 0). Далі передавач надсилає від п'яти до восьми біт даних, що містять фактичне повідомлення, за яким слідує необов'язковий біт парності та один або два стопові біти (з логічним значенням 1), залежно від конфігурації. Біт парності, що використовується для перевірки помилок, рідко зустрічається на практиці. Стоповий біт (або біти) сигналізують про кінець передачі.
 
-We call the most common configuration 8N1: eight data bits, no parity, and one stop bit. For example, if we wanted to send the character C, or 0x43 in ASCII, in an 8N1 UART configuration, we would send the following bits: 0 (the start bit); 0, 1, 0, 0, 0, 0, 1, 1 (the value of 0x43 in binary), and 0 (the stop bit).
+Ми називаємо найпоширенішу конфігурацію 8N1: вісім біт даних, без парності та один стоповий біт. Наприклад, якщо ми хочемо надіслати символ C, або 0x43 в ASCII, в конфігурації 8N1 UART, ми надішлемо такі біти: 0 (стартовий біт); 0, 1, 0, 0, 0, 0, 1, 1 (значення 0x43 у двійковому вигляді) та 0 (стоповий біт).
 
 ![](<../../images/image (764).png>)
 
-Hardware tools to communicate with UART:
+Апаратура для зв'язку з UART:
 
-- USB-to-serial adapter
-- Adapters with the CP2102 or PL2303 chips
-- Multipurpose tool such as: Bus Pirate, the Adafruit FT232H, the Shikra, or the Attify Badge
+- USB-to-serial адаптер
+- Адаптери з чіпами CP2102 або PL2303
+- Універсальний інструмент, такий як: Bus Pirate, Adafruit FT232H, Shikra або Attify Badge
 
-### Identifying UART Ports
+### Визначення портів UART
 
-UART has 4 ports: **TX**(Transmit), **RX**(Receive), **Vcc**(Voltage), and **GND**(Ground). You might be able to find 4 ports with the **`TX`** and **`RX`** letters **written** in the PCB. But if there is no indication, you might need to try to find them yourself using a **multimeter** or a **logic analyzer**.
+UART має 4 порти: **TX**(Передача), **RX**(Прийом), **Vcc**(Напруга) та **GND**(Заземлення). Ви можете знайти 4 порти з літерами **`TX`** та **`RX`**, **написаними** на PCB. Але якщо немає жодних вказівок, вам, можливо, доведеться спробувати знайти їх самостійно, використовуючи **мультиметр** або **логічний аналізатор**.
 
-With a **multimeter** and the device powered off:
+З **мультиметром** і вимкненим пристроєм:
 
-- To identify the **GND** pin use the **Continuity Test** mode, place the back lead into ground and test with the red one until you hear a sound from the multimeter. Several GND pins can be found the PCB, so you might have found or not the one belonging to UART.
-- To identify the **VCC port**, set the **DC voltage mode** and set it up to 20 V of voltage. Black probe on ground and red probe on the pin. Power on the device. If the multimeter measures a constant voltage of either 3.3 V or 5 V, you’ve found the Vcc pin. If you get other voltages, retry with other ports.
-- To identify the **TX** **port**, **DC voltage mode** up to 20 V of voltage, black probe on ground, and red probe on the pin, and power on the device. If you find the voltage fluctuates for a few seconds and then stabilizes at the Vcc value, you’ve most likely found the TX port. This is because when powering on, it sends some debug data.
-- The **RX port** would be the closest one to the other 3, it has the lowest voltage fluctuation and lowest overall value of all the UART pins.
+- Щоб визначити **GND** пін, використовуйте режим **Тест на безперервність**, помістіть задній провід у заземлення і тестуйте червоним, поки не почуєте звук з мультиметра. На PCB можна знайти кілька GND пінів, тому ви могли знайти або не знайти той, що належить UART.
+- Щоб визначити **VCC порт**, встановіть режим **DC напруги** і налаштуйте його на 20 В. Чорний щуп на заземлення, а червоний щуп на пін. Увімкніть пристрій. Якщо мультиметр вимірює постійну напругу 3.3 В або 5 В, ви знайшли пін Vcc. Якщо ви отримали інші напруги, спробуйте з іншими портами.
+- Щоб визначити **TX** **порт**, встановіть режим **DC напруги** до 20 В, чорний щуп на заземлення, а червоний щуп на пін, і увімкніть пристрій. Якщо ви помітили, що напруга коливається протягом кількох секунд, а потім стабілізується на значенні Vcc, ви, ймовірно, знайшли порт TX. Це тому, що при увімкненні він надсилає деякі дані для налагодження.
+- **RX порт** буде найближчим до інших 3, він має найнижчі коливання напруги та найнижче загальне значення всіх пінів UART.
 
-You can confuse the TX and RX ports and nothing would happen, but if you confuses the GND and the VCC port you might fry the circuit.
+Ви можете переплутати порти TX і RX, і нічого не станеться, але якщо ви переплутаєте GND і VCC порт, ви можете зіпсувати схему.
 
-In some target devices, the UART port is disabled by the manufacturer by disabling RX or TX or even both. In that case, it can be helpful to trace down the connections in the circuit board and finding some breakout point. A strong hint about confirming no detection of UART and breaking of the circuit is to check the device warranty. If the device has been shipped with some warranty, the manufacturer leaves some debug interfaces (in this case, UART) and hence, must have disconnected the UART and would attach it again while debugging. These breakout pins can be connected by soldering or jumper wires.
+У деяких цільових пристроях порт UART відключений виробником шляхом відключення RX або TX або навіть обох. У такому випадку може бути корисно простежити з'єднання на платі та знайти точку розподілу. Сильним натяком на підтвердження відсутності виявлення UART і розриву схеми є перевірка гарантії на пристрій. Якщо пристрій було відправлено з гарантією, виробник залишає деякі інтерфейси для налагодження (в даному випадку UART) і, отже, повинен був відключити UART і знову підключити його під час налагодження. Ці пін-коди можна підключити шляхом пайки або за допомогою перемичок.
 
-### Identifying the UART Baud Rate
+### Визначення швидкості UART
 
-The easiest way to identify the correct baud rate is to look at the **TX pin’s output and try to read the data**. If the data you receive isn’t readable, switch to the next possible baud rate until the data becomes readable. You can use a USB-to-serial adapter or a multipurpose device like Bus Pirate to do this, paired with a helper script, such as [baudrate.py](https://github.com/devttys0/baudrate/). The most common baud rates are 9600, 38400, 19200, 57600, and 115200.
+Найпростіший спосіб визначити правильну швидкість передачі - це подивитися на **вихідний сигнал TX піну та спробувати прочитати дані**. Якщо отримані дані нечитабельні, перемикайтеся на наступну можливу швидкість передачі, поки дані не стануть читабельними. Ви можете використовувати USB-to-serial адаптер або універсальний пристрій, такий як Bus Pirate, щоб зробити це, в парі з допоміжним скриптом, таким як [baudrate.py](https://github.com/devttys0/baudrate/). Найпоширеніші швидкості передачі - 9600, 38400, 19200, 57600 та 115200.
 
 > [!CAUTION]
-> It's important to note that in this protocol you need to connect the TX of one device to the RX of the other!
+> Важливо зазначити, що в цьому протоколі вам потрібно підключити TX одного пристрою до RX іншого!
 
-## CP210X UART to TTY Adapter
+## CP210X UART до TTY адаптер
 
-The CP210X Chip is used in a lot of prototyping boards like NodeMCU (with esp8266) for Serial Communication. These adapters are relatively inexpensive and can be used to connect to the UART interface of the target. The device has 5 pins: 5V, GND, RXD, TXD, 3.3V. Make sure to connect the voltage as supported by the target to avoid any damage. Finally connect the RXD pin of the Adapter to TXD of the target and TXD pin of the Adapter to RXD of the target.
+Чіп CP210X використовується в багатьох прототипних платах, таких як NodeMCU (з esp8266) для серійної комунікації. Ці адаптери відносно недорогі і можуть бути використані для підключення до інтерфейсу UART цільового пристрою. Пристрій має 5 пінів: 5V, GND, RXD, TXD, 3.3V. Переконайтеся, що ви підключили напругу, підтримувану цільовим пристроєм, щоб уникнути пошкоджень. Нарешті, підключіть пін RXD адаптера до TXD цільового пристрою та пін TXD адаптера до RXD цільового пристрою.
 
-Incase the adapter is not detected, make sure that the CP210X drivers are installed in the host system. Once the adapter is detected and connected, tools like picocom, minicom or screen can be used.
+Якщо адаптер не виявлено, переконайтеся, що драйвери CP210X встановлені в хост-системі. Як тільки адаптер буде виявлено та підключено, можна використовувати такі інструменти, як picocom, minicom або screen.
 
-To list the devices connected to Linux/MacOS systems:
-
+Щоб перерахувати пристрої, підключені до систем Linux/MacOS:
 ```
 ls /dev/
 ```
-
-For basic interaction with the UART interface, use the following command:
-
+Для базової взаємодії з інтерфейсом UART використовуйте наступну команду:
 ```
 picocom /dev/<adapter> --baud <baudrate>
 ```
-
-For minicom, use the following command to configure it:
-
+Для minicom використовуйте наступну команду для його налаштування:
 ```
 minicom -s
 ```
+Налаштуйте параметри, такі як швидкість передачі даних та ім'я пристрою в опції `Serial port setup`.
 
-Configure the settings such as baudrate and device name in the `Serial port setup` option.
+Після налаштування використовуйте команду `minicom`, щоб запустити UART Console.
 
-After configuration, use the command `minicom` to start get the UART Console.
+## UART через Arduino UNO R3 (знімні плати Atmel 328p)
 
-## UART Via Arduino UNO R3 (Removable Atmel 328p Chip Boards)
+Якщо адаптери UART Serial to USB недоступні, Arduino UNO R3 можна використовувати з швидким хаком. Оскільки Arduino UNO R3 зазвичай доступний скрізь, це може заощадити багато часу.
 
-Incase UART Serial to USB adapters are not available, Arduino UNO R3 can be used with a quick hack. Since Arduino UNO R3 is usually available anywhere, this can save a lot of time.
+Arduino UNO R3 має вбудований адаптер USB до Serial на самій платі. Щоб отримати з'єднання UART, просто витягніть мікроконтролер Atmel 328p з плати. Цей хак працює на варіантах Arduino UNO R3, де Atmel 328p не припаяний до плати (використовується версія SMD). Підключіть RX пін Arduino (Цифровий пін 0) до TX піну UART інтерфейсу та TX пін Arduino (Цифровий пін 1) до RX піну UART інтерфейсу.
 
-Arduino UNO R3 has a USB to Serial adapter built on the board itself. To get UART connection, just plug out the Atmel 328p microcontroller chip from the board. This hack works on Arduino UNO R3 variants having the Atmel 328p not soldered on the board (SMD version is used in it). Connect the RX pin of Arduino (Digital Pin 0) to the TX pin of the UART Interface and TX pin of the Arduino (Digital Pin 1) to the RX pin of the UART interface.
-
-Finally, it is recommended to use Arduino IDE to get the Serial Console. In the `tools` section in the menu, select `Serial Console` option and set the baud rate as per the UART interface.
+Нарешті, рекомендується використовувати Arduino IDE для отримання Serial Console. У розділі `tools` у меню виберіть опцію `Serial Console` і встановіть швидкість передачі даних відповідно до UART інтерфейсу.
 
 ## Bus Pirate
 
-In this scenario we are going to sniff the UART communication of the Arduino that is sending all the prints of the program to the Serial Monitor.
-
+У цьому сценарії ми будемо перехоплювати UART зв'язок Arduino, яка надсилає всі виводи програми до Serial Monitor.
 ```bash
 # Check the modes
 UART>m
@@ -99,39 +92,39 @@ x. exit(without change)
 # Select UART
 (1)>3
 Set serial port speed: (bps)
- 1. 300
- 2. 1200
- 3. 2400
- 4. 4800
- 5. 9600
- 6. 19200
- 7. 38400
- 8. 57600
- 9. 115200
+1. 300
+2. 1200
+3. 2400
+4. 4800
+5. 9600
+6. 19200
+7. 38400
+8. 57600
+9. 115200
 10. BRG raw value
 
 # Select the speed the communication is occurring on (you BF all this until you find readable things)
 # Or you could later use the macro (4) to try to find the speed
 (1)>5
 Data bits and parity:
- 1. 8, NONE *default
- 2. 8, EVEN
- 3. 8, ODD
- 4. 9, NONE
+1. 8, NONE *default
+2. 8, EVEN
+3. 8, ODD
+4. 9, NONE
 
- # From now on pulse enter for default
+# From now on pulse enter for default
 (1)>
 Stop bits:
- 1. 1 *default
- 2. 2
+1. 1 *default
+2. 2
 (1)>
 Receive polarity:
- 1. Idle 1 *default
- 2. Idle 0
+1. Idle 1 *default
+2. Idle 0
 (1)>
 Select output type:
- 1. Open drain (H=Hi-Z, L=GND)
- 2. Normal (H=3.3V, L=GND)
+1. Open drain (H=Hi-Z, L=GND)
+2. Normal (H=3.3V, L=GND)
 
 (1)>
 Clutch disengaged!!!
@@ -151,36 +144,30 @@ Escritura inicial completada:
 AAA Hi Dreg! AAA
 waiting a few secs to repeat....
 ```
+## Вивантаження ПЗ з UART Консолі
 
-## Dumping Firmware with UART Console
+UART Консоль надає чудовий спосіб працювати з основним ПЗ в середовищі виконання. Але коли доступ до UART Консолі є лише для читання, це може ввести багато обмежень. У багатьох вбудованих пристроях ПЗ зберігається в EEPROM і виконується на процесорах, які мають нестабільну пам'ять. Отже, ПЗ зберігається в режимі лише для читання, оскільки оригінальне ПЗ під час виробництва знаходиться всередині самого EEPROM, і будь-які нові файли можуть бути втрачені через нестабільну пам'ять. Тому вивантаження ПЗ є цінним зусиллям при роботі з вбудованими ПЗ.
 
-UART Console provides a great way to work with the underlying firmware in runtime environment. But when the UART Console access is read-only, it might introduce a lot of constrains. In many embedded devices, the firmware is stored in EEPROMs and executed in processors that have volatile memory. Hence, the firmware is kept read-only since the original firmware during manufacturing is inside the EEPROM itself and any new files would get lost due to volatile memory. Hence, dumping firmware is a valuable effort while working with embedded firmwares.
+Існує багато способів зробити це, і розділ SPI охоплює методи витягування ПЗ безпосередньо з EEPROM за допомогою різних пристроїв. Хоча рекомендується спочатку спробувати вивантажити ПЗ за допомогою UART, оскільки вивантаження ПЗ за допомогою фізичних пристроїв та зовнішніх взаємодій може бути ризикованим.
 
-There are a lot of ways to do this and the SPI section covers methods to extract firmware directly from the EEPROM with various devices. Although, it is recommended to first try dumping firmware with UART since dumping firmware with physical devices and external interactions can be risky.
+Вивантаження ПЗ з UART Консолі вимагає спочатку отримати доступ до завантажувачів. Багато популярних постачальників використовують uboot (Універсальний Завантажувач) як свій завантажувач для завантаження Linux. Отже, отримання доступу до uboot є необхідним.
 
-Dumping firmware from UART Console requires first getting access to bootloaders. Many popular vendors make use of uboot (Universal Bootloader) as their bootloader to load Linux. Hence, getting access to uboot is necessary.
+Щоб отримати доступ до завантажувача, підключіть UART порт до комп'ютера та використовуйте будь-які інструменти Серійної Консолі, при цьому живлення пристрою має бути відключено. Коли налаштування готове, натисніть клавішу Enter і утримуйте її. Нарешті, підключіть живлення до пристрою і дайте йому завантажитися.
 
-To get access to boot bootloader, connect the UART port to the computer and use any of the Serial Console tools and keep the power supply to the device disconnected. Once the setup is ready, press the Enter Key and hold it. Finally, connect the power supply to the device and let it boot.
+Це перерве завантаження uboot і надасть меню. Рекомендується ознайомитися з командами uboot і використовувати меню допомоги для їх переліку. Це може бути команда `help`. Оскільки різні постачальники використовують різні конфігурації, необхідно зрозуміти кожну з них окремо.
 
-Doing this will interrupt uboot from loading and will provide a menu. It is recommended to understand uboot commands and using help menu to list them. This might be `help` command. Since different vendors use different configurations, it is necessary to understand each of them seperately.
-
-Usually, the command to dump the firmware is:
-
+Зазвичай команда для вивантаження ПЗ виглядає так:
 ```
 md
 ```
+який означає "дамп пам'яті". Це виведе пам'ять (вміст EEPROM) на екран. Рекомендується зафіксувати вихід Serial Console перед початком процедури для захоплення дампу пам'яті.
 
-which stands for "memory dump". This will dump the memory (EEPROM Content) on the screen. It is recommended to log the Serial Console output before starting the proceedure to capture the memory dump.
-
-Finally, just strip out all the unnecessary data from the log file and store the file as `filename.rom` and use binwalk to extract the contents:
-
+Нарешті, просто видаліть всі непотрібні дані з файлу журналу та збережіть файл як `filename.rom` і використовуйте binwalk для витягнення вмісту:
 ```
 binwalk -e <filename.rom>
 ```
+Це перераховує можливий вміст з EEPROM відповідно до підписів, знайдених у hex-файлі.
 
-This will list the possible contents from the EEPROM as per the signatures found in the hex file.
-
-Although, it is necessary to note that it's not always the case that the uboot is unlocked even if it is being used. If the Enter Key doesn't do anything, check for different keys like Space Key, etc. If the bootloader is locked and does not get interrupted, this method would not work. To check if uboot is the bootloader for the device, check the output on the UART Console while booting of the device. It might mention uboot while booting.
+Хоча необхідно зазначити, що не завжди uboot розблоковано, навіть якщо він використовується. Якщо клавіша Enter нічого не робить, перевірте інші клавіші, такі як клавіша Space тощо. Якщо завантажувач заблоковано і не переривається, цей метод не спрацює. Щоб перевірити, чи є uboot завантажувачем для пристрою, перевірте вивід на UART Console під час завантаження пристрою. Можливо, він згадує uboot під час завантаження.
 
 {{#include ../../banners/hacktricks-training.md}}
-

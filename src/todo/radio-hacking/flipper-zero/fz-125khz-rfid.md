@@ -6,51 +6,51 @@
 
 {% embed url="https://websec.nl/" %}
 
-## Intro
+## Вступ
 
-For more info about how 125kHz tags work check:
+Для отримання додаткової інформації про те, як працюють 125kHz мітки, перегляньте:
 
 {{#ref}}
 ../pentesting-rfid.md
 {{#endref}}
 
-## Actions
+## Дії
 
-For more info about these types of tags [**read this intro**](../pentesting-rfid.md#low-frequency-rfid-tags-125khz).
+Для отримання додаткової інформації про ці типи міток [**прочитайте цей вступ**](../pentesting-rfid.md#low-frequency-rfid-tags-125khz).
 
-### Read
+### Читати
 
-Tries to **read** the card info. Then it can **emulate** them.
+Спробуйте **прочитати** інформацію з картки. Потім ви можете **емулювати** їх.
 
 > [!WARNING]
-> Note that some intercoms try to protect themselves from key duplication by sending a write command prior to reading. If the write succeeds, that tag is considered fake. When Flipper emulates RFID there is no way for the reader to distinguish it from the original one, so no such problems occur.
+> Зверніть увагу, що деякі домофони намагаються захистити себе від дублікації ключів, відправляючи команду запису перед читанням. Якщо запис успішний, ця мітка вважається підробленою. Коли Flipper емулює RFID, немає способу для зчитувача відрізнити її від оригіналу, тому таких проблем не виникає.
 
-### Add Manually
+### Додати вручну
 
-You can create **fake cards in Flipper Zero indicating the data** you manually and then emulate it.
+Ви можете створити **підроблені картки в Flipper Zero, вказуючи дані** вручну, а потім емулювати їх.
 
-#### IDs on cards
+#### ID на картках
 
-Some times, when you get a card you will find the ID (or part) of it written in the card visible.
+Іноді, коли ви отримуєте картку, ви знайдете ID (або частину) написану на видимій частині картки.
 
 - **EM Marin**
 
-For example in this EM-Marin card in the physical card is possible to **read the last 3 of 5 bytes in clear**.\
-The other 2 can be brute-forced if you cannot read them from the card.
+Наприклад, на цій картці EM-Marin на фізичній картці можна **прочитати останні 3 з 5 байтів у відкритому вигляді**.\
+Інші 2 можна зламати, якщо ви не можете прочитати їх з картки.
 
 <figure><img src="../../../images/image (104).png" alt=""><figcaption></figcaption></figure>
 
 - **HID**
 
-Same happens in this HID card where only 2 out of 3 bytes can be found printed in the card
+Те ж саме відбувається на цій картці HID, де лише 2 з 3 байтів можна знайти надрукованими на картці.
 
 <figure><img src="../../../images/image (1014).png" alt=""><figcaption></figcaption></figure>
 
-### Emulate/Write
+### Емулювати/Записати
 
-After **copying** a card or **entering** the ID **manually** it's possible to **emulate** it with Flipper Zero or **write** it in a real card.
+Після **копіювання** картки або **введення** ID **вручну** можна **емулювати** її за допомогою Flipper Zero або **записати** на реальну картку.
 
-## References
+## Посилання
 
 - [https://blog.flipperzero.one/rfid/](https://blog.flipperzero.one/rfid/)
 
@@ -59,4 +59,3 @@ After **copying** a card or **entering** the ID **manually** it's possible to **
 {% embed url="https://websec.nl/" %}
 
 {{#include ../../../banners/hacktricks-training.md}}
-

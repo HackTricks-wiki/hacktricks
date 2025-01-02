@@ -2,12 +2,12 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Download the free version app from [https://www.exemsi.com/documentation/getting-started/](https://www.exemsi.com/download/), execute it and wrap the "malicious" binary on it.\
-Note that you can wrap a "**.bat**" if you **just** want to **execute** **command lines (instead of cmd.exe select the .bat file)**
+Завантажте безкоштовну версію програми з [https://www.exemsi.com/documentation/getting-started/](https://www.exemsi.com/download/), виконайте її та оберніть "зловмисний" бінарний файл.\
+Зверніть увагу, що ви можете обернути "**.bat**", якщо ви **просто** хочете **виконати** **командні рядки (замість cmd.exe виберіть файл .bat)**
 
 ![](<../../images/image (417).png>)
 
-And this is the most important part of the configuration:
+І це найважливіша частина конфігурації:
 
 ![](<../../images/image (312).png>)
 
@@ -15,9 +15,8 @@ And this is the most important part of the configuration:
 
 ![](<../../images/image (1072).png>)
 
-(Please, note that if you try to pack your own binary you will be able to modify these values)
+(Будь ласка, зверніть увагу, що якщо ви спробуєте упакувати свій власний бінарний файл, ви зможете змінити ці значення)
 
-From here just click on **next buttons** and the last **build button and your installer/wrapper will be generated.**
+Звідси просто натискайте на **кнопки далі** та останню **кнопку збірки, і ваш установник/обгортка буде згенерована.**
 
 {{#include ../../banners/hacktricks-training.md}}
-

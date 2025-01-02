@@ -1,10 +1,10 @@
 # LLM Training - Data Preparation
 
-**These are my notes from the very recommended book** [**https://www.manning.com/books/build-a-large-language-model-from-scratch**](https://www.manning.com/books/build-a-large-language-model-from-scratch) **with some extra information.**
+**Це мої нотатки з дуже рекомендованої книги** [**https://www.manning.com/books/build-a-large-language-model-from-scratch**](https://www.manning.com/books/build-a-large-language-model-from-scratch) **з деякою додатковою інформацією.**
 
 ## Basic Information
 
-You should start by reading this post for some basic concepts you should know about:
+Вам слід почати з прочитання цього посту для деяких базових концепцій, які ви повинні знати:
 
 {{#ref}}
 0.-basic-llm-concepts.md
@@ -13,7 +13,7 @@ You should start by reading this post for some basic concepts you should know ab
 ## 1. Tokenization
 
 > [!TIP]
-> The goal of this initial phase is very simple: **Divide the input in tokens (ids) in some way that makes sense**.
+> Мета цього початкового етапу дуже проста: **Розділіть вхідні дані на токени (ідентифікатори) таким чином, щоб це мало сенс**.
 
 {{#ref}}
 1.-tokenizing.md
@@ -22,7 +22,7 @@ You should start by reading this post for some basic concepts you should know ab
 ## 2. Data Sampling
 
 > [!TIP]
-> The goal of this second phase is very simple: **Sample the input data and prepare it for the training phase usually by separating the dataset into sentences of a specific length and generating also the expected response.**
+> Мета цього другого етапу дуже проста: **Вибірка вхідних даних і підготовка їх до етапу навчання, зазвичай шляхом розділення набору даних на речення певної довжини та також генерування очікуваної відповіді.**
 
 {{#ref}}
 2.-data-sampling.md
@@ -31,10 +31,10 @@ You should start by reading this post for some basic concepts you should know ab
 ## 3. Token Embeddings
 
 > [!TIP]
-> The goal of this third phase is very simple: **Assign each of the previous tokens in the vocabulary a vector of the desired dimensions to train the model.** Each word in the vocabulary will a point in a space of X dimensions.\
-> Note that initially the position of each word in the space is just initialised "randomly" and these positions are trainable parameters (will be improved during the training).
+> Мета цього третього етапу дуже проста: **Призначити кожному з попередніх токенів у словнику вектор бажаних розмірів для навчання моделі.** Кожне слово в словнику буде точкою в просторі X вимірів.\
+> Зверніть увагу, що спочатку позиція кожного слова в просторі просто ініціалізується "випадково", і ці позиції є параметрами, що підлягають навчання (будуть покращені під час навчання).
 >
-> Moreover, during the token embedding **another layer of embeddings is created** which represents (in this case) the **absolute possition of the word in the training sentence**. This way a word in different positions in the sentence will have a different representation (meaning).
+> Більше того, під час вбудовування токенів **створюється ще один шар вбудовувань**, який представляє (в даному випадку) **абсолютну позицію слова в навчальному реченні**. Таким чином, слово в різних позиціях у реченні матиме різне представлення (значення).
 
 {{#ref}}
 3.-token-embeddings.md
@@ -43,8 +43,8 @@ You should start by reading this post for some basic concepts you should know ab
 ## 4. Attention Mechanisms
 
 > [!TIP]
-> The goal of this fourth phase is very simple: **Apply some attetion mechanisms**. These are going to be a lot of **repeated layers** that are going to **capture the relation of a word in the vocabulary with its neighbours in the current sentence being used to train the LLM**.\
-> A lot of layers are used for this, so a lot of trainable parameters are going to be capturing this information.
+> Мета цього четвертого етапу дуже проста: **Застосувати деякі механізми уваги**. Це будуть багато **повторюваних шарів**, які будуть **фіксувати зв'язок слова в словнику з його сусідами в поточному реченні, що використовується для навчання LLM**.\
+> Для цього використовується багато шарів, тому багато параметрів, що підлягають навчання, будуть фіксувати цю інформацію.
 
 {{#ref}}
 4.-attention-mechanisms.md
@@ -53,9 +53,9 @@ You should start by reading this post for some basic concepts you should know ab
 ## 5. LLM Architecture
 
 > [!TIP]
-> The goal of this fifth phase is very simple: **Develop the architecture of the full LLM**. Put everything together, apply all the layers and create all the functions to generate text or transform text to IDs and backwards.
+> Мета цього п'ятого етапу дуже проста: **Розробити архітектуру повного LLM**. З'єднайте все разом, застосуйте всі шари та створіть усі функції для генерації тексту або перетворення тексту в ідентифікатори і назад.
 >
-> This architecture will be used for both, training and predicting text after it was trained.
+> Ця архітектура буде використовуватися як для навчання, так і для прогнозування тексту після його навчання.
 
 {{#ref}}
 5.-llm-architecture.md
@@ -64,7 +64,7 @@ You should start by reading this post for some basic concepts you should know ab
 ## 6. Pre-training & Loading models
 
 > [!TIP]
-> The goal of this sixth phase is very simple: **Train the model from scratch**. For this the previous LLM architecture will be used with some loops going over the data sets using the defined loss functions and optimizer to train all the parameters of the model.
+> Мета цього шостого етапу дуже проста: **Навчити модель з нуля**. Для цього буде використана попередня архітектура LLM з деякими циклами, що проходять через набори даних, використовуючи визначені функції втрат і оптимізатор для навчання всіх параметрів моделі.
 
 {{#ref}}
 6.-pre-training-and-loading-models.md
@@ -73,7 +73,7 @@ You should start by reading this post for some basic concepts you should know ab
 ## 7.0. LoRA Improvements in fine-tuning
 
 > [!TIP]
-> The use of **LoRA reduce a lot the computation** needed to **fine tune** already trained models.
+> Використання **LoRA значно зменшує обчислення**, необхідні для **тонкої настройки** вже навчених моделей.
 
 {{#ref}}
 7.0.-lora-improvements-in-fine-tuning.md
@@ -82,7 +82,7 @@ You should start by reading this post for some basic concepts you should know ab
 ## 7.1. Fine-Tuning for Classification
 
 > [!TIP]
-> The goal of this section is to show how to fine-tune an already pre-trained model so instead of generating new text the LLM will select give the **probabilities of the given text being categorized in each of the given categories** (like if a text is spam or not).
+> Мета цього розділу полягає в тому, щоб показати, як тонко налаштувати вже попередньо навчену модель, щоб замість генерації нового тексту LLM вибирав **ймовірності того, що даний текст буде класифікований у кожну з наданих категорій** (наприклад, чи є текст спамом чи ні).
 
 {{#ref}}
 7.1.-fine-tuning-for-classification.md
@@ -91,9 +91,8 @@ You should start by reading this post for some basic concepts you should know ab
 ## 7.2. Fine-Tuning to follow instructions
 
 > [!TIP]
-> The goal of this section is to show how to **fine-tune an already pre-trained model to follow instructions** rather than just generating text, for example, responding to tasks as a chat bot.
+> Мета цього розділу полягає в тому, щоб показати, як **тонко налаштувати вже попередньо навчену модель для виконання інструкцій**, а не просто генерувати текст, наприклад, відповідати на завдання як чат-бот.
 
 {{#ref}}
 7.2.-fine-tuning-to-follow-instructions.md
 {{#endref}}
-

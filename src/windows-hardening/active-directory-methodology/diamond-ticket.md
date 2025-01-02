@@ -4,18 +4,17 @@
 
 ## Diamond Ticket
 
-**Like a golden ticket**, a diamond ticket is a TGT which can be used to **access any service as any user**. A golden ticket is forged completely offline, encrypted with the krbtgt hash of that domain, and then passed into a logon session for use. Because domain controllers don't track TGTs it (or they) have legitimately issued, they will happily accept TGTs that are encrypted with its own krbtgt hash.
+**Як золотий квиток**, діамантовий квиток - це TGT, який можна використовувати для **доступу до будь-якої служби як будь-який користувач**. Золотий квиток повністю підробляється офлайн, зашифрований хешем krbtgt цього домену, а потім передається в сеанс входу для використання. Оскільки контролери домену не відстежують TGT, які (або які) вони легітимно видали, вони з радістю приймуть TGT, зашифровані їх власним хешем krbtgt.
 
-There are two common techniques to detect the use of golden tickets:
+Існує дві поширені техніки для виявлення використання золотих квитків:
 
-- Look for TGS-REQs that have no corresponding AS-REQ.
-- Look for TGTs that have silly values, such as Mimikatz's default 10-year lifetime.
+- Шукати TGS-REQ, які не мають відповідного AS-REQ.
+- Шукати TGT, які мають смішні значення, такі як стандартний 10-річний термін дії Mimikatz.
 
-A **diamond ticket** is made by **modifying the fields of a legitimate TGT that was issued by a DC**. This is achieved by **requesting** a **TGT**, **decrypting** it with the domain's krbtgt hash, **modifying** the desired fields of the ticket, then **re-encrypting it**. This **overcomes the two aforementioned shortcomings** of a golden ticket because:
+**Діамантовий квиток** створюється шляхом **модифікації полів легітимного TGT, який був виданий DC**. Це досягається шляхом **запиту** **TGT**, **дешифрування** його за допомогою хешу krbtgt домену, **модифікації** бажаних полів квитка, а потім **повторного шифрування**. Це **переборює дві вищезгадані недоліки** золотого квитка, оскільки:
 
-- TGS-REQs will have a preceding AS-REQ.
-- The TGT was issued by a DC which means it will have all the correct details from the domain's Kerberos policy. Even though these can be accurately forged in a golden ticket, it's more complex and open to mistakes.
-
+- TGS-REQ матиме попередній AS-REQ.
+- TGT був виданий DC, що означає, що він матиме всі правильні деталі з політики Kerberos домену. Навіть якщо ці деталі можна точно підробити в золотому квитку, це складніше і відкрито для помилок.
 ```bash
 # Get user RID
 powershell Get-DomainUser -Identity <username> -Properties objectsid
@@ -28,6 +27,4 @@ powershell Get-DomainUser -Identity <username> -Properties objectsid
 # /groups are the desired group RIDs (512 being Domain Admins).
 # /krbkey is the krbtgt AES256 hash.
 ```
-
 {{#include ../../banners/hacktricks-training.md}}
-

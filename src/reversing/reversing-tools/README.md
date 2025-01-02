@@ -1,33 +1,33 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-# Wasm Decompilation and Wat Compilation Guide
+# Посібник з декомпіляції Wasm та компіляції Wat
 
-In the realm of **WebAssembly**, tools for **decompiling** and **compiling** are essential for developers. This guide introduces some online resources and software for handling **Wasm (WebAssembly binary)** and **Wat (WebAssembly text)** files.
+У сфері **WebAssembly** інструменти для **декомпіляції** та **компіляції** є необхідними для розробників. Цей посібник представляє деякі онлайн-ресурси та програмне забезпечення для роботи з **Wasm (бінарний формат WebAssembly)** та **Wat (текстовий формат WebAssembly)** файлами.
 
-## Online Tools
+## Онлайн інструменти
 
-- To **decompile** Wasm to Wat, the tool available at [Wabt's wasm2wat demo](https://webassembly.github.io/wabt/demo/wasm2wat/index.html) comes in handy.
-- For **compiling** Wat back to Wasm, [Wabt's wat2wasm demo](https://webassembly.github.io/wabt/demo/wat2wasm/) serves the purpose.
-- Another decompilation option can be found at [web-wasmdec](https://wwwg.github.io/web-wasmdec/).
+- Для **декомпіляції** Wasm у Wat, корисним є інструмент, доступний на [демо wasm2wat від Wabt](https://webassembly.github.io/wabt/demo/wasm2wat/index.html).
+- Для **компіляції** Wat назад у Wasm, [демо wat2wasm від Wabt](https://webassembly.github.io/wabt/demo/wat2wasm/) виконує цю функцію.
+- Інший варіант декомпіляції можна знайти на [web-wasmdec](https://wwwg.github.io/web-wasmdec/).
 
-## Software Solutions
+## Програмні рішення
 
-- For a more robust solution, [JEB by PNF Software](https://www.pnfsoftware.com/jeb/demo) offers extensive features.
-- The open-source project [wasmdec](https://github.com/wwwg/wasmdec) is also available for decompilation tasks.
+- Для більш надійного рішення, [JEB від PNF Software](https://www.pnfsoftware.com/jeb/demo) пропонує розширені функції.
+- Відкритий проект [wasmdec](https://github.com/wwwg/wasmdec) також доступний для завдань декомпіляції.
 
-# .Net Decompilation Resources
+# Ресурси для декомпіляції .Net
 
-Decompiling .Net assemblies can be accomplished with tools such as:
+Декомпіляцію .Net збірок можна виконати за допомогою таких інструментів:
 
-- [ILSpy](https://github.com/icsharpcode/ILSpy), which also offers a [plugin for Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode), allowing cross-platform usage.
-- For tasks involving **decompilation**, **modification**, and **recompilation**, [dnSpy](https://github.com/0xd4d/dnSpy/releases) is highly recommended. **Right-clicking** a method and choosing **Modify Method** enables code changes.
-- [JetBrains' dotPeek](https://www.jetbrains.com/es-es/decompiler/) is another alternative for decompiling .Net assemblies.
+- [ILSpy](https://github.com/icsharpcode/ILSpy), який також пропонує [плагін для Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode), що дозволяє крос-платформене використання.
+- Для завдань, що включають **декомпіляцію**, **модифікацію** та **рекомпіляцію**, [dnSpy](https://github.com/0xd4d/dnSpy/releases) настійно рекомендується. **Клацання правою кнопкою** на методі та вибір **Modify Method** дозволяє вносити зміни в код.
+- [dotPeek від JetBrains](https://www.jetbrains.com/es-es/decompiler/) є ще одним альтернативним інструментом для декомпіляції .Net збірок.
 
-## Enhancing Debugging and Logging with DNSpy
+## Покращення налагодження та ведення журналів з DNSpy
 
-### DNSpy Logging
+### Ведення журналів DNSpy
 
-To log information to a file using DNSpy, incorporate the following .Net code snippet:
+Щоб записати інформацію у файл за допомогою DNSpy, включіть наступний фрагмент коду .Net:
 
 %%%cpp
 using System.IO;
@@ -35,81 +35,80 @@ path = "C:\\inetpub\\temp\\MyTest2.txt";
 File.AppendAllText(path, "Password: " + password + "\n");
 %%%
 
-### DNSpy Debugging
+### Налагодження DNSpy
 
-For effective debugging with DNSpy, a sequence of steps is recommended to adjust **Assembly attributes** for debugging, ensuring that optimizations that could hinder debugging are disabled. This process includes changing the `DebuggableAttribute` settings, recompiling the assembly, and saving the changes.
+Для ефективного налагодження з DNSpy рекомендується виконати послідовність кроків для налаштування **атрибутів збірки** для налагодження, забезпечуючи, щоб оптимізації, які можуть заважати налагодженню, були вимкнені. Цей процес включає зміну налаштувань `DebuggableAttribute`, рекомпіляцію збірки та збереження змін.
 
-Moreover, to debug a .Net application run by **IIS**, executing `iisreset /noforce` restarts IIS. To attach DNSpy to the IIS process for debugging, the guide instructs on selecting the **w3wp.exe** process within DNSpy and starting the debugging session.
+Крім того, щоб налагодити .Net додаток, запущений через **IIS**, виконання `iisreset /noforce` перезапускає IIS. Щоб приєднати DNSpy до процесу IIS для налагодження, посібник інструктує про вибір процесу **w3wp.exe** в DNSpy та початок сесії налагодження.
 
-For a comprehensive view of loaded modules during debugging, accessing the **Modules** window in DNSpy is advised, followed by opening all modules and sorting assemblies for easier navigation and debugging.
+Для всебічного перегляду завантажених модулів під час налагодження рекомендується отримати доступ до вікна **Modules** в DNSpy, після чого відкрити всі модулі та відсортувати збірки для легшої навігації та налагодження.
 
-This guide encapsulates the essence of WebAssembly and .Net decompilation, offering a pathway for developers to navigate these tasks with ease.
+Цей посібник охоплює суть декомпіляції WebAssembly та .Net, пропонуючи шлях для розробників, щоб легко виконувати ці завдання.
 
-## **Java Decompiler**
+## **Java Декомпілятор**
 
-To decompile Java bytecode, these tools can be very helpful:
+Для декомпіляції Java байт-коду ці інструменти можуть бути дуже корисними:
 
 - [jadx](https://github.com/skylot/jadx)
 - [JD-GUI](https://github.com/java-decompiler/jd-gui/releases)
 
-## **Debugging DLLs**
+## **Налагодження DLL**
 
-### Using IDA
+### Використання IDA
 
-- **Rundll32** is loaded from specific paths for 64-bit and 32-bit versions.
-- **Windbg** is selected as the debugger with the option to suspend on library load/unload enabled.
-- Execution parameters include the DLL path and function name. This setup halts execution upon each DLL's loading.
+- **Rundll32** завантажується з конкретних шляхів для 64-бітних та 32-бітних версій.
+- **Windbg** обирається як налагоджувач з можливістю призупинення при завантаженні/вивантаженні бібліотеки.
+- Параметри виконання включають шлях до DLL та ім'я функції. Ця конфігурація зупиняє виконання при кожному завантаженні DLL.
 
-### Using x64dbg/x32dbg
+### Використання x64dbg/x32dbg
 
-- Similar to IDA, **rundll32** is loaded with command line modifications to specify the DLL and function.
-- Settings are adjusted to break on DLL entry, allowing breakpoint setting at the desired DLL entry point.
+- Подібно до IDA, **rundll32** завантажується з модифікаціями командного рядка для вказівки DLL та функції.
+- Налаштування коригуються для зупинки на вході DLL, що дозволяє встановлювати точки зупинки на бажаній точці входу DLL.
 
-### Images
+### Зображення
 
-- Execution stopping points and configurations are illustrated through screenshots.
+- Точки зупинки виконання та конфігурації ілюструються через скріншоти.
 
 ## **ARM & MIPS**
 
-- For emulation, [arm_now](https://github.com/nongiach/arm_now) is a useful resource.
+- Для емуляції, [arm_now](https://github.com/nongiach/arm_now) є корисним ресурсом.
 
 ## **Shellcodes**
 
-### Debugging Techniques
+### Техніки налагодження
 
-- **Blobrunner** and **jmp2it** are tools for allocating shellcodes in memory and debugging them with Ida or x64dbg.
-  - Blobrunner [releases](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)
-  - jmp2it [compiled version](https://github.com/adamkramer/jmp2it/releases/)
-- **Cutter** offers GUI-based shellcode emulation and inspection, highlighting differences in shellcode handling as a file versus direct shellcode.
+- **Blobrunner** та **jmp2it** є інструментами для виділення shellcode в пам'яті та налагодження їх за допомогою Ida або x64dbg.
+- Blobrunner [випуски](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)
+- jmp2it [скомпільована версія](https://github.com/adamkramer/jmp2it/releases/)
+- **Cutter** пропонує емуляцію shellcode на основі GUI та інспекцію, підкреслюючи відмінності в обробці shellcode як файлу в порівнянні з прямим shellcode.
 
-### Deobfuscation and Analysis
+### Деобфускація та аналіз
 
-- **scdbg** provides insights into shellcode functions and deobfuscation capabilities.
-  %%%bash
-  scdbg.exe -f shellcode # Basic info
-  scdbg.exe -f shellcode -r # Analysis report
-  scdbg.exe -f shellcode -i -r # Interactive hooks
-  scdbg.exe -f shellcode -d # Dump decoded shellcode
-  scdbg.exe -f shellcode /findsc # Find start offset
-  scdbg.exe -f shellcode /foff 0x0000004D # Execute from offset
-  %%%
+- **scdbg** надає інформацію про функції shellcode та можливості деобфускації.
+%%%bash
+scdbg.exe -f shellcode # Основна інформація
+scdbg.exe -f shellcode -r # Звіт з аналізу
+scdbg.exe -f shellcode -i -r # Інтерактивні хуки
+scdbg.exe -f shellcode -d # Вивантажити декодований shellcode
+scdbg.exe -f shellcode /findsc # Знайти початковий зсув
+scdbg.exe -f shellcode /foff 0x0000004D # Виконати з зсуву
+%%%
 
-- **CyberChef** for disassembling shellcode: [CyberChef recipe](https://gchq.github.io/CyberChef/#recipe=To_Hex%28'Space',0%29Disassemble_x86%28'32','Full%20x86%20architecture',16,0,true,true%29)
+- **CyberChef** для дизасемблювання shellcode: [рецепт CyberChef](https://gchq.github.io/CyberChef/#recipe=To_Hex%28'Space',0%29Disassemble_x86%28'32','Full%20x86%20architecture',16,0,true,true%29)
 
 ## **Movfuscator**
 
-- An obfuscator that replaces all instructions with `mov`.
-- Useful resources include a [YouTube explanation](https://www.youtube.com/watch?v=2VF_wPkiBJY) and [PDF slides](https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas_2015_the_movfuscator.pdf).
-- **demovfuscator** might reverse movfuscator's obfuscation, requiring dependencies like `libcapstone-dev` and `libz3-dev`, and installing [keystone](https://github.com/keystone-engine/keystone/blob/master/docs/COMPILE-NIX.md).
+- Обфускатор, який замінює всі інструкції на `mov`.
+- Корисні ресурси включають [пояснення на YouTube](https://www.youtube.com/watch?v=2VF_wPkiBJY) та [PDF слайди](https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas_2015_the_movfuscator.pdf).
+- **demovfuscator** може скасувати обфускацію movfuscator, вимагаючи залежностей, таких як `libcapstone-dev` та `libz3-dev`, а також встановлення [keystone](https://github.com/keystone-engine/keystone/blob/master/docs/COMPILE-NIX.md).
 
 ## **Delphi**
 
-- For Delphi binaries, [IDR](https://github.com/crypto2011/IDR) is recommended.
+- Для бінарних файлів Delphi рекомендується [IDR](https://github.com/crypto2011/IDR).
 
-# Courses
+# Курси
 
 - [https://github.com/0xZ0F/Z0FCourse_ReverseEngineering](https://github.com/0xZ0F/Z0FCourse_ReverseEngineering)
-- [https://github.com/malrev/ABD](https://github.com/malrev/ABD) \(Binary deobfuscation\)
+- [https://github.com/malrev/ABD](https://github.com/malrev/ABD) \(Деобфускація бінарних файлів\)
 
 {{#include ../../banners/hacktricks-training.md}}
-

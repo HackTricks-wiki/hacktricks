@@ -1,100 +1,90 @@
-# Windows Credentials Protections
+# Захист облікових даних Windows
 
-## Credentials Protections
+## Захист облікових даних
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ## WDigest
 
-The [WDigest](<https://technet.microsoft.com/pt-pt/library/cc778868(v=ws.10).aspx?f=255&MSPPError=-2147217396>) protocol, introduced with Windows XP, is designed for authentication via the HTTP Protocol and is **enabled by default on Windows XP through Windows 8.0 and Windows Server 2003 to Windows Server 2012**. This default setting results in **plain-text password storage in LSASS** (Local Security Authority Subsystem Service). An attacker can use Mimikatz to **extract these credentials** by executing:
-
+Протокол [WDigest](<https://technet.microsoft.com/pt-pt/library/cc778868(v=ws.10).aspx?f=255&MSPPError=-2147217396>), представлений з Windows XP, призначений для аутентифікації через HTTP-протокол і **включений за замовчуванням у Windows XP до Windows 8.0 та Windows Server 2003 до Windows Server 2012**. Це налаштування за замовчуванням призводить до **зберігання паролів у відкритому вигляді в LSASS** (Служба підсистеми локальної безпеки). Зловмисник може використовувати Mimikatz для **витягування цих облікових даних**, виконавши:
 ```bash
 sekurlsa::wdigest
 ```
-
-To **toggle this feature off or on**, the _**UseLogonCredential**_ and _**Negotiate**_ registry keys within _**HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\SecurityProviders\WDigest**_ must be set to "1". If these keys are **absent or set to "0"**, WDigest is **disabled**:
-
+Щоб **вимкнути або ввімкнути цю функцію**, реєстрові ключі _**UseLogonCredential**_ та _**Negotiate**_ в _**HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\SecurityProviders\WDigest**_ повинні бути встановлені на "1". Якщо ці ключі **відсутні або встановлені на "0"**, WDigest є **вимкненим**:
 ```bash
 reg query HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest /v UseLogonCredential
 ```
+## Захист LSA
 
-## LSA Protection
-
-Starting with **Windows 8.1**, Microsoft enhanced the security of LSA to **block unauthorized memory reads or code injections by untrusted processes**. This enhancement hinders the typical functioning of commands like `mimikatz.exe sekurlsa:logonpasswords`. To **enable this enhanced protection**, the _**RunAsPPL**_ value in _**HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA**_ should be adjusted to 1:
-
+Починаючи з **Windows 8.1**, Microsoft покращила безпеку LSA, щоб **блокувати несанкціоновані зчитування пам'яті або ін'єкції коду ненадійними процесами**. Це покращення ускладнює звичайне функціонування команд, таких як `mimikatz.exe sekurlsa:logonpasswords`. Щоб **увімкнути цей покращений захист**, значення _**RunAsPPL**_ в _**HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA**_ слід налаштувати на 1:
 ```
 reg query HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA /v RunAsPPL
 ```
-
 ### Bypass
 
-It is possible to bypass this protection using Mimikatz driver mimidrv.sys:
+Можливо обійти цю захист за допомогою драйвера Mimikatz mimidrv.sys:
 
 ![](../../images/mimidrv.png)
 
 ## Credential Guard
 
-**Credential Guard**, a feature exclusive to **Windows 10 (Enterprise and Education editions)**, enhances the security of machine credentials using **Virtual Secure Mode (VSM)** and **Virtualization Based Security (VBS)**. It leverages CPU virtualization extensions to isolate key processes within a protected memory space, away from the main operating system's reach. This isolation ensures that even the kernel cannot access the memory in VSM, effectively safeguarding credentials from attacks like **pass-the-hash**. The **Local Security Authority (LSA)** operates within this secure environment as a trustlet, while the **LSASS** process in the main OS acts merely as a communicator with the VSM's LSA.
+**Credential Guard**, функція, що є ексклюзивною для **Windows 10 (Enterprise та Education editions)**, підвищує безпеку облікових даних машини за допомогою **Virtual Secure Mode (VSM)** та **Virtualization Based Security (VBS)**. Вона використовує розширення віртуалізації процесора для ізоляції ключових процесів у захищеному просторі пам'яті, подалі від основної операційної системи. Ця ізоляція забезпечує, що навіть ядро не може отримати доступ до пам'яті в VSM, ефективно захищаючи облікові дані від атак, таких як **pass-the-hash**. **Local Security Authority (LSA)** працює в цьому захищеному середовищі як trustlet, тоді як процес **LSASS** в основній ОС виконує лише роль комунікатора з LSA VSM.
 
-By default, **Credential Guard** is not active and requires manual activation within an organization. It's critical for enhancing security against tools like **Mimikatz**, which are hindered in their ability to extract credentials. However, vulnerabilities can still be exploited through the addition of custom **Security Support Providers (SSP)** to capture credentials in clear text during login attempts.
+За замовчуванням **Credential Guard** не активний і вимагає ручної активації в організації. Це критично важливо для підвищення безпеки проти інструментів, таких як **Mimikatz**, які обмежені у своїй здатності витягувати облікові дані. Однак вразливості все ще можуть бути використані через додавання користувацьких **Security Support Providers (SSP)** для захоплення облікових даних у відкритому тексті під час спроб входу.
 
-To verify **Credential Guard**'s activation status, the registry key _**LsaCfgFlags**_ under _**HKLM\System\CurrentControlSet\Control\LSA**_ can be inspected. A value of "**1**" indicates activation with **UEFI lock**, "**2**" without lock, and "**0**" denotes it is not enabled. This registry check, while a strong indicator, is not the sole step for enabling Credential Guard. Detailed guidance and a PowerShell script for enabling this feature are available online.
-
+Щоб перевірити статус активації **Credential Guard**, можна перевірити реєстровий ключ _**LsaCfgFlags**_ під _**HKLM\System\CurrentControlSet\Control\LSA**_. Значення "**1**" вказує на активацію з **UEFI lock**, "**2**" без замка, а "**0**" позначає, що він не активований. Ця перевірка реєстру, хоча і є сильним показником, не є єдиним кроком для активації Credential Guard. Детальні вказівки та скрипт PowerShell для активації цієї функції доступні онлайн.
 ```powershell
 reg query HKLM\System\CurrentControlSet\Control\LSA /v LsaCfgFlags
 ```
+Для всебічного розуміння та інструкцій щодо активації **Credential Guard** у Windows 10 та його автоматичної активації в сумісних системах **Windows 11 Enterprise та Education (версія 22H2)**, відвідайте [документацію Microsoft](https://docs.microsoft.com/en-us/windows/security/identity-protection/credential-guard/credential-guard-manage).
 
-For a comprehensive understanding and instructions on enabling **Credential Guard** in Windows 10 and its automatic activation in compatible systems of **Windows 11 Enterprise and Education (version 22H2)**, visit [Microsoft's documentation](https://docs.microsoft.com/en-us/windows/security/identity-protection/credential-guard/credential-guard-manage).
+Додаткові відомості про реалізацію користувацьких SSP для захоплення облікових даних наведені в [цьому посібнику](../active-directory-methodology/custom-ssp.md).
 
-Further details on implementing custom SSPs for credential capture are provided in [this guide](../active-directory-methodology/custom-ssp.md).
+## Режим обмеженого адміністратора RDP
 
-## RDP RestrictedAdmin Mode
+**Windows 8.1 та Windows Server 2012 R2** представили кілька нових функцій безпеки, включаючи _**Режим обмеженого адміністратора для RDP**_. Цей режим був розроблений для підвищення безпеки шляхом зменшення ризиків, пов'язаних з [**pass the hash**](https://blog.ahasayen.com/pass-the-hash/) атаками.
 
-**Windows 8.1 and Windows Server 2012 R2** introduced several new security features, including the _**Restricted Admin mode for RDP**_. This mode was designed to enhance security by mitigating the risks associated with [**pass the hash**](https://blog.ahasayen.com/pass-the-hash/) attacks.
+Традиційно, підключаючись до віддаленого комп'ютера через RDP, ваші облікові дані зберігаються на цільовій машині. Це становить значний ризик для безпеки, особливо при використанні облікових записів з підвищеними привілеями. Однак, з впровадженням _**Режиму обмеженого адміністратора**_, цей ризик суттєво зменшується.
 
-Traditionally, when connecting to a remote computer via RDP, your credentials are stored on the target machine. This poses a significant security risk, especially when using accounts with elevated privileges. However, with the introduction of _**Restricted Admin mode**_, this risk is substantially reduced.
+При ініціюванні з'єднання RDP за допомогою команди **mstsc.exe /RestrictedAdmin**, автентифікація на віддаленому комп'ютері виконується без зберігання ваших облікових даних на ньому. Цей підхід забезпечує, що в разі зараження шкідливим ПЗ або якщо зловмисник отримує доступ до віддаленого сервера, ваші облікові дані не будуть скомпрометовані, оскільки вони не зберігаються на сервері.
 
-When initiating an RDP connection using the command **mstsc.exe /RestrictedAdmin**, authentication to the remote computer is performed without storing your credentials on it. This approach ensures that, in the event of a malware infection or if a malicious user gains access to the remote server, your credentials are not compromised, as they are not stored on the server.
+Важливо зазначити, що в **Режимі обмеженого адміністратора** спроби доступу до мережевих ресурсів з RDP-сесії не використовуватимуть ваші особисті облікові дані; натомість використовується **ідентичність машини**.
 
-It's important to note that in **Restricted Admin mode**, attempts to access network resources from the RDP session will not use your personal credentials; instead, the **machine's identity** is used.
-
-This feature marks a significant step forward in securing remote desktop connections and protecting sensitive information from being exposed in case of a security breach.
+Ця функція є значним кроком вперед у забезпеченні безпеки з'єднань віддаленого робочого столу та захисті чутливої інформації від витоку у разі порушення безпеки.
 
 ![](../../images/RAM.png)
 
-For more detailed information on visit [this resource](https://blog.ahasayen.com/restricted-admin-mode-for-rdp/).
+Для отримання більш детальної інформації відвідайте [цей ресурс](https://blog.ahasayen.com/restricted-admin-mode-for-rdp/).
 
-## Cached Credentials
+## Кешовані облікові дані
 
-Windows secures **domain credentials** through the **Local Security Authority (LSA)**, supporting logon processes with security protocols like **Kerberos** and **NTLM**. A key feature of Windows is its capability to cache the **last ten domain logins** to ensure users can still access their computers even if the **domain controller is offline**—a boon for laptop users often away from their company's network.
+Windows захищає **облікові дані домену** через **Local Security Authority (LSA)**, підтримуючи процеси входу з безпековими протоколами, такими як **Kerberos** та **NTLM**. Ключовою особливістю Windows є її здатність кешувати **останні десять входів до домену**, щоб забезпечити доступ користувачів до своїх комп'ютерів, навіть якщо **контролер домену офлайн**—це перевага для користувачів ноутбуків, які часто перебувають поза мережею своєї компанії.
 
-The number of cached logins is adjustable via a specific **registry key or group policy**. To view or change this setting, the following command is utilized:
-
+Кількість кешованих входів можна налаштувати за допомогою конкретного **реєстраційного ключа або групової політики**. Щоб переглянути або змінити цю настройку, використовується наступна команда:
 ```bash
 reg query "HKEY_LOCAL_MACHINE\SOFTWARE\MICROSOFT\WINDOWS NT\CURRENTVERSION\WINLOGON" /v CACHEDLOGONSCOUNT
 ```
+Доступ до цих кешованих облікових даних суворо контролюється, і лише обліковий запис **SYSTEM** має необхідні дозволи для їх перегляду. Адміністраторам, які потребують доступу до цієї інформації, потрібно робити це з привілеями користувача SYSTEM. Облікові дані зберігаються за адресою: `HKEY_LOCAL_MACHINE\SECURITY\Cache`
 
-Access to these cached credentials is tightly controlled, with only the **SYSTEM** account having the necessary permissions to view them. Administrators needing to access this information must do so with SYSTEM user privileges. The credentials are stored at: `HKEY_LOCAL_MACHINE\SECURITY\Cache`
+**Mimikatz** може бути використаний для витягнення цих кешованих облікових даних за допомогою команди `lsadump::cache`.
 
-**Mimikatz** can be employed to extract these cached credentials using the command `lsadump::cache`.
+Для отримання додаткової інформації оригінальне [джерело](http://juggernaut.wikidot.com/cached-credentials) надає всебічну інформацію.
 
-For further details, the original [source](http://juggernaut.wikidot.com/cached-credentials) provides comprehensive information.
+## Захищені користувачі
 
-## Protected Users
+Членство в групі **Захищені користувачі** вводить кілька покращень безпеки для користувачів, забезпечуючи вищі рівні захисту від крадіжки облікових даних та їх неналежного використання:
 
-Membership in the **Protected Users group** introduces several security enhancements for users, ensuring higher levels of protection against credential theft and misuse:
+- **Делегування облікових даних (CredSSP)**: Навіть якщо налаштування групової політики для **Дозволити делегування стандартних облікових даних** увімкнено, облікові дані у відкритому тексті Захищених користувачів не будуть кешуватися.
+- **Windows Digest**: Починаючи з **Windows 8.1 та Windows Server 2012 R2**, система не буде кешувати облікові дані у відкритому тексті Захищених користувачів, незалежно від статусу Windows Digest.
+- **NTLM**: Система не буде кешувати облікові дані у відкритому тексті Захищених користувачів або односторонні функції NT (NTOWF).
+- **Kerberos**: Для Захищених користувачів аутентифікація Kerberos не буде генерувати **DES** або **RC4 ключі**, а також не буде кешувати облікові дані у відкритому тексті або довгострокові ключі після початкового отримання квитка на доступ (TGT).
+- **Офлайн вхід**: У Захищених користувачів не буде створено кешований перевірник під час входу або розблокування, що означає, що офлайн вхід не підтримується для цих облікових записів.
 
-- **Credential Delegation (CredSSP)**: Even if the Group Policy setting for **Allow delegating default credentials** is enabled, plain text credentials of Protected Users will not be cached.
-- **Windows Digest**: Starting from **Windows 8.1 and Windows Server 2012 R2**, the system will not cache plain text credentials of Protected Users, regardless of the Windows Digest status.
-- **NTLM**: The system will not cache Protected Users' plain text credentials or NT one-way functions (NTOWF).
-- **Kerberos**: For Protected Users, Kerberos authentication will not generate **DES** or **RC4 keys**, nor will it cache plain text credentials or long-term keys beyond the initial Ticket-Granting Ticket (TGT) acquisition.
-- **Offline Sign-In**: Protected Users will not have a cached verifier created at sign-in or unlock, meaning offline sign-in is not supported for these accounts.
+Ці заходи захисту активуються в момент, коли користувач, який є членом групи **Захищені користувачі**, входить на пристрій. Це забезпечує наявність критичних заходів безпеки для захисту від різних методів компрометації облікових даних.
 
-These protections are activated the moment a user, who is a member of the **Protected Users group**, signs into the device. This ensures that critical security measures are in place to safeguard against various methods of credential compromise.
+Для отримання більш детальної інформації зверніться до офіційної [документації](https://docs.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/protected-users-security-group).
 
-For more detailed information, consult the official [documentation](https://docs.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/protected-users-security-group).
-
-**Table from** [**the docs**](https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/appendix-c--protected-accounts-and-groups-in-active-directory)**.**
+**Таблиця з** [**документів**](https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/appendix-c--protected-accounts-and-groups-in-active-directory)**.**
 
 | Windows Server 2003 RTM | Windows Server 2003 SP1+ | <p>Windows Server 2012,<br>Windows Server 2008 R2,<br>Windows Server 2008</p> | Windows Server 2016          |
 | ----------------------- | ------------------------ | ----------------------------------------------------------------------------- | ---------------------------- |
@@ -116,4 +106,3 @@ For more detailed information, consult the official [documentation](https://docs
 | Server Operators        | Server Operators         | Server Operators                                                              | Server Operators             |
 
 {{#include ../../banners/hacktricks-training.md}}
-

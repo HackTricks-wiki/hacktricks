@@ -4,16 +4,15 @@
 
 ### Junk Code
 
-It's very common to find **junk code that is never used** to make the reversing of the macro more difficult.\
-For example, in the following image you can see that and If that is never going to be true is used to execute some junk and useless code.
+Дуже поширено знаходити **сміттєвий код, який ніколи не використовується**, щоб ускладнити реверс інженерію макросу.\
+Наприклад, на наступному зображенні ви можете побачити, що If, який ніколи не буде істинним, використовується для виконання деякого сміттєвого та непотрібного коду.
 
 ![](<../images/image (369).png>)
 
 ### Macro Forms
 
-Using the **GetObject** function it's possible to obtain data from forms of the macro. This can be used to difficult the analysis. The following is a photo of a macro form used to **hide data inside text boxes** (a text box can be hiding other text boxes):
+Використовуючи функцію **GetObject**, можливо отримати дані з форм макросу. Це може бути використано для ускладнення аналізу. Наступне - це фото форми макросу, що використовується для **приховування даних всередині текстових полів** (текстове поле може приховувати інші текстові поля):
 
 ![](<../images/image (344).png>)
 
 {{#include ../banners/hacktricks-training.md}}
-

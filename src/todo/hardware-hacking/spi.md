@@ -2,59 +2,56 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Основна інформація
 
-SPI (Serial Peripheral Interface) is an Synchronous Serial Communication Protocol used in embedded systems for short distance communication between ICs (Integrated Circuits). SPI Communication Protocol makes use of the master-slave architecture which is orchastrated by the Clock and Chip Select Signal. A master-slave architecture consists of a master (usually a microprocessor) that manages external peripherals like EEPROM, sensors, control devices, etc. which are considered to be the slaves.
+SPI (Serial Peripheral Interface) - це синхронний послідовний комунікаційний протокол, що використовується в вбудованих системах для короткострокової комунікації між ІС (інтегральними схемами). Протокол комунікації SPI використовує архітектуру майстер-раб, яка координується годинниковим сигналом та сигналом вибору чіпа. Архітектура майстер-раб складається з майстра (зазвичай мікропроцесора), який керує зовнішніми периферійними пристроями, такими як EEPROM, датчики, контрольні пристрої тощо, які вважаються рабами.
 
-Multiple slaves can be connected to a master but slaves can't communicate with each other. Slaves are administrated by two pins, clock and chip select. As SPI is an synchronous communication protocol, the input and output pins follow the clock signals. The chip select is used by the master to select a slave and interact with it. When the chip select is high, the slave device is not selected whereas when it's low, the chip has been selected and the master would be interacting with the slave.
+До майстра можна підключити кілька рабів, але раби не можуть спілкуватися один з одним. Раби керуються двома виводами: годинником і вибором чіпа. Оскільки SPI є синхронним комунікаційним протоколом, вхідні та вихідні виводи слідують за годинниковими сигналами. Сигнал вибору чіпа використовується майстром для вибору раба та взаємодії з ним. Коли сигнал вибору чіпа високий, пристрій-раб не вибрано, тоді як коли він низький, чіп вибрано, і майстер взаємодіє з рабом.
 
-The MOSI (Master Out, Slave In) and MISO (Master In, Slave Out) are responsible for data sending and recieving data. Data is sent to the slave device through the MOSI pin while the chip select is held low. The input data contains instructions, memory addresses or data as per the datasheet of the slave device vendor. Upon a valid input, the MISO pin is responsible for transmitting data to the master. The output data is sent exactly at the next clock cycle after the input ends. The MISO pins transmits data till the data is fully transmitter or the master sets the chip select pin high (in that case, the slave would stop transmitting and master would not listen after that clock cycle).
+MOSI (Master Out, Slave In) та MISO (Master In, Slave Out) відповідають за передачу та отримання даних. Дані надсилаються до пристрою-раба через вивід MOSI, поки сигнал вибору чіпа утримується на низькому рівні. Вхідні дані містять інструкції, адреси пам'яті або дані відповідно до технічного опису постачальника пристрою-раба. Після дійсного вводу вивід MISO відповідає за передачу даних до майстра. Вихідні дані надсилаються точно на наступному тактовому циклі після завершення вводу. Вивід MISO передає дані, поки дані повністю не передадуться або поки майстер не встановить сигнал вибору чіпа високим (в цьому випадку раб перестане передавати, і майстер не буде слухати після цього тактового циклу).
 
-## Dumping Firmware from EEPROMs
+## Вивантаження прошивки з EEPROM
 
-Dumping firmware can be useful for analysing the firmware and finding vulnerabilities in them. Often times, the firmware is not available on the internet or is irrelevant due to variations of factors like model number, version, etc. Hence, extracting the firmware directly from the physical device can be helpful to be specific while hunting for threats.
+Вивантаження прошивки може бути корисним для аналізу прошивки та виявлення вразливостей у ній. Часто прошивка недоступна в Інтернеті або є нерелевантною через різні фактори, такі як номер моделі, версія тощо. Тому безпосереднє витягування прошивки з фізичного пристрою може бути корисним для конкретизації під час пошуку загроз.
 
-Getting Serial Console can be helpful, but often times it happens that the files are read-only. This constrains the analysis due to various reasons. For example, a tools that are required to send and recieve packages would not be there in the firmware. So extracting the binaries to reverse engineer them is not feasible. Hence, having the whole firmware dumped on the system and extracting the binaries for analysis can be very helpful.
+Отримання серійної консолі може бути корисним, але часто трапляється, що файли є тільки для читання. Це обмежує аналіз з різних причин. Наприклад, інструменти, які потрібні для надсилання та отримання пакетів, можуть бути відсутніми в прошивці. Тому витягування бінарних файлів для реверс-інжинірингу є недоцільним. Отже, наявність всієї прошивки, вивантаженої на систему, та витягування бінарних файлів для аналізу може бути дуже корисним.
 
-Also, during red reaming and getting physical access to devices, dumping the firmware can help on modifying the files or injecting malicious files and then reflashing them into the memory which could be helpful to implant a backdoor into the device. Hence, there are numerous possibilities that can be unlocked with firmware dumping.
+Крім того, під час червоного читання та отримання фізичного доступу до пристроїв, вивантаження прошивки може допомогти в модифікації файлів або інжекції шкідливих файлів, а потім повторного запису їх у пам'ять, що може бути корисним для впровадження бекдору в пристрій. Отже, існує безліч можливостей, які можна відкрити за допомогою вивантаження прошивки.
 
-### CH341A EEPROM Programmer and Reader
+### CH341A Програматор та читач EEPROM
 
-This device is an inexpensive tool for dumping firmwares from EEPROMs and also reflashing them with firmware files. This has been a popular choice for working with computer BIOS chips (which are just EEPROMs). This device connects over USB and needs minimal tools to get started. Also, it usually gets the task done quickly, so can be helpful in physical device access too.
+Цей пристрій є недорогим інструментом для вивантаження прошивок з EEPROM та повторного запису їх з файлами прошивки. Це був популярний вибір для роботи з чіпами BIOS комп'ютера (які є просто EEPROM). Цей пристрій підключається через USB і потребує мінімальних інструментів для початку. Крім того, він зазвичай виконує завдання швидко, тому може бути корисним і для фізичного доступу до пристроїв.
 
 ![drawing](../../images/board_image_ch341a.jpg)
 
-Connect the EEPROM memory with the CH341a Programmer and plug the device into the computer. Incase the device is not getting detected, try installing drivers into the computer. Also, make sure that the EEPROM is connected in proper orientation (usually, place the VCC Pin in reverse orientation to the USB connector) or else, the software would not be able to detect the chip. Refer to the diagram if required:
+Підключіть пам'ять EEPROM до програматора CH341a та підключіть пристрій до комп'ютера. Якщо пристрій не виявляється, спробуйте встановити драйвери на комп'ютер. Також переконайтеся, що EEPROM підключено в правильній орієнтації (зазвичай, розмістіть вивід VCC у зворотній орієнтації до USB-роз'єму), інакше програмне забезпечення не зможе виявити чіп. За потреби зверніться до діаграми:
 
 ![drawing](../../images/connect_wires_ch341a.jpg) ![drawing](../../images/eeprom_plugged_ch341a.jpg)
 
-Finally, use softwares like flashrom, G-Flash (GUI), etc. for dumping the firmware. G-Flash is a minimal GUI tool is fast and detects the EEPROM automatically. This can be helpful in the firmware needs to be extracted quickly, without much tinkering with the documentation.
+Нарешті, використовуйте програмне забезпечення, таке як flashrom, G-Flash (GUI) тощо, для вивантаження прошивки. G-Flash - це мінімальний GUI-інструмент, який швидкий і автоматично виявляє EEPROM. Це може бути корисним, якщо прошивку потрібно витягнути швидко, без зайвих маніпуляцій з документацією.
 
 ![drawing](../../images/connected_status_ch341a.jpg)
 
-After dumping the firmware, the analysis can be done on the binary files. Tools like strings, hexdump, xxd, binwalk, etc. can be used to extract a lot of information about the firmware as well as the whole file system too.
+Після вивантаження прошивки аналіз можна провести на бінарних файлах. Інструменти, такі як strings, hexdump, xxd, binwalk тощо, можуть бути використані для витягнення великої кількості інформації про прошивку, а також про всю файлову систему.
 
-To extract the contents from the firmware, binwalk can be used. Binwalk analyses for hex signatures and identifies the files in the binary file and is capabale of extracting them.
-
+Для витягнення вмісту з прошивки можна використовувати binwalk. Binwalk аналізує шістнадцяткові сигнатури та ідентифікує файли в бінарному файлі та здатний їх витягувати.
 ```
 binwalk -e <filename>
 ```
-
-The can be .bin or .rom as per the tools and configurations used.
+Файли можуть бути .bin або .rom в залежності від використовуваних інструментів та конфігурацій.
 
 > [!CAUTION]
-> Note that firmware extraction is a delicate process and requires a lot of patience. Any mishandling can potentially corrupt the firmware or even erase it completely and make the device unusable. It is recommended to study the specific device before attempting to extract the firmware.
+> Зверніть увагу, що витягування прошивки є делікатним процесом і вимагає багато терпіння. Будь-яке неналежне поводження може потенційно пошкодити прошивку або навіть повністю її стерти, зробивши пристрій непридатним для використання. Рекомендується вивчити конкретний пристрій перед спробою витягти прошивку.
 
 ### Bus Pirate + flashrom
 
 ![](<../../images/image (910).png>)
 
-Note that even if the PINOUT of the Pirate Bus indicates pins for **MOSI** and **MISO** to connect to SPI however some SPIs may indicate pins as DI and DO. **MOSI -> DI, MISO -> DO**
+Зверніть увагу, що навіть якщо PINOUT Pirate Bus вказує на контакти для **MOSI** та **MISO** для підключення до SPI, деякі SPI можуть вказувати контакти як DI та DO. **MOSI -> DI, MISO -> DO**
 
 ![](<../../images/image (360).png>)
 
-In Windows or Linux you can use the program [**`flashrom`**](https://www.flashrom.org/Flashrom) to dump the content of the flash memory running something like:
-
+У Windows або Linux ви можете використовувати програму [**`flashrom`**](https://www.flashrom.org/Flashrom) для скидання вмісту флеш-пам'яті, запустивши щось на зразок:
 ```bash
 # In this command we are indicating:
 # -VV Verbose
@@ -63,6 +60,4 @@ In Windows or Linux you can use the program [**`flashrom`**](https://www.flashro
 # -r <file> Image to save in the filesystem
 flashrom -VV -c "W25Q64.V" -p buspirate_spi:dev=COM3 -r flash_content.img
 ```
-
 {{#include ../../banners/hacktricks-training.md}}
-

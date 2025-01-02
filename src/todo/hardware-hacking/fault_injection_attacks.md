@@ -1,7 +1,5 @@
-# Fault Injection Attacks 
+# Fault Injection Attacks
 
-Fault injections attacks includes introducing external distrubance in electronic circuits to influence it's behaviour, resulting to disclose information or even bypass certian restrictions in the circuit. This attacks opens a lot of possibilities for attacking electronic circuits. This attack is also referred as glitching of electronic circuits.
+Атаки з впровадженням помилок включають введення зовнішніх збурень в електронні схеми для впливу на їхню поведінку, що призводить до розкриття інформації або навіть обходу певних обмежень у схемі. Ці атаки відкривають багато можливостей для атак на електронні схеми. Цю атаку також називають глічингом електронних схем.
 
-There are a lot of methods and mediums for injecting fault into an electronic circuit. 
-
-
+Існує багато методів і засобів для впровадження помилок в електронну схему.

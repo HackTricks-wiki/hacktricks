@@ -1,25 +1,24 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-# Identifying packed binaries
+# Визначення упакованих бінарних файлів
 
-- **lack of strings**: It's common to find that packed binaries doesn't have almost any string
-- A lot of **unused strings**: Also, when a malware is using some kind of commercial packer it's common to find a lot of strings without cross-references. Even if these strings exist that doesn't mean that the binary isn't packed.
-- You can also use some tools to try to find which packer was used to pack a binary:
-  - [PEiD](http://www.softpedia.com/get/Programming/Packers-Crypters-Protectors/PEiD-updated.shtml)
-  - [Exeinfo PE](http://www.softpedia.com/get/Programming/Packers-Crypters-Protectors/ExEinfo-PE.shtml)
-  - [Language 2000](http://farrokhi.net/language/)
+- **відсутність рядків**: Зазвичай упаковані бінарні файли майже не містять рядків
+- Багато **невикористаних рядків**: Також, коли шкідливе ПЗ використовує якийсь комерційний упакувальник, зазвичай можна знайти багато рядків без перехресних посилань. Навіть якщо ці рядки існують, це не означає, що бінарний файл не упакований.
+- Ви також можете використовувати деякі інструменти, щоб спробувати визначити, який упакувальник був використаний для упаковки бінарного файлу:
+- [PEiD](http://www.softpedia.com/get/Programming/Packers-Crypters-Protectors/PEiD-updated.shtml)
+- [Exeinfo PE](http://www.softpedia.com/get/Programming/Packers-Crypters-Protectors/ExEinfo-PE.shtml)
+- [Language 2000](http://farrokhi.net/language/)
 
-# Basic Recommendations
+# Основні рекомендації
 
-- **Start** analysing the packed binary **from the bottom in IDA and move up**. Unpackers exit once the unpacked code exit so it's unlikely that the unpacker passes execution to the unpacked code at the start.
-- Search for **JMP's** or **CALLs** to **registers** or **regions** of **memory**. Also search for **functions pushing arguments and an address direction and then calling `retn`**, because the return of the function in that case may call the address just pushed to the stack before calling it.
-- Put a **breakpoint** on `VirtualAlloc` as this allocates space in memory where the program can write unpacked code. The "run to user code" or use F8 to **get to value inside EAX** after executing the function and "**follow that address in dump**". You never know if that is the region where the unpacked code is going to be saved.
-  - **`VirtualAlloc`** with the value "**40**" as an argument means Read+Write+Execute (some code that needs execution is going to be copied here).
-- **While unpacking** code it's normal to find **several calls** to **arithmetic operations** and functions like **`memcopy`** or **`Virtual`**`Alloc`. If you find yourself in a function that apparently only perform arithmetic operations and maybe some `memcopy` , the recommendation is to try to **find the end of the function** (maybe a JMP or call to some register) **or** at least the **call to the last function** and run to then as the code isn't interesting.
-- While unpacking code **note** whenever you **change memory region** as a memory region change may indicate the **starting of the unpacking code**. You can easily dump a memory region using Process Hacker (process --> properties --> memory).
-- While trying to unpack code a good way to **know if you are already working with the unpacked code** (so you can just dump it) is to **check the strings of the binary**. If at some point you perform a jump (maybe changing the memory region) and you notice that **a lot more strings where added**, then you can know **you are working with the unpacked code**.\
-  However, if the packer already contains a lot of strings you can see how many strings contains the word "http" and see if this number increases.
-- When you dump an executable from a region of memory you can fix some headers using [PE-bear](https://github.com/hasherezade/pe-bear-releases/releases).
+- **Почніть** аналізувати упакований бінарний файл **знизу в IDA і рухайтеся вгору**. Упаковщики виходять, коли розпакований код виходить, тому малоймовірно, що упаковщик передає виконання розпакованому коду на початку.
+- Шукайте **JMP** або **CALL** до **реєстрів** або **областей** **пам'яті**. Також шукайте **функції, що передають аргументи та адресу, а потім викликають `retn`**, оскільки повернення функції в цьому випадку може викликати адресу, яка тільки що була передана в стек перед її викликом.
+- Встановіть **точку зупинки** на `VirtualAlloc`, оскільки це виділяє місце в пам'яті, куди програма може записати розпакований код. "Запустіть до коду користувача" або використовуйте F8, щоб **отримати значення в EAX** після виконання функції та "**слідкуйте за цією адресою в дампі**". Ви ніколи не знаєте, чи це область, куди буде збережено розпакований код.
+- **`VirtualAlloc`** зі значенням "**40**" як аргумент означає Читання+Запис+Виконання (деякий код, який потребує виконання, буде скопійовано сюди).
+- **Під час розпакування** коду нормально знаходити **кілька викликів** до **арифметичних операцій** та функцій, таких як **`memcopy`** або **`Virtual`**`Alloc`. Якщо ви опинитеся в функції, яка, здається, виконує лише арифметичні операції і, можливо, деякий `memcopy`, рекомендація полягає в тому, щоб спробувати **знайти кінець функції** (можливо, JMP або виклик до якогось реєстру) **або** принаймні **виклик до останньої функції** і запустити до неї, оскільки код не є цікавим.
+- Під час розпакування коду **звертайте увагу** на будь-які **зміни області пам'яті**, оскільки зміна області пам'яті може вказувати на **початок розпакування коду**. Ви можете легко скинути область пам'яті, використовуючи Process Hacker (процес --> властивості --> пам'ять).
+- Під час спроби розпакувати код хороший спосіб **знати, чи ви вже працюєте з розпакованим кодом** (щоб ви могли просто скинути його) - це **перевірити рядки бінарного файлу**. Якщо в якийсь момент ви виконуєте стрибок (можливо, змінюючи область пам'яті) і помічаєте, що **додалося набагато більше рядків**, тоді ви можете знати, що **ви працюєте з розпакованим кодом**.\
+Однак, якщо упакувальник вже містить багато рядків, ви можете подивитися, скільки рядків містить слово "http" і перевірити, чи це число зростає.
+- Коли ви скидаєте виконуваний файл з області пам'яті, ви можете виправити деякі заголовки, використовуючи [PE-bear](https://github.com/hasherezade/pe-bear-releases/releases).
 
 {{#include ../../banners/hacktricks-training.md}}
-

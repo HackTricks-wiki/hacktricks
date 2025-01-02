@@ -4,11 +4,11 @@
 
 ## Introduction
 
-If you found that you can **write in a System Path folder** (note that this won't work if you can write in a User Path folder) it's possible that you could **escalate privileges** in the system.
+Якщо ви виявили, що можете **записувати в папку системного шляху** (зверніть увагу, що це не спрацює, якщо ви можете записувати в папку користувача), можливо, ви зможете **підвищити привілеї** в системі.
 
-In order to do that you can abuse a **Dll Hijacking** where you are going to **hijack a library being loaded** by a service or process with **more privileges** than yours, and because that service is loading a Dll that probably doesn't even exist in the entire system, it's going to try to load it from the System Path where you can write.
+Для цього ви можете зловживати **Dll Hijacking**, де ви будете **викрадати бібліотеку, що завантажується** службою або процесом з **більшими привілеями**, ніж у вас, і оскільки ця служба завантажує Dll, яка, ймовірно, навіть не існує в системі, вона спробує завантажити її з системного шляху, в який ви можете записувати.
 
-For more info about **what is Dll Hijackig** check:
+Для отримання додаткової інформації про **що таке Dll Hijacking** перегляньте:
 
 {{#ref}}
 ./
@@ -18,68 +18,65 @@ For more info about **what is Dll Hijackig** check:
 
 ### Finding a missing Dll
 
-The first thing you need is to **identify a process** running with **more privileges** than you that is trying to **load a Dll from the System Path** you can write in.
+Перше, що вам потрібно зробити, це **виявити процес**, що працює з **більшими привілеями**, ніж у вас, який намагається **завантажити Dll з системного шляху**, в який ви можете записувати.
 
-The problem in this cases is that probably thoses processes are already running. To find which Dlls are lacking the services you need to launch procmon as soon as possible (before processes are loaded). So, to find lacking .dlls do:
+Проблема в таких випадках полягає в тому, що, ймовірно, ці процеси вже працюють. Щоб дізнатися, які Dll відсутні, вам потрібно запустити procmon якомога швидше (перед завантаженням процесів). Отже, щоб знайти відсутні .dll, зробіть:
 
-- **Create** the folder `C:\privesc_hijacking` and add the path `C:\privesc_hijacking` to **System Path env variable**. You can do this **manually** or with **PS**:
-
+- **Створіть** папку `C:\privesc_hijacking` і додайте шлях `C:\privesc_hijacking` до **системної змінної середовища Path**. Ви можете зробити це **вручну** або за допомогою **PS**:
 ```powershell
 # Set the folder path to create and check events for
 $folderPath = "C:\privesc_hijacking"
 
 # Create the folder if it does not exist
 if (!(Test-Path $folderPath -PathType Container)) {
-    New-Item -ItemType Directory -Path $folderPath | Out-Null
+New-Item -ItemType Directory -Path $folderPath | Out-Null
 }
 
 # Set the folder path in the System environment variable PATH
 $envPath = [Environment]::GetEnvironmentVariable("PATH", "Machine")
 if ($envPath -notlike "*$folderPath*") {
-    $newPath = "$envPath;$folderPath"
-    [Environment]::SetEnvironmentVariable("PATH", $newPath, "Machine")
+$newPath = "$envPath;$folderPath"
+[Environment]::SetEnvironmentVariable("PATH", $newPath, "Machine")
 }
 ```
-
-- Launch **`procmon`** and go to **`Options`** --> **`Enable boot logging`** and press **`OK`** in the prompt.
-- Then, **reboot**. When the computer is restarted **`procmon`** will start **recording** events asap.
-- Once **Windows** is **started execute `procmon`** again, it'll tell you that it has been running and will **ask you if you want to store** the events in a file. Say **yes** and **store the events in a file**.
-- **After** the **file** is **generated**, **close** the opened **`procmon`** window and **open the events file**.
-- Add these **filters** and you will find all the Dlls that some **proccess tried to load** from the writable System Path folder:
+- Запустіть **`procmon`** і перейдіть до **`Options`** --> **`Enable boot logging`** та натисніть **`OK`** у сповіщенні.
+- Потім, **перезавантажте** комп'ютер. Коли комп'ютер перезавантажиться, **`procmon`** почне **записувати** події якомога швидше.
+- Після того, як **Windows** буде **запущено, виконайте `procmon`** знову, він скаже вам, що працює, і **запитає, чи хочете ви зберегти** події у файл. Скажіть **так** і **збережіть події у файл**.
+- **Після** того, як **файл** буде **згенеровано**, **закрийте** відкрите **вікно `procmon`** і **відкрийте файл подій**.
+- Додайте ці **фільтри**, і ви знайдете всі Dll, які деякі **процеси намагалися завантажити** з папки запису в системному шляху:
 
 <figure><img src="../../../images/image (945).png" alt=""><figcaption></figcaption></figure>
 
-### Missed Dlls
+### Пропущені Dll
 
-Running this in a free **virtual (vmware) Windows 11 machine** I got these results:
+Запустивши це на безкоштовній **віртуальній (vmware) Windows 11 машині**, я отримав такі результати:
 
 <figure><img src="../../../images/image (607).png" alt=""><figcaption></figcaption></figure>
 
-In this case the .exe are useless so ignore them, the missed DLLs where from:
+У цьому випадку .exe є марними, тому ігноруйте їх, пропущені DLL були з:
 
-| Service                         | Dll                | CMD line                                                             |
-| ------------------------------- | ------------------ | -------------------------------------------------------------------- |
-| Task Scheduler (Schedule)       | WptsExtensions.dll | `C:\Windows\system32\svchost.exe -k netsvcs -p -s Schedule`          |
-| Diagnostic Policy Service (DPS) | Unknown.DLL        | `C:\Windows\System32\svchost.exe -k LocalServiceNoNetwork -p -s DPS` |
-| ???                             | SharedRes.dll      | `C:\Windows\system32\svchost.exe -k UnistackSvcGroup`                |
+| Служба                         | Dll                | CMD рядок                                                             |
+| ------------------------------- | ------------------ | ---------------------------------------------------------------------- |
+| Планувальник завдань (Schedule)       | WptsExtensions.dll | `C:\Windows\system32\svchost.exe -k netsvcs -p -s Schedule`            |
+| Служба діагностичної політики (DPS) | Unknown.DLL        | `C:\Windows\System32\svchost.exe -k LocalServiceNoNetwork -p -s DPS`   |
+| ???                             | SharedRes.dll      | `C:\Windows\system32\svchost.exe -k UnistackSvcGroup`                  |
 
-After finding this, I found this interesting blog post that also explains how to [**abuse WptsExtensions.dll for privesc**](https://juggernaut-sec.com/dll-hijacking/#Windows_10_Phantom_DLL_Hijacking_-_WptsExtensionsdll). Which is what we **are going to do now**.
+Після того, як я це знайшов, я натрапив на цей цікавий блог, який також пояснює, як [**зловживати WptsExtensions.dll для підвищення привілеїв**](https://juggernaut-sec.com/dll-hijacking/#Windows_10_Phantom_DLL_Hijacking_-_WptsExtensionsdll). Що ми **зараз будемо робити**.
 
-### Exploitation
+### Експлуатація
 
-So, to **escalate privileges** we are going to hijack the library **WptsExtensions.dll**. Having the **path** and the **name** we just need to **generate the malicious dll**.
+Отже, щоб **підвищити привілеї**, ми збираємося вкрасти бібліотеку **WptsExtensions.dll**. Маючи **шлях** і **ім'я**, нам просто потрібно **згенерувати шкідливий dll**.
 
-You can [**try to use any of these examples**](./#creating-and-compiling-dlls). You could run payloads such as: get a rev shell, add a user, execute a beacon...
+Ви можете [**спробувати використати будь-який з цих прикладів**](./#creating-and-compiling-dlls). Ви можете запустити корисні навантаження, такі як: отримати rev shell, додати користувача, виконати beacon...
 
 > [!WARNING]
-> Note that **not all the service are run** with **`NT AUTHORITY\SYSTEM`** some are also run with **`NT AUTHORITY\LOCAL SERVICE`** which has **less privileges** and you **won't be able to create a new user** abuse its permissions.\
-> However, that user has the **`seImpersonate`** privilege, so you can use the[ **potato suite to escalate privileges**](../roguepotato-and-printspoofer.md). So, in this case a rev shell is a better option that trying to create a user.
+> Зверніть увагу, що **не всі служби працюють** з **`NT AUTHORITY\SYSTEM`**, деякі також працюють з **`NT AUTHORITY\LOCAL SERVICE`**, які мають **менше привілеїв**, і ви **не зможете створити нового користувача**, зловживаючи його дозволами.\
+> Однак, цей користувач має привілей **`seImpersonate`**, тому ви можете використовувати [**потаточний набір для підвищення привілеїв**](../roguepotato-and-printspoofer.md). Отже, в цьому випадку rev shell є кращим варіантом, ніж намагатися створити користувача.
 
-At the moment of writing the **Task Scheduler** service is run with **Nt AUTHORITY\SYSTEM**.
+На момент написання служба **Планувальник завдань** працює з **Nt AUTHORITY\SYSTEM**.
 
-Having **generated the malicious Dll** (_in my case I used x64 rev shell and I got a shell back but defender killed it because it was from msfvenom_), save it in the writable System Path with the name **WptsExtensions.dll** and **restart** the computer (or restart the service or do whatever it takes to rerun the affected service/program).
+Маючи **згенерований шкідливий Dll** (_в моєму випадку я використав x64 rev shell і отримав shell назад, але захисник його вбив, оскільки він був з msfvenom_), збережіть його в записуваному системному шляху з ім'ям **WptsExtensions.dll** і **перезавантажте** комп'ютер (або перезапустіть службу або зробіть все, що потрібно, щоб повторно запустити уражену службу/програму).
 
-When the service is re-started, the **dll should be loaded and executed** (you can **reuse** the **procmon** trick to check if the **library was loaded as expected**).
+Коли служба буде перезапущена, **dll має бути завантажено та виконано** (ви можете **повторно використовувати** трюк з **procmon**, щоб перевірити, чи **бібліотека була завантажена, як очікувалося**).
 
 {{#include ../../../banners/hacktricks-training.md}}
-

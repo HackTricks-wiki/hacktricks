@@ -4,10 +4,9 @@
 
 ## Access Tokens
 
-Each **user logged** onto the system **holds an access token with security information** for that logon session. The system creates an access token when the user logs on. **Every process executed** on behalf of the user **has a copy of the access token**. The token identifies the user, the user's groups, and the user's privileges. A token also contains a logon SID (Security Identifier) that identifies the current logon session.
+Кожен **користувач, що увійшов** в систему **має токен доступу з інформацією про безпеку** для цієї сесії входу. Система створює токен доступу, коли користувач входить в систему. **Кожен процес, що виконується** від імені користувача **має копію токена доступу**. Токен ідентифікує користувача, групи користувача та привілеї користувача. Токен також містить SID входу (Security Identifier), який ідентифікує поточну сесію входу.
 
-You can see this information executing `whoami /all`
-
+Ви можете побачити цю інформацію, виконавши `whoami /all`
 ```
 whoami /all
 
@@ -51,61 +50,55 @@ SeUndockPrivilege             Remove computer from docking station Disabled
 SeIncreaseWorkingSetPrivilege Increase a process working set       Disabled
 SeTimeZonePrivilege           Change the time zone                 Disabled
 ```
-
-or using _Process Explorer_ from Sysinternals (select process and access"Security" tab):
+або використовуючи _Process Explorer_ від Sysinternals (виберіть процес і перейдіть на вкладку "Security"):
 
 ![](<../../images/image (772).png>)
 
-### Local administrator
+### Локальний адміністратор
 
-When a local administrator logins, **two access tokens are created**: One with admin rights and other one with normal rights. **By default**, when this user executes a process the one with **regular** (non-administrator) **rights is used**. When this user tries to **execute** anything **as administrator** ("Run as Administrator" for example) the **UAC** will be used to ask for permission.\
-If you want to [**learn more about the UAC read this page**](../authentication-credentials-uac-and-efs/#uac)**.**
+Коли локальний адміністратор входить в систему, **створюються два токени доступу**: один з правами адміністратора і інший з нормальними правами. **За замовчуванням**, коли цей користувач виконує процес, використовується токен з **звичайними** (неадміністративними) **правами**. Коли цей користувач намагається **виконати** щось **як адміністратор** ("Запустити від імені адміністратора", наприклад), буде використано **UAC** для запиту дозволу.\
+Якщо ви хочете [**дізнатися більше про UAC, прочитайте цю сторінку**](../authentication-credentials-uac-and-efs/#uac)**.**
 
-### Credentials user impersonation
+### Імітація облікових даних користувача
 
-If you have **valid credentials of any other user**, you can **create** a **new logon session** with those credentials :
-
+Якщо у вас є **дійсні облікові дані будь-якого іншого користувача**, ви можете **створити** **нову сесію входу** з цими обліковими даними:
 ```
 runas /user:domain\username cmd.exe
 ```
-
-The **access token** has also a **reference** of the logon sessions inside the **LSASS**, this is useful if the process needs to access some objects of the network.\
-You can launch a process that **uses different credentials for accessing network services** using:
-
+**Токен доступу** також має **посилання** на сеанси входу всередині **LSASS**, це корисно, якщо процесу потрібно отримати доступ до деяких об'єктів мережі.\
+Ви можете запустити процес, який **використовує різні облікові дані для доступу до мережевих служб**, використовуючи:
 ```
 runas /user:domain\username /netonly cmd.exe
 ```
+Це корисно, якщо у вас є корисні облікові дані для доступу до об'єктів у мережі, але ці облікові дані не є дійсними на поточному хості, оскільки вони будуть використовуватися лише в мережі (на поточному хості будуть використовуватися ваші поточні привілеї користувача).
 
-This is useful if you have useful credentials to access objects in the network but those credentials aren't valid inside the current host as they are only going to be used in the network (in the current host your current user privileges will be used).
+### Типи токенів
 
-### Types of tokens
+Існує два типи токенів:
 
-There are two types of tokens available:
+- **Первинний токен**: Він слугує представленням облікових даних безпеки процесу. Створення та асоціація первинних токенів з процесами є діями, які вимагають підвищених привілеїв, підкреслюючи принцип розділення привілеїв. Зазвичай, служба аутентифікації відповідає за створення токенів, тоді як служба входу обробляє їх асоціацію з оболонкою операційної системи користувача. Варто зазначити, що процеси успадковують первинний токен свого батьківського процесу під час створення.
+- **Токен уособлення**: Дозволяє серверному додатку тимчасово приймати ідентичність клієнта для доступу до захищених об'єктів. Цей механізм поділяється на чотири рівні роботи:
+- **Анонімний**: Надає серверу доступ, подібний до того, що має невизначений користувач.
+- **Ідентифікація**: Дозволяє серверу перевірити ідентичність клієнта без використання її для доступу до об'єктів.
+- **Уособлення**: Дозволяє серверу діяти під ідентичністю клієнта.
+- **Делегування**: Подібно до уособлення, але включає можливість розширити це прийняття ідентичності на віддалені системи, з якими взаємодіє сервер, забезпечуючи збереження облікових даних.
 
-- **Primary Token**: It serves as a representation of a process's security credentials. The creation and association of primary tokens with processes are actions that require elevated privileges, emphasizing the principle of privilege separation. Typically, an authentication service is responsible for token creation, while a logon service handles its association with the user's operating system shell. It is worth noting that processes inherit the primary token of their parent process at creation.
-- **Impersonation Token**: Empowers a server application to adopt the client's identity temporarily for accessing secure objects. This mechanism is stratified into four levels of operation:
-  - **Anonymous**: Grants server access akin to that of an unidentified user.
-  - **Identification**: Allows the server to verify the client's identity without utilizing it for object access.
-  - **Impersonation**: Enables the server to operate under the client's identity.
-  - **Delegation**: Similar to Impersonation but includes the ability to extend this identity assumption to remote systems the server interacts with, ensuring credential preservation.
+#### Токени уособлення
 
-#### Impersonate Tokens
+Використовуючи модуль _**incognito**_ метасploit, якщо у вас достатньо привілеїв, ви можете легко **переглядати** та **уособлювати** інші **токени**. Це може бути корисно для виконання **дій так, ніби ви є іншим користувачем**. Ви також можете **підвищити привілеї** за допомогою цієї техніки.
 
-Using the _**incognito**_ module of metasploit if you have enough privileges you can easily **list** and **impersonate** other **tokens**. This could be useful to perform **actions as if you where the other user**. You could also **escalate privileges** with this technique.
+### Привілеї токенів
 
-### Token Privileges
-
-Learn which **token privileges can be abused to escalate privileges:**
+Дізнайтеся, які **привілеї токенів можна зловживати для підвищення привілеїв:**
 
 {{#ref}}
 privilege-escalation-abusing-tokens.md
 {{#endref}}
 
-Take a look to [**all the possible token privileges and some definitions on this external page**](https://github.com/gtworek/Priv2Admin).
+Ознайомтеся з [**усіма можливими привілеями токенів та деякими визначеннями на цій зовнішній сторінці**](https://github.com/gtworek/Priv2Admin).
 
-## References
+## Посилання
 
-Learn more about tokens in this tutorials: [https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa](https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa) and [https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)
+Дізнайтеся більше про токени в цих навчальних матеріалах: [https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa](https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa) та [https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)
 
 {{#include ../../banners/hacktricks-training.md}}
-
