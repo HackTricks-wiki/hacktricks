@@ -4,16 +4,16 @@
 
 ## Firewalls
 
-- [**Little Snitch**](https://www.obdev.at/products/littlesnitch/index.html): It will monitor every connection made by each process. Depending on the mode (silent allow connections, silent deny connection and alert) it will **show you an alert** every time a new connection is stablished. It also has a very nice GUI to see all this information.
-- [**LuLu**](https://objective-see.org/products/lulu.html): Objective-See firewall. This is a basic firewall that will alert you for suspicious connections (it has a GUI but it isn't as fancy as the one of Little Snitch).
+- [**Little Snitch**](https://www.obdev.at/products/littlesnitch/index.html): यह प्रत्येक प्रक्रिया द्वारा बनाए गए हर कनेक्शन की निगरानी करेगा। मोड के आधार पर (चुपचाप कनेक्शन की अनुमति, चुपचाप कनेक्शन को अस्वीकार करना और अलर्ट) यह हर बार जब एक नया कनेक्शन स्थापित होता है, आपको **एक अलर्ट दिखाएगा**। इसमें सभी जानकारी देखने के लिए एक बहुत अच्छा GUI भी है।
+- [**LuLu**](https://objective-see.org/products/lulu.html): Objective-See फ़ायरवॉल। यह एक बुनियादी फ़ायरवॉल है जो संदिग्ध कनेक्शनों के लिए आपको अलर्ट करेगा (इसमें एक GUI है लेकिन यह Little Snitch के जैसा फैंसी नहीं है)।
 
 ## Persistence detection
 
-- [**KnockKnock**](https://objective-see.org/products/knockknock.html): Objective-See application that will search in several locations where **malware could be persisting** (it's a one-shot tool, not a monitoring service).
-- [**BlockBlock**](https://objective-see.org/products/blockblock.html): Like KnockKnock by monitoring processes that generate persistence.
+- [**KnockKnock**](https://objective-see.org/products/knockknock.html): Objective-See एप्लिकेशन जो कई स्थानों में खोज करेगा जहाँ **malware स्थायी हो सकता है** (यह एक-बार का उपकरण है, निगरानी सेवा नहीं)।
+- [**BlockBlock**](https://objective-see.org/products/blockblock.html): KnockKnock की तरह, जो स्थिरता उत्पन्न करने वाली प्रक्रियाओं की निगरानी करता है।
 
 ## Keyloggers detection
 
-- [**ReiKey**](https://objective-see.org/products/reikey.html): Objective-See application to find **keyloggers** that install keyboard "event taps"&#x20;
+- [**ReiKey**](https://objective-see.org/products/reikey.html): Objective-See एप्लिकेशन जो **keyloggers** को खोजने के लिए है जो कीबोर्ड "इवेंट टैप" स्थापित करते हैं&#x20;
 
 {{#include ../../banners/hacktricks-training.md}}

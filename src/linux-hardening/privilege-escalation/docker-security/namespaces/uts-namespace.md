@@ -4,75 +4,65 @@
 
 ## Basic Information
 
-A UTS (UNIX Time-Sharing System) namespace is a Linux kernel feature that provides i**solation of two system identifiers**: the **hostname** and the **NIS** (Network Information Service) domain name. This isolation allows each UTS namespace to have its **own independent hostname and NIS domain name**, which is particularly useful in containerization scenarios where each container should appear as a separate system with its own hostname.
+एक UTS (UNIX Time-Sharing System) namespace एक Linux kernel विशेषता है जो **दो सिस्टम पहचानकर्ताओं** का **अलगाव** प्रदान करती है: **hostname** और **NIS** (Network Information Service) डोमेन नाम। यह अलगाव प्रत्येक UTS namespace को **अपना स्वतंत्र hostname और NIS डोमेन नाम** रखने की अनुमति देता है, जो कंटेनरीकरण परिदृश्यों में विशेष रूप से उपयोगी है जहां प्रत्येक कंटेनर को अपने hostname के साथ एक अलग सिस्टम के रूप में प्रकट होना चाहिए।
 
 ### How it works:
 
-1. When a new UTS namespace is created, it starts with a **copy of the hostname and NIS domain name from its parent namespace**. This means that, at creation, the new namespace s**hares the same identifiers as its parent**. However, any subsequent changes to the hostname or NIS domain name within the namespace will not affect other namespaces.
-2. Processes within a UTS namespace **can change the hostname and NIS domain name** using the `sethostname()` and `setdomainname()` system calls, respectively. These changes are local to the namespace and do not affect other namespaces or the host system.
-3. Processes can move between namespaces using the `setns()` system call or create new namespaces using the `unshare()` or `clone()` system calls with the `CLONE_NEWUTS` flag. When a process moves to a new namespace or creates one, it will start using the hostname and NIS domain name associated with that namespace.
+1. जब एक नया UTS namespace बनाया जाता है, तो यह अपने माता-पिता namespace से **hostname और NIS डोमेन नाम की एक प्रति** के साथ शुरू होता है। इसका मतलब है कि, निर्माण के समय, नया namespace **अपने माता-पिता के समान पहचानकर्ता साझा करता है**। हालाँकि, namespace के भीतर hostname या NIS डोमेन नाम में बाद में किए गए किसी भी परिवर्तन का अन्य namespaces पर कोई प्रभाव नहीं पड़ेगा।
+2. UTS namespace के भीतर प्रक्रियाएँ **hostname और NIS डोमेन नाम** को क्रमशः `sethostname()` और `setdomainname()` सिस्टम कॉल का उपयोग करके बदल सकती हैं। ये परिवर्तन namespace के लिए स्थानीय होते हैं और अन्य namespaces या होस्ट सिस्टम को प्रभावित नहीं करते हैं।
+3. प्रक्रियाएँ `setns()` सिस्टम कॉल का उपयोग करके namespaces के बीच स्थानांतरित हो सकती हैं या `CLONE_NEWUTS` ध्वज के साथ `unshare()` या `clone()` सिस्टम कॉल का उपयोग करके नए namespaces बना सकती हैं। जब एक प्रक्रिया एक नए namespace में जाती है या एक बनाती है, तो यह उस namespace से संबंधित hostname और NIS डोमेन नाम का उपयोग करना शुरू कर देगी।
 
 ## Lab:
 
 ### Create different Namespaces
 
 #### CLI
-
 ```bash
 sudo unshare -u [--mount-proc] /bin/bash
 ```
-
-By mounting a new instance of the `/proc` filesystem if you use the param `--mount-proc`, you ensure that the new mount namespace has an **accurate and isolated view of the process information specific to that namespace**.
+`/proc` फ़ाइल सिस्टम के एक नए उदाहरण को माउंट करके, यदि आप पैरामीटर `--mount-proc` का उपयोग करते हैं, तो आप सुनिश्चित करते हैं कि नए माउंट नामस्थान में **उस नामस्थान के लिए विशिष्ट प्रक्रिया जानकारी का सटीक और अलग दृश्य** है।
 
 <details>
 
-<summary>Error: bash: fork: Cannot allocate memory</summary>
+<summary>त्रुटि: bash: fork: मेमोरी आवंटित नहीं कर सकता</summary>
 
-When `unshare` is executed without the `-f` option, an error is encountered due to the way Linux handles new PID (Process ID) namespaces. The key details and the solution are outlined below:
+जब `unshare` को `-f` विकल्प के बिना निष्पादित किया जाता है, तो लिनक्स नए PID (प्रक्रिया आईडी) नामस्थान को संभालने के तरीके के कारण एक त्रुटि उत्पन्न होती है। मुख्य विवरण और समाधान नीचे दिए गए हैं:
 
-1. **Problem Explanation**:
+1. **समस्या का विवरण**:
 
-   - The Linux kernel allows a process to create new namespaces using the `unshare` system call. However, the process that initiates the creation of a new PID namespace (referred to as the "unshare" process) does not enter the new namespace; only its child processes do.
-   - Running `%unshare -p /bin/bash%` starts `/bin/bash` in the same process as `unshare`. Consequently, `/bin/bash` and its child processes are in the original PID namespace.
-   - The first child process of `/bin/bash` in the new namespace becomes PID 1. When this process exits, it triggers the cleanup of the namespace if there are no other processes, as PID 1 has the special role of adopting orphan processes. The Linux kernel will then disable PID allocation in that namespace.
+- लिनक्स कर्नेल एक प्रक्रिया को `unshare` सिस्टम कॉल का उपयोग करके नए नामस्थान बनाने की अनुमति देता है। हालाँकि, नए PID नामस्थान के निर्माण की शुरुआत करने वाली प्रक्रिया (जिसे "unshare" प्रक्रिया कहा जाता है) नए नामस्थान में प्रवेश नहीं करती है; केवल इसकी बाल प्रक्रियाएँ करती हैं।
+- `%unshare -p /bin/bash%` चलाने से `/bin/bash` उसी प्रक्रिया में शुरू होता है जैसे `unshare`। परिणामस्वरूप, `/bin/bash` और इसकी बाल प्रक्रियाएँ मूल PID नामस्थान में होती हैं।
+- नए नामस्थान में `/bin/bash` की पहली बाल प्रक्रिया PID 1 बन जाती है। जब यह प्रक्रिया समाप्त होती है, तो यदि कोई अन्य प्रक्रियाएँ नहीं हैं, तो यह नामस्थान की सफाई को ट्रिगर करती है, क्योंकि PID 1 का अनाथ प्रक्रियाओं को अपनाने की विशेष भूमिका होती है। लिनक्स कर्नेल तब उस नामस्थान में PID आवंटन को अक्षम कर देगा।
 
-2. **Consequence**:
+2. **परिणाम**:
 
-   - The exit of PID 1 in a new namespace leads to the cleaning of the `PIDNS_HASH_ADDING` flag. This results in the `alloc_pid` function failing to allocate a new PID when creating a new process, producing the "Cannot allocate memory" error.
+- नए नामस्थान में PID 1 का समाप्त होना `PIDNS_HASH_ADDING` ध्वज की सफाई की ओर ले जाता है। इसका परिणाम यह होता है कि नए प्रक्रिया बनाने के समय `alloc_pid` फ़ंक्शन नए PID को आवंटित करने में विफल हो जाता है, जिससे "Cannot allocate memory" त्रुटि उत्पन्न होती है।
 
-3. **Solution**:
-   - The issue can be resolved by using the `-f` option with `unshare`. This option makes `unshare` fork a new process after creating the new PID namespace.
-   - Executing `%unshare -fp /bin/bash%` ensures that the `unshare` command itself becomes PID 1 in the new namespace. `/bin/bash` and its child processes are then safely contained within this new namespace, preventing the premature exit of PID 1 and allowing normal PID allocation.
+3. **समाधान**:
+- इस समस्या को `unshare` के साथ `-f` विकल्प का उपयोग करके हल किया जा सकता है। यह विकल्प `unshare` को नए PID नामस्थान बनाने के बाद एक नई प्रक्रिया बनाने के लिए फोर्क करता है।
+- `%unshare -fp /bin/bash%` निष्पादित करने से यह सुनिश्चित होता है कि `unshare` कमांड स्वयं नए नामस्थान में PID 1 बन जाता है। `/bin/bash` और इसकी बाल प्रक्रियाएँ फिर इस नए नामस्थान में सुरक्षित रूप से समाहित होती हैं, PID 1 के पूर्व समय में समाप्त होने को रोकती हैं और सामान्य PID आवंटन की अनुमति देती हैं।
 
-By ensuring that `unshare` runs with the `-f` flag, the new PID namespace is correctly maintained, allowing `/bin/bash` and its sub-processes to operate without encountering the memory allocation error.
+यह सुनिश्चित करके कि `unshare` `-f` ध्वज के साथ चलता है, नया PID नामस्थान सही ढंग से बनाए रखा जाता है, जिससे `/bin/bash` और इसकी उप-प्रक्रियाएँ बिना मेमोरी आवंटन त्रुटि का सामना किए कार्य कर सकती हैं।
 
 </details>
 
 #### Docker
-
 ```bash
 docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 ```
-
-### &#x20;Check which namespace is your process in
-
+### &#x20;जांचें कि आपका प्रोसेस किस नामस्थान में है
 ```bash
 ls -l /proc/self/ns/uts
 lrwxrwxrwx 1 root root 0 Apr  4 20:49 /proc/self/ns/uts -> 'uts:[4026531838]'
 ```
-
-### Find all UTS namespaces
-
+### सभी UTS नामस्थान खोजें
 ```bash
 sudo find /proc -maxdepth 3 -type l -name uts -exec readlink {} \; 2>/dev/null | sort -u
 # Find the processes with an specific namespace
 sudo find /proc -maxdepth 3 -type l -name uts -exec ls -l  {} \; 2>/dev/null | grep <ns-number>
 ```
-
-### Enter inside an UTS namespace
-
+### UTS नामस्थान के अंदर प्रवेश करें
 ```bash
 nsenter -u TARGET_PID --pid /bin/bash
 ```
-
 {{#include ../../../../banners/hacktricks-training.md}}

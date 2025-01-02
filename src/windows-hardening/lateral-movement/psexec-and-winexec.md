@@ -2,11 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-{% embed url="https://websec.nl/" %}
-
 ## ये कैसे काम करते हैं
 
-प्रक्रिया नीचे दिए गए चरणों में स्पष्ट की गई है, जो दिखाती है कि सेवा बाइनरी को लक्षित मशीन पर SMB के माध्यम से दूरस्थ निष्पादन प्राप्त करने के लिए कैसे हेरफेर किया जाता है:
+प्रक्रिया नीचे दिए गए चरणों में वर्णित है, जो दिखाती है कि सेवा बाइनरी को लक्षित मशीन पर SMB के माध्यम से दूरस्थ निष्पादन प्राप्त करने के लिए कैसे हेरफेर किया जाता है:
 
 1. **ADMIN$ शेयर पर SMB के माध्यम से सेवा बाइनरी की कॉपी** की जाती है।
 2. **दूरस्थ मशीन पर एक सेवा का निर्माण** बाइनरी की ओर इशारा करके किया जाता है।
@@ -32,9 +30,7 @@ Find moe detailed steps in: [https://blog.ropnop.com/using-credentials-to-own-wi
 ![](<../../images/image (928).png>)
 
 आप [**SharpLateral**](https://github.com/mertdas/SharpLateral) का भी उपयोग कर सकते हैं:
-```
+```bash
 SharpLateral.exe redexec HOSTNAME C:\\Users\\Administrator\\Desktop\\malware.exe.exe malware.exe ServiceName
 ```
-{% embed url="https://websec.nl/" %}
-
 {{#include ../../banners/hacktricks-training.md}}

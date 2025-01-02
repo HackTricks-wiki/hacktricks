@@ -1,86 +1,76 @@
-# Network Namespace
+# नेटवर्क नेमस्पेस
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## बुनियादी जानकारी
 
-A network namespace is a Linux kernel feature that provides isolation of the network stack, allowing **each network namespace to have its own independent network configuration**, interfaces, IP addresses, routing tables, and firewall rules. This isolation is useful in various scenarios, such as containerization, where each container should have its own network configuration, independent of other containers and the host system.
+एक नेटवर्क नेमस्पेस एक Linux कर्नेल फीचर है जो नेटवर्क स्टैक का पृथक्करण प्रदान करता है, जिससे **प्रत्येक नेटवर्क नेमस्पेस अपनी स्वतंत्र नेटवर्क कॉन्फ़िगरेशन** , इंटरफेस, IP पते, रूटिंग तालिकाएँ, और फ़ायरवॉल नियम रख सकता है। यह पृथक्करण विभिन्न परिदृश्यों में उपयोगी है, जैसे कंटेनरीकरण, जहाँ प्रत्येक कंटेनर को अन्य कंटेनरों और होस्ट सिस्टम से स्वतंत्र अपनी नेटवर्क कॉन्फ़िगरेशन होनी चाहिए।
 
-### How it works:
+### यह कैसे काम करता है:
 
-1. When a new network namespace is created, it starts with a **completely isolated network stack**, with **no network interfaces** except for the loopback interface (lo). This means that processes running in the new network namespace cannot communicate with processes in other namespaces or the host system by default.
-2. **Virtual network interfaces**, such as veth pairs, can be created and moved between network namespaces. This allows for establishing network connectivity between namespaces or between a namespace and the host system. For example, one end of a veth pair can be placed in a container's network namespace, and the other end can be connected to a **bridge** or another network interface in the host namespace, providing network connectivity to the container.
-3. Network interfaces within a namespace can have their **own IP addresses, routing tables, and firewall rules**, independent of other namespaces. This allows processes in different network namespaces to have different network configurations and operate as if they are running on separate networked systems.
-4. Processes can move between namespaces using the `setns()` system call, or create new namespaces using the `unshare()` or `clone()` system calls with the `CLONE_NEWNET` flag. When a process moves to a new namespace or creates one, it will start using the network configuration and interfaces associated with that namespace.
+1. जब एक नया नेटवर्क नेमस्पेस बनाया जाता है, तो यह **पूर्णतः पृथक नेटवर्क स्टैक** के साथ शुरू होता है, जिसमें **कोई नेटवर्क इंटरफेस** नहीं होता सिवाय लूपबैक इंटरफेस (lo) के। इसका मतलब है कि नए नेटवर्क नेमस्पेस में चलने वाली प्रक्रियाएँ डिफ़ॉल्ट रूप से अन्य नेमस्पेस या होस्ट सिस्टम में चलने वाली प्रक्रियाओं के साथ संवाद नहीं कर सकती हैं।
+2. **वर्चुअल नेटवर्क इंटरफेस**, जैसे veth जोड़े, बनाए जा सकते हैं और नेटवर्क नेमस्पेस के बीच स्थानांतरित किए जा सकते हैं। यह नेमस्पेस के बीच या एक नेमस्पेस और होस्ट सिस्टम के बीच नेटवर्क कनेक्टिविटी स्थापित करने की अनुमति देता है। उदाहरण के लिए, एक veth जोड़े का एक सिरा एक कंटेनर के नेटवर्क नेमस्पेस में रखा जा सकता है, और दूसरा सिरा होस्ट नेमस्पेस में एक **ब्रिज** या अन्य नेटवर्क इंटरफेस से जोड़ा जा सकता है, जिससे कंटेनर को नेटवर्क कनेक्टिविटी मिलती है।
+3. एक नेमस्पेस के भीतर नेटवर्क इंटरफेस के **अपने IP पते, रूटिंग तालिकाएँ, और फ़ायरवॉल नियम** हो सकते हैं, जो अन्य नेमस्पेस से स्वतंत्र होते हैं। यह विभिन्न नेटवर्क नेमस्पेस में प्रक्रियाओं को विभिन्न नेटवर्क कॉन्फ़िगरेशन रखने और ऐसा कार्य करने की अनुमति देता है जैसे कि वे अलग-अलग नेटवर्क सिस्टम पर चल रही हैं।
+4. प्रक्रियाएँ `setns()` सिस्टम कॉल का उपयोग करके नेमस्पेस के बीच स्थानांतरित हो सकती हैं, या `CLONE_NEWNET` फ्लैग के साथ `unshare()` या `clone()` सिस्टम कॉल का उपयोग करके नए नेमस्पेस बना सकती हैं। जब एक प्रक्रिया एक नए नेमस्पेस में जाती है या एक बनाती है, तो यह उस नेमस्पेस से संबंधित नेटवर्क कॉन्फ़िगरेशन और इंटरफेस का उपयोग करना शुरू कर देगी।
 
-## Lab:
+## प्रयोगशाला:
 
-### Create different Namespaces
+### विभिन्न नेमस्पेस बनाएं
 
 #### CLI
-
 ```bash
 sudo unshare -n [--mount-proc] /bin/bash
 # Run ifconfig or ip -a
 ```
-
-By mounting a new instance of the `/proc` filesystem if you use the param `--mount-proc`, you ensure that the new mount namespace has an **accurate and isolated view of the process information specific to that namespace**.
+`/proc` फ़ाइल सिस्टम के एक नए उदाहरण को माउंट करके यदि आप पैरामीटर `--mount-proc` का उपयोग करते हैं, तो आप सुनिश्चित करते हैं कि नए माउंट नामस्थान में **उस नामस्थान के लिए विशिष्ट प्रक्रिया जानकारी का सटीक और अलगावित दृश्य** है।
 
 <details>
 
-<summary>Error: bash: fork: Cannot allocate memory</summary>
+<summary>त्रुटि: bash: fork: मेमोरी आवंटित नहीं कर सकता</summary>
 
-When `unshare` is executed without the `-f` option, an error is encountered due to the way Linux handles new PID (Process ID) namespaces. The key details and the solution are outlined below:
+जब `unshare` को `-f` विकल्प के बिना निष्पादित किया जाता है, तो लिनक्स नए PID (प्रक्रिया आईडी) नामस्थान को संभालने के तरीके के कारण एक त्रुटि का सामना करता है। मुख्य विवरण और समाधान नीचे दिए गए हैं:
 
-1. **Problem Explanation**:
+1. **समस्या का विवरण**:
 
-   - The Linux kernel allows a process to create new namespaces using the `unshare` system call. However, the process that initiates the creation of a new PID namespace (referred to as the "unshare" process) does not enter the new namespace; only its child processes do.
-   - Running `%unshare -p /bin/bash%` starts `/bin/bash` in the same process as `unshare`. Consequently, `/bin/bash` and its child processes are in the original PID namespace.
-   - The first child process of `/bin/bash` in the new namespace becomes PID 1. When this process exits, it triggers the cleanup of the namespace if there are no other processes, as PID 1 has the special role of adopting orphan processes. The Linux kernel will then disable PID allocation in that namespace.
+- लिनक्स कर्नेल एक प्रक्रिया को `unshare` सिस्टम कॉल का उपयोग करके नए नामस्थान बनाने की अनुमति देता है। हालाँकि, नए PID नामस्थान के निर्माण की शुरुआत करने वाली प्रक्रिया (जिसे "unshare" प्रक्रिया कहा जाता है) नए नामस्थान में प्रवेश नहीं करती है; केवल इसकी बाल प्रक्रियाएँ करती हैं।
+- `%unshare -p /bin/bash%` चलाने से `/bin/bash` उसी प्रक्रिया में शुरू होता है जैसे `unshare`। परिणामस्वरूप, `/bin/bash` और इसकी बाल प्रक्रियाएँ मूल PID नामस्थान में होती हैं।
+- नए नामस्थान में `/bin/bash` की पहली बाल प्रक्रिया PID 1 बन जाती है। जब यह प्रक्रिया समाप्त होती है, तो यह नामस्थान की सफाई को ट्रिगर करती है यदि कोई अन्य प्रक्रियाएँ नहीं हैं, क्योंकि PID 1 का अनाथ प्रक्रियाओं को अपनाने की विशेष भूमिका होती है। लिनक्स कर्नेल तब उस नामस्थान में PID आवंटन को अक्षम कर देगा।
 
-2. **Consequence**:
+2. **परिणाम**:
 
-   - The exit of PID 1 in a new namespace leads to the cleaning of the `PIDNS_HASH_ADDING` flag. This results in the `alloc_pid` function failing to allocate a new PID when creating a new process, producing the "Cannot allocate memory" error.
+- नए नामस्थान में PID 1 के समाप्त होने से `PIDNS_HASH_ADDING` ध्वज की सफाई होती है। इसका परिणाम यह होता है कि नए प्रक्रिया बनाने के दौरान `alloc_pid` फ़ंक्शन नए PID को आवंटित करने में विफल हो जाता है, जिससे "Cannot allocate memory" त्रुटि उत्पन्न होती है।
 
-3. **Solution**:
-   - The issue can be resolved by using the `-f` option with `unshare`. This option makes `unshare` fork a new process after creating the new PID namespace.
-   - Executing `%unshare -fp /bin/bash%` ensures that the `unshare` command itself becomes PID 1 in the new namespace. `/bin/bash` and its child processes are then safely contained within this new namespace, preventing the premature exit of PID 1 and allowing normal PID allocation.
+3. **समाधान**:
+- समस्या को `unshare` के साथ `-f` विकल्प का उपयोग करके हल किया जा सकता है। यह विकल्प `unshare` को नए PID नामस्थान बनाने के बाद एक नई प्रक्रिया बनाने के लिए मजबूर करता है।
+- `%unshare -fp /bin/bash%` निष्पादित करने से यह सुनिश्चित होता है कि `unshare` कमांड स्वयं नए नामस्थान में PID 1 बन जाता है। `/bin/bash` और इसकी बाल प्रक्रियाएँ फिर इस नए नामस्थान में सुरक्षित रूप से समाहित होती हैं, PID 1 के पूर्व समय में समाप्त होने को रोकती हैं और सामान्य PID आवंटन की अनुमति देती हैं।
 
-By ensuring that `unshare` runs with the `-f` flag, the new PID namespace is correctly maintained, allowing `/bin/bash` and its sub-processes to operate without encountering the memory allocation error.
+यह सुनिश्चित करके कि `unshare` `-f` ध्वज के साथ चलता है, नया PID नामस्थान सही ढंग से बनाए रखा जाता है, जिससे `/bin/bash` और इसकी उप-प्रक्रियाएँ बिना मेमोरी आवंटन त्रुटि का सामना किए कार्य कर सकती हैं।
 
 </details>
 
 #### Docker
-
 ```bash
 docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 # Run ifconfig or ip -a
 ```
-
-### &#x20;Check which namespace is your process in
-
+### &#x20;जांचें कि आपका प्रोसेस किस नेमस्पेस में है
 ```bash
 ls -l /proc/self/ns/net
 lrwxrwxrwx 1 root root 0 Apr  4 20:30 /proc/self/ns/net -> 'net:[4026531840]'
 ```
-
-### Find all Network namespaces
-
+### सभी नेटवर्क नामस्थान खोजें
 ```bash
 sudo find /proc -maxdepth 3 -type l -name net -exec readlink {} \; 2>/dev/null | sort -u | grep "net:"
 # Find the processes with an specific namespace
 sudo find /proc -maxdepth 3 -type l -name net -exec ls -l  {} \; 2>/dev/null | grep <ns-number>
 ```
-
-### Enter inside a Network namespace
-
+### नेटवर्क नामस्थान के अंदर प्रवेश करें
 ```bash
 nsenter -n TARGET_PID --pid /bin/bash
 ```
+आप केवल **रूट** होने पर ही किसी अन्य प्रक्रिया नामस्थान में **प्रवेश** कर सकते हैं। और आप **बिना** किसी **विवरण** के अन्य नामस्थान में **प्रवेश** **नहीं** कर सकते (जैसे `/proc/self/ns/net`)।
 
-Also, you can only **enter in another process namespace if you are root**. And you **cannot** **enter** in other namespace **without a descriptor** pointing to it (like `/proc/self/ns/net`).
-
-## References
+## संदर्भ
 
 - [https://stackoverflow.com/questions/44666700/unshare-pid-bin-bash-fork-cannot-allocate-memory](https://stackoverflow.com/questions/44666700/unshare-pid-bin-bash-fork-cannot-allocate-memory)
 

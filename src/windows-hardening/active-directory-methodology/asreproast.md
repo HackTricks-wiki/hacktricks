@@ -2,30 +2,15 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/image (3).png" alt=""><figcaption></figcaption></figure>
-
-Join [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server to communicate with experienced hackers and bug bounty hunters!
-
-**Hacking Insights**\
-Engage with content that delves into the thrill and challenges of hacking
-
-**Real-Time Hack News**\
-Keep up-to-date with fast-paced hacking world through real-time news and insights
-
-**Latest Announcements**\
-Stay informed with the newest bug bounties launching and crucial platform updates
-
-**Join us on** [**Discord**](https://discord.com/invite/N3FrSbmwdy) and start collaborating with top hackers today!
-
 ## ASREPRoast
 
-ASREPRoast एक सुरक्षा हमला है जो उन उपयोगकर्ताओं का लाभ उठाता है जिनमें **Kerberos प्री-प्रमाणीकरण आवश्यक विशेषता** नहीं है। मूल रूप से, यह भेद्यता हमलावरों को डोमेन कंट्रोलर (DC) से एक उपयोगकर्ता के लिए प्रमाणीकरण का अनुरोध करने की अनुमति देती है बिना उपयोगकर्ता के पासवर्ड की आवश्यकता के। फिर DC उपयोगकर्ता के पासवर्ड-व्युत्पन्न कुंजी के साथ एन्क्रिप्टेड संदेश के साथ प्रतिक्रिया करता है, जिसे हमलावर ऑफ़लाइन क्रैक करने का प्रयास कर सकते हैं ताकि उपयोगकर्ता का पासवर्ड पता चल सके।
+ASREPRoast एक सुरक्षा हमला है जो उन उपयोगकर्ताओं का लाभ उठाता है जिनमें **Kerberos प्री-प्रमाणीकरण आवश्यक विशेषता** नहीं होती। मूल रूप से, यह कमजोरियों हमलावरों को उपयोगकर्ता के लिए डोमेन कंट्रोलर (DC) से प्रमाणीकरण का अनुरोध करने की अनुमति देती है बिना उपयोगकर्ता के पासवर्ड की आवश्यकता के। फिर DC उपयोगकर्ता के पासवर्ड-व्युत्पन्न कुंजी के साथ एन्क्रिप्टेड संदेश के साथ प्रतिक्रिया करता है, जिसे हमलावर ऑफ़लाइन क्रैक करने का प्रयास कर सकते हैं ताकि उपयोगकर्ता का पासवर्ड पता चल सके।
 
 इस हमले की मुख्य आवश्यकताएँ हैं:
 
 - **Kerberos प्री-प्रमाणीकरण की कमी**: लक्षित उपयोगकर्ताओं में यह सुरक्षा विशेषता सक्षम नहीं होनी चाहिए।
 - **डोमेन कंट्रोलर (DC) से कनेक्शन**: हमलावरों को अनुरोध भेजने और एन्क्रिप्टेड संदेश प्राप्त करने के लिए DC तक पहुंच की आवश्यकता होती है।
-- **वैकल्पिक डोमेन खाता**: एक डोमेन खाता होने से हमलावरों को LDAP क्वेरी के माध्यम से कमजोर उपयोगकर्ताओं की पहचान अधिक कुशलता से करने की अनुमति मिलती है। बिना ऐसे खाते के, हमलावरों को उपयोगकर्ता नामों का अनुमान लगाना होगा।
+- **वैकल्पिक डोमेन खाता**: एक डोमेन खाता होने से हमलावरों को LDAP क्वेरी के माध्यम से कमजोर उपयोगकर्ताओं की पहचान करने में अधिक कुशलता मिलती है। बिना ऐसे खाते के, हमलावरों को उपयोगकर्ता नामों का अनुमान लगाना होगा।
 
 #### कमजोर उपयोगकर्ताओं की गणना करना (डोमेन क्रेडेंशियल की आवश्यकता)
 ```bash:Using Windows
@@ -57,7 +42,7 @@ hashcat -m 18200 --force -a 0 hashes.asreproast passwords_kerb.txt
 ```
 ### Persistence
 
-एक उपयोगकर्ता के लिए **preauth** को मजबूर करें जहाँ आपके पास **GenericAll** अनुमतियाँ (या गुण लिखने की अनुमतियाँ) हैं:
+एक उपयोगकर्ता के लिए **preauth** को मजबूर करना आवश्यक नहीं है जहाँ आपके पास **GenericAll** अनुमतियाँ (या गुण लिखने की अनुमतियाँ) हैं:
 ```bash:Using Windows
 Set-DomainObject -Identity <username> -XOR @{useraccountcontrol=4194304} -Verbose
 ```
@@ -84,20 +69,5 @@ ASRepCatcher listen
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/as-rep-roasting-using-rubeus-and-hashcat](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/as-rep-roasting-using-rubeus-and-hashcat)
 
 ---
-
-<figure><img src="../../images/image (3).png" alt=""><figcaption></figcaption></figure>
-
-Join [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server to communicate with experienced hackers and bug bounty hunters!
-
-**हैकिंग अंतर्दृष्टि**\
-Engage with content that delves into the thrill and challenges of hacking
-
-**वास्तविक समय हैक समाचार**\
-Keep up-to-date with fast-paced hacking world through real-time news and insights
-
-**नवीनतम घोषणाएँ**\
-Stay informed with the newest bug bounties launching and crucial platform updates
-
-**Join us on** [**Discord**](https://discord.com/invite/N3FrSbmwdy) and start collaborating with top hackers today!
 
 {{#include ../../banners/hacktricks-training.md}}

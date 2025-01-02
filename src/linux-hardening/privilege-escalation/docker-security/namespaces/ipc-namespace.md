@@ -4,81 +4,70 @@
 
 ## Basic Information
 
-An IPC (Inter-Process Communication) namespace is a Linux kernel feature that provides **isolation** of System V IPC objects, such as message queues, shared memory segments, and semaphores. This isolation ensures that processes in **different IPC namespaces cannot directly access or modify each other's IPC objects**, providing an additional layer of security and privacy between process groups.
+IPC (Inter-Process Communication) namespace एक Linux kernel विशेषता है जो **system V IPC वस्तुओं** जैसे संदेश कतारें, साझा मेमोरी खंड, और सेमाफोर का **अलगाव** प्रदान करती है। यह अलगाव सुनिश्चित करता है कि **विभिन्न IPC namespaces में प्रक्रियाएँ एक-दूसरे की IPC वस्तुओं को सीधे एक्सेस या संशोधित नहीं कर सकतीं**, जो प्रक्रिया समूहों के बीच सुरक्षा और गोपनीयता की एक अतिरिक्त परत प्रदान करता है।
 
 ### How it works:
 
-1. When a new IPC namespace is created, it starts with a **completely isolated set of System V IPC objects**. This means that processes running in the new IPC namespace cannot access or interfere with the IPC objects in other namespaces or the host system by default.
-2. IPC objects created within a namespace are visible and **accessible only to processes within that namespace**. Each IPC object is identified by a unique key within its namespace. Although the key may be identical in different namespaces, the objects themselves are isolated and cannot be accessed across namespaces.
-3. Processes can move between namespaces using the `setns()` system call or create new namespaces using the `unshare()` or `clone()` system calls with the `CLONE_NEWIPC` flag. When a process moves to a new namespace or creates one, it will start using the IPC objects associated with that namespace.
+1. जब एक नया IPC namespace बनाया जाता है, तो यह **system V IPC वस्तुओं का पूरी तरह से अलग सेट** के साथ शुरू होता है। इसका मतलब है कि नए IPC namespace में चल रही प्रक्रियाएँ डिफ़ॉल्ट रूप से अन्य namespaces या होस्ट सिस्टम में IPC वस्तुओं को एक्सेस या हस्तक्षेप नहीं कर सकतीं।
+2. एक namespace के भीतर बनाई गई IPC वस्तुएँ केवल **उस namespace के भीतर की प्रक्रियाओं के लिए दृश्य और सुलभ होती हैं**। प्रत्येक IPC वस्तु को अपने namespace के भीतर एक अद्वितीय कुंजी द्वारा पहचाना जाता है। हालांकि कुंजी विभिन्न namespaces में समान हो सकती है, वस्तुएँ स्वयं अलग हैं और namespaces के बीच एक्सेस नहीं की जा सकतीं।
+3. प्रक्रियाएँ `setns()` सिस्टम कॉल का उपयोग करके namespaces के बीच स्थानांतरित हो सकती हैं या `unshare()` या `clone()` सिस्टम कॉल का उपयोग करके नए namespaces बना सकती हैं जिसमें `CLONE_NEWIPC` फ्लैग होता है। जब एक प्रक्रिया एक नए namespace में जाती है या एक बनाती है, तो यह उस namespace से संबंधित IPC वस्तुओं का उपयोग करना शुरू कर देगी।
 
 ## Lab:
 
 ### Create different Namespaces
 
 #### CLI
-
 ```bash
 sudo unshare -i [--mount-proc] /bin/bash
 ```
-
-By mounting a new instance of the `/proc` filesystem if you use the param `--mount-proc`, you ensure that the new mount namespace has an **accurate and isolated view of the process information specific to that namespace**.
+एक नए `/proc` फ़ाइल सिस्टम के उदाहरण को माउंट करके, यदि आप पैरामीटर `--mount-proc` का उपयोग करते हैं, तो आप सुनिश्चित करते हैं कि नया माउंट नामस्थान उस नामस्थान के लिए विशिष्ट प्रक्रिया जानकारी का **सटीक और अलग दृश्य** रखता है।
 
 <details>
 
-<summary>Error: bash: fork: Cannot allocate memory</summary>
+<summary>त्रुटि: bash: fork: मेमोरी आवंटित नहीं कर सकता</summary>
 
-When `unshare` is executed without the `-f` option, an error is encountered due to the way Linux handles new PID (Process ID) namespaces. The key details and the solution are outlined below:
+जब `unshare` को `-f` विकल्प के बिना निष्पादित किया जाता है, तो लिनक्स नए PID (प्रक्रिया आईडी) नामस्थान को संभालने के तरीके के कारण एक त्रुटि उत्पन्न होती है। मुख्य विवरण और समाधान नीचे दिए गए हैं:
 
-1. **Problem Explanation**:
+1. **समस्या का विवरण**:
 
-   - The Linux kernel allows a process to create new namespaces using the `unshare` system call. However, the process that initiates the creation of a new PID namespace (referred to as the "unshare" process) does not enter the new namespace; only its child processes do.
-   - Running `%unshare -p /bin/bash%` starts `/bin/bash` in the same process as `unshare`. Consequently, `/bin/bash` and its child processes are in the original PID namespace.
-   - The first child process of `/bin/bash` in the new namespace becomes PID 1. When this process exits, it triggers the cleanup of the namespace if there are no other processes, as PID 1 has the special role of adopting orphan processes. The Linux kernel will then disable PID allocation in that namespace.
+- लिनक्स कर्नेल एक प्रक्रिया को `unshare` सिस्टम कॉल का उपयोग करके नए नामस्थान बनाने की अनुमति देता है। हालाँकि, नई PID नामस्थान बनाने की प्रक्रिया (जिसे "unshare" प्रक्रिया कहा जाता है) नए नामस्थान में प्रवेश नहीं करती है; केवल इसकी बाल प्रक्रियाएँ करती हैं।
+- `%unshare -p /bin/bash%` चलाने से `/bin/bash` उसी प्रक्रिया में शुरू होता है जैसे `unshare`। परिणामस्वरूप, `/bin/bash` और इसकी बाल प्रक्रियाएँ मूल PID नामस्थान में होती हैं।
+- नए नामस्थान में `/bin/bash` की पहली बाल प्रक्रिया PID 1 बन जाती है। जब यह प्रक्रिया समाप्त होती है, तो यह नामस्थान की सफाई को ट्रिगर करती है यदि कोई अन्य प्रक्रियाएँ नहीं हैं, क्योंकि PID 1 का अनाथ प्रक्रियाओं को अपनाने की विशेष भूमिका होती है। लिनक्स कर्नेल तब उस नामस्थान में PID आवंटन को अक्षम कर देगा।
 
-2. **Consequence**:
+2. **परिणाम**:
 
-   - The exit of PID 1 in a new namespace leads to the cleaning of the `PIDNS_HASH_ADDING` flag. This results in the `alloc_pid` function failing to allocate a new PID when creating a new process, producing the "Cannot allocate memory" error.
+- नए नामस्थान में PID 1 का समाप्त होना `PIDNS_HASH_ADDING` ध्वज की सफाई की ओर ले जाता है। इसका परिणाम यह होता है कि नए प्रक्रिया बनाने के समय `alloc_pid` फ़ंक्शन नए PID को आवंटित करने में विफल रहता है, जिससे "Cannot allocate memory" त्रुटि उत्पन्न होती है।
 
-3. **Solution**:
-   - The issue can be resolved by using the `-f` option with `unshare`. This option makes `unshare` fork a new process after creating the new PID namespace.
-   - Executing `%unshare -fp /bin/bash%` ensures that the `unshare` command itself becomes PID 1 in the new namespace. `/bin/bash` and its child processes are then safely contained within this new namespace, preventing the premature exit of PID 1 and allowing normal PID allocation.
+3. **समाधान**:
+- समस्या को `unshare` के साथ `-f` विकल्प का उपयोग करके हल किया जा सकता है। यह विकल्प `unshare` को नए PID नामस्थान बनाने के बाद एक नई प्रक्रिया बनाने के लिए मजबूर करता है।
+- `%unshare -fp /bin/bash%` निष्पादित करने से यह सुनिश्चित होता है कि `unshare` कमांड स्वयं नए नामस्थान में PID 1 बन जाता है। `/bin/bash` और इसकी बाल प्रक्रियाएँ फिर इस नए नामस्थान में सुरक्षित रूप से समाहित होती हैं, PID 1 के पूर्व समय में समाप्त होने को रोकती हैं और सामान्य PID आवंटन की अनुमति देती हैं।
 
-By ensuring that `unshare` runs with the `-f` flag, the new PID namespace is correctly maintained, allowing `/bin/bash` and its sub-processes to operate without encountering the memory allocation error.
+यह सुनिश्चित करके कि `unshare` `-f` ध्वज के साथ चलता है, नया PID नामस्थान सही ढंग से बनाए रखा जाता है, जिससे `/bin/bash` और इसकी उप-प्रक्रियाएँ बिना मेमोरी आवंटन त्रुटि का सामना किए कार्य कर सकती हैं।
 
 </details>
 
 #### Docker
-
 ```bash
 docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 ```
-
-### &#x20;Check which namespace is your process in
-
+### &#x20;जांचें कि आपका प्रोसेस किस नेमस्पेस में है
 ```bash
 ls -l /proc/self/ns/ipc
 lrwxrwxrwx 1 root root 0 Apr  4 20:37 /proc/self/ns/ipc -> 'ipc:[4026531839]'
 ```
-
-### Find all IPC namespaces
-
+### सभी IPC नामस्थान खोजें
 ```bash
 sudo find /proc -maxdepth 3 -type l -name ipc -exec readlink {} \; 2>/dev/null | sort -u
 # Find the processes with an specific namespace
 sudo find /proc -maxdepth 3 -type l -name ipc -exec ls -l  {} \; 2>/dev/null | grep <ns-number>
 ```
-
-### Enter inside an IPC namespace
-
+### IPC नामस्थान के अंदर प्रवेश करें
 ```bash
 nsenter -i TARGET_PID --pid /bin/bash
 ```
+आप केवल **दूसरे प्रक्रिया नामस्थान में प्रवेश कर सकते हैं यदि आप रूट हैं**। और आप **दूसरे नामस्थान में प्रवेश नहीं कर सकते** **बिना एक वर्णनकर्ता** जो इसे इंगित करता है (जैसे `/proc/self/ns/net`)।
 
-Also, you can only **enter in another process namespace if you are root**. And you **cannot** **enter** in other namespace **without a descriptor** pointing to it (like `/proc/self/ns/net`).
-
-### Create IPC object
-
+### IPC ऑब्जेक्ट बनाएं
 ```bash
 # Container
 sudo unshare -i /bin/bash
@@ -93,8 +82,7 @@ key        shmid      owner      perms      bytes      nattch     status
 # From the host
 ipcs -m # Nothing is seen
 ```
-
-## References
+## संदर्भ
 
 - [https://stackoverflow.com/questions/44666700/unshare-pid-bin-bash-fork-cannot-allocate-memory](https://stackoverflow.com/questions/44666700/unshare-pid-bin-bash-fork-cannot-allocate-memory)
 

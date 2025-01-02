@@ -4,27 +4,27 @@
 
 ## What is Distroless
 
-A distroless container is a type of container that **contains only the necessary dependencies to run a specific application**, without any additional software or tools that are not required. These containers are designed to be as **lightweight** and **secure** as possible, and they aim to **minimize the attack surface** by removing any unnecessary components.
+एक distroless कंटेनर एक प्रकार का कंटेनर है जो **विशिष्ट एप्लिकेशन को चलाने के लिए केवल आवश्यक निर्भरताएँ** रखता है, बिना किसी अतिरिक्त सॉफ़्टवेयर या उपकरणों के जो आवश्यक नहीं हैं। ये कंटेनर **हल्के** और **सुरक्षित** होने के लिए डिज़ाइन किए गए हैं, और वे **हमले की सतह को कम करने** का लक्ष्य रखते हैं, अनावश्यक घटकों को हटाकर।
 
-Distroless containers are often used in **production environments where security and reliability are paramount**.
+Distroless कंटेनर अक्सर **उत्पादन वातावरण में उपयोग किए जाते हैं जहाँ सुरक्षा और विश्वसनीयता सर्वोपरि हैं**।
 
-Some **examples** of **distroless containers** are:
+कुछ **उदाहरण** **distroless कंटेनरों** के हैं:
 
-- Provided by **Google**: [https://console.cloud.google.com/gcr/images/distroless/GLOBAL](https://console.cloud.google.com/gcr/images/distroless/GLOBAL)
-- Provided by **Chainguard**: [https://github.com/chainguard-images/images/tree/main/images](https://github.com/chainguard-images/images/tree/main/images)
+- **Google** द्वारा प्रदान किया गया: [https://console.cloud.google.com/gcr/images/distroless/GLOBAL](https://console.cloud.google.com/gcr/images/distroless/GLOBAL)
+- **Chainguard** द्वारा प्रदान किया गया: [https://github.com/chainguard-images/images/tree/main/images](https://github.com/chainguard-images/images/tree/main/images)
 
 ## Weaponizing Distroless
 
-The goal of weaponize a distroless container is to be able to **execute arbitrary binaries and payloads even with the limitations** implied by **distroless** (lack of common binaries in the system) and also protections commonly found in containers such as **read-only** or **no-execute** in `/dev/shm`.
+एक distroless कंटेनर को हथियार बनाने का लक्ष्य यह है कि **मनमाने बाइनरी और पेलोड को निष्पादित किया जा सके, भले ही distroless द्वारा लगाए गए सीमाओं** (सिस्टम में सामान्य बाइनरी की कमी) और कंटेनरों में सामान्यतः पाए जाने वाले सुरक्षा उपायों जैसे **पढ़ने के लिए केवल** या **निष्पादित न करें** `/dev/shm` में।
 
 ### Through memory
 
-Coming at some point of 2023...
+2023 के किसी बिंदु पर आ रहा है...
 
 ### Via Existing binaries
 
 #### openssl
 
-\***\*[**In this post,**](https://www.form3.tech/engineering/content/exploiting-distroless-images) it is explained that the binary **`openssl`** is frequently found in these containers, potentially because it's **needed\*\* by the software that is going to be running inside the container.
+\***\*[**इस पोस्ट में,**](https://www.form3.tech/engineering/content/exploiting-distroless-images) यह बताया गया है कि बाइनरी **`openssl`** अक्सर इन कंटेनरों में पाई जाती है, संभवतः क्योंकि यह **जरूरी है\*\* उस सॉफ़्टवेयर के लिए जो कंटेनर के अंदर चलने वाला है।
 
 {{#include ../../../banners/hacktricks-training.md}}

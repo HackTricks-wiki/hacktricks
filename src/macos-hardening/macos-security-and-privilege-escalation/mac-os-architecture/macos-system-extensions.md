@@ -1,81 +1,79 @@
-# macOS System Extensions
+# macOS सिस्टम एक्सटेंशन
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## System Extensions / Endpoint Security Framework
+## सिस्टम एक्सटेंशन / एंडपॉइंट सुरक्षा ढांचा
 
-Unlike Kernel Extensions, **System Extensions run in user space** instead of kernel space, reducing the risk of a system crash due to extension malfunction.
+Kernel Extensions के विपरीत, **सिस्टम एक्सटेंशन उपयोगकर्ता स्थान में चलते हैं** न कि कर्नेल स्थान में, जिससे एक्सटेंशन की खराबी के कारण सिस्टम क्रैश होने का जोखिम कम होता है।
 
 <figure><img src="../../../images/image (606).png" alt="https://knight.sc/images/system-extension-internals-1.png"><figcaption></figcaption></figure>
 
-There are three types of system extensions: **DriverKit** Extensions, **Network** Extensions, and **Endpoint Security** Extensions.
+सिस्टम एक्सटेंशन के तीन प्रकार हैं: **DriverKit** एक्सटेंशन, **Network** एक्सटेंशन, और **Endpoint Security** एक्सटेंशन।
 
-### **DriverKit Extensions**
+### **DriverKit एक्सटेंशन**
 
-DriverKit is a replacement for kernel extensions that **provide hardware support**. It allows device drivers (like USB, Serial, NIC, and HID drivers) to run in user space rather than kernel space. The DriverKit framework includes **user space versions of certain I/O Kit classes**, and the kernel forwards normal I/O Kit events to user space, offering a safer environment for these drivers to run.
+DriverKit कर्नेल एक्सटेंशन का एक विकल्प है जो **हार्डवेयर समर्थन प्रदान करता है**। यह डिवाइस ड्राइवरों (जैसे USB, Serial, NIC, और HID ड्राइवर) को कर्नेल स्थान के बजाय उपयोगकर्ता स्थान में चलाने की अनुमति देता है। DriverKit ढांचा **कुछ I/O किट वर्गों के उपयोगकर्ता स्थान संस्करणों** को शामिल करता है, और कर्नेल सामान्य I/O किट घटनाओं को उपयोगकर्ता स्थान में अग्रेषित करता है, जिससे इन ड्राइवरों के चलने के लिए एक सुरक्षित वातावरण प्रदान होता है।
 
-### **Network Extensions**
+### **Network एक्सटेंशन**
 
-Network Extensions provide the ability to customize network behaviors. There are several types of Network Extensions:
+Network एक्सटेंशन नेटवर्क व्यवहार को अनुकूलित करने की क्षमता प्रदान करते हैं। Network एक्सटेंशन के कई प्रकार हैं:
 
-- **App Proxy**: This is used for creating a VPN client that implements a flow-oriented, custom VPN protocol. This means it handles network traffic based on connections (or flows) rather than individual packets.
-- **Packet Tunnel**: This is used for creating a VPN client that implements a packet-oriented, custom VPN protocol. This means it handles network traffic based on individual packets.
-- **Filter Data**: This is used for filtering network "flows". It can monitor or modify network data at the flow level.
-- **Filter Packet**: This is used for filtering individual network packets. It can monitor or modify network data at the packet level.
-- **DNS Proxy**: This is used for creating a custom DNS provider. It can be used to monitor or modify DNS requests and responses.
+- **App Proxy**: इसका उपयोग एक VPN क्लाइंट बनाने के लिए किया जाता है जो एक प्रवाह-आधारित, कस्टम VPN प्रोटोकॉल को लागू करता है। इसका मतलब है कि यह नेटवर्क ट्रैफ़िक को कनेक्शनों (या प्रवाहों) के आधार पर संभालता है न कि व्यक्तिगत पैकेट के आधार पर।
+- **Packet Tunnel**: इसका उपयोग एक VPN क्लाइंट बनाने के लिए किया जाता है जो एक पैकेट-आधारित, कस्टम VPN प्रोटोकॉल को लागू करता है। इसका मतलब है कि यह नेटवर्क ट्रैफ़िक को व्यक्तिगत पैकेट के आधार पर संभालता है।
+- **Filter Data**: इसका उपयोग नेटवर्क "प्रवाहों" को फ़िल्टर करने के लिए किया जाता है। यह प्रवाह स्तर पर नेटवर्क डेटा की निगरानी या संशोधन कर सकता है।
+- **Filter Packet**: इसका उपयोग व्यक्तिगत नेटवर्क पैकेट को फ़िल्टर करने के लिए किया जाता है। यह पैकेट स्तर पर नेटवर्क डेटा की निगरानी या संशोधन कर सकता है।
+- **DNS Proxy**: इसका उपयोग एक कस्टम DNS प्रदाता बनाने के लिए किया जाता है। इसका उपयोग DNS अनुरोधों और प्रतिक्रियाओं की निगरानी या संशोधन के लिए किया जा सकता है।
 
-## Endpoint Security Framework
+## एंडपॉइंट सुरक्षा ढांचा
 
-Endpoint Security is a framework provided by Apple in macOS that provides a set of APIs for system security. It's intended for use by **security vendors and developers to build products that can monitor and control system activity** to identify and protect against malicious activity.
+एंडपॉइंट सुरक्षा एक ढांचा है जो Apple द्वारा macOS में प्रदान किया गया है जो सिस्टम सुरक्षा के लिए API का एक सेट प्रदान करता है। इसका उपयोग **सुरक्षा विक्रेताओं और डेवलपर्स द्वारा उन उत्पादों को बनाने के लिए किया जाता है जो सिस्टम गतिविधि की निगरानी और नियंत्रण कर सकते हैं** ताकि दुर्भावनापूर्ण गतिविधियों की पहचान और सुरक्षा की जा सके।
 
-This framework provides a **collection of APIs to monitor and control system activity**, such as process executions, file system events, network and kernel events.
+यह ढांचा **सिस्टम गतिविधि की निगरानी और नियंत्रण के लिए API का एक संग्रह प्रदान करता है**, जैसे प्रक्रिया निष्पादन, फ़ाइल प्रणाली घटनाएँ, नेटवर्क और कर्नेल घटनाएँ।
 
-The core of this framework is implemented in the kernel, as a Kernel Extension (KEXT) located at **`/System/Library/Extensions/EndpointSecurity.kext`**. This KEXT is made up of several key components:
+इस ढांचे का मुख्य भाग कर्नेल में लागू किया गया है, एक कर्नेल एक्सटेंशन (KEXT) के रूप में जो **`/System/Library/Extensions/EndpointSecurity.kext`** पर स्थित है। यह KEXT कई प्रमुख घटकों से बना है:
 
-- **EndpointSecurityDriver**: This acts as the "entry point" for the kernel extension. It's the main point of interaction between the OS and the Endpoint Security framework.
-- **EndpointSecurityEventManager**: This component is responsible for implementing kernel hooks. Kernel hooks allow the framework to monitor system events by intercepting system calls.
-- **EndpointSecurityClientManager**: This manages the communication with user space clients, keeping track of which clients are connected and need to receive event notifications.
-- **EndpointSecurityMessageManager**: This sends messages and event notifications to user space clients.
+- **EndpointSecurityDriver**: यह कर्नेल एक्सटेंशन के लिए "प्रवेश बिंदु" के रूप में कार्य करता है। यह OS और एंडपॉइंट सुरक्षा ढांचे के बीच बातचीत का मुख्य बिंदु है।
+- **EndpointSecurityEventManager**: यह घटक कर्नेल हुक को लागू करने के लिए जिम्मेदार है। कर्नेल हुक ढांचे को सिस्टम कॉल को इंटरसेप्ट करके सिस्टम घटनाओं की निगरानी करने की अनुमति देते हैं।
+- **EndpointSecurityClientManager**: यह उपयोगकर्ता स्थान क्लाइंट के साथ संचार का प्रबंधन करता है, यह ट्रैक करता है कि कौन से क्लाइंट जुड़े हुए हैं और जिन्हें घटना सूचनाएँ प्राप्त करने की आवश्यकता है।
+- **EndpointSecurityMessageManager**: यह उपयोगकर्ता स्थान क्लाइंट को संदेश और घटना सूचनाएँ भेजता है।
 
-The events that the Endpoint Security framework can monitor are categorized into:
+एंडपॉइंट सुरक्षा ढांचा जिन घटनाओं की निगरानी कर सकता है, उन्हें निम्नलिखित श्रेणियों में वर्गीकृत किया गया है:
 
-- File events
-- Process events
-- Socket events
-- Kernel events (such as loading/unloading a kernel extension or opening an I/O Kit device)
+- फ़ाइल घटनाएँ
+- प्रक्रिया घटनाएँ
+- सॉकेट घटनाएँ
+- कर्नेल घटनाएँ (जैसे कर्नेल एक्सटेंशन को लोड/अनलोड करना या I/O किट डिवाइस खोलना)
 
-### Endpoint Security Framework Architecture
+### एंडपॉइंट सुरक्षा ढांचा आर्किटेक्चर
 
 <figure><img src="../../../images/image (1068).png" alt="https://www.youtube.com/watch?v=jaVkpM1UqOs"><figcaption></figcaption></figure>
 
-**User-space communication** with the Endpoint Security framework happens through the IOUserClient class. Two different subclasses are used, depending on the type of caller:
+**उपयोगकर्ता-स्थान संचार** एंडपॉइंट सुरक्षा ढांचे के साथ IOUserClient वर्ग के माध्यम से होता है। कॉलर के प्रकार के आधार पर दो अलग-अलग उपवर्गों का उपयोग किया जाता है:
 
-- **EndpointSecurityDriverClient**: This requires the `com.apple.private.endpoint-security.manager` entitlement, which is only held by the system process `endpointsecurityd`.
-- **EndpointSecurityExternalClient**: This requires the `com.apple.developer.endpoint-security.client` entitlement. This would typically be used by third-party security software that needs to interact with the Endpoint Security framework.
+- **EndpointSecurityDriverClient**: इसके लिए `com.apple.private.endpoint-security.manager` अधिकार की आवश्यकता होती है, जो केवल सिस्टम प्रक्रिया `endpointsecurityd` के पास होता है।
+- **EndpointSecurityExternalClient**: इसके लिए `com.apple.developer.endpoint-security.client` अधिकार की आवश्यकता होती है। इसका उपयोग आमतौर पर तीसरे पक्ष के सुरक्षा सॉफ़्टवेयर द्वारा किया जाएगा जिसे एंडपॉइंट सुरक्षा ढांचे के साथ बातचीत करने की आवश्यकता होती है।
 
-The Endpoint Security Extensions:**`libEndpointSecurity.dylib`** is the C library that system extensions use to communicate with the kernel. This library uses the I/O Kit (`IOKit`) to communicate with the Endpoint Security KEXT.
+एंडपॉइंट सुरक्षा एक्सटेंशन:**`libEndpointSecurity.dylib`** वह C लाइब्रेरी है जिसका उपयोग सिस्टम एक्सटेंशन कर्नेल के साथ संवाद करने के लिए करते हैं। यह लाइब्रेरी एंडपॉइंट सुरक्षा KEXT के साथ संवाद करने के लिए I/O किट (`IOKit`) का उपयोग करती है।
 
-**`endpointsecurityd`** is a key system daemon involved in managing and launching endpoint security system extensions, particularly during the early boot process. **Only system extensions** marked with **`NSEndpointSecurityEarlyBoot`** in their `Info.plist` file receive this early boot treatment.
+**`endpointsecurityd`** एक प्रमुख सिस्टम डेमॉन है जो एंडपॉइंट सुरक्षा सिस्टम एक्सटेंशनों का प्रबंधन और लॉन्च करने में शामिल है, विशेष रूप से प्रारंभिक बूट प्रक्रिया के दौरान। **केवल सिस्टम एक्सटेंशन** जिन्हें उनके `Info.plist` फ़ाइल में **`NSEndpointSecurityEarlyBoot`** के रूप में चिह्नित किया गया है, इस प्रारंभिक बूट उपचार को प्राप्त करते हैं।
 
-Another system daemon, **`sysextd`**, **validates system extensions** and moves them into the proper system locations. It then asks the relevant daemon to load the extension. The **`SystemExtensions.framework`** is responsible for activating and deactivating system extensions.
+एक अन्य सिस्टम डेमॉन, **`sysextd`**, **सिस्टम एक्सटेंशनों को मान्य करता है** और उन्हें उचित सिस्टम स्थानों में स्थानांतरित करता है। फिर यह संबंधित डेमॉन से एक्सटेंशन को लोड करने के लिए कहता है। **`SystemExtensions.framework`** सिस्टम एक्सटेंशनों को सक्रिय और निष्क्रिय करने के लिए जिम्मेदार है।
 
-## Bypassing ESF
+## ESF को बायपास करना
 
-ESF is used by security tools that will try to detect a red teamer, so any information about how this could be avoided sounds interesting.
+ESF का उपयोग सुरक्षा उपकरणों द्वारा किया जाता है जो एक रेड टीमर का पता लगाने की कोशिश करेंगे, इसलिए इस बारे में कोई भी जानकारी कि इसे कैसे टाला जा सकता है, दिलचस्प लगती है।
 
 ### CVE-2021-30965
 
-The thing is that the security application needs to have **Full Disk Access permissions**. So if an attacker could remove that, he could prevent the software from running:
-
+बात यह है कि सुरक्षा एप्लिकेशन को **पूर्ण डिस्क एक्सेस अनुमतियाँ** होनी चाहिए। इसलिए यदि एक हमलावर इसे हटा सकता है, तो वह सॉफ़्टवेयर को चलने से रोक सकता है:
 ```bash
 tccutil reset All
 ```
+अधिक जानकारी के लिए इस बायपास और संबंधित विषयों के बारे में बात करें [#OBTS v5.0: "The Achilles Heel of EndpointSecurity" - Fitzl Csaba](https://www.youtube.com/watch?v=lQO7tvNCoTI)
 
-For **more information** about this bypass and related ones check the talk [#OBTS v5.0: "The Achilles Heel of EndpointSecurity" - Fitzl Csaba](https://www.youtube.com/watch?v=lQO7tvNCoTI)
+अंत में, इसे ठीक किया गया था नए अनुमति **`kTCCServiceEndpointSecurityClient`** को सुरक्षा ऐप को देने के द्वारा जो **`tccd`** द्वारा प्रबंधित है ताकि `tccutil` इसकी अनुमतियों को साफ न करे जिससे यह चलने से रोक सके।
 
-At the end this was fixed by giving the new permission **`kTCCServiceEndpointSecurityClient`** to the security app managed by **`tccd`** so `tccutil` won't clear its permissions preventing it from running.
-
-## References
+## संदर्भ
 
 - [**OBTS v3.0: "Endpoint Security & Insecurity" - Scott Knight**](https://www.youtube.com/watch?v=jaVkpM1UqOs)
 - [**https://knight.sc/reverse%20engineering/2019/08/24/system-extension-internals.html**](https://knight.sc/reverse%20engineering/2019/08/24/system-extension-internals.html)

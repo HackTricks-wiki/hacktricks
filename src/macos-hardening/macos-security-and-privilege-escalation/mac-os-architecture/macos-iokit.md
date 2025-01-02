@@ -4,16 +4,15 @@
 
 ## Basic Information
 
-The I/O Kit is an open-source, object-oriented **device-driver framework** in the XNU kernel, handles **dynamically loaded device drivers**. It allows modular code to be added to the kernel on-the-fly, supporting diverse hardware.
+I/O Kit एक ओपन-सोर्स, ऑब्जेक्ट-ओरिएंटेड **डिवाइस-ड्राइवर ढांचा** है जो XNU कर्नेल में है, जो **डायनामिक रूप से लोड किए गए डिवाइस ड्राइवरों** को संभालता है। यह कर्नेल में ऑन-द-फ्लाई मॉड्यूलर कोड जोड़ने की अनुमति देता है, जो विविध हार्डवेयर का समर्थन करता है।
 
-IOKit drivers will basically **export functions from the kernel**. These function parameter **types** are **predefined** and are verified. Moreover, similar to XPC, IOKit is just another layer on **top of Mach messages**.
+IOKit ड्राइवर मूल रूप से **कर्नेल से फ़ंक्शन निर्यात करेंगे**। इन फ़ंक्शन पैरामीटर **प्रकार** **पूर्व-परिभाषित** होते हैं और सत्यापित किए जाते हैं। इसके अलावा, XPC के समान, IOKit **Mach संदेशों** के **ऊपर** एक और परत है।
 
-**IOKit XNU kernel code** is opensourced by Apple in [https://github.com/apple-oss-distributions/xnu/tree/main/iokit](https://github.com/apple-oss-distributions/xnu/tree/main/iokit). Moreover, the user space IOKit components are also opensource [https://github.com/opensource-apple/IOKitUser](https://github.com/opensource-apple/IOKitUser).
+**IOKit XNU कर्नेल कोड** को Apple द्वारा [https://github.com/apple-oss-distributions/xnu/tree/main/iokit](https://github.com/apple-oss-distributions/xnu/tree/main/iokit) पर ओपनसोर्स किया गया है। इसके अलावा, उपयोगकर्ता स्थान IOKit घटक भी ओपनसोर्स हैं [https://github.com/opensource-apple/IOKitUser](https://github.com/opensource-apple/IOKitUser)।
 
-However, **no IOKit drivers** are opensource. Anyway, from time to time a release of a driver might come with symbols that makes it easier to debug it. Check how to [**get the driver extensions from the firmware here**](./#ipsw)**.**
+हालांकि, **कोई IOKit ड्राइवर** ओपनसोर्स नहीं हैं। फिर भी, समय-समय पर एक ड्राइवर का रिलीज़ ऐसे प्रतीकों के साथ आ सकता है जो इसे डिबग करना आसान बनाते हैं। यहाँ देखें कि [**फर्मवेयर से ड्राइवर एक्सटेंशन कैसे प्राप्त करें**](./#ipsw)**।**
 
-It's written in **C++**. You can get demangled C++ symbols with:
-
+यह **C++** में लिखा गया है। आप demangled C++ प्रतीकों को प्राप्त कर सकते हैं:
 ```bash
 # Get demangled symbols
 nm -C com.apple.driver.AppleJPEGDriver
@@ -23,210 +22,193 @@ c++filt
 __ZN16IOUserClient202222dispatchExternalMethodEjP31IOExternalMethodArgumentsOpaquePK28IOExternalMethodDispatch2022mP8OSObjectPv
 IOUserClient2022::dispatchExternalMethod(unsigned int, IOExternalMethodArgumentsOpaque*, IOExternalMethodDispatch2022 const*, unsigned long, OSObject*, void*)
 ```
-
 > [!CAUTION]
-> IOKit **exposed functions** could perform **additional security checks** when a client tries to call a function but note that the apps are usually **limited** by the **sandbox** to which IOKit functions they can interact with.
+> IOKit **exposed functions** अतिरिक्त **सुरक्षा जांच** कर सकते हैं जब एक क्लाइंट एक फ़ंक्शन को कॉल करने की कोशिश करता है लेकिन ध्यान दें कि ऐप्स आमतौर पर **sandbox** द्वारा **सीमित** होते हैं कि वे IOKit फ़ंक्शंस के साथ किस प्रकार इंटरैक्ट कर सकते हैं।
 
-## Drivers
+## ड्राइवर
 
-In macOS they are located in:
+macOS में ये स्थित हैं:
 
 - **`/System/Library/Extensions`**
-  - KEXT files built into the OS X operating system.
+- KEXT फ़ाइलें जो OS X ऑपरेटिंग सिस्टम में निर्मित हैं।
 - **`/Library/Extensions`**
-  - KEXT files installed by 3rd party software
+- KEXT फ़ाइलें जो 3rd पार्टी सॉफ़्टवेयर द्वारा स्थापित की गई हैं।
 
-In iOS they are located in:
+iOS में ये स्थित हैं:
 
 - **`/System/Library/Extensions`**
-
 ```bash
 #Use kextstat to print the loaded drivers
 kextstat
 Executing: /usr/bin/kmutil showloaded
 No variant specified, falling back to release
 Index Refs Address            Size       Wired      Name (Version) UUID <Linked Against>
-    1  142 0                  0          0          com.apple.kpi.bsd (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
-    2   11 0                  0          0          com.apple.kpi.dsep (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
-    3  170 0                  0          0          com.apple.kpi.iokit (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
-    4    0 0                  0          0          com.apple.kpi.kasan (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
-    5  175 0                  0          0          com.apple.kpi.libkern (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
-    6  154 0                  0          0          com.apple.kpi.mach (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
-    7   88 0                  0          0          com.apple.kpi.private (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
-    8  106 0                  0          0          com.apple.kpi.unsupported (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
-    9    2 0xffffff8003317000 0xe000     0xe000     com.apple.kec.Libm (1) 6C1342CC-1D74-3D0F-BC43-97D5AD38200A <5>
-   10   12 0xffffff8003544000 0x92000    0x92000    com.apple.kec.corecrypto (11.1) F5F1255F-6552-3CF4-A9DB-D60EFDEB4A9A <8 7 6 5 3 1>
+1  142 0                  0          0          com.apple.kpi.bsd (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
+2   11 0                  0          0          com.apple.kpi.dsep (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
+3  170 0                  0          0          com.apple.kpi.iokit (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
+4    0 0                  0          0          com.apple.kpi.kasan (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
+5  175 0                  0          0          com.apple.kpi.libkern (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
+6  154 0                  0          0          com.apple.kpi.mach (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
+7   88 0                  0          0          com.apple.kpi.private (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
+8  106 0                  0          0          com.apple.kpi.unsupported (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
+9    2 0xffffff8003317000 0xe000     0xe000     com.apple.kec.Libm (1) 6C1342CC-1D74-3D0F-BC43-97D5AD38200A <5>
+10   12 0xffffff8003544000 0x92000    0x92000    com.apple.kec.corecrypto (11.1) F5F1255F-6552-3CF4-A9DB-D60EFDEB4A9A <8 7 6 5 3 1>
 ```
+9 तक सूचीबद्ध ड्राइवर **पता 0 में लोड होते हैं**। इसका मतलब है कि वे असली ड्राइवर नहीं हैं बल्कि **कर्नेल का हिस्सा हैं और इन्हें अनलोड नहीं किया जा सकता**।
 
-Until the number 9 the listed drivers are **loaded in the address 0**. This means that those aren't real drivers but **part of the kernel and they cannot be unloaded**.
-
-In order to find specific extensions you can use:
-
+विशिष्ट एक्सटेंशन खोजने के लिए आप उपयोग कर सकते हैं:
 ```bash
 kextfind -bundle-id com.apple.iokit.IOReportFamily #Search by full bundle-id
 kextfind -bundle-id -substring IOR #Search by substring in bundle-id
 ```
-
-To load and unload kernel extensions do:
-
+कर्नेल एक्सटेंशन को लोड और अनलोड करने के लिए करें:
 ```bash
 kextload com.apple.iokit.IOReportFamily
 kextunload com.apple.iokit.IOReportFamily
 ```
-
 ## IORegistry
 
-The **IORegistry** is a crucial part of the IOKit framework in macOS and iOS which serves as a database for representing the system's hardware configuration and state. It's a **hierarchical collection of objects that represent all the hardware and drivers** loaded on the system, and their relationships to each other.
+**IORegistry** macOS और iOS में IOKit ढांचे का एक महत्वपूर्ण हिस्सा है जो सिस्टम की हार्डवेयर कॉन्फ़िगरेशन और स्थिति का प्रतिनिधित्व करने के लिए एक डेटाबेस के रूप में कार्य करता है। यह **वस्तुओं का एक पदानुक्रमित संग्रह है जो सिस्टम पर लोड किए गए सभी हार्डवेयर और ड्राइवरों का प्रतिनिधित्व करता है, और उनके बीच के संबंधों को** दर्शाता है।
 
-You can get the IORegistry using the cli **`ioreg`** to inspect it from the console (specially useful for iOS).
-
+आप IORegistry को cli **`ioreg`** का उपयोग करके कंसोल से निरीक्षण कर सकते हैं (विशेष रूप से iOS के लिए उपयोगी)।
 ```bash
 ioreg -l #List all
 ioreg -w 0 #Not cut lines
 ioreg -p <plane> #Check other plane
 ```
-
-You could download **`IORegistryExplorer`** from **Xcode Additional Tools** from [**https://developer.apple.com/download/all/**](https://developer.apple.com/download/all/) and inspect the **macOS IORegistry** through a **graphical** interface.
+आप **`IORegistryExplorer`** को **Xcode Additional Tools** से [**https://developer.apple.com/download/all/**](https://developer.apple.com/download/all/) से डाउनलोड कर सकते हैं और **macOS IORegistry** का निरीक्षण **ग्राफिकल** इंटरफेस के माध्यम से कर सकते हैं।
 
 <figure><img src="../../../images/image (1167).png" alt="" width="563"><figcaption></figcaption></figure>
 
-In IORegistryExplorer, "planes" are used to organize and display the relationships between different objects in the IORegistry. Each plane represents a specific type of relationship or a particular view of the system's hardware and driver configuration. Here are some of the common planes you might encounter in IORegistryExplorer:
+IORegistryExplorer में, "planes" का उपयोग IORegistry में विभिन्न वस्तुओं के बीच संबंधों को व्यवस्थित और प्रदर्शित करने के लिए किया जाता है। प्रत्येक plane एक विशिष्ट प्रकार के संबंध या सिस्टम के हार्डवेयर और ड्राइवर कॉन्फ़िगरेशन का एक विशेष दृश्य दर्शाता है। यहाँ कुछ सामान्य planes हैं जिनका आप IORegistryExplorer में सामना कर सकते हैं:
 
-1. **IOService Plane**: This is the most general plane, displaying the service objects that represent drivers and nubs (communication channels between drivers). It shows the provider-client relationships between these objects.
-2. **IODeviceTree Plane**: This plane represents the physical connections between devices as they are attached to the system. It is often used to visualize the hierarchy of devices connected via buses like USB or PCI.
-3. **IOPower Plane**: Displays objects and their relationships in terms of power management. It can show which objects are affecting the power state of others, useful for debugging power-related issues.
-4. **IOUSB Plane**: Specifically focused on USB devices and their relationships, showing the hierarchy of USB hubs and connected devices.
-5. **IOAudio Plane**: This plane is for representing audio devices and their relationships within the system.
+1. **IOService Plane**: यह सबसे सामान्य plane है, जो सेवा वस्तुओं को प्रदर्शित करता है जो ड्राइवरों और नब्स (ड्राइवरों के बीच संचार चैनल) का प्रतिनिधित्व करते हैं। यह इन वस्तुओं के बीच प्रदाता-ग्राहक संबंधों को दिखाता है।
+2. **IODeviceTree Plane**: यह plane उन उपकरणों के बीच भौतिक कनेक्शनों का प्रतिनिधित्व करता है जब वे सिस्टम से जुड़े होते हैं। इसका उपयोग अक्सर USB या PCI जैसे बसों के माध्यम से जुड़े उपकरणों की पदानुक्रम को दृश्य बनाने के लिए किया जाता है।
+3. **IOPower Plane**: यह पावर प्रबंधन के संदर्भ में वस्तुओं और उनके संबंधों को प्रदर्शित करता है। यह दिखा सकता है कि कौन सी वस्तुएं अन्य की पावर स्थिति को प्रभावित कर रही हैं, जो पावर से संबंधित मुद्दों को डिबग करने के लिए उपयोगी है।
+4. **IOUSB Plane**: विशेष रूप से USB उपकरणों और उनके संबंधों पर केंद्रित, USB हब और जुड़े उपकरणों की पदानुक्रम को दिखाता है।
+5. **IOAudio Plane**: यह plane ऑडियो उपकरणों और उनके संबंधों का प्रतिनिधित्व करने के लिए है।
 6. ...
 
 ## Driver Comm Code Example
 
-The following code connects to the IOKit service `"YourServiceNameHere"` and calls the function inside the selector 0. For it:
+निम्नलिखित कोड IOKit सेवा `"YourServiceNameHere"` से कनेक्ट करता है और चयनकर्ता 0 के अंदर फ़ंक्शन को कॉल करता है। इसके लिए:
 
-- it first calls **`IOServiceMatching`** and **`IOServiceGetMatchingServices`** to get the service.
-- It then establish a connection calling **`IOServiceOpen`**.
-- And it finally calls a function with **`IOConnectCallScalarMethod`** indicating the selector 0 (the selector is the number the function you want to call has assigned).
-
+- यह पहले **`IOServiceMatching`** और **`IOServiceGetMatchingServices`** को कॉल करता है ताकि सेवा प्राप्त की जा सके।
+- फिर यह **`IOServiceOpen`** को कॉल करके एक कनेक्शन स्थापित करता है।
+- और अंत में **`IOConnectCallScalarMethod`** के साथ एक फ़ंक्शन को कॉल करता है जो चयनकर्ता 0 को इंगित करता है (चयनकर्ता वह संख्या है जो आप जिस फ़ंक्शन को कॉल करना चाहते हैं उसे सौंपा गया है)।
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <IOKit/IOKitLib.h>
 
 int main(int argc, const char * argv[]) {
-    @autoreleasepool {
-        // Get a reference to the service using its name
-        CFMutableDictionaryRef matchingDict = IOServiceMatching("YourServiceNameHere");
-        if (matchingDict == NULL) {
-            NSLog(@"Failed to create matching dictionary");
-            return -1;
-        }
+@autoreleasepool {
+// Get a reference to the service using its name
+CFMutableDictionaryRef matchingDict = IOServiceMatching("YourServiceNameHere");
+if (matchingDict == NULL) {
+NSLog(@"Failed to create matching dictionary");
+return -1;
+}
 
-        // Obtain an iterator over all matching services
-        io_iterator_t iter;
-        kern_return_t kr = IOServiceGetMatchingServices(kIOMasterPortDefault, matchingDict, &iter);
-        if (kr != KERN_SUCCESS) {
-            NSLog(@"Failed to get matching services");
-            return -1;
-        }
+// Obtain an iterator over all matching services
+io_iterator_t iter;
+kern_return_t kr = IOServiceGetMatchingServices(kIOMasterPortDefault, matchingDict, &iter);
+if (kr != KERN_SUCCESS) {
+NSLog(@"Failed to get matching services");
+return -1;
+}
 
-        // Get a reference to the first service (assuming it exists)
-        io_service_t service = IOIteratorNext(iter);
-        if (!service) {
-            NSLog(@"No matching service found");
-            IOObjectRelease(iter);
-            return -1;
-        }
+// Get a reference to the first service (assuming it exists)
+io_service_t service = IOIteratorNext(iter);
+if (!service) {
+NSLog(@"No matching service found");
+IOObjectRelease(iter);
+return -1;
+}
 
-        // Open a connection to the service
-        io_connect_t connect;
-        kr = IOServiceOpen(service, mach_task_self(), 0, &connect);
-        if (kr != KERN_SUCCESS) {
-            NSLog(@"Failed to open service");
-            IOObjectRelease(service);
-            IOObjectRelease(iter);
-            return -1;
-        }
+// Open a connection to the service
+io_connect_t connect;
+kr = IOServiceOpen(service, mach_task_self(), 0, &connect);
+if (kr != KERN_SUCCESS) {
+NSLog(@"Failed to open service");
+IOObjectRelease(service);
+IOObjectRelease(iter);
+return -1;
+}
 
-        // Call a method on the service
-        // Assume the method has a selector of 0, and takes no arguments
-        kr = IOConnectCallScalarMethod(connect, 0, NULL, 0, NULL, NULL);
-        if (kr != KERN_SUCCESS) {
-            NSLog(@"Failed to call method");
-        }
+// Call a method on the service
+// Assume the method has a selector of 0, and takes no arguments
+kr = IOConnectCallScalarMethod(connect, 0, NULL, 0, NULL, NULL);
+if (kr != KERN_SUCCESS) {
+NSLog(@"Failed to call method");
+}
 
-        // Cleanup
-        IOServiceClose(connect);
-        IOObjectRelease(service);
-        IOObjectRelease(iter);
-    }
-    return 0;
+// Cleanup
+IOServiceClose(connect);
+IOObjectRelease(service);
+IOObjectRelease(iter);
+}
+return 0;
 }
 ```
+अन्य कार्य हैं जिन्हें **`IOConnectCallScalarMethod`** के अलावा IOKit कार्यों को कॉल करने के लिए उपयोग किया जा सकता है जैसे **`IOConnectCallMethod`**, **`IOConnectCallStructMethod`**...
 
-There are **other** functions that can be used to call IOKit functions apart of **`IOConnectCallScalarMethod`** like **`IOConnectCallMethod`**, **`IOConnectCallStructMethod`**...
+## ड्राइवर एंट्रीपॉइंट को रिवर्स करना
 
-## Reversing driver entrypoint
+आप इन्हें उदाहरण के लिए [**फर्मवेयर इमेज (ipsw)**](./#ipsw) से प्राप्त कर सकते हैं। फिर, इसे अपने पसंदीदा डिकंपाइलर में लोड करें।
 
-You could obtain these for example from a [**firmware image (ipsw)**](./#ipsw). Then, load it into your favourite decompiler.
-
-You could start decompiling the **`externalMethod`** function as this is the driver function that will be receiving the call and calling the correct function:
+आप **`externalMethod`** कार्य को डिकंपाइल करना शुरू कर सकते हैं क्योंकि यह वह ड्राइवर कार्य है जो कॉल प्राप्त करेगा और सही कार्य को कॉल करेगा:
 
 <figure><img src="../../../images/image (1168).png" alt="" width="315"><figcaption></figcaption></figure>
 
 <figure><img src="../../../images/image (1169).png" alt=""><figcaption></figcaption></figure>
 
-That awful call demagled means:
-
+उस भयानक कॉल का डेमैग्लेड मतलब है:
 ```cpp
 IOUserClient2022::dispatchExternalMethod(unsigned int, IOExternalMethodArgumentsOpaque*, IOExternalMethodDispatch2022 const*, unsigned long, OSObject*, void*)
 ```
-
-Note how in the previous definition the **`self`** param is missed, the good definition would be:
-
+ध्यान दें कि पिछले परिभाषा में **`self`** पैरामीटर गायब है, सही परिभाषा होगी:
 ```cpp
 IOUserClient2022::dispatchExternalMethod(self, unsigned int, IOExternalMethodArgumentsOpaque*, IOExternalMethodDispatch2022 const*, unsigned long, OSObject*, void*)
 ```
-
-Actually, you can find the real definition in [https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/Kernel/IOUserClient.cpp#L6388](https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/Kernel/IOUserClient.cpp#L6388):
-
+वास्तव में, आप असली परिभाषा [https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/Kernel/IOUserClient.cpp#L6388](https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/Kernel/IOUserClient.cpp#L6388) में पा सकते हैं:
 ```cpp
 IOUserClient2022::dispatchExternalMethod(uint32_t selector, IOExternalMethodArgumentsOpaque *arguments,
-    const IOExternalMethodDispatch2022 dispatchArray[], size_t dispatchArrayCount,
-    OSObject * target, void * reference)
+const IOExternalMethodDispatch2022 dispatchArray[], size_t dispatchArrayCount,
+OSObject * target, void * reference)
 ```
-
-With this info you can rewrite Ctrl+Right -> `Edit function signature` and set the known types:
+इस जानकारी के साथ आप Ctrl+Right -> `Edit function signature` को फिर से लिख सकते हैं और ज्ञात प्रकार सेट कर सकते हैं:
 
 <figure><img src="../../../images/image (1174).png" alt=""><figcaption></figcaption></figure>
 
-The new decompiled code will look like:
+नया डिकंपाइल किया गया कोड इस तरह दिखेगा:
 
 <figure><img src="../../../images/image (1175).png" alt=""><figcaption></figcaption></figure>
 
-For the next step we need to have defined the **`IOExternalMethodDispatch2022`** struct. It's opensource in [https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176](https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176), you could define it:
+अगले चरण के लिए हमें **`IOExternalMethodDispatch2022`** संरचना को परिभाषित करना होगा। यह ओपनसोर्स है [https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176](https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176), आप इसे परिभाषित कर सकते हैं:
 
 <figure><img src="../../../images/image (1170).png" alt=""><figcaption></figcaption></figure>
 
-Now, following the `(IOExternalMethodDispatch2022 *)&sIOExternalMethodArray` you can see a lot of data:
+अब, `(IOExternalMethodDispatch2022 *)&sIOExternalMethodArray` के बाद आप बहुत सारे डेटा देख सकते हैं:
 
 <figure><img src="../../../images/image (1176).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Change the Data Type to **`IOExternalMethodDispatch2022:`**
+डेटा प्रकार को **`IOExternalMethodDispatch2022:`** में बदलें:
 
 <figure><img src="../../../images/image (1177).png" alt="" width="375"><figcaption></figcaption></figure>
 
-after the change:
+बदलाव के बाद:
 
 <figure><img src="../../../images/image (1179).png" alt="" width="563"><figcaption></figcaption></figure>
 
-And as we now in there we have an **array of 7 elements** (check the final decompiled code), click to create an array of 7 elements:
+और जैसा कि हम अब वहां हैं, हमारे पास **7 तत्वों का एक एरे** है (अंतिम डिकंपाइल किए गए कोड की जांच करें), 7 तत्वों का एक एरे बनाने के लिए क्लिक करें:
 
 <figure><img src="../../../images/image (1180).png" alt="" width="563"><figcaption></figcaption></figure>
 
-After the array is created you can see all the exported functions:
+एरे बनने के बाद आप सभी निर्यातित कार्यों को देख सकते हैं:
 
 <figure><img src="../../../images/image (1181).png" alt=""><figcaption></figcaption></figure>
 
 > [!TIP]
-> If you remember, to **call** an **exported** function from user space we don't need to call the name of the function, but the **selector number**. Here you can see that the selector **0** is the function **`initializeDecoder`**, the selector **1** is **`startDecoder`**, the selector **2** **`initializeEncoder`**...
+> यदि आप याद रखें, तो उपयोगकर्ता स्थान से एक **निर्यातित** कार्य को **call** करने के लिए हमें कार्य का नाम नहीं, बल्कि **selector number** को कॉल करने की आवश्यकता होती है। यहां आप देख सकते हैं कि selector **0** कार्य **`initializeDecoder`** है, selector **1** **`startDecoder`** है, selector **2** **`initializeEncoder`** है...
 
 {{#include ../../../banners/hacktricks-training.md}}

