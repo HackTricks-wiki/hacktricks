@@ -2,27 +2,26 @@
 
 {{#include ./banners/hacktricks-training.md}}
 
-## Locked Device
+## Dispositivo Bloccato
 
-To start extracting data from an Android device it has to be unlocked. If it's locked you can:
+Per iniziare a estrarre dati da un dispositivo Android, deve essere sbloccato. Se è bloccato, puoi:
 
-- Check if the device has debugging via USB activated.
-- Check for a possible [smudge attack](https://www.usenix.org/legacy/event/woot10/tech/full_papers/Aviv.pdf)
-- Try with [Brute-force](https://www.cultofmac.com/316532/this-brute-force-device-can-crack-any-iphones-pin-code/)
+- Controllare se il dispositivo ha attivato il debug via USB.
+- Controllare un possibile [smudge attack](https://www.usenix.org/legacy/event/woot10/tech/full_papers/Aviv.pdf)
+- Provare con [Brute-force](https://www.cultofmac.com/316532/this-brute-force-device-can-crack-any-iphones-pin-code/)
 
-## Data Adquisition
+## Acquisizione Dati
 
-Create an [android backup using adb](mobile-pentesting/android-app-pentesting/adb-commands.md#backup) and extract it using [Android Backup Extractor](https://sourceforge.net/projects/adbextractor/): `java -jar abe.jar unpack file.backup file.tar`
+Crea un [backup android usando adb](mobile-pentesting/android-app-pentesting/adb-commands.md#backup) ed estrailo usando [Android Backup Extractor](https://sourceforge.net/projects/adbextractor/): `java -jar abe.jar unpack file.backup file.tar`
 
-### If root access or physical connection to JTAG interface
+### Se accesso root o connessione fisica all'interfaccia JTAG
 
-- `cat /proc/partitions` (search the path to the flash memory, generally the first entry is _mmcblk0_ and corresponds to the whole flash memory).
-- `df /data` (Discover the block size of the system).
-- dd if=/dev/block/mmcblk0 of=/sdcard/blk0.img bs=4096 (execute it with the information gathered from the block size).
+- `cat /proc/partitions` (cerca il percorso della memoria flash, generalmente la prima voce è _mmcblk0_ e corrisponde all'intera memoria flash).
+- `df /data` (Scopri la dimensione del blocco del sistema).
+- dd if=/dev/block/mmcblk0 of=/sdcard/blk0.img bs=4096 (eseguilo con le informazioni raccolte dalla dimensione del blocco).
 
-### Memory
+### Memoria
 
-Use Linux Memory Extractor (LiME) to extract the RAM information. It's a kernel extension that should be loaded via adb.
+Usa Linux Memory Extractor (LiME) per estrarre le informazioni della RAM. È un'estensione del kernel che deve essere caricata tramite adb.
 
 {{#include ./banners/hacktricks-training.md}}
-
