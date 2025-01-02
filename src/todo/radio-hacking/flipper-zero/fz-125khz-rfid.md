@@ -8,49 +8,49 @@
 
 ## Intro
 
-For more info about how 125kHz tags work check:
+Für weitere Informationen darüber, wie 125kHz-Tags funktionieren, siehe:
 
 {{#ref}}
 ../pentesting-rfid.md
 {{#endref}}
 
-## Actions
+## Aktionen
 
-For more info about these types of tags [**read this intro**](../pentesting-rfid.md#low-frequency-rfid-tags-125khz).
+Für weitere Informationen über diese Arten von Tags [**lesen Sie diese Einführung**](../pentesting-rfid.md#low-frequency-rfid-tags-125khz).
 
-### Read
+### Lesen
 
-Tries to **read** the card info. Then it can **emulate** them.
+Versucht, die **Karteninformationen zu lesen**. Dann kann es sie **emulieren**.
 
 > [!WARNING]
-> Note that some intercoms try to protect themselves from key duplication by sending a write command prior to reading. If the write succeeds, that tag is considered fake. When Flipper emulates RFID there is no way for the reader to distinguish it from the original one, so no such problems occur.
+> Beachten Sie, dass einige Gegensprechanlagen versuchen, sich vor Schlüsselduplikationen zu schützen, indem sie einen Schreibbefehl vor dem Lesen senden. Wenn das Schreiben erfolgreich ist, wird dieses Tag als gefälscht betrachtet. Wenn Flipper RFID emuliert, gibt es keine Möglichkeit für den Leser, es von dem Original zu unterscheiden, sodass keine solchen Probleme auftreten.
 
-### Add Manually
+### Manuell hinzufügen
 
-You can create **fake cards in Flipper Zero indicating the data** you manually and then emulate it.
+Sie können **gefälschte Karten in Flipper Zero erstellen, indem Sie die Daten** manuell angeben und sie dann emulieren.
 
-#### IDs on cards
+#### IDs auf Karten
 
-Some times, when you get a card you will find the ID (or part) of it written in the card visible.
+Manchmal, wenn Sie eine Karte erhalten, finden Sie die ID (oder einen Teil davon) sichtbar auf der Karte geschrieben.
 
 - **EM Marin**
 
-For example in this EM-Marin card in the physical card is possible to **read the last 3 of 5 bytes in clear**.\
-The other 2 can be brute-forced if you cannot read them from the card.
+Zum Beispiel ist es bei dieser EM-Marin-Karte möglich, die **letzten 3 von 5 Bytes im Klartext zu lesen**.\
+Die anderen 2 können brute-forced werden, wenn Sie sie nicht von der Karte lesen können.
 
 <figure><img src="../../../images/image (104).png" alt=""><figcaption></figcaption></figure>
 
 - **HID**
 
-Same happens in this HID card where only 2 out of 3 bytes can be found printed in the card
+Das gleiche passiert bei dieser HID-Karte, wo nur 2 von 3 Bytes auf der Karte gedruckt gefunden werden können.
 
 <figure><img src="../../../images/image (1014).png" alt=""><figcaption></figcaption></figure>
 
-### Emulate/Write
+### Emulieren/Schreiben
 
-After **copying** a card or **entering** the ID **manually** it's possible to **emulate** it with Flipper Zero or **write** it in a real card.
+Nach dem **Kopieren** einer Karte oder dem **manuellen Eingeben** der ID ist es möglich, sie mit Flipper Zero zu **emulieren** oder sie auf eine echte Karte zu **schreiben**.
 
-## References
+## Referenzen
 
 - [https://blog.flipperzero.one/rfid/](https://blog.flipperzero.one/rfid/)
 
@@ -59,4 +59,3 @@ After **copying** a card or **entering** the ID **manually** it's possible to **
 {% embed url="https://websec.nl/" %}
 
 {{#include ../../../banners/hacktricks-training.md}}
-

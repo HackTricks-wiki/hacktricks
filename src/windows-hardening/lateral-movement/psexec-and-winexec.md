@@ -4,40 +4,37 @@
 
 {% embed url="https://websec.nl/" %}
 
-## How do they work
+## Wie funktionieren sie
 
-The process is outlined in the steps below, illustrating how service binaries are manipulated to achieve remote execution on a target machine via SMB:
+Der Prozess ist in den folgenden Schritten skizziert, die veranschaulichen, wie Dienst-Binärdateien manipuliert werden, um eine Remote-Ausführung auf einem Zielrechner über SMB zu erreichen:
 
-1. **Copying of a service binary to the ADMIN$ share over SMB** is performed.
-2. **Creation of a service on the remote machine** is done by pointing to the binary.
-3. The service is **started remotely**.
-4. Upon exit, the service is **stopped, and the binary is deleted**.
+1. **Kopieren einer Dienst-Binärdatei in den ADMIN$-Freigabe über SMB** wird durchgeführt.
+2. **Erstellung eines Dienstes auf dem Remote-Rechner** erfolgt durch Verweisen auf die Binärdatei.
+3. Der Dienst wird **remote gestartet**.
+4. Nach dem Beenden wird der Dienst **gestoppt und die Binärdatei gelöscht**.
 
-### **Process of Manually Executing PsExec**
+### **Prozess der manuellen Ausführung von PsExec**
 
-Assuming there is an executable payload (created with msfvenom and obfuscated using Veil to evade antivirus detection), named 'met8888.exe', representing a meterpreter reverse_http payload, the following steps are taken:
+Angenommen, es gibt eine ausführbare Payload (erstellt mit msfvenom und obfuskiert mit Veil, um die Erkennung durch Antivirenprogramme zu umgehen), benannt 'met8888.exe', die eine meterpreter reverse_http Payload darstellt, werden die folgenden Schritte unternommen:
 
-- **Copying the binary**: The executable is copied to the ADMIN$ share from a command prompt, though it may be placed anywhere on the filesystem to remain concealed.
-- **Creating a service**: Utilizing the Windows `sc` command, which allows for querying, creating, and deleting Windows services remotely, a service named "meterpreter" is created to point to the uploaded binary.
-- **Starting the service**: The final step involves starting the service, which will likely result in a "time-out" error due to the binary not being a genuine service binary and failing to return the expected response code. This error is inconsequential as the primary goal is the binary's execution.
+- **Kopieren der Binärdatei**: Die ausführbare Datei wird von einer Eingabeaufforderung in die ADMIN$-Freigabe kopiert, obwohl sie überall im Dateisystem platziert werden kann, um verborgen zu bleiben.
+- **Erstellen eines Dienstes**: Mit dem Windows `sc` Befehl, der das Abfragen, Erstellen und Löschen von Windows-Diensten remote ermöglicht, wird ein Dienst namens "meterpreter" erstellt, der auf die hochgeladene Binärdatei verweist.
+- **Starten des Dienstes**: Der letzte Schritt besteht darin, den Dienst zu starten, was wahrscheinlich zu einem "time-out" Fehler führen wird, da die Binärdatei kein echtes Dienst-Binärdateiformat ist und nicht den erwarteten Antwortcode zurückgibt. Dieser Fehler ist unerheblich, da das Hauptziel die Ausführung der Binärdatei ist.
 
-Observation of the Metasploit listener will reveal that the session has been initiated successfully.
+Die Beobachtung des Metasploit-Listeners wird zeigen, dass die Sitzung erfolgreich initiiert wurde.
 
-[Learn more about the `sc` command](https://technet.microsoft.com/en-us/library/bb490995.aspx).
+[Erfahren Sie mehr über den `sc` Befehl](https://technet.microsoft.com/en-us/library/bb490995.aspx).
 
-Find moe detailed steps in: [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
+Finden Sie detailliertere Schritte in: [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
 
-**You could also use the Windows Sysinternals binary PsExec.exe:**
+**Sie könnten auch die Windows Sysinternals Binärdatei PsExec.exe verwenden:**
 
 ![](<../../images/image (928).png>)
 
-You could also use [**SharpLateral**](https://github.com/mertdas/SharpLateral):
-
+Sie könnten auch [**SharpLateral**](https://github.com/mertdas/SharpLateral) verwenden:
 ```
 SharpLateral.exe redexec HOSTNAME C:\\Users\\Administrator\\Desktop\\malware.exe.exe malware.exe ServiceName
 ```
-
 {% embed url="https://websec.nl/" %}
 
 {{#include ../../banners/hacktricks-training.md}}
-

@@ -2,40 +2,35 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## How it Works
+## Wie es funktioniert
 
-**Smbexec** is a tool used for remote command execution on Windows systems, similar to **Psexec**, but it avoids placing any malicious files on the target system.
+**Smbexec** ist ein Tool zur Remote-Befehlsausführung auf Windows-Systemen, ähnlich wie **Psexec**, aber es vermeidet das Platzieren von schädlichen Dateien auf dem Zielsystem.
 
-### Key Points about **SMBExec**
+### Wichtige Punkte zu **SMBExec**
 
-- It operates by creating a temporary service (for example, "BTOBTO") on the target machine to execute commands via cmd.exe (%COMSPEC%), without dropping any binaries.
-- Despite its stealthy approach, it does generate event logs for each command executed, offering a form of non-interactive "shell".
-- The command to connect using **Smbexec** looks like this:
-
+- Es funktioniert, indem es einen temporären Dienst (zum Beispiel "BTOBTO") auf der Zielmaschine erstellt, um Befehle über cmd.exe (%COMSPEC%) auszuführen, ohne Binärdateien abzulegen.
+- Trotz seines stealthy Ansatzes generiert es Ereignisprotokolle für jeden ausgeführten Befehl und bietet eine Form von nicht-interaktivem "Shell".
+- Der Befehl zur Verbindung mit **Smbexec** sieht folgendermaßen aus:
 ```bash
 smbexec.py WORKGROUP/genericuser:genericpassword@10.10.10.10
 ```
+### Ausführen von Befehlen ohne Binaries
 
-### Executing Commands Without Binaries
+- **Smbexec** ermöglicht die direkte Ausführung von Befehlen über DienstbinPaths, wodurch die Notwendigkeit physischer Binaries auf dem Ziel entfällt.
+- Diese Methode ist nützlich, um einmalige Befehle auf einem Windows-Ziel auszuführen. Zum Beispiel ermöglicht die Kombination mit Metasploit's `web_delivery`-Modul die Ausführung eines PowerShell-zielgerichteten Reverse-Meterpreter-Payloads.
+- Durch das Erstellen eines Remote-Dienstes auf dem Rechner des Angreifers mit binPath, der so eingestellt ist, dass der bereitgestellte Befehl über cmd.exe ausgeführt wird, ist es möglich, das Payload erfolgreich auszuführen, Callback und Payload-Ausführung mit dem Metasploit-Listener zu erreichen, selbst wenn Dienstantwortfehler auftreten.
 
-- **Smbexec** enables direct command execution through service binPaths, eliminating the need for physical binaries on the target.
-- This method is useful for executing one-time commands on a Windows target. For instance, pairing it with Metasploit's `web_delivery` module allows for the execution of a PowerShell-targeted reverse Meterpreter payload.
-- By creating a remote service on the attacker's machine with binPath set to run the provided command through cmd.exe, it's possible to execute the payload successfully, achieving callback and payload execution with the Metasploit listener, even if service response errors occur.
+### Beispielbefehle
 
-### Commands Example
-
-Creating and starting the service can be accomplished with the following commands:
-
+Das Erstellen und Starten des Dienstes kann mit den folgenden Befehlen durchgeführt werden:
 ```bash
 sc create [ServiceName] binPath= "cmd.exe /c [PayloadCommand]"
 sc start [ServiceName]
 ```
+Für weitere Details siehe [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
 
-FOr further details check [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
-
-## References
+## Referenzen
 
 - [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
 
 {{#include ../../banners/hacktricks-training.md}}
-

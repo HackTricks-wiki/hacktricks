@@ -4,7 +4,7 @@
 
 ## Intro
 
-For more info about what is an iButton check:
+Für weitere Informationen darüber, was ein iButton ist, siehe:
 
 {{#ref}}
 ../ibutton.md
@@ -12,32 +12,31 @@ For more info about what is an iButton check:
 
 ## Design
 
-The **blue** part of the following imageis how you would need to **put the real iButton** so the Flipper can **read it.** The **green** part is how you need to **touch the reader** with the Flipper zero to **correctly emulate an iButton**.
+Der **blaue** Teil des folgenden Bildes zeigt, wie Sie den **echten iButton** **platzieren** müssen, damit der Flipper ihn **lesen** kann. Der **grüne** Teil zeigt, wie Sie den **Leser** mit dem Flipper Zero **berühren** müssen, um einen iButton **korrekt zu emulieren**.
 
 <figure><img src="../../../images/image (565).png" alt=""><figcaption></figcaption></figure>
 
-## Actions
+## Aktionen
 
-### Read
+### Lesen
 
-In Read Mode Flipper is waiting for the iButton key to touch and is able to digest any of three types of keys: **Dallas, Cyfral, and Metakom**. Flipper will **figure out the type of the key itself**. The name of the key protocol will be displayed on the screen above the ID number.
+Im Lesemodus wartet der Flipper darauf, dass der iButton berührt wird, und kann jeden der drei Typen von Schlüsseln verarbeiten: **Dallas, Cyfral und Metakom**. Der Flipper wird **den Typ des Schlüssels selbst herausfinden**. Der Name des Schlüsselprotokolls wird auf dem Bildschirm über der ID-Nummer angezeigt.
 
-### Add manually
+### Manuell hinzufügen
 
-It's possible to **add manually** an iButton of type: **Dallas, Cyfral, and Metakom**
+Es ist möglich, einen iButton des Typs **Dallas, Cyfral und Metakom** **manuell hinzuzufügen**.
 
-### **Emulate**
+### **Emulieren**
 
-It's possible to **emulate** saved iButtons (read or manually added).
+Es ist möglich, gespeicherte iButtons (gelesen oder manuell hinzugefügt) zu **emulieren**.
 
 > [!NOTE]
-> If you cannot make the expected contacts of the Flipper Zero touch the reader you can **use the external GPIO:**
+> Wenn Sie die erwarteten Kontakte des Flipper Zero nicht an den Leser bringen können, können Sie **die externen GPIO verwenden:**
 
 <figure><img src="../../../images/image (138).png" alt=""><figcaption></figcaption></figure>
 
-## References
+## Referenzen
 
 - [https://blog.flipperzero.one/taming-ibutton/](https://blog.flipperzero.one/taming-ibutton/)
 
 {{#include ../../../banners/hacktricks-training.md}}
-

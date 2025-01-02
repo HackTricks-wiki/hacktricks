@@ -1,41 +1,40 @@
-# FZ - Infrared
+# FZ - Infrarot
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Intro <a href="#ir-signal-receiver-in-flipper-zero" id="ir-signal-receiver-in-flipper-zero"></a>
+## Einleitung <a href="#ir-signal-receiver-in-flipper-zero" id="ir-signal-receiver-in-flipper-zero"></a>
 
-For more info about how Infrared works check:
+Für weitere Informationen darüber, wie Infrarot funktioniert, siehe:
 
 {{#ref}}
 ../infrared.md
 {{#endref}}
 
-## IR Signal Receiver in Flipper Zero <a href="#ir-signal-receiver-in-flipper-zero" id="ir-signal-receiver-in-flipper-zero"></a>
+## IR-Signalempfänger im Flipper Zero <a href="#ir-signal-receiver-in-flipper-zero" id="ir-signal-receiver-in-flipper-zero"></a>
 
-Flipper uses a digital IR signal receiver TSOP, which **allows intercepting signals from IR remotes**. There are some **smartphones** like Xiaomi, which also have an IR port, but keep in mind that **most of them can only transmit** signals and are **unable to receive** them.
+Flipper verwendet einen digitalen IR-Signalempfänger TSOP, der **das Abfangen von Signalen von IR-Fernbedienungen ermöglicht**. Es gibt einige **Smartphones** wie Xiaomi, die ebenfalls einen IR-Port haben, aber beachten Sie, dass **die meisten von ihnen nur senden** können und **nicht empfangen** können.
 
-The Flipper infrared **receiver is quite sensitive**. You can even **catch the signal** while remaining **somewhere in between** the remote and the TV. Pointing the remote directly at Flipper's IR port is unnecessary. This comes in handy when someone is switching channels while standing near the TV, and both you and Flipper are some distance away.
+Der Infrarot-**Empfänger von Flipper ist ziemlich empfindlich**. Sie können sogar **das Signal empfangen**, während Sie **irgendwo dazwischen** der Fernbedienung und dem Fernseher stehen. Es ist nicht notwendig, die Fernbedienung direkt auf den IR-Port von Flipper zu richten. Dies ist nützlich, wenn jemand die Kanäle wechselt, während er in der Nähe des Fernsehers steht, und sowohl Sie als auch Flipper sich in einiger Entfernung befinden.
 
-As the **decoding of the infrared** signal happens on the **software** side, Flipper Zero potentially supports the **reception and transmission of any IR remote codes**. In the case of **unknown** protocols which could not be recognized - it **records and plays back** the raw signal exactly as received.
+Da die **Dekodierung des Infrarotsignals** auf der **Software**-Seite erfolgt, unterstützt Flipper Zero potenziell die **Empfang und Übertragung von beliebigen IR-Fernbedienungscodes**. Im Falle von **unbekannten** Protokollen, die nicht erkannt werden konnten, **zeichnet es das rohe Signal genau so auf, wie es empfangen wurde, und spielt es ab**.
 
-## Actions
+## Aktionen
 
-### Universal Remotes
+### Universelle Fernbedienungen
 
-Flipper Zero can be used as a **universal remote to control any TV, air conditioner, or media center**. In this mode, Flipper **bruteforces** all **known codes** of all supported manufacturers **according to the dictionary from the SD card**. You don't need to choose a particular remote to turn off a restaurant TV.
+Flipper Zero kann als **universelle Fernbedienung verwendet werden, um jeden Fernseher, Klimaanlage oder Mediacenter zu steuern**. In diesem Modus **bruteforced** Flipper alle **bekannten Codes** aller unterstützten Hersteller **laut dem Wörterbuch von der SD-Karte**. Sie müssen keine bestimmte Fernbedienung auswählen, um einen Restaurantfernseher auszuschalten.
 
-It is enough to press the power button in the Universal Remote mode, and Flipper will **sequentially send "Power Off"** commands of all the TVs it knows: Sony, Samsung, Panasonic... and so on. When the TV receives its signal, it will react and turn off.
+Es reicht aus, die Einschalttaste im Modus Universelle Fernbedienung zu drücken, und Flipper wird **nacheinander "Power Off"**-Befehle aller Fernseher senden, die er kennt: Sony, Samsung, Panasonic... und so weiter. Wenn der Fernseher sein Signal empfängt, wird er reagieren und sich ausschalten.
 
-Such brute-force takes time. The larger the dictionary, the longer it will take to finish. It is impossible to find out which signal exactly the TV recognized since there is no feedback from the TV.
+Ein solches Brute-Force benötigt Zeit. Je größer das Wörterbuch, desto länger dauert es, bis es abgeschlossen ist. Es ist unmöglich herauszufinden, welches Signal der Fernseher genau erkannt hat, da es kein Feedback vom Fernseher gibt.
 
-### Learn New Remote
+### Neue Fernbedienung lernen
 
-It's possible to **capture an infrared signal** with Flipper Zero. If it **finds the signal in the database** Flipper will automatically **know which device this is** and will let you interact with it.\
-If it doesn't, Flipper can **store** the **signal** and will allow you to **replay it**.
+Es ist möglich, ein **Infrarotsignal** mit Flipper Zero **einzufangen**. Wenn es **das Signal in der Datenbank findet**, wird Flipper automatisch **wissen, welches Gerät das ist** und Ihnen erlauben, damit zu interagieren.\
+Wenn nicht, kann Flipper das **Signal speichern** und Ihnen erlauben, es **wiederzugeben**.
 
-## References
+## Referenzen
 
 - [https://blog.flipperzero.one/infrared/](https://blog.flipperzero.one/infrared/)
 
 {{#include ../../../banners/hacktricks-training.md}}
-

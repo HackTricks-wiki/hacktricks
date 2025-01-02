@@ -4,102 +4,101 @@
 
 ## Intro <a href="#kfpn7" id="kfpn7"></a>
 
-Flipper Zero can **receive and transmit radio frequencies in the range of 300-928 MHz** with its built-in module, which can read, save, and emulate remote controls. These controls are used for interaction with gates, barriers, radio locks, remote control switches, wireless doorbells, smart lights, and more. Flipper Zero can help you to learn if your security is compromised.
+Flipper Zero kann **Funkfrequenzen im Bereich von 300-928 MHz empfangen und übertragen** mit seinem integrierten Modul, das Fernbedienungen lesen, speichern und emulieren kann. Diese Steuerungen werden zur Interaktion mit Toren, Barrieren, Funk-Schlössern, Fernbedienungsschaltern, drahtlosen Türklingeln, smarten Lichtern und mehr verwendet. Flipper Zero kann Ihnen helfen zu lernen, ob Ihre Sicherheit gefährdet ist.
 
 <figure><img src="../../../images/image (714).png" alt=""><figcaption></figcaption></figure>
 
-## Sub-GHz hardware <a href="#kfpn7" id="kfpn7"></a>
+## Sub-GHz Hardware <a href="#kfpn7" id="kfpn7"></a>
 
-Flipper Zero has a built-in sub-1 GHz module based on a [﻿](https://www.st.com/en/nfc/st25r3916.html#overview)﻿[CC1101 chip](https://www.ti.com/lit/ds/symlink/cc1101.pdf) and a radio antenna (the maximum range is 50 meters). Both the CC1101 chip and the antenna are designed to operate at frequencies in the 300-348 MHz, 387-464 MHz, and 779-928 MHz bands.
+Flipper Zero verfügt über ein integriertes Sub-1 GHz Modul, das auf einem [﻿](https://www.st.com/en/nfc/st25r3916.html#overview)﻿[CC1101 Chip](https://www.ti.com/lit/ds/symlink/cc1101.pdf) basiert und eine Funkantenne hat (die maximale Reichweite beträgt 50 Meter). Sowohl der CC1101 Chip als auch die Antenne sind dafür ausgelegt, bei Frequenzen in den Bändern 300-348 MHz, 387-464 MHz und 779-928 MHz zu arbeiten.
 
 <figure><img src="../../../images/image (923).png" alt=""><figcaption></figcaption></figure>
 
-## Actions
+## Aktionen
 
-### Frequency Analyser
-
-> [!NOTE]
-> How to find which frequency is the remote using
-
-When analysing, Flipper Zero is scanning signals strength (RSSI) at all the frequencies available in frequency configuration. Flipper Zero displays the frequency with the highest RSSI value, with signal strength higher than -90 [dBm](https://en.wikipedia.org/wiki/DBm).
-
-To determine the remote's frequency, do the following:
-
-1. Place the remote control very close to the left of Flipper Zero.
-2. Go to **Main Menu** **→ Sub-GHz**.
-3. Select **Frequency Analyzer**, then press and hold the button on the remote control you want to analyze.
-4. Review the frequency value on the screen.
-
-### Read
+### Frequenzanalysator
 
 > [!NOTE]
-> Find info about the frequency used (also another way to find which frequency is used)
+> Wie man herausfindet, welche Frequenz die Fernbedienung verwendet
 
-The **Read** option **listens on the configured frequency** on the indicated modulation: 433.92 AM by default. If **something is found** when reading, **info is given** in the screen. This info could be use to replicate the signal in the future.
+Beim Analysieren scannt Flipper Zero die Signalstärke (RSSI) an allen in der Frequenzkonfiguration verfügbaren Frequenzen. Flipper Zero zeigt die Frequenz mit dem höchsten RSSI-Wert an, mit einer Signalstärke höher als -90 [dBm](https://en.wikipedia.org/wiki/DBm).
 
-While Read is in use, it's possible to press the **left button** and **configure it**.\
-At this moment it has **4 modulations** (AM270, AM650, FM328 and FM476), and **several relevant frequencies** stored:
+Um die Frequenz der Fernbedienung zu bestimmen, gehen Sie wie folgt vor:
+
+1. Platzieren Sie die Fernbedienung sehr nah links von Flipper Zero.
+2. Gehen Sie zu **Hauptmenü** **→ Sub-GHz**.
+3. Wählen Sie **Frequenzanalysator**, und drücken und halten Sie die Taste auf der Fernbedienung, die Sie analysieren möchten.
+4. Überprüfen Sie den Frequenzwert auf dem Bildschirm.
+
+### Lesen
+
+> [!NOTE]
+> Informationen über die verwendete Frequenz finden (auch eine andere Möglichkeit, um herauszufinden, welche Frequenz verwendet wird)
+
+Die **Lesen**-Option **lauscht auf der konfigurierten Frequenz** bei der angegebenen Modulation: standardmäßig 433,92 AM. Wenn **etwas gefunden wird**, während gelesen wird, **werden Informationen auf dem Bildschirm angezeigt**. Diese Informationen können verwendet werden, um das Signal in der Zukunft zu replizieren.
+
+Während Lesen verwendet wird, ist es möglich, die **linke Taste** zu drücken und **es zu konfigurieren**.\
+Im Moment hat es **4 Modulationen** (AM270, AM650, FM328 und FM476) und **mehrere relevante Frequenzen** gespeichert:
 
 <figure><img src="../../../images/image (947).png" alt=""><figcaption></figcaption></figure>
 
-You can set **any that interests you**, however, if you are **not sure which frequency** could be the one used by the remote you have, **set Hopping to ON** (Off by default), and press the button several times until Flipper captures it and give you the info you need to set the frequency.
+Sie können **jede, die Sie interessiert**, einstellen, jedoch, wenn Sie **nicht sicher sind, welche Frequenz** die von Ihrer Fernbedienung verwendete sein könnte, **stellen Sie Hopping auf EIN** (standardmäßig AUS) und drücken Sie die Taste mehrmals, bis Flipper sie erfasst und Ihnen die Informationen gibt, die Sie benötigen, um die Frequenz einzustellen.
 
 > [!CAUTION]
-> Switching between frequencies takes some time, therefore signals transmitted at the time of switching can be missed. For better signal reception, set a fixed frequency determined by Frequency Analyzer.
+> Der Wechsel zwischen Frequenzen benötigt etwas Zeit, daher können Signale, die zum Zeitpunkt des Wechsels übertragen werden, verpasst werden. Für eine bessere Signalempfang stellen Sie eine feste Frequenz ein, die vom Frequenzanalysator bestimmt wird.
 
-### **Read Raw**
+### **Raw Lesen**
 
 > [!NOTE]
-> Steal (and replay) a signal in the configured frequency
+> Ein Signal in der konfigurierten Frequenz stehlen (und wiederholen)
 
-The **Read Raw** option **records signals** send in the listening frequency. This can be used to **steal** a signal and **repeat** it.
+Die **Raw Lesen**-Option **zeichnet Signale** auf, die in der Lauscherfrequenz gesendet werden. Dies kann verwendet werden, um ein Signal zu **stehlen** und es **zu wiederholen**.
 
-By default **Read Raw is also in 433.92 in AM650**, but if with the Read option you found that the signal that interest you is in a **different frequency/modulation, you can also modify that** pressing left (while inside the Read Raw option).
+Standardmäßig ist **Raw Lesen auch in 433,92 in AM650**, aber wenn Sie mit der Lesen-Option festgestellt haben, dass das Signal, das Sie interessiert, in einer **anderen Frequenz/Modulation ist, können Sie das auch** ändern, indem Sie links drücken (während Sie sich in der Raw Lesen-Option befinden).
 
 ### Brute-Force
 
-If you know the protocol used for example by the garage door it's possible to g**enerate all the codes and send them with the Flipper Zero.** This is an example that support general common types of garages: [**https://github.com/tobiabocchi/flipperzero-bruteforce**](https://github.com/tobiabocchi/flipperzero-bruteforce)
+Wenn Sie das Protokoll kennen, das beispielsweise vom Garagentor verwendet wird, ist es möglich, **alle Codes zu generieren und sie mit dem Flipper Zero zu senden.** Dies ist ein Beispiel, das allgemeine gängige Arten von Garagen unterstützt: [**https://github.com/tobiabocchi/flipperzero-bruteforce**](https://github.com/tobiabocchi/flipperzero-bruteforce)
 
-### Add Manually
+### Manuell hinzufügen
 
 > [!NOTE]
-> Add signals from a configured list of protocols
+> Signale aus einer konfigurierten Liste von Protokollen hinzufügen
 
-#### List of [supported protocols](https://docs.flipperzero.one/sub-ghz/add-new-remote) <a href="#id-3iglu" id="id-3iglu"></a>
+#### Liste der [unterstützten Protokolle](https://docs.flipperzero.one/sub-ghz/add-new-remote) <a href="#id-3iglu" id="id-3iglu"></a>
 
-| Princeton_433 (works with the majority of static code systems) | 433.92 | Static  |
-| -------------------------------------------------------------- | ------ | ------- |
-| Nice Flo 12bit_433                                             | 433.92 | Static  |
-| Nice Flo 24bit_433                                             | 433.92 | Static  |
-| CAME 12bit_433                                                 | 433.92 | Static  |
-| CAME 24bit_433                                                 | 433.92 | Static  |
-| Linear_300                                                     | 300.00 | Static  |
-| CAME TWEE                                                      | 433.92 | Static  |
-| Gate TX_433                                                    | 433.92 | Static  |
-| DoorHan_315                                                    | 315.00 | Dynamic |
-| DoorHan_433                                                    | 433.92 | Dynamic |
-| LiftMaster_315                                                 | 315.00 | Dynamic |
-| LiftMaster_390                                                 | 390.00 | Dynamic |
-| Security+2.0_310                                               | 310.00 | Dynamic |
-| Security+2.0_315                                               | 315.00 | Dynamic |
-| Security+2.0_390                                               | 390.00 | Dynamic |
+| Princeton_433 (funktioniert mit der Mehrheit der statischen Codesysteme) | 433.92 | Statisch  |
+| ------------------------------------------------------------------------- | ------ | -------- |
+| Nice Flo 12bit_433                                                       | 433.92 | Statisch  |
+| Nice Flo 24bit_433                                                       | 433.92 | Statisch  |
+| CAME 12bit_433                                                           | 433.92 | Statisch  |
+| CAME 24bit_433                                                           | 433.92 | Statisch  |
+| Linear_300                                                               | 300.00 | Statisch  |
+| CAME TWEE                                                                | 433.92 | Statisch  |
+| Gate TX_433                                                              | 433.92 | Statisch  |
+| DoorHan_315                                                              | 315.00 | Dynamisch |
+| DoorHan_433                                                              | 433.92 | Dynamisch |
+| LiftMaster_315                                                           | 315.00 | Dynamisch |
+| LiftMaster_390                                                           | 390.00 | Dynamisch |
+| Security+2.0_310                                                         | 310.00 | Dynamisch |
+| Security+2.0_315                                                         | 315.00 | Dynamisch |
+| Security+2.0_390                                                         | 390.00 | Dynamisch |
 
-### Supported Sub-GHz vendors
+### Unterstützte Sub-GHz-Anbieter
 
-Check the list in [https://docs.flipperzero.one/sub-ghz/supported-vendors](https://docs.flipperzero.one/sub-ghz/supported-vendors)
+Überprüfen Sie die Liste in [https://docs.flipperzero.one/sub-ghz/supported-vendors](https://docs.flipperzero.one/sub-ghz/supported-vendors)
 
-### Supported Frequencies by region
+### Unterstützte Frequenzen nach Region
 
-Check the list in [https://docs.flipperzero.one/sub-ghz/frequencies](https://docs.flipperzero.one/sub-ghz/frequencies)
+Überprüfen Sie die Liste in [https://docs.flipperzero.one/sub-ghz/frequencies](https://docs.flipperzero.one/sub-ghz/frequencies)
 
 ### Test
 
 > [!NOTE]
-> Get dBms of the saved frequencies
+> Erhalten Sie dBms der gespeicherten Frequenzen
 
-## Reference
+## Referenz
 
 - [https://docs.flipperzero.one/sub-ghz](https://docs.flipperzero.one/sub-ghz)
 
 {{#include ../../../banners/hacktricks-training.md}}
-

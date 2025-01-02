@@ -1,57 +1,52 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-There are several blogs in the Internet which **highlight the dangers of leaving printers configured with LDAP with default/weak** logon credentials.\
-This is because an attacker could **trick the printer to authenticate against a rouge LDAP server** (typically a `nc -vv -l -p 444` is enough) and to capture the printer **credentials on clear-text**.
+Es gibt mehrere Blogs im Internet, die **die Gefahren hervorheben, Drucker mit LDAP mit Standard-/schwachen** Anmeldeinformationen konfiguriert zu lassen.\
+Das liegt daran, dass ein Angreifer **den Drucker dazu bringen könnte, sich gegen einen bösartigen LDAP-Server zu authentifizieren** (typischerweise reicht ein `nc -vv -l -p 444` aus) und die **Anmeldeinformationen des Druckers im Klartext** zu erfassen.
 
-Also, several printers will contains **logs with usernames** or could even be able to **download all usernames** from the Domain Controller.
+Außerdem enthalten mehrere Drucker **Protokolle mit Benutzernamen** oder könnten sogar in der Lage sein, **alle Benutzernamen** vom Domänencontroller herunterzuladen.
 
-All this **sensitive information** and the common **lack of security** makes printers very interesting for attackers.
+All diese **sensiblen Informationen** und der allgemeine **Mangel an Sicherheit** machen Drucker für Angreifer sehr interessant.
 
-Some blogs about the topic:
+Einige Blogs zu diesem Thema:
 
 - [https://www.ceos3c.com/hacking/obtaining-domain-credentials-printer-netcat/](https://www.ceos3c.com/hacking/obtaining-domain-credentials-printer-netcat/)
 - [https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)
 
-## Printer Configuration
+## Druckerkonfiguration
 
-- **Location**: The LDAP server list is found at: `Network > LDAP Setting > Setting Up LDAP`.
-- **Behavior**: The interface allows LDAP server modifications without re-entering credentials, aiming for user convenience but posing security risks.
-- **Exploit**: The exploit involves redirecting the LDAP server address to a controlled machine and leveraging the "Test Connection" feature to capture credentials.
+- **Standort**: Die LDAP-Serverliste befindet sich unter: `Netzwerk > LDAP-Einstellungen > LDAP einrichten`.
+- **Verhalten**: Die Schnittstelle ermöglicht LDAP-Serveränderungen, ohne Anmeldeinformationen erneut einzugeben, was die Benutzerfreundlichkeit erhöht, aber Sicherheitsrisiken birgt.
+- **Ausnutzung**: Die Ausnutzung besteht darin, die LDAP-Serveradresse auf eine kontrollierte Maschine umzuleiten und die Funktion "Verbindung testen" zu nutzen, um Anmeldeinformationen zu erfassen.
 
-## Capturing Credentials
+## Anmeldeinformationen erfassen
 
-**For more detailed steps, refer to the original [source](https://grimhacker.com/2018/03/09/just-a-printer/).**
+**Für detailliertere Schritte siehe die ursprüngliche [Quelle](https://grimhacker.com/2018/03/09/just-a-printer/).**
 
-### Method 1: Netcat Listener
+### Methode 1: Netcat Listener
 
-A simple netcat listener might suffice:
-
+Ein einfacher Netcat-Listener könnte ausreichen:
 ```bash
 sudo nc -k -v -l -p 386
 ```
+Allerdings variiert der Erfolg dieser Methode.
 
-However, this method's success varies.
+### Methode 2: Vollständiger LDAP-Server mit Slapd
 
-### Method 2: Full LDAP Server with Slapd
+Ein zuverlässigerer Ansatz besteht darin, einen vollständigen LDAP-Server einzurichten, da der Drucker eine Nullbindung gefolgt von einer Abfrage durchführt, bevor er versucht, die Anmeldeinformationen zu binden.
 
-A more reliable approach involves setting up a full LDAP server because the printer performs a null bind followed by a query before attempting credential binding.
-
-1. **LDAP Server Setup**: The guide follows steps from [this source](https://www.server-world.info/en/note?os=Fedora_26&p=openldap).
-2. **Key Steps**:
-   - Install OpenLDAP.
-   - Configure admin password.
-   - Import basic schemas.
-   - Set domain name on LDAP DB.
-   - Configure LDAP TLS.
-3. **LDAP Service Execution**: Once set up, the LDAP service can be run using:
-
+1. **LDAP-Server-Einrichtung**: Der Leitfaden folgt den Schritten aus [dieser Quelle](https://www.server-world.info/en/note?os=Fedora_26&p=openldap).
+2. **Wichtige Schritte**:
+- OpenLDAP installieren.
+- Admin-Passwort konfigurieren.
+- Grundlegende Schemata importieren.
+- Domainnamen in der LDAP-Datenbank festlegen.
+- LDAP TLS konfigurieren.
+3. **Ausführung des LDAP-Dienstes**: Nach der Einrichtung kann der LDAP-Dienst mit folgendem Befehl ausgeführt werden:
 ```bash
 slapd -d 2
 ```
-
-## References
+## Referenzen
 
 - [https://grimhacker.com/2018/03/09/just-a-printer/](https://grimhacker.com/2018/03/09/just-a-printer/)
 
 {{#include ../../banners/hacktricks-training.md}}
-
