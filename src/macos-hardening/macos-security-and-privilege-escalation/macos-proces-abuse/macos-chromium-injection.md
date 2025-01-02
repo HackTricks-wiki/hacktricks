@@ -2,33 +2,31 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Informazioni di base
 
-Chromium-based browsers like Google Chrome, Microsoft Edge, Brave, and others. These browsers are built on the Chromium open-source project, which means they share a common base and, therefore, have similar functionalities and developer options.
+I browser basati su Chromium come Google Chrome, Microsoft Edge, Brave e altri. Questi browser sono costruiti sul progetto open-source Chromium, il che significa che condividono una base comune e, quindi, hanno funzionalità e opzioni per sviluppatori simili.
 
-#### `--load-extension` Flag
+#### Flag `--load-extension`
 
-The `--load-extension` flag is used when starting a Chromium-based browser from the command line or a script. This flag allows to **automatically load one or more extensions** into the browser upon startup.
+Il flag `--load-extension` viene utilizzato quando si avvia un browser basato su Chromium dalla riga di comando o da uno script. Questo flag consente di **caricare automaticamente una o più estensioni** nel browser all'avvio.
 
-#### `--use-fake-ui-for-media-stream` Flag
+#### Flag `--use-fake-ui-for-media-stream`
 
-The `--use-fake-ui-for-media-stream` flag is another command-line option that can be used to start Chromium-based browsers. This flag is designed to **bypass the normal user prompts that ask for permission to access media streams from the camera and microphone**. When this flag is used, the browser automatically grants permission to any website or application that requests access to the camera or microphone.
+Il flag `--use-fake-ui-for-media-stream` è un'altra opzione da riga di comando che può essere utilizzata per avviare i browser basati su Chromium. Questo flag è progettato per **bypassare i normali avvisi per l'utente che chiedono il permesso di accedere ai flussi multimediali dalla fotocamera e dal microfono**. Quando questo flag è utilizzato, il browser concede automaticamente il permesso a qualsiasi sito web o applicazione che richiede l'accesso alla fotocamera o al microfono.
 
-### Tools
+### Strumenti
 
 - [https://github.com/breakpointHQ/snoop](https://github.com/breakpointHQ/snoop)
 - [https://github.com/breakpointHQ/VOODOO](https://github.com/breakpointHQ/VOODOO)
 
-### Example
-
+### Esempio
 ```bash
 # Intercept traffic
 voodoo intercept -b chrome
 ```
+Trova ulteriori esempi nei link degli strumenti
 
-Find more examples in the tools links
-
-## References
+## Riferimenti
 
 - [https://twitter.com/RonMasas/status/1758106347222995007](https://twitter.com/RonMasas/status/1758106347222995007)
 

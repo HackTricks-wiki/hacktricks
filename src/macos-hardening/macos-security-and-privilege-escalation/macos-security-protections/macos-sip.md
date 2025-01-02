@@ -2,226 +2,206 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## **Basic Information**
+## **Informazioni di Base**
 
-**System Integrity Protection (SIP)** in macOS is a mechanism designed to prevent even the most privileged users from making unauthorized changes to key system folders. This feature plays a crucial role in maintaining the integrity of the system by restricting actions like adding, modifying, or deleting files in protected areas. The primary folders shielded by SIP include:
+**System Integrity Protection (SIP)** in macOS è un meccanismo progettato per impedire anche agli utenti più privilegiati di apportare modifiche non autorizzate a cartelle di sistema chiave. Questa funzione gioca un ruolo cruciale nel mantenere l'integrità del sistema limitando azioni come l'aggiunta, la modifica o la cancellazione di file in aree protette. Le cartelle principali protette da SIP includono:
 
 - **/System**
 - **/bin**
 - **/sbin**
 - **/usr**
 
-The rules that govern SIP's behavior are defined in the configuration file located at **`/System/Library/Sandbox/rootless.conf`**. Within this file, paths that are prefixed with an asterisk (\*) are denoted as exceptions to the otherwise stringent SIP restrictions.
+Le regole che governano il comportamento di SIP sono definite nel file di configurazione situato in **`/System/Library/Sandbox/rootless.conf`**. All'interno di questo file, i percorsi che sono preceduti da un asterisco (\*) sono indicati come eccezioni alle altrimenti rigorose restrizioni di SIP.
 
-Consider the example below:
-
+Considera l'esempio qui sotto:
 ```javascript
 /usr
 * /usr/libexec/cups
 * /usr/local
 * /usr/share/man
 ```
+Questo frammento implica che mentre SIP generalmente protegge la directory **`/usr`**, ci sono sottodirectory specifiche (**`/usr/libexec/cups`**, **`/usr/local`** e **`/usr/share/man`**) dove le modifiche sono consentite, come indicato dall'asterisco (\*) che precede i loro percorsi.
 
-This snippet implies that while SIP generally secures the **`/usr`** directory, there are specific subdirectories (`/usr/libexec/cups`, `/usr/local`, and `/usr/share/man`) where modifications are permissible, as indicated by the asterisk (\*) preceding their paths.
-
-To verify whether a directory or file is protected by SIP, you can use the **`ls -lOd`** command to check for the presence of the **`restricted`** or **`sunlnk`** flag. For example:
-
+Per verificare se una directory o un file è protetto da SIP, puoi utilizzare il comando **`ls -lOd`** per controllare la presenza del flag **`restricted`** o **`sunlnk`**. Ad esempio:
 ```bash
 ls -lOd /usr/libexec/cups
 drwxr-xr-x  11 root  wheel  sunlnk 352 May 13 00:29 /usr/libexec/cups
 ```
+In questo caso, il flag **`sunlnk`** indica che la directory `/usr/libexec/cups` stessa **non può essere eliminata**, anche se i file al suo interno possono essere creati, modificati o eliminati.
 
-In this case, the **`sunlnk`** flag signifies that the `/usr/libexec/cups` directory itself **cannot be deleted**, though files within it can be created, modified, or deleted.
-
-On the other hand:
-
+D'altra parte:
 ```bash
 ls -lOd /usr/libexec
 drwxr-xr-x  338 root  wheel  restricted 10816 May 13 00:29 /usr/libexec
 ```
+Qui, il flag **`restricted`** indica che la directory `/usr/libexec` è protetta da SIP. In una directory protetta da SIP, i file non possono essere creati, modificati o eliminati.
 
-Here, the **`restricted`** flag indicates that the `/usr/libexec` directory is protected by SIP. In a SIP-protected directory, files cannot be created, modified, or deleted.
-
-Moreover, if a file contains the attribute **`com.apple.rootless`** extended **attribute**, that file will also be **protected by SIP**.
+Inoltre, se un file contiene l'attributo **`com.apple.rootless`** come **attributo** esteso, quel file sarà anche **protetto da SIP**.
 
 > [!TIP]
-> Note that **Sandbox** hook **`hook_vnode_check_setextattr`** prevents any attempt to modify the extended attribute **`com.apple.rootless`.**
+> Nota che il hook **Sandbox** **`hook_vnode_check_setextattr`** impedisce qualsiasi tentativo di modificare l'attributo esteso **`com.apple.rootless`.**
 
-**SIP also limits other root actions** like:
+**SIP limita anche altre azioni di root** come:
 
-- Loading untrusted kernel extensions
-- Getting task-ports for Apple-signed processes
-- Modifying NVRAM variables
-- Allowing kernel debugging
+- Caricamento di estensioni del kernel non affidabili
+- Ottenere task-ports per processi firmati da Apple
+- Modificare le variabili NVRAM
+- Consentire il debug del kernel
 
-Options are maintained in nvram variable as a bitflag (`csr-active-config` on Intel and `lp-sip0` is read from the booted Device Tree for ARM). You can find the flags in the XNU source code in `csr.sh`:
+Le opzioni sono mantenute nella variabile nvram come un bitflag (`csr-active-config` su Intel e `lp-sip0` è letto dall'albero dei dispositivi avviato per ARM). Puoi trovare i flag nel codice sorgente di XNU in `csr.sh`:
 
 <figure><img src="../../../images/image (1192).png" alt=""><figcaption></figcaption></figure>
 
-### SIP Status
+### Stato di SIP
 
-You can check if SIP is enabled on your system with the following command:
-
+Puoi controllare se SIP è abilitato sul tuo sistema con il seguente comando:
 ```bash
 csrutil status
 ```
-
-If you need to disable SIP, you must restart your computer in recovery mode (by pressing Command+R during startup), then execute the following command:
-
+Se è necessario disabilitare SIP, è necessario riavviare il computer in modalità di recupero (premendo Command+R durante l'avvio), quindi eseguire il seguente comando:
 ```bash
 csrutil disable
 ```
-
-If you wish to keep SIP enabled but remove debugging protections, you can do so with:
-
+Se desideri mantenere SIP abilitato ma rimuovere le protezioni di debug, puoi farlo con:
 ```bash
 csrutil enable --without debug
 ```
+### Altre Restrizioni
 
-### Other Restrictions
+- **Disabilita il caricamento di estensioni del kernel non firmate** (kexts), garantendo che solo le estensioni verificate interagiscano con il kernel di sistema.
+- **Previene il debugging** dei processi di sistema macOS, proteggendo i componenti core del sistema da accessi e modifiche non autorizzate.
+- **Inibisce strumenti** come dtrace dall'ispezionare i processi di sistema, proteggendo ulteriormente l'integrità del funzionamento del sistema.
 
-- **Disallows loading of unsigned kernel extensions** (kexts), ensuring only verified extensions interact with the system kernel.
-- **Prevents the debugging** of macOS system processes, safeguarding core system components from unauthorized access and modification.
-- **Inhibits tools** like dtrace from inspecting system processes, further protecting the integrity of the system's operation.
+[**Scopri di più sulle informazioni SIP in questo talk**](https://www.slideshare.net/i0n1c/syscan360-stefan-esser-os-x-el-capitan-sinking-the-ship)**.**
 
-[**Learn more about SIP info in this talk**](https://www.slideshare.net/i0n1c/syscan360-stefan-esser-os-x-el-capitan-sinking-the-ship)**.**
+### **Autorizzazioni relative a SIP**
 
-### **SIP related Entitlements**
-
-- `com.apple.rootless.xpc.bootstrap`: Control launchd
-- `com.apple.rootless.install[.heritable]`: Access file system
+- `com.apple.rootless.xpc.bootstrap`: Controlla launchd
+- `com.apple.rootless.install[.heritable]`: Accesso al file system
 - `com.apple.rootless.kext-management`: `kext_request`
-- `com.apple.rootless.datavault.controller`: Manage UF_DATAVAULT
-- `com.apple.rootless.xpc.bootstrap`: XPC setup capabilities
-- `com.apple.rootless.xpc.effective-root`: Root via launchd XPC
-- `com.apple.rootless.restricted-block-devices`: Access to raw block devices
-- `com.apple.rootless.internal.installer-equivalent`: Unfettered filesystem access
-- `com.apple.rootless.restricted-nvram-variables[.heritable]`: Full access to NVRAM
-- `com.apple.rootless.storage.label`: Modify files restricted by com.apple.rootless xattr with the corresponding label
-- `com.apple.rootless.volume.VM.label`: Maintain VM swap on volume
+- `com.apple.rootless.datavault.controller`: Gestisci UF_DATAVAULT
+- `com.apple.rootless.xpc.bootstrap`: Capacità di configurazione XPC
+- `com.apple.rootless.xpc.effective-root`: Root tramite launchd XPC
+- `com.apple.rootless.restricted-block-devices`: Accesso a dispositivi a blocchi raw
+- `com.apple.rootless.internal.installer-equivalent`: Accesso illimitato al file system
+- `com.apple.rootless.restricted-nvram-variables[.heritable]`: Accesso completo a NVRAM
+- `com.apple.rootless.storage.label`: Modifica file limitati da com.apple.rootless xattr con l'etichetta corrispondente
+- `com.apple.rootless.volume.VM.label`: Mantieni lo swap VM sul volume
 
-## SIP Bypasses
+## Bypass di SIP
 
-Bypassing SIP enables an attacker to:
+Il bypass di SIP consente a un attaccante di:
 
-- **Access User Data**: Read sensitive user data like mail, messages, and Safari history from all user accounts.
-- **TCC Bypass**: Directly manipulate the TCC (Transparency, Consent, and Control) database to grant unauthorized access to the webcam, microphone, and other resources.
-- **Establish Persistence**: Place malware in SIP-protected locations, making it resistant to removal, even by root privileges. This also includes the potential to tamper with the Malware Removal Tool (MRT).
-- **Load Kernel Extensions**: Although there are additional safeguards, bypassing SIP simplifies the process of loading unsigned kernel extensions.
+- **Accedere ai dati dell'utente**: Leggere dati sensibili dell'utente come email, messaggi e cronologia di Safari da tutti gli account utente.
+- **Bypass TCC**: Manipolare direttamente il database TCC (Trasparenza, Consenso e Controllo) per concedere accesso non autorizzato alla webcam, al microfono e ad altre risorse.
+- **Stabilire persistenza**: Posizionare malware in posizioni protette da SIP, rendendolo resistente alla rimozione, anche da privilegi di root. Questo include anche la possibilità di manomettere lo strumento di rimozione malware (MRT).
+- **Caricare estensioni del kernel**: Sebbene ci siano ulteriori protezioni, bypassare SIP semplifica il processo di caricamento di estensioni del kernel non firmate.
 
-### Installer Packages
+### Pacchetti di Installazione
 
-**Installer packages signed with Apple's certificate** can bypass its protections. This means that even packages signed by standard developers will be blocked if they attempt to modify SIP-protected directories.
+**I pacchetti di installazione firmati con il certificato di Apple** possono bypassare le sue protezioni. Ciò significa che anche i pacchetti firmati da sviluppatori standard verranno bloccati se tentano di modificare directory protette da SIP.
 
-### Inexistent SIP file
+### File SIP inesistente
 
-One potential loophole is that if a file is specified in **`rootless.conf` but does not currently exist**, it can be created. Malware could exploit this to **establish persistence** on the system. For example, a malicious program could create a .plist file in `/System/Library/LaunchDaemons` if it is listed in `rootless.conf` but not present.
+Una potenziale falla è che se un file è specificato in **`rootless.conf` ma attualmente non esiste**, può essere creato. Il malware potrebbe sfruttare questo per **stabilire persistenza** sul sistema. Ad esempio, un programma malevolo potrebbe creare un file .plist in `/System/Library/LaunchDaemons` se è elencato in `rootless.conf` ma non presente.
 
 ### com.apple.rootless.install.heritable
 
 > [!CAUTION]
-> The entitlement **`com.apple.rootless.install.heritable`** allows to bypass SIP
+> L'autorizzazione **`com.apple.rootless.install.heritable`** consente di bypassare SIP
 
 #### [CVE-2019-8561](https://objective-see.org/blog/blog_0x42.html) <a href="#cve" id="cve"></a>
 
-It was discovered that it was possible to **swap the installer package after the system verified its code** signature and then, the system would install the malicious package instead of the original. As these actions were performed by **`system_installd`**, it would allow to bypass SIP.
+È stato scoperto che era possibile **scambiare il pacchetto di installazione dopo che il sistema aveva verificato la sua firma** e poi, il sistema avrebbe installato il pacchetto malevolo invece di quello originale. Poiché queste azioni venivano eseguite da **`system_installd`**, ciò avrebbe consentito di bypassare SIP.
 
 #### [CVE-2020–9854](https://objective-see.org/blog/blog_0x4D.html) <a href="#cve-unauthd-chain" id="cve-unauthd-chain"></a>
 
-If a package was installed from a mounted image or external drive the **installer** would **execute** the binary from **that file system** (instead from a SIP protected location), making **`system_installd`** execute an arbitrary binary.
+Se un pacchetto veniva installato da un'immagine montata o da un'unità esterna, l'**installer** avrebbe **eseguito** il binario da **quella file system** (invece che da una posizione protetta da SIP), facendo eseguire a **`system_installd`** un binario arbitrario.
 
 #### CVE-2021-30892 - Shrootless
 
-[**Researchers from this blog post**](https://www.microsoft.com/en-us/security/blog/2021/10/28/microsoft-finds-new-macos-vulnerability-shrootless-that-could-bypass-system-integrity-protection/) discovered a vulnerability in macOS's System Integrity Protection (SIP) mechanism, dubbed the 'Shrootless' vulnerability. This vulnerability centers around the **`system_installd`** daemon, which has an entitlement, **`com.apple.rootless.install.heritable`**, that allows any of its child processes to bypass SIP's file system restrictions.
+[**I ricercatori di questo post del blog**](https://www.microsoft.com/en-us/security/blog/2021/10/28/microsoft-finds-new-macos-vulnerability-shrootless-that-could-bypass-system-integrity-protection/) hanno scoperto una vulnerabilità nel meccanismo di Protezione dell'Integrità di Sistema (SIP) di macOS, soprannominata vulnerabilità 'Shrootless'. Questa vulnerabilità si concentra sul demone **`system_installd`**, che ha un'autorizzazione, **`com.apple.rootless.install.heritable`**, che consente a qualsiasi dei suoi processi figli di bypassare le restrizioni del file system di SIP.
 
-**`system_installd`** daemon will install packages that have been signed by **Apple**.
+Il demone **`system_installd`** installerà pacchetti che sono stati firmati da **Apple**.
 
-Researchers found that during the installation of an Apple-signed package (.pkg file), **`system_installd`** **runs** any **post-install** scripts included in the package. These scripts are executed by the default shell, **`zsh`**, which automatically **runs** commands from the **`/etc/zshenv`** file, if it exists, even in non-interactive mode. This behaviour could be exploited by attackers: by creating a malicious `/etc/zshenv` file and waiting for **`system_installd` to invoke `zsh`**, they could perform arbitrary operations on the device.
+I ricercatori hanno scoperto che durante l'installazione di un pacchetto firmato da Apple (.pkg), **`system_installd`** **esegue** qualsiasi **script post-installazione** incluso nel pacchetto. Questi script vengono eseguiti dalla shell predefinita, **`zsh`**, che esegue automaticamente **comandi dal file** **`/etc/zshenv`**, se esiste, anche in modalità non interattiva. Questo comportamento potrebbe essere sfruttato dagli attaccanti: creando un file `/etc/zshenv` malevolo e aspettando che **`system_installd` invochi `zsh`**, potrebbero eseguire operazioni arbitrarie sul dispositivo.
 
-Moreover, it was discovered that **`/etc/zshenv` could be used as a general attack technique**, not just for a SIP bypass. Each user profile has a `~/.zshenv` file, which behaves the same way as `/etc/zshenv` but doesn't require root permissions. This file could be used as a persistence mechanism, triggering every time `zsh` starts, or as an elevation of privilege mechanism. If an admin user elevates to root using `sudo -s` or `sudo <command>`, the `~/.zshenv` file would be triggered, effectively elevating to root.
+Inoltre, è stato scoperto che **`/etc/zshenv` potrebbe essere utilizzato come una tecnica di attacco generale**, non solo per un bypass di SIP. Ogni profilo utente ha un file `~/.zshenv`, che si comporta allo stesso modo di `/etc/zshenv` ma non richiede permessi di root. Questo file potrebbe essere utilizzato come meccanismo di persistenza, attivandosi ogni volta che `zsh` si avvia, o come meccanismo di elevazione dei privilegi. Se un utente admin si eleva a root usando `sudo -s` o `sudo <comando>`, il file `~/.zshenv` verrebbe attivato, elevando effettivamente a root.
 
 #### [**CVE-2022-22583**](https://perception-point.io/blog/technical-analysis-cve-2022-22583/)
 
-In [**CVE-2022-22583**](https://perception-point.io/blog/technical-analysis-cve-2022-22583/) it was discovered that the same **`system_installd`** process could still be abused because it was putting the **post-install script inside a random named folder protected by SIP inside `/tmp`**. The thing is that **`/tmp` itself isn't protected by SIP**, so it was possible to **mount** a **virtual image on it**, then the **installer** would put in there the **post-install script**, **unmount** the virtual image, **recreate** all the **folders** and **add** the **post installation** script with the **payload** to execute.
+In [**CVE-2022-22583**](https://perception-point.io/blog/technical-analysis-cve-2022-22583/) è stato scoperto che lo stesso processo **`system_installd`** poteva ancora essere abusato perché stava mettendo lo **script post-installazione all'interno di una cartella con nome casuale protetta da SIP all'interno di `/tmp`**. Il fatto è che **`/tmp` stesso non è protetto da SIP**, quindi era possibile **montare** un **immagine virtuale su di esso**, poi l'**installer** avrebbe messo lì lo **script post-installazione**, **smontato** l'immagine virtuale, **ricreato** tutte le **cartelle** e **aggiunto** lo **script di post installazione** con il **payload** da eseguire.
 
 #### [fsck_cs utility](https://www.theregister.com/2016/03/30/apple_os_x_rootless/)
 
-A vulnerability was identified where **`fsck_cs`** was misled into corrupting a crucial file, due to its ability to follow **symbolic links**. Specifically, attackers crafted a link from _`/dev/diskX`_ to the file `/System/Library/Extensions/AppleKextExcludeList.kext/Contents/Info.plist`. Executing **`fsck_cs`** on _`/dev/diskX`_ led to the corruption of `Info.plist`. This file's integrity is vital for the operating system's SIP (System Integrity Protection), which controls the loading of kernel extensions. Once corrupted, SIP's ability to manage kernel exclusions is compromised.
+È stata identificata una vulnerabilità in cui **`fsck_cs`** è stato ingannato a corrompere un file cruciale, a causa della sua capacità di seguire **link simbolici**. In particolare, gli attaccanti hanno creato un link da _`/dev/diskX`_ al file `/System/Library/Extensions/AppleKextExcludeList.kext/Contents/Info.plist`. Eseguire **`fsck_cs`** su _`/dev/diskX`_ ha portato alla corruzione di `Info.plist`. L'integrità di questo file è vitale per la SIP (Protezione dell'Integrità di Sistema) del sistema operativo, che controlla il caricamento delle estensioni del kernel. Una volta corrotto, la capacità di SIP di gestire le esclusioni del kernel è compromessa.
 
-The commands to exploit this vulnerability are:
-
+I comandi per sfruttare questa vulnerabilità sono:
 ```bash
 ln -s /System/Library/Extensions/AppleKextExcludeList.kext/Contents/Info.plist /dev/diskX
 fsck_cs /dev/diskX 1>&-
 touch /Library/Extensions/
 reboot
 ```
+L'exploitation de cette vulnérabilité a de graves implications. Le fichier `Info.plist`, normalement responsable de la gestion des autorisations pour les extensions du noyau, devient inefficace. Cela inclut l'incapacité de mettre sur liste noire certaines extensions, telles que `AppleHWAccess.kext`. Par conséquent, avec le mécanisme de contrôle de SIP hors service, cette extension peut être chargée, accordant un accès en lecture et en écriture non autorisé à la RAM du système.
 
-The exploitation of this vulnerability has severe implications. The `Info.plist` file, normally responsible for managing permissions for kernel extensions, becomes ineffective. This includes the inability to blacklist certain extensions, such as `AppleHWAccess.kext`. Consequently, with the SIP's control mechanism out of order, this extension can be loaded, granting unauthorized read and write access to the system's RAM.
+#### [Montare su cartelle protette da SIP](https://www.slideshare.net/i0n1c/syscan360-stefan-esser-os-x-el-capitan-sinking-the-ship)
 
-#### [Mount over SIP protected folders](https://www.slideshare.net/i0n1c/syscan360-stefan-esser-os-x-el-capitan-sinking-the-ship)
-
-It was possible to mount a new file system over **SIP protected folders to bypass the protection**.
-
+È stato possibile montare un nuovo file system su **cartelle protette da SIP per bypassare la protezione**.
 ```bash
 mkdir evil
 # Add contento to the folder
 hdiutil create -srcfolder evil evil.dmg
 hdiutil attach -mountpoint /System/Library/Snadbox/ evil.dmg
 ```
-
 #### [Upgrader bypass (2016)](https://objective-see.org/blog/blog_0x14.html)
 
-The system is set to boot from an embedded installer disk image within the `Install macOS Sierra.app` to upgrade the OS, utilizing the `bless` utility. The command used is as follows:
-
+Il sistema è impostato per avviarsi da un'immagine disco di installazione incorporata all'interno di `Install macOS Sierra.app` per aggiornare il sistema operativo, utilizzando l'utilità `bless`. Il comando utilizzato è il seguente:
 ```bash
 /usr/sbin/bless -setBoot -folder /Volumes/Macintosh HD/macOS Install Data -bootefi /Volumes/Macintosh HD/macOS Install Data/boot.efi -options config="\macOS Install Data\com.apple.Boot" -label macOS Installer
 ```
+La sicurezza di questo processo può essere compromessa se un attaccante altera l'immagine di aggiornamento (`InstallESD.dmg`) prima dell'avvio. La strategia prevede la sostituzione di un loader dinamico (dyld) con una versione malevola (`libBaseIA.dylib`). Questa sostituzione porta all'esecuzione del codice dell'attaccante quando viene avviato l'installer.
 
-The security of this process can be compromised if an attacker alters the upgrade image (`InstallESD.dmg`) before booting. The strategy involves substituting a dynamic loader (dyld) with a malicious version (`libBaseIA.dylib`). This replacement results in the execution of the attacker's code when the installer is initiated.
+Il codice dell'attaccante guadagna il controllo durante il processo di aggiornamento, sfruttando la fiducia del sistema nell'installer. L'attacco procede alterando l'immagine `InstallESD.dmg` tramite method swizzling, mirando in particolare al metodo `extractBootBits`. Questo consente l'iniezione di codice malevolo prima che l'immagine del disco venga utilizzata.
 
-The attacker's code gains control during the upgrade process, exploiting the system's trust in the installer. The attack proceeds by altering the `InstallESD.dmg` image via method swizzling, particularly targeting the `extractBootBits` method. This allows the injection of malicious code before the disk image is employed.
-
-Moreover, within the `InstallESD.dmg`, there's a `BaseSystem.dmg`, which serves as the upgrade code's root file system. Injecting a dynamic library into this allows the malicious code to operate within a process capable of altering OS-level files, significantly increasing the potential for system compromise.
+Inoltre, all'interno di `InstallESD.dmg`, c'è un `BaseSystem.dmg`, che funge da file system radice del codice di aggiornamento. Iniettare una libreria dinamica in questo consente al codice malevolo di operare all'interno di un processo in grado di alterare file a livello di OS, aumentando significativamente il potenziale di compromissione del sistema.
 
 #### [systemmigrationd (2023)](https://www.youtube.com/watch?v=zxZesAN-TEk)
 
-In this talk from [**DEF CON 31**](https://www.youtube.com/watch?v=zxZesAN-TEk), it's shown how **`systemmigrationd`** (which can bypass SIP) executes a **bash** and a **perl** script, which can be abused via env variables **`BASH_ENV`** and **`PERL5OPT`**.
+In questo intervento di [**DEF CON 31**](https://www.youtube.com/watch?v=zxZesAN-TEk), viene mostrato come **`systemmigrationd`** (che può bypassare SIP) esegue uno **script bash** e uno **script perl**, che possono essere abusati tramite variabili d'ambiente **`BASH_ENV`** e **`PERL5OPT`**.
 
 #### CVE-2023-42860 <a href="#cve-a-detailed-look" id="cve-a-detailed-look"></a>
 
-As [**detailed in this blog post**](https://blog.kandji.io/apple-mitigates-vulnerabilities-installer-scripts), a `postinstall` script from `InstallAssistant.pkg` packages allowed was executing:
-
+Come [**dettagliato in questo post del blog**](https://blog.kandji.io/apple-mitigates-vulnerabilities-installer-scripts), uno script `postinstall` dai pacchetti `InstallAssistant.pkg` consentiva di eseguire:
 ```bash
 /usr/bin/chflags -h norestricted "${SHARED_SUPPORT_PATH}/SharedSupport.dmg"
 ```
-
-and it was possible to crate a symlink in `${SHARED_SUPPORT_PATH}/SharedSupport.dmg` that would allow a user to **unrestrict any file, bypassing SIP protection**.
+e era possibile creare un symlink in `${SHARED_SUPPORT_PATH}/SharedSupport.dmg` che consentirebbe a un utente di **rimuovere le restrizioni da qualsiasi file, eludendo la protezione SIP**.
 
 ### **com.apple.rootless.install**
 
 > [!CAUTION]
-> The entitlement **`com.apple.rootless.install`** allows to bypass SIP
+> L'attributo **`com.apple.rootless.install`** consente di eludere SIP
 
-The entitlement `com.apple.rootless.install` is known to bypass System Integrity Protection (SIP) on macOS. This was notably mentioned in relation to [**CVE-2022-26712**](https://jhftss.github.io/CVE-2022-26712-The-POC-For-SIP-Bypass-Is-Even-Tweetable/).
+L'attributo `com.apple.rootless.install` è noto per eludere la Protezione dell'Integrità di Sistema (SIP) su macOS. Questo è stato menzionato in particolare in relazione a [**CVE-2022-26712**](https://jhftss.github.io/CVE-2022-26712-The-POC-For-SIP-Bypass-Is-Even-Tweetable/).
 
-In this specific case, the system XPC service located at `/System/Library/PrivateFrameworks/ShoveService.framework/Versions/A/XPCServices/SystemShoveService.xpc` possesses this entitlement. This allows the related process to circumvent SIP constraints. Furthermore, this service notably presents a method that permits the movement of files without enforcing any security measures.
+In questo caso specifico, il servizio XPC di sistema situato in `/System/Library/PrivateFrameworks/ShoveService.framework/Versions/A/XPCServices/SystemShoveService.xpc` possiede questo attributo. Questo consente al processo correlato di eludere i vincoli SIP. Inoltre, questo servizio presenta un metodo che consente il movimento di file senza applicare alcuna misura di sicurezza.
 
 ## Sealed System Snapshots
 
-Sealed System Snapshots are a feature introduced by Apple in **macOS Big Sur (macOS 11)** as a part of its **System Integrity Protection (SIP)** mechanism to provide an additional layer of security and system stability. They are essentially read-only versions of the system volume.
+I Sealed System Snapshots sono una funzionalità introdotta da Apple in **macOS Big Sur (macOS 11)** come parte del meccanismo di **Protezione dell'Integrità di Sistema (SIP)** per fornire un ulteriore livello di sicurezza e stabilità del sistema. Sono essenzialmente versioni di sola lettura del volume di sistema.
 
-Here's a more detailed look:
+Ecco uno sguardo più dettagliato:
 
-1. **Immutable System**: Sealed System Snapshots make the macOS system volume "immutable", meaning that it cannot be modified. This prevents any unauthorised or accidental changes to the system that could compromise security or system stability.
-2. **System Software Updates**: When you install macOS updates or upgrades, macOS creates a new system snapshot. The macOS startup volume then uses **APFS (Apple File System)** to switch to this new snapshot. The entire process of applying updates becomes safer and more reliable as the system can always revert to the previous snapshot if something goes wrong during the update.
-3. **Data Separation**: In conjunction with the concept of Data and System volume separation introduced in macOS Catalina, the Sealed System Snapshot feature makes sure that all your data and settings are stored on a separate "**Data**" volume. This separation makes your data independent from the system, which simplifies the process of system updates and enhances system security.
+1. **Sistema Immutabile**: I Sealed System Snapshots rendono il volume di sistema macOS "immutabile", il che significa che non può essere modificato. Questo previene qualsiasi cambiamento non autorizzato o accidentale al sistema che potrebbe compromettere la sicurezza o la stabilità del sistema.
+2. **Aggiornamenti del Software di Sistema**: Quando installi aggiornamenti o upgrade di macOS, macOS crea un nuovo snapshot di sistema. Il volume di avvio di macOS utilizza quindi **APFS (Apple File System)** per passare a questo nuovo snapshot. L'intero processo di applicazione degli aggiornamenti diventa più sicuro e affidabile poiché il sistema può sempre tornare allo snapshot precedente se qualcosa va storto durante l'aggiornamento.
+3. **Separazione dei Dati**: In concomitanza con il concetto di separazione dei volumi Dati e Sistema introdotto in macOS Catalina, la funzionalità Sealed System Snapshot garantisce che tutti i tuoi dati e le impostazioni siano memorizzati su un volume "**Dati**" separato. Questa separazione rende i tuoi dati indipendenti dal sistema, semplificando il processo di aggiornamenti di sistema e migliorando la sicurezza del sistema.
 
-Remember that these snapshots are automatically managed by macOS and don't take up additional space on your disk, thanks to the space sharing capabilities of APFS. It’s also important to note that these snapshots are different from **Time Machine snapshots**, which are user-accessible backups of the entire system.
+Ricorda che questi snapshot sono gestiti automaticamente da macOS e non occupano spazio aggiuntivo sul tuo disco, grazie alle capacità di condivisione dello spazio di APFS. È anche importante notare che questi snapshot sono diversi dagli **snapshot di Time Machine**, che sono backup accessibili dall'utente dell'intero sistema.
 
-### Check Snapshots
+### Controlla gli Snapshot
 
-The command **`diskutil apfs list`** lists the **details of the APFS volumes** and their layout:
+Il comando **`diskutil apfs list`** elenca i **dettagli dei volumi APFS** e il loro layout:
 
 <pre><code>+-- Container disk3 966B902E-EDBA-4775-B743-CF97A0556A13
 |   ====================================================
@@ -251,32 +231,27 @@ The command **`diskutil apfs list`** lists the **details of the APFS volumes** a
 </strong><strong>|   |   Snapshot Sealed:           Yes
 </strong>[...]
 +-> Volume disk3s5 281959B7-07A1-4940-BDDF-6419360F3327
-    |   ---------------------------------------------------
-    |   APFS Volume Disk (Role):   disk3s5 (Data)
-    |   Name:                      Macintosh HD - Data (Case-insensitive)
+|   ---------------------------------------------------
+|   APFS Volume Disk (Role):   disk3s5 (Data)
+|   Name:                      Macintosh HD - Data (Case-insensitive)
 <strong>    |   Mount Point:               /System/Volumes/Data
 </strong><strong>    |   Capacity Consumed:         412071784448 B (412.1 GB)
 </strong>    |   Sealed:                    No
-    |   FileVault:                 Yes (Unlocked)
+|   FileVault:                 Yes (Unlocked)
 </code></pre>
 
-In the previous output it's possible to see that **user-accessible locations** are mounted under `/System/Volumes/Data`.
+Nell'output precedente è possibile vedere che le **posizioni accessibili all'utente** sono montate sotto `/System/Volumes/Data`.
 
-Moreover, **macOS System volume snapshot** is mounted in `/` and it's **sealed** (cryptographically signed by the OS). So, if SIP is bypassed and modifies it, the **OS won't boot anymore**.
+Inoltre, lo **snapshot del volume di sistema macOS** è montato in `/` ed è **sigillato** (firmato crittograficamente dal sistema operativo). Quindi, se SIP viene eluso e viene modificato, il **sistema operativo non si avvierà più**.
 
-It's also possible to **verify that seal is enabled** by running:
-
+È anche possibile **verificare che il sigillo sia abilitato** eseguendo:
 ```bash
 csrutil authenticated-root status
 Authenticated Root status: enabled
 ```
-
-Moreover, the snapshot disk is also mounted as **read-only**:
-
+Inoltre, il disco snapshot è montato come **sola lettura**:
 ```bash
 mount
 /dev/disk3s1s1 on / (apfs, sealed, local, read-only, journaled)
 ```
-
 {{#include ../../../banners/hacktricks-training.md}}
-

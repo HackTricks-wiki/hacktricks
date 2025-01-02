@@ -2,22 +2,21 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Informazioni di base
 
-**Apple Events** are a feature in Apple's macOS that allows applications to communicate with each other. They are part of the **Apple Event Manager**, which is a component of the macOS operating system responsible for handling interprocess communication. This system enables one application to send a message to another application to request that it perform a particular operation, like opening a file, retrieving data, or executing a command.
+**Apple Events** sono una funzionalità del macOS di Apple che consente alle applicazioni di comunicare tra loro. Fanno parte del **Apple Event Manager**, che è un componente del sistema operativo macOS responsabile della gestione della comunicazione interprocesso. Questo sistema consente a un'applicazione di inviare un messaggio a un'altra applicazione per richiedere che esegua un'operazione particolare, come aprire un file, recuperare dati o eseguire un comando.
 
-The mina daemon is `/System/Library/CoreServices/appleeventsd` which registers the service `com.apple.coreservices.appleevents`.
+Il daemon mina è `/System/Library/CoreServices/appleeventsd` che registra il servizio `com.apple.coreservices.appleevents`.
 
-Every application that can receive events will checking with this daemon providing its Apple Event Mach Port. And when an app wants to send an event to to it, the app will request this port from the daemon.
+Ogni applicazione che può ricevere eventi verificherà con questo daemon fornendo il suo Apple Event Mach Port. E quando un'app vuole inviare un evento a esso, l'app richiederà questo port dal daemon.
 
-Sandboxed applications requires privileges like `allow appleevent-send` and `(allow mach-lookup (global-name "com.apple.coreservices.appleevents))` in order to be able to send events. Noten that entitlements like `com.apple.security.temporary-exception.apple-events` could restrict who have access to send events which will need entitlements like `com.apple.private.appleevents`.
+Le applicazioni sandboxed richiedono privilegi come `allow appleevent-send` e `(allow mach-lookup (global-name "com.apple.coreservices.appleevents))` per poter inviare eventi. Si noti che i diritti come `com.apple.security.temporary-exception.apple-events` potrebbero limitare chi ha accesso per inviare eventi, il che richiederà diritti come `com.apple.private.appleevents`.
 
 > [!TIP]
-> It's possible to use the env variable **`AEDebugSends`** in order to log informtion about the message sent:
+> È possibile utilizzare la variabile env **`AEDebugSends`** per registrare informazioni sul messaggio inviato:
 >
 > ```bash
 > AEDebugSends=1 osascript -e 'tell application "iTerm" to activate'
 > ```
 
 {{#include ../../../../banners/hacktricks-training.md}}
-
