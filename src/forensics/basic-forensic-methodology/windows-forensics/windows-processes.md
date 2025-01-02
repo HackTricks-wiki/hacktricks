@@ -104,3 +104,5 @@ This is run from **userinit.exe** which should be terminated, so **no parent** s
 - Are the children processes the expecting ones? (no cmd.exe, wscript.exe, powershell.exe..?)
 
 {{#include ../../../banners/hacktricks-training.md}}
+
+

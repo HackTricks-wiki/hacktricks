@@ -2,9 +2,6 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 ## Acquisition
 
@@ -114,8 +111,7 @@ Note that sector size is **512** and start is **2048**. Then mount the image lik
 mount disk.img /mnt -o ro,offset=$((2048*512))
 ```
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../../banners/hacktricks-training.md}}
+
+

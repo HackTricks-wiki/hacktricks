@@ -184,3 +184,5 @@ These practices and mechanisms are foundational for anyone looking to engage wit
 - [https://en.bitcoin.it/wiki/Privacy](https://en.bitcoin.it/wiki/Privacy#Forced_address_reuse)
 
 {{#include ../banners/hacktricks-training.md}}
+
+

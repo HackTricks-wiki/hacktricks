@@ -50,3 +50,5 @@ The following steps are recommended for modifying device startup configurations 
 - [https://scriptingxss.gitbook.io/firmware-security-testing-methodology/](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
 
 {{#include ../../banners/hacktricks-training.md}}
+
+

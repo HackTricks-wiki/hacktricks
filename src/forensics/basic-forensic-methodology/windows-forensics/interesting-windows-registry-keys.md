@@ -99,3 +99,5 @@
 This guide condenses the crucial paths and methods for accessing detailed system, network, and user activity information on Windows systems, aiming for clarity and usability.
 
 {{#include ../../../banners/hacktricks-training.md}}
+
+

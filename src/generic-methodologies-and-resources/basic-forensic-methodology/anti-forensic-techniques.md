@@ -151,3 +151,5 @@ It's also possible to modify the configuration of which files are going to be co
 - `fsutil usn deletejournal /d c:`
 
 {{#include ../../banners/hacktricks-training.md}}
+
+

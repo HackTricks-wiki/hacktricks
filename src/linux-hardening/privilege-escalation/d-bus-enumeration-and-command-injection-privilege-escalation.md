@@ -469,3 +469,5 @@ finish:
 - [https://unit42.paloaltonetworks.com/usbcreator-d-bus-privilege-escalation-in-ubuntu-desktop/](https://unit42.paloaltonetworks.com/usbcreator-d-bus-privilege-escalation-in-ubuntu-desktop/)
 
 {{#include ../../banners/hacktricks-training.md}}
+
+

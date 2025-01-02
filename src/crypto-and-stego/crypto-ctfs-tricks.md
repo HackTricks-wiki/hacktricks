@@ -299,3 +299,5 @@ A secret is splitted in X parts and to recover it you need Y parts (_Y <=X_).
 - [https://github.com/nccgroup/featherduster](https://github.com/nccgroup/featherduster)
 
 {{#include ../banners/hacktricks-training.md}}
+
+

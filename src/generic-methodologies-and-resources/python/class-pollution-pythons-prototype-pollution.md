@@ -268,3 +268,5 @@ python-internal-read-gadgets.md
 - [https://blog.abdulrah33m.com/prototype-pollution-in-python/](https://blog.abdulrah33m.com/prototype-pollution-in-python/)
 
 {{#include ../../banners/hacktricks-training.md}}
+
+

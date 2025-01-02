@@ -2,11 +2,6 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
-
-Deepen your expertise in **Mobile Security** with 8kSec Academy. Master iOS and Android security through our self-paced courses and get certified:
-
-{% embed url="https://academy.8ksec.io/" %}
 
 ### User Identification Variables
 
@@ -215,10 +210,7 @@ uid=99(nobody) gid=99(nobody) euid=100
 
 - [https://0xdf.gitlab.io/2022/05/31/setuid-rabbithole.html#testing-on-jail](https://0xdf.gitlab.io/2022/05/31/setuid-rabbithole.html#testing-on-jail)
 
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
-
-Deepen your expertise in **Mobile Security** with 8kSec Academy. Master iOS and Android security through our self-paced courses and get certified:
-
-{% embed url="https://academy.8ksec.io/" %}
 
 {{#include ../../banners/hacktricks-training.md}}
+
+

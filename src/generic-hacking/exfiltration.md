@@ -365,3 +365,5 @@ Then copy-paste the text into the windows-shell and a file called nc.exe will be
 - [https://github.com/62726164/dns-exfil](https://github.com/62726164/dns-exfil)
 
 {{#include ../banners/hacktricks-training.md}}
+
+

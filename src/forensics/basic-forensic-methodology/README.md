@@ -80,3 +80,5 @@ file-integrity-monitoring.md
 {{#endref}}
 
 {{#include ../../banners/hacktricks-training.md}}
+
+

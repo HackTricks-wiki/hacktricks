@@ -2,8 +2,6 @@
 
 <figure><img src="/..https:/pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
 
-{% embed url="https://websec.nl/" %}
-
 # CBC - Cipher Block Chaining
 
 In CBC mode the **previous encrypted block is used as IV** to XOR with the next block:
@@ -109,6 +107,6 @@ But if you BF the padding (using padbuster for example) you manage to get anothe
 
 <figure><img src="/..https:/pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
 
-{% embed url="https://websec.nl/" %}
-
 {{#include ../banners/hacktricks-training.md}}
+
+

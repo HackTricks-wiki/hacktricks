@@ -1,10 +1,5 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
-
-Deepen your expertise in **Mobile Security** with 8kSec Academy. Master iOS and Android security through our self-paced courses and get certified:
-
-{% embed url="https://academy.8ksec.io/" %}
 
 **Audio and video file manipulation** is a staple in **CTF forensics challenges**, leveraging **steganography** and metadata analysis to hide or reveal secret messages. Tools such as **[mediainfo](https://mediaarea.net/en/MediaInfo)** and **`exiftool`** are essential for inspecting file metadata and identifying content types.
 
@@ -20,10 +15,7 @@ This array of tools underscores the versatility required in CTF challenges, wher
 
 - [https://trailofbits.github.io/ctf/forensics/](https://trailofbits.github.io/ctf/forensics/)
 
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
-
-Deepen your expertise in **Mobile Security** with 8kSec Academy. Master iOS and Android security through our self-paced courses and get certified:
-
-{% embed url="https://academy.8ksec.io/" %}
 
 {{#include ../../../banners/hacktricks-training.md}}
+
+

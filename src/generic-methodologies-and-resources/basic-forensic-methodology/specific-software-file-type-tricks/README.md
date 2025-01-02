@@ -39,3 +39,5 @@ zips-tricks.md
 {{#endref}}
 
 {{#include ../../../banners/hacktricks-training.md}}
+
+

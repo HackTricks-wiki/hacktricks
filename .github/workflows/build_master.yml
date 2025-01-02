@@ -47,7 +47,7 @@ jobs:
 
       # Build the mdBook
       - name: Build mdBook
-        run: mdbook build
+        run: MDBOOK_BOOK__LANGUAGE=en mdbook build
       
       # Cat hacktricks-preprocessor.log
       #- name: Cat hacktricks-preprocessor.log

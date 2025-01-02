@@ -24,3 +24,5 @@ File Integrity Monitoring (FIM) is a critical security technique that protects I
 - [https://cybersecurity.att.com/blogs/security-essentials/what-is-file-integrity-monitoring-and-why-you-need-it](https://cybersecurity.att.com/blogs/security-essentials/what-is-file-integrity-monitoring-and-why-you-need-it)
 
 {{#include ../../banners/hacktricks-training.md}}
+
+

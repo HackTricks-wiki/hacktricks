@@ -15,3 +15,5 @@ This array of tools underscores the versatility required in CTF challenges, wher
 - [https://trailofbits.github.io/ctf/forensics/](https://trailofbits.github.io/ctf/forensics/)
 
 {{#include ../../../banners/hacktricks-training.md}}
+
+

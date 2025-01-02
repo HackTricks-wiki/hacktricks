@@ -166,3 +166,5 @@ Start-Process "Chrome" "--remote-debugging-port=9222 --restore-last-session"
 - [https://embracethered.com/blog/posts/2020/chrome-spy-remote-control/](https://embracethered.com/blog/posts/2020/chrome-spy-remote-control/)
 
 {{#include ../../banners/hacktricks-training.md}}
+
+
