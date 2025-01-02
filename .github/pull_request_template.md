@@ -1,9 +1,4 @@
-You can remove this content before sending the PR:
+## Toeskryfing
+Ons waardeer jou kennis en moedig jou aan om inhoud te deel. Maak asseblief seker dat jy slegs inhoud oplaai wat jy besit of waarvoor jy toestemming het om dit van die oorspronklike outeur te deel (voeg 'n verwysing na die outeur in die bygevoegde teks of aan die einde van die bladsy wat jy wysig of albei). Jou respek vir intellektuele eiendomsregte bevorder 'n betroubare en wettige deelomgewing vir almal.
 
-## Attribution
-We value your knowledge and encourage you to share content. Please ensure that you only upload content that you own or that have permission to share it from the original author (adding a reference to the author in the added text or at the end of the page you are modifying or both). Your respect for intellectual property rights fosters a trustworthy and legal sharing environment for everyone.
-
-
-Thank you for contributing to HackTricks!
-
-
+Dankie dat jy by HackTricks bydra!
