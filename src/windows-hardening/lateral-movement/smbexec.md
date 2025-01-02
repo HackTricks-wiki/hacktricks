@@ -2,14 +2,6 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="/images/pentest-tools.svg" alt=""><figcaption></figcaption></figure>
-
-**해커의 관점에서 웹 앱, 네트워크 및 클라우드를 살펴보세요**
-
-**실제 비즈니스에 영향을 미치는 중요한 취약점을 찾아보고 보고하세요.** 공격 표면을 매핑하고 권한 상승을 허용하는 보안 문제를 찾아내며, 필수 증거를 수집하기 위해 자동화된 익스플로잇을 사용하여 귀하의 노력을 설득력 있는 보고서로 전환하는 20개 이상의 맞춤형 도구를 사용하세요.
-
-{% embed url="https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons" %}
-
 ## 작동 방식
 
 **Smbexec**는 Windows 시스템에서 원격 명령 실행에 사용되는 도구로, **Psexec**와 유사하지만 대상 시스템에 악성 파일을 배치하지 않습니다.
@@ -22,9 +14,9 @@
 ```bash
 smbexec.py WORKGROUP/genericuser:genericpassword@10.10.10.10
 ```
-### 이진 파일 없이 명령 실행하기
+### 이진 파일 없이 명령 실행
 
-- **Smbexec**는 서비스 binPaths를 통해 직접 명령을 실행할 수 있게 하여, 대상에 물리적 이진 파일이 필요 없도록 합니다.
+- **Smbexec**는 서비스 binPaths를 통해 직접 명령 실행을 가능하게 하여 대상에 물리적 이진 파일이 필요 없게 합니다.
 - 이 방법은 Windows 대상에서 일회성 명령을 실행하는 데 유용합니다. 예를 들어, Metasploit의 `web_delivery` 모듈과 결합하면 PowerShell을 대상으로 하는 역 Meterpreter 페이로드를 실행할 수 있습니다.
 - cmd.exe를 통해 제공된 명령을 실행하도록 binPath가 설정된 원격 서비스를 공격자의 머신에서 생성함으로써, 서비스 응답 오류가 발생하더라도 페이로드를 성공적으로 실행하고 Metasploit 리스너와의 콜백 및 페이로드 실행을 달성할 수 있습니다.
 
@@ -41,12 +33,5 @@ sc start [ServiceName]
 
 - [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
 
-<figure><img src="/images/pentest-tools.svg" alt=""><figcaption></figcaption></figure>
-
-**웹 앱, 네트워크 및 클라우드에 대한 해커의 관점을 얻으세요.**
-
-**실제 비즈니스에 영향을 미치는 중요한 취약점을 찾아보고 보고하세요.** 20개 이상의 맞춤형 도구를 사용하여 공격 표면을 매핑하고 권한 상승을 허용하는 보안 문제를 찾아내며, 자동화된 익스플로잇을 사용하여 필수 증거를 수집하여 귀하의 노력을 설득력 있는 보고서로 전환하세요.
-
-{% embed url="https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons" %}
 
 {{#include ../../banners/hacktricks-training.md}}

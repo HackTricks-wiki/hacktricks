@@ -5,24 +5,21 @@
 ## Objective-C
 
 > [!CAUTION]
-> Note that programs written in Objective-C **retain** their class declarations **when** **compiled** into [Mach-O binaries](macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md). Such class declarations **include** the name and type of:
+> Objective-C로 작성된 프로그램은 [Mach-O binaries](macos-files-folders-and-binaries/universal-binaries-and-mach-o-format.md)로 **컴파일**될 때 **클래스 선언**을 **유지**합니다. 이러한 클래스 선언에는 다음의 이름과 유형이 **포함**됩니다:
 
-- The class
-- The class methods
-- The class instance variables
+- 클래스
+- 클래스 메서드
+- 클래스 인스턴스 변수
 
-You can get this information using [**class-dump**](https://github.com/nygard/class-dump):
-
+이 정보를 [**class-dump**](https://github.com/nygard/class-dump)를 사용하여 얻을 수 있습니다:
 ```bash
 class-dump Kindle.app
 ```
+이 이름들은 이진 파일의 리버싱을 더 어렵게 만들기 위해 난독화될 수 있습니다.
 
-Note that this names could be obfuscated to make the reversing of the binary more difficult.
+## 클래스, 메서드 및 객체
 
-## Classes, Methods & Objects
-
-### Interface, Properties & Methods
-
+### 인터페이스, 속성 및 메서드
 ```objectivec
 // Declare the interface of the class
 @interface MyVehicle : NSObject
@@ -37,29 +34,25 @@ Note that this names could be obfuscated to make the reversing of the binary mor
 
 @end
 ```
-
-### **Class**
-
+### **클래스**
 ```objectivec
 @implementation MyVehicle : NSObject
 
 // No need to indicate the properties, only define methods
 
 - (void)startEngine {
-    NSLog(@"Engine started");
+NSLog(@"Engine started");
 }
 
 - (void)addWheels:(int)value {
-    self.numberOfWheels += value;
+self.numberOfWheels += value;
 }
 
 @end
 ```
+### **객체 및 메서드 호출**
 
-### **Object & Call Method**
-
-To create an instance of a class the **`alloc`** method is called which **allocate memory** for each **property** and **zero** those allocations. Then **`init`** is called, which **initilize the properties** to the **required values**.
-
+클래스의 인스턴스를 생성하기 위해 **`alloc`** 메서드가 호출되어 각 **속성**에 대한 **메모리**를 **할당**하고 해당 할당을 **제로**로 설정합니다. 그런 다음 **`init`**이 호출되어 **속성**을 **필요한 값**으로 **초기화**합니다.
 ```objectivec
 // Something like this:
 MyVehicle *newVehicle = [[MyVehicle alloc] init];
@@ -71,19 +64,15 @@ MyVehicle *newVehicle = [MyVehicle new];
 // [myClassInstance nameOfTheMethodFirstParam:param1 secondParam:param2]
 [newVehicle addWheels:4];
 ```
+### **클래스 메서드**
 
-### **Class Methods**
-
-Class methods are defined with the **plus sign** (+) not the hyphen (-) that is used with instance methods. Like the **NSString** class method **`stringWithString`**:
-
+클래스 메서드는 인스턴스 메서드에 사용되는 하이픈 (-)이 아닌 **플러스 기호** (+)로 정의됩니다. **NSString** 클래스 메서드 **`stringWithString`**와 같이:
 ```objectivec
 + (id)stringWithString:(NSString *)aString;
 ```
-
 ### Setter & Getter
 
-To **set** & **get** properties, you could do it with a **dot notation** or like if you were **calling a method**:
-
+속성을 **설정**하고 **가져오기** 위해, **점 표기법**을 사용하거나 **메서드를 호출하는 것처럼** 할 수 있습니다:
 ```objectivec
 // Set
 newVehicle.numberOfWheels = 2;
@@ -93,24 +82,20 @@ newVehicle.numberOfWheels = 2;
 NSLog(@"Number of wheels: %i", newVehicle.numberOfWheels);
 NSLog(@"Number of wheels: %i", [newVehicle numberOfWheels]);
 ```
+### **인스턴스 변수**
 
-### **Instance Variables**
-
-Alternatively to setter & getter methods you can use instance variables. These variables have the same name as the properties but starting with a "\_":
-
+setter 및 getter 메서드 대신 인스턴스 변수를 사용할 수 있습니다. 이 변수들은 속성과 동일한 이름을 가지지만 "\_"로 시작합니다:
 ```objectivec
 - (void)makeLongTruck {
-    _numberOfWheels = +10000;
-    NSLog(@"Number of wheels: %i", self.numberOfLeaves);
+_numberOfWheels = +10000;
+NSLog(@"Number of wheels: %i", self.numberOfLeaves);
 }
 ```
+### 프로토콜
 
-### Protocols
+프로토콜은 메서드 선언의 집합입니다(속성 없이). 프로토콜을 구현하는 클래스는 선언된 메서드를 구현합니다.
 
-Protocols are set of method declarations (without properties). A class that implements a protocol implement the declared methods.
-
-There are 2 types of methods: **mandatory** and **optional**. By **default** a method is **mandatory** (but you can also indicate it with a **`@required`** tag). To indicate that a method is optional use **`@optional`**.
-
+메서드는 두 가지 유형이 있습니다: **필수** 및 **선택적**. **기본적으로** 메서드는 **필수**입니다(하지만 **`@required`** 태그로도 표시할 수 있습니다). 메서드가 선택적임을 나타내려면 **`@optional`**을 사용하십시오.
 ```objectivec
 @protocol myNewProtocol
 - (void) method1; //mandatory
@@ -120,9 +105,7 @@ There are 2 types of methods: **mandatory** and **optional**. By **default** a m
 - (void) method3; //optional
 @end
 ```
-
-### All together
-
+### 모두 함께
 ```objectivec
 // gcc -framework Foundation test_obj.m -o test_obj
 #import <Foundation/Foundation.h>
@@ -148,50 +131,44 @@ There are 2 types of methods: **mandatory** and **optional**. By **default** a m
 @implementation MyVehicle : NSObject
 
 - (void)startEngine {
-    NSLog(@"Engine started");
+NSLog(@"Engine started");
 }
 
 - (void)addWheels:(int)value {
-    self.numberOfWheels += value;
+self.numberOfWheels += value;
 }
 
 - (void)makeLongTruck {
-    _numberOfWheels = +10000;
-    NSLog(@"Number of wheels: %i", self.numberOfWheels);
+_numberOfWheels = +10000;
+NSLog(@"Number of wheels: %i", self.numberOfWheels);
 }
 
 @end
 
 int main() {
-    MyVehicle* mySuperCar = [MyVehicle new];
-    [mySuperCar startEngine];
-    mySuperCar.numberOfWheels = 4;
-    NSLog(@"Number of wheels: %i", mySuperCar.numberOfWheels);
-    [mySuperCar setNumberOfWheels:3];
-    NSLog(@"Number of wheels: %i", mySuperCar.numberOfWheels);
-    [mySuperCar makeLongTruck];
+MyVehicle* mySuperCar = [MyVehicle new];
+[mySuperCar startEngine];
+mySuperCar.numberOfWheels = 4;
+NSLog(@"Number of wheels: %i", mySuperCar.numberOfWheels);
+[mySuperCar setNumberOfWheels:3];
+NSLog(@"Number of wheels: %i", mySuperCar.numberOfWheels);
+[mySuperCar makeLongTruck];
 }
 ```
+### 기본 클래스
 
-### Basic Classes
-
-#### String
-
+#### 문자열
 ```objectivec
 // NSString
 NSString *bookTitle = @"The Catcher in the Rye";
 NSString *bookAuthor = [[NSString alloc] initWithCString:"J.D. Salinger" encoding:NSUTF8StringEncoding];
 NSString *bookPublicationYear = [NSString stringWithCString:"1951" encoding:NSUTF8StringEncoding];
 ```
-
-Basic classes are **immutable**, so to append a string to an existing one a **new NSString needs to be created**.
-
+기본 클래스는 **불변**하므로 기존 문자열에 문자열을 추가하려면 **새 NSString을 생성해야 합니다**.
 ```objectivec
 NSString *bookDescription = [NSString stringWithFormat:@"%@ by %@ was published in %@", bookTitle, bookAuthor, bookPublicationYear];
 ```
-
-Or you could also use a **mutable** string class:
-
+또는 **mutable** 문자열 클래스를 사용할 수도 있습니다:
 ```objectivec
 NSMutableString *mutableString = [NSMutableString stringWithString:@"The book "];
 [mutableString appendString:bookTitle];
@@ -200,9 +177,7 @@ NSMutableString *mutableString = [NSMutableString stringWithString:@"The book "]
 [mutableString appendString:@" and published in "];
 [mutableString appendString:bookPublicationYear];
 ```
-
-#### Number
-
+#### 번호
 ```objectivec
 // character literals.
 NSNumber *theLetterZ = @'Z'; // equivalent to [NSNumber numberWithChar:'Z']
@@ -221,9 +196,7 @@ NSNumber *piDouble = @3.1415926535; // equivalent to [NSNumber numberWithDouble:
 NSNumber *yesNumber = @YES; // equivalent to [NSNumber numberWithBool:YES]
 NSNumber *noNumber = @NO; // equivalent to [NSNumber numberWithBool:NO]
 ```
-
-#### Array, Sets & Dictionary
-
+#### 배열, 집합 및 사전
 ```objectivec
 // Inmutable arrays
 NSArray *colorsArray1 = [NSArray arrayWithObjects:@"red", @"green", @"blue", nil];
@@ -250,18 +223,18 @@ NSMutableSet *mutFruitsSet = [NSMutableSet setWithObjects:@"apple", @"banana", @
 
 // Dictionary
 NSDictionary *fruitColorsDictionary = @{
-    @"apple" : @"red",
-    @"banana" : @"yellow",
-    @"orange" : @"orange",
-    @"grape" : @"purple"
+@"apple" : @"red",
+@"banana" : @"yellow",
+@"orange" : @"orange",
+@"grape" : @"purple"
 };
 
 // In dictionaryWithObjectsAndKeys you specify the value and then the key:
 NSDictionary *fruitColorsDictionary2 = [NSDictionary dictionaryWithObjectsAndKeys:
-    @"red", @"apple",
-    @"yellow", @"banana",
-    @"orange", @"orange",
-    @"purple", @"grape",
+@"red", @"apple",
+@"yellow", @"banana",
+@"orange", @"orange",
+@"purple", @"grape",
 nil];
 
 // Mutable dictionary
@@ -269,80 +242,71 @@ NSMutableDictionary *mutFruitColorsDictionary = [NSMutableDictionary dictionaryW
 [mutFruitColorsDictionary setObject:@"green" forKey:@"apple"];
 [mutFruitColorsDictionary removeObjectForKey:@"grape"];
 ```
+### 블록
 
-### Blocks
-
-Blocks are **functions that behaves as objects** so they can be passed to functions or **stored** in **arrays** or **dictionaries**. Also, they can **represent a value if they are given values** so it's similar to lambdas.
-
+블록은 **객체처럼 동작하는 함수**로, 함수에 전달되거나 **배열**이나 **사전**에 **저장**될 수 있습니다. 또한, 값이 주어지면 **값을 나타낼 수** 있어 람다와 유사합니다.
 ```objectivec
 returnType (^blockName)(argumentType1, argumentType2, ...) = ^(argumentType1 param1, argumentType2 param2, ...){
-    //Perform operations here
+//Perform operations here
 };
 
 // For example
 
 int (^suma)(int, int) = ^(int a, int b){
-    return a+b;
+return a+b;
 };
 NSLog(@"3+4 = %d", suma(3,4));
 ```
-
-It's also possible to **define a block type to be used as a parameter** in functions:
-
+함수에서 **매개변수로 사용될 블록 유형을 정의하는** 것도 가능합니다:
 ```objectivec
 // Define the block type
 typedef void (^callbackLogger)(void);
 
 // Create a bloack with the block type
 callbackLogger myLogger = ^{
-    NSLog(@"%@", @"This is my block");
+NSLog(@"%@", @"This is my block");
 };
 
 // Use it inside a function as a param
 void genericLogger(callbackLogger blockParam) {
-    NSLog(@"%@", @"This is my function");
-    blockParam();
+NSLog(@"%@", @"This is my function");
+blockParam();
 }
 genericLogger(myLogger);
 
 // Call it inline
 genericLogger(^{
-    NSLog(@"%@", @"This is my second block");
+NSLog(@"%@", @"This is my second block");
 });
 ```
-
-### Files
-
+### 파일
 ```objectivec
 // Manager to manage files
 NSFileManager *fileManager = [NSFileManager defaultManager];
 
 // Check if file exists:
 if ([fileManager fileExistsAtPath:@"/path/to/file.txt" ] == YES) {
-    NSLog (@"File exists");
+NSLog (@"File exists");
 }
 
 // copy files
 if ([fileManager copyItemAtPath: @"/path/to/file1.txt" toPath: @"/path/to/file2.txt" error:nil] == YES) {
-    NSLog (@"Copy successful");
+NSLog (@"Copy successful");
 }
 
 // Check if the content of 2 files match
 if ([fileManager contentsEqualAtPath:@"/path/to/file1.txt" andPath:@"/path/to/file2.txt"] == YES) {
-    NSLog (@"File contents match");
+NSLog (@"File contents match");
 }
 
 // Delete file
 if ([fileManager removeItemAtPath:@"/path/to/file1.txt" error:nil]) {
-    NSLog(@"Removed successfully");
+NSLog(@"Removed successfully");
 }
 ```
-
-It's also possible to manage files **using `NSURL` objects instead of `NSString`** objects. The method names are similar, but **with `URL` instead of `Path`**.
-
+파일을 **`NSString`** 객체 대신 **`NSURL`** 객체를 사용하여 관리하는 것도 가능합니다. 메서드 이름은 비슷하지만 **`Path`** 대신 **`URL`**을 사용합니다.
 ```objectivec
 
 
 ```
-
 {{#include ../../banners/hacktricks-training.md}}

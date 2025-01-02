@@ -1,10 +1,7 @@
 {{#include ../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
 
-{% embed url="https://websec.nl/" %}
-
-# 블루팀
+# BlueTeam
 
 - [https://github.com/yarox24/attack_monitor](https://github.com/yarox24/attack_monitor)
 - [https://capsule8.com/blog/dont-get-kicked-out-a-tale-of-rootkits-and-other-backdoors/](https://capsule8.com/blog/dont-get-kicked-out-a-tale-of-rootkits-and-other-backdoors/)
@@ -33,7 +30,7 @@
 - [https://github.com/zricethezav/gitleaks](https://github.com/zricethezav/gitleaks)
 - [https://www.nmmapper.com/sys/tools/subdomainfinder/](https://www.nmmapper.com/sys/tools/subdomainfinder/) : 8개의 서브도메인 찾기 도구, sublist3r, amass 등
 
-# **웹**
+# **WEB**
 
 - [https://github.com/AlisamTechnology/ATSCAN](https://github.com/AlisamTechnology/ATSCAN)
 - [https://github.com/momenbasel/KeyFinder](https://github.com/momenbasel/KeyFinder)
@@ -53,14 +50,14 @@
 - [https://github.com/izo30/google-dorker](https://github.com/izo30/google-dorker) : Google dorks
 - [https://github.com/sehno/Bug-bounty/blob/master/bugbounty_checklist.md](https://github.com/sehno/Bug-bounty/blob/master/bugbounty_checklist.md) : 웹 BugBounty 체크리스트
 - [https://github.com/Naategh/dom-red](https://github.com/Naategh/dom-red) : Open Redirection에 대한 도메인 목록 확인
-- [https://github.com/prodigysml/Dr.-Watson](https://github.com/prodigysml/Dr.-Watson) : Burp 플러그인, 도메인, 서브도메인 및 IP 발견을 위한 오프라인 분석
+- [https://github.com/prodigysml/Dr.-Watson](https://github.com/prodigysml/Dr.-Watson) : Burp 플러그인, 오프라인 분석으로 도메인, 서브도메인 및 IP 발견
 - [https://github.com/hahwul/WebHackersWeapons](https://github.com/hahwul/WebHackersWeapons): 다양한 도구 목록
 - [https://github.com/gauravnarwani97/Trishul](https://github.com/gauravnarwani97/Trishul) : 취약점 찾기 위한 BurpSuite 플러그인 (SQLi, XSS, SSTI)
 - [https://github.com/fransr/postMessage-tracker](https://github.com/fransr/postMessage-tracker) : post-messages 기능 추적을 위한 Chrome 확장
 - [https://github.com/Quitten/Autorize](https://github.com/Quitten/Autorize) : 자동 인증 테스트 (쿠키 제거 후 요청 전송 시도)
-- [https://github.com/pikpikcu/xrcross](https://github.com/pikpikcu/xrcross): XRCross는 재구성, 스캐너 및 침투/버그 바운티 테스트 도구입니다. 이 도구는 (XSS|SSRF|CORS|SSTI|IDOR|RCE|LFI|SQLI) 취약점을 테스트하기 위해 만들어졌습니다.
+- [https://github.com/pikpikcu/xrcross](https://github.com/pikpikcu/xrcross): XRCross는 재구성, 스캐너 및 침투 / BugBounty 테스트 도구입니다. 이 도구는 (XSS|SSRF|CORS|SSTI|IDOR|RCE|LFI|SQLI) 취약점을 테스트하기 위해 만들어졌습니다.
 
-# 윈도우
+# Windows
 
 - [https://github.com/Mr-Un1k0d3r/PoisonHandler](https://github.com/Mr-Un1k0d3r/PoisonHandler) : 측면 이동
 - [https://freddiebarrsmith.com/trix/trix.html](https://freddiebarrsmith.com/trix/trix.html) : LOL bins
@@ -76,28 +73,28 @@
 - [https://bestestredteam.com/2018/10/02/tracking-pixel-in-microsoft-office-document/](https://bestestredteam.com/2018/10/02/tracking-pixel-in-microsoft-office-document/) : 문서를 열어본 사람 추적
 - [https://github.com/Integration-IT/Active-Directory-Exploitation-Cheat-Sheet](https://github.com/Integration-IT/Active-Directory-Exploitation-Cheat-Sheet) : Active Directory 치트 시트
 
-# 펌웨어
+# Firmware
 
-분석을 위한 도구들:
+도구 q veo q pueden molar para analizar firmares (automaticas):
 
 - [https://github.com/craigz28/firmwalker](https://github.com/craigz28/firmwalker)
 - [https://github.com/fkie-cad/FACT_core](https://github.com/fkie-cad/FACT_core)
 - [https://gitlab.com/bytesweep/bytesweep-go](https://gitlab.com/bytesweep/bytesweep-go)
 
-후속 자료:
+Post-crema:
 
 - [https://blog.mindedsecurity.com/2018/09/pentesting-iot-devices-part-1-static.html](https://blog.mindedsecurity.com/2018/09/pentesting-iot-devices-part-1-static.html)
 - [https://blog.mindedsecurity.com/2018/10/pentesting-iot-devices-part-2-dynamic.html](https://blog.mindedsecurity.com/2018/10/pentesting-iot-devices-part-2-dynamic.html)
 
-펌웨어를 온라인에서 찾지 못할 경우 추출하는 방법: [https://www.youtube.com/watch?v=Kxvpbu9STU4](https://www.youtube.com/watch?v=Kxvpbu9STU4)
+온라인에서 펌웨어를 찾지 못할 경우 추출하는 방법: [https://www.youtube.com/watch?v=Kxvpbu9STU4](https://www.youtube.com/watch?v=Kxvpbu9STU4)
 
-분석할 취약점이 있는 펌웨어: [https://github.com/scriptingxss/IoTGoat](https://github.com/scriptingxss/IoTGoat)
+여기 분석할 수 있는 취약점이 있는 펌웨어: [https://github.com/scriptingxss/IoTGoat](https://github.com/scriptingxss/IoTGoat)
 
-펌웨어 분석을 위한 OWASP 방법론: [https://github.com/scriptingxss/owasp-fstm](https://github.com/scriptingxss/owasp-fstm)
+그리고 여기 펌웨어 분석을 위한 OWASP 방법론: [https://github.com/scriptingxss/owasp-fstm](https://github.com/scriptingxss/owasp-fstm)
 
 펌웨어 에뮬레이션: FIRMADYNE (https://github.com/firmadyne/firmadyne/)는 Linux 기반 펌웨어의 에뮬레이션 및 동적 분석을 자동화하는 플랫폼입니다.
 
-# 기타
+# OTHER
 
 - [https://twitter.com/HackAndDo/status/1202695084543791117](https://twitter.com/HackAndDo/status/1202695084543791117)
 - [https://github.com/weev3/LKWA](https://github.com/weev3/LKWA)
@@ -105,22 +102,19 @@
 - [https://github.com/skelsec/jackdaw](https://github.com/skelsec/jackdaw)
 - [https://github.com/CoatiSoftware/Sourcetrail](https://github.com/CoatiSoftware/Sourcetrail) : 정적 코드 분석
 - [https://www.hackerdecabecera.com/2019/12/blectf-capture-flag-en-formato-hardware.html](https://www.hackerdecabecera.com/2019/12/blectf-capture-flag-en-formato-hardware.html) : Bluetooth LE CTF
-- [https://github.com/skeeto/endlessh](https://github.com/skeeto/endlessh) : 느리게 끝없이 배너를 보내는 SSH 타르핏.
+- [https://github.com/skeeto/endlessh](https://github.com/skeeto/endlessh) : 느리게 끝없는 배너를 보내는 SSH tarpit.
 - AWS 및 클라우드 도구: [https://github.com/toniblyx/my-arsenal-of-aws-security-tools](https://github.com/toniblyx/my-arsenal-of-aws-security-tools)
 - 피싱을 위한 IFS (Interplanetary File System): [https://www.trustwave.com/en-us/resources/blogs/spiderlabs-blog/using-the-interplanetary-file-system-for-offensive-operations/](https://www.trustwave.com/en-us/resources/blogs/spiderlabs-blog/using-the-interplanetary-file-system-for-offensive-operations/)
 - IP 회전 서비스: [https://medium.com/@lokeshdlk77/how-to-rotate-ip-address-in-brute-force-attack-e66407259212](https://medium.com/@lokeshdlk77/how-to-rotate-ip-address-in-brute-force-attack-e66407259212)
-- 리눅스 루트킷: [https://github.com/aesophor/satanic-rootkit](https://github.com/aesophor/satanic-rootkit)
+- Linux 루트킷: [https://github.com/aesophor/satanic-rootkit](https://github.com/aesophor/satanic-rootkit)
 - [https://theia-ide.org/](https://theia-ide.org) : 온라인 IDE
-- [https://github.com/nahamsec/Resources-for-Beginner-Bug-Bounty-Hunters/](https://github.com/nahamsec/Resources-for-Beginner-Bug-Bounty-Hunters/) : BugBounty 시작을 위한 자료
-- [https://medium.com/macoclock/jailbreak-and-stuff-kickstart-tools-and-techniques-for-ios-application-pentesting-6fa53a3987ab](https://medium.com/macoclock/jailbreak-and-stuff-kickstart-tools-and-techniques-for-ios-application-pentesting-6fa53a3987ab) : IOS 침투 테스트 도구
+- [https://github.com/nahamsec/Resources-for-Beginner-Bug-Bounty-Hunters/](https://github.com/nahamsec/Resources-for-Beginner-Bug-Bounty-Hunters/) : BugBounties 시작을 위한 자료
+- [https://medium.com/macoclock/jailbreak-and-stuff-kickstart-tools-and-techniques-for-ios-application-pentesting-6fa53a3987ab](https://medium.com/macoclock/jailbreak-and-stuff-kickstart-tools-and-techniques-for-ios-application-pentesting-6fa53a3987ab) : IOS 펜테스팅 도구
 - [https://github.com/random-robbie/keywords/blob/master/keywords.txt](https://github.com/random-robbie/keywords/blob/master/keywords.txt) : 키워드
 - [https://github.com/ElevenPaths/HomePWN](https://github.com/ElevenPaths/HomePWN) : IoT 해킹 (Wifi, BLE, SSDP, MDNS)
-- [https://github.com/rackerlabs/scantron](https://github.com/rackerlabs/scantron) : 스캔 자동화
+- [https://github.com/rackerlabs/scantron](https://github.com/rackerlabs/scantron) : 스캐닝 자동화
 - [https://github.com/doyensec/awesome-electronjs-hacking](https://github.com/doyensec/awesome-electronjs-hacking) : 이 목록은 Electron.js 보안 관련 주제를 다루는 것을 목표로 합니다.
 - [https://github.com/serain/bbrecon](https://github.com/serain/bbrecon) : BB 프로그램에 대한 정보
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../banners/hacktricks-training.md}}

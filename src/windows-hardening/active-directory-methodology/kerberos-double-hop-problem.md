@@ -2,17 +2,13 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
-
 ## Introduction
 
 Kerberos "Double Hop" 문제는 공격자가 **두 개의** **홉**을 통해 **Kerberos 인증**을 사용하려고 할 때 발생합니다. 예를 들어 **PowerShell**/**WinRM**을 사용하는 경우입니다.
 
-**Kerberos**를 통해 **인증**이 발생할 때, **자격 증명**이 **메모리**에 캐시되지 않습니다. 따라서 사용자가 프로세스를 실행하고 있더라도 mimikatz를 실행하면 해당 사용자의 **자격 증명**을 찾을 수 없습니다.
+**Kerberos**를 통해 **인증**이 발생할 때, **자격 증명**이 **메모리**에 캐시되지 않습니다. 따라서 사용자가 프로세스를 실행하고 있더라도 mimikatz를 실행하면 해당 사용자의 **자격 증명**을 머신에서 찾을 수 없습니다.
 
-Kerberos로 연결할 때의 단계는 다음과 같습니다:
+이는 Kerberos로 연결할 때 다음과 같은 단계가 있기 때문입니다:
 
 1. User1이 자격 증명을 제공하고 **도메인 컨트롤러**가 User1에게 Kerberos **TGT**를 반환합니다.
 2. User1이 **TGT**를 사용하여 **Server1**에 연결하기 위한 **서비스 티켓**을 요청합니다.
@@ -26,9 +22,9 @@ PC에서 **제한 없는 위임**이 활성화되어 있으면, **서버**는 �
 
 ### CredSSP
 
-이 문제를 피하는 또 다른 방법은 [**상당히 안전하지 않은**](https://docs.microsoft.com/en-us/powershell/module/microsoft.wsman.management/enable-wsmancredssp?view=powershell-7) **Credential Security Support Provider**입니다. Microsoft에서:
+이 문제를 피하는 또 다른 방법은 [**상당히 안전하지 않은**](https://docs.microsoft.com/en-us/powershell/module/microsoft.wsman.management/enable-wsmancredssp?view=powershell-7) **자격 증명 보안 지원 공급자**입니다. Microsoft에서:
 
-> CredSSP 인증은 로컬 컴퓨터에서 원격 컴퓨터로 사용자 자격 증명을 위임합니다. 이 관행은 원격 작업의 보안 위험을 증가시킵니다. 원격 컴퓨터가 손상되면 자격 증명이 전달될 때, 자격 증명을 사용하여 네트워크 세션을 제어할 수 있습니다.
+> CredSSP 인증은 로컬 컴퓨터에서 원격 컴퓨터로 사용자 자격 증명을 위임합니다. 이 관행은 원격 작업의 보안 위험을 증가시킵니다. 원격 컴퓨터가 손상되면 자격 증명이 전달될 때, 해당 자격 증명은 네트워크 세션을 제어하는 데 사용될 수 있습니다.
 
 보안 문제로 인해 **CredSSP**는 프로덕션 시스템, 민감한 네트워크 및 유사한 환경에서 비활성화하는 것이 강력히 권장됩니다. **CredSSP**가 활성화되어 있는지 확인하려면 `Get-WSManCredSSP` 명령을 실행할 수 있습니다. 이 명령은 **CredSSP 상태를 확인**할 수 있으며, **WinRM**이 활성화되어 있는 경우 원격으로도 실행할 수 있습니다.
 ```powershell
@@ -40,7 +36,7 @@ Get-WSManCredSSP
 
 ### Invoke Command
 
-더블 홉 문제를 해결하기 위해 중첩된 `Invoke-Command`를 포함하는 방법이 제시됩니다. 이는 문제를 직접적으로 해결하지는 않지만 특별한 구성이 필요 없는 우회 방법을 제공합니다. 이 접근 방식은 초기 공격 머신에서 실행된 PowerShell 명령어를 통해 또는 첫 번째 서버와 이전에 설정된 PS-Session을 통해 보조 서버에서 명령어(`hostname`)를 실행할 수 있게 합니다. 방법은 다음과 같습니다:
+더블 홉 문제를 해결하기 위해 중첩된 `Invoke-Command`를 포함하는 방법이 제시됩니다. 이는 문제를 직접적으로 해결하지는 않지만 특별한 구성이 필요 없는 우회 방법을 제공합니다. 이 접근 방식은 초기 공격 머신에서 실행된 PowerShell 명령 또는 첫 번째 서버와 이전에 설정된 PS-Session을 통해 보조 서버에서 명령(`hostname`)을 실행할 수 있게 합니다. 방법은 다음과 같습니다:
 ```powershell
 $cred = Get-Credential ta\redsuit
 Invoke-Command -ComputerName bizintel -Credential $cred -ScriptBlock {
@@ -85,15 +81,12 @@ winrs -r:http://bizintel:5446 -u:ta\redsuit -p:2600leet hostname
 ```bash
 icacls.exe "C:\Users\redsuit\Documents\ssh\OpenSSH-Win64" /grant Everyone:RX /T
 ```
-## References
+## 참고 문헌
 
 - [https://techcommunity.microsoft.com/t5/ask-the-directory-services-team/understanding-kerberos-double-hop/ba-p/395463?lightbox-message-images-395463=102145i720503211E78AC20](https://techcommunity.microsoft.com/t5/ask-the-directory-services-team/understanding-kerberos-double-hop/ba-p/395463?lightbox-message-images-395463=102145i720503211E78AC20)
 - [https://posts.slayerlabs.com/double-hop/](https://posts.slayerlabs.com/double-hop/)
 - [https://learn.microsoft.com/en-gb/archive/blogs/sergey_babkins_blog/another-solution-to-multi-hop-powershell-remoting](https://learn.microsoft.com/en-gb/archive/blogs/sergey_babkins_blog/another-solution-to-multi-hop-powershell-remoting)
 - [https://4sysops.com/archives/solve-the-powershell-multi-hop-problem-without-using-credssp/](https://4sysops.com/archives/solve-the-powershell-multi-hop-problem-without-using-credssp/)
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

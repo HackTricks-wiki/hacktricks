@@ -1,44 +1,44 @@
-# Namespaces
+# 네임스페이스
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-### **PID namespace**
+### **PID 네임스페이스**
 
 {{#ref}}
 pid-namespace.md
 {{#endref}}
 
-### **Mount namespace**
+### **마운트 네임스페이스**
 
 {{#ref}}
 mount-namespace.md
 {{#endref}}
 
-### **Network namespace**
+### **네트워크 네임스페이스**
 
 {{#ref}}
 network-namespace.md
 {{#endref}}
 
-### **IPC Namespace**
+### **IPC 네임스페이스**
 
 {{#ref}}
 ipc-namespace.md
 {{#endref}}
 
-### **UTS namespace**
+### **UTS 네임스페이스**
 
 {{#ref}}
 uts-namespace.md
 {{#endref}}
 
-### Time Namespace
+### 시간 네임스페이스
 
 {{#ref}}
 time-namespace.md
 {{#endref}}
 
-### User namespace
+### 사용자 네임스페이스
 
 {{#ref}}
 user-namespace.md

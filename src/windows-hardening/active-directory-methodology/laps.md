@@ -2,15 +2,12 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 ## 기본 정보
 
-Local Administrator Password Solution (LAPS)는 **관리자 비밀번호**를 관리하는 도구로, 이 비밀번호는 **고유하고 무작위이며 자주 변경**됩니다. 이 비밀번호는 도메인에 가입된 컴퓨터에 적용됩니다. 이러한 비밀번호는 Active Directory 내에 안전하게 저장되며, Access Control Lists (ACLs)를 통해 권한이 부여된 사용자만 접근할 수 있습니다. 클라이언트에서 서버로의 비밀번호 전송 보안은 **Kerberos version 5**와 **Advanced Encryption Standard (AES)**를 사용하여 보장됩니다.
+Local Administrator Password Solution (LAPS)는 **고유하고 무작위이며 자주 변경되는** **관리자 비밀번호**가 도메인에 가입된 컴퓨터에 적용되는 시스템을 관리하는 데 사용되는 도구입니다. 이러한 비밀번호는 Active Directory 내에 안전하게 저장되며, Access Control Lists (ACLs)를 통해 권한이 부여된 사용자만 접근할 수 있습니다. 클라이언트에서 서버로의 비밀번호 전송 보안은 **Kerberos version 5**와 **Advanced Encryption Standard (AES)**의 사용으로 보장됩니다.
 
-도메인의 컴퓨터 객체에서 LAPS의 구현은 두 개의 새로운 속성인 **`ms-mcs-AdmPwd`**와 **`ms-mcs-AdmPwdExpirationTime`**의 추가로 이어집니다. 이 속성들은 각각 **일반 텍스트 관리자 비밀번호**와 **만료 시간**을 저장합니다.
+도메인의 컴퓨터 객체에서 LAPS의 구현은 두 개의 새로운 속성인 **`ms-mcs-AdmPwd`**와 **`ms-mcs-AdmPwdExpirationTime`**의 추가로 이어집니다. 이러한 속성은 각각 **일반 텍스트 관리자 비밀번호**와 **만료 시간**을 저장합니다.
 
 ### 활성화 여부 확인
 ```bash
@@ -106,7 +103,7 @@ Password: 2Z@Ae)7!{9#Cq
 
 ### **만료 날짜**
 
-관리자가 되면, **비밀번호를 얻고** **업데이트**를 **방지**하기 위해 **만료 날짜를 미래로 설정**할 수 있습니다.
+관리자가 되면, **비밀번호를 얻고** **비밀번호 업데이트를 방지**하기 위해 **만료 날짜를 미래로 설정**하는 것이 가능합니다.
 ```powershell
 # Get expiration time
 Get-DomainObject -Identity computer-21 -Properties ms-mcs-admpwdexpirationtime
@@ -120,16 +117,13 @@ Set-DomainObject -Identity wkstn-2 -Set @{"ms-mcs-admpwdexpirationtime"="2326099
 
 ### 백도어
 
-LAPS의 원본 소스 코드는 [여기](https://github.com/GreyCorbel/admpwd)에서 찾을 수 있으며, 따라서 코드에 백도어를 삽입하는 것이 가능합니다 (예: `Main/AdmPwd.PS/Main.cs`의 `Get-AdmPwdPassword` 메서드 내부) 이 백도어는 어떤 식으로든 **새 비밀번호를 유출하거나 어딘가에 저장**할 수 있습니다.
+LAPS의 원본 소스 코드는 [여기](https://github.com/GreyCorbel/admpwd)에서 찾을 수 있으므로, 코드에 백도어를 삽입하는 것이 가능합니다 (예: `Main/AdmPwd.PS/Main.cs`의 `Get-AdmPwdPassword` 메서드 내부) 이 백도어는 어떤 식으로든 **새 비밀번호를 유출하거나 어딘가에 저장**할 수 있습니다.
 
 그런 다음, 새로운 `AdmPwd.PS.dll`을 컴파일하고 `C:\Tools\admpwd\Main\AdmPwd.PS\bin\Debug\AdmPwd.PS.dll`에 업로드합니다 (그리고 수정 시간을 변경합니다).
 
-## 참고문헌
+## 참조
 
 - [https://4sysops.com/archives/introduction-to-microsoft-laps-local-administrator-password-solution/](https://4sysops.com/archives/introduction-to-microsoft-laps-local-administrator-password-solution/)
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

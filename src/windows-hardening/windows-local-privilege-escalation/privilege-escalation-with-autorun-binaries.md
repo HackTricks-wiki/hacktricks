@@ -1,16 +1,10 @@
-# Autoruns를 통한 권한 상승
+# Autoruns를 이용한 권한 상승
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/i3.png" alt=""><figcaption></figcaption></figure>
-
-**버그 바운티 팁**: **해커를 위해 해커가 만든 프리미엄 버그 바운티 플랫폼인 Intigriti에 가입하세요**! 오늘 [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks)에서 저희와 함께하고 최대 **$100,000**의 보상을 받기 시작하세요!
-
-{% embed url="https://go.intigriti.com/hacktricks" %}
-
 ## WMIC
 
-**Wmic**는 **시작 시** 프로그램을 실행하는 데 사용할 수 있습니다. 시작 시 실행되도록 프로그래밍된 바이너리를 확인하려면:
+**Wmic**는 **시작** 시 프로그램을 실행하는 데 사용할 수 있습니다. 시작 시 실행되도록 프로그래밍된 바이너리를 확인하려면:
 ```bash
 wmic startup get caption,command 2>nul & ^
 Get-CimInstance Win32_StartupCommand | select Name, command, Location, User | fl
@@ -42,7 +36,7 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 ## 레지스트리
 
 > [!NOTE]
-> [여기에서 노트](https://answers.microsoft.com/en-us/windows/forum/all/delete-registry-key/d425ae37-9dcc-4867-b49c-723dcd15147f): **Wow6432Node** 레지스트리 항목은 64비트 Windows 버전을 실행하고 있음을 나타냅니다. 운영 체제는 이 키를 사용하여 64비트 Windows 버전에서 실행되는 32비트 응용 프로그램에 대한 HKEY_LOCAL_MACHINE\SOFTWARE의 별도 보기를 표시합니다.
+> [여기에서의 노트](https://answers.microsoft.com/en-us/windows/forum/all/delete-registry-key/d425ae37-9dcc-4867-b49c-723dcd15147f): **Wow6432Node** 레지스트리 항목은 64비트 Windows 버전을 실행하고 있음을 나타냅니다. 운영 체제는 이 키를 사용하여 64비트 Windows 버전에서 실행되는 32비트 응용 프로그램에 대한 HKEY_LOCAL_MACHINE\SOFTWARE의 별도 보기를 표시합니다.
 
 ### 실행
 
@@ -83,10 +77,10 @@ Windows Vista 및 이후 버전에서는 **Run** 및 **RunOnce** 레지스트리
 reg add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnceEx\\0001\\Depend /v 1 /d "C:\\temp\\evil.dll"
 ```
 > [!NOTE]
-> **Exploit 1**: **HKLM**에 언급된 레지스트리 중 어느 곳에든 쓸 수 있다면, 다른 사용자가 로그인할 때 권한을 상승시킬 수 있습니다.
+> **Exploit 1**: **HKLM** 내의 언급된 레지스트리 중 어느 곳에든 쓸 수 있다면, 다른 사용자가 로그인할 때 권한을 상승시킬 수 있습니다.
 
 > [!NOTE]
-> **Exploit 2**: **HKLM**에 있는 레지스트리 중 어느 이진 파일을 덮어쓸 수 있다면, 다른 사용자가 로그인할 때 해당 이진 파일을 백도어로 수정하고 권한을 상승시킬 수 있습니다.
+> **Exploit 2**: **HKLM** 내의 레지스트리 중 어느 곳에든 표시된 이진 파일을 덮어쓸 수 있다면, 다른 사용자가 로그인할 때 해당 이진 파일을 백도어로 수정하고 권한을 상승시킬 수 있습니다.
 ```bash
 #CMD
 reg query HKLM\Software\Microsoft\Windows\CurrentVersion\Run
@@ -152,7 +146,7 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Wow6432Node\Microsoft\Windows\Ru
 **시작** 폴더에 배치된 바로 가기는 사용자 로그온 또는 시스템 재부팅 중에 서비스나 애플리케이션을 자동으로 실행합니다. **시작** 폴더의 위치는 **로컬 머신** 및 **현재 사용자** 범위에 대해 레지스트리에서 정의됩니다. 이는 이러한 지정된 **시작** 위치에 추가된 모든 바로 가기가 로그온 또는 재부팅 프로세스 후에 연결된 서비스나 프로그램이 시작되도록 보장함을 의미하며, 프로그램을 자동으로 실행하도록 예약하는 간단한 방법입니다.
 
 > [!NOTE]
-> **HKLM** 아래의 \[User] Shell Folder를 덮어쓸 수 있다면, 이를 당신이 제어하는 폴더로 지정하고 사용자가 시스템에 로그인할 때마다 실행될 백도어를 배치할 수 있습니다.
+> **HKLM** 아래의 \[User] Shell Folder를 덮어쓸 수 있다면, 이를 당신이 제어하는 폴더로 지정하고 사용자가 시스템에 로그인할 때마다 실행되는 백도어를 배치할 수 있습니다.
 ```bash
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" /v "Common Startup"
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" /v "Common Startup"
@@ -183,7 +177,7 @@ Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVers
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer`
 - `HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer`
 
-**실행** 키를 확인하세요.
+**실행** 키를 확인하십시오.
 ```bash
 reg query "HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v "Run"
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v "Run"
@@ -196,7 +190,7 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\CurrentVersion
 
 Windows 레지스트리의 `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot` 아래에 기본적으로 `cmd.exe`로 설정된 **`AlternateShell`** 값이 있습니다. 이는 시작 시 "명령 프롬프트가 있는 안전 모드"를 선택할 때 (F8을 눌러서) `cmd.exe`가 사용된다는 것을 의미합니다. 그러나 F8을 눌러 수동으로 선택하지 않고도 이 모드에서 자동으로 시작하도록 컴퓨터를 설정할 수 있습니다.
 
-"명령 프롬프트가 있는 안전 모드"에서 자동으로 시작하기 위한 부팅 옵션을 만드는 단계:
+"명령 프롬프트가 있는 안전 모드"에서 자동으로 시작하는 부팅 옵션을 만들기 위한 단계:
 
 1. `boot.ini` 파일의 속성을 변경하여 읽기 전용, 시스템 및 숨김 플래그를 제거합니다: `attrib c:\boot.ini -r -s -h`
 2. `boot.ini`를 편집을 위해 엽니다.
@@ -205,7 +199,7 @@ Windows 레지스트리의 `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot` 아�
 5. 원래 파일 속성을 다시 적용합니다: `attrib c:\boot.ini +r +s +h`
 
 - **Exploit 1:** **AlternateShell** 레지스트리 키를 변경하면 사용자 정의 명령 셸 설정이 가능해져, 무단 접근이 발생할 수 있습니다.
-- **Exploit 2 (PATH 쓰기 권한):** 시스템 **PATH** 변수의 어떤 부분에든 쓰기 권한이 있는 경우, 특히 `C:\Windows\system32` 이전에 있으면, 사용자 정의 `cmd.exe`를 실행할 수 있으며, 이는 시스템이 안전 모드에서 시작될 경우 백도어가 될 수 있습니다.
+- **Exploit 2 (PATH 쓰기 권한):** 시스템 **PATH** 변수의 어떤 부분에든 쓰기 권한이 있는 경우, 특히 `C:\Windows\system32` 이전에, 사용자 정의 `cmd.exe`를 실행할 수 있으며, 이는 시스템이 안전 모드에서 시작될 경우 백도어가 될 수 있습니다.
 - **Exploit 3 (PATH 및 boot.ini 쓰기 권한):** `boot.ini`에 대한 쓰기 접근은 자동 안전 모드 시작을 가능하게 하여, 다음 재부팅 시 무단 접근을 용이하게 합니다.
 
 현재 **AlternateShell** 설정을 확인하려면 다음 명령을 사용하십시오:
@@ -233,8 +227,8 @@ Active Setup은 다음 레지스트리 키를 통해 관리됩니다:
 
 **보안 통찰력:**
 
-- **`IsInstalled`**가 `"1"`로 설정된 키를 특정 **`StubPath`**로 수정하거나 쓰는 것은 무단 명령 실행으로 이어질 수 있으며, 이는 권한 상승을 초래할 수 있습니다.
-- 어떤 **`StubPath`** 값에서 참조된 이진 파일을 변경하는 것도 충분한 권한이 있을 경우 권한 상승을 달성할 수 있습니다.
+- **`IsInstalled`**가 `"1"`로 설정된 키를 수정하거나 특정 **`StubPath`**에 쓰는 것은 권한 상승을 위한 무단 명령 실행으로 이어질 수 있습니다.
+- 충분한 권한이 주어질 경우, 어떤 **`StubPath`** 값에서 참조된 이진 파일을 변경하는 것도 권한 상승을 달성할 수 있습니다.
 
 Active Setup 구성 요소 전반에 걸쳐 **`StubPath`** 구성을 검사하기 위해 다음 명령을 사용할 수 있습니다:
 ```bash
@@ -243,11 +237,11 @@ reg query "HKCU\SOFTWARE\Microsoft\Active Setup\Installed Components" /s /v Stub
 reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components" /s /v StubPath
 reg query "HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components" /s /v StubPath
 ```
-### Browser Helper Objects
+### 브라우저 헬퍼 오브젝트
 
-### Overview of Browser Helper Objects (BHOs)
+### 브라우저 헬퍼 오브젝트(BHOs) 개요
 
-Browser Helper Objects (BHOs)는 Microsoft의 Internet Explorer에 추가 기능을 제공하는 DLL 모듈입니다. 이들은 매번 시작할 때 Internet Explorer와 Windows Explorer에 로드됩니다. 그러나 **NoExplorer** 키를 1로 설정하면 실행이 차단되어 Windows Explorer 인스턴스와 함께 로드되지 않도록 할 수 있습니다.
+브라우저 헬퍼 오브젝트(BHOs)는 Microsoft의 Internet Explorer에 추가 기능을 제공하는 DLL 모듈입니다. 이들은 각 시작 시 Internet Explorer와 Windows Explorer에 로드됩니다. 그러나 **NoExplorer** 키를 1로 설정하면 실행이 차단되어 Windows Explorer 인스턴스와 함께 로드되지 않도록 할 수 있습니다.
 
 BHOs는 Internet Explorer 11을 통해 Windows 10과 호환되지만, 최신 버전의 Windows에서 기본 브라우저인 Microsoft Edge에서는 지원되지 않습니다.
 
@@ -297,25 +291,21 @@ HKLM\Software\Microsoft\Wow6432Node\Windows NT\CurrentVersion\Image File Executi
 ```
 ## SysInternals
 
-autoruns를 찾을 수 있는 모든 사이트는 **이미**[ **winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe)로 검색되었습니다. 그러나 **자동 실행되는** 파일의 **더 포괄적인 목록**을 원한다면 systinternals의 [autoruns](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns)를 사용할 수 있습니다:
+모든 autoruns를 찾을 수 있는 사이트는 **이미**[ **winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe)로 검색되었습니다. 그러나 **자동 실행되는** 파일의 **더 포괄적인 목록**을 원한다면 Sysinternals의 [autoruns](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns)를 사용할 수 있습니다:
 ```
 autorunsc.exe -m -nobanner -a * -ct /accepteula
 ```
-## More
+## 더 많은 정보
 
 **레지스트리와 같은 Autoruns를 더 찾으려면** [**https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2**](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
 
-## References
+## 참고 문헌
 
 - [https://resources.infosecinstitute.com/common-malware-persistence-mechanisms/#gref](https://resources.infosecinstitute.com/common-malware-persistence-mechanisms/#gref)
 - [https://attack.mitre.org/techniques/T1547/001/](https://attack.mitre.org/techniques/T1547/001/)
 - [https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
 - [https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell](https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell)
 
-<figure><img src="../../images/i3.png" alt=""><figcaption></figcaption></figure>
 
-**버그 바운티 팁**: **Intigriti**에 **가입하세요**, 해커를 위해 해커가 만든 프리미엄 **버그 바운티 플랫폼**입니다! 오늘 [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks)에서 저희와 함께하고 최대 **$100,000**의 보상을 받기 시작하세요!
-
-{% embed url="https://go.intigriti.com/hacktricks" %}
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -1,13 +1,5 @@
 # DCSync
 
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-[**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=dcsync)를 사용하여 세계에서 **가장 진보된** 커뮤니티 도구로 구동되는 **워크플로우**를 쉽게 구축하고 **자동화**하세요.\
-오늘 바로 접근하세요:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=dcsync" %}
-
 {{#include ../../banners/hacktricks-training.md}}
 
 ## DCSync
@@ -16,13 +8,13 @@
 
 **DCSync에 대한 중요 사항:**
 
-- **DCSync 공격은 도메인 컨트롤러의 동작을 시뮬레이션하고 다른 도메인 컨트롤러에 정보를 복제하도록 요청합니다**. 이는 디렉터리 복제 서비스 원격 프로토콜(MS-DRSR)을 사용합니다. MS-DRSR은 Active Directory의 유효하고 필요한 기능이므로 끄거나 비활성화할 수 없습니다.
+- **DCSync 공격은 도메인 컨트롤러의 동작을 시뮬레이션하고 다른 도메인 컨트롤러에 정보를 복제하도록 요청합니다**. 이는 디렉터리 복제 서비스 원격 프로토콜(MS-DRSR)을 사용합니다. MS-DRSR은 Active Directory의 유효하고 필요한 기능이기 때문에 끄거나 비활성화할 수 없습니다.
 - 기본적으로 **도메인 관리자, 엔터프라이즈 관리자, 관리자 및 도메인 컨트롤러** 그룹만이 필요한 권한을 가지고 있습니다.
 - reversible encryption으로 저장된 계정 비밀번호가 있는 경우, Mimikatz에서 비밀번호를 평문으로 반환하는 옵션이 제공됩니다.
 
 ### Enumeration
 
-`powerview`를 사용하여 이러한 권한을 가진 사용자를 확인하세요:
+`powerview`를 사용하여 이러한 권한을 가진 사람을 확인하십시오:
 ```powershell
 Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveGUIDs | ?{($_.ObjectType -match 'replication-get') -or ($_.ActiveDirectoryRights -match 'GenericAll') -or ($_.ActiveDirectoryRights -match 'WriteDacl')}
 ```
@@ -41,7 +33,7 @@ secretsdump.py -just-dc <user>:<password>@<ipaddress> -outputfile dcsync_hashes
 
 - 하나는 **NTLM 해시**
 - 하나는 **Kerberos 키**
-- 하나는 NTDS에서 [**가역 암호화**](https://docs.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/store-passwords-using-reversible-encryption)가 활성화된 모든 계정의 평문 비밀번호입니다. 가역 암호화가 활성화된 사용자를 얻으려면 다음을 사용하세요.
+- 하나는 NTDS에서 [**가역 암호화**](https://docs.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/store-passwords-using-reversible-encryption)가 활성화된 모든 계정의 평문 비밀번호입니다. 가역 암호화가 활성화된 사용자를 얻으려면
 
 ```powershell
 Get-DomainUser -Identity * | ? {$_.useraccountcontrol -like '*ENCRYPTED_TEXT_PWD_ALLOWED*'} |select samaccountname,useraccountcontrol
@@ -70,11 +62,3 @@ Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveG
 - [https://yojimbosecurity.ninja/dcsync/](https://yojimbosecurity.ninja/dcsync/)
 
 {{#include ../../banners/hacktricks-training.md}}
-
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-[**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=dcsync)를 사용하여 세계에서 **가장 진보된** 커뮤니티 도구로 구동되는 **워크플로우**를 쉽게 구축하고 **자동화**하세요.\
-오늘 바로 액세스하세요:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=dcsync" %}

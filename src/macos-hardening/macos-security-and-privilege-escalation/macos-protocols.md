@@ -1,19 +1,18 @@
-# macOS Network Services & Protocols
+# macOS 네트워크 서비스 및 프로토콜
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Remote Access Services
+## 원격 액세스 서비스
 
-These are the common macOS services to access them remotely.\
-You can enable/disable these services in `System Settings` --> `Sharing`
+이들은 원격으로 액세스하기 위한 일반적인 macOS 서비스입니다.\
+이 서비스는 `시스템 설정` --> `공유`에서 활성화/비활성화할 수 있습니다.
 
-- **VNC**, known as “Screen Sharing” (tcp:5900)
-- **SSH**, called “Remote Login” (tcp:22)
-- **Apple Remote Desktop** (ARD), or “Remote Management” (tcp:3283, tcp:5900)
-- **AppleEvent**, known as “Remote Apple Event” (tcp:3031)
+- **VNC**, "화면 공유"로 알려져 있음 (tcp:5900)
+- **SSH**, "원격 로그인"이라고 불림 (tcp:22)
+- **Apple Remote Desktop** (ARD), 또는 "원격 관리" (tcp:3283, tcp:5900)
+- **AppleEvent**, "원격 Apple 이벤트"로 알려져 있음 (tcp:3031)
 
-Check if any is enabled running:
-
+활성화된 서비스가 있는지 확인하려면 다음을 실행하세요:
 ```bash
 rmMgmt=$(netstat -na | grep LISTEN | grep tcp46 | grep "*.3283" | wc -l);
 scrShrng=$(netstat -na | grep LISTEN | egrep 'tcp4|tcp6' | grep "*.5900" | wc -l);
@@ -23,103 +22,90 @@ rAE=$(netstat -na | grep LISTEN | egrep 'tcp4|tcp6' | grep "*.3031" | wc -l);
 bmM=$(netstat -na | grep LISTEN | egrep 'tcp4|tcp6' | grep "*.4488" | wc -l);
 printf "\nThe following services are OFF if '0', or ON otherwise:\nScreen Sharing: %s\nFile Sharing: %s\nRemote Login: %s\nRemote Mgmt: %s\nRemote Apple Events: %s\nBack to My Mac: %s\n\n" "$scrShrng" "$flShrng" "$rLgn" "$rmMgmt" "$rAE" "$bmM";
 ```
-
 ### Pentesting ARD
 
-Apple Remote Desktop (ARD) is an enhanced version of [Virtual Network Computing (VNC)](https://en.wikipedia.org/wiki/Virtual_Network_Computing) tailored for macOS, offering additional features. A notable vulnerability in ARD is its authentication method for the control screen password, which only uses the first 8 characters of the password, making it prone to [brute force attacks](https://thudinh.blogspot.com/2017/09/brute-forcing-passwords-with-thc-hydra.html) with tools like Hydra or [GoRedShell](https://github.com/ahhh/GoRedShell/), as there are no default rate limits.
+Apple Remote Desktop (ARD)는 macOS에 맞게 조정된 [Virtual Network Computing (VNC)](https://en.wikipedia.org/wiki/Virtual_Network_Computing)의 향상된 버전으로, 추가 기능을 제공합니다. ARD의 주목할 만한 취약점은 제어 화면 비밀번호의 인증 방법으로, 비밀번호의 처음 8자만 사용하여 [brute force attacks](https://thudinh.blogspot.com/2017/09/brute-forcing-passwords-with-thc-hydra.html)에 취약하게 만듭니다. Hydra 또는 [GoRedShell](https://github.com/ahhh/GoRedShell/)과 같은 도구를 사용하여 공격할 수 있으며, 기본 속도 제한이 없습니다.
 
-Vulnerable instances can be identified using **nmap**'s `vnc-info` script. Services supporting `VNC Authentication (2)` are especially susceptible to brute force attacks due to the 8-character password truncation.
+취약한 인스턴스는 **nmap**의 `vnc-info` 스크립트를 사용하여 식별할 수 있습니다. `VNC Authentication (2)`를 지원하는 서비스는 8자 비밀번호 잘림으로 인해 특히 brute force 공격에 취약합니다.
 
-To enable ARD for various administrative tasks like privilege escalation, GUI access, or user monitoring, use the following command:
-
+권한 상승, GUI 접근 또는 사용자 모니터링과 같은 다양한 관리 작업을 위해 ARD를 활성화하려면 다음 명령을 사용하십시오:
 ```bash
 sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -allowAccessFor -allUsers -privs -all -clientopts -setmenuextra -menuextra yes
 ```
+ARD는 관찰, 공유 제어 및 전체 제어를 포함한 다양한 제어 수준을 제공하며, 사용자 비밀번호 변경 후에도 세션이 지속됩니다. 관리 사용자를 위해 루트로 Unix 명령을 직접 전송하고 실행할 수 있습니다. 작업 예약 및 원격 Spotlight 검색은 여러 머신에서 민감한 파일에 대한 원격 저영향 검색을 용이하게 하는 주목할 만한 기능입니다.
 
-ARD provides versatile control levels, including observation, shared control, and full control, with sessions persisting even after user password changes. It allows sending Unix commands directly, executing them as root for administrative users. Task scheduling and Remote Spotlight search are notable features, facilitating remote, low-impact searches for sensitive files across multiple machines.
+## Bonjour 프로토콜
 
-## Bonjour Protocol
+Bonjour는 **같은 네트워크에 있는 장치들이 서로 제공하는 서비스를 감지할 수 있게 해주는 Apple 설계 기술**입니다. Rendezvous, **Zero Configuration** 또는 Zeroconf로도 알려져 있으며, 장치가 TCP/IP 네트워크에 가입하고, **자동으로 IP 주소를 선택**하며, 다른 네트워크 장치에 자신의 서비스를 브로드캐스트할 수 있게 합니다.
 
-Bonjour, an Apple-designed technology, allows **devices on the same network to detect each other's offered services**. Known also as Rendezvous, **Zero Configuration**, or Zeroconf, it enables a device to join a TCP/IP network, **automatically choose an IP address**, and broadcast its services to other network devices.
+Bonjour가 제공하는 Zero Configuration Networking은 장치가 다음을 보장합니다:
 
-Zero Configuration Networking, provided by Bonjour, ensures that devices can:
+- **DHCP 서버가 없는 경우에도 자동으로 IP 주소를 얻습니다.**
+- DNS 서버 없이 **이름-주소 변환**을 수행합니다.
+- 네트워크에서 사용 가능한 **서비스를 발견합니다.**
 
-- **Automatically obtain an IP Address** even in the absence of a DHCP server.
-- Perform **name-to-address translation** without requiring a DNS server.
-- **Discover services** available on the network.
+Bonjour를 사용하는 장치는 **169.254/16 범위의 IP 주소를 할당**하고 네트워크에서 그 고유성을 확인합니다. Macs는 이 서브넷에 대한 라우팅 테이블 항목을 유지하며, `netstat -rn | grep 169`를 통해 확인할 수 있습니다.
 
-Devices using Bonjour will assign themselves an **IP address from the 169.254/16 range** and verify its uniqueness on the network. Macs maintain a routing table entry for this subnet, verifiable via `netstat -rn | grep 169`.
+DNS의 경우, Bonjour는 **Multicast DNS (mDNS) 프로토콜**을 사용합니다. mDNS는 **포트 5353/UDP**를 통해 작동하며, **표준 DNS 쿼리**를 사용하지만 **멀티캐스트 주소 224.0.0.251**을 대상으로 합니다. 이 접근 방식은 네트워크의 모든 수신 장치가 쿼리를 수신하고 응답할 수 있도록 하여 기록 업데이트를 용이하게 합니다.
 
-For DNS, Bonjour utilizes the **Multicast DNS (mDNS) protocol**. mDNS operates over **port 5353/UDP**, employing **standard DNS queries** but targeting the **multicast address 224.0.0.251**. This approach ensures that all listening devices on the network can receive and respond to the queries, facilitating the update of their records.
+네트워크에 가입할 때, 각 장치는 일반적으로 **.local**로 끝나는 이름을 자가 선택하며, 이는 호스트 이름에서 파생되거나 무작위로 생성될 수 있습니다.
 
-Upon joining the network, each device self-selects a name, typically ending in **.local**, which may be derived from the hostname or randomly generated.
+네트워크 내 서비스 발견은 **DNS 서비스 발견 (DNS-SD)**에 의해 촉진됩니다. DNS SRV 레코드의 형식을 활용하여, DNS-SD는 **DNS PTR 레코드**를 사용하여 여러 서비스의 목록을 가능하게 합니다. 특정 서비스를 찾는 클라이언트는 `<Service>.<Domain>`에 대한 PTR 레코드를 요청하며, 서비스가 여러 호스트에서 사용 가능한 경우 `<Instance>.<Service>.<Domain>` 형식의 PTR 레코드 목록을 반환받습니다.
 
-Service discovery within the network is facilitated by **DNS Service Discovery (DNS-SD)**. Leveraging the format of DNS SRV records, DNS-SD uses **DNS PTR records** to enable the listing of multiple services. A client seeking a specific service will request a PTR record for `<Service>.<Domain>`, receiving in return a list of PTR records formatted as `<Instance>.<Service>.<Domain>` if the service is available from multiple hosts.
+`dns-sd` 유틸리티는 **네트워크 서비스를 발견하고 광고하는 데 사용될 수 있습니다**. 다음은 그 사용 예시입니다:
 
-The `dns-sd` utility can be employed for **discovering and advertising network services**. Here are some examples of its usage:
+### SSH 서비스 검색
 
-### Searching for SSH Services
-
-To search for SSH services on the network, the following command is used:
-
+네트워크에서 SSH 서비스를 검색하기 위해 다음 명령을 사용합니다:
 ```bash
 dns-sd -B _ssh._tcp
 ```
+이 명령은 \_ssh.\_tcp 서비스 검색을 시작하고 타임스탬프, 플래그, 인터페이스, 도메인, 서비스 유형 및 인스턴스 이름과 같은 세부 정보를 출력합니다.
 
-This command initiates browsing for \_ssh.\_tcp services and outputs details such as timestamp, flags, interface, domain, service type, and instance name.
+### HTTP 서비스 광고
 
-### Advertising an HTTP Service
-
-To advertise an HTTP service, you can use:
-
+HTTP 서비스를 광고하려면 다음을 사용할 수 있습니다:
 ```bash
 dns-sd -R "Index" _http._tcp . 80 path=/index.html
 ```
+이 명령은 포트 80에서 `/index.html` 경로를 가진 "Index"라는 HTTP 서비스를 등록합니다.
 
-This command registers an HTTP service named "Index" on port 80 with a path of `/index.html`.
-
-To then search for HTTP services on the network:
-
+그런 다음 네트워크에서 HTTP 서비스를 검색하려면:
 ```bash
 dns-sd -B _http._tcp
 ```
+서비스가 시작되면, 서브넷의 모든 장치에 자신의 가용성을 멀티캐스트하여 알립니다. 이러한 서비스에 관심이 있는 장치는 요청을 보낼 필요 없이 이러한 알림을 듣기만 하면 됩니다.
 
-When a service starts, it announces its availability to all devices on the subnet by multicasting its presence. Devices interested in these services don't need to send requests but simply listen for these announcements.
+보다 사용자 친화적인 인터페이스를 위해, Apple App Store에서 제공되는 **Discovery - DNS-SD Browser** 앱은 로컬 네트워크에서 제공되는 서비스를 시각화할 수 있습니다.
 
-For a more user-friendly interface, the **Discovery - DNS-SD Browser** app available on the Apple App Store can visualize the services offered on your local network.
-
-Alternatively, custom scripts can be written to browse and discover services using the `python-zeroconf` library. The [**python-zeroconf**](https://github.com/jstasiak/python-zeroconf) script demonstrates creating a service browser for `_http._tcp.local.` services, printing added or removed services:
-
+또는, `python-zeroconf` 라이브러리를 사용하여 서비스를 탐색하고 발견하는 사용자 정의 스크립트를 작성할 수 있습니다. [**python-zeroconf**](https://github.com/jstasiak/python-zeroconf) 스크립트는 `_http._tcp.local.` 서비스에 대한 서비스 브라우저를 생성하고 추가되거나 제거된 서비스를 출력하는 방법을 보여줍니다:
 ```python
 from zeroconf import ServiceBrowser, Zeroconf
 
 class MyListener:
 
-    def remove_service(self, zeroconf, type, name):
-        print("Service %s removed" % (name,))
+def remove_service(self, zeroconf, type, name):
+print("Service %s removed" % (name,))
 
-    def add_service(self, zeroconf, type, name):
-        info = zeroconf.get_service_info(type, name)
-        print("Service %s added, service info: %s" % (name, info))
+def add_service(self, zeroconf, type, name):
+info = zeroconf.get_service_info(type, name)
+print("Service %s added, service info: %s" % (name, info))
 
 zeroconf = Zeroconf()
 listener = MyListener()
 browser = ServiceBrowser(zeroconf, "_http._tcp.local.", listener)
 try:
-    input("Press enter to exit...\n\n")
+input("Press enter to exit...\n\n")
 finally:
-    zeroconf.close()
+zeroconf.close()
 ```
+### Bonjour 비활성화
 
-### Disabling Bonjour
-
-If there are concerns about security or other reasons to disable Bonjour, it can be turned off using the following command:
-
+보안에 대한 우려가 있거나 Bonjour를 비활성화해야 할 다른 이유가 있는 경우, 다음 명령어를 사용하여 끌 수 있습니다:
 ```bash
 sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.mDNSResponder.plist
 ```
-
-## References
+## 참고 문헌
 
 - [**The Mac Hacker's Handbook**](https://www.amazon.com/-/es/Charlie-Miller-ebook-dp-B004U7MUMU/dp/B004U7MUMU/ref=mt_other?_encoding=UTF8&me=&qid=)
 - [**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)

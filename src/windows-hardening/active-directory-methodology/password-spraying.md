@@ -2,11 +2,6 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
-
-8kSec 아카데미와 함께 **모바일 보안**에 대한 전문성을 심화하세요. 자율 학습 과정을 통해 iOS 및 Android 보안을 마스터하고 인증을 받으세요:
-
-{% embed url="https://academy.8ksec.io/" %}
 
 ## **비밀번호 스프레이**
 
@@ -104,7 +99,7 @@ Outlook에 대한 p**assword spraying**을 위한 여러 도구가 있습니다.
 - [DomainPasswordSpray](https://github.com/dafthack/DomainPasswordSpray) 사용 (Powershell)
 - [MailSniper](https://github.com/dafthack/MailSniper) 사용 (Powershell)
 
-이 도구 중 하나를 사용하려면 사용자 목록과 비밀번호 / 비밀번호의 작은 목록이 필요합니다.
+이 도구를 사용하려면 사용자 목록과 비밀번호 / 비밀번호의 작은 목록이 필요합니다.
 ```bash
 ./ruler-linux64 --domain reel2.htb -k brute --users users.txt --passwords passwords.txt --delay 0 --verbose
 [x] Failed: larsson:Summer2020
@@ -130,10 +125,5 @@ Outlook에 대한 p**assword spraying**을 위한 여러 도구가 있습니다.
 - [www.blackhillsinfosec.com/?p=5296](https://www.blackhillsinfosec.com/?p=5296)
 - [https://hunter2.gitbook.io/darthsidious/initial-access/password-spraying](https://hunter2.gitbook.io/darthsidious/initial-access/password-spraying)
 
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
-
-**모바일 보안**에 대한 전문성을 심화하세요. 8kSec 아카데미와 함께 iOS 및 Android 보안을 마스터하고 자격증을 취득하세요:
-
-{% embed url="https://academy.8ksec.io/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

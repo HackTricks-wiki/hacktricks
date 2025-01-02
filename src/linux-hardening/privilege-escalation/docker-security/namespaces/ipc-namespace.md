@@ -2,83 +2,72 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## 기본 정보
 
-An IPC (Inter-Process Communication) namespace is a Linux kernel feature that provides **isolation** of System V IPC objects, such as message queues, shared memory segments, and semaphores. This isolation ensures that processes in **different IPC namespaces cannot directly access or modify each other's IPC objects**, providing an additional layer of security and privacy between process groups.
+IPC (Inter-Process Communication) 네임스페이스는 메시지 큐, 공유 메모리 세그먼트 및 세마포어와 같은 System V IPC 객체의 **격리**를 제공하는 Linux 커널 기능입니다. 이 격리는 **다른 IPC 네임스페이스에 있는 프로세스가 서로의 IPC 객체에 직접 접근하거나 수정할 수 없도록** 보장하여 프로세스 그룹 간에 추가적인 보안 및 프라이버시 계층을 제공합니다.
 
-### How it works:
+### 작동 방식:
 
-1. When a new IPC namespace is created, it starts with a **completely isolated set of System V IPC objects**. This means that processes running in the new IPC namespace cannot access or interfere with the IPC objects in other namespaces or the host system by default.
-2. IPC objects created within a namespace are visible and **accessible only to processes within that namespace**. Each IPC object is identified by a unique key within its namespace. Although the key may be identical in different namespaces, the objects themselves are isolated and cannot be accessed across namespaces.
-3. Processes can move between namespaces using the `setns()` system call or create new namespaces using the `unshare()` or `clone()` system calls with the `CLONE_NEWIPC` flag. When a process moves to a new namespace or creates one, it will start using the IPC objects associated with that namespace.
+1. 새로운 IPC 네임스페이스가 생성되면 **완전히 격리된 System V IPC 객체 세트**로 시작합니다. 이는 새로운 IPC 네임스페이스에서 실행되는 프로세스가 기본적으로 다른 네임스페이스나 호스트 시스템의 IPC 객체에 접근하거나 간섭할 수 없음을 의미합니다.
+2. 네임스페이스 내에서 생성된 IPC 객체는 **해당 네임스페이스 내의 프로세스만 볼 수 있고 접근할 수 있습니다**. 각 IPC 객체는 해당 네임스페이스 내에서 고유한 키로 식별됩니다. 키는 다른 네임스페이스에서 동일할 수 있지만, 객체 자체는 격리되어 있으며 네임스페이스 간에 접근할 수 없습니다.
+3. 프로세스는 `setns()` 시스템 호출을 사용하여 네임스페이스 간에 이동하거나 `unshare()` 또는 `clone()` 시스템 호출을 사용하여 `CLONE_NEWIPC` 플래그와 함께 새로운 네임스페이스를 생성할 수 있습니다. 프로세스가 새로운 네임스페이스로 이동하거나 생성할 때, 해당 네임스페이스와 연결된 IPC 객체를 사용하기 시작합니다.
 
-## Lab:
+## 실습:
 
-### Create different Namespaces
+### 다양한 네임스페이스 생성
 
 #### CLI
-
 ```bash
 sudo unshare -i [--mount-proc] /bin/bash
 ```
-
-By mounting a new instance of the `/proc` filesystem if you use the param `--mount-proc`, you ensure that the new mount namespace has an **accurate and isolated view of the process information specific to that namespace**.
+새로운 인스턴스의 `/proc` 파일 시스템을 마운트하면 `--mount-proc` 매개변수를 사용하여 새로운 마운트 네임스페이스가 **해당 네임스페이스에 특정한 프로세스 정보에 대한 정확하고 격리된 뷰를 갖도록** 보장합니다.
 
 <details>
 
-<summary>Error: bash: fork: Cannot allocate memory</summary>
+<summary>오류: bash: fork: 메모리를 할당할 수 없습니다</summary>
 
-When `unshare` is executed without the `-f` option, an error is encountered due to the way Linux handles new PID (Process ID) namespaces. The key details and the solution are outlined below:
+`unshare`가 `-f` 옵션 없이 실행될 때, Linux가 새로운 PID(프로세스 ID) 네임스페이스를 처리하는 방식 때문에 오류가 발생합니다. 주요 세부사항과 해결책은 아래에 설명되어 있습니다:
 
-1. **Problem Explanation**:
+1. **문제 설명**:
 
-   - The Linux kernel allows a process to create new namespaces using the `unshare` system call. However, the process that initiates the creation of a new PID namespace (referred to as the "unshare" process) does not enter the new namespace; only its child processes do.
-   - Running `%unshare -p /bin/bash%` starts `/bin/bash` in the same process as `unshare`. Consequently, `/bin/bash` and its child processes are in the original PID namespace.
-   - The first child process of `/bin/bash` in the new namespace becomes PID 1. When this process exits, it triggers the cleanup of the namespace if there are no other processes, as PID 1 has the special role of adopting orphan processes. The Linux kernel will then disable PID allocation in that namespace.
+- Linux 커널은 프로세스가 `unshare` 시스템 호출을 사용하여 새로운 네임스페이스를 생성할 수 있도록 허용합니다. 그러나 새로운 PID 네임스페이스를 생성하는 프로세스(이를 "unshare" 프로세스라고 함)는 새로운 네임스페이스에 들어가지 않으며, 오직 그 자식 프로세스만 들어갑니다.
+- `%unshare -p /bin/bash%`를 실행하면 `/bin/bash`가 `unshare`와 동일한 프로세스에서 시작됩니다. 결과적으로 `/bin/bash`와 그 자식 프로세스는 원래 PID 네임스페이스에 있습니다.
+- 새로운 네임스페이스에서 `/bin/bash`의 첫 번째 자식 프로세스는 PID 1이 됩니다. 이 프로세스가 종료되면, 다른 프로세스가 없을 경우 네임스페이스의 정리가 트리거됩니다. PID 1은 고아 프로세스를 입양하는 특별한 역할을 가지고 있습니다. 그러면 Linux 커널은 해당 네임스페이스에서 PID 할당을 비활성화합니다.
 
-2. **Consequence**:
+2. **결과**:
 
-   - The exit of PID 1 in a new namespace leads to the cleaning of the `PIDNS_HASH_ADDING` flag. This results in the `alloc_pid` function failing to allocate a new PID when creating a new process, producing the "Cannot allocate memory" error.
+- 새로운 네임스페이스에서 PID 1의 종료는 `PIDNS_HASH_ADDING` 플래그의 정리를 초래합니다. 이로 인해 새로운 프로세스를 생성할 때 `alloc_pid` 함수가 새로운 PID를 할당하지 못하게 되어 "메모리를 할당할 수 없습니다" 오류가 발생합니다.
 
-3. **Solution**:
-   - The issue can be resolved by using the `-f` option with `unshare`. This option makes `unshare` fork a new process after creating the new PID namespace.
-   - Executing `%unshare -fp /bin/bash%` ensures that the `unshare` command itself becomes PID 1 in the new namespace. `/bin/bash` and its child processes are then safely contained within this new namespace, preventing the premature exit of PID 1 and allowing normal PID allocation.
+3. **해결책**:
+- 이 문제는 `unshare`와 함께 `-f` 옵션을 사용하여 해결할 수 있습니다. 이 옵션은 `unshare`가 새로운 PID 네임스페이스를 생성한 후 새로운 프로세스를 포크하도록 만듭니다.
+- `%unshare -fp /bin/bash%`를 실행하면 `unshare` 명령 자체가 새로운 네임스페이스에서 PID 1이 됩니다. 그 결과 `/bin/bash`와 그 자식 프로세스는 이 새로운 네임스페이스 내에서 안전하게 포함되어 PID 1의 조기 종료를 방지하고 정상적인 PID 할당을 허용합니다.
 
-By ensuring that `unshare` runs with the `-f` flag, the new PID namespace is correctly maintained, allowing `/bin/bash` and its sub-processes to operate without encountering the memory allocation error.
+`unshare`가 `-f` 플래그와 함께 실행되도록 보장함으로써 새로운 PID 네임스페이스가 올바르게 유지되며, `/bin/bash`와 그 하위 프로세스가 메모리 할당 오류 없이 작동할 수 있습니다.
 
 </details>
 
 #### Docker
-
 ```bash
 docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 ```
-
-### &#x20;Check which namespace is your process in
-
+### &#x20;프로세스가 있는 네임스페이스 확인하기
 ```bash
 ls -l /proc/self/ns/ipc
 lrwxrwxrwx 1 root root 0 Apr  4 20:37 /proc/self/ns/ipc -> 'ipc:[4026531839]'
 ```
-
-### Find all IPC namespaces
-
+### 모든 IPC 네임스페이스 찾기
 ```bash
 sudo find /proc -maxdepth 3 -type l -name ipc -exec readlink {} \; 2>/dev/null | sort -u
 # Find the processes with an specific namespace
 sudo find /proc -maxdepth 3 -type l -name ipc -exec ls -l  {} \; 2>/dev/null | grep <ns-number>
 ```
-
-### Enter inside an IPC namespace
-
+### IPC 네임스페이스 내부로 들어가기
 ```bash
 nsenter -i TARGET_PID --pid /bin/bash
 ```
+또한, **루트일 경우에만 다른 프로세스 네임스페이스에 들어갈 수 있습니다**. 그리고 **디스크립터**가 없으면 **다른 네임스페이스에 들어갈 수 없습니다** (예: `/proc/self/ns/net`).
 
-Also, you can only **enter in another process namespace if you are root**. And you **cannot** **enter** in other namespace **without a descriptor** pointing to it (like `/proc/self/ns/net`).
-
-### Create IPC object
-
+### IPC 객체 생성
 ```bash
 # Container
 sudo unshare -i /bin/bash
@@ -93,7 +82,6 @@ key        shmid      owner      perms      bytes      nattch     status
 # From the host
 ipcs -m # Nothing is seen
 ```
-
 ## References
 
 - [https://stackoverflow.com/questions/44666700/unshare-pid-bin-bash-fork-cannot-allocate-memory](https://stackoverflow.com/questions/44666700/unshare-pid-bin-bash-fork-cannot-allocate-memory)

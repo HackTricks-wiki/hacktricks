@@ -1,15 +1,14 @@
-# macOS Useful Commands
+# macOS 유용한 명령어
 
 {{#include ../banners/hacktricks-training.md}}
 
-### MacOS Automatic Enumeration Tools
+### MacOS 자동 열거 도구
 
 - **MacPEAS**: [https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS](https://github.com/carlospolop/PEASS-ng/tree/master/linPEAS)
 - **Metasploit**: [https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb](https://github.com/rapid7/metasploit-framework/blob/master/modules/post/osx/gather/enum_osx.rb)
 - **SwiftBelt**: [https://github.com/cedowens/SwiftBelt](https://github.com/cedowens/SwiftBelt)
 
-### Specific MacOS Commands
-
+### 특정 MacOS 명령어
 ```bash
 #System info
 date
@@ -111,25 +110,21 @@ sudo launchctl load -w /System/Library/LaunchDaemons/ssh.plist (enable ssh)
 sudo launchctl unload /System/Library/LaunchDaemons/ssh.plist (disable ssh)
 #Start apache
 sudo apachectl (start|status|restart|stop)
- ##Web folder: /Library/WebServer/Documents/
+##Web folder: /Library/WebServer/Documents/
 #Remove DNS cache
 dscacheutil -flushcache
 sudo killall -HUP mDNSResponder
 ```
+### 설치된 소프트웨어 및 서비스
 
-### Installed Software & Services
-
-Check for **suspicious** applications installed and **privileges** over the.installed resources:
-
+설치된 **의심스러운** 애플리케이션과 설치된 리소스에 대한 **권한**을 확인하십시오:
 ```
 system_profiler SPApplicationsDataType #Installed Apps
 system_profiler SPFrameworksDataType #Instaled framework
 lsappinfo list #Installed Apps
 launchctl list #Services
 ```
-
-### User Processes
-
+### 사용자 프로세스
 ```bash
 # will print all the running services under that particular user domain.
 launchctl print gui/<users UID>
@@ -140,10 +135,9 @@ launchctl print system
 # will print detailed information about the specific launch agent. And if it’s not running or you’ve mistyped, you will get some output with a non-zero exit code: Could not find service “com.company.launchagent.label” in domain for login
 launchctl print gui/<user's UID>/com.company.launchagent.label
 ```
+### 사용자 생성
 
-### Create a user
-
-Without prompts
+프롬프트 없이
 
 <figure><img src="../images/image (79).png" alt=""><figcaption></figcaption></figure>
 

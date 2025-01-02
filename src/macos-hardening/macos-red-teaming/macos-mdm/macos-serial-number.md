@@ -1,40 +1,40 @@
-# macOS Serial Number
+# macOS 일련 번호
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## 기본 정보
 
-Apple devices post-2010 have serial numbers consisting of **12 alphanumeric characters**, each segment conveying specific information:
+2010년 이후의 Apple 기기는 **12자리 알파벳 숫자**로 구성된 일련 번호를 가지고 있으며, 각 세그먼트는 특정 정보를 전달합니다:
 
-- **First 3 Characters**: Indicate the **manufacturing location**.
-- **Characters 4 & 5**: Denote the **year and week of manufacture**.
-- **Characters 6 to 8**: Serve as a **unique identifier** for each device.
-- **Last 4 Characters**: Specify the **model number**.
+- **첫 3자리**: **제조 위치**를 나타냅니다.
+- **4번째 및 5번째 문자**: **제조 연도 및 주**를 나타냅니다.
+- **6번째에서 8번째 문자**: 각 기기에 대한 **고유 식별자** 역할을 합니다.
+- **마지막 4자리**: **모델 번호**를 지정합니다.
 
-For instance, the serial number **C02L13ECF8J2** follows this structure.
+예를 들어, 일련 번호 **C02L13ECF8J2**는 이 구조를 따릅니다.
 
-### **Manufacturing Locations (First 3 Characters)**
+### **제조 위치 (첫 3자리)**
 
-Certain codes represent specific factories:
+특정 코드는 특정 공장을 나타냅니다:
 
-- **FC, F, XA/XB/QP/G8**: Various locations in the USA.
-- **RN**: Mexico.
-- **CK**: Cork, Ireland.
-- **VM**: Foxconn, Czech Republic.
-- **SG/E**: Singapore.
-- **MB**: Malaysia.
-- **PT/CY**: Korea.
-- **EE/QT/UV**: Taiwan.
-- **FK/F1/F2, W8, DL/DM, DN, YM/7J, 1C/4H/WQ/F7**: Different locations in China.
-- **C0, C3, C7**: Specific cities in China.
-- **RM**: Refurbished devices.
+- **FC, F, XA/XB/QP/G8**: 미국의 다양한 위치.
+- **RN**: 멕시코.
+- **CK**: 아일랜드 코크.
+- **VM**: 체코 공화국 폭스콘.
+- **SG/E**: 싱가포르.
+- **MB**: 말레이시아.
+- **PT/CY**: 한국.
+- **EE/QT/UV**: 대만.
+- **FK/F1/F2, W8, DL/DM, DN, YM/7J, 1C/4H/WQ/F7**: 중국의 다양한 위치.
+- **C0, C3, C7**: 중국의 특정 도시.
+- **RM**: 리퍼비시된 기기.
 
-### **Year of Manufacturing (4th Character)**
+### **제조 연도 (4번째 문자)**
 
-This character varies from 'C' (representing the first half of 2010) to 'Z' (second half of 2019), with different letters indicating different half-year periods.
+이 문자는 'C' (2010년 상반기)를 나타내는 것부터 'Z' (2019년 하반기)까지 다양하며, 서로 다른 문자는 서로 다른 반년 기간을 나타냅니다.
 
-### **Week of Manufacturing (5th Character)**
+### **제조 주 (5번째 문자)**
 
-Digits 1-9 correspond to weeks 1-9. Letters C-Y (excluding vowels and 'S') represent weeks 10-27. For the second half of the year, 26 is added to this number.
+숫자 1-9는 주 1-9에 해당합니다. 문자 C-Y (모음과 'S' 제외)는 주 10-27을 나타냅니다. 연도의 하반기에는 이 숫자에 26이 추가됩니다.
 
 {{#include ../../../banners/hacktricks-training.md}}
