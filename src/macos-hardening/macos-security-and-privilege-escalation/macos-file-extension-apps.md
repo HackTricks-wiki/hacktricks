@@ -4,69 +4,61 @@
 
 ## LaunchServices Database
 
-This is a database of all the installed applications in the macOS that can be queried to get information about each installed application such as URL schemes it support and MIME types.
+Hii ni hifadhidata ya programu zote zilizowekwa katika macOS ambazo zinaweza kuulizwa ili kupata taarifa kuhusu kila programu iliyowekwa kama vile mipango ya URL inayounga mkono na aina za MIME.
 
-It's possible to dump this datase with:
-
+Inawezekana kutoa hifadhidata hii kwa:
 ```
 /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister -dump
 ```
+Au kutumia chombo [**lsdtrip**](https://newosxbook.com/tools/lsdtrip.html).
 
-Or using the tool [**lsdtrip**](https://newosxbook.com/tools/lsdtrip.html).
+**`/usr/libexec/lsd`** ni ubongo wa hifadhidata. Inatoa **huduma kadhaa za XPC** kama vile `.lsd.installation`, `.lsd.open`, `.lsd.openurl`, na zaidi. Lakini pia **inahitaji baadhi ya ruhusa** kwa ajili ya programu ili kuweza kutumia kazi za XPC zilizofichuliwa, kama vile `.launchservices.changedefaulthandler` au `.launchservices.changeurlschemehandler` kubadilisha programu za kawaida kwa aina za mime au mipango ya url na mengineyo.
 
-**`/usr/libexec/lsd`** is the brain of the database. It provides **several XPC services** like `.lsd.installation`, `.lsd.open`, `.lsd.openurl`, and more. But it also **requires some entitlements** to applications to be able to use the exposed XPC functionalities, like `.launchservices.changedefaulthandler` or `.launchservices.changeurlschemehandler` to change default apps for mime types or url schemes and others.
+**`/System/Library/CoreServices/launchservicesd`** inadai huduma `com.apple.coreservices.launchservicesd` na inaweza kuulizwa ili kupata taarifa kuhusu programu zinazotembea. Inaweza kuulizwa kwa chombo cha mfumo /**`usr/bin/lsappinfo`** au kwa kutumia [**lsdtrip**](https://newosxbook.com/tools/lsdtrip.html).
 
-**`/System/Library/CoreServices/launchservicesd`** claims the service `com.apple.coreservices.launchservicesd` and can be queried to get information about running applications. It can be queried with the system tool /**`usr/bin/lsappinfo`** or with [**lsdtrip**](https://newosxbook.com/tools/lsdtrip.html).
+## Wakala wa programu za Kiambatisho cha Faili & mpango wa URL
 
-## File Extension & URL scheme app handlers
-
-The following line can be useful to find the applications that can open files depending on the extension:
-
+Mistari ifuatayo inaweza kuwa na manufaa katika kutafuta programu ambazo zinaweza kufungua faili kulingana na kiambatisho:
 ```bash
 /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister -dump | grep -E "path:|bindings:|name:"
 ```
-
-Or use something like [**SwiftDefaultApps**](https://github.com/Lord-Kamina/SwiftDefaultApps):
-
+Au tumia kitu kama [**SwiftDefaultApps**](https://github.com/Lord-Kamina/SwiftDefaultApps):
 ```bash
 ./swda getSchemes #Get all the available schemes
 ./swda getApps #Get all the apps declared
 ./swda getUTIs #Get all the UTIs
 ./swda getHandler --URL ftp #Get ftp handler
 ```
-
-You can also check the extensions supported by an application doing:
-
+Unaweza pia kuangalia nyongeza zinazoungwa mkono na programu kwa kufanya:
 ```
 cd /Applications/Safari.app/Contents
 grep -A3 CFBundleTypeExtensions Info.plist  | grep string
-				<string>css</string>
-				<string>pdf</string>
-				<string>webarchive</string>
-				<string>webbookmark</string>
-				<string>webhistory</string>
-				<string>webloc</string>
-				<string>download</string>
-				<string>safariextz</string>
-				<string>gif</string>
-				<string>html</string>
-				<string>htm</string>
-				<string>js</string>
-				<string>jpg</string>
-				<string>jpeg</string>
-				<string>jp2</string>
-				<string>txt</string>
-				<string>text</string>
-				<string>png</string>
-				<string>tiff</string>
-				<string>tif</string>
-				<string>url</string>
-				<string>ico</string>
-				<string>xhtml</string>
-				<string>xht</string>
-				<string>xml</string>
-				<string>xbl</string>
-				<string>svg</string>
+<string>css</string>
+<string>pdf</string>
+<string>webarchive</string>
+<string>webbookmark</string>
+<string>webhistory</string>
+<string>webloc</string>
+<string>download</string>
+<string>safariextz</string>
+<string>gif</string>
+<string>html</string>
+<string>htm</string>
+<string>js</string>
+<string>jpg</string>
+<string>jpeg</string>
+<string>jp2</string>
+<string>txt</string>
+<string>text</string>
+<string>png</string>
+<string>tiff</string>
+<string>tif</string>
+<string>url</string>
+<string>ico</string>
+<string>xhtml</string>
+<string>xht</string>
+<string>xml</string>
+<string>xbl</string>
+<string>svg</string>
 ```
-
 {{#include ../../banners/hacktricks-training.md}}

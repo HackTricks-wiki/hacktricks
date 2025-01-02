@@ -4,42 +4,42 @@
 
 ## XNU Kernel
 
-The **core of macOS is XNU**, which stands for "X is Not Unix". This kernel is fundamentally composed of the **Mach microkerne**l (to be discussed later), **and** elements from Berkeley Software Distribution (**BSD**). XNU also provides a platform for **kernel drivers via a system called the I/O Kit**. The XNU kernel is part of the Darwin open source project, which means **its source code is freely accessible**.
+**Msingi wa macOS ni XNU**, ambayo inasimama kwa "X is Not Unix". Kernel hii kimsingi inajumuisha **Mach microkernel** (itaongelewa baadaye), **na** vipengele kutoka Berkeley Software Distribution (**BSD**). XNU pia inatoa jukwaa kwa **madereva ya kernel kupitia mfumo unaoitwa I/O Kit**. Kernel ya XNU ni sehemu ya mradi wa wazi wa chanzo wa Darwin, ambayo inamaanisha **kanuni yake ya chanzo inapatikana bure**.
 
-From a perspective of a security researcher or a Unix developer, **macOS** can feel quite **similar** to a **FreeBSD** system with an elegant GUI and a host of custom applications. Most applications developed for BSD will compile and run on macOS without needing modifications, as the command-line tools familiar to Unix users are all present in macOS. However, because the XNU kernel incorporates Mach, there are some significant differences between a traditional Unix-like system and macOS, and these differences might cause potential issues or provide unique advantages.
+Kutoka kwa mtazamo wa mtafiti wa usalama au mendelezo wa Unix, **macOS** inaweza kuonekana kuwa **kama** mfumo wa **FreeBSD** wenye GUI nzuri na idadi ya programu za kawaida. Programu nyingi zilizotengenezwa kwa BSD zitakusanywa na kuendesha kwenye macOS bila kuhitaji marekebisho, kwani zana za amri zinazojulikana kwa watumiaji wa Unix zipo zote kwenye macOS. Hata hivyo, kwa sababu kernel ya XNU inajumuisha Mach, kuna tofauti kubwa kati ya mfumo wa jadi wa Unix na macOS, na tofauti hizi zinaweza kusababisha matatizo ya uwezekano au kutoa faida za kipekee.
 
-Open source version of XNU: [https://opensource.apple.com/source/xnu/](https://opensource.apple.com/source/xnu/)
+Toleo la wazi la XNU: [https://opensource.apple.com/source/xnu/](https://opensource.apple.com/source/xnu/)
 
 ### Mach
 
-Mach is a **microkernel** designed to be **UNIX-compatible**. One of its key design principles was to **minimize** the amount of **code** running in the **kernel** space and instead allow many typical kernel functions, such as file system, networking, and I/O, to **run as user-level tasks**.
+Mach ni **microkernel** iliyoundwa kuwa **UNIX-inayofaa**. Moja ya kanuni zake kuu za muundo ilikuwa **kupunguza** kiasi cha **kanuni** inayotumika katika **nafasi ya kernel** na badala yake kuruhusu kazi nyingi za kawaida za kernel, kama vile mfumo wa faili, mtandao, na I/O, **kufanya kazi kama kazi za ngazi ya mtumiaji**.
 
-In XNU, Mach is **responsible for many of the critical low-level operations** a kernel typically handles, such as processor scheduling, multitasking, and virtual memory management.
+Katika XNU, Mach ni **responsible kwa shughuli nyingi muhimu za kiwango cha chini** ambazo kernel kwa kawaida inashughulikia, kama vile kupanga ratiba ya processor, multitasking, na usimamizi wa kumbukumbu ya virtual.
 
 ### BSD
 
-The XNU **kernel** also **incorporates** a significant amount of code derived from the **FreeBSD** project. This code **runs as part of the kernel along with Mach**, in the same address space. However, the FreeBSD code within XNU may differ substantially from the original FreeBSD code because modifications were required to ensure its compatibility with Mach. FreeBSD contributes to many kernel operations including:
+Kernel ya XNU pia **inajumuisha** kiasi kikubwa cha kanuni inayotokana na mradi wa **FreeBSD**. Kanuni hii **inafanya kazi kama sehemu ya kernel pamoja na Mach**, katika nafasi moja ya anwani. Hata hivyo, kanuni ya FreeBSD ndani ya XNU inaweza kutofautiana kwa kiasi kikubwa na kanuni ya asili ya FreeBSD kwa sababu marekebisho yalihitajika kuhakikisha ufanisi wake na Mach. FreeBSD inachangia katika shughuli nyingi za kernel ikiwa ni pamoja na:
 
-- Process management
-- Signal handling
-- Basic security mechanisms, including user and group management
-- System call infrastructure
-- TCP/IP stack and sockets
-- Firewall and packet filtering
+- Usimamizi wa mchakato
+- Kushughulikia ishara
+- Mekanismu za msingi za usalama, ikiwa ni pamoja na usimamizi wa mtumiaji na kikundi
+- Miundombinu ya wito wa mfumo
+- TCP/IP stack na soketi
+- Firewall na kuchuja pakiti
 
-Understanding the interaction between BSD and Mach can be complex, due to their different conceptual frameworks. For instance, BSD uses processes as its fundamental executing unit, while Mach operates based on threads. This discrepancy is reconciled in XNU by **associating each BSD process with a Mach task** that contains exactly one Mach thread. When BSD's fork() system call is used, the BSD code within the kernel uses Mach functions to create a task and a thread structure.
+Kuelewa mwingiliano kati ya BSD na Mach kunaweza kuwa ngumu, kutokana na mifumo yao tofauti ya dhana. Kwa mfano, BSD inatumia michakato kama kitengo chake cha msingi cha utekelezaji, wakati Mach inafanya kazi kwa msingi wa nyuzi. Tofauti hii inarekebishwa katika XNU kwa **kuunganisha kila mchakato wa BSD na kazi ya Mach** ambayo ina nyuzi moja tu ya Mach. Wakati wito wa mfumo wa fork() wa BSD unapotumika, kanuni ya BSD ndani ya kernel inatumia kazi za Mach kuunda kazi na muundo wa nyuzi.
 
-Moreover, **Mach and BSD each maintain different security models**: **Mach's** security model is based on **port rights**, whereas BSD's security model operates based on **process ownership**. Disparities between these two models have occasionally resulted in local privilege-escalation vulnerabilities. Apart from typical system calls, there are also **Mach traps that allow user-space programs to interact with the kernel**. These different elements together form the multifaceted, hybrid architecture of the macOS kernel.
+Zaidi ya hayo, **Mach na BSD kila mmoja ina mifano tofauti za usalama**: mfano wa usalama wa **Mach** unategemea **haki za bandari**, wakati mfano wa usalama wa BSD unafanya kazi kwa msingi wa **umiliki wa mchakato**. Tofauti kati ya mifano hii miwili mara nyingine imesababisha udhaifu wa kupanda kwa haki za ndani. Mbali na wito wa kawaida wa mfumo, pia kuna **Mach traps zinazoruhusu programu za nafasi ya mtumiaji kuingiliana na kernel**. Vipengele hivi tofauti pamoja vinaunda usanifu wa kipekee, wa mchanganyiko wa kernel ya macOS.
 
 ### I/O Kit - Drivers
 
-The I/O Kit is an open-source, object-oriented **device-driver framework** in the XNU kernel, handles **dynamically loaded device drivers**. It allows modular code to be added to the kernel on-the-fly, supporting diverse hardware.
+I/O Kit ni mfumo wa wazi, wa mwelekeo wa kitu **wa madereva ya kifaa** katika kernel ya XNU, inashughulikia **madereva ya kifaa yanayopakiwa kwa nguvu**. Inaruhusu kanuni za moduli kuongezwa kwenye kernel mara moja, ikisaidia vifaa mbalimbali.
 
 {{#ref}}
 macos-iokit.md
 {{#endref}}
 
-### IPC - Inter Process Communication
+### IPC - Mawasiliano ya Mchakato
 
 {{#ref}}
 ../macos-proces-abuse/macos-ipc-inter-process-communication/
@@ -47,9 +47,9 @@ macos-iokit.md
 
 ## macOS Kernel Extensions
 
-macOS is **super restrictive to load Kernel Extensions** (.kext) because of the high privileges that code will run with. Actually, by default is virtually impossible (unless a bypass is found).
+macOS ni **ya kukandamiza sana kupakia Extensions za Kernel** (.kext) kwa sababu ya haki kubwa ambazo kanuni hiyo itafanya kazi nazo. Kwa kweli, kwa kawaida haiwezekani (isipokuwa njia ya kupita ipatikane).
 
-In the following page you can also see how to recover the `.kext` that macOS loads inside its **kernelcache**:
+Katika ukurasa ufuatao unaweza pia kuona jinsi ya kurejesha `.kext` ambayo macOS inapakua ndani ya **kernelcache** yake:
 
 {{#ref}}
 macos-kernel-extensions.md
@@ -57,13 +57,13 @@ macos-kernel-extensions.md
 
 ### macOS System Extensions
 
-Instead of using Kernel Extensions macOS created the System Extensions, which offers in user level APIs to interact with the kernel. This way, developers can avoid to use kernel extensions.
+Badala ya kutumia Extensions za Kernel, macOS iliumba System Extensions, ambayo inatoa APIs za ngazi ya mtumiaji kuingiliana na kernel. Kwa njia hii, waendelezaji wanaweza kuepuka kutumia extensions za kernel.
 
 {{#ref}}
 macos-system-extensions.md
 {{#endref}}
 
-## References
+## Marejeleo
 
 - [**The Mac Hacker's Handbook**](https://www.amazon.com/-/es/Charlie-Miller-ebook-dp-B004U7MUMU/dp/B004U7MUMU/ref=mt_other?_encoding=UTF8&me=&qid=)
 - [**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)

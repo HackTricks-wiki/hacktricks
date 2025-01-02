@@ -4,27 +4,27 @@
 
 ## What is Distroless
 
-A distroless container is a type of container that **contains only the necessary dependencies to run a specific application**, without any additional software or tools that are not required. These containers are designed to be as **lightweight** and **secure** as possible, and they aim to **minimize the attack surface** by removing any unnecessary components.
+Konteina isiyo na mfumo wa uendeshaji ni aina ya kontena ambayo **ina viambatisho muhimu tu kuendesha programu maalum**, bila programu au zana za ziada ambazo hazihitajiki. Kontena hizi zimeundwa kuwa **nyepesi** na **salama** kadri iwezekanavyo, na zina lengo la **kupunguza uso wa shambulio** kwa kuondoa vipengele visivyohitajika.
 
-Distroless containers are often used in **production environments where security and reliability are paramount**.
+Konteina zisizo na mfumo wa uendeshaji mara nyingi hutumiwa katika **mazingira ya uzalishaji ambapo usalama na uaminifu ni muhimu**.
 
-Some **examples** of **distroless containers** are:
+Baadhi ya **mfano** wa **konteina zisizo na mfumo wa uendeshaji** ni:
 
-- Provided by **Google**: [https://console.cloud.google.com/gcr/images/distroless/GLOBAL](https://console.cloud.google.com/gcr/images/distroless/GLOBAL)
-- Provided by **Chainguard**: [https://github.com/chainguard-images/images/tree/main/images](https://github.com/chainguard-images/images/tree/main/images)
+- Iliyotolewa na **Google**: [https://console.cloud.google.com/gcr/images/distroless/GLOBAL](https://console.cloud.google.com/gcr/images/distroless/GLOBAL)
+- Iliyotolewa na **Chainguard**: [https://github.com/chainguard-images/images/tree/main/images](https://github.com/chainguard-images/images/tree/main/images)
 
 ## Weaponizing Distroless
 
-The goal of weaponize a distroless container is to be able to **execute arbitrary binaries and payloads even with the limitations** implied by **distroless** (lack of common binaries in the system) and also protections commonly found in containers such as **read-only** or **no-execute** in `/dev/shm`.
+Lengo la kuunda silaha kutoka kwa kontena isiyo na mfumo wa uendeshaji ni kuwa na uwezo wa **kutekeleza binaries na payloads za kiholela hata na vikwazo** vinavyotokana na **distroless** (ukosefu wa binaries za kawaida katika mfumo) na pia ulinzi unaopatikana mara nyingi katika kontena kama **kusoma tu** au **hakuna utekelezaji** katika `/dev/shm`.
 
 ### Through memory
 
-Coming at some point of 2023...
+Kujitokeza katika wakati fulani wa 2023...
 
 ### Via Existing binaries
 
 #### openssl
 
-\***\*[**In this post,**](https://www.form3.tech/engineering/content/exploiting-distroless-images) it is explained that the binary **`openssl`** is frequently found in these containers, potentially because it's **needed\*\* by the software that is going to be running inside the container.
+\***\*[**Katika chapisho hili,**](https://www.form3.tech/engineering/content/exploiting-distroless-images) inafafanuliwa kuwa binary **`openssl`** mara nyingi hupatikana katika kontena hizi, labda kwa sababu inahitajika\*\* na programu ambayo itakuwa ikikimbia ndani ya kontena.
 
 {{#include ../../../banners/hacktricks-training.md}}

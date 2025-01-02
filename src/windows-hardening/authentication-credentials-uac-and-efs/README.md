@@ -2,23 +2,16 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-Tumia [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) kujenga na **kujiendesha kiotomatiki** kazi zinazotolewa na zana za jamii **zilizoendelea zaidi** duniani.\
-Pata Ufikiaji Leo:
-
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
-
 ## AppLocker Policy
 
-Orodha ya programu ni orodha ya programu au executable zilizothibitishwa ambazo zinaruhusiwa kuwepo na kuendesha kwenye mfumo. Lengo ni kulinda mazingira kutokana na malware hatari na programu zisizothibitishwa ambazo hazilingani na mahitaji maalum ya biashara ya shirika.
+Orodha ya programu ni orodha ya programu za programu au executable zilizothibitishwa ambazo zinaruhusiwa kuwepo na kuendesha kwenye mfumo. Lengo ni kulinda mazingira kutokana na malware hatari na programu zisizothibitishwa ambazo hazikidhi mahitaji maalum ya biashara ya shirika.
 
-[AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) ni **suluhisho la orodha ya programu** la Microsoft na inawapa wasimamizi wa mifumo udhibiti juu ya **ni programu na faili zipi watumiaji wanaweza kuendesha**. Inatoa **udhibiti wa kina** juu ya executable, skripti, faili za Windows installer, DLLs, programu zilizopakiwa, na waendeshaji wa programu zilizopakiwa.\
-Ni kawaida kwa mashirika **kuzuia cmd.exe na PowerShell.exe** na kuandika ufikiaji kwa baadhi ya directories, **lakini hii yote inaweza kupuuziliwa mbali**.
+[AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) ni **suluhisho la orodha ya programu** la Microsoft na inawapa wasimamizi wa mifumo udhibiti juu ya **ni programu na faili zipi watumiaji wanaweza kuendesha**. Inatoa **udhibiti wa kina** juu ya executable, scripts, faili za Windows installer, DLLs, programu zilizopakiwa, na waandishi wa programu zilizopakiwa.\
+Ni kawaida kwa mashirika **kuzuia cmd.exe na PowerShell.exe** na kuandika ufikiaji kwa saraka fulani, **lakini hii yote inaweza kupuuziliwa mbali**.
 
 ### Check
 
-Angalia faili/nyongeza zipi zimeorodheshwa kwenye orodha ya mblacklist/whitelist:
+Angalia faili/nyongeza zipi zimeorodheshwa kwenye orodha ya mblacklist/mwhite list:
 ```powershell
 Get-ApplockerPolicy -Effective -xml
 
@@ -43,7 +36,7 @@ C:\windows\tracing
 - Binaries za kawaida **zilizoaminika** [**"LOLBAS's"**](https://lolbas-project.github.io/) zinaweza pia kuwa na manufaa katika kupita AppLocker.
 - **Kanuni zilizoandikwa vibaya zinaweza pia kupitishwa**
 - Kwa mfano, **`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`**, unaweza kuunda **folda inayoitwa `allowed`** mahali popote na itaruhusiwa.
-- Mashirika mara nyingi pia yanazingatia **kuzuia `%System32%\WindowsPowerShell\v1.0\powershell.exe` executable**, lakini yanasahau kuhusu **mengine** [**PowerShell executable locations**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations) kama vile `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` au `PowerShell_ISE.exe`.
+- Mashirika mara nyingi pia yanazingatia **kuzuia `%System32%\WindowsPowerShell\v1.0\powershell.exe` executable**, lakini yanasahau kuhusu **mikoa mingine** [**ya PowerShell executable**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations) kama vile `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` au `PowerShell_ISE.exe`.
 - **DLL enforcement mara chache huwekwa** kutokana na mzigo wa ziada ambao inaweza kuweka kwenye mfumo, na kiasi cha majaribio kinachohitajika kuhakikisha hakuna kitu kitaharibika. Hivyo kutumia **DLLs kama milango ya nyuma kutasaidia kupita AppLocker**.
 - Unaweza kutumia [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) au [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) ili **kutekeleza Powershell** msimbo katika mchakato wowote na kupita AppLocker. Kwa maelezo zaidi angalia: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
 
@@ -59,7 +52,7 @@ Akida za ndani zipo katika faili hii, nywila zimepangwa.
 **LSA** inasimamia **sera ya usalama** ya ndani (sera ya nywila, ruhusa za watumiaji...), **uthibitishaji**, **tokens za ufikiaji**...\
 LSA itakuwa ndiyo itakayofanya **ukaguzi** wa akida zilizotolewa ndani ya faili ya **SAM** (kwa kuingia kwa ndani) na **kuzungumza** na **kikundi cha kudhibiti** ili kuthibitisha mtumiaji wa kikoa.
 
-**Akida** zime **hifadhiwa** ndani ya **mchakato LSASS**: tiketi za Kerberos, hashes NT na LM, nywila zinazoweza kufichuliwa kwa urahisi.
+**Akida** zime **hifadhiwa** ndani ya **mchakato wa LSASS**: tiketi za Kerberos, hashes NT na LM, nywila zinazoweza kufichuliwa kwa urahisi.
 
 ### Siri za LSA
 
@@ -72,15 +65,15 @@ LSA inaweza kuhifadhi kwenye diski baadhi ya akida:
 
 ### NTDS.dit
 
-Ni hifadhidata ya Active Directory. Inapatikana tu katika Vikundi vya Kudhibiti.
+Ni hifadhidata ya Active Directory. Ipo tu katika Vikundi vya Kudhibiti.
 
-## Mlinzi
+## Defender
 
 [**Microsoft Defender**](https://en.wikipedia.org/wiki/Microsoft_Defender) ni Antivirus inayopatikana katika Windows 10 na Windows 11, na katika matoleo ya Windows Server. In **zuia** zana za kawaida za pentesting kama **`WinPEAS`**. Hata hivyo, kuna njia za **kupita ulinzi huu**.
 
 ### Angalia
 
-Ili kuangalia **hali** ya **Mlinzi** unaweza kutekeleza cmdlet ya PS **`Get-MpComputerStatus`** (angalia thamani ya **`RealTimeProtectionEnabled`** kujua kama inafanya kazi):
+Ili kuangalia **hali** ya **Defender** unaweza kutekeleza cmdlet ya PS **`Get-MpComputerStatus`** (angalia thamani ya **`RealTimeProtectionEnabled`** kujua kama inafanya kazi):
 
 <pre class="language-powershell"><code class="lang-powershell">PS C:\> Get-MpComputerStatus
 
@@ -110,11 +103,11 @@ sc query windefend
 ```
 ## Encrypted File System (EFS)
 
-EFS inalinda faili kupitia usimbaji, ikitumia **symmetric key** inayojulikana kama **File Encryption Key (FEK)**. Funguo hii inasimbwa kwa kutumia **public key** ya mtumiaji na kuhifadhiwa ndani ya $EFS **alternative data stream** ya faili iliyosimbwa. Wakati usimbuaji unahitajika, **private key** inayolingana na cheti cha kidijitali cha mtumiaji inatumika kusimbua FEK kutoka kwenye $EFS stream. Maelezo zaidi yanaweza kupatikana [hapa](https://en.wikipedia.org/wiki/Encrypting_File_System).
+EFS inalinda faili kupitia usimbaji, ikitumia **symmetric key** inayojulikana kama **File Encryption Key (FEK)**. Funguo hii inasimbwa kwa kutumia **public key** ya mtumiaji na kuhifadhiwa ndani ya $EFS **alternative data stream** ya faili iliyosimbwa. Wakati usimbuaji unahitajika, **private key** inayohusiana na cheti cha kidijitali cha mtumiaji inatumika kusimbua FEK kutoka kwenye $EFS stream. Maelezo zaidi yanaweza kupatikana [hapa](https://en.wikipedia.org/wiki/Encrypting_File_System).
 
 **Mifano ya Usimbuaji bila kuanzishwa na mtumiaji** ni pamoja na:
 
-- Wakati faili au folda zinapohamishwa kwenye mfumo wa faili usio EFS, kama [FAT32](https://en.wikipedia.org/wiki/File_Allocation_Table), zinapaswa kusimbuliwa moja kwa moja.
+- Wakati faili au folda zinahamishwa kwenye mfumo wa faili usio EFS, kama [FAT32](https://en.wikipedia.org/wiki/File_Allocation_Table), zinapaswa kusimbuliwa moja kwa moja.
 - Faili zilizofichwa zinazotumwa kupitia mtandao kwa kutumia SMB/CIFS protocol zinapaswa kusimbuliwa kabla ya usafirishaji.
 
 Njia hii ya usimbuaji inaruhusu **upatikanaji wa wazi** kwa faili zilizofichwa kwa mmiliki. Hata hivyo, kubadilisha tu nenosiri la mmiliki na kuingia hakutaruhusu usimbuaji.
@@ -137,7 +130,7 @@ Unaweza pia kutumia `cipher /e` na `cipher /d` ndani ya folda ili **kusimbua** n
 
 #### Kuwa Mamlaka ya Mfumo
 
-Njia hii inahitaji **mtumiaji waathiriwa** kuwa **akifanya** **mchakato** ndani ya mwenyeji. Ikiwa hiyo ni kesi, kwa kutumia `meterpreter` sessions unaweza kujifanya kuwa token ya mchakato wa mtumiaji (`impersonate_token` kutoka `incognito`). Au unaweza tu `migrate` kwenye mchakato wa mtumiaji.
+Njia hii inahitaji **mtumiaji waathirika** kuwa **akifanya** **mchakato** ndani ya mwenyeji. Ikiwa hiyo ni kesi, kwa kutumia `meterpreter` sessions unaweza kujifanya kuwa token ya mchakato wa mtumiaji (`impersonate_token` kutoka `incognito`). Au unaweza tu `migrate` kwenye mchakato wa mtumiaji.
 
 #### Kujua nenosiri la watumiaji
 
@@ -151,23 +144,23 @@ Microsoft ilitengeneza **Group Managed Service Accounts (gMSA)** ili kurahisisha
 - **Usalama Ulioimarishwa**: Akaunti hizi hazihusiki na kufungwa na haziwezi kutumika kwa kuingia kwa mwingiliano, kuimarisha usalama wao.
 - **Msaada wa Wenyeji Wengi**: gMSAs zinaweza kushirikiwa kati ya wenyeji wengi, na kuifanya kuwa bora kwa huduma zinazotumia seva nyingi.
 - **Uwezo wa Kazi Iliyopangwa**: Tofauti na akaunti za huduma zinazodhibitiwa, gMSAs zinasaidia kuendesha kazi zilizopangwa.
-- **Usimamizi wa SPN Ulio Rahisishwa**: Mfumo unasasisha moja kwa moja Jina la Kitaalamu la Huduma (SPN) wakati kuna mabadiliko katika maelezo ya sAMaccount ya kompyuta au jina la DNS, kuimarisha usimamizi wa SPN.
+- **Usimamizi wa SPN Ulio Rahisishwa**: Mfumo unasasisha moja kwa moja Jina la Kiongozi wa Huduma (SPN) wakati kuna mabadiliko katika maelezo ya sAMaccount ya kompyuta au jina la DNS, kuimarisha usimamizi wa SPN.
 
-Nenosiri za gMSAs zinahifadhiwa katika mali ya LDAP _**msDS-ManagedPassword**_ na zinapaswa kurekebishwa moja kwa moja kila siku 30 na Wajibu wa Kikoa (DCs). Nenosiri hili, ambalo ni data iliyosimbwa inayojulikana kama [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e), linaweza kupatikana tu na wasimamizi walioidhinishwa na seva ambazo gMSAs zimewekwa, kuhakikisha mazingira salama. Ili kufikia taarifa hii, unahitaji muunganisho salama kama LDAPS, au muunganisho lazima uthibitishwe na 'Sealing & Secure'.
+Nenosiri za gMSAs zinahifadhiwa katika mali ya LDAP _**msDS-ManagedPassword**_ na zinarejeshwa moja kwa moja kila siku 30 na Wasimamizi wa Kikoa (DCs). Nenosiri hili, ambalo ni blob ya data iliyosimbwa inayojulikana kama [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e), linaweza kupatikana tu na wasimamizi walioidhinishwa na seva ambazo gMSAs zimewekwa, kuhakikisha mazingira salama. Ili kufikia taarifa hii, unahitaji muunganisho salama kama LDAPS, au muunganisho lazima uthibitishwe na 'Sealing & Secure'.
 
 ![https://cube0x0.github.io/Relaying-for-gMSA/](../../images/asd1.png)
 
-Unaweza kusoma nenosiri hili kwa [**GMSAPasswordReader**](https://github.com/rvazarkar/GMSAPasswordReader)**:**
+Unaweza kusoma nenosiri hili kwa kutumia [**GMSAPasswordReader**](https://github.com/rvazarkar/GMSAPasswordReader)**:**
 ```
 /GMSAPasswordReader --AccountName jkohler
 ```
 [**Pata maelezo zaidi katika chapisho hili**](https://cube0x0.github.io/Relaying-for-gMSA/)
 
-Pia, angalia hii [ukurasa wa wavuti](https://cube0x0.github.io/Relaying-for-gMSA/) kuhusu jinsi ya kufanya **NTLM relay attack** ili **kusoma** **nenosiri** la **gMSA**.
+Pia, angalia hii [kurasa ya wavuti](https://cube0x0.github.io/Relaying-for-gMSA/) kuhusu jinsi ya kufanya **NTLM relay attack** ili **kusoma** **nenosiri** la **gMSA**.
 
 ## LAPS
 
-**Local Administrator Password Solution (LAPS)**, inayopatikana kwa kupakua kutoka [Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899), inaruhusu usimamizi wa nenosiri za Msimamizi wa ndani. Nenosiri haya, ambayo ni **ya nasibu**, ya kipekee, na **yanabadilishwa mara kwa mara**, huhifadhiwa kwa kati katika Active Directory. Ufikiaji wa nenosiri haya umewekwa vizuizi kupitia ACLs kwa watumiaji walioidhinishwa. Ikiwa ruhusa za kutosha zimetolewa, uwezo wa kusoma nenosiri za msimamizi wa ndani unapatikana.
+**Local Administrator Password Solution (LAPS)**, inayopatikana kwa kupakuliwa kutoka [Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899), inaruhusu usimamizi wa nenosiri za Msimamizi wa ndani. Nenosiri haya, ambayo ni **ya nasibu**, ya kipekee, na **yanabadilishwa mara kwa mara**, yanahifadhiwa kwa kati katika Active Directory. Ufikiaji wa nenosiri haya umewekwa vizuizi kupitia ACLs kwa watumiaji walioidhinishwa. Kwa ruhusa ya kutosha, uwezo wa kusoma nenosiri za msimamizi wa ndani unapatikana.
 
 {{#ref}}
 ../active-directory-methodology/laps.md
@@ -224,11 +217,11 @@ $command = "Write-Host 'My voice is my passport, verify me.'" $bytes = [System.T
 ```
 Zaidi ya hayo yanaweza kupatikana [hapa](https://blog.netspi.com/15-ways-to-bypass-the-powershell-execution-policy/)
 
-## Interface ya Msaada wa Usalama (SSPI)
+## Security Support Provider Interface (SSPI)
 
-Ni API inayoweza kutumika kuthibitisha watumiaji.
+Ni API ambayo inaweza kutumika kuthibitisha watumiaji.
 
-SSPI itakuwa na jukumu la kutafuta itifaki inayofaa kwa mashine mbili zinazotaka kuwasiliana. Njia inayopendekezwa kwa hili ni Kerberos. Kisha SSPI itajadili itifaki ipi ya uthibitishaji itatumika, hizi itifaki za uthibitishaji zinaitwa Mtoa Msaada wa Usalama (SSP), ziko ndani ya kila mashine ya Windows katika mfumo wa DLL na mashine zote mbili lazima ziunge mkono ile ile ili kuweza kuwasiliana.
+SSPI itakuwa na jukumu la kutafuta itifaki inayofaa kwa mashine mbili zinazotaka kuwasiliana. Njia inayopendekezwa kwa hili ni Kerberos. Kisha SSPI itajadili itifaki ipi ya uthibitishaji itatumika, hizi itifaki za uthibitishaji zinaitwa Security Support Provider (SSP), ziko ndani ya kila mashine ya Windows kwa njia ya DLL na mashine zote mbili lazima ziunge mkono ile ile ili kuweza kuwasiliana.
 
 ### SSPs Kuu
 
@@ -236,7 +229,7 @@ SSPI itakuwa na jukumu la kutafuta itifaki inayofaa kwa mashine mbili zinazotaka
 - %windir%\Windows\System32\kerberos.dll
 - **NTLMv1** na **NTLMv2**: Sababu za ulinganifu
 - %windir%\Windows\System32\msv1_0.dll
-- **Digest**: Seva za wavuti na LDAP, nenosiri katika mfumo wa hash ya MD5
+- **Digest**: Seva za wavuti na LDAP, nenosiri katika mfumo wa MD5 hash
 - %windir%\Windows\System32\Wdigest.dll
 - **Schannel**: SSL na TLS
 - %windir%\Windows\System32\Schannel.dll
@@ -245,22 +238,12 @@ SSPI itakuwa na jukumu la kutafuta itifaki inayofaa kwa mashine mbili zinazotaka
 
 #### Majadiliano yanaweza kutoa mbinu kadhaa au moja tu.
 
-## UAC - Udhibiti wa Akaunti ya Mtumiaji
+## UAC - User Account Control
 
-[Udhibiti wa Akaunti ya Mtumiaji (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) ni kipengele kinachowezesha **kuonyeshwa kwa idhini kwa shughuli zilizoimarishwa**.
+[User Account Control (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) ni kipengele kinachowezesha **kiashiria cha idhini kwa shughuli zilizoimarishwa**.
 
 {{#ref}}
 uac-user-account-control.md
 {{#endref}}
-
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Tumia [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) kujenga na **kujiendesha kiotomatiki** kwa urahisi kwa kutumia zana za jamii **zilizoendelea zaidi** duniani.\
-Pata Ufikiaji Leo:
-
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
-
----
 
 {{#include ../../banners/hacktricks-training.md}}

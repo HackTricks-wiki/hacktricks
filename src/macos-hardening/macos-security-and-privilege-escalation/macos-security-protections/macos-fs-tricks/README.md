@@ -7,36 +7,42 @@
 Ruhusa katika **directory**:
 
 - **kusoma** - unaweza **kuorodhesha** entries za directory
-- **kuandika** - unaweza **kufuta/kuandika** **faili** katika directory na unaweza **kufuta folda tupu**.
+- **kuandika** - unaweza **kufuta/kuandika** **files** katika directory na unaweza **kufuta folda tupu**.
 - Lakini huwezi **kufuta/kubadilisha folda zisizo tupu** isipokuwa una ruhusa za kuandika juu yake.
-- Huwezi **kubadilisha jina la folda** isipokuwa unamiliki hiyo.
-- **kutekeleza** - ume **ruhusiwa kupita** katika directory - ikiwa huna haki hii, huwezi kufikia faili zozote ndani yake, au katika folda ndogo zozote.
+- Huwezi **kubadilisha jina la folda** isipokuwa umiliki.
+- **kutekeleza** - ume **ruhusiwa kupita** directory - ikiwa huna haki hii, huwezi kufikia files zozote ndani yake, au katika subdirectories zozote.
 
 ### Mchanganyiko Hatari
 
-**Jinsi ya kufuta faili/folda inayomilikiwa na root**, lakini:
+**Jinsi ya kufuta file/folda inayomilikiwa na root**, lakini:
 
 - Mmiliki mmoja wa **directory** katika njia ni mtumiaji
 - Mmiliki mmoja wa **directory** katika njia ni **kikundi cha watumiaji** chenye **ruhusa za kuandika**
-- Kikundi cha watumiaji kina **ruhusa za kuandika** kwa **faili**
+- Kikundi cha watumiaji kina **ruhusa za kuandika** kwa **file**
 
 Kwa mchanganyiko wowote wa hapo juu, mshambuliaji anaweza **kuingiza** **sym/hard link** kwenye njia inayotarajiwa ili kupata kuandika kwa kibali bila mipaka.
 
-### Kesi Maalum ya Folda root R+X
+### Kesi Maalum ya Folder root R+X
 
-Ikiwa kuna faili katika **directory** ambapo **ni root pekee mwenye R+X ruhusa**, hizo **hazipatikani kwa mtu mwingine yeyote**. Hivyo, udhaifu unaoruhusu **kuhamasisha faili inayoweza kusomwa na mtumiaji**, ambayo haiwezi kusomwa kwa sababu ya **kizuizi** hicho, kutoka folda hii **kwenda nyingine**, inaweza kutumika vibaya kusoma faili hizi.
+Ikiwa kuna files katika **directory** ambapo **ni root pekee mwenye R+X access**, hizo **hazipatikani kwa mtu mwingine yeyote**. Hivyo, udhaifu unaoruhusu **kuhamasisha file inayoweza kusomwa na mtumiaji**, ambayo haiwezi kusomwa kwa sababu ya **kizuizi** hicho, kutoka folda hii **kwenda nyingine**, unaweza kutumiwa kusoma files hizi.
 
 Mfano katika: [https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions](https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions)
 
-## Link ya Alama / Link ya Ngumu
+## Link ya Alama / Link ngumu
 
-Ikiwa mchakato wenye kibali unandika data katika **faili** ambayo inaweza **kudhibitiwa** na **mtumiaji mwenye kibali kidogo**, au ambayo inaweza **kuundwa awali** na mtumiaji mwenye kibali kidogo. Mtumiaji anaweza tu **kuielekeza kwenye faili nyingine** kupitia Link ya Alama au Link ya Ngumu, na mchakato wenye kibali utaandika kwenye faili hiyo.
+### File/folda yenye ruhusa
 
-Angalia katika sehemu nyingine ambapo mshambuliaji anaweza **kutumia kuandika bila mipaka ili kupandisha kibali**.
+Ikiwa mchakato wenye kibali unaandika data katika **file** ambayo inaweza **kudhibitiwa** na **mtumiaji mwenye ruhusa ya chini**, au ambayo inaweza **kuundwa awali** na mtumiaji mwenye ruhusa ya chini. Mtumiaji anaweza tu **kuielekeza kwa file nyingine** kupitia Link ya Alama au Link ngumu, na mchakato wenye kibali utaandika kwenye file hiyo.
+
+Angalia katika sehemu nyingine ambapo mshambuliaji anaweza **kutilia shaka kuandika bila mipaka ili kupandisha ruhusa**.
+
+### Fungua `O_NOFOLLOW`
+
+Bendera `O_NOFOLLOW` inapokuwa inatumika na kazi `open` haitafuata symlink katika kipengele cha mwisho cha njia, lakini itafuata sehemu nyingine za njia. Njia sahihi ya kuzuia kufuata symlinks katika njia ni kwa kutumia bendera `O_NOFOLLOW_ANY`.
 
 ## .fileloc
 
-Faili zenye **`.fileloc`** upanuzi zinaweza kuelekeza kwenye programu nyingine au binaries hivyo wakati zinapofunguliwa, programu/binary itakuwa ndiyo itakayotekelezwa.\
+Files zenye kiambatisho **`.fileloc`** zinaweza kuelekeza kwenye programu nyingine au binaries hivyo wakati zinapofunguliwa, programu/binary itakuwa ndiyo itakayotekelezwa.\
 Mfano:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -50,11 +56,15 @@ Mfano:
 </dict>
 </plist>
 ```
-## Arbitrary FD
+## File Descriptors
 
-Ikiwa unaweza kufanya **mchakato ufungue faili au folda kwa haki za juu**, unaweza kutumia **`crontab`** kufungua faili katika `/etc/sudoers.d` na **`EDITOR=exploit.py`**, hivyo `exploit.py` itapata FD kwa faili ndani ya `/etc/sudoers` na kuifanya.
+### Leak FD (no `O_CLOEXEC`)
 
-Kwa mfano: [https://youtu.be/f1HA5QhLQ7Y?t=21098](https://youtu.be/f1HA5QhLQ7Y?t=21098)
+Ikiwa wito wa `open` haina bendera `O_CLOEXEC`, file descriptor itarithiwa na mchakato wa mtoto. Hivyo, ikiwa mchakato wenye mamlaka unafungua faili yenye mamlaka na kutekeleza mchakato unaodhibitiwa na mshambuliaji, mshambuliaji atakuwa **na FD juu ya faili yenye mamlaka**.
+
+Ikiwa unaweza kufanya **mchakato ufungue faili au folda yenye mamlaka ya juu**, unaweza kutumia **`crontab`** kufungua faili katika `/etc/sudoers.d` na **`EDITOR=exploit.py`**, hivyo `exploit.py` itapata FD kwa faili ndani ya `/etc/sudoers` na kuifanya iweze kutumika.
+
+Kwa mfano: [https://youtu.be/f1HA5QhLQ7Y?t=21098](https://youtu.be/f1HA5QhLQ7Y?t=21098), code: https://github.com/gergelykalman/CVE-2023-32428-a-macOS-LPE-via-MallocStackLogging
 
 ## Avoid quarantine xattrs tricks
 
@@ -136,12 +146,33 @@ ls -le test
 ```
 (Note that even if this works the sandbox write the quarantine xattr before)
 
-Not really needed but I leave it there just in case:
+Sio muhimu sana lakini naiacha hapa tu kwa sababu:
 
 {{#ref}}
 macos-xattr-acls-extra-stuff.md
 {{#endref}}
 
+## Kupita ukaguzi wa saini
+
+### Kupita ukaguzi wa binaries za jukwaa
+
+Baadhi ya ukaguzi wa usalama huangalia kama binary ni **binary ya jukwaa**, kwa mfano kuruhusu kuungana na huduma ya XPC. Hata hivyo, kama ilivyoonyeshwa katika kupita kwenye https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/, inawezekana kupita ukaguzi huu kwa kupata binary ya jukwaa (kama /bin/ls) na kuingiza exploit kupitia dyld kwa kutumia variable ya mazingira `DYLD_INSERT_LIBRARIES`.
+
+### Kupita bendera `CS_REQUIRE_LV` na `CS_FORCED_LV`
+
+Inawezekana kwa binary inayotekelezwa kubadilisha bendera zake mwenyewe ili kupita ukaguzi kwa kutumia msimbo kama:
+```c
+// Code from https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/
+int pid = getpid();
+NSString *exePath = NSProcessInfo.processInfo.arguments[0];
+
+uint32_t status = SecTaskGetCodeSignStatus(SecTaskCreateFromSelf(0));
+status |= 0x2000; // CS_REQUIRE_LV
+csops(pid, 9, &status, 4); // CS_OPS_SET_STATUS
+
+status = SecTaskGetCodeSignStatus(SecTaskCreateFromSelf(0));
+NSLog(@"=====Inject successfully into %d(%@), csflags=0x%x", pid, exePath, status);
+```
 ## Bypass Code Signatures
 
 Bundles zina faili **`_CodeSignature/CodeResources`** ambayo ina **hash** ya kila **faili** katika **bundle**. Kumbuka kwamba hash ya CodeResources pia **imejumuishwa katika executable**, hivyo hatuwezi kuingilia hapo pia.
@@ -247,21 +278,41 @@ Andika **LaunchDaemon** ya kiholela kama **`/Library/LaunchDaemons/xyz.hacktrick
 </dict>
 </plist>
 ```
-Tuunda tu skripti `/Applications/Scripts/privesc.sh` na **amri** unazotaka kutekeleza kama root.
+Tuunda tu skripti `/Applications/Scripts/privesc.sh` na **amri** unazotaka kuendesha kama root.
 
 ### Faili la Sudoers
 
-Ikiwa una **kuandika bila mipaka**, unaweza kuunda faili ndani ya folda **`/etc/sudoers.d/`** ukijipa **suduo** haki.
+Ikiwa una **kuandika bila mipaka**, unaweza kuunda faili ndani ya folda **`/etc/sudoers.d/`** ukijipa **mamlaka ya sudo**.
 
 ### Faili za PATH
 
-Faili **`/etc/paths`** ni moja ya maeneo makuu yanayojaza mabadiliko ya PATH env. Lazima uwe root ili kuandika tena, lakini ikiwa skripti kutoka **mchakato wenye mamlaka** inatekeleza **amri bila njia kamili**, unaweza kuwa na uwezo wa **kudhibiti** kwa kubadilisha faili hili.
+Faili **`/etc/paths`** ni moja ya maeneo makuu yanayojaza variable ya mazingira ya PATH. Lazima uwe root ili kuandika tena, lakini ikiwa skripti kutoka **mchakato wenye mamlaka** inatekeleza **amri bila njia kamili**, unaweza kuwa na uwezo wa **kudhibiti** kwa kubadilisha faili hili.
 
-Pia unaweza kuandika faili katika **`/etc/paths.d`** ili kupakia folda mpya kwenye mabadiliko ya `PATH` env.
+Pia unaweza kuandika faili katika **`/etc/paths.d`** ili kupakia folda mpya kwenye variable ya mazingira ya `PATH`.
 
-## Tengeneza faili zinazoweza kuandikwa kama watumiaji wengine
+### cups-files.conf
 
-Hii itaunda faili inayomilikiwa na root ambayo inaweza kuandikwa na mimi ([**kanuni kutoka hapa**](https://github.com/gergelykalman/brew-lpe-via-periodic/blob/main/brew_lpe.sh)). Hii inaweza pia kufanya kazi kama privesc:
+Teknolojia hii ilitumika katika [hiki andiko](https://www.kandji.io/blog/macos-audit-story-part1).
+
+Unda faili `/etc/cups/cups-files.conf` na maudhui yafuatayo:
+```
+ErrorLog /etc/sudoers.d/lpe
+LogFilePerm 777
+<some junk>
+```
+Hii itaunda faili `/etc/sudoers.d/lpe` yenye ruhusa 777. Takataka za ziada mwishoni ni kuanzisha uundaji wa kumbukumbu ya makosa.
+
+Kisha, andika katika `/etc/sudoers.d/lpe` usanidi unaohitajika ili kupandisha mamlaka kama `%staff ALL=(ALL) NOPASSWD:ALL`.
+
+Kisha, badilisha faili `/etc/cups/cups-files.conf` tena ukionyesha `LogFilePerm 700` ili faili mpya ya sudoers iwe halali kwa kuanzisha `cupsctl`.
+
+### Sandbox Escape
+
+Inawezekana kutoroka sandbox ya macOS kwa kuandika FS isiyo na mipaka. Kwa baadhi ya mifano angalia ukurasa [macOS Auto Start](../../../../macos-auto-start-locations.md) lakini moja ya kawaida ni kuandika faili ya mapendeleo ya Terminal katika `~/Library/Preferences/com.apple.Terminal.plist` inayotekeleza amri wakati wa kuanzisha na kuitwa kwa kutumia `open`.
+
+## Generate writable files as other users
+
+Hii itazalisha faili inayomilikiwa na root ambayo inaweza kuandikwa na mimi ([**code from here**](https://github.com/gergelykalman/brew-lpe-via-periodic/blob/main/brew_lpe.sh)). Hii inaweza pia kufanya kazi kama privesc:
 ```bash
 DIRNAME=/usr/local/etc/periodic/daily
 

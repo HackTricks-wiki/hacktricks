@@ -2,15 +2,12 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 ## Msingi wa Resource-based Constrained Delegation
 
-Hii ni sawa na [Constrained Delegation](constrained-delegation.md) ya msingi lakini **badala** ya kutoa ruhusa kwa **kitu** ku **jifanya mtumiaji yeyote dhidi ya huduma**. Resource-based Constrained Delegation **inasanifisha** katika **kitu ambacho kinaweza kujifanya mtumiaji yeyote dhidi yake**.
+Hii ni sawa na [Constrained Delegation](constrained-delegation.md) ya msingi lakini **badala** ya kutoa ruhusa kwa **kitu** ku **jifanya kama mtumiaji yeyote dhidi ya huduma**. Resource-based Constrained Delegation **inasanifisha** katika **kitu ambacho kinaweza kujifanya kama mtumiaji yeyote dhidi yake**.
 
-Katika kesi hii, kitu kilichozuiliwa kitakuwa na sifa inayoitwa _**msDS-AllowedToActOnBehalfOfOtherIdentity**_ yenye jina la mtumiaji ambaye anaweza kujifanya mtumiaji mwingine dhidi yake.
+Katika kesi hii, kitu kilichozuiliwa kitakuwa na sifa inayoitwa _**msDS-AllowedToActOnBehalfOfOtherIdentity**_ yenye jina la mtumiaji ambaye anaweza kujifanya kama mtumiaji mwingine dhidi yake.
 
 Tofauti nyingine muhimu kutoka kwa Constrained Delegation hii hadi delegations nyingine ni kwamba mtumiaji yeyote mwenye **ruhusa za kuandika juu ya akaunti ya mashine** (_GenericAll/GenericWrite/WriteDacl/WriteProperty/etc_) anaweza kuweka _**msDS-AllowedToActOnBehalfOfOtherIdentity**_ (Katika aina nyingine za Delegation ulihitaji ruhusa za admin wa kikoa).
 
@@ -19,7 +16,7 @@ Tofauti nyingine muhimu kutoka kwa Constrained Delegation hii hadi delegations n
 Katika Constrained Delegation ilisemwa kwamba bendera ya **`TrustedToAuthForDelegation`** ndani ya thamani ya _userAccountControl_ ya mtumiaji inahitajika ili kutekeleza **S4U2Self.** Lakini hiyo si kweli kabisa.\
 Ukweli ni kwamba hata bila thamani hiyo, unaweza kutekeleza **S4U2Self** dhidi ya mtumiaji yeyote ikiwa wewe ni **huduma** (una SPN) lakini, ikiwa una **`TrustedToAuthForDelegation`** TGS iliyorejeshwa itakuwa **Forwardable** na ikiwa **huna** bendera hiyo TGS iliyorejeshwa **haitakuwa** **Forwardable**.
 
-Hata hivyo, ikiwa **TGS** inayotumika katika **S4U2Proxy** **SIO Forwardable** kujaribu kutumia **Constrain Delegation ya msingi** haitafanya kazi. Lakini ikiwa unajaribu kutumia **Resource-Based constrain delegation, itafanya kazi** (hii si udhaifu, ni kipengele, kwa wazi).
+Hata hivyo, ikiwa **TGS** iliyotumika katika **S4U2Proxy** **SIO Forwardable** kujaribu kutumia **Constrain Delegation ya msingi** haitafanya kazi. Lakini ikiwa unajaribu kutumia **Resource-Based constrain delegation, itafanya kazi** (hii si udhaifu, ni kipengele, kwa wazi).
 
 ### Muundo wa Shambulio
 
@@ -27,13 +24,13 @@ Hata hivyo, ikiwa **TGS** inayotumika katika **S4U2Proxy** **SIO Forwardable** k
 
 Fikiria kwamba mshambuliaji tayari ana **ruhusa sawa za kuandika juu ya kompyuta ya mwathirika**.
 
-1. Mshambuliaji **anavunja** akaunti ambayo ina **SPN** au **anaunda moja** (“Huduma A”). Kumbuka kwamba **mtumiaji yeyote wa Admin** bila ruhusa nyingine maalum anaweza **kuunda** hadi vitu 10 vya **Kompyuta (**_**MachineAccountQuota**_**)** na kuweka SPN. Hivyo mshambuliaji anaweza tu kuunda kitu cha Kompyuta na kuweka SPN.
-2. Mshambuliaji **anatumia ruhusa zake za KUANDIKA** juu ya kompyuta ya mwathirika (HudumaB) kusanidi **resource-based constrained delegation ili kuruhusu HudumaA kujifanya mtumiaji yeyote** dhidi ya kompyuta hiyo ya mwathirika (HudumaB).
+1. Mshambuliaji **anavunja** akaunti ambayo ina **SPN** au **anaunda moja** (“Huduma A”). Kumbuka kwamba **mtumiaji yeyote** _Admin User_ bila ruhusa nyingine maalum anaweza **kuunda** hadi 10 **vitu vya Kompyuta (**_**MachineAccountQuota**_**)** na kuziweka SPN. Hivyo mshambuliaji anaweza tu kuunda kitu cha Kompyuta na kuweka SPN.
+2. Mshambuliaji **anatumia ruhusa zake za KUANDIKA** juu ya kompyuta ya mwathirika (HudumaB) ili kuunda **resource-based constrained delegation ili kuruhusu HudumaA kujifanya kama mtumiaji yeyote** dhidi ya kompyuta hiyo ya mwathirika (HudumaB).
 3. Mshambuliaji anatumia Rubeus kutekeleza **shambulio kamili la S4U** (S4U2Self na S4U2Proxy) kutoka Huduma A hadi Huduma B kwa mtumiaji **aliye na ufikiaji wa ruhusa kwa Huduma B**.
 1. S4U2Self (kutoka akaunti ya SPN iliyovunjwa/iliyoundwa): Omba **TGS ya Msimamizi kwangu** (Sio Forwardable).
-2. S4U2Proxy: Tumia **TGS isiyo Forwardable** ya hatua ya awali kuomba **TGS** kutoka **Msimamizi** hadi **kompyuta ya mwathirika**.
+2. S4U2Proxy: Tumia **TGS isiyo Forwardable** ya hatua iliyopita kuomba **TGS** kutoka **Msimamizi** hadi **kompyuta ya mwathirika**.
 3. Hata kama unatumia TGS isiyo Forwardable, kwani unatumia Resource-based constrained delegation, itafanya kazi.
-4. Mshambuliaji anaweza **kupitisha tiketi** na **kujifanya** mtumiaji ili kupata **ufikiaji kwa HudumaB ya mwathirika**.
+4. Mshambuliaji anaweza **kupitisha tiketi** na **kujifanya** kama mtumiaji ili kupata **ufikiaji kwa HudumaB ya mwathirika**.
 
 Ili kuangalia _**MachineAccountQuota**_ ya kikoa unaweza kutumia:
 ```powershell
@@ -109,7 +106,7 @@ Jifunze kuhusu [**tiketi za huduma zinazopatikana hapa**](silver-ticket.md#avail
 - **`preauth_failed`**: Hii inamaanisha kwamba jina la mtumiaji + hash zilizotolewa hazifanyi kazi kuingia. Huenda umesahau kuweka "$" ndani ya jina la mtumiaji unapozalisha hash (`.\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local`)
 - **`KDC_ERR_BADOPTION`**: Hii inaweza kumaanisha:
   - Mtumiaji unayejaribu kujifanya hawezi kufikia huduma inayotakiwa (kwa sababu huwezi kujifanya au kwa sababu hana ruhusa za kutosha)
-  - Huduma iliyotakiwa haipo (ikiwa unahitaji tiketi ya winrm lakini winrm haifanyi kazi)
+  - Huduma iliyoulizwa haipo (ikiwa unahitaji tiketi ya winrm lakini winrm haifanyi kazi)
   - Kompyuta ya bandia iliyoundwa imepoteza ruhusa zake juu ya seva iliyo hatarini na unahitaji kuzirudisha.
 
 ## Marejeleo
@@ -118,9 +115,5 @@ Jifunze kuhusu [**tiketi za huduma zinazopatikana hapa**](silver-ticket.md#avail
 - [https://www.harmj0y.net/blog/redteaming/another-word-on-delegation/](https://www.harmj0y.net/blog/redteaming/another-word-on-delegation/)
 - [https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/resource-based-constrained-delegation-ad-computer-object-take-over-and-privilged-code-execution#modifying-target-computers-ad-object](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/resource-based-constrained-delegation-ad-computer-object-take-over-and-privilged-code-execution#modifying-target-computers-ad-object)
 - [https://stealthbits.com/blog/resource-based-constrained-delegation-abuse/](https://stealthbits.com/blog/resource-based-constrained-delegation-abuse/)
-
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

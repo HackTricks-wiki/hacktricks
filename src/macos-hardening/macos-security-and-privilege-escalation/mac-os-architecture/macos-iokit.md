@@ -4,16 +4,15 @@
 
 ## Basic Information
 
-The I/O Kit is an open-source, object-oriented **device-driver framework** in the XNU kernel, handles **dynamically loaded device drivers**. It allows modular code to be added to the kernel on-the-fly, supporting diverse hardware.
+I/O Kit ni mfumo wa **madereva wa vifaa** wa chanzo wazi, unaoelekezwa na vitu katika kernel ya XNU, unashughulikia **madereva wa vifaa wanaopakiwa kwa nguvu**. Inaruhusu msimbo wa moduli kuongezwa kwenye kernel mara moja, ikisaidia vifaa mbalimbali.
 
-IOKit drivers will basically **export functions from the kernel**. These function parameter **types** are **predefined** and are verified. Moreover, similar to XPC, IOKit is just another layer on **top of Mach messages**.
+Madereva ya IOKit kwa msingi **yanatoa kazi kutoka kwa kernel**. Aina za **vigezo** vya kazi hizi ni **zilizopangwa awali** na zinathibitishwa. Zaidi ya hayo, kama ilivyo kwa XPC, IOKit ni safu nyingine juu ya **ujumbe wa Mach**.
 
-**IOKit XNU kernel code** is opensourced by Apple in [https://github.com/apple-oss-distributions/xnu/tree/main/iokit](https://github.com/apple-oss-distributions/xnu/tree/main/iokit). Moreover, the user space IOKit components are also opensource [https://github.com/opensource-apple/IOKitUser](https://github.com/opensource-apple/IOKitUser).
+**Msimbo wa kernel ya IOKit XNU** umewekwa wazi na Apple katika [https://github.com/apple-oss-distributions/xnu/tree/main/iokit](https://github.com/apple-oss-distributions/xnu/tree/main/iokit). Aidha, vipengele vya IOKit katika nafasi ya mtumiaji pia ni chanzo wazi [https://github.com/opensource-apple/IOKitUser](https://github.com/opensource-apple/IOKitUser).
 
-However, **no IOKit drivers** are opensource. Anyway, from time to time a release of a driver might come with symbols that makes it easier to debug it. Check how to [**get the driver extensions from the firmware here**](./#ipsw)**.**
+Hata hivyo, **hakuna madereva ya IOKit** yanayopatikana kama chanzo wazi. Hata hivyo, mara kwa mara, toleo la dereva linaweza kuja na alama zinazofanya iwe rahisi kuifanyia ufuatiliaji. Angalia jinsi ya [**kupata nyongeza za dereva kutoka kwa firmware hapa**](./#ipsw)**.**
 
-It's written in **C++**. You can get demangled C++ symbols with:
-
+Imeandikwa kwa **C++**. Unaweza kupata alama za C++ zisizokuwa na mchanganyiko kwa:
 ```bash
 # Get demangled symbols
 nm -C com.apple.driver.AppleJPEGDriver
@@ -23,210 +22,193 @@ c++filt
 __ZN16IOUserClient202222dispatchExternalMethodEjP31IOExternalMethodArgumentsOpaquePK28IOExternalMethodDispatch2022mP8OSObjectPv
 IOUserClient2022::dispatchExternalMethod(unsigned int, IOExternalMethodArgumentsOpaque*, IOExternalMethodDispatch2022 const*, unsigned long, OSObject*, void*)
 ```
-
 > [!CAUTION]
-> IOKit **exposed functions** could perform **additional security checks** when a client tries to call a function but note that the apps are usually **limited** by the **sandbox** to which IOKit functions they can interact with.
+> IOKit **imefunua kazi** inaweza kufanya **ukaguzi wa ziada wa usalama** wakati mteja anapojaribu kuita kazi lakini kumbuka kwamba programu mara nyingi **zina mipaka** na **sandbox** ambayo IOKit kazi zinaweza kuingiliana nayo.
 
-## Drivers
+## Madereva
 
-In macOS they are located in:
+Katika macOS zinapatikana katika:
 
 - **`/System/Library/Extensions`**
-  - KEXT files built into the OS X operating system.
+- Faili za KEXT zilizojengwa ndani ya mfumo wa uendeshaji wa OS X.
 - **`/Library/Extensions`**
-  - KEXT files installed by 3rd party software
+- Faili za KEXT zilizowekwa na programu za upande wa tatu
 
-In iOS they are located in:
+Katika iOS zinapatikana katika:
 
 - **`/System/Library/Extensions`**
-
 ```bash
 #Use kextstat to print the loaded drivers
 kextstat
 Executing: /usr/bin/kmutil showloaded
 No variant specified, falling back to release
 Index Refs Address            Size       Wired      Name (Version) UUID <Linked Against>
-    1  142 0                  0          0          com.apple.kpi.bsd (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
-    2   11 0                  0          0          com.apple.kpi.dsep (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
-    3  170 0                  0          0          com.apple.kpi.iokit (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
-    4    0 0                  0          0          com.apple.kpi.kasan (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
-    5  175 0                  0          0          com.apple.kpi.libkern (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
-    6  154 0                  0          0          com.apple.kpi.mach (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
-    7   88 0                  0          0          com.apple.kpi.private (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
-    8  106 0                  0          0          com.apple.kpi.unsupported (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
-    9    2 0xffffff8003317000 0xe000     0xe000     com.apple.kec.Libm (1) 6C1342CC-1D74-3D0F-BC43-97D5AD38200A <5>
-   10   12 0xffffff8003544000 0x92000    0x92000    com.apple.kec.corecrypto (11.1) F5F1255F-6552-3CF4-A9DB-D60EFDEB4A9A <8 7 6 5 3 1>
+1  142 0                  0          0          com.apple.kpi.bsd (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
+2   11 0                  0          0          com.apple.kpi.dsep (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
+3  170 0                  0          0          com.apple.kpi.iokit (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
+4    0 0                  0          0          com.apple.kpi.kasan (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
+5  175 0                  0          0          com.apple.kpi.libkern (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
+6  154 0                  0          0          com.apple.kpi.mach (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
+7   88 0                  0          0          com.apple.kpi.private (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
+8  106 0                  0          0          com.apple.kpi.unsupported (20.5.0) 52A1E876-863E-38E3-AC80-09BBAB13B752 <>
+9    2 0xffffff8003317000 0xe000     0xe000     com.apple.kec.Libm (1) 6C1342CC-1D74-3D0F-BC43-97D5AD38200A <5>
+10   12 0xffffff8003544000 0x92000    0x92000    com.apple.kec.corecrypto (11.1) F5F1255F-6552-3CF4-A9DB-D60EFDEB4A9A <8 7 6 5 3 1>
 ```
+Mpaka nambari 9, madereva waliotajwa **yamepakizwa katika anwani 0**. Hii ina maana kwamba si madereva halisi bali **sehemu ya kernel na hayawezi kuondolewa**.
 
-Until the number 9 the listed drivers are **loaded in the address 0**. This means that those aren't real drivers but **part of the kernel and they cannot be unloaded**.
-
-In order to find specific extensions you can use:
-
+Ili kupata nyongeza maalum unaweza kutumia:
 ```bash
 kextfind -bundle-id com.apple.iokit.IOReportFamily #Search by full bundle-id
 kextfind -bundle-id -substring IOR #Search by substring in bundle-id
 ```
-
-To load and unload kernel extensions do:
-
+Ili kupakia na kuondoa nyongeza za kernel fanya:
 ```bash
 kextload com.apple.iokit.IOReportFamily
 kextunload com.apple.iokit.IOReportFamily
 ```
-
 ## IORegistry
 
-The **IORegistry** is a crucial part of the IOKit framework in macOS and iOS which serves as a database for representing the system's hardware configuration and state. It's a **hierarchical collection of objects that represent all the hardware and drivers** loaded on the system, and their relationships to each other.
+**IORegistry** ni sehemu muhimu ya mfumo wa IOKit katika macOS na iOS ambayo inatumika kama hifadhidata ya kuwakilisha usanidi wa vifaa vya mfumo na hali yake. Ni **mkusanyiko wa kihierarkia wa vitu vinavyowakilisha vifaa vyote na madereva** yaliyojumuishwa kwenye mfumo, na uhusiano wao kwa kila mmoja.
 
-You can get the IORegistry using the cli **`ioreg`** to inspect it from the console (specially useful for iOS).
-
+Unaweza kupata IORegistry kwa kutumia cli **`ioreg`** kuikagua kutoka kwenye console (hasa inafaida kwa iOS).
 ```bash
 ioreg -l #List all
 ioreg -w 0 #Not cut lines
 ioreg -p <plane> #Check other plane
 ```
-
-You could download **`IORegistryExplorer`** from **Xcode Additional Tools** from [**https://developer.apple.com/download/all/**](https://developer.apple.com/download/all/) and inspect the **macOS IORegistry** through a **graphical** interface.
+Unaweza kupakua **`IORegistryExplorer`** kutoka **Xcode Additional Tools** kutoka [**https://developer.apple.com/download/all/**](https://developer.apple.com/download/all/) na kukagua **macOS IORegistry** kupitia kiolesura **cha picha**.
 
 <figure><img src="../../../images/image (1167).png" alt="" width="563"><figcaption></figcaption></figure>
 
-In IORegistryExplorer, "planes" are used to organize and display the relationships between different objects in the IORegistry. Each plane represents a specific type of relationship or a particular view of the system's hardware and driver configuration. Here are some of the common planes you might encounter in IORegistryExplorer:
+Katika IORegistryExplorer, "planes" zinatumika kuandaa na kuonyesha uhusiano kati ya vitu tofauti katika IORegistry. Kila plane inawakilisha aina maalum ya uhusiano au mtazamo maalum wa usanidi wa vifaa na madereva wa mfumo. Hapa kuna baadhi ya planes za kawaida ambazo unaweza kukutana nazo katika IORegistryExplorer:
 
-1. **IOService Plane**: This is the most general plane, displaying the service objects that represent drivers and nubs (communication channels between drivers). It shows the provider-client relationships between these objects.
-2. **IODeviceTree Plane**: This plane represents the physical connections between devices as they are attached to the system. It is often used to visualize the hierarchy of devices connected via buses like USB or PCI.
-3. **IOPower Plane**: Displays objects and their relationships in terms of power management. It can show which objects are affecting the power state of others, useful for debugging power-related issues.
-4. **IOUSB Plane**: Specifically focused on USB devices and their relationships, showing the hierarchy of USB hubs and connected devices.
-5. **IOAudio Plane**: This plane is for representing audio devices and their relationships within the system.
+1. **IOService Plane**: Hii ni plane ya jumla zaidi, ikionyesha vitu vya huduma vinavyowakilisha madereva na nubs (michannel ya mawasiliano kati ya madereva). Inaonyesha uhusiano wa mtoa huduma-mteja kati ya vitu hivi.
+2. **IODeviceTree Plane**: Plane hii inawakilisha muunganisho wa kimwili kati ya vifaa kadri vinavyounganishwa kwenye mfumo. Mara nyingi hutumiwa kuonyesha hierarchi ya vifaa vilivyounganishwa kupitia mabasi kama USB au PCI.
+3. **IOPower Plane**: Inaonyesha vitu na uhusiano wao kwa upande wa usimamizi wa nguvu. Inaweza kuonyesha ni vitu gani vinavyoathiri hali ya nguvu ya vingine, muhimu kwa kutatua matatizo yanayohusiana na nguvu.
+4. **IOUSB Plane**: Imejikita hasa kwenye vifaa vya USB na uhusiano wao, ikionyesha hierarchi ya USB hubs na vifaa vilivyounganishwa.
+5. **IOAudio Plane**: Plane hii inawakilisha vifaa vya sauti na uhusiano wao ndani ya mfumo.
 6. ...
 
-## Driver Comm Code Example
+## Mfano wa Msimbo wa Comm wa Dereva
 
-The following code connects to the IOKit service `"YourServiceNameHere"` and calls the function inside the selector 0. For it:
+Msimbo ufuatao unajihusisha na huduma ya IOKit `"YourServiceNameHere"` na kuita kazi ndani ya mteule 0. Kwa hivyo:
 
-- it first calls **`IOServiceMatching`** and **`IOServiceGetMatchingServices`** to get the service.
-- It then establish a connection calling **`IOServiceOpen`**.
-- And it finally calls a function with **`IOConnectCallScalarMethod`** indicating the selector 0 (the selector is the number the function you want to call has assigned).
-
+- kwanza inaita **`IOServiceMatching`** na **`IOServiceGetMatchingServices`** kupata huduma.
+- Kisha inaunda muunganisho kwa kuita **`IOServiceOpen`**.
+- Na hatimaye inaita kazi kwa **`IOConnectCallScalarMethod`** ikionyesha mteule 0 (mteule ni nambari ambayo kazi unayotaka kuita imepewa).
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <IOKit/IOKitLib.h>
 
 int main(int argc, const char * argv[]) {
-    @autoreleasepool {
-        // Get a reference to the service using its name
-        CFMutableDictionaryRef matchingDict = IOServiceMatching("YourServiceNameHere");
-        if (matchingDict == NULL) {
-            NSLog(@"Failed to create matching dictionary");
-            return -1;
-        }
+@autoreleasepool {
+// Get a reference to the service using its name
+CFMutableDictionaryRef matchingDict = IOServiceMatching("YourServiceNameHere");
+if (matchingDict == NULL) {
+NSLog(@"Failed to create matching dictionary");
+return -1;
+}
 
-        // Obtain an iterator over all matching services
-        io_iterator_t iter;
-        kern_return_t kr = IOServiceGetMatchingServices(kIOMasterPortDefault, matchingDict, &iter);
-        if (kr != KERN_SUCCESS) {
-            NSLog(@"Failed to get matching services");
-            return -1;
-        }
+// Obtain an iterator over all matching services
+io_iterator_t iter;
+kern_return_t kr = IOServiceGetMatchingServices(kIOMasterPortDefault, matchingDict, &iter);
+if (kr != KERN_SUCCESS) {
+NSLog(@"Failed to get matching services");
+return -1;
+}
 
-        // Get a reference to the first service (assuming it exists)
-        io_service_t service = IOIteratorNext(iter);
-        if (!service) {
-            NSLog(@"No matching service found");
-            IOObjectRelease(iter);
-            return -1;
-        }
+// Get a reference to the first service (assuming it exists)
+io_service_t service = IOIteratorNext(iter);
+if (!service) {
+NSLog(@"No matching service found");
+IOObjectRelease(iter);
+return -1;
+}
 
-        // Open a connection to the service
-        io_connect_t connect;
-        kr = IOServiceOpen(service, mach_task_self(), 0, &connect);
-        if (kr != KERN_SUCCESS) {
-            NSLog(@"Failed to open service");
-            IOObjectRelease(service);
-            IOObjectRelease(iter);
-            return -1;
-        }
+// Open a connection to the service
+io_connect_t connect;
+kr = IOServiceOpen(service, mach_task_self(), 0, &connect);
+if (kr != KERN_SUCCESS) {
+NSLog(@"Failed to open service");
+IOObjectRelease(service);
+IOObjectRelease(iter);
+return -1;
+}
 
-        // Call a method on the service
-        // Assume the method has a selector of 0, and takes no arguments
-        kr = IOConnectCallScalarMethod(connect, 0, NULL, 0, NULL, NULL);
-        if (kr != KERN_SUCCESS) {
-            NSLog(@"Failed to call method");
-        }
+// Call a method on the service
+// Assume the method has a selector of 0, and takes no arguments
+kr = IOConnectCallScalarMethod(connect, 0, NULL, 0, NULL, NULL);
+if (kr != KERN_SUCCESS) {
+NSLog(@"Failed to call method");
+}
 
-        // Cleanup
-        IOServiceClose(connect);
-        IOObjectRelease(service);
-        IOObjectRelease(iter);
-    }
-    return 0;
+// Cleanup
+IOServiceClose(connect);
+IOObjectRelease(service);
+IOObjectRelease(iter);
+}
+return 0;
 }
 ```
+Kuna **zingine** kazi ambazo zinaweza kutumika kuita kazi za IOKit mbali na **`IOConnectCallScalarMethod`** kama **`IOConnectCallMethod`**, **`IOConnectCallStructMethod`**...
 
-There are **other** functions that can be used to call IOKit functions apart of **`IOConnectCallScalarMethod`** like **`IOConnectCallMethod`**, **`IOConnectCallStructMethod`**...
+## Kurejesha kiingilio cha dereva
 
-## Reversing driver entrypoint
+Unaweza kupata hizi kwa mfano kutoka kwa [**picha ya firmware (ipsw)**](./#ipsw). Kisha, pakia kwenye decompiler unayependa.
 
-You could obtain these for example from a [**firmware image (ipsw)**](./#ipsw). Then, load it into your favourite decompiler.
-
-You could start decompiling the **`externalMethod`** function as this is the driver function that will be receiving the call and calling the correct function:
+Unaweza kuanza kurejesha kazi ya **`externalMethod`** kwani hii ni kazi ya dereva ambayo itakuwa ikipokea wito na kuita kazi sahihi:
 
 <figure><img src="../../../images/image (1168).png" alt="" width="315"><figcaption></figcaption></figure>
 
 <figure><img src="../../../images/image (1169).png" alt=""><figcaption></figcaption></figure>
 
-That awful call demagled means:
-
+Wito huo mbaya ulioondolewa unamaanisha:
 ```cpp
 IOUserClient2022::dispatchExternalMethod(unsigned int, IOExternalMethodArgumentsOpaque*, IOExternalMethodDispatch2022 const*, unsigned long, OSObject*, void*)
 ```
-
-Note how in the previous definition the **`self`** param is missed, the good definition would be:
-
+Kumbuka jinsi katika ufafanuzi wa awali param ya **`self`** ilikosekana, ufafanuzi mzuri ungekuwa:
 ```cpp
 IOUserClient2022::dispatchExternalMethod(self, unsigned int, IOExternalMethodArgumentsOpaque*, IOExternalMethodDispatch2022 const*, unsigned long, OSObject*, void*)
 ```
-
-Actually, you can find the real definition in [https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/Kernel/IOUserClient.cpp#L6388](https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/Kernel/IOUserClient.cpp#L6388):
-
+Kwa kweli, unaweza kupata ufafanuzi halisi katika [https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/Kernel/IOUserClient.cpp#L6388](https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/Kernel/IOUserClient.cpp#L6388):
 ```cpp
 IOUserClient2022::dispatchExternalMethod(uint32_t selector, IOExternalMethodArgumentsOpaque *arguments,
-    const IOExternalMethodDispatch2022 dispatchArray[], size_t dispatchArrayCount,
-    OSObject * target, void * reference)
+const IOExternalMethodDispatch2022 dispatchArray[], size_t dispatchArrayCount,
+OSObject * target, void * reference)
 ```
-
-With this info you can rewrite Ctrl+Right -> `Edit function signature` and set the known types:
+Kwa habari hii unaweza kuandika upya Ctrl+Right -> `Edit function signature` na kuweka aina zinazojulikana:
 
 <figure><img src="../../../images/image (1174).png" alt=""><figcaption></figcaption></figure>
 
-The new decompiled code will look like:
+Msimbo mpya uliofanywa upya utaonekana kama ifuatavyo:
 
 <figure><img src="../../../images/image (1175).png" alt=""><figcaption></figcaption></figure>
 
-For the next step we need to have defined the **`IOExternalMethodDispatch2022`** struct. It's opensource in [https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176](https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176), you could define it:
+Kwa hatua inayofuata tunahitaji kuwa na muundo wa **`IOExternalMethodDispatch2022`** umefafanuliwa. Ni wazi katika [https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176](https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/IOKit/IOUserClient.h#L168-L176), unaweza kuifafanua:
 
 <figure><img src="../../../images/image (1170).png" alt=""><figcaption></figcaption></figure>
 
-Now, following the `(IOExternalMethodDispatch2022 *)&sIOExternalMethodArray` you can see a lot of data:
+Sasa, kufuatia `(IOExternalMethodDispatch2022 *)&sIOExternalMethodArray` unaweza kuona data nyingi:
 
 <figure><img src="../../../images/image (1176).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Change the Data Type to **`IOExternalMethodDispatch2022:`**
+Badilisha Aina ya Data kuwa **`IOExternalMethodDispatch2022:`**
 
 <figure><img src="../../../images/image (1177).png" alt="" width="375"><figcaption></figcaption></figure>
 
-after the change:
+baada ya mabadiliko:
 
 <figure><img src="../../../images/image (1179).png" alt="" width="563"><figcaption></figcaption></figure>
 
-And as we now in there we have an **array of 7 elements** (check the final decompiled code), click to create an array of 7 elements:
+Na kama tunavyojua huko tuna **array ya vipengele 7** (angalia msimbo wa mwisho uliofanywa upya), bonyeza kuunda array ya vipengele 7:
 
 <figure><img src="../../../images/image (1180).png" alt="" width="563"><figcaption></figcaption></figure>
 
-After the array is created you can see all the exported functions:
+Baada ya array kuundwa unaweza kuona kazi zote zilizotolewa:
 
 <figure><img src="../../../images/image (1181).png" alt=""><figcaption></figcaption></figure>
 
 > [!TIP]
-> If you remember, to **call** an **exported** function from user space we don't need to call the name of the function, but the **selector number**. Here you can see that the selector **0** is the function **`initializeDecoder`**, the selector **1** is **`startDecoder`**, the selector **2** **`initializeEncoder`**...
+> Ikiwa unakumbuka, ili **kuita** kazi **iliyotolewa** kutoka kwa nafasi ya mtumiaji hatuhitaji kuita jina la kazi, bali **nambari ya mteule**. Hapa unaweza kuona kwamba mteule **0** ni kazi **`initializeDecoder`**, mteule **1** ni **`startDecoder`**, mteule **2** **`initializeEncoder`**...
 
 {{#include ../../../banners/hacktricks-training.md}}

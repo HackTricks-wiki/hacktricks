@@ -2,42 +2,42 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-There are some occasions were you just have **access to the docker socket** and you want to use it to **escalate privileges**. Some actions might be very suspicious and you may want to avoid them, so here you can find different flags that can be useful to escalate privileges:
+Kuna nyakati ambapo una **ufikiaji wa docker socket** na unataka kuutumia ili **kuinua mamlaka**. Vitendo vingine vinaweza kuwa vya kutatanisha na unaweza kutaka kuvikwepa, hivyo hapa unaweza kupata bendera tofauti ambazo zinaweza kuwa na manufaa katika kuinua mamlaka:
 
 ### Via mount
 
-You can **mount** different parts of the **filesystem** in a container running as root and **access** them.\
-You could also **abuse a mount to escalate privileges** inside the container.
+Unaweza **kuunganisha** sehemu tofauti za **filesystem** katika kontena linalotembea kama root na **kuzipata**.\
+Pia unaweza **kudhulumu kuunganisha ili kuinua mamlaka** ndani ya kontena.
 
-- **`-v /:/host`** -> Mount the host filesystem in the container so you can **read the host filesystem.**
-  - If you want to **feel like you are in the host** but being on the container you could disable other defense mechanisms using flags like:
-    - `--privileged`
-    - `--cap-add=ALL`
-    - `--security-opt apparmor=unconfined`
-    - `--security-opt seccomp=unconfined`
-    - `-security-opt label:disable`
-    - `--pid=host`
-    - `--userns=host`
-    - `--uts=host`
-    - `--cgroupns=host`
-- \*\*`--device=/dev/sda1 --cap-add=SYS_ADMIN --security-opt apparmor=unconfined` \*\* -> This is similar to the previous method, but here we are **mounting the device disk**. Then, inside the container run `mount /dev/sda1 /mnt` and you can **access** the **host filesystem** in `/mnt`
-  - Run `fdisk -l` in the host to find the `</dev/sda1>` device to mount
-- **`-v /tmp:/host`** -> If for some reason you can **just mount some directory** from the host and you have access inside the host. Mount it and create a **`/bin/bash`** with **suid** in the mounted directory so you can **execute it from the host and escalate to root**.
+- **`-v /:/host`** -> Unganisha filesystem ya mwenyeji katika kontena ili uweze **kusoma filesystem ya mwenyeji.**
+- Ikiwa unataka **kujihisi kama uko kwenye mwenyeji** lakini uko kwenye kontena unaweza kuzima mitambo mingine ya ulinzi kwa kutumia bendera kama:
+- `--privileged`
+- `--cap-add=ALL`
+- `--security-opt apparmor=unconfined`
+- `--security-opt seccomp=unconfined`
+- `-security-opt label:disable`
+- `--pid=host`
+- `--userns=host`
+- `--uts=host`
+- `--cgroupns=host`
+- \*\*`--device=/dev/sda1 --cap-add=SYS_ADMIN --security-opt apparmor=unconfined` \*\* -> Hii ni sawa na njia ya awali, lakini hapa tunafanya **kuunganisha diski ya kifaa**. Kisha, ndani ya kontena endesha `mount /dev/sda1 /mnt` na unaweza **kuipata** **filesystem ya mwenyeji** katika `/mnt`
+- Endesha `fdisk -l` kwenye mwenyeji ili kupata kifaa `</dev/sda1>` cha kuunganisha
+- **`-v /tmp:/host`** -> Ikiwa kwa sababu fulani unaweza **kuunganisha tu directory fulani** kutoka kwa mwenyeji na una ufikiaji ndani ya mwenyeji. Unganisha na uunde **`/bin/bash`** yenye **suid** katika directory iliyounganishwa ili uweze **kuitekeleza kutoka kwa mwenyeji na kuinua hadi root**.
 
 > [!NOTE]
-> Note that maybe you cannot mount the folder `/tmp` but you can mount a **different writable folder**. You can find writable directories using: `find / -writable -type d 2>/dev/null`
+> Kumbuka kwamba huenda usiweze kuunganisha folda `/tmp` lakini unaweza kuunganisha **folda nyingine inayoweza kuandikwa**. Unaweza kupata directories zinazoweza kuandikwa kwa kutumia: `find / -writable -type d 2>/dev/null`
 >
-> **Note that not all the directories in a linux machine will support the suid bit!** In order to check which directories support the suid bit run `mount | grep -v "nosuid"` For example usually `/dev/shm` , `/run` , `/proc` , `/sys/fs/cgroup` and `/var/lib/lxcfs` don't support the suid bit.
+> **Kumbuka kwamba si directories zote katika mashine ya linux zitasaidia suid bit!** Ili kuangalia ni directories zipi zinasaidia suid bit endesha `mount | grep -v "nosuid"` Kwa mfano kawaida `/dev/shm`, `/run`, `/proc`, `/sys/fs/cgroup` na `/var/lib/lxcfs` hazisaidii suid bit.
 >
-> Note also that if you can **mount `/etc`** or any other folder **containing configuration files**, you may change them from the docker container as root in order to **abuse them in the host** and escalate privileges (maybe modifying `/etc/shadow`)
+> Kumbuka pia kwamba ikiwa unaweza **kuunganisha `/etc`** au folda nyingine yoyote **iliyokuwa na faili za usanidi**, unaweza kuzibadilisha kutoka kwa kontena la docker kama root ili **uzitumie kwenye mwenyeji** na kuinua mamlaka (labda kubadilisha `/etc/shadow`)
 
 ### Escaping from the container
 
-- **`--privileged`** -> With this flag you [remove all the isolation from the container](docker-privileged.md#what-affects). Check techniques to [escape from privileged containers as root](docker-breakout-privilege-escalation/#automatic-enumeration-and-escape).
-- **`--cap-add=<CAPABILITY/ALL> [--security-opt apparmor=unconfined] [--security-opt seccomp=unconfined] [-security-opt label:disable]`** -> To [escalate abusing capabilities](../linux-capabilities.md), **grant that capability to the container** and disable other protection methods that may prevent the exploit to work.
+- **`--privileged`** -> Kwa bendera hii un [ondoa kila ulinzi kutoka kwa kontena](docker-privileged.md#what-affects). Angalia mbinu za [kutoroka kutoka kwa kontena zenye mamlaka kama root](docker-breakout-privilege-escalation/#automatic-enumeration-and-escape).
+- **`--cap-add=<CAPABILITY/ALL> [--security-opt apparmor=unconfined] [--security-opt seccomp=unconfined] [-security-opt label:disable]`** -> Ili [kuinua kwa kudhulumu uwezo](../linux-capabilities.md), **peana uwezo huo kwa kontena** na uzime njia nyingine za ulinzi ambazo zinaweza kuzuia exploit kufanya kazi.
 
 ### Curl
 
-In this page we have discussed ways to escalate privileges using docker flags, you can find **ways to abuse these methods using curl** command in the page:
+Katika ukurasa huu tumajadili njia za kuinua mamlaka kwa kutumia bendera za docker, unaweza kupata **njia za kudhulumu mbinu hizi kwa kutumia amri ya curl** katika ukurasa:
 
 {{#include ../../../banners/hacktricks-training.md}}

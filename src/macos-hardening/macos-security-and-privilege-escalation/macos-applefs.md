@@ -2,33 +2,29 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Apple Propietary File System (APFS)
+## Apple Proprietary File System (APFS)
 
-**Apple File System (APFS)** is a modern file system designed to supersede the Hierarchical File System Plus (HFS+). Its development was driven by the need for **improved performance, security, and efficiency**.
+**Apple File System (APFS)** ni mfumo wa kisasa wa faili ulioandaliwa ili kubadilisha Mfumo wa Faili wa Kihierarkia Plus (HFS+). Maendeleo yake yalichochewa na hitaji la **kuboresha utendaji, usalama, na ufanisi**.
 
-Some notable features of APFS include:
+Baadhi ya sifa muhimu za APFS ni pamoja na:
 
-1. **Space Sharing**: APFS allows multiple volumes to **share the same underlying free storage** on a single physical device. This enables more efficient space utilization as the volumes can dynamically grow and shrink without the need for manual resizing or repartitioning.
-   1. This means, compared with traditional partitions in file disks, **that in APFS different partitions (volumes) shares all the disk space**, while a regular partition usually had a fixed size.
-2. **Snapshots**: APFS supports **creating snapshots**, which are **read-only**, point-in-time instances of the file system. Snapshots enable efficient backups and easy system rollbacks, as they consume minimal additional storage and can be quickly created or reverted.
-3. **Clones**: APFS can **create file or directory clones that share the same storage** as the original until either the clone or the original file is modified. This feature provides an efficient way to create copies of files or directories without duplicating the storage space.
-4. **Encryption**: APFS **natively supports full-disk encryption** as well as per-file and per-directory encryption, enhancing data security across different use cases.
-5. **Crash Protection**: APFS uses a **copy-on-write metadata scheme that ensures file system consistency** even in cases of sudden power loss or system crashes, reducing the risk of data corruption.
+1. **Kushiriki Nafasi**: APFS inaruhusu volumu nyingi **kushiriki hifadhi ya bure iliyo chini** kwenye kifaa kimoja cha kimwili. Hii inaruhusu matumizi bora ya nafasi kwani volumu zinaweza kukua na kupungua kwa njia ya kidijitali bila haja ya kubadilisha ukubwa au kugawanya upya.
+1. Hii inamaanisha, ikilinganishwa na sehemu za jadi katika diski za faili, **kwamba katika APFS sehemu tofauti (volumu) zinashiriki nafasi yote ya diski**, wakati sehemu ya kawaida mara nyingi ilikuwa na ukubwa wa kudumu.
+2. **Snapshots**: APFS inasaidia **kuunda snapshots**, ambazo ni **za kusoma tu**, matukio ya wakati wa mfumo wa faili. Snapshots zinaruhusu nakala za haraka na urahisi wa kurudi nyuma kwa mfumo, kwani zinatumia hifadhi ya ziada kidogo na zinaweza kuundwa au kurejeshwa haraka.
+3. **Clones**: APFS inaweza **kuunda clones za faili au saraka zinazoshiriki hifadhi ile ile** kama ya asili hadi clone au faili ya asili ibadilishwe. Sifa hii inatoa njia bora ya kuunda nakala za faili au saraka bila kuiga nafasi ya hifadhi.
+4. **Ushirikiano**: APFS **inasaidia kwa asili usimbaji wa diski nzima** pamoja na usimbaji wa faili na saraka, ikiongeza usalama wa data katika matumizi tofauti.
+5. **Ulinzi wa Ajali**: APFS inatumia **mpango wa metadata wa nakala-katika-k写 ambao unahakikisha uthabiti wa mfumo wa faili** hata katika hali za kupoteza nguvu ghafla au ajali za mfumo, ikipunguza hatari ya uharibifu wa data.
 
-Overall, APFS offers a more modern, flexible, and efficient file system for Apple devices, with a focus on improved performance, reliability, and security.
-
+Kwa ujumla, APFS inatoa mfumo wa faili wa kisasa, rahisi, na wenye ufanisi kwa vifaa vya Apple, ukiwa na mkazo wa kuboresha utendaji, uaminifu, na usalama.
 ```bash
 diskutil list # Get overview of the APFS volumes
 ```
-
 ## Firmlinks
 
-The `Data` volume is mounted in **`/System/Volumes/Data`** (you can check this with `diskutil apfs list`).
+Hifadhi ya `Data` imewekwa katika **`/System/Volumes/Data`** (unaweza kuangalia hii kwa kutumia `diskutil apfs list`).
 
-The list of firmlinks can be found in the **`/usr/share/firmlinks`** file.
-
+Orodha ya firmlinks inaweza kupatikana katika faili ya **`/usr/share/firmlinks`**.
 ```bash
 
 ```
-
 {{#include ../../banners/hacktricks-training.md}}

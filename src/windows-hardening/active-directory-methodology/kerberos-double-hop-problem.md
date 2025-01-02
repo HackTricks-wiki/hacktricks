@@ -2,15 +2,11 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
-
 ## Introduction
 
 Tatizo la "Double Hop" la Kerberos linaonekana wakati mshambuliaji anajaribu kutumia **uthibitishaji wa Kerberos kati ya hops mbili**, kwa mfano kutumia **PowerShell**/**WinRM**.
 
-Wakati **uthibitishaji** unapotokea kupitia **Kerberos**, **akili** **hazihifadhiwi** katika **kumbukumbu.** Hivyo, ikiwa unakimbia mimikatz hu **wezi kupata akili** za mtumiaji kwenye mashine hata kama anafanya michakato.
+Wakati **uthibitishaji** unapotokea kupitia **Kerberos**, **akili** **hazihifadhiwi** katika **kumbukumbu.** Hivyo, ikiwa unakimbia mimikatz hu **wezi kupata akili** za mtumiaji katika mashine hata kama anafanya michakato.
 
 Hii ni kwa sababu wakati wa kuungana na Kerberos hatua hizi zinafuatwa:
 
@@ -21,8 +17,8 @@ Hii ni kwa sababu wakati wa kuungana na Kerberos hatua hizi zinafuatwa:
 
 ### Unconstrained Delegation
 
-Ikiwa **unconstrained delegation** imewezeshwa kwenye PC, hii haitatokea kwani **Server** itapata **TGT** ya kila mtumiaji anayefikia. Zaidi ya hayo, ikiwa unconstrained delegation inatumika unaweza **kudhoofisha Meneja wa Eneo** kutoka hapo.\
-[**Maelezo zaidi kwenye ukurasa wa unconstrained delegation**](unconstrained-delegation.md).
+Ikiwa **unconstrained delegation** imewezeshwa katika PC, hii haitatokea kwani **Server** itapata **TGT** ya kila mtumiaji anayefikia. Zaidi ya hayo, ikiwa unconstrained delegation inatumika unaweza **kudhoofisha Meneja wa Eneo** kutoka hapo.\
+[**Maelezo zaidi katika ukurasa wa unconstrained delegation**](unconstrained-delegation.md).
 
 ### CredSSP
 
@@ -47,11 +43,11 @@ Invoke-Command -ComputerName bizintel -Credential $cred -ScriptBlock {
 Invoke-Command -ComputerName secdev -Credential $cred -ScriptBlock {hostname}
 }
 ```
-Kwa upande mwingine, kuanzisha PS-Session na seva ya kwanza na kuendesha `Invoke-Command` kwa kutumia `$cred` kunapendekezwa kwa ajili ya kuunganisha kazi.
+Kwa upande mwingine, kuanzisha PS-Session na seva ya kwanza na kuendesha `Invoke-Command` kwa kutumia `$cred` inapendekezwa kwa kuunganisha kazi.
 
 ### Sajili Mipangilio ya PSSession
 
-Suluhisho la kupita tatizo la double hop linahusisha kutumia `Register-PSSessionConfiguration` na `Enter-PSSession`. Njia hii inahitaji mbinu tofauti na `evil-winrm` na inaruhusu kwa ajili ya kikao ambacho hakikabiliwi na kikomo cha double hop.
+Suluhisho la kupita tatizo la double hop linahusisha kutumia `Register-PSSessionConfiguration` na `Enter-PSSession`. Njia hii inahitaji mbinu tofauti na `evil-winrm` na inaruhusu kikao ambacho hakikabiliwi na kikomo cha double hop.
 ```powershell
 Register-PSSessionConfiguration -Name doublehopsess -RunAsCredential domain_name\username
 Restart-Service WinRM
@@ -60,7 +56,7 @@ klist
 ```
 ### PortForwarding
 
-Kwa wasimamizi wa ndani kwenye lengo la kati, upitishaji wa bandari unaruhusu maombi kutumwa kwa seva ya mwisho. Kwa kutumia `netsh`, sheria inaweza kuongezwa kwa upitishaji wa bandari, pamoja na sheria ya firewall ya Windows kuruhusu bandari iliyopitishwa.
+Kwa wasimamizi wa ndani kwenye lengo la kati, upitishaji wa bandari unaruhusu maombi kutumwa kwa seva ya mwisho. Kwa kutumia `netsh`, sheria inaweza kuongezwa kwa upitishaji wa bandari, pamoja na sheria ya moto ya Windows kuruhusu bandari iliyopitishwa.
 ```bash
 netsh interface portproxy add v4tov4 listenport=5446 listenaddress=10.35.8.17 connectport=5985 connectaddress=10.35.8.23
 netsh advfirewall firewall add rule name=fwd dir=in action=allow protocol=TCP localport=5446
@@ -77,11 +73,11 @@ Kuweka OpenSSH kwenye seva ya kwanza kunaruhusu suluhisho la tatizo la double-ho
 
 #### Hatua za Usakinishaji wa OpenSSH
 
-1. Pakua na uhamishe toleo la hivi karibuni la OpenSSH zip kwenye seva lengwa.
-2. Fungua na uendeshe script ya `Install-sshd.ps1`.
+1. Pakua na uhamishe toleo jipya la OpenSSH zip kwenye seva lengwa.
+2. Fungua na endesha skripti ya `Install-sshd.ps1`.
 3. Ongeza sheria ya firewall kufungua bandari 22 na thibitisha huduma za SSH zinaendesha.
 
-Ili kutatua makosa ya `Connection reset`, ruhusa zinaweza kuhitajika kuboreshwa ili kuruhusu kila mtu kusoma na kutekeleza kwenye directory ya OpenSSH.
+Ili kutatua makosa ya `Connection reset`, ruhusa zinaweza kuhitajika kuboreshwa ili kuruhusu kila mtu kusoma na kutekeleza kwenye saraka ya OpenSSH.
 ```bash
 icacls.exe "C:\Users\redsuit\Documents\ssh\OpenSSH-Win64" /grant Everyone:RX /T
 ```
@@ -92,8 +88,5 @@ icacls.exe "C:\Users\redsuit\Documents\ssh\OpenSSH-Win64" /grant Everyone:RX /T
 - [https://learn.microsoft.com/en-gb/archive/blogs/sergey_babkins_blog/another-solution-to-multi-hop-powershell-remoting](https://learn.microsoft.com/en-gb/archive/blogs/sergey_babkins_blog/another-solution-to-multi-hop-powershell-remoting)
 - [https://4sysops.com/archives/solve-the-powershell-multi-hop-problem-without-using-credssp/](https://4sysops.com/archives/solve-the-powershell-multi-hop-problem-without-using-credssp/)
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

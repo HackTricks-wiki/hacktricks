@@ -1,33 +1,18 @@
-# macOS Security & Privilege Escalation
+# Usalama wa macOS & Kuinua Privilege
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/image (3).png" alt=""><figcaption></figcaption></figure>
+## Msingi wa MacOS
 
-Join [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server to communicate with experienced hackers and bug bounty hunters!
+Ikiwa hujafahamu macOS, unapaswa kuanza kujifunza misingi ya macOS:
 
-**Hacking Insights**\
-Engage with content that delves into the thrill and challenges of hacking
-
-**Real-Time Hack News**\
-Keep up-to-date with fast-paced hacking world through real-time news and insights
-
-**Latest Announcements**\
-Stay informed with the newest bug bounties launching and crucial platform updates
-
-**Join us on** [**Discord**](https://discord.com/invite/N3FrSbmwdy) and start collaborating with top hackers today!
-
-## Basic MacOS
-
-If you are not familiar with macOS, you should start learning the basics of macOS:
-
-- Special macOS **files & permissions:**
+- Faili maalum za macOS **na ruhusa:**
 
 {{#ref}}
 macos-files-folders-and-binaries/
 {{#endref}}
 
-- Common macOS **users**
+- Watumiaji wa kawaida wa macOS
 
 {{#ref}}
 macos-users.md
@@ -39,112 +24,97 @@ macos-users.md
 macos-applefs.md
 {{#endref}}
 
-- The **architecture** of the k**ernel**
+- **Muundo** wa k**ernel**
 
 {{#ref}}
 mac-os-architecture/
 {{#endref}}
 
-- Common macOS n**etwork services & protocols**
+- Huduma za kawaida za macOS n**etwork & protokali**
 
 {{#ref}}
 macos-protocols.md
 {{#endref}}
 
 - **Opensource** macOS: [https://opensource.apple.com/](https://opensource.apple.com/)
-  - To download a `tar.gz` change a URL such as [https://opensource.apple.com/**source**/dyld/](https://opensource.apple.com/source/dyld/) to [https://opensource.apple.com/**tarballs**/dyld/**dyld-852.2.tar.gz**](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz)
+- Ili kupakua `tar.gz` badilisha URL kama [https://opensource.apple.com/**source**/dyld/](https://opensource.apple.com/source/dyld/) kuwa [https://opensource.apple.com/**tarballs**/dyld/**dyld-852.2.tar.gz**](https://opensource.apple.com/tarballs/dyld/dyld-852.2.tar.gz)
 
 ### MacOS MDM
 
-In companies **macOS** systems are highly probably going to be **managed with a MDM**. Therefore, from the perspective of an attacker is interesting to know **how that works**:
+Katika kampuni **sistimu za macOS** zina uwezekano mkubwa wa kuwa **zinazosimamiwa na MDM**. Hivyo, kutoka mtazamo wa mshambuliaji ni muhimu kujua **jinsi hiyo inavyofanya kazi**:
 
 {{#ref}}
 ../macos-red-teaming/macos-mdm/
 {{#endref}}
 
-### MacOS - Inspecting, Debugging and Fuzzing
+### MacOS - Kukagua, Kurekebisha na Fuzzing
 
 {{#ref}}
 macos-apps-inspecting-debugging-and-fuzzing/
 {{#endref}}
 
-## MacOS Security Protections
+## Ulinzi wa Usalama wa MacOS
 
 {{#ref}}
 macos-security-protections/
 {{#endref}}
 
-## Attack Surface
+## Uso wa Shambulio
 
-### File Permissions
+### Ruhusa za Faili
 
-If a **process running as root writes** a file that can be controlled by a user, the user could abuse this to **escalate privileges**.\
-This could occur in the following situations:
+Ikiwa **mchakato unaotembea kama root unaandika** faili ambayo inaweza kudhibitiwa na mtumiaji, mtumiaji anaweza kuitumia hii ili **kuinua ruhusa**.\
+Hii inaweza kutokea katika hali zifuatazo:
 
-- File used was already created by a user (owned by the user)
-- File used is writable by the user because of a group
-- File used is inside a directory owned by the user (the user could create the file)
-- File used is inside a directory owned by root but user has write access over it because of a group (the user could create the file)
+- Faili iliyotumika tayari iliumbwa na mtumiaji (inamilikiwa na mtumiaji)
+- Faili iliyotumika inaweza kuandikwa na mtumiaji kwa sababu ya kundi
+- Faili iliyotumika iko ndani ya directory inayomilikiwa na mtumiaji (mtumiaji anaweza kuunda faili hiyo)
+- Faili iliyotumika iko ndani ya directory inayomilikiwa na root lakini mtumiaji ana ufaccess wa kuandika juu yake kwa sababu ya kundi (mtumiaji anaweza kuunda faili hiyo)
 
-Being able to **create a file** that is going to be **used by root**, allows a user to **take advantage of its content** or even create **symlinks/hardlinks** to point it to another place.
+Kuwa na uwezo wa **kuunda faili** ambayo itatumika na **root**, inamruhusu mtumiaji **kunufaika na maudhui yake** au hata kuunda **symlinks/hardlinks** kuielekeza mahali pengine.
 
-For this kind of vulnerabilities don't forget to **check vulnerable `.pkg` installers**:
+Kwa aina hii ya udhaifu usisahau **kuangalia waandishi wa `.pkg` walio hatarini**:
 
 {{#ref}}
 macos-files-folders-and-binaries/macos-installers-abuse.md
 {{#endref}}
 
-### File Extension & URL scheme app handlers
+### Mipangilio ya Faili & Wakala wa mpango wa URL
 
-Weird apps registered by file extensions could be abused and different applications can be register to open specific protocols
+Programu za ajabu zilizosajiliwa na mipangilio ya faili zinaweza kutumiwa vibaya na programu tofauti zinaweza kusajiliwa kufungua protokali maalum
 
 {{#ref}}
 macos-file-extension-apps.md
 {{#endref}}
 
-## macOS TCC / SIP Privilege Escalation
+## Kuinua Privilege ya macOS TCC / SIP
 
-In macOS **applications and binaries can have permissions** to access folders or settings that make them more privileged than others.
+Katika macOS **programu na binaries zinaweza kuwa na ruhusa** za kufikia folda au mipangilio ambayo inawafanya kuwa na nguvu zaidi kuliko wengine.
 
-Therefore, an attacker that wants to successfully compromise a macOS machine will need to **escalate its TCC privileges** (or even **bypass SIP**, depending on his needs).
+Hivyo, mshambuliaji anayetaka kufanikiwa kuathiri mashine ya macOS atahitaji **kuinua ruhusa zake za TCC** (au hata **kupita SIP**, kulingana na mahitaji yake).
 
-These privileges are usually given in the form of **entitlements** the application is signed with, or the application might requested some accesses and after the **user approving them** they can be found in the **TCC databases**. Another way a process can obtain these privileges is by being a **child of a process** with those **privileges** as they are usually **inherited**.
+Ruhusa hizi kwa kawaida hutolewa kwa njia ya **entitlements** ambayo programu imesainiwa nayo, au programu inaweza kuomba baadhi ya ufaccess na baada ya **mtumiaji kuidhinisha** zinaweza kupatikana katika **maktaba za TCC**. Njia nyingine mchakato unaweza kupata ruhusa hizi ni kwa kuwa **mtoto wa mchakato** wenye hizo **ruhusa** kwani kwa kawaida **zinarithiwa**.
 
-Follow these links to find different was to [**escalate privileges in TCC**](macos-security-protections/macos-tcc/#tcc-privesc-and-bypasses), to [**bypass TCC**](macos-security-protections/macos-tcc/macos-tcc-bypasses/) and how in the past [**SIP has been bypassed**](macos-security-protections/macos-sip.md#sip-bypasses).
+Fuata viungo hivi kupata njia tofauti za [**kuinua ruhusa katika TCC**](macos-security-protections/macos-tcc/#tcc-privesc-and-bypasses), [**kupita TCC**](macos-security-protections/macos-tcc/macos-tcc-bypasses/) na jinsi katika siku za nyuma [**SIP imepita**](macos-security-protections/macos-sip.md#sip-bypasses).
 
-## macOS Traditional Privilege Escalation
+## Kuinua Privilege ya Kawaida ya macOS
 
-Of course from a red teams perspective you should be also interested in escalating to root. Check the following post for some hints:
+Bila shaka kutoka mtazamo wa timu nyekundu unapaswa pia kuwa na hamu ya kuinua hadi root. Angalia chapisho lifuatalo kwa vidokezo vingine:
 
 {{#ref}}
 macos-privilege-escalation.md
 {{#endref}}
 
-## macOS Compliance
+## Uzingatiaji wa macOS
 
 - [https://github.com/usnistgov/macos_security](https://github.com/usnistgov/macos_security)
 
-## References
+## Marejeleo
 
 - [**OS X Incident Response: Scripting and Analysis**](https://www.amazon.com/OS-Incident-Response-Scripting-Analysis-ebook/dp/B01FHOHHVS)
 - [**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)
 - [**https://github.com/NicolasGrimonpont/Cheatsheet**](https://github.com/NicolasGrimonpont/Cheatsheet)
 - [**https://assets.sentinelone.com/c/sentinal-one-mac-os-?x=FvGtLJ**](https://assets.sentinelone.com/c/sentinal-one-mac-os-?x=FvGtLJ)
 - [**https://www.youtube.com/watch?v=vMGiplQtjTY**](https://www.youtube.com/watch?v=vMGiplQtjTY)
-
-<figure><img src="../../images/image (3).png" alt=""><figcaption></figcaption></figure>
-
-Join [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server to communicate with experienced hackers and bug bounty hunters!
-
-**Hacking Insights**\
-Engage with content that delves into the thrill and challenges of hacking
-
-**Real-Time Hack News**\
-Keep up-to-date with fast-paced hacking world through real-time news and insights
-
-**Latest Announcements**\
-Stay informed with the newest bug bounties launching and crucial platform updates
-
-**Join us on** [**Discord**](https://discord.com/invite/N3FrSbmwdy) and start collaborating with top hackers today!
 
 {{#include ../../banners/hacktricks-training.md}}

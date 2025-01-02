@@ -4,78 +4,76 @@
 
 ## System Extensions / Endpoint Security Framework
 
-Unlike Kernel Extensions, **System Extensions run in user space** instead of kernel space, reducing the risk of a system crash due to extension malfunction.
+Tofauti na Kernel Extensions, **System Extensions zinafanya kazi katika nafasi ya mtumiaji** badala ya nafasi ya kernel, kupunguza hatari ya kuanguka kwa mfumo kutokana na kasoro ya kiendelezi.
 
 <figure><img src="../../../images/image (606).png" alt="https://knight.sc/images/system-extension-internals-1.png"><figcaption></figcaption></figure>
 
-There are three types of system extensions: **DriverKit** Extensions, **Network** Extensions, and **Endpoint Security** Extensions.
+Kuna aina tatu za system extensions: **DriverKit** Extensions, **Network** Extensions, na **Endpoint Security** Extensions.
 
 ### **DriverKit Extensions**
 
-DriverKit is a replacement for kernel extensions that **provide hardware support**. It allows device drivers (like USB, Serial, NIC, and HID drivers) to run in user space rather than kernel space. The DriverKit framework includes **user space versions of certain I/O Kit classes**, and the kernel forwards normal I/O Kit events to user space, offering a safer environment for these drivers to run.
+DriverKit ni mbadala wa kernel extensions ambazo **zinatoa msaada wa vifaa**. Inaruhusu madereva ya vifaa (kama vile USB, Serial, NIC, na HID drivers) kufanya kazi katika nafasi ya mtumiaji badala ya nafasi ya kernel. Mfumo wa DriverKit unajumuisha **toleo la nafasi ya mtumiaji la baadhi ya madarasa ya I/O Kit**, na kernel inapeleka matukio ya kawaida ya I/O Kit kwa nafasi ya mtumiaji, ikitoa mazingira salama kwa madereva haya kufanya kazi.
 
 ### **Network Extensions**
 
-Network Extensions provide the ability to customize network behaviors. There are several types of Network Extensions:
+Network Extensions zinatoa uwezo wa kubadilisha tabia za mtandao. Kuna aina kadhaa za Network Extensions:
 
-- **App Proxy**: This is used for creating a VPN client that implements a flow-oriented, custom VPN protocol. This means it handles network traffic based on connections (or flows) rather than individual packets.
-- **Packet Tunnel**: This is used for creating a VPN client that implements a packet-oriented, custom VPN protocol. This means it handles network traffic based on individual packets.
-- **Filter Data**: This is used for filtering network "flows". It can monitor or modify network data at the flow level.
-- **Filter Packet**: This is used for filtering individual network packets. It can monitor or modify network data at the packet level.
-- **DNS Proxy**: This is used for creating a custom DNS provider. It can be used to monitor or modify DNS requests and responses.
+- **App Proxy**: Hii inatumika kwa kuunda mteja wa VPN ambao unatekeleza itifaki ya VPN iliyobinafsishwa inayotegemea mtiririko. Hii inamaanisha inashughulikia trafiki ya mtandao kulingana na muunganisho (au mitiririko) badala ya pakiti za kibinafsi.
+- **Packet Tunnel**: Hii inatumika kwa kuunda mteja wa VPN ambao unatekeleza itifaki ya VPN iliyobinafsishwa inayotegemea pakiti. Hii inamaanisha inashughulikia trafiki ya mtandao kulingana na pakiti za kibinafsi.
+- **Filter Data**: Hii inatumika kwa kuchuja "mitiririko" ya mtandao. Inaweza kufuatilia au kubadilisha data za mtandao katika kiwango cha mtiririko.
+- **Filter Packet**: Hii inatumika kwa kuchuja pakiti za mtandao za kibinafsi. Inaweza kufuatilia au kubadilisha data za mtandao katika kiwango cha pakiti.
+- **DNS Proxy**: Hii inatumika kwa kuunda mtoa huduma wa DNS uliobinafsishwa. Inaweza kutumika kufuatilia au kubadilisha maombi na majibu ya DNS.
 
 ## Endpoint Security Framework
 
-Endpoint Security is a framework provided by Apple in macOS that provides a set of APIs for system security. It's intended for use by **security vendors and developers to build products that can monitor and control system activity** to identify and protect against malicious activity.
+Endpoint Security ni mfumo unaotolewa na Apple katika macOS ambao unatoa seti ya APIs kwa usalama wa mfumo. Unakusudiwa kutumiwa na **watoa huduma za usalama na waendelezaji kujenga bidhaa ambazo zinaweza kufuatilia na kudhibiti shughuli za mfumo** ili kubaini na kulinda dhidi ya shughuli mbaya.
 
-This framework provides a **collection of APIs to monitor and control system activity**, such as process executions, file system events, network and kernel events.
+Mfumo huu unatoa **mkusanyiko wa APIs za kufuatilia na kudhibiti shughuli za mfumo**, kama vile utekelezaji wa michakato, matukio ya mfumo wa faili, matukio ya mtandao na kernel.
 
-The core of this framework is implemented in the kernel, as a Kernel Extension (KEXT) located at **`/System/Library/Extensions/EndpointSecurity.kext`**. This KEXT is made up of several key components:
+Msingi wa mfumo huu umewekwa katika kernel, kama Kernel Extension (KEXT) iliyoko **`/System/Library/Extensions/EndpointSecurity.kext`**. KEXT hii inajumuisha vipengele kadhaa muhimu:
 
-- **EndpointSecurityDriver**: This acts as the "entry point" for the kernel extension. It's the main point of interaction between the OS and the Endpoint Security framework.
-- **EndpointSecurityEventManager**: This component is responsible for implementing kernel hooks. Kernel hooks allow the framework to monitor system events by intercepting system calls.
-- **EndpointSecurityClientManager**: This manages the communication with user space clients, keeping track of which clients are connected and need to receive event notifications.
-- **EndpointSecurityMessageManager**: This sends messages and event notifications to user space clients.
+- **EndpointSecurityDriver**: Hii inafanya kazi kama "nukta ya kuingia" kwa kiendelezi cha kernel. Ni nukta kuu ya mwingiliano kati ya OS na mfumo wa Endpoint Security.
+- **EndpointSecurityEventManager**: Kipengele hiki kinawajibika kwa kutekeleza nanga za kernel. Nanga za kernel zinaruhusu mfumo kufuatilia matukio ya mfumo kwa kukamata wito wa mfumo.
+- **EndpointSecurityClientManager**: Hii inasimamia mawasiliano na wateja wa nafasi ya mtumiaji, ikifuatilia ni wateja gani wameunganishwa na wanahitaji kupokea arifa za matukio.
+- **EndpointSecurityMessageManager**: Hii inatuma ujumbe na arifa za matukio kwa wateja wa nafasi ya mtumiaji.
 
-The events that the Endpoint Security framework can monitor are categorized into:
+Matukio ambayo mfumo wa Endpoint Security unaweza kufuatilia yanagawanywa katika:
 
-- File events
-- Process events
-- Socket events
-- Kernel events (such as loading/unloading a kernel extension or opening an I/O Kit device)
+- Matukio ya faili
+- Matukio ya mchakato
+- Matukio ya socket
+- Matukio ya kernel (kama vile kupakia/kutoa kiendelezi cha kernel au kufungua kifaa cha I/O Kit)
 
 ### Endpoint Security Framework Architecture
 
 <figure><img src="../../../images/image (1068).png" alt="https://www.youtube.com/watch?v=jaVkpM1UqOs"><figcaption></figcaption></figure>
 
-**User-space communication** with the Endpoint Security framework happens through the IOUserClient class. Two different subclasses are used, depending on the type of caller:
+**Mawasiliano ya nafasi ya mtumiaji** na mfumo wa Endpoint Security hufanyika kupitia darasa la IOUserClient. Aina mbili tofauti za subclasses zinatumika, kulingana na aina ya mpiga simu:
 
-- **EndpointSecurityDriverClient**: This requires the `com.apple.private.endpoint-security.manager` entitlement, which is only held by the system process `endpointsecurityd`.
-- **EndpointSecurityExternalClient**: This requires the `com.apple.developer.endpoint-security.client` entitlement. This would typically be used by third-party security software that needs to interact with the Endpoint Security framework.
+- **EndpointSecurityDriverClient**: Hii inahitaji ruhusa ya `com.apple.private.endpoint-security.manager`, ambayo inashikiliwa tu na mchakato wa mfumo `endpointsecurityd`.
+- **EndpointSecurityExternalClient**: Hii inahitaji ruhusa ya `com.apple.developer.endpoint-security.client`. Hii kwa kawaida ingetumiwa na programu za usalama za wahusika wengine ambazo zinahitaji kuingiliana na mfumo wa Endpoint Security.
 
-The Endpoint Security Extensions:**`libEndpointSecurity.dylib`** is the C library that system extensions use to communicate with the kernel. This library uses the I/O Kit (`IOKit`) to communicate with the Endpoint Security KEXT.
+The Endpoint Security Extensions:**`libEndpointSecurity.dylib`** ni maktaba ya C ambayo system extensions hutumia kuwasiliana na kernel. Maktaba hii inatumia I/O Kit (`IOKit`) kuwasiliana na KEXT ya Endpoint Security.
 
-**`endpointsecurityd`** is a key system daemon involved in managing and launching endpoint security system extensions, particularly during the early boot process. **Only system extensions** marked with **`NSEndpointSecurityEarlyBoot`** in their `Info.plist` file receive this early boot treatment.
+**`endpointsecurityd`** ni daemon muhimu wa mfumo unaohusika na kusimamia na kuzindua system extensions za usalama wa mwisho, hasa wakati wa mchakato wa kuanzisha mapema. **Ni system extensions tu** zilizo na **`NSEndpointSecurityEarlyBoot`** katika faili yao ya `Info.plist` zinazopokea matibabu haya ya kuanzisha mapema.
 
-Another system daemon, **`sysextd`**, **validates system extensions** and moves them into the proper system locations. It then asks the relevant daemon to load the extension. The **`SystemExtensions.framework`** is responsible for activating and deactivating system extensions.
+Daemon nyingine ya mfumo, **`sysextd`**, **inasimamia system extensions** na kuhamasisha katika maeneo sahihi ya mfumo. Kisha inaomba daemon husika kupakia kiendelezi. **`SystemExtensions.framework`** inawajibika kwa kuanzisha na kuzima system extensions.
 
 ## Bypassing ESF
 
-ESF is used by security tools that will try to detect a red teamer, so any information about how this could be avoided sounds interesting.
+ESF inatumika na zana za usalama ambazo zitajaribu kugundua mchezaji wa red team, hivyo taarifa yoyote kuhusu jinsi hii inaweza kuepukwa inavutia.
 
 ### CVE-2021-30965
 
-The thing is that the security application needs to have **Full Disk Access permissions**. So if an attacker could remove that, he could prevent the software from running:
-
+Jambo ni kwamba programu ya usalama inahitaji kuwa na **Ruhusa za Ufikiaji wa Disk Kamili**. Hivyo ikiwa mshambuliaji anaweza kuondoa hiyo, anaweza kuzuia programu hiyo isifanye kazi:
 ```bash
 tccutil reset All
 ```
+Kwa **maelezo zaidi** kuhusu hii bypass na zinazohusiana, angalia mazungumzo [#OBTS v5.0: "The Achilles Heel of EndpointSecurity" - Fitzl Csaba](https://www.youtube.com/watch?v=lQO7tvNCoTI)
 
-For **more information** about this bypass and related ones check the talk [#OBTS v5.0: "The Achilles Heel of EndpointSecurity" - Fitzl Csaba](https://www.youtube.com/watch?v=lQO7tvNCoTI)
+Mwishowe, hii ilirekebishwa kwa kutoa ruhusa mpya **`kTCCServiceEndpointSecurityClient`** kwa programu ya usalama inayosimamiwa na **`tccd`** ili `tccutil` isifute ruhusa zake na kuzuia kuendesha kwake.
 
-At the end this was fixed by giving the new permission **`kTCCServiceEndpointSecurityClient`** to the security app managed by **`tccd`** so `tccutil` won't clear its permissions preventing it from running.
-
-## References
+## Marejeleo
 
 - [**OBTS v3.0: "Endpoint Security & Insecurity" - Scott Knight**](https://www.youtube.com/watch?v=jaVkpM1UqOs)
 - [**https://knight.sc/reverse%20engineering/2019/08/24/system-extension-internals.html**](https://knight.sc/reverse%20engineering/2019/08/24/system-extension-internals.html)

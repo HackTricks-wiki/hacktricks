@@ -4,38 +4,37 @@
 
 ## Basic Information
 
-Kernel extensions (Kexts) are **packages** with a **`.kext`** extension that are **loaded directly into the macOS kernel space**, providing additional functionality to the main operating system.
+Kernel extensions (Kexts) ni **packages** zenye **`.kext`** extension ambazo zinapakiwa moja kwa moja kwenye **macOS kernel space**, zikitoa kazi za ziada kwa mfumo mkuu wa uendeshaji.
 
 ### Requirements
 
-Obviously, this is so powerful that it is **complicated to load a kernel extension**. These are the **requirements** that a kernel extension must meet to be loaded:
+Kwa wazi, hii ni nguvu sana kiasi kwamba ni **ngumu kupakia kernel extension**. Hizi ndizo **requirements** ambazo kernel extension lazima ikidhi ili ipakie:
 
-- When **entering recovery mode**, kernel **extensions must be allowed** to be loaded:
+- Wakati wa **kuingia kwenye recovery mode**, kernel **extensions lazima ziaruhusiwe** kupakiwa:
 
 <figure><img src="../../../images/image (327).png" alt=""><figcaption></figcaption></figure>
 
-- The kernel extension must be **signed with a kernel code signing certificate**, which can only be **granted by Apple**. Who will review in detail the company and the reasons why it is needed.
-- The kernel extension must also be **notarized**, Apple will be able to check it for malware.
-- Then, the **root** user is the one who can **load the kernel extension** and the files inside the package must **belong to root**.
-- During the upload process, the package must be prepared in a **protected non-root location**: `/Library/StagedExtensions` (requires the `com.apple.rootless.storage.KernelExtensionManagement` grant).
-- Finally, when attempting to load it, the user will [**receive a confirmation request**](https://developer.apple.com/library/archive/technotes/tn2459/_index.html) and, if accepted, the computer must be **restarted** to load it.
+- Kernel extension lazima iwe **signed with a kernel code signing certificate**, ambayo inaweza tu **kupewa na Apple**. Nani atakayeangalia kwa undani kampuni na sababu zinazohitajika.
+- Kernel extension lazima pia iwe **notarized**, Apple itakuwa na uwezo wa kuangalia kwa malware.
+- Kisha, mtumiaji wa **root** ndiye anayeweza **kupakia kernel extension** na faili ndani ya package lazima **zihusiane na root**.
+- Wakati wa mchakato wa kupakia, package lazima iwe tayari katika **mahali salama yasiyo ya root**: `/Library/StagedExtensions` (inahitaji `com.apple.rootless.storage.KernelExtensionManagement` grant).
+- Hatimaye, wakati wa kujaribu kuipakia, mtumiaji atapokea [**ombile la uthibitisho**](https://developer.apple.com/library/archive/technotes/tn2459/_index.html) na, ikiwa itakubaliwa, kompyuta lazima **irejeshwe** ili kuipakia.
 
 ### Loading process
 
-In Catalina it was like this: It is interesting to note that the **verification** process occurs in **userland**. However, only applications with the **`com.apple.private.security.kext-management`** grant can **request the kernel to load an extension**: `kextcache`, `kextload`, `kextutil`, `kextd`, `syspolicyd`
+Katika Catalina ilikuwa hivi: Ni muhimu kutaja kwamba mchakato wa **verification** unafanyika katika **userland**. Hata hivyo, ni programu pekee zenye **`com.apple.private.security.kext-management`** grant zinaweza **kuomba kernel kupakia extension**: `kextcache`, `kextload`, `kextutil`, `kextd`, `syspolicyd`
 
-1. **`kextutil`** cli **starts** the **verification** process for loading an extension
-   - It will talk to **`kextd`** by sending using a **Mach service**.
-2. **`kextd`** will check several things, such as the **signature**
-   - It will talk to **`syspolicyd`** to **check** if the extension can be **loaded**.
-3. **`syspolicyd`** will **prompt** the **user** if the extension has not been previously loaded.
-   - **`syspolicyd`** will report the result to **`kextd`**
-4. **`kextd`** will finally be able to **tell the kernel to load** the extension
+1. **`kextutil`** cli **inaanza** mchakato wa **verification** wa kupakia extension
+- Itazungumza na **`kextd`** kwa kutuma kwa kutumia **Mach service**.
+2. **`kextd`** itakagua mambo kadhaa, kama vile **signature**
+- Itazungumza na **`syspolicyd`** ili **kuangalia** ikiwa extension inaweza **kupakiwa**.
+3. **`syspolicyd`** itamwomba **mtumiaji** ikiwa extension haijawahi kupakiwa hapo awali.
+- **`syspolicyd`** itaripoti matokeo kwa **`kextd`**
+4. **`kextd`** hatimaye itakuwa na uwezo wa **kueleza kernel kupakia** extension
 
-If **`kextd`** is not available, **`kextutil`** can perform the same checks.
+Ikiwa **`kextd`** haipatikani, **`kextutil`** inaweza kufanya ukaguzi sawa.
 
 ### Enumeration (loaded kexts)
-
 ```bash
 # Get loaded kernel extensions
 kextstat
@@ -43,40 +42,38 @@ kextstat
 # Get dependencies of the kext number 22
 kextstat | grep " 22 " | cut -c2-5,50- | cut -d '(' -f1
 ```
-
 ## Kernelcache
 
 > [!CAUTION]
-> Even though the kernel extensions are expected to be in `/System/Library/Extensions/`, if you go to this folder you **won't find any binary**. This is because of the **kernelcache** and in order to reverse one `.kext` you need to find a way to obtain it.
+> Ingawa nyongeza za kernel zinatarajiwa kuwa katika `/System/Library/Extensions/`, ukitembelea folda hii **hutapata binary yoyote**. Hii ni kwa sababu ya **kernelcache** na ili kubadilisha moja ya `.kext` unahitaji kupata njia ya kuipata.
 
-The **kernelcache** is a **pre-compiled and pre-linked version of the XNU kernel**, along with essential device **drivers** and **kernel extensions**. It's stored in a **compressed** format and gets decompressed into memory during the boot-up process. The kernelcache facilitates a **faster boot time** by having a ready-to-run version of the kernel and crucial drivers available, reducing the time and resources that would otherwise be spent on dynamically loading and linking these components at boot time.
+**Kernelcache** ni **toleo lililotayarishwa na kuunganishwa la kernel ya XNU**, pamoja na **madereva** muhimu na **nyongeza za kernel**. Inahifadhiwa katika muundo wa **kushinikizwa** na inachukuliwa kutoka kwenye kumbukumbu wakati wa mchakato wa kuanzisha. Kernelcache inarahisisha **wakati wa kuanzisha haraka** kwa kuwa na toleo lililo tayari la kernel na madereva muhimu yanapatikana, kupunguza muda na rasilimali ambazo zingetumika kwa kupakia na kuunganisha vipengele hivi kwa wakati wa kuanzisha.
 
 ### Local Kerlnelcache
 
-In iOS it's located in **`/System/Library/Caches/com.apple.kernelcaches/kernelcache`** in macOS you can find it with: **`find / -name "kernelcache" 2>/dev/null`** \
-In my case in macOS I found it in:
+Katika iOS inapatikana katika **`/System/Library/Caches/com.apple.kernelcaches/kernelcache`** katika macOS unaweza kuipata kwa: **`find / -name "kernelcache" 2>/dev/null`** \
+Katika kesi yangu katika macOS niliipata katika:
 
 - `/System/Volumes/Preboot/1BAEB4B5-180B-4C46-BD53-51152B7D92DA/boot/DAD35E7BC0CDA79634C20BD1BD80678DFB510B2AAD3D25C1228BB34BCD0A711529D3D571C93E29E1D0C1264750FA043F/System/Library/Caches/com.apple.kernelcaches/kernelcache`
 
 #### IMG4
 
-The IMG4 file format is a container format used by Apple in its iOS and macOS devices for securely **storing and verifying firmware** components (like **kernelcache**). The IMG4 format includes a header and several tags which encapsulate different pieces of data including the actual payload (like a kernel or bootloader), a signature, and a set of manifest properties. The format supports cryptographic verification, allowing the device to confirm the authenticity and integrity of the firmware component before executing it.
+Muundo wa faili ya IMG4 ni muundo wa kontena unaotumiwa na Apple katika vifaa vyake vya iOS na macOS kwa ajili ya **kuhifadhi na kuthibitisha** vipengele vya firmware kwa usalama (kama **kernelcache**). Muundo wa IMG4 unajumuisha kichwa na lebo kadhaa ambazo zinafunga vipande tofauti vya data ikiwa ni pamoja na mzigo halisi (kama kernel au bootloader), saini, na seti ya mali za manifest. Muundo huu unasaidia uthibitishaji wa kificho, kuruhusu kifaa kuthibitisha ukweli na uadilifu wa kipengele cha firmware kabla ya kukitekeleza.
 
-It's usually composed of the following components:
+Kwa kawaida unajumuisha vipengele vifuatavyo:
 
 - **Payload (IM4P)**:
-  - Often compressed (LZFSE4, LZSS, …)
-  - Optionally encrypted
+- Mara nyingi inashinikizwa (LZFSE4, LZSS, …)
+- Inaweza kuwa na usimbuaji
 - **Manifest (IM4M)**:
-  - Contains Signature
-  - Additional Key/Value dictionary
+- Inajumuisha Saini
+- Kamusi ya Kifunguo/Thamani ya ziada
 - **Restore Info (IM4R)**:
-  - Also known as APNonce
-  - Prevents replaying of some updates
-  - OPTIONAL: Usually this isn't found
+- Pia inajulikana kama APNonce
+- Inazuia kurudiwa kwa baadhi ya masasisho
+- HIARI: Kwa kawaida hii haipatikani
 
-Decompress the Kernelcache:
-
+Fungua Kernelcache:
 ```bash
 # img4tool (https://github.com/tihmstar/img4tool
 img4tool -e kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
@@ -84,49 +81,39 @@ img4tool -e kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
 # pyimg4 (https://github.com/m1stadev/PyIMG4)
 pyimg4 im4p extract -i kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
 ```
-
-### Download&#x20;
+### Pakua&#x20;
 
 - [**KernelDebugKit Github**](https://github.com/dortania/KdkSupportPkg/releases)
 
-In [https://github.com/dortania/KdkSupportPkg/releases](https://github.com/dortania/KdkSupportPkg/releases) it's possible to find all the kernel debug kits. You can download it, mount it, open it with [Suspicious Package](https://www.mothersruin.com/software/SuspiciousPackage/get.html) tool, access the **`.kext`** folder and **extract it**.
+Katika [https://github.com/dortania/KdkSupportPkg/releases](https://github.com/dortania/KdkSupportPkg/releases) inawezekana kupata vifaa vyote vya ufuatiliaji wa kernel. Unaweza kuvipakua, kuvifunga, kuvifungua kwa kutumia chombo cha [Suspicious Package](https://www.mothersruin.com/software/SuspiciousPackage/get.html), kufikia folda ya **`.kext`** na **kuvitoa**.
 
-Check it for symbols with:
-
+Angalia kwa alama na:
 ```bash
 nm -a ~/Downloads/Sandbox.kext/Contents/MacOS/Sandbox | wc -l
 ```
-
 - [**theapplewiki.com**](https://theapplewiki.com/wiki/Firmware/Mac/14.x)**,** [**ipsw.me**](https://ipsw.me/)**,** [**theiphonewiki.com**](https://www.theiphonewiki.com/)
 
-Sometime Apple releases **kernelcache** with **symbols**. You can download some firmwares with symbols by following links on those pages. The firmwares will contain the **kernelcache** among other files.
+Wakati mwingine Apple inatoa **kernelcache** pamoja na **symbols**. Unaweza kupakua firmware kadhaa zenye symbols kwa kufuata viungo kwenye kurasa hizo. Firmware zitakuwa na **kernelcache** pamoja na faili nyingine.
 
-To **extract** the files start by changing the extension from `.ipsw` to `.zip` and **unzip** it.
+Ili **extract** faili, anza kwa kubadilisha kiendelezi kutoka `.ipsw` hadi `.zip` na **unzip**.
 
-After extracting the firmware you will get a file like: **`kernelcache.release.iphone14`**. It's in **IMG4** format, you can extract the interesting info with:
+Baada ya kutoa firmware utapata faili kama: **`kernelcache.release.iphone14`**. Iko katika muundo wa **IMG4**, unaweza kutoa taarifa muhimu kwa kutumia:
 
 [**pyimg4**](https://github.com/m1stadev/PyIMG4)**:**
-
 ```bash
 pyimg4 im4p extract -i kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
 ```
-
 [**img4tool**](https://github.com/tihmstar/img4tool)**:**
-
 ```bash
 img4tool -e kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
 ```
+### Kukagua kernelcache
 
-### Inspecting kernelcache
-
-Check if the kernelcache has symbols with
-
+Angalia ikiwa kernelcache ina alama za
 ```bash
 nm -a kernelcache.release.iphone14.e | wc -l
 ```
-
-With this we can now **extract all the extensions** or the **one you are interested in:**
-
+Na hii sasa tunaweza **kuchota nyongeza zote** au **ile unayovutiwa nayo:**
 ```bash
 # List all extensions
 kextex -l kernelcache.release.iphone14.e
@@ -139,10 +126,9 @@ kextex_all kernelcache.release.iphone14.e
 # Check the extension for symbols
 nm -a binaries/com.apple.security.sandbox | wc -l
 ```
+## Urekebishaji
 
-## Debugging
-
-## Referencias
+## Marejeleo
 
 - [https://www.makeuseof.com/how-to-enable-third-party-kernel-extensions-apple-silicon-mac/](https://www.makeuseof.com/how-to-enable-third-party-kernel-extensions-apple-silicon-mac/)
 - [https://www.youtube.com/watch?v=hGKOskSiaQo](https://www.youtube.com/watch?v=hGKOskSiaQo)

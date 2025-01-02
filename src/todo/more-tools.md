@@ -1,8 +1,5 @@
 {{#include ../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 # BlueTeam
 
@@ -40,7 +37,7 @@
 - [https://github.com/hahwul/XSpear](https://github.com/hahwul/XSpear)
 - [https://github.com/BitTheByte/Monitorizer/](https://github.com/BitTheByte/Monitorizer/)
 - [https://github.com/spinkham/skipfish](https://github.com/spinkham/skipfish)
-- [https://github.com/blark/aiodnsbrute](https://github.com/blark/aiodnsbrute) : Brute force majina ya domain kwa njia ya asynchronous
+- [https://github.com/blark/aiodnsbrute](https://github.com/blark/aiodnsbrute) : Brute force majina ya domain kwa wakati mmoja
 - [https://crt.sh/?q=%.yahoo.com](https://crt.sh/?q=%.yahoo.com) : Subdomain bruteforce
 - [https://github.com/tomnomnom/httprobe](https://github.com/tomnomnom/httprobe): Angalia kama seva za wavuti katika domain zinapatikana
 - [https://github.com/aboul3la/Sublist3r](https://github.com/aboul3la/Sublist3r) : Ugunduzi wa subdomain
@@ -51,13 +48,13 @@
 - [https://github.com/TypeError/Bookmarks/blob/master/README.md](https://github.com/TypeError/Bookmarks/blob/master/README.md) : BurpExtension ili kuepuka tab za kurudi
 - [https://github.com/hakluke/hakrawler](https://github.com/hakluke/hakrawler) : Pata mali
 - [https://github.com/izo30/google-dorker](https://github.com/izo30/google-dorker) : Google dorks
-- [https://github.com/sehno/Bug-bounty/blob/master/bugbounty_checklist.md](https://github.com/sehno/Bug-bounty/blob/master/bugbounty_checklist.md) : Orodha ya ukaguzi wa BugBounty wa wavuti
+- [https://github.com/sehno/Bug-bounty/blob/master/bugbounty_checklist.md](https://github.com/sehno/Bug-bounty/blob/master/bugbounty_checklist.md) : Orodha ya ukaguzi wa Web BugBounty
 - [https://github.com/Naategh/dom-red](https://github.com/Naategh/dom-red) : Angalia orodha ya domain dhidi ya Open Redirection
 - [https://github.com/prodigysml/Dr.-Watson](https://github.com/prodigysml/Dr.-Watson) : Burp plugin, uchambuzi wa offline kugundua domains, subdomains na IPs
 - [https://github.com/hahwul/WebHackersWeapons](https://github.com/hahwul/WebHackersWeapons): Orodha ya zana tofauti
 - [https://github.com/gauravnarwani97/Trishul](https://github.com/gauravnarwani97/Trishul) : BurpSuite Pluging ili kupata vulns (SQLi, XSS, SSTI)
-- [https://github.com/fransr/postMessage-tracker](https://github.com/fransr/postMessage-tracker) : Chrome extension ya kufuatilia kazi za ujumbe wa baadae
-- [https://github.com/Quitten/Autorize](https://github.com/Quitten/Autorize) : Majaribio ya uthibitishaji ya kiotomatiki (ondoa cookies na jaribu kutuma ombi)
+- [https://github.com/fransr/postMessage-tracker](https://github.com/fransr/postMessage-tracker) : Chrome extension kwa ajili ya kufuatilia kazi za ujumbe wa baadae
+- [https://github.com/Quitten/Autorize](https://github.com/Quitten/Autorize) : Majaribio ya uthibitishaji ya kiotomatiki (ondoa vidakuzi na jaribu kutuma ombi)
 - [https://github.com/pikpikcu/xrcross](https://github.com/pikpikcu/xrcross): XRCross ni Ujenzi, Scanner, na zana ya kupenya / BugBounty kupima. Zana hii ilijengwa ili kupima (XSS|SSRF|CORS|SSTI|IDOR|RCE|LFI|SQLI) udhaifu
 
 # Windows
@@ -66,19 +63,19 @@
 - [https://freddiebarrsmith.com/trix/trix.html](https://freddiebarrsmith.com/trix/trix.html) : LOL bins
 - [https://gist.github.com/netbiosX/ee35fcd3722e401a38136cff7b751d79](https://gist.github.com/netbiosX/ee35fcd3722e401a38136cff7b751d79) ([https://pentestlab.blog/2020/01/13/persistence-image-file-execution-options-injection/](https://pentestlab.blog/2020/01/13/persistence-image-file-execution-options-injection/)): Uendelevu
 - [https://github.com/odzhan/injection](https://github.com/odzhan/injection) : Mbinu za Uingizaji wa Mchakato wa Windows
-- [https://github.com/BankSecurity/Red_Team](https://github.com/BankSecurity/Red_Team) : Mipango ya Red Team
+- [https://github.com/BankSecurity/Red_Team](https://github.com/BankSecurity/Red_Team) : Mifumo ya Red Team
 - [https://github.com/l0ss/Grouper2](https://github.com/l0ss/Grouper2) : pata makosa yanayohusiana na usalama katika Sera ya Kundi la Active Directory.
-- [https://www.wietzebeukema.nl/blog/powershell-obfuscation-using-securestring](https://www.wietzebeukema.nl/blog/powershell-obfuscation-using-securestring) : Obfuscation ya Securestring
+- [https://www.wietzebeukema.nl/blog/powershell-obfuscation-using-securestring](https://www.wietzebeukema.nl/blog/powershell-obfuscation-using-securestring) : Ufafanuzi wa securestring
 - [https://pentestlab.blog/2020/02/24/parent-pid-spoofing/](https://pentestlab.blog/2020/02/24/parent-pid-spoofing/) : Ulaghai wa PID wa mzazi
 - [https://github.com/the-xentropy/xencrypt](https://github.com/the-xentropy/xencrypt) : Ficha payloads za Powershell
-- [https://shells.systems/introducing-ninja-c2-the-c2-built-for-stealth-red-team-operations/](https://shells.systems/introducing-ninja-c2-the-c2-built-for-stealth-red-team-operations/) : C2 ya siri
+- [https://shells.systems/introducing-ninja-c2-the-c2-built-for-stealth-red-team-operations/](https://shells.systems/introducing-ninja-c2-the-c2-built-for-stealth-red-team-operations/) : Stealth C2
 - [https://windows-internals.com/faxing-your-way-to-system/](https://windows-internals.com/faxing-your-way-to-system/) : Mfululizo wa kumbukumbu kuhusu Windows Internals
 - [https://bestestredteam.com/2018/10/02/tracking-pixel-in-microsoft-office-document/](https://bestestredteam.com/2018/10/02/tracking-pixel-in-microsoft-office-document/) : Fuata nani alifungua hati
 - [https://github.com/Integration-IT/Active-Directory-Exploitation-Cheat-Sheet](https://github.com/Integration-IT/Active-Directory-Exploitation-Cheat-Sheet) : Karatasi ya udanganyifu ya Active Directory
 
 # Firmware
 
-Zana ambazo naona zinaweza kuwa nzuri kwa kuchambua firmware (za kiotomatiki):
+Zana ambazo naona zinaweza kuwa nzuri kwa kuchambua firmware (kiotomatiki):
 
 - [https://github.com/craigz28/firmwalker](https://github.com/craigz28/firmwalker)
 - [https://github.com/fkie-cad/FACT_core](https://github.com/fkie-cad/FACT_core)
@@ -93,7 +90,7 @@ Jinsi ya kutoa firmware ikiwa hatuipati mtandaoni: [https://www.youtube.com/watc
 
 Hapa kuna firmware yenye udhaifu wa kuchambua: [https://github.com/scriptingxss/IoTGoat](https://github.com/scriptingxss/IoTGoat)
 
-na hapa kuna mbinu ya owasp ya kuchambua firmware: [https://github.com/scriptingxss/owasp-fstm](https://github.com/scriptingxss/owasp-fstm)
+na hapa ni mbinu ya owasp ya kuchambua firmware: [https://github.com/scriptingxss/owasp-fstm](https://github.com/scriptingxss/owasp-fstm)
 
 Uigaji wa firmware: FIRMADYNE (https://github.com/firmadyne/firmadyne/) ni jukwaa la kuendesha uigaji na uchambuzi wa dynamic wa firmware inayotegemea Linux.
 
@@ -114,13 +111,10 @@ Uigaji wa firmware: FIRMADYNE (https://github.com/firmadyne/firmadyne/) ni jukwa
 - [https://github.com/nahamsec/Resources-for-Beginner-Bug-Bounty-Hunters/](https://github.com/nahamsec/Resources-for-Beginner-Bug-Bounty-Hunters/) : Rasilimali za kuanza kwenye BugBounties
 - [https://medium.com/macoclock/jailbreak-and-stuff-kickstart-tools-and-techniques-for-ios-application-pentesting-6fa53a3987ab](https://medium.com/macoclock/jailbreak-and-stuff-kickstart-tools-and-techniques-for-ios-application-pentesting-6fa53a3987ab) : Zana za pentesting za IOS
 - [https://github.com/random-robbie/keywords/blob/master/keywords.txt](https://github.com/random-robbie/keywords/blob/master/keywords.txt) : Maneno muhimu
-- [https://github.com/ElevenPaths/HomePWN](https://github.com/ElevenPaths/HomePWN) : Kupanua IoT (Wifi, BLE, SSDP, MDNS)
+- [https://github.com/ElevenPaths/HomePWN](https://github.com/ElevenPaths/HomePWN) : Kughushi IoT (Wifi, BLE, SSDP, MDNS)
 - [https://github.com/rackerlabs/scantron](https://github.com/rackerlabs/scantron) : kuendesha skanning
 - [https://github.com/doyensec/awesome-electronjs-hacking](https://github.com/doyensec/awesome-electronjs-hacking) : Orodha hii inalenga kufunika mada zinazohusiana na usalama wa Electron.js.
 - [https://github.com/serain/bbrecon](https://github.com/serain/bbrecon) : Taarifa kuhusu programu za BB
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../banners/hacktricks-training.md}}

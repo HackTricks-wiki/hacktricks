@@ -4,29 +4,28 @@
 
 ## Basic Information
 
-AppArmor is a **kernel enhancement designed to restrict the resources available to programs through per-program profiles**, effectively implementing Mandatory Access Control (MAC) by tying access control attributes directly to programs instead of users. This system operates by **loading profiles into the kernel**, usually during boot, and these profiles dictate what resources a program can access, such as network connections, raw socket access, and file permissions.
+AppArmor ni **kuimarisha kernel iliyoundwa kupunguza rasilimali zinazopatikana kwa programu kupitia wasifu wa kila programu**, kwa ufanisi ikitekeleza Udhibiti wa Ufikiaji wa Lazima (MAC) kwa kufunga sifa za udhibiti wa ufikiaji moja kwa moja kwa programu badala ya watumiaji. Mfumo huu unafanya kazi kwa **kuchaji wasifu kwenye kernel**, kawaida wakati wa kuanzisha, na wasifu hawa huamua ni rasilimali zipi programu inaweza kufikia, kama vile muunganisho wa mtandao, ufikiaji wa socket mbichi, na ruhusa za faili.
 
-There are two operational modes for AppArmor profiles:
+Kuna njia mbili za uendeshaji kwa wasifu wa AppArmor:
 
-- **Enforcement Mode**: This mode actively enforces the policies defined within the profile, blocking actions that violate these policies and logging any attempts to breach them through systems like syslog or auditd.
-- **Complain Mode**: Unlike enforcement mode, complain mode does not block actions that go against the profile's policies. Instead, it logs these attempts as policy violations without enforcing restrictions.
+- **Enforcement Mode**: Njia hii inatekeleza kwa nguvu sera zilizofafanuliwa ndani ya wasifu, ikizuia vitendo vinavyokiuka sera hizi na kuandika jaribio lolote la kuvunja sheria kupitia mifumo kama syslog au auditd.
+- **Complain Mode**: Tofauti na njia ya utekelezaji, njia ya malalamiko haizuia vitendo vinavyokwenda kinyume na sera za wasifu. Badala yake, inaandika jaribio hizi kama ukiukaji wa sera bila kutekeleza vizuizi.
 
 ### Components of AppArmor
 
-- **Kernel Module**: Responsible for the enforcement of policies.
-- **Policies**: Specify the rules and restrictions for program behavior and resource access.
-- **Parser**: Loads policies into the kernel for enforcement or reporting.
-- **Utilities**: These are user-mode programs that provide an interface for interacting with and managing AppArmor.
+- **Kernel Module**: Inawajibika kwa utekelezaji wa sera.
+- **Policies**: Zinabainisha sheria na vizuizi kwa tabia ya programu na ufikiaji wa rasilimali.
+- **Parser**: Inachaji sera kwenye kernel kwa utekelezaji au ripoti.
+- **Utilities**: Hizi ni programu za hali ya mtumiaji zinazotoa kiolesura cha kuingiliana na kusimamia AppArmor.
 
 ### Profiles path
 
-Apparmor profiles are usually saved in _**/etc/apparmor.d/**_\
-With `sudo aa-status` you will be able to list the binaries that are restricted by some profile. If you can change the char "/" for a dot of the path of each listed binary and you will obtain the name of the apparmor profile inside the mentioned folder.
+Wasifu wa AppArmor kawaida huhifadhiwa katika _**/etc/apparmor.d/**_\
+Kwa kutumia `sudo aa-status` utaweza kuorodhesha binaries ambazo zimepunguziliwa mbali na wasifu fulani. Ikiwa unaweza kubadilisha herufi "/" kuwa nukta katika njia ya kila binary iliyoorodheshwa, utapata jina la wasifu wa apparmor ndani ya folda iliyoelezwa.
 
-For example, a **apparmor** profile for _/usr/bin/man_ will be located in _/etc/apparmor.d/usr.bin.man_
+Kwa mfano, wasifu wa **apparmor** kwa _/usr/bin/man_ utawekwa katika _/etc/apparmor.d/usr.bin.man_
 
 ### Commands
-
 ```bash
 aa-status     #check the current status
 aa-enforce    #set profile to enforce mode (from disable or complain)
@@ -36,47 +35,41 @@ aa-genprof    #generate a new profile
 aa-logprof    #used to change the policy when the binary/program is changed
 aa-mergeprof  #used to merge the policies
 ```
+## Kuunda wasifu
 
-## Creating a profile
-
-- In order to indicate the affected executable, **absolute paths and wildcards** are allowed (for file globbing) for specifying files.
-- To indicate the access the binary will have over **files** the following **access controls** can be used:
-  - **r** (read)
-  - **w** (write)
-  - **m** (memory map as executable)
-  - **k** (file locking)
-  - **l** (creation hard links)
-  - **ix** (to execute another program with the new program inheriting policy)
-  - **Px** (execute under another profile, after cleaning the environment)
-  - **Cx** (execute under a child profile, after cleaning the environment)
-  - **Ux** (execute unconfined, after cleaning the environment)
-- **Variables** can be defined in the profiles and can be manipulated from outside the profile. For example: @{PROC} and @{HOME} (add #include \<tunables/global> to the profile file)
-- **Deny rules are supported to override allow rules**.
+- Ili kuonyesha executable iliyoathirika, **njia za moja kwa moja na wildcards** zinakubaliwa (kwa ajili ya kufafanua faili).
+- Kuonyesha ufikiaji ambao binary itakuwa nao juu ya **faili**, **udhibiti wa ufikiaji** zifuatazo zinaweza kutumika:
+- **r** (kusoma)
+- **w** (kuandika)
+- **m** (ramani ya kumbukumbu kama executable)
+- **k** (kufunga faili)
+- **l** (kuunda viungo vigumu)
+- **ix** (kutekeleza programu nyingine na programu mpya ikirithi sera)
+- **Px** (kutekeleza chini ya wasifu mwingine, baada ya kusafisha mazingira)
+- **Cx** (kutekeleza chini ya wasifu wa mtoto, baada ya kusafisha mazingira)
+- **Ux** (kutekeleza bila vizuizi, baada ya kusafisha mazingira)
+- **Vigezo** vinaweza kufafanuliwa katika wasifu na vinaweza kubadilishwa kutoka nje ya wasifu. Kwa mfano: @{PROC} na @{HOME} (ongeza #include \<tunables/global> kwenye faili la wasifu)
+- **Sheria za kukataa zinasaidiwa kubadilisha sheria za kuruhusu**.
 
 ### aa-genprof
 
-To easily start creating a profile apparmor can help you. It's possible to make **apparmor inspect the actions performed by a binary and then let you decide which actions you want to allow or deny**.\
-You just need to run:
-
+Ili kuanza kwa urahisi kuunda wasifu, apparmor inaweza kukusaidia. Inawezekana kufanya **apparmor ikague vitendo vilivyofanywa na binary kisha kukuruhusu uamue ni vitendo gani unataka kuruhusu au kukataa**.\
+Unahitaji tu kukimbia:
 ```bash
 sudo aa-genprof /path/to/binary
 ```
-
-Then, in a different console perform all the actions that the binary will usually perform:
-
+Kisha, katika console tofauti fanya vitendo vyote ambavyo binary kawaida hufanya:
 ```bash
 /path/to/binary -a dosomething
 ```
-
-Then, in the first console press "**s**" and then in the recorded actions indicate if you want to ignore, allow, or whatever. When you have finished press "**f**" and the new profile will be created in _/etc/apparmor.d/path.to.binary_
+Kisha, katika console ya kwanza bonyeza "**s**" na kisha katika vitendo vilivyorekodiwa onyesha kama unataka kupuuza, kuruhusu, au chochote. Unapomaliza bonyeza "**f**" na wasifu mpya utaundwa katika _/etc/apparmor.d/path.to.binary_
 
 > [!NOTE]
-> Using the arrow keys you can select what you want to allow/deny/whatever
+> Kwa kutumia funguo za mshale unaweza kuchagua unachotaka kuruhusu/kukataa/chochote
 
 ### aa-easyprof
 
-You can also create a template of an apparmor profile of a binary with:
-
+Unaweza pia kuunda kiolezo cha wasifu wa apparmor wa binary kwa:
 ```bash
 sudo aa-easyprof /path/to/binary
 # vim:syntax=apparmor
@@ -90,40 +83,34 @@ sudo aa-easyprof /path/to/binary
 # No template variables specified
 
 "/path/to/binary" {
-  #include <abstractions/base>
+#include <abstractions/base>
 
-  # No abstractions specified
+# No abstractions specified
 
-  # No policy groups specified
+# No policy groups specified
 
-  # No read paths specified
+# No read paths specified
 
-  # No write paths specified
+# No write paths specified
 }
 ```
-
 > [!NOTE]
-> Note that by default in a created profile nothing is allowed, so everything is denied. You will need to add lines like `/etc/passwd r,` to allow the binary read `/etc/passwd` for example.
+> Kumbuka kwamba kwa kawaida katika wasifu ulioundwa hakuna kitu kinachoruhusiwa, hivyo kila kitu kinakataliwa. Itabidi uongeze mistari kama `/etc/passwd r,` ili kuruhusu binary kusoma `/etc/passwd` kwa mfano.
 
-You can then **enforce** the new profile with
-
+Unaweza kisha **kulazimisha** wasifu mpya na
 ```bash
 sudo apparmor_parser -a /etc/apparmor.d/path.to.binary
 ```
+### Kubadilisha wasifu kutoka kwa kumbukumbu
 
-### Modifying a profile from logs
-
-The following tool will read the logs and ask the user if he wants to permit some of the detected forbidden actions:
-
+Chombo kifuatacho kitaisoma kumbukumbu na kumuuliza mtumiaji kama anataka kuruhusu baadhi ya vitendo vilivyogunduliwa kuwa haramu:
 ```bash
 sudo aa-logprof
 ```
-
 > [!NOTE]
-> Using the arrow keys you can select what you want to allow/deny/whatever
+> Kwa kutumia funguo za mshale unaweza kuchagua kile unachotaka kuruhusu/kukataa/chochote
 
-### Managing a Profile
-
+### Kusimamia Profaili
 ```bash
 #Main profile management commands
 apparmor_parser -a /etc/apparmor.d/profile.name #Load a new profile in enforce mode
@@ -131,18 +118,14 @@ apparmor_parser -C /etc/apparmor.d/profile.name #Load a new profile in complain 
 apparmor_parser -r /etc/apparmor.d/profile.name #Replace existing profile
 apparmor_parser -R /etc/apparmor.d/profile.name #Remove profile
 ```
-
 ## Logs
 
-Example of **AUDIT** and **DENIED** logs from _/var/log/audit/audit.log_ of the executable **`service_bin`**:
-
+Mfano wa **AUDIT** na **DENIED** logs kutoka _/var/log/audit/audit.log_ ya executable **`service_bin`**:
 ```bash
 type=AVC msg=audit(1610061880.392:286): apparmor="AUDIT" operation="getattr" profile="/bin/rcat" name="/dev/pts/1" pid=954 comm="service_bin" requested_mask="r" fsuid=1000 ouid=1000
 type=AVC msg=audit(1610061880.392:287): apparmor="DENIED" operation="open" profile="/bin/rcat" name="/etc/hosts" pid=954 comm="service_bin" requested_mask="r" denied_mask="r" fsuid=1000 ouid=0
 ```
-
-You can also get this information using:
-
+Unaweza pia kupata habari hii ukitumia:
 ```bash
 sudo aa-notify -s 1 -v
 Profile: /bin/service_bin
@@ -160,126 +143,104 @@ Logfile: /var/log/audit/audit.log
 AppArmor denials: 2 (since Wed Jan  6 23:51:08 2021)
 For more information, please see: https://wiki.ubuntu.com/DebuggingApparmor
 ```
+## Apparmor katika Docker
 
-## Apparmor in Docker
-
-Note how the profile **docker-profile** of docker is loaded by default:
-
+Kumbuka jinsi profaili **docker-profile** ya docker inavyopakiwa kwa default:
 ```bash
 sudo aa-status
 apparmor module is loaded.
 50 profiles are loaded.
 13 profiles are in enforce mode.
-   /sbin/dhclient
-   /usr/bin/lxc-start
-   /usr/lib/NetworkManager/nm-dhcp-client.action
-   /usr/lib/NetworkManager/nm-dhcp-helper
-   /usr/lib/chromium-browser/chromium-browser//browser_java
-   /usr/lib/chromium-browser/chromium-browser//browser_openjdk
-   /usr/lib/chromium-browser/chromium-browser//sanitized_helper
-   /usr/lib/connman/scripts/dhclient-script
-   docker-default
+/sbin/dhclient
+/usr/bin/lxc-start
+/usr/lib/NetworkManager/nm-dhcp-client.action
+/usr/lib/NetworkManager/nm-dhcp-helper
+/usr/lib/chromium-browser/chromium-browser//browser_java
+/usr/lib/chromium-browser/chromium-browser//browser_openjdk
+/usr/lib/chromium-browser/chromium-browser//sanitized_helper
+/usr/lib/connman/scripts/dhclient-script
+docker-default
 ```
+Kwa default **Apparmor docker-default profile** inatengenezwa kutoka [https://github.com/moby/moby/tree/master/profiles/apparmor](https://github.com/moby/moby/tree/master/profiles/apparmor)
 
-By default **Apparmor docker-default profile** is generated from [https://github.com/moby/moby/tree/master/profiles/apparmor](https://github.com/moby/moby/tree/master/profiles/apparmor)
+**Muhtasari wa docker-default profile**:
 
-**docker-default profile Summary**:
+- **Upatikanaji** wa **mtandao** wote
+- **Hakuna uwezo** ulioelezwa (Hata hivyo, baadhi ya uwezo utaweza kuja kutokana na kuingiza sheria za msingi i.e. #include \<abstractions/base>)
+- **Kuandika** kwenye faili yoyote ya **/proc** **hakuruhusiwi**
+- **Madirisha**/**faili** mengine ya /**proc** na /**sys** yanakataliwa upatikanaji wa kusoma/kuandika/kufunga/kuunganisha/kutekeleza
+- **Kuweka** **hakuruhusiwi**
+- **Ptrace** inaweza kuendeshwa tu kwenye mchakato ambao umekandamizwa na **profil ya apparmor** sawa
 
-- **Access** to all **networking**
-- **No capability** is defined (However, some capabilities will come from including basic base rules i.e. #include \<abstractions/base> )
-- **Writing** to any **/proc** file is **not allowed**
-- Other **subdirectories**/**files** of /**proc** and /**sys** are **denied** read/write/lock/link/execute access
-- **Mount** is **not allowed**
-- **Ptrace** can only be run on a process that is confined by **same apparmor profile**
-
-Once you **run a docker container** you should see the following output:
-
+Mara tu unapofanya **kazi na docker container** unapaswa kuona matokeo yafuatayo:
 ```bash
 1 processes are in enforce mode.
-   docker-default (825)
+docker-default (825)
 ```
-
-Note that **apparmor will even block capabilities privileges** granted to the container by default. For example, it will be able to **block permission to write inside /proc even if the SYS_ADMIN capability is granted** because by default docker apparmor profile denies this access:
-
+Kumbuka kwamba **apparmor hata itazuia uwezo wa haki** uliotolewa kwa kontena kwa default. Kwa mfano, itakuwa na uwezo wa **kuzuia ruhusa ya kuandika ndani ya /proc hata kama uwezo wa SYS_ADMIN umepatiwa** kwa sababu kwa default profaili ya apparmor ya docker inakataa ufikiaji huu:
 ```bash
 docker run -it --cap-add SYS_ADMIN --security-opt seccomp=unconfined ubuntu /bin/bash
 echo "" > /proc/stat
 sh: 1: cannot create /proc/stat: Permission denied
 ```
-
-You need to **disable apparmor** to bypass its restrictions:
-
+Unahitaji **kuondoa apparmor** ili kupita vizuizi vyake:
 ```bash
 docker run -it --cap-add SYS_ADMIN --security-opt seccomp=unconfined --security-opt apparmor=unconfined ubuntu /bin/bash
 ```
+Kumbuka kwamba kwa kawaida **AppArmor** pia **itakataza kontena kuunganisha** folda kutoka ndani hata ikiwa na uwezo wa SYS_ADMIN.
 
-Note that by default **AppArmor** will also **forbid the container to mount** folders from the inside even with SYS_ADMIN capability.
+Kumbuka kwamba unaweza **kuongeza/kuondoa** **uwezo** kwa kontena la docker (hii bado itakuwa na mipaka kutokana na mbinu za ulinzi kama **AppArmor** na **Seccomp**):
 
-Note that you can **add/remove** **capabilities** to the docker container (this will be still restricted by protection methods like **AppArmor** and **Seccomp**):
-
-- `--cap-add=SYS_ADMIN` give `SYS_ADMIN` cap
-- `--cap-add=ALL` give all caps
-- `--cap-drop=ALL --cap-add=SYS_PTRACE` drop all caps and only give `SYS_PTRACE`
+- `--cap-add=SYS_ADMIN` toa uwezo wa `SYS_ADMIN`
+- `--cap-add=ALL` toa uwezo wote
+- `--cap-drop=ALL --cap-add=SYS_PTRACE` ondoa uwezo wote na toa tu `SYS_PTRACE`
 
 > [!NOTE]
-> Usually, when you **find** that you have a **privileged capability** available **inside** a **docker** container **but** some part of the **exploit isn't working**, this will be because docker **apparmor will be preventing it**.
+> Kwa kawaida, unapogundua kuwa una **uwezo wa kipaumbele** uliopatikana **ndani** ya **kontena** la **docker** **lakini** sehemu fulani ya **kuvamia haifanyi kazi**, hii itakuwa kwa sababu docker **apparmor itakuwa inazuia**.
 
-### Example
+### Mfano
 
-(Example from [**here**](https://sreeninet.wordpress.com/2016/03/06/docker-security-part-2docker-engine/))
+(Mfano kutoka [**hapa**](https://sreeninet.wordpress.com/2016/03/06/docker-security-part-2docker-engine/))
 
-To illustrate AppArmor functionality, I created a new Docker profile “mydocker” with the following line added:
-
+Ili kuonyesha kazi za AppArmor, niliumba profaili mpya ya Docker "mydocker" na mstari ufuatao umeongezwa:
 ```
 deny /etc/* w,   # deny write for all files directly in /etc (not in a subdir)
 ```
-
-To activate the profile, we need to do the following:
-
+Ili kuamsha wasifu, tunahitaji kufanya yafuatayo:
 ```
 sudo apparmor_parser -r -W mydocker
 ```
-
-To list the profiles, we can do the following command. The command below is listing my new AppArmor profile.
-
+Ili orodhesha wasifu, tunaweza kufanya amri ifuatayo. Amri iliyo hapa chini inoorodhesha wasifu wangu mpya wa AppArmor.
 ```
 $ sudo apparmor_status  | grep mydocker
-   mydocker
+mydocker
 ```
-
-As shown below, we get error when trying to change “/etc/” since AppArmor profile is preventing write access to “/etc”.
-
+Kama inavyoonyeshwa hapa chini, tunapata kosa tunapojaribu kubadilisha “/etc/” kwani profaili ya AppArmor inazuia ufikiaji wa kuandika kwenye “/etc”.
 ```
 $ docker run --rm -it --security-opt apparmor:mydocker -v ~/haproxy:/localhost busybox chmod 400 /etc/hostname
 chmod: /etc/hostname: Permission denied
 ```
-
 ### AppArmor Docker Bypass1
 
-You can find which **apparmor profile is running a container** using:
-
+Unaweza kupata ni **profil ya apparmor ipi inayoendesha kontena** kwa kutumia:
 ```bash
 docker inspect 9d622d73a614 | grep lowpriv
-        "AppArmorProfile": "lowpriv",
-                "apparmor=lowpriv"
+"AppArmorProfile": "lowpriv",
+"apparmor=lowpriv"
 ```
-
-Then, you can run the following line to **find the exact profile being used**:
-
+Kisha, unaweza kukimbia mstari ufuatao ili **kupata wasifu sahihi unaotumika**:
 ```bash
 find /etc/apparmor.d/ -name "*lowpriv*" -maxdepth 1 2>/dev/null
 ```
-
-In the weird case you can **modify the apparmor docker profile and reload it.** You could remove the restrictions and "bypass" them.
+Katika hali ya ajabu unaweza **kubadilisha profaili ya apparmor docker na kuipakia upya.** Unaweza kuondoa vizuizi na "kuvuka" hizo.
 
 ### AppArmor Docker Bypass2
 
-**AppArmor is path based**, this means that even if it might be **protecting** files inside a directory like **`/proc`** if you can **configure how the container is going to be run**, you could **mount** the proc directory of the host inside **`/host/proc`** and it **won't be protected by AppArmor anymore**.
+**AppArmor ni ya msingi wa njia**, hii inamaanisha kwamba hata kama inaweza kuwa **inalinda** faili ndani ya directory kama **`/proc`** ikiwa unaweza **kuweka jinsi kontena litakavyokuwa linaendeshwa**, unaweza **kuunganisha** directory ya proc ya mwenyeji ndani ya **`/host/proc`** na haitakuwa **inalindwa na AppArmor tena**.
 
 ### AppArmor Shebang Bypass
 
-In [**this bug**](https://bugs.launchpad.net/apparmor/+bug/1911431) you can see an example of how **even if you are preventing perl to be run with certain resources**, if you just create a a shell script **specifying** in the first line **`#!/usr/bin/perl`** and you **execute the file directly**, you will be able to execute whatever you want. E.g.:
-
+Katika [**bug hii**](https://bugs.launchpad.net/apparmor/+bug/1911431) unaweza kuona mfano wa jinsi **hata kama unazuia perl kuendeshwa na rasilimali fulani**, ikiwa tu unaunda script ya shell **ukitaja** katika mstari wa kwanza **`#!/usr/bin/perl`** na unafanya **kufanya faili moja kwa moja**, utaweza kutekeleza chochote unachotaka. Mfano:
 ```perl
 echo '#!/usr/bin/perl
 use POSIX qw(strftime);
@@ -289,5 +250,4 @@ exec "/bin/sh"' > /tmp/test.pl
 chmod +x /tmp/test.pl
 /tmp/test.pl
 ```
-
 {{#include ../../../banners/hacktricks-training.md}}

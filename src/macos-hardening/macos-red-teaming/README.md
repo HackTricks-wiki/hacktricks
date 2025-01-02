@@ -2,109 +2,98 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="/images/pentest-tools.svg" alt=""><figcaption></figcaption></figure>
 
-**Get a hacker's perspective on your web apps, network, and cloud**
-
-**Find and report critical, exploitable vulnerabilities with real business impact.** Use our 20+ custom tools to map the attack surface, find security issues that let you escalate privileges, and use automated exploits to collect essential evidence, turning your hard work into persuasive reports.
-
-{% embed url="https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons" %}
-
-## Abusing MDMs
+## Kutumia MDMs vibaya
 
 - JAMF Pro: `jamf checkJSSConnection`
 - Kandji
 
-If you manage to **compromise admin credentials** to access the management platform, you can **potentially compromise all the computers** by distributing your malware in the machines.
+Ikiwa utafanikiwa **kushawishi akauti za admin** ili kufikia jukwaa la usimamizi, unaweza **kushawishi kompyuta zote** kwa kusambaza malware yako kwenye mashine.
 
-For red teaming in MacOS environments it's highly recommended to have some understanding of how the MDMs work:
+Kwa red teaming katika mazingira ya MacOS, inashauriwa sana kuwa na ufahamu wa jinsi MDMs zinavyofanya kazi:
 
 {{#ref}}
 macos-mdm/
 {{#endref}}
 
-### Using MDM as a C2
+### Kutumia MDM kama C2
 
-A MDM will have permission to install, query or remove profiles, install applications, create local admin accounts, set firmware password, change the FileVault key...
+MDM itakuwa na ruhusa ya kufunga, kuuliza au kuondoa profaili, kufunga programu, kuunda akaunti za admin za ndani, kuweka nenosiri la firmware, kubadilisha funguo za FileVault...
 
-In order to run your own MDM you need to **your CSR signed by a vendor** which you could try to get with [**https://mdmcert.download/**](https://mdmcert.download/). And to run your own MDM for Apple devices you could use [**MicroMDM**](https://github.com/micromdm/micromdm).
+Ili kuendesha MDM yako mwenyewe unahitaji **CSR yako isainiwe na muuzaji** ambayo unaweza kujaribu kupata na [**https://mdmcert.download/**](https://mdmcert.download/). Na ili kuendesha MDM yako mwenyewe kwa vifaa vya Apple unaweza kutumia [**MicroMDM**](https://github.com/micromdm/micromdm).
 
-However, to install an application in an enrolled device, you still need it to be signed by a developer account... however, upon MDM enrolment the **device adds the SSL cert of the MDM as a trusted CA**, so you can now sign anything.
+Hata hivyo, ili kufunga programu kwenye kifaa kilichosajiliwa, bado unahitaji isainiwe na akaunti ya developer... hata hivyo, wakati wa usajili wa MDM **kifaa kinaongeza cheti cha SSL cha MDM kama CA inayotambulika**, hivyo sasa unaweza kusaini chochote.
 
-To enrol the device in a MDM you. need to install a **`mobileconfig`** file as root, which could be delivered via a **pkg** file (you could compress it in zip and when downloaded from safari it will be decompressed).
+Ili kusajili kifaa katika MDM unahitaji kufunga **`mobileconfig`** faili kama root, ambayo inaweza kutolewa kupitia faili ya **pkg** (unaweza kuifunga katika zip na wakati inapakuliwa kutoka safari itakua isiyofunguliwa).
 
-**Mythic agent Orthrus** uses this technique.
+**Mythic agent Orthrus** inatumia mbinu hii.
 
-### Abusing JAMF PRO
+### Kutumia JAMF PRO vibaya
 
-JAMF can run **custom scripts** (scripts developed by the sysadmin), **native payloads** (local account creation, set EFI password, file/process monitoring...) and **MDM** (device configurations, device certificates...).
+JAMF inaweza kuendesha **scripts za kawaida** (scripts zilizotengenezwa na sysadmin), **payloads za asili** (kuunda akaunti za ndani, kuweka nenosiri la EFI, ufuatiliaji wa faili/mchakato...) na **MDM** (mipangilio ya kifaa, vyeti vya kifaa...).
 
-#### JAMF self-enrolment
+#### Usajili wa kujitegemea wa JAMF
 
-Go to a page such as `https://<company-name>.jamfcloud.com/enroll/` to see if they have **self-enrolment enabled**. If they have it might **ask for credentials to access**.
+Nenda kwenye ukurasa kama `https://<company-name>.jamfcloud.com/enroll/` kuona kama wana **usajili wa kujitegemea ulioanzishwa**. Ikiwa wanaweza **kuomba akauti za kufikia**.
 
-You could use the script [**JamfSniper.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfSniper.py) to perform a password spraying attack.
+Unaweza kutumia script [**JamfSniper.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfSniper.py) kufanya shambulio la password spraying.
 
-Moreover, after finding proper credentials you could be able to brute-force other usernames with the next form:
+Zaidi ya hayo, baada ya kupata akauti sahihi unaweza kuwa na uwezo wa kujaribu nguvu majina mengine ya watumiaji kwa fomu ifuatayo:
 
 ![](<../../images/image (107).png>)
 
-#### JAMF device Authentication
+#### Uthibitishaji wa kifaa cha JAMF
 
 <figure><img src="../../images/image (167).png" alt=""><figcaption></figcaption></figure>
 
-The **`jamf`** binary contained the secret to open the keychain which at the time of the discovery was **shared** among everybody and it was: **`jk23ucnq91jfu9aj`**.\
-Moreover, jamf **persist** as a **LaunchDaemon** in **`/Library/LaunchAgents/com.jamf.management.agent.plist`**
+Binary ya **`jamf`** ilikuwa na siri ya kufungua keychain ambayo wakati wa ugunduzi ilikuwa **shirikishi** kati ya kila mtu na ilikuwa: **`jk23ucnq91jfu9aj`**.\
+Zaidi ya hayo, jamf **inaendelea** kama **LaunchDaemon** katika **`/Library/LaunchAgents/com.jamf.management.agent.plist`**
 
-#### JAMF Device Takeover
+#### Kuchukua Udhibiti wa Kifaa cha JAMF
 
-The **JSS** (Jamf Software Server) **URL** that **`jamf`** will use is located in **`/Library/Preferences/com.jamfsoftware.jamf.plist`**.\
-This file basically contains the URL:
-
+**JSS** (Jamf Software Server) **URL** ambayo **`jamf`** itatumia iko katika **`/Library/Preferences/com.jamfsoftware.jamf.plist`**.\
+Faili hii kimsingi ina URL:
 ```bash
 plutil -convert xml1 -o - /Library/Preferences/com.jamfsoftware.jamf.plist
 
 [...]
-	<key>is_virtual_machine</key>
-	<false/>
-	<key>jss_url</key>
-	<string>https://halbornasd.jamfcloud.com/</string>
-	<key>last_management_framework_change_id</key>
-	<integer>4</integer>
+<key>is_virtual_machine</key>
+<false/>
+<key>jss_url</key>
+<string>https://halbornasd.jamfcloud.com/</string>
+<key>last_management_framework_change_id</key>
+<integer>4</integer>
 [...]
 ```
-
-So, an attacker could drop a malicious package (`pkg`) that **overwrites this file** when installed setting the **URL to a Mythic C2 listener from a Typhon agent** to now be able to abuse JAMF as C2.
-
+Hivyo, mshambuliaji anaweza kuweka kifurushi kibaya (`pkg`) ambacho **kinabadilisha faili hii** wakati wa usakinishaji na kuweka **URL kwa mteja wa Mythic C2 kutoka kwa wakala wa Typhon** ili sasa aweze kutumia JAMF kama C2.
 ```bash
 # After changing the URL you could wait for it to be reloaded or execute:
 sudo jamf policy -id 0
 
 # TODO: There is an ID, maybe it's possible to have the real jamf connection and another one to the C2
 ```
-
 #### JAMF Impersonation
 
-In order to **impersonate the communication** between a device and JMF you need:
+Ili **kuiga mawasiliano** kati ya kifaa na JMF unahitaji:
 
-- The **UUID** of the device: `ioreg -d2 -c IOPlatformExpertDevice | awk -F" '/IOPlatformUUID/{print $(NF-1)}'`
-- The **JAMF keychain** from: `/Library/Application\ Support/Jamf/JAMF.keychain` which contains the device certificate
+- **UUID** ya kifaa: `ioreg -d2 -c IOPlatformExpertDevice | awk -F" '/IOPlatformUUID/{print $(NF-1)}'`
+- **JAMF keychain** kutoka: `/Library/Application\ Support/Jamf/JAMF.keychain` ambayo ina cheti cha kifaa
 
-With this information, **create a VM** with the **stolen** Hardware **UUID** and with **SIP disabled**, drop the **JAMF keychain,** **hook** the Jamf **agent** and steal its information.
+Kwa habari hii, **unda VM** yenye **stolen** Hardware **UUID** na **SIP disabled**, weka **JAMF keychain,** **hook** Jamf **agent** na uibe habari zake.
 
 #### Secrets stealing
 
 <figure><img src="../../images/image (1025).png" alt=""><figcaption><p>a</p></figcaption></figure>
 
-You could also monitor the location `/Library/Application Support/Jamf/tmp/` for the **custom scripts** admins might want to execute via Jamf as they are **placed here, executed and removed**. These scripts **might contain credentials**.
+Unaweza pia kufuatilia eneo `/Library/Application Support/Jamf/tmp/` kwa **custom scripts** ambazo wasimamizi wanaweza kutaka kutekeleza kupitia Jamf kwani zina **wekwa hapa, kutekelezwa na kuondolewa**. Scripts hizi **zinaweza kuwa na credentials**.
 
-However, **credentials** might be passed tho these scripts as **parameters**, so you would need to monitor `ps aux | grep -i jamf` (without even being root).
+Hata hivyo, **credentials** zinaweza kupitishwa kwa scripts hizi kama **parameters**, hivyo unahitaji kufuatilia `ps aux | grep -i jamf` (bila hata kuwa root).
 
-The script [**JamfExplorer.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfExplorer.py) can listen for new files being added and new process arguments.
+Script [**JamfExplorer.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfExplorer.py) inaweza kusikiliza kwa faili mpya zinazoongezwa na hoja mpya za mchakato.
 
 ### macOS Remote Access
 
-And also about **MacOS** "special" **network** **protocols**:
+Na pia kuhusu **MacOS** "maalum" **network** **protocols**:
 
 {{#ref}}
 ../macos-security-and-privilege-escalation/macos-protocols.md
@@ -112,7 +101,7 @@ And also about **MacOS** "special" **network** **protocols**:
 
 ## Active Directory
 
-In some occasions you will find that the **MacOS computer is connected to an AD**. In this scenario you should try to **enumerate** the active directory as you are use to it. Find some **help** in the following pages:
+Katika hali fulani utaona kuwa **kompyuta ya MacOS imeunganishwa na AD**. Katika hali hii unapaswa kujaribu **kuorodhesha** active directory kama unavyojua. Pata **msaada** katika kurasa zifuatazo:
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-ldap.md
@@ -126,41 +115,36 @@ In some occasions you will find that the **MacOS computer is connected to an AD*
 ../../network-services-pentesting/pentesting-kerberos-88/
 {{#endref}}
 
-Some **local MacOS tool** that may also help you is `dscl`:
-
+Zana **za ndani za MacOS** ambazo zinaweza pia kukusaidia ni `dscl`:
 ```bash
 dscl "/Active Directory/[Domain]/All Domains" ls /
 ```
+Pia kuna zana kadhaa zilizotayarishwa kwa MacOS ili kuhesabu moja kwa moja AD na kucheza na kerberos:
 
-Also there are some tools prepared for MacOS to automatically enumerate the AD and play with kerberos:
+- [**Machound**](https://github.com/XMCyber/MacHound): MacHound ni nyongeza kwa chombo cha ukaguzi wa Bloodhound kinachoruhusu kukusanya na kuingiza uhusiano wa Active Directory kwenye mwenyeji wa MacOS.
+- [**Bifrost**](https://github.com/its-a-feature/bifrost): Bifrost ni mradi wa Objective-C ulioandaliwa ili kuingiliana na Heimdal krb5 APIs kwenye macOS. Lengo la mradi ni kuwezesha upimaji bora wa usalama kuhusiana na Kerberos kwenye vifaa vya macOS kwa kutumia APIs za asili bila kuhitaji mfumo mwingine wowote au pakiti kwenye lengo.
+- [**Orchard**](https://github.com/its-a-feature/Orchard): Zana ya JavaScript kwa Utaftaji (JXA) kufanya hesabu ya Active Directory.
 
-- [**Machound**](https://github.com/XMCyber/MacHound): MacHound is an extension to the Bloodhound audting tool allowing collecting and ingesting of Active Directory relationships on MacOS hosts.
-- [**Bifrost**](https://github.com/its-a-feature/bifrost): Bifrost is an Objective-C project designed to interact with the Heimdal krb5 APIs on macOS. The goal of the project is to enable better security testing around Kerberos on macOS devices using native APIs without requiring any other framework or packages on the target.
-- [**Orchard**](https://github.com/its-a-feature/Orchard): JavaScript for Automation (JXA) tool to do Active Directory enumeration.
-
-### Domain Information
-
+### Taarifa za Kikoa
 ```bash
 echo show com.apple.opendirectoryd.ActiveDirectory | scutil
 ```
+### Watumiaji
 
-### Users
+Aina tatu za watumiaji wa MacOS ni:
 
-The three types of MacOS users are:
+- **Watumiaji wa Mitaa** — Wanadhibitiwa na huduma ya OpenDirectory ya ndani, hawajashikamana kwa njia yoyote na Active Directory.
+- **Watumiaji wa Mtandao** — Watumiaji wa Active Directory wanaobadilika ambao wanahitaji muunganisho na seva ya DC ili kuthibitisha.
+- **Watumiaji wa Simu** — Watumiaji wa Active Directory wenye nakala ya ndani ya hati zao na faili.
 
-- **Local Users** — Managed by the local OpenDirectory service, they aren’t connected in any way to the Active Directory.
-- **Network Users** — Volatile Active Directory users who require a connection to the DC server to authenticate.
-- **Mobile Users** — Active Directory users with a local backup for their credentials and files.
+Taarifa za ndani kuhusu watumiaji na vikundi zinaifadhiwa katika folda _/var/db/dslocal/nodes/Default._\
+Kwa mfano, taarifa kuhusu mtumiaji anayeitwa _mark_ zinaifadhiwa katika _/var/db/dslocal/nodes/Default/users/mark.plist_ na taarifa kuhusu kundi _admin_ ziko katika _/var/db/dslocal/nodes/Default/groups/admin.plist_.
 
-The local information about users and groups is stored in in the folder _/var/db/dslocal/nodes/Default._\
-For example, the info about user called _mark_ is stored in _/var/db/dslocal/nodes/Default/users/mark.plist_ and the info about the group _admin_ is in _/var/db/dslocal/nodes/Default/groups/admin.plist_.
+Mbali na kutumia edges za HasSession na AdminTo, **MacHound inaongeza edges tatu mpya** kwenye hifadhidata ya Bloodhound:
 
-In addition to using the HasSession and AdminTo edges, **MacHound adds three new edges** to the Bloodhound database:
-
-- **CanSSH** - entity allowed to SSH to host
-- **CanVNC** - entity allowed to VNC to host
-- **CanAE** - entity allowed to execute AppleEvent scripts on host
-
+- **CanSSH** - chombo kinachoruhusiwa SSH kwa mwenyeji
+- **CanVNC** - chombo kinachoruhusiwa VNC kwa mwenyeji
+- **CanAE** - chombo kinachoruhusiwa kutekeleza scripts za AppleEvent kwenye mwenyeji
 ```bash
 #User enumeration
 dscl . ls /Users
@@ -182,71 +166,60 @@ dscl "/Active Directory/TEST/All Domains" read "/Groups/[groupname]"
 #Domain Information
 dsconfigad -show
 ```
-
-More info in [https://its-a-feature.github.io/posts/2018/01/Active-Directory-Discovery-with-a-Mac/](https://its-a-feature.github.io/posts/2018/01/Active-Directory-Discovery-with-a-Mac/)
+Zaidi ya habari katika [https://its-a-feature.github.io/posts/2018/01/Active-Directory-Discovery-with-a-Mac/](https://its-a-feature.github.io/posts/2018/01/Active-Directory-Discovery-with-a-Mac/)
 
 ### Computer$ password
 
-Get passwords using:
-
+Pata nywila kwa kutumia:
 ```bash
 bifrost --action askhash --username [name] --password [password] --domain [domain]
 ```
-
-It's possible to access the **`Computer$`** password inside the System keychain.
+Inawezekana kufikia **`Computer$`** nenosiri ndani ya mfumo wa keychain.
 
 ### Over-Pass-The-Hash
 
-Get a TGT for an specific user and service:
-
+Pata TGT kwa mtumiaji maalum na huduma:
 ```bash
 bifrost --action asktgt --username [user] --domain [domain.com] \
-       --hash [hash] --enctype [enctype] --keytab [/path/to/keytab]
+--hash [hash] --enctype [enctype] --keytab [/path/to/keytab]
 ```
-
-Once the TGT is gathered, it's possible to inject it in the current session with:
-
+Mara TGT imekusanywa, inawezekana kuingiza katika kikao cha sasa kwa:
 ```bash
 bifrost --action asktgt --username test_lab_admin \
-       --hash CF59D3256B62EE655F6430B0F80701EE05A0885B8B52E9C2480154AFA62E78 \
-       --enctype aes256 --domain test.lab.local
+--hash CF59D3256B62EE655F6430B0F80701EE05A0885B8B52E9C2480154AFA62E78 \
+--enctype aes256 --domain test.lab.local
 ```
-
 ### Kerberoasting
-
 ```bash
 bifrost --action asktgs --spn [service] --domain [domain.com] \
-       --username [user] --hash [hash] --enctype [enctype]
+--username [user] --hash [hash] --enctype [enctype]
 ```
-
-With obtained service tickets it's possible to try to access shares in other computers:
-
+Kwa tiketi za huduma zilizopatikana, inawezekana kujaribu kufikia sehemu katika kompyuta nyingine:
 ```bash
 smbutil view //computer.fqdn
 mount -t smbfs //server/folder /local/mount/point
 ```
+## Kupata Keychain
 
-## Accessing the Keychain
-
-The Keychain highly probably contains sensitive information that if accessed without generating a prompt could help to move forward a red team exercise:
+Keychain ina uwezekano mkubwa wa kuwa na taarifa nyeti ambazo ikiwa zitafikiwa bila kuunda kichocheo zinaweza kusaidia kuendeleza zoezi la timu nyekundu:
 
 {{#ref}}
 macos-keychain.md
 {{#endref}}
 
-## External Services
+## Huduma za Nje
 
-MacOS Red Teaming is different from a regular Windows Red Teaming as usually **MacOS is integrated with several external platforms directly**. A common configuration of MacOS is to access to the computer using **OneLogin synchronised credentials, and accessing several external services** (like github, aws...) via OneLogin.
+MacOS Red Teaming ni tofauti na Red Teaming ya kawaida ya Windows kwani kawaida **MacOS imeunganishwa na majukwaa kadhaa ya nje moja kwa moja**. Mipangilio ya kawaida ya MacOS ni kupata kompyuta kwa kutumia **OneLogin credentials zilizoratibiwa, na kufikia huduma kadhaa za nje** (kama github, aws...) kupitia OneLogin.
 
-## Misc Red Team techniques
+## Mbinu Mbalimbali za Timu Nyekundu
 
 ### Safari
 
-When a file is downloaded in Safari, if its a "safe" file, it will be **automatically opened**. So for example, if you **download a zip**, it will be automatically decompressed:
+Wakati faili inapopakuliwa katika Safari, ikiwa ni faili "salama", itafunguliwa **automatically**. Hivyo kwa mfano, ikiwa **unapakua zip**, itafunguliwa moja kwa moja:
 
 <figure><img src="../../images/image (226).png" alt=""><figcaption></figcaption></figure>
 
-## References
+## Marejeleo
 
 - [**https://www.youtube.com/watch?v=IiMladUbL6E**](https://www.youtube.com/watch?v=IiMladUbL6E)
 - [**https://medium.com/xm-cyber/introducing-machound-a-solution-to-macos-active-directory-based-attacks-2a425f0a22b6**](https://medium.com/xm-cyber/introducing-machound-a-solution-to-macos-active-directory-based-attacks-2a425f0a22b6)
@@ -254,12 +227,5 @@ When a file is downloaded in Safari, if its a "safe" file, it will be **automati
 - [**Come to the Dark Side, We Have Apples: Turning macOS Management Evil**](https://www.youtube.com/watch?v=pOQOh07eMxY)
 - [**OBTS v3.0: "An Attackers Perspective on Jamf Configurations" - Luke Roberts / Calum Hall**](https://www.youtube.com/watch?v=ju1IYWUv4ZA)
 
-<figure><img src="/images/pentest-tools.svg" alt=""><figcaption></figcaption></figure>
-
-**Get a hacker's perspective on your web apps, network, and cloud**
-
-**Find and report critical, exploitable vulnerabilities with real business impact.** Use our 20+ custom tools to map the attack surface, find security issues that let you escalate privileges, and use automated exploits to collect essential evidence, turning your hard work into persuasive reports.
-
-{% embed url="https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons" %}
 
 {{#include ../../banners/hacktricks-training.md}}

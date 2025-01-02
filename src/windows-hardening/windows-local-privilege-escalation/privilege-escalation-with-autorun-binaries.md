@@ -2,12 +2,6 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/i3.png" alt=""><figcaption></figcaption></figure>
-
-**Bug bounty tip**: **jiandikishe** kwa **Intigriti**, jukwaa la **bug bounty la kiwango cha juu lililotengenezwa na hackers, kwa hackers**! Jiunge nasi kwenye [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) leo, na uanze kupata zawadi hadi **$100,000**!
-
-{% embed url="https://go.intigriti.com/hacktricks" %}
-
 ## WMIC
 
 **Wmic** inaweza kutumika kuendesha programu kwenye **kuanzisha**. Angalia ni binaries gani zimepangwa kuendesha kwenye kuanzisha kwa:
@@ -30,7 +24,7 @@ schtasks /Create /RU "SYSTEM" /SC ONLOGON /TN "SchedPE" /TR "cmd /c net localgro
 ```
 ## Folders
 
-Mifano yote iliyo katika **Startup folders itatekelezwa wakati wa kuanzisha**. Mifano ya kawaida ya kuanzisha ni zile zilizo orodheshwa hapa chini, lakini folda ya kuanzisha inaonyeshwa katika rejista. [Read this to learn where.](privilege-escalation-with-autorun-binaries.md#startup-path)
+Binaries zote zilizoko katika **Startup folders zitatekelezwa wakati wa kuanzisha**. Folders za kawaida za kuanzisha ni zile zilizoorodheshwa hapa chini, lakini folda ya kuanzisha inaonyeshwa katika rejista. [Read this to learn where.](privilege-escalation-with-autorun-binaries.md#startup-path)
 ```bash
 dir /b "C:\Documents and Settings\All Users\Start Menu\Programs\Startup" 2>nul
 dir /b "C:\Documents and Settings\%username%\Start Menu\Programs\Startup" 2>nul
@@ -62,7 +56,7 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 
 Funguo za registry zinazojulikana kama **Run** na **RunOnce** zimeundwa ili kutekeleza programu kiotomatiki kila wakati mtumiaji anapoingia kwenye mfumo. Mstari wa amri uliotolewa kama thamani ya data ya funguo umewekwa mipaka ya herufi 260 au chini.
 
-**Huduma inazoendesha** (zinaweza kudhibiti kuanzishwa kiotomatiki kwa huduma wakati wa kuanzisha):
+**Service runs** (zinaweza kudhibiti kuanzishwa kiotomatiki kwa huduma wakati wa boot):
 
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\RunServicesOnce`
 - `HKCU\Software\Microsoft\Windows\CurrentVersion\RunServicesOnce`
@@ -78,7 +72,7 @@ Funguo za registry zinazojulikana kama **Run** na **RunOnce** zimeundwa ili kute
 - `HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnceEx`
 - `HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunOnceEx`
 
-Katika Windows Vista na toleo la baadaye, funguo za **Run** na **RunOnce** hazijazalishwa kiotomatiki. Kuingizwa katika funguo hizi kunaweza kuanzisha programu moja kwa moja au kuzitaja kama utegemezi. Kwa mfano, ili kupakia faili ya DLL wakati wa kuingia, mtu anaweza kutumia funguo ya registry ya **RunOnceEx** pamoja na funguo ya "Depend". Hii inaonyeshwa kwa kuongeza kuingizwa kwa registry ili kutekeleza "C:\temp\evil.dll" wakati wa kuanzisha mfumo:
+Katika Windows Vista na toleo la baadaye, funguo za registry **Run** na **RunOnce** hazizalishwi kiotomatiki. Kuingizwa katika funguo hizi kunaweza kuanzisha programu moja kwa moja au kuzitaja kama utegemezi. Kwa mfano, ili kupakia faili ya DLL wakati wa kuingia, mtu anaweza kutumia funguo ya registry **RunOnceEx** pamoja na funguo ya "Depend". Hii inaonyeshwa kwa kuongeza kuingizwa kwa registry kutekeleza "C:\temp\evil.dll" wakati wa kuanzishwa kwa mfumo:
 ```
 reg add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnceEx\\0001\\Depend /v 1 /d "C:\\temp\\evil.dll"
 ```
@@ -152,7 +146,7 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Wow6432Node\Microsoft\Windows\Ru
 Viungo vilivyowekwa katika folda ya **Kuanzisha** vitasababisha huduma au programu kuanzishwa wakati wa kuingia kwa mtumiaji au upya wa mfumo. Mahali pa folda ya **Kuanzisha** lin defined katika rejista kwa mipango ya **Mashine ya Mitaa** na **Mtumiaji wa Sasa**. Hii inamaanisha kwamba kiungo chochote kilichoongezwa kwenye maeneo haya maalum ya **Kuanzisha** kitahakikisha huduma au programu iliyounganishwa inaanza baada ya mchakato wa kuingia au upya, na kufanya kuwa njia rahisi ya kupanga programu kuendesha kiotomatiki.
 
 > [!NOTE]
-> Ikiwa unaweza kubadilisha yoyote ya \[User] Shell Folder chini ya **HKLM**, utaweza kuielekeza kwenye folda inayodhibitiwa na wewe na kuweka nyuma ya mlango itakayotekelezwa wakati wowote mtumiaji anapoingia kwenye mfumo ikipandisha mamlaka.
+> Ikiwa unaweza kubadilisha chochote \[User] Shell Folder chini ya **HKLM**, utaweza kuielekeza kwenye folda inayodhibitiwa na wewe na kuweka nyuma ya mlango itakayotekelezwa wakati wowote mtumiaji anapoingia kwenye mfumo ikipandisha mamlaka.
 ```bash
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" /v "Common Startup"
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" /v "Common Startup"
@@ -176,7 +170,7 @@ Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVers
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon' -Name "Shell"
 ```
 > [!NOTE]
-> Ikiwa unaweza kubadilisha thamani ya registry au binary, utaweza kuongeza mamlaka.
+> Ikiwa unaweza kubadilisha thamani ya registry au binary utaweza kuongeza mamlaka.
 
 ### Sera za Mipangilio
 
@@ -192,11 +186,11 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\CurrentVersion
 ```
 ### AlternateShell
 
-### Kubadilisha Amri ya Salama ya Command Prompt
+### Kubadilisha Amri ya Salama ya Msimbo
 
-Katika Windows Registry chini ya `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot`, kuna thamani ya **`AlternateShell`** iliyowekwa kwa chaguo-msingi kuwa `cmd.exe`. Hii inamaanisha unapochagua "Safe Mode with Command Prompt" wakati wa kuanzisha (kwa kubonyeza F8), `cmd.exe` inatumika. Lakini, inawezekana kuandaa kompyuta yako kuanzisha moja kwa moja katika hali hii bila kuhitaji kubonyeza F8 na kuchagua kwa mikono.
+Katika Usajili wa Windows chini ya `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot`, kuna thamani ya **`AlternateShell`** iliyowekwa kwa chaguo-msingi kuwa `cmd.exe`. Hii inamaanisha unapochagua "Salama Msimbo na Amri" wakati wa kuanzisha (kwa kubonyeza F8), `cmd.exe` inatumika. Lakini, inawezekana kuandaa kompyuta yako kuanzisha moja kwa moja katika hali hii bila kuhitaji kubonyeza F8 na kuchagua kwa mikono.
 
-Hatua za kuunda chaguo la kuanzisha ili kuanzisha moja kwa moja katika "Safe Mode with Command Prompt":
+Hatua za kuunda chaguo la kuanzisha ili kuanzisha moja kwa moja katika "Salama Msimbo na Amri":
 
 1. Badilisha sifa za faili ya `boot.ini` kuondoa bendera za kusoma pekee, mfumo, na zilizofichwa: `attrib c:\boot.ini -r -s -h`
 2. Fungua `boot.ini` kwa ajili ya kuhariri.
@@ -204,9 +198,9 @@ Hatua za kuunda chaguo la kuanzisha ili kuanzisha moja kwa moja katika "Safe Mod
 4. Hifadhi mabadiliko kwenye `boot.ini`.
 5. Rudisha sifa za awali za faili: `attrib c:\boot.ini +r +s +h`
 
-- **Exploit 1:** Kubadilisha funguo za **AlternateShell** katika rejista kunaruhusu usanidi wa shell ya amri ya kawaida, huenda kwa ufikiaji usioidhinishwa.
-- **Exploit 2 (PATH Write Permissions):** Kuwa na ruhusa za kuandika sehemu yoyote ya mfumo wa **PATH** variable, hasa kabla ya `C:\Windows\system32`, kunakuwezesha kutekeleza `cmd.exe` ya kawaida, ambayo inaweza kuwa nyuma ya mlango ikiwa mfumo utaanzishwa katika Hali ya Salama.
-- **Exploit 3 (PATH and boot.ini Write Permissions):** Upatikanaji wa kuandika kwenye `boot.ini` unaruhusu kuanzisha Hali ya Salama kiotomatiki, kurahisisha ufikiaji usioidhinishwa kwenye kuanzisha kwa pili.
+- **Kuvunja 1:** Kubadilisha funguo za usajili za **AlternateShell** kunaruhusu usanidi wa shell ya amri ya kawaida, huenda kwa ufikiaji usioidhinishwa.
+- **Kuvunja 2 (Ruhusa za Kuandika PATH):** Kuwa na ruhusa za kuandika sehemu yoyote ya mfumo wa **PATH** variable, hasa kabla ya `C:\Windows\system32`, kunakuwezesha kutekeleza `cmd.exe` ya kawaida, ambayo inaweza kuwa nyuma ya mlango ikiwa mfumo utaanzishwa katika Hali ya Salama.
+- **Kuvunja 3 (Ruhusa za Kuandika PATH na boot.ini):** Upatikanaji wa kuandika kwenye `boot.ini` unaruhusu kuanzisha Hali ya Salama kiotomatiki, ikirahisisha ufikiaji usioidhinishwa kwenye kuanzisha kwa pili.
 
 Ili kuangalia mipangilio ya sasa ya **AlternateShell**, tumia amri hizi:
 ```bash
@@ -215,7 +209,7 @@ Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Co
 ```
 ### Installed Component
 
-Active Setup ni kipengele katika Windows ambacho **kinanzishwa kabla ya mazingira ya desktop kupakiwa kikamilifu**. Kinatoa kipaumbele kwa utekelezaji wa amri fulani, ambazo lazima zikamilike kabla ya kuingia kwa mtumiaji kuendelea. Mchakato huu unafanyika hata kabla ya kuanzishwa kwa vitu vingine vya kuanzisha, kama vile vile vilivyomo katika sehemu za Run au RunOnce za rejista.
+Active Setup ni kipengele katika Windows ambacho **kinanzishwa kabla ya mazingira ya desktop kupakiwa kikamilifu**. Kinatoa kipaumbele kwa utekelezaji wa amri fulani, ambazo lazima zikamilike kabla ya kuingia kwa mtumiaji kuendelea. Mchakato huu unafanyika hata kabla ya kuanzishwa kwa entries nyingine za kuanzisha, kama zile katika sehemu za Run au RunOnce za rejista.
 
 Active Setup inasimamiwa kupitia funguo za rejista zifuatazo:
 
@@ -224,12 +218,12 @@ Active Setup inasimamiwa kupitia funguo za rejista zifuatazo:
 - `HKCU\SOFTWARE\Microsoft\Active Setup\Installed Components`
 - `HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components`
 
-Ndani ya funguo hizi, kuna funguo ndogo mbalimbali, kila moja ikihusiana na kipengele maalum. Thamani za funguo ambazo ni za umuhimu maalum ni pamoja na:
+Ndani ya funguo hizi, kuna funguo ndogo mbalimbali, kila moja ikihusiana na kipengele maalum. Thamani za funguo zinazovutia ni pamoja na:
 
 - **IsInstalled:**
 - `0` inaonyesha amri ya kipengele haitatekelezwa.
 - `1` inamaanisha amri itatekelezwa mara moja kwa kila mtumiaji, ambayo ni tabia ya kawaida ikiwa thamani ya `IsInstalled` haipo.
-- **StubPath:** Inaelezea amri itakayotekelezwa na Active Setup. Inaweza kuwa amri yoyote halali ya mistari, kama vile kuanzisha `notepad`.
+- **StubPath:** Mwelekeo wa amri itakayotekelezwa na Active Setup. Inaweza kuwa amri yoyote halali ya mstari, kama kuanzisha `notepad`.
 
 **Security Insights:**
 
@@ -251,7 +245,7 @@ Browser Helper Objects (BHOs) ni moduli za DLL ambazo zinaongeza vipengele vya z
 
 BHOs zinaendana na Windows 10 kupitia Internet Explorer 11 lakini hazipati msaada katika Microsoft Edge, kivinjari cha chaguo-msingi katika matoleo mapya ya Windows.
 
-Ili kuchunguza BHOs zilizosajiliwa kwenye mfumo, unaweza kukagua funguo zifuatazo za rejista:
+Ili kuchunguza BHOs zilizosajiliwa kwenye mfumo, unaweza kukagua ufunguo wa rejista zifuatazo:
 
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
 - `HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
@@ -303,19 +297,15 @@ autorunsc.exe -m -nobanner -a * -ct /accepteula
 ```
 ## Zaidi
 
-**Pata zaidi ya Autoruns kama vile rekodi katika** [**https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2**](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
+**Pata zaidi kuhusu Autoruns kama vile rekodi katika** [**https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2**](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
 
-## Marejeo
+## Marejeleo
 
 - [https://resources.infosecinstitute.com/common-malware-persistence-mechanisms/#gref](https://resources.infosecinstitute.com/common-malware-persistence-mechanisms/#gref)
 - [https://attack.mitre.org/techniques/T1547/001/](https://attack.mitre.org/techniques/T1547/001/)
 - [https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
 - [https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell](https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell)
 
-<figure><img src="../../images/i3.png" alt=""><figcaption></figcaption></figure>
 
-**Usanidi wa bug bounty**: **jiandikishe** kwa **Intigriti**, jukwaa la **bug bounty la kiwango cha juu lililotengenezwa na hackers, kwa hackers**! Jiunge nasi katika [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) leo, na anza kupata zawadi hadi **$100,000**!
-
-{% embed url="https://go.intigriti.com/hacktricks" %}
 
 {{#include ../../banners/hacktricks-training.md}}

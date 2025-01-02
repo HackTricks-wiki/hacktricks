@@ -1,57 +1,46 @@
-# Docker Security
+# Usalama wa Docker
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-<figure><img src="../../../images/image (48).png" alt=""><figcaption></figcaption></figure>
+## **Usalama wa Msingi wa Injini ya Docker**
 
-\
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=docker-security) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+**Injini ya Docker** inatumia **Namespaces** na **Cgroups** za kernel ya Linux kutenga kontena, ikitoa tabaka la msingi la usalama. Ulinzi wa ziada unapatikana kupitia **Capabilities dropping**, **Seccomp**, na **SELinux/AppArmor**, ukiongeza kutengwa kwa kontena. **Auth plugin** inaweza kuzuia vitendo vya mtumiaji zaidi.
 
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=docker-security" %}
+![Usalama wa Docker](https://sreeninet.files.wordpress.com/2016/03/dockersec1.png)
 
-## **Basic Docker Engine Security**
+### Ufikiaji Salama kwa Injini ya Docker
 
-The **Docker engine** employs the Linux kernel's **Namespaces** and **Cgroups** to isolate containers, offering a basic layer of security. Additional protection is provided through **Capabilities dropping**, **Seccomp**, and **SELinux/AppArmor**, enhancing container isolation. An **auth plugin** can further restrict user actions.
+Injini ya Docker inaweza kufikiwa kwa ndani kupitia socket ya Unix au kwa mbali kwa kutumia HTTP. Kwa ufikiaji wa mbali, ni muhimu kutumia HTTPS na **TLS** ili kuhakikisha usiri, uadilifu, na uthibitisho.
 
-![Docker Security](https://sreeninet.files.wordpress.com/2016/03/dockersec1.png)
-
-### Secure Access to Docker Engine
-
-The Docker engine can be accessed either locally via a Unix socket or remotely using HTTP. For remote access, it's essential to employ HTTPS and **TLS** to ensure confidentiality, integrity, and authentication.
-
-The Docker engine, by default, listens on the Unix socket at `unix:///var/run/docker.sock`. On Ubuntu systems, Docker's startup options are defined in `/etc/default/docker`. To enable remote access to the Docker API and client, expose the Docker daemon over an HTTP socket by adding the following settings:
-
+Injini ya Docker, kwa default, inasikiliza kwenye socket ya Unix katika `unix:///var/run/docker.sock`. Kwenye mifumo ya Ubuntu, chaguo za kuanzisha Docker zimefafanuliwa katika `/etc/default/docker`. Ili kuwezesha ufikiaji wa mbali kwa API ya Docker na mteja, fungua daemon ya Docker kupitia socket ya HTTP kwa kuongeza mipangilio ifuatayo:
 ```bash
 DOCKER_OPTS="-D -H unix:///var/run/docker.sock -H tcp://192.168.56.101:2376"
 sudo service docker restart
 ```
+Hata hivyo, kufichua Docker daemon kupitia HTTP hakupendekezwi kutokana na wasiwasi wa usalama. Inashauriwa kulinda mawasiliano kwa kutumia HTTPS. Kuna mbinu mbili kuu za kulinda mawasiliano:
 
-However, exposing the Docker daemon over HTTP is not recommended due to security concerns. It's advisable to secure connections using HTTPS. There are two main approaches to securing the connection:
+1. Mteja anathibitisha utambulisho wa seva.
+2. Mteja na seva wanathibitisha utambulisho wa kila mmoja.
 
-1. The client verifies the server's identity.
-2. Both the client and server mutually authenticate each other's identity.
+Vyeti vinatumika kuthibitisha utambulisho wa seva. Kwa mifano ya kina ya mbinu zote mbili, rejelea [**hiki kiongozi**](https://sreeninet.wordpress.com/2016/03/06/docker-security-part-3engine-access/).
 
-Certificates are utilized to confirm a server's identity. For detailed examples of both methods, refer to [**this guide**](https://sreeninet.wordpress.com/2016/03/06/docker-security-part-3engine-access/).
+### Usalama wa Picha za Kontena
 
-### Security of Container Images
+Picha za kontena zinaweza kuhifadhiwa katika hifadhi za kibinafsi au za umma. Docker inatoa chaguzi kadhaa za uhifadhi kwa picha za kontena:
 
-Container images can be stored in either private or public repositories. Docker offers several storage options for container images:
+- [**Docker Hub**](https://hub.docker.com): Huduma ya hifadhi ya umma kutoka Docker.
+- [**Docker Registry**](https://github.com/docker/distribution): Mradi wa chanzo wazi unaowezesha watumiaji kuendesha hifadhi yao wenyewe.
+- [**Docker Trusted Registry**](https://www.docker.com/docker-trusted-registry): Hifadhi ya kibiashara ya Docker inayotoa uthibitisho wa mtumiaji kulingana na majukumu na uunganisho na huduma za directory za LDAP.
 
-- [**Docker Hub**](https://hub.docker.com): A public registry service from Docker.
-- [**Docker Registry**](https://github.com/docker/distribution): An open-source project allowing users to host their own registry.
-- [**Docker Trusted Registry**](https://www.docker.com/docker-trusted-registry): Docker's commercial registry offering, featuring role-based user authentication and integration with LDAP directory services.
+### Uchanganuzi wa Picha
 
-### Image Scanning
+Kontena zinaweza kuwa na **udhaifu wa usalama** ama kwa sababu ya picha ya msingi au kwa sababu ya programu iliyosakinishwa juu ya picha ya msingi. Docker inafanya kazi kwenye mradi unaoitwa **Nautilus** ambao unafanya uchambuzi wa usalama wa Kontena na kuorodhesha udhaifu. Nautilus inafanya kazi kwa kulinganisha kila safu ya picha ya Kontena na hifadhi ya udhaifu ili kubaini mapengo ya usalama.
 
-Containers can have **security vulnerabilities** either because of the base image or because of the software installed on top of the base image. Docker is working on a project called **Nautilus** that does security scan of Containers and lists the vulnerabilities. Nautilus works by comparing the each Container image layer with vulnerability repository to identify security holes.
-
-For more [**information read this**](https://docs.docker.com/engine/scan/).
+Kwa maelezo zaidi [**soma hii**](https://docs.docker.com/engine/scan/).
 
 - **`docker scan`**
 
-The **`docker scan`** command allows you to scan existing Docker images using the image name or ID. For example, run the following command to scan the hello-world image:
-
+Amri ya **`docker scan`** inakuwezesha kuchambua picha za Docker zilizopo kwa kutumia jina la picha au ID. Kwa mfano,endesha amri ifuatayo kuchambua picha ya hello-world:
 ```bash
 docker scan hello-world
 
@@ -67,103 +56,82 @@ Licenses:          enabled
 
 Note that we do not currently have vulnerability data for your image.
 ```
-
 - [**`trivy`**](https://github.com/aquasecurity/trivy)
-
 ```bash
 trivy -q -f json <container_name>:<tag>
 ```
-
 - [**`snyk`**](https://docs.snyk.io/snyk-cli/getting-started-with-the-cli)
-
 ```bash
 snyk container test <image> --json-file-output=<output file> --severity-threshold=high
 ```
-
 - [**`clair-scanner`**](https://github.com/arminc/clair-scanner)
-
 ```bash
 clair-scanner -w example-alpine.yaml --ip YOUR_LOCAL_IP alpine:3.5
 ```
-
 ### Docker Image Signing
 
-Docker image signing ensures the security and integrity of images used in containers. Here's a condensed explanation:
+Saini ya picha za Docker inahakikisha usalama na uaminifu wa picha zinazotumika katika kontena. Hapa kuna maelezo mafupi:
 
-- **Docker Content Trust** utilizes the Notary project, based on The Update Framework (TUF), to manage image signing. For more info, see [Notary](https://github.com/docker/notary) and [TUF](https://theupdateframework.github.io).
-- To activate Docker content trust, set `export DOCKER_CONTENT_TRUST=1`. This feature is off by default in Docker version 1.10 and later.
-- With this feature enabled, only signed images can be downloaded. Initial image push requires setting passphrases for the root and tagging keys, with Docker also supporting Yubikey for enhanced security. More details can be found [here](https://blog.docker.com/2015/11/docker-content-trust-yubikey/).
-- Attempting to pull an unsigned image with content trust enabled results in a "No trust data for latest" error.
-- For image pushes after the first, Docker asks for the repository key's passphrase to sign the image.
+- **Docker Content Trust** inatumia mradi wa Notary, unaotegemea The Update Framework (TUF), kusimamia saini za picha. Kwa maelezo zaidi, angalia [Notary](https://github.com/docker/notary) na [TUF](https://theupdateframework.github.io).
+- Ili kuwasha uaminifu wa maudhui ya Docker, weka `export DOCKER_CONTENT_TRUST=1`. Kipengele hiki hakijawashwa kwa chaguo-msingi katika toleo la Docker 1.10 na baadaye.
+- Ikiwa kipengele hiki kimewashwa, picha zilizotiwa saini pekee ndizo zinaweza kupakuliwa. Kuanzisha kupakia picha kunahitaji kuweka maneno ya siri kwa funguo za mzizi na za kuweka alama, huku Docker pia ikisaidia Yubikey kwa usalama wa ziada. Maelezo zaidi yanaweza kupatikana [hapa](https://blog.docker.com/2015/11/docker-content-trust-yubikey/).
+- Kujaribu kuvuta picha isiyo na saini huku uaminifu wa maudhui ukiwashwa kunasababisha kosa la "No trust data for latest".
+- Kwa kupakia picha baada ya ya kwanza, Docker inauliza neno la siri la funguo za hifadhi ili kusaini picha.
 
-To back up your private keys, use the command:
-
+Ili kuhifadhi funguo zako za kibinafsi, tumia amri:
 ```bash
 tar -zcvf private_keys_backup.tar.gz ~/.docker/trust/private
 ```
+Wakati wa kubadilisha mwenyeji wa Docker, ni muhimu kuhamasisha funguo za mizizi na hazina ili kudumisha shughuli.
 
-When switching Docker hosts, it's necessary to move the root and repository keys to maintain operations.
-
----
-
-<figure><img src="../../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=docker-security) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=docker-security" %}
-
-## Containers Security Features
+## Vipengele vya Usalama wa Kontena
 
 <details>
 
-<summary>Summary of Container Security Features</summary>
+<summary>Muhtasari wa Vipengele vya Usalama wa Kontena</summary>
 
-**Main Process Isolation Features**
+**Vipengele Vikuu vya Kutenganisha Mchakato**
 
-In containerized environments, isolating projects and their processes is paramount for security and resource management. Here's a simplified explanation of key concepts:
+Katika mazingira ya kontena, kutenganisha miradi na michakato yake ni muhimu kwa usalama na usimamizi wa rasilimali. Hapa kuna maelezo rahisi ya dhana muhimu:
 
 **Namespaces**
 
-- **Purpose**: Ensure isolation of resources like processes, network, and filesystems. Particularly in Docker, namespaces keep a container's processes separate from the host and other containers.
-- **Usage of `unshare`**: The `unshare` command (or the underlying syscall) is utilized to create new namespaces, providing an added layer of isolation. However, while Kubernetes doesn't inherently block this, Docker does.
-- **Limitation**: Creating new namespaces doesn't allow a process to revert to the host's default namespaces. To penetrate the host namespaces, one would typically require access to the host's `/proc` directory, using `nsenter` for entry.
+- **Madhumuni**: Kuhakikisha kutenganisha rasilimali kama michakato, mtandao, na mifumo ya faili. Haswa katika Docker, namespaces huzuia michakato ya kontena kuwa tofauti na mwenyeji na kontena nyingine.
+- **Matumizi ya `unshare`**: Amri ya `unshare` (au syscall ya msingi) inatumika kuunda namespaces mpya, ikitoa safu ya ziada ya kutenganisha. Hata hivyo, ingawa Kubernetes haizuia hii kimsingi, Docker inafanya hivyo.
+- **Kikomo**: Kuunda namespaces mpya hakuruhusu mchakato kurudi kwenye namespaces za kawaida za mwenyeji. Ili kuingia kwenye namespaces za mwenyeji, mtu kwa kawaida anahitaji kupata saraka ya `/proc` ya mwenyeji, akitumia `nsenter` kwa kuingia.
 
 **Control Groups (CGroups)**
 
-- **Function**: Primarily used for allocating resources among processes.
-- **Security Aspect**: CGroups themselves don't offer isolation security, except for the `release_agent` feature, which, if misconfigured, could potentially be exploited for unauthorized access.
+- **Kazi**: Kimsingi inatumika kwa kugawa rasilimali kati ya michakato.
+- **Nukta ya Usalama**: CGroups wenyewe hazitoi usalama wa kutenganisha, isipokuwa kwa kipengele cha `release_agent`, ambacho, ikiwa kimepangwa vibaya, kinaweza kutumika kwa ufikiaji usioidhinishwa.
 
 **Capability Drop**
 
-- **Importance**: It's a crucial security feature for process isolation.
-- **Functionality**: It restricts the actions a root process can perform by dropping certain capabilities. Even if a process runs with root privileges, lacking the necessary capabilities prevents it from executing privileged actions, as the syscalls will fail due to insufficient permissions.
+- **Umuhimu**: Ni kipengele muhimu cha usalama kwa kutenganisha michakato.
+- **Kazi**: Inapunguza vitendo ambavyo mchakato wa mizizi unaweza kufanya kwa kuondoa uwezo fulani. Hata kama mchakato unakimbia kwa ruhusa za mizizi, kukosa uwezo unaohitajika kunazuia kutekeleza vitendo vya kipaumbele, kwani syscalls zitashindwa kutokana na ruhusa zisizotosha.
 
-These are the **remaining capabilities** after the process drop the others:
-
+Hizi ni **uwezo uliobaki** baada ya mchakato kuondoa wengine:
 ```
 Current: cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_net_raw,cap_sys_chroot,cap_mknod,cap_audit_write,cap_setfcap=ep
 ```
-
 **Seccomp**
 
-It's enabled by default in Docker. It helps to **limit even more the syscalls** that the process can call.\
-The **default Docker Seccomp profile** can be found in [https://github.com/moby/moby/blob/master/profiles/seccomp/default.json](https://github.com/moby/moby/blob/master/profiles/seccomp/default.json)
+Imewezeshwa kwa default katika Docker. Inasaidia **kudhibiti zaidi syscalls** ambazo mchakato unaweza kuita.\
+**Profaili ya Seccomp ya default ya Docker** inaweza kupatikana katika [https://github.com/moby/moby/blob/master/profiles/seccomp/default.json](https://github.com/moby/moby/blob/master/profiles/seccomp/default.json)
 
 **AppArmor**
 
-Docker has a template that you can activate: [https://github.com/moby/moby/tree/master/profiles/apparmor](https://github.com/moby/moby/tree/master/profiles/apparmor)
+Docker ina kiolezo ambacho unaweza kuanzisha: [https://github.com/moby/moby/tree/master/profiles/apparmor](https://github.com/moby/moby/tree/master/profiles/apparmor)
 
-This will allow to reduce capabilities, syscalls, access to files and folders...
+Hii itaruhusu kupunguza uwezo, syscalls, ufikiaji wa faili na folda...
 
 </details>
 
 ### Namespaces
 
-**Namespaces** are a feature of the Linux kernel that **partitions kernel resources** such that one set of **processes** **sees** one set of **resources** while **another** set of **processes** sees a **different** set of resources. The feature works by having the same namespace for a set of resources and processes, but those namespaces refer to distinct resources. Resources may exist in multiple spaces.
+**Namespaces** ni kipengele cha kernel ya Linux ambacho **kinagawanya rasilimali za kernel** kwa namna ambayo seti moja ya **michakato** **inaona** seti moja ya **rasilimali** wakati seti **nyingine** ya **michakato** inaona seti **tofauti** ya rasilimali. Kipengele hiki kinatumika kwa kuwa na namespace sawa kwa seti ya rasilimali na michakato, lakini namespaces hizo zinarejelea rasilimali tofauti. Rasilimali zinaweza kuwepo katika nafasi nyingi.
 
-Docker makes use of the following Linux kernel Namespaces to achieve Container isolation:
+Docker inatumia Namespaces zifuatazo za kernel ya Linux ili kufikia kutengwa kwa Kontena:
 
 - pid namespace
 - mount namespace
@@ -171,7 +139,7 @@ Docker makes use of the following Linux kernel Namespaces to achieve Container i
 - ipc namespace
 - UTS namespace
 
-For **more information about the namespaces** check the following page:
+Kwa **maelezo zaidi kuhusu namespaces** angalia ukurasa ufuatao:
 
 {{#ref}}
 namespaces/
@@ -179,62 +147,58 @@ namespaces/
 
 ### cgroups
 
-Linux kernel feature **cgroups** provides capability to **restrict resources like cpu, memory, io, network bandwidth among** a set of processes. Docker allows to create Containers using cgroup feature which allows for resource control for the specific Container.\
-Following is a Container created with user space memory limited to 500m, kernel memory limited to 50m, cpu share to 512, blkioweight to 400. CPU share is a ratio that controls Container’s CPU usage. It has a default value of 1024 and range between 0 and 1024. If three Containers have the same CPU share of 1024, each Container can take upto 33% of CPU in case of CPU resource contention. blkio-weight is a ratio that controls Container’s IO. It has a default value of 500 and range between 10 and 1000.
-
+Kipengele cha kernel ya Linux **cgroups** kinatoa uwezo wa **kudhibiti rasilimali kama cpu, memory, io, upana wa mtandao kati ya** seti ya michakato. Docker inaruhusu kuunda Kontena kwa kutumia kipengele cha cgroup ambacho kinatoa udhibiti wa rasilimali kwa Kontena maalum.\
+Ifuatayo ni Kontena iliyoundwa na nafasi ya kumbukumbu ya mtumiaji iliyopunguziliwa hadi 500m, kumbukumbu ya kernel iliyopunguziliwa hadi 50m, sehemu ya cpu hadi 512, blkioweight hadi 400. Sehemu ya CPU ni uwiano unaodhibiti matumizi ya CPU ya Kontena. Ina thamani ya default ya 1024 na anuwai kati ya 0 na 1024. Ikiwa Kontena tatu zina sehemu sawa ya CPU ya 1024, kila Kontena inaweza kuchukua hadi 33% ya CPU katika hali ya ushindani wa rasilimali za CPU. blkio-weight ni uwiano unaodhibiti IO ya Kontena. Ina thamani ya default ya 500 na anuwai kati ya 10 na 1000.
 ```
 docker run -it -m 500M --kernel-memory 50M --cpu-shares 512 --blkio-weight 400 --name ubuntu1 ubuntu bash
 ```
-
-To get the cgroup of a container you can do:
-
+Ili kupata cgroup ya kontena unaweza kufanya:
 ```bash
 docker run -dt --rm denial sleep 1234 #Run a large sleep inside a Debian container
 ps -ef | grep 1234 #Get info about the sleep process
 ls -l /proc/<PID>/ns #Get the Group and the namespaces (some may be uniq to the hosts and some may be shred with it)
 ```
-
-For more information check:
+Kwa maelezo zaidi angalia:
 
 {{#ref}}
 cgroups.md
 {{#endref}}
 
-### Capabilities
+### Uwezo
 
-Capabilities allow **finer control for the capabilities that can be allowed** for root user. Docker uses the Linux kernel capability feature to **limit the operations that can be done inside a Container** irrespective of the type of user.
+Uwezo unaruhusu **udhibiti wa kina kwa uwezo ambao unaweza kuruhusiwa** kwa mtumiaji wa root. Docker inatumia kipengele cha uwezo wa kernel ya Linux ili **kudhibiti shughuli ambazo zinaweza kufanywa ndani ya Kontena** bila kujali aina ya mtumiaji.
 
-When a docker container is run, the **process drops sensitive capabilities that the proccess could use to escape from the isolation**. This try to assure that the proccess won't be able to perform sensitive actions and escape:
+Wakati kontena la docker linaendeshwa, **mchakato unashusha uwezo nyeti ambao mchakato unaweza kutumia kutoroka kutoka kwa kutengwa**. Hii inajaribu kuhakikisha kwamba mchakato hauwezi kufanya vitendo nyeti na kutoroka:
 
 {{#ref}}
 ../linux-capabilities.md
 {{#endref}}
 
-### Seccomp in Docker
+### Seccomp katika Docker
 
-This is a security feature that allows Docker to **limit the syscalls** that can be used inside the container:
+Hii ni kipengele cha usalama ambacho kinaruhusu Docker **kudhibiti syscalls** ambazo zinaweza kutumika ndani ya kontena:
 
 {{#ref}}
 seccomp.md
 {{#endref}}
 
-### AppArmor in Docker
+### AppArmor katika Docker
 
-**AppArmor** is a kernel enhancement to confine **containers** to a **limited** set of **resources** with **per-program profiles**.:
+**AppArmor** ni uboreshaji wa kernel ili kufunga **kontena** kwa seti **ndogo** ya **rasilimali** zenye **profaili za kila programu**.:
 
 {{#ref}}
 apparmor.md
 {{#endref}}
 
-### SELinux in Docker
+### SELinux katika Docker
 
-- **Labeling System**: SELinux assigns a unique label to every process and filesystem object.
-- **Policy Enforcement**: It enforces security policies that define what actions a process label can perform on other labels within the system.
-- **Container Process Labels**: When container engines initiate container processes, they are typically assigned a confined SELinux label, commonly `container_t`.
-- **File Labeling within Containers**: Files within the container are usually labeled as `container_file_t`.
-- **Policy Rules**: The SELinux policy primarily ensures that processes with the `container_t` label can only interact (read, write, execute) with files labeled as `container_file_t`.
+- **Mfumo wa Kuweka Alama**: SELinux inatoa alama ya kipekee kwa kila mchakato na kitu cha mfumo wa faili.
+- **Utekelezaji wa Sera**: Inatekeleza sera za usalama ambazo zinaeleza ni vitendo vipi alama ya mchakato inaweza kufanya kwenye alama nyingine ndani ya mfumo.
+- **Alama za Mchakato wa Kontena**: Wakati injini za kontena zinaanzisha michakato ya kontena, kwa kawaida zinapewa alama ya SELinux iliyofungwa, mara nyingi `container_t`.
+- **Kuweka Alama kwa Faili ndani ya Kontena**: Faili ndani ya kontena kwa kawaida zinawekwa alama kama `container_file_t`.
+- **Sheria za Sera**: Sera ya SELinux kwa msingi inahakikisha kwamba michakato yenye alama ya `container_t` inaweza kuingiliana tu (kusoma, kuandika, kutekeleza) na faili zilizowekwa alama kama `container_file_t`.
 
-This mechanism ensures that even if a process within a container is compromised, it's confined to interacting only with objects that have the corresponding labels, significantly limiting the potential damage from such compromises.
+Mekanism hii inahakikisha kwamba hata kama mchakato ndani ya kontena umeathirika, umefungwa kuingiliana tu na vitu vilivyo na alama zinazolingana, ikipunguza kwa kiasi kikubwa uharibifu unaoweza kutokea kutokana na athari hizo.
 
 {{#ref}}
 ../selinux.md
@@ -242,23 +206,22 @@ This mechanism ensures that even if a process within a container is compromised,
 
 ### AuthZ & AuthN
 
-In Docker, an authorization plugin plays a crucial role in security by deciding whether to allow or block requests to the Docker daemon. This decision is made by examining two key contexts:
+Katika Docker, plugin ya idhini ina jukumu muhimu katika usalama kwa kuamua ikiwa ruhusa itatolewa au kuzuia maombi kwa daemon ya Docker. Uamuzi huu unafanywa kwa kuchunguza muktadha mbili muhimu:
 
-- **Authentication Context**: This includes comprehensive information about the user, such as who they are and how they've authenticated themselves.
-- **Command Context**: This comprises all pertinent data related to the request being made.
+- **Muktadha wa Uthibitishaji**: Hii inajumuisha taarifa kamili kuhusu mtumiaji, kama vile nani walivyo na jinsi walivyojithibitisha.
+- **Muktadha wa Amri**: Hii inajumuisha data yote muhimu inayohusiana na ombi linalofanywa.
 
-These contexts help ensure that only legitimate requests from authenticated users are processed, enhancing the security of Docker operations.
+Muktadha hii inasaidia kuhakikisha kwamba maombi halali tu kutoka kwa watumiaji walioidhinishwa yanashughulikiwa, ikiongeza usalama wa shughuli za Docker.
 
 {{#ref}}
 authz-and-authn-docker-access-authorization-plugin.md
 {{#endref}}
 
-## DoS from a container
+## DoS kutoka kwa kontena
 
-If you are not properly limiting the resources a container can use, a compromised container could DoS the host where it's running.
+Ikiwa hujapunguza ipasavyo rasilimali ambazo kontena linaweza kutumia, kontena lililoathirika linaweza kufanya DoS kwa mwenyeji ambapo linaendesha.
 
 - CPU DoS
-
 ```bash
 # stress-ng
 sudo apt-get install -y stress-ng && stress-ng --vm 1 --vm-bytes 1G --verify -t 5m
@@ -266,18 +229,15 @@ sudo apt-get install -y stress-ng && stress-ng --vm 1 --vm-bytes 1G --verify -t 
 # While loop
 docker run -d --name malicious-container -c 512 busybox sh -c 'while true; do :; done'
 ```
-
 - Bandwidth DoS
-
 ```bash
 nc -lvp 4444 >/dev/null & while true; do cat /dev/urandom | nc <target IP> 4444; done
 ```
-
-## Interesting Docker Flags
+## Bendera za Kuvutia za Docker
 
 ### --privileged flag
 
-In the following page you can learn **what does the `--privileged` flag imply**:
+Katika ukurasa ufuatao unaweza kujifunza **ni nini `--privileged` flag inamaanisha**:
 
 {{#ref}}
 docker-privileged.md
@@ -287,16 +247,13 @@ docker-privileged.md
 
 #### no-new-privileges
 
-If you are running a container where an attacker manages to get access as a low privilege user. If you have a **miss-configured suid binary**, the attacker may abuse it and **escalate privileges inside** the container. Which, may allow him to escape from it.
+Ikiwa unakimbia kontena ambapo mshambuliaji anafanikiwa kupata ufikiaji kama mtumiaji wa hadhi ya chini. Ikiwa una **suid binary isiyo na usanidi mzuri**, mshambuliaji anaweza kuitumia vibaya na **kuinua hadhi ndani** ya kontena. Hii, inaweza kumruhusu kutoroka kutoka kwake.
 
-Running the container with the **`no-new-privileges`** option enabled will **prevent this kind of privilege escalation**.
-
+Kukimbia kontena na chaguo la **`no-new-privileges`** lililowekwa litazuia **aina hii ya kuinua hadhi**.
 ```
 docker run -it --security-opt=no-new-privileges:true nonewpriv
 ```
-
-#### Other
-
+#### Mengineyo
 ```bash
 #You can manually add/drop capabilities with
 --cap-add
@@ -311,82 +268,77 @@ docker run -it --security-opt=no-new-privileges:true nonewpriv
 # You can manually disable selinux in docker with
 --security-opt label:disable
 ```
+Kwa maelezo zaidi kuhusu **`--security-opt`** chaguzi angalia: [https://docs.docker.com/engine/reference/run/#security-configuration](https://docs.docker.com/engine/reference/run/#security-configuration)
 
-For more **`--security-opt`** options check: [https://docs.docker.com/engine/reference/run/#security-configuration](https://docs.docker.com/engine/reference/run/#security-configuration)
+## Mambo Mengine ya Usalama
 
-## Other Security Considerations
+### Kusimamia Siri: Mbinu Bora
 
-### Managing Secrets: Best Practices
+Ni muhimu kuepuka kuweka siri moja kwa moja katika picha za Docker au kutumia mabadiliko ya mazingira, kwani mbinu hizi zinaweka taarifa zako nyeti wazi kwa yeyote mwenye ufikiaji wa kontena kupitia amri kama `docker inspect` au `exec`.
 
-It's crucial to avoid embedding secrets directly in Docker images or using environment variables, as these methods expose your sensitive information to anyone with access to the container through commands like `docker inspect` or `exec`.
+**Docker volumes** ni mbadala salama, inashauriwa kwa kupata taarifa nyeti. Zinweza kutumika kama mfumo wa muda wa faili katika kumbukumbu, kupunguza hatari zinazohusiana na `docker inspect` na logging. Hata hivyo, watumiaji wa root na wale wenye ufikiaji wa `exec` kwenye kontena bado wanaweza kufikia siri hizo.
 
-**Docker volumes** are a safer alternative, recommended for accessing sensitive information. They can be utilized as a temporary filesystem in memory, mitigating the risks associated with `docker inspect` and logging. However, root users and those with `exec` access to the container might still access the secrets.
+**Docker secrets** inatoa njia salama zaidi ya kushughulikia taarifa nyeti. Kwa matukio yanayohitaji siri wakati wa awamu ya kujenga picha, **BuildKit** inatoa suluhisho bora lenye msaada wa siri za wakati wa kujenga, ikiongeza kasi ya kujenga na kutoa vipengele vya ziada.
 
-**Docker secrets** offer an even more secure method for handling sensitive information. For instances requiring secrets during the image build phase, **BuildKit** presents an efficient solution with support for build-time secrets, enhancing build speed and providing additional features.
+Ili kutumia BuildKit, inaweza kuwashwa kwa njia tatu:
 
-To leverage BuildKit, it can be activated in three ways:
+1. Kupitia mabadiliko ya mazingira: `export DOCKER_BUILDKIT=1`
+2. Kwa kuweka mbele amri: `DOCKER_BUILDKIT=1 docker build .`
+3. Kwa kuifanya iwe ya default katika usanidi wa Docker: `{ "features": { "buildkit": true } }`, ikifuatiwa na upya wa Docker.
 
-1. Through an environment variable: `export DOCKER_BUILDKIT=1`
-2. By prefixing commands: `DOCKER_BUILDKIT=1 docker build .`
-3. By enabling it by default in the Docker configuration: `{ "features": { "buildkit": true } }`, followed by a Docker restart.
-
-BuildKit allows for the use of build-time secrets with the `--secret` option, ensuring these secrets are not included in the image build cache or the final image, using a command like:
-
+BuildKit inaruhusu matumizi ya siri za wakati wa kujenga kwa kutumia chaguo la `--secret`, kuhakikisha kwamba siri hizi hazijumuishwi katika cache ya kujenga picha au picha ya mwisho, kwa kutumia amri kama:
 ```bash
 docker build --secret my_key=my_value ,src=path/to/my_secret_file .
 ```
-
-For secrets needed in a running container, **Docker Compose and Kubernetes** offer robust solutions. Docker Compose utilizes a `secrets` key in the service definition for specifying secret files, as shown in a `docker-compose.yml` example:
-
+Kwa siri zinazohitajika katika kontena linalofanya kazi, **Docker Compose na Kubernetes** hutoa suluhisho thabiti. Docker Compose inatumia ufunguo wa `secrets` katika ufafanuzi wa huduma kwa ajili ya kubainisha faili za siri, kama inavyoonyeshwa katika mfano wa `docker-compose.yml`:
 ```yaml
 version: "3.7"
 services:
-  my_service:
-    image: centos:7
-    entrypoint: "cat /run/secrets/my_secret"
-    secrets:
-      - my_secret
+my_service:
+image: centos:7
+entrypoint: "cat /run/secrets/my_secret"
 secrets:
-  my_secret:
-    file: ./my_secret_file.txt
+- my_secret
+secrets:
+my_secret:
+file: ./my_secret_file.txt
 ```
+Hii configuration inaruhusu matumizi ya siri wakati wa kuanzisha huduma na Docker Compose.
 
-This configuration allows for the use of secrets when starting services with Docker Compose.
-
-In Kubernetes environments, secrets are natively supported and can be further managed with tools like [Helm-Secrets](https://github.com/futuresimple/helm-secrets). Kubernetes' Role Based Access Controls (RBAC) enhances secret management security, similar to Docker Enterprise.
+Katika mazingira ya Kubernetes, siri zinasaidiwa kiasili na zinaweza kusimamiwa zaidi kwa zana kama [Helm-Secrets](https://github.com/futuresimple/helm-secrets). Udhibiti wa Upatikanaji Kulingana na Majukumu (RBAC) wa Kubernetes unaboresha usalama wa usimamizi wa siri, sawa na Docker Enterprise.
 
 ### gVisor
 
-**gVisor** is an application kernel, written in Go, that implements a substantial portion of the Linux system surface. It includes an [Open Container Initiative (OCI)](https://www.opencontainers.org) runtime called `runsc` that provides an **isolation boundary between the application and the host kernel**. The `runsc` runtime integrates with Docker and Kubernetes, making it simple to run sandboxed containers.
+**gVisor** ni kernel ya programu, iliyoandikwa kwa Go, inayotekeleza sehemu kubwa ya uso wa mfumo wa Linux. Inajumuisha runtime ya [Open Container Initiative (OCI)](https://www.opencontainers.org) inayoitwa `runsc` ambayo inatoa **mipaka ya kutengwa kati ya programu na kernel ya mwenyeji**. Runtime ya `runsc` inajumuishwa na Docker na Kubernetes, na kufanya iwe rahisi kuendesha kontena zilizowekwa kwenye sanduku.
 
 {% embed url="https://github.com/google/gvisor" %}
 
 ### Kata Containers
 
-**Kata Containers** is an open source community working to build a secure container runtime with lightweight virtual machines that feel and perform like containers, but provide **stronger workload isolation using hardware virtualization** technology as a second layer of defense.
+**Kata Containers** ni jamii ya chanzo wazi inayofanya kazi kujenga runtime salama ya kontena yenye mashine za virtual nyepesi ambazo zina hisia na utendaji kama kontena, lakini zinatoa **kutengwa kwa mzigo zaidi kwa kutumia teknolojia ya virtualisasi ya vifaa** kama safu ya pili ya ulinzi.
 
 {% embed url="https://katacontainers.io/" %}
 
-### Summary Tips
+### Vidokezo vya Muhtasari
 
-- **Do not use the `--privileged` flag or mount a** [**Docker socket inside the container**](https://raesene.github.io/blog/2016/03/06/The-Dangers-Of-Docker.sock/)**.** The docker socket allows for spawning containers, so it is an easy way to take full control of the host, for example, by running another container with the `--privileged` flag.
-- Do **not run as root inside the container. Use a** [**different user**](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#user) **and** [**user namespaces**](https://docs.docker.com/engine/security/userns-remap/)**.** The root in the container is the same as on host unless remapped with user namespaces. It is only lightly restricted by, primarily, Linux namespaces, capabilities, and cgroups.
-- [**Drop all capabilities**](https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities) **(`--cap-drop=all`) and enable only those that are required** (`--cap-add=...`). Many of workloads don’t need any capabilities and adding them increases the scope of a potential attack.
-- [**Use the “no-new-privileges” security option**](https://raesene.github.io/blog/2019/06/01/docker-capabilities-and-no-new-privs/) to prevent processes from gaining more privileges, for example through suid binaries.
-- [**Limit resources available to the container**](https://docs.docker.com/engine/reference/run/#runtime-constraints-on-resources)**.** Resource limits can protect the machine from denial of service attacks.
-- **Adjust** [**seccomp**](https://docs.docker.com/engine/security/seccomp/)**,** [**AppArmor**](https://docs.docker.com/engine/security/apparmor/) **(or SELinux)** profiles to restrict the actions and syscalls available for the container to the minimum required.
-- **Use** [**official docker images**](https://docs.docker.com/docker-hub/official_images/) **and require signatures** or build your own based on them. Don’t inherit or use [backdoored](https://arstechnica.com/information-technology/2018/06/backdoored-images-downloaded-5-million-times-finally-removed-from-docker-hub/) images. Also store root keys, passphrase in a safe place. Docker has plans to manage keys with UCP.
-- **Regularly** **rebuild** your images to **apply security patches to the host an images.**
-- Manage your **secrets wisely** so it's difficult to the attacker to access them.
-- If you **exposes the docker daemon use HTTPS** with client & server authentication.
-- In your Dockerfile, **favor COPY instead of ADD**. ADD automatically extracts zipped files and can copy files from URLs. COPY doesn’t have these capabilities. Whenever possible, avoid using ADD so you aren’t susceptible to attacks through remote URLs and Zip files.
-- Have **separate containers for each micro-s**ervice
-- **Don’t put ssh** inside container, “docker exec” can be used to ssh to Container.
-- Have **smaller** container **images**
+- **Usitumie bendera ya `--privileged` au kuunganisha** [**Docker socket ndani ya kontena**](https://raesene.github.io/blog/2016/03/06/The-Dangers-Of-Docker.sock/)**.** Socket ya docker inaruhusu kuanzisha kontena, hivyo ni njia rahisi ya kuchukua udhibiti kamili wa mwenyeji, kwa mfano, kwa kuendesha kontena nyingine na bendera ya `--privileged`.
+- Usifanye **kazi kama root ndani ya kontena. Tumia** [**mtumiaji tofauti**](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#user) **na** [**majina ya watumiaji**](https://docs.docker.com/engine/security/userns-remap/)**.** Root ndani ya kontena ni sawa na kwenye mwenyeji isipokuwa ikirekebishwa na majina ya watumiaji. Inapunguziliwa mbali kidogo na, hasa, majina ya Linux, uwezo, na cgroups.
+- [**Ondoa uwezo wote**](https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities) **(`--cap-drop=all`) na wezesha tu wale wanaohitajika** (`--cap-add=...`). Mengi ya mzigo hayahitaji uwezo wowote na kuongeza uwezo huongeza wigo wa shambulio linaloweza kutokea.
+- [**Tumia chaguo la usalama "no-new-privileges"**](https://raesene.github.io/blog/2019/06/01/docker-capabilities-and-no-new-privs/) ili kuzuia michakato kupata zaidi ya uwezo, kwa mfano kupitia binaries za suid.
+- [**Punguza rasilimali zinazopatikana kwa kontena**](https://docs.docker.com/engine/reference/run/#runtime-constraints-on-resources)**.** Mipaka ya rasilimali inaweza kulinda mashine kutokana na mashambulizi ya kukataa huduma.
+- **Rekebisha** [**seccomp**](https://docs.docker.com/engine/security/seccomp/)**,** [**AppArmor**](https://docs.docker.com/engine/security/apparmor/) **(au SELinux)** profaili ili kupunguza vitendo na syscalls vinavyopatikana kwa kontena hadi kiwango cha chini kinachohitajika.
+- **Tumia** [**picha rasmi za docker**](https://docs.docker.com/docker-hub/official_images/) **na hitaji saini** au jenga yako mwenyewe kulingana nazo. Usirithi au kutumia [picha zenye backdoor](https://arstechnica.com/information-technology/2018/06/backdoored-images-downloaded-5-million-times-finally-removed-from-docker-hub/). Pia hifadhi funguo za root, neno la siri mahali salama. Docker ina mipango ya kusimamia funguo na UCP.
+- **Kila wakati** **jenga upya** picha zako ili **kuweka patch za usalama kwenye mwenyeji na picha.**
+- Simamia **siri zako kwa busara** ili iwe vigumu kwa mshambuliaji kuzipata.
+- Ikiwa **unafichua docker daemon tumia HTTPS** na uthibitishaji wa mteja na seva.
+- Katika Dockerfile yako, **pendelea COPY badala ya ADD**. ADD inatoa kiotomatiki kufungua faili zilizoshonwa na inaweza nakala faili kutoka URL. COPY haina uwezo huu. Kila wakati inapowezekana, epuka kutumia ADD ili usiwe hatarini kwa mashambulizi kupitia URL za mbali na faili za Zip.
+- Kuwa na **kontena tofauti kwa kila huduma ndogo**
+- **Usiweke ssh** ndani ya kontena, “docker exec” inaweza kutumika kuingia kwenye Kontena.
+- Kuwa na **picha za kontena ndogo**
 
 ## Docker Breakout / Privilege Escalation
 
-If you are **inside a docker container** or you have access to a user in the **docker group**, you could try to **escape and escalate privileges**:
+Ikiwa uko **ndani ya kontena la docker** au una ufikiaji wa mtumiaji katika **kikundi cha docker**, unaweza kujaribu **kutoroka na kupandisha mamlaka**:
 
 {{#ref}}
 docker-breakout-privilege-escalation/
@@ -394,7 +346,7 @@ docker-breakout-privilege-escalation/
 
 ## Docker Authentication Plugin Bypass
 
-If you have access to the docker socket or have access to a user in the **docker group but your actions are being limited by a docker auth plugin**, check if you can **bypass it:**
+Ikiwa una ufikiaji wa socket ya docker au una ufikiaji wa mtumiaji katika **kikundi cha docker lakini vitendo vyako vinapunguziliwa mbali na plugin ya uthibitishaji ya docker**, angalia ikiwa unaweza **kuipita:**
 
 {{#ref}}
 authz-and-authn-docker-access-authorization-plugin.md
@@ -402,10 +354,10 @@ authz-and-authn-docker-access-authorization-plugin.md
 
 ## Hardening Docker
 
-- The tool [**docker-bench-security**](https://github.com/docker/docker-bench-security) is a script that checks for dozens of common best-practices around deploying Docker containers in production. The tests are all automated, and are based on the [CIS Docker Benchmark v1.3.1](https://www.cisecurity.org/benchmark/docker/).\
-  You need to run the tool from the host running docker or from a container with enough privileges. Find out **how to run it in the README:** [**https://github.com/docker/docker-bench-security**](https://github.com/docker/docker-bench-security).
+- Chombo [**docker-bench-security**](https://github.com/docker/docker-bench-security) ni script inayokagua mazoea bora ya kawaida kuhusu kupeleka kontena za Docker katika uzalishaji. Majaribio yote ni ya kiotomatiki, na yanategemea [CIS Docker Benchmark v1.3.1](https://www.cisecurity.org/benchmark/docker/).\
+Unahitaji kuendesha chombo kutoka kwa mwenyeji anayekimbia docker au kutoka kwa kontena lenye mamlaka ya kutosha. Pata **jinsi ya kuendesha katika README:** [**https://github.com/docker/docker-bench-security**](https://github.com/docker/docker-bench-security).
 
-## References
+## Marejeleo
 
 - [https://blog.trailofbits.com/2019/07/19/understanding-docker-container-escapes/](https://blog.trailofbits.com/2019/07/19/understanding-docker-container-escapes/)
 - [https://twitter.com/\_fel1x/status/1151487051986087936](https://twitter.com/_fel1x/status/1151487051986087936)
@@ -421,12 +373,5 @@ authz-and-authn-docker-access-authorization-plugin.md
 - [https://towardsdatascience.com/top-20-docker-security-tips-81c41dd06f57](https://towardsdatascience.com/top-20-docker-security-tips-81c41dd06f57)
 - [https://resources.experfy.com/bigdata-cloud/top-20-docker-security-tips/](https://resources.experfy.com/bigdata-cloud/top-20-docker-security-tips/)
 
-<figure><img src="../../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=docker-security) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=docker-security" %}
 
 {{#include ../../../banners/hacktricks-training.md}}

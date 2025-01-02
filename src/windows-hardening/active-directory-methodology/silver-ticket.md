@@ -2,17 +2,13 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/i3.png" alt=""><figcaption></figcaption></figure>
 
-**Bug bounty tip**: **jiandikishe** kwa **Intigriti**, jukwaa la **bug bounty la kiwango cha juu lililotengenezwa na hackers, kwa hackers**! Jiunge nasi kwenye [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) leo, na uanze kupata zawadi hadi **$100,000**!
-
-{% embed url="https://go.intigriti.com/hacktricks" %}
 
 ## Silver ticket
 
 Shambulio la **Silver Ticket** linahusisha unyakuzi wa tiketi za huduma katika mazingira ya Active Directory (AD). Njia hii inategemea **kupata NTLM hash ya akaunti ya huduma**, kama akaunti ya kompyuta, ili kuunda tiketi ya Ticket Granting Service (TGS). Kwa tiketi hii iliyoundwa, mshambuliaji anaweza kufikia huduma maalum kwenye mtandao, **akijifanya kuwa mtumiaji yeyote**, kwa kawaida akilenga mamlaka ya usimamizi. Inasisitizwa kwamba kutumia funguo za AES kwa ajili ya kuunda tiketi ni salama zaidi na si rahisi kugundulika.
 
-Kwa ajili ya kuunda tiketi, zana tofauti hutumika kulingana na mfumo wa uendeshaji:
+Kwa ajili ya kuunda tiketi, zana tofauti zinatumika kulingana na mfumo wa uendeshaji:
 
 ### On Linux
 ```bash
@@ -32,44 +28,44 @@ mimikatz.exe "kerberos::ptt <TICKET_FILE>"
 # Obtain a shell
 .\PsExec.exe -accepteula \\<TARGET> cmd
 ```
-The CIFS service is highlighted as a common target for accessing the victim's file system, but other services like HOST and RPCSS can also be exploited for tasks and WMI queries.
+Huduma ya CIFS inasisitizwa kama lengo la kawaida la kufikia mfumo wa faili wa mwathirika, lakini huduma nyingine kama HOST na RPCSS pia zinaweza kutumika kwa kazi na maswali ya WMI.
 
-## Available Services
+## Huduma Zinazopatikana
 
-| Service Type                               | Service Silver Tickets                                                     |
-| ------------------------------------------ | -------------------------------------------------------------------------- |
-| WMI                                        | <p>HOST</p><p>RPCSS</p>                                                    |
-| PowerShell Remoting                        | <p>HOST</p><p>HTTP</p><p>Kulingana na OS pia:</p><p>WSMAN</p><p>RPCSS</p> |
-| WinRM                                      | <p>HOST</p><p>HTTP</p><p>Katika matukio mengine unaweza tu kuuliza: WINRM</p> |
-| Scheduled Tasks                            | HOST                                                                       |
-| Windows File Share, also psexec            | CIFS                                                                       |
-| LDAP operations, included DCSync           | LDAP                                                                       |
-| Windows Remote Server Administration Tools | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                         |
-| Golden Tickets                             | krbtgt                                                                     |
+| Aina ya Huduma                            | Tiketi za Silver za Huduma                                               |
+| ----------------------------------------- | ------------------------------------------------------------------------ |
+| WMI                                       | <p>HOST</p><p>RPCSS</p>                                                |
+| PowerShell Remoting                       | <p>HOST</p><p>HTTP</p><p>Kulingana na OS pia:</p><p>WSMAN</p><p>RPCSS</p> |
+| WinRM                                     | <p>HOST</p><p>HTTP</p><p>Katika matukio mengine unaweza tu kuuliza: WINRM</p> |
+| Kazi za Ratiba                            | HOST                                                                   |
+| Windows File Share, pia psexec           | CIFS                                                                   |
+| Operesheni za LDAP, ikiwa ni pamoja na DCSync | LDAP                                                                   |
+| Zana za Usimamizi wa Windows Remote Server | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                     |
+| Tiketi za Dhahabu                         | krbtgt                                                                 |
 
-Using **Rubeus** you may **ask for all** these tickets using the parameter:
+Kwa kutumia **Rubeus** unaweza **kuomba zote** tiketi hizi kwa kutumia parameter:
 
 - `/altservice:host,RPCSS,http,wsman,cifs,ldap,krbtgt,winrm`
 
-### Silver tickets Event IDs
+### Vitambulisho vya Tukio la Tiketi za Silver
 
-- 4624: Account Logon
-- 4634: Account Logoff
-- 4672: Admin Logon
+- 4624: Kuingia kwa Akaunti
+- 4634: Kutoka kwa Akaunti
+- 4672: Kuingia kwa Admin
 
-## Abusing Service tickets
+## Kutumia Tiketi za Huduma
 
-In the following examples lets imagine that the ticket is retrieved impersonating the administrator account.
+Katika mifano ifuatayo hebu tuwaze kwamba tiketi inapatikana kwa kujifanya kuwa akaunti ya msimamizi.
 
 ### CIFS
 
-With this ticket you will be able to access the `C$` and `ADMIN$` folder via **SMB** (if they are exposed) and copy files to a part of the remote filesystem just doing something like:
+Kwa tiketi hii utaweza kufikia folda za `C$` na `ADMIN$` kupitia **SMB** (ikiwa zimewekwa wazi) na nakala za faili sehemu ya mfumo wa faili wa mbali kwa kufanya kitu kama:
 ```bash
 dir \\vulnerable.computer\C$
 dir \\vulnerable.computer\ADMIN$
 copy afile.txt \\vulnerable.computer\C$\Windows\Temp
 ```
-Utapata pia uwezo wa kupata shell ndani ya mwenyeji au kutekeleza amri zisizo na mpangilio kwa kutumia **psexec**:
+Utapata pia uwezo wa kupata shell ndani ya mwenyeji au kutekeleza amri za kawaida ukitumia **psexec**:
 
 {{#ref}}
 ../lateral-movement/psexec-and-winexec.md
@@ -77,7 +73,7 @@ Utapata pia uwezo wa kupata shell ndani ya mwenyeji au kutekeleza amri zisizo na
 
 ### HOST
 
-Kwa ruhusa hii unaweza kuunda kazi zilizopangwa katika kompyuta za mbali na kutekeleza amri zisizo na mpangilio:
+Kwa ruhusa hii unaweza kuunda kazi zilizopangwa katika kompyuta za mbali na kutekeleza amri za kawaida:
 ```bash
 #Check you have permissions to use schtasks over a remote server
 schtasks /S some.vuln.pc
@@ -139,10 +135,6 @@ mimikatz(commandline) # lsadump::dcsync /dc:pcdc.domain.local /domain:domain.loc
 dcsync.md
 {{#endref}}
 
-<figure><img src="../../images/i3.png" alt=""><figcaption></figcaption></figure>
 
-**Ushauri wa bug bounty**: **jiandikishe** kwa **Intigriti**, jukwaa la **bug bounty la kiwango cha juu lililotengenezwa na hackers, kwa hackers**! Jiunge nasi katika [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) leo, na uanze kupata zawadi hadi **$100,000**!
-
-{% embed url="https://go.intigriti.com/hacktricks" %}
 
 {{#include ../../banners/hacktricks-training.md}}

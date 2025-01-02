@@ -1,13 +1,12 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-# SELinux in Containers
+# SELinux katika Mifuko
 
-[Introduction and example from the redhat docs](https://www.redhat.com/sysadmin/privileged-flag-container-engines)
+[Utangulizi na mfano kutoka kwa nyaraka za redhat](https://www.redhat.com/sysadmin/privileged-flag-container-engines)
 
-[SELinux](https://www.redhat.com/en/blog/latest-container-exploit-runc-can-be-blocked-selinux) is a **labeling** **system**. Every **process** and every **file** system object has a **label**. SELinux policies define rules about what a **process label is allowed to do with all of the other labels** on the system.
+[SELinux](https://www.redhat.com/en/blog/latest-container-exploit-runc-can-be-blocked-selinux) ni **mfumo wa kuweka lebo**. Kila **mchakato** na kila **kitu** cha mfumo wa faili kina **lebo**. Sera za SELinux zinafafanua sheria kuhusu kile **lebo ya mchakato inaruhusiwa kufanya na lebo nyingine zote** kwenye mfumo.
 
-Container engines launch **container processes with a single confined SELinux label**, usually `container_t`, and then set the container inside of the container to be labeled `container_file_t`. The SELinux policy rules basically say that the **`container_t` processes can only read/write/execute files labeled `container_file_t`**. If a container process escapes the container and attempts to write to content on the host, the Linux kernel denies access and only allows the container process to write to content labeled `container_file_t`.
-
+Mifumo ya mifuko inazindua **michakato ya mfuko yenye lebo moja ya SELinux iliyo na mipaka**, kawaida `container_t`, na kisha kuweka mfuko ndani ya mfuko kuwa na lebo `container_file_t`. Sheria za sera za SELinux kimsingi zinasema kwamba **michakato ya `container_t` inaweza kusoma/kandika/kutekeleza faili zilizo na lebo `container_file_t` pekee**. Ikiwa mchakato wa mfuko unatoroka mfuko na kujaribu kuandika kwenye maudhui kwenye mwenyeji, kernel ya Linux inakataa ufikiaji na inaruhusu tu mchakato wa mfuko kuandika kwenye maudhui yaliyo na lebo `container_file_t`.
 ```shell
 $ podman run -d fedora sleep 100
 d4194babf6b877c7100e79de92cd6717166f7302113018686cea650ea40bd7cb
@@ -15,9 +14,8 @@ $ podman top -l label
 LABEL
 system_u:system_r:container_t:s0:c647,c780
 ```
+# Watumiaji wa SELinux
 
-# SELinux Users
-
-There are SELinux users in addition to the regular Linux users. SELinux users are part of an SELinux policy. Each Linux user is mapped to a SELinux user as part of the policy. This allows Linux users to inherit the restrictions and security rules and mechanisms placed on SELinux users.
+Kuna watumiaji wa SELinux pamoja na watumiaji wa kawaida wa Linux. Watumiaji wa SELinux ni sehemu ya sera ya SELinux. Kila mtumiaji wa Linux ameunganishwa na mtumiaji wa SELinux kama sehemu ya sera. Hii inaruhusu watumiaji wa Linux kurithi vizuizi na sheria za usalama na mifumo iliyowekwa kwa watumiaji wa SELinux.
 
 {{#include ../../banners/hacktricks-training.md}}

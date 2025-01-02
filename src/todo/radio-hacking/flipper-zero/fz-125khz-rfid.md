@@ -2,9 +2,6 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 ## Intro
 
@@ -35,14 +32,14 @@ Wakati mwingine, unapopata kadi utaona ID (au sehemu) yake imeandikwa kwenye kad
 
 - **EM Marin**
 
-Kwa mfano katika kadi hii ya EM-Marin kwenye kadi halisi inawezekana **kusoma mwisho 3 kati ya 5 bytes wazi**.\
-Mengine 2 yanaweza kujaribiwa kwa nguvu ikiwa huwezi kuyasoma kutoka kwenye kadi.
+Kwa mfano katika kadi hii ya EM-Marin kwenye kadi halisi inawezekana **kusoma mwisho 3 wa 5 bytes wazi**.\
+Bytes 2 nyingine zinaweza kujaribiwa kwa nguvu ikiwa huwezi kuzisoma kutoka kwenye kadi.
 
 <figure><img src="../../../images/image (104).png" alt=""><figcaption></figcaption></figure>
 
 - **HID**
 
-Vivyo hivyo inatokea katika kadi hii ya HID ambapo ni 2 tu kati ya 3 bytes zinaweza kupatikana zimeandikwa kwenye kadi
+Vivyo hivyo inatokea katika kadi hii ya HID ambapo bytes 2 tu kati ya 3 zinaweza kupatikana zimeandikwa kwenye kadi
 
 <figure><img src="../../../images/image (1014).png" alt=""><figcaption></figcaption></figure>
 
@@ -54,8 +51,5 @@ Baada ya **kunakili** kadi au **kuingiza** ID **kwa mikono** inawezekana **kuiga
 
 - [https://blog.flipperzero.one/rfid/](https://blog.flipperzero.one/rfid/)
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../../../banners/hacktricks-training.md}}
