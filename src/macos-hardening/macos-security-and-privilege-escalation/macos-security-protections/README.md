@@ -1,18 +1,18 @@
-# macOS Security Protections
+# macOS-Sicherheitsmaßnahmen
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## Gatekeeper
 
-Gatekeeper is usually used to refer to the combination of **Quarantine + Gatekeeper + XProtect**, 3 macOS security modules that will try to **prevent users from executing potentially malicious software downloaded**.
+Gatekeeper wird normalerweise verwendet, um die Kombination von **Quarantäne + Gatekeeper + XProtect** zu bezeichnen, 3 macOS-Sicherheitsmodule, die versuchen, **zu verhindern, dass Benutzer potenziell schädliche Software ausführen, die heruntergeladen wurde**.
 
-More information in:
+Weitere Informationen in:
 
 {{#ref}}
 macos-gatekeeper.md
 {{#endref}}
 
-## Processes Limitants
+## Prozessbeschränkungen
 
 ### MACF
 
@@ -24,23 +24,23 @@ macos-sip.md
 
 ### Sandbox
 
-MacOS Sandbox **limits applications** running inside the sandbox to the **allowed actions specified in the Sandbox profile** the app is running with. This helps to ensure that **the application will be accessing only expected resources**.
+Die macOS-Sandbox **beschränkt Anwendungen**, die innerhalb der Sandbox ausgeführt werden, auf die **erlaubten Aktionen, die im Sandbox-Profil** festgelegt sind, mit dem die App ausgeführt wird. Dies hilft sicherzustellen, dass **die Anwendung nur auf erwartete Ressourcen zugreift**.
 
 {{#ref}}
 macos-sandbox/
 {{#endref}}
 
-### TCC - **Transparency, Consent, and Control**
+### TCC - **Transparenz, Zustimmung und Kontrolle**
 
-**TCC (Transparency, Consent, and Control)** is a security framework. It's designed to **manage the permissions** of applications, specifically by regulating their access to sensitive features. This includes elements like **location services, contacts, photos, microphone, camera, accessibility, and full disk access**. TCC ensures that apps can only access these features after obtaining explicit user consent, thereby bolstering privacy and control over personal data.
+**TCC (Transparenz, Zustimmung und Kontrolle)** ist ein Sicherheitsrahmen. Er wurde entwickelt, um **die Berechtigungen** von Anwendungen zu **verwalten**, insbesondere indem der Zugriff auf sensible Funktionen reguliert wird. Dazu gehören Elemente wie **Standortdienste, Kontakte, Fotos, Mikrofon, Kamera, Barrierefreiheit und Vollzugriff auf die Festplatte**. TCC stellt sicher, dass Apps nur auf diese Funktionen zugreifen können, nachdem sie die ausdrückliche Zustimmung des Benutzers erhalten haben, wodurch die Privatsphäre und Kontrolle über persönliche Daten gestärkt wird.
 
 {{#ref}}
 macos-tcc/
 {{#endref}}
 
-### Launch/Environment Constraints & Trust Cache
+### Start-/Umgebungsbeschränkungen & Vertrauenscache
 
-Launch constraints in macOS are a security feature to **regulate process initiation** by defining **who can launch** a process, **how**, and **from where**. Introduced in macOS Ventura, they categorize system binaries into constraint categories within a **trust cache**. Every executable binary has set **rules** for its **launch**, including **self**, **parent**, and **responsible** constraints. Extended to third-party apps as **Environment** Constraints in macOS Sonoma, these features help mitigate potential system exploitations by governing process launching conditions.
+Startbeschränkungen in macOS sind eine Sicherheitsfunktion, um **die Prozessinitiierung zu regulieren**, indem definiert wird, **wer einen Prozess starten kann**, **wie** und **von wo**. Eingeführt in macOS Ventura, kategorisieren sie System-Binärdateien in Beschränkungs-Kategorien innerhalb eines **Vertrauenscaches**. Jede ausführbare Binärdatei hat festgelegte **Regeln** für ihren **Start**, einschließlich **selbst**, **Eltern** und **verantwortlich**. Diese Funktionen wurden in macOS Sonoma auf Drittanbieter-Apps als **Umgebungs**-Beschränkungen ausgeweitet, um potenzielle Systemausnutzungen zu mindern, indem die Bedingungen für das Starten von Prozessen geregelt werden.
 
 {{#ref}}
 macos-launch-environment-constraints.md
@@ -48,79 +48,70 @@ macos-launch-environment-constraints.md
 
 ## MRT - Malware Removal Tool
 
-The Malware Removal Tool (MRT) is another part of macOS's security infrastructure. As the name suggests, MRT's main function is to **remove known malware from infected systems**.
+Das Malware Removal Tool (MRT) ist ein weiterer Teil der Sicherheitsinfrastruktur von macOS. Wie der Name schon sagt, besteht die Hauptfunktion von MRT darin, **bekannte Malware von infizierten Systemen zu entfernen**.
 
-Once malware is detected on a Mac (either by XProtect or by some other means), MRT can be used to automatically **remove the malware**. MRT operates silently in the background and typically runs whenever the system is updated or when a new malware definition is downloaded (it looks like the rules MRT has to detect malware are inside the binary).
+Sobald Malware auf einem Mac erkannt wird (entweder durch XProtect oder auf andere Weise), kann MRT verwendet werden, um die **Malware automatisch zu entfernen**. MRT arbeitet im Hintergrund und wird normalerweise ausgeführt, wenn das System aktualisiert wird oder wenn eine neue Malware-Definition heruntergeladen wird (es scheint, dass die Regeln, die MRT zur Erkennung von Malware hat, in der Binärdatei enthalten sind).
 
-While both XProtect and MRT are part of macOS's security measures, they perform different functions:
+Während sowohl XProtect als auch MRT Teil der Sicherheitsmaßnahmen von macOS sind, erfüllen sie unterschiedliche Funktionen:
 
-- **XProtect** is a preventative tool. It **checks files as they're downloaded** (via certain applications), and if it detects any known types of malware, it **prevents the file from opening**, thereby preventing the malware from infecting your system in the first place.
-- **MRT**, on the other hand, is a **reactive tool**. It operates after malware has been detected on a system, with the goal of removing the offending software to clean up the system.
+- **XProtect** ist ein präventives Tool. Es **überprüft Dateien, während sie heruntergeladen werden** (über bestimmte Anwendungen), und wenn es bekannte Malware erkennt, **verhindert es, dass die Datei geöffnet wird**, wodurch verhindert wird, dass die Malware Ihr System überhaupt infiziert.
+- **MRT** hingegen ist ein **reaktives Tool**. Es arbeitet, nachdem Malware auf einem System erkannt wurde, mit dem Ziel, die störende Software zu entfernen, um das System zu bereinigen.
 
-The MRT application is located in **`/Library/Apple/System/Library/CoreServices/MRT.app`**
+Die MRT-Anwendung befindet sich in **`/Library/Apple/System/Library/CoreServices/MRT.app`**
 
-## Background Tasks Management
+## Verwaltung von Hintergrundaufgaben
 
-**macOS** now **alerts** every time a tool uses a well known **technique to persist code execution** (such as Login Items, Daemons...), so the user knows better **which software is persisting**.
+**macOS** warnt jetzt jedes Mal, wenn ein Tool eine bekannte **Technik zur Persistenz der Codeausführung** verwendet (wie Anmeldeobjekte, Daemons...), damit der Benutzer besser weiß, **welche Software persistiert**.
 
 <figure><img src="../../../images/image (1183).png" alt=""><figcaption></figcaption></figure>
 
-This runs with a **daemon** located in `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/backgroundtaskmanagementd` and the **agent** in `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Support/BackgroundTaskManagementAgent.app`
+Dies läuft mit einem **Daemon**, der sich in `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/backgroundtaskmanagementd` befindet, und dem **Agenten** in `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Support/BackgroundTaskManagementAgent.app`
 
-The way **`backgroundtaskmanagementd`** knows something is installed in a persistent folder is by **getting the FSEvents** and creating some **handlers** for those.
+Die Art und Weise, wie **`backgroundtaskmanagementd`** weiß, dass etwas in einem persistenten Ordner installiert ist, besteht darin, **die FSEvents abzurufen** und einige **Handler** dafür zu erstellen.
 
-Moreover, there is a plist file that contains **well known applications** that frequently persists maintained by apple located in: `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/attributions.plist`
-
+Darüber hinaus gibt es eine plist-Datei, die **bekannte Anwendungen** enthält, die häufig persistiert werden und von Apple verwaltet werden, die sich in: `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/attributions.plist` befindet.
 ```json
 [...]
 "us.zoom.ZoomDaemon" => {
-    "AssociatedBundleIdentifiers" => [
-      0 => "us.zoom.xos"
-    ]
-    "Attribution" => "Zoom"
-    "Program" => "/Library/PrivilegedHelperTools/us.zoom.ZoomDaemon"
-    "ProgramArguments" => [
-      0 => "/Library/PrivilegedHelperTools/us.zoom.ZoomDaemon"
-    ]
-    "TeamIdentifier" => "BJ4HAAB9B3"
-  }
+"AssociatedBundleIdentifiers" => [
+0 => "us.zoom.xos"
+]
+"Attribution" => "Zoom"
+"Program" => "/Library/PrivilegedHelperTools/us.zoom.ZoomDaemon"
+"ProgramArguments" => [
+0 => "/Library/PrivilegedHelperTools/us.zoom.ZoomDaemon"
+]
+"TeamIdentifier" => "BJ4HAAB9B3"
+}
 [...]
 ```
+### Aufzählung
 
-### Enumeration
-
-It's possible to **enumerate all** the configured background items running the Apple cli tool:
-
+Es ist möglich, **alle** konfigurierten Hintergrundelemente mit dem Apple CLI-Tool aufzulisten:
 ```bash
 # The tool will always ask for the users password
 sfltool dumpbtm
 ```
-
-Moreover, it's also possible to list this information with [**DumpBTM**](https://github.com/objective-see/DumpBTM).
-
+Darüber hinaus ist es auch möglich, diese Informationen mit [**DumpBTM**](https://github.com/objective-see/DumpBTM) aufzulisten.
 ```bash
 # You need to grant the Terminal Full Disk Access for this to work
 chmod +x dumpBTM
 xattr -rc dumpBTM # Remove quarantine attr
 ./dumpBTM
 ```
+Diese Informationen werden in **`/private/var/db/com.apple.backgroundtaskmanagement/BackgroundItems-v4.btm`** gespeichert und das Terminal benötigt FDA.
 
-This information is being stored in **`/private/var/db/com.apple.backgroundtaskmanagement/BackgroundItems-v4.btm`** and the Terminal needs FDA.
+### Manipulation mit BTM
 
-### Messing with BTM
+Wenn eine neue Persistenz gefunden wird, wird ein Ereignis vom Typ **`ES_EVENT_TYPE_NOTIFY_BTM_LAUNCH_ITEM_ADD`** ausgelöst. Jede Möglichkeit, dieses **Ereignis** daran zu hindern, gesendet zu werden, oder den **Agenten daran zu hindern**, den Benutzer zu benachrichtigen, wird einem Angreifer helfen, BTM _**zu umgehen**_.
 
-When a new persistence is found an event of type **`ES_EVENT_TYPE_NOTIFY_BTM_LAUNCH_ITEM_ADD`**. So, any way to **prevent** this **event** from being sent or the **agent from alerting** the user will help an attacker to _**bypass**_ BTM.
-
-- **Reseting the database**: Running the following command will reset the database (should rebuild it from the ground), however, for some reason, after running this, **no new persistence will be alerted until the system is rebooted**.
-  - **root** is required.
-
+- **Datenbank zurücksetzen**: Das Ausführen des folgenden Befehls setzt die Datenbank zurück (sollte sie von Grund auf neu aufbauen), jedoch wird aus irgendeinem Grund nach dem Ausführen dies **keine neue Persistenz benachrichtigt, bis das System neu gestartet wird**.
+- **root** ist erforderlich.
 ```bash
 # Reset the database
 sfltool resettbtm
 ```
-
-- **Stop the Agent**: It's possible to send a stop signal to the agent so it **won't be alerting the user** when new detections are found.
-
+- **Stoppe den Agenten**: Es ist möglich, ein Stoppsignal an den Agenten zu senden, sodass er **den Benutzer nicht benachrichtigt**, wenn neue Erkennungen gefunden werden.
 ```bash
 # Get PID
 pgrep BackgroundTaskManagementAgent
@@ -133,14 +124,12 @@ kill -SIGSTOP 1011
 ps -o state 1011
 T
 ```
+- **Fehler**: Wenn der **Prozess, der die Persistenz erstellt hat, direkt danach schnell existiert**, wird der Daemon versuchen, **Informationen darüber zu erhalten**, **scheitern** und **nicht in der Lage sein, das Ereignis zu senden**, das anzeigt, dass eine neue Sache persistiert.
 
-- **Bug**: If the **process that created the persistence exists fast right after it**, the daemon will try to **get information** about it, **fail**, and **won't be able to send the event** indicating that a new thing is persisting.
-
-References and **more information about BTM**:
+Referenzen und **weitere Informationen über BTM**:
 
 - [https://youtu.be/9hjUmT031tc?t=26481](https://youtu.be/9hjUmT031tc?t=26481)
 - [https://www.patreon.com/posts/new-developer-77420730?l=fr](https://www.patreon.com/posts/new-developer-77420730?l=fr)
 - [https://support.apple.com/en-gb/guide/deployment/depdca572563/web](https://support.apple.com/en-gb/guide/deployment/depdca572563/web)
 
 {{#include ../../../banners/hacktricks-training.md}}
-

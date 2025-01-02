@@ -2,33 +2,31 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Grundinformationen
 
-Chromium-based browsers like Google Chrome, Microsoft Edge, Brave, and others. These browsers are built on the Chromium open-source project, which means they share a common base and, therefore, have similar functionalities and developer options.
+Chromium-basierte Browser wie Google Chrome, Microsoft Edge, Brave und andere. Diese Browser basieren auf dem Chromium-Open-Source-Projekt, was bedeutet, dass sie eine gemeinsame Basis teilen und daher ähnliche Funktionen und Entwickleroptionen haben.
 
 #### `--load-extension` Flag
 
-The `--load-extension` flag is used when starting a Chromium-based browser from the command line or a script. This flag allows to **automatically load one or more extensions** into the browser upon startup.
+Das `--load-extension` Flag wird verwendet, wenn ein Chromium-basierter Browser über die Befehlszeile oder ein Skript gestartet wird. Dieses Flag ermöglicht es, **eine oder mehrere Erweiterungen automatisch** beim Start in den Browser zu laden.
 
 #### `--use-fake-ui-for-media-stream` Flag
 
-The `--use-fake-ui-for-media-stream` flag is another command-line option that can be used to start Chromium-based browsers. This flag is designed to **bypass the normal user prompts that ask for permission to access media streams from the camera and microphone**. When this flag is used, the browser automatically grants permission to any website or application that requests access to the camera or microphone.
+Das `--use-fake-ui-for-media-stream` Flag ist eine weitere Befehlszeilenoption, die verwendet werden kann, um Chromium-basierte Browser zu starten. Dieses Flag ist dafür ausgelegt, **die normalen Benutzeraufforderungen zu umgehen, die um Erlaubnis bitten, auf Medienströme von der Kamera und dem Mikrofon zuzugreifen**. Wenn dieses Flag verwendet wird, gewährt der Browser automatisch die Erlaubnis für jede Website oder Anwendung, die Zugriff auf die Kamera oder das Mikrofon anfordert.
 
-### Tools
+### Werkzeuge
 
 - [https://github.com/breakpointHQ/snoop](https://github.com/breakpointHQ/snoop)
 - [https://github.com/breakpointHQ/VOODOO](https://github.com/breakpointHQ/VOODOO)
 
-### Example
-
+### Beispiel
 ```bash
 # Intercept traffic
 voodoo intercept -b chrome
 ```
+Finde weitere Beispiele in den Tool-Links
 
-Find more examples in the tools links
-
-## References
+## Referenzen
 
 - [https://twitter.com/RonMasas/status/1758106347222995007](https://twitter.com/RonMasas/status/1758106347222995007)
 
