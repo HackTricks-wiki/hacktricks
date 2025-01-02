@@ -1,13 +1,12 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-Very basically, this tool will help us to find values for variables that need to satisfy some conditions and calculating them by hand will be so annoying. Therefore, you can indicate to Z3 the conditions the variables need to satisfy and it will find some values (if possible).
+기본적으로 이 도구는 특정 조건을 만족해야 하는 변수의 값을 찾는 데 도움을 줄 것이며, 수작업으로 계산하는 것은 매우 번거로울 것입니다. 따라서 Z3에 변수가 만족해야 하는 조건을 지정하면 가능한 경우 일부 값을 찾아줍니다.
 
-**Some texts and examples are extracted from [https://ericpony.github.io/z3py-tutorial/guide-examples.htm](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)**
+**일부 텍스트와 예시는 [https://ericpony.github.io/z3py-tutorial/guide-examples.htm](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)에서 추출되었습니다.**
 
-# Basic Operations
+# 기본 작업
 
-## Booleans/And/Or/Not
-
+## 불리언/그리고/또는/아니오
 ```python
 #pip3 install z3-solver
 from z3 import *
@@ -22,9 +21,7 @@ s.add(And(Or(x,y,Not(z)),y))
 s.check() #If response is "sat" then the model is satifable, if "unsat" something is wrong
 print(s.model()) #Print valid values to satisfy the model
 ```
-
 ## Ints/Simplify/Reals
-
 ```python
 from z3 import *
 
@@ -44,9 +41,7 @@ print(solve(r1**2 + r2**2 == 3, r1**3 == 2))
 set_option(precision=30)
 print(solve(r1**2 + r2**2 == 3, r1**3 == 2))
 ```
-
-## Printing Model
-
+## 모델 출력
 ```python
 from z3 import *
 
@@ -58,13 +53,11 @@ s.check()
 m = s.model()
 print ("x = %s" % m[x])
 for d in m.decls():
-    print("%s = %s" % (d.name(), m[d]))
+print("%s = %s" % (d.name(), m[d]))
 ```
+# 머신 산술
 
-# Machine Arithmetic
-
-Modern CPUs and main-stream programming languages use arithmetic over **fixed-size bit-vectors**. Machine arithmetic is available in Z3Py as **Bit-Vectors**.
-
+현대 CPU와 주류 프로그래밍 언어는 **고정 크기 비트 벡터**에 대한 산술을 사용합니다. 머신 산술은 Z3Py에서 **비트 벡터**로 제공됩니다.
 ```python
 from z3 import *
 
@@ -79,11 +72,9 @@ a = BitVecVal(-1, 32)
 b = BitVecVal(65535, 32)
 print(simplify(a == b)) #This is False
 ```
-
 ## Signed/Unsigned Numbers
 
-Z3 provides special signed versions of arithmetical operations where it makes a difference whether the **bit-vector is treated as signed or unsigned**. In Z3Py, the operators **<, <=, >, >=, /, % and >>** correspond to the **signed** versions. The corresponding **unsigned** operators are **ULT, ULE, UGT, UGE, UDiv, URem and LShR.**
-
+Z3는 **비트 벡터가 부호가 있는지 없는지**에 따라 차이가 나는 특별한 부호 있는 버전의 산술 연산을 제공합니다. Z3Py에서 연산자 **<, <=, >, >=, /, % 및 >>**는 **부호 있는** 버전에 해당합니다. 해당하는 **부호 없는** 연산자는 **ULT, ULE, UGT, UGE, UDiv, URem 및 LShR.**입니다.
 ```python
 from z3 import *
 
@@ -101,13 +92,11 @@ solve(x < 0)
 # using unsigned version of <
 solve(ULT(x, 0))
 ```
-
 ## Functions
 
-**Interpreted functio**ns such as arithmetic where the **function +** has a **fixed standard interpretation** (it adds two numbers). **Uninterpreted functions** and constants are **maximally flexible**; they allow **any interpretation** that is **consistent** with the **constraints** over the function or constant.
+**해석된 함수**는 산술과 같은 것으로, **함수 +**는 **고정된 표준 해석**을 가지고 있습니다(두 숫자를 더합니다). **비해석 함수**와 상수는 **최대 유연성**을 가지며, 함수나 상수에 대한 **제약**과 **일관된** **모든 해석**을 허용합니다.
 
-Example: f applied twice to x results in x again, but f applied once to x is different from x.
-
+예: f가 x에 두 번 적용되면 다시 x가 되지만, f가 x에 한 번 적용되면 x와 다릅니다.
 ```python
 from z3 import *
 
@@ -126,64 +115,60 @@ s.add(f(x) == 4) #Find the value that generates 4 as response
 s.check()
 print(m.model())
 ```
+# 예제
 
-# Examples
-
-## Sudoku solver
-
+## 스도쿠 해결기
 ```python
 # 9x9 matrix of integer variables
 X = [ [ Int("x_%s_%s" % (i+1, j+1)) for j in range(9) ]
-      for i in range(9) ]
+for i in range(9) ]
 
 # each cell contains a value in {1, ..., 9}
 cells_c  = [ And(1 <= X[i][j], X[i][j] <= 9)
-             for i in range(9) for j in range(9) ]
+for i in range(9) for j in range(9) ]
 
 # each row contains a digit at most once
 rows_c   = [ Distinct(X[i]) for i in range(9) ]
 
 # each column contains a digit at most once
 cols_c   = [ Distinct([ X[i][j] for i in range(9) ])
-             for j in range(9) ]
+for j in range(9) ]
 
 # each 3x3 square contains a digit at most once
 sq_c     = [ Distinct([ X[3*i0 + i][3*j0 + j]
-                        for i in range(3) for j in range(3) ])
-             for i0 in range(3) for j0 in range(3) ]
+for i in range(3) for j in range(3) ])
+for i0 in range(3) for j0 in range(3) ]
 
 sudoku_c = cells_c + rows_c + cols_c + sq_c
 
 # sudoku instance, we use '0' for empty cells
 instance = ((0,0,0,0,9,4,0,3,0),
-            (0,0,0,5,1,0,0,0,7),
-            (0,8,9,0,0,0,0,4,0),
-            (0,0,0,0,0,0,2,0,8),
-            (0,6,0,2,0,1,0,5,0),
-            (1,0,2,0,0,0,0,0,0),
-            (0,7,0,0,0,0,5,2,0),
-            (9,0,0,0,6,5,0,0,0),
-            (0,4,0,9,7,0,0,0,0))
+(0,0,0,5,1,0,0,0,7),
+(0,8,9,0,0,0,0,4,0),
+(0,0,0,0,0,0,2,0,8),
+(0,6,0,2,0,1,0,5,0),
+(1,0,2,0,0,0,0,0,0),
+(0,7,0,0,0,0,5,2,0),
+(9,0,0,0,6,5,0,0,0),
+(0,4,0,9,7,0,0,0,0))
 
 instance_c = [ If(instance[i][j] == 0,
-                  True,
-                  X[i][j] == instance[i][j])
-               for i in range(9) for j in range(9) ]
+True,
+X[i][j] == instance[i][j])
+for i in range(9) for j in range(9) ]
 
 s = Solver()
 s.add(sudoku_c + instance_c)
 if s.check() == sat:
-    m = s.model()
-    r = [ [ m.evaluate(X[i][j]) for j in range(9) ]
-          for i in range(9) ]
-    print_matrix(r)
+m = s.model()
+r = [ [ m.evaluate(X[i][j]) for j in range(9) ]
+for i in range(9) ]
+print_matrix(r)
 else:
-    print "failed to solve"
+print "failed to solve"
 ```
-
-## References
+## 참고문헌
 
 - [https://ericpony.github.io/z3py-tutorial/guide-examples.htm](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)
 
 {{#include ../../banners/hacktricks-training.md}}
-

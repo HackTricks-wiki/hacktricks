@@ -1,18 +1,15 @@
-# Industrial Control Systems Hacking 
+# 산업 제어 시스템 해킹
 
-## About this Section
+## 이 섹션에 대하여
 
-This section contains all about Industrial Control Systems including concepts as well as methodologies to hack them with various security issues that persists in them. 
+이 섹션은 개념과 다양한 보안 문제를 포함하여 산업 제어 시스템 해킹 방법론에 대한 모든 정보를 포함하고 있습니다.
 
-Industrial Control Systems are everywhere, since industries are vital for economic development of a nation. But these ICS are hard to update and lesser advancements are made in this field. Hence, finding security flaws is common here. Most of the protocols and standards used here where developed back in the 90's and have much lesser capabilities as compared to current attack scenarios. 
+산업 제어 시스템은 국가의 경제 발전에 필수적이기 때문에 어디에나 존재합니다. 그러나 이러한 ICS는 업데이트가 어렵고 이 분야에서의 발전이 적습니다. 따라서 보안 결함을 찾는 것이 일반적입니다. 여기에서 사용되는 대부분의 프로토콜과 표준은 90년대에 개발되었으며 현재의 공격 시나리오에 비해 기능이 훨씬 떨어집니다.
 
-It has become important to secure these systems since damaging them can cost a lot and even lives at the worst case. To understand Industrial Contol Systems security, knowing the internals of them is necessary. 
+이 시스템을 보호하는 것이 중요해졌습니다. 왜냐하면 이를 손상시키는 데는 많은 비용이 들 수 있으며 최악의 경우 생명까지 위협할 수 있기 때문입니다. 산업 제어 시스템 보안을 이해하려면 내부 구조를 아는 것이 필요합니다.
 
-Since Industrial Control Systems are installed following set standards, knowing each components would help in interconnecting every other mechanisms in the control system. Installation of these devices like PLCs and SCADA systems is different is various industries, hence information gathering is critical. 
+산업 제어 시스템은 정해진 표준에 따라 설치되므로 각 구성 요소를 아는 것이 제어 시스템의 다른 모든 메커니즘을 상호 연결하는 데 도움이 됩니다. PLC 및 SCADA 시스템과 같은 이러한 장치의 설치는 다양한 산업에서 다르므로 정보 수집이 중요합니다.
 
-Industrial Control Systems can be complicated at times and hence require a lot of patience to do anything. It's all about probing and reconnaissance before planning attacks and developing any exploits. 
+산업 제어 시스템은 때때로 복잡할 수 있으며, 따라서 어떤 작업을 수행하기 위해 많은 인내가 필요합니다. 공격 계획 및 익스플로잇 개발 전에 탐색 및 정찰이 중요합니다.
 
-These techniques can also be used to protect against attacks and blue teaming for industrial control systems. 
-
-
-
+이 기술은 산업 제어 시스템에 대한 공격을 방어하고 블루 팀을 구성하는 데에도 사용할 수 있습니다.

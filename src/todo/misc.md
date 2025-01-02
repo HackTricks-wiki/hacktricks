@@ -1,38 +1,32 @@
 {{#include ../banners/hacktricks-training.md}}
 
-In a ping response TTL:\
+핑 응답 TTL:\
 127 = Windows\
 254 = Cisco\
-Lo demás,algunlinux
+나머지, 어떤 리눅스
 
 $1$- md5\
-$2$or $2a$ - Blowfish\
+$2$ 또는 $2a$ - Blowfish\
 $5$- sha256\
 $6$- sha512
 
-If you do not know what is behind a service, try to make and HTTP GET request.
+서비스 뒤에 무엇이 있는지 모른다면, HTTP GET 요청을 시도해 보세요.
 
-**UDP Scans**\
+**UDP 스캔**\
 nc -nv -u -z -w 1 \<IP> 160-16
 
-An empty UDP packet is sent to a specific port. If the UDP port is open, no reply is sent back from the target machine. If the UDP port is closed, an ICMP port unreachable packet should be sent back from the target machine.\
+특정 포트로 빈 UDP 패킷이 전송됩니다. UDP 포트가 열려 있으면, 대상 머신에서 응답이 전송되지 않습니다. UDP 포트가 닫혀 있으면, 대상 머신에서 ICMP 포트 도달 불가 패킷이 전송되어야 합니다.\
+UDP 포트 스캔은 종종 신뢰할 수 없으며, 방화벽과 라우터가 ICMP 패킷을 차단할 수 있습니다. 이는 스캔에서 잘못된 긍정 결과를 초래할 수 있으며, 스캔된 머신에서 모든 UDP 포트가 열려 있는 것으로 표시되는 UDP 포트 스캔을 자주 볼 수 있습니다.\
+대부분의 포트 스캐너는 모든 사용 가능한 포트를 스캔하지 않으며, 일반적으로 스캔되는 "흥미로운 포트"의 미리 설정된 목록을 가지고 있습니다.
 
-UDP port scanning is often unreliable, as firewalls and routers may drop ICMP\
- packets. This can lead to false positives in your scan, and you will regularly see\
- UDP port scans showing all UDP ports open on a scanned machine.\
- o Most port scanners do not scan all available ports, and usually have a preset list\
- of “interesting ports” that are scanned.
+# CTF - 트릭
 
-# CTF - Tricks
-
-In **Windows** use **Winzip** to search for files.\
-**Alternate data Streams**: _dir /r | find ":$DATA"_\
-
+**Windows**에서 **Winzip**을 사용하여 파일을 검색하세요.\
+**대체 데이터 스트림**: _dir /r | find ":$DATA"_
 ```
 binwalk --dd=".*" <file> #Extract everything
 binwalk -M -e -d=10000 suspicious.pdf #Extract, look inside extracted files and continue extracing (depth of 10000)
 ```
-
 ## Crypto
 
 **featherduster**\
@@ -51,11 +45,10 @@ binwalk -M -e -d=10000 suspicious.pdf #Extract, look inside extracted files and 
 factordb.com\
 rsatool
 
-Snow --> Hide messages using spaces and tabs
+Snow --> 메시지를 공백과 탭을 사용하여 숨기기
 
 # Characters
 
-%E2%80%AE => RTL Character (writes payloads backwards)
+%E2%80%AE => RTL 문자 (페이로드를 거꾸로 씀)
 
 {{#include ../banners/hacktricks-training.md}}
-

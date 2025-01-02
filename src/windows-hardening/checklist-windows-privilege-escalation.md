@@ -1,115 +1,114 @@
-# Checklist - Local Windows Privilege Escalation
+# 체크리스트 - 로컬 Windows 권한 상승
 
 {{#include ../banners/hacktricks-training.md}}
 
-### **Best tool to look for Windows local privilege escalation vectors:** [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)
+### **Windows 로컬 권한 상승 벡터를 찾기 위한 최고의 도구:** [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)
 
-### [System Info](windows-local-privilege-escalation/#system-info)
+### [시스템 정보](windows-local-privilege-escalation/#system-info)
 
-- [ ] Obtain [**System information**](windows-local-privilege-escalation/#system-info)
-- [ ] Search for **kernel** [**exploits using scripts**](windows-local-privilege-escalation/#version-exploits)
-- [ ] Use **Google to search** for kernel **exploits**
-- [ ] Use **searchsploit to search** for kernel **exploits**
-- [ ] Interesting info in [**env vars**](windows-local-privilege-escalation/#environment)?
-- [ ] Passwords in [**PowerShell history**](windows-local-privilege-escalation/#powershell-history)?
-- [ ] Interesting info in [**Internet settings**](windows-local-privilege-escalation/#internet-settings)?
-- [ ] [**Drives**](windows-local-privilege-escalation/#drives)?
-- [ ] [**WSUS exploit**](windows-local-privilege-escalation/#wsus)?
+- [ ] [**시스템 정보**](windows-local-privilege-escalation/#system-info) 얻기
+- [ ] **커널** [**스크립트를 사용한 익스플로잇**](windows-local-privilege-escalation/#version-exploits) 검색
+- [ ] **Google로 커널 익스플로잇** 검색
+- [ ] **searchsploit로 커널 익스플로잇** 검색
+- [ ] [**환경 변수**](windows-local-privilege-escalation/#environment)에서 흥미로운 정보?
+- [ ] [**PowerShell 기록**](windows-local-privilege-escalation/#powershell-history)에서 비밀번호?
+- [ ] [**인터넷 설정**](windows-local-privilege-escalation/#internet-settings)에서 흥미로운 정보?
+- [ ] [**드라이브**](windows-local-privilege-escalation/#drives)?
+- [ ] [**WSUS 익스플로잇**](windows-local-privilege-escalation/#wsus)?
 - [ ] [**AlwaysInstallElevated**](windows-local-privilege-escalation/#alwaysinstallelevated)?
 
-### [Logging/AV enumeration](windows-local-privilege-escalation/#enumeration)
+### [로그/AV 열거](windows-local-privilege-escalation/#enumeration)
 
-- [ ] Check [**Audit** ](windows-local-privilege-escalation/#audit-settings)and [**WEF** ](windows-local-privilege-escalation/#wef)settings
-- [ ] Check [**LAPS**](windows-local-privilege-escalation/#laps)
-- [ ] Check if [**WDigest** ](windows-local-privilege-escalation/#wdigest)is active
-- [ ] [**LSA Protection**](windows-local-privilege-escalation/#lsa-protection)?
-- [ ] [**Credentials Guard**](windows-local-privilege-escalation/#credentials-guard)[?](windows-local-privilege-escalation/#cached-credentials)
-- [ ] [**Cached Credentials**](windows-local-privilege-escalation/#cached-credentials)?
-- [ ] Check if any [**AV**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/windows-av-bypass/README.md)
-- [ ] [**AppLocker Policy**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/authentication-credentials-uac-and-efs/README.md#applocker-policy)?
+- [ ] [**감사**](windows-local-privilege-escalation/#audit-settings) 및 [**WEF**](windows-local-privilege-escalation/#wef) 설정 확인
+- [ ] [**LAPS**](windows-local-privilege-escalation/#laps) 확인
+- [ ] [**WDigest**](windows-local-privilege-escalation/#wdigest)가 활성화되어 있는지 확인
+- [ ] [**LSA 보호**](windows-local-privilege-escalation/#lsa-protection)?
+- [ ] [**자격 증명 가드**](windows-local-privilege-escalation/#credentials-guard)[?](windows-local-privilege-escalation/#cached-credentials)
+- [ ] [**캐시된 자격 증명**](windows-local-privilege-escalation/#cached-credentials)?
+- [ ] [**AV**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/windows-av-bypass/README.md) 확인
+- [ ] [**AppLocker 정책**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/authentication-credentials-uac-and-efs/README.md#applocker-policy)?
 - [ ] [**UAC**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/authentication-credentials-uac-and-efs/uac-user-account-control/README.md)
-- [ ] [**User Privileges**](windows-local-privilege-escalation/#users-and-groups)
-- [ ] Check [**current** user **privileges**](windows-local-privilege-escalation/#users-and-groups)
-- [ ] Are you [**member of any privileged group**](windows-local-privilege-escalation/#privileged-groups)?
-- [ ] Check if you have [any of these tokens enabled](windows-local-privilege-escalation/#token-manipulation): **SeImpersonatePrivilege, SeAssignPrimaryPrivilege, SeTcbPrivilege, SeBackupPrivilege, SeRestorePrivilege, SeCreateTokenPrivilege, SeLoadDriverPrivilege, SeTakeOwnershipPrivilege, SeDebugPrivilege** ?
-- [ ] [**Users Sessions**](windows-local-privilege-escalation/#logged-users-sessions)?
-- [ ] Check[ **users homes**](windows-local-privilege-escalation/#home-folders) (access?)
-- [ ] Check [**Password Policy**](windows-local-privilege-escalation/#password-policy)
-- [ ] What is[ **inside the Clipboard**](windows-local-privilege-escalation/#get-the-content-of-the-clipboard)?
+- [ ] [**사용자 권한**](windows-local-privilege-escalation/#users-and-groups)
+- [ ] [**현재** 사용자 **권한**](windows-local-privilege-escalation/#users-and-groups) 확인
+- [ ] [**특권 그룹의 구성원**](windows-local-privilege-escalation/#privileged-groups)인가요?
+- [ ] [이 토큰 중 어떤 것이 활성화되어 있는지 확인](windows-local-privilege-escalation/#token-manipulation): **SeImpersonatePrivilege, SeAssignPrimaryPrivilege, SeTcbPrivilege, SeBackupPrivilege, SeRestorePrivilege, SeCreateTokenPrivilege, SeLoadDriverPrivilege, SeTakeOwnershipPrivilege, SeDebugPrivilege** ?
+- [ ] [**사용자 세션**](windows-local-privilege-escalation/#logged-users-sessions)?
+- [ ] [**사용자 홈**](windows-local-privilege-escalation/#home-folders) 확인 (접근 가능?)
+- [ ] [**비밀번호 정책**](windows-local-privilege-escalation/#password-policy) 확인
+- [ ] [**클립보드**](windows-local-privilege-escalation/#get-the-content-of-the-clipboard) 안에 무엇이 있나요?
 
-### [Network](windows-local-privilege-escalation/#network)
+### [네트워크](windows-local-privilege-escalation/#network)
 
-- [ ] Check **current** [**network** **information**](windows-local-privilege-escalation/#network)
-- [ ] Check **hidden local services** restricted to the outside
+- [ ] **현재** [**네트워크** **정보**](windows-local-privilege-escalation/#network) 확인
+- [ ] 외부에 제한된 **숨겨진 로컬 서비스** 확인
 
-### [Running Processes](windows-local-privilege-escalation/#running-processes)
+### [실행 중인 프로세스](windows-local-privilege-escalation/#running-processes)
 
-- [ ] Processes binaries [**file and folders permissions**](windows-local-privilege-escalation/#file-and-folder-permissions)
-- [ ] [**Memory Password mining**](windows-local-privilege-escalation/#memory-password-mining)
-- [ ] [**Insecure GUI apps**](windows-local-privilege-escalation/#insecure-gui-apps)
-- [ ] Steal credentials with **interesting processes** via `ProcDump.exe` ? (firefox, chrome, etc ...)
+- [ ] 프로세스 바이너리 [**파일 및 폴더 권한**](windows-local-privilege-escalation/#file-and-folder-permissions)
+- [ ] [**메모리 비밀번호 채굴**](windows-local-privilege-escalation/#memory-password-mining)
+- [ ] [**안전하지 않은 GUI 앱**](windows-local-privilege-escalation/#insecure-gui-apps)
+- [ ] `ProcDump.exe`를 통해 **흥미로운 프로세스**로 자격 증명 도용? (firefox, chrome 등 ...)
 
-### [Services](windows-local-privilege-escalation/#services)
+### [서비스](windows-local-privilege-escalation/#services)
 
-- [ ] [Can you **modify any service**?](windows-local-privilege-escalation/#permissions)
-- [ ] [Can you **modify** the **binary** that is **executed** by any **service**?](windows-local-privilege-escalation/#modify-service-binary-path)
-- [ ] [Can you **modify** the **registry** of any **service**?](windows-local-privilege-escalation/#services-registry-modify-permissions)
-- [ ] [Can you take advantage of any **unquoted service** binary **path**?](windows-local-privilege-escalation/#unquoted-service-paths)
+- [ ] [**서비스를 수정할 수 있나요**?](windows-local-privilege-escalation/#permissions)
+- [ ] [**서비스에 의해 실행되는 바이너리를 수정할 수 있나요**?](windows-local-privilege-escalation/#modify-service-binary-path)
+- [ ] [**서비스의 레지스트리를 수정할 수 있나요**?](windows-local-privilege-escalation/#services-registry-modify-permissions)
+- [ ] [**인용되지 않은 서비스** 바이너리 **경로**를 이용할 수 있나요?](windows-local-privilege-escalation/#unquoted-service-paths)
 
-### [**Applications**](windows-local-privilege-escalation/#applications)
+### [**응용 프로그램**](windows-local-privilege-escalation/#applications)
 
-- [ ] **Write** [**permissions on installed applications**](windows-local-privilege-escalation/#write-permissions)
-- [ ] [**Startup Applications**](windows-local-privilege-escalation/#run-at-startup)
-- [ ] **Vulnerable** [**Drivers**](windows-local-privilege-escalation/#drivers)
+- [ ] **설치된 응용 프로그램에 대한** [**쓰기** 권한](windows-local-privilege-escalation/#write-permissions)
+- [ ] [**시작 응용 프로그램**](windows-local-privilege-escalation/#run-at-startup)
+- [ ] **취약한** [**드라이버**](windows-local-privilege-escalation/#drivers)
 
-### [DLL Hijacking](windows-local-privilege-escalation/#path-dll-hijacking)
+### [DLL 하이재킹](windows-local-privilege-escalation/#path-dll-hijacking)
 
-- [ ] Can you **write in any folder inside PATH**?
-- [ ] Is there any known service binary that **tries to load any non-existant DLL**?
-- [ ] Can you **write** in any **binaries folder**?
+- [ ] **PATH 안의 어떤 폴더에 쓸 수 있나요**?
+- [ ] **존재하지 않는 DLL을 로드하려고 하는** 알려진 서비스 바이너리가 있나요?
+- [ ] **바이너리 폴더에 쓸 수 있나요**?
 
-### [Network](windows-local-privilege-escalation/#network)
+### [네트워크](windows-local-privilege-escalation/#network)
 
-- [ ] Enumerate the network (shares, interfaces, routes, neighbours, ...)
-- [ ] Take a special look at network services listening on localhost (127.0.0.1)
+- [ ] 네트워크 열거 (공유, 인터페이스, 경로, 이웃 등 ...)
+- [ ] 로컬호스트(127.0.0.1)에서 수신 대기 중인 네트워크 서비스에 특별히 주목하세요.
 
-### [Windows Credentials](windows-local-privilege-escalation/#windows-credentials)
+### [Windows 자격 증명](windows-local-privilege-escalation/#windows-credentials)
 
-- [ ] [**Winlogon** ](windows-local-privilege-escalation/#winlogon-credentials)credentials
-- [ ] [**Windows Vault**](windows-local-privilege-escalation/#credentials-manager-windows-vault) credentials that you could use?
-- [ ] Interesting [**DPAPI credentials**](windows-local-privilege-escalation/#dpapi)?
-- [ ] Passwords of saved [**Wifi networks**](windows-local-privilege-escalation/#wifi)?
-- [ ] Interesting info in [**saved RDP Connections**](windows-local-privilege-escalation/#saved-rdp-connections)?
-- [ ] Passwords in [**recently run commands**](windows-local-privilege-escalation/#recently-run-commands)?
-- [ ] [**Remote Desktop Credentials Manager**](windows-local-privilege-escalation/#remote-desktop-credential-manager) passwords?
-- [ ] [**AppCmd.exe** exists](windows-local-privilege-escalation/#appcmd-exe)? Credentials?
-- [ ] [**SCClient.exe**](windows-local-privilege-escalation/#scclient-sccm)? DLL Side Loading?
+- [ ] [**Winlogon**](windows-local-privilege-escalation/#winlogon-credentials) 자격 증명
+- [ ] [**Windows Vault**](windows-local-privilege-escalation/#credentials-manager-windows-vault) 자격 증명을 사용할 수 있나요?
+- [ ] 흥미로운 [**DPAPI 자격 증명**](windows-local-privilege-escalation/#dpapi)?
+- [ ] 저장된 [**Wifi 네트워크**](windows-local-privilege-escalation/#wifi) 비밀번호?
+- [ ] [**저장된 RDP 연결**](windows-local-privilege-escalation/#saved-rdp-connections)에서 흥미로운 정보?
+- [ ] [**최근 실행된 명령**](windows-local-privilege-escalation/#recently-run-commands)에서 비밀번호?
+- [ ] [**원격 데스크톱 자격 증명 관리자**](windows-local-privilege-escalation/#remote-desktop-credential-manager) 비밀번호?
+- [ ] [**AppCmd.exe** 존재](windows-local-privilege-escalation/#appcmd-exe)? 자격 증명?
+- [ ] [**SCClient.exe**](windows-local-privilege-escalation/#scclient-sccm)? DLL 사이드 로딩?
 
-### [Files and Registry (Credentials)](windows-local-privilege-escalation/#files-and-registry-credentials)
+### [파일 및 레지스트리 (자격 증명)](windows-local-privilege-escalation/#files-and-registry-credentials)
 
-- [ ] **Putty:** [**Creds**](windows-local-privilege-escalation/#putty-creds) **and** [**SSH host keys**](windows-local-privilege-escalation/#putty-ssh-host-keys)
-- [ ] [**SSH keys in registry**](windows-local-privilege-escalation/#ssh-keys-in-registry)?
-- [ ] Passwords in [**unattended files**](windows-local-privilege-escalation/#unattended-files)?
-- [ ] Any [**SAM & SYSTEM**](windows-local-privilege-escalation/#sam-and-system-backups) backup?
-- [ ] [**Cloud credentials**](windows-local-privilege-escalation/#cloud-credentials)?
-- [ ] [**McAfee SiteList.xml**](windows-local-privilege-escalation/#mcafee-sitelist.xml) file?
-- [ ] [**Cached GPP Password**](windows-local-privilege-escalation/#cached-gpp-pasword)?
-- [ ] Password in [**IIS Web config file**](windows-local-privilege-escalation/#iis-web-config)?
-- [ ] Interesting info in [**web** **logs**](windows-local-privilege-escalation/#logs)?
-- [ ] Do you want to [**ask for credentials**](windows-local-privilege-escalation/#ask-for-credentials) to the user?
-- [ ] Interesting [**files inside the Recycle Bin**](windows-local-privilege-escalation/#credentials-in-the-recyclebin)?
-- [ ] Other [**registry containing credentials**](windows-local-privilege-escalation/#inside-the-registry)?
-- [ ] Inside [**Browser data**](windows-local-privilege-escalation/#browsers-history) (dbs, history, bookmarks, ...)?
-- [ ] [**Generic password search**](windows-local-privilege-escalation/#generic-password-search-in-files-and-registry) in files and registry
-- [ ] [**Tools**](windows-local-privilege-escalation/#tools-that-search-for-passwords) to automatically search for passwords
+- [ ] **Putty:** [**자격 증명**](windows-local-privilege-escalation/#putty-creds) **및** [**SSH 호스트 키**](windows-local-privilege-escalation/#putty-ssh-host-keys)
+- [ ] [**레지스트리의 SSH 키**](windows-local-privilege-escalation/#ssh-keys-in-registry)?
+- [ ] [**비대면 파일**](windows-local-privilege-escalation/#unattended-files)에서 비밀번호?
+- [ ] [**SAM & SYSTEM**](windows-local-privilege-escalation/#sam-and-system-backups) 백업이 있나요?
+- [ ] [**클라우드 자격 증명**](windows-local-privilege-escalation/#cloud-credentials)?
+- [ ] [**McAfee SiteList.xml**](windows-local-privilege-escalation/#mcafee-sitelist.xml) 파일?
+- [ ] [**캐시된 GPP 비밀번호**](windows-local-privilege-escalation/#cached-gpp-pasword)?
+- [ ] [**IIS 웹 구성 파일**](windows-local-privilege-escalation/#iis-web-config)에서 비밀번호?
+- [ ] [**웹** **로그**](windows-local-privilege-escalation/#logs)에서 흥미로운 정보?
+- [ ] 사용자에게 [**자격 증명을 요청**](windows-local-privilege-escalation/#ask-for-credentials)하고 싶나요?
+- [ ] [**휴지통 안의 흥미로운 파일**](windows-local-privilege-escalation/#credentials-in-the-recyclebin)?
+- [ ] [**자격 증명을 포함하는 다른 레지스트리**](windows-local-privilege-escalation/#inside-the-registry)?
+- [ ] [**브라우저 데이터**](windows-local-privilege-escalation/#browsers-history) 안에 (dbs, 기록, 북마크 등)?
+- [ ] [**파일 및 레지스트리에서 일반 비밀번호 검색**](windows-local-privilege-escalation/#generic-password-search-in-files-and-registry)
+- [ ] 비밀번호를 자동으로 검색하는 [**도구**](windows-local-privilege-escalation/#tools-that-search-for-passwords)
 
-### [Leaked Handlers](windows-local-privilege-escalation/#leaked-handlers)
+### [유출된 핸들러](windows-local-privilege-escalation/#leaked-handlers)
 
-- [ ] Have you access to any handler of a process run by administrator?
+- [ ] 관리자에 의해 실행된 프로세스의 핸들러에 접근할 수 있나요?
 
-### [Pipe Client Impersonation](windows-local-privilege-escalation/#named-pipe-client-impersonation)
+### [파이프 클라이언트 가장](windows-local-privilege-escalation/#named-pipe-client-impersonation)
 
-- [ ] Check if you can abuse it
+- [ ] 이를 악용할 수 있는지 확인하세요.
 
 {{#include ../banners/hacktricks-training.md}}
-

@@ -4,10 +4,9 @@
 
 ## Access Tokens
 
-Each **user logged** onto the system **holds an access token with security information** for that logon session. The system creates an access token when the user logs on. **Every process executed** on behalf of the user **has a copy of the access token**. The token identifies the user, the user's groups, and the user's privileges. A token also contains a logon SID (Security Identifier) that identifies the current logon session.
+각 **시스템에 로그인한 사용자**는 해당 로그인 세션에 대한 **보안 정보가 포함된 액세스 토큰을 보유**합니다. 사용자가 로그인할 때 시스템은 액세스 토큰을 생성합니다. **사용자를 대신하여 실행되는 모든 프로세스**는 **액세스 토큰의 복사본을 가집니다**. 이 토큰은 사용자, 사용자의 그룹 및 사용자의 권한을 식별합니다. 토큰에는 현재 로그인 세션을 식별하는 로그인 SID(보안 식별자)도 포함되어 있습니다.
 
-You can see this information executing `whoami /all`
-
+이 정보를 보려면 `whoami /all`을 실행할 수 있습니다.
 ```
 whoami /all
 
@@ -51,61 +50,55 @@ SeUndockPrivilege             Remove computer from docking station Disabled
 SeIncreaseWorkingSetPrivilege Increase a process working set       Disabled
 SeTimeZonePrivilege           Change the time zone                 Disabled
 ```
-
 or using _Process Explorer_ from Sysinternals (select process and access"Security" tab):
 
 ![](<../../images/image (772).png>)
 
-### Local administrator
+### 로컬 관리자
 
-When a local administrator logins, **two access tokens are created**: One with admin rights and other one with normal rights. **By default**, when this user executes a process the one with **regular** (non-administrator) **rights is used**. When this user tries to **execute** anything **as administrator** ("Run as Administrator" for example) the **UAC** will be used to ask for permission.\
-If you want to [**learn more about the UAC read this page**](../authentication-credentials-uac-and-efs/#uac)**.**
+로컬 관리자가 로그인할 때, **두 개의 액세스 토큰이 생성됩니다**: 하나는 관리자 권한을 가진 것이고, 다른 하나는 일반 권한을 가진 것입니다. **기본적으로**, 이 사용자가 프로세스를 실행할 때 **정상** (비관리자) **권한이 사용됩니다**. 이 사용자가 **관리자로서** 무엇인가를 **실행하려고** 할 때 ("관리자로 실행" 예를 들어) **UAC**가 권한 요청을 위해 사용됩니다.\
+UAC에 대해 [**더 알아보려면 이 페이지를 읽으세요**](../authentication-credentials-uac-and-efs/#uac)**.**
 
-### Credentials user impersonation
+### 자격 증명 사용자 가장
 
-If you have **valid credentials of any other user**, you can **create** a **new logon session** with those credentials :
-
+다른 사용자의 **유효한 자격 증명이 있다면**, 해당 자격 증명으로 **새로운 로그인 세션을 생성**할 수 있습니다:
 ```
 runas /user:domain\username cmd.exe
 ```
-
-The **access token** has also a **reference** of the logon sessions inside the **LSASS**, this is useful if the process needs to access some objects of the network.\
-You can launch a process that **uses different credentials for accessing network services** using:
-
+**액세스 토큰**은 **LSASS** 내의 로그온 세션에 대한 **참조**도 가지고 있습니다. 이는 프로세스가 네트워크의 일부 객체에 접근해야 할 때 유용합니다.\
+네트워크 서비스에 접근하기 위해 **다른 자격 증명을 사용하는** 프로세스를 시작할 수 있습니다:
 ```
 runas /user:domain\username /netonly cmd.exe
 ```
+이것은 네트워크의 객체에 접근할 수 있는 유용한 자격 증명이 있지만, 현재 호스트 내에서는 유효하지 않은 경우에 유용합니다(현재 호스트에서는 현재 사용자 권한이 사용됩니다).
 
-This is useful if you have useful credentials to access objects in the network but those credentials aren't valid inside the current host as they are only going to be used in the network (in the current host your current user privileges will be used).
+### 토큰의 종류
 
-### Types of tokens
+사용 가능한 두 가지 유형의 토큰이 있습니다:
 
-There are two types of tokens available:
-
-- **Primary Token**: It serves as a representation of a process's security credentials. The creation and association of primary tokens with processes are actions that require elevated privileges, emphasizing the principle of privilege separation. Typically, an authentication service is responsible for token creation, while a logon service handles its association with the user's operating system shell. It is worth noting that processes inherit the primary token of their parent process at creation.
-- **Impersonation Token**: Empowers a server application to adopt the client's identity temporarily for accessing secure objects. This mechanism is stratified into four levels of operation:
-  - **Anonymous**: Grants server access akin to that of an unidentified user.
-  - **Identification**: Allows the server to verify the client's identity without utilizing it for object access.
-  - **Impersonation**: Enables the server to operate under the client's identity.
-  - **Delegation**: Similar to Impersonation but includes the ability to extend this identity assumption to remote systems the server interacts with, ensuring credential preservation.
+- **Primary Token**: 프로세스의 보안 자격 증명을 나타내는 역할을 합니다. 기본 토큰을 프로세스와 생성 및 연결하는 작업은 권한 상승이 필요한 작업으로, 권한 분리 원칙을 강조합니다. 일반적으로 인증 서비스가 토큰 생성을 담당하고, 로그온 서비스가 사용자 운영 체제 셸과의 연결을 처리합니다. 프로세스는 생성 시 부모 프로세스의 기본 토큰을 상속받는다는 점도 주목할 만합니다.
+- **Impersonation Token**: 서버 애플리케이션이 클라이언트의 신원을 일시적으로 채택하여 보안 객체에 접근할 수 있도록 합니다. 이 메커니즘은 네 가지 운영 수준으로 나뉩니다:
+  - **Anonymous**: 식별되지 않은 사용자와 유사한 서버 접근을 허용합니다.
+  - **Identification**: 서버가 객체 접근을 위해 클라이언트의 신원을 사용하지 않고 확인할 수 있도록 합니다.
+  - **Impersonation**: 서버가 클라이언트의 신원으로 작동할 수 있게 합니다.
+  - **Delegation**: Impersonation과 유사하지만, 서버가 상호작용하는 원격 시스템에 이 신원 가정을 확장할 수 있는 능력을 포함하여 자격 증명을 보존합니다.
 
 #### Impersonate Tokens
 
-Using the _**incognito**_ module of metasploit if you have enough privileges you can easily **list** and **impersonate** other **tokens**. This could be useful to perform **actions as if you where the other user**. You could also **escalate privileges** with this technique.
+메타스플로잇의 _**incognito**_ 모듈을 사용하면 충분한 권한이 있는 경우 다른 **tokens**를 쉽게 **목록화**하고 **가장**할 수 있습니다. 이는 **다른 사용자처럼 행동하는 작업을 수행하는 데 유용할 수 있습니다**. 이 기술로 **권한 상승**도 할 수 있습니다.
 
 ### Token Privileges
 
-Learn which **token privileges can be abused to escalate privileges:**
+어떤 **토큰 권한이 권한 상승을 위해 악용될 수 있는지 알아보세요:**
 
 {{#ref}}
 privilege-escalation-abusing-tokens.md
 {{#endref}}
 
-Take a look to [**all the possible token privileges and some definitions on this external page**](https://github.com/gtworek/Priv2Admin).
+[**모든 가능한 토큰 권한과 이 외부 페이지의 일부 정의를 확인하세요**](https://github.com/gtworek/Priv2Admin).
 
 ## References
 
-Learn more about tokens in this tutorials: [https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa](https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa) and [https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)
+이 튜토리얼에서 토큰에 대해 더 알아보세요: [https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa](https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa) 및 [https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)
 
 {{#include ../../banners/hacktricks-training.md}}
-

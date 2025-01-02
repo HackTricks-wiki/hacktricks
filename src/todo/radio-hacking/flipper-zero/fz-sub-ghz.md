@@ -4,102 +4,101 @@
 
 ## Intro <a href="#kfpn7" id="kfpn7"></a>
 
-Flipper Zero can **receive and transmit radio frequencies in the range of 300-928 MHz** with its built-in module, which can read, save, and emulate remote controls. These controls are used for interaction with gates, barriers, radio locks, remote control switches, wireless doorbells, smart lights, and more. Flipper Zero can help you to learn if your security is compromised.
+Flipper Zero는 **300-928 MHz 범위의 라디오 주파수를 수신하고 전송**할 수 있는 내장 모듈을 가지고 있으며, 원격 제어 장치를 읽고 저장하며 에뮬레이트할 수 있습니다. 이러한 제어 장치는 게이트, 장벽, 라디오 잠금 장치, 원격 제어 스위치, 무선 초인종, 스마트 조명 등과의 상호작용에 사용됩니다. Flipper Zero는 보안이 침해되었는지 여부를 학습하는 데 도움을 줄 수 있습니다.
 
 <figure><img src="../../../images/image (714).png" alt=""><figcaption></figcaption></figure>
 
-## Sub-GHz hardware <a href="#kfpn7" id="kfpn7"></a>
+## Sub-GHz 하드웨어 <a href="#kfpn7" id="kfpn7"></a>
 
-Flipper Zero has a built-in sub-1 GHz module based on a [﻿](https://www.st.com/en/nfc/st25r3916.html#overview)﻿[CC1101 chip](https://www.ti.com/lit/ds/symlink/cc1101.pdf) and a radio antenna (the maximum range is 50 meters). Both the CC1101 chip and the antenna are designed to operate at frequencies in the 300-348 MHz, 387-464 MHz, and 779-928 MHz bands.
+Flipper Zero는 [﻿](https://www.st.com/en/nfc/st25r3916.html#overview)﻿[CC1101 칩](https://www.ti.com/lit/ds/symlink/cc1101.pdf)을 기반으로 한 내장 서브 1 GHz 모듈과 라디오 안테나를 가지고 있으며 (최대 범위는 50미터입니다). CC1101 칩과 안테나는 300-348 MHz, 387-464 MHz 및 779-928 MHz 대역의 주파수에서 작동하도록 설계되었습니다.
 
 <figure><img src="../../../images/image (923).png" alt=""><figcaption></figcaption></figure>
 
-## Actions
+## 작업
 
-### Frequency Analyser
-
-> [!NOTE]
-> How to find which frequency is the remote using
-
-When analysing, Flipper Zero is scanning signals strength (RSSI) at all the frequencies available in frequency configuration. Flipper Zero displays the frequency with the highest RSSI value, with signal strength higher than -90 [dBm](https://en.wikipedia.org/wiki/DBm).
-
-To determine the remote's frequency, do the following:
-
-1. Place the remote control very close to the left of Flipper Zero.
-2. Go to **Main Menu** **→ Sub-GHz**.
-3. Select **Frequency Analyzer**, then press and hold the button on the remote control you want to analyze.
-4. Review the frequency value on the screen.
-
-### Read
+### 주파수 분석기
 
 > [!NOTE]
-> Find info about the frequency used (also another way to find which frequency is used)
+> 원격 제어가 사용하는 주파수를 찾는 방법
 
-The **Read** option **listens on the configured frequency** on the indicated modulation: 433.92 AM by default. If **something is found** when reading, **info is given** in the screen. This info could be use to replicate the signal in the future.
+분석할 때 Flipper Zero는 주파수 구성에서 사용 가능한 모든 주파수에서 신호 강도(RSSI)를 스캔합니다. Flipper Zero는 -90 [dBm](https://en.wikipedia.org/wiki/DBm)보다 높은 신호 강도를 가진 주파수 중 가장 높은 RSSI 값을 표시합니다.
 
-While Read is in use, it's possible to press the **left button** and **configure it**.\
-At this moment it has **4 modulations** (AM270, AM650, FM328 and FM476), and **several relevant frequencies** stored:
+원격 제어의 주파수를 확인하려면 다음을 수행하십시오:
+
+1. 원격 제어를 Flipper Zero의 왼쪽에 매우 가깝게 놓습니다.
+2. **메인 메뉴** **→ Sub-GHz**로 이동합니다.
+3. **주파수 분석기**를 선택한 다음 분석할 원격 제어의 버튼을 누르고 유지합니다.
+4. 화면에서 주파수 값을 검토합니다.
+
+### 읽기
+
+> [!NOTE]
+> 사용 중인 주파수에 대한 정보를 찾기 (또한 사용 중인 주파수를 찾는 또 다른 방법)
+
+**읽기** 옵션은 **지정된 변조에서 구성된 주파수를 청취**합니다: 기본값은 433.92 AM입니다. 읽기 중 **무언가가 발견되면**, **정보가** 화면에 표시됩니다. 이 정보는 미래에 신호를 복제하는 데 사용할 수 있습니다.
+
+읽기 중에는 **왼쪽 버튼**을 눌러 **구성할 수 있습니다**.\
+현재 **4개의 변조**(AM270, AM650, FM328 및 FM476)와 **여러 관련 주파수**가 저장되어 있습니다:
 
 <figure><img src="../../../images/image (947).png" alt=""><figcaption></figcaption></figure>
 
-You can set **any that interests you**, however, if you are **not sure which frequency** could be the one used by the remote you have, **set Hopping to ON** (Off by default), and press the button several times until Flipper captures it and give you the info you need to set the frequency.
+**관심 있는 주파수**를 설정할 수 있지만, 원격 제어가 사용하는 주파수가 **확실하지 않은 경우**, **호핑을 켜기로 설정**(기본값은 꺼짐)하고 버튼을 여러 번 눌러 Flipper가 이를 캡처하고 주파수를 설정하는 데 필요한 정보를 제공하도록 합니다.
 
 > [!CAUTION]
-> Switching between frequencies takes some time, therefore signals transmitted at the time of switching can be missed. For better signal reception, set a fixed frequency determined by Frequency Analyzer.
+> 주파수 간 전환에는 시간이 걸리므로 전환 시 전송된 신호가 누락될 수 있습니다. 더 나은 신호 수신을 위해 주파수 분석기에 의해 결정된 고정 주파수를 설정하십시오.
 
-### **Read Raw**
-
-> [!NOTE]
-> Steal (and replay) a signal in the configured frequency
-
-The **Read Raw** option **records signals** send in the listening frequency. This can be used to **steal** a signal and **repeat** it.
-
-By default **Read Raw is also in 433.92 in AM650**, but if with the Read option you found that the signal that interest you is in a **different frequency/modulation, you can also modify that** pressing left (while inside the Read Raw option).
-
-### Brute-Force
-
-If you know the protocol used for example by the garage door it's possible to g**enerate all the codes and send them with the Flipper Zero.** This is an example that support general common types of garages: [**https://github.com/tobiabocchi/flipperzero-bruteforce**](https://github.com/tobiabocchi/flipperzero-bruteforce)
-
-### Add Manually
+### **원시 읽기**
 
 > [!NOTE]
-> Add signals from a configured list of protocols
+> 구성된 주파수에서 신호를 훔치고 (재생)하기
 
-#### List of [supported protocols](https://docs.flipperzero.one/sub-ghz/add-new-remote) <a href="#id-3iglu" id="id-3iglu"></a>
+**원시 읽기** 옵션은 **청취 주파수에서 전송된 신호를 기록**합니다. 이는 신호를 **훔치고** **반복**하는 데 사용할 수 있습니다.
 
-| Princeton_433 (works with the majority of static code systems) | 433.92 | Static  |
-| -------------------------------------------------------------- | ------ | ------- |
-| Nice Flo 12bit_433                                             | 433.92 | Static  |
-| Nice Flo 24bit_433                                             | 433.92 | Static  |
-| CAME 12bit_433                                                 | 433.92 | Static  |
-| CAME 24bit_433                                                 | 433.92 | Static  |
-| Linear_300                                                     | 300.00 | Static  |
-| CAME TWEE                                                      | 433.92 | Static  |
-| Gate TX_433                                                    | 433.92 | Static  |
-| DoorHan_315                                                    | 315.00 | Dynamic |
-| DoorHan_433                                                    | 433.92 | Dynamic |
-| LiftMaster_315                                                 | 315.00 | Dynamic |
-| LiftMaster_390                                                 | 390.00 | Dynamic |
-| Security+2.0_310                                               | 310.00 | Dynamic |
-| Security+2.0_315                                               | 315.00 | Dynamic |
-| Security+2.0_390                                               | 390.00 | Dynamic |
+기본적으로 **원시 읽기는 AM650에서 433.92로 설정되어 있지만**, 읽기 옵션으로 관심 있는 신호가 **다른 주파수/변조에 있는 경우**, 원시 읽기 옵션 내에서 왼쪽 버튼을 눌러 수정할 수 있습니다.
 
-### Supported Sub-GHz vendors
+### 무차별 대입
 
-Check the list in [https://docs.flipperzero.one/sub-ghz/supported-vendors](https://docs.flipperzero.one/sub-ghz/supported-vendors)
+예를 들어 차고 문에 사용되는 프로토콜을 알고 있다면 **모든 코드를 생성하고 Flipper Zero로 전송할 수 있습니다.** 이는 일반적인 차고 유형을 지원하는 예입니다: [**https://github.com/tobiabocchi/flipperzero-bruteforce**](https://github.com/tobiabocchi/flipperzero-bruteforce)
 
-### Supported Frequencies by region
-
-Check the list in [https://docs.flipperzero.one/sub-ghz/frequencies](https://docs.flipperzero.one/sub-ghz/frequencies)
-
-### Test
+### 수동 추가
 
 > [!NOTE]
-> Get dBms of the saved frequencies
+> 구성된 프로토콜 목록에서 신호 추가
 
-## Reference
+#### [지원되는 프로토콜 목록](https://docs.flipperzero.one/sub-ghz/add-new-remote) <a href="#id-3iglu" id="id-3iglu"></a>
+
+| Princeton_433 (대부분의 정적 코드 시스템과 작동) | 433.92 | 정적  |
+| --------------------------------------------------- | ------ | ----- |
+| Nice Flo 12bit_433                                  | 433.92 | 정적  |
+| Nice Flo 24bit_433                                  | 433.92 | 정적  |
+| CAME 12bit_433                                      | 433.92 | 정적  |
+| CAME 24bit_433                                      | 433.92 | 정적  |
+| Linear_300                                          | 300.00 | 정적  |
+| CAME TWEE                                           | 433.92 | 정적  |
+| Gate TX_433                                         | 433.92 | 정적  |
+| DoorHan_315                                         | 315.00 | 동적  |
+| DoorHan_433                                         | 433.92 | 동적  |
+| LiftMaster_315                                      | 315.00 | 동적  |
+| LiftMaster_390                                      | 390.00 | 동적  |
+| Security+2.0_310                                    | 310.00 | 동적  |
+| Security+2.0_315                                    | 315.00 | 동적  |
+| Security+2.0_390                                    | 390.00 | 동적  |
+
+### 지원되는 Sub-GHz 공급업체
+
+[https://docs.flipperzero.one/sub-ghz/supported-vendors](https://docs.flipperzero.one/sub-ghz/supported-vendors)에서 목록을 확인하십시오.
+
+### 지역별 지원되는 주파수
+
+[https://docs.flipperzero.one/sub-ghz/frequencies](https://docs.flipperzero.one/sub-ghz/frequencies)에서 목록을 확인하십시오.
+
+### 테스트
+
+> [!NOTE]
+> 저장된 주파수의 dBms 가져오기
+
+## 참조
 
 - [https://docs.flipperzero.one/sub-ghz](https://docs.flipperzero.one/sub-ghz)
 
 {{#include ../../../banners/hacktricks-training.md}}
-

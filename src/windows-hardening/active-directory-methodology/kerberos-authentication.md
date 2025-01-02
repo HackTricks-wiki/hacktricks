@@ -1,8 +1,7 @@
-# Kerberos Authentication
+# Kerberos 인증
 
 {{#include ../../banners/hacktricks-training.md}}
 
-**Check the amazing post from:** [**https://www.tarlogic.com/en/blog/how-kerberos-works/**](https://www.tarlogic.com/en/blog/how-kerberos-works/)
+**다음의 놀라운 게시물을 확인하세요:** [**https://www.tarlogic.com/en/blog/how-kerberos-works/**](https://www.tarlogic.com/en/blog/how-kerberos-works/)
 
 {{#include ../../banners/hacktricks-training.md}}
-

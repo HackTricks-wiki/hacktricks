@@ -1,10 +1,10 @@
 # LLM Training - Data Preparation
 
-**These are my notes from the very recommended book** [**https://www.manning.com/books/build-a-large-language-model-from-scratch**](https://www.manning.com/books/build-a-large-language-model-from-scratch) **with some extra information.**
+**이것은 매우 추천되는 책** [**https://www.manning.com/books/build-a-large-language-model-from-scratch**](https://www.manning.com/books/build-a-large-language-model-from-scratch) **에서의 내 노트와 추가 정보입니다.**
 
 ## Basic Information
 
-You should start by reading this post for some basic concepts you should know about:
+기본 개념에 대해 알아야 할 내용을 위해 이 게시물을 읽는 것으로 시작해야 합니다:
 
 {{#ref}}
 0.-basic-llm-concepts.md
@@ -13,7 +13,7 @@ You should start by reading this post for some basic concepts you should know ab
 ## 1. Tokenization
 
 > [!TIP]
-> The goal of this initial phase is very simple: **Divide the input in tokens (ids) in some way that makes sense**.
+> 이 초기 단계의 목표는 매우 간단합니다: **입력을 의미 있는 방식으로 토큰(아이디)으로 나누는 것입니다.**
 
 {{#ref}}
 1.-tokenizing.md
@@ -22,7 +22,7 @@ You should start by reading this post for some basic concepts you should know ab
 ## 2. Data Sampling
 
 > [!TIP]
-> The goal of this second phase is very simple: **Sample the input data and prepare it for the training phase usually by separating the dataset into sentences of a specific length and generating also the expected response.**
+> 이 두 번째 단계의 목표는 매우 간단합니다: **입력 데이터를 샘플링하고 훈련 단계에 맞게 준비하는 것입니다. 일반적으로 특정 길이의 문장으로 데이터셋을 분리하고 예상 응답도 생성합니다.**
 
 {{#ref}}
 2.-data-sampling.md
@@ -31,10 +31,10 @@ You should start by reading this post for some basic concepts you should know ab
 ## 3. Token Embeddings
 
 > [!TIP]
-> The goal of this third phase is very simple: **Assign each of the previous tokens in the vocabulary a vector of the desired dimensions to train the model.** Each word in the vocabulary will a point in a space of X dimensions.\
-> Note that initially the position of each word in the space is just initialised "randomly" and these positions are trainable parameters (will be improved during the training).
+> 이 세 번째 단계의 목표는 매우 간단합니다: **어휘의 각 이전 토큰에 원하는 차원의 벡터를 할당하여 모델을 훈련하는 것입니다.** 어휘의 각 단어는 X 차원의 공간에서 한 점이 됩니다.\
+> 처음에 각 단어의 위치는 "무작위로" 초기화되며, 이러한 위치는 훈련 가능한 매개변수입니다(훈련 중 개선됩니다).
 >
-> Moreover, during the token embedding **another layer of embeddings is created** which represents (in this case) the **absolute possition of the word in the training sentence**. This way a word in different positions in the sentence will have a different representation (meaning).
+> 게다가, 토큰 임베딩 동안 **또 다른 임베딩 레이어가 생성됩니다**. 이는 (이 경우) **훈련 문장에서 단어의 절대 위치를 나타냅니다**. 이렇게 하면 문장에서 서로 다른 위치에 있는 단어는 서로 다른 표현(의미)을 갖게 됩니다.
 
 {{#ref}}
 3.-token-embeddings.md
@@ -43,8 +43,8 @@ You should start by reading this post for some basic concepts you should know ab
 ## 4. Attention Mechanisms
 
 > [!TIP]
-> The goal of this fourth phase is very simple: **Apply some attetion mechanisms**. These are going to be a lot of **repeated layers** that are going to **capture the relation of a word in the vocabulary with its neighbours in the current sentence being used to train the LLM**.\
-> A lot of layers are used for this, so a lot of trainable parameters are going to be capturing this information.
+> 이 네 번째 단계의 목표는 매우 간단합니다: **일부 주의 메커니즘을 적용하는 것입니다**. 이는 **어휘의 단어와 현재 LLM 훈련에 사용되는 문장에서의 이웃 간의 관계를 포착하는 많은 반복 레이어**가 될 것입니다.\
+> 이를 위해 많은 레이어가 사용되며, 많은 훈련 가능한 매개변수가 이 정보를 포착하게 됩니다.
 
 {{#ref}}
 4.-attention-mechanisms.md
@@ -53,9 +53,9 @@ You should start by reading this post for some basic concepts you should know ab
 ## 5. LLM Architecture
 
 > [!TIP]
-> The goal of this fifth phase is very simple: **Develop the architecture of the full LLM**. Put everything together, apply all the layers and create all the functions to generate text or transform text to IDs and backwards.
+> 이 다섯 번째 단계의 목표는 매우 간단합니다: **전체 LLM의 아키텍처를 개발하는 것입니다**. 모든 것을 함께 모으고, 모든 레이어를 적용하며, 텍스트를 생성하거나 텍스트를 ID로 변환하고 그 반대로 변환하는 모든 기능을 생성합니다.
 >
-> This architecture will be used for both, training and predicting text after it was trained.
+> 이 아키텍처는 훈련 후 텍스트를 예측하는 데에도 사용됩니다.
 
 {{#ref}}
 5.-llm-architecture.md
@@ -64,7 +64,7 @@ You should start by reading this post for some basic concepts you should know ab
 ## 6. Pre-training & Loading models
 
 > [!TIP]
-> The goal of this sixth phase is very simple: **Train the model from scratch**. For this the previous LLM architecture will be used with some loops going over the data sets using the defined loss functions and optimizer to train all the parameters of the model.
+> 이 여섯 번째 단계의 목표는 매우 간단합니다: **모델을 처음부터 훈련하는 것입니다**. 이를 위해 이전 LLM 아키텍처를 사용하여 정의된 손실 함수와 최적화를 사용하여 데이터 세트를 반복하며 모델의 모든 매개변수를 훈련합니다.
 
 {{#ref}}
 6.-pre-training-and-loading-models.md
@@ -73,7 +73,7 @@ You should start by reading this post for some basic concepts you should know ab
 ## 7.0. LoRA Improvements in fine-tuning
 
 > [!TIP]
-> The use of **LoRA reduce a lot the computation** needed to **fine tune** already trained models.
+> **LoRA의 사용은 이미 훈련된 모델을 미세 조정하는 데 필요한 계산을 많이 줄입니다.**
 
 {{#ref}}
 7.0.-lora-improvements-in-fine-tuning.md
@@ -82,7 +82,7 @@ You should start by reading this post for some basic concepts you should know ab
 ## 7.1. Fine-Tuning for Classification
 
 > [!TIP]
-> The goal of this section is to show how to fine-tune an already pre-trained model so instead of generating new text the LLM will select give the **probabilities of the given text being categorized in each of the given categories** (like if a text is spam or not).
+> 이 섹션의 목표는 이미 사전 훈련된 모델을 미세 조정하는 방법을 보여주는 것입니다. 따라서 새로운 텍스트를 생성하는 대신 LLM은 **주어진 텍스트가 각 주어진 카테고리에 분류될 확률을 선택합니다**(예: 텍스트가 스팸인지 아닌지).
 
 {{#ref}}
 7.1.-fine-tuning-for-classification.md
@@ -91,9 +91,8 @@ You should start by reading this post for some basic concepts you should know ab
 ## 7.2. Fine-Tuning to follow instructions
 
 > [!TIP]
-> The goal of this section is to show how to **fine-tune an already pre-trained model to follow instructions** rather than just generating text, for example, responding to tasks as a chat bot.
+> 이 섹션의 목표는 **텍스트를 생성하는 대신 지침을 따르도록 이미 사전 훈련된 모델을 미세 조정하는 방법을 보여주는 것입니다**. 예를 들어, 챗봇으로서 작업에 응답하는 것입니다.
 
 {{#ref}}
 7.2.-fine-tuning-to-follow-instructions.md
 {{#endref}}
-

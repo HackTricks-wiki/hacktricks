@@ -1,70 +1,68 @@
-# Investment Terms
+# 투자 용어
 
-## Spot
+## 스팟
 
-This is the most basic way to do some trading. You can **indicate the amount of the asset and the price** that you want to buy or sell, and whenever that price is reached the operation is done.
+이는 거래를 수행하는 가장 기본적인 방법입니다. **구매하거나 판매하고자 하는 자산의 양과 가격을 지정할 수 있으며**, 해당 가격에 도달하면 거래가 이루어집니다.
 
-Usually you can also use the **current market price** in order to perform the transaction as fast as possible to the current price.
+보통 **현재 시장 가격**을 사용하여 가능한 한 빨리 거래를 수행할 수 있습니다.
 
-**Stop Loss - Limit**: You can also indicate amount and the price of the assets to buy or sell while also indicating a lower price to buy or sell in case it's reached (to stop losses).
+**손절매 - 한도**: 자산의 구매 또는 판매 가격과 양을 지정하면서, 손실을 방지하기 위해 도달할 경우의 낮은 가격도 지정할 수 있습니다.
 
-## Futures
+## 선물
 
-A future is a contract where 2 parts comes to an agreement to **acquire something in the future at a fixed price**. For example to sell 1 bitcoin in 6 months at 70.000$.
+선물은 두 당사자가 **미래에 고정된 가격으로 무언가를 인수하기로 합의하는 계약**입니다. 예를 들어, 6개월 후 70,000$에 1 비트코인을 판매하는 것입니다.
 
-Obviously if by 6 months the bitcoin value is 80.000$ the seller part loses money and the buying part earns it. If in 6 months the bitcoin value is 60.000$, the opposite happens.
+물론 6개월 후 비트코인 가치가 80,000$이면 판매자는 손실을 보고 구매자는 이익을 얻습니다. 6개월 후 비트코인 가치가 60,000$이면 반대의 상황이 발생합니다.
 
-However, this is interesting for example for business which are generating a product and need to have the security that thy will be able to sell it at a price to pay the costs. Or business which want to assure fixed prices in the future for something eve if higher.
+그러나 이는 제품을 생산하고 비용을 지불할 가격에 판매할 수 있는 보장을 필요로 하는 비즈니스에 흥미롭습니다. 또는 미래에 더 높은 가격으로 고정된 가격을 보장하고자 하는 비즈니스에도 해당됩니다.
 
-Although in exchanges this is usually used to try to make a profit.
+거래소에서는 일반적으로 이익을 얻기 위해 사용됩니다.
 
-* Notice that a "Long position" means that someone if betting that a price is going to increase
-* While a "short position" means that someone if betting that a price is going to go down
+* "롱 포지션"은 누군가 가격이 상승할 것이라고 베팅하고 있음을 의미합니다.
+* "숏 포지션"은 누군가 가격이 하락할 것이라고 베팅하고 있음을 의미합니다.
 
-### Hedging With Futures <a href="#mntl-sc-block_7-0" id="mntl-sc-block_7-0"></a>
+### 선물로 헤지하기 <a href="#mntl-sc-block_7-0" id="mntl-sc-block_7-0"></a>
 
-If a fund manager is afraid that some stocks are going to go down he might take a short position over some assets like bitcoins or S\&P 500 futures contracts. This would be similar to buying or having some assets and create a contract of selling those at a future time at a bigger price.&#x20;
+펀드 매니저가 일부 주식이 하락할까 두려워하면 비트코인이나 S&P 500 선물 계약과 같은 자산에 대해 숏 포지션을 취할 수 있습니다. 이는 자산을 구매하거나 보유하고 있는 것과 유사하며, 미래에 더 높은 가격으로 판매하는 계약을 생성하는 것입니다.&#x20;
 
-In case the price goes down the fund manager will earn benefits because he will sell the assets at a bigger price. If the price of the assets goes up the manager won't earn that benefit but he will still keep his assets.
+가격이 하락할 경우 펀드 매니저는 더 높은 가격에 자산을 판매하여 이익을 얻습니다. 자산 가격이 상승하면 매니저는 그 이익을 얻지 못하지만 여전히 자산을 보유하게 됩니다.
 
-### Perpetual Futures
+### 영구 선물
 
-**These are "futures" that will last indefinitely** (without an ending contract date). It's very common to find them for example in crypto exchanges where you can go in an out of futures based on the price of cryptos.
+**이들은 무기한 지속되는 "선물"입니다** (종료 계약 날짜가 없습니다). 암호화폐 거래소에서 가격에 따라 선물에 들어가고 나가는 것이 매우 일반적입니다.
 
-Notice that in these cases the benefits and lose can be in real time, if the price increases 1% you win a 1%, if the price decreases 1%, you will lose it.
+이 경우 이익과 손실이 실시간으로 발생할 수 있으며, 가격이 1% 상승하면 1%의 이익을 얻고, 가격이 1% 하락하면 손실을 보게 됩니다.
 
-### Futures with Leverage
+### 레버리지 있는 선물
 
-**Leverage** allows you to control a larger position in the market with a smaller amount of money. It basically allows you to "bet" much more money than you have risking only the money that you actually have.
+**레버리지**는 적은 금액으로 시장에서 더 큰 포지션을 제어할 수 있게 해줍니다. 기본적으로 실제로 보유하고 있는 돈만 위험에 빠뜨리면서 "더 많은 돈을 베팅"할 수 있게 해줍니다.
 
-For example, if you open a future position in the BTC/USDT with 100$ a 50x leverage this means that if the price is increased 1%, then you would be winning 1x50 = 50% of your initial investment (50$). And therefore you will have 150$.\
-However, if the price decreases 1%, you will lost 50% of your funds (59$ in this case). And if the price decreases 2% you will lose all your bet (2x50 = 100%).
+예를 들어, 100$로 BTC/USDT에서 50배 레버리지로 선물 포지션을 열면, 가격이 1% 상승할 경우 초기 투자금의 1x50 = 50%인 50$를 이익으로 얻게 됩니다. 따라서 150$를 가지게 됩니다.\
+그러나 가격이 1% 하락하면 자금의 50%를 잃게 됩니다 (이 경우 59$). 가격이 2% 하락하면 모든 베팅을 잃게 됩니다 (2x50 = 100%).
 
-Therefore, leveraging allows to control the amount of money you bet while increasing the winnings and loses.
+따라서 레버리지는 베팅하는 금액을 제어하면서 이익과 손실을 증가시킬 수 있게 해줍니다.
 
-## Differences Futures & Options
+## 선물과 옵션의 차이점
 
-The main difference between futures and options is that the contract is optional for the buyer: He can decide to execute it or not (usually he will only if he will benefit for it). The seller must sell if the buyer wants to use the option.\
-However, the buyer will be paying some fee to the seller for opening the option (so the seller, who is taking more risk aparently, starts earning some money).
+선물과 옵션의 주요 차이점은 계약이 구매자에게 선택적이라는 것입니다: 그는 이를 실행할지 여부를 결정할 수 있습니다 (보통 이익이 있을 경우에만 실행합니다). 판매자는 구매자가 옵션을 사용하고자 할 경우 판매해야 합니다.\
+그러나 구매자는 옵션을 열기 위해 판매자에게 일부 수수료를 지불해야 합니다 (따라서 더 많은 위험을 감수하는 판매자는 일부 돈을 벌기 시작합니다).
 
-### 1. **Obligation vs. Right:**
+### 1. **의무 vs. 권리:**
 
-* **Futures:** When you buy or sell a futures contract, you're entering a **binding agreement** to buy or sell an asset at a specific price on a future date. Both the buyer and the seller are **obligated** to fulfill the contract at expiration (unless the contract is closed before then).
-* **Options:** With options, you have the **right, but not the obligation**, to buy (in the case of a **call option**) or sell (in the case of a **put option**) an asset at a specific price before or at a certain expiration date. The **buyer** has the option to execute, while the **seller** is obligated to fulfill the trade if the buyer decides to exercise the option.
+* **선물:** 선물 계약을 구매하거나 판매할 때, 특정 날짜에 특정 가격으로 자산을 구매하거나 판매하기 위한 **구속력 있는 계약**에 들어가는 것입니다. 구매자와 판매자 모두 계약 만료 시 이를 이행할 **의무가** 있습니다 (계약이 그 전에 종료되지 않는 한).
+* **옵션:** 옵션의 경우, 특정 만료 날짜 이전 또는 해당 날짜에 특정 가격으로 자산을 구매(콜 옵션의 경우)하거나 판매(풋 옵션의 경우)할 **권리, 그러나 의무는 없습니다**. **구매자**는 실행할 선택권이 있으며, **판매자**는 구매자가 옵션을 행사하기로 결정할 경우 거래를 이행해야 할 의무가 있습니다.
 
-### 2. **Risk:**
+### 2. **위험:**
 
-* **Futures:** Both the buyer and the seller take on **unlimited risk** because they are obligated to complete the contract. The risk is the difference between the agreed-upon price and the market price at the expiration date.
-* **Options:** The buyer’s risk is limited to the **premium** paid to purchase the option. If the market doesn't move in favor of the option holder, they can simply let the option expire. However, the **seller** (writer) of the option has unlimited risk if the market moves significantly against them.
+* **선물:** 구매자와 판매자 모두 **무제한 위험**을 감수합니다. 위험은 만료 날짜에 합의된 가격과 시장 가격의 차이입니다.
+* **옵션:** 구매자의 위험은 옵션을 구매하기 위해 지불한 **프리미엄**으로 제한됩니다. 시장이 옵션 보유자에게 유리하게 움직이지 않으면, 옵션을 단순히 만료시킬 수 있습니다. 그러나 옵션의 **판매자**(작성자)는 시장이 그들에게 불리하게 크게 움직일 경우 무제한 위험을 감수합니다.
 
-### 3. **Cost:**
+### 3. **비용:**
 
-* **Futures:** There is no upfront cost beyond the margin required to hold the position, as the buyer and seller are both obligated to complete the trade.
-* **Options:** The buyer must pay an **option premium** upfront for the right to exercise the option. This premium is essentially the cost of the option.
+* **선물:** 포지션을 유지하기 위해 필요한 마진 외에 선불 비용이 없으며, 구매자와 판매자 모두 거래를 완료할 의무가 있습니다.
+* **옵션:** 구매자는 옵션을 행사할 권리를 위해 **옵션 프리미엄**을 선불로 지불해야 합니다. 이 프리미엄은 본질적으로 옵션의 비용입니다.
 
-### 4. **Profit Potential:**
+### 4. **이익 잠재력:**
 
-* **Futures:** The profit or loss is based on the difference between the market price at expiration and the agreed-upon price in the contract.
-* **Options:** The buyer profits when the market moves favorably beyond the strike price by more than the premium paid. The seller profits by keeping the premium if the option is not exercised.
-
-
+* **선물:** 이익 또는 손실은 만료 시 시장 가격과 계약에서 합의된 가격의 차이에 기반합니다.
+* **옵션:** 구매자는 시장이 프리미엄을 초과하여 유리하게 움직일 때 이익을 얻습니다. 판매자는 옵션이 행사되지 않을 경우 프리미엄을 유지하여 이익을 얻습니다.

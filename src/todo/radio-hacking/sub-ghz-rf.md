@@ -2,82 +2,82 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Garage Doors
+## 차고 문
 
-Garage door openers typically operate at frequencies in the 300-190 MHz range, with the most common frequencies being 300 MHz, 310 MHz, 315 MHz, and 390 MHz. This frequency range is commonly used for garage door openers because it is less crowded than other frequency bands and is less likely to experience interference from other devices.
+차고 문 개폐기는 일반적으로 300-190 MHz 범위의 주파수에서 작동하며, 가장 일반적인 주파수는 300 MHz, 310 MHz, 315 MHz 및 390 MHz입니다. 이 주파수 범위는 다른 주파수 대역보다 혼잡하지 않기 때문에 차고 문 개폐기에 일반적으로 사용됩니다.
 
-## Car Doors
+## 자동차 문
 
-Most car key fobs operate on either **315 MHz or 433 MHz**. These are both radio frequencies, and they are used in a variety of different applications. The main difference between the two frequencies is that 433 MHz has a longer range than 315 MHz. This means that 433 MHz is better for applications that require a longer range, such as remote keyless entry.\
-In Europe 433.92MHz is commonly used and in U.S. and Japan it's the 315MHz.
+대부분의 자동차 키 폼은 **315 MHz 또는 433 MHz**에서 작동합니다. 이 두 주파수는 모두 라디오 주파수이며 다양한 응용 프로그램에 사용됩니다. 두 주파수의 주요 차이점은 433 MHz가 315 MHz보다 더 긴 범위를 가지고 있다는 것입니다. 이는 433 MHz가 원격 키리스 진입과 같이 더 긴 범위가 필요한 응용 프로그램에 더 적합하다는 것을 의미합니다.\
+유럽에서는 433.92MHz가 일반적으로 사용되며, 미국과 일본에서는 315MHz가 사용됩니다.
 
-## **Brute-force Attack**
+## **무차별 대입 공격**
 
 <figure><img src="../../images/image (1084).png" alt=""><figcaption></figcaption></figure>
 
-If instead of sending each code 5 times (sent like this to make sure the receiver gets it) so just send it once, the time is reduced to 6mins:
+각 코드를 5번 전송하는 대신(수신자가 수신하도록 하기 위해 이렇게 전송됨) 한 번만 전송하면 시간이 6분으로 줄어듭니다:
 
 <figure><img src="../../images/image (622).png" alt=""><figcaption></figcaption></figure>
 
-and if you **remove the 2 ms waiting** period between signals you can **reduce the time to 3minutes.**
+신호 사이의 2ms 대기 시간을 **제거하면 시간을 3분으로 줄일 수 있습니다.**
 
-Moreover, by using the De Bruijn Sequence (a way to reduce the number of bits needed to send all the potential binary numbers to burteforce) this **time is reduced just to 8 seconds**:
+또한, De Bruijn Sequence를 사용하면(모든 잠재적인 이진 숫자를 무차별 대입하기 위해 필요한 비트 수를 줄이는 방법) 이 **시간이 단 8초로 줄어듭니다**:
 
 <figure><img src="../../images/image (583).png" alt=""><figcaption></figcaption></figure>
 
-Example of this attack was implemented in [https://github.com/samyk/opensesame](https://github.com/samyk/opensesame)
+이 공격의 예는 [https://github.com/samyk/opensesame](https://github.com/samyk/opensesame)에서 구현되었습니다.
 
-Requiring **a preamble will avoid the De Bruijn Sequence** optimization and **rolling codes will prevent this attack** (supposing the code is long enough to not be bruteforceable).
+**프리앰블을 요구하면 De Bruijn Sequence** 최적화를 피할 수 있으며, **롤링 코드는 이 공격을 방지합니다**(코드가 무차별 대입할 수 없을 만큼 충분히 길다고 가정할 때).
 
-## Sub-GHz Attack
+## Sub-GHz 공격
 
-To attack these signals with Flipper Zero check:
+Flipper Zero로 이러한 신호를 공격하려면 확인하십시오:
 
 {{#ref}}
 flipper-zero/fz-sub-ghz.md
 {{#endref}}
 
-## Rolling Codes Protection
+## 롤링 코드 보호
 
-Automatic garage door openers typically use a wireless remote control to open and close the garage door. The remote control **sends a radio frequency (RF) signal** to the garage door opener, which activates the motor to open or close the door.
+자동 차고 문 개폐기는 일반적으로 차고 문을 열고 닫기 위해 무선 리모컨을 사용합니다. 리모컨은 차고 문 개폐기에 **라디오 주파수(RF) 신호**를 전송하여 모터를 활성화하여 문을 열거나 닫습니다.
 
-It is possible for someone to use a device known as a code grabber to intercept the RF signal and record it for later use. This is known as a **replay attack**. To prevent this type of attack, many modern garage door openers use a more secure encryption method known as a **rolling code** system.
+누군가 코드 그래버라는 장치를 사용하여 RF 신호를 가로채고 나중에 사용할 수 있도록 기록할 수 있습니다. 이를 **재전송 공격**이라고 합니다. 이러한 유형의 공격을 방지하기 위해 많은 현대 차고 문 개폐기는 **롤링 코드** 시스템이라는 보다 안전한 암호화 방법을 사용합니다.
 
-The **RF signal is typically transmitted using a rolling code**, which means that the code changes with each use. This makes it **difficult** for someone to **intercept** the signal and **use** it to gain **unauthorised** access to the garage.
+**RF 신호는 일반적으로 롤링 코드를 사용하여 전송됩니다.** 이는 코드가 매번 사용될 때마다 변경된다는 것을 의미합니다. 이는 누군가가 신호를 **가로채고** 이를 사용하여 차고에 **무단 접근**하는 것을 **어렵게** 만듭니다.
 
-In a rolling code system, the remote control and the garage door opener have a **shared algorithm** that **generates a new code** every time the remote is used. The garage door opener will only respond to the **correct code**, making it much more difficult for someone to gain unauthorised access to the garage just by capturing a code.
+롤링 코드 시스템에서 리모컨과 차고 문 개폐기는 **공유 알고리즘**을 가지고 있어 리모컨이 사용될 때마다 **새로운 코드를 생성**합니다. 차고 문 개폐기는 **올바른 코드**에만 반응하므로 누군가가 코드를 캡처하여 차고에 무단으로 접근하는 것이 훨씬 더 어렵습니다.
 
-### **Missing Link Attack**
+### **누락된 링크 공격**
 
-Basically, you listen for the button and **capture the signal whilst the remote is out of range** of the device (say the car or garage). You then move to the device and **use the captured code to open it**.
+기본적으로 버튼을 듣고 **리모컨이 장치(예: 자동차 또는 차고)의 범위를 벗어났을 때 신호를 캡처**합니다. 그런 다음 장치로 이동하여 **캡처한 코드를 사용하여 열 수 있습니다**.
 
-### Full Link Jamming Attack
+### 전체 링크 재밍 공격
 
-An attacker could **jam the signal near the vehicle or receive**r so the **receiver cannot actually ‘hear’ the code**, and once that is happening you can simply **capture and replay** the code when you have stopped jamming.
+공격자는 **차량이나 수신기 근처에서 신호를 방해**하여 **수신기가 실제로 코드를 ‘듣지 못하게** 할 수 있으며, 그렇게 되면 단순히 **코드를 캡처하고 재전송**할 수 있습니다.
 
-The victim at some point will use the **keys to lock the car**, but then the attack will have **recorded enough "close door" codes** that hopefully could be resent to open the door (a **change of frequency might be needed** as there are cars that use the same codes to open and close but listens for both commands in different frequencies).
-
-> [!WARNING]
-> **Jamming works**, but it's noticeable as if the **person locking the car simply tests the doors** to ensure they are locked they would notice the car unlocked. Additionally if they were aware of such attacks they could even listen to the fact that the doors never made the lock **sound** or the cars **lights** never flashed when they pressed the ‘lock’ button.
-
-### **Code Grabbing Attack ( aka ‘RollJam’ )**
-
-This is a more **stealth Jamming technique**. The attacker will jam the signal, so when the victim tries to lock the door it won't work, but the attacker will **record this code**. Then, the victim will **try to lock the car again** pressing the button and the car will **record this second code**.\
-Instantly after this the **attacker can send the first code** and the **car will lock** (victim will think the second press closed it). Then, the attacker will be able to **send the second stolen code to open** the car (supposing that a **"close car" code can also be used to open it**). A change of frequency might be needed (as there are cars that use the same codes to open and close but listens for both commands in different frequencies).
-
-The attacker can **jam the car receiver and not his receiver** because if the car receiver is listening in for example a 1MHz broadband, the attacker won't **jam** the exact frequency used by the remote but **a close one in that spectrum** while the **attackers receiver will be listening in a smaller range** where he can listen the remote signal **without the jam signal**.
+피해자는 어느 시점에서 **차를 잠그기 위해 키를 사용할 것**이지만, 공격자는 **"문 닫기" 코드**를 충분히 기록했을 것이므로 이를 재전송하여 문을 열 수 있습니다(차량이 열고 닫는 데 동일한 코드를 사용하는 경우 **주파수 변경이 필요할 수 있습니다**).
 
 > [!WARNING]
-> Other implementations seen in specifications show that the **rolling code is a portion** of the total code sent. Ie the code sent is a **24 bit key** where the first **12 are the rolling code**, the **second 8 are the command** (such as lock or unlock) and the last 4 is the **checksum**. Vehicles implementing this type are also naturally susceptible as the attacker merely needs to replace the rolling code segment to be able to **use any rolling code on both frequencies**.
+> **재밍은 작동하지만**, 눈에 띄게 나타납니다. **차를 잠그는 사람이 문이 잠겼는지 확인하기 위해 단순히 테스트하면** 차가 잠기지 않았다는 것을 알게 될 것입니다. 또한, 그들이 이러한 공격을 알고 있다면 **문이 잠기는 소리**가 나지 않거나 **차량의 불빛**이 잠금 버튼을 눌렀을 때 깜박이지 않았다는 것을 들을 수 있습니다.
+
+### **코드 캡처 공격(일명 ‘롤잼’)**
+
+이는 보다 **은밀한 재밍 기술**입니다. 공격자는 신호를 방해하여 피해자가 문을 잠그려고 할 때 작동하지 않게 하지만, 공격자는 **이 코드를 기록**합니다. 그런 다음 피해자는 버튼을 눌러 **차를 다시 잠그려고 시도**하고 차량은 **이 두 번째 코드를 기록**합니다.\
+즉시 이후에 **공격자는 첫 번째 코드를 전송**하고 **차량이 잠깁니다**(피해자는 두 번째 눌림으로 잠겼다고 생각할 것입니다). 그런 다음 공격자는 **두 번째 도난 코드를 전송하여** 차량을 열 수 있습니다( **"차 닫기" 코드가 차량을 여는 데 사용될 수 있다고 가정할 때**). 주파수 변경이 필요할 수 있습니다(차량이 열고 닫는 데 동일한 코드를 사용하지만 서로 다른 주파수에서 두 명령을 듣는 경우).
+
+공격자는 **차량 수신기를 방해하고 자신의 수신기를 방해하지 않을 수 있습니다.** 예를 들어 차량 수신기가 1MHz 대역폭에서 듣고 있다면, 공격자는 리모컨이 사용하는 정확한 주파수를 **방해하지 않고** 그 스펙트럼에서 **가까운 주파수를 방해**하면서 **공격자의 수신기는 더 작은 범위에서** 리모컨 신호를 **방해 신호 없이 들을 수 있습니다.**
+
+> [!WARNING]
+> 사양에서 본 다른 구현은 **롤링 코드가 전송된 총 코드의 일부**임을 보여줍니다. 즉, 전송된 코드는 **24비트 키**이며, 처음 **12비트는 롤링 코드**, **다음 8비트는 명령**(잠금 또는 잠금 해제와 같은)이고 마지막 4비트는 **체크섬**입니다. 이러한 유형을 구현하는 차량은 공격자가 롤링 코드 세그먼트를 교체하기만 하면 **두 주파수에서 모든 롤링 코드를 사용할 수 있게 됩니다.**
 
 > [!CAUTION]
-> Note that if the victim sends a third code while the attacker is sending the first one, the first and second code will be invalidated.
+> 피해자가 공격자가 첫 번째 코드를 전송하는 동안 세 번째 코드를 전송하면 첫 번째 및 두 번째 코드는 무효화됩니다.
 
-### Alarm Sounding Jamming Attack
+### 경고음 재밍 공격
 
-Testing against an aftermarket rolling code system installed on a car, **sending the same code twice** immediately **activated the alarm** and immobiliser providing a unique **denial of service** opportunity. Ironically the means of **disabling the alarm** and immobiliser was to **press** the **remote**, providing an attacker with the ability to **continually perform DoS attack**. Or mix this attack with the **previous one to obtain more codes** as the victim would like to stop the attack asap.
+차량에 설치된 애프터마켓 롤링 코드 시스템에 대한 테스트에서, **같은 코드를 두 번 전송하면** 즉시 **알람**과 **이모빌라이저**가 활성화되어 독특한 **서비스 거부** 기회를 제공합니다. 아이러니하게도 **알람**과 **이모빌라이저를 비활성화하는 방법은 **리모컨을 누르는 것**이었으며, 이는 공격자가 **지속적으로 DoS 공격을 수행할 수 있는 능력을 제공합니다.** 또는 피해자가 공격을 최대한 빨리 중단하고 싶어하므로 **이 공격과 이전 공격을 혼합하여 더 많은 코드를 얻을 수 있습니다.**
 
-## References
+## 참고 문헌
 
 - [https://www.americanradioarchives.com/what-radio-frequency-does-car-key-fobs-run-on/](https://www.americanradioarchives.com/what-radio-frequency-does-car-key-fobs-run-on/)
 - [https://www.andrewmohawk.com/2016/02/05/bypassing-rolling-code-systems/](https://www.andrewmohawk.com/2016/02/05/bypassing-rolling-code-systems/)
@@ -85,4 +85,3 @@ Testing against an aftermarket rolling code system installed on a car, **sending
 - [https://hackaday.io/project/164566-how-to-hack-a-car/details](https://hackaday.io/project/164566-how-to-hack-a-car/details)
 
 {{#include ../../banners/hacktricks-training.md}}
-

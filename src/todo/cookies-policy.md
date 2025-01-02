@@ -1,47 +1,45 @@
-# Cookies Policy
+# 쿠키 정책
 
-Last updated: 02/04/2023
+최종 업데이트: 2023년 4월 2일
 
-### Introduction
+### 소개
 
-This Cookies Policy applies to the following websites owned and operated by HackTricks team ("HackTricks", "we", "us" or "our"):
+이 쿠키 정책은 HackTricks 팀("HackTricks", "우리", "저희" 또는 "우리의")이 소유하고 운영하는 다음 웹사이트에 적용됩니다:
 
 * hacktricks.xyz
 * [www.hacktricks.xyz](http://www.hacktricks.xyz/)
 * book.hacktricks.xyz
 * cloud.hacktricks.xyz
 
-By using any of these websites, you agree to the use of cookies in accordance with this Cookies Policy. If you do not agree, please disable cookies in your browser settings or refrain from using our websites.
+이 웹사이트 중 하나를 사용함으로써, 귀하는 이 쿠키 정책에 따라 쿠키 사용에 동의하는 것입니다. 동의하지 않으시면, 브라우저 설정에서 쿠키를 비활성화하거나 저희 웹사이트 사용을 자제해 주시기 바랍니다.
 
-### What are cookies?
+### 쿠키란 무엇인가요?
 
-Cookies are small text files that are stored on your computer or mobile device when you visit a website. They are widely used to make websites work, improve their functionality, and provide a more personalized user experience.
+쿠키는 웹사이트를 방문할 때 귀하의 컴퓨터나 모바일 장치에 저장되는 작은 텍스트 파일입니다. 쿠키는 웹사이트가 작동하도록 하고, 기능을 개선하며, 보다 개인화된 사용자 경험을 제공하기 위해 널리 사용됩니다.
 
-### How we use cookies
+### 쿠키 사용 방법
 
-We use cookies on our websites for the following purposes:
+저희 웹사이트에서는 다음과 같은 목적으로 쿠키를 사용합니다:
 
-1. Essential cookies: These cookies are necessary for the basic functionality of our websites, such as enabling user authentication, maintaining security, and remembering your preferences.
-2. Performance cookies: These cookies help us understand how visitors interact with our websites, by collecting and reporting information anonymously. This allows us to improve our website performance and user experience.
-3. Functionality cookies: These cookies enable our websites to remember choices you make, such as your language or region, to provide a more personalized experience.
-4. Targeting/advertising cookies: These cookies are used to deliver relevant ads and marketing communications based on your interests, browsing history, and interactions with our websites.
+1. 필수 쿠키: 이러한 쿠키는 사용자 인증을 가능하게 하고, 보안을 유지하며, 귀하의 선호 사항을 기억하는 등 저희 웹사이트의 기본 기능에 필요합니다.
+2. 성능 쿠키: 이러한 쿠키는 방문자가 저희 웹사이트와 상호작용하는 방식을 이해하는 데 도움을 주며, 정보를 익명으로 수집하고 보고합니다. 이를 통해 저희 웹사이트의 성능과 사용자 경험을 개선할 수 있습니다.
+3. 기능성 쿠키: 이러한 쿠키는 저희 웹사이트가 귀하가 선택한 언어 또는 지역과 같은 선택 사항을 기억하여 보다 개인화된 경험을 제공할 수 있게 합니다.
+4. 타겟팅/광고 쿠키: 이러한 쿠키는 귀하의 관심사, 탐색 기록 및 저희 웹사이트와의 상호작용에 따라 관련 광고 및 마케팅 커뮤니케이션을 제공하는 데 사용됩니다.
 
-Moreover, the pages book.hacktricks.xyz and cloud.hacktricks.xyz are hosted in Gitbook. You can find more information about Gitbooks cookies in [https://gitbook-1652864889.teamtailor.com/cookie-policy](https://gitbook-1652864889.teamtailor.com/cookie-policy).
+또한, book.hacktricks.xyz 및 cloud.hacktricks.xyz 페이지는 Gitbook에서 호스팅됩니다. Gitbook의 쿠키에 대한 자세한 정보는 [https://gitbook-1652864889.teamtailor.com/cookie-policy](https://gitbook-1652864889.teamtailor.com/cookie-policy)에서 확인할 수 있습니다.
 
-### Third-party cookies
+### 제3자 쿠키
 
-In addition to our own cookies, we may also use third-party cookies to report website usage statistics, deliver advertisements, and enable social media sharing buttons. The use of third-party cookies is subject to their respective privacy policies.
+저희 쿠키 외에도, 웹사이트 사용 통계 보고, 광고 제공 및 소셜 미디어 공유 버튼 활성화를 위해 제3자 쿠키를 사용할 수 있습니다. 제3자 쿠키의 사용은 해당 개인 정보 보호 정책에 따릅니다.
 
-Managing cookies
+쿠키 관리
 
-Most web browsers allow you to manage cookies through their settings. You can choose to block, delete, or limit the use of cookies on your device. However, please note that disabling cookies may affect the functionality and performance of our websites.
+대부분의 웹 브라우저는 설정을 통해 쿠키를 관리할 수 있도록 허용합니다. 귀하는 장치에서 쿠키의 사용을 차단, 삭제 또는 제한할 수 있습니다. 그러나 쿠키를 비활성화하면 저희 웹사이트의 기능과 성능에 영향을 미칠 수 있습니다.
 
-Changes to this Cookies Policy
+이 쿠키 정책의 변경
 
-We may update this Cookies Policy from time to time to reflect changes in our practices or relevant laws. We encourage you to periodically review this page for the latest information on our cookie practices.
+저희는 관행이나 관련 법률의 변경을 반영하기 위해 이 쿠키 정책을 수시로 업데이트할 수 있습니다. 최신 쿠키 관행에 대한 정보를 확인하기 위해 이 페이지를 주기적으로 검토하시기 바랍니다.
 
-### Contact us
+### 문의하기
 
-If you have any questions or concerns about this Cookies Policy, please contact us at [support@hacktricks.xyz](mailto:support@hacktricks.xyz)
-
-
+이 쿠키 정책에 대한 질문이나 우려 사항이 있으시면, [support@hacktricks.xyz](mailto:support@hacktricks.xyz)로 저희에게 연락해 주시기 바랍니다.

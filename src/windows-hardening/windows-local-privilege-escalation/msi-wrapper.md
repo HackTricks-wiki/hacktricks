@@ -2,12 +2,12 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Download the free version app from [https://www.exemsi.com/documentation/getting-started/](https://www.exemsi.com/download/), execute it and wrap the "malicious" binary on it.\
-Note that you can wrap a "**.bat**" if you **just** want to **execute** **command lines (instead of cmd.exe select the .bat file)**
+무료 버전 앱을 [https://www.exemsi.com/documentation/getting-started/](https://www.exemsi.com/download/)에서 다운로드하고 실행한 후 "악성" 바이너리를 래핑하세요.\
+**cmd.exe 대신 .bat 파일을 선택하면** **명령어를 실행**하고 싶을 경우 "**.bat**" 파일을 래핑할 수 있습니다.
 
 ![](<../../images/image (417).png>)
 
-And this is the most important part of the configuration:
+그리고 이것이 구성의 가장 중요한 부분입니다:
 
 ![](<../../images/image (312).png>)
 
@@ -15,9 +15,8 @@ And this is the most important part of the configuration:
 
 ![](<../../images/image (1072).png>)
 
-(Please, note that if you try to pack your own binary you will be able to modify these values)
+(자신의 바이너리를 패킹하려고 하면 이러한 값을 수정할 수 있습니다)
 
-From here just click on **next buttons** and the last **build button and your installer/wrapper will be generated.**
+여기서 **다음 버튼**을 클릭하고 마지막 **빌드 버튼**을 클릭하면 설치 프로그램/래퍼가 생성됩니다.
 
 {{#include ../../banners/hacktricks-training.md}}
-

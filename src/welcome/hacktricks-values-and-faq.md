@@ -5,17 +5,17 @@
 ## HackTricks Values
 
 > [!TIP]
-> These are the **values of the HackTricks Project**:
+> 이것은 **HackTricks 프로젝트의 가치**입니다:
 >
-> - Give **FREE** access to **EDUCATIONAL hacking** resources to **ALL** Internet.
->   - Hacking is about learning, and learning should be as free as possible.
->   - The purpose of this book is to serve as a comprehensive **educational resource**.
-> - **STORE** awesome **hacking** techniques that the community publishes giving the **ORIGINAL** **AUTHORS** all the **credits**.
->   - **We don't want the credit from other people**, we just want to store cool tricks for everyone.
->   - We also write **our own researches** in HackTricks.
->   - In several cases we will just write **in HackTricks a summary of the important parts** of the technique and will **encourage the lector to visit the original post** for more details.
-> - **ORGANIZE** all the hacking techniques in the book so it's **MORE ACCESSIBLE**
->   - The HackTricks team has dedicated thousands of hours for free **only to organize the content** so people can **learn faster**
+> - **모든** 인터넷 사용자에게 **무료**로 **교육적인 해킹** 리소스를 제공합니다.
+>   - 해킹은 배우는 것이며, 배우는 것은 가능한 한 무료여야 합니다.
+>   - 이 책의 목적은 포괄적인 **교육 리소스**로서의 역할을 하는 것입니다.
+> - 커뮤니티가 게시한 멋진 **해킹** 기술을 **저장**하고 **원래 저자**에게 모든 **크레딧**을 부여합니다.
+>   - **우리는 다른 사람에게서 크레딧을 원하지 않습니다**, 우리는 단지 모두를 위해 멋진 트릭을 저장하고 싶습니다.
+>   - 우리는 또한 HackTricks에서 **우리의 연구**를 작성합니다.
+>   - 여러 경우에 우리는 기술의 중요한 부분에 대한 **요약을 HackTricks에 작성하고** 더 많은 세부정보를 위해 **원래 게시물을 방문하도록 독자를 권장할 것입니다**.
+> - 책의 모든 해킹 기술을 **조직화**하여 **더 접근 가능하게** 만듭니다.
+>   - HackTricks 팀은 사람들이 **더 빠르게 배울 수 있도록** 콘텐츠를 **조직화하는 데** 수천 시간을 무료로 헌신했습니다.
 
 <figure><img src="../images/hack tricks gif.gif" alt="" width="375"><figcaption></figcaption></figure>
 
@@ -23,124 +23,121 @@
 
 > [!TIP]
 >
-> - **Thank you so much for these resources, how can I thank you?**
+> - **이 리소스에 대해 정말 감사합니다. 어떻게 감사할 수 있을까요?**
 
-You can publicly thanks HackTricks teams for putting together all these resources publicly in a tweet mentioning [**@hacktricks_live**](https://twitter.com/hacktricks_live).\
-If you are specially grateful you can also [**sponsor the project here**](https://github.com/sponsors/carlospolop).\
-And don't forget to **give a star in the Github projects!** (Find the links below).
+HackTricks 팀이 모든 리소스를 공개적으로 모아준 것에 대해 [**@hacktricks_live**](https://twitter.com/hacktricks_live)를 언급하며 트윗으로 공개적으로 감사할 수 있습니다.\
+특별히 감사한 마음이 있다면 [**여기에서 프로젝트를 후원할 수 있습니다**](https://github.com/sponsors/carlospolop).\
+그리고 **Github 프로젝트에 별을 주는 것을 잊지 마세요!** (아래 링크를 찾으세요).
 
 > [!TIP]
 >
-> - **How can I contribute to the project?**
+> - **프로젝트에 어떻게 기여할 수 있나요?**
 
-You can **share new tips and tricks with the community or fix bugs** you find in the books sending a **Pull Request** to the respective Github pages:
+커뮤니티와 **새로운 팁과 트릭을 공유하거나** 책에서 발견한 버그를 수정하여 **Pull Request**를 해당 Github 페이지에 보낼 수 있습니다:
 
 - [https://github.com/carlospolop/hacktricks](https://github.com/carlospolop/hacktricks)
 - [https://github.com/carlospolop/hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)
 
-Don't forget to **give a star in the Github projects!**
+**Github 프로젝트에 별을 주는 것을 잊지 마세요!**
 
 > [!TIP]
 >
-> - **Can I copy some content from HackTricks and put it in my blog?**
+> - **HackTricks의 일부 콘텐츠를 복사하여 내 블로그에 올릴 수 있나요?**
 
-Yes, you can, but **don't forget to mention the specific link(s)** where the content was taken from.
+네, 가능합니다. 하지만 **콘텐츠가 어디에서 가져온 것인지에 대한 특정 링크를 언급하는 것을 잊지 마세요.**
 
 > [!TIP]
 >
-> - **How can I cite a page of HackTricks?**
+> - **HackTricks의 페이지를 어떻게 인용할 수 있나요?**
 
-As long as the link **of** the page(s) were you took the information from appears it's enough.\
-If you need a bibtex you can use something like:
-
+정보를 가져온 페이지의 **링크**가 나타나기만 하면 충분합니다.\
+bibtex가 필요하다면 다음과 같은 것을 사용할 수 있습니다:
 ```latex
 @misc{hacktricks-bibtexing,
-  author = {"HackTricks Team" or the Authors name of the specific page/trick},
-  title = {Title of the Specific Page},
-  year = {Year of Last Update (check it at the end of the page)},
-  url = {\url{https://book.hacktricks.xyz/specific-page}},
+author = {"HackTricks Team" or the Authors name of the specific page/trick},
+title = {Title of the Specific Page},
+year = {Year of Last Update (check it at the end of the page)},
+url = {\url{https://book.hacktricks.xyz/specific-page}},
 }
 ```
+> [!WARNING]
+>
+> - **내 블로그에 모든 HackTricks를 복사해도 되나요?**
+
+**그렇지 않기를 바랍니다**. 이는 **아무에게도 도움이 되지 않습니다**. 모든 **내용은 이미 공식 HackTricks 책에서 무료로 공개되어 있습니다**.
+
+사라질까 두려우시다면, 그냥 Github에서 포크하거나 다운로드하세요. 이미 무료입니다.
 
 > [!WARNING]
 >
-> - **Can I copy all HackTricks in my blog?**
+> - **왜 후원자가 있나요? HackTricks 책은 상업적 목적으로 만들어졌나요?**
 
-**I would rather not**. Thats **not going to benefit anyone** as all the **content is already publicly available** in the official HackTricks books for free.
+첫 번째 **HackTricks** **가치**는 **모든** 사람에게 **무료** 해킹 교육 자료를 제공하는 것입니다. HackTricks 팀은 이 콘텐츠를 제공하기 위해 **수천 시간을 헌신했습니다**, 다시 말해 **무료**로 제공하고 있습니다.
 
-If you fear that it will disappear, just fork it in Github or download it, as I said it's already free.
+HackTricks 책이 **상업적 목적**을 위해 만들어졌다고 생각하신다면, **완전히 잘못된 생각입니다**.
 
-> [!WARNING]
->
-> - **Why do you have sponsors? Are HackTricks books for commercial purposes?**
+우리는 후원자가 있습니다. 모든 콘텐츠가 무료이지만, 우리는 **커뮤니티가 우리의 작업을 감사할 수 있는 가능성을 제공하고 싶습니다**. 따라서, 우리는 사람들이 [**Github 후원자**](https://github.com/sponsors/carlospolop)를 통해 HackTricks에 기부할 수 있는 옵션과 **관련 사이버 보안 회사들**이 HackTricks를 후원하고 **책에 광고를 게재할 수 있는 옵션**을 제공합니다. 이 광고는 항상 **가시적**이지만 **학습** 과정에 방해가 되지 않는 곳에 배치됩니다.
 
-The first **HackTricks** **value** is to offer **FREE** hacking educational resources to **ALL** the world. The HackTricks team has **dedicated thousands of hours** to offer this content, again, for **FREE**.
-
-If you think HackTricks books are made for **commercial purposes** you are **COMPLETELY WRONG**.
-
-We have sponsors because, even if all the content is FREE, we want to **offer the community the possibility of appreciating our work** if they want to. Therefore, we offer people the option to donate to HackTricks via [**Github sponsors**](https://github.com/sponsors/carlospolop), and **relevant cybersecurity companies** to sponsor HackTricks and to **have some ads** in the book being the **ads** always placed in places where make them **visible** but **doesn't disturb the learning** process if someone focus in the content.
-
-You won't find HackTricks filled with annoying ads like other blogs with much less content than HackTricks, because HackTricks is not made for commercial purposes.
+HackTricks는 HackTricks보다 훨씬 적은 콘텐츠를 가진 다른 블로그처럼 성가신 광고로 가득 차지 않을 것입니다. 왜냐하면 HackTricks는 상업적 목적을 위해 만들어지지 않았기 때문입니다.
 
 > [!CAUTION]
 >
-> - **What should I do if some HackTricks page is based on my blog post but it isn't referenced?**
+> - **내 블로그 게시물을 기반으로 한 HackTricks 페이지가 있지만 참조되지 않았다면 어떻게 해야 하나요?**
 
-**We are very sorry. This shouldn't have happened**. Please, let us know via Github issues, Twitter, Discord... the link of the HackTricks page with the content and the link of your blog and **we will check it and add it ASAP**.
-
-> [!CAUTION]
->
-> - **What should I do if there is content from my blog in HackTricks and I don't want it there?**
-
-Note that having links to your page in HackTricks:
-
-- Improve your **SEO**
-- The content gets **translated to more than 15 languages** making possible for more people to access this content
-- **HackTricks encourages** people to **check your page** (several people has mentioned us that since some page of them is in HackTricks they receive more visits)
-
-However, If you still want the content of your blog to be removed from HackTricks just let us know and we will definitely **remove every link to your blog**, and any content based on it.
+**죄송합니다. 이런 일이 발생해서는 안 됩니다**. HackTricks 페이지의 링크와 귀하의 블로그 링크를 Github 이슈, Twitter, Discord 등을 통해 알려주시면 **확인하고 ASAP 추가하겠습니다**.
 
 > [!CAUTION]
 >
-> - **What should I do if I find copy-pasted content in HackTricks?**
+> - **내 블로그의 콘텐츠가 HackTricks에 있는데 거기 있기를 원하지 않으면 어떻게 해야 하나요?**
 
-We always **give the original authors all the credits**. If you find a page with copy-pasted content without original source referenced, let us know and we will either **remove it**, **add the link before the text**, or **rewrite it adding the link**.
+HackTricks에 귀하의 페이지 링크가 있는 것은:
+
+- 귀하의 **SEO**를 개선합니다.
+- 콘텐츠가 **15개 이상의 언어로 번역되어** 더 많은 사람들이 이 콘텐츠에 접근할 수 있게 됩니다.
+- **HackTricks는** 사람들이 **귀하의 페이지를 확인하도록 장려합니다** (여러 사람들이 HackTricks에 자신의 페이지가 포함된 이후로 더 많은 방문을 받았다고 언급했습니다).
+
+그러나 여전히 귀하의 블로그 콘텐츠가 HackTricks에서 제거되기를 원하신다면, 알려주시면 **귀하의 블로그에 대한 모든 링크**와 그에 기반한 콘텐츠를 **확실히 제거하겠습니다**.
+
+> [!CAUTION]
+>
+> - **HackTricks에서 복사-붙여넣기된 콘텐츠를 발견하면 어떻게 해야 하나요?**
+
+우리는 항상 **원래 저자에게 모든 크레딧을 부여합니다**. 원본 출처가 참조되지 않은 복사-붙여넣기된 콘텐츠가 있는 페이지를 발견하면 알려주시면 **제거하거나**, **텍스트 앞에 링크를 추가하거나**, **링크를 추가하여 다시 작성하겠습니다**.
 
 ## LICENSE
 
-Copyright © All rights reserved unless otherwise specified.
+Copyright © 모든 권리 보유. 별도로 명시되지 않는 한.
 
-#### License Summary:
+#### 라이센스 요약:
 
-- Attribution: You are free to:
-  - Share — copy and redistribute the material in any medium or format.
-  - Adapt — remix, transform, and build upon the material.
+- 저작권 표시: 귀하는 자유롭게:
+- 공유 — 모든 매체나 형식으로 자료를 복사하고 재배포할 수 있습니다.
+- 수정 — 자료를 리믹스하고 변형하며 기반을 구축할 수 있습니다.
 
-#### Additional Terms:
+#### 추가 조건:
 
-- Third-Party Content: Some parts of this blog/book may include content from other sources, such as excerpts from other blogs or publications. The use of such content is done under the principles of fair use or with explicit permission from the respective copyright holders. Please refer to the original sources for specific licensing information regarding third-party content.
-- Authorship: The original content authored by HackTricks is subject to the terms of this license. You are encouraged to attribute this work to the author when sharing or adapting it.
+- 제3자 콘텐츠: 이 블로그/책의 일부는 다른 블로그나 출판물의 발췌와 같은 다른 출처의 콘텐츠를 포함할 수 있습니다. 이러한 콘텐츠의 사용은 공정 사용의 원칙에 따라 이루어지거나 해당 저작권 소유자의 명시적인 허가를 받습니다. 제3자 콘텐츠에 대한 특정 라이센스 정보는 원본 출처를 참조하십시오.
+- 저작권: HackTricks가 저작한 원본 콘텐츠는 이 라이센스의 조건에 따릅니다. 공유하거나 수정할 때 이 작업을 저자에게 귀속시키는 것이 권장됩니다.
 
-#### Exemptions:
+#### 면제:
 
-- Commercial Use: For inquiries regarding commercial use of this content, please contact me.
+- 상업적 사용: 이 콘텐츠의 상업적 사용에 대한 문의는 저에게 연락해 주십시오.
 
-This license does not grant any trademark or branding rights in relation to the content. All trademarks and branding featured in this blog/book are the property of their respective owners.
+이 라이센스는 콘텐츠와 관련하여 상표 또는 브랜드 권리를 부여하지 않습니다. 이 블로그/책에 포함된 모든 상표 및 브랜드는 해당 소유자의 재산입니다.
 
-**By accessing or using HackTricks, you agree to abide by the terms of this license. If you do not agree with these terms, please, do not access this website.**
+**HackTricks에 접근하거나 사용함으로써 귀하는 이 라이센스의 조건을 준수할 것에 동의합니다. 이 조건에 동의하지 않으면 이 웹사이트에 접근하지 마십시오.**
 
-## **Disclaimer**
+## **면책 조항**
 
 > [!CAUTION]
-> This book, 'HackTricks,' is intended for educational and informational purposes only. The content within this book is provided on an 'as is' basis, and the authors and publishers make no representations or warranties of any kind, express or implied, about the completeness, accuracy, reliability, suitability, or availability of the information, products, services, or related graphics contained within this book. Any reliance you place on such information is therefore strictly at your own risk.
+> 이 책 'HackTricks'는 교육 및 정보 제공 목적으로만 사용됩니다. 이 책의 내용은 '있는 그대로' 제공되며, 저자와 출판사는 이 책에 포함된 정보, 제품, 서비스 또는 관련 그래픽의 완전성, 정확성, 신뢰성, 적합성 또는 가용성에 대해 명시적이거나 암시적인 어떤 종류의 진술이나 보증을 하지 않습니다. 따라서 귀하가 이러한 정보에 의존하는 것은 전적으로 귀하의 위험입니다.
 >
-> The authors and publishers shall in no event be liable for any loss or damage, including without limitation, indirect or consequential loss or damage, or any loss or damage whatsoever arising from loss of data or profits arising out of, or in connection with, the use of this book.
+> 저자와 출판사는 데이터 손실이나 이익 손실로 인해 발생하는 모든 손실이나 손해, 간접적 또는 결과적 손실이나 손해를 포함하여, 이 책의 사용과 관련하여 발생하는 모든 손실이나 손해에 대해 어떤 경우에도 책임을 지지 않습니다.
 >
-> Furthermore, the techniques and tips described in this book are provided for educational and informational purposes only, and should not be used for any illegal or malicious activities. The authors and publishers do not condone or support any illegal or unethical activities, and any use of the information contained within this book is at the user's own risk and discretion.
+> 또한, 이 책에 설명된 기술과 팁은 교육 및 정보 제공 목적으로만 제공되며, 불법 또는 악의적인 활동에 사용되어서는 안 됩니다. 저자와 출판사는 불법 또는 비윤리적인 활동을 용인하거나 지지하지 않으며, 이 책에 포함된 정보를 사용하는 것은 사용자의 위험과 재량에 따라 이루어집니다.
 >
-> The user is solely responsible for any actions taken based on the information contained within this book, and should always seek professional advice and assistance when attempting to implement any of the techniques or tips described herein.
+> 사용자는 이 책에 포함된 정보를 기반으로 취한 모든 행동에 대해 전적으로 책임이 있으며, 이 책에 설명된 기술이나 팁을 구현하려고 할 때 항상 전문가의 조언과 도움을 구해야 합니다.
 >
-> By using this book, the user agrees to release the authors and publishers from any and all liability and responsibility for any damages, losses, or harm that may result from the use of this book or any of the information contained within it.
+> 이 책을 사용함으로써 사용자는 이 책이나 그 안에 포함된 정보의 사용으로 인해 발생할 수 있는 모든 손해, 손실 또는 피해에 대해 저자와 출판사를 면책하는 데 동의합니다.
 
 {{#include ../banners/hacktricks-training.md}}
-

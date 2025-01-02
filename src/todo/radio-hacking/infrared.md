@@ -1,82 +1,81 @@
-# Infrared
+# 적외선
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## How the Infrared Works <a href="#how-the-infrared-port-works" id="how-the-infrared-port-works"></a>
+## 적외선 작동 원리 <a href="#how-the-infrared-port-works" id="how-the-infrared-port-works"></a>
 
-**Infrared light is invisible to humans**. IR wavelength is from **0.7 to 1000 microns**. Household remotes use an IR signal for data transmission and operate in the wavelength range of 0.75..1.4 microns. A microcontroller in the remote makes an infrared LED blink with a specific frequency, turning the digital signal into an IR signal.
+**적외선은 인간에게 보이지 않습니다**. IR 파장은 **0.7에서 1000 마이크론**입니다. 가정용 리모컨은 데이터 전송을 위해 IR 신호를 사용하며, 0.75..1.4 마이크론의 파장 범위에서 작동합니다. 리모컨의 마이크로컨트롤러는 특정 주파수로 적외선 LED를 깜박이게 하여 디지털 신호를 IR 신호로 변환합니다.
 
-To receive IR signals a **photoreceiver** is used. It **converts IR light into voltage pulses**, which are already **digital signals**. Usually, there is a **dark light filter inside the receiver**, which lets **only the desired wavelength through** and cuts out noise.
+IR 신호를 수신하기 위해 **포토리시버**가 사용됩니다. 이는 **IR 빛을 전압 펄스로 변환**하며, 이는 이미 **디지털 신호**입니다. 일반적으로 수신기 내부에는 **어두운 빛 필터**가 있어 **원하는 파장만 통과**시키고 잡음을 차단합니다.
 
-### Variety of IR Protocols <a href="#variety-of-ir-protocols" id="variety-of-ir-protocols"></a>
+### 다양한 IR 프로토콜 <a href="#variety-of-ir-protocols" id="variety-of-ir-protocols"></a>
 
-IR protocols differ in 3 factors:
+IR 프로토콜은 3가지 요소에서 다릅니다:
 
-- bit encoding
-- data structure
-- carrier frequency — often in range 36..38 kHz
+- 비트 인코딩
+- 데이터 구조
+- 반송 주파수 — 일반적으로 36..38 kHz 범위
 
-#### Bit encoding ways <a href="#bit-encoding-ways" id="bit-encoding-ways"></a>
+#### 비트 인코딩 방식 <a href="#bit-encoding-ways" id="bit-encoding-ways"></a>
 
-**1. Pulse Distance Encoding**
+**1. 펄스 간격 인코딩**
 
-Bits are encoded by modulating the duration of the space between pulses. The width of the pulse itself is constant.
+비트는 펄스 간의 간격 지속 시간을 조절하여 인코딩됩니다. 펄스 자체의 너비는 일정합니다.
 
 <figure><img src="../../images/image (295).png" alt=""><figcaption></figcaption></figure>
 
-**2. Pulse Width Encoding**
+**2. 펄스 폭 인코딩**
 
-Bits are encoded by modulation of the pulse width. The width of space after pulse burst is constant.
+비트는 펄스 폭의 변조로 인코딩됩니다. 펄스 폭 후의 간격 너비는 일정합니다.
 
 <figure><img src="../../images/image (282).png" alt=""><figcaption></figcaption></figure>
 
-**3. Phase Encoding**
+**3. 위상 인코딩**
 
-It is also known as Manchester encoding. The logical value is defined by the polarity of the transition between pulse burst and space. "Space to pulse burst" denotes logic "0", "pulse burst to space" denotes logic "1".
+맨체스터 인코딩으로도 알려져 있습니다. 논리 값은 펄스 폭과 간격 간의 전환의 극성에 의해 정의됩니다. "간격에서 펄스 폭"은 논리 "0"을 나타내고, "펄스 폭에서 간격"은 논리 "1"을 나타냅니다.
 
 <figure><img src="../../images/image (634).png" alt=""><figcaption></figcaption></figure>
 
-**4. Combination of previous ones and other exotics**
+**4. 이전 방식과 기타 이국적인 조합**
 
 > [!NOTE]
-> There are IR protocols that are **trying to become universal** for several types of devices. The most famous ones are RC5 and NEC. Unfortunately, the most famous **does not mean the most common**. In my environment, I met just two NEC remotes and no RC5 ones.
+> 여러 유형의 장치에 대해 **보편적이 되려고 하는** IR 프로토콜이 있습니다. 가장 유명한 것은 RC5와 NEC입니다. 불행히도, 가장 유명하다고 해서 가장 일반적이라는 의미는 아닙니다. 제 환경에서는 NEC 리모컨 두 개만 보았고 RC5는 없었습니다.
 >
-> Manufacturers love to use their own unique IR protocols, even within the same range of devices (for example, TV-boxes). Therefore, remotes from different companies and sometimes from different models from the same company, are unable to work with other devices of the same type.
+> 제조업체는 동일한 장치 범위 내에서도 고유한 IR 프로토콜을 사용하는 것을 좋아합니다(예: TV 박스). 따라서 서로 다른 회사의 리모컨과 때로는 동일한 회사의 서로 다른 모델의 리모컨은 동일한 유형의 다른 장치와 작동할 수 없습니다.
 
-### Exploring an IR signal
+### IR 신호 탐색
 
-The most reliable way to see how the remote IR signal looks like is to use an oscilloscope. It does not demodulate or invert the received signal, it is just displayed "as is". This is useful for testing and debugging. I will show the expected signal on the example of the NEC IR protocol.
+리모컨의 IR 신호가 어떻게 생겼는지 확인하는 가장 신뢰할 수 있는 방법은 오실로스코프를 사용하는 것입니다. 이는 수신된 신호를 복조하거나 반전하지 않고 "있는 그대로" 표시합니다. 이는 테스트 및 디버깅에 유용합니다. NEC IR 프로토콜의 예를 통해 예상 신호를 보여드리겠습니다.
 
 <figure><img src="../../images/image (235).png" alt=""><figcaption></figcaption></figure>
 
-Usually, there is a preamble at the beginning of an encoded packet. This allows the receiver to determine the level of gain and background. There are also protocols without preamble, for example, Sharp.
+일반적으로 인코딩된 패킷의 시작 부분에는 프리앰블이 있습니다. 이는 수신기가 이득 수준과 배경을 결정할 수 있게 해줍니다. 프리앰블이 없는 프로토콜도 있으며, 예를 들어 Sharp가 있습니다.
 
-Then data is transmitted. The structure, preamble, and bit encoding method are determined by the specific protocol.
+그런 다음 데이터가 전송됩니다. 구조, 프리앰블 및 비트 인코딩 방법은 특정 프로토콜에 의해 결정됩니다.
 
-**NEC IR protocol** contains a short command and a repeat code, which is sent while the button is pressed. Both the command and the repeat code have the same preamble at the beginning.
+**NEC IR 프로토콜**은 짧은 명령과 반복 코드를 포함하며, 버튼이 눌리는 동안 전송됩니다. 명령과 반복 코드 모두 시작 부분에 동일한 프리앰블을 가지고 있습니다.
 
-NEC **command**, in addition to the preamble, consists of an address byte and a command-number byte, by which the device understands what needs to be performed. Address and command-number bytes are duplicated with inverse values, to check the integrity of the transmission. There is an additional stop bit at the end of the command.
+NEC **명령**은 프리앰블 외에도 주소 바이트와 명령 번호 바이트로 구성되어 있으며, 이를 통해 장치는 수행해야 할 작업을 이해합니다. 주소 및 명령 번호 바이트는 전송의 무결성을 확인하기 위해 역값으로 중복됩니다. 명령의 끝에는 추가적인 정지 비트가 있습니다.
 
-The **repeat code** has a "1" after the preamble, which is a stop bit.
+**반복 코드**는 프리앰블 뒤에 "1"이 있으며, 이는 정지 비트입니다.
 
-For **logic "0" and "1"** NEC uses Pulse Distance Encoding: first, a pulse burst is transmitted after which there is a pause, its length sets the value of the bit.
+**논리 "0"과 "1"**에 대해 NEC는 펄스 간격 인코딩을 사용합니다: 먼저 펄스 폭이 전송된 후 그 뒤에 간격이 있으며, 그 길이가 비트의 값을 설정합니다.
 
-### Air Conditioners
+### 에어컨
 
-Unlike other remotes, **air conditioners do not transmit just the code of the pressed button**. They also **transmit all the information** when a button is pressed to assure that the **air conditioned machine and the remote are synchronised**.\
-This will avoid that a machine set as 20ºC is increased to 21ºC with one remote, and then when another remote, which still has the temperature as 20ºC, is used to increase more the temperature, it will "increase" it to 21ºC (and not to 22ºC thinking it's in 21ºC).
+다른 리모컨과 달리 **에어컨은 눌린 버튼의 코드만 전송하지 않습니다**. 버튼이 눌릴 때 **모든 정보를 전송**하여 **에어컨과 리모컨이 동기화되도록** 합니다.\
+이렇게 하면 20ºC로 설정된 기계가 한 리모컨으로 21ºC로 증가하고, 다른 리모컨이 여전히 20ºC로 설정되어 있을 때 온도를 더 높이려고 하면 21ºC로 "증가"하게 됩니다(21ºC에 있다고 생각하고 22ºC로 증가하지 않음).
 
-### Attacks
+### 공격
 
-You can attack Infrared with Flipper Zero:
+Flipper Zero로 적외선을 공격할 수 있습니다:
 
 {{#ref}}
 flipper-zero/fz-infrared.md
 {{#endref}}
 
-## References
+## 참고 문헌
 
 - [https://blog.flipperzero.one/infrared/](https://blog.flipperzero.one/infrared/)
 
 {{#include ../../banners/hacktricks-training.md}}
-

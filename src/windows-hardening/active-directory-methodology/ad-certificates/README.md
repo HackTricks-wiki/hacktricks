@@ -6,107 +6,102 @@
 
 ### Components of a Certificate
 
-- The **Subject** of the certificate denotes its owner.
-- A **Public Key** is paired with a privately held key to link the certificate to its rightful owner.
-- The **Validity Period**, defined by **NotBefore** and **NotAfter** dates, marks the certificate's effective duration.
-- A unique **Serial Number**, provided by the Certificate Authority (CA), identifies each certificate.
-- The **Issuer** refers to the CA that has issued the certificate.
-- **SubjectAlternativeName** allows for additional names for the subject, enhancing identification flexibility.
-- **Basic Constraints** identify if the certificate is for a CA or an end entity and define usage restrictions.
-- **Extended Key Usages (EKUs)** delineate the certificate's specific purposes, like code signing or email encryption, through Object Identifiers (OIDs).
-- The **Signature Algorithm** specifies the method for signing the certificate.
-- The **Signature**, created with the issuer's private key, guarantees the certificate's authenticity.
+- 인증서의 **주체**는 소유자를 나타냅니다.
+- **공개 키**는 개인 키와 쌍을 이루어 인증서를 정당한 소유자와 연결합니다.
+- **유효 기간**은 **NotBefore** 및 **NotAfter** 날짜로 정의되며, 인증서의 유효 기간을 표시합니다.
+- 고유한 **일련 번호**는 인증 기관(CA)에서 제공하며 각 인증서를 식별합니다.
+- **발급자**는 인증서를 발급한 CA를 나타냅니다.
+- **SubjectAlternativeName**은 주체에 대한 추가 이름을 허용하여 식별 유연성을 향상시킵니다.
+- **기본 제약 조건**은 인증서가 CA용인지 최종 엔티티용인지 식별하고 사용 제한을 정의합니다.
+- **확장 키 사용(EKUs)**은 인증서의 특정 목적을 정의하며, 코드 서명 또는 이메일 암호화와 같은 용도로 객체 식별자(OIDs)를 통해 구분합니다.
+- **서명 알고리즘**은 인증서 서명 방법을 지정합니다.
+- **서명**은 발급자의 개인 키로 생성되어 인증서의 진위를 보장합니다.
 
 ### Special Considerations
 
-- **Subject Alternative Names (SANs)** expand a certificate's applicability to multiple identities, crucial for servers with multiple domains. Secure issuance processes are vital to avoid impersonation risks by attackers manipulating the SAN specification.
+- **주체 대체 이름(SANs)**은 인증서의 적용 범위를 여러 신원으로 확장하여 여러 도메인을 가진 서버에 중요합니다. 공격자가 SAN 사양을 조작하여 사칭 위험을 피하기 위해 안전한 발급 프로세스가 필수적입니다.
 
 ### Certificate Authorities (CAs) in Active Directory (AD)
 
-AD CS acknowledges CA certificates in an AD forest through designated containers, each serving unique roles:
+AD CS는 AD 포리스트 내에서 지정된 컨테이너를 통해 CA 인증서를 인식하며, 각 컨테이너는 고유한 역할을 수행합니다:
 
-- **Certification Authorities** container holds trusted root CA certificates.
-- **Enrolment Services** container details Enterprise CAs and their certificate templates.
-- **NTAuthCertificates** object includes CA certificates authorized for AD authentication.
-- **AIA (Authority Information Access)** container facilitates certificate chain validation with intermediate and cross CA certificates.
+- **인증 기관** 컨테이너는 신뢰할 수 있는 루트 CA 인증서를 보유합니다.
+- **등록 서비스** 컨테이너는 엔터프라이즈 CA 및 해당 인증서 템플릿을 자세히 설명합니다.
+- **NTAuthCertificates** 객체는 AD 인증을 위해 승인된 CA 인증서를 포함합니다.
+- **AIA (Authority Information Access)** 컨테이너는 중간 및 교차 CA 인증서와 함께 인증서 체인 검증을 용이하게 합니다.
 
 ### Certificate Acquisition: Client Certificate Request Flow
 
-1. The request process begins with clients finding an Enterprise CA.
-2. A CSR is created, containing a public key and other details, after generating a public-private key pair.
-3. The CA assesses the CSR against available certificate templates, issuing the certificate based on the template's permissions.
-4. Upon approval, the CA signs the certificate with its private key and returns it to the client.
+1. 요청 프로세스는 클라이언트가 엔터프라이즈 CA를 찾는 것으로 시작됩니다.
+2. 공개-개인 키 쌍을 생성한 후, 공개 키 및 기타 세부 정보를 포함하는 CSR이 생성됩니다.
+3. CA는 사용 가능한 인증서 템플릿에 대해 CSR을 평가하고, 템플릿의 권한에 따라 인증서를 발급합니다.
+4. 승인 후, CA는 개인 키로 인증서에 서명하고 클라이언트에게 반환합니다.
 
 ### Certificate Templates
 
-Defined within AD, these templates outline the settings and permissions for issuing certificates, including permitted EKUs and enrollment or modification rights, critical for managing access to certificate services.
+AD 내에서 정의된 이러한 템플릿은 인증서 발급을 위한 설정 및 권한을 개요하며, 허용된 EKU 및 등록 또는 수정 권한을 포함하여 인증서 서비스에 대한 접근 관리를 위해 중요합니다.
 
 ## Certificate Enrollment
 
-The enrollment process for certificates is initiated by an administrator who **creates a certificate template**, which is then **published** by an Enterprise Certificate Authority (CA). This makes the template available for client enrollment, a step achieved by adding the template's name to the `certificatetemplates` field of an Active Directory object.
+인증서 등록 프로세스는 관리자가 **인증서 템플릿을 생성**함으로써 시작되며, 이후 **엔터프라이즈 인증 기관(CA)**에 의해 **게시**됩니다. 이는 템플릿을 클라이언트 등록에 사용할 수 있도록 하며, 이는 Active Directory 객체의 `certificatetemplates` 필드에 템플릿 이름을 추가하여 달성됩니다.
 
-For a client to request a certificate, **enrollment rights** must be granted. These rights are defined by security descriptors on the certificate template and the Enterprise CA itself. Permissions must be granted in both locations for a request to be successful.
+클라이언트가 인증서를 요청하려면 **등록 권한**이 부여되어야 합니다. 이러한 권한은 인증서 템플릿 및 엔터프라이즈 CA 자체의 보안 설명자에 의해 정의됩니다. 요청이 성공하려면 두 위치 모두에서 권한이 부여되어야 합니다.
 
 ### Template Enrollment Rights
 
-These rights are specified through Access Control Entries (ACEs), detailing permissions like:
+이러한 권한은 Access Control Entries (ACEs)를 통해 지정되며, 다음과 같은 권한을 자세히 설명합니다:
 
-- **Certificate-Enrollment** and **Certificate-AutoEnrollment** rights, each associated with specific GUIDs.
-- **ExtendedRights**, allowing all extended permissions.
-- **FullControl/GenericAll**, providing complete control over the template.
+- **Certificate-Enrollment** 및 **Certificate-AutoEnrollment** 권한은 각각 특정 GUID와 연결됩니다.
+- **ExtendedRights**는 모든 확장 권한을 허용합니다.
+- **FullControl/GenericAll**은 템플릿에 대한 완전한 제어를 제공합니다.
 
 ### Enterprise CA Enrollment Rights
 
-The CA's rights are outlined in its security descriptor, accessible via the Certificate Authority management console. Some settings even allow low-privileged users remote access, which could be a security concern.
+CA의 권한은 보안 설명서에 명시되어 있으며, 인증 기관 관리 콘솔을 통해 접근할 수 있습니다. 일부 설정은 낮은 권한의 사용자에게 원격 접근을 허용할 수 있으며, 이는 보안 문제를 일으킬 수 있습니다.
 
 ### Additional Issuance Controls
 
-Certain controls may apply, such as:
+일부 제어가 적용될 수 있습니다, 예를 들어:
 
-- **Manager Approval**: Places requests in a pending state until approved by a certificate manager.
-- **Enrolment Agents and Authorized Signatures**: Specify the number of required signatures on a CSR and the necessary Application Policy OIDs.
+- **관리자 승인**: 요청을 인증서 관리자가 승인할 때까지 보류 상태로 둡니다.
+- **등록 에이전트 및 승인된 서명**: CSR에 필요한 서명의 수와 필요한 응용 프로그램 정책 OID를 지정합니다.
 
 ### Methods to Request Certificates
 
-Certificates can be requested through:
+인증서는 다음을 통해 요청할 수 있습니다:
 
-1. **Windows Client Certificate Enrollment Protocol** (MS-WCCE), using DCOM interfaces.
-2. **ICertPassage Remote Protocol** (MS-ICPR), through named pipes or TCP/IP.
-3. The **certificate enrollment web interface**, with the Certificate Authority Web Enrollment role installed.
-4. The **Certificate Enrollment Service** (CES), in conjunction with the Certificate Enrollment Policy (CEP) service.
-5. The **Network Device Enrollment Service** (NDES) for network devices, using the Simple Certificate Enrollment Protocol (SCEP).
+1. **Windows Client Certificate Enrollment Protocol** (MS-WCCE), DCOM 인터페이스를 사용합니다.
+2. **ICertPassage Remote Protocol** (MS-ICPR), 명명된 파이프 또는 TCP/IP를 통해.
+3. **인증서 등록 웹 인터페이스**, 인증 기관 웹 등록 역할이 설치된 경우.
+4. **인증서 등록 서비스** (CES), 인증서 등록 정책(CEP) 서비스와 함께.
+5. **네트워크 장치 등록 서비스** (NDES) 네트워크 장치를 위한, 간단한 인증서 등록 프로토콜(SCEP)을 사용합니다.
 
-Windows users can also request certificates via the GUI (`certmgr.msc` or `certlm.msc`) or command-line tools (`certreq.exe` or PowerShell's `Get-Certificate` command).
-
+Windows 사용자는 GUI(`certmgr.msc` 또는 `certlm.msc`) 또는 명령줄 도구(`certreq.exe` 또는 PowerShell의 `Get-Certificate` 명령)를 통해 인증서를 요청할 수도 있습니다.
 ```powershell
 # Example of requesting a certificate using PowerShell
 Get-Certificate -Template "User" -CertStoreLocation "cert:\\CurrentUser\\My"
 ```
+## 인증서 인증
 
-## Certificate Authentication
+Active Directory (AD)는 인증서 인증을 지원하며, 주로 **Kerberos** 및 **Secure Channel (Schannel)** 프로토콜을 활용합니다.
 
-Active Directory (AD) supports certificate authentication, primarily utilizing **Kerberos** and **Secure Channel (Schannel)** protocols.
+### Kerberos 인증 프로세스
 
-### Kerberos Authentication Process
-
-In the Kerberos authentication process, a user's request for a Ticket Granting Ticket (TGT) is signed using the **private key** of the user's certificate. This request undergoes several validations by the domain controller, including the certificate's **validity**, **path**, and **revocation status**. Validations also include verifying that the certificate comes from a trusted source and confirming the issuer's presence in the **NTAUTH certificate store**. Successful validations result in the issuance of a TGT. The **`NTAuthCertificates`** object in AD, found at:
-
+Kerberos 인증 프로세스에서 사용자의 Ticket Granting Ticket (TGT) 요청은 사용자의 인증서의 **개인 키**를 사용하여 서명됩니다. 이 요청은 도메인 컨트롤러에 의해 인증서의 **유효성**, **경로**, 및 **폐기 상태**를 포함한 여러 검증을 거칩니다. 검증에는 인증서가 신뢰할 수 있는 출처에서 왔는지 확인하고 발급자의 존재를 **NTAUTH 인증서 저장소**에서 확인하는 것도 포함됩니다. 검증이 성공적으로 완료되면 TGT가 발급됩니다. AD의 **`NTAuthCertificates`** 객체는 다음 위치에 있습니다:
 ```bash
 CN=NTAuthCertificates,CN=Public Key Services,CN=Services,CN=Configuration,DC=<domain>,DC=<com>
 ```
+신뢰를 구축하는 데 중앙 역할을 합니다.
 
-is central to establishing trust for certificate authentication.
+### Secure Channel (Schannel) 인증
 
-### Secure Channel (Schannel) Authentication
+Schannel은 안전한 TLS/SSL 연결을 용이하게 하며, 핸드셰이크 중 클라이언트는 인증서를 제시하고, 성공적으로 검증되면 접근을 허가합니다. 인증서를 AD 계정에 매핑하는 과정은 Kerberos의 **S4U2Self** 기능이나 인증서의 **Subject Alternative Name (SAN)** 등을 포함할 수 있습니다.
 
-Schannel facilitates secure TLS/SSL connections, where during a handshake, the client presents a certificate that, if successfully validated, authorizes access. The mapping of a certificate to an AD account may involve Kerberos’s **S4U2Self** function or the certificate’s **Subject Alternative Name (SAN)**, among other methods.
+### AD 인증서 서비스 열거
 
-### AD Certificate Services Enumeration
+AD의 인증서 서비스는 LDAP 쿼리를 통해 열거할 수 있으며, **Enterprise Certificate Authorities (CAs)** 및 그 구성에 대한 정보를 드러냅니다. 이는 특별한 권한 없이 도메인 인증된 사용자라면 누구나 접근할 수 있습니다. **[Certify](https://github.com/GhostPack/Certify)** 및 **[Certipy](https://github.com/ly4k/Certipy)**와 같은 도구는 AD CS 환경에서 열거 및 취약성 평가에 사용됩니다.
 
-AD's certificate services can be enumerated through LDAP queries, revealing information about **Enterprise Certificate Authorities (CAs)** and their configurations. This is accessible by any domain-authenticated user without special privileges. Tools like **[Certify](https://github.com/GhostPack/Certify)** and **[Certipy](https://github.com/ly4k/Certipy)** are used for enumeration and vulnerability assessment in AD CS environments.
-
-Commands for using these tools include:
-
+이 도구를 사용하는 명령어는 다음과 같습니다:
 ```bash
 # Enumerate trusted root CA certificates and Enterprise CAs with Certify
 Certify.exe cas
@@ -120,11 +115,9 @@ certipy find -vulnerable -u john@corp.local -p Passw0rd -dc-ip 172.16.126.128
 certutil.exe -TCAInfo
 certutil -v -dstemplate
 ```
-
-## References
+## 참고문헌
 
 - [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)
 - [https://comodosslstore.com/blog/what-is-ssl-tls-client-authentication-how-does-it-work.html](https://comodosslstore.com/blog/what-is-ssl-tls-client-authentication-how-does-it-work.html)
 
 {{#include ../../../banners/hacktricks-training.md}}
-

@@ -1,32 +1,31 @@
-# Skeleton Key
+# 스켈레톤 키
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Skeleton Key Attack
+## 스켈레톤 키 공격
 
-The **Skeleton Key attack** is a sophisticated technique that allows attackers to **bypass Active Directory authentication** by **injecting a master password** into the domain controller. This enables the attacker to **authenticate as any user** without their password, effectively **granting them unrestricted access** to the domain.
+**스켈레톤 키 공격**은 공격자가 **마스터 비밀번호**를 도메인 컨트롤러에 **주입하여 Active Directory 인증을 우회**할 수 있게 해주는 정교한 기술입니다. 이를 통해 공격자는 **비밀번호 없이도 모든 사용자로 인증**할 수 있으며, 사실상 **도메인에 대한 무제한 접근 권한을 부여**받습니다.
 
-It can be performed using [Mimikatz](https://github.com/gentilkiwi/mimikatz). To carry out this attack, **Domain Admin rights are prerequisite**, and the attacker must target each domain controller to ensure a comprehensive breach. However, the attack's effect is temporary, as **restarting the domain controller eradicates the malware**, necessitating a reimplementation for sustained access.
+이 공격은 [Mimikatz](https://github.com/gentilkiwi/mimikatz)를 사용하여 수행할 수 있습니다. 이 공격을 수행하기 위해서는 **도메인 관리자 권한이 필요**하며, 공격자는 포괄적인 침해를 보장하기 위해 각 도메인 컨트롤러를 목표로 삼아야 합니다. 그러나 공격의 효과는 일시적이며, **도메인 컨트롤러를 재시작하면 악성 코드가 제거**되므로 지속적인 접근을 위해서는 재구현이 필요합니다.
 
-**Executing the attack** requires a single command: `misc::skeleton`.
+**공격 실행**에는 단일 명령어가 필요합니다: `misc::skeleton`.
 
-## Mitigations
+## 완화 조치
 
-Mitigation strategies against such attacks include monitoring for specific event IDs that indicate the installation of services or the use of sensitive privileges. Specifically, looking for System Event ID 7045 or Security Event ID 4673 can reveal suspicious activities. Additionally, running `lsass.exe` as a protected process can significantly hinder attackers' efforts, as this requires them to employ a kernel mode driver, increasing the attack's complexity.
+이러한 공격에 대한 완화 전략에는 서비스 설치 또는 민감한 권한 사용을 나타내는 특정 이벤트 ID를 모니터링하는 것이 포함됩니다. 특히, 시스템 이벤트 ID 7045 또는 보안 이벤트 ID 4673을 찾으면 의심스러운 활동을 드러낼 수 있습니다. 또한, `lsass.exe`를 보호된 프로세스로 실행하면 공격자의 노력을 상당히 저해할 수 있으며, 이는 그들이 커널 모드 드라이버를 사용해야 하므로 공격의 복잡성이 증가합니다.
 
-Here are the PowerShell commands to enhance security measures:
+보안 조치를 강화하기 위한 PowerShell 명령어는 다음과 같습니다:
 
-- To detect the installation of suspicious services, use: `Get-WinEvent -FilterHashtable @{Logname='System';ID=7045} | ?{$_.message -like "*Kernel Mode Driver*"}`
+- 의심스러운 서비스 설치를 감지하려면 다음을 사용하세요: `Get-WinEvent -FilterHashtable @{Logname='System';ID=7045} | ?{$_.message -like "*Kernel Mode Driver*"}`
 
-- Specifically, to detect Mimikatz's driver, the following command can be utilized: `Get-WinEvent -FilterHashtable @{Logname='System';ID=7045} | ?{$_.message -like "*Kernel Mode Driver*" -and $_.message -like "*mimidrv*"}`
+- 특히 Mimikatz의 드라이버를 감지하기 위해 다음 명령어를 사용할 수 있습니다: `Get-WinEvent -FilterHashtable @{Logname='System';ID=7045} | ?{$_.message -like "*Kernel Mode Driver*" -and $_.message -like "*mimidrv*"}`
 
-- To fortify `lsass.exe`, enabling it as a protected process is recommended: `New-ItemProperty HKLM:\SYSTEM\CurrentControlSet\Control\Lsa -Name RunAsPPL -Value 1 -Verbose`
+- `lsass.exe`를 강화하기 위해 보호된 프로세스로 활성화하는 것이 권장됩니다: `New-ItemProperty HKLM:\SYSTEM\CurrentControlSet\Control\Lsa -Name RunAsPPL -Value 1 -Verbose`
 
-Verification after a system reboot is crucial to ensure that the protective measures have been successfully applied. This is achievable through: `Get-WinEvent -FilterHashtable @{Logname='System';ID=12} | ?{$_.message -like "*protected process*`
+시스템 재부팅 후 검증은 보호 조치가 성공적으로 적용되었는지 확인하는 데 중요합니다. 이는 다음을 통해 수행할 수 있습니다: `Get-WinEvent -FilterHashtable @{Logname='System';ID=12} | ?{$_.message -like "*protected process*`
 
-## References
+## 참고 문헌
 
 - [https://blog.netwrix.com/2022/11/29/skeleton-key-attack-active-directory/](https://blog.netwrix.com/2022/11/29/skeleton-key-attack-active-directory/)
 
 {{#include ../../banners/hacktricks-training.md}}
-

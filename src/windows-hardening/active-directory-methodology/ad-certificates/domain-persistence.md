@@ -2,29 +2,26 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**This is a summary of the domain persistence techniques shared in [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)**. Check it for further details.
+**이것은 [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)에서 공유된 도메인 지속성 기술의 요약입니다**. 추가 세부정보는 해당 링크를 확인하세요.
 
-## Forging Certificates with Stolen CA Certificates - DPERSIST1
+## 도난당한 CA 인증서로 인증서 위조하기 - DPERSIST1
 
-How can you tell that a certificate is a CA certificate?
+인증서가 CA 인증서인지 어떻게 알 수 있나요?
 
-It can be determined that a certificate is a CA certificate if several conditions are met:
+여러 조건이 충족되면 인증서가 CA 인증서임을 확인할 수 있습니다:
 
-- The certificate is stored on the CA server, with its private key secured by the machine's DPAPI, or by hardware such as a TPM/HSM if the operating system supports it.
-- Both the Issuer and Subject fields of the certificate match the distinguished name of the CA.
-- A "CA Version" extension is present in the CA certificates exclusively.
-- The certificate lacks Extended Key Usage (EKU) fields.
+- 인증서는 CA 서버에 저장되며, 개인 키는 머신의 DPAPI 또는 운영 체제가 지원하는 경우 TPM/HSM과 같은 하드웨어로 보호됩니다.
+- 인증서의 발급자(Issuer) 및 주체(Subject) 필드가 CA의 고유 이름과 일치합니다.
+- "CA Version" 확장자가 CA 인증서에만 존재합니다.
+- 인증서에는 확장 키 사용(EKU) 필드가 없습니다.
 
-To extract the private key of this certificate, the `certsrv.msc` tool on the CA server is the supported method via the built-in GUI. Nonetheless, this certificate does not differ from others stored within the system; thus, methods such as the [THEFT2 technique](certificate-theft.md#user-certificate-theft-via-dpapi-theft2) can be applied for extraction.
+이 인증서의 개인 키를 추출하기 위해 CA 서버의 `certsrv.msc` 도구가 내장 GUI를 통해 지원되는 방법입니다. 그럼에도 불구하고 이 인증서는 시스템 내의 다른 인증서와 다르지 않으므로, [THEFT2 기술](certificate-theft.md#user-certificate-theft-via-dpapi-theft2)과 같은 방법을 사용하여 추출할 수 있습니다.
 
-The certificate and private key can also be obtained using Certipy with the following command:
-
+인증서와 개인 키는 다음 명령어를 사용하여 Certipy로도 얻을 수 있습니다:
 ```bash
 certipy ca 'corp.local/administrator@ca.corp.local' -hashes :123123.. -backup
 ```
-
-Upon acquiring the CA certificate and its private key in `.pfx` format, tools like [ForgeCert](https://github.com/GhostPack/ForgeCert) can be utilized to generate valid certificates:
-
+CA 인증서와 그 개인 키를 `.pfx` 형식으로 획득한 후, [ForgeCert](https://github.com/GhostPack/ForgeCert)와 같은 도구를 사용하여 유효한 인증서를 생성할 수 있습니다:
 ```bash
 # Generating a new certificate with ForgeCert
 ForgeCert.exe --CaCertPath ca.pfx --CaCertPassword Password123! --Subject "CN=User" --SubjectAltName localadmin@theshire.local --NewCertPath localadmin.pfx --NewCertPassword Password123!
@@ -38,31 +35,29 @@ Rubeus.exe asktgt /user:localdomain /certificate:C:\ForgeCert\localadmin.pfx /pa
 # Authenticating using the new certificate with certipy
 certipy auth -pfx administrator_forged.pfx -dc-ip 172.16.126.128
 ```
-
 > [!WARNING]
-> The user targeted for certificate forgery must be active and capable of authenticating in Active Directory for the process to succeed. Forging a certificate for special accounts like krbtgt is ineffective.
+> 인증서 위조의 대상이 되는 사용자는 활성 상태여야 하며 Active Directory에서 인증할 수 있어야 프로세스가 성공합니다. krbtgt와 같은 특수 계정에 대한 인증서를 위조하는 것은 효과적이지 않습니다.
 
-This forged certificate will be **valid** until the end date specified and as **long as the root CA certificate is valid** (usually from 5 to **10+ years**). It's also valid for **machines**, so combined with **S4U2Self**, an attacker can **maintain persistence on any domain machine** for as long as the CA certificate is valid.\
-Moreover, the **certificates generated** with this method **cannot be revoked** as CA is not aware of them.
+이 위조된 인증서는 **유효** 기간이 지정된 종료일까지 **루트 CA 인증서가 유효한 한** (보통 5년에서 **10년 이상**) 유효합니다. 또한 **기계**에 대해서도 유효하므로 **S4U2Self**와 결합하면 공격자는 **CA 인증서가 유효한 한** 어떤 도메인 기계에서든 **지속성을 유지할 수 있습니다**.\
+게다가, 이 방법으로 **생성된 인증서**는 CA가 이를 인식하지 못하므로 **취소할 수 없습니다**.
 
-## Trusting Rogue CA Certificates - DPERSIST2
+## 악성 CA 인증서 신뢰 - DPERSIST2
 
-The `NTAuthCertificates` object is defined to contain one or more **CA certificates** within its `cacertificate` attribute, which Active Directory (AD) utilizes. The verification process by the **domain controller** involves checking the `NTAuthCertificates` object for an entry matching the **CA specified** in the Issuer field of the authenticating **certificate**. Authentication proceeds if a match is found.
+`NTAuthCertificates` 객체는 Active Directory (AD)가 사용하는 `cacertificate` 속성 내에 하나 이상의 **CA 인증서**를 포함하도록 정의됩니다. **도메인 컨트롤러**의 검증 프로세스는 인증하는 **인증서**의 발급자 필드에 지정된 **CA**와 일치하는 항목을 `NTAuthCertificates` 객체에서 확인하는 것을 포함합니다. 일치하는 항목이 발견되면 인증이 진행됩니다.
 
-A self-signed CA certificate can be added to the `NTAuthCertificates` object by an attacker, provided they have control over this AD object. Normally, only members of the **Enterprise Admin** group, along with **Domain Admins** or **Administrators** in the **forest root’s domain**, are granted permission to modify this object. They can edit the `NTAuthCertificates` object using `certutil.exe` with the command `certutil.exe -dspublish -f C:\Temp\CERT.crt NTAuthCA126`, or by employing the [**PKI Health Tool**](https://docs.microsoft.com/en-us/troubleshoot/windows-server/windows-security/import-third-party-ca-to-enterprise-ntauth-store#method-1---import-a-certificate-by-using-the-pki-health-tool).
+공격자는 이 AD 객체에 대한 제어 권한이 있는 경우 `NTAuthCertificates` 객체에 자체 서명된 CA 인증서를 추가할 수 있습니다. 일반적으로 **Enterprise Admin** 그룹의 구성원과 **도메인 관리자** 또는 **포리스트 루트 도메인**의 **관리자**만 이 객체를 수정할 수 있는 권한이 부여됩니다. 그들은 `certutil.exe`를 사용하여 `NTAuthCertificates` 객체를 편집할 수 있으며, 명령어는 `certutil.exe -dspublish -f C:\Temp\CERT.crt NTAuthCA126`입니다. 또는 [**PKI Health Tool**](https://docs.microsoft.com/en-us/troubleshoot/windows-server/windows-security/import-third-party-ca-to-enterprise-ntauth-store#method-1---import-a-certificate-by-using-the-pki-health-tool)을 사용할 수 있습니다.
 
-This capability is especially relevant when used in conjunction with a previously outlined method involving ForgeCert to dynamically generate certificates.
+이 기능은 ForgeCert를 사용하여 동적으로 인증서를 생성하는 이전에 설명된 방법과 함께 사용할 때 특히 관련이 있습니다.
 
-## Malicious Misconfiguration - DPERSIST3
+## 악의적인 잘못된 구성 - DPERSIST3
 
-Opportunities for **persistence** through **security descriptor modifications of AD CS** components are plentiful. Modifications described in the "[Domain Escalation](domain-escalation.md)" section can be maliciously implemented by an attacker with elevated access. This includes the addition of "control rights" (e.g., WriteOwner/WriteDACL/etc.) to sensitive components such as:
+AD CS 구성 요소의 **보안 설명자 수정**을 통한 **지속성** 기회는 풍부합니다. "[Domain Escalation](domain-escalation.md)" 섹션에 설명된 수정 사항은 권한이 상승된 공격자에 의해 악의적으로 구현될 수 있습니다. 여기에는 다음과 같은 민감한 구성 요소에 "제어 권한" (예: WriteOwner/WriteDACL 등)을 추가하는 것이 포함됩니다:
 
-- The **CA server’s AD computer** object
-- The **CA server’s RPC/DCOM server**
-- Any **descendant AD object or container** in **`CN=Public Key Services,CN=Services,CN=Configuration,DC=<DOMAIN>,DC=<COM>`** (for instance, the Certificate Templates container, Certification Authorities container, the NTAuthCertificates object, etc.)
-- **AD groups delegated rights to control AD CS** by default or by the organization (such as the built-in Cert Publishers group and any of its members)
+- **CA 서버의 AD 컴퓨터** 객체
+- **CA 서버의 RPC/DCOM 서버**
+- **`CN=Public Key Services,CN=Services,CN=Configuration,DC=<DOMAIN>,DC=<COM>`** 내의 모든 **하위 AD 객체 또는 컨테이너** (예: 인증서 템플릿 컨테이너, 인증 기관 컨테이너, NTAuthCertificates 객체 등)
+- 기본적으로 또는 조직에 의해 AD CS를 제어할 권한이 위임된 **AD 그룹** (예: 내장된 Cert Publishers 그룹 및 그 구성원)
 
-An example of malicious implementation would involve an attacker, who has **elevated permissions** in the domain, adding the **`WriteOwner`** permission to the default **`User`** certificate template, with the attacker being the principal for the right. To exploit this, the attacker would first change the ownership of the **`User`** template to themselves. Following this, the **`mspki-certificate-name-flag`** would be set to **1** on the template to enable **`ENROLLEE_SUPPLIES_SUBJECT`**, allowing a user to provide a Subject Alternative Name in the request. Subsequently, the attacker could **enroll** using the **template**, choosing a **domain administrator** name as an alternative name, and utilize the acquired certificate for authentication as the DA.
+악의적인 구현의 예는 도메인에서 **상승된 권한**을 가진 공격자가 기본 **`User`** 인증서 템플릿에 **`WriteOwner`** 권한을 추가하는 것입니다. 공격자는 먼저 **`User`** 템플릿의 소유권을 자신으로 변경합니다. 그 후, **`mspki-certificate-name-flag`**를 **1**로 설정하여 **`ENROLLEE_SUPPLIES_SUBJECT`**를 활성화하여 사용자가 요청에 주체 대체 이름을 제공할 수 있도록 합니다. 이후 공격자는 **템플릿**을 사용하여 **도메인 관리자** 이름을 대체 이름으로 선택하고, 획득한 인증서를 DA로서 인증에 사용할 수 있습니다.
 
 {{#include ../../../banners/hacktricks-training.md}}
-

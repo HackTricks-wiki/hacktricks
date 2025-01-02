@@ -1,25 +1,23 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-# Identifying packed binaries
+# 패킹된 바이너리 식별하기
 
-- **lack of strings**: It's common to find that packed binaries doesn't have almost any string
-- A lot of **unused strings**: Also, when a malware is using some kind of commercial packer it's common to find a lot of strings without cross-references. Even if these strings exist that doesn't mean that the binary isn't packed.
-- You can also use some tools to try to find which packer was used to pack a binary:
-  - [PEiD](http://www.softpedia.com/get/Programming/Packers-Crypters-Protectors/PEiD-updated.shtml)
-  - [Exeinfo PE](http://www.softpedia.com/get/Programming/Packers-Crypters-Protectors/ExEinfo-PE.shtml)
-  - [Language 2000](http://farrokhi.net/language/)
+- **문자열 부족**: 패킹된 바이너리에서 거의 문자열이 없는 경우가 흔합니다.
+- **사용되지 않는 문자열**: 또한, 악성 코드가 상업용 패커를 사용하는 경우, 교차 참조가 없는 많은 문자열을 찾는 것이 일반적입니다. 이러한 문자열이 존재한다고 해서 바이너리가 패킹되지 않았다는 의미는 아닙니다.
+- 어떤 도구를 사용하여 바이너리를 패킹하는 데 사용된 패커를 찾을 수 있습니다:
+- [PEiD](http://www.softpedia.com/get/Programming/Packers-Crypters-Protectors/PEiD-updated.shtml)
+- [Exeinfo PE](http://www.softpedia.com/get/Programming/Packers-Crypters-Protectors/ExEinfo-PE.shtml)
+- [Language 2000](http://farrokhi.net/language/)
 
-# Basic Recommendations
+# 기본 권장 사항
 
-- **Start** analysing the packed binary **from the bottom in IDA and move up**. Unpackers exit once the unpacked code exit so it's unlikely that the unpacker passes execution to the unpacked code at the start.
-- Search for **JMP's** or **CALLs** to **registers** or **regions** of **memory**. Also search for **functions pushing arguments and an address direction and then calling `retn`**, because the return of the function in that case may call the address just pushed to the stack before calling it.
-- Put a **breakpoint** on `VirtualAlloc` as this allocates space in memory where the program can write unpacked code. The "run to user code" or use F8 to **get to value inside EAX** after executing the function and "**follow that address in dump**". You never know if that is the region where the unpacked code is going to be saved.
-  - **`VirtualAlloc`** with the value "**40**" as an argument means Read+Write+Execute (some code that needs execution is going to be copied here).
-- **While unpacking** code it's normal to find **several calls** to **arithmetic operations** and functions like **`memcopy`** or **`Virtual`**`Alloc`. If you find yourself in a function that apparently only perform arithmetic operations and maybe some `memcopy` , the recommendation is to try to **find the end of the function** (maybe a JMP or call to some register) **or** at least the **call to the last function** and run to then as the code isn't interesting.
-- While unpacking code **note** whenever you **change memory region** as a memory region change may indicate the **starting of the unpacking code**. You can easily dump a memory region using Process Hacker (process --> properties --> memory).
-- While trying to unpack code a good way to **know if you are already working with the unpacked code** (so you can just dump it) is to **check the strings of the binary**. If at some point you perform a jump (maybe changing the memory region) and you notice that **a lot more strings where added**, then you can know **you are working with the unpacked code**.\
-  However, if the packer already contains a lot of strings you can see how many strings contains the word "http" and see if this number increases.
-- When you dump an executable from a region of memory you can fix some headers using [PE-bear](https://github.com/hasherezade/pe-bear-releases/releases).
+- **IDA에서 패킹된 바이너리를 아래에서 위로 분석하기 시작하세요**. 언팩커는 언팩된 코드가 종료되면 종료되므로 언팩커가 시작할 때 언팩된 코드로 실행을 전달할 가능성은 낮습니다.
+- **레지스터** 또는 **메모리**의 **영역**에 대한 **JMP** 또는 **CALL**을 검색하세요. 또한 **인수를 푸시하고 주소 방향을 지정한 다음 `retn`을 호출하는 함수**를 검색하세요. 이 경우 함수의 반환은 호출하기 전에 스택에 푸시된 주소를 호출할 수 있습니다.
+- `VirtualAlloc`에 **중단점**을 설정하세요. 이는 프로그램이 언팩된 코드를 쓸 수 있는 메모리 공간을 할당합니다. "사용자 코드로 실행"하거나 F8을 사용하여 **함수를 실행한 후 EAX 내부의 값을 가져오세요**. 그런 다음 "**덤프에서 해당 주소를 따르세요**". 언팩된 코드가 저장될 지역인지 알 수 없습니다.
+- **`VirtualAlloc`**에 값 "**40**"을 인수로 사용하면 읽기+쓰기+실행을 의미합니다(여기에 실행이 필요한 코드가 복사될 것입니다).
+- **코드를 언팩하는 동안** **여러 호출**을 **산술 연산** 및 **`memcopy`** 또는 **`Virtual`**`Alloc`과 같은 함수에서 찾는 것이 일반적입니다. 만약 산술 연산만 수행하는 함수에 있다면, **함수의 끝을 찾으려고 시도하세요**(아마도 레지스터에 대한 JMP 또는 호출) **또는** 최소한 **마지막 함수에 대한 호출**을 찾고 그곳으로 실행하세요. 코드는 흥미롭지 않습니다.
+- 코드를 언팩하는 동안 **메모리 영역이 변경될 때마다 주의하세요**. 메모리 영역의 변경은 **언팩 코드의 시작**을 나타낼 수 있습니다. Process Hacker를 사용하여 메모리 영역을 쉽게 덤프할 수 있습니다(프로세스 --> 속성 --> 메모리).
+- 코드를 언팩하려고 할 때 **이미 언팩된 코드로 작업하고 있는지 아는 좋은 방법**은 **바이너리의 문자열을 확인하는 것입니다**. 만약 어떤 시점에 점프를 수행하고(아마도 메모리 영역을 변경하면서) **더 많은 문자열이 추가된 것을 발견하면**, **언팩된 코드로 작업하고 있다는 것을 알 수 있습니다**. 그러나 패커에 이미 많은 문자열이 포함되어 있다면 "http"라는 단어가 포함된 문자열의 수를 확인하고 이 숫자가 증가하는지 확인하세요.
+- 메모리 영역에서 실행 파일을 덤프할 때 [PE-bear](https://github.com/hasherezade/pe-bear-releases/releases)를 사용하여 일부 헤더를 수정할 수 있습니다.
 
 {{#include ../../banners/hacktricks-training.md}}
-

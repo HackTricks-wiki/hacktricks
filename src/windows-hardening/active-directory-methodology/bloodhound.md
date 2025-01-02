@@ -4,95 +4,84 @@
 
 ## AD Explorer
 
-[AD Explorer](https://docs.microsoft.com/en-us/sysinternals/downloads/adexplorer) is from Sysinternal Suite:
+[AD Explorer](https://docs.microsoft.com/en-us/sysinternals/downloads/adexplorer)는 Sysinternal Suite의 도구입니다:
 
-> An advanced Active Directory (AD) viewer and editor. You can use AD Explorer to navigate an AD database easily, define favourite locations, view object properties, and attributes without opening dialog boxes, edit permissions, view an object's schema, and execute sophisticated searches that you can save and re-execute.
+> 고급 Active Directory (AD) 뷰어 및 편집기입니다. AD Explorer를 사용하여 AD 데이터베이스를 쉽게 탐색하고, 즐겨찾기 위치를 정의하고, 대화 상자를 열지 않고도 객체 속성과 특성을 보고, 권한을 편집하고, 객체의 스키마를 보고, 저장하고 다시 실행할 수 있는 정교한 검색을 수행할 수 있습니다.
 
 ### Snapshots
 
-AD Explorer can create snapshots of an AD so you can check it offline.\
-It can be used to discover vulns offline, or to compare different states of the AD DB across the time.
+AD Explorer는 AD의 스냅샷을 생성할 수 있어 오프라인에서 확인할 수 있습니다.\
+오프라인에서 취약점을 발견하거나 시간에 따라 AD DB의 다양한 상태를 비교하는 데 사용할 수 있습니다.
 
-You will be requires the username, password, and direction to connect (any AD user is required).
+연결하려면 사용자 이름, 비밀번호 및 방향이 필요합니다 (모든 AD 사용자가 필요합니다).
 
-To take a snapshot of AD, go to `File` --> `Create Snapshot` and enter a name for the snapshot.
+AD의 스냅샷을 찍으려면 `File` --> `Create Snapshot`으로 이동하고 스냅샷의 이름을 입력합니다.
 
 ## ADRecon
 
-[**ADRecon**](https://github.com/adrecon/ADRecon) is a tool which extracts and combines various artefacts out of an AD environment. The information can be presented in a **specially formatted** Microsoft Excel **report** that includes summary views with metrics to facilitate analysis and provide a holistic picture of the current state of the target AD environment.
-
+[**ADRecon**](https://github.com/adrecon/ADRecon)은 AD 환경에서 다양한 아티팩트를 추출하고 결합하는 도구입니다. 이 정보는 분석을 용이하게 하고 대상 AD 환경의 현재 상태에 대한 전체적인 그림을 제공하는 메트릭이 포함된 **특별히 형식화된** Microsoft Excel **보고서**로 제공될 수 있습니다.
 ```bash
 # Run it
 .\ADRecon.ps1
 ```
-
 ## BloodHound
 
 From [https://github.com/BloodHoundAD/BloodHound](https://github.com/BloodHoundAD/BloodHound)
 
-> BloodHound is a single page Javascript web application, built on top of [Linkurious](http://linkurio.us/), compiled with [Electron](http://electron.atom.io/), with a [Neo4j](https://neo4j.com/) database fed by a C# data collector.
+> BloodHound는 [Linkurious](http://linkurio.us/) 위에 구축된 단일 페이지 Javascript 웹 애플리케이션으로, [Electron](http://electron.atom.io/)으로 컴파일되었으며, C# 데이터 수집기로 공급되는 [Neo4j](https://neo4j.com/) 데이터베이스를 사용합니다.
 
-BloodHound uses graph theory to reveal the hidden and often unintended relationships within an Active Directory or Azure environment. Attackers can use BloodHound to easily identify highly complex attack paths that would otherwise be impossible to quickly identify. Defenders can use BloodHound to identify and eliminate those same attack paths. Both blue and red teams can use BloodHound to easily gain a deeper understanding of privilege relationships in an Active Directory or Azure environment.
+BloodHound는 그래프 이론을 사용하여 Active Directory 또는 Azure 환경 내의 숨겨진 관계와 종종 의도하지 않은 관계를 드러냅니다. 공격자는 BloodHound를 사용하여 빠르게 식별할 수 없는 복잡한 공격 경로를 쉽게 식별할 수 있습니다. 방어자는 BloodHound를 사용하여 동일한 공격 경로를 식별하고 제거할 수 있습니다. 블루 팀과 레드 팀 모두 BloodHound를 사용하여 Active Directory 또는 Azure 환경에서 권한 관계에 대한 더 깊은 이해를 쉽게 얻을 수 있습니다.
 
-So, [Bloodhound ](https://github.com/BloodHoundAD/BloodHound)is an amazing tool which can enumerate a domain automatically, save all the information, find possible privilege escalation paths and show all the information using graphs.
+그래서, [Bloodhound ](https://github.com/BloodHoundAD/BloodHound)는 도메인을 자동으로 열거하고 모든 정보를 저장하며 가능한 권한 상승 경로를 찾고 모든 정보를 그래프를 사용하여 보여줄 수 있는 놀라운 도구입니다.
 
-Booldhound is composed of 2 main parts: **ingestors** and the **visualisation application**.
+BloodHound는 두 가지 주요 부분으로 구성됩니다: **ingestors**와 **visualisation application**.
 
-The **ingestors** are used to **enumerate the domain and extract all the information** in a format that the visualisation application will understand.
+**ingestors**는 **도메인을 열거하고 모든 정보를 시각화 애플리케이션이 이해할 수 있는 형식으로 추출하는 데 사용됩니다**.
 
-The **visualisation application uses neo4j** to show how all the information is related and to show different ways to escalate privileges in the domain.
+**visualisation application은 neo4j를 사용하여** 모든 정보가 어떻게 관련되어 있는지 보여주고 도메인에서 권한을 상승시키는 다양한 방법을 보여줍니다.
 
 ### Installation
 
-After the creation of BloodHound CE, the entire project was updated for ease of use with Docker. The easiest way to get started is to use its pre-configured Docker Compose configuration.
+BloodHound CE가 생성된 후, 전체 프로젝트는 Docker 사용의 용이성을 위해 업데이트되었습니다. 시작하는 가장 쉬운 방법은 미리 구성된 Docker Compose 구성을 사용하는 것입니다.
 
-1. Install Docker Compose. This should be included with the [Docker Desktop](https://www.docker.com/products/docker-desktop/) installation.
-2. Run:
-
+1. Docker Compose를 설치합니다. 이는 [Docker Desktop](https://www.docker.com/products/docker-desktop/) 설치에 포함되어야 합니다.
+2. 실행:
 ```
 curl -L https://ghst.ly/getbhce | docker compose -f - up
 ```
+3. Docker Compose의 터미널 출력에서 무작위로 생성된 비밀번호를 찾습니다.  
+4. 브라우저에서 http://localhost:8080/ui/login으로 이동합니다. 사용자 이름으로 admin을 입력하고 로그에서 무작위로 생성된 비밀번호로 로그인합니다.  
 
-3. Locate the randomly generated password in the terminal output of Docker Compose.
-4. In a browser, navigate to http://localhost:8080/ui/login. Login with a username of admin and the randomly generated password from the logs.
+이후 무작위로 생성된 비밀번호를 변경해야 하며, 새로운 인터페이스가 준비되어 ingestors를 직접 다운로드할 수 있습니다.  
 
-After this you will need to change the randomly generated password and you will have the new interface ready, from which you can directly download the ingestors.
+### SharpHound  
 
-### SharpHound
-
-They have several options but if you want to run SharpHound from a PC joined to the domain, using your current user and extract all the information you can do:
-
+여러 가지 옵션이 있지만, 도메인에 가입된 PC에서 현재 사용자로 SharpHound를 실행하고 모든 정보를 추출하려면 다음을 수행할 수 있습니다:
 ```
 ./SharpHound.exe --CollectionMethods All
 Invoke-BloodHound -CollectionMethod All
 ```
+> **CollectionMethod** 및 루프 세션에 대한 자세한 내용은 [여기](https://support.bloodhoundenterprise.io/hc/en-us/articles/17481375424795-All-SharpHound-Community-Edition-Flags-Explained)에서 확인할 수 있습니다.
 
-> You can read more about **CollectionMethod** and loop session [here](https://support.bloodhoundenterprise.io/hc/en-us/articles/17481375424795-All-SharpHound-Community-Edition-Flags-Explained)
-
-If you wish to execute SharpHound using different credentials you can create a CMD netonly session and run SharpHound from there:
-
+다른 자격 증명을 사용하여 SharpHound를 실행하려면 CMD netonly 세션을 생성하고 그곳에서 SharpHound를 실행할 수 있습니다:
 ```
 runas /netonly /user:domain\user "powershell.exe -exec bypass"
 ```
-
-[**Learn more about Bloodhound in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-with-bloodhound-on-kali-linux)
+[**Bloodhound에 대해 더 알아보세요 ired.team에서.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-with-bloodhound-on-kali-linux)
 
 ## Group3r
 
-[**Group3r**](https://github.com/Group3r/Group3r) is a tool to find **vulnerabilities** in Active Directory associated **Group Policy**. \
-You need to **run group3r** from a host inside the domain using **any domain user**.
-
+[**Group3r**](https://github.com/Group3r/Group3r)는 **그룹 정책**과 관련된 Active Directory의 **취약점**을 찾기 위한 도구입니다. \
+도메인 내의 호스트에서 **모든 도메인 사용자**를 사용하여 **group3r를 실행**해야 합니다.
 ```bash
 group3r.exe -f <filepath-name.log>
 # -s sends results to stdin
 # -f send results to file
 ```
-
 ## PingCastle
 
-[**PingCastle**](https://www.pingcastle.com/documentation/) **evaluates the security posture of an AD environment** and provides a nice **report** with graphs.
+[**PingCastle**](https://www.pingcastle.com/documentation/) **AD 환경의 보안 태세를 평가**하고 멋진 **보고서**를 그래프와 함께 제공합니다.
 
-To run it, can execute the binary `PingCastle.exe` and it will start an **interactive session** presenting a menu of options. The default option to use is **`healthcheck`** which will establish a baseline **overview** of the **domain**, and find **misconfigurations** and **vulnerabilities**.&#x20;
+실행하려면 이진 파일 `PingCastle.exe`를 실행하면 **인터랙티브 세션**이 시작되어 옵션 메뉴를 표시합니다. 기본 옵션은 **`healthcheck`**로, **도메인**의 **개요**를 설정하고 **구성 오류** 및 **취약점**을 찾습니다.&#x20;
 
 {{#include ../../banners/hacktricks-training.md}}
-

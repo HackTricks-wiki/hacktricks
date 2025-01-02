@@ -1,14 +1,13 @@
-# About the author
+# 저자 소개
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Hello!!
+### 안녕하세요!!
 
-First of all, it's needed to indicate that all **credits of techniques from researches from other sites belongs to the original authors** (there are references in the pages). Kudos to every research that shares knowledge to improve the security of the internet.
+우선, 다른 사이트의 연구에서 나온 기술에 대한 모든 **크레딧은 원저자에게 속한다는 점을 명시할 필요가 있습니다** (페이지에 참고 문헌이 있습니다). 인터넷 보안을 향상시키기 위해 지식을 공유하는 모든 연구에 감사드립니다.
 
-HackTricks is a educational Wiki that compiles knowledge about **cyber-security** lead by Carlos with hundreds of collaborators! It's a **huge collection of hacking tricks** that is updated by the community much as possible to keep it up to date. If you find something is missing or outdated, please, send a **Pull Request** to the [**Hacktricks Github**](https://github.com/carlospolop/hacktricks)!
+HackTricks는 Carlos가 이끄는 **사이버 보안**에 대한 지식을 모은 교육용 위키로, 수백 명의 협력자가 있습니다! 이는 **해킹 기술의 방대한 모음**으로, 커뮤니티가 가능한 한 자주 업데이트하여 최신 상태를 유지합니다. 누락되거나 오래된 내용이 있으면, **Pull Request**를 [**Hacktricks Github**](https://github.com/carlospolop/hacktricks)로 보내주세요!
 
-HackTricks is also a wiki were **a lot of researches also share their latest findings**, so it's a great place to keep up to date with the latest hacking techniques.
+HackTricks는 또한 **많은 연구자들이 최신 발견을 공유하는 위키**이므로, 최신 해킹 기술을 따라잡기에 좋은 장소입니다.
 
 {{#include ../banners/hacktricks-training.md}}
-
