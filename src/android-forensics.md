@@ -4,25 +4,24 @@
 
 ## Locked Device
 
-To start extracting data from an Android device it has to be unlocked. If it's locked you can:
+Android डिवाइस से डेटा निकालने के लिए इसे अनलॉक करना आवश्यक है। यदि यह लॉक है, तो आप:
 
-- Check if the device has debugging via USB activated.
-- Check for a possible [smudge attack](https://www.usenix.org/legacy/event/woot10/tech/full_papers/Aviv.pdf)
-- Try with [Brute-force](https://www.cultofmac.com/316532/this-brute-force-device-can-crack-any-iphones-pin-code/)
+- जांचें कि क्या डिवाइस में USB के माध्यम से डिबगिंग सक्रिय है।
+- संभावित [smudge attack](https://www.usenix.org/legacy/event/woot10/tech/full_papers/Aviv.pdf) के लिए जांचें।
+- [Brute-force](https://www.cultofmac.com/316532/this-brute-force-device-can-crack-any-iphones-pin-code/) के साथ प्रयास करें।
 
 ## Data Adquisition
 
-Create an [android backup using adb](mobile-pentesting/android-app-pentesting/adb-commands.md#backup) and extract it using [Android Backup Extractor](https://sourceforge.net/projects/adbextractor/): `java -jar abe.jar unpack file.backup file.tar`
+[adb का उपयोग करके android बैकअप बनाएं](mobile-pentesting/android-app-pentesting/adb-commands.md#backup) और इसे [Android Backup Extractor](https://sourceforge.net/projects/adbextractor/) का उपयोग करके निकालें: `java -jar abe.jar unpack file.backup file.tar`
 
-### If root access or physical connection to JTAG interface
+### यदि रूट एक्सेस या JTAG इंटरफेस के लिए भौतिक कनेक्शन है
 
-- `cat /proc/partitions` (search the path to the flash memory, generally the first entry is _mmcblk0_ and corresponds to the whole flash memory).
-- `df /data` (Discover the block size of the system).
-- dd if=/dev/block/mmcblk0 of=/sdcard/blk0.img bs=4096 (execute it with the information gathered from the block size).
+- `cat /proc/partitions` (फ्लैश मेमोरी के पथ की खोज करें, सामान्यतः पहला प्रविष्टि _mmcblk0_ होती है और यह पूरी फ्लैश मेमोरी से संबंधित होती है)।
+- `df /data` (सिस्टम का ब्लॉक आकार खोजें)।
+- dd if=/dev/block/mmcblk0 of=/sdcard/blk0.img bs=4096 (इसे ब्लॉक आकार से एकत्रित जानकारी के साथ निष्पादित करें)।
 
 ### Memory
 
-Use Linux Memory Extractor (LiME) to extract the RAM information. It's a kernel extension that should be loaded via adb.
+RAM जानकारी निकालने के लिए Linux Memory Extractor (LiME) का उपयोग करें। यह एक कर्नेल एक्सटेंशन है जिसे adb के माध्यम से लोड किया जाना चाहिए।
 
 {{#include ./banners/hacktricks-training.md}}
-

@@ -1,173 +1,170 @@
 {{#include ./banners/hacktricks-training.md}}
 
-<a rel="license" href="https://creativecommons.org/licenses/by-nc/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://licensebuttons.net/l/by-nc/4.0/88x31.png" /></a><br>Copyright © Carlos Polop 2021. Except where otherwise specified (the external information copied into the book belongs to the original authors), the text on <a href="https://github.com/carlospolop/hacktricks">HACK TRICKS</a> by Carlos Polop is licensed under the <a href="https://creativecommons.org/licenses/by-nc/4.0/">Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)</a>.
+<a rel="license" href="https://creativecommons.org/licenses/by-nc/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://licensebuttons.net/l/by-nc/4.0/88x31.png" /></a><br>कॉपीराइट © Carlos Polop 2021। जब तक अन्यथा निर्दिष्ट न किया गया हो (पुस्तक में कॉपी की गई बाहरी जानकारी मूल लेखकों की है), Carlos Polop द्वारा <a href="https://github.com/carlospolop/hacktricks">HACK TRICKS</a> पर पाठ को <a href="https://creativecommons.org/licenses/by-nc/4.0/">Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)</a> के तहत लाइसेंस प्राप्त है।
 
-License: Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)<br>
-Human Readable License: https://creativecommons.org/licenses/by-nc/4.0/<br>
-Complete Legal Terms: https://creativecommons.org/licenses/by-nc/4.0/legalcode<br>
-Formatting: https://github.com/jmatsushita/Creative-Commons-4.0-Markdown/blob/master/licenses/by-nc.markdown<br>
+लाइसेंस: Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)<br>
+मानव पठनीय लाइसेंस: https://creativecommons.org/licenses/by-nc/4.0/<br>
+पूर्ण कानूनी शर्तें: https://creativecommons.org/licenses/by-nc/4.0/legalcode<br>
+फॉर्मेटिंग: https://github.com/jmatsushita/Creative-Commons-4.0-Markdown/blob/master/licenses/by-nc.markdown<br>
 
 # creative commons
 
 # Attribution-NonCommercial 4.0 International
 
-Creative Commons Corporation (“Creative Commons”) is not a law firm and does not provide legal services or legal advice. Distribution of Creative Commons public licenses does not create a lawyer-client or other relationship. Creative Commons makes its licenses and related information available on an “as-is” basis. Creative Commons gives no warranties regarding its licenses, any material licensed under their terms and conditions, or any related information. Creative Commons disclaims all liability for damages resulting from their use to the fullest extent possible.
+Creative Commons Corporation (“Creative Commons”) एक कानून फर्म नहीं है और कानूनी सेवाएँ या कानूनी सलाह प्रदान नहीं करती है। Creative Commons सार्वजनिक लाइसेंस का वितरण वकील-ग्राहक या अन्य संबंध नहीं बनाता है। Creative Commons अपने लाइसेंस और संबंधित जानकारी को "जैसा है" के आधार पर उपलब्ध कराता है। Creative Commons अपने लाइसेंस, उनके शर्तों और शर्तों के तहत लाइसेंस प्राप्त किसी भी सामग्री, या किसी भी संबंधित जानकारी के बारे में कोई वारंटी नहीं देता है। Creative Commons उनके उपयोग से होने वाले नुकसान के लिए अधिकतम सीमा तक सभी जिम्मेदारी से इनकार करता है।
 
 ## Using Creative Commons Public Licenses
 
-Creative Commons public licenses provide a standard set of terms and conditions that creators and other rights holders may use to share original works of authorship and other material subject to copyright and certain other rights specified in the public license below. The following considerations are for informational purposes only, are not exhaustive, and do not form part of our licenses.
+Creative Commons सार्वजनिक लाइसेंस एक मानक सेट के शर्तों और शर्तों को प्रदान करते हैं जिन्हें निर्माता और अन्य अधिकार धारक मूल लेखन और अन्य सामग्री को साझा करने के लिए उपयोग कर सकते हैं जो कॉपीराइट और नीचे दिए गए सार्वजनिक लाइसेंस में निर्दिष्ट कुछ अन्य अधिकारों के अधीन हैं। निम्नलिखित विचार केवल सूचना के उद्देश्यों के लिए हैं, ये संपूर्ण नहीं हैं, और हमारे लाइसेंस का हिस्सा नहीं बनाते हैं।
 
-- **Considerations for licensors:** Our public licenses are intended for use by those authorized to give the public permission to use material in ways otherwise restricted by copyright and certain other rights. Our licenses are irrevocable. Licensors should read and understand the terms and conditions of the license they choose before applying it. Licensors should also secure all rights necessary before applying our licenses so that the public can reuse the material as expected. Licensors should clearly mark any material not subject to the license. This includes other CC-licensed material, or material used under an exception or limitation to copyright. [More considerations for licensors](http://wiki.creativecommons.org/Considerations_for_licensors_and_licensees#Considerations_for_licensors).
+- **लाइसेंसधारकों के लिए विचार:** हमारे सार्वजनिक लाइसेंस उन लोगों के उपयोग के लिए हैं जिन्हें सामग्री को कॉपीराइट और कुछ अन्य अधिकारों द्वारा प्रतिबंधित तरीकों से उपयोग करने की अनुमति देने के लिए अधिकृत किया गया है। हमारे लाइसेंस अपरिवर्तनीय हैं। लाइसेंसधारकों को लागू करने से पहले वे जिस लाइसेंस का चयन करते हैं, उसकी शर्तों और शर्तों को पढ़ना और समझना चाहिए। लाइसेंसधारकों को यह सुनिश्चित करना चाहिए कि वे हमारे लाइसेंस लागू करने से पहले सभी आवश्यक अधिकार सुरक्षित करें ताकि जनता सामग्री का पुन: उपयोग कर सके जैसा अपेक्षित है। लाइसेंसधारकों को किसी भी सामग्री को स्पष्ट रूप से चिह्नित करना चाहिए जो लाइसेंस के अधीन नहीं है। इसमें अन्य CC-लाइसेंस प्राप्त सामग्री, या कॉपीराइट के लिए अपवाद या सीमा के तहत उपयोग की गई सामग्री शामिल है। [लाइसेंसधारकों के लिए अधिक विचार](http://wiki.creativecommons.org/Considerations_for_licensors_and_licensees#Considerations_for_licensors).
 
-- **Considerations for the public:** By using one of our public licenses, a licensor grants the public permission to use the licensed material under specified terms and conditions. If the licensor’s permission is not necessary for any reason–for example, because of any applicable exception or limitation to copyright–then that use is not regulated by the license. Our licenses grant only permissions under copyright and certain other rights that a licensor has authority to grant. Use of the licensed material may still be restricted for other reasons, including because others have copyright or other rights in the material. A licensor may make special requests, such as asking that all changes be marked or described. Although not required by our licenses, you are encouraged to respect those requests where reasonable. [More considerations for the public](http://wiki.creativecommons.org/Considerations_for_licensors_and_licensees#Considerations_for_licensees).
+- **जनता के लिए विचार:** हमारे सार्वजनिक लाइसेंस में से एक का उपयोग करके, एक लाइसेंसधारक जनता को निर्दिष्ट शर्तों और शर्तों के तहत लाइसेंस प्राप्त सामग्री का उपयोग करने की अनुमति देता है। यदि किसी कारण से लाइसेंसधारक की अनुमति आवश्यक नहीं है - उदाहरण के लिए, कॉपीराइट के लिए किसी भी लागू अपवाद या सीमा के कारण - तो वह उपयोग लाइसेंस द्वारा नियंत्रित नहीं है। हमारे लाइसेंस केवल उन अधिकारों के तहत अनुमतियाँ प्रदान करते हैं जो कॉपीराइट और कुछ अन्य अधिकारों के तहत हैं जिन्हें लाइसेंसधारक देने के लिए अधिकृत है। लाइसेंस प्राप्त सामग्री का उपयोग अन्य कारणों से भी प्रतिबंधित हो सकता है, जिसमें यह शामिल है कि दूसरों के पास सामग्री में कॉपीराइट या अन्य अधिकार हैं। एक लाइसेंसधारक विशेष अनुरोध कर सकता है, जैसे कि सभी परिवर्तनों को चिह्नित या वर्णित करने के लिए कहना। हालाँकि हमारे लाइसेंस द्वारा आवश्यक नहीं है, आपको उन अनुरोधों का सम्मान करने के लिए प्रोत्साहित किया जाता है जहाँ यह उचित हो। [जनता के लिए अधिक विचार](http://wiki.creativecommons.org/Considerations_for_licensors_and_licensees#Considerations_for_licensees).
 
 # Creative Commons Attribution-NonCommercial 4.0 International Public License
 
-By exercising the Licensed Rights (defined below), You accept and agree to be bound by the terms and conditions of this Creative Commons Attribution-NonCommercial 4.0 International Public License ("Public License"). To the extent this Public License may be interpreted as a contract, You are granted the Licensed Rights in consideration of Your acceptance of these terms and conditions, and the Licensor grants You such rights in consideration of benefits the Licensor receives from making the Licensed Material available under these terms and conditions.
+लाइसेंस प्राप्त अधिकारों का प्रयोग करके (नीचे परिभाषित), आप इस Creative Commons Attribution-NonCommercial 4.0 International Public License ("Public License") की शर्तों और शर्तों से बंधने के लिए स्वीकार करते हैं और सहमत होते हैं। इस Public License को एक अनुबंध के रूप में व्याख्या किए जाने की सीमा तक, आपको इन शर्तों और शर्तों को स्वीकार करने के लिए लाइसेंस प्राप्त अधिकार दिए जाते हैं, और लाइसेंसधारक आपको इन शर्तों और शर्तों के तहत लाइसेंस प्राप्त सामग्री उपलब्ध कराने से प्राप्त लाभ के विचार में ऐसे अधिकार प्रदान करता है।
 
 ## Section 1 – Definitions.
 
-a. **Adapted Material** means material subject to Copyright and Similar Rights that is derived from or based upon the Licensed Material and in which the Licensed Material is translated, altered, arranged, transformed, or otherwise modified in a manner requiring permission under the Copyright and Similar Rights held by the Licensor. For purposes of this Public License, where the Licensed Material is a musical work, performance, or sound recording, Adapted Material is always produced where the Licensed Material is synched in timed relation with a moving image.
+a. **Adapted Material** का अर्थ है कॉपीराइट और समान अधिकारों के अधीन सामग्री जो लाइसेंस प्राप्त सामग्री से व्युत्पन्न या आधारित है और जिसमें लाइसेंस प्राप्त सामग्री का अनुवाद, परिवर्तन, व्यवस्था, रूपांतरण, या अन्यथा संशोधन किया गया है, जो लाइसेंसधारक द्वारा रखे गए कॉपीराइट और समान अधिकारों के तहत अनुमति की आवश्यकता है। इस Public License के उद्देश्यों के लिए, जहाँ लाइसेंस प्राप्त सामग्री एक संगीत कार्य, प्रदर्शन, या ध्वनि रिकॉर्डिंग है, वहाँ Adapted Material हमेशा तब उत्पन्न होता है जब लाइसेंस प्राप्त सामग्री को चलती छवि के साथ समय संबंध में समन्वयित किया जाता है।
 
-b. **Adapter's License** means the license You apply to Your Copyright and Similar Rights in Your contributions to Adapted Material in accordance with the terms and conditions of this Public License.
+b. **Adapter's License** का अर्थ है वह लाइसेंस जिसे आप अपने योगदान में Adapted Material के लिए अपने कॉपीराइट और समान अधिकारों पर लागू करते हैं, इस Public License की शर्तों और शर्तों के अनुसार।
 
-c. **Copyright and Similar Rights** means copyright and/or similar rights closely related to copyright including, without limitation, performance, broadcast, sound recording, and Sui Generis Database Rights, without regard to how the rights are labeled or categorized. For purposes of this Public License, the rights specified in Section 2(b)(1)-(2) are not Copyright and Similar Rights.
+c. **Copyright and Similar Rights** का अर्थ है कॉपीराइट और/या कॉपीराइट से निकटता से संबंधित समान अधिकार, जिसमें, बिना किसी सीमा के, प्रदर्शन, प्रसारण, ध्वनि रिकॉर्डिंग, और Sui Generis Database Rights शामिल हैं, बिना यह देखे कि अधिकारों को कैसे लेबल या वर्गीकृत किया गया है। इस Public License के उद्देश्यों के लिए, धारा 2(b)(1)-(2) में निर्दिष्ट अधिकार कॉपीराइट और समान अधिकार नहीं हैं।
 
-d. **Effective Technological Measures** means those measures that, in the absence of proper authority, may not be circumvented under laws fulfilling obligations under Article 11 of the WIPO Copyright Treaty adopted on December 20, 1996, and/or similar international agreements.
+d. **Effective Technological Measures** का अर्थ है वे उपाय जो, उचित प्राधिकरण की अनुपस्थिति में, WIPO Copyright Treaty के अनुच्छेद 11 के तहत दायित्वों को पूरा करने वाले कानूनों के तहत नहीं हटाए जा सकते हैं, जिसे 20 दिसंबर 1996 को अपनाया गया था, और/या समान अंतरराष्ट्रीय समझौतों के तहत।
 
-e. **Exceptions and Limitations** means fair use, fair dealing, and/or any other exception or limitation to Copyright and Similar Rights that applies to Your use of the Licensed Material.
+e. **Exceptions and Limitations** का अर्थ है उचित उपयोग, उचित सौदा, और/या कॉपीराइट और समान अधिकारों के लिए कोई अन्य अपवाद या सीमा जो आपकी लाइसेंस प्राप्त सामग्री के उपयोग पर लागू होती है।
 
-f. **Licensed Material** means the artistic or literary work, database, or other material to which the Licensor applied this Public License.
+f. **Licensed Material** का अर्थ है कलात्मक या साहित्यिक कार्य, डेटाबेस, या अन्य सामग्री जिस पर लाइसेंसधारक ने इस Public License को लागू किया है।
 
-g. **Licensed Rights** means the rights granted to You subject to the terms and conditions of this Public License, which are limited to all Copyright and Similar Rights that apply to Your use of the Licensed Material and that the Licensor has authority to license.
+g. **Licensed Rights** का अर्थ है वे अधिकार जो आपको इस Public License की शर्तों और शर्तों के अधीन दिए जाते हैं, जो आपके लाइसेंस प्राप्त सामग्री के उपयोग पर लागू सभी कॉपीराइट और समान अधिकारों तक सीमित हैं और जिन्हें लाइसेंसधारक लाइसेंस देने के लिए अधिकृत है।
 
-h. **Licensor** means the individual(s) or entity(ies) granting rights under this Public License.
+h. **Licensor** का अर्थ है वह व्यक्ति(गण) या इकाई(याँ) जो इस Public License के तहत अधिकार प्रदान करती है।
 
-i. **NonCommercial** means not primarily intended for or directed towards commercial advantage or monetary compensation. For purposes of this Public License, the exchange of the Licensed Material for other material subject to Copyright and Similar Rights by digital file-sharing or similar means is NonCommercial provided there is no payment of monetary compensation in connection with the exchange.
+i. **NonCommercial** का अर्थ है मुख्य रूप से वाणिज्यिक लाभ या मौद्रिक मुआवजे के लिए नहीं। इस Public License के उद्देश्यों के लिए, लाइसेंस प्राप्त सामग्री का अन्य सामग्री के लिए आदान-प्रदान जो कॉपीराइट और समान अधिकारों के अधीन है, डिजिटल फ़ाइल-शेयरिंग या समान तरीकों द्वारा NonCommercial है, बशर्ते कि आदान-प्रदान के संबंध में मौद्रिक मुआवजे का कोई भुगतान न हो।
 
-j. **Share** means to provide material to the public by any means or process that requires permission under the Licensed Rights, such as reproduction, public display, public performance, distribution, dissemination, communication, or importation, and to make material available to the public including in ways that members of the public may access the material from a place and at a time individually chosen by them.
+j. **Share** का अर्थ है किसी भी तरीके या प्रक्रिया द्वारा सामग्री को जनता को प्रदान करना जो लाइसेंस प्राप्त अधिकारों के तहत अनुमति की आवश्यकता है, जैसे कि पुनरुत्पादन, सार्वजनिक प्रदर्शन, वितरण, प्रसार, संचार, या आयात, और सामग्री को जनता के लिए उपलब्ध कराना जिसमें ऐसे तरीके शामिल हैं जिनसे जनता के सदस्य सामग्री को किसी स्थान से और किसी समय पर व्यक्तिगत रूप से चुन सकते हैं।
 
-k. **Sui Generis Database Rights** means rights other than copyright resulting from Directive 96/9/EC of the European Parliament and of the Council of 11 March 1996 on the legal protection of databases, as amended and/or succeeded, as well as other essentially equivalent rights anywhere in the world.
+k. **Sui Generis Database Rights** का अर्थ है कॉपीराइट के अलावा अधिकार जो 11 मार्च 1996 को यूरोपीय संसद और परिषद के निर्देश 96/9/EC से उत्पन्न होते हैं, जैसा कि संशोधित और/या उत्तराधिकारित किया गया है, साथ ही दुनिया में कहीं भी अन्य मौलिक रूप से समकक्ष अधिकार।
 
-l. **You** means the individual or entity exercising the Licensed Rights under this Public License. Your has a corresponding meaning.
+l. **You** का अर्थ है वह व्यक्ति या इकाई जो इस Public License के तहत लाइसेंस प्राप्त अधिकारों का प्रयोग कर रही है। आपका एक संबंधित अर्थ है।
 
 ## Section 2 – Scope.
 
 a. **_License grant._**
 
-1.  Subject to the terms and conditions of this Public License, the Licensor hereby grants You a worldwide, royalty-free, non-sublicensable, non-exclusive, irrevocable license to exercise the Licensed Rights in the Licensed Material to:
+1.  इस Public License की शर्तों और शर्तों के अधीन, लाइसेंसधारक आपको लाइसेंस प्राप्त सामग्री में लाइसेंस प्राप्त अधिकारों का प्रयोग करने के लिए एक विश्वव्यापी, रॉयल्टी-फ्री, गैर-सब-लाइसेंस योग्य, गैर-विशेष, अपरिवर्तनीय लाइसेंस प्रदान करता है:
 
-A. reproduce and Share the Licensed Material, in whole or in part, for NonCommercial purposes only; and
+A. लाइसेंस प्राप्त सामग्री को, पूरी या आंशिक रूप से, केवल NonCommercial उद्देश्यों के लिए पुनरुत्पादित और साझा करना; और
 
-B. produce, reproduce, and Share Adapted Material for NonCommercial purposes only.
+B. केवल NonCommercial उद्देश्यों के लिए Adapted Material का उत्पादन, पुनरुत्पादन, और साझा करना।
 
-2.  **Exceptions and Limitations.** For the avoidance of doubt, where Exceptions and Limitations apply to Your use, this Public License does not apply, and You do not need to comply with its terms and conditions.
-3.  **Term.** The term of this Public License is specified in Section 6(a).
+2.  **Exceptions and Limitations.** संदेह से बचने के लिए, जहाँ Exceptions and Limitations आपके उपयोग पर लागू होते हैं, यह Public License लागू नहीं होता है, और आपको इसकी शर्तों और शर्तों का पालन करने की आवश्यकता नहीं है।
+3.  **Term.** इस Public License की अवधि धारा 6(a) में निर्दिष्ट है।
 
-4.  **Media and formats; technical modifications allowed.** The Licensor authorizes You to exercise the Licensed Rights in all media and formats whether now known or hereafter created, and to make technical modifications necessary to do so. The Licensor waives and/or agrees not to assert any right or authority to forbid You from making technical modifications necessary to exercise the Licensed Rights, including technical modifications necessary to circumvent Effective Technological Measures. For purposes of this Public License, simply making modifications authorized by this Section 2(a)(4) never produces Adapted Material.
+4.  **Media and formats; technical modifications allowed.** लाइसेंसधारक आपको सभी मीडिया और प्रारूपों में लाइसेंस प्राप्त अधिकारों का प्रयोग करने के लिए अधिकृत करता है चाहे वे अब ज्ञात हों या बाद में बनाए जाएं, और ऐसा करने के लिए आवश्यक तकनीकी संशोधन करने के लिए। लाइसेंसधारक आपको लाइसेंस प्राप्त अधिकारों का प्रयोग करने के लिए आवश्यक तकनीकी संशोधन करने से रोकने के लिए किसी भी अधिकार या प्राधिकरण का दावा करने से मना करता है, जिसमें प्रभावी तकनीकी उपायों को दरकिनार करने के लिए आवश्यक तकनीकी संशोधन शामिल हैं। इस Public License के उद्देश्यों के लिए, इस धारा 2(a)(4) द्वारा अधिकृत संशोधन करना कभी भी Adapted Material उत्पन्न नहीं करता है।
 5.  **Downstream recipients.**
 
-A. **Offer from the Licensor – Licensed Material.** Every recipient of the Licensed Material automatically receives an offer from the Licensor to exercise the Licensed Rights under the terms and conditions of this Public License.
+A. **Offer from the Licensor – Licensed Material.** लाइसेंस प्राप्त सामग्री के प्रत्येक प्राप्तकर्ता को स्वचालित रूप से लाइसेंसधारक से इस Public License की शर्तों और शर्तों के तहत लाइसेंस प्राप्त अधिकारों का प्रयोग करने का एक प्रस्ताव प्राप्त होता है।
 
-B. **No downstream restrictions.** You may not offer or impose any additional or different terms or conditions on, or apply any Effective Technological Measures to, the Licensed Material if doing so restricts exercise of the Licensed Rights by any recipient of the Licensed Material.
+B. **No downstream restrictions.** आप लाइसेंस प्राप्त सामग्री पर कोई अतिरिक्त या भिन्न शर्तें या शर्तें लागू नहीं कर सकते हैं, या लाइसेंस प्राप्त सामग्री पर कोई प्रभावी तकनीकी उपाय लागू नहीं कर सकते हैं यदि ऐसा करने से लाइसेंस प्राप्त सामग्री के किसी प्राप्तकर्ता द्वारा लाइसेंस प्राप्त अधिकारों का प्रयोग प्रतिबंधित होता है।
 
-6.  **No endorsement.** Nothing in this Public License constitutes or may be construed as permission to assert or imply that You are, or that Your use of the Licensed Material is, connected with, or sponsored, endorsed, or granted official status by, the Licensor or others designated to receive attribution as provided in Section 3(a)(1)(A)(i).
+6.  **No endorsement.** इस Public License में कुछ भी यह स्थापित नहीं करता है या इसे इस तरह से व्याख्या नहीं किया जा सकता है कि आप, या आपकी लाइसेंस प्राप्त सामग्री का उपयोग, लाइसेंसधारक या अन्य लोगों के साथ जुड़ा हुआ है, या प्रायोजित, समर्थन प्राप्त, या आधिकारिक स्थिति दी गई है जैसा कि धारा 3(a)(1)(A)(i) में प्रदान किया गया है।
 
 b. **_Other rights._**
 
-1.  Moral rights, such as the right of integrity, are not licensed under this Public License, nor are publicity, privacy, and/or other similar personality rights; however, to the extent possible, the Licensor waives and/or agrees not to assert any such rights held by the Licensor to the limited extent necessary to allow You to exercise the Licensed Rights, but not otherwise.
+1.  नैतिक अधिकार, जैसे कि अखंडता का अधिकार, इस Public License के तहत लाइसेंस प्राप्त नहीं हैं, न ही प्रचार, गोपनीयता, और/या अन्य समान व्यक्तित्व अधिकार; हालाँकि, यथासंभव, लाइसेंसधारक उन अधिकारों का परित्याग करता है और/या सहमत होता है कि लाइसेंस प्राप्त अधिकारों का प्रयोग करने के लिए आवश्यक सीमित सीमा में लाइसेंसधारक द्वारा रखे गए किसी भी ऐसे अधिकार का दावा न करें।
 
-2.  Patent and trademark rights are not licensed under this Public License.
+2.  पेटेंट और ट्रेडमार्क अधिकार इस Public License के तहत लाइसेंस प्राप्त नहीं हैं।
 
-3.  To the extent possible, the Licensor waives any right to collect royalties from You for the exercise of the Licensed Rights, whether directly or through a collecting society under any voluntary or waivable statutory or compulsory licensing scheme. In all other cases the Licensor expressly reserves any right to collect such royalties, including when the Licensed Material is used other than for NonCommercial purposes.
+3.  यथासंभव, लाइसेंसधारक आपसे लाइसेंस प्राप्त अधिकारों के प्रयोग के लिए रॉयल्टी एकत्र करने के किसी भी अधिकार का परित्याग करता है, चाहे सीधे या किसी स्वैच्छिक या छोडे जाने योग्य वैधानिक या अनिवार्य लाइसेंसिंग योजना के तहत एकत्र करने वाले समाज के माध्यम से। अन्य सभी मामलों में, लाइसेंसधारक स्पष्ट रूप से ऐसे रॉयल्टी एकत्र करने का अधिकार सुरक्षित रखता है, जिसमें जब लाइसेंस प्राप्त सामग्री का उपयोग NonCommercial उद्देश्यों के अलावा किया जाता है।
 
 ## Section 3 – License Conditions.
 
-Your exercise of the Licensed Rights is expressly made subject to the following conditions.
+आपका लाइसेंस प्राप्त अधिकारों का प्रयोग स्पष्ट रूप से निम्नलिखित शर्तों के अधीन है।
 
 a. **_Attribution._**
 
-1.  If You Share the Licensed Material (including in modified form), You must:
+1.  यदि आप लाइसेंस प्राप्त सामग्री साझा करते हैं (संशोधित रूप में भी), तो आपको:
 
-A. retain the following if it is supplied by the Licensor with the Licensed Material:
+A. निम्नलिखित को बनाए रखना चाहिए यदि यह लाइसेंसधारक द्वारा लाइसेंस प्राप्त सामग्री के साथ प्रदान किया गया है:
 
-i. identification of the creator(s) of the Licensed Material and any others designated to receive attribution, in any reasonable manner requested by the Licensor (including by pseudonym if designated);
+i. लाइसेंस प्राप्त सामग्री के निर्माता(गण) की पहचान और किसी अन्य को जो श्रेय प्राप्त करने के लिए निर्दिष्ट किया गया है, किसी भी उचित तरीके से जो लाइसेंसधारक द्वारा अनुरोध किया गया है (यदि निर्दिष्ट किया गया हो तो उपनाम सहित);
 
-ii. a copyright notice;
+ii. एक कॉपीराइट नोटिस;
 
-iii. a notice that refers to this Public License;
+iii. एक नोटिस जो इस Public License का संदर्भ देता है;
 
-iv. a notice that refers to the disclaimer of warranties;
+iv. एक नोटिस जो वारंटी के अस्वीकरण का संदर्भ देता है;
 
-v. a URI or hyperlink to the Licensed Material to the extent reasonably practicable;
+v. लाइसेंस प्राप्त सामग्री के लिए एक URI या हाइपरलिंक यथासंभव व्यावहारिक रूप से;
 
-B. indicate if You modified the Licensed Material and retain an indication of any previous modifications; and
+B. यह संकेत करें कि आपने लाइसेंस प्राप्त सामग्री में संशोधन किया है और किसी भी पूर्व संशोधन का संकेत बनाए रखें; और
 
-C. indicate the Licensed Material is licensed under this Public License, and include the text of, or the URI or hyperlink to, this Public License.
+C. यह संकेत करें कि लाइसेंस प्राप्त सामग्री इस Public License के तहत लाइसेंस प्राप्त है, और इस Public License के पाठ या URI या हाइपरलिंक को शामिल करें।
 
-2.  You may satisfy the conditions in Section 3(a)(1) in any reasonable manner based on the medium, means, and context in which You Share the Licensed Material. For example, it may be reasonable to satisfy the conditions by providing a URI or hyperlink to a resource that includes the required information.
+2.  आप धारा 3(a)(1) में शर्तों को किसी भी उचित तरीके से पूरा कर सकते हैं जो उस माध्यम, साधन, और संदर्भ पर आधारित है जिसमें आप लाइसेंस प्राप्त सामग्री साझा करते हैं। उदाहरण के लिए, यह उचित हो सकता है कि आवश्यक जानकारी शामिल करने वाले संसाधन के लिए एक URI या हाइपरलिंक प्रदान करके शर्तों को पूरा किया जाए।
 
-3.  If requested by the Licensor, You must remove any of the information required by Section 3(a)(1)(A) to the extent reasonably practicable.
+3.  यदि लाइसेंसधारक द्वारा अनुरोध किया गया, तो आपको यथासंभव व्यावहारिक रूप से धारा 3(a)(1)(A) द्वारा आवश्यक किसी भी जानकारी को हटाना चाहिए।
 
-4.  If You Share Adapted Material You produce, the Adapter's License You apply must not prevent recipients of the Adapted Material from complying with this Public License.
+4.  यदि आप साझा करते हैं Adapted Material जो आप उत्पन्न करते हैं, तो आप जो Adapter's License लागू करते हैं वह Adapted Material के प्राप्तकर्ताओं को इस Public License का पालन करने से रोकना नहीं चाहिए।
 
 ## Section 4 – Sui Generis Database Rights.
 
-Where the Licensed Rights include Sui Generis Database Rights that apply to Your use of the Licensed Material:
+जहाँ लाइसेंस प्राप्त अधिकारों में Sui Generis Database Rights शामिल हैं जो आपकी लाइसेंस प्राप्त सामग्री के उपयोग पर लागू होते हैं:
 
-a. for the avoidance of doubt, Section 2(a)(1) grants You the right to extract, reuse, reproduce, and Share all or a substantial portion of the contents of the database for NonCommercial purposes only;
+a. संदेह से बचने के लिए, धारा 2(a)(1) आपको लाइसेंस प्राप्त सामग्री के सभी या एक महत्वपूर्ण भाग की सामग्री को केवल NonCommercial उद्देश्यों के लिए निकालने, पुन: उपयोग करने, पुनरुत्पादित करने, और साझा करने का अधिकार देती है;
 
-b. if You include all or a substantial portion of the database contents in a database in which You have Sui Generis Database Rights, then the database in which You have Sui Generis Database Rights (but not its individual contents) is Adapted Material; and
+b. यदि आप अपने Sui Generis Database Rights वाले डेटाबेस में सभी या एक महत्वपूर्ण भाग की सामग्री शामिल करते हैं, तो जिस डेटाबेस में आपके पास Sui Generis Database Rights हैं (लेकिन इसकी व्यक्तिगत सामग्री नहीं) वह Adapted Material है; और
 
-c. You must comply with the conditions in Section 3(a) if You Share all or a substantial portion of the contents of the database.
+c. यदि आप डेटाबेस की सभी या एक महत्वपूर्ण भाग की सामग्री साझा करते हैं, तो आपको धारा 3(a) में शर्तों का पालन करना चाहिए।
 
-For the avoidance of doubt, this Section 4 supplements and does not replace Your obligations under this Public License where the Licensed Rights include other Copyright and Similar Rights.
+संदेह से बचने के लिए, यह धारा 4 आपके इस Public License के तहत अन्य कॉपीराइट और समान अधिकारों के तहत आपके दायित्वों को पूरक करती है और प्रतिस्थापित नहीं करती है।
 
 ## Section 5 – Disclaimer of Warranties and Limitation of Liability.
 
-a. **Unless otherwise separately undertaken by the Licensor, to the extent possible, the Licensor offers the Licensed Material as-is and as-available, and makes no representations or warranties of any kind concerning the Licensed Material, whether express, implied, statutory, or other. This includes, without limitation, warranties of title, merchantability, fitness for a particular purpose, non-infringement, absence of latent or other defects, accuracy, or the presence or absence of errors, whether or not known or discoverable. Where disclaimers of warranties are not allowed in full or in part, this disclaimer may not apply to You.**
+a. **जब तक लाइसेंसधारक द्वारा अलग से Undertaken न किया गया हो, यथासंभव, लाइसेंसधारक लाइसेंस प्राप्त सामग्री को जैसा है और उपलब्ध के रूप में प्रदान करता है, और लाइसेंस प्राप्त सामग्री के बारे में किसी भी प्रकार की कोई भी प्रस्तुति या वारंटी नहीं देता है, चाहे वह स्पष्ट, निहित, वैधानिक, या अन्य हो। इसमें, बिना किसी सीमा के, शीर्षक, व्यापारिकता, विशेष उद्देश्य के लिए उपयुक्तता, गैर-उल्लंघन, छिपे हुए या अन्य दोषों की अनुपस्थिति, सटीकता, या त्रुटियों की उपस्थिति या अनुपस्थिति, चाहे ज्ञात हो या खोजी जा सकें, शामिल हैं। जहाँ वारंटी के अस्वीकरण पूरी या आंशिक रूप से अनुमति नहीं है, यह अस्वीकरण आपके लिए लागू नहीं हो सकता है।**
 
-b. **To the extent possible, in no event will the Licensor be liable to You on any legal theory (including, without limitation, negligence) or otherwise for any direct, special, indirect, incidental, consequential, punitive, exemplary, or other losses, costs, expenses, or damages arising out of this Public License or use of the Licensed Material, even if the Licensor has been advised of the possibility of such losses, costs, expenses, or damages. Where a limitation of liability is not allowed in full or in part, this limitation may not apply to You.**
+b. **यथासंभव, किसी भी कानूनी सिद्धांत (जिसमें, बिना किसी सीमा के, लापरवाही) या अन्यथा, लाइसेंसधारक आपके लिए किसी भी प्रत्यक्ष, विशेष, अप्रत्यक्ष, आकस्मिक, परिणामी, दंडात्मक, उदाहरणात्मक, या अन्य हानियों, लागतों, व्यय, या नुकसान के लिए जिम्मेदार नहीं होगा जो इस Public License या लाइसेंस प्राप्त सामग्री के उपयोग से उत्पन्न होते हैं, भले ही लाइसेंसधारक को ऐसे नुकसान, लागत, व्यय, या हानियों की संभावना के बारे में सूचित किया गया हो। जहाँ जिम्मेदारी की सीमा पूरी या आंशिक रूप से अनुमति नहीं है, यह सीमा आपके लिए लागू नहीं हो सकती है।**
 
-c. The disclaimer of warranties and limitation of liability provided above shall be interpreted in a manner that, to the extent possible, most closely approximates an absolute disclaimer and waiver of all liability.
+c. उपरोक्त प्रदान किया गया वारंटी का अस्वीकरण और जिम्मेदारी की सीमा इस प्रकार व्याख्यायित की जाएगी कि, यथासंभव, यह सभी जिम्मेदारी का एक पूर्ण अस्वीकरण और परित्याग के सबसे निकटतम रूप में हो।
 
 ## Section 6 – Term and Termination.
 
-a. This Public License applies for the term of the Copyright and Similar Rights licensed here. However, if You fail to comply with this Public License, then Your rights under this Public License terminate automatically.
+a. यह Public License यहाँ लाइसेंस प्राप्त कॉपीराइट और समान अधिकारों की अवधि के लिए लागू होता है। हालाँकि, यदि आप इस Public License का पालन करने में विफल रहते हैं, तो इस Public License के तहत आपके अधिकार स्वचालित रूप से समाप्त हो जाते हैं।
 
-b. Where Your right to use the Licensed Material has terminated under Section 6(a), it reinstates:
+b. जहाँ आपके लाइसेंस प्राप्त सामग्री का उपयोग करने का अधिकार धारा 6(a) के तहत समाप्त हो गया है, यह पुनर्स्थापित होता है:
 
-1.  automatically as of the date the violation is cured, provided it is cured within 30 days of Your discovery of the violation; or
+1.  स्वचालित रूप से उस दिन से जब उल्लंघन को ठीक किया गया, बशर्ते कि यह आपके उल्लंघन की खोज के 30 दिनों के भीतर ठीक किया गया हो; या
 
-2.  upon express reinstatement by the Licensor.
+2.  लाइसेंसधारक द्वारा स्पष्ट पुनर्स्थापना पर।
 
-For the avoidance of doubt, this Section 6(b) does not affect any right the Licensor may have to seek remedies for Your violations of this Public License.
+संदेह से बचने के लिए, यह धारा 6(b) लाइसेंसधारक के आपके इस Public License के उल्लंघनों के लिए उपचार की मांग करने के किसी भी अधिकार को प्रभावित नहीं करती है।
 
-c. For the avoidance of doubt, the Licensor may also offer the Licensed Material under separate terms or conditions or stop distributing the Licensed Material at any time; however, doing so will not terminate this Public License.
+c. संदेह से बचने के लिए, लाइसेंसधारक किसी भी समय अलग शर्तों या शर्तों के तहत लाइसेंस प्राप्त सामग्री की पेशकश कर सकता है या लाइसेंस प्राप्त सामग्री का वितरण बंद कर सकता है; हालाँकि, ऐसा करने से इस Public License की समाप्ति नहीं होगी।
 
-d. Sections 1, 5, 6, 7, and 8 survive termination of this Public License.
+d. धारा 1, 5, 6, 7, और 8 इस Public License की समाप्ति के बाद भी जीवित रहती हैं।
 
 ## Section 7 – Other Terms and Conditions.
 
-a. The Licensor shall not be bound by any additional or different terms or conditions communicated by You unless expressly agreed.
+a. लाइसेंसधारक किसी भी अतिरिक्त या भिन्न शर्तों या शर्तों से बंधा नहीं होगा जो आप द्वारा संप्रेषित की गई हैं जब तक कि स्पष्ट रूप से सहमति न दी गई हो।
 
-b. Any arrangements, understandings, or agreements regarding the Licensed Material not stated herein are separate from and independent of the terms and conditions of this Public License.
+b. लाइसेंस प्राप्त सामग्री के संबंध में यहाँ उल्लिखित कोई भी व्यवस्था, समझौते, या सहमतियाँ इस Public License की शर्तों और शर्तों से अलग और स्वतंत्र हैं।
 
 ## Section 8 – Interpretation.
 
-a. For the avoidance of doubt, this Public License does not, and shall not be interpreted to, reduce, limit, restrict, or impose conditions on any use of the Licensed Material that could lawfully be made without permission under this Public License.
+a. संदेह से बचने के लिए, यह Public License किसी भी उपयोग को कम नहीं करता है, सीमित नहीं करता है, प्रतिबंधित नहीं करता है, या लाइसेंस प्राप्त सामग्री के किसी भी उपयोग पर शर्तें नहीं लगाता है जो इस Public License के तहत अनुमति के बिना वैध रूप से किया जा सकता है।
 
-b. To the extent possible, if any provision of this Public License is deemed unenforceable, it shall be automatically reformed to the minimum extent necessary to make it enforceable. If the provision cannot be reformed, it shall be severed from this Public License without affecting the enforceability of the remaining terms and conditions.
+b. यथासंभव, यदि इस Public License का कोई प्रावधान लागू नहीं किया जा सकता है, तो इसे लागू करने के लिए आवश्यक न्यूनतम सीमा तक स्वचालित रूप से सुधारित किया जाएगा। यदि प्रावधान को सुधारित नहीं किया जा सकता है, तो इसे इस Public License से अलग किया जाएगा बिना शेष शर्तों और शर्तों की लागूता को प्रभावित किए।
 
-c. No term or condition of this Public License will be waived and no failure to comply consented to unless expressly agreed to by the Licensor.
+c. इस Public License की कोई भी शर्त या शर्त माफ नहीं की जाएगी और अनुपालन की कोई विफलता सहमति नहीं दी जाएगी जब तक कि लाइसेंसधारक द्वारा स्पष्ट रूप से सहमति न दी गई हो।
 
-d. Nothing in this Public License constitutes or may be interpreted as a limitation upon, or waiver of, any privileges and immunities that apply to the Licensor or You, including from the legal processes of any jurisdiction or authority.
-
+d. इस Public License में कुछ भी लाइसेंसधारक या आपके लिए लागू होने वाले किसी भी विशेषाधिकार और छूटों पर एक सीमा या परित्याग के रूप में स्थापित नहीं करता है, जिसमें किसी भी क्षेत्राधिकार या प्राधिकरण की कानूनी प्रक्रियाओं से छूट शामिल है।
 ```
 Creative Commons is not a party to its public licenses. Notwithstanding, Creative Commons may elect to apply one of its public licenses to material it publishes and in those instances will be considered the “Licensor.” Except for the limited purpose of indicating that material is shared under a Creative Commons public license or as otherwise permitted by the Creative Commons policies published at [creativecommons.org/policies](http://creativecommons.org/policies), Creative Commons does not authorize the use of the trademark “Creative Commons” or any other trademark or logo of Creative Commons without its prior written consent including, without limitation, in connection with any unauthorized modifications to any of its public licenses or any other arrangements, understandings, or agreements concerning use of licensed material. For the avoidance of doubt, this paragraph does not form part of the public licenses.
 
 Creative Commons may be contacted at [creativecommons.org](http://creativecommons.org/).
 ```
-
 {{#include ./banners/hacktricks-training.md}}
-
