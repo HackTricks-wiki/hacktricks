@@ -1,275 +1,271 @@
-# macOS Process Abuse
+# macOS Процесне Зловживання
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Processes Basic Information
+## Основна Інформація про Процеси
 
-A process is an instance of a running executable, however processes doesn't run code, these are threads. Therefore **processes are just containers for running threads** providing the memory, descriptors, ports, permissions...
+Процес - це екземпляр виконуваного файлу, однак процеси не виконують код, це потоки. Тому **процеси - це лише контейнери для виконуваних потоків**, які забезпечують пам'ять, дескриптори, порти, дозволи...
 
-Traditionally, processes where started within other processes (except PID 1) by calling **`fork`** which would create a exact copy of the current process and then the **child process** would generally call **`execve`** to load the new executable and run it. Then, **`vfork`** was introduced to make this process faster without any memory copying.\
-Then **`posix_spawn`** was introduced combining **`vfork`** and **`execve`** in one call and accepting flags:
+Традиційно, процеси запускалися в межах інших процесів (за винятком PID 1) шляхом виклику **`fork`**, що створювало точну копію поточного процесу, а потім **дочірній процес** зазвичай викликав **`execve`** для завантаження нового виконуваного файлу та його виконання. Потім був введений **`vfork`**, щоб зробити цей процес швидшим без копіювання пам'яті.\
+Потім був введений **`posix_spawn`**, який поєднує **`vfork`** та **`execve`** в одному виклику та приймає прапори:
 
-- `POSIX_SPAWN_RESETIDS`: Reset effective ids to real ids
-- `POSIX_SPAWN_SETPGROUP`: Set process group affiliation
-- `POSUX_SPAWN_SETSIGDEF`: Set signal default behaviour
-- `POSIX_SPAWN_SETSIGMASK`: Set signal mask
-- `POSIX_SPAWN_SETEXEC`: Exec in the same process (like `execve` with more options)
-- `POSIX_SPAWN_START_SUSPENDED`: Start suspended
-- `_POSIX_SPAWN_DISABLE_ASLR`: Start without ASLR
-- `_POSIX_SPAWN_NANO_ALLOCATOR:` Use libmalloc's Nano allocator
-- `_POSIX_SPAWN_ALLOW_DATA_EXEC:` Allow `rwx` on data segments
-- `POSIX_SPAWN_CLOEXEC_DEFAULT`: Close all file descriptions on exec(2) by default
-- `_POSIX_SPAWN_HIGH_BITS_ASLR:` Randomize high bits of ASLR slide
+- `POSIX_SPAWN_RESETIDS`: Скинути ефективні ідентифікатори до реальних
+- `POSIX_SPAWN_SETPGROUP`: Встановити приналежність до групи процесів
+- `POSUX_SPAWN_SETSIGDEF`: Встановити поведінку за замовчуванням сигналів
+- `POSIX_SPAWN_SETSIGMASK`: Встановити маску сигналів
+- `POSIX_SPAWN_SETEXEC`: Виконати в тому ж процесі (як `execve` з більшою кількістю опцій)
+- `POSIX_SPAWN_START_SUSPENDED`: Запустити в підвішеному стані
+- `_POSIX_SPAWN_DISABLE_ASLR`: Запустити без ASLR
+- `_POSIX_SPAWN_NANO_ALLOCATOR:` Використовувати Nano аллокатор libmalloc
+- `_POSIX_SPAWN_ALLOW_DATA_EXEC:` Дозволити `rwx` на сегментах даних
+- `POSIX_SPAWN_CLOEXEC_DEFAULT`: Закрити всі файлові дескриптори за замовчуванням при exec(2)
+- `_POSIX_SPAWN_HIGH_BITS_ASLR:` Випадковим чином змінити високі біти слайду ASLR
 
-Moreover, `posix_spawn` allows to specify an array of **`posix_spawnattr`** that controls some aspects of the spawned process, and **`posix_spawn_file_actions`** to modify the state of the descriptors.
+Більше того, `posix_spawn` дозволяє вказати масив **`posix_spawnattr`**, який контролює деякі аспекти створеного процесу, та **`posix_spawn_file_actions`** для зміни стану дескрипторів.
 
-When a process dies it send the **return code to the parent process** (if the parent died, the new parent is PID 1) with the signal `SIGCHLD`. The parent needs to get this value calling `wait4()` or `waitid()` and until that happen the child stays in a zombie state where it's still listed but doesn't consume resources.
+Коли процес завершує свою роботу, він надсилає **код повернення батьківському процесу** (якщо батьківський процес завершився, новим батьком є PID 1) з сигналом `SIGCHLD`. Батьківський процес повинен отримати це значення, викликавши `wait4()` або `waitid()`, і до того часу дочірній процес залишається в зомбі-стані, де він все ще вказується, але не споживає ресурси.
 
 ### PIDs
 
-PIDs, process identifiers, identifies a uniq process. In XNU the **PIDs** are of **64bits** increasing monotonically and **never wrap** (to avoid abuses).
+PID, ідентифікатори процесів, ідентифікують унікальний процес. У XNU **PIDs** мають **64 біти**, зростають монотонно і **ніколи не обертаються** (щоб уникнути зловживань).
 
-### Process Groups, Sessions & Coalations
+### Групи Процесів, Сесії та Коаліції
 
-**Processes** can be inserted in **groups** to make it easier to handle them. For example, commands in a shell script will be in the same process group so it's possible to **signal them together** using kill for example.\
-It's also possible to **group processes in sessions**. When a process starts a session (`setsid(2)`), the children processes are set inside the session, unless they start their own session.
+**Процеси** можуть бути об'єднані в **групи**, щоб полегшити їх обробку. Наприклад, команди в оболонці будуть в одній групі процесів, тому їх можна **сигналізувати разом** за допомогою kill, наприклад.\
+Також можливо **групувати процеси в сесії**. Коли процес починає сесію (`setsid(2)`), дочірні процеси потрапляють у цю сесію, якщо вони не починають свою власну сесію.
 
-Coalition is another waya to group processes in Darwin. A process joining a coalation allows it to access pool resources, sharing a ledger or facing Jetsam. Coalations have different roles: Leader, XPC service, Extension.
+Коаліція - це ще один спосіб групувати процеси в Darwin. Процес, що приєднується до коаліції, отримує доступ до ресурсів пулу, ділиться реєстром або стикається з Jetsam. Коаліції мають різні ролі: Лідер, XPC сервіс, Розширення.
 
-### Credentials & Personae
+### Облікові Дані та Персони
 
-Each process with hold **credentials** that **identify its privileges** in the system. Each process will have one primary `uid` and one primary `gid` (although might belong to several groups).\
-It's also possible to change the user and group id if the binary has the `setuid/setgid` bit.\
-There are several functions to **set new uids/gids**.
+Кожен процес має **облікові дані**, які **ідентифікують його привілеї** в системі. Кожен процес матиме один основний `uid` та один основний `gid` (хоча може належати до кількох груп).\
+Також можливо змінити ідентифікатор користувача та групи, якщо бінарний файл має біт `setuid/setgid`.\
+Існує кілька функцій для **встановлення нових uid/gid**.
 
-The syscall **`persona`** provides an **alternate** set of **credentials**. Adopting a persona assumes its uid, gid and group memberships **at one**. In the [**source code**](https://github.com/apple/darwin-xnu/blob/main/bsd/sys/persona.h) it's possible to find the struct:
-
+Системний виклик **`persona`** надає **альтернативний** набір **облікових даних**. Прийняття персони передбачає прийняття її uid, gid та членства в групах **одразу**. У [**джерельному коді**](https://github.com/apple/darwin-xnu/blob/main/bsd/sys/persona.h) можна знайти структуру:
 ```c
 struct kpersona_info { uint32_t persona_info_version;
-    uid_t    persona_id; /* overlaps with UID */
-    int      persona_type;
-    gid_t    persona_gid;
-    uint32_t persona_ngroups;
-    gid_t    persona_groups[NGROUPS];
-    uid_t    persona_gmuid;
-    char     persona_name[MAXLOGNAME + 1];
+uid_t    persona_id; /* overlaps with UID */
+int      persona_type;
+gid_t    persona_gid;
+uint32_t persona_ngroups;
+gid_t    persona_groups[NGROUPS];
+uid_t    persona_gmuid;
+char     persona_name[MAXLOGNAME + 1];
 
-    /* TODO: MAC policies?! */
+/* TODO: MAC policies?! */
 }
 ```
+## Основна інформація про потоки
 
-## Threads Basic Information
+1. **POSIX потоки (pthreads):** macOS підтримує POSIX потоки (`pthreads`), які є частиною стандартного API потоків для C/C++. Реалізація pthreads в macOS знаходиться в `/usr/lib/system/libsystem_pthread.dylib`, яка походить з публічно доступного проекту `libpthread`. Ця бібліотека надає необхідні функції для створення та управління потоками.
+2. **Створення потоків:** Функція `pthread_create()` використовується для створення нових потоків. Внутрішньо ця функція викликає `bsdthread_create()`, яка є системним викликом нижчого рівня, специфічним для ядра XNU (ядро, на якому базується macOS). Цей системний виклик приймає різні прапори, отримані з `pthread_attr` (атрибути), які вказують на поведінку потоку, включаючи політики планування та розмір стеку.
+- **Розмір стеку за замовчуванням:** Розмір стеку за замовчуванням для нових потоків становить 512 КБ, що є достатнім для типових операцій, але може бути відкориговано через атрибути потоку, якщо потрібно більше або менше місця.
+3. **Ініціалізація потоків:** Функція `__pthread_init()` є критично важливою під час налаштування потоків, використовуючи аргумент `env[]` для парсингу змінних середовища, які можуть містити деталі про місцезнаходження та розмір стеку.
 
-1. **POSIX Threads (pthreads):** macOS supports POSIX threads (`pthreads`), which are part of a standard threading API for C/C++. The implementation of pthreads in macOS is found in `/usr/lib/system/libsystem_pthread.dylib`, which comes from the publicly available `libpthread` project. This library provides the necessary functions to create and manage threads.
-2. **Creating Threads:** The `pthread_create()` function is used to create new threads. Internally, this function calls `bsdthread_create()`, which is a lower-level system call specific to the XNU kernel (the kernel macOS is based on). This system call takes various flags derived from `pthread_attr` (attributes) that specify thread behavior, including scheduling policies and stack size.
-   - **Default Stack Size:** The default stack size for new threads is 512 KB, which is sufficient for typical operations but can be adjusted via thread attributes if more or less space is needed.
-3. **Thread Initialization:** The `__pthread_init()` function is crucial during thread setup, utilizing the `env[]` argument to parse environment variables that can include details about the stack's location and size.
+#### Завершення потоків в macOS
 
-#### Thread Termination in macOS
+1. **Вихід з потоків:** Потоки зазвичай завершуються викликом `pthread_exit()`. Ця функція дозволяє потоку вийти коректно, виконуючи необхідні дії з очищення та дозволяючи потоку надіслати значення повернення назад до будь-яких приєднувачів.
+2. **Очищення потоків:** Після виклику `pthread_exit()` викликається функція `pthread_terminate()`, яка обробляє видалення всіх асоційованих структур потоків. Вона звільняє порти потоків Mach (Mach є підсистемою зв'язку в ядрі XNU) і викликає `bsdthread_terminate`, системний виклик, який видаляє структури на рівні ядра, пов'язані з потоком.
 
-1. **Exiting Threads:** Threads are typically terminated by calling `pthread_exit()`. This function allows a thread to exit cleanly, performing necessary cleanup and allowing the thread to send a return value back to any joiners.
-2. **Thread Cleanup:** Upon calling `pthread_exit()`, the function `pthread_terminate()` is invoked, which handles the removal of all associated thread structures. It deallocates Mach thread ports (Mach is the communication subsystem in the XNU kernel) and calls `bsdthread_terminate`, a syscall that removes the kernel-level structures associated with the thread.
+#### Механізми синхронізації
 
-#### Synchronization Mechanisms
+Для управління доступом до спільних ресурсів та уникнення станів гонки macOS надає кілька примітивів синхронізації. Вони є критично важливими в середовищах з багатопоточністю для забезпечення цілісності даних та стабільності системи:
 
-To manage access to shared resources and avoid race conditions, macOS provides several synchronization primitives. These are critical in multi-threading environments to ensure data integrity and system stability:
-
-1. **Mutexes:**
-   - **Regular Mutex (Signature: 0x4D555458):** Standard mutex with a memory footprint of 60 bytes (56 bytes for the mutex and 4 bytes for the signature).
-   - **Fast Mutex (Signature: 0x4d55545A):** Similar to a regular mutex but optimized for faster operations, also 60 bytes in size.
-2. **Condition Variables:**
-   - Used for waiting for certain conditions to occur, with a size of 44 bytes (40 bytes plus a 4-byte signature).
-   - **Condition Variable Attributes (Signature: 0x434e4441):** Configuration attributes for condition variables, sized at 12 bytes.
-3. **Once Variable (Signature: 0x4f4e4345):**
-   - Ensures that a piece of initialization code is executed only once. Its size is 12 bytes.
-4. **Read-Write Locks:**
-   - Allows multiple readers or one writer at a time, facilitating efficient access to shared data.
-   - **Read Write Lock (Signature: 0x52574c4b):** Sized at 196 bytes.
-   - **Read Write Lock Attributes (Signature: 0x52574c41):** Attributes for read-write locks, 20 bytes in size.
+1. **М'ютекси:**
+- **Звичайний м'ютекс (Signature: 0x4D555458):** Стандартний м'ютекс з обсягом пам'яті 60 байт (56 байт для м'ютекса та 4 байти для підпису).
+- **Швидкий м'ютекс (Signature: 0x4d55545A):** Схожий на звичайний м'ютекс, але оптимізований для швидших операцій, також 60 байт розміру.
+2. **Змінні умов:**
+- Використовуються для очікування настання певних умов, з розміром 44 байти (40 байт плюс 4-байтовий підпис).
+- **Атрибути змінних умов (Signature: 0x434e4441):** Атрибути конфігурації для змінних умов, розміром 12 байт.
+3. **Змінна Once (Signature: 0x4f4e4345):**
+- Забезпечує виконання певного коду ініціалізації лише один раз. Її розмір становить 12 байт.
+4. **Замки читання-запису:**
+- Дозволяють одночасно кільком читачам або одному записувачу, сприяючи ефективному доступу до спільних даних.
+- **Замок читання-запису (Signature: 0x52574c4b):** Розміром 196 байт.
+- **Атрибути замка читання-запису (Signature: 0x52574c41):** Атрибути для замків читання-запису, 20 байт розміру.
 
 > [!TIP]
-> The last 4 bytes of those objects are used to deetct overflows.
+> Останні 4 байти цих об'єктів використовуються для виявлення переповнень.
 
-### Thread Local Variables (TLV)
+### Локальні змінні потоків (TLV)
 
-**Thread Local Variables (TLV)** in the context of Mach-O files (the format for executables in macOS) are used to declare variables that are specific to **each thread** in a multi-threaded application. This ensures that each thread has its own separate instance of a variable, providing a way to avoid conflicts and maintain data integrity without needing explicit synchronization mechanisms like mutexes.
+**Локальні змінні потоків (TLV)** в контексті файлів Mach-O (формат для виконуваних файлів в macOS) використовуються для оголошення змінних, які є специфічними для **кожного потоку** в багатопоточному додатку. Це забезпечує, що кожен потік має свій власний окремий екземпляр змінної, що дозволяє уникати конфліктів і підтримувати цілісність даних без необхідності в явних механізмах синхронізації, таких як м'ютекси.
 
-In C and related languages, you can declare a thread-local variable using the **`__thread`** keyword. Here’s how it works in your example:
-
+У C та суміжних мовах ви можете оголосити локальну змінну потоку, використовуючи ключове слово **`__thread`**. Ось як це працює у вашому прикладі:
 ```c
 cCopy code__thread int tlv_var;
 
 void main (int argc, char **argv){
-    tlv_var = 10;
+tlv_var = 10;
 }
 ```
+Цей фрагмент визначає `tlv_var` як змінну, локальну для потоку. Кожен потік, що виконує цей код, матиме свою власну `tlv_var`, і зміни, які один потік вносить у `tlv_var`, не вплинуть на `tlv_var` в іншому потоці.
 
-This snippet defines `tlv_var` as a thread-local variable. Each thread running this code will have its own `tlv_var`, and changes one thread makes to `tlv_var` will not affect `tlv_var` in another thread.
+У бінарному файлі Mach-O дані, пов'язані з локальними для потоку змінними, організовані в специфічні секції:
 
-In the Mach-O binary, the data related to thread local variables is organized into specific sections:
+- **`__DATA.__thread_vars`**: Ця секція містить метадані про локальні для потоку змінні, такі як їх типи та статус ініціалізації.
+- **`__DATA.__thread_bss`**: Ця секція використовується для локальних для потоку змінних, які не ініціалізовані явно. Це частина пам'яті, відведена для даних, ініціалізованих нулем.
 
-- **`__DATA.__thread_vars`**: This section contains the metadata about the thread-local variables, like their types and initialization status.
-- **`__DATA.__thread_bss`**: This section is used for thread-local variables that are not explicitly initialized. It's a part of memory set aside for zero-initialized data.
+Mach-O також надає специфічний API під назвою **`tlv_atexit`** для управління локальними для потоку змінними, коли потік завершується. Цей API дозволяє **реєструвати деструктори** — спеціальні функції, які очищають локальні для потоку дані, коли потік завершується.
 
-Mach-O also provides a specific API called **`tlv_atexit`** to manage thread-local variables when a thread exits. This API allows you to **register destructors**—special functions that clean up thread-local data when a thread terminates.
+### Пріоритети потоків
 
-### Threading Priorities
+Розуміння пріоритетів потоків передбачає вивчення того, як операційна система вирішує, які потоки виконувати і коли. Це рішення впливає на рівень пріоритету, призначений кожному потоку. У macOS та Unix-подібних системах це обробляється за допомогою концепцій, таких як `nice`, `renice` та класи якості обслуговування (QoS).
 
-Understanding thread priorities involves looking at how the operating system decides which threads to run and when. This decision is influenced by the priority level assigned to each thread. In macOS and Unix-like systems, this is handled using concepts like `nice`, `renice`, and Quality of Service (QoS) classes.
-
-#### Nice and Renice
+#### Nice та Renice
 
 1. **Nice:**
-   - The `nice` value of a process is a number that affects its priority. Every process has a nice value ranging from -20 (the highest priority) to 19 (the lowest priority). The default nice value when a process is created is typically 0.
-   - A lower nice value (closer to -20) makes a process more "selfish," giving it more CPU time compared to other processes with higher nice values.
+- Значення `nice` процесу — це число, яке впливає на його пріоритет. Кожен процес має значення nice в діапазоні від -20 (найвищий пріоритет) до 19 (найнижчий пріоритет). Значення nice за замовчуванням, коли процес створюється, зазвичай становить 0.
+- Нижче значення nice (ближче до -20) робить процес більш "егоїстичним", надаючи йому більше часу ЦП у порівнянні з іншими процесами з вищими значеннями nice.
 2. **Renice:**
-   - `renice` is a command used to change the nice value of an already running process. This can be used to dynamically adjust the priority of processes, either increasing or decreasing their CPU time allocation based on new nice values.
-   - For example, if a process needs more CPU resources temporarily, you might lower its nice value using `renice`.
+- `renice` — це команда, яка використовується для зміни значення nice вже запущеного процесу. Це можна використовувати для динамічного коригування пріоритету процесів, або підвищуючи, або знижуючи їх виділення часу ЦП на основі нових значень nice.
+- Наприклад, якщо процесу тимчасово потрібно більше ресурсів ЦП, ви можете знизити його значення nice за допомогою `renice`.
 
-#### Quality of Service (QoS) Classes
+#### Класи якості обслуговування (QoS)
 
-QoS classes are a more modern approach to handling thread priorities, particularly in systems like macOS that support **Grand Central Dispatch (GCD)**. QoS classes allow developers to **categorize** work into different levels based on their importance or urgency. macOS manages thread prioritization automatically based on these QoS classes:
+Класи QoS є більш сучасним підходом до управління пріоритетами потоків, особливо в системах, таких як macOS, які підтримують **Grand Central Dispatch (GCD)**. Класи QoS дозволяють розробникам **категоризувати** роботу на різні рівні залежно від їх важливості або терміновості. macOS автоматично управляє пріоритизацією потоків на основі цих класів QoS:
 
-1. **User Interactive:**
-   - This class is for tasks that are currently interacting with the user or require immediate results to provide a good user experience. These tasks are given the highest priority to keep the interface responsive (e.g., animations or event handling).
-2. **User Initiated:**
-   - Tasks that the user initiates and expects immediate results, such as opening a document or clicking a button that requires computations. These are high priority but below user interactive.
-3. **Utility:**
-   - These tasks are long-running and typically show a progress indicator (e.g., downloading files, importing data). They are lower in priority than user-initiated tasks and do not need to finish immediately.
-4. **Background:**
-   - This class is for tasks that operate in the background and are not visible to the user. These can be tasks like indexing, syncing, or backups. They have the lowest priority and minimal impact on system performance.
+1. **Користувацький інтерактивний:**
+- Цей клас призначений для завдань, які в даний час взаємодіють з користувачем або вимагають негайних результатів для забезпечення хорошого користувацького досвіду. Ці завдання отримують найвищий пріоритет, щоб інтерфейс залишався чутливим (наприклад, анімації або обробка подій).
+2. **Ініційований користувачем:**
+- Завдання, які ініціює користувач і очікує негайних результатів, такі як відкриття документа або натискання кнопки, що вимагає обчислень. Це високий пріоритет, але нижче, ніж користувацький інтерактивний.
+3. **Утиліта:**
+- Ці завдання є тривалими і зазвичай показують індикатор прогресу (наприклад, завантаження файлів, імпорт даних). Вони мають нижчий пріоритет, ніж ініційовані користувачем завдання, і не потребують негайного завершення.
+4. **Фоновий:**
+- Цей клас призначений для завдань, які працюють у фоновому режимі і не видимі для користувача. Це можуть бути завдання, такі як індексація, синхронізація або резервне копіювання. Вони мають найнижчий пріоритет і мінімальний вплив на продуктивність системи.
 
-Using QoS classes, developers do not need to manage the exact priority numbers but rather focus on the nature of the task, and the system optimizes the CPU resources accordingly.
+Використовуючи класи QoS, розробники не повинні управляти точними номерами пріоритету, а скоріше зосереджуватися на природі завдання, а система оптимізує ресурси ЦП відповідно.
 
-Moreover, there are different **thread scheduling policies** that flows to specify a set of scheduling parameters that the scheduler will take into consideration. This can be done using `thread_policy_[set/get]`. This might be useful in race condition attacks.
+Більше того, існують різні **політики планування потоків**, які визначають набір параметрів планування, які планувальник враховуватиме. Це можна зробити за допомогою `thread_policy_[set/get]`. Це може бути корисно в атаках на умови гонки.
 
-## MacOS Process Abuse
+## Зловживання процесами в MacOS
 
-MacOS, like any other operating system, provides a variety of methods and mechanisms for **processes to interact, communicate, and share data**. While these techniques are essential for efficient system functioning, they can also be abused by threat actors to **perform malicious activities**.
+MacOS, як і будь-яка інша операційна система, надає різноманітні методи та механізми для **взаємодії, комунікації та обміну даними** між процесами. Хоча ці техніки є важливими для ефективного функціонування системи, їх також можуть зловживати зловмисники для **виконання шкідливих дій**.
 
-### Library Injection
+### Ін'єкція бібліотек
 
-Library Injection is a technique wherein an attacker **forces a process to load a malicious library**. Once injected, the library runs in the context of the target process, providing the attacker with the same permissions and access as the process.
+Ін'єкція бібліотек — це техніка, при якій зловмисник **примушує процес завантажити шкідливу бібліотеку**. Після ін'єкції бібліотека виконується в контексті цільового процесу, надаючи зловмиснику ті ж дозволи та доступ, що й процес.
 
 {{#ref}}
 macos-library-injection/
 {{#endref}}
 
-### Function Hooking
+### Хук функцій
 
-Function Hooking involves **intercepting function calls** or messages within a software code. By hooking functions, an attacker can **modify the behavior** of a process, observe sensitive data, or even gain control over the execution flow.
+Хук функцій передбачає **перехоплення викликів функцій** або повідомлень у програмному коді. Перехоплюючи функції, зловмисник може **модифікувати поведінку** процесу, спостерігати за чутливими даними або навіть отримати контроль над потоком виконання.
 
 {{#ref}}
 macos-function-hooking.md
 {{#endref}}
 
-### Inter Process Communication
+### Міжпроцесна комунікація
 
-Inter Process Communication (IPC) refers to different methods by which separate processes **share and exchange data**. While IPC is fundamental for many legitimate applications, it can also be misused to subvert process isolation, leak sensitive information, or perform unauthorized actions.
+Міжпроцесна комунікація (IPC) відноситься до різних методів, за допомогою яких окремі процеси **діляться та обмінюються даними**. Хоча IPC є основоположним для багатьох легітимних застосувань, його також можна зловживати для підриву ізоляції процесів, витоку чутливої інформації або виконання несанкціонованих дій.
 
 {{#ref}}
 macos-ipc-inter-process-communication/
 {{#endref}}
 
-### Electron Applications Injection
+### Ін'єкція додатків Electron
 
-Electron applications executed with specific env variables could be vulnerable to process injection:
+Додатки Electron, виконувані з певними змінними середовища, можуть бути вразливими до ін'єкції процесів:
 
 {{#ref}}
 macos-electron-applications-injection.md
 {{#endref}}
 
-### Chromium Injection
+### Ін'єкція Chromium
 
-It's possible to use the flags `--load-extension` and `--use-fake-ui-for-media-stream` to perform a **man in the browser attack** allowing to steal keystrokes, traffic, cookies, inject scripts in pages...:
+Можна використовувати параметри `--load-extension` та `--use-fake-ui-for-media-stream` для виконання **атаки "людина в браузері"**, що дозволяє красти натискання клавіш, трафік, куки, ін'єктувати скрипти на сторінках...:
 
 {{#ref}}
 macos-chromium-injection.md
 {{#endref}}
 
-### Dirty NIB
+### Брудний NIB
 
-NIB files **define user interface (UI) elements** and their interactions within an application. However, they can **execute arbitrary commands** and **Gatekeeper doesn't stop** an already executed application from being executed if a **NIB file is modified**. Therefore, they could be used to make arbitrary programs execute arbitrary commands:
+Файли NIB **визначають елементи інтерфейсу користувача (UI)** та їх взаємодії в додатку. Однак вони можуть **виконувати довільні команди**, і **Gatekeeper не зупиняє** вже виконуваний додаток від повторного виконання, якщо **файл NIB модифіковано**. Тому їх можна використовувати для виконання довільних команд:
 
 {{#ref}}
 macos-dirty-nib.md
 {{#endref}}
 
-### Java Applications Injection
+### Ін'єкція Java-додатків
 
-It's possible to abuse certain java capabilities (like the **`_JAVA_OPTS`** env variable) to make a java application execute **arbitrary code/commands**.
+Можна зловживати певними можливостями Java (такими як змінна середовища **`_JAVA_OPTS`**), щоб змусити Java-додаток виконувати **довільний код/команди**.
 
 {{#ref}}
 macos-java-apps-injection.md
 {{#endref}}
 
-### .Net Applications Injection
+### Ін'єкція .Net-додатків
 
-It's possible to inject code into .Net applications by **abusing the .Net debugging functionality** (not protected by macOS protections such as runtime hardening).
+Можна ін'єктувати код у .Net-додатки, **зловживаючи функціональністю налагодження .Net** (яка не захищена такими захистами macOS, як посилене виконання).
 
 {{#ref}}
 macos-.net-applications-injection.md
 {{#endref}}
 
-### Perl Injection
+### Ін'єкція Perl
 
-Check different options to make a Perl script execute arbitrary code in:
+Перевірте різні варіанти, щоб змусити скрипт Perl виконувати довільний код у:
 
 {{#ref}}
 macos-perl-applications-injection.md
 {{#endref}}
 
-### Ruby Injection
+### Ін'єкція Ruby
 
-I't also possible to abuse ruby env variables to make arbitrary scripts execute arbitrary code:
+Також можливо зловживати змінними середовища Ruby, щоб змусити довільні скрипти виконувати довільний код:
 
 {{#ref}}
 macos-ruby-applications-injection.md
 {{#endref}}
 
-### Python Injection
+### Ін'єкція Python
 
-If the environment variable **`PYTHONINSPECT`** is set, the python process will drop into a python cli once it's finished. It's also possible to use **`PYTHONSTARTUP`** to indicate a python script to execute at the beginning of an interactive session.\
-However, note that **`PYTHONSTARTUP`** script won't be executed when **`PYTHONINSPECT`** creates the interactive session.
+Якщо змінна середовища **`PYTHONINSPECT`** встановлена, процес Python перейде в CLI Python після завершення. Також можливо використовувати **`PYTHONSTARTUP`**, щоб вказати скрипт Python для виконання на початку інтерактивної сесії.\
+Однак зверніть увагу, що скрипт **`PYTHONSTARTUP`** не буде виконаний, коли **`PYTHONINSPECT`** створює інтерактивну сесію.
 
-Other env variables such as **`PYTHONPATH`** and **`PYTHONHOME`** could also be useful to make a python command execute arbitrary code.
+Інші змінні середовища, такі як **`PYTHONPATH`** та **`PYTHONHOME`**, також можуть бути корисними для виконання довільного коду командою Python.
 
-Note that executables compiled with **`pyinstaller`** won't use these environmental variables even if they are running using an embedded python.
+Зверніть увагу, що виконувані файли, скомпільовані за допомогою **`pyinstaller`**, не використовуватимуть ці змінні середовища, навіть якщо вони виконуються за допомогою вбудованого Python.
 
 > [!CAUTION]
-> Overall I couldn't find a way to make python execute arbitrary code abusing environment variables.\
-> However, most of the people install pyhton using **Hombrew**, which will install pyhton in a **writable location** for the default admin user. You can hijack it with something like:
+> Загалом, я не зміг знайти спосіб змусити Python виконувати довільний код, зловживаючи змінними середовища.\
+> Однак більшість людей встановлюють Python за допомогою **Homebrew**, що встановлює Python у **записуване місце** для користувача за замовчуванням. Ви можете перехопити його чимось на зразок:
 >
 > ```bash
 > mv /opt/homebrew/bin/python3 /opt/homebrew/bin/python3.old
 > cat > /opt/homebrew/bin/python3 <<EOF
 > #!/bin/bash
-> # Extra hijack code
+> # Додатковий код перехоплення
 > /opt/homebrew/bin/python3.old "$@"
 > EOF
 > chmod +x /opt/homebrew/bin/python3
 > ```
 >
-> Even **root** will run this code when running python.
+> Навіть **root** виконає цей код, коли запуститься Python.
 
-## Detection
+## Виявлення
 
 ### Shield
 
-[**Shield**](https://theevilbit.github.io/shield/) ([**Github**](https://github.com/theevilbit/Shield)) is an open source application that can **detect and block process injection** actions:
+[**Shield**](https://theevilbit.github.io/shield/) ([**Github**](https://github.com/theevilbit/Shield)) — це відкритий додаток, який може **виявляти та блокувати дії ін'єкції процесів**:
 
-- Using **Environmental Variables**: It will monitor the presence of any of the following environmental variables: **`DYLD_INSERT_LIBRARIES`**, **`CFNETWORK_LIBRARY_PATH`**, **`RAWCAMERA_BUNDLE_PATH`** and **`ELECTRON_RUN_AS_NODE`**
-- Using **`task_for_pid`** calls: To find when one process wants to get the **task port of another** which allows to inject code in the process.
-- **Electron apps params**: Someone can use **`--inspect`**, **`--inspect-brk`** and **`--remote-debugging-port`** command line argument to start an Electron app in debugging mode, and thus inject code to it.
-- Using **symlinks** or **hardlinks**: Typically the most common abuse is to **place a link with our user privileges**, and **point it to a higher privilege** location. The detection is very simple for both hardlink and symlinks. If the process creating the link has a **different privilege level** than the target file, we create an **alert**. Unfortunately in the case of symlinks blocking is not possible, as we don’t have information about the destination of the link prior creation. This is a limitation of Apple’s EndpointSecuriy framework.
+- Використовуючи **змінні середовища**: Він буде контролювати наявність будь-якої з наступних змінних середовища: **`DYLD_INSERT_LIBRARIES`**, **`CFNETWORK_LIBRARY_PATH`**, **`RAWCAMERA_BUNDLE_PATH`** та **`ELECTRON_RUN_AS_NODE`**
+- Використовуючи виклики **`task_for_pid`**: Щоб дізнатися, коли один процес хоче отримати **порт завдання іншого**, що дозволяє ін'єктувати код у процес.
+- **Параметри додатків Electron**: Хтось може використовувати аргументи командного рядка **`--inspect`**, **`--inspect-brk`** та **`--remote-debugging-port`**, щоб запустити додаток Electron у режимі налагодження, і таким чином ін'єктувати код у нього.
+- Використовуючи **символьні посилання** або **жорсткі посилання**: Зазвичай найпоширеніше зловживання полягає в **розміщенні посилання з нашими привілеями** та **вказуванні на місце з вищими привілеями**. Виявлення дуже просте для обох жорстких і символьних посилань. Якщо процес, що створює посилання, має **інший рівень привілеїв**, ніж цільовий файл, ми створюємо **попередження**. На жаль, у випадку символьних посилань блокування неможливе, оскільки у нас немає інформації про призначення посилання до його створення. Це обмеження фреймворку EndpointSecurity Apple.
 
-### Calls made by other processes
+### Виклики, зроблені іншими процесами
 
-In [**this blog post**](https://knight.sc/reverse%20engineering/2019/04/15/detecting-task-modifications.html) you can find how it's possible to use the function **`task_name_for_pid`** to get information about other **processes injecting code in a process** and then getting information about that other process.
+У [**цьому блозі**](https://knight.sc/reverse%20engineering/2019/04/15/detecting-task-modifications.html) ви можете дізнатися, як можна використовувати функцію **`task_name_for_pid`**, щоб отримати інформацію про інші **процеси, що ін'єктують код у процес** і потім отримати інформацію про цей інший процес.
 
-Note that to call that function you need to be **the same uid** as the one running the process or **root** (and it returns info about the process, not a way to inject code).
+Зверніть увагу, що для виклику цієї функції вам потрібно бути **тим же uid**, що й той, хто виконує процес, або **root** (і вона повертає інформацію про процес, а не спосіб ін'єкції коду).
 
-## References
+## Посилання
 
 - [https://theevilbit.github.io/shield/](https://theevilbit.github.io/shield/)
 - [https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f](https://medium.com/@metnew/why-electron-apps-cant-store-your-secrets-confidentially-inspect-option-a49950d6d51f)

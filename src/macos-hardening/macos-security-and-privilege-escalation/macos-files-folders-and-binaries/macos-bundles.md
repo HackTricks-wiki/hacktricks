@@ -4,41 +4,41 @@
 
 ## Basic Information
 
-Bundles in macOS serve as containers for a variety of resources including applications, libraries, and other necessary files, making them appear as single objects in Finder, such as the familiar `*.app` files. The most commonly encountered bundle is the `.app` bundle, though other types like `.framework`, `.systemextension`, and `.kext` are also prevalent.
+Бандли в macOS слугують контейнерами для різноманітних ресурсів, включаючи програми, бібліотеки та інші необхідні файли, що дозволяє їм з'являтися як єдині об'єкти у Finder, такі як знайомі `*.app` файли. Найбільш поширеним бандлом є бандл `.app`, хоча також поширені інші типи, такі як `.framework`, `.systemextension` та `.kext`.
 
 ### Essential Components of a Bundle
 
-Within a bundle, particularly within the `<application>.app/Contents/` directory, a variety of important resources are housed:
+Усередині бандла, зокрема в каталозі `<application>.app/Contents/`, розміщено різноманітні важливі ресурси:
 
-- **\_CodeSignature**: This directory stores code-signing details vital for verifying the integrity of the application. You can inspect the code-signing information using commands like: %%%bash openssl dgst -binary -sha1 /Applications/Safari.app/Contents/Resources/Assets.car | openssl base64 %%%
-- **MacOS**: Contains the executable binary of the application that runs upon user interaction.
-- **Resources**: A repository for the application's user interface components including images, documents, and interface descriptions (nib/xib files).
-- **Info.plist**: Acts as the application's main configuration file, crucial for the system to recognize and interact with the application appropriately.
+- **\_CodeSignature**: Цей каталог зберігає деталі підпису коду, які є важливими для перевірки цілісності програми. Ви можете перевірити інформацію про підпис коду, використовуючи команди, такі як: %%%bash openssl dgst -binary -sha1 /Applications/Safari.app/Contents/Resources/Assets.car | openssl base64 %%%
+- **MacOS**: Містить виконуваний бінарний файл програми, який запускається при взаємодії з користувачем.
+- **Resources**: Сховище для компонентів інтерфейсу користувача програми, включаючи зображення, документи та описи інтерфейсу (файли nib/xib).
+- **Info.plist**: Виконує роль основного конфігураційного файлу програми, що є критично важливим для системи, щоб правильно розпізнавати та взаємодіяти з програмою.
 
 #### Important Keys in Info.plist
 
-The `Info.plist` file is a cornerstone for application configuration, containing keys such as:
+Файл `Info.plist` є основою для конфігурації програми, містячи ключі, такі як:
 
-- **CFBundleExecutable**: Specifies the name of the main executable file located in the `Contents/MacOS` directory.
-- **CFBundleIdentifier**: Provides a global identifier for the application, used extensively by macOS for application management.
-- **LSMinimumSystemVersion**: Indicates the minimum version of macOS required for the application to run.
+- **CFBundleExecutable**: Вказує на ім'я основного виконуваного файлу, розташованого в каталозі `Contents/MacOS`.
+- **CFBundleIdentifier**: Надає глобальний ідентифікатор для програми, який широко використовується macOS для управління програмами.
+- **LSMinimumSystemVersion**: Вказує на мінімальну версію macOS, необхідну для запуску програми.
 
 ### Exploring Bundles
 
-To explore the contents of a bundle, such as `Safari.app`, the following command can be used: `bash ls -lR /Applications/Safari.app/Contents`
+Щоб дослідити вміст бандла, такого як `Safari.app`, можна використовувати наступну команду: `bash ls -lR /Applications/Safari.app/Contents`
 
-This exploration reveals directories like `_CodeSignature`, `MacOS`, `Resources`, and files like `Info.plist`, each serving a unique purpose from securing the application to defining its user interface and operational parameters.
+Це дослідження виявляє каталоги, такі як `_CodeSignature`, `MacOS`, `Resources`, та файли, такі як `Info.plist`, кожен з яких виконує унікальну роль від забезпечення безпеки програми до визначення її інтерфейсу користувача та операційних параметрів.
 
 #### Additional Bundle Directories
 
-Beyond the common directories, bundles may also include:
+Окрім загальних каталогів, бандли можуть також включати:
 
-- **Frameworks**: Contains bundled frameworks used by the application. Frameworks are like dylibs with extra resources.
-- **PlugIns**: A directory for plug-ins and extensions that enhance the application's capabilities.
-- **XPCServices**: Holds XPC services used by the application for out-of-process communication.
+- **Frameworks**: Містить упаковані фреймворки, які використовуються програмою. Фреймворки подібні до dylibs з додатковими ресурсами.
+- **PlugIns**: Каталог для плагінів та розширень, які покращують можливості програми.
+- **XPCServices**: Містить XPC сервіси, які використовуються програмою для міжпроцесної комунікації.
 
-This structure ensures that all necessary components are encapsulated within the bundle, facilitating a modular and secure application environment.
+Ця структура забезпечує, що всі необхідні компоненти інкапсульовані в бандлі, що сприяє модульному та безпечному середовищу програми.
 
-For more detailed information on `Info.plist` keys and their meanings, the Apple developer documentation provides extensive resources: [Apple Info.plist Key Reference](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html).
+Для отримання більш детальної інформації про ключі `Info.plist` та їх значення, документація розробника Apple надає обширні ресурси: [Apple Info.plist Key Reference](https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html).
 
 {{#include ../../../banners/hacktricks-training.md}}

@@ -4,23 +4,22 @@
 
 ## Basic Information
 
-MacOS Sandbox (initially called Seatbelt) **limits applications** running inside the sandbox to the **allowed actions specified in the Sandbox profile** the app is running with. This helps to ensure that **the application will be accessing only expected resources**.
+MacOS Sandbox (спочатку називався Seatbelt) **обмежує програми**, що працюють всередині пісочниці, до **дозволених дій, зазначених у профілі Sandbox**, з яким працює програма. Це допомагає забезпечити, що **програма буде отримувати доступ лише до очікуваних ресурсів**.
 
-Any app with the **entitlement** **`com.apple.security.app-sandbox`** will be executed inside the sandbox. **Apple binaries** are usually executed inside a Sandbox, and all applications from the **App Store have that entitlement**. So several applications will be executed inside the sandbox.
+Будь-яка програма з **правом** **`com.apple.security.app-sandbox`** буде виконуватися всередині пісочниці. **Бінарники Apple** зазвичай виконуються всередині пісочниці, і всі програми з **App Store мають це право**. Тому кілька програм буде виконуватися всередині пісочниці.
 
-In order to control what a process can or cannot do the **Sandbox has hooks** in almost any operation a process might try (including most syscalls) using **MACF**. However, d**epending** on the **entitlements** of the app the Sandbox might be more permissive with the process.
+Щоб контролювати, що процес може або не може робити, **пісочниця має хуки** практично в будь-якій операції, яку процес може спробувати (включаючи більшість системних викликів) за допомогою **MACF**. Однак, **залежно** від **прав** програми, пісочниця може бути більш поблажливою до процесу.
 
-Some important components of the Sandbox are:
+Деякі важливі компоненти пісочниці:
 
-- The **kernel extension** `/System/Library/Extensions/Sandbox.kext`
-- The **private framework** `/System/Library/PrivateFrameworks/AppSandbox.framework`
-- A **daemon** running in userland `/usr/libexec/sandboxd`
-- The **containers** `~/Library/Containers`
+- **Розширення ядра** `/System/Library/Extensions/Sandbox.kext`
+- **Приватний фреймворк** `/System/Library/PrivateFrameworks/AppSandbox.framework`
+- **Демон**, що працює в користувацькому просторі `/usr/libexec/sandboxd`
+- **Контейнери** `~/Library/Containers`
 
 ### Containers
 
-Every sandboxed application will have its own container in `~/Library/Containers/{CFBundleIdentifier}` :
-
+Кожна програма в пісочниці матиме свій власний контейнер у `~/Library/Containers/{CFBundleIdentifier}` :
 ```bash
 ls -l ~/Library/Containers
 total 0
@@ -31,9 +30,7 @@ drwx------@ 4 username  staff  128 Mar 25 14:14 com.apple.Accessibility-Settings
 drwx------@ 4 username  staff  128 Mar 25 14:10 com.apple.ActionKit.BundledIntentHandler
 [...]
 ```
-
-Inside each bundle id folder you can find the **plist** and the **Data directory** of the App with a structure that mimics the Home folder:
-
+У кожній папці з ідентифікатором пакета ви можете знайти **plist** та **каталог даних** програми зі структурою, що імітує домашню папку:
 ```bash
 cd /Users/username/Library/Containers/com.apple.Safari
 ls -la
@@ -56,12 +53,10 @@ lrwxr-xr-x   1 username  staff    20 Mar 24 18:02 Pictures -> ../../../../Pictur
 drwx------   2 username  staff    64 Mar 24 18:02 SystemData
 drwx------   2 username  staff    64 Mar 24 18:02 tmp
 ```
-
 > [!CAUTION]
-> Note that even if the symlinks are there to "escape" from the Sandbox and access other folders, the App still needs to **have permissions** to access them. These permissions are inside the **`.plist`** in the `RedirectablePaths`.
+> Зверніть увагу, що навіть якщо символічні посилання існують для "втечі" з Sandbox і доступу до інших папок, додаток все ще повинен **мати дозволи** для їх доступу. Ці дозволи знаходяться в **`.plist`** у `RedirectablePaths`.
 
-The **`SandboxProfileData`** is the compiled sandbox profile CFData escaped to B64.
-
+**`SandboxProfileData`** - це скомпільований профіль пісочниці CFData, закодований у B64.
 ```bash
 # Get container config
 ## You need FDA to access the file, not even just root can read it
@@ -74,52 +69,50 @@ AAAhAboBAAAAAAgAAABZAO4B5AHjBMkEQAUPBSsGPwsgASABHgEgASABHwEf...
 
 # In this file you can find the entitlements:
 <key>Entitlements</key>
-	<dict>
-		<key>com.apple.MobileAsset.PhishingImageClassifier2</key>
-		<true/>
-		<key>com.apple.accounts.appleaccount.fullaccess</key>
-		<true/>
-		<key>com.apple.appattest.spi</key>
-		<true/>
-		<key>keychain-access-groups</key>
-		<array>
-			<string>6N38VWS5BX.ru.keepcoder.Telegram</string>
-			<string>6N38VWS5BX.ru.keepcoder.TelegramShare</string>
-		</array>
+<dict>
+<key>com.apple.MobileAsset.PhishingImageClassifier2</key>
+<true/>
+<key>com.apple.accounts.appleaccount.fullaccess</key>
+<true/>
+<key>com.apple.appattest.spi</key>
+<true/>
+<key>keychain-access-groups</key>
+<array>
+<string>6N38VWS5BX.ru.keepcoder.Telegram</string>
+<string>6N38VWS5BX.ru.keepcoder.TelegramShare</string>
+</array>
 [...]
 
 # Some parameters
 <key>Parameters</key>
-	<dict>
-		<key>_HOME</key>
-		<string>/Users/username</string>
-		<key>_UID</key>
-		<string>501</string>
-		<key>_USER</key>
-		<string>username</string>
+<dict>
+<key>_HOME</key>
+<string>/Users/username</string>
+<key>_UID</key>
+<string>501</string>
+<key>_USER</key>
+<string>username</string>
 [...]
 
 # The paths it can access
 <key>RedirectablePaths</key>
-	<array>
-		<string>/Users/username/Downloads</string>
-		<string>/Users/username/Documents</string>
-		<string>/Users/username/Library/Calendars</string>
-		<string>/Users/username/Desktop</string>
+<array>
+<string>/Users/username/Downloads</string>
+<string>/Users/username/Documents</string>
+<string>/Users/username/Library/Calendars</string>
+<string>/Users/username/Desktop</string>
 <key>RedirectedPaths</key>
-	<array/>
+<array/>
 [...]
 ```
-
 > [!WARNING]
-> Everything created/modified by a Sandboxed application will get the **quarantine attribut**e. This will prevent a sandbox space by triggering Gatekeeper if the sandbox app tries to execute something with **`open`**.
+> Все, що створюється/модифікується пісочницею, отримає **атрибут карантину**. Це запобіжить простору пісочниці, активуючи Gatekeeper, якщо пісочна програма намагається виконати щось за допомогою **`open`**.
 
-## Sandbox Profiles
+## Профілі пісочниці
 
-The Sandbox profiles are configuration files that indicate what is going to be **allowed/forbidden** in that **Sandbox**. It uses the **Sandbox Profile Language (SBPL)**, which uses the [**Scheme**](<https://en.wikipedia.org/wiki/Scheme_(programming_language)>) programming language.
+Профілі пісочниці - це конфігураційні файли, які вказують, що буде **дозволено/заборонено** в цій **пісочниці**. Вони використовують **Мову профілів пісочниці (SBPL)**, яка використовує [**Scheme**](<https://en.wikipedia.org/wiki/Scheme_(programming_language)>) мову програмування.
 
-Here you can find an example:
-
+Ось приклад:
 ```scheme
 (version 1) ; First you get the version
 
@@ -128,42 +121,38 @@ Here you can find an example:
 (allow network*) ; You can use wildcards and allow everything
 
 (allow file-read* ; You can specify where to apply the rule
-    (subpath "/Users/username/")
-    (literal "/tmp/afile")
-    (regex #"^/private/etc/.*")
+(subpath "/Users/username/")
+(literal "/tmp/afile")
+(regex #"^/private/etc/.*")
 )
 
 (allow mach-lookup
-    (global-name "com.apple.analyticsd")
+(global-name "com.apple.analyticsd")
 )
 ```
-
 > [!TIP]
-> Check this [**research**](https://reverse.put.as/2011/09/14/apple-sandbox-guide-v1-0/) **to check more actions that could be allowed or denied.**
+> Перевірте це [**дослідження**](https://reverse.put.as/2011/09/14/apple-sandbox-guide-v1-0/) **щоб дізнатися більше про дії, які можуть бути дозволені або заборонені.**
 >
-> Note that in the compiled version of a profile the name of the operations are substituded by their entries in an array known by the dylib and the kext, making the compiled version shorter and more difficult to read.
+> Зверніть увагу, що в скомпільованій версії профілю назви операцій замінюються їхніми записами в масиві, відомому dylib та kext, що робить скомпільовану версію коротшою і важчою для читання.
 
-Important **system services** also run inside their own custom **sandbox** such as the `mdnsresponder` service. You can view these custom **sandbox profiles** inside:
+Важливі **системні сервіси** також працюють у своїх власних спеціальних **пісочницях**, таких як сервіс `mdnsresponder`. Ви можете переглянути ці спеціальні **профілі пісочниці** в:
 
 - **`/usr/share/sandbox`**
 - **`/System/Library/Sandbox/Profiles`**
-- Other sandbox profiles can be checked in [https://github.com/s7ephen/OSX-Sandbox--Seatbelt--Profiles](https://github.com/s7ephen/OSX-Sandbox--Seatbelt--Profiles).
+- Інші профілі пісочниці можна перевірити за посиланням [https://github.com/s7ephen/OSX-Sandbox--Seatbelt--Profiles](https://github.com/s7ephen/OSX-Sandbox--Seatbelt--Profiles).
 
-**App Store** apps use the **profile** **`/System/Library/Sandbox/Profiles/application.sb`**. You can check in this profile how entitlements such as **`com.apple.security.network.server`** allows a process to use the network.
+Додатки з **App Store** використовують **профіль** **`/System/Library/Sandbox/Profiles/application.sb`**. Ви можете перевірити в цьому профілі, як права, такі як **`com.apple.security.network.server`**, дозволяють процесу використовувати мережу.
 
-SIP is a Sandbox profile called platform_profile in /System/Library/Sandbox/rootless.conf
+SIP - це профіль пісочниці, званий platform_profile в /System/Library/Sandbox/rootless.conf
 
-### Sandbox Profile Examples
+### Приклади профілів пісочниці
 
-To start an application with an **specific sandbox profile** you can use:
-
+Щоб запустити додаток з **конкретним профілем пісочниці**, ви можете використовувати:
 ```bash
 sandbox-exec -f example.sb /Path/To/The/Application
 ```
-
 {{#tabs}}
 {{#tab name="touch"}}
-
 ```scheme:touch.sb
 (version 1)
 (deny default)
@@ -205,93 +194,86 @@ log show --style syslog --predicate 'eventMessage contains[c] "sandbox"' --last 
 (allow file-read-data (literal "/"))
 ; This one will work
 ```
-
 {{#endtab}}
 {{#endtabs}}
 
 > [!NOTE]
-> Note that the **Apple-authored** **software** that runs on **Windows** **doesn’t have additional security precautions**, such as application sandboxing.
+> Зверніть увагу, що **програмне забезпечення**, написане **Apple**, яке працює на **Windows**, **не має додаткових заходів безпеки**, таких як пісочниця для додатків.
 
-Bypasses examples:
+Приклади обходів:
 
 - [https://lapcatsoftware.com/articles/sandbox-escape.html](https://lapcatsoftware.com/articles/sandbox-escape.html)
-- [https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c](https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c) (they are able to write files outside the sandbox whose name starts with `~$`).
+- [https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c](https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c) (вони можуть записувати файли поза пісочницею, назва яких починається з `~$`).
 
-### Sandbox Tracing
+### Відстеження пісочниці
 
-#### Via profile
+#### Через профіль
 
-It's possible to trace all the checks sandbox performs every time an action is checked. For it just create the following profile:
-
+Можливо відстежувати всі перевірки, які виконує пісочниця щоразу, коли перевіряється дія. Для цього просто створіть наступний профіль:
 ```scheme:trace.sb
 (version 1)
 (trace /tmp/trace.out)
 ```
-
-Ans then just execute something using that profile:
-
+А потім просто виконайте щось, використовуючи цей профіль:
 ```bash
 sandbox-exec -f /tmp/trace.sb /bin/ls
 ```
+У `/tmp/trace.out` ви зможете побачити кожну перевірку пісочниці, яка виконувалася щоразу, коли її викликали (тобто, багато дублікатів).
 
-In `/tmp/trace.out` you will be able to see each sandbox check performed every-time it was called (so, lots of duplicates).
+Також можливо відстежувати пісочницю, використовуючи параметр **`-t`**: `sandbox-exec -t /path/trace.out -p "(version 1)" /bin/ls`
 
-It's also possible to trace the sandbox using the **`-t`** parameter: `sandbox-exec -t /path/trace.out -p "(version 1)" /bin/ls`
+#### Через API
 
-#### Via API
+Функція `sandbox_set_trace_path`, експортована `libsystem_sandbox.dylib`, дозволяє вказати ім'я файлу трасування, куди будуть записані перевірки пісочниці.\
+Також можливо зробити щось подібне, викликавши `sandbox_vtrace_enable()` і отримавши журнали помилок з буфера, викликавши `sandbox_vtrace_report()`.
 
-The function `sandbox_set_trace_path` exported by `libsystem_sandbox.dylib` allows to specify a trace filename where sandbox checks will be written to.\
-It's also possible to do something similar calling `sandbox_vtrace_enable()` and getting then the logs error from the buffer calling `sandbox_vtrace_report()`.
+### Інспекція пісочниці
 
-### Sandbox Inspection
+`libsandbox.dylib` експортує функцію під назвою sandbox_inspect_pid, яка надає список стану пісочниці процесу (включаючи розширення). Однак лише платформи бінарних файлів можуть використовувати цю функцію.
 
-`libsandbox.dylib` exports a function called sandbox_inspect_pid which gives a list of the sandbox state of a process (including extensions). However, only platform binaries can use this function.
+### Профілі пісочниці MacOS та iOS
 
-### MacOS & iOS Sandbox Profiles
+MacOS зберігає системні профілі пісочниці у двох місцях: **/usr/share/sandbox/** та **/System/Library/Sandbox/Profiles**.
 
-MacOS stores system sandbox profiles in two locations: **/usr/share/sandbox/** and **/System/Library/Sandbox/Profiles**.
+І якщо сторонній додаток має право _**com.apple.security.app-sandbox**_, система застосовує профіль **/System/Library/Sandbox/Profiles/application.sb** до цього процесу.
 
-And if a third-party application carry the _**com.apple.security.app-sandbox**_ entitlement, the system applies the **/System/Library/Sandbox/Profiles/application.sb** profile to that process.
+В iOS за замовчуванням профіль називається **container**, і ми не маємо текстового представлення SBPL. У пам'яті ця пісочниця представлена як бінарне дерево Allow/Deny для кожного дозволу з пісочниці.
 
-In iOS, the default profile is called **container** and we don't have the SBPL text representation. In memory, this sandbox is represented as Allow/Deny binary tree for each permissions from the sandbox.
+### Користувацький SBPL у додатках App Store
 
-### Custom SBPL in App Store apps
+Можливо, що компанії можуть змусити свої додатки працювати **з користувацькими профілями пісочниці** (замість за замовчуванням). Вони повинні використовувати право **`com.apple.security.temporary-exception.sbpl`**, яке потрібно авторизувати в Apple.
 
-It could be possible for companies to make their apps run **with custom Sandbox profiles** (instead of with the default one). They need to use the entitlement **`com.apple.security.temporary-exception.sbpl`** which needs to be authorized by Apple.
-
-It's possible to check the definition of this entitlement in **`/System/Library/Sandbox/Profiles/application.sb:`**
-
+Можна перевірити визначення цього права в **`/System/Library/Sandbox/Profiles/application.sb:`**
 ```scheme
 (sandbox-array-entitlement
-  "com.apple.security.temporary-exception.sbpl"
-  (lambda (string)
-    (let* ((port (open-input-string string)) (sbpl (read port)))
-      (with-transparent-redirection (eval sbpl)))))
+"com.apple.security.temporary-exception.sbpl"
+(lambda (string)
+(let* ((port (open-input-string string)) (sbpl (read port)))
+(with-transparent-redirection (eval sbpl)))))
 ```
+Це **оцінить рядок після цього права** як профіль Sandbox.
 
-This will **eval the string after this entitlement** as an Sandbox profile.
+### Компіляція та декомпіляція профілю Sandbox
 
-### Compiling & decompiling a Sandbox Profile
+Інструмент **`sandbox-exec`** використовує функції `sandbox_compile_*` з `libsandbox.dylib`. Основні експортовані функції: `sandbox_compile_file` (очікує шлях до файлу, параметр `-f`), `sandbox_compile_string` (очікує рядок, параметр `-p`), `sandbox_compile_name` (очікує назву контейнера, параметр `-n`), `sandbox_compile_entitlements` (очікує plist прав).
 
-The **`sandbox-exec`** tool uses the functions `sandbox_compile_*` from `libsandbox.dylib`. The main functions exported are: `sandbox_compile_file` (expects a file path, param `-f`), `sandbox_compile_string` (expects a string, param `-p`), `sandbox_compile_name` (expects a name of a container, param `-n`), `sandbox_compile_entitlements` (expects entitlements plist).
+Ця реверсована та [**відкрита версія інструменту sandbox-exec**](https://newosxbook.com/src.jl?tree=listings&file=/sandbox_exec.c) дозволяє **`sandbox-exec`** записувати скомпільований профіль sandbox у файл.
 
-This reversed and [**open sourced version of the tool sandbox-exec**](https://newosxbook.com/src.jl?tree=listings&file=/sandbox_exec.c) allows to make **`sandbox-exec`** write into a file the compiled sandbox profile.
+Більше того, щоб обмежити процес всередині контейнера, він може викликати `sandbox_spawnattrs_set[container/profilename]` і передати контейнер або вже існуючий профіль.
 
-Moreover, to confine a process inside a container it might call `sandbox_spawnattrs_set[container/profilename]` and pass a container or pre-existing profile.
+## Налагодження та обхід Sandbox
 
-## Debug & Bypass Sandbox
+На macOS, на відміну від iOS, де процеси з самого початку ізольовані ядром, **процеси повинні самостійно вибрати участь у sandbox**. Це означає, що на macOS процес не обмежується sandbox, поки він активно не вирішить увійти в нього, хоча програми з App Store завжди ізольовані.
 
-On macOS, unlike iOS where processes are sandboxed from the start by the kernel, **processes must opt-in to the sandbox themselves**. This means on macOS, a process is not restricted by the sandbox until it actively decides to enter it, although App Store apps are always sandboxed.
-
-Processes are automatically Sandboxed from userland when they start if they have the entitlement: `com.apple.security.app-sandbox`. For a detailed explanation of this process check:
+Процеси автоматично ізолюються з userland, коли вони запускаються, якщо у них є право: `com.apple.security.app-sandbox`. Для детального пояснення цього процесу дивіться:
 
 {{#ref}}
 macos-sandbox-debug-and-bypass/
 {{#endref}}
 
-## **Sandbox Extensions**
+## **Розширення Sandbox**
 
-Extensions allow to give further privileges to an object and are giving calling one of the functions:
+Розширення дозволяють надати додаткові привілеї об'єкту і викликають одну з функцій:
 
 - `sandbox_issue_extension`
 - `sandbox_extension_issue_file[_with_new_type]`
@@ -301,31 +283,29 @@ Extensions allow to give further privileges to an object and are giving calling 
 - `sandbox_extension_issue_generic`
 - `sandbox_extension_issue_posix_ipc`
 
-The extensions are stored in the second MACF label slot accessible from the process credentials. The following **`sbtool`** can access this information.
+Розширення зберігаються в другому слоті мітки MACF, доступному з облікових даних процесу. Наступний **`sbtool`** може отримати доступ до цієї інформації.
 
-Note that extensions are usually granted by allowed processes, for example, `tccd` will grant the extension token of `com.apple.tcc.kTCCServicePhotos` when a process tried to access the photos and was allowed in a XPC message. Then, the process will need to consume the extension token so it gets added to it.\
-Note that the extension tokens are long hexadecimals that encode the granted permissions. However they don't have the allowed PID hardcoded which means that any process with access to the token might be **consumed by multiple processes**.
+Зверніть увагу, що розширення зазвичай надаються дозволеними процесами, наприклад, `tccd` надасть токен розширення `com.apple.tcc.kTCCServicePhotos`, коли процес намагався отримати доступ до фотографій і був дозволений у повідомленні XPC. Тоді процесу потрібно буде спожити токен розширення, щоб він був доданий до нього.\
+Зверніть увагу, що токени розширення є довгими шістнадцятковими числами, які кодують надані дозволи. Однак у них немає жорстко закодованого дозволеного PID, що означає, що будь-який процес з доступом до токена може бути **спожитий кількома процесами**.
 
-Note that extensions are very related to entitlements also, so having certain entitlements might automatically grant certain extensions.
+Зверніть увагу, що розширення дуже пов'язані з правами, тому наявність певних прав може автоматично надавати певні розширення.
 
-### **Check PID Privileges**
+### **Перевірка привілеїв PID**
 
-[**According to this**](https://www.youtube.com/watch?v=mG715HcDgO8&t=3011s), the **`sandbox_check`** functions (it's a `__mac_syscall`), can check **if an operation is allowed or not** by the sandbox in a certain PID, audit token or unique ID.
+[**Згідно з цим**](https://www.youtube.com/watch?v=mG715HcDgO8&t=3011s), функції **`sandbox_check`** (це `__mac_syscall`), можуть перевірити **чи дозволена операція чи ні** sandbox у певному PID, аудиторському токені або унікальному ID.
 
-The [**tool sbtool**](http://newosxbook.com/src.jl?tree=listings&file=sbtool.c) (find it [compiled here](https://newosxbook.com/articles/hitsb.html)) can check if a PID can perform a certain actions:
-
+[**Інструмент sbtool**](http://newosxbook.com/src.jl?tree=listings&file=sbtool.c) (знайдіть його [скомпільованим тут](https://newosxbook.com/articles/hitsb.html)) може перевірити, чи може PID виконати певні дії:
 ```bash
 sbtool <pid> mach #Check mac-ports (got from launchd with an api)
 sbtool <pid> file /tmp #Check file access
 sbtool <pid> inspect #Gives you an explanation of the sandbox profile and extensions
 sbtool <pid> all
 ```
-
 ### \[un]suspend
 
-It's also possible to suspend and unsuspend the sandbox using the functions `sandbox_suspend` and `sandbox_unsuspend` from `libsystem_sandbox.dylib`.
+Також можливо призупинити та відновити пісочницю, використовуючи функції `sandbox_suspend` та `sandbox_unsuspend` з `libsystem_sandbox.dylib`.
 
-Note that to call the suspend function some entitlements are checked in order to authorize the caller to call it like:
+Зверніть увагу, що для виклику функції призупинення перевіряються деякі права для авторизації виклику, такі як:
 
 - com.apple.private.security.sandbox-manager
 - com.apple.security.print
@@ -333,68 +313,67 @@ Note that to call the suspend function some entitlements are checked in order to
 
 ## mac_syscall
 
-This system call (#381) expects one string first argument which will indicate the module to run, and then a code in the second argument which will indicate the function to run. Then the third argument will depend on the function executed.
+Цей системний виклик (#381) очікує один рядок як перший аргумент, який вказуватиме модуль для виконання, а потім код у другому аргументі, який вказуватиме функцію для виконання. Третій аргумент залежатиме від виконуваної функції.
 
-The function `___sandbox_ms` call wraps `mac_syscall` indicating in the first argument `"Sandbox"` just like `___sandbox_msp` is a wrapper of `mac_set_proc` (#387). Then, the some of supported codes by `___sandbox_ms` can be found in this table:
+Виклик функції `___sandbox_ms` обгортає `mac_syscall`, вказуючи в першому аргументі `"Sandbox"`, так само як `___sandbox_msp` є обгорткою для `mac_set_proc` (#387). Деякі з підтримуваних кодів `___sandbox_ms` можна знайти в цій таблиці:
 
-- **set_profile (#0)**: Apply a compiled or named profile to a process.
-- **platform_policy (#1)**: Enforce platform-specific policy checks (varies between macOS and iOS).
-- **check_sandbox (#2)**: Perform a manual check of a specific sandbox operation.
-- **note (#3)**: Adds ana nontation to a Sandbox
-- **container (#4)**: Attach an annotation to a sandbox, typically for debugging or identification.
-- **extension_issue (#5)**: Generate a new extension for a process.
-- **extension_consume (#6)**: Consume a given extension.
-- **extension_release (#7)**: Release the memory tied to a consumed extension.
-- **extension_update_file (#8)**: Modify parameters of an existing file extension within the sandbox.
-- **extension_twiddle (#9)**: Adjust or modify an existing file extension (e.g., TextEdit, rtf, rtfd).
-- **suspend (#10)**: Temporarily suspend all sandbox checks (requires appropriate entitlements).
-- **unsuspend (#11)**: Resume all previously suspended sandbox checks.
-- **passthrough_access (#12)**: Allow direct passthrough access to a resource, bypassing sandbox checks.
-- **set_container_path (#13)**: (iOS only) Set a container path for an app group or signing ID.
-- **container_map (#14)**: (iOS only) Retrieve a container path from `containermanagerd`.
-- **sandbox_user_state_item_buffer_send (#15)**: (iOS 10+) Set user mode metadata in the sandbox.
-- **inspect (#16)**: Provide debug information about a sandboxed process.
-- **dump (#18)**: (macOS 11) Dump the current profile of a sandbox for analysis.
-- **vtrace (#19)**: Trace sandbox operations for monitoring or debugging.
-- **builtin_profile_deactivate (#20)**: (macOS < 11) Deactivate named profiles (e.g., `pe_i_can_has_debugger`).
-- **check_bulk (#21)**: Perform multiple `sandbox_check` operations in a single call.
-- **reference_retain_by_audit_token (#28)**: Create a reference for an audit token for use in sandbox checks.
-- **reference_release (#29)**: Release a previously retained audit token reference.
-- **rootless_allows_task_for_pid (#30)**: Verify whether `task_for_pid` is allowed (similar to `csr` checks).
-- **rootless_whitelist_push (#31)**: (macOS) Apply a System Integrity Protection (SIP) manifest file.
-- **rootless_whitelist_check (preflight) (#32)**: Check the SIP manifest file before execution.
-- **rootless_protected_volume (#33)**: (macOS) Apply SIP protections to a disk or partition.
-- **rootless_mkdir_protected (#34)**: Apply SIP/DataVault protection to a directory creation process.
+- **set_profile (#0)**: Застосувати скомпільований або іменований профіль до процесу.
+- **platform_policy (#1)**: Застосувати перевірки політики, специфічні для платформи (варіюється між macOS та iOS).
+- **check_sandbox (#2)**: Виконати ручну перевірку конкретної операції пісочниці.
+- **note (#3)**: Додати анотацію до пісочниці.
+- **container (#4)**: Прикріпити анотацію до пісочниці, зазвичай для налагодження або ідентифікації.
+- **extension_issue (#5)**: Створити нове розширення для процесу.
+- **extension_consume (#6)**: Використати дане розширення.
+- **extension_release (#7)**: Вивільнити пам'ять, пов'язану з використаним розширенням.
+- **extension_update_file (#8)**: Змінити параметри існуючого розширення файлу в межах пісочниці.
+- **extension_twiddle (#9)**: Налаштувати або змінити існуюче розширення файлу (наприклад, TextEdit, rtf, rtfd).
+- **suspend (#10)**: Тимчасово призупинити всі перевірки пісочниці (вимагає відповідних прав).
+- **unsuspend (#11)**: Відновити всі раніше призупинені перевірки пісочниці.
+- **passthrough_access (#12)**: Дозволити прямий доступ до ресурсу, обходячи перевірки пісочниці.
+- **set_container_path (#13)**: (тільки iOS) Встановити шлях контейнера для групи додатків або ID підпису.
+- **container_map (#14)**: (тільки iOS) Отримати шлях контейнера з `containermanagerd`.
+- **sandbox_user_state_item_buffer_send (#15)**: (iOS 10+) Встановити метадані режиму користувача в пісочниці.
+- **inspect (#16)**: Надати інформацію для налагодження про процес, що працює в пісочниці.
+- **dump (#18)**: (macOS 11) Вивантажити поточний профіль пісочниці для аналізу.
+- **vtrace (#19)**: Відстежувати операції пісочниці для моніторингу або налагодження.
+- **builtin_profile_deactivate (#20)**: (macOS < 11) Деактивувати іменовані профілі (наприклад, `pe_i_can_has_debugger`).
+- **check_bulk (#21)**: Виконати кілька операцій `sandbox_check` в одному виклику.
+- **reference_retain_by_audit_token (#28)**: Створити посилання для аудиторського токена для використання в перевірках пісочниці.
+- **reference_release (#29)**: Вивільнити раніше збережене посилання на аудиторський токен.
+- **rootless_allows_task_for_pid (#30)**: Перевірити, чи дозволено `task_for_pid` (схоже на перевірки `csr`).
+- **rootless_whitelist_push (#31)**: (macOS) Застосувати файл маніфесту системної цілісності (SIP).
+- **rootless_whitelist_check (preflight) (#32)**: Перевірити файл маніфесту SIP перед виконанням.
+- **rootless_protected_volume (#33)**: (macOS) Застосувати SIP-захисти до диска або розділу.
+- **rootless_mkdir_protected (#34)**: Застосувати SIP/DataVault захист до процесу створення каталогу.
 
 ## Sandbox.kext
 
-Note that in iOS the kernel extension contains **hardcoded all the profiles** inside the `__TEXT.__const` segment to avoid them being modified. The following are some interesting functions from the kernel extension:
+Зверніть увагу, що в iOS розширення ядра містить **жорстко закодовані всі профілі** всередині сегмента `__TEXT.__const`, щоб уникнути їх модифікації. Ось деякі цікаві функції з розширення ядра:
 
-- **`hook_policy_init`**: It hooks `mpo_policy_init` and it's called after `mac_policy_register`. It performs most of the initializations of the Sandbox. It also initializes SIP.
-- **`hook_policy_initbsd`**: It sets up the sysctl interface registering `security.mac.sandbox.sentinel`, `security.mac.sandbox.audio_active` and `security.mac.sandbox.debug_mode` (if booed with `PE_i_can_has_debugger`).
-- **`hook_policy_syscall`**: It's called by `mac_syscall` with "Sandbox" as first argument and code indicating the operation in the second one. A switch is used to find the code to run according to the requested code.
+- **`hook_policy_init`**: Він підключає `mpo_policy_init` і викликається після `mac_policy_register`. Він виконує більшість ініціалізацій пісочниці. Він також ініціалізує SIP.
+- **`hook_policy_initbsd`**: Налаштовує інтерфейс sysctl, реєструючи `security.mac.sandbox.sentinel`, `security.mac.sandbox.audio_active` та `security.mac.sandbox.debug_mode` (якщо завантажено з `PE_i_can_has_debugger`).
+- **`hook_policy_syscall`**: Викликається `mac_syscall` з "Sandbox" як першим аргументом і кодом, що вказує на операцію, у другому. Використовується оператор switch для знаходження коду для виконання відповідно до запитуваного коду.
 
 ### MACF Hooks
 
-**`Sandbox.kext`** uses more than a hundred of hooks via MACF. Most of the hooks will just check some trivial cases that allows to perform the action if it not, they will call **`cred_sb_evalutate`** with the **credentials** from MACF and a number corresponding to the **operation** to perform and a **buffer** for the output.
+**`Sandbox.kext`** використовує більше ста хуків через MACF. Більшість хуків просто перевіряють деякі тривіальні випадки, які дозволяють виконати дію, якщо ні, вони викликають **`cred_sb_evalutate`** з **обліковими даними** з MACF та номером, що відповідає **операції**, яку потрібно виконати, і **буфером** для виходу.
 
-A good example of that is the function **`_mpo_file_check_mmap`** which hooked **`mmap`** and which will start checking if the new memory is going to be writable (and if not allow the execution), then it'll check if its used for the dyld shared cache and if so allow the execution, and finally it'll call **`sb_evaluate_internal`** (or one of its wrappers) to perform further allowance checks.
+Добрим прикладом цього є функція **`_mpo_file_check_mmap`**, яка підключає **`mmap`** і яка почне перевіряти, чи буде нова пам'ять записуваною (і якщо ні, дозволить виконання), потім перевірить, чи використовується вона для спільного кешу dyld, і якщо так, дозволить виконання, а в кінці викличе **`sb_evaluate_internal`** (або одну з його обгорток) для виконання подальших перевірок дозволу.
 
-Moreover, out of the hundred(s) hooks Sandbox uses, there are 3 in particular that are very interesting:
+Більше того, з сотень хуків, які використовує пісочниця, є 3, які особливо цікаві:
 
-- `mpo_proc_check_for`: It applies the profile if needed and if it wasn't previously applied
-- `mpo_vnode_check_exec`: Called when a process loads the associated binary, then a profile check is perfomed and also a check forbidding SUID/SGID executions.
-- `mpo_cred_label_update_execve`: This is called when the label is assigned. This is the longest one as it's called when the binary is fully loaded but it hasn't been executed yet. It'll perform actions such as creating the sandbox object, attach sandbox struct to the kauth credentials, remove access to mach ports...
+- `mpo_proc_check_for`: Застосовує профіль, якщо це необхідно, і якщо він не був раніше застосований.
+- `mpo_vnode_check_exec`: Викликається, коли процес завантажує асоційований бінарний файл, тоді виконується перевірка профілю, а також перевірка, що забороняє виконання SUID/SGID.
+- `mpo_cred_label_update_execve`: Це викликається, коли призначається мітка. Це найдовший, оскільки викликається, коли бінарний файл повністю завантажений, але ще не виконаний. Він виконує такі дії, як створення об'єкта пісочниці, прикріплення структури пісочниці до облікових даних kauth, видалення доступу до mach портів...
 
-Note that **`_cred_sb_evalutate`** is a wrapper over **`sb_evaluate_internal`** and this function gets the credentials passed and then performs the evaluation using the **`eval`** function which usually evaluates the **platform profile** which is by default applied to all processes and then the **specific process profile**. Note that the platform profile is one of the main components of **SIP** in macOS.
+Зверніть увагу, що **`_cred_sb_evalutate`** є обгорткою над **`sb_evaluate_internal`**, і ця функція отримує передані облікові дані, а потім виконує оцінку, використовуючи функцію **`eval`**, яка зазвичай оцінює **профіль платформи**, який за замовчуванням застосовується до всіх процесів, а потім **специфічний профіль процесу**. Зверніть увагу, що профіль платформи є одним з основних компонентів **SIP** в macOS.
 
 ## Sandboxd
 
-Sandbox also has a user daemon running exposing the XPC Mach service `com.apple.sandboxd` and binding the special port 14 (`HOST_SEATBELT_PORT`) which the kernel extension uses to communicate with it. It exposes some functions using MIG.
+Пісочниця також має демон користувача, який запускає XPC Mach сервіс `com.apple.sandboxd` і прив'язує спеціальний порт 14 (`HOST_SEATBELT_PORT`), який розширення ядра використовує для зв'язку з ним. Він надає деякі функції, використовуючи MIG.
 
 ## References
 
 - [**\*OS Internals Volume III**](https://newosxbook.com/home.html)
 
 {{#include ../../../../banners/hacktricks-training.md}}
-

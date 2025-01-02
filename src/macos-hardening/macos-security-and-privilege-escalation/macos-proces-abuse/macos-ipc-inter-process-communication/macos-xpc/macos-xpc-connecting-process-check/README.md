@@ -4,33 +4,33 @@
 
 ## XPC Connecting Process Check
 
-When a connection is stablished to an XPC service, the server will check if the connection is allowed. These are the checks it would usually perform:
+Коли встановлюється з'єднання з XPC сервісом, сервер перевіряє, чи дозволено це з'єднання. Ось перевірки, які зазвичай виконуються:
 
-1. Check if the connecting **process is signed with an Apple-signed** certificate (only given out by Apple).
-   - If this **isn't verified**, an attacker could create a **fake certificate** to match any other check.
-2. Check if the connecting process is signed with the **organization’s certificate**, (team ID verification).
-   - If this **isn't verified**, **any developer certificate** from Apple can be used for signing, and connect to the service.
-3. Check if the connecting process **contains a proper bundle ID**.
-   - If this **isn't verified**, any tool **signed by the same org** could be used to interact with the XPC service.
-4. (4 or 5) Check if the connecting process has a **proper software version number**.
-   - If this **isn't verified,** an old, insecure clients, vulnerable to process injection could be used to connect to the XPC service even with the other checks in place.
-5. (4 or 5) Check if the connecting process has hardened runtime without dangerous entitlements (like the ones that allows to load arbitrary libraries or use DYLD env vars)
-   1. If this **isn't verified,** the client might be **vulnerable to code injection**
-6. Check if the connecting process has an **entitlement** that allows it to connect to the service. This is applicable for Apple binaries.
-7. The **verification** must be **based** on the connecting **client’s audit token** **instead** of its process ID (**PID**) since the former prevents **PID reuse attacks**.
-   - Developers **rarely use the audit token** API call since it’s **private**, so Apple could **change** at any time. Additionally, private API usage is not allowed in Mac App Store apps.
-     - If the method **`processIdentifier`** is used, it might be vulnerable
-     - **`xpc_dictionary_get_audit_token`** should be used instead of **`xpc_connection_get_audit_token`**, as the latest could also be [vulnerable in certain situations](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/).
+1. Перевірте, чи **підписаний процес Apple-сертифікатом** (видається тільки Apple).
+- Якщо це **не перевірено**, зловмисник може створити **підроблений сертифікат**, щоб відповідати будь-якій іншій перевірці.
+2. Перевірте, чи підписаний процес **сертифікатом організації** (перевірка ID команди).
+- Якщо це **не перевірено**, **будь-який сертифікат розробника** від Apple може бути використаний для підпису та підключення до сервісу.
+3. Перевірте, чи **містить процес правильний ідентифікатор пакета**.
+- Якщо це **не перевірено**, будь-який інструмент, **підписаний тією ж організацією**, може бути використаний для взаємодії з XPC сервісом.
+4. (4 або 5) Перевірте, чи має процес **правильний номер версії програмного забезпечення**.
+- Якщо це **не перевірено**, старі, небезпечні клієнти, вразливі до ін'єкцій процесів, можуть бути використані для підключення до XPC сервісу, навіть якщо інші перевірки виконані.
+5. (4 або 5) Перевірте, чи має процес **захищений час виконання без небезпечних прав** (як ті, що дозволяють завантажувати довільні бібліотеки або використовувати змінні середовища DYLD).
+1. Якщо це **не перевірено**, клієнт може бути **вразливим до ін'єкцій коду**.
+6. Перевірте, чи має процес **право**, яке дозволяє йому підключатися до сервісу. Це стосується бінарних файлів Apple.
+7. **Перевірка** повинна **базуватися** на **аудитному токені клієнта** **замість** його ідентифікатора процесу (**PID**), оскільки перше запобігає **атакам повторного використання PID**.
+- Розробники **рідко використовують API виклик аудитного токена**, оскільки він **приватний**, тому Apple може **змінити** його в будь-який момент. Крім того, використання приватних API не дозволено в додатках Mac App Store.
+- Якщо використовується метод **`processIdentifier`**, він може бути вразливим.
+- **`xpc_dictionary_get_audit_token`** слід використовувати замість **`xpc_connection_get_audit_token`**, оскільки останній також може бути [вразливим у певних ситуаціях](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/).
 
 ### Communication Attacks
 
-For more information about the PID reuse attack check:
+Для отримання додаткової інформації про атаку повторного використання PID дивіться:
 
 {{#ref}}
 macos-pid-reuse.md
 {{#endref}}
 
-For more information **`xpc_connection_get_audit_token`** attack check:
+Для отримання додаткової інформації про атаку **`xpc_connection_get_audit_token`** дивіться:
 
 {{#ref}}
 macos-xpc_connection_get_audit_token-attack.md
@@ -38,23 +38,20 @@ macos-xpc_connection_get_audit_token-attack.md
 
 ### Trustcache - Downgrade Attacks Prevention
 
-Trustcache is a defensive method introduced in Apple Silicon machines that stores a database of CDHSAH of Apple binaries so only allowed non modified binaries can be executed. Which prevent the execution of downgrade versions.
+Trustcache - це захисний метод, введений в машинах Apple Silicon, який зберігає базу даних CDHSAH бінарних файлів Apple, щоб лише дозволені, не модифіковані бінарні файли могли виконуватися. Це запобігає виконанню версій з пониженим рівнем.
 
 ### Code Examples
 
-The server will implement this **verification** in a function called **`shouldAcceptNewConnection`**.
-
+Сервер реалізує цю **перевірку** в функції, яка називається **`shouldAcceptNewConnection`**.
 ```objectivec
 - (BOOL)listener:(NSXPCListener *)listener shouldAcceptNewConnection:(NSXPCConnection *)newConnection {
-    //Check connection
-    return YES;
+//Check connection
+return YES;
 }
 ```
+Об'єкт NSXPCConnection має **приватну** властивість **`auditToken`** (ту, що повинна використовуватися, але може змінитися) та **публічну** властивість **`processIdentifier`** (ту, що не повинна використовуватися).
 
-The object NSXPCConnection has a **private** property **`auditToken`** (the one that should be used but could change) and a the **public** property **`processIdentifier`** (the one that shouldn't be used).
-
-The connecting process could be verified with something like:
-
+З'єднуючий процес можна перевірити за допомогою чогось на кшталт:
 ```objectivec
 [...]
 SecRequirementRef requirementRef = NULL;
@@ -74,9 +71,7 @@ SecCodeCheckValidity(code, kSecCSDefaultFlags, requirementRef);
 SecTaskRef taskRef = SecTaskCreateWithAuditToken(NULL, ((ExtendedNSXPCConnection*)newConnection).auditToken);
 SecTaskValidateForRequirement(taskRef, (__bridge CFStringRef)(requirementString))
 ```
-
-If a developer doesn't want to check the version of the client, he could check that the client is not vulnerable to process injection at least:
-
+Якщо розробник не хоче перевіряти версію клієнта, він може принаймні перевірити, що клієнт не вразливий до ін'єкцій процесів:
 ```objectivec
 [...]
 CFDictionaryRef csInfo = NULL;
@@ -88,9 +83,7 @@ const uint32_t cs_restrict = 0x800;    // Prevent debugging
 const uint32_t cs_require_lv = 0x2000; // Library Validation
 const uint32_t cs_runtime = 0x10000;   // hardened runtime
 if ((csFlags & (cs_hard | cs_require_lv)) {
-    return Yes; // Accept connection
+return Yes; // Accept connection
 }
 ```
-
 {{#include ../../../../../../banners/hacktricks-training.md}}
-

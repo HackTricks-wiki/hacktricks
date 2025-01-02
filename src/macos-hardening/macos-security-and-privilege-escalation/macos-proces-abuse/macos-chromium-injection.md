@@ -2,33 +2,31 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Основна інформація
 
-Chromium-based browsers like Google Chrome, Microsoft Edge, Brave, and others. These browsers are built on the Chromium open-source project, which means they share a common base and, therefore, have similar functionalities and developer options.
+Браузери на базі Chromium, такі як Google Chrome, Microsoft Edge, Brave та інші. Ці браузери побудовані на відкритому проекті Chromium, що означає, що вони мають спільну основу і, отже, мають подібні функціональні можливості та параметри для розробників.
 
-#### `--load-extension` Flag
+#### `--load-extension` Параметр
 
-The `--load-extension` flag is used when starting a Chromium-based browser from the command line or a script. This flag allows to **automatically load one or more extensions** into the browser upon startup.
+Параметр `--load-extension` використовується при запуску браузера на базі Chromium з командного рядка або скрипта. Цей параметр дозволяє **автоматично завантажувати один або кілька розширень** у браузер під час запуску.
 
-#### `--use-fake-ui-for-media-stream` Flag
+#### `--use-fake-ui-for-media-stream` Параметр
 
-The `--use-fake-ui-for-media-stream` flag is another command-line option that can be used to start Chromium-based browsers. This flag is designed to **bypass the normal user prompts that ask for permission to access media streams from the camera and microphone**. When this flag is used, the browser automatically grants permission to any website or application that requests access to the camera or microphone.
+Параметр `--use-fake-ui-for-media-stream` є ще одним параметром командного рядка, який можна використовувати для запуску браузерів на базі Chromium. Цей параметр призначений для **обходу звичайних запитів користувача, які запитують дозвіл на доступ до медіа-потоків з камери та мікрофона**. Коли цей параметр використовується, браузер автоматично надає дозвіл будь-якому веб-сайту або додатку, який запитує доступ до камери або мікрофона.
 
-### Tools
+### Інструменти
 
 - [https://github.com/breakpointHQ/snoop](https://github.com/breakpointHQ/snoop)
 - [https://github.com/breakpointHQ/VOODOO](https://github.com/breakpointHQ/VOODOO)
 
-### Example
-
+### Приклад
 ```bash
 # Intercept traffic
 voodoo intercept -b chrome
 ```
+Знайдіть більше прикладів у посиланнях на інструменти
 
-Find more examples in the tools links
-
-## References
+## Посилання
 
 - [https://twitter.com/RonMasas/status/1758106347222995007](https://twitter.com/RonMasas/status/1758106347222995007)
 

@@ -4,20 +4,19 @@
 
 ## Basic Information
 
-**Apple Events** are a feature in Apple's macOS that allows applications to communicate with each other. They are part of the **Apple Event Manager**, which is a component of the macOS operating system responsible for handling interprocess communication. This system enables one application to send a message to another application to request that it perform a particular operation, like opening a file, retrieving data, or executing a command.
+**Apple Events** - це функція в macOS від Apple, яка дозволяє додаткам спілкуватися один з одним. Вони є частиною **Apple Event Manager**, який є компонентом операційної системи macOS, відповідальним за обробку міжпроцесного спілкування. Ця система дозволяє одному додатку надсилати повідомлення іншому додатку з проханням виконати певну операцію, наприклад, відкрити файл, отримати дані або виконати команду.
 
-The mina daemon is `/System/Library/CoreServices/appleeventsd` which registers the service `com.apple.coreservices.appleevents`.
+Основний демон - це `/System/Library/CoreServices/appleeventsd`, який реєструє сервіс `com.apple.coreservices.appleevents`.
 
-Every application that can receive events will checking with this daemon providing its Apple Event Mach Port. And when an app wants to send an event to to it, the app will request this port from the daemon.
+Кожен додаток, який може отримувати події, перевіряє цей демон, надаючи свій Apple Event Mach Port. І коли додаток хоче надіслати подію, він запитує цей порт у демона.
 
-Sandboxed applications requires privileges like `allow appleevent-send` and `(allow mach-lookup (global-name "com.apple.coreservices.appleevents))` in order to be able to send events. Noten that entitlements like `com.apple.security.temporary-exception.apple-events` could restrict who have access to send events which will need entitlements like `com.apple.private.appleevents`.
+Пісочничні додатки потребують привілеїв, таких як `allow appleevent-send` та `(allow mach-lookup (global-name "com.apple.coreservices.appleevents))`, щоб мати можливість надсилати події. Зверніть увагу, що права, такі як `com.apple.security.temporary-exception.apple-events`, можуть обмежити доступ до надсилання подій, що вимагатиме прав, таких як `com.apple.private.appleevents`.
 
 > [!TIP]
-> It's possible to use the env variable **`AEDebugSends`** in order to log informtion about the message sent:
+> Можливо використовувати змінну середовища **`AEDebugSends`** для ведення журналу інформації про надіслане повідомлення:
 >
 > ```bash
 > AEDebugSends=1 osascript -e 'tell application "iTerm" to activate'
 > ```
 
 {{#include ../../../../banners/hacktricks-training.md}}
-

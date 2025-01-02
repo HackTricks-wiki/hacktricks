@@ -4,9 +4,9 @@
 
 ## Gatekeeper
 
-Gatekeeper is usually used to refer to the combination of **Quarantine + Gatekeeper + XProtect**, 3 macOS security modules that will try to **prevent users from executing potentially malicious software downloaded**.
+Gatekeeper зазвичай використовується для позначення комбінації **Quarantine + Gatekeeper + XProtect**, 3 модулів безпеки macOS, які намагаються **запобігти виконанню потенційно шкідливого програмного забезпечення, завантаженого користувачами**.
 
-More information in:
+Більше інформації в:
 
 {{#ref}}
 macos-gatekeeper.md
@@ -24,7 +24,7 @@ macos-sip.md
 
 ### Sandbox
 
-MacOS Sandbox **limits applications** running inside the sandbox to the **allowed actions specified in the Sandbox profile** the app is running with. This helps to ensure that **the application will be accessing only expected resources**.
+MacOS Sandbox **обмежує програми**, що працюють всередині пісочниці, до **дозволених дій, зазначених у профілі Sandbox**, з яким працює програма. Це допомагає забезпечити, що **програма буде отримувати доступ лише до очікуваних ресурсів**.
 
 {{#ref}}
 macos-sandbox/
@@ -32,7 +32,7 @@ macos-sandbox/
 
 ### TCC - **Transparency, Consent, and Control**
 
-**TCC (Transparency, Consent, and Control)** is a security framework. It's designed to **manage the permissions** of applications, specifically by regulating their access to sensitive features. This includes elements like **location services, contacts, photos, microphone, camera, accessibility, and full disk access**. TCC ensures that apps can only access these features after obtaining explicit user consent, thereby bolstering privacy and control over personal data.
+**TCC (Transparency, Consent, and Control)** є безпековою структурою. Вона призначена для **управління дозволами** програм, зокрема шляхом регулювання їх доступу до чутливих функцій. Це включає елементи, такі як **сервіси геолокації, контакти, фотографії, мікрофон, камера, доступність та повний доступ до диска**. TCC забезпечує, що програми можуть отримувати доступ до цих функцій лише після отримання явної згоди користувача, тим самим зміцнюючи конфіденційність і контроль над особистими даними.
 
 {{#ref}}
 macos-tcc/
@@ -40,7 +40,7 @@ macos-tcc/
 
 ### Launch/Environment Constraints & Trust Cache
 
-Launch constraints in macOS are a security feature to **regulate process initiation** by defining **who can launch** a process, **how**, and **from where**. Introduced in macOS Ventura, they categorize system binaries into constraint categories within a **trust cache**. Every executable binary has set **rules** for its **launch**, including **self**, **parent**, and **responsible** constraints. Extended to third-party apps as **Environment** Constraints in macOS Sonoma, these features help mitigate potential system exploitations by governing process launching conditions.
+Обмеження запуску в macOS є функцією безпеки для **регулювання ініціації процесів**, визначаючи **хто може запустити** процес, **як** і **звідки**. Введені в macOS Ventura, вони класифікують системні бінарні файли на категорії обмежень у **кеші довіри**. Кожен виконуваний бінар має встановлені **правила** для свого **запуску**, включаючи **сам**, **батьківський** та **відповідальний** обмеження. Розширені до сторонніх програм як **Environment** Constraints в macOS Sonoma, ці функції допомагають зменшити потенційні експлуатації системи, регулюючи умови запуску процесів.
 
 {{#ref}}
 macos-launch-environment-constraints.md
@@ -48,79 +48,70 @@ macos-launch-environment-constraints.md
 
 ## MRT - Malware Removal Tool
 
-The Malware Removal Tool (MRT) is another part of macOS's security infrastructure. As the name suggests, MRT's main function is to **remove known malware from infected systems**.
+Інструмент видалення шкідливих програм (MRT) є ще однією частиною інфраструктури безпеки macOS. Як випливає з назви, основна функція MRT полягає в тому, щоб **видаляти відомі шкідливі програми з заражених систем**.
 
-Once malware is detected on a Mac (either by XProtect or by some other means), MRT can be used to automatically **remove the malware**. MRT operates silently in the background and typically runs whenever the system is updated or when a new malware definition is downloaded (it looks like the rules MRT has to detect malware are inside the binary).
+Коли шкідливе програмне забезпечення виявляється на Mac (або за допомогою XProtect, або іншим способом), MRT може бути використаний для автоматичного **видалення шкідливого програмного забезпечення**. MRT працює тихо у фоновому режимі і зазвичай запускається щоразу, коли система оновлюється або коли завантажується нове визначення шкідливого програмного забезпечення (схоже, що правила, які MRT має для виявлення шкідливого програмного забезпечення, знаходяться всередині бінару).
 
-While both XProtect and MRT are part of macOS's security measures, they perform different functions:
+Хоча як XProtect, так і MRT є частинами заходів безпеки macOS, вони виконують різні функції:
 
-- **XProtect** is a preventative tool. It **checks files as they're downloaded** (via certain applications), and if it detects any known types of malware, it **prevents the file from opening**, thereby preventing the malware from infecting your system in the first place.
-- **MRT**, on the other hand, is a **reactive tool**. It operates after malware has been detected on a system, with the goal of removing the offending software to clean up the system.
+- **XProtect** є профілактичним інструментом. Він **перевіряє файли під час їх завантаження** (через певні програми), і якщо виявляє будь-які відомі типи шкідливого програмного забезпечення, він **запобігає відкриттю файлу**, тим самим запобігаючи зараженню вашої системи з самого початку.
+- **MRT**, з іншого боку, є **реактивним інструментом**. Він працює після виявлення шкідливого програмного забезпечення в системі, з метою видалення шкідливого програмного забезпечення для очищення системи.
 
-The MRT application is located in **`/Library/Apple/System/Library/CoreServices/MRT.app`**
+Додаток MRT розташований у **`/Library/Apple/System/Library/CoreServices/MRT.app`**
 
 ## Background Tasks Management
 
-**macOS** now **alerts** every time a tool uses a well known **technique to persist code execution** (such as Login Items, Daemons...), so the user knows better **which software is persisting**.
+**macOS** тепер **інформує** щоразу, коли інструмент використовує добре відому **техніку для збереження виконання коду** (таку як елементи входу, демонів...), щоб користувач краще знав, **яке програмне забезпечення зберігається**.
 
 <figure><img src="../../../images/image (1183).png" alt=""><figcaption></figcaption></figure>
 
-This runs with a **daemon** located in `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/backgroundtaskmanagementd` and the **agent** in `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Support/BackgroundTaskManagementAgent.app`
+Це працює з **демоном**, розташованим у `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/backgroundtaskmanagementd`, і **агентом** у `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Support/BackgroundTaskManagementAgent.app`
 
-The way **`backgroundtaskmanagementd`** knows something is installed in a persistent folder is by **getting the FSEvents** and creating some **handlers** for those.
+Спосіб, яким **`backgroundtaskmanagementd`** дізнається, що щось встановлено в постійній папці, полягає в **отриманні FSEvents** і створенні деяких **обробників** для них.
 
-Moreover, there is a plist file that contains **well known applications** that frequently persists maintained by apple located in: `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/attributions.plist`
-
+Більше того, існує файл plist, який містить **добре відомі програми**, які часто зберігаються, що підтримується Apple, розташований у: `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/attributions.plist`
 ```json
 [...]
 "us.zoom.ZoomDaemon" => {
-    "AssociatedBundleIdentifiers" => [
-      0 => "us.zoom.xos"
-    ]
-    "Attribution" => "Zoom"
-    "Program" => "/Library/PrivilegedHelperTools/us.zoom.ZoomDaemon"
-    "ProgramArguments" => [
-      0 => "/Library/PrivilegedHelperTools/us.zoom.ZoomDaemon"
-    ]
-    "TeamIdentifier" => "BJ4HAAB9B3"
-  }
+"AssociatedBundleIdentifiers" => [
+0 => "us.zoom.xos"
+]
+"Attribution" => "Zoom"
+"Program" => "/Library/PrivilegedHelperTools/us.zoom.ZoomDaemon"
+"ProgramArguments" => [
+0 => "/Library/PrivilegedHelperTools/us.zoom.ZoomDaemon"
+]
+"TeamIdentifier" => "BJ4HAAB9B3"
+}
 [...]
 ```
-
 ### Enumeration
 
-It's possible to **enumerate all** the configured background items running the Apple cli tool:
-
+Можливо **перерахувати всі** налаштовані фонові елементи, що працюють за допомогою інструменту Apple cli:
 ```bash
 # The tool will always ask for the users password
 sfltool dumpbtm
 ```
-
-Moreover, it's also possible to list this information with [**DumpBTM**](https://github.com/objective-see/DumpBTM).
-
+Крім того, також можливо перерахувати цю інформацію за допомогою [**DumpBTM**](https://github.com/objective-see/DumpBTM).
 ```bash
 # You need to grant the Terminal Full Disk Access for this to work
 chmod +x dumpBTM
 xattr -rc dumpBTM # Remove quarantine attr
 ./dumpBTM
 ```
+Ця інформація зберігається в **`/private/var/db/com.apple.backgroundtaskmanagement/BackgroundItems-v4.btm`** і Terminal потребує FDA.
 
-This information is being stored in **`/private/var/db/com.apple.backgroundtaskmanagement/BackgroundItems-v4.btm`** and the Terminal needs FDA.
+### Маніпуляції з BTM
 
-### Messing with BTM
+Коли знаходиться нова персистентність, відбувається подія типу **`ES_EVENT_TYPE_NOTIFY_BTM_LAUNCH_ITEM_ADD`**. Отже, будь-який спосіб **запобігти** цій **події** відправленню або **агенту від попередження** користувача допоможе зловмиснику _**обійти**_ BTM.
 
-When a new persistence is found an event of type **`ES_EVENT_TYPE_NOTIFY_BTM_LAUNCH_ITEM_ADD`**. So, any way to **prevent** this **event** from being sent or the **agent from alerting** the user will help an attacker to _**bypass**_ BTM.
-
-- **Reseting the database**: Running the following command will reset the database (should rebuild it from the ground), however, for some reason, after running this, **no new persistence will be alerted until the system is rebooted**.
-  - **root** is required.
-
+- **Скидання бази даних**: Виконання наступної команди скине базу даних (повинно відновити її з нуля), однак, з якоїсь причини, після виконання цього **жодна нова персистентність не буде попереджена, поки система не буде перезавантажена**.
+- **root** потрібен.
 ```bash
 # Reset the database
 sfltool resettbtm
 ```
-
-- **Stop the Agent**: It's possible to send a stop signal to the agent so it **won't be alerting the user** when new detections are found.
-
+- **Зупиніть агента**: Можливо надіслати сигнал зупинки агенту, щоб він **не сповіщав користувача** про нові виявлення.
 ```bash
 # Get PID
 pgrep BackgroundTaskManagementAgent
@@ -133,14 +124,12 @@ kill -SIGSTOP 1011
 ps -o state 1011
 T
 ```
+- **Помилка**: Якщо **процес, що створив постійність, існує швидко після цього**, демон спробує **отримати інформацію** про нього, **не вдасться** і **не зможе надіслати подію**, що вказує на те, що новий об'єкт зберігається.
 
-- **Bug**: If the **process that created the persistence exists fast right after it**, the daemon will try to **get information** about it, **fail**, and **won't be able to send the event** indicating that a new thing is persisting.
-
-References and **more information about BTM**:
+Посилання та **додаткова інформація про BTM**:
 
 - [https://youtu.be/9hjUmT031tc?t=26481](https://youtu.be/9hjUmT031tc?t=26481)
 - [https://www.patreon.com/posts/new-developer-77420730?l=fr](https://www.patreon.com/posts/new-developer-77420730?l=fr)
 - [https://support.apple.com/en-gb/guide/deployment/depdca572563/web](https://support.apple.com/en-gb/guide/deployment/depdca572563/web)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
