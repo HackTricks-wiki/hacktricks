@@ -45,3 +45,5 @@ user-namespace.md
 {{#endref}}
 
 {{#include ../../../../banners/hacktricks-training.md}}
+
+

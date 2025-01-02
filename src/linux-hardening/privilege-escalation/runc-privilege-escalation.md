@@ -42,3 +42,5 @@ runc run demo
 > This won't always work as the default operation of runc is to run as root, so running it as an unprivileged user simply cannot work (unless you have a rootless configuration). Making a rootless configuration the default isn't generally a good idea because there are quite a few restrictions inside rootless containers that don't apply outside rootless containers.
 
 {{#include ../../banners/hacktricks-training.md}}
+
+

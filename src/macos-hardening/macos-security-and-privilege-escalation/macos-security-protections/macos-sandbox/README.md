@@ -151,7 +151,9 @@ Important **system services** also run inside their own custom **sandbox** such 
 
 **App Store** apps use the **profile** **`/System/Library/Sandbox/Profiles/application.sb`**. You can check in this profile how entitlements such as **`com.apple.security.network.server`** allows a process to use the network.
 
-SIP is a Sandbox profile called platform_profile in /System/Library/Sandbox/rootless.conf
+Then, some **Apple daemon services** use different profiles located in `/System/Library/Sandbox/Profiles/*.sb` or `/usr/share/sandbox/*.sb`. These sandboxes are applied in the main funciton calling the API `sandbox_init_XXX`.
+
+**SIP** is a Sandbox profile called platform_profile in `/System/Library/Sandbox/rootless.conf`.
 
 ### Sandbox Profile Examples
 

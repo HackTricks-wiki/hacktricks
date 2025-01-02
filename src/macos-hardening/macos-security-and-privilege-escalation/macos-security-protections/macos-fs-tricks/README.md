@@ -30,9 +30,15 @@ Example in: [https://theevilbit.github.io/posts/exploiting_directory_permissions
 
 ## Symbolic Link / Hard Link
 
+### Permissive file/folder
+
 If a privileged process is writing data in **file** that could be **controlled** by a **lower privileged user**, or that could be **previously created** by a lower privileged user. The user could just **point it to another file** via a Symbolic or Hard link, and the privileged process will write on that file.
 
 Check in the other sections where an attacker could **abuse an arbitrary write to escalate privileges**.
+
+### Open `O_NOFOLLOW`
+
+The flag `O_NOFOLLOW` when used by the function `open` won't follow a symlink in the last path component, but it will follow the rest of the path. The correct way to prevent following symlinks in the path is by using the flag `O_NOFOLLOW_ANY`.
 
 ## .fileloc
 
@@ -52,11 +58,15 @@ Example:
 </plist>
 ```
 
-## Arbitrary FD
+## File Descriptors
+
+### Leak FD (no `O_CLOEXEC`)
+
+If a call to `open` doesn't have the flag `O_CLOEXEC` the file descriptor will be inherited by the child process. So, if a privileged process opens a privileged file and executes a process controlled by the attacker, the attacker will **inherit the FD over the privielged file**.
 
 If you can make a **process open a file or a folder with high privileges**, you can abuse **`crontab`** to open a file in `/etc/sudoers.d` with **`EDITOR=exploit.py`**, so the `exploit.py` will get the FD to the file inside `/etc/sudoers` and abuse it.
 
-For example: [https://youtu.be/f1HA5QhLQ7Y?t=21098](https://youtu.be/f1HA5QhLQ7Y?t=21098)
+For example: [https://youtu.be/f1HA5QhLQ7Y?t=21098](https://youtu.be/f1HA5QhLQ7Y?t=21098), code: https://github.com/gergelykalman/CVE-2023-32428-a-macOS-LPE-via-MallocStackLogging
 
 ## Avoid quarantine xattrs tricks
 
@@ -153,6 +163,31 @@ Not really needed but I leave it there just in case:
 {{#ref}}
 macos-xattr-acls-extra-stuff.md
 {{#endref}}
+
+## Bypass signature checks
+
+### Bypass platform binaries checks
+
+Some security checks check if the binary is a **platform binary**, for example to allow to connect to a XPC service. However, as exposed in on bypass in https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/ it's possible to bypass this check by getting a platform binary (like /bin/ls) and inject the exploit via dyld using en env variable `DYLD_INSERT_LIBRARIES`.
+
+### Bypass flags `CS_REQUIRE_LV` and `CS_FORCED_LV`
+
+It's possible for an executing binary to modify it's own flags to bypass checks with a code such as:
+
+```c
+// Code from https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/
+int pid = getpid();
+NSString *exePath = NSProcessInfo.processInfo.arguments[0];
+
+uint32_t status = SecTaskGetCodeSignStatus(SecTaskCreateFromSelf(0));
+status |= 0x2000; // CS_REQUIRE_LV
+csops(pid, 9, &status, 4); // CS_OPS_SET_STATUS
+
+status = SecTaskGetCodeSignStatus(SecTaskCreateFromSelf(0));
+NSLog(@"=====Inject successfully into %d(%@), csflags=0x%x", pid, exePath, status);
+```
+
+
 
 ## Bypass Code Signatures
 
@@ -278,6 +313,28 @@ If you have **arbitrary write**, you could create a file inside the folder **`/e
 The file **`/etc/paths`** is one of the main places that populates the PATH env variable. You must be root to overwrite it, but if a script from **privileged process** is executing some **command without the full path**, you might be able to **hijack** it modifying this file.
 
 You can also write files in **`/etc/paths.d`** to load new folders into the `PATH` env variable.
+
+### cups-files.conf
+
+This technique was used in [this writeup](https://www.kandji.io/blog/macos-audit-story-part1).
+
+Create the file `/etc/cups/cups-files.conf` with the following content:
+
+```
+ErrorLog /etc/sudoers.d/lpe
+LogFilePerm 777
+<some junk>
+```
+
+This will create the file `/etc/sudoers.d/lpe` with permissions 777. The extra junk at the end is to trigger the error log creation.
+
+Then, write in `/etc/sudoers.d/lpe` the needed config to escalate privileges like `%staff ALL=(ALL) NOPASSWD:ALL`.
+
+Then, modify the file `/etc/cups/cups-files.conf` again indicating `LogFilePerm 700` so the new sudoers file becomes valid invoking `cupsctl`.
+
+### Sandbox Escape
+
+It's posisble to escape the macOS sandbox with a FS arbitrary write. For some examples check the page [macOS Auto Start](../../../../macos-auto-start-locations.md) but a common one is to write a Terminal preferences file in `~/Library/Preferences/com.apple.Terminal.plist` that executes a command at startup and call it using `open`.
 
 ## Generate writable files as other users
 

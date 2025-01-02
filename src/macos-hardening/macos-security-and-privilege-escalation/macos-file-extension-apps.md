@@ -70,3 +70,5 @@ grep -A3 CFBundleTypeExtensions Info.plist  | grep string
 ```
 
 {{#include ../../banners/hacktricks-training.md}}
+
+

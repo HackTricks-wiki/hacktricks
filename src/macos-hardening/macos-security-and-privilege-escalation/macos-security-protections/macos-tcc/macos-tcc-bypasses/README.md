@@ -489,6 +489,14 @@ def create_dmg():
 
 Check the **full exploit** in the [**original writeup**](https://theevilbit.github.io/posts/cve-2021-30808/).
 
+### CVE-2024-40855
+
+As explained in the [original writeup](https://www.kandji.io/blog/macos-audit-story-part2), this CVE abused `diskarbitrationd`.
+
+The function `DADiskMountWithArgumentsCommon` from the public `DiskArbitration` framework performed the security checks. However, it's possible to bypass it by directly calling `diskarbitrationd` and therefore use `../` elements in the path and symlinks.
+
+This allowed an attacker to do arbitrary mounts in any location, including over the TCC database due to the entitlement `com.apple.private.security.storage-exempt.heritable` of `diskarbitrationd`.
+
 ### asr
 
 The tool **`/usr/sbin/asr`** allowed to copy the whole disk and mount it in another place bypassing TCC protections.

@@ -41,3 +41,5 @@ You could also **abuse a mount to escalate privileges** inside the container.
 In this page we have discussed ways to escalate privileges using docker flags, you can find **ways to abuse these methods using curl** command in the page:
 
 {{#include ../../../banners/hacktricks-training.md}}
+
+

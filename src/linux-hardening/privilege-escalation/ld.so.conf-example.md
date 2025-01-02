@@ -151,3 +151,5 @@ ldd sharedvuln
 **As you can see, having sudo privileges over `ldconfig` you can exploit the same vulnerability.**
 
 {{#include ../../banners/hacktricks-training.md}}
+
+

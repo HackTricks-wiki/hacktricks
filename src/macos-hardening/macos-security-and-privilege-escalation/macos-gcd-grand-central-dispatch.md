@@ -223,3 +223,5 @@ Ghidra will automatically rewrite everything:
 - [**\*OS Internals, Volume I: User Mode. By Jonathan Levin**](https://www.amazon.com/MacOS-iOS-Internals-User-Mode/dp/099105556X)
 
 {{#include ../../banners/hacktricks-training.md}}
+
+

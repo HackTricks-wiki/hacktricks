@@ -245,3 +245,5 @@ macos-files-folders-and-binaries/macos-sensitive-locations.md
 {{#endref}}
 
 {{#include ../../banners/hacktricks-training.md}}
+
+
