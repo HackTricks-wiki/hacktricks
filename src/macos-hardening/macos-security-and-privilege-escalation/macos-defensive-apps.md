@@ -4,16 +4,16 @@
 
 ## Firewalls
 
-- [**Little Snitch**](https://www.obdev.at/products/littlesnitch/index.html): It will monitor every connection made by each process. Depending on the mode (silent allow connections, silent deny connection and alert) it will **show you an alert** every time a new connection is stablished. It also has a very nice GUI to see all this information.
-- [**LuLu**](https://objective-see.org/products/lulu.html): Objective-See firewall. This is a basic firewall that will alert you for suspicious connections (it has a GUI but it isn't as fancy as the one of Little Snitch).
+- [**Little Snitch**](https://www.obdev.at/products/littlesnitch/index.html): Pratiće svaku vezu koju uspostavi svaki proces. U zavisnosti od režima (tiho dozvoliti veze, tiho odbiti vezu i upozoriti) će **prikazati upozorenje** svaki put kada se uspostavi nova veza. Takođe ima veoma lepu GUI za pregled svih ovih informacija.
+- [**LuLu**](https://objective-see.org/products/lulu.html): Objective-See vatrozid. Ovo je osnovni vatrozid koji će vas upozoriti na sumnjive veze (ima GUI, ali nije tako sofisticiran kao onaj od Little Snitch).
 
 ## Persistence detection
 
-- [**KnockKnock**](https://objective-see.org/products/knockknock.html): Objective-See application that will search in several locations where **malware could be persisting** (it's a one-shot tool, not a monitoring service).
-- [**BlockBlock**](https://objective-see.org/products/blockblock.html): Like KnockKnock by monitoring processes that generate persistence.
+- [**KnockKnock**](https://objective-see.org/products/knockknock.html): Objective-See aplikacija koja će pretraživati na nekoliko lokacija gde **malver može da se zadrži** (to je alat za jednokratnu upotrebu, nije servis za praćenje).
+- [**BlockBlock**](https://objective-see.org/products/blockblock.html): Kao KnockKnock, prati procese koji generišu postojanost.
 
 ## Keyloggers detection
 
-- [**ReiKey**](https://objective-see.org/products/reikey.html): Objective-See application to find **keyloggers** that install keyboard "event taps"&#x20;
+- [**ReiKey**](https://objective-see.org/products/reikey.html): Objective-See aplikacija za pronalaženje **keylogger-a** koji instaliraju "event taps" za tastaturu. 
 
 {{#include ../../banners/hacktricks-training.md}}

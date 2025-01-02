@@ -1,13 +1,5 @@
 # ACLs - DACLs/SACLs/ACEs
 
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Koristite [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=acls-dacls-sacls-aces) za lako kreiranje i **automatizaciju radnih tokova** uz pomoć **najnaprednijih** alata zajednice na svetu.\
-Pribavite pristup danas:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=acls-dacls-sacls-aces" %}
-
 {{#include ../../banners/hacktricks-training.md}}
 
 ## **Lista Kontrole Pristupa (ACL)**
@@ -16,15 +8,15 @@ Lista Kontrole Pristupa (ACL) se sastoji od uređenog skupa Unosa Kontrole Prist
 
 Postoje dve vrste ACL:
 
-- **Diskreciona Lista Kontrole Pristupa (DACL):** Određuje koji korisnici i grupe imaju ili nemaju pristup objektu.
+- **Diskreciona Lista Kontrole Pristupa (DACL):** Specifikuje koji korisnici i grupe imaju ili nemaju pristup objektu.
 - **Sistematska Lista Kontrole Pristupa (SACL):** Upravlja revizijom pokušaja pristupa objektu.
 
 Proces pristupanja datoteci uključuje sistem koji proverava sigurnosni opis objekta u odnosu na pristupni token korisnika kako bi odredio da li pristup treba biti odobren i u kojoj meri, na osnovu ACE.
 
 ### **Ključne Komponente**
 
-- **DACL:** Sadrži ACE koji odobravaju ili odbijaju pristupne dozvole korisnicima i grupama za objekat. To je suštinski glavna ACL koja određuje prava pristupa.
-- **SACL:** Koristi se za reviziju pristupa objektima, gde ACE definišu tipove pristupa koji se beleže u Bezbednosnom Dnevniku Događaja. Ovo može biti neprocenjivo za otkrivanje neovlašćenih pokušaja pristupa ili rešavanje problema sa pristupom.
+- **DACL:** Sadrži ACE koji dodeljuju ili odbijaju dozvole pristupa korisnicima i grupama za objekat. To je suštinski glavna ACL koja diktira prava pristupa.
+- **SACL:** Koristi se za reviziju pristupa objektima, gde ACE definišu tipove pristupa koji se beleže u Bezbednosni Događajni Zapis. Ovo može biti neprocenjivo za otkrivanje neovlašćenih pokušaja pristupa ili rešavanje problema sa pristupom.
 
 ### **Interakcija Sistema sa ACL**
 
@@ -34,7 +26,7 @@ Lokalna Bezbednosna Autoritet (LSASS) obrađuje zahteve za pristup objektima isp
 
 ### **Sažeti Proces**
 
-- **ACL:** Definišu pristupne dozvole kroz DACL i pravila revizije kroz SACL.
+- **ACL:** Definišu dozvole pristupa kroz DACL i pravila revizije kroz SACL.
 - **Pristupni Token:** Sadrži informacije o korisniku, grupi i privilegijama za sesiju.
 - **Odluka o Pristupu:** Donosi se upoređivanjem DACL ACE sa pristupnim tokenom; SACL se koristi za reviziju.
 
@@ -44,30 +36,30 @@ Postoje **tri glavne vrste Unosa Kontrole Pristupa (ACE)**:
 
 - **ACE Odbijen Pristup**: Ovaj ACE izričito odbija pristup objektu za određene korisnike ili grupe (u DACL).
 - **ACE Dozvoljen Pristup**: Ovaj ACE izričito odobrava pristup objektu za određene korisnike ili grupe (u DACL).
-- **Sistematski Revizorski ACE**: Postavljen unutar Sistematske Liste Kontrole Pristupa (SACL), ovaj ACE je odgovoran za generisanje revizorskih logova prilikom pokušaja pristupa objektu od strane korisnika ili grupa. Beleži da li je pristup bio odobren ili odbijen i prirodu pristupa.
+- **Sistematski Revizorski ACE**: Postavljen unutar Sistematske Liste Kontrole Pristupa (SACL), ovaj ACE je odgovoran za generisanje revizorskih zapisa prilikom pokušaja pristupa objektu od strane korisnika ili grupa. Beleži da li je pristup bio odobren ili odbijen i prirodu pristupa.
 
 Svaki ACE ima **četiri ključne komponente**:
 
-1. **Identifikator Sigurnosti (SID)** korisnika ili grupe (ili njihovog imena u grafičkom prikazu).
-2. **Zastavicu** koja identifikuje tip ACE (pristup odbijen, dozvoljen ili sistematski revizorski).
+1. **Identifikator Sigurnosti (SID)** korisnika ili grupe (ili njihovog imena principa u grafičkoj reprezentaciji).
+2. **Zastavica** koja identifikuje tip ACE (pristup odbijen, dozvoljen ili sistematski revizorski).
 3. **Zastavice nasleđivanja** koje određuju da li deca objekti mogu nasleđivati ACE od svog roditelja.
-4. [**Pristupnu masku**](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/7a53f60e-e730-4dfe-bbe9-b21b62eb790b?redirectedfrom=MSDN), 32-bitnu vrednost koja specificira odobrena prava objekta.
+4. [**Maska pristupa**](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/7a53f60e-e730-4dfe-bbe9-b21b62eb790b?redirectedfrom=MSDN), 32-bitna vrednost koja specificira prava dodeljena objektu.
 
 Određivanje pristupa se vrši sekvencijalnim ispitivanjem svakog ACE dok:
 
 - **ACE Odbijen Pristup** izričito odbija tražena prava poveriocu identifikovanom u pristupnom tokenu.
 - **ACE Dozvoljen Pristup** izričito odobrava sva tražena prava poveriocu u pristupnom tokenu.
-- Nakon provere svih ACE, ako bilo koje traženo pravo **nije izričito odobreno**, pristup je implicitno **odbijen**.
+- Nakon provere svih ACE, ako nijedno traženo pravo **nije izričito odobreno**, pristup je implicitno **odbijen**.
 
 ### Redosled ACE
 
-Način na koji su **ACE** (pravila koja kažu ko može ili ne može pristupiti nečemu) postavljeni u listu nazvanu **DACL** je veoma važan. To je zato što, kada sistem odobri ili odbije pristup na osnovu ovih pravila, prestaje da gleda na ostatak.
+Način na koji su **ACE** (pravila koja kažu ko može ili ne može pristupiti nečemu) postavljeni u listu nazvanu **DACL** je veoma važan. To je zato što, kada sistem dodeli ili odbije pristup na osnovu ovih pravila, prestaje da gleda ostatak.
 
-Postoji najbolji način za organizovanje ovih ACE, a to se naziva **"kanonski redosled."** Ova metoda pomaže da se osigura da sve funkcioniše glatko i pravedno. Evo kako to ide za sisteme kao što su **Windows 2000** i **Windows Server 2003**:
+Postoji najbolji način za organizovanje ovih ACE, a to se zove **"kanonski red."** Ova metoda pomaže da se osigura da sve funkcioniše glatko i pravedno. Evo kako to ide za sisteme kao što su **Windows 2000** i **Windows Server 2003**:
 
-- Prvo, stavite sva pravila koja su napravljena **specifično za ovu stavku** pre onih koja dolaze od nekuda drugde, poput roditeljskog foldera.
+- Prvo, stavite sva pravila koja su napravljena **specifično za ovu stavku** pre onih koja dolaze od nekuda drugde, kao što je roditeljski folder.
 - U tim specifičnim pravilima, stavite ona koja kažu **"ne" (odbiti)** pre onih koja kažu **"da" (dozvoliti)**.
-- Za pravila koja dolaze od nekuda drugde, počnite sa onima iz **najbližeg izvora**, poput roditelja, a zatim se vraćajte odatle. Ponovo, stavite **"ne"** pre **"da."**
+- Za pravila koja dolaze od nekuda drugde, počnite sa onima iz **najbližeg izvora**, kao što je roditelj, a zatim se vraćajte odatle. Ponovo, stavite **"ne"** pre **"da."**
 
 Ova postavka pomaže na dva velika načina:
 
@@ -78,15 +70,7 @@ Na ovaj način, vlasnik datoteke ili foldera može biti veoma precizan u vezi sa
 
 ![](https://www.ntfs.com/images/screenshots/ACEs.gif)
 
-Dakle, ovaj **"kanonski redosled"** se odnosi na osiguranje da su pravila pristupa jasna i da dobro funkcionišu, stavljajući specifična pravila na prvo mesto i organizujući sve na pametan način.
-
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Koristite [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) za lako kreiranje i **automatizaciju radnih tokova** uz pomoć **najnaprednijih** alata zajednice na svetu.\
-Pribavite pristup danas:
-
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
+Dakle, ovaj **"kanonski red"** se odnosi na osiguranje da su pravila pristupa jasna i da dobro funkcionišu, stavljajući specifična pravila na prvo mesto i organizujući sve na pametan način.
 
 ### GUI Primer
 
@@ -104,37 +88,37 @@ I ako dodate ili izmenite Sigurnosni Princip:
 
 ![http://secureidentity.se/wp-content/uploads/2014/04/editseprincipalpointers1.jpg](../../images/editseprincipalpointers1.jpg)
 
-I na kraju imamo SACL u kartici Revizija:
+I na kraju imamo SACL u kartici Revizije:
 
 ![http://secureidentity.se/wp-content/uploads/2014/04/audit-tab.jpg](../../images/audit-tab.jpg)
 
 ### Objašnjenje Kontrole Pristupa na Pojednostavljen Način
 
-Kada upravljamo pristupom resursima, poput foldera, koristimo liste i pravila poznata kao Liste Kontrole Pristupa (ACL) i Unosi Kontrole Pristupa (ACE). Ovi definišu ko može ili ne može pristupiti određenim podacima.
+Kada upravljamo pristupom resursima, kao što je folder, koristimo liste i pravila poznata kao Liste Kontrole Pristupa (ACL) i Unosi Kontrole Pristupa (ACE). Ove definišu ko može ili ne može pristupiti određenim podacima.
 
 #### Odbijanje Pristupa Specifičnoj Grupi
 
-Zamislite da imate folder nazvan Troškovi, i želite da svi imaju pristup osim marketinškog tima. Postavljanjem pravila na pravi način, možemo osigurati da marketinškom timu bude izričito odbijen pristup pre nego što dozvolimo svima ostalima. To se postiže postavljanjem pravila za odbijanje pristupa marketinškom timu pre pravila koje dozvoljava pristup svima.
+Zamislite da imate folder nazvan Troškovi, i želite da svi imaju pristup osim marketinške ekipe. Postavljanjem pravila na pravi način, možemo osigurati da marketinška ekipa bude izričito odbijena pristup pre nego što se dozvoli svima ostalima. To se postiže postavljanjem pravila za odbijanje pristupa marketinškoj ekipi pre pravila koje dozvoljava pristup svima.
 
 #### Dozvoljavanje Pristupa Specifičnom Članu Odbijene Grupe
 
-Recimo da Bob, direktor marketinga, treba pristup folderu Troškovi, iako marketinški tim generalno ne bi trebao imati pristup. Možemo dodati specifično pravilo (ACE) za Boba koje mu odobrava pristup, i postaviti ga pre pravila koje odbija pristup marketinškom timu. Na taj način, Bob dobija pristup uprkos opštem ograničenju na njegov tim.
+Recimo da Bob, direktor marketinga, treba pristup folderu Troškovi, iako marketinška ekipa generalno ne bi trebala imati pristup. Možemo dodati specifično pravilo (ACE) za Boba koje mu dodeljuje pristup, i postaviti ga pre pravila koje odbija pristup marketinškoj ekipi. Na ovaj način, Bob dobija pristup uprkos opštem ograničenju na njegov tim.
 
 #### Razumevanje Unosa Kontrole Pristupa
 
 ACE su pojedinačna pravila u ACL. Ona identifikuju korisnike ili grupe, specificiraju koji pristup je dozvoljen ili odbijen, i određuju kako se ova pravila primenjuju na podstavke (nasleđivanje). Postoje dve glavne vrste ACE:
 
-- **Generički ACE:** Ovi se primenjuju široko, utičući ili na sve tipove objekata ili razlikujući samo između kontejnera (poput foldera) i nekontejnera (poput datoteka). Na primer, pravilo koje dozvoljava korisnicima da vide sadržaj foldera, ali ne i da pristupe datotekama unutar njega.
+- **Generički ACE:** Ovi se primenjuju široko, utičući ili na sve tipove objekata ili razlikujući samo između kontejnera (kao što su folderi) i nekontejnera (kao što su datoteke). Na primer, pravilo koje dozvoljava korisnicima da vide sadržaj foldera, ali ne i da pristupe datotekama unutar njega.
 - **Specifični ACE:** Ovi pružaju precizniju kontrolu, omogućavajući postavljanje pravila za specifične tipove objekata ili čak pojedinačne osobine unutar objekta. Na primer, u direktorijumu korisnika, pravilo može dozvoliti korisniku da ažurira svoj broj telefona, ali ne i svoje radno vreme.
 
-Svaki ACE sadrži važne informacije kao što su ko se pravilo primenjuje (koristeći Identifikator Sigurnosti ili SID), šta pravilo dozvoljava ili odbija (koristeći pristupnu masku), i kako se nasleđuje od drugih objekata.
+Svaki ACE sadrži važne informacije kao što su ko se pravilo primenjuje (koristeći Identifikator Sigurnosti ili SID), šta pravilo dozvoljava ili odbija (koristeći masku pristupa), i kako se nasleđuje od drugih objekata.
 
 #### Ključne Razlike između Tipova ACE
 
 - **Generički ACE** su pogodna za jednostavne scenarije kontrole pristupa, gde se isto pravilo primenjuje na sve aspekte objekta ili na sve objekte unutar kontejnera.
-- **Specifični ACE** se koriste za složenije scenarije, posebno u okruženjima kao što je Active Directory, gde možda treba kontrolisati pristup specifičnim osobinama objekta na različite načine.
+- **Specifični ACE** se koriste za složenije scenarije, posebno u okruženjima kao što je Active Directory, gde možda treba kontrolisati pristup specifičnim osobinama objekta na drugačiji način.
 
-U sažetku, ACL i ACE pomažu u definisanju preciznih kontrola pristupa, osiguravajući da samo prave osobe ili grupe imaju pristup osetljivim informacijama ili resursima, uz mogućnost prilagođavanja prava pristupa do nivoa pojedinačnih osobina ili tipova objekata.
+U sažetku, ACL i ACE pomažu u definisanju preciznih kontrola pristupa, osiguravajući da samo prave osobe ili grupe imaju pristup osetljivim informacijama ili resursima, sa mogućnošću prilagođavanja prava pristupa do nivoa pojedinačnih osobina ili tipova objekata.
 
 ### Raspored Unosa Kontrole Pristupa
 
@@ -143,10 +127,10 @@ U sažetku, ACL i ACE pomažu u definisanju preciznih kontrola pristupa, osigura
 | Tip         | Zastavica koja označava tip ACE. Windows 2000 i Windows Server 2003 podržavaju šest tipova ACE: Tri generička tipa ACE koja su prikačena za sve sigurnosne objekte. Tri specifična tipa ACE koja se mogu pojaviti za objekte Active Directory.                                                                                                                                                                                                                                                            |
 | Zastavice   | Skup bit zastavica koje kontrolišu nasleđivanje i reviziju.                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | Veličina    | Broj bajtova memorije koji su dodeljeni za ACE.                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| Pristupna maska | 32-bitna vrednost čiji bitovi odgovaraju pravima pristupa za objekat. Bitovi se mogu postaviti ili uključiti ili isključiti, ali značenje postavke zavisi od tipa ACE. Na primer, ako je bit koji odgovara pravu na čitanje dozvola uključen, a tip ACE je Odbij, ACE odbija pravo na čitanje dozvola objekta. Ako je isti bit uključen, ali je tip ACE Dozvoliti, ACE odobrava pravo na čitanje dozvola objekta. Više detalja o pristupnoj maski pojavljuje se u sledećoj tabeli. |
+| Maska pristupa | 32-bitna vrednost čiji bitovi odgovaraju pravima pristupa za objekat. Bitovi se mogu postaviti ili uključiti ili isključiti, ali značenje postavke zavisi od tipa ACE. Na primer, ako je bit koji odgovara pravu na čitanje dozvola uključen, a tip ACE je Odbij, ACE odbija pravo na čitanje dozvola objekta. Ako je isti bit uključen, ali je tip ACE Dozvoliti, ACE odobrava pravo na čitanje dozvola objekta. Više detalja o maski pristupa pojavljuje se u sledećoj tabeli. |
 | SID         | Identifikuje korisnika ili grupu čiji je pristup kontrolisan ili praćen ovim ACE.                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 
-### Raspored Pristupne Maske
+### Raspored Maske Pristupa
 
 | Bit (Opseg) | Značenje                            | Opis/Primer                       |
 | ----------- | ---------------------------------- | ----------------------------------------- |
@@ -166,11 +150,3 @@ U sažetku, ACL i ACE pomažu u definisanju preciznih kontrola pristupa, osigura
 - [https://www.coopware.in2.info/\_ntfsacl_ht.htm](https://www.coopware.in2.info/_ntfsacl_ht.htm)
 
 {{#include ../../banners/hacktricks-training.md}}
-
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Koristite [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=acls-dacls-sacls-aces) za lako kreiranje i **automatizaciju radnih tokova** uz pomoć **najnaprednijih** alata zajednice na svetu.\
-Pribavite pristup danas:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=acls-dacls-sacls-aces" %}

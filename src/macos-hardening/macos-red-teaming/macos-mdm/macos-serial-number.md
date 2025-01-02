@@ -1,40 +1,40 @@
-# macOS Serial Number
+# macOS Serijski Broj
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Osnovne Informacije
 
-Apple devices post-2010 have serial numbers consisting of **12 alphanumeric characters**, each segment conveying specific information:
+Apple uređaji posle 2010. godine imaju serijske brojeve koji se sastoje od **12 alfanumeričkih karaktera**, pri čemu svaki segment prenosi specifične informacije:
 
-- **First 3 Characters**: Indicate the **manufacturing location**.
-- **Characters 4 & 5**: Denote the **year and week of manufacture**.
-- **Characters 6 to 8**: Serve as a **unique identifier** for each device.
-- **Last 4 Characters**: Specify the **model number**.
+- **Prva 3 Karaktera**: Oznaka **mesta proizvodnje**.
+- **Karakteri 4 i 5**: Oznaka **godine i nedelje proizvodnje**.
+- **Karakteri 6 do 8**: Služe kao **jedinstveni identifikator** za svaki uređaj.
+- **Poslednja 4 Karaktera**: Oznaka **broja modela**.
 
-For instance, the serial number **C02L13ECF8J2** follows this structure.
+Na primer, serijski broj **C02L13ECF8J2** prati ovu strukturu.
 
-### **Manufacturing Locations (First 3 Characters)**
+### **Mesta Proizvodnje (Prva 3 Karaktera)**
 
-Certain codes represent specific factories:
+Određeni kodovi predstavljaju specifične fabrike:
 
-- **FC, F, XA/XB/QP/G8**: Various locations in the USA.
-- **RN**: Mexico.
-- **CK**: Cork, Ireland.
-- **VM**: Foxconn, Czech Republic.
-- **SG/E**: Singapore.
-- **MB**: Malaysia.
-- **PT/CY**: Korea.
-- **EE/QT/UV**: Taiwan.
-- **FK/F1/F2, W8, DL/DM, DN, YM/7J, 1C/4H/WQ/F7**: Different locations in China.
-- **C0, C3, C7**: Specific cities in China.
-- **RM**: Refurbished devices.
+- **FC, F, XA/XB/QP/G8**: Različite lokacije u SAD-u.
+- **RN**: Meksiko.
+- **CK**: Kork, Irska.
+- **VM**: Foxconn, Češka Republika.
+- **SG/E**: Singapur.
+- **MB**: Malezija.
+- **PT/CY**: Koreja.
+- **EE/QT/UV**: Tajvan.
+- **FK/F1/F2, W8, DL/DM, DN, YM/7J, 1C/4H/WQ/F7**: Različite lokacije u Kini.
+- **C0, C3, C7**: Specifični gradovi u Kini.
+- **RM**: Obnovljeni uređaji.
 
-### **Year of Manufacturing (4th Character)**
+### **Godina Proizvodnje (4. Karakter)**
 
-This character varies from 'C' (representing the first half of 2010) to 'Z' (second half of 2019), with different letters indicating different half-year periods.
+Ovaj karakter varira od 'C' (predstavlja prvu polovinu 2010. godine) do 'Z' (druga polovina 2019. godine), pri čemu različita slova označavaju različite polugodišnje periode.
 
-### **Week of Manufacturing (5th Character)**
+### **Nedelja Proizvodnje (5. Karakter)**
 
-Digits 1-9 correspond to weeks 1-9. Letters C-Y (excluding vowels and 'S') represent weeks 10-27. For the second half of the year, 26 is added to this number.
+Brojevi 1-9 odgovaraju nedeljama 1-9. Slova C-Y (izuzev samoglasnika i 'S') predstavljaju nedelje 10-27. Za drugu polovinu godine, 26 se dodaje ovom broju.
 
 {{#include ../../../banners/hacktricks-training.md}}

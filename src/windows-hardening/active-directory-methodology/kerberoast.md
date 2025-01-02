@@ -1,32 +1,24 @@
 # Kerberoast
 
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Koristite [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=kerberoast) za lako kreiranje i **automatizaciju radnih tokova** pokretanih najnaprednijim **alatom** zajednice.\
-Pribavite pristup danas:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=kerberoast" %}
-
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Kerberoast
 
-Kerberoasting se fokusira na sticanje **TGS karata**, posebno onih povezanih sa uslugama koje rade pod **korisničkim nalozima** u **Active Directory (AD)**, isključujući **računare**. Enkripcija ovih karata koristi ključeve koji potiču od **korisničkih lozinki**, što omogućava mogućnost **offline krakenja kredencijala**. Korišćenje korisničkog naloga kao usluge označeno je ne-praznom **"ServicePrincipalName"** svojstvom.
+Kerberoasting se fokusira na sticanje **TGS karata**, posebno onih povezanih sa uslugama koje rade pod **korisničkim nalozima** u **Active Directory (AD)**, isključujući **računare**. Enkripcija ovih karata koristi ključeve koji potiču od **korisničkih lozinki**, što omogućava mogućnost **offline cracking-a kredencijala**. Korišćenje korisničkog naloga kao usluge označeno je ne-praznom **"ServicePrincipalName"** svojstvu.
 
-Za izvršavanje **Kerberoasting-a**, neophodan je domen nalog sposoban za zahtev **TGS karata**; međutim, ovaj proces ne zahteva **posebne privilegije**, što ga čini dostupnim svima sa **važećim domen kredencijalima**.
+Za izvršavanje **Kerberoasting-a**, neophodan je domen nalog sposoban da zahteva **TGS karte**; međutim, ovaj proces ne zahteva **posebne privilegije**, što ga čini dostupnim svima sa **validnim domen kredencijalima**.
 
 ### Ključne tačke:
 
 - **Kerberoasting** cilja **TGS karte** za **usluge korisničkih naloga** unutar **AD**.
-- Karte enkriptovane sa ključevima iz **korisničkih lozinki** mogu se **krakati offline**.
-- Usluga se identifikuje po **ServicePrincipalName** koji nije prazan.
-- **Nema posebnih privilegija** potrebnih, samo **važeći domen kredencijali**.
+- Karte enkriptovane sa ključevima iz **korisničkih lozinki** mogu se **crack-ovati offline**.
+- Usluga se identifikuje po **ServicePrincipalName** koji nije null.
+- **Nema posebnih privilegija** potrebnih, samo **validni domen kredencijali**.
 
 ### **Napad**
 
 > [!WARNING]
-> **Kerberoasting alati** obično zahtevaju **`RC4 enkripciju`** prilikom izvođenja napada i iniciranja TGS-REQ zahteva. To je zato što je **RC4** [**slabiji**](https://www.stigviewer.com/stig/windows_10/2017-04-28/finding/V-63795) i lakše se kraka offline koristeći alate kao što je Hashcat nego drugi algoritmi enkripcije kao što su AES-128 i AES-256.\
+> **Kerberoasting alati** obično zahtevaju **`RC4 enkripciju`** prilikom izvođenja napada i iniciranja TGS-REQ zahteva. To je zato što je **RC4** [**slabiji**](https://www.stigviewer.com/stig/windows_10/2017-04-28/finding/V-63795) i lakši za crack-ovanje offline koristeći alate kao što je Hashcat nego druge algoritme enkripcije kao što su AES-128 i AES-256.\
 > RC4 (tip 23) hešovi počinju sa **`$krb5tgs$23$*`** dok AES-256 (tip 18) počinju sa **`$krb5tgs$18$*`**.`
 
 #### **Linux**
@@ -93,15 +85,7 @@ Invoke-Kerberoast -OutputFormat hashcat | % { $_.Hash } | Out-File -Encoding ASC
 > [!WARNING]
 > Kada se zatraži TGS, generiše se Windows događaj `4769 - A Kerberos service ticket was requested`.
 
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Koristite [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=kerberoast) za lako kreiranje i **automatizaciju radnih tokova** pokretanih **najnaprednijim** alatima zajednice na svetu.\
-Pribavite pristup danas:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=kerberoast" %}
-
-### Kršenje
+### Kracking
 ```bash
 john --format=krb5tgs --wordlist=passwords_kerb.txt hashes.kerberoast
 hashcat -m 13100 --force -a 0 hashes.kerberoast passwords_kerb.txt
@@ -122,12 +106,12 @@ Ako dobijete ovu **grešku** iz Linux-a: **`Kerberos SessionError: KRB_AP_ERR_SK
 
 ### Ublažavanje
 
-Kerberoasting se može sprovoditi sa visokim stepenom prikrivenosti ako je moguće iskoristiti. Da bi se otkrila ova aktivnost, treba obratiti pažnju na **Security Event ID 4769**, koji ukazuje da je Kerberos tiket zatražen. Međutim, zbog visoke učestalosti ovog događaja, moraju se primeniti specifične filtracije kako bi se izolovale sumnjive aktivnosti:
+Kerberoasting se može sprovoditi sa visokim stepenom prikrivenosti ako je moguće iskoristiti. Da bi se otkrila ova aktivnost, treba obratiti pažnju na **Security Event ID 4769**, koji ukazuje da je Kerberos tiket zatražen. Međutim, zbog visoke učestalosti ovog događaja, moraju se primeniti specifični filteri kako bi se izolovale sumnjive aktivnosti:
 
 - Ime usluge ne bi trebalo da bude **krbtgt**, jer je to normalan zahtev.
-- Imena usluga koja se završavaju sa **$** treba isključiti kako bi se izbeglo uključivanje mašinskih naloga koji se koriste za usluge.
-- Zahtevi sa mašina treba filtrirati isključivanjem imena naloga formatiranih kao **machine@domain**.
-- Samo uspešni zahtevi za tikete treba uzeti u obzir, identifikovani kodom greške **'0x0'**.
+- Imena usluga koja se završavaju sa **$** treba isključiti kako bi se izbegli računi mašina korišćeni za usluge.
+- Zahtevi sa mašina treba da budu filtrirani isključivanjem imena računa formatiranih kao **machine@domain**.
+- Samo uspešni zahtevi za tikete treba da se uzmu u obzir, identifikovani kodom greške **'0x0'**.
 - **Najvažnije**, tip enkripcije tiketa treba da bude **0x17**, koji se često koristi u Kerberoasting napadima.
 ```bash
 Get-WinEvent -FilterHashtable @{Logname='Security';ID=4769} -MaxEvents 1000 | ?{$_.Message.split("`n")[8] -ne 'krbtgt' -and $_.Message.split("`n")[8] -ne '*$' -and $_.Message.split("`n")[3] -notlike '*$@*' -and $_.Message.split("`n")[18] -like '*0x0*' -and $_.Message.split("`n")[17] -like "*0x17*"} | select ExpandProperty message
@@ -141,7 +125,7 @@ Implementacijom ovih mera, organizacije mogu značajno smanjiti rizik povezan sa
 
 ## Kerberoast bez domena
 
-U **septembru 2022**, novi način za eksploataciju sistema otkrio je istraživač po imenu Charlie Clark, podeljen putem njegove platforme [exploit.ph](https://exploit.ph/). Ova metoda omogućava sticanje **Servisnih karata (ST)** putem **KRB_AS_REQ** zahteva, što izuzetno ne zahteva kontrolu nad bilo kojim Active Directory nalogom. Suštinski, ako je glavni entitet postavljen na način koji ne zahteva prethodnu autentifikaciju—scenario sličan onome što se u oblasti sajber bezbednosti naziva **AS-REP Roasting napad**—ova karakteristika se može iskoristiti za manipulaciju procesom zahteva. Konkretno, menjajući **sname** atribut unutar tela zahteva, sistem se obmanjuje da izda **ST** umesto standardne enkriptovane karte za dobijanje karte (TGT).
+U **septembru 2022**, novi način za eksploataciju sistema otkrio je istraživač po imenu Charlie Clark, podelivši to putem svoje platforme [exploit.ph](https://exploit.ph/). Ova metoda omogućava sticanje **Servisnih karata (ST)** putem **KRB_AS_REQ** zahteva, što izuzetno ne zahteva kontrolu nad bilo kojim Active Directory nalogom. Suštinski, ako je glavni entitet postavljen na način koji ne zahteva prethodnu autentifikaciju—scenario sličan onome što se u oblasti sajber bezbednosti naziva **AS-REP Roasting napad**—ova karakteristika se može iskoristiti za manipulaciju procesom zahteva. Konkretno, menjajući **sname** atribut unutar tela zahteva, sistem se obmanjuje da izda **ST** umesto standardne enkriptovane karte za dobijanje karte (TGT).
 
 Tehnika je u potpunosti objašnjena u ovom članku: [Semperis blog post](https://www.semperis.com/blog/new-attack-paths-as-requested-sts/).
 
@@ -167,11 +151,3 @@ Rubeus.exe kerberoast /outfile:kerberoastables.txt /domain:"domain.local" /dc:"d
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberoasting-requesting-rc4-encrypted-tgs-when-aes-is-enabled](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberoasting-requesting-rc4-encrypted-tgs-when-aes-is-enabled)
 
 {{#include ../../banners/hacktricks-training.md}}
-
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Koristite [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=kerberoast) da lako izgradite i **automatizujete radne tokove** pokretane **najnaprednijim** alatima zajednice na svetu.\
-Pribavite pristup danas:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=kerberoast" %}

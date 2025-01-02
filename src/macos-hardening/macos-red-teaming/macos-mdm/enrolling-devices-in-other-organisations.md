@@ -1,53 +1,53 @@
-# Enrolling Devices in Other Organisations
+# Upisivanje Uređaja u Druge Organizacije
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Intro
+## Uvod
 
-As [**previously commented**](./#what-is-mdm-mobile-device-management)**,** in order to try to enrol a device into an organization **only a Serial Number belonging to that Organization is needed**. Once the device is enrolled, several organizations will install sensitive data on the new device: certificates, applications, WiFi passwords, VPN configurations [and so on](https://developer.apple.com/enterprise/documentation/Configuration-Profile-Reference.pdf).\
-Therefore, this could be a dangerous entrypoint for attackers if the enrolment process isn't correctly protected.
+Kao što je [**ranije komentarisano**](./#what-is-mdm-mobile-device-management)**,** da bi se pokušalo upisati uređaj u organizaciju **potreban je samo Serijski Broj koji pripada toj Organizaciji**. Kada je uređaj upisan, nekoliko organizacija će instalirati osetljive podatke na novom uređaju: sertifikate, aplikacije, WiFi lozinke, VPN konfiguracije [i tako dalje](https://developer.apple.com/enterprise/documentation/Configuration-Profile-Reference.pdf).\
+Stoga, ovo može biti opasna tačka ulaza za napadače ako proces upisivanja nije pravilno zaštićen.
 
-**The following is a summary of the research [https://duo.com/labs/research/mdm-me-maybe](https://duo.com/labs/research/mdm-me-maybe). Check it for further technical details!**
+**Sledeće je sažetak istraživanja [https://duo.com/labs/research/mdm-me-maybe](https://duo.com/labs/research/mdm-me-maybe). Proverite ga za dodatne tehničke detalje!**
 
-## Overview of DEP and MDM Binary Analysis
+## Pregled DEP i MDM Analize Binarnih Datoteka
 
-This research delves into the binaries associated with the Device Enrollment Program (DEP) and Mobile Device Management (MDM) on macOS. Key components include:
+Ovo istraživanje se bavi binarnim datotekama povezanim sa Programom za Upis Uređaja (DEP) i Upravom Mobilnih Uređaja (MDM) na macOS-u. Ključne komponente uključuju:
 
-- **`mdmclient`**: Communicates with MDM servers and triggers DEP check-ins on macOS versions before 10.13.4.
-- **`profiles`**: Manages Configuration Profiles, and triggers DEP check-ins on macOS versions 10.13.4 and later.
-- **`cloudconfigurationd`**: Manages DEP API communications and retrieves Device Enrollment profiles.
+- **`mdmclient`**: Komunicira sa MDM serverima i pokreće DEP prijave na macOS verzijama pre 10.13.4.
+- **`profiles`**: Upravljanje Konfiguracionim Profilima, i pokreće DEP prijave na macOS verzijama 10.13.4 i kasnijim.
+- **`cloudconfigurationd`**: Upravljanje DEP API komunikacijama i preuzimanje profila za Upis Uređaja.
 
-DEP check-ins utilize the `CPFetchActivationRecord` and `CPGetActivationRecord` functions from the private Configuration Profiles framework to fetch the Activation Record, with `CPFetchActivationRecord` coordinating with `cloudconfigurationd` through XPC.
+DEP prijave koriste `CPFetchActivationRecord` i `CPGetActivationRecord` funkcije iz privatnog okvira Konfiguracionih Profila za preuzimanje Aktivacionog Zapisa, pri čemu `CPFetchActivationRecord` koordinira sa `cloudconfigurationd` putem XPC.
 
-## Tesla Protocol and Absinthe Scheme Reverse Engineering
+## Tesla Protokol i Inženjering Reverzibilnog Schematizma Absinthe
 
-The DEP check-in involves `cloudconfigurationd` sending an encrypted, signed JSON payload to _iprofiles.apple.com/macProfile_. The payload includes the device's serial number and the action "RequestProfileConfiguration". The encryption scheme used is referred to internally as "Absinthe". Unraveling this scheme is complex and involves numerous steps, which led to exploring alternative methods for inserting arbitrary serial numbers in the Activation Record request.
+DEP prijava uključuje `cloudconfigurationd` koji šalje enkriptovani, potpisani JSON payload na _iprofiles.apple.com/macProfile_. Payload uključuje serijski broj uređaja i akciju "RequestProfileConfiguration". Šema enkripcije koja se koristi interno se naziva "Absinthe". Razotkrivanje ove šeme je složeno i uključuje brojne korake, što je dovelo do istraživanja alternativnih metoda za umetanje proizvoljnih serijskih brojeva u zahtev za Aktivacioni Zapis.
 
-## Proxying DEP Requests
+## Proksiranje DEP Zahteva
 
-Attempts to intercept and modify DEP requests to _iprofiles.apple.com_ using tools like Charles Proxy were hindered by payload encryption and SSL/TLS security measures. However, enabling the `MCCloudConfigAcceptAnyHTTPSCertificate` configuration allows bypassing the server certificate validation, although the payload's encrypted nature still prevents modification of the serial number without the decryption key.
+Pokušaji presretanja i modifikacije DEP zahteva ka _iprofiles.apple.com_ korišćenjem alata kao što je Charles Proxy su ometeni enkripcijom payload-a i SSL/TLS bezbednosnim merama. Međutim, omogućavanje konfiguracije `MCCloudConfigAcceptAnyHTTPSCertificate` omogućava zaobilaženje validacije sertifikata servera, iako enkriptovana priroda payload-a i dalje sprečava modifikaciju serijskog broja bez ključa za dekripciju.
 
-## Instrumenting System Binaries Interacting with DEP
+## Instrumentacija Sistemskih Binarnih Datoteka koje Interaguju sa DEP
 
-Instrumenting system binaries like `cloudconfigurationd` requires disabling System Integrity Protection (SIP) on macOS. With SIP disabled, tools like LLDB can be used to attach to system processes and potentially modify the serial number used in DEP API interactions. This method is preferable as it avoids the complexities of entitlements and code signing.
+Instrumentacija sistemskih binarnih datoteka kao što je `cloudconfigurationd` zahteva onemogućavanje Zaštite Integriteta Sistema (SIP) na macOS-u. Sa onemogućenim SIP-om, alati kao što je LLDB mogu se koristiti za povezivanje sa sistemskim procesima i potencijalno modifikovanje serijskog broja koji se koristi u DEP API interakcijama. Ova metoda je poželjnija jer izbegava složenosti prava i potpisivanja koda.
 
-**Exploiting Binary Instrumentation:**
-Modifying the DEP request payload before JSON serialization in `cloudconfigurationd` proved effective. The process involved:
+**Eksploatacija Binarne Instrumentacije:**
+Modifikacija DEP zahteva payload-a pre JSON serijalizacije u `cloudconfigurationd` se pokazala efikasnom. Proces je uključivao:
 
-1. Attaching LLDB to `cloudconfigurationd`.
-2. Locating the point where the system serial number is fetched.
-3. Injecting an arbitrary serial number into the memory before the payload is encrypted and sent.
+1. Povezivanje LLDB sa `cloudconfigurationd`.
+2. Lociranje tačke gde se preuzima sistemski serijski broj.
+3. Umetanje proizvoljnog serijskog broja u memoriju pre nego što se payload enkriptuje i pošalje.
 
-This method allowed for retrieving complete DEP profiles for arbitrary serial numbers, demonstrating a potential vulnerability.
+Ova metoda je omogućila preuzimanje kompletnog DEP profila za proizvoljne serijske brojeve, pokazujući potencijalnu ranjivost.
 
-### Automating Instrumentation with Python
+### Automatizacija Instrumentacije sa Pythonom
 
-The exploitation process was automated using Python with the LLDB API, making it feasible to programmatically inject arbitrary serial numbers and retrieve corresponding DEP profiles.
+Proces eksploatacije je automatizovan korišćenjem Pythona sa LLDB API-jem, što je omogućilo programatsko umetanje proizvoljnih serijskih brojeva i preuzimanje odgovarajućih DEP profila.
 
-### Potential Impacts of DEP and MDM Vulnerabilities
+### Potencijalni Uticaji DEP i MDM Ranjivosti
 
-The research highlighted significant security concerns:
+Istraživanje je istaklo značajne bezbednosne brige:
 
-1. **Information Disclosure**: By providing a DEP-registered serial number, sensitive organizational information contained in the DEP profile can be retrieved.
+1. **Otkrivanje Informacija**: Pružanjem serijskog broja registrovanog u DEP-u, osetljive organizacione informacije sadržane u DEP profilu mogu se preuzeti.
 
 {{#include ../../../banners/hacktricks-training.md}}

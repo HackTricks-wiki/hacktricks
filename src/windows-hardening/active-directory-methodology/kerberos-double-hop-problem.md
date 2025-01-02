@@ -2,15 +2,12 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 ## Introduction
 
 Kerberos "Double Hop" problem se pojavljuje kada napadač pokušava da koristi **Kerberos autentifikaciju preko dva** **hopa**, na primer koristeći **PowerShell**/**WinRM**.
 
-Kada se **autentifikacija** vrši putem **Kerberos-a**, **akreditivi** **nisu** keširani u **memoriji.** Stoga, ako pokrenete mimikatz nećete **pronaći akreditive** korisnika na mašini čak i ako on pokreće procese.
+Kada se **autentifikacija** vrši putem **Kerberos-a**, **akreditivi** **nisu** keširani u **memoriji.** Stoga, ako pokrenete mimikatz, **nećete pronaći akreditive** korisnika na mašini čak i ako on pokreće procese.
 
 To je zato što su koraci prilikom povezivanja sa Kerberos-om sledeći:
 
@@ -21,16 +18,16 @@ To je zato što su koraci prilikom povezivanja sa Kerberos-om sledeći:
 
 ### Unconstrained Delegation
 
-Ako je **neograničena delegacija** omogućena na PC-u, to se neće desiti jer će **Server** **dobiti** **TGT** svakog korisnika koji mu pristupa. Štaviše, ako se koristi neograničena delegacija, verovatno možete **kompromitovati Kontroler Domena** iz nje.\
+Ako je **neograničena delegacija** omogućena na PC-u, to se neće desiti jer će **Server** **dobiti** **TGT** svakog korisnika koji mu pristupa. Štaviše, ako se koristi neograničena delegacija, verovatno možete **kompromitovati Kontroler Domen** iz nje.\
 [**Više informacija na stranici o neograničenoj delegaciji**](unconstrained-delegation.md).
 
 ### CredSSP
 
-Još jedan način da se izbegne ovaj problem koji je [**značajno nesiguran**](https://docs.microsoft.com/en-us/powershell/module/microsoft.wsman.management/enable-wsmancredssp?view=powershell-7) je **Credential Security Support Provider**. Od Microsoft-a:
+Još jedan način da se izbegne ovaj problem koji je [**posebno nesiguran**](https://docs.microsoft.com/en-us/powershell/module/microsoft.wsman.management/enable-wsmancredssp?view=powershell-7) je **Credential Security Support Provider**. Od Microsoft-a:
 
-> CredSSP autentifikacija delegira korisničke akreditive sa lokalnog računara na udaljeni računar. Ova praksa povećava sigurnosni rizik od udaljene operacije. Ako je udaljeni računar kompromitovan, kada se akreditive proslede njemu, akreditive se mogu koristiti za kontrolu mrežne sesije.
+> CredSSP autentifikacija delegira korisničke akreditive sa lokalnog računara na udaljeni računar. Ova praksa povećava sigurnosni rizik udaljene operacije. Ako je udaljeni računar kompromitovan, kada se akreditive proslede njemu, akreditive se mogu koristiti za kontrolu mrežne sesije.
 
-Preporučuje se da **CredSSP** bude onemogućen na produkcionim sistemima, osetljivim mrežama i sličnim okruženjima zbog sigurnosnih problema. Da biste utvrdili da li je **CredSSP** omogućen, može se pokrenuti komanda `Get-WSManCredSSP`. Ova komanda omogućava **proveru statusa CredSSP** i može se čak izvršiti daljinski, pod uslovom da je **WinRM** omogućen.
+Preporučuje se da **CredSSP** bude onemogućen na produkcionim sistemima, osetljivim mrežama i sličnim okruženjima zbog sigurnosnih razloga. Da biste utvrdili da li je **CredSSP** omogućen, može se pokrenuti komanda `Get-WSManCredSSP`. Ova komanda omogućava **proveru statusa CredSSP** i može se čak izvršiti daljinski, pod uslovom da je **WinRM** omogućen.
 ```powershell
 Invoke-Command -ComputerName bizintel -Credential ta\redsuit -ScriptBlock {
 Get-WSManCredSSP
@@ -38,9 +35,9 @@ Get-WSManCredSSP
 ```
 ## Obilaznice
 
-### Invoke Command
+### Pozivanje komande
 
-Da bi se rešio problem dvostrukog skakanja, predstavljen je metod koji uključuje ugnježdeni `Invoke-Command`. Ovo ne rešava problem direktno, ali nudi obilaznicu bez potrebe za posebnim konfiguracijama. Pristup omogućava izvršavanje komande (`hostname`) na sekundarnom serveru putem PowerShell komande izvršene sa inicijalne napadačke mašine ili kroz prethodno uspostavljenu PS-Session sa prvim serverom. Evo kako se to radi:
+Da bi se rešio problem dvostrukog skakanja, predstavljena je metoda koja uključuje ugnježdeni `Invoke-Command`. Ovo ne rešava problem direktno, ali nudi obilaznicu bez potrebe za posebnim konfiguracijama. Pristup omogućava izvršavanje komande (`hostname`) na sekundarnom serveru putem PowerShell komande izvršene sa inicijalne napadačke mašine ili kroz prethodno uspostavljenu PS-Session sa prvim serverom. Evo kako se to radi:
 ```powershell
 $cred = Get-Credential ta\redsuit
 Invoke-Command -ComputerName bizintel -Credential $cred -ScriptBlock {
@@ -73,7 +70,7 @@ winrs -r:http://bizintel:5446 -u:ta\redsuit -p:2600leet hostname
 ```
 ### OpenSSH
 
-Instalacija OpenSSH na prvom serveru omogućava rešenje za problem dvostrukog skakanja, posebno korisno za scenarije jump box-a. Ova metoda zahteva CLI instalaciju i podešavanje OpenSSH za Windows. Kada je konfigurisano za autentifikaciju lozinkom, ovo omogućava posredničkom serveru da dobije TGT u ime korisnika.
+Instalacija OpenSSH na prvom serveru omogućava rešenje za problem dvostrukog skakanja, posebno korisno za scenarije jump box-a. Ova metoda zahteva CLI instalaciju i podešavanje OpenSSH za Windows. Kada je konfigurisana za autentifikaciju lozinkom, ovo omogućava posredničkom serveru da dobije TGT u ime korisnika.
 
 #### Koraci za instalaciju OpenSSH
 
@@ -81,7 +78,7 @@ Instalacija OpenSSH na prvom serveru omogućava rešenje za problem dvostrukog s
 2. Raspakujte i pokrenite `Install-sshd.ps1` skriptu.
 3. Dodajte pravilo vatrozida za otvaranje porta 22 i proverite da li SSH usluge rade.
 
-Da biste rešili greške `Connection reset`, možda će biti potrebno ažurirati dozvole kako bi se omogućio pristup za čitanje i izvršavanje svima na OpenSSH direktorijumu.
+Da biste rešili greške `Connection reset`, možda će biti potrebno ažurirati dozvole kako bi svako imao pristup za čitanje i izvršavanje u OpenSSH direktorijumu.
 ```bash
 icacls.exe "C:\Users\redsuit\Documents\ssh\OpenSSH-Win64" /grant Everyone:RX /T
 ```
@@ -92,8 +89,5 @@ icacls.exe "C:\Users\redsuit\Documents\ssh\OpenSSH-Win64" /grant Everyone:RX /T
 - [https://learn.microsoft.com/en-gb/archive/blogs/sergey_babkins_blog/another-solution-to-multi-hop-powershell-remoting](https://learn.microsoft.com/en-gb/archive/blogs/sergey_babkins_blog/another-solution-to-multi-hop-powershell-remoting)
 - [https://4sysops.com/archives/solve-the-powershell-multi-hop-problem-without-using-credssp/](https://4sysops.com/archives/solve-the-powershell-multi-hop-problem-without-using-credssp/)
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

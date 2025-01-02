@@ -2,29 +2,29 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## What is Distroless
+## Šta je Distroless
 
-A distroless container is a type of container that **contains only the necessary dependencies to run a specific application**, without any additional software or tools that are not required. These containers are designed to be as **lightweight** and **secure** as possible, and they aim to **minimize the attack surface** by removing any unnecessary components.
+Distroless kontejner je vrsta kontejnera koja **sadrži samo neophodne zavisnosti za pokretanje specifične aplikacije**, bez dodatnog softvera ili alata koji nisu potrebni. Ovi kontejneri su dizajnirani da budu što **lakši** i **bezbedniji**, i imaju za cilj da **minimizuju površinu napada** uklanjanjem svih nepotrebnih komponenti.
 
-Distroless containers are often used in **production environments where security and reliability are paramount**.
+Distroless kontejneri se često koriste u **produkcijskim okruženjima gde su bezbednost i pouzdanost od suštinskog značaja**.
 
-Some **examples** of **distroless containers** are:
+Neki **primeri** **distroless kontejnera** su:
 
-- Provided by **Google**: [https://console.cloud.google.com/gcr/images/distroless/GLOBAL](https://console.cloud.google.com/gcr/images/distroless/GLOBAL)
-- Provided by **Chainguard**: [https://github.com/chainguard-images/images/tree/main/images](https://github.com/chainguard-images/images/tree/main/images)
+- Obezbeđeni od strane **Google**: [https://console.cloud.google.com/gcr/images/distroless/GLOBAL](https://console.cloud.google.com/gcr/images/distroless/GLOBAL)
+- Obezbeđeni od strane **Chainguard**: [https://github.com/chainguard-images/images/tree/main/images](https://github.com/chainguard-images/images/tree/main/images)
 
 ## Weaponizing Distroless
 
-The goal of weaponize a distroless container is to be able to **execute arbitrary binaries and payloads even with the limitations** implied by **distroless** (lack of common binaries in the system) and also protections commonly found in containers such as **read-only** or **no-execute** in `/dev/shm`.
+Cilj oružavanja distroless kontejnera je da se omogući **izvršavanje proizvoljnih binarnih datoteka i payload-a čak i sa ograničenjima** koja podrazumeva **distroless** (nedostatak uobičajenih binarnih datoteka u sistemu) i takođe zaštitama koje se obično nalaze u kontejnerima kao što su **samo za čitanje** ili **bez izvršavanja** u `/dev/shm`.
 
-### Through memory
+### Kroz memoriju
 
-Coming at some point of 2023...
+Dolazi u nekom trenutku 2023...
 
-### Via Existing binaries
+### Putem postojećih binarnih datoteka
 
 #### openssl
 
-\***\*[**In this post,**](https://www.form3.tech/engineering/content/exploiting-distroless-images) it is explained that the binary **`openssl`** is frequently found in these containers, potentially because it's **needed\*\* by the software that is going to be running inside the container.
+\***\*[**U ovom postu,**](https://www.form3.tech/engineering/content/exploiting-distroless-images) objašnjeno je da se binarna datoteka **`openssl`** često nalazi u ovim kontejnerima, potencijalno zato što je **potrebna\*\* softveru koji će se pokretati unutar kontejnera.
 
 {{#include ../../../banners/hacktricks-training.md}}

@@ -8,8 +8,8 @@ Dozvole u **direktorijumu**:
 
 - **čitanje** - možete **nabrojati** unose u direktorijumu
 - **pisanje** - možete **brisati/pisati** **fajlove** u direktorijumu i možete **brisati prazne foldere**.
-- Ali ne možete **brisati/modifikovati neprazne foldere** osim ako nemate dozvolu za pisanje nad njima.
-- Ne možete **modifikovati ime foldera** osim ako ga ne posedujete.
+- Ali ne **možete brisati/modifikovati neprazne foldere** osim ako nemate dozvolu za pisanje nad njima.
+- Ne **možete modifikovati ime foldera** osim ako ga ne posedujete.
 - **izvršavanje** - **dozvoljeno vam je da prolazite** kroz direktorijum - ako nemate ovo pravo, ne možete pristupiti nijednom fajlu unutar njega, niti u bilo kojim poddirektorijumima.
 
 ### Opasne kombinacije
@@ -24,15 +24,21 @@ Sa bilo kojom od prethodnih kombinacija, napadač bi mogao **ubaciti** **sim/lin
 
 ### Folder root R+X Poseban slučaj
 
-Ako postoje fajlovi u **direktorijumu** gde **samo root ima R+X pristup**, ti fajlovi su **nedostupni bilo kome drugom**. Tako da ranjivost koja omogućava **premestiti fajl koji je čitljiv za korisnika**, a koji ne može biti pročitan zbog te **restrikcije**, iz ovog foldera **u drugi**, može se zloupotrebiti da bi se pročitali ti fajlovi.
+Ako postoje fajlovi u **direktorijumu** gde **samo root ima R+X pristup**, ti fajlovi su **nedostupni bilo kome drugom**. Tako da ranjivost koja omogućava **premestiti fajl koji je čitljiv od strane korisnika**, koji ne može biti pročitan zbog te **restrikcije**, iz ovog foldera **u drugi**, može se zloupotrebiti da bi se pročitali ti fajlovi.
 
 Primer u: [https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions](https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions)
 
 ## Simbolički link / Hard link
 
+### Dozvoljen fajl/folder
+
 Ako privilegovani proces piše podatke u **fajl** koji bi mogao biti **kontrolisan** od strane **korisnika sa nižim privilegijama**, ili koji bi mogao biti **prethodno kreiran** od strane korisnika sa nižim privilegijama. Korisnik bi mogao samo **usmeriti na drugi fajl** putem simboličkog ili hard linka, i privilegovani proces će pisati na taj fajl.
 
 Proverite u drugim sekcijama gde bi napadač mogao **zloupotrebiti proizvoljno pisanje da bi eskalirao privilegije**.
+
+### Otvoreno `O_NOFOLLOW`
+
+Zastavica `O_NOFOLLOW` kada se koristi u funkciji `open` neće pratiti simbolički link u poslednjem komponentu putanje, ali će pratiti ostatak putanje. Ispravan način da se spreči praćenje simboličkih linkova u putanji je korišćenje zastavice `O_NOFOLLOW_ANY`.
 
 ## .fileloc
 
@@ -50,15 +56,19 @@ Primer:
 </dict>
 </plist>
 ```
-## Arbitrarni FD
+## File Descriptors
 
-Ako možete da **naterate proces da otvori datoteku ili folder sa visokim privilegijama**, možete zloupotrebiti **`crontab`** da otvorite datoteku u `/etc/sudoers.d` sa **`EDITOR=exploit.py`**, tako da `exploit.py` dobije FD do datoteke unutar `/etc/sudoers` i zloupotrebi je.
+### Leak FD (bez `O_CLOEXEC`)
 
-Na primer: [https://youtu.be/f1HA5QhLQ7Y?t=21098](https://youtu.be/f1HA5QhLQ7Y?t=21098)
+Ako poziv `open` nema flag `O_CLOEXEC`, deskriptor datoteke će biti nasledđen od strane child procesa. Dakle, ako privilegovani proces otvori privilegovanu datoteku i izvrši proces koji kontroliše napadač, napadač će **naslediti FD nad privilegovanom datotekom**.
 
-## Izbegavajte trikove sa xattrs karantinom
+Ako možete da naterate **proces da otvori datoteku ili folder sa visokim privilegijama**, možete zloupotrebiti **`crontab`** da otvorite datoteku u `/etc/sudoers.d` sa **`EDITOR=exploit.py`**, tako da će `exploit.py` dobiti FD do datoteke unutar `/etc/sudoers` i zloupotrebiti je.
 
-### Uklonite to
+Na primer: [https://youtu.be/f1HA5QhLQ7Y?t=21098](https://youtu.be/f1HA5QhLQ7Y?t=21098), kod: https://github.com/gergelykalman/CVE-2023-32428-a-macOS-LPE-via-MallocStackLogging
+
+## Izbegavajte trikove sa xattrs u karantinu
+
+### Ukloni to
 ```bash
 xattr -d com.apple.quarantine /path/to/file_or_app
 ```
@@ -112,7 +122,7 @@ ls -le /tmp/test
 
 **AppleDouble** format datoteka kopira datoteku uključujući njene ACE.
 
-U [**izvornom kodu**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html) moguće je videti da će ACL tekstualna reprezentacija smeštena unutar xattr pod nazivom **`com.apple.acl.text`** biti postavljena kao ACL u dekompresovanoj datoteci. Dakle, ako ste kompresovali aplikaciju u zip datoteku sa **AppleDouble** formatom datoteke sa ACL-om koji sprečava da se drugi xattrs upisuju u nju... xattr za karantin nije postavljen u aplikaciju:
+U [**izvornom kodu**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html) moguće je videti da će ACL tekstualna reprezentacija smeštena unutar xattr pod nazivom **`com.apple.acl.text`** biti postavljena kao ACL u dekompresovanoj datoteci. Dakle, ako ste kompresovali aplikaciju u zip datoteku sa **AppleDouble** formatom datoteke sa ACL-om koji sprečava da se drugi xattrs upisuju u nju... xattr karantina nije postavljen u aplikaciju:
 
 Proverite [**originalni izveštaj**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) za više informacija.
 
@@ -136,12 +146,33 @@ ls -le test
 ```
 (Note that even if this works the sandbox write the quarantine xattr before)
 
-Not really needed but I leave it there just in case:
+Nije baš potrebno, ali ostavljam to tu za svaki slučaj:
 
 {{#ref}}
 macos-xattr-acls-extra-stuff.md
 {{#endref}}
 
+## Obilaženje provere potpisa
+
+### Obilaženje provere platformskih binarnih datoteka
+
+Neke sigurnosne provere proveravaju da li je binarna datoteka **platformska binarna datoteka**, na primer, da bi se omogućilo povezivanje sa XPC servisom. Međutim, kao što je izloženo u obilaženju na https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/, moguće je zaobići ovu proveru dobijanjem platformskih binarnih datoteka (kao što je /bin/ls) i injektovanjem eksploita putem dyld koristeći promenljivu okruženja `DYLD_INSERT_LIBRARIES`.
+
+### Obilaženje zastavica `CS_REQUIRE_LV` i `CS_FORCED_LV`
+
+Moguće je da izvršna binarna datoteka izmeni svoje vlastite zastavice kako bi zaobišla provere sa kodom kao što je:
+```c
+// Code from https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/
+int pid = getpid();
+NSString *exePath = NSProcessInfo.processInfo.arguments[0];
+
+uint32_t status = SecTaskGetCodeSignStatus(SecTaskCreateFromSelf(0));
+status |= 0x2000; // CS_REQUIRE_LV
+csops(pid, 9, &status, 4); // CS_OPS_SET_STATUS
+
+status = SecTaskGetCodeSignStatus(SecTaskCreateFromSelf(0));
+NSLog(@"=====Inject successfully into %d(%@), csflags=0x%x", pid, exePath, status);
+```
 ## Bypass Code Signatures
 
 Paketi sadrže datoteku **`_CodeSignature/CodeResources`** koja sadrži **hash** svake pojedinačne **datoteke** u **paketu**. Imajte na umu da je hash CodeResources takođe **ugrađen u izvršnu datoteku**, tako da ne možemo ni s tim da se igramo.
@@ -247,21 +278,41 @@ Napišite arbitrarnu **LaunchDaemon** kao **`/Library/LaunchDaemons/xyz.hacktric
 </dict>
 </plist>
 ```
-Samo generiši skriptu `/Applications/Scripts/privesc.sh` sa **komandama** koje želiš da izvršiš kao root.
+Samo generišite skriptu `/Applications/Scripts/privesc.sh` sa **komandama** koje želite da izvršite kao root.
 
-### Sudoers Fajl
+### Sudoers File
 
-Ako imaš **arbitrarno pisanje**, možeš kreirati fajl unutar foldera **`/etc/sudoers.d/`** dodeljujući sebi **sudo** privilegije.
+Ako imate **arbitrarno pisanje**, možete kreirati datoteku unutar foldera **`/etc/sudoers.d/`** dodeljujući sebi **sudo** privilegije.
 
-### PATH fajlovi
+### PATH files
 
-Fajl **`/etc/paths`** je jedno od glavnih mesta koje popunjava PATH env varijablu. Moraš biti root da bi ga prepisao, ali ako skripta iz **privilegovanog procesa** izvršava neku **komandu bez punog puta**, možda ćeš moći da je **preuzmeš** modifikovanjem ovog fajla.
+Datoteka **`/etc/paths`** je jedno od glavnih mesta koja popunjavaju PATH env varijablu. Morate biti root da biste je prepisali, ali ako skripta iz **privilegovanog procesa** izvršava neku **komandu bez punog puta**, možda ćete moći da je **preuzmete** modifikovanjem ove datoteke.
 
-Takođe možeš pisati fajlove u **`/etc/paths.d`** da učitaš nove foldere u `PATH` env varijablu.
+Takođe možete pisati datoteke u **`/etc/paths.d`** da biste učitali nove foldere u `PATH` env varijablu.
 
-## Generiši pisljive fajlove kao drugi korisnici
+### cups-files.conf
 
-Ovo će generisati fajl koji pripada root-u, a koji je pisiv od strane mene ([**kod odavde**](https://github.com/gergelykalman/brew-lpe-via-periodic/blob/main/brew_lpe.sh)). Ovo takođe može raditi kao privesc:
+Ova tehnika je korišćena u [ovoj analizi](https://www.kandji.io/blog/macos-audit-story-part1).
+
+Kreirajte datoteku `/etc/cups/cups-files.conf` sa sledećim sadržajem:
+```
+ErrorLog /etc/sudoers.d/lpe
+LogFilePerm 777
+<some junk>
+```
+Ovo će kreirati datoteku `/etc/sudoers.d/lpe` sa dozvolama 777. Dodatni sadržaj na kraju je da pokrene kreiranje loga grešaka.
+
+Zatim, napišite u `/etc/sudoers.d/lpe` potrebnu konfiguraciju za eskalaciju privilegija kao što je `%staff ALL=(ALL) NOPASSWD:ALL`.
+
+Zatim, ponovo izmenite datoteku `/etc/cups/cups-files.conf` tako da označite `LogFilePerm 700` kako bi nova sudoers datoteka postala validna pozivajući `cupsctl`.
+
+### Sandbox Escape
+
+Moguće je pobjeći iz macOS sandbox-a sa FS proizvoljnim pisanjem. Za neke primere pogledajte stranicu [macOS Auto Start](../../../../macos-auto-start-locations.md), ali uobičajen primer je pisanje datoteke sa podešavanjima Terminala u `~/Library/Preferences/com.apple.Terminal.plist` koja izvršava komandu pri pokretanju i poziva je koristeći `open`.
+
+## Generišite pisane datoteke kao drugi korisnici
+
+Ovo će generisati datoteku koja pripada root-u, a koju mogu pisati ja ([**code from here**](https://github.com/gergelykalman/brew-lpe-via-periodic/blob/main/brew_lpe.sh)). Ovo bi takođe moglo raditi kao privesc:
 ```bash
 DIRNAME=/usr/local/etc/periodic/daily
 
@@ -369,9 +420,9 @@ return 0;
 ```
 </details>
 
-## macOS Zaštićeni Deskriptor
+## macOS Zaštićeni Deskriptori
 
-**macOS zaštićeni deskriptor** je bezbednosna funkcija uvedena u macOS kako bi se poboljšala sigurnost i pouzdanost **operacija sa deskriptorima datoteka** u korisničkim aplikacijama. Ovi zaštićeni deskriptor pružaju način za povezivanje specifičnih ograničenja ili "čuvara" sa deskriptorima datoteka, koja se sprovode od strane jezgra.
+**macOS zaštićeni deskriptori** su bezbednosna funkcija uvedena u macOS kako bi se poboljšala sigurnost i pouzdanost **operacija sa deskriptorima datoteka** u korisničkim aplikacijama. Ovi zaštićeni deskriptori pružaju način za povezivanje specifičnih ograničenja ili "čuvara" sa deskriptorima datoteka, koja se sprovode od strane jezgra.
 
 Ova funkcija je posebno korisna za sprečavanje određenih klasa bezbednosnih ranjivosti kao što su **neovlašćen pristup datotekama** ili **trkačke uslove**. Ove ranjivosti se javljaju kada, na primer, jedan nit pristupa opisu datoteke dajući **drugom ranjivom niti pristup** ili kada deskriptor datoteke bude **nasleđen** od ranjivog procesa. Neke funkcije povezane sa ovom funkcionalnošću su:
 

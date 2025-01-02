@@ -2,18 +2,17 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Osnovne Informacije
 
-**Linux Control Groups**, or **cgroups**, are a feature of the Linux kernel that allows the allocation, limitation, and prioritization of system resources like CPU, memory, and disk I/O among process groups. They offer a mechanism for **managing and isolating the resource usage** of process collections, beneficial for purposes such as resource limitation, workload isolation, and resource prioritization among different process groups.
+**Linux kontrolne grupe**, ili **cgroups**, su funkcija Linux jezgra koja omogućava dodeljivanje, ograničavanje i prioritizaciju sistemskih resursa kao što su CPU, memorija i disk I/O među grupama procesa. One nude mehanizam za **upravljanje i izolaciju korišćenja resursa** kolekcija procesa, što je korisno za svrhe kao što su ograničenje resursa, izolacija radnog opterećenja i prioritizacija resursa među različitim grupama procesa.
 
-There are **two versions of cgroups**: version 1 and version 2. Both can be used concurrently on a system. The primary distinction is that **cgroups version 2** introduces a **hierarchical, tree-like structure**, enabling more nuanced and detailed resource distribution among process groups. Additionally, version 2 brings various enhancements, including:
+Postoje **dve verzije cgroups**: verzija 1 i verzija 2. Obe se mogu koristiti istovremeno na sistemu. Primarna razlika je u tome što **cgroups verzija 2** uvodi **hijerarhijsku, stablo-ličnu strukturu**, omogućavajući suptilniju i detaljniju distribuciju resursa među grupama procesa. Pored toga, verzija 2 donosi razne poboljšanja, uključujući:
 
-In addition to the new hierarchical organization, cgroups version 2 also introduced **several other changes and improvements**, such as support for **new resource controllers**, better support for legacy applications, and improved performance.
+Pored nove hijerarhijske organizacije, cgroups verzija 2 takođe je uvela **nekoliko drugih promena i poboljšanja**, kao što su podrška za **nove kontrolere resursa**, bolja podrška za nasleđene aplikacije i poboljšane performanse.
 
-Overall, cgroups **version 2 offers more features and better performance** than version 1, but the latter may still be used in certain scenarios where compatibility with older systems is a concern.
+Sve u svemu, cgroups **verzija 2 nudi više funkcija i bolje performanse** od verzije 1, ali se potonja može i dalje koristiti u određenim scenarijima gde je kompatibilnost sa starijim sistemima važna.
 
-You can list the v1 and v2 cgroups for any process by looking at its cgroup file in /proc/\<pid>. You can start by looking at your shell’s cgroups with this command:
-
+Možete navesti v1 i v2 cgroups za bilo koji proces gledajući njegov cgroup fajl u /proc/\<pid>. Možete početi tako što ćete pogledati cgroups vašeg shell-a sa ovom komandom:
 ```shell-session
 $ cat /proc/self/cgroup
 12:rdma:/
@@ -28,60 +27,53 @@ $ cat /proc/self/cgroup
 1:name=systemd:/user.slice/user-1000.slice/session-2.scope
 0::/user.slice/user-1000.slice/session-2.scope
 ```
+Struktura izlaza je sledeća:
 
-The output structure is as follows:
+- **Brojevi 2–12**: cgroups v1, pri čemu svaka linija predstavlja različiti cgroup. Kontroleri za njih su navedeni pored broja.
+- **Broj 1**: Takođe cgroups v1, ali isključivo za upravljačke svrhe (postavlja, npr., systemd), i nema kontroler.
+- **Broj 0**: Predstavlja cgroups v2. Nema navedene kontrolere, a ova linija je ekskluzivna za sisteme koji rade samo sa cgroups v2.
+- **Imena su hijerarhijska**, podsećajući na putanje fajlova, što ukazuje na strukturu i odnos između različitih cgroups.
+- **Imena kao što su /user.slice ili /system.slice** specificiraju kategorizaciju cgroups, pri čemu je user.slice obično za sesije prijavljivanja koje upravlja systemd, a system.slice za sistemske usluge.
 
-- **Numbers 2–12**: cgroups v1, with each line representing a different cgroup. Controllers for these are specified adjacent to the number.
-- **Number 1**: Also cgroups v1, but solely for management purposes (set by, e.g., systemd), and lacks a controller.
-- **Number 0**: Represents cgroups v2. No controllers are listed, and this line is exclusive on systems only running cgroups v2.
-- The **names are hierarchical**, resembling file paths, indicating the structure and relationship between different cgroups.
-- **Names like /user.slice or /system.slice** specify the categorization of cgroups, with user.slice typically for login sessions managed by systemd and system.slice for system services.
+### Pregled cgroups
 
-### Viewing cgroups
-
-The filesystem is typically utilized for accessing **cgroups**, diverging from the Unix system call interface traditionally used for kernel interactions. To investigate a shell's cgroup configuration, one should examine the **/proc/self/cgroup** file, which reveals the shell's cgroup. Then, by navigating to the **/sys/fs/cgroup** (or **`/sys/fs/cgroup/unified`**) directory and locating a directory that shares the cgroup's name, one can observe various settings and resource usage information pertinent to the cgroup.
+Datotečni sistem se obično koristi za pristup **cgroups**, odstupajući od Unix sistemskog poziva koji se tradicionalno koristi za interakciju sa kernelom. Da bi se istražila konfiguracija cgroup-a u shell-u, treba ispitati **/proc/self/cgroup** fajl, koji otkriva cgroup shell-a. Zatim, navigacijom do **/sys/fs/cgroup** (ili **`/sys/fs/cgroup/unified`**) direktorijuma i pronalaženjem direktorijuma koji deli ime cgroup-a, može se posmatrati razne postavke i informacije o korišćenju resursa relevantne za cgroup.
 
 ![Cgroup Filesystem](<../../../images/image (1128).png>)
 
-The key interface files for cgroups are prefixed with **cgroup**. The **cgroup.procs** file, which can be viewed with standard commands like cat, lists the processes within the cgroup. Another file, **cgroup.threads**, includes thread information.
+Ključni interfejs fajlovi za cgroups su prefiksirani sa **cgroup**. Fajl **cgroup.procs**, koji se može pregledati standardnim komandama kao što je cat, navodi procese unutar cgroup-a. Drugi fajl, **cgroup.threads**, uključuje informacije o nitima.
 
 ![Cgroup Procs](<../../../images/image (281).png>)
 
-Cgroups managing shells typically encompass two controllers that regulate memory usage and process count. To interact with a controller, files bearing the controller's prefix should be consulted. For instance, **pids.current** would be referenced to ascertain the count of threads in the cgroup.
+Cgroups koje upravljaju shell-ovima obično obuhvataju dva kontrolera koja regulišu korišćenje memorije i broj procesa. Da bi se interagovalo sa kontrolerom, treba konsultovati fajlove sa prefiksom kontrolera. Na primer, **pids.current** bi se referisao da bi se utvrdio broj niti u cgroup-u.
 
 ![Cgroup Memory](<../../../images/image (677).png>)
 
-The indication of **max** in a value suggests the absence of a specific limit for the cgroup. However, due to the hierarchical nature of cgroups, limits might be imposed by a cgroup at a lower level in the directory hierarchy.
+Naznaka **max** u vrednosti sugeriše odsustvo specifičnog limita za cgroup. Međutim, zbog hijerarhijske prirode cgroups, limiti mogu biti nametnuti od strane cgroup-a na nižem nivou u hijerarhiji direktorijuma.
 
-### Manipulating and Creating cgroups
+### Manipulacija i kreiranje cgroups
 
-Processes are assigned to cgroups by **writing their Process ID (PID) to the `cgroup.procs` file**. This requires root privileges. For instance, to add a process:
-
+Procesi se dodeljuju cgroups pisanjem njihovog ID-a procesa (PID) u **`cgroup.procs`** fajl. Ovo zahteva root privilegije. Na primer, da bi se dodao proces:
 ```bash
 echo [pid] > cgroup.procs
 ```
-
-Similarly, **modifying cgroup attributes, like setting a PID limit**, is done by writing the desired value to the relevant file. To set a maximum of 3,000 PIDs for a cgroup:
-
+Slično, **modifikacija cgroup atributa, kao što je postavljanje limita za PID**, se vrši pisanjem željene vrednosti u odgovarajući fajl. Da biste postavili maksimum od 3.000 PID-ova za cgroup:
 ```bash
 echo 3000 > pids.max
 ```
+**Kreiranje novih cgroups** podrazumeva pravljenje nove poddirektorijuma unutar hijerarhije cgroup-a, što pokreće kernel da automatski generiše potrebne interfejsne datoteke. Iako se cgroups bez aktivnih procesa mogu ukloniti pomoću `rmdir`, budite svesni određenih ograničenja:
 
-**Creating new cgroups** involves making a new subdirectory within the cgroup hierarchy, which prompts the kernel to automatically generate necessary interface files. Though cgroups without active processes can be removed with `rmdir`, be aware of certain constraints:
-
-- **Processes can only be placed in leaf cgroups** (i.e., the most nested ones in a hierarchy).
-- **A cgroup cannot possess a controller absent in its parent**.
-- **Controllers for child cgroups must be explicitly declared** in the `cgroup.subtree_control` file. For example, to enable CPU and PID controllers in a child cgroup:
-
+- **Procesi se mogu postaviti samo u leaf cgroups** (tj. najdublje u hijerarhiji).
+- **Cgroup ne može imati kontroler koji nije prisutan u svom roditelju**.
+- **Kontroleri za child cgroups moraju biti eksplicitno deklarisani** u datoteci `cgroup.subtree_control`. Na primer, da biste omogućili CPU i PID kontrolere u child cgroup-u:
 ```bash
 echo "+cpu +pids" > cgroup.subtree_control
 ```
+**root cgroup** je izuzetak od ovih pravila, omogućavajući direktno postavljanje procesa. Ovo se može koristiti za uklanjanje procesa iz systemd upravljanja.
 
-The **root cgroup** is an exception to these rules, allowing direct process placement. This can be used to remove processes from systemd management.
+**Praćenje korišćenja CPU-a** unutar cgroup-a je moguće kroz `cpu.stat` datoteku, koja prikazuje ukupno vreme CPU-a koje je potrošeno, što je korisno za praćenje korišćenja kroz podprocese servisa:
 
-**Monitoring CPU usage** within a cgroup is possible through the `cpu.stat` file, displaying total CPU time consumed, helpful for tracking usage across a service's subprocesses:
-
-<figure><img src="../../../images/image (908).png" alt=""><figcaption><p>CPU usage statistics as shown in the cpu.stat file</p></figcaption></figure>
+<figure><img src="../../../images/image (908).png" alt=""><figcaption><p>Statistika korišćenja CPU-a kako je prikazano u cpu.stat datoteci</p></figcaption></figure>
 
 ## References
 

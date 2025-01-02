@@ -1,19 +1,18 @@
-# macOS Network Services & Protocols
+# macOS Mrežne Usluge i Protokoli
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Remote Access Services
+## Usluge Daljinskog Pristupa
 
-These are the common macOS services to access them remotely.\
-You can enable/disable these services in `System Settings` --> `Sharing`
+Ovo su uobičajene macOS usluge za daljinski pristup.\
+Možete omogućiti/onemogućiti ove usluge u `System Settings` --> `Sharing`
 
-- **VNC**, known as “Screen Sharing” (tcp:5900)
-- **SSH**, called “Remote Login” (tcp:22)
-- **Apple Remote Desktop** (ARD), or “Remote Management” (tcp:3283, tcp:5900)
-- **AppleEvent**, known as “Remote Apple Event” (tcp:3031)
+- **VNC**, poznat kao “Deljenje Ekrana” (tcp:5900)
+- **SSH**, nazvan “Daljinska Prijava” (tcp:22)
+- **Apple Remote Desktop** (ARD), ili “Daljinsko Upravljanje” (tcp:3283, tcp:5900)
+- **AppleEvent**, poznat kao “Daljinski Apple Događaj” (tcp:3031)
 
-Check if any is enabled running:
-
+Proverite da li je neka od njih omogućena pokretanjem:
 ```bash
 rmMgmt=$(netstat -na | grep LISTEN | grep tcp46 | grep "*.3283" | wc -l);
 scrShrng=$(netstat -na | grep LISTEN | egrep 'tcp4|tcp6' | grep "*.5900" | wc -l);
@@ -23,103 +22,90 @@ rAE=$(netstat -na | grep LISTEN | egrep 'tcp4|tcp6' | grep "*.3031" | wc -l);
 bmM=$(netstat -na | grep LISTEN | egrep 'tcp4|tcp6' | grep "*.4488" | wc -l);
 printf "\nThe following services are OFF if '0', or ON otherwise:\nScreen Sharing: %s\nFile Sharing: %s\nRemote Login: %s\nRemote Mgmt: %s\nRemote Apple Events: %s\nBack to My Mac: %s\n\n" "$scrShrng" "$flShrng" "$rLgn" "$rmMgmt" "$rAE" "$bmM";
 ```
-
 ### Pentesting ARD
 
-Apple Remote Desktop (ARD) is an enhanced version of [Virtual Network Computing (VNC)](https://en.wikipedia.org/wiki/Virtual_Network_Computing) tailored for macOS, offering additional features. A notable vulnerability in ARD is its authentication method for the control screen password, which only uses the first 8 characters of the password, making it prone to [brute force attacks](https://thudinh.blogspot.com/2017/09/brute-forcing-passwords-with-thc-hydra.html) with tools like Hydra or [GoRedShell](https://github.com/ahhh/GoRedShell/), as there are no default rate limits.
+Apple Remote Desktop (ARD) je unapređena verzija [Virtual Network Computing (VNC)](https://en.wikipedia.org/wiki/Virtual_Network_Computing) prilagođena za macOS, koja nudi dodatne funkcije. Značajna ranjivost u ARD-u je njegova metoda autentifikacije za lozinku kontrolne ekrana, koja koristi samo prvih 8 karaktera lozinke, što je čini podložnom [brute force napadima](https://thudinh.blogspot.com/2017/09/brute-forcing-passwords-with-thc-hydra.html) sa alatima kao što su Hydra ili [GoRedShell](https://github.com/ahhh/GoRedShell/), jer ne postoje podrazumevani ograničenja brzine.
 
-Vulnerable instances can be identified using **nmap**'s `vnc-info` script. Services supporting `VNC Authentication (2)` are especially susceptible to brute force attacks due to the 8-character password truncation.
+Ranjive instance se mogu identifikovati korišćenjem **nmap**-ovog `vnc-info` skripta. Usluge koje podržavaju `VNC Authentication (2)` su posebno podložne brute force napadima zbog skraćivanja lozinke na 8 karaktera.
 
-To enable ARD for various administrative tasks like privilege escalation, GUI access, or user monitoring, use the following command:
-
+Da biste omogućili ARD za razne administrativne zadatke kao što su eskalacija privilegija, GUI pristup ili praćenje korisnika, koristite sledeću komandu:
 ```bash
 sudo /System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -allowAccessFor -allUsers -privs -all -clientopts -setmenuextra -menuextra yes
 ```
+ARD pruža svestrane nivoe kontrole, uključujući posmatranje, deljenu kontrolu i punu kontrolu, sa sesijama koje traju čak i nakon promene korisničke lozinke. Omogućava slanje Unix komandi direktno, izvršavajući ih kao root za administrativne korisnike. Planiranje zadataka i daljinsko Spotlight pretraživanje su značajne karakteristike, olakšavajući daljinsko, niskoprofilno pretraživanje osetljivih fajlova na više mašina.
 
-ARD provides versatile control levels, including observation, shared control, and full control, with sessions persisting even after user password changes. It allows sending Unix commands directly, executing them as root for administrative users. Task scheduling and Remote Spotlight search are notable features, facilitating remote, low-impact searches for sensitive files across multiple machines.
+## Bonjour Protokol
 
-## Bonjour Protocol
+Bonjour, tehnologija koju je dizajnirao Apple, omogućava **uređajima na istoj mreži da otkriju usluge koje nude jedni drugima**. Poznat i kao Rendezvous, **Zero Configuration**, ili Zeroconf, omogućava uređaju da se pridruži TCP/IP mreži, **automatski odabere IP adresu**, i emitira svoje usluge drugim mrežnim uređajima.
 
-Bonjour, an Apple-designed technology, allows **devices on the same network to detect each other's offered services**. Known also as Rendezvous, **Zero Configuration**, or Zeroconf, it enables a device to join a TCP/IP network, **automatically choose an IP address**, and broadcast its services to other network devices.
+Zero Configuration Networking, koji pruža Bonjour, osigurava da uređaji mogu:
 
-Zero Configuration Networking, provided by Bonjour, ensures that devices can:
+- **Automatski dobiti IP adresu** čak i u odsustvu DHCP servera.
+- Izvršiti **prevod imena u adresu** bez potrebe za DNS serverom.
+- **Otkrivati usluge** dostupne na mreži.
 
-- **Automatically obtain an IP Address** even in the absence of a DHCP server.
-- Perform **name-to-address translation** without requiring a DNS server.
-- **Discover services** available on the network.
+Uređaji koji koriste Bonjour dodeljuju sebi **IP adresu iz opsega 169.254/16** i proveravaju njenu jedinstvenost na mreži. Mac računari održavaju unos u tabeli rutiranja za ovu podmrežu, koji se može proveriti putem `netstat -rn | grep 169`.
 
-Devices using Bonjour will assign themselves an **IP address from the 169.254/16 range** and verify its uniqueness on the network. Macs maintain a routing table entry for this subnet, verifiable via `netstat -rn | grep 169`.
+Za DNS, Bonjour koristi **Multicast DNS (mDNS) protokol**. mDNS funkcioniše preko **porta 5353/UDP**, koristeći **standardne DNS upite** ali cilja **multicast adresu 224.0.0.251**. Ovaj pristup osigurava da svi uređaji koji slušaju na mreži mogu primati i odgovarati na upite, olakšavajući ažuriranje njihovih zapisa.
 
-For DNS, Bonjour utilizes the **Multicast DNS (mDNS) protocol**. mDNS operates over **port 5353/UDP**, employing **standard DNS queries** but targeting the **multicast address 224.0.0.251**. This approach ensures that all listening devices on the network can receive and respond to the queries, facilitating the update of their records.
+Prilikom pridruživanja mreži, svaki uređaj samostalno bira ime, obično završavajući sa **.local**, koje može biti izvedeno iz imena hosta ili nasumično generisano.
 
-Upon joining the network, each device self-selects a name, typically ending in **.local**, which may be derived from the hostname or randomly generated.
+Otkrivanje usluga unutar mreže olakšava **DNS Service Discovery (DNS-SD)**. Koristeći format DNS SRV zapisa, DNS-SD koristi **DNS PTR zapise** za omogućavanje liste više usluga. Klijent koji traži određenu uslugu će zatražiti PTR zapis za `<Service>.<Domain>`, primajući zauzvrat listu PTR zapisa formatiranih kao `<Instance>.<Service>.<Domain>` ako je usluga dostupna sa više hostova.
 
-Service discovery within the network is facilitated by **DNS Service Discovery (DNS-SD)**. Leveraging the format of DNS SRV records, DNS-SD uses **DNS PTR records** to enable the listing of multiple services. A client seeking a specific service will request a PTR record for `<Service>.<Domain>`, receiving in return a list of PTR records formatted as `<Instance>.<Service>.<Domain>` if the service is available from multiple hosts.
+Alat `dns-sd` može se koristiti za **otkrivanje i oglašavanje mrežnih usluga**. Evo nekoliko primera njegove upotrebe:
 
-The `dns-sd` utility can be employed for **discovering and advertising network services**. Here are some examples of its usage:
+### Pretraživanje SSH Usluga
 
-### Searching for SSH Services
-
-To search for SSH services on the network, the following command is used:
-
+Za pretraživanje SSH usluga na mreži koristi se sledeća komanda:
 ```bash
 dns-sd -B _ssh._tcp
 ```
+Ova komanda pokreće pretragu za \_ssh.\_tcp servisima i prikazuje detalje kao što su vremenska oznaka, zastavice, interfejs, domen, tip servisa i ime instance.
 
-This command initiates browsing for \_ssh.\_tcp services and outputs details such as timestamp, flags, interface, domain, service type, and instance name.
+### Oglašavanje HTTP Servisa
 
-### Advertising an HTTP Service
-
-To advertise an HTTP service, you can use:
-
+Da biste oglasili HTTP servis, možete koristiti:
 ```bash
 dns-sd -R "Index" _http._tcp . 80 path=/index.html
 ```
+Ova komanda registruje HTTP servis pod imenom "Index" na portu 80 sa putanjom `/index.html`.
 
-This command registers an HTTP service named "Index" on port 80 with a path of `/index.html`.
-
-To then search for HTTP services on the network:
-
+Da biste zatim pretražili HTTP servise na mreži:
 ```bash
 dns-sd -B _http._tcp
 ```
+Kada usluga počne, ona najavljuje svoju dostupnost svim uređajima na podmreži putem multicastinga. Uređaji zainteresovani za ove usluge ne moraju slati zahteve, već jednostavno slušaju ove najave.
 
-When a service starts, it announces its availability to all devices on the subnet by multicasting its presence. Devices interested in these services don't need to send requests but simply listen for these announcements.
+Za korisnički prijatniji interfejs, aplikacija **Discovery - DNS-SD Browser** dostupna na Apple App Store-u može vizualizovati usluge koje se nude na vašoj lokalnoj mreži.
 
-For a more user-friendly interface, the **Discovery - DNS-SD Browser** app available on the Apple App Store can visualize the services offered on your local network.
-
-Alternatively, custom scripts can be written to browse and discover services using the `python-zeroconf` library. The [**python-zeroconf**](https://github.com/jstasiak/python-zeroconf) script demonstrates creating a service browser for `_http._tcp.local.` services, printing added or removed services:
-
+Alternativno, mogu se napisati prilagođeni skripti za pretraživanje i otkrivanje usluga koristeći biblioteku `python-zeroconf`. Skripta [**python-zeroconf**](https://github.com/jstasiak/python-zeroconf) demonstrira kreiranje pretraživača usluga za `_http._tcp.local.` usluge, štampajući dodate ili uklonjene usluge:
 ```python
 from zeroconf import ServiceBrowser, Zeroconf
 
 class MyListener:
 
-    def remove_service(self, zeroconf, type, name):
-        print("Service %s removed" % (name,))
+def remove_service(self, zeroconf, type, name):
+print("Service %s removed" % (name,))
 
-    def add_service(self, zeroconf, type, name):
-        info = zeroconf.get_service_info(type, name)
-        print("Service %s added, service info: %s" % (name, info))
+def add_service(self, zeroconf, type, name):
+info = zeroconf.get_service_info(type, name)
+print("Service %s added, service info: %s" % (name, info))
 
 zeroconf = Zeroconf()
 listener = MyListener()
 browser = ServiceBrowser(zeroconf, "_http._tcp.local.", listener)
 try:
-    input("Press enter to exit...\n\n")
+input("Press enter to exit...\n\n")
 finally:
-    zeroconf.close()
+zeroconf.close()
 ```
+### Onemogućavanje Bonjour
 
-### Disabling Bonjour
-
-If there are concerns about security or other reasons to disable Bonjour, it can be turned off using the following command:
-
+Ako postoje zabrinutosti u vezi sa bezbednošću ili drugi razlozi za onemogućavanje Bonjour-a, može se isključiti pomoću sledeće komande:
 ```bash
 sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.mDNSResponder.plist
 ```
-
-## References
+## Reference
 
 - [**The Mac Hacker's Handbook**](https://www.amazon.com/-/es/Charlie-Miller-ebook-dp-B004U7MUMU/dp/B004U7MUMU/ref=mt_other?_encoding=UTF8&me=&qid=)
 - [**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)

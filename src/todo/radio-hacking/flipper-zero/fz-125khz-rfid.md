@@ -2,13 +2,10 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 ## Uvod
 
-Za više informacija o tome kako 125kHz oznake funkcionišu, proverite:
+Za više informacija o tome kako 125kHz oznake funkcionišu, pogledajte:
 
 {{#ref}}
 ../pentesting-rfid.md
@@ -36,7 +33,7 @@ Ponekad, kada dobijete karticu, pronaći ćete ID (ili deo) napisanu na vidljivo
 - **EM Marin**
 
 Na primer, na ovoj EM-Marin kartici moguće je **pročitati poslednja 3 od 5 bajtova u čistom obliku**.\
-Ostala 2 mogu se probati da se otkriju ako ih ne možete pročitati sa kartice.
+Ostala 2 se mogu probiti ako ih ne možete pročitati sa kartice.
 
 <figure><img src="../../../images/image (104).png" alt=""><figcaption></figcaption></figure>
 
@@ -54,8 +51,5 @@ Nakon **kopiranja** kartice ili **unošenja** ID-a **ručno**, moguće je **emul
 
 - [https://blog.flipperzero.one/rfid/](https://blog.flipperzero.one/rfid/)
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../../../banners/hacktricks-training.md}}

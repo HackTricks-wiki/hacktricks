@@ -1,12 +1,8 @@
-# Eskalacija privilegija pomoću Autoruns
+# Eskalacija privilegija sa Autoruns
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/i3.png" alt=""><figcaption></figcaption></figure>
 
-**Savjet za bug bounty**: **prijavite se** za **Intigriti**, premium **bug bounty platformu koju su kreirali hakeri, za hakere**! Pridružite nam se na [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) danas, i počnite zarađivati nagrade do **$100,000**!
-
-{% embed url="https://go.intigriti.com/hacktricks" %}
 
 ## WMIC
 
@@ -15,7 +11,7 @@
 wmic startup get caption,command 2>nul & ^
 Get-CimInstance Win32_StartupCommand | select Name, command, Location, User | fl
 ```
-## Zakazani Zadaci
+## Zakazani zadaci
 
 **Zadaci** mogu biti zakazani da se izvršavaju sa **određenom frekvencijom**. Pogledajte koji su binarni fajlovi zakazani za izvršavanje sa:
 ```bash
@@ -42,7 +38,7 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 ## Registry
 
 > [!NOTE]
-> [Napomena ovde](https://answers.microsoft.com/en-us/windows/forum/all/delete-registry-key/d425ae37-9dcc-4867-b49c-723dcd15147f): **Wow6432Node** registracioni unos ukazuje da koristite 64-bitnu verziju Windows-a. Operativni sistem koristi ovaj ključ da prikaže odvojeni prikaz HKEY_LOCAL_MACHINE\SOFTWARE za 32-bitne aplikacije koje se pokreću na 64-bitnim verzijama Windows-a.
+> [Napomena odavde](https://answers.microsoft.com/en-us/windows/forum/all/delete-registry-key/d425ae37-9dcc-4867-b49c-723dcd15147f): **Wow6432Node** registracioni unos ukazuje da koristite 64-bitnu verziju Windows-a. Operativni sistem koristi ovaj ključ da prikaže odvojeni prikaz HKEY_LOCAL_MACHINE\SOFTWARE za 32-bitne aplikacije koje se pokreću na 64-bitnim verzijama Windows-a.
 
 ### Runs
 
@@ -78,7 +74,7 @@ Registri ključevi poznati kao **Run** i **RunOnce** su dizajnirani da automatsk
 - `HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnceEx`
 - `HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunOnceEx`
 
-Na Windows Vista i novijim verzijama, **Run** i **RunOnce** registri se ne generišu automatski. Unosi u ovim ključevima mogu ili direktno pokrenuti programe ili ih odrediti kao zavisnosti. Na primer, da bi se učitao DLL fajl prilikom prijavljivanja, može se koristiti **RunOnceEx** registri ključ zajedno sa "Depend" ključem. Ovo se demonstrira dodavanjem registracionog unosa za izvršavanje "C:\temp\evil.dll" tokom pokretanja sistema:
+Na Windows Vista i novijim verzijama, **Run** i **RunOnce** registri se ne generišu automatski. Unosi u ovim ključevima mogu ili direktno pokrenuti programe ili ih odrediti kao zavisnosti. Na primer, da bi se učitao DLL fajl prilikom prijavljivanja, može se koristiti **RunOnceEx** registracioni ključ zajedno sa "Depend" ključem. Ovo se demonstrira dodavanjem registracionog unosa za izvršavanje "C:\temp\evil.dll" tokom pokretanja sistema:
 ```
 reg add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnceEx\\0001\\Depend /v 1 /d "C:\\temp\\evil.dll"
 ```
@@ -86,7 +82,7 @@ reg add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnceEx\\0001\\Dep
 > **Eksploit 1**: Ako možete da pišete unutar bilo kog od pomenutih registra unutar **HKLM**, možete da eskalirate privilegije kada se drugi korisnik prijavi.
 
 > [!NOTE]
-> **Eksploit 2**: Ako možete da prepišete bilo koji od binarnih fajlova navedenih u bilo kom registru unutar **HKLM**, možete da modifikujete taj binarni fajl sa backdoor-om kada se drugi korisnik prijavi i eskalirate privilegije.
+> **Eksploit 2**: Ako možete da prepišete bilo koji od binarnih fajlova navedenih u bilo kom od registra unutar **HKLM**, možete da modifikujete taj binarni fajl sa backdoor-om kada se drugi korisnik prijavi i eskalirate privilegije.
 ```bash
 #CMD
 reg query HKLM\Software\Microsoft\Windows\CurrentVersion\Run
@@ -152,7 +148,7 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Wow6432Node\Microsoft\Windows\Ru
 Prečice postavljene u **Startup** folder će automatski pokrenuti servise ili aplikacije tokom prijavljivanja korisnika ili ponovnog pokretanja sistema. Lokacija **Startup** foldera je definisana u registru za **Local Machine** i **Current User** opsege. To znači da će svaka prečica dodata ovim specificiranim **Startup** lokacijama osigurati da se povezani servis ili program pokrene nakon procesa prijavljivanja ili ponovnog pokretanja, što ga čini jednostavnom metodom za zakazivanje programa da se automatski pokreću.
 
 > [!NOTE]
-> Ako možete da prepišete bilo koji \[User] Shell Folder pod **HKLM**, moći ćete da ga usmerite na folder koji kontrolišete i postavite backdoor koji će se izvršiti svaki put kada se korisnik prijavi u sistem, čime se eskaliraju privilegije.
+> Ako možete da prepišete bilo koji \[User] Shell Folder pod **HKLM**, moći ćete da ga usmerite na folder koji kontrolišete i postavite backdoor koji će se izvršavati svaki put kada se korisnik prijavi u sistem, čime se eskaliraju privilegije.
 ```bash
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" /v "Common Startup"
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" /v "Common Startup"
@@ -196,7 +192,7 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\CurrentVersion
 
 U Windows Registry-ju pod `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot`, postoji **`AlternateShell`** vrednost koja je podrazumevano postavljena na `cmd.exe`. To znači da kada izaberete "Safe Mode with Command Prompt" tokom pokretanja (pritiskom na F8), koristi se `cmd.exe`. Međutim, moguće je postaviti vaš računar da se automatski pokreće u ovom režimu bez potrebe da pritisnete F8 i ručno ga izaberete.
 
-Koraci za kreiranje opcije za pokretanje u "Safe Mode with Command Prompt":
+Koraci za kreiranje opcije za pokretanje koja automatski startuje u "Safe Mode with Command Prompt":
 
 1. Promenite atribute `boot.ini` datoteke da uklonite read-only, system i hidden oznake: `attrib c:\boot.ini -r -s -h`
 2. Otvorite `boot.ini` za uređivanje.
@@ -204,9 +200,9 @@ Koraci za kreiranje opcije za pokretanje u "Safe Mode with Command Prompt":
 4. Sačuvajte promene u `boot.ini`.
 5. Ponovo primenite originalne atribute datoteke: `attrib c:\boot.ini +r +s +h`
 
-- **Eksploit 1:** Promena **AlternateShell** registry ključa omogućava prilagođenu postavku komandne ljuske, potencijalno za neovlašćen pristup.
-- **Eksploit 2 (PATH Write Permissions):** Imati dozvole za pisanje u bilo koji deo sistema **PATH** promenljive, posebno pre `C:\Windows\system32`, omogućava vam da izvršite prilagođeni `cmd.exe`, koji bi mogao biti backdoor ako se sistem pokrene u Safe Mode.
-- **Eksploit 3 (PATH i boot.ini Write Permissions):** Pristup za pisanje u `boot.ini` omogućava automatsko pokretanje u Safe Mode, olakšavajući neovlašćen pristup prilikom sledećeg ponovnog pokretanja.
+- **Eksploatacija 1:** Promena **AlternateShell** registry ključa omogućava prilagođenu postavku komandne ljuske, potencijalno za neovlašćen pristup.
+- **Eksploatacija 2 (PATH Write Permissions):** Imati dozvole za pisanje u bilo koji deo sistema **PATH** promenljive, posebno pre `C:\Windows\system32`, omogućava vam da izvršite prilagođeni `cmd.exe`, koji bi mogao biti backdoor ako se sistem pokrene u Safe Mode.
+- **Eksploatacija 3 (PATH i boot.ini Write Permissions):** Pristup za pisanje u `boot.ini` omogućava automatsko pokretanje Safe Mode-a, olakšavajući neovlašćen pristup pri sledećem ponovnom pokretanju.
 
 Da proverite trenutnu **AlternateShell** postavku, koristite ove komande:
 ```bash
@@ -236,7 +232,7 @@ Unutar ovih ključeva postoje različiti podključevi, od kojih svaki odgovara s
 - Modifikovanje ili pisanje u ključ gde je **`IsInstalled`** postavljeno na `"1"` sa specifičnim **`StubPath`** može dovesti do neovlašćenog izvršavanja komandi, potencijalno za eskalaciju privilegija.
 - Menjanje binarnog fajla na koji se poziva u bilo kojoj **`StubPath`** vrednosti takođe može postići eskalaciju privilegija, uz dovoljno dozvola.
 
-Da biste pregledali **`StubPath`** konfiguracije širom Active Setup komponenti, mogu se koristiti sledeće komande:
+Da biste pregledali konfiguracije **`StubPath`** u Active Setup komponentama, mogu se koristiti sledeće komande:
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Active Setup\Installed Components" /s /v StubPath
 reg query "HKCU\SOFTWARE\Microsoft\Active Setup\Installed Components" /s /v StubPath
@@ -280,7 +276,7 @@ reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows NT\CurrentVersion\Font Dr
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Font Drivers'
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows NT\CurrentVersion\Font Drivers'
 ```
-### Otvorite komandu
+### Open Command
 
 - `HKLM\SOFTWARE\Classes\htmlfile\shell\open\command`
 - `HKLM\SOFTWARE\Wow6432Node\Classes\htmlfile\shell\open\command`
@@ -297,7 +293,7 @@ HKLM\Software\Microsoft\Wow6432Node\Windows NT\CurrentVersion\Image File Executi
 ```
 ## SysInternals
 
-Napomena da su sve lokacije gde možete pronaći autorune **već pretražene od strane**[ **winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe). Međutim, za **opsežniju listu automatski izvršenih** datoteka možete koristiti [autoruns](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns) iz sysinternals:
+Napomena da su sve lokacije gde možete pronaći autoruns **već pretražene od strane**[ **winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe). Međutim, za **opsežniju listu automatski izvršenih** fajlova možete koristiti [autoruns](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns) iz sysinternals:
 ```
 autorunsc.exe -m -nobanner -a * -ct /accepteula
 ```
@@ -312,10 +308,6 @@ autorunsc.exe -m -nobanner -a * -ct /accepteula
 - [https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
 - [https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell](https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell)
 
-<figure><img src="../../images/i3.png" alt=""><figcaption></figcaption></figure>
 
-**Bug bounty savet**: **prijavite se** za **Intigriti**, premium **bug bounty platformu koju su kreirali hakeri, za hakere**! Pridružite nam se na [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) danas, i počnite da zarađujete nagrade do **$100,000**!
-
-{% embed url="https://go.intigriti.com/hacktricks" %}
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -2,102 +2,87 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Osnovne informacije
 
-A user namespace is a Linux kernel feature that **provides isolation of user and group ID mappings**, allowing each user namespace to have its **own set of user and group IDs**. This isolation enables processes running in different user namespaces to **have different privileges and ownership**, even if they share the same user and group IDs numerically.
+User namespace je funkcija Linux kernela koja **omogućava izolaciju mapa korisničkih i grupnih ID-ova**, omogućavajući svakom user namespace-u da ima **svoj set korisničkih i grupnih ID-ova**. Ova izolacija omogućava procesima koji se izvršavaju u različitim user namespace-ima da **imaju različite privilegije i vlasništvo**, čak i ako dele iste korisničke i grupne ID-ove numerički.
 
-User namespaces are particularly useful in containerization, where each container should have its own independent set of user and group IDs, allowing for better security and isolation between containers and the host system.
+User namespace-i su posebno korisni u kontejnerizaciji, gde svaki kontejner treba da ima svoj nezavistan set korisničkih i grupnih ID-ova, omogućavajući bolju sigurnost i izolaciju između kontejnera i host sistema.
 
-### How it works:
+### Kako to funkcioniše:
 
-1. When a new user namespace is created, it **starts with an empty set of user and group ID mappings**. This means that any process running in the new user namespace will **initially have no privileges outside of the namespace**.
-2. ID mappings can be established between the user and group IDs in the new namespace and those in the parent (or host) namespace. This **allows processes in the new namespace to have privileges and ownership corresponding to user and group IDs in the parent namespace**. However, the ID mappings can be restricted to specific ranges and subsets of IDs, allowing for fine-grained control over the privileges granted to processes in the new namespace.
-3. Within a user namespace, **processes can have full root privileges (UID 0) for operations inside the namespace**, while still having limited privileges outside the namespace. This allows **containers to run with root-like capabilities within their own namespace without having full root privileges on the host system**.
-4. Processes can move between namespaces using the `setns()` system call or create new namespaces using the `unshare()` or `clone()` system calls with the `CLONE_NEWUSER` flag. When a process moves to a new namespace or creates one, it will start using the user and group ID mappings associated with that namespace.
+1. Kada se kreira novi user namespace, **počinje sa praznim setom mapa korisničkih i grupnih ID-ova**. To znači da bilo koji proces koji se izvršava u novom user namespace-u **prvobitno neće imati privilegije van namespace-a**.
+2. Mape ID-ova mogu biti uspostavljene između korisničkih i grupnih ID-ova u novom namespace-u i onih u roditeljskom (ili host) namespace-u. To **omogućava procesima u novom namespace-u da imaju privilegije i vlasništvo koja odgovaraju korisničkim i grupnim ID-ovima u roditeljskom namespace-u**. Međutim, mape ID-ova mogu biti ograničene na specifične opsege i podskupove ID-ova, omogućavajući preciznu kontrolu nad privilegijama dodeljenim procesima u novom namespace-u.
+3. Unutar user namespace-a, **procesi mogu imati pune root privilegije (UID 0) za operacije unutar namespace-a**, dok i dalje imaju ograničene privilegije van namespace-a. To omogućava **kontejnerima da se izvršavaju sa root-sličnim sposobnostima unutar svog namespace-a bez punih root privilegija na host sistemu**.
+4. Procesi mogu prelaziti između namespace-a koristeći `setns()` sistemski poziv ili kreirati nove namespace-e koristeći `unshare()` ili `clone()` sistemske pozive sa `CLONE_NEWUSER` zastavicom. Kada proces pređe u novi namespace ili ga kreira, počeće da koristi mape korisničkih i grupnih ID-ova povezane sa tim namespace-om.
 
 ## Lab:
 
-### Create different Namespaces
+### Kreirajte različite Namespace-e
 
 #### CLI
-
 ```bash
 sudo unshare -U [--mount-proc] /bin/bash
 ```
-
-By mounting a new instance of the `/proc` filesystem if you use the param `--mount-proc`, you ensure that the new mount namespace has an **accurate and isolated view of the process information specific to that namespace**.
+Montiranjem nove instance `/proc` datotečnog sistema ako koristite parametar `--mount-proc`, osiguravate da nova mount namespace ima **tačan i izolovan prikaz informacija o procesima specifičnim za tu namespace**.
 
 <details>
 
-<summary>Error: bash: fork: Cannot allocate memory</summary>
+<summary>Greška: bash: fork: Ne može da dodeli memoriju</summary>
 
-When `unshare` is executed without the `-f` option, an error is encountered due to the way Linux handles new PID (Process ID) namespaces. The key details and the solution are outlined below:
+Kada se `unshare` izvrši bez opcije `-f`, dolazi do greške zbog načina na koji Linux upravlja novim PID (ID procesa) namespace-ima. Ključni detalji i rešenje su navedeni u nastavku:
 
-1. **Problem Explanation**:
+1. **Objašnjenje problema**:
 
-   - The Linux kernel allows a process to create new namespaces using the `unshare` system call. However, the process that initiates the creation of a new PID namespace (referred to as the "unshare" process) does not enter the new namespace; only its child processes do.
-   - Running `%unshare -p /bin/bash%` starts `/bin/bash` in the same process as `unshare`. Consequently, `/bin/bash` and its child processes are in the original PID namespace.
-   - The first child process of `/bin/bash` in the new namespace becomes PID 1. When this process exits, it triggers the cleanup of the namespace if there are no other processes, as PID 1 has the special role of adopting orphan processes. The Linux kernel will then disable PID allocation in that namespace.
+- Linux kernel omogućava procesu da kreira nove namespace-e koristeći `unshare` sistemski poziv. Međutim, proces koji inicira kreiranje novog PID namespace-a (poznat kao "unshare" proces) ne ulazi u novi namespace; samo njegovi podprocesi to čine.
+- Pokretanjem `%unshare -p /bin/bash%` pokreće se `/bin/bash` u istom procesu kao `unshare`. Kao rezultat, `/bin/bash` i njegovi podprocesi su u originalnom PID namespace-u.
+- Prvi podproces `/bin/bash` u novom namespace-u postaje PID 1. Kada ovaj proces izađe, pokreće čišćenje namespace-a ako nema drugih procesa, jer PID 1 ima posebnu ulogu usvajanja siročadi procesa. Linux kernel će tada onemogućiti dodelu PID-a u tom namespace-u.
 
-2. **Consequence**:
+2. **Posledica**:
 
-   - The exit of PID 1 in a new namespace leads to the cleaning of the `PIDNS_HASH_ADDING` flag. This results in the `alloc_pid` function failing to allocate a new PID when creating a new process, producing the "Cannot allocate memory" error.
+- Izlazak PID 1 u novom namespace-u dovodi do čišćenja `PIDNS_HASH_ADDING` oznake. To rezultira neuspehom funkcije `alloc_pid` da dodeli novi PID prilikom kreiranja novog procesa, proizvodeći grešku "Ne može da dodeli memoriju".
 
-3. **Solution**:
-   - The issue can be resolved by using the `-f` option with `unshare`. This option makes `unshare` fork a new process after creating the new PID namespace.
-   - Executing `%unshare -fp /bin/bash%` ensures that the `unshare` command itself becomes PID 1 in the new namespace. `/bin/bash` and its child processes are then safely contained within this new namespace, preventing the premature exit of PID 1 and allowing normal PID allocation.
+3. **Rešenje**:
+- Problem se može rešiti korišćenjem opcije `-f` sa `unshare`. Ova opcija čini da `unshare` fork-uje novi proces nakon kreiranja novog PID namespace-a.
+- Izvršavanje `%unshare -fp /bin/bash%` osigurava da sam `unshare` komanda postane PID 1 u novom namespace-u. `/bin/bash` i njegovi podprocesi su tada sigurno sadržani unutar ovog novog namespace-a, sprečavajući prevremeni izlazak PID 1 i omogućavajući normalnu dodelu PID-a.
 
-By ensuring that `unshare` runs with the `-f` flag, the new PID namespace is correctly maintained, allowing `/bin/bash` and its sub-processes to operate without encountering the memory allocation error.
+Osiguravanjem da `unshare` radi sa `-f` oznakom, novi PID namespace se ispravno održava, omogućavajući `/bin/bash` i njegovim podprocesima da funkcionišu bez susretanja greške u dodeli memorije.
 
 </details>
 
 #### Docker
-
 ```bash
 docker run -ti --name ubuntu1 -v /usr:/ubuntu1 ubuntu bash
 ```
+Da biste koristili user namespace, Docker daemon treba da se pokrene sa **`--userns-remap=default`**(U ubuntu 14.04, to se može uraditi modifikovanjem `/etc/default/docker` i zatim izvršavanjem `sudo service docker restart`)
 
-To use user namespace, Docker daemon needs to be started with **`--userns-remap=default`**(In ubuntu 14.04, this can be done by modifying `/etc/default/docker` and then executing `sudo service docker restart`)
-
-### &#x20;Check which namespace is your process in
-
+### &#x20;Proverite u kojem je namespace-u vaš proces
 ```bash
 ls -l /proc/self/ns/user
 lrwxrwxrwx 1 root root 0 Apr  4 20:57 /proc/self/ns/user -> 'user:[4026531837]'
 ```
-
-It's possible to check the user map from the docker container with:
-
+Moguće je proveriti mapu korisnika iz docker kontejnera sa:
 ```bash
 cat /proc/self/uid_map
-         0          0 4294967295  --> Root is root in host
-         0     231072      65536  --> Root is 231072 userid in host
+0          0 4294967295  --> Root is root in host
+0     231072      65536  --> Root is 231072 userid in host
 ```
-
-Or from the host with:
-
+Ili sa hosta sa:
 ```bash
 cat /proc/<pid>/uid_map
 ```
-
-### Find all User namespaces
-
+### Pronađite sve korisničke prostore
 ```bash
 sudo find /proc -maxdepth 3 -type l -name user -exec readlink {} \; 2>/dev/null | sort -u
 # Find the processes with an specific namespace
 sudo find /proc -maxdepth 3 -type l -name user -exec ls -l  {} \; 2>/dev/null | grep <ns-number>
 ```
-
-### Enter inside a User namespace
-
+### Uđite unutar User namespace
 ```bash
 nsenter -U TARGET_PID --pid /bin/bash
 ```
+Takođe, možete **ući u drugi procesni prostor samo ako ste root**. I **ne možete** **ući** u drugi prostor **bez deskriptora** koji na njega ukazuje (kao što je `/proc/self/ns/user`).
 
-Also, you can only **enter in another process namespace if you are root**. And you **cannot** **enter** in other namespace **without a descriptor** pointing to it (like `/proc/self/ns/user`).
-
-### Create new User namespace (with mappings)
-
+### Kreirajte novi korisnički prostor (sa mapiranjima)
 ```bash
 unshare -U [--map-user=<uid>|<name>] [--map-group=<gid>|<name>] [--map-root-user] [--map-current-user]
 ```
@@ -111,16 +96,14 @@ nobody@ip-172-31-28-169:/home/ubuntu$ #Check how the user is nobody
 ps -ef | grep bash # The user inside the host is still root, not nobody
 root       27756   27755  0 21:11 pts/10   00:00:00 /bin/bash
 ```
+### Oporavak sposobnosti
 
-### Recovering Capabilities
+U slučaju korisničkih prostora, **kada se kreira novi korisnički prostor, procesu koji ulazi u prostor dodeljuje se potpuni skup sposobnosti unutar tog prostora**. Ove sposobnosti omogućavaju procesu da izvršava privilegovane operacije kao što su **montiranje** **fajl sistema**, kreiranje uređaja ili menjanje vlasništva nad fajlovima, ali **samo unutar konteksta svog korisničkog prostora**.
 
-In the case of user namespaces, **when a new user namespace is created, the process that enters the namespace is granted a full set of capabilities within that namespace**. These capabilities allow the process to perform privileged operations such as **mounting** **filesystems**, creating devices, or changing ownership of files, but **only within the context of its user namespace**.
-
-For example, when you have the `CAP_SYS_ADMIN` capability within a user namespace, you can perform operations that typically require this capability, like mounting filesystems, but only within the context of your user namespace. Any operations you perform with this capability won't affect the host system or other namespaces.
+Na primer, kada imate `CAP_SYS_ADMIN` sposobnost unutar korisničkog prostora, možete izvršavati operacije koje obično zahtevaju ovu sposobnost, poput montiranja fajl sistema, ali samo unutar konteksta vašeg korisničkog prostora. Sve operacije koje izvršavate sa ovom sposobnošću neće uticati na host sistem ili druge prostore.
 
 > [!WARNING]
-> Therefore, even if getting a new process inside a new User namespace **will give you all the capabilities back** (CapEff: 000001ffffffffff), you actually can **only use the ones related to the namespace** (mount for example) but not every one. So, this on its own is not enough to escape from a Docker container.
-
+> Stoga, čak i ako dobijanje novog procesa unutar novog korisničkog prostora **će vam vratiti sve sposobnosti** (CapEff: 000001ffffffffff), zapravo možete **koristiti samo one koje se odnose na prostor** (montiranje na primer) ali ne svaku. Dakle, ovo samo po sebi nije dovoljno da pobegnete iz Docker kontejnera.
 ```bash
 # There are the syscalls that are filtered after changing User namespace with:
 unshare -UmCpf  bash
@@ -144,5 +127,4 @@ Probando: 0x139 . . . Error
 Probando: 0x140 . . . Error
 Probando: 0x141 . . . Error
 ```
-
 {{#include ../../../../banners/hacktricks-training.md}}

