@@ -4,52 +4,49 @@
 
 <figure><img src="/images/image (48).png" alt=""><figcaption></figcaption></figure>
 
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=command-injection) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+Utilisez [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=command-injection) pour construire et **automatiser des flux de travail** facilement grâce aux **outils communautaires les plus avancés** au monde.\
+Obtenez l'accès aujourd'hui :
 
 {% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=command-injection" %}
 
-## How do they work
+## Comment ils fonctionnent
 
-The process is outlined in the steps below, illustrating how service binaries are manipulated to achieve remote execution on a target machine via SMB:
+Le processus est décrit dans les étapes ci-dessous, illustrant comment les binaires de service sont manipulés pour obtenir une exécution à distance sur une machine cible via SMB :
 
-1. **Copying of a service binary to the ADMIN$ share over SMB** is performed.
-2. **Creation of a service on the remote machine** is done by pointing to the binary.
-3. The service is **started remotely**.
-4. Upon exit, the service is **stopped, and the binary is deleted**.
+1. **La copie d'un binaire de service sur le partage ADMIN$ via SMB** est effectuée.
+2. **La création d'un service sur la machine distante** est réalisée en pointant vers le binaire.
+3. Le service est **démarré à distance**.
+4. À la sortie, le service est **arrêté et le binaire est supprimé**.
 
-### **Process of Manually Executing PsExec**
+### **Processus d'exécution manuelle de PsExec**
 
-Assuming there is an executable payload (created with msfvenom and obfuscated using Veil to evade antivirus detection), named 'met8888.exe', representing a meterpreter reverse_http payload, the following steps are taken:
+En supposant qu'il existe un payload exécutable (créé avec msfvenom et obfusqué à l'aide de Veil pour échapper à la détection antivirus), nommé 'met8888.exe', représentant un payload meterpreter reverse_http, les étapes suivantes sont suivies :
 
-- **Copying the binary**: The executable is copied to the ADMIN$ share from a command prompt, though it may be placed anywhere on the filesystem to remain concealed.
+- **Copie du binaire** : L'exécutable est copié sur le partage ADMIN$ depuis une invite de commande, bien qu'il puisse être placé n'importe où sur le système de fichiers pour rester dissimulé.
 
-- **Creating a service**: Utilizing the Windows `sc` command, which allows for querying, creating, and deleting Windows services remotely, a service named "meterpreter" is created to point to the uploaded binary.
+- **Création d'un service** : En utilisant la commande Windows `sc`, qui permet de requêter, créer et supprimer des services Windows à distance, un service nommé "meterpreter" est créé pour pointer vers le binaire téléchargé.
 
-- **Starting the service**: The final step involves starting the service, which will likely result in a "time-out" error due to the binary not being a genuine service binary and failing to return the expected response code. This error is inconsequential as the primary goal is the binary's execution.
+- **Démarrage du service** : La dernière étape consiste à démarrer le service, ce qui entraînera probablement une erreur de "délai d'attente" en raison du fait que le binaire n'est pas un véritable binaire de service et échoue à renvoyer le code de réponse attendu. Cette erreur est sans conséquence car l'objectif principal est l'exécution du binaire.
 
-Observation of the Metasploit listener will reveal that the session has been initiated successfully.
+L'observation de l'auditeur Metasploit révélera que la session a été initiée avec succès.
 
-[Learn more about the `sc` command](https://technet.microsoft.com/en-us/library/bb490995.aspx).
+[En savoir plus sur la commande `sc`](https://technet.microsoft.com/en-us/library/bb490995.aspx).
 
-Find moe detailed steps in: [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
+Trouvez des étapes plus détaillées dans : [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
 
-**You could also use the Windows Sysinternals binary PsExec.exe:**
+**Vous pouvez également utiliser le binaire PsExec.exe de Windows Sysinternals :**
 
 ![](<../../images/image (165).png>)
 
-You could also use [**SharpLateral**](https://github.com/mertdas/SharpLateral):
-
+Vous pouvez également utiliser [**SharpLateral**](https://github.com/mertdas/SharpLateral) :
 ```
 SharpLateral.exe redexec HOSTNAME C:\\Users\\Administrator\\Desktop\\malware.exe.exe malware.exe ServiceName
 ```
-
 <figure><img src="/images/image (48).png" alt=""><figcaption></figcaption></figure>
 
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=command-injection) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+Utilisez [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=command-injection) pour créer et **automatiser des flux de travail** facilement grâce aux **outils communautaires les plus avancés** au monde.\
+Obtenez l'accès aujourd'hui :
 
 {% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=command-injection" %}
 
 {{#include ../../banners/hacktricks-training.md}}
-

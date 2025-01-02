@@ -4,43 +4,42 @@
 
 ## Intro
 
-iButton is a generic name for an electronic identification key packed in a **coin-shaped metal container**. It is also called **Dallas Touch** Memory or contact memory. Even though it is often wrongly referred to as a “magnetic” key, there is **nothing magnetic** in it. In fact, a full-fledged **microchip** operating on a digital protocol is hidden inside.
+iButton est un nom générique pour une clé d'identification électronique emballée dans un **conteneur métallique en forme de pièce**. Il est également appelé **Dallas Touch** Memory ou mémoire de contact. Bien qu'il soit souvent mal appelé clé « magnétique », il n'y a **rien de magnétique** à l'intérieur. En fait, un **microchip** complet fonctionnant sur un protocole numérique est caché à l'intérieur.
 
 <figure><img src="../../images/image (915).png" alt=""><figcaption></figcaption></figure>
 
-### What is iButton? <a href="#what-is-ibutton" id="what-is-ibutton"></a>
+### Qu'est-ce que l'iButton ? <a href="#what-is-ibutton" id="what-is-ibutton"></a>
 
-Usually, iButton implies the physical form of the key and reader - a round coin with two contacts. For the frame surrounding it, there are lots of variations from the most common plastic holder with a hole to rings, pendants, etc.
+En général, l'iButton implique la forme physique de la clé et du lecteur - une pièce ronde avec deux contacts. Pour le cadre qui l'entoure, il existe de nombreuses variations, du support en plastique le plus courant avec un trou aux anneaux, pendentifs, etc.
 
 <figure><img src="../../images/image (1078).png" alt=""><figcaption></figcaption></figure>
 
-When the key reaches the reader, the **contacts come to touch** and the key is powered to **transmit** its ID. Sometimes the key is **not read** immediately because the **contact PSD of an intercom is larger** than it should be. So the outer contours of the key and the reader couldn't touch. If that's the case, you'll have to press the key over one of the walls of the reader.
+Lorsque la clé atteint le lecteur, les **contacts se touchent** et la clé est alimentée pour **transmettre** son ID. Parfois, la clé n'est **pas lue** immédiatement car le **PSD de contact d'un interphone est plus grand** qu'il ne devrait l'être. Ainsi, les contours extérieurs de la clé et du lecteur ne pouvaient pas se toucher. Si c'est le cas, vous devrez appuyer la clé contre l'un des murs du lecteur.
 
 <figure><img src="../../images/image (290).png" alt=""><figcaption></figcaption></figure>
 
-### **1-Wire protocol** <a href="#id-1-wire-protocol" id="id-1-wire-protocol"></a>
+### **Protocole 1-Wire** <a href="#id-1-wire-protocol" id="id-1-wire-protocol"></a>
 
-Dallas keys exchange data using the 1-wire protocol. With only one contact for data transfer (!!) in both directions, from master to slave and vice versa. The 1-wire protocol works according to the Master-Slave model. In this topology, the Master always initiates communication and the Slave follows its instructions.
+Les clés Dallas échangent des données en utilisant le protocole 1-wire. Avec un seul contact pour le transfert de données (!!) dans les deux sens, du maître à l'esclave et vice versa. Le protocole 1-wire fonctionne selon le modèle Maître-Esclave. Dans cette topologie, le Maître initie toujours la communication et l'Esclave suit ses instructions.
 
-When the key (Slave) contacts the intercom (Master), the chip inside the key turns on, powered by the intercom, and the key is initialized. Following that the intercom requests the key ID. Next, we will look up this process in more detail.
+Lorsque la clé (Esclave) entre en contact avec l'interphone (Maître), la puce à l'intérieur de la clé s'allume, alimentée par l'interphone, et la clé est initialisée. Ensuite, l'interphone demande l'ID de la clé. Nous examinerons ce processus plus en détail.
 
-Flipper can work both in Master and Slave modes. In the key reading mode, Flipper acts as a reader this is to say it works as a Master. And in the key emulation mode, the flipper pretends to be a key, it is in the Slave mode.
+Flipper peut fonctionner à la fois en modes Maître et Esclave. En mode de lecture de clé, Flipper agit comme un lecteur, c'est-à-dire qu'il fonctionne comme un Maître. Et en mode d'émulation de clé, le flipper fait semblant d'être une clé, il est en mode Esclave.
 
-### Dallas, Cyfral & Metakom keys
+### Clés Dallas, Cyfral & Metakom
 
-For information about how these keys works check the page [https://blog.flipperzero.one/taming-ibutton/](https://blog.flipperzero.one/taming-ibutton/)
+Pour des informations sur le fonctionnement de ces clés, consultez la page [https://blog.flipperzero.one/taming-ibutton/](https://blog.flipperzero.one/taming-ibutton/)
 
-### Attacks
+### Attaques
 
-iButtons can be attacked with Flipper Zero:
+Les iButtons peuvent être attaqués avec Flipper Zero :
 
 {{#ref}}
 flipper-zero/fz-ibutton.md
 {{#endref}}
 
-## References
+## Références
 
 - [https://blog.flipperzero.one/taming-ibutton/](https://blog.flipperzero.one/taming-ibutton/)
 
 {{#include ../../banners/hacktricks-training.md}}
-

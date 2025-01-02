@@ -2,12 +2,12 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Download the free version app from [https://www.exemsi.com/documentation/getting-started/](https://www.exemsi.com/download/), execute it and wrap the "malicious" binary on it.\
-Note that you can wrap a "**.bat**" if you **just** want to **execute** **command lines (instead of cmd.exe select the .bat file)**
+Téléchargez la version gratuite de l'application depuis [https://www.exemsi.com/documentation/getting-started/](https://www.exemsi.com/download/), exécutez-la et enveloppez le binaire "malveillant" avec.\
+Notez que vous pouvez envelopper un "**.bat**" si vous **voulez juste** **exécuter** **des lignes de commande (au lieu de cmd.exe, sélectionnez le fichier .bat)**
 
 ![](<../../images/image (417).png>)
 
-And this is the most important part of the configuration:
+Et c'est la partie la plus importante de la configuration :
 
 ![](<../../images/image (312).png>)
 
@@ -15,9 +15,8 @@ And this is the most important part of the configuration:
 
 ![](<../../images/image (1072).png>)
 
-(Please, note that if you try to pack your own binary you will be able to modify these values)
+(Veuillez noter que si vous essayez d'emballer votre propre binaire, vous pourrez modifier ces valeurs)
 
-From here just click on **next buttons** and the last **build button and your installer/wrapper will be generated.**
+À partir de là, cliquez simplement sur les **boutons suivants** et le dernier **bouton de construction et votre installateur/enveloppe sera généré.**
 
 {{#include ../../banners/hacktricks-training.md}}
-

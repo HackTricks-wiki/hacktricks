@@ -1,14 +1,13 @@
-# About the author
+# À propos de l'auteur
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Hello!!
+### Bonjour!!
 
-First of all, it's needed to indicate that all **credits of techniques from researches from other sites belongs to the original authors** (there are references in the pages). Kudos to every research that shares knowledge to improve the security of the internet.
+Tout d'abord, il est nécessaire d'indiquer que tous les **crédits des techniques provenant de recherches d'autres sites appartiennent aux auteurs originaux** (il y a des références dans les pages). Bravo à chaque recherche qui partage des connaissances pour améliorer la sécurité d'internet.
 
-HackTricks is a educational Wiki that compiles knowledge about **cyber-security** lead by Carlos with hundreds of collaborators! It's a **huge collection of hacking tricks** that is updated by the community much as possible to keep it up to date. If you find something is missing or outdated, please, send a **Pull Request** to the [**Hacktricks Github**](https://github.com/carlospolop/hacktricks)!
+HackTricks est un Wiki éducatif qui compile des connaissances sur la **cyber-sécurité** dirigé par Carlos avec des centaines de collaborateurs ! C'est une **énorme collection de trucs de hacking** qui est mise à jour par la communauté autant que possible pour rester à jour. Si vous trouvez que quelque chose manque ou est obsolète, veuillez envoyer une **Pull Request** à la [**Hacktricks Github**](https://github.com/carlospolop/hacktricks)!
 
-HackTricks is also a wiki were **a lot of researches also share their latest findings**, so it's a great place to keep up to date with the latest hacking techniques.
+HackTricks est également un wiki où **beaucoup de chercheurs partagent également leurs dernières découvertes**, donc c'est un excellent endroit pour se tenir au courant des dernières techniques de hacking.
 
 {{#include ../banners/hacktricks-training.md}}
-

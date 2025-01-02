@@ -4,38 +4,37 @@
 
 ## Intro <a href="#ir-signal-receiver-in-flipper-zero" id="ir-signal-receiver-in-flipper-zero"></a>
 
-For more info about how Infrared works check:
+Pour plus d'informations sur le fonctionnement de l'infrarouge, consultez :
 
 {{#ref}}
 ../infrared.md
 {{#endref}}
 
-## IR Signal Receiver in Flipper Zero <a href="#ir-signal-receiver-in-flipper-zero" id="ir-signal-receiver-in-flipper-zero"></a>
+## Récepteur de signal IR dans Flipper Zero <a href="#ir-signal-receiver-in-flipper-zero" id="ir-signal-receiver-in-flipper-zero"></a>
 
-Flipper uses a digital IR signal receiver TSOP, which **allows intercepting signals from IR remotes**. There are some **smartphones** like Xiaomi, which also have an IR port, but keep in mind that **most of them can only transmit** signals and are **unable to receive** them.
+Flipper utilise un récepteur de signal IR numérique TSOP, qui **permet d'intercepter les signaux des télécommandes IR**. Il existe des **smartphones** comme Xiaomi, qui ont également un port IR, mais gardez à l'esprit que **la plupart d'entre eux ne peuvent que transmettre** des signaux et sont **incapables de les recevoir**.
 
-The Flipper infrared **receiver is quite sensitive**. You can even **catch the signal** while remaining **somewhere in between** the remote and the TV. Pointing the remote directly at Flipper's IR port is unnecessary. This comes in handy when someone is switching channels while standing near the TV, and both you and Flipper are some distance away.
+Le récepteur infrarouge de Flipper **est assez sensible**. Vous pouvez même **attraper le signal** tout en restant **quelque part entre** la télécommande et la télévision. Pointer la télécommande directement vers le port IR de Flipper n'est pas nécessaire. Cela est pratique lorsque quelqu'un change de chaîne en se tenant près de la télévision, et que vous et Flipper êtes à une certaine distance.
 
-As the **decoding of the infrared** signal happens on the **software** side, Flipper Zero potentially supports the **reception and transmission of any IR remote codes**. In the case of **unknown** protocols which could not be recognized - it **records and plays back** the raw signal exactly as received.
+Comme le **décodage du signal infrarouge** se fait du côté **logiciel**, Flipper Zero prend potentiellement en charge la **réception et la transmission de tous les codes de télécommande IR**. Dans le cas de protocoles **inconnus** qui ne peuvent pas être reconnus - il **enregistre et rejoue** le signal brut exactement tel qu'il a été reçu.
 
 ## Actions
 
-### Universal Remotes
+### Télécommandes Universelles
 
-Flipper Zero can be used as a **universal remote to control any TV, air conditioner, or media center**. In this mode, Flipper **bruteforces** all **known codes** of all supported manufacturers **according to the dictionary from the SD card**. You don't need to choose a particular remote to turn off a restaurant TV.
+Flipper Zero peut être utilisé comme une **télécommande universelle pour contrôler n'importe quelle télévision, climatiseur ou centre multimédia**. Dans ce mode, Flipper **force par essais** tous les **codes connus** de tous les fabricants pris en charge **selon le dictionnaire de la carte SD**. Vous n'avez pas besoin de choisir une télécommande particulière pour éteindre une télévision de restaurant.
 
-It is enough to press the power button in the Universal Remote mode, and Flipper will **sequentially send "Power Off"** commands of all the TVs it knows: Sony, Samsung, Panasonic... and so on. When the TV receives its signal, it will react and turn off.
+Il suffit d'appuyer sur le bouton d'alimentation en mode Télécommande Universelle, et Flipper **enverra séquentiellement des commandes "Power Off"** de toutes les télévisions qu'il connaît : Sony, Samsung, Panasonic... et ainsi de suite. Lorsque la télévision reçoit son signal, elle réagira et s'éteindra.
 
-Such brute-force takes time. The larger the dictionary, the longer it will take to finish. It is impossible to find out which signal exactly the TV recognized since there is no feedback from the TV.
+Ce type de force brute prend du temps. Plus le dictionnaire est grand, plus cela prendra du temps pour finir. Il est impossible de savoir quel signal exactement la télévision a reconnu, car il n'y a pas de retour d'information de la télévision.
 
-### Learn New Remote
+### Apprendre une Nouvelle Télécommande
 
-It's possible to **capture an infrared signal** with Flipper Zero. If it **finds the signal in the database** Flipper will automatically **know which device this is** and will let you interact with it.\
-If it doesn't, Flipper can **store** the **signal** and will allow you to **replay it**.
+Il est possible de **capturer un signal infrarouge** avec Flipper Zero. S'il **trouve le signal dans la base de données**, Flipper saura automatiquement **de quel appareil il s'agit** et vous permettra d'interagir avec lui.\
+S'il ne le trouve pas, Flipper peut **stocker** le **signal** et vous permettra de **le rejouer**.
 
-## References
+## Références
 
 - [https://blog.flipperzero.one/infrared/](https://blog.flipperzero.one/infrared/)
 
 {{#include ../../../banners/hacktricks-training.md}}
-

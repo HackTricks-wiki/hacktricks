@@ -1,9 +1,7 @@
-# Side Channel Analysis Attacks 
+# Attaques par Analyse de Canal Latéral
 
-Side Channel Analysis Attacks refers to determining the information from a device or entity by some other channel or source that has an indirect influence on it and information can be extracted from it. This can be explained better with an example: 
+Les Attaques par Analyse de Canal Latéral se réfèrent à la détermination des informations d'un appareil ou d'une entité par un autre canal ou source qui a une influence indirecte sur celui-ci et dont les informations peuvent en être extraites. Cela peut être mieux expliqué par un exemple :
 
-Analysing the vibrations in glass sheets which is near the sound source, but the sound source is not accessible. The vibrations in glass are influenced by the sound source and if monitored and analysed, the sound can be decoded and interpreted.
+Analyser les vibrations dans des feuilles de verre qui sont près de la source sonore, mais la source sonore n'est pas accessible. Les vibrations dans le verre sont influencées par la source sonore et si elles sont surveillées et analysées, le son peut être décodé et interprété.
 
-These attacks are very popular in case of leaking data such as private keys or finding operations in the processors. An electronic circuit is has a lot of channels from which, information is constantly leaked. Monitoring and analysing can be useful for diclosing a lot of information about the circuit and internals of it. 
-
-
+Ces attaques sont très populaires en cas de fuite de données telles que des clés privées ou pour trouver des opérations dans les processeurs. Un circuit électronique a beaucoup de canaux par lesquels les informations sont constamment fuites. La surveillance et l'analyse peuvent être utiles pour divulguer beaucoup d'informations sur le circuit et ses composants internes.

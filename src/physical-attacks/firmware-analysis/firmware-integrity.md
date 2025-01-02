@@ -1,36 +1,35 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-## Firmware Integrity
+## Intégrité du Firmware
 
-The **custom firmware and/or compiled binaries can be uploaded to exploit integrity or signature verification flaws**. The following steps can be followed for backdoor bind shell compilation:
+Le **firmware personnalisé et/ou les binaires compilés peuvent être téléchargés pour exploiter les failles de vérification d'intégrité ou de signature**. Les étapes suivantes peuvent être suivies pour la compilation d'un shell de liaison backdoor :
 
-1. The firmware can be extracted using firmware-mod-kit (FMK).
-2. The target firmware architecture and endianness should be identified.
-3. A cross compiler can be built using Buildroot or other suitable methods for the environment.
-4. The backdoor can be built using the cross compiler.
-5. The backdoor can be copied to the extracted firmware /usr/bin directory.
-6. The appropriate QEMU binary can be copied to the extracted firmware rootfs.
-7. The backdoor can be emulated using chroot and QEMU.
-8. The backdoor can be accessed via netcat.
-9. The QEMU binary should be removed from the extracted firmware rootfs.
-10. The modified firmware can be repackaged using FMK.
-11. The backdoored firmware can be tested by emulating it with firmware analysis toolkit (FAT) and connecting to the target backdoor IP and port using netcat.
+1. Le firmware peut être extrait en utilisant firmware-mod-kit (FMK).
+2. L'architecture et l'endianness du firmware cible doivent être identifiées.
+3. Un compilateur croisé peut être construit en utilisant Buildroot ou d'autres méthodes appropriées pour l'environnement.
+4. La backdoor peut être construite en utilisant le compilateur croisé.
+5. La backdoor peut être copiée dans le répertoire /usr/bin du firmware extrait.
+6. Le binaire QEMU approprié peut être copié dans le rootfs du firmware extrait.
+7. La backdoor peut être émulée en utilisant chroot et QEMU.
+8. La backdoor peut être accessible via netcat.
+9. Le binaire QEMU doit être supprimé du rootfs du firmware extrait.
+10. Le firmware modifié peut être reconditionné en utilisant FMK.
+11. Le firmware avec backdoor peut être testé en l'émulant avec l'outil d'analyse de firmware (FAT) et en se connectant à l'adresse IP et au port de la backdoor cible en utilisant netcat.
 
-If a root shell has already been obtained through dynamic analysis, bootloader manipulation, or hardware security testing, precompiled malicious binaries such as implants or reverse shells can be executed. Automated payload/implant tools like the Metasploit framework and 'msfvenom' can be leveraged using the following steps:
+Si un shell root a déjà été obtenu par analyse dynamique, manipulation du bootloader ou test de sécurité matériel, des binaires malveillants précompilés tels que des implants ou des shells inversés peuvent être exécutés. Des outils de charge utile/implant automatisés comme le framework Metasploit et 'msfvenom' peuvent être utilisés en suivant les étapes suivantes :
 
-1. The target firmware architecture and endianness should be identified.
-2. Msfvenom can be used to specify the target payload, attacker host IP, listening port number, filetype, architecture, platform, and the output file.
-3. The payload can be transferred to the compromised device and ensured that it has execution permissions.
-4. Metasploit can be prepared to handle incoming requests by starting msfconsole and configuring the settings according to the payload.
-5. The meterpreter reverse shell can be executed on the compromised device.
-6. Meterpreter sessions can be monitored as they open.
-7. Post-exploitation activities can be performed.
+1. L'architecture et l'endianness du firmware cible doivent être identifiées.
+2. Msfvenom peut être utilisé pour spécifier la charge utile cible, l'adresse IP de l'attaquant, le numéro de port d'écoute, le type de fichier, l'architecture, la plateforme et le fichier de sortie.
+3. La charge utile peut être transférée vers le dispositif compromis et s'assurer qu'elle a les permissions d'exécution.
+4. Metasploit peut être préparé pour gérer les demandes entrantes en démarrant msfconsole et en configurant les paramètres selon la charge utile.
+5. Le shell inversé meterpreter peut être exécuté sur le dispositif compromis.
+6. Les sessions meterpreter peuvent être surveillées à mesure qu'elles s'ouvrent.
+7. Des activités post-exploitation peuvent être effectuées.
 
-If possible, vulnerabilities within startup scripts can be exploited to gain persistent access to a device across reboots. These vulnerabilities arise when startup scripts reference, [symbolically link](https://www.chromium.org/chromium-os/chromiumos-design-docs/hardening-against-malicious-stateful-data), or depend on code located in untrusted mounted locations such as SD cards and flash volumes used for storing data outside of root filesystems.
+Si possible, des vulnérabilités dans les scripts de démarrage peuvent être exploitées pour obtenir un accès persistant à un dispositif à travers les redémarrages. Ces vulnérabilités surviennent lorsque les scripts de démarrage font référence, [lient symboliquement](https://www.chromium.org/chromium-os/chromiumos-design-docs/hardening-against-malicious-stateful-data), ou dépendent de code situé dans des emplacements montés non fiables tels que des cartes SD et des volumes flash utilisés pour stocker des données en dehors des systèmes de fichiers racines.
 
-## References
+## Références
 
-- For further information check [https://scriptingxss.gitbook.io/firmware-security-testing-methodology/](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
+- Pour plus d'informations, consultez [https://scriptingxss.gitbook.io/firmware-security-testing-methodology/](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
 
 {{#include ../../banners/hacktricks-training.md}}
-
