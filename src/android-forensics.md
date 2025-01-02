@@ -1,28 +1,27 @@
-# Android Forensics
+# Android Adli Bilimi
 
 {{#include ./banners/hacktricks-training.md}}
 
-## Locked Device
+## Kilitli Cihaz
 
-To start extracting data from an Android device it has to be unlocked. If it's locked you can:
+Bir Android cihazdan veri çıkarmaya başlamak için cihazın kilidinin açılması gerekir. Eğer kilitliyse şunları yapabilirsiniz:
 
-- Check if the device has debugging via USB activated.
-- Check for a possible [smudge attack](https://www.usenix.org/legacy/event/woot10/tech/full_papers/Aviv.pdf)
-- Try with [Brute-force](https://www.cultofmac.com/316532/this-brute-force-device-can-crack-any-iphones-pin-code/)
+- Cihazın USB üzerinden hata ayıklamanın etkin olup olmadığını kontrol edin.
+- Olası bir [smudge attack](https://www.usenix.org/legacy/event/woot10/tech/full_papers/Aviv.pdf) kontrol edin.
+- [Brute-force](https://www.cultofmac.com/316532/this-brute-force-device-can-crack-any-iphones-pin-code/) ile deneyin.
 
-## Data Adquisition
+## Veri Edinimi
 
-Create an [android backup using adb](mobile-pentesting/android-app-pentesting/adb-commands.md#backup) and extract it using [Android Backup Extractor](https://sourceforge.net/projects/adbextractor/): `java -jar abe.jar unpack file.backup file.tar`
+Bir [android yedeği oluşturun](mobile-pentesting/android-app-pentesting/adb-commands.md#backup) ve bunu [Android Backup Extractor](https://sourceforge.net/projects/adbextractor/) kullanarak çıkarın: `java -jar abe.jar unpack file.backup file.tar`
 
-### If root access or physical connection to JTAG interface
+### Eğer root erişimi veya JTAG arayüzüne fiziksel bağlantı varsa
 
-- `cat /proc/partitions` (search the path to the flash memory, generally the first entry is _mmcblk0_ and corresponds to the whole flash memory).
-- `df /data` (Discover the block size of the system).
-- dd if=/dev/block/mmcblk0 of=/sdcard/blk0.img bs=4096 (execute it with the information gathered from the block size).
+- `cat /proc/partitions` (flash belleğin yolunu arayın, genellikle ilk giriş _mmcblk0_ olup tüm flash belleği temsil eder).
+- `df /data` (sistemin blok boyutunu keşfedin).
+- dd if=/dev/block/mmcblk0 of=/sdcard/blk0.img bs=4096 (blok boyutundan elde edilen bilgilerle çalıştırın).
 
-### Memory
+### Bellek
 
-Use Linux Memory Extractor (LiME) to extract the RAM information. It's a kernel extension that should be loaded via adb.
+RAM bilgilerini çıkarmak için Linux Memory Extractor (LiME) kullanın. Bu, adb üzerinden yüklenmesi gereken bir çekirdek uzantısıdır.
 
 {{#include ./banners/hacktricks-training.md}}
-

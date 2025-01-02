@@ -1,173 +1,170 @@
 {{#include ./banners/hacktricks-training.md}}
 
-<a rel="license" href="https://creativecommons.org/licenses/by-nc/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://licensebuttons.net/l/by-nc/4.0/88x31.png" /></a><br>Copyright © Carlos Polop 2021. Except where otherwise specified (the external information copied into the book belongs to the original authors), the text on <a href="https://github.com/carlospolop/hacktricks">HACK TRICKS</a> by Carlos Polop is licensed under the <a href="https://creativecommons.org/licenses/by-nc/4.0/">Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)</a>.
+<a rel="license" href="https://creativecommons.org/licenses/by-nc/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://licensebuttons.net/l/by-nc/4.0/88x31.png" /></a><br>Copyright © Carlos Polop 2021. Aksi belirtilmedikçe (kitaba kopyalanan dış bilgiler orijinal yazarlara aittir), Carlos Polop'un <a href="https://github.com/carlospolop/hacktricks">HACK TRICKS</a> üzerindeki metni <a href="https://creativecommons.org/licenses/by-nc/4.0/">Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)</a> lisansı altındadır.
 
-License: Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)<br>
-Human Readable License: https://creativecommons.org/licenses/by-nc/4.0/<br>
-Complete Legal Terms: https://creativecommons.org/licenses/by-nc/4.0/legalcode<br>
-Formatting: https://github.com/jmatsushita/Creative-Commons-4.0-Markdown/blob/master/licenses/by-nc.markdown<br>
+Lisans: Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)<br>
+İnsan Okunabilir Lisans: https://creativecommons.org/licenses/by-nc/4.0/<br>
+Tam Yasal Şartlar: https://creativecommons.org/licenses/by-nc/4.0/legalcode<br>
+Formatlama: https://github.com/jmatsushita/Creative-Commons-4.0-Markdown/blob/master/licenses/by-nc.markdown<br>
 
 # creative commons
 
 # Attribution-NonCommercial 4.0 International
 
-Creative Commons Corporation (“Creative Commons”) is not a law firm and does not provide legal services or legal advice. Distribution of Creative Commons public licenses does not create a lawyer-client or other relationship. Creative Commons makes its licenses and related information available on an “as-is” basis. Creative Commons gives no warranties regarding its licenses, any material licensed under their terms and conditions, or any related information. Creative Commons disclaims all liability for damages resulting from their use to the fullest extent possible.
+Creative Commons Corporation (“Creative Commons”) bir hukuk firması değildir ve hukuki hizmetler veya hukuki tavsiye sağlamaz. Creative Commons kamu lisanslarının dağıtımı, avukat-müvekkil veya başka bir ilişki oluşturmaz. Creative Commons, lisanslarını ve ilgili bilgileri "olduğu gibi" sunar. Creative Commons, lisansları, bu şartlar ve koşullar altında lisanslanan herhangi bir materyal veya ilgili bilgiler hakkında hiçbir garanti vermez. Creative Commons, bunların kullanımından kaynaklanan zararlar için mümkün olan en geniş ölçüde sorumluluğu reddeder.
 
 ## Using Creative Commons Public Licenses
 
-Creative Commons public licenses provide a standard set of terms and conditions that creators and other rights holders may use to share original works of authorship and other material subject to copyright and certain other rights specified in the public license below. The following considerations are for informational purposes only, are not exhaustive, and do not form part of our licenses.
+Creative Commons kamu lisansları, yaratıcıların ve diğer hak sahiplerinin telif hakkına tabi orijinal eserleri ve aşağıdaki kamu lisansında belirtilen belirli diğer hakları paylaşmak için kullanabileceği standart bir terim ve koşul seti sağlar. Aşağıdaki hususlar yalnızca bilgilendirme amaçlıdır, kapsamlı değildir ve lisanslarımızın bir parçasını oluşturmaz.
 
-- **Considerations for licensors:** Our public licenses are intended for use by those authorized to give the public permission to use material in ways otherwise restricted by copyright and certain other rights. Our licenses are irrevocable. Licensors should read and understand the terms and conditions of the license they choose before applying it. Licensors should also secure all rights necessary before applying our licenses so that the public can reuse the material as expected. Licensors should clearly mark any material not subject to the license. This includes other CC-licensed material, or material used under an exception or limitation to copyright. [More considerations for licensors](http://wiki.creativecommons.org/Considerations_for_licensors_and_licensees#Considerations_for_licensors).
+- **Lisans verenler için hususlar:** Kamu lisanslarımız, telif hakkı ve belirli diğer haklar tarafından kısıtlanan şekillerde materyali kullanma izni vermek için yetkilendirilmiş olanlar tarafından kullanılmak üzere tasarlanmıştır. Lisanslarımız geri alınamaz. Lisans verenler, seçtikleri lisansın şartlarını ve koşullarını uygulamadan önce okumalı ve anlamalıdır. Lisans verenler, kamuya materyali beklenildiği gibi yeniden kullanabilmesi için gerekli tüm hakları güvence altına almalıdır. Lisans verenler, lisansa tabi olmayan herhangi bir materyali açıkça işaret etmelidir. Bu, diğer CC lisanslı materyalleri veya telif hakkına istisna veya sınırlama altında kullanılan materyali içerir. [Lisans verenler için daha fazla husus](http://wiki.creativecommons.org/Considerations_for_licensors_and_licensees#Considerations_for_licensors).
 
-- **Considerations for the public:** By using one of our public licenses, a licensor grants the public permission to use the licensed material under specified terms and conditions. If the licensor’s permission is not necessary for any reason–for example, because of any applicable exception or limitation to copyright–then that use is not regulated by the license. Our licenses grant only permissions under copyright and certain other rights that a licensor has authority to grant. Use of the licensed material may still be restricted for other reasons, including because others have copyright or other rights in the material. A licensor may make special requests, such as asking that all changes be marked or described. Although not required by our licenses, you are encouraged to respect those requests where reasonable. [More considerations for the public](http://wiki.creativecommons.org/Considerations_for_licensors_and_licensees#Considerations_for_licensees).
+- **Kamu için hususlar:** Kamu lisanslarımızdan birini kullanarak, bir lisans veren, kamuya lisanslı materyali belirtilen şartlar ve koşullar altında kullanma izni verir. Lisans verenin izni herhangi bir nedenle gerekli değilse - örneğin, telif hakkına ilişkin herhangi bir geçerli istisna veya sınırlama nedeniyle - o zaman bu kullanım lisansla düzenlenmez. Lisanslarımız yalnızca, bir lisans verenin vermeye yetkili olduğu telif hakkı ve belirli diğer haklar altında izinler verir. Lisanslı materyalin kullanımı, diğer nedenlerle, başkalarının materyal üzerindeki telif hakkı veya diğer hakları nedeniyle hala kısıtlanabilir. Bir lisans veren, tüm değişikliklerin işaretlenmesini veya tanımlanmasını istemek gibi özel taleplerde bulunabilir. Lisanslarımız tarafından zorunlu olmasa da, makul olduğunda bu taleplere saygı göstermeniz teşvik edilir. [Kamu için daha fazla husus](http://wiki.creativecommons.org/Considerations_for_licensors_and_licensees#Considerations_for_licensees).
 
 # Creative Commons Attribution-NonCommercial 4.0 International Public License
 
-By exercising the Licensed Rights (defined below), You accept and agree to be bound by the terms and conditions of this Creative Commons Attribution-NonCommercial 4.0 International Public License ("Public License"). To the extent this Public License may be interpreted as a contract, You are granted the Licensed Rights in consideration of Your acceptance of these terms and conditions, and the Licensor grants You such rights in consideration of benefits the Licensor receives from making the Licensed Material available under these terms and conditions.
+Lisanslı Hakları (aşağıda tanımlanmıştır) kullanarak, bu Creative Commons Attribution-NonCommercial 4.0 International Kamu Lisansı'nın ("Kamu Lisansı") şartlarına ve koşullarına bağlı kalmayı kabul edersiniz. Bu Kamu Lisansı, bir sözleşme olarak yorumlanabileceği ölçüde, bu şartlara ve koşullara kabulünüz karşılığında Lisanslı Hakları size verir ve Lisans veren, bu şartlar ve koşullar altında Lisanslı Materyali sunmaktan elde ettiği faydalar karşılığında size bu hakları verir.
 
-## Section 1 – Definitions.
+## Bölüm 1 – Tanımlar.
 
-a. **Adapted Material** means material subject to Copyright and Similar Rights that is derived from or based upon the Licensed Material and in which the Licensed Material is translated, altered, arranged, transformed, or otherwise modified in a manner requiring permission under the Copyright and Similar Rights held by the Licensor. For purposes of this Public License, where the Licensed Material is a musical work, performance, or sound recording, Adapted Material is always produced where the Licensed Material is synched in timed relation with a moving image.
+a. **Uyarlanmış Materyal**; Telif Hakkı ve Benzer Haklara tabi olan, Lisanslı Materyalden türetilen veya ona dayanan ve Lisanslı Materyalin, Lisans verenin sahip olduğu Telif Hakkı ve Benzer Haklar altında izin gerektiren bir şekilde çevrildiği, değiştirildiği, düzenlendiği, dönüştürüldüğü veya başka bir şekilde değiştirildiği materyaldir. Bu Kamu Lisansı açısından, Lisanslı Materyal bir müzik eseri, performans veya ses kaydı olduğunda, Uyarlanmış Materyal her zaman Lisanslı Materyalin hareketli bir görüntü ile zamanlı ilişki içinde senkronize edildiği durumlarda üretilir.
 
-b. **Adapter's License** means the license You apply to Your Copyright and Similar Rights in Your contributions to Adapted Material in accordance with the terms and conditions of this Public License.
+b. **Adaptör Lisansı**; Uyarlanmış Materyale katkılarınızda Telif Hakkı ve Benzer Haklarınıza uyguladığınız lisans anlamına gelir.
 
-c. **Copyright and Similar Rights** means copyright and/or similar rights closely related to copyright including, without limitation, performance, broadcast, sound recording, and Sui Generis Database Rights, without regard to how the rights are labeled or categorized. For purposes of this Public License, the rights specified in Section 2(b)(1)-(2) are not Copyright and Similar Rights.
+c. **Telif Hakkı ve Benzer Haklar**; telif hakkı ve/veya telif hakkıyla yakından ilişkili benzer haklar anlamına gelir; bunlar arasında, sınırlama olmaksızın, performans, yayın, ses kaydı ve Sui Generis Veri Tabanı Hakları bulunur; hakların nasıl etiketlendiği veya kategorize edildiği dikkate alınmaksızın. Bu Kamu Lisansı açısından, Bölüm 2(b)(1)-(2)'de belirtilen haklar Telif Hakkı ve Benzer Haklar değildir.
 
-d. **Effective Technological Measures** means those measures that, in the absence of proper authority, may not be circumvented under laws fulfilling obligations under Article 11 of the WIPO Copyright Treaty adopted on December 20, 1996, and/or similar international agreements.
+d. **Etkin Teknolojik Önlemler**; uygun yetki olmaksızın, 20 Aralık 1996'da kabul edilen WIPO Telif Hakkı Antlaşması'nın 11. Maddesi uyarınca yükümlülükleri yerine getiren yasalar altında aşılmaması gereken önlemleri ifade eder ve/veya benzer uluslararası anlaşmaları.
 
-e. **Exceptions and Limitations** means fair use, fair dealing, and/or any other exception or limitation to Copyright and Similar Rights that applies to Your use of the Licensed Material.
+e. **İstisnalar ve Sınırlamalar**; adil kullanım, adil işlem ve/veya Telif Hakkı ve Benzer Haklara tabi olan Lisanslı Materyali kullanmanız için geçerli olan herhangi bir diğer istisna veya sınırlama anlamına gelir.
 
-f. **Licensed Material** means the artistic or literary work, database, or other material to which the Licensor applied this Public License.
+f. **Lisanslı Materyal**; Lisans verenin bu Kamu Lisansını uyguladığı sanatsal veya edebi eser, veri tabanı veya diğer materyali ifade eder.
 
-g. **Licensed Rights** means the rights granted to You subject to the terms and conditions of this Public License, which are limited to all Copyright and Similar Rights that apply to Your use of the Licensed Material and that the Licensor has authority to license.
+g. **Lisanslı Haklar**; bu Kamu Lisansının şartlarına ve koşullarına tabi olarak size verilen haklardır; bu haklar, Lisanslı Materyali kullanmanıza uygulanan tüm Telif Hakkı ve Benzer Haklarla sınırlıdır ve Lisans verenin lisans verme yetkisine sahiptir.
 
-h. **Licensor** means the individual(s) or entity(ies) granting rights under this Public License.
+h. **Lisans Veren**; bu Kamu Lisansı altında hakları veren birey(ler) veya varlık(lar) anlamına gelir.
 
-i. **NonCommercial** means not primarily intended for or directed towards commercial advantage or monetary compensation. For purposes of this Public License, the exchange of the Licensed Material for other material subject to Copyright and Similar Rights by digital file-sharing or similar means is NonCommercial provided there is no payment of monetary compensation in connection with the exchange.
+i. **Ticari Olmayan**; esasen ticari avantaj veya maddi tazminat amacı gütmeyen anlamına gelir. Bu Kamu Lisansı açısından, Lisanslı Materyalin, Telif Hakkı ve Benzer Haklar altında başka bir materyal ile dijital dosya paylaşımı veya benzeri yollarla değiştirilmesi Ticari Olmayan olarak kabul edilir, sağlanan değişimle bağlantılı olarak maddi tazminat ödemesi yapılmadığı sürece.
 
-j. **Share** means to provide material to the public by any means or process that requires permission under the Licensed Rights, such as reproduction, public display, public performance, distribution, dissemination, communication, or importation, and to make material available to the public including in ways that members of the public may access the material from a place and at a time individually chosen by them.
+j. **Paylaşmak**; Lisanslı Haklar altında izin gerektiren herhangi bir yöntem veya süreçle materyali kamuya sağlamak, örneğin, çoğaltma, kamuya gösterim, kamu performansı, dağıtım, yayma, iletişim veya ithalat ve materyali kamuya sunmak, kamu üyelerinin materyale kendi seçtikleri bir yerden ve zamanda erişebileceği yollar dahil.
 
-k. **Sui Generis Database Rights** means rights other than copyright resulting from Directive 96/9/EC of the European Parliament and of the Council of 11 March 1996 on the legal protection of databases, as amended and/or succeeded, as well as other essentially equivalent rights anywhere in the world.
+k. **Sui Generis Veri Tabanı Hakları**; Avrupa Parlamentosu ve 11 Mart 1996 tarihli Veri Tabanlarının yasal korunmasına ilişkin 96/9/EC sayılı Direktiften kaynaklanan telif hakkı dışındaki hakları ifade eder; bu haklar, değişiklikler ve/veya halefiyetler ile birlikte, dünyanın herhangi bir yerinde esasen eşdeğer hakları içerir.
 
-l. **You** means the individual or entity exercising the Licensed Rights under this Public License. Your has a corresponding meaning.
+l. **Siz**; bu Kamu Lisansı altında Lisanslı Hakları kullanan birey veya varlık anlamına gelir. "Siz" kelimesinin karşılık gelen bir anlamı vardır.
 
-## Section 2 – Scope.
+## Bölüm 2 – Kapsam.
 
-a. **_License grant._**
+a. **_Lisans verme._**
 
-1.  Subject to the terms and conditions of this Public License, the Licensor hereby grants You a worldwide, royalty-free, non-sublicensable, non-exclusive, irrevocable license to exercise the Licensed Rights in the Licensed Material to:
+1.  Bu Kamu Lisansının şartlarına ve koşullarına tabi olarak, Lisans veren, size Lisanslı Materyalde Lisanslı Hakları kullanma hakkını dünya çapında, telif ücreti ödemeksizin, devredilemez, münhasır olmayan, geri alınamaz bir lisans verir:
 
-A. reproduce and Share the Licensed Material, in whole or in part, for NonCommercial purposes only; and
+A. Lisanslı Materyali, tamamen veya kısmen, yalnızca Ticari Olmayan amaçlar için çoğaltmak ve Paylaşmak; ve
 
-B. produce, reproduce, and Share Adapted Material for NonCommercial purposes only.
+B. Uyarlanmış Materyali yalnızca Ticari Olmayan amaçlar için üretmek, çoğaltmak ve Paylaşmak.
 
-2.  **Exceptions and Limitations.** For the avoidance of doubt, where Exceptions and Limitations apply to Your use, this Public License does not apply, and You do not need to comply with its terms and conditions.
-3.  **Term.** The term of this Public License is specified in Section 6(a).
+2.  **İstisnalar ve Sınırlamalar.** Şüpheye mahal vermemek için, İstisnalar ve Sınırlamalar sizin kullanımınıza uygulanıyorsa, bu Kamu Lisansı geçerli değildir ve şartlarına ve koşullarına uymanız gerekmez.
+3.  **Süre.** Bu Kamu Lisansının süresi Bölüm 6(a)'da belirtilmiştir.
 
-4.  **Media and formats; technical modifications allowed.** The Licensor authorizes You to exercise the Licensed Rights in all media and formats whether now known or hereafter created, and to make technical modifications necessary to do so. The Licensor waives and/or agrees not to assert any right or authority to forbid You from making technical modifications necessary to exercise the Licensed Rights, including technical modifications necessary to circumvent Effective Technological Measures. For purposes of this Public License, simply making modifications authorized by this Section 2(a)(4) never produces Adapted Material.
-5.  **Downstream recipients.**
+4.  **Medya ve formatlar; teknik değişikliklere izin verilir.** Lisans veren, Lisanslı Hakları tüm mevcut veya gelecekte oluşturulacak medya ve formatlarda kullanmanıza izin verir ve bunu yapmak için gerekli teknik değişiklikleri yapmanıza izin verir. Lisans veren, Lisanslı Hakları kullanmak için gerekli teknik değişiklikleri yapmanızı engelleme hakkını ve/veya yetkisini feragat eder ve/veya bu tür değişiklikleri yapmanızı engellemeyeceğini kabul eder; bu, Etkin Teknolojik Önlemleri aşmak için gerekli teknik değişiklikleri içerir. Bu Kamu Lisansı açısından, yalnızca bu Bölüm 2(a)(4) tarafından yetkilendirilmiş değişiklikler, Uyarlanmış Materyal üretmez.
+5.  **Aşağı akış alıcıları.**
 
-A. **Offer from the Licensor – Licensed Material.** Every recipient of the Licensed Material automatically receives an offer from the Licensor to exercise the Licensed Rights under the terms and conditions of this Public License.
+A. **Lisans verenin teklifi – Lisanslı Materyal.** Lisanslı Materyalin her alıcısı, otomatik olarak, bu Kamu Lisansının şartları ve koşulları altında Lisanslı Hakları kullanma teklifi alır.
 
-B. **No downstream restrictions.** You may not offer or impose any additional or different terms or conditions on, or apply any Effective Technological Measures to, the Licensed Material if doing so restricts exercise of the Licensed Rights by any recipient of the Licensed Material.
+B. **Aşağı akış kısıtlamaları yok.** Lisanslı Materyale, Lisanslı Hakları kullanan herhangi bir alıcının kullanımını kısıtlayacak şekilde ek veya farklı şartlar veya koşullar sunamaz veya uygulayamazsınız.
 
-6.  **No endorsement.** Nothing in this Public License constitutes or may be construed as permission to assert or imply that You are, or that Your use of the Licensed Material is, connected with, or sponsored, endorsed, or granted official status by, the Licensor or others designated to receive attribution as provided in Section 3(a)(1)(A)(i).
+6.  **Onay yok.** Bu Kamu Lisansında hiçbir şey, sizin veya Lisanslı Materyali kullanımınızın, Lisans veren veya atıf almak üzere belirlenen diğerleri tarafından onaylandığı veya desteklendiği veya resmi bir statü verildiği anlamına gelmez veya böyle yorumlanamaz.
 
-b. **_Other rights._**
+b. **_Diğer haklar._**
 
-1.  Moral rights, such as the right of integrity, are not licensed under this Public License, nor are publicity, privacy, and/or other similar personality rights; however, to the extent possible, the Licensor waives and/or agrees not to assert any such rights held by the Licensor to the limited extent necessary to allow You to exercise the Licensed Rights, but not otherwise.
+1.  Ahlaki haklar, bütünlük hakkı gibi, bu Kamu Lisansı altında lisanslanmamıştır; ayrıca tanıtım, gizlilik ve/veya diğer benzer kişilik hakları da lisanslanmamıştır; ancak, mümkün olduğu ölçüde, Lisans veren, Lisanslı Hakları kullanabilmeniz için gerekli olan sınırlı ölçüde, Lisans verenin sahip olduğu bu tür hakları feragat eder ve/veya bu hakları ileri sürmeyeceğini kabul eder.
 
-2.  Patent and trademark rights are not licensed under this Public License.
+2.  Patent ve ticari marka hakları bu Kamu Lisansı altında lisanslanmamıştır.
 
-3.  To the extent possible, the Licensor waives any right to collect royalties from You for the exercise of the Licensed Rights, whether directly or through a collecting society under any voluntary or waivable statutory or compulsory licensing scheme. In all other cases the Licensor expressly reserves any right to collect such royalties, including when the Licensed Material is used other than for NonCommercial purposes.
+3.  Mümkün olduğu ölçüde, Lisans veren, Lisanslı Hakları kullanmanız için sizden telif ücreti talep etme hakkından feragat eder; bu, doğrudan veya herhangi bir gönüllü veya feragat edilebilir yasal veya zorunlu lisanslama düzenlemesi aracılığıyla olabilir. Diğer tüm durumlarda, Lisans veren, bu tür telif ücretlerini toplama hakkını açıkça saklı tutar; bu, Lisanslı Materyalin Ticari Olmayan amaçlar dışında kullanılması durumunda geçerlidir.
 
-## Section 3 – License Conditions.
+## Bölüm 3 – Lisans Şartları.
 
-Your exercise of the Licensed Rights is expressly made subject to the following conditions.
+Lisanslı Hakları kullanmanız, aşağıdaki şartlara tabi olarak açıkça yapılmıştır.
 
-a. **_Attribution._**
+a. **_Atıf._**
 
-1.  If You Share the Licensed Material (including in modified form), You must:
+1.  Lisanslı Materyali (değiştirilmiş formda dahil) Paylaşırsanız, şunları yapmalısınız:
 
-A. retain the following if it is supplied by the Licensor with the Licensed Material:
+A. Lisans veren tarafından Lisanslı Materyal ile sağlanmışsa, aşağıdakileri korumalısınız:
 
-i. identification of the creator(s) of the Licensed Material and any others designated to receive attribution, in any reasonable manner requested by the Licensor (including by pseudonym if designated);
+i. Lisanslı Materyalin yaratıcısının ve atıf almak üzere belirlenen diğerlerinin kimliğini, Lisans verenin talep ettiği makul bir şekilde (belirtilmişse takma adla dahil) tanımlamak;
 
-ii. a copyright notice;
+ii. bir telif hakkı bildirimi;
 
-iii. a notice that refers to this Public License;
+iii. bu Kamu Lisansına atıfta bulunan bir bildirim;
 
-iv. a notice that refers to the disclaimer of warranties;
+iv. garantilerin reddine atıfta bulunan bir bildirim;
 
-v. a URI or hyperlink to the Licensed Material to the extent reasonably practicable;
+v. Lisanslı Materyale makul ölçüde ulaşılabilir bir URI veya köprü;
 
-B. indicate if You modified the Licensed Material and retain an indication of any previous modifications; and
+B. Lisanslı Materyali değiştirdiyseniz belirtmek ve önceki değişikliklerin bir göstergesini korumak; ve
 
-C. indicate the Licensed Material is licensed under this Public License, and include the text of, or the URI or hyperlink to, this Public License.
+C. Lisanslı Materyalin bu Kamu Lisansı altında lisanslandığını belirtmek ve bu Kamu Lisansının metnini veya URI veya köprüsünü dahil etmek.
 
-2.  You may satisfy the conditions in Section 3(a)(1) in any reasonable manner based on the medium, means, and context in which You Share the Licensed Material. For example, it may be reasonable to satisfy the conditions by providing a URI or hyperlink to a resource that includes the required information.
+2.  Bölüm 3(a)(1) şartlarını, Lisanslı Materyali Paylaştığınız ortam, araç ve bağlama dayalı olarak makul bir şekilde yerine getirebilirsiniz. Örneğin, gerekli bilgileri içeren bir kaynağa URI veya köprü sağlamak makul olabilir.
 
-3.  If requested by the Licensor, You must remove any of the information required by Section 3(a)(1)(A) to the extent reasonably practicable.
+3.  Lisans veren tarafından talep edilirse, Bölüm 3(a)(1)(A) tarafından talep edilen bilgilerin herhangi birini makul ölçüde kaldırmalısınız.
 
-4.  If You Share Adapted Material You produce, the Adapter's License You apply must not prevent recipients of the Adapted Material from complying with this Public License.
+4.  Ürettiğiniz Uyarlanmış Materyali Paylaşırsanız, uyguladığınız Adaptör Lisansı, Uyarlanmış Materyalin alıcılarının bu Kamu Lisansına uymasını engellememelidir.
 
-## Section 4 – Sui Generis Database Rights.
+## Bölüm 4 – Sui Generis Veri Tabanı Hakları.
 
-Where the Licensed Rights include Sui Generis Database Rights that apply to Your use of the Licensed Material:
+Lisanslı Haklar, Lisanslı Materyali kullanmanız için geçerli olan Sui Generis Veri Tabanı Haklarını içeriyorsa:
 
-a. for the avoidance of doubt, Section 2(a)(1) grants You the right to extract, reuse, reproduce, and Share all or a substantial portion of the contents of the database for NonCommercial purposes only;
+a. Şüpheye mahal vermemek için, Bölüm 2(a)(1) size, yalnızca Ticari Olmayan amaçlar için veri tabanının tümünü veya önemli bir kısmını çıkartma, yeniden kullanma, çoğaltma ve Paylaşma hakkı verir;
 
-b. if You include all or a substantial portion of the database contents in a database in which You have Sui Generis Database Rights, then the database in which You have Sui Generis Database Rights (but not its individual contents) is Adapted Material; and
+b. Eğer Sui Generis Veri Tabanı Haklarına sahip olduğunuz bir veri tabanında veri tabanı içeriğinin tamamını veya önemli bir kısmını dahil ederseniz, o zaman Sui Generis Veri Tabanı Haklarına sahip olduğunuz veri tabanı (ancak bireysel içerikleri değil) Uyarlanmış Materyaldir; ve
 
-c. You must comply with the conditions in Section 3(a) if You Share all or a substantial portion of the contents of the database.
+c. Veri tabanının tümünü veya önemli bir kısmını Paylaşırsanız, Bölüm 3(a) şartlarına uymalısınız.
 
-For the avoidance of doubt, this Section 4 supplements and does not replace Your obligations under this Public License where the Licensed Rights include other Copyright and Similar Rights.
+Şüpheye mahal vermemek için, bu Bölüm 4, Lisanslı Hakların diğer Telif Hakkı ve Benzer Hakları içerdiği durumlarda bu Kamu Lisansı altındaki yükümlülüklerinizi tamamlar ve değiştirmez.
 
-## Section 5 – Disclaimer of Warranties and Limitation of Liability.
+## Bölüm 5 – Garantilerin Reddine ve Sorumluluğun Sınırlandırılmasına İlişkin Feragat.
 
-a. **Unless otherwise separately undertaken by the Licensor, to the extent possible, the Licensor offers the Licensed Material as-is and as-available, and makes no representations or warranties of any kind concerning the Licensed Material, whether express, implied, statutory, or other. This includes, without limitation, warranties of title, merchantability, fitness for a particular purpose, non-infringement, absence of latent or other defects, accuracy, or the presence or absence of errors, whether or not known or discoverable. Where disclaimers of warranties are not allowed in full or in part, this disclaimer may not apply to You.**
+a. **Aksi takdirde Lisans veren tarafından ayrı olarak üstlenilmedikçe, mümkün olduğu ölçüde, Lisans veren, Lisanslı Materyali olduğu gibi ve mevcut haliyle sunar ve Lisanslı Materyal hakkında hiçbir türde, açık, örtük, yasal veya diğer herhangi bir garanti vermez. Bu, sınırlama olmaksızın, mülkiyet, ticari uygunluk, belirli bir amaca uygunluk, ihlal etmeme, gizli veya diğer kusurların yokluğu, doğruluk veya hata varlığı veya yokluğu ile ilgili garantileri içerir; bunlar biliniyor veya keşfediliyor olsun ya da olmasın. Garantilerin reddedilmesine izin verilmediği durumlarda, bu feragat sizin için geçerli olmayabilir.**
 
-b. **To the extent possible, in no event will the Licensor be liable to You on any legal theory (including, without limitation, negligence) or otherwise for any direct, special, indirect, incidental, consequential, punitive, exemplary, or other losses, costs, expenses, or damages arising out of this Public License or use of the Licensed Material, even if the Licensor has been advised of the possibility of such losses, costs, expenses, or damages. Where a limitation of liability is not allowed in full or in part, this limitation may not apply to You.**
+b. **Mümkün olduğu ölçüde, Lisans veren, herhangi bir yasal teori (sınırlama olmaksızın, ihmal dahil) veya başka bir şekilde, bu Kamu Lisansı veya Lisanslı Materyalin kullanımı nedeniyle doğan herhangi bir doğrudan, özel, dolaylı, tesadüfi, sonuçsal, cezai, örnek niteliğinde veya diğer kayıplar, maliyetler, harcamalar veya zararlar için size karşı sorumlu olmayacaktır; bu, Lisans verenin bu tür kayıpların, maliyetlerin, harcamaların veya zararların olasılığı hakkında bilgilendirilmiş olması durumunda bile geçerlidir. Sorumluluğun sınırlandırılmasına izin verilmediği durumlarda, bu sınırlama sizin için geçerli olmayabilir.**
 
-c. The disclaimer of warranties and limitation of liability provided above shall be interpreted in a manner that, to the extent possible, most closely approximates an absolute disclaimer and waiver of all liability.
+c. Yukarıda sağlanan garantilerin reddi ve sorumluluğun sınırlandırılması, mümkün olduğu ölçüde, tüm sorumluluğun mutlak bir feragat ve reddi ile en yakın şekilde yorumlanacaktır.
 
-## Section 6 – Term and Termination.
+## Bölüm 6 – Süre ve Fesih.
 
-a. This Public License applies for the term of the Copyright and Similar Rights licensed here. However, if You fail to comply with this Public License, then Your rights under this Public License terminate automatically.
+a. Bu Kamu Lisansı, burada lisanslanan Telif Hakkı ve Benzer Hakların süresi boyunca geçerlidir. Ancak, bu Kamu Lisansına uymadığınız takdirde, bu Kamu Lisansı altındaki haklarınız otomatik olarak sona erer.
 
-b. Where Your right to use the Licensed Material has terminated under Section 6(a), it reinstates:
+b. Eğer Bölüm 6(a) uyarınca Lisanslı Materyali kullanma hakkınız sona erdiyse, bu hak, aşağıdaki durumlarda otomatik olarak yeniden kazanılır:
 
-1.  automatically as of the date the violation is cured, provided it is cured within 30 days of Your discovery of the violation; or
+1.  ihlalin düzeltildiği tarihten itibaren otomatik olarak, eğer ihlal, ihlali keşfettiğiniz tarihten itibaren 30 gün içinde düzeltilirse; veya
 
-2.  upon express reinstatement by the Licensor.
+2.  Lisans veren tarafından açıkça yeniden kazanılması durumunda.
 
-For the avoidance of doubt, this Section 6(b) does not affect any right the Licensor may have to seek remedies for Your violations of this Public License.
+Şüpheye mahal vermemek için, bu Bölüm 6(b), Lisans verenin bu Kamu Lisansına uymadığınız durumlarda herhangi bir çözüm arama hakkını etkilemez.
 
-c. For the avoidance of doubt, the Licensor may also offer the Licensed Material under separate terms or conditions or stop distributing the Licensed Material at any time; however, doing so will not terminate this Public License.
+c. Şüpheye mahal vermemek için, Lisans veren ayrıca Lisanslı Materyali ayrı şartlar veya koşullar altında sunabilir veya Lisanslı Materyali dağıtmayı herhangi bir zamanda durdurabilir; ancak, bunu yapmak bu Kamu Lisansını sona erdirmeyecektir.
 
-d. Sections 1, 5, 6, 7, and 8 survive termination of this Public License.
+d. Bölüm 1, 5, 6, 7 ve 8, bu Kamu Lisansının sona ermesinden sonra geçerliliğini korur.
 
-## Section 7 – Other Terms and Conditions.
+## Bölüm 7 – Diğer Şartlar ve Koşullar.
 
-a. The Licensor shall not be bound by any additional or different terms or conditions communicated by You unless expressly agreed.
+a. Lisans veren, siz tarafından iletilen ek veya farklı şartlar veya koşullara bağlı değildir; ancak açıkça kabul edilmedikçe.
 
-b. Any arrangements, understandings, or agreements regarding the Licensed Material not stated herein are separate from and independent of the terms and conditions of this Public License.
+b. Burada belirtilmeyen Lisanslı Materyal ile ilgili herhangi bir düzenleme, anlayış veya anlaşma, bu Kamu Lisansının şartlarından ve koşullarından ayrı ve bağımsızdır.
 
-## Section 8 – Interpretation.
+## Bölüm 8 – Yorumlama.
 
-a. For the avoidance of doubt, this Public License does not, and shall not be interpreted to, reduce, limit, restrict, or impose conditions on any use of the Licensed Material that could lawfully be made without permission under this Public License.
+a. Şüpheye mahal vermemek için, bu Kamu Lisansı, Lisanslı Materyali, bu Kamu Lisansı altında izin olmaksızın yasal olarak yapılabilecek herhangi bir kullanımını azaltmaz, sınırlamaz, kısıtlamaz veya koşul getirmez.
 
-b. To the extent possible, if any provision of this Public License is deemed unenforceable, it shall be automatically reformed to the minimum extent necessary to make it enforceable. If the provision cannot be reformed, it shall be severed from this Public License without affecting the enforceability of the remaining terms and conditions.
+b. Mümkün olduğu ölçüde, bu Kamu Lisansının herhangi bir hükmü uygulanamaz olarak kabul edilirse, uygulanabilir hale getirmek için gerekli olan en az ölçüde otomatik olarak yeniden düzenlenecektir. Eğer hüküm yeniden düzenlenemezse, bu Kamu Lisansından ayrılacak ve kalan şartların ve koşulların uygulanabilirliğini etkilemeyecektir.
 
-c. No term or condition of this Public License will be waived and no failure to comply consented to unless expressly agreed to by the Licensor.
+c. Bu Kamu Lisansının hiçbir şartı veya koşulu feragat edilmez ve hiçbir uyumsuzluk kabul edilmez; ancak, Lisans veren tarafından açıkça kabul edilmedikçe.
 
-d. Nothing in this Public License constitutes or may be interpreted as a limitation upon, or waiver of, any privileges and immunities that apply to the Licensor or You, including from the legal processes of any jurisdiction or authority.
-
+d. Bu Kamu Lisansında hiçbir şey, Lisans veren veya sizin için geçerli olan herhangi bir ayrıcalık ve dokunulmazlık üzerinde bir sınırlama veya feragat olarak yorumlanamaz; bu, herhangi bir yargı veya otoritenin yasal süreçlerinden muafiyet dahil.
 ```
 Creative Commons is not a party to its public licenses. Notwithstanding, Creative Commons may elect to apply one of its public licenses to material it publishes and in those instances will be considered the “Licensor.” Except for the limited purpose of indicating that material is shared under a Creative Commons public license or as otherwise permitted by the Creative Commons policies published at [creativecommons.org/policies](http://creativecommons.org/policies), Creative Commons does not authorize the use of the trademark “Creative Commons” or any other trademark or logo of Creative Commons without its prior written consent including, without limitation, in connection with any unauthorized modifications to any of its public licenses or any other arrangements, understandings, or agreements concerning use of licensed material. For the avoidance of doubt, this paragraph does not form part of the public licenses.
 
 Creative Commons may be contacted at [creativecommons.org](http://creativecommons.org/).
 ```
-
 {{#include ./banners/hacktricks-training.md}}
-

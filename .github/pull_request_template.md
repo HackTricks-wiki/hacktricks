@@ -1,9 +1,4 @@
-You can remove this content before sending the PR:
+## Atıf
+Bilginizi değerlendiriyoruz ve içerik paylaşmanızı teşvik ediyoruz. Lütfen yalnızca sahip olduğunuz veya orijinal yazardan paylaşma izni aldığınız içeriği yüklediğinizden emin olun (eklediğiniz metinde veya değiştirdiğiniz sayfanın sonunda yazara bir referans ekleyerek veya her ikisini de yaparak). Fikri mülkiyet haklarına saygınız, herkes için güvenilir ve yasal bir paylaşım ortamını teşvik eder.
 
-## Attribution
-We value your knowledge and encourage you to share content. Please ensure that you only upload content that you own or that have permission to share it from the original author (adding a reference to the author in the added text or at the end of the page you are modifying or both). Your respect for intellectual property rights fosters a trustworthy and legal sharing environment for everyone.
-
-
-Thank you for contributing to HackTricks!
-
-
+HackTricks'e katkıda bulunduğunuz için teşekkür ederiz!
