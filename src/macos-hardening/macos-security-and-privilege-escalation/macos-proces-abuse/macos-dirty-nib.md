@@ -2,72 +2,72 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**For further detail about the technique check the original post from:** [**https://blog.xpnsec.com/dirtynib/**](https://blog.xpnsec.com/dirtynib/) and the following post by [**https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/**](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/)**.** Here is a summary:
+**Tekniğin detayları için orijinal gönderiyi kontrol edin:** [**https://blog.xpnsec.com/dirtynib/**](https://blog.xpnsec.com/dirtynib/) ve [**https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/**](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/) tarafından yapılan gönderiyi. İşte bir özet:
 
-### What are Nib files
+### Nib dosyaları nedir
 
-Nib (short for NeXT Interface Builder) files, part of Apple's development ecosystem, are intended for defining **UI elements** and their interactions in applications. They encompass serialized objects such as windows and buttons, and are loaded at runtime. Despite their ongoing usage, Apple now advocates for Storyboards for more comprehensive UI flow visualization.
+Nib (NeXT Interface Builder'ın kısaltması) dosyaları, Apple'ın geliştirme ekosisteminin bir parçası olarak, uygulamalardaki **UI öğelerini** ve etkileşimlerini tanımlamak için tasarlanmıştır. Pencereler ve butonlar gibi serileştirilmiş nesneleri kapsar ve çalışma zamanında yüklenir. Sürekli kullanımlarına rağmen, Apple artık daha kapsamlı UI akış görselleştirmesi için Storyboard'ları önermektedir.
 
-The main Nib file is referenced in the value **`NSMainNibFile`** inside the `Info.plist` file of the application and is loaded by the function **`NSApplicationMain`** executed in the `main` function of the application.
+Ana Nib dosyası, uygulamanın `Info.plist` dosyasında **`NSMainNibFile`** değerinde referans alınır ve uygulamanın `main` fonksiyonunda yürütülen **`NSApplicationMain`** fonksiyonu tarafından yüklenir.
 
-### Dirty Nib Injection Process
+### Kirli Nib Enjeksiyon Süreci
 
-#### Creating and Setting Up a NIB File
+#### NIB Dosyası Oluşturma ve Ayarlama
 
-1. **Initial Setup**:
-   - Create a new NIB file using XCode.
-   - Add an Object to the interface, setting its class to `NSAppleScript`.
-   - Configure the initial `source` property via User Defined Runtime Attributes.
-2. **Code Execution Gadget**:
-   - The setup facilitates running AppleScript on demand.
-   - Integrate a button to activate the `Apple Script` object, specifically triggering the `executeAndReturnError:` selector.
-3. **Testing**:
+1. **İlk Kurulum**:
+- XCode kullanarak yeni bir NIB dosyası oluşturun.
+- Arayüze bir Nesne ekleyin, sınıfını `NSAppleScript` olarak ayarlayın.
+- Kullanıcı Tanımlı Çalışma Zamanı Özellikleri aracılığıyla başlangıç `source` özelliğini yapılandırın.
+2. **Kod Yürütme Aleti**:
+- Kurulum, AppleScript'in talep üzerine çalıştırılmasını sağlar.
+- `Apple Script` nesnesini etkinleştirmek için bir buton ekleyin, özellikle `executeAndReturnError:` seçicisini tetikleyin.
+3. **Test**:
 
-   - A simple Apple Script for testing purposes:
+- Test amaçlı basit bir Apple Script:
 
-     ```bash
-     set theDialogText to "PWND"
-     display dialog theDialogText
-     ```
+```bash
+set theDialogText to "PWND"
+display dialog theDialogText
+```
 
-   - Test by running in the XCode debugger and clicking the button.
+- XCode hata ayıklayıcısında çalıştırarak ve butona tıklayarak test edin.
 
-#### Targeting an Application (Example: Pages)
+#### Bir Uygulamayı Hedefleme (Örnek: Pages)
 
-1. **Preparation**:
-   - Copy the target app (e.g., Pages) into a separate directory (e.g., `/tmp/`).
-   - Initiate the app to sidestep Gatekeeper issues and cache it.
-2. **Overwriting NIB File**:
-   - Replace an existing NIB file (e.g., About Panel NIB) with the crafted DirtyNIB file.
-3. **Execution**:
-   - Trigger the execution by interacting with the app (e.g., selecting the `About` menu item).
+1. **Hazırlık**:
+- Hedef uygulamayı (örneğin, Pages) ayrı bir dizine (örneğin, `/tmp/`) kopyalayın.
+- Gatekeeper sorunlarını aşmak ve önbelleğe almak için uygulamayı başlatın.
+2. **NIB Dosyasını Üzerine Yazma**:
+- Mevcut bir NIB dosyasını (örneğin, Hakkında Panel NIB) oluşturulan DirtyNIB dosyasıyla değiştirin.
+3. **Yürütme**:
+- Uygulama ile etkileşimde bulunarak yürütmeyi tetikleyin (örneğin, `Hakkında` menü öğesini seçerek).
 
-#### Proof of Concept: Accessing User Data
+#### Kanıt Konsepti: Kullanıcı Verilerine Erişim
 
-- Modify the AppleScript to access and extract user data, such as photos, without user consent.
+- Kullanıcı izni olmadan fotoğraflar gibi kullanıcı verilerine erişmek ve çıkarmak için AppleScript'i değiştirin.
 
-### Code Sample: Malicious .xib File
+### Kod Örneği: Kötü Amaçlı .xib Dosyası
 
-- Access and review a [**sample of a malicious .xib file**](https://gist.github.com/xpn/16bfbe5a3f64fedfcc1822d0562636b4) that demonstrates executing arbitrary code.
+- Rastgele kod yürütmeyi gösteren bir [**kötü amaçlı .xib dosyası örneği**](https://gist.github.com/xpn/16bfbe5a3f64fedfcc1822d0562636b4) erişin ve inceleyin.
 
-### Other Example
+### Diğer Örnek
 
-In the post [https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/) you can find tutorial on how to create a dirty nib.&#x20;
+[https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/) gönderisinde kirli nib oluşturma ile ilgili bir eğitim bulabilirsiniz.&#x20;
 
-### Addressing Launch Constraints
+### Başlatma Kısıtlamalarını Ele Alma
 
-- Launch Constraints hinder app execution from unexpected locations (e.g., `/tmp`).
-- It's possible to identify apps not protected by Launch Constraints and target them for NIB file injection.
+- Başlatma Kısıtlamaları, uygulama yürütmesini beklenmedik yerlerden (örneğin, `/tmp`) engeller.
+- NIB dosyası enjeksiyonu için hedeflenebilecek Başlatma Kısıtlamaları ile korunmayan uygulamaları tanımlamak mümkündür.
 
-### Additional macOS Protections
+### Ek macOS Koruma Önlemleri
 
-From macOS Sonoma onwards, modifications inside App bundles are restricted. However, earlier methods involved:
+macOS Sonoma'dan itibaren, Uygulama paketleri içindeki değişiklikler kısıtlanmıştır. Ancak, önceki yöntemler şunları içeriyordu:
 
-1. Copying the app to a different location (e.g., `/tmp/`).
-2. Renaming directories within the app bundle to bypass initial protections.
-3. After running the app to register with Gatekeeper, modifying the app bundle (e.g., replacing MainMenu.nib with Dirty.nib).
-4. Renaming directories back and rerunning the app to execute the injected NIB file.
+1. Uygulamayı farklı bir konuma (örneğin, `/tmp/`) kopyalamak.
+2. İlk korumaları aşmak için uygulama paketindeki dizinleri yeniden adlandırmak.
+3. Uygulamayı Gatekeeper ile kaydetmek için çalıştırdıktan sonra, uygulama paketini değiştirmek (örneğin, MainMenu.nib'i Dirty.nib ile değiştirmek).
+4. Dizinleri geri yeniden adlandırmak ve enjeksiyon yapılan NIB dosyasını yürütmek için uygulamayı yeniden çalıştırmak.
 
-**Note**: Recent macOS updates have mitigated this exploit by preventing file modifications within app bundles post Gatekeeper caching, rendering the exploit ineffective.
+**Not**: Son macOS güncellemeleri, Gatekeeper önbelleklemesinden sonra uygulama paketleri içinde dosya değişikliklerini engelleyerek bu istismarı etkisiz hale getirmiştir.
 
 {{#include ../../../banners/hacktricks-training.md}}

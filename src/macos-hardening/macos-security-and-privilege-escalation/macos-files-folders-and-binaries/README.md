@@ -1,89 +1,88 @@
-# macOS Files, Folders, Binaries & Memory
+# macOS Dosyaları, Klasörler, İkili Dosyalar ve Bellek
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## File hierarchy layout
+## Dosya hiyerarşisi düzeni
 
-- **/Applications**: The installed apps should be here. All the users will be able to access them.
-- **/bin**: Command line binaries
-- **/cores**: If exists, it's used to store core dumps
-- **/dev**: Everything is treated as a file so you may see hardware devices stored here.
-- **/etc**: Configuration files
-- **/Library**: A lot of subdirectories and files related to preferences, caches and logs can be found here. A Library folder exists in root and on each user's directory.
-- **/private**: Undocumented but a lot of the mentioned folders are symbolic links to the private directory.
-- **/sbin**: Essential system binaries (related to administration)
-- **/System**: File fo making OS X run. You should find mostly only Apple specific files here (not third party).
-- **/tmp**: Files are deleted after 3 days (it's a soft link to /private/tmp)
-- **/Users**: Home directory for users.
-- **/usr**: Config and system binaries
-- **/var**: Log files
-- **/Volumes**: The mounted drives will apear here.
-- **/.vol**: Running `stat a.txt` you obtain something like `16777223 7545753 -rw-r--r-- 1 username wheel ...` where the first number is the id number of the volume where the file exists and the second one is the inode number. You can access the content of this file through /.vol/ with that information running `cat /.vol/16777223/7545753`
+- **/Applications**: Yüklenen uygulamalar burada olmalıdır. Tüm kullanıcılar bunlara erişebilir.
+- **/bin**: Komut satırı ikili dosyaları
+- **/cores**: Varsa, çekirdek dökümlerini saklamak için kullanılır
+- **/dev**: Her şey bir dosya olarak kabul edilir, bu nedenle burada donanım cihazlarını görebilirsiniz.
+- **/etc**: Yapılandırma dosyaları
+- **/Library**: Tercihler, önbellekler ve günlüklerle ilgili birçok alt dizin ve dosya burada bulunabilir. Kök dizinde ve her kullanıcının dizininde bir Library klasörü vardır.
+- **/private**: Belgelendirilmemiştir ancak bahsedilen birçok klasör özel dizine sembolik bağlantılardır.
+- **/sbin**: Temel sistem ikili dosyaları (yönetimle ilgili)
+- **/System**: OS X'in çalışmasını sağlayan dosya. Burada çoğunlukla yalnızca Apple'a özgü dosyalar bulmalısınız (üçüncü taraf değil).
+- **/tmp**: Dosyalar 3 gün sonra silinir (bu, /private/tmp'e yumuşak bir bağlantıdır)
+- **/Users**: Kullanıcılar için ana dizin.
+- **/usr**: Yapılandırma ve sistem ikili dosyaları
+- **/var**: Günlük dosyaları
+- **/Volumes**: Bağlı sürücüler burada görünecektir.
+- **/.vol**: `stat a.txt` komutunu çalıştırdığınızda `16777223 7545753 -rw-r--r-- 1 username wheel ...` gibi bir şey elde edersiniz; burada ilk sayı dosyanın bulunduğu hacmin kimlik numarası ve ikincisi inode numarasıdır. Bu bilgiyi kullanarak `cat /.vol/16777223/7545753` komutunu çalıştırarak bu dosyanın içeriğine erişebilirsiniz.
 
-### Applications Folders
+### Uygulama Klasörleri
 
-- **System applications** are located under `/System/Applications`
-- **Installed** applications are usually installed in `/Applications` or in `~/Applications`
-- **Application data** can be found in `/Library/Application Support` for the applications running as root and `~/Library/Application Support` for applications running as the user.
-- Third-party applications **daemons** that **need to run as root** as usually located in `/Library/PrivilegedHelperTools/`
-- **Sandboxed** apps are mapped into the `~/Library/Containers` folder. Each app has a folder named according to the application’s bundle ID (`com.apple.Safari`).
-- The **kernel** is located in `/System/Library/Kernels/kernel`
-- **Apple's kernel extensions** are located in `/System/Library/Extensions`
-- **Third-party kernel extensions** are stored in `/Library/Extensions`
+- **Sistem uygulamaları** `/System/Applications` altında bulunur
+- **Yüklenen** uygulamalar genellikle `/Applications` veya `~/Applications` dizininde yüklenir
+- **Uygulama verileri**, root olarak çalışan uygulamalar için `/Library/Application Support` ve kullanıcı olarak çalışan uygulamalar için `~/Library/Application Support` dizininde bulunabilir.
+- Üçüncü taraf uygulamaların **daemon'ları** **root olarak çalışması gereken** genellikle `/Library/PrivilegedHelperTools/` dizininde bulunur
+- **Sandboxed** uygulamalar `~/Library/Containers` klasörüne haritalanır. Her uygulamanın uygulamanın paket kimliğine göre adlandırılmış bir klasörü vardır (`com.apple.Safari`).
+- **Kernel** `/System/Library/Kernels/kernel` dizinindedir
+- **Apple'ın kernel uzantıları** `/System/Library/Extensions` dizinindedir
+- **Üçüncü taraf kernel uzantıları** `/Library/Extensions` dizininde saklanır
 
-### Files with Sensitive Information
+### Hassas Bilgiler İçeren Dosyalar
 
-MacOS stores information such as passwords in several places:
+MacOS, şifreler gibi bilgileri birkaç yerde saklar:
 
 {{#ref}}
 macos-sensitive-locations.md
 {{#endref}}
 
-### Vulnerable pkg installers
+### Zayıf pkg yükleyicileri
 
 {{#ref}}
 macos-installers-abuse.md
 {{#endref}}
 
-## OS X Specific Extensions
+## OS X Özel Uzantıları
 
-- **`.dmg`**: Apple Disk Image files are very frequent for installers.
-- **`.kext`**: It must follow a specific structure and it's the OS X version of a driver. (it's a bundle)
-- **`.plist`**: Also known as property list stores information in XML or binary format.
-  - Can be XML or binary. Binary ones can be read with:
-    - `defaults read config.plist`
-    - `/usr/libexec/PlistBuddy -c print config.plsit`
-    - `plutil -p ~/Library/Preferences/com.apple.screensaver.plist`
-    - `plutil -convert xml1 ~/Library/Preferences/com.apple.screensaver.plist -o -`
-    - `plutil -convert json ~/Library/Preferences/com.apple.screensaver.plist -o -`
-- **`.app`**: Apple applications that follows directory structure (It's a bundle).
-- **`.dylib`**: Dynamic libraries (like Windows DLL files)
-- **`.pkg`**: Are the same as xar (eXtensible Archive format). The installer command can be use to install the contents of these files.
-- **`.DS_Store`**: This file is on each directory, it saves the attributes and customisations of the directory.
-- **`.Spotlight-V100`**: This folder appears on the root directory of every volume on the system.
-- **`.metadata_never_index`**: If this file is at the root of a volume Spotlight won't index that volume.
-- **`.noindex`**: Files and folder with this extension won't be indexed by Spotlight.
-- **`.sdef`**: Files inside bundles specifying how it's possible to interact wth the application from an AppleScript.
+- **`.dmg`**: Apple Disk Image dosyaları yükleyiciler için çok yaygındır.
+- **`.kext`**: Belirli bir yapıyı takip etmelidir ve OS X sürümünde bir sürücüdür. (bu bir pakettir)
+- **`.plist`**: XML veya ikili formatta bilgi saklayan özellik listesi olarak da bilinir.
+- XML veya ikili olabilir. İkili olanlar şu komutlarla okunabilir:
+- `defaults read config.plist`
+- `/usr/libexec/PlistBuddy -c print config.plist`
+- `plutil -p ~/Library/Preferences/com.apple.screensaver.plist`
+- `plutil -convert xml1 ~/Library/Preferences/com.apple.screensaver.plist -o -`
+- `plutil -convert json ~/Library/Preferences/com.apple.screensaver.plist -o -`
+- **`.app`**: Dizin yapısını takip eden Apple uygulamaları (bu bir pakettir).
+- **`.dylib`**: Dinamik kütüphaneler (Windows DLL dosyaları gibi)
+- **`.pkg`**: xar (eXtensible Archive format) ile aynıdır. Yükleyici komutu bu dosyaların içeriğini yüklemek için kullanılabilir.
+- **`.DS_Store`**: Bu dosya her dizinde bulunur, dizinin özelliklerini ve özelleştirmelerini kaydeder.
+- **`.Spotlight-V100`**: Bu klasör, sistemdeki her hacmin kök dizininde görünür.
+- **`.metadata_never_index`**: Bu dosya bir hacmin kökünde bulunuyorsa, Spotlight o hacmi dizinlemez.
+- **`.noindex`**: Bu uzantıya sahip dosya ve klasörler Spotlight tarafından dizinlenmez.
+- **`.sdef`**: Paketler içindeki dosyalar, bir AppleScript ile uygulama ile nasıl etkileşim kurulabileceğini belirtir.
 
-### macOS Bundles
+### macOS Paketleri
 
-A bundle is a **directory** which **looks like an object in Finder** (a Bundle example are `*.app` files).
+Bir paket, **Finder'da bir nesne gibi görünen** bir **dizindir** (bir Paket örneği `*.app` dosyalarıdır).
 
 {{#ref}}
 macos-bundles.md
 {{#endref}}
 
-## Dyld Shared Library Cache (SLC)
+## Dyld Paylaşılan Kütüphane Önbelleği (SLC)
 
-On macOS (and iOS) all system shared libraries, like frameworks and dylibs, are **combined into a single file**, called the **dyld shared cache**. This improved performance, since code can be loaded faster.
+macOS'ta (ve iOS'ta) tüm sistem paylaşılan kütüphaneleri, çerçeveler ve dylib'ler, **tek bir dosyada birleştirilmiştir**, buna **dyld paylaşılan önbelleği** denir. Bu, performansı artırır, çünkü kod daha hızlı yüklenebilir.
 
-This is located in macOS in `/System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/` and in older versions you might be able to find the **shared cache** in **`/System/Library/dyld/`**.\
-In iOS you can find them in **`/System/Library/Caches/com.apple.dyld/`**.
+Bu, macOS'ta `/System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/` dizininde bulunur ve eski sürümlerde **paylaşılan önbelleği** **`/System/Library/dyld/`** dizininde bulabilirsiniz.\
+iOS'ta bunları **`/System/Library/Caches/com.apple.dyld/`** dizininde bulabilirsiniz.
 
-Similar to the dyld shared cache, the kernel and the kernel extensions are also compiled into a kernel cache, which is loaded at boot time.
+Dyld paylaşılan önbelleğine benzer şekilde, kernel ve kernel uzantıları da bir kernel önbelleğine derlenir ve bu, önyükleme sırasında yüklenir.
 
-In order to extract the libraries from the single file dylib shared cache it was possible to use the binary [dyld_shared_cache_util](https://www.mbsplugins.de/files/dyld_shared_cache_util-dyld-733.8.zip) which might not be working nowadays but you can also use [**dyldextractor**](https://github.com/arandomdev/dyldextractor):
-
+Tek dosya dylib paylaşılan önbelleğinden kütüphaneleri çıkarmak için [dyld_shared_cache_util](https://www.mbsplugins.de/files/dyld_shared_cache_util-dyld-733.8.zip) ikilisini kullanmak mümkündü, bu günümüzde çalışmayabilir ama [**dyldextractor**](https://github.com/arandomdev/dyldextractor) da kullanılabilir:
 ```bash
 # dyld_shared_cache_util
 dyld_shared_cache_util -extract ~/shared_cache/ /System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/dyld_shared_cache_arm64e
@@ -93,119 +92,111 @@ dyldex -l [dyld_shared_cache_path] # List libraries
 dyldex_all [dyld_shared_cache_path] # Extract all
 # More options inside the readme
 ```
-
 > [!TIP]
-> Note that even if `dyld_shared_cache_util` tool doesn't work, you can pass the **shared dyld binary to Hopper** and Hopper will be able to identify all the libraries and let you **select which one** you want to investigate:
+> `dyld_shared_cache_util` aracının çalışmaması durumunda, **paylaşılan dyld ikili dosyasını Hopper'a** iletebileceğinizi ve Hopper'ın tüm kütüphaneleri tanıyıp **hangi kütüphaneyi** incelemek istediğinizi **seçmenize** izin vereceğini unutmayın:
 
 <figure><img src="../../../images/image (1152).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Some extractors won't work as dylibs are prelinked with hard coded addresses in therefore they might be jumping to unknown addresses
+Bazı çıkarıcılar çalışmayabilir çünkü dylib'ler, bilinmeyen adreslere atlama yapabilecekleri için sabit kodlanmış adreslerle önceden bağlantılıdır.
 
 > [!TIP]
-> It's also possible to download the Shared Library Cache of other \*OS devices in macos by using an emulator in Xcode. They will be downloaded inside: ls `$HOME/Library/Developer/Xcode/<*>OS\ DeviceSupport/<version>/Symbols/System/Library/Caches/com.apple.dyld/`, like:`$HOME/Library/Developer/Xcode/iOS\ DeviceSupport/14.1\ (18A8395)/Symbols/System/Library/Caches/com.apple.dyld/dyld_shared_cache_arm64`
+> Xcode'da bir emülatör kullanarak macos'ta diğer \*OS cihazlarının Paylaşılan Kütüphane Önbelleğini indirmenin de mümkün olduğunu unutmayın. Bunlar şu dizinde indirilecektir: ls `$HOME/Library/Developer/Xcode/<*>OS\ DeviceSupport/<version>/Symbols/System/Library/Caches/com.apple.dyld/`, örneğin: `$HOME/Library/Developer/Xcode/iOS\ DeviceSupport/14.1\ (18A8395)/Symbols/System/Library/Caches/com.apple.dyld/dyld_shared_cache_arm64`
 
-### Mapping SLC
+### SLC Haritalama
 
-**`dyld`** uses the syscall **`shared_region_check_np`** to know if the SLC has been mapped (which returns the address) and **`shared_region_map_and_slide_np`** to map the SLC.
+**`dyld`** SLC'nin haritalanıp haritalanmadığını bilmek için **`shared_region_check_np`** sistem çağrısını kullanır (bu adresi döndürür) ve **`shared_region_map_and_slide_np`** ile SLC'yi haritalar.
 
-Note that even if the SLC is slid on the first use, all the **processes** use the **same copy**, which **eliminated the ASLR** protection if the attacker was able to run processes in the system. This was actually exploited in the past and fixed with shared region pager.
+SLC ilk kullanımda kaydırılsa bile, tüm **işlemler** **aynı kopyayı** kullanır, bu da saldırganın sistemde işlemleri çalıştırabilmesi durumunda **ASLR** korumasını **ortadan kaldırır**. Bu geçmişte gerçekten istismar edildi ve paylaşılan alan sayfası ile düzeltildi.
 
-Branch pools are little Mach-O dylibs that creates small spaces between image mappings making impossible to interpose the functions.
+Branch havuzları, görüntü haritalamaları arasında küçük alanlar oluşturan küçük Mach-O dylib'lerdir ve bu da işlevlerin araya girmesini imkansız hale getirir.
 
-### Override SLCs
+### SLC'leri Geçersiz Kılma
 
-Using the the env variables:
+Aşağıdaki çevre değişkenlerini kullanarak:
 
-- **`DYLD_DHARED_REGION=private DYLD_SHARED_CACHE_DIR=</path/dir> DYLD_SHARED_CACHE_DONT_VALIDATE=1`** -> This will allow to load a new shared library cache
-- **`DYLD_SHARED_CACHE_DIR=avoid`** and manually replace the libraries with symlinks to the shared cache with the real ones (you will need to extract them)
+- **`DYLD_DHARED_REGION=private DYLD_SHARED_CACHE_DIR=</path/dir> DYLD_SHARED_CACHE_DONT_VALIDATE=1`** -> Bu, yeni bir paylaşılan kütüphane önbelleği yüklemeye izin verecektir.
+- **`DYLD_SHARED_CACHE_DIR=avoid`** ve kütüphaneleri gerçek olanlarla paylaşılan önbelleğe simlinklerle manuel olarak değiştirmek (bunları çıkarmanız gerekecek).
 
-## Special File Permissions
+## Özel Dosya İzinleri
 
-### Folder permissions
+### Klasör izinleri
 
-In a **folder**, **read** allows to **list it**, **write** allows to **delete** and **write** files on it, and **execute** allows to **traverse** the directory. So, for example, a user with **read permission over a file** inside a directory where he **doesn't have execute** permission **won't be able to read** the file.
+Bir **klasörde**, **okuma** onu **listelemeye** izin verir, **yazma** dosyaları **silme** ve **yazma** izni verir, ve **çalıştırma** dizinde **gezinmeye** izin verir. Örneğin, bir kullanıcı bir dizinde **çalıştırma** iznine sahip olmadığı bir dosya üzerinde **okuma iznine** sahip olsa bile, dosyayı **okuyamaz**.
 
-### Flag modifiers
+### Bayrak değiştiricileri
 
-There are some flags that could be set in the files that will make file behave differently. You can **check the flags** of the files inside a directory with `ls -lO /path/directory`
+Dosyalarda ayarlanabilecek bazı bayraklar vardır, bu da dosyanın farklı davranmasına neden olur. Bir dizindeki dosyaların **bayraklarını kontrol edebilirsiniz**: `ls -lO /path/directory`
 
-- **`uchg`**: Known as **uchange** flag will **prevent any action** changing or deleting the **file**. To set it do: `chflags uchg file.txt`
-  - The root user could **remove the flag** and modify the file
-- **`restricted`**: This flag makes the file be **protected by SIP** (you cannot add this flag to a file).
-- **`Sticky bit`**: If a directory with sticky bit, **only** the **directories owner or root can remane or delete** files. Typically this is set on the /tmp directory to prevent ordinary users from deleting or moving other users’ files.
+- **`uchg`**: **uchange** bayrağı, **dosyanın** değiştirilmesini veya silinmesini **önler**. Ayarlamak için: `chflags uchg file.txt`
+- Root kullanıcısı **bayrağı kaldırabilir** ve dosyayı değiştirebilir.
+- **`restricted`**: Bu bayrak dosyanın **SIP tarafından korunmasını** sağlar (bu bayrağı bir dosyaya ekleyemezsiniz).
+- **`Sticky bit`**: Eğer bir dizin sticky bit'e sahipse, **yalnızca** **dizin sahibi veya root dosyaları yeniden adlandırabilir veya silebilir**. Genellikle bu, sıradan kullanıcıların diğer kullanıcıların dosyalarını silmesini veya taşınmasını önlemek için /tmp dizininde ayarlanır.
 
-All the flags can be found in the file `sys/stat.h` (find it using `mdfind stat.h | grep stat.h`) and are:
+Tüm bayraklar `sys/stat.h` dosyasında bulunabilir (bunu `mdfind stat.h | grep stat.h` kullanarak bulabilirsiniz) ve şunlardır:
 
-- `UF_SETTABLE` 0x0000ffff: Mask of owner changeable flags.
-- `UF_NODUMP` 0x00000001: Do not dump file.
-- `UF_IMMUTABLE` 0x00000002: File may not be changed.
-- `UF_APPEND` 0x00000004: Writes to file may only append.
-- `UF_OPAQUE` 0x00000008: Directory is opaque wrt. union.
-- `UF_COMPRESSED` 0x00000020: File is compressed (some file-systems).
-- `UF_TRACKED` 0x00000040: No notifications for deletes/renames for files with this set.
-- `UF_DATAVAULT` 0x00000080: Entitlement required for reading and writing.
-- `UF_HIDDEN` 0x00008000: Hint that this item should not be displayed in a GUI.
-- `SF_SUPPORTED` 0x009f0000: Mask of superuser supported flags.
-- `SF_SETTABLE` 0x3fff0000: Mask of superuser changeable flags.
-- `SF_SYNTHETIC` 0xc0000000: Mask of system read-only synthetic flags.
-- `SF_ARCHIVED` 0x00010000: File is archived.
-- `SF_IMMUTABLE` 0x00020000: File may not be changed.
-- `SF_APPEND` 0x00040000: Writes to file may only append.
-- `SF_RESTRICTED` 0x00080000: Entitlement required for writing.
-- `SF_NOUNLINK` 0x00100000: Item may not be removed, renamed or mounted on.
-- `SF_FIRMLINK` 0x00800000: File is a firmlink.
-- `SF_DATALESS` 0x40000000: File is dataless object.
+- `UF_SETTABLE` 0x0000ffff: Sahip değiştirilebilir bayrakların maskesi.
+- `UF_NODUMP` 0x00000001: Dosyayı dökme.
+- `UF_IMMUTABLE` 0x00000002: Dosya değiştirilemez.
+- `UF_APPEND` 0x00000004: Dosyaya yazma yalnızca ekleme yapabilir.
+- `UF_OPAQUE` 0x00000008: Dizin, birleşim açısından opaktır.
+- `UF_COMPRESSED` 0x00000020: Dosya sıkıştırılmıştır (bazı dosya sistemleri).
+- `UF_TRACKED` 0x00000040: Bu ayar için dosyalar için silme/yeniden adlandırma bildirimleri yoktur.
+- `UF_DATAVAULT` 0x00000080: Okuma ve yazma için yetki gereklidir.
+- `UF_HIDDEN` 0x00008000: Bu öğenin bir GUI'de görüntülenmemesi gerektiğini belirten ipucu.
+- `SF_SUPPORTED` 0x009f0000: Süper kullanıcı destekli bayrakların maskesi.
+- `SF_SETTABLE` 0x3fff0000: Süper kullanıcı değiştirilebilir bayrakların maskesi.
+- `SF_SYNTHETIC` 0xc0000000: Sistem salt okunur sentetik bayrakların maskesi.
+- `SF_ARCHIVED` 0x00010000: Dosya arşivlenmiştir.
+- `SF_IMMUTABLE` 0x00020000: Dosya değiştirilemez.
+- `SF_APPEND` 0x00040000: Dosyaya yazma yalnızca ekleme yapabilir.
+- `SF_RESTRICTED` 0x00080000: Yazma için yetki gereklidir.
+- `SF_NOUNLINK` 0x00100000: Öğe kaldırılmayabilir, yeniden adlandırılamaz veya bağlanamaz.
+- `SF_FIRMLINK` 0x00800000: Dosya bir firmlink'tir.
+- `SF_DATALESS` 0x40000000: Dosya dataless nesnedir.
 
-### **File ACLs**
+### **Dosya ACL'leri**
 
-File **ACLs** contain **ACE** (Access Control Entries) where more **granular permissions** can be assigned to different users.
+Dosya **ACL'leri**, farklı kullanıcılara daha **ince izinler** atamak için **ACE** (Erişim Kontrol Girdileri) içerir.
 
-It's possible to grant a **directory** these permissions: `list`, `search`, `add_file`, `add_subdirectory`, `delete_child`, `delete_child`.\
-Ans to a **file**: `read`, `write`, `append`, `execute`.
+Bir **dizin** için bu izinleri vermek mümkündür: `listele`, `arama`, `dosya_ekle`, `alt_dizin_ekle`, `çocuk_sil`, `çocuk_sil`.\
+Ve bir **dosya** için: `okuma`, `yazma`, `ekleme`, `çalıştırma`.
 
-When the file contains ACLs you will **find a "+" when listing the permissions like in**:
-
+Dosya ACL'ler içeriyorsa, izinleri listelediğinizde **"+" bulacaksınız**:
 ```bash
 ls -ld Movies
 drwx------+   7 username  staff     224 15 Apr 19:42 Movies
 ```
-
-You can **read the ACLs** of the file with:
-
+Dosyanın **ACL'lerini** şu şekilde okuyabilirsiniz:
 ```bash
 ls -lde Movies
 drwx------+ 7 username  staff  224 15 Apr 19:42 Movies
- 0: group:everyone deny delete
+0: group:everyone deny delete
 ```
-
-You can find **all the files with ACLs** with (this is veeery slow):
-
+Tüm **ACL'lere sahip dosyaları** (bu çok yavaş) bulabilirsiniz:
 ```bash
 ls -RAle / 2>/dev/null | grep -E -B1 "\d: "
 ```
+### Genişletilmiş Nitelikler
 
-### Extended Attributes
+Genişletilmiş niteliklerin bir adı ve istenen herhangi bir değeri vardır ve `ls -@` kullanılarak görülebilir ve `xattr` komutu ile manipüle edilebilir. Bazı yaygın genişletilmiş nitelikler şunlardır:
 
-Extended attributes have a name and any desired value, and can be seen using `ls -@` and manipulated using the `xattr` command. Some common extended attributes are:
+- `com.apple.resourceFork`: Kaynak fork uyumluluğu. Ayrıca `filename/..namedfork/rsrc` olarak görünür
+- `com.apple.quarantine`: MacOS: Gatekeeper karantina mekanizması (III/6)
+- `metadata:*`: MacOS: `_backup_excludeItem` veya `kMD*` gibi çeşitli meta veriler
+- `com.apple.lastuseddate` (#PS): Son dosya kullanım tarihi
+- `com.apple.FinderInfo`: MacOS: Finder bilgisi (örneğin, renk Etiketleri)
+- `com.apple.TextEncoding`: ASCII metin dosyalarının metin kodlamasını belirtir
+- `com.apple.logd.metadata`: `/var/db/diagnostics` içindeki dosyalar için logd tarafından kullanılır
+- `com.apple.genstore.*`: Nesil depolama (`/.DocumentRevisions-V100` dosya sisteminin kökünde)
+- `com.apple.rootless`: MacOS: Dosyayı etiketlemek için Sistem Bütünlüğü Koruması tarafından kullanılır (III/10)
+- `com.apple.uuidb.boot-uuid`: benzersiz UUID ile önyükleme dönemlerinin logd işaretleri
+- `com.apple.decmpfs`: MacOS: Şeffaf dosya sıkıştırması (II/7)
+- `com.apple.cprotect`: \*OS: Dosya başına şifreleme verileri (III/11)
+- `com.apple.installd.*`: \*OS: installd tarafından kullanılan meta veriler, örneğin, `installType`, `uniqueInstallID`
 
-- `com.apple.resourceFork`: Resource fork compatibility. Also visible as `filename/..namedfork/rsrc`
-- `com.apple.quarantine`: MacOS: Gatekeeper quarantine mechanism (III/6)
-- `metadata:*`: MacOS: various metadata, such as `_backup_excludeItem`, or `kMD*`
-- `com.apple.lastuseddate` (#PS): Last file use date
-- `com.apple.FinderInfo`: MacOS: Finder information (e.g., color Tags)
-- `com.apple.TextEncoding`: Specifies text encoding of ASCII text files
-- `com.apple.logd.metadata`: Used by logd on files in `/var/db/diagnostics`
-- `com.apple.genstore.*`: Generational storage (`/.DocumentRevisions-V100` in root of filesystem)
-- `com.apple.rootless`: MacOS: Used by System Integrity Protection to label file (III/10)
-- `com.apple.uuidb.boot-uuid`: logd markings of boot epochs with unique UUID
-- `com.apple.decmpfs`: MacOS: Transparent file compression (II/7)
-- `com.apple.cprotect`: \*OS: Per-file encryption data (III/11)
-- `com.apple.installd.*`: \*OS: Metadata used by installd, e.g., `installType`, `uniqueInstallID`
+### Kaynak Forkları | macOS ADS
 
-### Resource Forks | macOS ADS
-
-This is a way to obtain **Alternate Data Streams in MacOS** machines. You can save content inside an extended attribute called **com.apple.ResourceFork** inside a file by saving it in **file/..namedfork/rsrc**.
-
+Bu, **MacOS'taki Alternatif Veri Akışlarını** elde etmenin bir yoludur. İçeriği, bir dosya içinde **com.apple.ResourceFork** adlı bir genişletilmiş nitelik içinde kaydederek **file/..namedfork/rsrc** içinde saklayabilirsiniz.
 ```bash
 echo "Hello" > a.txt
 echo "Hello Mac ADS" > a.txt/..namedfork/rsrc
@@ -216,55 +207,52 @@ com.apple.ResourceFork: Hello Mac ADS
 ls -l a.txt #The file length is still q
 -rw-r--r--@ 1 username  wheel  6 17 Jul 01:15 a.txt
 ```
-
-You can **find all the files containing this extended attribute** with:
-
+Bu genişletilmiş niteliği içeren **tüm dosyaları bulabilirsiniz**:
 ```bash
 find / -type f -exec ls -ld {} \; 2>/dev/null | grep -E "[x\-]@ " | awk '{printf $9; printf "\n"}' | xargs -I {} xattr -lv {} | grep "com.apple.ResourceFork"
 ```
-
 ### decmpfs
 
-The extended attribute `com.apple.decmpfs` indicates that the file is stored encrypted, `ls -l` will report a **size of 0** and the compressed data is inside this attribute. Whenever the file is accessed it'll be decrypted in memory.
+Genişletilmiş özellik `com.apple.decmpfs`, dosyanın şifreli olarak saklandığını gösterir, `ls -l` **boyutun 0** olduğunu bildirecek ve sıkıştırılmış veriler bu özellik içinde yer alacaktır. Dosya her erişildiğinde bellek içinde şifresi çözülecektir.
 
-This attr can be seen with `ls -lO` indicated as compressed because compressed files are also tagged with the flag `UF_COMPRESSED`. If a compressed file is removed this flag with `chflags nocompressed </path/to/file>`, the system won't know that the file was compressed and therefore it won't be able to decompress and access the data (it will think that it's actually empty).
+Bu özellik `ls -lO` ile sıkıştırılmış olarak görülebilir çünkü sıkıştırılmış dosyalar `UF_COMPRESSED` bayrağı ile etiketlenir. Eğer bir sıkıştırılmış dosya `chflags nocompressed </path/to/file>` ile kaldırılırsa, sistem dosyanın sıkıştırıldığını bilmeyecek ve bu nedenle veriyi açıp erişemeyecektir (gerçekten boş olduğunu düşünecektir).
 
-The tool afscexpand can be used to force decompress a dile.
+Afscexpand aracı, bir dosyayı zorla açmak için kullanılabilir.
 
-## **Universal binaries &** Mach-o Format
+## **Evrensel ikililer &** Mach-o Formatı
 
-Mac OS binaries usually are compiled as **universal binaries**. A **universal binary** can **support multiple architectures in the same file**.
+Mac OS ikilileri genellikle **evrensel ikililer** olarak derlenir. Bir **evrensel ikili**, **aynı dosyada birden fazla mimariyi destekleyebilir**.
 
 {{#ref}}
 universal-binaries-and-mach-o-format.md
 {{#endref}}
 
-## macOS Process Memory
+## macOS Süreç Belleği
 
-## macOS memory dumping
+## macOS bellek dökümü
 
 {{#ref}}
 macos-memory-dumping.md
 {{#endref}}
 
-## Risk Category Files Mac OS
+## Risk Kategorisi Dosyaları Mac OS
 
-The directory `/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/System` is where information about the **risk associated with different file extensions is stored**. This directory categorizes files into various risk levels, influencing how Safari handles these files upon download. The categories are as follows:
+`/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/System` dizini, **farklı dosya uzantılarıyla ilişkili risk hakkında bilgilerin saklandığı yerdir**. Bu dizin, dosyaları çeşitli risk seviyelerine ayırarak Safari'nin bu dosyaları indirdikten sonra nasıl işleyeceğini etkiler. Kategoriler şunlardır:
 
-- **LSRiskCategorySafe**: Files in this category are considered **completely safe**. Safari will automatically open these files after they are downloaded.
-- **LSRiskCategoryNeutral**: These files come with no warnings and are **not automatically opened** by Safari.
-- **LSRiskCategoryUnsafeExecutable**: Files under this category **trigger a warning** indicating that the file is an application. This serves as a security measure to alert the user.
-- **LSRiskCategoryMayContainUnsafeExecutable**: This category is for files, such as archives, that might contain an executable. Safari will **trigger a warning** unless it can verify that all contents are safe or neutral.
+- **LSRiskCategorySafe**: Bu kategorideki dosyalar **tamamen güvenli** olarak kabul edilir. Safari, bu dosyaları indirdikten sonra otomatik olarak açacaktır.
+- **LSRiskCategoryNeutral**: Bu dosyalar uyarı içermez ve Safari tarafından **otomatik olarak açılmaz**.
+- **LSRiskCategoryUnsafeExecutable**: Bu kategori altındaki dosyalar, dosyanın bir uygulama olduğunu belirten **bir uyarı tetikler**. Bu, kullanıcıyı uyarmak için bir güvenlik önlemidir.
+- **LSRiskCategoryMayContainUnsafeExecutable**: Bu kategori, bir yürütülebilir dosya içerebilecek arşivler gibi dosyalar içindir. Safari, tüm içeriklerin güvenli veya nötr olduğunu doğrulayamazsa **bir uyarı tetikler**.
 
-## Log files
+## Log dosyaları
 
-- **`$HOME/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV2`**: Contains information about downloaded files, like the URL from where they were downloaded.
-- **`/var/log/system.log`**: Main log of OSX systems. com.apple.syslogd.plist is responsible for the execution of syslogging (you can check if it's disabled looking for "com.apple.syslogd" in `launchctl list`.
-- **`/private/var/log/asl/*.asl`**: These are the Apple System Logs which may contain interesting information.
-- **`$HOME/Library/Preferences/com.apple.recentitems.plist`**: Stores recently accessed files and applications through "Finder".
-- **`$HOME/Library/Preferences/com.apple.loginitems.plsit`**: Stores items to launch upon system startup
-- **`$HOME/Library/Logs/DiskUtility.log`**: Log file for thee DiskUtility App (info about drives, including USBs)
-- **`/Library/Preferences/SystemConfiguration/com.apple.airport.preferences.plist`**: Data about wireless access points.
-- **`/private/var/db/launchd.db/com.apple.launchd/overrides.plist`**: List of daemons deactivated.
+- **`$HOME/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV2`**: İndirilen dosyalar hakkında, nereden indirildikleri gibi bilgiler içerir.
+- **`/var/log/system.log`**: OSX sistemlerinin ana günlüğü. com.apple.syslogd.plist, syslogging'in yürütülmesinden sorumludur (devre dışı olup olmadığını kontrol etmek için `launchctl list` içinde "com.apple.syslogd" arayabilirsiniz).
+- **`/private/var/log/asl/*.asl`**: İlginç bilgiler içerebilecek Apple Sistem Günlükleridir.
+- **`$HOME/Library/Preferences/com.apple.recentitems.plist`**: "Finder" aracılığıyla en son erişilen dosyaları ve uygulamaları saklar.
+- **`$HOME/Library/Preferences/com.apple.loginitems.plsit`**: Sistem başlangıcında başlatılacak öğeleri saklar.
+- **`$HOME/Library/Logs/DiskUtility.log`**: DiskUtility Uygulaması için günlük dosyası (sürücüler hakkında bilgi, USB'ler dahil).
+- **`/Library/Preferences/SystemConfiguration/com.apple.airport.preferences.plist`**: Kablosuz erişim noktaları hakkında veriler.
+- **`/private/var/db/launchd.db/com.apple.launchd/overrides.plist`**: Devre dışı bırakılan daemonların listesi.
 
 {{#include ../../../banners/hacktricks-training.md}}

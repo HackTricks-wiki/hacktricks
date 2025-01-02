@@ -2,33 +2,31 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Temel Bilgiler
 
-Chromium-based browsers like Google Chrome, Microsoft Edge, Brave, and others. These browsers are built on the Chromium open-source project, which means they share a common base and, therefore, have similar functionalities and developer options.
+Google Chrome, Microsoft Edge, Brave ve diğerleri gibi Chromium tabanlı tarayıcılar. Bu tarayıcılar, ortak bir temel paylaştıkları için Chromium açık kaynak projesine dayanarak inşa edilmiştir ve bu nedenle benzer işlevselliklere ve geliştirici seçeneklerine sahiptir.
 
-#### `--load-extension` Flag
+#### `--load-extension` Bayrağı
 
-The `--load-extension` flag is used when starting a Chromium-based browser from the command line or a script. This flag allows to **automatically load one or more extensions** into the browser upon startup.
+`--load-extension` bayrağı, bir Chromium tabanlı tarayıcıyı komut satırından veya bir betikten başlatırken kullanılır. Bu bayrak, tarayıcıyı başlatırken **bir veya daha fazla uzantıyı otomatik olarak yüklemeye** olanak tanır.
 
-#### `--use-fake-ui-for-media-stream` Flag
+#### `--use-fake-ui-for-media-stream` Bayrağı
 
-The `--use-fake-ui-for-media-stream` flag is another command-line option that can be used to start Chromium-based browsers. This flag is designed to **bypass the normal user prompts that ask for permission to access media streams from the camera and microphone**. When this flag is used, the browser automatically grants permission to any website or application that requests access to the camera or microphone.
+`--use-fake-ui-for-media-stream` bayrağı, Chromium tabanlı tarayıcıları başlatmak için kullanılabilecek bir diğer komut satırı seçeneğidir. Bu bayrak, **kamera ve mikrofon üzerinden medya akışlarına erişim izni isteyen normal kullanıcı istemlerini atlamak için tasarlanmıştır**. Bu bayrak kullanıldığında, tarayıcı otomatik olarak kameraya veya mikrofon erişimi talep eden herhangi bir web sitesine veya uygulamaya izin verir.
 
-### Tools
+### Araçlar
 
 - [https://github.com/breakpointHQ/snoop](https://github.com/breakpointHQ/snoop)
 - [https://github.com/breakpointHQ/VOODOO](https://github.com/breakpointHQ/VOODOO)
 
-### Example
-
+### Örnek
 ```bash
 # Intercept traffic
 voodoo intercept -b chrome
 ```
+Daha fazla örnek bulmak için araç bağlantılarına bakın
 
-Find more examples in the tools links
-
-## References
+## Referanslar
 
 - [https://twitter.com/RonMasas/status/1758106347222995007](https://twitter.com/RonMasas/status/1758106347222995007)
 

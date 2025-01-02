@@ -2,34 +2,33 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## **Athorizarions DB**
+## **Yetkilendirme DB**
 
-The database located in `/var/db/auth.db` is database used to store permissions to perform sensitive operations. These operations are performed completely in **user space** and are usually used by **XPC services** which need to check **if the calling client is authorized** to perform certain action checking this database.
+`/var/db/auth.db` konumunda bulunan veritabanı, hassas işlemleri gerçekleştirmek için izinleri saklamak amacıyla kullanılan bir veritabanıdır. Bu işlemler tamamen **kullanıcı alanında** gerçekleştirilir ve genellikle belirli bir eylemi gerçekleştirmek için **çağrılan istemcinin yetkilendirilip yetkilendirilmediğini** kontrol etmesi gereken **XPC hizmetleri** tarafından kullanılır.
 
-Initially this database is created from the content of `/System/Library/Security/authorization.plist`. Then, some services might add or modify this dataabse to add other permissions to it.
+Başlangıçta bu veritabanı, `/System/Library/Security/authorization.plist` içeriğinden oluşturulur. Daha sonra bazı hizmetler, bu veritabanına diğer izinleri eklemek veya mevcut verileri değiştirmek için ekleme yapabilir.
 
-The rules are stored in the `rules` table inside the database and contains the folliwing colmns:
+Kurallar, veritabanının içindeki `rules` tablosunda saklanır ve aşağıdaki sütunları içerir:
 
-- **id**: A unique identifier for each rule, automatically incremented and serving as the primary key.
-- **name**: The unique name of the rule used to identify and reference it within the authorization system.
-- **type**: Specifies the type of the rule, restricted to values 1 or 2 to define its authorization logic.
-- **class**: Categorizes the rule into a specific class, ensuring it is a positive integer.
-  - "allow" for allow, "deny" for deny, "user" if the group property indicated a group which membership allows the access, "rule" indicates in an array a rule to be fulfilled, "evaluate-mechanisms" followed by a `mechanisms` array which are either builtins or a name of a bundle inside `/System/Library/CoreServices/SecurityAgentPlugins/` or /Library/Security//SecurityAgentPlugins
-- **group**: Indicates the user group associated with the rule for group-based authorization.
-- **kofn**: Represents the "k-of-n" parameter, determining how many subrules must be satisfied out of a total number.
-- **timeout**: Defines the duration in seconds before the authorization granted by the rule expires.
-- **flags**: Contains various flags that modify the behavior and characteristics of the rule.
-- **tries**: Limits the number of allowed authorization attempts to enhance security.
-- **version**: Tracks the version of the rule for version control and updates.
-- **created**: Records the timestamp when the rule was created for auditing purposes.
-- **modified**: Stores the timestamp of the last modification made to the rule.
-- **hash**: Holds a hash value of the rule to ensure its integrity and detect tampering.
-- **identifier**: Provides a unique string identifier, such as a UUID, for external references to the rule.
-- **requirement**: Contains serialized data defining the rule's specific authorization requirements and mechanisms.
-- **comment**: Offers a human-readable description or comment about the rule for documentation and clarity.
+- **id**: Her kural için benzersiz bir tanımlayıcı, otomatik olarak artırılır ve birincil anahtar olarak hizmet eder.
+- **name**: Yetkilendirme sisteminde kuralı tanımlamak ve referans almak için kullanılan kuralın benzersiz adı.
+- **type**: Kuralın türünü belirtir, yetkilendirme mantığını tanımlamak için 1 veya 2 değerleriyle sınırlıdır.
+- **class**: Kuralı belirli bir sınıfa kategorize eder, pozitif bir tam sayı olmasını sağlar.
+- "allow" izin vermek için, "deny" reddetmek için, "user" eğer grup özelliği erişimi sağlayan bir grup gösteriyorsa, "rule" bir dizide yerine getirilmesi gereken bir kuralı belirtir, "evaluate-mechanisms" ardından `/System/Library/CoreServices/SecurityAgentPlugins/` veya /Library/Security//SecurityAgentPlugins içindeki bir paket adını içeren `mechanisms` dizisi gelir.
+- **group**: Grup tabanlı yetkilendirme için kural ile ilişkili kullanıcı grubunu belirtir.
+- **kofn**: Toplam sayıdan kaç alt kuralın karşılanması gerektiğini belirleyen "k-of-n" parametresini temsil eder.
+- **timeout**: Kural tarafından verilen yetkilendirmenin süresinin dolmadan önceki süreyi saniye cinsinden tanımlar.
+- **flags**: Kuralın davranışını ve özelliklerini değiştiren çeşitli bayrakları içerir.
+- **tries**: Güvenliği artırmak için izin verilen yetkilendirme denemelerinin sayısını sınırlar.
+- **version**: Kuralın sürümünü sürüm kontrolü ve güncellemeler için takip eder.
+- **created**: Kuralın oluşturulduğu zaman damgasını kaydeder, denetim amaçları için.
+- **modified**: Kurala yapılan son değişikliğin zaman damgasını saklar.
+- **hash**: Kuralın bütünlüğünü sağlamak ve müdahaleyi tespit etmek için kuralın bir hash değerini tutar.
+- **identifier**: Kural için dış referanslar için benzersiz bir dize tanımlayıcı, örneğin bir UUID sağlar.
+- **requirement**: Kuralın belirli yetkilendirme gereksinimlerini ve mekanizmalarını tanımlayan serileştirilmiş verileri içerir.
+- **comment**: Belgelendirme ve açıklık için kural hakkında insan tarafından okunabilir bir açıklama veya yorum sunar.
 
-### Example
-
+### Örnek
 ```bash
 # List by name and comments
 sudo sqlite3 /var/db/auth.db "select name, comment from rules"
@@ -40,50 +39,46 @@ security authorizationdb read com.apple.tcc.util.admin
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>class</key>
-	<string>rule</string>
-	<key>comment</key>
-	<string>For modification of TCC settings.</string>
-	<key>created</key>
-	<real>701369782.01043606</real>
-	<key>modified</key>
-	<real>701369782.01043606</real>
-	<key>rule</key>
-	<array>
-		<string>authenticate-admin-nonshared</string>
-	</array>
-	<key>version</key>
-	<integer>0</integer>
+<key>class</key>
+<string>rule</string>
+<key>comment</key>
+<string>For modification of TCC settings.</string>
+<key>created</key>
+<real>701369782.01043606</real>
+<key>modified</key>
+<real>701369782.01043606</real>
+<key>rule</key>
+<array>
+<string>authenticate-admin-nonshared</string>
+</array>
+<key>version</key>
+<integer>0</integer>
 </dict>
 </plist>
 ```
-
-Moreover in [https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/](https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/) it's possible to see the meaning of `authenticate-admin-nonshared`:
-
+Ayrıca [https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/](https://www.dssw.co.uk/reference/authorization-rights/authenticate-admin-nonshared/) adresinde `authenticate-admin-nonshared` ifadesinin anlamını görmek mümkündür:
 ```json
 {
-  "allow-root": "false",
-  "authenticate-user": "true",
-  "class": "user",
-  "comment": "Authenticate as an administrator.",
-  "group": "admin",
-  "session-owner": "false",
-  "shared": "false",
-  "timeout": "30",
-  "tries": "10000",
-  "version": "1"
+"allow-root": "false",
+"authenticate-user": "true",
+"class": "user",
+"comment": "Authenticate as an administrator.",
+"group": "admin",
+"session-owner": "false",
+"shared": "false",
+"timeout": "30",
+"tries": "10000",
+"version": "1"
 }
 ```
-
 ## Authd
 
-It's a deamon that will receive requests to authorize clients to perform sensitive actions. It works as a XPC service defined inside the `XPCServices/` folder and use to write its logs in `/var/log/authd.log`.
+Bu, istemcilerin hassas eylemleri gerçekleştirmesi için yetkilendirme taleplerini alacak bir deamondur. `XPCServices/` klasörü içinde tanımlanan bir XPC hizmeti olarak çalışır ve günlüklerini `/var/log/authd.log` dosyasına yazar.
 
-Moreover using the security tool it's possible to test many `Security.framework` APIs. For example the `AuthorizationExecuteWithPrivileges` running: `security execute-with-privileges /bin/ls`
+Ayrıca, güvenlik aracını kullanarak birçok `Security.framework` API'sini test etmek mümkündür. Örneğin, `AuthorizationExecuteWithPrivileges` komutunu çalıştırarak: `security execute-with-privileges /bin/ls`
 
-That will fork and exec `/usr/libexec/security_authtrampoline /bin/ls` as root, which will ask for permissions in a prompt to execute ls as root:
+Bu, `/usr/libexec/security_authtrampoline /bin/ls` komutunu root olarak fork ve exec edecektir; bu da ls komutunu root olarak çalıştırmak için bir izin istemi gösterecektir:
 
 <figure><img src="../../../images/image (10).png" alt=""><figcaption></figcaption></figure>
 
 {{#include ../../../banners/hacktricks-training.md}}
-

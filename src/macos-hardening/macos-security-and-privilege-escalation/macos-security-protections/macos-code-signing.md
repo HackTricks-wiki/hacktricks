@@ -1,117 +1,112 @@
-# macOS Code Signing
+# macOS Kod İmzalama
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Temel Bilgiler
 
-Mach-o binaries contains a load command called **`LC_CODE_SIGNATURE`** that indicates the **offset** and **size** of the signatures inside the binary. Actually, using the GUI tool MachOView, it's possible to find at the end of the binary a section called **Code Signature** with this information:
+Mach-o ikili dosyaları, ikilinin içindeki imzaların **offset** ve **boyutunu** belirten **`LC_CODE_SIGNATURE`** adlı bir yükleme komutu içerir. Aslında, GUI aracı MachOView kullanarak, ikilinin sonunda bu bilgileri içeren **Kod İmzası** adlı bir bölüm bulmak mümkündür:
 
 <figure><img src="../../../images/image (1) (1) (1) (1).png" alt="" width="431"><figcaption></figcaption></figure>
 
-The magic header of the Code Signature is **`0xFADE0CC0`**. Then you have information such as the length and the number of blobs of the superBlob that contains them.\
-It's possible to find this information in the [source code here](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L276):
-
+Kod İmzasının sihirli başlığı **`0xFADE0CC0`**'dır. Ardından, bunları içeren superBlob'un uzunluğu ve blob sayısı gibi bilgiler vardır.\
+Bu bilgiyi [kaynak kodda burada](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L276) bulmak mümkündür:
 ```c
 /*
- * Structure of an embedded-signature SuperBlob
- */
+* Structure of an embedded-signature SuperBlob
+*/
 
 typedef struct __BlobIndex {
-	uint32_t type;                                  /* type of entry */
-	uint32_t offset;                                /* offset of entry */
+uint32_t type;                                  /* type of entry */
+uint32_t offset;                                /* offset of entry */
 } CS_BlobIndex
 __attribute__ ((aligned(1)));
 
 typedef struct __SC_SuperBlob {
-	uint32_t magic;                                 /* magic number */
-	uint32_t length;                                /* total length of SuperBlob */
-	uint32_t count;                                 /* number of index entries following */
-	CS_BlobIndex index[];                   /* (count) entries */
-	/* followed by Blobs in no particular order as indicated by offsets in index */
+uint32_t magic;                                 /* magic number */
+uint32_t length;                                /* total length of SuperBlob */
+uint32_t count;                                 /* number of index entries following */
+CS_BlobIndex index[];                   /* (count) entries */
+/* followed by Blobs in no particular order as indicated by offsets in index */
 } CS_SuperBlob
 __attribute__ ((aligned(1)));
 
 #define KERNEL_HAVE_CS_GENERICBLOB 1
 typedef struct __SC_GenericBlob {
-	uint32_t magic;                                 /* magic number */
-	uint32_t length;                                /* total length of blob */
-	char data[];
+uint32_t magic;                                 /* magic number */
+uint32_t length;                                /* total length of blob */
+char data[];
 } CS_GenericBlob
 __attribute__ ((aligned(1)));
 ```
+Yaygın olarak bulunan blob'lar, Kod Dizini, Gereksinimler ve Yetkiler ile Kriptografik Mesaj Sözleşmesi (CMS) içerir.\
+Ayrıca, blob'larda kodlanan verilerin **Big Endian** formatında kodlandığını not edin.
 
-Common blobs contained are Code Directory, Requirements and Entitlements and a Cryptographic Message Syntax (CMS).\
-Moreover, note how the data encoded in the blobs is encoded in **Big Endian.**
+Ayrıca, imzaların ikili dosyalardan ayrılabileceği ve `/var/db/DetachedSignatures` dizininde saklanabileceği (iOS tarafından kullanılır) unutulmamalıdır.
 
-Moreover, signatures cloud be detached from the binaries and stored in `/var/db/DetachedSignatures` (used by iOS).
+## Kod Dizini Blob
 
-## Code Directory Blob
-
-It's possible to find the declaration of the [Code Directory Blob in the code](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L104):
-
+[Kod Dizini Blob'unun kod içindeki beyanını](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L104) bulmak mümkündür:
 ```c
 typedef struct __CodeDirectory {
-	uint32_t magic;                                 /* magic number (CSMAGIC_CODEDIRECTORY) */
-	uint32_t length;                                /* total length of CodeDirectory blob */
-	uint32_t version;                               /* compatibility version */
-	uint32_t flags;                                 /* setup and mode flags */
-	uint32_t hashOffset;                    /* offset of hash slot element at index zero */
-	uint32_t identOffset;                   /* offset of identifier string */
-	uint32_t nSpecialSlots;                 /* number of special hash slots */
-	uint32_t nCodeSlots;                    /* number of ordinary (code) hash slots */
-	uint32_t codeLimit;                             /* limit to main image signature range */
-	uint8_t hashSize;                               /* size of each hash in bytes */
-	uint8_t hashType;                               /* type of hash (cdHashType* constants) */
-	uint8_t platform;                               /* platform identifier; zero if not platform binary */
-	uint8_t pageSize;                               /* log2(page size in bytes); 0 => infinite */
-	uint32_t spare2;                                /* unused (must be zero) */
+uint32_t magic;                                 /* magic number (CSMAGIC_CODEDIRECTORY) */
+uint32_t length;                                /* total length of CodeDirectory blob */
+uint32_t version;                               /* compatibility version */
+uint32_t flags;                                 /* setup and mode flags */
+uint32_t hashOffset;                    /* offset of hash slot element at index zero */
+uint32_t identOffset;                   /* offset of identifier string */
+uint32_t nSpecialSlots;                 /* number of special hash slots */
+uint32_t nCodeSlots;                    /* number of ordinary (code) hash slots */
+uint32_t codeLimit;                             /* limit to main image signature range */
+uint8_t hashSize;                               /* size of each hash in bytes */
+uint8_t hashType;                               /* type of hash (cdHashType* constants) */
+uint8_t platform;                               /* platform identifier; zero if not platform binary */
+uint8_t pageSize;                               /* log2(page size in bytes); 0 => infinite */
+uint32_t spare2;                                /* unused (must be zero) */
 
-	char end_earliest[0];
+char end_earliest[0];
 
-	/* Version 0x20100 */
-	uint32_t scatterOffset;                 /* offset of optional scatter vector */
-	char end_withScatter[0];
+/* Version 0x20100 */
+uint32_t scatterOffset;                 /* offset of optional scatter vector */
+char end_withScatter[0];
 
-	/* Version 0x20200 */
-	uint32_t teamOffset;                    /* offset of optional team identifier */
-	char end_withTeam[0];
+/* Version 0x20200 */
+uint32_t teamOffset;                    /* offset of optional team identifier */
+char end_withTeam[0];
 
-	/* Version 0x20300 */
-	uint32_t spare3;                                /* unused (must be zero) */
-	uint64_t codeLimit64;                   /* limit to main image signature range, 64 bits */
-	char end_withCodeLimit64[0];
+/* Version 0x20300 */
+uint32_t spare3;                                /* unused (must be zero) */
+uint64_t codeLimit64;                   /* limit to main image signature range, 64 bits */
+char end_withCodeLimit64[0];
 
-	/* Version 0x20400 */
-	uint64_t execSegBase;                   /* offset of executable segment */
-	uint64_t execSegLimit;                  /* limit of executable segment */
-	uint64_t execSegFlags;                  /* executable segment flags */
-	char end_withExecSeg[0];
+/* Version 0x20400 */
+uint64_t execSegBase;                   /* offset of executable segment */
+uint64_t execSegLimit;                  /* limit of executable segment */
+uint64_t execSegFlags;                  /* executable segment flags */
+char end_withExecSeg[0];
 
-	/* Version 0x20500 */
-	uint32_t runtime;
-	uint32_t preEncryptOffset;
-	char end_withPreEncryptOffset[0];
+/* Version 0x20500 */
+uint32_t runtime;
+uint32_t preEncryptOffset;
+char end_withPreEncryptOffset[0];
 
-	/* Version 0x20600 */
-	uint8_t linkageHashType;
-	uint8_t linkageApplicationType;
-	uint16_t linkageApplicationSubType;
-	uint32_t linkageOffset;
-	uint32_t linkageSize;
-	char end_withLinkage[0];
+/* Version 0x20600 */
+uint8_t linkageHashType;
+uint8_t linkageApplicationType;
+uint16_t linkageApplicationSubType;
+uint32_t linkageOffset;
+uint32_t linkageSize;
+char end_withLinkage[0];
 
-	/* followed by dynamic content as located by offset fields above */
+/* followed by dynamic content as located by offset fields above */
 } CS_CodeDirectory
 __attribute__ ((aligned(1)));
 ```
+Not edin ki, bu yapının farklı versiyonları vardır ve eski olanlar daha az bilgi içerebilir.
 
-Note that there are different versions of this struct where old ones might contain less information.
+## Kod İmzalama Sayfaları
 
-## Signing Code Pages
-
-Hashing the full binary would be inefficient and even useless if when it's only loaded in memory partially. Therefore, the code signature is actually a hash of hashes where each binary page is hashed individually.\
-Actually, in the previous **Code Directory** code you can see that the **page size is specified** in one of its fields. Moreover, if the size of the binary is not a multiple of the size of a page, the field **CodeLimit** specifies where is the end of the signature.
-
+Tam ikili dosyanın hash'lenmesi verimsiz ve hatta yalnızca bellekte kısmen yüklüyse işe yaramaz olur. Bu nedenle, kod imzası aslında her ikili sayfanın ayrı ayrı hash'lenmesiyle oluşturulan bir hash'ler hash'idir.\
+Aslında, önceki **Kod Dizini** kodunda **sayfa boyutunun belirtildiğini** görebilirsiniz. Ayrıca, ikilinin boyutu bir sayfa boyutunun katı değilse, **CodeLimit** alanı imzanın nerede sona erdiğini belirtir.
 ```bash
 # Get all hashes of /bin/ps
 codesign -d -vvvvvv /bin/ps
@@ -125,16 +120,16 @@ Executable Segment base=0
 Executable Segment limit=32768
 Executable Segment flags=0x1
 Page size=4096
-    -7=a542b4dcbc134fbd950c230ed9ddb99a343262a2df8e0c847caee2b6d3b41cc8
-    -6=0000000000000000000000000000000000000000000000000000000000000000
-    -5=2bb2de519f43b8e116c7eeea8adc6811a276fb134c55c9c2e9dcbd3047f80c7d
-    -4=0000000000000000000000000000000000000000000000000000000000000000
-    -3=0000000000000000000000000000000000000000000000000000000000000000
-    -2=4ca453dc8908dc7f6e637d6159c8761124ae56d080a4a550ad050c27ead273b3
-    -1=0000000000000000000000000000000000000000000000000000000000000000
-     0=a5e6478f89812c0c09f123524cad560a9bf758d16014b586089ddc93f004e39c
-     1=ad7facb2586fc6e966c004d7d1d16b024f5805ff7cb47c7a85dabd8b48892ca7
-     2=93d476eeace15a5ad14c0fb56169fd080a04b99582b4c7a01e1afcbc58688f
+-7=a542b4dcbc134fbd950c230ed9ddb99a343262a2df8e0c847caee2b6d3b41cc8
+-6=0000000000000000000000000000000000000000000000000000000000000000
+-5=2bb2de519f43b8e116c7eeea8adc6811a276fb134c55c9c2e9dcbd3047f80c7d
+-4=0000000000000000000000000000000000000000000000000000000000000000
+-3=0000000000000000000000000000000000000000000000000000000000000000
+-2=4ca453dc8908dc7f6e637d6159c8761124ae56d080a4a550ad050c27ead273b3
+-1=0000000000000000000000000000000000000000000000000000000000000000
+0=a5e6478f89812c0c09f123524cad560a9bf758d16014b586089ddc93f004e39c
+1=ad7facb2586fc6e966c004d7d1d16b024f5805ff7cb47c7a85dabd8b48892ca7
+2=93d476eeace15a5ad14c0fb56169fd080a04b99582b4c7a01e1afcbc58688f
 [...]
 
 # Calculate the hasehs of each page manually
@@ -143,33 +138,31 @@ SIZE=`stat -f "%Z" $BINARY`
 PAGESIZE=4096 # From the previous output
 PAGES=`expr $SIZE / $PAGESIZE`
 for i in `seq 0 $PAGES`; do
-    dd if=$BINARY of=/tmp/`basename $BINARY`.page.$i bs=$PAGESIZE skip=$i count=1
+dd if=$BINARY of=/tmp/`basename $BINARY`.page.$i bs=$PAGESIZE skip=$i count=1
 done
 openssl sha256 /tmp/*.page.*
 ```
+## Yetki Blob'u
 
-## Entitlements Blob
+Uygulamaların tüm yetkilerin tanımlandığı bir **yetki blob'u** içerebileceğini unutmayın. Ayrıca, bazı iOS ikili dosyaları, yetkilerini özel slot -7'de (özel slot -5 yerine) belirtebilir.
 
-Note that applications might also contain an **entitlement blob** where all the entitlements are defined. Moreover, some iOS binaries might have their entitlements specific in the special slot -7 (instead of in the -5 entitlements special slot).
+## Özel Slotlar
 
-## Special Slots
+MacOS uygulamaları, ikili dosya içinde çalıştırmak için ihtiyaç duydukları her şeye sahip değildir, aynı zamanda **harici kaynaklar** (genellikle uygulamaların **paketinde**) kullanırlar. Bu nedenle, ikili dosya içinde bazı ilginç harici kaynakların değiştirilmediğini kontrol etmek için hash'lerini içeren bazı slotlar bulunmaktadır.
 
-MacOS applications doesn't have everything they need to execute inside the binary but they also use **external resources** (usually inside the applications **bundle**). Therefore, there are some slots inside the binary who will be containing the hashes of some interesting external resources to check they weren't modified.
+Aslında, Kod Dizini yapılarında **`nSpecialSlots`** adında özel slot sayısını belirten bir parametre görmek mümkündür. Özel slot 0 yoktur ve en yaygın olanları (-1'den -6'ya kadar) şunlardır:
 
-Actually, it's possible to see in the Code Directory structs a parameter called **`nSpecialSlots`** indicating the number of the special slots. The there isn't a special slot 0 and the most common ones (from -1 to -6 are):
+- `info.plist`'in hash'i (veya `__TEXT.__info__plist` içindeki).
+- Gereksinimlerin hash'i
+- Kaynak Dizini'nin hash'i (paket içindeki `_CodeSignature/CodeResources` dosyasının hash'i).
+- Uygulamaya özgü (kullanılmayan)
+- Yetkilerin hash'i
+- Sadece DMG kod imzaları
+- DER Yetkileri
 
-- Hash of `info.plist` (or the one inside `__TEXT.__info__plist`).
-- Has of the Requirements
-- Hash of the Resource Directory (hash of `_CodeSignature/CodeResources` file inside the bundle).
-- Application specific (unused)
-- Hash of the entitlements
-- DMG code signatures only
-- DER Entitlements
+## Kod İmzalama Bayrakları
 
-## Code Signing Flags
-
-Every process has related a bitmask known as the `status` which is started by the kernel and some of them can be overridden by the **code signature**. These flags that can be included in the code signing are [defined in the code](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L36):
-
+Her süreç, çekirdek tarafından başlatılan ve bazıları **kod imzası** ile geçersiz kılınabilen `status` olarak bilinen bir bitmask ile ilişkilidir. Kod imzalamasında dahil edilebilecek bu bayraklar [kodda tanımlanmıştır](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L36):
 ```c
 /* code signing attributes of a process */
 #define CS_VALID                    0x00000001  /* dynamically valid */
@@ -194,7 +187,7 @@ Every process has related a bitmask known as the `status` which is started by th
 #define CS_LINKER_SIGNED            0x00020000  /* Automatically signed by the linker */
 
 #define CS_ALLOWED_MACHO            (CS_ADHOC | CS_HARD | CS_KILL | CS_CHECK_EXPIRATION | \
-	                             CS_RESTRICT | CS_ENFORCEMENT | CS_REQUIRE_LV | CS_RUNTIME | CS_LINKER_SIGNED)
+CS_RESTRICT | CS_ENFORCEMENT | CS_REQUIRE_LV | CS_RUNTIME | CS_LINKER_SIGNED)
 
 #define CS_EXEC_SET_HARD            0x00100000  /* set CS_HARD on any exec'ed process */
 #define CS_EXEC_SET_KILL            0x00200000  /* set CS_KILL on any exec'ed process */
@@ -214,17 +207,15 @@ Every process has related a bitmask known as the `status` which is started by th
 
 #define CS_ENTITLEMENT_FLAGS        (CS_GET_TASK_ALLOW | CS_INSTALLER | CS_DATAVAULT_CONTROLLER | CS_NVRAM_UNRESTRICTED)
 ```
+Not edin ki [**exec_mach_imgact**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/kern/kern_exec.c#L1420) fonksiyonu, yürütmeye başlarken `CS_EXEC_*` bayraklarını dinamik olarak ekleyebilir.
 
-Note that the function [**exec_mach_imgact**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/kern/kern_exec.c#L1420) can also add the `CS_EXEC_*` flags dynamically when starting the execution.
+## Kod İmzası Gereksinimleri
 
-## Code Signature Requirements
+Her uygulama, yürütülebilmesi için **karşılaması gereken** bazı **gereksinimler** saklar. Eğer **uygulama, uygulama tarafından karşılanmayan gereksinimler içeriyorsa**, yürütülmeyecektir (muhtemelen değiştirilmiştir).
 
-Each application store some **requirements** that it must **satisfy** in order to be able to be executed. If the **application contains requirements aren't satisfied by the application**, it won't be executed (as it has probably been altered).
+Bir ikili dosyanın gereksinimleri, **özel bir dilbilgisi** kullanır; bu, **ifadelerin** bir akışıdır ve `0xfade0c00` sihirli değeri kullanılarak bloblar olarak kodlanmıştır; **hash'i özel bir kod slotunda** saklanır.
 
-The requirements of a binary use a **special grammar** which is a stream of **expressions** and are encoded as blobs using `0xfade0c00` as the magic whose **hash is stored in a special code slot**.
-
-The requirements of a binary can be seen running:
-
+Bir ikili dosyanın gereksinimleri, çalıştırılarak görülebilir:
 ```bash
 codesign -d -r- /bin/ls
 Executable=/bin/ls
@@ -234,12 +225,10 @@ codesign -d -r- /Applications/Signal.app/
 Executable=/Applications/Signal.app/Contents/MacOS/Signal
 designated => identifier "org.whispersystems.signal-desktop" and anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] /* exists */ and certificate leaf[field.1.2.840.113635.100.6.1.13] /* exists */ and certificate leaf[subject.OU] = U68MSDN6DR
 ```
-
 > [!NOTE]
-> Note how this signatures can check things like certification information, TeamID, IDs, entitlements and many other data.
+> Bu imzaların sertifika bilgileri, TeamID, kimlikler, yetkilendirmeler ve birçok diğer verileri kontrol edebileceğini unutmayın.
 
-Moreover, it's possible to generate some compiled requirements using the `csreq` tool:
-
+Ayrıca, `csreq` aracı kullanarak bazı derlenmiş gereksinimler oluşturmak mümkündür:
 ```bash
 # Generate compiled requirements
 csreq -b /tmp/output.csreq -r='identifier "org.whispersystems.signal-desktop" and anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] /* exists */ and certificate leaf[field.1.2.840.113635.100.6.1.13] /* exists */ and certificate leaf[subject.OU] = U68MSDN6DR'
@@ -251,121 +240,115 @@ od -A x -t x1 /tmp/output.csreq
 0000020    00  00  00  21  6f  72  67  2e  77  68  69  73  70  65  72  73
 [...]
 ```
+#### **Geçerliliği Kontrol Etme**
 
-It's possible to access this information and create or modify requirements with some APIs from the `Security.framework` like:
+- **`Sec[Static]CodeCheckValidity`**: SecCodeRef'in Geçerliliğini Gereksinime göre kontrol et.
+- **`SecRequirementEvaluate`**: Sertifika bağlamında gereksinimi doğrula.
+- **`SecTaskValidateForRequirement`**: Çalışan bir SecTask'ı `CFString` gereksinimine karşı doğrula.
 
-#### **Checking Validity**
+#### **Kod Gereksinimlerini Oluşturma ve Yönetme**
 
-- **`Sec[Static]CodeCheckValidity`**: Check the validity of SecCodeRef per Requirement.
-- **`SecRequirementEvaluate`**: Validate requirement in certificate context
-- **`SecTaskValidateForRequirement`**: Validate a running SecTask against `CFString` requirement.
+- **`SecRequirementCreateWithData`:** Gereksinimi temsil eden ikili veriden bir `SecRequirementRef` oluşturur.
+- **`SecRequirementCreateWithString`:** Gereksinimin string ifadesinden bir `SecRequirementRef` oluşturur.
+- **`SecRequirementCopy[Data/String]`**: Bir `SecRequirementRef`'in ikili veri temsilini alır.
+- **`SecRequirementCreateGroup`**: Uygulama grubu üyeliği için bir gereksinim oluştur.
 
-#### **Creating and Managing Code Requirements**
+#### **Kod İmzalama Bilgilerine Erişim**
 
-- **`SecRequirementCreateWithData`:** Creates a `SecRequirementRef` from binary data representing the requirement.
-- **`SecRequirementCreateWithString`:** Creates a `SecRequirementRef` from a string expression of the requirement.
-- **`SecRequirementCopy[Data/String]`**: Retrieves the binary data representation of a `SecRequirementRef`.
-- **`SecRequirementCreateGroup`**: Create a requirement for app-group membership
+- **`SecStaticCodeCreateWithPath`**: Kod imzalarını incelemek için bir dosya sistemi yolundan `SecStaticCodeRef` nesnesini başlatır.
+- **`SecCodeCopySigningInformation`**: Bir `SecCodeRef` veya `SecStaticCodeRef`'den imzalama bilgilerini alır.
 
-#### **Accessing Code Signing Information**
+#### **Kod Gereksinimlerini Değiştirme**
 
-- **`SecStaticCodeCreateWithPath`**: Initializes a `SecStaticCodeRef` object from a file system path for inspecting code signatures.
-- **`SecCodeCopySigningInformation`**: Obtains signing information from a `SecCodeRef` or `SecStaticCodeRef`.
+- **`SecCodeSignerCreate`**: Kod imzalama işlemleri gerçekleştirmek için bir `SecCodeSignerRef` nesnesi oluşturur.
+- **`SecCodeSignerSetRequirement`**: İmzalama sırasında uygulanacak yeni bir gereksinim belirler.
+- **`SecCodeSignerAddSignature`**: Belirtilen imzalayıcı ile imzalanan koda bir imza ekler.
 
-#### **Modifying Code Requirements**
+#### **Gereksinimlerle Kodu Doğrulama**
 
-- **`SecCodeSignerCreate`**: Creates a `SecCodeSignerRef` object for performing code signing operations.
-- **`SecCodeSignerSetRequirement`**: Sets a new requirement for the code signer to apply during signing.
-- **`SecCodeSignerAddSignature`**: Adds a signature to the code being signed with the specified signer.
+- **`SecStaticCodeCheckValidity`**: Belirtilen gereksinimlere karşı bir statik kod nesnesini doğrular.
 
-#### **Validating Code with Requirements**
+#### **Ekstra Kullanışlı API'ler**
 
-- **`SecStaticCodeCheckValidity`**: Validates a static code object against specified requirements.
+- **`SecCodeCopy[Internal/Designated]Requirement`: SecCodeRef'den SecRequirementRef al**
+- **`SecCodeCopyGuestWithAttributes`**: Belirli özelliklere dayanan bir kod nesnesini temsil eden bir `SecCodeRef` oluşturur, sandboxing için kullanışlıdır.
+- **`SecCodeCopyPath`**: Bir `SecCodeRef` ile ilişkili dosya sistemi yolunu alır.
+- **`SecCodeCopySigningIdentifier`**: Bir `SecCodeRef`'den imzalama tanımlayıcısını (örneğin, Takım ID'si) alır.
+- **`SecCodeGetTypeID`**: `SecCodeRef` nesneleri için tür tanımlayıcısını döndürür.
+- **`SecRequirementGetTypeID`**: Bir `SecRequirementRef`'in CFTypeID'sini alır.
 
-#### **Additional Useful APIs**
+#### **Kod İmzalama Bayrakları ve Sabitleri**
 
-- **`SecCodeCopy[Internal/Designated]Requirement`: Get SecRequirementRef from SecCodeRef**
-- **`SecCodeCopyGuestWithAttributes`**: Creates a `SecCodeRef` representing a code object based on specific attributes, useful for sandboxing.
-- **`SecCodeCopyPath`**: Retrieves the file system path associated with a `SecCodeRef`.
-- **`SecCodeCopySigningIdentifier`**: Obtains the signing identifier (e.g., Team ID) from a `SecCodeRef`.
-- **`SecCodeGetTypeID`**: Returns the type identifier for `SecCodeRef` objects.
-- **`SecRequirementGetTypeID`**: Gets a CFTypeID of a `SecRequirementRef`
+- **`kSecCSDefaultFlags`**: Kod imzalama işlemleri için birçok Security.framework fonksiyonunda kullanılan varsayılan bayraklar.
+- **`kSecCSSigningInformation`**: İmzalama bilgilerinin alınması gerektiğini belirtmek için kullanılan bayrak.
 
-#### **Code Signing Flags and Constants**
+## Kod İmzası Uygulaması
 
-- **`kSecCSDefaultFlags`**: Default flags used in many Security.framework functions for code signing operations.
-- **`kSecCSSigningInformation`**: Flag used to specify that signing information should be retrieved.
-
-## Code Signature Enforcement
-
-The **kernel** is the one that **checks the code signature** before allowing the code of the app to execute. Moreover, one way to be able to write and execute in memory new code is abusing JIT if `mprotect` is called with `MAP_JIT` flag. Note that the application needs a special entitlement to be able to do this.
+**Kernel**, uygulamanın kodunun çalışmasına izin vermeden önce **kod imzasını kontrol eder**. Ayrıca, bellekte yeni kod yazmak ve çalıştırmak için bir yol, `mprotect` çağrıldığında `MAP_JIT` bayrağının kullanılmasıdır. Uygulamanın bunu yapabilmesi için özel bir yetkiye ihtiyacı olduğunu unutmayın.
 
 ## `cs_blobs` & `cs_blob`
 
-[**cs_blob**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/ubc_internal.h#L106) struct contains the information about the entitlement of the running process on it. `csb_platform_binary` also informs if the application is a platform binary (which is checked in different moments by the OS to apply security mechanisms like to protect the SEND rights to the task ports of these processes).
-
+[**cs_blob**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/ubc_internal.h#L106) yapısı, çalışan sürecin üzerindeki yetki hakkında bilgi içerir. `csb_platform_binary` ayrıca uygulamanın bir platform ikili dosyası olup olmadığını bildirir (bu, OS tarafından güvenlik mekanizmalarını uygulamak için farklı zamanlarda kontrol edilir, örneğin bu süreçlerin görev portlarına SEND haklarını korumak için).
 ```c
 struct cs_blob {
-	struct cs_blob  *csb_next;
-	vnode_t         csb_vnode;
-	void            *csb_ro_addr;
-	__xnu_struct_group(cs_cpu_info, csb_cpu_info, {
-		cpu_type_t      csb_cpu_type;
-		cpu_subtype_t   csb_cpu_subtype;
-	});
-	__xnu_struct_group(cs_signer_info, csb_signer_info, {
-		unsigned int    csb_flags;
-		unsigned int    csb_signer_type;
-	});
-	off_t           csb_base_offset;        /* Offset of Mach-O binary in fat binary */
-	off_t           csb_start_offset;       /* Blob coverage area start, from csb_base_offset */
-	off_t           csb_end_offset;         /* Blob coverage area end, from csb_base_offset */
-	vm_size_t       csb_mem_size;
-	vm_offset_t     csb_mem_offset;
-	void            *csb_mem_kaddr;
-	unsigned char   csb_cdhash[CS_CDHASH_LEN];
-	const struct cs_hash  *csb_hashtype;
+struct cs_blob  *csb_next;
+vnode_t         csb_vnode;
+void            *csb_ro_addr;
+__xnu_struct_group(cs_cpu_info, csb_cpu_info, {
+cpu_type_t      csb_cpu_type;
+cpu_subtype_t   csb_cpu_subtype;
+});
+__xnu_struct_group(cs_signer_info, csb_signer_info, {
+unsigned int    csb_flags;
+unsigned int    csb_signer_type;
+});
+off_t           csb_base_offset;        /* Offset of Mach-O binary in fat binary */
+off_t           csb_start_offset;       /* Blob coverage area start, from csb_base_offset */
+off_t           csb_end_offset;         /* Blob coverage area end, from csb_base_offset */
+vm_size_t       csb_mem_size;
+vm_offset_t     csb_mem_offset;
+void            *csb_mem_kaddr;
+unsigned char   csb_cdhash[CS_CDHASH_LEN];
+const struct cs_hash  *csb_hashtype;
 #if CONFIG_SUPPLEMENTAL_SIGNATURES
-	unsigned char   csb_linkage[CS_CDHASH_LEN];
-	const struct cs_hash  *csb_linkage_hashtype;
+unsigned char   csb_linkage[CS_CDHASH_LEN];
+const struct cs_hash  *csb_linkage_hashtype;
 #endif
-	int             csb_hash_pageshift;
-	int             csb_hash_firstlevel_pageshift;   /* First hash this many bytes, then hash the hashes together */
-	const CS_CodeDirectory *csb_cd;
-	const char      *csb_teamid;
+int             csb_hash_pageshift;
+int             csb_hash_firstlevel_pageshift;   /* First hash this many bytes, then hash the hashes together */
+const CS_CodeDirectory *csb_cd;
+const char      *csb_teamid;
 #if CONFIG_SUPPLEMENTAL_SIGNATURES
-	char            *csb_supplement_teamid;
+char            *csb_supplement_teamid;
 #endif
-	const CS_GenericBlob *csb_entitlements_blob;    /* raw blob, subrange of csb_mem_kaddr */
-	const CS_GenericBlob *csb_der_entitlements_blob;    /* raw blob, subrange of csb_mem_kaddr */
+const CS_GenericBlob *csb_entitlements_blob;    /* raw blob, subrange of csb_mem_kaddr */
+const CS_GenericBlob *csb_der_entitlements_blob;    /* raw blob, subrange of csb_mem_kaddr */
 
-	/*
-	 * OSEntitlements pointer setup by AMFI. This is PAC signed in addition to the
-	 * cs_blob being within RO-memory to prevent modifications on the temporary stack
-	 * variable used to setup the blob.
-	 */
-	void *XNU_PTRAUTH_SIGNED_PTR("cs_blob.csb_entitlements") csb_entitlements;
+/*
+* OSEntitlements pointer setup by AMFI. This is PAC signed in addition to the
+* cs_blob being within RO-memory to prevent modifications on the temporary stack
+* variable used to setup the blob.
+*/
+void *XNU_PTRAUTH_SIGNED_PTR("cs_blob.csb_entitlements") csb_entitlements;
 
-	unsigned int    csb_reconstituted;      /* signature has potentially been modified after validation */
-	__xnu_struct_group(cs_blob_platform_flags, csb_platform_flags, {
-		/* The following two will be replaced by the csb_signer_type. */
-		unsigned int    csb_platform_binary:1;
-		unsigned int    csb_platform_path:1;
-	});
+unsigned int    csb_reconstituted;      /* signature has potentially been modified after validation */
+__xnu_struct_group(cs_blob_platform_flags, csb_platform_flags, {
+/* The following two will be replaced by the csb_signer_type. */
+unsigned int    csb_platform_binary:1;
+unsigned int    csb_platform_path:1;
+});
 
-	/* Validation category used for TLE */
-	unsigned int    csb_validation_category;
+/* Validation category used for TLE */
+unsigned int    csb_validation_category;
 
 #if CODE_SIGNING_MONITOR
-	void *XNU_PTRAUTH_SIGNED_PTR("cs_blob.csb_csm_obj") csb_csm_obj;
-	bool csb_csm_managed;
+void *XNU_PTRAUTH_SIGNED_PTR("cs_blob.csb_csm_obj") csb_csm_obj;
+bool csb_csm_managed;
 #endif
 };
 ```
+## Referanslar
 
-## References
-
-- [**\*OS Internals Volume III**](https://newosxbook.com/home.html)
+- [**\*OS İç Yapıları Cilt III**](https://newosxbook.com/home.html)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
