@@ -2,16 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/image (3) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
-
-Usa [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente impulsados por las **herramientas comunitarias más avanzadas** del mundo.\
-Obtén acceso hoy:
-
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
-
 ## UAC
 
-[Control de Cuentas de Usuario (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) es una función que permite un **mensaje de consentimiento para actividades elevadas**. Las aplicaciones tienen diferentes niveles de `integridad`, y un programa con un **alto nivel** puede realizar tareas que **podrían comprometer potencialmente el sistema**. Cuando UAC está habilitado, las aplicaciones y tareas siempre **se ejecutan bajo el contexto de seguridad de una cuenta no administrativa** a menos que un administrador autorice explícitamente a estas aplicaciones/tareas para tener acceso a nivel de administrador al sistema para ejecutarse. Es una función de conveniencia que protege a los administradores de cambios no intencionados, pero no se considera un límite de seguridad.
+[Control de Cuentas de Usuario (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) es una función que habilita un **mensaje de consentimiento para actividades elevadas**. Las aplicaciones tienen diferentes niveles de `integridad`, y un programa con un **alto nivel** puede realizar tareas que **podrían comprometer potencialmente el sistema**. Cuando UAC está habilitado, las aplicaciones y tareas siempre **se ejecutan bajo el contexto de seguridad de una cuenta no administrativa** a menos que un administrador autorice explícitamente a estas aplicaciones/tareas para tener acceso a nivel de administrador al sistema para ejecutarse. Es una función de conveniencia que protege a los administradores de cambios no intencionados, pero no se considera un límite de seguridad.
 
 Para más información sobre los niveles de integridad:
 
@@ -40,7 +33,7 @@ Esta [página](https://docs.microsoft.com/en-us/windows/security/identity-protec
 
 Algunos programas son **autoelevados automáticamente** si el **usuario pertenece** al **grupo de administradores**. Estos binarios tienen dentro de sus _**Manifiestos**_ la opción _**autoElevate**_ con valor _**True**_. El binario también debe estar **firmado por Microsoft**.
 
-Luego, para **eludir** el **UAC** (elevar de **nivel** de integridad **medio** a **alto**) algunos atacantes utilizan este tipo de binarios para **ejecutar código arbitrario** porque se ejecutará desde un **proceso de alta integridad**.
+Luego, para **eludir** el **UAC** (elevar de **nivel** de integridad **medio** **a alto**) algunos atacantes utilizan este tipo de binarios para **ejecutar código arbitrario** porque se ejecutará desde un **proceso de alta integridad**.
 
 Puedes **verificar** el _**Manifiesto**_ de un binario usando la herramienta _**sigcheck.exe**_ de Sysinternals. Y puedes **ver** el **nivel de integridad** de los procesos usando _Process Explorer_ o _Process Monitor_ (de Sysinternals).
 
@@ -98,9 +91,9 @@ El bypass de UAC es necesario en la siguiente situación: **el UAC está activad
 
 Es importante mencionar que es **mucho más difícil eludir el UAC si está en el nivel de seguridad más alto (Siempre) que si está en cualquiera de los otros niveles (Predeterminado).**
 
-### UAC desactivado
+### UAC deshabilitado
 
-Si el UAC ya está desactivado (`ConsentPromptBehaviorAdmin` es **`0`**) puede **ejecutar un shell inverso con privilegios de administrador** (nivel de integridad alto) utilizando algo como:
+Si el UAC ya está deshabilitado (`ConsentPromptBehaviorAdmin` es **`0`**) puede **ejecutar un shell inverso con privilegios de administrador** (nivel de integridad alto) utilizando algo como:
 ```bash
 #Put your reverse shell instead of "calc.exe"
 Start-Process powershell -Verb runAs "calc.exe"
@@ -146,7 +139,7 @@ Documentación y herramienta en [https://github.com/wh0amitz/KRBUACBypass](https
 
 ### Explotaciones de elusión de UAC
 
-[**UACME** ](https://github.com/hfiref0x/UACME) que es una **compilación** de varias explotaciones de elusión de UAC. Ten en cuenta que necesitarás **compilar UACME usando visual studio o msbuild**. La compilación creará varios ejecutables (como `Source\Akagi\outout\x64\Debug\Akagi.exe`), necesitarás saber **cuál necesitas.**\
+[**UACME** ](https://github.com/hfiref0x/UACME)que es una **compilación** de varias explotaciones de elusión de UAC. Ten en cuenta que necesitarás **compilar UACME usando visual studio o msbuild**. La compilación creará varios ejecutables (como `Source\Akagi\outout\x64\Debug\Akagi.exe`), necesitarás saber **cuál necesitas.**\
 Debes **tener cuidado** porque algunas elusiones **solicitarán algunos otros programas** que **alertarán** al **usuario** que algo está sucediendo.
 
 UACME tiene la **versión de compilación desde la cual cada técnica comenzó a funcionar**. Puedes buscar una técnica que afecte tus versiones:
@@ -193,12 +186,5 @@ Si echas un vistazo a **UACME** notarás que **la mayoría de los bypass de UAC 
 ### Otra técnica de bypass de UAC
 
 Consiste en observar si un **binario autoElevado** intenta **leer** del **registro** el **nombre/ruta** de un **binario** o **comando** a ser **ejecutado** (esto es más interesante si el binario busca esta información dentro del **HKCU**).
-
-<figure><img src="../../images/image (3) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
-
-Usa [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente impulsados por las **herramientas comunitarias más avanzadas** del mundo.\
-Obtén acceso hoy:
-
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -2,29 +2,23 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
-
-Profundiza tu experiencia en **Seguridad Móvil** con 8kSec Academy. Domina la seguridad de iOS y Android a través de nuestros cursos autoguiados y obtén certificación:
-
-{% embed url="https://academy.8ksec.io/" %}
-
 **Esta página se basa en una de [adsecurity.org](https://adsecurity.org/?page_id=1821)**. ¡Consulta el original para más información!
 
 ## LM y texto claro en memoria
 
 Desde Windows 8.1 y Windows Server 2012 R2 en adelante, se han implementado medidas significativas para proteger contra el robo de credenciales:
 
-- **LM hashes y contraseñas en texto claro** ya no se almacenan en memoria para mejorar la seguridad. Un ajuste específico del registro, _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_, debe configurarse con un valor DWORD de `0` para deshabilitar la Autenticación Digest, asegurando que las contraseñas "en texto claro" no se almacenen en caché en LSASS.
+- **Los hashes LM y las contraseñas en texto claro** ya no se almacenan en memoria para mejorar la seguridad. Se debe configurar un ajuste específico del registro, _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_ con un valor DWORD de `0` para deshabilitar la Autenticación Digest, asegurando que las contraseñas en "texto claro" no se almacenen en caché en LSASS.
 
-- **Protección LSA** se introduce para proteger el proceso de la Autoridad de Seguridad Local (LSA) de la lectura no autorizada de memoria y la inyección de código. Esto se logra marcando el LSASS como un proceso protegido. La activación de la Protección LSA implica:
-1. Modificar el registro en _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa_ configurando `RunAsPPL` a `dword:00000001`.
-2. Implementar un Objeto de Política de Grupo (GPO) que haga cumplir este cambio de registro en dispositivos gestionados.
+- **La Protección LSA** se introduce para proteger el proceso de la Autoridad de Seguridad Local (LSA) de la lectura no autorizada de memoria y la inyección de código. Esto se logra marcando el LSASS como un proceso protegido. La activación de la Protección LSA implica:
+1. Modificar el registro en _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa_ estableciendo `RunAsPPL` en `dword:00000001`.
+2. Implementar un Objeto de Política de Grupo (GPO) que haga cumplir este cambio de registro en los dispositivos gestionados.
 
 A pesar de estas protecciones, herramientas como Mimikatz pueden eludir la Protección LSA utilizando controladores específicos, aunque tales acciones probablemente se registren en los registros de eventos.
 
 ### Contrarrestar la eliminación de SeDebugPrivilege
 
-Los administradores suelen tener SeDebugPrivilege, lo que les permite depurar programas. Este privilegio puede restringirse para evitar volcado de memoria no autorizado, una técnica común utilizada por los atacantes para extraer credenciales de la memoria. Sin embargo, incluso con este privilegio eliminado, la cuenta TrustedInstaller aún puede realizar volcado de memoria utilizando una configuración de servicio personalizada:
+Los administradores suelen tener SeDebugPrivilege, lo que les permite depurar programas. Este privilegio puede ser restringido para prevenir volcado de memoria no autorizado, una técnica común utilizada por los atacantes para extraer credenciales de la memoria. Sin embargo, incluso con este privilegio eliminado, la cuenta TrustedInstaller aún puede realizar volcado de memoria utilizando una configuración de servicio personalizada:
 ```bash
 sc config TrustedInstaller binPath= "C:\\Users\\Public\\procdump64.exe -accepteula -ma lsass.exe C:\\Users\\Public\\lsass.dmp"
 sc start TrustedInstaller
@@ -78,7 +72,7 @@ Los Silver Tickets otorgan acceso a servicios específicos. Comando clave y par�
 
 - Comando: Similar al Golden Ticket pero se dirige a servicios específicos.
 - Parámetros:
-- `/service`: El servicio a atacar (por ejemplo, cifs, http).
+- `/service`: El servicio a dirigir (por ejemplo, cifs, http).
 - Otros parámetros similares al Golden Ticket.
 
 Ejemplo:
@@ -103,7 +97,7 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 - **Listar Tickets**:
 
 - Comando: `kerberos::list`
-- Lista todos los tickets de Kerberos para la sesión de usuario actual.
+- Lista todos los tickets de Kerberos para la sesión actual del usuario.
 
 - **Pasar la Caché**:
 
@@ -203,10 +197,5 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 - Extraer contraseñas de Windows Vault.
 - `mimikatz "vault::cred /patch" exit`
 
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
-
-Profundiza tu experiencia en **Seguridad Móvil** con 8kSec Academy. Domina la seguridad de iOS y Android a través de nuestros cursos autoguiados y obtén certificación:
-
-{% embed url="https://academy.8ksec.io/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

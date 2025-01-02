@@ -2,15 +2,11 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/i3.png" alt=""><figcaption></figcaption></figure>
 
-**Consejo de bug bounty**: **regístrate** en **Intigriti**, una **plataforma de bug bounty premium creada por hackers, para hackers**! Únete a nosotros en [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) hoy, y comienza a ganar recompensas de hasta **$100,000**!
-
-{% embed url="https://go.intigriti.com/hacktricks" %}
 
 ## WMIC
 
-**Wmic** se puede usar para ejecutar programas al **iniciar**. Ve qué binarios están programados para ejecutarse al iniciar con:
+**Wmic** se puede usar para ejecutar programas en **inicio**. Vea qué binarios están programados para ejecutarse al inicio con:
 ```bash
 wmic startup get caption,command 2>nul & ^
 Get-CimInstance Win32_StartupCommand | select Name, command, Location, User | fl
@@ -149,7 +145,7 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Wow6432Node\Microsoft\Windows\Ru
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders`
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders`
 
-Los accesos directos colocados en la carpeta **Inicio** activarán automáticamente servicios o aplicaciones para que se inicien durante el inicio de sesión del usuario o el reinicio del sistema. La ubicación de la carpeta **Inicio** está definida en el registro tanto para el ámbito de **Máquina Local** como para el de **Usuario Actual**. Esto significa que cualquier acceso directo agregado a estas ubicaciones de **Inicio** especificadas asegurará que el servicio o programa vinculado se inicie después del proceso de inicio de sesión o reinicio, lo que lo convierte en un método sencillo para programar la ejecución automática de programas.
+Los accesos directos colocados en la carpeta **Inicio** activarán automáticamente servicios o aplicaciones para que se inicien durante el inicio de sesión del usuario o el reinicio del sistema. La ubicación de la carpeta **Inicio** está definida en el registro tanto para el ámbito de **Máquina Local** como para el de **Usuario Actual**. Esto significa que cualquier acceso directo agregado a estas ubicaciones de **Inicio** asegurará que el servicio o programa vinculado se inicie después del proceso de inicio de sesión o reinicio, lo que lo convierte en un método sencillo para programar la ejecución automática de programas.
 
 > [!NOTE]
 > Si puedes sobrescribir cualquier \[User] Shell Folder bajo **HKLM**, podrás apuntarlo a una carpeta controlada por ti y colocar una puerta trasera que se ejecutará cada vez que un usuario inicie sesión en el sistema, escalando privilegios.
@@ -178,7 +174,7 @@ Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVers
 > [!NOTE]
 > Si puedes sobrescribir el valor del registro o el binario, podrás escalar privilegios.
 
-### Configuraciones de Política
+### Configuración de Políticas
 
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer`
 - `HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer`
@@ -205,7 +201,7 @@ Pasos para crear una opción de arranque para iniciar automáticamente en "Modo 
 5. Vuelve a aplicar los atributos originales del archivo: `attrib c:\boot.ini +r +s +h`
 
 - **Explotación 1:** Cambiar la clave del registro **AlternateShell** permite la configuración de un shell de comandos personalizado, potencialmente para acceso no autorizado.
-- **Explotación 2 (Permisos de Escritura en PATH):** Tener permisos de escritura en cualquier parte de la variable **PATH** del sistema, especialmente antes de `C:\Windows\system32`, te permite ejecutar un `cmd.exe` personalizado, que podría ser una puerta trasera si el sistema se inicia en Modo Seguro.
+- **Explotación 2 (Permisos de Escritura en PATH):** Tener permisos de escritura en cualquier parte de la variable del sistema **PATH**, especialmente antes de `C:\Windows\system32`, te permite ejecutar un `cmd.exe` personalizado, que podría ser una puerta trasera si el sistema se inicia en Modo Seguro.
 - **Explotación 3 (Permisos de Escritura en PATH y boot.ini):** El acceso de escritura a `boot.ini` permite el inicio automático en Modo Seguro, facilitando el acceso no autorizado en el próximo reinicio.
 
 Para verificar la configuración actual de **AlternateShell**, utiliza estos comandos:
@@ -297,7 +293,7 @@ HKLM\Software\Microsoft\Wow6432Node\Windows NT\CurrentVersion\Image File Executi
 ```
 ## SysInternals
 
-Tenga en cuenta que todos los sitios donde puede encontrar autoruns ya han sido **buscados por** [**winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe). Sin embargo, para una **lista más completa de archivos autoejecutados**, puede utilizar [autoruns](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns) de Sysinternals:
+Tenga en cuenta que todos los sitios donde puede encontrar autoruns ya han sido **buscados por** [**winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe). Sin embargo, para una **lista más completa de archivos auto-ejecutados**, puede usar [autoruns](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns) de Sysinternals:
 ```
 autorunsc.exe -m -nobanner -a * -ct /accepteula
 ```
@@ -312,10 +308,6 @@ autorunsc.exe -m -nobanner -a * -ct /accepteula
 - [https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
 - [https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell](https://www.itprotoday.com/cloud-computing/how-can-i-add-boot-option-starts-alternate-shell)
 
-<figure><img src="../../images/i3.png" alt=""><figcaption></figcaption></figure>
 
-**Consejo de bug bounty**: **regístrate** en **Intigriti**, una **plataforma de bug bounty premium creada por hackers, para hackers**! Únete a nosotros en [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) hoy, y comienza a ganar recompensas de hasta **$100,000**!
-
-{% embed url="https://go.intigriti.com/hacktricks" %}
 
 {{#include ../../banners/hacktricks-training.md}}

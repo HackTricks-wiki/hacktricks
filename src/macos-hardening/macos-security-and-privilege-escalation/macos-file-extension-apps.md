@@ -1,72 +1,64 @@
-# macOS File Extension & URL scheme app handlers
+# Controladores de aplicaciones de extensión de archivo y esquema de URL de macOS
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## LaunchServices Database
+## Base de datos de LaunchServices
 
-This is a database of all the installed applications in the macOS that can be queried to get information about each installed application such as URL schemes it support and MIME types.
+Esta es una base de datos de todas las aplicaciones instaladas en macOS que se puede consultar para obtener información sobre cada aplicación instalada, como los esquemas de URL que admite y los tipos MIME.
 
-It's possible to dump this datase with:
-
+Es posible volcar esta base de datos con:
 ```
 /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister -dump
 ```
+O usando la herramienta [**lsdtrip**](https://newosxbook.com/tools/lsdtrip.html).
 
-Or using the tool [**lsdtrip**](https://newosxbook.com/tools/lsdtrip.html).
+**`/usr/libexec/lsd`** es el cerebro de la base de datos. Proporciona **varios servicios XPC** como `.lsd.installation`, `.lsd.open`, `.lsd.openurl`, y más. Pero también **requiere algunos derechos** para que las aplicaciones puedan usar las funcionalidades XPC expuestas, como `.launchservices.changedefaulthandler` o `.launchservices.changeurlschemehandler` para cambiar aplicaciones predeterminadas para tipos MIME o esquemas de URL y otros.
 
-**`/usr/libexec/lsd`** is the brain of the database. It provides **several XPC services** like `.lsd.installation`, `.lsd.open`, `.lsd.openurl`, and more. But it also **requires some entitlements** to applications to be able to use the exposed XPC functionalities, like `.launchservices.changedefaulthandler` or `.launchservices.changeurlschemehandler` to change default apps for mime types or url schemes and others.
+**`/System/Library/CoreServices/launchservicesd`** reclama el servicio `com.apple.coreservices.launchservicesd` y se puede consultar para obtener información sobre las aplicaciones en ejecución. Se puede consultar con la herramienta del sistema /**`usr/bin/lsappinfo`** o con [**lsdtrip**](https://newosxbook.com/tools/lsdtrip.html).
 
-**`/System/Library/CoreServices/launchservicesd`** claims the service `com.apple.coreservices.launchservicesd` and can be queried to get information about running applications. It can be queried with the system tool /**`usr/bin/lsappinfo`** or with [**lsdtrip**](https://newosxbook.com/tools/lsdtrip.html).
+## Controladores de aplicaciones de extensión de archivo y esquema de URL
 
-## File Extension & URL scheme app handlers
-
-The following line can be useful to find the applications that can open files depending on the extension:
-
+La siguiente línea puede ser útil para encontrar las aplicaciones que pueden abrir archivos dependiendo de la extensión:
 ```bash
 /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister -dump | grep -E "path:|bindings:|name:"
 ```
-
-Or use something like [**SwiftDefaultApps**](https://github.com/Lord-Kamina/SwiftDefaultApps):
-
+O utiliza algo como [**SwiftDefaultApps**](https://github.com/Lord-Kamina/SwiftDefaultApps):
 ```bash
 ./swda getSchemes #Get all the available schemes
 ./swda getApps #Get all the apps declared
 ./swda getUTIs #Get all the UTIs
 ./swda getHandler --URL ftp #Get ftp handler
 ```
-
-You can also check the extensions supported by an application doing:
-
+También puedes verificar las extensiones soportadas por una aplicación haciendo:
 ```
 cd /Applications/Safari.app/Contents
 grep -A3 CFBundleTypeExtensions Info.plist  | grep string
-				<string>css</string>
-				<string>pdf</string>
-				<string>webarchive</string>
-				<string>webbookmark</string>
-				<string>webhistory</string>
-				<string>webloc</string>
-				<string>download</string>
-				<string>safariextz</string>
-				<string>gif</string>
-				<string>html</string>
-				<string>htm</string>
-				<string>js</string>
-				<string>jpg</string>
-				<string>jpeg</string>
-				<string>jp2</string>
-				<string>txt</string>
-				<string>text</string>
-				<string>png</string>
-				<string>tiff</string>
-				<string>tif</string>
-				<string>url</string>
-				<string>ico</string>
-				<string>xhtml</string>
-				<string>xht</string>
-				<string>xml</string>
-				<string>xbl</string>
-				<string>svg</string>
+<string>css</string>
+<string>pdf</string>
+<string>webarchive</string>
+<string>webbookmark</string>
+<string>webhistory</string>
+<string>webloc</string>
+<string>download</string>
+<string>safariextz</string>
+<string>gif</string>
+<string>html</string>
+<string>htm</string>
+<string>js</string>
+<string>jpg</string>
+<string>jpeg</string>
+<string>jp2</string>
+<string>txt</string>
+<string>text</string>
+<string>png</string>
+<string>tiff</string>
+<string>tif</string>
+<string>url</string>
+<string>ico</string>
+<string>xhtml</string>
+<string>xht</string>
+<string>xml</string>
+<string>xbl</string>
+<string>svg</string>
 ```
-
 {{#include ../../banners/hacktricks-training.md}}

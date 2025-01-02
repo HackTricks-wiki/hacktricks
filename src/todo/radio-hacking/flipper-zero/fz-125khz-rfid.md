@@ -2,9 +2,6 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 ## Intro
 
@@ -27,7 +24,7 @@ Intenta **leer** la información de la tarjeta. Luego puede **emularlas**.
 
 ### Add Manually
 
-Puedes crear **tarjetas falsas en Flipper Zero indicando los datos** que introduces manualmente y luego emularla.
+Puedes crear **tarjetas falsas en Flipper Zero indicando los datos** que ingresas manualmente y luego emularla.
 
 #### IDs on cards
 
@@ -42,7 +39,7 @@ Los otros 2 pueden ser forzados por fuerza bruta si no puedes leerlos de la tarj
 
 - **HID**
 
-Lo mismo ocurre en esta tarjeta HID, donde solo se pueden encontrar impresos 2 de 3 bytes en la tarjeta.
+Lo mismo ocurre en esta tarjeta HID donde solo se pueden encontrar impresos 2 de 3 bytes en la tarjeta.
 
 <figure><img src="../../../images/image (1014).png" alt=""><figcaption></figcaption></figure>
 
@@ -54,8 +51,5 @@ Después de **copiar** una tarjeta o **ingresar** el ID **manualmente**, es posi
 
 - [https://blog.flipperzero.one/rfid/](https://blog.flipperzero.one/rfid/)
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../../../banners/hacktricks-training.md}}

@@ -2,11 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/i3.png" alt=""><figcaption></figcaption></figure>
 
-**Bug bounty tip**: **regístrate** en **Intigriti**, una plataforma de **bug bounty premium creada por hackers, para hackers**! Únete a nosotros en [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) hoy, y comienza a ganar recompensas de hasta **$100,000**!
-
-{% embed url="https://go.intigriti.com/hacktricks" %}
 
 ## Silver ticket
 
@@ -57,7 +53,7 @@ Usando **Rubeus** puedes **pedir todos** estos tickets usando el parámetro:
 - 4634: Cierre de Sesión de Cuenta
 - 4672: Inicio de Sesión de Administrador
 
-## Abusando de los Tickets de Servicio
+## Abusando de los tickets de Servicio
 
 En los siguientes ejemplos imaginemos que el ticket se recupera suplantando la cuenta de administrador.
 
@@ -113,7 +109,7 @@ Con acceso winrm a una computadora, puedes **acceder a ella** e incluso obtener 
 ```bash
 New-PSSession -Name PSC -ComputerName the.computer.name; Enter-PSSession PSC
 ```
-Consulta la siguiente página para aprender **más formas de conectarte con un host remoto usando winrm**:
+Consulta la siguiente página para aprender **más formas de conectarse con un host remoto usando winrm**:
 
 {{#ref}}
 ../lateral-movement/winrm.md
@@ -139,10 +135,6 @@ mimikatz(commandline) # lsadump::dcsync /dc:pcdc.domain.local /domain:domain.loc
 dcsync.md
 {{#endref}}
 
-<figure><img src="../../images/i3.png" alt=""><figcaption></figcaption></figure>
 
-**Consejo de bug bounty**: **regístrate** en **Intigriti**, una **plataforma de bug bounty premium creada por hackers, para hackers**! Únete a nosotros en [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) hoy, y comienza a ganar recompensas de hasta **$100,000**!
-
-{% embed url="https://go.intigriti.com/hacktricks" %}
 
 {{#include ../../banners/hacktricks-training.md}}

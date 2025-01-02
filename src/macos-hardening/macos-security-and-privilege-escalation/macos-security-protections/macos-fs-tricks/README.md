@@ -6,10 +6,10 @@
 
 Permisos en un **directorio**:
 
-- **lectura** - puedes **enumerar** las entradas del directorio
-- **escritura** - puedes **eliminar/escribir** **archivos** en el directorio y puedes **eliminar carpetas vacías**.
+- **leer** - puedes **enumerar** las entradas del directorio
+- **escribir** - puedes **eliminar/escribir** **archivos** en el directorio y puedes **eliminar carpetas vacías**.
 - Pero **no puedes eliminar/modificar carpetas no vacías** a menos que tengas permisos de escritura sobre ellas.
-- **no puedes modificar el nombre de una carpeta** a menos que seas el propietario.
+- **No puedes modificar el nombre de una carpeta** a menos que seas el propietario.
 - **ejecutar** - se te **permite recorrer** el directorio - si no tienes este derecho, no puedes acceder a ningún archivo dentro de él, ni en ningún subdirectorio.
 
 ### Combinaciones Peligrosas
@@ -18,7 +18,7 @@ Permisos en un **directorio**:
 
 - Un **propietario de directorio** padre en la ruta es el usuario
 - Un **propietario de directorio** padre en la ruta es un **grupo de usuarios** con **acceso de escritura**
-- Un **grupo** de usuarios tiene acceso de **escritura** al **archivo**
+- Un **grupo** de usuarios tiene **acceso de escritura** al **archivo**
 
 Con cualquiera de las combinaciones anteriores, un atacante podría **inyectar** un **enlace simbólico/duro** en la ruta esperada para obtener una escritura arbitraria privilegiada.
 
@@ -30,9 +30,15 @@ Ejemplo en: [https://theevilbit.github.io/posts/exploiting_directory_permissions
 
 ## Enlace simbólico / Enlace duro
 
+### Archivo/carpeta permisivo
+
 Si un proceso privilegiado está escribiendo datos en un **archivo** que podría ser **controlado** por un **usuario de menor privilegio**, o que podría haber sido **creado previamente** por un usuario de menor privilegio. El usuario podría simplemente **apuntarlo a otro archivo** a través de un enlace simbólico o duro, y el proceso privilegiado escribirá en ese archivo.
 
 Consulta en las otras secciones donde un atacante podría **abusar de una escritura arbitraria para escalar privilegios**.
+
+### Abrir `O_NOFOLLOW`
+
+La bandera `O_NOFOLLOW` cuando es utilizada por la función `open` no seguirá un symlink en el último componente de la ruta, pero seguirá el resto de la ruta. La forma correcta de prevenir seguir symlinks en la ruta es utilizando la bandera `O_NOFOLLOW_ANY`.
 
 ## .fileloc
 
@@ -50,11 +56,15 @@ Ejemplo:
 </dict>
 </plist>
 ```
-## FD Arbitrario
+## Descriptores de Archivo
 
-Si puedes hacer que un **proceso abra un archivo o una carpeta con altos privilegios**, puedes abusar de **`crontab`** para abrir un archivo en `/etc/sudoers.d` con **`EDITOR=exploit.py`**, de modo que `exploit.py` obtenga el FD del archivo dentro de `/etc/sudoers` y lo abuse.
+### Fuga de FD (sin `O_CLOEXEC`)
 
-Por ejemplo: [https://youtu.be/f1HA5QhLQ7Y?t=21098](https://youtu.be/f1HA5QhLQ7Y?t=21098)
+Si una llamada a `open` no tiene la bandera `O_CLOEXEC`, el descriptor de archivo será heredado por el proceso hijo. Así que, si un proceso privilegiado abre un archivo privilegiado y ejecuta un proceso controlado por el atacante, el atacante **heredará el FD sobre el archivo privilegiado**.
+
+Si puedes hacer que un **proceso abra un archivo o una carpeta con altos privilegios**, puedes abusar de **`crontab`** para abrir un archivo en `/etc/sudoers.d` con **`EDITOR=exploit.py`**, de modo que `exploit.py` obtenga el FD al archivo dentro de `/etc/sudoers` y lo abuse.
+
+Por ejemplo: [https://youtu.be/f1HA5QhLQ7Y?t=21098](https://youtu.be/f1HA5QhLQ7Y?t=21098), código: https://github.com/gergelykalman/CVE-2023-32428-a-macOS-LPE-via-MallocStackLogging
 
 ## Evitar trucos de xattrs de cuarentena
 
@@ -142,11 +152,32 @@ No es realmente necesario, pero lo dejo ahí por si acaso:
 macos-xattr-acls-extra-stuff.md
 {{#endref}}
 
+## Bypass de verificaciones de firma
+
+### Bypass de verificaciones de binarios de plataforma
+
+Al algunas verificaciones de seguridad se les verifica si el binario es un **binario de plataforma**, por ejemplo, para permitir la conexión a un servicio XPC. Sin embargo, como se expone en un bypass en https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/, es posible eludir esta verificación obteniendo un binario de plataforma (como /bin/ls) e inyectando el exploit a través de dyld usando una variable de entorno `DYLD_INSERT_LIBRARIES`.
+
+### Bypass de las flags `CS_REQUIRE_LV` y `CS_FORCED_LV`
+
+Es posible que un binario en ejecución modifique sus propias flags para eludir verificaciones con un código como:
+```c
+// Code from https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/
+int pid = getpid();
+NSString *exePath = NSProcessInfo.processInfo.arguments[0];
+
+uint32_t status = SecTaskGetCodeSignStatus(SecTaskCreateFromSelf(0));
+status |= 0x2000; // CS_REQUIRE_LV
+csops(pid, 9, &status, 4); // CS_OPS_SET_STATUS
+
+status = SecTaskGetCodeSignStatus(SecTaskCreateFromSelf(0));
+NSLog(@"=====Inject successfully into %d(%@), csflags=0x%x", pid, exePath, status);
+```
 ## Bypass Code Signatures
 
-Los bundles contienen el archivo **`_CodeSignature/CodeResources`** que contiene el **hash** de cada **archivo** en el **bundle**. Tenga en cuenta que el hash de CodeResources también está **incrustado en el ejecutable**, por lo que no podemos interferir con eso, tampoco.
+Los bundles contienen el archivo **`_CodeSignature/CodeResources`** que contiene el **hash** de cada **archivo** en el **bundle**. Ten en cuenta que el hash de CodeResources también está **incrustado en el ejecutable**, así que no podemos interferir con eso, tampoco.
 
-Sin embargo, hay algunos archivos cuya firma no será verificada, estos tienen la clave omitida en el plist, como:
+Sin embargo, hay algunos archivos cuya firma no será verificada, estos tienen la clave omit en el plist, como:
 ```xml
 <dict>
 ...
@@ -217,8 +248,8 @@ hdiutil detach /private/tmp/mnt 1>/dev/null
 # You can also create a dmg from an app using:
 hdiutil create -srcfolder justsome.app justsome.dmg
 ```
-Usualmente, macOS monta discos comunicándose con el servicio Mach `com.apple.DiskArbitration.diskarbitrationd` (proporcionado por `/usr/libexec/diskarbitrationd`). Si se agrega el parámetro `-d` al archivo plist de LaunchDaemons y se reinicia, almacenará registros en `/var/log/diskarbitrationd.log`.\
-Sin embargo, es posible utilizar herramientas como `hdik` y `hdiutil` para comunicarse directamente con el kext `com.apple.driver.DiskImages`.
+Usualmente, macOS monta discos hablando con el servicio Mach `com.apple.DiskArbitration.diskarbitrationd` (proporcionado por `/usr/libexec/diskarbitrationd`). Si se agrega el parámetro `-d` al archivo plist de LaunchDaemons y se reinicia, almacenará registros en `/var/log/diskarbitrationd.log`.\
+Sin embargo, es posible usar herramientas como `hdik` y `hdiutil` para comunicarse directamente con el kext `com.apple.driver.DiskImages`.
 
 ## Escrituras Arbitrarias
 
@@ -247,7 +278,7 @@ Escribe un **LaunchDaemon** arbitrario como **`/Library/LaunchDaemons/xyz.hacktr
 </dict>
 </plist>
 ```
-Simplemente genera el script `/Applications/Scripts/privesc.sh` con los **comandos** que te gustaría ejecutar como root.
+Solo genera el script `/Applications/Scripts/privesc.sh` con los **comandos** que te gustaría ejecutar como root.
 
 ### Archivo Sudoers
 
@@ -255,13 +286,33 @@ Si tienes **escritura arbitraria**, podrías crear un archivo dentro de la carpe
 
 ### Archivos PATH
 
-El archivo **`/etc/paths`** es uno de los principales lugares que llena la variable de entorno PATH. Debes ser root para sobrescribirlo, pero si un script de **proceso privilegiado** está ejecutando algún **comando sin la ruta completa**, podrías ser capaz de **secuestrarlo** modificando este archivo.
+El archivo **`/etc/paths`** es uno de los principales lugares que poblan la variable de entorno PATH. Debes ser root para sobrescribirlo, pero si un script de **proceso privilegiado** está ejecutando algún **comando sin la ruta completa**, podrías ser capaz de **secuestrarlo** modificando este archivo.
 
 También puedes escribir archivos en **`/etc/paths.d`** para cargar nuevas carpetas en la variable de entorno `PATH`.
 
+### cups-files.conf
+
+Esta técnica fue utilizada en [este informe](https://www.kandji.io/blog/macos-audit-story-part1).
+
+Crea el archivo `/etc/cups/cups-files.conf` con el siguiente contenido:
+```
+ErrorLog /etc/sudoers.d/lpe
+LogFilePerm 777
+<some junk>
+```
+Esto creará el archivo `/etc/sudoers.d/lpe` con permisos 777. La basura extra al final es para activar la creación del registro de errores.
+
+Luego, escribe en `/etc/sudoers.d/lpe` la configuración necesaria para escalar privilegios como `%staff ALL=(ALL) NOPASSWD:ALL`.
+
+Luego, modifica el archivo `/etc/cups/cups-files.conf` nuevamente indicando `LogFilePerm 700` para que el nuevo archivo sudoers se vuelva válido invocando `cupsctl`.
+
+### Escape de Sandbox
+
+Es posible escapar del sandbox de macOS con una escritura arbitraria en el sistema de archivos. Para algunos ejemplos, consulta la página [macOS Auto Start](../../../../macos-auto-start-locations.md), pero uno común es escribir un archivo de preferencias de Terminal en `~/Library/Preferences/com.apple.Terminal.plist` que ejecute un comando al inicio y llamarlo usando `open`.
+
 ## Generar archivos escribibles como otros usuarios
 
-Esto generará un archivo que pertenece a root y que es escribible por mí ([**código de aquí**](https://github.com/gergelykalman/brew-lpe-via-periodic/blob/main/brew_lpe.sh)). Esto también podría funcionar como privesc:
+Esto generará un archivo que pertenece a root que es escribible por mí ([**código de aquí**](https://github.com/gergelykalman/brew-lpe-via-periodic/blob/main/brew_lpe.sh)). Esto también podría funcionar como privesc:
 ```bash
 DIRNAME=/usr/local/etc/periodic/daily
 
@@ -275,7 +326,7 @@ echo $FILENAME
 ```
 ## Memoria Compartida POSIX
 
-**La memoria compartida POSIX** permite que los procesos en sistemas operativos compatibles con POSIX accedan a un área de memoria común, facilitando una comunicación más rápida en comparación con otros métodos de comunicación entre procesos. Implica crear o abrir un objeto de memoria compartida con `shm_open()`, establecer su tamaño con `ftruncate()`, y mapearlo en el espacio de direcciones del proceso usando `mmap()`. Los procesos pueden luego leer y escribir directamente en esta área de memoria. Para gestionar el acceso concurrente y prevenir la corrupción de datos, a menudo se utilizan mecanismos de sincronización como mutexes o semáforos. Finalmente, los procesos desmapean y cierran la memoria compartida con `munmap()` y `close()`, y opcionalmente eliminan el objeto de memoria con `shm_unlink()`. Este sistema es especialmente efectivo para IPC eficiente y rápido en entornos donde múltiples procesos necesitan acceder a datos compartidos rápidamente.
+**La memoria compartida POSIX** permite que los procesos en sistemas operativos compatibles con POSIX accedan a un área de memoria común, facilitando una comunicación más rápida en comparación con otros métodos de comunicación entre procesos. Implica crear o abrir un objeto de memoria compartida con `shm_open()`, establecer su tamaño con `ftruncate()`, y mapearlo en el espacio de direcciones del proceso usando `mmap()`. Los procesos pueden entonces leer y escribir directamente en esta área de memoria. Para gestionar el acceso concurrente y prevenir la corrupción de datos, a menudo se utilizan mecanismos de sincronización como mutexes o semáforos. Finalmente, los procesos desmapean y cierran la memoria compartida con `munmap()` y `close()`, y opcionalmente eliminan el objeto de memoria con `shm_unlink()`. Este sistema es especialmente efectivo para IPC eficiente y rápido en entornos donde múltiples procesos necesitan acceder a datos compartidos rápidamente.
 
 <details>
 

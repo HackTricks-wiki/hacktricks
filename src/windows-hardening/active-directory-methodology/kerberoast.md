@@ -1,24 +1,16 @@
 # Kerberoast
 
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Utiliza [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=kerberoast) para construir y **automatizar flujos de trabajo** fácilmente impulsados por las **herramientas comunitarias más avanzadas** del mundo.\
-Obtén acceso hoy:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=kerberoast" %}
-
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Kerberoast
 
-Kerberoasting se centra en la adquisición de **tickets TGS**, específicamente aquellos relacionados con servicios que operan bajo **cuentas de usuario** en **Active Directory (AD)**, excluyendo **cuentas de computadora**. La encriptación de estos tickets utiliza claves que provienen de **contraseñas de usuario**, lo que permite la posibilidad de **cracking de credenciales offline**. El uso de una cuenta de usuario como servicio se indica por una propiedad **"ServicePrincipalName"** no vacía.
+Kerberoasting se centra en la adquisición de **TGS tickets**, específicamente aquellos relacionados con servicios que operan bajo **cuentas de usuario** en **Active Directory (AD)**, excluyendo **cuentas de computadora**. La encriptación de estos tickets utiliza claves que provienen de **contraseñas de usuario**, lo que permite la posibilidad de **cracking de credenciales offline**. El uso de una cuenta de usuario como servicio se indica por una propiedad **"ServicePrincipalName"** no vacía.
 
-Para ejecutar **Kerberoasting**, es esencial una cuenta de dominio capaz de solicitar **tickets TGS**; sin embargo, este proceso no requiere **privilegios especiales**, lo que lo hace accesible para cualquier persona con **credenciales de dominio válidas**.
+Para ejecutar **Kerberoasting**, es esencial una cuenta de dominio capaz de solicitar **TGS tickets**; sin embargo, este proceso no requiere **privilegios especiales**, lo que lo hace accesible para cualquier persona con **credenciales de dominio válidas**.
 
 ### Puntos Clave:
 
-- **Kerberoasting** tiene como objetivo los **tickets TGS** para **servicios de cuentas de usuario** dentro de **AD**.
+- **Kerberoasting** tiene como objetivo los **TGS tickets** para **servicios de cuentas de usuario** dentro de **AD**.
 - Los tickets encriptados con claves de **contraseñas de usuario** pueden ser **crackeados offline**.
 - Un servicio se identifica por un **ServicePrincipalName** que no es nulo.
 - **No se necesitan privilegios especiales**, solo **credenciales de dominio válidas**.
@@ -26,8 +18,8 @@ Para ejecutar **Kerberoasting**, es esencial una cuenta de dominio capaz de soli
 ### **Ataque**
 
 > [!WARNING]
-> Las **herramientas de Kerberoasting** típicamente solicitan **`RC4 encryption`** al realizar el ataque e iniciar solicitudes TGS-REQ. Esto se debe a que **RC4 es** [**más débil**](https://www.stigviewer.com/stig/windows_10/2017-04-28/finding/V-63795) y más fácil de crackear offline utilizando herramientas como Hashcat que otros algoritmos de encriptación como AES-128 y AES-256.\
-> Los hashes RC4 (tipo 23) comienzan con **`$krb5tgs$23$*`** mientras que AES-256 (tipo 18) comienzan con **`$krb5tgs$18$*`**.`
+> Las **herramientas de Kerberoasting** normalmente solicitan **`RC4 encryption`** al realizar el ataque e iniciar solicitudes TGS-REQ. Esto se debe a que **RC4 es** [**más débil**](https://www.stigviewer.com/stig/windows_10/2017-04-28/finding/V-63795) y más fácil de crackear offline utilizando herramientas como Hashcat que otros algoritmos de encriptación como AES-128 y AES-256.\
+> Los hashes de RC4 (tipo 23) comienzan con **`$krb5tgs$23$*`** mientras que los de AES-256 (tipo 18) comienzan con **`$krb5tgs$18$*`**.`
 
 #### **Linux**
 ```bash
@@ -93,14 +85,6 @@ Invoke-Kerberoast -OutputFormat hashcat | % { $_.Hash } | Out-File -Encoding ASC
 > [!WARNING]
 > Cuando se solicita un TGS, se genera el evento de Windows `4769 - Se solicitó un ticket de servicio Kerberos`.
 
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Utiliza [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=kerberoast) para construir y **automatizar flujos de trabajo** fácilmente, impulsados por las **herramientas comunitarias más avanzadas** del mundo.\
-Obtén acceso hoy:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=kerberoast" %}
-
 ### Cracking
 ```bash
 john --format=krb5tgs --wordlist=passwords_kerb.txt hashes.kerberoast
@@ -141,7 +125,7 @@ Al implementar estas medidas, las organizaciones pueden reducir significativamen
 
 ## Kerberoast sin cuenta de dominio
 
-En **septiembre de 2022**, un nuevo método para explotar un sistema fue revelado por un investigador llamado Charlie Clark, compartido a través de su plataforma [exploit.ph](https://exploit.ph/). Este método permite la adquisición de **Tickets de Servicio (ST)** a través de una solicitud **KRB_AS_REQ**, que notablemente no requiere control sobre ninguna cuenta de Active Directory. Esencialmente, si un principal está configurado de tal manera que no requiere pre-autenticación—un escenario similar a lo que se conoce en el ámbito de la ciberseguridad como un ataque de **AS-REP Roasting**—esta característica puede ser aprovechada para manipular el proceso de solicitud. Específicamente, al alterar el atributo **sname** dentro del cuerpo de la solicitud, el sistema es engañado para emitir un **ST** en lugar del estándar Ticket Granting Ticket (TGT) encriptado.
+En **septiembre de 2022**, un nuevo método para explotar un sistema fue revelado por un investigador llamado Charlie Clark, compartido a través de su plataforma [exploit.ph](https://exploit.ph/). Este método permite la adquisición de **Tickets de Servicio (ST)** a través de una solicitud **KRB_AS_REQ**, que notablemente no requiere control sobre ninguna cuenta de Active Directory. Esencialmente, si un principal está configurado de tal manera que no requiere pre-autenticación—un escenario similar a lo que se conoce en el ámbito de la ciberseguridad como un **ataque AS-REP Roasting**—esta característica puede ser aprovechada para manipular el proceso de solicitud. Específicamente, al alterar el atributo **sname** dentro del cuerpo de la solicitud, el sistema es engañado para emitir un **ST** en lugar del estándar Ticket Granting Ticket (TGT) encriptado.
 
 La técnica se explica completamente en este artículo: [Semperis blog post](https://www.semperis.com/blog/new-attack-paths-as-requested-sts/).
 
@@ -167,11 +151,3 @@ Rubeus.exe kerberoast /outfile:kerberoastables.txt /domain:"domain.local" /dc:"d
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberoasting-requesting-rc4-encrypted-tgs-when-aes-is-enabled](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberoasting-requesting-rc4-encrypted-tgs-when-aes-is-enabled)
 
 {{#include ../../banners/hacktricks-training.md}}
-
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Utiliza [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=kerberoast) para construir y **automatizar flujos de trabajo** fácilmente, impulsados por las **herramientas comunitarias más avanzadas** del mundo.\
-Accede hoy: 
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=kerberoast" %}

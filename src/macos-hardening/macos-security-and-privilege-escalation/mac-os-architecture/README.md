@@ -1,69 +1,69 @@
-# macOS Kernel & System Extensions
+# Kernel de macOS y Extensiones del Sistema
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## XNU Kernel
+## Kernel XNU
 
-The **core of macOS is XNU**, which stands for "X is Not Unix". This kernel is fundamentally composed of the **Mach microkerne**l (to be discussed later), **and** elements from Berkeley Software Distribution (**BSD**). XNU also provides a platform for **kernel drivers via a system called the I/O Kit**. The XNU kernel is part of the Darwin open source project, which means **its source code is freely accessible**.
+El **núcleo de macOS es XNU**, que significa "X no es Unix". Este núcleo está fundamentalmente compuesto por el **microkernel Mach** (que se discutirá más adelante) **y** elementos de Berkeley Software Distribution (**BSD**). XNU también proporciona una plataforma para **controladores de núcleo a través de un sistema llamado I/O Kit**. El núcleo XNU es parte del proyecto de código abierto Darwin, lo que significa que **su código fuente es accesible de forma gratuita**.
 
-From a perspective of a security researcher or a Unix developer, **macOS** can feel quite **similar** to a **FreeBSD** system with an elegant GUI and a host of custom applications. Most applications developed for BSD will compile and run on macOS without needing modifications, as the command-line tools familiar to Unix users are all present in macOS. However, because the XNU kernel incorporates Mach, there are some significant differences between a traditional Unix-like system and macOS, and these differences might cause potential issues or provide unique advantages.
+Desde la perspectiva de un investigador de seguridad o un desarrollador de Unix, **macOS** puede parecer bastante **similar** a un sistema **FreeBSD** con una GUI elegante y una serie de aplicaciones personalizadas. La mayoría de las aplicaciones desarrolladas para BSD se compilarán y ejecutarán en macOS sin necesidad de modificaciones, ya que las herramientas de línea de comandos familiares para los usuarios de Unix están presentes en macOS. Sin embargo, debido a que el núcleo XNU incorpora Mach, hay algunas diferencias significativas entre un sistema tradicional similar a Unix y macOS, y estas diferencias pueden causar problemas potenciales o proporcionar ventajas únicas.
 
-Open source version of XNU: [https://opensource.apple.com/source/xnu/](https://opensource.apple.com/source/xnu/)
+Versión de código abierto de XNU: [https://opensource.apple.com/source/xnu/](https://opensource.apple.com/source/xnu/)
 
 ### Mach
 
-Mach is a **microkernel** designed to be **UNIX-compatible**. One of its key design principles was to **minimize** the amount of **code** running in the **kernel** space and instead allow many typical kernel functions, such as file system, networking, and I/O, to **run as user-level tasks**.
+Mach es un **microkernel** diseñado para ser **compatible con UNIX**. Uno de sus principios de diseño clave fue **minimizar** la cantidad de **código** que se ejecuta en el **espacio del núcleo** y, en su lugar, permitir que muchas funciones típicas del núcleo, como el sistema de archivos, la red y la E/S, **se ejecuten como tareas a nivel de usuario**.
 
-In XNU, Mach is **responsible for many of the critical low-level operations** a kernel typically handles, such as processor scheduling, multitasking, and virtual memory management.
+En XNU, Mach es **responsable de muchas de las operaciones críticas de bajo nivel** que un núcleo maneja típicamente, como la programación de procesadores, la multitarea y la gestión de memoria virtual.
 
 ### BSD
 
-The XNU **kernel** also **incorporates** a significant amount of code derived from the **FreeBSD** project. This code **runs as part of the kernel along with Mach**, in the same address space. However, the FreeBSD code within XNU may differ substantially from the original FreeBSD code because modifications were required to ensure its compatibility with Mach. FreeBSD contributes to many kernel operations including:
+El **núcleo** XNU también **incorpora** una cantidad significativa de código derivado del proyecto **FreeBSD**. Este código **se ejecuta como parte del núcleo junto con Mach**, en el mismo espacio de direcciones. Sin embargo, el código de FreeBSD dentro de XNU puede diferir sustancialmente del código original de FreeBSD porque se requirieron modificaciones para garantizar su compatibilidad con Mach. FreeBSD contribuye a muchas operaciones del núcleo, incluyendo:
 
-- Process management
-- Signal handling
-- Basic security mechanisms, including user and group management
-- System call infrastructure
-- TCP/IP stack and sockets
-- Firewall and packet filtering
+- Gestión de procesos
+- Manejo de señales
+- Mecanismos de seguridad básicos, incluyendo gestión de usuarios y grupos
+- Infraestructura de llamadas al sistema
+- Pila TCP/IP y sockets
+- Cortafuegos y filtrado de paquetes
 
-Understanding the interaction between BSD and Mach can be complex, due to their different conceptual frameworks. For instance, BSD uses processes as its fundamental executing unit, while Mach operates based on threads. This discrepancy is reconciled in XNU by **associating each BSD process with a Mach task** that contains exactly one Mach thread. When BSD's fork() system call is used, the BSD code within the kernel uses Mach functions to create a task and a thread structure.
+Entender la interacción entre BSD y Mach puede ser complejo, debido a sus diferentes marcos conceptuales. Por ejemplo, BSD utiliza procesos como su unidad fundamental de ejecución, mientras que Mach opera en función de hilos. Esta discrepancia se reconcilia en XNU **asociando cada proceso BSD con una tarea Mach** que contiene exactamente un hilo Mach. Cuando se utiliza la llamada al sistema fork() de BSD, el código de BSD dentro del núcleo utiliza funciones de Mach para crear una tarea y una estructura de hilo.
 
-Moreover, **Mach and BSD each maintain different security models**: **Mach's** security model is based on **port rights**, whereas BSD's security model operates based on **process ownership**. Disparities between these two models have occasionally resulted in local privilege-escalation vulnerabilities. Apart from typical system calls, there are also **Mach traps that allow user-space programs to interact with the kernel**. These different elements together form the multifaceted, hybrid architecture of the macOS kernel.
+Además, **Mach y BSD mantienen cada uno diferentes modelos de seguridad**: el modelo de seguridad de **Mach** se basa en **derechos de puerto**, mientras que el modelo de seguridad de BSD opera en función de **la propiedad del proceso**. Las disparidades entre estos dos modelos han resultado ocasionalmente en vulnerabilidades de escalada de privilegios locales. Aparte de las llamadas al sistema típicas, también hay **trampas de Mach que permiten a los programas en espacio de usuario interactuar con el núcleo**. Estos diferentes elementos juntos forman la arquitectura híbrida y multifacética del núcleo de macOS.
 
-### I/O Kit - Drivers
+### I/O Kit - Controladores
 
-The I/O Kit is an open-source, object-oriented **device-driver framework** in the XNU kernel, handles **dynamically loaded device drivers**. It allows modular code to be added to the kernel on-the-fly, supporting diverse hardware.
+El I/O Kit es un marco de **controladores de dispositivos** de código abierto y orientado a objetos en el núcleo XNU, que maneja **controladores de dispositivos cargados dinámicamente**. Permite que se agregue código modular al núcleo sobre la marcha, soportando hardware diverso.
 
 {{#ref}}
 macos-iokit.md
 {{#endref}}
 
-### IPC - Inter Process Communication
+### IPC - Comunicación entre Procesos
 
 {{#ref}}
 ../macos-proces-abuse/macos-ipc-inter-process-communication/
 {{#endref}}
 
-## macOS Kernel Extensions
+## Extensiones del Núcleo de macOS
 
-macOS is **super restrictive to load Kernel Extensions** (.kext) because of the high privileges that code will run with. Actually, by default is virtually impossible (unless a bypass is found).
+macOS es **super restrictivo para cargar Extensiones del Núcleo** (.kext) debido a los altos privilegios con los que se ejecutará el código. De hecho, por defecto es prácticamente imposible (a menos que se encuentre un bypass).
 
-In the following page you can also see how to recover the `.kext` that macOS loads inside its **kernelcache**:
+En la siguiente página también puedes ver cómo recuperar el `.kext` que macOS carga dentro de su **kernelcache**:
 
 {{#ref}}
 macos-kernel-extensions.md
 {{#endref}}
 
-### macOS System Extensions
+### Extensiones del Sistema de macOS
 
-Instead of using Kernel Extensions macOS created the System Extensions, which offers in user level APIs to interact with the kernel. This way, developers can avoid to use kernel extensions.
+En lugar de usar Extensiones del Núcleo, macOS creó las Extensiones del Sistema, que ofrecen APIs a nivel de usuario para interactuar con el núcleo. De esta manera, los desarrolladores pueden evitar usar extensiones del núcleo.
 
 {{#ref}}
 macos-system-extensions.md
 {{#endref}}
 
-## References
+## Referencias
 
 - [**The Mac Hacker's Handbook**](https://www.amazon.com/-/es/Charlie-Miller-ebook-dp-B004U7MUMU/dp/B004U7MUMU/ref=mt_other?_encoding=UTF8&me=&qid=)
 - [**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)

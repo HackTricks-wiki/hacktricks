@@ -2,15 +2,12 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 ## **Enumeración / Descubrimiento de MSSQL**
 
 ### Python
 
-La herramienta [MSSQLPwner](https://github.com/ScorpionesLabs/MSSqlPwner) se basa en impacket, y también permite autenticarse utilizando tickets kerberos, y atacar a través de cadenas de enlaces.
+La herramienta [MSSQLPwner](https://github.com/ScorpionesLabs/MSSqlPwner) se basa en impacket y también permite autenticarse utilizando tickets kerberos y atacar a través de cadenas de enlaces.
 
 <figure><img src="https://raw.githubusercontent.com/ScorpionesLabs/MSSqlPwner/main/assets/interractive.png"></figure>
 ```shell
@@ -161,7 +158,7 @@ Revisa en la página mencionada en la **siguiente sección cómo hacerlo manualm
 
 ## Enlaces de Confianza en MSSQL
 
-Si una instancia de MSSQL es de confianza (enlace de base de datos) por otra instancia de MSSQL. Si el usuario tiene privilegios sobre la base de datos de confianza, podrá **utilizar la relación de confianza para ejecutar consultas también en la otra instancia**. Estas confianzas pueden encadenarse y en algún momento el usuario podría encontrar alguna base de datos mal configurada donde pueda ejecutar comandos.
+Si una instancia de MSSQL es confiable (enlace de base de datos) por otra instancia de MSSQL. Si el usuario tiene privilegios sobre la base de datos confiable, podrá **utilizar la relación de confianza para ejecutar consultas también en la otra instancia**. Estas confianzas pueden encadenarse y en algún momento el usuario podría encontrar alguna base de datos mal configurada donde pueda ejecutar comandos.
 
 **Los enlaces entre bases de datos funcionan incluso a través de confianzas de bosque.**
 
@@ -217,7 +214,7 @@ _Inicia sesión usando autenticación de Windows:_
 
 ![](<../../images/image (808).png>)
 
-#### Encontrar Enlaces Confiables
+#### Encontrar enlaces confiables
 ```sql
 select * from master..sysservers;
 EXEC sp_linkedservers;
@@ -235,7 +232,7 @@ select * from openquery("dcorp-sql1", 'select * from master..sysservers')
 
 ![](<../../images/image (643).png>)
 
-Puede continuar esta cadena de enlaces de confianza para siempre de forma manual.
+Puedes continuar esta cadena de enlaces de confianza para siempre de forma manual.
 ```sql
 # First level RCE
 SELECT * FROM OPENQUERY("<computer>", 'select @@servername; exec xp_cmdshell ''powershell -w hidden -enc blah''')
@@ -257,12 +254,9 @@ EXECUTE('EXECUTE(''sp_addsrvrolemember ''''hacker'''' , ''''sysadmin'''' '') AT 
 
 El **usuario local de MSSQL** generalmente tiene un tipo especial de privilegio llamado **`SeImpersonatePrivilege`**. Esto permite que la cuenta "imite a un cliente después de la autenticación".
 
-Una estrategia que muchos autores han ideado es forzar a un servicio del SISTEMA a autenticarse en un servicio malicioso o de intermediario que crea el atacante. Este servicio malicioso puede entonces imitar al servicio del SISTEMA mientras intenta autenticarse.
+Una estrategia que muchos autores han ideado es forzar a un servicio del SYSTEM a autenticarse en un servicio malicioso o de intermediario que el atacante crea. Este servicio malicioso puede entonces imitar al servicio del SYSTEM mientras intenta autenticarse.
 
 [SweetPotato](https://github.com/CCob/SweetPotato) tiene una colección de estas diversas técnicas que se pueden ejecutar a través del comando `execute-assembly` de Beacon.
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

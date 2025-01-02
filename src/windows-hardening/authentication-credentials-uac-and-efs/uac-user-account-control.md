@@ -2,16 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-Usa [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente, impulsados por las **herramientas comunitarias más avanzadas** del mundo.\
-Obtén acceso hoy:
-
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
-
 ## UAC
 
-[Control de Cuentas de Usuario (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) es una función que permite un **mensaje de consentimiento para actividades elevadas**. Las aplicaciones tienen diferentes niveles de `integridad`, y un programa con un **alto nivel** puede realizar tareas que **podrían comprometer potencialmente el sistema**. Cuando UAC está habilitado, las aplicaciones y tareas siempre **se ejecutan bajo el contexto de seguridad de una cuenta no administrativa** a menos que un administrador autorice explícitamente a estas aplicaciones/tareas para tener acceso a nivel de administrador al sistema para ejecutarse. Es una función de conveniencia que protege a los administradores de cambios no intencionados, pero no se considera un límite de seguridad.
+[Control de Cuentas de Usuario (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) es una función que permite un **mensaje de consentimiento para actividades elevadas**. Las aplicaciones tienen diferentes niveles de `integridad`, y un programa con un **alto nivel** puede realizar tareas que **podrían comprometer potencialmente el sistema**. Cuando UAC está habilitado, las aplicaciones y tareas siempre **se ejecutan bajo el contexto de seguridad de una cuenta no administrativa** a menos que un administrador autorice explícitamente a estas aplicaciones/tareas a tener acceso de nivel administrativo al sistema para ejecutarse. Es una función de conveniencia que protege a los administradores de cambios no intencionados, pero no se considera un límite de seguridad.
 
 Para más información sobre los niveles de integridad:
 
@@ -38,7 +31,7 @@ Esta [página](https://docs.microsoft.com/en-us/windows/security/identity-protec
 
 ### Teoría de Bypass de UAC
 
-Algunos programas son **autoelevados automáticamente** si el **usuario pertenece** al **grupo de administradores**. Estos binarios tienen dentro de sus _**Manifiestos**_ la opción _**autoElevate**_ con el valor _**True**_. El binario también debe estar **firmado por Microsoft**.
+Algunos programas son **autoelevados automáticamente** si el **usuario pertenece** al **grupo de administradores**. Estos binarios tienen dentro de sus _**Manifiestos**_ la opción _**autoElevate**_ con valor _**True**_. El binario también debe estar **firmado por Microsoft**.
 
 Luego, para **eludir** el **UAC** (elevar de **nivel** de integridad **medio** a **alto**) algunos atacantes utilizan este tipo de binarios para **ejecutar código arbitrario** porque se ejecutará desde un **proceso de alta integridad**.
 
@@ -46,14 +39,14 @@ Puedes **verificar** el _**Manifiesto**_ de un binario usando la herramienta _**
 
 ### Verificar UAC
 
-Para confirmar si UAC está habilitado, haz:
+Para confirmar si UAC está habilitado haz:
 ```
 REG QUERY HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System\ /v EnableLUA
 
 HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System
 EnableLUA    REG_DWORD    0x1
 ```
-Si es **`1`** entonces UAC está **activado**, si es **`0`** o **no existe**, entonces UAC está **inactivo**.
+Si es **`1`**, entonces UAC está **activado**, si es **`0`** o **no existe**, entonces UAC está **inactivo**.
 
 Luego, verifica **qué nivel** está configurado:
 ```
@@ -193,12 +186,5 @@ Si echas un vistazo a **UACME** notarás que **la mayoría de los bypass de UAC 
 ### Otra técnica de bypass de UAC
 
 Consiste en observar si un **binario autoElevado** intenta **leer** del **registro** el **nombre/ruta** de un **binario** o **comando** a ser **ejecutado** (esto es más interesante si el binario busca esta información dentro del **HKCU**).
-
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-Usa [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) para construir y **automatizar flujos de trabajo** fácilmente impulsados por las herramientas de la comunidad **más avanzadas** del mundo.\
-Obtén acceso hoy:
-
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
 {{#include ../../banners/hacktricks-training.md}}

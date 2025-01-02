@@ -2,11 +2,6 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
-
-Profundiza tu experiencia en **Mobile Security** con 8kSec Academy. Domina la seguridad de iOS y Android a través de nuestros cursos autoguiados y obtén una certificación:
-
-{% embed url="https://academy.8ksec.io/" %}
 
 ## **Password Spraying**
 
@@ -17,7 +12,7 @@ Las listas de nombres de usuario comunes también podrían ser útiles: [https:/
 
 Ten en cuenta que **podrías bloquear algunas cuentas si intentas varias contraseñas incorrectas** (por defecto más de 10).
 
-### Obtener política de contraseñas
+### Obtener la política de contraseñas
 
 Si tienes algunas credenciales de usuario o una shell como usuario de dominio, puedes **obtener la política de contraseñas con**:
 ```bash
@@ -130,10 +125,5 @@ Para usar cualquiera de estas herramientas, necesitas una lista de usuarios y un
 - [www.blackhillsinfosec.com/?p=5296](https://www.blackhillsinfosec.com/?p=5296)
 - [https://hunter2.gitbook.io/darthsidious/initial-access/password-spraying](https://hunter2.gitbook.io/darthsidious/initial-access/password-spraying)
 
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
-
-Profundiza tu experiencia en **Seguridad Móvil** con 8kSec Academy. Domina la seguridad de iOS y Android a través de nuestros cursos autoguiados y obtén una certificación:
-
-{% embed url="https://academy.8ksec.io/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

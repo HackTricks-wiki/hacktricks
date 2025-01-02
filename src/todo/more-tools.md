@@ -1,8 +1,5 @@
 {{#include ../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 # BlueTeam
 
@@ -51,7 +48,7 @@
 - [https://github.com/TypeError/Bookmarks/blob/master/README.md](https://github.com/TypeError/Bookmarks/blob/master/README.md) : BurpExtension para evitar docenas de pestañas de repetidor
 - [https://github.com/hakluke/hakrawler](https://github.com/hakluke/hakrawler) : Obtener activos
 - [https://github.com/izo30/google-dorker](https://github.com/izo30/google-dorker) : Google dorks
-- [https://github.com/sehno/Bug-bounty/blob/master/bugbounty_checklist.md](https://github.com/sehno/Bug-bounty/blob/master/bugbounty_checklist.md) : Lista de verificación de Web BugBounty
+- [https://github.com/sehno/Bug-bounty/blob/master/bugbounty_checklist.md](https://github.com/sehno/Bug-bounty/blob/master/bugbounty_checklist.md) : Lista de verificación de BugBounty web
 - [https://github.com/Naategh/dom-red](https://github.com/Naategh/dom-red) : Verificar una lista de dominios contra Redirección Abierta
 - [https://github.com/prodigysml/Dr.-Watson](https://github.com/prodigysml/Dr.-Watson) : Plugin de Burp, análisis offline para descubrir dominios, subdominios e IPs
 - [https://github.com/hahwul/WebHackersWeapons](https://github.com/hahwul/WebHackersWeapons): Lista de diferentes herramientas
@@ -119,8 +116,5 @@ Emulación de firmware: FIRMADYNE (https://github.com/firmadyne/firmadyne/) es u
 - [https://github.com/doyensec/awesome-electronjs-hacking](https://github.com/doyensec/awesome-electronjs-hacking) : Esta lista tiene como objetivo cubrir temas relacionados con la seguridad de Electron.js.
 - [https://github.com/serain/bbrecon](https://github.com/serain/bbrecon) : Información sobre programas de BB
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../banners/hacktricks-training.md}}

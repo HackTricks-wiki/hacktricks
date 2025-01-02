@@ -4,78 +4,76 @@
 
 ## System Extensions / Endpoint Security Framework
 
-Unlike Kernel Extensions, **System Extensions run in user space** instead of kernel space, reducing the risk of a system crash due to extension malfunction.
+A diferencia de las Kernel Extensions, **las System Extensions se ejecutan en el espacio de usuario** en lugar del espacio del kernel, reduciendo el riesgo de un fallo del sistema debido a un mal funcionamiento de la extensión.
 
 <figure><img src="../../../images/image (606).png" alt="https://knight.sc/images/system-extension-internals-1.png"><figcaption></figcaption></figure>
 
-There are three types of system extensions: **DriverKit** Extensions, **Network** Extensions, and **Endpoint Security** Extensions.
+Hay tres tipos de system extensions: **DriverKit** Extensions, **Network** Extensions y **Endpoint Security** Extensions.
 
 ### **DriverKit Extensions**
 
-DriverKit is a replacement for kernel extensions that **provide hardware support**. It allows device drivers (like USB, Serial, NIC, and HID drivers) to run in user space rather than kernel space. The DriverKit framework includes **user space versions of certain I/O Kit classes**, and the kernel forwards normal I/O Kit events to user space, offering a safer environment for these drivers to run.
+DriverKit es un reemplazo para las kernel extensions que **proporcionan soporte de hardware**. Permite que los controladores de dispositivos (como USB, Serial, NIC y controladores HID) se ejecuten en el espacio de usuario en lugar del espacio del kernel. El marco DriverKit incluye **versiones de espacio de usuario de ciertas clases de I/O Kit**, y el kernel reenvía eventos normales de I/O Kit al espacio de usuario, ofreciendo un entorno más seguro para que estos controladores se ejecuten.
 
 ### **Network Extensions**
 
-Network Extensions provide the ability to customize network behaviors. There are several types of Network Extensions:
+Las Network Extensions proporcionan la capacidad de personalizar comportamientos de red. Hay varios tipos de Network Extensions:
 
-- **App Proxy**: This is used for creating a VPN client that implements a flow-oriented, custom VPN protocol. This means it handles network traffic based on connections (or flows) rather than individual packets.
-- **Packet Tunnel**: This is used for creating a VPN client that implements a packet-oriented, custom VPN protocol. This means it handles network traffic based on individual packets.
-- **Filter Data**: This is used for filtering network "flows". It can monitor or modify network data at the flow level.
-- **Filter Packet**: This is used for filtering individual network packets. It can monitor or modify network data at the packet level.
-- **DNS Proxy**: This is used for creating a custom DNS provider. It can be used to monitor or modify DNS requests and responses.
+- **App Proxy**: Esto se utiliza para crear un cliente VPN que implementa un protocolo VPN personalizado orientado a flujos. Esto significa que maneja el tráfico de red basado en conexiones (o flujos) en lugar de paquetes individuales.
+- **Packet Tunnel**: Esto se utiliza para crear un cliente VPN que implementa un protocolo VPN personalizado orientado a paquetes. Esto significa que maneja el tráfico de red basado en paquetes individuales.
+- **Filter Data**: Esto se utiliza para filtrar "flujos" de red. Puede monitorear o modificar datos de red a nivel de flujo.
+- **Filter Packet**: Esto se utiliza para filtrar paquetes individuales de red. Puede monitorear o modificar datos de red a nivel de paquete.
+- **DNS Proxy**: Esto se utiliza para crear un proveedor DNS personalizado. Puede usarse para monitorear o modificar solicitudes y respuestas DNS.
 
 ## Endpoint Security Framework
 
-Endpoint Security is a framework provided by Apple in macOS that provides a set of APIs for system security. It's intended for use by **security vendors and developers to build products that can monitor and control system activity** to identify and protect against malicious activity.
+Endpoint Security es un marco proporcionado por Apple en macOS que ofrece un conjunto de APIs para la seguridad del sistema. Está destinado a ser utilizado por **proveedores de seguridad y desarrolladores para construir productos que puedan monitorear y controlar la actividad del sistema** para identificar y protegerse contra actividades maliciosas.
 
-This framework provides a **collection of APIs to monitor and control system activity**, such as process executions, file system events, network and kernel events.
+Este marco proporciona una **colección de APIs para monitorear y controlar la actividad del sistema**, como ejecuciones de procesos, eventos del sistema de archivos, eventos de red y del kernel.
 
-The core of this framework is implemented in the kernel, as a Kernel Extension (KEXT) located at **`/System/Library/Extensions/EndpointSecurity.kext`**. This KEXT is made up of several key components:
+El núcleo de este marco está implementado en el kernel, como una Kernel Extension (KEXT) ubicada en **`/System/Library/Extensions/EndpointSecurity.kext`**. Este KEXT está compuesto por varios componentes clave:
 
-- **EndpointSecurityDriver**: This acts as the "entry point" for the kernel extension. It's the main point of interaction between the OS and the Endpoint Security framework.
-- **EndpointSecurityEventManager**: This component is responsible for implementing kernel hooks. Kernel hooks allow the framework to monitor system events by intercepting system calls.
-- **EndpointSecurityClientManager**: This manages the communication with user space clients, keeping track of which clients are connected and need to receive event notifications.
-- **EndpointSecurityMessageManager**: This sends messages and event notifications to user space clients.
+- **EndpointSecurityDriver**: Actúa como el "punto de entrada" para la extensión del kernel. Es el principal punto de interacción entre el sistema operativo y el marco de Endpoint Security.
+- **EndpointSecurityEventManager**: Este componente es responsable de implementar ganchos del kernel. Los ganchos del kernel permiten que el marco monitoree eventos del sistema interceptando llamadas al sistema.
+- **EndpointSecurityClientManager**: Este gestiona la comunicación con los clientes del espacio de usuario, manteniendo un registro de qué clientes están conectados y necesitan recibir notificaciones de eventos.
+- **EndpointSecurityMessageManager**: Este envía mensajes y notificaciones de eventos a los clientes del espacio de usuario.
 
-The events that the Endpoint Security framework can monitor are categorized into:
+Los eventos que el marco de Endpoint Security puede monitorear se clasifican en:
 
-- File events
-- Process events
-- Socket events
-- Kernel events (such as loading/unloading a kernel extension or opening an I/O Kit device)
+- Eventos de archivos
+- Eventos de procesos
+- Eventos de sockets
+- Eventos del kernel (como cargar/descargar una extensión del kernel o abrir un dispositivo de I/O Kit)
 
-### Endpoint Security Framework Architecture
+### Arquitectura del Endpoint Security Framework
 
 <figure><img src="../../../images/image (1068).png" alt="https://www.youtube.com/watch?v=jaVkpM1UqOs"><figcaption></figcaption></figure>
 
-**User-space communication** with the Endpoint Security framework happens through the IOUserClient class. Two different subclasses are used, depending on the type of caller:
+La **comunicación en el espacio de usuario** con el marco de Endpoint Security ocurre a través de la clase IOUserClient. Se utilizan dos subclases diferentes, dependiendo del tipo de llamador:
 
-- **EndpointSecurityDriverClient**: This requires the `com.apple.private.endpoint-security.manager` entitlement, which is only held by the system process `endpointsecurityd`.
-- **EndpointSecurityExternalClient**: This requires the `com.apple.developer.endpoint-security.client` entitlement. This would typically be used by third-party security software that needs to interact with the Endpoint Security framework.
+- **EndpointSecurityDriverClient**: Esto requiere el derecho `com.apple.private.endpoint-security.manager`, que solo posee el proceso del sistema `endpointsecurityd`.
+- **EndpointSecurityExternalClient**: Esto requiere el derecho `com.apple.developer.endpoint-security.client`. Esto sería utilizado típicamente por software de seguridad de terceros que necesita interactuar con el marco de Endpoint Security.
 
-The Endpoint Security Extensions:**`libEndpointSecurity.dylib`** is the C library that system extensions use to communicate with the kernel. This library uses the I/O Kit (`IOKit`) to communicate with the Endpoint Security KEXT.
+Las Endpoint Security Extensions:**`libEndpointSecurity.dylib`** es la biblioteca C que utilizan las system extensions para comunicarse con el kernel. Esta biblioteca utiliza el I/O Kit (`IOKit`) para comunicarse con el KEXT de Endpoint Security.
 
-**`endpointsecurityd`** is a key system daemon involved in managing and launching endpoint security system extensions, particularly during the early boot process. **Only system extensions** marked with **`NSEndpointSecurityEarlyBoot`** in their `Info.plist` file receive this early boot treatment.
+**`endpointsecurityd`** es un daemon del sistema clave involucrado en la gestión y lanzamiento de las system extensions de seguridad de endpoint, particularmente durante el proceso de arranque temprano. **Solo las system extensions** marcadas con **`NSEndpointSecurityEarlyBoot`** en su archivo `Info.plist` reciben este tratamiento de arranque temprano.
 
-Another system daemon, **`sysextd`**, **validates system extensions** and moves them into the proper system locations. It then asks the relevant daemon to load the extension. The **`SystemExtensions.framework`** is responsible for activating and deactivating system extensions.
+Otro daemon del sistema, **`sysextd`**, **valida las system extensions** y las mueve a las ubicaciones adecuadas del sistema. Luego pide al daemon relevante que cargue la extensión. El **`SystemExtensions.framework`** es responsable de activar y desactivar las system extensions.
 
 ## Bypassing ESF
 
-ESF is used by security tools that will try to detect a red teamer, so any information about how this could be avoided sounds interesting.
+ESF es utilizado por herramientas de seguridad que intentarán detectar a un red teamer, por lo que cualquier información sobre cómo evitar esto suena interesante.
 
 ### CVE-2021-30965
 
-The thing is that the security application needs to have **Full Disk Access permissions**. So if an attacker could remove that, he could prevent the software from running:
-
+La cuestión es que la aplicación de seguridad necesita tener **permisos de Acceso Completo al Disco**. Así que si un atacante pudiera eliminar eso, podría evitar que el software se ejecute:
 ```bash
 tccutil reset All
 ```
+Para **más información** sobre este bypass y otros relacionados, consulta la charla [#OBTS v5.0: "The Achilles Heel of EndpointSecurity" - Fitzl Csaba](https://www.youtube.com/watch?v=lQO7tvNCoTI)
 
-For **more information** about this bypass and related ones check the talk [#OBTS v5.0: "The Achilles Heel of EndpointSecurity" - Fitzl Csaba](https://www.youtube.com/watch?v=lQO7tvNCoTI)
+Al final, esto se solucionó otorgando el nuevo permiso **`kTCCServiceEndpointSecurityClient`** a la aplicación de seguridad gestionada por **`tccd`**, de modo que `tccutil` no borre sus permisos, impidiendo que deje de funcionar.
 
-At the end this was fixed by giving the new permission **`kTCCServiceEndpointSecurityClient`** to the security app managed by **`tccd`** so `tccutil` won't clear its permissions preventing it from running.
-
-## References
+## Referencias
 
 - [**OBTS v3.0: "Endpoint Security & Insecurity" - Scott Knight**](https://www.youtube.com/watch?v=jaVkpM1UqOs)
 - [**https://knight.sc/reverse%20engineering/2019/08/24/system-extension-internals.html**](https://knight.sc/reverse%20engineering/2019/08/24/system-extension-internals.html)

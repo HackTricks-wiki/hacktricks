@@ -2,22 +2,18 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
-
 ## Introducción
 
 El problema de "Doble Salto" de Kerberos aparece cuando un atacante intenta usar **la autenticación Kerberos a través de dos** **saltos**, por ejemplo usando **PowerShell**/**WinRM**.
 
-Cuando ocurre una **autenticación** a través de **Kerberos**, las **credenciales** **no** se almacenan en **memoria.** Por lo tanto, si ejecutas mimikatz **no encontrarás credenciales** del usuario en la máquina, incluso si está ejecutando procesos.
+Cuando ocurre una **autenticación** a través de **Kerberos**, las **credenciales** **no están** almacenadas en **memoria.** Por lo tanto, si ejecutas mimikatz **no encontrarás credenciales** del usuario en la máquina, incluso si está ejecutando procesos.
 
 Esto se debe a que al conectarse con Kerberos, estos son los pasos:
 
 1. User1 proporciona credenciales y el **controlador de dominio** devuelve un **TGT** de Kerberos a User1.
 2. User1 usa el **TGT** para solicitar un **ticket de servicio** para **conectarse** a Server1.
 3. User1 **se conecta** a **Server1** y proporciona el **ticket de servicio**.
-4. **Server1** **no** tiene las **credenciales** de User1 almacenadas o el **TGT** de User1. Por lo tanto, cuando User1 desde Server1 intenta iniciar sesión en un segundo servidor, **no puede autenticarse**.
+4. **Server1** **no tiene** las **credenciales** de User1 almacenadas o el **TGT** de User1. Por lo tanto, cuando User1 desde Server1 intenta iniciar sesión en un segundo servidor, **no puede autenticarse**.
 
 ### Delegación No Restringida
 
@@ -47,7 +43,7 @@ Invoke-Command -ComputerName bizintel -Credential $cred -ScriptBlock {
 Invoke-Command -ComputerName secdev -Credential $cred -ScriptBlock {hostname}
 }
 ```
-Alternativamente, se sugiere establecer una PS-Session con el primer servidor y ejecutar el `Invoke-Command` utilizando `$cred` para centralizar tareas.
+Alternativamente, se sugiere establecer una PS-Session con el primer servidor y ejecutar el `Invoke-Command` usando `$cred` para centralizar tareas.
 
 ### Registrar la Configuración de PSSession
 
@@ -92,8 +88,5 @@ icacls.exe "C:\Users\redsuit\Documents\ssh\OpenSSH-Win64" /grant Everyone:RX /T
 - [https://learn.microsoft.com/en-gb/archive/blogs/sergey_babkins_blog/another-solution-to-multi-hop-powershell-remoting](https://learn.microsoft.com/en-gb/archive/blogs/sergey_babkins_blog/another-solution-to-multi-hop-powershell-remoting)
 - [https://4sysops.com/archives/solve-the-powershell-multi-hop-problem-without-using-credssp/](https://4sysops.com/archives/solve-the-powershell-multi-hop-problem-without-using-credssp/)
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

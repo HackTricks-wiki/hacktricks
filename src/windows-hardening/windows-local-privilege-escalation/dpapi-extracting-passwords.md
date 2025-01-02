@@ -2,15 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
-
-​​[**RootedCON**](https://www.rootedcon.com/) es el evento de ciberseguridad más relevante en **España** y uno de los más importantes en **Europa**. Con **la misión de promover el conocimiento técnico**, este congreso es un punto de encuentro vibrante para profesionales de la tecnología y la ciberseguridad en cada disciplina.
-
-{% embed url="https://www.rootedcon.com/" %}
-
 ## ¿Qué es DPAPI?
 
-La API de Protección de Datos (DPAPI) se utiliza principalmente dentro del sistema operativo Windows para la **encriptación simétrica de claves privadas asimétricas**, aprovechando ya sea secretos de usuario o del sistema como una fuente significativa de entropía. Este enfoque simplifica la encriptación para los desarrolladores al permitirles encriptar datos utilizando una clave derivada de los secretos de inicio de sesión del usuario o, para la encriptación del sistema, los secretos de autenticación del dominio del sistema, eliminando así la necesidad de que los desarrolladores gestionen la protección de la clave de encriptación ellos mismos.
+La API de Protección de Datos (DPAPI) se utiliza principalmente dentro del sistema operativo Windows para la **cifrado simétrico de claves privadas asimétricas**, aprovechando ya sea secretos de usuario o del sistema como una fuente significativa de entropía. Este enfoque simplifica el cifrado para los desarrolladores al permitirles cifrar datos utilizando una clave derivada de los secretos de inicio de sesión del usuario o, para el cifrado del sistema, los secretos de autenticación del dominio del sistema, eliminando así la necesidad de que los desarrolladores gestionen la protección de la clave de cifrado ellos mismos.
 
 ### Datos Protegidos por DPAPI
 
@@ -18,9 +12,9 @@ Entre los datos personales protegidos por DPAPI se encuentran:
 
 - Contraseñas y datos de autocompletado de Internet Explorer y Google Chrome
 - Contraseñas de cuentas de correo electrónico y FTP interno para aplicaciones como Outlook y Windows Mail
-- Contraseñas para carpetas compartidas, recursos, redes inalámbricas y Windows Vault, incluyendo claves de encriptación
-- Contraseñas para conexiones de escritorio remoto, .NET Passport y claves privadas para diversos propósitos de encriptación y autenticación
-- Contraseñas de red gestionadas por Credential Manager y datos personales en aplicaciones que utilizan CryptProtectData, como Skype, MSN messenger y más
+- Contraseñas para carpetas compartidas, recursos, redes inalámbricas y Windows Vault, incluyendo claves de cifrado
+- Contraseñas para conexiones de escritorio remoto, .NET Passport y claves privadas para diversos propósitos de cifrado y autenticación
+- Contraseñas de red gestionadas por el Administrador de Credenciales y datos personales en aplicaciones que utilizan CryptProtectData, como Skype, MSN messenger y más
 
 ## List Vault
 ```bash
@@ -64,15 +58,15 @@ Get-ChildItem -Hidden C:\Users\USER\AppData\Local\Microsoft\Protect\
 Get-ChildItem -Hidden C:\Users\USER\AppData\Roaming\Microsoft\Protect\{SID}
 Get-ChildItem -Hidden C:\Users\USER\AppData\Local\Microsoft\Protect\{SID}
 ```
-Esto es lo que un montón de Master Keys de un usuario se verá:
+Esto es lo que un montón de Claves Maestras de un usuario se verá:
 
 ![](<../../images/image (1121).png>)
 
-Usualmente **cada master key es una clave simétrica encriptada que puede desencriptar otro contenido**. Por lo tanto, **extraer** la **Master Key encriptada** es interesante para **desencriptar** más tarde ese **otro contenido** encriptado con ella.
+Usualmente **cada clave maestra es una clave simétrica encriptada que puede desencriptar otro contenido**. Por lo tanto, **extraer** la **Clave Maestra encriptada** es interesante para **desencriptar** más tarde ese **otro contenido** encriptado con ella.
 
-### Extraer master key y desencriptar
+### Extraer clave maestra y desencriptar
 
-Consulta el post [https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++](https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#extracting-dpapi-backup-keys-with-domain-admin) para un ejemplo de cómo extraer la master key y desencriptarla.
+Consulta la publicación [https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++](https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#extracting-dpapi-backup-keys-with-domain-admin) para un ejemplo de cómo extraer la clave maestra y desencriptarla.
 
 ## SharpDPAPI
 
@@ -86,7 +80,7 @@ Consulta el post [https://www.ired.team/offensive-security/credential-access-and
 
 ¡Con la lista de computadoras extraídas de LDAP puedes encontrar cada subred incluso si no las conocías!
 
-"Porque los derechos de Domain Admin no son suficientes. Hackéalos a todos."
+"Porque los derechos de Administrador de Dominio no son suficientes. Hackea a todos."
 
 ## DonPAPI
 
@@ -96,11 +90,5 @@ Consulta el post [https://www.ired.team/offensive-security/credential-access-and
 
 - [https://www.passcape.com/index.php?section=docsys\&cmd=details\&id=28#13](https://www.passcape.com/index.php?section=docsys&cmd=details&id=28#13)
 - [https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++](https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#using-dpapis-to-encrypt-decrypt-data-in-c)
-
-<figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
-
-[**RootedCON**](https://www.rootedcon.com/) es el evento de ciberseguridad más relevante en **España** y uno de los más importantes en **Europa**. Con **la misión de promover el conocimiento técnico**, este congreso es un punto de encuentro bullicioso para profesionales de la tecnología y la ciberseguridad en cada disciplina.
-
-{% embed url="https://www.rootedcon.com/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

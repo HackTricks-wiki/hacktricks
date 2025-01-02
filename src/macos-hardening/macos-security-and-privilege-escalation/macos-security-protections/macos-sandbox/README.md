@@ -30,7 +30,7 @@ drwx------@ 4 username  staff  128 Mar 25 14:14 com.apple.Accessibility-Settings
 drwx------@ 4 username  staff  128 Mar 25 14:10 com.apple.ActionKit.BundledIntentHandler
 [...]
 ```
-Dentro de cada carpeta de id de paquete, puedes encontrar el **plist** y el **Directorio de Datos** de la aplicación con una estructura que imita la carpeta de Inicio:
+Dentro de cada carpeta de id de paquete, puedes encontrar el **plist** y el **Directorio de Datos** de la aplicación con una estructura que imita la carpeta de inicio:
 ```bash
 cd /Users/username/Library/Containers/com.apple.Safari
 ls -la
@@ -56,7 +56,7 @@ drwx------   2 username  staff    64 Mar 24 18:02 tmp
 > [!CAUTION]
 > Tenga en cuenta que incluso si los symlinks están ahí para "escapar" del Sandbox y acceder a otras carpetas, la App aún necesita **tener permisos** para acceder a ellas. Estos permisos están dentro del **`.plist`** en los `RedirectablePaths`.
 
-Los **`SandboxProfileData`** son el perfil de sandbox compilado CFData escapado a B64.
+El **`SandboxProfileData`** es el perfil de sandbox compilado CFData escapado a B64.
 ```bash
 # Get container config
 ## You need FDA to access the file, not even just root can read it
@@ -131,7 +131,7 @@ Aquí puedes encontrar un ejemplo:
 )
 ```
 > [!TIP]
-> Consulta esta [**investigación**](https://reverse.put.as/2011/09/14/apple-sandbox-guide-v1-0/) **para verificar más acciones que podrían ser permitidas o denegadas.**
+> Consulta esta [**investigación**](https://reverse.put.as/2011/09/14/apple-sandbox-guide-v1-0/) **para ver más acciones que podrían ser permitidas o denegadas.**
 >
 > Ten en cuenta que en la versión compilada de un perfil, el nombre de las operaciones es sustituido por sus entradas en un array conocido por el dylib y el kext, haciendo que la versión compilada sea más corta y más difícil de leer.
 
@@ -143,11 +143,13 @@ Los **servicios del sistema** importantes también se ejecutan dentro de su prop
 
 Las aplicaciones de la **App Store** utilizan el **perfil** **`/System/Library/Sandbox/Profiles/application.sb`**. Puedes verificar en este perfil cómo los derechos como **`com.apple.security.network.server`** permiten a un proceso utilizar la red.
 
-SIP es un perfil de Sandbox llamado platform_profile en /System/Library/Sandbox/rootless.conf
+Luego, algunos **servicios de demonios de Apple** utilizan diferentes perfiles ubicados en `/System/Library/Sandbox/Profiles/*.sb` o `/usr/share/sandbox/*.sb`. Estos sandboxes se aplican en la función principal que llama a la API `sandbox_init_XXX`.
+
+**SIP** es un perfil de Sandbox llamado platform_profile en `/System/Library/Sandbox/rootless.conf`.
 
 ### Ejemplos de Perfiles de Sandbox
 
-Para iniciar una aplicación con un **perfil de sandbox específico** puedes usar:
+Para iniciar una aplicación con un **perfil de sandbox específico**, puedes usar:
 ```bash
 sandbox-exec -f example.sb /Path/To/The/Application
 ```
@@ -222,12 +224,12 @@ En `/tmp/trace.out` podrás ver cada verificación de sandbox realizada cada vez
 
 También es posible rastrear el sandbox usando el **`-t`** parámetro: `sandbox-exec -t /path/trace.out -p "(version 1)" /bin/ls`
 
-#### A través de la API
+#### A través de API
 
-La función `sandbox_set_trace_path` exportada por `libsystem_sandbox.dylib` permite especificar un nombre de archivo de rastreo donde se escribirán las verificaciones del sandbox.\
-También es posible hacer algo similar llamando a `sandbox_vtrace_enable()` y luego obteniendo los errores de registro del búfer llamando a `sandbox_vtrace_report()`.
+La función `sandbox_set_trace_path` exportada por `libsystem_sandbox.dylib` permite especificar un nombre de archivo de rastreo donde se escribirán las verificaciones de sandbox.\
+También es posible hacer algo similar llamando a `sandbox_vtrace_enable()` y luego obteniendo los registros de error del búfer llamando a `sandbox_vtrace_report()`.
 
-### Inspección del Sandbox
+### Inspección de Sandbox
 
 `libsandbox.dylib` exporta una función llamada sandbox_inspect_pid que proporciona una lista del estado del sandbox de un proceso (incluidas las extensiones). Sin embargo, solo los binarios de la plataforma pueden usar esta función.
 
@@ -255,7 +257,7 @@ Esto **evalúa la cadena después de este derecho** como un perfil de Sandbox.
 
 ### Compilación y descompilación de un perfil de Sandbox
 
-La herramienta **`sandbox-exec`** utiliza las funciones `sandbox_compile_*` de `libsandbox.dylib`. Las principales funciones exportadas son: `sandbox_compile_file` (espera una ruta de archivo, parámetro `-f`), `sandbox_compile_string` (espera una cadena, parámetro `-p`), `sandbox_compile_name` (espera un nombre de contenedor, parámetro `-n`), `sandbox_compile_entitlements` (espera un plist de derechos).
+La herramienta **`sandbox-exec`** utiliza las funciones `sandbox_compile_*` de `libsandbox.dylib`. Las funciones principales exportadas son: `sandbox_compile_file` (espera una ruta de archivo, parámetro `-f`), `sandbox_compile_string` (espera una cadena, parámetro `-p`), `sandbox_compile_name` (espera un nombre de contenedor, parámetro `-n`), `sandbox_compile_entitlements` (espera un plist de derechos).
 
 Esta versión revertida y [**de código abierto de la herramienta sandbox-exec**](https://newosxbook.com/src.jl?tree=listings&file=/sandbox_exec.c) permite que **`sandbox-exec`** escriba en un archivo el perfil de sandbox compilado.
 
@@ -263,9 +265,9 @@ Además, para confinar un proceso dentro de un contenedor, puede llamar a `sandb
 
 ## Depurar y eludir el Sandbox
 
-En macOS, a diferencia de iOS donde los procesos están aislados desde el inicio por el kernel, **los procesos deben optar por el sandbox ellos mismos**. Esto significa que en macOS, un proceso no está restringido por el sandbox hasta que decide activamente entrar en él, aunque las aplicaciones de la App Store siempre están aisladas.
+En macOS, a diferencia de iOS donde los procesos están en sandbox desde el inicio por el kernel, **los procesos deben optar por el sandbox ellos mismos**. Esto significa que en macOS, un proceso no está restringido por el sandbox hasta que decide activamente entrar en él, aunque las aplicaciones de la App Store siempre están en sandbox.
 
-Los procesos se aíslan automáticamente desde el userland cuando comienzan si tienen el derecho: `com.apple.security.app-sandbox`. Para una explicación detallada de este proceso, consulta:
+Los procesos se en sandbox automáticamente desde el userland cuando comienzan si tienen el derecho: `com.apple.security.app-sandbox`. Para una explicación detallada de este proceso, consulta:
 
 {{#ref}}
 macos-sandbox-debug-and-bypass/
@@ -318,13 +320,13 @@ Esta llamada al sistema (#381) espera un primer argumento de tipo cadena que ind
 La llamada a la función `___sandbox_ms` envuelve `mac_syscall` indicando en el primer argumento `"Sandbox"`, así como `___sandbox_msp` es un envoltorio de `mac_set_proc` (#387). Luego, algunos de los códigos soportados por `___sandbox_ms` se pueden encontrar en esta tabla:
 
 - **set_profile (#0)**: Aplica un perfil compilado o nombrado a un proceso.
-- **platform_policy (#1)**: Impone verificaciones de políticas específicas de la plataforma (varía entre macOS e iOS).
+- **platform_policy (#1)**: Impone verificaciones de políticas específicas de la plataforma (varía entre macOS y iOS).
 - **check_sandbox (#2)**: Realiza una verificación manual de una operación específica del sandbox.
 - **note (#3)**: Agrega una anotación a un Sandbox.
 - **container (#4)**: Adjunta una anotación a un sandbox, típicamente para depuración o identificación.
 - **extension_issue (#5)**: Genera una nueva extensión para un proceso.
 - **extension_consume (#6)**: Consume una extensión dada.
-- **extension_release (#7)**: Libera la memoria asociada a una extensión consumida.
+- **extension_release (#7)**: Libera la memoria vinculada a una extensión consumida.
 - **extension_update_file (#8)**: Modifica los parámetros de una extensión de archivo existente dentro del sandbox.
 - **extension_twiddle (#9)**: Ajusta o modifica una extensión de archivo existente (por ejemplo, TextEdit, rtf, rtfd).
 - **suspend (#10)**: Suspende temporalmente todas las verificaciones del sandbox (requiere derechos apropiados).

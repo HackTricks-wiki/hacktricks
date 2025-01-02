@@ -2,18 +2,17 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Información Básica
 
-**Linux Control Groups**, or **cgroups**, are a feature of the Linux kernel that allows the allocation, limitation, and prioritization of system resources like CPU, memory, and disk I/O among process groups. They offer a mechanism for **managing and isolating the resource usage** of process collections, beneficial for purposes such as resource limitation, workload isolation, and resource prioritization among different process groups.
+**Linux Control Groups**, o **cgroups**, son una característica del núcleo de Linux que permite la asignación, limitación y priorización de recursos del sistema como CPU, memoria y disco I/O entre grupos de procesos. Ofrecen un mecanismo para **gestionar y aislar el uso de recursos** de colecciones de procesos, beneficioso para propósitos como la limitación de recursos, el aislamiento de cargas de trabajo y la priorización de recursos entre diferentes grupos de procesos.
 
-There are **two versions of cgroups**: version 1 and version 2. Both can be used concurrently on a system. The primary distinction is that **cgroups version 2** introduces a **hierarchical, tree-like structure**, enabling more nuanced and detailed resource distribution among process groups. Additionally, version 2 brings various enhancements, including:
+Hay **dos versiones de cgroups**: versión 1 y versión 2. Ambas pueden ser utilizadas de manera concurrente en un sistema. La principal distinción es que **cgroups versión 2** introduce una **estructura jerárquica, en forma de árbol**, que permite una distribución de recursos más matizada y detallada entre grupos de procesos. Además, la versión 2 trae varias mejoras, incluyendo:
 
-In addition to the new hierarchical organization, cgroups version 2 also introduced **several other changes and improvements**, such as support for **new resource controllers**, better support for legacy applications, and improved performance.
+Además de la nueva organización jerárquica, cgroups versión 2 también introdujo **cambios y mejoras adicionales**, como soporte para **nuevos controladores de recursos**, mejor soporte para aplicaciones heredadas y un rendimiento mejorado.
 
-Overall, cgroups **version 2 offers more features and better performance** than version 1, but the latter may still be used in certain scenarios where compatibility with older systems is a concern.
+En general, cgroups **versión 2 ofrece más características y mejor rendimiento** que la versión 1, pero esta última aún puede ser utilizada en ciertos escenarios donde la compatibilidad con sistemas más antiguos es una preocupación.
 
-You can list the v1 and v2 cgroups for any process by looking at its cgroup file in /proc/\<pid>. You can start by looking at your shell’s cgroups with this command:
-
+Puedes listar los cgroups v1 y v2 para cualquier proceso mirando su archivo de cgroup en /proc/\<pid>. Puedes comenzar mirando los cgroups de tu shell con este comando:
 ```shell-session
 $ cat /proc/self/cgroup
 12:rdma:/
@@ -28,63 +27,56 @@ $ cat /proc/self/cgroup
 1:name=systemd:/user.slice/user-1000.slice/session-2.scope
 0::/user.slice/user-1000.slice/session-2.scope
 ```
+La estructura de salida es la siguiente:
 
-The output structure is as follows:
+- **Números 2–12**: cgroups v1, con cada línea representando un cgroup diferente. Los controladores para estos se especifican adyacentes al número.
+- **Número 1**: También cgroups v1, pero únicamente para fines de gestión (establecido por, por ejemplo, systemd), y carece de un controlador.
+- **Número 0**: Representa cgroups v2. No se enumeran controladores, y esta línea es exclusiva en sistemas que solo ejecutan cgroups v2.
+- Los **nombres son jerárquicos**, asemejándose a rutas de archivos, indicando la estructura y relación entre diferentes cgroups.
+- **Nombres como /user.slice o /system.slice** especifican la categorización de cgroups, siendo user.slice típicamente para sesiones de inicio gestionadas por systemd y system.slice para servicios del sistema.
 
-- **Numbers 2–12**: cgroups v1, with each line representing a different cgroup. Controllers for these are specified adjacent to the number.
-- **Number 1**: Also cgroups v1, but solely for management purposes (set by, e.g., systemd), and lacks a controller.
-- **Number 0**: Represents cgroups v2. No controllers are listed, and this line is exclusive on systems only running cgroups v2.
-- The **names are hierarchical**, resembling file paths, indicating the structure and relationship between different cgroups.
-- **Names like /user.slice or /system.slice** specify the categorization of cgroups, with user.slice typically for login sessions managed by systemd and system.slice for system services.
+### Visualizando cgroups
 
-### Viewing cgroups
-
-The filesystem is typically utilized for accessing **cgroups**, diverging from the Unix system call interface traditionally used for kernel interactions. To investigate a shell's cgroup configuration, one should examine the **/proc/self/cgroup** file, which reveals the shell's cgroup. Then, by navigating to the **/sys/fs/cgroup** (or **`/sys/fs/cgroup/unified`**) directory and locating a directory that shares the cgroup's name, one can observe various settings and resource usage information pertinent to the cgroup.
+El sistema de archivos se utiliza típicamente para acceder a **cgroups**, desviándose de la interfaz de llamada del sistema Unix tradicionalmente utilizada para interacciones con el kernel. Para investigar la configuración del cgroup de un shell, se debe examinar el archivo **/proc/self/cgroup**, que revela el cgroup del shell. Luego, al navegar al directorio **/sys/fs/cgroup** (o **`/sys/fs/cgroup/unified`**) y localizar un directorio que comparta el nombre del cgroup, se pueden observar varios ajustes e información sobre el uso de recursos pertinente al cgroup.
 
 ![Cgroup Filesystem](<../../../images/image (1128).png>)
 
-The key interface files for cgroups are prefixed with **cgroup**. The **cgroup.procs** file, which can be viewed with standard commands like cat, lists the processes within the cgroup. Another file, **cgroup.threads**, includes thread information.
+Los archivos de interfaz clave para cgroups están prefijados con **cgroup**. El archivo **cgroup.procs**, que se puede ver con comandos estándar como cat, lista los procesos dentro del cgroup. Otro archivo, **cgroup.threads**, incluye información sobre los hilos.
 
 ![Cgroup Procs](<../../../images/image (281).png>)
 
-Cgroups managing shells typically encompass two controllers that regulate memory usage and process count. To interact with a controller, files bearing the controller's prefix should be consulted. For instance, **pids.current** would be referenced to ascertain the count of threads in the cgroup.
+Los cgroups que gestionan shells típicamente abarcan dos controladores que regulan el uso de memoria y el conteo de procesos. Para interactuar con un controlador, se deben consultar los archivos que llevan el prefijo del controlador. Por ejemplo, **pids.current** se referiría para determinar el conteo de hilos en el cgroup.
 
 ![Cgroup Memory](<../../../images/image (677).png>)
 
-The indication of **max** in a value suggests the absence of a specific limit for the cgroup. However, due to the hierarchical nature of cgroups, limits might be imposed by a cgroup at a lower level in the directory hierarchy.
+La indicación de **max** en un valor sugiere la ausencia de un límite específico para el cgroup. Sin embargo, debido a la naturaleza jerárquica de los cgroups, los límites pueden ser impuestos por un cgroup en un nivel inferior en la jerarquía de directorios.
 
-### Manipulating and Creating cgroups
+### Manipulando y Creando cgroups
 
-Processes are assigned to cgroups by **writing their Process ID (PID) to the `cgroup.procs` file**. This requires root privileges. For instance, to add a process:
-
+Los procesos se asignan a cgroups mediante **escribir su ID de Proceso (PID) en el archivo `cgroup.procs`**. Esto requiere privilegios de root. Por ejemplo, para agregar un proceso:
 ```bash
 echo [pid] > cgroup.procs
 ```
-
-Similarly, **modifying cgroup attributes, like setting a PID limit**, is done by writing the desired value to the relevant file. To set a maximum of 3,000 PIDs for a cgroup:
-
+De manera similar, **modificar los atributos de cgroup, como establecer un límite de PID**, se realiza escribiendo el valor deseado en el archivo correspondiente. Para establecer un máximo de 3,000 PIDs para un cgroup:
 ```bash
 echo 3000 > pids.max
 ```
+**Crear nuevos cgroups** implica hacer un nuevo subdirectorio dentro de la jerarquía de cgroup, lo que provoca que el kernel genere automáticamente los archivos de interfaz necesarios. Aunque los cgroups sin procesos activos pueden ser eliminados con `rmdir`, ten en cuenta ciertas restricciones:
 
-**Creating new cgroups** involves making a new subdirectory within the cgroup hierarchy, which prompts the kernel to automatically generate necessary interface files. Though cgroups without active processes can be removed with `rmdir`, be aware of certain constraints:
-
-- **Processes can only be placed in leaf cgroups** (i.e., the most nested ones in a hierarchy).
-- **A cgroup cannot possess a controller absent in its parent**.
-- **Controllers for child cgroups must be explicitly declared** in the `cgroup.subtree_control` file. For example, to enable CPU and PID controllers in a child cgroup:
-
+- **Los procesos solo pueden ser colocados en cgroups hoja** (es decir, los más anidados en una jerarquía).
+- **Un cgroup no puede poseer un controlador ausente en su padre**.
+- **Los controladores para cgroups hijos deben ser declarados explícitamente** en el archivo `cgroup.subtree_control`. Por ejemplo, para habilitar los controladores de CPU y PID en un cgroup hijo:
 ```bash
 echo "+cpu +pids" > cgroup.subtree_control
 ```
+El **root cgroup** es una excepción a estas reglas, permitiendo la colocación directa de procesos. Esto se puede utilizar para eliminar procesos de la gestión de systemd.
 
-The **root cgroup** is an exception to these rules, allowing direct process placement. This can be used to remove processes from systemd management.
+**Monitorear el uso de CPU** dentro de un cgroup es posible a través del archivo `cpu.stat`, que muestra el tiempo total de CPU consumido, útil para rastrear el uso a través de los subprocesos de un servicio:
 
-**Monitoring CPU usage** within a cgroup is possible through the `cpu.stat` file, displaying total CPU time consumed, helpful for tracking usage across a service's subprocesses:
+<figure><img src="../../../images/image (908).png" alt=""><figcaption><p>Estadísticas de uso de CPU como se muestra en el archivo cpu.stat</p></figcaption></figure>
 
-<figure><img src="../../../images/image (908).png" alt=""><figcaption><p>CPU usage statistics as shown in the cpu.stat file</p></figcaption></figure>
+## Referencias
 
-## References
-
-- **Book: How Linux Works, 3rd Edition: What Every Superuser Should Know By Brian Ward**
+- **Libro: How Linux Works, 3rd Edition: What Every Superuser Should Know By Brian Ward**
 
 {{#include ../../../banners/hacktricks-training.md}}
