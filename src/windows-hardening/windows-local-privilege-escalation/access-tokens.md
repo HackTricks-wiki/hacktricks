@@ -4,10 +4,9 @@
 
 ## Access Tokens
 
-Each **user logged** onto the system **holds an access token with security information** for that logon session. The system creates an access token when the user logs on. **Every process executed** on behalf of the user **has a copy of the access token**. The token identifies the user, the user's groups, and the user's privileges. A token also contains a logon SID (Security Identifier) that identifies the current logon session.
+Cada **usuário conectado** ao sistema **possui um token de acesso com informações de segurança** para essa sessão de logon. O sistema cria um token de acesso quando o usuário faz logon. **Cada processo executado** em nome do usuário **tem uma cópia do token de acesso**. O token identifica o usuário, os grupos do usuário e os privilégios do usuário. Um token também contém um SID de logon (Identificador de Segurança) que identifica a sessão de logon atual.
 
-You can see this information executing `whoami /all`
-
+Você pode ver essas informações executando `whoami /all`
 ```
 whoami /all
 
@@ -51,61 +50,55 @@ SeUndockPrivilege             Remove computer from docking station Disabled
 SeIncreaseWorkingSetPrivilege Increase a process working set       Disabled
 SeTimeZonePrivilege           Change the time zone                 Disabled
 ```
-
-or using _Process Explorer_ from Sysinternals (select process and access"Security" tab):
+ou usando _Process Explorer_ da Sysinternals (selecione o processo e acesse a aba "Segurança"):
 
 ![](<../../images/image (772).png>)
 
-### Local administrator
+### Administrador local
 
-When a local administrator logins, **two access tokens are created**: One with admin rights and other one with normal rights. **By default**, when this user executes a process the one with **regular** (non-administrator) **rights is used**. When this user tries to **execute** anything **as administrator** ("Run as Administrator" for example) the **UAC** will be used to ask for permission.\
-If you want to [**learn more about the UAC read this page**](../authentication-credentials-uac-and-efs/#uac)**.**
+Quando um administrador local faz login, **dois tokens de acesso são criados**: Um com direitos de administrador e outro com direitos normais. **Por padrão**, quando esse usuário executa um processo, o que possui **direitos regulares** (não-administrador) **é usado**. Quando esse usuário tenta **executar** qualquer coisa **como administrador** ("Executar como Administrador", por exemplo), o **UAC** será usado para pedir permissão.\
+Se você quiser [**saber mais sobre o UAC, leia esta página**](../authentication-credentials-uac-and-efs/#uac)**.**
 
-### Credentials user impersonation
+### Impersonação de credenciais de usuário
 
-If you have **valid credentials of any other user**, you can **create** a **new logon session** with those credentials :
-
+Se você tiver **credenciais válidas de qualquer outro usuário**, pode **criar** uma **nova sessão de logon** com essas credenciais:
 ```
 runas /user:domain\username cmd.exe
 ```
-
-The **access token** has also a **reference** of the logon sessions inside the **LSASS**, this is useful if the process needs to access some objects of the network.\
-You can launch a process that **uses different credentials for accessing network services** using:
-
+O **token de acesso** também possui uma **referência** das sessões de logon dentro do **LSASS**, isso é útil se o processo precisar acessar alguns objetos da rede.\
+Você pode iniciar um processo que **usa credenciais diferentes para acessar serviços de rede** usando:
 ```
 runas /user:domain\username /netonly cmd.exe
 ```
+Isso é útil se você tiver credenciais úteis para acessar objetos na rede, mas essas credenciais não são válidas dentro do host atual, pois serão usadas apenas na rede (no host atual, os privilégios do seu usuário atual serão utilizados).
 
-This is useful if you have useful credentials to access objects in the network but those credentials aren't valid inside the current host as they are only going to be used in the network (in the current host your current user privileges will be used).
+### Tipos de tokens
 
-### Types of tokens
+Existem dois tipos de tokens disponíveis:
 
-There are two types of tokens available:
+- **Token Primário**: Serve como uma representação das credenciais de segurança de um processo. A criação e associação de tokens primários com processos são ações que requerem privilégios elevados, enfatizando o princípio da separação de privilégios. Normalmente, um serviço de autenticação é responsável pela criação do token, enquanto um serviço de logon lida com sua associação ao shell do sistema operacional do usuário. Vale ressaltar que os processos herdam o token primário de seu processo pai na criação.
+- **Token de Impersonação**: Capacita uma aplicação de servidor a adotar temporariamente a identidade do cliente para acessar objetos seguros. Este mecanismo é estratificado em quatro níveis de operação:
+- **Anônimo**: Concede acesso ao servidor semelhante ao de um usuário não identificado.
+- **Identificação**: Permite que o servidor verifique a identidade do cliente sem utilizá-la para acesso a objetos.
+- **Impersonação**: Permite que o servidor opere sob a identidade do cliente.
+- **Delegação**: Semelhante à Impersonação, mas inclui a capacidade de estender essa assunção de identidade para sistemas remotos com os quais o servidor interage, garantindo a preservação das credenciais.
 
-- **Primary Token**: It serves as a representation of a process's security credentials. The creation and association of primary tokens with processes are actions that require elevated privileges, emphasizing the principle of privilege separation. Typically, an authentication service is responsible for token creation, while a logon service handles its association with the user's operating system shell. It is worth noting that processes inherit the primary token of their parent process at creation.
-- **Impersonation Token**: Empowers a server application to adopt the client's identity temporarily for accessing secure objects. This mechanism is stratified into four levels of operation:
-  - **Anonymous**: Grants server access akin to that of an unidentified user.
-  - **Identification**: Allows the server to verify the client's identity without utilizing it for object access.
-  - **Impersonation**: Enables the server to operate under the client's identity.
-  - **Delegation**: Similar to Impersonation but includes the ability to extend this identity assumption to remote systems the server interacts with, ensuring credential preservation.
+#### Tokens de Impersonação
 
-#### Impersonate Tokens
+Usando o módulo _**incognito**_ do metasploit, se você tiver privilégios suficientes, pode facilmente **listar** e **impersonar** outros **tokens**. Isso pode ser útil para realizar **ações como se você fosse o outro usuário**. Você também pode **escalar privilégios** com essa técnica.
 
-Using the _**incognito**_ module of metasploit if you have enough privileges you can easily **list** and **impersonate** other **tokens**. This could be useful to perform **actions as if you where the other user**. You could also **escalate privileges** with this technique.
+### Privilégios de Token
 
-### Token Privileges
-
-Learn which **token privileges can be abused to escalate privileges:**
+Saiba quais **privilégios de token podem ser abusados para escalar privilégios:**
 
 {{#ref}}
 privilege-escalation-abusing-tokens.md
 {{#endref}}
 
-Take a look to [**all the possible token privileges and some definitions on this external page**](https://github.com/gtworek/Priv2Admin).
+Dê uma olhada em [**todos os possíveis privilégios de token e algumas definições nesta página externa**](https://github.com/gtworek/Priv2Admin).
 
-## References
+## Referências
 
-Learn more about tokens in this tutorials: [https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa](https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa) and [https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)
+Saiba mais sobre tokens nestes tutoriais: [https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa](https://medium.com/@seemant.bisht24/understanding-and-abusing-process-tokens-part-i-ee51671f2cfa) e [https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962)
 
 {{#include ../../banners/hacktricks-training.md}}
-

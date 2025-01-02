@@ -2,59 +2,56 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Informações Básicas
 
-SPI (Serial Peripheral Interface) is an Synchronous Serial Communication Protocol used in embedded systems for short distance communication between ICs (Integrated Circuits). SPI Communication Protocol makes use of the master-slave architecture which is orchastrated by the Clock and Chip Select Signal. A master-slave architecture consists of a master (usually a microprocessor) that manages external peripherals like EEPROM, sensors, control devices, etc. which are considered to be the slaves.
+SPI (Serial Peripheral Interface) é um Protocolo de Comunicação Serial Síncrono usado em sistemas embarcados para comunicação de curta distância entre ICs (Circuitos Integrados). O Protocolo de Comunicação SPI utiliza a arquitetura mestre-escravo, que é orquestrada pelo Clock e pelo Sinal de Seleção de Chip. Uma arquitetura mestre-escravo consiste em um mestre (geralmente um microprocessador) que gerencia periféricos externos como EEPROM, sensores, dispositivos de controle, etc., que são considerados escravos.
 
-Multiple slaves can be connected to a master but slaves can't communicate with each other. Slaves are administrated by two pins, clock and chip select. As SPI is an synchronous communication protocol, the input and output pins follow the clock signals. The chip select is used by the master to select a slave and interact with it. When the chip select is high, the slave device is not selected whereas when it's low, the chip has been selected and the master would be interacting with the slave.
+Vários escravos podem ser conectados a um mestre, mas os escravos não podem se comunicar entre si. Os escravos são administrados por dois pinos, clock e seleção de chip. Como o SPI é um protocolo de comunicação síncrono, os pinos de entrada e saída seguem os sinais de clock. A seleção de chip é usada pelo mestre para selecionar um escravo e interagir com ele. Quando a seleção de chip está alta, o dispositivo escravo não é selecionado, enquanto quando está baixa, o chip foi selecionado e o mestre interagirá com o escravo.
 
-The MOSI (Master Out, Slave In) and MISO (Master In, Slave Out) are responsible for data sending and recieving data. Data is sent to the slave device through the MOSI pin while the chip select is held low. The input data contains instructions, memory addresses or data as per the datasheet of the slave device vendor. Upon a valid input, the MISO pin is responsible for transmitting data to the master. The output data is sent exactly at the next clock cycle after the input ends. The MISO pins transmits data till the data is fully transmitter or the master sets the chip select pin high (in that case, the slave would stop transmitting and master would not listen after that clock cycle).
+O MOSI (Master Out, Slave In) e o MISO (Master In, Slave Out) são responsáveis pelo envio e recebimento de dados. Os dados são enviados para o dispositivo escravo através do pino MOSI enquanto a seleção de chip é mantida baixa. Os dados de entrada contêm instruções, endereços de memória ou dados conforme a folha de dados do fornecedor do dispositivo escravo. Após uma entrada válida, o pino MISO é responsável por transmitir dados para o mestre. Os dados de saída são enviados exatamente no próximo ciclo de clock após o término da entrada. O pino MISO transmite dados até que os dados sejam totalmente transmitidos ou o mestre defina o pino de seleção de chip como alto (nesse caso, o escravo pararia de transmitir e o mestre não ouviria após esse ciclo de clock).
 
-## Dumping Firmware from EEPROMs
+## Dumping de Firmware de EEPROMs
 
-Dumping firmware can be useful for analysing the firmware and finding vulnerabilities in them. Often times, the firmware is not available on the internet or is irrelevant due to variations of factors like model number, version, etc. Hence, extracting the firmware directly from the physical device can be helpful to be specific while hunting for threats.
+Fazer o dump de firmware pode ser útil para analisar o firmware e encontrar vulnerabilidades nele. Muitas vezes, o firmware não está disponível na internet ou é irrelevante devido a variações de fatores como número do modelo, versão, etc. Portanto, extrair o firmware diretamente do dispositivo físico pode ser útil para ser específico ao caçar ameaças.
 
-Getting Serial Console can be helpful, but often times it happens that the files are read-only. This constrains the analysis due to various reasons. For example, a tools that are required to send and recieve packages would not be there in the firmware. So extracting the binaries to reverse engineer them is not feasible. Hence, having the whole firmware dumped on the system and extracting the binaries for analysis can be very helpful.
+Obter o Console Serial pode ser útil, mas muitas vezes acontece que os arquivos são somente leitura. Isso limita a análise por várias razões. Por exemplo, ferramentas que são necessárias para enviar e receber pacotes podem não estar presentes no firmware. Portanto, extrair os binários para engenharia reversa não é viável. Assim, ter o firmware completo despejado no sistema e extrair os binários para análise pode ser muito útil.
 
-Also, during red reaming and getting physical access to devices, dumping the firmware can help on modifying the files or injecting malicious files and then reflashing them into the memory which could be helpful to implant a backdoor into the device. Hence, there are numerous possibilities that can be unlocked with firmware dumping.
+Além disso, durante a leitura em vermelho e ao obter acesso físico aos dispositivos, fazer o dump do firmware pode ajudar a modificar os arquivos ou injetar arquivos maliciosos e, em seguida, regravar esses arquivos na memória, o que pode ser útil para implantar um backdoor no dispositivo. Portanto, existem inúmeras possibilidades que podem ser desbloqueadas com o dumping de firmware.
 
-### CH341A EEPROM Programmer and Reader
+### Programador e Leitor de EEPROM CH341A
 
-This device is an inexpensive tool for dumping firmwares from EEPROMs and also reflashing them with firmware files. This has been a popular choice for working with computer BIOS chips (which are just EEPROMs). This device connects over USB and needs minimal tools to get started. Also, it usually gets the task done quickly, so can be helpful in physical device access too.
+Este dispositivo é uma ferramenta barata para fazer o dump de firmwares de EEPROMs e também regravar com arquivos de firmware. Este tem sido uma escolha popular para trabalhar com chips BIOS de computador (que são apenas EEPROMs). Este dispositivo se conecta via USB e precisa de ferramentas mínimas para começar. Além disso, geralmente realiza a tarefa rapidamente, o que pode ser útil no acesso físico ao dispositivo também.
 
 ![drawing](../../images/board_image_ch341a.jpg)
 
-Connect the EEPROM memory with the CH341a Programmer and plug the device into the computer. Incase the device is not getting detected, try installing drivers into the computer. Also, make sure that the EEPROM is connected in proper orientation (usually, place the VCC Pin in reverse orientation to the USB connector) or else, the software would not be able to detect the chip. Refer to the diagram if required:
+Conecte a memória EEPROM ao Programador CH341a e conecte o dispositivo ao computador. Caso o dispositivo não seja detectado, tente instalar drivers no computador. Além disso, certifique-se de que a EEPROM está conectada na orientação correta (geralmente, coloque o pino VCC na orientação reversa em relação ao conector USB) ou, caso contrário, o software não conseguirá detectar o chip. Consulte o diagrama se necessário:
 
 ![drawing](../../images/connect_wires_ch341a.jpg) ![drawing](../../images/eeprom_plugged_ch341a.jpg)
 
-Finally, use softwares like flashrom, G-Flash (GUI), etc. for dumping the firmware. G-Flash is a minimal GUI tool is fast and detects the EEPROM automatically. This can be helpful in the firmware needs to be extracted quickly, without much tinkering with the documentation.
+Por fim, use softwares como flashrom, G-Flash (GUI), etc. para fazer o dump do firmware. O G-Flash é uma ferramenta GUI mínima, rápida e detecta a EEPROM automaticamente. Isso pode ser útil se o firmware precisar ser extraído rapidamente, sem muitas modificações na documentação.
 
 ![drawing](../../images/connected_status_ch341a.jpg)
 
-After dumping the firmware, the analysis can be done on the binary files. Tools like strings, hexdump, xxd, binwalk, etc. can be used to extract a lot of information about the firmware as well as the whole file system too.
+Após fazer o dump do firmware, a análise pode ser realizada nos arquivos binários. Ferramentas como strings, hexdump, xxd, binwalk, etc. podem ser usadas para extrair muitas informações sobre o firmware, bem como sobre todo o sistema de arquivos.
 
-To extract the contents from the firmware, binwalk can be used. Binwalk analyses for hex signatures and identifies the files in the binary file and is capabale of extracting them.
-
+Para extrair os conteúdos do firmware, o binwalk pode ser usado. O binwalk analisa assinaturas hexadecimais e identifica os arquivos no arquivo binário e é capaz de extraí-los.
 ```
 binwalk -e <filename>
 ```
-
-The can be .bin or .rom as per the tools and configurations used.
+Os arquivos podem ser .bin ou .rom de acordo com as ferramentas e configurações utilizadas.
 
 > [!CAUTION]
-> Note that firmware extraction is a delicate process and requires a lot of patience. Any mishandling can potentially corrupt the firmware or even erase it completely and make the device unusable. It is recommended to study the specific device before attempting to extract the firmware.
+> Note que a extração de firmware é um processo delicado e requer muita paciência. Qualquer manuseio inadequado pode potencialmente corromper o firmware ou até mesmo apagá-lo completamente, tornando o dispositivo inutilizável. É recomendável estudar o dispositivo específico antes de tentar extrair o firmware.
 
 ### Bus Pirate + flashrom
 
 ![](<../../images/image (910).png>)
 
-Note that even if the PINOUT of the Pirate Bus indicates pins for **MOSI** and **MISO** to connect to SPI however some SPIs may indicate pins as DI and DO. **MOSI -> DI, MISO -> DO**
+Note que mesmo que o PINOUT do Pirate Bus indique pinos para **MOSI** e **MISO** para conectar ao SPI, alguns SPIs podem indicar pinos como DI e DO. **MOSI -> DI, MISO -> DO**
 
 ![](<../../images/image (360).png>)
 
-In Windows or Linux you can use the program [**`flashrom`**](https://www.flashrom.org/Flashrom) to dump the content of the flash memory running something like:
-
+No Windows ou Linux, você pode usar o programa [**`flashrom`**](https://www.flashrom.org/Flashrom) para despejar o conteúdo da memória flash executando algo como:
 ```bash
 # In this command we are indicating:
 # -VV Verbose
@@ -63,6 +60,4 @@ In Windows or Linux you can use the program [**`flashrom`**](https://www.flashro
 # -r <file> Image to save in the filesystem
 flashrom -VV -c "W25Q64.V" -p buspirate_spi:dev=COM3 -r flash_content.img
 ```
-
 {{#include ../../banners/hacktricks-training.md}}
-

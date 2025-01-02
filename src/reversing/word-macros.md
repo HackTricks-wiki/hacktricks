@@ -2,18 +2,17 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Junk Code
+### Código Lixo
 
-It's very common to find **junk code that is never used** to make the reversing of the macro more difficult.\
-For example, in the following image you can see that and If that is never going to be true is used to execute some junk and useless code.
+É muito comum encontrar **código lixo que nunca é usado** para dificultar a reversão do macro.\
+Por exemplo, na imagem a seguir, você pode ver que um If que nunca será verdadeiro é usado para executar algum código lixo e inútil.
 
 ![](<../images/image (369).png>)
 
-### Macro Forms
+### Formulários de Macro
 
-Using the **GetObject** function it's possible to obtain data from forms of the macro. This can be used to difficult the analysis. The following is a photo of a macro form used to **hide data inside text boxes** (a text box can be hiding other text boxes):
+Usando a função **GetObject**, é possível obter dados de formulários do macro. Isso pode ser usado para dificultar a análise. A seguir, está uma foto de um formulário de macro usado para **ocultar dados dentro de caixas de texto** (uma caixa de texto pode estar ocultando outras caixas de texto):
 
 ![](<../images/image (344).png>)
 
 {{#include ../banners/hacktricks-training.md}}
-

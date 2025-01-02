@@ -4,77 +4,76 @@
 
 ## Intro <a href="#id-9wrzi" id="id-9wrzi"></a>
 
-For info about RFID and NFC check the following page:
+Para informações sobre RFID e NFC, consulte a página a seguir:
 
 {{#ref}}
 ../pentesting-rfid.md
 {{#endref}}
 
-## Supported NFC cards <a href="#id-9wrzi" id="id-9wrzi"></a>
+## Cartões NFC suportados <a href="#id-9wrzi" id="id-9wrzi"></a>
 
 > [!CAUTION]
-> Apart from NFC cards Flipper Zero supports **other type of High-frequency cards** such as several **Mifare** Classic and Ultralight and **NTAG**.
+> Além dos cartões NFC, o Flipper Zero suporta **outro tipo de cartões de alta frequência** como vários **Mifare** Classic e Ultralight e **NTAG**.
 
-New types of NFC cards will be added to the list of supported cards. Flipper Zero supports the following **NFC cards type A** (ISO 14443A):
+Novos tipos de cartões NFC serão adicionados à lista de cartões suportados. O Flipper Zero suporta os seguintes **tipos de cartões NFC A** (ISO 14443A):
 
-- **Bank cards (EMV)** — only read UID, SAK, and ATQA without saving.
-- **Unknown cards** — read (UID, SAK, ATQA) and emulate an UID.
+- **Cartões bancários (EMV)** — apenas lê UID, SAK e ATQA sem salvar.
+- **Cartões desconhecidos** — lê (UID, SAK, ATQA) e emula um UID.
 
-For **NFC cards type B, type F, and type V**, Flipper Zero is able to read an UID without saving it.
+Para **cartões NFC tipo B, tipo F e tipo V**, o Flipper Zero é capaz de ler um UID sem salvá-lo.
 
-### NFC cards type A <a href="#uvusf" id="uvusf"></a>
+### Cartões NFC tipo A <a href="#uvusf" id="uvusf"></a>
 
-#### Bank card (EMV) <a href="#kzmrp" id="kzmrp"></a>
+#### Cartão bancário (EMV) <a href="#kzmrp" id="kzmrp"></a>
 
-Flipper Zero can only read an UID, SAK, ATQA, and stored data on bank cards **without saving**.
+O Flipper Zero pode apenas ler um UID, SAK, ATQA e dados armazenados em cartões bancários **sem salvar**.
 
-Bank card reading screenFor bank cards, Flipper Zero can only read data **without saving and emulating it**.
+Tela de leitura de cartão bancárioPara cartões bancários, o Flipper Zero pode apenas ler dados **sem salvar e emular**.
 
 <figure><img src="https://cdn.flipperzero.one/Monosnap_Miro_2022-08-17_12-26-31.png?auto=format&#x26;ixlib=react-9.1.1&#x26;h=916&#x26;w=2662" alt=""><figcaption></figcaption></figure>
 
-#### Unknown cards <a href="#id-37eo8" id="id-37eo8"></a>
+#### Cartões desconhecidos <a href="#id-37eo8" id="id-37eo8"></a>
 
-When Flipper Zero is **unable to determine NFC card's type**, then only an **UID, SAK, and ATQA** can be **read and saved**.
+Quando o Flipper Zero é **incapaz de determinar o tipo de cartão NFC**, então apenas um **UID, SAK e ATQA** podem ser **lidos e salvos**.
 
-Unknown card reading screenFor unknown NFC cards, Flipper Zero can emulate only an UID.
+Tela de leitura de cartão desconhecidoPara cartões NFC desconhecidos, o Flipper Zero pode emular apenas um UID.
 
 <figure><img src="https://cdn.flipperzero.one/Monosnap_Miro_2022-08-17_12-27-53.png?auto=format&#x26;ixlib=react-9.1.1&#x26;h=932&#x26;w=2634" alt=""><figcaption></figcaption></figure>
 
-### NFC cards types B, F, and V <a href="#wyg51" id="wyg51"></a>
+### Cartões NFC tipos B, F e V <a href="#wyg51" id="wyg51"></a>
 
-For **NFC cards types B, F, and V**, Flipper Zero can only **read and display an UID** without saving it.
+Para **cartões NFC tipos B, F e V**, o Flipper Zero pode apenas **ler e exibir um UID** sem salvá-lo.
 
 <figure><img src="https://archbee.imgix.net/3StCFqarJkJQZV-7N79yY/zBU55Fyj50TFO4U7S-OXH_screenshot-2022-08-12-at-182540.png?auto=format&#x26;ixlib=react-9.1.1&#x26;h=1080&#x26;w=2704" alt=""><figcaption></figcaption></figure>
 
-## Actions
+## Ações
 
-For an intro about NFC [**read this page**](../pentesting-rfid.md#high-frequency-rfid-tags-13.56-mhz).
+Para uma introdução sobre NFC [**leia esta página**](../pentesting-rfid.md#high-frequency-rfid-tags-13.56-mhz).
 
-### Read
+### Ler
 
-Flipper Zero can **read NFC cards**, however, it **doesn't understand all the protocols** that are based on ISO 14443. However, since **UID is a low-level attribute**, you might find yourself in a situation when **UID is already read, but the high-level data transfer protocol is still unknown**. You can read, emulate and manually input UID using Flipper for the primitive readers that use UID for authorization.
+O Flipper Zero pode **ler cartões NFC**, no entanto, ele **não entende todos os protocolos** que são baseados em ISO 14443. No entanto, como **UID é um atributo de baixo nível**, você pode se encontrar em uma situação em que **UID já foi lido, mas o protocolo de transferência de dados de alto nível ainda é desconhecido**. Você pode ler, emular e inserir manualmente o UID usando o Flipper para os leitores primitivos que usam UID para autorização.
 
-#### Reading the UID VS Reading the Data Inside <a href="#reading-the-uid-vs-reading-the-data-inside" id="reading-the-uid-vs-reading-the-data-inside"></a>
+#### Lendo o UID VS Lendo os Dados Internos <a href="#reading-the-uid-vs-reading-the-data-inside" id="reading-the-uid-vs-reading-the-data-inside"></a>
 
 <figure><img src="../../../images/image (217).png" alt=""><figcaption></figcaption></figure>
 
-In Flipper, reading 13.56 MHz tags can be divided into two parts:
+No Flipper, a leitura de tags de 13,56 MHz pode ser dividida em duas partes:
 
-- **Low-level read** — reads only the UID, SAK, and ATQA. Flipper tries to guess the high-level protocol based on this data read from the card. You can't be 100% certain with this, as it is just an assumption based on certain factors.
-- **High-level read** — reads the data from the card's memory using a specific high-level protocol. That would be reading the data on a Mifare Ultralight, reading the sectors from a Mifare Classic, or reading the card's attributes from PayPass/Apple Pay.
+- **Leitura de baixo nível** — lê apenas o UID, SAK e ATQA. O Flipper tenta adivinhar o protocolo de alto nível com base nesses dados lidos do cartão. Você não pode ter 100% de certeza com isso, pois é apenas uma suposição baseada em certos fatores.
+- **Leitura de alto nível** — lê os dados da memória do cartão usando um protocolo de alto nível específico. Isso seria ler os dados em um Mifare Ultralight, ler os setores de um Mifare Classic ou ler os atributos do cartão de PayPass/Apple Pay.
 
-### Read Specific
+### Ler Específico
 
-In case Flipper Zero isn't capable of finding the type of card from the low level data, in `Extra Actions` you can select `Read Specific Card Type` and **manually** **indicate the type of card you would like to read**.
+Caso o Flipper Zero não consiga encontrar o tipo de cartão a partir dos dados de baixo nível, em `Ações Extras` você pode selecionar `Ler Tipo de Cartão Específico` e **indicar manualmente** **o tipo de cartão que você gostaria de ler**.
 
-#### EMV Bank Cards (PayPass, payWave, Apple Pay, Google Pay) <a href="#emv-bank-cards-paypass-paywave-apple-pay-google-pay" id="emv-bank-cards-paypass-paywave-apple-pay-google-pay"></a>
+#### Cartões Bancários EMV (PayPass, payWave, Apple Pay, Google Pay) <a href="#emv-bank-cards-paypass-paywave-apple-pay-google-pay" id="emv-bank-cards-paypass-paywave-apple-pay-google-pay"></a>
 
-Apart from simply reading the UID, you can extract a lot more data from a bank card. It's possible to **get the full card number** (the 16 digits on the front of the card), **validity date**, and in some cases even the **owner's name** along with a list of the **most recent transactions**.\
-However, you **can't read the CVV this way** (the 3 digits on the back of the card). Also **bank cards are protected from replay attacks**, so copying it with Flipper and then trying to emulate it to pay for something won't work.
+Além de simplesmente ler o UID, você pode extrair muito mais dados de um cartão bancário. É possível **obter o número completo do cartão** (os 16 dígitos na frente do cartão), **data de validade**, e em alguns casos até mesmo o **nome do proprietário** junto com uma lista das **transações mais recentes**.\
+No entanto, você **não pode ler o CVV dessa forma** (os 3 dígitos na parte de trás do cartão). Além disso, **cartões bancários estão protegidos contra ataques de repetição**, então copiá-lo com o Flipper e depois tentar emulá-lo para pagar por algo não funcionará.
 
-## References
+## Referências
 
 - [https://blog.flipperzero.one/rfid/](https://blog.flipperzero.one/rfid/)
 
 {{#include ../../../banners/hacktricks-training.md}}
-

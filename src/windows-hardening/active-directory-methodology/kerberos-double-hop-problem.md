@@ -1,4 +1,4 @@
-# Kerberos Double Hop Problem
+# Problema do Double Hop do Kerberos
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -6,98 +6,86 @@
 
 {% embed url="https://websec.nl/" %}
 
-## Introduction
+## Introdução
 
-The Kerberos "Double Hop" problem appears when an attacker attempts to use **Kerberos authentication across two** **hops**, for example using **PowerShell**/**WinRM**.
+O problema do "Double Hop" do Kerberos aparece quando um atacante tenta usar **autenticação Kerberos através de dois** **hops**, por exemplo, usando **PowerShell**/**WinRM**.
 
-When an **authentication** occurs through **Kerberos**, **credentials** **aren't** cached in **memory.** Therefore, if you run mimikatz you **won't find credentials** of the user in the machine even if he is running processes.
+Quando uma **autenticação** ocorre através do **Kerberos**, as **credenciais** **não são** armazenadas em **memória.** Portanto, se você executar o mimikatz, você **não encontrará credenciais** do usuário na máquina, mesmo que ele esteja executando processos.
 
-This is because when connecting with Kerberos these are the steps:
+Isso ocorre porque, ao conectar-se com o Kerberos, estes são os passos:
 
-1. User1 provides credentials and **domain controller** returns a Kerberos **TGT** to the User1.
-2. User1 uses **TGT** to request a **service ticket** to **connect** to Server1.
-3. User1 **connects** to **Server1** and provides **service ticket**.
-4. **Server1** **doesn't** have **credentials** of User1 cached or the **TGT** of User1. Therefore, when User1 from Server1 tries to login to a second server, he is **not able to authenticate**.
+1. User1 fornece credenciais e o **controlador de domínio** retorna um **TGT** Kerberos para o User1.
+2. User1 usa o **TGT** para solicitar um **ticket de serviço** para **conectar-se** ao Server1.
+3. User1 **conecta-se** ao **Server1** e fornece o **ticket de serviço**.
+4. O **Server1** **não tem** as **credenciais** do User1 armazenadas ou o **TGT** do User1. Portanto, quando o User1 do Server1 tenta fazer login em um segundo servidor, ele **não consegue se autenticar**.
 
-### Unconstrained Delegation
+### Delegação Não Restrita
 
-If **unconstrained delegation** is enabled in the PC, this won't happen as the **Server** will **get** a **TGT** of each user accessing it. Moreover, if unconstrained delegation is used you probably can **compromise the Domain Controller** from it.\
-[**More info in the unconstrained delegation page**](unconstrained-delegation.md).
+Se a **delegação não restrita** estiver habilitada no PC, isso não acontecerá, pois o **Servidor** irá **obter** um **TGT** de cada usuário que o acessar. Além disso, se a delegação não restrita for usada, você provavelmente pode **comprometer o Controlador de Domínio** a partir dele.\
+[**Mais informações na página de delegação não restrita**](unconstrained-delegation.md).
 
 ### CredSSP
 
-Another way to avoid this problem which is [**notably insecure**](https://docs.microsoft.com/en-us/powershell/module/microsoft.wsman.management/enable-wsmancredssp?view=powershell-7) is **Credential Security Support Provider**. From Microsoft:
+Outra maneira de evitar esse problema, que é [**notavelmente insegura**](https://docs.microsoft.com/en-us/powershell/module/microsoft.wsman.management/enable-wsmancredssp?view=powershell-7), é o **Provedor de Suporte de Segurança de Credenciais**. Da Microsoft:
 
-> CredSSP authentication delegates the user credentials from the local computer to a remote computer. This practice increases the security risk of the remote operation. If the remote computer is compromised, when credentials are passed to it, the credentials can be used to control the network session.
+> A autenticação CredSSP delega as credenciais do usuário do computador local para um computador remoto. Essa prática aumenta o risco de segurança da operação remota. Se o computador remoto for comprometido, quando as credenciais forem passadas para ele, as credenciais podem ser usadas para controlar a sessão de rede.
 
-It is highly recommended that **CredSSP** be disabled on production systems, sensitive networks, and similar environments due to security concerns. To determine whether **CredSSP** is enabled, the `Get-WSManCredSSP` command can be run. This command allows for the **checking of CredSSP status** and can even be executed remotely, provided **WinRM** is enabled.
-
+É altamente recomendável que o **CredSSP** seja desativado em sistemas de produção, redes sensíveis e ambientes semelhantes devido a preocupações de segurança. Para determinar se o **CredSSP** está habilitado, o comando `Get-WSManCredSSP` pode ser executado. Este comando permite a **verificação do status do CredSSP** e pode até ser executado remotamente, desde que o **WinRM** esteja habilitado.
 ```powershell
 Invoke-Command -ComputerName bizintel -Credential ta\redsuit -ScriptBlock {
-    Get-WSManCredSSP
+Get-WSManCredSSP
 }
 ```
-
-## Workarounds
+## Soluções Alternativas
 
 ### Invoke Command
 
-To address the double hop issue, a method involving a nested `Invoke-Command` is presented. This does not solve the problem directly but offers a workaround without needing special configurations. The approach allows executing a command (`hostname`) on a secondary server through a PowerShell command executed from an initial attacking machine or through a previously established PS-Session with the first server. Here's how it's done:
-
+Para resolver o problema do double hop, é apresentado um método envolvendo um `Invoke-Command` aninhado. Isso não resolve o problema diretamente, mas oferece uma solução alternativa sem a necessidade de configurações especiais. A abordagem permite executar um comando (`hostname`) em um servidor secundário através de um comando PowerShell executado de uma máquina de ataque inicial ou através de uma PS-Session previamente estabelecida com o primeiro servidor. Veja como é feito:
 ```powershell
 $cred = Get-Credential ta\redsuit
 Invoke-Command -ComputerName bizintel -Credential $cred -ScriptBlock {
-    Invoke-Command -ComputerName secdev -Credential $cred -ScriptBlock {hostname}
+Invoke-Command -ComputerName secdev -Credential $cred -ScriptBlock {hostname}
 }
 ```
+Alternativamente, estabelecer uma PS-Session com o primeiro servidor e executar o `Invoke-Command` usando `$cred` é sugerido para centralizar tarefas.
 
-Alternatively, establishing a PS-Session with the first server and running the `Invoke-Command` using `$cred` is suggested for centralizing tasks.
+### Registrar Configuração de PSSession
 
-### Register PSSession Configuration
-
-A solution to bypass the double hop problem involves using `Register-PSSessionConfiguration` with `Enter-PSSession`. This method requires a different approach than `evil-winrm` and allows for a session that does not suffer from the double hop limitation.
-
+Uma solução para contornar o problema do double hop envolve usar `Register-PSSessionConfiguration` com `Enter-PSSession`. Este método requer uma abordagem diferente da `evil-winrm` e permite uma sessão que não sofre da limitação do double hop.
 ```powershell
 Register-PSSessionConfiguration -Name doublehopsess -RunAsCredential domain_name\username
 Restart-Service WinRM
 Enter-PSSession -ConfigurationName doublehopsess -ComputerName <pc_name> -Credential domain_name\username
 klist
 ```
-
 ### PortForwarding
 
-For local administrators on an intermediary target, port forwarding allows requests to be sent to a final server. Using `netsh`, a rule can be added for port forwarding, alongside a Windows firewall rule to allow the forwarded port.
-
+Para administradores locais em um alvo intermediário, o redirecionamento de porta permite que solicitações sejam enviadas para um servidor final. Usando `netsh`, uma regra pode ser adicionada para o redirecionamento de porta, juntamente com uma regra de firewall do Windows para permitir a porta redirecionada.
 ```bash
 netsh interface portproxy add v4tov4 listenport=5446 listenaddress=10.35.8.17 connectport=5985 connectaddress=10.35.8.23
 netsh advfirewall firewall add rule name=fwd dir=in action=allow protocol=TCP localport=5446
 ```
-
 #### winrs.exe
 
-`winrs.exe` can be used for forwarding WinRM requests, potentially as a less detectable option if PowerShell monitoring is a concern. The command below demonstrates its use:
-
+`winrs.exe` pode ser usado para encaminhar solicitações WinRM, potencialmente como uma opção menos detectável se o monitoramento do PowerShell for uma preocupação. O comando abaixo demonstra seu uso:
 ```bash
 winrs -r:http://bizintel:5446 -u:ta\redsuit -p:2600leet hostname
 ```
-
 ### OpenSSH
 
-Installing OpenSSH on the first server enables a workaround for the double-hop issue, particularly useful for jump box scenarios. This method requires CLI installation and setup of OpenSSH for Windows. When configured for Password Authentication, this allows the intermediary server to obtain a TGT on behalf of the user.
+Instalar o OpenSSH no primeiro servidor permite uma solução para o problema do double-hop, particularmente útil para cenários de jump box. Este método requer a instalação e configuração do OpenSSH para Windows via CLI. Quando configurado para Autenticação por Senha, isso permite que o servidor intermediário obtenha um TGT em nome do usuário.
 
-#### OpenSSH Installation Steps
+#### Passos para Instalação do OpenSSH
 
-1. Download and move the latest OpenSSH release zip to the target server.
-2. Unzip and run the `Install-sshd.ps1` script.
-3. Add a firewall rule to open port 22 and verify SSH services are running.
+1. Baixe e mova o arquivo zip da versão mais recente do OpenSSH para o servidor de destino.
+2. Descompacte e execute o script `Install-sshd.ps1`.
+3. Adicione uma regra de firewall para abrir a porta 22 e verifique se os serviços SSH estão em execução.
 
-To resolve `Connection reset` errors, permissions might need to be updated to allow everyone read and execute access on the OpenSSH directory.
-
+Para resolver erros de `Connection reset`, as permissões podem precisar ser atualizadas para permitir que todos tenham acesso de leitura e execução no diretório do OpenSSH.
 ```bash
 icacls.exe "C:\Users\redsuit\Documents\ssh\OpenSSH-Win64" /grant Everyone:RX /T
 ```
-
-## References
+## Referências
 
 - [https://techcommunity.microsoft.com/t5/ask-the-directory-services-team/understanding-kerberos-double-hop/ba-p/395463?lightbox-message-images-395463=102145i720503211E78AC20](https://techcommunity.microsoft.com/t5/ask-the-directory-services-team/understanding-kerberos-double-hop/ba-p/395463?lightbox-message-images-395463=102145i720503211E78AC20)
 - [https://posts.slayerlabs.com/double-hop/](https://posts.slayerlabs.com/double-hop/)
@@ -109,4 +97,3 @@ icacls.exe "C:\Users\redsuit\Documents\ssh\OpenSSH-Win64" /grant Everyone:RX /T
 {% embed url="https://websec.nl/" %}
 
 {{#include ../../banners/hacktricks-training.md}}
-

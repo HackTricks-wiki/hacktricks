@@ -8,49 +8,49 @@
 
 ## Intro
 
-For more info about how 125kHz tags work check:
+Para mais informações sobre como funcionam as tags de 125kHz, consulte:
 
 {{#ref}}
 ../pentesting-rfid.md
 {{#endref}}
 
-## Actions
+## Ações
 
-For more info about these types of tags [**read this intro**](../pentesting-rfid.md#low-frequency-rfid-tags-125khz).
+Para mais informações sobre esses tipos de tags [**leia esta introdução**](../pentesting-rfid.md#low-frequency-rfid-tags-125khz).
 
-### Read
+### Ler
 
-Tries to **read** the card info. Then it can **emulate** them.
+Tenta **ler** as informações do cartão. Então pode **emular** elas.
 
 > [!WARNING]
-> Note that some intercoms try to protect themselves from key duplication by sending a write command prior to reading. If the write succeeds, that tag is considered fake. When Flipper emulates RFID there is no way for the reader to distinguish it from the original one, so no such problems occur.
+> Note que alguns intercomunicadores tentam se proteger contra a duplicação de chaves enviando um comando de gravação antes da leitura. Se a gravação for bem-sucedida, essa tag é considerada falsa. Quando o Flipper emula RFID, não há como o leitor distinguir isso do original, então não ocorrem tais problemas.
 
-### Add Manually
+### Adicionar Manualmente
 
-You can create **fake cards in Flipper Zero indicating the data** you manually and then emulate it.
+Você pode criar **cartões falsos no Flipper Zero indicando os dados** que você insere manualmente e então emulá-los.
 
-#### IDs on cards
+#### IDs nos cartões
 
-Some times, when you get a card you will find the ID (or part) of it written in the card visible.
+Às vezes, quando você obtém um cartão, encontrará o ID (ou parte dele) escrito no cartão visivelmente.
 
 - **EM Marin**
 
-For example in this EM-Marin card in the physical card is possible to **read the last 3 of 5 bytes in clear**.\
-The other 2 can be brute-forced if you cannot read them from the card.
+Por exemplo, neste cartão EM-Marin, é possível **ler os últimos 3 de 5 bytes em claro**.\
+Os outros 2 podem ser forçados por força bruta se você não conseguir lê-los do cartão.
 
 <figure><img src="../../../images/image (104).png" alt=""><figcaption></figcaption></figure>
 
 - **HID**
 
-Same happens in this HID card where only 2 out of 3 bytes can be found printed in the card
+O mesmo acontece neste cartão HID, onde apenas 2 de 3 bytes podem ser encontrados impressos no cartão.
 
 <figure><img src="../../../images/image (1014).png" alt=""><figcaption></figcaption></figure>
 
-### Emulate/Write
+### Emular/Gravar
 
-After **copying** a card or **entering** the ID **manually** it's possible to **emulate** it with Flipper Zero or **write** it in a real card.
+Após **copiar** um cartão ou **inserir** o ID **manualmente**, é possível **emular** com o Flipper Zero ou **gravar** em um cartão real.
 
-## References
+## Referências
 
 - [https://blog.flipperzero.one/rfid/](https://blog.flipperzero.one/rfid/)
 
@@ -59,4 +59,3 @@ After **copying** a card or **entering** the ID **manually** it's possible to **
 {% embed url="https://websec.nl/" %}
 
 {{#include ../../../banners/hacktricks-training.md}}
-

@@ -1,7 +1,5 @@
-# Fault Injection Attacks 
+# Ataques de Injeção de Falhas
 
-Fault injections attacks includes introducing external distrubance in electronic circuits to influence it's behaviour, resulting to disclose information or even bypass certian restrictions in the circuit. This attacks opens a lot of possibilities for attacking electronic circuits. This attack is also referred as glitching of electronic circuits.
+Ataques de injeção de falhas incluem a introdução de distúrbios externos em circuitos eletrônicos para influenciar seu comportamento, resultando na divulgação de informações ou até mesmo na superação de certas restrições no circuito. Esses ataques abrem muitas possibilidades para atacar circuitos eletrônicos. Esse ataque também é referido como glitching de circuitos eletrônicos.
 
-There are a lot of methods and mediums for injecting fault into an electronic circuit. 
-
-
+Existem muitos métodos e meios para injetar falhas em um circuito eletrônico.

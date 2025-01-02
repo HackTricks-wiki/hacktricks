@@ -1,70 +1,68 @@
-# Investment Terms
+# Termos de Investimento
 
 ## Spot
 
-This is the most basic way to do some trading. You can **indicate the amount of the asset and the price** that you want to buy or sell, and whenever that price is reached the operation is done.
+Esta é a maneira mais básica de fazer algumas negociações. Você pode **indicar a quantidade do ativo e o preço** que deseja comprar ou vender, e sempre que esse preço for alcançado, a operação é realizada.
 
-Usually you can also use the **current market price** in order to perform the transaction as fast as possible to the current price.
+Normalmente, você também pode usar o **preço de mercado atual** para realizar a transação o mais rápido possível ao preço atual.
 
-**Stop Loss - Limit**: You can also indicate amount and the price of the assets to buy or sell while also indicating a lower price to buy or sell in case it's reached (to stop losses).
+**Stop Loss - Limite**: Você também pode indicar a quantidade e o preço dos ativos para comprar ou vender, enquanto também indica um preço mais baixo para comprar ou vender caso seja alcançado (para parar perdas).
 
-## Futures
+## Futuros
 
-A future is a contract where 2 parts comes to an agreement to **acquire something in the future at a fixed price**. For example to sell 1 bitcoin in 6 months at 70.000$.
+Um futuro é um contrato onde 2 partes chegam a um acordo para **adquirir algo no futuro a um preço fixo**. Por exemplo, vender 1 bitcoin em 6 meses a 70.000$.
 
-Obviously if by 6 months the bitcoin value is 80.000$ the seller part loses money and the buying part earns it. If in 6 months the bitcoin value is 60.000$, the opposite happens.
+Obviamente, se em 6 meses o valor do bitcoin for 80.000$, a parte vendedora perde dinheiro e a parte compradora ganha. Se em 6 meses o valor do bitcoin for 60.000$, o oposto acontece.
 
-However, this is interesting for example for business which are generating a product and need to have the security that thy will be able to sell it at a price to pay the costs. Or business which want to assure fixed prices in the future for something eve if higher.
+No entanto, isso é interessante, por exemplo, para negócios que estão gerando um produto e precisam ter a segurança de que poderão vendê-lo a um preço que cubra os custos. Ou negócios que desejam garantir preços fixos no futuro para algo, mesmo que mais altos.
 
-Although in exchanges this is usually used to try to make a profit.
+Embora nas bolsas isso seja geralmente usado para tentar obter lucro.
 
-* Notice that a "Long position" means that someone if betting that a price is going to increase
-* While a "short position" means that someone if betting that a price is going to go down
+* Observe que uma "posição longa" significa que alguém está apostando que um preço vai aumentar.
+* Enquanto uma "posição curta" significa que alguém está apostando que um preço vai cair.
 
-### Hedging With Futures <a href="#mntl-sc-block_7-0" id="mntl-sc-block_7-0"></a>
+### Hedging Com Futuros <a href="#mntl-sc-block_7-0" id="mntl-sc-block_7-0"></a>
 
-If a fund manager is afraid that some stocks are going to go down he might take a short position over some assets like bitcoins or S\&P 500 futures contracts. This would be similar to buying or having some assets and create a contract of selling those at a future time at a bigger price.&#x20;
+Se um gerente de fundo tem medo de que algumas ações vão cair, ele pode assumir uma posição curta sobre alguns ativos, como bitcoins ou contratos futuros do S\&P 500. Isso seria semelhante a comprar ou ter alguns ativos e criar um contrato para vender esses ativos em um momento futuro a um preço maior.&#x20;
 
-In case the price goes down the fund manager will earn benefits because he will sell the assets at a bigger price. If the price of the assets goes up the manager won't earn that benefit but he will still keep his assets.
+Caso o preço caia, o gerente do fundo ganhará benefícios porque venderá os ativos a um preço maior. Se o preço dos ativos subir, o gerente não ganhará esse benefício, mas ainda manterá seus ativos.
 
-### Perpetual Futures
+### Futuros Perpétuos
 
-**These are "futures" that will last indefinitely** (without an ending contract date). It's very common to find them for example in crypto exchanges where you can go in an out of futures based on the price of cryptos.
+**Estes são "futuros" que durarão indefinidamente** (sem uma data de contrato final). É muito comum encontrá-los, por exemplo, em exchanges de criptomoedas, onde você pode entrar e sair de futuros com base no preço das criptos.
 
-Notice that in these cases the benefits and lose can be in real time, if the price increases 1% you win a 1%, if the price decreases 1%, you will lose it.
+Observe que, nesses casos, os benefícios e perdas podem ser em tempo real; se o preço aumentar 1%, você ganha 1%, se o preço diminuir 1%, você perderá.
 
-### Futures with Leverage
+### Futuros com Alavancagem
 
-**Leverage** allows you to control a larger position in the market with a smaller amount of money. It basically allows you to "bet" much more money than you have risking only the money that you actually have.
+**Alavancagem** permite que você controle uma posição maior no mercado com uma quantia menor de dinheiro. Basicamente, permite que você "apostar" muito mais dinheiro do que você tem, arriscando apenas o dinheiro que você realmente possui.
 
-For example, if you open a future position in the BTC/USDT with 100$ a 50x leverage this means that if the price is increased 1%, then you would be winning 1x50 = 50% of your initial investment (50$). And therefore you will have 150$.\
-However, if the price decreases 1%, you will lost 50% of your funds (59$ in this case). And if the price decreases 2% you will lose all your bet (2x50 = 100%).
+Por exemplo, se você abrir uma posição futura no BTC/USDT com 100$ a uma alavancagem de 50x, isso significa que se o preço aumentar 1%, você estaria ganhando 1x50 = 50% do seu investimento inicial (50$). E, portanto, você terá 150$.\
+No entanto, se o preço diminuir 1%, você perderá 50% de seus fundos (59$ neste caso). E se o preço diminuir 2%, você perderá toda a sua aposta (2x50 = 100%).
 
-Therefore, leveraging allows to control the amount of money you bet while increasing the winnings and loses.
+Portanto, a alavancagem permite controlar a quantidade de dinheiro que você aposta, enquanto aumenta os ganhos e as perdas.
 
-## Differences Futures & Options
+## Diferenças entre Futuros e Opções
 
-The main difference between futures and options is that the contract is optional for the buyer: He can decide to execute it or not (usually he will only if he will benefit for it). The seller must sell if the buyer wants to use the option.\
-However, the buyer will be paying some fee to the seller for opening the option (so the seller, who is taking more risk aparently, starts earning some money).
+A principal diferença entre futuros e opções é que o contrato é opcional para o comprador: ele pode decidir executá-lo ou não (geralmente ele só o fará se se beneficiar disso). O vendedor deve vender se o comprador quiser usar a opção.\
+No entanto, o comprador pagará uma taxa ao vendedor para abrir a opção (então o vendedor, que aparentemente está assumindo mais risco, começa a ganhar algum dinheiro).
 
-### 1. **Obligation vs. Right:**
+### 1. **Obrigação vs. Direito:**
 
-* **Futures:** When you buy or sell a futures contract, you're entering a **binding agreement** to buy or sell an asset at a specific price on a future date. Both the buyer and the seller are **obligated** to fulfill the contract at expiration (unless the contract is closed before then).
-* **Options:** With options, you have the **right, but not the obligation**, to buy (in the case of a **call option**) or sell (in the case of a **put option**) an asset at a specific price before or at a certain expiration date. The **buyer** has the option to execute, while the **seller** is obligated to fulfill the trade if the buyer decides to exercise the option.
+* **Futuros:** Quando você compra ou vende um contrato futuro, está entrando em um **acordo vinculativo** para comprar ou vender um ativo a um preço específico em uma data futura. Tanto o comprador quanto o vendedor estão **obrigados** a cumprir o contrato na expiração (a menos que o contrato seja encerrado antes disso).
+* **Opções:** Com opções, você tem o **direito, mas não a obrigação**, de comprar (no caso de uma **opção de compra**) ou vender (no caso de uma **opção de venda**) um ativo a um preço específico antes ou na data de expiração. O **comprador** tem a opção de executar, enquanto o **vendedor** é obrigado a cumprir a negociação se o comprador decidir exercer a opção.
 
-### 2. **Risk:**
+### 2. **Risco:**
 
-* **Futures:** Both the buyer and the seller take on **unlimited risk** because they are obligated to complete the contract. The risk is the difference between the agreed-upon price and the market price at the expiration date.
-* **Options:** The buyer’s risk is limited to the **premium** paid to purchase the option. If the market doesn't move in favor of the option holder, they can simply let the option expire. However, the **seller** (writer) of the option has unlimited risk if the market moves significantly against them.
+* **Futuros:** Tanto o comprador quanto o vendedor assumem **risco ilimitado** porque estão obrigados a completar o contrato. O risco é a diferença entre o preço acordado e o preço de mercado na data de expiração.
+* **Opções:** O risco do comprador é limitado ao **prêmio** pago para adquirir a opção. Se o mercado não se mover a favor do detentor da opção, ele pode simplesmente deixar a opção expirar. No entanto, o **vendedor** (escritor) da opção tem risco ilimitado se o mercado se mover significativamente contra ele.
 
-### 3. **Cost:**
+### 3. **Custo:**
 
-* **Futures:** There is no upfront cost beyond the margin required to hold the position, as the buyer and seller are both obligated to complete the trade.
-* **Options:** The buyer must pay an **option premium** upfront for the right to exercise the option. This premium is essentially the cost of the option.
+* **Futuros:** Não há custo inicial além da margem necessária para manter a posição, já que o comprador e o vendedor estão ambos obrigados a completar a negociação.
+* **Opções:** O comprador deve pagar um **prêmio da opção** antecipadamente pelo direito de exercer a opção. Este prêmio é essencialmente o custo da opção.
 
-### 4. **Profit Potential:**
+### 4. **Potencial de Lucro:**
 
-* **Futures:** The profit or loss is based on the difference between the market price at expiration and the agreed-upon price in the contract.
-* **Options:** The buyer profits when the market moves favorably beyond the strike price by more than the premium paid. The seller profits by keeping the premium if the option is not exercised.
-
-
+* **Futuros:** O lucro ou a perda é baseado na diferença entre o preço de mercado na expiração e o preço acordado no contrato.
+* **Opções:** O comprador lucra quando o mercado se move favoravelmente além do preço de exercício, mais do que o prêmio pago. O vendedor lucra mantendo o prêmio se a opção não for exercida.

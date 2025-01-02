@@ -4,12 +4,11 @@
 
 ## Golden ticket
 
-A **Golden Ticket** attack consist on the **creation of a legitimate Ticket Granting Ticket (TGT) impersonating any user** through the use of the **NTLM hash of the Active Directory (AD) krbtgt account**. This technique is particularly advantageous because it **enables access to any service or machine** within the domain as the impersonated user. It's crucial to remember that the **krbtgt account's credentials are never automatically updated**.
+Um **ataque Golden Ticket** consiste na **criação de um Ticket Granting Ticket (TGT) legítimo impersonando qualquer usuário** através do uso do **hash NTLM da conta krbtgt do Active Directory (AD)**. Esta técnica é particularmente vantajosa porque **permite acesso a qualquer serviço ou máquina** dentro do domínio como o usuário impersonado. É crucial lembrar que as **credenciais da conta krbtgt nunca são atualizadas automaticamente**.
 
-To **acquire the NTLM hash** of the krbtgt account, various methods can be employed. It can be extracted from the **Local Security Authority Subsystem Service (LSASS) process** or the **NT Directory Services (NTDS.dit) file** located on any Domain Controller (DC) within the domain. Furthermore, **executing a DCsync attack** is another strategy to obtain this NTLM hash, which can be performed using tools such as the **lsadump::dcsync module** in Mimikatz or the **secretsdump.py script** by Impacket. It's important to underscore that to undertake these operations, **domain admin privileges or a similar level of access is typically required**.
+Para **adquirir o hash NTLM** da conta krbtgt, vários métodos podem ser empregados. Ele pode ser extraído do **processo Local Security Authority Subsystem Service (LSASS)** ou do **arquivo NT Directory Services (NTDS.dit)** localizado em qualquer Controlador de Domínio (DC) dentro do domínio. Além disso, **executar um ataque DCsync** é outra estratégia para obter esse hash NTLM, que pode ser realizado usando ferramentas como o **módulo lsadump::dcsync** no Mimikatz ou o **script secretsdump.py** do Impacket. É importante ressaltar que para realizar essas operações, **privilégios de administrador de domínio ou um nível de acesso semelhante são tipicamente necessários**.
 
-Although the NTLM hash serves as a viable method for this purpose, it is **strongly recommended** to **forge tickets using the Advanced Encryption Standard (AES) Kerberos keys (AES128 and AES256)** for operational security reasons.
-
+Embora o hash NTLM sirva como um método viável para esse propósito, é **fortemente recomendado** **forjar tickets usando as chaves Kerberos do Advanced Encryption Standard (AES) (AES128 e AES256)** por razões de segurança operacional.
 ```bash:From Linux
 python ticketer.py -nthash 25b2076cda3bfd6209161a6c78a69c1c -domain-sid S-1-5-21-1339291983-1349129144-367733775 -domain jurassic.park stegosaurus
 export KRB5CCNAME=/root/impacket-examples/stegosaurus.ccache
@@ -25,41 +24,37 @@ klist #List tickets in memory
 # Example using aes key
 kerberos::golden /user:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-21-1874506631-3219952063-538504511 /aes256:430b2fdb13cc820d73ecf123dddd4c9d76425d4c2156b89ac551efb9d591a439 /ticket:golden.kirbi
 ```
+**Uma vez** que você tenha o **golden Ticket injetado**, você pode acessar os arquivos compartilhados **(C$)** e executar serviços e WMI, então você poderia usar **psexec** ou **wmiexec** para obter um shell (parece que você não pode obter um shell via winrm).
 
-**Once** you have the **golden Ticket injected**, you can access the shared files **(C$)**, and execute services and WMI, so you could use **psexec** or **wmiexec** to obtain a shell (looks like yo can not get a shell via winrm).
+### Contornando detecções comuns
 
-### Bypassing common detections
-
-The most frequent ways to detect a golden ticket are by **inspecting Kerberos traffic** on the wire. By default, Mimikatz **signs the TGT for 10 years**, which will stand out as anomalous in subsequent TGS requests made with it.
+As maneiras mais frequentes de detectar um golden ticket são **inspecionando o tráfego Kerberos** na rede. Por padrão, o Mimikatz **assina o TGT por 10 anos**, o que se destacará como anômalo em solicitações TGS subsequentes feitas com ele.
 
 `Lifetime : 3/11/2021 12:39:57 PM ; 3/9/2031 12:39:57 PM ; 3/9/2031 12:39:57 PM`
 
-Use the `/startoffset`, `/endin` and `/renewmax` parameters to control the start offset, duration and the maximum renewals (all in minutes).
-
+Use os parâmetros `/startoffset`, `/endin` e `/renewmax` para controlar o deslocamento inicial, a duração e o número máximo de renovações (todos em minutos).
 ```
 Get-DomainPolicy | select -expand KerberosPolicy
 ```
+Infelizmente, a duração do TGT não é registrada nos eventos 4769, então você não encontrará essa informação nos logs de eventos do Windows. No entanto, o que você pode correlacionar é **ver 4769's sem um 4768 anterior**. **Não é possível solicitar um TGS sem um TGT**, e se não houver registro de um TGT sendo emitido, podemos inferir que ele foi forjado offline.
 
-Unfortunately, the TGT's lifetime is not logged in 4769's, so you won't find this information in the Windows event logs. However, what you can correlate is **seeing 4769's without a prior 4768**. It's **not possible to request a TGS without a TGT**, and if there is no record of a TGT being issued, we can infer that it was forged offline.
-
-In order to **bypass this detection** check the diamond tickets:
+Para **contornar essa detecção**, verifique os diamond tickets:
 
 {{#ref}}
 diamond-ticket.md
 {{#endref}}
 
-### Mitigation
+### Mitigação
 
-- 4624: Account Logon
-- 4672: Admin Logon
+- 4624: Logon de Conta
+- 4672: Logon de Admin
 - `Get-WinEvent -FilterHashtable @{Logname='Security';ID=4672} -MaxEvents 1 | Format-List –Property`
 
-Other little tricks defenders can do is **alert on 4769's for sensitive users** such as the default domain administrator account.
+Outras pequenas dicas que os defensores podem fazer é **alertar sobre 4769's para usuários sensíveis** como a conta de administrador de domínio padrão.
 
-## References
+## Referências
 
 - [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-golden-tickets] (https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-golden-tickets)
 
 {{#include ../../banners/hacktricks-training.md}}
-
