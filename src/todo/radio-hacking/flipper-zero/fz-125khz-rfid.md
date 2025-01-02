@@ -2,10 +2,6 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
-
 ## Intro
 
 Para mais informações sobre como funcionam as tags de 125kHz, consulte:
@@ -14,22 +10,22 @@ Para mais informações sobre como funcionam as tags de 125kHz, consulte:
 ../pentesting-rfid.md
 {{#endref}}
 
-## Ações
+## Actions
 
 Para mais informações sobre esses tipos de tags [**leia esta introdução**](../pentesting-rfid.md#low-frequency-rfid-tags-125khz).
 
-### Ler
+### Read
 
-Tenta **ler** as informações do cartão. Então pode **emular** elas.
+Tenta **ler** as informações do cartão. Em seguida, pode **emular** elas.
 
 > [!WARNING]
-> Note que alguns intercomunicadores tentam se proteger contra a duplicação de chaves enviando um comando de gravação antes da leitura. Se a gravação for bem-sucedida, essa tag é considerada falsa. Quando o Flipper emula RFID, não há como o leitor distinguir isso do original, então não ocorrem tais problemas.
+> Note que alguns intercomunicadores tentam se proteger contra duplicação de chaves enviando um comando de gravação antes de ler. Se a gravação for bem-sucedida, essa tag é considerada falsa. Quando o Flipper emula RFID, não há como o leitor distinguir isso do original, então não ocorrem tais problemas.
 
-### Adicionar Manualmente
+### Add Manually
 
-Você pode criar **cartões falsos no Flipper Zero indicando os dados** que você insere manualmente e então emulá-los.
+Você pode criar **cartões falsos no Flipper Zero indicando os dados** manualmente e, em seguida, emulá-los.
 
-#### IDs nos cartões
+#### IDs on cards
 
 Às vezes, quando você obtém um cartão, encontrará o ID (ou parte dele) escrito no cartão visivelmente.
 
@@ -46,16 +42,12 @@ O mesmo acontece neste cartão HID, onde apenas 2 de 3 bytes podem ser encontrad
 
 <figure><img src="../../../images/image (1014).png" alt=""><figcaption></figcaption></figure>
 
-### Emular/Gravar
+### Emulate/Write
 
 Após **copiar** um cartão ou **inserir** o ID **manualmente**, é possível **emular** com o Flipper Zero ou **gravar** em um cartão real.
 
-## Referências
+## References
 
 - [https://blog.flipperzero.one/rfid/](https://blog.flipperzero.one/rfid/)
-
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../../../banners/hacktricks-training.md}}

@@ -2,31 +2,30 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Informações Básicas
 
-AppArmor is a **kernel enhancement designed to restrict the resources available to programs through per-program profiles**, effectively implementing Mandatory Access Control (MAC) by tying access control attributes directly to programs instead of users. This system operates by **loading profiles into the kernel**, usually during boot, and these profiles dictate what resources a program can access, such as network connections, raw socket access, and file permissions.
+AppArmor é uma **melhoria do kernel projetada para restringir os recursos disponíveis para programas através de perfis por programa**, implementando efetivamente o Controle de Acesso Mandatório (MAC) ao vincular atributos de controle de acesso diretamente a programas em vez de usuários. Este sistema opera **carregando perfis no kernel**, geralmente durante a inicialização, e esses perfis ditam quais recursos um programa pode acessar, como conexões de rede, acesso a soquetes brutos e permissões de arquivo.
 
-There are two operational modes for AppArmor profiles:
+Existem dois modos operacionais para os perfis do AppArmor:
 
-- **Enforcement Mode**: This mode actively enforces the policies defined within the profile, blocking actions that violate these policies and logging any attempts to breach them through systems like syslog or auditd.
-- **Complain Mode**: Unlike enforcement mode, complain mode does not block actions that go against the profile's policies. Instead, it logs these attempts as policy violations without enforcing restrictions.
+- **Modo de Aplicação**: Este modo aplica ativamente as políticas definidas dentro do perfil, bloqueando ações que violam essas políticas e registrando quaisquer tentativas de violá-las através de sistemas como syslog ou auditd.
+- **Modo de Reclamação**: Ao contrário do modo de aplicação, o modo de reclamação não bloqueia ações que vão contra as políticas do perfil. Em vez disso, registra essas tentativas como violações de política sem impor restrições.
 
-### Components of AppArmor
+### Componentes do AppArmor
 
-- **Kernel Module**: Responsible for the enforcement of policies.
-- **Policies**: Specify the rules and restrictions for program behavior and resource access.
-- **Parser**: Loads policies into the kernel for enforcement or reporting.
-- **Utilities**: These are user-mode programs that provide an interface for interacting with and managing AppArmor.
+- **Módulo do Kernel**: Responsável pela aplicação das políticas.
+- **Políticas**: Especificam as regras e restrições para o comportamento do programa e acesso a recursos.
+- **Analisador**: Carrega políticas no kernel para aplicação ou relatório.
+- **Utilitários**: Estes são programas em modo usuário que fornecem uma interface para interagir e gerenciar o AppArmor.
 
-### Profiles path
+### Caminho dos perfis
 
-Apparmor profiles are usually saved in _**/etc/apparmor.d/**_\
-With `sudo aa-status` you will be able to list the binaries that are restricted by some profile. If you can change the char "/" for a dot of the path of each listed binary and you will obtain the name of the apparmor profile inside the mentioned folder.
+Os perfis do AppArmor geralmente são salvos em _**/etc/apparmor.d/**_\
+Com `sudo aa-status` você poderá listar os binários que estão restritos por algum perfil. Se você puder trocar o caractere "/" por um ponto no caminho de cada binário listado, você obterá o nome do perfil do AppArmor dentro da pasta mencionada.
 
-For example, a **apparmor** profile for _/usr/bin/man_ will be located in _/etc/apparmor.d/usr.bin.man_
+Por exemplo, um **perfil do apparmor** para _/usr/bin/man_ estará localizado em _/etc/apparmor.d/usr.bin.man_
 
-### Commands
-
+### Comandos
 ```bash
 aa-status     #check the current status
 aa-enforce    #set profile to enforce mode (from disable or complain)
@@ -36,47 +35,41 @@ aa-genprof    #generate a new profile
 aa-logprof    #used to change the policy when the binary/program is changed
 aa-mergeprof  #used to merge the policies
 ```
+## Criando um perfil
 
-## Creating a profile
-
-- In order to indicate the affected executable, **absolute paths and wildcards** are allowed (for file globbing) for specifying files.
-- To indicate the access the binary will have over **files** the following **access controls** can be used:
-  - **r** (read)
-  - **w** (write)
-  - **m** (memory map as executable)
-  - **k** (file locking)
-  - **l** (creation hard links)
-  - **ix** (to execute another program with the new program inheriting policy)
-  - **Px** (execute under another profile, after cleaning the environment)
-  - **Cx** (execute under a child profile, after cleaning the environment)
-  - **Ux** (execute unconfined, after cleaning the environment)
-- **Variables** can be defined in the profiles and can be manipulated from outside the profile. For example: @{PROC} and @{HOME} (add #include \<tunables/global> to the profile file)
-- **Deny rules are supported to override allow rules**.
+- Para indicar o executável afetado, **caminhos absolutos e curingas** são permitidos (para globbing de arquivos) para especificar arquivos.
+- Para indicar o acesso que o binário terá sobre **arquivos**, os seguintes **controles de acesso** podem ser usados:
+- **r** (ler)
+- **w** (escrever)
+- **m** (mapa de memória como executável)
+- **k** (bloqueio de arquivo)
+- **l** (criação de links duros)
+- **ix** (executar outro programa com a nova política herdada)
+- **Px** (executar sob outro perfil, após limpar o ambiente)
+- **Cx** (executar sob um perfil filho, após limpar o ambiente)
+- **Ux** (executar sem restrições, após limpar o ambiente)
+- **Variáveis** podem ser definidas nos perfis e podem ser manipuladas de fora do perfil. Por exemplo: @{PROC} e @{HOME} (adicione #include \<tunables/global> ao arquivo de perfil)
+- **Regras de negação são suportadas para substituir regras de permissão**.
 
 ### aa-genprof
 
-To easily start creating a profile apparmor can help you. It's possible to make **apparmor inspect the actions performed by a binary and then let you decide which actions you want to allow or deny**.\
-You just need to run:
-
+Para começar a criar um perfil facilmente, o apparmor pode ajudar você. É possível fazer com que **apparmor inspecione as ações realizadas por um binário e então deixe você decidir quais ações deseja permitir ou negar**.\
+Você só precisa executar:
 ```bash
 sudo aa-genprof /path/to/binary
 ```
-
-Then, in a different console perform all the actions that the binary will usually perform:
-
+Então, em um console diferente, execute todas as ações que o binário geralmente realizará:
 ```bash
 /path/to/binary -a dosomething
 ```
-
-Then, in the first console press "**s**" and then in the recorded actions indicate if you want to ignore, allow, or whatever. When you have finished press "**f**" and the new profile will be created in _/etc/apparmor.d/path.to.binary_
+Então, no primeiro console pressione "**s**" e depois nas ações gravadas indique se você deseja ignorar, permitir ou qualquer outra coisa. Quando terminar, pressione "**f**" e o novo perfil será criado em _/etc/apparmor.d/path.to.binary_
 
 > [!NOTE]
-> Using the arrow keys you can select what you want to allow/deny/whatever
+> Usando as teclas de seta, você pode selecionar o que deseja permitir/negar/qualquer outra coisa
 
 ### aa-easyprof
 
-You can also create a template of an apparmor profile of a binary with:
-
+Você também pode criar um template de um perfil apparmor de um binário com:
 ```bash
 sudo aa-easyprof /path/to/binary
 # vim:syntax=apparmor
@@ -90,40 +83,34 @@ sudo aa-easyprof /path/to/binary
 # No template variables specified
 
 "/path/to/binary" {
-  #include <abstractions/base>
+#include <abstractions/base>
 
-  # No abstractions specified
+# No abstractions specified
 
-  # No policy groups specified
+# No policy groups specified
 
-  # No read paths specified
+# No read paths specified
 
-  # No write paths specified
+# No write paths specified
 }
 ```
-
 > [!NOTE]
-> Note that by default in a created profile nothing is allowed, so everything is denied. You will need to add lines like `/etc/passwd r,` to allow the binary read `/etc/passwd` for example.
+> Note que, por padrão, em um perfil criado, nada é permitido, então tudo é negado. Você precisará adicionar linhas como `/etc/passwd r,` para permitir a leitura do binário `/etc/passwd`, por exemplo.
 
-You can then **enforce** the new profile with
-
+Você pode então **impor** o novo perfil com
 ```bash
 sudo apparmor_parser -a /etc/apparmor.d/path.to.binary
 ```
+### Modificando um perfil a partir de logs
 
-### Modifying a profile from logs
-
-The following tool will read the logs and ask the user if he wants to permit some of the detected forbidden actions:
-
+A ferramenta a seguir irá ler os logs e perguntar ao usuário se ele deseja permitir algumas das ações proibidas detectadas:
 ```bash
 sudo aa-logprof
 ```
-
 > [!NOTE]
-> Using the arrow keys you can select what you want to allow/deny/whatever
+> Usando as teclas de seta, você pode selecionar o que deseja permitir/negar/o que for
 
-### Managing a Profile
-
+### Gerenciando um Perfil
 ```bash
 #Main profile management commands
 apparmor_parser -a /etc/apparmor.d/profile.name #Load a new profile in enforce mode
@@ -131,18 +118,14 @@ apparmor_parser -C /etc/apparmor.d/profile.name #Load a new profile in complain 
 apparmor_parser -r /etc/apparmor.d/profile.name #Replace existing profile
 apparmor_parser -R /etc/apparmor.d/profile.name #Remove profile
 ```
-
 ## Logs
 
-Example of **AUDIT** and **DENIED** logs from _/var/log/audit/audit.log_ of the executable **`service_bin`**:
-
+Exemplo de logs **AUDIT** e **DENIED** do _/var/log/audit/audit.log_ do executável **`service_bin`**:
 ```bash
 type=AVC msg=audit(1610061880.392:286): apparmor="AUDIT" operation="getattr" profile="/bin/rcat" name="/dev/pts/1" pid=954 comm="service_bin" requested_mask="r" fsuid=1000 ouid=1000
 type=AVC msg=audit(1610061880.392:287): apparmor="DENIED" operation="open" profile="/bin/rcat" name="/etc/hosts" pid=954 comm="service_bin" requested_mask="r" denied_mask="r" fsuid=1000 ouid=0
 ```
-
-You can also get this information using:
-
+Você também pode obter essas informações usando:
 ```bash
 sudo aa-notify -s 1 -v
 Profile: /bin/service_bin
@@ -160,126 +143,104 @@ Logfile: /var/log/audit/audit.log
 AppArmor denials: 2 (since Wed Jan  6 23:51:08 2021)
 For more information, please see: https://wiki.ubuntu.com/DebuggingApparmor
 ```
+## Apparmor no Docker
 
-## Apparmor in Docker
-
-Note how the profile **docker-profile** of docker is loaded by default:
-
+Note como o perfil **docker-profile** do docker é carregado por padrão:
 ```bash
 sudo aa-status
 apparmor module is loaded.
 50 profiles are loaded.
 13 profiles are in enforce mode.
-   /sbin/dhclient
-   /usr/bin/lxc-start
-   /usr/lib/NetworkManager/nm-dhcp-client.action
-   /usr/lib/NetworkManager/nm-dhcp-helper
-   /usr/lib/chromium-browser/chromium-browser//browser_java
-   /usr/lib/chromium-browser/chromium-browser//browser_openjdk
-   /usr/lib/chromium-browser/chromium-browser//sanitized_helper
-   /usr/lib/connman/scripts/dhclient-script
-   docker-default
+/sbin/dhclient
+/usr/bin/lxc-start
+/usr/lib/NetworkManager/nm-dhcp-client.action
+/usr/lib/NetworkManager/nm-dhcp-helper
+/usr/lib/chromium-browser/chromium-browser//browser_java
+/usr/lib/chromium-browser/chromium-browser//browser_openjdk
+/usr/lib/chromium-browser/chromium-browser//sanitized_helper
+/usr/lib/connman/scripts/dhclient-script
+docker-default
 ```
+Por padrão, o **perfil docker-default do Apparmor** é gerado a partir de [https://github.com/moby/moby/tree/master/profiles/apparmor](https://github.com/moby/moby/tree/master/profiles/apparmor)
 
-By default **Apparmor docker-default profile** is generated from [https://github.com/moby/moby/tree/master/profiles/apparmor](https://github.com/moby/moby/tree/master/profiles/apparmor)
+**Resumo do perfil docker-default**:
 
-**docker-default profile Summary**:
+- **Acesso** a toda a **rede**
+- **Nenhuma capacidade** é definida (No entanto, algumas capacidades virão da inclusão de regras básicas, ou seja, #include \<abstractions/base>)
+- **Escrita** em qualquer arquivo **/proc** **não é permitida**
+- Outros **subdiretórios**/**arquivos** de /**proc** e /**sys** têm acesso de leitura/escrita/bloqueio/link/executar **negado**
+- **Montagem** **não é permitida**
+- **Ptrace** só pode ser executado em um processo que está confinado pelo **mesmo perfil apparmor**
 
-- **Access** to all **networking**
-- **No capability** is defined (However, some capabilities will come from including basic base rules i.e. #include \<abstractions/base> )
-- **Writing** to any **/proc** file is **not allowed**
-- Other **subdirectories**/**files** of /**proc** and /**sys** are **denied** read/write/lock/link/execute access
-- **Mount** is **not allowed**
-- **Ptrace** can only be run on a process that is confined by **same apparmor profile**
-
-Once you **run a docker container** you should see the following output:
-
+Uma vez que você **execute um contêiner docker**, você deve ver a seguinte saída:
 ```bash
 1 processes are in enforce mode.
-   docker-default (825)
+docker-default (825)
 ```
-
-Note that **apparmor will even block capabilities privileges** granted to the container by default. For example, it will be able to **block permission to write inside /proc even if the SYS_ADMIN capability is granted** because by default docker apparmor profile denies this access:
-
+Observe que **o apparmor até bloqueará privilégios de capacidades** concedidos ao contêiner por padrão. Por exemplo, ele será capaz de **bloquear a permissão para escrever dentro de /proc mesmo que a capacidade SYS_ADMIN seja concedida** porque, por padrão, o perfil do apparmor do docker nega esse acesso:
 ```bash
 docker run -it --cap-add SYS_ADMIN --security-opt seccomp=unconfined ubuntu /bin/bash
 echo "" > /proc/stat
 sh: 1: cannot create /proc/stat: Permission denied
 ```
-
-You need to **disable apparmor** to bypass its restrictions:
-
+Você precisa **desativar o apparmor** para contornar suas restrições:
 ```bash
 docker run -it --cap-add SYS_ADMIN --security-opt seccomp=unconfined --security-opt apparmor=unconfined ubuntu /bin/bash
 ```
+Note que, por padrão, **AppArmor** também **proibirá o contêiner de montar** pastas de dentro, mesmo com a capacidade SYS_ADMIN.
 
-Note that by default **AppArmor** will also **forbid the container to mount** folders from the inside even with SYS_ADMIN capability.
+Note que você pode **adicionar/remover** **capacidades** ao contêiner docker (isso ainda será restrito por métodos de proteção como **AppArmor** e **Seccomp**):
 
-Note that you can **add/remove** **capabilities** to the docker container (this will be still restricted by protection methods like **AppArmor** and **Seccomp**):
-
-- `--cap-add=SYS_ADMIN` give `SYS_ADMIN` cap
-- `--cap-add=ALL` give all caps
-- `--cap-drop=ALL --cap-add=SYS_PTRACE` drop all caps and only give `SYS_PTRACE`
+- `--cap-add=SYS_ADMIN` dá a capacidade `SYS_ADMIN`
+- `--cap-add=ALL` dá todas as capacidades
+- `--cap-drop=ALL --cap-add=SYS_PTRACE` remove todas as capacidades e dá apenas `SYS_PTRACE`
 
 > [!NOTE]
-> Usually, when you **find** that you have a **privileged capability** available **inside** a **docker** container **but** some part of the **exploit isn't working**, this will be because docker **apparmor will be preventing it**.
+> Normalmente, quando você **descobre** que tem uma **capacidade privilegiada** disponível **dentro** de um **contêiner** **docker**, **mas** alguma parte da **exploração não está funcionando**, isso será porque o **apparmor do docker estará impedindo**.
 
-### Example
+### Exemplo
 
-(Example from [**here**](https://sreeninet.wordpress.com/2016/03/06/docker-security-part-2docker-engine/))
+(Exemplo de [**aqui**](https://sreeninet.wordpress.com/2016/03/06/docker-security-part-2docker-engine/))
 
-To illustrate AppArmor functionality, I created a new Docker profile “mydocker” with the following line added:
-
+Para ilustrar a funcionalidade do AppArmor, criei um novo perfil Docker “mydocker” com a seguinte linha adicionada:
 ```
 deny /etc/* w,   # deny write for all files directly in /etc (not in a subdir)
 ```
-
-To activate the profile, we need to do the following:
-
+Para ativar o perfil, precisamos fazer o seguinte:
 ```
 sudo apparmor_parser -r -W mydocker
 ```
-
-To list the profiles, we can do the following command. The command below is listing my new AppArmor profile.
-
+Para listar os perfis, podemos executar o seguinte comando. O comando abaixo está listando meu novo perfil do AppArmor.
 ```
 $ sudo apparmor_status  | grep mydocker
-   mydocker
+mydocker
 ```
-
-As shown below, we get error when trying to change “/etc/” since AppArmor profile is preventing write access to “/etc”.
-
+Conforme mostrado abaixo, recebemos um erro ao tentar mudar “/etc/” já que o perfil do AppArmor está impedindo o acesso de escrita a “/etc”.
 ```
 $ docker run --rm -it --security-opt apparmor:mydocker -v ~/haproxy:/localhost busybox chmod 400 /etc/hostname
 chmod: /etc/hostname: Permission denied
 ```
-
 ### AppArmor Docker Bypass1
 
-You can find which **apparmor profile is running a container** using:
-
+Você pode descobrir qual **perfil apparmor está executando um contêiner** usando:
 ```bash
 docker inspect 9d622d73a614 | grep lowpriv
-        "AppArmorProfile": "lowpriv",
-                "apparmor=lowpriv"
+"AppArmorProfile": "lowpriv",
+"apparmor=lowpriv"
 ```
-
-Then, you can run the following line to **find the exact profile being used**:
-
+Então, você pode executar a seguinte linha para **encontrar o perfil exato sendo usado**:
 ```bash
 find /etc/apparmor.d/ -name "*lowpriv*" -maxdepth 1 2>/dev/null
 ```
+No caso estranho de você poder **modificar o perfil do docker do apparmor e recarregá-lo.** Você poderia remover as restrições e "contorná-las".
 
-In the weird case you can **modify the apparmor docker profile and reload it.** You could remove the restrictions and "bypass" them.
+### Bypass2 do AppArmor Docker
 
-### AppArmor Docker Bypass2
+**AppArmor é baseado em caminho**, isso significa que mesmo que ele possa estar **protegendo** arquivos dentro de um diretório como **`/proc`**, se você puder **configurar como o contêiner será executado**, você poderia **montar** o diretório proc do host dentro de **`/host/proc`** e ele **não será mais protegido pelo AppArmor**.
 
-**AppArmor is path based**, this means that even if it might be **protecting** files inside a directory like **`/proc`** if you can **configure how the container is going to be run**, you could **mount** the proc directory of the host inside **`/host/proc`** and it **won't be protected by AppArmor anymore**.
+### Bypass Shebang do AppArmor
 
-### AppArmor Shebang Bypass
-
-In [**this bug**](https://bugs.launchpad.net/apparmor/+bug/1911431) you can see an example of how **even if you are preventing perl to be run with certain resources**, if you just create a a shell script **specifying** in the first line **`#!/usr/bin/perl`** and you **execute the file directly**, you will be able to execute whatever you want. E.g.:
-
+Em [**este bug**](https://bugs.launchpad.net/apparmor/+bug/1911431) você pode ver um exemplo de como **mesmo que você esteja impedindo o perl de ser executado com certos recursos**, se você apenas criar um script shell **especificando** na primeira linha **`#!/usr/bin/perl`** e você **executar o arquivo diretamente**, você poderá executar o que quiser. Ex.:
 ```perl
 echo '#!/usr/bin/perl
 use POSIX qw(strftime);
@@ -289,5 +250,4 @@ exec "/bin/sh"' > /tmp/test.pl
 chmod +x /tmp/test.pl
 /tmp/test.pl
 ```
-
 {{#include ../../../banners/hacktricks-training.md}}

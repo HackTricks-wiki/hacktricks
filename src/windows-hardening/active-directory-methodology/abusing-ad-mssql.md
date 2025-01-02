@@ -1,12 +1,9 @@
-# Abuso de AD MSSQL
+# Abuso de MSSQL AD
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
 
-{% embed url="https://websec.nl/" %}
-
-## **Enumeração / Descoberta MSSQL**
+## **Enumeração / Descoberta de MSSQL**
 
 ### Python
 
@@ -161,7 +158,7 @@ Verifique na página mencionada na **seção seguinte como fazer isso manualment
 
 ## Links Confiáveis MSSQL
 
-Se uma instância MSSQL é confiável (link de banco de dados) por uma diferente instância MSSQL. Se o usuário tem privilégios sobre o banco de dados confiável, ele poderá **usar o relacionamento de confiança para executar consultas também na outra instância**. Essas confianças podem ser encadeadas e, em algum momento, o usuário pode ser capaz de encontrar algum banco de dados mal configurado onde ele pode executar comandos.
+Se uma instância MSSQL é confiável (link de banco de dados) por uma diferente instância MSSQL. Se o usuário tem privilégios sobre o banco de dados confiável, ele poderá **usar a relação de confiança para executar consultas também na outra instância**. Essas confianças podem ser encadeadas e, em algum momento, o usuário pode ser capaz de encontrar algum banco de dados mal configurado onde ele pode executar comandos.
 
 **Os links entre bancos de dados funcionam mesmo através de confianças de floresta.**
 
@@ -224,7 +221,7 @@ EXEC sp_linkedservers;
 ```
 ![](<../../images/image (716).png>)
 
-#### Execute queries in link confiável
+#### Execute consultas em link confiável
 
 Execute consultas através do link (exemplo: encontre mais links na nova instância acessível):
 ```sql
@@ -259,10 +256,7 @@ O **usuário local do MSSQL** geralmente possui um tipo especial de privilégio 
 
 Uma estratégia que muitos autores desenvolveram é forçar um serviço do SYSTEM a se autenticar em um serviço malicioso ou man-in-the-middle que o atacante cria. Esse serviço malicioso é então capaz de imitar o serviço do SYSTEM enquanto tenta se autenticar.
 
-[SweetPotato](https://github.com/CCob/SweetPotato) possui uma coleção dessas várias técnicas que podem ser executadas através do comando `execute-assembly` do Beacon.
+[SweetPotato](https://github.com/CCob/SweetPotato) possui uma coleção dessas várias técnicas que podem ser executadas via comando `execute-assembly` do Beacon.
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

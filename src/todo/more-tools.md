@@ -1,15 +1,12 @@
 {{#include ../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 # BlueTeam
 
 - [https://github.com/yarox24/attack_monitor](https://github.com/yarox24/attack_monitor)
 - [https://capsule8.com/blog/dont-get-kicked-out-a-tale-of-rootkits-and-other-backdoors/](https://capsule8.com/blog/dont-get-kicked-out-a-tale-of-rootkits-and-other-backdoors/)
 - [https://github.com/ION28/BLUESPAWN](https://github.com/ION28/BLUESPAWN)
-- [https://github.com/PaperMtn/lil-pwny](https://github.com/PaperMtn/lil-pwny) : Verifique contas divulgadas
+- [https://github.com/PaperMtn/lil-pwny](https://github.com/PaperMtn/lil-pwny) : Verificar contas divulgadas
 - [https://github.com/rabobank-cdc/DeTTECT](https://github.com/rabobank-cdc/DeTTECT)
 
 # OSINT
@@ -40,22 +37,22 @@
 - [https://github.com/hahwul/XSpear](https://github.com/hahwul/XSpear)
 - [https://github.com/BitTheByte/Monitorizer/](https://github.com/BitTheByte/Monitorizer/)
 - [https://github.com/spinkham/skipfish](https://github.com/spinkham/skipfish)
-- [https://github.com/blark/aiodnsbrute](https://github.com/blark/aiodnsbrute) : Força bruta de nomes de domínio de forma assíncrona
+- [https://github.com/blark/aiodnsbrute](https://github.com/blark/aiodnsbrute) : Força bruta em nomes de domínio de forma assíncrona
 - [https://crt.sh/?q=%.yahoo.com](https://crt.sh/?q=%.yahoo.com) : Força bruta de subdomínios
-- [https://github.com/tomnomnom/httprobe](https://github.com/tomnomnom/httprobe): Verifique se os servidores web em um domínio são acessíveis
+- [https://github.com/tomnomnom/httprobe](https://github.com/tomnomnom/httprobe): Verificar se servidores web em um domínio são acessíveis
 - [https://github.com/aboul3la/Sublist3r](https://github.com/aboul3la/Sublist3r) : Descoberta de subdomínios
 - [https://github.com/gwen001/github-search/blob/master/github-subdomains.py](https://github.com/gwen001/github-search/blob/master/github-subdomains.py) : Descoberta de subdomínios no github
 - [https://github.com/robertdavidgraham/masscan](https://github.com/robertdavidgraham/masscan) : Escaneamento rápido de portas
-- [https://github.com/Threezh1/JSFinder](https://github.com/Threezh1/JSFinder) : Subdomínios e URLs de arquivos JS em um web
+- [https://github.com/Threezh1/JSFinder](https://github.com/Threezh1/JSFinder) : Subdomínios e URLs de arquivos JS em um site
 - [https://github.com/C1h2e1/MyFuzzingDict](https://github.com/C1h2e1/MyFuzzingDict) : Dicionário de arquivos web
 - [https://github.com/TypeError/Bookmarks/blob/master/README.md](https://github.com/TypeError/Bookmarks/blob/master/README.md) : BurpExtension para evitar dezenas de abas de repetição
 - [https://github.com/hakluke/hakrawler](https://github.com/hakluke/hakrawler) : Obter ativos
 - [https://github.com/izo30/google-dorker](https://github.com/izo30/google-dorker) : Google dorks
-- [https://github.com/sehno/Bug-bounty/blob/master/bugbounty_checklist.md](https://github.com/sehno/Bug-bounty/blob/master/bugbounty_checklist.md) : Checklist de Web BugBounty
-- [https://github.com/Naategh/dom-red](https://github.com/Naategh/dom-red) : Verifique uma lista de domínios contra Redirecionamento Aberto
-- [https://github.com/prodigysml/Dr.-Watson](https://github.com/prodigysml/Dr.-Watson) : Plugin Burp, análise offline para descobrir domínios, subdomínios e IPs
+- [https://github.com/sehno/Bug-bounty/blob/master/bugbounty_checklist.md](https://github.com/sehno/Bug-bounty/blob/master/bugbounty_checklist.md) : Checklist de BugBounty para web
+- [https://github.com/Naategh/dom-red](https://github.com/Naategh/dom-red) : Verificar uma lista de domínios contra Redirecionamento Aberto
+- [https://github.com/prodigysml/Dr.-Watson](https://github.com/prodigysml/Dr.-Watson) : Plugin do Burp, análise offline para descobrir domínios, subdomínios e IPs
 - [https://github.com/hahwul/WebHackersWeapons](https://github.com/hahwul/WebHackersWeapons): Lista de diferentes ferramentas
-- [https://github.com/gauravnarwani97/Trishul](https://github.com/gauravnarwani97/Trishul) : Plugin BurpSuite para encontrar vulnerabilidades (SQLi, XSS, SSTI)
+- [https://github.com/gauravnarwani97/Trishul](https://github.com/gauravnarwani97/Trishul) : Plugin do BurpSuite para encontrar vulnerabilidades (SQLi, XSS, SSTI)
 - [https://github.com/fransr/postMessage-tracker](https://github.com/fransr/postMessage-tracker) : Extensão do Chrome para rastrear funções de post-messages
 - [https://github.com/Quitten/Autorize](https://github.com/Quitten/Autorize) : Testes automáticos de autenticação (remover cookies e tentar enviar a solicitação)
 - [https://github.com/pikpikcu/xrcross](https://github.com/pikpikcu/xrcross): XRCross é uma ferramenta de Reconstrução, Scanner e para testes de penetração / BugBounty. Esta ferramenta foi criada para testar vulnerabilidades (XSS|SSRF|CORS|SSTI|IDOR|RCE|LFI|SQLI)
@@ -69,9 +66,9 @@
 - [https://github.com/BankSecurity/Red_Team](https://github.com/BankSecurity/Red_Team) : Scripts da Red Team
 - [https://github.com/l0ss/Grouper2](https://github.com/l0ss/Grouper2) : encontrar configurações incorretas relacionadas à segurança na Política de Grupo do Active Directory.
 - [https://www.wietzebeukema.nl/blog/powershell-obfuscation-using-securestring](https://www.wietzebeukema.nl/blog/powershell-obfuscation-using-securestring) : Ofuscação de Securestring
-- [https://pentestlab.blog/2020/02/24/parent-pid-spoofing/](https://pentestlab.blog/2020/02/24/parent-pid-spoofing/) : Spoofing de PID Pai
-- [https://github.com/the-xentropy/xencrypt](https://github.com/the-xentropy/xencrypt) : Criptografar cargas úteis do Powershell
-- [https://shells.systems/introducing-ninja-c2-the-c2-built-for-stealth-red-team-operations/](https://shells.systems/introducing-ninja-c2-the-c2-built-for-stealth-red-team-operations/) : C2 Stealth
+- [https://pentestlab.blog/2020/02/24/parent-pid-spoofing/](https://pentestlab.blog/2020/02/24/parent-pid-spoofing/) : Spoofing de PID pai
+- [https://github.com/the-xentropy/xencrypt](https://github.com/the-xentropy/xencrypt) : Criptografar payloads do Powershell
+- [https://shells.systems/introducing-ninja-c2-the-c2-built-for-stealth-red-team-operations/](https://shells.systems/introducing-ninja-c2-the-c2-built-for-stealth-red-team-operations/) : C2 furtivo
 - [https://windows-internals.com/faxing-your-way-to-system/](https://windows-internals.com/faxing-your-way-to-system/) : Série de logs sobre Windows Internals
 - [https://bestestredteam.com/2018/10/02/tracking-pixel-in-microsoft-office-document/](https://bestestredteam.com/2018/10/02/tracking-pixel-in-microsoft-office-document/) : Rastrear quem abriu um documento
 - [https://github.com/Integration-IT/Active-Directory-Exploitation-Cheat-Sheet](https://github.com/Integration-IT/Active-Directory-Exploitation-Cheat-Sheet) : Cheat Sheet do Active Directory
@@ -103,10 +100,10 @@ Emulação de firmware: FIRMADYNE (https://github.com/firmadyne/firmadyne/) é u
 - [https://github.com/weev3/LKWA](https://github.com/weev3/LKWA)
 - [https://h0mbre.github.io/Learn-C-By-Creating-A-Rootkit/](https://h0mbre.github.io/Learn-C-By-Creating-A-Rootkit/)
 - [https://github.com/skelsec/jackdaw](https://github.com/skelsec/jackdaw)
-- [https://github.com/CoatiSoftware/Sourcetrail](https://github.com/CoatiSoftware/Sourcetrail) : Análise de código estático
+- [https://github.com/CoatiSoftware/Sourcetrail](https://github.com/CoatiSoftware/Sourcetrail) : Análise de código estática
 - [https://www.hackerdecabecera.com/2019/12/blectf-capture-flag-en-formato-hardware.html](https://www.hackerdecabecera.com/2019/12/blectf-capture-flag-en-formato-hardware.html) : Bluetooth LE CTF
 - [https://github.com/skeeto/endlessh](https://github.com/skeeto/endlessh) : SSH tarpit que envia lentamente um banner infinito.
-- AWS e ferramentas de nuvem: [https://github.com/toniblyx/my-arsenal-of-aws-security-tools](https://github.com/toniblyx/my-arsenal-of-aws-security-tools)
+- Ferramentas AWS e Cloud: [https://github.com/toniblyx/my-arsenal-of-aws-security-tools](https://github.com/toniblyx/my-arsenal-of-aws-security-tools)
 - IFS (Interplanetary File System) para phishing: [https://www.trustwave.com/en-us/resources/blogs/spiderlabs-blog/using-the-interplanetary-file-system-for-offensive-operations/](https://www.trustwave.com/en-us/resources/blogs/spiderlabs-blog/using-the-interplanetary-file-system-for-offensive-operations/)
 - Serviços de rotação de IP: [https://medium.com/@lokeshdlk77/how-to-rotate-ip-address-in-brute-force-attack-e66407259212](https://medium.com/@lokeshdlk77/how-to-rotate-ip-address-in-brute-force-attack-e66407259212)
 - Rootkit Linux: [https://github.com/aesophor/satanic-rootkit](https://github.com/aesophor/satanic-rootkit)
@@ -115,12 +112,9 @@ Emulação de firmware: FIRMADYNE (https://github.com/firmadyne/firmadyne/) é u
 - [https://medium.com/macoclock/jailbreak-and-stuff-kickstart-tools-and-techniques-for-ios-application-pentesting-6fa53a3987ab](https://medium.com/macoclock/jailbreak-and-stuff-kickstart-tools-and-techniques-for-ios-application-pentesting-6fa53a3987ab) : Ferramentas de pentesting para IOS
 - [https://github.com/random-robbie/keywords/blob/master/keywords.txt](https://github.com/random-robbie/keywords/blob/master/keywords.txt) : Palavras-chave
 - [https://github.com/ElevenPaths/HomePWN](https://github.com/ElevenPaths/HomePWN) : Hacking IoT (Wifi, BLE, SSDP, MDNS)
-- [https://github.com/rackerlabs/scantron](https://github.com/rackerlabs/scantron) : automatizando escaneamento
+- [https://github.com/rackerlabs/scantron](https://github.com/rackerlabs/scantron) : automação de escaneamento
 - [https://github.com/doyensec/awesome-electronjs-hacking](https://github.com/doyensec/awesome-electronjs-hacking) : Esta lista visa cobrir tópicos relacionados à segurança do Electron.js.
 - [https://github.com/serain/bbrecon](https://github.com/serain/bbrecon) : Informações sobre programas de BB
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../banners/hacktricks-training.md}}

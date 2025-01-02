@@ -2,27 +2,21 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
-
-Aprofunde sua experiência em **Segurança Móvel** com a 8kSec Academy. Domine a segurança de iOS e Android através de nossos cursos autônomos e obtenha certificação:
-
-{% embed url="https://academy.8ksec.io/" %}
-
 **Esta página é baseada em uma do [adsecurity.org](https://adsecurity.org/?page_id=1821)**. Confira o original para mais informações!
 
 ## LM e Senhas em Texto Claro na Memória
 
 A partir do Windows 8.1 e Windows Server 2012 R2, medidas significativas foram implementadas para proteger contra o roubo de credenciais:
 
-- **LM hashes e senhas em texto claro** não são mais armazenados na memória para aumentar a segurança. Uma configuração específica do registro, _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_, deve ser configurada com um valor DWORD de `0` para desativar a Autenticação Digest, garantindo que senhas "em texto claro" não sejam armazenadas em cache no LSASS.
+- **Hashes LM e senhas em texto claro** não são mais armazenados na memória para aumentar a segurança. Uma configuração específica do registro, _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_, deve ser configurada com um valor DWORD de `0` para desativar a Autenticação Digest, garantindo que senhas "em texto claro" não sejam armazenadas em cache no LSASS.
 
 - **Proteção LSA** é introduzida para proteger o processo da Autoridade de Segurança Local (LSA) contra leitura não autorizada de memória e injeção de código. Isso é alcançado marcando o LSASS como um processo protegido. A ativação da Proteção LSA envolve:
-1. Modificar o registro em _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa_ definindo `RunAsPPL` como `dword:00000001`.
+1. Modificar o registro em _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa_ definindo `RunAsPPL` para `dword:00000001`.
 2. Implementar um Objeto de Política de Grupo (GPO) que aplica essa alteração de registro em dispositivos gerenciados.
 
 Apesar dessas proteções, ferramentas como Mimikatz podem contornar a Proteção LSA usando drivers específicos, embora tais ações provavelmente sejam registradas nos logs de eventos.
 
-### Contrarrestando a Remoção do SeDebugPrivilege
+### Combatendo a Remoção do SeDebugPrivilege
 
 Administradores normalmente têm SeDebugPrivilege, permitindo que eles depurem programas. Este privilégio pode ser restrito para evitar despejos de memória não autorizados, uma técnica comum usada por atacantes para extrair credenciais da memória. No entanto, mesmo com esse privilégio removido, a conta TrustedInstaller ainda pode realizar despejos de memória usando uma configuração de serviço personalizada:
 ```bash
@@ -124,7 +118,7 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 
 ### Manipulação do Active Directory
 
-- **DCShadow**: Faz uma máquina agir temporariamente como um DC para manipulação de objetos AD.
+- **DCShadow**: Faz uma máquina agir temporariamente como um DC para manipulação de objetos do AD.
 
 - `mimikatz "lsadump::dcshadow /object:targetObject /attribute:attributeName /value:newValue" exit`
 
@@ -203,10 +197,5 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 - Extrair senhas do Cofre do Windows.
 - `mimikatz "vault::cred /patch" exit`
 
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
-
-Aprofunde sua experiência em **Segurança Móvel** com a 8kSec Academy. Domine a segurança de iOS e Android através de nossos cursos autônomos e obtenha certificação:
-
-{% embed url="https://academy.8ksec.io/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -2,39 +2,39 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Informações Básicas
 
-Apple devices post-2010 have serial numbers consisting of **12 alphanumeric characters**, each segment conveying specific information:
+Dispositivos Apple pós-2010 têm números de série consistindo de **12 caracteres alfanuméricos**, cada segmento transmitindo informações específicas:
 
-- **First 3 Characters**: Indicate the **manufacturing location**.
-- **Characters 4 & 5**: Denote the **year and week of manufacture**.
-- **Characters 6 to 8**: Serve as a **unique identifier** for each device.
-- **Last 4 Characters**: Specify the **model number**.
+- **Primeiros 3 Caracteres**: Indicam a **localização de fabricação**.
+- **Caracteres 4 e 5**: Denotam o **ano e a semana de fabricação**.
+- **Caracteres 6 a 8**: Servem como um **identificador único** para cada dispositivo.
+- **Últimos 4 Caracteres**: Especificam o **número do modelo**.
 
-For instance, the serial number **C02L13ECF8J2** follows this structure.
+Por exemplo, o número de série **C02L13ECF8J2** segue essa estrutura.
 
-### **Manufacturing Locations (First 3 Characters)**
+### **Locais de Fabricação (Primeiros 3 Caracteres)**
 
-Certain codes represent specific factories:
+Certos códigos representam fábricas específicas:
 
-- **FC, F, XA/XB/QP/G8**: Various locations in the USA.
-- **RN**: Mexico.
-- **CK**: Cork, Ireland.
-- **VM**: Foxconn, Czech Republic.
-- **SG/E**: Singapore.
-- **MB**: Malaysia.
-- **PT/CY**: Korea.
+- **FC, F, XA/XB/QP/G8**: Vários locais nos EUA.
+- **RN**: México.
+- **CK**: Cork, Irlanda.
+- **VM**: Foxconn, República Tcheca.
+- **SG/E**: Cingapura.
+- **MB**: Malásia.
+- **PT/CY**: Coreia.
 - **EE/QT/UV**: Taiwan.
-- **FK/F1/F2, W8, DL/DM, DN, YM/7J, 1C/4H/WQ/F7**: Different locations in China.
-- **C0, C3, C7**: Specific cities in China.
-- **RM**: Refurbished devices.
+- **FK/F1/F2, W8, DL/DM, DN, YM/7J, 1C/4H/WQ/F7**: Diferentes locais na China.
+- **C0, C3, C7**: Cidades específicas na China.
+- **RM**: Dispositivos recondicionados.
 
-### **Year of Manufacturing (4th Character)**
+### **Ano de Fabricação (4º Caractere)**
 
-This character varies from 'C' (representing the first half of 2010) to 'Z' (second half of 2019), with different letters indicating different half-year periods.
+Este caractere varia de 'C' (representando a primeira metade de 2010) a 'Z' (segunda metade de 2019), com diferentes letras indicando diferentes períodos de meio ano.
 
-### **Week of Manufacturing (5th Character)**
+### **Semana de Fabricação (5º Caractere)**
 
-Digits 1-9 correspond to weeks 1-9. Letters C-Y (excluding vowels and 'S') represent weeks 10-27. For the second half of the year, 26 is added to this number.
+Dígitos 1-9 correspondem às semanas 1-9. Letras C-Y (excluindo vogais e 'S') representam as semanas 10-27. Para a segunda metade do ano, 26 é adicionado a esse número.
 
 {{#include ../../../banners/hacktricks-training.md}}

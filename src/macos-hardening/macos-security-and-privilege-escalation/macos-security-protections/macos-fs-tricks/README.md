@@ -10,7 +10,7 @@ Permissões em um **diretório**:
 - **escrita** - você pode **deletar/escrever** **arquivos** no diretório e pode **deletar pastas vazias**.
 - Mas você **não pode deletar/modificar pastas não vazias** a menos que tenha permissões de escrita sobre elas.
 - Você **não pode modificar o nome de uma pasta** a menos que a possua.
-- **execução** - você está **autorizado a percorrer** o diretório - se você não tiver esse direito, não pode acessar nenhum arquivo dentro dele, ou em quaisquer subdiretórios.
+- **execução** - você está **autorizado a percorrer** o diretório - se você não tiver esse direito, não pode acessar nenhum arquivo dentro dele, ou em subdiretórios.
 
 ### Combinações Perigosas
 
@@ -30,13 +30,19 @@ Exemplo em: [https://theevilbit.github.io/posts/exploiting_directory_permissions
 
 ## Link Simbólico / Link Duro
 
-Se um processo privilegiado estiver escrevendo dados em um **arquivo** que poderia ser **controlado** por um **usuário de menor privilégio**, ou que poderia ter sido **criado anteriormente** por um usuário de menor privilégio. O usuário poderia simplesmente **apontá-lo para outro arquivo** via um link simbólico ou duro, e o processo privilegiado escreverá nesse arquivo.
+### Arquivo/Pasta permissiva
+
+Se um processo privilegiado estiver escrevendo dados em um **arquivo** que poderia ser **controlado** por um **usuário de menor privilégio**, ou que poderia ter sido **anteriormente criado** por um usuário de menor privilégio. O usuário poderia simplesmente **apontá-lo para outro arquivo** via um link simbólico ou duro, e o processo privilegiado escreverá nesse arquivo.
 
 Verifique nas outras seções onde um atacante poderia **abusar de uma escrita arbitrária para escalar privilégios**.
 
+### Abrir `O_NOFOLLOW`
+
+A flag `O_NOFOLLOW` quando usada pela função `open` não seguirá um symlink no último componente do caminho, mas seguirá o resto do caminho. A maneira correta de evitar seguir symlinks no caminho é usando a flag `O_NOFOLLOW_ANY`.
+
 ## .fileloc
 
-Arquivos com extensão **`.fileloc`** podem apontar para outros aplicativos ou binários, então quando são abertos, o aplicativo/binário será o que será executado.\
+Arquivos com extensão **`.fileloc`** podem apontar para outros aplicativos ou binários, então quando são abertos, o aplicativo/binário será o executado.\
 Exemplo:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -50,11 +56,15 @@ Exemplo:
 </dict>
 </plist>
 ```
-## FD Arbitrário
+## Descritores de Arquivo
+
+### Vazamento de FD (sem `O_CLOEXEC`)
+
+Se uma chamada para `open` não tiver a flag `O_CLOEXEC`, o descritor de arquivo será herdado pelo processo filho. Assim, se um processo privilegiado abrir um arquivo privilegiado e executar um processo controlado pelo atacante, o atacante **herdará o FD sobre o arquivo privilegiado**.
 
 Se você conseguir fazer um **processo abrir um arquivo ou uma pasta com altos privilégios**, você pode abusar do **`crontab`** para abrir um arquivo em `/etc/sudoers.d` com **`EDITOR=exploit.py`**, assim o `exploit.py` obterá o FD para o arquivo dentro de `/etc/sudoers` e abusará dele.
 
-Por exemplo: [https://youtu.be/f1HA5QhLQ7Y?t=21098](https://youtu.be/f1HA5QhLQ7Y?t=21098)
+Por exemplo: [https://youtu.be/f1HA5QhLQ7Y?t=21098](https://youtu.be/f1HA5QhLQ7Y?t=21098), código: https://github.com/gergelykalman/CVE-2023-32428-a-macOS-LPE-via-MallocStackLogging
 
 ## Evitar truques de xattrs de quarentena
 
@@ -142,11 +152,32 @@ Não é realmente necessário, mas deixo aqui só por precaução:
 macos-xattr-acls-extra-stuff.md
 {{#endref}}
 
+## Bypass de verificações de assinatura
+
+### Bypass de verificações de binários da plataforma
+
+Algumas verificações de segurança checam se o binário é um **binário da plataforma**, por exemplo, para permitir a conexão a um serviço XPC. No entanto, como exposto em um bypass em https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/, é possível contornar essa verificação obtendo um binário da plataforma (como /bin/ls) e injetando o exploit via dyld usando uma variável de ambiente `DYLD_INSERT_LIBRARIES`.
+
+### Bypass das flags `CS_REQUIRE_LV` e `CS_FORCED_LV`
+
+É possível que um binário em execução modifique suas próprias flags para contornar verificações com um código como:
+```c
+// Code from https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/
+int pid = getpid();
+NSString *exePath = NSProcessInfo.processInfo.arguments[0];
+
+uint32_t status = SecTaskGetCodeSignStatus(SecTaskCreateFromSelf(0));
+status |= 0x2000; // CS_REQUIRE_LV
+csops(pid, 9, &status, 4); // CS_OPS_SET_STATUS
+
+status = SecTaskGetCodeSignStatus(SecTaskCreateFromSelf(0));
+NSLog(@"=====Inject successfully into %d(%@), csflags=0x%x", pid, exePath, status);
+```
 ## Bypass Code Signatures
 
-Bundles contêm o arquivo **`_CodeSignature/CodeResources`** que contém o **hash** de cada **arquivo** no **bundle**. Note que o hash de CodeResources também está **embutido no executável**, então não podemos mexer com isso, também.
+Bundles contém o arquivo **`_CodeSignature/CodeResources`** que contém o **hash** de cada **arquivo** no **bundle**. Note que o hash de CodeResources também está **embutido no executável**, então não podemos mexer com isso, também.
 
-No entanto, existem alguns arquivos cuja assinatura não será verificada, estes têm a chave omitida no plist, como:
+No entanto, existem alguns arquivos cuja assinatura não será verificada, estes têm a chave omit no plist, como:
 ```xml
 <dict>
 ...
@@ -249,19 +280,39 @@ Escreva um **LaunchDaemon** arbitrário como **`/Library/LaunchDaemons/xyz.hackt
 ```
 Gere o script `/Applications/Scripts/privesc.sh` com os **comandos** que você gostaria de executar como root.
 
-### Arquivo Sudoers
+### Sudoers File
 
-Se você tiver **escrita arbitrária**, poderá criar um arquivo dentro da pasta **`/etc/sudoers.d/`** concedendo a si mesmo privilégios de **sudo**.
+Se você tiver **escrita arbitrária**, pode criar um arquivo dentro da pasta **`/etc/sudoers.d/`** concedendo a si mesmo privilégios de **sudo**.
 
-### Arquivos PATH
+### PATH files
 
 O arquivo **`/etc/paths`** é um dos principais locais que preenche a variável de ambiente PATH. Você deve ser root para sobrescrevê-lo, mas se um script de **processo privilegiado** estiver executando algum **comando sem o caminho completo**, você pode ser capaz de **sequestar** isso modificando este arquivo.
 
 Você também pode escrever arquivos em **`/etc/paths.d`** para carregar novas pastas na variável de ambiente `PATH`.
 
-## Gere arquivos graváveis como outros usuários
+### cups-files.conf
 
-Isso gerará um arquivo que pertence ao root e que é gravável por mim ([**código daqui**](https://github.com/gergelykalman/brew-lpe-via-periodic/blob/main/brew_lpe.sh)). Isso também pode funcionar como privesc:
+Esta técnica foi usada em [este artigo](https://www.kandji.io/blog/macos-audit-story-part1).
+
+Crie o arquivo `/etc/cups/cups-files.conf` com o seguinte conteúdo:
+```
+ErrorLog /etc/sudoers.d/lpe
+LogFilePerm 777
+<some junk>
+```
+Isto criará o arquivo `/etc/sudoers.d/lpe` com permissões 777. O lixo extra no final é para acionar a criação do log de erros.
+
+Em seguida, escreva em `/etc/sudoers.d/lpe` a configuração necessária para escalar privilégios como `%staff ALL=(ALL) NOPASSWD:ALL`.
+
+Depois, modifique o arquivo `/etc/cups/cups-files.conf` novamente indicando `LogFilePerm 700` para que o novo arquivo sudoers se torne válido ao invocar `cupsctl`.
+
+### Escape do Sandbox
+
+É possível escapar do sandbox do macOS com uma gravação arbitrária de FS. Para alguns exemplos, verifique a página [macOS Auto Start](../../../../macos-auto-start-locations.md), mas um comum é escrever um arquivo de preferências do Terminal em `~/Library/Preferences/com.apple.Terminal.plist` que executa um comando na inicialização e chamá-lo usando `open`.
+
+## Gerar arquivos graváveis como outros usuários
+
+Isto gerará um arquivo que pertence ao root e que é gravável por mim ([**código daqui**](https://github.com/gergelykalman/brew-lpe-via-periodic/blob/main/brew_lpe.sh)). Isso também pode funcionar como privesc:
 ```bash
 DIRNAME=/usr/local/etc/periodic/daily
 
@@ -377,7 +428,7 @@ Esse recurso é particularmente útil para prevenir certas classes de vulnerabil
 
 - `guarded_open_np`: Abre um FD com uma guarda
 - `guarded_close_np`: Fecha-o
-- `change_fdguard_np`: Altera as flags de guarda em um descritor (até removendo a proteção da guarda)
+- `change_fdguard_np`: Altera as flags de guarda em um descritor (até removendo a proteção de guarda)
 
 ## Referências
 

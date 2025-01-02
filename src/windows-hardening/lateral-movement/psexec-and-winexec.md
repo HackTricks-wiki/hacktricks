@@ -2,8 +2,6 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-{% embed url="https://websec.nl/" %}
-
 ## Como eles funcionam
 
 O processo é descrito nos passos abaixo, ilustrando como os binários de serviço são manipulados para alcançar a execução remota em uma máquina alvo via SMB:
@@ -19,7 +17,7 @@ Assumindo que há um payload executável (criado com msfvenom e ofuscado usando 
 
 - **Cópia do binário**: O executável é copiado para o compartilhamento ADMIN$ a partir de um prompt de comando, embora possa ser colocado em qualquer lugar no sistema de arquivos para permanecer oculto.
 - **Criação de um serviço**: Utilizando o comando `sc` do Windows, que permite consultar, criar e deletar serviços do Windows remotamente, um serviço chamado "meterpreter" é criado para apontar para o binário carregado.
-- **Iniciando o serviço**: O passo final envolve iniciar o serviço, o que provavelmente resultará em um erro de "time-out" devido ao binário não ser um verdadeiro binário de serviço e falhar em retornar o código de resposta esperado. Este erro é irrelevante, pois o objetivo principal é a execução do binário.
+- **Iniciando o serviço**: O passo final envolve iniciar o serviço, o que provavelmente resultará em um erro de "timeout" devido ao binário não ser um verdadeiro binário de serviço e falhar em retornar o código de resposta esperado. Este erro é irrelevante, pois o objetivo principal é a execução do binário.
 
 A observação do listener do Metasploit revelará que a sessão foi iniciada com sucesso.
 
@@ -32,9 +30,7 @@ Encontre passos mais detalhados em: [https://blog.ropnop.com/using-credentials-t
 ![](<../../images/image (928).png>)
 
 Você também pode usar [**SharpLateral**](https://github.com/mertdas/SharpLateral):
-```
+```bash
 SharpLateral.exe redexec HOSTNAME C:\\Users\\Administrator\\Desktop\\malware.exe.exe malware.exe ServiceName
 ```
-{% embed url="https://websec.nl/" %}
-
 {{#include ../../banners/hacktricks-training.md}}

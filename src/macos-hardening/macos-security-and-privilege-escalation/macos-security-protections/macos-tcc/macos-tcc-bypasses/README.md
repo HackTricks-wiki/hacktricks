@@ -27,7 +27,7 @@ O **atributo estendido `com.apple.macl`** é adicionado ao novo **arquivo** para
 ### Solicitação TCC por nome arbitrário
 
 O atacante pode **criar aplicativos com qualquer nome** (por exemplo, Finder, Google Chrome...) no **`Info.plist`** e fazer com que ele solicite acesso a algum local protegido pelo TCC. O usuário pensará que o aplicativo legítimo é quem está solicitando esse acesso.\
-Além disso, é possível **remover o aplicativo legítimo do Dock e colocar o falso nele**, para que quando o usuário clique no falso (que pode usar o mesmo ícone), ele possa chamar o legítimo, pedir permissões do TCC e executar um malware, fazendo o usuário acreditar que o aplicativo legítimo solicitou o acesso.
+Além disso, é possível **remover o aplicativo legítimo do Dock e colocar o falso nele**, para que quando o usuário clicar no falso (que pode usar o mesmo ícone), ele possa chamar o legítimo, pedir permissões do TCC e executar um malware, fazendo o usuário acreditar que o aplicativo legítimo solicitou o acesso.
 
 <figure><img src="https://lh7-us.googleusercontent.com/Sh-Z9qekS_fgIqnhPVSvBRmGpCXCpyuVuTw0x5DLAIxc2MZsSlzBOP7QFeGo_fjMeCJJBNh82f7RnewW1aWo8r--JEx9Pp29S17zdDmiyGgps1hH9AGR8v240m5jJM8k0hovp7lm8ZOrbzv-RC8NwzbB8w=s2048" alt="" width="375"><figcaption></figcaption></figure>
 
@@ -74,13 +74,13 @@ Para mais informações sobre Apple Scripts, confira:
 macos-apple-scripts.md
 {{#endref}}
 
-Por exemplo, se um aplicativo tem **permissão de Automação sobre `iTerm`**, por exemplo, neste exemplo **`Terminal`** tem acesso ao iTerm:
+Por exemplo, se um aplicativo tem **permissão de Automação sobre `iTerm`**, por exemplo, neste exemplo **`Terminal`** tem acesso sobre iTerm:
 
 <figure><img src="../../../../../images/image (981).png" alt=""><figcaption></figcaption></figure>
 
 #### Sobre iTerm
 
-O Terminal, que não tem FDA, pode chamar o iTerm, que tem, e usá-lo para realizar ações:
+Terminal, que não tem FDA, pode chamar iTerm, que tem, e usá-lo para realizar ações:
 ```applescript:iterm.script
 tell application "iTerm"
 activate
@@ -115,7 +115,7 @@ do shell script "rm " & POSIX path of (copyFile as alias)
 O **daemon tccd** do userland estava usando a variável de ambiente **`HOME`** para acessar o banco de dados de usuários do TCC em: **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`**
 
 De acordo com [este post do Stack Exchange](https://stackoverflow.com/questions/135688/setting-environment-variables-on-os-x/3756686#3756686) e porque o daemon TCC está sendo executado via `launchd` dentro do domínio do usuário atual, é possível **controlar todas as variáveis de ambiente** passadas para ele.\
-Assim, um **atacante poderia definir a variável de ambiente `$HOME`** em **`launchctl`** para apontar para um **diretório controlado**, **reiniciar** o **daemon TCC**, e então **modificar diretamente o banco de dados TCC** para se conceder **todas as permissões TCC disponíveis** sem nunca solicitar ao usuário final.\
+Assim, um **atacante poderia definir a variável de ambiente `$HOME`** no **`launchctl`** para apontar para um **diretório controlado**, **reiniciar** o **daemon TCC**, e então **modificar diretamente o banco de dados TCC** para se conceder **todas as permissões TCC disponíveis** sem nunca solicitar ao usuário final.\
 PoC:
 ```bash
 # reset database just in case (no cheating!)
@@ -145,7 +145,7 @@ $> ls ~/Documents
 ```
 ### CVE-2021-30761 - Notas
 
-Notas tinham acesso a locais protegidos pelo TCC, mas quando uma nota é criada, ela é **criada em um local não protegido**. Assim, você poderia pedir para notas copiarem um arquivo protegido em uma nota (então em um local não protegido) e depois acessar o arquivo:
+Notas tinham acesso a locais protegidos pelo TCC, mas quando uma nota é criada, ela é **criada em um local não protegido**. Assim, você poderia pedir para notas copiarem um arquivo protegido em uma nota (ou seja, em um local não protegido) e então acessar o arquivo:
 
 <figure><img src="../../../../../images/image (476).png" alt=""><figcaption></figcaption></figure>
 
@@ -162,7 +162,7 @@ Era possível adicionar o atributo de quarentena a "Library", chamar o serviço 
 - `a = "~/Music/Music/Media.localized/Automatically Add to Music.localized/myfile.mp3"`
 - `b = "~/Music/Music/Media.localized/Automatically Add to Music.localized/Not Added.localized/2023-09-25 11.06.28/myfile.mp3`
 
-Esse **`rename(a, b);`** comportamento é vulnerável a uma **Condição de Corrida**, pois é possível colocar dentro da pasta `Automatically Add to Music.localized` um arquivo **TCC.db** falso e então, quando a nova pasta (b) é criada para copiar o arquivo, deletá-lo e apontá-lo para **`~/Library/Application Support/com.apple.TCC`**/.
+Esse comportamento **`rename(a, b);`** é vulnerável a uma **Condição de Corrida**, pois é possível colocar dentro da pasta `Automatically Add to Music.localized` um arquivo **TCC.db** falso e então, quando a nova pasta (b) é criada para copiar o arquivo, deletá-lo e apontá-lo para **`~/Library/Application Support/com.apple.TCC`**/.
 
 ### SQLITE_SQLLOG_DIR - CVE-2023-32422
 
@@ -185,7 +185,7 @@ Esta **variável de ambiente é usada pelo framework `Metal`** que é uma depend
 Definindo o seguinte: `MTL_DUMP_PIPELINES_TO_JSON_FILE="path/name"`. Se `path` for um diretório válido, o bug será acionado e podemos usar `fs_usage` para ver o que está acontecendo no programa:
 
 - um arquivo será `open()`ado, chamado `path/.dat.nosyncXXXX.XXXXXX` (X é aleatório)
-- um ou mais `write()`s escreverão o conteúdo no arquivo (não controlamos isso)
+- uma ou mais `write()`s escreverão o conteúdo no arquivo (não controlamos isso)
 - `path/.dat.nosyncXXXX.XXXXXX` será `renamed()` para `path/name`
 
 É uma gravação de arquivo temporário, seguida por um **`rename(old, new)`** **que não é seguro.**
@@ -244,7 +244,7 @@ O **primeiro POC** usa [**dsexport**](https://www.unix.com/man-page/osx/1/dsexpo
 6. Parar o _tccd_ do usuário e reiniciar o processo.
 
 O segundo POC usou **`/usr/libexec/configd`** que tinha `com.apple.private.tcc.allow` com o valor `kTCCServiceSystemPolicySysAdminFiles`.\
-Era possível executar **`configd`** com a opção **`-t`**, um atacante poderia especificar um **Bundle personalizado para carregar**. Portanto, a exploração **substitui** o método **`dsexport`** e **`dsimport`** de mudar o diretório home do usuário com uma **injeção de código configd**.
+Era possível executar **`configd`** com a opção **`-t`**, um atacante poderia especificar um **Bundle personalizado para carregar**. Portanto, a exploração **substitui** o método **`dsexport`** e **`dsimport`** de mudar o diretório home do usuário por uma **injeção de código configd**.
 
 Para mais informações, confira o [**relatório original**](https://www.microsoft.com/en-us/security/blog/2022/01/10/new-macos-vulnerability-powerdir-could-lead-to-unauthorized-user-data-access/).
 
@@ -336,7 +336,7 @@ Executable=/Applications/Firefox.app/Contents/MacOS/firefox
 </dict>
 </plist>
 ```
-Para mais informações sobre como explorar isso facilmente, [**verifique o relatório original**](https://wojciechregula.blog/post/how-to-rob-a-firefox/).
+Para mais informações sobre como explorar isso facilmente [**ver o relatório original**](https://wojciechregula.blog/post/how-to-rob-a-firefox/).
 
 ### CVE-2020-10006
 
@@ -344,9 +344,9 @@ O binário `/system/Library/Filesystems/acfs.fs/Contents/bin/xsanctl` tinha as p
 
 ### CVE-2023-26818 - Telegram
 
-O Telegram tinha as permissões **`com.apple.security.cs.allow-dyld-environment-variables`** e **`com.apple.security.cs.disable-library-validation`**, então era possível abusar disso para **obter acesso às suas permissões**, como gravar com a câmera. Você pode [**encontrar o payload na descrição**](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/).
+O Telegram tinha as permissões **`com.apple.security.cs.allow-dyld-environment-variables`** e **`com.apple.security.cs.disable-library-validation`**, então era possível abusar disso para **obter acesso às suas permissões** como gravar com a câmera. Você pode [**encontrar o payload na descrição**](https://danrevah.github.io/2023/05/15/CVE-2023-26818-Bypass-TCC-with-Telegram/).
 
-Note como usar a variável env para carregar uma biblioteca; um **plist personalizado** foi criado para injetar essa biblioteca e **`launchctl`** foi usado para lançá-la:
+Note como usar a variável env para carregar uma biblioteca, um **plist personalizado** foi criado para injetar essa biblioteca e **`launchctl`** foi usado para lançá-la:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -417,7 +417,7 @@ exploit_location]; task.standardOutput = pipe;
 
 ### CVE-2020-9771 - bypass do TCC do mount_apfs e escalonamento de privilégios
 
-**Qualquer usuário** (mesmo os não privilegiados) pode criar e montar um snapshot da Time Machine e **acessar TODOS os arquivos** desse snapshot.\
+**Qualquer usuário** (mesmo os sem privilégios) pode criar e montar um snapshot do time machine e **acessar TODOS os arquivos** desse snapshot.\
 O **único privilégio** necessário é que o aplicativo usado (como `Terminal`) tenha acesso **Full Disk Access** (FDA) (`kTCCServiceSystemPolicyAllfiles`), que precisa ser concedido por um administrador.
 ```bash
 # Create snapshot
@@ -465,13 +465,21 @@ os.system("hdiutil detach /tmp/mnt 1>/dev/null")
 ```
 Verifique o **exploit completo** na [**escrita original**](https://theevilbit.github.io/posts/cve-2021-30808/).
 
+### CVE-2024-40855
+
+Conforme explicado na [escrita original](https://www.kandji.io/blog/macos-audit-story-part2), este CVE abusou do `diskarbitrationd`.
+
+A função `DADiskMountWithArgumentsCommon` do framework público `DiskArbitration` realizava as verificações de segurança. No entanto, é possível contorná-la chamando diretamente o `diskarbitrationd` e, portanto, usar elementos `../` no caminho e symlinks.
+
+Isso permitiu que um atacante realizasse montagens arbitrárias em qualquer local, incluindo sobre o banco de dados TCC devido à concessão `com.apple.private.security.storage-exempt.heritable` do `diskarbitrationd`.
+
 ### asr
 
-A ferramenta **`/usr/sbin/asr`** permitiu copiar todo o disco e montá-lo em outro lugar, contornando as proteções do TCC.
+A ferramenta **`/usr/sbin/asr`** permitiu copiar todo o disco e montá-lo em outro lugar contornando as proteções do TCC.
 
 ### Serviços de Localização
 
-Há um terceiro banco de dados do TCC em **`/var/db/locationd/clients.plist`** para indicar os clientes autorizados a **acessar os serviços de localização**.\
+Há um terceiro banco de dados TCC em **`/var/db/locationd/clients.plist`** para indicar os clientes autorizados a **acessar os serviços de localização**.\
 A pasta **`/var/db/locationd/` não estava protegida contra montagem de DMG**, então era possível montar nosso próprio plist.
 
 ## Por aplicativos de inicialização

@@ -1,20 +1,12 @@
 # Kerberoast
 
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=kerberoast) para construir e **automatizar fluxos de trabalho** facilmente, impulsionados pelas **ferramentas comunitárias mais avançadas** do mundo.\
-Acesse hoje:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=kerberoast" %}
-
 {{#include ../../banners/hacktricks-training.md}}
 
 ## Kerberoast
 
-Kerberoasting foca na aquisição de **TGS tickets**, especificamente aqueles relacionados a serviços operando sob **contas de usuário** no **Active Directory (AD)**, excluindo **contas de computador**. A criptografia desses tickets utiliza chaves que se originam de **senhas de usuário**, permitindo a possibilidade de **cracking de credenciais offline**. O uso de uma conta de usuário como serviço é indicado por uma propriedade **"ServicePrincipalName"** não vazia.
+Kerberoasting foca na aquisição de **TGS tickets**, especificamente aqueles relacionados a serviços operando sob **contas de usuário** em **Active Directory (AD)**, excluindo **contas de computador**. A criptografia desses tickets utiliza chaves que se originam de **senhas de usuário**, permitindo a possibilidade de **cracking de credenciais offline**. O uso de uma conta de usuário como serviço é indicado por uma propriedade **"ServicePrincipalName"** não vazia.
 
-Para executar **Kerberoasting**, é essencial uma conta de domínio capaz de solicitar **TGS tickets**; no entanto, esse processo não exige **privilégios especiais**, tornando-o acessível a qualquer um com **credenciais de domínio válidas**.
+Para executar **Kerberoasting**, é essencial uma conta de domínio capaz de solicitar **TGS tickets**; no entanto, esse processo não exige **privilégios especiais**, tornando-o acessível a qualquer pessoa com **credenciais de domínio válidas**.
 
 ### Pontos Chave:
 
@@ -93,14 +85,6 @@ Invoke-Kerberoast -OutputFormat hashcat | % { $_.Hash } | Out-File -Encoding ASC
 > [!WARNING]
 > Quando um TGS é solicitado, o evento do Windows `4769 - Um ticket de serviço Kerberos foi solicitado` é gerado.
 
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=kerberoast) para construir e **automatizar fluxos de trabalho** facilmente, impulsionados pelas **ferramentas** da comunidade **mais avançadas** do mundo.\
-Obtenha Acesso Hoje:
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=kerberoast" %}
-
 ### Quebra
 ```bash
 john --format=krb5tgs --wordlist=passwords_kerb.txt hashes.kerberoast
@@ -126,8 +110,8 @@ Kerberoasting pode ser realizado com um alto grau de furtividade se for explorá
 
 - O nome do serviço não deve ser **krbtgt**, pois este é um pedido normal.
 - Nomes de serviços que terminam com **$** devem ser excluídos para evitar incluir contas de máquina usadas para serviços.
-- Solicitações de máquinas devem ser filtradas excluindo nomes de contas formatados como **machine@domain**.
-- Apenas solicitações de ticket bem-sucedidas devem ser consideradas, identificadas por um código de falha de **'0x0'**.
+- Pedidos de máquinas devem ser filtrados excluindo nomes de contas formatados como **machine@domain**.
+- Apenas pedidos de ticket bem-sucedidos devem ser considerados, identificados por um código de falha de **'0x0'**.
 - **Mais importante**, o tipo de criptografia do ticket deve ser **0x17**, que é frequentemente usado em ataques de Kerberoasting.
 ```bash
 Get-WinEvent -FilterHashtable @{Logname='Security';ID=4769} -MaxEvents 1000 | ?{$_.Message.split("`n")[8] -ne 'krbtgt' -and $_.Message.split("`n")[8] -ne '*$' -and $_.Message.split("`n")[3] -notlike '*$@*' -and $_.Message.split("`n")[18] -like '*0x0*' -and $_.Message.split("`n")[17] -like "*0x17*"} | select ExpandProperty message
@@ -167,11 +151,3 @@ Rubeus.exe kerberoast /outfile:kerberoastables.txt /domain:"domain.local" /dc:"d
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberoasting-requesting-rc4-encrypted-tgs-when-aes-is-enabled](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberoasting-requesting-rc4-encrypted-tgs-when-aes-is-enabled)
 
 {{#include ../../banners/hacktricks-training.md}}
-
-<figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
-
-\
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=kerberoast) para construir e **automatizar fluxos de trabalho** facilmente, impulsionados pelas **ferramentas** comunitárias **mais avançadas** do mundo.\
-Acesse hoje: 
-
-{% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=kerberoast" %}

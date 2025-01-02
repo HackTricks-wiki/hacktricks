@@ -2,11 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
 
-​​[**RootedCON**](https://www.rootedcon.com/) é o evento de cibersegurança mais relevante na **Espanha** e um dos mais importantes na **Europa**. Com **a missão de promover o conhecimento técnico**, este congresso é um ponto de encontro fervilhante para profissionais de tecnologia e cibersegurança em todas as disciplinas.
-
-{% embed url="https://www.rootedcon.com/" %}
 
 ## O que é DPAPI
 
@@ -64,15 +60,15 @@ Get-ChildItem -Hidden C:\Users\USER\AppData\Local\Microsoft\Protect\
 Get-ChildItem -Hidden C:\Users\USER\AppData\Roaming\Microsoft\Protect\{SID}
 Get-ChildItem -Hidden C:\Users\USER\AppData\Local\Microsoft\Protect\{SID}
 ```
-Isto é como um conjunto de Master Keys de um usuário se parecerá:
+Isto é como um conjunto de Chaves Mestras de um usuário se parecerá:
 
 ![](<../../images/image (1121).png>)
 
-Geralmente, **cada master key é uma chave simétrica criptografada que pode descriptografar outro conteúdo**. Portanto, **extrair** a **Master Key criptografada** é interessante para **descriptografar** posteriormente aquele **outro conteúdo** criptografado com ela.
+Normalmente, **cada chave mestra é uma chave simétrica criptografada que pode descriptografar outro conteúdo**. Portanto, **extrair** a **Chave Mestra criptografada** é interessante para **descriptografar** posteriormente aquele **outro conteúdo** criptografado com ela.
 
-### Extrair master key e descriptografar
+### Extrair chave mestra e descriptografar
 
-Verifique o post [https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++](https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#extracting-dpapi-backup-keys-with-domain-admin) para um exemplo de como extrair a master key e descriptografá-la.
+Verifique o post [https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++](https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#extracting-dpapi-backup-keys-with-domain-admin) para um exemplo de como extrair a chave mestra e descriptografá-la.
 
 ## SharpDPAPI
 
@@ -84,7 +80,7 @@ Verifique o post [https://www.ired.team/offensive-security/credential-access-and
 
 `python3 hekatomb.py -hashes :ed0052e5a66b1c8e942cc9481a50d56 DOMAIN.local/administrator@10.0.0.1 -debug -dnstcp`
 
-Com a lista de computadores extraída do LDAP, você pode encontrar cada sub-rede, mesmo que não as conhecesse!
+Com a lista de computadores extraída do LDAP, você pode encontrar toda sub-rede mesmo que não soubesse delas!
 
 "Porque os direitos de Administrador de Domínio não são suficientes. Hackeie todos."
 
@@ -96,11 +92,5 @@ Com a lista de computadores extraída do LDAP, você pode encontrar cada sub-red
 
 - [https://www.passcape.com/index.php?section=docsys\&cmd=details\&id=28#13](https://www.passcape.com/index.php?section=docsys&cmd=details&id=28#13)
 - [https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++](https://www.ired.team/offensive-security/credential-access-and-credential-dumping/reading-dpapi-encrypted-secrets-with-mimikatz-and-c++#using-dpapis-to-encrypt-decrypt-data-in-c)
-
-<figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
-
-[**RootedCON**](https://www.rootedcon.com/) é o evento de cibersegurança mais relevante na **Espanha** e um dos mais importantes na **Europa**. Com **a missão de promover o conhecimento técnico**, este congresso é um ponto de encontro fervente para profissionais de tecnologia e cibersegurança em todas as disciplinas.
-
-{% embed url="https://www.rootedcon.com/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

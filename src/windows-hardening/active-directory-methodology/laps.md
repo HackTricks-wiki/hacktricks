@@ -2,9 +2,6 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 ## Informações Básicas
 
@@ -92,7 +89,7 @@ Se não houver acesso a um powershell, você pode abusar desse privilégio remot
 ```
 crackmapexec ldap 10.10.10.10 -u user -p password --kdcHost 10.10.10.10 -M laps
 ```
-Isso irá despejar todas as senhas que o usuário pode ler, permitindo que você obtenha uma melhor posição com um usuário diferente.
+Isso irá despejar todas as senhas que o usuário pode ler, permitindo que você obtenha uma melhor base com um usuário diferente.
 
 ## ** Usando a Senha LAPS **
 ```
@@ -106,7 +103,7 @@ Password: 2Z@Ae)7!{9#Cq
 
 ### **Data de Expiração**
 
-Uma vez administrador, é possível **obter as senhas** e **prevenir** que uma máquina **atualize** sua **senha** ao **definir a data de expiração para o futuro**.
+Uma vez administrador, é possível **obter as senhas** e **prevenir** que uma máquina **atualize** sua **senha** **definindo a data de expiração para o futuro**.
 ```powershell
 # Get expiration time
 Get-DomainObject -Identity computer-21 -Properties ms-mcs-admpwdexpirationtime
@@ -128,8 +125,5 @@ Em seguida, basta compilar o novo `AdmPwd.PS.dll` e enviá-lo para a máquina em
 
 - [https://4sysops.com/archives/introduction-to-microsoft-laps-local-administrator-password-solution/](https://4sysops.com/archives/introduction-to-microsoft-laps-local-administrator-password-solution/)
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../../banners/hacktricks-training.md}}

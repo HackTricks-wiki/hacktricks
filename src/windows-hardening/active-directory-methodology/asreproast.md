@@ -2,21 +2,6 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/image (3).png" alt=""><figcaption></figcaption></figure>
-
-Junte-se ao [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) para se comunicar com hackers experientes e caçadores de bugs!
-
-**Insights de Hacking**\
-Engaje-se com conteúdo que explora a emoção e os desafios do hacking
-
-**Notícias de Hack em Tempo Real**\
-Mantenha-se atualizado com o mundo do hacking em ritmo acelerado através de notícias e insights em tempo real
-
-**Últimos Anúncios**\
-Fique informado sobre as novas recompensas de bugs lançadas e atualizações cruciais da plataforma
-
-**Junte-se a nós no** [**Discord**](https://discord.com/invite/N3FrSbmwdy) e comece a colaborar com os melhores hackers hoje!
-
 ## ASREPRoast
 
 ASREPRoast é um ataque de segurança que explora usuários que não possuem o **atributo requerido de pré-autenticação Kerberos**. Essencialmente, essa vulnerabilidade permite que atacantes solicitem autenticação para um usuário do Controlador de Domínio (DC) sem precisar da senha do usuário. O DC então responde com uma mensagem criptografada com a chave derivada da senha do usuário, que os atacantes podem tentar quebrar offline para descobrir a senha do usuário.
@@ -25,7 +10,7 @@ Os principais requisitos para este ataque são:
 
 - **Falta de pré-autenticação Kerberos**: Os usuários-alvo não devem ter esse recurso de segurança habilitado.
 - **Conexão ao Controlador de Domínio (DC)**: Os atacantes precisam de acesso ao DC para enviar solicitações e receber mensagens criptografadas.
-- **Conta de domínio opcional**: Ter uma conta de domínio permite que os atacantes identifiquem usuários vulneráveis de forma mais eficiente através de consultas LDAP. Sem tal conta, os atacantes devem adivinhar nomes de usuário.
+- **Conta de domínio opcional**: Ter uma conta de domínio permite que os atacantes identifiquem usuários vulneráveis de forma mais eficiente por meio de consultas LDAP. Sem tal conta, os atacantes devem adivinhar nomes de usuário.
 
 #### Enumerando usuários vulneráveis (necessita de credenciais de domínio)
 ```bash:Using Windows
@@ -84,20 +69,5 @@ ASRepCatcher listen
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/as-rep-roasting-using-rubeus-and-hashcat](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/as-rep-roasting-using-rubeus-and-hashcat)
 
 ---
-
-<figure><img src="../../images/image (3).png" alt=""><figcaption></figcaption></figure>
-
-Junte-se ao servidor [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) para se comunicar com hackers experientes e caçadores de bugs!
-
-**Insights de Hacking**\
-Engaje-se com conteúdo que mergulha na emoção e nos desafios do hacking
-
-**Notícias de Hack em Tempo Real**\
-Mantenha-se atualizado com o mundo do hacking em ritmo acelerado através de notícias e insights em tempo real
-
-**Últimos Anúncios**\
-Fique informado sobre os novos programas de recompensas por bugs que estão sendo lançados e atualizações cruciais da plataforma
-
-**Junte-se a nós no** [**Discord**](https://discord.com/invite/N3FrSbmwdy) e comece a colaborar com os melhores hackers hoje!
 
 {{#include ../../banners/hacktricks-training.md}}

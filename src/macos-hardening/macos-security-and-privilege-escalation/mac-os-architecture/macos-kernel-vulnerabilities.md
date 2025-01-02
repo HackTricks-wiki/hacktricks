@@ -1,10 +1,10 @@
-# macOS Kernel Vulnerabilities
+# Vulnerabilidades do Kernel do macOS
 
 {{#include ../../../banners/hacktricks-training.md}}
 
 ## [Pwning OTA](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/)
 
-[**In this report**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) are explained several vulnerabilities that allowed to compromised the kernel compromising the software updater.\
+[**Neste relatório**](https://jhftss.github.io/The-Nightmare-of-Apple-OTA-Update/) são explicadas várias vulnerabilidades que permitiram comprometer o kernel comprometendo o atualizador de software.\
 [**PoC**](https://github.com/jhftss/POC/tree/main/CVE-2022-46722).
 
 {{#include ../../../banners/hacktricks-training.md}}

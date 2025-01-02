@@ -1,14 +1,11 @@
-# Delegação Constrangida Baseada em Recursos
+# Delegação Constrangida Baseada em Recurso
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
 
-{% embed url="https://websec.nl/" %}
+## Noções Básicas da Delegação Constrangida Baseada em Recurso
 
-## Fundamentos da Delegação Constrangida Baseada em Recursos
-
-Isso é semelhante à [Delegação Constrangida](constrained-delegation.md) básica, mas **em vez** de dar permissões a um **objeto** para **impersonar qualquer usuário contra um serviço**. A Delegação Constrangida Baseada em Recursos **define** no **objeto quem pode impersonar qualquer usuário contra ele**.
+Isso é semelhante à [Delegação Constrangida](constrained-delegation.md) básica, mas **em vez** de dar permissões a um **objeto** para **impersonar qualquer usuário contra um serviço**. A Delegação Constrangida Baseada em Recurso **define** no **objeto quem pode impersonar qualquer usuário contra ele**.
 
 Neste caso, o objeto constrangido terá um atributo chamado _**msDS-AllowedToActOnBehalfOfOtherIdentity**_ com o nome do usuário que pode impersonar qualquer outro usuário contra ele.
 
@@ -19,7 +16,7 @@ Outra diferença importante desta Delegação Constrangida em relação às outr
 Na Delegação Constrangida, foi dito que a **`TrustedToAuthForDelegation`** flag dentro do valor _userAccountControl_ do usuário é necessária para realizar um **S4U2Self.** Mas isso não é completamente verdade.\
 A realidade é que mesmo sem esse valor, você pode realizar um **S4U2Self** contra qualquer usuário se você for um **serviço** (tiver um SPN), mas, se você **tiver `TrustedToAuthForDelegation`** o TGS retornado será **Forwardable** e se você **não tiver** essa flag, o TGS retornado **não será** **Forwardable**.
 
-No entanto, se o **TGS** usado em **S4U2Proxy** **NÃO for Forwardable**, tentar abusar de uma **delegação constrangida básica** **não funcionará**. Mas se você estiver tentando explorar uma **delegação constrangida baseada em recursos, funcionará** (isso não é uma vulnerabilidade, é um recurso, aparentemente).
+No entanto, se o **TGS** usado em **S4U2Proxy** **NÃO for Forwardable**, tentar abusar de uma **delegação constrangida básica** **não funcionará**. Mas se você estiver tentando explorar uma **delegação constrangida baseada em recurso, funcionará** (isso não é uma vulnerabilidade, é um recurso, aparentemente).
 
 ### Estrutura do Ataque
 
@@ -28,12 +25,12 @@ No entanto, se o **TGS** usado em **S4U2Proxy** **NÃO for Forwardable**, tentar
 Suponha que o atacante já tenha **privilégios equivalentes de escrita sobre o computador da vítima**.
 
 1. O atacante **compromete** uma conta que tem um **SPN** ou **cria um** (“Serviço A”). Note que **qualquer** _Usuário Admin_ sem nenhum outro privilégio especial pode **criar** até 10 **objetos de Computador (**_**MachineAccountQuota**_**)** e definir um **SPN** para eles. Assim, o atacante pode simplesmente criar um objeto de Computador e definir um SPN.
-2. O atacante **abusa de seu privilégio de ESCRITA** sobre o computador da vítima (Serviço B) para configurar **delegação constrangida baseada em recursos para permitir que o Serviço A impersonifique qualquer usuário** contra aquele computador da vítima (Serviço B).
+2. O atacante **abusa de seu privilégio de ESCRITA** sobre o computador da vítima (Serviço B) para configurar **delegação constrangida baseada em recurso para permitir que o Serviço A impersonifique qualquer usuário** contra aquele computador da vítima (Serviço B).
 3. O atacante usa Rubeus para realizar um **ataque S4U completo** (S4U2Self e S4U2Proxy) do Serviço A para o Serviço B para um usuário **com acesso privilegiado ao Serviço B**.
 1. S4U2Self (da conta SPN comprometida/criada): Solicitar um **TGS de Administrador para mim** (Não Forwardable).
 2. S4U2Proxy: Usar o **TGS não Forwardable** do passo anterior para solicitar um **TGS** de **Administrador** para o **host da vítima**.
-3. Mesmo que você esteja usando um TGS não Forwardable, como você está explorando a delegação constrangida baseada em recursos, funcionará.
-4. O atacante pode **passar o ticket** e **impersonar** o usuário para ganhar **acesso ao Serviço B da vítima**.
+3. Mesmo que você esteja usando um TGS não Forwardable, como você está explorando a delegação constrangida baseada em recurso, funcionará.
+4. O atacante pode **passar o ticket** e **impersonificar** o usuário para ganhar **acesso ao Serviço B da vítima**.
 
 Para verificar o _**MachineAccountQuota**_ do domínio, você pode usar:
 ```powershell
@@ -109,8 +106,8 @@ Saiba mais sobre os [**tickets de serviço disponíveis aqui**](silver-ticket.md
 - **`preauth_failed`**: Isso significa que o nome de usuário + hashes fornecidos não estão funcionando para login. Você pode ter esquecido de colocar o "$" dentro do nome de usuário ao gerar os hashes (`.\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local`)
 - **`KDC_ERR_BADOPTION`**: Isso pode significar:
   - O usuário que você está tentando impersonar não pode acessar o serviço desejado (porque você não pode impersoná-lo ou porque ele não tem privilégios suficientes)
-  - O serviço solicitado não existe (se você pedir um ticket para winrm, mas o winrm não está em execução)
-  - O fakecomputer criado perdeu seus privilégios sobre o servidor vulnerável e você precisa recuperá-los.
+  - O serviço solicitado não existe (se você pedir um ticket para winrm, mas o winrm não estiver em execução)
+  - O fakecomputer criado perdeu seus privilégios sobre o servidor vulnerável e você precisa devolvê-los.
 
 ## Referências
 
@@ -119,8 +116,5 @@ Saiba mais sobre os [**tickets de serviço disponíveis aqui**](silver-ticket.md
 - [https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/resource-based-constrained-delegation-ad-computer-object-take-over-and-privilged-code-execution#modifying-target-computers-ad-object](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/resource-based-constrained-delegation-ad-computer-object-take-over-and-privilged-code-execution#modifying-target-computers-ad-object)
 - [https://stealthbits.com/blog/resource-based-constrained-delegation-abuse/](https://stealthbits.com/blog/resource-based-constrained-delegation-abuse/)
 
-<figure><img src="https://pentest.eu/RENDER_WebSec_10fps_21sec_9MB_29042024.gif" alt=""><figcaption></figcaption></figure>
-
-{% embed url="https://websec.nl/" %}
 
 {{#include ../../banners/hacktricks-training.md}}
