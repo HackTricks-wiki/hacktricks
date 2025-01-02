@@ -6,26 +6,25 @@
 
 ### Swap Files
 
-Swap files, such as `/private/var/vm/swapfile0`, serve as **caches when the physical memory is full**. When there's no more room in physical memory, its data is transferred to a swap file and then brought back to physical memory as needed. Multiple swap files might be present, with names like swapfile0, swapfile1, and so on.
+Los archivos de intercambio, como `/private/var/vm/swapfile0`, sirven como **cachés cuando la memoria física está llena**. Cuando no hay más espacio en la memoria física, sus datos se transfieren a un archivo de intercambio y luego se traen de vuelta a la memoria física según sea necesario. Pueden estar presentes múltiples archivos de intercambio, con nombres como swapfile0, swapfile1, y así sucesivamente.
 
 ### Hibernate Image
 
-The file located at `/private/var/vm/sleepimage` is crucial during **hibernation mode**. **Data from memory is stored in this file when OS X hibernates**. Upon waking the computer, the system retrieves memory data from this file, allowing the user to continue where they left off.
+El archivo ubicado en `/private/var/vm/sleepimage` es crucial durante el **modo de hibernación**. **Los datos de la memoria se almacenan en este archivo cuando OS X hiberna**. Al despertar la computadora, el sistema recupera los datos de la memoria de este archivo, permitiendo al usuario continuar donde lo dejó.
 
-It's worth noting that on modern MacOS systems, this file is typically encrypted for security reasons, making recovery difficult.
+Vale la pena señalar que en los sistemas MacOS modernos, este archivo está típicamente cifrado por razones de seguridad, lo que dificulta la recuperación.
 
-- To check if encryption is enabled for the sleepimage, the command `sysctl vm.swapusage` can be run. This will show if the file is encrypted.
+- Para verificar si el cifrado está habilitado para el sleepimage, se puede ejecutar el comando `sysctl vm.swapusage`. Esto mostrará si el archivo está cifrado.
 
 ### Memory Pressure Logs
 
-Another important memory-related file in MacOS systems is the **memory pressure log**. These logs are located in `/var/log` and contain detailed information about the system's memory usage and pressure events. They can be particularly useful for diagnosing memory-related issues or understanding how the system manages memory over time.
+Otro archivo importante relacionado con la memoria en los sistemas MacOS es el **registro de presión de memoria**. Estos registros se encuentran en `/var/log` y contienen información detallada sobre el uso de memoria del sistema y eventos de presión. Pueden ser particularmente útiles para diagnosticar problemas relacionados con la memoria o entender cómo el sistema gestiona la memoria a lo largo del tiempo.
 
 ## Dumping memory with osxpmem
 
-In order to dump the memory in a MacOS machine you can use [**osxpmem**](https://github.com/google/rekall/releases/download/v1.5.1/osxpmem-2.1.post4.zip).
+Para volcar la memoria en una máquina MacOS, puedes usar [**osxpmem**](https://github.com/google/rekall/releases/download/v1.5.1/osxpmem-2.1.post4.zip).
 
-**Note**: The following instructions will only work for Macs with Intel architecture. This tool is now archived and the last release was in 2017. The binary downloaded using the instructions below targets Intel chips as Apple Silicon wasn't around in 2017. It may be possible to compile the binary for arm64 architecture but you'll have to try for yourself.
-
+**Nota**: Las siguientes instrucciones solo funcionarán para Macs con arquitectura Intel. Esta herramienta ahora está archivada y la última versión fue en 2017. El binario descargado utilizando las instrucciones a continuación está dirigido a chips Intel, ya que Apple Silicon no existía en 2017. Puede ser posible compilar el binario para arquitectura arm64, pero tendrás que intentarlo por ti mismo.
 ```bash
 #Dump raw format
 sudo osxpmem.app/osxpmem --format raw -o /tmp/dump_mem
@@ -33,23 +32,18 @@ sudo osxpmem.app/osxpmem --format raw -o /tmp/dump_mem
 #Dump aff4 format
 sudo osxpmem.app/osxpmem -o /tmp/dump_mem.aff4
 ```
-
-If you find this error: `osxpmem.app/MacPmem.kext failed to load - (libkern/kext) authentication failure (file ownership/permissions); check the system/kernel logs for errors or try kextutil(8)` You can fix it doing:
-
+Si encuentras este error: `osxpmem.app/MacPmem.kext failed to load - (libkern/kext) authentication failure (file ownership/permissions); check the system/kernel logs for errors or try kextutil(8)` Puedes solucionarlo haciendo:
 ```bash
 sudo cp -r osxpmem.app/MacPmem.kext "/tmp/"
 sudo kextutil "/tmp/MacPmem.kext"
 #Allow the kext in "Security & Privacy --> General"
 sudo osxpmem.app/osxpmem --format raw -o /tmp/dump_mem
 ```
+**Otros errores** pueden ser corregidos **permitiendo la carga del kext** en "Seguridad y Privacidad --> General", solo **permítelo**.
 
-**Other errors** might be fixed by **allowing the load of the kext** in "Security & Privacy --> General", just **allow** it.
-
-You can also use this **oneliner** to download the application, load the kext and dump the memory:
-
+También puedes usar este **oneliner** para descargar la aplicación, cargar el kext y volcar la memoria:
 ```bash
 sudo su
 cd /tmp; wget https://github.com/google/rekall/releases/download/v1.5.1/osxpmem-2.1.post4.zip; unzip osxpmem-2.1.post4.zip; chown -R root:wheel osxpmem.app/MacPmem.kext; kextload osxpmem.app/MacPmem.kext; osxpmem.app/osxpmem --format raw -o /tmp/dump_mem
 ```
-
 {{#include ../../../banners/hacktricks-training.md}}

@@ -1,34 +1,32 @@
-# macOS Chromium Injection
+# Inyección de Chromium en macOS
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Información Básica
 
-Chromium-based browsers like Google Chrome, Microsoft Edge, Brave, and others. These browsers are built on the Chromium open-source project, which means they share a common base and, therefore, have similar functionalities and developer options.
+Los navegadores basados en Chromium como Google Chrome, Microsoft Edge, Brave y otros. Estos navegadores están construidos sobre el proyecto de código abierto Chromium, lo que significa que comparten una base común y, por lo tanto, tienen funcionalidades y opciones de desarrollador similares.
 
-#### `--load-extension` Flag
+#### Bandera `--load-extension`
 
-The `--load-extension` flag is used when starting a Chromium-based browser from the command line or a script. This flag allows to **automatically load one or more extensions** into the browser upon startup.
+La bandera `--load-extension` se utiliza al iniciar un navegador basado en Chromium desde la línea de comandos o un script. Esta bandera permite **cargar automáticamente una o más extensiones** en el navegador al inicio.
 
-#### `--use-fake-ui-for-media-stream` Flag
+#### Bandera `--use-fake-ui-for-media-stream`
 
-The `--use-fake-ui-for-media-stream` flag is another command-line option that can be used to start Chromium-based browsers. This flag is designed to **bypass the normal user prompts that ask for permission to access media streams from the camera and microphone**. When this flag is used, the browser automatically grants permission to any website or application that requests access to the camera or microphone.
+La bandera `--use-fake-ui-for-media-stream` es otra opción de línea de comandos que se puede usar para iniciar navegadores basados en Chromium. Esta bandera está diseñada para **eludir los mensajes de usuario normales que piden permiso para acceder a los flujos de medios de la cámara y el micrófono**. Cuando se utiliza esta bandera, el navegador otorga automáticamente permiso a cualquier sitio web o aplicación que solicite acceso a la cámara o al micrófono.
 
-### Tools
+### Herramientas
 
 - [https://github.com/breakpointHQ/snoop](https://github.com/breakpointHQ/snoop)
 - [https://github.com/breakpointHQ/VOODOO](https://github.com/breakpointHQ/VOODOO)
 
-### Example
-
+### Ejemplo
 ```bash
 # Intercept traffic
 voodoo intercept -b chrome
 ```
+Encuentra más ejemplos en los enlaces de herramientas
 
-Find more examples in the tools links
-
-## References
+## Referencias
 
 - [https://twitter.com/RonMasas/status/1758106347222995007](https://twitter.com/RonMasas/status/1758106347222995007)
 

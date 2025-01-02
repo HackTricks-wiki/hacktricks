@@ -1,40 +1,37 @@
-# macOS .Net Applications Injection
+# Inyección de Aplicaciones .Net en macOS
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**This is a summary of the post [https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/](https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/). Check it for further details!**
+**Este es un resumen de la publicación [https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/](https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/). ¡Consúltalo para más detalles!**
 
-## .NET Core Debugging <a href="#net-core-debugging" id="net-core-debugging"></a>
+## Depuración de .NET Core <a href="#net-core-debugging" id="net-core-debugging"></a>
 
-### **Establishing a Debugging Session** <a href="#net-core-debugging" id="net-core-debugging"></a>
+### **Estableciendo una Sesión de Depuración** <a href="#net-core-debugging" id="net-core-debugging"></a>
 
-The handling of communication between debugger and debuggee in .NET is managed by [**dbgtransportsession.cpp**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp). This component sets up two named pipes per .NET process as seen in [dbgtransportsession.cpp#L127](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L127), which are initiated via [twowaypipe.cpp#L27](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/debug-pal/unix/twowaypipe.cpp#L27). These pipes are suffixed with **`-in`** and **`-out`**.
+El manejo de la comunicación entre el depurador y el depurado en .NET es gestionado por [**dbgtransportsession.cpp**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp). Este componente establece dos tuberías nombradas por cada proceso .NET como se ve en [dbgtransportsession.cpp#L127](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L127), que son iniciadas a través de [twowaypipe.cpp#L27](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/debug-pal/unix/twowaypipe.cpp#L27). Estas tuberías tienen el sufijo **`-in`** y **`-out`**.
 
-By visiting the user's **`$TMPDIR`**, one can find debugging FIFOs available for debugging .Net applications.
+Al visitar el **`$TMPDIR`** del usuario, se pueden encontrar FIFOs de depuración disponibles para depurar aplicaciones .Net.
 
-[**DbgTransportSession::TransportWorker**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L1259) is responsible for managing communication from a debugger. To initiate a new debugging session, a debugger must send a message via the `out` pipe starting with a `MessageHeader` struct, detailed in the .NET source code:
-
+[**DbgTransportSession::TransportWorker**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L1259) es responsable de gestionar la comunicación desde un depurador. Para iniciar una nueva sesión de depuración, un depurador debe enviar un mensaje a través de la tubería `out` comenzando con una estructura `MessageHeader`, detallada en el código fuente de .NET:
 ```c
 struct MessageHeader {
-    MessageType   m_eType;        // Message type
-    DWORD         m_cbDataBlock;  // Size of following data block (can be zero)
-    DWORD         m_dwId;         // Message ID from sender
-    DWORD         m_dwReplyId;    // Reply-to Message ID
-    DWORD         m_dwLastSeenId; // Last seen Message ID by sender
-    DWORD         m_dwReserved;   // Reserved for future (initialize to zero)
-        union {
-            struct {
-                DWORD         m_dwMajorVersion;   // Requested/accepted protocol version
-                DWORD         m_dwMinorVersion;
-            } VersionInfo;
-          ...
-        } TypeSpecificData;
-    BYTE          m_sMustBeZero[8];
+MessageType   m_eType;        // Message type
+DWORD         m_cbDataBlock;  // Size of following data block (can be zero)
+DWORD         m_dwId;         // Message ID from sender
+DWORD         m_dwReplyId;    // Reply-to Message ID
+DWORD         m_dwLastSeenId; // Last seen Message ID by sender
+DWORD         m_dwReserved;   // Reserved for future (initialize to zero)
+union {
+struct {
+DWORD         m_dwMajorVersion;   // Requested/accepted protocol version
+DWORD         m_dwMinorVersion;
+} VersionInfo;
+...
+} TypeSpecificData;
+BYTE          m_sMustBeZero[8];
 }
 ```
-
-To request a new session, this struct is populated as follows, setting the message type to `MT_SessionRequest` and the protocol version to the current version:
-
+Para solicitar una nueva sesión, esta estructura se completa de la siguiente manera, estableciendo el tipo de mensaje en `MT_SessionRequest` y la versión del protocolo en la versión actual:
 ```c
 static const DWORD kCurrentMajorVersion = 2;
 static const DWORD kCurrentMinorVersion = 0;
@@ -45,25 +42,19 @@ sSendHeader.TypeSpecificData.VersionInfo.m_dwMajorVersion = kCurrentMajorVersion
 sSendHeader.TypeSpecificData.VersionInfo.m_dwMinorVersion = kCurrentMinorVersion;
 sSendHeader.m_cbDataBlock = sizeof(SessionRequestData);
 ```
-
-This header is then sent over to the target using the `write` syscall, followed by the `sessionRequestData` struct containing a GUID for the session:
-
+Este encabezado se envía al objetivo utilizando la llamada al sistema `write`, seguido de la estructura `sessionRequestData` que contiene un GUID para la sesión:
 ```c
 write(wr, &sSendHeader, sizeof(MessageHeader));
 memset(&sDataBlock.m_sSessionID, 9, sizeof(SessionRequestData));
 write(wr, &sDataBlock, sizeof(SessionRequestData));
 ```
-
-A read operation on the `out` pipe confirms the success or failure of the debugging session establishment:
-
+Una operación de lectura en el `out` pipe confirma el éxito o fracaso del establecimiento de la sesión de depuración:
 ```c
 read(rd, &sReceiveHeader, sizeof(MessageHeader));
 ```
+## Lectura de Memoria
 
-## Reading Memory
-
-Once a debugging session is established, memory can be read using the [`MT_ReadMemory`](https://github.com/dotnet/runtime/blob/f3a45a91441cf938765bafc795cbf4885cad8800/src/coreclr/src/debug/shared/dbgtransportsession.cpp#L1896) message type. The function readMemory is detailed, performing the necessary steps to send a read request and retrieve the response:
-
+Una vez que se establece una sesión de depuración, se puede leer la memoria utilizando el [`MT_ReadMemory`](https://github.com/dotnet/runtime/blob/f3a45a91441cf938765bafc795cbf4885cad8800/src/coreclr/src/debug/shared/dbgtransportsession.cpp#L1896) tipo de mensaje. La función readMemory se detalla, realizando los pasos necesarios para enviar una solicitud de lectura y recuperar la respuesta:
 ```c
 bool readMemory(void *addr, int len, unsigned char **output) {
 // Allocation and initialization
@@ -75,13 +66,11 @@ bool readMemory(void *addr, int len, unsigned char **output) {
 return true;
 }
 ```
+La prueba de concepto completa (POC) está disponible [aquí](https://gist.github.com/xpn/95eefc14918998853f6e0ab48d9f7b0b).
 
-The complete proof of concept (POC) is available [here](https://gist.github.com/xpn/95eefc14918998853f6e0ab48d9f7b0b).
+## Escribiendo en Memoria
 
-## Writing Memory
-
-Similarly, memory can be written using the `writeMemory` function. The process involves setting the message type to `MT_WriteMemory`, specifying the address and length of the data, and then sending the data:
-
+De manera similar, se puede escribir en memoria utilizando la función `writeMemory`. El proceso implica establecer el tipo de mensaje en `MT_WriteMemory`, especificar la dirección y la longitud de los datos, y luego enviar los datos:
 ```c
 bool writeMemory(void *addr, int len, unsigned char *input) {
 // Increment IDs, set message type, and specify memory location
@@ -93,27 +82,24 @@ bool writeMemory(void *addr, int len, unsigned char *input) {
 return true;
 }
 ```
+El POC asociado está disponible [aquí](https://gist.github.com/xpn/7c3040a7398808747e158a25745380a5).
 
-The associated POC is available [here](https://gist.github.com/xpn/7c3040a7398808747e158a25745380a5).
+## Ejecución de Código .NET Core <a href="#net-core-code-execution" id="net-core-code-execution"></a>
 
-## .NET Core Code Execution <a href="#net-core-code-execution" id="net-core-code-execution"></a>
-
-To execute code, one needs to identify a memory region with rwx permissions, which can be done using vmmap -pages:
-
+Para ejecutar código, es necesario identificar una región de memoria con permisos rwx, lo que se puede hacer utilizando vmmap -pages:
 ```bash
 vmmap -pages [pid]
 vmmap -pages 35829 | grep "rwx/rwx"
 ```
+Localizar un lugar para sobrescribir un puntero de función es necesario, y en .NET Core, esto se puede hacer apuntando a la **Dynamic Function Table (DFT)**. Esta tabla, detallada en [`jithelpers.h`](https://github.com/dotnet/runtime/blob/6072e4d3a7a2a1493f514cdf4be75a3d56580e84/src/coreclr/src/inc/jithelpers.h), es utilizada por el runtime para funciones auxiliares de compilación JIT.
 
-Locating a place to overwrite a function pointer is necessary, and in .NET Core, this can be done by targeting the **Dynamic Function Table (DFT)**. This table, detailed in [`jithelpers.h`](https://github.com/dotnet/runtime/blob/6072e4d3a7a2a1493f514cdf4be75a3d56580e84/src/coreclr/src/inc/jithelpers.h), is used by the runtime for JIT compilation helper functions.
+Para sistemas x64, se puede utilizar la búsqueda de firmas para encontrar una referencia al símbolo `_hlpDynamicFuncTable` en `libcorclr.dll`.
 
-For x64 systems, signature hunting can be used to find a reference to the symbol `_hlpDynamicFuncTable` in `libcorclr.dll`.
+La función del depurador `MT_GetDCB` proporciona información útil, incluyendo la dirección de una función auxiliar, `m_helperRemoteStartAddr`, que indica la ubicación de `libcorclr.dll` en la memoria del proceso. Esta dirección se utiliza luego para iniciar una búsqueda de la DFT y sobrescribir un puntero de función con la dirección del shellcode.
 
-The `MT_GetDCB` debugger function provides useful information, including the address of a helper function, `m_helperRemoteStartAddr`, indicating the location of `libcorclr.dll` in the process memory. This address is then used to start a search for the DFT and overwrite a function pointer with the shellcode's address.
+El código completo de POC para inyección en PowerShell es accesible [aquí](https://gist.github.com/xpn/b427998c8b3924ab1d63c89d273734b6).
 
-The full POC code for injection into PowerShell is accessible [here](https://gist.github.com/xpn/b427998c8b3924ab1d63c89d273734b6).
-
-## References
+## Referencias
 
 - [https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/](https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/)
 
