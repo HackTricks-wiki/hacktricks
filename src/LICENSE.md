@@ -1,173 +1,170 @@
 {{#include ./banners/hacktricks-training.md}}
 
-<a rel="license" href="https://creativecommons.org/licenses/by-nc/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://licensebuttons.net/l/by-nc/4.0/88x31.png" /></a><br>Copyright © Carlos Polop 2021. Except where otherwise specified (the external information copied into the book belongs to the original authors), the text on <a href="https://github.com/carlospolop/hacktricks">HACK TRICKS</a> by Carlos Polop is licensed under the <a href="https://creativecommons.org/licenses/by-nc/4.0/">Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)</a>.
+<a rel="license" href="https://creativecommons.org/licenses/by-nc/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://licensebuttons.net/l/by-nc/4.0/88x31.png" /></a><br>Hakimiliki © Carlos Polop 2021. Isipokuwa ambapo imeelezwa vinginevyo (taarifa za nje zilizokopwa katika kitabu zinamilikiwa na waandishi wa asili), maandiko kwenye <a href="https://github.com/carlospolop/hacktricks">HACK TRICKS</a> na Carlos Polop yanatolewa chini ya <a href="https://creativecommons.org/licenses/by-nc/4.0/">Leseni ya Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)</a>.
 
-License: Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)<br>
-Human Readable License: https://creativecommons.org/licenses/by-nc/4.0/<br>
-Complete Legal Terms: https://creativecommons.org/licenses/by-nc/4.0/legalcode<br>
-Formatting: https://github.com/jmatsushita/Creative-Commons-4.0-Markdown/blob/master/licenses/by-nc.markdown<br>
+Leseni: Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)<br>
+Leseni Inayosomwa na Binadamu: https://creativecommons.org/licenses/by-nc/4.0/<br>
+Masharti Kamili ya Kisheria: https://creativecommons.org/licenses/by-nc/4.0/legalcode<br>
+Muundo: https://github.com/jmatsushita/Creative-Commons-4.0-Markdown/blob/master/licenses/by-nc.markdown<br>
 
 # creative commons
 
 # Attribution-NonCommercial 4.0 International
 
-Creative Commons Corporation (“Creative Commons”) is not a law firm and does not provide legal services or legal advice. Distribution of Creative Commons public licenses does not create a lawyer-client or other relationship. Creative Commons makes its licenses and related information available on an “as-is” basis. Creative Commons gives no warranties regarding its licenses, any material licensed under their terms and conditions, or any related information. Creative Commons disclaims all liability for damages resulting from their use to the fullest extent possible.
+Creative Commons Corporation (“Creative Commons”) si kampuni ya sheria na haitoi huduma za kisheria au ushauri wa kisheria. Usambazaji wa leseni za umma za Creative Commons hauunda uhusiano wa wakili-mteja au uhusiano mwingine. Creative Commons inapatikana leseni zake na taarifa zinazohusiana kwenye msingi wa “kama ilivyo”. Creative Commons haitoi dhamana yoyote kuhusu leseni zake, nyenzo yoyote iliyotolewa chini ya masharti na hali zao, au taarifa yoyote inayohusiana. Creative Commons inakanusha dhima yoyote kwa uharibifu unaotokana na matumizi yao kwa kiwango kikubwa iwezekanavyo.
 
-## Using Creative Commons Public Licenses
+## Kutumia Leseni za Umma za Creative Commons
 
-Creative Commons public licenses provide a standard set of terms and conditions that creators and other rights holders may use to share original works of authorship and other material subject to copyright and certain other rights specified in the public license below. The following considerations are for informational purposes only, are not exhaustive, and do not form part of our licenses.
+Leseni za umma za Creative Commons zinatoa seti ya kawaida ya masharti na hali ambazo waumbaji na wamiliki wengine wa haki wanaweza kutumia kushiriki kazi za asili za uandishi na nyenzo nyingine zinazohusishwa na hakimiliki na haki nyingine maalum zilizotajwa katika leseni ya umma hapa chini. Mambo yafuatayo ni kwa madhumuni ya taarifa tu, si ya kina, na hayaundai sehemu ya leseni zetu.
 
-- **Considerations for licensors:** Our public licenses are intended for use by those authorized to give the public permission to use material in ways otherwise restricted by copyright and certain other rights. Our licenses are irrevocable. Licensors should read and understand the terms and conditions of the license they choose before applying it. Licensors should also secure all rights necessary before applying our licenses so that the public can reuse the material as expected. Licensors should clearly mark any material not subject to the license. This includes other CC-licensed material, or material used under an exception or limitation to copyright. [More considerations for licensors](http://wiki.creativecommons.org/Considerations_for_licensors_and_licensees#Considerations_for_licensors).
+- **Mambo ya kuzingatia kwa watoaji leseni:** Leseni zetu za umma zinakusudiwa kutumiwa na wale walioidhinishwa kutoa ruhusa kwa umma kutumia nyenzo kwa njia ambazo kwa kawaida zinakabiliwa na hakimiliki na haki nyingine maalum. Leseni zetu hazirudishwi. Watoaji leseni wanapaswa kusoma na kuelewa masharti na hali za leseni wanayochagua kabla ya kuitumia. Watoaji leseni wanapaswa pia kuhakikisha haki zote zinazohitajika kabla ya kutumia leseni zetu ili umma uweze kutumia nyenzo kama inavyotarajiwa. Watoaji leseni wanapaswa wazi kuashiria nyenzo yoyote isiyo chini ya leseni. Hii inajumuisha nyenzo nyingine zilizo na leseni ya CC, au nyenzo zinazotumiwa chini ya ubaguzi au kikomo cha hakimiliki. [Maelezo zaidi kwa watoaji leseni](http://wiki.creativecommons.org/Considerations_for_licensors_and_licensees#Considerations_for_licensors).
 
-- **Considerations for the public:** By using one of our public licenses, a licensor grants the public permission to use the licensed material under specified terms and conditions. If the licensor’s permission is not necessary for any reason–for example, because of any applicable exception or limitation to copyright–then that use is not regulated by the license. Our licenses grant only permissions under copyright and certain other rights that a licensor has authority to grant. Use of the licensed material may still be restricted for other reasons, including because others have copyright or other rights in the material. A licensor may make special requests, such as asking that all changes be marked or described. Although not required by our licenses, you are encouraged to respect those requests where reasonable. [More considerations for the public](http://wiki.creativecommons.org/Considerations_for_licensors_and_licensees#Considerations_for_licensees).
+- **Mambo ya kuzingatia kwa umma:** Kwa kutumia moja ya leseni zetu za umma, mtoaji leseni anampa umma ruhusa ya kutumia nyenzo iliyotolewa chini ya masharti na hali zilizotajwa. Ikiwa ruhusa ya mtoaji leseni si ya lazima kwa sababu yoyote – kwa mfano, kwa sababu ya ubaguzi au kikomo chochote cha hakimiliki – basi matumizi hayo hayataregulishwa na leseni. Leseni zetu zinatoa tu ruhusa chini ya hakimiliki na haki nyingine maalum ambazo mtoaji leseni ana mamlaka ya kutoa. Matumizi ya nyenzo iliyotolewa yanaweza bado kuwa na vizuizi kwa sababu nyingine, ikiwa ni pamoja na kwa sababu wengine wana hakimiliki au haki nyingine katika nyenzo hiyo. Mtoaji leseni anaweza kufanya maombi maalum, kama vile kuomba kwamba mabadiliko yote yawe na alama au kuelezwa. Ingawa si lazima na leseni zetu, unashauriwa kuheshimu maombi hayo pale inapowezekana. [Maelezo zaidi kwa umma](http://wiki.creativecommons.org/Considerations_for_licensors_and_licensees#Considerations_for_licensees).
 
-# Creative Commons Attribution-NonCommercial 4.0 International Public License
+# Leseni ya Umma ya Creative Commons Attribution-NonCommercial 4.0 International
 
-By exercising the Licensed Rights (defined below), You accept and agree to be bound by the terms and conditions of this Creative Commons Attribution-NonCommercial 4.0 International Public License ("Public License"). To the extent this Public License may be interpreted as a contract, You are granted the Licensed Rights in consideration of Your acceptance of these terms and conditions, and the Licensor grants You such rights in consideration of benefits the Licensor receives from making the Licensed Material available under these terms and conditions.
+Kwa kutumia Haki za Leseni (zilizofafanuliwa hapa chini), Unakubali na kukubali kufungwa na masharti na hali za Leseni hii ya Umma ya Creative Commons Attribution-NonCommercial 4.0 International ("Leseni ya Umma"). Kwa kiwango ambacho Leseni hii ya Umma inaweza kutafsiriwa kama mkataba, unapewa Haki za Leseni kwa kuzingatia kukubali kwako masharti na hali hizi, na Mtoaji leseni anakupa haki hizo kwa kuzingatia faida ambazo Mtoaji leseni anapata kwa kufanya Nyenzo za Leseni kupatikana chini ya masharti na hali hizi.
 
-## Section 1 – Definitions.
+## Sehemu ya 1 – M definitions.
 
-a. **Adapted Material** means material subject to Copyright and Similar Rights that is derived from or based upon the Licensed Material and in which the Licensed Material is translated, altered, arranged, transformed, or otherwise modified in a manner requiring permission under the Copyright and Similar Rights held by the Licensor. For purposes of this Public License, where the Licensed Material is a musical work, performance, or sound recording, Adapted Material is always produced where the Licensed Material is synched in timed relation with a moving image.
+a. **Nyenzo zilizobadilishwa** inamaanisha nyenzo zinazohusishwa na Hakimiliki na Haki Zinazofanana ambazo zinatokana na au zinategemea Nyenzo za Leseni na ambazo Nyenzo za Leseni zimewekwa tafsiri, kubadilishwa, kuandaliwa, kubadilishwa, au vinginevyo kubadilishwa kwa njia inayohitaji ruhusa chini ya Hakimiliki na Haki Zinazofanana zinazoshikiliwa na Mtoaji leseni. Kwa madhumuni ya Leseni hii ya Umma, ambapo Nyenzo za Leseni ni kazi ya muziki, utendaji, au rekodi ya sauti, Nyenzo zilizobadilishwa daima zinatengenezwa ambapo Nyenzo za Leseni zimeunganishwa kwa wakati na picha inayoenda.
 
-b. **Adapter's License** means the license You apply to Your Copyright and Similar Rights in Your contributions to Adapted Material in accordance with the terms and conditions of this Public License.
+b. **Leseni ya Mbadala** inamaanisha leseni unayoomba kwa Hakimiliki na Haki Zinazofanana katika michango yako kwa Nyenzo zilizobadilishwa kulingana na masharti na hali za Leseni hii ya Umma.
 
-c. **Copyright and Similar Rights** means copyright and/or similar rights closely related to copyright including, without limitation, performance, broadcast, sound recording, and Sui Generis Database Rights, without regard to how the rights are labeled or categorized. For purposes of this Public License, the rights specified in Section 2(b)(1)-(2) are not Copyright and Similar Rights.
+c. **Hakimiliki na Haki Zinazofanana** inamaanisha hakimiliki na/au haki zinazofanana kwa karibu na hakimiliki ikiwa ni pamoja, bila kikomo, utendaji, matangazo, rekodi za sauti, na Haki za Hifadhidata za Sui Generis, bila kujali jinsi haki hizo zinavyotajwa au kuainishwa. Kwa madhumuni ya Leseni hii ya Umma, haki zilizotajwa katika Sehemu ya 2(b)(1)-(2) si Hakimiliki na Haki Zinazofanana.
 
-d. **Effective Technological Measures** means those measures that, in the absence of proper authority, may not be circumvented under laws fulfilling obligations under Article 11 of the WIPO Copyright Treaty adopted on December 20, 1996, and/or similar international agreements.
+d. **Hatua za Kiteknolojia za Ufanisi** inamaanisha hatua hizo ambazo, kwa kukosekana kwa mamlaka sahihi, haziwezi kupuuziliwa mbali chini ya sheria zinazotimiza wajibu chini ya Kifungu cha 11 cha Mkataba wa Hakimiliki wa WIPO ulioanzishwa tarehe 20 Desemba 1996, na/au makubaliano mengine ya kimataifa yanayofanana.
 
-e. **Exceptions and Limitations** means fair use, fair dealing, and/or any other exception or limitation to Copyright and Similar Rights that applies to Your use of the Licensed Material.
+e. **Ubaguzi na Vikwazo** inamaanisha matumizi ya haki, biashara ya haki, na/au ubaguzi mwingine au kikomo kwa Hakimiliki na Haki Zinazofanana kinachotumika kwa matumizi yako ya Nyenzo za Leseni.
 
-f. **Licensed Material** means the artistic or literary work, database, or other material to which the Licensor applied this Public License.
+f. **Nyenzo za Leseni** inamaanisha kazi ya kisanii au ya kifasihi, hifadhidata, au nyenzo nyingine ambazo Mtoaji leseni alitumia Leseni hii ya Umma.
 
-g. **Licensed Rights** means the rights granted to You subject to the terms and conditions of this Public License, which are limited to all Copyright and Similar Rights that apply to Your use of the Licensed Material and that the Licensor has authority to license.
+g. **Haki za Leseni** inamaanisha haki zinazokupwa chini ya masharti na hali za Leseni hii ya Umma, ambazo zinapunguzwa kwa Hakimiliki zote na Haki Zinazofanana zinazotumika kwa matumizi yako ya Nyenzo za Leseni na ambazo Mtoaji leseni ana mamlaka ya kutoa leseni.
 
-h. **Licensor** means the individual(s) or entity(ies) granting rights under this Public License.
+h. **Mtoaji leseni** inamaanisha mtu(au) au chombo(au) kinachotoa haki chini ya Leseni hii ya Umma.
 
-i. **NonCommercial** means not primarily intended for or directed towards commercial advantage or monetary compensation. For purposes of this Public License, the exchange of the Licensed Material for other material subject to Copyright and Similar Rights by digital file-sharing or similar means is NonCommercial provided there is no payment of monetary compensation in connection with the exchange.
+i. **NonCommercial** inamaanisha si kwa nia kuu ya faida ya kibiashara au malipo ya fedha. Kwa madhumuni ya Leseni hii ya Umma, kubadilishana Nyenzo za Leseni kwa nyenzo nyingine zinazohusishwa na Hakimiliki na Haki Zinazofanana kwa njia ya kushiriki faili za kidijitali au njia nyingine zinazofanana ni NonCommercial ikiwa hakuna malipo ya fedha yanayohusiana na kubadilishana.
 
-j. **Share** means to provide material to the public by any means or process that requires permission under the Licensed Rights, such as reproduction, public display, public performance, distribution, dissemination, communication, or importation, and to make material available to the public including in ways that members of the public may access the material from a place and at a time individually chosen by them.
+j. **Shiriki** inamaanisha kutoa nyenzo kwa umma kwa njia yoyote au mchakato unaohitaji ruhusa chini ya Haki za Leseni, kama vile uzalishaji, kuonyesha hadharani, utendaji wa hadharani, usambazaji, usambazaji, mawasiliano, au uagizaji, na kufanya nyenzo kupatikana kwa umma ikiwa ni pamoja na njia ambazo wanachama wa umma wanaweza kufikia nyenzo kutoka mahali na wakati waliouchagua binafsi.
 
-k. **Sui Generis Database Rights** means rights other than copyright resulting from Directive 96/9/EC of the European Parliament and of the Council of 11 March 1996 on the legal protection of databases, as amended and/or succeeded, as well as other essentially equivalent rights anywhere in the world.
+k. **Haki za Hifadhidata za Sui Generis** inamaanisha haki nyingine isipokuwa hakimiliki zinazotokana na Maagizo 96/9/EC ya Bunge la Ulaya na Baraza la 11 Machi 1996 kuhusu ulinzi wa kisheria wa hifadhidata, kama ilivyorekebishwa na/au kufuatwa, pamoja na haki nyingine zinazofanana mahali popote duniani.
 
-l. **You** means the individual or entity exercising the Licensed Rights under this Public License. Your has a corresponding meaning.
+l. **Wewe** inamaanisha mtu au chombo kinachotumia Haki za Leseni chini ya Leseni hii ya Umma. Wewe ina maana inayolingana.
 
-## Section 2 – Scope.
+## Sehemu ya 2 – Muktadha.
 
-a. **_License grant._**
+a. **_Utoaji wa leseni._**
 
-1.  Subject to the terms and conditions of this Public License, the Licensor hereby grants You a worldwide, royalty-free, non-sublicensable, non-exclusive, irrevocable license to exercise the Licensed Rights in the Licensed Material to:
+1.  Kwa kuzingatia masharti na hali za Leseni hii ya Umma, Mtoaji leseni kwa hapa anakupa leseni ya kimataifa, isiyo na malipo, isiyoweza kutolewa, isiyo ya kipekee, isiyoweza kubadilishwa ya kutumia Haki za Leseni katika Nyenzo za Leseni ili:
 
-A. reproduce and Share the Licensed Material, in whole or in part, for NonCommercial purposes only; and
+A. kuzalisha na Kushiriki Nyenzo za Leseni, kwa ujumla au sehemu, kwa madhumuni ya NonCommercial pekee; na
 
-B. produce, reproduce, and Share Adapted Material for NonCommercial purposes only.
+B. kutengeneza, kuzalisha, na Kushiriki Nyenzo zilizobadilishwa kwa madhumuni ya NonCommercial pekee.
 
-2.  **Exceptions and Limitations.** For the avoidance of doubt, where Exceptions and Limitations apply to Your use, this Public License does not apply, and You do not need to comply with its terms and conditions.
-3.  **Term.** The term of this Public License is specified in Section 6(a).
+2.  **Ubaguzi na Vikwazo.** Ili kuepuka shaka, ambapo Ubaguzi na Vikwazo vinatumika kwa matumizi yako, Leseni hii ya Umma haitatumika, na huna haja ya kufuata masharti na hali zake.
+3.  **Muda.** Muda wa Leseni hii ya Umma umeainishwa katika Sehemu ya 6(a).
 
-4.  **Media and formats; technical modifications allowed.** The Licensor authorizes You to exercise the Licensed Rights in all media and formats whether now known or hereafter created, and to make technical modifications necessary to do so. The Licensor waives and/or agrees not to assert any right or authority to forbid You from making technical modifications necessary to exercise the Licensed Rights, including technical modifications necessary to circumvent Effective Technological Measures. For purposes of this Public License, simply making modifications authorized by this Section 2(a)(4) never produces Adapted Material.
-5.  **Downstream recipients.**
+4.  **Vyombo na muundo; mabadiliko ya kiufundi yanaruhusiwa.** Mtoaji leseni anakupa ruhusa ya kutumia Haki za Leseni katika vyombo vyote na muundo iwe sasa inajulikana au itakayotengenezwa baadaye, na kufanya mabadiliko ya kiufundi yanayohitajika kufanya hivyo. Mtoaji leseni anakanusha na/au anakubali kutoshikilia haki yoyote au mamlaka ya kukuzuia kufanya mabadiliko ya kiufundi yanayohitajika kutumia Haki za Leseni, ikiwa ni pamoja na mabadiliko ya kiufundi yanayohitajika kupita Hatua za Kiteknolojia za Ufanisi. Kwa madhumuni ya Leseni hii ya Umma, kufanya tu mabadiliko yanayoruhusiwa na Sehemu hii 2(a)(4) kamwe hakuzalishi Nyenzo zilizobadilishwa.
+5.  **Wapokeaji wa chini.**
 
-A. **Offer from the Licensor – Licensed Material.** Every recipient of the Licensed Material automatically receives an offer from the Licensor to exercise the Licensed Rights under the terms and conditions of this Public License.
+A. **Ofa kutoka kwa Mtoaji leseni – Nyenzo za Leseni.** Kila mpokeaji wa Nyenzo za Leseni moja kwa moja anapata ofa kutoka kwa Mtoaji leseni kutumia Haki za Leseni chini ya masharti na hali za Leseni hii ya Umma.
 
-B. **No downstream restrictions.** You may not offer or impose any additional or different terms or conditions on, or apply any Effective Technological Measures to, the Licensed Material if doing so restricts exercise of the Licensed Rights by any recipient of the Licensed Material.
+B. **Hakuna vizuizi vya chini.** Huwezi kutoa au kuweka masharti au hali yoyote ya ziada au tofauti, au kutumia Hatua za Kiteknolojia za Ufanisi kwa Nyenzo za Leseni ikiwa kufanya hivyo kunakabili matumizi ya Haki za Leseni na mpokeaji yeyote wa Nyenzo za Leseni.
 
-6.  **No endorsement.** Nothing in this Public License constitutes or may be construed as permission to assert or imply that You are, or that Your use of the Licensed Material is, connected with, or sponsored, endorsed, or granted official status by, the Licensor or others designated to receive attribution as provided in Section 3(a)(1)(A)(i).
+6.  **Hakuna uthibitisho.** Hakuna kitu katika Leseni hii ya Umma kinachounda au kinaweza kutafsiriwa kama ruhusa ya kudai au kuashiria kwamba wewe ni, au kwamba matumizi yako ya Nyenzo za Leseni ni, kuhusiana na, au kudhaminiwa, kuungwa mkono, au kutolewa hadhi rasmi na, Mtoaji leseni au wengine waliopewa sifa kama ilivyoainishwa katika Sehemu ya 3(a)(1)(A)(i).
 
-b. **_Other rights._**
+b. **_Haki nyingine._**
 
-1.  Moral rights, such as the right of integrity, are not licensed under this Public License, nor are publicity, privacy, and/or other similar personality rights; however, to the extent possible, the Licensor waives and/or agrees not to assert any such rights held by the Licensor to the limited extent necessary to allow You to exercise the Licensed Rights, but not otherwise.
+1.  Haki za maadili, kama haki ya uadilifu, hazijatumika chini ya Leseni hii ya Umma, wala matangazo, faragha, na/au haki nyingine za kibinafsi zinazofanana; hata hivyo, kadri inavyowezekana, Mtoaji leseni anakanusha na/au anakubali kutoshikilia haki yoyote kama hizo zinazoshikiliwa na Mtoaji leseni kwa kiwango kidogo kinachohitajika kuruhusu wewe kutumia Haki za Leseni, lakini si vinginevyo.
 
-2.  Patent and trademark rights are not licensed under this Public License.
+2.  Haki za patent na alama za biashara hazijatumika chini ya Leseni hii ya Umma.
 
-3.  To the extent possible, the Licensor waives any right to collect royalties from You for the exercise of the Licensed Rights, whether directly or through a collecting society under any voluntary or waivable statutory or compulsory licensing scheme. In all other cases the Licensor expressly reserves any right to collect such royalties, including when the Licensed Material is used other than for NonCommercial purposes.
+3.  Kadri inavyowezekana, Mtoaji leseni anakanusha haki yoyote ya kukusanya malipo kutoka kwako kwa matumizi ya Haki za Leseni, iwe moja kwa moja au kupitia jamii ya kukusanya chini ya mpango wowote wa leseni wa hiari au wa kuweza kuondolewa. Katika hali nyingine zote Mtoaji leseni anahifadhi haki yoyote ya kukusanya malipo kama hayo, ikiwa ni pamoja na wakati Nyenzo za Leseni zinapotumiwa tofauti na madhumuni ya NonCommercial.
 
-## Section 3 – License Conditions.
+## Sehemu ya 3 – Masharti ya Leseni.
 
-Your exercise of the Licensed Rights is expressly made subject to the following conditions.
+Matumizi yako ya Haki za Leseni yanategemea masharti yafuatayo.
 
-a. **_Attribution._**
+a. **_Sifa._**
 
-1.  If You Share the Licensed Material (including in modified form), You must:
+1.  Ikiwa Unashiriki Nyenzo za Leseni (ikiwemo katika mfumo uliobadilishwa), lazima:
 
-A. retain the following if it is supplied by the Licensor with the Licensed Material:
+A. uendelee yafuatayo ikiwa yanatolewa na Mtoaji leseni pamoja na Nyenzo za Leseni:
 
-i. identification of the creator(s) of the Licensed Material and any others designated to receive attribution, in any reasonable manner requested by the Licensor (including by pseudonym if designated);
+i. utambulisho wa muumba(muumbaji) wa Nyenzo za Leseni na wengine wote waliotajwa kupokea sifa, kwa njia yoyote inayofaa iliyotolewa na Mtoaji leseni (ikiwemo kwa jina la utani ikiwa imeainishwa);
 
-ii. a copyright notice;
+ii. tangazo la hakimiliki;
 
-iii. a notice that refers to this Public License;
+iii. tangazo linalorejelea Leseni hii ya Umma;
 
-iv. a notice that refers to the disclaimer of warranties;
+iv. tangazo linalorejelea kukana dhamana;
 
-v. a URI or hyperlink to the Licensed Material to the extent reasonably practicable;
+v. URI au kiungo cha nyaraka za Nyenzo za Leseni kadri inavyowezekana;
 
-B. indicate if You modified the Licensed Material and retain an indication of any previous modifications; and
+B. uonyeshe ikiwa umebadilisha Nyenzo za Leseni na uendelee kuashiria mabadiliko yoyote ya awali; na
 
-C. indicate the Licensed Material is licensed under this Public License, and include the text of, or the URI or hyperlink to, this Public License.
+C. uonyeshe Nyenzo za Leseni ziko chini ya Leseni hii ya Umma, na ujumuishe maandiko ya, au URI au kiungo cha, Leseni hii ya Umma.
 
-2.  You may satisfy the conditions in Section 3(a)(1) in any reasonable manner based on the medium, means, and context in which You Share the Licensed Material. For example, it may be reasonable to satisfy the conditions by providing a URI or hyperlink to a resource that includes the required information.
+2.  Unaweza kutimiza masharti katika Sehemu 3(a)(1) kwa njia yoyote inayofaa kulingana na vyombo, njia, na muktadha ambao Unashiriki Nyenzo za Leseni. Kwa mfano, inaweza kuwa na maana kutoa URI au kiungo kwa rasilimali inayojumuisha taarifa zinazohitajika.
 
-3.  If requested by the Licensor, You must remove any of the information required by Section 3(a)(1)(A) to the extent reasonably practicable.
+3.  Ikiwa inahitajika na Mtoaji leseni, lazima uondoe taarifa yoyote inayohitajika na Sehemu 3(a)(1)(A) kadri inavyowezekana.
 
-4.  If You Share Adapted Material You produce, the Adapter's License You apply must not prevent recipients of the Adapted Material from complying with this Public License.
+4.  Ikiwa Unashiriki Nyenzo zilizobadilishwa unazozalisha, Leseni ya Mbadala unayoomba haipaswi kuzuia wapokeaji wa Nyenzo zilizobadilishwa kufuata Leseni hii ya Umma.
 
-## Section 4 – Sui Generis Database Rights.
+## Sehemu ya 4 – Haki za Hifadhidata za Sui Generis.
 
-Where the Licensed Rights include Sui Generis Database Rights that apply to Your use of the Licensed Material:
+Wakati Haki za Leseni zinajumuisha Haki za Hifadhidata za Sui Generis zinazotumika kwa matumizi yako ya Nyenzo za Leseni:
 
-a. for the avoidance of doubt, Section 2(a)(1) grants You the right to extract, reuse, reproduce, and Share all or a substantial portion of the contents of the database for NonCommercial purposes only;
+a. ili kuepuka shaka, Sehemu 2(a)(1) inakupa haki ya kutoa, kutumia tena, kuzalisha, na Kushiriki yote au sehemu kubwa ya maudhui ya hifadhidata kwa madhumuni ya NonCommercial pekee;
 
-b. if You include all or a substantial portion of the database contents in a database in which You have Sui Generis Database Rights, then the database in which You have Sui Generis Database Rights (but not its individual contents) is Adapted Material; and
+b. ikiwa unajumuisha yote au sehemu kubwa ya maudhui ya hifadhidata katika hifadhidata ambayo una Haki za Hifadhidata za Sui Generis, basi hifadhidata ambayo una Haki za Hifadhidata za Sui Generis (lakini si maudhui yake binafsi) ni Nyenzo zilizobadilishwa; na
 
-c. You must comply with the conditions in Section 3(a) if You Share all or a substantial portion of the contents of the database.
+c. lazima ufuate masharti katika Sehemu 3(a) ikiwa Unashiriki yote au sehemu kubwa ya maudhui ya hifadhidata.
 
-For the avoidance of doubt, this Section 4 supplements and does not replace Your obligations under this Public License where the Licensed Rights include other Copyright and Similar Rights.
+Ili kuepuka shaka, Sehemu hii 4 inakamilisha na haitabadilisha wajibu wako chini ya Leseni hii ya Umma ambapo Haki za Leseni zinajumuisha Hakimiliki na Haki Zinazofanana nyingine.
 
-## Section 5 – Disclaimer of Warranties and Limitation of Liability.
+## Sehemu ya 5 – Kukana Dhamana na Kizuizi cha Dhima.
 
-a. **Unless otherwise separately undertaken by the Licensor, to the extent possible, the Licensor offers the Licensed Material as-is and as-available, and makes no representations or warranties of any kind concerning the Licensed Material, whether express, implied, statutory, or other. This includes, without limitation, warranties of title, merchantability, fitness for a particular purpose, non-infringement, absence of latent or other defects, accuracy, or the presence or absence of errors, whether or not known or discoverable. Where disclaimers of warranties are not allowed in full or in part, this disclaimer may not apply to You.**
+a. **Ili kuepuka shaka, isipokuwa ikiwa imefanywa tofauti na Mtoaji leseni, kadri inavyowezekana, Mtoaji leseni anatoa Nyenzo za Leseni kama ilivyo na inapatikana, na haitoi uwakilishi au dhamana yoyote ya aina yoyote kuhusu Nyenzo za Leseni, iwe wazi, iliyofichwa, ya kisheria, au nyingine. Hii inajumuisha, bila kikomo, dhamana za umiliki, biashara, kufaa kwa madhumuni maalum, kutovunja, ukosefu wa kasoro za siri au nyingine, usahihi, au uwepo au ukosefu wa makosa, iwe yanajulikana au yanayoweza kugundulika. Wakati kukana dhamana hakuruhusiwi kwa sehemu au kwa sehemu, kukana huku hakutaweza kukuhusu.**
 
-b. **To the extent possible, in no event will the Licensor be liable to You on any legal theory (including, without limitation, negligence) or otherwise for any direct, special, indirect, incidental, consequential, punitive, exemplary, or other losses, costs, expenses, or damages arising out of this Public License or use of the Licensed Material, even if the Licensor has been advised of the possibility of such losses, costs, expenses, or damages. Where a limitation of liability is not allowed in full or in part, this limitation may not apply to You.**
+b. **Kadri inavyowezekana, kwa hali yoyote Mtoaji leseni hatakuwa na dhima kwako kwa nadharia yoyote ya kisheria (ikiwemo, bila kikomo, uzembe) au vinginevyo kwa hasara yoyote ya moja kwa moja, maalum, isiyo ya moja kwa moja, ya bahati mbaya, ya matokeo, ya adhabu, ya mfano, au hasara nyingine, gharama, matumizi, au uharibifu unaotokana na Leseni hii ya Umma au matumizi ya Nyenzo za Leseni, hata kama Mtoaji leseni ameshawishiwa uwezekano wa hasara hizo, gharama, matumizi, au uharibifu. Wakati kizuizi cha dhima hakuruhusiwi kwa sehemu au kwa sehemu, kizuizi hiki hakiwezi kukuhusu.**
 
-c. The disclaimer of warranties and limitation of liability provided above shall be interpreted in a manner that, to the extent possible, most closely approximates an absolute disclaimer and waiver of all liability.
+c. Kukana dhamana na kizuizi cha dhima kilichotolewa hapo juu kitatafsiriwa kwa njia ambayo, kadri inavyowezekana, inakaribia kukana kabisa na kuondoa dhima zote.
 
-## Section 6 – Term and Termination.
+## Sehemu ya 6 – Muda na Kukomesha.
 
-a. This Public License applies for the term of the Copyright and Similar Rights licensed here. However, if You fail to comply with this Public License, then Your rights under this Public License terminate automatically.
+a. Leseni hii ya Umma inatumika kwa muda wa Hakimiliki na Haki Zinazofanana zilizotolewa hapa. Hata hivyo, ikiwa hutatii Leseni hii ya Umma, basi haki zako chini ya Leseni hii ya Umma zitakoma moja kwa moja.
 
-b. Where Your right to use the Licensed Material has terminated under Section 6(a), it reinstates:
+b. Wakati haki yako ya kutumia Nyenzo za Leseni imekoma chini ya Sehemu 6(a), inarejeshwa:
 
-1.  automatically as of the date the violation is cured, provided it is cured within 30 days of Your discovery of the violation; or
+1.  moja kwa moja kuanzia tarehe ukiukaji unavyotatuliwa, ikiwa umetatuliwa ndani ya siku 30 za kugundua ukiukaji; au
 
-2.  upon express reinstatement by the Licensor.
+2.  kwa kurejeshwa wazi na Mtoaji leseni.
 
-For the avoidance of doubt, this Section 6(b) does not affect any right the Licensor may have to seek remedies for Your violations of this Public License.
+Ili kuepuka shaka, Sehemu hii 6(b) haikathiri haki yoyote ambayo Mtoaji leseni anaweza kuwa nayo kutafuta suluhu kwa ukiukaji wako wa Leseni hii ya Umma.
 
-c. For the avoidance of doubt, the Licensor may also offer the Licensed Material under separate terms or conditions or stop distributing the Licensed Material at any time; however, doing so will not terminate this Public License.
+c. Ili kuepuka shaka, Mtoaji leseni anaweza pia kutoa Nyenzo za Leseni chini ya masharti au hali tofauti au kusitisha usambazaji wa Nyenzo za Leseni wakati wowote; hata hivyo, kufanya hivyo hakutakomesha Leseni hii ya Umma.
 
-d. Sections 1, 5, 6, 7, and 8 survive termination of this Public License.
+d. Sehemu za 1, 5, 6, 7, na 8 zinaendelea hata baada ya kukomesha Leseni hii ya Umma.
 
-## Section 7 – Other Terms and Conditions.
+## Sehemu ya 7 – Masharti na Hali Nyingine.
 
-a. The Licensor shall not be bound by any additional or different terms or conditions communicated by You unless expressly agreed.
+a. Mtoaji leseni hatakuwa na wajibu wa masharti au hali yoyote ya ziada au tofauti iliyowasilishwa na wewe isipokuwa ikikubaliwa wazi.
 
-b. Any arrangements, understandings, or agreements regarding the Licensed Material not stated herein are separate from and independent of the terms and conditions of this Public License.
+b. Mpango wowote, kuelewana, au makubaliano kuhusu Nyenzo za Leseni ambayo hayajatangazwa hapa ni tofauti na huru kutoka kwa masharti na hali za Leseni hii ya Umma.
 
-## Section 8 – Interpretation.
+## Sehemu ya 8 – Tafsiri.
 
-a. For the avoidance of doubt, this Public License does not, and shall not be interpreted to, reduce, limit, restrict, or impose conditions on any use of the Licensed Material that could lawfully be made without permission under this Public License.
+a. Ili kuepuka shaka, Leseni hii ya Umma haitapunguza, kuzuia, kukandamiza, au kuweka masharti yoyote juu ya matumizi yoyote ya Nyenzo za Leseni ambayo yanaweza kufanywa kisheria bila ruhusa chini ya Leseni hii ya Umma.
 
-b. To the extent possible, if any provision of this Public License is deemed unenforceable, it shall be automatically reformed to the minimum extent necessary to make it enforceable. If the provision cannot be reformed, it shall be severed from this Public License without affecting the enforceability of the remaining terms and conditions.
+b. Kadri inavyowezekana, ikiwa kipengele chochote cha Leseni hii ya Umma kinachukuliwa kuwa hakiwezi kutekelezeka, kitarejeshwa moja kwa moja kwa kiwango cha chini kinachohitajika kufanya iweze kutekelezeka. Ikiwa kipengele hakiwezi kurekebishwa, kitakatwa kutoka Leseni hii ya Umma bila kuathiri utekelezaji wa masharti na hali zilizobaki.
 
-c. No term or condition of this Public License will be waived and no failure to comply consented to unless expressly agreed to by the Licensor.
+c. Hakuna masharti au hali yoyote ya Leseni hii ya Umma itakayoondolewa na hakuna kushindwa kutii kutakubaliwa isipokuwa ikikubaliwa wazi na Mtoaji leseni.
 
-d. Nothing in this Public License constitutes or may be interpreted as a limitation upon, or waiver of, any privileges and immunities that apply to the Licensor or You, including from the legal processes of any jurisdiction or authority.
-
+d. Hakuna kitu katika Leseni hii ya Umma kinachounda au kinaweza kutafsiriwa kama kizuizi, au kuondolewa, kwa haki na kinga zozote zinazotumika kwa Mtoaji leseni au Wewe, ikiwa ni pamoja na kutoka kwa michakato ya kisheria ya mamlaka yoyote au mamlaka.
 ```
 Creative Commons is not a party to its public licenses. Notwithstanding, Creative Commons may elect to apply one of its public licenses to material it publishes and in those instances will be considered the “Licensor.” Except for the limited purpose of indicating that material is shared under a Creative Commons public license or as otherwise permitted by the Creative Commons policies published at [creativecommons.org/policies](http://creativecommons.org/policies), Creative Commons does not authorize the use of the trademark “Creative Commons” or any other trademark or logo of Creative Commons without its prior written consent including, without limitation, in connection with any unauthorized modifications to any of its public licenses or any other arrangements, understandings, or agreements concerning use of licensed material. For the avoidance of doubt, this paragraph does not form part of the public licenses.
 
 Creative Commons may be contacted at [creativecommons.org](http://creativecommons.org/).
 ```
-
 {{#include ./banners/hacktricks-training.md}}
-

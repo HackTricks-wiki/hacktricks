@@ -4,25 +4,24 @@
 
 ## Locked Device
 
-To start extracting data from an Android device it has to be unlocked. If it's locked you can:
+Ili kuanza kutoa data kutoka kwa kifaa cha Android, lazima kifaa kiwe wazi. Ikiwa kimefungwa unaweza:
 
-- Check if the device has debugging via USB activated.
-- Check for a possible [smudge attack](https://www.usenix.org/legacy/event/woot10/tech/full_papers/Aviv.pdf)
-- Try with [Brute-force](https://www.cultofmac.com/316532/this-brute-force-device-can-crack-any-iphones-pin-code/)
+- Kuangalia ikiwa kifaa kina ufuatiliaji kupitia USB umewezeshwa.
+- Kuangalia kwa shambulio la [smudge attack](https://www.usenix.org/legacy/event/woot10/tech/full_papers/Aviv.pdf)
+- Jaribu na [Brute-force](https://www.cultofmac.com/316532/this-brute-force-device-can-crack-any-iphones-pin-code/)
 
 ## Data Adquisition
 
-Create an [android backup using adb](mobile-pentesting/android-app-pentesting/adb-commands.md#backup) and extract it using [Android Backup Extractor](https://sourceforge.net/projects/adbextractor/): `java -jar abe.jar unpack file.backup file.tar`
+Unda [android backup using adb](mobile-pentesting/android-app-pentesting/adb-commands.md#backup) na uitoe kwa kutumia [Android Backup Extractor](https://sourceforge.net/projects/adbextractor/): `java -jar abe.jar unpack file.backup file.tar`
 
 ### If root access or physical connection to JTAG interface
 
-- `cat /proc/partitions` (search the path to the flash memory, generally the first entry is _mmcblk0_ and corresponds to the whole flash memory).
-- `df /data` (Discover the block size of the system).
-- dd if=/dev/block/mmcblk0 of=/sdcard/blk0.img bs=4096 (execute it with the information gathered from the block size).
+- `cat /proc/partitions` (tafuta njia ya kumbukumbu ya flash, kwa kawaida ingizo la kwanza ni _mmcblk0_ na linahusiana na kumbukumbu yote ya flash).
+- `df /data` (Gundua ukubwa wa block wa mfumo).
+- dd if=/dev/block/mmcblk0 of=/sdcard/blk0.img bs=4096 (itekeleze kwa kutumia taarifa zilizokusanywa kutoka kwa ukubwa wa block).
 
 ### Memory
 
-Use Linux Memory Extractor (LiME) to extract the RAM information. It's a kernel extension that should be loaded via adb.
+Tumia Linux Memory Extractor (LiME) kutoa taarifa za RAM. Ni nyongeza ya kernel ambayo inapaswa kupakiwa kupitia adb.
 
 {{#include ./banners/hacktricks-training.md}}
-
