@@ -4,26 +4,25 @@
 
 ## Summary
 
-Two registry keys were found to be writable by the current user:
+Mfunguo mbili za rejista zilipatikana kuwa zinaweza kuandikwa na mtumiaji wa sasa:
 
 - **`HKLM\SYSTEM\CurrentControlSet\Services\Dnscache`**
 - **`HKLM\SYSTEM\CurrentControlSet\Services\RpcEptMapper`**
 
-It was suggested to check the permissions of the **RpcEptMapper** service using the **regedit GUI**, specifically the **Advanced Security Settings** window's **Effective Permissions** tab. This approach enables the assessment of granted permissions to specific users or groups without the need to examine each Access Control Entry (ACE) individually.
+Ilipendekezwa kuangalia ruhusa za huduma ya **RpcEptMapper** kwa kutumia **regedit GUI**, hasa kwenye kichupo cha **Ruhusa za Ufanisi** katika dirisha la **Advanced Security Settings**. Njia hii inaruhusu tathmini ya ruhusa zilizotolewa kwa watumiaji au vikundi maalum bila kuhitaji kuchunguza kila Kuingilia Udhibiti wa Ufikiaji (ACE) moja kwa moja.
 
-A screenshot showed the permissions assigned to a low-privileged user, among which the **Create Subkey** permission was notable. This permission, also referred to as **AppendData/AddSubdirectory**, corresponds with the script's findings.
+Picha ilionyesha ruhusa zilizotolewa kwa mtumiaji mwenye mamlaka ya chini, ambapo ruhusa ya **Create Subkey** ilikuwa ya kutambulika. Ruhusa hii, pia inajulikana kama **AppendData/AddSubdirectory**, inalingana na matokeo ya script.
 
-The inability to modify certain values directly, yet the capability to create new subkeys, was noted. An example highlighted was an attempt to alter the **ImagePath** value, which resulted in an access denied message.
+Uwezo wa kubadilisha baadhi ya thamani moja kwa moja haukuwezekana, lakini uwezo wa kuunda funguo mpya za chini ulionekana. Mfano ulionyesha jaribio la kubadilisha thamani ya **ImagePath**, ambalo lilisababisha ujumbe wa kukataliwa kwa ufikiaji.
 
-Despite these limitations, a potential for privilege escalation was identified through the possibility of leveraging the **Performance** subkey within the **RpcEptMapper** service's registry structure, a subkey not present by default. This could enable DLL registration and performance monitoring.
+Licha ya vikwazo hivi, uwezekano wa kupandisha mamlaka ulitambuliwa kupitia uwezekano wa kutumia funguo ya **Performance** ndani ya muundo wa rejista wa huduma ya **RpcEptMapper**, funguo ambayo haipo kwa kawaida. Hii inaweza kuruhusu usajili wa DLL na ufuatiliaji wa utendaji.
 
-Documentation on the **Performance** subkey and its utilization for performance monitoring was consulted, leading to the development of a proof-of-concept DLL. This DLL, demonstrating the implementation of **OpenPerfData**, **CollectPerfData**, and **ClosePerfData** functions, was tested via **rundll32**, confirming its operational success.
+Hati kuhusu funguo ya **Performance** na matumizi yake kwa ufuatiliaji wa utendaji ilikaguliwa, ikisababisha maendeleo ya DLL ya uthibitisho wa dhana. DLL hii, ikionyesha utekelezaji wa kazi za **OpenPerfData**, **CollectPerfData**, na **ClosePerfData**, ilijaribiwa kupitia **rundll32**, ikithibitisha mafanikio yake ya uendeshaji.
 
-The goal was to coerce the **RPC Endpoint Mapper service** into loading the crafted Performance DLL. Observations revealed that executing WMI class queries related to Performance Data via PowerShell resulted in the creation of a log file, enabling the execution of arbitrary code under the **LOCAL SYSTEM** context, thus granting elevated privileges.
+Lengo lilikuwa kulazimisha huduma ya **RPC Endpoint Mapper** kupakia DLL ya Performance iliyoundwa. Uangalizi ulionyesha kuwa kutekeleza maswali ya darasa la WMI yanayohusiana na Data ya Utendaji kupitia PowerShell kulisababisha kuundwa kwa faili ya kumbukumbu, ikiruhusu utekelezaji wa msimbo wa kiholela chini ya muktadha wa **LOCAL SYSTEM**, hivyo kutoa mamlaka ya juu.
 
-The persistence and potential implications of this vulnerability were underscored, highlighting its relevance for post-exploitation strategies, lateral movement, and evasion of antivirus/EDR systems.
+Uthibitisho wa kudumu na athari zinazoweza kutokea za udhaifu huu zilisisitizwa, zikionyesha umuhimu wake kwa mikakati ya baada ya unyakuzi, harakati za pembeni, na kuepuka mifumo ya antivirus/EDR.
 
-Although the vulnerability was initially disclosed unintentionally through the script, it was emphasized that its exploitation is constrained to outdated Windows versions (e.g., **Windows 7 / Server 2008 R2**) and requires local access.
+Ingawa udhaifu huu ulifunuliwa kwa bahati mbaya kupitia script, ilisisitizwa kuwa unyakuzi wake unategemea toleo la zamani la Windows (mfano, **Windows 7 / Server 2008 R2**) na unahitaji ufikiaji wa ndani.
 
 {{#include ../../banners/hacktricks-training.md}}
-

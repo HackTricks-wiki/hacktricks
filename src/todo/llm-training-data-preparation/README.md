@@ -1,10 +1,10 @@
 # LLM Training - Data Preparation
 
-**These are my notes from the very recommended book** [**https://www.manning.com/books/build-a-large-language-model-from-scratch**](https://www.manning.com/books/build-a-large-language-model-from-scratch) **with some extra information.**
+**Hizi ni nota zangu kutoka kwa kitabu kinachopendekezwa sana** [**https://www.manning.com/books/build-a-large-language-model-from-scratch**](https://www.manning.com/books/build-a-large-language-model-from-scratch) **pamoja na taarifa za ziada.**
 
 ## Basic Information
 
-You should start by reading this post for some basic concepts you should know about:
+Unapaswa kuanza kwa kusoma chapisho hili kwa baadhi ya dhana za msingi unazopaswa kujua kuhusu:
 
 {{#ref}}
 0.-basic-llm-concepts.md
@@ -13,7 +13,7 @@ You should start by reading this post for some basic concepts you should know ab
 ## 1. Tokenization
 
 > [!TIP]
-> The goal of this initial phase is very simple: **Divide the input in tokens (ids) in some way that makes sense**.
+> Lengo la awamu hii ya awali ni rahisi sana: **Gawanya ingizo katika tokeni (ids) kwa njia ambayo ina maana**.
 
 {{#ref}}
 1.-tokenizing.md
@@ -22,7 +22,7 @@ You should start by reading this post for some basic concepts you should know ab
 ## 2. Data Sampling
 
 > [!TIP]
-> The goal of this second phase is very simple: **Sample the input data and prepare it for the training phase usually by separating the dataset into sentences of a specific length and generating also the expected response.**
+> Lengo la awamu hii ya pili ni rahisi sana: **Chukua sampuli ya data ya ingizo na kuandaa kwa awamu ya mafunzo kwa kawaida kwa kutenganisha dataset katika sentensi za urefu maalum na pia kuzalisha jibu linalotarajiwa.**
 
 {{#ref}}
 2.-data-sampling.md
@@ -31,10 +31,10 @@ You should start by reading this post for some basic concepts you should know ab
 ## 3. Token Embeddings
 
 > [!TIP]
-> The goal of this third phase is very simple: **Assign each of the previous tokens in the vocabulary a vector of the desired dimensions to train the model.** Each word in the vocabulary will a point in a space of X dimensions.\
-> Note that initially the position of each word in the space is just initialised "randomly" and these positions are trainable parameters (will be improved during the training).
+> Lengo la awamu hii ya tatu ni rahisi sana: **Patia kila moja ya tokeni za awali katika msamiati vector ya vipimo vinavyotakiwa ili kufundisha mfano.** Kila neno katika msamiati litakuwa na pointi katika nafasi ya vipimo X.\
+> Kumbuka kwamba awali nafasi ya kila neno katika nafasi inaanzishwa "kwa bahati nasibu" na nafasi hizi ni vigezo vinavyoweza kufundishwa (vitaboreshwa wakati wa mafunzo).
 >
-> Moreover, during the token embedding **another layer of embeddings is created** which represents (in this case) the **absolute possition of the word in the training sentence**. This way a word in different positions in the sentence will have a different representation (meaning).
+> Zaidi ya hayo, wakati wa token embedding **tabaka lingine la embeddings linaundwa** ambalo linawakilisha (katika kesi hii) **nafasi halisi ya neno katika sentensi ya mafunzo**. Kwa njia hii neno katika nafasi tofauti katika sentensi litakuwa na uwakilishi tofauti (maana).
 
 {{#ref}}
 3.-token-embeddings.md
@@ -43,8 +43,8 @@ You should start by reading this post for some basic concepts you should know ab
 ## 4. Attention Mechanisms
 
 > [!TIP]
-> The goal of this fourth phase is very simple: **Apply some attetion mechanisms**. These are going to be a lot of **repeated layers** that are going to **capture the relation of a word in the vocabulary with its neighbours in the current sentence being used to train the LLM**.\
-> A lot of layers are used for this, so a lot of trainable parameters are going to be capturing this information.
+> Lengo la awamu hii ya nne ni rahisi sana: **Tumia baadhi ya mitambo ya umakini**. Hizi zitakuwa tabaka nyingi **zinazorudiwa** ambazo zitakuwa **zinakamata uhusiano wa neno katika msamiati na majirani zake katika sentensi ya sasa inayotumika kufundisha LLM**.\
+> Tabaka nyingi zinatumika kwa hili, hivyo vigezo vingi vinavyoweza kufundishwa vitakuwa vinakamata taarifa hii.
 
 {{#ref}}
 4.-attention-mechanisms.md
@@ -53,9 +53,9 @@ You should start by reading this post for some basic concepts you should know ab
 ## 5. LLM Architecture
 
 > [!TIP]
-> The goal of this fifth phase is very simple: **Develop the architecture of the full LLM**. Put everything together, apply all the layers and create all the functions to generate text or transform text to IDs and backwards.
+> Lengo la awamu hii ya tano ni rahisi sana: **Tengeneza muundo wa LLM kamili**. Panga kila kitu pamoja, tumia tabaka zote na uunde kazi zote za kuzalisha maandiko au kubadilisha maandiko kuwa IDs na kinyume chake.
 >
-> This architecture will be used for both, training and predicting text after it was trained.
+> Muundo huu utatumika kwa mafunzo na kutabiri maandiko baada ya kufundishwa.
 
 {{#ref}}
 5.-llm-architecture.md
@@ -64,7 +64,7 @@ You should start by reading this post for some basic concepts you should know ab
 ## 6. Pre-training & Loading models
 
 > [!TIP]
-> The goal of this sixth phase is very simple: **Train the model from scratch**. For this the previous LLM architecture will be used with some loops going over the data sets using the defined loss functions and optimizer to train all the parameters of the model.
+> Lengo la awamu hii ya sita ni rahisi sana: **Fundisha mfano kutoka mwanzo**. Kwa hili muundo wa awali wa LLM utatumika na miduara fulani ikipita juu ya seti za data kwa kutumia kazi za hasara zilizofafanuliwa na msaidizi kufundisha vigezo vyote vya mfano.
 
 {{#ref}}
 6.-pre-training-and-loading-models.md
@@ -73,7 +73,7 @@ You should start by reading this post for some basic concepts you should know ab
 ## 7.0. LoRA Improvements in fine-tuning
 
 > [!TIP]
-> The use of **LoRA reduce a lot the computation** needed to **fine tune** already trained models.
+> Matumizi ya **LoRA hupunguza sana hesabu** inayohitajika ili **kurekebisha** mifano iliyofundishwa tayari.
 
 {{#ref}}
 7.0.-lora-improvements-in-fine-tuning.md
@@ -82,7 +82,7 @@ You should start by reading this post for some basic concepts you should know ab
 ## 7.1. Fine-Tuning for Classification
 
 > [!TIP]
-> The goal of this section is to show how to fine-tune an already pre-trained model so instead of generating new text the LLM will select give the **probabilities of the given text being categorized in each of the given categories** (like if a text is spam or not).
+> Lengo la sehemu hii ni kuonyesha jinsi ya kurekebisha mfano uliofundishwa tayari ili badala ya kuzalisha maandiko mapya LLM itachagua kutoa **uwezekano wa maandiko yaliyotolewa kuainishwa katika kila moja ya makundi yaliyotolewa** (kama maandiko ni spam au la).
 
 {{#ref}}
 7.1.-fine-tuning-for-classification.md
@@ -91,9 +91,8 @@ You should start by reading this post for some basic concepts you should know ab
 ## 7.2. Fine-Tuning to follow instructions
 
 > [!TIP]
-> The goal of this section is to show how to **fine-tune an already pre-trained model to follow instructions** rather than just generating text, for example, responding to tasks as a chat bot.
+> Lengo la sehemu hii ni kuonyesha jinsi ya **kurekebisha mfano uliofundishwa tayari ili kufuata maagizo** badala ya tu kuzalisha maandiko, kwa mfano, kujibu kazi kama roboti ya mazungumzo.
 
 {{#ref}}
 7.2.-fine-tuning-to-follow-instructions.md
 {{#endref}}
-

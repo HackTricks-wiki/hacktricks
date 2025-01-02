@@ -1,46 +1,43 @@
-# Integrity Levels
+# Viwango vya Uaminifu
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Integrity Levels
+## Viwango vya Uaminifu
 
-In Windows Vista and later versions, all protected items come with an **integrity level** tag. This setup mostly assigns a "medium" integrity level to files and registry keys, except for certain folders and files that Internet Explorer 7 can write to at a low integrity level. The default behavior is for processes initiated by standard users to have a medium integrity level, whereas services typically operate at a system integrity level. A high-integrity label safeguards the root directory.
+Katika Windows Vista na toleo la baadaye, vitu vyote vilivyolindwa vinakuja na lebo ya **kiwango cha uaminifu**. Mpangilio huu kwa kawaida unatoa kiwango cha "kati" cha uaminifu kwa faili na funguo za rejista, isipokuwa kwa folda na faili fulani ambazo Internet Explorer 7 inaweza kuandika kwa kiwango cha chini cha uaminifu. Tabia ya kawaida ni kwamba michakato inayozinduliwa na watumiaji wa kawaida ina kiwango cha kati cha uaminifu, wakati huduma kwa kawaida hufanya kazi kwa kiwango cha uaminifu wa mfumo. Lebo ya uaminifu wa juu inalinda saraka ya mzizi.
 
-A key rule is that objects can't be modified by processes with a lower integrity level than the object's level. The integrity levels are:
+Kanuni muhimu ni kwamba vitu haviwezi kubadilishwa na michakato yenye kiwango cha chini cha uaminifu kuliko kiwango cha kitu. Viwango vya uaminifu ni:
 
-- **Untrusted**: This level is for processes with anonymous logins. %%%Example: Chrome%%%
-- **Low**: Mainly for internet interactions, especially in Internet Explorer's Protected Mode, affecting associated files and processes, and certain folders like the **Temporary Internet Folder**. Low integrity processes face significant restrictions, including no registry write access and limited user profile write access.
-- **Medium**: The default level for most activities, assigned to standard users and objects without specific integrity levels. Even members of the Administrators group operate at this level by default.
-- **High**: Reserved for administrators, allowing them to modify objects at lower integrity levels, including those at the high level itself.
-- **System**: The highest operational level for the Windows kernel and core services, out of reach even for administrators, ensuring protection of vital system functions.
-- **Installer**: A unique level that stands above all others, enabling objects at this level to uninstall any other object.
+- **Hauaminiki**: Kiwango hiki ni kwa michakato yenye kuingia kwa siri. %%%Mfano: Chrome%%%
+- **Chini**: Kimsingi kwa mwingiliano wa mtandao, hasa katika Modu ya Kulindwa ya Internet Explorer, ikihusisha faili na michakato zinazohusiana, na folda fulani kama **Folda ya Mtandao ya Muda**. Michakato ya chini ya uaminifu inakabiliwa na vizuizi vikubwa, ikiwa ni pamoja na kukosa ufikiaji wa kuandika rejista na ufikiaji mdogo wa kuandika wasifu wa mtumiaji.
+- **Kati**: Kiwango cha kawaida kwa shughuli nyingi, kinachotolewa kwa watumiaji wa kawaida na vitu bila viwango maalum vya uaminifu. Hata wanachama wa kundi la Wasimamizi hufanya kazi kwa kiwango hiki kwa kawaida.
+- **Juu**: Imehifadhiwa kwa wasimamizi, ikiwaruhusu kubadilisha vitu vilivyo na viwango vya chini vya uaminifu, ikiwa ni pamoja na vile vilivyo katika kiwango cha juu chenyewe.
+- **Mfumo**: Kiwango cha juu zaidi cha uendeshaji kwa kernel ya Windows na huduma za msingi, ambacho hakiwezi kufikiwa hata na wasimamizi, kuhakikisha ulinzi wa kazi muhimu za mfumo.
+- **Mfunguo**: Kiwango cha kipekee ambacho kiko juu ya vingine vyote, kikiruhusu vitu katika kiwango hiki kufuta kitu kingine chochote.
 
-You can get the integrity level of a process using **Process Explorer** from **Sysinternals**, accessing the **properties** of the process and viewing the "**Security**" tab:
+Unaweza kupata kiwango cha uaminifu cha mchakato kwa kutumia **Process Explorer** kutoka **Sysinternals**, ukifikia **mali** ya mchakato na kuangalia kichupo cha "**Usalama**":
 
 ![](<../../images/image (824).png>)
 
-You can also get your **current integrity level** using `whoami /groups`
+Unaweza pia kupata **kiwango chako cha uaminifu cha sasa** kwa kutumia `whoami /groups`
 
 ![](<../../images/image (325).png>)
 
-### Integrity Levels in File-system
+### Viwango vya Uaminifu katika Mfumo wa Faili
 
-A object inside the file-system may need an **minimum integrity level requirement** and if a process doesn't have this integrity process it won't be able to interact with it.\
-For example, lets **create a regular from a regular user console file and check the permissions**:
-
+Kitu ndani ya mfumo wa faili kinaweza kuhitaji **mahitaji ya kiwango cha chini cha uaminifu** na ikiwa mchakato huna mchakato huu wa uaminifu hautaweza kuingiliana nacho.\
+Kwa mfano, hebu **tufanye faili ya kawaida kutoka kwa konsole ya mtumiaji wa kawaida na kuangalia ruhusa**:
 ```
 echo asd >asd.txt
 icacls asd.txt
 asd.txt BUILTIN\Administrators:(I)(F)
-        DESKTOP-IDJHTKP\user:(I)(F)
-        NT AUTHORITY\SYSTEM:(I)(F)
-        NT AUTHORITY\INTERACTIVE:(I)(M,DC)
-        NT AUTHORITY\SERVICE:(I)(M,DC)
-        NT AUTHORITY\BATCH:(I)(M,DC)
+DESKTOP-IDJHTKP\user:(I)(F)
+NT AUTHORITY\SYSTEM:(I)(F)
+NT AUTHORITY\INTERACTIVE:(I)(M,DC)
+NT AUTHORITY\SERVICE:(I)(M,DC)
+NT AUTHORITY\BATCH:(I)(M,DC)
 ```
-
-Now, lets assign a minimum integrity level of **High** to the file. This **must be done from a console** running as **administrator** as a **regular console** will be running in Medium Integrity level and **won't be allowed** to assign High Integrity level to an object:
-
+Sasa, hebu tuweke kiwango cha chini cha uaminifu cha **Juu** kwa faili. Hii **lazima ifanywe kutoka kwenye konso** inayotembea kama **meneja** kwani **konso ya kawaida** itakuwa ikitembea katika kiwango cha Uaminifu wa Kati na **haitaruhusiwa** kuweka kiwango cha Juu cha Uaminifu kwa kitu:
 ```
 icacls asd.txt /setintegritylevel(oi)(ci) High
 processed file: asd.txt
@@ -48,16 +45,14 @@ Successfully processed 1 files; Failed processing 0 files
 
 C:\Users\Public>icacls asd.txt
 asd.txt BUILTIN\Administrators:(I)(F)
-        DESKTOP-IDJHTKP\user:(I)(F)
-        NT AUTHORITY\SYSTEM:(I)(F)
-        NT AUTHORITY\INTERACTIVE:(I)(M,DC)
-        NT AUTHORITY\SERVICE:(I)(M,DC)
-        NT AUTHORITY\BATCH:(I)(M,DC)
-        Mandatory Label\High Mandatory Level:(NW)
+DESKTOP-IDJHTKP\user:(I)(F)
+NT AUTHORITY\SYSTEM:(I)(F)
+NT AUTHORITY\INTERACTIVE:(I)(M,DC)
+NT AUTHORITY\SERVICE:(I)(M,DC)
+NT AUTHORITY\BATCH:(I)(M,DC)
+Mandatory Label\High Mandatory Level:(NW)
 ```
-
-This is where things get interesting. You can see that the user `DESKTOP-IDJHTKP\user` has **FULL privileges** over the file (indeed this was the user that created the file), however, due to the minimum integrity level implemented he won't be able to modify the file anymore unless he is running inside a High Integrity Level (note that he will be able to read it):
-
+Hapa ndipo mambo yanakuwa ya kuvutia. Unaweza kuona kwamba mtumiaji `DESKTOP-IDJHTKP\user` ana **haki kamili** juu ya faili (kweli huyu ndiye mtumiaji aliyeunda faili), hata hivyo, kutokana na kiwango cha chini cha uaminifu kilichotekelezwa hatoweza kubadilisha faili tena isipokuwa anapokuwa akifanya kazi ndani ya Kiwango cha Juu cha Uaminifu (zingatia kwamba ataweza kuisoma):
 ```
 echo 1234 > asd.txt
 Access is denied.
@@ -66,35 +61,31 @@ del asd.txt
 C:\Users\Public\asd.txt
 Access is denied.
 ```
-
 > [!NOTE]
-> **Therefore, when a file has a minimum integrity level, in order to modify it you need to be running at least in that integrity level.**
+> **Hivyo, wakati faili ina kiwango cha chini cha uaminifu, ili kuibadilisha unahitaji kuwa unafanya kazi angalau katika kiwango hicho cha uaminifu.**
 
-### Integrity Levels in Binaries
+### Viwango vya Uaminifu katika Binaries
 
-I made a copy of `cmd.exe` in `C:\Windows\System32\cmd-low.exe` and set it an **integrity level of low from an administrator console:**
-
+Nimefanya nakala ya `cmd.exe` katika `C:\Windows\System32\cmd-low.exe` na kuweka kiwango chake cha **uaminifu kuwa wa chini kutoka kwa konso ya msimamizi:**
 ```
 icacls C:\Windows\System32\cmd-low.exe
 C:\Windows\System32\cmd-low.exe NT AUTHORITY\SYSTEM:(I)(F)
-                                BUILTIN\Administrators:(I)(F)
-                                BUILTIN\Users:(I)(RX)
-                                APPLICATION PACKAGE AUTHORITY\ALL APPLICATION PACKAGES:(I)(RX)
-                                APPLICATION PACKAGE AUTHORITY\ALL RESTRICTED APP PACKAGES:(I)(RX)
-                                Mandatory Label\Low Mandatory Level:(NW)
+BUILTIN\Administrators:(I)(F)
+BUILTIN\Users:(I)(RX)
+APPLICATION PACKAGE AUTHORITY\ALL APPLICATION PACKAGES:(I)(RX)
+APPLICATION PACKAGE AUTHORITY\ALL RESTRICTED APP PACKAGES:(I)(RX)
+Mandatory Label\Low Mandatory Level:(NW)
 ```
-
-Now, when I run `cmd-low.exe` it will **run under a low-integrity level** instead of a medium one:
+Sasa, ninapokimbia `cmd-low.exe` itafanya **kazi chini ya kiwango cha chini cha uaminifu** badala ya kiwango cha kati:
 
 ![](<../../images/image (313).png>)
 
-For curious people, if you assign high integrity level to a binary (`icacls C:\Windows\System32\cmd-high.exe /setintegritylevel high`) it won't run with high integrity level automatically (if you invoke it from a medium integrity level --by default-- it will run under a medium integrity level).
+Kwa watu wenye hamu, ikiwa utaweka kiwango cha juu cha uaminifu kwa binary (`icacls C:\Windows\System32\cmd-high.exe /setintegritylevel high`) haitafanya kazi kwa kiwango cha juu cha uaminifu moja kwa moja (ikiwa utaikumbusha kutoka kiwango cha kati cha uaminifu --kwa default-- itafanya kazi chini ya kiwango cha kati cha uaminifu).
 
-### Integrity Levels in Processes
+### Viwango vya Uaminifu katika Mchakato
 
-Not all files and folders have a minimum integrity level, **but all processes are running under an integrity level**. And similar to what happened with the file-system, **if a process wants to write inside another process it must have at least the same integrity level**. This means that a process with low integrity level can’t open a handle with full access to a process with medium integrity level.
+Sio faili na folda zote zina kiwango cha chini cha uaminifu, **lakini mchakato wote unafanya kazi chini ya kiwango cha uaminifu**. Na sawa na kile kilichotokea na mfumo wa faili, **ikiwa mchakato unataka kuandika ndani ya mchakato mwingine lazima uwe na angalau kiwango sawa cha uaminifu**. Hii inamaanisha kwamba mchakato wenye kiwango cha chini cha uaminifu hauwezi kufungua kushughulikia kwa ufikiaji kamili kwa mchakato wenye kiwango cha kati cha uaminifu.
 
-Due to the restrictions commented in this and the previous section, from a security point of view, it's always **recommended to run a process in the lower level of integrity possible**.
+Kwa sababu ya vizuizi vilivyotajwa katika sehemu hii na sehemu iliyopita, kutoka kwa mtazamo wa usalama, kila wakati **inapendekezwa kufanya kazi katika kiwango cha chini cha uaminifu iwezekanavyo**.
 
 {{#include ../../banners/hacktricks-training.md}}
-

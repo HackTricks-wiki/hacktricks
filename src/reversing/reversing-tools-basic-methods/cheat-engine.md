@@ -2,163 +2,162 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-[**Cheat Engine**](https://www.cheatengine.org/downloads.php) is a useful program to find where important values are saved inside the memory of a running game and change them.\
-When you download and run it, you are **presented** with a **tutorial** of how to use the tool. If you want to learn how to use the tool it's highly recommended to complete it.
+[**Cheat Engine**](https://www.cheatengine.org/downloads.php) ni programu muhimu ya kutafuta mahali ambapo thamani muhimu zimehifadhiwa ndani ya kumbukumbu ya mchezo unaoendelea na kuzibadilisha.\
+Unaposhusha na kuendesha, unapata **mafunzo** ya jinsi ya kutumia chombo hicho. Ikiwa unataka kujifunza jinsi ya kutumia chombo hicho, inashauriwa kukamilisha.
 
-## What are you searching?
+## Unatafuta nini?
 
 ![](<../../images/image (762).png>)
 
-This tool is very useful to find **where some value** (usually a number) **is stored in the memory** of a program.\
-**Usually numbers** are stored in **4bytes** form, but you could also find them in **double** or **float** formats, or you may want to look for something **different from a number**. For that reason you need to be sure you **select** what you want to **search for**:
+Chombo hiki ni muhimu sana kutafuta **mahali ambapo thamani fulani** (kawaida ni nambari) **imehifadhiwa katika kumbukumbu** ya programu.\
+**Kawaida nambari** huhifadhiwa katika **4bytes** lakini unaweza pia kuziona katika **double** au **float** formats, au unaweza kutaka kutafuta kitu **tofauti na nambari**. Kwa hiyo unahitaji kuwa na uhakika unachagua kile unachotaka **kutafuta**:
 
 ![](<../../images/image (324).png>)
 
-Also you can indicate **different** types of **searches**:
+Pia unaweza kuashiria **aina tofauti** za **tafiti**:
 
 ![](<../../images/image (311).png>)
 
-You can also check the box to **stop the game while scanning the memory**:
+Unaweza pia kuangalia kisanduku ili **kusitisha mchezo wakati wa kuskania kumbukumbu**:
 
 ![](<../../images/image (1052).png>)
 
 ### Hotkeys
 
-In _**Edit --> Settings --> Hotkeys**_ you can set different **hotkeys** for different purposes like **stopping** the **game** (which is quiet useful if at some point you want to scan the memory). Other options are available:
+Katika _**Edit --> Settings --> Hotkeys**_ unaweza kuweka **hotkeys** tofauti kwa madhumuni tofauti kama **kusitisha** **mchezo** (ambayo ni muhimu sana ikiwa kwa wakati fulani unataka kuskania kumbukumbu). Chaguzi nyingine zinapatikana:
 
 ![](<../../images/image (864).png>)
 
-## Modifying the value
+## Kubadilisha thamani
 
-Once you **found** where is the **value** you are **looking for** (more about this in the following steps) you can **modify it** double clicking it, then double clicking its value:
+Mara tu unapokuwa **umeipata** thamani unayo **itafuta** (zaidi kuhusu hii katika hatua zinazofuata) unaweza **kuibadilisha** kwa kubofya mara mbili, kisha kubofya mara mbili kwenye thamani yake:
 
 ![](<../../images/image (563).png>)
 
-And finally **marking the check** to get the modification done in the memory:
+Na hatimaye **kuweka alama** ili kupata mabadiliko yafanyike katika kumbukumbu:
 
 ![](<../../images/image (385).png>)
 
-The **change** to the **memory** will be immediately **applied** (note that until the game doesn't use this value again the value **won't be updated in the game**).
+**Mabadiliko** kwa **kumbukumbu** yatakuwa **yamewekwa** mara moja (kumbuka kwamba hadi mchezo usitumie thamani hii tena, thamani **haitawekwa upya katika mchezo**).
 
-## Searching the value
+## Kutafuta thamani
 
-So, we are going to suppose that there is an important value (like the life of your user) that you want to improve, and you are looking for this value in the memory)
+Hivyo, tutadhani kuna thamani muhimu (kama maisha ya mtumiaji wako) unayotaka kuboresha, na unatafuta thamani hii katika kumbukumbu)
 
-### Through a known change
+### Kupitia mabadiliko yanayojulikana
 
-Supposing you are looking for the value 100, you **perform a scan** searching for that value and you find a lot of coincidences:
+Tukidhani unatafuta thamani 100, unafanya **scan** ukitafuta thamani hiyo na unapata coincidences nyingi:
 
 ![](<../../images/image (108).png>)
 
-Then, you do something so that **value changes**, and you **stop** the game and **perform** a **next scan**:
+Kisha, unafanya kitu ili **thamani ibadilike**, na un **asitisha** mchezo na **ufanye** **scan inayofuata**:
 
 ![](<../../images/image (684).png>)
 
-Cheat Engine will search for the **values** that **went from 100 to the new value**. Congrats, you **found** the **address** of the value you were looking for, you can now modify it.\
-&#xNAN;_&#x49;f you still have several values, do something to modify again that value, and perform another "next scan" to filter the addresses._
+Cheat Engine itatafuta **thamani** ambazo **zilipita kutoka 100 hadi thamani mpya**. Hongera, umepata **anwani** ya thamani uliyokuwa unatafuta, sasa unaweza kuibadilisha.\
+&#xNAN;_&#x49;f bado una thamani kadhaa, fanya kitu kubadilisha tena thamani hiyo, na fanya "scan inayofuata" ili kuchuja anwani._
 
-### Unknown Value, known change
+### Thamani isiyojulikana, mabadiliko yanayojulikana
 
-In the scenario you **don't know the value** but you know **how to make it change** (and even the value of the change) you can look for your number.
+Katika hali ambapo **hujui thamani** lakini unajua **jinsi ya kuifanya ibadilike** (na hata thamani ya mabadiliko) unaweza kutafuta nambari yako.
 
-So, start by performing a scan of type "**Unknown initial value**":
+Hivyo, anza kwa kufanya scan ya aina "**Thamani ya mwanzo isiyojulikana**":
 
 ![](<../../images/image (890).png>)
 
-Then, make the value change, indicate **how** the **value** **changed** (in my case it was decreased by 1) and perform a **next scan**:
+Kisha, fanya thamani ibadilike, onyesha **jinsi** **thamani** **ilibadilika** (katika kesi yangu ilipungua kwa 1) na fanya **scan inayofuata**:
 
 ![](<../../images/image (371).png>)
 
-You will be presented **all the values that were modified in the selected way**:
+Utawasilishwa **na thamani zote ambazo zilibadilishwa kwa njia iliyochaguliwa**:
 
 ![](<../../images/image (569).png>)
 
-Once you have found your value, you can modify it.
+Mara tu unapokuwa umepata thamani yako, unaweza kuibadilisha.
 
-Note that there are a **lot of possible changes** and you can do these **steps as much as you want** to filter the results:
+Kumbuka kwamba kuna **mabadiliko mengi yanayowezekana** na unaweza kufanya hatua hizi **kama unavyotaka** ili kuchuja matokeo:
 
 ![](<../../images/image (574).png>)
 
-### Random Memory Address - Finding the code
+### Anwani ya Kumbukumbu ya Nasibu - Kutafuta msimbo
 
-Until know we learnt how to find an address storing a value, but it's highly probably that in **different executions of the game that address is in different places of the memory**. So lets find out how to always find that address.
+Hadi sasa tumefundishwa jinsi ya kupata anwani inayohifadhi thamani, lakini kuna uwezekano mkubwa kwamba katika **utekelezaji tofauti wa mchezo anwani hiyo iko katika maeneo tofauti ya kumbukumbu**. Hivyo hebu tujifunze jinsi ya kila wakati kupata anwani hiyo.
 
-Using some of the mentioned tricks, find the address where your current game is storing the important value. Then (stopping the game if you whish) do a **right click** on the found **address** and select "**Find out what accesses this address**" or "**Find out what writes to this address**":
+Tumia baadhi ya hila zilizotajwa, pata anwani ambapo mchezo wako wa sasa unahifadhi thamani muhimu. Kisha (ukisimamisha mchezo ikiwa unataka) fanya **kubofya kulia** kwenye **anwani** iliyopatikana na uchague "**Jua ni nani anayefikia anwani hii**" au "**Jua ni nani anayandika kwenye anwani hii**":
 
 ![](<../../images/image (1067).png>)
 
-The **first option** is useful to know which **parts** of the **code** are **using** this **address** (which is useful for more things like **knowing where you can modify the code** of the game).\
-The **second option** is more **specific**, and will be more helpful in this case as we are interested in knowing **from where this value is being written**.
+**Chaguo la kwanza** ni muhimu kujua ni **sehemu** gani za **msimbo** zinazo **tumia** anwani hii (ambayo ni muhimu kwa mambo zaidi kama **kujua wapi unaweza kubadilisha msimbo** wa mchezo).\
+**Chaguo la pili** ni **maalum zaidi**, na litakuwa na msaada zaidi katika kesi hii kwani tunavutiwa kujua **kutoka wapi thamani hii inaandikwa**.
 
-Once you have selected one of those options, the **debugger** will be **attached** to the program and a new **empty window** will appear. Now, **play** the **game** and **modify** that **value** (without restarting the game). The **window** should be **filled** with the **addresses** that are **modifying** the **value**:
+Mara tu unapochagua moja ya chaguzi hizo, **debugger** itakuwa **imeunganishwa** na programu na dirisha jipya **bila maudhui** litajitokeza. Sasa, **chezesha** **mchezo** na **badilisha** hiyo **thamani** (bila kuanzisha upya mchezo). **Dirisha** linapaswa kuwa **limejaa** na **anwani** zinazobadilisha **thamani**:
 
 ![](<../../images/image (91).png>)
 
-Now that you found the address it's modifying the value you can **modify the code at your pleasure** (Cheat Engine allows you to modify it for NOPs real quick):
+Sasa kwamba umepata anwani inayobadilisha thamani unaweza **kubadilisha msimbo kwa mapenzi yako** (Cheat Engine inakuwezesha kuibadilisha kwa NOPs haraka):
 
 ![](<../../images/image (1057).png>)
 
-So, you can now modify it so the code won't affect your number, or will always affect in a positive way.
+Hivyo, sasa unaweza kuibadilisha ili msimbo usiathiri nambari yako, au uathiri kila wakati kwa njia chanya.
 
-### Random Memory Address - Finding the pointer
+### Anwani ya Kumbukumbu ya Nasibu - Kutafuta kiashiria
 
-Following the previous steps, find where the value you are interested is. Then, using "**Find out what writes to this address**" find out which address writes this value and double click on it to get the disassembly view:
+Kufuata hatua zilizopita, pata mahali ambapo thamani unayovutiwa nayo iko. Kisha, kwa kutumia "**Jua ni nani anayandika kwenye anwani hii**" pata ni anwani gani inayoandika thamani hii na ubofye mara mbili ili kupata mtazamo wa disassembly:
 
 ![](<../../images/image (1039).png>)
 
-Then, perform a new scan **searching for the hex value between "\[]"** (the value of $edx in this case):
+Kisha, fanya scan mpya **ukitafuta thamani ya hex kati ya "\[]"** (thamani ya $edx katika kesi hii):
 
 ![](<../../images/image (994).png>)
 
-(_If several appear you usually need the smallest address one_)\
-Now, we have f**ound the pointer that will be modifying the value we are interested in**.
+(_Ikiwa kadhaa zinaonekana kawaida unahitaji ile yenye anwani ndogo zaidi_)\
+Sasa, tumepata **kiashiria ambacho kitakuwa kikibadilisha thamani tunayotaka**.
 
-Click on "**Add Address Manually**":
+Bofya kwenye "**Ongeza Anwani kwa Mikono**":
 
 ![](<../../images/image (990).png>)
 
-Now, click on the "Pointer" check box and add the found address in the text box (in this scenario, the found address in the previous image was "Tutorial-i386.exe"+2426B0):
+Sasa, bofya kwenye kisanduku cha "Kiashiria" na ongeza anwani iliyopatikana katika kisanduku cha maandiko (katika hali hii, anwani iliyopatikana katika picha iliyopita ilikuwa "Tutorial-i386.exe"+2426B0):
 
 ![](<../../images/image (392).png>)
 
-(Note how the first "Address" is automatically populated from the pointer address you introduce)
+(Kumbuka jinsi "Anwani" ya kwanza inajazwa kiotomatiki kutoka kwa anwani ya kiashiria unayoingiza)
 
-Click OK and a new pointer will be created:
+Bofya OK na kiashiria kipya kitaundwa:
 
 ![](<../../images/image (308).png>)
 
-Now, every time you modifies that value you are **modifying the important value even if the memory address where the value is is different.**
+Sasa, kila wakati unabadilisha thamani hiyo unakuwa **unabadilisha thamani muhimu hata kama anwani ya kumbukumbu ambapo thamani hiyo iko ni tofauti.**
 
-### Code Injection
+### Uingizaji wa Msimbo
 
-Code injection is a technique where you inject a piece of code into the target process, and then reroute the execution of code to go through your own written code (like giving you points instead of resting them).
+Uingizaji wa msimbo ni mbinu ambapo unatia kipande cha msimbo katika mchakato wa lengo, na kisha unarudisha utekelezaji wa msimbo ili upitie msimbo wako ulioandikwa (kama kukupa alama badala ya kuziondoa).
 
-So, imagine you have found the address that is subtracting 1 to the life of your player:
+Hivyo, fikiria umepata anwani inayopunguza 1 kwa maisha ya mchezaji wako:
 
 ![](<../../images/image (203).png>)
 
-Click on Show disassembler to get the **disassemble code**.\
-Then, click **CTRL+a** to invoke the Auto assemble window and select _**Template --> Code Injection**_
+Bofya kwenye Onyesha disassembler ili kupata **msimbo wa disassemble**.\
+Kisha, bofya **CTRL+a** ili kuitisha dirisha la Auto assemble na uchague _**Template --> Uingizaji wa Msimbo**_
 
 ![](<../../images/image (902).png>)
 
-Fill the **address of the instruction you want to modify** (this is usually autofilled):
+Jaza **anwani ya maagizo unayotaka kubadilisha** (hii kawaida hujaza kiotomatiki):
 
 ![](<../../images/image (744).png>)
 
-A template will be generated:
+Kigezo kitaundwa:
 
 ![](<../../images/image (944).png>)
 
-So, insert your new assembly code in the "**newmem**" section and remove the original code from the "**originalcode**" if you don't want it to be executed\*\*.\*\* In this example the injected code will add 2 points instead of substracting 1:
+Hivyo, ingiza msimbo wako mpya wa assembly katika sehemu ya "**newmem**" na ondoa msimbo wa asili kutoka kwa "**originalcode**" ikiwa hutaki utekelezwe\*\*.\*\* Katika mfano huu, msimbo uliotiwa utaongeza alama 2 badala ya kupunguza 1:
 
 ![](<../../images/image (521).png>)
 
-**Click on execute and so on and your code should be injected in the program changing the behaviour of the functionality!**
+**Bofya kwenye tekeleza na kadhalika na msimbo wako unapaswa kuingizwa katika programu ukibadilisha tabia ya kazi hiyo!**
 
-## **References**
+## **Marejeleo**
 
-- **Cheat Engine tutorial, complete it to learn how to start with Cheat Engine**
+- **Mafunzo ya Cheat Engine, kamilisha ili kujifunza jinsi ya kuanza na Cheat Engine**
 
 {{#include ../../banners/hacktricks-training.md}}
-

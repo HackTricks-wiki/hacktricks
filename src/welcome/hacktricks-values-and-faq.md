@@ -5,17 +5,17 @@
 ## HackTricks Values
 
 > [!TIP]
-> These are the **values of the HackTricks Project**:
+> Hizi ni **thamani za Mradi wa HackTricks**:
 >
-> - Give **FREE** access to **EDUCATIONAL hacking** resources to **ALL** Internet.
->   - Hacking is about learning, and learning should be as free as possible.
->   - The purpose of this book is to serve as a comprehensive **educational resource**.
-> - **STORE** awesome **hacking** techniques that the community publishes giving the **ORIGINAL** **AUTHORS** all the **credits**.
->   - **We don't want the credit from other people**, we just want to store cool tricks for everyone.
->   - We also write **our own researches** in HackTricks.
->   - In several cases we will just write **in HackTricks a summary of the important parts** of the technique and will **encourage the lector to visit the original post** for more details.
-> - **ORGANIZE** all the hacking techniques in the book so it's **MORE ACCESSIBLE**
->   - The HackTricks team has dedicated thousands of hours for free **only to organize the content** so people can **learn faster**
+> - Toa **UFIKIRI** wa rasilimali za **ELIMU ya hacking** kwa **WOTE** kwenye Mtandao.
+>   - Hacking ni kuhusu kujifunza, na kujifunza inapaswa kuwa bure kadri iwezekanavyo.
+>   - Kusudi la kitabu hiki ni kutumikia kama **rasilimali ya elimu** ya kina.
+> - **HIFADHI** mbinu za **hacking** za kushangaza ambazo jamii inachapisha ikitoa **WANDIKAJI** wa **AWALI** sifa zote.
+>   - **Hatupendi sifa kutoka kwa watu wengine**, tunataka tu kuhifadhi mbinu nzuri kwa kila mtu.
+>   - Pia tunaandika **utafiti wetu wenyewe** katika HackTricks.
+>   - Katika hali kadhaa tutandika tu **katika HackTricks muhtasari wa sehemu muhimu** za mbinu na tutawatia moyo **wasomaji kutembelea chapisho la asili** kwa maelezo zaidi.
+> - **ANDAA** mbinu zote za hacking katika kitabu ili iwe **RAHISI KUFIKIA**
+>   - Timu ya HackTricks imejitolea maelfu ya masaa bure **kuandaa maudhui** ili watu waweze **kujifunza haraka**
 
 <figure><img src="../images/hack tricks gif.gif" alt="" width="375"><figcaption></figcaption></figure>
 
@@ -23,124 +23,121 @@
 
 > [!TIP]
 >
-> - **Thank you so much for these resources, how can I thank you?**
+> - **Asante sana kwa rasilimali hizi, naweza vipi kuwashukuru?**
 
-You can publicly thanks HackTricks teams for putting together all these resources publicly in a tweet mentioning [**@hacktricks_live**](https://twitter.com/hacktricks_live).\
-If you are specially grateful you can also [**sponsor the project here**](https://github.com/sponsors/carlospolop).\
-And don't forget to **give a star in the Github projects!** (Find the links below).
+Unaweza kuwashukuru hadharani timu za HackTricks kwa kuandaa rasilimali hizi zote hadharani katika tweet ukimnukuu [**@hacktricks_live**](https://twitter.com/hacktricks_live).\
+Ikiwa unashukuru sana unaweza pia [**kudhamini mradi hapa**](https://github.com/sponsors/carlospolop).\
+Na usisahau **kutoa nyota katika miradi ya Github!** (Pata viungo hapa chini).
 
 > [!TIP]
 >
-> - **How can I contribute to the project?**
+> - **Ninaweza vipi kuchangia katika mradi?**
 
-You can **share new tips and tricks with the community or fix bugs** you find in the books sending a **Pull Request** to the respective Github pages:
+Unaweza **kushiriki vidokezo na mbinu mpya na jamii au kurekebisha makosa** unayoyapata katika vitabu kwa kutuma **Pull Request** kwenye kurasa husika za Github:
 
 - [https://github.com/carlospolop/hacktricks](https://github.com/carlospolop/hacktricks)
 - [https://github.com/carlospolop/hacktricks-cloud](https://github.com/carlospolop/hacktricks-cloud)
 
-Don't forget to **give a star in the Github projects!**
+Usisahau **kutoa nyota katika miradi ya Github!**
 
 > [!TIP]
 >
-> - **Can I copy some content from HackTricks and put it in my blog?**
+> - **Naweza kunakili maudhui kutoka HackTricks na kuyweka kwenye blogu yangu?**
 
-Yes, you can, but **don't forget to mention the specific link(s)** where the content was taken from.
+Ndio, unaweza, lakini **usisahau kutaja kiungo maalum** ambacho maudhui yalitolewa.
 
 > [!TIP]
 >
-> - **How can I cite a page of HackTricks?**
+> - **Ninaweza vipi kunukuu ukurasa wa HackTricks?**
 
-As long as the link **of** the page(s) were you took the information from appears it's enough.\
-If you need a bibtex you can use something like:
-
+Mradi tu kiungo **cha** ukurasa(za) ulizochukua habari kutoka kitatosha.\
+Ikiwa unahitaji bibtex unaweza kutumia kitu kama:
 ```latex
 @misc{hacktricks-bibtexing,
-  author = {"HackTricks Team" or the Authors name of the specific page/trick},
-  title = {Title of the Specific Page},
-  year = {Year of Last Update (check it at the end of the page)},
-  url = {\url{https://book.hacktricks.xyz/specific-page}},
+author = {"HackTricks Team" or the Authors name of the specific page/trick},
+title = {Title of the Specific Page},
+year = {Year of Last Update (check it at the end of the page)},
+url = {\url{https://book.hacktricks.xyz/specific-page}},
 }
 ```
+> [!WARNING]
+>
+> - **Naweza kunakili HackTricks zote kwenye blogu yangu?**
+
+**Ningependa kutokufanya hivyo**. Hii **haitafaidisha mtu yeyote** kwani **maudhui yote tayari yanapatikana hadharani** katika vitabu rasmi vya HackTricks bure.
+
+Ikiwa unahofia kwamba itatoweka, tu fork kwenye Github au uipakue, kama nilivyosema tayari ni bure.
 
 > [!WARNING]
 >
-> - **Can I copy all HackTricks in my blog?**
+> - **Kwa nini una wadhamini? Je, vitabu vya HackTricks ni kwa madhumuni ya kibiashara?**
 
-**I would rather not**. Thats **not going to benefit anyone** as all the **content is already publicly available** in the official HackTricks books for free.
+Thamani ya kwanza ya **HackTricks** ni kutoa rasilimali za elimu za **BURE** za hacking kwa **DUNIA YOTE**. Timu ya HackTricks imejitolea **masaa maelfu** kutoa maudhui haya, tena, kwa **BURE**.
 
-If you fear that it will disappear, just fork it in Github or download it, as I said it's already free.
+Ikiwa unafikiri vitabu vya HackTricks vimeandikwa kwa **madhumuni ya kibiashara** uko **KABISA KOSA**.
 
-> [!WARNING]
->
-> - **Why do you have sponsors? Are HackTricks books for commercial purposes?**
+Tuna wadhamini kwa sababu, hata kama maudhui yote ni BURE, tunataka **kutoa jamii fursa ya kuthamini kazi yetu** ikiwa wanataka. Hivyo, tunawapa watu chaguo la kuchangia HackTricks kupitia [**wadhamini wa Github**](https://github.com/sponsors/carlospolop), na **makampuni muhimu ya usalama wa mtandao** kudhamini HackTricks na **kuwa na matangazo** katika kitabu, ambapo **matangazo** yanapangwa kila wakati katika maeneo yanayofanya yawe **naonekana** lakini **hayakoseshi mchakato wa kujifunza** ikiwa mtu anazingatia maudhui.
 
-The first **HackTricks** **value** is to offer **FREE** hacking educational resources to **ALL** the world. The HackTricks team has **dedicated thousands of hours** to offer this content, again, for **FREE**.
-
-If you think HackTricks books are made for **commercial purposes** you are **COMPLETELY WRONG**.
-
-We have sponsors because, even if all the content is FREE, we want to **offer the community the possibility of appreciating our work** if they want to. Therefore, we offer people the option to donate to HackTricks via [**Github sponsors**](https://github.com/sponsors/carlospolop), and **relevant cybersecurity companies** to sponsor HackTricks and to **have some ads** in the book being the **ads** always placed in places where make them **visible** but **doesn't disturb the learning** process if someone focus in the content.
-
-You won't find HackTricks filled with annoying ads like other blogs with much less content than HackTricks, because HackTricks is not made for commercial purposes.
+Hautapata HackTricks imejaa matangazo ya annoying kama blogu nyingine zenye maudhui kidogo kuliko HackTricks, kwa sababu HackTricks haijandikwa kwa madhumuni ya kibiashara.
 
 > [!CAUTION]
 >
-> - **What should I do if some HackTricks page is based on my blog post but it isn't referenced?**
+> - **Nifanye nini ikiwa ukurasa fulani wa HackTricks unategemea chapisho langu la blogu lakini haujarejelewa?**
 
-**We are very sorry. This shouldn't have happened**. Please, let us know via Github issues, Twitter, Discord... the link of the HackTricks page with the content and the link of your blog and **we will check it and add it ASAP**.
-
-> [!CAUTION]
->
-> - **What should I do if there is content from my blog in HackTricks and I don't want it there?**
-
-Note that having links to your page in HackTricks:
-
-- Improve your **SEO**
-- The content gets **translated to more than 15 languages** making possible for more people to access this content
-- **HackTricks encourages** people to **check your page** (several people has mentioned us that since some page of them is in HackTricks they receive more visits)
-
-However, If you still want the content of your blog to be removed from HackTricks just let us know and we will definitely **remove every link to your blog**, and any content based on it.
+**Tunaomba radhi sana. Hii haikupaswa kutokea**. Tafadhali, tujulishe kupitia masuala ya Github, Twitter, Discord... kiungo cha ukurasa wa HackTricks wenye maudhui na kiungo cha blogu yako na **tutakagua na kuongeza ASAP**.
 
 > [!CAUTION]
 >
-> - **What should I do if I find copy-pasted content in HackTricks?**
+> - **Nifanye nini ikiwa kuna maudhui kutoka kwa blogu yangu katika HackTricks na sitaki iwepo hapo?**
 
-We always **give the original authors all the credits**. If you find a page with copy-pasted content without original source referenced, let us know and we will either **remove it**, **add the link before the text**, or **rewrite it adding the link**.
+Kumbuka kwamba kuwa na viungo kwenye ukurasa wako katika HackTricks:
+
+- Inaboresha **SEO** yako
+- Maudhui yanapata **kutafsiriwa kwa zaidi ya lugha 15** ikifanya iwezekane kwa watu wengi kufikia maudhui haya
+- **HackTricks inahamasisha** watu **kuangalia ukurasa wako** (watu kadhaa wametujulisha kwamba tangu ukurasa wao upo katika HackTricks wanapata ziara zaidi)
+
+Hata hivyo, ikiwa bado unataka maudhui ya blogu yako yaondolewe kutoka HackTricks tu tujulishe na bila shaka tutafanya **kuondoa kila kiungo kwa blogu yako**, na maudhui yoyote yanayotegemea hiyo.
+
+> [!CAUTION]
+>
+> - **Nifanye nini ikiwa napata maudhui yaliyokopwa katika HackTricks?**
+
+Sisi kila wakati **tunawapa waandishi wa asili sifa zote**. Ikiwa unapata ukurasa wenye maudhui yaliyokopwa bila chanzo cha asili kilichorejelewa, tujulishe na tutafanya **kuondoa**, **kuongeza kiungo kabla ya maandiko**, au **kuandika upya kwa kuongeza kiungo**.
 
 ## LICENSE
 
-Copyright © All rights reserved unless otherwise specified.
+Copyright © Haki zote zimehifadhiwa isipokuwa kama vinginevyo imeelezwa.
 
-#### License Summary:
+#### Muhtasari wa Leseni:
 
-- Attribution: You are free to:
-  - Share — copy and redistribute the material in any medium or format.
-  - Adapt — remix, transform, and build upon the material.
+- Kutambua: Una uhuru wa:
+- Kushiriki — kunakili na kugawa nyenzo katika njia yoyote au muundo.
+- Kubadilisha — kuchanganya, kubadilisha, na kujenga juu ya nyenzo.
 
-#### Additional Terms:
+#### Masharti ya Ziada:
 
-- Third-Party Content: Some parts of this blog/book may include content from other sources, such as excerpts from other blogs or publications. The use of such content is done under the principles of fair use or with explicit permission from the respective copyright holders. Please refer to the original sources for specific licensing information regarding third-party content.
-- Authorship: The original content authored by HackTricks is subject to the terms of this license. You are encouraged to attribute this work to the author when sharing or adapting it.
+- Maudhui ya Watu wa Tatu: Sehemu zingine za blogu hii/kitabu zinaweza kujumuisha maudhui kutoka vyanzo vingine, kama vile nukuu kutoka blogu nyingine au machapisho. Matumizi ya maudhui kama haya yanafanywa chini ya kanuni za matumizi ya haki au kwa ruhusa wazi kutoka kwa wamiliki wa hakimiliki husika. Tafadhali rejelea vyanzo vya asili kwa habari maalum za leseni kuhusu maudhui ya watu wa tatu.
+- Uandishi: Maudhui ya asili yaliyoandikwa na HackTricks yanategemea masharti ya leseni hii. Unahimizwa kutambua kazi hii kwa mwandishi unaposhiriki au kubadilisha.
 
-#### Exemptions:
+#### Mipango ya Kutengwa:
 
-- Commercial Use: For inquiries regarding commercial use of this content, please contact me.
+- Matumizi ya Kibiashara: Kwa maswali kuhusu matumizi ya kibiashara ya maudhui haya, tafadhali wasiliana nami.
 
-This license does not grant any trademark or branding rights in relation to the content. All trademarks and branding featured in this blog/book are the property of their respective owners.
+Leseni hii haitoi haki yoyote ya alama ya biashara au haki za chapa kuhusiana na maudhui. Alama zote za biashara na chapa zilizomo katika blogu hii/kitabu ni mali ya wamiliki wao husika.
 
-**By accessing or using HackTricks, you agree to abide by the terms of this license. If you do not agree with these terms, please, do not access this website.**
+**Kwa kufikia au kutumia HackTricks, unakubali kufuata masharti ya leseni hii. Ikiwa hukubaliani na masharti haya, tafadhali, usifike kwenye tovuti hii.**
 
-## **Disclaimer**
+## **Kanusho**
 
 > [!CAUTION]
-> This book, 'HackTricks,' is intended for educational and informational purposes only. The content within this book is provided on an 'as is' basis, and the authors and publishers make no representations or warranties of any kind, express or implied, about the completeness, accuracy, reliability, suitability, or availability of the information, products, services, or related graphics contained within this book. Any reliance you place on such information is therefore strictly at your own risk.
+> Kitabu hiki, 'HackTricks,' kinakusudiwa kwa madhumuni ya elimu na taarifa pekee. Maudhui ndani ya kitabu hiki yanatolewa kwa msingi wa 'kama ilivyo', na waandishi na wachapishaji hawatoi uwakilishi au dhamana yoyote, wazi au fiche, kuhusu ukamilifu, usahihi, uaminifu, kufaa, au upatikanaji wa habari, bidhaa, huduma, au picha zinazohusiana zilizomo ndani ya kitabu hiki. Kila unavyotegemea habari kama hiyo ni kwa hatari yako mwenyewe.
 >
-> The authors and publishers shall in no event be liable for any loss or damage, including without limitation, indirect or consequential loss or damage, or any loss or damage whatsoever arising from loss of data or profits arising out of, or in connection with, the use of this book.
+> Waandishi na wachapishaji hawatakuwa na jukumu lolote kwa hasara au uharibifu wowote, ikiwa ni pamoja na bila kikomo, hasara au uharibifu wa moja kwa moja au wa matokeo, au hasara au uharibifu wowote unaotokana na kupoteza data au faida zinazotokana na, au kuhusiana na, matumizi ya kitabu hiki.
 >
-> Furthermore, the techniques and tips described in this book are provided for educational and informational purposes only, and should not be used for any illegal or malicious activities. The authors and publishers do not condone or support any illegal or unethical activities, and any use of the information contained within this book is at the user's own risk and discretion.
+> Zaidi ya hayo, mbinu na vidokezo vilivyoelezewa katika kitabu hiki vinatolewa kwa madhumuni ya elimu na taarifa pekee, na havipaswi kutumika kwa shughuli zozote zisizo za kisheria au zenye uharibifu. Waandishi na wachapishaji hawakubali wala kuunga mkono shughuli zozote zisizo za kisheria au zisizo za maadili, na matumizi yoyote ya habari iliyomo ndani ya kitabu hiki ni kwa hatari na uamuzi wa mtumiaji.
 >
-> The user is solely responsible for any actions taken based on the information contained within this book, and should always seek professional advice and assistance when attempting to implement any of the techniques or tips described herein.
+> Mtumiaji ndiye mwenye jukumu pekee kwa hatua zozote zinazochukuliwa kwa msingi wa habari iliyomo ndani ya kitabu hiki, na inapaswa kila wakati kutafuta ushauri wa kitaalamu na msaada wanapojaribu kutekeleza mbinu au vidokezo vyovyote vilivyoelezewa hapa.
 >
-> By using this book, the user agrees to release the authors and publishers from any and all liability and responsibility for any damages, losses, or harm that may result from the use of this book or any of the information contained within it.
+> Kwa kutumia kitabu hiki, mtumiaji anakubali kuachilia waandishi na wachapishaji kutoka kwa dhima na wajibu wowote kwa uharibifu, hasara, au madhara yoyote yanayoweza kutokea kutokana na matumizi ya kitabu hiki au maudhui yoyote yaliyomo ndani yake.
 
 {{#include ../banners/hacktricks-training.md}}
-

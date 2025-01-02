@@ -2,29 +2,26 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**This is a summary of the domain persistence techniques shared in [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)**. Check it for further details.
+**Hii ni muhtasari wa mbinu za kudumu za kikoa zilizoshirikiwa katika [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)**. Angalia kwa maelezo zaidi.
 
-## Forging Certificates with Stolen CA Certificates - DPERSIST1
+## Kuunda Vyeti kwa Vyeti vya CA Vilivyoibiwa - DPERSIST1
 
-How can you tell that a certificate is a CA certificate?
+Unawezaje kujua kwamba cheti ni cheti cha CA?
 
-It can be determined that a certificate is a CA certificate if several conditions are met:
+Inaweza kubainishwa kwamba cheti ni cheti cha CA ikiwa masharti kadhaa yanatimizwa:
 
-- The certificate is stored on the CA server, with its private key secured by the machine's DPAPI, or by hardware such as a TPM/HSM if the operating system supports it.
-- Both the Issuer and Subject fields of the certificate match the distinguished name of the CA.
-- A "CA Version" extension is present in the CA certificates exclusively.
-- The certificate lacks Extended Key Usage (EKU) fields.
+- Cheti kimehifadhiwa kwenye seva ya CA, na funguo zake za faragha zimehifadhiwa na DPAPI ya mashine, au na vifaa kama TPM/HSM ikiwa mfumo wa uendeshaji unauunga mkono.
+- Sehemu za Issuer na Subject za cheti zinakubaliana na jina lililoainishwa la CA.
+- Kiambatisho cha "CA Version" kinapatikana katika vyeti vya CA pekee.
+- Cheti hakina sehemu za Matumizi ya Funguo Yaliyoongezwa (EKU).
 
-To extract the private key of this certificate, the `certsrv.msc` tool on the CA server is the supported method via the built-in GUI. Nonetheless, this certificate does not differ from others stored within the system; thus, methods such as the [THEFT2 technique](certificate-theft.md#user-certificate-theft-via-dpapi-theft2) can be applied for extraction.
+Ili kutoa funguo za faragha za cheti hiki, zana ya `certsrv.msc` kwenye seva ya CA ndiyo njia inayoungwa mkono kupitia GUI iliyojengwa ndani. Hata hivyo, cheti hiki hakitofautiani na vingine vilivyohifadhiwa ndani ya mfumo; hivyo, mbinu kama [mbinu ya THEFT2](certificate-theft.md#user-certificate-theft-via-dpapi-theft2) zinaweza kutumika kwa ajili ya kutoa.
 
-The certificate and private key can also be obtained using Certipy with the following command:
-
+Cheti na funguo za faragha pia zinaweza kupatikana kwa kutumia Certipy na amri ifuatayo:
 ```bash
 certipy ca 'corp.local/administrator@ca.corp.local' -hashes :123123.. -backup
 ```
-
-Upon acquiring the CA certificate and its private key in `.pfx` format, tools like [ForgeCert](https://github.com/GhostPack/ForgeCert) can be utilized to generate valid certificates:
-
+Baada ya kupata cheti cha CA na funguo zake za faragha katika muundo wa `.pfx`, zana kama [ForgeCert](https://github.com/GhostPack/ForgeCert) zinaweza kutumika kutengeneza vyeti halali:
 ```bash
 # Generating a new certificate with ForgeCert
 ForgeCert.exe --CaCertPath ca.pfx --CaCertPassword Password123! --Subject "CN=User" --SubjectAltName localadmin@theshire.local --NewCertPath localadmin.pfx --NewCertPassword Password123!
@@ -38,31 +35,29 @@ Rubeus.exe asktgt /user:localdomain /certificate:C:\ForgeCert\localadmin.pfx /pa
 # Authenticating using the new certificate with certipy
 certipy auth -pfx administrator_forged.pfx -dc-ip 172.16.126.128
 ```
-
 > [!WARNING]
-> The user targeted for certificate forgery must be active and capable of authenticating in Active Directory for the process to succeed. Forging a certificate for special accounts like krbtgt is ineffective.
+> Mtumiaji anayelengwa kwa ajili ya uongozi wa cheti lazima awe hai na awe na uwezo wa kuthibitisha katika Active Directory ili mchakato uweze kufanikiwa. Uongozi wa cheti kwa akaunti maalum kama krbtgt haufanikii.
 
-This forged certificate will be **valid** until the end date specified and as **long as the root CA certificate is valid** (usually from 5 to **10+ years**). It's also valid for **machines**, so combined with **S4U2Self**, an attacker can **maintain persistence on any domain machine** for as long as the CA certificate is valid.\
-Moreover, the **certificates generated** with this method **cannot be revoked** as CA is not aware of them.
+Cheti hiki kilichofanywa kuwa **halali** hadi tarehe ya mwisho iliyotajwa na **kama cheti cha CA cha mzizi ni halali** (kawaida kutoka miaka 5 hadi **10+**). Pia ni halali kwa **mashine**, hivyo ikichanganywa na **S4U2Self**, mshambuliaji anaweza **kuendelea kuwepo kwenye mashine yoyote ya domain** kwa muda wote ambao cheti cha CA ni halali.\
+Zaidi ya hayo, **vyeti vilivyotengenezwa** kwa njia hii **haviwezi kufutwa** kwani CA haijui kuhusu hivyo.
 
-## Trusting Rogue CA Certificates - DPERSIST2
+## Kuamini Vyeti vya CA vya Kijanja - DPERSIST2
 
-The `NTAuthCertificates` object is defined to contain one or more **CA certificates** within its `cacertificate` attribute, which Active Directory (AD) utilizes. The verification process by the **domain controller** involves checking the `NTAuthCertificates` object for an entry matching the **CA specified** in the Issuer field of the authenticating **certificate**. Authentication proceeds if a match is found.
+Kituo cha `NTAuthCertificates` kimewekwa ili kuwa na cheti kimoja au zaidi **vyeti vya CA** ndani ya sifa yake ya `cacertificate`, ambayo Active Directory (AD) inatumia. Mchakato wa uthibitishaji na **kikundi cha domain** unahusisha kuangalia kituo cha `NTAuthCertificates` kwa kipengee kinacholingana na **CA iliyotajwa** katika uwanja wa Mtoaji wa **cheti** kinachothibitishwa. Uthibitishaji unaendelea ikiwa mechi imepatikana.
 
-A self-signed CA certificate can be added to the `NTAuthCertificates` object by an attacker, provided they have control over this AD object. Normally, only members of the **Enterprise Admin** group, along with **Domain Admins** or **Administrators** in the **forest root’s domain**, are granted permission to modify this object. They can edit the `NTAuthCertificates` object using `certutil.exe` with the command `certutil.exe -dspublish -f C:\Temp\CERT.crt NTAuthCA126`, or by employing the [**PKI Health Tool**](https://docs.microsoft.com/en-us/troubleshoot/windows-server/windows-security/import-third-party-ca-to-enterprise-ntauth-store#method-1---import-a-certificate-by-using-the-pki-health-tool).
+Cheti cha CA kilichojisaini mwenyewe kinaweza kuongezwa kwenye kituo cha `NTAuthCertificates` na mshambuliaji, ikiwa wana udhibiti juu ya kituo hiki cha AD. Kawaida, ni wanachama wa kundi la **Enterprise Admin**, pamoja na **Domain Admins** au **Administrators** katika **domain ya mzizi wa msitu**, ndio wanapewa ruhusa ya kubadilisha kitu hiki. Wanaweza kuhariri kituo cha `NTAuthCertificates` wakitumia `certutil.exe` na amri `certutil.exe -dspublish -f C:\Temp\CERT.crt NTAuthCA126`, au kwa kutumia [**Zana ya Afya ya PKI**](https://docs.microsoft.com/en-us/troubleshoot/windows-server/windows-security/import-third-party-ca-to-enterprise-ntauth-store#method-1---import-a-certificate-by-using-the-pki-health-tool).
 
-This capability is especially relevant when used in conjunction with a previously outlined method involving ForgeCert to dynamically generate certificates.
+Uwezo huu ni muhimu hasa unapotumika kwa pamoja na njia iliyotajwa hapo awali inayohusisha ForgeCert ili kuunda vyeti kwa njia ya moja kwa moja.
 
-## Malicious Misconfiguration - DPERSIST3
+## Usanidi Mbaya wa Kijanja - DPERSIST3
 
-Opportunities for **persistence** through **security descriptor modifications of AD CS** components are plentiful. Modifications described in the "[Domain Escalation](domain-escalation.md)" section can be maliciously implemented by an attacker with elevated access. This includes the addition of "control rights" (e.g., WriteOwner/WriteDACL/etc.) to sensitive components such as:
+Fursa za **kuendelea kuwepo** kupitia **mabadiliko ya descriptor ya usalama ya sehemu za AD CS** ni nyingi. Mabadiliko yaliyotajwa katika sehemu ya "[Domain Escalation](domain-escalation.md)" yanaweza kutekelezwa kwa uovu na mshambuliaji mwenye ufikiaji wa juu. Hii inajumuisha kuongeza "haki za udhibiti" (mfano, WriteOwner/WriteDACL/n.k.) kwa sehemu nyeti kama:
 
-- The **CA server’s AD computer** object
-- The **CA server’s RPC/DCOM server**
-- Any **descendant AD object or container** in **`CN=Public Key Services,CN=Services,CN=Configuration,DC=<DOMAIN>,DC=<COM>`** (for instance, the Certificate Templates container, Certification Authorities container, the NTAuthCertificates object, etc.)
-- **AD groups delegated rights to control AD CS** by default or by the organization (such as the built-in Cert Publishers group and any of its members)
+- Kituo cha **kompyuta ya AD ya seva ya CA**
+- Kituo cha **seva ya RPC/DCOM ya seva ya CA**
+- Kila **kituo au chombo cha AD kilichoshuka** katika **`CN=Public Key Services,CN=Services,CN=Configuration,DC=<DOMAIN>,DC=<COM>`** (kwa mfano, chombo cha Templeti za Cheti, chombo cha Mamlaka ya Uthibitishaji, kituo cha NTAuthCertificates, n.k.)
+- **Makundi ya AD yaliyopewa haki za kudhibiti AD CS** kwa kawaida au na shirika (kama kundi la ndani la Watoa Cheti na wanachama wake)
 
-An example of malicious implementation would involve an attacker, who has **elevated permissions** in the domain, adding the **`WriteOwner`** permission to the default **`User`** certificate template, with the attacker being the principal for the right. To exploit this, the attacker would first change the ownership of the **`User`** template to themselves. Following this, the **`mspki-certificate-name-flag`** would be set to **1** on the template to enable **`ENROLLEE_SUPPLIES_SUBJECT`**, allowing a user to provide a Subject Alternative Name in the request. Subsequently, the attacker could **enroll** using the **template**, choosing a **domain administrator** name as an alternative name, and utilize the acquired certificate for authentication as the DA.
+Mfano wa utekelezaji mbaya ungehusisha mshambuliaji, ambaye ana **idhini ya juu** katika domain, kuongeza ruhusa ya **`WriteOwner`** kwenye templeti ya cheti ya **`User`** ya kawaida, huku mshambuliaji akiwa ndiye mwenye haki hiyo. Ili kutumia hili, mshambuliaji angebadilisha kwanza umiliki wa templeti ya **`User`** kuwa wao wenyewe. Baada ya hapo, **`mspki-certificate-name-flag`** ingetengwa kuwa **1** kwenye templeti ili kuwezesha **`ENROLLEE_SUPPLIES_SUBJECT`**, ikiruhusu mtumiaji kutoa Jina Alternatif la Somo katika ombi. Kisha, mshambuliaji angeweza **kujiandikisha** kwa kutumia **templeti**, akichagua jina la **meneja wa domain** kama jina mbadala, na kutumia cheti kilichopatikana kwa uthibitishaji kama DA.
 
 {{#include ../../../banners/hacktricks-training.md}}
-

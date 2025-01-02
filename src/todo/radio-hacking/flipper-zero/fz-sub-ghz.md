@@ -4,13 +4,13 @@
 
 ## Intro <a href="#kfpn7" id="kfpn7"></a>
 
-Flipper Zero can **receive and transmit radio frequencies in the range of 300-928 MHz** with its built-in module, which can read, save, and emulate remote controls. These controls are used for interaction with gates, barriers, radio locks, remote control switches, wireless doorbells, smart lights, and more. Flipper Zero can help you to learn if your security is compromised.
+Flipper Zero inaweza **kupokea na kutuma masafa ya redio katika anuwai ya 300-928 MHz** na moduli yake iliyojengwa, ambayo inaweza kusoma, kuhifadhi, na kuiga remote controls. Remote hizi zinatumika kwa mwingiliano na milango, vizuizi, funguo za redio, swichi za remote control, kengele za mlango zisizo na waya, mwanga wa smart, na zaidi. Flipper Zero inaweza kukusaidia kujifunza ikiwa usalama wako umeathirika.
 
 <figure><img src="../../../images/image (714).png" alt=""><figcaption></figcaption></figure>
 
 ## Sub-GHz hardware <a href="#kfpn7" id="kfpn7"></a>
 
-Flipper Zero has a built-in sub-1 GHz module based on a [﻿](https://www.st.com/en/nfc/st25r3916.html#overview)﻿[CC1101 chip](https://www.ti.com/lit/ds/symlink/cc1101.pdf) and a radio antenna (the maximum range is 50 meters). Both the CC1101 chip and the antenna are designed to operate at frequencies in the 300-348 MHz, 387-464 MHz, and 779-928 MHz bands.
+Flipper Zero ina moduli ya sub-1 GHz iliyojengwa inayotegemea [﻿](https://www.st.com/en/nfc/st25r3916.html#overview)﻿[CC1101 chip](https://www.ti.com/lit/ds/symlink/cc1101.pdf) na antenna ya redio (anuwai ya juu ni mita 50). Chip ya CC1101 na antenna zimeundwa kufanya kazi katika masafa ya 300-348 MHz, 387-464 MHz, na 779-928 MHz.
 
 <figure><img src="../../../images/image (923).png" alt=""><figcaption></figcaption></figure>
 
@@ -19,55 +19,55 @@ Flipper Zero has a built-in sub-1 GHz module based on a [﻿](https://www.st.com
 ### Frequency Analyser
 
 > [!NOTE]
-> How to find which frequency is the remote using
+> Jinsi ya kupata ni masafa gani remote inatumia
 
-When analysing, Flipper Zero is scanning signals strength (RSSI) at all the frequencies available in frequency configuration. Flipper Zero displays the frequency with the highest RSSI value, with signal strength higher than -90 [dBm](https://en.wikipedia.org/wiki/DBm).
+Wakati wa kuchambua, Flipper Zero inachanganua nguvu za ishara (RSSI) katika masafa yote yanayopatikana katika usanidi wa masafa. Flipper Zero inaonyesha masafa yenye thamani ya juu ya RSSI, ikiwa na nguvu ya ishara zaidi ya -90 [dBm](https://en.wikipedia.org/wiki/DBm).
 
-To determine the remote's frequency, do the following:
+Ili kubaini masafa ya remote, fanya yafuatayo:
 
-1. Place the remote control very close to the left of Flipper Zero.
-2. Go to **Main Menu** **→ Sub-GHz**.
-3. Select **Frequency Analyzer**, then press and hold the button on the remote control you want to analyze.
-4. Review the frequency value on the screen.
+1. Weka remote control karibu sana na kushoto ya Flipper Zero.
+2. Nenda kwenye **Main Menu** **→ Sub-GHz**.
+3. Chagua **Frequency Analyzer**, kisha bonyeza na ushikilie kitufe kwenye remote control unayotaka kuchambua.
+4. Kagua thamani ya masafa kwenye skrini.
 
 ### Read
 
 > [!NOTE]
-> Find info about the frequency used (also another way to find which frequency is used)
+> Pata taarifa kuhusu masafa yanayotumika (pia njia nyingine ya kupata ni masafa gani yanayotumika)
 
-The **Read** option **listens on the configured frequency** on the indicated modulation: 433.92 AM by default. If **something is found** when reading, **info is given** in the screen. This info could be use to replicate the signal in the future.
+Chaguo la **Read** **linasikiliza kwenye masafa yaliyosanidiwa** kwenye moduli iliyotajwa: 433.92 AM kwa chaguo-msingi. Ikiwa **kitu kinapatikana** wakati wa kusoma, **taarifa inatolewa** kwenye skrini. Taarifa hii inaweza kutumika kuiga ishara siku zijazo.
 
-While Read is in use, it's possible to press the **left button** and **configure it**.\
-At this moment it has **4 modulations** (AM270, AM650, FM328 and FM476), and **several relevant frequencies** stored:
+Wakati Read inatumika, inawezekana kubonyeza **kitufe cha kushoto** na **kuisakinisha**.\
+Kwa sasa ina **modulations 4** (AM270, AM650, FM328 na FM476), na **masafa kadhaa muhimu** yaliyohifadhiwa:
 
 <figure><img src="../../../images/image (947).png" alt=""><figcaption></figcaption></figure>
 
-You can set **any that interests you**, however, if you are **not sure which frequency** could be the one used by the remote you have, **set Hopping to ON** (Off by default), and press the button several times until Flipper captures it and give you the info you need to set the frequency.
+Unaweza kuweka **yoyote inayokuvutia**, hata hivyo, ikiwa **hujui ni masafa gani** yanaweza kuwa yanayotumiwa na remote ulionayo, **weka Hopping kuwa ON** (Off kwa chaguo-msingi), na bonyeza kitufe mara kadhaa hadi Flipper ikiteka na kukupa taarifa unayohitaji kuweka masafa.
 
 > [!CAUTION]
-> Switching between frequencies takes some time, therefore signals transmitted at the time of switching can be missed. For better signal reception, set a fixed frequency determined by Frequency Analyzer.
+> Kubadilisha kati ya masafa kunachukua muda, kwa hivyo ishara zinazotumwa wakati wa kubadilisha zinaweza kupuuziliwa mbali. Kwa kupokea ishara bora, weka masafa thabiti yaliyopangwa na Frequency Analyzer.
 
 ### **Read Raw**
 
 > [!NOTE]
-> Steal (and replay) a signal in the configured frequency
+> Pora (na rudia) ishara katika masafa yaliyosanidiwa
 
-The **Read Raw** option **records signals** send in the listening frequency. This can be used to **steal** a signal and **repeat** it.
+Chaguo la **Read Raw** **linarekodi ishara** zinazotumwa katika masafa ya kusikiliza. Hii inaweza kutumika **kuiba** ishara na **kurudia** hiyo.
 
-By default **Read Raw is also in 433.92 in AM650**, but if with the Read option you found that the signal that interest you is in a **different frequency/modulation, you can also modify that** pressing left (while inside the Read Raw option).
+Kwa chaguo-msingi **Read Raw pia iko katika 433.92 katika AM650**, lakini ikiwa na chaguo la Read umegundua kuwa ishara inayokuvutia iko katika **masafa/modulation tofauti, unaweza pia kubadilisha hiyo** kwa kubonyeza kushoto (wakati uko ndani ya chaguo la Read Raw).
 
 ### Brute-Force
 
-If you know the protocol used for example by the garage door it's possible to g**enerate all the codes and send them with the Flipper Zero.** This is an example that support general common types of garages: [**https://github.com/tobiabocchi/flipperzero-bruteforce**](https://github.com/tobiabocchi/flipperzero-bruteforce)
+Ikiwa unajua itifaki inayotumiwa kwa mfano na mlango wa garaji inawezekana **kuunda nambari zote na kuzituma na Flipper Zero.** Hii ni mfano unaounga mkono aina za kawaida za garaji: [**https://github.com/tobiabocchi/flipperzero-bruteforce**](https://github.com/tobiabocchi/flipperzero-bruteforce)
 
 ### Add Manually
 
 > [!NOTE]
-> Add signals from a configured list of protocols
+> Ongeza ishara kutoka orodha iliyosanidiwa ya itifaki
 
-#### List of [supported protocols](https://docs.flipperzero.one/sub-ghz/add-new-remote) <a href="#id-3iglu" id="id-3iglu"></a>
+#### Orodha ya [itifaki zinazoungwa mkono](https://docs.flipperzero.one/sub-ghz/add-new-remote) <a href="#id-3iglu" id="id-3iglu"></a>
 
-| Princeton_433 (works with the majority of static code systems) | 433.92 | Static  |
+| Princeton_433 (inafanya kazi na mfumo wa nambari za statiki nyingi) | 433.92 | Static  |
 | -------------------------------------------------------------- | ------ | ------- |
 | Nice Flo 12bit_433                                             | 433.92 | Static  |
 | Nice Flo 24bit_433                                             | 433.92 | Static  |
@@ -84,22 +84,21 @@ If you know the protocol used for example by the garage door it's possible to g*
 | Security+2.0_315                                               | 315.00 | Dynamic |
 | Security+2.0_390                                               | 390.00 | Dynamic |
 
-### Supported Sub-GHz vendors
+### Vendors wa Sub-GHz wanaoungwa mkono
 
-Check the list in [https://docs.flipperzero.one/sub-ghz/supported-vendors](https://docs.flipperzero.one/sub-ghz/supported-vendors)
+Angalia orodha katika [https://docs.flipperzero.one/sub-ghz/supported-vendors](https://docs.flipperzero.one/sub-ghz/supported-vendors)
 
-### Supported Frequencies by region
+### Masafa yanayoungwa mkono kwa eneo
 
-Check the list in [https://docs.flipperzero.one/sub-ghz/frequencies](https://docs.flipperzero.one/sub-ghz/frequencies)
+Angalia orodha katika [https://docs.flipperzero.one/sub-ghz/frequencies](https://docs.flipperzero.one/sub-ghz/frequencies)
 
 ### Test
 
 > [!NOTE]
-> Get dBms of the saved frequencies
+> Pata dBms za masafa yaliyohifadhiwa
 
 ## Reference
 
 - [https://docs.flipperzero.one/sub-ghz](https://docs.flipperzero.one/sub-ghz)
 
 {{#include ../../../banners/hacktricks-training.md}}
-

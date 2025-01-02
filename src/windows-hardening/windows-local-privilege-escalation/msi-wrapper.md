@@ -2,12 +2,12 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Download the free version app from [https://www.exemsi.com/documentation/getting-started/](https://www.exemsi.com/download/), execute it and wrap the "malicious" binary on it.\
-Note that you can wrap a "**.bat**" if you **just** want to **execute** **command lines (instead of cmd.exe select the .bat file)**
+Pakua toleo la bure kutoka [https://www.exemsi.com/documentation/getting-started/](https://www.exemsi.com/download/), lifanyie kazi na uweke "malicious" binary ndani yake.\
+Kumbuka kwamba unaweza kuweka "**.bat**" ikiwa unataka **kutekeleza** **mistari ya amri (badala ya cmd.exe chagua faili la .bat)**
 
 ![](<../../images/image (417).png>)
 
-And this is the most important part of the configuration:
+Na hii ndiyo sehemu muhimu zaidi ya usanidi:
 
 ![](<../../images/image (312).png>)
 
@@ -15,9 +15,8 @@ And this is the most important part of the configuration:
 
 ![](<../../images/image (1072).png>)
 
-(Please, note that if you try to pack your own binary you will be able to modify these values)
+(Tafadhali, kumbuka kwamba ikiwa utajaribu kufunga binary yako mwenyewe utaweza kubadilisha hizi thamani)
 
-From here just click on **next buttons** and the last **build button and your installer/wrapper will be generated.**
+Kutoka hapa bonyeza tu **next buttons** na **build button** ya mwisho na installer/wrapper yako itazalishwa.**
 
 {{#include ../../banners/hacktricks-training.md}}
-

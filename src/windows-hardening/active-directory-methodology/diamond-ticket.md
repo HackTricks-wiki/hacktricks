@@ -4,18 +4,17 @@
 
 ## Diamond Ticket
 
-**Like a golden ticket**, a diamond ticket is a TGT which can be used to **access any service as any user**. A golden ticket is forged completely offline, encrypted with the krbtgt hash of that domain, and then passed into a logon session for use. Because domain controllers don't track TGTs it (or they) have legitimately issued, they will happily accept TGTs that are encrypted with its own krbtgt hash.
+**Kama tiketi ya dhahabu**, tiketi ya almasi ni TGT ambayo inaweza kutumika **kuingia kwenye huduma yoyote kama mtumiaji yeyote**. Tiketi ya dhahabu inaundwa kabisa bila mtandao, imefungwa kwa hash ya krbtgt ya eneo hilo, na kisha kuingizwa kwenye kikao cha kuingia kwa matumizi. Kwa sababu waendesha eneo hawafuatilii TGTs ambazo zimepewa kihalali, watakubali kwa furaha TGTs ambazo zimefungwa kwa hash yao ya krbtgt.
 
-There are two common techniques to detect the use of golden tickets:
+Kuna mbinu mbili za kawaida kugundua matumizi ya tiketi za dhahabu:
 
-- Look for TGS-REQs that have no corresponding AS-REQ.
-- Look for TGTs that have silly values, such as Mimikatz's default 10-year lifetime.
+- Angalia TGS-REQs ambazo hazina AS-REQ inayolingana.
+- Angalia TGTs ambazo zina thamani za kipumbavu, kama vile muda wa maisha wa miaka 10 wa Mimikatz.
 
-A **diamond ticket** is made by **modifying the fields of a legitimate TGT that was issued by a DC**. This is achieved by **requesting** a **TGT**, **decrypting** it with the domain's krbtgt hash, **modifying** the desired fields of the ticket, then **re-encrypting it**. This **overcomes the two aforementioned shortcomings** of a golden ticket because:
+**Tiketi ya almasi** inatengenezwa kwa **kubadilisha maeneo ya TGT halali ambayo ilitolewa na DC**. Hii inafikiwa kwa **kuomba** **TGT**, **kuifungua** kwa hash ya krbtgt ya eneo, **kubadilisha** maeneo yanayohitajika ya tiketi, kisha **kuifunga tena**. Hii **inasuluhisha mapungufu mawili yaliyotajwa hapo juu** ya tiketi ya dhahabu kwa sababu:
 
-- TGS-REQs will have a preceding AS-REQ.
-- The TGT was issued by a DC which means it will have all the correct details from the domain's Kerberos policy. Even though these can be accurately forged in a golden ticket, it's more complex and open to mistakes.
-
+- TGS-REQs zitakuwa na AS-REQ inayotangulia.
+- TGT ilitolewa na DC ambayo inamaanisha itakuwa na maelezo yote sahihi kutoka kwenye sera ya Kerberos ya eneo. Ingawa haya yanaweza kuundwa kwa usahihi katika tiketi ya dhahabu, ni ngumu zaidi na yanaweza kuwa na makosa.
 ```bash
 # Get user RID
 powershell Get-DomainUser -Identity <username> -Properties objectsid
@@ -28,6 +27,4 @@ powershell Get-DomainUser -Identity <username> -Properties objectsid
 # /groups are the desired group RIDs (512 being Domain Admins).
 # /krbkey is the krbtgt AES256 hash.
 ```
-
 {{#include ../../banners/hacktricks-training.md}}
-

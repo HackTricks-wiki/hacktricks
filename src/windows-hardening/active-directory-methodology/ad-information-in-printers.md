@@ -1,57 +1,52 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-There are several blogs in the Internet which **highlight the dangers of leaving printers configured with LDAP with default/weak** logon credentials.\
-This is because an attacker could **trick the printer to authenticate against a rouge LDAP server** (typically a `nc -vv -l -p 444` is enough) and to capture the printer **credentials on clear-text**.
+Kuna blogu kadhaa kwenye Mtandao ambazo **zinasisitiza hatari za kuacha printers zikiwa zimewekwa na LDAP zikiwa na** akauti za kuingia za kawaida/dhaifu.\
+Hii ni kwa sababu mshambuliaji anaweza **kudanganya printer kujiunga na seva ya LDAP isiyo halali** (kawaida `nc -vv -l -p 444` inatosha) na kukamata **akauti za printer kwa maandiko wazi**.
 
-Also, several printers will contains **logs with usernames** or could even be able to **download all usernames** from the Domain Controller.
+Pia, printers kadhaa zitakuwa na **kumbukumbu za majina ya watumiaji** au zinaweza hata kuwa na uwezo wa **kupakua majina yote ya watumiaji** kutoka kwa Domain Controller.
 
-All this **sensitive information** and the common **lack of security** makes printers very interesting for attackers.
+Taarifa hii **nyeti** na ukosefu wa **usalama** wa kawaida hufanya printers kuwa za kuvutia sana kwa washambuliaji.
 
-Some blogs about the topic:
+Baadhi ya blogu kuhusu mada hii:
 
 - [https://www.ceos3c.com/hacking/obtaining-domain-credentials-printer-netcat/](https://www.ceos3c.com/hacking/obtaining-domain-credentials-printer-netcat/)
 - [https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)
 
-## Printer Configuration
+## Mipangilio ya Printer
 
-- **Location**: The LDAP server list is found at: `Network > LDAP Setting > Setting Up LDAP`.
-- **Behavior**: The interface allows LDAP server modifications without re-entering credentials, aiming for user convenience but posing security risks.
-- **Exploit**: The exploit involves redirecting the LDAP server address to a controlled machine and leveraging the "Test Connection" feature to capture credentials.
+- **Mahali**: Orodha ya seva ya LDAP inapatikana kwenye: `Network > LDAP Setting > Setting Up LDAP`.
+- **Tabia**: Kiolesura kinaruhusu mabadiliko ya seva ya LDAP bila kuingiza tena akauti, ikilenga urahisi wa mtumiaji lakini ikileta hatari za usalama.
+- **Kuvunja**: Kuvunja kunahusisha kuelekeza anwani ya seva ya LDAP kwenye mashine iliyo chini ya udhibiti na kutumia kipengele cha "Test Connection" kukamata akauti.
 
-## Capturing Credentials
+## Kukamata Akauti
 
-**For more detailed steps, refer to the original [source](https://grimhacker.com/2018/03/09/just-a-printer/).**
+**Kwa hatua za kina zaidi, rejelea [chanzo](https://grimhacker.com/2018/03/09/just-a-printer/).**
 
-### Method 1: Netcat Listener
+### Njia 1: Netcat Listener
 
-A simple netcat listener might suffice:
-
+Listener rahisi ya netcat inaweza kutosha:
 ```bash
 sudo nc -k -v -l -p 386
 ```
-
-However, this method's success varies.
+Hata hivyo, mafanikio ya mbinu hii yanatofautiana.
 
 ### Method 2: Full LDAP Server with Slapd
 
-A more reliable approach involves setting up a full LDAP server because the printer performs a null bind followed by a query before attempting credential binding.
+Njia ya kuaminika zaidi inahusisha kuanzisha seva kamili ya LDAP kwa sababu printer inafanya bind ya null ikifuatiwa na uchunguzi kabla ya kujaribu kuunganisha akidi.
 
-1. **LDAP Server Setup**: The guide follows steps from [this source](https://www.server-world.info/en/note?os=Fedora_26&p=openldap).
+1. **LDAP Server Setup**: Mwongozo unafuata hatua kutoka [this source](https://www.server-world.info/en/note?os=Fedora_26&p=openldap).
 2. **Key Steps**:
-   - Install OpenLDAP.
-   - Configure admin password.
-   - Import basic schemas.
-   - Set domain name on LDAP DB.
-   - Configure LDAP TLS.
-3. **LDAP Service Execution**: Once set up, the LDAP service can be run using:
-
+- Sakinisha OpenLDAP.
+- Sanidi nenosiri la admin.
+- Ingiza mifano ya msingi.
+- Weka jina la kikoa kwenye DB ya LDAP.
+- Sanidi LDAP TLS.
+3. **LDAP Service Execution**: Mara baada ya kuanzishwa, huduma ya LDAP inaweza kuendeshwa kwa kutumia:
 ```bash
 slapd -d 2
 ```
-
-## References
+## Marejeleo
 
 - [https://grimhacker.com/2018/03/09/just-a-printer/](https://grimhacker.com/2018/03/09/just-a-printer/)
 
 {{#include ../../banners/hacktricks-training.md}}
-

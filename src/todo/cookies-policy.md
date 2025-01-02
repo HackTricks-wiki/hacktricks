@@ -1,47 +1,45 @@
-# Cookies Policy
+# Sera ya Vidakuzi
 
-Last updated: 02/04/2023
+Imesasishwa mwisho: 02/04/2023
 
-### Introduction
+### Utangulizi
 
-This Cookies Policy applies to the following websites owned and operated by HackTricks team ("HackTricks", "we", "us" or "our"):
+Sera hii ya Vidakuzi inatumika kwa tovuti zifuatazo zinazomilikiwa na kuendeshwa na timu ya HackTricks ("HackTricks", "sisi", "sisi" au "yetu"):
 
 * hacktricks.xyz
 * [www.hacktricks.xyz](http://www.hacktricks.xyz/)
 * book.hacktricks.xyz
 * cloud.hacktricks.xyz
 
-By using any of these websites, you agree to the use of cookies in accordance with this Cookies Policy. If you do not agree, please disable cookies in your browser settings or refrain from using our websites.
+Kwa kutumia tovuti hizi, unakubali matumizi ya vidakuzi kulingana na Sera hii ya Vidakuzi. Ikiwa hukubali, tafadhali zima vidakuzi katika mipangilio ya kivinjari chako au epuka kutumia tovuti zetu.
 
-### What are cookies?
+### Vidakuzi ni nini?
 
-Cookies are small text files that are stored on your computer or mobile device when you visit a website. They are widely used to make websites work, improve their functionality, and provide a more personalized user experience.
+Vidakuzi ni faili ndogo za maandiko ambazo huhifadhiwa kwenye kompyuta yako au kifaa chako cha rununu unap visiting tovuti. Vinatumika sana kufanya tovuti zifanye kazi, kuboresha utendaji wao, na kutoa uzoefu wa mtumiaji wa kibinafsi zaidi.
 
-### How we use cookies
+### Jinsi tunavyotumia vidakuzi
 
-We use cookies on our websites for the following purposes:
+Tunatumia vidakuzi kwenye tovuti zetu kwa madhumuni yafuatayo:
 
-1. Essential cookies: These cookies are necessary for the basic functionality of our websites, such as enabling user authentication, maintaining security, and remembering your preferences.
-2. Performance cookies: These cookies help us understand how visitors interact with our websites, by collecting and reporting information anonymously. This allows us to improve our website performance and user experience.
-3. Functionality cookies: These cookies enable our websites to remember choices you make, such as your language or region, to provide a more personalized experience.
-4. Targeting/advertising cookies: These cookies are used to deliver relevant ads and marketing communications based on your interests, browsing history, and interactions with our websites.
+1. Vidakuzi muhimu: Vidakuzi hivi ni muhimu kwa utendaji wa msingi wa tovuti zetu, kama vile kuwezesha uthibitishaji wa mtumiaji, kudumisha usalama, na kukumbuka mapendeleo yako.
+2. Vidakuzi vya utendaji: Vidakuzi hivi vinatusaidia kuelewa jinsi wageni wanavyoshirikiana na tovuti zetu, kwa kukusanya na kuripoti taarifa kwa njia isiyo ya wazi. Hii inatuwezesha kuboresha utendaji wa tovuti zetu na uzoefu wa mtumiaji.
+3. Vidakuzi vya utendaji: Vidakuzi hivi vinawawezesha tovuti zetu kukumbuka chaguo unazofanya, kama vile lugha yako au eneo lako, ili kutoa uzoefu wa kibinafsi zaidi.
+4. Vidakuzi vya kulenga/reklama: Vidakuzi hivi vinatumika kutoa matangazo yanayohusiana na mawasiliano ya masoko kulingana na maslahi yako, historia ya kuvinjari, na mwingiliano wako na tovuti zetu.
 
-Moreover, the pages book.hacktricks.xyz and cloud.hacktricks.xyz are hosted in Gitbook. You can find more information about Gitbooks cookies in [https://gitbook-1652864889.teamtailor.com/cookie-policy](https://gitbook-1652864889.teamtailor.com/cookie-policy).
+Zaidi ya hayo, kurasa book.hacktricks.xyz na cloud.hacktricks.xyz zinahostiwa katika Gitbook. Unaweza kupata maelezo zaidi kuhusu vidakuzi vya Gitbook katika [https://gitbook-1652864889.teamtailor.com/cookie-policy](https://gitbook-1652864889.teamtailor.com/cookie-policy).
 
-### Third-party cookies
+### Vidakuzi vya upande wa tatu
 
-In addition to our own cookies, we may also use third-party cookies to report website usage statistics, deliver advertisements, and enable social media sharing buttons. The use of third-party cookies is subject to their respective privacy policies.
+Mbali na vidakuzi vyetu, tunaweza pia kutumia vidakuzi vya upande wa tatu kuripoti takwimu za matumizi ya tovuti, kutoa matangazo, na kuwezesha vitufe vya kushiriki mitandao ya kijamii. Matumizi ya vidakuzi vya upande wa tatu yanategemea sera zao za faragha.
 
-Managing cookies
+Kusimamia vidakuzi
 
-Most web browsers allow you to manage cookies through their settings. You can choose to block, delete, or limit the use of cookies on your device. However, please note that disabling cookies may affect the functionality and performance of our websites.
+Kivinjari nyingi za wavuti zinakuruhusu kusimamia vidakuzi kupitia mipangilio yao. Unaweza kuchagua kuzuia, kufuta, au kupunguza matumizi ya vidakuzi kwenye kifaa chako. Hata hivyo, tafadhali kumbuka kwamba kuzima vidakuzi kunaweza kuathiri utendaji na ufanisi wa tovuti zetu.
 
-Changes to this Cookies Policy
+Mabadiliko ya Sera hii ya Vidakuzi
 
-We may update this Cookies Policy from time to time to reflect changes in our practices or relevant laws. We encourage you to periodically review this page for the latest information on our cookie practices.
+Tunaweza kusasisha Sera hii ya Vidakuzi mara kwa mara ili kuakisi mabadiliko katika mazoea yetu au sheria zinazohusiana. Tunakuhimiza uangalie ukurasa huu mara kwa mara kwa maelezo ya hivi punde kuhusu mazoea yetu ya vidakuzi.
 
-### Contact us
+### Wasiliana nasi
 
-If you have any questions or concerns about this Cookies Policy, please contact us at [support@hacktricks.xyz](mailto:support@hacktricks.xyz)
-
-
+Ikiwa una maswali au wasiwasi kuhusu Sera hii ya Vidakuzi, tafadhali wasiliana nasi kwa [support@hacktricks.xyz](mailto:support@hacktricks.xyz)

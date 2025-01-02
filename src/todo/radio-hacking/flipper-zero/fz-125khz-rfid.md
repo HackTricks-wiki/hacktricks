@@ -8,7 +8,7 @@
 
 ## Intro
 
-For more info about how 125kHz tags work check:
+Kwa maelezo zaidi kuhusu jinsi vitambulisho vya 125kHz vinavyofanya kazi angalia:
 
 {{#ref}}
 ../pentesting-rfid.md
@@ -16,39 +16,39 @@ For more info about how 125kHz tags work check:
 
 ## Actions
 
-For more info about these types of tags [**read this intro**](../pentesting-rfid.md#low-frequency-rfid-tags-125khz).
+Kwa maelezo zaidi kuhusu aina hizi za vitambulisho [**soma utangulizi huu**](../pentesting-rfid.md#low-frequency-rfid-tags-125khz).
 
 ### Read
 
-Tries to **read** the card info. Then it can **emulate** them.
+Inajaribu **kusoma** taarifa za kadi. Kisha inaweza **kuiga** hizo.
 
 > [!WARNING]
-> Note that some intercoms try to protect themselves from key duplication by sending a write command prior to reading. If the write succeeds, that tag is considered fake. When Flipper emulates RFID there is no way for the reader to distinguish it from the original one, so no such problems occur.
+> Kumbuka kwamba baadhi ya intercoms zinajaribu kujilinda kutokana na nakala za funguo kwa kutuma amri ya kuandika kabla ya kusoma. Ikiwa kuandika kunafanikiwa, kitambulisho hicho kinachukuliwa kuwa bandia. Wakati Flipper inapoiga RFID, hakuna njia kwa msomaji kutofautisha kati yake na ile ya asili, hivyo matatizo kama hayo hayatokea.
 
 ### Add Manually
 
-You can create **fake cards in Flipper Zero indicating the data** you manually and then emulate it.
+Unaweza kuunda **kadi bandia katika Flipper Zero ukionyesha data** unazozingatia kwa mikono kisha uige.
 
 #### IDs on cards
 
-Some times, when you get a card you will find the ID (or part) of it written in the card visible.
+Wakati mwingine, unapopata kadi utaona ID (au sehemu) yake imeandikwa kwenye kadi inayoonekana.
 
 - **EM Marin**
 
-For example in this EM-Marin card in the physical card is possible to **read the last 3 of 5 bytes in clear**.\
-The other 2 can be brute-forced if you cannot read them from the card.
+Kwa mfano katika kadi hii ya EM-Marin kwenye kadi halisi inawezekana **kusoma mwisho 3 kati ya 5 bytes wazi**.\
+Mengine 2 yanaweza kujaribiwa kwa nguvu ikiwa huwezi kuyasoma kutoka kwenye kadi.
 
 <figure><img src="../../../images/image (104).png" alt=""><figcaption></figcaption></figure>
 
 - **HID**
 
-Same happens in this HID card where only 2 out of 3 bytes can be found printed in the card
+Vivyo hivyo inatokea katika kadi hii ya HID ambapo ni 2 tu kati ya 3 bytes zinaweza kupatikana zimeandikwa kwenye kadi
 
 <figure><img src="../../../images/image (1014).png" alt=""><figcaption></figcaption></figure>
 
 ### Emulate/Write
 
-After **copying** a card or **entering** the ID **manually** it's possible to **emulate** it with Flipper Zero or **write** it in a real card.
+Baada ya **kunakili** kadi au **kuingiza** ID **kwa mikono** inawezekana **kuiga** hiyo na Flipper Zero au **kuandika** kwenye kadi halisi.
 
 ## References
 
@@ -59,4 +59,3 @@ After **copying** a card or **entering** the ID **manually** it's possible to **
 {% embed url="https://websec.nl/" %}
 
 {{#include ../../../banners/hacktricks-training.md}}
-

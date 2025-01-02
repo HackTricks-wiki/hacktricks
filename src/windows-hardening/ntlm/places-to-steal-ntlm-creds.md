@@ -1,8 +1,7 @@
-# Places to steal NTLM creds
+# Mahali pa kuiba NTLM creds
 
 {{#include ../../banners/hacktricks-training.md}}
 
-**Check all the great ideas from [https://osandamalith.com/2017/03/24/places-of-interest-in-stealing-netntlm-hashes/](https://osandamalith.com/2017/03/24/places-of-interest-in-stealing-netntlm-hashes/)**
+**Angalia mawazo yote mazuri kutoka [https://osandamalith.com/2017/03/24/places-of-interest-in-stealing-netntlm-hashes/](https://osandamalith.com/2017/03/24/places-of-interest-in-stealing-netntlm-hashes/)**
 
 {{#include ../../banners/hacktricks-training.md}}
-

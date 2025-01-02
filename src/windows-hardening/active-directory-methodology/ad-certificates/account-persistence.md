@@ -2,55 +2,44 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**This is a small summary of the machine persistence chapters of the awesome research from [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)**
+**Hii ni muhtasari mdogo wa sura za kudumu za mashine kutoka utafiti mzuri wa [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)**
 
-## **Understanding Active User Credential Theft with Certificates – PERSIST1**
+## **Kuelewa Wizi wa Akreditivu za Watumiaji Wanaofanya Kazi kwa kutumia Vyeti – PERSIST1**
 
-In a scenario where a certificate that allows domain authentication can be requested by a user, an attacker has the opportunity to **request** and **steal** this certificate to **maintain persistence** on a network. By default, the `User` template in Active Directory allows such requests, though it may sometimes be disabled.
+Katika hali ambapo cheti kinachoruhusu uthibitisho wa kikoa kinaweza kuombwa na mtumiaji, mshambuliaji ana fursa ya **kuomba** na **kuchukua** cheti hiki ili **kuhifadhi kudumu** kwenye mtandao. Kwa kawaida, kiolezo cha `User` katika Active Directory kinaruhusu maombi kama haya, ingawa wakati mwingine kinaweza kuzuiliwa.
 
-Using a tool named [**Certify**](https://github.com/GhostPack/Certify), one can search for valid certificates that enable persistent access:
-
+Kwa kutumia zana inayoitwa [**Certify**](https://github.com/GhostPack/Certify), mtu anaweza kutafuta vyeti halali vinavyowezesha ufikiaji wa kudumu:
 ```bash
 Certify.exe find /clientauth
 ```
+Inasisitizwa kwamba nguvu ya cheti iko katika uwezo wake wa **kujiuthibitisha kama mtumiaji** anayemilikiwa, bila kujali mabadiliko yoyote ya nenosiri, mradi cheti kihakikishe **halali**.
 
-It's highlighted that a certificate's power lies in its ability to **authenticate as the user** it belongs to, regardless of any password changes, as long as the certificate remains **valid**.
-
-Certificates can be requested through a graphical interface using `certmgr.msc` or through the command line with `certreq.exe`. With **Certify**, the process to request a certificate is simplified as follows:
-
+Vyeti vinaweza kuombwa kupitia kiolesura cha picha kwa kutumia `certmgr.msc` au kupitia mstari wa amri na `certreq.exe`. Pamoja na **Certify**, mchakato wa kuomba cheti umewekwa rahisi kama ifuatavyo:
 ```bash
 Certify.exe request /ca:CA-SERVER\CA-NAME /template:TEMPLATE-NAME
 ```
-
-Upon successful request, a certificate along with its private key is generated in `.pem` format. To convert this into a `.pfx` file, which is usable on Windows systems, the following command is utilized:
-
+Baada ya ombi kufanikiwa, cheti pamoja na funguo yake ya faragha kinatengenezwa katika muundo wa `.pem`. Ili kubadilisha hii kuwa faili ya `.pfx`, ambayo inaweza kutumika kwenye mifumo ya Windows, amri ifuatayo inatumika:
 ```bash
 openssl pkcs12 -in cert.pem -keyex -CSP "Microsoft Enhanced Cryptographic Provider v1.0" -export -out cert.pfx
 ```
-
-The `.pfx` file can then be uploaded to a target system and used with a tool called [**Rubeus**](https://github.com/GhostPack/Rubeus) to request a Ticket Granting Ticket (TGT) for the user, extending the attacker's access for as long as the certificate is **valid** (typically one year):
-
+Faili la `.pfx` linaweza kupakiwa kwenye mfumo wa lengo na kutumika na chombo kinachoitwa [**Rubeus**](https://github.com/GhostPack/Rubeus) kuomba Tiketi ya Kutoa Tiketi (TGT) kwa mtumiaji, ikipanua ufikiaji wa mshambuliaji kwa muda mrefu kama cheti ni **halali** (kawaida mwaka mmoja):
 ```bash
 Rubeus.exe asktgt /user:harmj0y /certificate:C:\Temp\cert.pfx /password:CertPass!
 ```
+Kikumbusho muhimu kinashirikiwa kuhusu jinsi mbinu hii, ikichanganywa na njia nyingine iliyoelezwa katika sehemu ya **THEFT5**, inamruhusu mshambuliaji kupata kwa kudumu **NTLM hash** ya akaunti bila kuingiliana na Local Security Authority Subsystem Service (LSASS), na kutoka katika muktadha usio na kiwango cha juu, ikitoa njia ya siri ya wizi wa akidi za muda mrefu.
 
-An important warning is shared about how this technique, combined with another method outlined in the **THEFT5** section, allows an attacker to persistently obtain an account’s **NTLM hash** without interacting with the Local Security Authority Subsystem Service (LSASS), and from a non-elevated context, providing a stealthier method for long-term credential theft.
+## **K kupata Uthibitisho wa Mashine kwa kutumia Vyeti - PERSIST2**
 
-## **Gaining Machine Persistence with Certificates - PERSIST2**
-
-Another method involves enrolling a compromised system’s machine account for a certificate, utilizing the default `Machine` template which allows such actions. If an attacker gains elevated privileges on a system, they can use the **SYSTEM** account to request certificates, providing a form of **persistence**:
-
+Njia nyingine inahusisha kujiandikisha akaunti ya mashine ya mfumo ulioathirika kwa cheti, ikitumia kigezo cha `Machine` cha kawaida ambacho kinaruhusu vitendo kama hivyo. Ikiwa mshambuliaji atapata haki za juu kwenye mfumo, wanaweza kutumia akaunti ya **SYSTEM** kuomba vyeti, wakitoa aina ya **persistence**:
 ```bash
 Certify.exe request /ca:dc.theshire.local/theshire-DC-CA /template:Machine /machine
 ```
+Hii ufikiaji inamwezesha mshambuliaji kuthibitisha kwa **Kerberos** kama akaunti ya mashine na kutumia **S4U2Self** kupata tiketi za huduma za Kerberos kwa huduma yoyote kwenye mwenyeji, kwa ufanisi ikimpa mshambuliaji ufikiaji wa kudumu kwa mashine.
 
-This access enables the attacker to authenticate to **Kerberos** as the machine account and utilize **S4U2Self** to obtain Kerberos service tickets for any service on the host, effectively granting the attacker persistent access to the machine.
+## **Kupanua Uthibitisho Kupitia Upya Leseni - PERSIST3**
 
-## **Extending Persistence Through Certificate Renewal - PERSIST3**
+Njia ya mwisho iliyozungumziwa inahusisha kutumia **uhalali** na **muda wa upya** wa mifano ya leseni. Kwa **kuhuisha** leseni kabla ya kuisha, mshambuliaji anaweza kudumisha uthibitisho kwa Active Directory bila haja ya kujiandikisha tiketi za ziada, ambazo zinaweza kuacha alama kwenye seva ya Mamlaka ya Leseni (CA).
 
-The final method discussed involves leveraging the **validity** and **renewal periods** of certificate templates. By **renewing** a certificate before its expiration, an attacker can maintain authentication to Active Directory without the need for additional ticket enrolments, which could leave traces on the Certificate Authority (CA) server.
-
-This approach allows for an **extended persistence** method, minimizing the risk of detection through fewer interactions with the CA server and avoiding the generation of artifacts that could alert administrators to the intrusion.
+Njia hii inaruhusu njia ya **uthibitisho wa muda mrefu**, ikipunguza hatari ya kugunduliwa kupitia mwingiliano mdogo na seva ya CA na kuepuka uzalishaji wa vitu ambavyo vinaweza kuwajulisha wasimamizi kuhusu uvamizi. 
 
 {{#include ../../../banners/hacktricks-training.md}}
-

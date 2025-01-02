@@ -1,18 +1,15 @@
-# Industrial Control Systems Hacking 
+# Industrial Control Systems Hacking
 
 ## About this Section
 
-This section contains all about Industrial Control Systems including concepts as well as methodologies to hack them with various security issues that persists in them. 
+Sehemu hii ina kila kitu kuhusu Mifumo ya Kudhibiti Viwanda ikiwa ni pamoja na dhana na mbinu za kuzikabili pamoja na masuala mbalimbali ya usalama yanayoshuhudiwa ndani yao.
 
-Industrial Control Systems are everywhere, since industries are vital for economic development of a nation. But these ICS are hard to update and lesser advancements are made in this field. Hence, finding security flaws is common here. Most of the protocols and standards used here where developed back in the 90's and have much lesser capabilities as compared to current attack scenarios. 
+Mifumo ya Kudhibiti Viwanda ipo kila mahali, kwani viwanda ni muhimu kwa maendeleo ya kiuchumi ya taifa. Lakini hizi ICS ni ngumu kuboresha na maendeleo madogo yamefanywa katika uwanja huu. Hivyo, kugundua kasoro za usalama ni jambo la kawaida hapa. Mifumo mingi na viwango vinavyotumika hapa vilitengenezwa nyuma ya miaka ya 90 na vina uwezo mdogo sana ikilinganishwa na hali za shambulio za sasa.
 
-It has become important to secure these systems since damaging them can cost a lot and even lives at the worst case. To understand Industrial Contol Systems security, knowing the internals of them is necessary. 
+Imekuwa muhimu kulinda mifumo hii kwani kuharibu hizo kunaweza kugharimu sana na hata maisha katika hali mbaya zaidi. Ili kuelewa usalama wa Mifumo ya Kudhibiti Viwanda, kujua ndani yao ni muhimu.
 
-Since Industrial Control Systems are installed following set standards, knowing each components would help in interconnecting every other mechanisms in the control system. Installation of these devices like PLCs and SCADA systems is different is various industries, hence information gathering is critical. 
+Kwa kuwa Mifumo ya Kudhibiti Viwanda imewekwa kufuata viwango vilivyowekwa, kujua kila kipengele kutasaidia katika kuunganisha mitambo mingine yote katika mfumo wa kudhibiti. Ufungaji wa vifaa hivi kama vile PLCs na mifumo ya SCADA ni tofauti katika viwanda mbalimbali, hivyo ukusanyaji wa taarifa ni muhimu.
 
-Industrial Control Systems can be complicated at times and hence require a lot of patience to do anything. It's all about probing and reconnaissance before planning attacks and developing any exploits. 
+Mifumo ya Kudhibiti Viwanda inaweza kuwa ngumu wakati mwingine na hivyo inahitaji uvumilivu mwingi kufanya chochote. Ni kuhusu kuchunguza na upelelezi kabla ya kupanga mashambulizi na kuendeleza exploit yoyote.
 
-These techniques can also be used to protect against attacks and blue teaming for industrial control systems. 
-
-
-
+Mbinu hizi zinaweza pia kutumika kulinda dhidi ya mashambulizi na blue teaming kwa mifumo ya kudhibiti viwanda.

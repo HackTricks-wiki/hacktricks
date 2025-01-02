@@ -4,29 +4,28 @@
 
 ## Skeleton Key Attack
 
-The **Skeleton Key attack** is a sophisticated technique that allows attackers to **bypass Active Directory authentication** by **injecting a master password** into the domain controller. This enables the attacker to **authenticate as any user** without their password, effectively **granting them unrestricted access** to the domain.
+**Shambulio la Skeleton Key** ni mbinu ya kisasa inayowezesha washambuliaji **kuzidi uthibitisho wa Active Directory** kwa **kuingiza nenosiri kuu** kwenye kidhibiti cha eneo. Hii inamwezesha mshambuliaji **kujiandikisha kama mtumiaji yeyote** bila nenosiri lao, kwa ufanisi **ikitoa ufikiaji usio na kikomo** kwa eneo hilo.
 
-It can be performed using [Mimikatz](https://github.com/gentilkiwi/mimikatz). To carry out this attack, **Domain Admin rights are prerequisite**, and the attacker must target each domain controller to ensure a comprehensive breach. However, the attack's effect is temporary, as **restarting the domain controller eradicates the malware**, necessitating a reimplementation for sustained access.
+Inaweza kufanywa kwa kutumia [Mimikatz](https://github.com/gentilkiwi/mimikatz). Ili kutekeleza shambulio hili, **haki za Admin wa Eneo ni lazima**, na mshambuliaji lazima alenge kila kidhibiti cha eneo ili kuhakikisha uvunjaji wa kina. Hata hivyo, athari za shambulio ni za muda mfupi, kwani **kuanzisha upya kidhibiti cha eneo kunafuta programu hasidi**, na hivyo inahitaji utekelezaji upya kwa ufikiaji wa kudumu.
 
-**Executing the attack** requires a single command: `misc::skeleton`.
+**Kutekeleza shambulio** kunahitaji amri moja: `misc::skeleton`.
 
 ## Mitigations
 
-Mitigation strategies against such attacks include monitoring for specific event IDs that indicate the installation of services or the use of sensitive privileges. Specifically, looking for System Event ID 7045 or Security Event ID 4673 can reveal suspicious activities. Additionally, running `lsass.exe` as a protected process can significantly hinder attackers' efforts, as this requires them to employ a kernel mode driver, increasing the attack's complexity.
+Mikakati ya kupunguza dhidi ya mashambulizi kama haya ni pamoja na kufuatilia vitambulisho maalum vya tukio vinavyoashiria usakinishaji wa huduma au matumizi ya mamlaka nyeti. Kwa haswa, kutafuta Kitambulisho cha Tukio la Mfumo 7045 au Kitambulisho cha Tukio la Usalama 4673 kunaweza kufichua shughuli za kushangaza. Zaidi ya hayo, kuendesha `lsass.exe` kama mchakato uliohifadhiwa kunaweza kuzuia kwa kiasi kikubwa juhudi za washambuliaji, kwani hii inawahitaji kutumia dereva wa hali ya kernel, ikiongeza ugumu wa shambulio.
 
-Here are the PowerShell commands to enhance security measures:
+Hapa kuna amri za PowerShell za kuboresha hatua za usalama:
 
-- To detect the installation of suspicious services, use: `Get-WinEvent -FilterHashtable @{Logname='System';ID=7045} | ?{$_.message -like "*Kernel Mode Driver*"}`
+- Ili kugundua usakinishaji wa huduma za kushangaza, tumia: `Get-WinEvent -FilterHashtable @{Logname='System';ID=7045} | ?{$_.message -like "*Kernel Mode Driver*"}`
 
-- Specifically, to detect Mimikatz's driver, the following command can be utilized: `Get-WinEvent -FilterHashtable @{Logname='System';ID=7045} | ?{$_.message -like "*Kernel Mode Driver*" -and $_.message -like "*mimidrv*"}`
+- Kwa haswa, kugundua dereva wa Mimikatz, amri ifuatayo inaweza kutumika: `Get-WinEvent -FilterHashtable @{Logname='System';ID=7045} | ?{$_.message -like "*Kernel Mode Driver*" -and $_.message -like "*mimidrv*"}`
 
-- To fortify `lsass.exe`, enabling it as a protected process is recommended: `New-ItemProperty HKLM:\SYSTEM\CurrentControlSet\Control\Lsa -Name RunAsPPL -Value 1 -Verbose`
+- Ili kuimarisha `lsass.exe`, inashauriwa kuifanya kuwa mchakato uliohifadhiwa: `New-ItemProperty HKLM:\SYSTEM\CurrentControlSet\Control\Lsa -Name RunAsPPL -Value 1 -Verbose`
 
-Verification after a system reboot is crucial to ensure that the protective measures have been successfully applied. This is achievable through: `Get-WinEvent -FilterHashtable @{Logname='System';ID=12} | ?{$_.message -like "*protected process*`
+Uthibitisho baada ya kuanzisha upya mfumo ni muhimu ili kuhakikisha kuwa hatua za ulinzi zimewekwa kwa mafanikio. Hii inaweza kufanywa kupitia: `Get-WinEvent -FilterHashtable @{Logname='System';ID=12} | ?{$_.message -like "*protected process*`
 
 ## References
 
 - [https://blog.netwrix.com/2022/11/29/skeleton-key-attack-active-directory/](https://blog.netwrix.com/2022/11/29/skeleton-key-attack-active-directory/)
 
 {{#include ../../banners/hacktricks-training.md}}
-

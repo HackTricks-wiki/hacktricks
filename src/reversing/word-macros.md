@@ -4,16 +4,15 @@
 
 ### Junk Code
 
-It's very common to find **junk code that is never used** to make the reversing of the macro more difficult.\
-For example, in the following image you can see that and If that is never going to be true is used to execute some junk and useless code.
+Ni kawaida sana kukutana na **junk code ambayo haitumiki kamwe** ili kufanya kurudi nyuma kwa macro kuwa ngumu.\
+Kwa mfano, katika picha ifuatayo unaweza kuona kwamba na If ambayo haitakuwa kweli kamwe inatumika kutekeleza baadhi ya junk na code isiyo na maana.
 
 ![](<../images/image (369).png>)
 
 ### Macro Forms
 
-Using the **GetObject** function it's possible to obtain data from forms of the macro. This can be used to difficult the analysis. The following is a photo of a macro form used to **hide data inside text boxes** (a text box can be hiding other text boxes):
+Kwa kutumia kazi ya **GetObject** inawezekana kupata data kutoka kwa fomu za macro. Hii inaweza kutumika kufanya uchambuzi kuwa mgumu. Ifuatayo ni picha ya fomu ya macro inayotumika **kuficha data ndani ya masanduku ya maandiko** (sanduku la maandiko linaweza kuficha masanduku mengine ya maandiko):
 
 ![](<../images/image (344).png>)
 
 {{#include ../banners/hacktricks-training.md}}
-

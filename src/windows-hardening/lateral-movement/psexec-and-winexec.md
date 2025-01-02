@@ -4,40 +4,37 @@
 
 {% embed url="https://websec.nl/" %}
 
-## How do they work
+## Jinsi zinavyofanya kazi
 
-The process is outlined in the steps below, illustrating how service binaries are manipulated to achieve remote execution on a target machine via SMB:
+Mchakato umeelezwa katika hatua zilizo hapa chini, ukionyesha jinsi binaries za huduma zinavyoshughulikiwa ili kufikia utekelezaji wa mbali kwenye mashine lengwa kupitia SMB:
 
-1. **Copying of a service binary to the ADMIN$ share over SMB** is performed.
-2. **Creation of a service on the remote machine** is done by pointing to the binary.
-3. The service is **started remotely**.
-4. Upon exit, the service is **stopped, and the binary is deleted**.
+1. **Nakilisha binary ya huduma kwenye ADMIN$ share kupitia SMB** inafanywa.
+2. **Kuunda huduma kwenye mashine ya mbali** kunafanywa kwa kuelekeza kwenye binary.
+3. Huduma inaanzishwa **kwa mbali**.
+4. Baada ya kutoka, huduma inasimamishwa, na binary inafutwa.
 
-### **Process of Manually Executing PsExec**
+### **Mchakato wa Kutekeleza PsExec kwa Mikono**
 
-Assuming there is an executable payload (created with msfvenom and obfuscated using Veil to evade antivirus detection), named 'met8888.exe', representing a meterpreter reverse_http payload, the following steps are taken:
+Tukichukulia kuna payload inayoweza kutekelezwa (iliyoundwa na msfvenom na kufichwa kwa kutumia Veil ili kuepuka kugunduliwa na antivirus), inayoitwa 'met8888.exe', ikiwakilisha payload ya meterpreter reverse_http, hatua zifuatazo zinachukuliwa:
 
-- **Copying the binary**: The executable is copied to the ADMIN$ share from a command prompt, though it may be placed anywhere on the filesystem to remain concealed.
-- **Creating a service**: Utilizing the Windows `sc` command, which allows for querying, creating, and deleting Windows services remotely, a service named "meterpreter" is created to point to the uploaded binary.
-- **Starting the service**: The final step involves starting the service, which will likely result in a "time-out" error due to the binary not being a genuine service binary and failing to return the expected response code. This error is inconsequential as the primary goal is the binary's execution.
+- **Nakilisha binary**: Executable inanakiliwa kwenye ADMIN$ share kutoka kwa amri ya prompt, ingawa inaweza kuwekwa mahali popote kwenye mfumo wa faili ili kubaki kufichwa.
+- **Kuunda huduma**: Kwa kutumia amri ya Windows `sc`, ambayo inaruhusu kuuliza, kuunda, na kufuta huduma za Windows kwa mbali, huduma inayoitwa "meterpreter" inaundwa ili kuelekeza kwenye binary iliyopakiwa.
+- **Kuanza huduma**: Hatua ya mwisho inahusisha kuanzisha huduma, ambayo kwa uwezekano itasababisha kosa la "time-out" kwa sababu binary sio binary halisi ya huduma na inashindwa kurudisha nambari ya majibu inayotarajiwa. Kosa hili halina umuhimu kwani lengo kuu ni utekelezaji wa binary.
 
-Observation of the Metasploit listener will reveal that the session has been initiated successfully.
+Kuchunguza mlistener wa Metasploit kutadhihirisha kuwa kikao kimeanzishwa kwa mafanikio.
 
 [Learn more about the `sc` command](https://technet.microsoft.com/en-us/library/bb490995.aspx).
 
 Find moe detailed steps in: [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
 
-**You could also use the Windows Sysinternals binary PsExec.exe:**
+**Unaweza pia kutumia binary ya Windows Sysinternals PsExec.exe:**
 
 ![](<../../images/image (928).png>)
 
-You could also use [**SharpLateral**](https://github.com/mertdas/SharpLateral):
-
+Unaweza pia kutumia [**SharpLateral**](https://github.com/mertdas/SharpLateral):
 ```
 SharpLateral.exe redexec HOSTNAME C:\\Users\\Administrator\\Desktop\\malware.exe.exe malware.exe ServiceName
 ```
-
 {% embed url="https://websec.nl/" %}
 
 {{#include ../../banners/hacktricks-training.md}}
-

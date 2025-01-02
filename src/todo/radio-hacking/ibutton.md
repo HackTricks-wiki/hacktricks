@@ -4,35 +4,35 @@
 
 ## Intro
 
-iButton is a generic name for an electronic identification key packed in a **coin-shaped metal container**. It is also called **Dallas Touch** Memory or contact memory. Even though it is often wrongly referred to as a “magnetic” key, there is **nothing magnetic** in it. In fact, a full-fledged **microchip** operating on a digital protocol is hidden inside.
+iButton ni jina la jumla la funguo ya kitambulisho cha kielektroniki iliyowekwa katika **konteina ya chuma yenye umbo la sarafu**. Pia inaitwa **Dallas Touch** Memory au kumbukumbu ya mawasiliano. Ingawa mara nyingi inaitwa kwa makosa kama funguo “za magnetic”, hakuna **kitu chochote cha magnetic** ndani yake. Kwa kweli, **microchip** kamili inayofanya kazi kwenye protokali ya kidijitali imefichwa ndani.
 
 <figure><img src="../../images/image (915).png" alt=""><figcaption></figcaption></figure>
 
 ### What is iButton? <a href="#what-is-ibutton" id="what-is-ibutton"></a>
 
-Usually, iButton implies the physical form of the key and reader - a round coin with two contacts. For the frame surrounding it, there are lots of variations from the most common plastic holder with a hole to rings, pendants, etc.
+Kawaida, iButton inamaanisha umbo la kimwili la funguo na msomaji - sarafu ya mviringo yenye mawasiliano mawili. Kwa ajili ya fremu inayozunguka, kuna aina nyingi kutoka kwa holder ya plastiki yenye shimo hadi pete, mapambo, n.k.
 
 <figure><img src="../../images/image (1078).png" alt=""><figcaption></figcaption></figure>
 
-When the key reaches the reader, the **contacts come to touch** and the key is powered to **transmit** its ID. Sometimes the key is **not read** immediately because the **contact PSD of an intercom is larger** than it should be. So the outer contours of the key and the reader couldn't touch. If that's the case, you'll have to press the key over one of the walls of the reader.
+Wakati funguo inafikia msomaji, **mawasiliano yanagusa** na funguo inapata nguvu ili **kupeleka** kitambulisho chake. Wakati mwingine funguo **haiwezi kusomwa** mara moja kwa sababu **PSD ya mawasiliano ya intercom ni kubwa** kuliko inavyopaswa kuwa. Hivyo, mipaka ya nje ya funguo na msomaji haiwezi kugusa. Ikiwa ndivyo ilivyo, itabidi ubonyeze funguo juu ya moja ya kuta za msomaji.
 
 <figure><img src="../../images/image (290).png" alt=""><figcaption></figcaption></figure>
 
 ### **1-Wire protocol** <a href="#id-1-wire-protocol" id="id-1-wire-protocol"></a>
 
-Dallas keys exchange data using the 1-wire protocol. With only one contact for data transfer (!!) in both directions, from master to slave and vice versa. The 1-wire protocol works according to the Master-Slave model. In this topology, the Master always initiates communication and the Slave follows its instructions.
+Funguo za Dallas hubadilishana data kwa kutumia protokali ya 1-wire. Kwa mawasiliano moja tu ya kuhamasisha data (!!) katika pande zote mbili, kutoka kwa bwana hadi mtumwa na kinyume chake. Protokali ya 1-wire inafanya kazi kulingana na mfano wa Bwana-Mtumwa. Katika topolojia hii, Bwana daima huanzisha mawasiliano na Mtumwa anafuata maagizo yake.
 
-When the key (Slave) contacts the intercom (Master), the chip inside the key turns on, powered by the intercom, and the key is initialized. Following that the intercom requests the key ID. Next, we will look up this process in more detail.
+Wakati funguo (Mtumwa) inagusa intercom (Bwana), chip ndani ya funguo inawashwa, ikipata nguvu kutoka kwa intercom, na funguo inaanzishwa. Kufuatia hiyo, intercom inaomba kitambulisho cha funguo. Kisha, tutaangalia mchakato huu kwa undani zaidi.
 
-Flipper can work both in Master and Slave modes. In the key reading mode, Flipper acts as a reader this is to say it works as a Master. And in the key emulation mode, the flipper pretends to be a key, it is in the Slave mode.
+Flipper inaweza kufanya kazi katika hali za Bwana na Mtumwa. Katika hali ya kusoma funguo, Flipper inafanya kazi kama msomaji hii inamaanisha inafanya kazi kama Bwana. Na katika hali ya kuiga funguo, flipper inajifanya kuwa funguo, iko katika hali ya Mtumwa.
 
 ### Dallas, Cyfral & Metakom keys
 
-For information about how these keys works check the page [https://blog.flipperzero.one/taming-ibutton/](https://blog.flipperzero.one/taming-ibutton/)
+Kwa maelezo kuhusu jinsi funguo hizi zinavyofanya kazi angalia ukurasa [https://blog.flipperzero.one/taming-ibutton/](https://blog.flipperzero.one/taming-ibutton/)
 
 ### Attacks
 
-iButtons can be attacked with Flipper Zero:
+iButtons zinaweza kushambuliwa kwa Flipper Zero:
 
 {{#ref}}
 flipper-zero/fz-ibutton.md
@@ -43,4 +43,3 @@ flipper-zero/fz-ibutton.md
 - [https://blog.flipperzero.one/taming-ibutton/](https://blog.flipperzero.one/taming-ibutton/)
 
 {{#include ../../banners/hacktricks-training.md}}
-

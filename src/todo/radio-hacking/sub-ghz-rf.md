@@ -4,34 +4,34 @@
 
 ## Garage Doors
 
-Garage door openers typically operate at frequencies in the 300-190 MHz range, with the most common frequencies being 300 MHz, 310 MHz, 315 MHz, and 390 MHz. This frequency range is commonly used for garage door openers because it is less crowded than other frequency bands and is less likely to experience interference from other devices.
+Vifunguo vya milango ya garaji kwa kawaida vinatumika katika masafa ya 300-190 MHz, ambapo masafa ya kawaida ni 300 MHz, 310 MHz, 315 MHz, na 390 MHz. Masafa haya yanatumika sana kwa sababu ni ya chini ya msongamano kuliko bendi nyingine za masafa na ni vigumu zaidi kukutana na usumbufu kutoka kwa vifaa vingine.
 
 ## Car Doors
 
-Most car key fobs operate on either **315 MHz or 433 MHz**. These are both radio frequencies, and they are used in a variety of different applications. The main difference between the two frequencies is that 433 MHz has a longer range than 315 MHz. This means that 433 MHz is better for applications that require a longer range, such as remote keyless entry.\
-In Europe 433.92MHz is commonly used and in U.S. and Japan it's the 315MHz.
+Vifunguo vingi vya magari vinatumika kwenye **315 MHz au 433 MHz**. Hizi ni masafa ya redio, na zinatumika katika matumizi mbalimbali tofauti. Tofauti kuu kati ya masafa haya mawili ni kwamba 433 MHz ina eneo kubwa zaidi kuliko 315 MHz. Hii inamaanisha kwamba 433 MHz ni bora kwa matumizi yanayohitaji eneo kubwa, kama vile kuingia bila funguo.\
+Nchini Ulaya 433.92MHz inatumika sana na nchini Marekani na Japani ni 315MHz.
 
 ## **Brute-force Attack**
 
 <figure><img src="../../images/image (1084).png" alt=""><figcaption></figcaption></figure>
 
-If instead of sending each code 5 times (sent like this to make sure the receiver gets it) so just send it once, the time is reduced to 6mins:
+Ikiwa badala ya kutuma kila msimbo mara 5 (tumewekwa hivi ili kuhakikisha mpokeaji anaupata) unautuma mara moja tu, muda unakuwa wa dakika 6:
 
 <figure><img src="../../images/image (622).png" alt=""><figcaption></figcaption></figure>
 
-and if you **remove the 2 ms waiting** period between signals you can **reduce the time to 3minutes.**
+na ikiwa **unaondoa kipindi cha kusubiri cha 2 ms** kati ya ishara unaweza **kupunguza muda hadi dakika 3.**
 
-Moreover, by using the De Bruijn Sequence (a way to reduce the number of bits needed to send all the potential binary numbers to burteforce) this **time is reduced just to 8 seconds**:
+Zaidi ya hayo, kwa kutumia Mfuatano wa De Bruijn (njia ya kupunguza idadi ya bits zinazohitajika kutuma nambari zote za binary zinazoweza kutumika kwa burteforce) **muda huu unakuwa wa sekunde 8 tu**:
 
 <figure><img src="../../images/image (583).png" alt=""><figcaption></figcaption></figure>
 
-Example of this attack was implemented in [https://github.com/samyk/opensesame](https://github.com/samyk/opensesame)
+Mfano wa shambulio hili ulitekelezwa katika [https://github.com/samyk/opensesame](https://github.com/samyk/opensesame)
 
-Requiring **a preamble will avoid the De Bruijn Sequence** optimization and **rolling codes will prevent this attack** (supposing the code is long enough to not be bruteforceable).
+Kuhitaji **preamble kutazuia uboreshaji wa Mfuatano wa De Bruijn** na **mifumo ya nambari zinazozunguka itazuia shambulio hili** (ikiwa nambari ni ndefu vya kutosha ili isiweze kuburute).
 
 ## Sub-GHz Attack
 
-To attack these signals with Flipper Zero check:
+Ili kushambulia ishara hizi kwa Flipper Zero angalia:
 
 {{#ref}}
 flipper-zero/fz-sub-ghz.md
@@ -39,43 +39,43 @@ flipper-zero/fz-sub-ghz.md
 
 ## Rolling Codes Protection
 
-Automatic garage door openers typically use a wireless remote control to open and close the garage door. The remote control **sends a radio frequency (RF) signal** to the garage door opener, which activates the motor to open or close the door.
+Vifunguo vya milango ya garaji vya kiotomatiki kwa kawaida vinatumia udhibiti wa mbali wa wireless kufungua na kufunga mlango wa garaji. Udhibiti wa mbali **unatuma ishara ya masafa ya redio (RF)** kwa kifaa cha kufungua mlango wa garaji, ambacho kinafanya kazi kufungua au kufunga mlango.
 
-It is possible for someone to use a device known as a code grabber to intercept the RF signal and record it for later use. This is known as a **replay attack**. To prevent this type of attack, many modern garage door openers use a more secure encryption method known as a **rolling code** system.
+Inawezekana kwa mtu kutumia kifaa kinachojulikana kama code grabber kukamata ishara ya RF na kuirekodi kwa matumizi ya baadaye. Hii inajulikana kama **replay attack**. Ili kuzuia aina hii ya shambulio, vifunguo vingi vya kisasa vya milango ya garaji vinatumia njia salama zaidi ya usimbaji inayoitwa **rolling code**.
 
-The **RF signal is typically transmitted using a rolling code**, which means that the code changes with each use. This makes it **difficult** for someone to **intercept** the signal and **use** it to gain **unauthorised** access to the garage.
+**Ishara ya RF kwa kawaida inatumika kwa kutumia nambari zinazozunguka**, ambayo inamaanisha kwamba nambari hubadilika kila wakati inapotumika. Hii inafanya iwe **vigumu** kwa mtu **kukamata** ishara na **kuitumia** kupata **ufikiaji usioidhinishwa** kwenye garaji.
 
-In a rolling code system, the remote control and the garage door opener have a **shared algorithm** that **generates a new code** every time the remote is used. The garage door opener will only respond to the **correct code**, making it much more difficult for someone to gain unauthorised access to the garage just by capturing a code.
+Katika mfumo wa nambari zinazozunguka, udhibiti wa mbali na kifaa cha kufungua mlango wa garaji vina **algorithms zinazoshirikiwa** ambazo **zinaunda nambari mpya** kila wakati udhibiti unapotumika. Kifaa cha kufungua mlango wa garaji kitajibu tu kwa **nambari sahihi**, na kufanya iwe vigumu zaidi kwa mtu kupata ufikiaji usioidhinishwa kwenye garaji kwa kukamata nambari tu.
 
 ### **Missing Link Attack**
 
-Basically, you listen for the button and **capture the signal whilst the remote is out of range** of the device (say the car or garage). You then move to the device and **use the captured code to open it**.
+Kimsingi, unakusikiliza kwa kitufe na **kukamata ishara wakati udhibiti uko nje ya anuwai** ya kifaa (kama gari au garaji). Kisha unahamia kwenye kifaa na **kutumia nambari iliyokamatwa kufungua**.
 
 ### Full Link Jamming Attack
 
-An attacker could **jam the signal near the vehicle or receive**r so the **receiver cannot actually ‘hear’ the code**, and once that is happening you can simply **capture and replay** the code when you have stopped jamming.
+Mshambuliaji anaweza **kuzuia ishara karibu na gari au mpokeaji** ili **mpokeaji asisikilize ‘nambari’**, na mara hiyo ikitokea unaweza tu **kukamata na kurudisha** nambari wakati umesitisha kuzuia.
 
-The victim at some point will use the **keys to lock the car**, but then the attack will have **recorded enough "close door" codes** that hopefully could be resent to open the door (a **change of frequency might be needed** as there are cars that use the same codes to open and close but listens for both commands in different frequencies).
+Mtu aliyeathirika kwa wakati fulani atatumia **funguo kufunga gari**, lakini kisha shambulio litakuwa **limerekodi nambari za "fungua mlango"** ambazo kwa matumaini zinaweza kutumwa tena kufungua mlango (**mabadiliko ya masafa yanaweza kuhitajika** kwani kuna magari yanayotumia nambari sawa kufungua na kufunga lakini yanakusikiliza kwa amri zote mbili katika masafa tofauti).
 
 > [!WARNING]
-> **Jamming works**, but it's noticeable as if the **person locking the car simply tests the doors** to ensure they are locked they would notice the car unlocked. Additionally if they were aware of such attacks they could even listen to the fact that the doors never made the lock **sound** or the cars **lights** never flashed when they pressed the ‘lock’ button.
+> **Kuzuia inafanya kazi**, lakini inaonekana kama mtu **anayeweka gari anajaribu milango** ili kuhakikisha zimefungwa wangeweza kugundua gari halijafungwa. Zaidi ya hayo, ikiwa wangejua kuhusu mashambulizi kama haya wangeweza hata kusikiliza ukweli kwamba milango haikutoa **sauti** ya kufunga au **mwanga** wa magari haukudunda wakati walipobonyeza kitufe cha ‘fungua’.
 
 ### **Code Grabbing Attack ( aka ‘RollJam’ )**
 
-This is a more **stealth Jamming technique**. The attacker will jam the signal, so when the victim tries to lock the door it won't work, but the attacker will **record this code**. Then, the victim will **try to lock the car again** pressing the button and the car will **record this second code**.\
-Instantly after this the **attacker can send the first code** and the **car will lock** (victim will think the second press closed it). Then, the attacker will be able to **send the second stolen code to open** the car (supposing that a **"close car" code can also be used to open it**). A change of frequency might be needed (as there are cars that use the same codes to open and close but listens for both commands in different frequencies).
+Hii ni **mbinu ya kuzuia ya siri zaidi**. Mshambuliaji atazuia ishara, hivyo wakati mtu aliyeathirika anajaribu kufunga mlango haitafanya kazi, lakini mshambuliaji atarekodi **nambari hii**. Kisha, mtu aliyeathirika atajaribu **kufunga gari tena** kwa kubonyeza kitufe na gari litarekodi **nambari hii ya pili**.\
+Mara moja baada ya hii **mshambuliaji anaweza kutuma nambari ya kwanza** na **gari litafungwa** (mtu aliyeathirika atafikiria kubonyeza pili kumefunga). Kisha, mshambuliaji ataweza **kutuma nambari ya pili iliyoporwa kufungua** gari (ikiwa **"nambari ya kufunga gari" inaweza pia kutumika kufungua**). Mabadiliko ya masafa yanaweza kuhitajika (kama kuna magari yanayotumia nambari sawa kufungua na kufunga lakini yanakusikiliza kwa amri zote mbili katika masafa tofauti).
 
-The attacker can **jam the car receiver and not his receiver** because if the car receiver is listening in for example a 1MHz broadband, the attacker won't **jam** the exact frequency used by the remote but **a close one in that spectrum** while the **attackers receiver will be listening in a smaller range** where he can listen the remote signal **without the jam signal**.
+Mshambuliaji anaweza **kuzuia mpokeaji wa gari na si mpokeaji wake** kwa sababu ikiwa mpokeaji wa gari unakusikiliza kwa mfano katika broadband ya 1MHz, mshambuliaji hata **zuia** masafa halisi yanayotumiwa na udhibiti wa mbali bali **masafa ya karibu katika spektra hiyo** wakati **mpokeaji wa mshambuliaji atakuwa akisikiliza katika anuwai ndogo** ambapo anaweza kusikiliza ishara ya udhibiti wa mbali **bila ishara ya kuzuia**.
 
 > [!WARNING]
-> Other implementations seen in specifications show that the **rolling code is a portion** of the total code sent. Ie the code sent is a **24 bit key** where the first **12 are the rolling code**, the **second 8 are the command** (such as lock or unlock) and the last 4 is the **checksum**. Vehicles implementing this type are also naturally susceptible as the attacker merely needs to replace the rolling code segment to be able to **use any rolling code on both frequencies**.
+> Utekelezaji mwingine ulioonekana katika maelezo unaonyesha kwamba **nambari zinazozunguka ni sehemu** ya jumla ya nambari inayotumwa. Yaani, nambari inayotumwa ni **funguo ya bit 24** ambapo **12 za kwanza ni nambari zinazozunguka**, **8 za pili ni amri** (kama kufunga au kufungua) na **4 za mwisho ni **checksum**. Magari yanayotumia aina hii pia kwa asili yanahatarishwa kwani mshambuliaji anahitaji tu kubadilisha sehemu ya nambari zinazozunguka ili kuweza **kutumia nambari yoyote inayozunguka kwenye masafa yote mawili**.
 
 > [!CAUTION]
-> Note that if the victim sends a third code while the attacker is sending the first one, the first and second code will be invalidated.
+> Kumbuka kwamba ikiwa mtu aliyeathirika atatuma nambari ya tatu wakati mshambuliaji anatuma ya kwanza, nambari ya kwanza na ya pili zitabatilishwa.
 
 ### Alarm Sounding Jamming Attack
 
-Testing against an aftermarket rolling code system installed on a car, **sending the same code twice** immediately **activated the alarm** and immobiliser providing a unique **denial of service** opportunity. Ironically the means of **disabling the alarm** and immobiliser was to **press** the **remote**, providing an attacker with the ability to **continually perform DoS attack**. Or mix this attack with the **previous one to obtain more codes** as the victim would like to stop the attack asap.
+Kujaribu dhidi ya mfumo wa nambari zinazozunguka uliowekwa kwenye gari, **kutuma nambari ile ile mara mbili** mara moja **kulizindua alamu** na immobiliser ikitoa fursa ya kipekee ya **kukataa huduma**. Kwa bahati mbaya njia ya **kuondoa alamu** na immobiliser ilikuwa **kubonyeza** **udhibiti wa mbali**, ikimpa mshambuliaji uwezo wa **kufanya shambulio la DoS mara kwa mara**. Au changanya shambulio hili na **la awali ili kupata nambari zaidi** kwani mtu aliyeathirika angependa kusitisha shambulio haraka iwezekanavyo.
 
 ## References
 
@@ -85,4 +85,3 @@ Testing against an aftermarket rolling code system installed on a car, **sending
 - [https://hackaday.io/project/164566-how-to-hack-a-car/details](https://hackaday.io/project/164566-how-to-hack-a-car/details)
 
 {{#include ../../banners/hacktricks-training.md}}
-

@@ -1,14 +1,13 @@
-# About the author
+# Kuhusu mwandishi
 
 {{#include ../banners/hacktricks-training.md}}
 
-### Hello!!
+### Habari!!
 
-First of all, it's needed to indicate that all **credits of techniques from researches from other sites belongs to the original authors** (there are references in the pages). Kudos to every research that shares knowledge to improve the security of the internet.
+Kwanza kabisa, inahitajika kuonyesha kwamba **mikopo ya mbinu kutoka utafiti wa tovuti nyingine inamilikiwa na waandishi wa asili** (kuna rejea kwenye kurasa). Hongera kwa kila utafiti unaoshiriki maarifa ili kuboresha usalama wa mtandao.
 
-HackTricks is a educational Wiki that compiles knowledge about **cyber-security** lead by Carlos with hundreds of collaborators! It's a **huge collection of hacking tricks** that is updated by the community much as possible to keep it up to date. If you find something is missing or outdated, please, send a **Pull Request** to the [**Hacktricks Github**](https://github.com/carlospolop/hacktricks)!
+HackTricks ni Wiki ya kielimu inayokusanya maarifa kuhusu **cyber-security** inayoongozwa na Carlos pamoja na mamia ya washirikiano! Ni **mkusanyiko mkubwa wa mbinu za hacking** ambao unasasishwa na jamii kadri inavyowezekana ili kuendelea kuwa wa kisasa. Ikiwa unapata kitu kinachokosekana au kisichokuwa na habari mpya, tafadhali, tuma **Pull Request** kwa [**Hacktricks Github**](https://github.com/carlospolop/hacktricks)!
 
-HackTricks is also a wiki were **a lot of researches also share their latest findings**, so it's a great place to keep up to date with the latest hacking techniques.
+HackTricks pia ni wiki ambapo **utafiti mwingi pia unashiriki matokeo yao ya hivi karibuni**, hivyo ni mahali pazuri pa kuendelea kuwa na habari mpya kuhusu mbinu za hacking za hivi karibuni.
 
 {{#include ../banners/hacktricks-training.md}}
-

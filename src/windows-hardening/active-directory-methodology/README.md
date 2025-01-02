@@ -4,81 +4,80 @@
 
 ## Basic overview
 
-**Active Directory** serves as a foundational technology, enabling **network administrators** to efficiently create and manage **domains**, **users**, and **objects** within a network. It is engineered to scale, facilitating the organization of an extensive number of users into manageable **groups** and **subgroups**, while controlling **access rights** at various levels.
+**Active Directory** inatoa teknolojia ya msingi, ikiruhusu **wasimamizi wa mtandao** kuunda na kusimamia kwa ufanisi **doma**, **watumiaji**, na **vitu** ndani ya mtandao. Imeundwa ili kupanuka, ikisaidia kuandaa idadi kubwa ya watumiaji katika **makundi** na **subgroups** yanayoweza kudhibitiwa, huku ikidhibiti **haki za ufikiaji** katika ngazi mbalimbali.
 
-The structure of **Active Directory** is comprised of three primary layers: **domains**, **trees**, and **forests**. A **domain** encompasses a collection of objects, such as **users** or **devices**, sharing a common database. **Trees** are groups of these domains linked by a shared structure, and a **forest** represents the collection of multiple trees, interconnected through **trust relationships**, forming the uppermost layer of the organizational structure. Specific **access** and **communication rights** can be designated at each of these levels.
+Muundo wa **Active Directory** unajumuisha tabaka tatu kuu: **doma**, **miti**, na **misitu**. **Doma** inajumuisha mkusanyiko wa vitu, kama **watumiaji** au **vifaa**, vinavyoshiriki hifadhidata ya kawaida. **Miti** ni makundi ya hizi doma zilizounganishwa na muundo wa pamoja, na **msitu** unawakilisha mkusanyiko wa miti kadhaa, zilizounganishwa kupitia **uhusiano wa kuaminiana**, zikiforma tabaka la juu zaidi la muundo wa shirika. Haki maalum za **ufikiaji** na **mawasiliano** zinaweza kutolewa katika kila moja ya hizi ngazi.
 
-Key concepts within **Active Directory** include:
+Mifano muhimu ndani ya **Active Directory** ni pamoja na:
 
-1. **Directory** – Houses all information pertaining to Active Directory objects.
-2. **Object** – Denotes entities within the directory, including **users**, **groups**, or **shared folders**.
-3. **Domain** – Serves as a container for directory objects, with the capability for multiple domains to coexist within a **forest**, each maintaining its own object collection.
-4. **Tree** – A grouping of domains that share a common root domain.
-5. **Forest** – The pinnacle of organizational structure in Active Directory, composed of several trees with **trust relationships** among them.
+1. **Directory** – Inahifadhi taarifa zote zinazohusiana na vitu vya Active Directory.
+2. **Object** – Inamaanisha viumbe ndani ya directory, ikiwa ni pamoja na **watumiaji**, **makundi**, au **folda zilizoshirikiwa**.
+3. **Domain** – Inatumika kama chombo cha vitu vya directory, ikiwa na uwezo wa doma nyingi kuishi pamoja ndani ya **msitu**, kila moja ikihifadhi mkusanyiko wake wa vitu.
+4. **Tree** – Kundi la doma zinazoshiriki domain ya mzizi wa pamoja.
+5. **Forest** – Kilele cha muundo wa shirika katika Active Directory, kinachojumuisha miti kadhaa zikiwa na **uaminifu** kati yao.
 
-**Active Directory Domain Services (AD DS)** encompasses a range of services critical for the centralized management and communication within a network. These services comprise:
+**Active Directory Domain Services (AD DS)** inajumuisha huduma mbalimbali muhimu kwa usimamizi wa kati na mawasiliano ndani ya mtandao. Huduma hizi zinajumuisha:
 
-1. **Domain Services** – Centralizes data storage and manages interactions between **users** and **domains**, including **authentication** and **search** functionalities.
-2. **Certificate Services** – Oversees the creation, distribution, and management of secure **digital certificates**.
-3. **Lightweight Directory Services** – Supports directory-enabled applications through the **LDAP protocol**.
-4. **Directory Federation Services** – Provides **single-sign-on** capabilities to authenticate users across multiple web applications in a single session.
-5. **Rights Management** – Assists in safeguarding copyright material by regulating its unauthorized distribution and use.
-6. **DNS Service** – Crucial for the resolution of **domain names**.
+1. **Domain Services** – Inakusanya uhifadhi wa data na kusimamia mwingiliano kati ya **watumiaji** na **doma**, ikiwa ni pamoja na **uthibitishaji** na **utafutaji**.
+2. **Certificate Services** – Inasimamia uundaji, usambazaji, na usimamizi wa **vyeti vya dijitali** salama.
+3. **Lightweight Directory Services** – Inasaidia programu zinazotumia directory kupitia **protokali ya LDAP**.
+4. **Directory Federation Services** – Inatoa uwezo wa **kuingia mara moja** kuthibitisha watumiaji katika programu nyingi za wavuti katika kikao kimoja.
+5. **Rights Management** – Inasaidia kulinda mali ya hakimiliki kwa kudhibiti usambazaji na matumizi yake yasiyoidhinishwa.
+6. **DNS Service** – Muhimu kwa kutatua **majina ya doma**.
 
-For a more detailed explanation check: [**TechTerms - Active Directory Definition**](https://techterms.com/definition/active_directory)
+Kwa maelezo zaidi, angalia: [**TechTerms - Active Directory Definition**](https://techterms.com/definition/active_directory)
 
 ### **Kerberos Authentication**
 
-To learn how to **attack an AD** you need to **understand** really good the **Kerberos authentication process**.\
-[**Read this page if you still don't know how it works.**](kerberos-authentication.md)
+Ili kujifunza jinsi ya **kushambulia AD** unahitaji **kuelewa** vizuri mchakato wa **uthibitishaji wa Kerberos**.\
+[**Soma ukurasa huu ikiwa bado hujui jinsi inavyofanya kazi.**](kerberos-authentication.md)
 
 ## Cheat Sheet
 
-You can take a lot to [https://wadcoms.github.io/](https://wadcoms.github.io) to have a quick view of which commands you can run to enumerate/exploit an AD.
+Unaweza kutembelea [https://wadcoms.github.io/](https://wadcoms.github.io) kupata muonekano wa haraka wa amri ambazo unaweza kukimbia ili kuhesabu/kutumia AD.
 
 ## Recon Active Directory (No creds/sessions)
 
-If you just have access to an AD environment but you don't have any credentials/sessions you could:
+Ikiwa una ufikiaji tu wa mazingira ya AD lakini huna akreditivu/sessions unaweza:
 
-- **Pentest the network:**
-  - Scan the network, find machines and open ports and try to **exploit vulnerabilities** or **extract credentials** from them (for example, [printers could be very interesting targets](ad-information-in-printers.md).
-  - Enumerating DNS could give information about key servers in the domain as web, printers, shares, vpn, media, etc.
-    - `gobuster dns -d domain.local -t 25 -w /opt/Seclist/Discovery/DNS/subdomain-top2000.txt`
-  - Take a look to the General [**Pentesting Methodology**](../../generic-methodologies-and-resources/pentesting-methodology.md) to find more information about how to do this.
-- **Check for null and Guest access on smb services** (this won't work on modern Windows versions):
-  - `enum4linux -a -u "" -p "" <DC IP> && enum4linux -a -u "guest" -p "" <DC IP>`
-  - `smbmap -u "" -p "" -P 445 -H <DC IP> && smbmap -u "guest" -p "" -P 445 -H <DC IP>`
-  - `smbclient -U '%' -L //<DC IP> && smbclient -U 'guest%' -L //`
-  - A more detailed guide on how to enumerate a SMB server can be found here:
+- **Pentest mtandao:**
+- Fanya skana ya mtandao, pata mashine na bandari wazi na jaribu **kutumia udhaifu** au **kuchota akreditivu** kutoka kwao (kwa mfano, [printa zinaweza kuwa malengo ya kuvutia](ad-information-in-printers.md).
+- Kuangalia DNS kunaweza kutoa taarifa kuhusu seva muhimu katika domain kama wavuti, printa, sehemu, vpn, media, nk.
+- `gobuster dns -d domain.local -t 25 -w /opt/Seclist/Discovery/DNS/subdomain-top2000.txt`
+- Angalia [**Pentesting Methodology**](../../generic-methodologies-and-resources/pentesting-methodology.md) kupata maelezo zaidi kuhusu jinsi ya kufanya hivi.
+- **Angalia ufikiaji wa null na Guest kwenye huduma za smb** (hii haitafanya kazi kwenye toleo la kisasa la Windows):
+- `enum4linux -a -u "" -p "" <DC IP> && enum4linux -a -u "guest" -p "" <DC IP>`
+- `smbmap -u "" -p "" -P 445 -H <DC IP> && smbmap -u "guest" -p "" -P 445 -H <DC IP>`
+- `smbclient -U '%' -L //<DC IP> && smbclient -U 'guest%' -L //`
+- Mwongozo wa kina juu ya jinsi ya kuhesabu seva ya SMB unaweza kupatikana hapa:
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-smb/
 {{#endref}}
 
-- **Enumerate Ldap**
-  - `nmap -n -sV --script "ldap* and not brute" -p 389 <DC IP>`
-  - A more detailed guide on how to enumerate LDAP can be found here (pay **special attention to the anonymous access**):
+- **Hesabu Ldap**
+- `nmap -n -sV --script "ldap* and not brute" -p 389 <DC IP>`
+- Mwongozo wa kina juu ya jinsi ya kuhesabu LDAP unaweza kupatikana hapa (lipa **kipaumbele maalum kwa ufikiaji wa siri**):
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-ldap.md
 {{#endref}}
 
-- **Poison the network**
-  - Gather credentials [**impersonating services with Responder**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md)
-  - Access host by [**abusing the relay attack**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack)
-  - Gather credentials **exposing** [**fake UPnP services with evil-S**](../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md)[**SDP**](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)
+- **Poison mtandao**
+- Kusanya akreditivu [**ukijifanya huduma kwa Responder**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md)
+- Fikia mwenyeji kwa [**kudhulumu shambulio la relay**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack)
+- Kusanya akreditivu **ukifichua** [**huduma za UPnP za uongo na evil-S**](../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md)[**SDP**](https://medium.com/@nickvangilder/exploiting-multifunction-printers-during-a-penetration-test-engagement-28d3840d8856)
 - [**OSINT**](https://book.hacktricks.xyz/external-recon-methodology):
-  - Extract usernames/names from internal documents, social media, services (mainly web) inside the domain environments and also from the publicly available.
-  - If you find the complete names of company workers, you could try different AD **username conventions (**[**read this**](https://activedirectorypro.com/active-directory-user-naming-convention/)). The most common conventions are: _NameSurname_, _Name.Surname_, _NamSur_ (3letters of each), _Nam.Sur_, _NSurname_, _N.Surname_, _SurnameName_, _Surname.Name_, _SurnameN_, _Surname.N_, 3 _random letters and 3 random numbers_ (abc123).
-  - Tools:
-    - [w0Tx/generate-ad-username](https://github.com/w0Tx/generate-ad-username)
-    - [urbanadventurer/username-anarchy](https://github.com/urbanadventurer/username-anarchy)
+- Toa majina ya watumiaji/majina kutoka kwa nyaraka za ndani, mitandao ya kijamii, huduma (hasa wavuti) ndani ya mazingira ya domain na pia kutoka kwa yaliyopo hadharani.
+- Ikiwa unapata majina kamili ya wafanyakazi wa kampuni, unaweza kujaribu mifumo tofauti ya **majina ya watumiaji AD** (**[soma hii](https://activedirectorypro.com/active-directory-user-naming-convention/)**). Mifumo ya kawaida ni: _NameSurname_, _Name.Surname_, _NamSur_ (herufi 3 za kila moja), _Nam.Sur_, _NSurname_, _N.Surname_, _SurnameName_, _Surname.Name_, _SurnameN_, _Surname.N_, herufi 3 _za nasibu na nambari 3 za nasibu_ (abc123).
+- Zana:
+- [w0Tx/generate-ad-username](https://github.com/w0Tx/generate-ad-username)
+- [urbanadventurer/username-anarchy](https://github.com/urbanadventurer/username-anarchy)
 
 ### User enumeration
 
-- **Anonymous SMB/LDAP enum:** Check the [**pentesting SMB**](../../network-services-pentesting/pentesting-smb/) and [**pentesting LDAP**](../../network-services-pentesting/pentesting-ldap.md) pages.
-- **Kerbrute enum**: When an **invalid username is requested** the server will respond using the **Kerberos error** code _KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN_, allowing us to determine that the username was invalid. **Valid usernames** will illicit either the **TGT in a AS-REP** response or the error _KRB5KDC_ERR_PREAUTH_REQUIRED_, indicating that the user is required to perform pre-authentication.
-
+- **Anonymous SMB/LDAP enum:** Angalia [**pentesting SMB**](../../network-services-pentesting/pentesting-smb/) na [**pentesting LDAP**](../../network-services-pentesting/pentesting-ldap.md) kurasa.
+- **Kerbrute enum**: Wakati **jina la mtumiaji lisilo sahihi linapohitajika** seva itajibu kwa kutumia **kodi ya kosa la Kerberos** _KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN_, ikituruhusu kubaini kwamba jina la mtumiaji halikuwa sahihi. **Majina sahihi ya watumiaji** yatatoa ama **TGT katika jibu la AS-REP** au kosa _KRB5KDC_ERR_PREAUTH_REQUIRED_, ikionyesha kwamba mtumiaji anahitajika kufanya uthibitishaji wa awali.
 ```bash
 ./kerbrute_linux_amd64 userenum -d lab.ropnop.com --dc 10.10.10.10 usernames.txt #From https://github.com/ropnop/kerbrute/releases
 
@@ -89,11 +88,9 @@ msf> use auxiliary/gather/kerberos_enumusers
 
 crackmapexec smb dominio.es  -u '' -p '' --users | awk '{print $4}' | uniq
 ```
-
 - **OWA (Outlook Web Access) Server**
 
-If you found one of these servers in the network you can also perform **user enumeration against it**. For example, you could use the tool [**MailSniper**](https://github.com/dafthack/MailSniper):
-
+Ikiwa umepata moja ya seva hizi katika mtandao unaweza pia kufanya **user enumeration dhidi yake**. Kwa mfano, unaweza kutumia chombo [**MailSniper**](https://github.com/dafthack/MailSniper):
 ```bash
 ipmo C:\Tools\MailSniper\MailSniper.ps1
 # Get info about the domain
@@ -105,19 +102,18 @@ Invoke-PasswordSprayOWA -ExchHostname [ip] -UserList .\valid.txt -Password Summe
 # Get addresses list from the compromised mail
 Get-GlobalAddressList -ExchHostname [ip] -UserName [domain]\[username] -Password Summer2021 -OutFile gal.txt
 ```
-
 > [!WARNING]
-> You can find lists of usernames in [**this github repo**](https://github.com/danielmiessler/SecLists/tree/master/Usernames/Names) \*\*\*\* and this one ([**statistically-likely-usernames**](https://github.com/insidetrust/statistically-likely-usernames)).
+> Unaweza kupata orodha za majina ya watumiaji katika [**hii github repo**](https://github.com/danielmiessler/SecLists/tree/master/Usernames/Names) \*\*\*\* na hii nyingine ([**statistically-likely-usernames**](https://github.com/insidetrust/statistically-likely-usernames)).
 >
-> However, you should have the **name of the people working on the company** from the recon step you should have performed before this. With the name and surname you could used the script [**namemash.py**](https://gist.github.com/superkojiman/11076951) to generate potential valid usernames.
+> Hata hivyo, unapaswa kuwa na **jina la watu wanaofanya kazi katika kampuni** kutoka hatua ya reconnaissance ambayo unapaswa kuwa umefanya kabla ya hii. Kwa jina na jina la ukoo unaweza kutumia script [**namemash.py**](https://gist.github.com/superkojiman/11076951) kuunda majina ya watumiaji halali yanayoweza kuwa.
 
-### Knowing one or several usernames
+### Kujua jina moja au kadhaa la watumiaji
 
-Ok, so you know you have already a valid username but no passwords... Then try:
+Sawa, kwa hivyo unajua tayari una jina halali la mtumiaji lakini hakuna nywila... Kisha jaribu:
 
-- [**ASREPRoast**](asreproast.md): If a user **doesn't have** the attribute _DONT_REQ_PREAUTH_ you can **request a AS_REP message** for that user that will contain some data encrypted by a derivation of the password of the user.
-- [**Password Spraying**](password-spraying.md): Let's try the most **common passwords** with each of the discovered users, maybe some user is using a bad password (keep in mind the password policy!).
-  - Note that you can also **spray OWA servers** to try to get access to the users mail servers.
+- [**ASREPRoast**](asreproast.md): Ikiwa mtumiaji **hana** sifa _DONT_REQ_PREAUTH_ unaweza **kuomba ujumbe wa AS_REP** kwa mtumiaji huyo ambao utakuwa na baadhi ya data iliyosimbwa kwa derivation ya nywila ya mtumiaji.
+- [**Password Spraying**](password-spraying.md): Hebu jaribu nywila **za kawaida zaidi** na kila mmoja wa watumiaji waliogunduliwa, labda mtumiaji fulani anatumia nywila mbaya (kumbuka sera ya nywila!).
+- Kumbuka kwamba unaweza pia **spray OWA servers** kujaribu kupata ufikiaji wa seva za barua za watumiaji.
 
 {{#ref}}
 password-spraying.md
@@ -125,7 +121,7 @@ password-spraying.md
 
 ### LLMNR/NBT-NS Poisoning
 
-You might be able to **obtain** some challenge **hashes** to crack **poisoning** some protocols of the **network**:
+Unaweza kuwa na uwezo wa **kupata** baadhi ya changamoto **hashes** ili kuvunja **kuchafua** baadhi ya protokali za **mtandao**:
 
 {{#ref}}
 ../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md
@@ -133,74 +129,73 @@ You might be able to **obtain** some challenge **hashes** to crack **poisoning**
 
 ### NTML Relay
 
-If you have managed to enumerate the active directory you will have **more emails and a better understanding of the network**. You might be able to to force NTML [**relay attacks**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack) \*\*\*\* to get access to the AD env.
+Ikiwa umeweza kuhesabu active directory utakuwa na **barua zaidi na ufahamu bora wa mtandao**. Unaweza kuwa na uwezo wa kulazimisha NTML [**relay attacks**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack) \*\*\*\* kupata ufikiaji wa mazingira ya AD.
 
-### Steal NTLM Creds
+### Kuiba NTLM Creds
 
-If you can **access other PCs or shares** with the **null or guest user** you could **place files** (like a SCF file) that if somehow accessed will t**rigger an NTML authentication against you** so you can **steal** the **NTLM challenge** to crack it:
+Ikiwa unaweza **kufikia kompyuta nyingine au sehemu** na **mtumiaji wa null au mgeni** unaweza **kweka faili** (kama faili ya SCF) ambayo ikiwa kwa namna fulani itafikiwa itasababisha **uthibitishaji wa NTML dhidi yako** ili uweze **kuiba** **NTLM challenge** ili kuivunja:
 
 {{#ref}}
 ../ntlm/places-to-steal-ntlm-creds.md
 {{#endref}}
 
-## Enumerating Active Directory WITH credentials/session
+## Kuorodhesha Active Directory KWA nywila/sessio
 
-For this phase you need to have **compromised the credentials or a session of a valid domain account.** If you have some valid credentials or a shell as a domain user, **you should remember that the options given before are still options to compromise other users**.
+Kwa hatua hii unahitaji kuwa **umevamia nywila au sessio ya akaunti halali ya domain.** Ikiwa una nywila halali au shell kama mtumiaji wa domain, **unapaswa kukumbuka kwamba chaguzi zilizotolewa hapo awali bado ni chaguzi za kuvamia watumiaji wengine**.
 
-Before start the authenticated enumeration you should know what is the **Kerberos double hop problem.**
+Kabla ya kuanza kuorodhesha kwa uthibitisho unapaswa kujua ni nini **tatizo la Kerberos double hop.**
 
 {{#ref}}
 kerberos-double-hop-problem.md
 {{#endref}}
 
-### Enumeration
+### Kuorodhesha
 
-Having compromised an account is a **big step to start compromising the whole domain**, because you are going to be able to start the **Active Directory Enumeration:**
+Kuwa na akaunti iliyovamiwa ni **hatua kubwa ya kuanza kuvamia domain nzima**, kwa sababu utaweza kuanza **Kuorodhesha Active Directory:**
 
-Regarding [**ASREPRoast**](asreproast.md) you can now find every possible vulnerable user, and regarding [**Password Spraying**](password-spraying.md) you can get a **list of all the usernames** and try the password of the compromised account, empty passwords and new promising passwords.
+Kuhusu [**ASREPRoast**](asreproast.md) sasa unaweza kupata kila mtumiaji anayeweza kuwa hatarini, na kuhusu [**Password Spraying**](password-spraying.md) unaweza kupata **orodha ya majina yote ya watumiaji** na kujaribu nywila ya akaunti iliyovamiwa, nywila tupu na nywila mpya zinazowezekana.
 
-- You could use the [**CMD to perform a basic recon**](../basic-cmd-for-pentesters.md#domain-info)
-- You can also use [**powershell for recon**](../basic-powershell-for-pentesters/) which will be stealthier
-- You ca also [**use powerview**](../basic-powershell-for-pentesters/powerview.md) to extract more detailed information
-- Another amazing tool for recon in an active directory is [**BloodHound**](bloodhound.md). It is **not very stealthy** (depending on the collection methods you use), but **if you don't care** about that, you should totally give it a try. Find where users can RDP, find path to other groups, etc.
-  - **Other automated AD enumeration tools are:** [**AD Explorer**](bloodhound.md#ad-explorer)**,** [**ADRecon**](bloodhound.md#adrecon)**,** [**Group3r**](bloodhound.md#group3r)**,** [**PingCastle**](bloodhound.md#pingcastle)**.**
-- [**DNS records of the AD**](ad-dns-records.md) as they might contain interesting information.
-- A **tool with GUI** that you can use to enumerate the directory is **AdExplorer.exe** from **SysInternal** Suite.
-- You can also search in the LDAP database with **ldapsearch** to look for credentials in fields _userPassword_ & _unixUserPassword_, or even for _Description_. cf. [Password in AD User comment on PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#password-in-ad-user-comment) for other methods.
-- If you are using **Linux**, you could also enumerate the domain using [**pywerview**](https://github.com/the-useless-one/pywerview).
-- You could also try automated tools as:
-  - [**tomcarver16/ADSearch**](https://github.com/tomcarver16/ADSearch)
-  - [**61106960/adPEAS**](https://github.com/61106960/adPEAS)
-- **Extracting all domain users**
+- Unaweza kutumia [**CMD kufanya reconnaissance ya msingi**](../basic-cmd-for-pentesters.md#domain-info)
+- Unaweza pia kutumia [**powershell kwa reconnaissance**](../basic-powershell-for-pentesters/) ambayo itakuwa ya siri zaidi
+- Unaweza pia [**kutumia powerview**](../basic-powershell-for-pentesters/powerview.md) kutoa taarifa za kina zaidi
+- Zana nyingine nzuri kwa ajili ya reconnaissance katika active directory ni [**BloodHound**](bloodhound.md). Si **ya siri sana** (kulingana na mbinu za ukusanyaji unazotumia), lakini **ikiwa hujali** kuhusu hilo, unapaswa kujaribu kabisa. Pata mahali ambapo watumiaji wanaweza RDP, pata njia za makundi mengine, nk.
+- **Zana nyingine za kuorodhesha za AD za kiotomatiki ni:** [**AD Explorer**](bloodhound.md#ad-explorer)**,** [**ADRecon**](bloodhound.md#adrecon)**,** [**Group3r**](bloodhound.md#group3r)**,** [**PingCastle**](bloodhound.md#pingcastle)**.**
+- [**Rekodi za DNS za AD**](ad-dns-records.md) kwani zinaweza kuwa na taarifa za kuvutia.
+- **Zana yenye GUI** ambayo unaweza kutumia kuorodhesha directory ni **AdExplorer.exe** kutoka **SysInternal** Suite.
+- Unaweza pia kutafuta katika database ya LDAP kwa **ldapsearch** kutafuta nywila katika maeneo _userPassword_ & _unixUserPassword_, au hata kwa _Description_. cf. [Nywila katika AD User comment on PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#password-in-ad-user-comment) kwa mbinu nyingine.
+- Ikiwa unatumia **Linux**, unaweza pia kuorodhesha domain kwa kutumia [**pywerview**](https://github.com/the-useless-one/pywerview).
+- Unaweza pia kujaribu zana za kiotomatiki kama:
+- [**tomcarver16/ADSearch**](https://github.com/tomcarver16/ADSearch)
+- [**61106960/adPEAS**](https://github.com/61106960/adPEAS)
+- **Kutoa majina yote ya watumiaji wa domain**
 
-  It's very easy to obtain all the domain usernames from Windows (`net user /domain` ,`Get-DomainUser` or `wmic useraccount get name,sid`). In Linux, you can use: `GetADUsers.py -all -dc-ip 10.10.10.110 domain.com/username` or `enum4linux -a -u "user" -p "password" <DC IP>`
+Ni rahisi sana kupata majina yote ya watumiaji wa domain kutoka Windows (`net user /domain` ,`Get-DomainUser` au `wmic useraccount get name,sid`). Katika Linux, unaweza kutumia: `GetADUsers.py -all -dc-ip 10.10.10.110 domain.com/username` au `enum4linux -a -u "user" -p "password" <DC IP>`
 
-> Even if this Enumeration section looks small this is the most important part of all. Access the links (mainly the one of cmd, powershell, powerview and BloodHound), learn how to enumerate a domain and practice until you feel comfortable. During an assessment, this will be the key moment to find your way to DA or to decide that nothing can be done.
+> Hata kama sehemu hii ya Kuorodhesha inaonekana ndogo hii ndiyo sehemu muhimu zaidi ya yote. Fikia viungo (hasa ile ya cmd, powershell, powerview na BloodHound), jifunze jinsi ya kuorodhesha domain na fanya mazoezi hadi ujisikie vizuri. Wakati wa tathmini, hii itakuwa wakati muhimu wa kupata njia yako kwenda DA au kuamua kwamba hakuna kinachoweza kufanywa.
 
 ### Kerberoast
 
-Kerberoasting involves obtaining **TGS tickets** used by services tied to user accounts and cracking their encryption—which is based on user passwords—**offline**.
+Kerberoasting inahusisha kupata **TGS tickets** zinazotumiwa na huduma zinazohusiana na akaunti za watumiaji na kuvunja usimbaji wao—ambao unategemea nywila za watumiaji—**nje ya mtandao**.
 
-More about this in:
+Zaidi kuhusu hii katika:
 
 {{#ref}}
 kerberoast.md
 {{#endref}}
 
-### Remote connexion (RDP, SSH, FTP, Win-RM, etc)
+### Muunganisho wa mbali (RDP, SSH, FTP, Win-RM, nk)
 
-Once you have obtained some credentials you could check if you have access to any **machine**. For that matter, you could use **CrackMapExec** to attempt connecting on several servers with different protocols, accordingly to your ports scans.
+Mara tu unapokuwa umepata baadhi ya nywila unaweza kuangalia ikiwa una ufikiaji wa **mashine** yoyote. Kwa jambo hilo, unaweza kutumia **CrackMapExec** kujaribu kuungana kwenye seva kadhaa kwa protokali tofauti, kulingana na skana zako za port.
 
-### Local Privilege Escalation
+### Kuinua Privilege za Mitaa
 
-If you have compromised credentials or a session as a regular domain user and you have **access** with this user to **any machine in the domain** you should try to find your way to **escalate privileges locally and looting for credentials**. This is because only with local administrator privileges you will be able to **dump hashes of other users** in memory (LSASS) and locally (SAM).
+Ikiwa umevamia nywila au sessio kama mtumiaji wa kawaida wa domain na una **ufikiaji** na mtumiaji huyu kwa **mashine yoyote katika domain** unapaswa kujaribu kupata njia yako ya **kuinua privileges kwa ndani na kutafuta nywila**. Hii ni kwa sababu ni tu kwa ruhusa za msimamizi wa ndani utaweza **dump hashes za watumiaji wengine** katika kumbukumbu (LSASS) na kwa ndani (SAM).
 
-There is a complete page in this book about [**local privilege escalation in Windows**](../windows-local-privilege-escalation/) and a [**checklist**](../checklist-windows-privilege-escalation.md). Also, don't forget to use [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite).
+Kuna ukurasa kamili katika kitabu hiki kuhusu [**kuinua privilege za ndani katika Windows**](../windows-local-privilege-escalation/) na [**orodha ya ukaguzi**](../checklist-windows-privilege-escalation.md). Pia, usisahau kutumia [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite).
 
-### Current Session Tickets
+### Tiketi za Sessio za Sasa
 
-It's very **unlikely** that you will find **tickets** in the current user **giving you permission to access** unexpected resources, but you could check:
-
+Ni **ngumu sana** kwamba utapata **tiketi** katika mtumiaji wa sasa **zinazokupa ruhusa ya kufikia** rasilimali zisizotarajiwa, lakini unaweza kuangalia:
 ```bash
 ## List all tickets (if not admin, only current user tickets)
 .\Rubeus.exe triage
@@ -208,20 +203,19 @@ It's very **unlikely** that you will find **tickets** in the current user **givi
 .\Rubeus.exe dump /service:krbtgt /luid:<luid> /nowrap
 [IO.File]::WriteAllBytes("ticket.kirbi", [Convert]::FromBase64String("<BASE64_TICKET>"))
 ```
-
 ### NTML Relay
 
-If you have managed to enumerate the active directory you will have **more emails and a better understanding of the network**. You might be able to to force NTML [**relay attacks**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack)**.**
+Ikiwa umeweza kuhesabu active directory utakuwa na **barua pepe zaidi na ufahamu bora wa mtandao**. Unaweza kuwa na uwezo wa kulazimisha NTML [**relay attacks**](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md#relay-attack)**.**
 
-### **Looks for Creds in Computer Shares**
+### **Angalia Creds katika Computer Shares**
 
-Now that you have some basic credentials you should check if you can **find** any **interesting files being shared inside the AD**. You could do that manually but it's a very boring repetitive task (and more if you find hundreds of docs you need to check).
+Sasa kwamba una baadhi ya akidi za msingi unapaswa kuangalia kama unaweza **kupata** faili zozote **za kuvutia zinazoshirikiwa ndani ya AD**. Unaweza kufanya hivyo kwa mikono lakini ni kazi ya kuchosha na ya kurudiwa (na zaidi ikiwa unapata mamia ya hati unahitaji kuangalia).
 
-[**Follow this link to learn about tools you could use.**](../../network-services-pentesting/pentesting-smb/#domain-shared-folders-search)
+[**Fuata kiungo hiki kujifunza kuhusu zana unazoweza kutumia.**](../../network-services-pentesting/pentesting-smb/#domain-shared-folders-search)
 
 ### Steal NTLM Creds
 
-If you can **access other PCs or shares** you could **place files** (like a SCF file) that if somehow accessed will t**rigger an NTML authentication against you** so you can **steal** the **NTLM challenge** to crack it:
+Ikiwa unaweza **kufikia PCs nyingine au shares** unaweza **kweka faili** (kama faili la SCF) ambayo ikiwa kwa namna fulani itafikiwa it **itazindua uthibitisho wa NTML dhidi yako** ili uweze **kuiba** **changamoto ya NTLM** ili kuifungua:
 
 {{#ref}}
 ../ntlm/places-to-steal-ntlm-creds.md
@@ -229,7 +223,7 @@ If you can **access other PCs or shares** you could **place files** (like a SCF 
 
 ### CVE-2021-1675/CVE-2021-34527 PrintNightmare
 
-This vulnerability allowed any authenticated user to **compromise the domain controller**.
+Uthibitisho huu uliruhusu mtumiaji yeyote aliyeidhinishwa **kuharibu kidhibiti cha eneo**.
 
 {{#ref}}
 printnightmare.md
@@ -237,23 +231,23 @@ printnightmare.md
 
 ## Privilege escalation on Active Directory WITH privileged credentials/session
 
-**For the following techniques a regular domain user is not enough, you need some special privileges/credentials to perform these attacks.**
+**Kwa mbinu zifuatazo mtumiaji wa kawaida wa eneo si wa kutosha, unahitaji baadhi ya haki/akidi maalum ili kutekeleza mashambulizi haya.**
 
 ### Hash extraction
 
-Hopefully you have managed to **compromise some local admin** account using [AsRepRoast](asreproast.md), [Password Spraying](password-spraying.md), [Kerberoast](kerberoast.md), [Responder](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md) including relaying, [EvilSSDP](../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md), [escalating privileges locally](../windows-local-privilege-escalation/).\
-Then, its time to dump all the hashes in memory and locally.\
-[**Read this page about different ways to obtain the hashes.**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/active-directory-methodology/broken-reference/README.md)
+Tuna matumaini umeweza **kuharibu akaunti ya msimamizi wa ndani** kwa kutumia [AsRepRoast](asreproast.md), [Password Spraying](password-spraying.md), [Kerberoast](kerberoast.md), [Responder](../../generic-methodologies-and-resources/pentesting-network/spoofing-llmnr-nbt-ns-mdns-dns-and-wpad-and-relay-attacks.md) ikiwa ni pamoja na relaying, [EvilSSDP](../../generic-methodologies-and-resources/pentesting-network/spoofing-ssdp-and-upnp-devices.md), [kuinua haki kwa ndani](../windows-local-privilege-escalation/).\
+Kisha, ni wakati wa kutupa hash zote katika kumbukumbu na ndani.\
+[**Soma ukurasa huu kuhusu njia tofauti za kupata hash.**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/active-directory-methodology/broken-reference/README.md)
 
 ### Pass the Hash
 
-**Once you have the hash of a user**, you can use it to **impersonate** it.\
-You need to use some **tool** that will **perform** the **NTLM authentication using** that **hash**, **or** you could create a new **sessionlogon** and **inject** that **hash** inside the **LSASS**, so when any **NTLM authentication is performed**, that **hash will be used.** The last option is what mimikatz does.\
-[**Read this page for more information.**](../ntlm/#pass-the-hash)
+**Mara tu unapo kuwa na hash ya mtumiaji**, unaweza kuitumia **kujifanya** kuwa yeye.\
+Unahitaji kutumia **chombo** ambacho kitafanya **uthibitisho wa NTLM kwa kutumia** hiyo **hash**, **au** unaweza kuunda **sessionlogon** mpya na **kuingiza** hiyo **hash** ndani ya **LSASS**, hivyo wakati wowote **uthibitisho wa NTLM unafanywa**, hiyo **hash itatumika.** Chaguo la mwisho ndilo ambalo mimikatz hufanya.\
+[**Soma ukurasa huu kwa maelezo zaidi.**](../ntlm/#pass-the-hash)
 
 ### Over Pass the Hash/Pass the Key
 
-This attack aims to **use the user NTLM hash to request Kerberos tickets**, as an alternative to the common Pass The Hash over NTLM protocol. Therefore, this could be especially **useful in networks where NTLM protocol is disabled** and only **Kerberos is allowed** as authentication protocol.
+Shambulizi hili linakusudia **kutumia hash ya mtumiaji wa NTLM kuomba tiketi za Kerberos**, kama mbadala wa kawaida ya Pass The Hash juu ya itifaki ya NTLM. Hivyo, hii inaweza kuwa hasa **faida katika mitandao ambapo itifaki ya NTLM imezimwa** na tu **Kerberos inaruhusiwa** kama itifaki ya uthibitisho.
 
 {{#ref}}
 over-pass-the-hash-pass-the-key.md
@@ -261,7 +255,7 @@ over-pass-the-hash-pass-the-key.md
 
 ### Pass the Ticket
 
-In the **Pass The Ticket (PTT)** attack method, attackers **steal a user's authentication ticket** instead of their password or hash values. This stolen ticket is then used to **impersonate the user**, gaining unauthorized access to resources and services within a network.
+Katika mbinu ya shambulizi ya **Pass The Ticket (PTT)**, washambuliaji **wanaiba tiketi ya uthibitisho ya mtumiaji** badala ya nenosiri lao au thamani za hash. Tiketi hii iliyibwa inatumika kisha **kujifanya kuwa mtumiaji**, ikipata ufikiaji usioidhinishwa kwa rasilimali na huduma ndani ya mtandao.
 
 {{#ref}}
 pass-the-ticket.md
@@ -269,22 +263,20 @@ pass-the-ticket.md
 
 ### Credentials Reuse
 
-If you have the **hash** or **password** of a **local administrato**r you should try to **login locally** to other **PCs** with it.
-
+Ikiwa una **hash** au **nenosiri** la **msimamizi wa ndani** unapaswa kujaribu **kuingia kwa ndani** kwenye **PCs** nyingine kwa kutumia hiyo.
 ```bash
 # Local Auth Spray (once you found some local admin pass or hash)
 ## --local-auth flag indicate to only try 1 time per machine
 crackmapexec smb --local-auth 10.10.10.10/23 -u administrator -H 10298e182387f9cab376ecd08491764a0 | grep +
 ```
-
 > [!WARNING]
-> Note that this is quite **noisy** and **LAPS** would **mitigate** it.
+> Kumbuka kwamba hii ni **kelele** na **LAPS** itapunguza.
 
 ### MSSQL Abuse & Trusted Links
 
-If a user has privileges to **access MSSQL instances**, he could be able to use it to **execute commands** in the MSSQL host (if running as SA), **steal** the NetNTLM **hash** or even perform a **relay** **attack**.\
-Also, if a MSSQL instance is trusted (database link) by a different MSSQL instance. If the user has privileges over the trusted database, he is going to be able to **use the trust relationship to execute queries also in the other instance**. These trusts can be chained and at some point the user might be able to find a misconfigured database where he can execute commands.\
-**The links between databases work even across forest trusts.**
+Ikiwa mtumiaji ana mamlaka ya **kufikia mifano ya MSSQL**, anaweza kuwa na uwezo wa kuitumia **kutekeleza amri** kwenye mwenyeji wa MSSQL (ikiwa inafanya kazi kama SA), **kuiba** NetNTLM **hash** au hata kufanya **shambulio la relay**.\
+Pia, ikiwa mfano wa MSSQL unakubaliwa (kiungo cha database) na mfano mwingine wa MSSQL. Ikiwa mtumiaji ana mamlaka juu ya database iliyoaminika, atakuwa na uwezo wa **kutumia uhusiano wa kuaminiana kutekeleza maswali pia kwenye mfano mwingine**. Hizi kuaminiana zinaweza kuunganishwa na wakati fulani mtumiaji anaweza kuwa na uwezo wa kupata database iliyo na makosa ambapo anaweza kutekeleza amri.\
+**Viungo kati ya databases vinafanya kazi hata katika kuaminiana kwa msitu.**
 
 {{#ref}}
 abusing-ad-mssql.md
@@ -292,9 +284,9 @@ abusing-ad-mssql.md
 
 ### Unconstrained Delegation
 
-If you find any Computer object with the attribute [ADS_UF_TRUSTED_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>) and you have domain privileges in the computer, you will be able to dump TGTs from memory of every users that logins onto the computer.\
-So, if a **Domain Admin logins onto the computer**, you will be able to dump his TGT and impersonate him using [Pass the Ticket](pass-the-ticket.md).\
-Thanks to constrained delegation you could even **automatically compromise a Print Server** (hopefully it will be a DC).
+Ikiwa unapata kitu chochote cha Kompyuta chenye sifa [ADS_UF_TRUSTED_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>) na una mamlaka ya eneo kwenye kompyuta, utaweza kutoa TGTs kutoka kwenye kumbukumbu ya kila mtumiaji anayeingia kwenye kompyuta.\
+Hivyo, ikiwa **Msimamizi wa Eneo anaingia kwenye kompyuta**, utaweza kutoa TGT yake na kumwakilisha kwa kutumia [Pass the Ticket](pass-the-ticket.md).\
+Shukrani kwa uwakilishi wa kizuizi unaweza hata **kuharibu kiotomatiki Server ya Print** (tunatumai itakuwa DC).
 
 {{#ref}}
 unconstrained-delegation.md
@@ -302,8 +294,8 @@ unconstrained-delegation.md
 
 ### Constrained Delegation
 
-If a user or computer is allowed for "Constrained Delegation" it will be able to **impersonate any user to access some services in a computer**.\
-Then, if you **compromise the hash** of this user/computer you will be able to **impersonate any user** (even domain admins) to access some services.
+Ikiwa mtumiaji au kompyuta inaruhusiwa kwa "Constrained Delegation" itakuwa na uwezo wa **kumwakilisha mtumiaji yeyote ili kufikia huduma fulani kwenye kompyuta**.\
+Kisha, ikiwa **utaharibu hash** ya mtumiaji/hii kompyuta utaweza **kumwakilisha mtumiaji yeyote** (hata wasimamizi wa eneo) ili kufikia huduma fulani.
 
 {{#ref}}
 constrained-delegation.md
@@ -311,7 +303,7 @@ constrained-delegation.md
 
 ### Resourced-based Constrain Delegation
 
-Having **WRITE** privilege on an Active Directory object of a remote computer enables the attainment of code execution with **elevated privileges**:
+Kuwa na mamlaka ya **WRITE** kwenye kitu cha Active Directory cha kompyuta ya mbali kunaruhusu kupata utekelezaji wa msimbo kwa **mamlaka ya juu**:
 
 {{#ref}}
 resource-based-constrained-delegation.md
@@ -319,7 +311,7 @@ resource-based-constrained-delegation.md
 
 ### ACLs Abuse
 
-The compromised user could have some **interesting privileges over some domain objects** that could let you **move** laterally/**escalate** privileges.
+Mtumiaji aliyeathirika anaweza kuwa na **mamlaka za kuvutia juu ya baadhi ya vitu vya eneo** ambavyo vinaweza kukuruhusu **kuhamasisha** kwa upande/**kuinua** mamlaka.
 
 {{#ref}}
 acl-persistence-abuse/
@@ -327,7 +319,7 @@ acl-persistence-abuse/
 
 ### Printer Spooler service abuse
 
-Discovering a **Spool service listening** within the domain can be **abused** to **acquire new credentials** and **escalate privileges**.
+Kugundua **Huduma ya Spool inayosikiliza** ndani ya eneo inaweza **kutumika vibaya** ili **kupata akidi mpya** na **kuinua mamlaka**.
 
 {{#ref}}
 printers-spooler-service-abuse.md
@@ -335,8 +327,8 @@ printers-spooler-service-abuse.md
 
 ### Third party sessions abuse
 
-If **other users** **access** the **compromised** machine, it's possible to **gather credentials from memory** and even **inject beacons in their processes** to impersonate them.\
-Usually users will access the system via RDP, so here you have how to performa couple of attacks over third party RDP sessions:
+Ikiwa **watumiaji wengine** **wanapata** mashine **iliyoathirika**, inawezekana **kukusanya akidi kutoka kwenye kumbukumbu** na hata **kuingiza beacons katika michakato yao** ili kuwawakilisha.\
+Kawaida watumiaji wataingia kwenye mfumo kupitia RDP, hivyo hapa kuna jinsi ya kufanya mashambulizi kadhaa juu ya vikao vya RDP vya wahusika wengine:
 
 {{#ref}}
 rdp-sessions-abuse.md
@@ -344,7 +336,7 @@ rdp-sessions-abuse.md
 
 ### LAPS
 
-**LAPS** provides a system for managing the **local Administrator password** on domain-joined computers, ensuring it's **randomized**, unique, and frequently **changed**. These passwords are stored in Active Directory and access is controlled through ACLs to authorized users only. With sufficient permissions to access these passwords, pivoting to other computers becomes possible.
+**LAPS** inatoa mfumo wa kusimamia **neno la siri la Msimamizi wa ndani** kwenye kompyuta zilizounganishwa na eneo, kuhakikisha kuwa ni **ya nasibu**, ya kipekee, na mara kwa mara **inabadilishwa**. Maneno haya ya siri yanahifadhiwa katika Active Directory na ufikiaji unadhibitiwa kupitia ACLs kwa watumiaji walioidhinishwa tu. Kwa ruhusa ya kutosha ya kufikia maneno haya ya siri, kuhamasisha kwa kompyuta nyingine kunakuwa na uwezekano.
 
 {{#ref}}
 laps.md
@@ -352,7 +344,7 @@ laps.md
 
 ### Certificate Theft
 
-**Gathering certificates** from the compromised machine could be a way to escalate privileges inside the environment:
+**Kukusanya vyeti** kutoka kwenye mashine iliyoharibiwa kunaweza kuwa njia ya kuinua mamlaka ndani ya mazingira:
 
 {{#ref}}
 ad-certificates/certificate-theft.md
@@ -360,7 +352,7 @@ ad-certificates/certificate-theft.md
 
 ### Certificate Templates Abuse
 
-If **vulnerable templates** are configured it's possible to abuse them to escalate privileges:
+Ikiwa **mipango ya vyeti** iliyo hatarini imewekwa, inawezekana kuitumia vibaya ili kuinua mamlaka:
 
 {{#ref}}
 ad-certificates/domain-escalation.md
@@ -370,38 +362,38 @@ ad-certificates/domain-escalation.md
 
 ### Dumping Domain Credentials
 
-Once you get **Domain Admin** or even better **Enterprise Admin** privileges, you can **dump** the **domain database**: _ntds.dit_.
+Mara tu unapopata **Msimamizi wa Eneo** au hata bora **Msimamizi wa Biashara**, unaweza **kutoa** **database ya eneo**: _ntds.dit_.
 
-[**More information about DCSync attack can be found here**](dcsync.md).
+[**Taarifa zaidi kuhusu shambulio la DCSync inaweza kupatikana hapa**](dcsync.md).
 
-[**More information about how to steal the NTDS.dit can be found here**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/active-directory-methodology/broken-reference/README.md)
+[**Taarifa zaidi kuhusu jinsi ya kuiba NTDS.dit inaweza kupatikana hapa**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/active-directory-methodology/broken-reference/README.md)
 
 ### Privesc as Persistence
 
-Some of the techniques discussed before can be used for persistence.\
-For example you could:
+Baadhi ya mbinu zilizozungumziwa hapo awali zinaweza kutumika kwa kudumu.\
+Kwa mfano unaweza:
 
-- Make users vulnerable to [**Kerberoast**](kerberoast.md)
+- Kufanya watumiaji kuwa hatarini kwa [**Kerberoast**](kerberoast.md)
 
-  ```powershell
-  Set-DomainObject -Identity <username> -Set @{serviceprincipalname="fake/NOTHING"}r
-  ```
+```powershell
+Set-DomainObject -Identity <username> -Set @{serviceprincipalname="fake/NOTHING"}r
+```
 
-- Make users vulnerable to [**ASREPRoast**](asreproast.md)
+- Kufanya watumiaji kuwa hatarini kwa [**ASREPRoast**](asreproast.md)
 
-  ```powershell
-  Set-DomainObject -Identity <username> -XOR @{UserAccountControl=4194304}
-  ```
+```powershell
+Set-DomainObject -Identity <username> -XOR @{UserAccountControl=4194304}
+```
 
-- Grant [**DCSync**](./#dcsync) privileges to a user
+- Kutoa [**DCSync**](./#dcsync) mamlaka kwa mtumiaji
 
-  ```powershell
-  Add-DomainObjectAcl -TargetIdentity "DC=SUB,DC=DOMAIN,DC=LOCAL" -PrincipalIdentity bfarmer -Rights DCSync
-  ```
+```powershell
+Add-DomainObjectAcl -TargetIdentity "DC=SUB,DC=DOMAIN,DC=LOCAL" -PrincipalIdentity bfarmer -Rights DCSync
+```
 
 ### Silver Ticket
 
-The **Silver Ticket attack** creates a **legitimate Ticket Granting Service (TGS) ticket** for a specific service by using the **NTLM hash** (for instance, the **hash of the PC account**). This method is employed to **access the service privileges**.
+**Shambulio la Silver Ticket** linaunda **tiketi halali ya Huduma ya Kutoa Tiketi (TGS)** kwa huduma maalum kwa kutumia **hash ya NTLM** (kwa mfano, **hash ya akaunti ya PC**). Njia hii inatumika ili **kufikia mamlaka ya huduma**.
 
 {{#ref}}
 silver-ticket.md
@@ -409,9 +401,9 @@ silver-ticket.md
 
 ### Golden Ticket
 
-A **Golden Ticket attack** involves an attacker gaining access to the **NTLM hash of the krbtgt account** in an Active Directory (AD) environment. This account is special because it's used to sign all **Ticket Granting Tickets (TGTs)**, which are essential for authenticating within the AD network.
+**Shambulio la Golden Ticket** linahusisha mshambuliaji kupata ufikiaji wa **hash ya NTLM ya akaunti ya krbtgt** katika mazingira ya Active Directory (AD). Akaunti hii ni maalum kwa sababu inatumika kusaini **Tiketi za Kutoa Tiketi (TGTs)**, ambazo ni muhimu kwa uthibitisho ndani ya mtandao wa AD.
 
-Once the attacker obtains this hash, they can create **TGTs** for any account they choose (Silver ticket attack).
+Mara mshambuliaji anapopata hash hii, anaweza kuunda **TGTs** kwa akaunti yoyote anayotaka (shambulio la tiketi ya fedha).
 
 {{#ref}}
 golden-ticket.md
@@ -419,7 +411,7 @@ golden-ticket.md
 
 ### Diamond Ticket
 
-These are like golden tickets forged in a way that **bypasses common golden tickets detection mechanisms.**
+Hizi ni kama tiketi za dhahabu zilizoforgiwa kwa njia ambayo **inasababisha kupita mifumo ya kawaida ya kugundua tiketi za dhahabu.**
 
 {{#ref}}
 diamond-ticket.md
@@ -427,7 +419,7 @@ diamond-ticket.md
 
 ### **Certificates Account Persistence**
 
-**Having certificates of an account or being able to request them** is a very good way to be able to persist in the users account (even if he changes the password):
+**Kuwa na vyeti vya akaunti au kuwa na uwezo wa kuviomba** ni njia nzuri sana ya kuweza kudumu katika akaunti za watumiaji (hata kama anabadilisha nenosiri):
 
 {{#ref}}
 ad-certificates/account-persistence.md
@@ -435,7 +427,7 @@ ad-certificates/account-persistence.md
 
 ### **Certificates Domain Persistence**
 
-**Using certificates is also possible to persist with high privileges inside the domain:**
+**Kutumia vyeti pia kunawezekana kudumu kwa mamlaka ya juu ndani ya eneo:**
 
 {{#ref}}
 ad-certificates/domain-persistence.md
@@ -443,13 +435,13 @@ ad-certificates/domain-persistence.md
 
 ### AdminSDHolder Group
 
-The **AdminSDHolder** object in Active Directory ensures the security of **privileged groups** (like Domain Admins and Enterprise Admins) by applying a standard **Access Control List (ACL)** across these groups to prevent unauthorized changes. However, this feature can be exploited; if an attacker modifies the AdminSDHolder's ACL to give full access to a regular user, that user gains extensive control over all privileged groups. This security measure, meant to protect, can thus backfire, allowing unwarranted access unless closely monitored.
+Kitu cha **AdminSDHolder** katika Active Directory kinahakikisha usalama wa **makundi yenye mamlaka** (kama Wasimamizi wa Eneo na Wasimamizi wa Biashara) kwa kutumia **Orodha ya Udhibiti wa Ufikiaji (ACL)** ya kawaida kati ya makundi haya ili kuzuia mabadiliko yasiyoidhinishwa. Hata hivyo, kipengele hiki kinaweza kutumika vibaya; ikiwa mshambuliaji atabadilisha ACL ya AdminSDHolder ili kutoa ufikiaji kamili kwa mtumiaji wa kawaida, mtumiaji huyo anapata udhibiti mkubwa juu ya makundi yote yenye mamlaka. Kipimo hiki cha usalama, kilichokusudiwa kulinda, kinaweza hivyo kurudi nyuma, kuruhusu ufikiaji usiofaa isipokuwa ufuatiliwe kwa karibu.
 
-[**More information about AdminDSHolder Group here.**](privileged-groups-and-token-privileges.md#adminsdholder-group)
+[**Taarifa zaidi kuhusu Kundi la AdminDSHolder hapa.**](privileged-groups-and-token-privileges.md#adminsdholder-group)
 
 ### DSRM Credentials
 
-Inside every **Domain Controller (DC)**, a **local administrator** account exists. By obtaining admin rights on such a machine, the local Administrator hash can be extracted using **mimikatz**. Following this, a registry modification is necessary to **enable the use of this password**, allowing for remote access to the local Administrator account.
+Ndani ya kila **Msimamizi wa Eneo (DC)**, akaunti ya **msimamizi wa ndani** inapatikana. Kwa kupata haki za usimamizi kwenye mashine kama hiyo, hash ya Msimamizi wa ndani inaweza kutolewa kwa kutumia **mimikatz**. Baada ya hapo, mabadiliko ya rejista yanahitajika ili **kuwezesha matumizi ya nenosiri hili**, kuruhusu ufikiaji wa mbali kwa akaunti ya Msimamizi wa ndani.
 
 {{#ref}}
 dsrm-credentials.md
@@ -457,7 +449,7 @@ dsrm-credentials.md
 
 ### ACL Persistence
 
-You could **give** some **special permissions** to a **user** over some specific domain objects that will let the user **escalate privileges in the future**.
+Unaweza **kutoa** baadhi ya **mamlaka maalum** kwa **mtumiaji** juu ya baadhi ya vitu maalum vya eneo ambavyo vitamruhusu mtumiaji **kuinua mamlaka katika siku zijazo**.
 
 {{#ref}}
 acl-persistence-abuse/
@@ -465,7 +457,7 @@ acl-persistence-abuse/
 
 ### Security Descriptors
 
-The **security descriptors** are used to **store** the **permissions** an **object** have **over** an **object**. If you can just **make** a **little change** in the **security descriptor** of an object, you can obtain very interesting privileges over that object without needing to be member of a privileged group.
+**Maelezo ya usalama** yanatumika kuhifadhi **mamlaka** ambayo **kitu** kina **juu ya** **kitu**. Ikiwa unaweza tu **kufanya** **mabadiliko madogo** katika **maelezo ya usalama** ya kitu, unaweza kupata mamlaka ya kuvutia juu ya kitu hicho bila kuhitaji kuwa mwanachama wa kundi lenye mamlaka.
 
 {{#ref}}
 security-descriptors.md
@@ -473,7 +465,7 @@ security-descriptors.md
 
 ### Skeleton Key
 
-Alter **LSASS** in memory to establish a **universal password**, granting access to all domain accounts.
+Badilisha **LSASS** katika kumbukumbu ili kuanzisha **nenosiri la ulimwengu**, linalotoa ufikiaji kwa akaunti zote za eneo.
 
 {{#ref}}
 skeleton-key.md
@@ -481,8 +473,8 @@ skeleton-key.md
 
 ### Custom SSP
 
-[Learn what is a SSP (Security Support Provider) here.](../authentication-credentials-uac-and-efs/#security-support-provider-interface-sspi)\
-You can create you **own SSP** to **capture** in **clear text** the **credentials** used to access the machine.\\
+[Jifunze nini SSP (Mtoa Huduma ya Usalama) hapa.](../authentication-credentials-uac-and-efs/#security-support-provider-interface-sspi)\
+Unaweza kuunda **SSP yako mwenyewe** ili **kukamata** kwa **maandishi wazi** **akidi** zinazotumika kufikia mashine.\\
 
 {{#ref}}
 custom-ssp.md
@@ -490,8 +482,8 @@ custom-ssp.md
 
 ### DCShadow
 
-It registers a **new Domain Controller** in the AD and uses it to **push attributes** (SIDHistory, SPNs...) on specified objects **without** leaving any **logs** regarding the **modifications**. You **need DA** privileges and be inside the **root domain**.\
-Note that if you use wrong data, pretty ugly logs will appear.
+Inasajili **Msimamizi mpya wa Eneo** katika AD na kuitumia **kushinikiza sifa** (SIDHistory, SPNs...) kwenye vitu vilivyotajwa **bila** kuacha **kumbukumbu** kuhusu **mabadiliko**. Unahitaji ruhusa za DA na uwe ndani ya **domeni ya mzizi**.\
+Kumbuka kwamba ikiwa utatumia data mbaya, kumbukumbu mbaya sana zitaonekana.
 
 {{#ref}}
 dcshadow.md
@@ -499,8 +491,8 @@ dcshadow.md
 
 ### LAPS Persistence
 
-Previously we have discussed about how to escalate privileges if you have **enough permission to read LAPS passwords**. However, these passwords can also be used to **maintain persistence**.\
-Check:
+Kabla tulizungumzie jinsi ya kuinua mamlaka ikiwa una **ruhusa ya kutosha kusoma maneno ya siri ya LAPS**. Hata hivyo, maneno haya ya siri yanaweza pia kutumika ili **kuhifadhi kudumu**.\
+Angalia:
 
 {{#ref}}
 laps.md
@@ -508,59 +500,50 @@ laps.md
 
 ## Forest Privilege Escalation - Domain Trusts
 
-Microsoft views the **Forest** as the security boundary. This implies that **compromising a single domain could potentially lead to the entire Forest being compromised**.
+Microsoft inaona **Msitu** kama mpaka wa usalama. Hii inamaanisha kwamba **kuharibu eneo moja kunaweza kusababisha msitu mzima kuharibiwa**.
 
 ### Basic Information
 
-A [**domain trust**](<http://technet.microsoft.com/en-us/library/cc759554(v=ws.10).aspx>) is a security mechanism that enables a user from one **domain** to access resources in another **domain**. It essentially creates a linkage between the authentication systems of the two domains, allowing authentication verifications to flow seamlessly. When domains set up a trust, they exchange and retain specific **keys** within their **Domain Controllers (DCs)**, which are crucial to the trust's integrity.
+[**kuaminiana kwa eneo**](<http://technet.microsoft.com/en-us/library/cc759554(v=ws.10).aspx>) ni mekanizma ya usalama inayowezesha mtumiaji kutoka kwenye **eneo** kufikia rasilimali katika **eneo** lingine. Kimsingi inaunda uhusiano kati ya mifumo ya uthibitisho ya maeneo mawili, ikiruhusu uthibitisho wa uhakiki kupita bila shida. Wakati maeneo yanapoweka uhusiano wa kuaminiana, wanabadilishana na kuhifadhi funguo maalum ndani ya **Msimamizi wao wa Eneo (DCs)**, ambazo ni muhimu kwa uaminifu wa uhusiano huo.
 
-In a typical scenario, if a user intends to access a service in a **trusted domain**, they must first request a special ticket known as an **inter-realm TGT** from their own domain's DC. This TGT is encrypted with a shared **key** that both domains have agreed upon. The user then presents this TGT to the **DC of the trusted domain** to get a service ticket (**TGS**). Upon successful validation of the inter-realm TGT by the trusted domain's DC, it issues a TGS, granting the user access to the service.
+Katika hali ya kawaida, ikiwa mtumiaji anataka kufikia huduma katika **eneo lililoaminika**, lazima kwanza aombe tiketi maalum inayojulikana kama **inter-realm TGT** kutoka kwa DC ya eneo lake. TGT hii imefungwa kwa **funguo** iliyoshirikiwa ambayo maeneo yote mawili yamekubaliana. Mtumiaji kisha anawasilisha TGT hii kwa **DC ya eneo lililoaminika** ili kupata tiketi ya huduma (**TGS**). Baada ya uthibitisho wa mafanikio wa inter-realm TGT na DC ya eneo lililoaminika, inatoa TGS, ikimpa mtumiaji ufikiaji wa huduma.
 
-**Steps**:
+**Hatua**:
 
-1. A **client computer** in **Domain 1** starts the process by using its **NTLM hash** to request a **Ticket Granting Ticket (TGT)** from its **Domain Controller (DC1)**.
-2. DC1 issues a new TGT if the client is authenticated successfully.
-3. The client then requests an **inter-realm TGT** from DC1, which is needed to access resources in **Domain 2**.
-4. The inter-realm TGT is encrypted with a **trust key** shared between DC1 and DC2 as part of the two-way domain trust.
-5. The client takes the inter-realm TGT to **Domain 2's Domain Controller (DC2)**.
-6. DC2 verifies the inter-realm TGT using its shared trust key and, if valid, issues a **Ticket Granting Service (TGS)** for the server in Domain 2 the client wants to access.
-7. Finally, the client presents this TGS to the server, which is encrypted with the server’s account hash, to get access to the service in Domain 2.
+1. **Kompyuta ya mteja** katika **Eneo 1** inaanza mchakato kwa kutumia **hash ya NTLM** kuomba **Tiketi ya Kutoa Tiketi (TGT)** kutoka kwa **Msimamizi wake wa Eneo (DC1)**.
+2. DC1 inatoa TGT mpya ikiwa mteja amethibitishwa kwa mafanikio.
+3. Mteja kisha anaomba **inter-realm TGT** kutoka DC1, ambayo inahitajika kufikia rasilimali katika **Eneo 2**.
+4. Inter-realm TGT imefungwa kwa **funguo ya kuaminiana** iliyoshirikiwa kati ya DC1 na DC2 kama sehemu ya uhusiano wa kuaminiana wa pande mbili.
+5. Mteja anachukua inter-realm TGT kwa **Msimamizi wa Eneo 2 (DC2)**.
+6. DC2 inathibitisha inter-realm TGT kwa kutumia funguo yake ya kuaminiana iliyoshirikiwa na, ikiwa ni halali, inatoa **Huduma ya Kutoa Tiketi (TGS)** kwa seva katika Eneo 2 ambayo mteja anataka kufikia.
+7. Hatimaye, mteja anawasilisha TGS hii kwa seva, ambayo imefungwa kwa hash ya akaunti ya seva, ili kupata ufikiaji wa huduma katika Eneo 2.
 
 ### Different trusts
 
-It's important to notice that **a trust can be 1 way or 2 ways**. In the 2 ways options, both domains will trust each other, but in the **1 way** trust relation one of the domains will be the **trusted** and the other the **trusting** domain. In the last case, **you will only be able to access resources inside the trusting domain from the trusted one**.
+Ni muhimu kutambua kwamba **uaminifu unaweza kuwa wa njia 1 au njia 2**. Katika chaguo la njia 2, maeneo yote mawili yatakuwa na uaminifu kwa kila mmoja, lakini katika uhusiano wa **njia 1** moja ya maeneo itakuwa **ya kuaminika** na nyingine itakuwa **ya kuamini**. Katika kesi ya mwisho, **utaweza tu kufikia rasilimali ndani ya eneo linaloamini kutoka kwenye eneo lililoaminika**.
 
-If Domain A trusts Domain B, A is the trusting domain and B ins the trusted one. Moreover, in **Domain A**, this would be an **Outbound trust**; and in **Domain B**, this would be an **Inbound trust**.
+Ikiwa Eneo A linakubali Eneo B, A ni eneo linaloamini na B ni eneo lililoaminika. Zaidi ya hayo, katika **Eneo A**, hii itakuwa **uaminifu wa nje**; na katika **Eneo B**, hii itakuwa **uaminifu wa ndani**.
 
-**Different trusting relationships**
+**Uhusiano tofauti wa kuaminiana**
 
-- **Parent-Child Trusts**: This is a common setup within the same forest, where a child domain automatically has a two-way transitive trust with its parent domain. Essentially, this means that authentication requests can flow seamlessly between the parent and the child.
-- **Cross-link Trusts**: Referred to as "shortcut trusts," these are established between child domains to expedite referral processes. In complex forests, authentication referrals typically have to travel up to the forest root and then down to the target domain. By creating cross-links, the journey is shortened, which is especially beneficial in geographically dispersed environments.
-- **External Trusts**: These are set up between different, unrelated domains and are non-transitive by nature. According to [Microsoft's documentation](<https://technet.microsoft.com/en-us/library/cc773178(v=ws.10).aspx>), external trusts are useful for accessing resources in a domain outside of the current forest that isn't connected by a forest trust. Security is bolstered through SID filtering with external trusts.
-- **Tree-root Trusts**: These trusts are automatically established between the forest root domain and a newly added tree root. While not commonly encountered, tree-root trusts are important for adding new domain trees to a forest, enabling them to maintain a unique domain name and ensuring two-way transitivity. More information can be found in [Microsoft's guide](<https://technet.microsoft.com/en-us/library/cc773178(v=ws.10).aspx>).
-- **Forest Trusts**: This type of trust is a two-way transitive trust between two forest root domains, also enforcing SID filtering to enhance security measures.
-- **MIT Trusts**: These trusts are established with non-Windows, [RFC4120-compliant](https://tools.ietf.org/html/rfc4120) Kerberos domains. MIT trusts are a bit more specialized and cater to environments requiring integration with Kerberos-based systems outside the Windows ecosystem.
+- **Uaminifu wa Mzazi-Mwana**: Hii ni mipangilio ya kawaida ndani ya msitu mmoja, ambapo eneo la mtoto moja kwa moja lina uaminifu wa pande mbili na eneo lake la mzazi. Kimsingi, hii inamaanisha kwamba maombi ya uthibitisho yanaweza kupita bila shida kati ya mzazi na mtoto.
+- **Uaminifu wa Cross-link**: Inajulikana kama "uaminifu wa mkato," hizi zimeanzishwa kati ya maeneo ya watoto ili kuharakisha michakato ya rejeleo. Katika misitu ngumu, rejeleo la uthibitisho kawaida linahitaji kusafiri hadi mzizi wa msitu na kisha chini hadi eneo lengwa. Kwa kuunda cross-links, safari inafupishwa, ambayo ni muhimu hasa katika mazingira yaliyosambazwa kijiografia.
+- **Uaminifu wa Nje**: Hizi zimeanzishwa kati ya maeneo tofauti, yasiyo na uhusiano na ni zisizo za kupita. Kulingana na [nyaraka za Microsoft](<https://technet.microsoft.com/en-us/library/cc773178(v=ws.10).aspx>), uaminifu wa nje ni muhimu kwa kufikia rasilimali katika eneo nje ya msitu wa sasa ambalo halijakamilishwa na uaminifu wa msitu. Usalama unaboreshwa kupitia kuchuja SID na uaminifu wa nje.
+- **Uaminifu wa Mti-Mzizi**: Hizi uaminifu huanzishwa moja kwa moja kati ya eneo la mzizi wa msitu na mti mpya ulioongezwa. Ingawa hazikutana mara kwa mara, uaminifu wa mti-mzizi ni muhimu kwa kuongeza miti mipya ya eneo kwenye msitu, ikiruhusu kudumisha jina la kipekee la eneo na kuhakikisha uhamasishaji wa pande mbili. Taarifa zaidi zinaweza kupatikana katika [mwongozo wa Microsoft](<https://technet.microsoft.com/en-us/library/cc773178(v=ws.10).aspx>).
+- **Uaminifu wa Msitu**: Aina hii ya uaminifu ni uaminifu wa pande mbili wa kupita kati ya maeneo mawili ya mzizi wa msitu, pia ikilazimisha kuchuja SID ili kuboresha hatua za usalama.
+- **Uaminifu wa MIT**: Hizi uaminifu zimeanzishwa na maeneo ya Kerberos yasiyo ya Windows, [RFC4120-inayokubalika](https://tools.ietf.org/html/rfc4120). Uaminifu wa MIT ni maalum zaidi na unalenga mazingira yanayohitaji ushirikiano na mifumo ya Kerberos nje ya mfumo wa Windows.
 
-#### Other differences in **trusting relationships**
+#### Tofauti nyingine katika **uhusiano wa kuaminiana**
 
-- A trust relationship can also be **transitive** (A trust B, B trust C, then A trust C) or **non-transitive**.
-- A trust relationship can be set up as **bidirectional trust** (both trust each other) or as **one-way trust** (only one of them trust the other).
+- Uhusiano wa kuaminiana unaweza pia kuwa **wa kupita** (A inakubali B, B inakubali C, basi A inakubali C) au **usio wa kupita**.
+- Uhusiano wa kuaminiana unaweza kuanzishwa kama **uaminifu wa pande mbili** (wote wanakubali kila mmoja) au kama **uaminifu wa njia moja** (moja tu kati yao inakubali mwingine).
 
 ### Attack Path
 
-1. **Enumerate** the trusting relationships
-2. Check if any **security principal** (user/group/computer) has **access** to resources of the **other domain**, maybe by ACE entries or by being in groups of the other domain. Look for **relationships across domains** (the trust was created for this probably).
-   1. kerberoast in this case could be another option.
-3. **Compromise** the **accounts** which can **pivot** through domains.
-
-Attackers with could access to resources in another domain through three primary mechanisms:
-
-- **Local Group Membership**: Principals might be added to local groups on machines, such as the “Administrators” group on a server, granting them significant control over that machine.
-- **Foreign Domain Group Membership**: Principals can also be members of groups within the foreign domain. However, the effectiveness of this method depends on the nature of the trust and the scope of the group.
-- **Access Control Lists (ACLs)**: Principals might be specified in an **ACL**, particularly as entities in **ACEs** within a **DACL**, providing them access to specific resources. For those looking to dive deeper into the mechanics of ACLs, DACLs, and ACEs, the whitepaper titled “[An ACE Up The Sleeve](https://specterops.io/assets/resources/an_ace_up_the_sleeve.pdf)” is an invaluable resource.
-
-### Child-to-Parent forest privilege escalation
-
+1. **Tathmini** uhusiano wa kuaminiana
+2. Angalia ikiwa **kiongozi wa usalama** (mtumiaji/kundi/kompyuta) ana **ufikiaji** wa rasilimali za **eneo lingine**, labda kwa njia ya ACE entries au kwa kuwa katika makundi ya eneo lingine. Tafuta **uhusiano kati ya maeneo** (uaminifu ulianzishwa kwa hili labda).
+1. kerberoast katika kesi hii inaweza kuwa chaguo lingine.
+3. **Haribu** **akaunti** ambazo zinaweza **kuhamasisha** kupitia maeneo.
 ```
 Get-DomainTrust
 
@@ -572,10 +555,9 @@ TrustDirection  : Bidirectional       --> Trust direction (2ways in this case)
 WhenCreated     : 2/19/2021 1:28:00 PM
 WhenChanged     : 2/19/2021 1:28:00 PM
 ```
-
 > [!WARNING]
-> There are **2 trusted keys**, one for _Child --> Parent_ and another one for _Parent_ --> _Child_.\
-> You can the one used by the current domain them with:
+> Kuna **funguo 2 za kuaminika**, moja kwa _Child --> Parent_ na nyingine kwa _Parent_ --> _Child_.\
+> Unaweza kutumia ile inayotumika na eneo la sasa kwa:
 >
 > ```bash
 > Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.my.domain.local
@@ -584,7 +566,7 @@ WhenChanged     : 2/19/2021 1:28:00 PM
 
 #### SID-History Injection
 
-Escalate as Enterprise admin to the child/parent domain abusing the trust with SID-History injection:
+Pandisha kama msimamizi wa Enterprise hadi eneo la mtoto/ mzazi kwa kutumia uaminifu na SID-History injection:
 
 {{#ref}}
 sid-history-injection.md
@@ -592,34 +574,33 @@ sid-history-injection.md
 
 #### Exploit writeable Configuration NC
 
-Understanding how the Configuration Naming Context (NC) can be exploited is crucial. The Configuration NC serves as a central repository for configuration data across a forest in Active Directory (AD) environments. This data is replicated to every Domain Controller (DC) within the forest, with writable DCs maintaining a writable copy of the Configuration NC. To exploit this, one must have **SYSTEM privileges on a DC**, preferably a child DC.
+Kuelewa jinsi Configuration Naming Context (NC) inavyoweza kutumika ni muhimu. Configuration NC inatumika kama hazina kuu ya data za usanidi katika msitu wa Active Directory (AD). Data hii inakopwa kwa kila Domain Controller (DC) ndani ya msitu, huku DC zinazoweza kuandikwa zikihifadhi nakala inayoweza kuandikwa ya Configuration NC. Ili kutumia hili, mtu lazima awe na **haki za SYSTEM kwenye DC**, bora iwe DC ya mtoto.
 
 **Link GPO to root DC site**
 
-The Configuration NC's Sites container includes information about all domain-joined computers' sites within the AD forest. By operating with SYSTEM privileges on any DC, attackers can link GPOs to the root DC sites. This action potentially compromises the root domain by manipulating policies applied to these sites.
+Konteina za Sites za Configuration NC zinajumuisha taarifa kuhusu tovuti za kompyuta zote zilizounganishwa na eneo ndani ya msitu wa AD. Kwa kufanya kazi na haki za SYSTEM kwenye DC yoyote, washambuliaji wanaweza kuunganisha GPOs kwenye tovuti za root DC. Kitendo hiki kinaweza kuhatarisha eneo la mzazi kwa kubadilisha sera zinazotumika kwenye tovuti hizi.
 
-For in-depth information, one might explore research on [Bypassing SID Filtering](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-4-bypass-sid-filtering-research).
+Kwa taarifa za kina, mtu anaweza kuchunguza utafiti kuhusu [Bypassing SID Filtering](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-4-bypass-sid-filtering-research).
 
 **Compromise any gMSA in the forest**
 
-An attack vector involves targeting privileged gMSAs within the domain. The KDS Root key, essential for calculating gMSAs' passwords, is stored within the Configuration NC. With SYSTEM privileges on any DC, it's possible to access the KDS Root key and compute the passwords for any gMSA across the forest.
+Njia ya shambulio inahusisha kulenga gMSAs zenye mamlaka ndani ya eneo. Funguo ya KDS Root, muhimu kwa kuhesabu nywila za gMSAs, inahifadhiwa ndani ya Configuration NC. Kwa kuwa na haki za SYSTEM kwenye DC yoyote, inawezekana kufikia funguo ya KDS Root na kuhesabu nywila za gMSA yoyote ndani ya msitu.
 
-Detailed analysis can be found in the discussion on [Golden gMSA Trust Attacks](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-5-golden-gmsa-trust-attack-from-child-to-parent).
+Uchambuzi wa kina unaweza kupatikana katika majadiliano kuhusu [Golden gMSA Trust Attacks](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-5-golden-gmsa-trust-attack-from-child-to-parent).
 
 **Schema change attack**
 
-This method requires patience, waiting for the creation of new privileged AD objects. With SYSTEM privileges, an attacker can modify the AD Schema to grant any user complete control over all classes. This could lead to unauthorized access and control over newly created AD objects.
+Njia hii inahitaji uvumilivu, kusubiri kuundwa kwa vitu vipya vya AD vyenye mamlaka. Kwa kuwa na haki za SYSTEM, mshambuliaji anaweza kubadilisha Schema ya AD ili kumpa mtumiaji yeyote udhibiti kamili juu ya makundi yote. Hii inaweza kusababisha ufikiaji usioidhinishwa na udhibiti wa vitu vipya vya AD vilivyoundwa.
 
-Further reading is available on [Schema Change Trust Attacks](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-6-schema-change-trust-attack-from-child-to-parent).
+Kusoma zaidi kunaweza kupatikana kwenye [Schema Change Trust Attacks](https://improsec.com/tech-blog/sid-filter-as-security-boundary-between-domains-part-6-schema-change-trust-attack-from-child-to-parent).
 
 **From DA to EA with ADCS ESC5**
 
-The ADCS ESC5 vulnerability targets control over Public Key Infrastructure (PKI) objects to create a certificate template that enables authentication as any user within the forest. As PKI objects reside in the Configuration NC, compromising a writable child DC enables the execution of ESC5 attacks.
+Ukatili wa ADCS ESC5 unalenga udhibiti wa vitu vya Public Key Infrastructure (PKI) ili kuunda kigezo cha cheti kinachowezesha uthibitisho kama mtumiaji yeyote ndani ya msitu. Kwa kuwa vitu vya PKI vinapatikana katika Configuration NC, kuhatarisha DC ya mtoto inayoweza kuandikwa kunaruhusu utekelezaji wa mashambulizi ya ESC5.
 
-More details on this can be read in [From DA to EA with ESC5](https://posts.specterops.io/from-da-to-ea-with-esc5-f9f045aa105c). In scenarios lacking ADCS, the attacker has the capability to set up the necessary components, as discussed in [Escalating from Child Domain Admins to Enterprise Admins](https://www.pkisolutions.com/escalating-from-child-domains-admins-to-enterprise-admins-in-5-minutes-by-abusing-ad-cs-a-follow-up/).
+Maelezo zaidi kuhusu hili yanaweza kusomwa katika [From DA to EA with ESC5](https://posts.specterops.io/from-da-to-ea-with-esc5-f9f045aa105c). Katika hali ambazo hazina ADCS, mshambuliaji ana uwezo wa kuanzisha vipengele muhimu, kama ilivyojadiliwa katika [Escalating from Child Domain Admins to Enterprise Admins](https://www.pkisolutions.com/escalating-from-child-domains-admins-to-enterprise-admins-in-5-minutes-by-abusing-ad-cs-a-follow-up/).
 
 ### External Forest Domain - One-Way (Inbound) or bidirectional
-
 ```powershell
 Get-DomainTrust
 SourceName      : a.domain.local   --> Current domain
@@ -630,15 +611,13 @@ TrustDirection  : Inbound          --> Inboud trust
 WhenCreated     : 2/19/2021 10:50:56 PM
 WhenChanged     : 2/19/2021 10:50:56 PM
 ```
-
-In this scenario **your domain is trusted** by an external one giving you **undetermined permissions** over it. You will need to find **which principals of your domain have which access over the external domain** and then try to exploit it:
+Katika hali hii **domeni yako inatambuliwa** na moja ya nje ikikupa **idhini zisizojulikana** juu yake. Utahitaji kutafuta **ni wakuu gani wa domeni yako wana ufikiaji gani juu ya domeni ya nje** na kisha jaribu kuifanyia shambulio:
 
 {{#ref}}
 external-forest-domain-oneway-inbound.md
 {{#endref}}
 
-### External Forest Domain - One-Way (Outbound)
-
+### Domeni ya Msitu wa Nje - Njia Moja (Nje)
 ```powershell
 Get-DomainTrust -Domain current.local
 
@@ -650,75 +629,73 @@ TrustDirection  : Outbound        --> Outbound trust
 WhenCreated     : 2/19/2021 10:15:24 PM
 WhenChanged     : 2/19/2021 10:15:24 PM
 ```
+Katika hali hii **domeini yako** in **kuamini** baadhi ya **mamlaka** kwa kiongozi kutoka **domeini tofauti**.
 
-In this scenario **your domain** is **trusting** some **privileges** to principal from a **different domains**.
-
-However, when a **domain is trusted** by the trusting domain, the trusted domain **creates a user** with a **predictable name** that uses as **password the trusted password**. Which means that it's possible to **access a user from the trusting domain to get inside the trusted one** to enumerate it and try to escalate more privileges:
+Hata hivyo, wakati **domeini inapoaminika** na domeini inayokuamini, domeini inayokuamini **inaunda mtumiaji** mwenye **jina linaloweza kutabiriwa** ambalo linatumia kama **nenosiri nenosiri lililoaminika**. Hii ina maana kwamba inawezekana **kufikia mtumiaji kutoka kwa domeini inayokuamini ili kuingia kwenye ile inayokuamini** ili kuhesabu na kujaribu kupandisha mamlaka zaidi:
 
 {{#ref}}
 external-forest-domain-one-way-outbound.md
 {{#endref}}
 
-Another way to compromise the trusted domain is to find a [**SQL trusted link**](abusing-ad-mssql.md#mssql-trusted-links) created in the **opposite direction** of the domain trust (which isn't very common).
+Njia nyingine ya kuathiri domeini inayokuamini ni kutafuta [**kiungo cha SQL kilichoaminika**](abusing-ad-mssql.md#mssql-trusted-links) kilichoundwa katika **mwelekeo kinyume** cha uaminifu wa domeini (ambayo si ya kawaida sana).
 
-Another way to compromise the trusted domain is to wait in a machine where a **user from the trusted domain can access** to login via **RDP**. Then, the attacker could inject code in the RDP session process and **access the origin domain of the victim** from there.\
-Moreover, if the **victim mounted his hard drive**, from the **RDP session** process the attacker could store **backdoors** in the **startup folder of the hard drive**. This technique is called **RDPInception.**
+Njia nyingine ya kuathiri domeini inayokuamini ni kusubiri kwenye mashine ambapo **mtumiaji kutoka domeini inayokuamini anaweza kufikia** kuingia kupitia **RDP**. Kisha, mshambuliaji anaweza kuingiza msimbo katika mchakato wa kikao cha RDP na **kufikia domeini ya asili ya mwathirika** kutoka pale.\
+Zaidi ya hayo, ikiwa **mwathirika ameunganisha diski yake ngumu**, kutoka kwenye mchakato wa **kikao cha RDP** mshambuliaji anaweza kuhifadhi **backdoors** kwenye **kabrasha la kuanzisha la diski ngumu**. Mbinu hii inaitwa **RDPInception.**
 
 {{#ref}}
 rdp-sessions-abuse.md
 {{#endref}}
 
-### Domain trust abuse mitigation
+### Kupunguza matumizi mabaya ya uaminifu wa domeini
 
 ### **SID Filtering:**
 
-- The risk of attacks leveraging the SID history attribute across forest trusts is mitigated by SID Filtering, which is activated by default on all inter-forest trusts. This is underpinned by the assumption that intra-forest trusts are secure, considering the forest, rather than the domain, as the security boundary as per Microsoft's stance.
-- However, there's a catch: SID filtering might disrupt applications and user access, leading to its occasional deactivation.
+- Hatari ya mashambulizi yanayotumia sifa ya historia ya SID katika uaminifu wa misitu inapunguziliwa mbali na SID Filtering, ambayo imewezeshwa kwa chaguo-msingi kwenye uaminifu wote wa kati ya misitu. Hii inategemea dhana kwamba uaminifu wa ndani ya misitu ni salama, ikizingatia msitu, badala ya domeini, kama mpaka wa usalama kulingana na msimamo wa Microsoft.
+- Hata hivyo, kuna tatizo: filtering ya SID inaweza kuathiri programu na ufikiaji wa watumiaji, na kusababisha kuondolewa kwake mara kwa mara.
 
-### **Selective Authentication:**
+### **Uthibitishaji wa Chaguo:**
 
-- For inter-forest trusts, employing Selective Authentication ensures that users from the two forests are not automatically authenticated. Instead, explicit permissions are required for users to access domains and servers within the trusting domain or forest.
-- It's important to note that these measures do not safeguard against the exploitation of the writable Configuration Naming Context (NC) or attacks on the trust account.
+- Kwa uaminifu wa kati ya misitu, kutumia Uthibitishaji wa Chaguo kunahakikisha kwamba watumiaji kutoka misitu miwili hawathibitishwi kiotomatiki. Badala yake, ruhusa wazi zinahitajika kwa watumiaji kufikia domeini na seva ndani ya domeini au msitu unaokuamini.
+- Ni muhimu kutambua kwamba hatua hizi hazilinda dhidi ya unyakuzi wa Muktadha wa Jina la Usanidi (NC) unaoweza kuandikwa au mashambulizi kwenye akaunti ya uaminifu.
 
-[**More information about domain trusts in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/child-domain-da-to-ea-in-parent-domain)
+[**Taarifa zaidi kuhusu uaminifu wa domeini katika ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/child-domain-da-to-ea-in-parent-domain)
 
 ## AD -> Azure & Azure -> AD
 
 {% embed url="https://cloud.hacktricks.xyz/pentesting-cloud/azure-security/az-lateral-movements/azure-ad-connect-hybrid-identity" %}
 
-## Some General Defenses
+## Ulinzi wa Jumla
 
-[**Learn more about how to protect credentials here.**](../stealing-credentials/credentials-protections.md)\\
+[**Jifunze zaidi kuhusu jinsi ya kulinda hati hapa.**](../stealing-credentials/credentials-protections.md)\\
 
-### **Defensive Measures for Credential Protection**
+### **Hatua za Kijihifadhi kwa Ulinzi wa Hati**
 
-- **Domain Admins Restrictions**: It is recommended that Domain Admins should only be allowed to login to Domain Controllers, avoiding their use on other hosts.
-- **Service Account Privileges**: Services should not be run with Domain Admin (DA) privileges to maintain security.
-- **Temporal Privilege Limitation**: For tasks requiring DA privileges, their duration should be limited. This can be achieved by: `Add-ADGroupMember -Identity ‘Domain Admins’ -Members newDA -MemberTimeToLive (New-TimeSpan -Minutes 20)`
+- **Vikwazo vya Wasimamizi wa Domeini**: Inapendekezwa kwamba Wasimamizi wa Domeini wanapaswa kuruhusiwa kuingia tu kwenye Wasimamizi wa Domeini, kuepuka matumizi yao kwenye mwenyeji wengine.
+- **Mamlaka ya Akaunti ya Huduma**: Huduma hazipaswi kuendeshwa kwa mamlaka ya Wasimamizi wa Domeini (DA) ili kudumisha usalama.
+- **Kikomo cha Mamlaka ya Muda**: Kwa kazi zinazohitaji mamlaka ya DA, muda wao unapaswa kuwa mdogo. Hii inaweza kufanywa kwa: `Add-ADGroupMember -Identity ‘Domain Admins’ -Members newDA -MemberTimeToLive (New-TimeSpan -Minutes 20)`
 
-### **Implementing Deception Techniques**
+### **Kutekeleza Mbinu za Udanganyifu**
 
-- Implementing deception involves setting traps, like decoy users or computers, with features such as passwords that do not expire or are marked as Trusted for Delegation. A detailed approach includes creating users with specific rights or adding them to high privilege groups.
-- A practical example involves using tools like: `Create-DecoyUser -UserFirstName user -UserLastName manager-uncommon -Password Pass@123 | DeployUserDeception -UserFlag PasswordNeverExpires -GUID d07da11f-8a3d-42b6-b0aa-76c962be719a -Verbose`
-- More on deploying deception techniques can be found at [Deploy-Deception on GitHub](https://github.com/samratashok/Deploy-Deception).
+- Kutekeleza udanganyifu kunahusisha kuweka mitego, kama vile watumiaji wa kudanganya au kompyuta, zikiwa na sifa kama vile nenosiri ambazo hazitaisha au zimewekwa kama Zinazoaminika kwa Delegation. Njia ya kina inajumuisha kuunda watumiaji wenye haki maalum au kuwaongeza kwenye vikundi vya mamlaka ya juu.
+- Mfano wa vitendo unahusisha kutumia zana kama: `Create-DecoyUser -UserFirstName user -UserLastName manager-uncommon -Password Pass@123 | DeployUserDeception -UserFlag PasswordNeverExpires -GUID d07da11f-8a3d-42b6-b0aa-76c962be719a -Verbose`
+- Zaidi kuhusu kutekeleza mbinu za udanganyifu yanaweza kupatikana kwenye [Deploy-Deception kwenye GitHub](https://github.com/samratashok/Deploy-Deception).
 
-### **Identifying Deception**
+### **Kutambua Udanganyifu**
 
-- **For User Objects**: Suspicious indicators include atypical ObjectSID, infrequent logons, creation dates, and low bad password counts.
-- **General Indicators**: Comparing attributes of potential decoy objects with those of genuine ones can reveal inconsistencies. Tools like [HoneypotBuster](https://github.com/JavelinNetworks/HoneypotBuster) can assist in identifying such deceptions.
+- **Kwa Vitu vya Mtumiaji**: Viashiria vya kutatanisha ni pamoja na ObjectSID isiyo ya kawaida, kuingia mara chache, tarehe za uundaji, na idadi ndogo ya nenosiri mbaya.
+- **Viashiria vya Jumla**: Kulinganisha sifa za vitu vya kudanganya vinavyowezekana na zile za halali kunaweza kufichua kutokuelewana. Zana kama [HoneypotBuster](https://github.com/JavelinNetworks/HoneypotBuster) zinaweza kusaidia katika kutambua udanganyifu kama huo.
 
-### **Bypassing Detection Systems**
+### **Kupita Mfumo wa Ugunduzi**
 
-- **Microsoft ATA Detection Bypass**:
-  - **User Enumeration**: Avoiding session enumeration on Domain Controllers to prevent ATA detection.
-  - **Ticket Impersonation**: Utilizing **aes** keys for ticket creation helps evade detection by not downgrading to NTLM.
-  - **DCSync Attacks**: Executing from a non-Domain Controller to avoid ATA detection is advised, as direct execution from a Domain Controller will trigger alerts.
+- **Kupita Ugunduzi wa Microsoft ATA**:
+- **Uhesabuji wa Watumiaji**: Kuepuka uhesabuji wa kikao kwenye Wasimamizi wa Domeini ili kuzuia ugunduzi wa ATA.
+- **Uigaji wa Tiketi**: Kutumia funguo za **aes** kwa ajili ya uundaji wa tiketi husaidia kuepuka ugunduzi kwa kutoshuka hadi NTLM.
+- **Mashambulizi ya DCSync**: Kutekeleza kutoka kwa Wasimamizi wa Domeini sio pendekezo, kwani utekelezaji wa moja kwa moja kutoka kwa Wasimamizi wa Domeini utaanzisha arifa.
 
-## References
+## Marejeleo
 
 - [http://www.harmj0y.net/blog/redteaming/a-guide-to-attacking-domain-trusts/](http://www.harmj0y.net/blog/redteaming/a-guide-to-attacking-domain-trusts/)
 - [https://www.labofapenetrationtester.com/2018/10/deploy-deception.html](https://www.labofapenetrationtester.com/2018/10/deploy-deception.html)
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/child-domain-da-to-ea-in-parent-domain](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/child-domain-da-to-ea-in-parent-domain)
 
 {{#include ../../banners/hacktricks-training.md}}
-

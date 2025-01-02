@@ -2,19 +2,18 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## How It Works Explained
+## Jinsi Inavyofanya Kazi
 
-Processes can be opened on hosts where the username and either password or hash are known through the use of WMI. Commands are executed using WMI by Wmiexec, providing a semi-interactive shell experience.
+Mchakato unaweza kufunguliwa kwenye mwenyeji ambapo jina la mtumiaji na ama nenosiri au hash zinajulikana kupitia matumizi ya WMI. Amri zinafanywa kwa kutumia WMI na Wmiexec, ikitoa uzoefu wa shell wa nusu-interactive.
 
-**dcomexec.py:** Utilizing different DCOM endpoints, this script offers a semi-interactive shell akin to wmiexec.py, specifically leveraging the ShellBrowserWindow DCOM object. It currently supports MMC20. Application, Shell Windows, and Shell Browser Window objects. (source: [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))
+**dcomexec.py:** Kutumia mwisho tofauti wa DCOM, skripti hii inatoa shell ya nusu-interactive kama wmiexec.py, ikitumia hasa kitu cha ShellBrowserWindow DCOM. Hivi sasa inasaidia MMC20. Maombi, Shell Windows, na Shell Browser Window objects. (chanzo: [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))
 
-## WMI Fundamentals
+## Misingi ya WMI
 
 ### Namespace
 
-Structured in a directory-style hierarchy, WMI's top-level container is \root, under which additional directories, referred to as namespaces, are organized.
-Commands to list namespaces:
-
+Imeundwa katika muundo wa hierarchi ya directory, kontena ya juu ya WMI ni \root, chini ambayo directories za ziada, zinazojulikana kama namespaces, zimepangwa. 
+Amri za kuorodhesha namespaces:
 ```bash
 # Retrieval of Root namespaces
 gwmi -namespace "root" -Class "__Namespace" | Select Name
@@ -25,36 +24,28 @@ Get-WmiObject -Class "__Namespace" -Namespace "Root" -List -Recurse 2> $null | s
 # Listing of namespaces within "root\cimv2"
 Get-WmiObject -Class "__Namespace" -Namespace "root\cimv2" -List -Recurse 2> $null | select __Namespace | sort __Namespace
 ```
-
-Classes within a namespace can be listed using:
-
+Darasa ndani ya namespace linaweza kuorodheshwa kwa kutumia:
 ```bash
 gwmwi -List -Recurse # Defaults to "root\cimv2" if no namespace specified
 gwmi -Namespace "root/microsoft" -List -Recurse
 ```
+### **Darasa**
 
-### **Classes**
-
-Knowing a WMI class name, such as win32_process, and the namespace it resides in is crucial for any WMI operation.
-Commands to list classes beginning with `win32`:
-
+Kujua jina la darasa la WMI, kama win32_process, na nafasi ambayo linaishi ni muhimu kwa operesheni yoyote ya WMI. 
+Amri za kuorodhesha madarasa yanayoanza na `win32`:
 ```bash
 Get-WmiObject -Recurse -List -class win32* | more # Defaults to "root\cimv2"
 gwmi -Namespace "root/microsoft" -List -Recurse -Class "MSFT_MpComput*"
 ```
-
-Invocation of a class:
-
+Kuitwa kwa darasa:
 ```bash
 # Defaults to "root/cimv2" when namespace isn't specified
 Get-WmiObject -Class win32_share
 Get-WmiObject -Namespace "root/microsoft/windows/defender" -Class MSFT_MpComputerStatus
 ```
-
 ### Methods
 
-Methods, which are one or more executable functions of WMI classes, can be executed.
-
+Mbinu, ambazo ni kazi moja au zaidi zinazoweza kutekelezwa za madarasa ya WMI, zinaweza kutekelezwa.
 ```bash
 # Class loading, method listing, and execution
 $c = [wmiclass]"win32_share"
@@ -66,13 +57,11 @@ $c.methods
 # Method listing and invocation
 Invoke-WmiMethod -Class win32_share -Name Create -ArgumentList @($null, "Description", $null, "Name", $null, "c:\share\path",0)
 ```
-
 ## WMI Enumeration
 
 ### WMI Service Status
 
-Commands to verify if the WMI service is operational:
-
+Amri za kuthibitisha ikiwa huduma ya WMI inafanya kazi:
 ```bash
 # WMI service status check
 Get-Service Winmgmt
@@ -80,18 +69,14 @@ Get-Service Winmgmt
 # Via CMD
 net start | findstr "Instrumentation"
 ```
+### Taarifa za Mfumo na Mchakato
 
-### System and Process Information
-
-Gathering system and process information through WMI:
-
+Kukusanya taarifa za mfumo na mchakato kupitia WMI:
 ```bash
 Get-WmiObject -ClassName win32_operatingsystem | select * | more
 Get-WmiObject win32_process | Select Name, Processid
 ```
-
-For attackers, WMI is a potent tool for enumerating sensitive data about systems or domains.
-
+Kwa washambuliaji, WMI ni chombo chenye nguvu cha kuorodhesha data nyeti kuhusu mifumo au maeneo.
 ```bash
 wmic computerystem list full /format:list
 wmic process list /format:list
@@ -100,32 +85,26 @@ wmic useraccount list /format:list
 wmic group list /format:list
 wmic sysaccount list /format:list
 ```
+Kuchunguza kwa mbali WMI kwa habari maalum, kama wasimamizi wa ndani au watumiaji walioingia, kunawezekana kwa ujenzi wa amri kwa makini.
 
-Remote querying of WMI for specific information, such as local admins or logged-on users, is feasible with careful command construction.
+### **Kuchunguza WMI kwa Mkono kwa Mbali**
 
-### **Manual Remote WMI Querying**
+Utambuzi wa kimya wa wasimamizi wa ndani kwenye mashine ya mbali na watumiaji walioingia unaweza kufanywa kupitia maswali maalum ya WMI. `wmic` pia inasaidia kusoma kutoka kwa faili ya maandiko ili kutekeleza amri kwenye nodi nyingi kwa wakati mmoja.
 
-Stealthy identification of local admins on a remote machine and logged-on users can be achieved through specific WMI queries. `wmic` also supports reading from a text file to execute commands on multiple nodes simultaneously.
-
-To remotely execute a process over WMI, such as deploying an Empire agent, the following command structure is employed, with successful execution indicated by a return value of "0":
-
+Ili kutekeleza mchakato kwa mbali kupitia WMI, kama vile kupeleka wakala wa Empire, muundo wa amri ifuatayo unatumika, huku utekelezaji wa mafanikio ukionyeshwa na thamani ya kurudi "0":
 ```bash
 wmic /node:hostname /user:user path win32_process call create "empire launcher string here"
 ```
+Hii mchakato inaonyesha uwezo wa WMI wa utekelezaji wa mbali na uainishaji wa mfumo, ikisisitiza matumizi yake kwa usimamizi wa mfumo na pentesting.
 
-This process illustrates WMI's capability for remote execution and system enumeration, highlighting its utility for both system administration and penetration testing.
-
-## References
+## Marejeleo
 
 - [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
 
-## Automatic Tools
+## Zana za Kiotomatiki
 
 - [**SharpLateral**](https://github.com/mertdas/SharpLateral):
-
 ```bash
 SharpLateral redwmi HOSTNAME C:\\Users\\Administrator\\Desktop\\malware.exe
 ```
-
 {{#include ../../banners/hacktricks-training.md}}
-

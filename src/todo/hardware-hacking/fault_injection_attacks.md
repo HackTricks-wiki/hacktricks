@@ -1,7 +1,5 @@
-# Fault Injection Attacks 
+# Fault Injection Attacks
 
-Fault injections attacks includes introducing external distrubance in electronic circuits to influence it's behaviour, resulting to disclose information or even bypass certian restrictions in the circuit. This attacks opens a lot of possibilities for attacking electronic circuits. This attack is also referred as glitching of electronic circuits.
+Shambulio la kuingiza makosa linajumuisha kuanzisha usumbufu wa nje katika mizunguko ya kielektroniki ili kuathiri tabia yake, na kusababisha kufichua taarifa au hata kupita vizuizi fulani katika mzunguko. Shambulio hili linafungua nafasi nyingi za kushambulia mizunguko ya kielektroniki. Shambulio hili pia linajulikana kama glitching ya mizunguko ya kielektroniki.
 
-There are a lot of methods and mediums for injecting fault into an electronic circuit. 
-
-
+Kuna mbinu nyingi na njia za kuingiza makosa katika mzunguko wa kielektroniki.

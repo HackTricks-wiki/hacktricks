@@ -1,14 +1,13 @@
-# Stealing Sensitive Information Disclosure from a Web
+# Kuiba Ufunuo wa Taarifa Nyeti Kutoka kwa Tovuti
 
 {{#include ../banners/hacktricks-training.md}}
 
-If at some point you find a **web page that presents you sensitive information based on your session**: Maybe it's reflecting cookies, or printing or CC details or any other sensitive information, you may try to steal it.\
-Here I present you the main ways to can try to achieve it:
+Ikiwa wakati fulani utapata **ukurasa wa wavuti unaokupa taarifa nyeti kulingana na kikao chako**: Huenda unareflect cookies, au kuchapisha au maelezo ya kadi ya mkopo au taarifa nyingine yoyote nyeti, unaweza kujaribu kuiba.\
+Hapa ninakuletea njia kuu ambazo unaweza kujaribu kuzifikia:
 
-- [**CORS bypass**](../pentesting-web/cors-bypass.md): If you can bypass CORS headers you will be able to steal the information performing Ajax request for a malicious page.
-- [**XSS**](../pentesting-web/xss-cross-site-scripting/): If you find a XSS vulnerability on the page you may be able to abuse it to steal the information.
-- [**Danging Markup**](../pentesting-web/dangling-markup-html-scriptless-injection/): If you cannot inject XSS tags you still may be able to steal the info using other regular HTML tags.
-- [**Clickjaking**](../pentesting-web/clickjacking.md): If there is no protection against this attack, you may be able to trick the user into sending you the sensitive data (an example [here](https://medium.com/bugbountywriteup/apache-example-servlet-leads-to-61a2720cac20)).
+- [**CORS bypass**](../pentesting-web/cors-bypass.md): Ikiwa unaweza kupita vichwa vya CORS utaweza kuiba taarifa kwa kufanya ombi la Ajax kwa ukurasa mbaya.
+- [**XSS**](../pentesting-web/xss-cross-site-scripting/): Ikiwa utapata udhaifu wa XSS kwenye ukurasa unaweza kuwa na uwezo wa kuutumia kuiba taarifa.
+- [**Danging Markup**](../pentesting-web/dangling-markup-html-scriptless-injection/): Ikiwa huwezi kuingiza lebo za XSS bado unaweza kuiba taarifa ukitumia lebo nyingine za kawaida za HTML.
+- [**Clickjaking**](../pentesting-web/clickjacking.md): Ikiwa hakuna ulinzi dhidi ya shambulio hili, unaweza kuwa na uwezo wa kumdanganya mtumiaji akakutumia taarifa nyeti (mfano [hapa](https://medium.com/bugbountywriteup/apache-example-servlet-leads-to-61a2720cac20)).
 
 {{#include ../banners/hacktricks-training.md}}
-

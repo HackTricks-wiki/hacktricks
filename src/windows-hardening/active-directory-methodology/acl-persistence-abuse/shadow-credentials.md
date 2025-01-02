@@ -4,58 +4,54 @@
 
 ## Intro <a href="#3f17" id="3f17"></a>
 
-**Check the original post for [all the information about this technique](https://posts.specterops.io/shadow-credentials-abusing-key-trust-account-mapping-for-takeover-8ee1a53566ab).**
+**Angalia chapisho la asili kwa [maelezo yote kuhusu mbinu hii](https://posts.specterops.io/shadow-credentials-abusing-key-trust-account-mapping-for-takeover-8ee1a53566ab).**
 
-As **summary**: if you can write to the **msDS-KeyCredentialLink** property of a user/computer, you can retrieve the **NT hash of that object**.
+Kama **muhtasari**: ikiwa unaweza kuandika kwenye mali ya **msDS-KeyCredentialLink** ya mtumiaji/kompyuta, unaweza kupata **NT hash ya kitu hicho**.
 
-In the post, a method is outlined for setting up **public-private key authentication credentials** to acquire a unique **Service Ticket** that includes the target's NTLM hash. This process involves the encrypted NTLM_SUPPLEMENTAL_CREDENTIAL within the Privilege Attribute Certificate (PAC), which can be decrypted.
+Katika chapisho, mbinu imeelezewa kwa kuanzisha **ithibitisho la ufunguo wa umma-binafsi** ili kupata **Tiketi ya Huduma** ya kipekee inayojumuisha NTLM hash ya lengo. Mchakato huu unahusisha NTLM_SUPPLEMENTAL_CREDENTIAL iliyosimbwa ndani ya Cheti cha Sifa za Haki (PAC), ambacho kinaweza kufichuliwa.
 
 ### Requirements
 
-To apply this technique, certain conditions must be met:
+Ili kutumia mbinu hii, masharti fulani lazima yatekelezwe:
 
-- A minimum of one Windows Server 2016 Domain Controller is needed.
-- The Domain Controller must have a server authentication digital certificate installed.
-- The Active Directory must be at the Windows Server 2016 Functional Level.
-- An account with delegated rights to modify the msDS-KeyCredentialLink attribute of the target object is required.
+- Inahitajika angalau Kituo kimoja cha Windows Server 2016 Domain.
+- Kituo cha Domain lazima kiwe na cheti cha kidijitali cha uthibitishaji wa seva kilichosakinishwa.
+- Active Directory lazima iwe katika Kiwango cha Kazi cha Windows Server 2016.
+- Inahitajika akaunti yenye haki za kuhamasisha kubadilisha sifa ya msDS-KeyCredentialLink ya kitu kilichokusudiwa.
 
 ## Abuse
 
-The abuse of Key Trust for computer objects encompasses steps beyond obtaining a Ticket Granting Ticket (TGT) and the NTLM hash. The options include:
+Kunyanyaswa kwa Key Trust kwa vitu vya kompyuta kunajumuisha hatua zaidi ya kupata Tiketi ya Kutoa Tiketi (TGT) na NTLM hash. Chaguzi ni pamoja na:
 
-1. Creating an **RC4 silver ticket** to act as privileged users on the intended host.
-2. Using the TGT with **S4U2Self** for impersonation of **privileged users**, necessitating alterations to the Service Ticket to add a service class to the service name.
+1. Kuunda **tiketi ya fedha ya RC4** ili kutenda kama watumiaji wenye mamlaka kwenye mwenyeji anayokusudiwa.
+2. Kutumia TGT na **S4U2Self** kwa ajili ya kujifanya **watumiaji wenye mamlaka**, ikihitaji mabadiliko ya Tiketi ya Huduma ili kuongeza darasa la huduma kwenye jina la huduma.
 
-A significant advantage of Key Trust abuse is its limitation to the attacker-generated private key, avoiding delegation to potentially vulnerable accounts and not requiring the creation of a computer account, which could be challenging to remove.
+Faida kubwa ya kunyanyaswa kwa Key Trust ni ukomo wake kwa ufunguo wa binafsi ulioanzishwa na mshambuliaji, kuepusha ugawaji kwa akaunti zinazoweza kuwa hatarini na kutohitaji kuunda akaunti ya kompyuta, ambayo inaweza kuwa ngumu kuondoa.
 
 ## Tools
 
 ### [**Whisker**](https://github.com/eladshamir/Whisker)
 
-It's based on DSInternals providing a C# interface for this attack. Whisker and its Python counterpart, **pyWhisker**, enable manipulation of the `msDS-KeyCredentialLink` attribute to gain control over Active Directory accounts. These tools support various operations like adding, listing, removing, and clearing key credentials from the target object.
+Inategemea DSInternals ikitoa kiolesura cha C# kwa shambulio hili. Whisker na sawa yake ya Python, **pyWhisker**, zinawezesha kudhibiti sifa ya `msDS-KeyCredentialLink` ili kupata udhibiti wa akaunti za Active Directory. Zana hizi zinasaidia operesheni mbalimbali kama kuongeza, kuorodhesha, kuondoa, na kufuta ithibitisho za ufunguo kutoka kwa kitu kilichokusudiwa.
 
-**Whisker** functions include:
+**Whisker** inafanya kazi zifuatazo:
 
-- **Add**: Generates a key pair and adds a key credential.
-- **List**: Displays all key credential entries.
-- **Remove**: Deletes a specified key credential.
-- **Clear**: Erases all key credentials, potentially disrupting legitimate WHfB usage.
-
+- **Add**: Inaunda jozi ya ufunguo na kuongeza ithibitisho la ufunguo.
+- **List**: Inaonyesha kila kipengee cha ithibitisho la ufunguo.
+- **Remove**: Inafuta ithibitisho maalum la ufunguo.
+- **Clear**: Inafuta ithibitisho zote za ufunguo, huenda ikaharibu matumizi halali ya WHfB.
 ```shell
 Whisker.exe add /target:computername$ /domain:constoso.local /dc:dc1.contoso.local /path:C:\path\to\file.pfx /password:P@ssword1
 ```
-
 ### [pyWhisker](https://github.com/ShutdownRepo/pywhisker)
 
-It extends Whisker functionality to **UNIX-based systems**, leveraging Impacket and PyDSInternals for comprehensive exploitation capabilities, including listing, adding, and removing KeyCredentials, as well as importing and exporting them in JSON format.
-
+Inapanua kazi za Whisker kwa **mifumo ya UNIX**, ikitumia Impacket na PyDSInternals kwa uwezo wa kina wa unyakuzi, ikiwa ni pamoja na orodha, kuongeza, na kuondoa KeyCredentials, pamoja na kuagiza na kusafirisha katika muundo wa JSON.
 ```shell
 python3 pywhisker.py -d "domain.local" -u "user1" -p "complexpassword" --target "user2" --action "list"
 ```
-
 ### [ShadowSpray](https://github.com/Dec0ne/ShadowSpray/)
 
-ShadowSpray aims to **exploit GenericWrite/GenericAll permissions that wide user groups may have over domain objects** to apply ShadowCredentials broadly. It entails logging into the domain, verifying the domain's functional level, enumerating domain objects, and attempting to add KeyCredentials for TGT acquisition and NT hash revelation. Cleanup options and recursive exploitation tactics enhance its utility.
+ShadowSpray inalenga **kufaidika na ruhusa za GenericWrite/GenericAll ambazo vikundi vya watumiaji vinaweza kuwa navyo juu ya vitu vya kikoa** ili kutumia ShadowCredentials kwa upana. Inahusisha kuingia kwenye kikoa, kuthibitisha kiwango cha kazi cha kikoa, kuorodhesha vitu vya kikoa, na kujaribu kuongeza KeyCredentials kwa ajili ya kupata TGT na kufichua NT hash. Chaguzi za kusafisha na mbinu za unyakuzi wa kurudiwa zinaboresha matumizi yake.
 
 ## References
 
@@ -65,4 +61,3 @@ ShadowSpray aims to **exploit GenericWrite/GenericAll permissions that wide user
 - [https://github.com/ShutdownRepo/pywhisker](https://github.com/ShutdownRepo/pywhisker)
 
 {{#include ../../../banners/hacktricks-training.md}}
-

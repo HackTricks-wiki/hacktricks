@@ -4,82 +4,75 @@
 
 ## Basic Information
 
-UART is a serial protocol, which means it transfers data between components one bit at a time. In contrast, parallel communication protocols transmit data simultaneously through multiple channels. Common serial protocols include RS-232, I2C, SPI, CAN, Ethernet, HDMI, PCI Express, and USB.
+UART ni protokali ya serial, ambayo inamaanisha inahamisha data kati ya vipengele bit moja kwa wakati. Kinyume chake, protokali za mawasiliano ya sambamba hupeleka data kwa wakati mmoja kupitia njia nyingi. Protokali za kawaida za serial ni pamoja na RS-232, I2C, SPI, CAN, Ethernet, HDMI, PCI Express, na USB.
 
-Generally, the line is held high (at a logical 1 value) while UART is in the idle state. Then, to signal the start of a data transfer, the transmitter sends a start bit to the receiver, during which the signal is held low (at a logical 0 value). Next, the transmitter sends five to eight data bits containing the actual message, followed by an optional parity bit and one or two stop bits (with a logical 1 value), depending on the configuration. The parity bit, used for error checking, is rarely seen in practice. The stop bit (or bits) signify the end of transmission.
+Kwa ujumla, laini inashikiliwa juu (katika thamani ya mantiki 1) wakati UART iko katika hali ya kupumzika. Kisha, ili kuashiria mwanzo wa uhamisho wa data, mtumaji anatumia bit ya mwanzo kwa mpokeaji, wakati ambapo ishara inashikiliwa chini (katika thamani ya mantiki 0). Kisha, mtumaji anatumia bits tano hadi nane za data zinazojumuisha ujumbe halisi, ikifuatiwa na bit ya parity ya hiari na bit moja au mbili za kusitisha (zikiwa na thamani ya mantiki 1), kulingana na usanidi. Bit ya parity, inayotumika kwa ajili ya kuangalia makosa, haionekani mara nyingi katika mazoezi. Bit ya kusitisha (au bits) inaashiria mwisho wa uhamisho.
 
-We call the most common configuration 8N1: eight data bits, no parity, and one stop bit. For example, if we wanted to send the character C, or 0x43 in ASCII, in an 8N1 UART configuration, we would send the following bits: 0 (the start bit); 0, 1, 0, 0, 0, 0, 1, 1 (the value of 0x43 in binary), and 0 (the stop bit).
+Tunaita usanidi wa kawaida zaidi 8N1: bits nane za data, hakuna parity, na bit moja ya kusitisha. Kwa mfano, ikiwa tunataka kutuma herufi C, au 0x43 katika ASCII, katika usanidi wa UART wa 8N1, tungepeleka bits zifuatazo: 0 (bit ya mwanzo); 0, 1, 0, 0, 0, 0, 1, 1 (thamani ya 0x43 katika binary), na 0 (bit ya kusitisha).
 
 ![](<../../images/image (764).png>)
 
-Hardware tools to communicate with UART:
+Zana za vifaa kuwasiliana na UART:
 
-- USB-to-serial adapter
-- Adapters with the CP2102 or PL2303 chips
-- Multipurpose tool such as: Bus Pirate, the Adafruit FT232H, the Shikra, or the Attify Badge
+- Adaptari ya USB-to-serial
+- Adaptari zenye chips CP2102 au PL2303
+- Zana nyingi kama: Bus Pirate, Adafruit FT232H, Shikra, au Attify Badge
 
 ### Identifying UART Ports
 
-UART has 4 ports: **TX**(Transmit), **RX**(Receive), **Vcc**(Voltage), and **GND**(Ground). You might be able to find 4 ports with the **`TX`** and **`RX`** letters **written** in the PCB. But if there is no indication, you might need to try to find them yourself using a **multimeter** or a **logic analyzer**.
+UART ina bandari 4: **TX**(Transmit), **RX**(Receive), **Vcc**(Voltage), na **GND**(Ground). Unaweza kuwa na uwezo wa kupata bandari 4 zikiwa na herufi **`TX`** na **`RX`** **zilizoandikwa** kwenye PCB. Lakini ikiwa hakuna dalili, unaweza kujaribu kuzipata mwenyewe kwa kutumia **multimeter** au **logic analyzer**.
 
-With a **multimeter** and the device powered off:
+Kwa kutumia **multimeter** na kifaa kikiwa kimezimwa:
 
-- To identify the **GND** pin use the **Continuity Test** mode, place the back lead into ground and test with the red one until you hear a sound from the multimeter. Several GND pins can be found the PCB, so you might have found or not the one belonging to UART.
-- To identify the **VCC port**, set the **DC voltage mode** and set it up to 20 V of voltage. Black probe on ground and red probe on the pin. Power on the device. If the multimeter measures a constant voltage of either 3.3 V or 5 V, you’ve found the Vcc pin. If you get other voltages, retry with other ports.
-- To identify the **TX** **port**, **DC voltage mode** up to 20 V of voltage, black probe on ground, and red probe on the pin, and power on the device. If you find the voltage fluctuates for a few seconds and then stabilizes at the Vcc value, you’ve most likely found the TX port. This is because when powering on, it sends some debug data.
-- The **RX port** would be the closest one to the other 3, it has the lowest voltage fluctuation and lowest overall value of all the UART pins.
+- Ili kubaini pini ya **GND** tumia hali ya **Continuity Test**, weka uongozi wa nyuma kwenye ardhi na jaribu na uongozi mwekundu hadi usikie sauti kutoka kwa multimeter. Pini kadhaa za GND zinaweza kupatikana kwenye PCB, hivyo unaweza kuwa umepata au hujapata ile inayohusiana na UART.
+- Ili kubaini bandari ya **VCC**, weka hali ya **DC voltage mode** na uweke hadi 20 V ya voltage. Uongozi mweusi kwenye ardhi na uongozi mwekundu kwenye pini. Washa kifaa. Ikiwa multimeter inapima voltage isiyobadilika ya 3.3 V au 5 V, umepata pini ya Vcc. Ikiwa unapata voltage nyingine, jaribu tena na bandari nyingine.
+- Ili kubaini bandari ya **TX**, weka **DC voltage mode** hadi 20 V ya voltage, uongozi mweusi kwenye ardhi, na uongozi mwekundu kwenye pini, na washia kifaa. Ikiwa unapata voltage inabadilika kwa sekunde chache kisha inastabilika kwenye thamani ya Vcc, umepata bandari ya TX. Hii ni kwa sababu wakati wa kuwasha, inatuma data za debug.
+- Bandari ya **RX** itakuwa karibu zaidi na zingine 3, ina mabadiliko madogo ya voltage na thamani ya chini zaidi ya pini zote za UART.
 
-You can confuse the TX and RX ports and nothing would happen, but if you confuses the GND and the VCC port you might fry the circuit.
+Unaweza kuchanganya bandari za TX na RX na hakuna kitu kitakachotokea, lakini ikiwa unachanganya bandari za GND na VCC unaweza kuharibu mzunguko.
 
-In some target devices, the UART port is disabled by the manufacturer by disabling RX or TX or even both. In that case, it can be helpful to trace down the connections in the circuit board and finding some breakout point. A strong hint about confirming no detection of UART and breaking of the circuit is to check the device warranty. If the device has been shipped with some warranty, the manufacturer leaves some debug interfaces (in this case, UART) and hence, must have disconnected the UART and would attach it again while debugging. These breakout pins can be connected by soldering or jumper wires.
+Katika baadhi ya vifaa vya lengo, bandari ya UART imezimwa na mtengenezaji kwa kuzima RX au TX au hata zote mbili. Katika kesi hiyo, inaweza kuwa na manufaa kufuatilia muunganisho kwenye bodi ya mzunguko na kupata sehemu fulani ya kuvunja. Kidokezo kikubwa kuhusu kuthibitisha kutokuwepo kwa UART na kuvunja mzunguko ni kuangalia dhamana ya kifaa. Ikiwa kifaa kimepelekwa na dhamana fulani, mtengenezaji huacha interfaces za debug (katika kesi hii, UART) na hivyo, lazima awe ameondoa UART na ataiunganisha tena wakati wa kujaribu. Pini hizi za kuvunja zinaweza kuunganishwa kwa kulehemu au nyaya za jumper.
 
 ### Identifying the UART Baud Rate
 
-The easiest way to identify the correct baud rate is to look at the **TX pin’s output and try to read the data**. If the data you receive isn’t readable, switch to the next possible baud rate until the data becomes readable. You can use a USB-to-serial adapter or a multipurpose device like Bus Pirate to do this, paired with a helper script, such as [baudrate.py](https://github.com/devttys0/baudrate/). The most common baud rates are 9600, 38400, 19200, 57600, and 115200.
+Njia rahisi ya kubaini kiwango sahihi cha baud ni kuangalia **matokeo ya pini ya TX na kujaribu kusoma data**. Ikiwa data unayopokea haiwezi kusomeka, badilisha hadi kiwango kinachowezekana cha baud hadi data iweze kusomeka. Unaweza kutumia adaptari ya USB-to-serial au kifaa cha matumizi mengi kama Bus Pirate kufanya hivyo, pamoja na script ya msaada, kama [baudrate.py](https://github.com/devttys0/baudrate/). Kiwango cha kawaida cha baud ni 9600, 38400, 19200, 57600, na 115200.
 
 > [!CAUTION]
-> It's important to note that in this protocol you need to connect the TX of one device to the RX of the other!
+> Ni muhimu kutambua kwamba katika protokali hii unahitaji kuunganisha TX ya kifaa kimoja na RX ya kingine!
 
 ## CP210X UART to TTY Adapter
 
-The CP210X Chip is used in a lot of prototyping boards like NodeMCU (with esp8266) for Serial Communication. These adapters are relatively inexpensive and can be used to connect to the UART interface of the target. The device has 5 pins: 5V, GND, RXD, TXD, 3.3V. Make sure to connect the voltage as supported by the target to avoid any damage. Finally connect the RXD pin of the Adapter to TXD of the target and TXD pin of the Adapter to RXD of the target.
+Chip ya CP210X inatumika katika bodi nyingi za prototyping kama NodeMCU (ikiwa na esp8266) kwa Mawasiliano ya Serial. Adaptari hizi ni za bei nafuu na zinaweza kutumika kuunganisha kwenye interface ya UART ya lengo. Kifaa kina pini 5: 5V, GND, RXD, TXD, 3.3V. Hakikisha kuunganisha voltage kama inavyoungwa mkono na lengo ili kuepuka uharibifu wowote. Mwishowe, ungana pini ya RXD ya Adaptari na TXD ya lengo na pini ya TXD ya Adaptari na RXD ya lengo.
 
-Incase the adapter is not detected, make sure that the CP210X drivers are installed in the host system. Once the adapter is detected and connected, tools like picocom, minicom or screen can be used.
+Ikiwa adaptari haijagundulika, hakikisha kuwa madereva wa CP210X yamewekwa kwenye mfumo wa mwenyeji. Mara baada ya adaptari kugundulika na kuunganishwa, zana kama picocom, minicom au screen zinaweza kutumika.
 
-To list the devices connected to Linux/MacOS systems:
-
+Ili orodhesha vifaa vilivyounganishwa kwenye mifumo ya Linux/MacOS:
 ```
 ls /dev/
 ```
-
-For basic interaction with the UART interface, use the following command:
-
+Kwa mwingiliano wa msingi na kiolesura cha UART, tumia amri ifuatayo:
 ```
 picocom /dev/<adapter> --baud <baudrate>
 ```
-
-For minicom, use the following command to configure it:
-
+Kwa minicom, tumia amri ifuatayo kuikamilisha:
 ```
 minicom -s
 ```
+Sanitize mipangilio kama baudrate na jina la kifaa katika chaguo la `Serial port setup`.
 
-Configure the settings such as baudrate and device name in the `Serial port setup` option.
+Baada ya usanidi, tumia amri `minicom` kuanza kupata UART Console.
 
-After configuration, use the command `minicom` to start get the UART Console.
+## UART Kupitia Arduino UNO R3 (Bodi za Chip za Atmel 328p Zinazoweza Kuondolewa)
 
-## UART Via Arduino UNO R3 (Removable Atmel 328p Chip Boards)
+Iwapo adapta za UART Serial hadi USB hazipatikani, Arduino UNO R3 inaweza kutumika kwa hack ya haraka. Kwa kuwa Arduino UNO R3 kwa kawaida inapatikana popote, hii inaweza kuokoa muda mwingi.
 
-Incase UART Serial to USB adapters are not available, Arduino UNO R3 can be used with a quick hack. Since Arduino UNO R3 is usually available anywhere, this can save a lot of time.
+Arduino UNO R3 ina adapta ya USB hadi Serial iliyojengwa kwenye bodi yenyewe. Ili kupata muunganisho wa UART, toa chip ya microcontroller ya Atmel 328p kutoka kwenye bodi. Hack hii inafanya kazi kwenye toleo la Arduino UNO R3 lenye Atmel 328p isiyosafishwa kwenye bodi (toleo la SMD linatumika ndani yake). Unganisha pini ya RX ya Arduino (Pini ya Kidijitali 0) kwa pini ya TX ya Kiunganishi cha UART na pini ya TX ya Arduino (Pini ya Kidijitali 1) kwa pini ya RX ya kiunganishi cha UART.
 
-Arduino UNO R3 has a USB to Serial adapter built on the board itself. To get UART connection, just plug out the Atmel 328p microcontroller chip from the board. This hack works on Arduino UNO R3 variants having the Atmel 328p not soldered on the board (SMD version is used in it). Connect the RX pin of Arduino (Digital Pin 0) to the TX pin of the UART Interface and TX pin of the Arduino (Digital Pin 1) to the RX pin of the UART interface.
-
-Finally, it is recommended to use Arduino IDE to get the Serial Console. In the `tools` section in the menu, select `Serial Console` option and set the baud rate as per the UART interface.
+Hatimaye, inapendekezwa kutumia Arduino IDE kupata Serial Console. Katika sehemu ya `tools` kwenye menyu, chagua chaguo la `Serial Console` na weka baud rate kulingana na kiunganishi cha UART.
 
 ## Bus Pirate
 
-In this scenario we are going to sniff the UART communication of the Arduino that is sending all the prints of the program to the Serial Monitor.
-
+Katika hali hii tutakuwa tukichunguza mawasiliano ya UART ya Arduino inayotuma uchapishaji wote wa programu kwa Monitor ya Serial.
 ```bash
 # Check the modes
 UART>m
@@ -99,39 +92,39 @@ x. exit(without change)
 # Select UART
 (1)>3
 Set serial port speed: (bps)
- 1. 300
- 2. 1200
- 3. 2400
- 4. 4800
- 5. 9600
- 6. 19200
- 7. 38400
- 8. 57600
- 9. 115200
+1. 300
+2. 1200
+3. 2400
+4. 4800
+5. 9600
+6. 19200
+7. 38400
+8. 57600
+9. 115200
 10. BRG raw value
 
 # Select the speed the communication is occurring on (you BF all this until you find readable things)
 # Or you could later use the macro (4) to try to find the speed
 (1)>5
 Data bits and parity:
- 1. 8, NONE *default
- 2. 8, EVEN
- 3. 8, ODD
- 4. 9, NONE
+1. 8, NONE *default
+2. 8, EVEN
+3. 8, ODD
+4. 9, NONE
 
- # From now on pulse enter for default
+# From now on pulse enter for default
 (1)>
 Stop bits:
- 1. 1 *default
- 2. 2
+1. 1 *default
+2. 2
 (1)>
 Receive polarity:
- 1. Idle 1 *default
- 2. Idle 0
+1. Idle 1 *default
+2. Idle 0
 (1)>
 Select output type:
- 1. Open drain (H=Hi-Z, L=GND)
- 2. Normal (H=3.3V, L=GND)
+1. Open drain (H=Hi-Z, L=GND)
+2. Normal (H=3.3V, L=GND)
 
 (1)>
 Clutch disengaged!!!
@@ -151,36 +144,30 @@ Escritura inicial completada:
 AAA Hi Dreg! AAA
 waiting a few secs to repeat....
 ```
+## Kutolewa kwa Firmware kwa kutumia UART Console
 
-## Dumping Firmware with UART Console
+UART Console inatoa njia nzuri ya kufanya kazi na firmware ya msingi katika mazingira ya wakati halisi. Lakini wakati ufikiaji wa UART Console ni wa kusoma tu, inaweza kuleta vizuizi vingi. Katika vifaa vingi vilivyojumuishwa, firmware huhifadhiwa katika EEPROMs na kutekelezwa katika prosesa ambazo zina kumbukumbu ya muda. Hivyo, firmware inahifadhiwa kuwa ya kusoma tu kwani firmware ya awali wakati wa utengenezaji iko ndani ya EEPROM yenyewe na faili zozote mpya zitapotea kutokana na kumbukumbu ya muda. Hivyo, kutolewa kwa firmware ni juhudi ya thamani wakati wa kufanya kazi na firmware zilizojumuishwa.
 
-UART Console provides a great way to work with the underlying firmware in runtime environment. But when the UART Console access is read-only, it might introduce a lot of constrains. In many embedded devices, the firmware is stored in EEPROMs and executed in processors that have volatile memory. Hence, the firmware is kept read-only since the original firmware during manufacturing is inside the EEPROM itself and any new files would get lost due to volatile memory. Hence, dumping firmware is a valuable effort while working with embedded firmwares.
+Kuna njia nyingi za kufanya hivi na sehemu ya SPI inashughulikia mbinu za kutoa firmware moja kwa moja kutoka kwa EEPROM kwa vifaa mbalimbali. Ingawa, inapendekezwa kwanza kujaribu kutolewa kwa firmware kwa kutumia UART kwani kutolewa kwa firmware kwa kutumia vifaa vya kimwili na mwingiliano wa nje kunaweza kuwa na hatari.
 
-There are a lot of ways to do this and the SPI section covers methods to extract firmware directly from the EEPROM with various devices. Although, it is recommended to first try dumping firmware with UART since dumping firmware with physical devices and external interactions can be risky.
+Kutolewa kwa firmware kutoka kwa UART Console kunahitaji kwanza kupata ufikiaji wa bootloaders. Wauzaji wengi maarufu hutumia uboot (Universal Bootloader) kama bootloader yao kupakia Linux. Hivyo, kupata ufikiaji wa uboot ni muhimu.
 
-Dumping firmware from UART Console requires first getting access to bootloaders. Many popular vendors make use of uboot (Universal Bootloader) as their bootloader to load Linux. Hence, getting access to uboot is necessary.
+Ili kupata ufikiaji wa boot bootloader, ung'anisha bandari ya UART kwenye kompyuta na tumia yoyote ya zana za Serial Console na uweke usambazaji wa nguvu kwa kifaa kisichounganishwa. Mara tu mipangilio ikikamilika, bonyeza Kitufe cha Enter na ushikilie. Hatimaye, ung'anisha usambazaji wa nguvu kwa kifaa na uache ipakie.
 
-To get access to boot bootloader, connect the UART port to the computer and use any of the Serial Console tools and keep the power supply to the device disconnected. Once the setup is ready, press the Enter Key and hold it. Finally, connect the power supply to the device and let it boot.
+Kufanya hivi kutakatisha uboot kutoka kupakia na kutatoa menyu. Inapendekezwa kuelewa amri za uboot na kutumia menyu ya msaada kuorodhesha hizo. Hii inaweza kuwa amri ya `help`. Kwa kuwa wauzaji tofauti hutumia mipangilio tofauti, ni muhimu kuelewa kila moja yao kwa tofauti.
 
-Doing this will interrupt uboot from loading and will provide a menu. It is recommended to understand uboot commands and using help menu to list them. This might be `help` command. Since different vendors use different configurations, it is necessary to understand each of them seperately.
-
-Usually, the command to dump the firmware is:
-
+Kwa kawaida, amri ya kutolewa kwa firmware ni:
 ```
 md
 ```
+ambayo inasimama kwa "memory dump". Hii itatoa yaliyomo kwenye kumbukumbu (EEPROM Content) kwenye skrini. Inapendekezwa kurekodi matokeo ya Serial Console kabla ya kuanza mchakato wa kukamata memory dump.
 
-which stands for "memory dump". This will dump the memory (EEPROM Content) on the screen. It is recommended to log the Serial Console output before starting the proceedure to capture the memory dump.
-
-Finally, just strip out all the unnecessary data from the log file and store the file as `filename.rom` and use binwalk to extract the contents:
-
+Hatimaye, ondolea tu data zisizohitajika kutoka kwa faili la log na uhifadhi faili kama `filename.rom` na tumia binwalk kutoa yaliyomo:
 ```
 binwalk -e <filename.rom>
 ```
+Hii itataja maudhui yanayowezekana kutoka kwa EEPROM kulingana na saini zilizopatikana katika faili la hex.
 
-This will list the possible contents from the EEPROM as per the signatures found in the hex file.
-
-Although, it is necessary to note that it's not always the case that the uboot is unlocked even if it is being used. If the Enter Key doesn't do anything, check for different keys like Space Key, etc. If the bootloader is locked and does not get interrupted, this method would not work. To check if uboot is the bootloader for the device, check the output on the UART Console while booting of the device. It might mention uboot while booting.
+Ingawa, ni muhimu kutambua kwamba si kila wakati uboot imefunguliwa hata kama inatumika. Ikiwa Funguo ya Kuingia haifanyi chochote, angalia funguo tofauti kama Funguo ya Nafasi, n.k. Ikiwa bootloader imefungwa na haikatizwa, njia hii haitafanya kazi. Ili kuangalia ikiwa uboot ni bootloader wa kifaa, angalia matokeo kwenye UART Console wakati wa kuanzisha kifaa. Inaweza kutaja uboot wakati wa kuanzisha. 
 
 {{#include ../../banners/hacktricks-training.md}}
-

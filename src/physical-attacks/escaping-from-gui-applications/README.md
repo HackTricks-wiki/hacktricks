@@ -1,47 +1,47 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-# Check for possible actions inside the GUI application
+# Angalia hatua zinazowezekana ndani ya programu ya GUI
 
-**Common Dialogs** are those options of **saving a file**, **opening a file**, selecting a font, a color... Most of them will **offer a full Explorer functionality**. This means that you will be able to access Explorer functionalities if you can access these options:
+**Mazungumzo ya Kawaida** ni zile chaguzi za **kuhifadhi faili**, **kufungua faili**, kuchagua fonti, rangi... Mengi yao yatatoa **ufunctionality kamili ya Explorer**. Hii inamaanisha kwamba utaweza kufikia functionalities za Explorer ikiwa utaweza kufikia chaguzi hizi:
 
-- Close/Close as
-- Open/Open with
-- Print
-- Export/Import
-- Search
+- Funga/Funga kama
+- Fungua/Fungua na
+- Chapisha
+- Hamisha/Pokea
+- Tafuta
 - Scan
 
-You should check if you can:
+Unapaswa kuangalia ikiwa unaweza:
 
-- Modify or create new files
-- Create symbolic links
-- Get access to restricted areas
-- Execute other apps
+- Kubadilisha au kuunda faili mpya
+- Kuunda viungo vya alama
+- Kupata ufikiaji wa maeneo yaliyopigwa marufuku
+- Kutekeleza programu nyingine
 
-## Command Execution
+## Utekelezaji wa Amri
 
-Maybe **using a `Open with`** option\*\* you can open/execute some kind of shell.
+Labda **ukitumia chaguo la `Fungua na`** unaweza kufungua/kutekeleza aina fulani ya shell.
 
 ### Windows
 
-For example _cmd.exe, command.com, Powershell/Powershell ISE, mmc.exe, at.exe, taskschd.msc..._ find more binaries that can be used to execute commands (and perform unexpected actions) here: [https://lolbas-project.github.io/](https://lolbas-project.github.io)
+Kwa mfano _cmd.exe, command.com, Powershell/Powershell ISE, mmc.exe, at.exe, taskschd.msc..._ pata zaidi ya binaries ambazo zinaweza kutumika kutekeleza amri (na kufanya vitendo visivyotarajiwa) hapa: [https://lolbas-project.github.io/](https://lolbas-project.github.io)
 
 ### \*NIX \_\_
 
-_bash, sh, zsh..._ More here: [https://gtfobins.github.io/](https://gtfobins.github.io)
+_bash, sh, zsh..._ Zaidi hapa: [https://gtfobins.github.io/](https://gtfobins.github.io)
 
 # Windows
 
-## Bypassing path restrictions
+## Kupita vizuizi vya njia
 
-- **Environment variables**: There are a lot of environment variables that are pointing to some path
-- **Other protocols**: _about:, data:, ftp:, file:, mailto:, news:, res:, telnet:, view-source:_
-- **Symbolic links**
-- **Shortcuts**: CTRL+N (open new session), CTRL+R (Execute Commands), CTRL+SHIFT+ESC (Task Manager), Windows+E (open explorer), CTRL-B, CTRL-I (Favourites), CTRL-H (History), CTRL-L, CTRL-O (File/Open Dialog), CTRL-P (Print Dialog), CTRL-S (Save As)
-  - Hidden Administrative menu: CTRL-ALT-F8, CTRL-ESC-F9
+- **Mabadiliko ya mazingira**: Kuna mabadiliko mengi ya mazingira yanayoelekeza kwenye njia fulani
+- **Protokali nyingine**: _about:, data:, ftp:, file:, mailto:, news:, res:, telnet:, view-source:_
+- **Viungo vya alama**
+- **Mifano**: CTRL+N (fungua kikao kipya), CTRL+R (Tekeleza Amri), CTRL+SHIFT+ESC (Meneja wa Kazi), Windows+E (fungua explorer), CTRL-B, CTRL-I (Mipendekezo), CTRL-H (Historia), CTRL-L, CTRL-O (Faili/Fungua Mazungumzo), CTRL-P (Chapisha Mazungumzo), CTRL-S (Hifadhi Kama)
+- Menyu ya Usimamizi iliyofichwa: CTRL-ALT-F8, CTRL-ESC-F9
 - **Shell URIs**: _shell:Administrative Tools, shell:DocumentsLibrary, shell:Librariesshell:UserProfiles, shell:Personal, shell:SearchHomeFolder, shell:Systemshell:NetworkPlacesFolder, shell:SendTo, shell:UsersProfiles, shell:Common Administrative Tools, shell:MyComputerFolder, shell:InternetFolder_
-- **UNC paths**: Paths to connect to shared folders. You should try to connect to the C$ of the local machine ("\\\127.0.0.1\c$\Windows\System32")
-  - **More UNC paths:**
+- **Njia za UNC**: Njia za kuungana na folda zilizoshirikiwa. Unapaswa kujaribu kuungana na C$ ya mashine ya ndani ("\\\127.0.0.1\c$\Windows\System32")
+- **Njia zaidi za UNC:**
 
 | UNC                       | UNC            | UNC                  |
 | ------------------------- | -------------- | -------------------- |
@@ -55,13 +55,13 @@ _bash, sh, zsh..._ More here: [https://gtfobins.github.io/](https://gtfobins.git
 | %TMP%                     | %USERDOMAIN%   | %USERNAME%           |
 | %USERPROFILE%             | %WINDIR%       |                      |
 
-## Download Your Binaries
+## Pakua Binaries Zako
 
 Console: [https://sourceforge.net/projects/console/](https://sourceforge.net/projects/console/)\
 Explorer: [https://sourceforge.net/projects/explorerplus/files/Explorer%2B%2B/](https://sourceforge.net/projects/explorerplus/files/Explorer%2B%2B/)\
-Registry editor: [https://sourceforge.net/projects/uberregedit/](https://sourceforge.net/projects/uberregedit/)
+Mhariri wa rejista: [https://sourceforge.net/projects/uberregedit/](https://sourceforge.net/projects/uberregedit/)
 
-## Accessing filesystem from the browser
+## Kupata mfumo wa faili kutoka kwa kivinjari
 
 | PATH                | PATH              | PATH               | PATH                |
 | ------------------- | ----------------- | ------------------ | ------------------- |
@@ -73,47 +73,47 @@ Registry editor: [https://sourceforge.net/projects/uberregedit/](https://sourcef
 | %TEMP%              | %SYSTEMDRIVE%     | %SYSTEMROOT%       | %APPDATA%           |
 | %HOMEDRIVE%         | %HOMESHARE        |                    | <p><br></p>         |
 
-## ShortCuts
+## Mifano
 
-- Sticky Keys – Press SHIFT 5 times
-- Mouse Keys – SHIFT+ALT+NUMLOCK
-- High Contrast – SHIFT+ALT+PRINTSCN
-- Toggle Keys – Hold NUMLOCK for 5 seconds
-- Filter Keys – Hold right SHIFT for 12 seconds
-- WINDOWS+F1 – Windows Search
-- WINDOWS+D – Show Desktop
-- WINDOWS+E – Launch Windows Explorer
-- WINDOWS+R – Run
-- WINDOWS+U – Ease of Access Centre
-- WINDOWS+F – Search
-- SHIFT+F10 – Context Menu
-- CTRL+SHIFT+ESC – Task Manager
-- CTRL+ALT+DEL – Splash screen on newer Windows versions
-- F1 – Help F3 – Search
-- F6 – Address Bar
-- F11 – Toggle full screen within Internet Explorer
-- CTRL+H – Internet Explorer History
-- CTRL+T – Internet Explorer – New Tab
-- CTRL+N – Internet Explorer – New Page
-- CTRL+O – Open File
-- CTRL+S – Save CTRL+N – New RDP / Citrix
+- Funguo za Sticky – Bonyeza SHIFT mara 5
+- Funguo za Panya – SHIFT+ALT+NUMLOCK
+- Mwangaza Mkali – SHIFT+ALT+PRINTSCN
+- Funguo za Kubadilisha – Shikilia NUMLOCK kwa sekunde 5
+- Funguo za Filter – Shikilia SHIFT ya kulia kwa sekunde 12
+- WINDOWS+F1 – Utafutaji wa Windows
+- WINDOWS+D – Onyesha Desktop
+- WINDOWS+E – Anzisha Windows Explorer
+- WINDOWS+R – Kimbia
+- WINDOWS+U – Kituo cha Ufikiaji Rahisi
+- WINDOWS+F – Tafuta
+- SHIFT+F10 – Menyu ya Muktadha
+- CTRL+SHIFT+ESC – Meneja wa Kazi
+- CTRL+ALT+DEL – Skrini ya Splash kwenye toleo jipya la Windows
+- F1 – Msaada F3 – Tafuta
+- F6 – Bar ya Anwani
+- F11 – Badilisha skrini kamili ndani ya Internet Explorer
+- CTRL+H – Historia ya Internet Explorer
+- CTRL+T – Internet Explorer – Kichupo Kipya
+- CTRL+N – Internet Explorer – Ukurasa Mpya
+- CTRL+O – Fungua Faili
+- CTRL+S – Hifadhi CTRL+N – RDP Mpya / Citrix
 
 ## Swipes
 
-- Swipe from the left side to the right to see all open Windows, minimizing the KIOSK app and accessing the whole OS directly;
-- Swipe from the right side to the left to open Action Center, minimizing the KIOSK app and accessing the whole OS directly;
-- Swipe in from the top edge to make the title bar visible for an app opened in full screen mode;
-- Swipe up from the bottom to show the taskbar in a full screen app.
+- Piga kutoka upande wa kushoto kwenda kulia ili kuona Windows zote zilizo wazi, kupunguza programu ya KIOSK na kufikia mfumo mzima wa uendeshaji moja kwa moja;
+- Piga kutoka upande wa kulia kwenda kushoto kufungua Kituo cha Hatua, kupunguza programu ya KIOSK na kufikia mfumo mzima wa uendeshaji moja kwa moja;
+- Piga kutoka kwenye kingo ya juu ili kufanya bar ya kichwa ionekane kwa programu iliyofunguliwa kwa njia ya skrini kamili;
+- Piga juu kutoka chini kuonyesha bar ya kazi katika programu ya skrini kamili.
 
-## Internet Explorer Tricks
+## Hila za Internet Explorer
 
-### 'Image Toolbar'
+### 'Kichombo cha Picha'
 
-It's a toolbar that appears on the top-left of image when it's clicked. You will be able to Save, Print, Mailto, Open "My Pictures" in Explorer. The Kiosk needs to be using Internet Explorer.
+Ni kichombo kinachotokea juu-kushoto ya picha wakati kinapobonyezwa. Utaweza Kuhifadhi, Chapisha, Tuma kwa barua, Fungua "Picha Zangu" katika Explorer. Kiosk inahitaji kutumia Internet Explorer.
 
-### Shell Protocol
+### Protokali ya Shell
 
-Type this URLs to obtain an Explorer view:
+Andika hizi URLs ili kupata mtazamo wa Explorer:
 
 - `shell:Administrative Tools`
 - `shell:DocumentsLibrary`
@@ -132,141 +132,141 @@ Type this URLs to obtain an Explorer view:
 - `Shell:System`
 - `Shell:ControlPanelFolder`
 - `Shell:Windows`
-- `shell:::{21EC2020-3AEA-1069-A2DD-08002B30309D}` --> Control Panel
-- `shell:::{20D04FE0-3AEA-1069-A2D8-08002B30309D}` --> My Computer
-- `shell:::{{208D2C60-3AEA-1069-A2D7-08002B30309D}}` --> My Network Places
+- `shell:::{21EC2020-3AEA-1069-A2DD-08002B30309D}` --> Kituo cha Kudhibiti
+- `shell:::{20D04FE0-3AEA-1069-A2D8-08002B30309D}` --> Kompyuta Yangu
+- `shell:::{{208D2C60-3AEA-1069-A2D7-08002B30309D}}` --> Mahali Pangu ya Mtandao
 - `shell:::{871C5380-42A0-1069-A2EA-08002B30309D}` --> Internet Explorer
 
-## Show File Extensions
+## Onyesha Nyongeza za Faili
 
-Check this page for more information: [https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml](https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml)
+Angalia ukurasa huu kwa maelezo zaidi: [https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml](https://www.howtohaven.com/system/show-file-extensions-in-windows-explorer.shtml)
 
-# Browsers tricks
+# Hila za Kivinjari
 
-Backup iKat versions:
+Backup iKat toleo:
 
 [http://swin.es/k/](http://swin.es/k/)\
 [http://www.ikat.kronicd.net/](http://www.ikat.kronicd.net)\
 
-Create a common dialog using JavaScript and access file explorer: `document.write('<input/type=file>')`  
-Source: https://medium.com/@Rend_/give-me-a-browser-ill-give-you-a-shell-de19811defa0
+Unda mazungumzo ya kawaida kwa kutumia JavaScript na upate explorer ya faili: `document.write('<input/type=file>')`
+Chanzo: https://medium.com/@Rend_/give-me-a-browser-ill-give-you-a-shell-de19811defa0
 
 # iPad
 
-## Gestures and bottoms
+## Gestures na vifungo
 
-- Swipe up with four (or five) fingers / Double-tap Home button: To view the multitask view and change App
+- Piga juu kwa vidole vinne (au vitano) / Bonyeza mara mbili kifungo cha Nyumbani: Ili kuona mtazamo wa multitask na kubadilisha Programu
 
-- Swipe one way or another with four or five fingers: In order to change to the next/last App
+- Piga kwa njia moja au nyingine kwa vidole vinne au vitano: Ili kubadilisha kwenda kwenye Programu inayofuata/ya mwisho
 
-- Pinch the screen with five fingers / Touch Home button / Swipe up with 1 finger from the bottom of the screen in a quick motion to the up: To access Home
+- Piga skrini kwa vidole vitano / Gusa kifungo cha Nyumbani / Piga juu kwa kidole 1 kutoka chini ya skrini kwa haraka: Ili kufikia Nyumbani
 
-- Swipe one finger from the bottom of the screen just 1-2 inches (slow): The dock will appear
+- Piga kidole kimoja kutoka chini ya skrini inchi 1-2 tu (polepole): Dock itaonekana
 
-- Swipe down from the top of the display with 1 finger: To view your notifications
+- Piga chini kutoka juu ya skrini kwa kidole 1: Ili kuona arifa zako
 
-- Swipe down with 1 finger the top-right corner of the screen: To see iPad Pro's control centre
+- Piga chini kwa kidole 1 kwenye kona ya juu-kulia ya skrini: Ili kuona kituo cha kudhibiti cha iPad Pro
 
-- Swipe 1 finger from the left of the screen 1-2 inches: To see Today view
+- Piga kidole 1 kutoka kushoto mwa skrini inchi 1-2: Ili kuona mtazamo wa Leo
 
-- Swipe fast 1 finger from the centre of the screen to the right or left: To change to next/last App
+- Piga haraka kidole 1 kutoka katikati ya skrini kwenda kulia au kushoto: Ili kubadilisha kwenda kwenye Programu inayofuata/ya mwisho
 
-- Press and hold the On/**Off**/Sleep button at the upper-right corner of the **iPad +** Move the Slide to **power off** slider all the way to the right: To power off
+- Bonyeza na shikilia kifungo cha On/**Off**/Using kwenye kona ya juu-kulia ya **iPad +** Hamisha Slide ili **kuzimia** slider yote kwenda kulia: Ili kuzima
 
-- Press the On/**Off**/Sleep button at the upper-right corner of the **iPad and the Home button for a few second**: To force a hard power off
+- Bonyeza kifungo cha On/**Off**/Using kwenye kona ya juu-kulia ya **iPad na kifungo cha Nyumbani kwa sekunde chache**: Ili kulazimisha kuzima nguvu
 
-- Press the On/**Off**/Sleep button at the upper-right corner of the **iPad and the Home button quickly**: To take a screenshot that will pop up in the lower left of the display. Press both buttons at the same time very briefly as if you hold them a few seconds a hard power off will be performed.
+- Bonyeza kifungo cha On/**Off**/Using kwenye kona ya juu-kulia ya **iPad na kifungo cha Nyumbani haraka**: Ili kuchukua picha ya skrini ambayo itatokea chini kushoto ya skrini. Bonyeza vifungo vyote kwa wakati mmoja kwa muda mfupi kana kwamba unavyoshikilia kwa sekunde chache kuzima nguvu kutafanyika.
 
-## Shortcuts
+## Mifano
 
-You should have an iPad keyboard or a USB keyboard adaptor. Only shortcuts that could help escaping from the application will be shown here.
+Unapaswa kuwa na kibodi ya iPad au adapta ya kibodi ya USB. Mifano pekee ambazo zinaweza kusaidia kutoroka kutoka kwa programu zitakuwa hapa.
 
-| Key | Name         |
+| Key | Jina         |
 | --- | ------------ |
-| ⌘   | Command      |
-| ⌥   | Option (Alt) |
+| ⌘   | Amri        |
+| ⌥   | Chaguo (Alt) |
 | ⇧   | Shift        |
-| ↩   | Return       |
+| ↩   | Kurudi       |
 | ⇥   | Tab          |
-| ^   | Control      |
-| ←   | Left Arrow   |
-| →   | Right Arrow  |
-| ↑   | Up Arrow     |
-| ↓   | Down Arrow   |
+| ^   | Udhibiti     |
+| ←   | Arrow ya Kushoto   |
+| →   | Arrow ya Kulia  |
+| ↑   | Arrow ya Juu     |
+| ↓   | Arrow ya Chini   |
 
-### System shortcuts
+### Mifano ya Mfumo
 
-These shortcuts are for the visual settings and sound settings, depending on the use of the iPad.
+Mifano hii ni kwa mipangilio ya kuona na mipangilio ya sauti, kulingana na matumizi ya iPad.
 
-| Shortcut | Action                                                                         |
-| -------- | ------------------------------------------------------------------------------ |
-| F1       | Dim Sscreen                                                                    |
-| F2       | Brighten screen                                                                |
-| F7       | Back one song                                                                  |
-| F8       | Play/pause                                                                     |
-| F9       | Skip song                                                                      |
-| F10      | Mute                                                                           |
-| F11      | Decrease volume                                                                |
-| F12      | Increase volume                                                                |
-| ⌘ Space  | Display a list of available languages; to choose one, tap the space bar again. |
+| Mifano | Kitendo                                                                         |
+| ------ | ------------------------------------------------------------------------------ |
+| F1     | Punguza Sscreen                                                                |
+| F2     | Pandisha skrini                                                                |
+| F7     | Rudi wimbo mmoja                                                               |
+| F8     | Cheza/pause                                                                    |
+| F9     | Kosa wimbo                                                                     |
+| F10    | Zima                                                                           |
+| F11    | Punguza sauti                                                                  |
+| F12    | Pandisha sauti                                                                |
+| ⌘ Space| Onyesha orodha ya lugha zinazopatikana; ili kuchagua moja, bonyeza upya nafasi. |
 
-### iPad navigation
+### Usafiri wa iPad
 
-| Shortcut                                           | Action                                                  |
-| -------------------------------------------------- | ------------------------------------------------------- |
-| ⌘H                                                 | Go to Home                                              |
-| ⌘⇧H (Command-Shift-H)                              | Go to Home                                              |
-| ⌘ (Space)                                          | Open Spotlight                                          |
-| ⌘⇥ (Command-Tab)                                   | List last ten used apps                                 |
-| ⌘\~                                                | Go t the last App                                       |
-| ⌘⇧3 (Command-Shift-3)                              | Screenshot (hovers in bottom left to save or act on it) |
-| ⌘⇧4                                                | Screenshot and open it in the editor                    |
-| Press and hold ⌘                                   | List of shortcuts available for the App                 |
-| ⌘⌥D (Command-Option/Alt-D)                         | Brings up the dock                                      |
-| ^⌥H (Control-Option-H)                             | Home button                                             |
-| ^⌥H H (Control-Option-H-H)                         | Show multitask bar                                      |
-| ^⌥I (Control-Option-i)                             | Item chooser                                            |
-| Escape                                             | Back button                                             |
-| → (Right arrow)                                    | Next item                                               |
-| ← (Left arrow)                                     | Previous item                                           |
-| ↑↓ (Up arrow, Down arrow)                          | Simultaneously tap selected item                        |
-| ⌥ ↓ (Option-Down arrow)                            | Scroll down                                             |
-| ⌥↑ (Option-Up arrow)                               | Scroll up                                               |
-| ⌥← or ⌥→ (Option-Left arrow or Option-Right arrow) | Scroll left or right                                    |
-| ^⌥S (Control-Option-S)                             | Turn VoiceOver speech on or off                         |
-| ⌘⇧⇥ (Command-Shift-Tab)                            | Switch to the previous app                              |
-| ⌘⇥ (Command-Tab)                                   | Switch back to the original app                         |
-| ←+→, then Option + ← or Option+→                   | Navigate through Dock                                   |
+| Mifano                                           | Kitendo                                                  |
+| ------------------------------------------------ | ------------------------------------------------------- |
+| ⌘H                                             | Nenda Nyumbani                                          |
+| ⌘⇧H (Amri-Shift-H)                              | Nenda Nyumbani                                          |
+| ⌘ (Space)                                      | Fungua Spotlight                                        |
+| ⌘⇥ (Amri-Tab)                                   | Orodha ya programu kumi zilizotumika hivi karibuni     |
+| ⌘\~                                            | Nenda kwenye Programu ya mwisho                         |
+| ⌘⇧3 (Amri-Shift-3)                              | Picha ya skrini (inashikilia chini kushoto kuhifadhi au kufanya kazi nayo) |
+| ⌘⇧4                                            | Picha ya skrini na ifungue kwenye mhariri              |
+| Bonyeza na shikilia ⌘                           | Orodha ya mifano inayopatikana kwa Programu             |
+| ⌘⌥D (Amri-Chaguo/Alt-D)                         | Inaleta dock                                            |
+| ^⌥H (Udhibiti-Chaguo-H)                         | Kifungo cha Nyumbani                                    |
+| ^⌥H H (Udhibiti-Chaguo-H-H)                     | Onyesha bar ya multitask                                 |
+| ^⌥I (Udhibiti-Chaguo-i)                         | Chaguo la kipengee                                      |
+| Escape                                          | Kifungo cha nyuma                                       |
+| → (Arrow ya Kulia)                              | Kipengee kinachofuata                                   |
+| ← (Arrow ya Kushoto)                            | Kipengee kilichopita                                     |
+| ↑↓ (Arrow ya Juu, Arrow ya Chini)              | Bonyeza kwa pamoja kipengee kilichochaguliwa           |
+| ⌥ ↓ (Chaguo-Arrow ya Chini)                    | Piga chini                                              |
+| ⌥↑ (Chaguo-Arrow ya Juu)                       | Piga juu                                                |
+| ⌥← au ⌥→ (Chaguo-Arrow ya Kushoto au Chaguo-Arrow ya Kulia) | Piga kushoto au kulia                                    |
+| ^⌥S (Udhibiti-Chaguo-S)                         | Zima au zima sauti ya VoiceOver                         |
+| ⌘⇧⇥ (Amri-Shift-Tab)                            | Badilisha kwenda kwenye programu ya awali               |
+| ⌘⇥ (Amri-Tab)                                   | Badilisha kurudi kwenye programu ya awali                |
+| ←+→, kisha Chaguo + ← au Chaguo+→               | Tembea kupitia Dock                                      |
 
-### Safari shortcuts
+### Mifano ya Safari
 
-| Shortcut                | Action                                           |
-| ----------------------- | ------------------------------------------------ |
-| ⌘L (Command-L)          | Open Location                                    |
-| ⌘T                      | Open a new tab                                   |
-| ⌘W                      | Close the current tab                            |
-| ⌘R                      | Refresh the current tab                          |
-| ⌘.                      | Stop loading the current tab                     |
-| ^⇥                      | Switch to the next tab                           |
-| ^⇧⇥ (Control-Shift-Tab) | Move to the previous tab                         |
-| ⌘L                      | Select the text input/URL field to modify it     |
-| ⌘⇧T (Command-Shift-T)   | Open last closed tab (can be used several times) |
-| ⌘\[                     | Goes back one page in your browsing history      |
-| ⌘]                      | Goes forward one page in your browsing history   |
-| ⌘⇧R                     | Activate Reader Mode                             |
+| Mifano                | Kitendo                                           |
+| --------------------- | ------------------------------------------------ |
+| ⌘L (Amri-L)          | Fungua Mahali                                    |
+| ⌘T                    | Fungua kichupo kipya                             |
+| ⌘W                    | Funga kichupo cha sasa                           |
+| ⌘R                    | Refresh kichupo cha sasa                         |
+| ⌘.                    | Zima kupakia kichupo cha sasa                    |
+| ^⇥                    | Badilisha kwenda kwenye kichupo kinachofuata    |
+| ^⇧⇥ (Udhibiti-Shift-Tab) | Hamisha kwenda kwenye kichupo kilichopita      |
+| ⌘L                    | Chagua uwanja wa kuingiza maandiko/URL ili kuibadilisha |
+| ⌘⇧T (Amri-Shift-T)   | Fungua kichupo kilichofungwa hivi karibuni (inaweza kutumika mara kadhaa) |
+| ⌘\[                   | Rudi ukurasa mmoja katika historia yako ya kuvinjari |
+| ⌘]                    | Nenda mbele ukurasa mmoja katika historia yako ya kuvinjari |
+| ⌘⇧R                   | Aktivisha Modu ya Msomaji                        |
 
-### Mail shortcuts
+### Mifano ya Barua
 
-| Shortcut                   | Action                       |
-| -------------------------- | ---------------------------- |
-| ⌘L                         | Open Location                |
-| ⌘T                         | Open a new tab               |
-| ⌘W                         | Close the current tab        |
-| ⌘R                         | Refresh the current tab      |
-| ⌘.                         | Stop loading the current tab |
-| ⌘⌥F (Command-Option/Alt-F) | Search in your mailbox       |
+| Mifano                   | Kitendo                       |
+| ------------------------ | ----------------------------- |
+| ⌘L                       | Fungua Mahali                |
+| ⌘T                       | Fungua kichupo kipya         |
+| ⌘W                       | Funga kichupo cha sasa       |
+| ⌘R                       | Refresh kichupo cha sasa     |
+| ⌘.                       | Zima kupakia kichupo cha sasa |
+| ⌘⌥F (Amri-Chaguo/Alt-F) | Tafuta kwenye sanduku lako    |
 
-# References
+# Marejeleo
 
 - [https://www.macworld.com/article/2975857/6-only-for-ipad-gestures-you-need-to-know.html](https://www.macworld.com/article/2975857/6-only-for-ipad-gestures-you-need-to-know.html)
 - [https://www.tomsguide.com/us/ipad-shortcuts,news-18205.html](https://www.tomsguide.com/us/ipad-shortcuts,news-18205.html)
@@ -274,4 +274,3 @@ These shortcuts are for the visual settings and sound settings, depending on the
 - [http://www.iphonehacks.com/2018/03/ipad-keyboard-shortcuts.html](http://www.iphonehacks.com/2018/03/ipad-keyboard-shortcuts.html)
 
 {{#include ../../banners/hacktricks-training.md}}
-

@@ -1,53 +1,52 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-The following steps are recommended for modifying device startup configurations and bootloaders like U-boot:
+Hatua zifuatazo zinapendekezwa kwa kubadilisha mipangilio ya kuanzisha kifaa na bootloaders kama U-boot:
 
-1. **Access Bootloader's Interpreter Shell**:
+1. **Fikia Shell ya Mfasiri wa Bootloader**:
 
-   - During boot, press "0", space, or other identified "magic codes" to access the bootloader's interpreter shell.
+- Wakati wa kuanzisha, bonyeza "0", nafasi, au "mifumo ya uchawi" nyingine iliyotambuliwa ili kufikia shell ya mfasiri wa bootloader.
 
-2. **Modify Boot Arguments**:
+2. **Badilisha Hoja za Boot**:
 
-   - Execute the following commands to append '`init=/bin/sh`' to the boot arguments, allowing execution of a shell command:
-     %%%
-     #printenv
-     #setenv bootargs=console=ttyS0,115200 mem=63M root=/dev/mtdblock3 mtdparts=sflash:<partitiionInfo> rootfstype=<fstype> hasEeprom=0 5srst=0 init=/bin/sh
-     #saveenv
-     #boot
-     %%%
+- Tekeleza amri zifuatazo kuongeza '`init=/bin/sh`' kwenye hoja za boot, kuruhusu utekelezaji wa amri ya shell:
+%%%
+#printenv
+#setenv bootargs=console=ttyS0,115200 mem=63M root=/dev/mtdblock3 mtdparts=sflash:<partitiionInfo> rootfstype=<fstype> hasEeprom=0 5srst=0 init=/bin/sh
+#saveenv
+#boot
+%%%
 
-3. **Setup TFTP Server**:
+3. **Weka Server ya TFTP**:
 
-   - Configure a TFTP server to load images over a local network:
-     %%%
-     #setenv ipaddr 192.168.2.2 #local IP of the device
-     #setenv serverip 192.168.2.1 #TFTP server IP
-     #saveenv
-     #reset
-     #ping 192.168.2.1 #check network access
-     #tftp ${loadaddr} uImage-3.6.35 #loadaddr takes the address to load the file into and the filename of the image on the TFTP server
-     %%%
+- Sanidi server ya TFTP ili kupakia picha kupitia mtandao wa ndani:
+%%%
+#setenv ipaddr 192.168.2.2 #IP ya ndani ya kifaa
+#setenv serverip 192.168.2.1 #IP ya server ya TFTP
+#saveenv
+#reset
+#ping 192.168.2.1 #angalia ufikiaji wa mtandao
+#tftp ${loadaddr} uImage-3.6.35 #loadaddr inachukua anwani ya kupakia faili na jina la picha kwenye server ya TFTP
+%%%
 
-4. **Utilize `ubootwrite.py`**:
+4. **Tumia `ubootwrite.py`**:
 
-   - Use `ubootwrite.py` to write the U-boot image and push a modified firmware to gain root access.
+- Tumia `ubootwrite.py` kuandika picha ya U-boot na kusukuma firmware iliyobadilishwa ili kupata ufikiaji wa root.
 
-5. **Check Debug Features**:
+5. **Angalia Vipengele vya Debug**:
 
-   - Verify if debug features like verbose logging, loading arbitrary kernels, or booting from untrusted sources are enabled.
+- Thibitisha ikiwa vipengele vya debug kama vile logging ya kina, kupakia nyuzi zisizo za kawaida, au kuanzisha kutoka vyanzo visivyoaminika vimewezeshwa.
 
-6. **Cautionary Hardware Interference**:
+6. **Uingiliaji wa Kihardware wa Tahadhari**:
 
-   - Be cautious when connecting one pin to ground and interacting with SPI or NAND flash chips during the device boot-up sequence, particularly before the kernel decompresses. Consult the NAND flash chip's datasheet before shorting pins.
+- Kuwa makini unapounganisha pini moja na ardhi na kuingiliana na chips za SPI au NAND flash wakati wa mchakato wa kuanzisha kifaa, hasa kabla ya kernel kufungua. Kagua karatasi ya data ya chip ya NAND flash kabla ya kufupisha pini.
 
-7. **Configure Rogue DHCP Server**:
-   - Set up a rogue DHCP server with malicious parameters for a device to ingest during a PXE boot. Utilize tools like Metasploit's (MSF) DHCP auxiliary server. Modify the 'FILENAME' parameter with command injection commands such as `'a";/bin/sh;#'` to test input validation for device startup procedures.
+7. **Sanidi Server ya DHCP ya Ulaghai**:
+- Sanidi server ya DHCP ya ulaghai yenye vigezo vya uharibifu ili kifaa kiweze kuyakubali wakati wa kuanzisha PXE. Tumia zana kama server ya DHCP ya msaada ya Metasploit (MSF). Badilisha parameter ya 'FILENAME' kwa amri za kuingiza kama `'a";/bin/sh;#'` ili kujaribu uthibitishaji wa ingizo kwa taratibu za kuanzisha kifaa.
 
-**Note**: The steps involving physical interaction with device pins (\*marked with asterisks) should be approached with extreme caution to avoid damaging the device.
+**Kumbuka**: Hatua zinazohusisha mwingiliano wa kimwili na pini za kifaa (\*zilizoorodheshwa kwa nyota) zinapaswa kushughulikiwa kwa tahadhari kubwa ili kuepuka kuharibu kifaa.
 
-## References
+## Marejeleo
 
 - [https://scriptingxss.gitbook.io/firmware-security-testing-methodology/](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
 
 {{#include ../../banners/hacktricks-training.md}}
-

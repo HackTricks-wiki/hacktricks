@@ -3,163 +3,163 @@
 <figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=acls-dacls-sacls-aces) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+Tumia [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=acls-dacls-sacls-aces) kujenga na **kujiendesha kiotomatiki** kwa urahisi kazi zinazotolewa na zana za jamii **zilizoendelea zaidi** duniani.\
+Pata Ufikiaji Leo:
 
 {% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=acls-dacls-sacls-aces" %}
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## **Access Control List (ACL)**
+## **Orodha ya Udhibiti wa Ufikiaji (ACL)**
 
-An Access Control List (ACL) consists of an ordered set of Access Control Entries (ACEs) that dictate the protections for an object and its properties. In essence, an ACL defines which actions by which security principals (users or groups) are permitted or denied on a given object.
+Orodha ya Udhibiti wa Ufikiaji (ACL) inajumuisha seti iliyopangwa ya Kuingilia Udhibiti wa Ufikiaji (ACEs) ambazo zinaelekeza ulinzi wa kitu na mali zake. Kwa msingi, ACL inafafanua ni vitendo vipi na ni wakala gani wa usalama (watumiaji au vikundi) vinavyoruhusiwa au kukataliwa kwenye kitu fulani.
 
-There are two types of ACLs:
+Kuna aina mbili za ACLs:
 
-- **Discretionary Access Control List (DACL):** Specifies which users and groups have or do not have access to an object.
-- **System Access Control List (SACL):** Governs the auditing of access attempts to an object.
+- **Orodha ya Udhibiti wa Ufikiaji wa Hiari (DACL):** Inabainisha ni watumiaji na vikundi gani wana au hawana ufikiaji wa kitu.
+- **Orodha ya Udhibiti wa Ufikiaji wa Mfumo (SACL):** Inasimamia ukaguzi wa majaribio ya ufikiaji wa kitu.
 
-The process of accessing a file involves the system checking the object's security descriptor against the user's access token to determine if access should be granted and the extent of that access, based on the ACEs.
+Mchakato wa kufikia faili unahusisha mfumo kuangalia descriptor ya usalama wa kitu dhidi ya token ya ufikiaji wa mtumiaji ili kubaini kama ufikiaji unapaswa kuruhusiwa na kiwango cha ufikiaji huo, kulingana na ACEs.
 
-### **Key Components**
+### **Vipengele Muhimu**
 
-- **DACL:** Contains ACEs that grant or deny access permissions to users and groups for an object. It's essentially the main ACL that dictates access rights.
-- **SACL:** Used for auditing access to objects, where ACEs define the types of access to be logged in the Security Event Log. This can be invaluable for detecting unauthorized access attempts or troubleshooting access issues.
+- **DACL:** Inajumuisha ACEs ambazo zinatoa au kukataa ruhusa za ufikiaji kwa watumiaji na vikundi kwa kitu. Kimsingi, ndiyo ACL kuu inayodhibiti haki za ufikiaji.
+- **SACL:** Inatumika kwa ukaguzi wa ufikiaji wa vitu, ambapo ACEs zinaeleza aina za ufikiaji ambazo zinapaswa kurekodiwa katika Kumbukumbu ya Matukio ya Usalama. Hii inaweza kuwa muhimu sana kwa kugundua majaribio yasiyoidhinishwa ya ufikiaji au kutatua matatizo ya ufikiaji.
 
-### **System Interaction with ACLs**
+### **Mwingiliano wa Mfumo na ACLs**
 
-Each user session is associated with an access token that contains security information relevant to that session, including user, group identities, and privileges. This token also includes a logon SID that uniquely identifies the session.
+Kila kikao cha mtumiaji kinahusishwa na token ya ufikiaji ambayo ina taarifa za usalama zinazohusiana na kikao hicho, ikiwa ni pamoja na mtumiaji, vitambulisho vya kikundi, na mamlaka. Token hii pia inajumuisha SID ya kuingia ambayo inatambulisha kwa kipekee kikao hicho.
 
-The Local Security Authority (LSASS) processes access requests to objects by examining the DACL for ACEs that match the security principal attempting access. Access is immediately granted if no relevant ACEs are found. Otherwise, LSASS compares the ACEs against the security principal's SID in the access token to determine access eligibility.
+Mamlaka ya Usalama wa Mitaa (LSASS) inashughulikia maombi ya ufikiaji wa vitu kwa kuchunguza DACL kwa ACEs zinazolingana na wakala wa usalama anayejaribu ufikiaji. Ufikiaji unaruhusiwa mara moja ikiwa hakuna ACEs zinazohusiana zinazopatikana. Vinginevyo, LSASS inalinganisha ACEs dhidi ya SID ya wakala wa usalama katika token ya ufikiaji ili kubaini sifa za ufikiaji.
 
-### **Summarized Process**
+### **Mchakato wa Muhtasari**
 
-- **ACLs:** Define access permissions through DACLs and audit rules through SACLs.
-- **Access Token:** Contains user, group, and privilege information for a session.
-- **Access Decision:** Made by comparing DACL ACEs with the access token; SACLs are used for auditing.
+- **ACLs:** Zinabainisha ruhusa za ufikiaji kupitia DACLs na sheria za ukaguzi kupitia SACLs.
+- **Token ya Ufikiaji:** Inajumuisha taarifa za mtumiaji, kikundi, na mamlaka kwa kikao.
+- **Uamuzi wa Ufikiaji:** Unafanywa kwa kulinganisha DACL ACEs na token ya ufikiaji; SACLs zinatumika kwa ukaguzi.
 
 ### ACEs
 
-There arey **three main types of Access Control Entries (ACEs)**:
+Kuna **aina tatu kuu za Kuingilia Udhibiti wa Ufikiaji (ACEs)**:
 
-- **Access Denied ACE**: This ACE explicitly denies access to an object for specified users or groups (in a DACL).
-- **Access Allowed ACE**: This ACE explicitly grants access to an object for specified users or groups (in a DACL).
-- **System Audit ACE**: Positioned within a System Access Control List (SACL), this ACE is responsible for generating audit logs upon access attempts to an object by users or groups. It documents whether access was allowed or denied and the nature of the access.
+- **ACE ya Kukataa Ufikiaji:** ACE hii inakataza kwa wazi ufikiaji wa kitu kwa watumiaji au vikundi maalum (katika DACL).
+- **ACE ya Kuruhusu Ufikiaji:** ACE hii inaruhusu kwa wazi ufikiaji wa kitu kwa watumiaji au vikundi maalum (katika DACL).
+- **ACE ya Ukaguzi wa Mfumo:** Iko ndani ya Orodha ya Udhibiti wa Ufikiaji wa Mfumo (SACL), ACE hii inawajibika kwa kuzalisha kumbukumbu za ukaguzi wakati wa majaribio ya ufikiaji wa kitu na watumiaji au vikundi. Inarekodi ikiwa ufikiaji uliruhusiwa au kukataliwa na asili ya ufikiaji.
 
-Each ACE has **four critical components**:
+Kila ACE ina **vipengele vinne muhimu**:
 
-1. The **Security Identifier (SID)** of the user or group (or their principal name in a graphical representation).
-2. A **flag** that identifies the ACE type (access denied, allowed, or system audit).
-3. **Inheritance flags** that determine if child objects can inherit the ACE from their parent.
-4. An [**access mask**](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/7a53f60e-e730-4dfe-bbe9-b21b62eb790b?redirectedfrom=MSDN), a 32-bit value specifying the object's granted rights.
+1. **Kitambulisho cha Usalama (SID)** cha mtumiaji au kikundi (au jina lao la msingi katika uwakilishi wa picha).
+2. **bendera** inayotambulisha aina ya ACE (ufikiaji umekataliwa, umekubaliwa, au ukaguzi wa mfumo).
+3. **bendera za urithi** zinazobainisha ikiwa vitu vya watoto vinaweza kurithi ACE kutoka kwa mzazi wao.
+4. [**mask ya ufikiaji**](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/7a53f60e-e730-4dfe-bbe9-b21b62eb790b?redirectedfrom=MSDN), thamani ya bit 32 inayobainisha haki zilizotolewa za kitu.
 
-Access determination is conducted by sequentially examining each ACE until:
+Uamuzi wa ufikiaji unafanywa kwa kuchunguza kwa mfululizo kila ACE hadi:
 
-- An **Access-Denied ACE** explicitly denies the requested rights to a trustee identified in the access token.
-- **Access-Allowed ACE(s)** explicitly grant all requested rights to a trustee in the access token.
-- Upon checking all ACEs, if any requested right has **not been explicitly allowed**, access is implicitly **denied**.
+- **ACE ya Kukataa Ufikiaji** inakataza kwa wazi haki zilizohitajika kwa mtunza mali aliyeainishwa katika token ya ufikiaji.
+- **ACE za Kuruhusu Ufikiaji** zinatoa kwa wazi haki zote zilizohitajika kwa mtunza mali katika token ya ufikiaji.
+- Baada ya kuangalia ACE zote, ikiwa haki yoyote iliyohitajika **haijaruhusiwa kwa wazi**, ufikiaji unakataliwa **kimya kimya**.
 
-### Order of ACEs
+### Mpangilio wa ACEs
 
-The way **ACEs** (rules that say who can or cannot access something) are put in a list called **DACL** is very important. This is because once the system gives or denies access based on these rules, it stops looking at the rest.
+Jinsi **ACEs** (sheria zinazosema nani anaweza au hawezi kufikia kitu) zinavyowekwa katika orodha inayoitwa **DACL** ni muhimu sana. Hii ni kwa sababu mara mfumo unaporuhusu au kukataa ufikiaji kulingana na sheria hizi, unakoma kuangalia zingine.
 
-There is a best way to organize these ACEs, and it is called **"canonical order."** This method helps make sure everything works smoothly and fairly. Here is how it goes for systems like **Windows 2000** and **Windows Server 2003**:
+Kuna njia bora ya kupanga ACEs hizi, na inaitwa **"mpangilio wa kanuni."** Njia hii inasaidia kuhakikisha kila kitu kinafanya kazi kwa urahisi na kwa haki. Hapa kuna jinsi inavyofanya kazi kwa mifumo kama **Windows 2000** na **Windows Server 2003**:
 
-- First, put all the rules that are made **specifically for this item** before the ones that come from somewhere else, like a parent folder.
-- In those specific rules, put the ones that say **"no" (deny)** before the ones that say **"yes" (allow)**.
-- For the rules that come from somewhere else, start with the ones from the **closest source**, like the parent, and then go back from there. Again, put **"no"** before **"yes."**
+- Kwanza, weka sheria zote ambazo zimeandikwa **haswa kwa kitu hiki** kabla ya zile zinazotoka mahali pengine, kama folda ya mzazi.
+- Katika sheria hizo maalum, weka zile zinazosema **"hapana" (kukataa)** kabla ya zile zinazosema **"ndiyo" (kuruhusu)**.
+- Kwa sheria zinazotoka mahali pengine, anza na zile kutoka **chanzo cha karibu**, kama mzazi, kisha rudi nyuma kutoka hapo. Tena, weka **"hapana"** kabla ya **"ndiyo."**
 
-This setup helps in two big ways:
+Mpangilio huu unasaidia kwa njia mbili kubwa:
 
-- It makes sure that if there is a specific **"no,"** it is respected, no matter what other **"yes"** rules are there.
-- It lets the owner of an item have the **final say** on who gets in, before any rules from parent folders or further back come into play.
+- Inahakikisha kwamba ikiwa kuna **"hapana"** maalum, inaheshimiwa, bila kujali sheria nyingine za **"ndiyo"** zilizopo.
+- Inamruhusu mmiliki wa kitu kuwa na **neno la mwisho** kuhusu nani anayeweza kuingia, kabla ya sheria zozote kutoka folda za mzazi au mbali zaidi kuingia kwenye mchezo.
 
-By doing things this way, the owner of a file or folder can be very precise about who gets access, making sure the right people can get in and the wrong ones can't.
+Kwa kufanya mambo hivi, mmiliki wa faili au folda anaweza kuwa sahihi sana kuhusu nani anayeweza kufikia, kuhakikisha watu sahihi wanaweza kuingia na wale wasiostahili hawawezi.
 
 ![](https://www.ntfs.com/images/screenshots/ACEs.gif)
 
-So, this **"canonical order"** is all about making sure the access rules are clear and work well, putting specific rules first and organizing everything in a smart way.
+Hivyo, **"mpangilio wa kanuni"** ni kuhusu kuhakikisha sheria za ufikiaji ni wazi na zinafanya kazi vizuri, kuweka sheria maalum kwanza na kupanga kila kitu kwa njia ya busara.
 
 <figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+Tumia [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) kujenga na **kujiendesha kiotomatiki** kwa urahisi kazi zinazotolewa na zana za jamii **zilizoendelea zaidi** duniani.\
+Pata Ufikiaji Leo:
 
 {% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
-### GUI Example
+### Mfano wa GUI
 
-[**Example from here**](https://secureidentity.se/acl-dacl-sacl-and-the-ace/)
+[**Mfano kutoka hapa**](https://secureidentity.se/acl-dacl-sacl-and-the-ace/)
 
-This is the classic security tab of a folder showing the ACL, DACL and ACEs:
+Hii ni tab ya usalama wa kawaida ya folda ikionyesha ACL, DACL na ACEs:
 
 ![http://secureidentity.se/wp-content/uploads/2014/04/classicsectab.jpg](../../images/classicsectab.jpg)
 
-If we click the **Advanced button** we will get more options like inheritance:
+Ikiwa tutabonyeza **Kitufe cha Juu** tutapata chaguzi zaidi kama urithi:
 
 ![http://secureidentity.se/wp-content/uploads/2014/04/aceinheritance.jpg](../../images/aceinheritance.jpg)
 
-And if you add or edit a Security Principal:
+Na ikiwa unongeza au kuhariri Msingi wa Usalama:
 
 ![http://secureidentity.se/wp-content/uploads/2014/04/editseprincipalpointers1.jpg](../../images/editseprincipalpointers1.jpg)
 
-And last we have the SACL in the Auditing tab:
+Na mwisho tuna SACL katika tab ya Ukaguzi:
 
 ![http://secureidentity.se/wp-content/uploads/2014/04/audit-tab.jpg](../../images/audit-tab.jpg)
 
-### Explaining Access Control in a Simplified Manner
+### Kufafanua Udhibiti wa Ufikiaji kwa Njia Rahisi
 
-When managing access to resources, like a folder, we use lists and rules known as Access Control Lists (ACLs) and Access Control Entries (ACEs). These define who can or cannot access certain data.
+Wakati wa kusimamia ufikiaji wa rasilimali, kama folda, tunatumia orodha na sheria zinazojulikana kama Orodha za Udhibiti wa Ufikiaji (ACLs) na Kuingilia Udhibiti wa Ufikiaji (ACEs). Hizi zinaeleza nani anaweza au hawezi kufikia data fulani.
 
-#### Denying Access to a Specific Group
+#### Kukataa Ufikiaji kwa Kikundi Maalum
 
-Imagine you have a folder named Cost, and you want everyone to access it except for a marketing team. By setting up the rules correctly, we can ensure that the marketing team is explicitly denied access before allowing everyone else. This is done by placing the rule to deny access to the marketing team before the rule that allows access to everyone.
+Fikiria una folda inayoitwa Gharama, na unataka kila mtu aifike isipokuwa timu ya masoko. Kwa kuweka sheria vizuri, tunaweza kuhakikisha kwamba timu ya masoko inakataliwa ufikiaji kwa wazi kabla ya kuruhusu wengine wote. Hii inafanywa kwa kuweka sheria ya kukataa ufikiaji kwa timu ya masoko kabla ya sheria inayoruhusu ufikiaji kwa kila mtu.
 
-#### Allowing Access to a Specific Member of a Denied Group
+#### Kuruhusu Ufikiaji kwa Mwanachama Maalum wa Kikundi Kilichokataliwa
 
-Let's say Bob, the marketing director, needs access to the Cost folder, even though the marketing team generally shouldn't have access. We can add a specific rule (ACE) for Bob that grants him access, and place it before the rule that denies access to the marketing team. This way, Bob gets access despite the general restriction on his team.
+Hebu sema Bob, mkurugenzi wa masoko, anahitaji ufikiaji wa folda ya Gharama, ingawa timu ya masoko kwa ujumla haipaswi kuwa na ufikiaji. Tunaweza kuongeza sheria maalum (ACE) kwa Bob inayomruhusu ufikiaji, na kuiweka kabla ya sheria inayokatisha ufikiaji kwa timu ya masoko. Kwa njia hii, Bob anapata ufikiaji licha ya vizuizi vya jumla kwa timu yake.
 
-#### Understanding Access Control Entries
+#### Kuelewa Kuingilia Udhibiti wa Ufikiaji
 
-ACEs are the individual rules in an ACL. They identify users or groups, specify what access is allowed or denied, and determine how these rules apply to sub-items (inheritance). There are two main types of ACEs:
+ACEs ni sheria za kibinafsi katika ACL. Zinazitambulisha watumiaji au vikundi, zinaeleza ni ufikiaji upi unaruhusiwa au kukataliwa, na zinabainisha jinsi sheria hizi zinavyotumika kwa vitu vidogo (urithi). Kuna aina mbili kuu za ACEs:
 
-- **Generic ACEs**: These apply broadly, affecting either all types of objects or distinguishing only between containers (like folders) and non-containers (like files). For example, a rule that allows users to see the contents of a folder but not to access the files within it.
-- **Object-Specific ACEs**: These provide more precise control, allowing rules to be set for specific types of objects or even individual properties within an object. For instance, in a directory of users, a rule might allow a user to update their phone number but not their login hours.
+- **ACEs za Kawaida:** Hizi zinatumika kwa upana, zikihusisha aina zote za vitu au kutofautisha tu kati ya vyombo (kama folda) na visivyo vyombo (kama faili). Kwa mfano, sheria inayoruhusu watumiaji kuona maudhui ya folda lakini si kufikia faili ndani yake.
+- **ACEs za Kitu Maalum:** Hizi zinatoa udhibiti wa kina zaidi, kuruhusu sheria kuwekwa kwa aina maalum za vitu au hata mali za kibinafsi ndani ya kitu. Kwa mfano, katika directory ya watumiaji, sheria inaweza kuruhusu mtumiaji kuboresha nambari yake ya simu lakini si masaa yake ya kuingia.
 
-Each ACE contains important information like who the rule applies to (using a Security Identifier or SID), what the rule allows or denies (using an access mask), and how it's inherited by other objects.
+Kila ACE ina taarifa muhimu kama nani sheria inahusiana nayo (kwa kutumia Kitambulisho cha Usalama au SID), ni nini sheria inaruhusu au kukataa (kwa kutumia mask ya ufikiaji), na jinsi inavyorithiwa na vitu vingine.
 
-#### Key Differences Between ACE Types
+#### Tofauti Kuu Kati ya Aina za ACE
 
-- **Generic ACEs** are suitable for simple access control scenarios, where the same rule applies to all aspects of an object or to all objects within a container.
-- **Object-Specific ACEs** are used for more complex scenarios, especially in environments like Active Directory, where you might need to control access to specific properties of an object differently.
+- **ACEs za Kawaida** zinafaa kwa hali rahisi za udhibiti wa ufikiaji, ambapo sheria moja inatumika kwa vipengele vyote vya kitu au kwa vitu vyote ndani ya chombo.
+- **ACEs za Kitu Maalum** zinatumika kwa hali ngumu zaidi, hasa katika mazingira kama Active Directory, ambapo unaweza kuhitaji kudhibiti ufikiaji wa mali maalum za kitu tofauti.
 
-In summary, ACLs and ACEs help define precise access controls, ensuring that only the right individuals or groups have access to sensitive information or resources, with the ability to tailor access rights down to the level of individual properties or object types.
+Kwa muhtasari, ACLs na ACEs husaidia kufafanua udhibiti sahihi wa ufikiaji, kuhakikisha kwamba ni watu au vikundi sahihi tu wanaweza kufikia taarifa au rasilimali nyeti, huku wakitoa uwezo wa kubinafsisha haki za ufikiaji hadi kiwango cha mali au aina za vitu binafsi.
 
-### Access Control Entry Layout
+### Mpangilio wa Kuingilia Udhibiti wa Ufikiaji
 
-| ACE Field   | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Type        | Flag that indicates the type of ACE. Windows 2000 and Windows Server 2003 support six types of ACE: Three generic ACE types that are attached to all securable objects. Three object-specific ACE types that can occur for Active Directory objects.                                                                                                                                                                                                                                                            |
-| Flags       | Set of bit flags that control inheritance and auditing.                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| Size        | Number of bytes of memory that are allocated for the ACE.                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| Access mask | 32-bit value whose bits correspond to access rights for the object. Bits can be set either on or off, but the setting's meaning depends on the ACE type. For example, if the bit that corresponds to the right to read permissions is turned on, and the ACE type is Deny, the ACE denies the right to read the object's permissions. If the same bit is set on but the ACE type is Allow, the ACE grants the right to read the object's permissions. More details of the Access mask appear in the next table. |
-| SID         | Identifies a user or group whose access is controlled or monitored by this ACE.                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| Uwanja wa ACE | Maelezo                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Aina         | Bendera inayotambulisha aina ya ACE. Windows 2000 na Windows Server 2003 zinasaidia aina sita za ACE: Aina tatu za ACE za kawaida ambazo zimeunganishwa na vitu vyote vinavyoweza kulindwa. Aina tatu za ACE maalum za kitu ambazo zinaweza kutokea kwa vitu vya Active Directory.                                                                                                                                                                                                                                                            |
+| Bendera      | Seti ya bendera za bit ambazo zinadhibiti urithi na ukaguzi.                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| Ukubwa       | Idadi ya bytes za kumbukumbu ambazo zimepewa ACE.                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| Mask ya ufikiaji | Thamani ya bit 32 ambayo bits zake zinahusiana na haki za ufikiaji kwa kitu. Bits zinaweza kuwekwa ama juu au chini, lakini maana ya kuweka inategemea aina ya ACE. Kwa mfano, ikiwa bit inayohusiana na haki ya kusoma ruhusa imewashwa, na aina ya ACE ni Kukataa, ACE inakataza haki ya kusoma ruhusa za kitu. Ikiwa bit hiyo hiyo imewashwa lakini aina ya ACE ni Kuruhusu, ACE inaruhusu haki ya kusoma ruhusa za kitu. Maelezo zaidi ya mask ya ufikiaji yanaonekana katika jedwali linalofuata. |
+| SID          | Inatambulisha mtumiaji au kikundi ambacho ufikiaji wake unadhibitiwa au unakaguliwa na ACE hii.                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 
-### Access Mask Layout
+### Mpangilio wa Mask ya Ufikiaji
 
-| Bit (Range) | Meaning                            | Description/Example                       |
-| ----------- | ---------------------------------- | ----------------------------------------- |
-| 0 - 15      | Object Specific Access Rights      | Read data, Execute, Append data           |
-| 16 - 22     | Standard Access Rights             | Delete, Write ACL, Write Owner            |
-| 23          | Can access security ACL            |                                           |
-| 24 - 27     | Reserved                           |                                           |
-| 28          | Generic ALL (Read, Write, Execute) | Everything below                          |
-| 29          | Generic Execute                    | All things necessary to execute a program |
-| 30          | Generic Write                      | All things necessary to write to a file   |
-| 31          | Generic Read                       | All things necessary to read a file       |
+| Bit (Muktadha) | Maana                            | Maelezo/Mfano                       |
+| --------------- | -------------------------------- | ----------------------------------- |
+| 0 - 15          | Haki za Ufikiaji Maalum         | Kusoma data, Kutekeleza, Kuongeza data           |
+| 16 - 22         | Haki za Ufikiaji za Kawaida     | Kufuta, Kuandika ACL, Kuandika Mmiliki            |
+| 23              | Inaweza kufikia ACL ya usalama   |                                       |
+| 24 - 27         | Imetengwa                        |                                       |
+| 28              | Kawaida ZOTE (Kusoma, Kuandika, Kutekeleza) | Kila kitu kilichopo chini                          |
+| 29              | Kawaida Kutekeleza              | Mambo yote muhimu kutekeleza programu |
+| 30              | Kawaida Kuandika                | Mambo yote muhimu kuandika kwenye faili   |
+| 31              | Kawaida Kusoma                  | Mambo yote muhimu kusoma faili       |
 
-## References
+## Marejeo
 
 - [https://www.ntfs.com/ntfs-permissions-acl-use.htm](https://www.ntfs.com/ntfs-permissions-acl-use.htm)
 - [https://secureidentity.se/acl-dacl-sacl-and-the-ace/](https://secureidentity.se/acl-dacl-sacl-and-the-ace/)
@@ -170,8 +170,7 @@ In summary, ACLs and ACEs help define precise access controls, ensuring that onl
 <figure><img src="../../images/image (48).png" alt=""><figcaption></figcaption></figure>
 
 \
-Use [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=acls-dacls-sacls-aces) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+Tumia [**Trickest**](https://trickest.com/?utm_source=hacktricks&utm_medium=text&utm_campaign=ppc&utm_content=acls-dacls-sacls-aces) kujenga na **kujiendesha kiotomatiki** kwa urahisi kazi zinazotolewa na zana za jamii **zilizoendelea zaidi** duniani.\
+Pata Ufikiaji Leo:
 
 {% embed url="https://trickest.com/?utm_source=hacktricks&utm_medium=banner&utm_campaign=ppc&utm_content=acls-dacls-sacls-aces" %}
-

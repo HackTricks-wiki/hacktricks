@@ -4,125 +4,124 @@
 
 ## [ProjectHoneypot](https://www.projecthoneypot.org/)
 
-You can ask if an IP is related to suspicious/malicious activities. Completely free.
+Unaweza kuuliza ikiwa IP inahusiana na shughuli za kutatanisha/mbaya. Bure kabisa.
 
 ## [**BotScout**](http://botscout.com/api.htm)
 
-Check if the IP address is related to a bot that register accounts. It can also check usernames and emails. Initially free.
+Angalia ikiwa anwani ya IP inahusiana na bot inayosajili akaunti. Inaweza pia kuangalia majina ya watumiaji na barua pepe. Kwanza bure.
 
 ## [Hunter](https://hunter.io/)
 
-Find and verify emails.\
-Some free API requests free, for more you need to pay.\
-Commercial?
+Pata na thibitisha barua pepe.\
+Maombi machache ya API bure, kwa zaidi unahitaji kulipa.\
+Kibiashara?
 
 ## [AlientVault](https://otx.alienvault.com/api)
 
-Find Malicious activities related to IPs and Domains. Free.
+Pata shughuli mbaya zinazohusiana na IPs na Domains. Bure.
 
 ## [Clearbit](https://dashboard.clearbit.com/)
 
-Find related personal data to a email (profiles on other platforms), domain (basic company info ,mails and people working) and companies (get company info from mail).\
-You need to pay to access all the possibilities.\
-Commercial?
+Pata data binafsi zinazohusiana na barua pepe (profaili kwenye majukwaa mengine), domain (taarifa za msingi za kampuni, barua na watu wanaofanya kazi) na kampuni (pata taarifa za kampuni kutoka kwa barua).\
+Unahitaji kulipa ili kufikia uwezekano wote.\
+Kibiashara?
 
 ## [BuiltWith](https://builtwith.com/)
 
-Technologies used by webs. Expensive...\
-Commercial?
+Teknolojia zinazotumika na wavuti. Ghali...\
+Kibiashara?
 
 ## [Fraudguard](https://fraudguard.io/)
 
-Check if a host (domain or IP) is related with suspicious/malicious activities. Have some free API access.\
-Commercial?
+Angalia ikiwa mwenyeji (domain au IP) anahusiana na shughuli za kutatanisha/mbaya. Ina upatikanaji wa bure wa API.\
+Kibiashara?
 
 ## [FortiGuard](https://fortiguard.com/)
 
-Check if a host (domain or IP) is related with suspicious/malicious activities. Have some free API access.
+Angalia ikiwa mwenyeji (domain au IP) anahusiana na shughuli za kutatanisha/mbaya. Ina upatikanaji wa bure wa API.
 
 ## [SpamCop](https://www.spamcop.net/)
 
-Indicates if host is related to spam activity. Have some free API access.
+Inaonyesha ikiwa mwenyeji anahusiana na shughuli za spam. Ina upatikanaji wa bure wa API.
 
 ## [mywot](https://www.mywot.com/)
 
-Based on opinions and other metrics get if a domain is related with suspicious/malicious information.
+Kulingana na maoni na vipimo vingine pata ikiwa domain inahusiana na taarifa za kutatanisha/mbaya.
 
 ## [ipinfo](https://ipinfo.io/)
 
-Obtains basic info from an IP address. You can test up to 100K/month.
+Pata taarifa za msingi kutoka kwa anwani ya IP. Unaweza kupima hadi 100K/ mwezi.
 
 ## [securitytrails](https://securitytrails.com/app/account)
 
-This platform give information about domains and IP addresses like domains inside an IP or inside a domain server, domains owned by an email (find related domains), IP history of domains (find the host behind CloudFlare), all domains using a nameserver....\
-You have some free access.
+Jukwaa hili linatoa taarifa kuhusu domains na anwani za IP kama domains ndani ya IP au ndani ya seva ya domain, domains zinazomilikiwa na barua pepe (pata domains zinazohusiana), historia ya IP ya domains (pata mwenyeji nyuma ya CloudFlare), domains zote zinazotumia nameserver....\
+Una upatikanaji wa bure.
 
 ## [fullcontact](https://www.fullcontact.com/)
 
-Allows to search by email, domain or company name and retrieve "personal" information related. It can also verify emails. There is some free access.
+Inaruhusu kutafuta kwa barua pepe, domain au jina la kampuni na kupata taarifa "binafsi" zinazohusiana. Inaweza pia kuthibitisha barua pepe. Kuna upatikanaji wa bure.
 
 ## [RiskIQ](https://www.spiderfoot.net/documentation/)
 
-A lot of information from domains and IPs even in the free/community version.
+Taarifa nyingi kutoka kwa domains na IPs hata katika toleo la bure/jamii.
 
 ## [\_IntelligenceX](https://intelx.io/)
 
-Search Domains, IPs and emails and get info from dumps. Have some free access.
+Tafuta Domains, IPs na barua pepe na pata taarifa kutoka kwa dumps. Ina upatikanaji wa bure.
 
 ## [IBM X-Force Exchange](https://exchange.xforce.ibmcloud.com/)
 
-Search by IP and gather information related to suspicions activities. There is some free access.
+Tafuta kwa IP na kukusanya taarifa zinazohusiana na shughuli za kutatanisha. Kuna upatikanaji wa bure.
 
 ## [Greynoise](https://viz.greynoise.io/)
 
-Search by IP or IP range and get information about IPs scanning the Internet. 15 days free access.
+Tafuta kwa IP au anuwai ya IP na pata taarifa kuhusu IPs zinazoskanisha Mtandao. Upatikanaji wa bure wa siku 15.
 
 ## [Shodan](https://www.shodan.io/)
 
-Get scan information of an IP address. Have some free api access.
+Pata taarifa za skana za anwani ya IP. Ina upatikanaji wa bure wa API.
 
 ## [Censys](https://censys.io/)
 
-Very similar to shodan
+Inafanana sana na shodan
 
 ## [buckets.grayhatwarfare.com](https://buckets.grayhatwarfare.com/)
 
-Find open S3 buckets searching by keyword.
+Pata ndoo za S3 zilizo wazi kwa kutafuta kwa neno muhimu.
 
 ## [Dehashed](https://www.dehashed.com/data)
 
-Find leaked credentials of emails and even domains\
-Commercial?
+Pata akidi zilizovuja za barua pepe na hata domains\
+Kibiashara?
 
 ## [psbdmp](https://psbdmp.ws/)
 
-Search pastebins where a email appeared. Commercial?
+Tafuta pastebins ambapo barua pepe ilionekana. Kibiashara?
 
 ## [emailrep.io](https://emailrep.io/key)
 
-Get reputation of a mail. Commercial?
+Pata sifa ya barua. Kibiashara?
 
 ## [ghostproject](https://ghostproject.fr/)
 
-Get passwords from leaked emails. Commercial?
+Pata nywila kutoka kwa barua pepe zilizovuja. Kibiashara?
 
 ## [Binaryedge](https://www.binaryedge.io/)
 
-Obtain interesting info from IPs
+Pata taarifa za kuvutia kutoka kwa IPs
 
 ## [haveibeenpwned](https://haveibeenpwned.com/)
 
-Search by domain and email and get if it was pwned and passwords. Commercial?
+Tafuta kwa domain na barua pepe na pata ikiwa ilipatikana na nywila. Kibiashara?
 
 ### [IP2Location.io](https://www.ip2location.io/)
 
-It detects IP geolocation, data center, ASN and even VPN information. It offers free 30K queries per month.
+Inagundua geolocation ya IP, kituo cha data, ASN na hata taarifa za VPN. Inatoa maswali 30K bure kwa mwezi.
 
-[https://dnsdumpster.com/](https://dnsdumpster.com/)(in a commercial tool?)
+[https://dnsdumpster.com/](https://dnsdumpster.com/)(katika zana ya kibiashara?)
 
-[https://www.netcraft.com/](https://www.netcraft.com/) (in a commercial tool?)
+[https://www.netcraft.com/](https://www.netcraft.com/) (katika zana ya kibiashara?)
 
-[https://www.nmmapper.com/sys/tools/subdomainfinder/](https://www.nmmapper.com/) (in a commercial tool?)
+[https://www.nmmapper.com/sys/tools/subdomainfinder/](https://www.nmmapper.com/) (katika zana ya kibiashara?)
 
 {{#include ../banners/hacktricks-training.md}}
-

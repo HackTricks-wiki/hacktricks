@@ -4,7 +4,7 @@
 
 ## Intro
 
-For more info about what is an iButton check:
+Kwa maelezo zaidi kuhusu iButton angalia:
 
 {{#ref}}
 ../ibutton.md
@@ -12,7 +12,7 @@ For more info about what is an iButton check:
 
 ## Design
 
-The **blue** part of the following imageis how you would need to **put the real iButton** so the Flipper can **read it.** The **green** part is how you need to **touch the reader** with the Flipper zero to **correctly emulate an iButton**.
+Sehemu ya **bluu** ya picha ifuatayo ni jinsi unavyohitaji **kueka iButton halisi** ili Flipper aweze **kuisoma.** Sehemu ya **kijani** ni jinsi unavyohitaji **kugusa msomaji** na Flipper zero ili **kuiga iButton** kwa usahihi.
 
 <figure><img src="../../../images/image (565).png" alt=""><figcaption></figcaption></figure>
 
@@ -20,18 +20,18 @@ The **blue** part of the following imageis how you would need to **put the real 
 
 ### Read
 
-In Read Mode Flipper is waiting for the iButton key to touch and is able to digest any of three types of keys: **Dallas, Cyfral, and Metakom**. Flipper will **figure out the type of the key itself**. The name of the key protocol will be displayed on the screen above the ID number.
+Katika Modu ya Kusoma Flipper anasubiri funguo ya iButton kugusa na anaweza kuchakata aina yoyote ya funguo tatu: **Dallas, Cyfral, na Metakom**. Flipper atajua **aina ya funguo yenyewe**. Jina la protokali ya funguo litakuwa kwenye skrini juu ya nambari ya ID.
 
 ### Add manually
 
-It's possible to **add manually** an iButton of type: **Dallas, Cyfral, and Metakom**
+Inawezekana **kuongeza kwa mkono** iButton ya aina: **Dallas, Cyfral, na Metakom**
 
 ### **Emulate**
 
-It's possible to **emulate** saved iButtons (read or manually added).
+Inawezekana **kuiga** iButtons zilizohifadhiwa (zilizosomwa au zilizoongezwa kwa mkono).
 
 > [!NOTE]
-> If you cannot make the expected contacts of the Flipper Zero touch the reader you can **use the external GPIO:**
+> Ikiwa huwezi kufanya mawasiliano yanayotarajiwa ya Flipper Zero kugusa msomaji unaweza **kutumia GPIO ya nje:**
 
 <figure><img src="../../../images/image (138).png" alt=""><figcaption></figcaption></figure>
 
@@ -40,4 +40,3 @@ It's possible to **emulate** saved iButtons (read or manually added).
 - [https://blog.flipperzero.one/taming-ibutton/](https://blog.flipperzero.one/taming-ibutton/)
 
 {{#include ../../../banners/hacktricks-training.md}}
-
