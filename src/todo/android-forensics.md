@@ -26,3 +26,4 @@ Use Linux Memory Extractor (LiME) to extract the RAM information. It's a kernel 
 
 {{#include ../banners/hacktricks-training.md}}
 
+

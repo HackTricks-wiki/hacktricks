@@ -25,3 +25,4 @@ If you are contacting a JTAG, you will find one or several **lines starting by F
 
 {{#include ../../banners/hacktricks-training.md}}
 
+

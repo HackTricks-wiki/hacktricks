@@ -63,3 +63,4 @@ You can create a script to **fuzz tag readers**, so copying the data of a **vali
 
 {{#include ../../banners/hacktricks-training.md}}
 
+

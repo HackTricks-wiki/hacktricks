@@ -80,3 +80,4 @@ flipper-zero/fz-infrared.md
 
 {{#include ../../banners/hacktricks-training.md}}
 
+

@@ -286,3 +286,4 @@ wce.exe -s <username>:<domain>:<hash_lm>:<hash_nt>
 
 {{#include ../../banners/hacktricks-training.md}}
 
+

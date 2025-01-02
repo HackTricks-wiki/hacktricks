@@ -78,3 +78,4 @@ However, you **can't read the CVV this way** (the 3 digits on the back of the ca
 
 {{#include ../../../banners/hacktricks-training.md}}
 
+

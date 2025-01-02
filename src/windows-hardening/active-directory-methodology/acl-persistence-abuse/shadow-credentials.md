@@ -66,3 +66,4 @@ ShadowSpray aims to **exploit GenericWrite/GenericAll permissions that wide user
 
 {{#include ../../../banners/hacktricks-training.md}}
 
+
