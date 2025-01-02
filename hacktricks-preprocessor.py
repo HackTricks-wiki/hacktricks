@@ -30,14 +30,16 @@ def ref(matchobj):
     href =  matchobj.groups(0)[0].strip()
     title = href
     if href.startswith("http://") or href.startswith("https://"):
-        # pass
-        try:
-            raw_html = str(urlopen(Request(href, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:124.0) Gecko/20100101 Firefox/124.0'})).read())
-            match = re.search('<title>(.*?)</title>', raw_html)
-            title = match.group(1) if match else href
-        except Exception as e:
-            logger.debug(f'Error opening URL {href}: {e}')
-            pass #nDont stop on broken link
+        if context['config']['preprocessor']['hacktricks']['env'] == 'dev':
+            pass
+        else:
+            try:
+                raw_html = str(urlopen(Request(href, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:124.0) Gecko/20100101 Firefox/124.0'})).read())
+                match = re.search('<title>(.*?)</title>', raw_html)
+                title = match.group(1) if match else href
+            except Exception as e:
+                logger.debug(f'Error opening URL {href}: {e}')
+                pass #nDont stop on broken link
     else:
         try:
             if href.endswith("/"):
@@ -90,7 +92,7 @@ if __name__ == '__main__':
     context, book = json.load(sys.stdin)
 
     logger.debug(f"Context: {context}")
-
+    logger.debug(f"Env: {context['config']['preprocessor']['hacktricks']['env']}")
 
     for chapter in iterate_chapters(book['sections']):
         logger.debug(f"Chapter: {chapter['path']}")
