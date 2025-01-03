@@ -124,7 +124,7 @@ Los parámetros que esta función espera son:
 
 - El primer parámetro (**self**) es "un puntero que apunta a la **instancia de la clase que debe recibir el mensaje**". O más simplemente, es el objeto sobre el cual se invoca el método. Si el método es un método de clase, esto será una instancia del objeto de la clase (en su totalidad), mientras que para un método de instancia, self apuntará a una instancia instanciada de la clase como un objeto.
 - El segundo parámetro, (**op**), es "el selector del método que maneja el mensaje". Nuevamente, más simplemente, esto es solo el **nombre del método.**
-- Los parámetros restantes son cualquier **valor que requiera el método** (op).
+- Los parámetros restantes son cualquier **valor que sea requerido por el método** (op).
 
 Vea cómo **obtener esta información fácilmente con `lldb` en ARM64** en esta página:
 
@@ -137,12 +137,12 @@ x64:
 | **Argumento**     | **Registro**                                                   | **(para) objc_msgSend**                                 |
 | ----------------- | -------------------------------------------------------------- | ------------------------------------------------------ |
 | **1er argumento**  | **rdi**                                                        | **self: objeto sobre el cual se invoca el método**     |
-| **2do argumento**  | **rsi**                                                        | **op: nombre del método**                               |
-| **3er argumento**  | **rdx**                                                        | **1er argumento al método**                             |
-| **4to argumento**  | **rcx**                                                        | **2do argumento al método**                             |
-| **5to argumento**  | **r8**                                                         | **3er argumento al método**                             |
-| **6to argumento**  | **r9**                                                         | **4to argumento al método**                             |
-| **7mo+ argumento** | <p><strong>rsp+</strong><br><strong>(en la pila)</strong></p> | **5to+ argumento al método**                            |
+| **2do argumento**  | **rsi**                                                        | **op: nombre del método**                              |
+| **3er argumento**  | **rdx**                                                        | **1er argumento al método**                            |
+| **4to argumento**  | **rcx**                                                        | **2do argumento al método**                            |
+| **5to argumento**  | **r8**                                                         | **3er argumento al método**                            |
+| **6to argumento**  | **r9**                                                         | **4to argumento al método**                            |
+| **7mo+ argumento** | <p><strong>rsp+</strong><br><strong>(en la pila)</strong></p> | **5to+ argumento al método**                           |
 
 ### Volcar metadatos de ObjectiveC
 
@@ -236,7 +236,7 @@ Su plist se encuentra en `/System/Library/LaunchDaemons/com.apple.sysdiagnose.pl
 
 MacOS genera muchos registros que pueden ser muy útiles al ejecutar una aplicación tratando de entender **qué está haciendo**.
 
-Además, hay algunos registros que contendrán la etiqueta `<private>` para **ocultar** información **identificable** de **usuario** o **computadora**. Sin embargo, es posible **instalar un certificado para divulgar esta información**. Siga las explicaciones de [**aquí**](https://superuser.com/questions/1532031/how-to-show-private-data-in-macos-unified-log).
+Además, hay algunos registros que contendrán la etiqueta `<private>` para **ocultar** información **identificable** del **usuario** o **computadora**. Sin embargo, es posible **instalar un certificado para divulgar esta información**. Siga las explicaciones de [**aquí**](https://superuser.com/questions/1532031/how-to-show-private-data-in-macos-unified-log).
 
 ### Hopper
 
@@ -254,7 +254,7 @@ Al hacer clic derecho en un objeto de código, puede ver **referencias a/desde e
 
 <figure><img src="../../../images/image (1117).png" alt=""><figcaption></figcaption></figure>
 
-Además, en la **parte inferior del medio puede escribir comandos de python**.
+Además, en la **parte media inferior puede escribir comandos de python**.
 
 #### Panel derecho
 
@@ -262,7 +262,7 @@ En el panel derecho puede ver información interesante como el **historial de na
 
 ### dtrace
 
-Permite a los usuarios acceder a aplicaciones a un nivel **muy bajo** y proporciona una forma para que los usuarios **rastreen** **programas** e incluso cambien su flujo de ejecución. Dtrace utiliza **probes** que están **colocados a lo largo del kernel** y están en ubicaciones como el inicio y el final de las llamadas al sistema.
+Permite a los usuarios acceder a aplicaciones a un nivel **muy bajo** y proporciona una forma para que los usuarios **rastreen** **programas** e incluso cambien su flujo de ejecución. Dtrace utiliza **probes** que están **colocadas a lo largo del kernel** y están en ubicaciones como el inicio y el final de las llamadas al sistema.
 
 DTrace utiliza la función **`dtrace_probe_create`** para crear un probe para cada llamada al sistema. Estos probes pueden activarse en el **punto de entrada y salida de cada llamada al sistema**. La interacción con DTrace ocurre a través de /dev/dtrace que solo está disponible para el usuario root.
 
@@ -343,14 +343,14 @@ Es una herramienta de trazado del kernel. Los códigos documentados se pueden en
 
 Herramientas como `latency`, `sc_usage`, `fs_usage` y `trace` la utilizan internamente.
 
-Para interactuar con `kdebug`, se usa `sysctl` sobre el espacio de nombres `kern.kdebug` y los MIBs que se pueden usar se encuentran en `sys/sysctl.h`, teniendo las funciones implementadas en `bsd/kern/kdebug.c`.
+Para interactuar con `kdebug`, se usa `sysctl` sobre el espacio de nombres `kern.kdebug` y los MIBs que se pueden encontrar en `sys/sysctl.h`, teniendo las funciones implementadas en `bsd/kern/kdebug.c`.
 
 Para interactuar con kdebug con un cliente personalizado, estos son generalmente los pasos:
 
 - Eliminar configuraciones existentes con KERN_KDSETREMOVE
-- Establecer trazado con KERN_KDSETBUF y KERN_KDSETUP
+- Establecer traza con KERN_KDSETBUF y KERN_KDSETUP
 - Usar KERN_KDGETBUF para obtener el número de entradas del búfer
-- Obtener el propio cliente del trazado con KERN_KDPINDEX
+- Obtener el propio cliente de la traza con KERN_KDPINDEX
 - Habilitar el trazado con KERN_KDENABLE
 - Leer el búfer llamando a KERN_KDREADTR
 - Para emparejar cada hilo con su proceso, llamar a KERN_KDTHRMAP.
@@ -438,7 +438,51 @@ settings set target.x86-disassembly-flavor intel
 > [!WARNING]
 > Dentro de lldb, volcar un proceso con `process save-core`
 
-<table data-header-hidden><thead><tr><th width="225"></th><th></th></tr></thead><tbody><tr><td><strong>(lldb) Comando</strong></td><td><strong>Descripción</strong></td></tr><tr><td><strong>run (r)</strong></td><td>Iniciar la ejecución, que continuará sin interrupciones hasta que se alcance un punto de interrupción o el proceso termine.</td></tr><tr><td><strong>process launch --stop-at-entry</strong></td><td>Iniciar la ejecución deteniéndose en el punto de entrada</td></tr><tr><td><strong>continue (c)</strong></td><td>Continuar la ejecución del proceso depurado.</td></tr><tr><td><strong>nexti (n / ni)</strong></td><td>Ejecutar la siguiente instrucción. Este comando omitirá las llamadas a funciones.</td></tr><tr><td><strong>stepi (s / si)</strong></td><td>Ejecutar la siguiente instrucción. A diferencia del comando nexti, este comando entrará en las llamadas a
+<table data-header-hidden><thead><tr><th width="225"></th><th></th></tr></thead><tbody><tr><td><strong>(lldb) Comando</strong></td><td><strong>Descripción</strong></td></tr><tr><td><strong>run (r)</strong></td><td>Iniciar la ejecución, que continuará sin interrupciones hasta que se alcance un punto de interrupción o el proceso termine.</td></tr><tr><td><strong>process launch --stop-at-entry</strong></td><td>Iniciar la ejecución deteniéndose en el punto de entrada</td></tr><tr><td><strong>continue (c)</strong></td><td>Continuar la ejecución del proceso depurado.</td></tr><tr><td><strong>nexti (n / ni)</strong></td><td>Ejecutar la siguiente instrucción. Este comando omitirá las llamadas a funciones.</td></tr><tr><td><strong>stepi (s / si)</strong></td><td>Ejecutar la siguiente instrucción. A diferencia del comando nexti, este comando entrará en las llamadas a funciones.</td></tr><tr><td><strong>finish (f)</strong></td><td>Ejecutar el resto de las instrucciones en la función actual (“frame”) y detenerse.</td></tr><tr><td><strong>control + c</strong></td><td>Pausar la ejecución. Si el proceso ha sido ejecutado (r) o continuado (c), esto hará que el proceso se detenga ...donde sea que esté ejecutándose actualmente.</td></tr><tr><td><strong>breakpoint (b)</strong></td><td><p><code>b main</code> #Cualquier función llamada main</p><p><code>b &#x3C;binname>`main</code> #Función principal del bin</p><p><code>b set -n main --shlib &#x3C;lib_name></code> #Función principal del bin indicado</p><p><code>breakpoint set -r '\[NSFileManager .*\]$'</code> #Cualquier método de NSFileManager</p><p><code>breakpoint set -r '\[NSFileManager contentsOfDirectoryAtPath:.*\]$'</code></p><p><code>break set -r . -s libobjc.A.dylib</code> # Romper en todas las funciones de esa biblioteca</p><p><code>b -a 0x0000000100004bd9</code></p><p><code>br l</code> #Lista de puntos de interrupción</p><p><code>br e/dis &#x3C;num></code> #Habilitar/Deshabilitar punto de interrupción</p><p>breakpoint delete &#x3C;num></p></td></tr><tr><td><strong>help</strong></td><td><p>help breakpoint #Obtener ayuda del comando de punto de interrupción</p><p>help memory write #Obtener ayuda para escribir en la memoria</p></td></tr><tr><td><strong>reg</strong></td><td><p>reg read</p><p>reg read $rax</p><p>reg read $rax --format &#x3C;<a href="https://lldb.llvm.org/use/variable.html#type-format">formato</a>></p><p>reg write $rip 0x100035cc0</p></td></tr><tr><td><strong>x/s &#x3C;reg/dirección de memoria></strong></td><td>Mostrar la memoria como una cadena terminada en nulo.</td></tr><tr><td><strong>x/i &#x3C;reg/dirección de memoria></strong></td><td>Mostrar la memoria como instrucción de ensamblador.</td></tr><tr><td><strong>x/b &#x3C;reg/dirección de memoria></strong></td><td>Mostrar la memoria como byte.</td></tr><tr><td><strong>print object (po)</strong></td><td><p>Esto imprimirá el objeto referenciado por el parámetro</p><p>po $raw</p><p><code>{</code></p><p><code>dnsChanger = {</code></p><p><code>"affiliate" = "";</code></p><p><code>"blacklist_dns" = ();</code></p><p>Nota que la mayoría de las APIs o métodos de Objective-C de Apple devuelven objetos, y por lo tanto deben ser mostrados a través del comando “print object” (po). Si po no produce una salida significativa, usa <code>x/b</code></p></td></tr><tr><td><strong>memory</strong></td><td>memory read 0x000....<br>memory read $x0+0xf2a<br>memory write 0x100600000 -s 4 0x41414141 #Escribir AAAA en esa dirección<br>memory write -f s $rip+0x11f+7 "AAAA" #Escribir AAAA en la dirección</td></tr><tr><td><strong>disassembly</strong></td><td><p>dis #Desensamblar función actual</p><p>dis -n &#x3C;funcname> #Desensamblar función</p><p>dis -n &#x3C;funcname> -b &#x3C;basename> #Desensamblar función<br>dis -c 6 #Desensamblar 6 líneas<br>dis -c 0x100003764 -e 0x100003768 # Desde una dirección hasta la otra<br>dis -p -c 4 # Comenzar en la dirección actual desensamblando</p></td></tr><tr><td><strong>parray</strong></td><td>parray 3 (char **)$x1 # Verificar array de 3 componentes en el registro x1</td></tr><tr><td><strong>image dump sections</strong></td><td>Imprimir mapa de la memoria del proceso actual</td></tr><tr><td><strong>image dump symtab &#x3C;library></strong></td><td><code>image dump symtab CoreNLP</code> #Obtener la dirección de todos los símbolos de CoreNLP</td></tr></tbody></table>
+
+> [!NOTE]
+> Al llamar a la función **`objc_sendMsg`**, el registro **rsi** contiene el **nombre del método** como una cadena terminada en nulo (“C”). Para imprimir el nombre a través de lldb haz:
+>
+> `(lldb) x/s $rsi: 0x1000f1576: "startMiningWithPort:password:coreCount:slowMemory:currency:"`
+>
+> `(lldb) print (char*)$rsi:`\
+> `(char *) $1 = 0x00000001000f1576 "startMiningWithPort:password:coreCount:slowMemory:currency:"`
+>
+> `(lldb) reg read $rsi: rsi = 0x00000001000f1576 "startMiningWithPort:password:coreCount:slowMemory:currency:"`
+
+### Análisis Dinámico Anti
+
+#### Detección de VM
+
+- El comando **`sysctl hw.model`** devuelve "Mac" cuando el **host es un MacOS** pero algo diferente cuando es una VM.
+- Jugando con los valores de **`hw.logicalcpu`** y **`hw.physicalcpu`**, algunos malwares intentan detectar si es una VM.
+- Algunos malwares también pueden **detectar** si la máquina está basada en **VMware** según la dirección MAC (00:50:56).
+- También es posible encontrar **si un proceso está siendo depurado** con un código simple como:
+- `if(P_TRACED == (info.kp_proc.p_flag & P_TRACED)){ //proceso siendo depurado }`
+- También puede invocar la llamada al sistema **`ptrace`** con la bandera **`PT_DENY_ATTACH`**. Esto **previene** que un depurador se adjunte y rastree.
+- Puedes verificar si la función **`sysctl`** o **`ptrace`** está siendo **importada** (pero el malware podría importarla dinámicamente)
+- Como se señala en este informe, “[Defeating Anti-Debug Techniques: macOS ptrace variants](https://alexomara.com/blog/defeating-anti-debug-techniques-macos-ptrace-variants/)” :\
+“_El mensaje Process # exited with **status = 45 (0x0000002d)** es generalmente una señal reveladora de que el objetivo de depuración está usando **PT_DENY_ATTACH**_”
+
+## Volcados de Núcleo
+
+Los volcados de núcleo se crean si:
+
+- `kern.coredump` sysctl está configurado en 1 (por defecto)
+- Si el proceso no era suid/sgid o `kern.sugid_coredump` es 1 (por defecto es 0)
+- El límite `AS_CORE` permite la operación. Es posible suprimir la creación de volcados de núcleo llamando a `ulimit -c 0` y reactivarlos con `ulimit -c unlimited`.
+
+En esos casos, el volcado de núcleo se genera de acuerdo con `kern.corefile` sysctl y se almacena generalmente en `/cores/core/.%P`.
+
+## Fuzzing
+
+### [ReportCrash](https://ss64.com/osx/reportcrash.html)
+
+ReportCrash **analiza procesos que fallan y guarda un informe de fallos en el disco**. Un informe de fallos contiene información que puede **ayudar a un desarrollador a diagnosticar** la causa de un fallo.\
+Para aplicaciones y otros procesos **que se ejecutan en el contexto de launchd por usuario**, ReportCrash se ejecuta como un LaunchAgent y guarda informes de fallos en `~/Library/Logs/DiagnosticReports/` del usuario.\
+Para demonios, otros procesos **que se ejecutan en el contexto de launchd del sistema** y otros procesos privilegiados, ReportCrash se ejecuta como un LaunchDaemon y guarda informes de fallos en `/Library/Logs/DiagnosticReports` del sistema.
+
+Si te preocupa que los informes de fallos **se envíen a Apple**, puedes desactivarlos. Si no, los informes de fallos pueden ser útiles para **averiguar cómo se cayó un servidor**.
 ```bash
 #To disable crash reporting:
 launchctl unload -w /System/Library/LaunchAgents/com.apple.ReportCrash.plist
@@ -456,7 +500,7 @@ Mientras se realiza fuzzing en MacOS, es importante no permitir que el Mac entre
 - pmset, Preferencias del Sistema
 - [KeepingYouAwake](https://github.com/newmarcel/KeepingYouAwake)
 
-#### Desconexión SSH
+#### Desconexión de SSH
 
 Si estás realizando fuzzing a través de una conexión SSH, es importante asegurarte de que la sesión no se desconecte. Así que cambia el archivo sshd_config con:
 
@@ -496,7 +540,7 @@ lldb -o "target create `which some-binary`" -o "settings set target.env-vars DYL
 
 #### [AFL++](https://github.com/AFLplusplus/AFLplusplus)
 
-Funciona para herramientas de CLI
+Funciona para herramientas de línea de comandos
 
 #### [Litefuzz](https://github.com/sec-tools/litefuzz)
 

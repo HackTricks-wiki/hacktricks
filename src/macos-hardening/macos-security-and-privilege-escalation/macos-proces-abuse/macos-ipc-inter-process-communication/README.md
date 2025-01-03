@@ -35,7 +35,7 @@ Los derechos de puerto, que definen qué operaciones puede realizar una tarea, s
 
 ### Puertos de Archivo
 
-Los puertos de archivo permiten encapsular descriptores de archivo en puertos Mac (usando derechos de puerto Mach). Es posible crear un `fileport` a partir de un FD dado usando `fileport_makeport` y crear un FD a partir de un fileport usando `fileport_makefd`.
+Los puertos de archivo permiten encapsular descriptores de archivo en puertos Mac (utilizando derechos de puerto Mach). Es posible crear un `fileport` a partir de un FD dado utilizando `fileport_makeport` y crear un FD a partir de un fileport utilizando `fileport_makefd`.
 
 ### Estableciendo una comunicación
 
@@ -53,7 +53,7 @@ Para esto, el **servidor de arranque** (**launchd** en mac) está involucrado, y
 6. Con este DERECHO DE ENVÍO, **la tarea B** es capaz de **enviar** un **mensaje** **a la tarea A**.
 7. Para una comunicación bidireccional, generalmente la tarea **B** genera un nuevo puerto con un **DERECHO DE RECEPCIÓN** y un **DERECHO DE ENVÍO**, y otorga el **DERECHO DE ENVÍO a la tarea A** para que pueda enviar mensajes a la TAREA B (comunicación bidireccional).
 
-El servidor de arranque **no puede autenticar** el nombre del servicio reclamado por una tarea. Esto significa que una **tarea** podría potencialmente **suplantar cualquier tarea del sistema**, como reclamar falsamente un nombre de servicio de autorización y luego aprobar cada solicitud.
+El servidor de arranque **no puede autenticar** el nombre del servicio reclamado por una tarea. Esto significa que una **tarea** podría potencialmente **suplantar cualquier tarea del sistema**, como falsamente **reclamando un nombre de servicio de autorización** y luego aprobando cada solicitud.
 
 Luego, Apple almacena los **nombres de los servicios proporcionados por el sistema** en archivos de configuración seguros, ubicados en directorios **protegidos por SIP**: `/System/Library/LaunchDaemons` y `/System/Library/LaunchAgents`. Junto a cada nombre de servicio, también se **almacena el binario asociado**. El servidor de arranque creará y mantendrá un **DERECHO DE RECEPCIÓN para cada uno de estos nombres de servicio**.
 
@@ -123,9 +123,9 @@ Los otros campos del encabezado del mensaje son:
 - `msgh_id`: el ID de este mensaje, que es interpretado por el receptor.
 
 > [!CAUTION]
-> Tenga en cuenta que **los mensajes mach se envían a través de un `mach port`**, que es un canal de comunicación **de un solo receptor**, **múltiples remitentes** integrado en el núcleo mach. **Múltiples procesos** pueden **enviar mensajes** a un puerto mach, pero en cualquier momento solo **un solo proceso puede leer** de él.
+> Tenga en cuenta que **los mensajes mach se envían a través de un `mach port`**, que es un canal de comunicación **de un solo receptor**, **múltiples remitentes** integrado en el núcleo mach. **Múltiples procesos** pueden **enviar mensajes** a un puerto mach, pero en cualquier momento **un solo proceso puede leer** de él.
 
-Los mensajes se forman entonces por el encabezado **`mach_msg_header_t`** seguido del **cuerpo** y del **trailer** (si lo hay) y puede otorgar permiso para responder a él. En estos casos, el núcleo solo necesita pasar el mensaje de una tarea a la otra.
+Los mensajes se forman entonces por el **encabezado `mach_msg_header_t`** seguido del **cuerpo** y del **trailer** (si lo hay) y puede otorgar permiso para responder a él. En estos casos, el núcleo solo necesita pasar el mensaje de una tarea a la otra.
 
 Un **trailer** es **información añadida al mensaje por el núcleo** (no puede ser establecida por el usuario) que puede ser solicitada en la recepción del mensaje con las banderas `MACH_RCV_TRAILER_<trailer_opt>` (hay diferente información que se puede solicitar).
 
@@ -425,12 +425,12 @@ Los que comienzan **desde** el número **8** son **propiedad de los demonios del
 - `host_statistics`: Obtener estadísticas del host
 - `mach_memory_info`: Obtener diseño de memoria del kernel
 - **Puerto Priv del Host**: Un proceso con derecho de **SEND** sobre este puerto puede realizar **acciones privilegiadas** como mostrar datos de arranque o intentar cargar una extensión del kernel. El **proceso necesita ser root** para obtener este permiso.
-- Además, para llamar a la API **`kext_request`** es necesario tener otros derechos **`com.apple.private.kext*`** que solo se otorgan a los binarios de Apple.
+- Además, para llamar a la API **`kext_request`** es necesario tener otros derechos **`com.apple.private.kext*`** que solo se otorgan a binarios de Apple.
 - Otras rutinas que se pueden llamar son:
 - `host_get_boot_info`: Obtener `machine_boot_info()`
 - `host_priv_statistics`: Obtener estadísticas privilegiadas
 - `vm_allocate_cpm`: Asignar Memoria Física Contigua
-- `host_processors`: Derecho de envío a los procesadores del host
+- `host_processors`: Derecho de envío a procesadores del host
 - `mach_vm_wire`: Hacer que la memoria sea residente
 - Como **root** puede acceder a este permiso, podría llamar a `host_set_[special/exception]_port[s]` para **secuestrar puertos especiales o de excepción del host**.
 
@@ -459,7 +459,7 @@ world.*/
 
 ### Puertos de Tarea
 
-Originalmente Mach no tenía "procesos", tenía "tareas" que se consideraban más como un contenedor de hilos. Cuando Mach se fusionó con BSD **cada tarea estaba correlacionada con un proceso BSD**. Por lo tanto, cada proceso BSD tiene los detalles que necesita para ser un proceso y cada tarea Mach también tiene su funcionamiento interno (excepto por el pid inexistente 0 que es el `kernel_task`).
+Originalmente Mach no tenía "procesos", tenía "tareas", que se consideraban más como un contenedor de hilos. Cuando Mach se fusionó con BSD **cada tarea estaba correlacionada con un proceso BSD**. Por lo tanto, cada proceso BSD tiene los detalles que necesita para ser un proceso y cada tarea Mach también tiene su funcionamiento interno (excepto por el pid inexistente 0 que es el `kernel_task`).
 
 Hay dos funciones muy interesantes relacionadas con esto:
 
@@ -772,7 +772,7 @@ gcc -framework Foundation -framework Appkit sc_inject.m -o sc_inject
 
 ### Inyección de Dylib en hilo a través del puerto de tarea
 
-En macOS, los **hilos** pueden ser manipulados a través de **Mach** o usando la **api `pthread` de posix**. El hilo que generamos en la inyección anterior fue generado usando la api de Mach, por lo que **no es compatible con posix**.
+En macOS, los **hilos** pueden ser manipulados a través de **Mach** o usando la **api posix `pthread`**. El hilo que generamos en la inyección anterior fue generado usando la api Mach, por lo que **no es compatible con posix**.
 
 Fue posible **inyectar un simple shellcode** para ejecutar un comando porque **no necesitaba trabajar con apis** compatibles con posix, solo con Mach. **Inyecciones más complejas** necesitarían que el **hilo** también sea **compatible con posix**.
 
@@ -1064,7 +1064,7 @@ gcc -framework Foundation -framework Appkit dylib_injector.m -o dylib_injector
 ```
 ### Secuestro de Hilos a través del Puerto de Tarea <a href="#step-1-thread-hijacking" id="step-1-thread-hijacking"></a>
 
-En esta técnica, se secuestra un hilo del proceso:
+En esta técnica, un hilo del proceso es secuestrado:
 
 {{#ref}}
 macos-thread-injection-via-task-port.md
@@ -1105,7 +1105,7 @@ Estas son algunas APIs interesantes para interactuar con el conjunto de procesad
 Como se mencionó en [**esta publicación**](https://reverse.put.as/2014/05/05/about-the-processor_set_tasks-access-to-kernel-memory-vulnerability/), en el pasado esto permitía eludir la protección mencionada anteriormente para obtener puertos de tarea en otros procesos y controlarlos llamando a **`processor_set_tasks`** y obteniendo un puerto de host en cada proceso.\
 Hoy en día, necesitas ser root para usar esa función y esto está protegido, por lo que solo podrás obtener estos puertos en procesos no protegidos.
 
-Puedes probarlo con:
+Puedes intentarlo con:
 
 <details>
 

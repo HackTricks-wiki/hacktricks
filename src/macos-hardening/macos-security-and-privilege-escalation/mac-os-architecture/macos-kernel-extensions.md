@@ -17,17 +17,17 @@ Obviamente, esto es tan poderoso que es **complicado cargar una extensión del k
 - La extensión del kernel debe estar **firmada con un certificado de firma de código del kernel**, que solo puede ser **otorgado por Apple**. Quien revisará en detalle la empresa y las razones por las que se necesita.
 - La extensión del kernel también debe estar **notarizada**, Apple podrá verificarla en busca de malware.
 - Luego, el usuario **root** es quien puede **cargar la extensión del kernel** y los archivos dentro del paquete deben **pertenecer a root**.
-- Durante el proceso de carga, el paquete debe estar preparado en una **ubicación protegida no root**: `/Library/StagedExtensions` (requiere el permiso `com.apple.rootless.storage.KernelExtensionManagement`).
-- Finalmente, al intentar cargarla, el usuario [**recibirá una solicitud de confirmación**](https://developer.apple.com/library/archive/technotes/tn2459/_index.html) y, si se acepta, la computadora debe ser **reiniciada** para cargarla.
+- Durante el proceso de carga, el paquete debe estar preparado en una **ubicación protegida no root**: `/Library/StagedExtensions` (requiere el otorgamiento `com.apple.rootless.storage.KernelExtensionManagement`).
+- Finalmente, al intentar cargarlo, el usuario [**recibirá una solicitud de confirmación**](https://developer.apple.com/library/archive/technotes/tn2459/_index.html) y, si se acepta, la computadora debe ser **reiniciada** para cargarlo.
 
-### Proceso de carga
+### Proceso de Carga
 
-En Catalina fue así: Es interesante notar que el proceso de **verificación** ocurre en **userland**. Sin embargo, solo las aplicaciones con el permiso **`com.apple.private.security.kext-management`** pueden **solicitar al kernel que cargue una extensión**: `kextcache`, `kextload`, `kextutil`, `kextd`, `syspolicyd`
+En Catalina fue así: Es interesante notar que el proceso de **verificación** ocurre en **userland**. Sin embargo, solo las aplicaciones con el otorgamiento **`com.apple.private.security.kext-management`** pueden **solicitar al kernel que cargue una extensión**: `kextcache`, `kextload`, `kextutil`, `kextd`, `syspolicyd`
 
 1. **`kextutil`** cli **inicia** el proceso de **verificación** para cargar una extensión
-- Se comunicará con **`kextd`** enviando usando un **servicio Mach**.
+- Hablará con **`kextd`** enviando usando un **servicio Mach**.
 2. **`kextd`** verificará varias cosas, como la **firma**
-- Se comunicará con **`syspolicyd`** para **verificar** si la extensión puede ser **cargada**.
+- Hablará con **`syspolicyd`** para **comprobar** si la extensión puede ser **cargada**.
 3. **`syspolicyd`** **preguntará** al **usuario** si la extensión no ha sido cargada previamente.
 - **`syspolicyd`** informará el resultado a **`kextd`**
 4. **`kextd`** finalmente podrá **decirle al kernel que cargue** la extensión
@@ -58,7 +58,7 @@ En mi caso en macOS lo encontré en:
 
 #### IMG4
 
-El formato de archivo IMG4 es un formato contenedor utilizado por Apple en sus dispositivos iOS y macOS para **almacenar y verificar de manera segura** componentes de firmware (como **kernelcache**). El formato IMG4 incluye un encabezado y varias etiquetas que encapsulan diferentes piezas de datos, incluyendo la carga útil real (como un kernel o cargador de arranque), una firma y un conjunto de propiedades de manifiesto. El formato admite verificación criptográfica, permitiendo que el dispositivo confirme la autenticidad e integridad del componente de firmware antes de ejecutarlo.
+El formato de archivo IMG4 es un formato contenedor utilizado por Apple en sus dispositivos iOS y macOS para **almacenar y verificar de manera segura** componentes de firmware (como **kernelcache**). El formato IMG4 incluye un encabezado y varias etiquetas que encapsulan diferentes piezas de datos, incluyendo la carga útil real (como un kernel o bootloader), una firma y un conjunto de propiedades de manifiesto. El formato admite verificación criptográfica, permitiendo que el dispositivo confirme la autenticidad e integridad del componente de firmware antes de ejecutarlo.
 
 Generalmente está compuesto por los siguientes componentes:
 

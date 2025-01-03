@@ -22,11 +22,11 @@ Ten en cuenta que MACF realmente no toma decisiones, ya que solo **intercepta** 
 
 ### Etiquetas
 
-MACF utiliza **etiquetas** que luego las políticas comprobarán si deben otorgar algún acceso o no. El código de la declaración de la estructura de etiquetas se puede [encontrar aquí](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/_label.h), que se utiliza dentro de la **`struct ucred`** en [**aquí**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/ucred.h#L86) en la parte de **`cr_label`**. La etiqueta contiene flags y un número de **slots** que pueden ser utilizados por **políticas MACF para asignar punteros**. Por ejemplo, Sanbox apuntará al perfil del contenedor.
+MACF utiliza **etiquetas** que luego las políticas comprobarán si deben otorgar algún acceso o no. El código de la declaración de la estructura de etiquetas se puede [encontrar aquí](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/_label.h), que se utiliza dentro de la **`struct ucred`** en [**aquí**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/ucred.h#L86) en la parte de **`cr_label`**. La etiqueta contiene flags y un número de **slots** que pueden ser utilizados por **políticas de MACF para asignar punteros**. Por ejemplo, Sanbox apuntará al perfil del contenedor.
 
-## Políticas MACF
+## Políticas de MACF
 
-Una Política MACF define **reglas y condiciones que se aplicarán en ciertas operaciones del kernel**.&#x20;
+Una Política de MACF define **reglas y condiciones que se aplicarán en ciertas operaciones del kernel**.&#x20;
 
 Una extensión del kernel podría configurar una estructura `mac_policy_conf` y luego registrarla llamando a `mac_policy_register`. Desde [aquí](https://opensource.apple.com/source/xnu/xnu-2050.18.24/security/mac_policy.h.auto.html):
 ```c
@@ -67,7 +67,7 @@ void			*mpc_data;		/** module data */
 ```
 Es fácil identificar las extensiones del kernel que configuran estas políticas al verificar las llamadas a `mac_policy_register`. Además, al revisar el desensamblado de la extensión, también es posible encontrar la estructura `mac_policy_conf` utilizada.
 
-Tenga en cuenta que las políticas MACF también se pueden registrar y anular **dinámicamente**.
+Tenga en cuenta que las políticas de MACF pueden registrarse y desregistrarse también **dinámicamente**.
 
 Uno de los campos principales de `mac_policy_conf` es **`mpc_ops`**. Este campo especifica qué operaciones le interesan a la política. Tenga en cuenta que hay cientos de ellas, por lo que es posible establecer todas en cero y luego seleccionar solo las que le interesan a la política. Desde [aquí](https://opensource.apple.com/source/xnu/xnu-2050.18.24/security/mac_policy.h.auto.html):
 ```c
@@ -137,7 +137,7 @@ panic("file_check_mmap increased max protections");
 return error;
 }
 ```
-El cual llama al macro `MAC_CHECK`, cuyo código se puede encontrar en [https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/mac_internal.h#L261](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/mac_internal.h#L261)
+El cual está llamando al macro `MAC_CHECK`, cuyo código se puede encontrar en [https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/mac_internal.h#L261](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/mac_internal.h#L261)
 ```c
 /*
 * MAC_CHECK performs the designated check by walking the policy
@@ -157,7 +157,7 @@ error = mac_error_select(__step_err, error);         \
 });                                                             \
 } while (0)
 ```
-Que revisará todas las políticas de mac registradas llamando a sus funciones y almacenando la salida dentro de la variable de error, que solo será sobreescribible por `mac_error_select` mediante códigos de éxito, por lo que si alguna verificación falla, la verificación completa fallará y la acción no será permitida.
+Lo que revisará todas las políticas de mac registradas llamando a sus funciones y almacenando la salida dentro de la variable de error, que solo será sobreescribible por `mac_error_select` mediante códigos de éxito, por lo que si alguna verificación falla, la verificación completa fallará y la acción no será permitida.
 
 > [!TIP]
 > Sin embargo, recuerda que no todos los llamados de MACF se utilizan solo para denegar acciones. Por ejemplo, `mac_priv_grant` llama al macro [**MAC_GRANT**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/mac_internal.h#L274), que otorgará el privilegio solicitado si alguna política responde con un 0:
@@ -204,9 +204,9 @@ goto skip_syscall;
 }
 #endif /* CONFIG_MACF */
 ```
-Que verificará en el proceso de llamada **bitmask** si la syscall actual debería llamar a `mac_proc_check_syscall_unix`. Esto se debe a que las syscalls se llaman con tanta frecuencia que es interesante evitar llamar a `mac_proc_check_syscall_unix` cada vez.
+Que verificará en el proceso que llama **bitmask** si la syscall actual debería llamar a `mac_proc_check_syscall_unix`. Esto se debe a que las syscalls se llaman con tanta frecuencia que es interesante evitar llamar a `mac_proc_check_syscall_unix` cada vez.
 
-Tenga en cuenta que la función `proc_set_syscall_filter_mask()`, que establece la bitmask de syscalls en un proceso, es llamada por Sandbox para establecer máscaras en procesos en sandbox.
+Tenga en cuenta que la función `proc_set_syscall_filter_mask()`, que establece la máscara de syscalls en un proceso, es llamada por Sandbox para establecer máscaras en procesos en sandbox.
 
 ## Syscalls MACF expuestas
 

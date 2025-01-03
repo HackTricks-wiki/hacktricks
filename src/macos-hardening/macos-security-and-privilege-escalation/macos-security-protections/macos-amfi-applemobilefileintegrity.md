@@ -4,31 +4,31 @@
 
 ## AppleMobileFileIntegrity.kext y amfid
 
-Se centra en hacer cumplir la integridad del código que se ejecuta en el sistema, proporcionando la lógica detrás de la verificación de la firma de código de XNU. También es capaz de verificar derechos y manejar otras tareas sensibles, como permitir la depuración u obtener puertos de tarea.
+Se centra en hacer cumplir la integridad del código que se ejecuta en el sistema, proporcionando la lógica detrás de la verificación de la firma de código de XNU. También puede verificar los derechos y manejar otras tareas sensibles, como permitir la depuración u obtener puertos de tarea.
 
 Además, para algunas operaciones, el kext prefiere contactar al espacio de usuario que ejecuta el demonio `/usr/libexec/amfid`. Esta relación de confianza ha sido abusada en varios jailbreaks.
 
-AMFI utiliza políticas de **MACF** y registra sus hooks en el momento en que se inicia. Además, prevenir su carga o descarga podría desencadenar un pánico del kernel. Sin embargo, hay algunos argumentos de arranque que permiten debilitar AMFI:
+AMFI utiliza políticas de **MACF** y registra sus hooks en el momento en que se inicia. Además, prevenir su carga o descarga podría provocar un pánico del kernel. Sin embargo, hay algunos argumentos de arranque que permiten debilitar AMFI:
 
-- `amfi_unrestricted_task_for_pid`: Permite que task_for_pid se permita sin derechos requeridos
-- `amfi_allow_any_signature`: Permite cualquier firma de código
+- `amfi_unrestricted_task_for_pid`: Permitir task_for_pid sin los derechos requeridos
+- `amfi_allow_any_signature`: Permitir cualquier firma de código
 - `cs_enforcement_disable`: Argumento a nivel de sistema utilizado para deshabilitar la aplicación de la firma de código
-- `amfi_prevent_old_entitled_platform_binaries`: Anula los binarios de plataforma con derechos
-- `amfi_get_out_of_my_way`: Desactiva amfi por completo
+- `amfi_prevent_old_entitled_platform_binaries`: Anular binarios de plataforma con derechos
+- `amfi_get_out_of_my_way`: Deshabilita amfi completamente
 
 Estas son algunas de las políticas de MACF que registra:
 
 - **`cred_check_label_update_execve:`** Se realizará una actualización de etiqueta y devolverá 1
-- **`cred_label_associate`**: Actualiza la ranura de etiqueta mac de AMFI con la etiqueta
-- **`cred_label_destroy`**: Elimina la ranura de etiqueta mac de AMFI
-- **`cred_label_init`**: Mueve 0 en la ranura de etiqueta mac de AMFI
+- **`cred_label_associate`**: Actualiza el slot de etiqueta mac de AMFI con la etiqueta
+- **`cred_label_destroy`**: Elimina el slot de etiqueta mac de AMFI
+- **`cred_label_init`**: Mueve 0 en el slot de etiqueta mac de AMFI
 - **`cred_label_update_execve`:** Verifica los derechos del proceso para ver si se le debe permitir modificar las etiquetas.
-- **`file_check_mmap`:** Verifica si mmap está adquiriendo memoria y configurándola como ejecutable. En ese caso, verifica si se necesita validación de biblioteca y, si es así, llama a la función de validación de biblioteca.
+- **`file_check_mmap`:** Verifica si mmap está adquiriendo memoria y configurándola como ejecutable. En ese caso, verifica si se necesita validación de biblioteca y, de ser así, llama a la función de validación de biblioteca.
 - **`file_check_library_validation`**: Llama a la función de validación de biblioteca que verifica, entre otras cosas, si un binario de plataforma está cargando otro binario de plataforma o si el proceso y el nuevo archivo cargado tienen el mismo TeamID. Ciertos derechos también permitirán cargar cualquier biblioteca.
 - **`policy_initbsd`**: Configura claves NVRAM de confianza
 - **`policy_syscall`**: Verifica políticas DYLD como si el binario tiene segmentos sin restricciones, si debe permitir variables de entorno... esto también se llama cuando un proceso se inicia a través de `amfi_check_dyld_policy_self()`.
 - **`proc_check_inherit_ipc_ports`**: Verifica si, cuando un proceso ejecuta un nuevo binario, otros procesos con derechos de ENVÍO sobre el puerto de tarea del proceso deben mantenerlos o no. Se permiten binarios de plataforma, el derecho `get-task-allow` lo permite, los derechos `task_for_pid-allow` son permitidos y los binarios con el mismo TeamID.
-- **`proc_check_expose_task`**: hace cumplir los derechos
+- **`proc_check_expose_task`**: hacer cumplir los derechos
 - **`amfi_exc_action_check_exception_send`**: Se envía un mensaje de excepción al depurador
 - **`amfi_exc_action_label_associate & amfi_exc_action_label_copy/populate & amfi_exc_action_label_destroy & amfi_exc_action_label_init & amfi_exc_action_label_update`**: Ciclo de vida de la etiqueta durante el manejo de excepciones (depuración)
 - **`proc_check_get_task`**: Verifica derechos como `get-task-allow` que permite a otros procesos obtener el puerto de tareas y `task_for_pid-allow`, que permite al proceso obtener los puertos de tareas de otros procesos. Si ninguno de esos, llama a `amfid permitunrestricteddebugging` para verificar si está permitido.
@@ -76,7 +76,7 @@ Una vez que se recibe un mensaje a través del puerto especial, **MIG** se utili
 
 ## Provisioning Profiles
 
-Un perfil de aprovisionamiento se puede utilizar para firmar código. Hay perfiles de **Desarrollador** que se pueden utilizar para firmar código y probarlo, y perfiles **Empresariales** que se pueden utilizar en todos los dispositivos.
+Un perfil de aprovisionamiento se puede utilizar para firmar código. Hay perfiles de **Desarrollador** que se pueden utilizar para firmar código y probarlo, y perfiles de **Empresa** que se pueden utilizar en todos los dispositivos.
 
 Después de que una aplicación se envía a la Apple Store, si es aprobada, es firmada por Apple y el perfil de aprovisionamiento ya no es necesario.
 
@@ -106,19 +106,19 @@ Aunque a veces se les llama certificados, estos perfiles de aprovisionamiento ti
 - **UUID**: Un Identificador Único Universal para este perfil
 - **Version**: Actualmente establecido en 1
 
-Tenga en cuenta que la entrada de derechos contendrá un conjunto restringido de derechos y el perfil de aprovisionamiento solo podrá otorgar esos derechos específicos para evitar otorgar derechos privados de Apple.
+Nota que la entrada de derechos contendrá un conjunto restringido de derechos y el perfil de aprovisionamiento solo podrá otorgar esos derechos específicos para evitar otorgar derechos privados de Apple.
 
-Tenga en cuenta que los perfiles generalmente se encuentran en `/var/MobileDeviceProvisioningProfiles` y es posible verificarlos con **`security cms -D -i /path/to/profile`**
+Nota que los perfiles generalmente se encuentran en `/var/MobileDeviceProvisioningProfiles` y es posible verificarlos con **`security cms -D -i /path/to/profile`**
 
 ## **libmis.dyld**
 
-Esta es la biblioteca externa que `amfid` llama para preguntar si debe permitir algo o no. Esto ha sido abusado históricamente en el jailbreak al ejecutar una versión con puerta trasera que permitiría todo.
+Esta es la biblioteca externa que `amfid` llama para preguntar si debe permitir algo o no. Esto ha sido abusado históricamente en el jailbreak ejecutando una versión con puerta trasera que permitiría todo.
 
 En macOS esto está dentro de `MobileDevice.framework`.
 
 ## AMFI Trust Caches
 
-iOS AMFI mantiene una lista de hashes conocidos que están firmados ad-hoc, llamada **Trust Cache** y se encuentra en la sección `__TEXT.__const` del kext. Tenga en cuenta que en operaciones muy específicas y sensibles es posible extender este Trust Cache con un archivo externo.
+iOS AMFI mantiene una lista de hashes conocidos que están firmados ad-hoc, llamada **Trust Cache** y se encuentra en la sección `__TEXT.__const` del kext. Nota que en operaciones muy específicas y sensibles es posible extender este Trust Cache con un archivo externo.
 
 ## References
 

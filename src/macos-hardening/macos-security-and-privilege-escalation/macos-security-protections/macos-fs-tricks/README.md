@@ -10,7 +10,7 @@ Permisos en un **directorio**:
 - **escribir** - puedes **eliminar/escribir** **archivos** en el directorio y puedes **eliminar carpetas vacías**.
 - Pero **no puedes eliminar/modificar carpetas no vacías** a menos que tengas permisos de escritura sobre ellas.
 - **No puedes modificar el nombre de una carpeta** a menos que seas el propietario.
-- **ejecutar** - se te **permite recorrer** el directorio - si no tienes este derecho, no puedes acceder a ningún archivo dentro de él, ni en ningún subdirectorio.
+- **ejecutar** - se te **permite recorrer** el directorio - si no tienes este derecho, no puedes acceder a ningún archivo dentro de él, ni en subdirectorios.
 
 ### Combinaciones Peligrosas
 
@@ -18,7 +18,7 @@ Permisos en un **directorio**:
 
 - Un **propietario de directorio** padre en la ruta es el usuario
 - Un **propietario de directorio** padre en la ruta es un **grupo de usuarios** con **acceso de escritura**
-- Un **grupo** de usuarios tiene **acceso de escritura** al **archivo**
+- Un **grupo** de usuarios tiene acceso de **escritura** al **archivo**
 
 Con cualquiera de las combinaciones anteriores, un atacante podría **inyectar** un **enlace simbólico/duro** en la ruta esperada para obtener una escritura arbitraria privilegiada.
 
@@ -30,7 +30,7 @@ Ejemplo en: [https://theevilbit.github.io/posts/exploiting_directory_permissions
 
 ## Enlace simbólico / Enlace duro
 
-### Archivo/carpeta permisivo
+### Archivo/carpeta permisiva
 
 Si un proceso privilegiado está escribiendo datos en un **archivo** que podría ser **controlado** por un **usuario de menor privilegio**, o que podría haber sido **creado previamente** por un usuario de menor privilegio. El usuario podría simplemente **apuntarlo a otro archivo** a través de un enlace simbólico o duro, y el proceso privilegiado escribirá en ese archivo.
 
@@ -122,7 +122,7 @@ ls -le /tmp/test
 
 El formato de archivo **AppleDouble** copia un archivo incluyendo sus ACEs.
 
-En el [**código fuente**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html) es posible ver que la representación de texto de la ACL almacenada dentro del xattr llamado **`com.apple.acl.text`** se establecerá como ACL en el archivo descomprimido. Así que, si comprimiste una aplicación en un archivo zip con el formato de archivo **AppleDouble** con una ACL que impide que otros xattrs sean escritos en él... el xattr de cuarentena no se estableció en la aplicación:
+En el [**código fuente**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copyfile.c.auto.html) es posible ver que la representación de texto de la ACL almacenada dentro del xattr llamado **`com.apple.acl.text`** se establecerá como ACL en el archivo descomprimido. Así que, si comprimiste una aplicación en un archivo zip con formato de archivo **AppleDouble** con una ACL que impide que otros xattrs sean escritos en él... el xattr de cuarentena no se estableció en la aplicación:
 
 Consulta el [**informe original**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) para más información.
 
@@ -156,7 +156,7 @@ macos-xattr-acls-extra-stuff.md
 
 ### Bypass de verificaciones de binarios de plataforma
 
-Al algunas verificaciones de seguridad se les verifica si el binario es un **binario de plataforma**, por ejemplo, para permitir la conexión a un servicio XPC. Sin embargo, como se expone en un bypass en https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/, es posible eludir esta verificación obteniendo un binario de plataforma (como /bin/ls) e inyectando el exploit a través de dyld usando una variable de entorno `DYLD_INSERT_LIBRARIES`.
+Algunas verificaciones de seguridad comprueban si el binario es un **binario de plataforma**, por ejemplo, para permitir la conexión a un servicio XPC. Sin embargo, como se expone en un bypass en https://jhftss.github.io/A-New-Era-of-macOS-Sandbox-Escapes/, es posible eludir esta verificación obteniendo un binario de plataforma (como /bin/ls) e inyectando el exploit a través de dyld usando una variable de entorno `DYLD_INSERT_LIBRARIES`.
 
 ### Bypass de las flags `CS_REQUIRE_LV` y `CS_FORCED_LV`
 
@@ -248,7 +248,7 @@ hdiutil detach /private/tmp/mnt 1>/dev/null
 # You can also create a dmg from an app using:
 hdiutil create -srcfolder justsome.app justsome.dmg
 ```
-Usualmente, macOS monta discos hablando con el servicio Mach `com.apple.DiskArbitration.diskarbitrationd` (proporcionado por `/usr/libexec/diskarbitrationd`). Si se agrega el parámetro `-d` al archivo plist de LaunchDaemons y se reinicia, almacenará registros en `/var/log/diskarbitrationd.log`.\
+Usualmente, macOS monta discos hablando con el servicio Mach `com.apple.DiskArbitrarion.diskarbitrariond` (proporcionado por `/usr/libexec/diskarbitrationd`). Si se agrega el parámetro `-d` al archivo plist de LaunchDaemons y se reinicia, almacenará registros en `/var/log/diskarbitrationd.log`.\
 Sin embargo, es posible usar herramientas como `hdik` y `hdiutil` para comunicarse directamente con el kext `com.apple.driver.DiskImages`.
 
 ## Escrituras Arbitrarias
@@ -326,7 +326,7 @@ echo $FILENAME
 ```
 ## Memoria Compartida POSIX
 
-**La memoria compartida POSIX** permite que los procesos en sistemas operativos compatibles con POSIX accedan a un área de memoria común, facilitando una comunicación más rápida en comparación con otros métodos de comunicación entre procesos. Implica crear o abrir un objeto de memoria compartida con `shm_open()`, establecer su tamaño con `ftruncate()`, y mapearlo en el espacio de direcciones del proceso usando `mmap()`. Los procesos pueden entonces leer y escribir directamente en esta área de memoria. Para gestionar el acceso concurrente y prevenir la corrupción de datos, a menudo se utilizan mecanismos de sincronización como mutexes o semáforos. Finalmente, los procesos desmapean y cierran la memoria compartida con `munmap()` y `close()`, y opcionalmente eliminan el objeto de memoria con `shm_unlink()`. Este sistema es especialmente efectivo para IPC eficiente y rápido en entornos donde múltiples procesos necesitan acceder a datos compartidos rápidamente.
+**La memoria compartida POSIX** permite a los procesos en sistemas operativos compatibles con POSIX acceder a un área de memoria común, facilitando una comunicación más rápida en comparación con otros métodos de comunicación entre procesos. Implica crear o abrir un objeto de memoria compartida con `shm_open()`, establecer su tamaño con `ftruncate()`, y mapearlo en el espacio de direcciones del proceso usando `mmap()`. Los procesos pueden luego leer y escribir directamente en esta área de memoria. Para gestionar el acceso concurrente y prevenir la corrupción de datos, a menudo se utilizan mecanismos de sincronización como mutexes o semáforos. Finalmente, los procesos desmapean y cierran la memoria compartida con `munmap()` y `close()`, y opcionalmente eliminan el objeto de memoria con `shm_unlink()`. Este sistema es especialmente efectivo para IPC eficiente y rápido en entornos donde múltiples procesos necesitan acceder a datos compartidos rápidamente.
 
 <details>
 

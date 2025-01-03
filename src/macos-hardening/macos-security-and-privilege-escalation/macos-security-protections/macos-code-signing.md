@@ -144,7 +144,7 @@ openssl sha256 /tmp/*.page.*
 ```
 ## Entitlements Blob
 
-Tenga en cuenta que las aplicaciones también pueden contener un **entitlement blob** donde se definen todos los derechos. Además, algunos binarios de iOS pueden tener sus derechos específicos en el slot especial -7 (en lugar de en el slot especial -5 de derechos).
+Tenga en cuenta que las aplicaciones también pueden contener un **entitlement blob** donde se definen todos los derechos. Además, algunos binarios de iOS pueden tener sus derechos específicos en el slot especial -7 (en lugar de en el slot especial de derechos -5).
 
 ## Special Slots
 
@@ -270,7 +270,7 @@ Es posible acceder a esta información y crear o modificar requisitos con alguna
 
 - **`SecStaticCodeCheckValidity`**: Valida un objeto de código estático contra requisitos especificados.
 
-#### **APIs Adicionales Útiles**
+#### **APIs Útiles Adicionales**
 
 - **`SecCodeCopy[Internal/Designated]Requirement`: Obtener SecRequirementRef de SecCodeRef**
 - **`SecCodeCopyGuestWithAttributes`**: Crea un `SecCodeRef` que representa un objeto de código basado en atributos específicos, útil para el sandboxing.
@@ -290,7 +290,7 @@ El **kernel** es el que **verifica la firma de código** antes de permitir que e
 
 ## `cs_blobs` & `cs_blob`
 
-[**cs_blob**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/ubc_internal.h#L106) la estructura contiene la información sobre el derecho de la proceso en ejecución sobre él. `csb_platform_binary` también informa si la aplicación es un binario de plataforma (lo cual es verificado en diferentes momentos por el OS para aplicar mecanismos de seguridad como proteger los derechos de SEND a los puertos de tarea de estos procesos).
+[**cs_blob**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/ubc_internal.h#L106) la estructura contiene la información sobre el derecho de la proceso en ejecución sobre él. `csb_platform_binary` también informa si la aplicación es un binario de plataforma (que es verificado en diferentes momentos por el OS para aplicar mecanismos de seguridad como proteger los derechos de SEND a los puertos de tarea de estos procesos).
 ```c
 struct cs_blob {
 struct cs_blob  *csb_next;

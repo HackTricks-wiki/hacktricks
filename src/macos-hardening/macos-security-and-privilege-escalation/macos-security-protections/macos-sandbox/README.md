@@ -8,7 +8,7 @@ MacOS Sandbox (inicialmente llamado Seatbelt) **limita las aplicaciones** que se
 
 Cualquier aplicación con la **entitlement** **`com.apple.security.app-sandbox`** se ejecutará dentro del sandbox. **Los binarios de Apple** generalmente se ejecutan dentro de un Sandbox, y todas las aplicaciones de la **App Store tienen esa entitlement**. Por lo tanto, varias aplicaciones se ejecutarán dentro del sandbox.
 
-Para controlar lo que un proceso puede o no hacer, el **Sandbox tiene hooks** en casi cualquier operación que un proceso podría intentar (incluyendo la mayoría de las syscalls) utilizando **MACF**. Sin embargo, **dependiendo** de las **entitlements** de la aplicación, el Sandbox podría ser más permisivo con el proceso.
+Para controlar lo que un proceso puede o no puede hacer, el **Sandbox tiene hooks** en casi cualquier operación que un proceso podría intentar (incluyendo la mayoría de las syscalls) utilizando **MACF**. Sin embargo, **dependiendo** de las **entitlements** de la aplicación, el Sandbox podría ser más permisivo con el proceso.
 
 Algunos componentes importantes del Sandbox son:
 
@@ -56,7 +56,7 @@ drwx------   2 username  staff    64 Mar 24 18:02 tmp
 > [!CAUTION]
 > Tenga en cuenta que incluso si los symlinks están ahí para "escapar" del Sandbox y acceder a otras carpetas, la App aún necesita **tener permisos** para acceder a ellas. Estos permisos están dentro del **`.plist`** en los `RedirectablePaths`.
 
-El **`SandboxProfileData`** es el perfil de sandbox compilado CFData escapado a B64.
+Los **`SandboxProfileData`** son el perfil de sandbox compilado CFData escapado a B64.
 ```bash
 # Get container config
 ## You need FDA to access the file, not even just root can read it
@@ -131,7 +131,7 @@ Aquí puedes encontrar un ejemplo:
 )
 ```
 > [!TIP]
-> Consulta esta [**investigación**](https://reverse.put.as/2011/09/14/apple-sandbox-guide-v1-0/) **para ver más acciones que podrían ser permitidas o denegadas.**
+> Consulta esta [**investigación**](https://reverse.put.as/2011/09/14/apple-sandbox-guide-v1-0/) **para verificar más acciones que podrían ser permitidas o denegadas.**
 >
 > Ten en cuenta que en la versión compilada de un perfil, el nombre de las operaciones es sustituido por sus entradas en un array conocido por el dylib y el kext, haciendo que la versión compilada sea más corta y más difícil de leer.
 
@@ -237,13 +237,13 @@ También es posible hacer algo similar llamando a `sandbox_vtrace_enable()` y lu
 
 MacOS almacena los perfiles de sandbox del sistema en dos ubicaciones: **/usr/share/sandbox/** y **/System/Library/Sandbox/Profiles**.
 
-Y si una aplicación de terceros tiene el _**com.apple.security.app-sandbox**_ derecho, el sistema aplica el perfil **/System/Library/Sandbox/Profiles/application.sb** a ese proceso.
+Y si una aplicación de terceros tiene el derecho _**com.apple.security.app-sandbox**_, el sistema aplica el perfil **/System/Library/Sandbox/Profiles/application.sb** a ese proceso.
 
 En iOS, el perfil predeterminado se llama **container** y no tenemos la representación de texto SBPL. En memoria, este sandbox se representa como un árbol binario de Permitir/Denegar para cada permiso del sandbox.
 
 ### SBPL personalizado en aplicaciones de la App Store
 
-Podría ser posible que las empresas hicieran que sus aplicaciones funcionaran **con perfiles de Sandbox personalizados** (en lugar de con el predeterminado). Necesitan usar el derecho **`com.apple.security.temporary-exception.sbpl`** que debe ser autorizado por Apple.
+Podría ser posible que las empresas hagan que sus aplicaciones se ejecuten **con perfiles de Sandbox personalizados** (en lugar de con el predeterminado). Necesitan usar el derecho **`com.apple.security.temporary-exception.sbpl`** que debe ser autorizado por Apple.
 
 Es posible verificar la definición de este derecho en **`/System/Library/Sandbox/Profiles/application.sb:`**
 ```scheme
@@ -257,7 +257,7 @@ Esto **evalúa la cadena después de este derecho** como un perfil de Sandbox.
 
 ### Compilación y descompilación de un perfil de Sandbox
 
-La herramienta **`sandbox-exec`** utiliza las funciones `sandbox_compile_*` de `libsandbox.dylib`. Las funciones principales exportadas son: `sandbox_compile_file` (espera una ruta de archivo, parámetro `-f`), `sandbox_compile_string` (espera una cadena, parámetro `-p`), `sandbox_compile_name` (espera un nombre de contenedor, parámetro `-n`), `sandbox_compile_entitlements` (espera un plist de derechos).
+La herramienta **`sandbox-exec`** utiliza las funciones `sandbox_compile_*` de `libsandbox.dylib`. Las principales funciones exportadas son: `sandbox_compile_file` (espera una ruta de archivo, parámetro `-f`), `sandbox_compile_string` (espera una cadena, parámetro `-p`), `sandbox_compile_name` (espera un nombre de contenedor, parámetro `-n`), `sandbox_compile_entitlements` (espera un plist de derechos).
 
 Esta versión revertida y [**de código abierto de la herramienta sandbox-exec**](https://newosxbook.com/src.jl?tree=listings&file=/sandbox_exec.c) permite que **`sandbox-exec`** escriba en un archivo el perfil de sandbox compilado.
 
@@ -265,9 +265,9 @@ Además, para confinar un proceso dentro de un contenedor, puede llamar a `sandb
 
 ## Depurar y eludir el Sandbox
 
-En macOS, a diferencia de iOS donde los procesos están en sandbox desde el inicio por el kernel, **los procesos deben optar por el sandbox ellos mismos**. Esto significa que en macOS, un proceso no está restringido por el sandbox hasta que decide activamente entrar en él, aunque las aplicaciones de la App Store siempre están en sandbox.
+En macOS, a diferencia de iOS donde los procesos están aislados desde el inicio por el kernel, **los procesos deben optar por el sandbox ellos mismos**. Esto significa que en macOS, un proceso no está restringido por el sandbox hasta que decide activamente entrar en él, aunque las aplicaciones de la App Store siempre están aisladas.
 
-Los procesos se en sandbox automáticamente desde el userland cuando comienzan si tienen el derecho: `com.apple.security.app-sandbox`. Para una explicación detallada de este proceso, consulta:
+Los procesos se aíslan automáticamente desde el userland cuando comienzan si tienen el derecho: `com.apple.security.app-sandbox`. Para una explicación detallada de este proceso, consulta:
 
 {{#ref}}
 macos-sandbox-debug-and-bypass/
@@ -346,7 +346,7 @@ La llamada a la función `___sandbox_ms` envuelve `mac_syscall` indicando en el 
 - **rootless_whitelist_push (#31)**: (macOS) Aplica un archivo de manifiesto de Protección de Integridad del Sistema (SIP).
 - **rootless_whitelist_check (preflight) (#32)**: Verifica el archivo de manifiesto SIP antes de la ejecución.
 - **rootless_protected_volume (#33)**: (macOS) Aplica protecciones SIP a un disco o partición.
-- **rootless_mkdir_protected (#34)**: Aplica protección SIP/DataVault a un proceso de creación de directorio.
+- **rootless_mkdir_protected (#34)**: Aplica protección SIP/DataVault a un proceso de creación de directorios.
 
 ## Sandbox.kext
 

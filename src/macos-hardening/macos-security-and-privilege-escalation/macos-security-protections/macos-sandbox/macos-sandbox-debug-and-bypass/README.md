@@ -107,7 +107,7 @@ Varios ejemplos que abusan de esta técnica se pueden encontrar en el [**escrito
 
 #### /System/Library/PrivateFrameworks/StorageKit.framework/XPCServices/storagekitfsrunner.xpc
 
-Este servicio permite todas las conexiones XPC al devolver siempre `YES` y el método `runTask:arguments:withReply:` ejecuta un comando arbitrario con parámetros arbitrarios.
+Este servicio permite cada conexión XPC al devolver siempre `YES` y el método `runTask:arguments:withReply:` ejecuta un comando arbitrario con parámetros arbitrarios.
 
 La explotación fue "tan simple como":
 ```objectivec
@@ -130,9 +130,9 @@ NSLog(@"run task result:%@, error:%@", bSucc, error);
 ```
 #### /System/Library/PrivateFrameworks/AudioAnalyticsInternal.framework/XPCServices/AudioAnalyticsHelperService.xpc
 
-Este servicio XPC permitía a cada cliente al devolver siempre YES y el método `createZipAtPath:hourThreshold:withReply:` básicamente permitía indicar la ruta a una carpeta para comprimir y la comprimiría en un archivo ZIP.
+Este servicio XPC permitía a cada cliente siempre devolver YES y el método `createZipAtPath:hourThreshold:withReply:` básicamente permitía indicar la ruta a una carpeta para comprimir y la comprimiría en un archivo ZIP.
 
-Por lo tanto, es posible generar una estructura de carpeta de aplicación falsa, comprimirla, luego descomprimirla y ejecutarla para escapar del sandbox ya que los nuevos archivos no tendrán el atributo de cuarentena.
+Por lo tanto, es posible generar una estructura de carpeta de aplicación falsa, comprimirla, luego descomprimirla y ejecutarla para escapar del sandbox, ya que los nuevos archivos no tendrán el atributo de cuarentena.
 
 La explotación fue:
 ```objectivec
@@ -207,7 +207,7 @@ NSLog(@"Read the target content:%@", [NSData dataWithContentsOfURL:targetURL]);
 
 [**Esta investigación**](https://saagarjha.com/blog/2020/05/20/mac-app-store-sandbox-escape/) descubrió 2 formas de eludir el Sandbox. Debido a que el sandbox se aplica desde el espacio de usuario cuando se carga la biblioteca **libSystem**. Si un binario pudiera evitar cargarla, nunca sería sandboxed:
 
-- Si el binario estuviera **completamente compilado de forma estática**, podría evitar cargar esa biblioteca.
+- Si el binario estuviera **completamente compilado estáticamente**, podría evitar cargar esa biblioteca.
 - Si el **binario no necesitara cargar ninguna biblioteca** (porque el enlazador también está en libSystem), no necesitará cargar libSystem.
 
 ### Shellcodes

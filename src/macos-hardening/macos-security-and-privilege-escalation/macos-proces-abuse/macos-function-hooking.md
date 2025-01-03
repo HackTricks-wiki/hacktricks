@@ -86,7 +86,7 @@ También tenga en cuenta que **la interposición ocurre entre el proceso y las b
 
 Ahora también es posible interponer una función dinámicamente utilizando la función **`dyld_dynamic_interpose`**. Esto permite interponer programáticamente una función en tiempo de ejecución en lugar de hacerlo solo desde el principio.
 
-Solo es necesario indicar los **tuples** de la **función a reemplazar y la función de reemplazo**.
+Solo es necesario indicar las **tuplas** de la **función a reemplazar y la función de reemplazo**.
 ```c
 struct dyld_interpose_tuple {
 const void* replacement;
@@ -95,22 +95,22 @@ const void* replacee;
 extern void dyld_dynamic_interpose(const struct mach_header* mh,
 const struct dyld_interpose_tuple array[], size_t count);
 ```
-## Intercambio de Métodos
+## Method Swizzling
 
 En ObjectiveC, así es como se llama a un método: **`[myClassInstance nameOfTheMethodFirstParam:param1 secondParam:param2]`**
 
-Se necesita el **objeto**, el **método** y los **parámetros**. Y cuando se llama a un método, se envía un **msg** utilizando la función **`objc_msgSend`**: `int i = ((int (*)(id, SEL, NSString *, NSString *))objc_msgSend)(someObject, @selector(method1p1:p2:), value1, value2);`
+Se necesita el **objeto**, el **método** y los **params**. Y cuando se llama a un método, se envía un **msg** utilizando la función **`objc_msgSend`**: `int i = ((int (*)(id, SEL, NSString *, NSString *))objc_msgSend)(someObject, @selector(method1p1:p2:), value1, value2);`
 
 El objeto es **`someObject`**, el método es **`@selector(method1p1:p2:)`** y los argumentos son **value1**, **value2**.
 
-Siguiendo las estructuras de objetos, es posible acceder a un **array de métodos** donde se **ubican** los **nombres** y los **punteros** al código del método.
+Siguiendo las estructuras de objetos, es posible acceder a un **array de métodos** donde se **ubican** los **nombres** y **punteros** al código del método.
 
 > [!CAUTION]
-> Tenga en cuenta que, dado que los métodos y las clases se acceden en función de sus nombres, esta información se almacena en el binario, por lo que es posible recuperarla con `otool -ov </path/bin>` o [`class-dump </path/bin>`](https://github.com/nygard/class-dump)
+> Tenga en cuenta que, dado que los métodos y clases se acceden en función de sus nombres, esta información se almacena en el binario, por lo que es posible recuperarla con `otool -ov </path/bin>` o [`class-dump </path/bin>`](https://github.com/nygard/class-dump)
 
-### Accediendo a los métodos en bruto
+### Accessing the raw methods
 
-Es posible acceder a la información de los métodos, como el nombre, el número de parámetros o la dirección, como en el siguiente ejemplo:
+Es posible acceder a la información de los métodos, como el nombre, el número de params o la dirección, como en el siguiente ejemplo:
 ```objectivec
 // gcc -framework Foundation test.m -o test
 
@@ -234,7 +234,7 @@ return 0;
 
 El formato anterior es extraño porque estás cambiando la implementación de 2 métodos uno por el otro. Usando la función **`method_setImplementation`** puedes **cambiar** la **implementación** de un **método por el otro**.
 
-Solo recuerda **almacenar la dirección de la implementación del original** si vas a llamarlo desde la nueva implementación antes de sobrescribirlo, porque más tarde será mucho más complicado localizar esa dirección.
+Solo recuerda **almacenar la dirección de la implementación del original** si vas a llamarlo desde la nueva implementación antes de sobrescribirlo, porque después será mucho más complicado localizar esa dirección.
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
@@ -294,7 +294,7 @@ Para hacer eso, la técnica más fácil de usar es inyectar un [Dyld a través d
 
 Sin embargo, ambas opciones están **limitadas** a binarios/procesos **no protegidos**. Revisa cada técnica para aprender más sobre las limitaciones.
 
-Sin embargo, un ataque de hooking de función es muy específico, un atacante hará esto para **robar información sensible desde dentro de un proceso** (si no, simplemente harías un ataque de inyección de proceso). Y esta información sensible podría estar ubicada en aplicaciones descargadas por el usuario, como MacPass.
+Sin embargo, un ataque de hooking de funciones es muy específico, un atacante hará esto para **robar información sensible desde dentro de un proceso** (si no, simplemente harías un ataque de inyección de proceso). Y esta información sensible podría estar ubicada en aplicaciones descargadas por el usuario, como MacPass.
 
 Así que el vector del atacante sería encontrar una vulnerabilidad o eliminar la firma de la aplicación, inyectar la variable de entorno **`DYLD_INSERT_LIBRARIES`** a través del Info.plist de la aplicación añadiendo algo como:
 ```xml
@@ -311,7 +311,7 @@ y luego **volver a registrar** la aplicación:
 Agrega en esa biblioteca el código de hooking para exfiltrar la información: Contraseñas, mensajes...
 
 > [!CAUTION]
-> Ten en cuenta que en versiones más recientes de macOS, si **eliminaste la firma** del binario de la aplicación y se ejecutó previamente, macOS **ya no ejecutará la aplicación**.
+> Ten en cuenta que en versiones más recientes de macOS, si **eliminaste la firma** del binario de la aplicación y se ejecutó previamente, macOS **no ejecutará la aplicación** más.
 
 #### Ejemplo de biblioteca
 ```objectivec

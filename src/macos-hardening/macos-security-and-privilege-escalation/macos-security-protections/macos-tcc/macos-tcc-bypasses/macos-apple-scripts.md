@@ -5,7 +5,7 @@
 ## Apple Scripts
 
 Es un lenguaje de scripting utilizado para la automatización de tareas **interactuando con procesos remotos**. Facilita bastante **pedir a otros procesos que realicen algunas acciones**. **El malware** puede abusar de estas características para aprovechar funciones exportadas por otros procesos.\
-Por ejemplo, un malware podría **inyectar código JS arbitrario en las páginas abiertas del navegador**. O **hacer clic automáticamente** en algunos permisos de autorización solicitados al usuario;
+Por ejemplo, un malware podría **inyectar código JS arbitrario en las páginas abiertas del navegador**. O **hacer clic automáticamente** en algunos permisos permitidos solicitados al usuario;
 ```applescript
 tell window 1 of process "SecurityAgent"
 click button "Always Allow" of group 1

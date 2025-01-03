@@ -11,9 +11,9 @@ El mecanismo clave de Gatekeeper radica en su proceso de **verificación**. Veri
 
 Además, Gatekeeper refuerza el control y la seguridad del usuario al **solicitar a los usuarios que aprueben la apertura** del software descargado por primera vez. Esta salvaguarda ayuda a prevenir que los usuarios ejecuten inadvertidamente código ejecutable potencialmente dañino que pueden haber confundido con un archivo de datos inofensivo.
 
-### Application Signatures
+### Firmas de Aplicación
 
-Las firmas de aplicaciones, también conocidas como firmas de código, son un componente crítico de la infraestructura de seguridad de Apple. Se utilizan para **verificar la identidad del autor del software** (el desarrollador) y para asegurar que el código no ha sido alterado desde que fue firmado por última vez.
+Las firmas de aplicación, también conocidas como firmas de código, son un componente crítico de la infraestructura de seguridad de Apple. Se utilizan para **verificar la identidad del autor del software** (el desarrollador) y para asegurar que el código no ha sido alterado desde que fue firmado por última vez.
 
 Así es como funciona:
 
@@ -21,11 +21,11 @@ Así es como funciona:
 2. **Distribuir la Aplicación:** La aplicación firmada se distribuye a los usuarios junto con el certificado del desarrollador, que contiene la clave pública correspondiente.
 3. **Verificar la Aplicación:** Cuando un usuario descarga e intenta ejecutar la aplicación, su sistema operativo Mac utiliza la clave pública del certificado del desarrollador para descifrar el hash. Luego recalcula el hash basado en el estado actual de la aplicación y lo compara con el hash descifrado. Si coinciden, significa que **la aplicación no ha sido modificada** desde que el desarrollador la firmó, y el sistema permite que la aplicación se ejecute.
 
-Las firmas de aplicaciones son una parte esencial de la tecnología Gatekeeper de Apple. Cuando un usuario intenta **abrir una aplicación descargada de internet**, Gatekeeper verifica la firma de la aplicación. Si está firmada con un certificado emitido por Apple a un desarrollador conocido y el código no ha sido alterado, Gatekeeper permite que la aplicación se ejecute. De lo contrario, bloquea la aplicación y alerta al usuario.
+Las firmas de aplicación son una parte esencial de la tecnología Gatekeeper de Apple. Cuando un usuario intenta **abrir una aplicación descargada de internet**, Gatekeeper verifica la firma de la aplicación. Si está firmada con un certificado emitido por Apple a un desarrollador conocido y el código no ha sido alterado, Gatekeeper permite que la aplicación se ejecute. De lo contrario, bloquea la aplicación y alerta al usuario.
 
 A partir de macOS Catalina, **Gatekeeper también verifica si la aplicación ha sido notarizada** por Apple, añadiendo una capa adicional de seguridad. El proceso de notarización verifica la aplicación en busca de problemas de seguridad conocidos y código malicioso, y si estas verificaciones son aprobadas, Apple añade un ticket a la aplicación que Gatekeeper puede verificar.
 
-#### Check Signatures
+#### Verificar Firmas
 
 Al verificar alguna **muestra de malware**, siempre debes **verificar la firma** del binario, ya que el **desarrollador** que lo firmó puede estar ya **relacionado** con **malware.**
 ```bash
@@ -90,7 +90,7 @@ anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] exists an
 Nota cómo la primera regla terminó en "**App Store**" y la segunda en "**Developer ID**" y que en la imagen anterior estaba **habilitado para ejecutar aplicaciones de la App Store y desarrolladores identificados**.\
 Si **modificas** esa configuración a App Store, las "**reglas de Developer ID Notarizado" desaparecerán**.
 
-También hay miles de reglas de **tipo GKE** :
+También hay miles de reglas de **tipo GKE**:
 ```bash
 SELECT requirement,allow,disabled,label from authority where label = 'GKE' limit 5;
 cdhash H"b40281d347dc574ae0850682f0fd1173aa2d0a39"|1|0|GKE
@@ -142,7 +142,7 @@ sudo spctl --enable --label "whitelist"
 spctl --assess -v /Applications/App.app
 /Applications/App.app: accepted
 ```
-Respecto a las **extensiones del kernel**, la carpeta `/var/db/SystemPolicyConfiguration` contiene archivos con listas de kexts permitidos para ser cargados. Además, `spctl` tiene el derecho `com.apple.private.iokit.nvram-csr` porque es capaz de agregar nuevas extensiones del kernel preaprobadas que también deben guardarse en NVRAM en una clave `kext-allowed-teams`.
+Respecto a las **extensiones del kernel**, la carpeta `/var/db/SystemPolicyConfiguration` contiene archivos con listas de kexts permitidos para ser cargados. Además, `spctl` tiene el derecho `com.apple.private.iokit.nvram-csr` porque es capaz de agregar nuevas extensiones del kernel preaprobadas que también necesitan ser guardadas en NVRAM en una clave `kext-allowed-teams`.
 
 ### Archivos de Cuarentena
 
@@ -321,11 +321,11 @@ Sin embargo, ahora esto no es posible porque macOS **previene la modificación d
 
 ## Bypasses de Gatekeeper
 
-Cualquier forma de eludir Gatekeeper (lograr que el usuario descargue algo y lo ejecute cuando Gatekeeper debería prohibirlo) se considera una vulnerabilidad en macOS. Estos son algunos CVEs asignados a técnicas que permitieron eludir Gatekeeper en el pasado:
+Cualquier forma de eludir Gatekeeper (lograr que el usuario descargue algo y lo ejecute cuando Gatekeeper debería deshabilitarlo) se considera una vulnerabilidad en macOS. Estos son algunos CVEs asignados a técnicas que permitieron eludir Gatekeeper en el pasado:
 
 ### [CVE-2021-1810](https://labs.withsecure.com/publications/the-discovery-of-cve-2021-1810)
 
-Se observó que si se utiliza la **Utilidad de Archivos** para la extracción, los archivos con **rutas que superan los 886 caracteres** no reciben el atributo extendido com.apple.quarantine. Esta situación permite inadvertidamente que esos archivos **eludan las** verificaciones de seguridad de Gatekeeper.
+Se observó que si se utiliza la **Utilidad de Archivos** para la extracción, los archivos con **rutas que exceden 886 caracteres** no reciben el atributo extendido com.apple.quarantine. Esta situación permite inadvertidamente que esos archivos **eludan las** verificaciones de seguridad de Gatekeeper.
 
 Consulta el [**informe original**](https://labs.withsecure.com/publications/the-discovery-of-cve-2021-1810) para más información.
 
@@ -341,7 +341,7 @@ Consulta el [**informe original**](https://ronmasas.com/posts/bypass-macos-gatek
 
 ### [CVE-2022-22616](https://www.jamf.com/blog/jamf-threat-labs-safari-vuln-gatekeeper-bypass/)
 
-En este bypass se creó un archivo zip con una aplicación comenzando a comprimir desde `application.app/Contents` en lugar de `application.app`. Por lo tanto, el **atributo de cuarentena** se aplicó a todos los **archivos de `application.app/Contents`** pero **no a `application.app`**, que era lo que Gatekeeper estaba verificando, por lo que Gatekeeper fue eludido porque cuando se activó `application.app` **no tenía el atributo de cuarentena.**
+En este bypass se creó un archivo zip con una aplicación comenzando a comprimir desde `application.app/Contents` en lugar de `application.app`. Por lo tanto, el **atributo de cuarentena** se aplicó a todos los **archivos de `application.app/Contents`** pero **no a `application.app`**, que es lo que Gatekeeper estaba verificando, por lo que Gatekeeper fue eludido porque cuando se activó `application.app` **no tenía el atributo de cuarentena.**
 ```bash
 zip -r test.app/Contents test.zip
 ```
@@ -398,7 +398,7 @@ aa archive -d test/ -o test.aar
 
 # If you downloaded the resulting test.aar and decompress it, the file test/._a won't have a quarantitne attribute
 ```
-Al poder crear un archivo que no tendrá el atributo de cuarentena, fue **posible eludir Gatekeeper.** El truco era **crear una aplicación de archivo DMG** utilizando la convención de nombres AppleDouble (comenzar con `._`) y crear un **archivo visible como un enlace simbólico a este archivo oculto** sin el atributo de cuarentena.\
+Al poder crear un archivo que no tendrá el atributo de cuarentena, fue **posible eludir Gatekeeper.** El truco fue **crear una aplicación de archivo DMG** utilizando la convención de nombres AppleDouble (comenzar con `._`) y crear un **archivo visible como un enlace simbólico a este archivo oculto** sin el atributo de cuarentena.\
 Cuando se **ejecuta el archivo dmg**, como no tiene un atributo de cuarentena, **eludirá Gatekeeper.**
 ```bash
 # Create an app bundle with the backdoor an call it app.app

@@ -14,13 +14,13 @@ Los principales beneficios de XPC incluyen:
 2. **Estabilidad**: XPC ayuda a aislar los bloqueos al componente donde ocurren. Si un proceso falla, puede reiniciarse sin afectar al resto del sistema.
 3. **Rendimiento**: XPC permite una fácil concurrencia, ya que diferentes tareas pueden ejecutarse simultáneamente en diferentes procesos.
 
-El único **inconveniente** es que **separar una aplicación en varios procesos** que se comunican a través de XPC es **menos eficiente**. Pero en los sistemas de hoy esto no es casi notable y los beneficios son mejores.
+El único **inconveniente** es que **separar una aplicación en varios procesos** que se comunican a través de XPC es **menos eficiente**. Pero en los sistemas actuales esto no es casi notable y los beneficios son mejores.
 
 ## Servicios XPC Específicos de la Aplicación
 
 Los componentes XPC de una aplicación están **dentro de la propia aplicación.** Por ejemplo, en Safari puedes encontrarlos en **`/Applications/Safari.app/Contents/XPCServices`**. Tienen la extensión **`.xpc`** (como **`com.apple.Safari.SandboxBroker.xpc`**) y **también son paquetes** con el binario principal dentro de él: `/Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/MacOS/com.apple.Safari.SandboxBroker` y un `Info.plist: /Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/Info.plist`
 
-Como podrías estar pensando, un **componente XPC tendrá diferentes derechos y privilegios** que los otros componentes XPC o el binario principal de la aplicación. EXCEPTO si un servicio XPC está configurado con [**JoinExistingSession**](https://developer.apple.com/documentation/bundleresources/information_property_list/xpcservice/joinexistingsession) establecido en “True” en su archivo **Info.plist**. En este caso, el servicio XPC se ejecutará en la **misma sesión de seguridad que la aplicación** que lo llamó.
+Como podrías estar pensando, un **componente XPC tendrá diferentes derechos y privilegios** que los otros componentes XPC o el binario principal de la aplicación. EXCEPTO si un servicio XPC está configurado con [**JoinExistingSession**](https://developer.apple.com/documentation/bundleresources/information_property_list/xpcservice/joinexistingsession) establecido en “True” en su **Info.plist**. En este caso, el servicio XPC se ejecutará en la **misma sesión de seguridad que la aplicación** que lo llamó.
 
 Los servicios XPC son **iniciados** por **launchd** cuando se requieren y **se apagan** una vez que todas las tareas están **completas** para liberar recursos del sistema. **Los componentes XPC específicos de la aplicación solo pueden ser utilizados por la aplicación**, reduciendo así el riesgo asociado con posibles vulnerabilidades.
 
@@ -118,7 +118,7 @@ La utilidad `xpcproxy` utiliza el prefijo `0x22`, por ejemplo: `0x2200001c: xpcp
 
 Las aplicaciones pueden **suscribirse** a diferentes **mensajes** de evento, lo que les permite ser **iniciadas bajo demanda** cuando ocurren tales eventos. La **configuración** para estos servicios se realiza en los **archivos plist de launchd**, ubicados en los **mismos directorios que los anteriores** y que contienen una clave adicional **`LaunchEvent`**.
 
-### Verificación del Proceso de Conexión XPC
+### Verificación del Proceso Conectado XPC
 
 Cuando un proceso intenta llamar a un método a través de una conexión XPC, el **servicio XPC debe verificar si ese proceso tiene permitido conectarse**. Aquí están las formas comunes de verificar eso y las trampas comunes:
 
@@ -136,7 +136,7 @@ macos-xpc-authorization.md
 
 ## Sniffer XPC
 
-Para espiar los mensajes XPC, podrías usar [**xpcspy**](https://github.com/hot3eed/xpcspy), que utiliza **Frida**.
+Para espiar los mensajes XPC, podrías usar [**xpcspy**](https://github.com/hot3eed/xpcspy) que utiliza **Frida**.
 ```bash
 # Install
 pip3 install xpcspy

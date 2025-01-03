@@ -6,7 +6,7 @@
 
 Cuando un **servicio XPC** de macOS está verificando el proceso llamado basado en el **PID** y no en el **token de auditoría**, es vulnerable a un ataque de reutilización de PID. Este ataque se basa en una **condición de carrera** donde un **exploit** va a **enviar mensajes al servicio XPC** **abusando** de la funcionalidad y justo **después** de eso, ejecutando **`posix_spawn(NULL, target_binary, NULL, &attr, target_argv, environ)`** con el binario **permitido**.
 
-Esta función hará que el **binario permitido tenga el PID**, pero el **mensaje XPC malicioso se habría enviado** justo antes. Así que, si el servicio **XPC** **usa** el **PID** para **autenticar** al remitente y lo verifica **DESPUÉS** de la ejecución de **`posix_spawn`**, pensará que proviene de un proceso **autorizado**.
+Esta función hará que el **binario permitido tenga el PID** pero el **mensaje XPC malicioso se habría enviado** justo antes. Así que, si el servicio **XPC** **usa** el **PID** para **autenticar** al remitente y lo verifica **DESPUÉS** de la ejecución de **`posix_spawn`**, pensará que proviene de un proceso **autorizado**.
 
 ### Ejemplo de exploit
 

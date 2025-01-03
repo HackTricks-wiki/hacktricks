@@ -13,7 +13,7 @@ Si no sabes qué son los Mensajes Mach, comienza a revisar esta página:
 {{#endref}}
 
 Por el momento, recuerda que ([definición de aquí](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing)):\
-Los mensajes Mach se envían a través de un _mach port_, que es un canal de comunicación de **un solo receptor, múltiples emisores** integrado en el núcleo mach. **Múltiples procesos pueden enviar mensajes** a un mach port, pero en cualquier momento **solo un único proceso puede leer de él**. Al igual que los descriptores de archivo y los sockets, los mach ports son asignados y gestionados por el núcleo y los procesos solo ven un entero, que pueden usar para indicar al núcleo cuál de sus mach ports desean usar.
+Los mensajes Mach se envían a través de un _mach port_, que es un canal de comunicación de **un solo receptor, múltiples emisores** integrado en el núcleo mach. **Múltiples procesos pueden enviar mensajes** a un mach port, pero en cualquier momento **solo un único proceso puede leer de él**. Al igual que los descriptores de archivo y los sockets, los mach ports son asignados y gestionados por el núcleo y los procesos solo ven un entero, que pueden usar para indicar al núcleo cuál de sus mach ports desean utilizar.
 
 ## Conexión XPC
 
@@ -34,7 +34,7 @@ Lo que es interesante que sepas es que **la abstracción de XPC es una conexión
 Aunque la situación anterior suena prometedora, hay algunos escenarios donde esto no causará problemas ([de aquí](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing)):
 
 - Los tokens de auditoría se utilizan a menudo para una verificación de autorización para decidir si aceptar una conexión. Como esto ocurre utilizando un mensaje al puerto de servicio, **no se ha establecido ninguna conexión aún**. Más mensajes en este puerto simplemente se manejarán como solicitudes de conexión adicionales. Por lo tanto, cualquier **verificación antes de aceptar una conexión no es vulnerable** (esto también significa que dentro de `-listener:shouldAcceptNewConnection:` el token de auditoría es seguro). Por lo tanto, **buscamos conexiones XPC que verifiquen acciones específicas**.
-- Los controladores de eventos XPC se manejan de manera sincrónica. Esto significa que el controlador de eventos para un mensaje debe completarse antes de llamarlo para el siguiente, incluso en colas de despacho concurrentes. Por lo tanto, dentro de un **controlador de eventos XPC, el token de auditoría no puede ser sobrescrito** por otros mensajes normales (¡no de respuesta!).
+- Los controladores de eventos XPC se manejan de manera sincrónica. Esto significa que el controlador de eventos para un mensaje debe completarse antes de llamarlo para el siguiente, incluso en colas de despacho concurrentes. Por lo tanto, dentro de un **controlador de eventos XPC, el token de auditoría no puede ser sobrescrito** por otros mensajes normales (¡sin respuesta!).
 
 Dos métodos diferentes en los que esto podría ser explotable:
 
@@ -48,7 +48,7 @@ Dos métodos diferentes en los que esto podría ser explotable:
 - El **exploit** intenta **llamar** a la **acción privilegiada.** En un RC, el svc **A** **verifica** la autorización de esta **acción** mientras **svc B sobrescribió el token de auditoría** (dando al exploit acceso para llamar a la acción privilegiada).
 2. Variante 2:
 - El servicio **B** puede llamar a una **funcionalidad privilegiada** en el servicio A que el usuario no puede
-- El exploit se conecta con **el servicio A** que **envía** al exploit un **mensaje esperando una respuesta** en un **puerto de respuesta** específico.
+- El exploit se conecta con **el servicio A**, que **envía** al exploit un **mensaje esperando una respuesta** en un **puerto de respuesta** específico.
 - El exploit envía a **servicio** B un mensaje pasando **ese puerto de respuesta**.
 - Cuando el servicio **B responde**, **envía el mensaje al servicio A**, **mientras** el **exploit** envía un **mensaje diferente al servicio A** tratando de **alcanzar una funcionalidad privilegiada** y esperando que la respuesta del servicio B sobrescriba el token de auditoría en el momento perfecto (Condición de Carrera).
 
@@ -116,7 +116,7 @@ A continuación se muestra una representación visual del escenario de ataque de
 
 ## La solución <a href="#the-fix" id="the-fix"></a>
 
-- **Problemas Reportados**: Se presentó un informe a Apple detallando los problemas generales y específicos encontrados en `smd`.
+- **Problemas Reportados**: Se presentó un informe a Apple detallando los problemas generales y específicos encontrados dentro de `smd`.
 - **Respuesta de Apple**: Apple abordó el problema en `smd` sustituyendo `xpc_connection_get_audit_token` por `xpc_dictionary_get_audit_token`.
 - **Naturaleza de la Solución**: La función `xpc_dictionary_get_audit_token` se considera segura ya que recupera el token de auditoría directamente del mensaje mach vinculado al mensaje XPC recibido. Sin embargo, no forma parte de la API pública, similar a `xpc_connection_get_audit_token`.
 - **Ausencia de una Solución Más Amplia**: No está claro por qué Apple no implementó una solución más integral, como descartar mensajes que no se alineen con el token de auditoría guardado de la conexión. La posibilidad de cambios legítimos en el token de auditoría en ciertos escenarios (por ejemplo, uso de `setuid`) podría ser un factor.

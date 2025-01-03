@@ -13,7 +13,7 @@ Estas técnicas se discutirán a continuación, pero en tiempos recientes Electr
 
 - **`RunAsNode`**: Si está deshabilitado, impide el uso de la variable de entorno **`ELECTRON_RUN_AS_NODE`** para inyectar código.
 - **`EnableNodeCliInspectArguments`**: Si está deshabilitado, parámetros como `--inspect`, `--inspect-brk` no serán respetados. Evitando así la forma de inyectar código.
-- **`EnableEmbeddedAsarIntegrityValidation`**: Si está habilitado, el **`archivo`** **`asar`** cargado será **validado** por macOS. **Previniendo** de esta manera la **inyección de código** al modificar el contenido de este archivo.
+- **`EnableEmbeddedAsarIntegrityValidation`**: Si está habilitado, el **`archivo asar`** cargado será **validado** por macOS. **Previniendo** de esta manera la **inyección de código** al modificar el contenido de este archivo.
 - **`OnlyLoadAppFromAsar`**: Si esto está habilitado, en lugar de buscar cargar en el siguiente orden: **`app.asar`**, **`app`** y finalmente **`default_app.asar`**. Solo verificará y usará app.asar, asegurando así que cuando se **combine** con el fusible **`embeddedAsarIntegrityValidation`** sea **imposible** **cargar código no validado**.
 - **`LoadBrowserProcessSpecificV8Snapshot`**: Si está habilitado, el proceso del navegador utiliza el archivo llamado `browser_v8_context_snapshot.bin` para su instantánea V8.
 
@@ -46,7 +46,7 @@ En las aplicaciones de macOS, esto se encuentra típicamente en `application.app
 grep -R "dL7pKGdnNz796PbbjQWNKmHXBZaB9tsX" Slack.app/
 Binary file Slack.app//Contents/Frameworks/Electron Framework.framework/Versions/A/Electron Framework matches
 ```
-Podrías cargar este archivo en [https://hexed.it/](https://hexed.it/) y buscar la cadena anterior. Después de esta cadena, puedes ver en ASCII un número "0" o "1" que indica si cada fusible está deshabilitado o habilitado. Simplemente modifica el código hexadecimal (`0x30` es `0` y `0x31` es `1`) para **modificar los valores de los fusibles**.
+Podrías cargar este archivo en [https://hexed.it/](https://hexed.it/) y buscar la cadena anterior. Después de esta cadena, puedes ver en ASCII un número "0" o "1" que indica si cada fusible está deshabilitado o habilitado. Simplemente modifica el código hex (`0x30` es `0` y `0x31` es `1`) para **modificar los valores de los fusibles**.
 
 <figure><img src="../../../images/image (34).png" alt=""><figcaption></figcaption></figure>
 
@@ -84,7 +84,7 @@ ELECTRON_RUN_AS_NODE=1 /Applications/Discord.app/Contents/MacOS/Discord
 require('child_process').execSync('/System/Applications/Calculator.app/Contents/MacOS/Calculator')
 ```
 > [!CAUTION]
-> Si el fuse **`RunAsNode`** está deshabilitado, la variable de entorno **`ELECTRON_RUN_AS_NODE`** será ignorada, y esto no funcionará.
+> Si el fuse **`RunAsNode`** está deshabilitado, la variable de entorno **`ELECTRON_RUN_AS_NODE`** será ignorada y esto no funcionará.
 
 ### Inyección desde el App Plist
 
@@ -123,11 +123,11 @@ require('child_process').execSync('/System/Applications/Calculator.app/Contents/
 NODE_OPTIONS="--require /tmp/payload.js" ELECTRON_RUN_AS_NODE=1 /Applications/Discord.app/Contents/MacOS/Discord
 ```
 > [!CAUTION]
-> Si el fuse **`EnableNodeOptionsEnvironmentVariable`** está **deshabilitado**, la aplicación **ignorar** la variable de entorno **NODE_OPTIONS** al iniciarse, a menos que la variable de entorno **`ELECTRON_RUN_AS_NODE`** esté configurada, la cual también será **ignorada** si el fuse **`RunAsNode`** está deshabilitado.
+> Si el fuse **`EnableNodeOptionsEnvironmentVariable`** está **deshabilitado**, la aplicación **ignorar**á la variable de entorno **NODE_OPTIONS** al iniciarse, a menos que la variable de entorno **`ELECTRON_RUN_AS_NODE`** esté configurada, la cual también será **ignorada** si el fuse **`RunAsNode`** está deshabilitado.
 >
 > Si no configuras **`ELECTRON_RUN_AS_NODE`**, encontrarás el **error**: `Most NODE_OPTIONs are not supported in packaged apps. See documentation for more details.`
 
-### Inyección desde el Plist de la App
+### Inyección desde el Plist de la Aplicación
 
 Podrías abusar de esta variable de entorno en un plist para mantener persistencia añadiendo estas claves:
 ```xml
@@ -159,9 +159,9 @@ require('child_process').execSync('/System/Applications/Calculator.app/Contents/
 >
 > Sin embargo, aún podrías usar el **parámetro de electron `--remote-debugging-port=9229`**, pero la carga útil anterior no funcionará para ejecutar otros procesos.
 
-Usando el parámetro **`--remote-debugging-port=9222`** es posible robar información de la aplicación Electron como el **historial** (con comandos GET) o las **cookies** del navegador (ya que están **descifradas** dentro del navegador y hay un **endpoint json** que las proporcionará).
+Usando el parámetro **`--remote-debugging-port=9222`** es posible robar información de la aplicación Electron como el **historial** (con comandos GET) o las **cookies** del navegador (ya que están **desencriptadas** dentro del navegador y hay un **endpoint json** que las proporcionará).
 
-Puedes aprender a hacer eso [**aquí**](https://posts.specterops.io/hands-in-the-cookie-jar-dumping-cookies-with-chromiums-remote-debugger-port-34c4f468844e) y [**aquí**](https://slyd0g.medium.com/debugging-cookie-dumping-failures-with-chromiums-remote-debugger-8a4c4d19429f) y usar la herramienta automática [WhiteChocolateMacademiaNut](https://github.com/slyd0g/WhiteChocolateMacademiaNut) o un script simple como:
+Puedes aprender cómo hacerlo [**aquí**](https://posts.specterops.io/hands-in-the-cookie-jar-dumping-cookies-with-chromiums-remote-debugger-port-34c4f468844e) y [**aquí**](https://slyd0g.medium.com/debugging-cookie-dumping-failures-with-chromiums-remote-debugger-8a4c4d19429f) y usar la herramienta automática [WhiteChocolateMacademiaNut](https://github.com/slyd0g/WhiteChocolateMacademiaNut) o un script simple como:
 ```python
 import websocket
 ws = websocket.WebSocket()
@@ -187,7 +187,7 @@ Podrías abusar de esta variable de entorno en un plist para mantener la persist
 <true/>
 </dict>
 ```
-## TCC Bypass abusando de versiones anteriores
+## Bypass de TCC abusando de versiones anteriores
 
 > [!TIP]
 > El daemon TCC de macOS no verifica la versión ejecutada de la aplicación. Así que si **no puedes inyectar código en una aplicación Electron** con ninguna de las técnicas anteriores, podrías descargar una versión anterior de la APP e inyectar código en ella, ya que aún obtendrá los privilegios de TCC (a menos que Trust Cache lo impida).

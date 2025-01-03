@@ -12,7 +12,7 @@ La bandera `--load-extension` se utiliza al iniciar un navegador basado en Chrom
 
 #### Bandera `--use-fake-ui-for-media-stream`
 
-La bandera `--use-fake-ui-for-media-stream` es otra opción de línea de comandos que se puede usar para iniciar navegadores basados en Chromium. Esta bandera está diseñada para **eludir los mensajes de usuario normales que piden permiso para acceder a los flujos de medios de la cámara y el micrófono**. Cuando se utiliza esta bandera, el navegador otorga automáticamente permiso a cualquier sitio web o aplicación que solicite acceso a la cámara o al micrófono.
+La bandera `--use-fake-ui-for-media-stream` es otra opción de línea de comandos que se puede utilizar para iniciar navegadores basados en Chromium. Esta bandera está diseñada para **eludir los mensajes de usuario normales que piden permiso para acceder a los flujos de medios de la cámara y el micrófono**. Cuando se utiliza esta bandera, el navegador otorga automáticamente permiso a cualquier sitio web o aplicación que solicite acceso a la cámara o al micrófono.
 
 ### Herramientas
 

@@ -60,7 +60,7 @@ macos-dyld-hijacking-and-dyld_insert_libraries.md
 > Recuerda que **las restricciones de Validación de Bibliotecas anteriores también se aplican** para realizar ataques de secuestro de Dylib.
 
 Al igual que en Windows, en MacOS también puedes **secuestro de dylibs** para hacer que **aplicaciones** **ejecuten** **código** **arbitrario** (bueno, en realidad desde un usuario regular esto podría no ser posible ya que podrías necesitar un permiso de TCC para escribir dentro de un paquete `.app` y secuestrar una biblioteca).\
-Sin embargo, la forma en que las **aplicaciones de MacOS** **cargan** bibliotecas es **más restringida** que en Windows. Esto implica que los desarrolladores de **malware** aún pueden usar esta técnica para **sigilo**, pero la probabilidad de poder **abusar de esto para escalar privilegios es mucho menor**.
+Sin embargo, la forma en que las aplicaciones de **MacOS** **cargan** bibliotecas es **más restringida** que en Windows. Esto implica que los desarrolladores de **malware** aún pueden usar esta técnica para **sigilo**, pero la probabilidad de poder **abusar de esto para escalar privilegios es mucho menor**.
 
 Primero que nada, es **más común** encontrar que los **binarios de MacOS indican la ruta completa** a las bibliotecas a cargar. Y segundo, **MacOS nunca busca** en las carpetas de **$PATH** para bibliotecas.
 
@@ -131,9 +131,9 @@ Desde **`man dlopen`**:
 > Si no hay barras en el nombre, habría 2 formas de hacer un secuestro:
 >
 > - Si algún **`LC_RPATH`** es **escribible** (pero se verifica la firma, así que para esto también necesitas que el binario no esté restringido)
-> - Si el binario es **sin restricciones** y luego es posible cargar algo desde el CWD (o abusando de una de las variables de entorno mencionadas)
+> - Si el binario es **sin restricciones** y luego es posible cargar algo desde el CWD (o abusar de una de las variables de entorno mencionadas)
 
-- Cuando la ruta **parece un marco** (por ejemplo, `/stuff/foo.framework/foo`), si **`$DYLD_FRAMEWORK_PATH`** se estableció al inicio, dyld primero buscará en ese directorio la **ruta parcial del marco** (por ejemplo, `foo.framework/foo`). Luego, dyld intentará la **ruta proporcionada tal cual** (usando el directorio de trabajo actual para rutas relativas). Por último, para binarios antiguos, dyld intentará algunas alternativas. Si **`$DYLD_FALLBACK_FRAMEWORK_PATH`** se estableció al inicio, dyld buscará en esos directorios. De lo contrario, buscará en **`/Library/Frameworks`** (en macOS si el proceso es sin restricciones), luego en **`/System/Library/Frameworks`**.
+- Cuando la ruta **parece un marco** (por ejemplo, `/stuff/foo.framework/foo`), si **`$DYLD_FRAMEWORK_PATH`** se estableció al inicio, dyld primero buscará en ese directorio para la **ruta parcial del marco** (por ejemplo, `foo.framework/foo`). Luego, dyld intentará la **ruta proporcionada tal cual** (usando el directorio de trabajo actual para rutas relativas). Por último, para binarios antiguos, dyld intentará algunas alternativas. Si **`$DYLD_FALLBACK_FRAMEWORK_PATH`** se estableció al inicio, dyld buscará en esos directorios. De lo contrario, buscará en **`/Library/Frameworks`** (en macOS si el proceso es sin restricciones), luego en **`/System/Library/Frameworks`**.
 1. `$DYLD_FRAMEWORK_PATH`
 2. ruta proporcionada (usando el directorio de trabajo actual para rutas relativas si no está restringido)
 3. `$DYLD_FALLBACK_FRAMEWORK_PATH`
@@ -155,7 +155,7 @@ Desde **`man dlopen`**:
 > [!CAUTION]
 > Si hay barras en el nombre y no es un marco, la forma de secuestrarlo sería:
 >
-> - Si el binario es **sin restricciones** y luego es posible cargar algo desde el CWD o `/usr/local/lib` (o abusando de una de las variables de entorno mencionadas)
+> - Si el binario es **sin restricciones** y luego es posible cargar algo desde el CWD o `/usr/local/lib` (o abusar de una de las variables de entorno mencionadas)
 
 > [!NOTE]
 > Nota: No hay **archivos de configuración** para **controlar la búsqueda de dlopen**.
@@ -164,7 +164,7 @@ Desde **`man dlopen`**:
 >
 > Nota: Las plataformas de Apple utilizan archivos "universales" para combinar bibliotecas de 32 bits y 64 bits. Esto significa que no hay **rutas de búsqueda separadas de 32 bits y 64 bits**.
 >
-> Nota: En las plataformas de Apple, la mayoría de los dylibs del sistema están **combinados en la caché de dyld** y no existen en el disco. Por lo tanto, llamar a **`stat()`** para preflight si un dylib del sistema existe **no funcionará**. Sin embargo, **`dlopen_preflight()`** utiliza los mismos pasos que **`dlopen()`** para encontrar un archivo mach-o compatible.
+> Nota: En las plataformas de Apple, la mayoría de los dylibs del sistema operativo están **combinados en la caché de dyld** y no existen en el disco. Por lo tanto, llamar a **`stat()`** para preflight si un dylib del sistema operativo existe **no funcionará**. Sin embargo, **`dlopen_preflight()`** utiliza los mismos pasos que **`dlopen()`** para encontrar un archivo mach-o compatible.
 
 **Verificar rutas**
 
@@ -307,15 +307,15 @@ codesign -f -s <cert-name> --option=restrict hello-signed
 DYLD_INSERT_LIBRARIES=inject.dylib ./hello-signed # Won't work
 ```
 > [!CAUTION]
-> Ten en cuenta que incluso si hay binarios firmados con las banderas **`0x0(none)`**, pueden obtener la bandera **`CS_RESTRICT`** dinámicamente al ejecutarse y, por lo tanto, esta técnica no funcionará en ellos.
+> Tenga en cuenta que incluso si hay binarios firmados con las banderas **`0x0(none)`**, pueden obtener la bandera **`CS_RESTRICT`** dinámicamente al ejecutarse y, por lo tanto, esta técnica no funcionará en ellos.
 >
-> Puedes verificar si un proc tiene esta bandera con (obtén [**csops aquí**](https://github.com/axelexic/CSOps)):
+> Puede verificar si un proc tiene esta bandera con (consulte [**csops aquí**](https://github.com/axelexic/CSOps)):
 >
 > ```bash
 > csops -status <pid>
 > ```
 >
-> y luego verifica si la bandera 0x800 está habilitada.
+> y luego verifique si la bandera 0x800 está habilitada.
 
 ## Referencias
 

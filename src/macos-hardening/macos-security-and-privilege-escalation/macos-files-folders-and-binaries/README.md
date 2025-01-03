@@ -12,7 +12,7 @@
 - **/Library**: Se pueden encontrar muchas subcarpetas y archivos relacionados con preferencias, cachés y registros aquí. Una carpeta Library existe en la raíz y en el directorio de cada usuario.
 - **/private**: No documentado, pero muchas de las carpetas mencionadas son enlaces simbólicos al directorio privado.
 - **/sbin**: Binarios esenciales del sistema (relacionados con la administración)
-- **/System**: Archivo para hacer funcionar OS X. Aquí deberías encontrar principalmente archivos específicos de Apple (no de terceros).
+- **/System**: Archivo para hacer funcionar OS X. Aquí deberías encontrar principalmente solo archivos específicos de Apple (no de terceros).
 - **/tmp**: Los archivos se eliminan después de 3 días (es un enlace simbólico a /private/tmp)
 - **/Users**: Directorio personal para usuarios.
 - **/usr**: Configuración y binarios del sistema
@@ -23,9 +23,9 @@
 ### Carpetas de Aplicaciones
 
 - **Las aplicaciones del sistema** se encuentran en `/System/Applications`
-- **Las aplicaciones instaladas** generalmente se instalan en `/Applications` o en `~/Applications`
+- **Las aplicaciones instaladas** suelen estar en `/Applications` o en `~/Applications`
 - **Los datos de la aplicación** se pueden encontrar en `/Library/Application Support` para las aplicaciones que se ejecutan como root y `~/Library/Application Support` para aplicaciones que se ejecutan como el usuario.
-- Los **demonios** de aplicaciones de terceros que **necesitan ejecutarse como root** generalmente se encuentran en `/Library/PrivilegedHelperTools/`
+- Los **demonios** de aplicaciones de terceros que **necesitan ejecutarse como root** suelen estar en `/Library/PrivilegedHelperTools/`
 - Las aplicaciones **sandboxed** están mapeadas en la carpeta `~/Library/Containers`. Cada aplicación tiene una carpeta nombrada de acuerdo con el ID del paquete de la aplicación (`com.apple.Safari`).
 - El **núcleo** se encuentra en `/System/Library/Kernels/kernel`
 - **Las extensiones del núcleo de Apple** se encuentran en `/System/Library/Extensions`
@@ -80,7 +80,7 @@ En macOS (y iOS) todas las bibliotecas compartidas del sistema, como frameworks 
 Esto se encuentra en macOS en `/System/Volumes/Preboot/Cryptexes/OS/System/Library/dyld/` y en versiones anteriores podrías encontrar la **caché compartida** en **`/System/Library/dyld/`**.\
 En iOS puedes encontrarlas en **`/System/Library/Caches/com.apple.dyld/`**.
 
-Similar a la caché compartida de dyld, el núcleo y las extensiones del núcleo también se compilan en una caché de núcleo, que se carga al inicio.
+Similar a la caché compartida de dyld, el núcleo y las extensiones del núcleo también se compilan en una caché del núcleo, que se carga al inicio.
 
 Para extraer las bibliotecas del único archivo de caché compartido de dylib, era posible usar el binario [dyld_shared_cache_util](https://www.mbsplugins.de/files/dyld_shared_cache_util-dyld-733.8.zip) que puede que no funcione hoy en día, pero también puedes usar [**dyldextractor**](https://github.com/arandomdev/dyldextractor):
 ```bash
@@ -104,7 +104,7 @@ Algunos extractores no funcionarán ya que las dylibs están preenlazadas con di
 
 ### Mapeo de SLC
 
-**`dyld`** utiliza la syscall **`shared_region_check_np`** para saber si el SLC ha sido mapeado (lo que devuelve la dirección) y **`shared_region_map_and_slide_np`** para mapear el SLC.
+**`dyld`** utiliza la llamada al sistema **`shared_region_check_np`** para saber si el SLC ha sido mapeado (lo que devuelve la dirección) y **`shared_region_map_and_slide_np`** para mapear el SLC.
 
 Ten en cuenta que incluso si el SLC se desliza en el primer uso, todos los **procesos** utilizan la **misma copia**, lo que **elimina la protección ASLR** si el atacante pudo ejecutar procesos en el sistema. Esto fue explotado en el pasado y se solucionó con el paginador de región compartida.
 
@@ -121,7 +121,7 @@ Usando las variables de entorno:
 
 ### Permisos de Carpeta
 
-En una **carpeta**, **leer** permite **listar** su contenido, **escribir** permite **eliminar** y **escribir** archivos en ella, y **ejecutar** permite **traversar** el directorio. Así que, por ejemplo, un usuario con **permiso de lectura sobre un archivo** dentro de un directorio donde **no tiene permiso de ejecución** **no podrá leer** el archivo.
+En una **carpeta**, **leer** permite **listar** su contenido, **escribir** permite **eliminar** y **escribir** archivos en ella, y **ejecutar** permite **traversar** el directorio. Por ejemplo, un usuario con **permiso de lectura sobre un archivo** dentro de un directorio donde **no tiene permiso de ejecución** **no podrá leer** el archivo.
 
 ### Modificadores de Bandera
 
@@ -196,7 +196,7 @@ Los atributos extendidos tienen un nombre y cualquier valor deseado, y se pueden
 
 ### Recursos Forks | macOS ADS
 
-Esta es una forma de obtener **Flujos de Datos Alternativos en MacOS**. Puedes guardar contenido dentro de un atributo extendido llamado **com.apple.ResourceFork** dentro de un archivo guardándolo en **file/..namedfork/rsrc**.
+Esta es una forma de obtener **Flujos de Datos Alternativos en máquinas MacOS**. Puedes guardar contenido dentro de un atributo extendido llamado **com.apple.ResourceFork** dentro de un archivo guardándolo en **file/..namedfork/rsrc**.
 ```bash
 echo "Hello" > a.txt
 echo "Hello Mac ADS" > a.txt/..namedfork/rsrc

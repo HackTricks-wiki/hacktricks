@@ -16,7 +16,7 @@ ls: Desktop: Operation not permitted
 username@hostname ~ % cat Desktop/lalala
 asd
 ```
-El **atributo extendido `com.apple.macl`** se agrega al nuevo **archivo** para dar acceso a la **aplicación creadora** para leerlo.
+El **atributo extendido `com.apple.macl`** se añade al nuevo **archivo** para dar acceso a la **aplicación creadora** para leerlo.
 
 ### TCC ClickJacking
 
@@ -37,7 +37,7 @@ Más información y PoC en:
 ../../../macos-privilege-escalation.md
 {{#endref}}
 
-### Bypass SSH
+### Bypass de SSH
 
 Por defecto, un acceso a través de **SSH solía tener "Acceso Completo al Disco"**. Para deshabilitar esto, necesitas tenerlo listado pero deshabilitado (eliminarlo de la lista no eliminará esos privilegios):
 
@@ -108,14 +108,14 @@ set t to paragraphs of (do shell script "cat " & POSIX path of (copyFile as alia
 end tell
 do shell script "rm " & POSIX path of (copyFile as alias)
 ```
-## Por comportamiento de la aplicación
+## Comportamiento de la aplicación
 
 ### CVE-2020–9934 - TCC <a href="#c19b" id="c19b"></a>
 
 El **daemon tccd** de userland estaba utilizando la variable de entorno **`HOME`** para acceder a la base de datos de usuarios de TCC desde: **`$HOME/Library/Application Support/com.apple.TCC/TCC.db`**
 
-Según [esta publicación de Stack Exchange](https://stackoverflow.com/questions/135688/setting-environment-variables-on-os-x/3756686#3756686) y debido a que el daemon TCC se ejecuta a través de `launchd` dentro del dominio del usuario actual, es posible **controlar todas las variables de entorno** pasadas a él.\
-Así, un **atacante podría establecer la variable de entorno `$HOME`** en **`launchctl`** para apuntar a un **directorio controlado**, **reiniciar** el **daemon TCC**, y luego **modificar directamente la base de datos de TCC** para otorgarse **todos los derechos de TCC disponibles** sin nunca solicitar al usuario final.\
+Según [esta publicación de Stack Exchange](https://stackoverflow.com/questions/135688/setting-environment-variables-on-os-x/3756686#3756686) y porque el daemon TCC se ejecuta a través de `launchd` dentro del dominio del usuario actual, es posible **controlar todas las variables de entorno** pasadas a él.\
+Así, un **atacante podría establecer la variable de entorno `$HOME`** en **`launchctl`** para apuntar a un **directorio controlado**, **reiniciar** el **daemon TCC**, y luego **modificar directamente la base de datos de TCC** para otorgarse **todas las concesiones de TCC disponibles** sin nunca solicitar al usuario final.\
 PoC:
 ```bash
 # reset database just in case (no cheating!)
@@ -145,7 +145,7 @@ $> ls ~/Documents
 ```
 ### CVE-2021-30761 - Notas
 
-Las notas tenían acceso a ubicaciones protegidas por TCC, pero cuando se crea una nota, esta se **crea en una ubicación no protegida**. Así que podrías pedir a las notas que copien un archivo protegido en una nota (así que en una ubicación no protegida) y luego acceder al archivo:
+Las notas tenían acceso a ubicaciones protegidas por TCC, pero cuando se crea una nota, esta se **crea en una ubicación no protegida**. Así que podrías pedir a notas que copien un archivo protegido en una nota (así que en una ubicación no protegida) y luego acceder al archivo:
 
 <figure><img src="../../../../../images/image (476).png" alt=""><figcaption></figcaption></figure>
 
@@ -157,17 +157,17 @@ Era posible agregar el atributo de cuarentena a "Library", llamar al servicio XP
 
 ### CVE-2023-38571 - Música y TV <a href="#cve-2023-38571-a-macos-tcc-bypass-in-music-and-tv" id="cve-2023-38571-a-macos-tcc-bypass-in-music-and-tv"></a>
 
-**`Music`** tiene una característica interesante: Cuando está en funcionamiento, **importará** los archivos que se coloquen en **`~/Music/Music/Media.localized/Automatically Add to Music.localized`** a la "biblioteca de medios" del usuario. Además, llama a algo como: **`rename(a, b);`** donde `a` y `b` son:
+**`Music`** tiene una característica interesante: Cuando está en funcionamiento, **importará** los archivos que se suelten en **`~/Music/Music/Media.localized/Automatically Add to Music.localized`** en la "biblioteca de medios" del usuario. Además, llama a algo como: **`rename(a, b);`** donde `a` y `b` son:
 
 - `a = "~/Music/Music/Media.localized/Automatically Add to Music.localized/myfile.mp3"`
 - `b = "~/Music/Music/Media.localized/Automatically Add to Music.localized/Not Added.localized/2023-09-25 11.06.28/myfile.mp3`
 
-Este comportamiento de **`rename(a, b);`** es vulnerable a una **Condición de Carrera**, ya que es posible colocar dentro de la carpeta `Automatically Add to Music.localized` un archivo **TCC.db** falso y luego, cuando se crea la nueva carpeta (b) para copiar el archivo, eliminarlo y apuntarlo a **`~/Library/Application Support/com.apple.TCC`**/.
+Este comportamiento de **`rename(a, b);`** es vulnerable a una **Condición de Carrera**, ya que es posible poner dentro de la carpeta `Automatically Add to Music.localized` un archivo **TCC.db** falso y luego, cuando se crea la nueva carpeta (b) para copiar el archivo, eliminarlo y apuntarlo a **`~/Library/Application Support/com.apple.TCC`**/.
 
 ### SQLITE_SQLLOG_DIR - CVE-2023-32422
 
 Si **`SQLITE_SQLLOG_DIR="path/folder"`** significa básicamente que **cualquier base de datos abierta se copia a esa ruta**. En este CVE, este control fue abusado para **escribir** dentro de una **base de datos SQLite** que va a ser **abierta por un proceso con FDA la base de datos TCC**, y luego abusar de **`SQLITE_SQLLOG_DIR`** con un **symlink en el nombre del archivo** para que cuando esa base de datos esté **abierta**, el usuario **TCC.db se sobrescriba** con la abierta.\
-**Más info** [**en el informe**](https://gergelykalman.com/sqlol-CVE-2023-32422-a-macos-tcc-bypass.html) **y** [**en la charla**](https://www.youtube.com/watch?v=f1HA5QhLQ7Y&t=20548s).
+**Más info** [**en el informe**](https://gergelykalman.com/sqlol-CVE-2023-32422-a-macos-tcc-bypass.html) **y**[ **en la charla**](https://www.youtube.com/watch?v=f1HA5QhLQ7Y&t=20548s).
 
 ### **SQLITE_AUTO_TRACE**
 
@@ -237,7 +237,7 @@ Por lo tanto, si el usuario logra reiniciar TCC con una variable de entorno $HOM
 El **primer POC** utiliza [**dsexport**](https://www.unix.com/man-page/osx/1/dsexport/) y [**dsimport**](https://www.unix.com/man-page/osx/1/dsimport/) para modificar la **carpeta HOME** del usuario.
 
 1. Obtener un blob _csreq_ para la aplicación objetivo.
-2. Plantar un archivo _TCC.db_ falso con el acceso requerido y el blob _csreq_.
+2. Plantar un archivo _TCC.db_ falso con acceso requerido y el blob _csreq_.
 3. Exportar la entrada de Servicios de Directorio del usuario con [**dsexport**](https://www.unix.com/man-page/osx/1/dsexport/).
 4. Modificar la entrada de Servicios de Directorio para cambiar el directorio home del usuario.
 5. Importar la entrada de Servicios de Directorio modificada con [**dsimport**](https://www.unix.com/man-page/osx/1/dsimport/).
@@ -263,7 +263,7 @@ Los plugins son código extra, generalmente en forma de bibliotecas o plist, que
 
 La aplicación `/System/Library/CoreServices/Applications/Directory Utility.app` tenía el derecho **`kTCCServiceSystemPolicySysAdminFiles`**, cargaba plugins con extensión **`.daplug`** y **no tenía el** runtime endurecido.
 
-Para armar este CVE, se **cambia** el **`NFSHomeDirectory`** (abusando del derecho anterior) para poder **tomar el control de la base de datos TCC del usuario** y eludir TCC.
+Para armar este CVE, el **`NFSHomeDirectory`** es **cambiado** (abusando del derecho anterior) para poder **tomar el control de la base de datos TCC del usuario** y eludir TCC.
 
 Para más información, consulta el [**informe original**](https://wojciechregula.blog/post/change-home-directory-and-bypass-tcc-aka-cve-2020-27937/).
 
@@ -300,7 +300,7 @@ exit(0);
 ```
 Para más información, consulta el [**informe original**](https://wojciechregula.blog/post/play-the-music-and-bypass-tcc-aka-cve-2020-29621/).
 
-### Complementos de Capa de Abstracción de Dispositivos (DAL)
+### Complementos de Capa de Abstracción de Dispositivo (DAL)
 
 Las aplicaciones del sistema que abren el flujo de la cámara a través de Core Media I/O (aplicaciones con **`kTCCServiceCamera`**) cargan **en el proceso estos complementos** ubicados en `/Library/CoreMediaIO/Plug-Ins/DAL` (no restringido por SIP).
 
@@ -382,7 +382,7 @@ Es posible invocar **`open`** incluso mientras está en sandbox
 
 ### Scripts de Terminal
 
-Es bastante común dar acceso completo al disco **(FDA)**, al menos en computadoras utilizadas por personas técnicas. Y es posible invocar scripts **`.terminal`** con ello.
+Es bastante común otorgar **Acceso Completo al Disco (FDA)**, al menos en computadoras utilizadas por personas técnicas. Y es posible invocar scripts **`.terminal`** con ello.
 
 Los scripts **`.terminal`** son archivos plist como este con el comando a ejecutar en la clave **`CommandString`**:
 ```xml
@@ -413,12 +413,12 @@ task.arguments = @[@"-a", @"/System/Applications/Utilities/Terminal.app",
 exploit_location]; task.standardOutput = pipe;
 [task launch];
 ```
-## Montando
+## Al montar
 
 ### CVE-2020-9771 - bypass de TCC de mount_apfs y escalada de privilegios
 
 **Cualquier usuario** (incluso los no privilegiados) puede crear y montar un snapshot de Time Machine y **acceder a TODOS los archivos** de ese snapshot.\
-El **único privilegio** necesario es que la aplicación utilizada (como `Terminal`) tenga acceso de **Acceso Completo al Disco** (FDA) (`kTCCServiceSystemPolicyAllfiles`), que debe ser concedido por un administrador.
+El **único privilegio** necesario es que la aplicación utilizada (como `Terminal`) tenga acceso **Full Disk Access** (FDA) (`kTCCServiceSystemPolicyAllfiles`), que debe ser concedido por un administrador.
 ```bash
 # Create snapshot
 tmutil localsnapshot
@@ -471,7 +471,7 @@ Como se explica en el [escrito original](https://www.kandji.io/blog/macos-audit-
 
 La función `DADiskMountWithArgumentsCommon` del marco público `DiskArbitration` realizó las verificaciones de seguridad. Sin embargo, es posible eludirlo llamando directamente a `diskarbitrationd` y, por lo tanto, usar elementos `../` en la ruta y enlaces simbólicos.
 
-Esto permitió a un atacante realizar montajes arbitrarios en cualquier ubicación, incluso sobre la base de datos TCC debido al derecho `com.apple.private.security.storage-exempt.heritable` de `diskarbitrationd`.
+Esto permitió a un atacante realizar montajes arbitrarios en cualquier ubicación, incluyendo sobre la base de datos TCC debido al derecho `com.apple.private.security.storage-exempt.heritable` de `diskarbitrationd`.
 
 ### asr
 
@@ -480,7 +480,7 @@ La herramienta **`/usr/sbin/asr`** permitió copiar todo el disco y montarlo en 
 ### Servicios de ubicación
 
 Hay una tercera base de datos TCC en **`/var/db/locationd/clients.plist`** para indicar los clientes permitidos para **acceder a los servicios de ubicación**.\
-La carpeta **`/var/db/locationd/` no estaba protegida contra el montaje de DMG** por lo que era posible montar nuestro propio plist.
+La carpeta **`/var/db/locationd/` no estaba protegida contra el montaje de DMG**, por lo que era posible montar nuestro propio plist.
 
 ## Por aplicaciones de inicio
 
@@ -496,7 +496,7 @@ En varias ocasiones, los archivos almacenarán información sensible como correo
 
 ## Clics sintéticos
 
-Esto ya no funciona, pero [**lo hizo en el pasado**](https://twitter.com/noarfromspace/status/639125916233416704/photo/1)**:**
+Esto ya no funciona, pero [**funcionó en el pasado**](https://twitter.com/noarfromspace/status/639125916233416704/photo/1)**:**
 
 <figure><img src="../../../../../images/image (29).png" alt=""><figcaption></figcaption></figure>
 

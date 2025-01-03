@@ -2,11 +2,11 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**Para más detalles sobre la técnica, consulta la publicación original de:** [**https://blog.xpnsec.com/dirtynib/**](https://blog.xpnsec.com/dirtynib/) y la siguiente publicación de [**https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/**](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/)**.** Aquí hay un resumen:
+**Para más detalles sobre la técnica, consulta la publicación original en:** [**https://blog.xpnsec.com/dirtynib/**](https://blog.xpnsec.com/dirtynib/) y la siguiente publicación de [**https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/**](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/)**.** Aquí hay un resumen:
 
-### Qué son los archivos Nib
+### ¿Qué son los archivos Nib?
 
-Los archivos Nib (abreviatura de NeXT Interface Builder), parte del ecosistema de desarrollo de Apple, están destinados a definir **elementos de UI** y sus interacciones en aplicaciones. Incluyen objetos serializados como ventanas y botones, y se cargan en tiempo de ejecución. A pesar de su uso continuo, Apple ahora aboga por Storyboards para una visualización más completa del flujo de UI.
+Los archivos Nib (abreviatura de NeXT Interface Builder), parte del ecosistema de desarrollo de Apple, están destinados a definir **elementos de UI** y sus interacciones en las aplicaciones. Incluyen objetos serializados como ventanas y botones, y se cargan en tiempo de ejecución. A pesar de su uso continuo, Apple ahora aboga por Storyboards para una visualización más completa del flujo de UI.
 
 El archivo Nib principal se referencia en el valor **`NSMainNibFile`** dentro del archivo `Info.plist` de la aplicación y se carga mediante la función **`NSApplicationMain`** ejecutada en la función `main` de la aplicación.
 
@@ -20,7 +20,7 @@ El archivo Nib principal se referencia en el valor **`NSMainNibFile`** dentro de
 - Configura la propiedad `source` inicial a través de Atributos de Tiempo de Ejecución Definidos por el Usuario.
 2. **Gadget de Ejecución de Código**:
 - La configuración facilita la ejecución de AppleScript bajo demanda.
-- Integra un botón para activar el objeto `Apple Script`, desencadenando específicamente el selector `executeAndReturnError:`.
+- Integra un botón para activar el objeto `Apple Script`, específicamente desencadenando el selector `executeAndReturnError:`.
 3. **Pruebas**:
 
 - Un simple Apple Script para fines de prueba:
@@ -61,13 +61,13 @@ En la publicación [https://sector7.computest.nl/post/2024-04-bringing-process-i
 
 ### Otras Protecciones de macOS
 
-Desde macOS Sonoma en adelante, las modificaciones dentro de los paquetes de aplicaciones están restringidas. Sin embargo, los métodos anteriores involucraban:
+Desde macOS Sonoma, las modificaciones dentro de los paquetes de aplicaciones están restringidas. Sin embargo, los métodos anteriores involucraban:
 
 1. Copiar la aplicación a una ubicación diferente (por ejemplo, `/tmp/`).
 2. Renombrar directorios dentro del paquete de la aplicación para eludir las protecciones iniciales.
 3. Después de ejecutar la aplicación para registrarse con Gatekeeper, modificar el paquete de la aplicación (por ejemplo, reemplazando MainMenu.nib con Dirty.nib).
 4. Renombrar los directorios de nuevo y volver a ejecutar la aplicación para ejecutar el archivo NIB inyectado.
 
-**Nota**: Las actualizaciones recientes de macOS han mitigado esta explotación al prevenir modificaciones de archivos dentro de los paquetes de aplicaciones después de la caché de Gatekeeper, lo que hace que la explotación sea ineficaz.
+**Nota**: Las actualizaciones recientes de macOS han mitigado este exploit al prevenir modificaciones de archivos dentro de los paquetes de aplicaciones después de la caché de Gatekeeper, lo que hace que el exploit sea ineficaz.
 
 {{#include ../../../banners/hacktricks-training.md}}

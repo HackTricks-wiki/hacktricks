@@ -18,11 +18,11 @@ DriverKit es un reemplazo para las kernel extensions que **proporcionan soporte 
 
 Las Network Extensions proporcionan la capacidad de personalizar comportamientos de red. Hay varios tipos de Network Extensions:
 
-- **App Proxy**: Esto se utiliza para crear un cliente VPN que implementa un protocolo VPN personalizado orientado a flujos. Esto significa que maneja el tráfico de red basado en conexiones (o flujos) en lugar de paquetes individuales.
-- **Packet Tunnel**: Esto se utiliza para crear un cliente VPN que implementa un protocolo VPN personalizado orientado a paquetes. Esto significa que maneja el tráfico de red basado en paquetes individuales.
-- **Filter Data**: Esto se utiliza para filtrar "flujos" de red. Puede monitorear o modificar datos de red a nivel de flujo.
-- **Filter Packet**: Esto se utiliza para filtrar paquetes individuales de red. Puede monitorear o modificar datos de red a nivel de paquete.
-- **DNS Proxy**: Esto se utiliza para crear un proveedor DNS personalizado. Puede usarse para monitorear o modificar solicitudes y respuestas DNS.
+- **App Proxy**: Se utiliza para crear un cliente VPN que implementa un protocolo VPN personalizado orientado a flujos. Esto significa que maneja el tráfico de red basado en conexiones (o flujos) en lugar de paquetes individuales.
+- **Packet Tunnel**: Se utiliza para crear un cliente VPN que implementa un protocolo VPN personalizado orientado a paquetes. Esto significa que maneja el tráfico de red basado en paquetes individuales.
+- **Filter Data**: Se utiliza para filtrar "flujos" de red. Puede monitorear o modificar datos de red a nivel de flujo.
+- **Filter Packet**: Se utiliza para filtrar paquetes individuales de red. Puede monitorear o modificar datos de red a nivel de paquete.
+- **DNS Proxy**: Se utiliza para crear un proveedor DNS personalizado. Puede usarse para monitorear o modificar solicitudes y respuestas DNS.
 
 ## Endpoint Security Framework
 
@@ -32,16 +32,16 @@ Este marco proporciona una **colección de APIs para monitorear y controlar la a
 
 El núcleo de este marco está implementado en el kernel, como una Kernel Extension (KEXT) ubicada en **`/System/Library/Extensions/EndpointSecurity.kext`**. Este KEXT está compuesto por varios componentes clave:
 
-- **EndpointSecurityDriver**: Actúa como el "punto de entrada" para la extensión del kernel. Es el principal punto de interacción entre el sistema operativo y el marco de Endpoint Security.
+- **EndpointSecurityDriver**: Actúa como el "punto de entrada" para la extensión del kernel. Es el principal punto de interacción entre el OS y el marco de Endpoint Security.
 - **EndpointSecurityEventManager**: Este componente es responsable de implementar ganchos del kernel. Los ganchos del kernel permiten que el marco monitoree eventos del sistema interceptando llamadas al sistema.
 - **EndpointSecurityClientManager**: Este gestiona la comunicación con los clientes del espacio de usuario, manteniendo un registro de qué clientes están conectados y necesitan recibir notificaciones de eventos.
 - **EndpointSecurityMessageManager**: Este envía mensajes y notificaciones de eventos a los clientes del espacio de usuario.
 
 Los eventos que el marco de Endpoint Security puede monitorear se clasifican en:
 
-- Eventos de archivos
-- Eventos de procesos
-- Eventos de sockets
+- Eventos de archivo
+- Eventos de proceso
+- Eventos de socket
 - Eventos del kernel (como cargar/descargar una extensión del kernel o abrir un dispositivo de I/O Kit)
 
 ### Arquitectura del Endpoint Security Framework

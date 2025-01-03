@@ -10,7 +10,7 @@ Los archivos de intercambio, como `/private/var/vm/swapfile0`, sirven como **cac
 
 ### Hibernate Image
 
-El archivo ubicado en `/private/var/vm/sleepimage` es crucial durante el **modo de hibernación**. **Los datos de la memoria se almacenan en este archivo cuando OS X hiberna**. Al despertar la computadora, el sistema recupera los datos de la memoria de este archivo, permitiendo al usuario continuar donde lo dejó.
+El archivo ubicado en `/private/var/vm/sleepimage` es crucial durante **el modo de hibernación**. **Los datos de la memoria se almacenan en este archivo cuando OS X hiberna**. Al despertar la computadora, el sistema recupera los datos de la memoria de este archivo, permitiendo al usuario continuar donde lo dejó.
 
 Vale la pena señalar que en los sistemas MacOS modernos, este archivo está típicamente cifrado por razones de seguridad, lo que dificulta la recuperación.
 

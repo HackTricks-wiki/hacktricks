@@ -61,7 +61,7 @@ Si un script de pre o post instalación está, por ejemplo, ejecutándose desde 
 
 ### AuthorizationExecuteWithPrivileges
 
-Esta es una [función pública](https://developer.apple.com/documentation/security/1540038-authorizationexecutewithprivileg) que varios instaladores y actualizadores llamarán para **ejecutar algo como root**. Esta función acepta la **ruta** del **archivo** a **ejecutar** como parámetro, sin embargo, si un atacante pudiera **modificar** este archivo, podrá **abusar** de su ejecución con root para **escalar privilegios**.
+Esta es una [función pública](https://developer.apple.com/documentation/security/1540038-authorizationexecutewithprivileg) que varios instaladores y actualizadores llamarán para **ejecutar algo como root**. Esta función acepta la **ruta** del **archivo** a **ejecutar** como parámetro; sin embargo, si un atacante pudiera **modificar** este archivo, podría **abusar** de su ejecución con root para **escalar privilegios**.
 ```bash
 # Breakpoint in the function to check wich file is loaded
 (lldb) b AuthorizationExecuteWithPrivileges
@@ -77,13 +77,13 @@ Un ejemplo de esto es **CVE-2021-26089** que logró **sobrescribir un script per
 
 ## pkg como malware
 
-### Carga útil vacía
+### Payload vacío
 
-Es posible generar un **`.pkg`** solo con **scripts de pre y post-instalación** sin ninguna carga útil real aparte del malware dentro de los scripts.
+Es posible generar un **`.pkg`** archivo con **scripts de pre y post-instalación** sin ningún payload real aparte del malware dentro de los scripts.
 
 ### JS en xml de distribución
 
-Es posible agregar etiquetas **`<script>`** en el archivo **xml de distribución** del paquete y ese código se ejecutará y puede **ejecutar comandos** usando **`system.run`**:
+Es posible agregar **`<script>`** etiquetas en el **archivo xml de distribución** del paquete y ese código se ejecutará y puede **ejecutar comandos** usando **`system.run`**:
 
 <figure><img src="../../../images/image (1043).png" alt=""><figcaption></figcaption></figure>
 

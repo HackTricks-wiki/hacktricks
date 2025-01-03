@@ -710,7 +710,7 @@ screencapture -V 5 /tmp/screen.mov
 
 ### Accesibilidad
 
-- **Permiso**: Ninguno
+- **Derecho**: Ninguno
 - **TCC**: `kTCCServiceAccessibility`
 
 Utiliza el privilegio TCC para aceptar el control de Finder presionando enter y eludir TCC de esa manera

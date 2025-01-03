@@ -4,7 +4,7 @@
 
 ## Información Básica
 
-Las restricciones de lanzamiento en macOS se introdujeron para mejorar la seguridad al **regular cómo, quién y desde dónde se puede iniciar un proceso**. Iniciadas en macOS Ventura, proporcionan un marco que categoriza **cada binario del sistema en distintas categorías de restricción**, que se definen dentro de la **caché de confianza**, una lista que contiene binarios del sistema y sus respectivos hashes. Estas restricciones se extienden a cada binario ejecutable dentro del sistema, implicando un conjunto de **reglas** que delinean los requisitos para **lanzar un binario particular**. Las reglas abarcan restricciones propias que un binario debe satisfacer, restricciones parentales que deben ser cumplidas por su proceso padre, y restricciones responsables que deben ser observadas por otras entidades relevantes.
+Las restricciones de lanzamiento en macOS se introdujeron para mejorar la seguridad al **regular cómo, quién y desde dónde se puede iniciar un proceso**. Iniciadas en macOS Ventura, proporcionan un marco que categoriza **cada binario del sistema en distintas categorías de restricción**, que se definen dentro de la **caché de confianza**, una lista que contiene binarios del sistema y sus respectivos hashes. Estas restricciones se extienden a cada binario ejecutable dentro del sistema, implicando un conjunto de **reglas** que delinean los requisitos para **lanzar un binario particular**. Las reglas abarcan restricciones propias que un binario debe satisfacer, restricciones parentales que deben ser cumplidas por su proceso padre, y restricciones responsables que deben ser respetadas por otras entidades relevantes.
 
 El mecanismo se extiende a aplicaciones de terceros a través de **Restricciones de Entorno**, comenzando desde macOS Sonoma, permitiendo a los desarrolladores proteger sus aplicaciones especificando un **conjunto de claves y valores para las restricciones de entorno.**
 
@@ -54,7 +54,7 @@ Parent Constraint: is-init-proc
 
 ### Invirtiendo las Categorías LC
 
-Tienes más información [**sobre esto aquí**](https://theevilbit.github.io/posts/launch_constraints_deep_dive/#reversing-constraints), pero básicamente, están definidos en **AMFI (AppleMobileFileIntegrity)**, así que necesitas descargar el Kernel Development Kit para obtener el **KEXT**. Los símbolos que comienzan con **`kConstraintCategory`** son los **interesantes**. Al extraerlos, obtendrás un flujo codificado en DER (ASN.1) que necesitarás decodificar con [ASN.1 Decoder](https://holtstrom.com/michael/tools/asn1decoder.php) o la biblioteca python-asn1 y su script `dump.py`, [andrivet/python-asn1](https://github.com/andrivet/python-asn1/tree/master) que te dará una cadena más comprensible.
+Tienes más información [**sobre esto aquí**](https://theevilbit.github.io/posts/launch_constraints_deep_dive/#reversing-constraints), pero básicamente, están definidos en **AMFI (AppleMobileFileIntegrity)**, así que necesitas descargar el Kernel Development Kit para obtener el **KEXT**. Los símbolos que comienzan con **`kConstraintCategory`** son los **interesantes**. Al extraerlos, obtendrás un flujo codificado DER (ASN.1) que necesitarás decodificar con [ASN.1 Decoder](https://holtstrom.com/michael/tools/asn1decoder.php) o la biblioteca python-asn1 y su script `dump.py`, [andrivet/python-asn1](https://github.com/andrivet/python-asn1/tree/master) que te dará una cadena más comprensible.
 
 ## Restricciones del Entorno
 
@@ -123,7 +123,7 @@ entry count = 969
 01e6934cb8833314ea29640c3f633d740fc187f2 [none] [2] [2]
 020bf8c388deaef2740d98223f3d2238b08bab56 [none] [2] [3]
 ```
-La caché de confianza sigue la siguiente estructura, así que la **categoría LC es la 4ª columna**.
+La caché de confianza sigue la siguiente estructura, así que la **categoría LC es la 4ª columna**
 ```c
 struct trust_cache_entry2 {
 uint8_t cdhash[CS_CDHASH_LEN];
@@ -135,7 +135,7 @@ uint8_t reserved0;
 ```
 Luego, podrías usar un script como [**este**](https://gist.github.com/xpn/66dc3597acd48a4c31f5f77c3cc62f30) para extraer datos.
 
-Con esos datos puedes verificar las Apps con un **valor de restricciones de lanzamiento de `0`**, que son las que no están restringidas ([**ver aquí**](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056) para qué significa cada valor).
+Con esos datos, puedes verificar las aplicaciones con un **valor de restricciones de lanzamiento de `0`**, que son las que no están restringidas ([**ver aquí**](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056) para qué significa cada valor).
 
 ## Mitigaciones de Ataques
 

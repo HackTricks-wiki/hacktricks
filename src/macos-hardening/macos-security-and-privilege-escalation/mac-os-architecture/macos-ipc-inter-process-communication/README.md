@@ -26,11 +26,11 @@ Los derechos de puerto, que definen qué operaciones puede realizar una tarea, s
 - **Derecho de conjunto de puertos**, que denota un _conjunto de puertos_ en lugar de un solo puerto. Desencolar un mensaje de un conjunto de puertos desencola un mensaje de uno de los puertos que contiene. Los conjuntos de puertos se pueden usar para escuchar en varios puertos simultáneamente, muy parecido a `select`/`poll`/`epoll`/`kqueue` en Unix.
 - **Nombre muerto**, que no es un derecho de puerto real, sino simplemente un marcador de posición. Cuando un puerto es destruido, todos los derechos de puerto existentes al puerto se convierten en nombres muertos.
 
-**Las tareas pueden transferir derechos de ENVÍO a otras**, permitiéndoles enviar mensajes de vuelta. **Los derechos de ENVÍO también pueden ser clonados, por lo que una tarea puede duplicar y dar el derecho a una tercera tarea**. Esto, combinado con un proceso intermediario conocido como el **servidor de arranque**, permite una comunicación efectiva entre tareas.
+**Las tareas pueden transferir derechos de ENVÍO a otros**, permitiéndoles enviar mensajes de vuelta. **Los derechos de ENVÍO también pueden ser clonados, por lo que una tarea puede duplicar y dar el derecho a una tercera tarea**. Esto, combinado con un proceso intermediario conocido como el **servidor de arranque**, permite una comunicación efectiva entre tareas.
 
 ### Puertos de Archivo
 
-Los puertos de archivo permiten encapsular descriptores de archivo en puertos Mac (utilizando derechos de puerto Mach). Es posible crear un `fileport` a partir de un FD dado usando `fileport_makeport` y crear un FD a partir de un fileport usando `fileport_makefd`.
+Los puertos de archivo permiten encapsular descriptores de archivo en puertos Mac (utilizando derechos de puerto Mach). Es posible crear un `fileport` a partir de un FD dado utilizando `fileport_makeport` y crear un FD a partir de un fileport utilizando `fileport_makefd`.
 
 ### Estableciendo una comunicación
 
@@ -41,11 +41,11 @@ Como se menciona, para establecer el canal de comunicación, el **servidor de ar
 1. La tarea **A** inicia un **nuevo puerto**, obteniendo un **derecho de RECEPCIÓN** en el proceso.
 2. La tarea **A**, siendo la titular del derecho de RECEPCIÓN, **genera un derecho de ENVÍO para el puerto**.
 3. La tarea **A** establece una **conexión** con el **servidor de arranque**, proporcionando el **nombre del servicio del puerto** y el **derecho de ENVÍO** a través de un procedimiento conocido como el registro de arranque.
-4. La tarea **B** interactúa con el **servidor de arranque** para ejecutar una búsqueda de arranque **para el nombre del servicio**. Si tiene éxito, el **servidor duplica el DERECHO DE ENVÍO** recibido de la Tarea A y **lo transmite a la Tarea B**.
-5. Al adquirir un DERECHO DE ENVÍO, la Tarea **B** es capaz de **formular** un **mensaje** y enviarlo **a la Tarea A**.
-6. Para una comunicación bidireccional, generalmente la tarea **B** genera un nuevo puerto con un **DERECHO DE RECEPCIÓN** y un **DERECHO DE ENVÍO**, y otorga el **DERECHO DE ENVÍO a la Tarea A** para que pueda enviar mensajes a la TAREA B (comunicación bidireccional).
+4. La tarea **B** interactúa con el **servidor de arranque** para ejecutar una búsqueda de arranque **para el nombre del servicio**. Si tiene éxito, el **servidor duplica el DERECHO DE ENVÍO** recibido de la tarea A y **lo transmite a la tarea B**.
+5. Al adquirir un derecho de ENVÍO, la tarea **B** es capaz de **formular** un **mensaje** y enviarlo **a la tarea A**.
+6. Para una comunicación bidireccional, generalmente la tarea **B** genera un nuevo puerto con un **DERECHO DE RECEPCIÓN** y un **DERECHO DE ENVÍO**, y otorga el **DERECHO DE ENVÍO a la tarea A** para que pueda enviar mensajes a la TAREA B (comunicación bidireccional).
 
-El servidor de arranque **no puede autenticar** el nombre del servicio reclamado por una tarea. Esto significa que una **tarea** podría potencialmente **suplantar cualquier tarea del sistema**, como falsamente **reclamando un nombre de servicio de autorización** y luego aprobando cada solicitud.
+El servidor de arranque **no puede autenticar** el nombre del servicio reclamado por una tarea. Esto significa que una **tarea** podría potencialmente **suplantar cualquier tarea del sistema**, como falsamente **reclamar un nombre de servicio de autorización** y luego aprobar cada solicitud.
 
 Luego, Apple almacena los **nombres de los servicios proporcionados por el sistema** en archivos de configuración seguros, ubicados en directorios **protegidos por SIP**: `/System/Library/LaunchDaemons` y `/System/Library/LaunchAgents`. Junto a cada nombre de servicio, también se **almacena el binario asociado**. El servidor de arranque creará y mantendrá un **DERECHO DE RECEPCIÓN para cada uno de estos nombres de servicio**.
 
@@ -53,9 +53,9 @@ Para estos servicios predefinidos, el **proceso de búsqueda difiere ligeramente
 
 - La tarea **B** inicia una búsqueda de arranque **para un nombre de servicio**.
 - **launchd** verifica si la tarea está en ejecución y, si no lo está, **la inicia**.
-- La tarea **A** (el servicio) realiza un **check-in de arranque**. Aquí, el **servidor de arranque** crea un derecho de ENVÍO, lo retiene y **transfiere el derecho de RECEPCIÓN a la Tarea A**.
-- launchd duplica el **DERECHO DE ENVÍO y lo envía a la Tarea B**.
-- La tarea **B** genera un nuevo puerto con un **DERECHO DE RECEPCIÓN** y un **DERECHO DE ENVÍO**, y otorga el **DERECHO DE ENVÍO a la Tarea A** (el svc) para que pueda enviar mensajes a la TAREA B (comunicación bidireccional).
+- La tarea **A** (el servicio) realiza un **registro de arranque**. Aquí, el **servidor de arranque** crea un derecho de ENVÍO, lo retiene y **transfiere el derecho de RECEPCIÓN a la tarea A**.
+- launchd duplica el **DERECHO DE ENVÍO y lo envía a la tarea B**.
+- La tarea **B** genera un nuevo puerto con un **DERECHO DE RECEPCIÓN** y un **DERECHO DE ENVÍO**, y otorga el **DERECHO DE ENVÍO a la tarea A** (el svc) para que pueda enviar mensajes a la TAREA B (comunicación bidireccional).
 
 Sin embargo, este proceso solo se aplica a tareas del sistema predefinidas. Las tareas no del sistema aún operan como se describió originalmente, lo que podría permitir potencialmente la suplantación.
 
@@ -76,7 +76,7 @@ mach_msg_id_t                 msgh_id;
 ```
 Los procesos que poseen un _**derecho de recepción**_ pueden recibir mensajes en un puerto Mach. Por el contrario, a los **remitentes** se les concede un _**derecho de envío**_ o un _**derecho de envío-una-vez**_. El derecho de envío-una-vez es exclusivamente para enviar un solo mensaje, después del cual se vuelve inválido.
 
-Para lograr una **comunicación bidireccional** fácil, un proceso puede especificar un **puerto mach** en el **encabezado del mensaje** mach llamado el _puerto de respuesta_ (**`msgh_local_port`**) donde el **receptor** del mensaje puede **enviar una respuesta** a este mensaje. Las banderas de bits en **`msgh_bits`** se pueden usar para **indicar** que un **derecho de envío-una-vez** debe ser derivado y transferido para este puerto (`MACH_MSG_TYPE_MAKE_SEND_ONCE`).
+Para lograr una **comunicación bidireccional** fácil, un proceso puede especificar un **puerto mach** en el **encabezado del mensaje** mach llamado el _puerto de respuesta_ (**`msgh_local_port`**) donde el **receptor** del mensaje puede **enviar una respuesta** a este mensaje. Los bits en **`msgh_bits`** se pueden usar para **indicar** que un **derecho de envío-una-vez** debe ser derivado y transferido para este puerto (`MACH_MSG_TYPE_MAKE_SEND_ONCE`).
 
 > [!TIP]
 > Tenga en cuenta que este tipo de comunicación bidireccional se utiliza en mensajes XPC que esperan una respuesta (`xpc_connection_send_message_with_reply` y `xpc_connection_send_message_with_reply_sync`). Pero **generalmente se crean diferentes puertos** como se explicó anteriormente para crear la comunicación bidireccional.
@@ -234,9 +234,9 @@ printf("Sent a message\n");
 - **Puerto de tarea** (también conocido como puerto del kernel)**:** Con permiso de Enviar sobre este puerto es posible controlar la tarea (leer/escribir memoria, crear hilos...).
 - Llama a `mach_task_self()` para **obtener el nombre** de este puerto para la tarea que llama. Este puerto solo se **hereda** a través de **`exec()`**; una nueva tarea creada con `fork()` obtiene un nuevo puerto de tarea (como un caso especial, una tarea también obtiene un nuevo puerto de tarea después de `exec()` en un binario suid). La única forma de generar una tarea y obtener su puerto es realizar el ["baile de intercambio de puertos"](https://robert.sesek.com/2014/1/changes_to_xnu_mach_ipc.html) mientras se realiza un `fork()`.
 - Estas son las restricciones para acceder al puerto (de `macos_task_policy` del binario `AppleMobileFileIntegrity`):
-- Si la aplicación tiene el **derecho `com.apple.security.get-task-allow`**, los procesos del **mismo usuario pueden acceder al puerto de tarea** (comúnmente agregado por Xcode para depuración). El proceso de **notarización** no lo permitirá en lanzamientos de producción.
+- Si la aplicación tiene el derecho **`com.apple.security.get-task-allow`**, los procesos del **mismo usuario pueden acceder al puerto de tarea** (comúnmente agregado por Xcode para depuración). El proceso de **notarización** no lo permitirá en lanzamientos de producción.
 - Las aplicaciones con el derecho **`com.apple.system-task-ports`** pueden obtener el **puerto de tarea para cualquier** proceso, excepto el kernel. En versiones anteriores se llamaba **`task_for_pid-allow`**. Esto solo se concede a aplicaciones de Apple.
-- **Root puede acceder a los puertos de tarea** de aplicaciones **no** compiladas con un **runtime** **endurecido** (y no de Apple).
+- **Root puede acceder a los puertos de tarea** de aplicaciones **no** compiladas con un tiempo de ejecución **endurecido** (y no de Apple).
 
 ### Inyección de Shellcode en hilo a través del Puerto de Tarea
 

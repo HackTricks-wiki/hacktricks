@@ -27,13 +27,13 @@ El **núcleo** XNU también **incorpora** una cantidad significativa de código 
 - Pila TCP/IP y sockets
 - Cortafuegos y filtrado de paquetes
 
-Entender la interacción entre BSD y Mach puede ser complejo, debido a sus diferentes marcos conceptuales. Por ejemplo, BSD utiliza procesos como su unidad fundamental de ejecución, mientras que Mach opera en función de hilos. Esta discrepancia se reconcilia en XNU **asociando cada proceso BSD con una tarea Mach** que contiene exactamente un hilo Mach. Cuando se utiliza la llamada al sistema fork() de BSD, el código de BSD dentro del núcleo utiliza funciones de Mach para crear una tarea y una estructura de hilo.
+Entender la interacción entre BSD y Mach puede ser complejo, debido a sus diferentes marcos conceptuales. Por ejemplo, BSD utiliza procesos como su unidad fundamental de ejecución, mientras que Mach opera en función de hilos. Esta discrepancia se reconcilia en XNU **asociando cada proceso BSD con una tarea Mach** que contiene exactamente un hilo Mach. Cuando se utiliza la llamada al sistema fork() de BSD, el código BSD dentro del núcleo utiliza funciones Mach para crear una tarea y una estructura de hilo.
 
-Además, **Mach y BSD mantienen cada uno diferentes modelos de seguridad**: el modelo de seguridad de **Mach** se basa en **derechos de puerto**, mientras que el modelo de seguridad de BSD opera en función de **la propiedad del proceso**. Las disparidades entre estos dos modelos han resultado ocasionalmente en vulnerabilidades de escalada de privilegios locales. Aparte de las llamadas al sistema típicas, también hay **trampas de Mach que permiten a los programas en espacio de usuario interactuar con el núcleo**. Estos diferentes elementos juntos forman la arquitectura híbrida y multifacética del núcleo de macOS.
+Además, **Mach y BSD mantienen diferentes modelos de seguridad**: el modelo de seguridad de **Mach** se basa en **derechos de puerto**, mientras que el modelo de seguridad de BSD opera en función de **la propiedad del proceso**. Las disparidades entre estos dos modelos han resultado ocasionalmente en vulnerabilidades de escalada de privilegios locales. Aparte de las llamadas al sistema típicas, también hay **trampas Mach que permiten a los programas en espacio de usuario interactuar con el núcleo**. Estos diferentes elementos juntos forman la arquitectura híbrida y multifacética del núcleo de macOS.
 
 ### I/O Kit - Controladores
 
-El I/O Kit es un marco de **controladores de dispositivos** de código abierto y orientado a objetos en el núcleo XNU, que maneja **controladores de dispositivos cargados dinámicamente**. Permite que se agregue código modular al núcleo sobre la marcha, soportando hardware diverso.
+El I/O Kit es un marco de **controladores de dispositivos** orientado a objetos y de código abierto en el núcleo XNU, que maneja **controladores de dispositivos cargados dinámicamente**. Permite que se agregue código modular al núcleo sobre la marcha, soportando hardware diverso.
 
 {{#ref}}
 macos-iokit.md

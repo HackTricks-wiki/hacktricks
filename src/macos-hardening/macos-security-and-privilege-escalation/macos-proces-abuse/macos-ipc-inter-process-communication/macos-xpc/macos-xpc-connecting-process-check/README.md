@@ -8,7 +8,7 @@ Cuando se establece una conexión a un servicio XPC, el servidor verificará si 
 
 1. Verificar si el **proceso que se conecta está firmado con un certificado firmado por Apple** (solo otorgado por Apple).
 - Si esto **no se verifica**, un atacante podría crear un **certificado falso** para coincidir con cualquier otra verificación.
-2. Verificar si el proceso que se conecta está firmado con el **certificado de la organización** (verificación del ID del equipo).
+2. Verificar si el proceso que se conecta está firmado con el **certificado de la organización** (verificación del ID de equipo).
 - Si esto **no se verifica**, **cualquier certificado de desarrollador** de Apple puede ser utilizado para firmar y conectarse al servicio.
 3. Verificar si el proceso que se conecta **contiene un ID de paquete adecuado**.
 - Si esto **no se verifica**, cualquier herramienta **firmada por la misma organización** podría ser utilizada para interactuar con el servicio XPC.
@@ -20,7 +20,7 @@ Cuando se establece una conexión a un servicio XPC, el servidor verificará si 
 7. La **verificación** debe basarse en el **token de auditoría del cliente que se conecta** **en lugar** de su ID de proceso (**PID**) ya que el primero previene **ataques de reutilización de PID**.
 - Los desarrolladores **raramente utilizan la llamada a la API del token de auditoría** ya que es **privada**, por lo que Apple podría **cambiarla** en cualquier momento. Además, el uso de API privadas no está permitido en las aplicaciones de Mac App Store.
 - Si se utiliza el método **`processIdentifier`**, podría ser vulnerable.
-- **`xpc_dictionary_get_audit_token`** debería ser utilizado en lugar de **`xpc_connection_get_audit_token`**, ya que este último también podría ser [vulnerable en ciertas situaciones](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/).
+- **`xpc_dictionary_get_audit_token`** debería ser utilizado en lugar de **`xpc_connection_get_audit_token`**, ya que el último también podría ser [vulnerable en ciertas situaciones](https://sector7.computest.nl/post/2023-10-xpc-audit-token-spoofing/).
 
 ### Communication Attacks
 
@@ -38,7 +38,7 @@ macos-xpc_connection_get_audit_token-attack.md
 
 ### Trustcache - Prevención de Ataques de Downgrade
 
-Trustcache es un método defensivo introducido en máquinas Apple Silicon que almacena una base de datos de CDHSAH de binarios de Apple para que solo se puedan ejecutar binarios no modificados permitidos. Lo que previene la ejecución de versiones de downgrade.
+Trustcache es un método defensivo introducido en máquinas Apple Silicon que almacena una base de datos de CDHSAH de binarios de Apple, de modo que solo se pueden ejecutar binarios no modificados permitidos. Lo que previene la ejecución de versiones de downgrade.
 
 ### Code Examples
 

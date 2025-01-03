@@ -78,7 +78,7 @@ sqlite> select * from access where client LIKE "%telegram%" and auth_value=0;
 ```
 {{#endtab}}
 
-{{#tab name="base de datos del sistema"}}
+{{#tab name="system DB"}}
 ```bash
 sqlite3 /Library/Application\ Support/com.apple.TCC/TCC.db
 sqlite> .schema
@@ -203,7 +203,7 @@ csreq -t -r /tmp/telegram_csreq.bin
 
 ### Derechos y Permisos de TCC
 
-Las aplicaciones **no solo necesitan** **solicitar** y haber **recibido acceso** a algunos recursos, también necesitan **tener los derechos relevantes**.\
+Las aplicaciones **no solo necesitan** **solicitar** y haber sido **otorgadas acceso** a algunos recursos, también necesitan **tener los derechos relevantes**.\
 Por ejemplo, **Telegram** tiene el derecho `com.apple.security.device.camera` para solicitar **acceso a la cámara**. Una **aplicación** que **no tenga** este **derecho no podrá** acceder a la cámara (y el usuario ni siquiera será preguntado por los permisos).
 
 Sin embargo, para que las aplicaciones **accedan** a **ciertas carpetas de usuario**, como `~/Desktop`, `~/Downloads` y `~/Documents`, **no necesitan** tener ningún **derecho específico.** El sistema manejará el acceso de manera transparente y **pedirá al usuario** según sea necesario.
@@ -306,9 +306,9 @@ strftime('%s', 'now') -- last_reminded with default current timestamp
 ```
 </details>
 
-### Cargas TCC
+### Cargas Útiles de TCC
 
-Si lograste entrar en una aplicación con algunos permisos de TCC, consulta la siguiente página con cargas TCC para abusar de ellas:
+Si lograste entrar en una aplicación con algunos permisos de TCC, consulta la siguiente página con cargas útiles de TCC para abusar de ellas:
 
 {{#ref}}
 macos-tcc-payloads.md
@@ -324,8 +324,8 @@ macos-apple-events.md
 
 ### Automatización (Finder) a FDA\*
 
-El nombre TCC del permiso de Automatización es: **`kTCCServiceAppleEvents`**\
-Este permiso TCC específico también indica la **aplicación que puede ser gestionada** dentro de la base de datos TCC (por lo que los permisos no permiten simplemente gestionar todo).
+El nombre de TCC del permiso de Automatización es: **`kTCCServiceAppleEvents`**\
+Este permiso específico de TCC también indica la **aplicación que puede ser gestionada** dentro de la base de datos de TCC (por lo que los permisos no permiten simplemente gestionar todo).
 
 **Finder** es una aplicación que **siempre tiene FDA** (incluso si no aparece en la interfaz de usuario), así que si tienes privilegios de **Automatización** sobre ella, puedes abusar de sus privilegios para **hacer que realice algunas acciones**.\
 En este caso, tu aplicación necesitaría el permiso **`kTCCServiceAppleEvents`** sobre **`com.apple.Finder`**.
@@ -370,7 +370,7 @@ Este es el aviso de TCC para obtener privilegios de Automatización sobre Finder
 <figure><img src="../../../../images/image (27).png" alt="" width="244"><figcaption></figcaption></figure>
 
 > [!CAUTION]
-> Ten en cuenta que debido a que la aplicación **Automator** tiene el permiso TCC **`kTCCServiceAppleEvents`**, puede **controlar cualquier aplicación**, como Finder. Así que al tener el permiso para controlar Automator, también podrías controlar el **Finder** con un código como el siguiente:
+> Ten en cuenta que debido a que la aplicación **Automator** tiene el permiso TCC **`kTCCServiceAppleEvents`**, puede **controlar cualquier aplicación**, como Finder. Así que al tener el permiso para controlar Automator, también podrías controlar el **Finder** con un código como el que se muestra a continuación:
 
 <details>
 
@@ -514,7 +514,7 @@ Pero puedes **dar** a ti mismo **`Derechos de Automatización al Finder`**, y ab
 
 **Acceso Completo al Disco** es el nombre de TCC **`kTCCServiceSystemPolicyAllFiles`**
 
-No creo que esto sea un verdadero privesc, pero por si acaso lo encuentras útil: Si controlas un programa con FDA puedes **modificar la base de datos TCC de los usuarios y darte cualquier acceso**. Esto puede ser útil como técnica de persistencia en caso de que pierdas tus permisos de FDA.
+No creo que esto sea un verdadero privesc, pero por si acaso lo encuentras útil: Si controlas un programa con FDA puedes **modificar la base de datos TCC de los usuarios y darte cualquier acceso**. Esto puede ser útil como técnica de persistencia en caso de que puedas perder tus permisos de FDA.
 
 ### **Bypass de SIP a Bypass de TCC**
 

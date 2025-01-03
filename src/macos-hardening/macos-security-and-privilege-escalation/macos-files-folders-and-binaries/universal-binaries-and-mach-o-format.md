@@ -106,10 +106,10 @@ Hay diferentes tipos de archivos, puedes encontrarlos definidos en el [**código
 - `MH_OBJECT`: Archivo objeto relocatable (productos intermedios de la compilación, aún no ejecutables).
 - `MH_EXECUTE`: Archivos ejecutables.
 - `MH_FVMLIB`: Archivo de biblioteca VM fija.
-- `MH_CORE`: Volcados de código
-- `MH_PRELOAD`: Archivo ejecutable pre-cargado (ya no soportado en XNU)
-- `MH_DYLIB`: Bibliotecas dinámicas
-- `MH_DYLINKER`: Vínculo dinámico
+- `MH_CORE`: Volcados de código.
+- `MH_PRELOAD`: Archivo ejecutable pre-cargado (ya no soportado en XNU).
+- `MH_DYLIB`: Bibliotecas dinámicas.
+- `MH_DYLINKER`: Enlazador dinámico.
 - `MH_BUNDLE`: "Archivos de plugin". Generados usando -bundle en gcc y cargados explícitamente por `NSBundle` o `dlopen`.
 - `MH_DYSM`: Archivo compañero `.dSym` (archivo con símbolos para depuración).
 - `MH_KEXT_BUNDLE`: Extensiones del núcleo.
@@ -133,7 +133,7 @@ El código fuente también define varios flags útiles para cargar bibliotecas:
 - `MH_PREBOUND`: Referencias dinámicas preenlazadas.
 - `MH_SPLIT_SEGS`: El archivo divide segmentos r/o y r/w.
 - `MH_WEAK_DEFINES`: El binario tiene símbolos definidos débiles
-- `MH_BINDS_TO_WEAK`: El binario utiliza símbolos débiles
+- `MH_BINDS_TO_WEAK`: El binario usa símbolos débiles
 - `MH_ALLOW_STACK_EXECUTION`: Hacer que la pila sea ejecutable
 - `MH_NO_REEXPORTED_DYLIBS`: Biblioteca no tiene comandos LC_REEXPORT
 - `MH_PIE`: Ejecutable Independiente de Posición
@@ -171,16 +171,16 @@ En el encabezado primero encuentras el **encabezado del segmento**:
 
 <pre class="language-c"><code class="lang-c">struct segment_command_64 { /* for 64-bit architectures */
 uint32_t	cmd;		/* LC_SEGMENT_64 */
-uint32_t	cmdsize;	/* includes sizeof section_64 structs */
-char		segname[16];	/* segment name */
-uint64_t	vmaddr;		/* memory address of this segment */
-uint64_t	vmsize;		/* memory size of this segment */
-uint64_t	fileoff;	/* file offset of this segment */
-uint64_t	filesize;	/* amount to map from the file */
-int32_t		maxprot;	/* maximum VM protection */
-int32_t		initprot;	/* initial VM protection */
-<strong>	uint32_t	nsects;		/* number of sections in segment */
-</strong>	uint32_t	flags;		/* flags */
+uint32_t	cmdsize;	/* incluye sizeof section_64 structs */
+char		segname[16];	/* nombre del segmento */
+uint64_t	vmaddr;		/* dirección de memoria de este segmento */
+uint64_t	vmsize;		/* tamaño de memoria de este segmento */
+uint64_t	fileoff;	/* desplazamiento de archivo de este segmento */
+uint64_t	filesize;	/* cantidad a mapear desde el archivo */
+int32_t		maxprot;	/* protección máxima de VM */
+int32_t		initprot;	/* protección inicial de VM */
+<strong>	uint32_t	nsects;		/* número de secciones en el segmento */
+</strong>	uint32_t	flags;		/* banderas */
 };
 </code></pre>
 
@@ -219,13 +219,13 @@ otool -lv /bin/ls
 ```
 Segmentos comunes cargados por este cmd:
 
-- **`__PAGEZERO`:** Instruye al kernel para **mapear** la **dirección cero** de modo que **no se pueda leer, escribir o ejecutar**. Las variables maxprot y minprot en la estructura se establecen en cero para indicar que **no hay derechos de lectura-escritura-ejecución en esta página**.
+- **`__PAGEZERO`:** Instruye al kernel a **mapear** la **dirección cero** para que **no pueda ser leída, escrita o ejecutada**. Las variables maxprot y minprot en la estructura se establecen en cero para indicar que **no hay derechos de lectura-escritura-ejecución en esta página**.
 - Esta asignación es importante para **mitigar vulnerabilidades de desreferencia de punteros NULL**. Esto se debe a que XNU impone una página cero dura que asegura que la primera página (solo la primera) de la memoria sea inaccesible (excepto en i386). Un binario podría cumplir con estos requisitos creando un pequeño \_\_PAGEZERO (usando `-pagezero_size`) para cubrir los primeros 4k y teniendo el resto de la memoria de 32 bits accesible tanto en modo usuario como en modo kernel.
 - **`__TEXT`**: Contiene **código** **ejecutable** con permisos de **lectura** y **ejecución** (no escribible)**.** Secciones comunes de este segmento:
 - `__text`: Código binario compilado
 - `__const`: Datos constantes (solo lectura)
 - `__[c/u/os_log]string`: Constantes de cadenas C, Unicode o os logs
-- `__stubs` y `__stubs_helper`: Involucrados durante el proceso de carga de bibliotecas dinámicas
+- `__stubs` y `__stubs_helper`: Involucrados durante el proceso de carga de la biblioteca dinámica
 - `__unwind_info`: Datos de deshacer la pila.
 - Tenga en cuenta que todo este contenido está firmado pero también marcado como ejecutable (creando más opciones para la explotación de secciones que no necesariamente necesitan este privilegio, como secciones dedicadas a cadenas).
 - **`__DATA`**: Contiene datos que son **legibles** y **escribibles** (no ejecutables)**.**
@@ -237,7 +237,7 @@ Segmentos comunes cargados por este cmd:
 - `__data`: Variables globales (que han sido inicializadas)
 - `__bss`: Variables estáticas (que no han sido inicializadas)
 - `__objc_*` (\_\_objc_classlist, \_\_objc_protolist, etc): Información utilizada por el tiempo de ejecución de Objective-C
-- **`__DATA_CONST`**: \_\_DATA.\_\_const no está garantizado que sea constante (permisos de escritura), ni lo son otros punteros y la GOT. Esta sección hace que `__const`, algunos inicializadores y la tabla GOT (una vez resuelta) sean **solo lectura** usando `mprotect`.
+- **`__DATA_CONST`**: \_\_DATA.\_\_const no está garantizado que sea constante (permisos de escritura), ni lo están otros punteros y la GOT. Esta sección hace que `__const`, algunos inicializadores y la tabla GOT (una vez resuelta) sean **solo lectura** usando `mprotect`.
 - **`__LINKEDIT`**: Contiene información para el enlazador (dyld) como, símbolos, cadenas y entradas de tabla de reubicación. Es un contenedor genérico para contenidos que no están en `__TEXT` o `__DATA` y su contenido se describe en otros comandos de carga.
 - Información de dyld: Rebase, opcodes de vinculación no perezosa/perezosa/débil e información de exportación
 - Comienzos de funciones: Tabla de direcciones de inicio de funciones
@@ -254,7 +254,7 @@ Como se pudo ver en el código, **los segmentos también admiten flags** (aunque
 - `SG_HIGHVM`: Solo núcleo (no utilizado)
 - `SG_FVMLIB`: No utilizado
 - `SG_NORELOC`: El segmento no tiene reubicación
-- `SG_PROTECTED_VERSION_1`: Cifrado. Utilizado, por ejemplo, por Finder para cifrar el segmento de texto `__TEXT`.
+- `SG_PROTECTED_VERSION_1`: Cifrado. Usado, por ejemplo, por Finder para cifrar el segmento de texto `__TEXT`.
 
 ### **`LC_UNIXTHREAD/LC_MAIN`**
 
@@ -286,8 +286,8 @@ cpsr 0x00000000
 ```
 ### **`LC_CODE_SIGNATURE`**
 
-Contiene información sobre la **firma de código del archivo Macho-O**. Solo contiene un **offset** que **apunta** al **blob de firma**. Esto suele estar al final del archivo.\
-Sin embargo, puedes encontrar información sobre esta sección en [**esta publicación de blog**](https://davedelong.com/blog/2018/01/10/reading-your-own-entitlements/) y en este [**gist**](https://gist.github.com/carlospolop/ef26f8eb9fafd4bc22e69e1a32b81da4).
+Contiene información sobre la **firma de código del archivo Macho-O**. Solo contiene un **desplazamiento** que **apunta** al **blob de firma**. Esto suele estar al final del archivo.\
+Sin embargo, puedes encontrar algo de información sobre esta sección en [**esta publicación de blog**](https://davedelong.com/blog/2018/01/10/reading-your-own-entitlements/) y en este [**gist**](https://gist.github.com/carlospolop/ef26f8eb9fafd4bc22e69e1a32b81da4).
 
 ### **`LC_ENCRYPTION_INFO[_64]`**
 
@@ -299,7 +299,21 @@ Contiene la **ruta al ejecutable del enlazador dinámico** que mapea bibliotecas
 
 ### **`LC_IDENT`**
 
-Obsoleto, pero cuando se configura para generar volcado en caso de pánico, se crea un volcado de núcleo Mach-O y la versión del kernel se establece en el comando `LC_IDENT
+Obsoleto, pero cuando se configura para generar volcado en caso de pánico, se crea un volcado de núcleo Mach-O y la versión del kernel se establece en el comando `LC_IDENT`.
+
+### **`LC_UUID`**
+
+UUID aleatorio. Es útil para cualquier cosa directamente, pero XNU lo almacena en caché con el resto de la información del proceso. Puede ser utilizado en informes de fallos.
+
+### **`LC_DYLD_ENVIRONMENT`**
+
+Permite indicar variables de entorno al dyld antes de que se ejecute el proceso. Esto puede ser muy peligroso, ya que puede permitir ejecutar código arbitrario dentro del proceso, por lo que este comando de carga solo se utiliza en dyld construido con `#define SUPPORT_LC_DYLD_ENVIRONMENT` y restringe aún más el procesamiento solo a variables de la forma `DYLD_..._PATH` especificando rutas de carga.
+
+### **`LC_LOAD_DYLIB`**
+
+Este comando de carga describe una dependencia de **biblioteca** **dinámica** que **instruye** al **cargador** (dyld) a **cargar y vincular dicha biblioteca**. Hay un comando de carga `LC_LOAD_DYLIB` **para cada biblioteca** que el binario Mach-O requiere.
+
+- Este comando de carga es una estructura de tipo **`dylib_command`** (que contiene una estructura dylib, describiendo la biblioteca dinámica dependiente real):
 ```objectivec
 struct dylib_command {
 uint32_t        cmd;            /* LC_LOAD_{,WEAK_}DYLIB */
@@ -316,7 +330,7 @@ uint32_t compatibility_version;     /* library's compatibility vers number*/
 ```
 ![](<../../../images/image (486).png>)
 
-También puedes obtener esta información desde la línea de comandos con:
+También podrías obtener esta información desde la línea de comandos con:
 ```bash
 otool -L /bin/ls
 /bin/ls:
@@ -368,10 +382,10 @@ En el segmento `__TEXT` (r-x):
 En el segmento `__DATA` (rw-):
 
 - `__objc_classlist`: Punteros a todas las clases de Objetive-C
-- `__objc_nlclslist`: Punteros a clases de Objective-C No Perezosas
+- `__objc_nlclslist`: Punteros a clases de Objetive-C No Perezosas
 - `__objc_catlist`: Puntero a Categorías
 - `__objc_nlcatlist`: Puntero a Categorías No Perezosas
-- `__objc_protolist`: Lista de Protocolos
+- `__objc_protolist`: Lista de protocolos
 - `__objc_const`: Datos constantes
 - `__objc_imageinfo`, `__objc_selrefs`, `objc__protorefs`...
 

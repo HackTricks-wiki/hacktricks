@@ -1,4 +1,4 @@
-# Inyección de Hilo en macOS a través del puerto de tarea
+# Inyección de Hilo en macOS a través del Puerto de Tarea
 
 {{#include ../../../../banners/hacktricks-training.md}}
 
@@ -21,9 +21,9 @@ Una estrategia implica **registrar un manejador de excepciones** para el hilo re
 
 La fase siguiente implica establecer puertos Mach para facilitar la comunicación con el hilo remoto. Estos puertos son fundamentales para transferir derechos de envío y recepción arbitrarios entre tareas.
 
-Para la comunicación bidireccional, se crean dos derechos de recepción Mach: uno en la tarea local y el otro en la tarea remota. Posteriormente, se transfiere un derecho de envío para cada puerto a la tarea contraparte, permitiendo el intercambio de mensajes.
+Para la comunicación bidireccional, se crean dos derechos de recepción Mach: uno en la tarea local y el otro en la tarea remota. Posteriormente, se transfiere un derecho de envío para cada puerto a la tarea contraria, permitiendo el intercambio de mensajes.
 
-Centrando en el puerto local, el derecho de recepción es mantenido por la tarea local. El puerto se crea con `mach_port_allocate()`. El desafío radica en transferir un derecho de envío a este puerto en la tarea remota.
+Enfocándose en el puerto local, el derecho de recepción es mantenido por la tarea local. El puerto se crea con `mach_port_allocate()`. El desafío radica en transferir un derecho de envío a este puerto en la tarea remota.
 
 Una estrategia implica aprovechar `thread_set_special_port()` para colocar un derecho de envío al puerto local en el `THREAD_KERNEL_PORT` del hilo remoto. Luego, se instruye al hilo remoto para que llame a `mach_thread_self()` para recuperar el derecho de envío.
 
@@ -58,7 +58,7 @@ _write_func:
 str x1, [x0]
 ret
 ```
-### Identificando Funciones Adecuadas
+### Identificación de Funciones Adecuadas
 
 Un escaneo de bibliotecas comunes reveló candidatos apropiados para estas operaciones:
 
@@ -123,11 +123,11 @@ Para crear y corregir el objeto de memoria compartida en el proceso remoto:
 malloc(); // for allocating memory remotely
 thread_set_special_port(); // for inserting send right
 ```
-Recuerde manejar correctamente los detalles de los puertos Mach y los nombres de las entradas de memoria para garantizar que la configuración de memoria compartida funcione correctamente.
+Recuerda manejar correctamente los detalles de los puertos Mach y los nombres de las entradas de memoria para asegurar que la configuración de memoria compartida funcione adecuadamente.
 
 ## 5. Logrando Control Total
 
-Al establecer con éxito la memoria compartida y obtener capacidades de ejecución arbitraria, hemos ganado esencialmente control total sobre el proceso objetivo. Las funcionalidades clave que permiten este control son:
+Al establecer con éxito la memoria compartida y obtener capacidades de ejecución arbitraria, esencialmente hemos ganado control total sobre el proceso objetivo. Las funcionalidades clave que permiten este control son:
 
 1. **Operaciones de Memoria Arbitrarias**:
 
@@ -136,7 +136,7 @@ Al establecer con éxito la memoria compartida y obtener capacidades de ejecuci�
 
 2. **Manejo de Llamadas a Funciones con Múltiples Argumentos**:
 
-- Para funciones que requieren más de 8 argumentos, organizar los argumentos adicionales en la pila de acuerdo con la convención de llamada.
+- Para funciones que requieren más de 8 argumentos, organiza los argumentos adicionales en la pila de acuerdo con la convención de llamada.
 
 3. **Transferencia de Puertos Mach**:
 
@@ -149,8 +149,8 @@ Este control integral está encapsulado dentro de la biblioteca [threadexec](htt
 
 ## Consideraciones Importantes:
 
-- Asegúrese de utilizar correctamente `memcpy()` para operaciones de lectura/escritura de memoria para mantener la estabilidad del sistema y la integridad de los datos.
-- Al transferir puertos Mach o descriptores de archivo, siga los protocolos adecuados y maneje los recursos de manera responsable para prevenir leaks o accesos no intencionados.
+- Asegúrate de usar correctamente `memcpy()` para operaciones de lectura/escritura de memoria para mantener la estabilidad del sistema y la integridad de los datos.
+- Al transferir puertos Mach o descriptores de archivo, sigue los protocolos adecuados y maneja los recursos de manera responsable para prevenir leaks o accesos no intencionados.
 
 Al adherirse a estas pautas y utilizar la biblioteca `threadexec`, se puede gestionar e interactuar eficientemente con los procesos a un nivel granular, logrando control total sobre el proceso objetivo.
 

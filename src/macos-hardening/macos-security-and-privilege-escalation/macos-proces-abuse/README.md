@@ -58,19 +58,19 @@ char     persona_name[MAXLOGNAME + 1];
 ```
 ## Información Básica sobre Hilos
 
-1. **Hilos POSIX (pthreads):** macOS soporta hilos POSIX (`pthreads`), que son parte de una API estándar de hilos para C/C++. La implementación de pthreads en macOS se encuentra en `/usr/lib/system/libsystem_pthread.dylib`, que proviene del proyecto `libpthread` disponible públicamente. Esta biblioteca proporciona las funciones necesarias para crear y gestionar hilos.
-2. **Creación de Hilos:** La función `pthread_create()` se utiliza para crear nuevos hilos. Internamente, esta función llama a `bsdthread_create()`, que es una llamada al sistema de nivel inferior específica del núcleo XNU (el núcleo en el que se basa macOS). Esta llamada al sistema toma varios flags derivados de `pthread_attr` (atributos) que especifican el comportamiento del hilo, incluyendo políticas de programación y tamaño de pila.
-- **Tamaño de Pila por Defecto:** El tamaño de pila por defecto para nuevos hilos es de 512 KB, lo cual es suficiente para operaciones típicas, pero puede ajustarse a través de atributos de hilo si se necesita más o menos espacio.
-3. **Inicialización de Hilos:** La función `__pthread_init()` es crucial durante la configuración del hilo, utilizando el argumento `env[]` para analizar variables de entorno que pueden incluir detalles sobre la ubicación y tamaño de la pila.
+1. **Hilos POSIX (pthreads):** macOS soporta hilos POSIX (`pthreads`), que son parte de una API de subprocesos estándar para C/C++. La implementación de pthreads en macOS se encuentra en `/usr/lib/system/libsystem_pthread.dylib`, que proviene del proyecto `libpthread` disponible públicamente. Esta biblioteca proporciona las funciones necesarias para crear y gestionar hilos.
+2. **Creación de Hilos:** La función `pthread_create()` se utiliza para crear nuevos hilos. Internamente, esta función llama a `bsdthread_create()`, que es una llamada al sistema de nivel inferior específica del núcleo XNU (el núcleo en el que se basa macOS). Esta llamada al sistema toma varias banderas derivadas de `pthread_attr` (atributos) que especifican el comportamiento del hilo, incluidas las políticas de programación y el tamaño de la pila.
+- **Tamaño de Pila por Defecto:** El tamaño de pila por defecto para nuevos hilos es de 512 KB, lo cual es suficiente para operaciones típicas, pero se puede ajustar a través de los atributos del hilo si se necesita más o menos espacio.
+3. **Inicialización de Hilos:** La función `__pthread_init()` es crucial durante la configuración del hilo, utilizando el argumento `env[]` para analizar las variables de entorno que pueden incluir detalles sobre la ubicación y el tamaño de la pila.
 
 #### Terminación de Hilos en macOS
 
-1. **Salida de Hilos:** Los hilos se terminan típicamente llamando a `pthread_exit()`. Esta función permite que un hilo salga de manera limpia, realizando la limpieza necesaria y permitiendo que el hilo envíe un valor de retorno a cualquier hilo que lo haya unido.
+1. **Salida de Hilos:** Los hilos se terminan típicamente llamando a `pthread_exit()`. Esta función permite que un hilo salga de manera limpia, realizando la limpieza necesaria y permitiendo que el hilo envíe un valor de retorno a cualquier unidor.
 2. **Limpieza de Hilos:** Al llamar a `pthread_exit()`, se invoca la función `pthread_terminate()`, que maneja la eliminación de todas las estructuras de hilo asociadas. Desasigna puertos de hilo Mach (Mach es el subsistema de comunicación en el núcleo XNU) y llama a `bsdthread_terminate`, una syscall que elimina las estructuras a nivel de núcleo asociadas con el hilo.
 
 #### Mecanismos de Sincronización
 
-Para gestionar el acceso a recursos compartidos y evitar condiciones de carrera, macOS proporciona varias primitivas de sincronización. Estas son críticas en entornos de múltiples hilos para asegurar la integridad de los datos y la estabilidad del sistema:
+Para gestionar el acceso a recursos compartidos y evitar condiciones de carrera, macOS proporciona varias primitivas de sincronización. Estas son críticas en entornos de múltiples hilos para garantizar la integridad de los datos y la estabilidad del sistema:
 
 1. **Mutexes:**
 - **Mutex Regular (Firma: 0x4D555458):** Mutex estándar con una huella de memoria de 60 bytes (56 bytes para el mutex y 4 bytes para la firma).
@@ -92,7 +92,7 @@ Para gestionar el acceso a recursos compartidos y evitar condiciones de carrera,
 
 **Variables Locales de Hilo (TLV)** en el contexto de archivos Mach-O (el formato para ejecutables en macOS) se utilizan para declarar variables que son específicas de **cada hilo** en una aplicación multihilo. Esto asegura que cada hilo tenga su propia instancia separada de una variable, proporcionando una forma de evitar conflictos y mantener la integridad de los datos sin necesidad de mecanismos de sincronización explícitos como mutexes.
 
-En C y lenguajes relacionados, puedes declarar una variable local de hilo utilizando la palabra clave **`__thread`**. Aquí te mostramos cómo funciona en tu ejemplo:
+En C y lenguajes relacionados, puedes declarar una variable local de hilo utilizando la **`__thread`** palabra clave. Aquí está cómo funciona en tu ejemplo:
 ```c
 cCopy code__thread int tlv_var;
 
@@ -100,7 +100,7 @@ void main (int argc, char **argv){
 tlv_var = 10;
 }
 ```
-Este fragmento define `tlv_var` como una variable local de hilo. Cada hilo que ejecute este código tendrá su propio `tlv_var`, y los cambios que un hilo haga en `tlv_var` no afectarán a `tlv_var` en otro hilo.
+Este fragmento define `tlv_var` como una variable local de hilo. Cada hilo que ejecuta este código tendrá su propio `tlv_var`, y los cambios que un hilo haga a `tlv_var` no afectarán a `tlv_var` en otro hilo.
 
 En el binario Mach-O, los datos relacionados con las variables locales de hilo están organizados en secciones específicas:
 
@@ -129,9 +129,9 @@ Las clases de QoS son un enfoque más moderno para manejar las prioridades de hi
 1. **Interacción del Usuario:**
 - Esta clase es para tareas que están interactuando actualmente con el usuario o requieren resultados inmediatos para proporcionar una buena experiencia de usuario. Estas tareas reciben la prioridad más alta para mantener la interfaz receptiva (por ejemplo, animaciones o manejo de eventos).
 2. **Iniciadas por el Usuario:**
-- Tareas que el usuario inicia y espera resultados inmediatos, como abrir un documento o hacer clic en un botón que requiere cálculos. Estas tienen alta prioridad pero por debajo de la interacción del usuario.
+- Tareas que el usuario inicia y espera resultados inmediatos, como abrir un documento o hacer clic en un botón que requiere cálculos. Estas son de alta prioridad pero por debajo de la interacción del usuario.
 3. **Utilidad:**
-- Estas tareas son de larga duración y típicamente muestran un indicador de progreso (por ejemplo, descargar archivos, importar datos). Tienen menor prioridad que las tareas iniciadas por el usuario y no necesitan finalizar de inmediato.
+- Estas tareas son de larga duración y típicamente muestran un indicador de progreso (por ejemplo, descargar archivos, importar datos). Tienen una prioridad más baja que las tareas iniciadas por el usuario y no necesitan finalizar de inmediato.
 4. **Fondo:**
 - Esta clase es para tareas que operan en segundo plano y no son visibles para el usuario. Estas pueden ser tareas como indexación, sincronización o copias de seguridad. Tienen la prioridad más baja y un impacto mínimo en el rendimiento del sistema.
 
@@ -233,7 +233,7 @@ Otras variables de entorno como **`PYTHONPATH`** y **`PYTHONHOME`** también pod
 Ten en cuenta que los ejecutables compilados con **`pyinstaller`** no usarán estas variables ambientales incluso si se están ejecutando usando un Python embebido.
 
 > [!CAUTION]
-> En general, no pude encontrar una manera de hacer que Python ejecute código arbitrario abusando de variables de entorno.\
+> En general, no pude encontrar una manera de hacer que Python ejecute código arbitrario abusando de las variables de entorno.\
 > Sin embargo, la mayoría de las personas instalan Python usando **Homebrew**, que instalará Python en una **ubicación escribible** para el usuario administrador predeterminado. Puedes secuestrarlo con algo como:
 >
 > ```bash

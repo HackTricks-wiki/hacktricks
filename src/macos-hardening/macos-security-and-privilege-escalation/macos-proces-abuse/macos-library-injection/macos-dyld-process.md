@@ -11,11 +11,11 @@ Este enlazador necesitará localizar todas las bibliotecas ejecutables, mapeánd
 Por supuesto, **`dyld`** no tiene dependencias (utiliza syscalls y extractos de libSystem).
 
 > [!CAUTION]
-> Si este enlazador contiene alguna vulnerabilidad, como se está ejecutando antes de ejecutar cualquier binario (incluso los altamente privilegiados), sería posible **escalar privilegios**.
+> Si este enlazador contiene alguna vulnerabilidad, dado que se ejecuta antes de ejecutar cualquier binario (incluso los altamente privilegiados), sería posible **escalar privilegios**.
 
 ### Flujo
 
-Dyld será cargado por **`dyldboostrap::start`**, que también cargará cosas como el **canario de pila**. Esto se debe a que esta función recibirá en su vector de argumentos **`apple`** este y otros **valores** **sensibles**.
+Dyld será cargado por **`dyldboostrap::start`**, que también cargará cosas como el **stack canary**. Esto se debe a que esta función recibirá en su vector de argumentos **`apple`** este y otros **valores** **sensibles**.
 
 **`dyls::_main()`** es el punto de entrada de dyld y su primera tarea es ejecutar `configureProcessRestrictions()`, que generalmente restringe las variables de entorno **`DYLD_*`** explicadas en:
 
@@ -47,7 +47,7 @@ Algunas secciones de stubs en el binario:
 - **`__DATA.__la_symbol_ptr`**: Punteros de símbolos perezosos (vinculados en el primer acceso)
 
 > [!WARNING]
-> Tenga en cuenta que los punteros con el prefijo "auth\_" están utilizando una clave de cifrado en proceso para protegerlo (PAC). Además, es posible utilizar la instrucción arm64 `BLRA[A/B]` para verificar el puntero antes de seguirlo. Y el RETA\[A/B] se puede usar en lugar de una dirección RET.\
+> Tenga en cuenta que los punteros con el prefijo "auth\_" están utilizando una clave de cifrado en proceso para protegerlo (PAC). Además, es posible usar la instrucción arm64 `BLRA[A/B]` para verificar el puntero antes de seguirlo. Y el RETA\[A/B] se puede usar en lugar de una dirección RET.\
 > De hecho, el código en **`__TEXT.__auth_stubs`** utilizará **`braa`** en lugar de **`bl`** para llamar a la función solicitada para autenticar el puntero.
 >
 > También tenga en cuenta que las versiones actuales de dyld cargan **todo como no perezoso**.
@@ -61,7 +61,7 @@ int main (int argc, char **argv, char **envp, char **apple)
 printf("Hi\n");
 }
 ```
-Interesante parte de desensamblaje:
+Interesante parte de desensamblado:
 ```armasm
 ; objdump -d ./load
 100003f7c: 90000000    	adrp	x0, 0x100003000 <_main+0x1c>
@@ -264,7 +264,7 @@ dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
 - `DYLD_PRINT_BINDINGS`: Imprimir símbolos cuando están vinculados
 - `DYLD_WEAK_BINDINGS`: Solo imprimir símbolos débiles cuando están vinculados
 - `DYLD_PRINT_CODE_SIGNATURES`: Imprimir operaciones de registro de firma de código
-- `DYLD_PRINT_DOFS`: Imprimir secciones del formato de objeto D-Trace a medida que se cargan
+- `DYLD_PRINT_DOFS`: Imprimir secciones de formato de objeto D-Trace a medida que se cargan
 - `DYLD_PRINT_ENV`: Imprimir el entorno visto por dyld
 - `DYLD_PRINT_INTERPOSTING`: Imprimir operaciones de interposición
 - `DYLD_PRINT_LIBRARIES`: Imprimir bibliotecas cargadas

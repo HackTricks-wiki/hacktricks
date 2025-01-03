@@ -43,11 +43,11 @@ security dump-keychain -d #Dump all the info, included secrets (the user will be
 
 Una herramienta llamada **keychaindump** ha sido desarrollada para extraer contraseñas de los llaveros de macOS, pero enfrenta limitaciones en versiones más nuevas de macOS como Big Sur, como se indica en una [discusión](https://github.com/juuso/keychaindump/issues/10#issuecomment-751218760). El uso de **keychaindump** requiere que el atacante obtenga acceso y escale privilegios a **root**. La herramienta explota el hecho de que el llavero está desbloqueado por defecto al iniciar sesión del usuario por conveniencia, permitiendo que las aplicaciones accedan a él sin requerir repetidamente la contraseña del usuario. Sin embargo, si un usuario opta por bloquear su llavero después de cada uso, **keychaindump** se vuelve ineficaz.
 
-**Keychaindump** opera apuntando a un proceso específico llamado **securityd**, descrito por Apple como un demonio para operaciones de autorización y criptografía, crucial para acceder al llavero. El proceso de extracción implica identificar una **Clave Maestra** derivada de la contraseña de inicio de sesión del usuario. Esta clave es esencial para leer el archivo del llavero. Para localizar la **Clave Maestra**, **keychaindump** escanea el montón de memoria de **securityd** utilizando el comando `vmmap`, buscando posibles claves dentro de áreas marcadas como `MALLOC_TINY`. El siguiente comando se utiliza para inspeccionar estas ubicaciones de memoria:
+**Keychaindump** opera apuntando a un proceso específico llamado **securityd**, descrito por Apple como un demonio para operaciones de autorización y criptografía, crucial para acceder al llavero. El proceso de extracción implica identificar una **Master Key** derivada de la contraseña de inicio de sesión del usuario. Esta clave es esencial para leer el archivo del llavero. Para localizar la **Master Key**, **keychaindump** escanea el heap de memoria de **securityd** utilizando el comando `vmmap`, buscando posibles claves dentro de áreas marcadas como `MALLOC_TINY`. El siguiente comando se utiliza para inspeccionar estas ubicaciones de memoria:
 ```bash
 sudo vmmap <securityd PID> | grep MALLOC_TINY
 ```
-Después de identificar posibles claves maestras, **keychaindump** busca a través de los montones un patrón específico (`0x0000000000000018`) que indica un candidato para la clave maestra. Se requieren pasos adicionales, incluida la deofuscación, para utilizar esta clave, como se detalla en el código fuente de **keychaindump**. Los analistas que se centran en esta área deben tener en cuenta que los datos cruciales para descifrar el llavero se almacenan dentro de la memoria del proceso **securityd**. Un comando de ejemplo para ejecutar **keychaindump** es:
+Después de identificar posibles claves maestras, **keychaindump** busca a través de los montones un patrón específico (`0x0000000000000018`) que indica un candidato para la clave maestra. Se requieren pasos adicionales, incluida la desofuscación, para utilizar esta clave, como se detalla en el código fuente de **keychaindump**. Los analistas que se centran en esta área deben tener en cuenta que los datos cruciales para descifrar el llavero se almacenan dentro de la memoria del proceso **securityd**. Un comando de ejemplo para ejecutar **keychaindump** es:
 ```bash
 sudo ./keychaindump
 ```
@@ -90,7 +90,7 @@ hashcat.exe -m 23100 --keep-guessing hashes.txt dictionary.txt
 # Use the key to decrypt the passwords
 python2.7 chainbreaker.py --dump-all --key 0293847570022761234562947e0bcd5bc04d196ad2345697 /Library/Keychains/System.keychain
 ```
-#### **Volcar claves del llavero (con contraseñas) con volcado de memoria**
+#### **Volcar claves del llavero (con contraseñas) con un volcado de memoria**
 
 [Sigue estos pasos](../#dumping-memory-with-osxpmem) para realizar un **volcado de memoria**
 ```bash
@@ -110,10 +110,10 @@ python2.7 chainbreaker.py --dump-all --password-prompt /Users/<username>/Library
 ```
 ### kcpassword
 
-El archivo **kcpassword** es un archivo que contiene la **contraseña de inicio de sesión del usuario**, pero solo si el propietario del sistema ha **activado el inicio de sesión automático**. Por lo tanto, el usuario se iniciará sesión automáticamente sin que se le pida una contraseña (lo cual no es muy seguro).
+El archivo **kcpassword** es un archivo que contiene la **contraseña de inicio de sesión del usuario**, pero solo si el propietario del sistema ha **activado el inicio de sesión automático**. Por lo tanto, el usuario iniciará sesión automáticamente sin que se le pida una contraseña (lo cual no es muy seguro).
 
 La contraseña se almacena en el archivo **`/etc/kcpassword`** xored con la clave **`0x7D 0x89 0x52 0x23 0xD2 0xBC 0xDD 0xEA 0xA3 0xB9 0x1F`**. Si la contraseña del usuario es más larga que la clave, la clave se reutilizará.\
-Esto hace que la contraseña sea bastante fácil de recuperar, por ejemplo, usando scripts como [**este**](https://gist.github.com/opshope/32f65875d45215c3677d).
+Esto hace que la contraseña sea bastante fácil de recuperar, por ejemplo, utilizando scripts como [**este**](https://gist.github.com/opshope/32f65875d45215c3677d).
 
 ## Información Interesante en Bases de Datos
 
@@ -217,7 +217,7 @@ El **Distributed Notification Center** cuyo binario principal es **`/usr/sbin/di
 
 ### Apple Push Notifications (APN)
 
-En este caso, las aplicaciones pueden registrarse para **temas**. El cliente generará un token contactando a los servidores de Apple a través de **`apsd`**.\
+En este caso, las aplicaciones pueden registrarse para **temas**. El cliente generará un token contactando los servidores de Apple a través de **`apsd`**.\
 Luego, los proveedores también habrán generado un token y podrán conectarse a los servidores de Apple para enviar mensajes a los clientes. Estos mensajes serán recibidos localmente por **`apsd`** que retransmitirá la notificación a la aplicación que la espera.
 
 Las preferencias se encuentran en `/Library/Preferences/com.apple.apsd.plist`.

@@ -29,11 +29,11 @@ Las aplicaciones con el derecho de Herramienta de Depuración pueden llamar a `t
 
 ### `com.apple.security.cs.disable-library-validation`
 
-Este derecho permite **cargar frameworks, complementos o bibliotecas sin estar firmados por Apple o firmados con el mismo Team ID** que el ejecutable principal, por lo que un atacante podría abusar de alguna carga de biblioteca arbitraria para inyectar código. Consulte [**esto para más información**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-library-validation).
+Este derecho permite **cargar frameworks, plug-ins o bibliotecas sin estar firmados por Apple o firmados con el mismo Team ID** que el ejecutable principal, por lo que un atacante podría abusar de alguna carga de biblioteca arbitraria para inyectar código. Consulte [**esto para más información**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_disable-library-validation).
 
 ### `com.apple.private.security.clear-library-validation`
 
-Este derecho es muy similar a **`com.apple.security.cs.disable-library-validation`** pero **en lugar de** **deshabilitar directamente** la validación de bibliotecas, permite al proceso **llamar a una llamada al sistema `csops` para deshabilitarla**.\
+Este derecho es muy similar a **`com.apple.security.cs.disable-library-validation`** pero **en lugar de** **deshabilitar directamente** la validación de bibliotecas, permite que el proceso **llame a una llamada al sistema `csops` para deshabilitarla**.\
 Consulte [**esto para más información**](https://theevilbit.github.io/posts/com.apple.private.security.clear-library-validation/).
 
 ### `com.apple.security.cs.allow-dyld-environment-variables`
@@ -156,7 +156,7 @@ Según esta publicación de blog, este permiso TCC generalmente se encuentra en 
 [Array]
 [String] kTCCServiceAll
 ```
-Permitir que el proceso **pida todos los permisos de TCC**.
+Permitir que el proceso **solicite todos los permisos de TCC**.
 
 ### **`kTCCServicePostEvent`**
 

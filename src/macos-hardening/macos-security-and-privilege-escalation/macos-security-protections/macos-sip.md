@@ -13,7 +13,7 @@
 
 Las reglas que rigen el comportamiento de SIP se definen en el archivo de configuración ubicado en **`/System/Library/Sandbox/rootless.conf`**. Dentro de este archivo, las rutas que están precedidas por un asterisco (\*) se denotan como excepciones a las estrictas restricciones de SIP. 
 
-Considera el siguiente ejemplo:
+Considere el siguiente ejemplo:
 ```javascript
 /usr
 * /usr/libexec/cups
@@ -22,7 +22,7 @@ Considera el siguiente ejemplo:
 ```
 Este fragmento implica que, aunque SIP generalmente asegura el **`/usr`** directorio, hay subdirectorios específicos (`/usr/libexec/cups`, `/usr/local`, y `/usr/share/man`) donde las modificaciones son permisibles, como lo indica el asterisco (\*) que precede sus rutas.
 
-Para verificar si un directorio o archivo está protegido por SIP, puedes usar el **`ls -lOd`** comando para comprobar la presencia de la **`restricted`** o **`sunlnk`** bandera. Por ejemplo:
+Para verificar si un directorio o archivo está protegido por SIP, puedes usar el comando **`ls -lOd`** para comprobar la presencia de la bandera **`restricted`** o **`sunlnk`**. Por ejemplo:
 ```bash
 ls -lOd /usr/libexec/cups
 drwxr-xr-x  11 root  wheel  sunlnk 352 May 13 00:29 /usr/libexec/cups
@@ -48,7 +48,7 @@ Además, si un archivo contiene el atributo **`com.apple.rootless`** atributo **
 - Modificar variables de NVRAM
 - Permitir depuración del kernel
 
-Las opciones se mantienen en la variable nvram como un bitflag (`csr-active-config` en Intel y `lp-sip0` se lee del Device Tree arrancado para ARM). Puede encontrar las banderas en el código fuente de XNU en `csr.sh`:
+Las opciones se mantienen en la variable nvram como un bitflag (`csr-active-config` en Intel y `lp-sip0` se lee del Device Tree iniciado para ARM). Puede encontrar las banderas en el código fuente de XNU en `csr.sh`:
 
 <figure><img src="../../../images/image (1192).png" alt=""><figcaption></figcaption></figure>
 
@@ -116,7 +116,7 @@ Se descubrió que era posible **intercambiar el paquete de instalación después
 
 #### [CVE-2020–9854](https://objective-see.org/blog/blog_0x4D.html) <a href="#cve-unauthd-chain" id="cve-unauthd-chain"></a>
 
-Si un paquete se instalaba desde una imagen montada o unidad externa, el **instalador** **ejecutaría** el binario de **ese sistema de archivos** (en lugar de un lugar protegido por SIP), haciendo que **`system_installd`** ejecute un binario arbitrario.
+Si un paquete se instalaba desde una imagen montada o un disco externo, el **instalador** **ejecutaría** el binario de **ese sistema de archivos** (en lugar de un lugar protegido por SIP), haciendo que **`system_installd`** ejecutara un binario arbitrario.
 
 #### CVE-2021-30892 - Shrootless
 
@@ -154,9 +154,9 @@ mkdir evil
 hdiutil create -srcfolder evil evil.dmg
 hdiutil attach -mountpoint /System/Library/Snadbox/ evil.dmg
 ```
-#### [Bypass de actualizador (2016)](https://objective-see.org/blog/blog_0x14.html)
+#### [Bypass de Upgrader (2016)](https://objective-see.org/blog/blog_0x14.html)
 
-El sistema está configurado para arrancar desde una imagen de disco de instalador embebida dentro de `Install macOS Sierra.app` para actualizar el sistema operativo, utilizando la utilidad `bless`. El comando utilizado es el siguiente:
+El sistema está configurado para arrancar desde una imagen de disco de instalador embebida dentro de `Install macOS Sierra.app` para actualizar el SO, utilizando la utilidad `bless`. El comando utilizado es el siguiente:
 ```bash
 /usr/sbin/bless -setBoot -folder /Volumes/Macintosh HD/macOS Install Data -bootefi /Volumes/Macintosh HD/macOS Install Data/boot.efi -options config="\macOS Install Data\com.apple.Boot" -label macOS Installer
 ```
@@ -172,7 +172,7 @@ En esta charla de [**DEF CON 31**](https://www.youtube.com/watch?v=zxZesAN-TEk),
 
 #### CVE-2023-42860 <a href="#cve-a-detailed-look" id="cve-a-detailed-look"></a>
 
-Como [**se detalla en esta publicación del blog**](https://blog.kandji.io/apple-mitigates-vulnerabilities-installer-scripts), un script `postinstall` de `InstallAssistant.pkg` permitía ejecutar:
+Como [**se detalla en esta publicación de blog**](https://blog.kandji.io/apple-mitigates-vulnerabilities-installer-scripts), un script `postinstall` de los paquetes `InstallAssistant.pkg` permitía ejecutar:
 ```bash
 /usr/bin/chflags -h norestricted "${SHARED_SUPPORT_PATH}/SharedSupport.dmg"
 ```
@@ -195,7 +195,7 @@ Aquí hay una mirada más detallada:
 
 1. **Sistema Inmutable**: Las Instantáneas del Sistema Selladas hacen que el volumen del sistema macOS sea "inmutable", lo que significa que no puede ser modificado. Esto previene cualquier cambio no autorizado o accidental en el sistema que podría comprometer la seguridad o la estabilidad del sistema.
 2. **Actualizaciones de Software del Sistema**: Cuando instalas actualizaciones o mejoras de macOS, macOS crea una nueva instantánea del sistema. El volumen de inicio de macOS luego utiliza **APFS (Apple File System)** para cambiar a esta nueva instantánea. Todo el proceso de aplicación de actualizaciones se vuelve más seguro y confiable, ya que el sistema siempre puede revertir a la instantánea anterior si algo sale mal durante la actualización.
-3. **Separación de Datos**: En conjunto con el concepto de separación de volúmenes de Datos y Sistema introducido en macOS Catalina, la característica de Instantánea del Sistema Sellada asegura que todos tus datos y configuraciones se almacenen en un volumen separado de "**Datos**". Esta separación hace que tus datos sean independientes del sistema, lo que simplifica el proceso de actualizaciones del sistema y mejora la seguridad del sistema.
+3. **Separación de Datos**: En conjunto con el concepto de separación de volúmenes de Datos y Sistema introducido en macOS Catalina, la característica de Instantánea del Sistema Sellada asegura que todos tus datos y configuraciones se almacenen en un volumen separado "**Data**". Esta separación hace que tus datos sean independientes del sistema, lo que simplifica el proceso de actualizaciones del sistema y mejora la seguridad del sistema.
 
 Recuerda que estas instantáneas son gestionadas automáticamente por macOS y no ocupan espacio adicional en tu disco, gracias a las capacidades de compartición de espacio de APFS. También es importante notar que estas instantáneas son diferentes de las **instantáneas de Time Machine**, que son copias de seguridad accesibles por el usuario de todo el sistema.
 
@@ -205,46 +205,46 @@ El comando **`diskutil apfs list`** lista los **detalles de los volúmenes APFS*
 
 <pre><code>+-- Container disk3 966B902E-EDBA-4775-B743-CF97A0556A13
 |   ====================================================
-|   Referencia del Contenedor APFS:     disk3
-|   Tamaño (Capacidad Máxima):          494384795648 B (494.4 GB)
-|   Capacidad Usada por Volúmenes:      219214536704 B (219.2 GB) (44.3% usado)
-|   Capacidad No Asignada:              275170258944 B (275.2 GB) (55.7% libre)
+|   APFS Container Reference:     disk3
+|   Size (Capacity Ceiling):      494384795648 B (494.4 GB)
+|   Capacity In Use By Volumes:   219214536704 B (219.2 GB) (44.3% used)
+|   Capacity Not Allocated:       275170258944 B (275.2 GB) (55.7% free)
 |   |
-|   +-&#x3C; Almacenamiento Físico disk0s2 86D4B7EC-6FA5-4042-93A7-D3766A222EBE
+|   +-&#x3C; Physical Store disk0s2 86D4B7EC-6FA5-4042-93A7-D3766A222EBE
 |   |   -----------------------------------------------------------
-|   |   Disco de Almacenamiento Físico APFS:   disk0s2
-|   |   Tamaño:                       494384795648 B (494.4 GB)
+|   |   APFS Physical Store Disk:   disk0s2
+|   |   Size:                       494384795648 B (494.4 GB)
 |   |
-|   +-> Volumen disk3s1 7A27E734-880F-4D91-A703-FB55861D49B7
+|   +-> Volume disk3s1 7A27E734-880F-4D91-A703-FB55861D49B7
 |   |   ---------------------------------------------------
-<strong>|   |   Disco de Volumen APFS (Rol):   disk3s1 (Sistema)
-</strong>|   |   Nombre:                      Macintosh HD (Sin distinción de mayúsculas)
-<strong>|   |   Punto de Montaje:           /System/Volumes/Update/mnt1
-</strong>|   |   Capacidad Consumida:         12819210240 B (12.8 GB)
-|   |   Sellado:                    Roto
-|   |   FileVault:                 Sí (Desbloqueado)
-|   |   Encriptado:                 No
+<strong>|   |   APFS Volume Disk (Role):   disk3s1 (System)
+</strong>|   |   Name:                      Macintosh HD (Case-insensitive)
+<strong>|   |   Mount Point:               /System/Volumes/Update/mnt1
+</strong>|   |   Capacity Consumed:         12819210240 B (12.8 GB)
+|   |   Sealed:                    Broken
+|   |   FileVault:                 Yes (Unlocked)
+|   |   Encrypted:                 No
 |   |   |
-|   |   Instantánea:                  FAA23E0C-791C-43FF-B0E7-0E1C0810AC61
-|   |   Disco de Instantánea:         disk3s1s1
-<strong>|   |   Punto de Montaje de Instantánea:      /
-</strong><strong>|   |   Instantánea Sellada:           Sí
+|   |   Snapshot:                  FAA23E0C-791C-43FF-B0E7-0E1C0810AC61
+|   |   Snapshot Disk:             disk3s1s1
+<strong>|   |   Snapshot Mount Point:      /
+</strong><strong>|   |   Snapshot Sealed:           Yes
 </strong>[...]
-+-> Volumen disk3s5 281959B7-07A1-4940-BDDF-6419360F3327
++-> Volume disk3s5 281959B7-07A1-4940-BDDF-6419360F3327
 |   ---------------------------------------------------
-|   Disco de Volumen APFS (Rol):   disk3s5 (Datos)
-|   Nombre:                      Macintosh HD - Datos (Sin distinción de mayúsculas)
-<strong>    |   Punto de Montaje:               /System/Volumes/Data
-</strong><strong>    |   Capacidad Consumida:         412071784448 B (412.1 GB)
-</strong>    |   Sellado:                    No
-|   FileVault:                 Sí (Desbloqueado)
+|   APFS Volume Disk (Role):   disk3s5 (Data)
+|   Name:                      Macintosh HD - Data (Case-insensitive)
+<strong>    |   Mount Point:               /System/Volumes/Data
+</strong><strong>    |   Capacity Consumed:         412071784448 B (412.1 GB)
+</strong>    |   Sealed:                    No
+|   FileVault:                 Yes (Unlocked)
 </code></pre>
 
 En la salida anterior es posible ver que **las ubicaciones accesibles por el usuario** están montadas bajo `/System/Volumes/Data`.
 
-Además, la **instantánea del volumen del sistema de macOS** está montada en `/` y está **sellada** (firmada criptográficamente por el OS). Así que, si se elude SIP y se modifica, el **OS ya no arrancará**.
+Además, **la instantánea del volumen del sistema de macOS** está montada en `/` y está **sellada** (firmada criptográficamente por el OS). Así que, si se elude SIP y se modifica, el **OS no arrancará más**.
 
-También es posible **verificar que el sellado está habilitado** ejecutando:
+También es posible **verificar que el sello está habilitado** ejecutando:
 ```bash
 csrutil authenticated-root status
 Authenticated Root status: enabled
