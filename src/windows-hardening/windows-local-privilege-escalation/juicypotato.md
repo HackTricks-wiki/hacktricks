@@ -2,8 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-> [!WARNING]
-> **JuicyPotato는** Windows Server 2019 및 Windows 10 빌드 1809 이상에서 **작동하지 않습니다. 그러나** [**PrintSpoofer**](https://github.com/itm4n/PrintSpoofer)**,** [**RoguePotato**](https://github.com/antonioCoco/RoguePotato)**,** [**SharpEfsPotato**](https://github.com/bugch3ck/SharpEfsPotato)를 사용하여 **동일한 권한을 활용하고 `NT AUTHORITY\SYSTEM`** 수준의 액세스를 얻을 수 있습니다. _**확인:**_
+> [!WARNING] > **JuicyPotato는** Windows Server 2019 및 Windows 10 빌드 1809 이상에서 **작동하지 않습니다**. 그러나, [**PrintSpoofer**](https://github.com/itm4n/PrintSpoofer)**,** [**RoguePotato**](https://github.com/antonioCoco/RoguePotato)**,** [**SharpEfsPotato**](https://github.com/bugch3ck/SharpEfsPotato)를 사용하여 **동일한 권한을 활용하고 `NT AUTHORITY\SYSTEM`** 수준의 접근을 얻을 수 있습니다. _**확인:**_
 
 {{#ref}}
 roguepotato-and-printspoofer.md
@@ -23,7 +22,7 @@ _조금의 주스를 더한_ [_RottenPotatoNG_](https://github.com/breenmachine/
 
 우리는 [RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG)를 무기화하기로 결정했습니다: **Juicy Potato에 인사하세요**.
 
-> 이론에 대해서는 [Rotten Potato - 서비스 계정에서 SYSTEM으로의 권한 상승](https://foxglovesecurity.com/2016/09/26/rotten-potato-privilege-escalation-from-service-accounts-to-system/)을 참조하고 링크와 참조의 체인을 따라가세요.
+> 이론에 대해서는 [Rotten Potato - 서비스 계정에서 SYSTEM으로의 권한 상승](https://foxglovesecurity.com/2016/09/26/rotten-potato-privilege-escalation-from-service-accounts-to-system/)을 참조하고 링크와 참고 문헌의 체인을 따라가세요.
 
 우리는 `BITS` 외에도 남용할 수 있는 여러 COM 서버가 있다는 것을 발견했습니다. 이들은 다음을 충족해야 합니다:
 
@@ -31,11 +30,11 @@ _조금의 주스를 더한_ [_RottenPotatoNG_](https://github.com/breenmachine/
 2. `IMarshal` 인터페이스를 구현해야 합니다.
 3. 상승된 사용자(SYSTEM, Administrator 등)로 실행되어야 합니다.
 
-몇 가지 테스트 후, 여러 Windows 버전에서 [흥미로운 CLSID 목록](http://ohpe.it/juicy-potato/CLSID/)을 얻고 테스트했습니다.
+몇 가지 테스트 후, 여러 Windows 버전에서 [흥미로운 CLSID의](http://ohpe.it/juicy-potato/CLSID/) 광범위한 목록을 얻고 테스트했습니다.
 
 ### Juicy 세부사항 <a href="#juicy-details" id="juicy-details"></a>
 
-JuicyPotato를 사용하면:
+JuicyPotato는 다음을 허용합니다:
 
 - **대상 CLSID** _원하는 CLSID를 선택하세요._ [_여기_](http://ohpe.it/juicy-potato/CLSID/) _에서 OS별로 정리된 목록을 찾을 수 있습니다._
 - **COM 리스닝 포트** _선호하는 COM 리스닝 포트를 정의하세요 (하드코딩된 6666 대신)_
@@ -48,7 +47,9 @@ JuicyPotato를 사용하면:
 - **프로세스 인수** _실행된 프로세스 인수를 사용자 정의하세요_
 - **RPC 서버 주소** _은밀한 접근을 위해 외부 RPC 서버에 인증할 수 있습니다_
 - **RPC 서버 포트** _외부 서버에 인증하고 방화벽이 포트 `135`를 차단하는 경우 유용합니다…_
-- **테스트 모드** _주로 테스트 목적으로, 즉 CLSID 테스트. DCOM을 생성하고 토큰의 사용자를 출력합니다. _[_테스트용 여기_](http://ohpe.it/juicy-potato/Test/)
+- **테스트 모드** _주로 테스트 목적, 즉 CLSID 테스트를 위한 것입니다. DCOM을 생성하고 토큰의 사용자를 출력합니다. _[_테스트를 위한 여기_](http://ohpe.it/juicy-potato/Test/)를 참조하세요._
+
+### 사용법 <a href="#usage" id="usage"></a>
 ```
 T:\>JuicyPotato.exe
 JuicyPotato v0.1
@@ -104,21 +105,23 @@ c:\Users\Public>
 
 ## CLSID 문제
 
-대부분의 경우, JuicyPotato가 사용하는 기본 CLSID는 **작동하지 않으며** 익스플로잇이 실패합니다. 일반적으로 **작동하는 CLSID**를 찾기 위해 여러 번 시도해야 합니다. 특정 운영 체제에 대해 시도할 CLSID 목록을 얻으려면 이 페이지를 방문해야 합니다:
+대부분의 경우, JuicyPotato가 사용하는 기본 CLSID는 **작동하지 않**으며 익스플로잇이 실패합니다. 일반적으로 **작동하는 CLSID**를 찾기 위해 여러 번 시도해야 합니다. 특정 운영 체제에 대해 시도할 CLSID 목록을 얻으려면 이 페이지를 방문해야 합니다:
 
-{% embed url="https://ohpe.it/juicy-potato/CLSID/" %}
+{{#ref}}
+https://ohpe.it/juicy-potato/CLSID/
+{{#endref}}
 
-### **CLSID 확인**
+### **CLSID 확인하기**
 
 먼저, juicypotato.exe 외에 몇 가지 실행 파일이 필요합니다.
 
-[Join-Object.ps1](https://github.com/ohpe/juicy-potato/blob/master/CLSID/utils/Join-Object.ps1)를 다운로드하고 PS 세션에 로드한 후, [GetCLSID.ps1](https://github.com/ohpe/juicy-potato/blob/master/CLSID/GetCLSID.ps1)을 다운로드하여 실행합니다. 이 스크립트는 테스트할 수 있는 CLSID 목록을 생성합니다.
+[Join-Object.ps1](https://github.com/ohpe/juicy-potato/blob/master/CLSID/utils/Join-Object.ps1)를 다운로드하고 PS 세션에 로드한 후, [GetCLSID.ps1](https://github.com/ohpe/juicy-potato/blob/master/CLSID/GetCLSID.ps1)을 다운로드하여 실행합니다. 이 스크립트는 테스트할 수 있는 가능한 CLSID 목록을 생성합니다.
 
-그런 다음 [test_clsid.bat](https://github.com/ohpe/juicy-potato/blob/master/Test/test_clsid.bat)(CLSID 목록과 juicypotato 실행 파일의 경로를 변경) 을 다운로드하고 실행합니다. 이 스크립트는 모든 CLSID를 시도하기 시작하며, **포트 번호가 변경되면 CLSID가 작동했음을 의미합니다**.
+그런 다음 [test_clsid.bat](https://github.com/ohpe/juicy-potato/blob/master/Test/test_clsid.bat)를 다운로드하고 (CLSID 목록과 juicypotato 실행 파일의 경로를 변경) 실행합니다. 이 스크립트는 모든 CLSID를 시도하기 시작하며, **포트 번호가 변경되면 CLSID가 작동했음을 의미합니다**.
 
-**-c 매개변수를 사용하여** 작동하는 CLSID를 **확인하십시오.**
+**매개변수 -c를 사용하여** 작동하는 CLSID를 **확인하세요.**
 
-## 참고 문헌
+## 참고자료
 
 - [https://github.com/ohpe/juicy-potato/blob/master/README.md](https://github.com/ohpe/juicy-potato/blob/master/README.md)
 

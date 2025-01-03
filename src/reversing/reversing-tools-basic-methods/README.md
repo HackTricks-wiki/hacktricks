@@ -40,7 +40,7 @@ dotPeek는 **라이브러리** (.dll), **Windows 메타데이터 파일** (.winm
 - 코드, 서드파티 구성 요소 및 라이브러리에서 오류의 정확한 위치를 추적합니다.
 - 작업하는 모든 .NET 코드의 소스에서 디버깅합니다.
 
-### [ILSpy](https://github.com/icsharpcode/ILSpy) & [dnSpy](https://github.com/dnSpy/dnSpy/releases)
+### [ILSpy](https://github.com/icsharpcode/ILSpy) 및 [dnSpy](https://github.com/dnSpy/dnSpy/releases)
 
 [Visual Studio Code용 ILSpy 플러그인](https://github.com/icsharpcode/ilspy-vscode): 모든 OS에서 사용할 수 있습니다 (VSCode에서 직접 설치할 수 있으며, git을 다운로드할 필요가 없습니다. **Extensions**를 클릭하고 **ILSpy**를 검색하세요).\
 **디컴파일**, **수정** 및 **다시 컴파일**해야 하는 경우 [**dnSpy**](https://github.com/dnSpy/dnSpy/releases) 또는 그 활발히 유지 관리되는 포크인 [**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases)를 사용할 수 있습니다. (**우클릭 -> 메서드 수정**하여 함수 내부의 내용을 변경합니다).
@@ -80,7 +80,7 @@ DebuggableAttribute.DebuggingModes.EnableEditAndContinue)]
 
 이것은 필요합니다. 왜냐하면 이렇게 하지 않으면 **runtime**에서 여러 **optimisations**가 코드에 적용되어 **break-point가 결코 도달되지 않거나** 일부 **변수가 존재하지 않을 수 있기 때문입니다**.
 
-그런 다음, .NET 애플리케이션이 **IIS**에 의해 **실행되고** 있다면 다음과 같이 **재시작**할 수 있습니다:
+그런 다음, .NET 애플리케이션이 **IIS**에 의해 **실행**되고 있다면 다음과 같이 **재시작**할 수 있습니다:
 ```
 iisreset /noforce
 ```
@@ -125,7 +125,7 @@ iisreset /noforce
 
 ![](<../../images/image (704).png>)
 
-그런 다음 디버깅을 시작하면 **각 DLL이 로드될 때 실행이 중지**됩니다. 그런 다음 rundll32가 DLL을 로드하면 실행이 중지됩니다.
+그런 다음 디버깅을 시작하면 **각 DLL이 로드될 때 실행이 중지**되고, rundll32가 DLL을 로드할 때 실행이 중지됩니다.
 
 하지만 로드된 DLL의 코드에 어떻게 접근할 수 있을까요? 이 방법을 사용하면 잘 모르겠습니다.
 
@@ -133,14 +133,14 @@ iisreset /noforce
 
 - **rundll32 로드** (64비트는 C:\Windows\System32\rundll32.exe, 32비트는 C:\Windows\SysWOW64\rundll32.exe)
 - **명령줄 변경** (_File --> Change Command Line_) 및 DLL 경로와 호출할 함수를 설정합니다. 예: "C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii_2.dll",DLLMain
-- _Options --> Settings_에서 "**DLL Entry**"를 선택합니다.
-- 그런 다음 **실행 시작**하면 디버거가 각 DLL 메인에서 중지되며, 어느 시점에서 **당신의 DLL의 DLL Entry에서 중지**됩니다. 거기서 중단점을 설정하고 싶은 지점을 검색하면 됩니다.
+- _Options --> Settings_에서 "**DLL Entry**" 선택.
+- 그런 다음 **실행 시작**, 디버거는 각 DLL 메인에서 중지되며, 어느 시점에서 **당신의 DLL의 DLL Entry에서 중지**됩니다. 거기서 중단점을 설정할 위치를 검색하면 됩니다.
 
 실행이 어떤 이유로 win64dbg에서 중지되면 **어떤 코드에 있는지** win64dbg 창의 **상단**에서 확인할 수 있습니다:
 
 ![](<../../images/image (842).png>)
 
-그런 다음 이 정보를 통해 디버깅하려는 DLL에서 실행이 중지된 시점을 확인할 수 있습니다.
+그런 다음, 이 정보를 통해 디버깅하려는 DLL에서 실행이 중지된 시점을 확인할 수 있습니다.
 
 ## GUI 앱 / 비디오 게임
 
@@ -156,14 +156,16 @@ cheat-engine.md
 
 ## ARM & MIPS
 
-{% embed url="https://github.com/nongiach/arm_now" %}
+{{#ref}}
+https://github.com/nongiach/arm_now
+{{#endref}}
 
 ## 쉘코드
 
 ### blobrunner로 쉘코드 디버깅
 
 [**Blobrunner**](https://github.com/OALabs/BlobRunner)는 **쉘코드**를 메모리 공간에 **할당**하고, 쉘코드가 할당된 **메모리 주소**를 **지시**하며 실행을 **중지**합니다.\
-그런 다음 프로세스에 **디버거**(Ida 또는 x64dbg)를 연결하고 **지정된 메모리 주소에 중단점**을 설정한 후 실행을 **재개**해야 합니다. 이렇게 하면 쉘코드를 디버깅할 수 있습니다.
+그런 다음, 프로세스에 **디버거**(Ida 또는 x64dbg)를 연결하고 **지정된 메모리 주소에 중단점**을 설정한 후 **실행을 재개**해야 합니다. 이렇게 하면 쉘코드를 디버깅할 수 있습니다.
 
 릴리스 github 페이지에는 컴파일된 릴리스를 포함하는 zip 파일이 있습니다: [https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
 다음 링크에서 Blobrunner의 약간 수정된 버전을 찾을 수 있습니다. 컴파일하려면 **Visual Studio Code에서 C/C++ 프로젝트를 생성하고 코드를 복사하여 붙여넣고 빌드**하면 됩니다.
@@ -174,7 +176,7 @@ blobrunner.md
 
 ### jmp2it로 쉘코드 디버깅
 
-[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4)는 blobrunner와 매우 유사합니다. **쉘코드**를 메모리 공간에 **할당**하고 **영원한 루프**를 시작합니다. 그런 다음 프로세스에 **디버거를 연결**하고, **시작을 누른 후 2-5초 기다렸다가 중지**를 누르면 **영원한 루프** 안에 있게 됩니다. 영원한 루프의 다음 명령으로 점프하면 쉘코드 호출이 이루어지고, 결국 쉘코드를 실행하게 됩니다.
+[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4)는 blobrunner와 매우 유사합니다. **쉘코드**를 메모리 공간에 **할당**하고 **영원한 루프**를 시작합니다. 그런 다음 프로세스에 **디버거를 연결**하고, **시작을 누르고 2-5초 기다린 후 중지**를 누르면 **영원한 루프** 안에 있게 됩니다. 영원한 루프의 다음 명령으로 점프하면 쉘코드 호출이 이루어지고, 결국 쉘코드를 실행하게 됩니다.
 
 ![](<../../images/image (509).png>)
 
@@ -182,7 +184,7 @@ blobrunner.md
 
 ### Cutter를 사용한 쉘코드 디버깅
 
-[**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0)는 radare의 GUI입니다. Cutter를 사용하면 쉘코드를 에뮬레이션하고 동적으로 검사할 수 있습니다.
+[**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0)는 radare의 GUI입니다. Cutter를 사용하면 쉘코드를 에뮬레이트하고 동적으로 검사할 수 있습니다.
 
 Cutter는 "파일 열기"와 "쉘코드 열기"를 허용합니다. 제 경우에는 쉘코드를 파일로 열었을 때 올바르게 디컴파일되었지만, 쉘코드로 열었을 때는 그렇지 않았습니다:
 
@@ -194,7 +196,7 @@ Cutter는 "파일 열기"와 "쉘코드 열기"를 허용합니다. 제 경우�
 
 ![](<../../images/image (387).png>)
 
-예를 들어 헥스 덤프 내에서 스택을 확인할 수 있습니다:
+예를 들어, 헥스 덤프 내에서 스택을 확인할 수 있습니다:
 
 ![](<../../images/image (186).png>)
 
@@ -214,9 +216,9 @@ scDbg는 선택한 옵션을 선택하고 shellcode를 실행할 수 있는 그�
 
 ![](<../../images/image (258).png>)
 
-**Create Dump** 옵션은 메모리에서 shellcode에 동적으로 변경이 이루어질 경우 최종 shellcode를 덤프합니다(디코딩된 shellcode를 다운로드하는 데 유용합니다). **start offset**은 특정 오프셋에서 shellcode를 시작하는 데 유용할 수 있습니다. **Debug Shell** 옵션은 scDbg 터미널을 사용하여 shellcode를 디버깅하는 데 유용하지만, 이 문제에 대해서는 이전에 설명한 옵션들이 더 나은 것 같습니다. 왜냐하면 Ida나 x64dbg를 사용할 수 있기 때문입니다.
+**Create Dump** 옵션은 메모리에서 shellcode에 동적으로 변경이 이루어질 경우 최종 shellcode를 덤프합니다(디코딩된 shellcode를 다운로드하는 데 유용합니다). **start offset**은 특정 오프셋에서 shellcode를 시작하는 데 유용할 수 있습니다. **Debug Shell** 옵션은 scDbg 터미널을 사용하여 shellcode를 디버깅하는 데 유용합니다(하지만 이 문제에 대해서는 이전에 설명한 옵션이 더 좋다고 생각합니다. Ida 또는 x64dbg를 사용할 수 있기 때문입니다).
 
-### CyberChef를 사용한 역어셈블링
+### CyberChef를 사용한 역어셈블리
 
 shellcode 파일을 입력으로 업로드하고 다음 레시피를 사용하여 디컴파일합니다: [https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)](<https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)>)
 
@@ -242,8 +244,8 @@ apt-get install libz3-dev
 
 ![](<../../images/image (1080).png>)
 
-이 경우 바이너리 이름이 authenticator였으므로, 이것이 흥미로운 메인 함수라는 것은 분명합니다.\
-호출되는 **함수**의 **이름**을 가지고, 그들의 **입력**과 **출력**에 대해 배우기 위해 **인터넷**에서 검색하세요.
+이 경우 바이너리 이름은 authenticator였으므로, 이것이 흥미로운 메인 함수라는 것은 분명합니다.\
+호출되는 **함수**의 **이름**을 가지고, **인터넷**에서 검색하여 그들의 **입력**과 **출력**에 대해 알아보세요.
 
 ## **Delphi**
 
@@ -253,7 +255,7 @@ Delphi 바이너리를 리버스해야 한다면 IDA 플러그인 [https://githu
 
 **ATL+f7**를 눌러 (IDA에서 파이썬 플러그인 가져오기) 파이썬 플러그인을 선택하세요.
 
-이 플러그인은 바이너리를 실행하고 디버깅 시작 시 함수 이름을 동적으로 해결합니다. 디버깅을 시작한 후 다시 시작 버튼(녹색 버튼 또는 f9)을 누르면 실제 코드의 시작 부분에서 중단점이 걸립니다.
+이 플러그인은 바이너리를 실행하고 디버깅 시작 시 함수 이름을 동적으로 해결합니다. 디버깅을 시작한 후 다시 시작 버튼(녹색 버튼 또는 f9)을 누르면 실제 코드의 시작 부분에서 중단점이 발생합니다.
 
 그래픽 애플리케이션에서 버튼을 누르면 디버거가 해당 버튼에 의해 실행된 함수에서 중단됩니다.
 
@@ -275,14 +277,14 @@ Golang 바이너리를 리버스해야 한다면 IDA 플러그인 [https://githu
 
 ## GBA - 게임 바디 어드밴스
 
-GBA 게임의 **바이너리**를 얻으면 다양한 도구를 사용하여 **에뮬레이트**하고 **디버깅**할 수 있습니다:
+GBA 게임의 **바이너리**를 얻으면 다양한 도구를 사용하여 **에뮬레이트**하고 **디버그**할 수 있습니다:
 
 - [**no$gba**](https://problemkaputt.de/gba.htm) (_디버그 버전 다운로드_) - 인터페이스가 있는 디버거 포함
 - [**mgba** ](https://mgba.io) - CLI 디버거 포함
 - [**gba-ghidra-loader**](https://github.com/pudii/gba-ghidra-loader) - Ghidra 플러그인
 - [**GhidraGBA**](https://github.com/SiD3W4y/GhidraGBA) - Ghidra 플러그인
 
-[**no$gba**](https://problemkaputt.de/gba.htm)에서, _**Options --> Emulation Setup --> Controls**_\*\* \*\*를 통해 게임 보이 어드밴스 **버튼**을 누르는 방법을 볼 수 있습니다.
+[**no$gba**](https://problemkaputt.de/gba.htm)에서 _**Options --> Emulation Setup --> Controls**_\*\* \*\*를 통해 게임 보이 어드밴스 **버튼**을 누르는 방법을 확인할 수 있습니다.
 
 ![](<../../images/image (581).png>)
 
@@ -372,7 +374,7 @@ DAT_030000d8 = DAT_030000d8 + 0x3a;
 - 그 다음, **값 8** (**START** 버튼)과 비교됩니다: 이 버튼은 코드가 플래그를 얻기 위한 유효한지 확인합니다.
 - 이 경우 **`DAT_030000d8`** 변수가 0xf3과 비교되며, 값이 같으면 일부 코드가 실행됩니다.
 - 다른 경우에는 일부 cont (`DAT_030000d4`)가 확인됩니다. 이는 코드에 들어간 직후 1을 더하기 때문에 cont입니다.\
-**8보다 작으면** **`DAT_030000d8`**에 값을 **더하는** 작업이 수행됩니다 (기본적으로 cont가 8보다 작을 때 이 변수에 눌린 키의 값을 더하고 있습니다).
+**8보다 작으면** **`DAT_030000d8`**에 값을 **더하는** 작업이 수행됩니다 (기본적으로 cont가 8보다 작을 때 눌린 키의 값을 이 변수에 더하는 것입니다).
 
 따라서 이 도전에서 버튼의 값을 알고 있다면, **결과적으로 더한 값이 0xf3이 되도록 길이가 8보다 작은 조합을 눌러야 했습니다.**
 
@@ -380,7 +382,9 @@ DAT_030000d8 = DAT_030000d8 + 0x3a;
 
 ## Game Boy
 
-{% embed url="https://www.youtube.com/watch?v=VVbRe7wr3G4" %}
+{{#ref}}
+https://www.youtube.com/watch?v=VVbRe7wr3G4
+{{#endref}}
 
 ## Courses
 

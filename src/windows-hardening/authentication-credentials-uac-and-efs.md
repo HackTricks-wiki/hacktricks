@@ -11,7 +11,7 @@
 
 ### Check
 
-블랙리스트/화이트리스트에 있는 파일/확장자를 확인하세요:
+어떤 파일/확장자가 블랙리스트/화이트리스트에 있는지 확인하십시오:
 ```powershell
 Get-ApplockerPolicy -Effective -xml
 
@@ -35,10 +35,10 @@ C:\windows\tracing
 ```
 - 일반적으로 **신뢰할 수 있는** [**"LOLBAS's"**](https://lolbas-project.github.io/) 바이너리는 AppLocker를 우회하는 데 유용할 수 있습니다.
 - **잘못 작성된 규칙은 우회될 수 있습니다.**
-- 예를 들어, **`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`**, 어디에나 **`allowed`라는 폴더를 생성하면** 허용됩니다.
-- 조직은 종종 **`%System32%\WindowsPowerShell\v1.0\powershell.exe` 실행 파일을 차단하는 데 집중하지만**, **다른** [**PowerShell 실행 파일 위치**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations)인 `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` 또는 `PowerShell_ISE.exe`를 잊어버립니다.
-- **DLL 강제 적용은 시스템에 추가 부하를 줄 수 있기 때문에 매우 드물게 활성화됩니다.** 따라서 **DLL를 백도어로 사용하면 AppLocker를 우회하는 데 도움이 됩니다.**
-- [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) 또는 [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick)를 사용하여 **Powershell** 코드를 모든 프로세스에서 실행하고 AppLocker를 우회할 수 있습니다. 자세한 내용은 확인하세요: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
+- 예를 들어, **`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`**, 어디에나 **`allowed`**라는 **폴더를 생성하면** 허용됩니다.
+- 조직은 종종 **`%System32%\WindowsPowerShell\v1.0\powershell.exe`** 실행 파일을 **차단하는 데** 집중하지만, **다른** [**PowerShell 실행 파일 위치**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations)인 `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` 또는 `PowerShell_ISE.exe`를 잊어버립니다.
+- **DLL 강제 적용은 시스템에 추가 부하를 줄 수 있기 때문에 매우 드물게 활성화됩니다.** 따라서 **백도어로서 DLL을 사용하는 것이 AppLocker를 우회하는 데 도움이 됩니다.**
+- [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) 또는 [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick)을 사용하여 **Powershell** 코드를 어떤 프로세스에서든 실행하고 AppLocker를 우회할 수 있습니다. 자세한 내용은 다음을 확인하세요: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
 
 ## 자격 증명 저장소
 
@@ -69,7 +69,7 @@ Active Directory의 데이터베이스입니다. 도메인 컨트롤러에만 �
 
 ## Defender
 
-[**Microsoft Defender**](https://en.wikipedia.org/wiki/Microsoft_Defender)는 Windows 10 및 Windows 11, 그리고 Windows Server 버전에서 사용할 수 있는 안티바이러스입니다. **일반적인 펜테스팅 도구**인 **`WinPEAS`**를 **차단합니다**. 그러나 이러한 보호를 **우회하는 방법이 있습니다**.
+[**Microsoft Defender**](https://en.wikipedia.org/wiki/Microsoft_Defender)는 Windows 10 및 Windows 11, 그리고 Windows Server 버전에서 사용할 수 있는 안티바이러스입니다. **일반적인** 펜테스팅 도구인 **`WinPEAS`**를 **차단합니다**. 그러나 이러한 보호를 **우회하는 방법이 있습니다.**
 
 ### 확인
 
@@ -121,9 +121,9 @@ EFS는 **대칭 키**인 **파일 암호화 키 (FEK)**를 사용하여 파일�
 
 ### EFS 정보 확인
 
-**사용자**가 이 **서비스**를 **사용했는지** 확인하려면 이 경로가 존재하는지 확인하십시오: `C:\users\<username>\appdata\roaming\Microsoft\Protect`
+**사용자**가 이 **서비스**를 **사용했는지** 확인하려면 이 경로가 존재하는지 확인하세요: `C:\users\<username>\appdata\roaming\Microsoft\Protect`
 
-파일에 **접근**할 수 있는 **사람**을 확인하려면 `cipher /c \<file>\`를 사용하십시오.  
+파일에 **접근**할 수 있는 **사람**을 확인하려면 `cipher /c \<file>\`를 사용하세요.  
 폴더 내에서 `cipher /e` 및 `cipher /d`를 사용하여 모든 파일을 **암호화**하고 **복호화**할 수도 있습니다.
 
 ### EFS 파일 복호화
@@ -134,19 +134,21 @@ EFS는 **대칭 키**인 **파일 암호화 키 (FEK)**를 사용하여 파일�
 
 #### 사용자의 비밀번호 알기
 
-{% embed url="https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files" %}
+{{#ref}}
+https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files
+{{#endref}}
 
 ## Group Managed Service Accounts (gMSA)
 
-Microsoft는 IT 인프라에서 서비스 계정 관리를 단순화하기 위해 **그룹 관리 서비스 계정 (gMSA)**를 개발했습니다. 전통적인 서비스 계정은 종종 "**비밀번호 만료 안 함**" 설정이 활성화되어 있는 반면, gMSA는 보다 안전하고 관리하기 쉬운 솔루션을 제공합니다:
+Microsoft는 IT 인프라에서 서비스 계정 관리를 단순화하기 위해 **Group Managed Service Accounts (gMSA)**를 개발했습니다. 전통적인 서비스 계정은 종종 "**비밀번호 만료 안 함**" 설정이 활성화되어 있는 반면, gMSA는 보다 안전하고 관리하기 쉬운 솔루션을 제공합니다:
 
 - **자동 비밀번호 관리**: gMSA는 도메인 또는 컴퓨터 정책에 따라 자동으로 변경되는 복잡한 240자 비밀번호를 사용합니다. 이 과정은 Microsoft의 키 배포 서비스(KDC)가 처리하여 수동 비밀번호 업데이트의 필요성을 없앱니다.
-- **강화된 보안**: 이러한 계정은 잠금에 면역이며 대화형 로그인에 사용할 수 없어 보안이 강화됩니다.
+- **강화된 보안**: 이러한 계정은 잠금에 면역이며 대화형 로그인을 위해 사용할 수 없어 보안을 강화합니다.
 - **다중 호스트 지원**: gMSA는 여러 호스트에서 공유할 수 있어 여러 서버에서 실행되는 서비스에 적합합니다.
 - **예약 작업 기능**: 관리 서비스 계정과 달리 gMSA는 예약 작업 실행을 지원합니다.
-- **단순화된 SPN 관리**: 시스템은 컴퓨터의 sAMaccount 세부정보 또는 DNS 이름에 변경이 있을 때 서비스 주체 이름(SPN)을 자동으로 업데이트하여 SPN 관리를 단순화합니다.
+- **단순화된 SPN 관리**: 시스템은 컴퓨터의 sAMaccount 세부정보 또는 DNS 이름에 변경이 있을 때 자동으로 서비스 주체 이름(SPN)을 업데이트하여 SPN 관리를 단순화합니다.
 
-gMSA의 비밀번호는 LDAP 속성 _**msDS-ManagedPassword**_에 저장되며 도메인 컨트롤러(DC)에 의해 30일마다 자동으로 재설정됩니다. 이 비밀번호는 [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e)로 알려진 암호화된 데이터 블롭으로, 권한이 있는 관리자와 gMSA가 설치된 서버만 검색할 수 있어 안전한 환경을 보장합니다. 이 정보에 접근하려면 LDAPS와 같은 보안 연결이 필요하거나 'Sealing & Secure'로 인증된 연결이어야 합니다.
+gMSA의 비밀번호는 LDAP 속성 _**msDS-ManagedPassword**_에 저장되며 도메인 컨트롤러(DC)에 의해 30일마다 자동으로 재설정됩니다. 이 비밀번호는 [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e)로 알려진 암호화된 데이터 블롭이며, 권한이 있는 관리자와 gMSA가 설치된 서버만 검색할 수 있어 안전한 환경을 보장합니다. 이 정보를 접근하려면 LDAPS와 같은 보안 연결이 필요하거나 'Sealing & Secure'로 인증된 연결이어야 합니다.
 
 ![https://cube0x0.github.io/Relaying-for-gMSA/](../images/asd1.png)
 
@@ -156,7 +158,7 @@ gMSA의 비밀번호는 LDAP 속성 _**msDS-ManagedPassword**_에 저장되며 �
 ```
 [**이 게시물에서 더 많은 정보를 찾으세요**](https://cube0x0.github.io/Relaying-for-gMSA/)
 
-또한, **gMSA**의 **비밀번호**를 **읽기** 위해 **NTLM 릴레이 공격**을 수행하는 방법에 대한 [웹 페이지](https://cube0x0.github.io/Relaying-for-gMSA/)를 확인하세요.
+또한, **gMSA**의 **비밀번호**를 **읽기** 위한 **NTLM 릴레이 공격** 수행 방법에 대한 [웹 페이지](https://cube0x0.github.io/Relaying-for-gMSA/)를 확인하세요.
 
 ## LAPS
 
@@ -180,8 +182,8 @@ $ExecutionContext.SessionState.LanguageMode
 #Easy bypass
 Powershell -version 2
 ```
-현재 Windows에서는 이 우회 방법이 작동하지 않지만, [**PSByPassCLM**](https://github.com/padovah4ck/PSByPassCLM)를 사용할 수 있습니다.\
-**컴파일하려면** **다음이 필요할 수 있습니다** **:** _**참조 추가**_ -> _찾아보기_ -> _찾아보기_ -> `C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0\31bf3856ad364e35\System.Management.Automation.dll`을 추가하고 **프로젝트를 .Net4.5로 변경하십시오**.
+현재 Windows에서는 이 우회 방법이 작동하지 않지만 [**PSByPassCLM**](https://github.com/padovah4ck/PSByPassCLM)를 사용할 수 있습니다.\
+**컴파일하려면** **다음이 필요할 수 있습니다** **_참조 추가_** -> _찾아보기_ -> _찾아보기_ -> `C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0\31bf3856ad364e35\System.Management.Automation.dll`를 추가하고 **프로젝트를 .Net4.5로 변경하십시오**.
 
 #### 직접 우회:
 ```bash
@@ -221,7 +223,7 @@ $command = "Write-Host 'My voice is my passport, verify me.'" $bytes = [System.T
 
 사용자를 인증하는 데 사용할 수 있는 API입니다.
 
-SSPI는 통신을 원하는 두 머신에 적합한 프로토콜을 찾는 역할을 합니다. 이를 위한 선호 방법은 Kerberos입니다. 그런 다음 SSPI는 사용할 인증 프로토콜을 협상하며, 이러한 인증 프로토콜은 보안 지원 공급자(SSP)라고 하며, 각 Windows 머신 내에서 DLL 형태로 존재하고 두 머신 모두 동일한 프로토콜을 지원해야 통신할 수 있습니다.
+SSPI는 통신을 원하는 두 머신에 적합한 프로토콜을 찾는 역할을 합니다. 이를 위한 선호 방법은 Kerberos입니다. 그런 다음 SSPI는 사용할 인증 프로토콜을 협상합니다. 이러한 인증 프로토콜은 보안 지원 공급자(SSP)라고 하며, 각 Windows 머신 내에서 DLL 형태로 존재하며 두 머신 모두 동일한 프로토콜을 지원해야 통신할 수 있습니다.
 
 ### 주요 SSP
 
