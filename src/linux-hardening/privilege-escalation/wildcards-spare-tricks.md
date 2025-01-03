@@ -72,3 +72,4 @@ zip name.zip files -T --unzip-command "sh -c whoami"
 {{#include ../../banners/hacktricks-training.md}}
 
 
+

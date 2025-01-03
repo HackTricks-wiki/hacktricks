@@ -301,3 +301,4 @@ A secret is splitted in X parts and to recover it you need Y parts (_Y <=X_).
 {{#include ../banners/hacktricks-training.md}}
 
 
+

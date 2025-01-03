@@ -11,3 +11,4 @@ If you can encrypt a known plaintext you can also extract the password. More ref
 {{#include ../banners/hacktricks-training.md}}
 
 
+

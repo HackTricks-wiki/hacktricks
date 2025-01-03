@@ -91,3 +91,4 @@ Also, you can only **enter in another process PID namespace if you are root**. A
 {{#include ../../../../banners/hacktricks-training.md}}
 
 
+

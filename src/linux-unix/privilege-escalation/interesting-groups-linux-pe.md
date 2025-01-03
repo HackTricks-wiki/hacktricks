@@ -170,3 +170,4 @@ You can mount the root filesystem of the host machine to an instance’s volume,
 {{#include ../../banners/hacktricks-training.md}}
 
 
+
