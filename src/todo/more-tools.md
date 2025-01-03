@@ -28,7 +28,7 @@
 - [https://builtwith.com/](https://builtwith.com)
 - [https://www.spiderfoot.net/](https://www.spiderfoot.net)
 - [https://github.com/zricethezav/gitleaks](https://github.com/zricethezav/gitleaks)
-- [https://www.nmmapper.com/sys/tools/subdomainfinder/](https://www.nmmapper.com/sys/tools/subdomainfinder/) : 8 सबडोमेन खोजने के उपकरण, sublist3r, amass और अधिक
+- [https://www.nmmapper.com/sys/tools/subdomainfinder/](https://www.nmmapper.com/sys/tools/subdomainfinder/) : 8 उपडोमेन खोजने के उपकरण, sublist3r, amass और अधिक
 
 # **WEB**
 
@@ -38,19 +38,19 @@
 - [https://github.com/BitTheByte/Monitorizer/](https://github.com/BitTheByte/Monitorizer/)
 - [https://github.com/spinkham/skipfish](https://github.com/spinkham/skipfish)
 - [https://github.com/blark/aiodnsbrute](https://github.com/blark/aiodnsbrute) : असिंक्रोनस रूप से डोमेन नामों पर ब्रूट फोर्स
-- [https://crt.sh/?q=%.yahoo.com](https://crt.sh/?q=%.yahoo.com) : सबडोमेन ब्रूटफोर्स
+- [https://crt.sh/?q=%.yahoo.com](https://crt.sh/?q=%.yahoo.com) : उपडोमेन ब्रूटफोर्स
 - [https://github.com/tomnomnom/httprobe](https://github.com/tomnomnom/httprobe): जांचें कि एक डोमेन में वेब सर्वर सुलभ हैं
-- [https://github.com/aboul3la/Sublist3r](https://github.com/aboul3la/Sublist3r) : सबडोमेन खोज
-- [https://github.com/gwen001/github-search/blob/master/github-subdomains.py](https://github.com/gwen001/github-search/blob/master/github-subdomains.py) : गिटहब में सबडोमेन खोज
+- [https://github.com/aboul3la/Sublist3r](https://github.com/aboul3la/Sublist3r) : उपडोमेन खोज
+- [https://github.com/gwen001/github-search/blob/master/github-subdomains.py](https://github.com/gwen001/github-search/blob/master/github-subdomains.py) : गिटहब में उपडोमेन खोज
 - [https://github.com/robertdavidgraham/masscan](https://github.com/robertdavidgraham/masscan) : तेज़ पोर्ट स्कैनिंग
-- [https://github.com/Threezh1/JSFinder](https://github.com/Threezh1/JSFinder) : एक वेब में JS फ़ाइलों से सबडोमेन और URLs
+- [https://github.com/Threezh1/JSFinder](https://github.com/Threezh1/JSFinder) : एक वेब में JS फ़ाइलों से उपडोमेन और URL
 - [https://github.com/C1h2e1/MyFuzzingDict](https://github.com/C1h2e1/MyFuzzingDict) : वेब फ़ाइलों का शब्दकोश
 - [https://github.com/TypeError/Bookmarks/blob/master/README.md](https://github.com/TypeError/Bookmarks/blob/master/README.md) : बर्प एक्सटेंशन जो दर्जनों रिपीटर टैब से बचने के लिए
 - [https://github.com/hakluke/hakrawler](https://github.com/hakluke/hakrawler) : संपत्तियों को प्राप्त करें
 - [https://github.com/izo30/google-dorker](https://github.com/izo30/google-dorker) : गूगल डॉर्क्स
 - [https://github.com/sehno/Bug-bounty/blob/master/bugbounty_checklist.md](https://github.com/sehno/Bug-bounty/blob/master/bugbounty_checklist.md) : वेब बग बाउंटी चेकलिस्ट
 - [https://github.com/Naategh/dom-red](https://github.com/Naategh/dom-red) : ओपन रीडायरेक्शन के खिलाफ डोमेन की एक सूची की जांच करें
-- [https://github.com/prodigysml/Dr.-Watson](https://github.com/prodigysml/Dr.-Watson) : बर्प प्लगइन, डोमेन, सबडोमेन और आईपी की खोज के लिए ऑफ़लाइन विश्लेषण
+- [https://github.com/prodigysml/Dr.-Watson](https://github.com/prodigysml/Dr.-Watson) : बर्प प्लगइन, डोमेन, उपडोमेन और आईपी खोजने के लिए ऑफ़लाइन विश्लेषण
 - [https://github.com/hahwul/WebHackersWeapons](https://github.com/hahwul/WebHackersWeapons): विभिन्न उपकरणों की सूची
 - [https://github.com/gauravnarwani97/Trishul](https://github.com/gauravnarwani97/Trishul) : कमजोरियों (SQLi, XSS, SSTI) को खोजने के लिए बर्पसुइट प्लगइन
 - [https://github.com/fransr/postMessage-tracker](https://github.com/fransr/postMessage-tracker) : पोस्ट-मेसज फ़ंक्शंस को ट्रैक करने के लिए क्रोम एक्सटेंशन
@@ -86,13 +86,13 @@ Post-crema:
 - [https://blog.mindedsecurity.com/2018/09/pentesting-iot-devices-part-1-static.html](https://blog.mindedsecurity.com/2018/09/pentesting-iot-devices-part-1-static.html)
 - [https://blog.mindedsecurity.com/2018/10/pentesting-iot-devices-part-2-dynamic.html](https://blog.mindedsecurity.com/2018/10/pentesting-iot-devices-part-2-dynamic.html)
 
-Como extraer firmware si no lo encontramos online: [https://www.youtube.com/watch?v=Kxvpbu9STU4](https://www.youtube.com/watch?v=Kxvpbu9STU4)
+अगर हम ऑनलाइन फर्मवेयर नहीं पाते हैं तो इसे कैसे निकालें: [https://www.youtube.com/watch?v=Kxvpbu9STU4](https://www.youtube.com/watch?v=Kxvpbu9STU4)
 
-Aqui un firware con vulnerabilidades para analizar: [https://github.com/scriptingxss/IoTGoat](https://github.com/scriptingxss/IoTGoat)
+यहाँ एक फर्मवेयर है जिसमें विश्लेषण के लिए कमजोरियाँ हैं: [https://github.com/scriptingxss/IoTGoat](https://github.com/scriptingxss/IoTGoat)
 
-y por aqui la metodologia owasp para analizar firmware: [https://github.com/scriptingxss/owasp-fstm](https://github.com/scriptingxss/owasp-fstm)
+और यहाँ फर्मवेयर का विश्लेषण करने के लिए ओवैस्प की कार्यप्रणाली है: [https://github.com/scriptingxss/owasp-fstm](https://github.com/scriptingxss/owasp-fstm)
 
-Firmware emulation: FIRMADYNE (https://github.com/firmadyne/firmadyne/) is a platform for automating the emulation and dynamic analysis of Linux-based firmware.
+फर्मवेयर अनुकरण: FIRMADYNE (https://github.com/firmadyne/firmadyne/) लिनक्स-आधारित फर्मवेयर के अनुकरण और गतिशील विश्लेषण को स्वचालित करने के लिए एक मंच है।
 
 # OTHER
 
@@ -104,12 +104,12 @@ Firmware emulation: FIRMADYNE (https://github.com/firmadyne/firmadyne/) is a pla
 - [https://www.hackerdecabecera.com/2019/12/blectf-capture-flag-en-formato-hardware.html](https://www.hackerdecabecera.com/2019/12/blectf-capture-flag-en-formato-hardware.html) : ब्लूटूथ LE CTF
 - [https://github.com/skeeto/endlessh](https://github.com/skeeto/endlessh) : SSH टारपिट जो धीरे-धीरे एक अंतहीन बैनर भेजता है।
 - AWS और क्लाउड उपकरण: [https://github.com/toniblyx/my-arsenal-of-aws-security-tools](https://github.com/toniblyx/my-arsenal-of-aws-security-tools)
-- IFS (Interplanetary File System) for phishing: [https://www.trustwave.com/en-us/resources/blogs/spiderlabs-blog/using-the-interplanetary-file-system-for-offensive-operations/](https://www.trustwave.com/en-us/resources/blogs/spiderlabs-blog/using-the-interplanetary-file-system-for-offensive-operations/)
-- IP रोटेशन सेवाएँ: [https://medium.com/@lokeshdlk77/how-to-rotate-ip-address-in-brute-force-attack-e66407259212](https://medium.com/@lokeshdlk77/how-to-rotate-ip-address-in-brute-force-attack-e66407259212)
+- IFS (इंटरप्लैनेटरी फ़ाइल सिस्टम) फ़िशिंग के लिए: [https://www.trustwave.com/en-us/resources/blogs/spiderlabs-blog/using-the-interplanetary-file-system-for-offensive-operations/](https://www.trustwave.com/en-us/resources/blogs/spiderlabs-blog/using-the-interplanetary-file-system-for-offensive-operations/)
+- आईपी रोटेशन सेवाएँ: [https://medium.com/@lokeshdlk77/how-to-rotate-ip-address-in-brute-force-attack-e66407259212](https://medium.com/@lokeshdlk77/how-to-rotate-ip-address-in-brute-force-attack-e66407259212)
 - लिनक्स रूटकिट: [https://github.com/aesophor/satanic-rootkit](https://github.com/aesophor/satanic-rootkit)
 - [https://theia-ide.org/](https://theia-ide.org) : ऑनलाइन IDE
 - [https://github.com/nahamsec/Resources-for-Beginner-Bug-Bounty-Hunters/](https://github.com/nahamsec/Resources-for-Beginner-Bug-Bounty-Hunters/) : बग बाउंटी पर शुरू करने के लिए संसाधन
-- [https://medium.com/macoclock/jailbreak-and-stuff-kickstart-tools-and-techniques-for-ios-application-pentesting-6fa53a3987ab](https://medium.com/macoclock/jailbreak-and-stuff-kickstart-tools-and-techniques-for-ios-application-pentesting-6fa53a3987ab) : IOS पेंटेस्टिंग उपकरण
+- [https://medium.com/macoclock/jailbreak-and-stuff-kickstart-tools-and-techniques-for-ios-application-pentesting-6fa53a3987ab](https://medium.com/macoclock/jailbreak-and-stuff-kickstart-tools-and-techniques-for-ios-application-pentesting-6fa53a3987ab) : आईओएस पेंटेस्टिंग उपकरण
 - [https://github.com/random-robbie/keywords/blob/master/keywords.txt](https://github.com/random-robbie/keywords/blob/master/keywords.txt) : कीवर्ड
 - [https://github.com/ElevenPaths/HomePWN](https://github.com/ElevenPaths/HomePWN) : IoT हैकिंग (Wifi, BLE, SSDP, MDNS)
 - [https://github.com/rackerlabs/scantron](https://github.com/rackerlabs/scantron) : स्कैनिंग को स्वचालित करना

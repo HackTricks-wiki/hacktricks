@@ -42,7 +42,7 @@ hashcat -m 18200 --force -a 0 hashes.asreproast passwords_kerb.txt
 ```
 ### Persistence
 
-एक उपयोगकर्ता के लिए **preauth** को मजबूर करना आवश्यक नहीं है जहाँ आपके पास **GenericAll** अनुमतियाँ (या गुण लिखने की अनुमतियाँ) हैं:
+एक उपयोगकर्ता के लिए **preauth** को मजबूर करें जहाँ आपके पास **GenericAll** अनुमतियाँ (या गुण लिखने की अनुमतियाँ) हैं:
 ```bash:Using Windows
 Set-DomainObject -Identity <username> -XOR @{useraccountcontrol=4194304} -Verbose
 ```
@@ -52,8 +52,8 @@ bloodyAD -u user -p 'totoTOTOtoto1234*' -d crash.lab --host 10.100.10.5 add uac 
 ```
 ## ASREProast बिना क्रेडेंशियल्स
 
-एक हमलावर मैन-इन-द-मिडल स्थिति का उपयोग करके AS-REP पैकेट्स को नेटवर्क के माध्यम से कैप्चर कर सकता है बिना कि Kerberos प्री-ऑथेंटिकेशन को बंद करने पर निर्भर किए। इसलिए, यह VLAN पर सभी उपयोगकर्ताओं के लिए काम करता है।\
-[ASRepCatcher](https://github.com/Yaxxine7/ASRepCatcher) हमें ऐसा करने की अनुमति देता है। इसके अलावा, यह उपकरण क्लाइंट वर्कस्टेशनों को Kerberos बातचीत को बदलकर RC4 का उपयोग करने के लिए मजबूर करता है।
+एक हमलावर मैन-इन-द-मिडल स्थिति का उपयोग करके AS-REP पैकेट्स को कैप्चर कर सकता है जब वे नेटवर्क के माध्यम से यात्रा करते हैं बिना Kerberos प्री-ऑथेंटिकेशन के बंद होने पर निर्भर किए। इसलिए, यह VLAN पर सभी उपयोगकर्ताओं के लिए काम करता है।\
+[ASRepCatcher](https://github.com/Yaxxine7/ASRepCatcher) हमें ऐसा करने की अनुमति देता है। इसके अलावा, यह उपकरण क्लाइंट वर्कस्टेशनों को Kerberos वार्ता को बदलकर RC4 का उपयोग करने के लिए मजबूर करता है।
 ```bash
 # Actively acting as a proxy between the clients and the DC, forcing RC4 downgrade if supported
 ASRepCatcher relay -dc $DC_IP

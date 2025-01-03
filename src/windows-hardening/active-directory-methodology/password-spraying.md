@@ -5,11 +5,11 @@
 ## **Password Spraying**
 
 एक बार जब आप कई **मान्य उपयोगकर्ता नाम** ढूंढ लेते हैं, तो आप प्रत्येक खोजे गए उपयोगकर्ता के साथ सबसे **सामान्य पासवर्ड** आजमा सकते हैं (पर्यावरण की पासवर्ड नीति को ध्यान में रखें)।\
-**डिफ़ॉल्ट** के रूप में **न्यूनतम** **पासवर्ड** **लंबाई** **7** है।
+**डिफ़ॉल्ट** रूप से **न्यूनतम** **पासवर्ड** **लंबाई** **7** है।
 
 सामान्य उपयोगकर्ता नामों की सूचियाँ भी उपयोगी हो सकती हैं: [https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames)
 
-ध्यान दें कि यदि आप कई गलत पासवर्ड आजमाते हैं तो आप **कुछ खातों को लॉक कर सकते हैं** (डिफ़ॉल्ट रूप से 10 से अधिक)।
+ध्यान दें कि आप **कुछ खातों को लॉक कर सकते हैं यदि आप कई गलत पासवर्ड आजमाते हैं** (डिफ़ॉल्ट रूप से 10 से अधिक)।
 
 ### Get password policy
 
@@ -39,7 +39,7 @@ crackmapexec smb <IP> -u users.txt -p passwords.txt
 ## --local-auth flag indicate to only try 1 time per machine
 crackmapexec smb --local-auth 10.10.10.10/23 -u administrator -H 10298e182387f9cab376ecd08491764a0 | grep +
 ```
-- [**kerbrute**](https://github.com/ropnop/kerbrute) (गो) का उपयोग करना
+- [**kerbrute**](https://github.com/ropnop/kerbrute) (Go) का उपयोग करना
 ```bash
 # Password Spraying
 ./kerbrute_linux_amd64 passwordspray -d lab.ropnop.com [--dc 10.10.10.10] domain_users.txt Password123
@@ -92,13 +92,13 @@ legba kerberos --target 127.0.0.1 --username admin --password wordlists/password
 
 p**assword spraying outlook** के लिए कई उपकरण हैं।
 
-- [MSF Owa_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_login/) के साथ
-- [MSF Owa_ews_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_ews_login/) के साथ
-- [Ruler](https://github.com/sensepost/ruler) के साथ (विश्वसनीय!)
-- [DomainPasswordSpray](https://github.com/dafthack/DomainPasswordSpray) के साथ (Powershell)
-- [MailSniper](https://github.com/dafthack/MailSniper) के साथ (Powershell)
+- With [MSF Owa_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_login/)
+- with [MSF Owa_ews_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_ews_login/)
+- With [Ruler](https://github.com/sensepost/ruler) (विश्वसनीय!)
+- With [DomainPasswordSpray](https://github.com/dafthack/DomainPasswordSpray) (Powershell)
+- With [MailSniper](https://github.com/dafthack/MailSniper) (Powershell)
 
-इनमें से किसी भी उपकरण का उपयोग करने के लिए, आपको एक उपयोगकर्ता सूची और एक पासवर्ड / पासवर्ड की एक छोटी सूची की आवश्यकता है।
+इन उपकरणों में से किसी का उपयोग करने के लिए, आपको एक उपयोगकर्ता सूची और एक पासवर्ड / पासवर्ड की एक छोटी सूची की आवश्यकता है।
 ```bash
 ./ruler-linux64 --domain reel2.htb -k brute --users users.txt --passwords passwords.txt --delay 0 --verbose
 [x] Failed: larsson:Summer2020

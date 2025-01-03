@@ -6,7 +6,7 @@
 
 एक एप्लिकेशन व्हाइटलिस्ट एक अनुमोदित सॉफ़्टवेयर एप्लिकेशन या निष्पादन योग्य फ़ाइलों की सूची है जो एक सिस्टम पर मौजूद और चलाने की अनुमति है। इसका लक्ष्य पर्यावरण को हानिकारक मैलवेयर और अप्रूव्ड सॉफ़्टवेयर से बचाना है जो किसी संगठन की विशिष्ट व्यावसायिक आवश्यकताओं के साथ मेल नहीं खाता।
 
-[AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) माइक्रोसॉफ्ट का **एप्लिकेशन व्हाइटलिस्टिंग समाधान** है और सिस्टम प्रशासकों को **यह नियंत्रित करने की अनुमति देता है कि उपयोगकर्ता कौन सी एप्लिकेशन और फ़ाइलें चला सकते हैं**। यह निष्पादन योग्य फ़ाइलों, स्क्रिप्ट, विंडोज इंस्टॉलर फ़ाइलों, DLLs, पैकेज्ड ऐप्स, और पैक्ड ऐप इंस्टॉलर पर **सूक्ष्म नियंत्रण** प्रदान करता है।\
+[AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) माइक्रोसॉफ्ट का **एप्लिकेशन व्हाइटलिस्टिंग समाधान** है और सिस्टम प्रशासकों को **यह नियंत्रित करने की अनुमति देता है कि उपयोगकर्ता कौन से एप्लिकेशन और फ़ाइलें चला सकते हैं**। यह निष्पादन योग्य फ़ाइलों, स्क्रिप्ट, विंडोज इंस्टॉलर फ़ाइलों, DLLs, पैकेज्ड ऐप्स, और पैक्ड ऐप इंस्टॉलर पर **सूक्ष्म नियंत्रण** प्रदान करता है।\
 यह सामान्य है कि संगठन **cmd.exe और PowerShell.exe** और कुछ निर्देशिकाओं में लिखने की अनुमति को **ब्लॉक करते हैं, लेकिन इसे सभी को बायपास किया जा सकता है**।
 
 ### Check
@@ -33,7 +33,7 @@ C:\Windows\System32\spool\drivers\color
 C:\Windows\Tasks
 C:\windows\tracing
 ```
-- सामान्यतः **विश्वसनीय** [**"LOLBAS's"**](https://lolbas-project.github.io/) बाइनरीज़ भी AppLocker को बायपास करने के लिए उपयोगी हो सकती हैं।
+- सामान्यतः **विश्वसनीय** [**"LOLBAS's"**](https://lolbas-project.github.io/) बाइनरीज़ AppLocker को बायपास करने के लिए उपयोगी हो सकती हैं।
 - **खराब लिखे गए नियमों को भी बायपास किया जा सकता है**
 - उदाहरण के लिए, **`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`**, आप कहीं भी एक **फोल्डर `allowed`** नाम से बना सकते हैं और इसे अनुमति दी जाएगी।
 - संगठन अक्सर **`%System32%\WindowsPowerShell\v1.0\powershell.exe` निष्पादन योग्य** को **ब्लॉक करने** पर ध्यान केंद्रित करते हैं, लेकिन **अन्य** [**PowerShell निष्पादन योग्य स्थानों**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations) को भूल जाते हैं जैसे कि `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` या `PowerShell_ISE.exe`।
@@ -115,7 +115,7 @@ EFS फ़ाइलों को एन्क्रिप्शन के मा
 **मुख्य निष्कर्ष**:
 
 - EFS एक समान FEK का उपयोग करता है, जो उपयोगकर्ता की सार्वजनिक कुंजी के साथ एन्क्रिप्ट किया गया है।
-- डिक्रिप्शन के लिए उपयोगकर्ता की निजी कुंजी का उपयोग किया जाता है ताकि FEK तक पहुंच प्राप्त की जा सके।
+- डिक्रिप्शन के लिए उपयोगकर्ता की निजी कुंजी का उपयोग किया जाता है ताकि FEK तक पहुंचा जा सके।
 - स्वचालित डिक्रिप्शन विशिष्ट परिस्थितियों के तहत होता है, जैसे FAT32 में कॉपी करना या नेटवर्क ट्रांसमिशन।
 - एन्क्रिप्टेड फ़ाइलें मालिक के लिए बिना अतिरिक्त कदमों के सुलभ होती हैं।
 
@@ -146,7 +146,7 @@ Microsoft ने IT बुनियादी ढांचों में से
 - **निर्धारित कार्य क्षमता**: प्रबंधित सेवा खातों के विपरीत, gMSA निर्धारित कार्यों को चलाने का समर्थन करते हैं।
 - **सरल SPN प्रबंधन**: जब कंप्यूटर के sAMaccount विवरण या DNS नाम में परिवर्तन होते हैं, तो सिस्टम स्वचालित रूप से सेवा प्रिंसिपल नाम (SPN) को अपडेट करता है, जिससे SPN प्रबंधन सरल हो जाता है।
 
-gMSA के लिए पासवर्ड LDAP प्रॉपर्टी _**msDS-ManagedPassword**_ में संग्रहीत होते हैं और हर 30 दिन में डोमेन नियंत्रकों (DCs) द्वारा स्वचालित रूप से रीसेट किए जाते हैं। यह पासवर्ड, जिसे [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e) के रूप में जाना जाता है, केवल अधिकृत प्रशासकों और उन सर्वरों द्वारा प्राप्त किया जा सकता है जिन पर gMSA स्थापित हैं, जिससे एक सुरक्षित वातावरण सुनिश्चित होता है। इस जानकारी तक पहुँचने के लिए, एक सुरक्षित कनेक्शन जैसे LDAPS की आवश्यकता होती है, या कनेक्शन को 'Sealing & Secure' के साथ प्रमाणित किया जाना चाहिए।
+gMSA के लिए पासवर्ड LDAP प्रॉपर्टी _**msDS-ManagedPassword**_ में संग्रहीत होते हैं और हर 30 दिन में डोमेन नियंत्रकों (DCs) द्वारा स्वचालित रूप से रीसेट किए जाते हैं। यह पासवर्ड, जिसे [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e) के रूप में जाना जाता है, केवल अधिकृत प्रशासकों और उन सर्वरों द्वारा पुनः प्राप्त किया जा सकता है जिन पर gMSA स्थापित हैं, जिससे एक सुरक्षित वातावरण सुनिश्चित होता है। इस जानकारी तक पहुँचने के लिए, एक सुरक्षित कनेक्शन जैसे LDAPS की आवश्यकता होती है, या कनेक्शन को 'Sealing & Secure' के साथ प्रमाणित किया जाना चाहिए।
 
 ![https://cube0x0.github.io/Relaying-for-gMSA/](../images/asd1.png)
 
@@ -160,7 +160,7 @@ gMSA के लिए पासवर्ड LDAP प्रॉपर्टी _**
 
 ## LAPS
 
-**लोकल एडमिनिस्ट्रेटर पासवर्ड सॉल्यूशन (LAPS)**, जिसे [Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899) से डाउनलोड किया जा सकता है, स्थानीय एडमिनिस्ट्रेटर पासवर्ड का प्रबंधन करने की अनुमति देता है। ये पासवर्ड, जो **यादृच्छिक**, अद्वितीय, और **नियमित रूप से बदले जाते हैं**, सक्रिय निर्देशिका में केंद्रीय रूप से संग्रहीत होते हैं। इन पासवर्डों तक पहुंच को अधिकृत उपयोगकर्ताओं के लिए ACLs के माध्यम से प्रतिबंधित किया गया है। पर्याप्त अनुमतियों के साथ, स्थानीय एडमिन पासवर्ड पढ़ने की क्षमता प्रदान की जाती है।
+**लोकल एडमिनिस्ट्रेटर पासवर्ड सॉल्यूशन (LAPS)**, जिसे [Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899) से डाउनलोड किया जा सकता है, स्थानीय एडमिनिस्ट्रेटर पासवर्ड के प्रबंधन की अनुमति देता है। ये पासवर्ड, जो **यादृच्छिक**, अद्वितीय, और **नियमित रूप से बदले जाते हैं**, सक्रिय निर्देशिका में केंद्रीय रूप से संग्रहीत होते हैं। इन पासवर्डों तक पहुंच को अधिकृत उपयोगकर्ताओं के लिए ACLs के माध्यम से प्रतिबंधित किया गया है। पर्याप्त अनुमतियों के साथ, स्थानीय एडमिन पासवर्ड पढ़ने की क्षमता प्रदान की जाती है।
 
 {{#ref}}
 active-directory-methodology/laps.md
@@ -168,7 +168,7 @@ active-directory-methodology/laps.md
 
 ## PS Constrained Language Mode
 
-PowerShell [**Constrained Language Mode**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **कई सुविधाओं को लॉक कर देता है** जो PowerShell का प्रभावी ढंग से उपयोग करने के लिए आवश्यक हैं, जैसे COM ऑब्जेक्ट्स को ब्लॉक करना, केवल अनुमोदित .NET प्रकारों, XAML-आधारित वर्कफ़्लो, PowerShell कक्षाओं, और अधिक की अनुमति देना।
+PowerShell [**संविधानित भाषा मोड**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **PowerShell का प्रभावी ढंग से उपयोग करने के लिए आवश्यक कई सुविधाओं को लॉक कर देता है**, जैसे COM ऑब्जेक्ट्स को ब्लॉक करना, केवल अनुमोदित .NET प्रकारों, XAML-आधारित वर्कफ़्लो, PowerShell कक्षाओं, और अधिक की अनुमति देना।
 
 ### **जांचें**
 ```powershell
@@ -181,7 +181,7 @@ $ExecutionContext.SessionState.LanguageMode
 Powershell -version 2
 ```
 वर्तमान Windows में वह Bypass काम नहीं करेगा लेकिन आप उपयोग कर सकते हैं [**PSByPassCLM**](https://github.com/padovah4ck/PSByPassCLM)।\
-**इसे संकलित करने के लिए आपको** **ज़रूरत हो सकती है** **_एक संदर्भ जोड़ने के लिए_** -> _ब्राउज़_ -> _ब्राउज़_ -> `C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0\31bf3856ad364e35\System.Management.Automation.dll` जोड़ें और **परियोजना को .Net4.5 में बदलें**।
+**इसे संकलित करने के लिए आपको** **ज़रूरत हो सकती है** **कि** _**एक संदर्भ जोड़ें**_ -> _ब्राउज़_ -> _ब्राउज़_ -> `C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0\31bf3856ad364e35\System.Management.Automation.dll` जोड़ें और **परियोजना को .Net4.5 में बदलें**।
 
 #### सीधे बायपास:
 ```bash
@@ -195,7 +195,7 @@ C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil.exe /logfile= /LogTo
 
 ## PS निष्पादन नीति
 
-डिफ़ॉल्ट रूप से इसे **प्रतिबंधित** पर सेट किया गया है। इस नीति को बायपास करने के मुख्य तरीके:
+डिफ़ॉल्ट रूप से इसे **restricted** पर सेट किया गया है। इस नीति को बायपास करने के मुख्य तरीके:
 ```powershell
 1º Just copy and paste inside the interactive PS console
 2º Read en Exec
@@ -223,7 +223,7 @@ More can be found [here](https://blog.netspi.com/15-ways-to-bypass-the-powershel
 
 SSPI उन दो मशीनों के लिए उपयुक्त प्रोटोकॉल खोजने के लिए जिम्मेदार होगा जो संवाद करना चाहती हैं। इसके लिए पसंदीदा विधि Kerberos है। फिर SSPI यह बातचीत करेगा कि कौन सा प्रमाणीकरण प्रोटोकॉल उपयोग किया जाएगा, इन प्रमाणीकरण प्रोटोकॉल को Security Support Provider (SSP) कहा जाता है, जो प्रत्येक Windows मशीन के अंदर DLL के रूप में स्थित होते हैं और दोनों मशीनों को संवाद करने के लिए समान का समर्थन करना चाहिए।
 
-### Main SSPs
+### मुख्य SSPs
 
 - **Kerberos**: पसंदीदा
 - %windir%\Windows\System32\kerberos.dll
@@ -233,10 +233,10 @@ SSPI उन दो मशीनों के लिए उपयुक्त प
 - %windir%\Windows\System32\Wdigest.dll
 - **Schannel**: SSL और TLS
 - %windir%\Windows\System32\Schannel.dll
-- **Negotiate**: इसका उपयोग प्रोटोकॉल को बातचीत करने के लिए किया जाता है (Kerberos या NTLM, जिसमें Kerberos डिफ़ॉल्ट है)
+- **Negotiate**: इसका उपयोग उपयोग करने के लिए प्रोटोकॉल को बातचीत करने के लिए किया जाता है (Kerberos या NTLM, Kerberos डिफ़ॉल्ट है)
 - %windir%\Windows\System32\lsasrv.dll
 
-#### The negotiation could offer several methods or only one.
+#### बातचीत कई विधियाँ या केवल एक पेश कर सकती है।
 
 ## UAC - User Account Control
 

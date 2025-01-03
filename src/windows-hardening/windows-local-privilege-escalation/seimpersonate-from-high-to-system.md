@@ -4,7 +4,7 @@
 
 ### Code
 
-The following code from [here](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962). यह **एक प्रक्रिया ID को तर्क के रूप में इंगित करने** की अनुमति देता है और एक CMD **इंगित की गई प्रक्रिया** के उपयोगकर्ता के रूप में चलाया जाएगा।\
+The following code from [here](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962). यह **एक प्रक्रिया ID को तर्क के रूप में इंगित करने** की अनुमति देता है और एक CMD **इंगित प्रक्रिया के उपयोगकर्ता के रूप में चलाया जाएगा।**\
 High Integrity प्रक्रिया में चलाते समय आप **System के रूप में चल रही प्रक्रिया का PID इंगित कर सकते हैं** (जैसे winlogon, wininit) और cmd.exe को सिस्टम के रूप में निष्पादित कर सकते हैं।
 ```cpp
 impersonateuser.exe 1234
@@ -171,6 +171,6 @@ return 0;
 
 ![](<../../images/image (1102).png>)
 
-उस प्रक्रिया के अंदर "Administrators" "Read Memory" और "Read Permissions" कर सकते हैं, जो शायद व्यवस्थापकों को इस प्रक्रिया द्वारा उपयोग किए जाने वाले टोकन का अनुकरण करने की अनुमति देता है।
+उस प्रक्रिया के अंदर "Administrators" "Read Memory" और "Read Permissions" कर सकते हैं जो शायद व्यवस्थापकों को इस प्रक्रिया द्वारा उपयोग किए जाने वाले टोकन का अनुकरण करने की अनुमति देता है।
 
 {{#include ../../banners/hacktricks-training.md}}

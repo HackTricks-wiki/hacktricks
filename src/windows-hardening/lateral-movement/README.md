@@ -1,4 +1,4 @@
-# Lateral Movement
+# लेटरल मूवमेंट
 
 {{#include ../../banners/hacktricks-training.md}}
 

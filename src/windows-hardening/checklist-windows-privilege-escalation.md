@@ -2,7 +2,7 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-### **Windows स्थानीय विशेषाधिकार वृद्धि वेक्टर के लिए सबसे अच्छा उपकरण:** [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)
+### **Windows स्थानीय विशेषाधिकार वृद्धि वेक्टर की खोज के लिए सबसे अच्छा उपकरण:** [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)
 
 ### [सिस्टम जानकारी](windows-local-privilege-escalation/#system-info)
 
@@ -52,17 +52,17 @@
 ### [सेवाएँ](windows-local-privilege-escalation/#services)
 
 - [ ] [क्या आप **किसी सेवा को संशोधित कर सकते हैं**?](windows-local-privilege-escalation/#permissions)
-- [ ] [क्या आप **किसी सेवा द्वारा निष्पादित** **बाइनरी** को **संशोधित कर सकते हैं**?](windows-local-privilege-escalation/#modify-service-binary-path)
-- [ ] [क्या आप किसी **सेवा** के **रजिस्ट्री** को **संशोधित कर सकते हैं**?](windows-local-privilege-escalation/#services-registry-modify-permissions)
-- [ ] [क्या आप किसी **अनकोटित सेवा** बाइनरी **पथ** का लाभ उठा सकते हैं?](windows-local-privilege-escalation/#unquoted-service-paths)
+- [ ] [क्या आप **किसी सेवा द्वारा** **निष्पादित** **बाइनरी** को **संशोधित** कर सकते हैं?](windows-local-privilege-escalation/#modify-service-binary-path)
+- [ ] [क्या आप किसी **सेवा** के **पंजीकरण** को **संशोधित** कर सकते हैं?](windows-local-privilege-escalation/#services-registry-modify-permissions)
+- [ ] [क्या आप किसी **अनकोटेड सेवा** बाइनरी **पथ** का लाभ उठा सकते हैं?](windows-local-privilege-escalation/#unquoted-service-paths)
 
 ### [**ऐप्लिकेशन**](windows-local-privilege-escalation/#applications)
 
-- [ ] **स्थापित ऐप्लिकेशन पर** [**लिखने** की अनुमतियाँ](windows-local-privilege-escalation/#write-permissions)
+- [ ] [**स्थापित ऐप्लिकेशन**](windows-local-privilege-escalation/#write-permissions) पर **लिखने** की अनुमतियाँ
 - [ ] [**स्टार्टअप ऐप्लिकेशन**](windows-local-privilege-escalation/#run-at-startup)
 - [ ] **कमजोर** [**ड्राइवर**](windows-local-privilege-escalation/#drivers)
 
-### [DLL हाईजैकिंग](windows-local-privilege-escalation/#path-dll-hijacking)
+### [DLL हाइजैकिंग](windows-local-privilege-escalation/#path-dll-hijacking)
 
 - [ ] क्या आप **PATH के अंदर किसी फ़ोल्डर में लिख सकते हैं**?
 - [ ] क्या कोई ज्ञात सेवा बाइनरी है जो **किसी गैर-मौजूद DLL को लोड करने की कोशिश करती है**?
@@ -85,10 +85,10 @@
 - [ ] [**AppCmd.exe** मौजूद है](windows-local-privilege-escalation/#appcmd-exe)? क्रेडेंशियल्स?
 - [ ] [**SCClient.exe**](windows-local-privilege-escalation/#scclient-sccm)? DLL साइड लोडिंग?
 
-### [फाइलें और रजिस्ट्री (क्रेडेंशियल्स)](windows-local-privilege-escalation/#files-and-registry-credentials)
+### [फाइलें और रजिस्ट्र्री (क्रेडेंशियल्स)](windows-local-privilege-escalation/#files-and-registry-credentials)
 
 - [ ] **Putty:** [**क्रेड्स**](windows-local-privilege-escalation/#putty-creds) **और** [**SSH होस्ट कुंजी**](windows-local-privilege-escalation/#putty-ssh-host-keys)
-- [ ] [**रजिस्ट्री में SSH कुंजी**](windows-local-privilege-escalation/#ssh-keys-in-registry)?
+- [ ] [**रजिस्ट्र्री में SSH कुंजी**](windows-local-privilege-escalation/#ssh-keys-in-registry)?
 - [ ] [**अनटेंडेड फाइलों**](windows-local-privilege-escalation/#unattended-files) में पासवर्ड?
 - [ ] कोई [**SAM & SYSTEM**](windows-local-privilege-escalation/#sam-and-system-backups) बैकअप?
 - [ ] [**क्लाउड क्रेडेंशियल्स**](windows-local-privilege-escalation/#cloud-credentials)?
@@ -96,11 +96,11 @@
 - [ ] [**कैश किए गए GPP पासवर्ड**](windows-local-privilege-escalation/#cached-gpp-pasword)?
 - [ ] [**IIS वेब कॉन्फ़िग फ़ाइल**](windows-local-privilege-escalation/#iis-web-config) में पासवर्ड?
 - [ ] [**वेब** **लॉग्स**](windows-local-privilege-escalation/#logs) में दिलचस्प जानकारी?
-- [ ] क्या आप [**उपयोगकर्ता से क्रेडेंशियल्स**](windows-local-privilege-escalation/#ask-for-credentials) मांगना चाहते हैं?
-- [ ] [**रीसाइक्लिंग बिन के अंदर दिलचस्प फाइलें**](windows-local-privilege-escalation/#credentials-in-the-recyclebin)?
-- [ ] अन्य [**रजिस्ट्री जिसमें क्रेडेंशियल्स हैं**](windows-local-privilege-escalation/#inside-the-registry)?
+- [ ] क्या आप उपयोगकर्ता से [**क्रेडेंशियल्स**](windows-local-privilege-escalation/#ask-for-credentials) मांगना चाहते हैं?
+- [ ] [**रीसाइक्ल बिन के अंदर दिलचस्प फाइलें**](windows-local-privilege-escalation/#credentials-in-the-recyclebin)?
+- [ ] अन्य [**पंजीकरण जिसमें क्रेडेंशियल्स हैं**](windows-local-privilege-escalation/#inside-the-registry)?
 - [ ] [**ब्राउज़र डेटा के अंदर**](windows-local-privilege-escalation/#browsers-history) (dbs, इतिहास, बुकमार्क, ...)?
-- [ ] [**फाइलों और रजिस्ट्री में सामान्य पासवर्ड खोज**](windows-local-privilege-escalation/#generic-password-search-in-files-and-registry)
+- [ ] [**फाइलों और रजिस्ट्र्री में सामान्य पासवर्ड खोज**](windows-local-privilege-escalation/#generic-password-search-in-files-and-registry)
 - [ ] पासवर्ड के लिए स्वचालित रूप से खोजने के लिए [**उपकरण**](windows-local-privilege-escalation/#tools-that-search-for-passwords)
 
 ### [लीक हुए हैंडलर्स](windows-local-privilege-escalation/#leaked-handlers)

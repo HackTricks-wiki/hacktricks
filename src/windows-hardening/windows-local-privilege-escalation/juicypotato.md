@@ -11,7 +11,7 @@ roguepotato-and-printspoofer.md
 
 ## Juicy Potato (सुनहरे विशेषाधिकारों का दुरुपयोग) <a href="#juicy-potato-abusing-the-golden-privileges" id="juicy-potato-abusing-the-golden-privileges"></a>
 
-_एक मीठा संस्करण_ [_RottenPotatoNG_](https://github.com/breenmachine/RottenPotatoNG)_, थोड़ा रस के साथ, यानी **एक और स्थानीय विशेषाधिकार वृद्धि उपकरण, Windows सेवा खातों से NT AUTHORITY\SYSTEM**_
+_एक मीठा संस्करण_ [_RottenPotatoNG_](https://github.com/breenmachine/RottenPotatoNG)_, थोड़ा जूस के साथ, यानी **एक और स्थानीय विशेषाधिकार वृद्धि उपकरण, Windows सेवा खातों से NT AUTHORITY\SYSTEM**_
 
 #### आप juicypotato को [https://ci.appveyor.com/project/ohpe/juicy-potato/build/artifacts](https://ci.appveyor.com/project/ohpe/juicy-potato/build/artifacts) से डाउनलोड कर सकते हैं
 
@@ -19,7 +19,7 @@ _एक मीठा संस्करण_ [_RottenPotatoNG_](https://github.co
 
 [**juicy-potato Readme से**](https://github.com/ohpe/juicy-potato/blob/master/README.md)**:**
 
-[RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG) और इसके [वैरिएंट्स](https://github.com/decoder-it/lonelypotato) विशेषाधिकार वृद्धि श्रृंखला का लाभ उठाते हैं जो [`BITS`](<https://msdn.microsoft.com/en-us/library/windows/desktop/bb968799(v=vs.85).aspx>) [सेवा](https://github.com/breenmachine/RottenPotatoNG/blob/4eefb0dd89decb9763f2bf52c7a067440a9ec1f0/RottenPotatoEXE/MSFRottenPotato/MSFRottenPotato.cpp#L126) पर आधारित है जिसमें `127.0.0.1:6666` पर MiTM श्रोता है और जब आपके पास `SeImpersonate` या `SeAssignPrimaryToken` विशेषाधिकार होते हैं। एक Windows निर्माण समीक्षा के दौरान, हमने एक सेटअप पाया जहां `BITS` जानबूझकर बंद था और पोर्ट `6666` लिया गया था।
+[RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG) और इसके [वेरिएंट्स](https://github.com/decoder-it/lonelypotato) विशेषाधिकार वृद्धि श्रृंखला का लाभ उठाते हैं जो [`BITS`](<https://msdn.microsoft.com/en-us/library/windows/desktop/bb968799(v=vs.85).aspx>) [सेवा](https://github.com/breenmachine/RottenPotatoNG/blob/4eefb0dd89decb9763f2bf52c7a067440a9ec1f0/RottenPotatoEXE/MSFRottenPotato/MSFRottenPotato.cpp#L126) पर आधारित है जिसमें `127.0.0.1:6666` पर MiTM श्रोता है और जब आपके पास `SeImpersonate` या `SeAssignPrimaryToken` विशेषाधिकार होते हैं। एक Windows बिल्ड समीक्षा के दौरान, हमने एक सेटअप पाया जहां `BITS` जानबूझकर बंद था और पोर्ट `6666` लिया गया था।
 
 हमने [RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG) को हथियार बनाने का निर्णय लिया: **Juicy Potato को नमस्ते कहें**।
 
@@ -33,7 +33,7 @@ _एक मीठा संस्करण_ [_RottenPotatoNG_](https://github.co
 
 कुछ परीक्षणों के बाद, हमने कई Windows संस्करणों पर [दिलचस्प CLSID की एक विस्तृत सूची प्राप्त की और परीक्षण किया](http://ohpe.it/juicy-potato/CLSID/)।
 
-### रसदार विवरण <a href="#juicy-details" id="juicy-details"></a>
+### जूस के विवरण <a href="#juicy-details" id="juicy-details"></a>
 
 JuicyPotato आपको अनुमति देता है:
 
@@ -106,7 +106,7 @@ c:\Users\Public>
 
 ## CLSID समस्याएँ
 
-अक्सर, JuicyPotato द्वारा उपयोग किया जाने वाला डिफ़ॉल्ट CLSID **काम नहीं करता** है और एक्सप्लॉइट विफल हो जाता है। आमतौर पर, एक **काम करने वाले CLSID** को खोजने के लिए कई प्रयासों की आवश्यकता होती है। एक विशिष्ट ऑपरेटिंग सिस्टम के लिए प्रयास करने के लिए CLSIDs की सूची प्राप्त करने के लिए, आपको इस पृष्ठ पर जाना चाहिए:
+अक्सर, JuicyPotato द्वारा उपयोग किया जाने वाला डिफ़ॉल्ट CLSID **काम नहीं करता** और एक्सप्लॉइट विफल हो जाता है। आमतौर पर, एक **काम करने वाला CLSID** खोजने के लिए कई प्रयासों की आवश्यकता होती है। एक विशिष्ट ऑपरेटिंग सिस्टम के लिए प्रयास करने के लिए CLSIDs की सूची प्राप्त करने के लिए, आपको इस पृष्ठ पर जाना चाहिए:
 
 {% embed url="https://ohpe.it/juicy-potato/CLSID/" %}
 
@@ -116,9 +116,9 @@ c:\Users\Public>
 
 [Join-Object.ps1](https://github.com/ohpe/juicy-potato/blob/master/CLSID/utils/Join-Object.ps1) डाउनलोड करें और इसे अपने PS सत्र में लोड करें, और [GetCLSID.ps1](https://github.com/ohpe/juicy-potato/blob/master/CLSID/GetCLSID.ps1) डाउनलोड करें और निष्पादित करें। यह स्क्रिप्ट परीक्षण के लिए संभावित CLSIDs की एक सूची बनाएगी।
 
-फिर [test_clsid.bat ](https://github.com/ohpe/juicy-potato/blob/master/Test/test_clsid.bat)डाउनलोड करें (CLSID सूची और juicypotato निष्पादन योग्य फ़ाइल के लिए पथ बदलें) और इसे निष्पादित करें। यह हर CLSID को आज़माना शुरू कर देगा, और **जब पोर्ट नंबर बदलता है, तो इसका मतलब होगा कि CLSID काम कर गया**।
+फिर [test_clsid.bat ](https://github.com/ohpe/juicy-potato/blob/master/Test/test_clsid.bat) डाउनलोड करें (CLSID सूची और juicypotato निष्पादन योग्य के लिए पथ बदलें) और इसे निष्पादित करें। यह हर CLSID को आजमाना शुरू कर देगा, और **जब पोर्ट नंबर बदलता है, तो इसका मतलब होगा कि CLSID काम कर गया**।
 
-**परामर्श -c** का उपयोग करके काम करने वाले CLSIDs की **जांच करें**
+**काम करने वाले CLSIDs की जांच करें** **पैरामीटर -c का उपयोग करके**
 
 ## संदर्भ
 

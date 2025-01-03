@@ -11,7 +11,7 @@
 - [Windows से टिकट एकत्र करना](../../network-services-pentesting/pentesting-kerberos-88/harvesting-tickets-from-windows.md)
 - [Linux से टिकट एकत्र करना](../../network-services-pentesting/pentesting-kerberos-88/harvesting-tickets-from-linux.md)
 
-### **प्लेटफार्मों के बीच Linux और Windows टिकटों का आदान-प्रदान करना**
+### **प्लेटफार्मों के बीच Linux और Windows टिकटों का आदान-प्रदान**
 
 [**ticket_converter**](https://github.com/Zer1t0/ticket_converter) उपकरण केवल टिकट और एक आउटपुट फ़ाइल का उपयोग करके टिकट प्रारूपों को परिवर्तित करता है।
 ```bash

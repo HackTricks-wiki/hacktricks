@@ -4,7 +4,7 @@
 
 ## [Esolangs Wiki](https://esolangs.org/wiki/Main_Page)
 
-अधिक esoteric भाषाओं की खोज के लिए उस विकी की जांच करें
+अधिक रहस्यमय भाषाओं की खोज के लिए उस विकी की जांच करें
 
 ## Malbolge
 ```
