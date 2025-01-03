@@ -4,92 +4,84 @@
 
 ## Carving & Recovery tools
 
-More tools in [https://github.com/Claudio-C/awesome-datarecovery](https://github.com/Claudio-C/awesome-datarecovery)
+Περισσότερα εργαλεία στο [https://github.com/Claudio-C/awesome-datarecovery](https://github.com/Claudio-C/awesome-datarecovery)
 
 ### Autopsy
 
-The most common tool used in forensics to extract files from images is [**Autopsy**](https://www.autopsy.com/download/). Download it, install it and make it ingest the file to find "hidden" files. Note that Autopsy is built to support disk images and other kinds of images, but not simple files.
+Το πιο κοινό εργαλείο που χρησιμοποιείται στην ψηφιακή εγκληματολογία για την εξαγωγή αρχείων από εικόνες είναι το [**Autopsy**](https://www.autopsy.com/download/). Κατεβάστε το, εγκαταστήστε το και κάντε το να επεξεργαστεί το αρχείο για να βρείτε "κρυφά" αρχεία. Σημειώστε ότι το Autopsy έχει σχεδιαστεί για να υποστηρίζει δισκοειδείς εικόνες και άλλους τύπους εικόνων, αλλά όχι απλά αρχεία.
 
 ### Binwalk <a href="#binwalk" id="binwalk"></a>
 
-**Binwalk** is a tool for analyzing binary files to find embedded content. It's installable via `apt` and its source is on [GitHub](https://github.com/ReFirmLabs/binwalk).
+**Binwalk** είναι ένα εργαλείο για την ανάλυση δυαδικών αρχείων για να βρείτε ενσωματωμένο περιεχόμενο. Είναι εγκαταστάσιμο μέσω του `apt` και η πηγή του είναι στο [GitHub](https://github.com/ReFirmLabs/binwalk).
 
-**Useful commands**:
-
+**Χρήσιμες εντολές**:
 ```bash
 sudo apt install binwalk #Insllation
 binwalk file #Displays the embedded data in the given file
 binwalk -e file #Displays and extracts some files from the given file
 binwalk --dd ".*" file #Displays and extracts all files from the given file
 ```
-
 ### Foremost
 
-Another common tool to find hidden files is **foremost**. You can find the configuration file of foremost in `/etc/foremost.conf`. If you just want to search for some specific files uncomment them. If you don't uncomment anything foremost will search for its default configured file types.
-
+Ένα άλλο κοινό εργαλείο για να βρείτε κρυφά αρχεία είναι το **foremost**. Μπορείτε να βρείτε το αρχείο ρύθμισης του foremost στο `/etc/foremost.conf`. Αν θέλετε να αναζητήσετε συγκεκριμένα αρχεία, αποσχολιάστε τα. Αν δεν αποσχολιάσετε τίποτα, το foremost θα αναζητήσει τους προεπιλεγμένους τύπους αρχείων που είναι ρυθμισμένοι.
 ```bash
 sudo apt-get install foremost
 foremost -v -i file.img -o output
 #Discovered files will appear inside the folder "output"
 ```
-
 ### **Scalpel**
 
-**Scalpel** is another tool that can be used to find and extract **files embedded in a file**. In this case, you will need to uncomment from the configuration file (_/etc/scalpel/scalpel.conf_) the file types you want it to extract.
-
+**Scalpel** είναι ένα άλλο εργαλείο που μπορεί να χρησιμοποιηθεί για να βρει και να εξάγει **αρχεία που είναι ενσωματωμένα σε ένα αρχείο**. Σε αυτή την περίπτωση, θα χρειαστεί να αφαιρέσετε το σχόλιο από το αρχείο ρυθμίσεων (_/etc/scalpel/scalpel.conf_) τους τύπους αρχείων που θέλετε να εξάγει.
 ```bash
 sudo apt-get install scalpel
 scalpel file.img -o output
 ```
-
 ### Bulk Extractor
 
-This tool comes inside kali but you can find it here: [https://github.com/simsong/bulk_extractor](https://github.com/simsong/bulk_extractor)
+Αυτό το εργαλείο έρχεται μέσα στο kali αλλά μπορείτε να το βρείτε εδώ: [https://github.com/simsong/bulk_extractor](https://github.com/simsong/bulk_extractor)
 
-This tool can scan an image and will **extract pcaps** inside it, **network information (URLs, domains, IPs, MACs, mails)** and more **files**. You only have to do:
-
+Αυτό το εργαλείο μπορεί να σαρώσει μια εικόνα και θα **εξάγει pcaps** μέσα σε αυτή, **πληροφορίες δικτύου (URLs, domains, IPs, MACs, mails)** και περισσότερα **αρχεία**. Πρέπει απλώς να κάνετε:
 ```
 bulk_extractor memory.img -o out_folder
 ```
-
-Navigate through **all the information** that the tool has gathered (passwords?), **analyse** the **packets** (read[ **Pcaps analysis**](../pcap-inspection/)), search for **weird domains** (domains related to **malware** or **non-existent**).
+Πλοηγηθείτε μέσα από **όλες τις πληροφορίες** που έχει συγκεντρώσει το εργαλείο (κωδικοί πρόσβασης;), **αναλύστε** τα **πακέτα** (διαβάστε [**Ανάλυση Pcaps**](../pcap-inspection/)), αναζητήστε **παράξενους τομείς** (τομείς σχετικούς με **κακόβουλο λογισμικό** ή **μη υπάρχοντες**).
 
 ### PhotoRec
 
-You can find it in [https://www.cgsecurity.org/wiki/TestDisk_Download](https://www.cgsecurity.org/wiki/TestDisk_Download)
+Μπορείτε να το βρείτε στο [https://www.cgsecurity.org/wiki/TestDisk_Download](https://www.cgsecurity.org/wiki/TestDisk_Download)
 
-It comes with GUI and CLI versions. You can select the **file-types** you want PhotoRec to search for.
+Έρχεται με εκδόσεις GUI και CLI. Μπορείτε να επιλέξετε τους **τύπους αρχείων** που θέλετε να αναζητήσει το PhotoRec.
 
 ![](<../../../images/image (242).png>)
 
 ### binvis
 
-Check the [code](https://code.google.com/archive/p/binvis/) and the [web page tool](https://binvis.io/#/).
+Ελέγξτε τον [κώδικα](https://code.google.com/archive/p/binvis/) και την [ιστοσελίδα εργαλείου](https://binvis.io/#/).
 
-#### Features of BinVis
+#### Χαρακτηριστικά του BinVis
 
-- Visual and active **structure viewer**
-- Multiple plots for different focus points
-- Focusing on portions of a sample
-- **Seeing stings and resources**, in PE or ELF executables e. g.
-- Getting **patterns** for cryptanalysis on files
-- **Spotting** packer or encoder algorithms
-- **Identify** Steganography by patterns
-- **Visual** binary-diffing
+- Οπτικός και ενεργός **θεατής δομής**
+- Πολλαπλά διαγράμματα για διαφορετικά σημεία εστίασης
+- Εστίαση σε τμήματα ενός δείγματος
+- **Βλέποντας αλυσίδες και πόρους**, σε εκτελέσιμα PE ή ELF π.χ.
+- Λαμβάνοντας **μοτίβα** για κρυπτοανάλυση σε αρχεία
+- **Εντοπισμός** αλγορίθμων συμπίεσης ή κωδικοποίησης
+- **Αναγνώριση** Στεγανότητας μέσω μοτίβων
+- **Οπτική** διαφορά δυαδικών αρχείων
 
-BinVis is a great **start-point to get familiar with an unknown target** in a black-boxing scenario.
+Το BinVis είναι ένα εξαιρετικό **σημείο εκκίνησης για να εξοικειωθείτε με έναν άγνωστο στόχο** σε ένα σενάριο μαύρης κουτί.
 
-## Specific Data Carving Tools
+## Ειδικά Εργαλεία Κατασκευής Δεδομένων
 
 ### FindAES
 
-Searches for AES keys by searching for their key schedules. Able to find 128. 192, and 256 bit keys, such as those used by TrueCrypt and BitLocker.
+Αναζητά κλειδιά AES αναζητώντας τα χρονοδιαγράμματα κλειδιών τους. Ικανό να βρει κλειδιά 128, 192 και 256 bit, όπως αυτά που χρησιμοποιούνται από το TrueCrypt και το BitLocker.
 
-Download [here](https://sourceforge.net/projects/findaes/).
+Κατεβάστε [εδώ](https://sourceforge.net/projects/findaes/).
 
-## Complementary tools
+## Συμπληρωματικά εργαλεία
 
-You can use [**viu** ](https://github.com/atanunq/viu)to see images from the terminal.\
-You can use the linux command line tool **pdftotext** to transform a pdf into text and read it.
+Μπορείτε να χρησιμοποιήσετε το [**viu**](https://github.com/atanunq/viu) για να δείτε εικόνες από το τερματικό.\
+Μπορείτε να χρησιμοποιήσετε το εργαλείο γραμμής εντολών linux **pdftotext** για να μετατρέψετε ένα pdf σε κείμενο και να το διαβάσετε.
 
 {{#include ../../../banners/hacktricks-training.md}}

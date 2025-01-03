@@ -1,101 +1,101 @@
-# Interesting Windows Registry Keys
+# Ενδιαφέροντα Κλειδιά Μητρώου Windows
 
-### Interesting Windows Registry Keys
+### Ενδιαφέροντα Κλειδιά Μητρώου Windows
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-### **Windows Version and Owner Info**
+### **Πληροφορίες Έκδοσης και Ιδιοκτήτη Windows**
 
-- Located at **`Software\Microsoft\Windows NT\CurrentVersion`**, you'll find the Windows version, Service Pack, installation time, and the registered owner's name in a straightforward manner.
+- Βρίσκεται στο **`Software\Microsoft\Windows NT\CurrentVersion`**, θα βρείτε την έκδοση των Windows, το Service Pack, τον χρόνο εγκατάστασης και το όνομα του καταχωρημένου ιδιοκτήτη με σαφή τρόπο.
 
-### **Computer Name**
+### **Όνομα Υπολογιστή**
 
-- The hostname is found under **`System\ControlSet001\Control\ComputerName\ComputerName`**.
+- Το όνομα υπολογιστή βρίσκεται κάτω από **`System\ControlSet001\Control\ComputerName\ComputerName`**.
 
-### **Time Zone Setting**
+### **Ρύθμιση Ζώνης Ώρας**
 
-- The system's time zone is stored in **`System\ControlSet001\Control\TimeZoneInformation`**.
+- Η ζώνη ώρας του συστήματος αποθηκεύεται στο **`System\ControlSet001\Control\TimeZoneInformation`**.
 
-### **Access Time Tracking**
+### **Παρακολούθηση Χρόνου Πρόσβασης**
 
-- By default, the last access time tracking is turned off (**`NtfsDisableLastAccessUpdate=1`**). To enable it, use:
-  `fsutil behavior set disablelastaccess 0`
+- Από προεπιλογή, η παρακολούθηση του τελευταίου χρόνου πρόσβασης είναι απενεργοποιημένη (**`NtfsDisableLastAccessUpdate=1`**). Για να την ενεργοποιήσετε, χρησιμοποιήστε:
+`fsutil behavior set disablelastaccess 0`
 
-### Windows Versions and Service Packs
+### Εκδόσεις Windows και Service Packs
 
-- The **Windows version** indicates the edition (e.g., Home, Pro) and its release (e.g., Windows 10, Windows 11), while **Service Packs** are updates that include fixes and, sometimes, new features.
+- Η **έκδοση Windows** υποδεικνύει την έκδοση (π.χ., Home, Pro) και την κυκλοφορία της (π.χ., Windows 10, Windows 11), ενώ τα **Service Packs** είναι ενημερώσεις που περιλαμβάνουν διορθώσεις και, μερικές φορές, νέες δυνατότητες.
 
-### Enabling Last Access Time
+### Ενεργοποίηση Χρόνου Τελευταίας Πρόσβασης
 
-- Enabling last access time tracking allows you to see when files were last opened, which can be critical for forensic analysis or system monitoring.
+- Η ενεργοποίηση της παρακολούθησης του τελευταίου χρόνου πρόσβασης σας επιτρέπει να δείτε πότε άνοιξαν τελευταία τα αρχεία, κάτι που μπορεί να είναι κρίσιμο για την εγκληματολογική ανάλυση ή την παρακολούθηση του συστήματος.
 
-### Network Information Details
+### Λεπτομέρειες Πληροφοριών Δικτύου
 
-- The registry holds extensive data on network configurations, including **types of networks (wireless, cable, 3G)** and **network categories (Public, Private/Home, Domain/Work)**, which are vital for understanding network security settings and permissions.
+- Το μητρώο περιέχει εκτενή δεδομένα σχετικά με τις ρυθμίσεις δικτύου, συμπεριλαμβανομένων **τύπων δικτύων (ασύρματα, καλωδιακά, 3G)** και **κατηγοριών δικτύου (Δημόσιο, Ιδιωτικό/Οικιακό, Τομέας/Εργασία)**, που είναι ζωτικής σημασίας για την κατανόηση των ρυθμίσεων ασφαλείας δικτύου και των δικαιωμάτων.
 
 ### Client Side Caching (CSC)
 
-- **CSC** enhances offline file access by caching copies of shared files. Different **CSCFlags** settings control how and what files are cached, affecting performance and user experience, especially in environments with intermittent connectivity.
+- **CSC** βελτιώνει την πρόσβαση σε αρχεία εκτός σύνδεσης αποθηκεύοντας αντίγραφα κοινών αρχείων. Διαφορετικές ρυθμίσεις **CSCFlags** ελέγχουν πώς και ποια αρχεία αποθηκεύονται στην κρυφή μνήμη, επηρεάζοντας την απόδοση και την εμπειρία του χρήστη, ειδικά σε περιβάλλοντα με διαλείπουσα συνδεσιμότητα.
 
-### AutoStart Programs
+### Προγράμματα AutoStart
 
-- Programs listed in various `Run` and `RunOnce` registry keys are automatically launched at startup, affecting system boot time and potentially being points of interest for identifying malware or unwanted software.
+- Τα προγράμματα που αναφέρονται σε διάφορα κλειδιά μητρώου `Run` και `RunOnce` εκκινούν αυτόματα κατά την εκκίνηση, επηρεάζοντας τον χρόνο εκκίνησης του συστήματος και ενδεχομένως αποτελώντας σημεία ενδιαφέροντος για την αναγνώριση κακόβουλου λογισμικού ή ανεπιθύμητου λογισμικού.
 
 ### Shellbags
 
-- **Shellbags** not only store preferences for folder views but also provide forensic evidence of folder access even if the folder no longer exists. They are invaluable for investigations, revealing user activity that isn't obvious through other means.
+- **Shellbags** όχι μόνο αποθηκεύουν προτιμήσεις για τις προβολές φακέλων αλλά παρέχουν επίσης εγκληματολογικά στοιχεία πρόσβασης φακέλων ακόμη και αν ο φάκελος δεν υπάρχει πια. Είναι ανεκτίμητα για τις έρευνες, αποκαλύπτοντας δραστηριότητα χρηστών που δεν είναι προφανής μέσω άλλων μέσων.
 
-### USB Information and Forensics
+### Πληροφορίες USB και Εγκληματολογία
 
-- The details stored in the registry about USB devices can help trace which devices were connected to a computer, potentially linking a device to sensitive file transfers or unauthorized access incidents.
+- Οι λεπτομέρειες που αποθηκεύονται στο μητρώο σχετικά με τις συσκευές USB μπορούν να βοηθήσουν στην ανίχνευση ποια συσκευές συνδέθηκαν σε έναν υπολογιστή, ενδεχομένως συνδέοντας μια συσκευή με ευαίσθητες μεταφορές αρχείων ή περιστατικά μη εξουσιοδοτημένης πρόσβασης.
 
-### Volume Serial Number
+### Αριθμός Σειράς Τόμου
 
-- The **Volume Serial Number** can be crucial for tracking the specific instance of a file system, useful in forensic scenarios where file origin needs to be established across different devices.
+- Ο **Αριθμός Σειράς Τόμου** μπορεί να είναι κρίσιμος για την παρακολούθηση της συγκεκριμένης περίπτωσης ενός συστήματος αρχείων, χρήσιμο σε εγκληματολογικά σενάρια όπου πρέπει να καθοριστεί η προέλευση ενός αρχείου σε διάφορες συσκευές.
 
-### **Shutdown Details**
+### **Λεπτομέρειες Τερματισμού**
 
-- Shutdown time and count (the latter only for XP) are kept in **`System\ControlSet001\Control\Windows`** and **`System\ControlSet001\Control\Watchdog\Display`**.
+- Ο χρόνος και ο αριθμός τερματισμού (ο τελευταίος μόνο για XP) διατηρούνται στο **`System\ControlSet001\Control\Windows`** και **`System\ControlSet001\Control\Watchdog\Display`**.
 
-### **Network Configuration**
+### **Ρύθμιση Δικτύου**
 
-- For detailed network interface info, refer to **`System\ControlSet001\Services\Tcpip\Parameters\Interfaces{GUID_INTERFACE}`**.
-- First and last network connection times, including VPN connections, are logged under various paths in **`Software\Microsoft\Windows NT\CurrentVersion\NetworkList`**.
+- Για λεπτομερείς πληροφορίες διεπαφής δικτύου, ανατρέξτε στο **`System\ControlSet001\Services\Tcpip\Parameters\Interfaces{GUID_INTERFACE}`**.
+- Οι πρώτοι και τελευταίοι χρόνοι σύνδεσης δικτύου, συμπεριλαμβανομένων των συνδέσεων VPN, καταγράφονται κάτω από διάφορες διαδρομές στο **`Software\Microsoft\Windows NT\CurrentVersion\NetworkList`**.
 
-### **Shared Folders**
+### **Κοινόχρηστοι Φάκελοι**
 
-- Shared folders and settings are under **`System\ControlSet001\Services\lanmanserver\Shares`**. The Client Side Caching (CSC) settings dictate offline file availability.
+- Οι κοινόχρηστοι φάκελοι και οι ρυθμίσεις βρίσκονται κάτω από **`System\ControlSet001\Services\lanmanserver\Shares`**. Οι ρυθμίσεις Client Side Caching (CSC) καθορίζουν τη διαθεσιμότητα αρχείων εκτός σύνδεσης.
 
-### **Programs that Start Automatically**
+### **Προγράμματα που Ξεκινάνε Αυτόματα**
 
-- Paths like **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Run`** and similar entries under `Software\Microsoft\Windows\CurrentVersion` detail programs set to run at startup.
+- Διαδρομές όπως **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Run`** και παρόμοιες καταχωρήσεις κάτω από `Software\Microsoft\Windows\CurrentVersion` περιγράφουν προγράμματα που έχουν ρυθμιστεί να εκκινούν κατά την εκκίνηση.
 
-### **Searches and Typed Paths**
+### **Αναζητήσεις και Πληκτρολογημένες Διαδρομές**
 
-- Explorer searches and typed paths are tracked in the registry under **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer`** for WordwheelQuery and TypedPaths, respectively.
+- Οι αναζητήσεις του Explorer και οι πληκτρολογημένες διαδρομές παρακολουθούνται στο μητρώο κάτω από **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer`** για WordwheelQuery και TypedPaths, αντίστοιχα.
 
-### **Recent Documents and Office Files**
+### **Πρόσφατα Έγγραφα και Αρχεία Office**
 
-- Recent documents and Office files accessed are noted in `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs` and specific Office version paths.
+- Τα πρόσφατα έγγραφα και τα αρχεία Office που έχουν προσπελαστεί σημειώνονται στο `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs` και σε συγκεκριμένες διαδρομές έκδοσης Office.
 
-### **Most Recently Used (MRU) Items**
+### **Πιο Πρόσφατα Χρησιμοποιούμενα (MRU) Στοιχεία**
 
-- MRU lists, indicating recent file paths and commands, are stored in various `ComDlg32` and `Explorer` subkeys under `NTUSER.DAT`.
+- Οι λίστες MRU, που υποδεικνύουν πρόσφατες διαδρομές αρχείων και εντολές, αποθηκεύονται σε διάφορα υποκλειδιά `ComDlg32` και `Explorer` κάτω από `NTUSER.DAT`.
 
-### **User Activity Tracking**
+### **Παρακολούθηση Δραστηριότητας Χρήστη**
 
-- The User Assist feature logs detailed application usage stats, including run count and last run time, at **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\{GUID}\Count`**.
+- Η δυνατότητα User Assist καταγράφει λεπτομερείς στατιστικές χρήσης εφαρμογών, συμπεριλαμβανομένου του αριθμού εκτελέσεων και του τελευταίου χρόνου εκτέλεσης, στο **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\{GUID}\Count`**.
 
-### **Shellbags Analysis**
+### **Ανάλυση Shellbags**
 
-- Shellbags, revealing folder access details, are stored in `USRCLASS.DAT` and `NTUSER.DAT` under `Software\Microsoft\Windows\Shell`. Use **[Shellbag Explorer](https://ericzimmerman.github.io/#!index.md)** for analysis.
+- Τα Shellbags, που αποκαλύπτουν λεπτομέρειες πρόσβασης φακέλων, αποθηκεύονται στο `USRCLASS.DAT` και `NTUSER.DAT` κάτω από `Software\Microsoft\Windows\Shell`. Χρησιμοποιήστε **[Shellbag Explorer](https://ericzimmerman.github.io/#!index.md)** για ανάλυση.
 
-### **USB Device History**
+### **Ιστορικό Συσκευών USB**
 
-- **`HKLM\SYSTEM\ControlSet001\Enum\USBSTOR`** and **`HKLM\SYSTEM\ControlSet001\Enum\USB`** contain rich details on connected USB devices, including manufacturer, product name, and connection timestamps.
-- The user associated with a specific USB device can be pinpointed by searching `NTUSER.DAT` hives for the device's **{GUID}**.
-- The last mounted device and its volume serial number can be traced through `System\MountedDevices` and `Software\Microsoft\Windows NT\CurrentVersion\EMDMgmt`, respectively.
+- **`HKLM\SYSTEM\ControlSet001\Enum\USBSTOR`** και **`HKLM\SYSTEM\ControlSet001\Enum\USB`** περιέχουν πλούσιες λεπτομέρειες σχετικά με τις συνδεδεμένες συσκευές USB, συμπεριλαμβανομένου του κατασκευαστή, του ονόματος προϊόντος και των χρονικών σημείων σύνδεσης.
+- Ο χρήστης που σχετίζεται με μια συγκεκριμένη συσκευή USB μπορεί να προσδιοριστεί αναζητώντας τις βάσεις `NTUSER.DAT` για το **{GUID}** της συσκευής.
+- Η τελευταία τοποθετημένη συσκευή και ο αριθμός σειράς τόμου της μπορούν να ανιχνευθούν μέσω `System\MountedDevices` και `Software\Microsoft\Windows NT\CurrentVersion\EMDMgmt`, αντίστοιχα.
 
-This guide condenses the crucial paths and methods for accessing detailed system, network, and user activity information on Windows systems, aiming for clarity and usability.
+Αυτός ο οδηγός συμπυκνώνει τις κρίσιμες διαδρομές και μεθόδους για την πρόσβαση σε λεπτομερείς πληροφορίες συστήματος, δικτύου και δραστηριότητας χρηστών σε συστήματα Windows, στοχεύοντας στην καθαρότητα και τη χρηστικότητα.
 
 {{#include ../../../banners/hacktricks-training.md}}

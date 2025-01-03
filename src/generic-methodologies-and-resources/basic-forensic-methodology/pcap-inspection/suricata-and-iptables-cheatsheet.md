@@ -6,14 +6,13 @@
 
 ### Chains
 
-In iptables, lists of rules known as chains are processed sequentially. Among these, three primary chains are universally present, with additional ones like NAT being potentially supported depending on the system's capabilities.
+Στο iptables, οι λίστες κανόνων που είναι γνωστές ως αλυσίδες επεξεργάζονται διαδοχικά. Μεταξύ αυτών, τρεις κύριες αλυσίδες είναι παρούσες καθολικά, με επιπλέον όπως το NAT να υποστηρίζονται δυνητικά ανάλογα με τις δυνατότητες του συστήματος.
 
-- **Input Chain**: Utilized for managing the behavior of incoming connections.
-- **Forward Chain**: Employed for handling incoming connections that are not destined for the local system. This is typical for devices acting as routers, where the data received is meant to be forwarded to another destination. This chain is relevant primarily when the system is involved in routing, NATing, or similar activities.
-- **Output Chain**: Dedicated to the regulation of outgoing connections.
+- **Input Chain**: Χρησιμοποιείται για τη διαχείριση της συμπεριφοράς των εισερχόμενων συνδέσεων.
+- **Forward Chain**: Χρησιμοποιείται για την επεξεργασία εισερχόμενων συνδέσεων που δεν προορίζονται για το τοπικό σύστημα. Αυτό είναι τυπικό για συσκευές που λειτουργούν ως δρομολογητές, όπου τα δεδομένα που λαμβάνονται προορίζονται να προωθηθούν σε άλλο προορισμό. Αυτή η αλυσίδα είναι σχετική κυρίως όταν το σύστημα εμπλέκεται σε δρομολόγηση, NATing ή παρόμοιες δραστηριότητες.
+- **Output Chain**: Αφιερωμένη στη ρύθμιση των εξερχόμενων συνδέσεων.
 
-These chains ensure the orderly processing of network traffic, allowing for the specification of detailed rules governing the flow of data into, through, and out of a system.
-
+Αυτές οι αλυσίδες διασφαλίζουν την τακτική επεξεργασία της δικτυακής κίνησης, επιτρέποντας τον καθορισμό λεπτομερών κανόνων που διέπουν τη ροή των δεδομένων μέσα, μέσω και έξω από ένα σύστημα.
 ```bash
 # Delete all rules
 iptables -F
@@ -50,11 +49,9 @@ iptables-save > /etc/sysconfig/iptables
 ip6tables-save > /etc/sysconfig/ip6tables
 iptables-restore < /etc/sysconfig/iptables
 ```
-
 ## Suricata
 
-### Install & Config
-
+### Εγκατάσταση & Ρύθμιση
 ```bash
 # Install details from: https://suricata.readthedocs.io/en/suricata-6.0.0/install.html#install-binary-packages
 # Ubuntu
@@ -64,7 +61,7 @@ apt-get install suricata
 
 # Debian
 echo "deb http://http.debian.net/debian buster-backports main" > \
-    /etc/apt/sources.list.d/backports.list
+/etc/apt/sources.list.d/backports.list
 apt-get update
 apt-get install suricata -t buster-backports
 
@@ -80,7 +77,7 @@ suricata-update
 ## To use the dowloaded rules update the following line in /etc/suricata/suricata.yaml
 default-rule-path: /var/lib/suricata/rules
 rule-files:
-  - suricata.rules
+- suricata.rules
 
 # Run
 ## Add rules in /etc/suricata/rules/suricata.rules
@@ -92,7 +89,7 @@ suricata -c /etc/suricata/suricata.yaml -i eth0
 suricatasc -c ruleset-reload-nonblocking
 ## or set the follogin in /etc/suricata/suricata.yaml
 detect-engine:
-  - rule-reload: true
+- rule-reload: true
 
 # Validate suricata config
 suricata -T -c /etc/suricata/suricata.yaml -v
@@ -101,8 +98,8 @@ suricata -T -c /etc/suricata/suricata.yaml -v
 ## Config drop to generate alerts
 ## Search for the following lines in /etc/suricata/suricata.yaml and remove comments:
 - drop:
-    alerts: yes
-    flows: all
+alerts: yes
+flows: all
 
 ## Forward all packages to the queue where suricata can act as IPS
 iptables -I INPUT -j NFQUEUE
@@ -120,76 +117,70 @@ Type=simple
 
 systemctl daemon-reload
 ```
+### Ορισμοί Κανόνων
 
-### Rules Definitions
+[Από τα έγγραφα:](https://github.com/OISF/suricata/blob/master/doc/userguide/rules/intro.rst) Ένας κανόνας/υπογραφή αποτελείται από τα εξής:
 
-[From the docs:](https://github.com/OISF/suricata/blob/master/doc/userguide/rules/intro.rst) A rule/signature consists of the following:
-
-- The **action**, determines what happens when the signature matches.
-- The **header**, defines the protocol, IP addresses, ports and direction of the rule.
-- The **rule options**, define the specifics of the rule.
-
+- Η **ενέργεια**, καθορίζει τι συμβαίνει όταν η υπογραφή ταιριάζει.
+- Η **κεφαλίδα**, ορίζει το πρωτόκολλο, τις διευθύνσεις IP, τις θύρες και την κατεύθυνση του κανόνα.
+- Οι **επιλογές κανόνα**, καθορίζουν τις λεπτομέρειες του κανόνα.
 ```bash
 alert http $HOME_NET any -> $EXTERNAL_NET any (msg:"HTTP GET Request Containing Rule in URI"; flow:established,to_server; http.method; content:"GET"; http.uri; content:"rule"; fast_pattern; classtype:bad-unknown; sid:123; rev:1;)
 ```
+#### **Έγκυρες ενέργειες είναι**
 
-#### **Valid actions are**
+- alert - δημιουργία ειδοποίησης
+- pass - σταματήστε την περαιτέρω επιθεώρηση του πακέτου
+- **drop** - απόρριψη πακέτου και δημιουργία ειδοποίησης
+- **reject** - αποστολή σφάλματος RST/ICMP μη προσβάσιμο στον αποστολέα του αντίστοιχου πακέτου.
+- rejectsrc - το ίδιο με το _reject_
+- rejectdst - αποστολή σφάλματος RST/ICMP στον παραλήπτη του αντίστοιχου πακέτου.
+- rejectboth - αποστολή σφαλμάτων RST/ICMP και στις δύο πλευρές της συνομιλίας.
 
-- alert - generate an alert
-- pass - stop further inspection of the packet
-- **drop** - drop packet and generate alert
-- **reject** - send RST/ICMP unreachable error to the sender of the matching packet.
-- rejectsrc - same as just _reject_
-- rejectdst - send RST/ICMP error packet to the receiver of the matching packet.
-- rejectboth - send RST/ICMP error packets to both sides of the conversation.
+#### **Πρωτόκολλα**
 
-#### **Protocols**
-
-- tcp (for tcp-traffic)
+- tcp (για tcp-traffic)
 - udp
 - icmp
-- ip (ip stands for ‘all’ or ‘any’)
-- _layer7 protocols_: http, ftp, tls, smb, dns, ssh... (more in the [**docs**](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/intro.html))
+- ip (ip σημαίνει ‘όλα’ ή ‘οποιοδήποτε’)
+- _πρωτόκολλα layer7_: http, ftp, tls, smb, dns, ssh... (περισσότερα στα [**docs**](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/intro.html))
 
-#### Source and Destination Addresses
+#### Διευθύνσεις Πηγής και Προορισμού
 
-It supports IP ranges, negations and a list of addresses:
+Υποστηρίζει εύρος IP, αρνήσεις και μια λίστα διευθύνσεων:
 
-| Example                       | Meaning                                  |
-| ----------------------------- | ---------------------------------------- |
-| ! 1.1.1.1                     | Every IP address but 1.1.1.1             |
-| !\[1.1.1.1, 1.1.1.2]          | Every IP address but 1.1.1.1 and 1.1.1.2 |
-| $HOME_NET                     | Your setting of HOME_NET in yaml         |
-| \[$EXTERNAL\_NET, !$HOME_NET] | EXTERNAL_NET and not HOME_NET            |
-| \[10.0.0.0/24, !10.0.0.5]     | 10.0.0.0/24 except for 10.0.0.5          |
+| Παράδειγμα                     | Σημασία                                  |
+| ------------------------------- | ---------------------------------------- |
+| ! 1.1.1.1                       | Κάθε διεύθυνση IP εκτός από 1.1.1.1     |
+| !\[1.1.1.1, 1.1.1.2]            | Κάθε διεύθυνση IP εκτός από 1.1.1.1 και 1.1.1.2 |
+| $HOME_NET                       | Η ρύθμισή σας για το HOME_NET στο yaml   |
+| \[$EXTERNAL\_NET, !$HOME_NET] | EXTERNAL_NET και όχι HOME_NET            |
+| \[10.0.0.0/24, !10.0.0.5]       | 10.0.0.0/24 εκτός από 10.0.0.5          |
 
-#### Source and Destination Ports
+#### Θύρες Πηγής και Προορισμού
 
-It supports port ranges, negations and lists of ports
+Υποστηρίζει εύρος θυρών, αρνήσεις και λίστες θυρών
 
-| Example         | Meaning                                |
-| --------------- | -------------------------------------- |
-| any             | any address                            |
-| \[80, 81, 82]   | port 80, 81 and 82                     |
-| \[80: 82]       | Range from 80 till 82                  |
-| \[1024: ]       | From 1024 till the highest port-number |
-| !80             | Every port but 80                      |
-| \[80:100,!99]   | Range from 80 till 100 but 99 excluded |
-| \[1:80,!\[2,4]] | Range from 1-80, except ports 2 and 4  |
+| Παράδειγμα         | Σημασία                                |
+| -------------------| -------------------------------------- |
+| any                | οποιαδήποτε διεύθυνση                 |
+| \[80, 81, 82]      | θύρες 80, 81 και 82                    |
+| \[80: 82]          | Εύρος από 80 έως 82                    |
+| \[1024: ]          | Από 1024 έως τον υψηλότερο αριθμό θύρας |
+| !80                | Κάθε θύρα εκτός από 80                 |
+| \[80:100,!99]      | Εύρος από 80 έως 100 αλλά 99 εξαιρείται |
+| \[1:80,!\[2,4]]   | Εύρος από 1-80, εκτός από τις θύρες 2 και 4  |
 
-#### Direction
+#### Κατεύθυνση
 
-It's possible to indicate the direction of the communication rule being applied:
-
+Είναι δυνατόν να υποδείξετε την κατεύθυνση του κανόνα επικοινωνίας που εφαρμόζεται:
 ```
 source -> destination
 source <> destination  (both directions)
 ```
+#### Λέξεις-κλειδιά
 
-#### Keywords
-
-There are **hundreds of options** available in Suricata to search for the **specific packet** you are looking for, here it will be mentioned if something interesting is found. Check the [**documentation** ](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/index.html)for more!
-
+Υπάρχουν **εκατοντάδες επιλογές** διαθέσιμες στο Suricata για να αναζητήσετε το **συγκεκριμένο πακέτο** που ψάχνετε, εδώ θα αναφερθεί αν βρεθεί κάτι ενδιαφέρον. Ελέγξτε την [**τεκμηρίωση**](https://suricata.readthedocs.io/en/suricata-6.0.0/rules/index.html) για περισσότερα!
 ```bash
 # Meta Keywords
 msg: "description"; #Set a description to the rule
@@ -230,5 +221,4 @@ drop tcp any any -> any any (msg:"regex"; pcre:"/CTF\{[\w]{3}/i"; sid:10001;)
 ## Drop by port
 drop tcp any any -> any 8000 (msg:"8000 port"; sid:1000;)
 ```
-
 {{#include ../../../banners/hacktricks-training.md}}

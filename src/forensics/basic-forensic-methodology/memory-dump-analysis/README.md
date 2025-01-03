@@ -1,49 +1,37 @@
-# Memory dump analysis
+# Ανάλυση εκχύλισης μνήμης
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-<figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
+## Έναρξη
 
-[**RootedCON**](https://www.rootedcon.com/) is the most relevant cybersecurity event in **Spain** and one of the most important in **Europe**. With **the mission of promoting technical knowledge**, this congress is a boiling meeting point for technology and cybersecurity professionals in every discipline.
-
-{% embed url="https://www.rootedcon.com/" %}
-
-## Start
-
-Start **searching** for **malware** inside the pcap. Use the **tools** mentioned in [**Malware Analysis**](../malware-analysis.md).
+Ξεκινήστε **αναζητώντας** **κακόβουλο λογισμικό** μέσα στο pcap. Χρησιμοποιήστε τα **εργαλεία** που αναφέρονται στο [**Malware Analysis**](../malware-analysis.md).
 
 ## [Volatility](../../../generic-methodologies-and-resources/basic-forensic-methodology/memory-dump-analysis/volatility-cheatsheet.md)
 
-**Volatility is the main open-source framework for memory dump analysis**. This Python tool analyzes dumps from external sources or VMware VMs, identifying data like processes and passwords based on the dump's OS profile. It's extensible with plugins, making it highly versatile for forensic investigations.
+**Το Volatility είναι το κύριο ανοιχτού κώδικα πλαίσιο για την ανάλυση εκχύλισης μνήμης**. Αυτό το εργαλείο Python αναλύει εκχυλίσεις από εξωτερικές πηγές ή VMware VMs, αναγνωρίζοντας δεδομένα όπως διαδικασίες και κωδικούς πρόσβασης με βάση το προφίλ OS της εκχύλισης. Είναι επεκτάσιμο με plugins, καθιστώντας το εξαιρετικά ευέλικτο για ποινικές έρευνες.
 
-**[Find here a cheatsheet](../../../generic-methodologies-and-resources/basic-forensic-methodology/memory-dump-analysis/volatility-cheatsheet.md)**
+**[Βρείτε εδώ ένα cheatsheet](../../../generic-methodologies-and-resources/basic-forensic-methodology/memory-dump-analysis/volatility-cheatsheet.md)**
 
-## Mini dump crash report
+## Αναφορά σφάλματος mini dump
 
-When the dump is small (just some KB, maybe a few MB) then it's probably a mini dump crash report and not a memory dump.
+Όταν η εκχύλιση είναι μικρή (μόλις μερικά KB, ίσως μερικά MB) τότε πιθανότατα πρόκειται για αναφορά σφάλματος mini dump και όχι για εκχύλιση μνήμης.
 
 ![](<../../../images/image (216).png>)
 
-If you have Visual Studio installed, you can open this file and bind some basic information like process name, architecture, exception info and modules being executed:
+Αν έχετε εγκατεστημένο το Visual Studio, μπορείτε να ανοίξετε αυτό το αρχείο και να συνδέσετε κάποιες βασικές πληροφορίες όπως το όνομα διαδικασίας, αρχιτεκτονική, πληροφορίες εξαίρεσης και μονάδες που εκτελούνται:
 
 ![](<../../../images/image (217).png>)
 
-You can also load the exception and see the decompiled instructions
+Μπορείτε επίσης να φορτώσετε την εξαίρεση και να δείτε τις αποσυμπιεσμένες εντολές
 
 ![](<../../../images/image (219).png>)
 
 ![](<../../../images/image (218) (1).png>)
 
-Anyway, Visual Studio isn't the best tool to perform an analysis of the depth of the dump.
+Ούτως ή άλλως, το Visual Studio δεν είναι το καλύτερο εργαλείο για να εκτελέσετε μια ανάλυση βάθους της εκχύλισης.
 
-You should **open** it using **IDA** or **Radare** to inspection it in **depth**.
+Πρέπει να **το ανοίξετε** χρησιμοποιώντας **IDA** ή **Radare** για να το επιθεωρήσετε σε **βάθος**.
 
 ​
-
-<figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
-
-[**RootedCON**](https://www.rootedcon.com/) is the most relevant cybersecurity event in **Spain** and one of the most important in **Europe**. With **the mission of promoting technical knowledge**, this congress is a boiling meeting point for technology and cybersecurity professionals in every discipline.
-
-{% embed url="https://www.rootedcon.com/" %}
 
 {{#include ../../../banners/hacktricks-training.md}}

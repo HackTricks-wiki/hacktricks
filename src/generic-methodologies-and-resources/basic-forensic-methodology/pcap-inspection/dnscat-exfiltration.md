@@ -1,11 +1,10 @@
-# DNSCat pcap analysis
+# Ανάλυση pcap του DNSCat
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-If you have pcap with data being **exfiltrated by DNSCat** (without using encryption), you can find the exfiltrated content.
+Αν έχετε pcap με δεδομένα που **εξάγονται από το DNSCat** (χωρίς χρήση κρυπτογράφησης), μπορείτε να βρείτε το εξαγόμενο περιεχόμενο.
 
-You only need to know that the **first 9 bytes** are not real data but are related to the **C\&C communication**:
-
+Πρέπει μόνο να γνωρίζετε ότι τα **πρώτα 9 bytes** δεν είναι πραγματικά δεδομένα αλλά σχετίζονται με την **επικοινωνία C\&C**:
 ```python
 from scapy.all import rdpcap, DNSQR, DNSRR
 import struct
@@ -13,25 +12,22 @@ import struct
 f = ""
 last = ""
 for p in rdpcap('ch21.pcap'):
-	if p.haslayer(DNSQR) and not p.haslayer(DNSRR):
+if p.haslayer(DNSQR) and not p.haslayer(DNSRR):
 
-		qry = p[DNSQR].qname.replace(".jz-n-bs.local.","").strip().split(".")
-		qry = ''.join(_.decode('hex') for _ in qry)[9:]
-		if last != qry:
-			print(qry)
-			f += qry
-		last = qry
+qry = p[DNSQR].qname.replace(".jz-n-bs.local.","").strip().split(".")
+qry = ''.join(_.decode('hex') for _ in qry)[9:]
+if last != qry:
+print(qry)
+f += qry
+last = qry
 
 #print(f)
 ```
-
-For more information: [https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap](https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap)\
+Για περισσότερες πληροφορίες: [https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap](https://github.com/jrmdev/ctf-writeups/tree/master/bsidessf-2017/dnscap)\
 [https://github.com/iagox86/dnscat2/blob/master/doc/protocol.md](https://github.com/iagox86/dnscat2/blob/master/doc/protocol.md)
 
-There is a script that works with Python3: [https://github.com/josemlwdf/DNScat-Decoder](https://github.com/josemlwdf/DNScat-Decoder)
-
+Υπάρχει ένα σενάριο που λειτουργεί με Python3: [https://github.com/josemlwdf/DNScat-Decoder](https://github.com/josemlwdf/DNScat-Decoder)
 ```
 python3 dnscat_decoder.py sample.pcap bad_domain
 ```
-
 {{#include ../../../banners/hacktricks-training.md}}

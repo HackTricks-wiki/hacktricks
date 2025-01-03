@@ -2,72 +2,66 @@
 
 # ECB
 
-(ECB) Electronic Code Book - symmetric encryption scheme which **replaces each block of the clear text** by the **block of ciphertext**. It is the **simplest** encryption scheme. The main idea is to **split** the clear text into **blocks of N bits** (depends on the size of the block of input data, encryption algorithm) and then to encrypt (decrypt) each block of clear text using the only key.
+(ECB) Ηλεκτρονικό Βιβλίο Κωδικών - συμμετρικό σχήμα κρυπτογράφησης που **αντικαθιστά κάθε μπλοκ του καθαρού κειμένου** με το **μπλοκ του κρυπτογραφημένου κειμένου**. Είναι το **απλούστερο** σχήμα κρυπτογράφησης. Η κύρια ιδέα είναι να **χωρίσετε** το καθαρό κείμενο σε **μπλοκ N bit** (εξαρτάται από το μέγεθος του μπλοκ των εισερχόμενων δεδομένων, αλγόριθμο κρυπτογράφησης) και στη συνέχεια να κρυπτογραφήσετε (αποκρυπτογραφήσετε) κάθε μπλοκ του καθαρού κειμένου χρησιμοποιώντας το μόνο κλειδί.
 
 ![](https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/ECB_decryption.svg/601px-ECB_decryption.svg.png)
 
-Using ECB has multiple security implications:
+Η χρήση του ECB έχει πολλές επιπτώσεις στην ασφάλεια:
 
-- **Blocks from encrypted message can be removed**
-- **Blocks from encrypted message can be moved around**
+- **Μπλοκ από το κρυπτογραφημένο μήνυμα μπορούν να αφαιρεθούν**
+- **Μπλοκ από το κρυπτογραφημένο μήνυμα μπορούν να μετακινηθούν**
 
-# Detection of the vulnerability
+# Ανίχνευση της ευπάθειας
 
-Imagine you login into an application several times and you **always get the same cookie**. This is because the cookie of the application is **`<username>|<password>`**.\
-Then, you generate to new users, both of them with the **same long password** and **almost** the **same** **username**.\
-You find out that the **blocks of 8B** where the **info of both users** is the same are **equals**. Then, you imagine that this might be because **ECB is being used**.
+Φανταστείτε ότι συνδέεστε σε μια εφαρμογή πολλές φορές και **πάντα λαμβάνετε το ίδιο cookie**. Αυτό συμβαίνει επειδή το cookie της εφαρμογής είναι **`<username>|<password>`**.\
+Στη συνέχεια, δημιουργείτε δύο νέους χρήστες, και οι δύο με το **ίδιο μακρύ κωδικό πρόσβασης** και **σχεδόν** το **ίδιο** **όνομα χρήστη**.\
+Ανακαλύπτετε ότι τα **μπλοκ των 8B** όπου οι **πληροφορίες και των δύο χρηστών** είναι οι ίδιες είναι **ίσα**. Στη συνέχεια, φαντάζεστε ότι αυτό μπορεί να συμβαίνει επειδή **χρησιμοποιείται το ECB**.
 
-Like in the following example. Observe how these** 2 decoded cookies** has several times the block **`\x23U\xE45K\xCB\x21\xC8`**
-
+Όπως στο παρακάτω παράδειγμα. Παρατηρήστε πώς αυτά τα **2 αποκωδικοποιημένα cookies** έχουν πολλές φορές το μπλοκ **`\x23U\xE45K\xCB\x21\xC8`**.
 ```
 \x23U\xE45K\xCB\x21\xC8\x23U\xE45K\xCB\x21\xC8\x04\xB6\xE1H\xD1\x1E \xB6\x23U\xE45K\xCB\x21\xC8\x23U\xE45K\xCB\x21\xC8+=\xD4F\xF7\x99\xD9\xA9
 
 \x23U\xE45K\xCB\x21\xC8\x23U\xE45K\xCB\x21\xC8\x04\xB6\xE1H\xD1\x1E \xB6\x23U\xE45K\xCB\x21\xC8\x23U\xE45K\xCB\x21\xC8+=\xD4F\xF7\x99\xD9\xA9
 ```
+Αυτό συμβαίνει επειδή το **όνομα χρήστη και ο κωδικός πρόσβασης αυτών των cookies περιείχαν πολλές φορές το γράμμα "a"** (για παράδειγμα). Οι **μπλοκ** που είναι **διαφορετικοί** είναι μπλοκ που περιείχαν **τουλάχιστον 1 διαφορετικό χαρακτήρα** (ίσως το διαχωριστικό "|" ή κάποια απαραίτητη διαφορά στο όνομα χρήστη).
 
-This is because the **username and password of those cookies contained several times the letter "a"** (for example). The **blocks** that are **different** are blocks that contained **at least 1 different character** (maybe the delimiter "|" or some necessary difference in the username).
+Τώρα, ο επιτιθέμενος χρειάζεται απλώς να ανακαλύψει αν η μορφή είναι `<username><delimiter><password>` ή `<password><delimiter><username>`. Για να το κάνει αυτό, μπορεί απλώς να **δημιουργήσει αρκετά ονόματα χρήστη** με **παρόμοια και μακριά ονόματα χρήστη και κωδικούς πρόσβασης μέχρι να βρει τη μορφή και το μήκος του διαχωριστικού:**
 
-Now, the attacker just need to discover if the format is `<username><delimiter><password>` or `<password><delimiter><username>`. For doing that, he can just **generate several usernames **with s**imilar and long usernames and passwords until he find the format and the length of the delimiter:**
+| Μήκος ονόματος χρήστη: | Μήκος κωδικού πρόσβασης: | Μήκος ονόματος χρήστη+Κωδικού πρόσβασης: | Μήκος cookie (μετά την αποκωδικοποίηση): |
+| ----------------------- | ------------------------ | ------------------------------------------ | ---------------------------------------- |
+| 2                       | 2                        | 4                                          | 8                                        |
+| 3                       | 3                        | 6                                          | 8                                        |
+| 3                       | 4                        | 7                                          | 8                                        |
+| 4                       | 4                        | 8                                          | 16                                       |
+| 7                       | 7                        | 14                                         | 16                                       |
 
-| Username length: | Password length: | Username+Password length: | Cookie's length (after decoding): |
-| ---------------- | ---------------- | ------------------------- | --------------------------------- |
-| 2                | 2                | 4                         | 8                                 |
-| 3                | 3                | 6                         | 8                                 |
-| 3                | 4                | 7                         | 8                                 |
-| 4                | 4                | 8                         | 16                                |
-| 7                | 7                | 14                        | 16                                |
+# Εκμετάλλευση της ευπάθειας
 
-# Exploitation of the vulnerability
+## Αφαίρεση ολόκληρων μπλοκ
 
-## Removing entire blocks
-
-Knowing the format of the cookie (`<username>|<password>`), in order to impersonate the username `admin` create a new user called `aaaaaaaaadmin` and get the cookie and decode it:
-
+Γνωρίζοντας τη μορφή του cookie (`<username>|<password>`), προκειμένου να προσποιηθεί το όνομα χρήστη `admin`, δημιουργήστε έναν νέο χρήστη με το όνομα `aaaaaaaaadmin` και αποκτήστε το cookie και αποκωδικοποιήστε το:
 ```
 \x23U\xE45K\xCB\x21\xC8\xE0Vd8oE\x123\aO\x43T\x32\xD5U\xD4
 ```
-
-We can see the pattern `\x23U\xE45K\xCB\x21\xC8` created previously with the username that contained only `a`.\
-Then, you can remove the first block of 8B and you will et a valid cookie for the username `admin`:
-
+Μπορούμε να δούμε το μοτίβο `\x23U\xE45K\xCB\x21\xC8` που δημιουργήθηκε προηγουμένως με το όνομα χρήστη που περιείχε μόνο `a`.\
+Στη συνέχεια, μπορείτε να αφαιρέσετε το πρώτο μπλοκ των 8B και θα αποκτήσετε ένα έγκυρο cookie για το όνομα χρήστη `admin`:
 ```
 \xE0Vd8oE\x123\aO\x43T\x32\xD5U\xD4
 ```
+## Μετακίνηση μπλοκ
 
-## Moving blocks
+Σε πολλές βάσεις δεδομένων είναι το ίδιο να αναζητάς `WHERE username='admin';` ή `WHERE username='admin    ';` _(Σημειώστε τα επιπλέον κενά)_
 
-In many databases it is the same to search for `WHERE username='admin';` or for `WHERE username='admin    ';` _(Note the extra spaces)_
+Έτσι, ένας άλλος τρόπος για να προσποιηθείς τον χρήστη `admin` θα ήταν να:
 
-So, another way to impersonate the user `admin` would be to:
+- Δημιουργήσεις ένα όνομα χρήστη που: `len(<username>) + len(<delimiter) % len(block)`. Με μέγεθος μπλοκ `8B` μπορείς να δημιουργήσεις ένα όνομα χρήστη που ονομάζεται: `username       `, με τον διαχωριστή `|` το κομμάτι `<username><delimiter>` θα δημιουργήσει 2 μπλοκ των 8Bs.
+- Στη συνέχεια, να δημιουργήσεις έναν κωδικό πρόσβασης που θα γεμίσει έναν ακριβή αριθμό μπλοκ που περιέχουν το όνομα χρήστη που θέλουμε να προσποιηθούμε και κενά, όπως: `admin   `
 
-- Generate a username that: `len(<username>) + len(<delimiter) % len(block)`. With a block size of `8B` you can generate username called: `username       `, with the delimiter `|` the chunk `<username><delimiter>` will generate 2 blocks of 8Bs.
-- Then, generate a password that will fill an exact number of blocks containing the username we want to impersonate and spaces, like: `admin   `
+Το cookie αυτού του χρήστη θα αποτελείται από 3 μπλοκ: τα πρώτα 2 είναι τα μπλοκ του ονόματος χρήστη + διαχωριστής και το τρίτο από τον κωδικό πρόσβασης (ο οποίος προσποιείται το όνομα χρήστη): `username       |admin   `
 
-The cookie of this user is going to be composed by 3 blocks: the first 2 is the blocks of the username + delimiter and the third one of the password (which is faking the username): `username       |admin   `
+**Στη συνέχεια, απλώς αντικατέστησε το πρώτο μπλοκ με το τελευταίο και θα προσποιείσαι τον χρήστη `admin`: `admin          |username`**
 
-**Then, just replace the first block with the last time and will be impersonating the user `admin`: `admin          |username`**
-
-## References
+## Αναφορές
 
 - [http://cryptowiki.net/index.php?title=Electronic_Code_Book\_(ECB)](<http://cryptowiki.net/index.php?title=Electronic_Code_Book_(ECB)>)
 

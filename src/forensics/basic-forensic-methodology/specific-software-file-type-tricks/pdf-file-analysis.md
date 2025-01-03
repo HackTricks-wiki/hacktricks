@@ -1,28 +1,20 @@
-# PDF File analysis
+# Ανάλυση αρχείων PDF
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-<figure><img src="../../../images/image (3) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+**Για περισσότερες λεπτομέρειες ελέγξτε:** [**https://trailofbits.github.io/ctf/forensics/**](https://trailofbits.github.io/ctf/forensics/)
 
-\
-Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+Η μορφή PDF είναι γνωστή για την πολυπλοκότητά της και την ικανότητά της να αποκρύπτει δεδομένα, καθιστώντας την κεντρικό σημείο για προκλήσεις ψηφιακής εγκληματολογίας CTF. Συνδυάζει στοιχεία απλού κειμένου με δυαδικά αντικείμενα, τα οποία μπορεί να είναι συμπιεσμένα ή κρυπτογραφημένα, και μπορεί να περιλαμβάνει σενάρια σε γλώσσες όπως JavaScript ή Flash. Για να κατανοήσετε τη δομή του PDF, μπορείτε να ανατρέξετε στο [εισαγωγικό υλικό](https://blog.didierstevens.com/2008/04/09/quickpost-about-the-physical-and-logical-structure-of-pdf-files/) του Didier Stevens ή να χρησιμοποιήσετε εργαλεία όπως ένας επεξεργαστής κειμένου ή ένας ειδικός επεξεργαστής PDF όπως το Origami.
 
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
+Για σε βάθος εξερεύνηση ή χειρισμό PDF, είναι διαθέσιμα εργαλεία όπως το [qpdf](https://github.com/qpdf/qpdf) και το [Origami](https://github.com/mobmewireless/origami-pdf). Τα κρυμμένα δεδομένα μέσα σε PDF μπορεί να είναι αποκρυμμένα σε:
 
-**For further details check:** [**https://trailofbits.github.io/ctf/forensics/**](https://trailofbits.github.io/ctf/forensics/)
+- Αόρατα επίπεδα
+- Μορφή μεταδεδομένων XMP από την Adobe
+- Σταδιακές γενιές
+- Κείμενο με το ίδιο χρώμα όπως το φόντο
+- Κείμενο πίσω από εικόνες ή επικαλυπτόμενες εικόνες
+- Μη εμφανιζόμενα σχόλια
 
-The PDF format is known for its complexity and potential for concealing data, making it a focal point for CTF forensics challenges. It combines plain-text elements with binary objects, which might be compressed or encrypted, and can include scripts in languages like JavaScript or Flash. To understand PDF structure, one can refer to Didier Stevens's [introductory material](https://blog.didierstevens.com/2008/04/09/quickpost-about-the-physical-and-logical-structure-of-pdf-files/), or use tools like a text editor or a PDF-specific editor such as Origami.
-
-For in-depth exploration or manipulation of PDFs, tools like [qpdf](https://github.com/qpdf/qpdf) and [Origami](https://github.com/mobmewireless/origami-pdf) are available. Hidden data within PDFs might be concealed in:
-
-- Invisible layers
-- XMP metadata format by Adobe
-- Incremental generations
-- Text with the same color as the background
-- Text behind images or overlapping images
-- Non-displayed comments
-
-For custom PDF analysis, Python libraries like [PeepDF](https://github.com/jesparza/peepdf) can be used to craft bespoke parsing scripts. Further, the PDF's potential for hidden data storage is so vast that resources like the NSA guide on PDF risks and countermeasures, though no longer hosted at its original location, still offer valuable insights. A [copy of the guide](http://www.itsecure.hu/library/file/Biztons%C3%A1gi%20%C3%BAtmutat%C3%B3k/Alkalmaz%C3%A1sok/Hidden%20Data%20and%20Metadata%20in%20Adobe%20PDF%20Files.pdf) and a collection of [PDF format tricks](https://github.com/corkami/docs/blob/master/PDF/PDF.md) by Ange Albertini can provide further reading on the subject.
+Για προσαρμοσμένη ανάλυση PDF, μπορούν να χρησιμοποιηθούν βιβλιοθήκες Python όπως το [PeepDF](https://github.com/jesparza/peepdf) για τη δημιουργία ειδικών σεναρίων ανάλυσης. Επιπλέον, η δυνατότητα του PDF για αποθήκευση κρυφών δεδομένων είναι τόσο εκτενής που πόροι όπως ο οδηγός της NSA για τους κινδύνους και τα μέτρα κατά των PDF, αν και δεν φιλοξενούνται πλέον στην αρχική τους τοποθεσία, προσφέρουν ακόμα πολύτιμες πληροφορίες. Ένας [αντίγραφος του οδηγού](http://www.itsecure.hu/library/file/Biztons%C3%A1gi%20%C3%BAtmutat%C3%B3k/Alkalmaz%C3%A1sok/Hidden%20Data%20and%20Metadata%20in%20Adobe%20PDF%20Files.pdf) και μια συλλογή από [κόλπα μορφής PDF](https://github.com/corkami/docs/blob/master/PDF/PDF.md) από τον Ange Albertini μπορούν να προσφέρουν περαιτέρω ανάγνωση στο θέμα.
 
 {{#include ../../../banners/hacktricks-training.md}}

@@ -1,8 +1,8 @@
 {{#include ../banners/hacktricks-training.md}}
 
-If you can somehow encrypt a plaintext using RC4, you can decrypt any content encrypted by that RC4 (using the same password) just using the encryption function.
+Αν μπορείτε με κάποιο τρόπο να κρυπτογραφήσετε ένα απλό κείμενο χρησιμοποιώντας RC4, μπορείτε να αποκρυπτογραφήσετε οποιοδήποτε περιεχόμενο έχει κρυπτογραφηθεί με αυτό το RC4 (χρησιμοποιώντας τον ίδιο κωδικό πρόσβασης) απλά χρησιμοποιώντας τη λειτουργία κρυπτογράφησης.
 
-If you can encrypt a known plaintext you can also extract the password. More references can be found in the HTB Kryptos machine:
+Αν μπορείτε να κρυπτογραφήσετε ένα γνωστό απλό κείμενο, μπορείτε επίσης να εξάγετε τον κωδικό πρόσβασης. Περισσότερες αναφορές μπορείτε να βρείτε στη μηχανή HTB Kryptos:
 
 {% embed url="https://0xrick.github.io/hack-the-box/kryptos/" %}
 

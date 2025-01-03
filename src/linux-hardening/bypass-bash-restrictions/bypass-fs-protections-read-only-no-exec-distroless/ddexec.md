@@ -4,16 +4,15 @@
 
 ## Context
 
-In Linux in order to run a program it must exist as a file, it must be accessible in some way through the file system hierarchy (this is just how `execve()` works). This file may reside on disk or in ram (tmpfs, memfd) but you need a filepath. This has made very easy to control what is run on a Linux system, it makes easy to detect threats and attacker's tools or to prevent them from trying to execute anything of theirs at all (_e. g._ not allowing unprivileged users to place executable files anywhere).
+Στο Linux, για να εκτελέσετε ένα πρόγραμμα, πρέπει να υπάρχει ως αρχείο, πρέπει να είναι προσβάσιμο με κάποιο τρόπο μέσω της ιεραρχίας του συστήματος αρχείων (αυτός είναι ο τρόπος που λειτουργεί το `execve()`). Αυτό το αρχείο μπορεί να βρίσκεται σε δίσκο ή σε ram (tmpfs, memfd) αλλά χρειάζεστε μια διαδρομή αρχείου. Αυτό έχει διευκολύνει πολύ τον έλεγχο του τι εκτελείται σε ένα σύστημα Linux, διευκολύνει την ανίχνευση απειλών και εργαλείων επιτιθέμενων ή την αποτροπή τους από το να προσπαθήσουν να εκτελέσουν οτιδήποτε δικό τους (_π.χ._ να μην επιτρέπεται στους μη προνομιούχους χρήστες να τοποθετούν εκτελέσιμα αρχεία οπουδήποτε).
 
-But this technique is here to change all of this. If you can not start the process you want... **then you hijack one already existing**.
+Αλλά αυτή η τεχνική είναι εδώ για να αλλάξει όλα αυτά. Αν δεν μπορείτε να ξεκινήσετε τη διαδικασία που θέλετε... **τότε καταλαμβάνετε μία που ήδη υπάρχει**.
 
-This technique allows you to **bypass common protection techniques such as read-only, noexec, file-name whitelisting, hash whitelisting...**
+Αυτή η τεχνική σας επιτρέπει να **παρακάμψετε κοινές τεχνικές προστασίας όπως read-only, noexec, whitelist ονομάτων αρχείων, whitelist hash...**
 
 ## Dependencies
 
-The final script depends on the following tools to work, they need to be accessible in the system you are attacking (by default you will find all of them everywhere):
-
+Το τελικό σενάριο εξαρτάται από τα παρακάτω εργαλεία για να λειτουργήσει, πρέπει να είναι προσβάσιμα στο σύστημα που επιτίθεστε (κατά προεπιλογή θα τα βρείτε παντού):
 ```
 dd
 bash | zsh | ash (busybox)
@@ -27,68 +26,61 @@ wc
 tr
 base64
 ```
+## Η τεχνική
 
-## The technique
+Αν μπορείτε να τροποποιήσετε αυθαίρετα τη μνήμη μιας διαδικασίας, τότε μπορείτε να την αναλάβετε. Αυτό μπορεί να χρησιμοποιηθεί για να καταλάβετε μια ήδη υπάρχουσα διαδικασία και να την αντικαταστήσετε με ένα άλλο πρόγραμμα. Μπορούμε να το πετύχουμε είτε χρησιμοποιώντας την κλήση συστήματος `ptrace()` (η οποία απαιτεί να έχετε τη δυνατότητα να εκτελείτε κλήσεις συστήματος ή να έχετε διαθέσιμο το gdb στο σύστημα) είτε, πιο ενδιαφέροντα, γράφοντας στο `/proc/$pid/mem`.
 
-If you are able to modify arbitrarily the memory of a process then you can take over it. This can be used to hijack an already existing process and replace it with another program. We can achieve this either by using the `ptrace()` syscall (which requires you to have the ability to execute syscalls or to have gdb available on the system) or, more interestingly, writing to `/proc/$pid/mem`.
+Το αρχείο `/proc/$pid/mem` είναι μια μία προς μία αντιστοίχιση του συνόλου του χώρου διευθύνσεων μιας διαδικασίας (_π.χ._ από `0x0000000000000000` έως `0x7ffffffffffff000` σε x86-64). Αυτό σημαίνει ότι η ανάγνωση ή η εγγραφή σε αυτό το αρχείο σε μια μετατόπιση `x` είναι το ίδιο με την ανάγνωση ή την τροποποίηση του περιεχομένου στη εικονική διεύθυνση `x`.
 
-The file `/proc/$pid/mem` is a one-to-one mapping of the entire address space of a process (_e. g._ from `0x0000000000000000` to `0x7ffffffffffff000` in x86-64). This means that reading from or writing to this file at an offset `x` is the same as reading from or modifying the contents at the virtual address `x`.
+Τώρα, έχουμε τέσσερα βασικά προβλήματα να αντιμετωπίσουμε:
 
-Now, we have four basic problems to face:
-
-- In general, only root and the program owner of the file may modify it.
+- Γενικά, μόνο ο root και ο ιδιοκτήτης του προγράμματος του αρχείου μπορούν να το τροποποιήσουν.
 - ASLR.
-- If we try to read or write to an address not mapped in the address space of the program we will get an I/O error.
+- Αν προσπαθήσουμε να διαβάσουμε ή να γράψουμε σε μια διεύθυνση που δεν είναι χαρτογραφημένη στο χώρο διευθύνσεων του προγράμματος, θα λάβουμε ένα σφάλμα I/O.
 
-This problems have solutions that, although they are not perfect, are good:
+Αυτά τα προβλήματα έχουν λύσεις που, αν και δεν είναι τέλειες, είναι καλές:
 
-- Most shell interpreters allow the creation of file descriptors that will then be inherited by child processes. We can create a fd pointing to the `mem` file of the sell with write permissions... so child processes that use that fd will be able to modify the shell's memory.
-- ASLR isn't even a problem, we can check the shell's `maps` file or any other from the procfs in order to gain information about the address space of the process.
-- So we need to `lseek()` over the file. From the shell this cannot be done unless using the infamous `dd`.
+- Οι περισσότερες ερμηνευτές κελύφους επιτρέπουν τη δημιουργία περιγραφικών αρχείων που θα κληρονομηθούν από τις παιδικές διαδικασίες. Μπορούμε να δημιουργήσουμε ένα fd που να δείχνει στο αρχείο `mem` του κελύφους με δικαιώματα εγγραφής... έτσι οι παιδικές διαδικασίες που χρησιμοποιούν αυτό το fd θα μπορούν να τροποποιήσουν τη μνήμη του κελύφους.
+- Το ASLR δεν είναι καν πρόβλημα, μπορούμε να ελέγξουμε το αρχείο `maps` του κελύφους ή οποιοδήποτε άλλο από το procfs προκειμένου να αποκτήσουμε πληροφορίες σχετικά με το χώρο διευθύνσεων της διαδικασίας.
+- Έτσι, πρέπει να κάνουμε `lseek()` πάνω από το αρχείο. Από το κέλυφος αυτό δεν μπορεί να γίνει εκτός αν χρησιμοποιήσουμε το α infamous `dd`.
 
-### In more detail
+### Σε περισσότερες λεπτομέρειες
 
-The steps are relatively easy and do not require any kind of expertise to understand them:
+Τα βήματα είναι σχετικά εύκολα και δεν απαιτούν καμία ειδική γνώση για να τα κατανοήσετε:
 
-- Parse the binary we want to run and the loader to find out what mappings they need. Then craft a "shell"code that will perform, broadly speaking, the same steps that the kernel does upon each call to `execve()`:
-  - Create said mappings.
-  - Read the binaries into them.
-  - Set up permissions.
-  - Finally initialize the stack with the arguments for the program and place the auxiliary vector (needed by the loader).
-  - Jump into the loader and let it do the rest (load libraries needed by the program).
-- Obtain from the `syscall` file the address to which the process will return after the syscall it is executing.
-- Overwrite that place, which will be executable, with our shellcode (through `mem` we can modify unwritable pages).
-- Pass the program we want to run to the stdin of the process (will be `read()` by said "shell"code).
-- At this point it is up to the loader to load the necessary libraries for our program and jump into it.
+- Αναλύστε το δυαδικό αρχείο που θέλουμε να εκτελέσουμε και τον φορτωτή για να ανακαλύψουμε ποιες αντιστοιχίσεις χρειάζονται. Στη συνέχεια, δημιουργήστε έναν "κώδικα" κελύφους που θα εκτελεί, γενικά μιλώντας, τα ίδια βήματα που εκτελεί ο πυρήνας σε κάθε κλήση του `execve()`:
+- Δημιουργήστε τις εν λόγω αντιστοιχίσεις.
+- Διαβάστε τα δυαδικά αρχεία σε αυτές.
+- Ρυθμίστε τα δικαιώματα.
+- Τέλος, αρχικοποιήστε τη στοίβα με τα επιχειρήματα για το πρόγραμμα και τοποθετήστε το βοηθητικό διάνυσμα (που απαιτείται από τον φορτωτή).
+- Πηδήξτε στον φορτωτή και αφήστε τον να κάνει τα υπόλοιπα (να φορτώσει τις βιβλιοθήκες που απαιτούνται από το πρόγραμμα).
+- Αποκτήστε από το αρχείο `syscall` τη διεύθυνση στην οποία θα επιστρέψει η διαδικασία μετά την κλήση συστήματος που εκτελεί.
+- Επικαλύψτε αυτό το σημείο, το οποίο θα είναι εκτελέσιμο, με τον κώδικα κελύφους μας (μέσω του `mem` μπορούμε να τροποποιήσουμε μη εγγράψιμες σελίδες).
+- Περάστε το πρόγραμμα που θέλουμε να εκτελέσουμε στο stdin της διαδικασίας (θα διαβαστεί από τον εν λόγω "κώδικα" κελύφους).
+- Σε αυτό το σημείο, είναι στο χέρι του φορτωτή να φορτώσει τις απαραίτητες βιβλιοθήκες για το πρόγραμμα μας και να πηδήξει σε αυτό.
 
-**Check out the tool in** [**https://github.com/arget13/DDexec**](https://github.com/arget13/DDexec)
+**Δείτε το εργαλείο στο** [**https://github.com/arget13/DDexec**](https://github.com/arget13/DDexec)
 
 ## EverythingExec
 
-There are several alternatives to `dd`, one of which, `tail`, is currently the default program used to `lseek()` through the `mem` file (which was the sole purpose for using `dd`). Said alternatives are:
-
+Υπάρχουν αρκετές εναλλακτικές στο `dd`, μία από τις οποίες, το `tail`, είναι αυτή τη στιγμή το προεπιλεγμένο πρόγραμμα που χρησιμοποιείται για να `lseek()` μέσω του αρχείου `mem` (το οποίο ήταν ο μοναδικός σκοπός για τη χρήση του `dd`). Οι εν λόγω εναλλακτικές είναι:
 ```bash
 tail
 hexdump
 cmp
 xxd
 ```
-
-Setting the variable `SEEKER` you may change the seeker used, _e. g._:
-
+Ορίζοντας τη μεταβλητή `SEEKER` μπορείτε να αλλάξετε τον ανακριτή που χρησιμοποιείται, _π.χ._:
 ```bash
 SEEKER=cmp bash ddexec.sh ls -l <<< $(base64 -w0 /bin/ls)
 ```
-
-If you find another valid seeker not implemented in the script you may still use it setting the `SEEKER_ARGS` variable:
-
+Αν βρείτε έναν άλλο έγκυρο seeker που δεν έχει υλοποιηθεί στο σενάριο, μπορείτε να τον χρησιμοποιήσετε ρυθμίζοντας τη μεταβλητή `SEEKER_ARGS`:
 ```bash
 SEEKER=xxd SEEKER_ARGS='-s $offset' zsh ddexec.sh ls -l <<< $(base64 -w0 /bin/ls)
 ```
+Αποκλείστε αυτό, EDRs.
 
-Block this, EDRs.
-
-## References
+## Αναφορές
 
 - [https://github.com/arget13/DDexec](https://github.com/arget13/DDexec)
 

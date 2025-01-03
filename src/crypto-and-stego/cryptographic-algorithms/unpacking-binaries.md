@@ -1,24 +1,24 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-# Identifying packed binaries
+# Αναγνώριση πακεταρισμένων δυαδικών αρχείων
 
-- **lack of strings**: It's common to find that packed binaries doesn't have almost any string
-- A lot of **unused strings**: Also, when a malware is using some kind of commercial packer it's common to find a lot of strings without cross-references. Even if these strings exist that doesn't mean that the binary isn't packed.
-- You can also use some tools to try to find which packer was used to pack a binary:
-  - [PEiD](http://www.softpedia.com/get/Programming/Packers-Crypters-Protectors/PEiD-updated.shtml)
-  - [Exeinfo PE](http://www.softpedia.com/get/Programming/Packers-Crypters-Protectors/ExEinfo-PE.shtml)
-  - [Language 2000](http://farrokhi.net/language/)
+- **έλλειψη συμβολοσειρών**: Είναι κοινό να διαπιστώνει κανείς ότι τα πακεταρισμένα δυαδικά αρχεία δεν έχουν σχεδόν καμία συμβολοσειρά.
+- Πολλές **μη χρησιμοποιούμενες συμβολοσειρές**: Επίσης, όταν ένα κακόβουλο λογισμικό χρησιμοποιεί κάποιο είδος εμπορικού πακετάρη, είναι κοινό να βρίσκουμε πολλές συμβολοσειρές χωρίς διασταυρώσεις. Ακόμα και αν αυτές οι συμβολοσειρές υπάρχουν, αυτό δεν σημαίνει ότι το δυαδικό αρχείο δεν είναι πακεταρισμένο.
+- Μπορείτε επίσης να χρησιμοποιήσετε κάποια εργαλεία για να προσπαθήσετε να βρείτε ποιος πακετάρης χρησιμοποιήθηκε για να πακετάρει ένα δυαδικό αρχείο:
+- [PEiD](http://www.softpedia.com/get/Programming/Packers-Crypters-Protectors/PEiD-updated.shtml)
+- [Exeinfo PE](http://www.softpedia.com/get/Programming/Packers-Crypters-Protectors/ExEinfo-PE.shtml)
+- [Language 2000](http://farrokhi.net/language/)
 
-# Basic Recommendations
+# Βασικές Συστάσεις
 
-- **Start** analysing the packed binary **from the bottom in IDA and move up**. Unpackers exit once the unpacked code exit so it's unlikely that the unpacker passes execution to the unpacked code at the start.
-- Search for **JMP's** or **CALLs** to **registers** or **regions** of **memory**. Also search for **functions pushing arguments and an address direction and then calling `retn`**, because the return of the function in that case may call the address just pushed to the stack before calling it.
-- Put a **breakpoint** on `VirtualAlloc` as this allocates space in memory where the program can write unpacked code. The "run to user code" or use F8 to **get to value inside EAX** after executing the function and "**follow that address in dump**". You never know if that is the region where the unpacked code is going to be saved.
-  - **`VirtualAlloc`** with the value "**40**" as an argument means Read+Write+Execute (some code that needs execution is going to be copied here).
-- **While unpacking** code it's normal to find **several calls** to **arithmetic operations** and functions like **`memcopy`** or **`Virtual`**`Alloc`. If you find yourself in a function that apparently only perform arithmetic operations and maybe some `memcopy` , the recommendation is to try to **find the end of the function** (maybe a JMP or call to some register) **or** at least the **call to the last function** and run to then as the code isn't interesting.
-- While unpacking code **note** whenever you **change memory region** as a memory region change may indicate the **starting of the unpacking code**. You can easily dump a memory region using Process Hacker (process --> properties --> memory).
-- While trying to unpack code a good way to **know if you are already working with the unpacked code** (so you can just dump it) is to **check the strings of the binary**. If at some point you perform a jump (maybe changing the memory region) and you notice that **a lot more strings where added**, then you can know **you are working with the unpacked code**.\
-  However, if the packer already contains a lot of strings you can see how many strings contains the word "http" and see if this number increases.
-- When you dump an executable from a region of memory you can fix some headers using [PE-bear](https://github.com/hasherezade/pe-bear-releases/releases).
+- **Ξεκινήστε** την ανάλυση του πακεταρισμένου δυαδικού αρχείου **από το κάτω μέρος στο IDA και προχωρήστε προς τα πάνω**. Οι αποπακετάρηδες τερματίζουν μόλις ο αποπακεταρισμένος κώδικας τερματίσει, οπότε είναι απίθανο ο αποπακετάρης να περάσει την εκτέλεση στον αποπακεταρισμένο κώδικα στην αρχή.
+- Αναζητήστε **JMP's** ή **CALLs** σε **καταχωρητές** ή **περιοχές** της **μνήμης**. Επίσης, αναζητήστε **συναρτήσεις που σπρώχνουν παραμέτρους και μια διεύθυνση και στη συνέχεια καλούν `retn`**, διότι η επιστροφή της συνάρτησης σε αυτή την περίπτωση μπορεί να καλέσει τη διεύθυνση που μόλις σπρώχτηκε στο στοίβα πριν την καλέσει.
+- Τοποθετήστε ένα **breakpoint** στο `VirtualAlloc`, καθώς αυτό δεσμεύει χώρο στη μνήμη όπου το πρόγραμμα μπορεί να γράψει αποπακεταρισμένο κώδικα. "τρέξτε μέχρι τον κώδικα χρήστη" ή χρησιμοποιήστε το F8 για να **φτάσετε στην τιμή μέσα στο EAX** μετά την εκτέλεση της συνάρτησης και "**ακολουθήστε αυτή τη διεύθυνση στο dump**". Ποτέ δεν ξέρετε αν αυτή είναι η περιοχή όπου θα αποθηκευτεί ο αποπακεταρισμένος κώδικας.
+- **`VirtualAlloc`** με την τιμή "**40**" ως επιχείρημα σημαίνει Ανάγνωση+Γράψιμο+Εκτέλεση (κάποιος κώδικας που χρειάζεται εκτέλεση θα αντιγραφεί εδώ).
+- **Κατά την αποπακετοποίηση** του κώδικα είναι φυσιολογικό να βρείτε **πολλές κλήσεις** σε **αριθμητικές λειτουργίες** και συναρτήσεις όπως **`memcopy`** ή **`Virtual`**`Alloc`. Αν βρεθείτε σε μια συνάρτηση που προφανώς εκτελεί μόνο αριθμητικές λειτουργίες και ίσως κάποια `memcopy`, η σύσταση είναι να προσπαθήσετε να **βρείτε το τέλος της συνάρτησης** (ίσως ένα JMP ή κλήση σε κάποιον καταχωρητή) **ή** τουλάχιστον την **κλήση στην τελευταία συνάρτηση** και να τρέξετε μέχρι εκεί καθώς ο κώδικας δεν είναι ενδιαφέρον.
+- Κατά την αποπακετοποίηση του κώδικα **σημειώστε** όποτε **αλλάζετε περιοχή μνήμης**, καθώς μια αλλαγή περιοχής μνήμης μπορεί να υποδηλώνει την **έναρξη του αποπακεταρισμένου κώδικα**. Μπορείτε εύκολα να κάνετε dump μια περιοχή μνήμης χρησιμοποιώντας το Process Hacker (process --> properties --> memory).
+- Κατά την προσπάθεια αποπακετοποίησης του κώδικα, ένας καλός τρόπος για να **γνωρίζετε αν ήδη εργάζεστε με τον αποπακεταρισμένο κώδικα** (έτσι ώστε να μπορείτε απλά να το κάνετε dump) είναι να **ελέγξετε τις συμβολοσειρές του δυαδικού αρχείου**. Αν σε κάποιο σημείο κάνετε ένα άλμα (ίσως αλλάζοντας την περιοχή μνήμης) και παρατηρήσετε ότι **προστέθηκαν πολλές περισσότερες συμβολοσειρές**, τότε μπορείτε να γνωρίζετε **ότι εργάζεστε με τον αποπακεταρισμένο κώδικα**.\
+Ωστόσο, αν ο πακετάρης περιέχει ήδη πολλές συμβολοσειρές, μπορείτε να δείτε πόσες συμβολοσειρές περιέχουν τη λέξη "http" και να δείτε αν αυτός ο αριθμός αυξάνεται.
+- Όταν κάνετε dump ένα εκτελέσιμο από μια περιοχή μνήμης, μπορείτε να διορθώσετε κάποιες κεφαλίδες χρησιμοποιώντας [PE-bear](https://github.com/hasherezade/pe-bear-releases/releases).
 
 {{#include ../../banners/hacktricks-training.md}}

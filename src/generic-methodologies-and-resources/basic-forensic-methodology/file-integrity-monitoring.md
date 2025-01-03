@@ -1,25 +1,25 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-# Baseline
+# Βασική Γραμμή
 
-A baseline consists of taking a snapshot of certain parts of a system to **compare it with a future status to highlight changes**.
+Μια βασική γραμμή αποτελείται από τη λήψη μιας στιγμιότυπης εικόνας ορισμένων τμημάτων ενός συστήματος για **να τη συγκρίνουμε με μια μελλοντική κατάσταση ώστε να επισημάνουμε τις αλλαγές**.
 
-For example, you can calculate and store the hash of each file of the filesystem to be able to find out which files were modified.\
-This can also be done with the user accounts created, processes running, services running and any other thing that shouldn't change much, or at all.
+Για παράδειγμα, μπορείτε να υπολογίσετε και να αποθηκεύσετε το hash κάθε αρχείου του συστήματος αρχείων για να μπορέσετε να διαπιστώσετε ποια αρχεία έχουν τροποποιηθεί.\
+Αυτό μπορεί επίσης να γίνει με τους λογαριασμούς χρηστών που έχουν δημιουργηθεί, τις διαδικασίες που εκτελούνται, τις υπηρεσίες που εκτελούνται και οτιδήποτε άλλο δεν θα έπρεπε να αλλάξει πολύ ή καθόλου.
 
-## File Integrity Monitoring
+## Παρακολούθηση Ακεραιότητας Αρχείων
 
-File Integrity Monitoring (FIM) is a critical security technique that protects IT environments and data by tracking changes in files. It involves two key steps:
+Η Παρακολούθηση Ακεραιότητας Αρχείων (FIM) είναι μια κρίσιμη τεχνική ασφάλειας που προστατεύει τα IT περιβάλλοντα και τα δεδομένα παρακολουθώντας τις αλλαγές στα αρχεία. Περιλαμβάνει δύο βασικά βήματα:
 
-1. **Baseline Comparison:** Establish a baseline using file attributes or cryptographic checksums (like MD5 or SHA-2) for future comparisons to detect modifications.
-2. **Real-Time Change Notification:** Get instant alerts when files are accessed or altered, typically through OS kernel extensions.
+1. **Σύγκριση Βασικής Γραμμής:** Καθιερώστε μια βασική γραμμή χρησιμοποιώντας χαρακτηριστικά αρχείων ή κρυπτογραφικούς ελέγχους (όπως MD5 ή SHA-2) για μελλοντικές συγκρίσεις ώστε να ανιχνεύσετε τροποποιήσεις.
+2. **Ειδοποίηση Αλλαγών σε Πραγματικό Χρόνο:** Λάβετε άμεσες ειδοποιήσεις όταν τα αρχεία προσπελάζονται ή τροποποιούνται, συνήθως μέσω επεκτάσεων πυρήνα OS.
 
-## Tools
+## Εργαλεία
 
 - [https://github.com/topics/file-integrity-monitoring](https://github.com/topics/file-integrity-monitoring)
 - [https://www.solarwinds.com/security-event-manager/use-cases/file-integrity-monitoring-software](https://www.solarwinds.com/security-event-manager/use-cases/file-integrity-monitoring-software)
 
-## References
+## Αναφορές
 
 - [https://cybersecurity.att.com/blogs/security-essentials/what-is-file-integrity-monitoring-and-why-you-need-it](https://cybersecurity.att.com/blogs/security-essentials/what-is-file-integrity-monitoring-and-why-you-need-it)
 

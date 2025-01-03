@@ -2,17 +2,17 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-The goal of this page is to enumerate **platforms that allow to search for code** (literal or regex) in across thousands/millions of repos in one or more platforms.
+Ο στόχος αυτής της σελίδας είναι να απαριθμήσει **πλατφόρμες που επιτρέπουν την αναζήτηση κώδικα** (κυριολεκτικά ή regex) σε χιλιάδες/εκατομμύρια αποθετήρια σε μία ή περισσότερες πλατφόρμες.
 
-This helps in several occasions to **search for leaked information** or for **vulnerabilities** patterns.
+Αυτό βοηθά σε πολλές περιπτώσεις να **αναζητήσετε διαρροές πληροφοριών** ή για **μοτίβα ευπαθειών**.
 
-- [**SourceGraph**](https://sourcegraph.com/search): Search in millions of repos. There is a free version and an enterprise version (with 15 days free). It supports regexes.
-- [**Github Search**](https://github.com/search): Search across Github. It supports regexes.
-  - Maybe it's also useful to check also [**Github Code Search**](https://cs.github.com/).
-- [**Gitlab Advanced Search**](https://docs.gitlab.com/ee/user/search/advanced_search.html): Search across Gitlab projects. Support regexes.
-- [**SearchCode**](https://searchcode.com/): Search code in millions of projects.
+- [**SourceGraph**](https://sourcegraph.com/search): Αναζητήστε σε εκατομμύρια αποθετήρια. Υπάρχει μια δωρεάν έκδοση και μια έκδοση επιχείρησης (με 15 ημέρες δωρεάν). Υποστηρίζει regexes.
+- [**Github Search**](https://github.com/search): Αναζητήστε σε όλο το Github. Υποστηρίζει regexes.
+- Ίσως είναι επίσης χρήσιμο να ελέγξετε και [**Github Code Search**](https://cs.github.com/).
+- [**Gitlab Advanced Search**](https://docs.gitlab.com/ee/user/search/advanced_search.html): Αναζητήστε σε έργα Gitlab. Υποστηρίζει regexes.
+- [**SearchCode**](https://searchcode.com/): Αναζητήστε κώδικα σε εκατομμύρια έργα.
 
 > [!WARNING]
-> When you look for leaks in a repo and run something like `git log -p` don't forget there might be **other branches with other commits** containing secrets!
+> Όταν αναζητάτε διαρροές σε ένα αποθετήριο και εκτελείτε κάτι όπως `git log -p` μην ξεχάσετε ότι μπορεί να υπάρχουν **άλλες branches με άλλες commits** που περιέχουν μυστικά!
 
 {{#include ../../banners/hacktricks-training.md}}

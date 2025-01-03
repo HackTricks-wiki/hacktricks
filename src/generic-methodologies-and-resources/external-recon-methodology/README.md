@@ -1,49 +1,41 @@
-# External Recon Methodology
+# Εξωτερική Μεθοδολογία Αναγνώρισης
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="../../images/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
-If you are interested in **hacking career** and hack the unhackable - **we are hiring!** (_fluent polish written and spoken required_).
+## Ανακαλύψεις Περιουσιακών Στοιχείων
 
-{% embed url="https://www.stmcyber.com/careers" %}
+> Έτσι σας είπαν ότι όλα όσα ανήκουν σε μια εταιρεία είναι εντός του πεδίου εφαρμογής, και θέλετε να καταλάβετε τι πραγματικά κατέχει αυτή η εταιρεία.
 
-## Assets discoveries
+Ο στόχος αυτής της φάσης είναι να αποκτήσουμε όλες τις **εταιρείες που ανήκουν στην κύρια εταιρεία** και στη συνέχεια όλα τα **περιουσιακά στοιχεία** αυτών των εταιρειών. Για να το κάνουμε αυτό, θα:
 
-> So you were said that everything belonging to some company is inside the scope, and you want to figure out what this company actually owns.
+1. Βρούμε τις εξαγορές της κύριας εταιρείας, αυτό θα μας δώσει τις εταιρείες εντός του πεδίου εφαρμογής.
+2. Βρούμε το ASN (αν υπάρχει) κάθε εταιρείας, αυτό θα μας δώσει τις περιοχές IP που ανήκουν σε κάθε εταιρεία.
+3. Χρησιμοποιήσουμε αναζητήσεις reverse whois για να αναζητήσουμε άλλες καταχωρίσεις (ονόματα οργανισμών, τομείς...) σχετικές με την πρώτη (αυτό μπορεί να γίνει αναδρομικά).
+4. Χρησιμοποιήσουμε άλλες τεχνικές όπως τα φίλτρα shodan `org` και `ssl` για να αναζητήσουμε άλλα περιουσιακά στοιχεία (το κόλπο `ssl` μπορεί να γίνει αναδρομικά).
 
-The goal of this phase is to obtain all the **companies owned by the main company** and then all the **assets** of these companies. To do so, we are going to:
+### **Εξαγορές**
 
-1. Find the acquisitions of the main company, this will give us the companies inside the scope.
-2. Find the ASN (if any) of each company, this will give us the IP ranges owned by each company
-3. Use reverse whois lookups to search for other entries (organisation names, domains...) related to the first one (this can be done recursively)
-4. Use other techniques like shodan `org`and `ssl`filters to search for other assets (the `ssl` trick can be done recursively).
+Πρώτα απ' όλα, πρέπει να γνωρίζουμε ποιες **άλλες εταιρείες ανήκουν στην κύρια εταιρεία**.\
+Μια επιλογή είναι να επισκεφθείτε το [https://www.crunchbase.com/](https://www.crunchbase.com), **να αναζητήσετε** την **κύρια εταιρεία**, και **να κάνετε κλικ** στις "**εξαγορές**". Εκεί θα δείτε άλλες εταιρείες που αποκτήθηκαν από την κύρια.\
+Μια άλλη επιλογή είναι να επισκεφθείτε τη σελίδα **Wikipedia** της κύριας εταιρείας και να αναζητήσετε **εξαγορές**.
 
-### **Acquisitions**
-
-First of all, we need to know which **other companies are owned by the main company**.\
-One option is to visit [https://www.crunchbase.com/](https://www.crunchbase.com), **search** for the **main company**, and **click** on "**acquisitions**". There you will see other companies acquired by the main one.\
-Other option is to visit the **Wikipedia** page of the main company and search for **acquisitions**.
-
-> Ok, at this point you should know all the companies inside the scope. Lets figure out how to find their assets.
+> Εντάξει, σε αυτό το σημείο θα πρέπει να γνωρίζετε όλες τις εταιρείες εντός του πεδίου εφαρμογής. Ας δούμε πώς να βρούμε τα περιουσιακά τους στοιχεία.
 
 ### **ASNs**
 
-An autonomous system number (**ASN**) is a **unique number** assigned to an **autonomous system** (AS) by the **Internet Assigned Numbers Authority (IANA)**.\
-An **AS** consists of **blocks** of **IP addresses** which have a distinctly defined policy for accessing external networks and are administered by a single organisation but may be made up of several operators.
+Ένας αριθμός αυτόνομου συστήματος (**ASN**) είναι ένας **μοναδικός αριθμός** που αποδίδεται σε ένα **αυτόνομο σύστημα** (AS) από την **Αρχή Ανάθεσης Αριθμών Διαδικτύου (IANA)**.\
+Ένα **AS** αποτελείται από **μπλοκ** **διευθύνσεων IP** που έχουν μια σαφώς καθορισμένη πολιτική για την πρόσβαση σε εξωτερικά δίκτυα και διοικούνται από μια μόνο οργάνωση αλλά μπορεί να αποτελείται από αρκετούς φορείς.
 
-It's interesting to find if the **company have assigned any ASN** to find its **IP ranges.** It will be interested to perform a **vulnerability test** against all the **hosts** inside the **scope** and **look for domains** inside these IPs.\
-You can **search** by company **name**, by **IP** or by **domain** in [**https://bgp.he.net/**](https://bgp.he.net)**.**\
-**Depending on the region of the company this links could be useful to gather more data:** [**AFRINIC**](https://www.afrinic.net) **(Africa),** [**Arin**](https://www.arin.net/about/welcome/region/)**(North America),** [**APNIC**](https://www.apnic.net) **(Asia),** [**LACNIC**](https://www.lacnic.net) **(Latin America),** [**RIPE NCC**](https://www.ripe.net) **(Europe). Anyway, probably all the** useful information **(IP ranges and Whois)** appears already in the first link.
-
+Είναι ενδιαφέρον να βρούμε αν η **εταιρεία έχει αναθέσει κάποιο ASN** για να βρούμε τις **περιοχές IP της.** Θα είναι ενδιαφέρον να εκτελέσουμε μια **δοκιμή ευπάθειας** σε όλους τους **φιλοξενούμενους** εντός του **πεδίου εφαρμογής** και **να αναζητήσουμε τομείς** μέσα σε αυτές τις IPs.\
+Μπορείτε να **αναζητήσετε** με το όνομα της εταιρείας, με **IP** ή με **τομέα** στο [**https://bgp.he.net/**](https://bgp.he.net)**.**\
+**Ανάλογα με την περιοχή της εταιρείας, αυτοί οι σύνδεσμοι θα μπορούσαν να είναι χρήσιμοι για τη συλλογή περισσότερων δεδομένων:** [**AFRINIC**](https://www.afrinic.net) **(Αφρική),** [**Arin**](https://www.arin.net/about/welcome/region/)**(Βόρεια Αμερική),** [**APNIC**](https://www.apnic.net) **(Ασία),** [**LACNIC**](https://www.lacnic.net) **(Λατινική Αμερική),** [**RIPE NCC**](https://www.ripe.net) **(Ευρώπη). Ούτως ή άλλως, πιθανώς όλες οι** χρήσιμες πληροφορίες **(περιοχές IP και Whois)** εμφανίζονται ήδη στον πρώτο σύνδεσμο.
 ```bash
 #You can try "automate" this with amass, but it's not very recommended
 amass intel -org tesla
 amass intel -asn 8911,50313,394161
 ```
-
-Also, [**BBOT**](https://github.com/blacklanternsecurity/bbot)**'s** subdomain enumeration automatically aggregates and summarizes ASNs at the end of the scan.
-
+Επίσης, [**BBOT**](https://github.com/blacklanternsecurity/bbot)**'s** η αναγνώριση υποτομέων συγκεντρώνει και συνοψίζει αυτόματα τα ASNs στο τέλος της σάρωσης.
 ```bash
 bbot -t tesla.com -f subdomain-enum
 ...
@@ -60,62 +52,59 @@ bbot -t tesla.com -f subdomain-enum
 [INFO] bbot.modules.asn: +----------+---------------------+--------------+----------------+----------------------------+-----------+
 
 ```
+Μπορείτε να βρείτε τα εύρη IP μιας οργάνωσης χρησιμοποιώντας επίσης [http://asnlookup.com/](http://asnlookup.com) (έχει δωρεάν API).\
+Μπορείτε να βρείτε το IP και το ASN ενός τομέα χρησιμοποιώντας [http://ipv4info.com/](http://ipv4info.com).
 
-You can find the IP ranges of an organisation also using [http://asnlookup.com/](http://asnlookup.com) (it has free API).\
-You can find the IP and ASN of a domain using [http://ipv4info.com/](http://ipv4info.com).
+### **Αναζητώντας ευπάθειες**
 
-### **Looking for vulnerabilities**
+Σε αυτό το σημείο γνωρίζουμε **όλα τα περιουσιακά στοιχεία εντός του πεδίου**, οπότε αν έχετε άδεια, μπορείτε να εκκινήσετε κάποιο **σάρωσης ευπαθειών** (Nessus, OpenVAS) σε όλους τους hosts.\
+Επίσης, μπορείτε να εκκινήσετε κάποιες [**σάρωσεις θυρών**](../pentesting-network/#discovering-hosts-from-the-outside) **ή να χρησιμοποιήσετε υπηρεσίες όπως** shodan **για να βρείτε** ανοιχτές θύρες **και ανάλογα με το τι θα βρείτε, θα πρέπει να** ρίξετε μια ματιά σε αυτό το βιβλίο για το πώς να κάνετε pentest σε πολλές πιθανές υπηρεσίες που τρέχουν.\
+**Επίσης, αξίζει να αναφερθεί ότι μπορείτε επίσης να προετοιμάσετε κάποιες** λίστες με προεπιλεγμένα ονόματα χρήστη **και** κωδικούς πρόσβασης **και να προσπαθήσετε να** κάνετε bruteforce υπηρεσίες με [https://github.com/x90skysn3k/brutespray](https://github.com/x90skysn3k/brutespray).
 
-At this point we known **all the assets inside the scope**, so if you are allowed you could launch some **vulnerability scanner** (Nessus, OpenVAS) over all the hosts.\
-Also, you could launch some [**port scans**](../pentesting-network/#discovering-hosts-from-the-outside) **or use services like** shodan **to find** open ports **and depending on what you find you should** take a look in this book to how to pentest several possible services running.\
-**Also, It could be worth it to mention that you can also prepare some** default username **and** passwords **lists and try to** bruteforce services with [https://github.com/x90skysn3k/brutespray](https://github.com/x90skysn3k/brutespray).
+## Τομείς
 
-## Domains
+> Γνωρίζουμε όλες τις εταιρείες εντός του πεδίου και τα περιουσιακά τους στοιχεία, ήρθε η ώρα να βρούμε τους τομείς εντός του πεδίου.
 
-> We know all the companies inside the scope and their assets, it's time to find the domains inside the scope.
+_Παρακαλώ σημειώστε ότι στις παρακάτω προτεινόμενες τεχνικές μπορείτε επίσης να βρείτε υποτομείς και αυτή η πληροφορία δεν θα πρέπει να υποτιμάται._
 
-_Please, note that in the following purposed techniques you can also find subdomains and that information shouldn't be underrated._
+Πρώτα απ' όλα, θα πρέπει να αναζητήσετε τον **κύριο τομέα**(ες) κάθε εταιρείας. Για παράδειγμα, για την _Tesla Inc._ θα είναι _tesla.com_.
 
-First of all you should look for the **main domain**(s) of each company. For example, for _Tesla Inc._ is going to be _tesla.com_.
+### **Αντίστροφη DNS**
 
-### **Reverse DNS**
-
-As you have found all the IP ranges of the domains you could try to perform **reverse dns lookups** on those **IPs to find more domains inside the scope**. Try to use some dns server of the victim or some well-known dns server (1.1.1.1, 8.8.8.8)
-
+Καθώς έχετε βρει όλα τα εύρη IP των τομέων, μπορείτε να προσπαθήσετε να εκτελέσετε **αντίστροφες αναζητήσεις dns** σε αυτές τις **IPs για να βρείτε περισσότερους τομείς εντός του πεδίου**. Προσπαθήστε να χρησιμοποιήσετε κάποιον dns server του θύματος ή κάποιον γνωστό dns server (1.1.1.1, 8.8.8.8)
 ```bash
 dnsrecon -r <DNS Range> -n <IP_DNS>   #DNS reverse of all of the addresses
 dnsrecon -d facebook.com -r 157.240.221.35/24 #Using facebooks dns
 dnsrecon -r 157.240.221.35/24 -n 1.1.1.1 #Using cloudflares dns
 dnsrecon -r 157.240.221.35/24 -n 8.8.8.8 #Using google dns
 ```
+Για να λειτουργήσει αυτό, ο διαχειριστής πρέπει να ενεργοποιήσει χειροκίνητα το PTR.\
+Μπορείτε επίσης να χρησιμοποιήσετε ένα διαδικτυακό εργαλείο για αυτές τις πληροφορίες: [http://ptrarchive.com/](http://ptrarchive.com)
 
-For this to work, the administrator has to enable manually the PTR.\
-You can also use a online tool for this info: [http://ptrarchive.com/](http://ptrarchive.com)
+### **Αντίστροφος Whois (loop)**
 
-### **Reverse Whois (loop)**
+Μέσα σε ένα **whois** μπορείτε να βρείτε πολλές ενδιαφέρουσες **πληροφορίες** όπως **όνομα οργανισμού**, **διεύθυνση**, **emails**, αριθμούς τηλεφώνου... Αλλά το πιο ενδιαφέρον είναι ότι μπορείτε να βρείτε **περισσότερα περιουσιακά στοιχεία που σχετίζονται με την εταιρεία** αν εκτελέσετε **αντίστροφες αναζητήσεις whois με οποιοδήποτε από αυτά τα πεδία** (για παράδειγμα άλλες καταχωρίσεις whois όπου εμφανίζεται το ίδιο email).\
+Μπορείτε να χρησιμοποιήσετε διαδικτυακά εργαλεία όπως:
 
-Inside a **whois** you can find a lot of interesting **information** like **organisation name**, **address**, **emails**, phone numbers... But which is even more interesting is that you can find **more assets related to the company** if you perform **reverse whois lookups by any of those fields** (for example other whois registries where the same email appears).\
-You can use online tools like:
+- [https://viewdns.info/reversewhois/](https://viewdns.info/reversewhois/) - **Δωρεάν**
+- [https://domaineye.com/reverse-whois](https://domaineye.com/reverse-whois) - **Δωρεάν**
+- [https://www.reversewhois.io/](https://www.reversewhois.io) - **Δωρεάν**
+- [https://www.whoxy.com/](https://www.whoxy.com) - **Δωρεάν** web, όχι δωρεάν API.
+- [http://reversewhois.domaintools.com/](http://reversewhois.domaintools.com) - Όχι δωρεάν
+- [https://drs.whoisxmlapi.com/reverse-whois-search](https://drs.whoisxmlapi.com/reverse-whois-search) - Όχι δωρεάν (μόνο **100 δωρεάν** αναζητήσεις)
+- [https://www.domainiq.com/](https://www.domainiq.com) - Όχι δωρεάν
 
-- [https://viewdns.info/reversewhois/](https://viewdns.info/reversewhois/) - **Free**
-- [https://domaineye.com/reverse-whois](https://domaineye.com/reverse-whois) - **Free**
-- [https://www.reversewhois.io/](https://www.reversewhois.io) - **Free**
-- [https://www.whoxy.com/](https://www.whoxy.com) - **Free** web, not free API.
-- [http://reversewhois.domaintools.com/](http://reversewhois.domaintools.com) - Not free
-- [https://drs.whoisxmlapi.com/reverse-whois-search](https://drs.whoisxmlapi.com/reverse-whois-search) - Not Free (only **100 free** searches)
-- [https://www.domainiq.com/](https://www.domainiq.com) - Not Free
+Μπορείτε να αυτοματοποιήσετε αυτή την εργασία χρησιμοποιώντας [**DomLink** ](https://github.com/vysecurity/DomLink)(απαιτεί κλειδί API whoxy).\
+Μπορείτε επίσης να εκτελέσετε κάποια αυτόματη ανακάλυψη αντίστροφου whois με [amass](https://github.com/OWASP/Amass): `amass intel -d tesla.com -whois`
 
-You can automate this task using [**DomLink** ](https://github.com/vysecurity/DomLink)(requires a whoxy API key).\
-You can also perform some automatic reverse whois discovery with [amass](https://github.com/OWASP/Amass): `amass intel -d tesla.com -whois`
-
-**Note that you can use this technique to discover more domain names every time you find a new domain.**
+**Σημειώστε ότι μπορείτε να χρησιμοποιήσετε αυτή την τεχνική για να ανακαλύψετε περισσότερα ονόματα τομέα κάθε φορά που βρίσκετε ένα νέο τομέα.**
 
 ### **Trackers**
 
-If find the **same ID of the same tracker** in 2 different pages you can suppose that **both pages** are **managed by the same team**.\
-For example, if you see the same **Google Analytics ID** or the same **Adsense ID** on several pages.
+Αν βρείτε το **ίδιο ID του ίδιου tracker** σε 2 διαφορετικές σελίδες μπορείτε να υποθέσετε ότι **και οι δύο σελίδες** διαχειρίζονται από την **ίδια ομάδα**.\
+Για παράδειγμα, αν δείτε το ίδιο **Google Analytics ID** ή το ίδιο **Adsense ID** σε πολλές σελίδες.
 
-There are some pages and tools that let you search by these trackers and more:
+Υπάρχουν κάποιες σελίδες και εργαλεία που σας επιτρέπουν να αναζητήσετε με αυτούς τους trackers και περισσότερα:
 
 - [**Udon**](https://github.com/dhn/udon)
 - [**BuiltWith**](https://builtwith.com)
@@ -125,113 +114,99 @@ There are some pages and tools that let you search by these trackers and more:
 
 ### **Favicon**
 
-Did you know that we can find related domains and sub domains to our target by looking for the same favicon icon hash? This is exactly what [favihash.py](https://github.com/m4ll0k/Bug-Bounty-Toolz/blob/master/favihash.py) tool made by [@m4ll0k2](https://twitter.com/m4ll0k2) does. Here’s how to use it:
-
+Γνωρίζατε ότι μπορούμε να βρούμε σχετικούς τομείς και υποτομείς με τον στόχο μας αναζητώντας το ίδιο hash εικονιδίου favicon; Αυτό ακριβώς κάνει το εργαλείο [favihash.py](https://github.com/m4ll0k/Bug-Bounty-Toolz/blob/master/favihash.py) που έχει δημιουργήσει ο [@m4ll0k2](https://twitter.com/m4ll0k2). Ορίστε πώς να το χρησιμοποιήσετε:
 ```bash
 cat my_targets.txt | xargs -I %% bash -c 'echo "http://%%/favicon.ico"' > targets.txt
 python3 favihash.py -f https://target/favicon.ico -t targets.txt -s
 ```
+![favihash - ανακαλύψτε τομείς με το ίδιο hash εικονιδίου favicon](https://www.infosecmatter.com/wp-content/uploads/2020/07/favihash.jpg)
 
-![favihash - discover domains with the same favicon icon hash](https://www.infosecmatter.com/wp-content/uploads/2020/07/favihash.jpg)
+Απλά, το favihash θα μας επιτρέψει να ανακαλύψουμε τομείς που έχουν το ίδιο hash εικονιδίου favicon με τον στόχο μας.
 
-Simply said, favihash will allow us to discover domains that have the same favicon icon hash as our target.
-
-Moreover, you can also search technologies using the favicon hash as explained in [**this blog post**](https://medium.com/@Asm0d3us/weaponizing-favicon-ico-for-bugbounties-osint-and-what-not-ace3c214e139). That means that if you know the **hash of the favicon of a vulnerable version of a web tech** you can search if in shodan and **find more vulnerable places**:
-
+Επιπλέον, μπορείτε επίσης να αναζητήσετε τεχνολογίες χρησιμοποιώντας το hash του favicon όπως εξηγείται σε [**αυτή την ανάρτηση blog**](https://medium.com/@Asm0d3us/weaponizing-favicon-ico-for-bugbounties-osint-and-what-not-ace3c214e139). Αυτό σημαίνει ότι αν γνωρίζετε το **hash του favicon μιας ευάλωτης έκδοσης μιας διαδικτυακής τεχνολογίας** μπορείτε να αναζητήσετε αν στο shodan και **να βρείτε περισσότερες ευάλωτες τοποθεσίες**:
 ```bash
 shodan search org:"Target" http.favicon.hash:116323821 --fields ip_str,port --separator " " | awk '{print $1":"$2}'
 ```
-
-This is how you can **calculate the favicon hash** of a web:
-
+Αυτός είναι ο τρόπος για να **υπολογίσετε το hash του favicon** ενός ιστότοπου:
 ```python
 import mmh3
 import requests
 import codecs
 
 def fav_hash(url):
-    response = requests.get(url)
-    favicon = codecs.encode(response.content,"base64")
-    fhash = mmh3.hash(favicon)
-    print(f"{url} : {fhash}")
-    return fhash
+response = requests.get(url)
+favicon = codecs.encode(response.content,"base64")
+fhash = mmh3.hash(favicon)
+print(f"{url} : {fhash}")
+return fhash
 ```
+### **Πνευματικά Δικαιώματα / Μοναδική αλυσίδα**
 
-### **Copyright / Uniq string**
+Αναζητήστε μέσα στις ιστοσελίδες **αλυσίδες που θα μπορούσαν να μοιραστούν σε διάφορες ιστοσελίδες της ίδιας οργάνωσης**. Η **αλυσίδα πνευματικών δικαιωμάτων** θα μπορούσε να είναι ένα καλό παράδειγμα. Στη συνέχεια, αναζητήστε αυτή την αλυσίδα σε **google**, σε άλλους **πλοηγούς** ή ακόμα και σε **shodan**: `shodan search http.html:"Copyright string"`
 
-Search inside the web pages **strings that could be shared across different webs in the same organisation**. The **copyright string** could be a good example. Then search for that string in **google**, in other **browsers** or even in **shodan**: `shodan search http.html:"Copyright string"`
+### **Χρόνος CRT**
 
-### **CRT Time**
-
-It's common to have a cron job such as
-
+Είναι κοινό να υπάρχει μια εργασία cron όπως
 ```bash
 # /etc/crontab
 37 13 */10 * * certbot renew --post-hook "systemctl reload nginx"
 ```
+να ανανεώσετε όλα τα πιστοποιητικά τομέα στον διακομιστή. Αυτό σημαίνει ότι ακόμη και αν η CA που χρησιμοποιείται για αυτό δεν ορίζει την ώρα που δημιουργήθηκε στην περίοδο ισχύος, είναι δυνατόν να **βρείτε τομείς που ανήκουν στην ίδια εταιρεία στα αρχεία διαφάνειας πιστοποιητικών**.\
+Δείτε αυτό το [**writeup για περισσότερες πληροφορίες**](https://swarm.ptsecurity.com/discovering-domains-via-a-time-correlation-attack/).
 
-to renew the all the domain certificates on the server. This means that even if the CA used for this doesn't set the time it was generated in the Validity time, it's possible to **find domains belonging to the same company in the certificate transparency logs**.\
-Check out this [**writeup for more information**](https://swarm.ptsecurity.com/discovering-domains-via-a-time-correlation-attack/).
+### Πληροφορίες DMARC Mail
 
-### Mail DMARC information
-
-You can use a web such as [https://dmarc.live/info/google.com](https://dmarc.live/info/google.com) or a tool such as [https://github.com/Tedixx/dmarc-subdomains](https://github.com/Tedixx/dmarc-subdomains) to find **domains and subdomain sharing the same dmarc information**.
+Μπορείτε να χρησιμοποιήσετε έναν ιστότοπο όπως [https://dmarc.live/info/google.com](https://dmarc.live/info/google.com) ή ένα εργαλείο όπως [https://github.com/Tedixx/dmarc-subdomains](https://github.com/Tedixx/dmarc-subdomains) για να βρείτε **τομείς και υποτομείς που μοιράζονται τις ίδιες πληροφορίες DMARC**.
 
 ### **Passive Takeover**
 
-Apparently is common for people to assign subdomains to IPs that belongs to cloud providers and at some point **lose that IP address but forget about removing the DNS record**. Therefore, just **spawning a VM** in a cloud (like Digital Ocean) you will be actually **taking over some subdomains(s)**.
+Φαίνεται ότι είναι κοινό για τους ανθρώπους να αναθέτουν υποτομείς σε IP που ανήκουν σε παρόχους cloud και σε κάποιο σημείο **να χάσουν αυτήν την διεύθυνση IP αλλά να ξεχάσουν να αφαιρέσουν την εγγραφή DNS**. Επομένως, απλά **δημιουργώντας μια VM** σε ένα cloud (όπως το Digital Ocean) θα **αναλαμβάνετε στην πραγματικότητα κάποιους υποτομείς**.
 
-[**This post**](https://kmsec.uk/blog/passive-takeover/) explains a store about it and propose a script that **spawns a VM in DigitalOcean**, **gets** the **IPv4** of the new machine, and **searches in Virustotal for subdomain records** pointing to it.
+[**Αυτή η ανάρτηση**](https://kmsec.uk/blog/passive-takeover/) εξηγεί μια ιστορία σχετικά με αυτό και προτείνει ένα σενάριο που **δημιουργεί μια VM στο DigitalOcean**, **παίρνει** την **IPv4** της νέας μηχανής και **αναζητά σε Virustotal για εγγραφές υποτομέων** που δείχνουν σε αυτήν.
 
-### **Other ways**
+### **Άλλοι τρόποι**
 
-**Note that you can use this technique to discover more domain names every time you find a new domain.**
+**Σημειώστε ότι μπορείτε να χρησιμοποιήσετε αυτήν την τεχνική για να ανακαλύψετε περισσότερα ονόματα τομέων κάθε φορά που βρίσκετε έναν νέο τομέα.**
 
 **Shodan**
 
-As you already know the name of the organisation owning the IP space. You can search by that data in shodan using: `org:"Tesla, Inc."` Check the found hosts for new unexpected domains in the TLS certificate.
+Όπως ήδη γνωρίζετε το όνομα της οργάνωσης που κατέχει τον χώρο IP. Μπορείτε να αναζητήσετε με αυτά τα δεδομένα στο shodan χρησιμοποιώντας: `org:"Tesla, Inc."` Ελέγξτε τους βρεθέντες διακομιστές για νέους απροσδόκητους τομείς στο πιστοποιητικό TLS.
 
-You could access the **TLS certificate** of the main web page, obtain the **Organisation name** and then search for that name inside the **TLS certificates** of all the web pages known by **shodan** with the filter : `ssl:"Tesla Motors"` or use a tool like [**sslsearch**](https://github.com/HarshVaragiya/sslsearch).
+Μπορείτε να αποκτήσετε πρόσβαση στο **πιστοποιητικό TLS** της κύριας ιστοσελίδας, να αποκτήσετε το **όνομα Οργάνωσης** και στη συνέχεια να αναζητήσετε αυτό το όνομα μέσα στα **πιστοποιητικά TLS** όλων των ιστοσελίδων που είναι γνωστές από το **shodan** με το φίλτρο: `ssl:"Tesla Motors"` ή να χρησιμοποιήσετε ένα εργαλείο όπως [**sslsearch**](https://github.com/HarshVaragiya/sslsearch).
 
 **Assetfinder**
 
-[**Assetfinder** ](https://github.com/tomnomnom/assetfinder)is a tool that look for **domains related** with a main domain and **subdomains** of them, pretty amazing.
+[**Assetfinder**](https://github.com/tomnomnom/assetfinder) είναι ένα εργαλείο που αναζητά **τομείς σχετικούς** με έναν κύριο τομέα και **υποτομείς** αυτών, αρκετά εκπληκτικό.
 
-### **Looking for vulnerabilities**
+### **Αναζητώντας ευπάθειες**
 
-Check for some [domain takeover](../../pentesting-web/domain-subdomain-takeover.md#domain-takeover). Maybe some company is **using some a domain** but they **lost the ownership**. Just register it (if cheap enough) and let know the company.
+Ελέγξτε για κάποια [ανάληψη τομέα](../../pentesting-web/domain-subdomain-takeover.md#domain-takeover). Ίσως κάποια εταιρεία **χρησιμοποιεί κάποιον τομέα** αλλά **έχασε την ιδιοκτησία**. Απλά καταχωρίστε τον (αν είναι αρκετά φθηνός) και ενημερώστε την εταιρεία.
 
-If you find any **domain with an IP different** from the ones you already found in the assets discovery, you should perform a **basic vulnerability scan** (using Nessus or OpenVAS) and some [**port scan**](../pentesting-network/#discovering-hosts-from-the-outside) with **nmap/masscan/shodan**. Depending on which services are running you can find in **this book some tricks to "attack" them**.\
-&#xNAN;_&#x4E;ote that sometimes the domain is hosted inside an IP that is not controlled by the client, so it's not in the scope, be careful._
+Αν βρείτε οποιονδήποτε **τομέα με μια IP διαφορετική** από αυτές που έχετε ήδη βρει στην ανακάλυψη περιουσιακών στοιχείων, θα πρέπει να εκτελέσετε μια **βασική σάρωση ευπαθειών** (χρησιμοποιώντας Nessus ή OpenVAS) και κάποια [**σάρωση θυρών**](../pentesting-network/#discovering-hosts-from-the-outside) με **nmap/masscan/shodan**. Ανάλογα με τις υπηρεσίες που εκτελούνται, μπορείτε να βρείτε σε **αυτό το βιβλίο μερικά κόλπα για να "επιτεθείτε" σε αυτές**.\
+&#xNAN;_&#x4E;ote ότι μερικές φορές ο τομέας φιλοξενείται μέσα σε μια IP που δεν ελέγχεται από τον πελάτη, οπότε δεν είναι στο πεδίο εφαρμογής, να είστε προσεκτικοί._
 
-<img src="../../images/i3.png" alt="" data-size="original">\
-**Bug bounty tip**: **sign up** for **Intigriti**, a premium **bug bounty platform created by hackers, for hackers**! Join us at [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) today, and start earning bounties up to **$100,000**!
 
-{% embed url="https://go.intigriti.com/hacktricks" %}
 
-## Subdomains
+## Υποτομείς
 
-> We know all the companies inside the scope, all the assets of each company and all the domains related to the companies.
+> Γνωρίζουμε όλες τις εταιρείες εντός του πεδίου εφαρμογής, όλα τα περιουσιακά στοιχεία κάθε εταιρείας και όλους τους τομείς που σχετίζονται με τις εταιρείες.
 
-It's time to find all the possible subdomains of each found domain.
+Ήρθε η ώρα να βρούμε όλους τους πιθανούς υποτομείς κάθε βρεθέντος τομέα.
 
 > [!TIP]
-> Note that some of the tools and techniques to find domains can also help to find subdomains
+> Σημειώστε ότι ορισμένα από τα εργαλεία και τις τεχνικές για την εύρεση τομέων μπορούν επίσης να βοηθήσουν στην εύρεση υποτομέων
 
 ### **DNS**
 
-Let's try to get **subdomains** from the **DNS** records. We should also try for **Zone Transfer** (If vulnerable, you should report it).
-
+Ας προσπαθήσουμε να αποκτήσουμε **υποτομείς** από τις **εγγραφές DNS**. Πρέπει επίσης να προσπαθήσουμε για **Μεταφορά Ζώνης** (Αν είναι ευάλωτη, θα πρέπει να το αναφέρετε).
 ```bash
 dnsrecon -a -d tesla.com
 ```
-
 ### **OSINT**
 
-The fastest way to obtain a lot of subdomains is search in external sources. The most used **tools** are the following ones (for better results configure the API keys):
+Ο ταχύτερος τρόπος για να αποκτήσετε πολλούς υποτομείς είναι η αναζήτηση σε εξωτερικές πηγές. Τα πιο χρησιμοποιούμενα **εργαλεία** είναι τα εξής (για καλύτερα αποτελέσματα ρυθμίστε τα κλειδιά API):
 
 - [**BBOT**](https://github.com/blacklanternsecurity/bbot)
-
 ```bash
 # subdomains
 bbot -t tesla.com -f subdomain-enum
@@ -242,108 +217,80 @@ bbot -t tesla.com -f subdomain-enum -rf passive
 # subdomains + port scan + web screenshots
 bbot -t tesla.com -f subdomain-enum -m naabu gowitness -n my_scan -o .
 ```
-
 - [**Amass**](https://github.com/OWASP/Amass)
-
 ```bash
 amass enum [-active] [-ip] -d tesla.com
 amass enum -d tesla.com | grep tesla.com # To just list subdomains
 ```
-
 - [**subfinder**](https://github.com/projectdiscovery/subfinder)
-
 ```bash
 # Subfinder, use -silent to only have subdomains in the output
 ./subfinder-linux-amd64 -d tesla.com [-silent]
 ```
-
 - [**findomain**](https://github.com/Edu4rdSHL/findomain/)
-
 ```bash
 # findomain, use -silent to only have subdomains in the output
 ./findomain-linux -t tesla.com [--quiet]
 ```
-
 - [**OneForAll**](https://github.com/shmilylty/OneForAll/tree/master/docs/en-us)
-
 ```bash
 python3 oneforall.py --target tesla.com [--dns False] [--req False] [--brute False] run
 ```
-
 - [**assetfinder**](https://github.com/tomnomnom/assetfinder)
-
 ```bash
 assetfinder --subs-only <domain>
 ```
-
 - [**Sudomy**](https://github.com/Screetsec/Sudomy)
-
 ```bash
 # It requires that you create a sudomy.api file with API keys
 sudomy -d tesla.com
 ```
-
 - [**vita**](https://github.com/junnlikestea/vita)
-
 ```
 vita -d tesla.com
 ```
-
 - [**theHarvester**](https://github.com/laramies/theHarvester)
-
 ```bash
 theHarvester -d tesla.com -b "anubis, baidu, bing, binaryedge, bingapi, bufferoverun, censys, certspotter, crtsh, dnsdumpster, duckduckgo, fullhunt, github-code, google, hackertarget, hunter, intelx, linkedin, linkedin_links, n45ht, omnisint, otx, pentesttools, projectdiscovery, qwant, rapiddns, rocketreach, securityTrails, spyse, sublist3r, threatcrowd, threatminer, trello, twitter, urlscan, virustotal, yahoo, zoomeye"
 ```
+Υπάρχουν **άλλα ενδιαφέροντα εργαλεία/APIs** που, ακόμη και αν δεν είναι άμεσα εξειδικευμένα στην εύρεση υποτομέων, θα μπορούσαν να είναι χρήσιμα για την εύρεση υποτομέων, όπως:
 
-There are **other interesting tools/APIs** that even if not directly specialised in finding subdomains could be useful to find subdomains, like:
-
-- [**Crobat**](https://github.com/cgboal/sonarsearch)**:** Uses the API [https://sonar.omnisint.io](https://sonar.omnisint.io) to obtain subdomains
-
+- [**Crobat**](https://github.com/cgboal/sonarsearch)**:** Χρησιμοποιεί το API [https://sonar.omnisint.io](https://sonar.omnisint.io) για να αποκτήσει υποτομείς
 ```bash
 # Get list of subdomains in output from the API
 ## This is the API the crobat tool will use
 curl https://sonar.omnisint.io/subdomains/tesla.com | jq -r ".[]"
 ```
-
-- [**JLDC free API**](https://jldc.me/anubis/subdomains/google.com)
-
+- [**JLDC δωρεάν API**](https://jldc.me/anubis/subdomains/google.com)
 ```bash
 curl https://jldc.me/anubis/subdomains/tesla.com | jq -r ".[]"
 ```
-
-- [**RapidDNS**](https://rapiddns.io) free API
-
+- [**RapidDNS**](https://rapiddns.io) δωρεάν API
 ```bash
 # Get Domains from rapiddns free API
 rapiddns(){
- curl -s "https://rapiddns.io/subdomain/$1?full=1" \
-  | grep -oE "[\.a-zA-Z0-9-]+\.$1" \
-  | sort -u
+curl -s "https://rapiddns.io/subdomain/$1?full=1" \
+| grep -oE "[\.a-zA-Z0-9-]+\.$1" \
+| sort -u
 }
 rapiddns tesla.com
 ```
-
 - [**https://crt.sh/**](https://crt.sh)
-
 ```bash
 # Get Domains from crt free API
 crt(){
- curl -s "https://crt.sh/?q=%25.$1" \
-  | grep -oE "[\.a-zA-Z0-9-]+\.$1" \
-  | sort -u
+curl -s "https://crt.sh/?q=%25.$1" \
+| grep -oE "[\.a-zA-Z0-9-]+\.$1" \
+| sort -u
 }
 crt tesla.com
 ```
-
-- [**gau**](https://github.com/lc/gau)**:** fetches known URLs from AlienVault's Open Threat Exchange, the Wayback Machine, and Common Crawl for any given domain.
-
+- [**gau**](https://github.com/lc/gau)**:** ανακτά γνωστές διευθύνσεις URL από το Open Threat Exchange της AlienVault, το Wayback Machine και το Common Crawl για οποιοδήποτε δεδομένο τομέα.
 ```bash
 # Get subdomains from GAUs found URLs
 gau --subs tesla.com | cut -d "/" -f 3 | sort -u
 ```
-
-- [**SubDomainizer**](https://github.com/nsonaniya2010/SubDomainizer) **&** [**subscraper**](https://github.com/Cillian-Collins/subscraper): They scrap the web looking for JS files and extract subdomains from there.
-
+- [**SubDomainizer**](https://github.com/nsonaniya2010/SubDomainizer) **&** [**subscraper**](https://github.com/Cillian-Collins/subscraper): Ψάχνουν στο διαδίκτυο για αρχεία JS και εξάγουν υποτομείς από εκεί.
 ```bash
 # Get only subdomains from SubDomainizer
 python3 SubDomainizer.py -u https://tesla.com | grep tesla.com
@@ -351,42 +298,35 @@ python3 SubDomainizer.py -u https://tesla.com | grep tesla.com
 # Get only subdomains from subscraper, this already perform recursion over the found results
 python subscraper.py -u tesla.com | grep tesla.com | cut -d " " -f
 ```
-
 - [**Shodan**](https://www.shodan.io/)
-
 ```bash
 # Get info about the domain
 shodan domain <domain>
 # Get other pages with links to subdomains
 shodan search "http.html:help.domain.com"
 ```
-
 - [**Censys subdomain finder**](https://github.com/christophetd/censys-subdomain-finder)
-
 ```bash
 export CENSYS_API_ID=...
 export CENSYS_API_SECRET=...
 python3 censys-subdomain-finder.py tesla.com
 ```
-
 - [**DomainTrail.py**](https://github.com/gatete/DomainTrail)
-
 ```bash
 python3 DomainTrail.py -d example.com
 ```
-
-- [**securitytrails.com**](https://securitytrails.com/) has a free API to search for subdomains and IP history
+- [**securitytrails.com**](https://securitytrails.com/) έχει δωρεάν API για αναζήτηση υποτομέων και ιστορικό IP
 - [**chaos.projectdiscovery.io**](https://chaos.projectdiscovery.io/#/)
 
-This project offers for **free all the subdomains related to bug-bounty programs**. You can access this data also using [chaospy](https://github.com/dr-0x0x/chaospy) or even access the scope used by this project [https://github.com/projectdiscovery/chaos-public-program-list](https://github.com/projectdiscovery/chaos-public-program-list)
+Αυτό το έργο προσφέρει **δωρεάν όλους τους υποτομείς που σχετίζονται με προγράμματα bug-bounty**. Μπορείτε να αποκτήσετε πρόσβαση σε αυτά τα δεδομένα χρησιμοποιώντας επίσης [chaospy](https://github.com/dr-0x0x/chaospy) ή ακόμα και να αποκτήσετε πρόσβαση στο πεδίο που χρησιμοποιείται από αυτό το έργο [https://github.com/projectdiscovery/chaos-public-program-list](https://github.com/projectdiscovery/chaos-public-program-list)
 
-You can find a **comparison** of many of these tools here: [https://blog.blacklanternsecurity.com/p/subdomain-enumeration-tool-face-off](https://blog.blacklanternsecurity.com/p/subdomain-enumeration-tool-face-off)
+Μπορείτε να βρείτε μια **σύγκριση** πολλών από αυτά τα εργαλεία εδώ: [https://blog.blacklanternsecurity.com/p/subdomain-enumeration-tool-face-off](https://blog.blacklanternsecurity.com/p/subdomain-enumeration-tool-face-off)
 
 ### **DNS Brute force**
 
-Let's try to find new **subdomains** brute-forcing DNS servers using possible subdomain names.
+Ας προσπαθήσουμε να βρούμε νέους **υποτομείς** κάνοντας brute-force στους DNS servers χρησιμοποιώντας πιθανά ονόματα υποτομέων.
 
-For this action you will need some **common subdomains wordlists like**:
+Για αυτή την ενέργεια θα χρειαστείτε κάποιες **κοινές λίστες λέξεων υποτομέων όπως**:
 
 - [https://gist.github.com/jhaddix/86a06c5dc309d08580a018c66354a056](https://gist.github.com/jhaddix/86a06c5dc309d08580a018c66354a056)
 - [https://wordlists-cdn.assetnote.io/data/manual/best-dns-wordlist.txt](https://wordlists-cdn.assetnote.io/data/manual/best-dns-wordlist.txt)
@@ -394,118 +334,93 @@ For this action you will need some **common subdomains wordlists like**:
 - [https://github.com/pentester-io/commonspeak](https://github.com/pentester-io/commonspeak)
 - [https://github.com/danielmiessler/SecLists/tree/master/Discovery/DNS](https://github.com/danielmiessler/SecLists/tree/master/Discovery/DNS)
 
-And also IPs of good DNS resolvers. In order to generate a list of trusted DNS resolvers you can download the resolvers from [https://public-dns.info/nameservers-all.txt](https://public-dns.info/nameservers-all.txt) and use [**dnsvalidator**](https://github.com/vortexau/dnsvalidator) to filter them. Or you could use: [https://raw.githubusercontent.com/trickest/resolvers/main/resolvers-trusted.txt](https://raw.githubusercontent.com/trickest/resolvers/main/resolvers-trusted.txt)
+Και επίσης IPs καλών DNS resolvers. Για να δημιουργήσετε μια λίστα αξιόπιστων DNS resolvers μπορείτε να κατεβάσετε τους resolvers από [https://public-dns.info/nameservers-all.txt](https://public-dns.info/nameservers-all.txt) και να χρησιμοποιήσετε [**dnsvalidator**](https://github.com/vortexau/dnsvalidator) για να τους φιλτράρετε. Ή μπορείτε να χρησιμοποιήσετε: [https://raw.githubusercontent.com/trickest/resolvers/main/resolvers-trusted.txt](https://raw.githubusercontent.com/trickest/resolvers/main/resolvers-trusted.txt)
 
-The most recommended tools for DNS brute-force are:
+Τα πιο συνιστώμενα εργαλεία για DNS brute-force είναι:
 
-- [**massdns**](https://github.com/blechschmidt/massdns): This was the first tool that performed an effective DNS brute-force. It's very fast however it's prone to false positives.
-
+- [**massdns**](https://github.com/blechschmidt/massdns): Αυτό ήταν το πρώτο εργαλείο που εκτέλεσε αποτελεσματικό DNS brute-force. Είναι πολύ γρήγορο, ωστόσο είναι επιρρεπές σε ψευδώς θετικά αποτελέσματα.
 ```bash
 sed 's/$/.domain.com/' subdomains.txt > bf-subdomains.txt
 ./massdns -r resolvers.txt -w /tmp/results.txt bf-subdomains.txt
 grep -E "tesla.com. [0-9]+ IN A .+" /tmp/results.txt
 ```
-
-- [**gobuster**](https://github.com/OJ/gobuster): This one I think just uses 1 resolver
-
+- [**gobuster**](https://github.com/OJ/gobuster): Αυτό νομίζω ότι χρησιμοποιεί μόνο 1 resolver
 ```
 gobuster dns -d mysite.com -t 50 -w subdomains.txt
 ```
-
-- [**shuffledns**](https://github.com/projectdiscovery/shuffledns) is a wrapper around `massdns`, written in go, that allows you to enumerate valid subdomains using active bruteforce, as well as resolve subdomains with wildcard handling and easy input-output support.
-
+- [**shuffledns**](https://github.com/projectdiscovery/shuffledns) είναι ένα wrapper γύρω από `massdns`, γραμμένο σε go, που σας επιτρέπει να καταγράφετε έγκυρους υποτομείς χρησιμοποιώντας ενεργό brute force, καθώς και να επιλύετε υποτομείς με διαχείριση wildcard και εύκολη υποστήριξη εισόδου-εξόδου.
 ```
 shuffledns -d example.com -list example-subdomains.txt -r resolvers.txt
 ```
-
-- [**puredns**](https://github.com/d3mondev/puredns): It also uses `massdns`.
-
+- [**puredns**](https://github.com/d3mondev/puredns): Χρησιμοποιεί επίσης το `massdns`.
 ```
 puredns bruteforce all.txt domain.com
 ```
-
-- [**aiodnsbrute**](https://github.com/blark/aiodnsbrute) uses asyncio to brute force domain names asynchronously.
-
+- [**aiodnsbrute**](https://github.com/blark/aiodnsbrute) χρησιμοποιεί το asyncio για να κάνει brute force ονόματα τομέα ασύγχρονα.
 ```
 aiodnsbrute -r resolvers -w wordlist.txt -vv -t 1024 domain.com
 ```
+### Δεύτερος Γύρος Brute-Force DNS
 
-### Second DNS Brute-Force Round
+Αφού βρείτε υποτομείς χρησιμοποιώντας ανοιχτές πηγές και brute-forcing, μπορείτε να δημιουργήσετε παραλλαγές των υποτομέων που βρήκατε για να προσπαθήσετε να βρείτε ακόμη περισσότερους. Πολλά εργαλεία είναι χρήσιμα για αυτόν τον σκοπό:
 
-After having found subdomains using open sources and brute-forcing, you could generate alterations of the subdomains found to try to find even more. Several tools are useful for this purpose:
-
-- [**dnsgen**](https://github.com/ProjectAnte/dnsgen)**:** Given the domains and subdomains generate permutations.
-
+- [**dnsgen**](https://github.com/ProjectAnte/dnsgen)**:** Δίνοντας τους τομείς και τους υποτομείς, δημιουργεί παραλλαγές.
 ```bash
 cat subdomains.txt | dnsgen -
 ```
-
-- [**goaltdns**](https://github.com/subfinder/goaltdns): Given the domains and subdomains generate permutations.
-  - You can get goaltdns permutations **wordlist** in [**here**](https://github.com/subfinder/goaltdns/blob/master/words.txt).
-
+- [**goaltdns**](https://github.com/subfinder/goaltdns): Δεδομένων των τομέων και υποτομέων, δημιουργεί παραλλαγές.
+- Μπορείτε να αποκτήσετε τις παραλλαγές goaltdns **wordlist** [**εδώ**](https://github.com/subfinder/goaltdns/blob/master/words.txt).
 ```bash
 goaltdns -l subdomains.txt -w /tmp/words-permutations.txt -o /tmp/final-words-s3.txt
 ```
-
-- [**gotator**](https://github.com/Josue87/gotator)**:** Given the domains and subdomains generate permutations. If not permutations file is indicated gotator will use its own one.
-
+- [**gotator**](https://github.com/Josue87/gotator)**:** Δίνοντας τα domains και subdomains, δημιουργεί παραλλαγές. Αν δεν υποδειχθεί αρχείο παραλλαγών, το gotator θα χρησιμοποιήσει το δικό του.
 ```
 gotator -sub subdomains.txt -silent [-perm /tmp/words-permutations.txt]
 ```
-
-- [**altdns**](https://github.com/infosec-au/altdns): Apart from generating subdomains permutations, it can also try to resolve them (but it's better to use the previous commented tools).
-  - You can get altdns permutations **wordlist** in [**here**](https://github.com/infosec-au/altdns/blob/master/words.txt).
-
+- [**altdns**](https://github.com/infosec-au/altdns): Εκτός από την παραγωγή παραλλαγών υποτομέων, μπορεί επίσης να προσπαθήσει να τις επιλύσει (αλλά είναι καλύτερα να χρησιμοποιήσετε τα προηγούμενα εργαλεία που αναφέρθηκαν).
+- Μπορείτε να αποκτήσετε τις παραλλαγές altdns **wordlist** [**εδώ**](https://github.com/infosec-au/altdns/blob/master/words.txt).
 ```
 altdns -i subdomains.txt -w /tmp/words-permutations.txt -o /tmp/asd3
 ```
-
-- [**dmut**](https://github.com/bp0lr/dmut): Another tool to perform permutations, mutations and alteration of subdomains. This tool will brute force the result (it doesn't support dns wild card).
-  - You can get dmut permutations wordlist in [**here**](https://raw.githubusercontent.com/bp0lr/dmut/main/words.txt).
-
+- [**dmut**](https://github.com/bp0lr/dmut): Ένα ακόμα εργαλείο για την εκτέλεση παραλλαγών, μεταλλάξεων και τροποποιήσεων υποτομέων. Αυτό το εργαλείο θα εκτελέσει brute force στο αποτέλεσμα (δεν υποστηρίζει dns wild card).
+- Μπορείτε να αποκτήσετε τη λίστα λέξεων παραλλαγών dmut [**εδώ**](https://raw.githubusercontent.com/bp0lr/dmut/main/words.txt).
 ```bash
 cat subdomains.txt | dmut -d /tmp/words-permutations.txt -w 100 \
-    --dns-errorLimit 10 --use-pb --verbose -s /tmp/resolvers-trusted.txt
+--dns-errorLimit 10 --use-pb --verbose -s /tmp/resolvers-trusted.txt
 ```
+- [**alterx**](https://github.com/projectdiscovery/alterx)**:** Βασισμένο σε ένα domain, **δημιουργεί νέα πιθανά ονόματα υποτομέων** με βάση τις υποδεικνυόμενες προτύπες για να προσπαθήσει να ανακαλύψει περισσότερους υποτομείς.
 
-- [**alterx**](https://github.com/projectdiscovery/alterx)**:** Based on a domain it **generates new potential subdomains names** based on indicated patterns to try to discover more subdomains.
+#### Δημιουργία έξυπνων παραλλαγών
 
-#### Smart permutations generation
-
-- [**regulator**](https://github.com/cramppet/regulator): For more info read this [**post**](https://cramppet.github.io/regulator/index.html) but it will basically get the **main parts** from the **discovered subdomains** and will mix them to find more subdomains.
-
+- [**regulator**](https://github.com/cramppet/regulator): Για περισσότερες πληροφορίες διαβάστε αυτήν την [**ανάρτηση**](https://cramppet.github.io/regulator/index.html) αλλά βασικά θα πάρει τα **κύρια μέρη** από τους **ανακαλυφθέντες υποτομείς** και θα τα αναμίξει για να βρει περισσότερους υποτομείς.
 ```bash
 python3 main.py adobe.com adobe adobe.rules
 make_brute_list.sh adobe.rules adobe.brute
 puredns resolve adobe.brute --write adobe.valid
 ```
-
-- [**subzuf**](https://github.com/elceef/subzuf)**:** _subzuf_ is a subdomain brute-force fuzzer coupled with an immensly simple but effective DNS reponse-guided algorithm. It utilizes a provided set of input data, like a tailored wordlist or historical DNS/TLS records, to accurately synthesize more corresponding domain names and expand them even further in a loop based on information gathered during DNS scan.
-
+- [**subzuf**](https://github.com/elceef/subzuf)**:** _subzuf_ είναι ένα εργαλείο brute-force για υποτομείς που συνδυάζεται με έναν εξαιρετικά απλό αλλά αποτελεσματικό αλγόριθμο καθοδηγούμενο από την απάντηση DNS. Χρησιμοποιεί ένα παρεχόμενο σύνολο δεδομένων εισόδου, όπως μια προσαρμοσμένη λίστα λέξεων ή ιστορικά αρχεία DNS/TLS, για να συνθέσει με ακρίβεια περισσότερα αντίστοιχα ονόματα τομέων και να τα επεκτείνει ακόμη περισσότερο σε έναν βρόχο με βάση τις πληροφορίες που συλλέγονται κατά τη διάρκεια της σάρωσης DNS.
 ```
 echo www | subzuf facebook.com
 ```
+### **Ροή Εργασίας Ανακάλυψης Υποτομέων**
 
-### **Subdomain Discovery Workflow**
-
-Check this blog post I wrote about how to **automate the subdomain discovery** from a domain using **Trickest workflows** so I don't need to launch manually a bunch of tools in my computer:
+Δείτε αυτή την ανάρτηση στο blog που έγραψα σχετικά με το πώς να **αυτοματοποιήσετε την ανακάλυψη υποτομέων** από έναν τομέα χρησιμοποιώντας **Trickest workflows** ώστε να μην χρειάζεται να εκκινώ χειροκίνητα μια σειρά εργαλείων στον υπολογιστή μου:
 
 {% embed url="https://trickest.com/blog/full-subdomain-discovery-using-workflow/" %}
 
 {% embed url="https://trickest.com/blog/full-subdomain-brute-force-discovery-using-workflow/" %}
 
-### **VHosts / Virtual Hosts**
+### **VHosts / Εικονικοί Φιλοξενούμενοι**
 
-If you found an IP address containing **one or several web pages** belonging to subdomains, you could try to **find other subdomains with webs in that IP** by looking in **OSINT sources** for domains in an IP or by **brute-forcing VHost domain names in that IP**.
+Αν βρείτε μια διεύθυνση IP που περιέχει **μία ή περισσότερες ιστοσελίδες** που ανήκουν σε υποτομείς, μπορείτε να προσπαθήσετε να **βρείτε άλλους υποτομείς με ιστοσελίδες σε αυτή τη διεύθυνση IP** αναζητώντας σε **πηγές OSINT** για τομείς σε μια IP ή με **brute-forcing ονόματα τομέων VHost σε αυτή τη διεύθυνση IP**.
 
 #### OSINT
 
-You can find some **VHosts in IPs using** [**HostHunter**](https://github.com/SpiderLabs/HostHunter) **or other APIs**.
+Μπορείτε να βρείτε μερικούς **VHosts σε IPs χρησιμοποιώντας** [**HostHunter**](https://github.com/SpiderLabs/HostHunter) **ή άλλες APIs**.
 
 **Brute Force**
 
-If you suspect that some subdomain can be hidden in a web server you could try to brute force it:
-
+Αν υποψιάζεστε ότι κάποιο υποτομέα μπορεί να είναι κρυμμένο σε έναν διακομιστή ιστού, μπορείτε να προσπαθήσετε να το brute force:
 ```bash
 ffuf -c -w /path/to/wordlist -u http://victim.com -H "Host: FUZZ.victim.com"
 
@@ -519,207 +434,196 @@ vhostbrute.py --url="example.com" --remoteip="10.1.1.15" --base="www.example.com
 #https://github.com/codingo/VHostScan
 VHostScan -t example.com
 ```
-
 > [!NOTE]
-> With this technique you may even be able to access internal/hidden endpoints.
+> Με αυτή την τεχνική μπορεί να είστε σε θέση να αποκτήσετε πρόσβαση σε εσωτερικά/κρυφά endpoints.
 
 ### **CORS Brute Force**
 
-Sometimes you will find pages that only return the header _**Access-Control-Allow-Origin**_ when a valid domain/subdomain is set in the _**Origin**_ header. In these scenarios, you can abuse this behaviour to **discover** new **subdomains**.
-
+Μερικές φορές θα βρείτε σελίδες που επιστρέφουν μόνο την κεφαλίδα _**Access-Control-Allow-Origin**_ όταν έχει οριστεί ένα έγκυρο domain/subdomain στην κεφαλίδα _**Origin**_. Σε αυτές τις περιπτώσεις, μπορείτε να εκμεταλλευτείτε αυτή τη συμπεριφορά για να **ανακαλύψετε** νέα **subdomains**.
 ```bash
 ffuf -w subdomains-top1million-5000.txt -u http://10.10.10.208 -H 'Origin: http://FUZZ.crossfit.htb' -mr "Access-Control-Allow-Origin" -ignore-body
 ```
-
 ### **Buckets Brute Force**
 
-While looking for **subdomains** keep an eye to see if it is **pointing** to any type of **bucket**, and in that case [**check the permissions**](../../network-services-pentesting/pentesting-web/buckets/)**.**\
-Also, as at this point you will know all the domains inside the scope, try to [**brute force possible bucket names and check the permissions**](../../network-services-pentesting/pentesting-web/buckets/).
+Ενώ ψάχνετε για **subdomains**, προσέξτε αν **δείχνει** σε οποιοδήποτε τύπο **bucket**, και σε αυτή την περίπτωση [**ελέγξτε τα δικαιώματα**](../../network-services-pentesting/pentesting-web/buckets/)**.**\
+Επίσης, καθώς σε αυτό το σημείο θα γνωρίζετε όλα τα domains μέσα στο πεδίο, προσπαθήστε να [**brute force πιθανές ονομασίες bucket και ελέγξτε τα δικαιώματα**](../../network-services-pentesting/pentesting-web/buckets/).
 
 ### **Monitorization**
 
-You can **monitor** if **new subdomains** of a domain are created by monitoring the **Certificate Transparency** Logs [**sublert** ](https://github.com/yassineaboukir/sublert/blob/master/sublert.py)does.
+Μπορείτε να **παρακολουθείτε** αν **δημιουργούνται νέα subdomains** ενός domain παρακολουθώντας τα **Certificate Transparency** Logs [**sublert** ](https://github.com/yassineaboukir/sublert/blob/master/sublert.py)το οποίο το κάνει.
 
 ### **Looking for vulnerabilities**
 
-Check for possible [**subdomain takeovers**](../../pentesting-web/domain-subdomain-takeover.md#subdomain-takeover).\
-If the **subdomain** is pointing to some **S3 bucket**, [**check the permissions**](../../network-services-pentesting/pentesting-web/buckets/).
+Ελέγξτε για πιθανές [**subdomain takeovers**](../../pentesting-web/domain-subdomain-takeover.md#subdomain-takeover).\
+Αν το **subdomain** δείχνει σε κάποιο **S3 bucket**, [**ελέγξτε τα δικαιώματα**](../../network-services-pentesting/pentesting-web/buckets/).
 
-If you find any **subdomain with an IP different** from the ones you already found in the assets discovery, you should perform a **basic vulnerability scan** (using Nessus or OpenVAS) and some [**port scan**](../pentesting-network/#discovering-hosts-from-the-outside) with **nmap/masscan/shodan**. Depending on which services are running you can find in **this book some tricks to "attack" them**.\
-&#xNAN;_&#x4E;ote that sometimes the subdomain is hosted inside an IP that is not controlled by the client, so it's not in the scope, be careful._
+Αν βρείτε οποιοδήποτε **subdomain με IP διαφορετική** από αυτές που έχετε ήδη βρει στην ανακάλυψη assets, θα πρέπει να εκτελέσετε μια **βασική σάρωση ευπαθειών** (χρησιμοποιώντας Nessus ή OpenVAS) και κάποια [**σάρωση θυρών**](../pentesting-network/#discovering-hosts-from-the-outside) με **nmap/masscan/shodan**. Ανάλογα με τις υπηρεσίες που τρέχουν, μπορείτε να βρείτε σε **αυτό το βιβλίο μερικά κόλπα για να "επιτεθείτε" σε αυτές**.\
+&#xNAN;_&#x4E;ote ότι μερικές φορές το subdomain φιλοξενείται σε μια IP που δεν ελέγχεται από τον πελάτη, οπότε δεν είναι στο πεδίο, προσέξτε._
 
 ## IPs
 
-In the initial steps you might have **found some IP ranges, domains and subdomains**.\
-It’s time to **recollect all the IPs from those ranges** and for the **domains/subdomains (DNS queries).**
+Στα αρχικά βήματα μπορεί να έχετε **βρει κάποιες περιοχές IP, domains και subdomains**.\
+Ήρθε η ώρα να **συλλέξετε όλες τις IPs από αυτές τις περιοχές** και για τα **domains/subdomains (DNS queries).**
 
-Using services from the following **free apis** you can also find **previous IPs used by domains and subdomains**. These IPs might still be owned by the client (and might allow you to find [**CloudFlare bypasses**](../../network-services-pentesting/pentesting-web/uncovering-cloudflare.md))
+Χρησιμοποιώντας υπηρεσίες από τις παρακάτω **δωρεάν APIs** μπορείτε επίσης να βρείτε **προηγούμενες IPs που χρησιμοποιήθηκαν από domains και subdomains**. Αυτές οι IPs μπορεί να ανήκουν ακόμα στον πελάτη (και μπορεί να σας επιτρέψουν να βρείτε [**CloudFlare bypasses**](../../network-services-pentesting/pentesting-web/uncovering-cloudflare.md))
 
 - [**https://securitytrails.com/**](https://securitytrails.com/)
 
-You can also check for domains pointing a specific IP address using the tool [**hakip2host**](https://github.com/hakluke/hakip2host)
+Μπορείτε επίσης να ελέγξετε για domains που δείχνουν σε μια συγκεκριμένη διεύθυνση IP χρησιμοποιώντας το εργαλείο [**hakip2host**](https://github.com/hakluke/hakip2host)
 
 ### **Looking for vulnerabilities**
 
-**Port scan all the IPs that doesn’t belong to CDNs** (as you highly probably won’t find anything interested in there). In the running services discovered you might be **able to find vulnerabilities**.
+**Σαρώστε όλες τις IPs που δεν ανήκουν σε CDNs** (καθώς είναι πολύ πιθανό να μην βρείτε τίποτα ενδιαφέρον εκεί). Στις υπηρεσίες που ανακαλύφθηκαν μπορεί να είστε **σε θέση να βρείτε ευπάθειες**.
 
-**Find a** [**guide**](../pentesting-network/) **about how to scan hosts.**
+**Βρείτε έναν** [**οδηγό**](../pentesting-network/) **για το πώς να σαρώσετε hosts.**
 
 ## Web servers hunting
 
-> We have found all the companies and their assets and we know IP ranges, domains and subdomains inside the scope. It's time to search for web servers.
+> Έχουμε βρει όλες τις εταιρείες και τα assets τους και γνωρίζουμε περιοχές IP, domains και subdomains μέσα στο πεδίο. Ήρθε η ώρα να αναζητήσουμε web servers.
 
-In the previous steps you have probably already performed some **recon of the IPs and domains discovered**, so you may have **already found all the possible web servers**. However, if you haven't we are now going to see some **fast tricks to search for web servers** inside the scope.
+Στα προηγούμενα βήματα έχετε πιθανώς ήδη εκτελέσει κάποια **recon των IPs και domains που ανακαλύφθηκαν**, οπότε μπορεί να έχετε **ήδη βρει όλους τους πιθανούς web servers**. Ωστόσο, αν δεν το έχετε κάνει, τώρα θα δούμε μερικά **γρήγορα κόλπα για να αναζητήσουμε web servers** μέσα στο πεδίο.
 
-Please, note that this will be **oriented for web apps discovery**, so you should **perform the vulnerability** and **port scanning** also (**if allowed** by the scope).
+Παρακαλώ σημειώστε ότι αυτό θα είναι **προσανατολισμένο στην ανακάλυψη web apps**, οπότε θα πρέπει να **εκτελέσετε τη σάρωση ευπαθειών** και **σάρωση θυρών** επίσης (**αν επιτρέπεται** από το πεδίο).
 
-A **fast method** to discover **ports open** related to **web** servers using [**masscan** can be found here](../pentesting-network/#http-port-discovery).\
-Another friendly tool to look for web servers is [**httprobe**](https://github.com/tomnomnom/httprobe)**,** [**fprobe**](https://github.com/theblackturtle/fprobe) and [**httpx**](https://github.com/projectdiscovery/httpx). You just pass a list of domains and it will try to connect to port 80 (http) and 443 (https). Additionally, you can indicate to try other ports:
-
+Μια **γρήγορη μέθοδος** για να ανακαλύψετε **ανοιχτές θύρες** σχετικές με **web** servers χρησιμοποιώντας [**masscan** μπορεί να βρεθεί εδώ](../pentesting-network/#http-port-discovery).\
+Ένα άλλο φιλικό εργαλείο για να αναζητήσετε web servers είναι [**httprobe**](https://github.com/tomnomnom/httprobe)**,** [**fprobe**](https://github.com/theblackturtle/fprobe) και [**httpx**](https://github.com/projectdiscovery/httpx). Απλά περνάτε μια λίστα domains και θα προσπαθήσει να συνδεθεί σε θύρα 80 (http) και 443 (https). Επιπλέον, μπορείτε να υποδείξετε να δοκιμάσει άλλες θύρες:
 ```bash
 cat /tmp/domains.txt | httprobe #Test all domains inside the file for port 80 and 443
 cat /tmp/domains.txt | httprobe -p http:8080 -p https:8443 #Check port 80, 443 and 8080 and 8443
 ```
+### **Στιγμιότυπα**
 
-### **Screenshots**
+Τώρα που έχετε ανακαλύψει **όλους τους web servers** που υπάρχουν στο πεδίο (μεταξύ των **IPs** της εταιρείας και όλων των **domains** και **subdomains**) πιθανόν **να μην ξέρετε από πού να ξεκινήσετε**. Έτσι, ας το κάνουμε απλό και ας ξεκινήσουμε απλά παίρνοντας στιγμιότυπα όλων τους. Απλά με **μια ματιά** στη **κύρια σελίδα** μπορείτε να βρείτε **παράξενες** διευθύνσεις που είναι πιο **επιρρεπείς** να είναι **ευάλωτες**.
 
-Now that you have discovered **all the web servers** present in the scope (among the **IPs** of the company and all the **domains** and **subdomains**) you probably **don't know where to start**. So, let's make it simple and start just taking screenshots of all of them. Just by **taking a look** at the **main page** you can find **weird** endpoints that are more **prone** to be **vulnerable**.
+Για να εκτελέσετε την προτεινόμενη ιδέα μπορείτε να χρησιμοποιήσετε [**EyeWitness**](https://github.com/FortyNorthSecurity/EyeWitness), [**HttpScreenshot**](https://github.com/breenmachine/httpscreenshot), [**Aquatone**](https://github.com/michenriksen/aquatone), [**Shutter**](https://shutter-project.org/downloads/third-party-packages/), [**Gowitness**](https://github.com/sensepost/gowitness) ή [**webscreenshot**](https://github.com/maaaaz/webscreenshot)**.**
 
-To perform the proposed idea you can use [**EyeWitness**](https://github.com/FortyNorthSecurity/EyeWitness), [**HttpScreenshot**](https://github.com/breenmachine/httpscreenshot), [**Aquatone**](https://github.com/michenriksen/aquatone), [**Shutter**](https://shutter-project.org/downloads/third-party-packages/), [**Gowitness**](https://github.com/sensepost/gowitness) or [**webscreenshot**](https://github.com/maaaaz/webscreenshot)**.**
+Επιπλέον, μπορείτε να χρησιμοποιήσετε [**eyeballer**](https://github.com/BishopFox/eyeballer) για να ελέγξετε όλα τα **στιγμιότυπα** και να σας πει **τι είναι πιθανό να περιέχει ευπάθειες**, και τι όχι.
 
-Moreover, you could then use [**eyeballer**](https://github.com/BishopFox/eyeballer) to run over all the **screenshots** to tell you **what's likely to contain vulnerabilities**, and what isn't.
+## Δημόσια Περιουσιακά Στοιχεία Cloud
 
-## Public Cloud Assets
+Για να βρείτε πιθανά περιουσιακά στοιχεία cloud που ανήκουν σε μια εταιρεία θα πρέπει να **ξεκινήσετε με μια λίστα λέξεων-κλειδιών που προσδιορίζουν αυτή την εταιρεία**. Για παράδειγμα, για μια κρυπτονομισματική εταιρεία μπορείτε να χρησιμοποιήσετε λέξεις όπως: `"crypto", "wallet", "dao", "<domain_name>", <"subdomain_names">`.
 
-In order to find potential cloud assets belonging to a company you should **start with a list of keywords that identify that company**. For example, a crypto for a crypto company you might use words such as: `"crypto", "wallet", "dao", "<domain_name>", <"subdomain_names">`.
-
-You will also need wordlists of **common words used in buckets**:
+Θα χρειαστείτε επίσης λίστες λέξεων με **κοινές λέξεις που χρησιμοποιούνται σε buckets**:
 
 - [https://raw.githubusercontent.com/cujanovic/goaltdns/master/words.txt](https://raw.githubusercontent.com/cujanovic/goaltdns/master/words.txt)
 - [https://raw.githubusercontent.com/infosec-au/altdns/master/words.txt](https://raw.githubusercontent.com/infosec-au/altdns/master/words.txt)
 - [https://raw.githubusercontent.com/jordanpotti/AWSBucketDump/master/BucketNames.txt](https://raw.githubusercontent.com/jordanpotti/AWSBucketDump/master/BucketNames.txt)
 
-Then, with those words you should generate **permutations** (check the [**Second Round DNS Brute-Force**](./#second-dns-bruteforce-round) for more info).
+Στη συνέχεια, με αυτές τις λέξεις θα πρέπει να δημιουργήσετε **παραλλαγές** (δείτε το [**Second Round DNS Brute-Force**](./#second-dns-bruteforce-round) για περισσότερες πληροφορίες).
 
-With the resulting wordlists you could use tools such as [**cloud_enum**](https://github.com/initstring/cloud_enum)**,** [**CloudScraper**](https://github.com/jordanpotti/CloudScraper)**,** [**cloudlist**](https://github.com/projectdiscovery/cloudlist) **or** [**S3Scanner**](https://github.com/sa7mon/S3Scanner)**.**
+Με τις προκύπτουσες λίστες λέξεων μπορείτε να χρησιμοποιήσετε εργαλεία όπως [**cloud_enum**](https://github.com/initstring/cloud_enum)**,** [**CloudScraper**](https://github.com/jordanpotti/CloudScraper)**,** [**cloudlist**](https://github.com/projectdiscovery/cloudlist) **ή** [**S3Scanner**](https://github.com/sa7mon/S3Scanner)**.**
 
-Remember that when looking for Cloud Assets you should l**ook for more than just buckets in AWS**.
+Θυμηθείτε ότι όταν ψάχνετε για περιουσιακά στοιχεία Cloud θα πρέπει να **ψάχνετε για περισσότερα από απλά buckets σε AWS**.
 
-### **Looking for vulnerabilities**
+### **Αναζητώντας ευπάθειες**
 
-If you find things such as **open buckets or cloud functions exposed** you should **access them** and try to see what they offer you and if you can abuse them.
+Αν βρείτε πράγματα όπως **ανοιχτά buckets ή εκτεθειμένες cloud functions** θα πρέπει να **τα αποκτήσετε πρόσβαση** και να δείτε τι σας προσφέρουν και αν μπορείτε να τα εκμεταλλευτείτε.
 
 ## Emails
 
-With the **domains** and **subdomains** inside the scope you basically have all what you **need to start searching for emails**. These are the **APIs** and **tools** that have worked the best for me to find emails of a company:
+Με τα **domains** και **subdomains** μέσα στο πεδίο έχετε βασικά όλα όσα **χρειάζεστε για να ξεκινήσετε την αναζήτηση για emails**. Αυτές είναι οι **APIs** και **εργαλεία** που έχουν λειτουργήσει καλύτερα για μένα για να βρω emails μιας εταιρείας:
 
-- [**theHarvester**](https://github.com/laramies/theHarvester) - with APIs
-- API of [**https://hunter.io/**](https://hunter.io/) (free version)
-- API of [**https://app.snov.io/**](https://app.snov.io/) (free version)
-- API of [**https://minelead.io/**](https://minelead.io/) (free version)
+- [**theHarvester**](https://github.com/laramies/theHarvester) - με APIs
+- API του [**https://hunter.io/**](https://hunter.io/) (δωρεάν έκδοση)
+- API του [**https://app.snov.io/**](https://app.snov.io/) (δωρεάν έκδοση)
+- API του [**https://minelead.io/**](https://minelead.io/) (δωρεάν έκδοση)
 
-### **Looking for vulnerabilities**
+### **Αναζητώντας ευπάθειες**
 
-Emails will come handy later to **brute-force web logins and auth services** (such as SSH). Also, they are needed for **phishings**. Moreover, these APIs will give you even more **info about the person** behind the email, which is useful for the phishing campaign.
+Τα emails θα σας φανούν χρήσιμα αργότερα για **brute-force web logins και auth services** (όπως το SSH). Επίσης, είναι απαραίτητα για **phishings**. Επιπλέον, αυτές οι APIs θα σας δώσουν ακόμα περισσότερες **πληροφορίες για το άτομο** πίσω από το email, που είναι χρήσιμες για την εκστρατεία phishing.
 
-## Credential Leaks
+## Διαρροές Διαπιστευτηρίων
 
-With the **domains,** **subdomains**, and **emails** you can start looking for credentials leaked in the past belonging to those emails:
+Με τα **domains,** **subdomains**, και **emails** μπορείτε να αρχίσετε να ψάχνετε για διαπιστευτήρια που έχουν διαρρεύσει στο παρελθόν που ανήκουν σε αυτά τα emails:
 
 - [https://leak-lookup.com](https://leak-lookup.com/account/login)
 - [https://www.dehashed.com/](https://www.dehashed.com/)
 
-### **Looking for vulnerabilities**
+### **Αναζητώντας ευπάθειες**
 
-If you find **valid leaked** credentials, this is a very easy win.
+Αν βρείτε **έγκυρα διαρρεύσαντα** διαπιστευτήρια, αυτό είναι μια πολύ εύκολη νίκη.
 
-## Secrets Leaks
+## Διαρροές Μυστικών
 
-Credential leaks are related to hacks of companies where **sensitive information was leaked and sold**. However, companies might be affected for **other leaks** whose info isn't in those databases:
+Οι διαρροές διαπιστευτηρίων σχετίζονται με επιθέσεις σε εταιρείες όπου **ευαίσθητες πληροφορίες διαρρεύσαν και πωλήθηκαν**. Ωστόσο, οι εταιρείες μπορεί να επηρεαστούν από **άλλες διαρροές** των οποίων οι πληροφορίες δεν είναι σε αυτές τις βάσεις δεδομένων:
 
-### Github Leaks
+### Διαρροές Github
 
-Credentials and APIs might be leaked in the **public repositories** of the **company** or of the **users** working by that github company.\
-You can use the **tool** [**Leakos**](https://github.com/carlospolop/Leakos) to **download** all the **public repos** of an **organization** and of its **developers** and run [**gitleaks**](https://github.com/zricethezav/gitleaks) over them automatically.
+Διαπιστευτήρια και APIs μπορεί να έχουν διαρρεύσει στις **δημόσιες αποθήκες** της **εταιρείας** ή των **χρηστών** που εργάζονται για αυτή την εταιρεία στο github.\
+Μπορείτε να χρησιμοποιήσετε το **εργαλείο** [**Leakos**](https://github.com/carlospolop/Leakos) για να **κατεβάσετε** όλες τις **δημόσιες αποθήκες** μιας **οργάνωσης** και των **προγραμματιστών** της και να εκτελέσετε [**gitleaks**](https://github.com/zricethezav/gitleaks) αυτόματα σε αυτές.
 
-**Leakos** can also be used to run **gitleaks** agains all the **text** provided **URLs passed** to it as sometimes **web pages also contains secrets**.
+**Leakos** μπορεί επίσης να χρησιμοποιηθεί για να εκτελέσει **gitleaks** σε όλο το **κείμενο** που παρέχεται **URLs που του έχουν περαστεί** καθώς μερικές φορές **οι ιστοσελίδες περιέχουν επίσης μυστικά**.
 
 #### Github Dorks
 
-Check also this **page** for potential **github dorks** you could also search for in the organization you are attacking:
+Ελέγξτε επίσης αυτή τη **σελίδα** για πιθανούς **github dorks** που θα μπορούσατε επίσης να αναζητήσετε στην οργάνωση που επιτίθεστε:
 
 {{#ref}}
 github-leaked-secrets.md
 {{#endref}}
 
-### Pastes Leaks
+### Διαρροές Pastes
 
-Sometimes attackers or just workers will **publish company content in a paste site**. This might or might not contain **sensitive information**, but it's very interesting to search for it.\
-You can use the tool [**Pastos**](https://github.com/carlospolop/Pastos) to search in more that 80 paste sites at the same time.
+Μερικές φορές οι επιτιθέμενοι ή απλά οι εργαζόμενοι θα **δημοσιεύσουν περιεχόμενο της εταιρείας σε μια ιστοσελίδα paste**. Αυτό μπορεί να περιέχει ή να μην περιέχει **ευαίσθητες πληροφορίες**, αλλά είναι πολύ ενδιαφέρον να το αναζητήσετε.\
+Μπορείτε να χρησιμοποιήσετε το εργαλείο [**Pastos**](https://github.com/carlospolop/Pastos) για να αναζητήσετε σε περισσότερες από 80 ιστοσελίδες paste ταυτόχρονα.
 
 ### Google Dorks
 
-Old but gold google dorks are always useful to find **exposed information that shouldn't be there**. The only problem is that the [**google-hacking-database**](https://www.exploit-db.com/google-hacking-database) contains several **thousands** of possible queries that you cannot run manually. So, you can get your favourite 10 ones or you could use a **tool such as** [**Gorks**](https://github.com/carlospolop/Gorks) **to run them all**.
+Οι παλιές αλλά χρυσές google dorks είναι πάντα χρήσιμες για να βρείτε **εκτεθειμένες πληροφορίες που δεν θα έπρεπε να υπάρχουν εκεί**. Το μόνο πρόβλημα είναι ότι η [**google-hacking-database**](https://www.exploit-db.com/google-hacking-database) περιέχει αρκετές **χιλιάδες** πιθανές ερωτήσεις που δεν μπορείτε να εκτελέσετε χειροκίνητα. Έτσι, μπορείτε να πάρετε τις 10 αγαπημένες σας ή μπορείτε να χρησιμοποιήσετε ένα **εργαλείο όπως** [**Gorks**](https://github.com/carlospolop/Gorks) **για να τις εκτελέσετε όλες**.
 
-_Note that the tools that expect to run all the database using the regular Google browser will never end as google will block you very very soon._
+_Σημειώστε ότι τα εργαλεία που αναμένουν να εκτελέσουν όλη τη βάση δεδομένων χρησιμοποιώντας τον κανονικό περιηγητή Google δεν θα τελειώσουν ποτέ καθώς η Google θα σας μπλοκάρει πολύ πολύ σύντομα._
 
-### **Looking for vulnerabilities**
+### **Αναζητώντας ευπάθειες**
 
-If you find **valid leaked** credentials or API tokens, this is a very easy win.
+Αν βρείτε **έγκυρα διαρρεύσαντα** διαπιστευτήρια ή API tokens, αυτή είναι μια πολύ εύκολη νίκη.
 
-## Public Code Vulnerabilities
+## Δημόσιες Ευπάθειες Κώδικα
 
-If you found that the company has **open-source code** you can **analyse** it and search for **vulnerabilities** on it.
+Αν διαπιστώσετε ότι η εταιρεία έχει **ανοιχτό κώδικα** μπορείτε να **αναλύσετε** αυτόν και να αναζητήσετε **ευπάθειες** σε αυτόν.
 
-**Depending on the language** there are different **tools** you can use:
+**Ανάλογα με τη γλώσσα** υπάρχουν διάφορα **εργαλεία** που μπορείτε να χρησιμοποιήσετε:
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-web/code-review-tools.md
 {{#endref}}
 
-There are also free services that allow you to **scan public repositories**, such as:
+Υπάρχουν επίσης δωρεάν υπηρεσίες που σας επιτρέπουν να **σκανάρετε δημόσιες αποθήκες**, όπως:
 
 - [**Snyk**](https://app.snyk.io/)
 
 ## [**Pentesting Web Methodology**](../../network-services-pentesting/pentesting-web/)
 
-The **majority of the vulnerabilities** found by bug hunters resides inside **web applications**, so at this point I would like to talk about a **web application testing methodology**, and you can [**find this information here**](../../network-services-pentesting/pentesting-web/).
+Η **πλειοψηφία των ευπαθειών** που βρίσκονται από τους κυνηγούς σφαλμάτων βρίσκεται μέσα σε **web applications**, οπότε σε αυτό το σημείο θα ήθελα να μιλήσω για μια **μεθοδολογία δοκιμών web εφαρμογών**, και μπορείτε να [**βρείτε αυτές τις πληροφορίες εδώ**](../../network-services-pentesting/pentesting-web/).
 
-I also want to do a special mention to the section [**Web Automated Scanners open source tools**](../../network-services-pentesting/pentesting-web/#automatic-scanners), as, if you shouldn't expect them to find you very sensitive vulnerabilities, they come handy to implement them on **workflows to have some initial web information.**
+Θέλω επίσης να κάνω μια ειδική αναφορά στην ενότητα [**Web Automated Scanners open source tools**](../../network-services-pentesting/pentesting-web/#automatic-scanners), καθώς, αν δεν πρέπει να περιμένετε να σας βρουν πολύ ευαίσθητες ευπάθειες, είναι χρήσιμα για να τα εφαρμόσετε σε **workflows για να έχετε κάποιες αρχικές πληροφορίες web.**
 
-## Recapitulation
+## Ανακεφαλαίωση
 
-> Congratulations! At this point you have already perform **all the basic enumeration**. Yes, it's basic because a lot more enumeration can be done (will see more tricks later).
+> Συγχαρητήρια! Σε αυτό το σημείο έχετε ήδη εκτελέσει **όλη την βασική καταμέτρηση**. Ναι, είναι βασική γιατί μπορεί να γίνει πολύ περισσότερη καταμέτρηση (θα δούμε περισσότερα κόλπα αργότερα).
 
-So you have already:
+Έτσι έχετε ήδη:
 
-1. Found all the **companies** inside the scope
-2. Found all the **assets** belonging to the companies (and perform some vuln scan if in scope)
-3. Found all the **domains** belonging to the companies
-4. Found all the **subdomains** of the domains (any subdomain takeover?)
-5. Found all the **IPs** (from and **not from CDNs**) inside the scope.
-6. Found all the **web servers** and took a **screenshot** of them (anything weird worth a deeper look?)
-7. Found all the **potential public cloud assets** belonging to the company.
-8. **Emails**, **credentials leaks**, and **secret leaks** that could give you a **big win very easily**.
-9. **Pentesting all the webs you found**
+1. Βρει όλες τις **εταιρείες** μέσα στο πεδίο
+2. Βρει όλα τα **περιουσιακά στοιχεία** που ανήκουν στις εταιρείες (και εκτελέσει κάποια σάρωση ευπαθειών αν είναι στο πεδίο)
+3. Βρει όλα τα **domains** που ανήκουν στις εταιρείες
+4. Βρει όλα τα **subdomains** των domains (υπάρχει κάποια ανάληψη subdomain;)
+5. Βρει όλες τις **IPs** (από και **όχι από CDNs**) μέσα στο πεδίο.
+6. Βρει όλους τους **web servers** και πήρε ένα **στιγμιότυπο** από αυτούς (υπάρχει κάτι παράξενο που αξίζει μια πιο βαθιά ματιά;)
+7. Βρει όλα τα **πιθανά δημόσια περιουσιακά στοιχεία cloud** που ανήκουν στην εταιρεία.
+8. **Emails**, **διαρροές διαπιστευτηρίων**, και **διαρροές μυστικών** που θα μπορούσαν να σας δώσουν μια **μεγάλη νίκη πολύ εύκολα**.
+9. **Pentesting όλων των ιστοσελίδων που βρήκατε**
 
-## **Full Recon Automatic Tools**
+## **Πλήρη Αυτόματα Εργαλεία Recon**
 
-There are several tools out there that will perform part of the proposed actions against a given scope.
+Υπάρχουν αρκετά εργαλεία εκεί έξω που θα εκτελέσουν μέρος των προτεινόμενων ενεργειών κατά ενός δεδομένου πεδίου.
 
 - [**https://github.com/yogeshojha/rengine**](https://github.com/yogeshojha/rengine)
 - [**https://github.com/j3ssie/Osmedeus**](https://github.com/j3ssie/Osmedeus)
 - [**https://github.com/six2dez/reconftw**](https://github.com/six2dez/reconftw)
-- [**https://github.com/hackerspider1/EchoPwn**](https://github.com/hackerspider1/EchoPwn) - A little old and not updated
+- [**https://github.com/hackerspider1/EchoPwn**](https://github.com/hackerspider1/EchoPwn) - Λίγο παλιό και όχι ενημερωμένο
 
-## **References**
+## **Αναφορές**
 
-- All free courses of [**@Jhaddix**](https://twitter.com/Jhaddix) like [**The Bug Hunter's Methodology v4.0 - Recon Edition**](https://www.youtube.com/watch?v=p4JgIu1mceI)
-
-<figure><img src="../../images/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
-
-If you are interested in **hacking career** and hack the unhackable - **we are hiring!** (_fluent polish written and spoken required_).
-
-{% embed url="https://www.stmcyber.com/careers" %}
+- Όλα τα δωρεάν μαθήματα του [**@Jhaddix**](https://twitter.com/Jhaddix) όπως [**The Bug Hunter's Methodology v4.0 - Recon Edition**](https://www.youtube.com/watch?v=p4JgIu1mceI)
 
 {{#include ../../banners/hacktricks-training.md}}

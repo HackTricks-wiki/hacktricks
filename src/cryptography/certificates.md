@@ -1,47 +1,38 @@
-# Certificates
+# Πιστοποιητικά
 
 {{#include ../banners/hacktricks-training.md}}
 
-<figure><img src="../images/image (3) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+## Τι είναι ένα Πιστοποιητικό
 
-\
-Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+Ένα **δημόσιο κλειδί πιστοποιητικό** είναι μια ψηφιακή ταυτότητα που χρησιμοποιείται στην κρυπτογραφία για να αποδείξει ότι κάποιος κατέχει ένα δημόσιο κλειδί. Περιλαμβάνει τις λεπτομέρειες του κλειδιού, την ταυτότητα του κατόχου (το υποκείμενο) και μια ψηφιακή υπογραφή από μια αξιόπιστη αρχή (τον εκδότη). Εάν το λογισμικό εμπιστεύεται τον εκδότη και η υπογραφή είναι έγκυρη, είναι δυνατή η ασφαλής επικοινωνία με τον κάτοχο του κλειδιού.
 
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
+Τα πιστοποιητικά εκδίδονται κυρίως από [αρχές πιστοποίησης](https://en.wikipedia.org/wiki/Certificate_authority) (CAs) σε μια [υποδομή δημόσιου κλειδιού](https://en.wikipedia.org/wiki/Public-key_infrastructure) (PKI). Μια άλλη μέθοδος είναι το [δίκτυο εμπιστοσύνης](https://en.wikipedia.org/wiki/Web_of_trust), όπου οι χρήστες επαληθεύουν άμεσα τα κλειδιά ο ένας του άλλου. Η κοινή μορφή για τα πιστοποιητικά είναι [X.509](https://en.wikipedia.org/wiki/X.509), η οποία μπορεί να προσαρμοστεί για συγκεκριμένες ανάγκες όπως περιγράφεται στο RFC 5280.
 
-## What is a Certificate
+## x509 Κοινά Πεδία
 
-A **public key certificate** is a digital ID used in cryptography to prove someone owns a public key. It includes the key's details, the owner's identity (the subject), and a digital signature from a trusted authority (the issuer). If the software trusts the issuer and the signature is valid, secure communication with the key's owner is possible.
+### **Κοινά Πεδία σε Πιστοποιητικά x509**
 
-Certificates are mostly issued by [certificate authorities](https://en.wikipedia.org/wiki/Certificate_authority) (CAs) in a [public-key infrastructure](https://en.wikipedia.org/wiki/Public-key_infrastructure) (PKI) setup. Another method is the [web of trust](https://en.wikipedia.org/wiki/Web_of_trust), where users directly verify each other’s keys. The common format for certificates is [X.509](https://en.wikipedia.org/wiki/X.509), which can be adapted for specific needs as outlined in RFC 5280.
+Στα πιστοποιητικά x509, αρκετά **πεδία** παίζουν κρίσιμους ρόλους στην εξασφάλιση της εγκυρότητας και της ασφάλειας του πιστοποιητικού. Ακολουθεί μια ανάλυση αυτών των πεδίων:
 
-## x509 Common Fields
+- **Αριθμός Έκδοσης** σηματοδοτεί την έκδοση της μορφής x509.
+- **Αριθμός Σειράς** προσδιορίζει μοναδικά το πιστοποιητικό μέσα στο σύστημα μιας Αρχής Πιστοποίησης (CA), κυρίως για παρακολούθηση ανάκλησης.
+- Το **Υποκείμενο** πεδίο αντιπροσωπεύει τον κάτοχο του πιστοποιητικού, ο οποίος μπορεί να είναι μια μηχανή, ένα άτομο ή ένας οργανισμός. Περιλαμβάνει λεπτομερή ταυτοποίηση όπως:
+- **Κοινό Όνομα (CN)**: Τομείς που καλύπτονται από το πιστοποιητικό.
+- **Χώρα (C)**, **Τοποθεσία (L)**, **Πολιτεία ή Επαρχία (ST, S, ή P)**, **Οργάνωση (O)**, και **Οργανωτική Μονάδα (OU)** παρέχουν γεωγραφικές και οργανωτικές λεπτομέρειες.
+- **Διακεκριμένο Όνομα (DN)** περιλαμβάνει την πλήρη ταυτοποίηση του υποκειμένου.
+- **Εκδότης** αναφέρει ποιος επαλήθευσε και υπέγραψε το πιστοποιητικό, περιλαμβάνοντας παρόμοια υποπεδία όπως το Υποκείμενο για την CA.
+- **Περίοδος Ικανότητας** σημειώνεται από τα χρονικά σήματα **Όχι Πριν** και **Όχι Μετά**, εξασφαλίζοντας ότι το πιστοποιητικό δεν χρησιμοποιείται πριν ή μετά από μια συγκεκριμένη ημερομηνία.
+- Η ενότητα **Δημόσιο Κλειδί**, κρίσιμη για την ασφάλεια του πιστοποιητικού, προσδιορίζει τον αλγόριθμο, το μέγεθος και άλλες τεχνικές λεπτομέρειες του δημόσιου κλειδιού.
+- Οι **επέκταση x509v3** ενισχύουν τη λειτουργικότητα του πιστοποιητικού, προσδιορίζοντας **Χρήση Κλειδιού**, **Εκτεταμένη Χρήση Κλειδιού**, **Εναλλακτικό Όνομα Υποκειμένου**, και άλλες ιδιότητες για την ακριβή ρύθμιση της εφαρμογής του πιστοποιητικού.
 
-### **Common Fields in x509 Certificates**
+#### **Χρήση Κλειδιού και Επεκτάσεις**
 
-In x509 certificates, several **fields** play critical roles in ensuring the certificate's validity and security. Here's a breakdown of these fields:
-
-- **Version Number** signifies the x509 format's version.
-- **Serial Number** uniquely identifies the certificate within a Certificate Authority's (CA) system, mainly for revocation tracking.
-- The **Subject** field represents the certificate's owner, which could be a machine, an individual, or an organization. It includes detailed identification such as:
-  - **Common Name (CN)**: Domains covered by the certificate.
-  - **Country (C)**, **Locality (L)**, **State or Province (ST, S, or P)**, **Organization (O)**, and **Organizational Unit (OU)** provide geographical and organizational details.
-  - **Distinguished Name (DN)** encapsulates the full subject identification.
-- **Issuer** details who verified and signed the certificate, including similar subfields as the Subject for the CA.
-- **Validity Period** is marked by **Not Before** and **Not After** timestamps, ensuring the certificate is not used before or after a certain date.
-- The **Public Key** section, crucial for the certificate's security, specifies the algorithm, size, and other technical details of the public key.
-- **x509v3 extensions** enhance the certificate's functionality, specifying **Key Usage**, **Extended Key Usage**, **Subject Alternative Name**, and other properties to fine-tune the certificate's application.
-
-#### **Key Usage and Extensions**
-
-- **Key Usage** identifies cryptographic applications of the public key, like digital signature or key encipherment.
-- **Extended Key Usage** further narrows down the certificate's use cases, e.g., for TLS server authentication.
-- **Subject Alternative Name** and **Basic Constraint** define additional host names covered by the certificate and whether it's a CA or end-entity certificate, respectively.
-- Identifiers like **Subject Key Identifier** and **Authority Key Identifier** ensure uniqueness and traceability of keys.
-- **Authority Information Access** and **CRL Distribution Points** provide paths to verify the issuing CA and check certificate revocation status.
-- **CT Precertificate SCTs** offer transparency logs, crucial for public trust in the certificate.
-
+- **Χρήση Κλειδιού** προσδιορίζει τις κρυπτογραφικές εφαρμογές του δημόσιου κλειδιού, όπως ψηφιακή υπογραφή ή κρυπτογράφηση κλειδιού.
+- **Εκτεταμένη Χρήση Κλειδιού** περιορίζει περαιτέρω τις περιπτώσεις χρήσης του πιστοποιητικού, π.χ., για πιστοποίηση διακομιστή TLS.
+- **Εναλλακτικό Όνομα Υποκειμένου** και **Βασικός Περιορισμός** καθορίζουν πρόσθετα ονόματα κεντρικών υπολογιστών που καλύπτονται από το πιστοποιητικό και αν είναι πιστοποιητικό CA ή τελικού φορέα, αντίστοιχα.
+- Αναγνωριστικά όπως **Αναγνωριστικό Κλειδιού Υποκειμένου** και **Αναγνωριστικό Κλειδιού Αρχής** εξασφαλίζουν μοναδικότητα και ιχνηλασιμότητα των κλειδιών.
+- **Πρόσβαση Πληροφοριών Αρχής** και **Σημεία Διανομής CRL** παρέχουν διαδρομές για την επαλήθευση της εκδούσας CA και τον έλεγχο της κατάστασης ανάκλησης του πιστοποιητικού.
+- **CT Προπιστοποιητικά SCTs** προσφέρουν διαφάνεια, κρίσιμη για τη δημόσια εμπιστοσύνη στο πιστοποιητικό.
 ```python
 # Example of accessing and using x509 certificate fields programmatically:
 from cryptography import x509
@@ -49,8 +40,8 @@ from cryptography.hazmat.backends import default_backend
 
 # Load an x509 certificate (assuming cert.pem is a certificate file)
 with open("cert.pem", "rb") as file:
-    cert_data = file.read()
-    certificate = x509.load_pem_x509_certificate(cert_data, default_backend())
+cert_data = file.read()
+certificate = x509.load_pem_x509_certificate(cert_data, default_backend())
 
 # Accessing fields
 serial_number = certificate.serial_number
@@ -63,133 +54,104 @@ print(f"Issuer: {issuer}")
 print(f"Subject: {subject}")
 print(f"Public Key: {public_key}")
 ```
+### **Διαφορά μεταξύ OCSP και CRL Distribution Points**
 
-### **Difference between OCSP and CRL Distribution Points**
+**OCSP** (**RFC 2560**) περιλαμβάνει έναν πελάτη και έναν απαντητή που συνεργάζονται για να ελέγξουν αν ένα ψηφιακό πιστοποιητικό δημόσιου κλειδιού έχει ανακληθεί, χωρίς να χρειάζεται να κατεβάσουν ολόκληρη την **CRL**. Αυτή η μέθοδος είναι πιο αποδοτική από την παραδοσιακή **CRL**, η οποία παρέχει μια λίστα με τους αριθμούς σειράς των ανακληθέντων πιστοποιητικών αλλά απαιτεί τη λήψη ενός ενδεχομένως μεγάλου αρχείου. Οι CRLs μπορούν να περιλαμβάνουν έως και 512 καταχωρίσεις. Περισσότερες λεπτομέρειες είναι διαθέσιμες [εδώ](https://www.arubanetworks.com/techdocs/ArubaOS%206_3_1_Web_Help/Content/ArubaFrameStyles/CertRevocation/About_OCSP_and_CRL.htm).
 
-**OCSP** (**RFC 2560**) involves a client and a responder working together to check if a digital public-key certificate has been revoked, without needing to download the full **CRL**. This method is more efficient than the traditional **CRL**, which provides a list of revoked certificate serial numbers but requires downloading a potentially large file. CRLs can include up to 512 entries. More details are available [here](https://www.arubanetworks.com/techdocs/ArubaOS%206_3_1_Web_Help/Content/ArubaFrameStyles/CertRevocation/About_OCSP_and_CRL.htm).
+### **Τι είναι η Διαφάνεια Πιστοποιητικών**
 
-### **What is Certificate Transparency**
+Η Διαφάνεια Πιστοποιητικών βοηθά στην καταπολέμηση των απειλών που σχετίζονται με πιστοποιητικά, διασφαλίζοντας ότι η έκδοση και η ύπαρξη SSL πιστοποιητικών είναι ορατές στους ιδιοκτήτες τομέων, τις CA και τους χρήστες. Οι στόχοι της είναι:
 
-Certificate Transparency helps combat certificate-related threats by ensuring the issuance and existence of SSL certificates are visible to domain owners, CAs, and users. Its objectives are:
+- Να αποτρέψει τις CA από το να εκδίδουν SSL πιστοποιητικά για έναν τομέα χωρίς τη γνώση του ιδιοκτήτη του τομέα.
+- Να καθιερώσει ένα ανοιχτό σύστημα ελέγχου για την παρακολούθηση πιστοποιητικών που εκδόθηκαν κατά λάθος ή κακόβουλα.
+- Να προστατεύσει τους χρήστες από δόλια πιστοποιητικά.
 
-- Preventing CAs from issuing SSL certificates for a domain without the domain owner's knowledge.
-- Establishing an open auditing system for tracking mistakenly or maliciously issued certificates.
-- Safeguarding users against fraudulent certificates.
+#### **Καταγραφές Πιστοποιητικών**
 
-#### **Certificate Logs**
+Οι καταγραφές πιστοποιητικών είναι δημόσια ελεγχόμενα, μόνο προσθετικά αρχεία πιστοποιητικών, που διατηρούνται από υπηρεσίες δικτύου. Αυτές οι καταγραφές παρέχουν κρυπτογραφικές αποδείξεις για σκοπούς ελέγχου. Τόσο οι αρχές έκδοσης όσο και το κοινό μπορούν να υποβάλουν πιστοποιητικά σε αυτές τις καταγραφές ή να τα ελέγξουν για επαλήθευση. Ενώ ο ακριβής αριθμός των διακομιστών καταγραφής δεν είναι σταθερός, αναμένεται να είναι λιγότερος από χίλια παγκοσμίως. Αυτοί οι διακομιστές μπορούν να διαχειρίζονται ανεξάρτητα από τις CA, ISPs ή οποιαδήποτε ενδιαφερόμενη οντότητα.
 
-Certificate logs are publicly auditable, append-only records of certificates, maintained by network services. These logs provide cryptographic proofs for auditing purposes. Both issuance authorities and the public can submit certificates to these logs or query them for verification. While the exact number of log servers is not fixed, it's expected to be less than a thousand globally. These servers can be independently managed by CAs, ISPs, or any interested entity.
+#### **Ερώτημα**
 
-#### **Query**
+Για να εξερευνήσετε τις καταγραφές Διαφάνειας Πιστοποιητικών για οποιονδήποτε τομέα, επισκεφθείτε [https://crt.sh/](https://crt.sh).
 
-To explore Certificate Transparency logs for any domain, visit [https://crt.sh/](https://crt.sh).
+Διαφορετικές μορφές υπάρχουν για την αποθήκευση πιστοποιητικών, καθεμία με τις δικές της περιπτώσεις χρήσης και συμβατότητα. Αυτή η σύνοψη καλύπτει τις κύριες μορφές και παρέχει καθοδήγηση για τη μετατροπή μεταξύ τους.
 
-Different formats exist for storing certificates, each with its own use cases and compatibility. This summary covers the main formats and provides guidance on converting between them.
+## **Μορφές**
 
-## **Formats**
+### **Μορφή PEM**
 
-### **PEM Format**
+- Η πιο ευρέως χρησιμοποιούμενη μορφή για πιστοποιητικά.
+- Απαιτεί ξεχωριστά αρχεία για πιστοποιητικά και ιδιωτικά κλειδιά, κωδικοποιημένα σε Base64 ASCII.
+- Κοινές επεκτάσεις: .cer, .crt, .pem, .key.
+- Χρησιμοποιείται κυρίως από Apache και παρόμοιους διακομιστές.
 
-- Most widely used format for certificates.
-- Requires separate files for certificates and private keys, encoded in Base64 ASCII.
-- Common extensions: .cer, .crt, .pem, .key.
-- Primarily used by Apache and similar servers.
+### **Μορφή DER**
 
-### **DER Format**
+- Μια δυαδική μορφή πιστοποιητικών.
+- Λείπουν οι δηλώσεις "BEGIN/END CERTIFICATE" που βρίσκονται σε αρχεία PEM.
+- Κοινές επεκτάσεις: .cer, .der.
+- Συχνά χρησιμοποιείται με πλατφόρμες Java.
 
-- A binary format of certificates.
-- Lacks the "BEGIN/END CERTIFICATE" statements found in PEM files.
-- Common extensions: .cer, .der.
-- Often used with Java platforms.
+### **Μορφή P7B/PKCS#7**
 
-### **P7B/PKCS#7 Format**
+- Αποθηκεύεται σε Base64 ASCII, με επεκτάσεις .p7b ή .p7c.
+- Περιέχει μόνο πιστοποιητικά και αλυσίδες πιστοποιητικών, εξαιρώντας το ιδιωτικό κλειδί.
+- Υποστηρίζεται από Microsoft Windows και Java Tomcat.
 
-- Stored in Base64 ASCII, with extensions .p7b or .p7c.
-- Contains only certificates and chain certificates, excluding the private key.
-- Supported by Microsoft Windows and Java Tomcat.
+### **Μορφή PFX/P12/PKCS#12**
 
-### **PFX/P12/PKCS#12 Format**
+- Μια δυαδική μορφή που περιλαμβάνει πιστοποιητικά διακομιστή, ενδιάμεσα πιστοποιητικά και ιδιωτικά κλειδιά σε ένα αρχείο.
+- Επεκτάσεις: .pfx, .p12.
+- Χρησιμοποιείται κυρίως σε Windows για εισαγωγή και εξαγωγή πιστοποιητικών.
 
-- A binary format that encapsulates server certificates, intermediate certificates, and private keys in one file.
-- Extensions: .pfx, .p12.
-- Mainly used on Windows for certificate import and export.
+### **Μετατροπή Μορφών**
 
-### **Converting Formats**
+**Οι μετατροπές PEM** είναι απαραίτητες για τη συμβατότητα:
 
-**PEM conversions** are essential for compatibility:
-
-- **x509 to PEM**
-
+- **x509 σε PEM**
 ```bash
 openssl x509 -in certificatename.cer -outform PEM -out certificatename.pem
 ```
-
-- **PEM to DER**
-
+- **PEM σε DER**
 ```bash
 openssl x509 -outform der -in certificatename.pem -out certificatename.der
 ```
-
-- **DER to PEM**
-
+- **DER σε PEM**
 ```bash
 openssl x509 -inform der -in certificatename.der -out certificatename.pem
 ```
-
-- **PEM to P7B**
-
+- **PEM σε P7B**
 ```bash
 openssl crl2pkcs7 -nocrl -certfile certificatename.pem -out certificatename.p7b -certfile CACert.cer
 ```
-
-- **PKCS7 to PEM**
-
+- **PKCS7 σε PEM**
 ```bash
 openssl pkcs7 -print_certs -in certificatename.p7b -out certificatename.pem
 ```
+**Οι μετατροπές PFX** είναι κρίσιμες για τη διαχείριση πιστοποιητικών στα Windows:
 
-**PFX conversions** are crucial for managing certificates on Windows:
-
-- **PFX to PEM**
-
+- **PFX σε PEM**
 ```bash
 openssl pkcs12 -in certificatename.pfx -out certificatename.pem
 ```
-
-- **PFX to PKCS#8** involves two steps:
-  1. Convert PFX to PEM
-
+- **PFX σε PKCS#8** περιλαμβάνει δύο βήματα:
+1. Μετατροπή PFX σε PEM
 ```bash
 openssl pkcs12 -in certificatename.pfx -nocerts -nodes -out certificatename.pem
 ```
-
-2. Convert PEM to PKCS8
-
+2. Μετατροπή PEM σε PKCS8
 ```bash
 openSSL pkcs8 -in certificatename.pem -topk8 -nocrypt -out certificatename.pk8
 ```
-
-- **P7B to PFX** also requires two commands:
-  1. Convert P7B to CER
-
+- **P7B σε PFX** απαιτεί επίσης δύο εντολές:
+1. Μετατροπή P7B σε CER
 ```bash
 openssl pkcs7 -print_certs -in certificatename.p7b -out certificatename.cer
 ```
-
-2. Convert CER and Private Key to PFX
-
+2. Μετατροπή CER και Ιδιωτικού Κλειδιού σε PFX
 ```bash
 openssl pkcs12 -export -in certificatename.cer -inkey privateKey.key -out certificatename.pfx -certfile cacert.cer
 ```
-
----
-
-<figure><img src="../images/image (3) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
-
-\
-Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
+--- 
 
 {{#include ../banners/hacktricks-training.md}}

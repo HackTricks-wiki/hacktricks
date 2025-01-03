@@ -1,12 +1,12 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
-If you have a pcap of a USB connection with a lot of Interruptions probably it is a USB Keyboard connection.
+Αν έχετε ένα pcap μιας σύνδεσης USB με πολλές διακοπές, πιθανότατα είναι μια σύνδεση USB πληκτρολογίου.
 
-A wireshark filter like this could be useful: `usb.transfer_type == 0x01 and frame.len == 35 and !(usb.capdata == 00:00:00:00:00:00:00:00)`
+Ένας φίλτρο wireshark όπως αυτός θα μπορούσε να είναι χρήσιμος: `usb.transfer_type == 0x01 and frame.len == 35 and !(usb.capdata == 00:00:00:00:00:00:00:00)`
 
-It could be important to know that the data that starts with "02" is pressed using shift.
+Είναι σημαντικό να γνωρίζετε ότι τα δεδομένα που ξεκινούν με "02" πατιούνται χρησιμοποιώντας shift.
 
-You can read more information and find some scripts about how to analyse this in:
+Μπορείτε να διαβάσετε περισσότερες πληροφορίες και να βρείτε μερικά σενάρια σχετικά με το πώς να αναλύσετε αυτό σε:
 
 - [https://medium.com/@ali.bawazeeer/kaizen-ctf-2018-reverse-engineer-usb-keystrok-from-pcap-file-2412351679f4](https://medium.com/@ali.bawazeeer/kaizen-ctf-2018-reverse-engineer-usb-keystrok-from-pcap-file-2412351679f4)
 - [https://github.com/tanc7/HacktheBox_Deadly_Arthropod_Writeup](https://github.com/tanc7/HacktheBox_Deadly_Arthropod_Writeup)

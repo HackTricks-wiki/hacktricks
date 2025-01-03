@@ -2,17 +2,17 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**Command-line tools** for managing **zip files** are essential for diagnosing, repairing, and cracking zip files. Here are some key utilities:
+**Εργαλεία γραμμής εντολών** για τη διαχείριση **zip αρχείων** είναι απαραίτητα για τη διάγνωση, επισκευή και σπάσιμο zip αρχείων. Ακολουθούν μερικά βασικά εργαλεία:
 
-- **`unzip`**: Reveals why a zip file may not decompress.
-- **`zipdetails -v`**: Offers detailed analysis of zip file format fields.
-- **`zipinfo`**: Lists contents of a zip file without extracting them.
-- **`zip -F input.zip --out output.zip`** and **`zip -FF input.zip --out output.zip`**: Try to repair corrupted zip files.
-- **[fcrackzip](https://github.com/hyc/fcrackzip)**: A tool for brute-force cracking of zip passwords, effective for passwords up to around 7 characters.
+- **`unzip`**: Αποκαλύπτει γιατί ένα zip αρχείο μπορεί να μην αποσυμπιέζεται.
+- **`zipdetails -v`**: Προσφέρει λεπτομερή ανάλυση των πεδίων μορφής zip αρχείου.
+- **`zipinfo`**: Λίστα περιεχομένων ενός zip αρχείου χωρίς να τα εξάγει.
+- **`zip -F input.zip --out output.zip`** και **`zip -FF input.zip --out output.zip`**: Προσπαθούν να επισκευάσουν κατεστραμμένα zip αρχεία.
+- **[fcrackzip](https://github.com/hyc/fcrackzip)**: Ένα εργαλείο για brute-force σπάσιμο κωδικών zip, αποτελεσματικό για κωδικούς έως περίπου 7 χαρακτήρες.
 
-The [Zip file format specification](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT) provides comprehensive details on the structure and standards of zip files.
+Η [προδιαγραφή μορφής zip αρχείου](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT) παρέχει λεπτομερείς πληροφορίες σχετικά με τη δομή και τα πρότυπα των zip αρχείων.
 
-It's crucial to note that password-protected zip files **do not encrypt filenames or file sizes** within, a security flaw not shared with RAR or 7z files which encrypt this information. Furthermore, zip files encrypted with the older ZipCrypto method are vulnerable to a **plaintext attack** if an unencrypted copy of a compressed file is available. This attack leverages the known content to crack the zip's password, a vulnerability detailed in [HackThis's article](https://www.hackthis.co.uk/articles/known-plaintext-attack-cracking-zip-files) and further explained in [this academic paper](https://www.cs.auckland.ac.nz/~mike/zipattacks.pdf). However, zip files secured with **AES-256** encryption are immune to this plaintext attack, showcasing the importance of choosing secure encryption methods for sensitive data.
+Είναι κρίσιμο να σημειωθεί ότι τα zip αρχεία που προστατεύονται με κωδικό **δεν κρυπτογραφούν τα ονόματα αρχείων ή τα μεγέθη αρχείων** εντός τους, μια αδυναμία ασφαλείας που δεν μοιράζονται τα RAR ή 7z αρχεία που κρυπτογραφούν αυτές τις πληροφορίες. Επιπλέον, τα zip αρχεία που κρυπτογραφούνται με την παλαιότερη μέθοδο ZipCrypto είναι ευάλωτα σε **επίθεση απλού κειμένου** αν είναι διαθέσιμο ένα μη κρυπτογραφημένο αντίγραφο ενός συμπιεσμένου αρχείου. Αυτή η επίθεση εκμεταλλεύεται το γνωστό περιεχόμενο για να σπάσει τον κωδικό του zip, μια ευπάθεια που αναλύεται στο [άρθρο του HackThis](https://www.hackthis.co.uk/articles/known-plaintext-attack-cracking-zip-files) και εξηγείται περαιτέρω σε [αυτή την ακαδημαϊκή εργασία](https://www.cs.auckland.ac.nz/~mike/zipattacks.pdf). Ωστόσο, τα zip αρχεία που ασφαλίζονται με κρυπτογράφηση **AES-256** είναι ανθεκτικά σε αυτή την επίθεση απλού κειμένου, επιδεικνύοντας τη σημασία της επιλογής ασφαλών μεθόδων κρυπτογράφησης για ευαίσθητα δεδομένα.
 
 ## References
 

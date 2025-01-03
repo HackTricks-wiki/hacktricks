@@ -1,69 +1,69 @@
-# Detecting Phishing
+# Ανίχνευση Phishing
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Introduction
+## Εισαγωγή
 
-To detect a phishing attempt it's important to **understand the phishing techniques that are being used nowadays**. On the parent page of this post, you can find this information, so if you aren't aware of which techniques are being used today I recommend you to go to the parent page and read at least that section.
+Για να ανιχνεύσετε μια απόπειρα phishing είναι σημαντικό να **κατανοήσετε τις τεχνικές phishing που χρησιμοποιούνται σήμερα**. Στη γονική σελίδα αυτής της ανάρτησης, μπορείτε να βρείτε αυτές τις πληροφορίες, οπότε αν δεν γνωρίζετε ποιες τεχνικές χρησιμοποιούνται σήμερα, σας προτείνω να πάτε στη γονική σελίδα και να διαβάσετε τουλάχιστον αυτή την ενότητα.
 
-This post is based on the idea that the **attackers will try to somehow mimic or use the victim's domain name**. If your domain is called `example.com` and you are phished using a completely different domain name for some reason like `youwonthelottery.com`, these techniques aren't going to uncover it.
+Αυτή η ανάρτηση βασίζεται στην ιδέα ότι οι **επιτιθέμενοι θα προσπαθήσουν με κάποιο τρόπο να μιμηθούν ή να χρησιμοποιήσουν το όνομα τομέα του θύματος**. Αν το όνομα τομέα σας είναι `example.com` και σας phishing χρησιμοποιώντας ένα εντελώς διαφορετικό όνομα τομέα για κάποιο λόγο όπως `youwonthelottery.com`, αυτές οι τεχνικές δεν θα το αποκαλύψουν.
 
-## Domain name variations
+## Παραλλαγές ονομάτων τομέα
 
-It's kind of **easy** to **uncover** those **phishing** attempts that will use a **similar domain** name inside the email.\
-It's enough to **generate a list of the most probable phishing names** that an attacker may use and **check** if it's **registered** or just check if there is any **IP** using it.
+Είναι κάπως **εύκολο** να **αποκαλύψετε** αυτές τις **απόπειρες phishing** που θα χρησιμοποιήσουν ένα **παρόμοιο όνομα τομέα** μέσα στο email.\
+Αρκεί να **δημιουργήσετε μια λίστα με τα πιο πιθανά ονόματα phishing** που μπορεί να χρησιμοποιήσει ένας επιτιθέμενος και να **ελέγξετε** αν είναι **καταχωρημένα** ή απλώς να ελέγξετε αν υπάρχει κάποια **IP** που τα χρησιμοποιεί.
 
-### Finding suspicious domains
+### Εύρεση ύποπτων τομέων
 
-For this purpose, you can use any of the following tools. Note that these tolls will also perform DNS requests automatically to check if the domain has any IP assigned to it:
+Για αυτόν τον σκοπό, μπορείτε να χρησιμοποιήσετε οποιοδήποτε από τα παρακάτω εργαλεία. Σημειώστε ότι αυτά τα εργαλεία θα εκτελούν επίσης αυτόματα DNS αιτήματα για να ελέγξουν αν ο τομέας έχει κάποια IP που του έχει ανατεθεί:
 
 - [**dnstwist**](https://github.com/elceef/dnstwist)
 - [**urlcrazy**](https://github.com/urbanadventurer/urlcrazy)
 
 ### Bitflipping
 
-**You can find a short the explanation of this technique in the parent page. Or read the original research in** [**https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/**](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
+**Μπορείτε να βρείτε μια σύντομη εξήγηση αυτής της τεχνικής στη γονική σελίδα. Ή διαβάστε την πρωτότυπη έρευνα στο** [**https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/**](https://www.bleepingcomputer.com/news/security/hijacking-traffic-to-microsoft-s-windowscom-with-bitflipping/)
 
-For example, a 1 bit modification in the domain microsoft.com can transform it into _windnws.com._\
-**Attackers may register as many bit-flipping domains as possible related to the victim to redirect legitimate users to their infrastructure**.
+Για παράδειγμα, μια τροποποίηση 1 bit στο domain microsoft.com μπορεί να το μετατρέψει σε _windnws.com._\
+**Οι επιτιθέμενοι μπορεί να καταχωρήσουν όσο το δυνατόν περισσότερους τομείς bit-flipping σχετικούς με το θύμα για να ανακατευθύνουν νόμιμους χρήστες στην υποδομή τους**.
 
-**All possible bit-flipping domain names should be also monitored.**
+**Όλα τα πιθανά ονόματα τομέα bit-flipping θα πρέπει επίσης να παρακολουθούνται.**
 
-### Basic checks
+### Βασικοί έλεγχοι
 
-Once you have a list of potential suspicious domain names you should **check** them (mainly the ports HTTP and HTTPS) to **see if they are using some login form similar** to someone of the victim's domain.\
-You could also check port 3333 to see if it's open and running an instance of `gophish`.\
-It's also interesting to know **how old each discovered suspicions domain is**, the younger it's the riskier it is.\
-You can also get **screenshots** of the HTTP and/or HTTPS suspicious web page to see if it's suspicious and in that case **access it to take a deeper look**.
+Αφού έχετε μια λίστα με πιθανά ύποπτα ονόματα τομέα, θα πρέπει να **τα ελέγξετε** (κυρίως τις θύρες HTTP και HTTPS) για να **δείτε αν χρησιμοποιούν κάποια φόρμα σύνδεσης παρόμοια** με αυτήν κάποιου από τον τομέα του θύματος.\
+Μπορείτε επίσης να ελέγξετε την θύρα 3333 για να δείτε αν είναι ανοιχτή και τρέχει μια instance του `gophish`.\
+Είναι επίσης ενδιαφέρον να γνωρίζετε **πόσο παλιός είναι κάθε ανακαλυφθείς ύποπτος τομέας**, όσο πιο νέος είναι, τόσο πιο επικίνδυνος είναι.\
+Μπορείτε επίσης να πάρετε **σcreenshot** της ύποπτης ιστοσελίδας HTTP και/ή HTTPS για να δείτε αν είναι ύποπτη και σε αυτή την περίπτωση **να την επισκεφθείτε για να ρίξετε μια πιο προσεκτική ματιά**.
 
-### Advanced checks
+### Προχωρημένοι έλεγχοι
 
-If you want to go one step further I would recommend you to **monitor those suspicious domains and search for more** once in a while (every day? it only takes a few seconds/minutes). You should also **check** the open **ports** of the related IPs and **search for instances of `gophish` or similar tools** (yes, attackers also make mistakes) and **monitor the HTTP and HTTPS web pages of the suspicious domains and subdomains** to see if they have copied any login form from the victim's web pages.\
-In order to **automate this** I would recommend having a list of login forms of the victim's domains, spider the suspicious web pages and comparing each login form found inside the suspicious domains with each login form of the victim's domain using something like `ssdeep`.\
-If you have located the login forms of the suspicious domains, you can try to **send junk credentials** and **check if it's redirecting you to the victim's domain**.
+Αν θέλετε να προχωρήσετε ένα βήμα παραπέρα, θα σας πρότεινα να **παρακολουθείτε αυτούς τους ύποπτους τομείς και να αναζητάτε περισσότερους** από καιρό σε καιρό (κάθε μέρα; χρειάζεται μόνο μερικά δευτερόλεπτα/λεπτά). Θα πρέπει επίσης να **ελέγξετε** τις ανοιχτές **θύρες** των σχετικών IP και να **αναζητήσετε instances του `gophish` ή παρόμοιων εργαλείων** (ναι, οι επιτιθέμενοι κάνουν επίσης λάθη) και να **παρακολουθείτε τις ιστοσελίδες HTTP και HTTPS των ύποπτων τομέων και υποτομέων** για να δείτε αν έχουν αντιγράψει κάποια φόρμα σύνδεσης από τις ιστοσελίδες του θύματος.\
+Για να **αυτοματοποιήσετε αυτό**, θα σας πρότεινα να έχετε μια λίστα με τις φόρμες σύνδεσης των τομέων του θύματος, να σπινάρετε τις ύποπτες ιστοσελίδες και να συγκρίνετε κάθε φόρμα σύνδεσης που βρέθηκε μέσα στους ύποπτους τομείς με κάθε φόρμα σύνδεσης του τομέα του θύματος χρησιμοποιώντας κάτι όπως το `ssdeep`.\
+Αν έχετε εντοπίσει τις φόρμες σύνδεσης των ύποπτων τομέων, μπορείτε να προσπαθήσετε να **στείλετε ψεύτικα διαπιστευτήρια** και να **ελέγξετε αν σας ανακατευθύνει στον τομέα του θύματος**.
 
-## Domain names using keywords
+## Ονόματα τομέα που χρησιμοποιούν λέξεις-κλειδιά
 
-The parent page also mentions a domain name variation technique that consists of putting the **victim's domain name inside a bigger domain** (e.g. paypal-financial.com for paypal.com).
+Η γονική σελίδα αναφέρει επίσης μια τεχνική παραλλαγής ονομάτων τομέα που συνίσταται στο να βάζετε το **όνομα τομέα του θύματος μέσα σε έναν μεγαλύτερο τομέα** (π.χ. paypal-financial.com για paypal.com).
 
-### Certificate Transparency
+### Διαφάνεια Πιστοποιητικών
 
-It's not possible to take the previous "Brute-Force" approach but it's actually **possible to uncover such phishing attempts** also thanks to certificate transparency. Every time a certificate is emitted by a CA, the details are made public. This means that by reading the certificate transparency or even monitoring it, it's **possible to find domains that are using a keyword inside its name** For example, if an attacker generates a certificate of [https://paypal-financial.com](https://paypal-financial.com), seeing the certificate it's possible to find the keyword "paypal" and know that suspicious email is being used.
+Δεν είναι δυνατόν να ακολουθήσετε την προηγούμενη προσέγγιση "Brute-Force", αλλά είναι στην πραγματικότητα **δυνατό να αποκαλύψετε τέτοιες απόπειρες phishing** επίσης χάρη στη διαφάνεια πιστοποιητικών. Κάθε φορά που ένα πιστοποιητικό εκδίδεται από μια CA, οι λεπτομέρειες δημοσιοποιούνται. Αυτό σημαίνει ότι διαβάζοντας τη διαφάνεια πιστοποιητικών ή ακόμα και παρακολουθώντας την, είναι **δυνατό να βρείτε τομείς που χρησιμοποιούν μια λέξη-κλειδί μέσα στο όνομά τους**. Για παράδειγμα, αν ένας επιτιθέμενος δημιουργήσει ένα πιστοποιητικό για [https://paypal-financial.com](https://paypal-financial.com), βλέποντας το πιστοποιητικό είναι δυνατό να βρείτε τη λέξη-κλειδί "paypal" και να γνωρίζετε ότι χρησιμοποιείται ένα ύποπτο email.
 
-The post [https://0xpatrik.com/phishing-domains/](https://0xpatrik.com/phishing-domains/) suggests that you can use Censys to search for certificates affecting a specific keyword and filter by date (only "new" certificates) and by the CA issuer "Let's Encrypt":
+Η ανάρτηση [https://0xpatrik.com/phishing-domains/](https://0xpatrik.com/phishing-domains/) προτείνει ότι μπορείτε να χρησιμοποιήσετε το Censys για να αναζητήσετε πιστοποιητικά που επηρεάζουν μια συγκεκριμένη λέξη-κλειδί και να φιλτράρετε κατά ημερομηνία (μόνο "νέα" πιστοποιητικά) και από τον εκδότη CA "Let's Encrypt":
 
 ![https://0xpatrik.com/content/images/2018/07/cert_listing.png](<../../images/image (1115).png>)
 
-However, you can do "the same" using the free web [**crt.sh**](https://crt.sh). You can **search for the keyword** and the **filter** the results **by date and CA** if you wish.
+Ωστόσο, μπορείτε να κάνετε "το ίδιο" χρησιμοποιώντας το δωρεάν web [**crt.sh**](https://crt.sh). Μπορείτε να **αναζητήσετε τη λέξη-κλειδί** και να **φιλτράρετε** τα αποτελέσματα **κατά ημερομηνία και CA** αν το επιθυμείτε.
 
 ![](<../../images/image (519).png>)
 
-Using this last option you can even use the field Matching Identities to see if any identity from the real domain matches any of the suspicious domains (note that a suspicious domain can be a false positive).
+Χρησιμοποιώντας αυτή την τελευταία επιλογή, μπορείτε ακόμη και να χρησιμοποιήσετε το πεδίο Matching Identities για να δείτε αν κάποια ταυτότητα από τον πραγματικό τομέα ταιριάζει με κάποιον από τους ύποπτους τομείς (σημειώστε ότι ένας ύποπτος τομέας μπορεί να είναι ψευδώς θετικός).
 
-**Another alternative** is the fantastic project called [**CertStream**](https://medium.com/cali-dog-security/introducing-certstream-3fc13bb98067). CertStream provides a real-time stream of newly generated certificates which you can use to detect specified keywords in (near) real-time. In fact, there is a project called [**phishing_catcher**](https://github.com/x0rz/phishing_catcher) that does just that.
+**Μια άλλη εναλλακτική** είναι το φανταστικό έργο που ονομάζεται [**CertStream**](https://medium.com/cali-dog-security/introducing-certstream-3fc13bb98067). Το CertStream παρέχει μια ροή σε πραγματικό χρόνο νέων πιστοποιητικών που μπορείτε να χρησιμοποιήσετε για να ανιχνεύσετε καθορισμένες λέξεις-κλειδιά σε (σχεδόν) πραγματικό χρόνο. Στην πραγματικότητα, υπάρχει ένα έργο που ονομάζεται [**phishing_catcher**](https://github.com/x0rz/phishing_catcher) που κάνει ακριβώς αυτό.
 
-### **New domains**
+### **Νέοι τομείς**
 
-**One last alternative** is to gather a list of **newly registered domains** for some TLDs ([Whoxy](https://www.whoxy.com/newly-registered-domains/) provides such service) and **check the keywords in these domains**. However, long domains usually use one or more subdomains, therefore the keyword won't appear inside the FLD and you won't be able to find the phishing subdomain.
+**Μια τελευταία εναλλακτική** είναι να συγκεντρώσετε μια λίστα με **νέα καταχωρημένα ονόματα τομέα** για ορισμένα TLDs ([Whoxy](https://www.whoxy.com/newly-registered-domains/) παρέχει τέτοια υπηρεσία) και να **ελέγξετε τις λέξεις-κλειδιά σε αυτούς τους τομείς**. Ωστόσο, οι μακροχρόνιοι τομείς συνήθως χρησιμοποιούν ένα ή περισσότερους υποτομείς, επομένως η λέξη-κλειδί δεν θα εμφανίζεται μέσα στο FLD και δεν θα μπορείτε να βρείτε τον υποτομέα phishing.
 
 {{#include ../../banners/hacktricks-training.md}}

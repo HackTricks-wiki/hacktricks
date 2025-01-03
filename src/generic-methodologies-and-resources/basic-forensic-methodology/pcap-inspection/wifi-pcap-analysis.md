@@ -2,9 +2,9 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Check BSSIDs
+## Έλεγχος BSSIDs
 
-When you receive a capture whose principal traffic is Wifi using WireShark you can start investigating all the SSIDs of the capture with _Wireless --> WLAN Traffic_:
+Όταν λάβετε μια καταγραφή της οποίας η κύρια κίνηση είναι Wifi χρησιμοποιώντας το WireShark, μπορείτε να αρχίσετε να ερευνάτε όλα τα SSIDs της καταγραφής με _Wireless --> WLAN Traffic_:
 
 ![](<../../../images/image (106).png>)
 
@@ -12,29 +12,27 @@ When you receive a capture whose principal traffic is Wifi using WireShark you c
 
 ### Brute Force
 
-One of the columns of that screen indicates if **any authentication was found inside the pcap**. If that is the case you can try to Brute force it using `aircrack-ng`:
-
+Μία από τις στήλες της οθόνης αυτής υποδεικνύει αν **βρέθηκε οποιαδήποτε αυθεντικοποίηση μέσα στο pcap**. Αν αυτό ισχύει, μπορείτε να προσπαθήσετε να το σπάσετε χρησιμοποιώντας το `aircrack-ng`:
 ```bash
 aircrack-ng -w pwds-file.txt -b <BSSID> file.pcap
 ```
+Για παράδειγμα, θα ανακτήσει το WPA passphrase που προστατεύει ένα PSK (προκαθορισμένο κλειδί), το οποίο θα απαιτηθεί για να αποκρυπτογραφήσετε την κίνηση αργότερα.
 
-For example it will retrieve the WPA passphrase protecting a PSK (pre shared-key), that will be required to decrypt the trafic later.
+## Δεδομένα σε Beacons / Παράπλευρη Διάσταση
 
-## Data in Beacons / Side Channel
+Εάν υποψιάζεστε ότι **δεδομένα διαρρέουν μέσα σε beacons ενός Wifi δικτύου**, μπορείτε να ελέγξετε τα beacons του δικτύου χρησιμοποιώντας ένα φίλτρο όπως το εξής: `wlan contains <NAMEofNETWORK>`, ή `wlan.ssid == "NAMEofNETWORK"` αναζητώντας μέσα στα φιλτραρισμένα πακέτα για ύποπτες αλυσίδες.
 
-If you suspect that **data is being leaked inside beacons of a Wifi network** you can check the beacons of the network using a filter like the following one: `wlan contains <NAMEofNETWORK>`, or `wlan.ssid == "NAMEofNETWORK"` search inside the filtered packets for suspicious strings.
+## Βρείτε Άγνωστες Διευθύνσεις MAC σε Ένα Wifi Δίκτυο
 
-## Find Unknown MAC Addresses in A Wifi Network
-
-The following link will be useful to find the **machines sending data inside a Wifi Network**:
+Ο παρακάτω σύνδεσμος θα είναι χρήσιμος για να βρείτε τις **μηχανές που στέλνουν δεδομένα μέσα σε ένα Wifi Δίκτυο**:
 
 - `((wlan.ta == e8:de:27:16:70:c9) && !(wlan.fc == 0x8000)) && !(wlan.fc.type_subtype == 0x0005) && !(wlan.fc.type_subtype ==0x0004) && !(wlan.addr==ff:ff:ff:ff:ff:ff) && wlan.fc.type==2`
 
-If you already know **MAC addresses you can remove them from the output** adding checks like this one: `&& !(wlan.addr==5c:51:88:31:a0:3b)`
+Εάν ήδη γνωρίζετε **διευθύνσεις MAC μπορείτε να τις αφαιρέσετε από την έξοδο** προσθέτοντας ελέγχους όπως αυτόν: `&& !(wlan.addr==5c:51:88:31:a0:3b)`
 
-Once you have detected **unknown MAC** addresses communicating inside the network you can use **filters** like the following one: `wlan.addr==<MAC address> && (ftp || http || ssh || telnet)` to filter its traffic. Note that ftp/http/ssh/telnet filters are useful if you have decrypted the traffic.
+Μόλις έχετε ανιχνεύσει **άγνωστες διευθύνσεις MAC** που επικοινωνούν μέσα στο δίκτυο, μπορείτε να χρησιμοποιήσετε **φίλτρα** όπως το εξής: `wlan.addr==<MAC address> && (ftp || http || ssh || telnet)` για να φιλτράρετε την κίνησή τους. Σημειώστε ότι τα φίλτρα ftp/http/ssh/telnet είναι χρήσιμα εάν έχετε αποκρυπτογραφήσει την κίνηση.
 
-## Decrypt Traffic
+## Αποκρυπτογράφηση Κίνησης
 
 Edit --> Preferences --> Protocols --> IEEE 802.11--> Edit
 

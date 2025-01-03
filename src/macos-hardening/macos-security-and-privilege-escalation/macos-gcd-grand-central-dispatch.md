@@ -170,7 +170,7 @@ sleep(1)  // Simulate a long-running task
 ```
 ## Frida
 
-Το παρακάτω σενάριο Frida μπορεί να χρησιμοποιηθεί για να **συνδεθεί σε πολλές `dispatch`** συναρτήσεις και να εξάγει το όνομα της ουράς, το backtrace και το block: [**https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js**](https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js)
+Το παρακάτω σενάριο Frida μπορεί να χρησιμοποιηθεί για να **hook into several `dispatch`** συναρτήσεις και να εξάγει το όνομα της ουράς, το backtrace και το block: [**https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js**](https://github.com/seemoo-lab/frida-scripts/blob/main/scripts/libdispatch.js)
 ```bash
 frida -U <prog_name> -l libdispatch.js
 
@@ -185,9 +185,9 @@ Backtrace:
 ```
 ## Ghidra
 
-Αυτή τη στιγμή, το Ghidra δεν κατανοεί ούτε τη δομή ObjectiveC **`dispatch_block_t`**, ούτε τη **`swift_dispatch_block`**.
+Αυτή τη στιγμή, το Ghidra δεν κατανοεί ούτε τη δομή ObjectiveC **`dispatch_block_t`**, ούτε τη δομή **`swift_dispatch_block`**.
 
-Έτσι, αν θέλετε να την κατανοήσει, μπορείτε απλά να **τις δηλώσετε**:
+Έτσι, αν θέλετε να τις κατανοήσει, μπορείτε απλά να **τις δηλώσετε**:
 
 <figure><img src="../../images/image (1160).png" alt="" width="563"><figcaption></figcaption></figure>
 
@@ -195,7 +195,7 @@ Backtrace:
 
 <figure><img src="../../images/image (1163).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Στη συνέχεια, βρείτε ένα μέρος στον κώδικα όπου **χρησιμοποιούνται**:
+Στη συνέχεια, βρείτε ένα μέρος στον κώδικα όπου χρησιμοποιούνται:
 
 > [!TIP]
 > Σημειώστε όλες τις αναφορές που γίνονται στο "block" για να κατανοήσετε πώς μπορείτε να καταλάβετε ότι η δομή χρησιμοποιείται.

@@ -1,29 +1,17 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
+**Η χειραγώγηση αρχείων ήχου και βίντεο** είναι βασικό στοιχείο στις **προκλήσεις ψηφιακής εγκληματολογίας CTF**, αξιοποιώντας **στεγανографία** και ανάλυση μεταδεδομένων για να κρύψει ή να αποκαλύψει μυστικά μηνύματα. Εργαλεία όπως το **[mediainfo](https://mediaarea.net/en/MediaInfo)** και το **`exiftool`** είναι απαραίτητα για την επιθεώρηση μεταδεδομένων αρχείων και την αναγνώριση τύπων περιεχομένου.
 
-Deepen your expertise in **Mobile Security** with 8kSec Academy. Master iOS and Android security through our self-paced courses and get certified:
+Για προκλήσεις ήχου, το **[Audacity](http://www.audacityteam.org/)** ξεχωρίζει ως ένα κορυφαίο εργαλείο για την προβολή κυματομορφών και την ανάλυση φασματογραμμάτων, απαραίτητο για την αποκάλυψη κειμένου που έχει κωδικοποιηθεί σε ήχο. Το **[Sonic Visualiser](http://www.sonicvisualiser.org/)** συνιστάται ιδιαίτερα για λεπτομερή ανάλυση φασματογραμμάτων. Το **Audacity** επιτρέπει τη χειραγώγηση ήχου όπως η επιβράδυνση ή η αναστροφή κομματιών για την ανίχνευση κρυμμένων μηνυμάτων. Το **[Sox](http://sox.sourceforge.net/)**, ένα εργαλείο γραμμής εντολών, διαπρέπει στη μετατροπή και επεξεργασία αρχείων ήχου.
 
-{% embed url="https://academy.8ksec.io/" %}
+**Η χειραγώγηση των λιγότερο σημαντικών bit (LSB)** είναι μια κοινή τεχνική στη στεγανографία ήχου και βίντεο, εκμεταλλευόμενη τα σταθερού μεγέθους κομμάτια των αρχείων πολυμέσων για να ενσωματώσει δεδομένα διακριτικά. Το **[Multimon-ng](http://tools.kali.org/wireless-attacks/multimon-ng)** είναι χρήσιμο για την αποκωδικοποίηση μηνυμάτων που είναι κρυμμένα ως **DTMF τόνοι** ή **κωδικός Μορς**.
 
-**Audio and video file manipulation** is a staple in **CTF forensics challenges**, leveraging **steganography** and metadata analysis to hide or reveal secret messages. Tools such as **[mediainfo](https://mediaarea.net/en/MediaInfo)** and **`exiftool`** are essential for inspecting file metadata and identifying content types.
+Οι προκλήσεις βίντεο συχνά περιλαμβάνουν μορφές κοντέινερ που συνδυάζουν ροές ήχου και βίντεο. Το **[FFmpeg](http://ffmpeg.org/)** είναι το εργαλείο αναφοράς για την ανάλυση και χειραγώγηση αυτών των μορφών, ικανό να απο-πολυπλέκει και να αναπαράγει περιεχόμενο. Για προγραμματιστές, το **[ffmpy](http://ffmpy.readthedocs.io/en/latest/examples.html)** ενσωματώνει τις δυνατότητες του FFmpeg σε Python για προηγμένες αλληλεπιδράσεις μέσω σεναρίων.
 
-For audio challenges, **[Audacity](http://www.audacityteam.org/)** stands out as a premier tool for viewing waveforms and analyzing spectrograms, essential for uncovering text encoded in audio. **[Sonic Visualiser](http://www.sonicvisualiser.org/)** is highly recommended for detailed spectrogram analysis. **Audacity** allows for audio manipulation like slowing down or reversing tracks to detect hidden messages. **[Sox](http://sox.sourceforge.net/)**, a command-line utility, excels in converting and editing audio files.
+Αυτή η σειρά εργαλείων υπογραμμίζει την ευελιξία που απαιτείται στις προκλήσεις CTF, όπου οι συμμετέχοντες πρέπει να χρησιμοποιήσουν ένα ευρύ φάσμα τεχνικών ανάλυσης και χειραγώγησης για να αποκαλύψουν κρυμμένα δεδομένα μέσα σε αρχεία ήχου και βίντεο.
 
-**Least Significant Bits (LSB)** manipulation is a common technique in audio and video steganography, exploiting the fixed-size chunks of media files to embed data discreetly. **[Multimon-ng](http://tools.kali.org/wireless-attacks/multimon-ng)** is useful for decoding messages hidden as **DTMF tones** or **Morse code**.
-
-Video challenges often involve container formats that bundle audio and video streams. **[FFmpeg](http://ffmpeg.org/)** is the go-to for analyzing and manipulating these formats, capable of de-multiplexing and playing back content. For developers, **[ffmpy](http://ffmpy.readthedocs.io/en/latest/examples.html)** integrates FFmpeg's capabilities into Python for advanced scriptable interactions.
-
-This array of tools underscores the versatility required in CTF challenges, where participants must employ a broad spectrum of analysis and manipulation techniques to uncover hidden data within audio and video files.
-
-## References
+## Αναφορές
 
 - [https://trailofbits.github.io/ctf/forensics/](https://trailofbits.github.io/ctf/forensics/)
-
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
-
-Deepen your expertise in **Mobile Security** with 8kSec Academy. Master iOS and Android security through our self-paced courses and get certified:
-
-{% embed url="https://academy.8ksec.io/" %}
 
 {{#include ../../../banners/hacktricks-training.md}}

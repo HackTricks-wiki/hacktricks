@@ -1,124 +1,109 @@
-# Checklist - Linux Privilege Escalation
+# Λίστα Ελέγχου - Ανύψωση Δικαιωμάτων Linux
 
 {{#include ../banners/hacktricks-training.md}}
 
-<figure><img src="../images/image (3).png" alt=""><figcaption></figcaption></figure>
+### **Καλύτερο εργαλείο για αναζήτηση τοπικών διαδρομών ανύψωσης δικαιωμάτων Linux:** [**LinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS)
 
-Join [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server to communicate with experienced hackers and bug bounty hunters!
+### [Πληροφορίες Συστήματος](privilege-escalation/#system-information)
 
-**Hacking Insights**\
-Engage with content that delves into the thrill and challenges of hacking
+- [ ] Λάβετε **πληροφορίες OS**
+- [ ] Ελέγξτε το [**PATH**](privilege-escalation/#path), υπάρχει **γραμμή που μπορεί να γραφτεί**;
+- [ ] Ελέγξτε [**μεταβλητές περιβάλλοντος**](privilege-escalation/#env-info), υπάρχει κάποια ευαίσθητη λεπτομέρεια;
+- [ ] Αναζητήστε [**εκμεταλλεύσεις πυρήνα**](privilege-escalation/#kernel-exploits) **χρησιμοποιώντας scripts** (DirtyCow;)
+- [ ] **Ελέγξτε** αν η [**έκδοση sudo** είναι ευάλωτη](privilege-escalation/#sudo-version)
+- [ ] [**Η υπογραφή Dmesg** απέτυχε](privilege-escalation/#dmesg-signature-verification-failed)
+- [ ] Περισσότερη αναγνώριση συστήματος ([ημερομηνία, στατιστικά συστήματος, πληροφορίες CPU, εκτυπωτές](privilege-escalation/#more-system-enumeration))
+- [ ] [**Αναγνωρίστε περισσότερες άμυνες**](privilege-escalation/#enumerate-possible-defenses)
 
-**Real-Time Hack News**\
-Keep up-to-date with fast-paced hacking world through real-time news and insights
+### [Δίσκοι](privilege-escalation/#drives)
 
-**Latest Announcements**\
-Stay informed with the newest bug bounties launching and crucial platform updates
+- [ ] **Λίστα των τοποθετημένων** δίσκων
+- [ ] **Κάποιος δίσκος που δεν είναι τοποθετημένος;**
+- [ ] **Κάποια διαπιστευτήρια στο fstab;**
 
-**Join us on** [**Discord**](https://discord.com/invite/N3FrSbmwdy) and start collaborating with top hackers today!
+### [**Εγκατεστημένο Λογισμικό**](privilege-escalation/#installed-software)
 
-### **Best tool to look for Linux local privilege escalation vectors:** [**LinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS)
+- [ ] **Ελέγξτε για** [**χρήσιμο λογισμικό**](privilege-escalation/#useful-software) **που είναι εγκατεστημένο**
+- [ ] **Ελέγξτε για** [**ευάλωτο λογισμικό**](privilege-escalation/#vulnerable-software-installed) **που είναι εγκατεστημένο**
 
-### [System Information](privilege-escalation/#system-information)
+### [Διεργασίες](privilege-escalation/#processes)
 
-- [ ] Get **OS information**
-- [ ] Check the [**PATH**](privilege-escalation/#path), any **writable folder**?
-- [ ] Check [**env variables**](privilege-escalation/#env-info), any sensitive detail?
-- [ ] Search for [**kernel exploits**](privilege-escalation/#kernel-exploits) **using scripts** (DirtyCow?)
-- [ ] **Check** if the [**sudo version** is vulnerable](privilege-escalation/#sudo-version)
-- [ ] [**Dmesg** signature verification failed](privilege-escalation/#dmesg-signature-verification-failed)
-- [ ] More system enum ([date, system stats, cpu info, printers](privilege-escalation/#more-system-enumeration))
-- [ ] [Enumerate more defenses](privilege-escalation/#enumerate-possible-defenses)
+- [ ] Τρέχει κάποιο **άγνωστο λογισμικό**;
+- [ ] Τρέχει κάποιο λογισμικό με **περισσότερα δικαιώματα από όσα θα έπρεπε**;
+- [ ] Αναζητήστε **εκμεταλλεύσεις τρεχουσών διεργασιών** (ιδιαίτερα την έκδοση που τρέχει).
+- [ ] Μπορείτε να **τροποποιήσετε το δυαδικό** οποιασδήποτε τρέχουσας διεργασίας;
+- [ ] **Παρακολουθήστε διεργασίες** και ελέγξτε αν τρέχει κάποια ενδιαφέρουσα διεργασία συχνά.
+- [ ] Μπορείτε να **διαβάσετε** κάποια ενδιαφέρουσα **μνήμη διεργασίας** (όπου θα μπορούσαν να αποθηκευτούν κωδικοί);
 
-### [Drives](privilege-escalation/#drives)
+### [Προγραμματισμένα/Cron jobs;](privilege-escalation/#scheduled-jobs)
 
-- [ ] **List mounted** drives
-- [ ] **Any unmounted drive?**
-- [ ] **Any creds in fstab?**
+- [ ] Ελέγχεται το [**PATH**](privilege-escalation/#cron-path) από κάποιο cron και μπορείτε να **γράψετε** σε αυτό;
+- [ ] Κάποιο [**wildcard**](privilege-escalation/#cron-using-a-script-with-a-wildcard-wildcard-injection) σε ένα cron job;
+- [ ] Κάποιο [**τροποποιήσιμο script**](privilege-escalation/#cron-script-overwriting-and-symlink) εκτελείται ή είναι μέσα σε **τροποποιήσιμο φάκελο**;
+- [ ] Έχετε ανιχνεύσει ότι κάποιο **script** θα μπορούσε να είναι ή είναι [**εκτελούμενο** πολύ **συχνά**](privilege-escalation/#frequent-cron-jobs); (κάθε 1, 2 ή 5 λεπτά)
 
-### [**Installed Software**](privilege-escalation/#installed-software)
+### [Υπηρεσίες](privilege-escalation/#services)
 
-- [ ] **Check for**[ **useful software**](privilege-escalation/#useful-software) **installed**
-- [ ] **Check for** [**vulnerable software**](privilege-escalation/#vulnerable-software-installed) **installed**
+- [ ] Κάποιο **γραμμένο .service** αρχείο;
+- [ ] Κάποιο **γραμμένο δυαδικό** που εκτελείται από μια **υπηρεσία**;
+- [ ] Κάποιο **γραμμένο φάκελο στο systemd PATH**;
 
-### [Processes](privilege-escalation/#processes)
+### [Χρονοδιακόπτες](privilege-escalation/#timers)
 
-- [ ] Is any **unknown software running**?
-- [ ] Is any software running with **more privileges than it should have**?
-- [ ] Search for **exploits of running processes** (especially the version running).
-- [ ] Can you **modify the binary** of any running process?
-- [ ] **Monitor processes** and check if any interesting process is running frequently.
-- [ ] Can you **read** some interesting **process memory** (where passwords could be saved)?
+- [ ] Κάποιο **γραμμένο χρονοδιακόπτη**;
 
-### [Scheduled/Cron jobs?](privilege-escalation/#scheduled-jobs)
+### [Υποδοχές](privilege-escalation/#sockets)
 
-- [ ] Is the [**PATH** ](privilege-escalation/#cron-path)being modified by some cron and you can **write** in it?
-- [ ] Any [**wildcard** ](privilege-escalation/#cron-using-a-script-with-a-wildcard-wildcard-injection)in a cron job?
-- [ ] Some [**modifiable script** ](privilege-escalation/#cron-script-overwriting-and-symlink)is being **executed** or is inside **modifiable folder**?
-- [ ] Have you detected that some **script** could be or are being [**executed** very **frequently**](privilege-escalation/#frequent-cron-jobs)? (every 1, 2 or 5 minutes)
-
-### [Services](privilege-escalation/#services)
-
-- [ ] Any **writable .service** file?
-- [ ] Any **writable binary** executed by a **service**?
-- [ ] Any **writable folder in systemd PATH**?
-
-### [Timers](privilege-escalation/#timers)
-
-- [ ] Any **writable timer**?
-
-### [Sockets](privilege-escalation/#sockets)
-
-- [ ] Any **writable .socket** file?
-- [ ] Can you **communicate with any socket**?
-- [ ] **HTTP sockets** with interesting info?
+- [ ] Κάποιο **γραμμένο .socket** αρχείο;
+- [ ] Μπορείτε να **επικοινωνήσετε με κάποια υποδοχή**;
+- [ ] **HTTP sockets** με ενδιαφέρουσες πληροφορίες;
 
 ### [D-Bus](privilege-escalation/#d-bus)
 
-- [ ] Can you **communicate with any D-Bus**?
+- [ ] Μπορείτε να **επικοινωνήσετε με κάποιο D-Bus**;
 
-### [Network](privilege-escalation/#network)
+### [Δίκτυο](privilege-escalation/#network)
 
-- [ ] Enumerate the network to know where you are
-- [ ] **Open ports you couldn't access before** getting a shell inside the machine?
-- [ ] Can you **sniff traffic** using `tcpdump`?
+- [ ] Αναγνωρίστε το δίκτυο για να ξέρετε πού βρίσκεστε
+- [ ] **Ανοιχτές θύρες που δεν μπορούσατε να αποκτήσετε πρόσβαση πριν** αποκτήσετε shell μέσα στη μηχανή;
+- [ ] Μπορείτε να **συλλάβετε κίνηση** χρησιμοποιώντας `tcpdump`;
 
-### [Users](privilege-escalation/#users)
+### [Χρήστες](privilege-escalation/#users)
 
-- [ ] Generic users/groups **enumeration**
-- [ ] Do you have a **very big UID**? Is the **machine** **vulnerable**?
-- [ ] Can you [**escalate privileges thanks to a group**](privilege-escalation/interesting-groups-linux-pe/) you belong to?
-- [ ] **Clipboard** data?
-- [ ] Password Policy?
-- [ ] Try to **use** every **known password** that you have discovered previously to login **with each** possible **user**. Try to login also without a password.
+- [ ] Γενική αναγνώριση χρηστών/ομάδων
+- [ ] Έχετε **πολύ μεγάλο UID**; Είναι η **μηχανή** **ευάλωτη**;
+- [ ] Μπορείτε να [**ανυψώσετε δικαιώματα χάρη σε μια ομάδα**](privilege-escalation/interesting-groups-linux-pe/) στην οποία ανήκετε;
+- [ ] **Δεδομένα Πρόσθεσης**;
+- [ ] Πολιτική Κωδικών;
+- [ ] Προσπαθήστε να **χρησιμοποιήσετε** κάθε **γνωστό κωδικό** που έχετε ανακαλύψει προηγουμένως για να συνδεθείτε **με κάθε** δυνατό **χρήστη**. Προσπαθήστε να συνδεθείτε επίσης χωρίς κωδικό.
 
-### [Writable PATH](privilege-escalation/#writable-path-abuses)
+### [Γραμμένο PATH](privilege-escalation/#writable-path-abuses)
 
-- [ ] If you have **write privileges over some folder in PATH** you may be able to escalate privileges
+- [ ] Αν έχετε **δικαιώματα εγγραφής σε κάποιο φάκελο στο PATH** μπορεί να μπορείτε να ανυψώσετε δικαιώματα
 
-### [SUDO and SUID commands](privilege-escalation/#sudo-and-suid)
+### [Εντολές SUDO και SUID](privilege-escalation/#sudo-and-suid)
 
-- [ ] Can you execute **any command with sudo**? Can you use it to READ, WRITE or EXECUTE anything as root? ([**GTFOBins**](https://gtfobins.github.io))
-- [ ] Is any **exploitable SUID binary**? ([**GTFOBins**](https://gtfobins.github.io))
-- [ ] Are [**sudo** commands **limited** by **path**? can you **bypass** the restrictions](privilege-escalation/#sudo-execution-bypassing-paths)?
-- [ ] [**Sudo/SUID binary without path indicated**](privilege-escalation/#sudo-command-suid-binary-without-command-path)?
-- [ ] [**SUID binary specifying path**](privilege-escalation/#suid-binary-with-command-path)? Bypass
+- [ ] Μπορείτε να εκτελέσετε **οποιαδήποτε εντολή με sudo**; Μπορείτε να το χρησιμοποιήσετε για να ΔΙΑΒΑΣΕΤΕ, ΓΡΑΨΕΤΕ ή ΕΚΤΕΛΕΣΕΤΕ οτιδήποτε ως root; ([**GTFOBins**](https://gtfobins.github.io))
+- [ ] Υπάρχει κάποιο **εκμεταλλεύσιμο SUID δυαδικό**; ([**GTFOBins**](https://gtfobins.github.io))
+- [ ] Είναι οι [**εντολές sudo** **περιορισμένες** από **path**; μπορείτε να **παρακάμψετε** τους περιορισμούς](privilege-escalation/#sudo-execution-bypassing-paths);
+- [ ] [**Sudo/SUID δυαδικό χωρίς καθορισμένο path**](privilege-escalation/#sudo-command-suid-binary-without-command-path);
+- [ ] [**SUID δυαδικό που καθορίζει path**](privilege-escalation/#suid-binary-with-command-path); Παράκαμψη
 - [ ] [**LD_PRELOAD vuln**](privilege-escalation/#ld_preload)
-- [ ] [**Lack of .so library in SUID binary**](privilege-escalation/#suid-binary-so-injection) from a writable folder?
-- [ ] [**SUDO tokens available**](privilege-escalation/#reusing-sudo-tokens)? [**Can you create a SUDO token**](privilege-escalation/#var-run-sudo-ts-less-than-username-greater-than)?
-- [ ] Can you [**read or modify sudoers files**](privilege-escalation/#etc-sudoers-etc-sudoers-d)?
-- [ ] Can you [**modify /etc/ld.so.conf.d/**](privilege-escalation/#etc-ld-so-conf-d)?
-- [ ] [**OpenBSD DOAS**](privilege-escalation/#doas) command
+- [ ] [**Έλλειψη .so βιβλιοθήκης σε SUID δυαδικό**](privilege-escalation/#suid-binary-so-injection) από έναν γραμμένο φάκελο;
+- [ ] [**Διαθέσιμα SUDO tokens**](privilege-escalation/#reusing-sudo-tokens); [**Μπορείτε να δημιουργήσετε ένα SUDO token**](privilege-escalation/#var-run-sudo-ts-less-than-username-greater-than);
+- [ ] Μπορείτε να [**διαβάσετε ή να τροποποιήσετε τα αρχεία sudoers**](privilege-escalation/#etc-sudoers-etc-sudoers-d);
+- [ ] Μπορείτε να [**τροποποιήσετε το /etc/ld.so.conf.d/**](privilege-escalation/#etc-ld-so-conf-d);
+- [ ] [**OpenBSD DOAS**](privilege-escalation/#doas) εντολή
 
-### [Capabilities](privilege-escalation/#capabilities)
+### [Δυνατότητες](privilege-escalation/#capabilities)
 
-- [ ] Has any binary any **unexpected capability**?
+- [ ] Έχει κάποιο δυαδικό κάποια **αναμενόμενη δυνατότητα**;
 
 ### [ACLs](privilege-escalation/#acls)
 
-- [ ] Has any file any **unexpected ACL**?
+- [ ] Έχει κάποιο αρχείο κάποια **αναμενόμενη ACL**;
 
-### [Open Shell sessions](privilege-escalation/#open-shell-sessions)
+### [Ανοιχτές συνεδρίες shell](privilege-escalation/#open-shell-sessions)
 
 - [ ] **screen**
 - [ ] **tmux**
@@ -126,48 +111,33 @@ Stay informed with the newest bug bounties launching and crucial platform update
 ### [SSH](privilege-escalation/#ssh)
 
 - [ ] **Debian** [**OpenSSL Predictable PRNG - CVE-2008-0166**](privilege-escalation/#debian-openssl-predictable-prng-cve-2008-0166)
-- [ ] [**SSH Interesting configuration values**](privilege-escalation/#ssh-interesting-configuration-values)
+- [ ] [**Ενδιαφέρουσες τιμές ρυθμίσεων SSH**](privilege-escalation/#ssh-interesting-configuration-values)
 
-### [Interesting Files](privilege-escalation/#interesting-files)
+### [Ενδιαφέροντα Αρχεία](privilege-escalation/#interesting-files)
 
-- [ ] **Profile files** - Read sensitive data? Write to privesc?
-- [ ] **passwd/shadow files** - Read sensitive data? Write to privesc?
-- [ ] **Check commonly interesting folders** for sensitive data
-- [ ] **Weird Location/Owned files,** you may have access to or alter executable files
-- [ ] **Modified** in last mins
-- [ ] **Sqlite DB files**
-- [ ] **Hidden files**
-- [ ] **Script/Binaries in PATH**
-- [ ] **Web files** (passwords?)
-- [ ] **Backups**?
-- [ ] **Known files that contains passwords**: Use **Linpeas** and **LaZagne**
-- [ ] **Generic search**
+- [ ] **Αρχεία προφίλ** - Διαβάστε ευαίσθητα δεδομένα; Γράψτε για privesc;
+- [ ] **αρχεία passwd/shadow** - Διαβάστε ευαίσθητα δεδομένα; Γράψτε για privesc;
+- [ ] **Ελέγξτε κοινά ενδιαφέροντα φακέλους** για ευαίσθητα δεδομένα
+- [ ] **Περίεργη Τοποθεσία/Αρχεία που ανήκουν,** μπορεί να έχετε πρόσβαση ή να τροποποιήσετε εκτελέσιμα αρχεία
+- [ ] **Τροποποιημένα** στα τελευταία λεπτά
+- [ ] **Sqlite DB αρχεία**
+- [ ] **Κρυφά αρχεία**
+- [ ] **Script/Δυαδικά στο PATH**
+- [ ] **Web αρχεία** (κωδικοί;)
+- [ ] **Αντίγραφα ασφαλείας**;
+- [ ] **Γνωστά αρχεία που περιέχουν κωδικούς**: Χρησιμοποιήστε **Linpeas** και **LaZagne**
+- [ ] **Γενική αναζήτηση**
 
-### [**Writable Files**](privilege-escalation/#writable-files)
+### [**Γραμμένα Αρχεία**](privilege-escalation/#writable-files)
 
-- [ ] **Modify python library** to execute arbitrary commands?
-- [ ] Can you **modify log files**? **Logtotten** exploit
-- [ ] Can you **modify /etc/sysconfig/network-scripts/**? Centos/Redhat exploit
-- [ ] Can you [**write in ini, int.d, systemd or rc.d files**](privilege-escalation/#init-init-d-systemd-and-rc-d)?
+- [ ] **Τροποποιήστε τη βιβλιοθήκη python** για να εκτελέσετε αυθαίρετες εντολές;
+- [ ] Μπορείτε να **τροποποιήσετε αρχεία καταγραφής**; **Logtotten** exploit
+- [ ] Μπορείτε να **τροποποιήσετε το /etc/sysconfig/network-scripts/**; Centos/Redhat exploit
+- [ ] Μπορείτε να [**γράψετε σε ini, int.d, systemd ή rc.d αρχεία**](privilege-escalation/#init-init-d-systemd-and-rc-d);
 
-### [**Other tricks**](privilege-escalation/#other-tricks)
+### [**Άλλες τεχνικές**](privilege-escalation/#other-tricks)
 
-- [ ] Can you [**abuse NFS to escalate privileges**](privilege-escalation/#nfs-privilege-escalation)?
-- [ ] Do you need to [**escape from a restrictive shell**](privilege-escalation/#escaping-from-restricted-shells)?
-
-<figure><img src="../images/image (3).png" alt=""><figcaption></figcaption></figure>
-
-Join [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server to communicate with experienced hackers and bug bounty hunters!
-
-**Hacking Insights**\
-Engage with content that delves into the thrill and challenges of hacking
-
-**Real-Time Hack News**\
-Keep up-to-date with fast-paced hacking world through real-time news and insights
-
-**Latest Announcements**\
-Stay informed with the newest bug bounties launching and crucial platform updates
-
-**Join us on** [**Discord**](https://discord.com/invite/N3FrSbmwdy) and start collaborating with top hackers today!
+- [ ] Μπορείτε να [**καταχραστείτε το NFS για να ανυψώσετε δικαιώματα**](privilege-escalation/#nfs-privilege-escalation);
+- [ ] Χρειάζεστε να [**ξεφύγετε από ένα περιορισμένο shell**](privilege-escalation/#escaping-from-restricted-shells);
 
 {{#include ../banners/hacktricks-training.md}}

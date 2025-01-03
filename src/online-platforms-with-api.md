@@ -2,121 +2,120 @@
 
 # [ProjectHoneypot](https://www.projecthoneypot.org/)
 
-You can ask if an IP is related to suspicious/malicious activities. Completely free.
+Μπορείτε να ρωτήσετε αν μια διεύθυνση IP σχετίζεται με ύποπτες/κακόβουλες δραστηριότητες. Εντελώς δωρεάν.
 
 # [**BotScout**](http://botscout.com/api.htm)
 
-Check if the IP address is related to a bot that register accounts. It can also check usernames and emails. Initially free.
+Ελέγξτε αν η διεύθυνση IP σχετίζεται με ένα bot που καταχωρεί λογαριασμούς. Μπορεί επίσης να ελέγξει ονόματα χρηστών και emails. Αρχικά δωρεάν.
 
 # [Hunter](https://hunter.io/)
 
-Find and verify emails.  
-Some free API requests free, for more you need to pay.  
-Commercial?
+Βρείτε και επαληθεύστε emails.
+Ορισμένα δωρεάν API requests, για περισσότερα χρειάζεται να πληρώσετε.
+Εμπορικό;
 
 # [AlientVault](https://otx.alienvault.com/api)
 
-Find Malicious activities related to IPs and Domains. Free.
+Βρείτε κακόβουλες δραστηριότητες που σχετίζονται με IPs και Domains. Δωρεάν.
 
 # [Clearbit](https://dashboard.clearbit.com/)
 
-Find related personal data to a email \(profiles on other platforms\), domain \(basic company info ,mails and people working\) and companies \(get company info from mail\).  
-You need to pay to access all the possibilities.  
-Commercial?
+Βρείτε σχετικά προσωπικά δεδομένα με ένα email \(προφίλ σε άλλες πλατφόρμες\), domain \(βασικές πληροφορίες εταιρείας, emails και άτομα που εργάζονται\) και εταιρείες \(λάβετε πληροφορίες εταιρείας από email\).
+Πρέπει να πληρώσετε για να αποκτήσετε πρόσβαση σε όλες τις δυνατότητες.
+Εμπορικό;
 
 # [BuiltWith](https://builtwith.com/)
 
-Technologies used by webs. Expensive...  
-Commercial?
+Τεχνολογίες που χρησιμοποιούνται από ιστοσελίδες. Ακριβό...
+Εμπορικό;
 
 # [Fraudguard](https://fraudguard.io/)
 
-Check if a host \(domain or IP\) is related with suspicious/malicious activities. Have some free API access.  
-Commercial?
+Ελέγξτε αν ένας host \(domain ή IP\) σχετίζεται με ύποπτες/κακόβουλες δραστηριότητες. Έχει κάποια δωρεάν πρόσβαση API.
+Εμπορικό;
 
 # [FortiGuard](https://fortiguard.com/)
 
-Check if a host \(domain or IP\) is related with suspicious/malicious activities. Have some free API access.
+Ελέγξτε αν ένας host \(domain ή IP\) σχετίζεται με ύποπτες/κακόβουλες δραστηριότητες. Έχει κάποια δωρεάν πρόσβαση API.
 
 # [SpamCop](https://www.spamcop.net/)
 
-Indicates if host is related to spam activity. Have some free API access.
+Δείχνει αν ο host σχετίζεται με δραστηριότητα spam. Έχει κάποια δωρεάν πρόσβαση API.
 
 # [mywot](https://www.mywot.com/)
 
-Based on opinions and other metrics get if a domain is related with suspicious/malicious information.
+Βασισμένο σε απόψεις και άλλες μετρήσεις, ελέγξτε αν ένα domain σχετίζεται με ύποπτες/κακόβουλες πληροφορίες.
 
 # [ipinfo](https://ipinfo.io/)
 
-Obtains basic info from an IP address. You can test up to 100K/month.
+Αποκτά βασικές πληροφορίες από μια διεύθυνση IP. Μπορείτε να δοκιμάσετε έως 100K/μήνα.
 
 # [securitytrails](https://securitytrails.com/app/account)
 
-This platform give information about domains and IP addresses like domains inside an IP or inside a domain server, domains owned by an email \(find related domains\), IP history of domains \(find the host behind CloudFlare\), all domains using a nameserver....  
-You have some free access.
+Αυτή η πλατφόρμα παρέχει πληροφορίες σχετικά με domains και διευθύνσεις IP, όπως domains μέσα σε μια IP ή μέσα σε έναν server domain, domains που ανήκουν σε ένα email \(βρείτε σχετικά domains\), ιστορικό IP των domains \(βρείτε τον host πίσω από το CloudFlare\), όλα τα domains που χρησιμοποιούν έναν nameserver....
+Έχετε κάποια δωρεάν πρόσβαση.
 
 # [fullcontact](https://www.fullcontact.com/)
 
-Allows to search by email, domain or company name and retrieve "personal" information related. It can also verify emails. There is some free access.
+Επιτρέπει την αναζήτηση με email, domain ή όνομα εταιρείας και την ανάκτηση σχετικών "προσωπικών" πληροφοριών. Μπορεί επίσης να επαληθεύσει emails. Υπάρχει κάποια δωρεάν πρόσβαση.
 
 # [RiskIQ](https://www.spiderfoot.net/documentation/)
 
-A lot of information from domains and IPs even in the free/community version.
+Πολλές πληροφορίες από domains και IPs ακόμη και στην δωρεάν/κοινότητα έκδοση.
 
 # [\_IntelligenceX](https://intelx.io/)
 
-Search Domains, IPs and emails and get info from dumps. Have some free access.
+Αναζητήστε Domains, IPs και emails και αποκτήστε πληροφορίες από dumps. Έχει κάποια δωρεάν πρόσβαση.
 
 # [IBM X-Force Exchange](https://exchange.xforce.ibmcloud.com/)
 
-Search by IP and gather information related to suspicions activities. There is some free access.
+Αναζητήστε με IP και συγκεντρώστε πληροφορίες σχετικές με ύποπτες δραστηριότητες. Υπάρχει κάποια δωρεάν πρόσβαση.
 
 # [Greynoise](https://viz.greynoise.io/)
 
-Search by IP or IP range and get information about IPs scanning the Internet. 15 days free access.
+Αναζητήστε με IP ή εύρος IP και αποκτήστε πληροφορίες σχετικά με IPs που σκανάρουν το Διαδίκτυο. 15 ημέρες δωρεάν πρόσβαση.
 
 # [Shodan](https://www.shodan.io/)
 
-Get scan information of an IP address. Have some free api access.
+Αποκτήστε πληροφορίες σάρωσης μιας διεύθυνσης IP. Έχει κάποια δωρεάν πρόσβαση API.
 
 # [Censys](https://censys.io/)
 
-Very similar to shodan
+Πολύ παρόμοιο με το shodan
 
 # [buckets.grayhatwarfare.com](https://buckets.grayhatwarfare.com/)
 
-Find open S3 buckets searching by keyword.
+Βρείτε ανοιχτά S3 buckets αναζητώντας με λέξη-κλειδί.
 
 # [Dehashed](https://www.dehashed.com/data)
 
-Find leaked credentials of emails and even domains  
-Commercial?
+Βρείτε διαρρεύσαντα διαπιστευτήρια emails και ακόμη και domains
+Εμπορικό;
 
 # [psbdmp](https://psbdmp.ws/)
 
-Search pastebins where a email appeared. Commercial?
+Αναζητήστε pastebins όπου εμφανίστηκε ένα email. Εμπορικό;
 
 # [emailrep.io](https://emailrep.io/key)
 
-Get reputation of a mail. Commercial?
+Αποκτήστε φήμη ενός email. Εμπορικό;
 
 # [ghostproject](https://ghostproject.fr/)
 
-Get passwords from leaked emails. Commercial?
+Αποκτήστε κωδικούς πρόσβασης από διαρρεύσαντα emails. Εμπορικό;
 
 # [Binaryedge](https://www.binaryedge.io/)
 
-Obtain interesting info from IPs
+Αποκτήστε ενδιαφέρουσες πληροφορίες από IPs
 
 # [haveibeenpwned](https://haveibeenpwned.com/)
 
-Search by domain and email and get if it was pwned and passwords. Commercial?
+Αναζητήστε με domain και email και δείτε αν έχει παραβιαστεί και κωδικούς πρόσβασης. Εμπορικό;
 
-[https://dnsdumpster.com/](https://dnsdumpster.com/)\(in a commercial tool?\)
+[https://dnsdumpster.com/](https://dnsdumpster.com/)\(σε ένα εμπορικό εργαλείο;\)
 
-[https://www.netcraft.com/](https://www.netcraft.com/) \(in a commercial tool?\)
+[https://www.netcraft.com/](https://www.netcraft.com/) \(σε ένα εμπορικό εργαλείο;\)
 
-[https://www.nmmapper.com/sys/tools/subdomainfinder/](https://www.nmmapper.com/) \(in a commercial tool?\)
+[https://www.nmmapper.com/sys/tools/subdomainfinder/](https://www.nmmapper.com/) \(σε ένα εμπορικό εργαλείο;\)
 
 {{#include ./banners/hacktricks-training.md}}
-

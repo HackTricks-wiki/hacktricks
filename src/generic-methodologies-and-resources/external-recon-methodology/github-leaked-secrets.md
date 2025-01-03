@@ -2,18 +2,15 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<img src="../../images/i3.png" alt="" data-size="original">\
-**Bug bounty tip**: **sign up** for **Intigriti**, a premium **bug bounty platform created by hackers, for hackers**! Join us at [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) today, and start earning bounties up to **$100,000**!
 
-{% embed url="https://go.intigriti.com/hacktricks" %}
 
-Now that we have built the list of assets of our scope it's time to search for some OSINT low-hanging fruits.
+Τώρα που έχουμε δημιουργήσει τη λίστα των περιουσιακών στοιχείων του πεδίου μας, είναι καιρός να αναζητήσουμε μερικούς καρπούς OSINT που είναι εύκολα προσβάσιμοι.
 
-### Platforms that already searched for leaks
+### Πλατφόρμες που έχουν ήδη αναζητήσει διαρροές
 
 - [https://trufflesecurity.com/blog/introducing-forager/](https://trufflesecurity.com/blog/introducing-forager/)
 
-### Api keys leaks in github
+### Διαρροές κλειδιών API στο github
 
 - [https://github.com/dxa4481/truffleHog](https://github.com/dxa4481/truffleHog)
 - [https://github.com/gitleaks/gitleaks](https://github.com/gitleaks/gitleaks)
@@ -28,7 +25,6 @@ Now that we have built the list of assets of our scope it's time to search for s
 - [https://github.com/obheda12/GitDorker](https://github.com/obheda12/GitDorker)
 
 ### **Dorks**
-
 ```bash
 ".mlab.com password"
 "access_key"
@@ -310,5 +306,4 @@ GCP SECRET
 AWS SECRET
 "private" extension:pgp
 ```
-
 {{#include ../../banners/hacktricks-training.md}}

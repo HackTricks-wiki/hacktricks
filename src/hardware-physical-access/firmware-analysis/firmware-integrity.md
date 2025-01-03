@@ -1,27 +1,27 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-## Firmware Integrity
+## Ακεραιότητα Firmware
 
-The **custom firmware and/or compiled binaries can be uploaded to exploit integrity or signature verification flaws**. The following steps can be followed for backdoor bind shell compilation:
+Το **προσαρμοσμένο firmware και/ή οι μεταγλωττισμένες δυαδικές μπορεί να ανέβουν για να εκμεταλλευτούν αδυναμίες στην ακεραιότητα ή την επαλήθευση υπογραφής**. Τα παρακάτω βήματα μπορούν να ακολουθηθούν για τη σύνθεση backdoor bind shell:
 
-1. The firmware can be extracted using firmware-mod-kit (FMK).
-2. The target firmware architecture and endianness should be identified.
-3. A cross compiler can be built using Buildroot or other suitable methods for the environment.
-4. The backdoor can be built using the cross compiler.
-5. The backdoor can be copied to the extracted firmware /usr/bin directory.
-6. The appropriate QEMU binary can be copied to the extracted firmware rootfs.
-7. The backdoor can be emulated using chroot and QEMU.
-8. The backdoor can be accessed via netcat.
-9. The QEMU binary should be removed from the extracted firmware rootfs.
-10. The modified firmware can be repackaged using FMK.
-11. The backdoored firmware can be tested by emulating it with firmware analysis toolkit (FAT) and connecting to the target backdoor IP and port using netcat.
+1. Το firmware μπορεί να εξαχθεί χρησιμοποιώντας το firmware-mod-kit (FMK).
+2. Η αρχιτεκτονική και η εντολή του στόχου firmware θα πρέπει να προσδιοριστούν.
+3. Ένας διασταυρωμένος μεταγλωττιστής μπορεί να κατασκευαστεί χρησιμοποιώντας το Buildroot ή άλλες κατάλληλες μεθόδους για το περιβάλλον.
+4. Η backdoor μπορεί να κατασκευαστεί χρησιμοποιώντας τον διασταυρωμένο μεταγλωττιστή.
+5. Η backdoor μπορεί να αντιγραφεί στον κατάλογο /usr/bin του εξαχθέντος firmware.
+6. Το κατάλληλο δυαδικό QEMU μπορεί να αντιγραφεί στο rootfs του εξαχθέντος firmware.
+7. Η backdoor μπορεί να προσομοιωθεί χρησιμοποιώντας chroot και QEMU.
+8. Η backdoor μπορεί να προσπελαστεί μέσω netcat.
+9. Το δυαδικό QEMU θα πρέπει να αφαιρεθεί από το rootfs του εξαχθέντος firmware.
+10. Το τροποποιημένο firmware μπορεί να επανασυσκευαστεί χρησιμοποιώντας το FMK.
+11. Το backdoored firmware μπορεί να δοκιμαστεί προσομοιώνοντάς το με το εργαλείο ανάλυσης firmware (FAT) και συνδέοντας τη διεύθυνση IP και την πόρτα της backdoor στόχου χρησιμοποιώντας το netcat.
 
-If a root shell has already been obtained through dynamic analysis, bootloader manipulation, or hardware security testing, precompiled malicious binaries such as implants or reverse shells can be executed. Automated payload/implant tools like the Metasploit framework and 'msfvenom' can be leveraged using the following steps:
+Εάν έχει ήδη αποκτηθεί ένα root shell μέσω δυναμικής ανάλυσης, χειρισμού bootloader ή δοκιμών ασφάλειας υλικού, μπορούν να εκτελούνται προμεταγλωττισμένες κακόβουλες δυαδικές όπως εμφυτεύματα ή αντίστροφες θήκες. Αυτοματοποιημένα εργαλεία payload/implant όπως το Metasploit framework και το 'msfvenom' μπορούν να αξιοποιηθούν χρησιμοποιώντας τα παρακάτω βήματα:
 
-1. The target firmware architecture and endianness should be identified.
-2. Msfvenom can be used to specify the target payload, attacker host IP, listening port number, filetype, architecture, platform, and the output file.
-3. The payload can be transferred to the compromised device and ensured that it has execution permissions.
-4. Metasploit can be prepared to handle incoming requests by starting msfconsole and configuring the settings according to the payload.
-5. The meterpreter reverse shell can be executed on the compromised device.
+1. Η αρχιτεκτονική και η εντολή του στόχου firmware θα πρέπει να προσδιοριστούν.
+2. Το msfvenom μπορεί να χρησιμοποιηθεί για να καθορίσει το payload στόχου, τη διεύθυνση IP του επιτιθέμενου, τον αριθμό θύρας ακρόασης, τον τύπο αρχείου, την αρχιτεκτονική, την πλατφόρμα και το αρχείο εξόδου.
+3. Το payload μπορεί να μεταφερθεί στη συμβιβασμένη συσκευή και να διασφαλιστεί ότι έχει δικαιώματα εκτέλεσης.
+4. Το Metasploit μπορεί να προετοιμαστεί για να χειριστεί τις εισερχόμενες αιτήσεις ξεκινώντας το msfconsole και ρυθμίζοντας τις ρυθμίσεις σύμφωνα με το payload.
+5. Η αντίστροφη θήκη meterpreter μπορεί να εκτελεστεί στη συμβιβασμένη συσκευή.
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -2,54 +2,54 @@
 
 # CBC
 
-If the **cookie** is **only** the **username** (or the first part of the cookie is the username) and you want to impersonate the username "**admin**". Then, you can create the username **"bdmin"** and **bruteforce** the **first byte** of the cookie.
+Αν το **cookie** είναι **μόνο** το **όνομα χρήστη** (ή το πρώτο μέρος του cookie είναι το όνομα χρήστη) και θέλεις να προσποιηθείς το όνομα χρήστη "**admin**". Τότε, μπορείς να δημιουργήσεις το όνομα χρήστη **"bdmin"** και να **bruteforce** το **πρώτο byte** του cookie.
 
 # CBC-MAC
 
-**Cipher block chaining message authentication code** (**CBC-MAC**) is a method used in cryptography. It works by taking a message and encrypting it block by block, where each block's encryption is linked to the one before it. This process creates a **chain of blocks**, making sure that changing even a single bit of the original message will lead to an unpredictable change in the last block of encrypted data. To make or reverse such a change, the encryption key is required, ensuring security.
+**Cipher block chaining message authentication code** (**CBC-MAC**) είναι μια μέθοδος που χρησιμοποιείται στην κρυπτογραφία. Λειτουργεί παίρνοντας ένα μήνυμα και κρυπτογραφώντας το μπλοκ προς μπλοκ, όπου η κρυπτογράφηση κάθε μπλοκ συνδέεται με το προηγούμενο. Αυτή η διαδικασία δημιουργεί μια **αλυσίδα μπλοκ**, διασφαλίζοντας ότι η αλλαγή ακόμη και ενός μόνο bit του αρχικού μηνύματος θα οδηγήσει σε μια απρόβλεπτη αλλαγή στο τελευταίο μπλοκ των κρυπτογραφημένων δεδομένων. Για να γίνει ή να αντιστραφεί μια τέτοια αλλαγή, απαιτείται το κλειδί κρυπτογράφησης, διασφαλίζοντας την ασφάλεια.
 
-To calculate the CBC-MAC of message m, one encrypts m in CBC mode with zero initialization vector and keeps the last block. The following figure sketches the computation of the CBC-MAC of a message comprising blocks![https://wikimedia.org/api/rest_v1/media/math/render/svg/bbafe7330a5e40a04f01cc776c9d94fe914b17f5](https://wikimedia.org/api/rest_v1/media/math/render/svg/bbafe7330a5e40a04f01cc776c9d94fe914b17f5) using a secret key k and a block cipher E:
+Για να υπολογίσεις το CBC-MAC του μηνύματος m, κρυπτογραφείς το m σε λειτουργία CBC με μηδενικό αρχικοποιητικό διανύσμα και κρατάς το τελευταίο μπλοκ. Η παρακάτω εικόνα σκιαγραφεί τον υπολογισμό του CBC-MAC ενός μηνύματος που αποτελείται από μπλοκ![https://wikimedia.org/api/rest_v1/media/math/render/svg/bbafe7330a5e40a04f01cc776c9d94fe914b17f5](https://wikimedia.org/api/rest_v1/media/math/render/svg/bbafe7330a5e40a04f01cc776c9d94fe914b17f5) χρησιμοποιώντας ένα μυστικό κλειδί k και έναν μπλοκ κρυπτογράφο E:
 
 ![https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/CBC-MAC_structure_(en).svg/570px-CBC-MAC_structure_(en).svg.png](<https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/CBC-MAC_structure_(en).svg/570px-CBC-MAC_structure_(en).svg.png>)
 
 # Vulnerability
 
-With CBC-MAC usually the **IV used is 0**.\
-This is a problem because 2 known messages (`m1` and `m2`) independently will generate 2 signatures (`s1` and `s2`). So:
+Με το CBC-MAC συνήθως το **IV που χρησιμοποιείται είναι 0**.\
+Αυτό είναι ένα πρόβλημα γιατί 2 γνωστά μηνύματα (`m1` και `m2`) ανεξάρτητα θα δημιουργήσουν 2 υπογραφές (`s1` και `s2`). Έτσι:
 
 - `E(m1 XOR 0) = s1`
 - `E(m2 XOR 0) = s2`
 
-Then a message composed by m1 and m2 concatenated (m3) will generate 2 signatures (s31 and s32):
+Τότε ένα μήνυμα που αποτελείται από τα m1 και m2 που συνδυάζονται (m3) θα δημιουργήσει 2 υπογραφές (s31 και s32):
 
 - `E(m1 XOR 0) = s31 = s1`
 - `E(m2 XOR s1) = s32`
 
-**Which is possible to calculate without knowing the key of the encryption.**
+**Το οποίο είναι δυνατό να υπολογιστεί χωρίς να γνωρίζεις το κλειδί της κρυπτογράφησης.**
 
-Imagine you are encrypting the name **Administrator** in **8bytes** blocks:
+Φαντάσου ότι κρυπτογραφείς το όνομα **Administrator** σε **8bytes** μπλοκ:
 
 - `Administ`
 - `rator\00\00\00`
 
-You can create a username called **Administ** (m1) and retrieve the signature (s1).\
-Then, you can create a username called the result of `rator\00\00\00 XOR s1`. This will generate `E(m2 XOR s1 XOR 0)` which is s32.\
-now, you can use s32 as the signature of the full name **Administrator**.
+Μπορείς να δημιουργήσεις ένα όνομα χρήστη που ονομάζεται **Administ** (m1) και να ανακτήσεις την υπογραφή (s1).\
+Τότε, μπορείς να δημιουργήσεις ένα όνομα χρήστη που είναι το αποτέλεσμα του `rator\00\00\00 XOR s1`. Αυτό θα δημιουργήσει `E(m2 XOR s1 XOR 0)` που είναι s32.\
+Τώρα, μπορείς να χρησιμοποιήσεις το s32 ως την υπογραφή του πλήρους ονόματος **Administrator**.
 
 ### Summary
 
-1. Get the signature of username **Administ** (m1) which is s1
-2. Get the signature of username **rator\x00\x00\x00 XOR s1 XOR 0** is s32**.**
-3. Set the cookie to s32 and it will be a valid cookie for the user **Administrator**.
+1. Πάρε την υπογραφή του ονόματος χρήστη **Administ** (m1) που είναι s1
+2. Πάρε την υπογραφή του ονόματος χρήστη **rator\x00\x00\x00 XOR s1 XOR 0** που είναι s32**.**
+3. Ρύθμισε το cookie σε s32 και θα είναι ένα έγκυρο cookie για τον χρήστη **Administrator**.
 
 # Attack Controlling IV
 
-If you can control the used IV the attack could be very easy.\
-If the cookies is just the username encrypted, to impersonate the user "**administrator**" you can create the user "**Administrator**" and you will get it's cookie.\
-Now, if you can control the IV, you can change the first Byte of the IV so **IV\[0] XOR "A" == IV'\[0] XOR "a"** and regenerate the cookie for the user **Administrator.** This cookie will be valid to **impersonate** the user **administrator** with the initial **IV**.
+Αν μπορείς να ελέγξεις το χρησιμοποιούμενο IV, η επίθεση μπορεί να είναι πολύ εύκολη.\
+Αν το cookie είναι απλώς το όνομα χρήστη που έχει κρυπτογραφηθεί, για να προσποιηθείς τον χρήστη "**administrator**" μπορείς να δημιουργήσεις τον χρήστη "**Administrator**" και θα πάρεις το cookie του.\
+Τώρα, αν μπορείς να ελέγξεις το IV, μπορείς να αλλάξεις το πρώτο Byte του IV έτσι ώστε **IV\[0] XOR "A" == IV'\[0] XOR "a"** και να αναγεννήσεις το cookie για τον χρήστη **Administrator.** Αυτό το cookie θα είναι έγκυρο για **να προσποιηθείς** τον χρήστη **administrator** με το αρχικό **IV**.
 
 ## References
 
-More information in [https://en.wikipedia.org/wiki/CBC-MAC](https://en.wikipedia.org/wiki/CBC-MAC)
+Περισσότερες πληροφορίες στο [https://en.wikipedia.org/wiki/CBC-MAC](https://en.wikipedia.org/wiki/CBC-MAC)
 
 {{#include ../banners/hacktricks-training.md}}

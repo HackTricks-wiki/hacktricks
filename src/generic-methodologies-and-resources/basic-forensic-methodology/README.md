@@ -1,30 +1,30 @@
-# Basic Forensic Methodology
+# Βασική Εγκληματολογική Μεθοδολογία
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Creating and Mounting an Image
+## Δημιουργία και Τοποθέτηση μιας Εικόνας
 
 {{#ref}}
 ../../generic-methodologies-and-resources/basic-forensic-methodology/image-acquisition-and-mount.md
 {{#endref}}
 
-## Malware Analysis
+## Ανάλυση Κακόβουλου Λογισμικού
 
-This **isn't necessary the first step to perform once you have the image**. But you can use this malware analysis techniques independently if you have a file, a file-system image, memory image, pcap... so it's good to **keep these actions in mind**:
+Αυτή **δεν είναι απαραίτητα το πρώτο βήμα που πρέπει να εκτελέσετε μόλις έχετε την εικόνα**. Αλλά μπορείτε να χρησιμοποιήσετε αυτές τις τεχνικές ανάλυσης κακόβουλου λογισμικού ανεξάρτητα αν έχετε ένα αρχείο, μια εικόνα συστήματος αρχείων, εικόνα μνήμης, pcap... οπότε είναι καλό να **κρατάτε αυτές τις ενέργειες στο μυαλό σας**:
 
 {{#ref}}
 malware-analysis.md
 {{#endref}}
 
-## Inspecting an Image
+## Επιθεώρηση μιας Εικόνας
 
-if you are given a **forensic image** of a device you can start **analyzing the partitions, file-system** used and **recovering** potentially **interesting files** (even deleted ones). Learn how in:
+Αν σας δοθεί μια **εγκληματολογική εικόνα** μιας συσκευής μπορείτε να ξεκινήσετε **να αναλύετε τις κατατμήσεις, το σύστημα αρχείων** που χρησιμοποιείται και **να ανακτάτε** δυνητικά **ενδιαφέροντα αρχεία** (ακόμα και διαγραμμένα). Μάθετε πώς στο:
 
 {{#ref}}
 partitions-file-systems-carving/
 {{#endref}}
 
-Depending on the used OSs and even platform different interesting artifacts should be searched:
+Ανάλογα με τα χρησιμοποιούμενα λειτουργικά συστήματα και ακόμα και την πλατφόρμα, θα πρέπει να αναζητηθούν διάφορα ενδιαφέροντα αντικείμενα:
 
 {{#ref}}
 windows-forensics/
@@ -38,42 +38,42 @@ linux-forensics.md
 docker-forensics.md
 {{#endref}}
 
-## Deep inspection of specific file-types and Software
+## Βαθιά επιθεώρηση συγκεκριμένων τύπων αρχείων και Λογισμικού
 
-If you have very **suspicious** **file**, then **depending on the file-type and software** that created it several **tricks** may be useful.\
-Read the following page to learn some interesting tricks:
+Αν έχετε ένα πολύ **ύποπτο** **αρχείο**, τότε **ανάλογα με τον τύπο αρχείου και το λογισμικό** που το δημιούργησε, αρκετές **τεχνικές** μπορεί να είναι χρήσιμες.\
+Διαβάστε την παρακάτω σελίδα για να μάθετε μερικές ενδιαφέρουσες τεχνικές:
 
 {{#ref}}
 specific-software-file-type-tricks/
 {{#endref}}
 
-I want to do a special mention to the page:
+Θέλω να κάνω μια ειδική αναφορά στη σελίδα:
 
 {{#ref}}
 specific-software-file-type-tricks/browser-artifacts.md
 {{#endref}}
 
-## Memory Dump Inspection
+## Επιθεώρηση Dump Μνήμης
 
 {{#ref}}
 memory-dump-analysis/
 {{#endref}}
 
-## Pcap Inspection
+## Επιθεώρηση Pcap
 
 {{#ref}}
 pcap-inspection/
 {{#endref}}
 
-## **Anti-Forensic Techniques**
+## **Αντι-Εγκληματολογικές Τεχνικές**
 
-Keep in mind the possible use of anti-forensic techniques:
+Λάβετε υπόψη τη δυνατότητα χρήσης αντι-εγκληματολογικών τεχνικών:
 
 {{#ref}}
 anti-forensic-techniques.md
 {{#endref}}
 
-## Threat Hunting
+## Κυνηγώντας Απειλές
 
 {{#ref}}
 file-integrity-monitoring.md

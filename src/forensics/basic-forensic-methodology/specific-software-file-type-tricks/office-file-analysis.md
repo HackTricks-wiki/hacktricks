@@ -1,36 +1,18 @@
-# Office file analysis
+# Ανάλυση αρχείων Office
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-<figure><img src="../../../images/image (3) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+Για περισσότερες πληροφορίες, ελέγξτε [https://trailofbits.github.io/ctf/forensics/](https://trailofbits.github.io/ctf/forensics/). Αυτό είναι απλώς μια περίληψη:
 
-\
-Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
+Η Microsoft έχει δημιουργήσει πολλούς τύπους εγγράφων Office, με τους δύο κύριους τύπους να είναι οι **OLE formats** (όπως RTF, DOC, XLS, PPT) και οι **Office Open XML (OOXML) formats** (όπως DOCX, XLSX, PPTX). Αυτοί οι τύποι μπορούν να περιλαμβάνουν μακροεντολές, καθιστώντας τους στόχους για phishing και κακόβουλο λογισμικό. Τα αρχεία OOXML είναι δομημένα ως zip containers, επιτρέποντας την επιθεώρηση μέσω αποσυμπίεσης, αποκαλύπτοντας τη δομή αρχείων και φακέλων και το περιεχόμενο των αρχείων XML.
 
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
+Για να εξερευνήσετε τις δομές αρχείων OOXML, παρέχονται η εντολή για την αποσυμπίεση ενός εγγράφου και η δομή εξόδου. Τεχνικές για την απόκρυψη δεδομένων σε αυτά τα αρχεία έχουν τεκμηριωθεί, υποδεικνύοντας συνεχιζόμενη καινοτομία στην απόκρυψη δεδομένων εντός προκλήσεων CTF.
 
-For further information check [https://trailofbits.github.io/ctf/forensics/](https://trailofbits.github.io/ctf/forensics/). This is just a sumary:
+Για ανάλυση, τα **oletools** και **OfficeDissector** προσφέρουν ολοκληρωμένα σύνολα εργαλείων για την εξέταση τόσο των εγγράφων OLE όσο και των OOXML. Αυτά τα εργαλεία βοηθούν στην αναγνώριση και ανάλυση ενσωματωμένων μακροεντολών, οι οποίες συχνά χρησιμεύουν ως διαδρομές για την παράδοση κακόβουλου λογισμικού, συνήθως κατεβάζοντας και εκτελώντας επιπλέον κακόβουλα φορτία. Η ανάλυση των VBA μακροεντολών μπορεί να διεξαχθεί χωρίς Microsoft Office χρησιμοποιώντας το Libre Office, το οποίο επιτρέπει την αποσφαλμάτωση με σημεία διακοπής και παρακολουθούμενες μεταβλητές.
 
-Microsoft has created many office document formats, with two main types being **OLE formats** (like RTF, DOC, XLS, PPT) and **Office Open XML (OOXML) formats** (such as DOCX, XLSX, PPTX). These formats can include macros, making them targets for phishing and malware. OOXML files are structured as zip containers, allowing inspection through unzipping, revealing the file and folder hierarchy and XML file contents.
-
-To explore OOXML file structures, the command to unzip a document and the output structure are given. Techniques for hiding data in these files have been documented, indicating ongoing innovation in data concealment within CTF challenges.
-
-For analysis, **oletools** and **OfficeDissector** offer comprehensive toolsets for examining both OLE and OOXML documents. These tools help in identifying and analyzing embedded macros, which often serve as vectors for malware delivery, typically downloading and executing additional malicious payloads. Analysis of VBA macros can be conducted without Microsoft Office by utilizing Libre Office, which allows for debugging with breakpoints and watch variables.
-
-Installation and usage of **oletools** are straightforward, with commands provided for installing via pip and extracting macros from documents. Automatic execution of macros is triggered by functions like `AutoOpen`, `AutoExec`, or `Document_Open`.
-
+Η εγκατάσταση και η χρήση των **oletools** είναι απλή, με εντολές που παρέχονται για την εγκατάσταση μέσω pip και την εξαγωγή μακροεντολών από έγγραφα. Η αυτόματη εκτέλεση των μακροεντολών ενεργοποιείται από συναρτήσεις όπως `AutoOpen`, `AutoExec` ή `Document_Open`.
 ```bash
 sudo pip3 install -U oletools
 olevba -c /path/to/document #Extract macros
 ```
-
-<figure><img src="../../../images/image (3) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
-
-\
-Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
-
 {{#include ../../../banners/hacktricks-training.md}}

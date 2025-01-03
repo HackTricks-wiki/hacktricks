@@ -12,7 +12,7 @@
 ```
 Ή χρησιμοποιώντας το εργαλείο [**lsdtrip**](https://newosxbook.com/tools/lsdtrip.html).
 
-**`/usr/libexec/lsd`** είναι ο εγκέφαλος της βάσης δεδομένων. Παρέχει **διάφορες υπηρεσίες XPC** όπως `.lsd.installation`, `.lsd.open`, `.lsd.openurl`, και άλλες. Αλλά απαιτεί επίσης **ορισμένα δικαιώματα** για τις εφαρμογές ώστε να μπορούν να χρησιμοποιούν τις εκτεθειμένες λειτουργίες XPC, όπως `.launchservices.changedefaulthandler` ή `.launchservices.changeurlschemehandler` για να αλλάξουν τις προεπιλεγμένες εφαρμογές για τύπους mime ή σχήματα url και άλλα.
+**`/usr/libexec/lsd`** είναι ο εγκέφαλος της βάσης δεδομένων. Παρέχει **διάφορες υπηρεσίες XPC** όπως `.lsd.installation`, `.lsd.open`, `.lsd.openurl` και άλλες. Αλλά απαιτεί επίσης **ορισμένα δικαιώματα** για τις εφαρμογές ώστε να μπορούν να χρησιμοποιούν τις εκτεθειμένες λειτουργίες XPC, όπως `.launchservices.changedefaulthandler` ή `.launchservices.changeurlschemehandler` για να αλλάξουν τις προεπιλεγμένες εφαρμογές για τύπους mime ή σχήματα url και άλλα.
 
 **`/System/Library/CoreServices/launchservicesd`** διεκδικεί την υπηρεσία `com.apple.coreservices.launchservicesd` και μπορεί να ερωτηθεί για να αποκτήσει πληροφορίες σχετικά με τις τρέχουσες εφαρμογές. Μπορεί να ερωτηθεί με το εργαλείο του συστήματος /**`usr/bin/lsappinfo`** ή με [**lsdtrip**](https://newosxbook.com/tools/lsdtrip.html).
 
@@ -22,7 +22,7 @@
 ```bash
 /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister -dump | grep -E "path:|bindings:|name:"
 ```
-Ή χρησιμοποιήστε κάτι όπως [**SwiftDefaultApps**](https://github.com/Lord-Kamina/SwiftDefaultApps):
+Ή χρησιμοποιήστε κάτι όπως το [**SwiftDefaultApps**](https://github.com/Lord-Kamina/SwiftDefaultApps):
 ```bash
 ./swda getSchemes #Get all the available schemes
 ./swda getApps #Get all the apps declared

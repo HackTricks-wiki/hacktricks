@@ -1,152 +1,152 @@
-# Anti-Forensic Techniques
+# Αντι-Δικαστικές Τεχνικές
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Timestamps
+## Χρονικά Σημάδια
 
-An attacker may be interested in **changing the timestamps of files** to avoid being detected.\
-It's possible to find the timestamps inside the MFT in attributes `$STANDARD_INFORMATION` \_\_ and \_\_ `$FILE_NAME`.
+Ένας επιτιθέμενος μπορεί να ενδιαφέρεται για **να αλλάξει τα χρονικά σημάδια των αρχείων** για να αποφύγει την ανίχνευση.\
+Είναι δυνατόν να βρείτε τα χρονικά σημάδια μέσα στο MFT σε χαρακτηριστικά `$STANDARD_INFORMATION` \_\_ και \_\_ `$FILE_NAME`.
 
-Both attributes have 4 timestamps: **Modification**, **access**, **creation**, and **MFT registry modification** (MACE or MACB).
+Και τα δύο χαρακτηριστικά έχουν 4 χρονικά σημάδια: **Τροποποίηση**, **πρόσβαση**, **δημιουργία** και **τροποποίηση μητρώου MFT** (MACE ή MACB).
 
-**Windows explorer** and other tools show the information from **`$STANDARD_INFORMATION`**.
+**Ο εξερευνητής των Windows** και άλλα εργαλεία δείχνουν τις πληροφορίες από **`$STANDARD_INFORMATION`**.
 
-### TimeStomp - Anti-forensic Tool
+### TimeStomp - Αντι-δικαστικό Εργαλείο
 
-This tool **modifies** the timestamp information inside **`$STANDARD_INFORMATION`** **but** **not** the information inside **`$FILE_NAME`**. Therefore, it's possible to **identify** **suspicious** **activity**.
+Αυτό το εργαλείο **τροποποιεί** τις πληροφορίες χρονικών σημάτων μέσα στο **`$STANDARD_INFORMATION`** **αλλά** **όχι** τις πληροφορίες μέσα στο **`$FILE_NAME`**. Επομένως, είναι δυνατόν να **εντοπιστεί** **ύποπτη** **δραστηριότητα**.
 
 ### Usnjrnl
 
-The **USN Journal** (Update Sequence Number Journal) is a feature of the NTFS (Windows NT file system) that keeps track of volume changes. The [**UsnJrnl2Csv**](https://github.com/jschicht/UsnJrnl2Csv) tool allows for the examination of these changes.
+Το **USN Journal** (Ημερολόγιο Αριθμού Ακολουθίας Ενημέρωσης) είναι μια δυνατότητα του NTFS (σύστημα αρχείων Windows NT) που παρακολουθεί τις αλλαγές του όγκου. Το [**UsnJrnl2Csv**](https://github.com/jschicht/UsnJrnl2Csv) εργαλείο επιτρέπει την εξέταση αυτών των αλλαγών.
 
 ![](<../../images/image (801).png>)
 
-The previous image is the **output** shown by the **tool** where it can be observed that some **changes were performed** to the file.
+Η προηγούμενη εικόνα είναι η **έξοδος** που εμφανίζεται από το **εργαλείο** όπου μπορεί να παρατηρηθεί ότι κάποιες **αλλαγές πραγματοποιήθηκαν** στο αρχείο.
 
 ### $LogFile
 
-**All metadata changes to a file system are logged** in a process known as [write-ahead logging](https://en.wikipedia.org/wiki/Write-ahead_logging). The logged metadata is kept in a file named `**$LogFile**`, located in the root directory of an NTFS file system. Tools such as [LogFileParser](https://github.com/jschicht/LogFileParser) can be used to parse this file and identify changes.
+**Όλες οι αλλαγές μεταδεδομένων σε ένα σύστημα αρχείων καταγράφονται** σε μια διαδικασία που ονομάζεται [write-ahead logging](https://en.wikipedia.org/wiki/Write-ahead_logging). Τα καταγεγραμμένα μεταδεδομένα διατηρούνται σε ένα αρχείο με όνομα `**$LogFile**`, που βρίσκεται στον ριζικό κατάλογο ενός συστήματος αρχείων NTFS. Εργαλεία όπως το [LogFileParser](https://github.com/jschicht/LogFileParser) μπορούν να χρησιμοποιηθούν για την ανάλυση αυτού του αρχείου και την αναγνώριση αλλαγών.
 
 ![](<../../images/image (137).png>)
 
-Again, in the output of the tool it's possible to see that **some changes were performed**.
+Και πάλι, στην έξοδο του εργαλείου είναι δυνατόν να δούμε ότι **κάποιες αλλαγές πραγματοποιήθηκαν**.
 
-Using the same tool it's possible to identify to **which time the timestamps were modified**:
+Χρησιμοποιώντας το ίδιο εργαλείο είναι δυνατόν να εντοπιστεί **σε ποιο χρόνο τροποποιήθηκαν τα χρονικά σημάδια**:
 
 ![](<../../images/image (1089).png>)
 
-- CTIME: File's creation time
-- ATIME: File's modification time
-- MTIME: File's MFT registry modification
-- RTIME: File's access time
+- CTIME: Χρόνος δημιουργίας αρχείου
+- ATIME: Χρόνος τροποποίησης αρχείου
+- MTIME: Τροποποίηση μητρώου MFT του αρχείου
+- RTIME: Χρόνος πρόσβασης αρχείου
 
-### `$STANDARD_INFORMATION` and `$FILE_NAME` comparison
+### Σύγκριση `$STANDARD_INFORMATION` και `$FILE_NAME`
 
-Another way to identify suspicious modified files would be to compare the time on both attributes looking for **mismatches**.
+Ένας άλλος τρόπος για να εντοπιστούν ύποπτα τροποποιημένα αρχεία θα ήταν να συγκρίνουμε το χρόνο και στα δύο χαρακτηριστικά αναζητώντας **ασυμφωνίες**.
 
-### Nanoseconds
+### Νανοδευτερόλεπτα
 
-**NTFS** timestamps have a **precision** of **100 nanoseconds**. Then, finding files with timestamps like 2010-10-10 10:10:**00.000:0000 is very suspicious**.
+**Τα χρονικά σημάδια NTFS έχουν μια **ακρίβεια** **100 νανοδευτερόλεπτα**. Έτσι, η εύρεση αρχείων με χρονικά σημάδια όπως 2010-10-10 10:10:**00.000:0000 είναι πολύ ύποπτη**.
 
-### SetMace - Anti-forensic Tool
+### SetMace - Αντι-δικαστικό Εργαλείο
 
-This tool can modify both attributes `$STARNDAR_INFORMATION` and `$FILE_NAME`. However, from Windows Vista, it's necessary for a live OS to modify this information.
+Αυτό το εργαλείο μπορεί να τροποποιήσει και τα δύο χαρακτηριστικά `$STARNDAR_INFORMATION` και `$FILE_NAME`. Ωστόσο, από τα Windows Vista, είναι απαραίτητο να υπάρχει ένα ζωντανό λειτουργικό σύστημα για να τροποποιηθεί αυτή η πληροφορία.
 
-## Data Hiding
+## Απόκρυψη Δεδομένων
 
-NFTS uses a cluster and the minimum information size. That means that if a file occupies uses and cluster and a half, the **reminding half is never going to be used** until the file is deleted. Then, it's possible to **hide data in this slack space**.
+Το NFTS χρησιμοποιεί ένα cluster και το ελάχιστο μέγεθος πληροφορίας. Αυτό σημαίνει ότι αν ένα αρχείο καταλαμβάνει και ένα cluster και μισό, το **υπόλοιπο μισό δεν θα χρησιμοποιηθεί ποτέ** μέχρι να διαγραφεί το αρχείο. Έτσι, είναι δυνατόν να **αποκρυφτούν δεδομένα σε αυτόν τον χώρο slack**.
 
-There are tools like slacker that allow hiding data in this "hidden" space. However, an analysis of the `$logfile` and `$usnjrnl` can show that some data was added:
+Υπάρχουν εργαλεία όπως το slacker που επιτρέπουν την απόκρυψη δεδομένων σε αυτόν τον "κρυφό" χώρο. Ωστόσο, μια ανάλυση του `$logfile` και του `$usnjrnl` μπορεί να δείξει ότι προστέθηκαν κάποια δεδομένα:
 
 ![](<../../images/image (1060).png>)
 
-Then, it's possible to retrieve the slack space using tools like FTK Imager. Note that this kind of tool can save the content obfuscated or even encrypted.
+Έτσι, είναι δυνατόν να ανακτηθεί ο χώρος slack χρησιμοποιώντας εργαλεία όπως το FTK Imager. Σημειώστε ότι αυτός ο τύπος εργαλείου μπορεί να αποθηκεύσει το περιεχόμενο κρυπτογραφημένο ή ακόμα και κρυπτογραφημένο.
 
 ## UsbKill
 
-This is a tool that will **turn off the computer if any change in the USB** ports is detected.\
-A way to discover this would be to inspect the running processes and **review each python script running**.
+Αυτό είναι ένα εργαλείο που θα **σβήσει τον υπολογιστή αν ανιχνευθεί οποιαδήποτε αλλαγή στις θύρες USB**.\
+Ένας τρόπος για να το ανακαλύψετε θα ήταν να ελέγξετε τις τρέχουσες διαδικασίες και **να αναθεωρήσετε κάθε εκτελέσιμο python script**.
 
-## Live Linux Distributions
+## Ζωντανές Διανομές Linux
 
-These distros are **executed inside the RAM** memory. The only way to detect them is **in case the NTFS file-system is mounted with write permissions**. If it's mounted just with read permissions it won't be possible to detect the intrusion.
+Αυτές οι διανομές **εκτελούνται μέσα στη μνήμη RAM**. Ο μόνος τρόπος για να τις ανιχνεύσετε είναι **σε περίπτωση που το σύστημα αρχείων NTFS είναι προσαρτημένο με δικαιώματα εγγραφής**. Αν είναι προσαρτημένο μόνο με δικαιώματα ανάγνωσης, δεν θα είναι δυνατόν να ανιχνευθεί η εισβολή.
 
-## Secure Deletion
+## Ασφαλής Διαγραφή
 
 [https://github.com/Claudio-C/awesome-data-sanitization](https://github.com/Claudio-C/awesome-data-sanitization)
 
-## Windows Configuration
+## Ρύθμιση των Windows
 
-It's possible to disable several windows logging methods to make the forensics investigation much harder.
+Είναι δυνατόν να απενεργοποιηθούν πολλές μέθοδοι καταγραφής των Windows για να καταστεί η δικαστική έρευνα πολύ πιο δύσκολη.
 
-### Disable Timestamps - UserAssist
+### Απενεργοποίηση Χρονικών Σημάτων - UserAssist
 
-This is a registry key that maintains dates and hours when each executable was run by the user.
+Αυτό είναι ένα κλειδί μητρώου που διατηρεί ημερομηνίες και ώρες όταν εκτελείται κάθε εκτελέσιμο από τον χρήστη.
 
-Disabling UserAssist requires two steps:
+Η απενεργοποίηση του UserAssist απαιτεί δύο βήματα:
 
-1. Set two registry keys, `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackProgs` and `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackEnabled`, both to zero in order to signal that we want UserAssist disabled.
-2. Clear your registry subtrees that look like `HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\<hash>`.
+1. Ρυθμίστε δύο κλειδιά μητρώου, `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackProgs` και `HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Advanced\Start_TrackEnabled`, και τα δύο στο μηδέν για να δηλώσετε ότι θέλουμε να απενεργοποιηθεί το UserAssist.
+2. Καθαρίστε τους υποκαταλόγους του μητρώου σας που μοιάζουν με `HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\<hash>`.
 
-### Disable Timestamps - Prefetch
+### Απενεργοποίηση Χρονικών Σημάτων - Prefetch
 
-This will save information about the applications executed with the goal of improving the performance of the Windows system. However, this can also be useful for forensics practices.
+Αυτό θα αποθηκεύσει πληροφορίες σχετικά με τις εφαρμογές που εκτελούνται με στόχο τη βελτίωση της απόδοσης του συστήματος Windows. Ωστόσο, αυτό μπορεί επίσης να είναι χρήσιμο για δικαστικές πρακτικές.
 
-- Execute `regedit`
-- Select the file path `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SessionManager\Memory Management\PrefetchParameters`
-- Right-click on both `EnablePrefetcher` and `EnableSuperfetch`
-- Select Modify on each of these to change the value from 1 (or 3) to 0
-- Restart
+- Εκτελέστε `regedit`
+- Επιλέξτε τη διαδρομή αρχείου `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SessionManager\Memory Management\PrefetchParameters`
+- Κάντε δεξί κλικ και στα δύο `EnablePrefetcher` και `EnableSuperfetch`
+- Επιλέξτε Τροποποίηση σε καθένα από αυτά για να αλλάξετε την τιμή από 1 (ή 3) σε 0
+- Επανεκκινήστε
 
-### Disable Timestamps - Last Access Time
+### Απενεργοποίηση Χρονικών Σημάτων - Χρόνος Τελευταίας Πρόσβασης
 
-Whenever a folder is opened from an NTFS volume on a Windows NT server, the system takes the time to **update a timestamp field on each listed folder**, called the last access time. On a heavily used NTFS volume, this can affect performance.
+Όποτε ανοίγεται ένας φάκελος από έναν όγκο NTFS σε έναν διακομιστή Windows NT, το σύστημα παίρνει το χρόνο για να **ενημερώσει ένα πεδίο χρονικού σήματος σε κάθε καταχωρημένο φάκελο**, που ονομάζεται χρόνος τελευταίας πρόσβασης. Σε έναν πολύ χρησιμοποιούμενο όγκο NTFS, αυτό μπορεί να επηρεάσει την απόδοση.
 
-1. Open the Registry Editor (Regedit.exe).
-2. Browse to `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem`.
-3. Look for `NtfsDisableLastAccessUpdate`. If it doesn’t exist, add this DWORD and set its value to 1, which will disable the process.
-4. Close the Registry Editor, and reboot the server.
+1. Ανοίξτε τον Επεξεργαστή Μητρώου (Regedit.exe).
+2. Περιηγηθείτε στο `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem`.
+3. Αναζητήστε το `NtfsDisableLastAccessUpdate`. Αν δεν υπάρχει, προσθέστε αυτό το DWORD και ρυθμίστε την τιμή του σε 1, που θα απενεργοποιήσει τη διαδικασία.
+4. Κλείστε τον Επεξεργαστή Μητρώου και επανεκκινήστε τον διακομιστή.
 
-### Delete USB History
+### Διαγραφή Ιστορικού USB
 
-All the **USB Device Entries** are stored in Windows Registry Under the **USBSTOR** registry key that contains sub keys which are created whenever you plug a USB Device into your PC or Laptop. You can find this key here H`KEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **Deleting this** you will delete the USB history.\
-You may also use the tool [**USBDeview**](https://www.nirsoft.net/utils/usb_devices_view.html) to be sure you have deleted them (and to delete them).
+Όλες οι **Εγγραφές Συσκευών USB** αποθηκεύονται στο Μητρώο των Windows κάτω από το κλειδί μητρώου **USBSTOR** που περιέχει υποκλειδιά που δημιουργούνται όποτε συνδέετε μια συσκευή USB στον υπολογιστή ή το φορητό σας. Μπορείτε να βρείτε αυτό το κλειδί εδώ H`KEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\USBSTOR`. **Διαγράφοντας αυτό** θα διαγράψετε το ιστορικό USB.\
+Μπορείτε επίσης να χρησιμοποιήσετε το εργαλείο [**USBDeview**](https://www.nirsoft.net/utils/usb_devices_view.html) για να βεβαιωθείτε ότι έχετε διαγράψει αυτά (και για να τα διαγράψετε).
 
-Another file that saves information about the USBs is the file `setupapi.dev.log` inside `C:\Windows\INF`. This should also be deleted.
+Ένα άλλο αρχείο που αποθηκεύει πληροφορίες σχετικά με τα USB είναι το αρχείο `setupapi.dev.log` μέσα στο `C:\Windows\INF`. Αυτό θα πρέπει επίσης να διαγραφεί.
 
-### Disable Shadow Copies
+### Απενεργοποίηση Αντίγραφα Σκιάς
 
-**List** shadow copies with `vssadmin list shadowstorage`\
-**Delete** them running `vssadmin delete shadow`
+**Λίστα** αντίγραφων σκιάς με `vssadmin list shadowstorage`\
+**Διαγράψτε** τα εκτελώντας `vssadmin delete shadow`
 
-You can also delete them via GUI following the steps proposed in [https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html](https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html)
+Μπορείτε επίσης να τα διαγράψετε μέσω GUI ακολουθώντας τα βήματα που προτείνονται στο [https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html](https://www.ubackup.com/windows-10/how-to-delete-shadow-copies-windows-10-5740.html)
 
-To disable shadow copies [steps from here](https://support.waters.com/KB_Inf/Other/WKB15560_How_to_disable_Volume_Shadow_Copy_Service_VSS_in_Windows):
+Για να απενεργοποιήσετε τα αντίγραφα σκιάς [βήματα από εδώ](https://support.waters.com/KB_Inf/Other/WKB15560_How_to_disable_Volume_Shadow_Copy_Service_VSS_in_Windows):
 
-1. Open the Services program by typing "services" into the text search box after clicking the Windows start button.
-2. From the list, find "Volume Shadow Copy", select it, and then access Properties by right-clicking.
-3. Choose Disabled from the "Startup type" drop-down menu, and then confirm the change by clicking Apply and OK.
+1. Ανοίξτε το πρόγραμμα Υπηρεσίες πληκτρολογώντας "services" στο πλαίσιο αναζήτησης κειμένου μετά την κλικ στο κουμπί εκκίνησης των Windows.
+2. Από τη λίστα, βρείτε "Volume Shadow Copy", επιλέξτε το και στη συνέχεια αποκτήστε πρόσβαση στις Ιδιότητες κάνοντας δεξί κλικ.
+3. Επιλέξτε Απενεργοποιημένο από το αναπτυσσόμενο μενού "Τύπος εκκίνησης" και στη συνέχεια επιβεβαιώστε την αλλαγή κάνοντας κλικ στο Εφαρμογή και OK.
 
-It's also possible to modify the configuration of which files are going to be copied in the shadow copy in the registry `HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot`
+Είναι επίσης δυνατόν να τροποποιήσετε τη ρύθμιση των αρχείων που θα αντιγραφούν στο αντίγραφο σκιάς στο μητρώο `HKLM\SYSTEM\CurrentControlSet\Control\BackupRestore\FilesNotToSnapshot`
 
-### Overwrite deleted files
+### Επικαλύψτε διαγραμμένα αρχεία
 
-- You can use a **Windows tool**: `cipher /w:C` This will indicate cipher to remove any data from the available unused disk space inside the C drive.
-- You can also use tools like [**Eraser**](https://eraser.heidi.ie)
+- Μπορείτε να χρησιμοποιήσετε ένα **εργαλείο Windows**: `cipher /w:C` Αυτό θα υποδείξει στον cipher να αφαιρέσει οποιαδήποτε δεδομένα από τον διαθέσιμο μη χρησιμοποιούμενο χώρο δίσκου μέσα στον δίσκο C.
+- Μπορείτε επίσης να χρησιμοποιήσετε εργαλεία όπως το [**Eraser**](https://eraser.heidi.ie)
 
-### Delete Windows event logs
+### Διαγραφή καταγραφών γεγονότων Windows
 
-- Windows + R --> eventvwr.msc --> Expand "Windows Logs" --> Right click each category and select "Clear Log"
+- Windows + R --> eventvwr.msc --> Επεκτείνετε "Windows Logs" --> Κάντε δεξί κλικ σε κάθε κατηγορία και επιλέξτε "Clear Log"
 - `for /F "tokens=*" %1 in ('wevtutil.exe el') DO wevtutil.exe cl "%1"`
 - `Get-EventLog -LogName * | ForEach { Clear-EventLog $_.Log }`
 
-### Disable Windows event logs
+### Απενεργοποίηση καταγραφών γεγονότων Windows
 
 - `reg add 'HKLM\SYSTEM\CurrentControlSet\Services\eventlog' /v Start /t REG_DWORD /d 4 /f`
-- Inside the services section disable the service "Windows Event Log"
-- `WEvtUtil.exec clear-log` or `WEvtUtil.exe cl`
+- Μέσα στην ενότητα υπηρεσιών απενεργοποιήστε την υπηρεσία "Windows Event Log"
+- `WEvtUtil.exec clear-log` ή `WEvtUtil.exe cl`
 
-### Disable $UsnJrnl
+### Απενεργοποίηση $UsnJrnl
 
 - `fsutil usn deletejournal /d c:`
 

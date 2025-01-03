@@ -9,7 +9,7 @@
 
 ## Persistence detection
 
-- [**KnockKnock**](https://objective-see.org/products/knockknock.html): Εφαρμογή Objective-See που θα αναζητήσει σε πολλές τοποθεσίες όπου **το κακόβουλο λογισμικό θα μπορούσε να επιμένει** (είναι ένα εργαλείο μιας χρήσης, όχι υπηρεσία παρακολούθησης).
+- [**KnockKnock**](https://objective-see.org/products/knockknock.html): Εφαρμογή Objective-See που θα αναζητήσει σε διάφορες τοποθεσίες όπου **το κακόβουλο λογισμικό θα μπορούσε να επιμένει** (είναι ένα εργαλείο μιας χρήσης, όχι υπηρεσία παρακολούθησης).
 - [**BlockBlock**](https://objective-see.org/products/blockblock.html): Όπως το KnockKnock παρακολουθώντας διαδικασίες που δημιουργούν επιμονή.
 
 ## Keyloggers detection
