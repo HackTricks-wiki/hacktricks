@@ -30,7 +30,7 @@ U kan funksies soos `is_some()` of `is_none()` gebruik om die waarde van die Ops
 
 ### Makros
 
-Makros is kragtiger as funksies omdat hulle uitbrei om meer kode te produseer as die kode wat jy handmatig geskryf het. Byvoorbeeld, 'n funksie-handtekening moet die aantal en tipe parameters wat die funksie het, verklaar. Makros, aan die ander kant, kan 'n veranderlike aantal parameters neem: ons kan `println!("hello")` met een argument of `println!("hello {}", name)` met twee argumente aanroep. Ook, makros word uitgebrei voordat die kompilateur die betekenis van die kode interpreteer, so 'n makro kan, byvoorbeeld, 'n trait op 'n gegewe tipe implementeer. 'n Funksie kan nie, omdat dit tydens uitvoering aangeroep word en 'n trait moet tydens kompilering geïmplementeer word.
+Makros is kragtiger as funksies omdat hulle uitbrei om meer kode te produseer as die kode wat jy handmatig geskryf het. Byvoorbeeld, 'n funksie-handtekening moet die aantal en tipe parameters wat die funksie het, verklaar. Makros, aan die ander kant, kan 'n veranderlike aantal parameters neem: ons kan `println!("hello")` met een argument of `println!("hello {}", name)` met twee argumente aanroep. Ook, makros word uitgebrei voordat die kompilator die betekenis van die kode interpreteer, so 'n makro kan, byvoorbeeld, 'n trait op 'n gegewe tipe implementeer. 'n Funksie kan nie, omdat dit tydens uitvoering aangeroep word en 'n trait moet tydens kompilering geïmplementeer word.
 ```rust
 macro_rules! my_macro {
 () => {

@@ -22,6 +22,6 @@ U kan ook [SharpLateral](https://github.com/mertdas/SharpLateral) gebruik.
 ```bash
 SharpLateral schedule HOSTNAME C:\Users\Administrator\Desktop\malware.exe TaskName
 ```
-Meer inligting oor die [**gebruik van schtasks met silwer kaartjies hier**](../active-directory-methodology/silver-ticket.md#host).
+Meer inligting oor die [**gebruik van schtasks met silver tickets hier**](../active-directory-methodology/silver-ticket.md#host).
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -2,7 +2,7 @@
 
 # Kontroleer vir moontlike aksies binne die GUI-toepassing
 
-**Algemene Dialoë** is daardie opsies van **'n lêer stoor**, **'n lêer oopmaak**, 'n lettertipe kies, 'n kleur... Die meeste van hulle sal **'n volledige Explorer-funksionaliteit bied**. Dit beteken dat jy toegang tot Explorer-funksies sal hê as jy toegang tot hierdie opsies kan kry:
+**Algemene Dialoë** is daardie opsies van **'n lêer stoor**, **'n lêer oopmaak**, 'n lettertipe kies, 'n kleur... Die meeste van hulle sal **'n volledige Explorer-funksionaliteit aanbied**. Dit beteken dat jy toegang tot Explorer-funksies sal hê as jy toegang tot hierdie opsies kan kry:
 
 - Sluit/Sluit as
 - Oop/Oop met
@@ -20,7 +20,7 @@ Jy moet nagaan of jy kan:
 
 ## Opdraguitvoering
 
-Miskien **kan jy 'n `Open with`** opsie\*\* gebruik om 'n soort skulp te open/uit te voer.
+Miskien **deur 'n `Open with`** opsie\*\* kan jy 'n soort skulp oopmaak/uitvoer.
 
 ### Windows
 
@@ -73,7 +73,7 @@ Registrie-redigeerder: [https://sourceforge.net/projects/uberregedit/](https://s
 | %TEMP%              | %SYSTEMDRIVE%     | %SYSTEMROOT%       | %APPDATA%           |
 | %HOMEDRIVE%         | %HOMESHARE        |                    | <p><br></p>         |
 
-## Kortpaaie
+## Skakels
 
 - Plakkerige Sleutels – Druk SHIFT 5 keer
 - Muis Sleutels – SHIFT+ALT+NUMLOCK
@@ -92,7 +92,7 @@ Registrie-redigeerder: [https://sourceforge.net/projects/uberregedit/](https://s
 - F1 – Hulp F3 – Soek
 - F6 – Adresbalk
 - F11 – Wissel volle skerm binne Internet Explorer
-- CTRL+H – Internet Explorer Geskiedenis
+- CTRL+H – Internet Explorer Gesiedenis
 - CTRL+T – Internet Explorer – Nuwe Tab
 - CTRL+N – Internet Explorer – Nuwe Bladsy
 - CTRL+O – Oop Lêer
@@ -100,12 +100,12 @@ Registrie-redigeerder: [https://sourceforge.net/projects/uberregedit/](https://s
 
 ## Veeg
 
-- Veeg van die linkerkant na die regterkant om al die oop Windows te sien, die KIOSK-toepassing te minimaliseer en direk toegang tot die hele OS te verkry;
-- Veeg van die regterkant na die linkerkant om die Aksiesentrum te open, die KIOSK-toepassing te minimaliseer en direk toegang tot die hele OS te verkry;
+- Veeg van die linkerkant na die regterkant om al die oop Windows te sien, die KIOSK-toepassing te minimaliseer en direk toegang tot die hele OS te kry;
+- Veeg van die regterkant na die linkerkant om die Aksiesentrum oop te maak, die KIOSK-toepassing te minimaliseer en direk toegang tot die hele OS te kry;
 - Veeg in vanaf die boonste rand om die titelbalk sigbaar te maak vir 'n toepassing wat in volle skermmodus oopgemaak is;
 - Veeg op vanaf die onderkant om die taakbalk in 'n volle skerm toepassing te wys.
 
-## Internet Explorer Trukies
+## Internet Explorer Triks
 
 ### 'Beeld Toolbar'
 
@@ -155,31 +155,31 @@ Bron: https://medium.com/@Rend_/give-me-a-browser-ill-give-you-a-shell-de19811de
 
 ## Gebare en knoppies
 
-- Veeg op met vier (of vyf) vingers / Dubbel-tik die Tuis-knoppie: Om die multitask-uitsig te sien en die Toepassing te verander
+- Veeg op met vier (of vyf) vingers / Dubbel-tik Huis knoppie: Om die multitask uitsig te sien en App te verander
 
-- Veeg een kant of die ander met vier of vyf vingers: Ten einde na die volgende/laaste Toepassing te verander
+- Veeg een kant of die ander met vier of vyf vingers: Ten einde na die volgende/laaste App te verander
 
-- Knyp die skerm met vyf vingers / Raak die Tuis-knoppie aan / Veeg op met 1 vinger vanaf die onderkant van die skerm in 'n vinnige beweging na bo: Om toegang tot Tuis te verkry
+- Knyp die skerm met vyf vingers / Raak Huis knoppie aan / Veeg op met 1 vinger vanaf die onderkant van die skerm in 'n vinnige beweging na bo: Om toegang tot Huis te kry
 
 - Veeg een vinger vanaf die onderkant van die skerm net 1-2 duim (stadig): Die dok sal verskyn
 
 - Veeg af vanaf die boonste deel van die skerm met 1 vinger: Om jou kennisgewings te sien
 
-- Veeg af met 1 vinger die boonste regterhoek van die skerm: Om die iPad Pro se kontrole sentrum te sien
+- Veeg af met 1 vinger die boonste regterhoek van die skerm: Om iPad Pro se kontrole sentrum te sien
 
-- Veeg 1 vinger vanaf die linkerkant van die skerm 1-2 duim: Om die Vandag-uitsig te sien
+- Veeg 1 vinger vanaf die linkerkant van die skerm 1-2 duim: Om Vandag se uitsig te sien
 
-- Veeg vinnig 1 vinger vanaf die middel van die skerm na regs of links: Om na die volgende/laaste Toepassing te verander
+- Veeg vinnig 1 vinger vanaf die middel van die skerm na regs of links: Om na die volgende/laaste App te verander
 
-- Druk en hou die Aan/**Af**/Slaap-knoppie in die boonste regterhoek van die **iPad +** Beweeg die Gly om **af te skakel** skuif heeltemal na regs: Om af te skakel
+- Druk en hou die Aan/**Af**/Slaap knoppie in die boonste regterhoek van die **iPad +** Beweeg die Gly om **af te skakel** skuif al die pad na regs: Om af te skakel
 
-- Druk die Aan/**Af**/Slaap-knoppie in die boonste regterhoek van die **iPad en die Tuis-knoppie vir 'n paar sekondes**: Om 'n harde afskakeling af te dwing
+- Druk die Aan/**Af**/Slaap knoppie in die boonste regterhoek van die **iPad en die Huis knoppie vir 'n paar sekondes**: Om 'n harde afskakeling af te dwing
 
-- Druk die Aan/**Af**/Slaap-knoppie in die boonste regterhoek van die **iPad en die Tuis-knoppie vinnig**: Om 'n skermskoot te neem wat in die onderste linkerhoek van die skerm sal verskyn. Druk albei knoppies gelyktydig baie kortliks, aangesien as jy hulle 'n paar sekondes hou, 'n harde afskakeling uitgevoer sal word.
+- Druk die Aan/**Af**/Slaap knoppie in die boonste regterhoek van die **iPad en die Huis knoppie vinnig**: Om 'n skermskoot te neem wat in die onderste linkerhoek van die skerm sal verskyn. Druk albei knoppies op dieselfde tyd baie kortliks, aangesien as jy hulle 'n paar sekondes hou, 'n harde afskakeling uitgevoer sal word.
 
-## Kortpaaie
+## Skakels
 
-Jy moet 'n iPad sleutelbord of 'n USB sleutelbord-adapter hê. Slegs kortpaaie wat kan help om uit die toepassing te ontsnap, sal hier getoon word.
+Jy moet 'n iPad sleutelbord of 'n USB sleutelbord-adapter hê. Slegs skakels wat kan help om uit die toepassing te ontsnap, sal hier getoon word.
 
 | Sleutel | Naam         |
 | --- | ------------ |
@@ -194,77 +194,77 @@ Jy moet 'n iPad sleutelbord of 'n USB sleutelbord-adapter hê. Slegs kortpaaie w
 | ↑   | Bo Pyl     |
 | ↓   | Onder Pyl   |
 
-### Stelselskortpaaie
+### Stelselskakels
 
-Hierdie kortpaaie is vir die visuele instellings en klankinstellings, afhangende van die gebruik van die iPad.
+Hierdie skakels is vir die visuele instellings en klankinstellings, afhangende van die gebruik van die iPad.
 
-| Kortpad | Aksie                                                                         |
+| Skakel | Aksie                                                                         |
 | -------- | ------------------------------------------------------------------------------ |
 | F1       | Dim Sscreen                                                                    |
 | F2       | Verhoog skerm                                                                |
-| F7       | Terug een liedjie                                                              |
+| F7       | Terug een liedjie                                                                  |
 | F8       | Speel/pouse                                                                     |
-| F9       | Skuif liedjie                                                                  |
+| F9       | Skuif liedjie                                                                      |
 | F10      | Stil                                                                           |
 | F11      | Verminder volume                                                                |
 | F12      | Verhoog volume                                                                |
-| ⌘ Space  | Wys 'n lys van beskikbare tale; om een te kies, tik weer die spasieknoppie. |
+| ⌘ Space  | Wys 'n lys van beskikbare tale; om een te kies, tik weer die spasie sleutel. |
 
 ### iPad navigasie
 
-| Kortpad                                           | Aksie                                                  |
+| Skakel                                           | Aksie                                                  |
 | -------------------------------------------------- | ------------------------------------------------------- |
-| ⌘H                                                 | Gaan na Tuis                                            |
-| ⌘⇧H (Opdrag-Shift-H)                              | Gaan na Tuis                                            |
+| ⌘H                                                 | Gaan na Huis                                              |
+| ⌘⇧H (Opdrag-Shift-H)                              | Gaan na Huis                                              |
 | ⌘ (Space)                                          | Open Spotlight                                          |
-| ⌘⇥ (Opdrag-Tab)                                   | Lys laaste tien gebruikte toepassings                   |
-| ⌘\~                                                | Gaan na die laaste Toepassing                           |
-| ⌘⇧3 (Opdrag-Shift-3)                              | Skermskoot (hang in die onderste linkerhoek om te stoor of daarop te handel) |
-| ⌘⇧4                                                | Skermskoot en open dit in die redigeerder              |
-| Druk en hou ⌘                                   | Lys van kortpaaie beskikbaar vir die Toepassing        |
-| ⌘⌥D (Opdrag-Opsie/Alt-D)                         | Bring die dok op                                       |
-| ^⌥H (Beheer-Opsie-H)                             | Tuis-knoppie                                           |
-| ^⌥H H (Beheer-Opsie-H-H)                         | Wys multitask-balk                                     |
-| ^⌥I (Beheer-Opsie-i)                             | Item kieser                                            |
-| Escape                                             | Terug knoppie                                          |
-| → (Regter pyl)                                    | Volgende item                                          |
+| ⌘⇥ (Opdrag-Tab)                                   | Lys laaste tien gebruikte toepassings                                 |
+| ⌘\~                                                | Gaan na die laaste App                                       |
+| ⌘⇧3 (Opdrag-Shift-3)                              | Skermskoot (hang in onderste linkerhoek om te stoor of daarop te handel) |
+| ⌘⇧4                                                | Skermskoot en open dit in die redigeerder                    |
+| Druk en hou ⌘                                   | Lys van skakels beskikbaar vir die App                 |
+| ⌘⌥D (Opdrag-Opsie/Alt-D)                         | Bring die dok op                                      |
+| ^⌥H (Beheer-Opsie-H)                             | Huis knoppie                                             |
+| ^⌥H H (Beheer-Opsie-H-H)                         | Wys multitask balk                                      |
+| ^⌥I (Beheer-Opsie-i)                             | Item keuse                                            |
+| Escape                                             | Terug knoppie                                             |
+| → (Regter pyl)                                    | Volgende item                                               |
 | ← (Linker pyl)                                     | Vorige item                                           |
-| ↑↓ (Bo pyl, Onder pyl)                          | Druk gelyktydig op die geselekte item                 |
-| ⌥ ↓ (Opsie-Onder pyl)                            | Rol af                                                 |
-| ⌥↑ (Opsie-Bo pyl)                               | Rol op                                                 |
-| ⌥← of ⌥→ (Opsie-Linker pyl of Opsie-Regter pyl) | Rol links of regs                                      |
-| ^⌥S (Beheer-Opsie-S)                             | Skakel VoiceOver spraak aan of af                      |
-| ⌘⇧⇥ (Opdrag-Shift-Tab)                            | Wissel na die vorige toepassing                         |
-| ⌘⇥ (Opdrag-Tab)                                   | Wissel terug na die oorspronklike toepassing           |
-| ←+→, dan Opsie + ← of Opsie+→                   | Navigeer deur Dok                                      |
+| ↑↓ (Bo pyl, Onder pyl)                          | Terselfdertyd tik op die geselekte item                        |
+| ⌥ ↓ (Opsie-Onder pyl)                            | Rol af                                             |
+| ⌥↑ (Opsie-Bo pyl)                               | Rol op                                               |
+| ⌥← of ⌥→ (Opsie-Linker pyl of Opsie-Regter pyl) | Rol links of regs                                    |
+| ^⌥S (Beheer-Opsie-S)                             | Skakel VoiceOver spraak aan of af                         |
+| ⌘⇧⇥ (Opdrag-Shift-Tab)                            | Wissel na die vorige app                              |
+| ⌘⇥ (Opdrag-Tab)                                   | Wissel terug na die oorspronklike app                         |
+| ←+→, dan Opsie + ← of Opsie+→                   | Navigeer deur Dok                                   |
 
-### Safari kortpaaie
+### Safari skakels
 
-| Kortpad                | Aksie                                           |
+| Skakel                | Aksie                                           |
 | ----------------------- | ------------------------------------------------ |
 | ⌘L (Opdrag-L)          | Open Ligging                                    |
-| ⌘T                      | Open 'n nuwe tab                               |
-| ⌘W                      | Sluit die huidige tab                          |
+| ⌘T                      | Open 'n nuwe tab                                   |
+| ⌘W                      | Sluit die huidige tab                            |
 | ⌘R                      | Vernuw die huidige tab                          |
-| ⌘.                      | Stop laai van die huidige tab                   |
-| ^⇥                      | Wissel na die volgende tab                       |
-| ^⇧⇥ (Beheer-Shift-Tab) | Beweeg na die vorige tab                        |
-| ⌘L                      | Kies die teksinvoer/URL veld om dit te wysig   |
+| ⌘.                      | Stop laai van die huidige tab                     |
+| ^⇥                      | Wissel na die volgende tab                           |
+| ^⇧⇥ (Beheer-Shift-Tab) | Beweeg na die vorige tab                         |
+| ⌘L                      | Kies die teksinvoer/URL veld om dit te wysig     |
 | ⌘⇧T (Opdrag-Shift-T)   | Open laaste geslote tab (kan verskeie kere gebruik word) |
-| ⌘\[                     | Gaan terug een bladsy in jou blaai geskiedenis  |
-| ⌘]                      | Gaan vorentoe een bladsy in jou blaai geskiedenis |
+| ⌘\[                     | Gaan terug een bladsy in jou blaai geskiedenis      |
+| ⌘]                      | Gaan vorentoe een bladsy in jou blaai geskiedenis   |
 | ⌘⇧R                     | Aktiveer Leser Modus                             |
 
-### Pos kortpaaie
+### Pos skakels
 
-| Kortpad                   | Aksie                       |
+| Skakel                   | Aksie                       |
 | -------------------------- | ---------------------------- |
 | ⌘L                         | Open Ligging                |
-| ⌘T                         | Open 'n nuwe tab           |
-| ⌘W                         | Sluit die huidige tab      |
+| ⌘T                         | Open 'n nuwe tab               |
+| ⌘W                         | Sluit die huidige tab        |
 | ⌘R                         | Vernuw die huidige tab      |
 | ⌘.                         | Stop laai van die huidige tab |
-| ⌘⌥F (Opdrag-Opsie/Alt-F) | Soek in jou posbus         |
+| ⌘⌥F (Opdrag-Opsie/Alt-F) | Soek in jou posbus       |
 
 # Verwysings
 

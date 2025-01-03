@@ -63,8 +63,8 @@ In hierdie geval, as jy soek na **0xA56363C6** kan jy vind dat dit verband hou m
 
 Dit bestaan uit 3 hoofdele:
 
-- **Inisialisering fase/**: Skep 'n **tabel van waardes van 0x00 tot 0xFF** (256bytes in totaal, 0x100). Hierdie tabel word algemeen 'Substitusie Boks' (of SBox) genoem.
-- **Scrambling fase**: Sal **deur die tabel loop** wat voorheen geskep is (lus van 0x100 iterasies, weer) en elke waarde met **semi-ewe** bytes aanpas. Om hierdie semi-ewe bytes te skep, word die RC4 **sleutel gebruik**. RC4 **sleutels** kan **tussen 1 en 256 bytes in lengte** wees, maar dit word gewoonlik aanbeveel dat dit bo 5 bytes is. Gewoonlik is RC4 sleutels 16 bytes in lengte.
+- **Inisialisering fase/**: Skep 'n **tabel van waardes van 0x00 tot 0xFF** (256bytes in totaal, 0x100). Hierdie tabel word algemeen die **Substitusie Boks** (of SBox) genoem.
+- **Scrambling fase**: Sal **deur die tabel loop** wat voorheen geskep is (lus van 0x100 iterasies, weer) en elke waarde met **semi-ewe random** bytes aanpas. Om hierdie semi-ewe random bytes te skep, word die RC4 **sleutel gebruik**. RC4 **sleutels** kan **tussen 1 en 256 bytes in lengte** wees, maar dit word gewoonlik aanbeveel dat dit bo 5 bytes is. Gewoonlik is RC4 sleutels 16 bytes in lengte.
 - **XOR fase**: Laastens, die plain-text of cyphertext word **XORed met die waardes wat voorheen geskep is**. Die funksie om te enkripteer en te dekripteer is dieselfde. Hiervoor sal 'n **lus deur die geskepte 256 bytes** uitgevoer word soveel keer as wat nodig is. Dit word gewoonlik in 'n dekompilde kode erken met 'n **%256 (mod 256)**.
 
 > [!NOTE]
@@ -87,7 +87,7 @@ Dit bestaan uit 3 hoofdele:
 ### **Kenmerke**
 
 - Gebruik van **substitusie bokse en opsoek tabelle**
-- Dit is moontlik om **AES te onderskei danksy die gebruik van spesifieke opsoek tabel waardes** (konstantes). _Let daarop dat die **konstante** in die binêre **of geskep** _**dynamies**._
+- Dit is moontlik om **AES te onderskei danksy die gebruik van spesifieke opsoek tabel waardes** (konstantes). _Let daarop dat die **konstante** in die binêre **gestoor** kan word **of geskep** _**dynamies**._
 - Die **enkripsiesleutel** moet **deelbaar** wees deur **16** (gewoonlik 32B) en gewoonlik word 'n **IV** van 16B gebruik.
 
 ### SBox konstantes
@@ -120,7 +120,7 @@ Daarom is dit moontlik om hierdie algoritme te identifiseer deur die **magiese n
 
 - Meer kompleks as simmetriese algoritmes
 - Daar is geen konstantes nie! (aangepaste implementasies is moeilik om te bepaal)
-- KANAL (n kripto ontleder) misluk om leidrade oor RSA te wys en dit staat op konstantes.
+- KANAL (n kripto ontleder) misluk om leidrade oor RSA te wys en dit staatmaak op konstantes.
 
 ### Identifisering deur vergelykings
 
@@ -170,7 +170,7 @@ Kontroleer **opsoek tabel konstantes**:
 ### Kenmerke
 
 - Nie herkenbare konstantes
-- Jy kan probeer om die algoritme in python te skryf en soek na soortgelyke dinge aanlyn
+- Jy kan probeer om die algoritme in python te skryf en soortgelyke dinge aanlyn te soek
 
 ### Identifiseer
 

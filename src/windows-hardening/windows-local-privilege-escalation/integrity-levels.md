@@ -37,7 +37,7 @@ NT AUTHORITY\INTERACTIVE:(I)(M,DC)
 NT AUTHORITY\SERVICE:(I)(M,DC)
 NT AUTHORITY\BATCH:(I)(M,DC)
 ```
-Nou, laat ons 'n minimum integriteitsvlak van **Hoog** aan die lêer toewys. Dit **moet gedoen word vanaf 'n konsole** wat as **administrateur** loop, aangesien 'n **gewone konsole** in Medium Integriteitsvlak sal loop en **nie toegelaat sal word** om 'n Hoog Integriteitsvlak aan 'n objek toe te wys:
+Nou, kom ons ken 'n minimum integriteitsvlak van **Hoog** aan die lêer toe. Dit **moet gedoen word vanaf 'n konsole** wat as **administrateur** loop, aangesien 'n **gewone konsole** in Medium Integriteitsvlak sal loop en **nie toegelaat sal word** om 'n Hoë Integriteitsvlak aan 'n objek toe te ken nie:
 ```
 icacls asd.txt /setintegritylevel(oi)(ci) High
 processed file: asd.txt
@@ -52,7 +52,7 @@ NT AUTHORITY\SERVICE:(I)(M,DC)
 NT AUTHORITY\BATCH:(I)(M,DC)
 Mandatory Label\High Mandatory Level:(NW)
 ```
-Hierdie is waar dinge interessant raak. Jy kan sien dat die gebruiker `DESKTOP-IDJHTKP\user` **VOLLEDIGE regte** oor die lêer het (in werklikheid was dit die gebruiker wat die lêer geskep het), egter, as gevolg van die minimum integriteitsvlak wat geïmplementeer is, sal hy nie in staat wees om die lêer weer te wysig nie, tensy hy binne 'n Hoë Integriteitsvlak loop (let op dat hy dit sal kan lees):
+Hierdie is waar dinge interessant raak. Jy kan sien dat die gebruiker `DESKTOP-IDJHTKP\user` **VOLLEDIGE regte** oor die lêer het (werklik, dit was die gebruiker wat die lêer geskep het), egter, as gevolg van die minimum integriteitsvlak wat geïmplementeer is, sal hy nie in staat wees om die lêer weer te wysig nie, tensy hy binne 'n Hoë Integriteitsvlak loop (let op dat hy dit sal kan lees):
 ```
 echo 1234 > asd.txt
 Access is denied.

@@ -6,9 +6,9 @@
 
 [Uit die dokumentasie](https://learn.microsoft.com/en-us/windows/win32/secauthz/security-descriptor-definition-language): Sekuriteitsbeskrywing Definisietaal (SDDL) definieer die formaat wat gebruik word om 'n sekuriteitsbeskrywing te beskryf. SDDL gebruik ACE stringe vir DACL en SACL: `ace_type;ace_flags;rights;object_guid;inherit_object_guid;account_sid;`
 
-Die **sekuriteitsbeskrywings** word gebruik om die **regte** wat 'n **objek** oor 'n **objek** het, te **stoor**. As jy net 'n **klein verandering** in die **sekuriteitsbeskrywing** van 'n objek kan **maak**, kan jy baie interessante voorregte oor daardie objek verkry sonder om 'n lid van 'n bevoorregte groep te wees.
+Die **sekuriteitsbeskrywings** word gebruik om die **regte** wat 'n **objek** oor 'n **objek** het, te **stoor**. As jy net 'n **klein verandering** in die **sekuriteitsbeskrywing** van 'n objek kan maak, kan jy baie interessante voorregte oor daardie objek verkry sonder om 'n lid van 'n bevoorregte groep te wees.
 
-Dan is hierdie volhardingstegniek gebaseer op die vermoë om elke voorreg wat teen sekere objek benodig word, te wen, om 'n taak uit te voer wat gewoonlik admin voorregte vereis, maar sonder die behoefte om admin te wees.
+Dan is hierdie volhardingstegniek gebaseer op die vermoë om elke voorreg wat nodig is teen sekere objek te wen, om 'n taak uit te voer wat gewoonlik admin voorregte vereis, maar sonder die behoefte om admin te wees.
 
 ### Toegang tot WMI
 
@@ -19,7 +19,7 @@ Set-RemoteWMI -UserName student1 -ComputerName dcorp-dc–namespace 'root\cimv2'
 ```
 ### Toegang tot WinRM
 
-Gee toegang tot **winrm PS-konsol aan 'n gebruiker** [**gebruik hierdie**](https://github.com/samratashok/nishang/blob/master/Backdoors/Set-RemoteWMI.ps1)**:**
+Gee toegang tot **winrm PS-konsol aan 'n gebruiker** [**met hierdie**](https://github.com/samratashok/nishang/blob/master/Backdoors/Set-RemoteWMI.ps1)**:**
 ```bash
 Set-RemotePSRemoting -UserName student1 -ComputerName <remotehost> -Verbose
 Set-RemotePSRemoting -UserName student1 -ComputerName <remotehost> -Remove #Remove

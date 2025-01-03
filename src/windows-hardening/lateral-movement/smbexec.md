@@ -10,7 +10,7 @@
 ### Sleutelpunte oor **SMBExec**
 
 - Dit werk deur 'n tydelike diens (byvoorbeeld, "BTOBTO") op die teikenmasjien te skep om opdragte via cmd.exe (%COMSPEC%) uit te voer, sonder om enige binêre lêers te laat val.
-- Ten spyte van sy stil benadering, genereer dit gebeurtenislogs vir elke opdrag wat uitgevoer word, wat 'n vorm van nie-interaktiewe "shell" bied.
+- Ten spyte van sy stil benadering, genereer dit gebeurtenislogboeke vir elke uitgevoerde opdrag, wat 'n vorm van nie-interaktiewe "shell" bied.
 - Die opdrag om te verbind met **Smbexec** lyk soos volg:
 ```bash
 smbexec.py WORKGROUP/genericuser:genericpassword@10.10.10.10
@@ -18,17 +18,17 @@ smbexec.py WORKGROUP/genericuser:genericpassword@10.10.10.10
 ### Uitvoering van Opdragte Sonder Binaries
 
 - **Smbexec** stel direkte opdrag uitvoering deur diens binPaths in, wat die behoefte aan fisiese binaries op die teiken uitskakel.
-- Hierdie metode is nuttig om eenmalige opdragte op 'n Windows-teiken uit te voer. Byvoorbeeld, om dit te kombineer met Metasploit se `web_delivery` module stel jou in staat om 'n PowerShell-gefokusde omgekeerde Meterpreter payload uit te voer.
-- Deur 'n afstanddiens op die aanvaller se masjien te skep met binPath ingestel om die verskafde opdrag deur cmd.exe uit te voer, is dit moontlik om die payload suksesvol uit te voer, wat callback en payload uitvoering met die Metasploit listener bereik, selfs al gebeur diens responsfoute.
+- Hierdie metode is nuttig vir die uitvoering van eenmalige opdragte op 'n Windows-teiken. Byvoorbeeld, om dit te kombineer met Metasploit se `web_delivery` module stel dit in staat om 'n PowerShell-gefokusde omgekeerde Meterpreter payload uit te voer.
+- Deur 'n afstanddiens op die aanvaller se masjien te skep met binPath ingestel om die verskafde opdrag deur cmd.exe uit te voer, is dit moontlik om die payload suksesvol uit te voer, wat 'n terugroep en payload uitvoering met die Metasploit luisteraar bereik, selfs al gebeur diens respons foute.
 
 ### Opdragte Voorbeeld
 
-Die skep en begin van die diens kan met die volgende opdragte gedoen word:
+Die skep en begin van die diens kan bereik word met die volgende opdragte:
 ```bash
 sc create [ServiceName] binPath= "cmd.exe /c [PayloadCommand]"
 sc start [ServiceName]
 ```
-Vir verdere besonderhede, kyk na [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
+Vir verdere besonderhede, kyk [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
 
 ## Verwysings
 

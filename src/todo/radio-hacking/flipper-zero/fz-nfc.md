@@ -52,7 +52,7 @@ Vir 'n inleiding oor NFC [**lees hierdie bladsy**](../pentesting-rfid.md#high-fr
 
 ### Lees
 
-Flipper Zero kan **NFC-kaarte lees**, maar dit **begryp nie al die protokolle** wat op ISO 14443 gebaseer is nie. Aangesien **UID 'n lae-vlak attribuut is**, mag jy in 'n situasie beland waar **UID reeds gelees is, maar die hoë-vlak data-oordragprotokol steeds onbekend is**. Jy kan UID lees, emuleer en handmatig invoer met Flipper vir die primitiewe lesers wat UID vir outorisering gebruik.
+Flipper Zero kan **NFC-kaarte lees**, maar dit **begryp nie al die protokolle** wat op ISO 14443 gebaseer is nie. Aangesien **UID 'n lae-vlak eienskap is**, mag jy in 'n situasie beland waar **UID reeds gelees is, maar die hoë-vlak data-oordragprotokol steeds onbekend is**. Jy kan UID lees, emuleer en handmatig invoer met Flipper vir die primitiewe lesers wat UID vir outorisering gebruik.
 
 #### Lees die UID VS Lees die Data Binne <a href="#reading-the-uid-vs-reading-the-data-inside" id="reading-the-uid-vs-reading-the-data-inside"></a>
 
@@ -69,8 +69,8 @@ In die geval dat Flipper Zero nie in staat is om die tipe kaart van die lae-vlak
 
 #### EMV Bankkaarte (PayPass, payWave, Apple Pay, Google Pay) <a href="#emv-bank-cards-paypass-paywave-apple-pay-google-pay" id="emv-bank-cards-paypass-paywave-apple-pay-google-pay"></a>
 
-Behalwe om eenvoudig die UID te lees, kan jy baie meer data van 'n bankkaart onttrek. Dit is moontlik om **die volle kaartnommer** (die 16 syfers aan die voorkant van die kaart), **geldigheidsdatum**, en in sommige gevalle selfs die **eienaar se naam** saam met 'n lys van die **mees onlangse transaksies** te verkry.\
-Echter, jy **kan nie die CVV op hierdie manier lees nie** (die 3 syfers aan die agterkant van die kaart). Ook **bankkaarte is beskerm teen herhalingsaanvalle**, so om dit met Flipper te kopieer en dan te probeer emuleer om vir iets te betaal, sal nie werk nie.
+Behalwe om eenvoudig die UID te lees, kan jy baie meer data van 'n bankkaart onttrek. Dit is moontlik om **die volle kaartnommer** (die 16 syfers aan die voorkant van die kaart), **geldigheidsdatum**, en in sommige gevalle selfs die **eienaarsnaam** saam met 'n lys van die **mees onlangse transaksies** te verkry.\
+E however, jy **kan nie die CVV op hierdie manier lees nie** (die 3 syfers aan die agterkant van die kaart). Ook **bankkaarte is beskerm teen herhalingsaanvalle**, so om dit met Flipper te kopieer en dan te probeer emuleer om vir iets te betaal, sal nie werk nie.
 
 ## Verwysings
 

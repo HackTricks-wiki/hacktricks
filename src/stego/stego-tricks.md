@@ -36,7 +36,7 @@ Identifiseer die tipe lêer waarmee jy te doen het.
 
 ### **Strings**
 
-Onthaal leesbare strings uit lêers, met verskillende koderinginstellings om die uitvoer te filter.
+Onthaal leesbare strings uit lêers, met verskillende koderinginstellings om die uitvoer te filtreer.
 ```bash
 strings -n 6 file # Extracts strings with a minimum length of 6
 strings -n 6 file | head -n 20 # First 20 strings
@@ -50,7 +50,7 @@ strings -e B -n 6 file # 32bit strings (big-endian)
 ```
 ### **Vergelyking (cmp)**
 
-Nuttig om 'n gewysigde lêer te vergelyk met sy oorspronklike weergawe wat aanlyn gevind is.
+Nuttig om 'n gewysigde lêer met sy oorspronklike weergawe wat aanlyn gevind is, te vergelyk.
 ```bash
 cmp original.jpg stego.jpg -b -l
 ```
@@ -64,7 +64,7 @@ Onsigbare karakters in blykbaar leë spasies mag inligting verberg. Om hierdie d
 
 ### **Identifisering van Beeldbesonderhede met GraphicMagick**
 
-[GraphicMagick](https://imagemagick.org/script/download.php) dien om beeldlêertipes te bepaal en potensiële korrupsie te identifiseer. Voer die onderstaande opdrag uit om 'n beeld te inspekteer:
+[GraphicMagick](https://imagemagick.org/script/download.php) dien om beeldlêertipes te bepaal en potensiële korrupsie te identifiseer. Voer die onderstaande opdrag uit om 'n beeld te ondersoek:
 ```bash
 ./magick identify -verbose stego.jpg
 ```
@@ -81,7 +81,7 @@ Steghide fasiliteer die verborge van data binne `JPEG, BMP, WAV, en AU` lêers, 
 - `steghide info file` onthul of 'n lêer verborge data bevat.
 - `steghide extract -sf file [--passphrase password]` trek die verborge data uit, wagwoord is opsioneel.
 
-Vir web-gebaseerde onttrekking, besoek [hierdie webwerf](https://futureboy.us/stegano/decinput.html).
+Vir web-gebaseerde ekstraksie, besoek [hierdie webwerf](https://futureboy.us/stegano/decinput.html).
 
 **Bruteforce Aanval met Stegcracker:**
 
@@ -104,7 +104,7 @@ zsteg spesialiseer in die ontdekking van versteekte data in PNG en BMP lêers. I
 
 **Stegsolve** pas verskeie kleurfilters toe om versteekte teks of boodskappe binne beelde te onthul. Dit is beskikbaar op [GitHub](https://github.com/eugenekolo/sec-tools/tree/master/stego/stegsolve/stegsolve).
 
-### **FFT vir Versteekte Inhoud Opsporing**
+### **FFT vir Versteekte Inhoudsopsporing**
 
 Fast Fourier Transform (FFT) tegnieke kan verborge inhoud in beelde onthul. Nuttige hulpbronne sluit in:
 
@@ -112,13 +112,13 @@ Fast Fourier Transform (FFT) tegnieke kan verborge inhoud in beelde onthul. Nutt
 - [Ejectamenta](https://www.ejectamenta.com/Fourifier-fullscreen/)
 - [FFTStegPic op GitHub](https://github.com/0xcomposure/FFTStegPic)
 
-### **Stegpy vir Klank en Beeld Lêers**
+### **Stegpy vir Klank- en Beeldlêers**
 
 Stegpy laat die insluiting van inligting in beeld- en klanklêers toe, wat formate soos PNG, BMP, GIF, WebP, en WAV ondersteun. Dit is beskikbaar op [GitHub](https://github.com/dhsdshdhk/stegpy).
 
-### **Pngcheck vir PNG Lêer Analise**
+### **Pngcheck vir PNG Lêeranalise**
 
-Om PNG lêers te analiseer of om hul egtheid te valideer, gebruik:
+Om PNG lêers te analiseer of om hul egtheid te verifieer, gebruik:
 ```bash
 apt-get install pngcheck
 pngcheck stego.png

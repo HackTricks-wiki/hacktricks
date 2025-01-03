@@ -42,12 +42,12 @@ Met 'n omvattende byvoegingmodel en 'n API wat die hulpmiddel uitbrei om aan jou
 
 ### [ILSpy](https://github.com/icsharpcode/ILSpy) & [dnSpy](https://github.com/dnSpy/dnSpy/releases)
 
-[ILSpy-inprop vir Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode): Jy kan dit in enige OS hê (jy kan dit direk van VSCode installeer, geen behoefte om die git af te laai nie. Klik op **Extensions** en **soek ILSpy**).\
-As jy wil **decompile**, **wysig** en **hercompile** weer kan jy [**dnSpy**](https://github.com/dnSpy/dnSpy/releases) of 'n aktief onderhandeerde fork daarvan, [**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases) gebruik. (**Regsklik -> Wysig Metode** om iets binne 'n funksie te verander).
+[ILSpy-inprop vir Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode): Jy kan dit op enige OS hê (jy kan dit direk van VSCode installeer, geen behoefte om die git af te laai nie. Klik op **Extensions** en **soek ILSpy**).\
+As jy wil **decompile**, **wysig** en **hercompile** kan jy [**dnSpy**](https://github.com/dnSpy/dnSpy/releases) of 'n aktief onderhandeerde fork daarvan, [**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases) gebruik. (**Regsklik -> Wysig Metode** om iets binne 'n funksie te verander).
 
 ### DNSpy Logging
 
-Om te maak dat **DNSpy 'n paar inligting in 'n lêer log**, kan jy hierdie snit gebruik:
+Om **DNSpy 'n paar inligting in 'n lêer te laat log**, kan jy hierdie snit gebruik:
 ```cs
 using System.IO;
 path = "C:\\inetpub\\temp\\MyTest2.txt";
@@ -55,7 +55,7 @@ File.AppendAllText(path, "Password: " + password + "\n");
 ```
 ### DNSpy Foutopsporing
 
-Om kode met DNSpy te foutopspoor, moet jy:
+Om kode te foutopspoor met DNSpy moet jy:
 
 Eerstens, verander die **Assembly eienskappe** wat verband hou met **foutopsporing**:
 
@@ -84,7 +84,7 @@ As jou .NET-toepassing deur **IIS** **run** word, kan jy dit **herbegin** met:
 ```
 iisreset /noforce
 ```
-Dan, om te begin debugg, moet jy al die geopen lêers sluit en binne die **Debug Tab** **Attach to Process...** kies:
+Dan, om te begin debugg, moet jy al die oopgemaakte lêers sluit en binne die **Debug Tab** **Attach to Process...** kies:
 
 ![](<../../images/image (318).png>)
 
@@ -116,7 +116,7 @@ Regsklik op enige module in **Assembly Explorer** en klik op **Sort Assemblies**
 ### Gebruik IDA
 
 - **Laai rundll32** (64bits in C:\Windows\System32\rundll32.exe en 32 bits in C:\Windows\SysWOW64\rundll32.exe)
-- Kies **Windbg** debugg
+- Kies **Windbg** debugger
 - Kies "**Suspend on library load/unload**"
 
 ![](<../../images/image (868).png>)
@@ -134,7 +134,7 @@ Maar, hoe kan jy by die kode van die DLL wat gelaai is, kom? Met hierdie metode,
 - **Laai rundll32** (64bits in C:\Windows\System32\rundll32.exe en 32 bits in C:\Windows\SysWOW64\rundll32.exe)
 - **Verander die Command Line** ( _File --> Change Command Line_ ) en stel die pad van die dll en die funksie wat jy wil aanroep, byvoorbeeld: "C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii_2.dll",DLLMain
 - Verander _Options --> Settings_ en kies "**DLL Entry**".
-- Dan **begin die uitvoering**, die debugg sal by elke dll main stop, op 'n sekere punt sal jy **stop in die dll Entry van jou dll**. Van daar af, soek net die punte waar jy 'n breakpoint wil plaas.
+- Dan **begin die uitvoering**, die debugger sal by elke dll main stop, op 'n sekere punt sal jy **stop in die dll Entry van jou dll**. Van daar af, soek net die punte waar jy 'n breakpoint wil plaas.
 
 Let daarop dat wanneer die uitvoering om enige rede in win64dbg gestop word, jy kan sien **in watter kode jy is** deur na die **boonste deel van die win64dbg venster** te kyk:
 
@@ -144,13 +144,13 @@ Dan, deur na hierdie te kyk, kan jy sien wanneer die uitvoering in die dll wat j
 
 ## GUI Apps / Videogames
 
-[**Cheat Engine**](https://www.cheatengine.org/downloads.php) is 'n nuttige program om te vind waar belangrike waardes binne die geheue van 'n lopende speletjie gestoor word en om dit te verander. Meer info in:
+[**Cheat Engine**](https://www.cheatengine.org/downloads.php) is 'n nuttige program om te vind waar belangrike waardes binne die geheue van 'n lopende speletjie gestoor word en om dit te verander. Meer inligting in:
 
 {{#ref}}
 cheat-engine.md
 {{#endref}}
 
-[**PiNCE**](https://github.com/korcankaraokcu/PINCE) is 'n front-end/omgekeerde ingenieursgereedskap vir die GNU Project Debugger (GDB), gefokus op speletjies. Dit kan egter vir enige omgekeerde ingenieurswerk verwante goed gebruik word.
+[**PiNCE**](https://github.com/korcankaraokcu/PINCE) is 'n front-end/omgekeerde ingenieursgereedskap vir die GNU Project Debugger (GDB), gefokus op speletjies. Dit kan egter vir enige omgekeerde ingenieurswerk gebruik word.
 
 [**Decompiler Explorer**](https://dogbolt.org/) is 'n web front-end vir 'n aantal decompilers. Hierdie webdiens laat jou toe om die uitvoer van verskillende decompilers op klein uitvoerbare lêers te vergelyk.
 
@@ -174,7 +174,7 @@ blobrunner.md
 
 ### Debugging 'n shellcode met jmp2it
 
-[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4) is baie soortgelyk aan blobrunner. Dit sal **toewys** die **shellcode** binne 'n geheue ruimte, en 'n **ewige lus** begin. Jy moet dan die **debugger** aan die proses koppel, **speel begin wag 2-5 sekondes en druk stop** en jy sal jouself binne die **ewige lus** vind. Spring na die volgende instruksie van die ewige lus, aangesien dit 'n oproep na die shellcode sal wees, en uiteindelik sal jy jouself vind wat die shellcode uitvoer.
+[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4) is baie soortgelyk aan blobrunner. Dit sal **toewys** die **shellcode** binne 'n geheue ruimte, en 'n **ewige lus** begin. Jy moet dan die **debugger** aan die proses koppel, **speel begin wag 2-5 sekondes en druk stop** en jy sal jouself binne die **ewige lus** vind. Spring na die volgende instruksie van die ewige lus, aangesien dit 'n oproep na die shellcode sal wees, en uiteindelik sal jy jouself die shellcode uitvoer.
 
 ![](<../../images/image (509).png>)
 
@@ -194,7 +194,7 @@ Om die emulering te begin op die plek waar jy wil, stel 'n bp daar in en blykbaa
 
 ![](<../../images/image (387).png>)
 
-Jy kan die stapel sien, byvoorbeeld, binne 'n hex dump:
+Jy kan die stapel sien byvoorbeeld binne 'n hex dump:
 
 ![](<../../images/image (186).png>)
 
@@ -243,23 +243,23 @@ Om die **toegangspunt** te vind, soek die funksies deur `::main` soos in:
 ![](<../../images/image (1080).png>)
 
 In hierdie geval was die binêre genaamd authenticator, so dit is redelik voor die hand liggend dat dit die interessante hooffunksie is.\
-Met die **naam** van die **funksies** wat aangeroep word, soek daarna op die **Internet** om meer te leer oor hul **insette** en **uitsette**.
+Met die **naam** van die **funksies** wat aangeroep word, soek daarna op die **Internet** om meer oor hul **insette** en **uitsette** te leer.
 
 ## **Delphi**
 
 Vir Delphi gecompileerde binêre kan jy gebruik maak van [https://github.com/crypto2011/IDR](https://github.com/crypto2011/IDR)
 
-As jy 'n Delphi binêre moet omkeer, sou ek jou aanbeveel om die IDA-inprop [https://github.com/Coldzer0/IDA-For-Delphi](https://github.com/Coldzer0/IDA-For-Delphi) te gebruik.
+As jy 'n Delphi binêre moet omkeer, sou ek voorstel dat jy die IDA-inprop [https://github.com/Coldzer0/IDA-For-Delphi](https://github.com/Coldzer0/IDA-For-Delphi) gebruik.
 
 Druk net **ATL+f7** (import python plugin in IDA) en kies die python plugin.
 
-Hierdie inprop sal die binêre uitvoer en funksiename dinamies aan die begin van die debuggery oplos. Nadat jy die debuggery begin het, druk weer die Begin-knoppie (die groen een of f9) en 'n breekpunt sal aan die begin van die werklike kode tref.
+Hierdie inprop sal die binêre uitvoer en funksiename dinamies aan die begin van die debuggery oplos. Nadat jy die debuggery begin, druk weer die Begin-knoppie (die groen een of f9) en 'n breekpunt sal aan die begin van die werklike kode tref.
 
 Dit is ook baie interessant omdat as jy 'n knoppie in die grafiese toepassing druk, die debugger in die funksie wat deur daardie knoppie uitgevoer word, sal stop.
 
 ## Golang
 
-As jy 'n Golang binêre moet omkeer, sou ek jou aanbeveel om die IDA-inprop [https://github.com/sibears/IDAGolangHelper](https://github.com/sibears/IDAGolangHelper) te gebruik.
+As jy 'n Golang binêre moet omkeer, sou ek voorstel dat jy die IDA-inprop [https://github.com/sibears/IDAGolangHelper](https://github.com/sibears/IDAGolangHelper) gebruik.
 
 Druk net **ATL+f7** (import python plugin in IDA) en kies die python plugin.
 
@@ -282,7 +282,7 @@ As jy die **binêre** van 'n GBA-speletjie kry, kan jy verskillende gereedskap g
 - [**gba-ghidra-loader**](https://github.com/pudii/gba-ghidra-loader) - Ghidra-inprop
 - [**GhidraGBA**](https://github.com/SiD3W4y/GhidraGBA) - Ghidra-inprop
 
-In [**no$gba**](https://problemkaputt.de/gba.htm), in _**Opsies --> Emulasie-opstelling --> Beheer**_\*\* \*\* kan jy sien hoe om die Game Boy Advance **knoppies** te druk.
+In [**no$gba**](https://problemkaputt.de/gba.htm), in _**Opsies --> Emulering Setup --> Beheer**_\*\* \*\* kan jy sien hoe om die Game Boy Advance **knoppies** te druk.
 
 ![](<../../images/image (581).png>)
 
@@ -305,7 +305,7 @@ So, in hierdie tipe program, die interessante deel sal wees **hoe die program di
 
 In die vorige beeld kan jy sien dat die funksie aangeroep word vanaf **FUN_080015a8** (adresse: _0x080015fa_ en _0x080017ac_).
 
-In daardie funksie, na 'n paar inisialisasie operasies (sonder enige belangrikheid):
+In daardie funksie, na 'n paar init operasies (sonder enige belangrikheid):
 ```c
 void FUN_080015a8(void)
 
@@ -372,9 +372,9 @@ In die vorige kode kan jy sien dat ons **uVar1** (die plek waar die **waarde van
 - Dan, dit word vergelyk met die **waarde 8** (**START** knoppie): In die uitdaging kontroleer dit of die kode geldig is om die vlag te kry.
 - In hierdie geval word die var **`DAT_030000d8`** met 0xf3 vergelyk en as die waarde dieselfde is, word 'n paar kode uitgevoer.
 - In enige ander gevalle, word 'n cont (`DAT_030000d4`) nagegaan. Dit is 'n cont omdat dit 1 byvoeg onmiddellik nadat dit in die kode ingaan.\
-**As** dit minder as 8 is, word iets wat **byvoeg** waardes aan \*\*`DAT_030000d8` \*\* doen (basies voeg dit die waardes van die knoppies wat in hierdie veranderlike gedruk is by solank die cont minder as 8 is).
+**As** dit minder as 8 is, word iets wat **waardes byvoeg** tot \*\*`DAT_030000d8` \*\* gedoen (basies voeg dit die waardes van die knoppies wat in hierdie veranderlike gedruk is by solank die cont minder as 8 is).
 
-So, in hierdie uitdaging, om die waardes van die knoppies te ken, moes jy **'n kombinasie druk met 'n lengte kleiner as 8 wat die resultaat toevoeging 0xf3 is.**
+So, in hierdie uitdaging, om die waardes van die knoppies te ken, moes jy **'n kombinasie druk met 'n lengte kleiner as 8 wat die resultaat van die optelling 0xf3 is.**
 
 **Verwysing vir hierdie tutoriaal:** [**https://exp.codes/Nostalgia/**](https://exp.codes/Nostalgia/)
 

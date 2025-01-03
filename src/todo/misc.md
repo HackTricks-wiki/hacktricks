@@ -49,10 +49,10 @@ binwalk -M -e -d=10000 suspicious.pdf #Extract, look inside extracted files and 
 factordb.com\
 rsatool
 
-Snow --> Versteek boodskappe met spaties en tabs
+Snow --> Versteek boodskappe met spaties en tabulatoren
 
 # Characters
 
-%E2%80%AE => RTL Karakter (skryf payloads agterstevoor)
+%E2%80%AE => RTL Karakter (skryf payloads agterstewe)
 
 {{#include ../banners/hacktricks-training.md}}

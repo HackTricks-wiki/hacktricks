@@ -8,11 +8,11 @@ Hier word konsepte puntgewys uiteengesit om die konteks van die protokol en sy w
 
 ## Die Kliënt-Server Argitektuur
 
-Modbus-protokol word tipies gebruik in 'n Kliënt-Server Argitektuur waar 'n meester toestel (kliënt) kommunikasie met een of meer slaaf toestelle (servers) begin. Dit word ook as Meester-Slaaf argitektuur verwys, wat wyd in elektronika en IoT met SPI, I2C, ens. gebruik word.
+Modbus-protokol word tipies gebruik in 'n Kliënt-Server Argitektuur waar 'n meester toestel (kliënt) kommunikasie met een of meer slaaf toestelle (bedieners) begin. Dit word ook as Meester-Slaaf argitektuur verwys, wat wyd in elektronika en IoT met SPI, I2C, ens. gebruik word.
 
 ## Serial en Ethernet Weergawes
 
-Modbus-protokol is ontwerp vir beide, Seriële Kommunikasie sowel as Ethernet Kommunikasies. Die Seriële Kommunikasie word wyd in erfenisstelsels gebruik terwyl moderne toestelle Ethernet ondersteun, wat hoë datarates bied en meer geskik is vir moderne industriële netwerke.
+Modbus-protokol is ontwerp vir beide, Seriële Kommunikasie sowel as Ethernet Kommunikasies. Die Seriële Kommunikasie word wyd in erfenisstelsels gebruik, terwyl moderne toestelle Ethernet ondersteun wat hoë datarates bied en meer geskik is vir moderne industriële netwerke.
 
 ## Data Verteenwoordiging
 
@@ -26,6 +26,6 @@ ModBus-protokol werk met die oordrag van spesifieke funksiekodes wat gebruik wor
 
 Elke toestel in die netwerk het 'n unieke adres wat noodsaaklik is vir kommunikasie tussen toestelle. Protokolle soos Modbus RTU, Modbus TCP, ens. word gebruik om adressering te implementeer en dien as 'n vervoervlak vir die datatransmissie. Die data wat oorgedra word, is in die Modbus-protokol formaat wat die boodskap bevat.
 
-Boonop implementeer Modbus ook foutkontroles om die integriteit van die oorgedrade data te verseker. Maar die belangrikste is, Modbus is 'n Open Standard en enige iemand kan dit in hul toestelle implementeer. Dit het hierdie protokol 'n globale standaard gemaak en dit is wydverspreid in die industriële outomatiseringsbedryf.
+Boonop implementeer Modbus ook foutkontroles om die integriteit van die oorgedrade data te verseker. Maar die meeste van alles, Modbus is 'n Open Standard en enige iemand kan dit in hul toestelle implementeer. Dit het hierdie protokol 'n globale standaard gemaak en dit is wydverspreid in die industriële outomatiseringsbedryf.
 
 As gevolg van sy groot skaal gebruik en gebrek aan opgraderings, bied die aanval op Modbus 'n beduidende voordeel met sy aanvalsvlak. ICS is hoogs afhanklik van kommunikasie tussen toestelle en enige aanvalle wat daarop gemaak word, kan gevaarlik wees vir die werking van die industriële stelsels. Aanvalle soos herhaling, datainspuiting, datasniffing en lek, Denial of Service, data vervalsing, ens. kan uitgevoer word as die medium van transmissie deur die aanvaller geïdentifiseer word.

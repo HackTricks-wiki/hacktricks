@@ -6,7 +6,7 @@
 
 'n Aansoek witlys is 'n lys van goedgekeurde sagtewaretoepassings of uitvoerbare lêers wat toegelaat word om teenwoordig te wees en op 'n stelsel te loop. Die doel is om die omgewing te beskerm teen skadelike malware en nie-goedgekeurde sagteware wat nie ooreenstem met die spesifieke besigheidsbehoeftes van 'n organisasie nie.
 
-[AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) is Microsoft se **aansoek witlys oplossing** en gee stelselsadministrateurs beheer oor **watter aansoeke en lêers gebruikers kan uitvoer**. Dit bied **fynbeheer** oor uitvoerbare lêers, skripte, Windows-installer lêers, DLL's, verpakte toepassings, en verpakte toepassingsinstalleerders.\
+[AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) is Microsoft se **aansoek witlys oplossing** en gee stelselsadministrateurs beheer oor **watter toepassings en lêers gebruikers kan uitvoer**. Dit bied **fynbeheer** oor uitvoerbare lêers, skripte, Windows-installer lêers, DLL's, verpakte toepassings, en verpakte toepassingsinstalleerders.\
 Dit is algemeen dat organisasies **cmd.exe en PowerShell.exe** blokkeer en skrywe toegang tot sekere gidse, **maar dit kan alles omseil word**.
 
 ### Kontroleer
@@ -50,7 +50,7 @@ Plaaslike kredensiale is teenwoordig in hierdie lêer, die wagwoorde is gehasht.
 
 Die **kredensiale** (gehasht) word **gestoor** in die **geheue** van hierdie subsisteem vir Enkelteken-in redes.\
 **LSA** bestuur die plaaslike **sekuriteitsbeleid** (wagwoordbeleid, gebruikersregte...), **verifikasie**, **toegangstokens**...\
-LSA sal die een wees wat die **kredensiale** in die **SAM** lêer (vir 'n plaaslike aanmelding) sal **kontroleer** en met die **domeinbeheerder** sal **praat** om 'n domein gebruiker te verifieer.
+LSA sal die een wees wat sal **kontroleer** vir verskafde kredensiale binne die **SAM** lêer (vir 'n plaaslike aanmelding) en **praat** met die **domeinbeheerder** om 'n domein gebruiker te verifieer.
 
 Die **kredensiale** word **gestoor** binne die **proses LSASS**: Kerberos kaartjies, hashes NT en LM, maklik ontsleutelde wagwoorde.
 
@@ -71,7 +71,7 @@ Dit is die databasis van die Aktiewe Gids. Dit is slegs teenwoordig in Domein Be
 
 [**Microsoft Defender**](https://en.wikipedia.org/wiki/Microsoft_Defender) is 'n Antivirus wat beskikbaar is in Windows 10 en Windows 11, en in weergawes van Windows Server. Dit **blokkeer** algemene pentesting gereedskap soos **`WinPEAS`**. Tog is daar maniere om **hierdie beskermings te omseil**.
 
-### Kontrole
+### Kontroleer
 
 Om die **status** van **Defender** te kontroleer, kan jy die PS cmdlet **`Get-MpComputerStatus`** uitvoer (kontroleer die waarde van **`RealTimeProtectionEnabled`** om te weet of dit aktief is):
 
@@ -103,7 +103,7 @@ sc query windefend
 ```
 ## Encrypted File System (EFS)
 
-EFS beveilig lêers deur middel van versleuteling, wat 'n **simmetriese sleutel** gebruik wat bekend staan as die **File Encryption Key (FEK)**. Hierdie sleutel word versleuteld met die gebruiker se **publieke sleutel** en gestoor binne die versleutelde lêer se $EFS **alternatiewe datastroom**. Wanneer ontsleuteling nodig is, word die ooreenstemmende **privaat sleutel** van die gebruiker se digitale sertifikaat gebruik om die FEK uit die $EFS-stroom te ontsleutel. Meer besonderhede kan gevind word [hier](https://en.wikipedia.org/wiki/Encrypting_File_System).
+EFS beveilig lêers deur middel van versleuteling, wat 'n **simmetriese sleutel** gebruik wat bekend staan as die **File Encryption Key (FEK)**. Hierdie sleutel word versleuteld met die gebruiker se **publieke sleutel** en gestoor binne die versleutelde lêer se $EFS **alternatiewe datastroom**. Wanneer ontsleuteling nodig is, word die ooreenstemmende **privaat sleutel** van die gebruiker se digitale sertifikaat gebruik om die FEK uit die $EFS-stroom te ontsleutel. Meer besonderhede kan [hier](https://en.wikipedia.org/wiki/Encrypting_File_System) gevind word.
 
 **Ontsleuteling scenario's sonder gebruiker inisiatief** sluit in:
 
@@ -138,12 +138,12 @@ Hierdie metode vereis dat die **slagoffer gebruiker** 'n **proses** binne die ga
 
 ## Group Managed Service Accounts (gMSA)
 
-Microsoft het **Group Managed Service Accounts (gMSA)** ontwikkel om die bestuur van diensrekeninge in IT-infrastrukture te vereenvoudig. Anders as tradisionele diensrekeninge wat dikwels die "**Wagwoord verval nooit**" instelling geaktiveer het, bied gMSA's 'n veiliger en meer hanteerbare oplossing:
+Microsoft het **Group Managed Service Accounts (gMSA)** ontwikkel om die bestuur van diensrekeninge in IT-infrastruktuur te vereenvoudig. Anders as tradisionele diensrekeninge wat dikwels die "**Wagwoord verval nooit**" instelling geaktiveer het, bied gMSA's 'n veiliger en meer hanteerbare oplossing:
 
-- **Outomatiese Wagwoordbestuur**: gMSA's gebruik 'n komplekse, 240-karakter wagwoord wat outomaties verander volgens domein of rekenaarbeleid. Hierdie proses word hanteer deur Microsoft se Key Distribution Service (KDC), wat die behoefte aan handmatige wagwoordopdaterings uitskakel.
+- **Outomatiese Wagwoordbestuur**: gMSA's gebruik 'n komplekse, 240-karakter wagwoord wat outomaties verander volgens domein of rekenaarbeleid. Hierdie proses word deur Microsoft se Key Distribution Service (KDC) hanteer, wat die behoefte aan handmatige wagwoordopdaterings uitskakel.
 - **Verbeterde Sekuriteit**: Hierdie rekeninge is immuun teen vergrendeling en kan nie vir interaktiewe aanmeldings gebruik word nie, wat hul sekuriteit verbeter.
-- **Meervoudige Gasheerondersteuning**: gMSA's kan oor verskeie gashere gedeel word, wat hulle ideaal maak vir dienste wat op verskeie bedieners loop.
-- **Geplande Taakvermoë**: Anders as bestuurde diensrekeninge, ondersteun gMSA's die uitvoering van geplande take.
+- **Meervoudige Gasheerondersteuning**: gMSA's kan oor verskeie gasheers gedeel word, wat hulle ideaal maak vir dienste wat op verskeie bedieners loop.
+- **Geskeduleerde Taakvermoë**: Anders as bestuurde diensrekeninge, ondersteun gMSA's die uitvoering van geskeduleerde take.
 - **Vereenvoudigde SPN-bestuur**: Die stelsel werk outomaties die Service Principal Name (SPN) by wanneer daar veranderinge aan die rekenaar se sAMaccount besonderhede of DNS-naam is, wat SPN-bestuur vereenvoudig.
 
 Die wagwoorde vir gMSA's word in die LDAP eienskap _**msDS-ManagedPassword**_ gestoor en word outomaties elke 30 dae deur Domein Beheerders (DC's) gereset. Hierdie wagwoord, 'n versleutelde datablad bekend as [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e), kan slegs deur gemagtigde administrateurs en die bedieners waarop die gMSA's geïnstalleer is, verkry word, wat 'n veilige omgewing verseker. Om toegang tot hierdie inligting te verkry, is 'n beveiligde verbinding soos LDAPS nodig, of die verbinding moet geverifieer word met 'Sealing & Secure'.
@@ -160,7 +160,7 @@ Kyk ook na hierdie [webblad](https://cube0x0.github.io/Relaying-for-gMSA/) oor h
 
 ## LAPS
 
-Die **Local Administrator Password Solution (LAPS)**, beskikbaar vir aflaai van [Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899), stel die bestuur van plaaslike Administrateur wagwoorde in staat. Hierdie wagwoorde, wat **ewekansig**, uniek, en **gereeld verander** word, word sentraal in Active Directory gestoor. Toegang tot hierdie wagwoorde is beperk deur ACLs aan gemagtigde gebruikers. Met voldoende toestemmings wat toegeken word, word die vermoë om plaaslike admin wagwoorde te lees, verskaf.
+Die **Local Administrator Password Solution (LAPS)**, beskikbaar vir aflaai van [Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899), stel die bestuur van plaaslike Administrateur wagwoorde in staat. Hierdie wagwoorde, wat **ewekansig**, uniek, en **gereeld verander** word, word sentraal in Active Directory gestoor. Toegang tot hierdie wagwoorde is beperk deur ACLs tot gemagtigde gebruikers. Met voldoende toestemmings wat toegeken word, word die vermoë om plaaslike admin wagwoorde te lees, verskaf.
 
 {{#ref}}
 active-directory-methodology/laps.md
@@ -215,7 +215,7 @@ Powershell -command "Write-Host 'My voice is my passport, verify me.'"
 9º Use EncodeCommand
 $command = "Write-Host 'My voice is my passport, verify me.'" $bytes = [System.Text.Encoding]::Unicode.GetBytes($command) $encodedCommand = [Convert]::ToBase64String($bytes) powershell.exe -EncodedCommand $encodedCommand
 ```
-Meer kan [hier](https://blog.netspi.com/15-ways-to-bypass-the-powershell-execution-policy/) gevind word.
+Meer kan gevind word [hier](https://blog.netspi.com/15-ways-to-bypass-the-powershell-execution-policy/)
 
 ## Security Support Provider Interface (SSPI)
 
@@ -227,7 +227,7 @@ Die SSPI sal verantwoordelik wees vir die vind van die toepaslike protokol vir t
 
 - **Kerberos**: Die verkieslike een
 - %windir%\Windows\System32\kerberos.dll
-- **NTLMv1** en **NTLMv2**: Compatibiliteitsredes
+- **NTLMv1** en **NTLMv2**: Kompatibiliteitsredes
 - %windir%\Windows\System32\msv1_0.dll
 - **Digest**: Webbedieners en LDAP, wagwoord in die vorm van 'n MD5-hash
 - %windir%\Windows\System32\Wdigest.dll

@@ -70,7 +70,7 @@ Boonop word 'n ander frekwensie "verteenwoordig" deur die IQ-grafiek deur 'n **s
 
 #### Checking the envelope
 
-Kontroleer AM-inligting met [**SigDigger** ](https://github.com/BatchDrake/SigDigger) en net kyk na die **omhulsel** kan jy verskillende duidelike amplitude vlakke sien. Die gebruikte sein stuur pulse met inligting in AM, so lyk een puls:
+Kontroleer AM-inligting met [**SigDigger** ](https://github.com/BatchDrake/SigDigger) en net deur na die **omhulsel** te kyk, kan jy verskillende duidelike amplitude vlakke sien. Die gebruikte sein stuur pulse met inligting in AM, so lyk een puls:
 
 ![](<../../images/image (590).png>)
 
@@ -84,7 +84,7 @@ Jy kan **die hele sein** waar inligting geleë is, kies, **Amplitude** modus en 
 
 ![](<../../images/image (264).png>)
 
-Byvoorbeeld, as jy Frekwensie kies in plaas van Amplitude in hierdie AM-sein, vind jy net 1 frekwensie (geen manier dat inligting wat in frekwensie gemoduleer is, net 1 frekwensie gebruik).
+Byvoorbeeld, as jy Frekwensie kies in plaas van Amplitude in hierdie AM-sein, vind jy net 1 frekwensie (geen manier dat inligting wat in frekwensie gemoduleer is, net 1 frekwensie gebruik nie).
 
 ![](<../../images/image (732).png>)
 
@@ -112,7 +112,7 @@ Jy kan ook die aantal simbole wat jy gaan kies, aandui en SigDigger sal die frek
 
 ### Get Bits
 
-Aangesien dit 'n **AM-gemoduleerde** sein is en die **simbooltempo** (en wetende dat in hierdie geval iets op beteken 1 en iets af beteken 0), is dit baie maklik om die **bits** wat in die sein gekodeer is, te **verkry**. So, kies die sein met inligting en konfigureer die monster en besluit en druk monster (kyk dat **Amplitude** gekies is, die ontdekte **Simbooltempo** is geconfigureer en die **Gadner klokherstel** is gekies):
+Aangesien dit 'n **AM-gemoduleerde** sein is en die **simbooltempo** (en wetende dat in hierdie geval iets op beteken 1 en iets af beteken 0), is dit baie maklik om die **bits** wat in die sein gekodeer is, te **verkry**. So, kies die sein met inligting en konfigureer die monster en besluit en druk monster (maak seker dat **Amplitude** gekies is, die ontdekte **Simbooltempo** is geconfigureer en die **Gadner klokherstel** is gekies):
 
 ![](<../../images/image (965).png>)
 
@@ -131,7 +131,7 @@ Nou, om SigDigger te laat verstaan **waar die reeks** van die vlak wat inligting
 
 As daar byvoorbeeld **4 verskillende vlakke van amplitude** was, sou jy die **Bits per simbool op 2** moes konfigureer en van die kleinste na die grootste kies.
 
-Laastens **verhoog** die **Zoom** en **verander die Ry-grootte** kan jy die bits sien (en jy kan alles kies en kopieer om al die bits te kry):
+Laastens, **verhoog** die **Zoom** en **verander die Ry-grootte** sodat jy die bits kan sien (en jy kan alles kies en kopieer om al die bits te kry):
 
 ![](<../../images/image (276).png>)
 
@@ -147,7 +147,7 @@ Gebruik ook **kodering** soos **Manchester**, en **up+down** kan **1 of 0** wees
 
 #### Checking the frequencies and waveform
 
-Seinvoorbeeld wat inligting gemoduleer in FM stuur:
+Voorbeeld van 'n sein wat inligting gemoduleer in FM stuur:
 
 ![](<../../images/image (725).png>)
 
@@ -159,7 +159,7 @@ Dit is omdat ek die sein in beide frekwensies opgeneem het, daarom is een ongeve
 
 ![](<../../images/image (942).png>)
 
-As die gesinkroniseerde frekwensie **naby aan een frekwensie is as aan die ander**, kan jy maklik die 2 verskillende frekwensies sien:
+As die gesinkroniseerde frekwensie **naby een frekwensie is as die ander**, kan jy maklik die 2 verskillende frekwensies sien:
 
 ![](<../../images/image (422).png>)
 
@@ -167,15 +167,15 @@ As die gesinkroniseerde frekwensie **naby aan een frekwensie is as aan die ander
 
 #### Checking the histogram
 
-Deur die frekwensiehistogram van die sein met inligting na te gaan, kan jy maklik 2 verskillende seine sien:
+Deur die frekwensie histogram van die sein met inligting na te gaan, kan jy maklik 2 verskillende seine sien:
 
 ![](<../../images/image (871).png>)
 
-In hierdie geval, as jy die **Amplitude histogram** nagaan, sal jy **slegs een amplitude** vind, so dit **kan nie AM wees nie** (as jy 'n klomp amplitudes vind, kan dit wees omdat die sein krag langs die kanaal verloor het):
+In hierdie geval, as jy die **Amplitude histogram** nagaan, sal jy **net een amplitude** vind, so dit **kan nie AM wees nie** (as jy 'n klomp amplitudes vind, kan dit wees omdat die sein krag langs die kanaal verloor het):
 
 ![](<../../images/image (817).png>)
 
-En dit sou die fasehistogram wees (wat baie duidelik maak dat die sein nie in fase gemoduleer is nie):
+En dit sou die fase histogram wees (wat baie duidelik maak dat die sein nie in fase gemoduleer is nie):
 
 ![](<../../images/image (996).png>)
 
@@ -189,10 +189,10 @@ Boonop word 'n ander frekwensie "verteenwoordig" deur die IQ-grafiek deur 'n **s
 
 ### Get Symbol Rate
 
-Jy kan die **dieselfde tegniek as die een wat in die AM-voorbeeld gebruik is** gebruik om die simbooltempo te kry sodra jy die frekwensies wat simbole dra, gevind het.
+Jy kan die **dieselfde tegniek as die een wat in die AM voorbeeld gebruik is** gebruik om die simbooltempo te kry sodra jy die frekwensies wat simbole dra, gevind het.
 
 ### Get Bits
 
-Jy kan die **dieselfde tegniek as die een wat in die AM-voorbeeld gebruik is** gebruik om die bits te kry sodra jy **gevind het dat die sein in frekwensie gemoduleer is** en die **simbooltempo**.
+Jy kan die **dieselfde tegniek as die een wat in die AM voorbeeld gebruik is** gebruik om die bits te kry sodra jy **gevind het dat die sein in frekwensie gemoduleer is** en die **simbooltempo**.
 
 {{#include ../../banners/hacktricks-training.md}}

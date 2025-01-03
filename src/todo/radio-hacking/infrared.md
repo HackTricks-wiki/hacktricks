@@ -36,7 +36,7 @@ Dit is ook bekend as Manchester kodering. Die logiese waarde word gedefinieer de
 
 <figure><img src="../../images/image (634).png" alt=""><figcaption></figcaption></figure>
 
-**4. Kombinasie van vorige en ander eksotiese metodes**
+**4. Kombinasie van vorige en ander eksotiese**
 
 > [!NOTE]
 > Daar is IR protokolle wat **probeer om universeel te word** vir verskeie tipes toestelle. Die bekendste is RC5 en NEC. Ongelukkig beteken die bekendste **nie die mees algemene** nie. In my omgewing het ek net twee NEC afstandsbedienings ontmoet en geen RC5 nie.
@@ -45,7 +45,7 @@ Dit is ook bekend as Manchester kodering. Die logiese waarde word gedefinieer de
 
 ### Verkenning van 'n IR sein
 
-Die mees betroubare manier om te sien hoe die afstandsbediening se IR sein lyk, is om 'n oscilloskoop te gebruik. Dit demoduleer of keer nie die ontvangde sein om nie, dit word net "soos dit is" vertoon. Dit is nuttig vir toetsing en foutopsporing. Ek sal die verwagte sein op die voorbeeld van die NEC IR protokol wys.
+Die mees betroubare manier om te sien hoe die afstandsbediening se IR sein lyk, is om 'n oscilloskoop te gebruik. Dit demoduleer of inverseer nie die ontvangde sein nie, dit word net "soos dit is" vertoon. Dit is nuttig vir toetsing en foutopsporing. Ek sal die verwagte sein op die voorbeeld van die NEC IR protokol wys.
 
 <figure><img src="../../images/image (235).png" alt=""><figcaption></figcaption></figure>
 
@@ -53,18 +53,18 @@ Gewoonlik is daar 'n preamble aan die begin van 'n gekodeerde pakket. Dit laat d
 
 Dan word data oorgedra. Die struktuur, preamble, en bit kodering metode word deur die spesifieke protokol bepaal.
 
-**NEC IR protokol** bevat 'n kort opdrag en 'n herhalingskode, wat gestuur word terwyl die knoppie ingedruk word. Beide die opdrag en die herhalingskode het dieselfde preamble aan die begin.
+**NEC IR protokol** bevat 'n kort opdrag en 'n herhaal kode, wat gestuur word terwyl die knoppie ingedruk word. Beide die opdrag en die herhaal kode het dieselfde preamble aan die begin.
 
 NEC **opdrag**, benewens die preamble, bestaan uit 'n adresbyte en 'n opdrag-nommer byte, waardeur die toestel verstaan wat gedoen moet word. Adres en opdrag-nommer bytes word gedupliseer met omgekeerde waardes, om die integriteit van die transmissie te kontroleer. Daar is 'n bykomende stopbit aan die einde van die opdrag.
 
-Die **herhalingskode** het 'n "1" na die preamble, wat 'n stopbit is.
+Die **herhaal kode** het 'n "1" na die preamble, wat 'n stopbit is.
 
-Vir **logika "0" en "1"** gebruik NEC Pulsafstand Kodering: eerstens word 'n pulsuitbarsting oorgedra waarna daar 'n pouse is, waarvan die lengte die waarde van die bit bepaal.
+Vir **logika "0" en "1"** gebruik NEC Pulsafstand Kodering: eers word 'n pulsuitbarsting oorgedra waarna daar 'n pouse is, sy lengte stel die waarde van die bit vas.
 
 ### Lugversorgers
 
 In teenstelling met ander afstandsbedienings, **stuur lugversorgers nie net die kode van die ingedrukte knoppie nie**. Hulle **stuur ook al die inligting** wanneer 'n knoppie ingedruk word om te verseker dat die **lugversorgingsmasjien en die afstandsbediening gesinchroniseer is**.\
-Dit sal verhoed dat 'n masjien wat op 20ºC gestel is, verhoog word na 21ºC met een afstandsbediening, en dan wanneer 'n ander afstandsbediening, wat steeds die temperatuur as 20ºC het, gebruik word om die temperatuur verder te verhoog, dit "verhoog" dit na 21ºC (en nie na 22ºC nie, dink dit is op 21ºC).
+Dit sal verhoed dat 'n masjien wat op 20ºC gestel is, verhoog word na 21ºC met een afstandsbediening, en dan wanneer 'n ander afstandsbediening, wat steeds die temperatuur as 20ºC het, gebruik word om die temperatuur verder te verhoog, dit "verhoog" dit na 21ºC (en nie na 22ºC nie, dink dit is in 21ºC).
 
 ### Aanvalle
 

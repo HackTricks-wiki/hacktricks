@@ -6,7 +6,7 @@
 
 ## **Begrip van Aktiewe Gebruiker Kredensiaal Diefstal met Sertifikate – PERSIST1**
 
-In 'n scenario waar 'n sertifikaat wat domeinverifikasie toelaat deur 'n gebruiker aangevra kan word, het 'n aanvaller die geleentheid om hierdie sertifikaat te **aanspreek** en **steel** om **volharding** op 'n netwerk te **onderhou**. Standaard laat die `User` sjabloon in Active Directory sulke versoeke toe, alhoewel dit soms gedeaktiveer kan wees.
+In 'n scenario waar 'n sertifikaat wat domeinverifikasie toelaat deur 'n gebruiker aangevra kan word, het 'n aanvaller die geleentheid om hierdie sertifikaat te **aanspreek** en **te steel** om **volharding** op 'n netwerk te **onderhou**. Standaard laat die `User` sjabloon in Active Directory sulke versoeke toe, alhoewel dit soms gedeaktiveer mag wees.
 
 Deur 'n hulpmiddel genaamd [**Certify**](https://github.com/GhostPack/Certify) te gebruik, kan 'n mens soek na geldige sertifikate wat volhoubare toegang moontlik maak:
 ```bash
@@ -26,7 +26,7 @@ Die `.pfx` lêer kan dan na 'n teikenstelsel opgelaai word en gebruik word met '
 ```bash
 Rubeus.exe asktgt /user:harmj0y /certificate:C:\Temp\cert.pfx /password:CertPass!
 ```
-'n Belangrike waarskuwing word gedeel oor hoe hierdie tegniek, gekombineer met 'n ander metode wat in die **THEFT5** afdeling uiteengesit word, 'n aanvaller in staat stel om volhoubaar 'n rekening se **NTLM hash** te verkry sonder om met die Local Security Authority Subsystem Service (LSASS) te interaksie, en vanuit 'n nie-verhoogde konteks, wat 'n meer stil metode vir langtermyn geloofsbriefdiefstal bied.
+'n Belangrike waarskuwing word gedeel oor hoe hierdie tegniek, gekombineer met 'n ander metode wat in die **THEFT5** afdeling uiteengesit word, 'n aanvaller in staat stel om volhoubaar 'n rekening se **NTLM hash** te verkry sonder om met die Local Security Authority Subsystem Service (LSASS) te kommunikeer, en vanuit 'n nie-verhoogde konteks, wat 'n meer stil metode vir langtermyn geloofsbriefdiefstal bied.
 
 ## **Masjien Volhoubaarheid Verkry met Sertifikate - PERSIST2**
 
@@ -34,12 +34,12 @@ Rubeus.exe asktgt /user:harmj0y /certificate:C:\Temp\cert.pfx /password:CertPass
 ```bash
 Certify.exe request /ca:dc.theshire.local/theshire-DC-CA /template:Machine /machine
 ```
-Hierdie toegang stel die aanvaller in staat om te autentiseer by **Kerberos** as die masjienrekening en **S4U2Self** te gebruik om Kerberos-dienskaartjies vir enige diens op die gasheer te verkry, wat effektief die aanvaller volgehoue toegang tot die masjien bied.
+Hierdie toegang stel die aanvaller in staat om as die masjienrekening by **Kerberos** te autentiseer en **S4U2Self** te gebruik om Kerberos-dienskaartjies vir enige diens op die gasheer te verkry, wat effektief die aanvaller volgehoue toegang tot die masjien bied.
 
 ## **Uitbreiding van Volgehoue Toegang Deur Sertifikaat Vernuwing - PERSIST3**
 
 Die finale metode wat bespreek word, behels die benutting van die **geldigheid** en **vernuwingperiodes** van sertifikaat sjablone. Deur 'n sertifikaat voor sy vervaldatum te **vernuwe**, kan 'n aanvaller die autentisering na Active Directory handhaaf sonder die behoefte aan addisionele kaartjie inskrywings, wat spore op die Sertifikaat Owerheid (CA) bediener kan agterlaat.
 
-Hierdie benadering stel 'n **verlengde volgehoue toegang** metode in, wat die risiko van opsporing minimaliseer deur minder interaksies met die CA bediener en die generering van artefakte te vermy wat administrateurs op die indringing kan waarsku.
+Hierdie benadering stel 'n **verlengde volgehoue toegang** metode in staat, wat die risiko van opsporing minimaliseer deur minder interaksies met die CA-bediener en die generering van artefakte te vermy wat administrateurs op die indringing kan waarsku. 
 
 {{#include ../../../banners/hacktricks-training.md}}

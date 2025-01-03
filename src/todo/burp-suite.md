@@ -8,7 +8,7 @@
 - **Nommer:** Genereer nommers van X tot Y met Z stap of ewekansig.
 - **Brute Forcer:** Karakterstel, minimum & maksimum lengte.
 
-[https://github.com/0xC01DF00D/Collabfiltrator](https://github.com/0xC01DF00D/Collabfiltrator) : Payload om opdragte uit te voer en die uitvoer te verkry via DNS versoeke na burpcollab.
+[https://github.com/0xC01DF00D/Collabfiltrator](https://github.com/0xC01DF00D/Collabfiltrator) : Payload om opdragte uit te voer en die uitvoer te verkry via DNS versoeke aan burpcollab.
 
 {% embed url="https://medium.com/@ArtsSEC/burp-suite-exporter-462531be24e" %}
 

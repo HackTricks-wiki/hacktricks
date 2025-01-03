@@ -11,7 +11,7 @@ Hoe kan jy sê dat 'n sertifikaat 'n CA sertifikaat is?
 Dit kan bepaal word dat 'n sertifikaat 'n CA sertifikaat is as verskeie voorwaardes nagekom word:
 
 - Die sertifikaat word op die CA bediener gestoor, met sy privaat sleutel beveilig deur die masjien se DPAPI, of deur hardeware soos 'n TPM/HSM as die bedryfstelsel dit ondersteun.
-- Beide die Uitgewer en Onderwerp velde van die sertifikaat stem ooreen met die onderskeibare naam van die CA.
+- Beide die Uitgewer en Onderwerp velde van die sertifikaat stem ooreen met die onderskeidelike naam van die CA.
 - 'n "CA Weergawe" uitbreiding is eksklusief teenwoordig in die CA sertifikate.
 - Die sertifikaat ontbreek Extended Key Usage (EKU) velde.
 
@@ -36,9 +36,9 @@ Rubeus.exe asktgt /user:localdomain /certificate:C:\ForgeCert\localadmin.pfx /pa
 certipy auth -pfx administrator_forged.pfx -dc-ip 172.16.126.128
 ```
 > [!WARNING]
-> Die gebruiker wat teiken vir sertifikaat vervalsing moet aktief wees en in staat wees om in te log in Active Directory vir die proses om te slaag. Vervalsing van 'n sertifikaat vir spesiale rekeninge soos krbtgt is ondoeltreffend.
+> Die gebruiker wat teiken vir sertifikaat vervalsing moet aktief wees en in staat wees om in te teken in Active Directory vir die proses om te slaag. Vervalsing van 'n sertifikaat vir spesiale rekeninge soos krbtgt is ondoeltreffend.
 
-Hierdie vervalste sertifikaat sal **geldigheid** hê tot die einddatum wat gespesifiseer is en so **lank as die wortel CA-sertifikaat geldig is** (gewoonlik van 5 tot **10+ jaar**). Dit is ook geldig vir **masjiene**, so gekombineer met **S4U2Self**, kan 'n aanvaller **volharding op enige domeinmasjien handhaaf** solank as wat die CA-sertifikaat geldig is.\
+Hierdie vervalste sertifikaat sal **geldigheid** hê tot die einddatum wat gespesifiseer is en so **lank as die wortel CA-sertifikaat geldig is** (gewoonlik van 5 tot **10+ jaar**). Dit is ook geldig vir **masjiene**, so gekombineer met **S4U2Self**, kan 'n aanvaller **volharding op enige domeinmasjien handhaaf** solank as die CA-sertifikaat geldig is.\
 Boonop kan die **sertifikate wat met hierdie metode gegenereer word** **nie herroep** word nie, aangesien die CA nie daarvan bewus is nie.
 
 ## Vertroue op Rogue CA Sertifikate - DPERSIST2
@@ -51,13 +51,13 @@ Hierdie vermoë is veral relevant wanneer dit saam met 'n voorheen uiteengesette
 
 ## Kwaadwillige Misconfigurasie - DPERSIST3
 
-Geleenthede vir **volharding** deur **veiligheidsbeskrywer wysigings van AD CS** komponente is volop. Wysigings wat in die "[Domein Escalation](domain-escalation.md)" afdeling beskryf word, kan kwaadwillig geïmplementeer word deur 'n aanvaller met verhoogde toegang. Dit sluit die toevoeging van "beheerregte" (bv. WriteOwner/WriteDACL/etc.) aan sensitiewe komponente soos:
+Geleenthede vir **volharding** deur **veiligheidsbeskrywer wysigings van AD CS** komponente is volop. Wysigings wat in die "[Domein Escalation](domain-escalation.md)" afdeling beskryf word, kan kwaadwillig deur 'n aanvaller met verhoogde toegang geïmplementeer word. Dit sluit die toevoeging van "beheerregte" (bv. WriteOwner/WriteDACL/etc.) aan sensitiewe komponente soos:
 
 - Die **CA bediener se AD rekenaar** objek
 - Die **CA bediener se RPC/DCOM bediener**
 - Enige **afstammeling AD objek of houer** in **`CN=Public Key Services,CN=Services,CN=Configuration,DC=<DOMAIN>,DC=<COM>`** (byvoorbeeld, die Sertifikaat Templates houer, Sertifiseringsowerhede houer, die NTAuthCertificates objek, ens.)
 - **AD groepe wat regte gedelegeer het om AD CS te beheer** per standaard of deur die organisasie (soos die ingeboude Cert Publishers groep en enige van sy lede)
 
-'n Voorbeeld van kwaadwillige implementering sou 'n aanvaller behels, wat **verhoogde toestemmings** in die domein het, wat die **`WriteOwner`** toestemming aan die standaard **`User`** sertifikaat sjabloon voeg, met die aanvaller as die hoof vir die reg. Om dit te benut, sou die aanvaller eers die eienaarskap van die **`User`** sjabloon na hulself verander. Daarna sou die **`mspki-certificate-name-flag`** op die sjabloon op **1** gestel word om **`ENROLLEE_SUPPLIES_SUBJECT`** te aktiveer, wat 'n gebruiker toelaat om 'n Subject Alternative Name in die versoek te verskaf. Vervolgens kan die aanvaller **inskryf** met behulp van die **sjabloon**, 'n **domein administrateur** naam as 'n alternatiewe naam kies, en die verkryde sertifikaat gebruik vir autentisering as die DA.
+'n Voorbeeld van kwaadwillige implementering sou 'n aanvaller behels, wat **verhoogde toestemmings** in die domein het, wat die **`WriteOwner`** toestemming aan die standaard **`User`** sertifikaat sjabloon voeg, met die aanvaller as die hoof vir die reg. Om dit te benut, sou die aanvaller eers die eienaarskap van die **`User`** sjabloon na hulself verander. Daarna sou die **`mspki-certificate-name-flag`** op **1** op die sjabloon gestel word om **`ENROLLEE_SUPPLIES_SUBJECT`** te aktiveer, wat 'n gebruiker toelaat om 'n Subject Alternative Name in die versoek te verskaf. Vervolgens kan die aanvaller **inskryf** met die **sjabloon**, 'n **domein administrateur** naam as 'n alternatiewe naam kies, en die verkryde sertifikaat gebruik vir autentisering as die DA.
 
 {{#include ../../../banners/hacktricks-training.md}}

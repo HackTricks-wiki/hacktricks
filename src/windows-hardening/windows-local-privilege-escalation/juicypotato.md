@@ -11,7 +11,7 @@ roguepotato-and-printspoofer.md
 
 ## Juicy Potato (misbruik van die goue voorregte) <a href="#juicy-potato-abusing-the-golden-privileges" id="juicy-potato-abusing-the-golden-privileges"></a>
 
-_'n Gesuikerde weergawe van_ [_RottenPotatoNG_](https://github.com/breenmachine/RottenPotatoNG)_, met 'n bietjie sap, d.w.s. **nog 'n Plaaslike Voorreg Escalation hulpmiddel, van 'n Windows Diensrekening na NT AUTHORITY\SYSTEM**_
+_'n gesuikerde weergawe van_ [_RottenPotatoNG_](https://github.com/breenmachine/RottenPotatoNG)_, met 'n bietjie sap, d.w.s. **nog 'n Plaaslike Voorreg Escalation hulpmiddel, van 'n Windows Diensrekening na NT AUTHORITY\SYSTEM**_
 
 #### Jy kan juicypotato aflaai van [https://ci.appveyor.com/project/ohpe/juicy-potato/build/artifacts](https://ci.appveyor.com/project/ohpe/juicy-potato/build/artifacts)
 
@@ -69,11 +69,11 @@ Optional args:
 ```
 ### Finale gedagtes <a href="#final-thoughts" id="final-thoughts"></a>
 
-[**Uit juicy-potato Readme**](https://github.com/ohpe/juicy-potato/blob/master/README.md#final-thoughts)**:**
+[**Van juicy-potato Readme**](https://github.com/ohpe/juicy-potato/blob/master/README.md#final-thoughts)**:**
 
 As die gebruiker `SeImpersonate` of `SeAssignPrimaryToken` regte het, dan is jy **SYSTEM**.
 
-Dit is byna onmoontlik om die misbruik van al hierdie COM Servers te voorkom. Jy kan oorweeg om die toestemmings van hierdie voorwerpe via `DCOMCNFG` te wysig, maar goeie geluk, dit gaan uitdagend wees.
+Dit is byna onmoontlik om die misbruik van al hierdie COM Servers te voorkom. Jy kan dink aan die aanpassing van die regte van hierdie voorwerpe via `DCOMCNFG`, maar goeie geluk, dit gaan uitdagend wees.
 
 Die werklike oplossing is om sensitiewe rekeninge en toepassings wat onder die `* SERVICE` rekeninge loop, te beskerm. Om `DCOM` te stop, sal beslis hierdie uitbuiting beperk, maar kan 'n ernstige impak op die onderliggende OS hê.
 
@@ -81,7 +81,7 @@ Van: [http://ohpe.it/juicy-potato/](http://ohpe.it/juicy-potato/)
 
 ## Voorbeelde
 
-Nota: Besoek [hierdie bladsy](https://ohpe.it/juicy-potato/CLSID/) vir 'n lys van CLSIDs om te probeer.
+Let op: Besoek [hierdie bladsy](https://ohpe.it/juicy-potato/CLSID/) vir 'n lys van CLSIDs om te probeer.
 
 ### Kry 'n nc.exe omgekeerde skulp
 ```
@@ -106,7 +106,7 @@ c:\Users\Public>
 
 ## CLSID Probleme
 
-Dikwels werk die standaard CLSID wat JuicyPotato gebruik **nie** en die exploit misluk. Gewoonlik neem dit verskeie pogings om 'n **werkende CLSID** te vind. Om 'n lys CLSIDs te kry om te probeer vir 'n spesifieke bedryfstelsel, moet jy hierdie bladsy besoek:
+Dikwels werk die standaard CLSID wat JuicyPotato gebruik **nie** en die exploit misluk. Gewoonlik neem dit verskeie pogings om 'n **werkende CLSID** te vind. Om 'n lys CLSIDs te kry om vir 'n spesifieke bedryfstelsel te probeer, moet jy hierdie bladsy besoek:
 
 {% embed url="https://ohpe.it/juicy-potato/CLSID/" %}
 

@@ -18,18 +18,18 @@
 - **Inskrywingsregte word aan laag-geprivilegieerde gebruikers deur die Enterprise CA toegeken.**
 - **Bestuurder goedkeuring is nie nodig nie.**
 - **Geen handtekeninge van gemagtigde personeel is nodig nie.**
-- **Sekuriteitsbeskrywings op sertifikaat sjablone is te permissief, wat laag-geprivilegieerde gebruikers toelaat om inskrywingsregte te verkry.**
-- **Sertifikaat sjablone is geconfigureer om EKU's te definieer wat verifikasie fasiliteer:**
+- **Sekuriteitsbeskrywings op sertifikaat sjablone is te toegeeflik, wat laag-geprivilegieerde gebruikers toelaat om inskrywingsregte te verkry.**
+- **Sertifikaat sjablone is geconfigureer om EKU's te definieer wat autentisering fasiliteer:**
 - Extended Key Usage (EKU) identifiseerders soos Client Authentication (OID 1.3.6.1.5.5.7.3.2), PKINIT Client Authentication (1.3.6.1.5.2.3.4), Smart Card Logon (OID 1.3.6.1.4.1.311.20.2.2), Any Purpose (OID 2.5.29.37.0), of geen EKU (SubCA) is ingesluit.
 - **Die vermoë vir versoekers om 'n subjectAltName in die Sertifikaat Ondertekening Versoek (CSR) in te sluit, word deur die sjabloon toegelaat:**
-- Die Active Directory (AD) prioritiseer die subjectAltName (SAN) in 'n sertifikaat vir identiteitsverifikasie indien teenwoordig. Dit beteken dat deur die SAN in 'n CSR te spesifiseer, 'n sertifikaat aangevra kan word om enige gebruiker (bv. 'n domein administrateur) na te doen. Of 'n SAN deur die versoeker gespesifiseer kan word, word in die sertifikaat sjabloon se AD objek deur die `mspki-certificate-name-flag` eienskap aangedui. Hierdie eienskap is 'n bitmask, en die teenwoordigheid van die `CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT` vlag laat die spesifikasie van die SAN deur die versoeker toe.
+- Die Active Directory (AD) prioritiseer die subjectAltName (SAN) in 'n sertifikaat vir identiteitsverifikasie indien teenwoordig. Dit beteken dat deur die SAN in 'n CSR te spesifiseer, 'n sertifikaat aangevra kan word om enige gebruiker (bv. 'n domein administrateur) na te boots. Of 'n SAN deur die versoeker gespesifiseer kan word, word in die sertifikaat sjabloon se AD objek deur die `mspki-certificate-name-flag` eienskap aangedui. Hierdie eienskap is 'n bitmask, en die teenwoordigheid van die `CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT` vlag laat die spesifikasie van die SAN deur die versoeker toe.
 
 > [!CAUTION]
-> Die konfigurasie wat uiteengesit is, laat laag-geprivilegieerde gebruikers toe om sertifikate met enige SAN van keuse aan te vra, wat verifikasie as enige domein hoof deur Kerberos of SChannel moontlik maak.
+> Die konfigurasie wat uiteengesit is, laat laag-geprivilegieerde gebruikers toe om sertifikate met enige SAN van keuse aan te vra, wat autentisering as enige domein hoof deur Kerberos of SChannel moontlik maak.
 
 Hierdie funksie word soms geaktiveer om die on-the-fly generasie van HTTPS of gasheer sertifikate deur produkte of ontplooiingsdienste te ondersteun, of weens 'n gebrek aan begrip.
 
-Daar word opgemerk dat die skep van 'n sertifikaat met hierdie opsie 'n waarskuwing aktiveer, wat nie die geval is wanneer 'n bestaande sertifikaat sjabloon (soos die `WebServer` sjabloon, wat `CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT` geaktiveer het) gedupliseer en dan gewysig word om 'n verifikasie OID in te sluit nie.
+Daar word opgemerk dat die skep van 'n sertifikaat met hierdie opsie 'n waarskuwing aktiveer, wat nie die geval is wanneer 'n bestaande sertifikaat sjabloon (soos die `WebServer` sjabloon, wat `CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT` geaktiveer het) gedupliseer en dan gewysig word om 'n autentisering OID in te sluit nie.
 
 ### Misbruik
 
@@ -50,13 +50,13 @@ certipy auth -pfx 'administrator.pfx' -username 'administrator' -domain 'corp.lo
 ```
 Die Windows binêre "Certreq.exe" & "Certutil.exe" kan gebruik word om die PFX te genereer: https://gist.github.com/b4cktr4ck2/95a9b908e57460d9958e8238f85ef8ee
 
-Die opsporing van sertifikaat sjablone binne die AD Forest se konfigurasieskema, spesifiek dié wat nie goedkeuring of handtekeninge vereis nie, wat 'n Klientverifikasie of Slimkaart Aanmelding EKU het, en met die `CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT` vlag geaktiveer, kan gedoen word deur die volgende LDAP-navraag uit te voer:
+Die opsporing van sertifikaat sjablone binne die AD Forest se konfigurasie skema, spesifiek dié wat nie goedkeuring of handtekeninge vereis nie, wat 'n Klientverifikasie of Slimkaart Aanmelding EKU het, en met die `CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT` vlag geaktiveer, kan gedoen word deur die volgende LDAP navraag uit te voer:
 ```
 (&(objectclass=pkicertificatetemplate)(!(mspki-enrollmentflag:1.2.840.113556.1.4.804:=2))(|(mspki-ra-signature=0)(!(mspki-rasignature=*)))(|(pkiextendedkeyusage=1.3.6.1.4.1.311.20.2.2)(pkiextendedkeyusage=1.3.6.1.5.5.7.3.2)(pkiextendedkeyusage=1.3.6.1.5.2.3.4)(pkiextendedkeyusage=2.5.29.37.0)(!(pkiextendedkeyusage=*)))(mspkicertificate-name-flag:1.2.840.113556.1.4.804:=1))
 ```
 ## Misgeconfigureerde Sertifikaat Sjablone - ESC2
 
-### Verklaring
+### Verduideliking
 
 Die tweede misbruikscenario is 'n variasie van die eerste een:
 
@@ -82,7 +82,7 @@ Om sjablone wat by hierdie scenario pas binne die AD Forest se konfigurasieskema
 
 Hierdie scenario is soos die eerste en tweede een, maar **misbruik** 'n **ander EKU** (Sertifikaat Versoek Agent) en **2 verskillende sjablone** (daarom het dit 2 stelle vereistes),
 
-Die **Sertifikaat Versoek Agent EKU** (OID 1.3.6.1.4.1.311.20.2.1), bekend as **Registrasie Agent** in Microsoft dokumentasie, laat 'n prinsiep toe om vir 'n **sertifikaat** te **registreer** **namens 'n ander gebruiker**.
+Die **Sertifikaat Versoek Agent EKU** (OID 1.3.6.1.4.1.311.20.2.1), bekend as **Registrasie Agent** in Microsoft dokumentasie, laat 'n prinsiep toe om **te registreer** vir 'n **sertifikaat** **namens 'n ander gebruiker**.
 
 Die **“registrasie agent”** registreer in so 'n **sjabloon** en gebruik die resulterende **sertifikaat om 'n CSR saam te teken namens die ander gebruiker**. Dit **stuur** die **saamgetekende CSR** na die CA, wat registreer in 'n **sjabloon** wat **“registreer namens”** toelaat, en die CA antwoord met 'n **sertifikaat wat aan die “ander” gebruiker behoort**.
 
@@ -99,7 +99,7 @@ Die **“registrasie agent”** registreer in so 'n **sjabloon** en gebruik die 
 - Die Enterprise CA verleen registrasiegeregte aan laag-geprivilegieerde gebruikers.
 - Bestuurder goedkeuring word omseil.
 - Die sjabloon se skema weergawe is of 1 of oorskry 2, en dit spesifiseer 'n Aansoek Beleid Uitreik Vereiste wat die Sertifikaat Versoek Agent EKU vereis.
-- 'n EKU gedefinieer in die sertifikaat sjabloon laat domeinverifikasie toe.
+- 'n EKU gedefinieer in die sertifikaat sjabloon laat domein autentisering toe.
 - Beperkings vir registrasie agente word nie op die CA toegepas nie.
 
 ### Misbruik
@@ -118,17 +118,17 @@ certipy req -username john@corp.local -password Pass0rd! -target-ip ca.corp.loca
 # Use Rubeus with the certificate to authenticate as the other user
 Rubeu.exe asktgt /user:CORP\itadmin /certificate:itadminenrollment.pfx /password:asdf
 ```
-Die **gebruikers** wat toegelaat word om 'n **inskrywingsagent sertifikaat** te **verkry**, die sjablone waarin inskrywings **agente** toegelaat word om in te skryf, en die **rekeninge** namens wie die inskrywingsagent mag optree, kan deur ondernemings CA's beperk word. Dit word bereik deur die `certsrc.msc` **snap-in** te open, **regsklik op die CA** te doen, **eienskappe** te kies, en dan na die “Inskrywingsagente” tab te **navigeer**.
+Die **gebruikers** wat toegelaat word om 'n **inskrywingsagent sertifikaat** te **verkry**, die sjablone waarin inskrywings **agente** toegelaat word om in te skryf, en die **rekeninge** namens wie die inskrywingsagent mag optree, kan deur ondernemings CA's beperk word. Dit word bereik deur die `certsrc.msc` **snap-in** te open, **regsklik op die CA** te klik, **klik Eienskappe**, en dan **navigeer** na die “Inskrywingsagente” oortjie.
 
-Dit word egter opgemerk dat die **standaard** instelling vir CA's is om “**Moet nie inskrywingsagente beperk nie**.” Wanneer die beperking op inskrywingsagente deur administrateurs geaktiveer word, en dit op “Beperk inskrywingsagente” gestel word, bly die standaardkonfigurasie uiters permissief. Dit laat **Enigeen** toe om in alle sjablone in te skryf as enige iemand.
+Dit word egter opgemerk dat die **standaard** instelling vir CA's is om “**Moet nie inskrywingsagente beperk nie**.” Wanneer die beperking op inskrywingsagente deur administrateurs geaktiveer word, en dit op “Beperk inskrywingsagente” gestel word, bly die standaardkonfigurasie uiters permissief. Dit laat **Enigiemand** toe om in alle sjablone in te skryf as enige iemand.
 
-## Kwetsbare Sertifikaat Sjabloon Toegang Beheer - ESC4
+## Kw vulnerable Sertifikaat Sjabloon Toegang Beheer - ESC4
 
 ### **Verklaring**
 
 Die **veiligheidsbeskrywer** op **sertifikaat sjablone** definieer die **toestemmings** wat spesifieke **AD prinsipes** het ten opsigte van die sjabloon.
 
-As 'n **aanvaller** die nodige **toestemmings** het om 'n **sjabloon** te **verander** en enige **uitbuitbare misconfigurasies** soos in **vorige afdelings** uiteengesit, kan voorregverhoging gefasiliteer word.
+As 'n **aanvaller** die nodige **toestemmings** het om 'n **sjabloon** te **verander** en enige **uitbuitbare misconfigurasies** soos in **vorige afdelings** uiteengesit, kan voorregte eskalasie gefasiliteer word.
 
 Opmerklike toestemmings wat van toepassing is op sertifikaat sjablone sluit in:
 
@@ -150,7 +150,7 @@ Soos ons in die pad hierbo kan sien, het slegs `JOHNPC` hierdie toestemmings, ma
 ```bash
 certipy shadow auto 'corp.local/john:Passw0rd!@dc.corp.local' -account 'johnpc'
 ```
-**Certipy** kan die konfigurasie van 'n sertifikaat sjabloon met 'n enkele opdrag oorskryf. Deur **standaard** sal Certipy die konfigurasie **oorskryf** om dit **kwetsbaar te maak vir ESC1**. Ons kan ook die **`-save-old` parameter spesifiseer om die ou konfigurasie te stoor**, wat nuttig sal wees vir **herstel** van die konfigurasie na ons aanval.
+**Certipy** kan die konfigurasie van 'n sertifikaat sjabloon met 'n enkele opdrag oorskryf. Deur **standaard** sal Certipy die konfigurasie **oorskryf** om dit **kwesbaar te maak vir ESC1**. Ons kan ook die **`-save-old` parameter spesifiseer om die ou konfigurasie te stoor**, wat nuttig sal wees vir **herstel** van die konfigurasie na ons aanval.
 ```bash
 # Make template vuln to ESC1
 certipy template -username john@corp.local -password Passw0rd -template ESC4-Test -save-old
@@ -165,11 +165,11 @@ certipy template -username john@corp.local -password Passw0rd -template ESC4-Tes
 
 ### Verklaring
 
-Die uitgebreide web van onderling verbonde ACL-gebaseerde verhoudings, wat verskeie objekte behalwe sertifikaat sjablone en die sertifikaatowerheid insluit, kan die sekuriteit van die hele AD CS-stelsel beïnvloed. Hierdie objekte, wat sekuriteit aansienlik kan beïnvloed, sluit in:
+Die uitgebreide web van onderling verbonde ACL-gebaseerde verhoudings, wat verskeie objekte behalwe sertifikaat sjablone en die sertifikaatowerheid insluit, kan die sekuriteit van die hele AD CS-stelsel beïnvloed. Hierdie objekte, wat 'n beduidende impak op sekuriteit kan hê, sluit in:
 
 - Die AD rekenaarobjek van die CA bediener, wat gecompromitteer kan word deur meganismes soos S4U2Self of S4U2Proxy.
 - Die RPC/DCOM bediener van die CA bediener.
-- Enige afstammeling AD objek of houer binne die spesifieke houer pad `CN=Public Key Services,CN=Services,CN=Configuration,DC=<DOMAIN>,DC=<COM>`. Hierdie pad sluit in, maar is nie beperk tot, houers en objekte soos die Sertifikaat Sjablone houer, Sertifiseringsowerhede houer, die NTAuthCertificates objek, en die Registrasie Dienste Houer.
+- Enige afstammeling AD objek of houer binne die spesifieke houer pad `CN=Public Key Services,CN=Services,CN=Configuration,DC=<DOMAIN>,DC=<COM>`. Hierdie pad sluit in, maar is nie beperk tot, houers en objekte soos die Sertifikaat Sjablone houer, Sertifiseringsowerhede houer, die NTAuthCertificates objek, en die Registrasie Dienste Houer nie.
 
 Die sekuriteit van die PKI-stelsel kan gecompromitteer word as 'n laag-geprivilegieerde aanvaller daarin slaag om beheer oor enige van hierdie kritieke komponente te verkry.
 
@@ -177,9 +177,9 @@ Die sekuriteit van die PKI-stelsel kan gecompromitteer word as 'n laag-geprivile
 
 ### Verklaring
 
-Die onderwerp wat in die [**CQure Academy pos**](https://cqureacademy.com/blog/enhanced-key-usage) bespreek word, raak ook die **`EDITF_ATTRIBUTESUBJECTALTNAME2`** vlag se implikasies aan, soos uiteengesit deur Microsoft. Hierdie konfigurasie, wanneer geaktiveer op 'n Sertifiseringsowerheid (CA), laat die insluiting van **gebruikersgedefinieerde waardes** in die **onderwerp alternatiewe naam** vir **enige versoek** toe, insluitend dié wat uit Active Directory® saamgestel is. Gevolglik laat hierdie bepaling 'n **indringer** toe om te registreer deur **enige sjabloon** wat opgestel is vir domein **autentisering**—specifiek dié wat oop is vir **onbevoegde** gebruikersregistrasie, soos die standaard Gebruiker sjabloon. As gevolg hiervan kan 'n sertifikaat beveilig word, wat die indringer in staat stel om as 'n domein administrateur of **enige ander aktiewe entiteit** binne die domein te autentiseer.
+Die onderwerp wat in die [**CQure Academy pos**](https://cqureacademy.com/blog/enhanced-key-usage) bespreek word, raak ook die **`EDITF_ATTRIBUTESUBJECTALTNAME2`** vlag se implikasies aan, soos uiteengesit deur Microsoft. Hierdie konfigurasie, wanneer geaktiveer op 'n Sertifiseringsowerheid (CA), laat die insluiting van **gebruikersgedefinieerde waardes** in die **onderwerp alternatiewe naam** vir **enige versoek** toe, insluitend dié wat uit Active Directory® saamgestel is. Gevolglik laat hierdie bepaling 'n **indringer** toe om te registreer deur **enige sjabloon** wat opgestel is vir domein **autorisering**—specifiek dié wat oop is vir **onbevoegde** gebruikersregistrasie, soos die standaard Gebruiker sjabloon. As gevolg hiervan kan 'n sertifikaat beveilig word, wat die indringer in staat stel om as 'n domein administrateur of **enige ander aktiewe entiteit** binne die domein te autentiseer.
 
-**Let wel**: Die benadering om **alternatiewe name** in 'n Sertifikaat Ondertekening Versoek (CSR) by te voeg, deur die `-attrib "SAN:"` argument in `certreq.exe` (genoem “Naam Waarde Pare”), bied 'n **kontras** van die uitbuitingsstrategie van SANs in ESC1. Hier lê die onderskeid in **hoe rekeninginligting ingekapsuleer word**—binne 'n sertifikaatattribuut, eerder as 'n uitbreiding.
+**Let wel**: Die benadering om **alternatiewe name** in 'n Sertifikaat Ondertekening Versoek (CSR) by te voeg, deur die `-attrib "SAN:"` argument in `certreq.exe` (verwys na as “Naam Waarde Pare”), bied 'n **kontras** van die uitbuitingsstrategie van SANs in ESC1. Hier lê die onderskeid in **hoe rekeninginligting ingekapsuleer word**—binne 'n sertifikaatattribuut, eerder as 'n uitbreiding.
 
 ### Misbruik
 
@@ -212,13 +212,13 @@ certutil -config "CA_HOST\CA_NAME" -setreg policy\EditFlags -EDITF_ATTRIBUTESUBJ
 > Na die Mei 2022 sekuriteitsopdaterings, sal nuut uitgereikte **sertifikate** 'n **sekuriteitsuitbreiding** bevat wat die **aanvrager se `objectSid` eienskap** inkorporeer. Vir ESC1, word hierdie SID afgelei van die gespesifiseerde SAN. egter, vir **ESC6**, spieël die SID die **aanvrager se `objectSid`**, nie die SAN nie.\
 > Om ESC6 te benut, is dit noodsaaklik dat die stelsel kwesbaar is vir ESC10 (Swak Sertifikaat Kaartjies), wat die **SAN bo die nuwe sekuriteitsuitbreiding** prioriteer.
 
-## Kwesbare Sertifikaat Owerheid Toegang Beheer - ESC7
+## Kwesbare Sertifikaat Owerheid Toegangsbeheer - ESC7
 
 ### Aanval 1
 
 #### Verklaring
 
-Toegangbeheer vir 'n sertifikaat owerheid word gehandhaaf deur 'n stel toestemmings wat CA aksies regeer. Hierdie toestemmings kan gesien word deur `certsrv.msc` te benader, met die rechtermuisklik op 'n CA, eienskappe te kies, en dan na die Sekuriteit oortjie te navigeer. Boonop kan toestemmings opgenoem word met die PSPKI module met opdragte soos:
+Toegangsbeheer vir 'n sertifikaat owerheid word gehandhaaf deur 'n stel toestemmings wat CA aksies regeer. Hierdie toestemmings kan gesien word deur `certsrv.msc` te benader, met die rechtermuisklik op 'n CA, eienskappe te kies, en dan na die Sekuriteit tab te navigeer. Boonop kan toestemmings opgenoem word met die PSPKI module met opdragte soos:
 ```bash
 Get-CertificationAuthority -ComputerName dc.domain.local | Get-CertificationAuthorityAcl | select -expand Access
 ```
@@ -253,7 +253,7 @@ Certify.exe download /ca:dc.domain.local\theshire-DC-CA /id:336
 #### Verklaring
 
 > [!WARNING]
-> In die **vorige aanval** is **`Manage CA`** regte gebruik om die **EDITF_ATTRIBUTESUBJECTALTNAME2** vlag te **aktiveer** om die **ESC6 aanval** uit te voer, maar dit sal geen effek hê totdat die CA diens (`CertSvc`) herbegin word nie. Wanneer 'n gebruiker die `Manage CA` toegangreg het, mag die gebruiker ook die **diens herbegin**. Dit **beteken egter nie dat die gebruiker die diens op afstand kan herbegin nie**. Verder, E**SC6 mag nie reg uit die boks werk** in die meeste gepatchte omgewings weens die sekuriteitsopdaterings van Mei 2022.
+> In die **vorige aanval** is **`Manage CA`** regte gebruik om die **EDITF_ATTRIBUTESUBJECTALTNAME2** vlag te **aktiveer** om die **ESC6 aanval** uit te voer, maar dit sal geen effek hê totdat die CA diens (`CertSvc`) herbegin word nie. Wanneer 'n gebruiker die `Manage CA` toegangreg het, mag die gebruiker ook die **diens herbegin**. Dit **beteken egter nie dat die gebruiker die diens op afstand kan herbegin** nie. Verder, E**SC6 mag nie regtig werk nie** in die meeste gepatchte omgewings weens die sekuriteitsopdaterings van Mei 2022.
 
 Daarom word 'n ander aanval hier aangebied.
 
@@ -263,7 +263,7 @@ Voorvereistes:
 - **`Manage Certificates`** toestemming (kan toegeken word vanaf **`ManageCA`**)
 - Sertifikaat sjabloon **`SubCA`** moet **geaktiveer** wees (kan geaktiveer word vanaf **`ManageCA`**)
 
-Die tegniek berus op die feit dat gebruikers met die `Manage CA` _en_ `Manage Certificates` toegangregte **mislukte sertifikaat versoeke kan uitreik**. Die **`SubCA`** sertifikaat sjabloon is **kwetsbaar vir ESC1**, maar **slegs administrateurs** kan in die sjabloon registreer. Dus kan 'n **gebruiker** **aansoek doen** om in die **`SubCA`** te registreer - wat **weggestoot** sal word - maar **dan deur die bestuurder daarna uitgereik**.
+Die tegniek berus op die feit dat gebruikers met die `Manage CA` _en_ `Manage Certificates` toegangregte **mislukte sertifikaat versoeke kan uitreik**. Die **`SubCA`** sertifikaat sjabloon is **kwetsbaar vir ESC1**, maar **slegs administrateurs** kan in die sjabloon registreer. Dus kan 'n **gebruiker** **versoek** om in die **`SubCA`** te registreer - wat **weggestoot** sal word - maar **dan deur die bestuurder daarna uitgereik** sal word.
 
 #### Misbruik
 
@@ -328,8 +328,8 @@ Certipy v4.0.0 - by Oliver Lyak (ly4k)
 
 Verskeie **HTTP-gebaseerde inskrywingsmetodes** word deur AD CS ondersteun, beskikbaar gemaak deur addisionele bediener rolle wat administrateurs kan installeer. Hierdie interfaces vir HTTP-gebaseerde sertifikaat inskrywing is kwesbaar vir **NTLM relay aanvalle**. 'n Aanvaller, vanaf 'n **gecompromitteerde masjien, kan enige AD rekening naboots wat via inkomende NTLM verifieer**. Terwyl die slagoffer rekening naboots, kan hierdie web interfaces deur 'n aanvaller toegang verkry om **'n kliënt verifikasie sertifikaat aan te vra met die `User` of `Machine` sertifikaat sjablone**.
 
-- Die **web inskrywingsinterface** (n ouer ASP toepassing beskikbaar by `http://<caserver>/certsrv/`), is standaard net op HTTP, wat nie beskerming teen NTLM relay aanvalle bied nie. Boonop, dit laat eksplisiet net NTLM verifikasie toe deur sy Outeurskap HTTP kop, wat meer veilige verifikasie metodes soos Kerberos onvanpas maak.
-- Die **Sertifikaat Inskrywingsdiens** (CES), **Sertifikaat Inskrywingsbeleid** (CEP) Webdiens, en **Netwerk Toestel Inskrywingsdiens** (NDES) ondersteun standaard onderhandelingsverifikasie via hul Outeurskap HTTP kop. Onderhandelingsverifikasie **ondersteun beide** Kerberos en **NTLM**, wat 'n aanvaller in staat stel om **te verlaag na NTLM** verifikasie tydens relay aanvalle. Alhoewel hierdie webdienste standaard HTTPS inskakel, bied HTTPS alleen **nie beskerming teen NTLM relay aanvalle nie**. Beskerming teen NTLM relay aanvalle vir HTTPS dienste is slegs moontlik wanneer HTTPS gekombineer word met kanaalbinding. Ongelukkig aktiveer AD CS nie Verlengde Beskerming vir Verifikasie op IIS nie, wat vereis word vir kanaalbinding.
+- Die **web inskrywingsinterface** (n ouer ASP toepassing beskikbaar by `http://<caserver>/certsrv/`), is standaard net op HTTP, wat nie beskerming teen NTLM relay aanvalle bied nie. Boonop, dit laat eksplisiet net NTLM verifikasie toe deur sy Authorization HTTP kop, wat meer veilige verifikasie metodes soos Kerberos onvanpas maak.
+- Die **Sertifikaat Inskrywingsdiens** (CES), **Sertifikaat Inskrywingsbeleid** (CEP) Webdiens, en **Netwerk Toestel Inskrywingsdiens** (NDES) ondersteun standaard onderhandelingsverifikasie deur hul Authorization HTTP kop. Onderhandelingsverifikasie **ondersteun beide** Kerberos en **NTLM**, wat 'n aanvaller toelaat om **af te gradeer na NTLM** verifikasie tydens relay aanvalle. Alhoewel hierdie webdienste standaard HTTPS inskakel, bied HTTPS alleen **nie beskerming teen NTLM relay aanvalle nie**. Beskerming teen NTLM relay aanvalle vir HTTPS dienste is slegs moontlik wanneer HTTPS gekombineer word met kanaalbinding. Ongelukkig aktiveer AD CS nie Verlengde Beskerming vir Verifikasie op IIS nie, wat vereis word vir kanaalbinding.
 
 'n Algemene **probleem** met NTLM relay aanvalle is die **kort duur van NTLM sessies** en die onmoontlikheid van die aanvaller om met dienste te interaksie wat **NTLM ondertekening vereis**.
 
@@ -381,7 +381,7 @@ execute-assembly C:\SpoolSample\SpoolSample\bin\Debug\SpoolSample.exe <victim> <
 ```
 #### Misbruik met [Certipy](https://github.com/ly4k/Certipy)
 
-Die versoek om 'n sertifikaat word standaard deur Certipy gemaak op grond van die sjabloon `Machine` of `User`, bepaal deur of die rekeningnaam wat oorgedra word eindig op `$`. Die spesifikasie van 'n alternatiewe sjabloon kan bereik word deur die gebruik van die `-template` parameter.
+Die versoek vir 'n sertifikaat word standaard deur Certipy gemaak op grond van die sjabloon `Machine` of `User`, bepaal deur of die rekeningnaam wat oorgedra word eindig op `$`. Die spesifikasie van 'n alternatiewe sjabloon kan bereik word deur die gebruik van die `-template` parameter.
 
 'n Tegniek soos [PetitPotam](https://github.com/ly4k/PetitPotam) kan dan gebruik word om outentisering af te dwing. Wanneer daar met domeinbeheerders gewerk word, is die spesifikasie van `-template DomainController` vereis.
 ```bash
@@ -417,7 +417,7 @@ Aanvanklik word `Jane` se hash verkry met behulp van Shadow Credentials, danksy 
 ```bash
 certipy shadow auto -username John@corp.local -password Passw0rd! -account Jane
 ```
-Daarna word `Jane` se `userPrincipalName` verander na `Administrator`, met opsetlike omissies van die `@corp.local` domein gedeelte:
+Daarna word `Jane` se `userPrincipalName` verander na `Administrator`, met opsetlike om die `@corp.local` domein gedeelte te laat val:
 ```bash
 certipy account update -username John@corp.local -password Passw0rd! -user Jane -upn Administrator
 ```
@@ -456,9 +456,9 @@ As `CertificateMappingMethods` die `UPN` bit (`0x4`) insluit.
 
 ### Misbruik Geval 1
 
-Met `StrongCertificateBindingEnforcement` geconfigureer as `0`, kan 'n rekening A met `GenericWrite` regte misbruik word om enige rekening B te kompromitteer.
+Met `StrongCertificateBindingEnforcement` geconfigureer as `0`, kan 'n rekening A met `GenericWrite` toestemmings misbruik word om enige rekening B te kompromitteer.
 
-Byvoorbeeld, met `GenericWrite` regte oor `Jane@corp.local`, mik 'n aanvaller om `Administrator@corp.local` te kompromitteer. Die prosedure weerspieël ESC9, wat enige sertifikaat sjabloon toelaat om gebruik te word.
+Byvoorbeeld, met `GenericWrite` toestemmings oor `Jane@corp.local`, mik 'n aanvaller om `Administrator@corp.local` te kompromitteer. Die prosedure weerspieël ESC9, wat enige sertifikaat sjabloon toelaat om gebruik te word.
 
 Aanvanklik word `Jane` se hash verkry met behulp van Shadow Credentials, wat die `GenericWrite` misbruik.
 ```bash
@@ -472,7 +472,7 @@ Hierdie, 'n sertifikaat wat kliëntverifikasie moontlik maak, word aangevra as `
 ```bash
 certipy req -ca 'corp-DC-CA' -username Jane@corp.local -hashes <hash>
 ```
-`Jane` se `userPrincipalName` word dan na sy oorspronklike, `Jane@corp.local`, teruggekeer.
+`Jane` se `userPrincipalName` word dan teruggestel na sy oorspronklike, `Jane@corp.local`.
 ```bash
 certipy account update -username John@corp.local -password Passw0rd! -user Jane -upn Jane@corp.local
 ```
@@ -496,7 +496,7 @@ certipy account update -username John@corp.local -password Passw0rd! -user Jane 
 ```bash
 certipy req -ca 'corp-DC-CA' -username Jane@corp.local -hashes <hash>
 ```
-`Jane` se `userPrincipalName` word na hierdie proses na sy oorspronklike toestand teruggekeer.
+`Jane` se `userPrincipalName` word na hierdie proses na sy oorspronklike teruggestel.
 ```bash
 certipy account update -username John@corp.local -password Passw0rd! -user Jane -upn 'Jane@corp.local'
 ```
@@ -554,7 +554,7 @@ Certipy v4.7.0 - by Oliver Lyak (ly4k)
 [*] Saved certificate and private key to 'administrator.pfx'
 [*] Exiting...
 ```
-Let wel: Vir domeinbeheerders moet ons `-template` in DomainController spesifiseer. 
+Nota: Vir domeinbeheerders moet ons `-template` in DomainController spesifiseer. 
 
 Of deur [sploutchy se fork van impacket](https://github.com/sploutchy/impacket) te gebruik:
 ```bash
@@ -590,7 +590,7 @@ Gebruik uiteindelik die certutil `-sign` opdrag om 'n nuwe arbitrêre sertifikaa
 
 ### Verklaring
 
-Die `msPKI-Certificate-Policy` attribuut laat die uitreikingsbeleid toe om by die sertifikaat sjabloon gevoeg te word. Die `msPKI-Enterprise-Oid` objekte wat verantwoordelik is vir die uitreiking van beleide kan ontdek word in die Konfigurasie Naam Konteks (CN=OID,CN=Public Key Services,CN=Services) van die PKI OID houer. 'n Beleid kan aan 'n AD-groep gekoppel word met behulp van hierdie objek se `msDS-OIDToGroupLink` attribuut, wat 'n stelsel in staat stel om 'n gebruiker te autoriseer wat die sertifikaat voorlê asof hy 'n lid van die groep was. [Verwysing hier](https://posts.specterops.io/adcs-esc13-abuse-technique-fda4272fbd53).
+Die `msPKI-Certificate-Policy` attribuut laat die uitreikingsbeleid toe om by die sertifikaat sjabloon gevoeg te word. Die `msPKI-Enterprise-Oid` objekte wat verantwoordelik is vir die uitreiking van beleid kan ontdek word in die Konfigurasie Naam Konteks (CN=OID,CN=Public Key Services,CN=Services) van die PKI OID houer. 'n Beleid kan aan 'n AD-groep gekoppel word met behulp van hierdie objek se `msDS-OIDToGroupLink` attribuut, wat 'n stelsel in staat stel om 'n gebruiker te magtig wat die sertifikaat voorlê asof hy 'n lid van die groep was. [Reference in here](https://posts.specterops.io/adcs-esc13-abuse-technique-fda4272fbd53).
 
 Met ander woorde, wanneer 'n gebruiker toestemming het om 'n sertifikaat aan te vra en die sertifikaat aan 'n OID-groep gekoppel is, kan die gebruiker die voorregte van hierdie groep erf.
 
@@ -626,11 +626,11 @@ Alles wat dit moet doen, is om die sjabloon te spesifiseer, dit sal 'n sertifika
 ```bash
 certipy req -u "John@domain.local" -p "password" -dc-ip 192.168.100.100 -target "DC01.domain.local" -ca 'DC01-CA' -template 'VulnerableTemplate'
 ```
-## Kompromitering van Woude met Sertifikate Verduidelik in Passiewe Stem
+## Kompromitering van Woude met Sertifikate Verduidelik in Passiewe Vorm
 
 ### Breking van Woud Vertroue deur Kompromiteerde CA's
 
-Die konfigurasie vir **cross-forest enrollment** is relatief eenvoudig gemaak. Die **root CA sertifikaat** van die hulpbronwoud word deur administrateurs **gepubliseer na die rekeningwoude**, en die **enterprise CA** sertifikate van die hulpbronwoud word **bygevoeg tot die `NTAuthCertificates` en AIA houers in elke rekeningwoud**. Om te verduidelik, hierdie reëling verleen die **CA in die hulpbronwoud volledige beheer** oor al die ander woude waarvoor dit PKI bestuur. Indien hierdie CA **deur aanvallers gekompromitteer word**, kan sertifikate vir alle gebruikers in beide die hulpbron- en rekeningwoude **deur hulle vervals word**, wat die sekuriteitsgrens van die woud breek.
+Die konfigurasie vir **cross-forest enrollment** is relatief eenvoudig gemaak. Die **root CA sertifikaat** van die hulpbronwoud word deur administrateurs **gepubliseer na die rekeningwoude**, en die **enterprise CA** sertifikate van die hulpbronwoud word **bygevoeg tot die `NTAuthCertificates` en AIA houers in elke rekeningwoud**. Om dit te verhelder, bied hierdie skikking die **CA in die hulpbronwoud volledige beheer** oor al die ander woude waarvoor dit PKI bestuur. Indien hierdie CA **deur aanvallers gekompromitteer word**, kan sertifikate vir alle gebruikers in beide die hulpbron- en rekeningwoude **deur hulle vervals word**, wat die sekuriteitsgrens van die woud breek.
 
 ### Registrasie Privileges Gegee aan Buitelandse Principals
 
@@ -638,6 +638,3 @@ In multi-woud omgewings is versigtigheid nodig rakende Enterprise CA's wat **ser
 Na verifikasie oor 'n vertroue, word die **Geverifieerde Gebruikers SID** aan die gebruiker se token deur AD bygevoeg. Dus, indien 'n domein 'n Enterprise CA het met 'n sjabloon wat **Geverifieerde Gebruikers registrasiegeregte toelaat**, kan 'n sjabloon potensieel **deur 'n gebruiker van 'n ander woud geregistreer word**. Net so, indien **registrasiegeregte eksplisiet aan 'n buitelandse principal deur 'n sjabloon gegee word**, word 'n **cross-forest access-control verhouding aldus geskep**, wat 'n principal van een woud in staat stel om **in 'n sjabloon van 'n ander woud te registreer**.
 
 Albei scenario's lei tot 'n **toename in die aanvaloppervlak** van een woud na 'n ander. Die instellings van die sertifikaat sjabloon kan deur 'n aanvaller uitgebuit word om addisionele privileges in 'n buitelandse domein te verkry.
-
-
-{{#include ../../../banners/hacktricks-training.md}}

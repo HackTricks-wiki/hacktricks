@@ -72,7 +72,7 @@ a = BitVecVal(-1, 32)
 b = BitVecVal(65535, 32)
 print(simplify(a == b)) #This is False
 ```
-## Getekende/Ongetekende Nommers
+## Getekende/Ongetekende Getalle
 
 Z3 bied spesiale getekende weergawes van wiskundige operasies waar dit 'n verskil maak of die **bit-vectore as getekend of ongetekend** behandel word. In Z3Py, die operateurs **<, <=, >, >=, /, % en >>** stem ooreen met die **getekende** weergawes. Die ooreenstemmende **ongetekende** operateurs is **ULT, ULE, UGT, UGE, UDiv, URem en LShR.**
 ```python

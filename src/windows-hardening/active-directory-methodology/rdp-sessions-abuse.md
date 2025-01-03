@@ -36,7 +36,7 @@ Kontroleer **ander maniere om sessies te steel met ander gereedskap** [**op hier
 
 As 'n gebruiker via **RDP in 'n masjien** toegang verkry waar 'n **aanvaller** op hom **wag**, sal die aanvaller in staat wees om 'n **beacon in die RDP-sessie van die gebruiker** te **injekteer** en as die **slagoffer sy skyf gemonteer het** toe hy via RDP toegang verkry, kan die **aanvaller dit toegang**.
 
-In hierdie geval kan jy net die **slagoffers** **oorspronklike rekenaar** **kompromitteer** deur 'n **backdoor** in die **opstartgids** te skryf.
+In hierdie geval kan jy net die **slagoffer se** **oorspronklike rekenaar** **kompromitteer** deur 'n **backdoor** in die **opstartgids** te skryf.
 ```powershell
 # Wait til someone logs in:
 net logons

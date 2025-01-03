@@ -7,7 +7,7 @@
 ### Components of a Certificate
 
 - Die **Onderwerp** van die sertifikaat dui sy eienaar aan.
-- 'n **Publieke Sleutel** word gekoppel aan 'n privaat besit sleutel om die sertifikaat aan sy regmatige eienaar te verbind.
+- 'n **Publieke Sleutel** word gekoppel aan 'n privaat gehou sleutel om die sertifikaat aan sy regmatige eienaar te verbind.
 - Die **Geldigheidsperiode**, gedefinieer deur **NotBefore** en **NotAfter** datums, merk die sertifikaat se effektiewe duur.
 - 'n Unieke **Serie Nommer**, verskaf deur die Sertifikaat Owerheid (CA), identifiseer elke sertifikaat.
 - Die **Uitgewer** verwys na die CA wat die sertifikaat uitgereik het.
@@ -19,7 +19,7 @@
 
 ### Special Considerations
 
-- **Subject Alternative Names (SANs)** brei 'n sertifikaat se toepasbaarheid uit na verskeie identiteite, wat noodsaaklik is vir bedieners met verskeie domeine. Veilige uitreikprosesse is noodsaaklik om te verhoed dat aanvallers die SAN spesifikasie manipuleer en so identiteitsdiefstal veroorsaak.
+- **Subject Alternative Names (SANs)** brei 'n sertifikaat se toepasbaarheid uit na verskeie identiteite, wat noodsaaklik is vir bedieners met verskeie domeine. Veilige uitreikprosesse is noodsaaklik om te verhoed dat aanvallers die SAN-spesifikasie manipuleer en so identiteitsdiefstal veroorsaak.
 
 ### Certificate Authorities (CAs) in Active Directory (AD)
 
@@ -28,7 +28,7 @@ AD CS erken CA sertifikate in 'n AD woud deur middel van aangewese houers, elk w
 - Die **Sertifiseringsowerhede** houer bevat vertroude wortel CA sertifikate.
 - Die **Inskrywingsdienste** houer detail Enterprise CA's en hul sertifikaat sjablone.
 - Die **NTAuthCertificates** objek sluit CA sertifikate in wat gemagtig is vir AD autentisering.
-- Die **AIA (Owerheid Inligting Toegang)** houer fasiliteer sertifikaat ketting validasie met tussenliggende en kruis CA sertifikate.
+- Die **AIA (Authority Information Access)** houer fasiliteer sertifikaat ketting validasie met tussenliggende en kruis CA sertifikate.
 
 ### Certificate Acquisition: Client Certificate Request Flow
 
@@ -39,7 +39,7 @@ AD CS erken CA sertifikate in 'n AD woud deur middel van aangewese houers, elk w
 
 ### Certificate Templates
 
-Gedefinieer binne AD, skets hierdie sjablone die instellings en toestemmings vir die uitreiking van sertifikate, insluitend toegelate EKUs en inskrywings of wysigingsregte, wat krities is vir die bestuur van toegang tot sertifikaatdienste.
+Gedefinieer binne AD, skets hierdie sjablone die instellings en toestemmings vir die uitreiking van sertifikate, insluitend toegelate EKUs en inskrywings- of wysigingsregte, wat krities is vir die bestuur van toegang tot sertifikaatdienste.
 
 ## Certificate Enrollment
 
@@ -81,13 +81,13 @@ Windows gebruikers kan ook sertifikate aan vra via die GUI (`certmgr.msc` of `ce
 # Example of requesting a certificate using PowerShell
 Get-Certificate -Template "User" -CertStoreLocation "cert:\\CurrentUser\\My"
 ```
-## Sertifikaat Verifikasie
+## Sertifikaat Outentisering
 
-Active Directory (AD) ondersteun sertifikaat verifikasie, hoofsaaklik deur gebruik te maak van **Kerberos** en **Secure Channel (Schannel)** protokolle.
+Active Directory (AD) ondersteun sertifikaat outentisering, hoofsaaklik deur gebruik te maak van **Kerberos** en **Secure Channel (Schannel)** protokolle.
 
-### Kerberos Verifikasie Proses
+### Kerberos Outentiseringsproses
 
-In die Kerberos verifikasie proses, word 'n gebruiker se versoek vir 'n Ticket Granting Ticket (TGT) onderteken met die **privaat sleutel** van die gebruiker se sertifikaat. Hierdie versoek ondergaan verskeie validerings deur die domeinbeheerder, insluitend die sertifikaat se **geldigheid**, **pad**, en **herroepingstatus**. Validerings sluit ook in om te verifieer dat die sertifikaat van 'n vertroude bron kom en om die uitreiker se teenwoordigheid in die **NTAUTH sertifikaatwinkel** te bevestig. Suksesvolle validerings lei tot die uitreiking van 'n TGT. Die **`NTAuthCertificates`** objek in AD, gevind by:
+In die Kerberos outentiseringsproses word 'n gebruiker se versoek om 'n Ticket Granting Ticket (TGT) onderteken met die **privaat sleutel** van die gebruiker se sertifikaat. Hierdie versoek ondergaan verskeie validerings deur die domeinbeheerder, insluitend die sertifikaat se **geldigheid**, **pad**, en **herroepingstatus**. Validerings sluit ook in die verifikasie dat die sertifikaat van 'n vertroude bron kom en die bevestiging van die uitreiker se teenwoordigheid in die **NTAUTH sertifikaatwinkel**. Suksesvolle validerings lei tot die uitreiking van 'n TGT. Die **`NTAuthCertificates`** objek in AD, gevind by:
 ```bash
 CN=NTAuthCertificates,CN=Public Key Services,CN=Services,CN=Configuration,DC=<domain>,DC=<com>
 ```

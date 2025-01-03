@@ -8,12 +8,12 @@ Jy kan vra of 'n IP verband hou met verdagte/slegte aktiwiteite. Heeltemal grati
 
 ## [**BotScout**](http://botscout.com/api.htm)
 
-Kontroleer of die IP-adres verband hou met 'n bot wat rekeninge registreer. Dit kan ook gebruikersname en e-posse kontroleer. Aanvanklik gratis.
+Kontroleer of die IP-adres verband hou met 'n bot wat rekeninge registreer. Dit kan ook gebruikersname en e-pos adresse kontroleer. Aanvanklik gratis.
 
 ## [Hunter](https://hunter.io/)
 
 Vind en verifieer e-posse.\
-Sommige gratis API-versoeke, vir meer moet jy betaal.\
+Sommige gratis API versoeke, vir meer moet jy betaal.\
 Kommersieel?
 
 ## [AlientVault](https://otx.alienvault.com/api)
@@ -54,12 +54,12 @@ Verkry basiese inligting van 'n IP-adres. Jy kan tot 100K per maand toets.
 
 ## [securitytrails](https://securitytrails.com/app/account)
 
-Hierdie platform gee inligting oor domeine en IP-adresse soos domeine binne 'n IP of binne 'n domein bediener, domeine besit deur 'n e-pos (vind verwante domeine), IP-geskiedenis van domeine (vind die gasheer agter CloudFlare), al die domeine wat 'n nameserver gebruik....\
+Hierdie platform gee inligting oor domeine en IP-adresse soos domeine binne 'n IP of binne 'n domein bediener, domeine besit deur 'n e-pos (vind verwante domeine), IP geskiedenis van domeine (vind die gasheer agter CloudFlare), al die domeine wat 'n nameserver gebruik....\
 Jy het 'n paar gratis toegang.
 
 ## [fullcontact](https://www.fullcontact.com/)
 
-Laat jou toe om te soek op e-pos, domein of maatskappynaam en "persoonlike" inligting te verkry. Dit kan ook e-posse verifieer. Daar is 'n paar gratis toegang.
+Laat jou toe om te soek op e-pos, domein of maatskappy naam en "persoonlike" inligting te verkry. Dit kan ook e-posse verifieer. Daar is 'n paar gratis toegang.
 
 ## [RiskIQ](https://www.spiderfoot.net/documentation/)
 
@@ -116,7 +116,7 @@ Soek op domein en e-pos en kry of dit gecompromitteer is en wagwoorde. Kommersie
 
 ### [IP2Location.io](https://www.ip2location.io/)
 
-Dit detecteer IP-geolokasie, datacentrum, ASN en selfs VPN-inligting. Dit bied gratis 30K navrae per maand.
+Dit detecteer IP-geolokasie, datacentrum, ASN en selfs VPN-inligting. Dit bied gratis 30K navrae per maand aan.
 
 [https://dnsdumpster.com/](https://dnsdumpster.com/)(in 'n kommersiële hulpmiddel?)
 

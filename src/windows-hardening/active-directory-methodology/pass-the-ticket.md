@@ -4,7 +4,7 @@
 
 ## Pass The Ticket (PTT)
 
-In die **Pass The Ticket (PTT)** aanvalmetode, aanvallers **steel 'n gebruiker se outentikasieticket** in plaas van hul wagwoord of hashwaardes. Hierdie gesteelde ticket word dan gebruik om **die gebruiker na te doen**, wat ongeoorloofde toegang tot hulpbronne en dienste binne 'n netwerk verkry.
+In die **Pass The Ticket (PTT)** aanvalmetode, aanvallers **steel 'n gebruiker se verifikasieticket** in plaas van hul wagwoord of hashwaardes. Hierdie gesteelde ticket word dan gebruik om **die gebruiker na te doen**, wat ongeoorloofde toegang tot hulpbronne en dienste binne 'n netwerk verkry.
 
 **Lees**:
 

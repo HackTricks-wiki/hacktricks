@@ -4,11 +4,11 @@
 
 ## SID History Inspuiting Aanval
 
-Die fokus van die **SID History Inspuiting Aanval** is om **gebruikermigrasie tussen domeine** te ondersteun terwyl toegang tot hulpbronne van die vorige domein verseker word. Dit word bereik deur **die gebruiker se vorige Veiligheidsidentifiseerder (SID) in die SID Geskiedenis** van hul nuwe rekening in te sluit. Dit is belangrik om te noem dat hierdie proses gemanipuleer kan word om ongeoorloofde toegang te verleen deur die SID van 'n hoë-privilege groep (soos Enterprise Admins of Domain Admins) van die ouerdomein by die SID Geskiedenis te voeg. Hierdie uitbuiting bied toegang tot alle hulpbronne binne die ouerdomein.
+Die fokus van die **SID History Inspuiting Aanval** is om **gebruikermigrasie tussen domeine** te ondersteun terwyl toegang tot hulpbronne van die vorige domein verseker word. Dit word bereik deur **die gebruiker se vorige Veiligheidsidentifiseerder (SID) in die SID Geskiedenis** van hul nuwe rekening in te sluit. Dit is belangrik om te noem dat hierdie proses gemanipuleer kan word om ongemagtigde toegang te verleen deur die SID van 'n hoë-privilege groep (soos Enterprise Admins of Domain Admins) van die ouer domein by die SID Geskiedenis te voeg. Hierdie uitbuiting bied toegang tot alle hulpbronne binne die ouer domein.
 
 Twee metodes bestaan om hierdie aanval uit te voer: deur die skep van 'n **Golden Ticket** of 'n **Diamond Ticket**.
 
-Om die SID vir die **"Enterprise Admins"** groep te bepaal, moet 'n mens eers die SID van die worteldomein vind. Na identifikasie kan die Enterprise Admins groep SID gebou word deur `-519` by die worteldomein se SID te voeg. Byvoorbeeld, as die worteldomein SID `S-1-5-21-280534878-1496970234-700767426` is, sal die resulterende SID vir die "Enterprise Admins" groep `S-1-5-21-280534878-1496970234-700767426-519` wees.
+Om die SID vir die **"Enterprise Admins"** groep te bepaal, moet 'n mens eers die SID van die worteldomein vind. Na identifikasie kan die Enterprise Admins groep SID saamgestel word deur `-519` by die worteldomein se SID te voeg. Byvoorbeeld, as die worteldomein SID `S-1-5-21-280534878-1496970234-700767426` is, sal die resulterende SID vir die "Enterprise Admins" groep `S-1-5-21-280534878-1496970234-700767426-519` wees.
 
 Jy kan ook die **Domain Admins** groepe gebruik, wat eindig op **512**.
 
@@ -49,7 +49,7 @@ Rubeus.exe golden /rc4:<krbtgt hash> /domain:<child_domain> /sid:<child_domain_s
 
 # You can use "Administrator" as username or any other string
 ```
-Vir meer inligting oor diamantkaartjies, kyk:
+Vir meer inligting oor diamond tickets, kyk na:
 
 {{#ref}}
 diamond-ticket.md
@@ -101,19 +101,19 @@ psexec.py <child_domain>/Administrator@dc.root.local -k -no-pass -target-ip 10.1
 ```
 #### Outomaties met [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py)
 
-Dit is 'n Impacket-skrip wat **outomaties die opgradering van kind- na ouer-domein** sal uitvoer. Die skrip benodig:
+Dit is 'n Impacket-skrip wat **outomaties die opgradering van kind- na ouer-domein** sal hanteer. Die skrip benodig:
 
-- Teiken-domeinbeheerder
-- Kredensies vir 'n admin-gebruiker in die kind-domein
+- Teikendomeinbeheerder
+- Kredensies vir 'n admin gebruiker in die kinddomein
 
 Die vloei is:
 
-- Verkry die SID vir die Enterprise Admins-groep van die ouer-domein
-- Herwin die hash vir die KRBTGT-rekening in die kind-domein
-- Skep 'n Golden Ticket
-- Meld aan by die ouer-domein
-- Herwin kredensies vir die Administrator-rekening in die ouer-domein
-- As die `target-exec` skakel gespesifiseer is, verifieer dit by die ouer-domein se Domeinbeheerder via Psexec.
+- Verkry die SID vir die Enterprise Admins-groep van die ouerdomein
+- Verkry die hash vir die KRBTGT-rekening in die kinddomein
+- Skep 'n Goue Tiket
+- Meld aan by die ouerdomein
+- Verkry kredensies vir die Administrateur-rekening in die ouerdomein
+- As die `target-exec` skakel gespesifiseer is, verifieer dit by die ouerdomein se Domeinbeheerder via Psexec.
 ```bash
 raiseChild.py -target-exec 10.10.10.10 <child_domain>/username
 ```

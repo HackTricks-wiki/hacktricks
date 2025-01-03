@@ -4,11 +4,11 @@
 
 ## Basiese Inligting
 
-SPI (Serial Peripheral Interface) is 'n Sinchroniese Seriële Kommunikasieprotokol wat in ingebedde stelsels gebruik word vir kortafstandkommunikasie tussen IC's (Geïntegreerde Stroombane). Die SPI Kommunikasieprotokol maak gebruik van die meester-slaaf argitektuur wat deur die Klok en Chip Kies Sein georkestreer word. 'n Meester-slaaf argitektuur bestaan uit 'n meester (gewoonlik 'n mikroverwerker) wat eksterne periferies soos EEPROM, sensors, beheertoestelle, ens. bestuur, wat as die slawe beskou word.
+SPI (Serial Peripheral Interface) is 'n Sinchroniese Seriële Kommunikasieprotokol wat in ingebedde stelsels gebruik word vir kortafstandkommunikasie tussen IC's (Geïntegreerde Stroombane). SPI Kommunikasieprotokol maak gebruik van die meester-slaaf argitektuur wat deur die Klok en Chip Kies Sein georkestreer word. 'n Meester-slaaf argitektuur bestaan uit 'n meester (gewoonlik 'n mikroverwerker) wat eksterne periferies soos EEPROM, sensors, beheertoestelle, ens. bestuur, wat as die slawe beskou word.
 
-Meerdere slawe kan aan 'n meester gekoppel word, maar slawe kan nie met mekaar kommunikeer nie. Slawe word bestuur deur twee penne, klok en chip kies. Aangesien SPI 'n sinchroniese kommunikasieprotokol is, volg die invoer- en uitvoerpenne die klokseine. Die chip kies word deur die meester gebruik om 'n slaaf te kies en met hom te kommunikeer. Wanneer die chip kies hoog is, is die slaaf toestel nie gekies nie, terwyl wanneer dit laag is, die chip gekies is en die meester met die slaaf sal kommunikeer.
+Meerdere slawe kan aan 'n meester gekoppel word, maar slawe kan nie met mekaar kommunikeer nie. Slawe word deur twee penne, klok en chip kies, bestuur. Aangesien SPI 'n sinchroniese kommunikasieprotokol is, volg die invoer- en uitvoerpenne die klokseine. Die chip kies word deur die meester gebruik om 'n slaaf te kies en met hom te kommunikeer. Wanneer die chip kies hoog is, is die slaaftoestel nie gekies nie, terwyl wanneer dit laag is, die chip gekies is en die meester met die slaaf sal kommunikeer.
 
-Die MOSI (Master Out, Slave In) en MISO (Master In, Slave Out) is verantwoordelik vir die stuur en ontvang van data. Data word na die slaaf toestel gestuur deur die MOSI pen terwyl die chip kies laag gehou word. Die invoerdata bevat instruksies, geheue adresse of data volgens die datasheet van die slaaf toestel verskaffer. Na 'n geldige invoer is die MISO pen verantwoordelik vir die oordrag van data na die meester. Die uitvoerdata word presies by die volgende klok siklus gestuur nadat die invoer eindig. Die MISO penne stuur data tot die data volledig oorgedra is of die meester die chip kies pen hoog stel (in daardie geval sal die slaaf ophou om te stuur en die meester sal nie daarna luister nie).
+Die MOSI (Master Out, Slave In) en MISO (Master In, Slave Out) is verantwoordelik vir die stuur en ontvang van data. Data word na die slaaftoestel gestuur deur die MOSI-pen terwyl die chip kies laag gehou word. Die invoerdata bevat instruksies, geheue adresse of data volgens die datasheet van die slaaftoestel verskaffer. Na 'n geldige invoer is die MISO-pen verantwoordelik vir die oordrag van data na die meester. Die uitvoerdata word presies by die volgende klok siklus gestuur nadat die invoer eindig. Die MISO-penne stuur data tot die data volledig oorgedra is of die meester die chip kies pen hoog stel (in daardie geval sal die slaaf ophou om te stuur en die meester sal nie daarna luister nie).
 
 ## Dumping Firmware van EEPROMs
 
@@ -24,11 +24,11 @@ Hierdie toestel is 'n goedkoop hulpmiddel vir die dumping van firmware van EEPRO
 
 ![drawing](../../images/board_image_ch341a.jpg)
 
-Koppel die EEPROM geheue met die CH341a Programmer en steek die toestel in die rekenaar. As die toestel nie gedetecteer word nie, probeer om bestuurders op die rekenaar te installeer. Maak ook seker dat die EEPROM in die regte oriëntasie gekoppel is (gewoonlik, plaas die VCC Pen in omgekeerde oriëntasie teen die USB-konnektor) anders sal die sagteware nie in staat wees om die chip te detecteer nie. Verwys na die diagram indien nodig:
+Koppel die EEPROM geheue met die CH341a Programmer en steek die toestel in die rekenaar. Indien die toestel nie gedetecteer word nie, probeer om bestuurders op die rekenaar te installeer. Maak ook seker dat die EEPROM in die regte oriëntasie gekoppel is (gewoonlik, plaas die VCC Pen in omgekeerde oriëntasie teen die USB-konnektor) anders sal die sagteware nie die chip kan opspoor nie. Verwys na die diagram indien nodig:
 
 ![drawing](../../images/connect_wires_ch341a.jpg) ![drawing](../../images/eeprom_plugged_ch341a.jpg)
 
-Laastens, gebruik sagteware soos flashrom, G-Flash (GUI), ens. vir die dumping van die firmware. G-Flash is 'n minimale GUI hulpmiddel wat vinnig is en die EEPROM outomaties detecteer. Dit kan nuttig wees as die firmware vinnig onttrek moet word, sonder om veel met die dokumentasie te krap.
+Laastens, gebruik sagteware soos flashrom, G-Flash (GUI), ens. vir die dumping van die firmware. G-Flash is 'n minimale GUI hulpmiddel wat vinnig is en die EEPROM outomaties opspoor. Dit kan nuttig wees as die firmware vinnig onttrek moet word, sonder om veel met die dokumentasie te krap.
 
 ![drawing](../../images/connected_status_ch341a.jpg)
 
@@ -41,7 +41,7 @@ binwalk -e <filename>
 Die kan .bin of .rom wees volgens die gereedskap en konfigurasies wat gebruik word.
 
 > [!CAUTION]
-> Let daarop dat firmware-ekstraksie 'n delikate proses is en baie geduld vereis. Enige verkeerde hantering kan moontlik die firmware beskadig of selfs heeltemal uitvee en die toestel onbruikbaar maak. Dit word aanbeveel om die spesifieke toestel te bestudeer voordat jy probeer om die firmware te ekstrak.
+> Let daarop dat firmware-ekstraksie 'n delikate proses is en baie geduld vereis. Enige verkeerde hantering kan moontlik die firmware korrupteer of selfs heeltemal uitvee en die toestel onbruikbaar maak. Dit word aanbeveel om die spesifieke toestel te bestudeer voordat jy probeer om die firmware te ekstrak.
 
 ### Bus Pirate + flashrom
 

@@ -6,9 +6,9 @@
 
 UART is 'n serial protokol, wat beteken dit oordra data tussen komponente een bit op 'n slag. In teenstelling hiermee, parallel kommunikasie protokolle oordra data gelyktydig deur verskeie kanale. Algemene serial protokolle sluit RS-232, I2C, SPI, CAN, Ethernet, HDMI, PCI Express, en USB in.
 
-Oor die algemeen, die lyn word hoog gehou (by 'n logiese 1 waarde) terwyl UART in die idle toestand is. Dan, om die begin van 'n data-oordrag aan te dui, stuur die transmitter 'n beginbit na die ontvanger, waartydens die sein laag gehou word (by 'n logiese 0 waarde). Volgende, stuur die transmitter vyf tot agt databits wat die werklike boodskap bevat, gevolg deur 'n opsionele pariteitsbit en een of twee stopbits (met 'n logiese 1 waarde), afhangende van die konfigurasie. Die pariteitsbit, wat gebruik word vir foutkontrole, word selde in die praktyk gesien. Die stopbit (of bits) dui die einde van die oordrag aan.
+Oor die algemeen, die lyn word hoog gehou (by 'n logiese 1 waarde) terwyl UART in die idle toestand is. Dan, om die begin van 'n data-oordrag aan te dui, stuur die transmitter 'n start bit na die ontvanger, waartydens die sein laag gehou word (by 'n logiese 0 waarde). Volgende, stuur die transmitter vyf tot agt data bits wat die werklike boodskap bevat, gevolg deur 'n opsionele pariteitsbit en een of twee stop bits (met 'n logiese 1 waarde), afhangende van die konfigurasie. Die pariteitsbit, wat gebruik word vir foutkontrole, word selde in die praktyk gesien. Die stopbit (of bits) dui die einde van die oordrag aan.
 
-Ons noem die mees algemene konfigurasie 8N1: agt databits, geen pariteit, en een stopbit. Byvoorbeeld, as ons die karakter C, of 0x43 in ASCII, in 'n 8N1 UART konfigurasie wou stuur, sou ons die volgende bits stuur: 0 (die beginbit); 0, 1, 0, 0, 0, 0, 1, 1 (die waarde van 0x43 in binêr), en 0 (die stopbit).
+Ons noem die mees algemene konfigurasie 8N1: agt databits, geen pariteit, en een stopbit. Byvoorbeeld, as ons die karakter C, of 0x43 in ASCII, in 'n 8N1 UART konfigurasie wou stuur, sou ons die volgende bits stuur: 0 (die startbit); 0, 1, 0, 0, 0, 0, 1, 1 (die waarde van 0x43 in binêr), en 0 (die stopbit).
 
 ![](<../../images/image (764).png>)
 
@@ -20,25 +20,25 @@ Hardeware gereedskap om met UART te kommunikeer:
 
 ### Identifisering van UART Poorte
 
-UART het 4 poorte: **TX**(Transmit), **RX**(Receive), **Vcc**(Voltage), en **GND**(Ground). Jy mag dalk 4 poorte vind met die **`TX`** en **`RX`** letters **geskryf** in die PCB. Maar as daar geen aanduiding is nie, mag jy dit self moet probeer vind met 'n **multimeter** of 'n **logika analiseerder**.
+UART het 4 poorte: **TX**(Transmit), **RX**(Receive), **Vcc**(Voltage), en **GND**(Ground). Jy mag dalk 4 poorte met die **`TX`** en **`RX`** letters **geskryf** in die PCB vind. Maar as daar geen aanduiding is nie, mag jy dalk self moet probeer om hulle te vind met 'n **multimeter** of 'n **logika analiseerder**.
 
 Met 'n **multimeter** en die toestel afgeskakel:
 
 - Om die **GND** pen te identifiseer, gebruik die **Continuity Test** modus, plaas die agterste draad in die grond en toets met die rooi een totdat jy 'n geluid van die multimeter hoor. Verskeie GND penne kan in die PCB gevind word, so jy mag dalk die een wat aan UART behoort gevind het of nie.
 - Om die **VCC poort** te identifiseer, stel die **DC voltage mode** in en stel dit op 20 V spanning. Swart sonde op grond en rooi sonde op die pen. Skakel die toestel aan. As die multimeter 'n konstante spanning van óf 3.3 V of 5 V meet, het jy die Vcc pen gevind. As jy ander spannings kry, probeer weer met ander poorte.
-- Om die **TX** **poort** te identifiseer, **DC voltage mode** tot 20 V spanning, swart sonde op grond, en rooi sonde op die pen, en skakel die toestel aan. As jy vind dat die spanning vir 'n paar sekondes fluktueer en dan stabiliseer by die Vcc waarde, het jy waarskynlik die TX poort gevind. Dit is omdat dit, wanneer dit aangeskakel word, 'n paar debug data stuur.
-- Die **RX poort** sou die naaste een aan die ander 3 wees, dit het die laagste spanning fluktuasie en die laagste algehele waarde van al die UART penne.
+- Om die **TX** **poort** te identifiseer, **DC voltage mode** tot 20 V spanning, swart sonde op grond, en rooi sonde op die pen, en skakel die toestel aan. As jy die spanning vir 'n paar sekondes sien fluktuëer en dan stabiliseer by die Vcc waarde, het jy waarskynlik die TX poort gevind. Dit is omdat dit, wanneer dit aangeskakel word, 'n paar foutopsporing data stuur.
+- Die **RX poort** sal die naaste een aan die ander 3 wees, dit het die laagste spanning fluktuasie en die laagste algehele waarde van al die UART penne.
 
 Jy kan die TX en RX poorte verwar en niks sal gebeur nie, maar as jy die GND en die VCC poort verwar, kan jy die stroombaan verbrand.
 
-In sommige teiken toestelle is die UART poort deur die vervaardiger gedeaktiveer deur RX of TX of selfs albei te deaktiveer. In daardie geval kan dit nuttig wees om die verbindings in die stroombaan na te spoor en 'n breekpunt te vind. 'n Sterk aanduiding oor die bevestiging van geen opsporing van UART en die breek van die stroombaan is om die toestel se waarborg te kontroleer. As die toestel met 'n waarborg gestuur is, laat die vervaardiger 'n paar debug interfaces (in hierdie geval, UART) agter, en moet dus die UART ontkoppel het en dit weer aansluit terwyl dit gedebug word. Hierdie breekpunte kan verbind word deur te soldeer of met jumper drade.
+In sommige teiken toestelle is die UART poort deur die vervaardiger gedeaktiveer deur RX of TX of selfs albei te deaktiveer. In daardie geval kan dit nuttig wees om die verbindings in die stroombaan na te spoor en 'n breekpunt te vind. 'n Sterk aanduiding oor die bevestiging van geen opsporing van UART en die breek van die stroombaan is om die toestel se waarborg te kontroleer. As die toestel met 'n waarborg gestuur is, laat die vervaardiger 'n paar foutopsporing interfaces (in hierdie geval, UART) agter, en moet dus die UART ontkoppel het en dit weer aansluit terwyl dit foutopsporing doen. Hierdie breekpunte kan verbind word deur te soldeer of met jumper drade.
 
 ### Identifisering van die UART Baud Rate
 
 Die maklikste manier om die korrekte baud rate te identifiseer, is om na die **TX pen se uitgang te kyk en die data te probeer lees**. As die data wat jy ontvang nie leesbaar is nie, skakel oor na die volgende moontlike baud rate totdat die data leesbaar word. Jy kan 'n USB-naar-serial adapter of 'n veelsydige toestel soos Bus Pirate gebruik om dit te doen, saam met 'n helper skrip, soos [baudrate.py](https://github.com/devttys0/baudrate/). Die mees algemene baud rates is 9600, 38400, 19200, 57600, en 115200.
 
 > [!CAUTION]
-> Dit is belangrik om te noem dat jy in hierdie protokol die TX van een toestel aan die RX van die ander moet koppel!
+> Dit is belangrik om op te let dat jy in hierdie protokol die TX van een toestel aan die RX van die ander moet koppel!
 
 ## CP210X UART na TTY Adapter
 
@@ -58,7 +58,7 @@ Vir minicom, gebruik die volgende opdrag om dit te konfigureer:
 ```
 minicom -s
 ```
-Stel die instellings soos baudrate en toestelnaam in die `Serial port setup` opsie.
+Configureer die instellings soos baudrate en toestelnaam in die `Serial port setup` opsie.
 
 Na konfigurasie, gebruik die opdrag `minicom` om die UART Console te begin.
 
@@ -72,7 +72,7 @@ Laastens, dit word aanbeveel om Arduino IDE te gebruik om die Serial Console te 
 
 ## Bus Pirate
 
-In hierdie scenario gaan ons die UART kommunikasie van die Arduino snuffel wat al die afdrukke van die program na die Serial Monitor stuur.
+In hierdie scenario gaan ons die UART-kommunikasie van die Arduino snuffel wat al die afdrukke van die program na die Serial Monitor stuur.
 ```bash
 # Check the modes
 UART>m
@@ -146,7 +146,7 @@ waiting a few secs to repeat....
 ```
 ## Dumping Firmware with UART Console
 
-UART Console bied 'n uitstekende manier om met die onderliggende firmware in 'n runtime-omgewing te werk. Maar wanneer die UART Console-toegang slegs lees is, kan dit baie beperkings inhou. In baie ingebedde toestelle word die firmware in EEPROMs gestoor en uitgevoer in verwerkers wat vlugtige geheue het. Daarom word die firmware as lees-slegs gehou aangesien die oorspronklike firmware tydens vervaardiging binne die EEPROM self is en enige nuwe lêers sou verlore gaan weens vlugtige geheue. Daarom is dit 'n waardevolle poging om firmware te dump terwyl jy met ingebedde firmwares werk.
+UART Console bied 'n uitstekende manier om met die onderliggende firmware in 'n runtime-omgewing te werk. Maar wanneer die UART Console-toegang slegs lees is, kan dit baie beperkings inhou. In baie ingebedde toestelle word die firmware in EEPROMs gestoor en in verwerkers met vlugtige geheue uitgevoer. Daarom word die firmware as lees-slegs gehou aangesien die oorspronklike firmware tydens vervaardiging binne die EEPROM self is en enige nuwe lêers sou verlore gaan weens vlugtige geheue. Daarom is dit 'n waardevolle poging om firmware te dump terwyl jy met ingebedde firmwares werk.
 
 Daar is baie maniere om dit te doen en die SPI-afdeling dek metodes om firmware direk uit die EEPROM met verskeie toestelle te onttrek. Alhoewel, dit word aanbeveel om eers te probeer om firmware met UART te dump, aangesien die dumping van firmware met fisiese toestelle en eksterne interaksies riskant kan wees.
 
@@ -168,6 +168,6 @@ binwalk -e <filename.rom>
 ```
 Dit sal die moontlike inhoud van die EEPROM lys volgens die handtekeninge wat in die hex-lêer gevind is.
 
-Alhoewel, dit is nodig om op te let dat dit nie altyd die geval is dat die uboot ontgrendel is nie, selfs al word dit gebruik. As die Enter-sleutel niks doen nie, kyk vir verskillende sleutels soos die Spasie-sleutel, ens. As die bootloader vergrendel is en nie onderbreek word nie, sal hierdie metode nie werk nie. Om te kyk of uboot die bootloader vir die toestel is, kyk na die uitvoer op die UART-konsol terwyl die toestel opstart. Dit mag uboot noem terwyl dit opstart.
+Alhoewel, dit is nodig om op te let dat dit nie altyd die geval is dat die uboot ontgrendel is nie, selfs al word dit gebruik. As die Enter-sleutel niks doen nie, kyk vir verskillende sleutels soos die Spasie-sleutel, ens. As die bootloader vergrendel is en nie onderbreek word nie, sal hierdie metode nie werk nie. Om te kontroleer of uboot die bootloader vir die toestel is, kyk na die uitvoer op die UART-konsol terwyl die toestel opstart. Dit mag uboot noem terwyl dit opstart.
 
 {{#include ../../banners/hacktricks-training.md}}

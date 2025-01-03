@@ -10,7 +10,7 @@ Distributed Component Object Model (DCOM) objekke bied 'n interessante vermoë v
 ```bash
 Get-CimInstance Win32_DCOMApplication
 ```
-Die COM objek, [MMC Application Class (MMC20.Application)](https://technet.microsoft.com/en-us/library/cc181199.aspx), stel die skripting van MMC snap-in operasies in staat. Opmerklik, hierdie objek bevat 'n `ExecuteShellCommand` metode onder `Document.ActiveView`. Meer inligting oor hierdie metode kan [hier](<https://msdn.microsoft.com/en-us/library/aa815396(v=vs.85).aspx>) gevind word. Kontroleer dit wat dit uitvoer:
+Die COM objek, [MMC Application Class (MMC20.Application)](https://technet.microsoft.com/en-us/library/cc181199.aspx), stel die skripting van MMC snap-in operasies in staat. Opmerklik is dat hierdie objek 'n `ExecuteShellCommand` metode onder `Document.ActiveView` bevat. Meer inligting oor hierdie metode kan [hier](<https://msdn.microsoft.com/en-us/library/aa815396(v=vs.85).aspx>) gevind word. Kontroleer dit wat dit uitvoer:
 
 Hierdie funksie fasiliteer die uitvoering van opdragte oor 'n netwerk deur 'n DCOM toepassing. Om met DCOM op afstand as 'n admin te kommunikeer, kan PowerShell soos volg gebruik word:
 ```powershell
@@ -53,7 +53,7 @@ $item.Document.Application.ShellExecute("cmd.exe", "/c calc.exe", "c:\windows\sy
 ```
 ### Laterale Beweging met Excel DCOM-objekte
 
-Laterale beweging kan bereik word deur DCOM Excel-objekte te benut. Vir gedetailleerde inligting, is dit raadsaam om die bespreking oor die benutting van Excel DDE vir laterale beweging via DCOM op [Cybereason se blog](https://www.cybereason.com/blog/leveraging-excel-dde-for-lateral-movement-via-dcom) te lees.
+Laterale beweging kan bereik word deur DCOM Excel-objekte te benut. Vir gedetailleerde inligting is dit raadsaam om die bespreking oor die benutting van Excel DDE vir laterale beweging via DCOM op [Cybereason se blog](https://www.cybereason.com/blog/leveraging-excel-dde-for-lateral-movement-via-dcom) te lees.
 
 Die Empire-projek bied 'n PowerShell-skrip, wat die gebruik van Excel vir afstandkode-uitvoering (RCE) demonstreer deur DCOM-objekte te manipuleer. Hieronder is snitte van die skrip beskikbaar op [Empire se GitHub-bewaarplek](https://github.com/EmpireProject/Empire/blob/master/data/module_source/lateral_movement/Invoke-DCOM.ps1), wat verskillende metodes toon om Excel vir RCE te misbruik:
 ```powershell
@@ -80,17 +80,17 @@ $Obj.DDEInitiate("cmd", "/c $Command")
 ```
 ### Outomatiseringstoestelle vir Laterale Beweging
 
-Twee toestelle word beklemtoon vir die outomatisering van hierdie tegnieke:
+Twee gereedskap word beklemtoon om hierdie tegnieke te outomatiseer:
 
 - **Invoke-DCOM.ps1**: 'n PowerShell-skrip wat deur die Empire-projek verskaf word en die oproep van verskillende metodes vir die uitvoering van kode op afstandmasjiene vereenvoudig. Hierdie skrip is beskikbaar by die Empire GitHub-bewaarplek.
 
-- **SharpLateral**: 'n Toestel wat ontwerp is om kode op afstand uit te voer, wat gebruik kan word met die opdrag:
+- **SharpLateral**: 'n Gereedskap ontwerp om kode op afstand uit te voer, wat gebruik kan word met die opdrag:
 ```bash
 SharpLateral.exe reddcom HOSTNAME C:\Users\Administrator\Desktop\malware.exe
 ```
 ## Outomatiese Gereedskap
 
-- Die Powershell-skrip [**Invoke-DCOM.ps1**](https://github.com/EmpireProject/Empire/blob/master/data/module_source/lateral_movement/Invoke-DCOM.ps1) maak dit maklik om al die kommentaar maniere om kode op ander masjiene uit te voer, aan te roep.
+- Die Powershell-skrip [**Invoke-DCOM.ps1**](https://github.com/EmpireProject/Empire/blob/master/data/module_source/lateral_movement/Invoke-DCOM.ps1) maak dit maklik om al die kommentaar maniere te aktiveer om kode op ander masjiene uit te voer.
 - Jy kan ook [**SharpLateral**](https://github.com/mertdas/SharpLateral) gebruik:
 ```bash
 SharpLateral.exe reddcom HOSTNAME C:\Users\Administrator\Desktop\malware.exe

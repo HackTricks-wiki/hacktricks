@@ -3,7 +3,7 @@
 {{#include ../banners/hacktricks-training.md}}
 
 As jy op 'n stadium 'n **webblad vind wat sensitiewe inligting op grond van jou sessie aan jou bied**: Miskien reflekteer dit koekies, of druk dit CC besonderhede of enige ander sensitiewe inligting, kan jy probeer om dit te steel.\
-Hier bied ek jou die hoofmaniere aan om dit te probeer bereik:
+Hier bied ek jou die hoofmaniere aan waarop jy dit kan probeer bereik:
 
 - [**CORS omseiling**](../pentesting-web/cors-bypass.md): As jy CORS koptekste kan omseil, sal jy in staat wees om die inligting te steel deur 'n Ajax versoek vir 'n kwaadwillige bladsy uit te voer.
 - [**XSS**](../pentesting-web/xss-cross-site-scripting/): As jy 'n XSS kwesbaarheid op die bladsy vind, mag jy dit kan misbruik om die inligting te steel.

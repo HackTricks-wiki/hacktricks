@@ -1,9 +1,9 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 Daar is verskeie blogs op die Internet wat **die gevare van die gebruik van printers met LDAP met standaard/ swak** aanmeldbesonderhede beklemtoon.\
-Dit is omdat 'n aanvaller die printer kan **mislei om teen 'n kwaadwillige LDAP-bediener te verifieer** (tipies is 'n `nc -vv -l -p 444` genoeg) en die printer **aanmeldbesonderhede in duidelike teks** kan vang.
+Dit is omdat 'n aanvaller **die printer kan mislei om teen 'n kwaadwillige LDAP-bediener te verifieer** (tipies is 'n `nc -vv -l -p 444` genoeg) en om die printer **aanmeldbesonderhede in duidelike teks** te vang.
 
-Ook, verskeie printers sal **logs met gebruikersname** bevat of kan selfs in staat wees om **alle gebruikersname** van die Domeinbeheerder te **aflaai**.
+Ook, verskeie printers sal **logs met gebruikersname** bevat of kan selfs in staat wees om **alle gebruikersname** van die Domeinbeheerder te aflaai.
 
 Al hierdie **sensitiewe inligting** en die algemene **gebrek aan sekuriteit** maak printers baie interessant vir aanvallers.
 
@@ -28,7 +28,7 @@ Sommige blogs oor die onderwerp:
 ```bash
 sudo nc -k -v -l -p 386
 ```
-Maar, die sukses van hierdie metode verskil.
+egter, die sukses van hierdie metode verskil.
 
 ### Metode 2: Volledige LDAP-bediener met Slapd
 

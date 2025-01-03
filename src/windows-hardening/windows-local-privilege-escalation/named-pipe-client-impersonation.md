@@ -1,6 +1,6 @@
-# Genoemde Pyp Klient Imersie
+# Naam Pyp Kliënt Imersie
 
-## Genoemde Pyp Klient Imersie
+## Naam Pyp Kliënt Imersie
 
 {{#include ../../banners/hacktricks-training.md}}
 

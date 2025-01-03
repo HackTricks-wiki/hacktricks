@@ -9,7 +9,7 @@
 - Die **Onderwerp** van die sertifikaat dui die eienaar aan.
 - 'n **Publieke Sleutel** word gekoppel aan 'n privaat besit sleutel om die sertifikaat aan sy regmatige eienaar te verbind.
 - Die **Geldigheidsperiode**, gedefinieer deur **NotBefore** en **NotAfter** datums, merk die sertifikaat se effektiewe duur.
-- 'n Unieke **Serie Nommer**, verskaf deur die Sertifikaat Owerheid (CA), identifiseer elke sertifikaat.
+- 'n unieke **Serie Nommer**, verskaf deur die Sertifikaat Owerheid (CA), identifiseer elke sertifikaat.
 - Die **Uitgewer** verwys na die CA wat die sertifikaat uitgereik het.
 - **SubjectAlternativeName** laat vir addisionele name vir die onderwerp, wat identifikasiefleksibiliteit verbeter.
 - **Basiese Beperkings** identifiseer of die sertifikaat vir 'n CA of 'n eindentiteit is en definieer gebruiksbeperkings.
@@ -19,41 +19,41 @@
 
 ### Special Considerations
 
-- **Subject Alternative Names (SANs)** brei 'n sertifikaat se toepasbaarheid uit na verskeie identiteite, wat noodsaaklik is vir bedieners met verskeie domeine. Veilige uitreikprosesse is noodsaaklik om te verhoed dat aanvallers die SAN spesifikasie manipuleer en so identiteitsbedrog pleeg.
+- **Onderwerp Alternatiewe Name (SANs)** brei 'n sertifikaat se toepasbaarheid uit na verskeie identiteite, wat noodsaaklik is vir bedieners met verskeie domeine. Veilige uitreikprosesse is noodsaaklik om te verhoed dat aanvallers die SAN spesifikasie manipuleer en so identiteitsdiefstal risikos skep.
 
 ### Certificate Authorities (CAs) in Active Directory (AD)
 
 AD CS erken CA sertifikate in 'n AD woud deur middel van aangewese houers, elk wat unieke rolle dien:
 
-- **Sertifikaat Owerhede** houer bevat vertroude wortel CA sertifikate.
-- **Registrasiedienste** houer detail Enterprise CA's en hul sertifikaat sjablone.
-- **NTAuthCertificates** objek sluit CA sertifikate in wat gemagtig is vir AD outentisering.
-- **AIA (Owerheid Inligting Toegang)** houer fasiliteer sertifikaat ketting validasie met tussenliggende en kruis CA sertifikate.
+- Die **Sertifiseringsowerhede** houer bevat vertroude wortel CA sertifikate.
+- Die **Inskrywingsdienste** houer detail Enterprise CA's en hul sertifikaat sjablone.
+- Die **NTAuthCertificates** objek sluit CA sertifikate in wat gemagtig is vir AD autentisering.
+- Die **AIA (Owerheid Inligting Toegang)** houer fasiliteer sertifikaat ketting validasie met tussenliggende en kruis CA sertifikate.
 
 ### Certificate Acquisition: Client Certificate Request Flow
 
 1. Die versoekproses begin met kliënte wat 'n Enterprise CA vind.
 2. 'n CSR word geskep, wat 'n publieke sleutel en ander besonderhede bevat, na die generering van 'n publieke-privaat sleutel paar.
-3. Die CA evalueer die CSR teenoor beskikbare sertifikaat sjablone, en stel die sertifikaat uit op grond van die sjabloon se toestemmings.
+3. Die CA evalueer die CSR teenoor beskikbare sertifikaat sjablone, en stel die sertifikaat uit gebaseer op die sjabloon se toestemmings.
 4. Na goedkeuring, onderteken die CA die sertifikaat met sy privaat sleutel en keer dit terug na die kliënt.
 
 ### Certificate Templates
 
-Gedefinieer binne AD, skets hierdie sjablone die instellings en toestemmings vir die uitreiking van sertifikate, insluitend toegelate EKUs en registrasie of wysigingsregte, wat krities is vir die bestuur van toegang tot sertifikaat dienste.
+Gedefinieer binne AD, skets hierdie sjablone die instellings en toestemmings vir die uitreiking van sertifikate, insluitend toegelate EKUs en inskrywings of wysigingsregte, wat krities is vir die bestuur van toegang tot sertifikaat dienste.
 
 ## Certificate Enrollment
 
-Die registrasieproses vir sertifikate word geinitieer deur 'n administrateur wat **'n sertifikaat sjabloon skep**, wat dan **gepubliseer** word deur 'n Enterprise Sertifikaat Owerheid (CA). Dit maak die sjabloon beskikbaar vir kliëntregistrasie, 'n stap wat bereik word deur die sjabloon se naam by die `certificatetemplates` veld van 'n Active Directory objek te voeg.
+Die inskrywingsproses vir sertifikate word geinitieer deur 'n administrateur wat **'n sertifikaat sjabloon skep**, wat dan **gepubliseer** word deur 'n Enterprise Sertifikaat Owerheid (CA). Dit maak die sjabloon beskikbaar vir kliënt inskrywing, 'n stap wat bereik word deur die sjabloon se naam by die `certificatetemplates` veld van 'n Active Directory objek te voeg.
 
-Vir 'n kliënt om 'n sertifikaat aan te vra, moet **registraseregte** toegeken word. Hierdie regte word gedefinieer deur sekuriteitsbeskrywings op die sertifikaat sjabloon en die Enterprise CA self. Toestemmings moet in beide plekke toegeken word vir 'n versoek om suksesvol te wees.
+Vir 'n kliënt om 'n sertifikaat aan te vra, moet **inskrywingsregte** toegeken word. Hierdie regte word gedefinieer deur sekuriteitsbeskrywings op die sertifikaat sjabloon en die Enterprise CA self. Toestemmings moet in beide plekke toegeken word vir 'n versoek om suksesvol te wees.
 
 ### Template Enrollment Rights
 
 Hierdie regte word gespesifiseer deur middel van Toegang Beheer Inskrywings (ACEs), wat toestemmings soos:
 
-- **Sertifikaat-Registrasie** en **Sertifikaat-AutoRegistrasie** regte, elk geassosieer met spesifieke GUIDs.
-- **Verlengde Regte**, wat alle verlengde toestemmings toelaat.
-- **Volle Beheer/Gemiddeld Alles**, wat volledige beheer oor die sjabloon bied.
+- **Sertifikaat-Inskrywing** en **Sertifikaat-AutoInskrywing** regte, elk geassosieer met spesifieke GUIDs.
+- **VerlengdeRegte**, wat alle verlengde toestemmings toelaat.
+- **VolleBeheer/GemiddeldAlles**, wat volledige beheer oor die sjabloon bied.
 
 ### Enterprise CA Enrollment Rights
 
@@ -64,17 +64,17 @@ Die CA se regte word uiteengesit in sy sekuriteitsbeskrywing, toeganklik via die
 Sekere kontroles mag van toepassing wees, soos:
 
 - **Bestuurder Goedkeuring**: Plaas versoeke in 'n hangende toestand totdat dit deur 'n sertifikaat bestuurder goedgekeur word.
-- **Registrasie Agente en Gemagtigde Handtekeninge**: Spesifiseer die aantal vereiste handtekeninge op 'n CSR en die nodige Aansoek Beleid OIDs.
+- **Inskrywingsagente en Gemagtigde Handtekeninge**: Spesifiseer die aantal vereiste handtekeninge op 'n CSR en die nodige Aansoek Beleid OIDs.
 
 ### Methods to Request Certificates
 
 Sertifikate kan aangevra word deur:
 
-1. **Windows Kliënt Sertifikaat Registrasie Protokol** (MS-WCCE), wat DCOM interfaces gebruik.
+1. **Windows Kliënt Sertifikaat Inskrywing Protokol** (MS-WCCE), wat DCOM interfaces gebruik.
 2. **ICertPassage Afstand Protokol** (MS-ICPR), deur middel van benoemde pype of TCP/IP.
-3. Die **sertifikaat registrasie web koppelvlak**, met die Sertifikaat Owerheid Web Registrasie rol geïnstalleer.
-4. Die **Sertifikaat Registrasie Diens** (CES), in samewerking met die Sertifikaat Registrasie Beleid (CEP) diens.
-5. Die **Netwerk Toestel Registrasie Diens** (NDES) vir netwerk toestelle, wat die Eenvoudige Sertifikaat Registrasie Protokol (SCEP) gebruik.
+3. Die **sertifikaat inskrywing web koppelvlak**, met die Sertifikaat Owerheid Web Inskrywing rol geïnstalleer.
+4. Die **Sertifikaat Inskrywing Diens** (CES), in samewerking met die Sertifikaat Inskrywing Beleid (CEP) diens.
+5. Die **Netwerk Toestel Inskrywing Diens** (NDES) vir netwerk toestelle, wat die Eenvoudige Sertifikaat Inskrywing Protokol (SCEP) gebruik.
 
 Windows gebruikers kan ook sertifikate aan vra via die GUI (`certmgr.msc` of `certlm.msc`) of opdraglyn gereedskap (`certreq.exe` of PowerShell se `Get-Certificate` opdrag).
 ```powershell

@@ -4,13 +4,13 @@
 
 ## Kerberoast
 
-Kerberoasting fokus op die verkryging van **TGS-tickets**, spesifiek dié wat verband hou met dienste wat onder **gebruikersrekeninge** in **Active Directory (AD)** werk, met uitsluiting van **rekeninge van rekenaars**. Die kodering van hierdie tickets gebruik sleutels wat afkomstig is van **gebruikerswagwoorde**, wat die moontlikheid van **offline geloofsbrief kraking** toelaat. Die gebruik van 'n gebruikersrekening as 'n diens word aangedui deur 'n nie-leë **"ServicePrincipalName"** eienskap.
+Kerberoasting fokus op die verkryging van **TGS tickets**, spesifiek dié wat verband hou met dienste wat onder **gebruikersrekeninge** in **Active Directory (AD)** werk, met uitsluiting van **rekeninge van rekenaars**. Die kodering van hierdie tickets gebruik sleutels wat afkomstig is van **gebruikerswagwoorde**, wat die moontlikheid van **offline geloofsbrief kraking** toelaat. Die gebruik van 'n gebruikersrekening as 'n diens word aangedui deur 'n nie-leë **"ServicePrincipalName"** eienskap.
 
-Vir die uitvoering van **Kerberoasting** is 'n domeinrekening wat in staat is om **TGS-tickets** aan te vra, noodsaaklik; egter, hierdie proses vereis nie **spesiale voorregte** nie, wat dit toeganklik maak vir enigiemand met **geldige domein geloofsbriewe**.
+Vir die uitvoering van **Kerberoasting** is 'n domeinrekening wat in staat is om **TGS tickets** aan te vra, noodsaaklik; egter, hierdie proses vereis nie **spesiale voorregte** nie, wat dit toeganklik maak vir enigiemand met **geldige domein geloofsbriewe**.
 
 ### Sleutelpunte:
 
-- **Kerberoasting** teiken **TGS-tickets** vir **gebruikersrekening dienste** binne **AD**.
+- **Kerberoasting** teiken **TGS tickets** vir **gebruikersrekening dienste** binne **AD**.
 - Tickets wat met sleutels van **gebruikerswagwoorde** gekodeer is, kan **offline gekraak** word.
 - 'n Diens word geïdentifiseer deur 'n **ServicePrincipalName** wat nie null is nie.
 - **Geen spesiale voorregte** is nodig nie, net **geldige domein geloofsbriewe**.
@@ -18,7 +18,7 @@ Vir die uitvoering van **Kerberoasting** is 'n domeinrekening wat in staat is om
 ### **Aanval**
 
 > [!WARNING]
-> **Kerberoasting gereedskap** vra tipies **`RC4-kodering`** aan wanneer die aanval uitgevoer word en TGS-REQ versoeke geïnisieer word. Dit is omdat **RC4 is** [**swakker**](https://www.stigviewer.com/stig/windows_10/2017-04-28/finding/V-63795) en makliker is om offline te kraak met gereedskap soos Hashcat as ander kodering algoritmes soos AES-128 en AES-256.\
+> **Kerberoasting gereedskap** vra tipies **`RC4 kodering`** aan wanneer die aanval uitgevoer word en TGS-REQ versoeke geïnisieer word. Dit is omdat **RC4 is** [**swakker**](https://www.stigviewer.com/stig/windows_10/2017-04-28/finding/V-63795) en makliker is om offline te kraak met gereedskap soos Hashcat as ander kodering algoritmes soos AES-128 en AES-256.\
 > RC4 (tipe 23) hashes begin met **`$krb5tgs$23$*`** terwyl AES-256 (tipe 18) begin met **`$krb5tgs$18$*`**.`
 
 #### **Linux**
@@ -93,7 +93,7 @@ hashcat -m 13100 --force -a 0 hashes.kerberoast passwords_kerb.txt
 ```
 ### Volharding
 
-As jy **genoeg regte** oor 'n gebruiker het, kan jy dit **kerberoastable maak**:
+As jy **genoeg regte** oor 'n gebruiker het, kan jy dit **kerberoastable** maak:
 ```bash
 Set-DomainObject -Identity <username> -Set @{serviceprincipalname='just/whateverUn1Que'} -verbose
 ```
@@ -106,12 +106,12 @@ As u hierdie **fout** van Linux kry: **`Kerberos SessionError: KRB_AP_ERR_SKEW(C
 
 ### Mitigering
 
-Kerberoasting kan met 'n hoë graad van stealthiness uitgevoer word as dit eksploiteerbaar is. Om hierdie aktiwiteit te kan opspoor, moet daar aandag gegee word aan **Security Event ID 4769**, wat aandui dat 'n Kerberos-tiket aangevra is. egter, as gevolg van die hoë frekwensie van hierdie gebeurtenis, moet spesifieke filters toegepas word om verdagte aktiwiteite te isoleer:
+Kerberoasting kan met 'n hoë graad van stealthiness uitgevoer word as dit eksploiteerbaar is. Om hierdie aktiwiteit te detecteer, moet aandag gegee word aan **Security Event ID 4769**, wat aandui dat 'n Kerberos-tiket aangevra is. egter, as gevolg van die hoë frekwensie van hierdie gebeurtenis, moet spesifieke filters toegepas word om verdagte aktiwiteite te isoleer:
 
-- Die diensnaam mag nie **krbtgt** wees nie, aangesien dit 'n normale versoek is.
+- Die diensnaam mag nie **krbtgt** wees nie, aangesien dit 'n normale aanvraag is.
 - Diensname wat eindig op **$** moet uitgesluit word om masjienrekeninge wat vir dienste gebruik word, te vermy.
-- Versoeke van masjiene moet gefilter word deur rekeningname wat geformateer is as **machine@domain** uit te sluit.
-- Slegs suksesvolle tiketversoeke moet oorweeg word, geïdentifiseer deur 'n mislukkingkode van **'0x0'**.
+- Aanspreek van masjiene moet gefiltreer word deur rekeningname wat geformateer is as **machine@domain** uit te sluit.
+- Slegs suksesvolle tiketaanvrae moet oorweeg word, geïdentifiseer deur 'n mislukkingkode van **'0x0'**.
 - **Die belangrikste**, die tiket-enkripsietipe moet **0x17** wees, wat dikwels in Kerberoasting-aanvalle gebruik word.
 ```bash
 Get-WinEvent -FilterHashtable @{Logname='Security';ID=4769} -MaxEvents 1000 | ?{$_.Message.split("`n")[8] -ne 'krbtgt' -and $_.Message.split("`n")[8] -ne '*$' -and $_.Message.split("`n")[3] -notlike '*$@*' -and $_.Message.split("`n")[18] -like '*0x0*' -and $_.Message.split("`n")[17] -like "*0x17*"} | select ExpandProperty message
@@ -125,9 +125,9 @@ Deur hierdie maatreëls te implementeer, kan organisasies die risiko wat met Ker
 
 ## Kerberoast sonder domeinrekening
 
-In **September 2022** is 'n nuwe manier om 'n stelsel te ontgin, aan die lig gebring deur 'n navorser genaamd Charlie Clark, wat deur sy platform [exploit.ph](https://exploit.ph/) gedeel is. Hierdie metode stel in staat om **Dienskaartjies (ST)** te verkry via 'n **KRB_AS_REQ** versoek, wat merkwaardig nie beheer oor enige Active Directory rekening vereis nie. Essensieel, as 'n prinsiep op so 'n manier opgestel is dat dit nie vooraf-verifikasie vereis nie—'n scenario soortgelyk aan wat in die kuberveiligheidsgebied bekend staan as 'n **AS-REP Roasting aanval**—kan hierdie eienskap benut word om die versoekproses te manipuleer. Spesifiek, deur die **sname** attribuut binne die versoek se liggaam te verander, word die stelsel mislei om 'n **ST** uit te reik eerder as die standaard versleutelde Ticket Granting Ticket (TGT).
+In **September 2022** is 'n nuwe manier om 'n stelsel te ontgin, aan die lig gebring deur 'n navorser genaamd Charlie Clark, wat deur sy platform [exploit.ph](https://exploit.ph/) gedeel is. Hierdie metode stel in staat om **Dienskaartjies (ST)** te verkry via 'n **KRB_AS_REQ** versoek, wat merkwaardig nie beheer oor enige Active Directory rekening vereis nie. Essensieel, as 'n prinsiep op so 'n manier opgestel is dat dit nie vooraf-verifikasie vereis nie—'n scenario soortgelyk aan wat in die kuberveiligheidsterrein bekend staan as 'n **AS-REP Roasting aanval**—kan hierdie eienskap benut word om die versoekproses te manipuleer. Spesifiek, deur die **sname** attribuut binne die versoek se liggaam te verander, word die stelsel mislei om 'n **ST** uit te reik eerder as die standaard versleutelde Kaartjie Toekennings Kaartjie (TGT).
 
-Die tegniek word volledig in hierdie artikel verduidelik: [Semperis blog post](https://www.semperis.com/blog/new-attack-paths-as-requested-sts/).
+Die tegniek word volledig in hierdie artikel verduidelik: [Semperis blog pos](https://www.semperis.com/blog/new-attack-paths-as-requested-sts/).
 
 > [!WARNING]
 > U moet 'n lys van gebruikers verskaf omdat ons nie 'n geldige rekening het om die LDAP met hierdie tegniek te ondervra nie.

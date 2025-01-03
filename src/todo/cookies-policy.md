@@ -15,13 +15,13 @@ Deur enige van hierdie webwerwe te gebruik, stem jy in tot die gebruik van koeki
 
 ### Wat is koekies?
 
-Koekies is klein tekslêers wat op jou rekenaar of mobiele toestel gestoor word wanneer jy 'n webwerf besoek. Hulle word wyd gebruik om webwerwe te laat werk, hul funksionaliteit te verbeter en 'n meer persoonlike gebruikerservaring te bied.
+Koekies is klein tekslêers wat op jou rekenaar of mobiele toestel gestoor word wanneer jy 'n webwerf besoek. Hulle word wyd gebruik om webwerwe te laat werk, hul funksionaliteit te verbeter, en 'n meer persoonlike gebruikerservaring te bied.
 
 ### Hoe ons koekies gebruik
 
 Ons gebruik koekies op ons webwerwe vir die volgende doeleindes:
 
-1. Essensiële koekies: Hierdie koekies is noodsaaklik vir die basiese funksionaliteit van ons webwerwe, soos om gebruikersverifikasie moontlik te maak, sekuriteit te handhaaf en jou voorkeure te onthou.
+1. Essensiële koekies: Hierdie koekies is noodsaaklik vir die basiese funksionaliteit van ons webwerwe, soos om gebruikersverifikasie moontlik te maak, sekuriteit te handhaaf, en jou voorkeure te onthou.
 2. Prestasie koekies: Hierdie koekies help ons om te verstaan hoe besoekers met ons webwerwe interaksie het, deur anoniem inligting te versamel en te rapporteer. Dit stel ons in staat om ons webwerf se prestasie en gebruikerservaring te verbeter.
 3. Funksionaliteit koekies: Hierdie koekies stel ons webwerwe in staat om keuses wat jy maak te onthou, soos jou taal of streek, om 'n meer persoonlike ervaring te bied.
 4. Teiken/advertering koekies: Hierdie koekies word gebruik om relevante advertensies en bemarkingskommunikasies te lewer gebaseer op jou belangstellings, blaai geskiedenis, en interaksies met ons webwerwe.
@@ -32,9 +32,9 @@ Boonop is die bladsye book.hacktricks.xyz en cloud.hacktricks.xyz gehos in Gitbo
 
 Benewens ons eie koekies, mag ons ook derdeparty koekies gebruik om webwerfgebruikstatistieke te rapporteer, advertensies te lewer, en sosiale media deelknoppies moontlik te maak. Die gebruik van derdeparty koekies is onderhewig aan hul onderskeie privaatheidsbeleide.
 
-Koekies bestuur
+Bestuur van koekies
 
-Die meeste webblaaiers laat jou toe om koekies deur hul instellings te bestuur. Jy kan kies om koekies op jou toestel te blokkeer, te verwyder of die gebruik daarvan te beperk. Hou egter in gedagte dat die deaktivering van koekies die funksionaliteit en prestasie van ons webwerwe kan beïnvloed.
+Meeste webblaaiers laat jou toe om koekies deur hul instellings te bestuur. Jy kan kies om koekies op jou toestel te blokkeer, te verwyder, of die gebruik daarvan te beperk. Hou egter in gedagte dat die deaktivering van koekies die funksionaliteit en prestasie van ons webwerwe kan beïnvloed.
 
 Veranderinge aan hierdie Koekiesbeleid
 

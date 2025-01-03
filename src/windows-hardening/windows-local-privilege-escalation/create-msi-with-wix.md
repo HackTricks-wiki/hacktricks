@@ -2,7 +2,7 @@
 
 # Skep Kwaadwillige MSI en Kry Root
 
-Die skepping van die MSI-installer sal gedoen word met behulp van wixtools, spesifiek [wixtools](http://wixtoolset.org) sal benut word. Dit is die moeite werd om te noem dat alternatiewe MSI-bouers probeer is, maar hulle was nie suksesvol in hierdie spesifieke geval nie.
+Die skepping van die MSI-installer sal gedoen word met wixtools, spesifiek [wixtools](http://wixtoolset.org) sal gebruik word. Dit is die moeite werd om te noem dat alternatiewe MSI-bouers probeer is, maar hulle was nie suksesvol in hierdie spesifieke geval nie.
 
 Vir 'n omvattende begrip van wix MSI gebruiksvoorbeelde, is dit raadsaam om [hierdie bladsy](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with) te raadpleeg. Hier kan jy verskeie voorbeelde vind wat die gebruik van wix MSI demonstreer.
 
@@ -38,7 +38,7 @@ fail_here
 </Product>
 </Wix>
 ```
-Dit is belangrik om te noem dat die Package-element eienskappe bevat soos InstallerVersion en Compressed, wat die weergawe van die installer spesifiseer en aandui of die pakket gecomprimeer is of nie, onderskeidelik.
+Dit is belangrik om te noem dat die Package-element eienskappe bevat soos InstallerVersion en Compressed, wat die weergawe van die installeerder spesifiseer en aandui of die pakket gecomprimeer is of nie, onderskeidelik.
 
 Die skepproses behels die gebruik van candle.exe, 'n hulpmiddel van wixtools, om 'n wixobject uit msi.xml te genereer. Die volgende opdrag moet uitgevoer word:
 ```

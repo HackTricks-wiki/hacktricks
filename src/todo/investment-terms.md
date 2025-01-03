@@ -29,15 +29,15 @@ In die geval dat die prys daal, sal die fondsbestuurder voordele verdien omdat h
 
 ### Perpetuele Termynkontrakte
 
-**Dit is "termynkontrakte" wat onbepaald sal duur** (sonder 'n einddatum vir die kontrak). Dit is baie algemeen om hulle byvoorbeeld in kripto-beurse te vind waar jy in en uit termynkontrakte kan gaan gebaseer op die prys van kripto's.
+**Dit is "termynkontrakte" wat onbepaald sal duur** (sonder 'n einddatum van die kontrak). Dit is baie algemeen om hulle byvoorbeeld in crypto beurse te vind waar jy in en uit termynkontrakte kan gaan gebaseer op die prys van crypto.
 
 Let daarop dat in hierdie gevalle die voordele en verliese in werklike tyd kan wees, as die prys met 1% styg, wen jy 1%, as die prys met 1% daal, sal jy dit verloor.
 
 ### Termynkontrakte met Hefboom
 
-**Hefboom** stel jou in staat om 'n groter posisie in die mark te beheer met 'n kleiner bedrag geld. Dit stel jou basies in staat om "te wed" met baie meer geld as wat jy het, terwyl jy net die geld wat jy werklik het, risiko.
+**Hefboom** stel jou in staat om 'n groter posisie in die mark te beheer met 'n kleiner bedrag geld. Dit stel jou basies in staat om "te wed" met baie meer geld as wat jy het, terwyl jy net die geld wat jy werklik het, riskeer.
 
-Byvoorbeeld, as jy 'n termynposisie in die BTC/USDT met 100$ en 'n 50x hefboom oopmaak, beteken dit dat as die prys met 1% styg, jy 1x50 = 50% van jou aanvanklike belegging (50$) sal wen. En daarom sal jy 150$ hê.\
+Byvoorbeeld, as jy 'n termynposisie in die BTC/USDT met 100$ en 'n 50x hefboom oopmaak, beteken dit dat as die prys met 1% styg, jy 1x50 = 50% van jou aanvanklike belegging (50$) sou wen. En daarom sal jy 150$ hê.\
 As die prys egter met 1% daal, sal jy 50% van jou fondse verloor (59$ in hierdie geval). En as die prys met 2% daal, sal jy al jou weddenskap verloor (2x50 = 100%).
 
 Daarom stel hefboom jou in staat om die bedrag geld wat jy wed, te beheer terwyl jy die winste en verliese verhoog.
@@ -49,20 +49,20 @@ Die koper sal egter 'n fooi aan die verkoper betaal om die opsie te open (sodat 
 
 ### 1. **Verpligting vs. Reg:**
 
-* **Termynkontrakte:** Wanneer jy 'n termynkontrak koop of verkoop, sluit jy 'n **bindende ooreenkoms** om 'n bate teen 'n spesifieke prys op 'n toekomstige datum te koop of te verkoop. Beide die koper en die verkoper is **verplig** om die kontrak by verstryking na te kom (tenzij die kontrak voor dit gesluit word).
-* **Opsies:** Met opsies het jy die **reg, maar nie die verpligting** om 'n bate (in die geval van 'n **oproepopsie**) te koop of te verkoop (in die geval van 'n **sitopsie**) teen 'n spesifieke prys voor of op 'n sekere vervaldatum. Die **koper** het die opsie om uit te voer, terwyl die **verkoper** verplig is om die transaksie na te kom as die koper besluit om die opsie uit te oefen.
+* **Termynkontrakte:** Wanneer jy 'n termynkontrak koop of verkoop, tree jy in 'n **bindende ooreenkoms** om 'n bate teen 'n spesifieke prys op 'n toekomstige datum te koop of te verkoop. Beide die koper en die verkoper is **verplig** om die kontrak by verstryking na te kom (tenzij die kontrak voor dit gesluit word).
+* **Opsies:** Met opsies het jy die **reg, maar nie die verpligting** om 'n bate (in die geval van 'n **call opsie**) te koop of te verkoop (in die geval van 'n **put opsie**) teen 'n spesifieke prys voor of op 'n sekere vervaldatum. Die **koper** het die opsie om uit te voer, terwyl die **verkoper** verplig is om die transaksie na te kom as die koper besluit om die opsie uit te oefen.
 
 ### 2. **Risiko:**
 
 * **Termynkontrakte:** Beide die koper en die verkoper neem **onbeperkte risiko** omdat hulle verplig is om die kontrak te voltooi. Die risiko is die verskil tussen die ooreengekome prys en die markprys op die vervaldatum.
-* **Opsies:** Die koper se risiko is beperk tot die **premie** wat betaal is om die opsie te koop. As die mark nie in die guns van die opsiehouer beweeg nie, kan hulle eenvoudig die opsie laat verval. Die **verkoper** (skrywer) van die opsie het egter onbeperkte risiko as die mark aansienlik teen hulle beweeg.
+* **Opsies:** Die koper se risiko is beperk tot die **premie** wat betaal is om die opsie te koop. As die mark nie in die guns van die opsiehouer beweeg nie, kan hulle eenvoudig die opsie laat verstryk. Die **verkoper** (skrywer) van die opsie het egter onbeperkte risiko as die mark aansienlik teen hulle beweeg.
 
 ### 3. **Koste:**
 
 * **Termynkontrakte:** Daar is geen vooraf koste behalwe die marge wat vereis word om die posisie te hou nie, aangesien die koper en verkoper albei verplig is om die transaksie te voltooi.
-* **Opsies:** Die koper moet 'n **opsie-premie** vooraf betaal vir die reg om die opsie uit te oefen. Hierdie premie is basies die koste van die opsie.
+* **Opsies:** Die koper moet 'n **opsie premie** vooraf betaal vir die reg om die opsie uit te oefen. Hierdie premie is basies die koste van die opsie.
 
 ### 4. **Wins Potensiaal:**
 
-* **Termynkontrakte:** Die wins of verlies is gebaseer op die verskil tussen die markprys op vervaldatum en die ooreengekome prys in die kontrak.
+* **Termynkontrakte:** Die wins of verlies is gebaseer op die verskil tussen die markprys by verstryking en die ooreengekome prys in die kontrak.
 * **Opsies:** Die koper verdien wanneer die mark gunstig beweeg bo die uitoefenprys deur meer as die betaalde premie. Die verkoper verdien deur die premie te hou as die opsie nie uitgeoefen word nie.

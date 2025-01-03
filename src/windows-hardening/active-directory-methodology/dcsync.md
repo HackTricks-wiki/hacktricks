@@ -14,7 +14,7 @@ Die **DCSync** toestemming impliseer dat jy hierdie toestemmings oor die domein 
 
 ### Enumeration
 
-Kontroleer wie hierdie toestemmings het met behulp van `powerview`:
+Kontroleer wie hierdie toestemmings het met `powerview`:
 ```powershell
 Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveGUIDs | ?{($_.ObjectType -match 'replication-get') -or ($_.ActiveDirectoryRights -match 'GenericAll') -or ($_.ActiveDirectoryRights -match 'WriteDacl')}
 ```

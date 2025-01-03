@@ -45,7 +45,7 @@ As die TGT van 'n domeinbeheerder is, kan jy 'n[ **DCSync-aanval**](acl-persiste
 printers-spooler-service-abuse.md
 {{#endref}}
 
-### Versagting
+### Mitigering
 
 - Beperk DA/Admin aanmeldings tot spesifieke dienste
 - Stel "Rekening is sensitief en kan nie gedelegeer word nie" vir bevoorregte rekeninge.

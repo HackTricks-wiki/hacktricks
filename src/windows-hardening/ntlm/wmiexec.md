@@ -6,14 +6,14 @@
 
 Proses kan geopen word op gasheer waar die gebruikersnaam en óf wagwoord óf hash bekend is deur die gebruik van WMI. Opdragte word uitgevoer met behulp van WMI deur Wmiexec, wat 'n semi-interaktiewe skaalervaring bied.
 
-**dcomexec.py:** Deur verskillende DCOM eindpunte te benut, bied hierdie skrip 'n semi-interaktiewe skaal soortgelyk aan wmiexec.py, spesifiek die ShellBrowserWindow DCOM objek. Dit ondersteun tans MMC20. Toepassing, Shell Windows, en Shell Browser Window objek. (bron: [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))
+**dcomexec.py:** Deur verskillende DCOM eindpunte te benut, bied hierdie skrip 'n semi-interaktiewe skaal soortgelyk aan wmiexec.py, spesifiek die ShellBrowserWindow DCOM objek benut. Dit ondersteun tans MMC20. Toepassing, Shell Windows, en Shell Browser Window objek. (bron: [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))
 
 ## WMI Grondbeginsels
 
-### Namespace
+### Naamruimte
 
-Gestructureer in 'n katalogus-styl hiërargie, is WMI se topvlak houer \root, waaronder addisionele katalogusse, bekend as namespaces, georganiseer is.
-Opdragte om namespaces te lys:
+Gestructureer in 'n gidsstyl hiërargie, is WMI se topvlak houer \root, waaronder addisionele gidse, bekend as naamruimtes, georganiseer is.
+Opdragte om naamruimtes te lys:
 ```bash
 # Retrieval of Root namespaces
 gwmi -namespace "root" -Class "__Namespace" | Select Name
@@ -59,9 +59,9 @@ Invoke-WmiMethod -Class win32_share -Name Create -ArgumentList @($null, "Descrip
 ```
 ## WMI Opname
 
-### WMI Diens Status
+### WMI Diensstatus
 
-Opdragte om te verifieer of die WMI diens operasioneel is:
+Opdragte om te verifieer of die WMI-diens operasioneel is:
 ```bash
 # WMI service status check
 Get-Service Winmgmt
@@ -69,7 +69,7 @@ Get-Service Winmgmt
 # Via CMD
 net start | findstr "Instrumentation"
 ```
-### Stelsel- en Prosesinligting
+### Stelsel en Proses Inligting
 
 Versameling van stelsel- en prosesinligting deur WMI:
 ```bash

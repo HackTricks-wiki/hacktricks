@@ -42,19 +42,19 @@
 - [https://github.com/tomnomnom/httprobe](https://github.com/tomnomnom/httprobe): Kontroleer of webbedieners in 'n domein toeganklik is
 - [https://github.com/aboul3la/Sublist3r](https://github.com/aboul3la/Sublist3r) : Subdomein ontdekking
 - [https://github.com/gwen001/github-search/blob/master/github-subdomains.py](https://github.com/gwen001/github-search/blob/master/github-subdomains.py) : Subdomein ontdekking in github
-- [https://github.com/robertdavidgraham/masscan](https://github.com/robertdavidgraham/masscan) : Vinning port skandering
+- [https://github.com/robertdavidgraham/masscan](https://github.com/robertdavidgraham/masscan) : Vinning van poorte
 - [https://github.com/Threezh1/JSFinder](https://github.com/Threezh1/JSFinder) : Subdomeine en URL's uit JS-lêers in 'n web
-- [https://github.com/C1h2e1/MyFuzzingDict](https://github.com/C1h2e1/MyFuzzingDict) : Web lêers woordeboek
+- [https://github.com/C1h2e1/MyFuzzingDict](https://github.com/C1h2e1/MyFuzzingDict) : Web lêers woordelys
 - [https://github.com/TypeError/Bookmarks/blob/master/README.md](https://github.com/TypeError/Bookmarks/blob/master/README.md) : BurpExtension om dosyne herhaler oortjies te vermy
 - [https://github.com/hakluke/hakrawler](https://github.com/hakluke/hakrawler) : Verkry bates
 - [https://github.com/izo30/google-dorker](https://github.com/izo30/google-dorker) : Google dorks
 - [https://github.com/sehno/Bug-bounty/blob/master/bugbounty_checklist.md](https://github.com/sehno/Bug-bounty/blob/master/bugbounty_checklist.md) : Web BugBounty kontrolelys
 - [https://github.com/Naategh/dom-red](https://github.com/Naategh/dom-red) : Kontroleer 'n lys van domeine teen Open Redirection
-- [https://github.com/prodigysml/Dr.-Watson](https://github.com/prodigysml/Dr.-Watson) : Burp plugin, aflyn analise om domeine, subdomeine en IP's te ontdek
+- [https://github.com/prodigysml/Dr.-Watson](https://github.com/prodigysml/Dr.-Watson) : Burp-inprop, aflyn analise om domeine, subdomeine en IP's te ontdek
 - [https://github.com/hahwul/WebHackersWeapons](https://github.com/hahwul/WebHackersWeapons): Lys van verskillende gereedskap
 - [https://github.com/gauravnarwani97/Trishul](https://github.com/gauravnarwani97/Trishul) : BurpSuite Pluging om kwesbaarhede te vind (SQLi, XSS, SSTI)
-- [https://github.com/fransr/postMessage-tracker](https://github.com/fransr/postMessage-tracker) : Chrome uitbreiding vir die opsporing van post-boodskappe funksies
-- [https://github.com/Quitten/Autorize](https://github.com/Quitten/Autorize) : Outomatiese verifikasietoetse (verwyder koekies en probeer om die versoek te stuur)
+- [https://github.com/fransr/postMessage-tracker](https://github.com/fransr/postMessage-tracker) : Chrome uitbreiding vir die opsporing van post-boodskap funksies
+- [https://github.com/Quitten/Autorize](https://github.com/Quitten/Autorize) : Outomatiese verifikasietoetsing (verwyder koekies en probeer om die versoek te stuur)
 - [https://github.com/pikpikcu/xrcross](https://github.com/pikpikcu/xrcross): XRCross is 'n Rekonstruksie, Scanner, en 'n gereedskap vir penetrasie / BugBounty toetsing. Hierdie gereedskap is gebou om (XSS|SSRF|CORS|SSTI|IDOR|RCE|LFI|SQLI) kwesbaarhede te toets
 
 # Windows
@@ -64,18 +64,18 @@
 - [https://gist.github.com/netbiosX/ee35fcd3722e401a38136cff7b751d79](https://gist.github.com/netbiosX/ee35fcd3722e401a38136cff7b751d79) ([https://pentestlab.blog/2020/01/13/persistence-image-file-execution-options-injection/](https://pentestlab.blog/2020/01/13/persistence-image-file-execution-options-injection/)): Volharding
 - [https://github.com/odzhan/injection](https://github.com/odzhan/injection) : Windows Proses Inspuitings tegnieke
 - [https://github.com/BankSecurity/Red_Team](https://github.com/BankSecurity/Red_Team) : Rooi Span skripte
-- [https://github.com/l0ss/Grouper2](https://github.com/l0ss/Grouper2) : vind sekuriteitsverwante misconfigurasies in Active Directory Groep Beleid.
+- [https://github.com/l0ss/Grouper2](https://github.com/l0ss/Grouper2) : vind sekuriteitsverwante miskonfigurasies in Aktiewe Gidsbeleid.
 - [https://www.wietzebeukema.nl/blog/powershell-obfuscation-using-securestring](https://www.wietzebeukema.nl/blog/powershell-obfuscation-using-securestring) : Securestring obfuskering
 - [https://pentestlab.blog/2020/02/24/parent-pid-spoofing/](https://pentestlab.blog/2020/02/24/parent-pid-spoofing/) : Ouers PID Spoofing
 - [https://github.com/the-xentropy/xencrypt](https://github.com/the-xentropy/xencrypt) : Enkripteer Powershell payloads
 - [https://shells.systems/introducing-ninja-c2-the-c2-built-for-stealth-red-team-operations/](https://shells.systems/introducing-ninja-c2-the-c2-built-for-stealth-red-team-operations/) : Stealth C2
 - [https://windows-internals.com/faxing-your-way-to-system/](https://windows-internals.com/faxing-your-way-to-system/) : Reeks van logs oor Windows Internals
 - [https://bestestredteam.com/2018/10/02/tracking-pixel-in-microsoft-office-document/](https://bestestredteam.com/2018/10/02/tracking-pixel-in-microsoft-office-document/) : Volg wie 'n dokument oopmaak
-- [https://github.com/Integration-IT/Active-Directory-Exploitation-Cheat-Sheet](https://github.com/Integration-IT/Active-Directory-Exploitation-Cheat-Sheet) : Active Directory Cheat Sheet
+- [https://github.com/Integration-IT/Active-Directory-Exploitation-Cheat-Sheet](https://github.com/Integration-IT/Active-Directory-Exploitation-Cheat-Sheet) : Aktiewe Gids Cheat Sheet
 
 # Firmware
 
-Gereedskap wat ek sien wat nuttig kan wees om firmware te analiseer (outomaties):
+Gereedskap wat ek sien wat nuttig kan wees om firmware (outomaties) te analiseer:
 
 - [https://github.com/craigz28/firmwalker](https://github.com/craigz28/firmwalker)
 - [https://github.com/fkie-cad/FACT_core](https://github.com/fkie-cad/FACT_core)

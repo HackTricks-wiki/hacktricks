@@ -67,15 +67,15 @@ As jy die protokol weet wat byvoorbeeld deur die motorhuisdeur gebruik word, is 
 
 #### Lys van [ondersteunde protokolle](https://docs.flipperzero.one/sub-ghz/add-new-remote) <a href="#id-3iglu" id="id-3iglu"></a>
 
-| Princeton_433 (werk met die meerderheid van statiese kode stelsels) | 433.92 | Statisch  |
+| Princeton_433 (werk met die meerderheid van statiese kode stelsels) | 433.92 | Staties  |
 | -------------------------------------------------------------- | ------ | ------- |
-| Nice Flo 12bit_433                                             | 433.92 | Statisch  |
-| Nice Flo 24bit_433                                             | 433.92 | Statisch  |
-| CAME 12bit_433                                                 | 433.92 | Statisch  |
-| CAME 24bit_433                                                 | 433.92 | Statisch  |
-| Linear_300                                                     | 300.00 | Statisch  |
-| CAME TWEE                                                      | 433.92 | Statisch  |
-| Gate TX_433                                                    | 433.92 | Statisch  |
+| Nice Flo 12bit_433                                             | 433.92 | Staties  |
+| Nice Flo 24bit_433                                             | 433.92 | Staties  |
+| CAME 12bit_433                                                 | 433.92 | Staties  |
+| CAME 24bit_433                                                 | 433.92 | Staties  |
+| Linear_300                                                     | 300.00 | Staties  |
+| CAME TWEE                                                      | 433.92 | Staties  |
+| Gate TX_433                                                    | 433.92 | Staties  |
 | DoorHan_315                                                    | 315.00 | Dinamies  |
 | DoorHan_433                                                    | 433.92 | Dinamies  |
 | LiftMaster_315                                                 | 315.00 | Dinamies  |
@@ -86,11 +86,11 @@ As jy die protokol weet wat byvoorbeeld deur die motorhuisdeur gebruik word, is 
 
 ### Ondersteunde Sub-GHz verskaffers
 
-Kyk na die lys in [https://docs.flipperzero.one/sub-ghz/supported-vendors](https://docs.flipperzero.one/sub-ghz/supported-vendors)
+Kyk die lys in [https://docs.flipperzero.one/sub-ghz/supported-vendors](https://docs.flipperzero.one/sub-ghz/supported-vendors)
 
 ### Ondersteunde Frekwensies per streek
 
-Kyk na die lys in [https://docs.flipperzero.one/sub-ghz/frequencies](https://docs.flipperzero.one/sub-ghz/frequencies)
+Kyk die lys in [https://docs.flipperzero.one/sub-ghz/frequencies](https://docs.flipperzero.one/sub-ghz/frequencies)
 
 ### Toets
 

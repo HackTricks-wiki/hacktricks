@@ -5,7 +5,7 @@
 ### Kode
 
 Die volgende kode van [hier](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962). Dit laat jou toe om **'n Proses ID as argument aan te dui** en 'n CMD **wat as die gebruiker** van die aangeduide proses loop, sal uitgevoer word.\
-Deur in 'n Hoë Integriteit proses te loop, kan jy **die PID van 'n proses wat as Stelsel loop** (soos winlogon, wininit) aan dui en 'n cmd.exe as stelsel uitvoer.
+As jy in 'n Hoë Integriteit proses loop, kan jy **die PID van 'n proses wat as Stelsel loop** (soos winlogon, wininit) aan dui en 'n cmd.exe as stelsel uitvoer.
 ```cpp
 impersonateuser.exe 1234
 ```
@@ -142,7 +142,7 @@ return 0;
 ```
 ### Fout
 
-In sommige gevalle mag jy probeer om System na te doen en dit mag nie werk nie, wat 'n uitvoer soos die volgende toon:
+In sommige gevalle mag jy probeer om die Stelsel te verpersoonlik en dit sal nie werk nie, wat 'n uitvoer soos die volgende toon:
 ```cpp
 [+] OpenProcess() success!
 [+] OpenProcessToken() success!
@@ -158,19 +158,19 @@ Kom ons kyk na die huidige Administrateur toestemming oor `svchost.exe` prosesse
 
 1. Kies 'n proses van `svchost.exe`
 2. Regsklik --> Eienskappe
-3. Binne die "Sekuriteit" Tab klik regs onder op die knoppie "Toestemmings"
+3. Binne die "Sekuriteit" Tab klik onderaan regs op die knoppie "Toestemmings"
 4. Klik op "Geavanceerd"
-5. Kies "Administrators" en klik op "Wysig"
+5. Kies "Administrateurs" en klik op "Wysig"
 6. Klik op "Wys geavanceerde toestemmings"
 
 ![](<../../images/image (437).png>)
 
-Die vorige beeld bevat al die voorregte wat "Administrators" oor die geselekteerde proses het (soos jy kan sien in die geval van `svchost.exe` het hulle net "Query" voorregte)
+Die vorige beeld bevat al die voorregte wat "Administrateurs" oor die geselekteerde proses het (soos jy kan sien in die geval van `svchost.exe` het hulle net "Query" voorregte)
 
-Kyk na die voorregte wat "Administrators" oor `winlogon.exe` het:
+Kyk na die voorregte wat "Administrateurs" oor `winlogon.exe` het:
 
 ![](<../../images/image (1102).png>)
 
-Binne daardie proses kan "Administrators" "Lees Geheue" en "Lees Toestemmings" wat waarskynlik Administrators toelaat om die token te verpersoonlik wat deur hierdie proses gebruik word.
+Binne daardie proses kan "Administrateurs" "Lees Geheue" en "Lees Toestemmings" wat waarskynlik Administrateurs toelaat om die token wat deur hierdie proses gebruik word, te verteenwoordig.
 
 {{#include ../../banners/hacktricks-training.md}}

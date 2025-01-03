@@ -6,7 +6,7 @@
 
 'n **Golden Ticket** aanval bestaan uit die **skepping van 'n legitieme Ticket Granting Ticket (TGT) wat enige gebruiker naboots** deur die gebruik van die **NTLM-hash van die Active Directory (AD) krbtgt rekening**. Hierdie tegniek is veral voordelig omdat dit **toegang tot enige diens of masjien** binne die domein as die nabootste gebruiker moontlik maak. Dit is belangrik om te onthou dat die **krbtgt rekening se akteer nooit outomaties opgedateer word**.
 
-Om die **NTLM-hash** van die krbtgt rekening te **verkry**, kan verskeie metodes gebruik word. Dit kan onttrek word uit die **Local Security Authority Subsystem Service (LSASS) proses** of die **NT Directory Services (NTDS.dit) lêer** wat op enige Domeinbeheerder (DC) binne die domein geleë is. Verder is **die uitvoering van 'n DCsync aanval** 'n ander strategie om hierdie NTLM-hash te verkry, wat uitgevoer kan word met behulp van gereedskap soos die **lsadump::dcsync module** in Mimikatz of die **secretsdump.py script** deur Impacket. Dit is belangrik om te beklemtoon dat om hierdie operasies uit te voer, **domein admin regte of 'n soortgelyke vlak van toegang gewoonlik vereis word**.
+Om die **NTLM-hash** van die krbtgt rekening te **verkry**, kan verskeie metodes gebruik word. Dit kan onttrek word uit die **Local Security Authority Subsystem Service (LSASS) proses** of die **NT Directory Services (NTDS.dit) lêer** wat op enige Domeinbeheerder (DC) binne die domein geleë is. Verder is **die uitvoering van 'n DCsync aanval** 'n ander strategie om hierdie NTLM-hash te verkry, wat uitgevoer kan word met behulp van gereedskap soos die **lsadump::dcsync module** in Mimikatz of die **secretsdump.py skrip** deur Impacket. Dit is belangrik om te beklemtoon dat om hierdie operasies uit te voer, **domein admin regte of 'n soortgelyke vlak van toegang gewoonlik vereis word**.
 
 Alhoewel die NTLM-hash as 'n lewensvatbare metode vir hierdie doel dien, word dit **sterk aanbeveel** om **kaartjies te vervals met die Advanced Encryption Standard (AES) Kerberos sleutels (AES128 en AES256)** vir operasionele sekuriteitsredes.
 ```bash:From Linux
@@ -24,11 +24,11 @@ klist #List tickets in memory
 # Example using aes key
 kerberos::golden /user:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-21-1874506631-3219952063-538504511 /aes256:430b2fdb13cc820d73ecf123dddd4c9d76425d4c2156b89ac551efb9d591a439 /ticket:golden.kirbi
 ```
-**Sodra** jy die **goue kaart** ingespuit het, kan jy toegang tot die gedeelde lêers **(C$)** verkry, en dienste en WMI uitvoer, sodat jy **psexec** of **wmiexec** kan gebruik om 'n shell te verkry (dit lyk of jy nie 'n shell via winrm kan kry nie).
+**Sodra** jy die **goue kaart** ingespuit het, kan jy toegang verkry tot die gedeelde lêers **(C$)**, en dienste en WMI uitvoer, sodat jy **psexec** of **wmiexec** kan gebruik om 'n shell te verkry (dit lyk of jy nie 'n shell via winrm kan kry nie).
 
 ### Om algemene opsporings te omseil
 
-Die mees algemene maniere om 'n goue kaart te ontdek, is deur **Kerberos-verkeer** op die draad te inspekteer. Standaard **teken Mimikatz die TGT vir 10 jaar**, wat as anomaal sal uitstaan in daaropvolgende TGS versoeke wat daarmee gemaak word.
+Die mees algemene maniere om 'n goue kaart te ontdek, is deur **Kerberos-verkeer** op die draad te inspekteer. Standaard **teken Mimikatz die TGT vir 10 jaar**, wat as anomaal sal uitstaan in daaropvolgende TGS-versoeke wat daarmee gemaak word.
 
 `Lifetime : 3/11/2021 12:39:57 PM ; 3/9/2031 12:39:57 PM ; 3/9/2031 12:39:57 PM`
 

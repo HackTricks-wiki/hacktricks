@@ -40,7 +40,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Invoer om adres te bereik (aanduiding drukke)
+### Invoer om adres te bereik (wat afdrukke aandui)
 ```python
 # If you don't know the address you want to recah, but you know it's printing something
 # You can also indicate that info
@@ -483,7 +483,7 @@ main(sys.argv)
 > In sommige scenario's kan jy **veritesting** aktiveer, wat soortgelyke status sal saamvoeg, om nuttelose takke te bespaar en die oplossing te vind: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 
 > [!NOTE]
-> Nog iets wat jy in hierdie scenario's kan doen, is om die **funksie te hook** en angr iets te gee wat dit makliker kan verstaan.
+> Nog iets wat jy in hierdie scenario's kan doen, is om die **funksie te hook** deur angr iets te gee wat dit makliker kan verstaan.
 
 ### Simulasie Bestuurders
 

@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-[**Cheat Engine**](https://www.cheatengine.org/downloads.php) is 'n nuttige program om te vind waar belangrike waardes in die geheue van 'n lopende speletjie gestoor word en om dit te verander.\
+[**Cheat Engine**](https://www.cheatengine.org/downloads.php) is 'n nuttige program om te vind waar belangrike waardes binne die geheue van 'n lopende speletjie gestoor word en om hulle te verander.\
 Wanneer jy dit aflaai en uitvoer, word jy **aanbied** met 'n **tutorial** oor hoe om die hulpmiddel te gebruik. As jy wil leer hoe om die hulpmiddel te gebruik, word dit sterk aanbeveel om dit te voltooi.
 
 ## Wat soek jy?
@@ -10,7 +10,7 @@ Wanneer jy dit aflaai en uitvoer, word jy **aanbied** met 'n **tutorial** oor ho
 ![](<../../images/image (762).png>)
 
 Hierdie hulpmiddel is baie nuttig om te vind **waar 'n waarde** (gewoonlik 'n nommer) **in die geheue** van 'n program gestoor word.\
-**Gewoonlik word nommers** in **4bytes** vorm gestoor, maar jy kan dit ook in **double** of **float** formate vind, of jy mag dalk iets **anders as 'n nommer** wil soek. Om hierdie rede moet jy seker wees dat jy **kies** wat jy wil **soek**:
+**Gewoonlik word nommers** in **4bytes** vorm gestoor, maar jy kan hulle ook in **double** of **float** formate vind, of jy mag dalk iets **anders as 'n nommer** wil soek. Om hierdie rede moet jy seker wees dat jy **kies** wat jy wil **soek**:
 
 ![](<../../images/image (324).png>)
 
@@ -24,40 +24,40 @@ Jy kan ook die boks merk om **die speletjie te stop terwyl jy die geheue skandee
 
 ### Hotkeys
 
-In _**Edit --> Settings --> Hotkeys**_ kan jy verskillende **hotkeys** vir verskillende doeleindes stel, soos **om die** **speletjie** te **stop** (wat baie nuttig is as jy op 'n stadium die geheue wil skandeer). Ander opsies is beskikbaar:
+In _**Edit --> Settings --> Hotkeys**_ kan jy verskillende **hotkeys** vir verskillende doeleindes stel, soos **om die speletjie te stop** (wat baie nuttig is as jy op 'n stadium die geheue wil skandeer). Ander opsies is beskikbaar:
 
 ![](<../../images/image (864).png>)
 
-## Modifying the value
+## Waarde verander
 
-Sodra jy **gevind** het waar die **waarde** wat jy **soek** is (meer oor hierdie in die volgende stappe) kan jy dit **verander** deur dit dubbel te klik, en dan dubbel te klik op sy waarde:
+Sodra jy **gevind** het waar die **waarde** wat jy **soek** is (meer oor hierdie in die volgende stappe), kan jy dit **verander** deur dit dubbel te klik, en dan dubbel te klik op sy waarde:
 
 ![](<../../images/image (563).png>)
 
-En uiteindelik **merk die vink** om die verandering in die geheue te laat plaasvind:
+En uiteindelik **merk die vinkie** om die verandering in die geheue te laat plaasvind:
 
 ![](<../../images/image (385).png>)
 
 Die **verandering** aan die **geheue** sal onmiddellik **toegepas** word (let daarop dat totdat die speletjie hierdie waarde nie weer gebruik nie, die waarde **nie in die speletjie opgedateer sal word**).
 
-## Searching the value
+## Waarde soek
 
 So, ons gaan veronderstel dat daar 'n belangrike waarde is (soos die lewe van jou gebruiker) wat jy wil verbeter, en jy soek hierdie waarde in die geheue)
 
-### Through a known change
+### Deur 'n bekende verandering
 
 Veronderstel jy soek die waarde 100, jy **voerende 'n skandering** om daardie waarde te soek en jy vind baie ooreenkomste:
 
 ![](<../../images/image (108).png>)
 
-Dan, doen jy iets sodat **waarde verander**, en jy **stop** die speletjie en **voerende** 'n **volgende skandering**:
+Dan, doen jy iets sodat **die waarde verander**, en jy **stop** die speletjie en **voerende** 'n **volgende skandering**:
 
 ![](<../../images/image (684).png>)
 
 Cheat Engine sal soek na die **waardes** wat **van 100 na die nuwe waarde gegaan het**. Geluk, jy **gevind** die **adres** van die waarde waarna jy gesoek het, jy kan dit nou verander.\
 &#xNAN;_&#x49;f jy steeds verskeie waardes het, doen iets om daardie waarde weer te verander, en voer 'n ander "volgende skandering" uit om die adresse te filter._
 
-### Unknown Value, known change
+### Onbekende waarde, bekende verandering
 
 In die scenario waar jy **nie die waarde weet nie** maar jy weet **hoe om dit te laat verander** (en selfs die waarde van die verandering) kan jy jou nommer soek.
 
@@ -65,7 +65,7 @@ So, begin deur 'n skandering van tipe "**Onbekende aanvanklike waarde**" uit te 
 
 ![](<../../images/image (890).png>)
 
-Dan, laat die waarde verander, dui aan **hoe** die **waarde** **verander** het (in my geval is dit met 1 verminder) en voer 'n **volgende skandering** uit:
+Dan, laat die waarde verander, dui **hoe** die **waarde** **verander** het (in my geval is dit met 1 verminder) en voer 'n **volgende skandering** uit:
 
 ![](<../../images/image (371).png>)
 
@@ -79,7 +79,7 @@ Let daarop dat daar 'n **baie moontlike veranderinge** is en jy kan hierdie **st
 
 ![](<../../images/image (574).png>)
 
-### Random Memory Address - Finding the code
+### Willekeurige geheue adres - Vind die kode
 
 Tot nou toe het ons geleer hoe om 'n adres te vind wat 'n waarde stoor, maar dit is hoogs waarskynlik dat in **verskillende uitvoerings van die speletjie daardie adres in verskillende plekke van die geheue is**. So kom ons vind uit hoe om daardie adres altyd te vind.
 
@@ -94,13 +94,13 @@ Sodra jy een van daardie opsies gekies het, sal die **debugger** aan die program
 
 ![](<../../images/image (91).png>)
 
-Nou dat jy die adres gevind het wat die waarde verander, kan jy die **kode na jou goeddunke verander** (Cheat Engine laat jou toe om dit vinnig vir NOPs te verander):
+Nou dat jy die adres gevind het wat die waarde verander, kan jy **die kode na jou goeddunke verander** (Cheat Engine laat jou toe om dit vinnig vir NOPs te verander):
 
 ![](<../../images/image (1057).png>)
 
 So, jy kan dit nou verander sodat die kode nie jou nommer beïnvloed nie, of altyd op 'n positiewe manier beïnvloed.
 
-### Random Memory Address - Finding the pointer
+### Willekeurige geheue adres - Vind die pointer
 
 Volg die vorige stappe, vind waar die waarde wat jy belangstel in is. Dan, gebruik "**Vind uit wat na hierdie adres skryf**" om uit te vind watter adres hierdie waarde skryf en dubbelklik daarop om die disassembly-weergave te kry:
 
@@ -111,13 +111,13 @@ Dan, voer 'n nuwe skandering uit **soek na die hex waarde tussen "\[]"** (die wa
 ![](<../../images/image (994).png>)
 
 (_As verskeie verskyn, het jy gewoonlik die kleinste adres een nodig_)\
-Nou, het ons f**ound die pointer wat die waarde wat ons belangstel in sal verander**.
+Nou, het ons **die pointer gevind wat die waarde wat ons belangstel in sal verander**.
 
 Klik op "**Voeg adres handmatig by**":
 
 ![](<../../images/image (990).png>)
 
-Nou, klik op die "Pointer" vink en voeg die gevonde adres in die teksvak (in hierdie scenario, was die gevonde adres in die vorige beeld "Tutorial-i386.exe"+2426B0):
+Nou, klik op die "Pointer" vinkie en voeg die gevonde adres in die tekskas in (in hierdie scenario was die gevonde adres in die vorige beeld "Tutorial-i386.exe"+2426B0):
 
 ![](<../../images/image (392).png>)
 
@@ -127,18 +127,18 @@ Klik OK en 'n nuwe pointer sal geskep word:
 
 ![](<../../images/image (308).png>)
 
-Nou, elke keer as jy daardie waarde verander, **verander jy die belangrike waarde selfs al is die geheue adres waar die waarde is anders.**
+Nou, elke keer as jy daardie waarde verander, verander jy **die belangrike waarde selfs al is die geheue adres waar die waarde is anders.**
 
-### Code Injection
+### Kode-inspuiting
 
-Code injection is 'n tegniek waar jy 'n stuk kode in die teikenproses inspuit, en dan die uitvoering van kode herlei om deur jou eie geskryf kode te gaan (soos om jou punte te gee in plaas van om dit af te trek).
+Kode-inspuiting is 'n tegniek waar jy 'n stuk kode in die teikenproses inspuit, en dan die uitvoering van kode herlei om deur jou eie geskryf kode te gaan (soos om jou punte te gee in plaas van om hulle af te trek).
 
 So, verbeel jou jy het die adres gevind wat 1 van die lewe van jou speler aftrek:
 
 ![](<../../images/image (203).png>)
 
 Klik op Toon disassembler om die **disassemble kode** te kry.\
-Dan, klik **CTRL+a** om die Auto assemble venster aan te roep en kies _**Template --> Code Injection**_
+Dan, klik **CTRL+a** om die Auto assemble venster aan te roep en kies _**Template --> Kode-inspuiting**_
 
 ![](<../../images/image (902).png>)
 
@@ -154,9 +154,9 @@ So, voeg jou nuwe assembly kode in die "**newmem**" afdeling in en verwyder die 
 
 ![](<../../images/image (521).png>)
 
-**Klik op voer uit en so aan en jou kode moet in die program ingespuit word wat die gedrag van die funksionaliteit verander!**
+**Klik op voer uit en so aan en jou kode behoort in die program ingespuit te wees wat die gedrag van die funksionaliteit verander!**
 
-## **References**
+## **Verwysings**
 
 - **Cheat Engine tutorial, voltooi dit om te leer hoe om met Cheat Engine te begin**
 

@@ -21,6 +21,6 @@ Stuur die opdrag s om te begin skandeer:
 
 ![](<../../images/image (774).png>)
 
-As jy 'n JTAG kontak, sal jy een of verskeie **lyne wat met FOUND! begin** vind wat die pinnes van JTAG aandui.
+As jy 'n JTAG kontak, sal jy een of verskeie **lyne wat begin met FOUND!** vind wat die pinnes van JTAG aandui.
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -3,12 +3,12 @@
 **Kode vloei:**
 
 1. Skep 'n nuwe Pyp
-2. Skep en begin 'n diens wat met die geskepte pyp sal verbind en iets sal skryf. Die dienskode sal hierdie geënkodeerde PS-kode uitvoer: `$pipe = new-object System.IO.Pipes.NamedPipeClientStream("piper"); $pipe.Connect(); $sw = new-object System.IO.StreamWriter($pipe); $sw.WriteLine("Go"); $sw.Dispose();`
+2. Skep en begin 'n diens wat met die geskepte pyp sal verbind en iets sal skryf. Die dienskode sal hierdie geënkodeerde PS kode uitvoer: `$pipe = new-object System.IO.Pipes.NamedPipeClientStream("piper"); $pipe.Connect(); $sw = new-object System.IO.StreamWriter($pipe); $sw.WriteLine("Go"); $sw.Dispose();`
 3. Die diens ontvang die data van die kliënt in die pyp, roep ImpersonateNamedPipeClient aan en wag vir die diens om klaar te maak
 4. Laastens, gebruik die token wat van die diens verkry is om 'n nuwe _cmd.exe_ te spawn
 
 > [!WARNING]
-> As jy nie genoeg bevoegdhede het nie, kan die uitbuiting vasgevang word en nooit terugkeer nie.
+> As jy nie genoeg bevoegdhede het nie, kan die uitbuiting vasgevang word en nooit terugkeer.
 ```c
 #include <windows.h>
 #include <time.h>

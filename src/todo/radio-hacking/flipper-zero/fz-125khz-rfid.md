@@ -39,7 +39,7 @@ Die ander 2 kan brute-forced word as jy dit nie van die kaart kan lees nie.
 
 - **HID**
 
-Dieselfde gebeur in hierdie HID kaart waar slegs 2 van 3 bytes op die kaart gedruk kan word.
+Dieselfde gebeur in hierdie HID kaart waar slegs 2 van die 3 bytes op die kaart gedruk kan word.
 
 <figure><img src="../../../images/image (1014).png" alt=""><figcaption></figcaption></figure>
 

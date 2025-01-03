@@ -6,13 +6,13 @@
 
 Proses kan geopen word op gasheer waar die gebruikersnaam en óf wagwoord óf hash bekend is deur die gebruik van WMI. Opdragte word uitgevoer met behulp van WMI deur Wmiexec, wat 'n semi-interaktiewe skaalervaring bied.
 
-**dcomexec.py:** Deur verskillende DCOM eindpunte te benut, bied hierdie skrip 'n semi-interaktiewe skaal soortgelyk aan wmiexec.py, spesifiek deur die ShellBrowserWindow DCOM objek te benut. Dit ondersteun tans MMC20. Toepassing, Shell Windows, en Shell Browser Window objek. (bron: [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))
+**dcomexec.py:** Deur verskillende DCOM eindpunte te benut, bied hierdie skrip 'n semi-interaktiewe skaal soortgelyk aan wmiexec.py, spesifiek die ShellBrowserWindow DCOM objek. Dit ondersteun tans MMC20. Toepassing, Shell Windows, en Shell Browser Window objek. (bron: [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))
 
 ## WMI Grondbeginsels
 
 ### Namespace
 
-Gestructureer in 'n katalogus-styl hiërargie, is WMI se topvlak houer \root, waaronder addisionele katalogusse, bekend as namespaces, georganiseer is.
+Gestructureer in 'n gids-styl hiërargie, is WMI se topvlak houer \root, waaronder addisionele gidse, bekend as namespaces, georganiseer is. 
 Opdragte om namespaces te lys:
 ```bash
 # Retrieval of Root namespaces
@@ -76,7 +76,7 @@ Versameling van stelsel- en prosesinligting deur WMI:
 Get-WmiObject -ClassName win32_operatingsystem | select * | more
 Get-WmiObject win32_process | Select Name, Processid
 ```
-Vir aanvallers is WMI 'n kragtige hulpmiddel om sensitiewe data oor stelsels of domeine te enumerate.
+Vir aanvallers is WMI 'n kragtige hulpmiddel om sensitiewe data oor stelsels of domeine te enumeer.
 ```bash
 wmic computerystem list full /format:list
 wmic process list /format:list

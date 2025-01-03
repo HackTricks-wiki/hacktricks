@@ -7,11 +7,11 @@
 Deur dit kan 'n Domein administrateur **toelaat** dat 'n rekenaar **'n gebruiker of rekenaar naboots** teen 'n **diens** van 'n masjien.
 
 - **Diens vir Gebruiker om self (**_**S4U2self**_**):** As 'n **diensrekening** 'n _userAccountControl_ waarde het wat [TRUSTED_TO_AUTH_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>) (T2A4D) bevat, kan dit 'n TGS vir homself (die diens) verkry namens enige ander gebruiker.
-- **Diens vir Gebruiker om Proxy(**_**S4U2proxy**_**):** 'n **diensrekening** kan 'n TGS verkry namens enige gebruiker na die diens wat in **msDS-AllowedToDelegateTo** gestel is. Om dit te doen, het dit eers 'n TGS van daardie gebruiker na homself nodig, maar dit kan S4U2self gebruik om daardie TGS te verkry voordat dit die ander een aanvra.
+- **Diens vir Gebruiker om Proxy(**_**S4U2proxy**_**):** 'n **diensrekening** kan 'n TGS verkry namens enige gebruiker na die diens wat in **msDS-AllowedToDelegateTo** gestel is. Om dit te doen, benodig dit eers 'n TGS van daardie gebruiker na homself, maar dit kan S4U2self gebruik om daardie TGS te verkry voordat dit die ander een aanvra.
 
 **Let wel**: As 'n gebruiker gemerk is as ‘_Rekening is sensitief en kan nie afgevaardig word_’ in AD, sal jy **nie in staat wees om** hulle te naboots nie.
 
-Dit beteken dat as jy die **hash van die diens** kompromitteer, jy **gebruikers kan naboots** en **toegang** namens hulle tot die **diens geconfigureer** (moontlike **privesc**).
+Dit beteken dat as jy die **hash van die diens** compromitteer, jy **gebruikers kan naboots** en **toegang** namens hulle tot die **diens geconfigureer** (moontlike **privesc**).
 
 Boonop, jy **sal nie net toegang hê tot die diens wat die gebruiker kan naboots nie, maar ook tot enige diens** omdat die SPN (die diensnaam wat aangevra word) nie nagegaan word nie, net voorregte. Daarom, as jy toegang het tot **CIFS diens** kan jy ook toegang hê tot **HOST diens** met die `/altservice` vlag in Rubeus.
 
@@ -44,7 +44,7 @@ tgt::ask /user:dcorp-adminsrv$ /domain:dollarcorp.moneycorp.local /rc4:8c6264140
 .\Rubeus.exe asktgt /user:dcorp-adminsrv$ /rc4:cc098f204c5887eaa8253e7c2749156f /outfile:TGT_websvc.kirbi
 ```
 > [!WARNING]
-> Daar is **ander maniere om 'n TGT-kaartjie te verkry** of die **RC4** of **AES256** sonder om SYSTEM op die rekenaar te wees, soos die Printer Bug en onbeperkte delegasie, NTLM herlewing en misbruik van die Active Directory Sertifikaatdiens.
+> Daar is **ander maniere om 'n TGT-kaartjie** of die **RC4** of **AES256** te verkry sonder om SYSTEM op die rekenaar te wees, soos die Printer Bug en onbeperkte delegasie, NTLM relaying en Active Directory Certificate Service misbruik.
 >
 > **Net deur daardie TGT-kaartjie (of gehasht) te hê, kan jy hierdie aanval uitvoer sonder om die hele rekenaar te kompromitteer.**
 ```bash:Using Rubeus
@@ -74,6 +74,6 @@ tgs::s4u /tgt:TGT_dcorpadminsrv$@DOLLARCORP.MONEYCORP.LOCAL_krbtgt~dollarcorp.mo
 #Load the TGS in memory
 Invoke-Mimikatz -Command '"kerberos::ptt TGS_Administrator@dollarcorp.moneycorp.local@DOLLARCORP.MONEYCORP.LOCAL_ldap~ dcorp-dc.dollarcorp.moneycorp.LOCAL@DOLLARCORP.MONEYCORP.LOCAL_ALT.kirbi"'
 ```
-[**Meer inligting op ired.team.**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-kerberos-constrained-delegation)
+[**Meer inligting in ired.team.**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-kerberos-constrained-delegation)
 
 {{#include ../../banners/hacktricks-training.md}}

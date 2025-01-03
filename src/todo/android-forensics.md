@@ -2,7 +2,7 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Gelslote Toestel
+## Geslote Toestel
 
 Om data van 'n Android-toestel te begin onttrek, moet dit ontgrendel wees. As dit gesluit is, kan jy:
 
@@ -12,12 +12,12 @@ Om data van 'n Android-toestel te begin onttrek, moet dit ontgrendel wees. As di
 
 ## Data Verkryging
 
-Skep 'n [android backup using adb](../mobile-pentesting/android-app-pentesting/adb-commands.md#backup) en onttrek dit met behulp van [Android Backup Extractor](https://sourceforge.net/projects/adbextractor/): `java -jar abe.jar unpack file.backup file.tar`
+Skep 'n [android backup using adb](../mobile-pentesting/android-app-pentesting/adb-commands.md#backup) en onttrek dit met [Android Backup Extractor](https://sourceforge.net/projects/adbextractor/): `java -jar abe.jar unpack file.backup file.tar`
 
-### As root-toegang of fisiese verbinding met JTAG-koppelvlak
+### As root toegang of fisiese verbinding met JTAG-interface
 
 - `cat /proc/partitions` (soek die pad na die flitsgeheue, gewoonlik is die eerste inskrywing _mmcblk0_ en kom ooreen met die hele flitsgeheue).
-- `df /data` (ontdek die blokgrootte van die stelsel).
+- `df /data` (Ontdek die blokgrootte van die stelsel).
 - dd if=/dev/block/mmcblk0 of=/sdcard/blk0.img bs=4096 (voer dit uit met die inligting wat van die blokgrootte versamel is).
 
 ### Geheue

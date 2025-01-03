@@ -2,9 +2,9 @@
 
 **Frekwensie Onafhanklike SDR-gebaseerde Sein Verstaan en Terugwerk**
 
-FISSURE is 'n oopbron RF en terugwerk raamwerk ontwerp vir alle vaardigheidsvlakke met haakplekke vir sein opsporing en klassifikasie, protokol ontdekking, aanval uitvoering, IQ manipulasie, kwesbaarheid analise, outomatisering, en KI/ML. Die raamwerk is gebou om die vinnige integrasie van sagteware modules, radio's, protokolle, sein data, skripte, vloei grafieke, verwysingsmateriaal, en derdeparty gereedskap te bevorder. FISSURE is 'n werksvloei fasiliteerder wat sagteware op een plek hou en spanne in staat stel om moeiteloos op hoogte te kom terwyl hulle dieselfde bewese basis konfigurasie vir spesifieke Linux verspreidings deel.
+FISSURE is 'n oopbron RF en terugwerk raamwerk ontwerp vir alle vaardigheidsvlakke met haakplekke vir sein opsporing en klassifikasie, protokol ontdekking, aanval uitvoering, IQ manipulasie, kwesbaarheid analise, outomatisering, en KI/ML. Die raamwerk is gebou om die vinnige integrasie van sagteware modules, radio's, protokolle, sein data, skripte, vloei grafieke, verwysingsmateriaal, en derdeparty gereedskap te bevorder. FISSURE is 'n werksvloei fasiliteerder wat sagteware op een plek hou en spanne in staat stel om moeiteloos op spoed te kom terwyl hulle dieselfde bewese basis konfigurasie vir spesifieke Linux verspreidings deel.
 
-Die raamwerk en gereedskap ingesluit by FISSURE is ontwerp om die teenwoordigheid van RF energie te detecteer, die eienskappe van 'n sein te verstaan, monsters te versamel en te analiseer, oordrag en/of inspuit tegnieke te ontwikkel, en pasgemaakte payloads of boodskappe te vervaardig. FISSURE bevat 'n groeiende biblioteek van protokol en sein inligting om te help met identifikasie, pakket vervaardiging, en fuzzing. Aanlyn argief vermoëns bestaan om sein lêers af te laai en afspeel lyste te bou om verkeer te simuleer en stelsels te toets.
+Die raamwerk en gereedskap ingesluit by FISSURE is ontwerp om die teenwoordigheid van RF energie te detecteer, die eienskappe van 'n sein te verstaan, monsters te versamel en te analiseer, transmit en/of inspuit tegnieke te ontwikkel, en pasgemaakte payloads of boodskappe te vervaardig. FISSURE bevat 'n groeiende biblioteek van protokol en sein inligting om te help met identifikasie, pakket vervaardiging, en fuzzing. Aanlyn argief vermoëns bestaan om sein lêers af te laai en afspeel lyste te bou om verkeer te simuleer en stelsels te toets.
 
 Die vriendelike Python kodebasis en gebruikerskoppelvlak laat beginners toe om vinnig te leer oor gewilde gereedskap en tegnieke wat RF en terugwerk betrek. Onderwysers in kuberveiligheid en ingenieurswese kan voordeel trek uit die ingeboude materiaal of die raamwerk gebruik om hul eie werklike toepassings te demonstreer. Ontwikkelaars en navorsers kan FISSURE gebruik vir hul daaglikse take of om hul baanbrekende oplossings aan 'n breër gehoor bloot te stel. Soos bewustheid en gebruik van FISSURE in die gemeenskap groei, sal die omvang van sy vermoëns en die breedte van die tegnologie wat dit insluit ook groei.
 
@@ -18,7 +18,7 @@ Die vriendelike Python kodebasis en gebruikerskoppelvlak laat beginners toe om v
 
 ## Begin
 
-**Gesteunde**
+**Gesteun**
 
 Daar is drie takke binne FISSURE om lêer navigasie makliker te maak en kode redundans te verminder. Die Python2\_maint-3.7 tak bevat 'n kodebasis gebou rondom Python2, PyQt4, en GNU Radio 3.7; die Python3\_maint-3.8 tak is gebou rondom Python3, PyQt5, en GNU Radio 3.8; en die Python3\_maint-3.10 tak is gebou rondom Python3, PyQt5, en GNU Radio 3.10.
 
@@ -33,7 +33,7 @@ Daar is drie takke binne FISSURE om lêer navigasie makliker te maak en kode red
 
 **In-Voortgang (beta)**
 
-Hierdie bedryfstelsels is steeds in beta status. Hulle is in ontwikkeling en verskeie funksies is bekend om te ontbreek. Items in die installeerder mag met bestaande programme konflikter of mag nie installeer totdat die status verwyder word nie.
+Hierdie bedryfstelsels is steeds in beta status. Hulle is in ontwikkeling en verskeie funksies is bekend om te ontbreek. Items in die installeerder mag met bestaande programme konflik hê of mag nie installeer totdat die status verwyder word.
 
 |     Bedryfstelsel     |    FISSURE Tak   |
 | :-------------------: | :--------------: |
@@ -50,7 +50,7 @@ git checkout <Python2_maint-3.7> or <Python3_maint-3.8> or <Python3_maint-3.10>
 git submodule update --init
 ./install
 ```
-Dit sal PyQt sagteware afhanklikhede installeer wat benodig word om die installasie GUIs te begin indien hulle nie gevind word nie.
+Dit sal PyQt sagteware afhanklikhede installeer wat benodig word om die installasie GUIs te begin as hulle nie gevind word nie.
 
 Kies volgende die opsie wat die beste by jou bedryfstelsel pas (moet outomaties gedetecteer word as jou OS by 'n opsie pas).
 
@@ -58,7 +58,7 @@ Kies volgende die opsie wat die beste by jou bedryfstelsel pas (moet outomaties 
 | :--------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------: |
 | ![install1b](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/install1b.png) | ![install1a](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/install1a.png) | ![install1c](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/install1c.png) |
 
-Dit word aanbeveel om FISSURE op 'n skoon bedryfstelsel te installeer om bestaande konflikte te vermy. Kies al die aanbevole keuselys (Standaard knoppie) om foute te vermy terwyl jy die verskillende gereedskap binne FISSURE bedryf. Daar sal verskeie vrae tydens die installasie wees, meestal wat om verhoogde toestemmings en gebruikersname vra. As 'n item 'n "Verifieer" afdeling aan die einde bevat, sal die installeerder die opdrag wat volg uitvoer en die keuselysitem groen of rooi uitlig, afhangende van of daar enige foute deur die opdrag geproduseer word. Gekontroleerde items sonder 'n "Verifieer" afdeling sal swart bly na die installasie.
+Dit word aanbeveel om FISSURE op 'n skoon bedryfstelsel te installeer om bestaande konflikte te vermy. Kies al die aanbevole keuselys (Standaard knoppie) om foute te vermy terwyl jy die verskillende gereedskap binne FISSURE bedryf. Daar sal verskeie vrae tydens die installasie wees, meestal wat om verhoogde toestemmings en gebruikersname vra. As 'n item 'n "Verifieer" afdeling aan die einde bevat, sal die installeerder die opdrag wat volg uitvoer en die keuselysitem groen of rooi uitlig, afhangende van of enige foute deur die opdrag geproduseer word. Gekontroleerde items sonder 'n "Verifieer" afdeling sal swart bly na die installasie.
 
 ![install2](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/install2.png)
 
@@ -98,13 +98,13 @@ Die volgende is 'n lys van "ondersteunde" hardeware met verskillende vlakke van 
 * RTL2832U
 * 802.11 Adapters
 * LimeSDR
-* bladeRF, bladeRF 2.0 micro
+* bladeRF, bladeRF 2.0 mikro
 * Open Sniffer
 * PlutoSDR
 
 ## Lesse
 
-FISSURE kom met verskeie nuttige gidse om bekend te raak met verskillende tegnologieë en tegnieke. Baie sluit stappe in vir die gebruik van verskillende gereedskap wat in FISSURE geïntegreer is.
+FISSURE kom met verskeie nuttige gidse om bekend te raak met verskillende tegnologieë en tegnieke. Baie sluit stappe in vir die gebruik van verskeie gereedskap wat in FISSURE geïntegreer is.
 
 * [Les1: OpenBTS](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson1\_OpenBTS.md)
 * [Les2: Lua Dissectors](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson2\_LuaDissectors.md)
@@ -124,7 +124,7 @@ FISSURE kom met verskeie nuttige gidse om bekend te raak met verskillende tegnol
 * [ ] Ondersteun meer bedryfstelsels
 * [ ] Ontwikkel klas materiaal rondom FISSURE (RF Aanvalle, Wi-Fi, GNU Radio, PyQt, ens.)
 * [ ] Skep 'n sein voorverwerker, kenmerk ekstrakteerder, en sein klassifiseerder met selekteerbare AI/ML tegnieke
-* [ ] Implementeer rekursiewe demodulasie meganismes om 'n bitstroom uit onbekende seine te produseer
+* [ ] Implementeer herhalende demodulasie meganismes om 'n bitstroom van onbekende seine te produseer
 * [ ] Oorgang van die hoof FISSURE komponente na 'n generiese sensor node ontplooiing skema
 
 ## Bydrae
@@ -151,7 +151,7 @@ Om [Probleme](https://github.com/ainfosec/FISSURE/issues) te skep om aandag aan 
 
 ## Samewerking
 
-Kontak Assured Information Security, Inc. (AIS) Besigheidsontwikkeling om enige FISSURE samewerkingsgeleenthede voor te stel en te formaliseer – of dit nou is deur tyd te wy aan die integrasie van jou sagteware, om die talentvolle mense by AIS oplossings vir jou tegniese uitdagings te laat ontwikkel, of om FISSURE in ander platforms/toepassings te integreer.
+Kontak Assured Information Security, Inc. (AIS) Besigheidsontwikkeling om enige FISSURE samewerkingsgeleenthede voor te stel en te formaliseer – of dit nou is deur tyd te wy aan die integrasie van jou sagteware, dat die talentvolle mense by AIS oplossings vir jou tegniese uitdagings ontwikkel, of om FISSURE in ander platforms/toepassings te integreer.
 
 ## Lisensie
 

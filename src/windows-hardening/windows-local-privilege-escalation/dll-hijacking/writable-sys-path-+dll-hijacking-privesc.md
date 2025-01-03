@@ -4,11 +4,11 @@
 
 ## Introduction
 
-As jy gevind het dat jy **in 'n Stelselpaaie-gids kan skryf** (let daarop dat dit nie sal werk as jy in 'n Gebruikerspaaie-gids kan skryf nie), is dit moontlik dat jy **privileges kan eskaleer** in die stelsel.
+As jy gevind het dat jy kan **skryf in 'n Stelselpaaie-gids** (let daarop dat dit nie sal werk as jy in 'n Gebruikerspaaie-gids kan skryf nie) is dit moontlik dat jy **privileges kan eskaleer** in die stelsel.
 
-Om dit te doen, kan jy 'n **Dll Hijacking** misbruik waar jy 'n **biblioteek wat deur 'n diens of proses gelaai word, gaan oorneem** met **meer privileges** as joune, en omdat daardie diens 'n Dll laai wat waarskynlik glad nie in die hele stelsel bestaan nie, gaan dit probeer om dit van die Stelselpaaie te laai waar jy kan skryf.
+Om dit te doen kan jy 'n **Dll Hijacking** misbruik waar jy 'n **biblioteek wat deur 'n diens of proses gelaai word** gaan **hijack** met **meer privileges** as joune, en omdat daardie diens 'n Dll laai wat waarskynlik glad nie in die hele stelsel bestaan nie, gaan dit probeer om dit van die Stelselpaaie te laai waar jy kan skryf.
 
-Vir meer inligting oor **wat Dll Hijacking is**, kyk:
+Vir meer inligting oor **wat is Dll Hijacking** kyk:
 
 {{#ref}}
 ./
@@ -20,9 +20,9 @@ Vir meer inligting oor **wat Dll Hijacking is**, kyk:
 
 Die eerste ding wat jy nodig het, is om 'n **proses te identifiseer** wat met **meer privileges** as jy loop en wat probeer om 'n **Dll van die Stelselpaaie** te laai waarin jy kan skryf.
 
-Die probleem in hierdie gevalle is dat daardie prosesse waarskynlik reeds loop. Om te vind watter Dlls die dienste ontbreek, moet jy procmon so gou as moontlik begin (voordat prosesse gelaai word). So, om ontbrekende .dlls te vind, doen:
+Die probleem in hierdie gevalle is dat daardie prosesse waarskynlik reeds loop. Om te vind watter Dlls die dienste ontbreek, moet jy procmon so gou as moontlik begin (voor prosesse gelaai word). So, om ontbrekende .dlls te vind, doen:
 
-- **Skep** die gids `C:\privesc_hijacking` en voeg die pad `C:\privesc_hijacking` by die **Stelselpaaie omgewingsvariabele**. Jy kan dit **handmatig** doen of met **PS**:
+- **Skep** die gids `C:\privesc_hijacking` en voeg die pad `C:\privesc_hijacking` by die **Stelselpaaie omgewing veranderlike**. Jy kan dit **handmatig** doen of met **PS**:
 ```powershell
 # Set the folder path to create and check events for
 $folderPath = "C:\privesc_hijacking"
@@ -41,7 +41,7 @@ $newPath = "$envPath;$folderPath"
 ```
 - Begin **`procmon`** en gaan na **`Options`** --> **`Enable boot logging`** en druk **`OK`** in die prompt.
 - Dan, **herbegin**. Wanneer die rekenaar herbegin, sal **`procmon`** begin **gebeurtenisse opneem** so gou as moontlik.
-- Sodra **Windows** **begin** het, voer **`procmon`** weer uit, dit sal jou vertel dat dit aan die gang was en sal **vra of jy die** gebeurtenisse in 'n lêer wil stoor. Sê **ja** en **stoor die gebeurtenisse in 'n lêer**.
+- Sodra **Windows** **begin** het, voer **`procmon`** weer uit, dit sal jou vertel dat dit aan die gang was en sal **vraag of jy die** gebeurtenisse in 'n lêer wil stoor. Sê **ja** en **stoor die gebeurtenisse in 'n lêer**.
 - **Nadat** die **lêer** **gegenereer** is, **sluit** die oop **`procmon`** venster en **open die gebeurtenis lêer**.
 - Voeg hierdie **filters** by en jy sal al die Dlls vind wat 'n paar **proses probeer het om te laai** vanaf die skryfbare Stelselpaaie-gids:
 
@@ -67,11 +67,11 @@ Nadat ek dit gevind het, het ek hierdie interessante blogpos gevind wat ook verd
 
 So, om **privileges te verhoog** gaan ons die biblioteek **WptsExtensions.dll** kaap. Met die **pad** en die **naam** moet ons net die **kwaadwillige dll** **genereer**.
 
-Jy kan [**enige van hierdie voorbeelde probeer**](./#creating-and-compiling-dlls). Jy kan payloads soos: kry 'n rev shell, voeg 'n gebruiker by, voer 'n beacon uit...
+Jy kan [**enige van hierdie voorbeelde probeer**](./#creating-and-compiling-dlls). Jy kan payloads soos: 'n rev shell kry, 'n gebruiker byvoeg, 'n beacon uitvoer...
 
 > [!WARNING]
 > Let daarop dat **nie al die dienste** met **`NT AUTHORITY\SYSTEM`** gedraai word nie, sommige word ook met **`NT AUTHORITY\LOCAL SERVICE`** gedraai wat **minder privileges** het en jy **sal nie in staat wees om 'n nuwe gebruiker te skep** om sy toestemmings te misbruik.\
-> Tog, daardie gebruiker het die **`seImpersonate`** privilege, so jy kan die [**potato suite gebruik om privileges te verhoog**](../roguepotato-and-printspoofer.md). So, in hierdie geval is 'n rev shell 'n beter opsie as om te probeer om 'n gebruiker te skep.
+> Tog, daardie gebruiker het die **`seImpersonate`** voorreg, so jy kan die [**potato suite gebruik om privileges te verhoog**](../roguepotato-and-printspoofer.md). So, in hierdie geval is 'n rev shell 'n beter opsie as om te probeer om 'n gebruiker te skep.
 
 Op die oomblik van skryf word die **Taak Skedule** diens met **Nt AUTHORITY\SYSTEM** gedraai.
 

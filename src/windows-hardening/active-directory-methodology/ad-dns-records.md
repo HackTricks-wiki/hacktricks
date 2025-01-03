@@ -2,9 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Standaard kan **enige gebruiker** in Active Directory **alle DNS rekords** in die Domein of Woud DNS sones **opnoem**, soortgelyk aan 'n sonetransfer (gebruikers kan die kindobjekte van 'n DNS son in 'n AD omgewing lys).
+Standaard kan **enige gebruiker** in Active Directory **alle DNS rekords** in die Domein of Woud DNS sones **opnoem**, soortgelyk aan 'n sonetransfer (gebruikers kan die kindobjekte van 'n DNS sone in 'n AD omgewing lys).
 
-Die hulpmiddel [**adidnsdump**](https://github.com/dirkjanm/adidnsdump) stel **opname** en **uitvoer** van **alle DNS rekords** in die son vir rekonsidering doeleindes van interne netwerke in staat.
+Die hulpmiddel [**adidnsdump**](https://github.com/dirkjanm/adidnsdump) stel **opname** en **uitvoer** van **alle DNS rekords** in die sone vir rekonsiliasiedoele van interne netwerke in staat.
 ```bash
 git clone https://github.com/dirkjanm/adidnsdump
 cd adidnsdump

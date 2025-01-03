@@ -2,7 +2,7 @@
 
 # DCShadow
 
-Dit registreer 'n **nuwe Domeinbeheerder** in die AD en gebruik dit om **atribute** (SIDHistory, SPNs...) op gespesifiseerde voorwerpe **te druk** **sonder** om enige **logs** oor die **wysigings** agter te laat. Jy **het DA** regte nodig en moet binne die **worteldomein** wees.\
+Dit registreer 'n **nuwe Domeinbeheerder** in die AD en gebruik dit om **attributen** (SIDHistory, SPNs...) op gespesifiseerde voorwerpe **te druk** **sonder** om enige **logs** oor die **wysigings** agter te laat. Jy **het DA** regte nodig en moet binne die **worteldomein** wees.\
 Let daarop dat as jy verkeerde data gebruik, sal daar baie lelike logs verskyn.
 
 Om die aanval uit te voer, het jy 2 mimikatz instansies nodig. Een van hulle sal die RPC bedieners met SYSTEM regte begin (jy moet hier die veranderinge wat jy wil maak, aandui), en die ander instansie sal gebruik word om die waardes te druk:
@@ -22,8 +22,8 @@ Jy kan die veranderinge vanaf 'n DA of vanaf 'n gebruiker met hierdie minimale t
 
 - In die **domein objek**:
 - _DS-Install-Replica_ (Voeg/Verwyder Replica in Domein)
-- _DS-Replication-Manage-Topology_ (Bestuur Replicasie Topologie)
-- _DS-Replication-Synchronize_ (Replicasie Sinchronisasie)
+- _DS-Replication-Manage-Topology_ (Bestuur Replika Topologie)
+- _DS-Replication-Synchronize_ (Replika Sinchronisasie)
 - Die **Sites objek** (en sy kinders) in die **Konfigurasie houer**:
 - _CreateChild en DeleteChild_
 - Die objek van die **rekenaar wat geregistreer is as 'n DC**:
@@ -32,9 +32,9 @@ Jy kan die veranderinge vanaf 'n DA of vanaf 'n gebruiker met hierdie minimale t
 - _WriteProperty_ (Nie Skryf nie)
 
 Jy kan [**Set-DCShadowPermissions**](https://github.com/samratashok/nishang/blob/master/ActiveDirectory/Set-DCShadowPermissions.ps1) gebruik om hierdie bevoegdhede aan 'n onbevoegde gebruiker te gee (let op dat dit 'n paar logs sal agterlaat). Dit is baie meer beperkend as om DA bevoegdhede te hê.\
-Byvoorbeeld: `Set-DCShadowPermissions -FakeDC mcorp-student1 SAMAccountName root1user -Username student1 -Verbose` Dit beteken dat die gebruikersnaam _**student1**_ wanneer hy aan die masjien _**mcorp-student1**_ ingelog is, DCShadow bevoegdhede oor die objek _**root1user**_ het.
+Byvoorbeeld: `Set-DCShadowPermissions -FakeDC mcorp-student1 SAMAccountName root1user -Username student1 -Verbose` Dit beteken dat die gebruikersnaam _**student1**_ wanneer hy aan die masjien _**mcorp-student1**_ aangemeld is, DCShadow bevoegdhede oor die objek _**root1user**_ het.
 
-## Gebruik van DCShadow om agterdeure te skep
+## Gebruik DCShadow om agterdeure te skep
 ```bash:Set Enterprise Admins in SIDHistory to a user
 lsadump::dcshadow /object:student1 /attribute:SIDHistory /value:S-1-521-280534878-1496970234-700767426-519
 ```

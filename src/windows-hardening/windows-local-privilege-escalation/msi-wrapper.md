@@ -2,8 +2,8 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Laai die gratis weergawe van die toepassing af van [https://www.exemsi.com/documentation/getting-started/](https://www.exemsi.com/download/), voer dit uit en verpak die "kwaadwillige" binêre daarin.\
-Let daarop dat jy 'n "**.bat**" kan verpak as jy **net** wil **uitvoer** **opdraglyne (in plaas van cmd.exe, kies die .bat-lêer)**
+Laai die gratis weergawe van die toepassing af van [https://www.exemsi.com/documentation/getting-started/](https://www.exemsi.com/download/), voer dit uit en wrap die "kwaadwillige" binêre daarop.\
+Let daarop dat jy 'n "**.bat**" kan wrap as jy **net** wil **uitvoer** **opdraglyne (in plaas van cmd.exe, kies die .bat-lêer)**
 
 ![](<../../images/image (417).png>)
 
@@ -17,6 +17,6 @@ En dit is die belangrikste deel van die konfigurasie:
 
 (Neem asseblief kennis dat as jy probeer om jou eie binêre te pak, jy in staat sal wees om hierdie waardes te wysig)
 
-Van hier af klik net op **volgende knoppies** en die laaste **bou knoppie en jou installeerder/verpakker sal gegenereer word.**
+Van hier af klik net op **volgende knoppies** en die laaste **bou knoppie en jou installeerder/wrapper sal gegenereer word.**
 
 {{#include ../../banners/hacktricks-training.md}}

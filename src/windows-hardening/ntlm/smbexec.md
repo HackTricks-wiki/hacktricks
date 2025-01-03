@@ -9,7 +9,7 @@
 ### Sleutelpunte oor **SMBExec**
 
 - Dit werk deur 'n tydelike diens (byvoorbeeld, "BTOBTO") op die teikenmasjien te skep om opdragte via cmd.exe (%COMSPEC%) uit te voer, sonder om enige binêre lêers te laat val.
-- Ten spyte van sy stil benadering, genereer dit gebeurtenislogboeke vir elke opdrag wat uitgevoer word, wat 'n vorm van nie-interaktiewe "shell" bied.
+- Ten spyte van sy stil benadering, genereer dit gebeurtenislogs vir elke opdrag wat uitgevoer word, wat 'n vorm van nie-interaktiewe "shell" bied.
 - Die opdrag om te verbind met **Smbexec** lyk soos volg:
 ```bash
 smbexec.py WORKGROUP/genericuser:genericpassword@10.10.10.10
@@ -27,7 +27,7 @@ Die skep en begin van die diens kan met die volgende opdragte gedoen word:
 sc create [ServiceName] binPath= "cmd.exe /c [PayloadCommand]"
 sc start [ServiceName]
 ```
-Vir verdere besonderhede, kyk [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
+Vir verdere besonderhede, kyk na [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
 
 ## Verwysings
 

@@ -34,7 +34,7 @@ Jy moet begin deur hierdie pos te lees vir 'n paar basiese konsepte wat jy moet 
 > Die doel van hierdie derde fase is baie eenvoudig: **Ken elkeen van die vorige tokens in die woordeskat 'n vektor van die verlangde dimensies toe om die model te oefen.** Elke woord in die woordeskat sal 'n punt in 'n ruimte van X dimensies wees.\
 > Let daarop dat die posisie van elke woord in die ruimte aanvanklik net "ewekansig" geinitialiseer word en hierdie posisies is opleibare parameters (sal verbeter word tydens die opleiding).
 >
-> Boonop, tydens die token inbedding **word 'n ander laag van inbeddings geskep** wat (in hierdie geval) die **absolute posisie van die woord in die opleidingssin** verteenwoordig. Op hierdie manier sal 'n woord in verskillende posisies in die sin 'n ander voorstelling (betekenis) hê.
+> Boonop, tydens die token inbedding **word 'n ander laag van inbedings geskep** wat (in hierdie geval) die **absolute posisie van die woord in die opleidingssin** verteenwoordig. Op hierdie manier sal 'n woord in verskillende posisies in die sin 'n ander voorstelling (betekenis) hê.
 
 {{#ref}}
 3.-token-embeddings.md
@@ -43,7 +43,7 @@ Jy moet begin deur hierdie pos te lees vir 'n paar basiese konsepte wat jy moet 
 ## 4. Aandag Meganismes
 
 > [!TIP]
-> Die doel van hierdie vierde fase is baie eenvoudig: **Pas 'n paar aandag meganismes toe**. Hierdie gaan baie **herhaalde lae** wees wat gaan **die verhouding van 'n woord in die woordeskat met sy bure in die huidige sin wat gebruik word om die LLM op te lei, vasvang**.\
+> Die doel van hierdie vierde fase is baie eenvoudig: **Pas 'n paar aandag meganismes toe**. Hierdie gaan baie **herhaalde lae** wees wat die **verhouding van 'n woord in die woordeskat met sy bure in die huidige sin wat gebruik word om die LLM op te lei, vasvang**.\
 > 'n Baie lae word hiervoor gebruik, so 'n baie opleibare parameters gaan hierdie inligting vasvang.
 
 {{#ref}}
@@ -61,7 +61,7 @@ Jy moet begin deur hierdie pos te lees vir 'n paar basiese konsepte wat jy moet 
 5.-llm-architecture.md
 {{#endref}}
 
-## 6. Voor-Opleiding & Laai Modelle
+## 6. Voor-Opleiding & Laai modelle
 
 > [!TIP]
 > Die doel van hierdie sesde fase is baie eenvoudig: **Oefen die model van nuuts af**. Hiervoor sal die vorige LLM argitektuur gebruik word met 'n paar lusse wat oor die datastelle gaan met die gedefinieerde verliesfunksies en optimizer om al die parameters van die model op te lei.
@@ -73,7 +73,7 @@ Jy moet begin deur hierdie pos te lees vir 'n paar basiese konsepte wat jy moet 
 ## 7.0. LoRA Verbeterings in fyn-afstemming
 
 > [!TIP]
-> Die gebruik van **LoRA verminder baie die berekening** wat nodig is om **fyn af te stel** reeds opgelei modelle.
+> Die gebruik van **LoRA verminder baie die berekening** wat nodig is om **fyn af te stel** reeds opgeleide modelle.
 
 {{#ref}}
 7.0.-lora-improvements-in-fine-tuning.md
@@ -82,7 +82,7 @@ Jy moet begin deur hierdie pos te lees vir 'n paar basiese konsepte wat jy moet 
 ## 7.1. Fyn-Afstemming vir Kategorisering
 
 > [!TIP]
-> Die doel van hierdie afdeling is om te wys hoe om 'n reeds voor-opgeleide model fyn af te stel sodat die LLM eerder as om nuwe teks te genereer, die **waarskynlikhede van die gegewe teks wat in elkeen van die gegewe kategorieë gekategoriseer word** (soos of 'n teks spam is of nie) sal gee.
+> Die doel van hierdie afdeling is om te wys hoe om 'n reeds voor-opgeleide model fyn af te stel sodat in plaas daarvan om nuwe teks te genereer, die LLM die **waarskynlikhede van die gegewe teks om in elkeen van die gegewe kategorieë gekategoriseer te word** (soos of 'n teks spam is of nie) sal gee.
 
 {{#ref}}
 7.1.-fine-tuning-for-classification.md
@@ -91,7 +91,7 @@ Jy moet begin deur hierdie pos te lees vir 'n paar basiese konsepte wat jy moet 
 ## 7.2. Fyn-Afstemming om Instruksies te Volg
 
 > [!TIP]
-> Die doel van hierdie afdeling is om te wys hoe om **'n reeds voor-opgeleide model fyn af te stel om instruksies te volg** eerder as net om teks te genereer, byvoorbeeld, om op take te reageer as 'n chat bot.
+> Die doel van hierdie afdeling is om te wys hoe om **'n reeds voor-opgeleide model fyn af te stel om instruksies te volg** eerder as net om teks te genereer, byvoorbeeld, om op take as 'n chat bot te reageer.
 
 {{#ref}}
 7.2.-fine-tuning-to-follow-instructions.md

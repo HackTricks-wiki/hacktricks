@@ -56,8 +56,8 @@ of deur _Process Explorer_ van Sysinternals (kies proses en toegang "Sekuriteit"
 
 ### Plaaslike administrateur
 
-Wanneer 'n plaaslike administrateur aanmeld, **word twee toegangstokens geskep**: Een met administrateurregte en die ander een met normale regte. **Standaard**, wanneer hierdie gebruiker 'n proses uitvoer, word die een met **reguliere** (nie-administrateur) **regte gebruik**. Wanneer hierdie gebruiker probeer om **enige iets** **as administrateur** uit te voer ("Hardloop as Administrateur" byvoorbeeld) sal die **UAC** gebruik word om toestemming te vra.\
-As jy wil [**meer oor die UAC leer, lees hierdie bladsy**](../authentication-credentials-uac-and-efs/#uac)**.**
+Wanneer 'n plaaslike administrateur aanmeld, **word twee toegangstokens geskep**: Een met administrateurregte en die ander een met normale regte. **Standaard**, wanneer hierdie gebruiker 'n proses uitvoer, word die een met **gereelde** (nie-administrateur) **regte gebruik**. Wanneer hierdie gebruiker probeer om **enige iets uit te voer** **as administrateur** ("Hardloop as Administrateur" byvoorbeeld) sal die **UAC** gebruik word om toestemming te vra.\
+As jy wil [**meer oor die UAC leer lees hierdie bladsy**](../authentication-credentials-uac-and-efs/#uac)**.**
 
 ### Kredensiële gebruiker impersonasie
 
@@ -65,8 +65,8 @@ As jy **geldige kredensiale van enige ander gebruiker** het, kan jy 'n **nuwe aa
 ```
 runas /user:domain\username cmd.exe
 ```
-Die **toegangsteken** het ook 'n **verwysing** van die aanmeldsessies binne die **LSASS**, dit is nuttig as die proses toegang tot sommige voorwerpe van die netwerk benodig.\
-Jy kan 'n proses begin wat **verskillende akrediteer vir toegang tot netwerkdienste** gebruik met:
+Die **toegangsteken** het ook 'n **verwysing** na die aanmeldsessies binne die **LSASS**, dit is nuttig as die proses toegang tot sommige voorwerpe van die netwerk moet verkry.\
+Jy kan 'n proses begin wat **verskillende akrediteerbesonderhede vir toegang tot netwerkdienste gebruik** deur:
 ```
 runas /user:domain\username /netonly cmd.exe
 ```
@@ -76,7 +76,7 @@ Dit is nuttig as jy nuttige akrediteerbare inligting het om toegang te verkry to
 
 Daar is twee tipes tokens beskikbaar:
 
-- **Primêre Token**: Dit dien as 'n voorstelling van 'n proses se sekuriteitsakrediteerbare inligting. Die skepping en assosiasie van primêre tokens met prosesse is aksies wat verhoogde privileges vereis, wat die beginsel van privilege-skeiding beklemtoon. Gewoonlik is 'n verifikasiediens verantwoordelik vir token skepping, terwyl 'n aanmelddiens die assosiasie met die gebruiker se bedryfstelsel-skal hanteer. Dit is die moeite werd om te noem dat prosesse die primêre token van hul ouer proses by skepping erf.
+- **Primêre Token**: Dit dien as 'n voorstelling van 'n proses se sekuriteitsakrediteerbare inligting. Die skepping en assosiasie van primêre tokens met prosesse is aksies wat verhoogde privileges vereis, wat die beginsel van privilege-skeiding beklemtoon. Gewoonlik is 'n verifikasiediens verantwoordelik vir token-skepping, terwyl 'n aanmelddiens die assosiasie met die gebruiker se bedryfstelsel-skal hanteer. Dit is die moeite werd om op te let dat prosesse die primêre token van hul ouer proses by skepping erf.
 - **Impersonasie Token**: Bemagtig 'n bedienertoepassing om die kliënt se identiteit tydelik aan te neem om toegang tot veilige voorwerpe te verkry. Hierdie meganisme is gelaag in vier vlakke van werking:
 - **Anoniem**: Gee bediener toegang soortgelyk aan dié van 'n onbekende gebruiker.
 - **Identifikasie**: Laat die bediener toe om die kliënt se identiteit te verifieer sonder om dit vir voorwerp toegang te gebruik.

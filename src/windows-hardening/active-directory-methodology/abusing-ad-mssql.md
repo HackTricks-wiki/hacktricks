@@ -7,7 +7,7 @@
 
 ### Python
 
-Die [MSSQLPwner](https://github.com/ScorpionesLabs/MSSqlPwner) hulpmiddel is gebaseer op impacket, en laat ook outentisering toe met behulp van kerberos kaartjies, en aanval deur middel van skakelkettings.
+Die [MSSQLPwner](https://github.com/ScorpionesLabs/MSSqlPwner) hulpmiddel is gebaseer op impacket, en laat ook outentisering toe met kerberos kaartjies, en aanval deur middel van skakelkettings.
 
 <figure><img src="https://raw.githubusercontent.com/ScorpionesLabs/MSSqlPwner/main/assets/interractive.png"></figure>
 ```shell
@@ -108,7 +108,7 @@ Get-Content c:\temp\computers.txt | Get-SQLInstanceScanUDP –Verbose –Threads
 #The discovered MSSQL servers must be on the file: C:\temp\instances.txt
 Get-SQLInstanceFile -FilePath C:\temp\instances.txt | Get-SQLConnectionTest -Verbose -Username test -Password test
 ```
-### Opname vanaf binne die domein
+### Opname van binne die domein
 ```powershell
 # Get local MSSQL instance (if any)
 Get-SQLInstanceLocal
@@ -156,9 +156,9 @@ Kontroleer in die bladsy genoem in die **volgende afdeling hoe om dit handmatig 
 ../../network-services-pentesting/pentesting-mssql-microsoft-sql-server/
 {{#endref}}
 
-## MSSQL Betroubare Skakels
+## MSSQL Vertroude Skakels
 
-As 'n MSSQL-instansie betroubaar (databasis skakel) is deur 'n ander MSSQL-instansie. As die gebruiker bevoegdhede oor die betroubare databasis het, sal hy in staat wees om **die vertrouensverhouding te gebruik om navrae ook in die ander instansie uit te voer**. Hierdie vertroue kan geketting word en op 'n sekere punt mag die gebruiker in staat wees om 'n verkeerd geconfigureerde databasis te vind waar hy opdragte kan uitvoer.
+As 'n MSSQL-instansie vertrou (databasis skakel) deur 'n ander MSSQL-instansie. As die gebruiker bevoegdhede oor die vertroude databasis het, sal hy in staat wees om **die vertrouensverhouding te gebruik om navrae ook in die ander instansie uit te voer**. Hierdie vertroue kan geketting word en op 'n sekere punt mag die gebruiker in staat wees om 'n verkeerd geconfigureerde databasis te vind waar hy opdragte kan uitvoer.
 
 **Die skakels tussen databasisse werk selfs oor woudvertroue.**
 
@@ -210,7 +210,7 @@ Van **Linux** kan jy 'n MSSQL konsole-skal met **sqsh** en **mssqlclient.py** ve
 
 Van **Windows** kan jy ook die skakels vind en opdragte handmatig uitvoer met 'n **MSSQL kliënt soos** [**HeidiSQL**](https://www.heidisql.com)
 
-_Registrasie met Windows-outeentifikasie:_
+_Registrasie met Windows-verifikasie:_
 
 ![](<../../images/image (808).png>)
 

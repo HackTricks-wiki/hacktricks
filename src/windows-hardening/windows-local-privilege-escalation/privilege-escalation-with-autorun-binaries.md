@@ -26,7 +26,7 @@ schtasks /Create /RU "SYSTEM" /SC ONLOGON /TN "SchedPE" /TR "cmd /c net localgro
 ```
 ## Gids
 
-Alle die binaries wat in die **Startup-gidse geleë is, gaan by opstart uitgevoer word**. Die algemene opstartgidse is diegene wat hieronder gelys is, maar die opstartgids word in die registrasie aangedui. [Read this to learn where.](privilege-escalation-with-autorun-binaries.md#startup-path)
+Alle die binaries wat in die **Startup-gidse geleë is, gaan by opstart uitgevoer word**. Die algemene opstartgidse is diegene wat hieronder gelys is, maar die opstartgids word in die register aangedui. [Read this to learn where.](privilege-escalation-with-autorun-binaries.md#startup-path)
 ```bash
 dir /b "C:\Documents and Settings\All Users\Start Menu\Programs\Startup" 2>nul
 dir /b "C:\Documents and Settings\%username%\Start Menu\Programs\Startup" 2>nul
@@ -38,7 +38,7 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 ## Registrasie
 
 > [!NOTE]
-> [Nota van hier](https://answers.microsoft.com/en-us/windows/forum/all/delete-registry-key/d425ae37-9dcc-4867-b49c-723dcd15147f): Die **Wow6432Node** registrasie-invoer dui aan dat jy 'n 64-bis Windows weergawe gebruik. Die bedryfstelsel gebruik hierdie sleutel om 'n aparte weergawe van HKEY_LOCAL_MACHINE\SOFTWARE vir 32-bis toepassings wat op 64-bis Windows weergawes loop, te vertoon.
+> [Nota hier vandaan](https://answers.microsoft.com/en-us/windows/forum/all/delete-registry-key/d425ae37-9dcc-4867-b49c-723dcd15147f): Die **Wow6432Node** registrasie-invoer dui aan dat jy 'n 64-bis Windows weergawe gebruik. Die bedryfstelsel gebruik hierdie sleutel om 'n aparte weergawe van HKEY_LOCAL_MACHINE\SOFTWARE vir 32-bis toepassings wat op 64-bis Windows weergawes loop, te vertoon.
 
 ### Loop
 
@@ -56,7 +56,7 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 - `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Install\Software\Microsoft\Windows\CurrentVersion\Runonce`
 - `HKLM\Software\Microsoft\Windows NT\CurrentVersion\Terminal Server\Install\Software\Microsoft\Windows\CurrentVersion\RunonceEx`
 
-Registrasie sleutels bekend as **Run** en **RunOnce** is ontwerp om programme outomaties uit te voer elke keer wanneer 'n gebruiker in die stelsel aanmeld. Die opdraglyn wat as 'n sleutel se datavalue toegeken word, is beperk tot 260 karakters of minder.
+Registrasie sleutels bekend as **Run** en **RunOnce** is ontwerp om outomaties programme uit te voer elke keer wanneer 'n gebruiker in die stelsel aanmeld. Die opdraglyn wat as 'n sleutel se datavalue toegeken word, is beperk tot 260 karakters of minder.
 
 **Diens loop** (kan outomatiese opstart van dienste tydens opstart beheer):
 
@@ -148,7 +148,7 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Wow6432Node\Microsoft\Windows\Ru
 Kortpaaie wat in die **Startup** gids geplaas word, sal outomaties dienste of toepassings aktiveer om te begin tydens gebruikersaanmelding of stelselhervatting. Die ligging van die **Startup** gids is in die register gedefinieer vir beide die **Local Machine** en **Current User** skope. Dit beteken enige kortpad wat by hierdie gespesifiseerde **Startup** plekke gevoeg word, sal verseker dat die gekoppelde diens of program begin na die aanmeld- of herlaai-proses, wat dit 'n eenvoudige metode maak om programme outomaties te skeduleer.
 
 > [!NOTE]
-> As jy enige \[User] Shell Folder onder **HKLM** kan oorskryf, sal jy in staat wees om dit na 'n gids wat deur jou beheer word, te wys en 'n backdoor te plaas wat uitgevoer sal word wanneer 'n gebruiker in die stelsel aanmeld, wat voorregte sal verhoog.
+> As jy enige \[User] Shell Folder onder **HKLM** kan oorskryf, sal jy in staat wees om dit na 'n gids wat deur jou beheer word, te wys en 'n backdoor te plaas wat uitgevoer sal word wanneer 'n gebruiker in die stelsel aanmeld, wat privaathede sal verhoog.
 ```bash
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" /v "Common Startup"
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" /v "Common Startup"
@@ -201,7 +201,7 @@ Stappe om 'n opstartopsie te skep vir outomatiese begin in "Veilige Modus met Op
 5. Herstel die oorspronklike lêer eienskappe: `attrib c:\boot.ini +r +s +h`
 
 - **Exploit 1:** Die verandering van die **AlternateShell** register sleutel laat vir 'n pasgemaakte opdragskil opstelling toe, moontlik vir ongeoorloofde toegang.
-- **Exploit 2 (PATH Skryf Toestemmings):** Om skryftoestemmings te hê na enige deel van die stelsel **PATH** veranderlike, veral voor `C:\Windows\system32`, laat jou toe om 'n pasgemaakte `cmd.exe` uit te voer, wat 'n agterdeur kan wees as die stelsel in Veilige Modus begin.
+- **Exploit 2 (PATH Skryf Toestemmings):** Om skryf toestemmings te hê na enige deel van die stelsel **PATH** veranderlike, veral voor `C:\Windows\system32`, laat jou toe om 'n pasgemaakte `cmd.exe` uit te voer, wat 'n agterdeur kan wees as die stelsel in Veilige Modus begin.
 - **Exploit 3 (PATH en boot.ini Skryf Toestemmings):** Skryf toegang tot `boot.ini` stel outomatiese Veilige Modus opstart in staat, wat ongeoorloofde toegang op die volgende herbegin vergemaklik.
 
 Om die huidige **AlternateShell** instelling te kontroleer, gebruik hierdie opdragte:
@@ -230,9 +230,9 @@ Binne hierdie sleutels bestaan verskeie subsleutels, elk wat ooreenstem met 'n s
 **Sekuriteitsinsigte:**
 
 - Om 'n sleutel te wysig of na 'n sleutel te skryf waar **`IsInstalled`** op `"1"` gestel is met 'n spesifieke **`StubPath`** kan lei tot ongeoorloofde opdraguitvoering, moontlik vir privilige-escalasie.
-- Om die binêre lêer wat in enige **`StubPath`** waarde verwys, te verander kan ook privilige-escalasie bereik, gegewe voldoende toestemmings.
+- Om die binêre lêer wat in enige **`StubPath`** waarde verwys, te verander kan ook privilige-escalasie bereik, gegewe voldoende regte.
 
-Om die **`StubPath`** konfigurasies oor Active Setup komponente te inspekteer, kan hierdie opdragte gebruik word:
+Om die **`StubPath`** konfigurasies oor Active Setup komponente te ondersoek, kan hierdie opdragte gebruik word:
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Active Setup\Installed Components" /s /v StubPath
 reg query "HKCU\SOFTWARE\Microsoft\Active Setup\Installed Components" /s /v StubPath
@@ -293,7 +293,7 @@ HKLM\Software\Microsoft\Wow6432Node\Windows NT\CurrentVersion\Image File Executi
 ```
 ## SysInternals
 
-Let daarop dat al die webwerwe waar jy autoruns kan vind **reeds deur**[ **winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe) gesoek is. egter, vir 'n **meer omvattende lys van outomaties uitgevoerde** lêers kan jy [autoruns ](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns) van sysinternals gebruik:
+Let daarop dat al die webwerwe waar jy autoruns kan vind **reeds deur**[ **winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe) gesoek is. egter, vir 'n **meer omvattende lys van outomaties uitgevoerde** lêers kan jy [autoruns ](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns) van systinternals gebruik:
 ```
 autorunsc.exe -m -nobanner -a * -ct /accepteula
 ```

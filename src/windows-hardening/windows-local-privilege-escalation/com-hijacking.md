@@ -4,13 +4,13 @@
 
 ### Soek na nie-bestaande COM-komponente
 
-Aangesien die waardes van HKCU deur die gebruikers gewysig kan word, kan **COM Hijacking** as 'n **volhardende meganisme** gebruik word. Deur `procmon` te gebruik, is dit maklik om gesoekte COM-registers te vind wat nie bestaan nie, wat 'n aanvaller kan skep om volharding te bewerkstellig. Filters:
+Aangesien die waardes van HKCU deur die gebruikers gewysig kan word, kan **COM Hijacking** as 'n **volhardende meganisme** gebruik word. Met `procmon` is dit maklik om gesoekte COM-registers te vind wat nie bestaan nie, wat 'n aanvaller kan skep om volhardend te wees. Filters:
 
 - **RegOpenKey** operasies.
 - waar die _Result_ **NAAM NIE GEVIND** is.
 - en die _Path_ eindig met **InprocServer32**.
 
-Sodra jy besluit het watter nie-bestaande COM om te verpersoonlik, voer die volgende opdragte uit. _Wees versigtig as jy besluit om 'n COM te verpersoonlik wat elke paar sekondes gelaai word, aangesien dit oorbodig kan wees._
+Sodra jy besluit het watter nie-bestaande COM om te verteenwoordig, voer die volgende opdragte uit. _Wees versigtig as jy besluit om 'n COM te verteenwoordig wat elke paar sekondes gelaai word, aangesien dit oorbodig kan wees._
 ```bash
 New-Item -Path "HKCU:Software\Classes\CLSID" -Name "{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}"
 New-Item -Path "HKCU:Software\Classes\CLSID\{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}" -Name "InprocServer32" -Value "C:\beacon.dll"
@@ -51,7 +51,7 @@ Write-Host
 
 Deur die uitset te kontroleer, kan jy een kies wat **elke keer 'n gebruiker aanmeld** gaan uitgevoer word, byvoorbeeld.
 
-Nou, deur te soek na die CLSID **{1936ED8A-BD93-3213-E325-F38D112938EF}** in **HKEY\_**_**CLASSES\_**_**ROOT\CLSID** en in HKLM en HKCU, sal jy gewoonlik vind dat die waarde nie in HKCU bestaan nie.
+Nou, deur die CLSID **{1936ED8A-BD93-3213-E325-F38D112938EF}** in **HKEY\_**_**CLASSES\_**_**ROOT\CLSID** en in HKLM en HKCU te soek, sal jy gewoonlik vind dat die waarde nie in HKCU bestaan nie.
 ```bash
 # Exists in HKCR\CLSID\
 Get-ChildItem -Path "Registry::HKCR\CLSID\{1936ED8A-BD93-3213-E325-F38D112938EF}"

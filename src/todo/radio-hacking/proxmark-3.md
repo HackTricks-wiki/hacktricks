@@ -31,11 +31,11 @@ proxmark3> hf mf eset 01 000102030405060708090a0b0c0d0e0f # Write those bytes to
 proxmark3> hf mf eget 01 # Read block 1
 proxmark3> hf mf wrbl 01 B FFFFFFFFFFFF 000102030405060708090a0b0c0d0e0f # Write to the card
 ```
-Die Proxmark3 maak dit moontlik om ander aksies uit te voer soos **afluister** 'n **Tag na Leser kommunikasie** om te probeer om sensitiewe data te vind. In hierdie kaart kan jy net die kommunikasie snuffel en die gebruikte sleutel bereken omdat die **kryptografiese operasies wat gebruik word swak is** en deur die plain en cipher teks te ken, kan jy dit bereken (`mfkey64` tool).
+Die Proxmark3 maak dit moontlik om ander aksies uit te voer soos **afluister** van 'n **Tag na Leser kommunikasie** om te probeer om sensitiewe data te vind. In hierdie kaart kan jy net die kommunikasie snuffel en die gebruikte sleutel bereken omdat die **kryptografiese operasies wat gebruik word swak is** en deur die plain en cipher teks te ken, kan jy dit bereken (`mfkey64` tool).
 
 ### Rauwe Opdragte
 
-IoT-stelsels gebruik soms **nie-gemerkte of nie-kommersiële tags**. In hierdie geval kan jy Proxmark3 gebruik om pasgemaakte **rauwe opdragte na die tags** te stuur.
+IoT-stelsels gebruik soms **nie-gemerkte of nie-kommersiële etikette**. In hierdie geval kan jy Proxmark3 gebruik om pasgemaakte **rauwe opdragte na die etikette** te stuur.
 ```bash
 proxmark3> hf search UID : 80 55 4b 6c ATQA : 00 04
 SAK : 08 [2]
@@ -45,11 +45,11 @@ No chinese magic backdoor command detected
 Prng detection: WEAK
 Valid ISO14443A Tag Found - Quiting Search
 ```
-Met hierdie inligting kan jy probeer om inligting oor die kaart en oor die manier om met dit te kommunikeer, te soek. Proxmark3 laat jou toe om rou opdragte te stuur soos: `hf 14a raw -p -b 7 26`
+Met hierdie inligting kan jy probeer om inligting oor die kaart en oor die manier om daarmee te kommunikeer, te soek. Proxmark3 laat jou toe om rou opdragte te stuur soos: `hf 14a raw -p -b 7 26`
 
 ### Skripte
 
-Die Proxmark3 sagteware kom met 'n vooraf gelaaide lys van **outomatiseringsskripte** wat jy kan gebruik om eenvoudige take uit te voer. Om die volledige lys te verkry, gebruik die `script list` opdrag. Gebruik dan die `script run` opdrag, gevolg deur die skrip se naam:
+Die Proxmark3 sagteware kom met 'n vooraf gelaaide lys van **outomatiseringsskripte** wat jy kan gebruik om eenvoudige take uit te voer. Om die volledige lys te verkry, gebruik die `script list` opdrag. Gebruik dan die `script run` opdrag, gevolg deur die naam van die skrip:
 ```
 proxmark3> script run mfkeys
 ```

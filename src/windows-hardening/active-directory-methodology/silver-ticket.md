@@ -8,7 +8,7 @@
 
 Die **Silver Ticket** aanval behels die uitbuiting van dienskaartjies in Active Directory (AD) omgewings. Hierdie metode staat op **die verkryging van die NTLM-hash van 'n diensrekening**, soos 'n rekenaarrekening, om 'n Ticket Granting Service (TGS) kaartjie te vervals. Met hierdie vervalste kaartjie kan 'n aanvaller toegang verkry tot spesifieke dienste op die netwerk, **om enige gebruiker na te boots**, tipies met die doel om administratiewe regte te verkry. Dit word beklemtoon dat die gebruik van AES-sleutels vir die vervalsing van kaartjies veiliger en minder opspoorbaar is.
 
-Vir kaartjie-ontwerp word verskillende gereedskap gebruik, gebaseer op die bedryfstelsel:
+Vir kaartjie-ontwikkeling word verskillende gereedskap gebruik, gebaseer op die bedryfstelsel:
 
 ### On Linux
 ```bash
@@ -28,7 +28,7 @@ mimikatz.exe "kerberos::ptt <TICKET_FILE>"
 # Obtain a shell
 .\PsExec.exe -accepteula \\<TARGET> cmd
 ```
-Die CIFS-diens word beklemtoon as 'n algemene teiken om toegang tot die slagoffer se lêerstelsel te verkry, maar ander dienste soos HOST en RPCSS kan ook uitgebuit word vir take en WMI-vrae.
+Die CIFS-diens word uitgelig as 'n algemene teiken om toegang tot die slagoffer se lêerstelsel te verkry, maar ander dienste soos HOST en RPCSS kan ook uitgebuit word vir take en WMI-vrae.
 
 ## Beskikbare Dienste
 
@@ -38,9 +38,9 @@ Die CIFS-diens word beklemtoon as 'n algemene teiken om toegang tot die slagoffe
 | PowerShell Remoting                        | <p>HOST</p><p>HTTP</p><p>Afhangende van OS ook:</p><p>WSMAN</p><p>RPCSS</p> |
 | WinRM                                      | <p>HOST</p><p>HTTP</p><p>In sommige gevalle kan jy net vra vir: WINRM</p> |
 | Geplande Take                              | HOST                                                                     |
-| Windows Lêer Deel, ook psexec              | CIFS                                                                     |
+| Windows Lêer Deel, ook psexec             | CIFS                                                                     |
 | LDAP operasies, ingesluit DCSync          | LDAP                                                                     |
-| Windows Remote Server Administrasie Hulpmiddels | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                       |
+| Windows Remote Server Administrasie Gereedskap | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                       |
 | Goue Tickets                               | krbtgt                                                                   |
 
 Met **Rubeus** kan jy **vra vir al** hierdie kaarte met die parameter:
@@ -55,11 +55,11 @@ Met **Rubeus** kan jy **vra vir al** hierdie kaarte met die parameter:
 
 ## Misbruik van Diens kaarte
 
-In die volgende voorbeelde kom ons veronderstel dat die kaart verkry is deur die administrateur rekening na te volg.
+In die volgende voorbeelde kom ons veronderstel dat die kaart verkry is deur die administrateurrekening na te volg.
 
 ### CIFS
 
-Met hierdie kaart sal jy in staat wees om toegang tot die `C$` en `ADMIN$` gids via **SMB** te verkry (as hulle blootgestel is) en lêers na 'n deel van die afstand lêerstelsel te kopieer deur net iets soos te doen:
+Met hierdie kaart sal jy in staat wees om toegang te verkry tot die `C$` en `ADMIN$` gids via **SMB** (as hulle blootgestel is) en lêers na 'n deel van die afstand lêerstelsel te kopieer deur iets soos te doen:
 ```bash
 dir \\vulnerable.computer\C$
 dir \\vulnerable.computer\ADMIN$
@@ -73,7 +73,7 @@ U sal ook in staat wees om 'n shell binne die gasheer te verkry of arbitrêre op
 
 ### GASHER
 
-Met hierdie toestemming kan jy geskeduleerde take in afstandrekenaars genereer en arbitrêre opdragte uitvoer:
+Met hierdie toestemming kan u geskeduleerde take in afstandrekenaars genereer en arbitrêre opdragte uitvoer:
 ```bash
 #Check you have permissions to use schtasks over a remote server
 schtasks /S some.vuln.pc

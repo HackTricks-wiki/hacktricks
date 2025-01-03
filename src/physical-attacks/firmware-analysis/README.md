@@ -60,7 +60,7 @@ Of [**binvis.io**](https://binvis.io/#/) ([code](https://code.google.com/archive
 
 ### Verkryging van die Lêerstelsel
 
-Met die vorige kommentaar gereedskap soos `binwalk -ev <bin>` behoort jy in staat te wees om die **lêerstelsel** te **onttrek**.\
+Met die vorige genoemde gereedskap soos `binwalk -ev <bin>` behoort jy in staat te wees om die **lêerstelsel** te **onttrek**.\
 Binwalk onttrek dit gewoonlik binne 'n **map wat as die lêerstelseltipe genoem word**, wat gewoonlik een van die volgende is: squashfs, ubifs, romfs, rootfs, jffs2, yaffs2, cramfs, initramfs.
 
 #### Handmatige Lêerstelsel Onttrekking
@@ -128,11 +128,11 @@ fdisk -lu <bin> #lists partitions and filesystems, if there are multiple
 ```
 Om die versleutelingstatus van die beeld te evalueer, word die **entropy** nagegaan met `binwalk -E <bin>`. Lae entropy dui op 'n gebrek aan versleuteling, terwyl hoë entropy moontlike versleuteling of kompressie aandui.
 
-Vir die onttrekking van **ingebedde lêers** word gereedskap en hulpbronne soos die **file-data-carving-recovery-tools** dokumentasie en **binvis.io** vir lêerinspeksie aanbeveel.
+Vir die onttrekking van **ingebedde lêers**, word gereedskap en hulpbronne soos die **file-data-carving-recovery-tools** dokumentasie en **binvis.io** vir lêerinspeksie aanbeveel.
 
 ### Onttrekking van die Lêerstelsel
 
-Met `binwalk -ev <bin>` kan 'n mens gewoonlik die lêerstelsel onttrek, dikwels in 'n gids wat na die lêerstelseltipe genoem is (bv. squashfs, ubifs). Wanneer **binwalk** egter nie die lêerstelseltipe kan herken nie weens ontbrekende magiese bytes, is handmatige onttrekking nodig. Dit behels die gebruik van `binwalk` om die lêerstelseloffset te lokaliseer, gevolg deur die `dd` opdrag om die lêerstelsel uit te sny:
+Met `binwalk -ev <bin>` kan 'n mens gewoonlik die lêerstelsel onttrek, dikwels in 'n gids wat na die lêerstelseltipe genoem is (bv. squashfs, ubifs). Wanneer **binwalk** egter nie die lêerstelseltipe kan herken weens ontbrekende magic bytes nie, is handmatige onttrekking nodig. Dit behels die gebruik van `binwalk` om die lêerstelseloffset te lokaliseer, gevolg deur die `dd` opdrag om die lêerstelsel uit te sny:
 ```bash
 $ binwalk DIR850L_REVB.bin
 
@@ -142,20 +142,20 @@ Daarna, afhangende van die lêerstelseltipe (bv. squashfs, cpio, jffs2, ubifs), 
 
 ### Lêerstelselanalise
 
-Met die lêerstelsel onttrek, begin die soektog na sekuriteitsfoute. Aandag word gegee aan onveilige netwerk daemons, hardgecodeerde akrediteer, API eindpunte, opdatering bediener funksies, nie-gecompileerde kode, opstart skripte, en gecompileerde binêre vir off-line analise.
+Met die lêerstelsel onttrek, begin die soektog na sekuriteitsfoute. Aandag word gegee aan onveilige netwerkdaemons, hardgecodeerde akrediteerbesonderhede, API-eindpunte, opdateringsbedienerfunksies, nie-gecompileerde kode, opstartskripte, en gecompileerde binêre vir offlinanalise.
 
 **Belangrike plekke** en **items** om te ondersoek sluit in:
 
-- **etc/shadow** en **etc/passwd** vir gebruikers akrediteer
+- **etc/shadow** en **etc/passwd** vir gebruikersakrediteerbesonderhede
 - SSL sertifikate en sleutels in **etc/ssl**
-- Konfigurasie en skrip lêers vir potensiële kwesbaarhede
+- Konfigurasie- en skriplêers vir potensiële kwesbaarhede
 - Ingebedde binêre vir verdere analise
-- Algemene IoT toestel web bedieners en binêre
+- Algemene IoT-toestel webbedieners en binêre
 
 Verskeie gereedskap help om sensitiewe inligting en kwesbaarhede binne die lêerstelsel te ontdek:
 
 - [**LinPEAS**](https://github.com/carlospolop/PEASS-ng) en [**Firmwalker**](https://github.com/craigz28/firmwalker) vir sensitiewe inligting soektog
-- [**The Firmware Analysis and Comparison Tool (FACT)**](https://github.com/fkie-cad/FACT_core) vir omvattende firmware analise
+- [**The Firmware Analysis and Comparison Tool (FACT)**](https://github.com/fkie-cad/FACT_core) vir omvattende firmware-analise
 - [**FwAnalyzer**](https://github.com/cruise-automation/fwanalyzer), [**ByteSweep**](https://gitlab.com/bytesweep/bytesweep), [**ByteSweep-go**](https://gitlab.com/bytesweep/bytesweep-go), en [**EMBA**](https://github.com/e-m-b-a/emba) vir statiese en dinamiese analise
 
 ### Sekuriteitskontroles op Gecompileerde Binêre
@@ -164,11 +164,11 @@ Sowel die bronkode as gecompileerde binêre wat in die lêerstelsel gevind word,
 
 ## Emulering van Firmware vir Dynamiese Analise
 
-Die proses van emulering van firmware stel **dynamiese analise** in staat of van 'n toestel se werking of 'n individuele program. Hierdie benadering kan uitdagings ondervind met hardeware of argitektuur afhanklikhede, maar die oordrag van die wortel lêerstelsel of spesifieke binêre na 'n toestel met ooreenstemmende argitektuur en endianness, soos 'n Raspberry Pi, of na 'n voorafgeboude virtuele masjien, kan verdere toetsing fasiliteer.
+Die proses van emulering van firmware stel **dynamiese analise** in staat van 'n toestel se werking of 'n individuele program. Hierdie benadering kan uitdagings ondervind met hardeware of argitektuurafhanklikhede, maar die oordrag van die wortellêerstelsel of spesifieke binêre na 'n toestel met ooreenstemmende argitektuur en endianness, soos 'n Raspberry Pi, of na 'n voorafgeboude virtuele masjien, kan verdere toetsing fasiliteer.
 
 ### Emulering van Individuele Binêre
 
-Vir die ondersoek van enkele programme, is dit noodsaaklik om die program se endianness en CPU argitektuur te identifiseer.
+Vir die ondersoek van enkele programme, is dit noodsaaklik om die program se endianness en CPU-argitektuur te identifiseer.
 
 #### Voorbeeld met MIPS Argitektuur
 
@@ -180,27 +180,27 @@ En om die nodige emulasie-instrumente te installeer:
 ```bash
 sudo apt-get install qemu qemu-user qemu-user-static qemu-system-arm qemu-system-mips qemu-system-x86 qemu-utils
 ```
-Vir MIPS (big-endian) word `qemu-mips` gebruik, en vir little-endian binêre sou `qemu-mipsel` die keuse wees.
+Vir MIPS (big-endian) word `qemu-mips` gebruik, en vir little-endian binaries sou `qemu-mipsel` die keuse wees.
 
 #### ARM Argitektuur Emulasie
 
-Vir ARM binêre is die proses soortgelyk, met die `qemu-arm` emulator wat gebruik word vir emulasie.
+Vir ARM binaries is die proses soortgelyk, met die `qemu-arm` emulator wat gebruik word vir emulasie.
 
 ### Volle Stelsel Emulasie
 
-Gereedskap soos [Firmadyne](https://github.com/firmadyne/firmadyne), [Firmware Analysis Toolkit](https://github.com/attify/firmware-analysis-toolkit), en ander, fasiliteer volle firmware emulasie, outomatiseer die proses en help met dinamiese analise.
+Gereedskap soos [Firmadyne](https://github.com/firmadyne/firmadyne), [Firmware Analysis Toolkit](https://github.com/attify/firmware-analysis-toolkit), en ander, fasiliteer volle firmware emulasie, wat die proses outomatiseer en help met dinamiese analise.
 
 ## Dinamiese Analise in Praktyk
 
-In hierdie stadium word 'n werklike of geëmuleerde toestelomgewing vir analise gebruik. Dit is noodsaaklik om skulp toegang tot die OS en lêerstelsel te handhaaf. Emulasie mag nie perfek hardeware-interaksies naboots nie, wat af en toe emulasie herbegin vereis. Analise moet die lêerstelsel herbesoek, blootgestelde webbladsye en netwerkdienste benut, en opstartlaaier kwesbaarhede verken. Firmware integriteitstoetse is krities om potensiële agterdeur kwesbaarhede te identifiseer.
+Op hierdie stadium word 'n werklike of geëmuleerde toestelomgewing vir analise gebruik. Dit is noodsaaklik om shell-toegang tot die OS en lêerstelsel te handhaaf. Emulasie mag nie perfek hardeware-interaksies naboots nie, wat af en toe emulasie-herstart vereis. Analise moet die lêerstelsel herbesoek, blootgestelde webbladsye en netwerkdienste benut, en opstartlader kwesbaarhede verken. Firmware integriteitstoetse is krities om potensiële agterdeur kwesbaarhede te identifiseer.
 
 ## Tydren Analise Tegnieke
 
-Tydren analise behels interaksie met 'n proses of binêre in sy bedryfsomgewing, met behulp van gereedskap soos gdb-multiarch, Frida, en Ghidra om breekpunte in te stel en kwesbaarhede deur fuzzing en ander tegnieke te identifiseer.
+Tydren analise behels interaksie met 'n proses of binary in sy bedryfsomgewing, met behulp van gereedskap soos gdb-multiarch, Frida, en Ghidra om breekpunte in te stel en kwesbaarhede deur fuzzing en ander tegnieke te identifiseer.
 
-## Binêre Exploitatie en Bewys-van-Konsep
+## Binary Exploitatie en Bewys-van-Konsep
 
-Om 'n PoC vir geïdentifiseerde kwesbaarhede te ontwikkel, vereis 'n diep begrip van die teikenargitektuur en programmering in laer vlak tale. Binêre tydren beskermings in ingebedde stelsels is skaars, maar wanneer dit teenwoordig is, mag tegnieke soos Return Oriented Programming (ROP) nodig wees.
+Om 'n PoC vir geïdentifiseerde kwesbaarhede te ontwikkel, vereis 'n diep begrip van die teikenargitektuur en programmering in laervlak tale. Binary tydren beskermings in ingebedde stelsels is skaars, maar wanneer dit teenwoordig is, mag tegnieke soos Return Oriented Programming (ROP) nodig wees.
 
 ## Voorbereide Bedryfstelsels vir Firmware Analise
 
@@ -228,13 +228,4 @@ Om kwesbaarhede in firmware te ontdek, gebruik die volgende kwesbare firmware pr
 - Damn Vulnerable IoT Device (DVID)
 - [https://github.com/Vulcainreo/DVID](https://github.com/Vulcainreo/DVID)
 
-## Verwysings
-
-- [https://scriptingxss.gitbook.io/firmware-security-testing-methodology/](https://scriptingxss.gitbook.io/firmware-security-testing-methodology/)
-- [Practical IoT Hacking: The Definitive Guide to Attacking the Internet of Things](https://www.amazon.co.uk/Practical-IoT-Hacking-F-Chantzis/dp/1718500904)
-
-## Opleiding en Sertifikaat
-
-- [https://www.attify-store.com/products/offensive-iot-exploitation](https://www.attify-store.com/products/offensive-iot-exploitation)
-
-{{#include ../../banners/hacktricks-training.md}}
+## Ver

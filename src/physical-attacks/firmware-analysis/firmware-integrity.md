@@ -19,7 +19,7 @@ Die **aangepaste firmware en/of gecompileerde binêre kan opgelaai word om integ
 As 'n root shell reeds verkry is deur dinamiese analise, bootloader manipulasie, of hardeware sekuriteitstoetsing, kan voorafgecompileerde kwaadwillige binêre soos implante of omgekeerde shells uitgevoer word. Geoutomatiseerde payload/implant gereedskap soos die Metasploit raamwerk en 'msfvenom' kan benut word met die volgende stappe:
 
 1. Die teiken firmware argitektuur en endianness moet geïdentifiseer word.
-2. Msfvenom kan gebruik word om die teiken payload, aanvaller gasheer IP, luister poortnommer, lêertype, argitektuur, platform, en die uitvoer lêer te spesifiseer.
+2. Msfvenom kan gebruik word om die teiken payload, aanvaller gasheer IP, luister poortnommer, lêertype, argitektuur, platform, en die uitvoer lêer spesifiek aan te dui.
 3. Die payload kan na die gecompromitteerde toestel oorgedra word en verseker word dat dit uitvoeringsregte het.
 4. Metasploit kan voorberei word om inkomende versoeke te hanteer deur msfconsole te begin en die instellings volgens die payload te konfigureer.
 5. Die meterpreter omgekeerde shell kan op die gecompromitteerde toestel uitgevoer word.

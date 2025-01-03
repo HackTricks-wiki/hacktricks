@@ -19,7 +19,7 @@
 
 ### [Logging/AV enumerasie](windows-local-privilege-escalation/#enumeration)
 
-- [ ] Kontroleer [**Auditing**](windows-local-privilege-escalation/#audit-settings) en [**WEF**](windows-local-privilege-escalation/#wef) instellings
+- [ ] Kontroleer [**Oudit**](windows-local-privilege-escalation/#audit-settings) en [**WEF**](windows-local-privilege-escalation/#wef) instellings
 - [ ] Kontroleer [**LAPS**](windows-local-privilege-escalation/#laps)
 - [ ] Kontroleer of [**WDigest**](windows-local-privilege-escalation/#wdigest) aktief is
 - [ ] [**LSA Beskerming**](windows-local-privilege-escalation/#lsa-protection)?
@@ -46,13 +46,13 @@
 
 - [ ] Prosesse binaries [**lêer en vouer toestemmings**](windows-local-privilege-escalation/#file-and-folder-permissions)
 - [ ] [**Geheue Wagwoord mynbou**](windows-local-privilege-escalation/#memory-password-mining)
-- [ ] [**Onveilige GUI apps**](windows-local-privilege-escalation/#insecure-gui-apps)
+- [ ] [**Onveilige GUI toepassings**](windows-local-privilege-escalation/#insecure-gui-apps)
 - [ ] Steel kredensiale met **interessante prosesse** via `ProcDump.exe` ? (firefox, chrome, ens ...)
 
 ### [Dienste](windows-local-privilege-escalation/#services)
 
 - [ ] [Kan jy **enige diens** **wysig**?](windows-local-privilege-escalation/#permissions)
-- [ ] [Kan jy die **binaire** wat deur enige **diens** **uitgevoer** word **wysig**?](windows-local-privilege-escalation/#modify-service-binary-path)
+- [ ] [Kan jy die **binaire** wat deur enige **diens** **uitgevoer** word, **wysig**?](windows-local-privilege-escalation/#modify-service-binary-path)
 - [ ] [Kan jy die **register** van enige **diens** **wysig**?](windows-local-privilege-escalation/#services-registry-modify-permissions)
 - [ ] [Kan jy voordeel trek uit enige **ongekwote diens** binaire **pad**?](windows-local-privilege-escalation/#unquoted-service-paths)
 
@@ -107,7 +107,7 @@
 
 - [ ] Het jy toegang tot enige hanteerder van 'n proses wat deur die administrateur uitgevoer word?
 
-### [Pyp Kliënt Imersonasie](windows-local-privilege-escalation/#named-pipe-client-impersonation)
+### [Pyp Kliënt Impersonasie](windows-local-privilege-escalation/#named-pipe-client-impersonation)
 
 - [ ] Kontroleer of jy dit kan misbruik
 

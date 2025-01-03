@@ -10,7 +10,7 @@ As daar op 'n stadium binne 'n webblad enige sensitiewe inligting op 'n GET-vers
 
 ## Versagting
 
-Jy kan die blaier laat volg 'n **Verwysingsbeleid** wat die sensitiewe inligting kan **verhoed** om na ander webtoepassings gestuur te word:
+Jy kan die blaaiers laat volg 'n **Verwysingsbeleid** wat die sensitiewe inligting kan **verhoed** om na ander webtoepassings gestuur te word:
 ```
 Referrer-Policy: no-referrer
 Referrer-Policy: no-referrer-when-downgrade

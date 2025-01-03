@@ -4,7 +4,7 @@
 
 ## Skeleton Key Aanval
 
-Die **Skeleton Key aanval** is 'n gesofistikeerde tegniek wat aanvallers in staat stel om **Active Directory-outeentifikasie te omseil** deur 'n **meesterwagwoord** in die domeinbeheerder in te spuit. Dit stel die aanvaller in staat om **as enige gebruiker te autentiseer** sonder hul wagwoord, wat effektief **onbeperkte toegang** tot die domein verleen.
+Die **Skeleton Key aanval** is 'n gesofistikeerde tegniek wat aanvallers in staat stel om **Active Directory-outeentifikasie te omseil** deur 'n **meesterwagwoord** in die domeinbeheerder in te spuit. Dit stel die aanvaller in staat om **as enige gebruiker te outentiseer** sonder hul wagwoord, wat effektief **onbeperkte toegang** tot die domein verleen.
 
 Dit kan uitgevoer word met [Mimikatz](https://github.com/gentilkiwi/mimikatz). Om hierdie aanval uit te voer, is **Domein Admin-regte 'n voorvereiste**, en die aanvaller moet elke domeinbeheerder teiken om 'n omvattende oortreding te verseker. Die effek van die aanval is egter tydelik, aangesien **herbegin van die domeinbeheerder die malware uitwis**, wat 'n herimplementering vir volgehoue toegang vereis.
 

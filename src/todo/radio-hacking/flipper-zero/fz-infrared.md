@@ -12,11 +12,11 @@ Vir meer inligting oor hoe Infrarooi werk, kyk:
 
 ## IR Seinontvanger in Flipper Zero <a href="#ir-signal-receiver-in-flipper-zero" id="ir-signal-receiver-in-flipper-zero"></a>
 
-Flipper gebruik 'n digitale IR seinontvanger TSOP, wat **toelaat om seine van IR afstandsbedienings te onderskep**. Daar is 'n paar **smartphones** soos Xiaomi, wat ook 'n IR-poort het, maar hou in gedagte dat **meeste van hulle slegs kan oordra** seine en **nie kan ontvang** nie.
+Flipper gebruik 'n digitale IR seinontvanger TSOP, wat **toelaat om seine van IR afstandsbedienings te onderskep**. Daar is 'n paar **smartphones** soos Xiaomi, wat ook 'n IR-poort het, maar hou in gedagte dat **meeste van hulle net kan oordra** seine en **nie kan ontvang** nie.
 
 Die Flipper infrarooi **ontvanger is redelik sensitief**. Jy kan selfs die **sein vang** terwyl jy **ergens tussen** die afstandsbediening en die TV bly. Dit is nie nodig om die afstandsbediening direk na Flipper se IR-poort te wys nie. Dit is handig wanneer iemand kanale verander terwyl hy naby die TV staan, en beide jy en Flipper is 'n afstand weg.
 
-Aangesien die **ontleding van die infrarooi** sein aan die **sagteware** kant gebeur, ondersteun Flipper Zero potensieel die **ontvangs en oordrag van enige IR afstandsbediening kode**. In die geval van **onbekende** protokolle wat nie herken kon word nie - dit **neem op en speel die** rou sein presies soos ontvang.
+Aangesien die **ontleding van die infrarooi** sein aan die **programmatuur** kant gebeur, ondersteun Flipper Zero potensieel die **ontvangs en oordrag van enige IR afstandsbediening kode**. In die geval van **onbekende** protokolle wat nie herken kon word nie - dit **neem op en speel** die rou sein presies soos ontvang.
 
 ## Aksies
 

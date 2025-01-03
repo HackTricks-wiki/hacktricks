@@ -28,7 +28,7 @@ Die Plaaslike Sekuriteitsowerheid (LSASS) verwerk toegang versoeke tot objek deu
 
 - **ACLs:** Definieer toegangstoestemmings deur DACLs en ouditreëls deur SACLs.
 - **Toegangstoken:** Bevat gebruiker, groep, en voorregte-inligting vir 'n sessie.
-- **Toegangbesluit:** Word geneem deur DACL ACEs met die toegangstoken te vergelyk; SACLs word gebruik vir ouditering.
+- **Toegangbesluit:** Gemaak deur DACL ACEs met die toegangstoken te vergelyk; SACLs word gebruik vir ouditering.
 
 ### ACEs
 
@@ -41,7 +41,7 @@ Daar is **drie hoof tipes Toegangsbeheeringe (ACEs)**:
 Elke ACE het **vier kritieke komponente**:
 
 1. Die **Sekuriteitsidentifiseerder (SID)** van die gebruiker of groep (of hul beginselnaam in 'n grafiese voorstelling).
-2. 'n **vlag** wat die ACE tipe identifiseer (toegang geweier, toegestaan, of stelsels oudit).
+2. 'n **vlag** wat die ACE tipe identifiseer (toegang geweier, toegelaat, of stelsels oudit).
 3. **Erfenisvlagte** wat bepaal of kindobjekte die ACE van hul ouer kan erf.
 4. 'n [**toegangsmasker**](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/7a53f60e-e730-4dfe-bbe9-b21b62eb790b?redirectedfrom=MSDN), 'n 32-bis waarde wat die objek se toegepaste regte spesifiseer.
 
@@ -49,13 +49,13 @@ Toegangsbepaling word uitgevoer deur elke ACE een vir een te ondersoek totdat:
 
 - 'n **Toegang-Geweier ACE** eksplisiet die aangevraagde regte aan 'n trustee in die toegangstoken weier.
 - **Toegang-Toegelaat ACE(s)** eksplisiet al die aangevraagde regte aan 'n trustee in die toegangstoken grant.
-- Na die nagaan van alle ACEs, as enige aangevraagde regte **nie eksplisiet toegestaan** is nie, word toegang implisiet **geweier**.
+- Na die nagaan van alle ACEs, as enige aangevraagde reg nie **eksplisiet toegestaan** is nie, word toegang implisiet **geweier**.
 
 ### Volgorde van ACEs
 
-Die manier waarop **ACEs** (reëls wat sê wie toegang kan of nie kan hê nie) in 'n lys genaamd **DACL** geplaas word, is baie belangrik. Dit is omdat sodra die stelsel toegang op grond van hierdie reëls gee of weier, dit ophou om na die res te kyk.
+Die manier waarop **ACEs** (reëls wat sê wie toegang kan of nie kan hê nie) in 'n lys genaamd **DACL** geplaas word, is baie belangrik. Dit is omdat sodra die stelsel toegang op grond van hierdie reëls toeken of weier, dit ophou om na die res te kyk.
 
-Daar is 'n beste manier om hierdie ACEs te organiseer, en dit word **"kanonieke orde"** genoem. Hierdie metode help om te verseker dat alles glad en regverdig werk. Hier is hoe dit gaan vir stelsels soos **Windows 2000** en **Windows Server 2003**:
+Daar is 'n beste manier om hierdie ACEs te organiseer, en dit word **"kanonieke volgorde"** genoem. Hierdie metode help om te verseker dat alles glad en regverdig werk. Hier is hoe dit gaan vir stelsels soos **Windows 2000** en **Windows Server 2003**:
 
 - Eerstens, plaas al die reëls wat **spesifiek vir hierdie item** gemaak is voor diegene wat van elders kom, soos 'n ouer gids.
 - In daardie spesifieke reëls, plaas diegene wat sê **"nee" (weier)** voor diegene wat sê **"ja" (toelaat)**.
@@ -70,7 +70,7 @@ Deur dit op hierdie manier te doen, kan die eienaar van 'n lêer of gids baie pr
 
 ![](https://www.ntfs.com/images/screenshots/ACEs.gif)
 
-So, hierdie **"kanonieke orde"** is alles oor om te verseker dat die toegang reëls duidelik en goed werk, spesifieke reëls eerste te plaas en alles op 'n slim manier te organiseer.
+So, hierdie **"kanonieke volgorde"** is alles oor om te verseker dat die toegang reëls duidelik en goed werk, spesifieke reëls eerste te plaas en alles op 'n slim manier te organiseer.
 
 ### GUI Voorbeeld
 
@@ -80,7 +80,7 @@ Dit is die klassieke sekuriteitstab van 'n gids wat die ACL, DACL en ACEs wys:
 
 ![http://secureidentity.se/wp-content/uploads/2014/04/classicsectab.jpg](../../images/classicsectab.jpg)
 
-As ons op die **Gevorderde knoppie** klik, sal ons meer opsies kry soos erfenis:
+As ons op die **Gevorderde knoppie** klik, sal ons meer opsies soos erfenis kry:
 
 ![http://secureidentity.se/wp-content/uploads/2014/04/aceinheritance.jpg](../../images/aceinheritance.jpg)
 
@@ -98,11 +98,11 @@ Wanneer ons toegang tot hulpbronne bestuur, soos 'n gids, gebruik ons lyste en r
 
 #### Toegang tot 'n Spesifieke Groep Weier
 
-Stel jou voor jy het 'n gids genaamd Kostes, en jy wil hê dat almal toegang moet hê behalwe vir 'n bemarking span. Deur die reëls korrek op te stel, kan ons verseker dat die bemarking span eksplisiet toegang geweier word voordat ons almal anders toelaat. Dit word gedoen deur die reël om toegang tot die bemarking span te weier voor die reël wat toegang aan almal toelaat.
+Stel jou voor jy het 'n gids genaamd Koste, en jy wil hê almal moet toegang hê behalwe vir 'n bemarking span. Deur die reëls korrek op te stel, kan ons verseker dat die bemarking span eksplisiet toegang geweier word voordat ons almal anders toelaat. Dit word gedoen deur die reël om toegang tot die bemarking span te weier voor die reël wat toegang aan almal toelaat.
 
-#### Toegang tot 'n Spesifieke Lid van 'n Geweerde Groep Toelaat
+#### Toegang aan 'n Spesifieke Lid van 'n Geweerde Groep Toelaat
 
-Kom ons sê Bob, die bemarkingsdirekteur, het toegang tot die Kostes gids nodig, alhoewel die bemarking span oor die algemeen nie toegang moet hê nie. Ons kan 'n spesifieke reël (ACE) vir Bob byvoeg wat hom toegang grant, en dit voor die reël wat toegang aan die bemarking span weier plaas. Op hierdie manier kry Bob toegang ten spyte van die algemene beperking op sy span.
+Kom ons sê Bob, die bemarkingsdirekteur, het toegang tot die Koste gids nodig, al mag die bemarking span oor die algemeen nie toegang hê nie. Ons kan 'n spesifieke reël (ACE) vir Bob byvoeg wat hom toegang grant, en dit voor die reël wat toegang aan die bemarking span weier plaas. Op hierdie manier kry Bob toegang ten spyte van die algemene beperking op sy span.
 
 #### Toegangsbeheeringe Verstaan
 
@@ -124,10 +124,10 @@ In samevatting help ACLs en ACEs om presiese toegangsbeheer te definieer, wat ve
 
 | ACE Veld    | Beskrywing                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Tipe        | Vlag wat die tipe ACE aandui. Windows 2000 en Windows Server 2003 ondersteun ses tipes ACE: Drie generiese ACE tipes wat aan alle beveiligbare objekte geheg is. Drie objek-spesifieke ACE tipes wat vir Aktiewe Gids objekte kan voorkom.                                                                                                                                                                                                                                                            |
+| Tipe        | Vlag wat die tipe ACE aandui. Windows 2000 en Windows Server 2003 ondersteun ses tipes ACE: Drie generiese ACE tipes wat aan alle beveiligbare objekte geheg is. Drie objek-spesifieke ACE tipes wat vir Aktiewe Gids objek kan voorkom.                                                                                                                                                                                                                                                            |
 | Vlagte      | Stel van bitvlagte wat erfenis en ouditering beheer.                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| Grootte     | Aantal bytes van geheue wat vir die ACE toegeken word.                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| Toegangsmasker | 32-bis waarde waarvan die bits ooreenstem met toegangregte vir die objek. Bits kan of aan of af gestel word, maar die betekenis van die instelling hang af van die ACE tipe. Byvoorbeeld, as die bit wat ooreenstem met die reg om toestemmings te lees aangeskakel is, en die ACE tipe is Weier, weier die ACE die reg om die objek se toestemmings te lees. As dieselfde bit aangeskakel is, maar die ACE tipe is Toelaat, grant die ACE die reg om die objek se toestemmings te lees. Meer besonderhede van die Toegangsmasker verskyn in die volgende tabel. |
+| Grootte     | Aantal bytes geheue wat vir die ACE toegeken is.                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| Toegangsmasker | 32-bis waarde waarvan die bits ooreenstem met toegangregte vir die objek. Bits kan of aan of af gestel word, maar die instelling se betekenis hang af van die ACE tipe. Byvoorbeeld, as die bit wat ooreenstem met die reg om toestemmings te lees aangeskakel is, en die ACE tipe is Weier, weier die ACE die reg om die objek se toestemmings te lees. As dieselfde bit aangeskakel is maar die ACE tipe is Toelaat, grant die ACE die reg om die objek se toestemmings te lees. Meer besonderhede van die Toegangsmasker verskyn in die volgende tabel. |
 | SID         | Identifiseer 'n gebruiker of groep wie se toegang deur hierdie ACE beheer of gemonitor word.                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 
 ### Toegangsmasker Uitleg
@@ -141,7 +141,7 @@ In samevatting help ACLs en ACEs om presiese toegangsbeheer te definieer, wat ve
 | 28          | Generies ALLES (Lees, Skryf, Voer uit) | Alles hieronder                          |
 | 29          | Generies Voer uit                    | Alle dinge wat nodig is om 'n program uit te voer |
 | 30          | Generies Skryf                      | Alle dinge wat nodig is om na 'n lêer te skryf   |
-| 31          | Generies Lees                       | Alle dinge wat nodig is om na 'n lêer te lees       |
+| 31          | Generies Lees                       | Alle dinge wat nodig is om 'n lêer te lees       |
 
 ## Verwysings
 

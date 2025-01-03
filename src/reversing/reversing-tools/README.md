@@ -2,7 +2,7 @@
 
 # Wasm Decompilation en Wat Compilation Gids
 
-In die wêreld van **WebAssembly** is gereedskap vir **decompiling** en **compiling** noodsaaklik vir ontwikkelaars. Hierdie gids stel 'n paar aanlyn hulpbronne en sagteware bekend vir die hantering van **Wasm (WebAssembly binêr)** en **Wat (WebAssembly teks)** lêers.
+In die wêreld van **WebAssembly** is gereedskap vir **decompiling** en **compiling** noodsaaklik vir ontwikkelaars. Hierdie gids stel 'n paar aanlyn hulpbronne en sagteware bekend vir die hantering van **Wasm (WebAssembly binêre)** en **Wat (WebAssembly teks)** lêers.
 
 ## Aanlyn Gereedskap
 
