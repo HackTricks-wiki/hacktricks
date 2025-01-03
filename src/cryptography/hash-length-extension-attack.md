@@ -2,16 +2,16 @@
 
 # Muhtasari wa shambulio
 
-Fikiria seva ambayo in **tishe** baadhi ya **data** kwa **kuongeza** **siri** kwa baadhi ya data ya wazi inayojulikana na kisha kuhashi data hiyo. Ikiwa unajua:
+Fikiria seva ambayo inafanya **kusaini** baadhi ya **data** kwa **kuongeza** **siri** kwa baadhi ya data ya wazi inayojulikana na kisha kuhashi data hiyo. Ikiwa unajua:
 
 - **Urefu wa siri** (hii inaweza pia kubruteforced kutoka kwa anuwai ya urefu uliopewa)
 - **Data ya wazi**
 - **Algorithimu (na inahatarishwa kwa shambulio hili)**
 - **Padding inajulikana**
-- Kawaida moja ya chaguo la msingi inatumika, hivyo ikiwa mahitaji mengine 3 yanakidhi, hii pia inafanya hivyo
+- Kawaida moja ya chaguo-msingi inatumika, hivyo ikiwa mahitaji mengine 3 yanakidhi, hii pia inakidhi
 - Padding inatofautiana kulingana na urefu wa siri + data, ndivyo maana urefu wa siri unahitajika
 
-Basi, inawezekana kwa **mshambuliaji** **kuongeza** **data** na **kuunda** **sahihi** halali kwa **data ya awali + data iliyoongezwa**.
+Basi, inawezekana kwa **mshambuliaji** **kuongeza** **data** na **kuunda** **saini** halali kwa **data ya awali + data iliyoongezwa**.
 
 ## Vipi?
 
@@ -25,11 +25,13 @@ Ikiwa mshambuliaji anataka kuongeza mfuatano "append" anaweza:
 - Kuongeza mfuatano "append"
 - Kumaliza hash na hash inayotokana itakuwa **halali kwa "siri" + "data" + "padding" + "append"**
 
-## **Chombo**
+## **Zana**
 
-{% embed url="https://github.com/iagox86/hash_extender" %}
+{{#ref}}
+https://github.com/iagox86/hash_extender
+{{#endref}}
 
-## Marejeo
+## Marejeleo
 
 Unaweza kupata shambulio hili limeelezwa vizuri katika [https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks](https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)
 

@@ -1,10 +1,10 @@
-# Lugha za Kifumbo
+# Lugha za Kigeni
 
 {{#include ../banners/hacktricks-training.md}}
 
 ## [Esolangs Wiki](https://esolangs.org/wiki/Main_Page)
 
-Angalia wiki hiyo kutafuta lugha zaidi za kifumbo
+Angalia wiki hiyo kutafuta lugha zaidi za kigeni
 
 ## Malbolge
 ```
@@ -48,7 +48,9 @@ Take it to the top
 
 Whisper my world
 ```
-{% embed url="https://codewithrockstar.com/" %}
+{{#ref}}
+https://codewithrockstar.com/
+{{#endref}}
 
 ## PETOOH
 ```

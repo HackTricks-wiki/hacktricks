@@ -26,21 +26,21 @@ Vyeti vinatumika kuthibitisha utambulisho wa seva. Kwa mifano ya kina ya mbinu z
 
 ### Usalama wa Picha za Kontena
 
-Picha za kontena zinaweza kuhifadhiwa katika hifadhi za kibinafsi au za umma. Docker inatoa chaguzi kadhaa za uhifadhi kwa picha za kontena:
+Picha za kontena zinaweza kuhifadhiwa katika hifadhi za kibinafsi au za umma. Docker inatoa chaguzi kadhaa za kuhifadhi picha za kontena:
 
 - [**Docker Hub**](https://hub.docker.com): Huduma ya hifadhi ya umma kutoka Docker.
 - [**Docker Registry**](https://github.com/docker/distribution): Mradi wa chanzo wazi unaowezesha watumiaji kuendesha hifadhi yao wenyewe.
-- [**Docker Trusted Registry**](https://www.docker.com/docker-trusted-registry): Hifadhi ya kibiashara ya Docker inayotoa uthibitisho wa mtumiaji kulingana na majukumu na uunganisho na huduma za directory za LDAP.
+- [**Docker Trusted Registry**](https://www.docker.com/docker-trusted-registry): Huduma ya kibiashara ya hifadhi ya Docker, ikijumuisha uthibitishaji wa watumiaji kulingana na majukumu na uunganisho na huduma za directory za LDAP.
 
 ### Uchanganuzi wa Picha
 
-Kontena zinaweza kuwa na **udhaifu wa usalama** ama kwa sababu ya picha ya msingi au kwa sababu ya programu iliyosakinishwa juu ya picha ya msingi. Docker inafanya kazi kwenye mradi unaoitwa **Nautilus** ambao unafanya uchambuzi wa usalama wa Kontena na kuorodhesha udhaifu. Nautilus inafanya kazi kwa kulinganisha kila safu ya picha ya Kontena na hifadhi ya udhaifu ili kubaini mapengo ya usalama.
+Kontena zinaweza kuwa na **udhaifu wa usalama** ama kwa sababu ya picha ya msingi au kwa sababu ya programu iliyosakinishwa juu ya picha ya msingi. Docker inafanya kazi kwenye mradi unaoitwa **Nautilus** ambao unafanya uchunguzi wa usalama wa Kontena na kuorodhesha udhaifu. Nautilus inafanya kazi kwa kulinganisha kila tabaka la picha ya Kontena na hifadhi ya udhaifu ili kubaini mapengo ya usalama.
 
 Kwa maelezo zaidi [**soma hii**](https://docs.docker.com/engine/scan/).
 
 - **`docker scan`**
 
-Amri ya **`docker scan`** inakuwezesha kuchanganua picha za Docker zilizopo kwa kutumia jina la picha au ID. Kwa mfano,endesha amri ifuatayo kuchanganua picha ya hello-world:
+Amri ya **`docker scan`** inakuwezesha kuchunguza picha za Docker zilizopo kwa kutumia jina la picha au ID. Kwa mfano,endesha amri ifuatayo kuchunguza picha ya hello-world:
 ```bash
 docker scan hello-world
 
@@ -74,7 +74,7 @@ Saini ya picha za Docker inahakikisha usalama na uaminifu wa picha zinazotumika 
 
 - **Docker Content Trust** inatumia mradi wa Notary, unaotegemea The Update Framework (TUF), kusimamia saini za picha. Kwa maelezo zaidi, angalia [Notary](https://github.com/docker/notary) na [TUF](https://theupdateframework.github.io).
 - Ili kuwasha uaminifu wa maudhui ya Docker, weka `export DOCKER_CONTENT_TRUST=1`. Kipengele hiki hakijawashwa kwa chaguo-msingi katika toleo la Docker 1.10 na baadaye.
-- Ikiwa kipengele hiki kimewashwa, picha zilizotiwa saini pekee ndizo zinaweza kupakuliwa. Kuanzisha kupakia picha kunahitaji kuweka maneno ya siri kwa funguo za mzizi na za kuweka alama, huku Docker pia ikisaidia Yubikey kwa usalama wa ziada. Maelezo zaidi yanaweza kupatikana [hapa](https://blog.docker.com/2015/11/docker-content-trust-yubikey/).
+- Ikiwa kipengele hiki kimewashwa, picha zilizotiwa saini pekee ndizo zinaweza kupakuliwa. Kuanzisha kupakia picha kunahitaji kuweka maneno ya siri kwa funguo za mzizi na lebo, huku Docker pia ikisaidia Yubikey kwa usalama wa ziada. Maelezo zaidi yanaweza kupatikana [hapa](https://blog.docker.com/2015/11/docker-content-trust-yubikey/).
 - Kujaribu kuvuta picha isiyo na saini huku uaminifu wa maudhui ukiwashwa kunasababisha kosa la "No trust data for latest".
 - Kwa kupakia picha baada ya ya kwanza, Docker inauliza neno la siri la funguo za hifadhi ili kusaini picha.
 
@@ -121,7 +121,7 @@ Imewezeshwa kwa default katika Docker. Inasaidia **kudhibiti zaidi syscalls** am
 
 **AppArmor**
 
-Docker ina kiolezo ambacho unaweza kuwasha: [https://github.com/moby/moby/tree/master/profiles/apparmor](https://github.com/moby/moby/tree/master/profiles/apparmor)
+Docker ina kiolezo ambacho unaweza kuanzisha: [https://github.com/moby/moby/tree/master/profiles/apparmor](https://github.com/moby/moby/tree/master/profiles/apparmor)
 
 Hii itaruhusu kupunguza uwezo, syscalls, ufikiaji wa faili na folda...
 
@@ -166,9 +166,9 @@ cgroups.md
 
 ### Uwezo
 
-Uwezo unaruhusu **udhibiti wa kina kwa uwezo ambao unaweza kuruhusiwa** kwa mtumiaji wa root. Docker inatumia kipengele cha uwezo wa kernel ya Linux ili **kupunguza shughuli ambazo zinaweza kufanywa ndani ya Kontena** bila kujali aina ya mtumiaji.
+Uwezo unaruhusu **udhibiti wa kina kwa uwezo ambao unaweza kuruhusiwa** kwa mtumiaji wa root. Docker inatumia kipengele cha uwezo wa kernel ya Linux ili **kudhibiti shughuli ambazo zinaweza kufanywa ndani ya Kontena** bila kujali aina ya mtumiaji.
 
-Wakati kontena la docker linaendeshwa, **mchakato unashusha uwezo wa nyeti ambao mchakato unaweza kutumia kutoroka kutoka kwa kutengwa**. Hii inajaribu kuhakikisha kwamba mchakato hauwezi kufanya vitendo nyeti na kutoroka:
+Wakati kontena la docker linaendeshwa, **mchakato unashusha uwezo nyeti ambao mchakato unaweza kutumia kutoroka kutoka kwa kutengwa**. Hii inajaribu kuhakikisha kwamba mchakato hauwezi kufanya vitendo nyeti na kutoroka:
 
 {{#ref}}
 ../linux-capabilities.md
@@ -176,7 +176,7 @@ Wakati kontena la docker linaendeshwa, **mchakato unashusha uwezo wa nyeti ambao
 
 ### Seccomp katika Docker
 
-Hii ni kipengele cha usalama ambacho kinaruhusu Docker **kupunguza syscalls** ambazo zinaweza kutumika ndani ya kontena:
+Hii ni kipengele cha usalama ambacho kinaruhusu Docker **kudhibiti syscalls** ambazo zinaweza kutumika ndani ya kontena:
 
 {{#ref}}
 seccomp.md
@@ -192,13 +192,13 @@ apparmor.md
 
 ### SELinux katika Docker
 
-- **Mfumo wa Kuweka Alama**: SELinux inatoa alama ya kipekee kwa kila mchakato na kitu cha mfumo wa faili.
-- **Utekelezaji wa Sera**: Inatekeleza sera za usalama ambazo zinaeleza ni vitendo vipi alama ya mchakato inaweza kufanya kwa alama nyingine ndani ya mfumo.
-- **Alama za Mchakato wa Kontena**: Wakati injini za kontena zinaanzisha michakato ya kontena, kwa kawaida zinapewa alama ya SELinux iliyofungwa, mara nyingi `container_t`.
-- **Kuweka Alama kwa Faili ndani ya Kontena**: Faili ndani ya kontena kwa kawaida zinawekwa alama kama `container_file_t`.
-- **Kanuni za Sera**: Sera ya SELinux hasa inahakikisha kwamba michakato yenye alama ya `container_t` zinaweza kuingiliana tu (kusoma, kuandika, kutekeleza) na faili zilizowekwa alama kama `container_file_t`.
+- **Mfumo wa Lebo**: SELinux inatoa lebo ya kipekee kwa kila mchakato na kitu cha mfumo wa faili.
+- **Utekelezaji wa Sera**: Inatekeleza sera za usalama ambazo zinaeleza ni vitendo gani lebo ya mchakato inaweza kufanya kwa lebo nyingine ndani ya mfumo.
+- **Lebo za Mchakato wa Kontena**: Wakati injini za kontena zinaanzisha michakato ya kontena, kawaida zinapewa lebo ya SELinux iliyofungwa, mara nyingi `container_t`.
+- **Uwekaji Lebo wa Faili ndani ya Kontena**: Faili ndani ya kontena kawaida huwekwa lebo kama `container_file_t`.
+- **Kanuni za Sera**: Sera ya SELinux hasa inahakikisha kwamba michakato yenye lebo ya `container_t` zinaweza kuingiliana tu (kusoma, kuandika, kutekeleza) na faili zilizo na lebo ya `container_file_t`.
 
-Mekanismu hii inahakikisha kwamba hata kama mchakato ndani ya kontena umeathiriwa, umefungwa kuingiliana tu na vitu vilivyo na alama zinazolingana, ikipunguza kwa kiasi kikubwa uharibifu unaoweza kutokea kutokana na athari hizo.
+Mekanismu hii inahakikisha kwamba hata kama mchakato ndani ya kontena umeathirika, umefungwa kuingiliana tu na vitu vilivyo na lebo zinazofanana, ikipunguza kwa kiasi kikubwa uharibifu unaoweza kutokea kutokana na athari hizo.
 
 {{#ref}}
 ../selinux.md
@@ -206,7 +206,7 @@ Mekanismu hii inahakikisha kwamba hata kama mchakato ndani ya kontena umeathiriw
 
 ### AuthZ & AuthN
 
-Katika Docker, plugin ya idhini ina jukumu muhimu katika usalama kwa kuamua ikiwa ruhusa itatolewa au kuzuia maombi kwa daemon ya Docker. Uamuzi huu unafanywa kwa kuchunguza muktadha mbili muhimu:
+Katika Docker, plugin ya idhini ina jukumu muhimu katika usalama kwa kuamua ikiwa ruhusa au kuzuia maombi kwa daemon ya Docker. Uamuzi huu unafanywa kwa kuchunguza muktadha mbili muhimu:
 
 - **Muktadha wa Uthibitishaji**: Hii inajumuisha taarifa kamili kuhusu mtumiaji, kama vile nani walivyo na jinsi walivyojithibitisha.
 - **Muktadha wa Amri**: Hii inajumuisha data yote muhimu inayohusiana na ombi linalofanywa.
@@ -219,7 +219,7 @@ authz-and-authn-docker-access-authorization-plugin.md
 
 ## DoS kutoka kwa kontena
 
-Ikiwa hujapunguza ipasavyo rasilimali ambazo kontena linaweza kutumia, kontena lililoathiriwa linaweza kufanya DoS kwa mwenyeji ambapo linaendesha.
+Ikiwa hujapunguza ipasavyo rasilimali ambazo kontena linaweza kutumia, kontena lililoathirika linaweza kufanya DoS kwa mwenyeji ambapo linaendesha.
 
 - CPU DoS
 ```bash
@@ -268,7 +268,7 @@ docker run -it --security-opt=no-new-privileges:true nonewpriv
 # You can manually disable selinux in docker with
 --security-opt label:disable
 ```
-Kwa maelezo zaidi kuhusu **`--security-opt`** chaguzi angalia: [https://docs.docker.com/engine/reference/run/#security-configuration](https://docs.docker.com/engine/reference/run/#security-configuration)
+Kwa maelezo zaidi ya chaguzi za **`--security-opt`** angalia: [https://docs.docker.com/engine/reference/run/#security-configuration](https://docs.docker.com/engine/reference/run/#security-configuration)
 
 ## Mambo Mengine ya Usalama
 
@@ -276,7 +276,7 @@ Kwa maelezo zaidi kuhusu **`--security-opt`** chaguzi angalia: [https://docs.doc
 
 Ni muhimu kuepuka kuweka siri moja kwa moja katika picha za Docker au kutumia mabadiliko ya mazingira, kwani mbinu hizi zinaweka taarifa zako nyeti wazi kwa yeyote mwenye ufikiaji wa kontena kupitia amri kama `docker inspect` au `exec`.
 
-**Docker volumes** ni mbadala salama, inashauriwa kwa kufikia taarifa nyeti. Zinweza kutumika kama mfumo wa muda wa faili katika kumbukumbu, kupunguza hatari zinazohusiana na `docker inspect` na logging. Hata hivyo, watumiaji wa root na wale wenye ufikiaji wa `exec` kwa kontena bado wanaweza kufikia siri hizo.
+**Docker volumes** ni mbadala salama, inashauriwa kwa ufikiaji wa taarifa nyeti. Zinatumika kama mfumo wa faili wa muda katika kumbukumbu, kupunguza hatari zinazohusiana na `docker inspect` na logging. Hata hivyo, watumiaji wa root na wale wenye ufikiaji wa `exec` kwa kontena bado wanaweza kufikia siri hizo.
 
 **Docker secrets** inatoa njia salama zaidi ya kushughulikia taarifa nyeti. Kwa matukio yanayohitaji siri wakati wa awamu ya kujenga picha, **BuildKit** inatoa suluhisho bora na msaada wa siri za wakati wa kujenga, ikiongeza kasi ya kujenga na kutoa vipengele vya ziada.
 
@@ -290,7 +290,7 @@ BuildKit inaruhusu matumizi ya siri za wakati wa kujenga kwa chaguo la `--secret
 ```bash
 docker build --secret my_key=my_value ,src=path/to/my_secret_file .
 ```
-Kwa siri zinazohitajika katika kontena linalofanya kazi, **Docker Compose na Kubernetes** zinatoa suluhisho thabiti. Docker Compose inatumia ufunguo wa `secrets` katika ufafanuzi wa huduma kwa ajili ya kubainisha faili za siri, kama inavyoonyeshwa katika mfano wa `docker-compose.yml`:
+Kwa siri zinazohitajika katika kontena linalofanya kazi, **Docker Compose na Kubernetes** hutoa suluhisho thabiti. Docker Compose inatumia ufunguo wa `secrets` katika ufafanuzi wa huduma kwa ajili ya kubainisha faili za siri, kama inavyoonyeshwa katika mfano wa `docker-compose.yml`:
 ```yaml
 version: "3.7"
 services:
@@ -305,40 +305,44 @@ file: ./my_secret_file.txt
 ```
 Hii usanidi inaruhusu matumizi ya siri wakati wa kuanzisha huduma na Docker Compose.
 
-Katika mazingira ya Kubernetes, siri zinasaidiwa kwa asili na zinaweza kusimamiwa zaidi kwa zana kama [Helm-Secrets](https://github.com/futuresimple/helm-secrets). Udhibiti wa Upatikanaji Kulingana na Majukumu (RBAC) wa Kubernetes unaboresha usalama wa usimamizi wa siri, sawa na Docker Enterprise.
+Katika mazingira ya Kubernetes, siri zinasaidiwa kiasili na zinaweza kusimamiwa zaidi kwa zana kama [Helm-Secrets](https://github.com/futuresimple/helm-secrets). Udhibiti wa Upatikanaji Kulingana na Majukumu (RBAC) wa Kubernetes unaboresha usalama wa usimamizi wa siri, sawa na Docker Enterprise.
 
 ### gVisor
 
-**gVisor** ni kernel ya programu, iliyoandikwa kwa Go, ambayo inatekeleza sehemu kubwa ya uso wa mfumo wa Linux. Inajumuisha runtime ya [Open Container Initiative (OCI)](https://www.opencontainers.org) inayoitwa `runsc` ambayo inatoa **mipaka ya kutengwa kati ya programu na kernel ya mwenyeji**. Runtime ya `runsc` inajumuishwa na Docker na Kubernetes, na kufanya iwe rahisi kuendesha kontena zilizowekwa kwenye sanduku.
+**gVisor** ni kernel ya programu, iliyoandikwa kwa Go, inayotekeleza sehemu kubwa ya uso wa mfumo wa Linux. Inajumuisha runtime ya [Open Container Initiative (OCI)](https://www.opencontainers.org) inayoitwa `runsc` ambayo inatoa **mipaka ya kutengwa kati ya programu na kernel ya mwenyeji**. Runtime ya `runsc` inajumuishwa na Docker na Kubernetes, na kufanya iwe rahisi kuendesha kontena zilizowekwa kwenye sanduku.
 
-{% embed url="https://github.com/google/gvisor" %}
+{{#ref}}
+https://github.com/google/gvisor
+{{#endref}}
 
 ### Kata Containers
 
-**Kata Containers** ni jamii ya chanzo wazi inayofanya kazi kujenga runtime salama ya kontena yenye mashine za virtual nyepesi ambazo zina hisia na utendaji kama kontena, lakini zinatoa **kutengwa kwa mzigo mzito zaidi kwa kutumia teknolojia ya virtualisasi ya vifaa** kama safu ya pili ya ulinzi.
+**Kata Containers** ni jamii ya chanzo wazi inayofanya kazi kujenga runtime salama ya kontena yenye mashine za virtual nyepesi ambazo zina hisia na utendaji kama kontena, lakini zinatoa **kutengwa kwa mzigo zaidi kwa kutumia teknolojia ya virtualisasi ya vifaa** kama safu ya pili ya ulinzi.
 
-{% embed url="https://katacontainers.io/" %}
+{{#ref}}
+https://katacontainers.io/
+{{#endref}}
 
 ### Vidokezo vya Muhtasari
 
 - **Usitumie bendera ya `--privileged` au kuunganisha** [**Docker socket ndani ya kontena**](https://raesene.github.io/blog/2016/03/06/The-Dangers-Of-Docker.sock/)**.** Socket ya docker inaruhusu kuanzisha kontena, hivyo ni njia rahisi ya kuchukua udhibiti kamili wa mwenyeji, kwa mfano, kwa kuendesha kontena nyingine na bendera ya `--privileged`.
 - Usifanye **kama root ndani ya kontena. Tumia** [**mtumiaji tofauti**](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#user) **na** [**majina ya watumiaji**](https://docs.docker.com/engine/security/userns-remap/)**.** Root ndani ya kontena ni sawa na kwenye mwenyeji isipokuwa ikirekebishwa na majina ya watumiaji. Inapunguziliwa mbali kidogo na, hasa, majina ya Linux, uwezo, na cgroups.
-- [**Ondoa uwezo wote**](https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities) **(`--cap-drop=all`) na wezesha tu wale wanaohitajika** (`--cap-add=...`). Mengi ya mzigo hayahitaji uwezo wowote na kuongeza uwezo huongeza wigo wa shambulio linaloweza kutokea.
-- [**Tumia chaguo la usalama "no-new-privileges"**](https://raesene.github.io/blog/2019/06/01/docker-capabilities-and-no-new-privs/) kuzuia michakato kupata zaidi ya uwezo, kwa mfano kupitia binaries za suid.
+- [**Ondoa uwezo wote**](https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities) **(`--cap-drop=all`) na wezesha tu wale wanaohitajika** (`--cap-add=...`). Mzigo mwingi hauhitaji uwezo wowote na kuongeza uwezo huongeza wigo wa shambulio linaloweza kutokea.
+- [**Tumia chaguo la usalama "no-new-privileges"**](https://raesene.github.io/blog/2019/06/01/docker-capabilities-and-no-new-privs/) ili kuzuia michakato kupata zaidi ya uwezo, kwa mfano kupitia binaries za suid.
 - [**Punguza rasilimali zinazopatikana kwa kontena**](https://docs.docker.com/engine/reference/run/#runtime-constraints-on-resources)**.** Mipaka ya rasilimali inaweza kulinda mashine kutokana na mashambulizi ya kukataa huduma.
 - **Sahihisha** [**seccomp**](https://docs.docker.com/engine/security/seccomp/)**,** [**AppArmor**](https://docs.docker.com/engine/security/apparmor/) **(au SELinux)** wasifu ili kupunguza vitendo na syscalls vinavyopatikana kwa kontena hadi kiwango cha chini kinachohitajika.
 - **Tumia** [**picha rasmi za docker**](https://docs.docker.com/docker-hub/official_images/) **na uhitaji saini** au jenga yako mwenyewe kulingana nazo. Usirithi au kutumia [picha zenye backdoor](https://arstechnica.com/information-technology/2018/06/backdoored-images-downloaded-5-million-times-finally-removed-from-docker-hub/) . Pia hifadhi funguo za root, neno la siri mahali salama. Docker ina mipango ya kusimamia funguo na UCP.
 - **Kila wakati** **jenga upya** picha zako ili **kuweka sasisho za usalama kwa mwenyeji na picha.**
 - Simamia **siri zako kwa busara** ili iwe vigumu kwa mshambuliaji kuzipata.
-- Ikiwa **unafichua docker daemon tumia HTTPS** na uthibitishaji wa mteja na seva.
-- Katika Dockerfile yako, **pendelea COPY badala ya ADD**. ADD inatoa kiotomatiki kufungua faili zilizoshonwa na inaweza nakala faili kutoka URL. COPY haina uwezo huu. Kila wakati inapowezekana, epuka kutumia ADD ili usiwe na hatari ya mashambulizi kupitia URL za mbali na faili za Zip.
+- Ikiwa un **weka docker daemon tumia HTTPS** na uthibitishaji wa mteja na seva.
+- Katika Dockerfile yako, **pendelea COPY badala ya ADD**. ADD inatoa kiotomatiki kufungua faili zilizoshonwa na inaweza nakala faili kutoka URL. COPY haina uwezo huu. Kila wakati inapowezekana, epuka kutumia ADD ili usiwe hatarini kwa mashambulizi kupitia URL za mbali na faili za Zip.
 - Kuwa na **kontena tofauti kwa kila huduma ndogo**
 - **Usiweke ssh** ndani ya kontena, “docker exec” inaweza kutumika kuingia kwenye Kontena.
-- Kuwa na **picha za** kontena **ndogo**
+- Kuwa na **picha za kontena** **ndogo**
 
 ## Docker Breakout / Privilege Escalation
 
-Ikiwa uko **ndani ya kontena ya docker** au una ufikiaji wa mtumiaji katika **kikundi cha docker**, unaweza kujaribu **kutoroka na kupandisha mamlaka**:
+Ikiwa uko **ndani ya kontena la docker** au una ufikiaji wa mtumiaji katika **kikundi cha docker**, unaweza kujaribu **kutoroka na kupandisha mamlaka**:
 
 {{#ref}}
 docker-breakout-privilege-escalation/
@@ -346,7 +350,7 @@ docker-breakout-privilege-escalation/
 
 ## Docker Authentication Plugin Bypass
 
-Ikiwa una ufikiaji wa socket ya docker au una ufikiaji wa mtumiaji katika **kikundi cha docker lakini vitendo vyako vinapunguziliwa mbali na plugin ya uthibitishaji ya docker**, angalia ikiwa unaweza **kuipita:**
+Ikiwa una ufikiaji wa socket ya docker au una ufikiaji wa mtumiaji katika **kikundi cha docker lakini vitendo vyako vinapunguziliwa mbali na plugin ya uthibitishaji wa docker**, angalia ikiwa unaweza **kuipita:**
 
 {{#ref}}
 authz-and-authn-docker-access-authorization-plugin.md
@@ -354,8 +358,8 @@ authz-and-authn-docker-access-authorization-plugin.md
 
 ## Hardening Docker
 
-- Chombo [**docker-bench-security**](https://github.com/docker/docker-bench-security) ni skripti inayokagua mazoea bora ya kawaida kuhusu kupeleka kontena za Docker katika uzalishaji. Majaribio yote ni ya kiotomatiki, na yanategemea [CIS Docker Benchmark v1.3.1](https://www.cisecurity.org/benchmark/docker/).\
-Unahitaji kuendesha chombo kutoka kwa mwenyeji anayekimbia docker au kutoka kwa kontena lenye mamlaka ya kutosha. Pata **jinsi ya kuendesha katika README:** [**https://github.com/docker/docker-bench-security**](https://github.com/docker/docker-bench-security).
+- Zana [**docker-bench-security**](https://github.com/docker/docker-bench-security) ni script inayokagua mazoea bora ya kawaida kuhusu kupeleka kontena za Docker katika uzalishaji. Majaribio yote ni ya kiotomatiki, na yanategemea [CIS Docker Benchmark v1.3.1](https://www.cisecurity.org/benchmark/docker/).\
+Unahitaji kuendesha zana hiyo kutoka kwa mwenyeji anayekimbia docker au kutoka kwa kontena lenye mamlaka ya kutosha. Pata **jinsi ya kuendesha katika README:** [**https://github.com/docker/docker-bench-security**](https://github.com/docker/docker-bench-security).
 
 ## Marejeleo
 
@@ -372,6 +376,5 @@ Unahitaji kuendesha chombo kutoka kwa mwenyeji anayekimbia docker au kutoka kwa 
 - [https://docs.docker.com/engine/extend/plugins_authorization](https://docs.docker.com/engine/extend/plugins_authorization)
 - [https://towardsdatascience.com/top-20-docker-security-tips-81c41dd06f57](https://towardsdatascience.com/top-20-docker-security-tips-81c41dd06f57)
 - [https://resources.experfy.com/bigdata-cloud/top-20-docker-security-tips/](https://resources.experfy.com/bigdata-cloud/top-20-docker-security-tips/)
-
 
 {{#include ../../../banners/hacktricks-training.md}}

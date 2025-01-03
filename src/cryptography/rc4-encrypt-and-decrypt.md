@@ -4,8 +4,12 @@ Ikiwa unaweza kwa namna fulani kuandika maandiko ya wazi kwa kutumia RC4, unawez
 
 Ikiwa unaweza kuandika maandiko ya wazi yanayojulikana unaweza pia kutoa nenosiri. Marejeleo zaidi yanaweza kupatikana katika mashine ya HTB Kryptos:
 
-{% embed url="https://0xrick.github.io/hack-the-box/kryptos/" %}
+{{#ref}}
+https://0xrick.github.io/hack-the-box/kryptos/
+{{#endref}}
 
-{% embed url="https://0xrick.github.io/hack-the-box/kryptos/" %}
+{{#ref}}
+https://0xrick.github.io/hack-the-box/kryptos/
+{{#endref}}
 
 {{#include ../banners/hacktricks-training.md}}

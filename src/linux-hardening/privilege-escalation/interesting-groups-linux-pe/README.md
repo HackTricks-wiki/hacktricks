@@ -4,9 +4,9 @@
 
 ## Makundi ya Sudo/Admin
 
-### **PE - Njia 1**
+### **PE - Njia ya 1**
 
-**Wakati mwingine**, **kwa kawaida (au kwa sababu programu fulani inahitaji hivyo)** ndani ya faili ya **/etc/sudoers** unaweza kupata baadhi ya mistari hii:
+**Wakati mwingine**, **kwa kawaida (au kwa sababu programu fulani inahitaji hivyo)** ndani ya faili **/etc/sudoers** unaweza kupata baadhi ya mistari hii:
 ```bash
 # Allow members of group sudo to execute any command
 %sudo	ALL=(ALL:ALL) ALL
@@ -14,7 +14,7 @@
 # Allow members of group admin to execute any command
 %admin 	ALL=(ALL:ALL) ALL
 ```
-Hii inamaanisha kwamba **mtumiaji yeyote anaye belong kwa kundi la sudo au admin anaweza kutekeleza chochote kama sudo**.
+Hii inamaanisha kwamba **mtumiaji yeyote anaye belong kwenye kundi la sudo au admin anaweza kutekeleza chochote kama sudo**.
 
 Ikiwa hii ni hali, **ili kuwa root unaweza tu kutekeleza**:
 ```
@@ -26,24 +26,24 @@ Pata binaries zote za suid na angalia kama kuna binary **Pkexec**:
 ```bash
 find / -perm -4000 2>/dev/null
 ```
-Ikiwa unapata kwamba binary **pkexec ni binary ya SUID** na unategemea **sudo** au **admin**, huenda unaweza kutekeleza binaries kama sudo ukitumia `pkexec`.\
+Ikiwa unapata kwamba **pkexec ni binary ya SUID** na unategemea **sudo** au **admin**, huenda unaweza kutekeleza binaries kama sudo ukitumia `pkexec`.\
 Hii ni kwa sababu kawaida hizo ndizo vikundi ndani ya **polkit policy**. Sera hii kimsingi inatambua ni vikundi vipi vinaweza kutumia `pkexec`. Angalia kwa:
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
 ```
-Hapo utapata ni vikundi vipi vinavyoruhusiwa kutekeleza **pkexec** na **kwa kawaida** katika baadhi ya distros za linux vikundi **sudo** na **admin** vinaonekana.
+Hapo utapata ni vikundi vipi vinavyoruhusiwa kutekeleza **pkexec** na **kwa kawaida** katika baadhi ya disktros za linux vikundi **sudo** na **admin** vinajitokeza.
 
 Ili **kuwa root unaweza kutekeleza**:
 ```bash
 pkexec "/bin/sh" #You will be prompted for your user password
 ```
-Ikiwa unajaribu kutekeleza **pkexec** na unapata **makosa** haya:
+Ikiwa unajaribu kutekeleza **pkexec** na unapata **error** hii:
 ```bash
 polkit-agent-helper-1: error response to PolicyKit daemon: GDBus.Error:org.freedesktop.PolicyKit1.Error.Failed: No session for cookie
 ==== AUTHENTICATION FAILED ===
 Error executing command as another user: Not authorized
 ```
-**Sio kwa sababu huna ruhusa bali kwa sababu haujaunganishwa bila GUI**. Na kuna suluhisho la tatizo hili hapa: [https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). Unahitaji **sehemu 2 tofauti za ssh**:
+**Sio kwa sababu huna ruhusa bali kwa sababu hujaunganishwa bila GUI**. Na kuna suluhisho kwa tatizo hili hapa: [https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). Unahitaji **sehemu 2 tofauti za ssh**:
 ```bash:session1
 echo $$ #Step1: Get current PID
 pkexec "/bin/bash" #Step 3, execute pkexec
@@ -60,9 +60,9 @@ pkttyagent --process <PID of session1> #Step 2, attach pkttyagent to session1
 ```
 %wheel	ALL=(ALL:ALL) ALL
 ```
-Hii inamaanisha kwamba **mtumiaji yeyote anaye belong kwenye kundi la wheel anaweza kutekeleza chochote kama sudo**.
+Hii inamaanisha kwamba **mtumiaji yeyote anaye belong kwa kundi la wheel anaweza kutekeleza chochote kama sudo**.
 
-Ikiwa hii ni hali, **ili kuwa root unaweza tu kutekeleza**:
+Ikiwa hii ni hali, ili **kuwa root unaweza tu kutekeleza**:
 ```
 sudo su
 ```
@@ -74,11 +74,11 @@ Watumiaji kutoka **group shadow** wanaweza **kusoma** faili **/etc/shadow**:
 ```
 Hivyo, soma faili na jaribu **kufungua baadhi ya hashes**.
 
-## Kundi la Wafanyakazi
+## Kikundi cha Wafanyakazi
 
-**staff**: Inaruhusu watumiaji kuongeza marekebisho ya ndani kwenye mfumo (`/usr/local`) bila kuhitaji ruhusa za mzizi (zingatia kwamba executable katika `/usr/local/bin` ziko kwenye mabadiliko ya PATH ya mtumiaji yeyote, na zinaweza "kufunika" executable katika `/bin` na `/usr/bin` zenye jina sawa). Linganisha na kundi "adm", ambalo lina uhusiano zaidi na ufuatiliaji/usalama. [\[source\]](https://wiki.debian.org/SystemGroups)
+**staff**: Inaruhusu watumiaji kuongeza marekebisho ya ndani kwenye mfumo (`/usr/local`) bila kuhitaji ruhusa za mzizi (zingatia kwamba executable katika `/usr/local/bin` ziko kwenye mabadiliko ya PATH ya mtumiaji yeyote, na zinaweza "kufunika" executable katika `/bin` na `/usr/bin` zenye jina sawa). Linganisha na kikundi "adm", ambacho kinahusiana zaidi na ufuatiliaji/usalama. [\[source\]](https://wiki.debian.org/SystemGroups)
 
-Katika usambazaji wa debian, mabadiliko ya `$PATH` yanaonyesha kwamba `/usr/local/` itatekelezwa kama kipaumbele cha juu zaidi, iwe wewe ni mtumiaji mwenye ruhusa au la.
+Katika usambazaji wa debian, mabadiliko ya `$PATH` yanaonyesha kwamba `/usr/local/` itatekelezwa kama kipaumbele cha juu, iwe wewe ni mtumiaji mwenye mamlaka au la.
 ```bash
 $ echo $PATH
 /usr/local/sbin:/usr/sbin:/sbin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
@@ -96,7 +96,7 @@ $ cat /etc/crontab | grep run-parts
 47 6    * * 7   root    test -x /usr/sbin/anacron || { cd / && run-parts --report /etc/cron.weekly; }
 52 6    1 * *   root    test -x /usr/sbin/anacron || { cd / && run-parts --report /etc/cron.monthly; }
 ```
-au Wakati wa kuingia kwa kikao kipya cha ssh.
+au Wakati wa kuingia kwenye kikao kipya cha ssh.
 ```bash
 $ pspy64
 2024/02/01 22:02:08 CMD: UID=0     PID=1      | init [2]
@@ -150,7 +150,7 @@ Hata hivyo, ukijaribu **kuandika faili zinazomilikiwa na root** (kama `/etc/shad
 
 ## Kundi la Video
 
-Kwa kutumia amri `w` unaweza kupata **nani amejiandikisha kwenye mfumo** na itakuonyesha matokeo kama ifuatavyo:
+Kwa kutumia amri `w` unaweza kupata **nani aliyeingia kwenye mfumo** na itakuonyesha matokeo kama ifuatavyo:
 ```bash
 USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT
 yossi    tty1                      22:16    5:13m  0.05s  0.04s -bash
@@ -173,7 +173,7 @@ Kisha badilisha Upana na Kimo kuwa zile zinazotumika kwenye skrini na angalia Ai
 
 ## Kundi la Root
 
-Inaonekana kwamba kwa kawaida **wanachama wa kundi la root** wanaweza kuwa na ufikiaji wa **kubadilisha** baadhi ya **faili za usanidi** wa **huduma** au baadhi ya **faili za maktaba** au **mambo mengine ya kuvutia** ambayo yanaweza kutumika kuongeza mamlaka...
+Inaonekana kama kwa kawaida **wanachama wa kundi la root** wanaweza kuwa na ufikiaji wa **kubadilisha** baadhi ya faili za usanidi wa **huduma** au baadhi ya faili za **maktaba** au **mambo mengine ya kuvutia** ambayo yanaweza kutumika kuongeza mamlaka...
 
 **Angalia ni faili zipi wanachama wa root wanaweza kubadilisha**:
 ```bash
@@ -181,7 +181,7 @@ find / -group root -perm -g=w 2>/dev/null
 ```
 ## Docker Group
 
-Unaweza **kuunganisha mfumo wa faili wa mizizi wa mashine mwenyeji kwenye kiasi cha mfano**, hivyo wakati mfano unapoanza inachaji mara moja `chroot` kwenye kiasi hicho. Hii inakupa kwa ufanisi mizizi kwenye mashine.
+Unaweza **kuunganisha mfumo wa faili wa mizizi wa mashine mwenyeji kwenye kiasi cha mfano**, hivyo wakati mfano unapoanza inachukua mara moja `chroot` kwenye kiasi hicho. Hii inakupa kwa ufanisi mizizi kwenye mashine.
 ```bash
 docker image #Get images from the docker service
 
@@ -199,11 +199,15 @@ Hatimaye, ikiwa hupendi mapendekezo yoyote ya awali, au hayafanyi kazi kwa sabab
 ../docker-security/
 {{#endref}}
 
-Ikiwa una ruhusa za kuandika juu ya docker socket soma [**hiki kipande kuhusu jinsi ya kupandisha mamlaka kwa kutumia docker socket**](../#writable-docker-socket)**.**
+Ikiwa una ruhusa za kuandika juu ya socket ya docker soma [**hiki kipande kuhusu jinsi ya kupandisha mamlaka kwa kutumia socket ya docker**](../#writable-docker-socket)**.**
 
-{% embed url="https://github.com/KrustyHack/docker-privilege-escalation" %}
+{{#ref}}
+https://github.com/KrustyHack/docker-privilege-escalation
+{{#endref}}
 
-{% embed url="https://fosterelli.co/privilege-escalation-via-docker.html" %}
+{{#ref}}
+https://fosterelli.co/privilege-escalation-via-docker.html
+{{#endref}}
 
 ## Kundi la lxc/lxd
 
@@ -214,7 +218,7 @@ Ikiwa una ruhusa za kuandika juu ya docker socket soma [**hiki kipande kuhusu ji
 ## Kundi la Adm
 
 Kwa kawaida **wanachama** wa kundi **`adm`** wana ruhusa za **kusoma faili za log** zilizopo ndani ya _/var/log/_.\
-Hivyo, ikiwa umepata mtumiaji ndani ya kundi hili unapaswa kuangalia **logi**.
+Hivyo, ikiwa umepata mtumiaji ndani ya kundi hili unapaswa kwa hakika kuangalia **logi**.
 
 ## Kundi la Auth
 

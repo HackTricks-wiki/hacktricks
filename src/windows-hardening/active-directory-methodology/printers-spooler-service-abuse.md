@@ -8,16 +8,16 @@
 
 ## Spooler Service Abuse
 
-Ikiwa huduma ya _**Print Spooler**_ ime **wezeshwa,** unaweza kutumia baadhi ya akidi za AD zinazojulikana tayari ku **omba** server ya uchapishaji ya Domain Controller **kuh更新** kuhusu kazi mpya za uchapishaji na kumwambia tu **aitumie arifa kwa mfumo fulani**.\
-Kumbuka wakati printer inatuma arifa kwa mifumo isiyo ya kawaida, inahitaji **kujiimarisha dhidi** ya **mfumo** huo. Hivyo, mshambuliaji anaweza kufanya huduma ya _**Print Spooler**_ kujiimarisha dhidi ya mfumo wowote, na huduma hiyo itatumia **akaunti ya kompyuta** katika uthibitishaji huu.
+Ikiwa huduma ya _**Print Spooler**_ ime **wezeshwa,** unaweza kutumia baadhi ya akidi za AD zinazojulikana tayari ili **kuomba** kwa seva ya uchapishaji ya Domain Controller **sasisho** kuhusu kazi mpya za uchapishaji na kumwambia tu **aitumie arifa kwa mfumo fulani**.\
+Kumbuka wakati printer inatuma arifa kwa mifumo isiyo ya kawaida, inahitaji **kujiuthibitisha dhidi** ya **mfumo** huo. Hivyo, mshambuliaji anaweza kufanya huduma ya _**Print Spooler**_ kujiuthibitisha dhidi ya mfumo wowote, na huduma hiyo itatumia **akaunti ya kompyuta** katika uthibitishaji huu.
 
 ### Finding Windows Servers on the domain
 
-Kwa kutumia PowerShell, pata orodha ya masanduku ya Windows. Servers kwa kawaida ni kipaumbele, hivyo hebu tuzingatie hapo:
+Kwa kutumia PowerShell, pata orodha ya masanduku ya Windows. Seva mara nyingi ni kipaumbele, hivyo hebu tuzingatie hapo:
 ```bash
 Get-ADComputer -Filter {(OperatingSystem -like "*windows*server*") -and (OperatingSystem -notlike "2016") -and (Enabled -eq "True")} -Properties * | select Name | ft -HideTableHeaders > servers.txt
 ```
-### Kupata huduma za Spooler zinazot listening
+### Kupata huduma za Spooler zinazot Listening
 
 Kwa kutumia toleo lililobadilishwa kidogo la @mysmartlogin's (Vincent Le Toux's) [SpoolerScanner](https://github.com/NotMedic/NetNTLMtoSilverTicket), angalia kama Huduma ya Spooler inasikiliza:
 ```bash
@@ -41,21 +41,23 @@ printerbug.py 'domain/username:password'@<Printer IP> <RESPONDERIP>
 ```
 ### Kuunganisha na Uwakilishi Usio na Kikomo
 
-Ikiwa mshambuliaji tayari ameathiri kompyuta yenye [Uwakilishi Usio na Kikomo](unconstrained-delegation.md), mshambuliaji anaweza **kufanya printer ithibitishwe dhidi ya kompyuta hii**. Kwa sababu ya uwakilishi usio na kikomo, **TGT** ya **akaunti ya kompyuta ya printer** itakuwa **imehifadhiwa katika** **kumbukumbu** ya kompyuta yenye uwakilishi usio na kikomo. Kwa kuwa mshambuliaji tayari ameathiri mwenyeji huyu, ataweza **kurejesha tiketi hii** na kuifanya itumike ([Pass the Ticket](pass-the-ticket.md)).
+Ikiwa mshambuliaji tayari ameathiri kompyuta yenye [Uwakilishi Usio na Kikomo](unconstrained-delegation.md), mshambuliaji anaweza **kufanya printer ithibitishwe dhidi ya kompyuta hii**. Kwa sababu ya uwakilishi usio na kikomo, **TGT** ya **akaunti ya kompyuta ya printer** itakuwa **imehifadhiwa katika** **kumbukumbu** ya kompyuta yenye uwakilishi usio na kikomo. Kwa kuwa mshambuliaji tayari ameathiri mwenyeji huyu, ataweza **kurejesha tiketi hii** na kuitumia vibaya ([Pass the Ticket](pass-the-ticket.md)).
 
 ## RCP Kulazimisha uthibitisho
 
-{% embed url="https://github.com/p0dalirius/Coercer" %}
+{{#ref}}
+https://github.com/p0dalirius/Coercer
+{{#endref}}
 
 ## PrivExchange
 
-Shambulio la `PrivExchange` ni matokeo ya kasoro iliyopatikana katika **kipengele cha `PushSubscription` cha Exchange Server**. Kipengele hiki kinaruhusu server ya Exchange kulazimishwa na mtumiaji yeyote wa kikoa mwenye sanduku la barua kuthibitisha kwa mwenyeji wowote uliopewa na mteja kupitia HTTP.
+Shambulio la `PrivExchange` ni matokeo ya kasoro iliyopatikana katika kipengele cha **Exchange Server `PushSubscription`**. Kipengele hiki kinaruhusu server ya Exchange kulazimishwa na mtumiaji yeyote wa kikoa mwenye sanduku la barua kuthibitisha kwa mwenyeji yeyote aliyepewa na mteja kupitia HTTP.
 
-Kwa kawaida, **huduma ya Exchange inafanya kazi kama SYSTEM** na inapewa mamlaka kupita kiasi (hasa, ina **WriteDacl privileges kwenye kikoa kabla ya Sasisho la Jumla la 2019**). Kasoro hii inaweza kutumika kuweza **kupeleka taarifa kwa LDAP na kisha kutoa hifadhidata ya NTDS ya kikoa**. Katika hali ambapo kupeleka kwa LDAP haiwezekani, kasoro hii bado inaweza kutumika kupeleka na kuthibitisha kwa wenyeji wengine ndani ya kikoa. Ufanisi wa shambulio hili unatoa ufikiaji wa haraka kwa Msimamizi wa Kikoa na akaunti yoyote ya mtumiaji wa kikoa iliyoidhinishwa.
+Kwa kawaida, **huduma ya Exchange inafanya kazi kama SYSTEM** na inapewa mamlaka kupita kiasi (hasa, ina **WriteDacl privileges kwenye kikoa kabla ya Sasisho la Jumla la 2019**). Kasoro hii inaweza kutumika kuboresha **kupeleka taarifa kwa LDAP na kisha kutoa hifadhidata ya NTDS ya kikoa**. Katika hali ambapo kupeleka kwa LDAP haiwezekani, kasoro hii bado inaweza kutumika kupeleka na kuthibitisha kwa wenyeji wengine ndani ya kikoa. Utekelezaji wa mafanikio wa shambulio hili unatoa ufikiaji wa haraka kwa Msimamizi wa Kikoa kwa akaunti yoyote ya mtumiaji wa kikoa iliyoidhinishwa.
 
 ## Ndani ya Windows
 
-Ikiwa tayari uko ndani ya mashine ya Windows unaweza kulazimisha Windows kuungana na server kwa kutumia akaunti zenye mamlaka na:
+Ikiwa tayari uko ndani ya mashine ya Windows unaweza kulazimisha Windows kuungana na server ukitumia akaunti zenye mamlaka kwa:
 
 ### Defender MpCmdRun
 ```bash

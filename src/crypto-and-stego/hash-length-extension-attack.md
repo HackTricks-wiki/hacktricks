@@ -15,9 +15,9 @@ Fikiria seva ambayo in **tishe** baadhi ya **data** kwa **kuongeza** **siri** kw
 
 Basi, inawezekana kwa **mshambuliaji** **kuongeza** **data** na **kuunda** **sahihi** halali kwa **data ya awali + data iliyoongezwa**.
 
-### Vipi?
+### Jinsi?
 
-K基本上, algorithimu zinazohatarishwa zinaweza kuunda hash kwa kwanza **kuhashi block ya data**, na kisha, **kutoka** kwa **hash** iliyoundwa **awali** (hali), wana **ongeza block inayofuata ya data** na **kuhashi**.
+K基本的上, algorithimu zinazohatarishwa zinaweza kuunda hash kwa kwanza **kuhashi block ya data**, na kisha, **kutoka** kwa **hash** iliyoundwa **awali** (hali), wana **ongeza block inayofuata ya data** na **kuhashi**.
 
 Basi, fikiria kwamba siri ni "siri" na data ni "data", MD5 ya "siri data" ni 6036708eba0d11f6ef52ad44e8b74d5b.\
 Ikiwa mshambuliaji anataka kuongeza mfuatano "append" anaweza:
@@ -29,7 +29,9 @@ Ikiwa mshambuliaji anataka kuongeza mfuatano "append" anaweza:
 
 ### **Chombo**
 
-{% embed url="https://github.com/iagox86/hash_extender" %}
+{{#ref}}
+https://github.com/iagox86/hash_extender
+{{#endref}}
 
 ### Marejeleo
 

