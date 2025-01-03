@@ -2,13 +2,13 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Funktion Interposition
+## Funktionseinfügung
 
 Erstellen Sie eine **dylib** mit einem **`__interpose` (`__DATA___interpose`)** Abschnitt (oder einem Abschnitt, der mit **`S_INTERPOSING`** gekennzeichnet ist), der Tupel von **Funktionszeigern** enthält, die auf die **ursprünglichen** und die **Ersatz**-Funktionen verweisen.
 
-Dann **injektieren** Sie die dylib mit **`DYLD_INSERT_LIBRARIES`** (die Interposition muss erfolgen, bevor die Hauptanwendung geladen wird). Offensichtlich gelten die [**Einschränkungen** für die Verwendung von **`DYLD_INSERT_LIBRARIES`** auch hier](macos-library-injection/#check-restrictions).
+Dann **injektieren** Sie die dylib mit **`DYLD_INSERT_LIBRARIES`** (die Einfügung muss erfolgen, bevor die Hauptanwendung geladen wird). Offensichtlich gelten die [**Einschränkungen** für die Verwendung von **`DYLD_INSERT_LIBRARIES`** auch hier](macos-library-injection/#check-restrictions).
 
-### Interpose printf
+### printf einfügen
 
 {{#tabs}}
 {{#tab name="interpose.c"}}
@@ -106,7 +106,7 @@ Das Objekt ist **`someObject`**, die Methode ist **`@selector(method1p1:p2:)`** 
 Folgend den Objektstrukturen ist es möglich, ein **Array von Methoden** zu erreichen, wo die **Namen** und **Zeiger** auf den Methodencode **lokalisiert** sind.
 
 > [!CAUTION]
-> Beachten Sie, dass Methoden und Klassen basierend auf ihren Namen zugegriffen werden, diese Informationen werden im Binärformat gespeichert, sodass es möglich ist, sie mit `otool -ov </path/bin>` oder [`class-dump </path/bin>`](https://github.com/nygard/class-dump) abzurufen.
+> Beachten Sie, dass Methoden und Klassen basierend auf ihren Namen zugegriffen werden, diese Informationen werden im Binärformat gespeichert, sodass sie mit `otool -ov </path/bin>` oder [`class-dump </path/bin>`](https://github.com/nygard/class-dump) abgerufen werden können.
 
 ### Zugriff auf die rohen Methoden
 
@@ -181,7 +181,7 @@ return 0;
 Die Funktion **`method_exchangeImplementations`** ermöglicht es, die **Adresse** der **Implementierung** von **einer Funktion für die andere** zu **ändern**.
 
 > [!CAUTION]
-> Wenn also eine Funktion aufgerufen wird, wird **die andere ausgeführt**.
+> Wenn eine Funktion aufgerufen wird, wird also **die andere ausgeführt**.
 ```objectivec
 //gcc -framework Foundation swizzle_str.m -o swizzle_str
 
@@ -226,7 +226,7 @@ return 0;
 }
 ```
 > [!WARNING]
-> In diesem Fall könnte der **Implementierungscode der legitimen** Methode **überprüfen**, ob der **Methodenname** **erkannt** wird, und dieses Swizzling daran hindern, ausgeführt zu werden.
+> In diesem Fall könnte der **Implementierungscode der legitimen** Methode **überprüfen**, ob der **Methodenname** **übereinstimmt**, und dieses Swizzling **erkennen** und dessen Ausführung verhindern.
 >
 > Die folgende Technik hat diese Einschränkung nicht.
 

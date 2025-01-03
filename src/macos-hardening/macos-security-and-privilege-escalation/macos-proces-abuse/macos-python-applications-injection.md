@@ -1,4 +1,4 @@
-# macOS Python-Anwendungsinjektion
+# macOS Python Applications Injection
 
 {{#include ../../../banners/hacktricks-training.md}}
 

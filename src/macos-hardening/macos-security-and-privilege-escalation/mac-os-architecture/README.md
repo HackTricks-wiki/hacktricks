@@ -20,7 +20,7 @@ In XNU ist Mach **verantwortlich für viele der kritischen Low-Level-Operationen
 
 Der XNU **Kernel** **integriert** auch eine erhebliche Menge an Code, der aus dem **FreeBSD**-Projekt stammt. Dieser Code **läuft als Teil des Kernels zusammen mit Mach** im selben Adressraum. Der FreeBSD-Code innerhalb von XNU kann jedoch erheblich vom ursprünglichen FreeBSD-Code abweichen, da Änderungen erforderlich waren, um die Kompatibilität mit Mach sicherzustellen. FreeBSD trägt zu vielen Kernel-Operationen bei, einschließlich:
 
-- Prozessverwaltung
+- Prozessmanagement
 - Signalverarbeitung
 - Grundlegende Sicherheitsmechanismen, einschließlich Benutzer- und Gruppenverwaltung
 - Systemaufruf-Infrastruktur
@@ -47,9 +47,9 @@ macos-iokit.md
 
 ## macOS Kernel-Erweiterungen
 
-macOS ist **sehr restriktiv beim Laden von Kernel-Erweiterungen** (.kext), aufgrund der hohen Berechtigungen, mit denen der Code ausgeführt wird. Tatsächlich ist es standardmäßig nahezu unmöglich (es sei denn, es wird ein Bypass gefunden).
+macOS ist **sehr restriktiv beim Laden von Kernel-Erweiterungen** (.kext), aufgrund der hohen Privilegien, mit denen der Code ausgeführt wird. Tatsächlich ist es standardmäßig nahezu unmöglich (es sei denn, es wird ein Bypass gefunden).
 
-Auf der folgenden Seite können Sie auch sehen, wie Sie die `.kext` wiederherstellen können, die macOS in seinem **kernelcache** lädt:
+Auf der folgenden Seite können Sie auch sehen, wie Sie die `.kext` wiederherstellen können, die macOS in seinem **Kernelcache** lädt:
 
 {{#ref}}
 macos-kernel-extensions.md

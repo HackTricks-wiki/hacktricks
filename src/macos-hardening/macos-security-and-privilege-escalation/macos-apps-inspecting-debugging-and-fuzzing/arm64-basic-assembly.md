@@ -7,7 +7,7 @@
 In der ARMv8-Architektur definieren die Ausführungsebenen, bekannt als Ausnahmeebenen (ELs), das Privilegieniveau und die Fähigkeiten der Ausführungsumgebung. Es gibt vier Ausnahmeebenen, die von EL0 bis EL3 reichen, wobei jede eine andere Funktion erfüllt:
 
 1. **EL0 - Benutzermodus**:
-- Dies ist die am wenigsten privilegierte Ebene und wird zur Ausführung regulärer Anwendungssoftware verwendet.
+- Dies ist die am wenigsten privilegierte Ebene und wird für die Ausführung regulärer Anwendungssoftware verwendet.
 - Anwendungen, die auf EL0 ausgeführt werden, sind voneinander und von der Systemsoftware isoliert, was die Sicherheit und Stabilität erhöht.
 2. **EL1 - Betriebssystem-Kernelmodus**:
 - Die meisten Betriebssystemkerne laufen auf dieser Ebene.
@@ -19,7 +19,7 @@ In der ARMv8-Architektur definieren die Ausführungsebenen, bekannt als Ausnahme
 - Dies ist die privilegierteste Ebene und wird häufig für sicheres Booten und vertrauenswürdige Ausführungsumgebungen verwendet.
 - EL3 kann Zugriffe zwischen sicheren und nicht-sicheren Zuständen verwalten und steuern (wie sicheres Booten, vertrauenswürdiges OS usw.).
 
-Die Verwendung dieser Ebenen ermöglicht eine strukturierte und sichere Verwaltung verschiedener Aspekte des Systems, von Benutzeranwendungen bis hin zu den privilegiertesten Systemsoftware. Der Ansatz von ARMv8 zu Privilegienniveaus hilft, verschiedene Systemkomponenten effektiv zu isolieren, wodurch die Sicherheit und Robustheit des Systems erhöht wird.
+Die Verwendung dieser Ebenen ermöglicht eine strukturierte und sichere Verwaltung verschiedener Aspekte des Systems, von Benutzeranwendungen bis hin zu den privilegiertesten Systemsoftware. Der Ansatz von ARMv8 zu Privilegienebenen hilft, verschiedene Systemkomponenten effektiv zu isolieren, wodurch die Sicherheit und Robustheit des Systems erhöht wird.
 
 ## **Register (ARM64v8)**
 
@@ -31,9 +31,9 @@ ARM64 hat **31 allgemeine Register**, die von `x0` bis `x30` beschriftet sind. J
 3. **`x9`** bis **`x15`** - Weitere temporäre Register, die oft für lokale Variablen verwendet werden.
 4. **`x16`** und **`x17`** - **Intra-prozedurale Aufrufregister**. Temporäre Register für unmittelbare Werte. Sie werden auch für indirekte Funktionsaufrufe und PLT (Procedure Linkage Table) Stub verwendet.
 - **`x16`** wird als **Systemaufrufnummer** für die **`svc`**-Anweisung in **macOS** verwendet.
-5. **`x18`** - **Plattformregister**. Es kann als allgemeines Register verwendet werden, aber auf einigen Plattformen ist dieses Register für plattformspezifische Zwecke reserviert: Zeiger auf den aktuellen Thread-Umgebungsblock in Windows oder um auf die aktuell **ausführende Aufgabenstruktur im Linux-Kernel** zu zeigen.
+5. **`x18`** - **Plattformregister**. Es kann als allgemeines Register verwendet werden, aber auf einigen Plattformen ist dieses Register für plattformspezifische Verwendungen reserviert: Zeiger auf den aktuellen Thread-Umgebungsblock in Windows oder um auf die aktuell **ausführende Aufgabenstruktur im Linux-Kernel** zu zeigen.
 6. **`x19`** bis **`x28`** - Dies sind callee-saved Register. Eine Funktion muss die Werte dieser Register für ihren Aufrufer bewahren, sodass sie im Stack gespeichert und vor der Rückkehr zum Aufrufer wiederhergestellt werden.
-7. **`x29`** - **Frame-Zeiger**, um den Stackrahmen zu verfolgen. Wenn ein neuer Stackrahmen erstellt wird, weil eine Funktion aufgerufen wird, wird das **`x29`**-Register **im Stack gespeichert** und die **neue** Frame-Zeiger-Adresse (Adresse von **`sp`**) wird **in diesem Register gespeichert**.
+7. **`x29`** - **Frame-Zeiger**, um den Stackrahmen zu verfolgen. Wenn ein neuer Stackrahmen erstellt wird, weil eine Funktion aufgerufen wird, wird das **`x29`**-Register **im Stack gespeichert** und die **neue** Frame-Zeigeradresse (Adresse von **`sp`**) wird **in diesem Register gespeichert**.
 - Dieses Register kann auch als **allgemeines Register** verwendet werden, obwohl es normalerweise als Referenz für **lokale Variablen** verwendet wird.
 8. **`x30`** oder **`lr`** - **Link-Register**. Es hält die **Rückgabeadresse**, wenn eine `BL` (Branch with Link) oder `BLR` (Branch with Link to Register) Anweisung ausgeführt wird, indem der **`pc`**-Wert in diesem Register gespeichert wird.
 - Es könnte auch wie jedes andere Register verwendet werden.
@@ -54,7 +54,7 @@ Darüber hinaus gibt es weitere **32 Register mit einer Länge von 128 Bit**, di
 **Es gibt Hunderte von Systemregistern**, auch als spezielle Register (SPRs) bezeichnet, die zur **Überwachung** und **Steuerung** des Verhaltens von **Prozessoren** verwendet werden.\
 Sie können nur mit den speziellen Anweisungen **`mrs`** und **`msr`** gelesen oder gesetzt werden.
 
-Die speziellen Register **`TPIDR_EL0`** und **`TPIDDR_EL0`** sind häufig beim Reverse Engineering zu finden. Der `EL0`-Suffix zeigt die **minimale Ausnahme** an, von der aus das Register zugänglich ist (in diesem Fall ist EL0 das reguläre Ausnahmeniveau (Privilegienniveau), mit dem reguläre Programme ausgeführt werden).\
+Die speziellen Register **`TPIDR_EL0`** und **`TPIDDR_EL0`** sind häufig beim Reverse Engineering zu finden. Der `EL0`-Suffix zeigt die **minimale Ausnahme** an, von der aus das Register zugegriffen werden kann (in diesem Fall ist EL0 das reguläre Ausnahmeniveau (Privileg), mit dem reguläre Programme ausgeführt werden).\
 Sie werden oft verwendet, um die **Basisadresse des thread-lokalen Speicherbereichs** im Speicher zu speichern. In der Regel ist das erste für Programme, die in EL0 laufen, lesbar und schreibbar, aber das zweite kann von EL0 gelesen und von EL1 (wie Kernel) geschrieben werden.
 
 - `mrs x0, TPIDR_EL0 ; Lese TPIDR_EL0 in x0`
@@ -80,9 +80,9 @@ Dies sind die zugänglichen Felder:
 > [!WARNING]
 > Nicht alle Anweisungen aktualisieren diese Flags. Einige wie **`CMP`** oder **`TST`** tun dies, und andere, die ein s-Suffix haben, wie **`ADDS`**, tun es ebenfalls.
 
-- Das aktuelle **Registerbreite (`nRW`) Flag**: Wenn das Flag den Wert 0 hat, wird das Programm im AArch64-Ausführungszustand fortgesetzt.
+- Das aktuelle **Registerbreite (`nRW`) Flag**: Wenn das Flag den Wert 0 hat, wird das Programm im AArch64-Ausführungszustand fortgesetzt, sobald es wieder aufgenommen wird.
 - Das aktuelle **Ausnahmelevel** (**`EL`**): Ein reguläres Programm, das in EL0 läuft, hat den Wert 0
-- Das **Single-Stepping**-Flag (**`SS`**): Wird von Debuggern verwendet, um einen Schritt auszuführen, indem das SS-Flag auf 1 innerhalb von **`SPSR_ELx`** durch eine Ausnahme gesetzt wird. Das Programm führt einen Schritt aus und gibt eine Einzelstepp-Ausnahme aus.
+- Das **Single-Stepping**-Flag (**`SS`**): Wird von Debuggern verwendet, um einen Schritt auszuführen, indem das SS-Flag auf 1 innerhalb von **`SPSR_ELx`** durch eine Ausnahme gesetzt wird. Das Programm führt einen Schritt aus und löst eine Einzelstepp-Ausnahme aus.
 - Das **illegal exception**-Zustandsflag (**`IL`**): Es wird verwendet, um zu kennzeichnen, wann eine privilegierte Software einen ungültigen Ausnahmelevel-Transfer durchführt, dieses Flag wird auf 1 gesetzt und der Prozessor löst eine illegale Zustandsausnahme aus.
 - Die **`DAIF`**-Flags: Diese Flags ermöglichen es einem privilegierten Programm, bestimmte externe Ausnahmen selektiv zu maskieren.
 - Wenn **`A`** 1 ist, bedeutet dies, dass **asynchrone Abbrüche** ausgelöst werden. Das **`I`** konfiguriert die Reaktion auf externe Hardware-**Interrupt-Anfragen** (IRQs). und das F bezieht sich auf **Fast Interrupt Requests** (FIRs).
@@ -90,9 +90,9 @@ Dies sind die zugänglichen Felder:
 
 ## **Aufrufkonvention (ARM64v8)**
 
-Die ARM64-Aufrufkonvention legt fest, dass die **ersten acht Parameter** an eine Funktion in den Registern **`x0` bis `x7`** übergeben werden. **Zusätzliche** Parameter werden auf dem **Stack** übergeben. Der **Rückgabewert** wird im Register **`x0`** oder auch in **`x1`** übergeben, **wenn er 128 Bit lang ist**. Die Register **`x19`** bis **`x30`** und **`sp`** müssen **bewahrt** werden, wenn Funktionen aufgerufen werden.
+Die ARM64-Aufrufkonvention legt fest, dass die **ersten acht Parameter** an eine Funktion in den Registern **`x0` bis `x7`** übergeben werden. **Zusätzliche** Parameter werden auf dem **Stack** übergeben. Der **Rückgabewert** wird im Register **`x0`** oder in **`x1`** zurückgegeben, wenn er **128 Bit lang** ist. Die Register **`x19`** bis **`x30`** und **`sp`** müssen **bewahrt** werden, wenn Funktionsaufrufe erfolgen.
 
-Beim Lesen einer Funktion in Assembler sollten Sie nach dem **Funktionsprolog und -epilog** suchen. Der **Prolog** umfasst normalerweise das **Speichern des Frame-Zeigers (`x29`)**, das **Einrichten** eines **neuen Frame-Zeigers** und das **Zuweisen von Stackplatz**. Der **Epilog** umfasst normalerweise das **Wiederherstellen des gespeicherten Frame-Zeigers** und das **Rückkehren** von der Funktion.
+Beim Lesen einer Funktion in Assembler sollte man nach dem **Funktionsprolog und -epilog** suchen. Der **Prolog** umfasst normalerweise das **Speichern des Frame-Zeigers (`x29`)**, das **Einrichten** eines **neuen Frame-Zeigers** und das **Zuweisen von Stackplatz**. Der **Epilog** umfasst normalerweise das **Wiederherstellen des gespeicherten Frame-Zeigers** und das **Rückkehren** aus der Funktion.
 
 ### Aufrufkonvention in Swift
 
@@ -108,7 +108,7 @@ ARM64-Anweisungen haben im Allgemeinen das **Format `opcode dst, src1, src2`**, 
 - Beispiel: `ldr x0, [x1]` — Dies lädt einen Wert von der Speicheradresse, die von `x1` angegeben wird, in `x0`.
 - **Offset-Modus**: Ein Offset, der den ursprünglichen Zeiger beeinflusst, wird angegeben, zum Beispiel:
 - `ldr x2, [x1, #8]`, dies lädt in x2 den Wert von x1 + 8
-- `ldr x2, [x0, x1, lsl #2]`, dies lädt in x2 ein Objekt aus dem Array x0, von der Position x1 (Index) * 4
+- `ldr x2, [x0, x1, lsl #2]`, dies lädt in x2 ein Objekt aus dem Array x0, von der Position x1 (Index) \* 4
 - **Pre-indexierter Modus**: Dies wendet Berechnungen auf den Ursprung an, erhält das Ergebnis und speichert auch den neuen Ursprung im Ursprung.
 - `ldr x2, [x1, #8]!`, dies lädt `x1 + 8` in `x2` und speichert das Ergebnis in x1
 - `str lr, [sp, #-4]!`, Speichert das Link-Register in sp und aktualisiert das Register sp
@@ -118,11 +118,11 @@ ARM64-Anweisungen haben im Allgemeinen das **Format `opcode dst, src1, src2`**, 
 - `ldr x1, =_start`, Dies lädt die Adresse, an der das `_start`-Symbol beginnt, in x1 in Bezug auf den aktuellen PC.
 - **`str`**: **Speichere** einen Wert von einem **Register** in den **Speicher**.
 - Beispiel: `str x0, [x1]` — Dies speichert den Wert in `x0` an der Speicheradresse, die von `x1` angegeben wird.
-- **`ldp`**: **Lade ein Paar von Registern**. Diese Anweisung **lädt zwei Register** aus **aufeinanderfolgenden Speicher**-Adressen. Die Speicheradresse wird typischerweise gebildet, indem ein Offset zum Wert in einem anderen Register hinzugefügt wird.
-- Beispiel: `ldp x0, x1, [x2]` — Dies lädt `x0` und `x1` von den Speicheradressen bei `x2` und `x2 + 8`.
-- **`stp`**: **Speichere ein Paar von Registern**. Diese Anweisung **speichert zwei Register** in **aufeinanderfolgende Speicher**-Adressen. Die Speicheradresse wird typischerweise gebildet, indem ein Offset zum Wert in einem anderen Register hinzugefügt wird.
-- Beispiel: `stp x0, x1, [sp]` — Dies speichert `x0` und `x1` an den Speicheradressen bei `sp` und `sp + 8`.
-- `stp x0, x1, [sp, #16]!` — Dies speichert `x0` und `x1` an den Speicheradressen bei `sp+16` und `sp + 24` und aktualisiert `sp` mit `sp+16`.
+- **`ldp`**: **Lade ein Paar von Registern**. Diese Anweisung **lädt zwei Register** aus **aufeinanderfolgenden Speicher**-Standorten. Die Speicheradresse wird typischerweise gebildet, indem ein Offset zum Wert in einem anderen Register hinzugefügt wird.
+- Beispiel: `ldp x0, x1, [x2]` — Dies lädt `x0` und `x1` von den Speicherorten bei `x2` und `x2 + 8`.
+- **`stp`**: **Speichere ein Paar von Registern**. Diese Anweisung **speichert zwei Register** in **aufeinanderfolgende Speicher**-Standorte. Die Speicheradresse wird typischerweise gebildet, indem ein Offset zum Wert in einem anderen Register hinzugefügt wird.
+- Beispiel: `stp x0, x1, [sp]` — Dies speichert `x0` und `x1` an den Speicherorten bei `sp` und `sp + 8`.
+- `stp x0, x1, [sp, #16]!` — Dies speichert `x0` und `x1` an den Speicherorten bei `sp+16` und `sp + 24` und aktualisiert `sp` mit `sp+16`.
 - **`add`**: **Addiere** die Werte von zwei Registern und speichere das Ergebnis in einem Register.
 - Syntax: add(s) Xn1, Xn2, Xn3 | #imm, \[shift #N | RRX]
 - Xn1 -> Ziel
@@ -133,19 +133,19 @@ ARM64-Anweisungen haben im Allgemeinen das **Format `opcode dst, src1, src2`**, 
 - `add x5, x5, #1, lsl #12` — Dies entspricht 4096 (ein 1-Verschieber 12 Mal) -> 1 0000 0000 0000 0000
 - **`adds`** Dies führt ein `add` aus und aktualisiert die Flags
 - **`sub`**: **Subtrahiere** die Werte von zwei Registern und speichere das Ergebnis in einem Register.
-- Überprüfen Sie die **`add`**-**Syntax**.
+- Überprüfe die **`add`**-**Syntax**.
 - Beispiel: `sub x0, x1, x2` — Dies subtrahiert den Wert in `x2` von `x1` und speichert das Ergebnis in `x0`.
 - **`subs`** Dies ist wie sub, aber aktualisiert das Flag
 - **`mul`**: **Multipliziere** die Werte von **zwei Registern** und speichere das Ergebnis in einem Register.
 - Beispiel: `mul x0, x1, x2` — Dies multipliziert die Werte in `x1` und `x2` und speichert das Ergebnis in `x0`.
-- **`div`**: **Teile** den Wert eines Registers durch einen anderen und speichere das Ergebnis in einem Register.
-- Beispiel: `div x0, x1, x2` — Dies teilt den Wert in `x1` durch `x2` und speichert das Ergebnis in `x0`.
+- **`div`**: **Dividiere** den Wert eines Registers durch einen anderen und speichere das Ergebnis in einem Register.
+- Beispiel: `div x0, x1, x2` — Dies dividiert den Wert in `x1` durch `x2` und speichert das Ergebnis in `x0`.
 - **`lsl`**, **`lsr`**, **`asr`**, **`ror`, `rrx`**:
-- **Logische Verschiebung nach links**: Füge 0en am Ende hinzu, indem die anderen Bits nach vorne verschoben werden (multipliziere mit n-mal 2)
-- **Logische Verschiebung nach rechts**: Füge 1en am Anfang hinzu, indem die anderen Bits nach hinten verschoben werden (teile durch n-mal 2 in unsigned)
-- **Arithmetische Verschiebung nach rechts**: Wie **`lsr`**, aber anstelle von 0en, wenn das bedeutendste Bit 1 ist, werden **1en hinzugefügt** (teile durch n-mal 2 in signed)
+- **Logische Verschiebung nach links**: Füge 0en am Ende hinzu, während die anderen Bits nach vorne verschoben werden (multipliziere mit n-mal 2)
+- **Logische Verschiebung nach rechts**: Füge 1en am Anfang hinzu, während die anderen Bits nach hinten verschoben werden (dividiere mit n-mal 2 in unsigned)
+- **Arithmetische Verschiebung nach rechts**: Wie **`lsr`**, aber anstelle von 0en, wenn das bedeutendste Bit 1 ist, werden **1en hinzugefügt** (teile mit n-mal 2 in signed)
 - **Rechtsrotation**: Wie **`lsr`**, aber was von rechts entfernt wird, wird links angehängt
-- **Rechtsrotation mit Erweiterung**: Wie **`ror`**, aber mit dem Übertragsflag als "bedeutendstes Bit". Das Übertragsflag wird also auf das Bit 31 verschoben und das entfernte Bit zum Übertragsflag.
+- **Rechtsrotation mit Erweiterung**: Wie **`ror`**, aber mit dem Übertragsflag als "bedeutendstes Bit". Das Übertragsflag wird also auf Bit 31 verschoben und das entfernte Bit in das Übertragsflag.
 - **`bfm`**: **Bitfeldverschiebung**, diese Operationen **kopieren Bits `0...n`** von einem Wert und platzieren sie in den Positionen **`m..m+n`**. Die **`#s`** gibt die **linkeste Bitposition** an und **`#r`** die **Verschiebung nach rechts**.
 - Bitfeldverschiebung: `BFM Xd, Xn, #r`
 - Signierte Bitfeldverschiebung: `SBFM Xd, Xn, #r, #s`
@@ -156,8 +156,8 @@ ARM64-Anweisungen haben im Allgemeinen das **Format `opcode dst, src1, src2`**, 
 - **`SBFIZ X1, X2, #3, #4`** Signerweitere 4 Bits von X2 und füge sie in X1 ein, beginnend bei Bitposition 3, wobei die rechten Bits auf 0 gesetzt werden
 - **`SBFX X1, X2, #3, #4`** Extrahiert 4 Bits, die bei Bit 3 von X2 beginnen, signiert sie und platziert das Ergebnis in X1
 - **`UBFIZ X1, X2, #3, #4`** Nullerweitert 4 Bits von X2 und fügt sie in X1 ein, beginnend bei Bitposition 3, wobei die rechten Bits auf 0 gesetzt werden
-- **`UBFX X1, X2, #3, #4`** Extrahiert 4 Bits, die bei Bit 3 von X2 beginnen, und platziert das nullerweiterte Ergebnis in X1.
-- **Sign Extend To X:** Erweitert das Vorzeichen (oder fügt einfach 0en in der unsigned-Version hinzu) eines Wertes, um Operationen damit durchzuführen:
+- **`UBFX X1, X2, #3, #4`** Extrahiert 4 Bits, die bei Bit 3 von X2 beginnen, und platziert das nullerweitere Ergebnis in X1.
+- **Sign Extend To X:** Erweitert das Vorzeichen (oder fügt einfach 0en in der unsigned-Version hinzu) eines Wertes, um Operationen damit durchführen zu können:
 - **`SXTB X1, W2`** Erweitert das Vorzeichen eines Bytes **von W2 nach X1** (`W2` ist die Hälfte von `X2`), um die 64 Bits zu füllen
 - **`SXTH X1, W2`** Erweitert das Vorzeichen einer 16-Bit-Zahl **von W2 nach X1**, um die 64 Bits zu füllen
 - **`SXTW X1, W2`** Erweitert das Vorzeichen eines Bytes **von W2 nach X1**, um die 64 Bits zu füllen
@@ -167,24 +167,24 @@ ARM64-Anweisungen haben im Allgemeinen das **Format `opcode dst, src1, src2`**, 
 - **`cmp`**: **Vergleiche** zwei Register und setze Bedingungsflags. Es ist ein **Alias von `subs`**, der das Zielregister auf das Nullregister setzt. Nützlich, um zu wissen, ob `m == n`.
 - Es unterstützt die **gleiche Syntax wie `subs`**
 - Beispiel: `cmp x0, x1` — Dies vergleicht die Werte in `x0` und `x1` und setzt die Bedingungsflags entsprechend.
-- **`cmn`**: **Vergleiche negative** Operanden. In diesem Fall ist es ein **Alias von `adds`** und unterstützt die gleiche Syntax. Nützlich, um zu wissen, ob `m == -n`.
+- **`cmn`**: **Vergleiche negativen** Operanden. In diesem Fall ist es ein **Alias von `adds`** und unterstützt die gleiche Syntax. Nützlich, um zu wissen, ob `m == -n`.
 - **`ccmp`**: Bedingter Vergleich, es ist ein Vergleich, der nur durchgeführt wird, wenn ein vorheriger Vergleich wahr war und speziell die nzcv-Bits setzt.
 - `cmp x1, x2; ccmp x3, x4, 0, NE; blt _func` -> wenn x1 != x2 und x3 < x4, springe zu func
 - Dies liegt daran, dass **`ccmp`** nur ausgeführt wird, wenn der **vorherige `cmp` ein `NE` war**, wenn nicht, werden die Bits `nzcv` auf 0 gesetzt (was den `blt`-Vergleich nicht erfüllt).
-- Dies kann auch als `ccmn` verwendet werden (gleich, aber negativ, wie `cmp` vs `cmn`).
+- Dies kann auch als `ccmn` verwendet werden (dasselbe, aber negativ, wie `cmp` vs `cmn`).
 - **`tst`**: Überprüft, ob einer der Werte des Vergleichs beide 1 sind (es funktioniert wie ein ANDS, ohne das Ergebnis irgendwo zu speichern). Es ist nützlich, um ein Register mit einem Wert zu überprüfen und zu sehen, ob eines der Bits des Registers, das im Wert angegeben ist, 1 ist.
 - Beispiel: `tst X1, #7` Überprüfe, ob eines der letzten 3 Bits von X1 1 ist
 - **`teq`**: XOR-Operation, die das Ergebnis verwirft
 - **`b`**: Unbedingter Sprung
 - Beispiel: `b myFunction`
-- Beachten Sie, dass dies das Link-Register nicht mit der Rückgabeadresse füllt (nicht geeignet für Unterprogrammaufrufe, die zurückkehren müssen)
-- **`bl`**: **Sprung** mit Link, verwendet, um eine **Unterroutine** **aufzurufen**. Speichert die **Rückgabeadresse in `x30`**.
+- Beachte, dass dies das Link-Register nicht mit der Rückgabeadresse füllt (nicht geeignet für Unterprogrammaufrufe, die zurückkehren müssen)
+- **`bl`**: **Sprung** mit Link, verwendet, um ein **Unterprogramm** aufzurufen. Speichert die **Rückgabeadresse in `x30`**.
 - Beispiel: `bl myFunction` — Dies ruft die Funktion `myFunction` auf und speichert die Rückgabeadresse in `x30`.
-- Beachten Sie, dass dies das Link-Register nicht mit der Rückgabeadresse füllt (nicht geeignet für Unterprogrammaufrufe, die zurückkehren müssen)
-- **`blr`**: **Sprung** mit Link zu Register, verwendet, um eine **Unterroutine** **aufzurufen**, bei der das Ziel in einem **Register** **angegeben** ist. Speichert die Rückgabeadresse in `x30`. (Dies ist
+- Beachte, dass dies das Link-Register nicht mit der Rückgabeadresse füllt (nicht geeignet für Unterprogrammaufrufe, die zurückkehren müssen)
+- **`blr`**: **Sprung** mit Link zu Register, verwendet, um ein **Unterprogramm** aufzurufen, bei dem das Ziel in einem **Register** angegeben ist. Speichert die Rückgabeadresse in `x30`. (Dies ist
 - Beispiel: `blr x1` — Dies ruft die Funktion auf, deren Adresse in `x1` enthalten ist, und speichert die Rückgabeadresse in `x30`.
-- **`ret`**: **Rückkehr** von **Unterroutine**, typischerweise unter Verwendung der Adresse in **`x30`**.
-- Beispiel: `ret` — Dies kehrt von der aktuellen Unterroutine unter Verwendung der Rückgabeadresse in `x30` zurück.
+- **`ret`**: **Rückkehr** aus dem **Unterprogramm**, typischerweise unter Verwendung der Adresse in **`x30`**.
+- Beispiel: `ret` — Dies kehrt aus dem aktuellen Unterprogramm unter Verwendung der Rückgabeadresse in `x30` zurück.
 - **`b.<cond>`**: Bedingte Sprünge
 - **`b.eq`**: **Sprung, wenn gleich**, basierend auf der vorherigen `cmp`-Anweisung.
 - Beispiel: `b.eq label` — Wenn die vorherige `cmp`-Anweisung zwei gleiche Werte gefunden hat, springt dies zu `label`.
@@ -246,9 +246,9 @@ ldp x29, x30, [sp], #16  ; load pair x29 and x30 from the stack and increment th
 
 Armv8-A unterstützt die Ausführung von 32-Bit-Programmen. **AArch32** kann in einem von **zwei Befehlssätzen** laufen: **`A32`** und **`T32`** und kann zwischen ihnen über **`interworking`** wechseln.\
 **Privilegierte** 64-Bit-Programme können die **Ausführung von 32-Bit**-Programmen planen, indem sie einen Ausnahmeebenenübergang zur weniger privilegierten 32-Bit-Ebene ausführen.\
-Beachten Sie, dass der Übergang von 64-Bit zu 32-Bit mit einer Senkung der Ausnahmeebene erfolgt (zum Beispiel ein 64-Bit-Programm in EL1, das ein Programm in EL0 auslöst). Dies geschieht, indem das **Bit 4 von** **`SPSR_ELx`** speziellen Register **auf 1** gesetzt wird, wenn der `AArch32`-Prozess-Thread bereit ist, ausgeführt zu werden, und der Rest von `SPSR_ELx` speichert die **`AArch32`** Programme CPSR. Dann ruft der privilegierte Prozess die **`ERET`**-Anweisung auf, damit der Prozessor zu **`AArch32`** wechselt und in A32 oder T32 je nach CPSR\*\*.\*\*
+Beachten Sie, dass der Übergang von 64-Bit zu 32-Bit mit einer Senkung der Ausnahmeebene erfolgt (zum Beispiel ein 64-Bit-Programm in EL1, das ein Programm in EL0 auslöst). Dies geschieht, indem das **Bit 4 von** **`SPSR_ELx`** speziellen Register **auf 1** gesetzt wird, wenn der `AArch32`-Prozess-Thread bereit ist, ausgeführt zu werden, und der Rest von `SPSR_ELx` speichert den **`AArch32`**-Programms CPSR. Dann ruft der privilegierte Prozess die **`ERET`**-Anweisung auf, damit der Prozessor zu **`AArch32`** wechselt und in A32 oder T32 je nach CPSR\*\*.\*\*
 
-Das **`interworking`** erfolgt unter Verwendung der J- und T-Bits von CPSR. `J=0` und `T=0` bedeutet **`A32`** und `J=0` und `T=1` bedeutet **T32**. Dies bedeutet im Wesentlichen, dass das **niedrigste Bit auf 1** gesetzt wird, um anzuzeigen, dass der Befehlssatz T32 ist.\
+Das **`interworking`** erfolgt unter Verwendung der J- und T-Bits des CPSR. `J=0` und `T=0` bedeutet **`A32`** und `J=0` und `T=1` bedeutet **T32**. Dies bedeutet im Wesentlichen, dass das **niedrigste Bit auf 1** gesetzt wird, um anzuzeigen, dass der Befehlssatz T32 ist.\
 Dies wird während der **interworking branch instructions** gesetzt, kann aber auch direkt mit anderen Anweisungen gesetzt werden, wenn der PC als Zielregister festgelegt ist. Beispiel:
 
 Ein weiteres Beispiel:
@@ -277,7 +277,7 @@ Dies geschieht durch **Speichern des Prozessorstatus von `CPSR` in `SPSR`** des 
 
 ### CPSR - Aktueller Programmstatusregister
 
-In AArch32 funktioniert der CPSR ähnlich wie **`PSTATE`** in AArch64 und wird auch in **`SPSR_ELx`** gespeichert, wenn eine Ausnahme auftritt, um später die Ausführung wiederherzustellen:
+In AArch32 funktioniert der CPSR ähnlich wie **`PSTATE`** in AArch64 und wird auch in **`SPSR_ELx`** gespeichert, wenn eine Ausnahme auftritt, um die Ausführung später wiederherzustellen:
 
 <figure><img src="../../../images/image (1197).png" alt=""><figcaption></figcaption></figure>
 
@@ -294,7 +294,7 @@ Die Felder sind in einige Gruppen unterteilt:
 
 Zum Beispiel addiert die **`UADD8`** Anweisung **vier Byte-Paare** (von zwei 32-Bit-Operanden) parallel und speichert die Ergebnisse in einem 32-Bit-Register. Sie **setzt dann die `GE` Flags im `APSR`** basierend auf diesen Ergebnissen. Jedes GE-Flag entspricht einer der Byte-Addition, die angibt, ob die Addition für dieses Byte-Paar **übergelaufen** ist.
 
-Die **`SEL`** Anweisung verwendet diese GE-Flags, um bedingte Aktionen durchzuführen.
+Die **`SEL`** Anweisung verwendet diese GE-Flags, um bedingte Aktionen auszuführen.
 
 #### Ausführungsstatusregister
 
@@ -330,9 +330,9 @@ Beachten Sie, dass **Ida** und **Ghidra** auch **spezifische dylibs** aus dem Ca
 > [!TIP]
 > Manchmal ist es einfacher, den **dekompilierten** Code von **`libsystem_kernel.dylib`** **zu überprüfen**, als den **Quellcode** zu überprüfen, da der Code mehrerer Syscalls (BSD und Mach) über Skripte generiert wird (siehe Kommentare im Quellcode), während Sie in der dylib finden können, was aufgerufen wird.
 
-### machdep Aufrufe
+### machdep-Aufrufe
 
-XNU unterstützt eine andere Art von Aufrufen, die maschinenabhängig sind. Die Anzahl dieser Aufrufe hängt von der Architektur ab, und weder die Aufrufe noch die Zahlen sind garantiert konstant.
+XNU unterstützt einen weiteren Typ von Aufrufen, die maschinenabhängig sind. Die Anzahl dieser Aufrufe hängt von der Architektur ab, und weder die Aufrufe noch die Zahlen sind garantiert konstant.
 
 ### comm-Seite
 
@@ -371,29 +371,29 @@ whoami
 > [!TIP]
 > Das Setzen der Umgebungsvariable **`NSObjCMessageLoggingEnabled=1`** ermöglicht es, zu protokollieren, wann diese Funktion in einer Datei wie `/tmp/msgSends-pid` aufgerufen wird.
 >
-> Darüber hinaus kann durch das Setzen von **`OBJC_HELP=1`** und das Aufrufen einer beliebigen Binärdatei andere Umgebungsvariablen angezeigt werden, die Sie verwenden können, um **log** zu protokollieren, wann bestimmte Objc-C-Aktionen auftreten.
+> Darüber hinaus kann durch das Setzen von **`OBJC_HELP=1`** und das Aufrufen einer beliebigen Binärdatei andere Umgebungsvariablen angezeigt werden, die verwendet werden können, um **log** zu protokollieren, wann bestimmte Objc-C-Aktionen auftreten.
 
 Wenn diese Funktion aufgerufen wird, ist es notwendig, die aufgerufene Methode der angegebenen Instanz zu finden. Dazu werden verschiedene Suchen durchgeführt:
 
 - Führen Sie eine optimistische Cache-Suche durch:
-- Wenn erfolgreich, fertig
+- Wenn erfolgreich, erledigt
 - Erwerben Sie runtimeLock (lesen)
 - Wenn (realize && !cls->realized) Klasse realisieren
 - Wenn (initialize && !cls->initialized) Klasse initialisieren
 - Versuchen Sie den eigenen Cache der Klasse:
-- Wenn erfolgreich, fertig
+- Wenn erfolgreich, erledigt
 - Versuchen Sie die Methodenliste der Klasse:
-- Wenn gefunden, Cache füllen und fertig
+- Wenn gefunden, Cache füllen und erledigt
 - Versuchen Sie den Cache der Superklasse:
-- Wenn erfolgreich, fertig
+- Wenn erfolgreich, erledigt
 - Versuchen Sie die Methodenliste der Superklasse:
-- Wenn gefunden, Cache füllen und fertig
+- Wenn gefunden, Cache füllen und erledigt
 - Wenn (resolver) versuchen Sie den Methodenresolver und wiederholen Sie die Suche von der Klassensuche
 - Wenn Sie immer noch hier sind (= alles andere ist fehlgeschlagen) versuchen Sie den Forwarder
 
 ### Shellcodes
 
-Zum Kompilieren:
+Um zu kompilieren:
 ```bash
 as -o shell.o shell.s
 ld -o shell shell.o -macosx_version_min 13.0 -lSystem -L /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib

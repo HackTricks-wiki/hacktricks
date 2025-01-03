@@ -73,7 +73,7 @@ Für weitere Informationen siehe diesen Vortrag: [https://www.youtube.com/watch?
 
 Wenn ein Installer in `/tmp/fixedname/bla/bla` schreibt, ist es möglich, ein **Mount** über `/tmp/fixedname` ohne Besitzer zu **erstellen**, sodass du **jede Datei während der Installation ändern** kannst, um den Installationsprozess auszunutzen.
 
-Ein Beispiel dafür ist **CVE-2021-26089**, das es geschafft hat, ein **periodisches Skript zu überschreiben**, um als Root auszuführen. Für weitere Informationen siehe den Vortrag: [**OBTS v4.0: "Mount(ain) of Bugs" - Csaba Fitzl**](https://www.youtube.com/watch?v=jSYPazD4VcE)
+Ein Beispiel dafür ist **CVE-2021-26089**, das es geschafft hat, ein **periodisches Skript zu überschreiben**, um als Root ausgeführt zu werden. Für weitere Informationen siehe den Vortrag: [**OBTS v4.0: "Mount(ain) of Bugs" - Csaba Fitzl**](https://www.youtube.com/watch?v=jSYPazD4VcE)
 
 ## pkg als Malware
 

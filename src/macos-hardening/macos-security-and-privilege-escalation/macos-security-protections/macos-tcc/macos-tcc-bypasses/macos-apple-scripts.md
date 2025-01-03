@@ -5,7 +5,7 @@
 ## Apple Scripts
 
 Es ist eine Skriptsprache, die zur Automatisierung von Aufgaben **mit Remote-Prozessen interagiert**. Es macht es ziemlich einfach, **andere Prozesse zu bitten, einige Aktionen auszuführen**. **Malware** kann diese Funktionen missbrauchen, um Funktionen zu nutzen, die von anderen Prozessen exportiert werden.\
-Zum Beispiel könnte eine Malware **willkürlichen JS-Code in geöffnete Browserseiten injizieren**. Oder **automatisch auf einige angeforderte Berechtigungen klicken**;
+Zum Beispiel könnte eine Malware **willkürlichen JS-Code in geöffneten Browserseiten injizieren**. Oder **automatisch auf einige vom Benutzer angeforderte Berechtigungen klicken**;
 ```applescript
 tell window 1 of process "SecurityAgent"
 click button "Always Allow" of group 1

@@ -52,13 +52,13 @@ Parent Constraint: is-init-proc
 - `validation-category == 1`: Eine ausführbare Datei des Betriebssystems.
 - `is-init-proc`: Launchd
 
-### Rückgängigmachen von LC-Kategorien
+### Umkehrung der LC-Kategorien
 
-Sie haben mehr Informationen [**darüber hier**](https://theevilbit.github.io/posts/launch_constraints_deep_dive/#reversing-constraints), aber im Grunde genommen sind sie in **AMFI (AppleMobileFileIntegrity)** definiert, daher müssen Sie das Kernel Development Kit herunterladen, um das **KEXT** zu erhalten. Die Symbole, die mit **`kConstraintCategory`** beginnen, sind die **interessanten**. Wenn Sie sie extrahieren, erhalten Sie einen DER (ASN.1) kodierten Stream, den Sie mit dem [ASN.1 Decoder](https://holtstrom.com/michael/tools/asn1decoder.php) oder der python-asn1-Bibliothek und ihrem `dump.py`-Skript, [andrivet/python-asn1](https://github.com/andrivet/python-asn1/tree/master) dekodieren müssen, was Ihnen eine verständlichere Zeichenkette liefert.
+Sie haben mehr Informationen [**darüber hier**](https://theevilbit.github.io/posts/launch_constraints_deep_dive/#reversing-constraints), aber im Grunde genommen sind sie in **AMFI (AppleMobileFileIntegrity)** definiert, daher müssen Sie das Kernel Development Kit herunterladen, um die **KEXT** zu erhalten. Die Symbole, die mit **`kConstraintCategory`** beginnen, sind die **interessanten**. Wenn Sie sie extrahieren, erhalten Sie einen DER (ASN.1) kodierten Stream, den Sie mit dem [ASN.1 Decoder](https://holtstrom.com/michael/tools/asn1decoder.php) oder der python-asn1-Bibliothek und ihrem `dump.py`-Skript, [andrivet/python-asn1](https://github.com/andrivet/python-asn1/tree/master) dekodieren müssen, was Ihnen eine verständlichere Zeichenkette liefert.
 
 ## Umgebungsbeschränkungen
 
-Dies sind die Launch Constraints, die in **drittanbieter Anwendungen** konfiguriert sind. Der Entwickler kann die **Fakten** und **logischen Operanden auswählen**, die er in seiner Anwendung verwenden möchte, um den Zugriff auf sich selbst einzuschränken.
+Dies sind die Launch Constraints, die in **drittanbieter Anwendungen** konfiguriert sind. Der Entwickler kann die **Fakten** und **logischen Operatoren auswählen**, die er in seiner Anwendung verwenden möchte, um den Zugriff auf sich selbst einzuschränken.
 
 Es ist möglich, die Umgebungsbeschränkungen einer Anwendung mit zu enumerieren:
 ```bash
@@ -75,7 +75,7 @@ In **macOS** gibt es einige Vertrauensspeicher:
 Und in iOS sieht es so aus, als wäre es in **`/usr/standalone/firmware/FUD/StaticTrustCache.img4`**.
 
 > [!WARNING]
-> Auf macOS, das auf Apple Silicon Geräten läuft, wird AMFI sich weigern, eine von Apple signierte Binärdatei zu laden, wenn sie nicht im Vertrauensspeicher ist.
+> Auf macOS, das auf Apple Silicon-Geräten läuft, wird AMFI sich weigern, eine von Apple signierte Binärdatei zu laden, wenn sie nicht im Vertrauensspeicher ist.
 
 ### Auflisten von Vertrauensspeichern
 
@@ -97,7 +97,7 @@ pyimg4 im4p extract -i /tmp/StaticTrustCache.im4p -o /tmp/StaticTrustCache.data
 
 pyimg4 im4p extract -i /System/Library/Security/OSLaunchPolicyData -o /tmp/OSLaunchPolicyData.data
 ```
-(Eine weitere Option könnte sein, das Tool [**img4tool**](https://github.com/tihmstar/img4tool) zu verwenden, das sogar auf M1 läuft, auch wenn die Version alt ist, und für x86_64, wenn Sie es an den richtigen Orten installieren).
+(Eine weitere Option könnte die Verwendung des Tools [**img4tool**](https://github.com/tihmstar/img4tool) sein, das sogar auf M1 läuft, auch wenn die Version alt ist, und für x86_64, wenn Sie es an den richtigen Orten installieren).
 
 Jetzt können Sie das Tool [**trustcache**](https://github.com/CRKatri/trustcache) verwenden, um die Informationen in einem lesbaren Format zu erhalten:
 ```bash
@@ -135,28 +135,28 @@ uint8_t reserved0;
 ```
 Dann könnten Sie ein Skript wie [**dieses**](https://gist.github.com/xpn/66dc3597acd48a4c31f5f77c3cc62f30) verwenden, um Daten zu extrahieren.
 
-Anhand dieser Daten können Sie die Apps mit einem **Wert für Startbeschränkungen von `0`** überprüfen, was die sind, die nicht eingeschränkt sind ([**hier überprüfen**](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056), was jeder Wert bedeutet).
+Anhand dieser Daten können Sie die Apps mit einem **Launch Constraints-Wert von `0`** überprüfen, die nicht eingeschränkt sind ([**hier überprüfen**](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056), was jeder Wert bedeutet).
 
 ## Angriffsminderungen
 
-Startbeschränkungen hätten mehrere alte Angriffe gemildert, indem sie **sicherstellen, dass der Prozess nicht unter unerwarteten Bedingungen ausgeführt wird:** Zum Beispiel von unerwarteten Standorten oder von einem unerwarteten übergeordneten Prozess aufgerufen wird (wenn nur launchd es starten sollte).
+Launch Constraints hätten mehrere alte Angriffe gemildert, indem sie **sicherstellen, dass der Prozess nicht unter unerwarteten Bedingungen ausgeführt wird:** Zum Beispiel von unerwarteten Standorten oder von einem unerwarteten übergeordneten Prozess aufgerufen wird (wenn nur launchd es starten sollte).
 
-Darüber hinaus **mildern Startbeschränkungen auch Downgrade-Angriffe.**
+Darüber hinaus **mildern Launch Constraints auch Downgrade-Angriffe.**
 
-Sie **mildern jedoch keine häufigen XPC** Missbräuche, **Electron** Code-Injektionen oder **dylib-Injektionen** ohne Bibliotheksvalidierung (es sei denn, die Team-IDs, die Bibliotheken laden können, sind bekannt).
+Sie **mildern jedoch keine häufigen XPC**-Missbräuche, **Electron**-Code-Injektionen oder **dylib-Injektionen** ohne Bibliotheksvalidierung (es sei denn, die Team-IDs, die Bibliotheken laden können, sind bekannt).
 
 ### XPC-Daemon-Schutz
 
-Im Sonoma-Release ist ein bemerkenswerter Punkt die **Verantwortlichkeitskonfiguration** des Daemon-XPC-Dienstes. Der XPC-Dienst ist für sich selbst verantwortlich, im Gegensatz zum verbindenden Client, der verantwortlich ist. Dies ist im Feedbackbericht FB13206884 dokumentiert. Diese Einrichtung mag fehlerhaft erscheinen, da sie bestimmte Interaktionen mit dem XPC-Dienst zulässt:
+Im Sonoma-Release ist ein bemerkenswerter Punkt die **Verantwortlichkeitskonfiguration** des Daemon-XPC-Dienstes. Der XPC-Dienst ist für sich selbst verantwortlich, im Gegensatz zum verbindenden Client, der verantwortlich ist. Dies ist im Feedback-Bericht FB13206884 dokumentiert. Diese Einrichtung mag fehlerhaft erscheinen, da sie bestimmte Interaktionen mit dem XPC-Dienst zulässt:
 
 - **Starten des XPC-Dienstes**: Wenn dies als Fehler angesehen wird, erlaubt diese Einrichtung nicht, den XPC-Dienst durch Angreifercode zu initiieren.
 - **Verbinden mit einem aktiven Dienst**: Wenn der XPC-Dienst bereits läuft (möglicherweise von seiner ursprünglichen Anwendung aktiviert), gibt es keine Barrieren, um sich mit ihm zu verbinden.
 
-Während die Implementierung von Beschränkungen für den XPC-Dienst vorteilhaft sein könnte, indem sie **das Fenster für potenzielle Angriffe verengt**, adressiert sie nicht das Hauptanliegen. Die Sicherheit des XPC-Dienstes sicherzustellen, erfordert grundlegend **eine effektive Validierung des verbindenden Clients**. Dies bleibt die einzige Methode, um die Sicherheit des Dienstes zu stärken. Es ist auch erwähnenswert, dass die erwähnte Verantwortlichkeitskonfiguration derzeit in Betrieb ist, was möglicherweise nicht mit dem beabsichtigten Design übereinstimmt.
+Während die Implementierung von Einschränkungen für den XPC-Dienst vorteilhaft sein könnte, indem sie **das Fenster für potenzielle Angriffe verengt**, adressiert sie nicht das Hauptanliegen. Die Sicherheit des XPC-Dienstes sicherzustellen, erfordert grundsätzlich **eine effektive Validierung des verbindenden Clients**. Dies bleibt die einzige Methode, um die Sicherheit des Dienstes zu stärken. Es ist auch erwähnenswert, dass die genannte Verantwortlichkeitskonfiguration derzeit in Betrieb ist, was möglicherweise nicht mit dem beabsichtigten Design übereinstimmt.
 
 ### Electron-Schutz
 
-Selbst wenn es erforderlich ist, dass die Anwendung **von LaunchService** (in den übergeordneten Beschränkungen) geöffnet werden muss. Dies kann durch die Verwendung von **`open`** (das Umgebungsvariablen setzen kann) oder durch die Verwendung der **Launch Services API** (wo Umgebungsvariablen angegeben werden können) erreicht werden.
+Selbst wenn es erforderlich ist, dass die Anwendung **von LaunchService geöffnet werden muss** (in den übergeordneten Einschränkungen). Dies kann durch die Verwendung von **`open`** (das Umgebungsvariablen setzen kann) oder durch die Verwendung der **Launch Services API** (wo Umgebungsvariablen angegeben werden können) erreicht werden.
 
 ## Referenzen
 

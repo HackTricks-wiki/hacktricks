@@ -8,23 +8,23 @@
 
 Im vorherigen Bild ist es möglich zu beobachten, **wie der Sandbox geladen wird**, wenn eine Anwendung mit dem Recht **`com.apple.security.app-sandbox`** ausgeführt wird.
 
-Der Compiler wird `/usr/lib/libSystem.B.dylib` mit der Binärdatei verknüpfen.
+Der Compiler verlinkt `/usr/lib/libSystem.B.dylib` mit der Binärdatei.
 
-Dann wird **`libSystem.B`** mehrere Funktionen aufrufen, bis die **`xpc_pipe_routine`** die Berechtigungen der App an **`securityd`** sendet. Securityd überprüft, ob der Prozess innerhalb der Sandbox quarantiniert werden soll, und wenn ja, wird er quarantiniert.\
+Dann wird **`libSystem.B`** mehrere andere Funktionen aufrufen, bis die **`xpc_pipe_routine`** die Berechtigungen der App an **`securityd`** sendet. Securityd überprüft, ob der Prozess innerhalb der Sandbox quarantiniert werden soll, und wenn ja, wird er quarantiniert.\
 Schließlich wird die Sandbox mit einem Aufruf von **`__sandbox_ms`** aktiviert, der **`__mac_syscall`** aufruft.
 
 ## Mögliche Umgehungen
 
 ### Umgehung des Quarantäneattributs
 
-**Dateien, die von sandboxed Prozessen erstellt werden**, erhalten das **Quarantäneattribut**, um ein Entkommen aus der Sandbox zu verhindern. Wenn es Ihnen jedoch gelingt, **einen `.app`-Ordner ohne das Quarantäneattribut** innerhalb einer sandboxed Anwendung zu erstellen, könnten Sie die App-Bündel-Binärdatei auf **`/bin/bash`** verweisen lassen und einige Umgebungsvariablen in der **plist** hinzufügen, um **`open`** zu missbrauchen, um **die neue App unsandboxed zu starten**.
+**Dateien, die von sandboxed Prozessen erstellt werden**, erhalten das **Quarantäneattribut**, um ein Entkommen aus der Sandbox zu verhindern. Wenn es Ihnen jedoch gelingt, **einen `.app`-Ordner ohne das Quarantäneattribut** innerhalb einer sandboxed Anwendung zu erstellen, könnten Sie die App-Bundle-Binärdatei auf **`/bin/bash`** verweisen lassen und einige Umgebungsvariablen in der **plist** hinzufügen, um **`open`** zu missbrauchen, um **die neue App unsandboxed zu starten**.
 
 Das wurde in [**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html)**.**
 
 > [!CAUTION]
 > Daher können Sie im Moment, wenn Sie nur in der Lage sind, einen Ordner mit einem Namen zu erstellen, der auf **`.app`** endet, ohne ein Quarantäneattribut, die Sandbox umgehen, da macOS nur das **Quarantäne**-Attribut im **`.app`-Ordner** und in der **Hauptausführungsdatei** überprüft (und wir werden die Hauptausführungsdatei auf **`/bin/bash`** verweisen).
 >
-> Beachten Sie, dass, wenn ein .app-Bündel bereits autorisiert wurde, um ausgeführt zu werden (es hat ein Quarantäne-xttr mit dem autorisierten Ausführungsflag), Sie es auch missbrauchen könnten... es sei denn, Sie können jetzt nicht in **`.app`**-Bündel schreiben, es sei denn, Sie haben einige privilegierte TCC-Berechtigungen (die Sie in einer Sandbox nicht haben werden).
+> Beachten Sie, dass, wenn ein .app-Bundle bereits autorisiert wurde, um ausgeführt zu werden (es hat ein Quarantäne-xttr mit dem autorisierten Ausführungsflag), Sie es auch missbrauchen könnten... es sei denn, Sie können jetzt nicht in **`.app`**-Bundles schreiben, es sei denn, Sie haben einige privilegierte TCC-Berechtigungen (die Sie in einer Sandbox nicht haben werden).
 
 ### Missbrauch der Open-Funktionalität
 
@@ -34,7 +34,7 @@ In den [**letzten Beispielen für die Umgehung der Word-Sandbox**](macos-office-
 macos-office-sandbox-bypasses.md
 {{#endref}}
 
-### Launch Agents/Dämonen
+### Launch Agents/Daemons
 
 Selbst wenn eine Anwendung **für die Sandbox vorgesehen ist** (`com.apple.security.app-sandbox`), ist es möglich, die Sandbox zu umgehen, wenn sie **von einem LaunchAgent** (`~/Library/LaunchAgents`) ausgeführt wird, zum Beispiel.\
 Wie in [**diesem Beitrag**](https://www.vicarius.io/vsociety/posts/cve-2023-26818-sandbox-macos-tcc-bypass-w-telegram-using-dylib-injection-part-2-3?q=CVE-2023-26818) erklärt, wenn Sie mit einer sandboxed Anwendung Persistenz erreichen möchten, könnten Sie sie automatisch als LaunchAgent ausführen lassen und möglicherweise schädlichen Code über DyLib-Umgebungsvariablen injizieren.
@@ -324,7 +324,7 @@ Sandbox Bypassed!
 ```
 ### Debuggen & Umgehen des Sandboxes mit lldb
 
-Lass uns eine Anwendung kompilieren, die sandboxed sein sollte:
+Lass uns eine Anwendung kompilieren, die im Sandbox-Modus laufen sollte:
 
 {{#tabs}}
 {{#tab name="sand.c"}}
@@ -456,7 +456,7 @@ Process 2517 resuming
 Sandbox Bypassed!
 Process 2517 exited with status = 0 (0x00000000)
 ```
-> [!WARNING] > **Selbst wenn der Sandbox umgangen wird, wird TCC** den Benutzer fragen, ob er dem Prozess erlauben möchte, Dateien vom Desktop zu lesen
+> [!WARNING] > **Selbst wenn der Sandbox umgangen wird,** wird TCC den Benutzer fragen, ob er dem Prozess erlauben möchte, Dateien vom Desktop zu lesen.
 
 ## References
 

@@ -45,7 +45,7 @@ Darüber hinaus können Signaturen von den Binärdateien getrennt und in `/var/d
 
 ## Codeverzeichnis-Blob
 
-Es ist möglich, die Deklaration des [Codeverzeichnis-Blob im Code](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L104) zu finden:
+Es ist möglich, die Deklaration des [Codeverzeichnis-Blobs im Code zu finden](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L104):
 ```c
 typedef struct __CodeDirectory {
 uint32_t magic;                                 /* magic number (CSMAGIC_CODEDIRECTORY) */
@@ -103,10 +103,10 @@ __attribute__ ((aligned(1)));
 ```
 Beachten Sie, dass es verschiedene Versionen dieser Struktur gibt, bei denen ältere möglicherweise weniger Informationen enthalten.
 
-## Signieren von Code-Seiten
+## Signing Code Pages
 
-Das Hashen des gesamten Binärformats wäre ineffizient und sogar nutzlos, wenn es nur teilweise im Speicher geladen ist. Daher ist die Codesignatur tatsächlich ein Hash von Hashes, bei dem jede Binärseite einzeln gehasht wird.\
-Tatsächlich können Sie im vorherigen **Codeverzeichnis**-Code sehen, dass die **Seitengröße angegeben ist** in einem seiner Felder. Darüber hinaus gibt das Feld **CodeLimit** an, wo das Ende der Signatur liegt, wenn die Größe der Binärdatei kein Vielfaches der Seitengröße ist.
+Das Hashing des vollständigen Binaries wäre ineffizient und sogar nutzlos, wenn es nur teilweise im Speicher geladen ist. Daher ist die Codesignatur tatsächlich ein Hash von Hashes, bei dem jede Binärseite einzeln gehasht wird.\
+Tatsächlich können Sie im vorherigen **Code Directory**-Code sehen, dass die **Seitenhöhe angegeben ist** in einem seiner Felder. Darüber hinaus gibt das Feld **CodeLimit** an, wo das Ende der Signatur liegt, wenn die Größe des Binaries kein Vielfaches der Seitenhöhe ist.
 ```bash
 # Get all hashes of /bin/ps
 codesign -d -vvvvvv /bin/ps
@@ -152,9 +152,9 @@ MacOS-Anwendungen haben nicht alles, was sie zur Ausführung benötigen, innerha
 
 Tatsächlich ist es möglich, in den Code Directory-Strukturen einen Parameter namens **`nSpecialSlots`** zu sehen, der die Anzahl der speziellen Slots angibt. Es gibt keinen speziellen Slot 0, und die häufigsten (von -1 bis -6) sind:
 
-- Hash von `info.plist` (oder dem, der sich in `__TEXT.__info__plist` befindet).
+- Hash von `info.plist` (oder dem innerhalb von `__TEXT.__info__plist`).
 - Hash der Anforderungen
-- Hash des Ressourcenverzeichnisses (Hash der Datei `_CodeSignature/CodeResources` im Bundle).
+- Hash des Ressourcenverzeichnisses (Hash der Datei `_CodeSignature/CodeResources` innerhalb des Bundles).
 - Anwendungsspezifisch (nicht verwendet)
 - Hash der Berechtigungen
 - DMG-Code-Signaturen nur
@@ -215,7 +215,7 @@ Jede Anwendung speichert einige **Anforderungen**, die sie **erfüllen** muss, u
 
 Die Anforderungen einer Binärdatei verwenden eine **spezielle Grammatik**, die ein Stream von **Ausdrücken** ist und als Blobs mit `0xfade0c00` als Magie kodiert ist, deren **Hash in einem speziellen Codeslot gespeichert ist**.
 
-Die Anforderungen einer Binärdatei können angezeigt werden, indem man Folgendes ausführt:
+Die Anforderungen einer Binärdatei können durch Ausführen von:
 ```bash
 codesign -d -r- /bin/ls
 Executable=/bin/ls
@@ -286,7 +286,7 @@ Es ist möglich, auf diese Informationen zuzugreifen und Anforderungen mit einig
 
 ## Durchsetzung der Codesignatur
 
-Der **Kernel** ist derjenige, der **die Codesignatur überprüft**, bevor er den Code der App ausführt. Darüber hinaus ist eine Möglichkeit, neuen Code im Speicher zu schreiben und auszuführen, den JIT zu missbrauchen, wenn `mprotect` mit dem `MAP_JIT`-Flag aufgerufen wird. Beachten Sie, dass die Anwendung eine spezielle Berechtigung benötigt, um dies tun zu können.
+Der **Kernel** ist derjenige, der **die Codesignatur überprüft**, bevor er den Code der App ausführen lässt. Darüber hinaus ist eine Möglichkeit, neuen Code im Speicher zu schreiben und auszuführen, den JIT zu missbrauchen, wenn `mprotect` mit dem `MAP_JIT`-Flag aufgerufen wird. Beachten Sie, dass die Anwendung eine spezielle Berechtigung benötigt, um dies tun zu können.
 
 ## `cs_blobs` & `cs_blob`
 

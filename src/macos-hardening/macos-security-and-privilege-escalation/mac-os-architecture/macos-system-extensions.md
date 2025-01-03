@@ -57,7 +57,7 @@ Die Endpoint Security Extensions:**`libEndpointSecurity.dylib`** ist die C-Bibli
 
 **`endpointsecurityd`** ist ein wichtiger Systemdaemon, der an der Verwaltung und dem Starten von Endpoint Security-Systemerweiterungen beteiligt ist, insbesondere während des frühen Bootprozesses. **Nur Systemerweiterungen**, die in ihrer `Info.plist`-Datei mit **`NSEndpointSecurityEarlyBoot`** gekennzeichnet sind, erhalten diese Behandlung beim frühen Boot.
 
-Ein weiterer Systemdaemon, **`sysextd`**, **validiert Systemerweiterungen** und verschiebt sie an die richtigen Systemstandorte. Er fragt dann den relevanten Daemon, die Erweiterung zu laden. Das **`SystemExtensions.framework`** ist verantwortlich für das Aktivieren und Deaktivieren von Systemerweiterungen.
+Ein weiterer Systemdaemon, **`sysextd`**, **validiert Systemerweiterungen** und verschiebt sie an die richtigen Systemstandorte. Er fordert dann den relevanten Daemon auf, die Erweiterung zu laden. Das **`SystemExtensions.framework`** ist verantwortlich für das Aktivieren und Deaktivieren von Systemerweiterungen.
 
 ## Umgehung des ESF
 

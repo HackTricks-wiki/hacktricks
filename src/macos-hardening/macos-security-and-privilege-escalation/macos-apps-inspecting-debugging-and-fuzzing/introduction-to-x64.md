@@ -4,15 +4,15 @@
 
 ## **Einführung in x64**
 
-x64, auch bekannt als x86-64, ist eine 64-Bit-Prozessorarchitektur, die überwiegend in Desktop- und Servercomputing verwendet wird. Sie stammt von der x86-Architektur, die von Intel produziert wurde und später von AMD unter dem Namen AMD64 übernommen wurde. Sie ist heute die vorherrschende Architektur in Personalcomputern und Servern.
+x64, auch bekannt als x86-64, ist eine 64-Bit-Prozessorarchitektur, die überwiegend in Desktop- und Server-Computing verwendet wird. Sie stammt von der x86-Architektur, die von Intel produziert wurde und später von AMD unter dem Namen AMD64 übernommen wurde. Sie ist heute die vorherrschende Architektur in Personal Computern und Servern.
 
 ### **Register**
 
-x64 baut auf der x86-Architektur auf und verfügt über **16 allgemeine Register**, die mit `rax`, `rbx`, `rcx`, `rdx`, `rbp`, `rsp`, `rsi`, `rdi` sowie `r8` bis `r15` bezeichnet sind. Jedes dieser Register kann einen **64-Bit** (8-Byte) Wert speichern. Diese Register haben auch 32-Bit-, 16-Bit- und 8-Bit-Teilregister für Kompatibilität und spezifische Aufgaben.
+x64 baut auf der x86-Architektur auf und verfügt über **16 allgemeine Register**, die als `rax`, `rbx`, `rcx`, `rdx`, `rbp`, `rsp`, `rsi`, `rdi` sowie `r8` bis `r15` bezeichnet werden. Jedes dieser Register kann einen **64-Bit** (8-Byte) Wert speichern. Diese Register haben auch 32-Bit-, 16-Bit- und 8-Bit-Teilregister für Kompatibilität und spezifische Aufgaben.
 
 1. **`rax`** - Traditionell verwendet für **Rückgabewerte** von Funktionen.
 2. **`rbx`** - Oft als **Basisregister** für Speicheroperationen verwendet.
-3. **`rcx`** - Häufig für **Schleifenzähler** verwendet.
+3. **`rcx`** - Häufig verwendet für **Schleifenzähler**.
 4. **`rdx`** - In verschiedenen Rollen verwendet, einschließlich erweiterter arithmetischer Operationen.
 5. **`rbp`** - **Basiszeiger** für den Stackrahmen.
 6. **`rsp`** - **Stackzeiger**, der den oberen Teil des Stacks verfolgt.
@@ -40,7 +40,7 @@ x64-Anweisungen haben einen umfangreichen Satz, der die Kompatibilität mit frü
 - Beispiel: `mov rax, rbx` — Bewegt den Wert von `rbx` nach `rax`.
 - **`push`** und **`pop`**: Werte auf den **Stack** schieben oder davon abziehen.
 - Beispiel: `push rax` — Schiebt den Wert in `rax` auf den Stack.
-- Beispiel: `pop rax` — Zieht den obersten Wert vom Stack in `rax`.
+- Beispiel: `pop rax` — Holt den obersten Wert vom Stack in `rax`.
 - **`add`** und **`sub`**: **Addition**- und **Subtraktions**operationen.
 - Beispiel: `add rax, rcx` — Addiert die Werte in `rax` und `rcx` und speichert das Ergebnis in `rax`.
 - **`mul`** und **`div`**: **Multiplikations**- und **Divisions**operationen. Hinweis: Diese haben spezifische Verhaltensweisen bezüglich der Operandenverwendung.
@@ -49,7 +49,7 @@ x64-Anweisungen haben einen umfangreichen Satz, der die Kompatibilität mit frü
 - **`cmp`**: **Vergleicht** zwei Werte und setzt die CPU-Flags basierend auf dem Ergebnis.
 - Beispiel: `cmp rax, rdx` — Vergleicht `rax` mit `rdx`.
 - **`je`, `jne`, `jl`, `jge`, ...**: **Bedingte Sprung**anweisungen, die den Kontrollfluss basierend auf den Ergebnissen eines vorherigen `cmp` oder Tests ändern.
-- Beispiel: Nach einer `cmp rax, rdx`-Anweisung springt `je label` — Springt zu `label`, wenn `rax` gleich `rdx` ist.
+- Beispiel: Nach einer `cmp rax, rdx`-Anweisung, `je label` — Springt zu `label`, wenn `rax` gleich `rdx` ist.
 - **`syscall`**: Wird für **Systemaufrufe** in einigen x64-Systemen (wie modernen Unix) verwendet.
 - **`sysenter`**: Eine optimierte **Systemaufruf**-Anweisung auf einigen Plattformen.
 

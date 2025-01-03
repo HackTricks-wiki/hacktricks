@@ -14,11 +14,11 @@ Erstellen Sie irgendwo ein Ruby-Skript wie:
 ```ruby:hello.rb
 puts 'Hello, World!'
 ```
-Dann lassen Sie ein beliebiges Ruby-Skript es mit folgendem laden:
+Dann lassen Sie ein beliebiges Ruby-Skript es mit:
 ```bash
 RUBYOPT="-I/tmp -rinject" ruby hello.rb
 ```
-Fun Fact, es funktioniert sogar mit dem Parameter **`--disable-rubyopt`**:
+Fun Fact: Es funktioniert sogar mit dem Parameter **`--disable-rubyopt`**:
 ```bash
 RUBYOPT="-I/tmp -rinject" ruby hello.rb --disable-rubyopt
 ```

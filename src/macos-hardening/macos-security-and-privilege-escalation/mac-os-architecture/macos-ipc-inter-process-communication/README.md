@@ -18,29 +18,29 @@ Ein Prozess kann auch einen Portnamen mit bestimmten Rechten **an eine andere Au
 
 Portrechte, die definieren, welche Operationen eine Aufgabe ausführen kann, sind entscheidend für diese Kommunikation. Die möglichen **Portrechte** sind ([Definitionen hier](https://docs.darlinghq.org/internals/macos-specifics/mach-ports.html)):
 
-- **Empfangsrecht**, das das Empfangen von Nachrichten, die an den Port gesendet werden, erlaubt. Mach-Ports sind MPSC (multiple-producer, single-consumer) Warteschlangen, was bedeutet, dass es im gesamten System **nur ein Empfangsrecht für jeden Port** geben kann (im Gegensatz zu Pipes, bei denen mehrere Prozesse alle Dateideskriptoren zum Leseende einer Pipe halten können).
+- **Empfangsrecht**, das das Empfangen von Nachrichten ermöglicht, die an den Port gesendet werden. Mach-Ports sind MPSC (multiple-producer, single-consumer) Warteschlangen, was bedeutet, dass es im gesamten System **nur ein Empfangsrecht für jeden Port** geben kann (im Gegensatz zu Pipes, bei denen mehrere Prozesse alle Dateideskriptoren zum Leseende einer Pipe halten können).
 - Eine **Aufgabe mit dem Empfangsrecht** kann Nachrichten empfangen und **Senderechte erstellen**, die es ihr ermöglichen, Nachrichten zu senden. Ursprünglich hat nur die **eigene Aufgabe das Empfangsrecht über ihren Port**.
-- **Senderecht**, das das Senden von Nachrichten an den Port erlaubt.
-- Das Senderecht kann **kloniert** werden, sodass eine Aufgabe, die ein Senderecht besitzt, das Recht klonieren und **einer dritten Aufgabe gewähren** kann.
-- **Send-einmal-Recht**, das das Senden einer Nachricht an den Port erlaubt und dann verschwindet.
+- **Senderecht**, das das Senden von Nachrichten an den Port ermöglicht.
+- Das Senderecht kann **kloniert** werden, sodass eine Aufgabe, die ein Senderecht besitzt, das Recht klonen und **einer dritten Aufgabe gewähren** kann.
+- **Send-einmal-Recht**, das das Senden einer Nachricht an den Port ermöglicht und dann verschwindet.
 - **Portset-Recht**, das ein _Portset_ anstelle eines einzelnen Ports bezeichnet. Das Dequeuen einer Nachricht aus einem Portset dequeuert eine Nachricht aus einem der enthaltenen Ports. Portsets können verwendet werden, um gleichzeitig auf mehreren Ports zu hören, ähnlich wie `select`/`poll`/`epoll`/`kqueue` in Unix.
 - **Toter Name**, der kein tatsächliches Portrecht ist, sondern lediglich ein Platzhalter. Wenn ein Port zerstört wird, verwandeln sich alle bestehenden Portrechte für den Port in tote Namen.
 
-**Aufgaben können SEND-Rechte an andere übertragen**, wodurch diese in der Lage sind, Nachrichten zurückzusenden. **SEND-Rechte können auch kloniert werden, sodass eine Aufgabe das Recht duplizieren und einer dritten Aufgabe geben kann**. Dies, kombiniert mit einem Zwischenprozess, der als **Bootstrap-Server** bekannt ist, ermöglicht eine effektive Kommunikation zwischen Aufgaben.
+**Aufgaben können SEND-Rechte an andere übertragen**, wodurch diese in der Lage sind, Nachrichten zurückzusenden. **SEND-Rechte können auch geklont werden, sodass eine Aufgabe das Recht duplizieren und einer dritten Aufgabe geben kann**. Dies, kombiniert mit einem Zwischenprozess, der als **Bootstrap-Server** bekannt ist, ermöglicht eine effektive Kommunikation zwischen Aufgaben.
 
 ### Datei-Ports
 
-Datei-Ports ermöglichen es, Dateideskriptoren in Mac-Ports (unter Verwendung von Mach-Port-Rechten) zu kapseln. Es ist möglich, einen `fileport` aus einem gegebenen FD mit `fileport_makeport` zu erstellen und einen FD aus einem fileport mit `fileport_makefd` zu erstellen.
+Datei-Ports ermöglichen es, Dateideskriptoren in Mac-Ports zu kapseln (unter Verwendung von Mach-Port-Rechten). Es ist möglich, einen `fileport` aus einem gegebenen FD mit `fileport_makeport` zu erstellen und einen FD aus einem fileport mit `fileport_makefd` zu erstellen.
 
-### Eine Kommunikation herstellen
+### Etablierung einer Kommunikation
 
 #### Schritte:
 
-Wie bereits erwähnt, ist der **Bootstrap-Server** (**launchd** in mac) beteiligt, um den Kommunikationskanal herzustellen.
+Wie bereits erwähnt, ist der **Bootstrap-Server** (**launchd** in mac) an der Etablierung des Kommunikationskanals beteiligt.
 
 1. Aufgabe **A** initiiert einen **neuen Port** und erhält dabei ein **EMPFANGSRECHT**.
 2. Aufgabe **A**, die Inhaberin des Empfangsrechts, **generiert ein SENDERECHT für den Port**.
-3. Aufgabe **A** stellt eine **Verbindung** mit dem **Bootstrap-Server** her und gibt den **Servicenamen des Ports** und das **SENDERECHT** über ein Verfahren bekannt, das als Bootstrap-Registrierung bekannt ist.
+3. Aufgabe **A** stellt eine **Verbindung** mit dem **Bootstrap-Server** her und gibt den **Servicenamen des Ports** sowie das **SENDERECHT** über ein Verfahren bekannt, das als Bootstrap-Registrierung bekannt ist.
 4. Aufgabe **B** interagiert mit dem **Bootstrap-Server**, um eine Bootstrap-**Suche nach dem Servicenamen** durchzuführen. Wenn erfolgreich, **dupliziert der Server das SENDERECHT**, das von Aufgabe A empfangen wurde, und **überträgt es an Aufgabe B**.
 5. Nach dem Erwerb eines SENDERECHTS ist Aufgabe **B** in der Lage, eine **Nachricht** zu **formulieren** und sie **an Aufgabe A** zu senden.
 6. Für eine bidirektionale Kommunikation generiert Aufgabe **B** normalerweise einen neuen Port mit einem **EMPFANGSRECHT** und einem **SENDERECHT** und gibt das **SENDERECHT an Aufgabe A** weiter, damit sie Nachrichten an Aufgabe B senden kann (bidirektionale Kommunikation).
@@ -53,7 +53,7 @@ Für diese vordefinierten Dienste unterscheidet sich der **Suchprozess leicht**.
 
 - Aufgabe **B** initiiert eine Bootstrap-**Suche** nach einem Servicenamen.
 - **launchd** überprüft, ob die Aufgabe läuft, und wenn nicht, **startet** sie sie.
-- Aufgabe **A** (der Dienst) führt eine **Bootstrap-Registrierung** durch. Hier erstellt der **Bootstrap-Server ein SENDERECHT**, behält es und **überträgt das EMPFANGSRECHT an Aufgabe A**.
+- Aufgabe **A** (der Dienst) führt eine **Bootstrap-Registrierung** durch. Hier erstellt der **Bootstrap-Server ein SENDERECHT, behält es und überträgt das EMPFANGSRECHT an Aufgabe A**.
 - launchd dupliziert das **SENDERECHT und sendet es an Aufgabe B**.
 - Aufgabe **B** generiert einen neuen Port mit einem **EMPFANGSRECHT** und einem **SENDERECHT** und gibt das **SENDERECHT an Aufgabe A** (den Dienst) weiter, damit sie Nachrichten an Aufgabe B senden kann (bidirektionale Kommunikation).
 
@@ -99,7 +99,7 @@ Sie können dieses Tool auf iOS installieren, indem Sie es von [http://newosxboo
 
 ### Codebeispiel
 
-Beachten Sie, wie der **Sender** einen Port **zuweist**, ein **Senderecht** für den Namen `org.darlinghq.example` erstellt und es an den **Bootstrap-Server** sendet, während der Sender um das **Senderecht** dieses Namens bittet und es verwendet, um eine **Nachricht zu senden**.
+Beachten Sie, wie der **Sender** einen Port **zuweist**, ein **Senderecht** für den Namen `org.darlinghq.example` erstellt und es an den **Bootstrap-Server** sendet, während der Sender um das **Senderecht** dieses Namens bittet und es verwendet, um eine **Nachricht** zu **senden**.
 
 {{#tabs}}
 {{#tab name="receiver.c"}}
@@ -228,14 +228,14 @@ printf("Sent a message\n");
 ### Privilegierte Ports
 
 - **Host-Port**: Wenn ein Prozess das **Send**-Recht über diesen Port hat, kann er **Informationen** über das **System** abrufen (z.B. `host_processor_info`).
-- **Host-Priv-Port**: Ein Prozess mit **Send**-Recht über diesen Port kann **privilegierte Aktionen** wie das Laden einer Kernel-Erweiterung durchführen. Der **Prozess muss root** sein, um diese Berechtigung zu erhalten.
+- **Host-Priv-Port**: Ein Prozess mit **Send**-Recht über diesen Port kann **privilegierte Aktionen** wie das Laden einer Kernel-Erweiterung durchführen. Der **Prozess muss root sein**, um diese Berechtigung zu erhalten.
 - Darüber hinaus ist es erforderlich, um die **`kext_request`** API aufzurufen, andere Berechtigungen **`com.apple.private.kext*`** zu haben, die nur Apple-Binärdateien gewährt werden.
 - **Task-Name-Port:** Eine unprivilegierte Version des _Task-Ports_. Er verweist auf die Aufgabe, erlaubt jedoch nicht, sie zu steuern. Das einzige, was darüber verfügbar zu sein scheint, ist `task_info()`.
 - **Task-Port** (auch bekannt als Kernel-Port): Mit Send-Berechtigung über diesen Port ist es möglich, die Aufgabe zu steuern (Speicher lesen/schreiben, Threads erstellen...).
 - Rufen Sie `mach_task_self()` auf, um **den Namen** für diesen Port für die aufrufende Aufgabe zu erhalten. Dieser Port wird nur **vererbt** über **`exec()`**; eine neue Aufgabe, die mit `fork()` erstellt wird, erhält einen neuen Task-Port (als Sonderfall erhält eine Aufgabe auch einen neuen Task-Port nach `exec()` in einer suid-Binärdatei). Der einzige Weg, eine Aufgabe zu starten und ihren Port zu erhalten, besteht darin, den ["Port-Swap-Tanz"](https://robert.sesek.com/2014/1/changes_to_xnu_mach_ipc.html) während eines `fork()` durchzuführen.
 - Dies sind die Einschränkungen für den Zugriff auf den Port (aus `macos_task_policy` der Binärdatei `AppleMobileFileIntegrity`):
-- Wenn die App die **`com.apple.security.get-task-allow` Berechtigung** hat, können Prozesse vom **gleichen Benutzer auf den Task-Port zugreifen** (häufig von Xcode zum Debuggen hinzugefügt). Der **Notarisierungs**-Prozess erlaubt dies nicht für Produktionsversionen.
-- Apps mit der **`com.apple.system-task-ports`** Berechtigung können den **Task-Port für jeden** Prozess erhalten, außer für den Kernel. In älteren Versionen wurde es **`task_for_pid-allow`** genannt. Dies wird nur Apple-Anwendungen gewährt.
+- Wenn die App die **`com.apple.security.get-task-allow` Berechtigung** hat, können Prozesse vom **gleichen Benutzer auf den Task-Port zugreifen** (häufig von Xcode zum Debuggen hinzugefügt). Der **Notarisierungs**prozess erlaubt dies nicht für Produktionsversionen.
+- Apps mit der **`com.apple.system-task-ports`** Berechtigung können den **Task-Port für jeden** Prozess, außer dem Kernel, abrufen. In älteren Versionen wurde es **`task_for_pid-allow`** genannt. Dies wird nur Apple-Anwendungen gewährt.
 - **Root kann auf Task-Ports** von Anwendungen **nicht** zugreifen, die mit einer **gehärteten** Laufzeit (und nicht von Apple) kompiliert wurden.
 
 ### Shellcode-Injektion in den Thread über den Task-Port
@@ -246,8 +246,7 @@ Sie können einen Shellcode von:
 ../../macos-apps-inspecting-debugging-and-fuzzing/arm64-basic-assembly.md
 {{#endref}}
 
-{{#tabs}}
-{{#tab name="mysleep.m"}}
+{{#
 ```objectivec
 // clang -framework Foundation mysleep.m -o mysleep
 // codesign --entitlements entitlements.plist -s - mysleep
@@ -504,9 +503,9 @@ In macOS können **Threads** über **Mach** oder die **posix `pthread` API** man
 
 Es war möglich, **einen einfachen Shellcode** zu injizieren, um einen Befehl auszuführen, da er **nicht mit posix** konformen APIs arbeiten musste, sondern nur mit Mach. **Komplexere Injektionen** würden erfordern, dass der **Thread** ebenfalls **posix-konform** ist.
 
-Daher sollte der **Thread** verbessert werden, indem er **`pthread_create_from_mach_thread`** aufruft, was **einen gültigen pthread** erstellt. Dann könnte dieser neue pthread **dlopen** aufrufen, um eine **dylib** aus dem System zu laden, sodass anstelle von neuem Shellcode, um verschiedene Aktionen auszuführen, benutzerdefinierte Bibliotheken geladen werden können.
+Daher sollte zur **Verbesserung des Threads** **`pthread_create_from_mach_thread`** aufgerufen werden, um **einen gültigen pthread** zu erstellen. Dann könnte dieser neue pthread **dlopen** aufrufen, um eine **dylib** aus dem System zu laden, sodass anstelle von neuem Shellcode, um verschiedene Aktionen auszuführen, benutzerdefinierte Bibliotheken geladen werden können.
 
-Sie finden **Beispiel-dylibs** in (zum Beispiel die, die ein Protokoll generiert und dann können Sie es anhören):
+Sie finden **Beispiel-dylibs** in (zum Beispiel die, die ein Protokoll generiert und dann können Sie es abhören):
 
 {{#ref}}
 ../../macos-dyld-hijacking-and-dyld_insert_libraries.md
@@ -802,7 +801,7 @@ In dieser Technik wird ein Thread des Prozesses hijacked:
 
 ### Grundinformationen
 
-XPC, was für XNU (den Kernel, der von macOS verwendet wird) Inter-Process Communication steht, ist ein Framework für **Kommunikation zwischen Prozessen** auf macOS und iOS. XPC bietet einen Mechanismus für **sichere, asynchrone Methodenaufrufe zwischen verschiedenen Prozessen** im System. Es ist Teil von Apples Sicherheitsparadigma und ermöglicht die **Erstellung von privilegierten Anwendungen**, bei denen jede **Komponente** nur mit **den Berechtigungen läuft, die sie benötigt**, um ihre Aufgabe zu erfüllen, wodurch der potenzielle Schaden durch einen kompromittierten Prozess begrenzt wird.
+XPC, was für XNU (den von macOS verwendeten Kernel) Inter-Prozess-Kommunikation steht, ist ein Framework für **Kommunikation zwischen Prozessen** auf macOS und iOS. XPC bietet einen Mechanismus für **sichere, asynchrone Methodenaufrufe zwischen verschiedenen Prozessen** im System. Es ist Teil von Apples Sicherheitsparadigma und ermöglicht die **Erstellung von privilegierten Anwendungen**, bei denen jede **Komponente** nur mit **den Berechtigungen läuft, die sie benötigt**, um ihre Aufgabe zu erfüllen, wodurch der potenzielle Schaden durch einen kompromittierten Prozess begrenzt wird.
 
 Für weitere Informationen darüber, wie diese **Kommunikation funktioniert** und wie sie **anfällig sein könnte**, siehe:
 
@@ -812,7 +811,7 @@ Für weitere Informationen darüber, wie diese **Kommunikation funktioniert** un
 
 ## MIG - Mach Interface Generator
 
-MIG wurde entwickelt, um **den Prozess der Mach IPC** Codeerstellung zu **vereinfachen**. Es **generiert im Wesentlichen den benötigten Code** für Server und Client, um mit einer gegebenen Definition zu kommunizieren. Auch wenn der generierte Code unansehnlich ist, muss ein Entwickler ihn nur importieren, und sein Code wird viel einfacher sein als zuvor.
+MIG wurde entwickelt, um **den Prozess der Mach IPC** Codeerstellung zu **vereinfachen**. Es **generiert im Grunde den benötigten Code** für Server und Client, um mit einer gegebenen Definition zu kommunizieren. Auch wenn der generierte Code unansehnlich ist, muss ein Entwickler ihn nur importieren, und sein Code wird viel einfacher sein als zuvor.
 
 Für weitere Informationen siehe:
 

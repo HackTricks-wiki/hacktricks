@@ -40,7 +40,7 @@ server_port :  mach_port_t;
 n1          :  uint32_t;
 n2          :  uint32_t);
 ```
-Beachten Sie, dass das erste **Argument der Port ist, an den gebunden werden soll**, und MIG wird **automatisch den Antwortport verwalten** (es sei denn, `mig_get_reply_port()` wird im Client-Code aufgerufen). Darüber hinaus wird die **ID der Operationen** **sequentiell** beginnend mit der angegebenen Subsystem-ID sein (wenn eine Operation veraltet ist, wird sie gelöscht und `skip` wird verwendet, um ihre ID weiterhin zu verwenden).
+Beachten Sie, dass das erste **Argument der Port ist, an den gebunden werden soll** und MIG **automatisch den Antwortport verwaltet** (es sei denn, `mig_get_reply_port()` wird im Client-Code aufgerufen). Darüber hinaus wird die **ID der Operationen** **sequentiell** beginnend mit der angegebenen Subsystem-ID sein (wenn eine Operation veraltet ist, wird sie gelöscht und `skip` wird verwendet, um ihre ID weiterhin zu verwenden).
 
 Verwenden Sie nun MIG, um den Server- und Client-Code zu generieren, der in der Lage ist, miteinander zu kommunizieren, um die Subtract-Funktion aufzurufen:
 ```bash
@@ -49,8 +49,8 @@ mig -header myipcUser.h -sheader myipcServer.h myipc.defs
 Mehrere neue Dateien werden im aktuellen Verzeichnis erstellt.
 
 > [!TIP]
-> Sie können ein komplexeres Beispiel in Ihrem System mit: `mdfind mach_port.defs` finden.\
-> Und Sie können es aus demselben Ordner wie die Datei mit: `mig -DLIBSYSCALL_INTERFACE mach_ports.defs` kompilieren.
+> Sie können ein komplexeres Beispiel in Ihrem System finden mit: `mdfind mach_port.defs`\
+> Und Sie können es aus demselben Ordner wie die Datei kompilieren mit: `mig -DLIBSYSCALL_INTERFACE mach_ports.defs`
 
 In den Dateien **`myipcServer.c`** und **`myipcServer.h`** finden Sie die Deklaration und Definition der Struktur **`SERVERPREFmyipc_subsystem`**, die im Grunde die Funktion definiert, die basierend auf der empfangenen Nachrichten-ID aufgerufen werden soll (wir haben eine Startnummer von 500 angegeben):
 
@@ -104,9 +104,9 @@ return 0;
 return SERVERPREFmyipc_subsystem.routine[msgh_id].stub_routine;
 }
 ```
-In diesem Beispiel haben wir nur 1 Funktion in den Definitionen definiert, aber wenn wir mehr Funktionen definiert hätten, wären sie im Array von **`SERVERPREFmyipc_subsystem`** enthalten gewesen, und die erste wäre der ID **500** zugewiesen worden, die zweite der ID **501**...
+In diesem Beispiel haben wir nur 1 Funktion in den Definitionen definiert, aber wenn wir mehr Funktionen definiert hätten, wären sie im Array von **`SERVERPREFmyipc_subsystem`** enthalten, und die erste wäre der ID **500** zugewiesen worden, die zweite der ID **501**...
 
-Wenn die Funktion erwartet wurde, eine **Antwort** zu senden, würde die Funktion `mig_internal kern_return_t __MIG_check__Reply__<name>` ebenfalls existieren.
+Wenn die Funktion eine **Antwort** senden sollte, würde die Funktion `mig_internal kern_return_t __MIG_check__Reply__<name>` ebenfalls existieren.
 
 Tatsächlich ist es möglich, diese Beziehung in der Struktur **`subsystem_to_name_map_myipc`** aus **`myipcServer.h`** (**`subsystem*to_name_map*\***`\*\* in anderen Dateien) zu identifizieren:
 ```c
@@ -132,7 +132,7 @@ mig_routine_t routine;
 
 OutHeadP->msgh_bits = MACH_MSGH_BITS(MACH_MSGH_BITS_REPLY(InHeadP->msgh_bits), 0);
 OutHeadP->msgh_remote_port = InHeadP->msgh_reply_port;
-/* Minimale Größe: routine() wird sie aktualisieren, wenn sie unterschiedlich ist */
+/* Minimale Größe: routine() wird aktualisiert, wenn sie unterschiedlich ist */
 OutHeadP->msgh_size = (mach_msg_size_t)sizeof(mig_reply_error_t);
 OutHeadP->msgh_local_port = MACH_PORT_NULL;
 OutHeadP->msgh_id = InHeadP->msgh_id + 100;
@@ -219,7 +219,7 @@ USERPREFSubtract(port, 40, 2);
 
 Der NDR_record wird von `libsystem_kernel.dylib` exportiert und ist eine Struktur, die es MIG ermöglicht, **Daten so zu transformieren, dass sie systemunabhängig sind**, da MIG ursprünglich für die Verwendung zwischen verschiedenen Systemen gedacht war (und nicht nur auf derselben Maschine).
 
-Das ist interessant, weil, wenn `_NDR_record` in einer Binärdatei als Abhängigkeit gefunden wird (`jtool2 -S <binary> | grep NDR` oder `nm`), bedeutet das, dass die Binärdatei ein MIG-Client oder -Server ist.
+Das ist interessant, weil das Vorhandensein von `_NDR_record` in einer Binärdatei als Abhängigkeit (`jtool2 -S <binary> | grep NDR` oder `nm`) bedeutet, dass die Binärdatei ein MIG-Client oder -Server ist.
 
 Darüber hinaus haben **MIG-Server** die Dispatch-Tabelle in `__DATA.__const` (oder in `__CONST.__constdata` im macOS-Kernel und `__DATA_CONST.__const` in anderen \*OS-Kernen). Dies kann mit **`jtool2`** ausgegeben werden.
 
@@ -260,7 +260,7 @@ if (*(int32_t *)(var_10 + 0x14) &#x3C;= 0x1f4 &#x26;&#x26; *(int32_t *)(var_10 +
 rax = *(int32_t *)(var_10 + 0x14);
 // Aufruf von sign_extend_64, der helfen kann, diese Funktion zu identifizieren
 // Dies speichert in rax den Zeiger auf den Aufruf, der aufgerufen werden muss
-// Überprüfen der Verwendung der Adresse 0x100004040 (Funktionsadressenarray)
+// Überprüfen Sie die Verwendung der Adresse 0x100004040 (Funktionsadressenarray)
 // 0x1f4 = 500 (die Start-ID)
 <strong>            rax = *(sign_extend_64(rax - 0x1f4) * 0x28 + 0x100004040);
 </strong>            var_20 = rax;
@@ -289,7 +289,7 @@ return rax;
 {{#endtab}}
 
 {{#tab name="myipc_server decompiled 2"}}
-Dies ist die gleiche Funktion, die in einer anderen kostenlosen Version von Hopper dekompiliert wurde:
+Dies ist dieselbe Funktion, die in einer anderen kostenlosen Hopper-Version dekompiliert wurde:
 
 <pre class="language-c"><code class="lang-c">int _myipc_server(int arg0, int arg1) {
 r31 = r31 - 0x40;
@@ -332,8 +332,8 @@ if (CPU_FLAGS &#x26; NE) {
 r8 = 0x1;
 }
 }
-// Gleiches if-else wie in der vorherigen Version
-// Überprüfen der Verwendung der Adresse 0x100004040 (Funktionsadressenarray)
+// Dasselbe if-else wie in der vorherigen Version
+// Überprüfen Sie die Verwendung der Adresse 0x100004040 (Funktionsadressenarray)
 <strong>                    if ((r8 &#x26; 0x1) == 0x0) {
 </strong><strong>                            *(var_18 + 0x18) = **0x100004000;
 </strong>                            *(int32_t *)(var_18 + 0x20) = 0xfffffed1;

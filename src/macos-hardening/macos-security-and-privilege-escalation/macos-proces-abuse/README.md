@@ -4,7 +4,7 @@
 
 ## Grundlegende Informationen zu Prozessen
 
-Ein Prozess ist eine Instanz eines laufenden ausführbaren Programms, jedoch führen Prozesse keinen Code aus, das sind Threads. Daher **sind Prozesse nur Container für laufende Threads**, die den Speicher, Deskriptoren, Ports, Berechtigungen bereitstellen...
+Ein Prozess ist eine Instanz eines laufenden ausführbaren Programms, jedoch führen Prozesse keinen Code aus, das sind Threads. Daher **sind Prozesse nur Container für laufende Threads**, die den Speicher, Deskriptoren, Ports, Berechtigungen... bereitstellen.
 
 Traditionell wurden Prozesse innerhalb anderer Prozesse (außer PID 1) durch den Aufruf von **`fork`** gestartet, was eine exakte Kopie des aktuellen Prozesses erstellt, und dann würde der **Kindprozess** normalerweise **`execve`** aufrufen, um die neue ausführbare Datei zu laden und auszuführen. Dann wurde **`vfork`** eingeführt, um diesen Prozess schneller zu machen, ohne Speicher zu kopieren.\
 Dann wurde **`posix_spawn`** eingeführt, das **`vfork`** und **`execve`** in einem Aufruf kombiniert und Flags akzeptiert:
@@ -42,7 +42,7 @@ Jeder Prozess hält **Berechtigungen**, die **seine Privilegien** im System iden
 Es ist auch möglich, die Benutzer- und Gruppen-ID zu ändern, wenn die Binärdatei das `setuid/setgid`-Bit hat.\
 Es gibt mehrere Funktionen, um **neue uids/gids** festzulegen.
 
-Der Syscall **`persona`** bietet ein **alternatives** Set von **Berechtigungen**. Die Annahme einer Persona übernimmt ihre uid, gid und Gruppenmitgliedschaften **auf einmal**. Im [**Quellcode**](https://github.com/apple/darwin-xnu/blob/main/bsd/sys/persona.h) ist es möglich, die Struktur zu finden:
+Der Systemaufruf **`persona`** bietet ein **alternatives** Set von **Berechtigungen**. Die Annahme einer Persona übernimmt ihre uid, gid und Gruppenmitgliedschaften **auf einmal**. Im [**Quellcode**](https://github.com/apple/darwin-xnu/blob/main/bsd/sys/persona.h) ist es möglich, die Struktur zu finden:
 ```c
 struct kpersona_info { uint32_t persona_info_version;
 uid_t    persona_id; /* overlaps with UID */
@@ -100,7 +100,7 @@ void main (int argc, char **argv){
 tlv_var = 10;
 }
 ```
-Dieser Abschnitt definiert `tlv_var` als eine thread-lokale Variable. Jeder Thread, der diesen Code ausführt, hat sein eigenes `tlv_var`, und Änderungen, die ein Thread an `tlv_var` vornimmt, wirken sich nicht auf `tlv_var` in einem anderen Thread aus.
+Dieser Abschnitt definiert `tlv_var` als eine thread-lokale Variable. Jeder Thread, der diesen Code ausführt, hat seine eigene `tlv_var`, und Änderungen, die ein Thread an `tlv_var` vornimmt, wirken sich nicht auf `tlv_var` in einem anderen Thread aus.
 
 Im Mach-O-Binärformat sind die Daten, die mit thread-lokalen Variablen verbunden sind, in spezifischen Abschnitten organisiert:
 
@@ -119,7 +119,7 @@ Das Verständnis von Thread-Prioritäten beinhaltet, wie das Betriebssystem ents
 - Der `nice`-Wert eines Prozesses ist eine Zahl, die seine Priorität beeinflusst. Jeder Prozess hat einen nice-Wert, der von -20 (höchste Priorität) bis 19 (niedrigste Priorität) reicht. Der Standard-nice-Wert, wenn ein Prozess erstellt wird, ist typischerweise 0.
 - Ein niedrigerer nice-Wert (näher an -20) macht einen Prozess "egoistischer" und gibt ihm mehr CPU-Zeit im Vergleich zu anderen Prozessen mit höheren nice-Werten.
 2. **Renice:**
-- `renice` ist ein Befehl, der verwendet wird, um den nice-Wert eines bereits laufenden Prozesses zu ändern. Dies kann verwendet werden, um die Priorität von Prozessen dynamisch anzupassen, indem die Zuteilung der CPU-Zeit basierend auf neuen nice-Werten erhöht oder verringert wird.
+- `renice` ist ein Befehl, der verwendet wird, um den nice-Wert eines bereits laufenden Prozesses zu ändern. Dies kann verwendet werden, um die Priorität von Prozessen dynamisch anzupassen, indem entweder ihre CPU-Zeit-Zuweisung erhöht oder verringert wird, basierend auf neuen nice-Werten.
 - Wenn ein Prozess beispielsweise vorübergehend mehr CPU-Ressourcen benötigt, könnten Sie seinen nice-Wert mit `renice` senken.
 
 #### Quality of Service (QoS) Klassen
@@ -127,7 +127,7 @@ Das Verständnis von Thread-Prioritäten beinhaltet, wie das Betriebssystem ents
 QoS-Klassen sind ein modernerer Ansatz zur Handhabung von Thread-Prioritäten, insbesondere in Systemen wie macOS, die **Grand Central Dispatch (GCD)** unterstützen. QoS-Klassen ermöglichen es Entwicklern, Arbeiten in verschiedene Ebenen basierend auf deren Wichtigkeit oder Dringlichkeit zu **kategorisieren**. macOS verwaltet die Thread-Priorisierung automatisch basierend auf diesen QoS-Klassen:
 
 1. **Benutzerinteraktiv:**
-- Diese Klasse ist für Aufgaben, die derzeit mit dem Benutzer interagieren oder sofortige Ergebnisse erfordern, um eine gute Benutzererfahrung zu bieten. Diese Aufgaben erhalten die höchste Priorität, um die Benutzeroberfläche reaktionsschnell zu halten (z. B. Animationen oder Ereignisbehandlung).
+- Diese Klasse ist für Aufgaben, die derzeit mit dem Benutzer interagieren oder sofortige Ergebnisse erfordern, um eine gute Benutzererfahrung zu bieten. Diese Aufgaben erhalten die höchste Priorität, um die Benutzeroberfläche reaktionsfähig zu halten (z. B. Animationen oder Ereignisbehandlung).
 2. **Benutzerinitiiert:**
 - Aufgaben, die der Benutzer initiiert und sofortige Ergebnisse erwartet, wie das Öffnen eines Dokuments oder das Klicken auf eine Schaltfläche, die Berechnungen erfordert. Diese haben eine hohe Priorität, liegen jedoch unter der Benutzerinteraktivität.
 3. **Dienstprogramm:**
@@ -201,7 +201,7 @@ macos-java-apps-injection.md
 
 ### .Net-Anwendungsinjektion
 
-Es ist möglich, Code in .Net-Anwendungen zu injizieren, indem die **Debugging-Funktionalität von .Net** (nicht durch macOS-Schutzmaßnahmen wie Runtime-Härtung geschützt) missbraucht wird.
+Es ist möglich, Code in .Net-Anwendungen zu injizieren, indem man **die .Net-Debugging-Funktionalität missbraucht** (nicht durch macOS-Schutzmaßnahmen wie Runtime-Härtung geschützt).
 
 {{#ref}}
 macos-.net-applications-injection.md
@@ -234,7 +234,7 @@ Beachten Sie, dass ausführbare Dateien, die mit **`pyinstaller`** kompiliert wu
 
 > [!CAUTION]
 > Insgesamt konnte ich keinen Weg finden, um Python willkürlichen Code durch den Missbrauch von Umgebungsvariablen auszuführen.\
-> Die meisten Leute installieren Python jedoch mit **Homebrew**, was Python an einem **beschreibbaren Ort** für den Standard-Admin-Benutzer installiert. Sie können es mit etwas wie folgendem übernehmen:
+> Die meisten Leute installieren jedoch Python mit **Homebrew**, was Python an einem **beschreibbaren Ort** für den Standard-Admin-Benutzer installiert. Sie können es mit etwas wie folgendem übernehmen:
 >
 > ```bash
 > mv /opt/homebrew/bin/python3 /opt/homebrew/bin/python3.old
@@ -257,7 +257,7 @@ Beachten Sie, dass ausführbare Dateien, die mit **`pyinstaller`** kompiliert wu
 - Verwendung von **Umgebungsvariablen**: Es wird die Anwesenheit einer der folgenden Umgebungsvariablen überwacht: **`DYLD_INSERT_LIBRARIES`**, **`CFNETWORK_LIBRARY_PATH`**, **`RAWCAMERA_BUNDLE_PATH`** und **`ELECTRON_RUN_AS_NODE`**
 - Verwendung von **`task_for_pid`**-Aufrufen: Um zu erkennen, wann ein Prozess den **Task-Port eines anderen** anfordern möchte, was das Injizieren von Code in den Prozess ermöglicht.
 - **Electron-App-Parameter**: Jemand kann die Befehlszeilenargumente **`--inspect`**, **`--inspect-brk`** und **`--remote-debugging-port`** verwenden, um eine Electron-App im Debugging-Modus zu starten und somit Code in sie zu injizieren.
-- Verwendung von **Symlinks** oder **Hardlinks**: Typischerweise ist der häufigste Missbrauch, einen Link mit unseren Benutzerprivilegien zu **platzieren** und **auf einen Ort mit höheren Privilegien** zu verweisen. Die Erkennung ist sehr einfach für sowohl Hardlinks als auch Symlinks. Wenn der Prozess, der den Link erstellt, ein **anderes Berechtigungsniveau** als die Zieldatei hat, erstellen wir einen **Alarm**. Leider ist es im Fall von Symlinks nicht möglich, zu blockieren, da wir keine Informationen über das Ziel des Links vor der Erstellung haben. Dies ist eine Einschränkung des EndpointSecurity-Frameworks von Apple.
+- Verwendung von **Symlinks** oder **Hardlinks**: Typischerweise ist der häufigste Missbrauch, einen Link mit unseren Benutzerprivilegien zu **platzieren** und **auf einen Ort mit höheren Privilegien** zu verweisen. Die Erkennung ist sehr einfach für sowohl Hardlinks als auch Symlinks. Wenn der Prozess, der den Link erstellt, ein **anderes Privilegieniveau** als die Zieldatei hat, erstellen wir einen **Alarm**. Leider ist es im Fall von Symlinks nicht möglich, zu blockieren, da wir keine Informationen über das Ziel des Links vor der Erstellung haben. Dies ist eine Einschränkung des EndpointSecurity-Frameworks von Apple.
 
 ### Aufrufe von anderen Prozessen
 

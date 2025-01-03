@@ -2,9 +2,9 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## **Autorisierungs-DB**
+## **Athorizarions DB**
 
-Die Datenbank, die sich in `/var/db/auth.db` befindet, ist eine Datenbank, die verwendet wird, um Berechtigungen für die Durchführung sensibler Operationen zu speichern. Diese Operationen werden vollständig im **Benutzermodus** durchgeführt und werden normalerweise von **XPC-Diensten** verwendet, die überprüfen müssen, **ob der aufrufende Client autorisiert ist**, um eine bestimmte Aktion durchzuführen, indem sie diese Datenbank abfragen.
+Die Datenbank, die sich in `/var/db/auth.db` befindet, ist eine Datenbank, die verwendet wird, um Berechtigungen für die Durchführung sensibler Operationen zu speichern. Diese Operationen werden vollständig im **Benutzermodus** durchgeführt und werden normalerweise von **XPC-Diensten** verwendet, die überprüfen müssen, **ob der aufrufende Client autorisiert ist**, um bestimmte Aktionen durchzuführen, indem sie diese Datenbank abfragen.
 
 Ursprünglich wird diese Datenbank aus dem Inhalt von `/System/Library/Security/authorization.plist` erstellt. Dann können einige Dienste diese Datenbank hinzufügen oder ändern, um weitere Berechtigungen hinzuzufügen.
 
@@ -20,7 +20,7 @@ Die Regeln werden in der `rules`-Tabelle innerhalb der Datenbank gespeichert und
 - **timeout**: Definiert die Dauer in Sekunden, bevor die durch die Regel gewährte Autorisierung abläuft.
 - **flags**: Enthält verschiedene Flags, die das Verhalten und die Eigenschaften der Regel ändern.
 - **tries**: Begrenzung der Anzahl der erlaubten Autorisierungsversuche zur Verbesserung der Sicherheit.
-- **version**: Verfolgt die Version der Regel für die Versionskontrolle und Updates.
+- **version**: Verfolgt die Version der Regel zur Versionskontrolle und Aktualisierungen.
 - **created**: Protokolliert den Zeitstempel, wann die Regel erstellt wurde, zu Prüfungszwecken.
 - **modified**: Speichert den Zeitstempel der letzten Änderung an der Regel.
 - **hash**: Enthält einen Hash-Wert der Regel, um ihre Integrität sicherzustellen und Manipulationen zu erkennen.
@@ -75,7 +75,7 @@ Darüber hinaus ist es möglich, die Bedeutung von `authenticate-admin-nonshared
 
 Es ist ein Daemon, der Anfragen erhält, um Clients zu autorisieren, sensible Aktionen durchzuführen. Es funktioniert als XPC-Dienst, der im `XPCServices/`-Ordner definiert ist, und schreibt seine Protokolle in `/var/log/authd.log`.
 
-Darüber hinaus ist es mit dem Sicherheitstool möglich, viele `Security.framework`-APIs zu testen. Zum Beispiel `AuthorizationExecuteWithPrivileges`, das ausgeführt wird mit: `security execute-with-privileges /bin/ls`
+Darüber hinaus ist es mit dem Sicherheitstool möglich, viele `Security.framework` APIs zu testen. Zum Beispiel `AuthorizationExecuteWithPrivileges`, das ausgeführt wird mit: `security execute-with-privileges /bin/ls`
 
 Das wird `/usr/libexec/security_authtrampoline /bin/ls` als root fork und exec, was um Erlaubnis in einem Prompt bittet, um ls als root auszuführen:
 

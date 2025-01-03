@@ -51,7 +51,7 @@ Einige der zurückgegebenen Ordner existieren nicht einmal, jedoch **existiert**
 
 <figure><img src="../../../images/image (28).png" alt="" width="244"><figcaption></figcaption></figure>
 
-Wenn beispielsweise ein Skript **`use File::Basename;`** importiert, wäre es möglich, `/Library/Perl/5.30/File/Basename.pm` zu erstellen, um beliebigen Code auszuführen.
+Wenn ein Skript beispielsweise **`use File::Basename;`** importiert, wäre es möglich, **`/Library/Perl/5.30/File/Basename.pm`** zu erstellen, um beliebigen Code auszuführen.
 
 ## References
 

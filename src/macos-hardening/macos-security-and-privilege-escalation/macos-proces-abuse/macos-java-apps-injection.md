@@ -1,4 +1,4 @@
-# macOS Java-Anwendungen Injektion
+# macOS Java-Anwendungen-Injektion
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -83,7 +83,7 @@ export _JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'
 open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Professional"
 ```
 > [!CAUTION]
-> Die Erstellung des Agents mit einer **anderen Java-Version** als der Anwendung kann die Ausführung sowohl des Agents als auch der Anwendung zum Absturz bringen
+> Die Erstellung des Agents mit einer **anderen Java-Version** als der Anwendung kann die Ausführung sowohl des Agents als auch der Anwendung zum Absturz bringen.
 
 Wo der Agent sein kann:
 ```java:Agent.java
@@ -128,7 +128,7 @@ open --env "_JAVA_OPTIONS='-javaagent:/tmp/Agent.jar'" -a "Burp Suite Profession
 Diese Datei unterstützt die Spezifikation von **Java-Parametern**, wenn Java ausgeführt wird. Sie könnten einige der vorherigen Tricks verwenden, um die Java-Parameter zu ändern und **den Prozess beliebige Befehle ausführen zu lassen**.\
 Darüber hinaus kann diese Datei auch **andere** mit dem `include`-Verzeichnis einfügen, sodass Sie auch eine eingeschlossene Datei ändern könnten.
 
-Noch mehr, einige Java-Anwendungen werden **mehr als eine `vmoptions`-Datei** laden.
+Noch mehr, einige Java-Anwendungen werden **mehr als eine `vmoptions`**-Datei laden.
 
 Einige Anwendungen wie Android Studio geben in ihrer **Ausgabe an, wo sie nach** diesen Dateien suchen, wie:
 ```bash
@@ -149,6 +149,6 @@ sudo eslogger lookup | grep vmoption # Give FDA to the Terminal
 # Launch the Java app
 /Applications/Android\ Studio.app/Contents/MacOS/studio
 ```
-Beachten Sie, wie interessant es ist, dass Android Studio in diesem Beispiel versucht, die Datei **`/Applications/Android Studio.app.vmoptions`** zu laden, ein Ort, an dem jeder Benutzer aus der **`admin`-Gruppe Schreibzugriff hat.**
+Beachten Sie, wie interessant es ist, dass Android Studio in diesem Beispiel versucht, die Datei **`/Applications/Android Studio.app.vmoptions`** zu laden, einen Ort, an dem jeder Benutzer aus der **`admin`-Gruppe Schreibzugriff hat.**
 
 {{#include ../../../banners/hacktricks-training.md}}

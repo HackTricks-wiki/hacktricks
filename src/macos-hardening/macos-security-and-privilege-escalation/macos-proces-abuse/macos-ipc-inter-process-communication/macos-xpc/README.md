@@ -8,7 +8,7 @@ XPC, was für XNU (den von macOS verwendeten Kernel) Inter-Process Communication
 
 XPC verwendet eine Form der Inter-Process Communication (IPC), die eine Reihe von Methoden umfasst, damit verschiedene Programme, die auf demselben System laufen, Daten hin und her senden können.
 
-Die wichtigsten Vorteile von XPC sind:
+Die Hauptvorteile von XPC sind:
 
 1. **Sicherheit**: Durch die Trennung der Arbeit in verschiedene Prozesse kann jedem Prozess nur die Berechtigung gewährt werden, die er benötigt. Das bedeutet, dass selbst wenn ein Prozess kompromittiert wird, er nur begrenzte Möglichkeiten hat, Schaden anzurichten.
 2. **Stabilität**: XPC hilft, Abstürze auf die Komponente zu isolieren, in der sie auftreten. Wenn ein Prozess abstürzt, kann er neu gestartet werden, ohne den Rest des Systems zu beeinträchtigen.
@@ -22,7 +22,7 @@ Die XPC-Komponenten einer Anwendung befinden sich **innerhalb der Anwendung selb
 
 Wie Sie vielleicht denken, wird eine **XPC-Komponente andere Berechtigungen und Privilegien** haben als die anderen XPC-Komponenten oder die Hauptanwendungs-Binärdatei. AUSGENOMMEN, wenn ein XPC-Dienst mit [**JoinExistingSession**](https://developer.apple.com/documentation/bundleresources/information_property_list/xpcservice/joinexistingsession) auf „Wahr“ in seiner **Info.plist**-Datei konfiguriert ist. In diesem Fall wird der XPC-Dienst in der **gleichen Sicherheits-Sitzung wie die Anwendung** ausgeführt, die ihn aufgerufen hat.
 
-XPC-Dienste werden von **launchd** gestartet, wenn sie benötigt werden, und **heruntergefahren**, sobald alle Aufgaben **abgeschlossen** sind, um Systemressourcen freizugeben. **Anwendungsspezifische XPC-Komponenten können nur von der Anwendung** genutzt werden, wodurch das Risiko im Zusammenhang mit potenziellen Schwachstellen verringert wird.
+XPC-Dienste werden von **launchd** gestartet, wenn sie benötigt werden, und **heruntergefahren**, sobald alle Aufgaben **abgeschlossen** sind, um Systemressourcen freizugeben. **Anwendungsspezifische XPC-Komponenten können nur von der Anwendung genutzt werden**, wodurch das Risiko im Zusammenhang mit potenziellen Schwachstellen verringert wird.
 
 ## Systemweite XPC-Dienste
 
@@ -101,7 +101,7 @@ XPC verwendet GCD, um Nachrichten zu übermitteln, außerdem generiert es bestim
 Dies sind **Bundles mit der Erweiterung `.xpc`**, die sich im **`XPCServices`**-Ordner anderer Projekte befinden und in der `Info.plist` den `CFBundlePackageType` auf **`XPC!`** gesetzt haben.\
 Diese Datei hat andere Konfigurationsschlüssel wie `ServiceType`, die Application, User, System oder `_SandboxProfile` sein können, die einen Sandbox oder `_AllowedClients` definieren können, die Berechtigungen oder IDs angeben könnten, die erforderlich sind, um den Dienst zu kontaktieren. Diese und andere Konfigurationsoptionen sind nützlich, um den Dienst beim Start zu konfigurieren.
 
-### Einen Dienst starten
+### Starten eines Dienstes
 
 Die App versucht, sich mit einem XPC-Dienst zu **verbinden**, indem sie `xpc_connection_create_mach_service` verwendet, dann lokalisiert launchd den Daemon und startet **`xpcproxy`**. **`xpcproxy`** setzt die konfigurierten Einschränkungen durch und startet den Dienst mit den bereitgestellten FDs und Mach-Ports.
 
@@ -116,7 +116,7 @@ Das Dienstprogramm `xpcproxy` verwendet das Präfix `0x22`, zum Beispiel: `0x220
 
 ## XPC-Ereignisnachrichten
 
-Anwendungen können **sich** für verschiedene Ereignis-**nachrichten** **anmelden**, sodass sie **auf Abruf** initiiert werden können, wenn solche Ereignisse eintreten. Die **Einrichtung** für diese Dienste erfolgt in **launchd plist-Dateien**, die sich in den **gleichen Verzeichnissen wie die vorherigen** befinden und einen zusätzlichen **`LaunchEvent`**-Schlüssel enthalten.
+Anwendungen können sich **für verschiedene Ereignis-**nachrichten **anmelden**, sodass sie **auf Abruf** initiiert werden können, wenn solche Ereignisse eintreten. Die **Einrichtung** für diese Dienste erfolgt in **launchd plist-Dateien**, die sich in den **gleichen Verzeichnissen wie die vorherigen** befinden und einen zusätzlichen **`LaunchEvent`**-Schlüssel enthalten.
 
 ### XPC-Verbindungsprozessprüfung
 
@@ -442,7 +442,7 @@ return;
 Diese Funktionalität, die von `RemoteXPC.framework` (aus `libxpc`) bereitgestellt wird, ermöglicht die Kommunikation über XPC zwischen verschiedenen Hosts.\
 Die Dienste, die Remote XPC unterstützen, haben in ihrer plist den Schlüssel UsesRemoteXPC, wie es bei `/System/Library/LaunchDaemons/com.apple.SubmitDiagInfo.plist` der Fall ist. Allerdings wird der Dienst zwar mit `launchd` registriert, es ist jedoch `UserEventAgent` mit den Plugins `com.apple.remoted.plugin` und `com.apple.remoteservicediscovery.events.plugin`, die die Funktionalität bereitstellen.
 
-Darüber hinaus ermöglicht das `RemoteServiceDiscovery.framework`, Informationen von dem `com.apple.remoted.plugin` abzurufen, das Funktionen wie `get_device`, `get_unique_device`, `connect`... bereitstellt.
+Darüber hinaus ermöglicht das `RemoteServiceDiscovery.framework`, Informationen vom `com.apple.remoted.plugin` abzurufen, das Funktionen wie `get_device`, `get_unique_device`, `connect`... bereitstellt.
 
 Sobald `connect` verwendet wird und der Socket `fd` des Dienstes gesammelt ist, ist es möglich, die Klasse `remote_xpc_connection_*` zu verwenden.
 

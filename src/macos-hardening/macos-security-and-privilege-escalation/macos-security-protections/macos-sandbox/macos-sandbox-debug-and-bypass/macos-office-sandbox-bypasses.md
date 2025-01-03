@@ -14,7 +14,7 @@ Daher war das Entkommen so einfach wie **das Schreiben eines `plist`** LaunchAge
 
 Denken Sie daran, dass Word von der ersten Umgehung an beliebige Dateien schreiben kann, deren Name mit `~$` beginnt, obwohl es nach dem Patch der vorherigen Schwachstelle nicht möglich war, in `/Library/Application Scripts` oder in `/Library/LaunchAgents` zu schreiben.
 
-Es wurde entdeckt, dass es innerhalb der Sandbox möglich ist, ein **Login Item** (Apps, die beim Anmelden des Benutzers ausgeführt werden) zu erstellen. Diese Apps **werden jedoch nicht ausgeführt**, es sei denn, sie sind **notarisiert**, und es ist **nicht möglich, Argumente hinzuzufügen** (also können Sie nicht einfach eine Reverse-Shell mit **`bash`** ausführen).
+Es wurde entdeckt, dass es innerhalb der Sandbox möglich ist, ein **Login Item** (Apps, die beim Anmelden des Benutzers ausgeführt werden) zu erstellen. Diese Apps **werden jedoch nicht ausgeführt**, es sei denn, sie sind **notarisiert** und es ist **nicht möglich, Argumente hinzuzufügen** (Sie können also nicht einfach eine Reverse-Shell mit **`bash`** ausführen).
 
 Von der vorherigen Sandbox-Umgehung hat Microsoft die Option deaktiviert, Dateien in `~/Library/LaunchAgents` zu schreiben. Es wurde jedoch entdeckt, dass, wenn Sie eine **Zip-Datei als Login Item** hinzufügen, das `Archive Utility` sie einfach **entpackt** an ihrem aktuellen Standort. Da der Ordner `LaunchAgents` von `~/Library` standardmäßig nicht erstellt wird, war es möglich, eine **plist in `LaunchAgents/~$escape.plist` zu zippen** und die Zip-Datei in **`~/Library`** zu platzieren, sodass sie beim Dekomprimieren das Ziel für die Persistenz erreicht.
 
@@ -28,7 +28,7 @@ Die vorherige Technik hatte jedoch eine Einschränkung: Wenn der Ordner **`~/Lib
 
 Ein Angreifer könnte die Dateien **`.bash_profile`** und **`.zshenv`** mit der Payload erstellen und sie dann zippen und **die Zip-Datei im Benutzerordner des Opfers schreiben**: **`~/~$escape.zip`**.
 
-Dann fügen Sie die Zip-Datei zu den **Login Items** hinzu und dann die **`Terminal`**-App. Wenn der Benutzer sich erneut anmeldet, wird die Zip-Datei im Benutzerverzeichnis entpackt, wodurch **`.bash_profile`** und **`.zshenv`** überschrieben werden und daher das Terminal eine dieser Dateien ausführt (je nachdem, ob bash oder zsh verwendet wird).
+Dann fügen Sie die Zip-Datei zu den **Login Items** hinzu und dann die **`Terminal`**-App. Wenn der Benutzer sich erneut anmeldet, wird die Zip-Datei im Benutzerverzeichnis entpackt, wodurch **`.bash_profile`** und **`.zshenv`** überschrieben werden und daher wird das Terminal eine dieser Dateien ausführen (je nachdem, ob bash oder zsh verwendet wird).
 
 Überprüfen Sie den [**originalen Bericht hier**](https://desi-jarvis.medium.com/office365-macos-sandbox-escape-fcce4fa4123c).
 

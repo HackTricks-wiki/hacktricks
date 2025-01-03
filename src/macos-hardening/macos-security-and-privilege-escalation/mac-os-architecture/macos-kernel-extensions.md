@@ -17,24 +17,24 @@ Offensichtlich ist es so mächtig, dass es **kompliziert ist, eine Kernel-Erweit
 - Die Kernel-Erweiterung muss **mit einem Kernel-Code-Signaturzertifikat signiert** sein, das nur von **Apple** gewährt werden kann. Wer wird das Unternehmen und die Gründe, warum es benötigt wird, im Detail überprüfen.
 - Die Kernel-Erweiterung muss auch **notariell beglaubigt** sein, Apple wird in der Lage sein, sie auf Malware zu überprüfen.
 - Dann ist der **Root**-Benutzer derjenige, der die **Kernel-Erweiterung laden** kann, und die Dateien im Paket müssen **dem Root gehören**.
-- Während des Upload-Prozesses muss das Paket an einem **geschützten Nicht-Root-Standort** vorbereitet werden: `/Library/StagedExtensions` (erfordert die Berechtigung `com.apple.rootless.storage.KernelExtensionManagement`).
+- Während des Upload-Prozesses muss das Paket an einem **geschützten Nicht-Root-Standort** vorbereitet werden: `/Library/StagedExtensions` (erfordert die Genehmigung `com.apple.rootless.storage.KernelExtensionManagement`).
 - Schließlich erhält der Benutzer beim Versuch, sie zu laden, eine [**Bestätigungsanfrage**](https://developer.apple.com/library/archive/technotes/tn2459/_index.html) und, wenn akzeptiert, muss der Computer **neu gestartet** werden, um sie zu laden.
 
 ### Ladeprozess
 
-In Catalina war es so: Es ist interessant zu bemerken, dass der **Überprüfungs**prozess in **Userland** erfolgt. Allerdings können nur Anwendungen mit der **`com.apple.private.security.kext-management`**-Berechtigung **den Kernel auffordern, eine Erweiterung zu laden**: `kextcache`, `kextload`, `kextutil`, `kextd`, `syspolicyd`
+In Catalina war es so: Es ist interessant zu beachten, dass der **Überprüfungs**prozess in **Userland** erfolgt. Allerdings können nur Anwendungen mit der Genehmigung **`com.apple.private.security.kext-management`** **die Kernel anfordern, eine Erweiterung zu laden**: `kextcache`, `kextload`, `kextutil`, `kextd`, `syspolicyd`
 
 1. **`kextutil`** cli **startet** den **Überprüfungs**prozess zum Laden einer Erweiterung
 - Es wird mit **`kextd`** kommunizieren, indem es einen **Mach-Dienst** verwendet.
 2. **`kextd`** wird mehrere Dinge überprüfen, wie die **Signatur**
 - Es wird mit **`syspolicyd`** kommunizieren, um zu **überprüfen**, ob die Erweiterung **geladen** werden kann.
-3. **`syspolicyd`** wird den **Benutzer** auffordern, wenn die Erweiterung nicht zuvor geladen wurde.
+3. **`syspolicyd`** wird den **Benutzer** **auffordern**, wenn die Erweiterung nicht zuvor geladen wurde.
 - **`syspolicyd`** wird das Ergebnis an **`kextd`** melden
 4. **`kextd`** wird schließlich in der Lage sein, dem Kernel zu **sagen, die Erweiterung zu laden**
 
 Wenn **`kextd`** nicht verfügbar ist, kann **`kextutil`** die gleichen Überprüfungen durchführen.
 
-### Aufzählung (geladene kexts)
+### Aufzählung (geladene Kexts)
 ```bash
 # Get loaded kernel extensions
 kextstat
@@ -47,7 +47,7 @@ kextstat | grep " 22 " | cut -c2-5,50- | cut -d '(' -f1
 > [!CAUTION]
 > Auch wenn die Kernel-Erweiterungen in `/System/Library/Extensions/` erwartet werden, wirst du in diesem Ordner **keine Binärdatei** finden. Das liegt am **Kernelcache**, und um eine `.kext` zurückzuverfolgen, musst du einen Weg finden, sie zu erhalten.
 
-Der **Kernelcache** ist eine **vorkompilierte und vorverlinkte Version des XNU-Kernels**, zusammen mit wesentlichen Geräte-**Treibern** und **Kernel-Erweiterungen**. Er wird in einem **komprimierten** Format gespeichert und während des Bootvorgangs in den Speicher dekomprimiert. Der Kernelcache ermöglicht eine **schnellere Bootzeit**, indem eine sofort einsatzbereite Version des Kernels und wichtiger Treiber verfügbar ist, wodurch die Zeit und Ressourcen reduziert werden, die sonst für das dynamische Laden und Verlinken dieser Komponenten beim Booten benötigt würden.
+Der **Kernelcache** ist eine **vorkompilierte und vorverlinkte Version des XNU-Kernels**, zusammen mit wesentlichen Geräte-**Treibern** und **Kernel-Erweiterungen**. Er wird in einem **komprimierten** Format gespeichert und während des Bootvorgangs in den Arbeitsspeicher dekomprimiert. Der Kernelcache ermöglicht eine **schnellere Bootzeit**, indem eine sofort einsatzbereite Version des Kernels und wichtiger Treiber verfügbar ist, wodurch die Zeit und Ressourcen reduziert werden, die sonst für das dynamische Laden und Verlinken dieser Komponenten beim Booten benötigt würden.
 
 ### Lokaler Kernelcache
 
@@ -68,10 +68,10 @@ Es besteht normalerweise aus den folgenden Komponenten:
 - **Manifest (IM4M)**:
 - Enthält Signatur
 - Zusätzliches Schlüssel/Wert-Wörterbuch
-- **Wiederherstellungsinformationen (IM4R)**:
+- **Wiederherstellungsinfo (IM4R)**:
 - Auch bekannt als APNonce
 - Verhindert das Wiederholen einiger Updates
-- OPTIONAL: Normalerweise wird dies nicht gefunden
+- OPTIONALE: Normalerweise wird dies nicht gefunden
 
 Dekomprimiere den Kernelcache:
 ```bash
@@ -93,9 +93,9 @@ nm -a ~/Downloads/Sandbox.kext/Contents/MacOS/Sandbox | wc -l
 ```
 - [**theapplewiki.com**](https://theapplewiki.com/wiki/Firmware/Mac/14.x)**,** [**ipsw.me**](https://ipsw.me/)**,** [**theiphonewiki.com**](https://www.theiphonewiki.com/)
 
-Manchmal veröffentlicht Apple **kernelcache** mit **Symbols**. Sie können einige Firmwares mit Symbols über die Links auf diesen Seiten herunterladen. Die Firmwares enthalten den **kernelcache** neben anderen Dateien.
+Manchmal veröffentlicht Apple **kernelcache** mit **Symbols**. Sie können einige Firmware-Versionen mit Symbols über die Links auf diesen Seiten herunterladen. Die Firmware wird den **kernelcache** neben anderen Dateien enthalten.
 
-Um die Dateien zu **extrahieren**, ändern Sie zunächst die Erweiterung von `.ipsw` in `.zip` und **entpacken** Sie sie.
+Um die Dateien zu **extrahieren**, ändern Sie zunächst die Erweiterung von `.ipsw` auf `.zip` und **entpacken** Sie sie.
 
 Nach dem Extrahieren der Firmware erhalten Sie eine Datei wie: **`kernelcache.release.iphone14`**. Sie ist im **IMG4**-Format, Sie können die interessanten Informationen mit:
 

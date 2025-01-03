@@ -40,9 +40,9 @@ Der Header enthält die **magischen** Bytes, gefolgt von der **Anzahl** der **Ar
 Überprüfen Sie es mit:
 
 <pre class="language-shell-session"><code class="lang-shell-session">% file /bin/ls
-/bin/ls: Mach-O universelles Binary mit 2 Architekturen: [x86_64:Mach-O 64-Bit ausführbare Datei x86_64] [arm64e:Mach-O 64-Bit ausführbare Datei arm64e]
-/bin/ls (für Architektur x86_64):	Mach-O 64-Bit ausführbare Datei x86_64
-/bin/ls (für Architektur arm64e):	Mach-O 64-Bit ausführbare Datei arm64e
+/bin/ls: Mach-O universelles Binary mit 2 Architekturen: [x86_64:Mach-O 64-Bit ausführbar x86_64] [arm64e:Mach-O 64-Bit ausführbar arm64e]
+/bin/ls (für Architektur x86_64):	Mach-O 64-Bit ausführbar x86_64
+/bin/ls (für Architektur arm64e):	Mach-O 64-Bit ausführbar arm64e
 
 % otool -f -v /bin/ls
 Fat-Header
@@ -246,7 +246,7 @@ Häufige Segmente, die von diesem Befehl geladen werden:
 - Indirekte Symboltabelle: Zeiger/stub-Symbole
 - Zeichenfolgen-Tabelle
 - Codesignatur
-- **`__OBJC`**: Enthält Informationen, die von der Objective-C-Laufzeit verwendet werden. Obwohl diese Informationen auch im \_\_DATA-Segment gefunden werden können, innerhalb verschiedener \_\_objc\_\*-Abschnitte.
+- **`__OBJC`**: Enthält Informationen, die von der Objective-C-Laufzeit verwendet werden. Obwohl diese Informationen auch im \_\_DATA-Segment gefunden werden können, innerhalb verschiedener \_\_objc\_\* Abschnitte.
 - **`__RESTRICT`**: Ein Segment ohne Inhalt mit einem einzigen Abschnitt namens **`__restrict`** (auch leer), das sicherstellt, dass beim Ausführen des Binärprogramms DYLD-Umgebungsvariablen ignoriert werden.
 
 Wie im Code zu sehen war, **unterstützen Segmente auch Flags** (obwohl sie nicht sehr häufig verwendet werden):
@@ -291,7 +291,7 @@ Sie können jedoch einige Informationen zu diesem Abschnitt in [**diesem Blogbei
 
 ### **`LC_ENCRYPTION_INFO[_64]`**
 
-Unterstützung für die Binärverschlüsselung. Wenn ein Angreifer jedoch den Prozess kompromittiert, kann er den Speicher unverschlüsselt dumpen.
+Unterstützung für die binäre Verschlüsselung. Wenn ein Angreifer jedoch den Prozess kompromittiert, kann er den Speicher unverschlüsselt dumpen.
 
 ### **`LC_LOAD_DYLINKER`**
 
@@ -381,10 +381,10 @@ Im `__TEXT` Segment (r-x):
 
 Im `__DATA` Segment (rw-):
 
-- `__objc_classlist`: Zeiger auf alle Objetive-C Klassen
-- `__objc_nlclslist`: Zeiger auf Non-Lazy Objective-C Klassen
+- `__objc_classlist`: Zeiger auf alle Objective-C Klassen
+- `__objc_nlclslist`: Zeiger auf Nicht-Lazy Objective-C Klassen
 - `__objc_catlist`: Zeiger auf Kategorien
-- `__objc_nlcatlist`: Zeiger auf Non-Lazy Kategorien
+- `__objc_nlcatlist`: Zeiger auf Nicht-Lazy Kategorien
 - `__objc_protolist`: Protokollliste
 - `__objc_const`: Konstanten Daten
 - `__objc_imageinfo`, `__objc_selrefs`, `objc__protorefs`...

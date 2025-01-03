@@ -10,7 +10,7 @@ Swap-Dateien, wie `/private/var/vm/swapfile0`, dienen als **Caches, wenn der phy
 
 ### Hibernate Image
 
-Die Datei, die sich unter `/private/var/vm/sleepimage` befindet, ist während des **Hibernate-Modus** entscheidend. **Daten aus dem Speicher werden in dieser Datei gespeichert, wenn OS X in den Ruhezustand wechselt**. Beim Aufwecken des Computers ruft das System die Speicher Daten aus dieser Datei ab, sodass der Benutzer dort weitermachen kann, wo er aufgehört hat.
+Die Datei, die sich unter `/private/var/vm/sleepimage` befindet, ist während des **Hibernate-Modus** entscheidend. **Daten aus dem Speicher werden in dieser Datei gespeichert, wenn OS X in den Ruhezustand wechselt**. Beim Aufwecken des Computers ruft das System die Speicherdaten aus dieser Datei ab, sodass der Benutzer dort weitermachen kann, wo er aufgehört hat.
 
 Es ist erwähnenswert, dass diese Datei auf modernen MacOS-Systemen aus Sicherheitsgründen typischerweise verschlüsselt ist, was die Wiederherstellung erschwert.
 
@@ -18,7 +18,7 @@ Es ist erwähnenswert, dass diese Datei auf modernen MacOS-Systemen aus Sicherhe
 
 ### Memory Pressure Logs
 
-Eine weitere wichtige speicherbezogene Datei in MacOS-Systemen ist das **Speicher-Druckprotokoll**. Diese Protokolle befinden sich in `/var/log` und enthalten detaillierte Informationen über die Speichernutzung des Systems und Druckereignisse. Sie können besonders nützlich sein, um speicherbezogene Probleme zu diagnostizieren oder zu verstehen, wie das System im Laufe der Zeit mit Speicher umgeht.
+Eine weitere wichtige speicherbezogene Datei in MacOS-Systemen ist das **Speicher-Druckprotokoll**. Diese Protokolle befinden sich in `/var/log` und enthalten detaillierte Informationen über die Speichernutzung des Systems und Druckereignisse. Sie können besonders nützlich sein, um speicherbezogene Probleme zu diagnostizieren oder zu verstehen, wie das System im Laufe der Zeit mit dem Speicher umgeht.
 
 ## Dumping memory with osxpmem
 

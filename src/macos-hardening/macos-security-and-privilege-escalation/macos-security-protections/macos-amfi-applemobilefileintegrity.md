@@ -65,10 +65,10 @@ No variant specified, falling back to release
 ```
 ## amfid
 
-Dies ist der im Benutzermodus laufende Daemon, den `AMFI.kext` verwendet, um Code-Signaturen im Benutzermodus zu überprüfen.\
+Dies ist der Daemon im Benutzermodus, den `AMFI.kext` verwendet, um Code-Signaturen im Benutzermodus zu überprüfen.\
 Damit `AMFI.kext` mit dem Daemon kommunizieren kann, verwendet es Mach-Nachrichten über den Port `HOST_AMFID_PORT`, der der spezielle Port `18` ist.
 
-Beachten Sie, dass es in macOS nicht mehr möglich ist, dass Root-Prozesse spezielle Ports übernehmen, da sie durch `SIP` geschützt sind und nur launchd sie erhalten kann. In iOS wird überprüft, dass der Prozess, der die Antwort zurücksendet, den hardcodierten CDHash von `amfid` hat.
+Beachten Sie, dass es in macOS nicht mehr möglich ist, dass Root-Prozesse spezielle Ports übernehmen, da sie durch `SIP` geschützt sind und nur launchd sie erhalten kann. In iOS wird überprüft, ob der Prozess, der die Antwort zurücksendet, den hardcodierten CDHash von `amfid` hat.
 
 Es ist möglich zu sehen, wann `amfid` angefordert wird, um eine Binärdatei zu überprüfen, und die Antwort darauf, indem man es debuggt und einen Haltepunkt in `mach_msg` setzt.
 
@@ -106,7 +106,7 @@ Obwohl manchmal als zertifiziert bezeichnet, haben diese Bereitstellungsprofile 
 - **UUID**: Eine universell eindeutige Kennung für dieses Profil
 - **Version**: Derzeit auf 1 gesetzt
 
-Beachten Sie, dass der Eintrag für Berechtigungen eine eingeschränkte Menge an Berechtigungen enthalten wird und das Bereitstellungsprofil nur in der Lage sein wird, diese spezifischen Berechtigungen zu gewähren, um zu verhindern, dass Apple private Berechtigungen gewährt.
+Beachten Sie, dass der Eintrag für Berechtigungen eine eingeschränkte Menge an Berechtigungen enthalten wird und das Bereitstellungsprofil nur in der Lage sein wird, diese spezifischen Berechtigungen zu gewähren, um zu verhindern, dass private Berechtigungen von Apple gewährt werden.
 
 Beachten Sie, dass Profile normalerweise in `/var/MobileDeviceProvisioningProfiles` zu finden sind und es möglich ist, sie mit **`security cms -D -i /path/to/profile`** zu überprüfen.
 
@@ -118,7 +118,7 @@ In macOS befindet sich dies innerhalb von `MobileDevice.framework`.
 
 ## AMFI Trust Caches
 
-iOS AMFI führt eine Liste bekannter Hashes, die ad-hoc signiert sind, genannt den **Trust Cache**, und befindet sich im `__TEXT.__const` Abschnitt des kext. Beachten Sie, dass es bei sehr spezifischen und sensiblen Operationen möglich ist, diesen Trust Cache mit einer externen Datei zu erweitern.
+iOS AMFI verwaltet eine Liste bekannter Hashes, die ad-hoc signiert sind, genannt **Trust Cache** und im `__TEXT.__const` Abschnitt des kexts gefunden werden. Beachten Sie, dass es bei sehr spezifischen und sensiblen Operationen möglich ist, diesen Trust Cache mit einer externen Datei zu erweitern.
 
 ## References
 

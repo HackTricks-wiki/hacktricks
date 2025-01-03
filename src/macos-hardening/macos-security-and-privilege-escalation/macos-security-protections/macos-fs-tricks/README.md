@@ -28,17 +28,17 @@ Wenn es Dateien in einem **Verzeichnis** gibt, in dem **nur root R+X-Zugriff hat
 
 Beispiel in: [https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions](https://theevilbit.github.io/posts/exploiting_directory_permissions_on_macos/#nix-directory-permissions)
 
-## Symbolischer Link / Harte Links
+## Symbolischer Link / Harte Verknüpfung
 
 ### Nachsichtige Datei/Ordner
 
-Wenn ein privilegierter Prozess Daten in eine **Datei** schreibt, die von einem **weniger privilegierten Benutzer** **kontrolliert** werden könnte oder die **zuvor von einem weniger privilegierten Benutzer erstellt** wurde. Der Benutzer könnte einfach **auf eine andere Datei** über einen symbolischen oder harten Link **verweisen**, und der privilegierte Prozess wird in diese Datei schreiben.
+Wenn ein privilegierter Prozess Daten in eine **Datei** schreibt, die von einem **weniger privilegierten Benutzer** **kontrolliert** werden könnte oder die **zuvor von einem weniger privilegierten Benutzer erstellt** wurde. Der Benutzer könnte einfach **auf eine andere Datei** über einen symbolischen oder harten Link **verweisen**, und der privilegierte Prozess wird in dieser Datei schreiben.
 
 Überprüfen Sie in den anderen Abschnitten, wo ein Angreifer **einen beliebigen Schreibzugriff ausnutzen könnte, um Privilegien zu eskalieren**.
 
 ### Offen `O_NOFOLLOW`
 
-Das Flag `O_NOFOLLOW`, wenn es von der Funktion `open` verwendet wird, folgt einem Symlink im letzten Pfadkomponenten nicht, folgt aber dem Rest des Pfades. Der richtige Weg, um das Folgen von Symlinks im Pfad zu verhindern, ist die Verwendung des Flags `O_NOFOLLOW_ANY`.
+Das Flag `O_NOFOLLOW`, wenn es von der Funktion `open` verwendet wird, folgt einem Symlink im letzten Pfadkomponenten nicht, folgt aber dem Rest des Pfades. Der richtige Weg, um zu verhindern, dass Symlinks im Pfad gefolgt wird, ist die Verwendung des Flags `O_NOFOLLOW_ANY`.
 
 ## .fileloc
 
@@ -86,7 +86,7 @@ ls -lO /tmp/asd
 ```
 ### defvfs mount
 
-Ein **devfs**-Mount **unterstützt kein xattr**, weitere Informationen in [**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html)
+Ein **devfs**-Mount **unterstützt keine xattr**, weitere Informationen in [**CVE-2023-32364**](https://gergelykalman.com/CVE-2023-32364-a-macOS-sandbox-escape-by-mounting.html)
 ```bash
 mkdir /tmp/mnt
 mount_devfs -o noowners none "/tmp/mnt"
@@ -126,7 +126,7 @@ Im [**Quellcode**](https://opensource.apple.com/source/Libc/Libc-391/darwin/copy
 
 Überprüfen Sie den [**ursprünglichen Bericht**](https://www.microsoft.com/en-us/security/blog/2022/12/19/gatekeepers-achilles-heel-unearthing-a-macos-vulnerability/) für weitere Informationen.
 
-Um dies zu replizieren, müssen wir zuerst den richtigen ACL-String erhalten:
+Um dies zu replizieren, müssen wir zuerst den richtigen acl-String erhalten:
 ```bash
 # Everything will be happening here
 mkdir /tmp/temp_xattrs
@@ -227,7 +227,7 @@ openssl dgst -binary -sha1 /System/Cryptexes/App/System/Applications/Safari.app/
 ```
 ## Mount dmgs
 
-Ein Benutzer kann ein benutzerdefiniertes dmg, das sogar über einige vorhandene Ordner erstellt wurde, einbinden. So könnten Sie ein benutzerdefiniertes dmg-Paket mit benutzerdefiniertem Inhalt erstellen:
+Ein Benutzer kann ein benutzerdefiniertes dmg, das sogar über einigen vorhandenen Ordnern erstellt wurde, einbinden. So könnten Sie ein benutzerdefiniertes dmg-Paket mit benutzerdefiniertem Inhalt erstellen:
 ```bash
 # Create the volume
 hdiutil create /private/tmp/tmp.dmg -size 2m -ov -volname CustomVolName -fs APFS 1>/dev/null
@@ -248,7 +248,7 @@ hdiutil detach /private/tmp/mnt 1>/dev/null
 # You can also create a dmg from an app using:
 hdiutil create -srcfolder justsome.app justsome.dmg
 ```
-Normalerweise mountet macOS Festplatten, indem es mit dem `com.apple.DiskArbitration.diskarbitrationd` Mach-Dienst (bereitgestellt von `/usr/libexec/diskarbitrationd`) kommuniziert. Wenn man den Parameter `-d` zur LaunchDaemons plist-Datei hinzufügt und neu startet, werden die Protokolle in `/var/log/diskarbitrationd.log` gespeichert.\
+Normalerweise mountet macOS Festplatten, indem es mit dem `com.apple.DiskArbitration.diskarbitrationd` Mach-Dienst kommuniziert (bereitgestellt von `/usr/libexec/diskarbitrationd`). Wenn man den Parameter `-d` zur LaunchDaemons plist-Datei hinzufügt und neu startet, werden die Protokolle in `/var/log/diskarbitrationd.log` gespeichert.\
 Es ist jedoch möglich, Tools wie `hdik` und `hdiutil` zu verwenden, um direkt mit dem `com.apple.driver.DiskImages` kext zu kommunizieren.
 
 ## Arbiträre Schreibvorgänge
@@ -257,7 +257,7 @@ Es ist jedoch möglich, Tools wie `hdik` und `hdiutil` zu verwenden, um direkt m
 
 Wenn Ihr Skript als **Shell-Skript** interpretiert werden könnte, könnten Sie das **`/etc/periodic/daily/999.local`** Shell-Skript überschreiben, das jeden Tag ausgelöst wird.
 
-Sie können eine **falsche** Ausführung dieses Skripts mit: **`sudo periodic daily`** faken.
+Sie können eine Ausführung dieses Skripts vortäuschen mit: **`sudo periodic daily`**
 
 ### Daemons
 
@@ -302,9 +302,9 @@ LogFilePerm 777
 ```
 Dies wird die Datei `/etc/sudoers.d/lpe` mit den Berechtigungen 777 erstellen. Der zusätzliche Müll am Ende dient dazu, die Erstellung des Fehlerprotokolls auszulösen.
 
-Dann schreibe in `/etc/sudoers.d/lpe` die benötigte Konfiguration, um Privilegien zu eskalieren, wie `%staff ALL=(ALL) NOPASSWD:ALL`.
+Dann schreibe in `/etc/sudoers.d/lpe` die benötigte Konfiguration zur Eskalation der Berechtigungen wie `%staff ALL=(ALL) NOPASSWD:ALL`.
 
-Ändere dann die Datei `/etc/cups/cups-files.conf` erneut und gebe `LogFilePerm 700` an, damit die neue sudoers-Datei gültig wird, indem `cupsctl` aufgerufen wird.
+Ändere dann die Datei `/etc/cups/cups-files.conf` erneut und gebe `LogFilePerm 700` an, damit die neue sudoers-Datei gültig wird, wenn `cupsctl` aufgerufen wird.
 
 ### Sandbox Escape
 
@@ -312,7 +312,7 @@ Es ist möglich, die macOS-Sandbox mit einem FS-arbiträren Schreibzugriff zu ve
 
 ## Generiere beschreibbare Dateien als andere Benutzer
 
-Dies wird eine Datei erzeugen, die root gehört und von mir beschreibbar ist ([**code from here**](https://github.com/gergelykalman/brew-lpe-via-periodic/blob/main/brew_lpe.sh)). Dies könnte auch als Privilegieneskalation funktionieren:
+Dies wird eine Datei erzeugen, die root gehört und von mir beschreibbar ist ([**code from here**](https://github.com/gergelykalman/brew-lpe-via-periodic/blob/main/brew_lpe.sh)). Dies könnte auch als privesc funktionieren:
 ```bash
 DIRNAME=/usr/local/etc/periodic/daily
 

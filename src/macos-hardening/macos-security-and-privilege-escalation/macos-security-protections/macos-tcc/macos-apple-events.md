@@ -4,7 +4,7 @@
 
 ## Grundinformationen
 
-**Apple Events** sind eine Funktion in Apples macOS, die es Anwendungen ermöglicht, miteinander zu kommunizieren. Sie sind Teil des **Apple Event Manager**, der ein Bestandteil des macOS-Betriebssystems ist und für die Verarbeitung der interprozessualen Kommunikation verantwortlich ist. Dieses System ermöglicht es einer Anwendung, einer anderen Anwendung eine Nachricht zu senden, um zu verlangen, dass sie eine bestimmte Operation ausführt, wie das Öffnen einer Datei, das Abrufen von Daten oder das Ausführen eines Befehls.
+**Apple Events** sind eine Funktion in Apples macOS, die es Anwendungen ermöglicht, miteinander zu kommunizieren. Sie sind Teil des **Apple Event Managers**, der ein Bestandteil des macOS-Betriebssystems ist und für die Handhabung der interprozessualen Kommunikation verantwortlich ist. Dieses System ermöglicht es einer Anwendung, einer anderen Anwendung eine Nachricht zu senden, um zu verlangen, dass sie eine bestimmte Operation ausführt, wie das Öffnen einer Datei, das Abrufen von Daten oder das Ausführen eines Befehls.
 
 Der mina-Daemon ist `/System/Library/CoreServices/appleeventsd`, der den Dienst `com.apple.coreservices.appleevents` registriert.
 

@@ -82,7 +82,7 @@ mpo_cred_check_label_update_execve_t	*mpo_cred_check_label_update_execve;
 mpo_cred_check_label_update_t		*mpo_cred_check_label_update;
 [...]
 ```
-Fast alle Hooks werden von MACF zurückgerufen, wenn eine dieser Operationen abgefangen wird. Allerdings sind die **`mpo_policy_*`** Hooks eine Ausnahme, da `mpo_hook_policy_init()` ein Callback ist, das bei der Registrierung aufgerufen wird (also nach `mac_policy_register()`) und `mpo_hook_policy_initbsd()` während der späten Registrierung aufgerufen wird, sobald das BSD-Subsystem ordnungsgemäß initialisiert wurde.
+Fast alle Hooks werden von MACF zurückgerufen, wenn eine dieser Operationen abgefangen wird. Die **`mpo_policy_*`** Hooks sind jedoch eine Ausnahme, da `mpo_hook_policy_init()` ein Callback ist, das bei der Registrierung aufgerufen wird (also nach `mac_policy_register()`) und `mpo_hook_policy_initbsd()` während der späten Registrierung aufgerufen wird, sobald das BSD-Subsystem ordnungsgemäß initialisiert wurde.
 
 Darüber hinaus kann der **`mpo_policy_syscall`** Hook von jedem Kext registriert werden, um einen privaten **ioctl**-Stilaufruf **Schnittstelle** bereitzustellen. Dann kann ein Benutzerclient `mac_syscall` (#381) aufrufen und als Parameter den **Policy-Namen** mit einem ganzzahligen **Code** und optionalen **Argumenten** angeben.\
 Zum Beispiel verwendet **`Sandbox.kext`** dies häufig.
@@ -97,7 +97,7 @@ MACF wird sehr früh initialisiert. Es wird im `bootstrap_thread` von XNU einger
 
 ## MACF-Callouts
 
-Es ist üblich, Callouts zu MACF in Code zu finden, wie: **`#if CONFIG_MAC`** bedingte Blöcke. Darüber hinaus ist es innerhalb dieser Blöcke möglich, Aufrufe zu `mac_proc_check*` zu finden, die MACF aufrufen, um **Berechtigungen** für bestimmte Aktionen zu **überprüfen**. Darüber hinaus hat das Format der MACF-Callouts die Form: **`mac_<object>_<opType>_opName`**.
+Es ist üblich, Callouts zu MACF in Code zu finden, wie: **`#if CONFIG_MAC`** bedingte Blöcke. Darüber hinaus ist es innerhalb dieser Blöcke möglich, Aufrufe von `mac_proc_check*` zu finden, die MACF aufrufen, um **Berechtigungen zu überprüfen**, um bestimmte Aktionen durchzuführen. Darüber hinaus hat das Format der MACF-Callouts die Form: **`mac_<object>_<opType>_opName`**.
 
 Das Objekt ist eines der folgenden: `bpfdesc`, `cred`, `file`, `proc`, `vnode`, `mount`, `devfs`, `ifnet`, `inpcb`, `mbuf`, `ipq`, `pipe`, `sysv[msg/msq/shm/sem]`, `posix[shm/sem]`, `socket`, `kext`.\
 Der `opType` ist normalerweise check, der verwendet wird, um die Aktion zu erlauben oder abzulehnen. Es ist jedoch auch möglich, `notify` zu finden, was dem Kext erlaubt, auf die gegebene Aktion zu reagieren.
@@ -137,7 +137,7 @@ panic("file_check_mmap increased max protections");
 return error;
 }
 ```
-Welche den `MAC_CHECK`-Makro aufruft, dessen Code in [https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/mac_internal.h#L261](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/mac_internal.h#L261) zu finden ist.
+Welches das `MAC_CHECK`-Makro aufruft, dessen Code in [https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/mac_internal.h#L261](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/security/mac_internal.h#L261) gefunden werden kann.
 ```c
 /*
 * MAC_CHECK performs the designated check by walking the policy

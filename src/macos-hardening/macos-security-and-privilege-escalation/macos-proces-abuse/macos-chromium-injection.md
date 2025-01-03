@@ -24,7 +24,7 @@ Das `--use-fake-ui-for-media-stream` Flag ist eine weitere Befehlszeilenoption, 
 # Intercept traffic
 voodoo intercept -b chrome
 ```
-Finde weitere Beispiele in den Tool-Links
+Finden Sie weitere Beispiele in den Tool-Links
 
 ## Referenzen
 

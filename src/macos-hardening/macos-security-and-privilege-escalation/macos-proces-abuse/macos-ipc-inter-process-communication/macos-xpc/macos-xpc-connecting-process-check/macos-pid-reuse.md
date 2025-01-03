@@ -11,11 +11,11 @@ Diese Funktion wird die **erlaubte Binärdatei** die PID **besitzen**, aber die 
 ### Exploit-Beispiel
 
 Wenn Sie die Funktion **`shouldAcceptNewConnection`** oder eine von ihr aufgerufene Funktion finden, die **`processIdentifier`** aufruft und nicht **`auditToken`** aufruft. Es bedeutet höchstwahrscheinlich, dass sie die **PID des Prozesses** und nicht das Audit-Token **überprüft**.\
-Wie zum Beispiel in diesem Bild (aus der Referenz entnommen):
+Wie zum Beispiel in diesem Bild (aus der Referenz):
 
 <figure><img src="../../../../../../images/image (306).png" alt="https://wojciechregula.blog/images/2020/04/pid.png"><figcaption></figcaption></figure>
 
-Überprüfen Sie dieses Beispiel-Exploit (wiederum aus der Referenz entnommen), um die 2 Teile des Exploits zu sehen:
+Überprüfen Sie dieses Beispiel-Exploit (wiederum aus der Referenz), um die 2 Teile des Exploits zu sehen:
 
 - Einer, der **mehrere Forks generiert**
 - **Jeder Fork** wird die **Payload** an den XPC-Dienst senden, während er **`posix_spawn`** direkt nach dem Senden der Nachricht ausführt.
@@ -31,7 +31,7 @@ Wie zum Beispiel in diesem Bild (aus der Referenz entnommen):
 
 {{#tabs}}
 {{#tab name="NSTasks"}}
-Erste Option mit **`NSTasks`** und Argument, um die Kinder zu starten, um die RC auszunutzen
+Erste Option unter Verwendung von **`NSTasks`** und Argumenten, um die Kinder zu starten, um die RC auszunutzen.
 ```objectivec
 // Code from https://wojciechregula.blog/post/learn-xpc-exploitation-part-2-say-no-to-the-pid/
 // gcc -framework Foundation expl.m -o expl
@@ -140,7 +140,7 @@ return 0;
 {{#endtab}}
 
 {{#tab name="fork"}}
-Dieses Beispiel verwendet ein rohes **`fork`**, um **Kinder zu starten, die die PID-Rennbedingung ausnutzen** und dann **eine andere Rennbedingung über einen Hardlink ausnutzen:**
+Dieses Beispiel verwendet ein rohes **`fork`**, um **Kinder zu starten, die die PID-Rennbedingung ausnutzen** und dann **eine weitere Rennbedingung über einen Hardlink ausnutzen:**
 ```objectivec
 // export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
 // gcc -framework Foundation expl.m -o expl

@@ -18,7 +18,7 @@
 - **/usr**: Konfigurations- und System-Binaries
 - **/var**: Protokolldateien
 - **/Volumes**: Die gemounteten Laufwerke erscheinen hier.
-- **/.vol**: Wenn Sie `stat a.txt` ausführen, erhalten Sie etwas wie `16777223 7545753 -rw-r--r-- 1 username wheel ...`, wobei die erste Zahl die ID-Nummer des Volumes ist, auf dem die Datei existiert, und die zweite die Inode-Nummer ist. Sie können den Inhalt dieser Datei über /.vol/ mit dieser Information abrufen, indem Sie `cat /.vol/16777223/7545753` ausführen.
+- **/.vol**: Wenn Sie `stat a.txt` ausführen, erhalten Sie etwas wie `16777223 7545753 -rw-r--r-- 1 username wheel ...`, wobei die erste Zahl die ID-Nummer des Volumes ist, auf dem die Datei existiert, und die zweite die Inode-Nummer ist. Sie können den Inhalt dieser Datei über /.vol/ mit diesen Informationen abrufen, indem Sie `cat /.vol/16777223/7545753` ausführen.
 
 ### Anwendungsordner
 
@@ -59,7 +59,7 @@ macos-installers-abuse.md
 - **`.app`**: Apple-Anwendungen, die der Verzeichnisstruktur folgen (es ist ein Bundle).
 - **`.dylib`**: Dynamische Bibliotheken (wie Windows DLL-Dateien)
 - **`.pkg`**: Sind dasselbe wie xar (eXtensible Archive Format). Der Installer-Befehl kann verwendet werden, um den Inhalt dieser Dateien zu installieren.
-- **`.DS_Store`**: Diese Datei befindet sich in jedem Verzeichnis und speichert die Attribute und Anpassungen des Verzeichnisses.
+- **`.DS_Store`**: Diese Datei befindet sich in jedem Verzeichnis, sie speichert die Attribute und Anpassungen des Verzeichnisses.
 - **`.Spotlight-V100`**: Dieser Ordner erscheint im Root-Verzeichnis jedes Volumes im System.
 - **`.metadata_never_index`**: Wenn sich diese Datei im Root eines Volumes befindet, wird Spotlight dieses Volume nicht indizieren.
 - **`.noindex`**: Dateien und Ordner mit dieser Erweiterung werden von Spotlight nicht indiziert.
@@ -97,7 +97,7 @@ dyldex_all [dyld_shared_cache_path] # Extract all
 
 <figure><img src="../../../images/image (1152).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Einige Extraktoren funktionieren nicht, da dylibs mit fest codierten Adressen vorverlinkt sind, wodurch sie möglicherweise zu unbekannten Adressen springen.
+Einige Extraktoren funktionieren möglicherweise nicht, da dylibs mit fest codierten Adressen vorverlinkt sind, wodurch sie möglicherweise zu unbekannten Adressen springen.
 
 > [!TIP]
 > Es ist auch möglich, den Shared Library Cache anderer \*OS-Geräte in macos herunterzuladen, indem Sie einen Emulator in Xcode verwenden. Sie werden heruntergeladen in: ls `$HOME/Library/Developer/Xcode/<*>OS\ DeviceSupport/<version>/Symbols/System/Library/Caches/com.apple.dyld/`, wie: `$HOME/Library/Developer/Xcode/iOS\ DeviceSupport/14.1\ (18A8395)/Symbols/System/Library/Caches/com.apple.dyld/dyld_shared_cache_arm64`
@@ -121,18 +121,18 @@ Verwendung der Umgebungsvariablen:
 
 ### Ordners Berechtigungen
 
-In einem **Ordner** erlaubt **lesen**, ihn **aufzulisten**, **schreiben** erlaubt das **Löschen** und **Schreiben** von Dateien darin, und **ausführen** erlaubt das **Durchqueren** des Verzeichnisses. Ein Benutzer mit **Leseerlaubnis über eine Datei** in einem Verzeichnis, in dem er **keine Ausführungsberechtigung** hat, **wird die Datei nicht lesen können**.
+In einem **Ordner** erlaubt **lesen**, ihn **aufzulisten**, **schreiben** erlaubt das **Löschen** und **Schreiben** von Dateien darin, und **ausführen** erlaubt das **Durchqueren** des Verzeichnisses. Ein Benutzer mit **Lesezugriff auf eine Datei** in einem Verzeichnis, in dem er **keine Ausführungsberechtigung** hat, **wird die Datei nicht lesen können**.
 
 ### Flag-Modifikatoren
 
 Es gibt einige Flags, die in den Dateien gesetzt werden können, die das Verhalten der Datei ändern. Sie können die **Flags** der Dateien in einem Verzeichnis mit `ls -lO /path/directory` überprüfen.
 
-- **`uchg`**: Bekannt als **uchange**-Flag, wird **jede Aktion** verhindern, die die **Datei** ändert oder löscht. Um es zu setzen, tun Sie: `chflags uchg file.txt`
+- **`uchg`**: Bekannt als **uchange**-Flag, wird **jede Aktion** zum Ändern oder Löschen der **Datei** verhindern. Um es zu setzen, tun Sie: `chflags uchg file.txt`
 - Der Root-Benutzer könnte **das Flag entfernen** und die Datei ändern.
 - **`restricted`**: Dieses Flag schützt die Datei **durch SIP** (Sie können dieses Flag nicht zu einer Datei hinzufügen).
-- **`Sticky bit`**: Wenn ein Verzeichnis mit Sticky-Bit, **kann nur** der **Verzeichnisbesitzer oder Root Dateien umbenennen oder löschen**. Typischerweise wird dies im /tmp-Verzeichnis gesetzt, um zu verhindern, dass normale Benutzer die Dateien anderer Benutzer löschen oder verschieben.
+- **`Sticky bit`**: Wenn ein Verzeichnis mit Sticky Bit, **kann nur** der **Verzeichnisbesitzer oder Root Dateien umbenennen oder löschen**. Typischerweise wird dies im /tmp-Verzeichnis gesetzt, um zu verhindern, dass normale Benutzer die Dateien anderer Benutzer löschen oder verschieben.
 
-Alle Flags finden Sie in der Datei `sys/stat.h` (finden Sie sie mit `mdfind stat.h | grep stat.h`) und sind:
+Alle Flags sind in der Datei `sys/stat.h` zu finden (finden Sie sie mit `mdfind stat.h | grep stat.h`) und sind:
 
 - `UF_SETTABLE` 0x0000ffff: Maske der vom Eigentümer änderbaren Flags.
 - `UF_NODUMP` 0x00000001: Datei nicht dumpen.
@@ -166,7 +166,7 @@ Wenn die Datei ACLs enthält, werden Sie **ein "+" finden, wenn Sie die Berechti
 ls -ld Movies
 drwx------+   7 username  staff     224 15 Apr 19:42 Movies
 ```
-Sie können **die ACLs** der Datei mit folgendem Befehl lesen:
+Sie können die **ACLs** der Datei mit folgendem Befehl lesen:
 ```bash
 ls -lde Movies
 drwx------+ 7 username  staff  224 15 Apr 19:42 Movies
@@ -237,7 +237,7 @@ macos-memory-dumping.md
 
 ## Risikokategorie Dateien Mac OS
 
-Das Verzeichnis `/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/System` ist der Ort, an dem Informationen über das **Risiko, das mit verschiedenen Dateierweiterungen verbunden ist**, gespeichert sind. Dieses Verzeichnis kategorisiert Dateien in verschiedene Risikostufen, die beeinflussen, wie Safari mit diesen Dateien beim Herunterladen umgeht. Die Kategorien sind wie folgt:
+Das Verzeichnis `/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/System` ist der Ort, an dem Informationen über das **Risiko, das mit verschiedenen Dateierweiterungen verbunden ist**, gespeichert werden. Dieses Verzeichnis kategorisiert Dateien in verschiedene Risikostufen, die beeinflussen, wie Safari mit diesen Dateien beim Herunterladen umgeht. Die Kategorien sind wie folgt:
 
 - **LSRiskCategorySafe**: Dateien in dieser Kategorie gelten als **vollständig sicher**. Safari öffnet diese Dateien automatisch, nachdem sie heruntergeladen wurden.
 - **LSRiskCategoryNeutral**: Diese Dateien kommen ohne Warnungen und werden **nicht automatisch von Safari geöffnet**.

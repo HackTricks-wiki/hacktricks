@@ -112,7 +112,7 @@ sqlite> select * from access where client LIKE "%telegram%" and auth_value=0;
 
 <summary>Wie man ausführt, wenn es ein absoluter Pfad ist</summary>
 
-Einfach **`launctl load you_bin.plist`** ausführen, mit einer plist wie:
+Führen Sie einfach **`launctl load you_bin.plist`** aus, mit einer plist wie:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -203,10 +203,10 @@ csreq -t -r /tmp/telegram_csreq.bin
 
 ### Berechtigungen & TCC-Berechtigungen
 
-Apps **müssen nicht nur** **anfordern** und **Zugriff gewährt bekommen** auf einige Ressourcen, sie müssen auch **die relevanten Berechtigungen haben**.\
+Apps **müssen nicht nur** **anfordern** und **erhaltenen Zugriff** auf einige Ressourcen haben, sie müssen auch **die relevanten Berechtigungen haben**.\
 Zum Beispiel hat **Telegram** die Berechtigung `com.apple.security.device.camera`, um **Zugriff auf die Kamera** zu beantragen. Eine **App**, die diese **Berechtigung nicht hat**, wird **nicht in der Lage sein**, auf die Kamera zuzugreifen (und der Benutzer wird nicht einmal nach den Berechtigungen gefragt).
 
-Um jedoch auf **bestimmte Benutzerordner** wie `~/Desktop`, `~/Downloads` und `~/Documents` zuzugreifen, **müssen** sie keine spezifischen **Berechtigungen haben.** Das System wird den Zugriff transparent handhaben und **den Benutzer** nach Bedarf **auffordern**.
+Um jedoch auf **bestimmte Benutzerordner** wie `~/Desktop`, `~/Downloads` und `~/Documents` zuzugreifen, **müssen** sie keine spezifischen **Berechtigungen haben.** Das System wird den Zugriff transparent verwalten und **den Benutzer** nach Bedarf **auffordern**.
 
 Apples Apps **werden keine Aufforderungen generieren**. Sie enthalten **vorab erteilte Rechte** in ihrer **Berechtigungsliste**, was bedeutet, dass sie **niemals ein Popup generieren**, **noch** werden sie in einer der **TCC-Datenbanken** angezeigt. Zum Beispiel:
 ```bash
@@ -234,7 +234,7 @@ Einige TCC-Berechtigungen sind: kTCCServiceAppleEvents, kTCCServiceCalendar, kTC
 
 ### Benutzerabsicht / com.apple.macl
 
-Wie bereits erwähnt, ist es möglich, **einer App Zugriff auf eine Datei zu gewähren, indem man sie per Drag & Drop darauf zieht**. Dieser Zugriff wird in keiner TCC-Datenbank angegeben, sondern als **erweiterte** **Eigenschaft der Datei**. Diese Eigenschaft wird **die UUID** der erlaubten App **speichern**:
+Wie bereits erwähnt, ist es möglich, **einer App Zugriff auf eine Datei zu gewähren, indem man sie per Drag & Drop darauf zieht**. Dieser Zugriff wird in keiner TCC-Datenbank angegeben, sondern als **erweiterte** **Eigenschaft der Datei** gespeichert. Diese Eigenschaft wird **die UUID** der erlaubten App **speichern**:
 ```bash
 xattr Desktop/private.txt
 com.apple.macl
@@ -250,7 +250,7 @@ otool -l /System/Applications/Utilities/Terminal.app/Contents/MacOS/Terminal| gr
 uuid 769FD8F1-90E0-3206-808C-A8947BEBD6C3
 ```
 > [!NOTE]
-> Es ist interessant, dass das **`com.apple.macl`** Attribut vom **Sandbox** verwaltet wird, nicht von tccd.
+> Es ist interessant, dass das **`com.apple.macl`** Attribut von der **Sandbox** und nicht von tccd verwaltet wird.
 >
 > Beachten Sie auch, dass wenn Sie eine Datei, die die UUID einer App auf Ihrem Computer erlaubt, auf einen anderen Computer verschieben, die gleiche App unterschiedliche UIDs haben wird und daher keinen Zugriff auf diese App gewährt.
 
@@ -308,7 +308,7 @@ strftime('%s', 'now') -- last_reminded with default current timestamp
 
 ### TCC-Payloads
 
-Wenn Sie es geschafft haben, in eine App mit einigen TCC-Berechtigungen zu gelangen, überprüfen Sie die folgende Seite mit TCC-Payloads, um diese auszunutzen:
+Wenn Sie es geschafft haben, in eine App mit einigen TCC-Berechtigungen einzudringen, überprüfen Sie die folgende Seite mit TCC-Payloads, um diese auszunutzen:
 
 {{#ref}}
 macos-tcc-payloads.md
@@ -361,7 +361,7 @@ EOD
 Sie könnten dies missbrauchen, um **Ihre eigene Benutzer-TCC-Datenbank zu schreiben**.
 
 > [!WARNING]
-> Mit dieser Berechtigung können Sie **Finder auffordern, auf TCC-eingeschränkte Ordner zuzugreifen** und Ihnen die Dateien zu geben, aber soweit ich weiß, **werden Sie Finder nicht dazu bringen können, beliebigen Code auszuführen**, um seinen FDA-Zugriff vollständig auszunutzen.
+> Mit dieser Berechtigung können Sie **Finder bitten, auf TCC-restriktive Ordner zuzugreifen** und Ihnen die Dateien zu geben, aber soweit ich weiß, **werden Sie Finder nicht dazu bringen können, beliebigen Code auszuführen**, um seinen FDA-Zugriff vollständig auszunutzen.
 >
 > Daher werden Sie nicht in der Lage sein, die vollständigen FDA-Fähigkeiten auszunutzen.
 
@@ -396,7 +396,7 @@ EOD
 ```
 </details>
 
-Das gleiche gilt für die **Script Editor-App**, sie kann den Finder steuern, aber mit einem AppleScript kann man sie nicht zwingen, ein Skript auszuführen.
+Das Gleiche gilt für die **Script Editor-App**, sie kann den Finder steuern, aber mit einem AppleScript kann man sie nicht zwingen, ein Skript auszuführen.
 
 ### Automatisierung (SE) zu einigen TCC
 
@@ -442,11 +442,11 @@ EOD
 touch "$HOME/Desktop/file"
 rm "$HOME/Desktop/file"
 ```
-### Automation (SE) + Accessibility (**`kTCCServicePostEvent`|**`kTCCServiceAccessibility`**)** zu FDA\*
+### Automatisierung (SE) + Barrierefreiheit (**`kTCCServicePostEvent`|**`kTCCServiceAccessibility`**)** zu FDA\*
 
-Automation auf **`System Events`** + Accessibility (**`kTCCServicePostEvent`**) ermöglicht das Senden von **Tasteneingaben an Prozesse**. Auf diese Weise könnten Sie den Finder missbrauchen, um die TCC.db der Benutzer zu ändern oder FDA an eine beliebige App zu gewähren (obwohl möglicherweise ein Passwort dafür angefordert wird).
+Automatisierung auf **`System Events`** + Barrierefreiheit (**`kTCCServicePostEvent`**) ermöglicht das Senden von **Tasteneingaben an Prozesse**. Auf diese Weise könnten Sie den Finder missbrauchen, um die TCC.db des Benutzers zu ändern oder FDA an eine beliebige App zu gewähren (obwohl möglicherweise ein Passwort dafür angefordert wird).
 
-Beispiel für das Überschreiben der TCC.db der Benutzer durch den Finder:
+Beispiel für das Überschreiben der TCC.db des Benutzers durch den Finder:
 ```applescript
 -- store the TCC.db file to copy in /tmp
 osascript <<EOF
@@ -494,38 +494,38 @@ EOF
 ```
 ### `kTCCServiceAccessibility` zu FDA\*
 
-Überprüfen Sie diese Seite für einige [**Payloads, um die Zugriffsberechtigungen zu missbrauchen**](macos-tcc-payloads.md#accessibility), um zu FDA\* zu privescen oder beispielsweise einen Keylogger auszuführen.
+Überprüfen Sie diese Seite auf einige [**Payloads, um die Zugriffsberechtigungen auszunutzen**](macos-tcc-payloads.md#accessibility), um zu FDA\* zu privescen oder beispielsweise einen Keylogger auszuführen.
 
 ### **Endpoint Security Client zu FDA**
 
 Wenn Sie **`kTCCServiceEndpointSecurityClient`** haben, haben Sie FDA. Ende.
 
-### System Policy SysAdmin File zu FDA
+### Systemrichtlinien SysAdmin-Datei zu FDA
 
-**`kTCCServiceSystemPolicySysAdminFiles`** ermöglicht es, das **`NFSHomeDirectory`** Attribut eines Benutzers zu **ändern**, was seinen Home-Ordner ändert und somit das **Umgehen von TCC** ermöglicht.
+**`kTCCServiceSystemPolicySysAdminFiles`** ermöglicht es, das **`NFSHomeDirectory`**-Attribut eines Benutzers zu **ändern**, was seinen Home-Ordner ändert und somit das **Umgehen von TCC** ermöglicht.
 
-### User TCC DB zu FDA
+### Benutzer TCC DB zu FDA
 
-Durch den Erhalt von **Schreibberechtigungen** über die **Benutzer-TCC**-Datenbank können Sie **`FDA`** Berechtigungen **nicht** gewähren, nur derjenige, der in der Systemdatenbank lebt, kann das gewähren.
+Durch den Erhalt von **Schreibberechtigungen** über die **Benutzer-TCC**-Datenbank können Sie **nicht** selbst **`FDA`**-Berechtigungen gewähren, nur derjenige, der in der Systemdatenbank lebt, kann das gewähren.
 
-Aber Sie können sich **`Automatisierungsrechte für Finder`** geben und die vorherige Technik missbrauchen, um zu FDA\* zu eskalieren.
+Aber Sie können sich **`Automatisierungsrechte für den Finder`** geben und die vorherige Technik ausnutzen, um zu FDA\* zu eskalieren.
 
-### **FDA zu TCC Berechtigungen**
+### **FDA zu TCC-Berechtigungen**
 
 **Vollständiger Festplattzugriff** ist der TCC-Name **`kTCCServiceSystemPolicyAllFiles`**.
 
-Ich denke nicht, dass dies ein echtes Privesc ist, aber nur für den Fall, dass Sie es nützlich finden: Wenn Sie ein Programm mit FDA steuern, können Sie **die TCC-Datenbank der Benutzer ändern und sich jeden Zugriff gewähren**. Dies kann als Persistenztechnik nützlich sein, falls Sie Ihre FDA-Berechtigungen verlieren sollten.
+Ich denke nicht, dass dies eine echte Privilegieneskalation ist, aber nur für den Fall, dass Sie es nützlich finden: Wenn Sie ein Programm mit FDA steuern, können Sie **die TCC-Datenbank der Benutzer ändern und sich jeden Zugriff gewähren**. Dies kann als Persistenztechnik nützlich sein, falls Sie Ihre FDA-Berechtigungen verlieren sollten.
 
 ### **SIP-Bypass zu TCC-Bypass**
 
-Die System-**TCC-Datenbank** ist durch **SIP** geschützt, weshalb nur Prozesse mit den **angegebenen Berechtigungen in der Lage sind, sie zu ändern**. Daher, wenn ein Angreifer einen **SIP-Bypass** über eine **Datei** findet (in der Lage, eine durch SIP eingeschränkte Datei zu ändern), kann er:
+Die **TCC-Datenbank** des Systems ist durch **SIP** geschützt, weshalb nur Prozesse mit den **angegebenen Berechtigungen in der Lage sind, sie zu ändern**. Daher, wenn ein Angreifer einen **SIP-Bypass** über eine **Datei** findet (in der Lage, eine durch SIP eingeschränkte Datei zu ändern), kann er:
 
-- **Den Schutz** einer TCC-Datenbank entfernen und sich alle TCC-Berechtigungen gewähren. Er könnte beispielsweise eine dieser Dateien missbrauchen:
+- **Den Schutz** einer TCC-Datenbank entfernen und sich alle TCC-Berechtigungen gewähren. Er könnte beispielsweise eine dieser Dateien ausnutzen:
 - Die TCC-Systemdatenbank
 - REG.db
 - MDMOverrides.plist
 
-Es gibt jedoch eine weitere Möglichkeit, diesen **SIP-Bypass zu nutzen, um TCC zu umgehen**. Die Datei `/Library/Apple/Library/Bundles/TCC_Compatibility.bundle/Contents/Resources/AllowApplicationsList.plist` ist eine Erlaubenliste von Anwendungen, die eine TCC-Ausnahme benötigen. Daher, wenn ein Angreifer den **SIP-Schutz** von dieser Datei **entfernen** und seine **eigene Anwendung** hinzufügen kann, wird die Anwendung in der Lage sein, TCC zu umgehen.\
+Es gibt jedoch eine weitere Möglichkeit, diesen **SIP-Bypass auszunutzen, um TCC zu umgehen**. Die Datei `/Library/Apple/Library/Bundles/TCC_Compatibility.bundle/Contents/Resources/AllowApplicationsList.plist` ist eine Erlaubenliste von Anwendungen, die eine TCC-Ausnahme benötigen. Daher, wenn ein Angreifer den **SIP-Schutz** von dieser Datei **entfernen** und seine **eigene Anwendung** hinzufügen kann, wird die Anwendung in der Lage sein, TCC zu umgehen.\
 Zum Beispiel, um das Terminal hinzuzufügen:
 ```bash
 # Get needed info
@@ -554,7 +554,7 @@ AllowApplicationsList.plist:
 </dict>
 </plist>
 ```
-### TCC Umgehungen
+### TCC Bypasses
 
 {{#ref}}
 macos-tcc-bypasses/

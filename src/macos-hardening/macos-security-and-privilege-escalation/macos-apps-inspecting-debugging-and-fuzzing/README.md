@@ -54,7 +54,7 @@ jtool2 -d __DATA.__const myipc_server | grep MIG
 
 ### Codesign / ldid
 
-> [!TIP] > **`Codesign`** ist in **macOS** zu finden, während **`ldid`** in **iOS** zu finden ist
+> [!TIP] > **`Codesign`** ist in **macOS** zu finden, während **`ldid`** in **iOS** zu finden ist.
 ```bash
 # Get signer
 codesign -vv -d /bin/ls 2>&1 | grep -E "Authority|TeamIdentifier"
@@ -84,7 +84,7 @@ ldid -S/tmp/entl.xml <binary>
 ### SuspiciousPackage
 
 [**SuspiciousPackage**](https://mothersruin.com/software/SuspiciousPackage/get.html) ist ein nützliches Tool, um **.pkg**-Dateien (Installer) zu inspizieren und zu sehen, was darin enthalten ist, bevor man sie installiert.\
-Diese Installer haben `preinstall` und `postinstall` Bash-Skripte, die von Malware-Autoren normalerweise missbraucht werden, um **die** **Malware** **zu** **persistieren**.
+Diese Installer haben `preinstall` und `postinstall` Bash-Skripte, die von Malware-Autoren normalerweise missbraucht werden, um **die** **Malware** **persistieren** zu lassen.
 
 ### hdiutil
 
@@ -98,7 +98,7 @@ Es wird in `/Volumes` gemountet
 
 - Überprüfen Sie die hohe Entropie
 - Überprüfen Sie die Strings (wenn es fast keinen verständlichen String gibt, gepackt)
-- Der UPX-Packer für MacOS generiert einen Abschnitt namens "\_\_XHDR"
+- Der UPX-Packer für MacOS erzeugt einen Abschnitt namens "\_\_XHDR"
 
 ## Statische Objective-C-Analyse
 
@@ -122,7 +122,7 @@ Wenn eine Funktion in einer Binärdatei aufgerufen wird, die Objective-C verwend
 
 Die Parameter, die diese Funktion erwartet, sind:
 
-- Der erste Parameter (**self**) ist "ein Zeiger, der auf die **Instanz der Klasse zeigt, die die Nachricht empfangen soll**". Einfacher ausgedrückt, es ist das Objekt, auf dem die Methode aufgerufen wird. Wenn die Methode eine Klassenmethode ist, wird dies eine Instanz des Klassenobjekts (als Ganzes) sein, während bei einer Instanzmethode self auf eine instanziierte Instanz der Klasse als Objekt zeigt.
+- Der erste Parameter (**self**) ist "ein Zeiger, der auf die **Instanz der Klasse zeigt, die die Nachricht empfangen soll**". Einfacher ausgedrückt, es ist das Objekt, auf dem die Methode aufgerufen wird. Wenn die Methode eine Klassenmethode ist, ist dies eine Instanz des Klassenobjekts (als Ganzes), während bei einer Instanzmethode self auf eine instanziierte Instanz der Klasse als Objekt zeigt.
 - Der zweite Parameter (**op**) ist "der Selektor der Methode, die die Nachricht verarbeitet". Einfacher ausgedrückt, dies ist nur der **Name der Methode.**
 - Die verbleibenden Parameter sind alle **Werte, die von der Methode benötigt werden** (op).
 
@@ -142,7 +142,7 @@ x64:
 | **4. Argument**   | **rcx**                                                         | **2. Argument für die Methode**                        |
 | **5. Argument**   | **r8**                                                          | **3. Argument für die Methode**                        |
 | **6. Argument**   | **r9**                                                          | **4. Argument für die Methode**                        |
-| **7.+ Argument**  | <p><strong>rsp+</strong><br><strong>(auf dem Stack)</strong></p> | **5. + Argument für die Methode**                      |
+| **7. Argument und mehr** | <p><strong>rsp+</strong><br><strong>(auf dem Stack)</strong></p> | **5. Argument und mehr für die Methode**              |
 
 ### ObjectiveC-Metadaten dumpen
 
@@ -162,7 +162,7 @@ objdump --macho --objc-meta-data /path/to/bin
 ```
 #### class-dump
 
-[**class-dump**](https://github.com/nygard/class-dump/) ist das ursprüngliche Tool, das Deklarationen für die Klassen, Kategorien und Protokolle im Objective-C formatierten Code generiert.
+[**class-dump**](https://github.com/nygard/class-dump/) ist das ursprüngliche Tool, um Deklarationen für die Klassen, Kategorien und Protokolle im Objective-C formatierten Code zu generieren.
 
 Es ist alt und wird nicht mehr gewartet, daher funktioniert es wahrscheinlich nicht richtig.
 
@@ -193,7 +193,7 @@ Mem: 0x1000274cc-0x100027608        __TEXT.__swift5_capture
 ```
 Sie finden weitere Informationen über die [**Informationen, die in diesem Abschnitt gespeichert sind, in diesem Blogbeitrag**](https://knight.sc/reverse%20engineering/2019/07/17/swift-metadata.html).
 
-Darüber hinaus **könnten Swift-Binärdateien Symbole enthalten** (zum Beispiel müssen Bibliotheken Symbole speichern, damit ihre Funktionen aufgerufen werden können). Die **Symbole enthalten normalerweise Informationen über den Funktionsnamen** und Attribute auf eine unansehnliche Weise, sodass sie sehr nützlich sind, und es gibt "**Demangler**", die den ursprünglichen Namen wiederherstellen können:
+Darüber hinaus **könnten Swift-Binärdateien Symbole enthalten** (zum Beispiel müssen Bibliotheken Symbole speichern, damit ihre Funktionen aufgerufen werden können). Die **Symbole enthalten normalerweise die Informationen über den Funktionsnamen** und Attribute auf eine unordentliche Weise, sodass sie sehr nützlich sind, und es gibt "**Demangler**", die den ursprünglichen Namen wiederherstellen können:
 ```bash
 # Ghidra plugin
 https://github.com/ghidraninja/ghidra_scripts/blob/master/swift_demangler.py
@@ -204,10 +204,10 @@ swift demangle
 ## Dynamische Analyse
 
 > [!WARNING]
-> Beachten Sie, dass zum Debuggen von Binärdateien **SIP deaktiviert sein muss** (`csrutil disable` oder `csrutil enable --without debug`) oder die Binärdateien in einen temporären Ordner kopiert und **die Signatur entfernt** werden muss mit `codesign --remove-signature <binary-path>` oder das Debuggen der Binärdatei erlaubt werden muss (Sie können [dieses Skript](https://gist.github.com/carlospolop/a66b8d72bb8f43913c4b5ae45672578b) verwenden).
+> Beachten Sie, dass **SIP deaktiviert sein muss**, um Binärdateien zu debuggen (`csrutil disable` oder `csrutil enable --without debug`), oder um die Binärdateien in einen temporären Ordner zu kopieren und **die Signatur zu entfernen** mit `codesign --remove-signature <binary-path>` oder um das Debuggen der Binärdatei zu erlauben (Sie können [dieses Skript](https://gist.github.com/carlospolop/a66b8d72bb8f43913c4b5ae45672578b) verwenden).
 
 > [!WARNING]
-> Beachten Sie, dass zum **Instrumentieren von System-Binärdateien** (wie `cloudconfigurationd`) auf macOS **SIP deaktiviert sein muss** (das Entfernen der Signatur funktioniert nicht).
+> Beachten Sie, dass **SIP deaktiviert sein muss**, um **System-Binärdateien** (wie `cloudconfigurationd`) auf macOS zu instrumentieren (das Entfernen der Signatur funktioniert nicht).
 
 ### APIs
 
@@ -218,11 +218,11 @@ macOS bietet einige interessante APIs, die Informationen über die Prozesse bere
 
 ### Stackshot & Mikrostackshots
 
-**Stackshotting** ist eine Technik, die verwendet wird, um den Zustand der Prozesse zu erfassen, einschließlich der Aufrufstapel aller laufenden Threads. Dies ist besonders nützlich für Debugging, Leistungsanalyse und das Verständnis des Verhaltens des Systems zu einem bestimmten Zeitpunkt. Auf iOS und macOS kann Stackshotting mit mehreren Tools und Methoden wie den Tools **`sample`** und **`spindump`** durchgeführt werden.
+**Stackshotting** ist eine Technik, die verwendet wird, um den Zustand der Prozesse zu erfassen, einschließlich der Aufrufstapel aller laufenden Threads. Dies ist besonders nützlich für Debugging, Leistungsanalyse und um das Verhalten des Systems zu einem bestimmten Zeitpunkt zu verstehen. Auf iOS und macOS kann Stackshotting mit mehreren Tools und Methoden wie den Tools **`sample`** und **`spindump`** durchgeführt werden.
 
 ### Sysdiagnose
 
-Dieses Tool (`/usr/bini/ysdiagnose`) sammelt im Wesentlichen viele Informationen von Ihrem Computer, indem es Dutzende verschiedener Befehle wie `ps`, `zprint`... ausführt.
+Dieses Tool (`/usr/bini/ysdiagnose`) sammelt im Wesentlichen viele Informationen von Ihrem Computer, indem es Dutzende von verschiedenen Befehlen wie `ps`, `zprint`... ausführt.
 
 Es muss als **root** ausgeführt werden, und der Daemon `/usr/libexec/sysdiagnosed` hat sehr interessante Berechtigungen wie `com.apple.system-task-ports` und `get-task-allow`.
 
@@ -262,7 +262,7 @@ In der rechten Spalte können Sie interessante Informationen wie die **Navigatio
 
 ### dtrace
 
-Es ermöglicht Benutzern den Zugriff auf Anwendungen auf einem extrem **niedrigen Niveau** und bietet eine Möglichkeit für Benutzer, **Programme** zu **verfolgen** und sogar ihren Ausführungsfluss zu ändern. Dtrace verwendet **Proben**, die **im gesamten Kernel platziert** sind und sich an Orten wie dem Anfang und Ende von Systemaufrufen befinden.
+Es ermöglicht Benutzern den Zugriff auf Anwendungen auf einem extrem **niedrigen Niveau** und bietet eine Möglichkeit für Benutzer, **Programme** zu **verfolgen** und sogar ihren Ausführungsfluss zu ändern. Dtrace verwendet **Proben**, die **im gesamten Kernel platziert sind** und sich an Orten wie dem Anfang und Ende von Systemaufrufen befinden.
 
 DTrace verwendet die Funktion **`dtrace_probe_create`**, um eine Probe für jeden Systemaufruf zu erstellen. Diese Proben können am **Einstieg und Ausgangspunkt jedes Systemaufrufs** ausgelöst werden. Die Interaktion mit DTrace erfolgt über /dev/dtrace, das nur für den Root-Benutzer verfügbar ist.
 
@@ -348,7 +348,7 @@ Um mit `kdebug` zu interagieren, wird `sysctl` über den `kern.kdebug`-Namespace
 Um mit kdebug über einen benutzerdefinierten Client zu interagieren, sind dies normalerweise die Schritte:
 
 - Entfernen Sie vorhandene Einstellungen mit KERN_KDSETREMOVE
-- Setzen Sie Trace mit KERN_KDSETBUF und KERN_KDSETUP
+- Setzen Sie den Trace mit KERN_KDSETBUF und KERN_KDSETUP
 - Verwenden Sie KERN_KDGETBUF, um die Anzahl der Puffer-Einträge zu erhalten
 - Holen Sie sich den eigenen Client aus dem Trace mit KERN_KDPINDEX
 - Aktivieren Sie das Tracing mit KERN_KDENABLE
@@ -357,11 +357,11 @@ Um mit kdebug über einen benutzerdefinierten Client zu interagieren, sind dies 
 
 Um diese Informationen zu erhalten, ist es möglich, das Apple-Tool **`trace`** oder das benutzerdefinierte Tool [kDebugView (kdv)](https://newosxbook.com/tools/kdv.html)**.**
 
-**Beachten Sie, dass Kdebug nur für 1 Kunden gleichzeitig verfügbar ist.** Daher kann nur ein k-debug-gestütztes Tool zur gleichen Zeit ausgeführt werden.
+**Beachten Sie, dass Kdebug nur für einen Kunden gleichzeitig verfügbar ist.** Daher kann nur ein k-debug-gestütztes Tool zur gleichen Zeit ausgeführt werden.
 
 ### ktrace
 
-Die `ktrace_*` APIs stammen von `libktrace.dylib`, die die von `Kdebug` umhüllen. Ein Client kann einfach `ktrace_session_create` und `ktrace_events_[single/class]` aufrufen, um Rückrufe für spezifische Codes festzulegen, und dann mit `ktrace_start` starten.
+Die `ktrace_*` APIs stammen von `libktrace.dylib`, die die von `Kdebug` umhüllen. Ein Client kann einfach `ktrace_session_create` und `ktrace_events_[single/class]` aufrufen, um Rückrufe für spezifische Codes festzulegen und dann mit `ktrace_start` zu starten.
 
 Sie können dies sogar mit **SIP aktiviert** verwenden.
 
@@ -398,7 +398,7 @@ Sie müssen Ihren Mac mit einem Befehl wie **`sudo eslogger fork exec rename cre
 
 ### Crescendo
 
-[**Crescendo**](https://github.com/SuprHackerSteve/Crescendo) ist ein GUI-Tool, das das Aussehen und das Gefühl hat, das Windows-Benutzer von Microsoft Sysinternals _Procmon_ kennen. Dieses Tool ermöglicht es, die Aufzeichnung verschiedener Ereignistypen zu starten und zu stoppen, ermöglicht das Filtern dieser Ereignisse nach Kategorien wie Datei, Prozess, Netzwerk usw. und bietet die Funktionalität, die aufgezeichneten Ereignisse im JSON-Format zu speichern.
+[**Crescendo**](https://github.com/SuprHackerSteve/Crescendo) ist ein GUI-Tool, das das Aussehen und Gefühl hat, das Windows-Benutzer von Microsoft Sysinternals _Procmon_ kennen. Dieses Tool ermöglicht es, verschiedene Ereignistypen zu starten und zu stoppen, ermöglicht das Filtern dieser Ereignisse nach Kategorien wie Datei, Prozess, Netzwerk usw. und bietet die Funktionalität, die aufgezeichneten Ereignisse im JSON-Format zu speichern.
 
 ### Apple Instruments
 
@@ -420,11 +420,11 @@ Es überprüft auch die Binärprozesse gegen **virustotal** und zeigt Informatio
 
 ## PT_DENY_ATTACH <a href="#page-title" id="page-title"></a>
 
-In [**diesem Blogbeitrag**](https://knight.sc/debugging/2019/06/03/debugging-apple-binaries-that-use-pt-deny-attach.html) finden Sie ein Beispiel dafür, wie man **einen laufenden Daemon debuggt**, der **`PT_DENY_ATTACH`** verwendet, um das Debuggen zu verhindern, selbst wenn SIP deaktiviert war.
+In [**diesem Blogbeitrag**](https://knight.sc/debugging/2019/06/03/debugging-apple-binaries-that-use-pt-deny-attach.html) finden Sie ein Beispiel, wie man einen **laufenden Daemon** debuggt, der **`PT_DENY_ATTACH`** verwendet, um das Debuggen zu verhindern, selbst wenn SIP deaktiviert war.
 
 ### lldb
 
-**lldb** ist das de **facto Tool** für **macOS** Binär-**Debugging**.
+**lldb** ist das de **facto Tool** für **macOS** Binärdatei **Debugging**.
 ```bash
 lldb ./malware.bin
 lldb -p 1122
@@ -470,19 +470,19 @@ Core Dumps werden erstellt, wenn:
 
 - `kern.coredump` sysctl auf 1 gesetzt ist (standardmäßig)
 - Wenn der Prozess nicht suid/sgid war oder `kern.sugid_coredump` auf 1 gesetzt ist (standardmäßig 0)
-- Das `AS_CORE`-Limit die Operation erlaubt. Es ist möglich, die Erstellung von Core Dumps zu unterdrücken, indem Sie `ulimit -c 0` aufrufen und sie mit `ulimit -c unlimited` wieder aktivieren.
+- Das `AS_CORE`-Limit die Operation erlaubt. Es ist möglich, die Erstellung von Core Dumps zu unterdrücken, indem `ulimit -c 0` aufgerufen wird und sie mit `ulimit -c unlimited` wieder aktiviert werden.
 
-In diesen Fällen wird der Core Dump gemäß dem `kern.corefile` sysctl generiert und normalerweise in `/cores/core/.%P` gespeichert.
+In diesen Fällen wird der Core Dump gemäß `kern.corefile` sysctl generiert und normalerweise in `/cores/core/.%P` gespeichert.
 
 ## Fuzzing
 
 ### [ReportCrash](https://ss64.com/osx/reportcrash.html)
 
-ReportCrash **analysiert abstürzende Prozesse und speichert einen Absturzbericht auf der Festplatte**. Ein Absturzbericht enthält Informationen, die einem **Entwickler helfen können,** die Ursache eines Absturzes zu diagnostizieren.\
+ReportCrash **analysiert abstürzende Prozesse und speichert einen Absturzbericht auf der Festplatte**. Ein Absturzbericht enthält Informationen, die einem Entwickler helfen können, die Ursache eines Absturzes zu diagnostizieren.\
 Für Anwendungen und andere Prozesse, die **im benutzerspezifischen launchd-Kontext** ausgeführt werden, läuft ReportCrash als LaunchAgent und speichert Absturzberichte im `~/Library/Logs/DiagnosticReports/` des Benutzers.\
-Für Daemons, andere Prozesse, die **im systemweiten launchd-Kontext** und andere privilegierte Prozesse ausgeführt werden, läuft ReportCrash als LaunchDaemon und speichert Absturzberichte im `/Library/Logs/DiagnosticReports` des Systems.
+Für Daemons, andere Prozesse, die **im systemweiten launchd-Kontext** ausgeführt werden, und andere privilegierte Prozesse, läuft ReportCrash als LaunchDaemon und speichert Absturzberichte im `/Library/Logs/DiagnosticReports` des Systems.
 
-Wenn Sie sich Sorgen über Absturzberichte **machen, die an Apple gesendet werden**, können Sie sie deaktivieren. Andernfalls können Absturzberichte nützlich sein, um **herauszufinden, wie ein Server abgestürzt ist**.
+Wenn Sie sich Sorgen über Absturzberichte machen, die **an Apple gesendet werden**, können Sie sie deaktivieren. Andernfalls können Absturzberichte nützlich sein, um **herauszufinden, wie ein Server abgestürzt ist**.
 ```bash
 #To disable crash reporting:
 launchctl unload -w /System/Library/LaunchAgents/com.apple.ReportCrash.plist

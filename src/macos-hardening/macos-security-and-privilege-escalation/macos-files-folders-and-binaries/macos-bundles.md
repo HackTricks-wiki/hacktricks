@@ -17,7 +17,7 @@ Innerhalb eines Bundles, insbesondere im `<application>.app/Contents/`-Verzeichn
 
 #### Wichtige Schlüssel in Info.plist
 
-Die `Info.plist`-Datei ist ein Grundpfeiler für die Anwendungs-Konfiguration und enthält Schlüssel wie:
+Die `Info.plist`-Datei ist ein Grundpfeiler für die Anwendungsconfiguration und enthält Schlüssel wie:
 
 - **CFBundleExecutable**: Gibt den Namen der Hauptausführungsdatei im Verzeichnis `Contents/MacOS` an.
 - **CFBundleIdentifier**: Stellt einen globalen Identifikator für die Anwendung bereit, der von macOS umfassend für das Anwendungsmanagement verwendet wird.

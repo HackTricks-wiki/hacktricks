@@ -1,4 +1,4 @@
-# macOS .Net-Anwendungen Injektion
+# macOS .Net-Anwendungen Injection
 
 {{#include ../../../banners/hacktricks-training.md}}
 
@@ -42,7 +42,7 @@ sSendHeader.TypeSpecificData.VersionInfo.m_dwMajorVersion = kCurrentMajorVersion
 sSendHeader.TypeSpecificData.VersionInfo.m_dwMinorVersion = kCurrentMinorVersion;
 sSendHeader.m_cbDataBlock = sizeof(SessionRequestData);
 ```
-Dieser Header wird dann über den `write` syscall an das Ziel gesendet, gefolgt von der `sessionRequestData` Struktur, die eine GUID für die Sitzung enthält:
+Dieser Header wird dann über den `write`-Syscall an das Ziel gesendet, gefolgt von der `sessionRequestData`-Struktur, die eine GUID für die Sitzung enthält:
 ```c
 write(wr, &sSendHeader, sizeof(MessageHeader));
 memset(&sDataBlock.m_sSessionID, 9, sizeof(SessionRequestData));
@@ -68,9 +68,9 @@ return true;
 ```
 Der vollständige Proof of Concept (POC) ist [hier](https://gist.github.com/xpn/95eefc14918998853f6e0ab48d9f7b0b) verfügbar.
 
-## Schreiben von Speicher
+## Schreiben in den Speicher
 
-Ähnlich kann der Speicher mit der Funktion `writeMemory` geschrieben werden. Der Prozess umfasst das Setzen des Nachrichtentyps auf `MT_WriteMemory`, das Spezifizieren der Adresse und der Länge der Daten und das anschließende Senden der Daten:
+Ähnlich kann der Speicher mit der Funktion `writeMemory` beschrieben werden. Der Prozess umfasst das Setzen des Nachrichtentyps auf `MT_WriteMemory`, das Spezifizieren der Adresse und der Länge der Daten und das anschließende Senden der Daten:
 ```c
 bool writeMemory(void *addr, int len, unsigned char *input) {
 // Increment IDs, set message type, and specify memory location
@@ -91,7 +91,7 @@ Um Code auszuführen, muss man einen Speicherbereich mit rwx-Berechtigungen iden
 vmmap -pages [pid]
 vmmap -pages 35829 | grep "rwx/rwx"
 ```
-Einen Ort zu finden, um einen Funktionszeiger zu überschreiben, ist notwendig, und in .NET Core kann dies durch das Anvisieren der **Dynamic Function Table (DFT)** erfolgen. Diese Tabelle, die in [`jithelpers.h`](https://github.com/dotnet/runtime/blob/6072e4d3a7a2a1493f514cdf4be75a3d56580e84/src/coreclr/src/inc/jithelpers.h) detailliert beschrieben ist, wird von der Laufzeit für JIT-Kompilierungs-Hilfsfunktionen verwendet.
+Einen Ort zu finden, um einen Funktionszeiger zu überschreiben, ist notwendig, und in .NET Core kann dies durch das Anvisieren der **Dynamic Function Table (DFT)** erfolgen. Diese Tabelle, die in [`jithelpers.h`](https://github.com/dotnet/runtime/blob/6072e4d3a7a2a1493f514cdf4be75a3d56580e84/src/coreclr/src/inc/jithelpers.h) detailliert beschrieben ist, wird vom Laufzeitumgebung für JIT-Kompilierungs-Hilfsfunktionen verwendet.
 
 Für x64-Systeme kann die Signaturjagd verwendet werden, um einen Verweis auf das Symbol `_hlpDynamicFuncTable` in `libcorclr.dll` zu finden.
 

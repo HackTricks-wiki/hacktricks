@@ -58,11 +58,11 @@ _write_func:
 str x1, [x0]
 ret
 ```
-### Identifying Suitable Functions
+### Identifizierung geeigneter Funktionen
 
 Ein Scan gängiger Bibliotheken hat geeignete Kandidaten für diese Operationen ergeben:
 
-1. **Reading Memory:**
+1. **Speicher lesen:**
 Die Funktion `property_getName()` aus der [Objective-C-Laufzeitbibliothek](https://opensource.apple.com/source/objc4/objc4-723/runtime/objc-runtime-new.mm.auto.html) wird als geeignete Funktion zum Lesen von Speicher identifiziert. Die Funktion wird unten beschrieben:
 ```c
 const char *property_getName(objc_property_t prop) {
@@ -72,7 +72,7 @@ return prop->name;
 Diese Funktion wirkt effektiv wie die `read_func`, indem sie das erste Feld von `objc_property_t` zurückgibt.
 
 2. **Speicher schreiben:**
-Eine vorgefertigte Funktion zum Schreiben von Speicher zu finden, ist herausfordernder. Die Funktion `_xpc_int64_set_value()` aus libxpc ist jedoch ein geeigneter Kandidat mit der folgenden Disassemblierung:
+Eine vorgefertigte Funktion zum Schreiben von Speicher zu finden, ist schwieriger. Die Funktion `_xpc_int64_set_value()` aus libxpc ist jedoch ein geeigneter Kandidat mit der folgenden Disassemblierung:
 ```c
 __xpc_int64_set_value:
 str x1, [x0, #0x18]
@@ -82,7 +82,7 @@ Um einen 64-Bit-Schreibvorgang an einer bestimmten Adresse durchzuführen, wird 
 ```c
 _xpc_int64_set_value(address - 0x18, value)
 ```
-Mit diesen Primitiven etabliert, ist die Bühne für die Erstellung von gemeinsamem Speicher bereitet, was einen bedeutenden Fortschritt in der Kontrolle des Remote-Prozesses darstellt.
+Mit diesen Primitiven ist die Bühne für die Erstellung von gemeinsamem Speicher bereitet, was einen bedeutenden Fortschritt bei der Kontrolle des Remote-Prozesses darstellt.
 
 ## 4. Einrichtung des gemeinsamen Speichers
 
@@ -103,13 +103,13 @@ Das Ziel ist es, gemeinsamen Speicher zwischen lokalen und Remote-Aufgaben einzu
 3. **Korrektur des Mach-Speichereintrags**:
 
 - Nutzen Sie die Methode `thread_set_special_port()`, um ein Sende-Recht für den Mach-Speichereintrag in die Remote-Aufgabe einzufügen.
-- Korrigieren Sie das Mach-Speichereintrag-Feld an Offset `0x18`, indem Sie es mit dem Namen des Remote-Speichereintrags überschreiben.
+- Korrigieren Sie das Mach-Speichereintragsfeld an Offset `0x18`, indem Sie es mit dem Namen des Remote-Speichereintrags überschreiben.
 
 4. **Abschluss der Einrichtung des gemeinsamen Speichers**:
 - Validieren Sie das Remote `OS_xpc_shmem` Objekt.
 - Stellen Sie die gemeinsame Speicherzuordnung mit einem Remote-Aufruf von `xpc_shmem_remote()` her.
 
-Durch das Befolgen dieser Schritte wird der gemeinsame Speicher zwischen den lokalen und Remote-Aufgaben effizient eingerichtet, was einen unkomplizierten Datentransfer und die Ausführung von Funktionen ermöglicht, die mehrere Argumente erfordern.
+Durch das Befolgen dieser Schritte wird der gemeinsame Speicher zwischen den lokalen und Remote-Aufgaben effizient eingerichtet, was einfache Datenübertragungen und die Ausführung von Funktionen, die mehrere Argumente erfordern, ermöglicht.
 
 ## Zusätzliche Code-Snippets
 
@@ -143,13 +143,13 @@ Nach dem erfolgreichen Einrichten des gemeinsamen Speichers und dem Erlangen von
 - Übertragen Sie Mach-Ports zwischen Aufgaben über Mach-Nachrichten über zuvor eingerichtete Ports.
 
 4. **Dateideskriptor-Übertragung**:
-- Übertragen Sie Dateideskriptoren zwischen Prozessen unter Verwendung von Fileports, einer Technik, die von Ian Beer in `triple_fetch` hervorgehoben wird.
+- Übertragen Sie Dateideskriptoren zwischen Prozessen mithilfe von Fileports, einer Technik, die von Ian Beer in `triple_fetch` hervorgehoben wird.
 
 Diese umfassende Kontrolle ist in der [threadexec](https://github.com/bazad/threadexec) Bibliothek zusammengefasst, die eine detaillierte Implementierung und eine benutzerfreundliche API für die Interaktion mit dem Opferprozess bietet.
 
 ## Wichtige Überlegungen:
 
-- Stellen Sie sicher, dass `memcpy()` für Speicher-Lese-/Schreiboperationen ordnungsgemäß verwendet wird, um die Systemstabilität und Datenintegrität zu gewährleisten.
+- Stellen Sie die ordnungsgemäße Verwendung von `memcpy()` für Speicher-Lese-/Schreiboperationen sicher, um die Systemstabilität und Datenintegrität zu gewährleisten.
 - Befolgen Sie beim Übertragen von Mach-Ports oder Dateideskriptoren die richtigen Protokolle und gehen Sie verantwortungsbewusst mit Ressourcen um, um Lecks oder unbeabsichtigten Zugriff zu verhindern.
 
 Durch die Einhaltung dieser Richtlinien und die Nutzung der `threadexec` Bibliothek kann man Prozesse effizient verwalten und auf granularer Ebene interagieren, um die vollständige Kontrolle über den Zielprozess zu erreichen.
