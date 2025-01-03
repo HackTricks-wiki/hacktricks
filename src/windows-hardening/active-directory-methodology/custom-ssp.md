@@ -46,3 +46,4 @@ Event ID 4657 - Audit creation/change of `HKLM:\System\CurrentControlSet\Control
 {{#include ../../banners/hacktricks-training.md}}
 
 
+

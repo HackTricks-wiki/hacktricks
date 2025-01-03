@@ -1,4 +1,4 @@
-name: Translator to IN (Hindi)
+name: Translator to HI (Hindi)
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
       - '.github/**'
   workflow_dispatch:
 
-concurrency: in
+concurrency: hi
 
 permissions:
   id-token: write
@@ -22,7 +22,7 @@ jobs:
     environment: prod
     env:
       LANGUAGE: Hindi
-      BRANCH: in
+      BRANCH: hi
 
     steps:
       - name: Checkout code

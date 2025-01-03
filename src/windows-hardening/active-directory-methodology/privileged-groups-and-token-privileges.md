@@ -308,3 +308,4 @@ Get-NetGroupMember -Identity "Server Operators" -Recurse
 {{#include ../../banners/hacktricks-training.md}}
 
 
+

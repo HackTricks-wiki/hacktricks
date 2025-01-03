@@ -173,3 +173,4 @@ Rubeus.exe kerberoast /outfile:kerberoastables.txt /domain:"domain.local" /dc:"d
 {{#include ../../banners/hacktricks-training.md}}
 
 
+

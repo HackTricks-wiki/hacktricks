@@ -204,3 +204,4 @@ Consists on watching if an **autoElevated binary** tries to **read** from the **
 {{#include ../../banners/hacktricks-training.md}}
 
 
+

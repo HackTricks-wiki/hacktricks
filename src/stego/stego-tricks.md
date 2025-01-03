@@ -220,3 +220,4 @@ For translating Braille, the [Branah Braille Translator](https://www.branah.com/
 {{#include ../banners/hacktricks-training.md}}
 
 
+

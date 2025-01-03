@@ -18,3 +18,4 @@ With [**Flipper Zero**](https://flipperzero.one/) you can:
 {{#include ../../../banners/hacktricks-training.md}}
 
 
+

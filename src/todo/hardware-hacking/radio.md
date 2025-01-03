@@ -198,3 +198,4 @@ You can use the **same technique as the one used in the AM example** to get the 
 {{#include ../../banners/hacktricks-training.md}}
 
 
+

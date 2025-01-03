@@ -185,3 +185,4 @@ Although, it is necessary to note that it's not always the case that the uboot i
 {{#include ../../banners/hacktricks-training.md}}
 
 
+

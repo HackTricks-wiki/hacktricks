@@ -20,3 +20,4 @@ For more information read [https://dirkjanm.io/getting-in-the-zone-dumping-activ
 {{#include ../../banners/hacktricks-training.md}}
 
 
+

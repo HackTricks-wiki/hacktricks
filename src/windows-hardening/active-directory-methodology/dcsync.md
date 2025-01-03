@@ -74,3 +74,4 @@ Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveG
 {{#include ../../banners/hacktricks-training.md}}
 
 
+
