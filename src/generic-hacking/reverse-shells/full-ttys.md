@@ -109,3 +109,4 @@ expect -c 'spawn sudo -S cat "/root/root.txt";expect "*password*";send "<THE_PAS
 {{#include ../../banners/hacktricks-training.md}}
 
 
+

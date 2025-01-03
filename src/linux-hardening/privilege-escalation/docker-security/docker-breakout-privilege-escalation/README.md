@@ -638,3 +638,4 @@ If you are in **userspace** (**no kernel exploit** involved) the way to find new
 {{#include ../../../../banners/hacktricks-training.md}}
 
 
+

@@ -35,3 +35,4 @@ Moreover, `accountsd` gets the list of account types from `/Library/Preferences/
 {{#include ../../banners/hacktricks-training.md}}
 
 
+

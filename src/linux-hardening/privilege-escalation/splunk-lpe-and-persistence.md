@@ -52,3 +52,4 @@ for i in `cat ip.txt`; do python PySplunkWhisperer2_remote.py --host $i --port 8
 {{#include ../../banners/hacktricks-training.md}}
 
 
+

@@ -50,3 +50,4 @@ The file located in `/proc/sys/fs/binfmt_misc` indicates which binary should exe
 {{#include ../../banners/hacktricks-training.md}}
 
 
+

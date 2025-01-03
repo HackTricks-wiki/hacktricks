@@ -92,3 +92,4 @@ Also, you can only **enter in another process namespace if you are root**. And y
 {{#include ../../../../banners/hacktricks-training.md}}
 
 
+
