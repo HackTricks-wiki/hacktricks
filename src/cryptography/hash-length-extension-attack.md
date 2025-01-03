@@ -2,7 +2,7 @@
 
 # Podsumowanie ataku
 
-Wyobraź sobie serwer, który **podpisuje** pewne **dane** poprzez **dodanie** **sekretu** do znanych danych w postaci czystego tekstu, a następnie hashuje te dane. Jeśli wiesz:
+Wyobraź sobie serwer, który **podpisuje** pewne **dane** przez **dodanie** **sekretu** do znanych danych w postaci czystego tekstu, a następnie hashuje te dane. Jeśli wiesz:
 
 - **Długość sekretu** (można to również brutalnie wymusić z danego zakresu długości)
 - **Dane w postaci czystego tekstu**
@@ -15,7 +15,7 @@ Wtedy możliwe jest, aby **atakujący** **dodał** **dane** i **wygenerował** w
 
 ## Jak?
 
-Zasadniczo podatne algorytmy generują hashe, najpierw **hashując blok danych**, a następnie, **z** **wcześniej** utworzonego **hasha** (stanu), **dodają następny blok danych** i **hashują go**.
+Zasadniczo podatne algorytmy generują hashe, najpierw **hashując blok danych**, a następnie, **z** wcześniej utworzonego **hasha** (stanu), **dodają następny blok danych** i **hashują go**.
 
 Wyobraź sobie, że sekret to "secret", a dane to "data", MD5 "secretdata" to 6036708eba0d11f6ef52ad44e8b74d5b.\
 Jeśli atakujący chce dodać ciąg "append", może:
@@ -27,10 +27,12 @@ Jeśli atakujący chce dodać ciąg "append", może:
 
 ## **Narzędzie**
 
-{% embed url="https://github.com/iagox86/hash_extender" %}
+{{#ref}}
+https://github.com/iagox86/hash_extender
+{{#endref}}
 
 ## Odniesienia
 
-Możesz znaleźć to atak dobrze wyjaśnione w [https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks](https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)
+Możesz znaleźć ten atak dobrze wyjaśniony w [https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks](https://blog.skullsecurity.org/2012/everything-you-need-to-know-about-hash-length-extension-attacks)
 
 {{#include ../banners/hacktricks-training.md}}

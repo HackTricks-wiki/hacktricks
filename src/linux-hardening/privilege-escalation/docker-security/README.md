@@ -2,22 +2,22 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## **Podstawowe bezpieczeństwo silnika Docker**
+## **Podstawowe zabezpieczenia silnika Docker**
 
-**Silnik Docker** wykorzystuje **Namespaces** i **Cgroups** jądra Linux do izolacji kontenerów, oferując podstawową warstwę bezpieczeństwa. Dodatkową ochronę zapewniają **Capabilities dropping**, **Seccomp** oraz **SELinux/AppArmor**, wzmacniając izolację kontenerów. **Plugin autoryzacji** może dodatkowo ograniczyć działania użytkowników.
+**Silnik Docker** wykorzystuje **Namespaces** i **Cgroups** jądra Linux do izolacji kontenerów, oferując podstawową warstwę zabezpieczeń. Dodatkową ochronę zapewniają **Capabilities dropping**, **Seccomp** oraz **SELinux/AppArmor**, co zwiększa izolację kontenerów. **Plugin autoryzacji** może dodatkowo ograniczyć działania użytkowników.
 
 ![Docker Security](https://sreeninet.files.wordpress.com/2016/03/dockersec1.png)
 
 ### Bezpieczny dostęp do silnika Docker
 
-Silnik Docker można uzyskać lokalnie za pomocą gniazda Unix lub zdalnie przy użyciu HTTP. W przypadku zdalnego dostępu istotne jest stosowanie HTTPS i **TLS**, aby zapewnić poufność, integralność i autoryzację.
+Silnik Docker można uzyskać lokalnie za pomocą gniazda Unix lub zdalnie przy użyciu HTTP. W przypadku dostępu zdalnego istotne jest stosowanie HTTPS i **TLS**, aby zapewnić poufność, integralność i uwierzytelnienie.
 
-Silnik Docker, domyślnie, nasłuchuje na gnieździe Unix pod `unix:///var/run/docker.sock`. W systemach Ubuntu opcje uruchamiania Dockera są definiowane w `/etc/default/docker`. Aby umożliwić zdalny dostęp do API Dockera i klienta, należy udostępnić demon Dockera przez gniazdo HTTP, dodając następujące ustawienia:
+Silnik Docker, domyślnie, nasłuchuje na gnieździe Unix pod adresem `unix:///var/run/docker.sock`. W systemach Ubuntu opcje uruchamiania Dockera są definiowane w `/etc/default/docker`. Aby umożliwić zdalny dostęp do API Dockera i klienta, należy udostępnić demon Dockera przez gniazdo HTTP, dodając następujące ustawienia:
 ```bash
 DOCKER_OPTS="-D -H unix:///var/run/docker.sock -H tcp://192.168.56.101:2376"
 sudo service docker restart
 ```
-Jednakże, udostępnianie demona Docker przez HTTP nie jest zalecane z powodu obaw dotyczących bezpieczeństwa. Zaleca się zabezpieczenie połączeń za pomocą HTTPS. Istnieją dwa główne podejścia do zabezpieczania połączenia:
+Jednakże, wystawianie demona Docker na HTTP nie jest zalecane z powodu obaw o bezpieczeństwo. Zaleca się zabezpieczenie połączeń za pomocą HTTPS. Istnieją dwa główne podejścia do zabezpieczenia połączenia:
 
 1. Klient weryfikuje tożsamość serwera.
 2. Klient i serwer wzajemnie uwierzytelniają swoją tożsamość.
@@ -40,7 +40,7 @@ Aby uzyskać więcej [**informacji, przeczytaj to**](https://docs.docker.com/eng
 
 - **`docker scan`**
 
-Polecenie **`docker scan`** pozwala na skanowanie istniejących obrazów Docker za pomocą nazwy lub ID obrazu. Na przykład, uruchom następujące polecenie, aby zeskanować obraz hello-world:
+Polecenie **`docker scan`** pozwala na skanowanie istniejących obrazów Docker za pomocą nazwy lub ID obrazu. Na przykład, uruchom następujące polecenie, aby przeskanować obraz hello-world:
 ```bash
 docker scan hello-world
 
@@ -72,7 +72,7 @@ clair-scanner -w example-alpine.yaml --ip YOUR_LOCAL_IP alpine:3.5
 
 Podpisywanie obrazów Docker zapewnia bezpieczeństwo i integralność obrazów używanych w kontenerach. Oto skrócone wyjaśnienie:
 
-- **Docker Content Trust** wykorzystuje projekt Notary, oparty na The Update Framework (TUF), do zarządzania podpisywaniem obrazów. Aby uzyskać więcej informacji, zobacz [Notary](https://github.com/docker/notary) i [TUF](https://theupdateframework.github.io).
+- **Docker Content Trust** wykorzystuje projekt Notary, oparty na The Update Framework (TUF), do zarządzania podpisywaniem obrazów. Więcej informacji można znaleźć w [Notary](https://github.com/docker/notary) i [TUF](https://theupdateframework.github.io).
 - Aby aktywować zaufanie do treści Docker, ustaw `export DOCKER_CONTENT_TRUST=1`. Ta funkcja jest domyślnie wyłączona w wersji Docker 1.10 i nowszych.
 - Po włączeniu tej funkcji można pobierać tylko podpisane obrazy. Początkowe przesyłanie obrazu wymaga ustawienia haseł dla kluczy głównych i tagujących, a Docker obsługuje również Yubikey dla zwiększonego bezpieczeństwa. Więcej szczegółów można znaleźć [tutaj](https://blog.docker.com/2015/11/docker-content-trust-yubikey/).
 - Próba pobrania niepodpisanego obrazu z włączonym zaufaniem do treści skutkuje błędem "No trust data for latest".
@@ -82,7 +82,7 @@ Aby wykonać kopię zapasową swoich prywatnych kluczy, użyj polecenia:
 ```bash
 tar -zcvf private_keys_backup.tar.gz ~/.docker/trust/private
 ```
-Kiedy zmieniasz hosty Docker, konieczne jest przeniesienie kluczy root i repozytoriów, aby utrzymać operacje.
+Przy przełączaniu hostów Docker, konieczne jest przeniesienie kluczy root i repozytoriów, aby utrzymać operacje.
 
 ## Funkcje zabezpieczeń kontenerów
 
@@ -117,7 +117,7 @@ Current: cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,ca
 **Seccomp**
 
 Jest domyślnie włączony w Dockerze. Pomaga **jeszcze bardziej ograniczyć syscalls**, które proces może wywołać.\
-**Domyślny profil Seccomp Dockera** można znaleźć pod adresem [https://github.com/moby/moby/blob/master/profiles/seccomp/default.json](https://github.com/moby/moby/blob/master/profiles/seccomp/default.json)
+**Domyślny profil Seccomp Docker** można znaleźć pod adresem [https://github.com/moby/moby/blob/master/profiles/seccomp/default.json](https://github.com/moby/moby/blob/master/profiles/seccomp/default.json)
 
 **AppArmor**
 
@@ -158,7 +158,7 @@ docker run -dt --rm denial sleep 1234 #Run a large sleep inside a Debian contain
 ps -ef | grep 1234 #Get info about the sleep process
 ls -l /proc/<PID>/ns #Get the Group and the namespaces (some may be uniq to the hosts and some may be shred with it)
 ```
-Dla uzyskania dodatkowych informacji sprawdź:
+Dla uzyskania dalszych informacji sprawdź:
 
 {{#ref}}
 cgroups.md
@@ -268,25 +268,25 @@ docker run -it --security-opt=no-new-privileges:true nonewpriv
 # You can manually disable selinux in docker with
 --security-opt label:disable
 ```
-Dla więcej opcji **`--security-opt`** sprawdź: [https://docs.docker.com/engine/reference/run/#security-configuration](https://docs.docker.com/engine/reference/run/#security-configuration)
+Aby uzyskać więcej opcji **`--security-opt`**, sprawdź: [https://docs.docker.com/engine/reference/run/#security-configuration](https://docs.docker.com/engine/reference/run/#security-configuration)
 
-## Inne Rozważania Bezpieczeństwa
+## Inne rozważania dotyczące bezpieczeństwa
 
-### Zarządzanie Sekretami: Najlepsze Praktyki
+### Zarządzanie sekretami: najlepsze praktyki
 
 Konieczne jest unikanie osadzania sekretów bezpośrednio w obrazach Docker lub używania zmiennych środowiskowych, ponieważ te metody narażają Twoje wrażliwe informacje na dostęp dla każdego, kto ma dostęp do kontenera za pomocą poleceń takich jak `docker inspect` lub `exec`.
 
-**Wolumeny Docker** są bezpieczniejszą alternatywą, zalecaną do uzyskiwania dostępu do wrażliwych informacji. Mogą być wykorzystywane jako tymczasowy system plików w pamięci, łagodząc ryzyko związane z `docker inspect` i logowaniem. Jednak użytkownicy root i ci, którzy mają dostęp do `exec` w kontenerze, mogą nadal uzyskać dostęp do sekretów.
+**Wolumeny Docker** są bezpieczniejszą alternatywą, zalecaną do uzyskiwania dostępu do wrażliwych informacji. Mogą być wykorzystywane jako tymczasowy system plików w pamięci, co zmniejsza ryzyko związane z `docker inspect` i logowaniem. Jednak użytkownicy root i ci, którzy mają dostęp do `exec` w kontenerze, mogą nadal uzyskać dostęp do sekretów.
 
-**Sekrety Docker** oferują jeszcze bezpieczniejszą metodę obsługi wrażliwych informacji. W przypadku instancji wymagających sekretów podczas fazy budowy obrazu, **BuildKit** przedstawia efektywne rozwiązanie z obsługą sekretów w czasie budowy, zwiększając prędkość budowy i oferując dodatkowe funkcje.
+**Sekrety Docker** oferują jeszcze bezpieczniejszą metodę obsługi wrażliwych informacji. W przypadku instancji wymagających sekretów podczas fazy budowy obrazu, **BuildKit** przedstawia efektywne rozwiązanie z obsługą sekretów w czasie budowy, co zwiększa szybkość budowy i zapewnia dodatkowe funkcje.
 
 Aby skorzystać z BuildKit, można go aktywować na trzy sposoby:
 
 1. Poprzez zmienną środowiskową: `export DOCKER_BUILDKIT=1`
 2. Poprzez prefiksowanie poleceń: `DOCKER_BUILDKIT=1 docker build .`
-3. Poprzez włączenie go domyślnie w konfiguracji Docker: `{ "features": { "buildkit": true } }`, a następnie restart Docker.
+3. Poprzez włączenie go domyślnie w konfiguracji Docker: `{ "features": { "buildkit": true } }`, a następnie ponowne uruchomienie Dockera.
 
-BuildKit pozwala na użycie sekretów w czasie budowy z opcją `--secret`, zapewniając, że te sekrety nie są uwzględniane w pamięci podręcznej budowy obrazu ani w finalnym obrazie, używając polecenia takiego jak:
+BuildKit umożliwia korzystanie z sekretów w czasie budowy za pomocą opcji `--secret`, zapewniając, że te sekrety nie są uwzględniane w pamięci podręcznej budowy obrazu ani w finalnym obrazie, używając polecenia takiego jak:
 ```bash
 docker build --secret my_key=my_value ,src=path/to/my_secret_file .
 ```
@@ -311,30 +311,34 @@ W środowiskach Kubernetes sekrety są natywnie obsługiwane i mogą być zarzą
 
 **gVisor** to jądro aplikacji, napisane w Go, które implementuje znaczną część powierzchni systemu Linux. Zawiera runtime [Open Container Initiative (OCI)](https://www.opencontainers.org) o nazwie `runsc`, który zapewnia **granice izolacji między aplikacją a jądrem hosta**. Runtime `runsc` integruje się z Dockerem i Kubernetes, co ułatwia uruchamianie kontenerów w piaskownicy.
 
-{% embed url="https://github.com/google/gvisor" %}
+{{#ref}}
+https://github.com/google/gvisor
+{{#endref}}
 
 ### Kata Containers
 
-**Kata Containers** to społeczność open source, która pracuje nad budowaniem bezpiecznego runtime kontenerów z lekkimi maszynami wirtualnymi, które działają i zachowują się jak kontenery, ale zapewniają **silniejszą izolację obciążenia roboczego przy użyciu technologii wirtualizacji sprzętowej** jako drugiej warstwy obrony.
+**Kata Containers** to społeczność open source, która pracuje nad budowaniem bezpiecznego runtime'u kontenerów z lekkimi maszynami wirtualnymi, które działają i zachowują się jak kontenery, ale zapewniają **silniejszą izolację obciążenia przy użyciu technologii wirtualizacji sprzętowej** jako drugiej warstwy obrony.
 
-{% embed url="https://katacontainers.io/" %}
+{{#ref}}
+https://katacontainers.io/
+{{#endref}}
 
 ### Podsumowanie wskazówek
 
 - **Nie używaj flagi `--privileged` ani nie montuj** [**gniazda Docker wewnątrz kontenera**](https://raesene.github.io/blog/2016/03/06/The-Dangers-Of-Docker.sock/)**.** Gniazdo Docker umożliwia uruchamianie kontenerów, więc jest to łatwy sposób na przejęcie pełnej kontroli nad hostem, na przykład uruchamiając inny kontener z flagą `--privileged`.
 - **Nie uruchamiaj jako root wewnątrz kontenera. Użyj** [**innego użytkownika**](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#user) **i** [**przestrzeni nazw użytkowników**](https://docs.docker.com/engine/security/userns-remap/)**.** Root w kontenerze jest taki sam jak na hoście, chyba że jest przemapowany za pomocą przestrzeni nazw użytkowników. Jest on tylko lekko ograniczony przez, przede wszystkim, przestrzenie nazw Linuxa, możliwości i cgroups.
-- [**Odrzuć wszystkie możliwości**](https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities) **(`--cap-drop=all`) i włącz tylko te, które są wymagane** (`--cap-add=...`). Wiele obciążeń roboczych nie potrzebuje żadnych możliwości, a ich dodanie zwiększa zakres potencjalnego ataku.
-- [**Użyj opcji zabezpieczeń „no-new-privileges”**](https://raesene.github.io/blog/2019/06/01/docker-capabilities-and-no-new-privs/) aby zapobiec uzyskiwaniu przez procesy większych uprawnień, na przykład poprzez binaria suid.
+- [**Zrzuć wszystkie możliwości**](https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities) **(`--cap-drop=all`) i włącz tylko te, które są wymagane** (`--cap-add=...`). Wiele obciążeń nie potrzebuje żadnych możliwości, a ich dodanie zwiększa zakres potencjalnego ataku.
+- [**Użyj opcji bezpieczeństwa „no-new-privileges”**](https://raesene.github.io/blog/2019/06/01/docker-capabilities-and-no-new-privs/) aby zapobiec uzyskiwaniu przez procesy większych uprawnień, na przykład przez binaria suid.
 - [**Ogranicz zasoby dostępne dla kontenera**](https://docs.docker.com/engine/reference/run/#runtime-constraints-on-resources)**.** Limity zasobów mogą chronić maszynę przed atakami typu denial of service.
 - **Dostosuj** [**seccomp**](https://docs.docker.com/engine/security/seccomp/)**,** [**AppArmor**](https://docs.docker.com/engine/security/apparmor/) **(lub SELinux)** profile, aby ograniczyć działania i wywołania syscalls dostępne dla kontenera do minimum.
-- **Używaj** [**oficjalnych obrazów docker**](https://docs.docker.com/docker-hub/official_images/) **i wymagaj podpisów** lub buduj własne na ich podstawie. Nie dziedzicz ani nie używaj [obrazów z backdoorem](https://arstechnica.com/information-technology/2018/06/backdoored-images-downloaded-5-million-times-finally-removed-from-docker-hub/). Przechowuj również klucze root i hasła w bezpiecznym miejscu. Docker planuje zarządzać kluczami za pomocą UCP.
-- **Regularnie** **przebudowuj** swoje obrazy, aby **zastosować poprawki zabezpieczeń do hosta i obrazów.**
+- **Używaj** [**oficjalnych obrazów docker**](https://docs.docker.com/docker-hub/official_images/) **i wymagaj podpisów** lub buduj własne na ich podstawie. Nie dziedzicz ani nie używaj [obrazów z backdoorem](https://arstechnica.com/information-technology/2018/06/backdoored-images-downloaded-5-million-times-finally-removed-from-docker-hub/). Przechowuj również klucze root, hasła w bezpiecznym miejscu. Docker planuje zarządzać kluczami za pomocą UCP.
+- **Regularnie** **przebudowuj** swoje obrazy, aby **zastosować poprawki bezpieczeństwa do hosta i obrazów.**
 - Zarządzaj swoimi **sekretami mądrze**, aby utrudnić atakującemu dostęp do nich.
 - Jeśli **udostępniasz demona docker, użyj HTTPS** z uwierzytelnianiem klienta i serwera.
 - W swoim Dockerfile, **preferuj COPY zamiast ADD**. ADD automatycznie wyodrębnia pliki skompresowane i może kopiować pliki z adresów URL. COPY nie ma tych możliwości. Kiedy to możliwe, unikaj używania ADD, aby nie być podatnym na ataki przez zdalne adresy URL i pliki Zip.
-- Miej **osobne kontenery dla każdego mikroserwisu**
+- Miej **osobne kontenery dla każdego mikro-s**erwisu.
 - **Nie umieszczaj ssh** wewnątrz kontenera, „docker exec” może być używane do ssh do kontenera.
-- Miej **mniejsze** obrazy kontenerów.
+- Miej **mniejsze** obrazy **kontenerów**.
 
 ## Docker Breakout / Eskalacja uprawnień
 
@@ -346,16 +350,16 @@ docker-breakout-privilege-escalation/
 
 ## Ominięcie wtyczki uwierzytelniania Docker
 
-Jeśli masz dostęp do gniazda docker lub masz dostęp do użytkownika w **grupie docker, ale twoje działania są ograniczane przez wtyczkę uwierzytelniania docker**, sprawdź, czy możesz **to obejść:**
+Jeśli masz dostęp do gniazda docker lub masz dostęp do użytkownika w **grupie docker, ale twoje działania są ograniczone przez wtyczkę uwierzytelniania docker**, sprawdź, czy możesz **to obejść:**
 
 {{#ref}}
 authz-and-authn-docker-access-authorization-plugin.md
 {{#endref}}
 
-## Utwardzanie Dockera
+## Wzmacnianie Docker
 
-- Narzędzie [**docker-bench-security**](https://github.com/docker/docker-bench-security) to skrypt, który sprawdza dziesiątki powszechnych najlepszych praktyk dotyczących wdrażania kontenerów Docker w produkcji. Testy są w pełni zautomatyzowane i opierają się na [CIS Docker Benchmark v1.3.1](https://www.cisecurity.org/benchmark/docker/).\
-Musisz uruchomić narzędzie z hosta uruchamiającego dockera lub z kontenera z wystarczającymi uprawnieniami. Dowiedz się, **jak je uruchomić w README:** [**https://github.com/docker/docker-bench-security**](https://github.com/docker/docker-bench-security).
+- Narzędzie [**docker-bench-security**](https://github.com/docker/docker-bench-security) to skrypt, który sprawdza dziesiątki powszechnych najlepszych praktyk dotyczących wdrażania kontenerów Docker w produkcji. Testy są w pełni zautomatyzowane i oparte na [CIS Docker Benchmark v1.3.1](https://www.cisecurity.org/benchmark/docker/).\
+Musisz uruchomić narzędzie z hosta uruchamiającego docker lub z kontenera z wystarczającymi uprawnieniami. Dowiedz się **jak to uruchomić w README:** [**https://github.com/docker/docker-bench-security**](https://github.com/docker/docker-bench-security).
 
 ## Odnośniki
 
@@ -372,6 +376,5 @@ Musisz uruchomić narzędzie z hosta uruchamiającego dockera lub z kontenera z 
 - [https://docs.docker.com/engine/extend/plugins_authorization](https://docs.docker.com/engine/extend/plugins_authorization)
 - [https://towardsdatascience.com/top-20-docker-security-tips-81c41dd06f57](https://towardsdatascience.com/top-20-docker-security-tips-81c41dd06f57)
 - [https://resources.experfy.com/bigdata-cloud/top-20-docker-security-tips/](https://resources.experfy.com/bigdata-cloud/top-20-docker-security-tips/)
-
 
 {{#include ../../../banners/hacktricks-training.md}}

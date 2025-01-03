@@ -60,7 +60,7 @@ pkttyagent --process <PID of session1> #Step 2, attach pkttyagent to session1
 ```
 %wheel	ALL=(ALL:ALL) ALL
 ```
-To oznacza, że **każdy użytkownik, który należy do grupy wheel, może wykonywać wszystko jako sudo**.
+To oznacza, że **każdy użytkownik, który należy do grupy wheel, może wykonywać cokolwiek jako sudo**.
 
 Jeśli tak jest, aby **stać się rootem, wystarczy wykonać**:
 ```
@@ -130,7 +130,7 @@ $ /bin/bash -p
 ```
 ## Grupa dysków
 
-To uprawnienie jest prawie **równoważne z dostępem root**, ponieważ możesz uzyskać dostęp do wszystkich danych wewnątrz maszyny.
+To uprawnienie jest prawie **równoważne z dostępem root** ponieważ możesz uzyskać dostęp do wszystkich danych wewnątrz maszyny.
 
 Pliki:`/dev/sd[a-z][1-9]`
 ```bash
@@ -150,7 +150,7 @@ Jednakże, jeśli spróbujesz **zapisać pliki należące do roota** (takie jak 
 
 ## Grupa Wideo
 
-Używając polecenia `w`, możesz znaleźć **kto jest zalogowany w systemie** i wyświetli to wynik podobny do poniższego:
+Używając polecenia `w`, możesz znaleźć **kto jest zalogowany w systemie** i wyświetli ono wynik podobny do poniższego:
 ```bash
 USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT
 yossi    tty1                      22:16    5:13m  0.05s  0.04s -bash
@@ -163,7 +163,7 @@ Grupa **video** ma dostęp do wyświetlania wyjścia ekranu. W zasadzie możesz 
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size
 ```
-Aby **otworzyć** **surowy obraz**, możesz użyć **GIMP**, wybrać plik **`screen.raw`** i wybrać jako typ pliku **Surowe dane obrazu**:
+Aby **otworzyć** **surowy obraz**, możesz użyć **GIMP**, wybrać plik **`screen.raw`** i wybrać jako typ pliku **Dane surowego obrazu**:
 
 ![](<../../../images/image (463).png>)
 
@@ -193,7 +193,7 @@ echo 'toor:$1$.ZcF5ts0$i4k6rQYzeegUkacRCvfxC0:0:0:root:/root:/bin/sh' >> /etc/pa
 #Ifyou just want filesystem and network access you can startthe following container:
 docker run --rm -it --pid=host --net=host --privileged -v /:/mnt <imagename> chroot /mnt bashbash
 ```
-Na koniec, jeśli nie podoba Ci się żadna z wcześniejszych sugestii lub z jakiegoś powodu nie działają (firewall API dockera?), zawsze możesz spróbować **uruchomić kontener z uprawnieniami i wydostać się z niego**, jak wyjaśniono tutaj:
+Na koniec, jeśli nie podoba Ci się żadna z wcześniejszych sugestii lub z jakiegoś powodu nie działają (firewall API dockera?), zawsze możesz spróbować **uruchomić kontener z uprawnieniami i uciec z niego**, jak wyjaśniono tutaj:
 
 {{#ref}}
 ../docker-security/
@@ -201,9 +201,13 @@ Na koniec, jeśli nie podoba Ci się żadna z wcześniejszych sugestii lub z jak
 
 Jeśli masz uprawnienia do zapisu w gnieździe dockera, przeczytaj [**ten post o tym, jak eskalować uprawnienia, nadużywając gniazda dockera**](../#writable-docker-socket)**.**
 
-{% embed url="https://github.com/KrustyHack/docker-privilege-escalation" %}
+{{#ref}}
+https://github.com/KrustyHack/docker-privilege-escalation
+{{#endref}}
 
-{% embed url="https://fosterelli.co/privilege-escalation-via-docker.html" %}
+{{#ref}}
+https://fosterelli.co/privilege-escalation-via-docker.html
+{{#endref}}
 
 ## Grupa lxc/lxd
 

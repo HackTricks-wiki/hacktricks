@@ -4,8 +4,12 @@ Jeśli w jakiś sposób możesz zaszyfrować tekst jawny za pomocą RC4, możesz
 
 Jeśli możesz zaszyfrować znany tekst jawny, możesz również wydobyć hasło. Więcej odniesień można znaleźć w maszynie HTB Kryptos:
 
-{% embed url="https://0xrick.github.io/hack-the-box/kryptos/" %}
+{{#ref}}
+https://0xrick.github.io/hack-the-box/kryptos/
+{{#endref}}
 
-{% embed url="https://0xrick.github.io/hack-the-box/kryptos/" %}
+{{#ref}}
+https://0xrick.github.io/hack-the-box/kryptos/
+{{#endref}}
 
 {{#include ../banners/hacktricks-training.md}}

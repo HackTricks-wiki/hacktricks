@@ -12,9 +12,9 @@ Oprogramowanie:
 
 Online:
 
-- Użyj [https://webassembly.github.io/wabt/demo/wasm2wat/index.html](https://webassembly.github.io/wabt/demo/wasm2wat/index.html), aby **zdekompilować** z wasm (binarnego) do wat (czystego tekstu)
-- Użyj [https://webassembly.github.io/wabt/demo/wat2wasm/](https://webassembly.github.io/wabt/demo/wat2wasm/), aby **skompilować** z wat do wasm
-- możesz także spróbować użyć [https://wwwg.github.io/web-wasmdec/](https://wwwg.github.io/web-wasmdec/), aby zdekompilować
+- Użyj [https://webassembly.github.io/wabt/demo/wasm2wat/index.html](https://webassembly.github.io/wabt/demo/wasm2wat/index.html), aby **dekompilować** z wasm (binarnego) do wat (czystego tekstu)
+- Użyj [https://webassembly.github.io/wabt/demo/wat2wasm/](https://webassembly.github.io/wabt/demo/wat2wasm/), aby **kompilować** z wat do wasm
+- możesz także spróbować użyć [https://wwwg.github.io/web-wasmdec/](https://wwwg.github.io/web-wasmdec/), aby dekompilować
 
 Oprogramowanie:
 
@@ -25,7 +25,7 @@ Oprogramowanie:
 
 ### [dotPeek](https://www.jetbrains.com/decompiler/)
 
-dotPeek to dekompilator, który **zdekompilowuje i bada wiele formatów**, w tym **biblioteki** (.dll), **pliki metadanych Windows** (.winmd) oraz **wykonywalne** (.exe). Po zdekompilowaniu, zestaw można zapisać jako projekt Visual Studio (.csproj).
+dotPeek to dekompilator, który **dekompiluje i bada wiele formatów**, w tym **biblioteki** (.dll), **pliki metadanych Windows** (.winmd) oraz **wykonywalne** (.exe). Po dekompilacji, zestaw można zapisać jako projekt Visual Studio (.csproj).
 
 Zaletą jest to, że jeśli utracony kod źródłowy wymaga przywrócenia z przestarzałego zestawu, ta akcja może zaoszczędzić czas. Ponadto, dotPeek zapewnia wygodną nawigację po zdekompilowanym kodzie, co czyni go jednym z idealnych narzędzi do **analizy algorytmów Xamarin.**
 
@@ -37,17 +37,17 @@ Dzięki kompleksowemu modelowi dodatków i API, które rozszerza narzędzie, aby
 - Zapewnia wgląd w implementację i użycie języków i frameworków .NET
 - Znajduje nieudokumentowane i nieujawnione funkcjonalności, aby uzyskać więcej z używanych API i technologii.
 - Znajduje zależności i różne zestawy
-- Śledzi dokładne miejsce błędów w Twoim kodzie, komponentach i bibliotekach stron trzecich.
+- Śledzi dokładne miejsce błędów w Twoim kodzie, komponentach i bibliotekach firm trzecich.
 - Debuguje źródło całego kodu .NET, z którym pracujesz.
 
 ### [ILSpy](https://github.com/icsharpcode/ILSpy) i [dnSpy](https://github.com/dnSpy/dnSpy/releases)
 
 [Plugin ILSpy dla Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode): Możesz go mieć w każdym systemie operacyjnym (możesz zainstalować go bezpośrednio z VSCode, nie ma potrzeby pobierania gita. Kliknij na **Rozszerzenia** i **wyszukaj ILSpy**).\
-Jeśli potrzebujesz **zdekompilować**, **zmodyfikować** i **ponownie skompilować**, możesz użyć [**dnSpy**](https://github.com/dnSpy/dnSpy/releases) lub aktywnie utrzymywanego forka, [**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases). (**Kliknij prawym przyciskiem -> Zmień metodę**, aby zmienić coś wewnątrz funkcji).
+Jeśli potrzebujesz **dekompilować**, **modyfikować** i **ponownie kompilować**, możesz użyć [**dnSpy**](https://github.com/dnSpy/dnSpy/releases) lub aktywnie utrzymywanego forka, [**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases). (**Kliknij prawym przyciskiem -> Modyfikuj metodę**, aby zmienić coś wewnątrz funkcji).
 
 ### Logowanie DNSpy
 
-Aby **DNSpy logował pewne informacje w pliku**, możesz użyć tego fragmentu:
+Aby **DNSpy logował pewne informacje do pliku**, możesz użyć tego fragmentu:
 ```cs
 using System.IO;
 path = "C:\\inetpub\\temp\\MyTest2.txt";
@@ -134,7 +134,7 @@ Ale jak możesz dotrzeć do kodu DLL, która została załadowana? Używając te
 - **Załaduj rundll32** (64 bity w C:\Windows\System32\rundll32.exe i 32 bity w C:\Windows\SysWOW64\rundll32.exe)
 - **Zmień linię poleceń** (_File --> Change Command Line_) i ustaw ścieżkę do dll oraz funkcję, którą chcesz wywołać, na przykład: "C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii_2.dll",DLLMain
 - Zmień _Options --> Settings_ i wybierz "**DLL Entry**".
-- Następnie **rozpocznij wykonanie**, debugger zatrzyma się w każdej głównej dll, w pewnym momencie **zatrzymasz się w wejściu dll twojej dll**. Stamtąd wystarczy poszukać punktów, w których chcesz ustawić punkt przerwania.
+- Następnie **rozpocznij wykonanie**, debugger zatrzyma się w każdej głównej dll, w pewnym momencie **zatrzymasz się w wejściu dll twojej dll**. Stamtąd po prostu poszukaj punktów, w których chcesz ustawić punkt przerwania.
 
 Zauważ, że gdy wykonanie zostanie zatrzymane z jakiegokolwiek powodu w win64dbg, możesz zobaczyć **w którym kodzie jesteś**, patrząc na **górę okna win64dbg**:
 
@@ -152,11 +152,13 @@ cheat-engine.md
 
 [**PiNCE**](https://github.com/korcankaraokcu/PINCE) to narzędzie front-end/odwróconego inżynierii dla GNU Project Debugger (GDB), skoncentrowane na grach. Może być jednak używane do wszelkich związanych z odwróconą inżynierią rzeczy.
 
-[**Decompiler Explorer**](https://dogbolt.org/) to internetowy front-end do wielu dekompilatorów. Ta usługa internetowa pozwala porównywać wyniki różnych dekompilatorów na małych plikach wykonywalnych.
+[**Decompiler Explorer**](https://dogbolt.org/) to internetowy front-end dla wielu dekompilatorów. Ta usługa internetowa pozwala porównywać wyniki różnych dekompilatorów na małych plikach wykonywalnych.
 
 ## ARM i MIPS
 
-{% embed url="https://github.com/nongiach/arm_now" %}
+{{#ref}}
+https://github.com/nongiach/arm_now
+{{#endref}}
 
 ## Shellcodes
 
@@ -198,7 +200,7 @@ Możesz zobaczyć stos na przykład w zrzucie heksadecymalnym:
 
 ![](<../../images/image (186).png>)
 
-### Deobfuskacja shellcode i uzyskiwanie wykonywanych funkcji
+### Deobfuskacja shellcode i uzyskiwanie wywoływanych funkcji
 
 Powinieneś spróbować [**scdbg**](http://sandsprite.com/blogs/index.php?uid=7&pid=152).\
 Powie ci rzeczy takie jak **które funkcje** używa shellcode i czy shellcode **dekoduje** się w pamięci.
@@ -369,10 +371,10 @@ DAT_030000d8 = DAT_030000d8 + 0x3a;
 W poprzednim kodzie widać, że porównujemy **uVar1** (miejsce, w którym znajduje się **wartość naciśniętego przycisku**) z pewnymi wartościami:
 
 - Najpierw porównuje się z **wartością 4** (**przycisk SELECT**): W wyzwaniu ten przycisk czyści ekran.
-- Następnie porównuje się z **wartością 8** (**przycisk START**): W wyzwaniu sprawdza, czy kod jest ważny, aby uzyskać flagę.
+- Następnie porównuje się z **wartością 8** (**przycisk START**): W wyzwaniu to sprawdza, czy kod jest ważny, aby uzyskać flagę.
 - W tym przypadku zmienna **`DAT_030000d8`** jest porównywana z 0xf3, a jeśli wartość jest taka sama, wykonywany jest pewien kod.
 - W innych przypadkach sprawdzana jest zmienna cont (`DAT_030000d4`). To jest cont, ponieważ dodaje 1 zaraz po wejściu w kod.\
-**Jeśli** jest mniej niż 8, wykonywane jest coś, co polega na **dodawaniu** wartości do \*\*`DAT_030000d8` \*\* (w zasadzie dodaje wartości naciśniętych klawiszy do tej zmiennej, o ile cont jest mniejszy niż 8).
+**Jeśli** mniej niż 8, wykonywane jest coś, co polega na **dodawaniu** wartości do \*\*`DAT_030000d8` \*\* (w zasadzie dodaje wartości naciśniętych klawiszy do tej zmiennej, o ile cont jest mniejszy niż 8).
 
 Tak więc, w tym wyzwaniu, znając wartości przycisków, musiałeś **nacisnąć kombinację o długości mniejszej niż 8, której wynikowa suma to 0xf3.**
 
@@ -380,7 +382,9 @@ Tak więc, w tym wyzwaniu, znając wartości przycisków, musiałeś **nacisną�
 
 ## Game Boy
 
-{% embed url="https://www.youtube.com/watch?v=VVbRe7wr3G4" %}
+{{#ref}}
+https://www.youtube.com/watch?v=VVbRe7wr3G4
+{{#endref}}
 
 ## Kursy
 

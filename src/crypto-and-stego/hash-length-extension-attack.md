@@ -4,7 +4,7 @@
 
 ## Podsumowanie ataku
 
-Wyobraź sobie serwer, który **podpisuje** pewne **dane** poprzez **dodanie** **sekretu** do znanych danych w postaci czystego tekstu, a następnie hashuje te dane. Jeśli znasz:
+Wyobraź sobie serwer, który **podpisuje** pewne **dane** przez **dołączenie** **sekretu** do znanych danych w postaci czystego tekstu, a następnie hashuje te dane. Jeśli znasz:
 
 - **Długość sekretu** (można to również brutalnie wymusić z danego zakresu długości)
 - **Dane w postaci czystego tekstu**
@@ -13,23 +13,25 @@ Wyobraź sobie serwer, który **podpisuje** pewne **dane** poprzez **dodanie** *
 - Zwykle używany jest domyślny, więc jeśli pozostałe 3 wymagania są spełnione, to również jest
 - Padding różni się w zależności od długości sekretu + danych, dlatego długość sekretu jest potrzebna
 
-Wtedy możliwe jest, aby **atakujący** **dodał** **dane** i **wygenerował** ważny **podpis** dla **poprzednich danych + dodanych danych**.
+Wtedy możliwe jest, aby **atakujący** **dołączył** **dane** i **wygenerował** ważny **podpis** dla **poprzednich danych + dołączonych danych**.
 
 ### Jak?
 
 Zasadniczo podatne algorytmy generują hashe, najpierw **hashując blok danych**, a następnie, **z** **wcześniej** utworzonego **hasha** (stanu), **dodają następny blok danych** i **hashują go**.
 
 Wyobraź sobie, że sekret to "secret", a dane to "data", MD5 "secretdata" to 6036708eba0d11f6ef52ad44e8b74d5b.\
-Jeśli atakujący chce dodać ciąg "append", może:
+Jeśli atakujący chce dołączyć ciąg "append", może:
 
 - Wygenerować MD5 z 64 "A"
 - Zmienić stan wcześniej zainicjowanego hasha na 6036708eba0d11f6ef52ad44e8b74d5b
-- Dodać ciąg "append"
+- Dołączyć ciąg "append"
 - Zakończyć hash, a wynikowy hash będzie **ważny dla "secret" + "data" + "padding" + "append"**
 
 ### **Narzędzie**
 
-{% embed url="https://github.com/iagox86/hash_extender" %}
+{{#ref}}
+https://github.com/iagox86/hash_extender
+{{#endref}}
 
 ### Odniesienia
 
