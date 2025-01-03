@@ -277,3 +277,4 @@ Note that to call that function you need to be **the same uid** as the one runni
 {{#include ../../../banners/hacktricks-training.md}}
 
 
+

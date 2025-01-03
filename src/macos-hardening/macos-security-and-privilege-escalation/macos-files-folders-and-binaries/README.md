@@ -270,3 +270,4 @@ The directory `/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/
 {{#include ../../../banners/hacktricks-training.md}}
 
 
+

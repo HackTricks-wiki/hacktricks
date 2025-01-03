@@ -120,3 +120,4 @@ The full POC code for injection into PowerShell is accessible [here](https://gis
 {{#include ../../../banners/hacktricks-training.md}}
 
 
+
