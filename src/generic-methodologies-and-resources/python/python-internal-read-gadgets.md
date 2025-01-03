@@ -1,44 +1,38 @@
-# Python Internal Read Gadgets
+# Python Interne Lees Gadgets
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Basic Information
+## Basiese Inligting
 
-Different vulnerabilities such as [**Python Format Strings**](bypass-python-sandboxes/#python-format-string) or [**Class Pollution**](class-pollution-pythons-prototype-pollution.md) might allow you to **read python internal data but won't allow you to execute code**. Therefore, a pentester will need to make the most of these read permissions to **obtain sensitive privileges and escalate the vulnerability**.
+Verskillende kwesbaarhede soos [**Python Formaat Strings**](bypass-python-sandboxes/#python-format-string) of [**Klas Besoedeling**](class-pollution-pythons-prototype-pollution.md) mag jou toelaat om **python interne data te lees maar sal jou nie toelaat om kode uit te voer nie**. Daarom sal 'n pentester die meeste van hierdie lees toestemmings moet benut om **sensitiewe voorregte te verkry en die kwesbaarheid te verhoog**.
 
-### Flask - Read secret key
+### Flask - Lees geheime sleutel
 
-The main page of a Flask application will probably have the **`app`** global object where this **secret is configured**.
-
+Die hoofblad van 'n Flask-toepassing sal waarskynlik die **`app`** globale objek hê waar hierdie **geheime sleutel geconfigureer is**.
 ```python
 app = Flask(__name__, template_folder='templates')
 app.secret_key = '(:secret:)'
 ```
+In hierdie geval is dit moontlik om toegang tot hierdie objek te verkry net deur enige gadget te gebruik om **globale objek te benader** vanaf die [**Bypass Python sandboxes page**](bypass-python-sandboxes/).
 
-In this case it's possible to access this object just using any gadget to **access global objects** from the [**Bypass Python sandboxes page**](bypass-python-sandboxes/).
+In die geval waar **die kwesbaarheid in 'n ander python-lêer is**, benodig jy 'n gadget om lêers te traverseer om by die hoof een te kom om **toegang tot die globale objek `app.secret_key`** te verkry om die Flask geheime sleutel te verander en in staat te wees om [**privileges te verhoog** deur hierdie sleutel te ken](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).
 
-In the case where **the vulnerability is in a different python file**, you need a gadget to traverse files to get to the main one to **access the global object `app.secret_key`** to change the Flask secret key and be able to [**escalate privileges** knowing this key](../../network-services-pentesting/pentesting-web/flask.md#flask-unsign).
-
-A payload like this one [from this writeup](https://ctftime.org/writeup/36082):
-
+'n Payload soos hierdie [van hierdie skrywe](https://ctftime.org/writeup/36082):
 ```python
 __init__.__globals__.__loader__.__init__.__globals__.sys.modules.__main__.app.secret_key
 ```
+Gebruik hierdie payload om **`app.secret_key`** (die naam in jou app mag anders wees) te verander om nuwe en meer bevoegdheid flask koekies te kan teken.
 
-Use this payload to **change `app.secret_key`** (the name in your app might be different) to be able to sign new and more privileges flask cookies.
+### Werkzeug - machine_id en node uuid
 
-### Werkzeug - machine_id and node uuid
-
-[**Using these payload from this writeup**](https://vozec.fr/writeups/tweedle-dum-dee/) you will be able to access the **machine_id** and the **uuid** node, which are the **main secrets** you need to [**generate the Werkzeug pin**](../../network-services-pentesting/pentesting-web/werkzeug.md) you can use to access the python console in `/console` if the **debug mode is enabled:**
-
+[**Deur hierdie payload uit hierdie skrywe te gebruik**](https://vozec.fr/writeups/tweedle-dum-dee/) sal jy toegang hê tot die **machine_id** en die **uuid** node, wat die **hoofdokumente** is wat jy nodig het om [**die Werkzeug pin te genereer**](../../network-services-pentesting/pentesting-web/werkzeug.md) wat jy kan gebruik om toegang te verkry tot die python konsole in `/console` as die **foutopsporing modus geaktiveer is:**
 ```python
 {ua.__class__.__init__.__globals__[t].sys.modules[werkzeug.debug]._machine_id}
 {ua.__class__.__init__.__globals__[t].sys.modules[werkzeug.debug].uuid._node}
 ```
-
 > [!WARNING]
-> Note that you can get the **servers local path to the `app.py`** generating some **error** in the web page which will **give you the path**.
+> Let daarop dat jy die **bediener se plaaslike pad na die `app.py`** kan kry deur 'n **fout** op die webblad te genereer wat jou **die pad** sal **gee**.
 
-If the vulnerability is in a different python file, check the previous Flask trick to access the objects from the main python file.
+As die kwesbaarheid in 'n ander python-lêer is, kyk na die vorige Flask-truk om toegang tot die voorwerpe van die hoof python-lêer te verkry.
 
 {{#include ../../banners/hacktricks-training.md}}

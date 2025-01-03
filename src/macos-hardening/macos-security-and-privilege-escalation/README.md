@@ -30,7 +30,7 @@ macos-applefs.md
 mac-os-architecture/
 {{#endref}}
 
-- Algemene macOS n**etwerkdienste & protokolle**
+- Algemene macOS n**etwerk dienste & protokolle**
 
 {{#ref}}
 macos-protocols.md
@@ -71,9 +71,9 @@ Dit kan in die volgende situasies gebeur:
 - Lêer wat gebruik word, is binne 'n gids besit deur die gebruiker (die gebruiker kan die lêer skep)
 - Lêer wat gebruik word, is binne 'n gids besit deur root, maar die gebruiker het skryftoegang daaroor weens 'n groep (die gebruiker kan die lêer skep)
 
-In staat wees om 'n **lêer te skep** wat gaan wees **gebruik deur root**, laat 'n gebruiker toe om **voordeel te trek uit sy inhoud** of selfs **simboliese skakels/hardlinks** te skep om dit na 'n ander plek te wys.
+In staat wees om 'n **lêer te skep** wat gaan **gebruik word deur root**, stel 'n gebruiker in staat om **voordeel te trek uit sy inhoud** of selfs **simboliese skakels/hardskakels** te skep om dit na 'n ander plek te wys.
 
-Vir hierdie tipe kwesbaarhede, moenie vergeet om **kwesbare `.pkg` installers** te **kontroleer** nie:
+Vir hierdie tipe kwesbaarhede, moenie vergeet om **kwesbare `.pkg` installeerders** te **kontroleer**:
 
 {{#ref}}
 macos-files-folders-and-binaries/macos-installers-abuse.md
@@ -89,7 +89,7 @@ macos-file-extension-apps.md
 
 ## macOS TCC / SIP Privilege Escalering
 
-In macOS **toepassings en lêers kan toestemmings hê** om toegang te verkry tot gidse of instellings wat hulle meer bevoorregte maak as ander.
+In macOS **toepassings en binaries kan toestemmings hê** om toegang te verkry tot gidsen of instellings wat hulle meer bevoorregte maak as ander.
 
 Daarom sal 'n aanvaller wat 'n macOS masjien suksesvol wil kompromitteer, moet **sy TCC privileges verhoog** (of selfs **SIP omseil**, afhangende van sy behoeftes).
 
@@ -111,7 +111,7 @@ macos-privilege-escalation.md
 
 ## Verwysings
 
-- [**OS X Incident Response: Scripting and Analysis**](https://www.amazon.com/OS-Incident-Response-Scripting-Analysis-ebook/dp/B01FHOHHVS)
+- [**OS X Voorval Respons: Scripting en Analise**](https://www.amazon.com/OS-Incident-Response-Scripting-Analysis-ebook/dp/B01FHOHHVS)
 - [**https://taomm.org/vol1/analysis.html**](https://taomm.org/vol1/analysis.html)
 - [**https://github.com/NicolasGrimonpont/Cheatsheet**](https://github.com/NicolasGrimonpont/Cheatsheet)
 - [**https://assets.sentinelone.com/c/sentinal-one-mac-os-?x=FvGtLJ**](https://assets.sentinelone.com/c/sentinal-one-mac-os-?x=FvGtLJ)

@@ -22,22 +22,22 @@ sudo su
 ```
 ### PE - Metode 2
 
-Vind alle suid binêre en kyk of daar die binêre **Pkexec** is:
+Vind alle suid binaire en kyk of daar die binaire **Pkexec** is:
 ```bash
 find / -perm -4000 2>/dev/null
 ```
-As jy vind dat die binêre **pkexec is 'n SUID binêre** en jy behoort tot **sudo** of **admin**, kan jy waarskynlik binêre as sudo uitvoer met `pkexec`.\
+As jy vind dat die binêre **pkexec is 'n SUID binêre** en jy behoort tot **sudo** of **admin**, kan jy waarskynlik binêre uitvoer as sudo met behulp van `pkexec`.\
 Dit is omdat dit tipies die groepe is binne die **polkit beleid**. Hierdie beleid identifiseer basies watter groepe `pkexec` kan gebruik. Kontroleer dit met:
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
 ```
-Daar sal jy vind watter groepe toegelaat is om **pkexec** uit te voer en **per standaard** verskyn die groepe **sudo** en **admin** in sommige Linux-distribusies.
+Daar sal jy vind watter groepe toegelaat word om **pkexec** uit te voer en **per standaard** verskyn die groepe **sudo** en **admin** in sommige Linux-distribusies.
 
 Om **root te word kan jy uitvoer**:
 ```bash
 pkexec "/bin/sh" #You will be prompted for your user password
 ```
-As jy probeer om **pkexec** uit te voer en jy kry hierdie **error**:
+As jy probeer om **pkexec** uit te voer en jy kry hierdie **fout**:
 ```bash
 polkit-agent-helper-1: error response to PolicyKit daemon: GDBus.Error:org.freedesktop.PolicyKit1.Error.Failed: No session for cookie
 ==== AUTHENTICATION FAILED ===
@@ -72,7 +72,7 @@ Gebruikers van die **groep shadow** kan **lees** die **/etc/shadow** lêer:
 ```
 -rw-r----- 1 root shadow 1824 Apr 26 19:10 /etc/shadow
 ```
-So, lees die lêer en probeer om **sommige hashes te kraak**.
+So, lees die lêer en probeer om **enkele hashes te kraak**.
 
 ## Personeel Groep
 
@@ -156,9 +156,9 @@ USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT
 yossi    tty1                      22:16    5:13m  0.05s  0.04s -bash
 moshe    pts/1    10.10.14.44      02:53   24:07   0.06s  0.06s /bin/bash
 ```
-Die **tty1** beteken dat die gebruiker **yossi fisies ingelogde** is op 'n terminal op die masjien.
+Die **tty1** beteken dat die gebruiker **yossi fisies ingelog is** op 'n terminal op die masjien.
 
-Die **video groep** het toegang om die skermuitset te sien. Basies kan jy die skerms observeer. Om dit te doen, moet jy die **huidige beeld op die skerm** in rou data gryp en die resolusie wat die skerm gebruik, kry. Die skermdata kan gestoor word in `/dev/fb0` en jy kan die resolusie van hierdie skerm op `/sys/class/graphics/fb0/virtual_size` vind.
+Die **video groep** het toegang om die skermuitset te sien. Basies kan jy die skerms observeer. Om dit te doen, moet jy die **huidige beeld op die skerm gryp** in rou data en die resolusie wat die skerm gebruik, kry. Die skermdata kan gestoor word in `/dev/fb0` en jy kan die resolusie van hierdie skerm vind op `/sys/class/graphics/fb0/virtual_size`
 ```bash
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size
@@ -173,7 +173,7 @@ Verander dan die Breedte en Hoogte na diegene wat op die skerm gebruik word en k
 
 ## Root Groep
 
-Dit lyk of **lede van die root groep** standaard toegang kan hê om **te wysig** sommige **diens** konfigurasielêers of sommige **biblioteek** lêers of **ander interessante dinge** wat gebruik kan word om voorregte te verhoog...
+Dit lyk of **lede van die root groep** standaard toegang kan hê om sommige **diens** konfigurasielêers of sommige **biblioteek** lêers of **ander interessante dinge** wat gebruik kan word om voorregte te verhoog, te **wysig**...
 
 **Kontroleer watter lêers root lede kan wysig**:
 ```bash
@@ -213,7 +213,7 @@ As jy skryfrechten oor die docker socket het, lees [**hierdie pos oor hoe om voo
 
 ## Adm Groep
 
-Gewoonlik het **lede** van die groep **`adm`** toestemming om **log** lêers te **lees** wat geleë is in _/var/log/_.\
+Gewoonlik het **lede** van die groep **`adm`** toestemming om **log** lêers te **lees** wat binne _/var/log/_ geleë is.\
 Daarom, as jy 'n gebruiker binne hierdie groep gecompromitteer het, moet jy beslis **na die logs kyk**.
 
 ## Auth groep

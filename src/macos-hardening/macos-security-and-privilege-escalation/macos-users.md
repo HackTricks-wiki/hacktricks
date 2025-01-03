@@ -20,14 +20,14 @@ for i in "${state[@]}"; do sysadminctl -"${i}" status; done;
 
 ## Gebruikersregte
 
-- **Standaard gebruiker:** Die mees basiese van gebruikers. Hierdie gebruiker het toestemmings nodig wat deur 'n admin gebruiker toegestaan word wanneer hy probeer om sagteware te installeer of ander gevorderde take uit te voer. Hulle kan dit nie op hul eie doen nie.
-- **Admin gebruiker**: 'n Gebruiker wat die meeste van die tyd as 'n standaard gebruiker werk, maar ook toegelaat word om root aksies uit te voer soos om sagteware te installeer en ander administratiewe take. Alle gebruikers wat tot die admin groep behoort, is **gegee toegang tot root via die sudoers lêer**.
+- **Standaard Gebruiker:** Die mees basiese van gebruikers. Hierdie gebruiker het toestemmings nodig wat van 'n admin-gebruiker toegestaan word wanneer hy probeer om sagteware te installeer of ander gevorderde take uit te voer. Hulle kan dit nie op hul eie doen nie.
+- **Admin Gebruiker**: 'n Gebruiker wat die meeste van die tyd as 'n standaard gebruiker werk, maar ook toegelaat word om root aksies uit te voer soos om sagteware te installeer en ander administratiewe take. Alle gebruikers wat tot die admin-groep behoort, is **gegee toegang tot root via die sudoers-lêer**.
 - **Root**: Root is 'n gebruiker wat toegelaat word om byna enige aksie uit te voer (daar is beperkings wat deur beskermings soos Stelselintegriteitsbeskerming opgelê word).
 - Byvoorbeeld, root sal nie in staat wees om 'n lêer binne `/System` te plaas nie.
 
 ## Eksterne Rekeninge
 
 MacOS ondersteun ook om in te log via eksterne identiteitsverskaffers soos FaceBook, Google... Die hoof daemon wat hierdie werk uitvoer is `accountsd` (`/System/Library/Frameworks/Accounts.framework//Versions/A/Support/accountsd`) en dit is moontlik om plugins wat vir eksterne autentisering gebruik word, binne die gids `/System/Library/Accounts/Authentication/` te vind.\
-Boonop kry `accountsd` die lys van rekening tipes van `/Library/Preferences/SystemConfiguration/com.apple.accounts.exists.plist`.
+Boonop kry `accountsd` die lys van rekeningsoorte van `/Library/Preferences/SystemConfiguration/com.apple.accounts.exists.plist`.
 
 {{#include ../../banners/hacktricks-training.md}}

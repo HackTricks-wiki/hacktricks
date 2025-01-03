@@ -9,13 +9,13 @@
 **GCD** bied en bestuur **FIFO-rye** waaraan jou toepassing **take** in die vorm van **blokobjekte** kan **indien**. Blokke wat aan afleweringsrye ingedien word, word **uitgevoer op 'n poel van drade** wat volledig deur die stelsel bestuur word. GCD skep outomaties drade om die take in die afleweringsrye uit te voer en skeduleer daardie take om op die beskikbare kerne te loop.
 
 > [!TIP]
-> In samevatting, om kode in **parallel** uit te voer, kan prosesse **blokke van kode na GCD** stuur, wat sorg vir hul uitvoering. Daarom skep prosesse nie nuwe drade nie; **GCD voer die gegewe kode uit met sy eie poel van drade** (wat kan toeneem of afneem soos nodig).
+> In samevatting, om kode in **parallel** uit te voer, kan prosesse **kodeblokke na GCD stuur**, wat sorg vir hul uitvoering. Daarom skep prosesse nie nuwe drade nie; **GCD voer die gegewe kode uit met sy eie poel van drade** (wat kan toeneem of afneem soos nodig).
 
 Dit is baie nuttig om parallelle uitvoering suksesvol te bestuur, wat die aantal drade wat prosesse skep, aansienlik verminder en die parallelle uitvoering optimaliseer. Dit is ideaal vir take wat **groot parallelisme** vereis (brute-forcing?) of vir take wat nie die hoofdraad moet blokkeer nie: Byvoorbeeld, die hoofdraad op iOS hanteer UI-interaksies, so enige ander funksionaliteit wat die toepassing kan laat hang (soek, toegang tot 'n web, lees 'n lêer...) word op hierdie manier bestuur.
 
 ### Blokke
 
-'n Blok is 'n **self-ingegronde afdeling van kode** (soos 'n funksie met argumente wat 'n waarde teruggee) en kan ook gebonde veranderlikes spesifiseer.\
+'n Blok is 'n **self-onderhoudende gedeelte van kode** (soos 'n funksie met argumente wat 'n waarde teruggee) en kan ook gebonde veranderlikes spesifiseer.\
 E however, op kompilervlak bestaan blokke nie, hulle is `os_object`s. Elke van hierdie objekten is gevorm deur twee strukture:
 
 - **blok letterlik**:&#x20;
@@ -31,13 +31,13 @@ E however, op kompilervlak bestaan blokke nie, hulle is `os_object`s. Elke van h
 - Dit het 'n paar gereserveerde bytes
 - Die grootte daarvan
 - Dit sal gewoonlik 'n aanwyser na 'n Objective-C styl handtekening hê om te weet hoeveel ruimte vir die params benodig word (vlag `BLOCK_HAS_SIGNATURE`)
-- As veranderlikes verwys word, sal hierdie blok ook aanwysers na 'n kopie-hulpbron (wat die waarde aan die begin kopieer) en 'n ontslag-hulpbron (wat dit vrymaak) hê.
+- As veranderlikes verwys word, sal hierdie blok ook aanwysers na 'n kopie-hulp (wat die waarde aan die begin kopieer) en 'n ontslae-hulp (wat dit vrymaak) hê.
 
 ### Rye
 
 'n Afleweringsry is 'n benoemde objek wat FIFO-ordening van blokke vir uitvoerings bied.
 
-Blokke word in rye gestel om uitgevoer te word, en hierdie ondersteun 2 modi: `DISPATCH_QUEUE_SERIAL` en `DISPATCH_QUEUE_CONCURRENT`. Natuurlik sal die **serial** een **nie race condition** probleme hê nie, aangesien 'n blok nie uitgevoer sal word totdat die vorige een klaar is nie. Maar **die ander tipe ry mag dit hê**.
+Blokke word in rye gestel om uitgevoer te word, en hierdie ondersteun 2 modi: `DISPATCH_QUEUE_SERIAL` en `DISPATCH_QUEUE_CONCURRENT`. Natuurlik sal die **seriale** een **nie race condition** probleme hê nie, aangesien 'n blok nie uitgevoer sal word totdat die vorige een klaar is nie. Maar **die ander tipe ry mag dit hê**.
 
 Standaard rye:
 
@@ -57,11 +57,11 @@ Standaard rye:
 - `.root.user-interactive-qos`: Hoogste prioriteit
 - `.root.background-qos.overcommit`
 
-Let daarop dat dit die stelsel sal wees wat besluit **watter drade watter rye op elke tydstip hanteer** (meervoudige drade mag in dieselfde ry werk of dieselfde draad mag op verskillende rye op 'n sekere tyd werk)
+Let daarop dat dit die stelsel sal wees wat besluit **watter drade watter rye op enige tyd hanteer** (meervoudige drade mag in dieselfde ry werk of dieselfde draad mag op verskillende rye op 'n sekere tyd werk)
 
 #### Attributte
 
-Wanneer 'n ry geskep word met **`dispatch_queue_create`** is die derde argument 'n `dispatch_queue_attr_t`, wat gewoonlik of `DISPATCH_QUEUE_SERIAL` (wat eintlik NULL is) of `DISPATCH_QUEUE_CONCURRENT` is wat 'n aanwyser na 'n `dispatch_queue_attr_t` struktuur is wat toelaat om sommige parameters van die ry te beheer.
+Wanneer 'n ry geskep word met **`dispatch_queue_create`** is die derde argument 'n `dispatch_queue_attr_t`, wat gewoonlik of `DISPATCH_QUEUE_SERIAL` (wat eintlik NULL is) of `DISPATCH_QUEUE_CONCURRENT` is wat 'n aanwyser na 'n `dispatch_queue_attr_t` strukt is wat toelaat om sommige parameters van die ry te beheer.
 
 ### Afleweringsobjekte
 
@@ -187,7 +187,7 @@ Backtrace:
 
 Tans verstaan Ghidra nie die ObjectiveC **`dispatch_block_t`** struktuur nie, en ook nie die **`swift_dispatch_block`** een nie.
 
-So as jy wil hê dit moet hulle verstaan, kan jy net **dit verklaar**:
+So as jy wil hê dit moet hulle verstaan, kan jy net **declareer**:
 
 <figure><img src="../../images/image (1160).png" alt="" width="563"><figcaption></figcaption></figure>
 

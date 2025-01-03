@@ -21,11 +21,11 @@ sudo su
 ```
 ## PE - Metode 2
 
-Vind alle suid binêre en kyk of daar die binêre **Pkexec** is:
+Vind alle suid binaire en kyk of daar die binaire **Pkexec** is:
 ```bash
 find / -perm -4000 2>/dev/null
 ```
-As jy vind dat die binêre pkexec 'n SUID-binêre is en jy behoort tot sudo of admin, kan jy waarskynlik binêre uitvoer as sudo met behulp van pkexec.
+As jy vind dat die binêre pkexec 'n SUID-binêre is en jy behoort tot sudo of admin, kan jy waarskynlik binêre uitvoer as sudo met behulp van pkexec. 
 Kontroleer die inhoud van:
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
@@ -65,7 +65,7 @@ As dit die geval is, om **root te word kan jy net uitvoer**:
 ```text
 sudo su
 ```
-# Shadow Groep
+# Shadow Group
 
 Gebruikers van die **groep shadow** kan **lees** die **/etc/shadow** lêer:
 ```text
@@ -102,16 +102,16 @@ moshe    pts/1    10.10.14.44      02:53   24:07   0.06s  0.06s /bin/bash
 ```
 Die **tty1** beteken dat die gebruiker **yossi fisies ingelogde** is op 'n terminal op die masjien.
 
-Die **video groep** het toegang om die skermuitset te sien. Basies kan jy die skerms observeer. Om dit te doen, moet jy die **huidige beeld op die skerm** in rou data gryp en die resolusie wat die skerm gebruik, kry. Die skermdata kan gestoor word in `/dev/fb0` en jy kan die resolusie van hierdie skerm op `/sys/class/graphics/fb0/virtual_size` vind.
+Die **video groep** het toegang om die skermuitset te sien. Basies kan jy die skerms observeer. Om dit te doen, moet jy die **huidige beeld op die skerm gryp** in rou data en die resolusie wat die skerm gebruik, kry. Die skermdata kan gestoor word in `/dev/fb0` en jy kan die resolusie van hierdie skerm vind op `/sys/class/graphics/fb0/virtual_size`
 ```bash
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size
 ```
-Om die **rauwe beeld** te **open**, kan jy **GIMP** gebruik, die **`screen.raw`** lêer te kies en as lêertipe **Raw image data** te kies:
+Om die **rauwe beeld** te **open**, kan jy **GIMP** gebruik, kies die **`screen.raw`** lêer en kies as lêertipe **Raw image data**:
 
 ![](../../images/image%20%28208%29.png)
 
-Verander dan die Breedte en Hoogte na diegene wat op die skerm gebruik word en kyk na verskillende Beeldtipes \(en kies die een wat die skerm beter wys\):
+Verander dan die Breedte en Hoogte na die waardes wat op die skerm gebruik word en kyk na verskillende Beeldtipes \(en kies die een wat die skerm beter vertoon\):
 
 ![](../../images/image%20%28295%29.png)
 
@@ -125,7 +125,7 @@ find / -group root -perm -g=w 2>/dev/null
 ```
 # Docker Groep
 
-Jy kan die wortel lêersisteem van die gasheer masjien aan 'n instansie se volume monteer, sodat wanneer die instansie begin, dit onmiddellik 'n `chroot` in daardie volume laai. Dit gee jou effektief root op die masjien.
+Jy kan die wortel lêersisteem van die gasheer masjien aan 'n instansie se volume monteer, sodat wanneer die instansie begin, dit onmiddellik 'n `chroot` in daardie volume laai. Dit gee jou effektief wortel op die masjien.
 
 {% embed url="https://github.com/KrustyHack/docker-privilege-escalation" %}
 

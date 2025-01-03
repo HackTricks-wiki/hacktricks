@@ -100,17 +100,17 @@ $ whoami
 ubuntu
 ```
 > [!NOTE]
-> Let daarop dat ons in hierdie voorbeeld nie privaathede verhoog het nie, maar deur die opdragte wat uitgevoer word te verander en **te wag vir root of 'n ander bevoorregte gebruiker om die kwesbare binêre uit te voer** sal ons in staat wees om privaathede te verhoog.
+> Let daarop dat ons in hierdie voorbeeld nie bevoegdhede verhoog het nie, maar deur die opdragte wat uitgevoer word te verander en **te wag vir root of 'n ander bevoegde gebruiker om die kwesbare binêre uit te voer** sal ons in staat wees om bevoegdhede te verhoog.
 
 ### Ander miskonfigurasies - Dieselfde kwesbaarheid
 
-In die vorige voorbeeld het ons 'n miskonfigurasie gefak waar 'n administrateur **'n nie-bevoorregte gids binne 'n konfigurasie-lêer binne `/etc/ld.so.conf.d/`** gestel het.\
+In die vorige voorbeeld het ons 'n miskonfigurasie gefak waar 'n administrateur **'n nie-bevoegde gids binne 'n konfigurasie-lêer binne `/etc/ld.so.conf.d/`** gestel het.\
 Maar daar is ander miskonfigurasies wat dieselfde kwesbaarheid kan veroorsaak, as jy **skryfregte** in 'n of ander **konfigurasie-lêer** binne `/etc/ld.so.conf.d`s, in die gids `/etc/ld.so.conf.d` of in die lêer `/etc/ld.so.conf` het, kan jy dieselfde kwesbaarheid konfigureer en dit benut.
 
 ## Exploit 2
 
-**Neem aan jy het sudo-regte oor `ldconfig`**.\
-Jy kan aan `ldconfig` **aanwys waar om die konfig-lêers te laai**, so ons kan dit benut om `ldconfig` te laat laai willekeurige gidse.\
+**Neem aan jy het sudo bevoegdhede oor `ldconfig`**.\
+Jy kan aan dui `ldconfig` **waar om die konfigurasie-lêers van te laai**, sodat ons dit kan benut om `ldconfig` willekeurige gidse te laat laai.\
 So, kom ons skep die lêers en gidse wat nodig is om "/tmp" te laai:
 ```bash
 cd /tmp
@@ -128,6 +128,6 @@ libcustom.so => /tmp/libcustom.so (0x00007fcb07756000)
 libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fcb0738c000)
 /lib64/ld-linux-x86-64.so.2 (0x00007fcb07958000)
 ```
-**Soos jy kan sien, as jy sudo-regte oor `ldconfig` het, kan jy dieselfde kwesbaarheid benut.**
+**Soos wat jy kan sien, kan jy die dieselfde kwesbaarheid benut deur sudo-regte oor `ldconfig` te hê.** 
 
 {{#include ../../banners/hacktricks-training.md}}

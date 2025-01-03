@@ -37,6 +37,6 @@ mkdir rootfs
 runc run demo
 ```
 > [!CAUTION]
-> Dit sal nie altyd werk nie, aangesien die standaard werking van runc is om as root te loop, so om dit as 'n nie-bevoegde gebruiker te loop, kan eenvoudig nie werk nie (tenzij jy 'n rootless konfigurasie het). Om 'n rootless konfigurasie die standaard te maak, is oor die algemeen nie 'n goeie idee nie, omdat daar 'n paar beperkings binne rootless houers is wat nie buite rootless houers van toepassing is nie.
+> Dit sal nie altyd werk nie, aangesien die standaard werking van runc is om as root te loop, so om dit as 'n nie-bevoegde gebruiker te loop kan eenvoudig nie werk nie (tenzij jy 'n rootless konfigurasie het). Om 'n rootless konfigurasie die standaard te maak is oor die algemeen nie 'n goeie idee nie, omdat daar 'n paar beperkings binne rootless houers is wat nie buite rootless houers van toepassing is nie.
 
 {{#include ../../banners/hacktricks-training.md}}

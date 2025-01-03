@@ -106,7 +106,7 @@ echo b > /proc/sysrq-trigger # Hervat die gasheer
 
 #### **`/proc/sched_debug`**
 
-- Teruggee proses skedulering inligting, wat PID naamruimte beskermings omseil.
+- Gee proses skedulering inligting terug, wat PID naamruimte beskermings omseil.
 - Blootstel prosesname, ID's, en cgroup identifiseerders.
 
 #### **`/proc/[pid]/mountinfo`**

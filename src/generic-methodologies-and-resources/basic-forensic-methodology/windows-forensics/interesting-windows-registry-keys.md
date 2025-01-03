@@ -1,101 +1,101 @@
-# Interesting Windows Registry Keys
+# Interessante Windows Registriesleutels
 
-### Interesting Windows Registry Keys
+### Interessante Windows Registriesleutels
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-### **Windows Version and Owner Info**
+### **Windows Weergawe en Eienaar Inligting**
 
-- Located at **`Software\Microsoft\Windows NT\CurrentVersion`**, you'll find the Windows version, Service Pack, installation time, and the registered owner's name in a straightforward manner.
+- Geleë by **`Software\Microsoft\Windows NT\CurrentVersion`**, sal jy die Windows weergawe, dienspakket, installasietyd en die geregistreerde eienaar se naam op 'n eenvoudige manier vind.
 
-### **Computer Name**
+### **Rekenaarnaam**
 
-- The hostname is found under **`System\ControlSet001\Control\ComputerName\ComputerName`**.
+- Die gasheernaam is onder **`System\ControlSet001\Control\ComputerName\ComputerName`** te vind.
 
-### **Time Zone Setting**
+### **Tydsone Instelling**
 
-- The system's time zone is stored in **`System\ControlSet001\Control\TimeZoneInformation`**.
+- Die stelseltijdsones is gestoor in **`System\ControlSet001\Control\TimeZoneInformation`**.
 
-### **Access Time Tracking**
+### **Toegangstyd Opvolging**
 
-- By default, the last access time tracking is turned off (**`NtfsDisableLastAccessUpdate=1`**). To enable it, use:
-  `fsutil behavior set disablelastaccess 0`
+- Standaard is die laaste toegangstyd opvolging afgeskakel (**`NtfsDisableLastAccessUpdate=1`**). Om dit in te skakel, gebruik:
+`fsutil behavior set disablelastaccess 0`
 
-### Windows Versions and Service Packs
+### Windows Weergawes en Dienspakkette
 
-- The **Windows version** indicates the edition (e.g., Home, Pro) and its release (e.g., Windows 10, Windows 11), while **Service Packs** are updates that include fixes and, sometimes, new features.
+- Die **Windows weergawe** dui die uitgawe aan (bv. Home, Pro) en sy vrystelling (bv. Windows 10, Windows 11), terwyl **dienspakkette** opdaterings is wat regstellings en, soms, nuwe funksies insluit.
 
-### Enabling Last Access Time
+### Laaste Toegangstyd Inskakel
 
-- Enabling last access time tracking allows you to see when files were last opened, which can be critical for forensic analysis or system monitoring.
+- Die inskakeling van laaste toegangstyd opvolging laat jou toe om te sien wanneer lêers laas geopen is, wat krities kan wees vir forensiese analise of stelseltelling.
 
-### Network Information Details
+### Netwerk Inligting Besonderhede
 
-- The registry holds extensive data on network configurations, including **types of networks (wireless, cable, 3G)** and **network categories (Public, Private/Home, Domain/Work)**, which are vital for understanding network security settings and permissions.
+- Die register hou uitgebreide data oor netwerk konfigurasies, insluitend **tipes netwerke (draadloos, kabel, 3G)** en **netwerk kategorieë (Publiek, Privaat/Huis, Domein/ Werk)**, wat noodsaaklik is om netwerk sekuriteitsinstellings en toestemmings te verstaan.
 
-### Client Side Caching (CSC)
+### Kliëntkant Kaping (CSC)
 
-- **CSC** enhances offline file access by caching copies of shared files. Different **CSCFlags** settings control how and what files are cached, affecting performance and user experience, especially in environments with intermittent connectivity.
+- **CSC** verbeter offline lêer toegang deur kopieë van gedeelde lêers te kas. Verskillende **CSCFlags** instellings beheer hoe en watter lêers gekas word, wat prestasie en gebruikerservaring beïnvloed, veral in omgewings met intermitterende konnektiwiteit.
 
-### AutoStart Programs
+### AutoStart Programme
 
-- Programs listed in various `Run` and `RunOnce` registry keys are automatically launched at startup, affecting system boot time and potentially being points of interest for identifying malware or unwanted software.
+- Programme wat in verskeie `Run` en `RunOnce` registriesleutels gelys is, word outomaties by opstart gelaai, wat die stelselaanlooptyd beïnvloed en moontlik punte van belang kan wees om malware of ongewenste sagteware te identifiseer.
 
 ### Shellbags
 
-- **Shellbags** not only store preferences for folder views but also provide forensic evidence of folder access even if the folder no longer exists. They are invaluable for investigations, revealing user activity that isn't obvious through other means.
+- **Shellbags** stoor nie net voorkeure vir vouer aansigte nie, maar bied ook forensiese bewyse van vouer toegang selfs al bestaan die vouer nie meer nie. Hulle is van onskatbare waarde vir ondersoeke, wat gebruikersaktiwiteit onthul wat nie duidelik is deur ander middele nie.
 
-### USB Information and Forensics
+### USB Inligting en Forensika
 
-- The details stored in the registry about USB devices can help trace which devices were connected to a computer, potentially linking a device to sensitive file transfers or unauthorized access incidents.
+- Die besonderhede wat in die register oor USB toestelle gestoor is, kan help om te spoor watter toestelle aan 'n rekenaar gekoppel was, wat moontlik 'n toestel aan sensitiewe lêer oordragte of ongeoorloofde toegang insidente kan koppel.
 
-### Volume Serial Number
+### Volume Serienommer
 
-- The **Volume Serial Number** can be crucial for tracking the specific instance of a file system, useful in forensic scenarios where file origin needs to be established across different devices.
+- Die **Volume Serienommer** kan noodsaaklik wees om die spesifieke geval van 'n lêerstelsel te spoor, nuttig in forensiese scenario's waar lêer oorsprong oor verskillende toestelle gevestig moet word.
 
-### **Shutdown Details**
+### **Afsluit Besonderhede**
 
-- Shutdown time and count (the latter only for XP) are kept in **`System\ControlSet001\Control\Windows`** and **`System\ControlSet001\Control\Watchdog\Display`**.
+- Afsluit tyd en telling (laasgenoemde slegs vir XP) word in **`System\ControlSet001\Control\Windows`** en **`System\ControlSet001\Control\Watchdog\Display`** gehou.
 
-### **Network Configuration**
+### **Netwerk Konfigurasie**
 
-- For detailed network interface info, refer to **`System\ControlSet001\Services\Tcpip\Parameters\Interfaces{GUID_INTERFACE}`**.
-- First and last network connection times, including VPN connections, are logged under various paths in **`Software\Microsoft\Windows NT\CurrentVersion\NetworkList`**.
+- Vir gedetailleerde netwerk koppelvlak inligting, verwys na **`System\ControlSet001\Services\Tcpip\Parameters\Interfaces{GUID_INTERFACE}`**.
+- Eerste en laaste netwerkverbinding tye, insluitend VPN verbindings, word onder verskeie paaie in **`Software\Microsoft\Windows NT\CurrentVersion\NetworkList`** gelog.
 
-### **Shared Folders**
+### **Gedeelde Vouers**
 
-- Shared folders and settings are under **`System\ControlSet001\Services\lanmanserver\Shares`**. The Client Side Caching (CSC) settings dictate offline file availability.
+- Gedeelde vouers en instellings is onder **`System\ControlSet001\Services\lanmanserver\Shares`**. Die Kliëntkant Kaping (CSC) instellings bepaal offline lêer beskikbaarheid.
 
-### **Programs that Start Automatically**
+### **Programme wat Outomaties Begin**
 
-- Paths like **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Run`** and similar entries under `Software\Microsoft\Windows\CurrentVersion` detail programs set to run at startup.
+- Paaie soos **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Run`** en soortgelyke inskrywings onder `Software\Microsoft\Windows\CurrentVersion` detail programme wat ingestel is om by opstart te loop.
 
-### **Searches and Typed Paths**
+### **Soek en Getypte Paaie**
 
-- Explorer searches and typed paths are tracked in the registry under **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer`** for WordwheelQuery and TypedPaths, respectively.
+- Explorer soeke en getypte paaie word in die register onder **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer`** vir WordwheelQuery en GetyptePaaie, onderskeidelik, opgeteken.
 
-### **Recent Documents and Office Files**
+### **Onlangse Dokumente en Office Lêers**
 
-- Recent documents and Office files accessed are noted in `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs` and specific Office version paths.
+- Onlangse dokumente en Office lêers wat toegang verkry is, word opgemerk in `NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs` en spesifieke Office weergawe paaie.
 
-### **Most Recently Used (MRU) Items**
+### **Mees Onlangs Gebruikte (MRU) Items**
 
-- MRU lists, indicating recent file paths and commands, are stored in various `ComDlg32` and `Explorer` subkeys under `NTUSER.DAT`.
+- MRU lyste, wat onlangse lêer paaie en opdragte aandui, word in verskeie `ComDlg32` en `Explorer` subsleutels onder `NTUSER.DAT` gestoor.
 
-### **User Activity Tracking**
+### **Gebruikersaktiwiteit Opvolging**
 
-- The User Assist feature logs detailed application usage stats, including run count and last run time, at **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\{GUID}\Count`**.
+- Die User Assist funksie log gedetailleerde toepassingsgebruik statistieke, insluitend loop telling en laaste loop tyd, by **`NTUSER.DAT\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\{GUID}\Count`**.
 
-### **Shellbags Analysis**
+### **Shellbags Analise**
 
-- Shellbags, revealing folder access details, are stored in `USRCLASS.DAT` and `NTUSER.DAT` under `Software\Microsoft\Windows\Shell`. Use **[Shellbag Explorer](https://ericzimmerman.github.io/#!index.md)** for analysis.
+- Shellbags, wat vouer toegang besonderhede onthul, word in `USRCLASS.DAT` en `NTUSER.DAT` onder `Software\Microsoft\Windows\Shell` gestoor. Gebruik **[Shellbag Explorer](https://ericzimmerman.github.io/#!index.md)** vir analise.
 
-### **USB Device History**
+### **USB Toestel Geskiedenis**
 
-- **`HKLM\SYSTEM\ControlSet001\Enum\USBSTOR`** and **`HKLM\SYSTEM\ControlSet001\Enum\USB`** contain rich details on connected USB devices, including manufacturer, product name, and connection timestamps.
-- The user associated with a specific USB device can be pinpointed by searching `NTUSER.DAT` hives for the device's **{GUID}**.
-- The last mounted device and its volume serial number can be traced through `System\MountedDevices` and `Software\Microsoft\Windows NT\CurrentVersion\EMDMgmt`, respectively.
+- **`HKLM\SYSTEM\ControlSet001\Enum\USBSTOR`** en **`HKLM\SYSTEM\ControlSet001\Enum\USB`** bevat ryk besonderhede oor gekoppelde USB toestelle, insluitend vervaardiger, produknaam, en verbindingstydstempels.
+- Die gebruiker wat met 'n spesifieke USB toestel geassosieer word, kan bepaal word deur `NTUSER.DAT` hives vir die toestel se **{GUID}** te soek.
+- Die laaste gemonteerde toestel en sy volume serienommer kan opgespoor word deur `System\MountedDevices` en `Software\Microsoft\Windows NT\CurrentVersion\EMDMgmt`, onderskeidelik.
 
-This guide condenses the crucial paths and methods for accessing detailed system, network, and user activity information on Windows systems, aiming for clarity and usability.
+Hierdie gids konsolideer die noodsaaklike paaie en metodes om gedetailleerde stelsel-, netwerk- en gebruikersaktiwiteit inligting op Windows stelsels te bekom, met die doel om duidelikheid en bruikbaarheid te bevorder.
 
 {{#include ../../../banners/hacktricks-training.md}}

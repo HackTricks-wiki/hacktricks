@@ -67,8 +67,8 @@ libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2 (0x00007fe472c54000)
 libcap-ng.so.0 => /lib/x86_64-linux-gnu/libcap-ng.so.0 (0x00007fe472a4f000)
 /lib64/ld-linux-x86-64.so.2 (0x00007fe473a93000)
 ```
-In hierdie geval, laat ons probeer om `/lib/x86_64-linux-gnu/libaudit.so.1` na te boots.\
-So, kyk na die funksies van hierdie biblioteek wat deur die **`su`** binêre gebruik word:
+In hierdie geval laat ons probeer om `/lib/x86_64-linux-gnu/libaudit.so.1` na te boots.\
+So, kyk vir funksies van hierdie biblioteek wat deur die **`su`** binêre gebruik word:
 ```bash
 objdump -T /bin/su | grep audit
 0000000000000000      DF *UND*  0000000000000000              audit_open
@@ -76,7 +76,7 @@ objdump -T /bin/su | grep audit
 0000000000000000      DF *UND*  0000000000000000              audit_log_acct_message
 000000000020e968 g    DO .bss   0000000000000004  Base        audit_fd
 ```
-Die simbole `audit_open`, `audit_log_acct_message`, `audit_log_acct_message` en `audit_fd` is waarskynlik van die libaudit.so.1 biblioteek. Aangesien die libaudit.so.1 deur die kwaadwillige gedeelde biblioteek oorgeskryf sal word, moet hierdie simbole in die nuwe gedeelde biblioteek teenwoordig wees, anders sal die program nie in staat wees om die simbool te vind nie en sal dit afsluit.
+Die simbole `audit_open`, `audit_log_acct_message`, `audit_log_acct_message` en `audit_fd` is waarskynlik van die libaudit.so.1 biblioteek. Aangesien die libaudit.so.1 deur die kwaadwillige gedeelde biblioteek oorgeskryf sal word, moet hierdie simbole in die nuwe gedeelde biblioteek teenwoordig wees, anders sal die program nie die simbool kan vind nie en sal dit afsluit.
 ```c
 #include<stdio.h>
 #include<stdlib.h>
@@ -102,7 +102,7 @@ Nou, net deur **`/bin/su`** aan te roep, sal jy 'n shell as root verkry.
 
 ## Skripte
 
-Kan jy root iets laat uitvoer?
+Kan jy maak dat root iets uitvoer?
 
 ### **www-data na sudoers**
 ```bash

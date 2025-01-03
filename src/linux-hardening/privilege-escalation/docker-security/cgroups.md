@@ -4,7 +4,7 @@
 
 ## Basiese Inligting
 
-**Linux Beheer Groepe**, of **cgroups**, is 'n kenmerk van die Linux-kern wat die toewysing, beperking en prioritisering van stelselhulpbronne soos CPU, geheue en skyf I/O onder prosesgroepe toelaat. Hulle bied 'n mekanisme vir **die bestuur en isolasie van hulpbronverbruik** van prosesversamelings, wat voordelig is vir doeleindes soos hulpbronbeperking, werkladingisolering, en hulpbronprioritisering onder verskillende prosesgroepe.
+**Linux Beheer Groepe**, of **cgroups**, is 'n kenmerk van die Linux-kern wat die toewysing, beperking en prioritisering van stelselhulpbronne soos CPU, geheue en skyf I/O onder prosesgroepe moontlik maak. Hulle bied 'n mekanisme vir **die bestuur en isolasie van hulpbronverbruik** van prosesversamelings, wat voordelig is vir doeleindes soos hulpbronbeperking, werkladingisolasie, en hulpbronprioritisering onder verskillende prosesgroepe.
 
 Daar is **twee weergawes van cgroups**: weergawe 1 en weergawe 2. Albei kan gelyktydig op 'n stelsel gebruik word. Die primêre onderskeid is dat **cgroups weergawe 2** 'n **hiërargiese, boomagtige struktuur** bekendstel, wat meer genuanseerde en gedetailleerde hulpbronverdeling onder prosesgroepe moontlik maak. Boonop bring weergawe 2 verskeie verbeterings, insluitend:
 
@@ -41,15 +41,15 @@ Die lêerstelsel word tipies gebruik om toegang te verkry tot **cgroups**, wat a
 
 ![Cgroup Filesystem](<../../../images/image (1128).png>)
 
-Die sleutelinterfaiselêers vir cgroups is met **cgroup** voorafgegaan. Die **cgroup.procs** lêer, wat met standaardopdragte soos cat beskou kan word, lys die prosesse binne die cgroup. 'n Ander lêer, **cgroup.threads**, sluit draad-inligting in.
+Die sleutelinterface-lêers vir cgroups is met **cgroup** voorafgegaan. Die **cgroup.procs** lêer, wat met standaardopdragte soos cat beskou kan word, lys die prosesse binne die cgroup. 'n Ander lêer, **cgroup.threads**, sluit draad-inligting in.
 
 ![Cgroup Procs](<../../../images/image (281).png>)
 
-Cgroups wat skulp bestuur, sluit tipies twee beheerders in wat geheuegebruik en prosesgetal reguleer. Om met 'n beheerder te kommunikeer, moet lêers met die beheerder se voorvoegsel geraadpleeg word. Byvoorbeeld, **pids.current** sou geraadpleeg word om die aantal drade in die cgroup te bepaal.
+Cgroups wat skulpens bestuur, sluit tipies twee beheerders in wat geheuegebruik en prosesgetal reguleer. Om met 'n beheerder te kommunikeer, moet lêers met die beheerder se voorvoegsel geraadpleeg word. Byvoorbeeld, **pids.current** sou geraadpleeg word om die aantal drade in die cgroup te bepaal.
 
 ![Cgroup Memory](<../../../images/image (677).png>)
 
-Die aanduiding van **max** in 'n waarde dui op die afwesigheid van 'n spesifieke limiet vir die cgroup. egter, as gevolg van die hiërargiese aard van cgroups, mag limiete opgelê word deur 'n cgroup op 'n laer vlak in die gids hiërargie.
+Die aanduiding van **max** in 'n waarde dui op die afwesigheid van 'n spesifieke limiet vir die cgroup. egter, weens die hiërargiese aard van cgroups, mag limiete opgelê word deur 'n cgroup op 'n laer vlak in die gids hiërargie.
 
 ### Manipuleer en Skep cgroups
 
@@ -57,13 +57,13 @@ Prosesse word aan cgroups toegeken deur **hulle Proses ID (PID) na die `cgroup.p
 ```bash
 echo [pid] > cgroup.procs
 ```
-Net so, **om cgroup-attribuutte te wysig, soos om 'n PID-limiet in te stel**, word dit gedoen deur die verlangde waarde na die relevante lêer te skryf. Om 'n maksimum van 3,000 PIDs vir 'n cgroup in te stel:
+Net soos, **om cgroup-attribuut te wysig, soos om 'n PID-limiet in te stel**, word dit gedoen deur die verlangde waarde na die relevante lêer te skryf. Om 'n maksimum van 3,000 PIDs vir 'n cgroup in te stel:
 ```bash
 echo 3000 > pids.max
 ```
 **Die skep van nuwe cgroups** behels die maak van 'n nuwe subgids binne die cgroup hiërargie, wat die kern aanmoedig om outomaties die nodige koppelvlaklêers te genereer. Alhoewel cgroups sonder aktiewe prosesse met `rmdir` verwyder kan word, wees bewus van sekere beperkings:
 
-- **Prosesse kan slegs in blaar cgroups geplaas word** (d.w.s., die mees geneste in 'n hiërargie).
+- **Prosesse kan slegs in blaar cgroups geplaas word** (d.w.s. die mees geneste in 'n hiërargie).
 - **'n cgroup kan nie 'n kontroleerder hê wat nie in sy ouer is nie**.
 - **Kontroleerders vir kind cgroups moet eksplisiet verklaar word** in die `cgroup.subtree_control` lêer. Byvoorbeeld, om CPU en PID kontroleerders in 'n kind cgroup in te skakel:
 ```bash

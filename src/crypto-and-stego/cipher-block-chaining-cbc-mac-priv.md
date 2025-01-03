@@ -2,54 +2,54 @@
 
 # CBC
 
-If the **cookie** is **only** the **username** (or the first part of the cookie is the username) and you want to impersonate the username "**admin**". Then, you can create the username **"bdmin"** and **bruteforce** the **first byte** of the cookie.
+As die **cookie** **net** die **gebruikersnaam** is (of die eerste deel van die cookie is die gebruikersnaam) en jy wil die gebruikersnaam "**admin**" naboots. Dan kan jy die gebruikersnaam **"bdmin"** skep en die **eerste byte** van die cookie **bruteforce**.
 
 # CBC-MAC
 
-**Cipher block chaining message authentication code** (**CBC-MAC**) is a method used in cryptography. It works by taking a message and encrypting it block by block, where each block's encryption is linked to the one before it. This process creates a **chain of blocks**, making sure that changing even a single bit of the original message will lead to an unpredictable change in the last block of encrypted data. To make or reverse such a change, the encryption key is required, ensuring security.
+**Cipher block chaining message authentication code** (**CBC-MAC**) is 'n metode wat in kriptografie gebruik word. Dit werk deur 'n boodskap blok vir blok te enkripteer, waar elke blok se enkripsie aan die een voor dit gekoppel is. Hierdie proses skep 'n **ketting van blokke**, wat verseker dat die verandering van selfs 'n enkele bit van die oorspronklike boodskap sal lei tot 'n onvoorspelbare verandering in die laaste blok van enkripteerde data. Om so 'n verandering te maak of omgekeerd, is die enkripsiesleutel nodig, wat sekuriteit verseker.
 
-To calculate the CBC-MAC of message m, one encrypts m in CBC mode with zero initialization vector and keeps the last block. The following figure sketches the computation of the CBC-MAC of a message comprising blocks![https://wikimedia.org/api/rest_v1/media/math/render/svg/bbafe7330a5e40a04f01cc776c9d94fe914b17f5](https://wikimedia.org/api/rest_v1/media/math/render/svg/bbafe7330a5e40a04f01cc776c9d94fe914b17f5) using a secret key k and a block cipher E:
+Om die CBC-MAC van boodskap m te bereken, enkripteer 'n mens m in CBC-modus met 'n nul-inisialisasievector en hou die laaste blok. Die volgende figuur skets die berekening van die CBC-MAC van 'n boodskap wat uit blokke bestaan![https://wikimedia.org/api/rest_v1/media/math/render/svg/bbafe7330a5e40a04f01cc776c9d94fe914b17f5](https://wikimedia.org/api/rest_v1/media/math/render/svg/bbafe7330a5e40a04f01cc776c9d94fe914b17f5) met 'n geheime sleutel k en 'n blok-kodering E:
 
 ![https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/CBC-MAC_structure_(en).svg/570px-CBC-MAC_structure_(en).svg.png](<https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/CBC-MAC_structure_(en).svg/570px-CBC-MAC_structure_(en).svg.png>)
 
-# Vulnerability
+# Kwetsbaarheid
 
-With CBC-MAC usually the **IV used is 0**.\
-This is a problem because 2 known messages (`m1` and `m2`) independently will generate 2 signatures (`s1` and `s2`). So:
+Met CBC-MAC is die **IV wat gebruik word gewoonlik 0**.\
+Dit is 'n probleem omdat 2 bekende boodskappe (`m1` en `m2`) onafhanklik 2 handtekeninge (`s1` en `s2`) sal genereer. So:
 
 - `E(m1 XOR 0) = s1`
 - `E(m2 XOR 0) = s2`
 
-Then a message composed by m1 and m2 concatenated (m3) will generate 2 signatures (s31 and s32):
+Dan sal 'n boodskap wat uit m1 en m2 saamgevoeg is (m3) 2 handtekeninge (s31 en s32) genereer:
 
 - `E(m1 XOR 0) = s31 = s1`
 - `E(m2 XOR s1) = s32`
 
-**Which is possible to calculate without knowing the key of the encryption.**
+**Wat moontlik is om te bereken sonder om die sleutel van die enkripsie te ken.**
 
-Imagine you are encrypting the name **Administrator** in **8bytes** blocks:
+Stel jou voor jy enkripteer die naam **Administrator** in **8bytes** blokke:
 
 - `Administ`
 - `rator\00\00\00`
 
-You can create a username called **Administ** (m1) and retrieve the signature (s1).\
-Then, you can create a username called the result of `rator\00\00\00 XOR s1`. This will generate `E(m2 XOR s1 XOR 0)` which is s32.\
-now, you can use s32 as the signature of the full name **Administrator**.
+Jy kan 'n gebruikersnaam genaamd **Administ** (m1) skep en die handtekening (s1) terugkry.\
+Dan kan jy 'n gebruikersnaam skep wat die resultaat is van `rator\00\00\00 XOR s1`. Dit sal `E(m2 XOR s1 XOR 0)` genereer wat s32 is.\
+Nou kan jy s32 as die handtekening van die volle naam **Administrator** gebruik.
 
-### Summary
+### Samevatting
 
-1. Get the signature of username **Administ** (m1) which is s1
-2. Get the signature of username **rator\x00\x00\x00 XOR s1 XOR 0** is s32**.**
-3. Set the cookie to s32 and it will be a valid cookie for the user **Administrator**.
+1. Kry die handtekening van gebruikersnaam **Administ** (m1) wat s1 is
+2. Kry die handtekening van gebruikersnaam **rator\x00\x00\x00 XOR s1 XOR 0** is s32**.**
+3. Stel die cookie op s32 en dit sal 'n geldige cookie wees vir die gebruiker **Administrator**.
 
-# Attack Controlling IV
+# Aanval Beheer IV
 
-If you can control the used IV the attack could be very easy.\
-If the cookies is just the username encrypted, to impersonate the user "**administrator**" you can create the user "**Administrator**" and you will get it's cookie.\
-Now, if you can control the IV, you can change the first Byte of the IV so **IV\[0] XOR "A" == IV'\[0] XOR "a"** and regenerate the cookie for the user **Administrator.** This cookie will be valid to **impersonate** the user **administrator** with the initial **IV**.
+As jy die gebruikte IV kan beheer, kan die aanval baie maklik wees.\
+As die cookies net die gebruikersnaam is wat geënkripteer is, om die gebruiker "**administrator**" na te boots, kan jy die gebruiker "**Administrator**" skep en jy sal sy cookie kry.\
+Nou, as jy die IV kan beheer, kan jy die eerste byte van die IV verander sodat **IV\[0] XOR "A" == IV'\[0] XOR "a"** en die cookie vir die gebruiker **Administrator** hergenereer. Hierdie cookie sal geldig wees om die gebruiker **administrator** met die aanvanklike **IV** na te boots.
 
-## References
+## Verwysings
 
-More information in [https://en.wikipedia.org/wiki/CBC-MAC](https://en.wikipedia.org/wiki/CBC-MAC)
+Meer inligting in [https://en.wikipedia.org/wiki/CBC-MAC](https://en.wikipedia.org/wiki/CBC-MAC)
 
 {{#include ../banners/hacktricks-training.md}}

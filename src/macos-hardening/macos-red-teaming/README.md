@@ -8,7 +8,7 @@
 - JAMF Pro: `jamf checkJSSConnection`
 - Kandji
 
-As jy daarin slaag om **administrateur akrediteer te kompromitteer** om toegang tot die bestuursplatform te verkry, kan jy **potensieel al die rekenaars kompromitteer** deur jou malware in die masjiene te versprei.
+As jy daarin slaag om **administrateur akrediteer te kompromitteer** om toegang tot die bestuurplatform te verkry, kan jy **potensieel al die rekenaars kompromitteer** deur jou malware in die masjiene te versprei.
 
 Vir red teaming in MacOS omgewings word dit sterk aanbeveel om 'n bietjie begrip te hê van hoe die MDMs werk:
 
@@ -16,7 +16,7 @@ Vir red teaming in MacOS omgewings word dit sterk aanbeveel om 'n bietjie begrip
 macos-mdm/
 {{#endref}}
 
-### Gebruik van MDM as 'n C2
+### Gebruik MDM as 'n C2
 
 'n MDM sal toestemming hê om profiele te installeer, te vra of te verwyder, toepassings te installeer, plaaslike administrateur rekeninge te skep, firmware wagwoord in te stel, die FileVault sleutel te verander...
 
@@ -24,13 +24,13 @@ Om jou eie MDM te laat loop, moet jy **jou CSR deur 'n verskaffer laat teken** w
 
 Om egter 'n toepassing op 'n geregistreerde toestel te installeer, moet dit steeds deur 'n ontwikkelaar rekening geteken wees... egter, by MDM registrasie voeg die **toestel die SSL sertifikaat van die MDM as 'n vertroude CA** by, sodat jy nou enigiets kan teken.
 
-Om die toestel in 'n MDM te registreer, moet jy 'n **`mobileconfig`** lêer as root installeer, wat via 'n **pkg** lêer afgelewer kan word (jy kan dit in zip komprimeer en wanneer dit van safari afgelaai word, sal dit uitgepak word).
+Om die toestel in 'n MDM te registreer, moet jy 'n **`mobileconfig`** lêer as root installeer, wat via 'n **pkg** lêer afgelewer kan word (jy kan dit in zip komprimeer en wanneer dit van safari afgelaai word, sal dit ontkoppel word).
 
 **Mythic agent Orthrus** gebruik hierdie tegniek.
 
 ### Misbruik van JAMF PRO
 
-JAMF kan **aangepaste skripte** (skripte wat deur die sysadmin ontwikkel is), **natuurlike payloads** (lokale rekening skepping, EFI wagwoord instel, lêer/proses monitering...) en **MDM** (toestel konfigurasies, toestel sertifikate...) uitvoer.
+JAMF kan **aangepaste skripte** (skripte wat deur die sysadmin ontwikkel is), **natuurlike payloads** (plaaslike rekening skepping, EFI wagwoord instel, lêer/proses monitering...) en **MDM** (toestel konfigurasies, toestel sertifikate...) uitvoer.
 
 #### JAMF self-registrasie
 
@@ -46,7 +46,7 @@ Boonop, nadat jy die regte akrediteer gevind het, kan jy in staat wees om ander 
 
 <figure><img src="../../images/image (167).png" alt=""><figcaption></figcaption></figure>
 
-Die **`jamf`** binêre het die geheim bevat om die sleutelhouer te open wat op die tydstip van die ontdekking **gedeel** was onder almal en dit was: **`jk23ucnq91jfu9aj`**.\
+Die **`jamf`** binêre het die geheim bevat om die sleutelsak te open wat op die tydstip van die ontdekking **gedeel** was onder almal en dit was: **`jk23ucnq91jfu9aj`**.\
 Boonop, jamf **bly** as 'n **LaunchDaemon** in **`/Library/LaunchAgents/com.jamf.management.agent.plist`**
 
 #### JAMF Toestel Oorneming
@@ -74,12 +74,12 @@ sudo jamf policy -id 0
 ```
 #### JAMF Vervalsing
 
-Om die **kommunikasie** tussen 'n toestel en JMF te **vervals** het jy nodig:
+Om die **kommunikasie** tussen 'n toestel en JMF te **verval** het jy nodig:
 
 - Die **UUID** van die toestel: `ioreg -d2 -c IOPlatformExpertDevice | awk -F" '/IOPlatformUUID/{print $(NF-1)}'`
 - Die **JAMF sleutelhouer** van: `/Library/Application\ Support/Jamf/JAMF.keychain` wat die toestel sertifikaat bevat
 
-Met hierdie inligting, **skep 'n VM** met die **gestole** Hardeware **UUID** en met **SIP gedeaktiveer**, laat die **JAMF sleutelhouer val,** **haak** die Jamf **agent** en steel sy inligting.
+Met hierdie inligting, **skep 'n VM** met die **gestole** Hardeware **UUID** en met **SIP gedeaktiveer**, plaas die **JAMF sleutelhouer,** **haak** die Jamf **agent** en steel sy inligting.
 
 #### Geheimste steel
 
@@ -87,7 +87,7 @@ Met hierdie inligting, **skep 'n VM** met die **gestole** Hardeware **UUID** en 
 
 Jy kan ook die ligging `/Library/Application Support/Jamf/tmp/` monitor vir die **aangepaste skripte** wat admins mag wil uitvoer via Jamf, aangesien hulle **hier geplaas, uitgevoer en verwyder** word. Hierdie skripte **kan akrediteer** bevat.
 
-Echter, **akrediteer** kan deur hierdie skripte as **parameters** oorgedra word, so jy sal `ps aux | grep -i jamf` moet monitor (sonder om eers root te wees).
+Echter, **akrediteer** kan aan hierdie skripte as **parameters** oorgedra word, so jy sal `ps aux | grep -i jamf` moet monitor (sonder om eers root te wees).
 
 Die skrip [**JamfExplorer.py**](https://github.com/WithSecureLabs/Jamf-Attack-Toolkit/blob/master/JamfExplorer.py) kan luister vir nuwe lêers wat bygevoeg word en nuwe proses argumente.
 
@@ -119,11 +119,11 @@ Sommige **lokale MacOS hulpmiddel** wat jou ook kan help is `dscl`:
 ```bash
 dscl "/Active Directory/[Domain]/All Domains" ls /
 ```
-Ook is daar 'n paar gereedskap voorberei vir MacOS om outomaties die AD te enumerate en met kerberos te speel:
+Daar is ook 'n paar gereedskap voorberei vir MacOS om outomaties die AD te enumerate en met kerberos te speel:
 
 - [**Machound**](https://github.com/XMCyber/MacHound): MacHound is 'n uitbreiding van die Bloodhound ouditgereedskap wat die versameling en opname van Active Directory verhoudings op MacOS gasheer toestelle moontlik maak.
 - [**Bifrost**](https://github.com/its-a-feature/bifrost): Bifrost is 'n Objective-C projek wat ontwerp is om met die Heimdal krb5 APIs op macOS te kommunikeer. Die doel van die projek is om beter sekuriteitstoetsing rondom Kerberos op macOS toestelle moontlik te maak deur gebruik te maak van inheemse APIs sonder om enige ander raamwerk of pakkette op die teiken te vereis.
-- [**Orchard**](https://github.com/its-a-feature/Orchard): JavaScript for Automation (JXA) gereedskap om Active Directory enumerasie te doen.
+- [**Orchard**](https://github.com/its-a-feature/Orchard): JavaScript for Automation (JXA) gereedskap om Active Directory te enumerate.
 
 ### Domein Inligting
 ```bash
@@ -176,7 +176,7 @@ bifrost --action askhash --username [name] --password [password] --domain [domai
 ```
 Dit is moontlik om die **`Computer$`** wagwoord binne die Stelsel sleutelhouer te verkry.
 
-### Oor-Pas-Dit-Die-Hash
+### Over-Pass-The-Hash
 
 Kry 'n TGT vir 'n spesifieke gebruiker en diens:
 ```bash
@@ -194,7 +194,7 @@ bifrost --action asktgt --username test_lab_admin \
 bifrost --action asktgs --spn [service] --domain [domain.com] \
 --username [user] --hash [hash] --enctype [enctype]
 ```
-Met verkregen dienskaartjies is dit moontlik om te probeer om toegang te verkry tot gedeeltes op ander rekenaars:
+Met verkrygde dienskaartjies is dit moontlik om te probeer om toegang te verkry tot gedeeltes op ander rekenaars:
 ```bash
 smbutil view //computer.fqdn
 mount -t smbfs //server/folder /local/mount/point
@@ -209,7 +209,7 @@ macos-keychain.md
 
 ## Eksterne Dienste
 
-MacOS Rooi Span werk verskillend van 'n gewone Windows Rooi Span, aangesien **MacOS gewoonlik direk met verskeie eksterne platforms geïntegreer is**. 'n Algemene konfigurasie van MacOS is om toegang tot die rekenaar te verkry met **OneLogin gesinkroniseerde akrediteer, en toegang tot verskeie eksterne dienste** (soos github, aws...) via OneLogin.
+MacOS Rooi Span is anders as 'n gewone Windows Rooi Span, aangesien **MacOS gewoonlik met verskeie eksterne platforms direk geïntegreer is**. 'n Algemene konfigurasie van MacOS is om toegang tot die rekenaar te verkry met **OneLogin gesinkroniseerde akrediteer, en toegang tot verskeie eksterne dienste** (soos github, aws...) via OneLogin.
 
 ## Verskeie Rooi Span tegnieke
 
@@ -223,4 +223,9 @@ Wanneer 'n lêer in Safari afgelaai word, as dit 'n "veilige" lêer is, sal dit 
 
 - [**https://www.youtube.com/watch?v=IiMladUbL6E**](https://www.youtube.com/watch?v=IiMladUbL6E)
 - [**https://medium.com/xm-cyber/introducing-machound-a-solution-to-macos-active-directory-based-attacks-2a425f0a22b6**](https://medium.com/xm-cyber/introducing-machound-a-solution-to-macos-active-directory-based-attacks-2a425f0a22b6)
-- [**https://gist.github.com/its-a-feature/1a34f597fb30985a2742bb16116e74e0**](https
+- [**https://gist.github.com/its-a-feature/1a34f597fb30985a2742bb16116e74e0**](https://gist.github.com/its-a-feature/1a34f597fb30985a2742bb16116e74e0)
+- [**Come to the Dark Side, We Have Apples: Turning macOS Management Evil**](https://www.youtube.com/watch?v=pOQOh07eMxY)
+- [**OBTS v3.0: "An Attackers Perspective on Jamf Configurations" - Luke Roberts / Calum Hall**](https://www.youtube.com/watch?v=ju1IYWUv4ZA)
+
+
+{{#include ../../banners/hacktricks-training.md}}

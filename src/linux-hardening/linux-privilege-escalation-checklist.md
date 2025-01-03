@@ -1,173 +1,143 @@
-# Checklist - Linux Privilege Escalation
+# Kontrolelys - Linux Privilege Escalation
 
 {{#include ../banners/hacktricks-training.md}}
 
-<figure><img src="../images/image (3).png" alt=""><figcaption></figcaption></figure>
+### **Beste hulpmiddel om na Linux plaaslike privilege escalatie vektore te soek:** [**LinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS)
 
-Join [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server to communicate with experienced hackers and bug bounty hunters!
+### [Stelselinligting](privilege-escalation/#system-information)
 
-**Hacking Insights**\
-Engage with content that delves into the thrill and challenges of hacking
+- [ ] Kry **OS-inligting**
+- [ ] Kontroleer die [**PATH**](privilege-escalation/#path), enige **skryfbare gids**?
+- [ ] Kontroleer [**omgewing veranderlikes**](privilege-escalation/#env-info), enige sensitiewe besonderhede?
+- [ ] Soek na [**kernel exploits**](privilege-escalation/#kernel-exploits) **met behulp van skripte** (DirtyCow?)
+- [ ] **Kontroleer** of die [**sudo weergawe** kwesbaar is](privilege-escalation/#sudo-version)
+- [ ] [**Dmesg** handtekeningverifikasie het misluk](privilege-escalation/#dmesg-signature-verification-failed)
+- [ ] Meer stelselinventaris ([datum, stelselsyfers, cpu-inligting, drukkers](privilege-escalation/#more-system-enumeration))
+- [ ] [**Inventariseer meer verdediging**](privilege-escalation/#enumerate-possible-defenses)
 
-**Real-Time Hack News**\
-Keep up-to-date with fast-paced hacking world through real-time news and insights
+### [Skyfies](privilege-escalation/#drives)
 
-**Latest Announcements**\
-Stay informed with the newest bug bounties launching and crucial platform updates
+- [ ] **Lys gemonteerde** skywe
+- [ ] **Enige ongemonteerde skyf?**
+- [ ] **Enige krediete in fstab?**
 
-**Join us on** [**Discord**](https://discord.com/invite/N3FrSbmwdy) and start collaborating with top hackers today!
+### [**Gemonteerde Sagteware**](privilege-escalation/#installed-software)
 
-### **Best tool to look for Linux local privilege escalation vectors:** [**LinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS)
+- [ ] **Kontroleer vir** [**nuttige sagteware**](privilege-escalation/#useful-software) **geïnstalleer**
+- [ ] **Kontroleer vir** [**kwesbare sagteware**](privilege-escalation/#vulnerable-software-installed) **geïnstalleer**
 
-### [System Information](privilege-escalation/#system-information)
+### [Prosesse](privilege-escalation/#processes)
 
-- [ ] Get **OS information**
-- [ ] Check the [**PATH**](privilege-escalation/#path), any **writable folder**?
-- [ ] Check [**env variables**](privilege-escalation/#env-info), any sensitive detail?
-- [ ] Search for [**kernel exploits**](privilege-escalation/#kernel-exploits) **using scripts** (DirtyCow?)
-- [ ] **Check** if the [**sudo version** is vulnerable](privilege-escalation/#sudo-version)
-- [ ] [**Dmesg** signature verification failed](privilege-escalation/#dmesg-signature-verification-failed)
-- [ ] More system enum ([date, system stats, cpu info, printers](privilege-escalation/#more-system-enumeration))
-- [ ] [Enumerate more defenses](privilege-escalation/#enumerate-possible-defenses)
+- [ ] Is enige **onbekende sagteware aan die gang**?
+- [ ] Is enige sagteware aan die gang met **meer bevoegdhede as wat dit behoort te hê**?
+- [ ] Soek na **exploits van lopende prosesse** (veral die weergawe wat aan die gang is).
+- [ ] Kan jy die **binaire** van enige lopende proses **wysig**?
+- [ ] **Monitor prosesse** en kyk of enige interessante proses gereeld aan die gang is.
+- [ ] Kan jy **lees** van sommige interessante **prosesgeheue** (waar wagwoorde gestoor kan word)?
 
-### [Drives](privilege-escalation/#drives)
+### [Geskeduleerde/Cron werke?](privilege-escalation/#scheduled-jobs)
 
-- [ ] **List mounted** drives
-- [ ] **Any unmounted drive?**
-- [ ] **Any creds in fstab?**
+- [ ] Word die [**PATH**](privilege-escalation/#cron-path) deur 'n cron gewysig en kan jy daarin **skryf**?
+- [ ] Enige [**wildcard**](privilege-escalation/#cron-using-a-script-with-a-wildcard-wildcard-injection) in 'n cron werk?
+- [ ] Sommige [**wysigbare skrip**](privilege-escalation/#cron-script-overwriting-and-symlink) word **uitgevoer** of is binne **wysigbare gids**?
+- [ ] Het jy opgemerk dat sommige **skrip** [**baie gereeld**](privilege-escalation/#frequent-cron-jobs) **uitgevoer** kan word of word? (elke 1, 2 of 5 minute)
 
-### [**Installed Software**](privilege-escalation/#installed-software)
+### [Dienste](privilege-escalation/#services)
 
-- [ ] **Check for**[ **useful software**](privilege-escalation/#useful-software) **installed**
-- [ ] **Check for** [**vulnerable software**](privilege-escalation/#vulnerable-software-installed) **installed**
-
-### [Processes](privilege-escalation/#processes)
-
-- [ ] Is any **unknown software running**?
-- [ ] Is any software running with **more privileges than it should have**?
-- [ ] Search for **exploits of running processes** (especially the version running).
-- [ ] Can you **modify the binary** of any running process?
-- [ ] **Monitor processes** and check if any interesting process is running frequently.
-- [ ] Can you **read** some interesting **process memory** (where passwords could be saved)?
-
-### [Scheduled/Cron jobs?](privilege-escalation/#scheduled-jobs)
-
-- [ ] Is the [**PATH** ](privilege-escalation/#cron-path)being modified by some cron and you can **write** in it?
-- [ ] Any [**wildcard** ](privilege-escalation/#cron-using-a-script-with-a-wildcard-wildcard-injection)in a cron job?
-- [ ] Some [**modifiable script** ](privilege-escalation/#cron-script-overwriting-and-symlink)is being **executed** or is inside **modifiable folder**?
-- [ ] Have you detected that some **script** could be or are being [**executed** very **frequently**](privilege-escalation/#frequent-cron-jobs)? (every 1, 2 or 5 minutes)
-
-### [Services](privilege-escalation/#services)
-
-- [ ] Any **writable .service** file?
-- [ ] Any **writable binary** executed by a **service**?
-- [ ] Any **writable folder in systemd PATH**?
+- [ ] Enige **skryfbare .service** lêer?
+- [ ] Enige **skryfbare binaire** wat deur 'n **diens** uitgevoer word?
+- [ ] Enige **skryfbare gids in systemd PATH**?
 
 ### [Timers](privilege-escalation/#timers)
 
-- [ ] Any **writable timer**?
+- [ ] Enige **skryfbare timer**?
 
 ### [Sockets](privilege-escalation/#sockets)
 
-- [ ] Any **writable .socket** file?
-- [ ] Can you **communicate with any socket**?
-- [ ] **HTTP sockets** with interesting info?
+- [ ] Enige **skryfbare .socket** lêer?
+- [ ] Kan jy **kommunikeer met enige socket**?
+- [ ] **HTTP sockets** met interessante inligting?
 
 ### [D-Bus](privilege-escalation/#d-bus)
 
-- [ ] Can you **communicate with any D-Bus**?
+- [ ] Kan jy **kommunikeer met enige D-Bus**?
 
-### [Network](privilege-escalation/#network)
+### [Netwerk](privilege-escalation/#network)
 
-- [ ] Enumerate the network to know where you are
-- [ ] **Open ports you couldn't access before** getting a shell inside the machine?
-- [ ] Can you **sniff traffic** using `tcpdump`?
+- [ ] Inventariseer die netwerk om te weet waar jy is
+- [ ] **Oop poorte wat jy voorheen nie kon toegang nie** om 'n shell binne die masjien te kry?
+- [ ] Kan jy **verkeer snuffel** met `tcpdump`?
 
-### [Users](privilege-escalation/#users)
+### [Gebruikers](privilege-escalation/#users)
 
-- [ ] Generic users/groups **enumeration**
-- [ ] Do you have a **very big UID**? Is the **machine** **vulnerable**?
-- [ ] Can you [**escalate privileges thanks to a group**](privilege-escalation/interesting-groups-linux-pe/) you belong to?
-- [ ] **Clipboard** data?
-- [ ] Password Policy?
-- [ ] Try to **use** every **known password** that you have discovered previously to login **with each** possible **user**. Try to login also without a password.
+- [ ] Generiese gebruikers/groepe **inventarisering**
+- [ ] Het jy 'n **baie groot UID**? Is die **masjien** **kwesbaar**?
+- [ ] Kan jy [**privileges verhoog danksy 'n groep**](privilege-escalation/interesting-groups-linux-pe/) waartoe jy behoort?
+- [ ] **Klipbord** data?
+- [ ] Wagwoordbeleid?
+- [ ] Probeer om **elke bekende wagwoord** wat jy voorheen ontdek het te gebruik om in te log met **elke** moontlike **gebruiker**. Probeer ook om sonder 'n wagwoord in te log.
 
-### [Writable PATH](privilege-escalation/#writable-path-abuses)
+### [Skryfbare PATH](privilege-escalation/#writable-path-abuses)
 
-- [ ] If you have **write privileges over some folder in PATH** you may be able to escalate privileges
+- [ ] As jy **skryfregte oor 'n gids in PATH** het, kan jy dalk privileges verhoog
 
-### [SUDO and SUID commands](privilege-escalation/#sudo-and-suid)
+### [SUDO en SUID opdragte](privilege-escalation/#sudo-and-suid)
 
-- [ ] Can you execute **any command with sudo**? Can you use it to READ, WRITE or EXECUTE anything as root? ([**GTFOBins**](https://gtfobins.github.io))
-- [ ] Is any **exploitable SUID binary**? ([**GTFOBins**](https://gtfobins.github.io))
-- [ ] Are [**sudo** commands **limited** by **path**? can you **bypass** the restrictions](privilege-escalation/#sudo-execution-bypassing-paths)?
-- [ ] [**Sudo/SUID binary without path indicated**](privilege-escalation/#sudo-command-suid-binary-without-command-path)?
-- [ ] [**SUID binary specifying path**](privilege-escalation/#suid-binary-with-command-path)? Bypass
-- [ ] [**LD_PRELOAD vuln**](privilege-escalation/#ld_preload)
-- [ ] [**Lack of .so library in SUID binary**](privilege-escalation/#suid-binary-so-injection) from a writable folder?
-- [ ] [**SUDO tokens available**](privilege-escalation/#reusing-sudo-tokens)? [**Can you create a SUDO token**](privilege-escalation/#var-run-sudo-ts-less-than-username-greater-than)?
-- [ ] Can you [**read or modify sudoers files**](privilege-escalation/#etc-sudoers-etc-sudoers-d)?
-- [ ] Can you [**modify /etc/ld.so.conf.d/**](privilege-escalation/#etc-ld-so-conf-d)?
-- [ ] [**OpenBSD DOAS**](privilege-escalation/#doas) command
+- [ ] Kan jy **enige opdrag met sudo** uitvoer? Kan jy dit gebruik om IES, SKRYF of UITVOER enigiets as root? ([**GTFOBins**](https://gtfobins.github.io))
+- [ ] Is enige **kwesbare SUID binaire**? ([**GTFOBins**](https://gtfobins.github.io))
+- [ ] Word [**sudo** opdragte **beperk** deur **pad**? kan jy die **beperkings omseil**](privilege-escalation/#sudo-execution-bypassing-paths)?
+- [ ] [**Sudo/SUID binaire sonder pad aangedui**](privilege-escalation/#sudo-command-suid-binary-without-command-path)?
+- [ ] [**SUID binaire wat pad spesifiseer**](privilege-escalation/#suid-binary-with-command-path)? Omseil
+- [ ] [**LD_PRELOAD kwesbaarheid**](privilege-escalation/#ld_preload)
+- [ ] [**Gebrek aan .so biblioteek in SUID binaire**](privilege-escalation/#suid-binary-so-injection) van 'n skryfbare gids?
+- [ ] [**SUDO tokens beskikbaar**](privilege-escalation/#reusing-sudo-tokens)? [**Kan jy 'n SUDO token skep**](privilege-escalation/#var-run-sudo-ts-less-than-username-greater-than)?
+- [ ] Kan jy [**sudoers lêers lees of wysig**](privilege-escalation/#etc-sudoers-etc-sudoers-d)?
+- [ ] Kan jy [**/etc/ld.so.conf.d/**](privilege-escalation/#etc-ld-so-conf-d) wysig?
+- [ ] [**OpenBSD DOAS**](privilege-escalation/#doas) opdrag
 
-### [Capabilities](privilege-escalation/#capabilities)
+### [Vermoeë](privilege-escalation/#capabilities)
 
-- [ ] Has any binary any **unexpected capability**?
+- [ ] Het enige binaire enige **onverwagte vermoë**?
 
 ### [ACLs](privilege-escalation/#acls)
 
-- [ ] Has any file any **unexpected ACL**?
+- [ ] Het enige lêer enige **onverwagte ACL**?
 
-### [Open Shell sessions](privilege-escalation/#open-shell-sessions)
+### [Oop Shell sessies](privilege-escalation/#open-shell-sessions)
 
 - [ ] **screen**
 - [ ] **tmux**
 
 ### [SSH](privilege-escalation/#ssh)
 
-- [ ] **Debian** [**OpenSSL Predictable PRNG - CVE-2008-0166**](privilege-escalation/#debian-openssl-predictable-prng-cve-2008-0166)
-- [ ] [**SSH Interesting configuration values**](privilege-escalation/#ssh-interesting-configuration-values)
+- [ ] **Debian** [**OpenSSL Voorspelbare PRNG - CVE-2008-0166**](privilege-escalation/#debian-openssl-predictable-prng-cve-2008-0166)
+- [ ] [**SSH Interessante konfigurasiewaardes**](privilege-escalation/#ssh-interesting-configuration-values)
 
-### [Interesting Files](privilege-escalation/#interesting-files)
+### [Interessante Lêers](privilege-escalation/#interesting-files)
 
-- [ ] **Profile files** - Read sensitive data? Write to privesc?
-- [ ] **passwd/shadow files** - Read sensitive data? Write to privesc?
-- [ ] **Check commonly interesting folders** for sensitive data
-- [ ] **Weird Location/Owned files,** you may have access to or alter executable files
-- [ ] **Modified** in last mins
-- [ ] **Sqlite DB files**
-- [ ] **Hidden files**
-- [ ] **Script/Binaries in PATH**
-- [ ] **Web files** (passwords?)
+- [ ] **Profiel lêers** - Lees sensitiewe data? Skryf na privesk?
+- [ ] **passwd/shadow lêers** - Lees sensitiewe data? Skryf na privesk?
+- [ ] **Kontroleer algemeen interessante gids** vir sensitiewe data
+- [ ] **Vreemde Ligging/Eienaars lêers,** jy mag toegang hê tot of uitvoerbare lêers verander
+- [ ] **Gewysig** in laaste minute
+- [ ] **Sqlite DB lêers**
+- [ ] **Versteekte lêers**
+- [ ] **Skrip/Binaries in PATH**
+- [ ] **Web lêers** (wagwoorde?)
 - [ ] **Backups**?
-- [ ] **Known files that contains passwords**: Use **Linpeas** and **LaZagne**
-- [ ] **Generic search**
+- [ ] **Bekende lêers wat wagwoorde bevat**: Gebruik **Linpeas** en **LaZagne**
+- [ ] **Generiese soektog**
 
-### [**Writable Files**](privilege-escalation/#writable-files)
+### [**Skryfbare Lêers**](privilege-escalation/#writable-files)
 
-- [ ] **Modify python library** to execute arbitrary commands?
-- [ ] Can you **modify log files**? **Logtotten** exploit
-- [ ] Can you **modify /etc/sysconfig/network-scripts/**? Centos/Redhat exploit
-- [ ] Can you [**write in ini, int.d, systemd or rc.d files**](privilege-escalation/#init-init-d-systemd-and-rc-d)?
+- [ ] **Wysig python biblioteek** om arbitrêre opdragte uit te voer?
+- [ ] Kan jy **log lêers wysig**? **Logtotten** kwesbaarheid
+- [ ] Kan jy **/etc/sysconfig/network-scripts/** wysig? Centos/Redhat kwesbaarheid
+- [ ] Kan jy [**skryf in ini, int.d, systemd of rc.d lêers**](privilege-escalation/#init-init-d-systemd-and-rc-d)?
 
-### [**Other tricks**](privilege-escalation/#other-tricks)
+### [**Ander truuks**](privilege-escalation/#other-tricks)
 
-- [ ] Can you [**abuse NFS to escalate privileges**](privilege-escalation/#nfs-privilege-escalation)?
-- [ ] Do you need to [**escape from a restrictive shell**](privilege-escalation/#escaping-from-restricted-shells)?
-
-<figure><img src="../images/image (3).png" alt=""><figcaption></figcaption></figure>
-
-Join [**HackenProof Discord**](https://discord.com/invite/N3FrSbmwdy) server to communicate with experienced hackers and bug bounty hunters!
-
-**Hacking Insights**\
-Engage with content that delves into the thrill and challenges of hacking
-
-**Real-Time Hack News**\
-Keep up-to-date with fast-paced hacking world through real-time news and insights
-
-**Latest Announcements**\
-Stay informed with the newest bug bounties launching and crucial platform updates
-
-**Join us on** [**Discord**](https://discord.com/invite/N3FrSbmwdy) and start collaborating with top hackers today!
+- [ ] Kan jy [**NFS misbruik om privileges te verhoog**](privilege-escalation/#nfs-privilege-escalation)?
+- [ ] Moet jy [**ontsnap uit 'n beperkende shell**](privilege-escalation/#escaping-from-restricted-shells)?
 
 {{#include ../banners/hacktricks-training.md}}

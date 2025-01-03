@@ -18,21 +18,21 @@ path.config: "/etc/logstash/conf.d/*.conf"
 path.config: "/usr/share/logstash/pipeline/1*.conf"
 pipeline.workers: 6
 ```
-Hierdie lêer onthul waar die **.conf** lêers, wat pyplyn-konfigurasies bevat, geleë is. Wanneer 'n **Elasticsearch output module** gebruik word, is dit algemeen dat **pyplyne** **Elasticsearch kredensiale** insluit, wat dikwels uitgebreide regte het weens Logstash se behoefte om data na Elasticsearch te skryf. Wildcards in konfigurasiepaaie laat Logstash toe om alle ooreenstemmende pyplyne in die aangewese gids uit te voer.
+Hierdie lêer onthul waar die **.conf** lêers, wat pyplyn konfigurasies bevat, geleë is. Wanneer 'n **Elasticsearch output module** gebruik word, is dit algemeen dat **pyplyne** **Elasticsearch kredensiale** insluit, wat dikwels uitgebreide bevoegdhede het weens Logstash se behoefte om data na Elasticsearch te skryf. Wildcards in konfigurasiepaaie laat Logstash toe om alle ooreenstemmende pyplyne in die aangewese gids uit te voer.
 
-### Privilege Escalation via Writable Pipelines
+### Bevoegdheid Escalatie via Skryfbare Pyplyne
 
-Om 'n poging tot privilege-escalasie te doen, identifiseer eers die gebruiker waaronder die Logstash-diens loop, tipies die **logstash** gebruiker. Verseker dat jy aan **een** van hierdie kriteria voldoen:
+Om 'n poging tot bevoegdheidsekalasie te doen, identifiseer eers die gebruiker waaronder die Logstash diens loop, tipies die **logstash** gebruiker. Verseker dat jy aan **een** van hierdie kriteria voldoen:
 
-- Besit **skryfrek** tot 'n pyplyn **.conf** lêer **of**
-- Die **/etc/logstash/pipelines.yml** lêer gebruik 'n wildcard, en jy kan na die teiken-gids skryf
+- Besit **skrywe toegang** tot 'n pyplyn **.conf** lêer **of**
+- Die **/etc/logstash/pipelines.yml** lêer gebruik 'n wildcard, en jy kan na die teiken gids skryf
 
-Boonop moet **een** van hierdie voorwaardes vervul word:
+Boonop moet **een** van hierdie toestande vervul word:
 
-- Vermoë om die Logstash-diens te herbegin **of**
+- Vermoë om die Logstash diens te herbegin **of**
 - Die **/etc/logstash/logstash.yml** lêer het **config.reload.automatic: true** ingestel
 
-Gegewe 'n wildcard in die konfigurasie, laat die skep van 'n lêer wat met hierdie wildcard ooreenstem, toe dat opdragte uitgevoer word. Byvoorbeeld:
+Gegewe 'n wildcard in die konfigurasie, laat die skep van 'n lêer wat met hierdie wildcard ooreenstem toe dat opdragte uitgevoer word. Byvoorbeeld:
 ```bash
 input {
 exec {

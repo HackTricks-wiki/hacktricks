@@ -1,19 +1,17 @@
-# USB Keystrokes
+# USB Toetsaanslagen
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-If you have a pcap containing the communication via USB of a keyboard like the following one:
+As jy 'n pcap het wat die kommunikasie via USB van 'n sleutelbord soos die volgende bevat:
 
 ![](<../../../images/image (962).png>)
 
-You can use the tool [**ctf-usb-keyboard-parser**](https://github.com/TeamRocketIst/ctf-usb-keyboard-parser) to get what was written in the communication:
-
+Kan jy die hulpmiddel [**ctf-usb-keyboard-parser**](https://github.com/TeamRocketIst/ctf-usb-keyboard-parser) gebruik om te kry wat in die kommunikasie geskryf is:
 ```bash
 tshark -r ./usb.pcap -Y 'usb.capdata && usb.data_len == 8' -T fields -e usb.capdata | sed 's/../:&/g2' > keystrokes.txt
 python3 usbkeyboard.py ./keystrokes.txt
 ```
-
-You can read more information and find some scripts about how to analyse this in:
+U kan meer inligting lees en 'n paar skripte vind oor hoe om dit te analiseer in:
 
 - [https://medium.com/@ali.bawazeeer/kaizen-ctf-2018-reverse-engineer-usb-keystrok-from-pcap-file-2412351679f4](https://medium.com/@ali.bawazeeer/kaizen-ctf-2018-reverse-engineer-usb-keystrok-from-pcap-file-2412351679f4)
 - [https://github.com/tanc7/HacktheBox_Deadly_Arthropod_Writeup](https://github.com/tanc7/HacktheBox_Deadly_Arthropod_Writeup)

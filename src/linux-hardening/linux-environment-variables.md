@@ -1,38 +1,31 @@
-# Linux Environment Variables
+# Linux Omgewing Veranderlikes
 
 {{#include ../banners/hacktricks-training.md}}
 
-## Global variables
+## Globale veranderlikes
 
-The global variables **will be** inherited by **child processes**.
+Die globale veranderlikes **sal wees** geërf deur **kind proses**.
 
-You can create a global variable for your current session doing:
-
+Jy kan 'n globale veranderlike vir jou huidige sessie skep deur:
 ```bash
 export MYGLOBAL="hello world"
 echo $MYGLOBAL #Prints: hello world
 ```
+Hierdie veranderlike sal toeganklik wees deur jou huidige sessies en sy kindprosesse.
 
-This variable will be accessible by your current sessions and its child processes.
-
-You can **remove** a variable doing:
-
+Jy kan 'n veranderlike **verwyder** deur:
 ```bash
 unset MYGLOBAL
 ```
+## Plaaslike veranderlikes
 
-## Local variables
-
-The **local variables** can only be **accessed** by the **current shell/script**.
-
+Die **plaaslike veranderlikes** kan slegs **toegang verkry** word deur die **huidige shell/script**.
 ```bash
 LOCAL="my local"
 echo $LOCAL
 unset LOCAL
 ```
-
-## List current variables
-
+## Lys huidige veranderlikes
 ```bash
 set
 env
@@ -40,84 +33,75 @@ printenv
 cat /proc/$$/environ
 cat /proc/`python -c "import os; print(os.getppid())"`/environ
 ```
+## Algemene veranderlikes
 
-## Common variables
+Van: [https://geek-university.com/linux/common-environment-variables/](https://geek-university.com/linux/common-environment-variables/)
 
-From: [https://geek-university.com/linux/common-environment-variables/](https://geek-university.com/linux/common-environment-variables/)
+- **DISPLAY** – die vertoning wat deur **X** gebruik word. Hierdie veranderlike is gewoonlik op **:0.0** gestel, wat die eerste vertoning op die huidige rekenaar beteken.
+- **EDITOR** – die gebruiker se verkiesde teksredigeerder.
+- **HISTFILESIZE** – die maksimum aantal lyne wat in die geskiedenis lêer bevat is.
+- **HISTSIZE** – Aantal lyne wat by die geskiedenis lêer gevoeg word wanneer die gebruiker sy sessie beëindig.
+- **HOME** – jou tuisgids.
+- **HOSTNAME** – die rekenaar se gasheernaam.
+- **LANG** – jou huidige taal.
+- **MAIL** – die ligging van die gebruiker se posspool. Gewoonlik **/var/spool/mail/USER**.
+- **MANPATH** – die lys van gidse om na handleidingsbladsye te soek.
+- **OSTYPE** – die tipe bedryfstelsel.
+- **PS1** – die standaardprompt in bash.
+- **PATH** – stoor die pad van al die gidse wat binêre lêers bevat wat jy wil uitvoer net deur die naam van die lêer te spesifiseer en nie deur relatiewe of absolute pad nie.
+- **PWD** – die huidige werkgids.
+- **SHELL** – die pad na die huidige opdragskel (byvoorbeeld, **/bin/bash**).
+- **TERM** – die huidige terminal tipe (byvoorbeeld, **xterm**).
+- **TZ** – jou tydsone.
+- **USER** – jou huidige gebruikersnaam.
 
-- **DISPLAY** – the display used by **X**. This variable is usually set to **:0.0**, which means the first display on the current computer.
-- **EDITOR** – the user’s preferred text editor.
-- **HISTFILESIZE** – the maximum number of lines contained in the history file.
-- **HISTSIZE** – Number of lines added to the history file when the user finish his session
-- **HOME** – your home directory.
-- **HOSTNAME** – the hostname of the computer.
-- **LANG** – your current language.
-- **MAIL** – the location of the user’s mail spool. Usually **/var/spool/mail/USER**.
-- **MANPATH** – the list of directories to search for manual pages.
-- **OSTYPE** – the type of operating system.
-- **PS1** – the default prompt in bash.
-- **PATH** – stores the path of all the directories which holds binary files you want to execute just by specifying the name of the file and not by relative or absolute path.
-- **PWD** – the current working directory.
-- **SHELL** – the path to the current command shell (for example, **/bin/bash**).
-- **TERM** – the current terminal type (for example, **xterm**).
-- **TZ** – your time zone.
-- **USER** – your current username.
-
-## Interesting variables for hacking
+## Interessante veranderlikes vir hacking
 
 ### **HISTFILESIZE**
 
-Change the **value of this variable to 0**, so when you **end your session** the **history file** (\~/.bash_history) **will be deleted**.
-
+Verander die **waarde van hierdie veranderlike na 0**, sodat wanneer jy jou **sessie beëindig** die **geskiedenis lêer** (\~/.bash_history) **verwyder sal word**.
 ```bash
 export HISTFILESIZE=0
 ```
-
 ### **HISTSIZE**
 
-Change the **value of this variable to 0**, so when you **end your session** any command will be added to the **history file** (\~/.bash_history).
-
+Verander die **waarde van hierdie veranderlike na 0**, sodat wanneer jy jou **sessie beëindig** enige opdrag by die **geskiedenis lêer** (\~/.bash_history) gevoeg sal word.
 ```bash
 export HISTSIZE=0
 ```
-
 ### http_proxy & https_proxy
 
-The processes will use the **proxy** declared here to connect to internet through **http or https**.
-
+Die prosesse sal die **proxy** wat hier verklaar is, gebruik om via **http of https** met die internet te verbind.
 ```bash
 export http_proxy="http://10.10.10.10:8080"
 export https_proxy="http://10.10.10.10:8080"
 ```
-
 ### SSL_CERT_FILE & SSL_CERT_DIR
 
-The processes will trust the certificates indicated in **these env variables**.
-
+Die prosesse sal die sertifikate vertrou wat in **hierdie omgewingsveranderlikes** aangedui word.
 ```bash
 export SSL_CERT_FILE=/path/to/ca-bundle.pem
 export SSL_CERT_DIR=/path/to/ca-certificates
 ```
-
 ### PS1
 
-Change how your prompt looks.
+Verander hoe jou prompt lyk.
 
-[**This is an example**](https://gist.github.com/carlospolop/43f7cd50f3deea972439af3222b68808)
+[**Dit is 'n voorbeeld**](https://gist.github.com/carlospolop/43f7cd50f3deea972439af3222b68808)
 
 Root:
 
 ![](<../images/image (897).png>)
 
-Regular user:
+Reguliere gebruiker:
 
 ![](<../images/image (740).png>)
 
-One, two and three backgrounded jobs:
+Een, twee en drie agtergrond take:
 
 ![](<../images/image (145).png>)
 
-One background job, one stopped and last command didn't finish correctly:
+Een agtergrond taak, een gestopte en laaste opdrag het nie korrek afgehandel nie:
 
 ![](<../images/image (715).png>)
 

@@ -88,7 +88,7 @@ Die objek is **`someObject`**, die metode is **`@selector(method1p1:p2:)`** en d
 Volg die objekstrukture, dit is moontlik om 'n **array van metodes** te bereik waar die **name** en **pointers** na die metodekode **geleë** is.
 
 > [!CAUTION]
-> Let daarop dat omdat metodes en klasse toeganklik is op grond van hul name, hierdie inligting in die binêre gestoor word, so dit is moontlik om dit te onttrek met `otool -ov </path/bin>` of [`class-dump </path/bin>`](https://github.com/nygard/class-dump)
+> Let daarop dat omdat metodes en klasse toeganklik is op grond van hul name, hierdie inligting in die binêre gestoor word, so dit is moontlik om dit te herwin met `otool -ov </path/bin>` of [`class-dump </path/bin>`](https://github.com/nygard/class-dump)
 
 ### Toegang tot die rou metodes
 
@@ -160,10 +160,10 @@ return 0;
 ```
 ### Metode Swizzling met method_exchangeImplementations
 
-Die funksie **`method_exchangeImplementations`** maak dit moontlik om die **adres** van die **implementering** van **een funksie vir die ander** te **verander**.
+Die funksie **`method_exchangeImplementations`** laat toe om die **adres** van die **implementering** van **een funksie vir die ander** te **verander**.
 
 > [!CAUTION]
-> So wanneer 'n funksie aangeroep word, is dit wat **uitgevoer word die ander een**.
+> So wanneer 'n funksie aangeroep word, wat **uitgevoer word is die ander een**.
 ```objectivec
 //gcc -framework Foundation swizzle_str.m -o swizzle_str
 
@@ -214,9 +214,9 @@ return 0;
 
 ### Metode Swizzling met method_setImplementation
 
-Die vorige formaat is vreemd omdat jy die implementasie van 2 metodes van mekaar verander. Deur die funksie **`method_setImplementation`** te gebruik, kan jy die **implementasie** van 'n **metode vir die ander een** **verander**.
+Die vorige formaat is vreemd omdat jy die implementasie van 2 metodes een van die ander verander. Deur die funksie **`method_setImplementation`** te gebruik, kan jy die **implementasie** van 'n **metode vir die ander een** **verander**.
 
-Onthou net om die **adres van die implementasie van die oorspronklike een** te **stoor** as jy dit van die nuwe implementasie af gaan aanroep voordat jy dit oorskryf, want later sal dit baie moeiliker wees om daardie adres te lokaliseer.
+Onthou net om die **adres van die implementasie van die oorspronklike een** te **stoor** as jy dit van die nuwe implementasie af gaan aanroep voordat jy dit oorskryf, want later sal dit baie moeilik wees om daardie adres te lokaliseer.
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
@@ -274,11 +274,11 @@ In hierdie bladsy is verskillende maniere om funksies te hook bespreek. Dit het 
 
 Om dit te doen, is die maklikste tegniek om te gebruik om 'n [Dyld via omgewing veranderlikes of kaping](../macos-dyld-hijacking-and-dyld_insert_libraries.md) in te spuit. Ek vermoed dit kan ook gedoen word via [Dylib proses inspuiting](macos-ipc-inter-process-communication/#dylib-process-injection-via-task-port).
 
-Albei opsies is egter **beperk** tot **onbeskermde** binêre/prosesse. Kyk na elke tegniek om meer oor die beperkings te leer.
+Albei opsies is egter **beperk** tot **onbeskermde** binêre/proses. Kyk na elke tegniek om meer oor die beperkings te leer.
 
-'n Funksie hooking aanval is egter baie spesifiek; 'n aanvaller sal dit doen om **sensitiewe inligting van binne 'n proses te steel** (as nie, sou jy net 'n proses inspuiting aanval doen). En hierdie sensitiewe inligting mag in gebruiker afgelaaide toepassings soos MacPass geleë wees.
+'n Funksie hooking aanval is egter baie spesifiek; 'n aanvaller sal dit doen om **sensitiewe inligting van binne 'n proses te steel** (as nie, sou jy net 'n proses inspuiting aanval doen). En hierdie sensitiewe inligting mag geleë wees in gebruiker afgelaaide toepassings soos MacPass.
 
-Die aanvaller se vektor sou wees om of 'n kwesbaarheid te vind of die handtekening van die toepassing te verwyder, en die **`DYLD_INSERT_LIBRARIES`** omgewing veranderlike deur die Info.plist van die toepassing in te spuit deur iets soos:
+Die aanvallersvectoer sou wees om of 'n kwesbaarheid te vind of die handtekening van die toepassing te verwyder, en die **`DYLD_INSERT_LIBRARIES`** omgewing veranderlike deur die Info.plist van die toepassing in te spuit deur iets soos:
 ```xml
 <key>LSEnvironment</key>
 <dict>

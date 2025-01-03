@@ -2,26 +2,24 @@
 
 {{#include ../banners/hacktricks-training.md}}
 
-{% embed url="https://websec.nl/" %}
-
 ## CBC - Cipher Block Chaining
 
-In CBC mode the **previous encrypted block is used as IV** to XOR with the next block:
+In CBC-modus word die **vorige versleutelde blok as IV** gebruik om met die volgende blok te XOR:
 
 ![https://defuse.ca/images/cbc_encryption.png](https://defuse.ca/images/cbc_encryption.png)
 
-To decrypt CBC the **opposite** **operations** are done:
+Om CBC te ontsleutel, word die **teenoorgestelde** **operasies** gedoen:
 
 ![https://defuse.ca/images/cbc_decryption.png](https://defuse.ca/images/cbc_decryption.png)
 
-Notice how it's needed to use an **encryption** **key** and an **IV**.
+Let op hoe dit nodig is om 'n **versleuteling** **sleutel** en 'n **IV** te gebruik.
 
 ## Message Padding
 
-As the encryption is performed in **fixed** **size** **blocks**, **padding** is usually needed in the **last** **block** to complete its length.\
-Usually **PKCS7** is used, which generates a padding **repeating** the **number** of **bytes** **needed** to **complete** the block. For example, if the last block is missing 3 bytes, the padding will be `\x03\x03\x03`.
+Aangesien die versleuteling in **vaste** **grootte** **blokken** uitgevoer word, is **padding** gewoonlik nodig in die **laaste** **blok** om sy lengte te voltooi.\
+Gewoonlik word **PKCS7** gebruik, wat 'n padding genereer deur die **aantal** **bytes** **nodig** om die blok te **voltooi** te herhaal. Byvoorbeeld, as die laaste blok 3 bytes kort, sal die padding `\x03\x03\x03` wees.
 
-Let's look at more examples with a **2 blocks of length 8bytes**:
+Kom ons kyk na meer voorbeelde met **2 blokke van lengte 8bytes**:
 
 | byte #0 | byte #1 | byte #2 | byte #3 | byte #4 | byte #5 | byte #6 | byte #7 | byte #0  | byte #1  | byte #2  | byte #3  | byte #4  | byte #5  | byte #6  | byte #7  |
 | ------- | ------- | ------- | ------- | ------- | ------- | ------- | ------- | -------- | -------- | -------- | -------- | -------- | -------- | -------- | -------- |
@@ -30,51 +28,43 @@ Let's look at more examples with a **2 blocks of length 8bytes**:
 | P       | A       | S       | S       | W       | O       | R       | D       | 1        | 2        | 3        | **0x05** | **0x05** | **0x05** | **0x05** | **0x05** |
 | P       | A       | S       | S       | W       | O       | R       | D       | **0x08** | **0x08** | **0x08** | **0x08** | **0x08** | **0x08** | **0x08** | **0x08** |
 
-Note how in the last example the **last block was full so another one was generated only with padding**.
+Let op hoe in die laaste voorbeeld die **laaste blok vol was, so 'n ander een is net met padding gegenereer**.
 
 ## Padding Oracle
 
-When an application decrypts encrypted data, it will first decrypt the data; then it will remove the padding. During the cleanup of the padding, if an **invalid padding triggers a detectable behaviour**, you have a **padding oracle vulnerability**. The detectable behaviour can be an **error**, a **lack of results**, or a **slower response**.
+Wanneer 'n toepassing versleutelde data ontsleutel, sal dit eers die data ontsleutel; dan sal dit die padding verwyder. Tydens die opruiming van die padding, as 'n **ongeldige padding 'n waarneembare gedrag veroorsaak**, het jy 'n **padding oracle kwesbaarheid**. Die waarneembare gedrag kan 'n **fout**, 'n **gebrek aan resultate**, of 'n **langsame reaksie** wees.
 
-If you detect this behaviour, you can **decrypt the encrypted data** and even **encrypt any cleartext**.
+As jy hierdie gedrag waarneem, kan jy die **versleutelde data ontsleutel** en selfs **enige duidelike teks versleutel**.
 
-### How to exploit
+### Hoe om te benut
 
-You could use [https://github.com/AonCyberLabs/PadBuster](https://github.com/AonCyberLabs/PadBuster) to exploit this kind of vulnerability or just do
-
+Jy kan [https://github.com/AonCyberLabs/PadBuster](https://github.com/AonCyberLabs/PadBuster) gebruik om hierdie tipe kwesbaarheid te benut of net doen
 ```
 sudo apt-get install padbuster
 ```
-
-In order to test if the cookie of a site is vulnerable you could try:
-
+Om te toets of die koekie van 'n webwerf kwesbaar is, kan jy probeer:
 ```bash
 perl ./padBuster.pl http://10.10.10.10/index.php "RVJDQrwUdTRWJUVUeBKkEA==" 8 -encoding 0 -cookies "login=RVJDQrwUdTRWJUVUeBKkEA=="
 ```
+**Kodering 0** beteken dat **base64** gebruik word (maar ander is beskikbaar, kyk na die hulpmenu).
 
-**Encoding 0** means that **base64** is used (but others are available, check the help menu).
-
-You could also **abuse this vulnerability to encrypt new data. For example, imagine that the content of the cookie is "**_**user=MyUsername**_**", then you may change it to "\_user=administrator\_" and escalate privileges inside the application. You could also do it using `paduster`specifying the -plaintext** parameter:
-
+Jy kan ook **hierdie kwesbaarheid misbruik om nuwe data te enkripteer. Byvoorbeeld, stel jou voor dat die inhoud van die koekie is "**_**user=MyUsername**_**", dan kan jy dit verander na "\_user=administrator\_" en voorregte binne die toepassing opgradeer. Jy kan dit ook doen met `paduster` deur die -plaintext** parameter te spesifiseer:
 ```bash
 perl ./padBuster.pl http://10.10.10.10/index.php "RVJDQrwUdTRWJUVUeBKkEA==" 8 -encoding 0 -cookies "login=RVJDQrwUdTRWJUVUeBKkEA==" -plaintext "user=administrator"
 ```
-
-If the site is vulnerable `padbuster`will automatically try to find when the padding error occurs, but you can also indicating the error message it using the **-error** parameter.
-
+As die webwerf kwesbaar is, sal `padbuster` outomaties probeer om te vind wanneer die padding fout voorkom, maar jy kan ook die foutboodskap aandui deur die **-error** parameter te gebruik.
 ```bash
 perl ./padBuster.pl http://10.10.10.10/index.php "" 8 -encoding 0 -cookies "hcon=RVJDQrwUdTRWJUVUeBKkEA==" -error "Invalid padding"
 ```
+### Die teorie
 
-### The theory
-
-In **summary**, you can start decrypting the encrypted data by guessing the correct values that can be used to create all the **different paddings**. Then, the padding oracle attack will start decrypting bytes from the end to the start by guessing which will be the correct value that **creates a padding of 1, 2, 3, etc**.
+In **samevatting**, jy kan begin om die versleutelde data te ontsleutel deur die korrekte waardes te raai wat gebruik kan word om al die **verskillende vullings** te skep. Dan sal die padding oracle aanval begin om bytes van die einde na die begin te ontsleutel deur te raai wat die korrekte waarde is wat **'n vulling van 1, 2, 3, ens.** skep.
 
 ![](<../images/image (561).png>)
 
-Imagine you have some encrypted text that occupies **2 blocks** formed by the bytes from **E0 to E15**.\
-In order to **decrypt** the **last** **block** (**E8** to **E15**), the whole block passes through the "block cipher decryption" generating the **intermediary bytes I0 to I15**.\
-Finally, each intermediary byte is **XORed** with the previous encrypted bytes (E0 to E7). So:
+Stel jou voor jy het 'n paar versleutelde teks wat **2 blokke** beslaan wat gevorm word deur die bytes van **E0 tot E15**.\
+Om die **laaste** **blok** (**E8** tot **E15**) te **ontsleutel**, gaan die hele blok deur die "blok-kodering ontsleuteling" wat die **intermediêre bytes I0 tot I15** genereer.\
+Laastens, elke intermediêre byte word **XORed** met die vorige versleutelde bytes (E0 tot E7). So:
 
 - `C15 = D(E15) ^ E7 = I15 ^ E7`
 - `C14 = I14 ^ E6`
@@ -82,31 +72,30 @@ Finally, each intermediary byte is **XORed** with the previous encrypted bytes (
 - `C12 = I12 ^ E4`
 - ...
 
-Now, It's possible to **modify `E7` until `C15` is `0x01`**, which will also be a correct padding. So, in this case: `\x01 = I15 ^ E'7`
+Nou, dit is moontlik om **`E7` te wysig totdat `C15` `0x01` is**, wat ook 'n korrekte vulling sal wees. So, in hierdie geval: `\x01 = I15 ^ E'7`
 
-So, finding E'7, it's **possible to calculate I15**: `I15 = 0x01 ^ E'7`
+So, om E'7 te vind, is dit **moontlik om I15 te bereken**: `I15 = 0x01 ^ E'7`
 
-Which allow us to **calculate C15**: `C15 = E7 ^ I15 = E7 ^ \x01 ^ E'7`
+Wat ons toelaat om **C15 te bereken**: `C15 = E7 ^ I15 = E7 ^ \x01 ^ E'7`
 
-Knowing **C15**, now it's possible to **calculate C14**, but this time brute-forcing the padding `\x02\x02`.
+As ons **C15** weet, is dit nou moontlik om **C14** te bereken, maar hierdie keer brute-forcing die vulling `\x02\x02`.
 
-This BF is as complex as the previous one as it's possible to calculate the the `E''15` whose value is 0x02: `E''7 = \x02 ^ I15` so it's just needed to find the **`E'14`** that generates a **`C14` equals to `0x02`**.\
-Then, do the same steps to decrypt C14: **`C14 = E6 ^ I14 = E6 ^ \x02 ^ E''6`**
+Hierdie BF is net so kompleks soos die vorige een, aangesien dit moontlik is om die `E''15` waarvan die waarde 0x02 is te bereken: `E''7 = \x02 ^ I15` so dit is net nodig om die **`E'14`** te vind wat 'n **`C14` gelyk aan `0x02`** genereer.\
+Dan, doen dieselfde stappe om C14 te ontsleutel: **`C14 = E6 ^ I14 = E6 ^ \x02 ^ E''6`**
 
-**Follow this chain until you decrypt the whole encrypted text.**
+**Volg hierdie ketting totdat jy die hele versleutelde teks ontsleutel.**
 
-### Detection of the vulnerability
+### Opsporing van die kwesbaarheid
 
-Register and account and log in with this account .\
-If you **log in many times** and always get the **same cookie**, there is probably **something** **wrong** in the application. The **cookie sent back should be unique** each time you log in. If the cookie is **always** the **same**, it will probably always be valid and there **won't be anyway to invalidate i**t.
+Registreer en skep 'n rekening en teken in met hierdie rekening.\
+As jy **baie keer aanmeld** en altyd die **dieselfde koekie** kry, is daar waarskynlik **iets** **verkeerd** in die toepassing. Die **koekie wat teruggestuur word, moet uniek wees** elke keer wat jy aanmeld. As die koekie **altyd** die **dieselfde** is, sal dit waarskynlik altyd geldig wees en daar **sal geen manier wees om dit te ongeldig te maak** nie.
 
-Now, if you try to **modify** the **cookie**, you can see that you get an **error** from the application.\
-But if you BF the padding (using padbuster for example) you manage to get another cookie valid for a different user. This scenario is highly probably vulnerable to padbuster.
+Nou, as jy probeer om die **koekie** te **wysig**, kan jy sien dat jy 'n **fout** van die toepassing kry.\
+Maar as jy die vulling BF (met padbuster byvoorbeeld) kan jy 'n ander koekie kry wat geldig is vir 'n ander gebruiker. Hierdie scenario is hoogs waarskynlik kwesbaar vir padbuster.
 
-### References
+### Verwysings
 
 - [https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation)
 
-{% embed url="https://websec.nl/" %}
 
 {{#include ../banners/hacktricks-training.md}}

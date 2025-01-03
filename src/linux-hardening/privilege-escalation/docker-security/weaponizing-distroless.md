@@ -6,7 +6,7 @@
 
 'n Distroless-container is 'n tipe container wat **slegs die nodige afhanklikhede bevat om 'n spesifieke toepassing te laat loop**, sonder enige addisionele sagteware of gereedskap wat nie benodig word nie. Hierdie containers is ontwerp om so **liggewig** en **veilig** as moontlik te wees, en hulle poog om die **aanvaloppervlak te minimaliseer** deur enige onnodige komponente te verwyder.
 
-Distroless-containers word dikwels in **produksie-omgewings waar veiligheid en betroubaarheid van die grootste belang is** gebruik.
+Distroless-containers word dikwels in **produksie-omgewings waar sekuriteit en betroubaarheid van kardinale belang is** gebruik.
 
 Sommige **voorbeelde** van **distroless-containers** is:
 

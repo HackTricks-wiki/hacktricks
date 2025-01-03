@@ -29,7 +29,7 @@ Of gebruik iets soos [**SwiftDefaultApps**](https://github.com/Lord-Kamina/Swift
 ./swda getUTIs #Get all the UTIs
 ./swda getHandler --URL ftp #Get ftp handler
 ```
-U kan ook die uitbreidings wat deur 'n toepassing ondersteun word, nagaan deur:
+Jy kan ook die uitbreidings wat deur 'n toepassing ondersteun word, nagaan deur:
 ```
 cd /Applications/Safari.app/Contents
 grep -A3 CFBundleTypeExtensions Info.plist  | grep string

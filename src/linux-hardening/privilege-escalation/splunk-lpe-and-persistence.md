@@ -8,9 +8,9 @@ As jy ook **alreeds root is en die Splunk diens nie net op localhost luister nie
 
 In die eerste beeld hieronder kan jy sien hoe 'n Splunkd webblad lyk.
 
-## Splunk Universele Voorouer Agent Exploit Samevatting
+## Splunk Universele Voorouer Agent Exploit Opsomming
 
-Vir verdere besonderhede, kyk na die pos [https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/](https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/). Dit is net 'n samevatting:
+Vir verdere besonderhede, kyk na die pos [https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/](https://eapolsniper.github.io/2020/08/14/Abusing-Splunk-Forwarders-For-RCE-And-Persistence/). Dit is net 'n opsomming:
 
 **Exploit Oorsig:**
 'n Exploit wat die Splunk Universele Voorouer Agent (UF) teiken, laat aanvallers met die agent wagwoord toe om arbitrêre kode op stelsels wat die agent loop, uit te voer, wat moontlik 'n hele netwerk in gevaar stel.
@@ -18,8 +18,8 @@ Vir verdere besonderhede, kyk na die pos [https://eapolsniper.github.io/2020/08/
 **Belangrike Punten:**
 
 - Die UF agent valideer nie inkomende verbindings of die egtheid van kode nie, wat dit kwesbaar maak vir ongeoorloofde kode-uitvoering.
-- Algemene wagwoord verkrygingsmetodes sluit in om hulle in netwerk gidse, lêer deelings, of interne dokumentasie te vind.
-- Suksevolle uitbuiting kan lei tot SYSTEM of root vlak toegang op gecompromitteerde gasheers, data-uitvloeiing, en verdere netwerk infiltrasie.
+- Algemene wagwoord verkrygingsmetodes sluit in om hulle in netwerk gidse, lêer deel, of interne dokumentasie te vind.
+- Suksevolle uitbuiting kan lei tot SYSTEM of root vlak toegang op gecompromitteerde gasheers, data uitvloeiing, en verdere netwerk infiltrasie.
 
 **Exploit Uitvoering:**
 

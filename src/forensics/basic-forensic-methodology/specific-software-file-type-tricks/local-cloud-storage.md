@@ -1,114 +1,97 @@
-# Local Cloud Storage
+# Plaaslike Wolkberging
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-<figure><img src="../../../images/image (3) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
-
-\
-Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
 ## OneDrive
 
-In Windows, you can find the OneDrive folder in `\Users\<username>\AppData\Local\Microsoft\OneDrive`. And inside `logs\Personal` it's possible to find the file `SyncDiagnostics.log` which contains some interesting data regarding the synchronized files:
+In Windows kan jy die OneDrive-gids vind in `\Users\<username>\AppData\Local\Microsoft\OneDrive`. En binne `logs\Personal` is dit moontlik om die lêer `SyncDiagnostics.log` te vind wat interessante data bevat rakende die gesinkroniseerde lêers:
 
-- Size in bytes
-- Creation date
-- Modification date
-- Number of files in the cloud
-- Number of files in the folder
-- **CID**: Unique ID of the OneDrive user
-- Report generation time
-- Size of the HD of the OS
+- Grootte in bytes
+- Skeppingsdatum
+- Wysigingsdatum
+- Aantal lêers in die wolk
+- Aantal lêers in die gids
+- **CID**: Unieke ID van die OneDrive-gebruiker
+- Verslaggenerasietyd
+- Grootte van die HD van die OS
 
-Once you have found the CID it's recommended to **search files containing this ID**. You may be able to find files with the name: _**\<CID>.ini**_ and _**\<CID>.dat**_ that may contain interesting information like the names of files synchronized with OneDrive.
+Sodra jy die CID gevind het, word dit aanbeveel om **lêers wat hierdie ID bevat te soek**. Jy mag dalk lêers met die naam: _**\<CID>.ini**_ en _**\<CID>.dat**_ vind wat interessante inligting kan bevat soos die name van lêers wat met OneDrive gesinkroniseer is.
 
 ## Google Drive
 
-In Windows, you can find the main Google Drive folder in `\Users\<username>\AppData\Local\Google\Drive\user_default`\
-This folder contains a file called Sync_log.log with information like the email address of the account, filenames, timestamps, MD5 hashes of the files, etc. Even deleted files appear in that log file with its corresponding MD5.
+In Windows kan jy die hoof Google Drive-gids vind in `\Users\<username>\AppData\Local\Google\Drive\user_default`\
+Hierdie gids bevat 'n lêer genaamd Sync_log.log met inligting soos die e-posadres van die rekening, lêernaam, tydstempels, MD5-hashes van die lêers, ens. Selfs verwyderde lêers verskyn in daardie loglêer met die ooreenstemmende MD5.
 
-The file **`Cloud_graph\Cloud_graph.db`** is a sqlite database which contains the table **`cloud_graph_entry`**. In this table you can find the **name** of the **synchronized** **files**, modified time, size, and the MD5 checksum of the files.
+Die lêer **`Cloud_graph\Cloud_graph.db`** is 'n sqlite-databasis wat die tabel **`cloud_graph_entry`** bevat. In hierdie tabel kan jy die **naam** van die **gesinkroniseerde** **lêers**, gewysigde tyd, grootte, en die MD5 kontrole som van die lêers vind.
 
-The table data of the database **`Sync_config.db`** contains the email address of the account, the path of the shared folders and the Google Drive version.
+Die tabeldata van die databasis **`Sync_config.db`** bevat die e-posadres van die rekening, die pad van die gedeelde gidse en die Google Drive weergawe.
 
 ## Dropbox
 
-Dropbox uses **SQLite databases** to manage the files. In this\
-You can find the databases in the folders:
+Dropbox gebruik **SQLite-databasisse** om die lêers te bestuur. In hierdie\
+Jy kan die databasisse in die gidse vind:
 
 - `\Users\<username>\AppData\Local\Dropbox`
 - `\Users\<username>\AppData\Local\Dropbox\Instance1`
 - `\Users\<username>\AppData\Roaming\Dropbox`
 
-And the main databases are:
+En die hoofdatabasisse is:
 
 - Sigstore.dbx
 - Filecache.dbx
 - Deleted.dbx
 - Config.dbx
 
-The ".dbx" extension means that the **databases** are **encrypted**. Dropbox uses **DPAPI** ([https://docs.microsoft.com/en-us/previous-versions/ms995355(v=msdn.10)?redirectedfrom=MSDN](<https://docs.microsoft.com/en-us/previous-versions/ms995355(v=msdn.10)?redirectedfrom=MSDN>))
+Die ".dbx" uitbreiding beteken dat die **databasisse** **versleuteld** is. Dropbox gebruik **DPAPI** ([https://docs.microsoft.com/en-us/previous-versions/ms995355(v=msdn.10)?redirectedfrom=MSDN](<https://docs.microsoft.com/en-us/previous-versions/ms995355(v=msdn.10)?redirectedfrom=MSDN>))
 
-To understand better the encryption that Dropbox uses you can read [https://blog.digital-forensics.it/2017/04/brush-up-on-dropbox-dbx-decryption.html](https://blog.digital-forensics.it/2017/04/brush-up-on-dropbox-dbx-decryption.html).
+Om die versleuteling wat Dropbox gebruik beter te verstaan, kan jy lees [https://blog.digital-forensics.it/2017/04/brush-up-on-dropbox-dbx-decryption.html](https://blog.digital-forensics.it/2017/04/brush-up-on-dropbox-dbx-decryption.html).
 
-However, the main information is:
+Die hoofinligting is egter:
 
 - **Entropy**: d114a55212655f74bd772e37e64aee9b
 - **Salt**: 0D638C092E8B82FC452883F95F355B8E
-- **Algorithm**: PBKDF2
-- **Iterations**: 1066
+- **Algoritme**: PBKDF2
+- **Herhalings**: 1066
 
-Apart from that information, to decrypt the databases you still need:
+Afgesien van daardie inligting, om die databasisse te ontsleutel het jy steeds nodig:
 
-- The **encrypted DPAPI key**: You can find it in the registry inside `NTUSER.DAT\Software\Dropbox\ks\client` (export this data as binary)
-- The **`SYSTEM`** and **`SECURITY`** hives
-- The **DPAPI master keys**: Which can be found in `\Users\<username>\AppData\Roaming\Microsoft\Protect`
-- The **username** and **password** of the Windows user
+- Die **versleutelde DPAPI-sleutel**: Jy kan dit in die registrasie vind binne `NTUSER.DAT\Software\Dropbox\ks\client` (eksporteer hierdie data as binêr)
+- Die **`SYSTEM`** en **`SECURITY`** hives
+- Die **DPAPI meester sleutels**: Wat gevind kan word in `\Users\<username>\AppData\Roaming\Microsoft\Protect`
+- Die **gebruikersnaam** en **wagwoord** van die Windows-gebruiker
 
-Then you can use the tool [**DataProtectionDecryptor**](https://nirsoft.net/utils/dpapi_data_decryptor.html)**:**
+Dan kan jy die hulpmiddel [**DataProtectionDecryptor**](https://nirsoft.net/utils/dpapi_data_decryptor.html)**:**
 
 ![](<../../../images/image (448).png>)
 
-If everything goes as expected, the tool will indicate the **primary key** that you need to **use to recover the original one**. To recover the original one, just use this [cyber_chef receipt](<https://gchq.github.io/CyberChef/#recipe=Derive_PBKDF2_key(%7B'option':'Hex','string':'98FD6A76ECB87DE8DAB4623123402167'%7D,128,1066,'SHA1',%7B'option':'Hex','string':'0D638C092E8B82FC452883F95F355B8E'%7D)>) putting the primary key as the "passphrase" inside the receipt.
+As alles volgens verwagting verloop, sal die hulpmiddel die **primêre sleutel** aandui wat jy moet **gebruik om die oorspronklike een te herstel**. Om die oorspronklike een te herstel, gebruik net hierdie [cyber_chef resep](<https://gchq.github.io/CyberChef/#recipe=Derive_PBKDF2_key(%7B'option':'Hex','string':'98FD6A76ECB87DE8DAB4623123402167'%7D,128,1066,'SHA1',%7B'option':'Hex','string':'0D638C092E8B82FC452883F95F355B8E'%7D)>) en plaas die primêre sleutel as die "wagwoord" binne die resep.
 
-The resulting hex is the final key used to encrypt the databases which can be decrypted with:
-
+Die resulterende hex is die finale sleutel wat gebruik word om die databasisse te versleutel wat ontsleuteld kan word met:
 ```bash
 sqlite -k <Obtained Key> config.dbx ".backup config.db" #This decompress the config.dbx and creates a clear text backup in config.db
 ```
+Die **`config.dbx`** databasis bevat:
 
-The **`config.dbx`** database contains:
+- **E-pos**: Die e-pos van die gebruiker
+- **usernamedisplayname**: Die naam van die gebruiker
+- **dropbox_path**: Pad waar die dropbox-gids geleë is
+- **Host_id: Hash** wat gebruik word om aan die wolk te verifieer. Dit kan slegs vanaf die web herroep word.
+- **Root_ns**: Gebruikeridentifiseerder
 
-- **Email**: The email of the user
-- **usernamedisplayname**: The name of the user
-- **dropbox_path**: Path where the dropbox folder is located
-- **Host_id: Hash** used to authenticate to the cloud. This can only be revoked from the web.
-- **Root_ns**: User identifier
+Die **`filecache.db`** databasis bevat inligting oor al die lêers en gidse wat met Dropbox gesinkroniseer is. Die tabel `File_journal` is die een met die meeste nuttige inligting:
 
-The **`filecache.db`** database contains information about all the files and folders synchronized with Dropbox. The table `File_journal` is the one with more useful information:
+- **Server_path**: Pad waar die lêer binne die bediener geleë is (hierdie pad word voorafgegaan deur die `host_id` van die kliënt).
+- **local_sjid**: Weergawe van die lêer
+- **local_mtime**: Wysigingsdatum
+- **local_ctime**: Skeppingsdatum
 
-- **Server_path**: Path where the file is located inside the server (this path is preceded by the `host_id` of the client).
-- **local_sjid**: Version of the file
-- **local_mtime**: Modification date
-- **local_ctime**: Creation date
+Ander tabelle binne hierdie databasis bevat meer interessante inligting:
 
-Other tables inside this database contain more interesting information:
-
-- **block_cache**: hash of all the files and folders of Dropbox
-- **block_ref**: Related the hash ID of the table `block_cache` with the file ID in the table `file_journal`
-- **mount_table**: Share folders of dropbox
-- **deleted_fields**: Dropbox deleted files
+- **block_cache**: hash van al die lêers en gidse van Dropbox
+- **block_ref**: Verbind die hash ID van die tabel `block_cache` met die lêer ID in die tabel `file_journal`
+- **mount_table**: Deel gidse van dropbox
+- **deleted_fields**: Dropbox verwyderde lêers
 - **date_added**
-
-<figure><img src="../../../images/image (3) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
-
-\
-Use [**Trickest**](https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks) to easily build and **automate workflows** powered by the world's **most advanced** community tools.\
-Get Access Today:
-
-{% embed url="https://trickest.com/?utm_campaign=hacktrics&utm_medium=banner&utm_source=hacktricks" %}
 
 {{#include ../../../banners/hacktricks-training.md}}

@@ -54,7 +54,7 @@ Index Refs Address            Size       Wired      Name (Version) UUID <Linked 
 9    2 0xffffff8003317000 0xe000     0xe000     com.apple.kec.Libm (1) 6C1342CC-1D74-3D0F-BC43-97D5AD38200A <5>
 10   12 0xffffff8003544000 0x92000    0x92000    com.apple.kec.corecrypto (11.1) F5F1255F-6552-3CF4-A9DB-D60EFDEB4A9A <8 7 6 5 3 1>
 ```
-Tot en met nommer 9 is die gelysde bestuurders **gelaai in die adres 0**. Dit beteken dat dit nie werklike bestuurders is nie, maar **deel van die kern is en hulle kan nie ontlaai word nie**.
+Tot nommer 9 is die gelysde bestuurders **gelaai in die adres 0**. Dit beteken dat dit nie werklike bestuurders is nie, maar **deel van die kernel en hulle kan nie ontlaai word nie**.
 
 Om spesifieke uitbreidings te vind, kan jy gebruik maak van:
 ```bash
@@ -68,7 +68,7 @@ kextunload com.apple.iokit.IOReportFamily
 ```
 ## IORegistry
 
-Die **IORegistry** is 'n belangrike deel van die IOKit-raamwerk in macOS en iOS wat dien as 'n databasis om die stelsels se hardewarekonfigurasie en toestand voor te stel. Dit is 'n **hiërargiese versameling van objekke wat al die hardeware en bestuurders** wat op die stelsel gelaai is, verteenwoordig, en hul verhoudings tot mekaar.
+Die **IORegistry** is 'n belangrike deel van die IOKit-raamwerk in macOS en iOS wat dien as 'n databasis om die stelsels se hardewarekonfigurasie en toestand voor te stel. Dit is 'n **hiërargiese versameling van voorwerpe wat al die hardeware en bestuurders** wat op die stelsel gelaai is, verteenwoordig, en hul verhoudings tot mekaar.
 
 Jy kan die IORegistry verkry met die cli **`ioreg`** om dit vanaf die konsole te inspekteer (spesifiek nuttig vir iOS).
 ```bash
@@ -80,11 +80,11 @@ U kan **`IORegistryExplorer`** aflaai van **Xcode Additional Tools** vanaf [**ht
 
 <figure><img src="../../../images/image (1167).png" alt="" width="563"><figcaption></figcaption></figure>
 
-In IORegistryExplorer word "vliegtuie" gebruik om die verhoudings tussen verskillende objekte in die IORegistry te organiseer en weer te gee. Elke vliegtuig verteenwoordig 'n spesifieke tipe verhouding of 'n bepaalde uitsig van die stelsel se hardeware en stuurprogramkonfigurasie. Hier is 'n paar van die algemene vliegtuie wat u in IORegistryExplorer mag teëkom:
+In IORegistryExplorer word "vliegtuie" gebruik om die verhoudings tussen verskillende objekten in die IORegistry te organiseer en weer te gee. Elke vliegtuig verteenwoordig 'n spesifieke tipe verhouding of 'n bepaalde uitsig van die stelsel se hardeware en stuurprogramkonfigurasie. Hier is 'n paar van die algemene vliegtuie wat u in IORegistryExplorer mag teëkom:
 
-1. **IOService Plane**: Dit is die mees algemene vliegtuig, wat die diensobjekte vertoon wat stuurprogramme en nubs (kommunikasiekanale tussen stuurprogramme) verteenwoordig. Dit toon die verskaffer-klant verhoudings tussen hierdie objek.
-2. **IODeviceTree Plane**: Hierdie vliegtuig verteenwoordig die fisiese verbande tussen toestelle soos hulle aan die stelsel gekoppel is. Dit word dikwels gebruik om die hiërargie van toestelle wat via busse soos USB of PCI gekoppel is, te visualiseer.
-3. **IOPower Plane**: Vertoon objek en hul verhoudings in terme van kragbestuur. Dit kan wys watter objek die kragtoestand van ander beïnvloed, nuttig vir die ontfouting van kragverwante probleme.
+1. **IOService Plane**: Dit is die mees algemene vliegtuig, wat die diensobjekte vertoon wat stuurprogramme en nubs (kommunikasiekanale tussen stuurprogramme) verteenwoordig. Dit toon die verskaffer-klant verhoudings tussen hierdie objekten.
+2. **IODeviceTree Plane**: Hierdie vliegtuig verteenwoordig die fisiese verbindings tussen toestelle soos hulle aan die stelsel gekoppel is. Dit word dikwels gebruik om die hiërargie van toestelle wat via busse soos USB of PCI gekoppel is, te visualiseer.
+3. **IOPower Plane**: Vertoon objekten en hul verhoudings in terme van kragbestuur. Dit kan wys watter objekten die kragtoestand van ander beïnvloed, nuttig vir die ontfouting van kragverwante probleme.
 4. **IOUSB Plane**: Spesifiek gefokus op USB-toestelle en hul verhoudings, wat die hiërargie van USB-hubs en gekonnekteerde toestelle toon.
 5. **IOAudio Plane**: Hierdie vliegtuig is vir die verteenwoordiging van klanktoestelle en hul verhoudings binne die stelsel.
 6. ...
@@ -95,7 +95,7 @@ Die volgende kode verbind met die IOKit diens `"YourServiceNameHere"` en roep di
 
 - dit roep eers **`IOServiceMatching`** en **`IOServiceGetMatchingServices`** aan om die diens te verkry.
 - Dit vestig dan 'n verbinding deur **`IOServiceOpen`** aan te roep.
-- En dit roep uiteindelik 'n funksie aan met **`IOConnectCallScalarMethod`** wat die selektor 0 aandui (die selektor is die nommer wat die funksie wat u wil aanroep, toegeken is).
+- En dit roep uiteindelik 'n funksie aan met **`IOConnectCallScalarMethod`** wat die selektor 0 aandui (die selektor is die nommer wat die funksie wat u wil aanroep, toegeken het).
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <IOKit/IOKitLib.h>
@@ -154,7 +154,7 @@ Daar is **ander** funksies wat gebruik kan word om IOKit funksies aan te roep be
 
 ## Terugkeer van bestuurder se ingangspunt
 
-Jy kan hierdie verkry byvoorbeeld van 'n [**firmware beeld (ipsw)**](./#ipsw). Laai dit dan in jou gunsteling decompiler.
+Jy kan hierdie byvoorbeeld verkry van 'n [**firmware beeld (ipsw)**](./#ipsw). Laai dit dan in jou gunsteling decompiler.
 
 Jy kan begin om die **`externalMethod`** funksie te dekompileer, aangesien dit die bestuurder funksie is wat die oproep sal ontvang en die korrekte funksie sal aanroep:
 
@@ -170,7 +170,7 @@ Let op hoe die **`self`** parameter in die vorige definisie gemis is, die goeie 
 ```cpp
 IOUserClient2022::dispatchExternalMethod(self, unsigned int, IOExternalMethodArgumentsOpaque*, IOExternalMethodDispatch2022 const*, unsigned long, OSObject*, void*)
 ```
-Werklik, jy kan die werklike definisie vind in [https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/Kernel/IOUserClient.cpp#L6388](https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/Kernel/IOUserClient.cpp#L6388):
+Tegelijkertijd kan jy die werklike definisie vind in [https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/Kernel/IOUserClient.cpp#L6388](https://github.com/apple-oss-distributions/xnu/blob/1031c584a5e37aff177559b9f69dbd3c8c3fd30a/iokit/Kernel/IOUserClient.cpp#L6388):
 ```cpp
 IOUserClient2022::dispatchExternalMethod(uint32_t selector, IOExternalMethodArgumentsOpaque *arguments,
 const IOExternalMethodDispatch2022 dispatchArray[], size_t dispatchArrayCount,

@@ -4,7 +4,7 @@
 
 ## Gevonde tegnieke
 
-Die volgende tegnieke is gevind wat werk in sommige macOS firewall toepassings.
+Die volgende tegnieke is gevind wat werk in sommige macOS firewall-apps.
 
 ### Misbruik van witlys name
 
@@ -12,15 +12,15 @@ Die volgende tegnieke is gevind wat werk in sommige macOS firewall toepassings.
 
 ### Sintetiese Klik
 
-- As die firewall toestemming van die gebruiker vra, laat die malware **klik op toelaat**
+- As die firewall om toestemming van die gebruiker vra, laat die malware **klik op toelaat**
 
-### **Gebruik Apple geskrewe binaries**
+### **Gebruik Apple-onderteken binaries**
 
 - Soos **`curl`**, maar ook ander soos **`whois`**
 
 ### Bekende apple domeine
 
-Die firewall mag verbinding met bekende apple domeine soos **`apple.com`** of **`icloud.com`** toelaat. En iCloud kan as 'n C2 gebruik word.
+Die firewall kan verbinding met bekende apple domeine soos **`apple.com`** of **`icloud.com`** toelaat. En iCloud kan as 'n C2 gebruik word.
 
 ### Generiese Bypass
 
@@ -28,7 +28,7 @@ Sommige idees om te probeer om firewalls te omseil
 
 ### Kontroleer toegelate verkeer
 
-Om die toegelate verkeer te ken, sal jou help om potensieel op die witlys geplaasde domeine of watter toepassings toegelaat word om toegang tot hulle te hê, te identifiseer.
+Om die toegelate verkeer te ken, sal jou help om potensieel gewhitelist domeine of watter toepassings toegelaat word om toegang tot hulle te verkry.
 ```bash
 lsof -i TCP -sTCP:ESTABLISHED
 ```

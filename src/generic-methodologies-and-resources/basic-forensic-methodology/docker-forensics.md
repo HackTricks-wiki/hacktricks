@@ -2,24 +2,16 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
 
-Deepen your expertise in **Mobile Security** with 8kSec Academy. Master iOS and Android security through our self-paced courses and get certified:
+## Hou van hou
 
-{% embed url="https://academy.8ksec.io/" %}
-
-## Container modification
-
-There are suspicions that some docker container was compromised:
-
+Daar is vermoedens dat 'n sekere docker houer gecompromitteer is:
 ```bash
 docker ps
 CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
 cc03e43a052a        lamp-wordpress      "./run.sh"          2 minutes ago       Up 2 minutes        80/tcp              wordpress
 ```
-
-You can easily **find the modifications done to this container with regards to the image** with:
-
+U kan maklik **die wysigings wat aan hierdie houer gemaak is met betrekking tot die beeld** vind met:
 ```bash
 docker diff wordpress
 C /var
@@ -33,70 +25,52 @@ A /var/lib/mysql/mysql/time_zone_leap_second.MYI
 A /var/lib/mysql/mysql/general_log.CSV
 ...
 ```
-
-In the previous command **C** means **Changed** and **A,** **Added**.\
-If you find that some interesting file like `/etc/shadow` was modified you can download it from the container to check for malicious activity with:
-
+In die vorige opdrag beteken **C** **Verander** en **A,** **Gevind**.\
+As jy vind dat 'n interessante lêer soos `/etc/shadow` gewysig is, kan jy dit van die houer aflaai om vir kwaadwillige aktiwiteit te kyk met:
 ```bash
 docker cp wordpress:/etc/shadow.
 ```
-
-You can also **compare it with the original one** running a new container and extracting the file from it:
-
+Jy kan dit ook **vergelyk met die oorspronklike een** deur 'n nuwe houer te laat loop en die lêer daaruit te onttrek:
 ```bash
 docker run -d lamp-wordpress
 docker cp b5d53e8b468e:/etc/shadow original_shadow #Get the file from the newly created container
 diff original_shadow shadow
 ```
-
-If you find that **some suspicious file was added** you can access the container and check it:
-
+As jy vind dat **'n paar verdagte lêer bygevoeg is** kan jy die houer toegang en dit nagaan:
 ```bash
 docker exec -it wordpress bash
 ```
+## Beeldwysigings
 
-## Images modifications
-
-When you are given an exported docker image (probably in `.tar` format) you can use [**container-diff**](https://github.com/GoogleContainerTools/container-diff/releases) to **extract a summary of the modifications**:
-
+Wanneer jy 'n uitgevoerde docker beeld ontvang (waarskynlik in `.tar` formaat) kan jy [**container-diff**](https://github.com/GoogleContainerTools/container-diff/releases) gebruik om **'n opsomming van die wysigings te onttrek**:
 ```bash
 docker save <image> > image.tar #Export the image to a .tar file
 container-diff analyze -t sizelayer image.tar
 container-diff analyze -t history image.tar
 container-diff analyze -t metadata image.tar
 ```
-
-Then, you can **decompress** the image and **access the blobs** to search for suspicious files you may have found in the changes history:
-
+Dan kan jy die **dekomprimeer** die beeld en **toegang tot die blobs** verkry om te soek na verdagte lêers wat jy in die veranderinge geskiedenis mag gevind het:
 ```bash
 tar -xf image.tar
 ```
+### Basiese Analise
 
-### Basic Analysis
-
-You can get **basic information** from the image running:
-
+Jy kan **basiese inligting** van die beeld verkry deur te loop:
 ```bash
 docker inspect <image>
 ```
-
-You can also get a summary **history of changes** with:
-
+Jy kan ook 'n opsomming **geskiedenis van veranderinge** kry met:
 ```bash
 docker history --no-trunc <image>
 ```
-
-You can also generate a **dockerfile from an image** with:
-
+U kan ook 'n **dockerfile uit 'n beeld** genereer met:
 ```bash
 alias dfimage="docker run -v /var/run/docker.sock:/var/run/docker.sock --rm alpine/dfimage"
 dfimage -sV=1.36 madhuakula/k8s-goat-hidden-in-layers>
 ```
-
 ### Dive
 
-In order to find added/modified files in docker images you can also use the [**dive**](https://github.com/wagoodman/dive) (download it from [**releases**](https://github.com/wagoodman/dive/releases/tag/v0.10.0)) utility:
-
+Om bygevoegde/gewijzigde lêers in docker beelde te vind, kan jy ook die [**dive**](https://github.com/wagoodman/dive) (aflaai dit van [**releases**](https://github.com/wagoodman/dive/releases/tag/v0.10.0)) nut gebruik:
 ```bash
 #First you need to load the image in your docker repo
 sudo docker load < image.tar                                                                                                                                                                                                         1 ⨯
@@ -105,27 +79,18 @@ Loaded image: flask:latest
 #And then open it with dive:
 sudo dive flask:latest
 ```
+Dit stel jou in staat om **deur die verskillende blobs van docker beelde te navigeer** en te kyk watter lêers gewysig/gevoeg is. **Rooi** beteken gevoeg en **geel** beteken gewysig. Gebruik **tab** om na die ander weergawe te beweeg en **spasie** om vouers in te klap/open.
 
-This allows you to **navigate through the different blobs of docker images** and check which files were modified/added. **Red** means added and **yellow** means modified. Use **tab** to move to the other view and **space** to collapse/open folders.
-
-With die you won't be able to access the content of the different stages of the image. To do so you will need to **decompress each layer and access it**.\
-You can decompress all the layers from an image from the directory where the image was decompressed executing:
-
+Met dit sal jy nie toegang hê tot die inhoud van die verskillende fases van die beeld nie. Om dit te doen, sal jy **elke laag moet dekomprimeer en toegang kry**.\
+Jy kan al die lae van 'n beeld dekomprimeer vanaf die gids waar die beeld gedecomprimeer is deur die volgende uit te voer:
 ```bash
 tar -xf image.tar
 for d in `find * -maxdepth 0 -type d`; do cd $d; tar -xf ./layer.tar; cd ..; done
 ```
+## Kredensiale uit geheue
 
-## Credentials from memory
+Let daarop dat wanneer jy 'n docker-container binne 'n gasheer uitvoer, **kan jy die prosesse wat op die container loop vanaf die gasheer sien** deur net `ps -ef` te loop.
 
-Note that when you run a docker container inside a host **you can see the processes running on the container from the host** just running `ps -ef`
-
-Therefore (as root) you can **dump the memory of the processes** from the host and search for **credentials** just [**like in the following example**](../../linux-hardening/privilege-escalation/#process-memory).
-
-<figure><img src="/images/image (2).png" alt=""><figcaption></figcaption></figure>
-
-Deepen your expertise in **Mobile Security** with 8kSec Academy. Master iOS and Android security through our self-paced courses and get certified:
-
-{% embed url="https://academy.8ksec.io/" %}
+Daarom (as root) kan jy **die geheue van die prosesse** vanaf die gasheer dump en soek na **kredensiale** net [**soos in die volgende voorbeeld**](../../linux-hardening/privilege-escalation/#process-memory). 
 
 {{#include ../../banners/hacktricks-training.md}}

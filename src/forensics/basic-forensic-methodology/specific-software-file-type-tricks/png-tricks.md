@@ -1,9 +1,9 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
-**PNG files** are highly regarded in **CTF challenges** for their **lossless compression**, making them ideal for embedding hidden data. Tools like **Wireshark** enable the analysis of PNG files by dissecting their data within network packets, revealing embedded information or anomalies.
+**PNG-lêers** word hoog aangeskryf in **CTF-uitdagings** vir hul **verlieslose kompressie**, wat hulle ideaal maak vir die insluiting van versteekte data. Gereedskap soos **Wireshark** stel die analise van PNG-lêers in staat deur hul data binne netwerkpakkette te ontleed, wat ingebedde inligting of anomalieë onthul.
 
-For checking PNG file integrity and repairing corruption, **pngcheck** is a crucial tool, offering command-line functionality to validate and diagnose PNG files ([pngcheck](http://libpng.org/pub/png/apps/pngcheck.html)). When files are beyond simple fixes, online services like [OfficeRecovery's PixRecovery](https://online.officerecovery.com/pixrecovery/) provide a web-based solution for **repairing corrupted PNGs**, aiding in the recovery of crucial data for CTF participants.
+Vir die nagaan van PNG-lêer integriteit en die herstel van korrupsie, is **pngcheck** 'n belangrike hulpmiddel, wat opdraglyn funksionaliteit bied om PNG-lêers te valideer en te diagnoseer ([pngcheck](http://libpng.org/pub/png/apps/pngcheck.html)). Wanneer lêers buite eenvoudige herstel is, bied aanlyn dienste soos [OfficeRecovery's PixRecovery](https://online.officerecovery.com/pixrecovery/) 'n web-gebaseerde oplossing vir **die herstel van beskadigde PNG's**, wat help met die herstel van belangrike data vir CTF-deelnemers.
 
-These strategies underscore the importance of a comprehensive approach in CTFs, utilizing a blend of analytical tools and repair techniques to uncover and recover hidden or lost data.
+Hierdie strategieë beklemtoon die belangrikheid van 'n omvattende benadering in CTF's, wat 'n mengsel van analitiese gereedskap en hersteltegnieke benut om versteekte of verlore data te ontdek en te herstel.
 
 {{#include ../../../banners/hacktricks-training.md}}

@@ -4,15 +4,15 @@
 
 ## Basiese Inligting
 
-**Seccomp**, wat staan vir Secure Computing mode, is 'n sekuriteitskenmerk van die **Linux-kern wat ontwerp is om stelsels oproepe te filtreer**. Dit beperk prosesse tot 'n beperkte stel stelsels oproepe (`exit()`, `sigreturn()`, `read()`, en `write()` vir reeds-geopende lêer beskrywings). As 'n proses probeer om enigiets anders aan te roep, word dit deur die kern beëindig met SIGKILL of SIGSYS. Hierdie meganisme virtualiseer nie hulpbronne nie, maar isoleer die proses daarvan.
+**Seccomp**, wat staan vir Secure Computing mode, is 'n sekuriteitskenmerk van die **Linux-kern wat ontwerp is om stelsels oproepe te filter**. Dit beperk prosesse tot 'n beperkte stel stelsels oproepe (`exit()`, `sigreturn()`, `read()`, en `write()` vir reeds-geopende lêer beskrywings). As 'n proses probeer om enigiets anders aan te roep, word dit deur die kern beëindig met SIGKILL of SIGSYS. Hierdie meganisme virtualiseer nie hulpbronne nie, maar isoleer die proses daarvan.
 
 Daar is twee maniere om seccomp te aktiveer: deur die `prctl(2)` stelsels oproep met `PR_SET_SECCOMP`, of vir Linux-kerns 3.17 en hoër, die `seccomp(2)` stelsels oproep. Die ouer metode om seccomp in te skakel deur na `/proc/self/seccomp` te skryf, is verouderd ten gunste van `prctl()`.
 
-'n Verbetering, **seccomp-bpf**, voeg die vermoë by om stelsels oproepe te filtreer met 'n aanpasbare beleid, met behulp van Berkeley Packet Filter (BPF) reëls. Hierdie uitbreiding word benut deur sagteware soos OpenSSH, vsftpd, en die Chrome/Chromium-browsers op Chrome OS en Linux vir buigsame en doeltreffende syscall-filtrering, wat 'n alternatief bied vir die nou nie-ondersteunde systrace vir Linux.
+'n Verbetering, **seccomp-bpf**, voeg die vermoë by om stelsels oproepe te filter met 'n aanpasbare beleid, met behulp van Berkeley Packet Filter (BPF) reëls. Hierdie uitbreiding word benut deur sagteware soos OpenSSH, vsftpd, en die Chrome/Chromium-browsers op Chrome OS en Linux vir buigsame en doeltreffende syscall-filtering, wat 'n alternatief bied vir die nou nie-ondersteunde systrace vir Linux.
 
 ### **Oorspronklike/Streng Modus**
 
-In hierdie modus laat Seccomp **slegs die syscalls** `exit()`, `sigreturn()`, `read()` en `write()` toe vir reeds-geopende lêer beskrywings. As enige ander syscall gemaak word, word die proses doodgemaak met SIGKILL
+In hierdie modus laat Seccomp **slegs die syscalls** `exit()`, `sigreturn()`, `read()` en `write()` toe vir reeds-geopende lêer beskrywings. As enige ander syscall gemaak word, word die proses doodgemaak met SIGKILL.
 ```c:seccomp_strict.c
 #include <fcntl.h>
 #include <stdio.h>
@@ -105,7 +105,7 @@ docker run --rm \
 hello-world
 ```
 As jy byvoorbeeld 'n container wil **verbied** om 'n **syscall** soos `uname` uit te voer, kan jy die standaardprofiel van [https://github.com/moby/moby/blob/master/profiles/seccomp/default.json](https://github.com/moby/moby/blob/master/profiles/seccomp/default.json) aflaai en net die **`uname` string uit die lys **verwyder.\
-As jy wil seker maak dat **'n sekere binêre nie binne 'n docker container werk nie**, kan jy strace gebruik om die syscalls wat die binêre gebruik, te lys en hulle dan verbied.\
+As jy wil seker maak dat **'n sekere binêre nie binne 'n docker container werk nie**, kan jy strace gebruik om die syscalls wat die binêre gebruik, op te lys en hulle dan verbied.\
 In die volgende voorbeeld word die **syscalls** van `uname` ontdek:
 ```bash
 docker run -it --security-opt seccomp=default.json modified-ubuntu strace uname
@@ -113,7 +113,7 @@ docker run -it --security-opt seccomp=default.json modified-ubuntu strace uname
 > [!NOTE]
 > As jy **Docker net gebruik om 'n toepassing te begin**, kan jy dit **profiel** met **`strace`** en **net die syscalls toelaat** wat dit benodig
 
-### Voorbeeld Seccomp-beleid
+### Voorbeeld Seccomp beleid
 
 [Voorbeeld hier vandaan](https://sreeninet.wordpress.com/2016/03/06/docker-security-part-2docker-engine/)
 

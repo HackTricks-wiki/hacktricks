@@ -4,16 +4,16 @@
 
 ## Basic Information
 
-'n gebruikersnaamruimte is 'n Linux-kernkenmerk wat **isolasie van gebruikers- en groep ID-kaartings** bied, wat elke gebruikersnaamruimte toelaat om sy **eie stel van gebruikers- en groep ID's** te hê. Hierdie isolasie stel prosesse wat in verskillende gebruikersnaamruimtes loop in staat om **verskillende bevoegdhede en eienaarskap** te hê, selfs al deel hulle dieselfde gebruikers- en groep ID's numeries.
+'n gebruikersnaamruimte is 'n Linux-kernkenmerk wat **isolasie van gebruikers- en groep ID-kaartings** bied, wat elke gebruikersnaamruimte toelaat om sy **eie stel gebruikers- en groep ID's** te hê. Hierdie isolasie stel prosesse wat in verskillende gebruikersnaamruimtes loop in staat om **verskillende bevoegdhede en eienaarskap** te hê, selfs al deel hulle dieselfde gebruikers- en groep ID's numeries.
 
-Gebruikersnaamruimtes is veral nuttig in houers, waar elke houer sy eie onafhanklike stel van gebruikers- en groep ID's moet hê, wat beter sekuriteit en isolasie tussen houers en die gasheerstelsel moontlik maak.
+Gebruikersnaamruimtes is veral nuttig in houers, waar elke houer sy eie onafhanklike stel gebruikers- en groep ID's moet hê, wat beter sekuriteit en isolasie tussen houers en die gasheerstelsel moontlik maak.
 
 ### How it works:
 
-1. Wanneer 'n nuwe gebruikersnaamruimte geskep word, **begin dit met 'n leë stel van gebruikers- en groep ID-kaartings**. Dit beteken dat enige proses wat in die nuwe gebruikersnaamruimte loop, **aanvanklik geen bevoegdhede buite die naamruimte sal hê**.
+1. Wanneer 'n nuwe gebruikersnaamruimte geskep word, **begin dit met 'n leë stel gebruikers- en groep ID-kaartings**. Dit beteken dat enige proses wat in die nuwe gebruikersnaamruimte loop, **aanvanklik geen bevoegdhede buite die naamruimte sal hê**.
 2. ID-kaartings kan gevestig word tussen die gebruikers- en groep ID's in die nuwe naamruimte en dié in die ouer (of gasheer) naamruimte. Dit **laat prosesse in die nuwe naamruimte toe om bevoegdhede en eienaarskap te hê wat ooreenstem met gebruikers- en groep ID's in die ouer naamruimte**. Die ID-kaartings kan egter beperk word tot spesifieke reekse en substelle van ID's, wat fynbeheer oor die bevoegdhede wat aan prosesse in die nuwe naamruimte toegeken word, moontlik maak.
 3. Binne 'n gebruikersnaamruimte kan **prosesse volle wortelbevoegdhede (UID 0) hê vir operasies binne die naamruimte**, terwyl hulle steeds beperkte bevoegdhede buite die naamruimte het. Dit laat **houers toe om met wortelagtige vermoëns binne hul eie naamruimte te loop sonder om volle wortelbevoegdhede op die gasheerstelsel te hê**.
-4. Prosesse kan tussen naamruimtes beweeg met die `setns()` stelselskakel of nuwe naamruimtes skep met die `unshare()` of `clone()` stelselskakels met die `CLONE_NEWUSER` vlag. Wanneer 'n proses na 'n nuwe naamruimte beweeg of een skep, sal dit begin om die gebruikers- en groep ID-kaartings wat met daardie naamruimte geassosieer is, te gebruik.
+4. Prosesse kan tussen naamruimtes beweeg deur die `setns()` stelselskakel of nuwe naamruimtes skep deur die `unshare()` of `clone()` stelselskakels met die `CLONE_NEWUSER` vlag. Wanneer 'n proses na 'n nuwe naamruimte beweeg of een skep, sal dit begin om die gebruikers- en groep ID-kaartings wat met daardie naamruimte geassosieer word, te gebruik.
 
 ## Lab:
 
@@ -45,7 +45,7 @@ Wanneer `unshare` sonder die `-f` opsie uitgevoer word, word 'n fout ondervind w
 - Die probleem kan opgelos word deur die `-f` opsie saam met `unshare` te gebruik. Hierdie opsie maak dat `unshare` 'n nuwe proses fork nadat die nuwe PID namespas geskep is.
 - Die uitvoering van `%unshare -fp /bin/bash%` verseker dat die `unshare` opdrag self PID 1 in die nuwe namespas word. `/bin/bash` en sy kindproses is dan veilig binne hierdie nuwe namespas, wat die voortydige uitgang van PID 1 voorkom en normale PID-toewysing toelaat.
 
-Deur te verseker dat `unshare` met die `-f` vlag loop, word die nuwe PID namespas korrek gehandhaaf, wat toelaat dat `/bin/bash` en sy sub-prosesse kan werk sonder om die geheue toewysing fout te ondervind.
+Deur te verseker dat `unshare` met die `-f` vlag loop, word die nuwe PID namespas korrek gehandhaaf, wat toelaat dat `/bin/bash` en sy sub-prosesse funksioneer sonder om die geheue toewysing fout te ondervind.
 
 </details>
 
@@ -70,7 +70,7 @@ Of van die gasheer met:
 ```bash
 cat /proc/<pid>/uid_map
 ```
-### Vind alle Gebruiker namespaces
+### Vind alle Gebruiker name ruimtes
 ```bash
 sudo find /proc -maxdepth 3 -type l -name user -exec readlink {} \; 2>/dev/null | sort -u
 # Find the processes with an specific namespace
@@ -82,7 +82,7 @@ nsenter -U TARGET_PID --pid /bin/bash
 ```
 Ook, jy kan slegs **in 'n ander prosesnaamruimte ingaan as jy root is**. En jy **kan nie** **ingaan** in 'n ander naamruimte **sonder 'n beskrywer** wat daarna verwys nie (soos `/proc/self/ns/user`).
 
-### Skep nuwe Gebruiker naamruimte (met kaarte)
+### Skep nuwe Gebruiker naamruimte (met kaartings)
 ```bash
 unshare -U [--map-user=<uid>|<name>] [--map-group=<gid>|<name>] [--map-root-user] [--map-current-user]
 ```
@@ -98,12 +98,12 @@ root       27756   27755  0 21:11 pts/10   00:00:00 /bin/bash
 ```
 ### Herwinning van Vermoëns
 
-In die geval van gebruikersname ruimtes, **wanneer 'n nuwe gebruikersnaam ruimte geskep word, word die proses wat in die ruimte ingaan 'n volle stel vermoëns binne daardie ruimte toegeken**. Hierdie vermoëns stel die proses in staat om bevoorregte operasies uit te voer soos **montage** **lêerstelsels**, die skep van toestelle, of die verandering van eienaarskap van lêers, maar **slegs binne die konteks van sy gebruikersnaam ruimte**.
+In die geval van gebruikersname ruimtes, **wanneer 'n nuwe gebruikersnaam ruimte geskep word, word die proses wat in die naamruimte ingaan 'n volle stel vermoëns binne daardie naamruimte toegeken**. Hierdie vermoëns stel die proses in staat om bevoorregte operasies uit te voer soos **montage** **lêerstelsels**, die skep van toestelle, of die verandering van eienaarskap van lêers, maar **slegs binne die konteks van sy gebruikersnaam ruimte**.
 
-Byvoorbeeld, wanneer jy die `CAP_SYS_ADMIN` vermoë binne 'n gebruikersnaam ruimte het, kan jy operasies uitvoer wat tipies hierdie vermoë vereis, soos die montage van lêerstelsels, maar slegs binne die konteks van jou gebruikersnaam ruimte. Enige operasies wat jy met hierdie vermoë uitvoer, sal nie die gasheerstelsel of ander naam ruimtes beïnvloed nie.
+Byvoorbeeld, wanneer jy die `CAP_SYS_ADMIN` vermoë binne 'n gebruikersnaam ruimte het, kan jy operasies uitvoer wat tipies hierdie vermoë vereis, soos die montering van lêerstelsels, maar slegs binne die konteks van jou gebruikersnaam ruimte. Enige operasies wat jy met hierdie vermoë uitvoer, sal nie die gasheerstelsel of ander naamruimtes beïnvloed nie.
 
 > [!WARNING]
-> Daarom, selfs al sal die verkryging van 'n nuwe proses binne 'n nuwe gebruikersnaam ruimte **jou al die vermoëns teruggee** (CapEff: 000001ffffffffff), kan jy eintlik **slegs diegene wat met die ruimte verband hou gebruik** (montage byvoorbeeld) maar nie elkeen nie. So, dit op sigself is nie genoeg om uit 'n Docker houer te ontsnap nie.
+> Daarom, selfs al sal die verkryging van 'n nuwe proses binne 'n nuwe gebruikersnaam ruimte **jou al die vermoëns teruggee** (CapEff: 000001ffffffffff), kan jy eintlik **slegs diegene wat met die naamruimte verband hou gebruik** (montage byvoorbeeld) maar nie elkeen nie. So, dit op sigself is nie genoeg om uit 'n Docker houer te ontsnap nie.
 ```bash
 # There are the syscalls that are filtered after changing User namespace with:
 unshare -UmCpf  bash

@@ -1,27 +1,27 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-## Firmware Integrity
+## Firmware Integriteit
 
-The **custom firmware and/or compiled binaries can be uploaded to exploit integrity or signature verification flaws**. The following steps can be followed for backdoor bind shell compilation:
+Die **pasgemaakte firmware en/of gecompileerde binêre kan opgelaai word om integriteit of handtekeningverifikasiefoute te benut**. Die volgende stappe kan gevolg word vir agterdeur bind shell kompilasie:
 
-1. The firmware can be extracted using firmware-mod-kit (FMK).
-2. The target firmware architecture and endianness should be identified.
-3. A cross compiler can be built using Buildroot or other suitable methods for the environment.
-4. The backdoor can be built using the cross compiler.
-5. The backdoor can be copied to the extracted firmware /usr/bin directory.
-6. The appropriate QEMU binary can be copied to the extracted firmware rootfs.
-7. The backdoor can be emulated using chroot and QEMU.
-8. The backdoor can be accessed via netcat.
-9. The QEMU binary should be removed from the extracted firmware rootfs.
-10. The modified firmware can be repackaged using FMK.
-11. The backdoored firmware can be tested by emulating it with firmware analysis toolkit (FAT) and connecting to the target backdoor IP and port using netcat.
+1. Die firmware kan onttrek word met firmware-mod-kit (FMK).
+2. Die teiken firmware argitektuur en endianness moet geïdentifiseer word.
+3. 'n Kruiskompiler kan gebou word met behulp van Buildroot of ander geskikte metodes vir die omgewing.
+4. Die agterdeur kan gebou word met behulp van die kruiskompiler.
+5. Die agterdeur kan na die onttrekte firmware /usr/bin gids gekopieer word.
+6. Die toepaslike QEMU binêre kan na die onttrekte firmware rootfs gekopieer word.
+7. Die agterdeur kan geëmuleer word met behulp van chroot en QEMU.
+8. Die agterdeur kan via netcat toeganklik gemaak word.
+9. Die QEMU binêre moet van die onttrekte firmware rootfs verwyder word.
+10. Die gewysigde firmware kan herverpak word met behulp van FMK.
+11. Die agterdeur firmware kan getoets word deur dit te emuleer met firmware analise toolkit (FAT) en verbinding te maak met die teiken agterdeur IP en poort met behulp van netcat.
 
-If a root shell has already been obtained through dynamic analysis, bootloader manipulation, or hardware security testing, precompiled malicious binaries such as implants or reverse shells can be executed. Automated payload/implant tools like the Metasploit framework and 'msfvenom' can be leveraged using the following steps:
+As 'n root shell reeds verkry is deur dinamiese analise, bootloader manipulasie, of hardeware sekuriteitstoetsing, kan voorafgecompileerde kwaadwillige binêre soos implante of omgekeerde shells uitgevoer word. Geoutomatiseerde payload/implant gereedskap soos die Metasploit raamwerk en 'msfvenom' kan benut word met behulp van die volgende stappe:
 
-1. The target firmware architecture and endianness should be identified.
-2. Msfvenom can be used to specify the target payload, attacker host IP, listening port number, filetype, architecture, platform, and the output file.
-3. The payload can be transferred to the compromised device and ensured that it has execution permissions.
-4. Metasploit can be prepared to handle incoming requests by starting msfconsole and configuring the settings according to the payload.
-5. The meterpreter reverse shell can be executed on the compromised device.
+1. Die teiken firmware argitektuur en endianness moet geïdentifiseer word.
+2. Msfvenom kan gebruik word om die teiken payload, aanvaller gasheer IP, luister poortnommer, lêertype, argitektuur, platform, en die uitvoer lêer te spesifiseer.
+3. Die payload kan na die gecompromitteerde toestel oorgedra word en verseker word dat dit uitvoeringsregte het.
+4. Metasploit kan voorberei word om inkomende versoeke te hanteer deur msfconsole te begin en die instellings volgens die payload te konfigureer.
+5. Die meterpreter omgekeerde shell kan op die gecompromitteerde toestel uitgevoer word.
 
 {{#include ../../banners/hacktricks-training.md}}

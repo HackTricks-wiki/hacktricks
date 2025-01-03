@@ -2,105 +2,105 @@
 
 ## smss.exe
 
-**Session Manager**.\
-Session 0 starts **csrss.exe** and **wininit.exe** (**OS** **services**) while Session 1 starts **csrss.exe** and **winlogon.exe** (**User** **session**). However, you should see **only one process** of that **binary** without children in the processes tree.
+**Sessie Bestuurder**.\
+Sessie 0 begin **csrss.exe** en **wininit.exe** (**OS** **dienste**) terwyl Sessie 1 **csrss.exe** en **winlogon.exe** (**Gebruiker** **sessie**) begin. U moet egter **slegs een proses** van daardie **binaire** sonder kinders in die prosesboom sien.
 
-Also, sessions apart from 0 and 1 may mean that RDP sessions are occurring.
+Verder kan sessies behalwe 0 en 1 beteken dat RDP-sessies plaasvind.
 
 ## csrss.exe
 
-**Client/Server Run Subsystem Process**.\
-It manages **processes** and **threads**, makes the **Windows** **API** available for other processes and also **maps drive letters**, create **temp files**, and handles the **shutdown** **process**.
+**Kliënt/Bediener Loop Substelsel Proses**.\
+Dit bestuur **prosesse** en **draadjies**, maak die **Windows** **API** beskikbaar vir ander prosesse en **map ook skyfletters**, skep **temp lêers**, en hanteer die **afsluiting** **proses**.
 
-There is one **running in Session 0 and another one in Session 1** (so **2 processes** in the processes tree). Another one is created **per new Session**.
+Daar is een **wat in Sessie 0 loop en nog een in Sessie 1** (so **2 prosesse** in die prosesboom). Nog een word **per nuwe Sessie** geskep.
 
 ## winlogon.exe
 
-**Windows Logon Process**.\
-It's responsible for user **logon**/**logoffs**. It launches **logonui.exe** to ask for username and password and then calls **lsass.exe** to verify them.
+**Windows Aanmeld Proses**.\
+Dit is verantwoordelik vir gebruiker **aanmeld**/**afmeld**. Dit begin **logonui.exe** om vir gebruikersnaam en wagwoord te vra en roep dan **lsass.exe** aan om dit te verifieer.
 
-Then it launches **userinit.exe** which is specified in **`HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon`** with key **Userinit**.
+Dan begin dit **userinit.exe** wat gespesifiseer is in **`HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon`** met sleutel **Userinit**.
 
-Mover over, the previous registry should have **explorer.exe** in the **Shell key** or it might be abused as a **malware persistence method**.
+Boonop moet die vorige register **explorer.exe** in die **Shell sleutel** hê of dit mag as 'n **malware volhardingsmetode** misbruik word.
 
 ## wininit.exe
 
-**Windows Initialization Process**. \
-It launches **services.exe**, **lsass.exe**, and **lsm.exe** in Session 0. There should only be 1 process.
+**Windows Inisialisasie Proses**. \
+Dit begin **services.exe**, **lsass.exe**, en **lsm.exe** in Sessie 0. Daar moet slegs 1 proses wees.
 
 ## userinit.exe
 
-**Userinit Logon Application**.\
-Loads the **ntduser.dat in HKCU** and initialises the **user** **environment** and runs **logon** **scripts** and **GPO**.
+**Userinit Aanmeld Toepassing**.\
+Laai die **ntduser.dat in HKCU** en inisieer die **gebruiker** **omgewing** en voer **aanmeld** **scripts** en **GPO** uit.
 
-It launches **explorer.exe**.
+Dit begin **explorer.exe**.
 
 ## lsm.exe
 
-**Local Session Manager**.\
-It works with smss.exe to manipulate user sessions: Logon/logoff, shell start, lock/unlock desktop, etc.
+**Plaaslike Sessie Bestuurder**.\
+Dit werk saam met smss.exe om gebruiker sessies te manipuleer: Aanmeld/afmeld, skulp begin, vergrendel/ontgrendel lessenaar, ens.
 
-After W7 lsm.exe was transformed into a service (lsm.dll).
+Na W7 is lsm.exe in 'n diens (lsm.dll) getransformeer.
 
-There should only be 1 process in W7 and from them a service running the DLL.
+Daar moet slegs 1 proses in W7 wees en van hulle 'n diens wat die DLL uitvoer.
 
 ## services.exe
 
-**Service Control Manager**.\
-It **loads** **services** configured as **auto-start** and **drivers**.
+**Diens Beheerder**.\
+Dit **laai** **dienste** wat as **outomatiese begin** en **drywers** geconfigureer is.
 
-It's the parent process of **svchost.exe**, **dllhost.exe**, **taskhost.exe**, **spoolsv.exe** and many more.
+Dit is die ouer proses van **svchost.exe**, **dllhost.exe**, **taskhost.exe**, **spoolsv.exe** en baie meer.
 
-Services are defined in `HKLM\SYSTEM\CurrentControlSet\Services` and this process maintains a DB in memory of service info that can be queried by sc.exe.
+Dienste word gedefinieer in `HKLM\SYSTEM\CurrentControlSet\Services` en hierdie proses handhaaf 'n DB in geheue van diensinligting wat deur sc.exe opgevraag kan word.
 
-Note how **some** **services** are going to be running in a **process of their own** and others are going to be **sharing a svchost.exe process**.
+Let op hoe **sommige** **dienste** in 'n **eie proses** gaan loop en ander gaan **'n svchost.exe proses deel**.
 
-There should only be 1 process.
+Daar moet slegs 1 proses wees.
 
 ## lsass.exe
 
-**Local Security Authority Subsystem**.\
-It's responsible for the user **authentication** and create the **security** **tokens**. It uses authentication packages located in `HKLM\System\CurrentControlSet\Control\Lsa`.
+**Plaaslike Sekuriteit Owerheid Substelsel**.\
+Dit is verantwoordelik vir die gebruiker **verifikasie** en skep die **sekuriteit** **tokens**. Dit gebruik verifikasie pakkette geleë in `HKLM\System\CurrentControlSet\Control\Lsa`.
 
-It writes to the **Security** **event** **log** and there should only be 1 process.
+Dit skryf na die **Sekuriteit** **gebeurtenis** **log** en daar moet slegs 1 proses wees.
 
-Keep in mind that this process is highly attacked to dump passwords.
+Hou in gedagte dat hierdie proses hoogs geteiken word om wagwoorde te dump.
 
 ## svchost.exe
 
-**Generic Service Host Process**.\
-It hosts multiple DLL services in one shared process.
+**Generiese Diens Gasheer Proses**.\
+Dit huisves verskeie DLL dienste in een gedeelde proses.
 
-Usually, you will find that **svchost.exe** is launched with the `-k` flag. This will launch a query to the registry **HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Svchost** where there will be a key with the argument mentioned in -k that will contain the services to launch in the same process.
+Gewoonlik sal u vind dat **svchost.exe** met die `-k` vlag begin. Dit sal 'n navraag na die register **HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Svchost** begin waar daar 'n sleutel met die argument genoem in -k sal wees wat die dienste bevat om in dieselfde proses te begin.
 
-For example: `-k UnistackSvcGroup` will launch: `PimIndexMaintenanceSvc MessagingService WpnUserService CDPUserSvc UnistoreSvc UserDataSvc OneSyncSvc`
+Byvoorbeeld: `-k UnistackSvcGroup` sal begin: `PimIndexMaintenanceSvc MessagingService WpnUserService CDPUserSvc UnistoreSvc UserDataSvc OneSyncSvc`
 
-If the **flag `-s`** is also used with an argument, then svchost is asked to **only launch the specified service** in this argument.
+As die **vlag `-s`** ook met 'n argument gebruik word, dan word svchost gevra om **slegs die gespesifiseerde diens** in hierdie argument te begin.
 
-There will be several processes of `svchost.exe`. If any of them is **not using the `-k` flag**, then that's very suspicious. If you find that **services.exe is not the parent**, that's also very suspicious.
+Daar sal verskeie prosesse van `svchost.exe` wees. As enige van hulle **nie die `-k` vlag gebruik nie**, dan is dit baie verdag. As u vind dat **services.exe nie die ouer** is nie, is dit ook baie verdag.
 
 ## taskhost.exe
 
-This process act as a host for processes running from DLLs. It also loads the services that are running from DLLs.
+Hierdie proses dien as 'n gasheer vir prosesse wat van DLLs loop. Dit laai ook die dienste wat van DLLs loop.
 
-In W8 this is called taskhostex.exe and in W10 taskhostw.exe.
+In W8 word dit taskhostex.exe genoem en in W10 taskhostw.exe.
 
 ## explorer.exe
 
-This is the process responsible for the **user's desktop** and launching files via file extensions.
+Dit is die proses wat verantwoordelik is vir die **gebruiker se lessenaar** en die begin van lêers via lêeruitbreidings.
 
-**Only 1** process should be spawned **per logged on user.**
+**Slegs 1** proses moet **per aangemelde gebruiker** geskep word.
 
-This is run from **userinit.exe** which should be terminated, so **no parent** should appear for this process.
+Dit word van **userinit.exe** uitgevoer wat beëindig moet word, so **geen ouer** moet vir hierdie proses verskyn nie.
 
-# Catching Malicious Processes
+# Vang Kwaadwillige Prosesse
 
-- Is it running from the expected path? (No Windows binaries run from temp location)
-- Is it communicating with weird IPs?
-- Check digital signatures (Microsoft artifacts should be signed)
-- Is it spelled correctly?
-- Is running under the expected SID?
-- Is the parent process the expected one (if any)?
-- Are the children processes the expecting ones? (no cmd.exe, wscript.exe, powershell.exe..?)
+- Loop dit vanaf die verwagte pad? (Geen Windows binaire loop vanaf tydelike plek nie)
+- Kommunikeer dit met vreemde IP's?
+- Kontroleer digitale handtekeninge (Microsoft artefakte moet onderteken wees)
+- Is dit korrek gespel?
+- Loop dit onder die verwagte SID?
+- Is die ouer proses die verwagte een (indien enige)?
+- Is die kindprosesse die verwagte? (geen cmd.exe, wscript.exe, powershell.exe..?)
 
 {{#include ../../../banners/hacktricks-training.md}}

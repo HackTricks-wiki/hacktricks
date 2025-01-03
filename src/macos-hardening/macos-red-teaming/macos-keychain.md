@@ -8,11 +8,11 @@
 - Die **Stelsel Sleutelkettie** (`/Library/Keychains/System.keychain`), wat **stelsel-wye akrediteerings** soos WiFi wagwoorde, stelsel wortelsertifikate, stelsel privaat sleutels, en stelsel toepassingswagwoorde stoor.
 - Dit is moontlik om ander komponente soos sertifikate in `/System/Library/Keychains/*` te vind.
 - In **iOS** is daar slegs een **Sleutelkettie** geleë in `/private/var/Keychains/`. Hierdie gids bevat ook databasisse vir die `TrustStore`, sertifikaatowerhede (`caissuercache`) en OSCP inskrywings (`ocspache`).
-- Toepassings sal in die sleutelkettie beperk wees tot hul private area gebaseer op hul toepassingsidentifiseerder.
+- Toepassings sal in die sleutelkettie beperk wees tot hul privaat area gebaseer op hul toepassingsidentifiseerder.
 
 ### Wagwoord Sleutelkettie Toegang
 
-Hierdie lêers, terwyl hulle nie inherente beskerming het nie en **afgelaai** kan word, is versleuteld en vereis die **gebruikers se platte wagwoord om ontcijfer** te word. 'n Gereedskap soos [**Chainbreaker**](https://github.com/n0fate/chainbreaker) kan gebruik word vir ontcijfering.
+Hierdie lêers, terwyl hulle nie inherente beskerming het nie en **afgelaai** kan word, is versleuteld en vereis die **gebruiker se platte wagwoord om ontcijfer** te word. 'n Gereedskap soos [**Chainbreaker**](https://github.com/n0fate/chainbreaker) kan gebruik word vir ontcijfering.
 
 ## Sleutelkettie Inskrywings Beskerming
 
@@ -33,25 +33,25 @@ Die ACLs word verder vergesel deur 'n **lys van vertroude toepassings** wat hier
 Ook kan die inskrywing die sleutel **`ACLAuthorizationPartitionID`** bevat, wat gebruik word om die **teamid, apple,** en **cdhash** te identifiseer.
 
 - As die **teamid** gespesifiseer is, dan om die **inskrywing** waarde **sonder** 'n **prompt** te **verkry**, moet die gebruikte toepassing die **selfde teamid** hê.
-- As die **apple** gespesifiseer is, dan moet die toepassing **onderteken** wees deur **Apple**.
+- As die **apple** gespesifiseer is, dan moet die app **onderteken** wees deur **Apple**.
 - As die **cdhash** aangedui is, dan moet die **app** die spesifieke **cdhash** hê.
 
 ### Skep van 'n Sleutelkettie Inskrywing
 
 Wanneer 'n **nuwe** **inskrywing** geskep word met **`Keychain Access.app`**, geld die volgende reëls:
 
-- Alle toepassings kan versleutel.
-- **Geen toepassings** kan uitvoer/ontcijfer (sonder om die gebruiker te vra).
-- Alle toepassings kan die integriteitskontrole sien.
-- Geen toepassings kan ACLs verander nie.
+- Alle apps kan versleutel.
+- **Geen apps** kan uitvoer/ontcijfer (sonder om die gebruiker te vra).
+- Alle apps kan die integriteitskontrole sien.
+- Geen apps kan ACLs verander nie.
 - Die **partitionID** is gestel op **`apple`**.
 
 Wanneer 'n **toepassing 'n inskrywing in die sleutelkettie skep**, is die reëls effens anders:
 
-- Alle toepassings kan versleutel.
-- Slegs die **skepende toepassing** (of enige ander toepassings wat eksplisiet bygevoeg is) kan uitvoer/ontcijfer (sonder om die gebruiker te vra).
-- Alle toepassings kan die integriteitskontrole sien.
-- Geen toepassings kan die ACLs verander nie.
+- Alle apps kan versleutel.
+- Slegs die **skepende toepassing** (of enige ander apps wat eksplisiet bygevoeg is) kan uitvoer/ontcijfer (sonder om die gebruiker te vra).
+- Alle apps kan die integriteitskontrole sien.
+- Geen apps kan die ACLs verander nie.
 - Die **partitionID** is gestel op **`teamid:[teamID here]`**.
 
 ## Toegang tot die Sleutelkettie

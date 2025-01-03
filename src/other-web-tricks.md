@@ -1,52 +1,38 @@
-# Other Web Tricks
+# Ander Web Tricks
 
 {{#include ./banners/hacktricks-training.md}}
 
-<figure><img src="/images/pentest-tools.svg" alt=""><figcaption></figcaption></figure>
 
-**Get a hacker's perspective on your web apps, network, and cloud**
+### Gasheer kop
 
-**Find and report critical, exploitable vulnerabilities with real business impact.** Use our 20+ custom tools to map the attack surface, find security issues that let you escalate privileges, and use automated exploits to collect essential evidence, turning your hard work into persuasive reports.
-
-{% embed url="https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons" %}
-
-### Host header
-
-Several times the back-end trust the **Host header** to perform some actions. For example, it could use its value as the **domain to send a password reset**. So when you receive an email with a link to reset your password, the domain being used is the one you put in the Host header.Then, you can request the password reset of other users and change the domain to one controlled by you to steal their password reset codes. [WriteUp](https://medium.com/nassec-cybersecurity-writeups/how-i-was-able-to-take-over-any-users-account-with-host-header-injection-546fff6d0f2).
+Verskeie kere vertrou die agterkant op die **Gasheer kop** om sekere aksies uit te voer. Byvoorbeeld, dit kan sy waarde gebruik as die **domein om 'n wagwoordherstel te stuur**. So wanneer jy 'n e-pos ontvang met 'n skakel om jou wagwoord te herstel, is die domein wat gebruik word die een wat jy in die Gasheer kop geplaas het. Dan kan jy die wagwoordherstel van ander gebruikers aanvra en die domein verander na een wat deur jou beheer word om hul wagwoordherstelkodes te steel. [WriteUp](https://medium.com/nassec-cybersecurity-writeups/how-i-was-able-to-take-over-any-users-account-with-host-header-injection-546fff6d0f2).
 
 > [!WARNING]
-> Note that it's possible that you don't even need to wait for the user to click on the reset password link to get the token, as maybe even **spam filters or other intermediary devices/bots will click on it to analyze it**.
+> Let daarop dat dit moontlik is dat jy selfs nie hoef te wag vir die gebruiker om op die wagwoordherstel skakel te klik om die token te kry nie, aangesien selfs **spamfilters of ander intermediêre toestelle/bots dit mag klik om dit te analiseer**.
 
 
-### Session booleans
+### Sessie booleans
 
-Some times when you complete some verification correctly the back-end will **just add a boolean with the value "True" to a security attribute your session**. Then, a different endpoint will know if you successfully passed that check.\
-However, if you **pass the check** and your sessions is granted that "True" value in the security attribute, you can try to **access other resources** that **depends on the same attribute** but that you **shouldn't have permissions** to access. [WriteUp](https://medium.com/@ozguralp/a-less-known-attack-vector-second-order-idor-attacks-14468009781a).
+Soms wanneer jy 'n sekere verifikasie korrek voltooi, sal die agterkant **net 'n boolean met die waarde "True" by 'n sekuriteitsattribuut van jou sessie voeg**. Dan sal 'n ander eindpunt weet of jy daardie toets suksesvol geslaag het.\
+As jy egter die **toets slaag** en jou sessie daardie "True" waarde in die sekuriteitsattribuut toegeken word, kan jy probeer om **toegang te verkry tot ander hulpbronne** wat **afhang van dieselfde attribuut** maar waarvoor jy **nie toestemming behoort te hê nie**. [WriteUp](https://medium.com/@ozguralp/a-less-known-attack-vector-second-order-idor-attacks-14468009781a).
 
-### Register functionality
+### Registreer funksionaliteit
 
-Try to register as an already existent user. Try also using equivalent characters (dots, lots of spaces and Unicode).
+Probeer om te registreer as 'n reeds bestaande gebruiker. Probeer ook om ekwivalente karakters te gebruik (punte, baie spasie en Unicode).
 
-### Takeover emails
+### Neem oor e-posse
 
-Register an email, before confirming it change the email, then, if the new confirmation email is sent to the first registered email,you can takeover any email. Or if you can enable the second email confirming the firt one, you can also takeover any account.
+Registreer 'n e-pos, voordat jy dit bevestig, verander die e-pos, dan, as die nuwe bevestigings e-pos na die eerste geregistreerde e-pos gestuur word, kan jy enige e-pos oorneem. Of as jy die tweede e-pos kan aktiveer wat die eerste een bevestig, kan jy ook enige rekening oorneem.
 
-### Access Internal servicedesk of companies using atlassian
+### Toegang tot interne servicedesk van maatskappye wat atlassian gebruik
 
 {% embed url="https://yourcompanyname.atlassian.net/servicedesk/customer/user/login" %}
 
-### TRACE method
+### TRACE metode
 
-Developers might forget to disable various debugging options in the production environment. For example, the HTTP `TRACE` method is designed for diagnostic purposes. If enabled, the web server will respond to requests that use the `TRACE` method by echoing in the response the exact request that was received. This behaviour is often harmless, but occasionally leads to information disclosure, such as the name of internal authentication headers that may be appended to requests by reverse proxies.![Image for post](https://miro.medium.com/max/60/1*wDFRADTOd9Tj63xucenvAA.png?q=20)
+Ontwikkelaars mag vergeet om verskeie foutopsporing opsies in die produksie-omgewing te deaktiveer. Byvoorbeeld, die HTTP `TRACE` metode is ontwerp vir diagnostiese doeleindes. As dit geaktiveer is, sal die webbediener op versoeke wat die `TRACE` metode gebruik, reageer deur in die antwoord die presiese versoek wat ontvang is, te herhaal. Hierdie gedrag is dikwels onskadelik, maar lei soms tot inligtingsontsluiting, soos die naam van interne verifikasie koppe wat aan versoeke deur omgekeerde proxies bygevoeg mag word.![Image for post](https://miro.medium.com/max/60/1*wDFRADTOd9Tj63xucenvAA.png?q=20)
 
 ![Image for post](https://miro.medium.com/max/1330/1*wDFRADTOd9Tj63xucenvAA.png)
 
-<figure><img src="/images/pentest-tools.svg" alt=""><figcaption></figcaption></figure>
-
-**Get a hacker's perspective on your web apps, network, and cloud**
-
-**Find and report critical, exploitable vulnerabilities with real business impact.** Use our 20+ custom tools to map the attack surface, find security issues that let you escalate privileges, and use automated exploits to collect essential evidence, turning your hard work into persuasive reports.
-
-{% embed url="https://pentest-tools.com/?utm_term=jul2024&utm_medium=link&utm_source=hacktricks&utm_campaign=spons" %}
 
 {{#include ./banners/hacktricks-training.md}}

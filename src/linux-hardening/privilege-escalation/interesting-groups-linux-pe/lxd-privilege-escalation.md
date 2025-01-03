@@ -60,7 +60,7 @@ lxc exec privesc /bin/sh
 ```
 ### Metode 2
 
-Bou 'n Alpine-beeld en begin dit met die vlag `security.privileged=true`, wat die houer dwing om as root met die gasheer lêerstelsel te kommunikeer.
+Bou 'n Alpine beeld en begin dit met die vlag `security.privileged=true`, wat die houer dwing om as root met die gasheer lêerstelsel te kommunikeer.
 ```bash
 # build a simple alpine image
 git clone https://github.com/saghul/lxd-alpine-builder

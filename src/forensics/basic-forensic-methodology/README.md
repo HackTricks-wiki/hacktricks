@@ -1,30 +1,30 @@
-# Basic Forensic Methodology
+# Basiese Forensiese Metodologie
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Creating and Mounting an Image
+## Skep en Monteer 'n Beeld
 
 {{#ref}}
 ../../generic-methodologies-and-resources/basic-forensic-methodology/image-acquisition-and-mount.md
 {{#endref}}
 
-## Malware Analysis
+## Malware Analise
 
-This **isn't necessary the first step to perform once you have the image**. But you can use this malware analysis techniques independently if you have a file, a file-system image, memory image, pcap... so it's good to **keep these actions in mind**:
+Dit **is nie noodsaaklik die eerste stap om uit te voer sodra jy die beeld het nie**. Maar jy kan hierdie malware analise tegnieke onafhanklik gebruik as jy 'n lêer, 'n lêer-stelsel beeld, geheue beeld, pcap... het, so dit is goed om **hierdie aksies in gedagte te hou**:
 
 {{#ref}}
 malware-analysis.md
 {{#endref}}
 
-## Inspecting an Image
+## Inspekteer 'n Beeld
 
-if you are given a **forensic image** of a device you can start **analyzing the partitions, file-system** used and **recovering** potentially **interesting files** (even deleted ones). Learn how in:
+As jy 'n **forensiese beeld** van 'n toestel ontvang, kan jy begin **analiseer die partisies, lêer-stelsel** wat gebruik word en **herstel** moontlik **interessante lêers** (selfs verwyderde). Leer hoe in:
 
 {{#ref}}
 partitions-file-systems-carving/
 {{#endref}}
 
-Depending on the used OSs and even platform different interesting artifacts should be searched:
+Afhangende van die gebruikte OS's en selfs platform, moet verskillende interessante artefakte gesoek word:
 
 {{#ref}}
 windows-forensics/
@@ -38,42 +38,42 @@ linux-forensics.md
 docker-forensics.md
 {{#endref}}
 
-## Deep inspection of specific file-types and Software
+## Diep inspeksie van spesifieke lêer-tipes en Sagteware
 
-If you have very **suspicious** **file**, then **depending on the file-type and software** that created it several **tricks** may be useful.\
-Read the following page to learn some interesting tricks:
+As jy 'n baie **verdagte** **lêer** het, dan **afhangende van die lêer-tipe en sagteware** wat dit geskep het, kan verskeie **tricks** nuttig wees.\
+Lees die volgende bladsy om 'n paar interessante truuks te leer:
 
 {{#ref}}
 specific-software-file-type-tricks/
 {{#endref}}
 
-I want to do a special mention to the page:
+Ek wil 'n spesiale vermelding maak van die bladsy:
 
 {{#ref}}
 specific-software-file-type-tricks/browser-artifacts.md
 {{#endref}}
 
-## Memory Dump Inspection
+## Geheue Dump Inspekteer
 
 {{#ref}}
 memory-dump-analysis/
 {{#endref}}
 
-## Pcap Inspection
+## Pcap Inspekteer
 
 {{#ref}}
 pcap-inspection/
 {{#endref}}
 
-## **Anti-Forensic Techniques**
+## **Anti-Forensiese Tegnieke**
 
-Keep in mind the possible use of anti-forensic techniques:
+Hou in gedagte die moontlike gebruik van anti-forensiese tegnieke:
 
 {{#ref}}
 anti-forensic-techniques.md
 {{#endref}}
 
-## Threat Hunting
+## Bedreiging Jag
 
 {{#ref}}
 file-integrity-monitoring.md

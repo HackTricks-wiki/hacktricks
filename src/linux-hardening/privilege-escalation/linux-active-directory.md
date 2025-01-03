@@ -71,7 +71,7 @@ Die aanroep van \*\*`SSSDKCMExtractor` \*\* met die --database en --key paramete
 git clone https://github.com/fireeye/SSSDKCMExtractor
 python3 SSSDKCMExtractor.py --database secrets.ldb --key secrets.mkey
 ```
-Die **bewys cache Kerberos blob kan omskep word in 'n bruikbare Kerberos CCache** lêer wat aan Mimikatz/Rubeus oorgedra kan word.
+Die **credential cache Kerberos blob kan omskep word in 'n bruikbare Kerberos CCache** lêer wat aan Mimikatz/Rubeus oorgedra kan word.
 
 ### CCACHE kaartjie hergebruik vanaf keytab
 ```bash
@@ -81,7 +81,7 @@ klist -k /etc/krb5.keytab
 ```
 ### Trek rekeninge uit /etc/krb5.keytab
 
-Diensrekening sleutels, wat noodsaaklik is vir dienste wat met wortelregte werk, word veilig gestoor in **`/etc/krb5.keytab`** lêers. Hierdie sleutels, soortgelyk aan wagwoorde vir dienste, vereis streng vertroulikheid.
+Diensrekening sleutels, wat noodsaaklik is vir dienste wat met wortelprivileges werk, word veilig gestoor in **`/etc/krb5.keytab`** lêers. Hierdie sleutels, soortgelyk aan wagwoorde vir dienste, vereis streng vertroulikheid.
 
 Om die inhoud van die keytab-lêer te ondersoek, kan **`klist`** gebruik word. Die hulpmiddel is ontwerp om sleuteldetails te vertoon, insluitend die **NT Hash** vir gebruikersverifikasie, veral wanneer die sleuteltipe as 23 geïdentifiseer word.
 ```bash

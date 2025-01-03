@@ -1,18 +1,18 @@
-# Wide Source Code Search
+# Wye Bronkode Soektog
 
 {{#include ../../banners/hacktricks-training.md}}
 
-The goal of this page is to enumerate **platforms that allow to search for code** (literal or regex) in across thousands/millions of repos in one or more platforms.
+Die doel van hierdie bladsy is om **platforms te noem wat toelaat om kode** (letterlik of regex) in duisende/miljoene repos op een of meer platforms te soek.
 
-This helps in several occasions to **search for leaked information** or for **vulnerabilities** patterns.
+Dit help in verskeie gevalle om **gelekte inligting** of **kwesbaarhede** patrone te soek.
 
-- [**SourceGraph**](https://sourcegraph.com/search): Search in millions of repos. There is a free version and an enterprise version (with 15 days free). It supports regexes.
-- [**Github Search**](https://github.com/search): Search across Github. It supports regexes.
-  - Maybe it's also useful to check also [**Github Code Search**](https://cs.github.com/).
-- [**Gitlab Advanced Search**](https://docs.gitlab.com/ee/user/search/advanced_search.html): Search across Gitlab projects. Support regexes.
-- [**SearchCode**](https://searchcode.com/): Search code in millions of projects.
+- [**SourceGraph**](https://sourcegraph.com/search): Soek in miljoene repos. Daar is 'n gratis weergawe en 'n ondernemingsweergawe (met 15 dae gratis). Dit ondersteun regexes.
+- [**Github Search**](https://github.com/search): Soek oor Github. Dit ondersteun regexes.
+- Miskien is dit ook nuttig om ook [**Github Code Search**](https://cs.github.com/) te kyk.
+- [**Gitlab Advanced Search**](https://docs.gitlab.com/ee/user/search/advanced_search.html): Soek oor Gitlab projekte. Ondersteun regexes.
+- [**SearchCode**](https://searchcode.com/): Soek kode in miljoene projekte.
 
 > [!WARNING]
-> When you look for leaks in a repo and run something like `git log -p` don't forget there might be **other branches with other commits** containing secrets!
+> Wanneer jy soek na lekkasies in 'n repo en iets soos `git log -p` uitvoer, moenie vergeet dat daar dalk **ander takke met ander verbintenisse** is wat geheime bevat nie!
 
 {{#include ../../banners/hacktricks-training.md}}

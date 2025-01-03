@@ -2,17 +2,17 @@
 
 # Baseline
 
-A baseline consists of taking a snapshot of certain parts of a system to **compare it with a future status to highlight changes**.
+'n Baseline bestaan uit die neem van 'n snapshot van sekere dele van 'n stelsel om **dit te vergelyk met 'n toekomstige status om veranderinge te beklemtoon**.
 
-For example, you can calculate and store the hash of each file of the filesystem to be able to find out which files were modified.\
-This can also be done with the user accounts created, processes running, services running and any other thing that shouldn't change much, or at all.
+Byvoorbeeld, jy kan die hash van elke lêer van die lêerstelsel bereken en stoor om te kan uitvind watter lêers gewysig is.\
+Dit kan ook gedoen word met die gebruikersrekeninge wat geskep is, prosesse wat loop, dienste wat loop en enige ander ding wat nie veel, of glad nie, behoort te verander nie.
 
 ## File Integrity Monitoring
 
-File Integrity Monitoring (FIM) is a critical security technique that protects IT environments and data by tracking changes in files. It involves two key steps:
+File Integrity Monitoring (FIM) is 'n kritieke sekuriteitstegniek wat IT-omgewings en data beskerm deur veranderinge in lêers te volg. Dit behels twee sleutelstappe:
 
-1. **Baseline Comparison:** Establish a baseline using file attributes or cryptographic checksums (like MD5 or SHA-2) for future comparisons to detect modifications.
-2. **Real-Time Change Notification:** Get instant alerts when files are accessed or altered, typically through OS kernel extensions.
+1. **Baseline Vergelyking:** Stel 'n baseline op met behulp van lêer eienskappe of kriptografiese kontrole somes (soos MD5 of SHA-2) vir toekomstige vergelykings om wysigings te ontdek.
+2. **Regte-Tyd Verandering Kennisgewing:** Kry onmiddellike waarskuwings wanneer lêers geopen of gewysig word, tipies deur OS-kernuitbreidings.
 
 ## Tools
 

@@ -4,17 +4,17 @@
 
 ## Basiese Inligting
 
-'n IPC (Inter-Process Communication) naamruimte is 'n Linux-kernkenmerk wat **isolasie** van System V IPC-objekte bied, soos boodskaprye, gedeelde geheue-segmente en semafore. Hierdie isolasie verseker dat prosesse in **verskillende IPC naamruimtes nie direk toegang kan verkry tot of mekaar se IPC-objekte kan verander nie**, wat 'n addisionele laag van sekuriteit en privaatheid tussen prosesgroepe bied.
+'n IPC (Inter-Process Communication) namespace is 'n Linux-kernfunksie wat **isolasie** van System V IPC-objekte bied, soos boodskapqueues, gedeelde geheue-segmente en semafore. Hierdie isolasie verseker dat prosesse in **verskillende IPC namespaces nie direk toegang kan verkry tot of mekaar se IPC-objekte kan verander nie**, wat 'n addisionele laag van sekuriteit en privaatheid tussen prosesgroepe bied.
 
 ### Hoe dit werk:
 
-1. Wanneer 'n nuwe IPC naamruimte geskep word, begin dit met 'n **heeltemal geïsoleerde stel van System V IPC-objekte**. Dit beteken dat prosesse wat in die nuwe IPC naamruimte loop nie toegang kan verkry tot of inmeng met die IPC-objekte in ander naamruimtes of die gasheerstelsel nie, per standaard.
-2. IPC-objekte wat binne 'n naamruimte geskep word, is sigbaar en **slegs toeganklik vir prosesse binne daardie naamruimte**. Elke IPC-objek word geïdentifiseer deur 'n unieke sleutel binne sy naamruimte. Alhoewel die sleutel identies kan wees in verskillende naamruimtes, is die objekte self geïsoleer en kan nie oor naamruimtes toeganklik wees nie.
-3. Prosesse kan tussen naamruimtes beweeg deur die `setns()` stelselskakel te gebruik of nuwe naamruimtes te skep met die `unshare()` of `clone()` stelselskakels met die `CLONE_NEWIPC` vlag. Wanneer 'n proses na 'n nuwe naamruimte beweeg of een skep, sal dit begin om die IPC-objekte wat met daardie naamruimte geassosieer is, te gebruik.
+1. Wanneer 'n nuwe IPC namespace geskep word, begin dit met 'n **heeltemal geïsoleerde stel van System V IPC-objekte**. Dit beteken dat prosesse wat in die nuwe IPC namespace loop nie toegang kan verkry tot of inmeng met die IPC-objekte in ander namespaces of die gasheerstelsel nie, per standaard.
+2. IPC-objekte wat binne 'n namespace geskep word, is sigbaar en **slegs toeganklik vir prosesse binne daardie namespace**. Elke IPC-objek word geïdentifiseer deur 'n unieke sleutel binne sy namespace. Alhoewel die sleutel identies mag wees in verskillende namespaces, is die objekte self geïsoleer en kan nie oor namespaces toeganklik wees nie.
+3. Prosesse kan tussen namespaces beweeg deur die `setns()` stelselskakel of nuwe namespaces skep deur die `unshare()` of `clone()` stelselskakels met die `CLONE_NEWIPC` vlag. Wanneer 'n proses na 'n nuwe namespace beweeg of een skep, sal dit begin om die IPC-objekte wat met daardie namespace geassosieer is, te gebruik.
 
 ## Laboratorium:
 
-### Skep verskillende Naamruimtes
+### Skep verskillende Namespaces
 
 #### CLI
 ```bash
@@ -30,9 +30,9 @@ Wanneer `unshare` sonder die `-f` opsie uitgevoer word, word 'n fout ondervind w
 
 1. **Probleemverklaring**:
 
-- Die Linux-kern laat 'n proses toe om nuwe naamruimtes te skep met die `unshare` stelselaanroep. Die proses wat die skepping van 'n nuwe PID naamruimte inisieer (genoem die "unshare" proses) gaan egter nie in die nuwe naamruimte in nie; slegs sy kindproses gaan.
-- Die uitvoering van `%unshare -p /bin/bash%` begin `/bin/bash` in dieselfde proses as `unshare`. Gevolglik is `/bin/bash` en sy kindproses in die oorspronklike PID naamruimte.
-- Die eerste kindproses van `/bin/bash` in die nuwe naamruimte word PID 1. Wanneer hierdie proses verlaat, veroorsaak dit die opruiming van die naamruimte as daar geen ander prosesse is nie, aangesien PID 1 die spesiale rol het om weesprosesse aan te neem. Die Linux-kern sal dan PID-toewysing in daardie naamruimte deaktiveer.
+- Die Linux-kern laat 'n proses toe om nuwe naamruimtes te skep met die `unshare` stelselaanroep. Die proses wat die skepping van 'n nuwe PID naamruimte inisieer (genoem die "unshare" proses) gaan egter nie in die nuwe naamruimte in nie; slegs sy kindprosesse doen.
+- Om `%unshare -p /bin/bash%` uit te voer, begin `/bin/bash` in dieselfde proses as `unshare`. Gevolglik is `/bin/bash` en sy kindprosesse in die oorspronklike PID naamruimte.
+- Die eerste kindproses van `/bin/bash` in die nuwe naamruimte word PID 1. Wanneer hierdie proses verlaat, aktiveer dit die opruiming van die naamruimte as daar geen ander prosesse is nie, aangesien PID 1 die spesiale rol het om weeskindprosesse aan te neem. Die Linux-kern sal dan PID-toewysing in daardie naamruimte deaktiveer.
 
 2. **Gevolg**:
 
@@ -40,9 +40,9 @@ Wanneer `unshare` sonder die `-f` opsie uitgevoer word, word 'n fout ondervind w
 
 3. **Oplossing**:
 - Die probleem kan opgelos word deur die `-f` opsie saam met `unshare` te gebruik. Hierdie opsie maak dat `unshare` 'n nuwe proses fork nadat die nuwe PID naamruimte geskep is.
-- Die uitvoering van `%unshare -fp /bin/bash%` verseker dat die `unshare` opdrag self PID 1 in die nuwe naamruimte word. `/bin/bash` en sy kindproses is dan veilig binne hierdie nuwe naamruimte, wat die voortydige uitgang van PID 1 voorkom en normale PID-toewysing toelaat.
+- Om `%unshare -fp /bin/bash%` uit te voer, verseker dat die `unshare` opdrag self PID 1 in die nuwe naamruimte word. `/bin/bash` en sy kindprosesse is dan veilig binne hierdie nuwe naamruimte, wat die voortydige uitgang van PID 1 voorkom en normale PID-toewysing toelaat.
 
-Deur te verseker dat `unshare` met die `-f` vlag loop, word die nuwe PID naamruimte korrek gehandhaaf, wat toelaat dat `/bin/bash` en sy sub-prosesse kan werk sonder om die geheue toewysing fout te ondervind.
+Deur te verseker dat `unshare` met die `-f` vlag loop, word die nuwe PID naamruimte korrek gehandhaaf, wat toelaat dat `/bin/bash` en sy subprosesse funksioneer sonder om die geheue toewysing fout te ondervind.
 
 </details>
 
@@ -61,11 +61,11 @@ sudo find /proc -maxdepth 3 -type l -name ipc -exec readlink {} \; 2>/dev/null |
 # Find the processes with an specific namespace
 sudo find /proc -maxdepth 3 -type l -name ipc -exec ls -l  {} \; 2>/dev/null | grep <ns-number>
 ```
-### Gaan binne 'n IPC-namespace in
+### Gaan binne 'n IPC-naamruimte in
 ```bash
 nsenter -i TARGET_PID --pid /bin/bash
 ```
-Ook, jy kan slegs **in 'n ander prosesnaamruimte ingaan as jy root is**. En jy **kan nie** **in** 'n ander naamruimte **ingaan sonder 'n beskrywer** wat daarna verwys nie (soos `/proc/self/ns/net`).
+Ook, jy kan slegs **in 'n ander prosesnaamruimte ingaan as jy root is**. En jy **kan nie** **ingaan** in 'n ander naamruimte **sonder 'n beskrywer** wat daarna verwys nie (soos `/proc/self/ns/net`).
 
 ### Skep IPC objek
 ```bash

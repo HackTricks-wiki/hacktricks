@@ -2,121 +2,124 @@
 
 # [ProjectHoneypot](https://www.projecthoneypot.org/)
 
-You can ask if an IP is related to suspicious/malicious activities. Completely free.
+Jy kan vra of 'n IP verband hou met verdagte/slegte aktiwiteite. Heeltemal gratis.
 
 # [**BotScout**](http://botscout.com/api.htm)
 
-Check if the IP address is related to a bot that register accounts. It can also check usernames and emails. Initially free.
+Kontroleer of die IP-adres verband hou met 'n bot wat rekeninge registreer. Dit kan ook gebruikersname en e-posse kontroleer. Aanvanklik gratis.
 
 # [Hunter](https://hunter.io/)
 
-Find and verify emails.  
-Some free API requests free, for more you need to pay.  
-Commercial?
+Vind en verifieer e-posse. 
+Sommige gratis API-versoeke, vir meer moet jy betaal. 
+Kommersieel?
 
 # [AlientVault](https://otx.alienvault.com/api)
 
-Find Malicious activities related to IPs and Domains. Free.
+Vind slegte aktiwiteite wat verband hou met IP's en domeine. Gratis.
 
 # [Clearbit](https://dashboard.clearbit.com/)
 
-Find related personal data to a email \(profiles on other platforms\), domain \(basic company info ,mails and people working\) and companies \(get company info from mail\).  
-You need to pay to access all the possibilities.  
-Commercial?
+Vind verwante persoonlike data aan 'n e-pos \(profiele op ander platforms\), domein \(basiese maatskappy-inligting, e-posse en mense wat werk\) en maatskappye \(kry maatskappy-inligting van e-pos\). 
+Jy moet betaal om toegang te verkry tot al die moontlikhede. 
+Kommersieel?
 
 # [BuiltWith](https://builtwith.com/)
 
-Technologies used by webs. Expensive...  
-Commercial?
+Tegnologieë wat deur webwerwe gebruik word. Duur... 
+Kommersieel?
 
 # [Fraudguard](https://fraudguard.io/)
 
-Check if a host \(domain or IP\) is related with suspicious/malicious activities. Have some free API access.  
-Commercial?
+Kontroleer of 'n gasheer \(domein of IP\) verband hou met verdagte/slegte aktiwiteite. Het 'n paar gratis API-toegang. 
+Kommersieel?
 
 # [FortiGuard](https://fortiguard.com/)
 
-Check if a host \(domain or IP\) is related with suspicious/malicious activities. Have some free API access.
+Kontroleer of 'n gasheer \(domein of IP\) verband hou met verdagte/slegte aktiwiteite. Het 'n paar gratis API-toegang.
 
 # [SpamCop](https://www.spamcop.net/)
 
-Indicates if host is related to spam activity. Have some free API access.
+Gee aan of 'n gasheer verband hou met spamaktiwiteit. Het 'n paar gratis API-toegang.
 
 # [mywot](https://www.mywot.com/)
 
-Based on opinions and other metrics get if a domain is related with suspicious/malicious information.
+Gebaseer op menings en ander metrieks, kry of 'n domein verband hou met verdagte/slegte inligting.
 
 # [ipinfo](https://ipinfo.io/)
 
-Obtains basic info from an IP address. You can test up to 100K/month.
+Verkry basiese inligting van 'n IP-adres. Jy kan tot 100K/maand toets.
 
 # [securitytrails](https://securitytrails.com/app/account)
 
-This platform give information about domains and IP addresses like domains inside an IP or inside a domain server, domains owned by an email \(find related domains\), IP history of domains \(find the host behind CloudFlare\), all domains using a nameserver....  
-You have some free access.
+Hierdie platform gee inligting oor domeine en IP-adresse soos domeine binne 'n IP of binne 'n domeinbediener, domeine besit deur 'n e-pos \(vind verwante domeine\), IP-geskiedenis van domeine \(vind die gasheer agter CloudFlare\), al die domeine wat 'n nameserver gebruik.... 
+Jy het 'n paar gratis toegang.
 
 # [fullcontact](https://www.fullcontact.com/)
 
-Allows to search by email, domain or company name and retrieve "personal" information related. It can also verify emails. There is some free access.
+Laat jou toe om te soek op e-pos, domein of maatskappynaam en "persoonlike" inligting te verkry wat verband hou. Dit kan ook e-posse verifieer. Daar is 'n paar gratis toegang.
 
 # [RiskIQ](https://www.spiderfoot.net/documentation/)
 
-A lot of information from domains and IPs even in the free/community version.
+Baie inligting van domeine en IP's selfs in die gratis/gemeenskapsweergawe.
 
 # [\_IntelligenceX](https://intelx.io/)
 
-Search Domains, IPs and emails and get info from dumps. Have some free access.
+Soek domeine, IP's en e-posse en kry inligting van dumps. Het 'n paar gratis toegang.
 
 # [IBM X-Force Exchange](https://exchange.xforce.ibmcloud.com/)
 
-Search by IP and gather information related to suspicions activities. There is some free access.
+Soek op IP en versamel inligting wat verband hou met verdagte aktiwiteite. Daar is 'n paar gratis toegang.
 
 # [Greynoise](https://viz.greynoise.io/)
 
-Search by IP or IP range and get information about IPs scanning the Internet. 15 days free access.
+Soek op IP of IP-reeks en kry inligting oor IP's wat die Internet skandeer. 15 dae gratis toegang.
 
 # [Shodan](https://www.shodan.io/)
 
-Get scan information of an IP address. Have some free api access.
+Kry skandeerinligting van 'n IP-adres. Het 'n paar gratis API-toegang.
 
 # [Censys](https://censys.io/)
 
-Very similar to shodan
+Baie soortgelyk aan shodan.
 
 # [buckets.grayhatwarfare.com](https://buckets.grayhatwarfare.com/)
 
-Find open S3 buckets searching by keyword.
+Vind oop S3-buckets deur te soek op sleutelwoord.
 
 # [Dehashed](https://www.dehashed.com/data)
 
-Find leaked credentials of emails and even domains  
-Commercial?
+Vind gelekte akrediteer van e-posse en selfs domeine. 
+Kommersieel?
 
 # [psbdmp](https://psbdmp.ws/)
 
-Search pastebins where a email appeared. Commercial?
+Soek pastebins waar 'n e-pos verskyn het. 
+Kommersieel?
 
 # [emailrep.io](https://emailrep.io/key)
 
-Get reputation of a mail. Commercial?
+Kry reputasie van 'n e-pos. 
+Kommersieel?
 
 # [ghostproject](https://ghostproject.fr/)
 
-Get passwords from leaked emails. Commercial?
+Kry wagwoorde van gelekte e-posse. 
+Kommersieel?
 
 # [Binaryedge](https://www.binaryedge.io/)
 
-Obtain interesting info from IPs
+Verkry interessante inligting van IP's.
 
 # [haveibeenpwned](https://haveibeenpwned.com/)
 
-Search by domain and email and get if it was pwned and passwords. Commercial?
+Soek op domein en e-pos en kry of dit gekap is en wagwoorde. 
+Kommersieel?
 
-[https://dnsdumpster.com/](https://dnsdumpster.com/)\(in a commercial tool?\)
+[https://dnsdumpster.com/](https://dnsdumpster.com/)\(in 'n kommersiële hulpmiddel?\)
 
-[https://www.netcraft.com/](https://www.netcraft.com/) \(in a commercial tool?\)
+[https://www.netcraft.com/](https://www.netcraft.com/) \(in 'n kommersiële hulpmiddel?\)
 
-[https://www.nmmapper.com/sys/tools/subdomainfinder/](https://www.nmmapper.com/) \(in a commercial tool?\)
+[https://www.nmmapper.com/sys/tools/subdomainfinder/](https://www.nmmapper.com/) \(in 'n kommersiële hulpmiddel?\)
 
 {{#include ./banners/hacktricks-training.md}}
-

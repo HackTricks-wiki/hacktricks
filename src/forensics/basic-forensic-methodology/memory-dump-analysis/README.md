@@ -1,49 +1,37 @@
-# Memory dump analysis
+# Geheugen dump analise
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-<figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
+## Begin
 
-[**RootedCON**](https://www.rootedcon.com/) is the most relevant cybersecurity event in **Spain** and one of the most important in **Europe**. With **the mission of promoting technical knowledge**, this congress is a boiling meeting point for technology and cybersecurity professionals in every discipline.
-
-{% embed url="https://www.rootedcon.com/" %}
-
-## Start
-
-Start **searching** for **malware** inside the pcap. Use the **tools** mentioned in [**Malware Analysis**](../malware-analysis.md).
+Begin **soek** vir **malware** binne die pcap. Gebruik die **gereedskap** genoem in [**Malware Analise**](../malware-analysis.md).
 
 ## [Volatility](../../../generic-methodologies-and-resources/basic-forensic-methodology/memory-dump-analysis/volatility-cheatsheet.md)
 
-**Volatility is the main open-source framework for memory dump analysis**. This Python tool analyzes dumps from external sources or VMware VMs, identifying data like processes and passwords based on the dump's OS profile. It's extensible with plugins, making it highly versatile for forensic investigations.
+**Volatility is die hoof oopbron raamwerk vir geheue dump analise**. Hierdie Python-gereedskap analiseer dumps van eksterne bronne of VMware VM's, en identifiseer data soos prosesse en wagwoorde gebaseer op die dump se OS-profiel. Dit is uitbreidbaar met plugins, wat dit baie veelsydig maak vir forensiese ondersoeke.
 
-**[Find here a cheatsheet](../../../generic-methodologies-and-resources/basic-forensic-methodology/memory-dump-analysis/volatility-cheatsheet.md)**
+**[Vind hier 'n cheatsheet](../../../generic-methodologies-and-resources/basic-forensic-methodology/memory-dump-analysis/volatility-cheatsheet.md)**
 
-## Mini dump crash report
+## Mini dump crash verslag
 
-When the dump is small (just some KB, maybe a few MB) then it's probably a mini dump crash report and not a memory dump.
+Wanneer die dump klein is (net 'n paar KB, dalk 'n paar MB) dan is dit waarskynlik 'n mini dump crash verslag en nie 'n geheue dump nie.
 
 ![](<../../../images/image (216).png>)
 
-If you have Visual Studio installed, you can open this file and bind some basic information like process name, architecture, exception info and modules being executed:
+As jy Visual Studio geïnstalleer het, kan jy hierdie lêer oopmaak en basiese inligting soos prosesnaam, argitektuur, uitsondering inligting en modules wat uitgevoer word, bind:
 
 ![](<../../../images/image (217).png>)
 
-You can also load the exception and see the decompiled instructions
+Jy kan ook die uitsondering laai en die gedecompileerde instruksies sien
 
 ![](<../../../images/image (219).png>)
 
 ![](<../../../images/image (218) (1).png>)
 
-Anyway, Visual Studio isn't the best tool to perform an analysis of the depth of the dump.
+In elk geval, Visual Studio is nie die beste gereedskap om 'n analise van die diepte van die dump uit te voer nie.
 
-You should **open** it using **IDA** or **Radare** to inspection it in **depth**.
+Jy moet dit **oopmaak** met **IDA** of **Radare** om dit in **diepte** te inspekteer.
 
 ​
-
-<figure><img src="https://files.gitbook.com/v0/b/gitbook-x-prod.appspot.com/o/spaces%2F-L_2uGJGU7AVNRcqRvEi%2Fuploads%2FelPCTwoecVdnsfjxCZtN%2Fimage.png?alt=media&#x26;token=9ee4ff3e-92dc-471c-abfe-1c25e446a6ed" alt=""><figcaption></figcaption></figure>
-
-[**RootedCON**](https://www.rootedcon.com/) is the most relevant cybersecurity event in **Spain** and one of the most important in **Europe**. With **the mission of promoting technical knowledge**, this congress is a boiling meeting point for technology and cybersecurity professionals in every discipline.
-
-{% embed url="https://www.rootedcon.com/" %}
 
 {{#include ../../../banners/hacktricks-training.md}}

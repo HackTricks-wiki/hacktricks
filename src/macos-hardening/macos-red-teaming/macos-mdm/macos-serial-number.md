@@ -7,13 +7,13 @@
 Apple-toestelle na 2010 het serienommers wat bestaan uit **12 alfanumeriese karakters**, elke segment wat spesifieke inligting oordra:
 
 - **Eerste 3 Karakters**: Dui die **produksie ligging** aan.
-- **Karakter 4 & 5**: Gee die **jaar en week van vervaardiging** aan.
+- **Karakter 4 & 5**: Dui die **jaar en week van vervaardiging** aan.
 - **Karakter 6 tot 8**: Dien as 'n **unieke identifiseerder** vir elke toestel.
 - **Laaste 4 Karakters**: Spesifiseer die **modelnommer**.
 
 Byvoorbeeld, die serienommer **C02L13ECF8J2** volg hierdie struktuur.
 
-### **Produksie Ligging (Eerste 3 Karakters)**
+### **Produksie Ligginge (Eerste 3 Karakters)**
 
 Sekere kodes verteenwoordig spesifieke fabrieke:
 
@@ -35,6 +35,6 @@ Hierdie karakter wissel van 'C' (wat die eerste helfte van 2010 verteenwoordig) 
 
 ### **Week van Vervaardiging (5de Karakter)**
 
-Cijfers 1-9 kom ooreen met weke 1-9. Letters C-Y (uitgesluit vokale en 'S') verteenwoordig weke 10-27. Vir die tweede helfte van die jaar, word 26 by hierdie nommer opgetel.
+Cijfers 1-9 kom ooreen met weke 1-9. Letters C-Y (uitgesluit vokale en 'S') verteenwoordig weke 10-27. Vir die tweede helfte van die jaar, word 26 by hierdie nommer gevoeg.
 
 {{#include ../../../banners/hacktricks-training.md}}

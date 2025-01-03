@@ -15,7 +15,7 @@ Jy kan hierdie inligting verkry met behulp van [**class-dump**](https://github.c
 ```bash
 class-dump Kindle.app
 ```
-Let wel dat hierdie name obfuskeer kan word om die omkering van die binêre meer moeilik te maak.
+Let wel, hierdie name kan obfuskeer word om die omkering van die binêre meer moeilik te maak.
 
 ## Klasse, Metodes & Objekte
 
@@ -244,7 +244,7 @@ NSMutableDictionary *mutFruitColorsDictionary = [NSMutableDictionary dictionaryW
 ```
 ### Blokke
 
-Blokke is **funksies wat as objekte optree** sodat hulle aan funksies oorgedra kan word of **gestoor** kan word in **arrays** of **woordeboeke**. Ook, hulle kan **'n waarde verteenwoordig as hulle waardes gegee word** so dit is soortgelyk aan lambdas.
+Blokke is **funksies wat as objekte optree** sodat hulle aan funksies oorgedra kan word of **gestoor** kan word in **reeks** of **woordeboeke**. Ook, hulle kan **'n waarde verteenwoordig as hulle waardes gegee word** so dit is soortgelyk aan lambdas.
 ```objectivec
 returnType (^blockName)(argumentType1, argumentType2, ...) = ^(argumentType1 param1, argumentType2 param2, ...){
 //Perform operations here
@@ -257,7 +257,7 @@ return a+b;
 };
 NSLog(@"3+4 = %d", suma(3,4));
 ```
-Dit is ook moontlik om **'n bloktipe te definieer wat as 'n parameter in funksies gebruik kan word**:
+Dit is ook moontlik om **'n bloktipe te definieer om as 'n parameter** in funksies gebruik te word:
 ```objectivec
 // Define the block type
 typedef void (^callbackLogger)(void);

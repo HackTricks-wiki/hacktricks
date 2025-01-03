@@ -24,7 +24,7 @@ Neem asseblief kennis dat **die meeste van die truuks oor privilege escalatie wa
 
 Jy kan die oorspronklike [Sudo Hijacking tegniek binne die Linux Privilege Escalation pos vind](../../linux-hardening/privilege-escalation/#sudo-hijacking).
 
-E however, macOS **onderhou** die gebruiker se **`PATH`** wanneer hy **`sudo`** uitvoer. Dit beteken dat 'n ander manier om hierdie aanval te bereik, sou wees om **ander binaries te kap** wat die slagoffer steeds sal uitvoer wanneer **sudo gedraai word:**
+E however, macOS **onderhou** die gebruiker se **`PATH`** wanneer hy **`sudo`** uitvoer. Dit beteken dat 'n ander manier om hierdie aanval te bereik, sou wees om **ander binaries** te **hijack** wat die slagoffer steeds sal uitvoer wanneer **sudo** gedraai word:
 ```bash
 # Let's hijack ls in /opt/homebrew/bin, as this is usually already in the users PATH
 cat > /opt/homebrew/bin/ls <<EOF
@@ -43,10 +43,10 @@ Let wel, 'n gebruiker wat die terminal gebruik, sal hoogs waarskynlik **Homebrew
 
 ### Dock Imitasie
 
-Deur sommige **sosiale ingenieurswese** te gebruik, kan jy **byvoorbeeld Google Chrome imiteer** binne die dock en werklik jou eie skrip uitvoer:
+Deur sommige **sosiale ingenieurswese** te gebruik, kan jy **byvoorbeeld Google Chrome imiteer** binne die dock en eintlik jou eie skrip uitvoer:
 
 {{#tabs}}
-{{#tab name="Chrome Impersonation"}}
+{{#tab name="Chrome Imitasie"}}
 Sommige voorstelle:
 
 - Kontroleer in die Dock of daar 'n Chrome is, en in daardie geval **verwyder** daardie inskrywing en **voeg** die **valse** **Chrome-inskrywing in dieselfde posisie** in die Dock-array by.&#x20;
@@ -203,10 +203,10 @@ killall Dock
 
 ## TCC - Wortel Privilege Escalation
 
-### CVE-2020-9771 - mount_apfs TCC omseiling en privilege escalasie
+### CVE-2020-9771 - mount_apfs TCC omseiling en privilege eskalasie
 
 **Enige gebruiker** (selfs onprivilegieerde) kan 'n tydmasjien-snapshot skep en monteer en **toegang hê tot AL die lêers** van daardie snapshot.\
-Die **enige privilegie** wat benodig word, is dat die toepassing wat gebruik word (soos `Terminal`) **Volledige Skyftoegang** (FDA) toegang moet hê (`kTCCServiceSystemPolicyAllfiles`) wat deur 'n admin toegestaan moet word.
+Die **enige privilegie** wat benodig word, is dat die toepassing wat gebruik word (soos `Terminal`) **Volledige Skyf Toegang** (FDA) toegang moet hê (`kTCCServiceSystemPolicyAllfiles`) wat deur 'n admin toegestaan moet word.
 ```bash
 # Create snapshot
 tmutil localsnapshot
@@ -230,7 +230,7 @@ ls /tmp/snap/Users/admin_user # This will work
 
 ## Sensitiewe Inligting
 
-Dit kan nuttig wees om voorregte te verhoog:
+Dit kan nuttig wees om bevoegdhede te verhoog:
 
 {{#ref}}
 macos-files-folders-and-binaries/macos-sensitive-locations.md

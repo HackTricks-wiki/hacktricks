@@ -4,7 +4,7 @@
 
 ## Basiese Inligting
 
-AppArmor is 'n **kernverbetering wat ontwerp is om die hulpbronne wat beskikbaar is vir programme deur middel van per-program profiele te beperk**, wat effektief Verpligte Toegangbeheer (MAC) implementeer deur toegangbeheer eienskappe direk aan programme te koppel eerder as aan gebruikers. Hierdie stelsel werk deur **profiele in die kern te laai**, gewoonlik tydens opstart, en hierdie profiele bepaal watter hulpbronne 'n program kan toegang hê, soos netwerkverbindinge, rou sokkettoegang, en lêer toestemmings.
+AppArmor is 'n **kernverbetering wat ontwerp is om die hulpbronne wat beskikbaar is vir programme deur middel van per-program profiele te beperk**, wat effektief Verpligte Toegang Beheer (MAC) implementeer deur toegangbeheer eienskappe direk aan programme te koppel eerder as aan gebruikers. Hierdie stelsel werk deur **profiele in die kern te laai**, gewoonlik tydens opstart, en hierdie profiele bepaal watter hulpbronne 'n program kan toegang hê, soos netwerkverbindinge, rou sokkettoegang, en lêer toestemmings.
 
 Daar is twee operasionele modi vir AppArmor profiele:
 
@@ -37,19 +37,19 @@ aa-mergeprof  #used to merge the policies
 ```
 ## Skep 'n profiel
 
-- Om die aangetaste uitvoerbare lêer aan te dui, **absolute paaie en wildcard** is toegelaat (vir lêer globbing) om lêers te spesifiseer.
+- Om die aangetaste uitvoerbare lêer aan te dui, **absolute paaie en wildcard** is toegelaat (vir lêer globbing) om lêers spesifiseer.
 - Om die toegang wat die binêre oor **lêers** sal hê aan te dui, kan die volgende **toegangbeheer** gebruik word:
 - **r** (lees)
 - **w** (skryf)
 - **m** (geheuekaart as uitvoerbaar)
-- **k** (lêer sluiting)
+- **k** (lêer vergrendeling)
 - **l** (skepping harde skakels)
 - **ix** (om 'n ander program uit te voer met die nuwe program wat die beleid erfen)
 - **Px** (uitvoer onder 'n ander profiel, na die omgewing skoongemaak is)
 - **Cx** (uitvoer onder 'n kindprofiel, na die omgewing skoongemaak is)
 - **Ux** (uitvoer onbepaal, na die omgewing skoongemaak is)
 - **Veranderlikes** kan in die profiele gedefinieer word en kan van buite die profiel gemanipuleer word. Byvoorbeeld: @{PROC} en @{HOME} (voeg #include \<tunables/global> by die profiel lêer)
-- **Weier reëls word ondersteun om toelaat reëls te oorskry**.
+- **Weier reëls word ondersteun om toelaat reëls te oortref**.
 
 ### aa-genprof
 
@@ -69,7 +69,7 @@ Dan, druk in die eerste konsole "**s**" en dui dan in die opgeneemde aksies aan 
 
 ### aa-easyprof
 
-Jy kan ook 'n sjabloon van 'n apparmor-profiel van 'n binêre met:
+Jy kan ook 'n sjabloon van 'n apparmor profiel van 'n binêre skep met:
 ```bash
 sudo aa-easyprof /path/to/binary
 # vim:syntax=apparmor
@@ -97,7 +97,7 @@ sudo aa-easyprof /path/to/binary
 > [!NOTE]
 > Let daarop dat niks standaard in 'n geskepte profiel toegelaat word nie, so alles word geweier. Jy sal lyne soos `/etc/passwd r,` moet byvoeg om die binêre lees `/etc/passwd` toe te laat, byvoorbeeld.
   
-Jy kan dan die **enforce** van die nuwe profiel met
+Jy kan dan die **enforce** die nuwe profiel met
 ```bash
 sudo apparmor_parser -a /etc/apparmor.d/path.to.binary
 ```
@@ -161,23 +161,23 @@ apparmor module is loaded.
 /usr/lib/connman/scripts/dhclient-script
 docker-default
 ```
-Deur die standaard **Apparmor docker-default profiel** word gegenereer vanaf [https://github.com/moby/moby/tree/master/profiles/apparmor](https://github.com/moby/moby/tree/master/profiles/apparmor)
+Standaard word die **Apparmor docker-default profiel** gegenereer vanaf [https://github.com/moby/moby/tree/master/profiles/apparmor](https://github.com/moby/moby/tree/master/profiles/apparmor)
 
-**docker-default profiel Samevatting**:
+**docker-default profiel Opsomming**:
 
 - **Toegang** tot alle **netwerk**
 - **Geen vermoë** is gedefinieer (Ehowever, sommige vermoëns sal kom van die insluiting van basiese basisreëls i.e. #include \<abstractions/base>)
 - **Skryf** na enige **/proc** lêer is **nie toegelaat** nie
-- Ander **subgidsen**/**lêers** van /**proc** en /**sys** het **weier** lees/skryf/slot/skakel/uitvoer toegang
+- Ander **subgidse**/**lêers** van /**proc** en /**sys** het **weier** lees/skryf/slot/skakel/uitvoer toegang
 - **Monteer** is **nie toegelaat** nie
-- **Ptrace** kan slegs op 'n proses wat deur **dieselfde apparmor profiel** beperk is, uitgevoer word
+- **Ptrace** kan slegs op 'n proses wat deur **dieselfde apparmor profiel** beperk word, uitgevoer word
 
-Sodra jy 'n **docker-container** **hardloop**, behoort jy die volgende uitvoer te sien:
+Sodra jy 'n **docker-container** **hardloop**, moet jy die volgende uitvoer sien:
 ```bash
 1 processes are in enforce mode.
 docker-default (825)
 ```
-Let wel, **apparmor sal selfs vermoënsprivileges blokkeer** wat aan die houer standaard toegeken word. Byvoorbeeld, dit sal in staat wees om **toestemming te blokkeer om binne /proc te skryf selfs as die SYS_ADMIN vermoë toegeken is** omdat die docker apparmor-profiel hierdie toegang standaard weier:
+Let wel, **apparmor sal selfs vermoënsprivileges blokkeer** wat aan die houer standaard toegeken word. Byvoorbeeld, dit sal in staat wees om **toestemming te blokkeer om binne /proc te skryf selfs as die SYS_ADMIN vermoë toegeken is** omdat die standaard docker apparmor-profiel hierdie toegang weier:
 ```bash
 docker run -it --cap-add SYS_ADMIN --security-opt seccomp=unconfined ubuntu /bin/bash
 echo "" > /proc/stat
@@ -187,7 +187,7 @@ U moet **apparmor deaktiveer** om sy beperkings te omseil:
 ```bash
 docker run -it --cap-add SYS_ADMIN --security-opt seccomp=unconfined --security-opt apparmor=unconfined ubuntu /bin/bash
 ```
-Let wel dat **AppArmor** standaard ook **die houer sal verbied om** vouers van binne te monteer, selfs met SYS_ADMIN vermoë.
+Let wel, standaard sal **AppArmor** ook **die houer verbied om** vouers van binne te monteer, selfs met SYS_ADMIN vermoë.
 
 Let wel dat jy **vermoëns** aan die docker houer kan **byvoeg/verwyder** (dit sal steeds beperk wees deur beskermingsmetodes soos **AppArmor** en **Seccomp**):
 
@@ -240,7 +240,7 @@ In die vreemde geval kan jy **die apparmor docker-profiel wysig en dit herlaai.*
 
 ### AppArmor Shebang Bypass
 
-In [**hierdie fout**](https://bugs.launchpad.net/apparmor/+bug/1911431) kan jy 'n voorbeeld sien van hoe **selfs al voorkom jy dat perl met sekere hulpbronne uitgevoer word**, as jy net 'n skulp-skrip **specifiseer** in die eerste lyn **`#!/usr/bin/perl`** en jy **voer die lêer direk uit**, sal jy in staat wees om te voer wat jy wil. Byvoorbeeld:
+In [**hierdie fout**](https://bugs.launchpad.net/apparmor/+bug/1911431) kan jy 'n voorbeeld sien van hoe **selfs al voorkom jy dat perl met sekere hulpbronne uitgevoer word**, as jy net 'n skulp-skrip **skep** wat in die eerste lyn **`#!/usr/bin/perl`** spesifiseer en jy **voer die lêer direk uit**, sal jy in staat wees om te voer wat jy wil. Byvoorbeeld:
 ```perl
 echo '#!/usr/bin/perl
 use POSIX qw(strftime);

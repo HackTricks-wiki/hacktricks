@@ -1,24 +1,24 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-# Identifying packed binaries
+# Identifisering van gepakte binêre
 
-- **lack of strings**: It's common to find that packed binaries doesn't have almost any string
-- A lot of **unused strings**: Also, when a malware is using some kind of commercial packer it's common to find a lot of strings without cross-references. Even if these strings exist that doesn't mean that the binary isn't packed.
-- You can also use some tools to try to find which packer was used to pack a binary:
-  - [PEiD](http://www.softpedia.com/get/Programming/Packers-Crypters-Protectors/PEiD-updated.shtml)
-  - [Exeinfo PE](http://www.softpedia.com/get/Programming/Packers-Crypters-Protectors/ExEinfo-PE.shtml)
-  - [Language 2000](http://farrokhi.net/language/)
+- **gebrek aan strings**: Dit is algemeen om te vind dat gepakte binêre amper geen string het nie
+- 'n Baie **onbenutte strings**: Ook, wanneer 'n malware 'n soort kommersiële pakker gebruik, is dit algemeen om 'n baie strings sonder kruisverwysings te vind. Alhoewel hierdie strings bestaan, beteken dit nie dat die binêre nie gepak is nie.
+- Jy kan ook 'n paar gereedskap gebruik om te probeer uitvind watter pakker gebruik is om 'n binêre te pak:
+- [PEiD](http://www.softpedia.com/get/Programming/Packers-Crypters-Protectors/PEiD-updated.shtml)
+- [Exeinfo PE](http://www.softpedia.com/get/Programming/Packers-Crypters-Protectors/ExEinfo-PE.shtml)
+- [Language 2000](http://farrokhi.net/language/)
 
-# Basic Recommendations
+# Basiese Aanbevelings
 
-- **Start** analysing the packed binary **from the bottom in IDA and move up**. Unpackers exit once the unpacked code exit so it's unlikely that the unpacker passes execution to the unpacked code at the start.
-- Search for **JMP's** or **CALLs** to **registers** or **regions** of **memory**. Also search for **functions pushing arguments and an address direction and then calling `retn`**, because the return of the function in that case may call the address just pushed to the stack before calling it.
-- Put a **breakpoint** on `VirtualAlloc` as this allocates space in memory where the program can write unpacked code. The "run to user code" or use F8 to **get to value inside EAX** after executing the function and "**follow that address in dump**". You never know if that is the region where the unpacked code is going to be saved.
-  - **`VirtualAlloc`** with the value "**40**" as an argument means Read+Write+Execute (some code that needs execution is going to be copied here).
-- **While unpacking** code it's normal to find **several calls** to **arithmetic operations** and functions like **`memcopy`** or **`Virtual`**`Alloc`. If you find yourself in a function that apparently only perform arithmetic operations and maybe some `memcopy` , the recommendation is to try to **find the end of the function** (maybe a JMP or call to some register) **or** at least the **call to the last function** and run to then as the code isn't interesting.
-- While unpacking code **note** whenever you **change memory region** as a memory region change may indicate the **starting of the unpacking code**. You can easily dump a memory region using Process Hacker (process --> properties --> memory).
-- While trying to unpack code a good way to **know if you are already working with the unpacked code** (so you can just dump it) is to **check the strings of the binary**. If at some point you perform a jump (maybe changing the memory region) and you notice that **a lot more strings where added**, then you can know **you are working with the unpacked code**.\
-  However, if the packer already contains a lot of strings you can see how many strings contains the word "http" and see if this number increases.
-- When you dump an executable from a region of memory you can fix some headers using [PE-bear](https://github.com/hasherezade/pe-bear-releases/releases).
+- **Begin** om die gepakte binêre **van die onderkant in IDA te analiseer en beweeg op**. Unpackers verlaat wanneer die uitgepakte kode verlaat, so dit is onwaarskynlik dat die unpacker uitvoering aan die uitgepakte kode aan die begin oorgee.
+- Soek na **JMP's** of **CALLs** na **registers** of **gebiede** van **geheue**. Soek ook na **funksies wat argumente en 'n adresrigting druk en dan `retn` aanroep**, want die terugkeer van die funksie in daardie geval kan die adres wat net na die stapel gedruk is, aanroep voordat dit aanroep.
+- Plaas 'n **breekpunt** op `VirtualAlloc` aangesien dit ruimte in geheue toewys waar die program uitgepakte kode kan skryf. Die "loop na gebruikerskode" of gebruik F8 om **na waarde binne EAX te kom** nadat die funksie uitgevoer is en "**volg daardie adres in dump**". Jy weet nooit of dit die gebied is waar die uitgepakte kode gestoor gaan word.
+- **`VirtualAlloc`** met die waarde "**40**" as 'n argument beteken Lees+Skryf+Voer uit (sommige kode wat uitvoering benodig, gaan hier gekopieer word).
+- **Terwyl jy** kode unpack, is dit normaal om **verskeie oproepe** na **aritmetiese operasies** en funksies soos **`memcopy`** of **`Virtual`**`Alloc` te vind. As jy in 'n funksie is wat blykbaar net aritmetiese operasies uitvoer en dalk 'n `memcopy`, is die aanbeveling om te probeer **die einde van die funksie te vind** (miskien 'n JMP of oproep na 'n register) **of** ten minste die **oproep na die laaste funksie** en loop dan na dit toe, aangesien die kode nie interessant is nie.
+- Terwyl jy kode unpack, **let op** wanneer jy **geheuegebied verander** aangesien 'n verandering in geheuegebied 'n aanduiding kan wees van die **begin van die unpacking kode**. Jy kan maklik 'n geheuegebied dump met Process Hacker (proses --> eienskappe --> geheue).
+- Terwyl jy probeer om kode te unpack, is 'n goeie manier om te **weet of jy reeds met die uitgepakte kode werk** (sodat jy dit net kan dump) om die **strings van die binêre te kontroleer**. As jy op 'n stadium 'n sprong maak (miskien die geheuegebied verander) en jy opmerk dat **baie meer strings bygevoeg is**, dan kan jy weet **jy werk met die uitgepakte kode**.\
+As die pakker egter reeds 'n baie strings bevat, kan jy kyk hoeveel strings die woord "http" bevat en sien of hierdie getal toeneem.
+- Wanneer jy 'n uitvoerbare lêer van 'n geheuegebied dump, kan jy 'n paar koptekste regstel met behulp van [PE-bear](https://github.com/hasherezade/pe-bear-releases/releases).
 
 {{#include ../../banners/hacktricks-training.md}}

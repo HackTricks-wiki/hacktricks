@@ -10,7 +10,7 @@ Die **Docker engine** gebruik die Linux-kern se **Namespaces** en **Cgroups** om
 
 ### Veilige Toegang tot Docker Engine
 
-Die Docker engine kan plaaslik via 'n Unix-sok of afstandelik met HTTP benader word. Vir afstandelike toegang is dit noodsaaklik om HTTPS en **TLS** te gebruik om vertroulikheid, integriteit en outentisering te verseker.
+Die Docker engine kan plaaslik via 'n Unix-sok of afstandelik met HTTP toeganklik gemaak word. Vir afstandelike toegang is dit noodsaaklik om HTTPS en **TLS** te gebruik om vertroulikheid, integriteit en outentisering te verseker.
 
 Die Docker engine luister standaard op die Unix-sok by `unix:///var/run/docker.sock`. Op Ubuntu-stelsels word Docker se opstartopsies gedefinieer in `/etc/default/docker`. Om afstandelike toegang tot die Docker API en kliënt te aktiveer, stel die Docker daemon bloot deur die volgende instellings by te voeg:
 ```bash
@@ -74,8 +74,8 @@ Docker beeld handtekening verseker die sekuriteit en integriteit van beelde wat 
 
 - **Docker Inhoud Vertroue** maak gebruik van die Notary projek, gebaseer op The Update Framework (TUF), om beeld handtekening te bestuur. Vir meer inligting, sien [Notary](https://github.com/docker/notary) en [TUF](https://theupdateframework.github.io).
 - Om Docker inhoud vertroue te aktiveer, stel `export DOCKER_CONTENT_TRUST=1` in. Hierdie funksie is standaard afgeskakel in Docker weergawe 1.10 en later.
-- Met hierdie funksie geaktiveer, kan slegs onderteken beelde afgelaai word. Die aanvanklike beeld druk vereis die instelling van wagwoorde vir die wortel en etikettering sleutels, met Docker wat ook Yubikey ondersteun vir verbeterde sekuriteit. Meer besonderhede kan [hier](https://blog.docker.com/2015/11/docker-content-trust-yubikey/) gevind word.
-- Poging om 'n ongetekende beeld te trek met inhoud vertroue geaktiveer, lei tot 'n "Geen vertrou data vir nuutste" fout.
+- Met hierdie funksie geaktiveer, kan slegs ondertekende beelde afgelaai word. Die aanvanklike beeld druk vereis die instelling van wagwoorde vir die wortel en etikettering sleutels, met Docker wat ook Yubikey ondersteun vir verbeterde sekuriteit. Meer besonderhede kan [hier](https://blog.docker.com/2015/11/docker-content-trust-yubikey/) gevind word.
+- Pogings om 'n ongetekende beeld te trek met inhoud vertroue geaktiveer, lei tot 'n "Geen vertrou data vir laaste" fout.
 - Vir beeld druk na die eerste, vra Docker vir die deposito sleutel se wagwoord om die beeld te teken.
 
 Om jou private sleutels te rugsteun, gebruik die opdrag:
@@ -88,7 +88,7 @@ Wanneer jy Docker-gashere verander, is dit nodig om die wortel- en repository-sl
 
 <details>
 
-<summary>Opsomming van Houer Sekuriteitskenmerke</summary>
+<summary>Samevatting van Houer Sekuriteitskenmerke</summary>
 
 **Hoof Proses Isolasie Kenmerke**
 
@@ -116,7 +116,7 @@ Current: cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,ca
 ```
 **Seccomp**
 
-Dit is standaard geaktiveer in Docker. Dit help om **die syscalls** wat die proses kan aanroep, **nog verder te beperk**.\
+Dit is standaard in Docker geaktiveer. Dit help om **die syscalls** wat die proses kan aanroep, **nog verder te beperk**.\
 Die **standaard Docker Seccomp-profiel** kan gevind word in [https://github.com/moby/moby/blob/master/profiles/seccomp/default.json](https://github.com/moby/moby/blob/master/profiles/seccomp/default.json)
 
 **AppArmor**
@@ -129,7 +129,7 @@ Dit sal toelaat om vermoëns, syscalls, toegang tot lêers en vouers te verminde
 
 ### Namespaces
 
-**Namespaces** is 'n kenmerk van die Linux-kern wat **kernhulpbronne** partitioneer sodat een stel **prosesse** **een stel hulpbronne** sien terwyl **'n ander** stel **prosesse** 'n **verskillende** stel hulpbronne sien. Die kenmerk werk deur die samelewing van die selfde namespace vir 'n stel hulpbronne en prosesse, maar daardie namespaces verwys na onderskeidene hulpbronne. Hulpbronne kan in verskeie ruimtes bestaan.
+**Namespaces** is 'n kenmerk van die Linux-kern wat **kernhulpbronne** partitioneer sodat een stel **prosesse** **een stel hulpbronne** sien terwyl **'n ander** stel **prosesse** 'n **verskillende** stel hulpbronne sien. Die kenmerk werk deur die samelewing van die selfde namespace vir 'n stel hulpbronne en prosesse, maar daardie namespaces verwys na onderskeie hulpbronne. Hulpbronne kan in verskeie ruimtes bestaan.
 
 Docker maak gebruik van die volgende Linux-kern Namespaces om Containere isolasie te bereik:
 
@@ -166,9 +166,9 @@ cgroups.md
 
 ### Vermoëns
 
-Vermoëns stel **finer beheer oor die vermoëns wat vir die wortelgebruiker toegelaat kan word**. Docker gebruik die Linux-kern vermoënskenmerk om **die operasies wat binne 'n houer gedoen kan word te beperk**, ongeag die tipe gebruiker.
+Vermoëns stel **finer beheer van die vermoëns wat vir die wortelgebruiker toegelaat kan word** moontlik. Docker gebruik die Linux-kern vermoënskenmerk om **die operasies wat binne 'n houer gedoen kan word, te beperk** ongeag die tipe gebruiker.
 
-Wanneer 'n docker-houer gedraai word, **verloor die proses sensitiewe vermoëns wat die proses kon gebruik om uit die isolasie te ontsnap**. Dit probeer verseker dat die proses nie sensitiewe aksies kan uitvoer en ontsnap nie:
+Wanneer 'n docker-houer gedraai word, **laat die proses sensitiewe vermoëns wat die proses kon gebruik om uit die isolasie te ontsnap, val**. Dit probeer verseker dat die proses nie sensitiewe aksies kan uitvoer en ontsnap nie:
 
 {{#ref}}
 ../linux-capabilities.md
@@ -176,7 +176,7 @@ Wanneer 'n docker-houer gedraai word, **verloor die proses sensitiewe vermoëns 
 
 ### Seccomp in Docker
 
-Dit is 'n sekuriteitskenmerk wat Docker toelaat om **die syscalls** wat binne die houer gebruik kan word te beperk:
+Dit is 'n sekuriteitskenmerk wat Docker toelaat om **die syscalls** wat binne die houer gebruik kan word, te beperk:
 
 {{#ref}}
 seccomp.md
@@ -184,7 +184,7 @@ seccomp.md
 
 ### AppArmor in Docker
 
-**AppArmor** is 'n kernverbetering om **houers** te beperk tot 'n **beperkte** stel **hulpbronne** met **per-program profiele**.:
+**AppArmor** is 'n kernverbetering om **houers** tot 'n **beperkte** stel **hulpbronne** met **per-program profiele** te beperk.:
 
 {{#ref}}
 apparmor.md
@@ -194,11 +194,11 @@ apparmor.md
 
 - **Etiketstelsel**: SELinux ken 'n unieke etiket aan elke proses en lêersysteemobjek toe.
 - **Beleidstoepassing**: Dit handhaaf sekuriteitsbeleide wat definieer watter aksies 'n proses etiket op ander etikette binne die stelsel kan uitvoer.
-- **Houer Proses Etikette**: Wanneer houermotors houerprosesse inisieer, word hulle gewoonlik 'n beperkte SELinux etiket, algemeen `container_t`, toegeken.
+- **Houer Proses Etikette**: Wanneer houer enjinse houerprosesse inisieer, word hulle gewoonlik 'n beperkte SELinux-etiket, algemeen `container_t`, toegeken.
 - **Lêer Etikettering binne Houers**: Lêers binne die houer word gewoonlik as `container_file_t` geëtiketteer.
 - **Beleidreëls**: Die SELinux-beleid verseker hoofsaaklik dat prosesse met die `container_t` etiket slegs met lêers geëtiketteer as `container_file_t` kan interaksie hê (lees, skryf, voer uit).
 
-Hierdie meganisme verseker dat selfs al is 'n proses binne 'n houer gecompromitteer, dit beperk is tot interaksie slegs met voorwerpe wat die ooreenstemmende etikette het, wat die potensiële skade van sulke kompromies aansienlik beperk.
+Hierdie meganisme verseker dat selfs as 'n proses binne 'n houer gecompromitteer word, dit beperk is tot interaksie slegs met voorwerpe wat die ooreenstemmende etikette het, wat die potensiële skade van sulke kompromies aansienlik beperk.
 
 {{#ref}}
 ../selinux.md
@@ -219,7 +219,7 @@ authz-and-authn-docker-access-authorization-plugin.md
 
 ## DoS vanaf 'n houer
 
-As jy nie behoorlik die hulpbronne wat 'n houer kan gebruik beperk nie, kan 'n gecompromitteerde houer die gasheer waar dit draai DoS.
+As jy nie behoorlik die hulpbronne wat 'n houer kan gebruik, beperk nie, kan 'n gecompromitteerde houer die gasheer waar dit draai, DoS.
 
 - CPU DoS
 ```bash
@@ -249,7 +249,7 @@ docker-privileged.md
 
 As jy 'n houer bestuur waar 'n aanvaller daarin slaag om toegang te verkry as 'n lae voorreg gebruiker. As jy 'n **verkeerd-gekonfigureerde suid binêre** het, kan die aanvaller dit misbruik en **voorregte binne** die houer verhoog. Dit kan hom toelaat om daaruit te ontsnap.
 
-Om die houer met die **`no-new-privileges`** opsie geaktiveer te bestuur, sal **hierdie soort voorregverhoging voorkom**.
+Om die houer met die **`no-new-privileges`** opsie geaktiveer te laat loop, sal **hierdie soort voorregverhoging voorkom**.
 ```
 docker run -it --security-opt=no-new-privileges:true nonewpriv
 ```
@@ -278,19 +278,19 @@ Dit is van kardinale belang om te vermy om geheime in Docker-beelde in te sluit 
 
 **Docker volumes** is 'n veiliger alternatief, wat aanbeveel word vir die toegang tot sensitiewe inligting. Hulle kan as 'n tydelike lêerstelsel in geheue gebruik word, wat die risiko's wat verband hou met `docker inspect` en logging verminder. egter, wortelgebruikers en diegene met `exec` toegang tot die houer mag steeds toegang tot die geheime hê.
 
-**Docker geheime** bied 'n selfs veiliger metode vir die hantering van sensitiewe inligting. Vir voorbeelde wat geheime tydens die beeldbou-fase benodig, bied **BuildKit** 'n doeltreffende oplossing met ondersteuning vir bou-tyd geheime, wat die bou spoed verbeter en addisionele funksies bied.
+**Docker geheime** bied 'n selfs veiliger metode vir die hantering van sensitiewe inligting. Vir voorbeelde wat geheime tydens die beeldbou-fase benodig, bied **BuildKit** 'n doeltreffende oplossing met ondersteuning vir bou-tyd geheime, wat die bou-snelheid verbeter en addisionele funksies bied.
 
 Om BuildKit te benut, kan dit op drie maniere geaktiveer word:
 
 1. Deur 'n omgewingsveranderlike: `export DOCKER_BUILDKIT=1`
 2. Deur opdragte te prefix: `DOCKER_BUILDKIT=1 docker build .`
-3. Deur dit standaard in die Docker-konfigurasie in te skakel: `{ "features": { "buildkit": true } }`, gevolg deur 'n Docker herstart.
+3. Deur dit standaard in die Docker-konfigurasie in te skakel: `{ "features": { "buildkit": true } }`, gevolg deur 'n Docker-herstart.
 
 BuildKit stel die gebruik van bou-tyd geheime met die `--secret` opsie moontlik, wat verseker dat hierdie geheime nie in die beeldbou-kas of die finale beeld ingesluit word nie, met 'n opdrag soos:
 ```bash
 docker build --secret my_key=my_value ,src=path/to/my_secret_file .
 ```
-Vir geheime wat nodig is in 'n lopende houer, **Docker Compose en Kubernetes** bied robuuste oplossings. Docker Compose gebruik 'n `secrets` sleutel in die diensdefinisie om geheime lêers spesifiek aan te dui, soos getoon in 'n `docker-compose.yml` voorbeeld:
+Vir geheime wat nodig is in 'n lopende houer, **Docker Compose en Kubernetes** bied robuuste oplossings. Docker Compose gebruik 'n `secrets` sleutel in die diensdefinisie om geheime lêers te spesifiseer, soos getoon in 'n `docker-compose.yml` voorbeeld:
 ```yaml
 version: "3.7"
 services:
@@ -309,28 +309,28 @@ In Kubernetes-omgewings word geheime van nature ondersteun en kan verder bestuur
 
 ### gVisor
 
-**gVisor** is 'n toepassingskern, geskryf in Go, wat 'n substansiële gedeelte van die Linux-stelselsurface implementeer. Dit sluit 'n [Open Container Initiative (OCI)](https://www.opencontainers.org) runtime genaamd `runsc` in wat 'n **isolasiegrens tussen die toepassing en die gasheerkern** bied. Die `runsc` runtime integreer met Docker en Kubernetes, wat dit eenvoudig maak om sandboxed houers te laat loop.
+**gVisor** is 'n toepassingskern, geskryf in Go, wat 'n substansiële gedeelte van die Linux-stelselsurface implementeer. Dit sluit 'n [Open Container Initiative (OCI)](https://www.opencontainers.org) runtime genaamd `runsc` in wat 'n **isolasiegrens tussen die toepassing en die gasheer-kern** bied. Die `runsc` runtime integreer met Docker en Kubernetes, wat dit eenvoudig maak om sandboxed houers te laat loop.
 
 {% embed url="https://github.com/google/gvisor" %}
 
 ### Kata Containers
 
-**Kata Containers** is 'n oopbron-gemeenskap wat werk om 'n veilige houer runtime te bou met liggewig virtuele masjiene wat soos houers voel en presteer, maar **sterker werklading-isolasie bied met behulp van hardeware virtualisering** tegnologie as 'n tweede verdedigingslaag.
+**Kata Containers** is 'n oopbron-gemeenskap wat werk om 'n veilige houer-runtime te bou met liggewig virtuele masjiene wat soos houers voel en presteer, maar **sterker werklading-isolasie bied met behulp van hardeware virtualisering** tegnologie as 'n tweede laag van verdediging.
 
 {% embed url="https://katacontainers.io/" %}
 
 ### Samevatting Wenke
 
-- **Moet nie die `--privileged` vlag gebruik of 'n** [**Docker-soket binne die houer**](https://raesene.github.io/blog/2016/03/06/The-Dangers-Of-Docker.sock/)** monteer nie.** Die docker soket stel in staat om houers te spawn, so dit is 'n maklike manier om volle beheer oor die gasheer te neem, byvoorbeeld deur 'n ander houer met die `--privileged` vlag te laat loop.
-- **Moet nie as root binne die houer loop nie. Gebruik 'n** [**ander gebruiker**](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#user) **en** [**gebruikersnamespaces**](https://docs.docker.com/engine/security/userns-remap/)**.** Die root in die houer is dieselfde as op die gasheer tensy dit met gebruikersnamespaces herverdeel word. Dit is slegs liggies beperk deur, hoofsaaklik, Linux namespaces, vermoëns, en cgroups.
+- **Moet nie die `--privileged` vlag gebruik of 'n** [**Docker-soket binne die houer monteer**](https://raesene.github.io/blog/2016/03/06/The-Dangers-Of-Docker.sock/)**.** Die docker soket stel in staat om houers te laat ontstaan, so dit is 'n maklike manier om volle beheer oor die gasheer te neem, byvoorbeeld deur 'n ander houer met die `--privileged` vlag te laat loop.
+- Moet **nie as root binne die houer loop nie. Gebruik 'n** [**ander gebruiker**](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#user) **en** [**gebruikersnamespaces**](https://docs.docker.com/engine/security/userns-remap/)**.** Die root in die houer is dieselfde as op die gasheer tensy dit met gebruikersnamespaces herverdeel word. Dit is slegs liggies beperk deur, hoofsaaklik, Linux-namespaces, vermoëns, en cgroups.
 - [**Laat alle vermoëns val**](https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities) **(`--cap-drop=all`) en stel slegs diegene wat benodig word in** (`--cap-add=...`). Baie werklading het nie enige vermoëns nodig nie en om dit by te voeg verhoog die omvang van 'n potensiële aanval.
 - [**Gebruik die “no-new-privileges” sekuriteitsopsie**](https://raesene.github.io/blog/2019/06/01/docker-capabilities-and-no-new-privs/) om te voorkom dat prosesse meer voorregte verkry, byvoorbeeld deur suid-binaries.
 - [**Beperk hulpbronne beskikbaar aan die houer**](https://docs.docker.com/engine/reference/run/#runtime-constraints-on-resources)**.** Hulpbronlimiete kan die masjien beskerm teen ontkenning van diens-aanvalle.
 - **Pas** [**seccomp**](https://docs.docker.com/engine/security/seccomp/)**,** [**AppArmor**](https://docs.docker.com/engine/security/apparmor/) **(of SELinux)** profiele aan om die aksies en syscalls wat beskikbaar is vir die houer tot die minimum vereiste te beperk.
-- **Gebruik** [**amptelike docker beelde**](https://docs.docker.com/docker-hub/official_images/) **en vereis handtekeninge** of bou jou eie gebaseer daarop. Moet nie [terugdeur](https://arstechnica.com/information-technology/2018/06/backdoored-images-downloaded-5-million-times-finally-removed-from-docker-hub/) beelde erf of gebruik nie. Stoor ook root sleutels, wagwoorde op 'n veilige plek. Docker het planne om sleutels met UCP te bestuur.
-- **Bou jou beelde gereeld** om **sekuriteitsopdaterings op die gasheer en beelde toe te pas.**
+- **Gebruik** [**amptelike docker-beelde**](https://docs.docker.com/docker-hub/official_images/) **en vereis handtekeninge** of bou jou eie gebaseer daarop. Moet nie [terugdeure](https://arstechnica.com/information-technology/2018/06/backdoored-images-downloaded-5-million-times-finally-removed-from-docker-hub/) beelde erf of gebruik nie. Stoor ook root sleutels, wagwoorde op 'n veilige plek. Docker het planne om sleutels met UCP te bestuur.
+- **Bou gereeld** jou beelde om **sekuriteitsopdaterings op die gasheer en beelde toe te pas.**
 - Bestuur jou **geheime verstandig** sodat dit moeilik is vir die aanvaller om toegang daartoe te verkry.
-- As jy **die docker daemon blootstel, gebruik HTTPS** met kliënt- en bedienerverifikasie.
+- As jy **die docker daemon blootstel, gebruik HTTPS** met kliënt- en bediener-authentisering.
 - In jou Dockerfile, **gee voorkeur aan COPY eerder as ADD**. ADD onttrek outomaties gecomprimeerde lêers en kan lêers van URL's kopieer. COPY het nie hierdie vermoëns nie. Vermy waar moontlik die gebruik van ADD sodat jy nie kwesbaar is vir aanvalle deur middel van afgeleë URL's en Zip-lêers nie.
 - Het **afsonderlike houers vir elke mikro-diens**
 - **Moet nie ssh** binne die houer plaas nie, “docker exec” kan gebruik word om na die Houer te ssh.
@@ -338,7 +338,7 @@ In Kubernetes-omgewings word geheime van nature ondersteun en kan verder bestuur
 
 ## Docker Breakout / Privilege Escalation
 
-As jy **binne 'n docker houer** is of jy het toegang tot 'n gebruiker in die **docker groep**, kan jy probeer om te **ontsnap en voorregte te verhoog**:
+As jy **binne 'n docker-houer** is of jy het toegang tot 'n gebruiker in die **docker-groep**, kan jy probeer om te **ontsnap en voorregte te verhoog**:
 
 {{#ref}}
 docker-breakout-privilege-escalation/
@@ -346,7 +346,7 @@ docker-breakout-privilege-escalation/
 
 ## Docker Authentication Plugin Bypass
 
-As jy toegang het tot die docker soket of toegang het tot 'n gebruiker in die **docker groep maar jou aksies word beperk deur 'n docker auth plugin**, kyk of jy dit kan **omseil:**
+As jy toegang het tot die docker soket of toegang het tot 'n gebruiker in die **docker-groep maar jou aksies word beperk deur 'n docker-auth-plugin**, kyk of jy dit kan **omseil:**
 
 {{#ref}}
 authz-and-authn-docker-access-authorization-plugin.md
@@ -354,8 +354,8 @@ authz-and-authn-docker-access-authorization-plugin.md
 
 ## Hardening Docker
 
-- Die gereedskap [**docker-bench-security**](https://github.com/docker/docker-bench-security) is 'n skrif wat vir dosyne algemene beste praktyke rondom die ontplooiing van Docker-houers in produksie nagaan. Die toetse is almal geoutomatiseer, en is gebaseer op die [CIS Docker Benchmark v1.3.1](https://www.cisecurity.org/benchmark/docker/).\
-Jy moet die gereedskap vanaf die gasheer wat docker draai of vanaf 'n houer met genoeg voorregte uitvoer. Vind uit **hoe om dit in die README te loop:** [**https://github.com/docker/docker-bench-security**](https://github.com/docker/docker-bench-security).
+- Die gereedskap [**docker-bench-security**](https://github.com/docker/docker-bench-security) is 'n skrip wat vir dosyne algemene beste praktyke rondom die ontplooiing van Docker-houers in produksie nagaan. Die toetse is almal geoutomatiseer, en is gebaseer op die [CIS Docker Benchmark v1.3.1](https://www.cisecurity.org/benchmark/docker/).\
+Jy moet die gereedskap vanaf die gasheer wat docker bestuur of vanaf 'n houer met genoeg voorregte uitvoer. Vind uit **hoe om dit in die README te loop:** [**https://github.com/docker/docker-bench-security**](https://github.com/docker/docker-bench-security).
 
 ## Verwysings
 

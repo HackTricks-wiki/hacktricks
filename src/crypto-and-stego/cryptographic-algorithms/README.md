@@ -1,184 +1,184 @@
-# Cryptographic/Compression Algorithms
+# Kriptografiese/Kompressie Algoritmes
 
-## Cryptographic/Compression Algorithms
+## Kriptografiese/Kompressie Algoritmes
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Identifying Algorithms
+## Identifisering van Algoritmes
 
-If you ends in a code **using shift rights and lefts, xors and several arithmetic operations** it's highly possible that it's the implementation of a **cryptographic algorithm**. Here it's going to be showed some ways to **identify the algorithm that it's used without needing to reverse each step**.
+As jy eindig in 'n kode **wat regte en linke skuif, xors en verskeie aritmetiese operasies gebruik**, is dit hoogs waarskynlik dat dit die implementering van 'n **kriptografiese algoritme** is. Hier gaan daar 'n paar maniere gewys word om die **algoritme wat gebruik word te identifiseer sonder om elke stap om te keer**.
 
-### API functions
+### API funksies
 
 **CryptDeriveKey**
 
-If this function is used, you can find which **algorithm is being used** checking the value of the second parameter:
+As hierdie funksie gebruik word, kan jy vind watter **algoritme gebruik word** deur die waarde van die tweede parameter te kontroleer:
 
 ![](<../../images/image (156).png>)
 
-Check here the table of possible algorithms and their assigned values: [https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id](https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id)
+Kontroleer hier die tabel van moontlike algoritmes en hul toegewyde waardes: [https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id](https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id)
 
 **RtlCompressBuffer/RtlDecompressBuffer**
 
-Compresses and decompresses a given buffer of data.
+Komprimeer en dekomprimeer 'n gegewe buffer van data.
 
 **CryptAcquireContext**
 
-From [the docs](https://learn.microsoft.com/en-us/windows/win32/api/wincrypt/nf-wincrypt-cryptacquirecontexta): The **CryptAcquireContext** function is used to acquire a handle to a particular key container within a particular cryptographic service provider (CSP). **This returned handle is used in calls to CryptoAPI** functions that use the selected CSP.
+Van [die dokumentasie](https://learn.microsoft.com/en-us/windows/win32/api/wincrypt/nf-wincrypt-cryptacquirecontexta): Die **CryptAcquireContext** funksie word gebruik om 'n handvatsel te verkry na 'n spesifieke sleutelhouer binne 'n spesifieke kriptografiese diensverskaffer (CSP). **Hierdie teruggegee handvatsel word gebruik in oproepe na CryptoAPI** funksies wat die geselekteerde CSP gebruik.
 
 **CryptCreateHash**
 
-Initiates the hashing of a stream of data. If this function is used, you can find which **algorithm is being used** checking the value of the second parameter:
+Begin die hashing van 'n datastroom. As hierdie funksie gebruik word, kan jy vind watter **algoritme gebruik word** deur die waarde van die tweede parameter te kontroleer:
 
 ![](<../../images/image (549).png>)
 
 \
-Check here the table of possible algorithms and their assigned values: [https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id](https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id)
+Kontroleer hier die tabel van moontlike algoritmes en hul toegewyde waardes: [https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id](https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id)
 
-### Code constants
+### Kode konstantes
 
-Sometimes it's really easy to identify an algorithm thanks to the fact that it needs to use a special and unique value.
+Soms is dit regtig maklik om 'n algoritme te identifiseer danksy die feit dat dit 'n spesiale en unieke waarde moet gebruik.
 
 ![](<../../images/image (833).png>)
 
-If you search for the first constant in Google this is what you get:
+As jy die eerste konstante in Google soek, is dit wat jy kry:
 
 ![](<../../images/image (529).png>)
 
-Therefore, you can assume that the decompiled function is a **sha256 calculator.**\
-You can search any of the other constants and you will obtain (probably) the same result.
+Daarom kan jy aanvaar dat die dekompilde funksie 'n **sha256 sakrekenaar** is.\
+Jy kan enige van die ander konstantes soek en jy sal (waarskynlik) dieselfde resultaat verkry.
 
 ### data info
 
-If the code doesn't have any significant constant it may be **loading information from the .data section**.\
-You can access that data, **group the first dword** and search for it in google as we have done in the section before:
+As die kode geen betekenisvolle konstante het nie, kan dit **inligting laai vanaf die .data afdeling**.\
+Jy kan daardie data toegang, **groepeer die eerste dword** en dit in Google soek soos ons in die vorige afdeling gedoen het:
 
 ![](<../../images/image (531).png>)
 
-In this case, if you look for **0xA56363C6** you can find that it's related to the **tables of the AES algorithm**.
+In hierdie geval, as jy soek na **0xA56363C6** kan jy vind dat dit verband hou met die **tabelle van die AES algoritme**.
 
-## RC4 **(Symmetric Crypt)**
+## RC4 **(Simmetriese Kriptografie)**
 
-### Characteristics
+### Kenmerke
 
-It's composed of 3 main parts:
+Dit bestaan uit 3 hoofdele:
 
-- **Initialization stage/**: Creates a **table of values from 0x00 to 0xFF** (256bytes in total, 0x100). This table is commonly call **Substitution Box** (or SBox).
-- **Scrambling stage**: Will **loop through the table** crated before (loop of 0x100 iterations, again) creating modifying each value with **semi-random** bytes. In order to create this semi-random bytes, the RC4 **key is used**. RC4 **keys** can be **between 1 and 256 bytes in length**, however it is usually recommended that it is above 5 bytes. Commonly, RC4 keys are 16 bytes in length.
-- **XOR stage**: Finally, the plain-text or cyphertext is **XORed with the values created before**. The function to encrypt and decrypt is the same. For this, a **loop through the created 256 bytes** will be performed as many times as necessary. This is usually recognized in a decompiled code with a **%256 (mod 256)**.
+- **Inisialisering fase/**: Skep 'n **tabel van waardes van 0x00 tot 0xFF** (256bytes in totaal, 0x100). Hierdie tabel word algemeen die **Substitusie Boks** (of SBox) genoem.
+- **Hussel fase**: Sal **deur die tabel loop** wat voorheen geskep is (lus van 0x100 iterasies, weer) en elke waarde met **semi-ewe** bytes aanpas. Om hierdie semi-ewe bytes te skep, word die RC4 **sleutel gebruik**. RC4 **sleutels** kan **tussen 1 en 256 bytes in lengte** wees, maar dit word gewoonlik aanbeveel dat dit bo 5 bytes is. Gewoonlik is RC4 sleutels 16 bytes in lengte.
+- **XOR fase**: Laastens, die plain-text of cyphertext word **XORed met die waardes wat voorheen geskep is**. Die funksie om te enkripteer en te dekripteer is dieselfde. Hiervoor sal 'n **lus deur die geskepte 256 bytes** uitgevoer word soveel keer as wat nodig is. Dit word gewoonlik in 'n dekompilde kode erken met 'n **%256 (mod 256)**.
 
 > [!NOTE]
-> **In order to identify a RC4 in a disassembly/decompiled code you can check for 2 loops of size 0x100 (with the use of a key) and then a XOR of the input data with the 256 values created before in the 2 loops probably using a %256 (mod 256)**
+> **Om 'n RC4 in 'n disassembly/dekompilde kode te identifiseer, kan jy kyk vir 2 lusse van grootte 0x100 (met die gebruik van 'n sleutel) en dan 'n XOR van die invoerdata met die 256 waardes wat voorheen in die 2 lusse geskep is, waarskynlik met 'n %256 (mod 256)**
 
-### **Initialization stage/Substitution Box:** (Note the number 256 used as counter and how a 0 is written in each place of the 256 chars)
+### **Inisialisering fase/Substitusie Boks:** (Let op die nommer 256 wat as teenwoordiger gebruik word en hoe 'n 0 in elke plek van die 256 karakters geskryf word)
 
 ![](<../../images/image (584).png>)
 
-### **Scrambling Stage:**
+### **Hussel Fase:**
 
 ![](<../../images/image (835).png>)
 
-### **XOR Stage:**
+### **XOR Fase:**
 
 ![](<../../images/image (904).png>)
 
-## **AES (Symmetric Crypt)**
+## **AES (Simmetriese Kriptografie)**
 
-### **Characteristics**
+### **Kenmerke**
 
-- Use of **substitution boxes and lookup tables**
-  - It's possible to **distinguish AES thanks to the use of specific lookup table values** (constants). _Note that the **constant** can be **stored** in the binary **or created**_ _**dynamically**._
-- The **encryption key** must be **divisible** by **16** (usually 32B) and usually an **IV** of 16B is used.
+- Gebruik van **substitusie bokse en opsoek tabelle**
+- Dit is moontlik om **AES te onderskei danksy die gebruik van spesifieke opsoek tabel waardes** (konstantes). _Let daarop dat die **konstante** in die binêre **gestoor** kan word **of geskep** _ _**dynamies**._
+- Die **enkripsiesleutel** moet **deelbaar** wees deur **16** (gewoonlik 32B) en gewoonlik word 'n **IV** van 16B gebruik.
 
-### SBox constants
+### SBox konstantes
 
 ![](<../../images/image (208).png>)
 
-## Serpent **(Symmetric Crypt)**
+## Serpent **(Simmetriese Kriptografie)**
 
-### Characteristics
+### Kenmerke
 
-- It's rare to find some malware using it but there are examples (Ursnif)
-- Simple to determine if an algorithm is Serpent or not based on it's length (extremely long function)
+- Dit is selde om sekere malware wat dit gebruik te vind, maar daar is voorbeelde (Ursnif)
+- Eenvoudig om te bepaal of 'n algoritme Serpent is of nie gebaseer op sy lengte (uiters lang funksie)
 
-### Identifying
+### Identifisering
 
-In the following image notice how the constant **0x9E3779B9** is used (note that this constant is also used by other crypto algorithms like **TEA** -Tiny Encryption Algorithm).\
-Also note the **size of the loop** (**132**) and the **number of XOR operations** in the **disassembly** instructions and in the **code** example:
+In die volgende beeld let op hoe die konstante **0x9E3779B9** gebruik word (let daarop dat hierdie konstante ook deur ander kripto algoritmes soos **TEA** -Tiny Encryption Algorithm gebruik word).\
+Let ook op die **grootte van die lus** (**132**) en die **aantal XOR operasies** in die **disassembly** instruksies en in die **kode** voorbeeld:
 
 ![](<../../images/image (547).png>)
 
-As it was mentioned before, this code can be visualized inside any decompiler as a **very long function** as there **aren't jumps** inside of it. The decompiled code can look like the following:
+Soos voorheen genoem, kan hierdie kode binne enige decompiler as 'n **baie lang funksie** gesien word aangesien daar **nie spronge** binne dit is nie. Die dekompilde kode kan soos volg lyk:
 
 ![](<../../images/image (513).png>)
 
-Therefore, it's possible to identify this algorithm checking the **magic number** and the **initial XORs**, seeing a **very long function** and **comparing** some **instructions** of the long function **with an implementation** (like the shift left by 7 and the rotate left by 22).
+Daarom is dit moontlik om hierdie algoritme te identifiseer deur die **magiese nommer** en die **begin XORs** te kontroleer, 'n **baie lang funksie** te sien en **instruksies** van die lang funksie **te vergelyk** met 'n implementering (soos die skuif links deur 7 en die rotasie links deur 22).
 
-## RSA **(Asymmetric Crypt)**
+## RSA **(Asimmetriese Kriptografie)**
 
-### Characteristics
+### Kenmerke
 
-- More complex than symmetric algorithms
-- There are no constants! (custom implementation are difficult to determine)
-- KANAL (a crypto analyzer) fails to show hints on RSA ad it relies on constants.
+- Meer kompleks as simmetriese algoritmes
+- Daar is geen konstantes nie! (aangepaste implementasies is moeilik om te bepaal)
+- KANAL (n kripto ontleder) misluk om leidrade oor RSA te toon en dit staatmaak op konstantes.
 
-### Identifying by comparisons
+### Identifisering deur vergelykings
 
 ![](<../../images/image (1113).png>)
 
-- In line 11 (left) there is a `+7) >> 3` which is the same as in line 35 (right): `+7) / 8`
-- Line 12 (left) is checking if `modulus_len < 0x040` and in line 36 (right) it's checking if `inputLen+11 > modulusLen`
+- In lyn 11 (links) is daar 'n `+7) >> 3` wat dieselfde is as in lyn 35 (regs): `+7) / 8`
+- Lyn 12 (links) kontroleer of `modulus_len < 0x040` en in lyn 36 (regs) kontroleer dit of `inputLen+11 > modulusLen`
 
 ## MD5 & SHA (hash)
 
-### Characteristics
+### Kenmerke
 
-- 3 functions: Init, Update, Final
-- Similar initialize functions
+- 3 funksies: Init, Update, Final
+- Soortgelyke inisialisering funksies
 
-### Identify
+### Identifiseer
 
 **Init**
 
-You can identify both of them checking the constants. Note that the sha_init has 1 constant that MD5 doesn't have:
+Jy kan albei identifiseer deur die konstantes te kontroleer. Let daarop dat die sha_init 'n konstante het wat MD5 nie het nie:
 
 ![](<../../images/image (406).png>)
 
 **MD5 Transform**
 
-Note the use of more constants
+Let op die gebruik van meer konstantes
 
 ![](<../../images/image (253) (1) (1).png>)
 
 ## CRC (hash)
 
-- Smaller and more efficient as it's function is to find accidental changes in data
-- Uses lookup tables (so you can identify constants)
+- Kleiner en meer doeltreffend aangesien dit se funksie is om toevallige veranderinge in data te vind
+- Gebruik opsoek tabelle (so jy kan konstantes identifiseer)
 
-### Identify
+### Identifiseer
 
-Check **lookup table constants**:
+Kontroleer **opsoek tabel konstantes**:
 
 ![](<../../images/image (508).png>)
 
-A CRC hash algorithm looks like:
+'n CRC hash algoritme lyk soos:
 
 ![](<../../images/image (391).png>)
 
-## APLib (Compression)
+## APLib (Kompressie)
 
-### Characteristics
+### Kenmerke
 
-- Not recognizable constants
-- You can try to write the algorithm in python and search for similar things online
+- Nie herkenbare konstantes
+- Jy kan probeer om die algoritme in python te skryf en soortgelyke dinge aanlyn te soek
 
-### Identify
+### Identifiseer
 
-The graph is quiet large:
+Die grafiek is redelik groot:
 
 ![](<../../images/image (207) (2) (1).png>)
 
-Check **3 comparisons to recognise it**:
+Kontroleer **3 vergelykings om dit te herken**:
 
 ![](<../../images/image (430).png>)
 

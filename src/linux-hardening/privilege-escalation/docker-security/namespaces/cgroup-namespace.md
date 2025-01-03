@@ -4,17 +4,17 @@
 
 ## Basiese Inligting
 
-'n cgroup namespace is 'n Linux-kernfunksie wat **isolatie van cgroup hiërargieë vir prosesse wat binne 'n namespace loop** bied. Cgroups, kort vir **kontrole groepe**, is 'n kernfunksie wat toelaat om prosesse in hiërargiese groepe te organiseer om **grense op stelselhulpbronne** soos CPU, geheue en I/O te bestuur en af te dwing.
+'n cgroup namespace is 'n Linux-kernfunksie wat **isolasie van cgroup hiërargieë vir prosesse wat binne 'n namespace loop, bied**. Cgroups, kort vir **kontrole groepe**, is 'n kernfunksie wat toelaat om prosesse in hiërargiese groepe te organiseer om **grense op stelselhulpbronne** soos CPU, geheue en I/O te bestuur en af te dwing.
 
-Terwyl cgroup namespaces nie 'n aparte namespace tipe is soos die ander wat ons vroeër bespreek het nie (PID, mount, netwerk, ens.), is hulle verwant aan die konsep van namespace isolasie. **Cgroup namespaces virtualiseer die siening van die cgroup hiërargie**, sodat prosesse wat binne 'n cgroup namespace loop 'n ander siening van die hiërargie het in vergelyking met prosesse wat in die gasheer of ander namespaces loop.
+Terwyl cgroup namespaces nie 'n aparte namespace tipe is soos die ander wat ons vroeër bespreek het (PID, mount, netwerk, ens.), is hulle verwant aan die konsep van namespace-isolasie. **Cgroup namespaces virtualiseer die siening van die cgroup hiërargie**, sodat prosesse wat binne 'n cgroup namespace loop, 'n ander siening van die hiërargie het in vergelyking met prosesse wat in die gasheer of ander namespaces loop.
 
 ### Hoe dit werk:
 
-1. Wanneer 'n nuwe cgroup namespace geskep word, **begin dit met 'n siening van die cgroup hiërargie gebaseer op die cgroup van die skepende proses**. Dit beteken dat prosesse wat in die nuwe cgroup namespace loop slegs 'n subset van die hele cgroup hiërargie sal sien, beperk tot die cgroup subboom wat gegrond is op die skepende proses se cgroup.
+1. Wanneer 'n nuwe cgroup namespace geskep word, **begin dit met 'n siening van die cgroup hiërargie gebaseer op die cgroup van die skepende proses**. Dit beteken dat prosesse wat in die nuwe cgroup namespace loop, slegs 'n subset van die hele cgroup hiërargie sal sien, beperk tot die cgroup subboom wat gegrond is op die cgroup van die skepende proses.
 2. Prosesse binne 'n cgroup namespace sal **hulle eie cgroup as die wortel van die hiërargie sien**. Dit beteken dat, vanuit die perspektief van prosesse binne die namespace, hulle eie cgroup as die wortel verskyn, en hulle kan nie cgroups buite hul eie subboom sien of toegang daartoe kry nie.
-3. Cgroup namespaces bied nie direk isolasie van hulpbronne nie; **hulle bied slegs isolasie van die cgroup hiërargie siening**. **Hulpbronbeheer en isolasie word steeds afgedwing deur die cgroup** subsisteme (bv., cpu, geheue, ens.) self.
+3. Cgroup namespaces bied nie direk isolasie van hulpbronne nie; **hulle bied slegs isolasie van die cgroup hiërargie siening**. **Hulpbronbeheer en isolasie word steeds afgedwing deur die cgroup** subsisteme (bv. cpu, geheue, ens.) self.
 
-Vir meer inligting oor CGroups kyk:
+Vir meer inligting oor CGroups, kyk:
 
 {{#ref}}
 ../cgroups.md
@@ -40,7 +40,7 @@ Wanneer `unshare` sonder die `-f` opsie uitgevoer word, word 'n fout ondervind w
 
 - Die Linux-kern laat 'n proses toe om nuwe naamruimtes te skep met die `unshare` stelselaanroep. Die proses wat die skepping van 'n nuwe PID naamruimte inisieer (genoem die "unshare" proses) gaan egter nie in die nuwe naamruimte in nie; slegs sy kindproses gaan.
 - Die uitvoering van `%unshare -p /bin/bash%` begin `/bin/bash` in dieselfde proses as `unshare`. Gevolglik is `/bin/bash` en sy kindproses in die oorspronklike PID naamruimte.
-- Die eerste kindproses van `/bin/bash` in die nuwe naamruimte word PID 1. Wanneer hierdie proses verlaat, aktiveer dit die opruiming van die naamruimte as daar geen ander prosesse is nie, aangesien PID 1 die spesiale rol het om weeskindprosesse aan te neem. Die Linux-kern sal dan PID-toewysing in daardie naamruimte deaktiveer.
+- Die eerste kindproses van `/bin/bash` in die nuwe naamruimte word PID 1. Wanneer hierdie proses verlaat, veroorsaak dit die opruiming van die naamruimte as daar geen ander prosesse is nie, aangesien PID 1 die spesiale rol het om weesprosesse aan te neem. Die Linux-kern sal dan PID-toewysing in daardie naamruimte deaktiveer.
 
 2. **Gevolg**:
 
@@ -50,7 +50,7 @@ Wanneer `unshare` sonder die `-f` opsie uitgevoer word, word 'n fout ondervind w
 - Die probleem kan opgelos word deur die `-f` opsie saam met `unshare` te gebruik. Hierdie opsie maak dat `unshare` 'n nuwe proses fork nadat die nuwe PID naamruimte geskep is.
 - Die uitvoering van `%unshare -fp /bin/bash%` verseker dat die `unshare` opdrag self PID 1 in die nuwe naamruimte word. `/bin/bash` en sy kindproses is dan veilig binne hierdie nuwe naamruimte, wat die voortydige uitgang van PID 1 voorkom en normale PID-toewysing toelaat.
 
-Deur te verseker dat `unshare` met die `-f` vlag loop, word die nuwe PID naamruimte korrek gehandhaaf, wat toelaat dat `/bin/bash` en sy sub-prosesse kan werk sonder om die geheue toewysing fout te ondervind.
+Deur te verseker dat `unshare` met die `-f` vlag loop, word die nuwe PID naamruimte korrek gehandhaaf, wat toelaat dat `/bin/bash` en sy sub-prosesse funksioneer sonder om die geheue toewysing fout te ondervind.
 
 </details>
 
