@@ -36,7 +36,7 @@ ls \\10.10.10.10\c$\Users
 
 **이 기술에 대한 자세한 정보는 원본 게시물을 확인하세요 [https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/](https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/)**
 
-**MMC20.Application** 객체는 명시적인 "LaunchPermissions"가 부족하여 기본적으로 관리자가 접근할 수 있는 권한으로 설정되어 있음을 확인했습니다. 추가 세부정보는 [여기](https://twitter.com/tiraniddo/status/817532039771525120)에서 확인할 수 있으며, 명시적인 Launch Permission이 없는 객체를 필터링하기 위해 [@tiraniddo](https://twitter.com/tiraniddo)의 OleView .NET 사용을 권장합니다.
+**MMC20.Application** 객체는 명시적인 "LaunchPermissions"가 부족하여 기본적으로 관리자가 접근할 수 있는 권한으로 설정되어 있습니다. 추가 세부정보는 [여기](https://twitter.com/tiraniddo/status/817532039771525120)에서 확인할 수 있으며, 명시적인 Launch Permission이 없는 객체를 필터링하기 위해 [@tiraniddo](https://twitter.com/tiraniddo)의 OleView .NET 사용이 권장됩니다.
 
 명시적인 Launch Permissions가 부족한 두 개의 특정 객체인 `ShellBrowserWindow`와 `ShellWindows`가 강조되었습니다. `HKCR:\AppID\{guid}` 아래에 `LaunchPermission` 레지스트리 항목이 없다는 것은 명시적인 권한이 없음을 의미합니다.
 
@@ -44,7 +44,7 @@ ls \\10.10.10.10\c$\Users
 
 ProgID가 없는 `ShellWindows`의 경우, .NET 메서드 `Type.GetTypeFromCLSID`와 `Activator.CreateInstance`를 사용하여 AppID를 통해 객체 인스턴스를 생성할 수 있습니다. 이 과정은 OleView .NET을 활용하여 `ShellWindows`의 CLSID를 검색합니다. 인스턴스화된 후에는 `WindowsShell.Item` 메서드를 통해 상호작용이 가능하며, `Document.Application.ShellExecute`와 같은 메서드 호출로 이어집니다.
 
-객체를 인스턴스화하고 원격으로 명령을 실행하기 위한 PowerShell 명령 예제가 제공되었습니다:
+객체를 인스턴스화하고 원격으로 명령을 실행하기 위한 PowerShell 명령의 예가 제공되었습니다:
 ```powershell
 $com = [Type]::GetTypeFromCLSID("<clsid>", "<IP>")
 $obj = [System.Activator]::CreateInstance($com)
@@ -53,7 +53,7 @@ $item.Document.Application.ShellExecute("cmd.exe", "/c calc.exe", "c:\windows\sy
 ```
 ### Lateral Movement with Excel DCOM Objects
 
-측면 이동은 DCOM Excel 객체를 악용하여 달성할 수 있습니다. 자세한 정보는 [Cybereason's blog](https://www.cybereason.com/blog/leveraging-excel-dde-for-lateral-movement-via-dcom)에서 DCOM을 통한 측면 이동을 위한 Excel DDE 활용에 대한 논의를 읽는 것이 좋습니다.
+측면 이동은 DCOM Excel 객체를 이용하여 수행할 수 있습니다. 자세한 정보는 [Cybereason's blog](https://www.cybereason.com/blog/leveraging-excel-dde-for-lateral-movement-via-dcom)에서 DCOM을 통한 측면 이동을 위한 Excel DDE 활용에 대한 논의를 읽는 것이 좋습니다.
 
 Empire 프로젝트는 DCOM 객체를 조작하여 원격 코드 실행(RCE)을 위해 Excel을 활용하는 PowerShell 스크립트를 제공합니다. 아래는 [Empire's GitHub repository](https://github.com/EmpireProject/Empire/blob/master/data/module_source/lateral_movement/Invoke-DCOM.ps1)에서 제공되는 스크립트의 일부로, RCE를 위해 Excel을 악용하는 다양한 방법을 보여줍니다:
 ```powershell
@@ -95,7 +95,7 @@ SharpLateral.exe reddcom HOSTNAME C:\Users\Administrator\Desktop\malware.exe
 ```bash
 SharpLateral.exe reddcom HOSTNAME C:\Users\Administrator\Desktop\malware.exe
 ```
-## 참고 문헌
+## 참고문헌
 
 - [https://enigma0x3.net/2017/01/05/lateral-movement-using-the-mmc20-application-com-object/](https://enigma0x3.net/2017/01/05/lateral-movement-using-the-mmc20-application-com-object/)
 - [https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/](https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/)

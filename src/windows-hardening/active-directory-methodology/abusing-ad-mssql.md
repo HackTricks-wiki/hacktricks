@@ -1,4 +1,4 @@
-# MSSQL AD Abuse
+# MSSQL AD 남용
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -148,7 +148,7 @@ MSSQL 호스트 내에서 **명령을 실행**하는 것도 가능할 수 있습
 Invoke-SQLOSCmd -Instance "srv.sub.domain.local,1433" -Command "whoami" -RawResults
 # Invoke-SQLOSCmd automatically checks if xp_cmdshell is enable and enables it if necessary
 ```
-다음 섹션에서 수동으로 수행하는 방법을 확인하세요.
+다음 섹션에서 수동으로 수행하는 방법을 확인하십시오.
 
 ### MSSQL 기본 해킹 기법
 
@@ -158,7 +158,7 @@ Invoke-SQLOSCmd -Instance "srv.sub.domain.local,1433" -Command "whoami" -RawResu
 
 ## MSSQL 신뢰 링크
 
-MSSQL 인스턴스가 다른 MSSQL 인스턴스에 의해 신뢰되는 경우(데이터베이스 링크). 사용자가 신뢰된 데이터베이스에 대한 권한을 가지고 있다면, 그는 **신뢰 관계를 사용하여 다른 인스턴스에서도 쿼리를 실행할 수 있습니다**. 이러한 신뢰는 연결될 수 있으며, 어느 시점에서 사용자는 명령을 실행할 수 있는 잘못 구성된 데이터베이스를 찾을 수 있습니다.
+MSSQL 인스턴스가 다른 MSSQL 인스턴스에 의해 신뢰받는 경우(데이터베이스 링크). 사용자가 신뢰된 데이터베이스에 대한 권한이 있는 경우, 그는 **신뢰 관계를 사용하여 다른 인스턴스에서도 쿼리를 실행할 수 있습니다**. 이러한 신뢰는 연결될 수 있으며, 어느 시점에서 사용자는 명령을 실행할 수 있는 잘못 구성된 데이터베이스를 찾을 수 있습니다.
 
 **데이터베이스 간의 링크는 포리스트 신뢰를 넘어 작동합니다.**
 
@@ -202,13 +202,13 @@ metasploit을 사용하여 신뢰할 수 있는 링크를 쉽게 확인할 수 �
 msf> use exploit/windows/mssql/mssql_linkcrawler
 [msf> set DEPLOY true] #Set DEPLOY to true if you want to abuse the privileges to obtain a meterpreter session
 ```
-메타스플로잇이 MSSQL에서 `openquery()` 함수만 악용하려고 시도한다는 점에 유의하세요 (따라서 `openquery()`로 명령을 실행할 수 없다면, 아래에서 더 자세히 설명하는 `EXECUTE` 방법을 **수동으로** 시도해야 합니다.)
+metasploit이 MSSQL에서 `openquery()` 함수만 악용하려고 시도한다는 점에 유의하세요 (따라서 `openquery()`로 명령을 실행할 수 없다면, 아래에서 더 자세히 설명하는 `EXECUTE` 방법을 **수동으로** 시도해야 합니다.)
 
 ### 수동 - Openquery()
 
 **Linux**에서 **sqsh**와 **mssqlclient.py**를 사용하여 MSSQL 콘솔 셸을 얻을 수 있습니다.
 
-**Windows**에서도 링크를 찾아 수동으로 명령을 실행할 수 있으며, **MSSQL 클라이언트**로 [**HeidiSQL**](https://www.heidisql.com)을 사용할 수 있습니다.
+**Windows**에서도 링크를 찾아 수동으로 명령을 실행할 수 있습니다 **MSSQL 클라이언트인** [**HeidiSQL**](https://www.heidisql.com)을 사용하여.
 
 _윈도우 인증을 사용하여 로그인:_
 
@@ -228,11 +228,11 @@ EXEC sp_linkedservers;
 select * from openquery("dcorp-sql1", 'select * from master..sysservers')
 ```
 > [!WARNING]
-> 더블 및 싱글 인용부호가 사용되는 위치를 확인하세요. 그렇게 사용하는 것이 중요합니다.
+> 더블 및 싱글 인용부호가 사용되는 위치를 확인하세요. 이렇게 사용하는 것이 중요합니다.
 
 ![](<../../images/image (643).png>)
 
-이 신뢰할 수 있는 링크 체인을 수동으로 무한히 계속할 수 있습니다.
+이 신뢰할 수 있는 링크 체인을 수동으로 영원히 계속할 수 있습니다.
 ```sql
 # First level RCE
 SELECT * FROM OPENQUERY("<computer>", 'select @@servername; exec xp_cmdshell ''powershell -w hidden -enc blah''')

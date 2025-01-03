@@ -4,15 +4,15 @@
 
 ## SID History Injection Attack
 
-**SID History Injection Attack**의 초점은 **도메인 간 사용자 마이그레이션**을 지원하면서 이전 도메인의 리소스에 대한 지속적인 접근을 보장하는 것입니다. 이는 **사용자의 이전 보안 식별자(SID)를 새 계정의 SID History에 통합함으로써** 이루어집니다. 특히, 이 과정은 상위 도메인에서 고급 권한 그룹(예: Enterprise Admins 또는 Domain Admins)의 SID를 SID History에 추가하여 무단 접근을 부여하도록 조작될 수 있습니다. 이 악용은 상위 도메인 내의 모든 리소스에 대한 접근을 부여합니다.
+**SID History Injection Attack**의 초점은 **도메인 간 사용자 마이그레이션**을 지원하면서 이전 도메인의 리소스에 대한 지속적인 접근을 보장하는 것입니다. 이는 **사용자의 이전 보안 식별자(SID)를 새로운 계정의 SID History에 통합함으로써** 이루어집니다. 특히, 이 과정은 상위 도메인에서 고급 권한 그룹(예: Enterprise Admins 또는 Domain Admins)의 SID를 SID History에 추가하여 무단 접근을 부여하도록 조작될 수 있습니다. 이 악용은 상위 도메인 내의 모든 리소스에 대한 접근을 부여합니다.
 
 이 공격을 실행하는 두 가지 방법이 있습니다: **Golden Ticket** 또는 **Diamond Ticket**의 생성입니다.
 
-**"Enterprise Admins"** 그룹의 SID를 정확히 찾으려면 먼저 루트 도메인의 SID를 찾아야 합니다. 식별 후, Enterprise Admins 그룹 SID는 루트 도메인의 SID에 `-519`를 추가하여 구성할 수 있습니다. 예를 들어, 루트 도메인 SID가 `S-1-5-21-280534878-1496970234-700767426`인 경우, "Enterprise Admins" 그룹의 결과 SID는 `S-1-5-21-280534878-1496970234-700767426-519`가 됩니다.
+**"Enterprise Admins"** 그룹의 SID를 찾으려면 먼저 루트 도메인의 SID를 찾아야 합니다. 식별 후, Enterprise Admins 그룹 SID는 루트 도메인의 SID에 `-519`를 추가하여 구성할 수 있습니다. 예를 들어, 루트 도메인 SID가 `S-1-5-21-280534878-1496970234-700767426`인 경우, "Enterprise Admins" 그룹의 결과 SID는 `S-1-5-21-280534878-1496970234-700767426-519`가 됩니다.
 
 또한 **Domain Admins** 그룹을 사용할 수도 있으며, 이는 **512**로 끝납니다.
 
-다른 도메인의 그룹(SID, 예: "Domain Admins")을 찾는 또 다른 방법은:
+다른 도메인의 그룹(SID, 예: "Domain Admins")을 찾는 또 다른 방법은 다음과 같습니다:
 ```powershell
 Get-DomainGroup -Identity "Domain Admins" -Domain parent.io -Properties ObjectSid
 ```
@@ -49,7 +49,7 @@ Rubeus.exe golden /rc4:<krbtgt hash> /domain:<child_domain> /sid:<child_domain_s
 
 # You can use "Administrator" as username or any other string
 ```
-다이아몬드 티켓에 대한 자세한 정보는 다음을 확인하세요:
+다이아몬드 티켓에 대한 자세한 내용은 다음을 확인하세요:
 
 {{#ref}}
 diamond-ticket.md
@@ -71,7 +71,7 @@ schtasks /create /S mcorp-dc.moneycorp.local /SC Weekely /RU "NT Authority\SYSTE
 
 schtasks /Run /S mcorp-dc.moneycorp.local /TN "STCheck114"
 ```
-획득한 권한을 사용하여 새로운 도메인에서 예를 들어 DCSync 공격을 실행할 수 있습니다:
+공격으로 획득한 권한을 사용하여 새 도메인에서 예를 들어 DCSync 공격을 실행할 수 있습니다:
 
 {{#ref}}
 dcsync.md
@@ -109,7 +109,7 @@ psexec.py <child_domain>/Administrator@dc.root.local -k -no-pass -target-ip 10.1
 흐름은 다음과 같습니다:
 
 - 부모 도메인의 Enterprise Admins 그룹에 대한 SID를 얻습니다.
-- 자식 도메인의 KRBTGT 계정 해시를 검색합니다.
+- 자식 도메인의 KRBTGT 계정에 대한 해시를 검색합니다.
 - Golden Ticket을 생성합니다.
 - 부모 도메인에 로그인합니다.
 - 부모 도메인의 Administrator 계정에 대한 자격 증명을 검색합니다.
@@ -117,7 +117,7 @@ psexec.py <child_domain>/Administrator@dc.root.local -k -no-pass -target-ip 10.1
 ```bash
 raiseChild.py -target-exec 10.10.10.10 <child_domain>/username
 ```
-## 참고문헌
+## 참고 문헌
 
 - [https://adsecurity.org/?p=1772](https://adsecurity.org/?p=1772)
 - [https://www.sentinelone.com/blog/windows-sid-history-injection-exposure-blog/](https://www.sentinelone.com/blog/windows-sid-history-injection-exposure-blog/)

@@ -48,9 +48,7 @@ JuicyPotato를 사용하면:
 - **프로세스 인수** _실행된 프로세스 인수를 사용자 정의하세요_
 - **RPC 서버 주소** _은밀한 접근을 위해 외부 RPC 서버에 인증할 수 있습니다_
 - **RPC 서버 포트** _외부 서버에 인증하고 방화벽이 포트 `135`를 차단하는 경우 유용합니다…_
-- **테스트 모드** _주로 테스트 목적으로, 즉 CLSID 테스트. DCOM을 생성하고 토큰의 사용자를 출력합니다. _[_테스트를 위한 여기_](http://ohpe.it/juicy-potato/Test/)를 참조하세요._
-
-### 사용법 <a href="#usage" id="usage"></a>
+- **테스트 모드** _주로 테스트 목적으로, 즉 CLSID 테스트. DCOM을 생성하고 토큰의 사용자를 출력합니다. _[_테스트용 여기_](http://ohpe.it/juicy-potato/Test/)
 ```
 T:\>JuicyPotato.exe
 JuicyPotato v0.1
@@ -114,11 +112,11 @@ c:\Users\Public>
 
 먼저, juicypotato.exe 외에 몇 가지 실행 파일이 필요합니다.
 
-[Join-Object.ps1](https://github.com/ohpe/juicy-potato/blob/master/CLSID/utils/Join-Object.ps1)를 다운로드하고 PS 세션에 로드한 후, [GetCLSID.ps1](https://github.com/ohpe/juicy-potato/blob/master/CLSID/GetCLSID.ps1)를 다운로드하여 실행합니다. 이 스크립트는 테스트할 수 있는 가능한 CLSID 목록을 생성합니다.
+[Join-Object.ps1](https://github.com/ohpe/juicy-potato/blob/master/CLSID/utils/Join-Object.ps1)를 다운로드하고 PS 세션에 로드한 후, [GetCLSID.ps1](https://github.com/ohpe/juicy-potato/blob/master/CLSID/GetCLSID.ps1)을 다운로드하여 실행합니다. 이 스크립트는 테스트할 수 있는 CLSID 목록을 생성합니다.
 
-그런 다음 [test_clsid.bat](https://github.com/ohpe/juicy-potato/blob/master/Test/test_clsid.bat)를 다운로드하고 (CLSID 목록과 juicypotato 실행 파일의 경로를 변경) 실행합니다. 이 스크립트는 모든 CLSID를 시도하기 시작하며, **포트 번호가 변경되면 CLSID가 작동했음을 의미합니다**.
+그런 다음 [test_clsid.bat](https://github.com/ohpe/juicy-potato/blob/master/Test/test_clsid.bat)(CLSID 목록과 juicypotato 실행 파일의 경로를 변경) 을 다운로드하고 실행합니다. 이 스크립트는 모든 CLSID를 시도하기 시작하며, **포트 번호가 변경되면 CLSID가 작동했음을 의미합니다**.
 
-**매개변수 -c를 사용하여** 작동하는 CLSID를 **확인하십시오.**
+**-c 매개변수를 사용하여** 작동하는 CLSID를 **확인하십시오.**
 
 ## 참고 문헌
 

@@ -6,7 +6,7 @@
 
 ### **Binwalk**
 
-임베디드 숨겨진 파일과 데이터를 찾기 위한 바이너리 파일 검색 도구입니다. `apt`를 통해 설치되며, 소스는 [GitHub](https://github.com/ReFirmLabs/binwalk)에서 확인할 수 있습니다.
+임베디드 숨겨진 파일과 데이터를 찾기 위한 이진 파일 검색 도구입니다. `apt`를 통해 설치되며, 소스는 [GitHub](https://github.com/ReFirmLabs/binwalk)에서 확인할 수 있습니다.
 ```bash
 binwalk file # Displays the embedded data
 binwalk -e file # Extracts the data
@@ -100,7 +100,7 @@ zsteg는 PNG 및 BMP 파일에서 숨겨진 데이터를 발견하는 데 특화
 
 ### **StegoVeritas and Stegsolve**
 
-**stegoVeritas**는 메타데이터를 확인하고, 이미지 변환을 수행하며, LSB 브루트 포싱을 적용하는 등 다양한 기능을 제공합니다. 전체 옵션 목록은 `stegoveritas.py -h`를 사용하고, 모든 검사를 실행하려면 `stegoveritas.py stego.jpg`를 사용하세요.
+**stegoVeritas**는 메타데이터를 확인하고, 이미지 변환을 수행하며, LSB 무차별 대입 공격을 적용하는 등 다양한 기능을 제공합니다. 전체 옵션 목록은 `stegoveritas.py -h`를 사용하고, 모든 검사를 실행하려면 `stegoveritas.py stego.jpg`를 사용하세요.
 
 **Stegsolve**는 이미지를 통해 숨겨진 텍스트나 메시지를 드러내기 위해 다양한 색상 필터를 적용합니다. [GitHub에서](https://github.com/eugenekolo/sec-tools/tree/master/stego/stegsolve/stegsolve) 사용할 수 있습니다.
 
@@ -118,7 +118,7 @@ Stegpy는 PNG, BMP, GIF, WebP 및 WAV와 같은 형식을 지원하여 이미지
 
 ### **Pngcheck for PNG File Analysis**
 
-PNG 파일을 분석하거나 그 진위를 검증하려면:
+PNG 파일을 분석하거나 그 진위를 확인하려면:
 ```bash
 apt-get install pngcheck
 pngcheck stego.png
@@ -165,7 +165,7 @@ Deepsound는 AES-256을 사용하여 사운드 파일 내의 정보를 암호화
 
 ### **Sonic Visualizer**
 
-Sonic Visualizer는 오디오 파일의 시각적 및 분석적 검사를 위한 귀중한 도구로, 다른 방법으로는 감지할 수 없는 숨겨진 요소를 드러낼 수 있습니다. 더 많은 정보는 [공식 웹사이트](https://www.sonicvisualiser.org/)를 방문하세요.
+Sonic Visualizer는 오디오 파일의 시각적 및 분석적 검사를 위한 귀중한 도구로, 다른 방법으로는 감지할 수 없는 숨겨진 요소를 드러낼 수 있습니다. [공식 웹사이트](https://www.sonicvisualiser.org/)를 방문하여 더 많은 정보를 확인하세요.
 
 ### **DTMF Tones - Dial Tones**
 

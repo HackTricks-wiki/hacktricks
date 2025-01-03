@@ -222,7 +222,7 @@ optional = Some(i + 1);
 ```
 ### 특성
 
-타입을 위한 새로운 메서드 생성
+타입에 대한 새로운 메서드 생성
 ```rust
 trait AppendBar {
 fn append_bar(self) -> Self;

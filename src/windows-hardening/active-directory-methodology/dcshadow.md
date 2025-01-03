@@ -61,9 +61,9 @@ lsadump::dcshadow /object:CN=AdminSDHolder,CN=System,DC=moneycorp,DC=local /attr
 - 대상 사용자 객체에서: `(A;;WP;;;UserSID)`
 - 구성 컨테이너의 사이트 객체에서: `(A;CI;CCDC;;;UserSID)`
 
-객체의 현재 ACE를 가져오려면: `(New-Object System.DirectoryServices.DirectoryEntry("LDAP://DC=moneycorp,DC=loca l")).psbase.ObjectSecurity.sddl`
+객체의 현재 ACE를 가져오려면: `(New-Object System.DirectoryServices.DirectoryEntry("LDAP://DC=moneycorp,DC=local")).psbase.ObjectSecurity.sddl`
 
-이 경우 **여러 변경을** 해야 하며, 하나만이 아닙니다. 따라서 **mimikatz1 세션** (RPC 서버)에서 변경하려는 각 변경에 대해 **`/stack`** 매개변수를 사용하세요. 이렇게 하면 **`/push`**를 한 번만 수행하여 모든 스택된 변경을 악성 서버에서 수행할 수 있습니다.
+이 경우 **여러 변경을** 해야 하므로, **mimikatz1 세션** (RPC 서버)에서 변경하려는 각 변경에 대해 **`/stack`** 매개변수를 사용해야 합니다. 이렇게 하면, 모든 스택된 변경을 수행하기 위해 **`/push`**를 한 번만 사용하면 됩니다.
 
 [**DCShadow에 대한 더 많은 정보는 ired.team에서 확인하세요.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1207-creating-rogue-domain-controllers-with-dcshadow)
 

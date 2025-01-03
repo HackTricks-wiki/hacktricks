@@ -28,21 +28,21 @@ IP 및 도메인과 관련된 악의적인 활동을 찾습니다. 무료입니�
 
 ## [BuiltWith](https://builtwith.com/)
 
-웹에서 사용되는 기술들. 비쌉니다...\
+웹에서 사용되는 기술. 비쌉니다...\
 상업적?
 
 ## [Fraudguard](https://fraudguard.io/)
 
-호스트(도메인 또는 IP)가 의심스러운/악의적인 활동과 관련이 있는지 확인합니다. 일부 무료 API 접근이 있습니다.\
+호스트(도메인 또는 IP)가 의심스러운/악의적인 활동과 관련이 있는지 확인합니다. 일부 무료 API 접근이 가능합니다.\
 상업적?
 
 ## [FortiGuard](https://fortiguard.com/)
 
-호스트(도메인 또는 IP)가 의심스러운/악의적인 활동과 관련이 있는지 확인합니다. 일부 무료 API 접근이 있습니다.
+호스트(도메인 또는 IP)가 의심스러운/악의적인 활동과 관련이 있는지 확인합니다. 일부 무료 API 접근이 가능합니다.
 
 ## [SpamCop](https://www.spamcop.net/)
 
-호스트가 스팸 활동과 관련이 있는지 나타냅니다. 일부 무료 API 접근이 있습니다.
+호스트가 스팸 활동과 관련이 있는지 나타냅니다. 일부 무료 API 접근이 가능합니다.
 
 ## [mywot](https://www.mywot.com/)
 
@@ -55,7 +55,7 @@ IP 주소에서 기본 정보를 얻습니다. 월 최대 100K까지 테스트�
 ## [securitytrails](https://securitytrails.com/app/account)
 
 이 플랫폼은 IP 내의 도메인 또는 도메인 서버 내의 도메인, 이메일에 의해 소유된 도메인(관련 도메인 찾기), 도메인의 IP 기록(CloudFlare 뒤의 호스트 찾기), 모든 도메인이 사용하는 네임서버에 대한 정보를 제공합니다....\
-일부 무료 접근이 있습니다.
+일부 무료 접근이 가능합니다.
 
 ## [fullcontact](https://www.fullcontact.com/)
 
@@ -67,7 +67,7 @@ IP 주소에서 기본 정보를 얻습니다. 월 최대 100K까지 테스트�
 
 ## [\_IntelligenceX](https://intelx.io/)
 
-도메인, IP 및 이메일을 검색하고 덤프에서 정보를 얻습니다. 일부 무료 접근이 있습니다.
+도메인, IP 및 이메일을 검색하고 덤프에서 정보를 얻습니다. 일부 무료 접근이 가능합니다.
 
 ## [IBM X-Force Exchange](https://exchange.xforce.ibmcloud.com/)
 
@@ -75,11 +75,11 @@ IP로 검색하고 의심스러운 활동과 관련된 정보를 수집합니다
 
 ## [Greynoise](https://viz.greynoise.io/)
 
-IP 또는 IP 범위로 검색하고 인터넷을 스캔하는 IP에 대한 정보를 얻습니다. 15일 무료 접근이 있습니다.
+IP 또는 IP 범위로 검색하고 인터넷을 스캔하는 IP에 대한 정보를 얻습니다. 15일 무료 접근이 가능합니다.
 
 ## [Shodan](https://www.shodan.io/)
 
-IP 주소의 스캔 정보를 얻습니다. 일부 무료 API 접근이 있습니다.
+IP 주소의 스캔 정보를 얻습니다. 일부 무료 API 접근이 가능합니다.
 
 ## [Censys](https://censys.io/)
 

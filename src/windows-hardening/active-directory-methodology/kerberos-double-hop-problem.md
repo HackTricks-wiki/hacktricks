@@ -13,7 +13,7 @@ Kerberos "Double Hop" 문제는 공격자가 **두 개의** **홉**을 통해 **
 1. User1이 자격 증명을 제공하고 **도메인 컨트롤러**가 User1에게 Kerberos **TGT**를 반환합니다.
 2. User1이 **TGT**를 사용하여 **Server1**에 연결하기 위한 **서비스 티켓**을 요청합니다.
 3. User1이 **Server1**에 **연결**하고 **서비스 티켓**을 제공합니다.
-4. **Server1**은 User1의 **자격 증명**이나 User1의 **TGT**를 캐시하지 않습니다. 따라서 Server1에서 User1이 두 번째 서버에 로그인하려고 할 때, 그는 **인증할 수 없습니다**.
+4. **Server1**은 User1의 **자격 증명**이나 User1의 **TGT**를 캐시하지 않습니다. 따라서 Server1의 User1이 두 번째 서버에 로그인하려고 할 때 **인증할 수 없습니다**.
 
 ### Unconstrained Delegation
 
@@ -26,7 +26,7 @@ PC에서 **제한 없는 위임**이 활성화되어 있으면, **서버**는 �
 
 > CredSSP 인증은 로컬 컴퓨터에서 원격 컴퓨터로 사용자 자격 증명을 위임합니다. 이 관행은 원격 작업의 보안 위험을 증가시킵니다. 원격 컴퓨터가 손상되면 자격 증명이 전달될 때, 해당 자격 증명은 네트워크 세션을 제어하는 데 사용될 수 있습니다.
 
-보안 문제로 인해 **CredSSP**는 프로덕션 시스템, 민감한 네트워크 및 유사한 환경에서 비활성화하는 것이 강력히 권장됩니다. **CredSSP**가 활성화되어 있는지 확인하려면 `Get-WSManCredSSP` 명령을 실행할 수 있습니다. 이 명령은 **CredSSP 상태를 확인**할 수 있으며, **WinRM**이 활성화되어 있는 경우 원격으로도 실행할 수 있습니다.
+보안 문제로 인해 **CredSSP**는 프로덕션 시스템, 민감한 네트워크 및 유사한 환경에서 비활성화하는 것이 강력히 권장됩니다. **CredSSP**가 활성화되어 있는지 확인하려면 `Get-WSManCredSSP` 명령을 실행할 수 있습니다. 이 명령은 **CredSSP 상태를 확인**할 수 있으며, **WinRM**이 활성화되어 있으면 원격으로도 실행할 수 있습니다.
 ```powershell
 Invoke-Command -ComputerName bizintel -Credential ta\redsuit -ScriptBlock {
 Get-WSManCredSSP
@@ -36,7 +36,7 @@ Get-WSManCredSSP
 
 ### Invoke Command
 
-더블 홉 문제를 해결하기 위해 중첩된 `Invoke-Command`를 포함하는 방법이 제시됩니다. 이는 문제를 직접적으로 해결하지는 않지만 특별한 구성이 필요 없는 우회 방법을 제공합니다. 이 접근 방식은 초기 공격 머신에서 실행된 PowerShell 명령 또는 첫 번째 서버와 이전에 설정된 PS-Session을 통해 보조 서버에서 명령(`hostname`)을 실행할 수 있게 합니다. 방법은 다음과 같습니다:
+더블 홉 문제를 해결하기 위해 중첩된 `Invoke-Command`를 포함하는 방법이 제시됩니다. 이는 문제를 직접적으로 해결하지는 않지만 특별한 구성이 필요 없는 우회 방법을 제공합니다. 이 접근 방식은 초기 공격 머신에서 실행된 PowerShell 명령어를 통해 또는 첫 번째 서버와 이전에 설정된 PS-Session을 통해 보조 서버에서 명령어(`hostname`)를 실행할 수 있게 합니다. 방법은 다음과 같습니다:
 ```powershell
 $cred = Get-Credential ta\redsuit
 Invoke-Command -ComputerName bizintel -Credential $cred -ScriptBlock {

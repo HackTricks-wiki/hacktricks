@@ -52,14 +52,14 @@
 ### [서비스](windows-local-privilege-escalation/#services)
 
 - [ ] [**서비스를 수정할 수 있나요**?](windows-local-privilege-escalation/#permissions)
-- [ ] [**서비스에 의해 실행되는 바이너리를 수정할 수 있나요**?](windows-local-privilege-escalation/#modify-service-binary-path)
-- [ ] [**서비스의 레지스트리를 수정할 수 있나요**?](windows-local-privilege-escalation/#services-registry-modify-permissions)
+- [ ] [**서비스에 의해 실행되는 바이너리**를 **수정할 수 있나요**?](windows-local-privilege-escalation/#modify-service-binary-path)
+- [ ] [**서비스의 레지스트리**를 **수정할 수 있나요**?](windows-local-privilege-escalation/#services-registry-modify-permissions)
 - [ ] [**인용되지 않은 서비스** 바이너리 **경로**를 이용할 수 있나요?](windows-local-privilege-escalation/#unquoted-service-paths)
 
 ### [**응용 프로그램**](windows-local-privilege-escalation/#applications)
 
 - [ ] **설치된 응용 프로그램에 대한** [**쓰기** 권한](windows-local-privilege-escalation/#write-permissions)
-- [ ] [**시작 응용 프로그램**](windows-local-privilege-escalation/#run-at-startup)
+- [ ] [**시작 프로그램**](windows-local-privilege-escalation/#run-at-startup)
 - [ ] **취약한** [**드라이버**](windows-local-privilege-escalation/#drivers)
 
 ### [DLL 하이재킹](windows-local-privilege-escalation/#path-dll-hijacking)
@@ -100,14 +100,14 @@
 - [ ] [**휴지통 안의 흥미로운 파일**](windows-local-privilege-escalation/#credentials-in-the-recyclebin)?
 - [ ] [**자격 증명을 포함하는 다른 레지스트리**](windows-local-privilege-escalation/#inside-the-registry)?
 - [ ] [**브라우저 데이터**](windows-local-privilege-escalation/#browsers-history) 안에 (dbs, 기록, 북마크 등)?
-- [ ] [**파일 및 레지스트리에서 일반 비밀번호 검색**](windows-local-privilege-escalation/#generic-password-search-in-files-and-registry)
+- [ ] 파일 및 레지스트리에서 [**일반 비밀번호 검색**](windows-local-privilege-escalation/#generic-password-search-in-files-and-registry)
 - [ ] 비밀번호를 자동으로 검색하는 [**도구**](windows-local-privilege-escalation/#tools-that-search-for-passwords)
 
 ### [유출된 핸들러](windows-local-privilege-escalation/#leaked-handlers)
 
 - [ ] 관리자에 의해 실행된 프로세스의 핸들러에 접근할 수 있나요?
 
-### [파이프 클라이언트 가장](windows-local-privilege-escalation/#named-pipe-client-impersonation)
+### [파이프 클라이언트 가장하기](windows-local-privilege-escalation/#named-pipe-client-impersonation)
 
 - [ ] 이를 악용할 수 있는지 확인하세요.
 

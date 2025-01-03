@@ -19,7 +19,7 @@
 
 ### Special Considerations
 
-- **주체 대체 이름(Subject Alternative Names, SANs)**은 인증서의 적용 범위를 여러 신원으로 확장하여 여러 도메인을 가진 서버에 중요합니다. 공격자가 SAN 사양을 조작하여 가장하는 위험을 피하기 위해 안전한 발급 프로세스가 필수적입니다.
+- **주체 대체 이름(SANs)**은 인증서의 적용 범위를 여러 신원으로 확장하여 여러 도메인을 가진 서버에 중요합니다. 안전한 발급 프로세스는 SAN 사양을 조작하는 공격자에 의한 사칭 위험을 피하는 데 필수적입니다.
 
 ### Certificate Authorities (CAs) in Active Directory (AD)
 
@@ -63,18 +63,18 @@ CA의 권한은 보안 설명서에 명시되어 있으며, 인증 기관 관리
 
 특정 제어가 적용될 수 있습니다, 예를 들어:
 
-- **관리자 승인(Manager Approval)**: 요청을 인증서 관리자에 의해 승인될 때까지 보류 상태로 둡니다.
-- **등록 에이전트 및 승인 서명(Enrolment Agents and Authorized Signatures)**: CSR에 필요한 서명의 수와 필요한 응용 프로그램 정책 OID를 지정합니다.
+- **관리자 승인(Manager Approval)**: 요청을 인증서 관리자가 승인할 때까지 보류 상태로 둡니다.
+- **등록 에이전트 및 승인 서명(Enrolment Agents and Authorized Signatures)**: CSR에 필요한 서명의 수와 필요한 애플리케이션 정책 OID를 지정합니다.
 
 ### Methods to Request Certificates
 
 인증서는 다음을 통해 요청할 수 있습니다:
 
-1. **Windows 클라이언트 인증서 등록 프로토콜(Windows Client Certificate Enrollment Protocol, MS-WCCE)**, DCOM 인터페이스를 사용합니다.
-2. **ICertPassage 원격 프로토콜(ICertPassage Remote Protocol, MS-ICPR)**, 명명된 파이프 또는 TCP/IP를 통해.
+1. **Windows 클라이언트 인증서 등록 프로토콜** (MS-WCCE), DCOM 인터페이스를 사용합니다.
+2. **ICertPassage 원격 프로토콜** (MS-ICPR), 명명된 파이프 또는 TCP/IP를 통해.
 3. **인증서 등록 웹 인터페이스**, 인증 기관 웹 등록 역할이 설치된 경우.
-4. **인증서 등록 서비스(Certificate Enrollment Service, CES)**, 인증서 등록 정책(CEP) 서비스와 함께.
-5. **네트워크 장치 등록 서비스(Network Device Enrollment Service, NDES)**, 네트워크 장치용으로, 간단한 인증서 등록 프로토콜(SCEP)을 사용합니다.
+4. **인증서 등록 서비스** (CES), 인증서 등록 정책(CEP) 서비스와 함께.
+5. **네트워크 장치 등록 서비스** (NDES) 네트워크 장치를 위한, 간단한 인증서 등록 프로토콜(SCEP)을 사용합니다.
 
 Windows 사용자는 GUI(`certmgr.msc` 또는 `certlm.msc`) 또는 명령줄 도구(`certreq.exe` 또는 PowerShell의 `Get-Certificate` 명령)를 통해 인증서를 요청할 수도 있습니다.
 ```powershell
@@ -87,7 +87,7 @@ Active Directory (AD)는 인증서 인증을 지원하며, 주로 **Kerberos** �
 
 ### Kerberos 인증 프로세스
 
-Kerberos 인증 프로세스에서 사용자의 Ticket Granting Ticket (TGT) 요청은 사용자의 인증서의 **개인 키**를 사용하여 서명됩니다. 이 요청은 도메인 컨트롤러에 의해 인증서의 **유효성**, **경로**, 및 **폐기 상태**를 포함한 여러 검증을 거칩니다. 검증에는 인증서가 신뢰할 수 있는 출처에서 왔는지 확인하고 발급자의 존재를 **NTAUTH 인증서 저장소**에서 확인하는 것도 포함됩니다. 검증이 성공적으로 완료되면 TGT가 발급됩니다. AD의 **`NTAuthCertificates`** 객체는 다음 위치에 있습니다:
+Kerberos 인증 프로세스에서 사용자의 Ticket Granting Ticket (TGT) 요청은 사용자의 인증서의 **개인 키**를 사용하여 서명됩니다. 이 요청은 도메인 컨트롤러에 의해 여러 검증을 거치며, 여기에는 인증서의 **유효성**, **경로**, 및 **폐기 상태**가 포함됩니다. 검증에는 인증서가 신뢰할 수 있는 출처에서 왔는지 확인하고 발급자의 존재를 **NTAUTH 인증서 저장소**에서 확인하는 것도 포함됩니다. 검증이 성공적으로 완료되면 TGT가 발급됩니다. AD의 **`NTAuthCertificates`** 객체는 다음 위치에 있습니다:
 ```bash
 CN=NTAuthCertificates,CN=Public Key Services,CN=Services,CN=Configuration,DC=<domain>,DC=<com>
 ```
@@ -99,7 +99,7 @@ Schannel은 안전한 TLS/SSL 연결을 용이하게 하며, 핸드셰이크 중
 
 ### AD 인증서 서비스 열거
 
-AD의 인증서 서비스는 LDAP 쿼리를 통해 열거할 수 있으며, **엔터프라이즈 인증 기관 (CAs)** 및 그 구성에 대한 정보를 드러냅니다. 이는 특별한 권한 없이 도메인 인증된 사용자라면 누구나 접근할 수 있습니다. **[Certify](https://github.com/GhostPack/Certify)** 및 **[Certipy](https://github.com/ly4k/Certipy)**와 같은 도구는 AD CS 환경에서 열거 및 취약성 평가에 사용됩니다.
+AD의 인증서 서비스는 LDAP 쿼리를 통해 열거할 수 있으며, **엔터프라이즈 인증 기관 (CAs)** 및 그 구성에 대한 정보를 드러냅니다. 이는 특별한 권한 없이 도메인 인증된 모든 사용자가 접근할 수 있습니다. **[Certify](https://github.com/GhostPack/Certify)** 및 **[Certipy](https://github.com/ly4k/Certipy)**와 같은 도구는 AD CS 환경에서 열거 및 취약성 평가에 사용됩니다.
 
 이 도구를 사용하는 명령어는 다음과 같습니다:
 ```bash
@@ -115,7 +115,7 @@ certipy find -vulnerable -u john@corp.local -p Passw0rd -dc-ip 172.16.126.128
 certutil.exe -TCAInfo
 certutil -v -dstemplate
 ```
-## 참고 문헌
+## 참고문헌
 
 - [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)
 - [https://comodosslstore.com/blog/what-is-ssl-tls-client-authentication-how-does-it-work.html](https://comodosslstore.com/blog/what-is-ssl-tls-client-authentication-how-does-it-work.html)

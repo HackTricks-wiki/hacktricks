@@ -153,7 +153,7 @@ return 0;
 [-] CreateProcessWithTokenW Return Code: 0
 [-] CreateProcessWithTokenW Error: 1326
 ```
-이것은 당신이 High Integrity 수준에서 실행 중이더라도 **충분한 권한이 없다는 것을 의미합니다**.\
+이것은 높은 무결성 수준에서 실행 중이더라도 **충분한 권한이 없다는** 것을 의미합니다.\
 현재 `svchost.exe` 프로세스에 대한 관리자 권한을 **processes explorer** (또는 process hacker를 사용할 수도 있음)로 확인해 보겠습니다:
 
 1. `svchost.exe` 프로세스를 선택합니다.
@@ -165,12 +165,12 @@ return 0;
 
 ![](<../../images/image (437).png>)
 
-이전 이미지는 선택된 프로세스에 대해 "Administrators"가 가진 모든 권한을 포함하고 있습니다 (예를 들어 `svchost.exe`의 경우 그들은 "Query" 권한만 가지고 있습니다).
+이전 이미지는 선택된 프로세스에 대해 "Administrators"가 가진 모든 권한을 포함하고 있습니다 (예를 들어 `svchost.exe`의 경우 "Query" 권한만 가지고 있음을 볼 수 있습니다).
 
-`winlogon.exe`에 대해 "Administrators"가 가진 권한을 확인해 보세요:
+`winlogon.exe`에 대한 "Administrators"의 권한을 확인해 보세요:
 
 ![](<../../images/image (1102).png>)
 
-해당 프로세스 내에서 "Administrators"는 "메모리 읽기" 및 "권한 읽기"를 할 수 있으며, 이는 아마도 Administrators가 이 프로세스에서 사용되는 토큰을 가장할 수 있게 해줍니다.
+해당 프로세스 내에서 "Administrators"는 "메모리 읽기" 및 "권한 읽기"를 할 수 있으며, 이는 아마도 관리자가 이 프로세스에서 사용되는 토큰을 가장할 수 있게 해줍니다.
 
 {{#include ../../banners/hacktricks-training.md}}

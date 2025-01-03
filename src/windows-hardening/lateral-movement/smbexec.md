@@ -14,9 +14,9 @@
 ```bash
 smbexec.py WORKGROUP/genericuser:genericpassword@10.10.10.10
 ```
-### 이진 파일 없이 명령 실행
+### 이진 파일 없이 명령 실행하기
 
-- **Smbexec**는 서비스 binPaths를 통해 직접 명령 실행을 가능하게 하여 대상에 물리적 이진 파일이 필요 없게 합니다.
+- **Smbexec**는 서비스 binPaths를 통해 직접 명령을 실행할 수 있게 하여, 대상에 물리적 이진 파일이 필요 없도록 합니다.
 - 이 방법은 Windows 대상에서 일회성 명령을 실행하는 데 유용합니다. 예를 들어, Metasploit의 `web_delivery` 모듈과 결합하면 PowerShell을 대상으로 하는 역 Meterpreter 페이로드를 실행할 수 있습니다.
 - cmd.exe를 통해 제공된 명령을 실행하도록 binPath가 설정된 원격 서비스를 공격자의 머신에서 생성함으로써, 서비스 응답 오류가 발생하더라도 페이로드를 성공적으로 실행하고 Metasploit 리스너와의 콜백 및 페이로드 실행을 달성할 수 있습니다.
 

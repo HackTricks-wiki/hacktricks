@@ -1,6 +1,6 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
-이 치트시트의 일부는 [angr 문서](https://docs.angr.io/_/downloads/en/stable/pdf/)를 기반으로 합니다.
+이 치트 시트의 일부는 [angr documentation](https://docs.angr.io/_/downloads/en/stable/pdf/)을 기반으로 합니다.
 
 # 설치
 ```bash
@@ -119,9 +119,9 @@ simgr.active[0].regs.rip #Get RIP from the last state
 ```
 ## 함수 호출
 
-- `entry_state`와 `full_init_state`에 `args`를 통해 인수 목록을 전달하고 `env`를 통해 환경 변수의 사전을 전달할 수 있습니다. 이러한 구조의 값은 문자열 또는 비트벡터일 수 있으며, 시뮬레이션된 실행의 인수 및 환경으로 상태에 직렬화됩니다. 기본 `args`는 빈 목록이므로, 분석 중인 프로그램이 최소한 `argv[0]`을 찾기를 기대하는 경우 항상 제공해야 합니다!
-- `argc`를 심볼릭으로 설정하려면, `entry_state`와 `full_init_state` 생성자에 심볼릭 비트벡터를 `argc`로 전달할 수 있습니다. 그러나 주의하세요: 이렇게 하면, `args`에 전달한 인수의 수보다 `argc`의 값이 클 수 없다는 제약 조건을 결과 상태에 추가해야 합니다.
-- 호출 상태를 사용하려면 `.call_state(addr, arg1, arg2, ...)`로 호출해야 하며, 여기서 `addr`은 호출하려는 함수의 주소이고 `argN`은 해당 함수에 대한 N번째 인수로, 파이썬 정수, 문자열, 배열 또는 비트벡터로 전달할 수 있습니다. 메모리를 할당하고 실제로 객체에 대한 포인터를 전달하려면, 이를 PointerWrapper로 감싸야 합니다. 즉, `angr.PointerWrapper("point to me!")`와 같이 사용합니다. 이 API의 결과는 다소 예측할 수 없지만, 우리는 이를 개선하고 있습니다.
+- `entry_state`와 `full_init_state`에 `args`를 통해 인수 목록을, `env`를 통해 환경 변수의 사전을 전달할 수 있습니다. 이러한 구조의 값은 문자열 또는 비트벡터일 수 있으며, 시뮬레이션된 실행의 인수와 환경으로 상태에 직렬화됩니다. 기본 `args`는 빈 목록이므로, 분석 중인 프로그램이 최소한 `argv[0]`을 찾기를 기대한다면 항상 제공해야 합니다!
+- `argc`를 심볼릭으로 설정하고 싶다면, `entry_state`와 `full_init_state` 생성자에 심볼릭 비트벡터를 `argc`로 전달할 수 있습니다. 그러나 주의해야 합니다: 이렇게 할 경우, `argc`에 대한 값이 `args`에 전달한 인수의 수보다 클 수 없다는 제약 조건을 결과 상태에 추가해야 합니다.
+- 호출 상태를 사용하려면 `.call_state(addr, arg1, arg2, ...)`로 호출해야 하며, 여기서 `addr`은 호출하려는 함수의 주소이고 `argN`은 해당 함수에 대한 N번째 인수로, 파이썬 정수, 문자열, 배열 또는 비트벡터일 수 있습니다. 메모리를 할당하고 실제로 객체에 대한 포인터를 전달하려면, 이를 PointerWrapper로 감싸야 합니다. 즉, `angr.PointerWrapper("point to me!")`와 같이 사용합니다. 이 API의 결과는 다소 예측할 수 없지만, 우리는 이를 개선하고 있습니다.
 
 ## 비트벡터
 ```python
@@ -184,7 +184,7 @@ True
 >>> proj.is_hooked(0x20000)
 True
 ```
-또한, `proj.hook_symbol(name, hook)`을 사용하여 기호의 이름을 첫 번째 인수로 제공함으로써 기호가 존재하는 주소를 후킹할 수 있습니다.
+또한, `proj.hook_symbol(name, hook)`을 사용하여 기호의 이름을 첫 번째 인수로 제공함으로써 기호가 위치한 주소를 후킹할 수 있습니다.
 
 # 예시
 

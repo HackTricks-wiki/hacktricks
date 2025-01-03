@@ -1,6 +1,6 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-**WTS Impersonator** 도구는 **"\\pipe\LSM_API_service"** RPC 명명된 파이프를 이용하여 로그인한 사용자를 은밀하게 열거하고 그들의 토큰을 탈취하여 전통적인 토큰 위장 기법을 우회합니다. 이 접근 방식은 네트워크 내에서 원활한 측면 이동을 촉진합니다. 이 기술의 혁신은 **Omri Baso**에게 기인하며, 그의 작업은 [GitHub](https://github.com/OmriBaso/WTSImpersonator)에서 확인할 수 있습니다.
+**WTS Impersonator** 도구는 **"\\pipe\LSM_API_service"** RPC 명명된 파이프를 이용하여 로그인한 사용자를 은밀하게 열거하고 그들의 토큰을 탈취하여 전통적인 토큰 위장 기법을 우회합니다. 이 접근 방식은 네트워크 내에서 원활한 수평 이동을 가능하게 합니다. 이 기법의 혁신은 **Omri Baso**에게서 비롯되었으며, 그의 작업은 [GitHub](https://github.com/OmriBaso/WTSImpersonator)에서 확인할 수 있습니다.
 
 ### 핵심 기능
 
@@ -21,7 +21,7 @@ WTSEnumerateSessionsA → WTSQuerySessionInformationA → WTSQueryUserToken → 
 .\WTSImpersonator.exe -m enum -s 192.168.40.131
 ```
 
-- **명령 실행**: `exec` 및 `exec-remote` 모듈은 작동을 위해 **서비스** 컨텍스트가 필요합니다. 로컬 실행은 WTSImpersonator 실행 파일과 명령만 필요합니다:
+- **명령 실행**: `exec` 및 `exec-remote` 모듈은 작동하기 위해 **서비스** 컨텍스트가 필요합니다. 로컬 실행은 WTSImpersonator 실행 파일과 명령만 필요합니다:
 
 - 로컬 명령 실행 예:
 ```powershell

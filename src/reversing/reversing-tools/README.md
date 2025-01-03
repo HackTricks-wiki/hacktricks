@@ -6,8 +6,8 @@
 
 ## 온라인 도구
 
-- Wasm을 Wat으로 **디컴파일**하려면 [Wabt의 wasm2wat 데모](https://webassembly.github.io/wabt/demo/wasm2wat/index.html)에서 제공하는 도구가 유용합니다.
-- Wat을 다시 Wasm으로 **컴파일**하려면 [Wabt의 wat2wasm 데모](https://webassembly.github.io/wabt/demo/wat2wasm/)를 사용하면 됩니다.
+- Wasm을 Wat으로 **디컴파일**하려면 [Wabt의 wasm2wat 데모](https://webassembly.github.io/wabt/demo/wasm2wat/index.html)를 사용하면 유용합니다.
+- Wat을 다시 Wasm으로 **컴파일**하려면 [Wabt의 wat2wasm 데모](https://webassembly.github.io/wabt/demo/wat2wasm/)가 목적에 맞습니다.
 - 또 다른 디컴파일 옵션은 [web-wasmdec](https://wwwg.github.io/web-wasmdec/)에서 찾을 수 있습니다.
 
 ## 소프트웨어 솔루션
@@ -21,7 +21,7 @@
 
 - [ILSpy](https://github.com/icsharpcode/ILSpy), 이 도구는 [Visual Studio Code용 플러그인](https://github.com/icsharpcode/ilspy-vscode)도 제공하여 크로스 플랫폼 사용이 가능합니다.
 - **디컴파일**, **수정**, **재컴파일** 작업에 대해 [dnSpy](https://github.com/0xd4d/dnSpy/releases)를 강력히 추천합니다. 메서드를 **우클릭**하고 **Modify Method**를 선택하면 코드 변경이 가능합니다.
-- [JetBrains의 dotPeek](https://www.jetbrains.com/es-es/decompiler/)도 .Net 어셈블리를 디컴파일하는 또 다른 대안입니다.
+- [JetBrains의 dotPeek](https://www.jetbrains.com/es-es/decompiler/)은 .Net 어셈블리를 디컴파일하는 또 다른 대안입니다.
 
 ## DNSpy로 디버깅 및 로깅 향상
 
@@ -82,9 +82,9 @@ Java 바이트코드를 디컴파일하기 위해 다음 도구가 매우 유용
 - jmp2it [컴파일된 버전](https://github.com/adamkramer/jmp2it/releases/)
 - **Cutter**는 GUI 기반의 쉘코드 에뮬레이션 및 검사를 제공하며, 파일로서의 쉘코드 처리와 직접 쉘코드 처리의 차이를 강조합니다.
 
-### 디오브퓨케이션 및 분석
+### 디오브퓨스케이션 및 분석
 
-- **scdbg**는 쉘코드 기능 및 디오브퓨케이션 기능에 대한 통찰력을 제공합니다.
+- **scdbg**는 쉘코드 기능 및 디오브퓨스케이션 기능에 대한 통찰력을 제공합니다.
 %%%bash
 scdbg.exe -f shellcode # 기본 정보
 scdbg.exe -f shellcode -r # 분석 보고서
@@ -98,17 +98,17 @@ scdbg.exe -f shellcode /foff 0x0000004D # 오프셋에서 실행
 
 ## **Movfuscator**
 
-- 모든 명령어를 `mov`로 대체하는 오브퓨케이터입니다.
+- 모든 명령어를 `mov`로 대체하는 오브퓨스케이터입니다.
 - 유용한 리소스에는 [YouTube 설명](https://www.youtube.com/watch?v=2VF_wPkiBJY) 및 [PDF 슬라이드](https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas_2015_the_movfuscator.pdf)가 포함됩니다.
-- **demovfuscator**는 movfuscator의 오브퓨케이션을 역으로 수행할 수 있으며, `libcapstone-dev` 및 `libz3-dev`와 같은 종속성이 필요하고 [keystone](https://github.com/keystone-engine/keystone/blob/master/docs/COMPILE-NIX.md)을 설치해야 합니다.
+- **demovfuscator**는 movfuscator의 오브퓨스케이션을 역으로 수행할 수 있으며, `libcapstone-dev` 및 `libz3-dev`와 같은 종속성이 필요하고 [keystone](https://github.com/keystone-engine/keystone/blob/master/docs/COMPILE-NIX.md)을 설치해야 합니다.
 
 ## **Delphi**
 
-- Delphi 바이너리에 대해서는 [IDR](https://github.com/crypto2011/IDR)를 추천합니다.
+- Delphi 바이너리의 경우 [IDR](https://github.com/crypto2011/IDR)를 추천합니다.
 
 # 강좌
 
 - [https://github.com/0xZ0F/Z0FCourse_ReverseEngineering](https://github.com/0xZ0F/Z0FCourse_ReverseEngineering)
-- [https://github.com/malrev/ABD](https://github.com/malrev/ABD) \(바이너리 디오브퓨케이션\)
+- [https://github.com/malrev/ABD](https://github.com/malrev/ABD) \(바이너리 디오브퓨스케이션\)
 
 {{#include ../../banners/hacktricks-training.md}}

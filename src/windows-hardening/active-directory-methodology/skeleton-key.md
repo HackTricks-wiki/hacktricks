@@ -20,7 +20,7 @@
 
 - 특히 Mimikatz의 드라이버를 감지하기 위해 다음 명령어를 사용할 수 있습니다: `Get-WinEvent -FilterHashtable @{Logname='System';ID=7045} | ?{$_.message -like "*Kernel Mode Driver*" -and $_.message -like "*mimidrv*"}`
 
-- `lsass.exe`를 강화하기 위해 보호된 프로세스로 활성화하는 것이 권장됩니다: `New-ItemProperty HKLM:\SYSTEM\CurrentControlSet\Control\Lsa -Name RunAsPPL -Value 1 -Verbose`
+- `lsass.exe`를 강화하기 위해 보호된 프로세스로 설정하는 것이 권장됩니다: `New-ItemProperty HKLM:\SYSTEM\CurrentControlSet\Control\Lsa -Name RunAsPPL -Value 1 -Verbose`
 
 시스템 재부팅 후 검증은 보호 조치가 성공적으로 적용되었는지 확인하는 데 중요합니다. 이는 다음을 통해 수행할 수 있습니다: `Get-WinEvent -FilterHashtable @{Logname='System';ID=12} | ?{$_.message -like "*protected process*`
 

@@ -55,11 +55,11 @@ CIFS 서비스는 피해자의 파일 시스템에 접근하기 위한 일반적
 
 ## 서비스 티켓 악용
 
-다음 예제에서는 티켓이 관리자 계정을 가장하여 검색된다고 가정해 보겠습니다.
+다음 예제에서는 티켓이 관리자 계정을 가장하여 검색되었다고 가정해 보겠습니다.
 
 ### CIFS
 
-이 티켓을 사용하면 **SMB**를 통해 `C$` 및 `ADMIN$` 폴더에 접근할 수 있으며(노출된 경우) 원격 파일 시스템의 일부에 파일을 복사할 수 있습니다.
+이 티켓을 사용하면 `C$` 및 `ADMIN$` 폴더에 **SMB**를 통해 접근할 수 있으며(노출된 경우) 원격 파일 시스템의 일부에 파일을 복사할 수 있습니다.
 ```bash
 dir \\vulnerable.computer\C$
 dir \\vulnerable.computer\ADMIN$
@@ -116,7 +116,7 @@ New-PSSession -Name PSC -ComputerName the.computer.name; Enter-PSSession PSC
 {{#endref}}
 
 > [!WARNING]
-> **winrm이 원격 컴퓨터에서 활성화되고 수신 대기 중이어야** 액세스할 수 있습니다.
+> 원격 컴퓨터에서 **winrm이 활성화되어 있고 수신 대기 중이어야** 액세스할 수 있습니다.
 
 ### LDAP
 

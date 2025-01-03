@@ -4,11 +4,11 @@
 
 **이 페이지는 [adsecurity.org](https://adsecurity.org/?page_id=1821)의 내용을 기반으로 합니다**. 추가 정보는 원본을 확인하세요!
 
-## LM 및 메모리의 평문
+## 메모리의 LM 및 평문
 
 Windows 8.1 및 Windows Server 2012 R2 이후로, 자격 증명 도난을 방지하기 위한 중요한 조치가 시행되었습니다:
 
-- **LM 해시 및 평문 비밀번호**는 보안을 강화하기 위해 더 이상 메모리에 저장되지 않습니다. 특정 레지스트리 설정인 _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_을 DWORD 값 `0`으로 설정하여 Digest Authentication을 비활성화해야 하며, 이를 통해 "평문" 비밀번호가 LSASS에 캐시되지 않도록 합니다.
+- **LM 해시 및 평문 비밀번호**는 보안을 강화하기 위해 더 이상 메모리에 저장되지 않습니다. 특정 레지스트리 설정인 _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_을 DWORD 값 `0`으로 구성하여 Digest Authentication을 비활성화해야 하며, 이를 통해 "평문" 비밀번호가 LSASS에 캐시되지 않도록 합니다.
 
 - **LSA 보호**는 로컬 보안 권한(LSA) 프로세스를 무단 메모리 읽기 및 코드 주입으로부터 보호하기 위해 도입되었습니다. 이는 LSASS를 보호된 프로세스로 표시함으로써 이루어집니다. LSA 보호를 활성화하려면:
 1. _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa_에서 레지스트리를 수정하여 `RunAsPPL`을 `dword:00000001`로 설정합니다.
@@ -111,7 +111,7 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 - 다른 세션에서 Kerberos 티켓을 사용할 수 있게 합니다.
 - 예: `mimikatz "kerberos::ptt /ticket:ticket.kirbi" exit`
 
-- **티켓 삭제**:
+- **티켓 정리**:
 - 명령어: `kerberos::purge`
 - 세션의 모든 Kerberos 티켓을 지웁니다.
 - 충돌을 피하기 위해 티켓 조작 명령어를 사용하기 전에 유용합니다.
@@ -133,7 +133,7 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 
 - **LSADUMP::NetSync**: 컴퓨터 계정의 비밀번호 데이터를 사용하여 DC를 가장합니다.
 
-- _원본 맥락에서 NetSync에 대한 특정 명령어가 제공되지 않았습니다._
+- _원본 맥락에서 NetSync에 대한 특정 명령어가 제공되지 않음._
 
 - **LSADUMP::SAM**: 로컬 SAM 데이터베이스에 접근합니다.
 
@@ -178,7 +178,7 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 - **SID::add/modify**: SID 및 SIDHistory를 변경합니다.
 
 - 추가: `mimikatz "sid::add /user:targetUser /sid:newSid" exit`
-- 수정: _원본 맥락에서 수정에 대한 특정 명령어가 제공되지 않았습니다._
+- 수정: _원본 맥락에서 수정에 대한 특정 명령어가 제공되지 않음._
 
 - **TOKEN::Elevate**: 토큰을 가장합니다.
 - `mimikatz "token::elevate /domainadmin" exit`
@@ -190,7 +190,7 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 - `mimikatz "ts::multirdp" exit`
 
 - **TS::Sessions**: TS/RDP 세션을 나열합니다.
-- _원본 맥락에서 TS::Sessions에 대한 특정 명령어가 제공되지 않았습니다._
+- _원본 맥락에서 TS::Sessions에 대한 특정 명령어가 제공되지 않음._
 
 ### 금고
 

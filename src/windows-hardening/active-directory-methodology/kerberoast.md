@@ -4,7 +4,7 @@
 
 ## Kerberoast
 
-Kerberoasting은 **Active Directory (AD)**에서 **사용자 계정**에 따라 운영되는 서비스와 관련된 **TGS 티켓**의 획득에 중점을 둡니다. 이 티켓의 암호화는 **사용자 비밀번호**에서 유래한 키를 사용하므로 **오프라인 자격 증명 크래킹**이 가능합니다. 서비스로서 사용자 계정을 사용하는 것은 비어 있지 않은 **"ServicePrincipalName"** 속성으로 표시됩니다.
+Kerberoasting은 **Active Directory (AD)**에서 **사용자 계정**에 따라 운영되는 서비스와 관련된 **TGS 티켓**의 획득에 중점을 둡니다. 이 티켓의 암호화는 **사용자 비밀번호**에서 유래한 키를 사용하므로 **오프라인 자격 증명 크래킹**이 가능합니다. 서비스로서 사용자 계정의 사용은 비어 있지 않은 **"ServicePrincipalName"** 속성으로 표시됩니다.
 
 **Kerberoasting**을 실행하기 위해서는 **TGS 티켓**을 요청할 수 있는 도메인 계정이 필수적이지만, 이 과정은 **특별한 권한**을 요구하지 않으므로 **유효한 도메인 자격 증명**을 가진 누구나 접근할 수 있습니다.
 
@@ -39,7 +39,7 @@ adenum -d <DOMAIN.FULL> -ip <DC_IP> -u <USERNAME> -p <PASSWORD> -c
 ```
 #### Windows
 
-- **Kerberoastable 사용자 열거**
+- **Kerberoastable 사용자 나열**
 ```powershell
 # Get Kerberoastable users
 setspn.exe -Q */* #This is a built-in binary. Focus on user accounts
@@ -125,9 +125,9 @@ Kerberoasting의 위험을 완화하기 위해:
 
 ## 도메인 계정 없이 Kerberoast
 
-**2022년 9월**, Charlie Clark라는 연구자가 자신의 플랫폼 [exploit.ph](https://exploit.ph/)를 통해 시스템을 악용하는 새로운 방법을 밝혀냈습니다. 이 방법은 **KRB_AS_REQ** 요청을 통해 **서비스 티켓(ST)**를 획득할 수 있게 해주며, 놀랍게도 어떤 Active Directory 계정에 대한 제어도 필요하지 않습니다. 본질적으로, 주체가 사전 인증을 요구하지 않도록 설정된 경우—사이버 보안 영역에서 **AS-REP Roasting 공격**으로 알려진 시나리오와 유사한 경우—이 특성을 활용하여 요청 프로세스를 조작할 수 있습니다. 구체적으로, 요청 본문 내의 **sname** 속성을 변경함으로써 시스템이 표준 암호화된 티켓 부여 티켓(TGT) 대신 **ST**를 발급하도록 속일 수 있습니다.
+**2022년 9월**, Charlie Clark라는 연구원이 자신의 플랫폼 [exploit.ph](https://exploit.ph/)를 통해 시스템을 악용하는 새로운 방법을 밝혔습니다. 이 방법은 **KRB_AS_REQ** 요청을 통해 **서비스 티켓(ST)**를 획득할 수 있게 해주며, 놀랍게도 어떤 Active Directory 계정에 대한 제어도 필요하지 않습니다. 본질적으로, 주체가 사전 인증을 요구하지 않도록 설정된 경우—사이버 보안 영역에서 **AS-REP Roasting 공격**으로 알려진 시나리오와 유사한 경우—이 특성을 활용하여 요청 프로세스를 조작할 수 있습니다. 구체적으로, 요청 본문 내의 **sname** 속성을 변경함으로써 시스템이 표준 암호화된 티켓 부여 티켓(TGT) 대신 **ST**를 발급하도록 속일 수 있습니다.
 
-이 기술은 이 기사에서 완전히 설명되어 있습니다: [Semperis 블로그 게시물](https://www.semperis.com/blog/new-attack-paths-as-requested-sts/).
+이 기술에 대한 자세한 설명은 이 기사에서 확인할 수 있습니다: [Semperis 블로그 게시물](https://www.semperis.com/blog/new-attack-paths-as-requested-sts/).
 
 > [!WARNING]
 > 이 기술을 사용하여 LDAP를 쿼리할 유효한 계정이 없기 때문에 사용자 목록을 제공해야 합니다.

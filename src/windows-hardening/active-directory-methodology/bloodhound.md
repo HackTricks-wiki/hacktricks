@@ -34,9 +34,9 @@ BloodHound는 그래프 이론을 사용하여 Active Directory 또는 Azure 환
 
 그래서, [Bloodhound ](https://github.com/BloodHoundAD/BloodHound)는 도메인을 자동으로 열거하고 모든 정보를 저장하며 가능한 권한 상승 경로를 찾고 모든 정보를 그래프를 사용하여 보여줄 수 있는 놀라운 도구입니다.
 
-BloodHound는 두 가지 주요 부분으로 구성됩니다: **ingestors**와 **visualisation application**.
+Bloodhound는 **ingestors**와 **visualisation application**의 2가지 주요 부분으로 구성됩니다.
 
-**ingestors**는 **도메인을 열거하고 모든 정보를 시각화 애플리케이션이 이해할 수 있는 형식으로 추출하는 데 사용됩니다**.
+**ingestors**는 **도메인을 열거하고 모든 정보를 시각화 애플리케이션이 이해할 수 있는 형식으로 추출하는 데 사용됩니다.**
 
 **visualisation application은 neo4j를 사용하여** 모든 정보가 어떻게 관련되어 있는지 보여주고 도메인에서 권한을 상승시키는 다양한 방법을 보여줍니다.
 
@@ -50,7 +50,7 @@ BloodHound CE가 생성된 후, 전체 프로젝트는 Docker 사용의 용이�
 curl -L https://ghst.ly/getbhce | docker compose -f - up
 ```
 3. Docker Compose의 터미널 출력에서 무작위로 생성된 비밀번호를 찾습니다.  
-4. 브라우저에서 http://localhost:8080/ui/login으로 이동합니다. 사용자 이름으로 admin을 입력하고 로그에서 무작위로 생성된 비밀번호로 로그인합니다.  
+4. 브라우저에서 http://localhost:8080/ui/login으로 이동합니다. 사용자 이름으로 admin을 입력하고 로그에서 가져온 무작위로 생성된 비밀번호로 로그인합니다.  
 
 이후 무작위로 생성된 비밀번호를 변경해야 하며, 새로운 인터페이스가 준비되어 ingestors를 직접 다운로드할 수 있습니다.  
 
@@ -63,7 +63,7 @@ Invoke-BloodHound -CollectionMethod All
 ```
 > **CollectionMethod** 및 루프 세션에 대한 자세한 내용은 [여기](https://support.bloodhoundenterprise.io/hc/en-us/articles/17481375424795-All-SharpHound-Community-Edition-Flags-Explained)에서 확인할 수 있습니다.
 
-다른 자격 증명을 사용하여 SharpHound를 실행하려면 CMD netonly 세션을 생성하고 그곳에서 SharpHound를 실행할 수 있습니다:
+다른 자격 증명을 사용하여 SharpHound를 실행하려면 CMD netonly 세션을 생성하고 거기에서 SharpHound를 실행할 수 있습니다:
 ```
 runas /netonly /user:domain\user "powershell.exe -exec bypass"
 ```
@@ -72,7 +72,7 @@ runas /netonly /user:domain\user "powershell.exe -exec bypass"
 ## Group3r
 
 [**Group3r**](https://github.com/Group3r/Group3r)는 **그룹 정책**과 관련된 Active Directory의 **취약점**을 찾기 위한 도구입니다. \
-도메인 내의 호스트에서 **모든 도메인 사용자**를 사용하여 **group3r를 실행**해야 합니다.
+**도메인 사용자**를 사용하여 도메인 내의 호스트에서 **group3r를 실행**해야 합니다.
 ```bash
 group3r.exe -f <filepath-name.log>
 # -s sends results to stdin
@@ -80,8 +80,8 @@ group3r.exe -f <filepath-name.log>
 ```
 ## PingCastle
 
-[**PingCastle**](https://www.pingcastle.com/documentation/) **AD 환경의 보안 태세를 평가**하고 멋진 **보고서**를 그래프와 함께 제공합니다.
+[**PingCastle**](https://www.pingcastle.com/documentation/) **는 AD 환경의 보안 태세를 평가**하고 멋진 **보고서**를 그래프와 함께 제공합니다.
 
-실행하려면 이진 파일 `PingCastle.exe`를 실행하면 **인터랙티브 세션**이 시작되어 옵션 메뉴를 표시합니다. 기본 옵션은 **`healthcheck`**로, **도메인**의 **개요**를 설정하고 **구성 오류** 및 **취약점**을 찾습니다.&#x20;
+실행하려면 이진 파일 `PingCastle.exe`를 실행하면 **옵션 메뉴**를 제공하는 **대화형 세션**이 시작됩니다. 기본 옵션은 **`healthcheck`**로, **도메인**의 **개요**를 설정하고 **구성 오류** 및 **취약점**을 찾습니다.&#x20;
 
 {{#include ../../banners/hacktricks-training.md}}

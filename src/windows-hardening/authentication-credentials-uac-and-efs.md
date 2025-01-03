@@ -73,7 +73,7 @@ Active Directory의 데이터베이스입니다. 도메인 컨트롤러에만 �
 
 ### 확인
 
-**Defender**의 **상태**를 확인하려면 PS cmdlet **`Get-MpComputerStatus`**를 실행할 수 있습니다(활성화 여부를 알기 위해 **`RealTimeProtectionEnabled`**의 값을 확인하세요):
+**Defender**의 **상태**를 확인하려면 PS cmdlet **`Get-MpComputerStatus`**를 실행할 수 있습니다(활성화 여부를 알기 위해 **`RealTimeProtectionEnabled`** 값을 확인하세요):
 
 <pre class="language-powershell"><code class="lang-powershell">PS C:\> Get-MpComputerStatus
 
@@ -121,9 +121,9 @@ EFS는 **대칭 키**인 **파일 암호화 키 (FEK)**를 사용하여 파일�
 
 ### EFS 정보 확인
 
-**사용자**가 이 **서비스**를 **사용했는지** 확인하려면 이 경로가 존재하는지 확인하세요: `C:\users\<username>\appdata\roaming\Microsoft\Protect`
+**사용자**가 이 **서비스**를 **사용했는지** 확인하려면 이 경로가 존재하는지 확인하십시오: `C:\users\<username>\appdata\roaming\Microsoft\Protect`
 
-파일에 **접근**할 수 있는 **사람**을 확인하려면 `cipher /c \<file>\`를 사용하세요.  
+파일에 **접근**할 수 있는 **사람**을 확인하려면 `cipher /c \<file>\`를 사용하십시오.  
 폴더 내에서 `cipher /e` 및 `cipher /d`를 사용하여 모든 파일을 **암호화**하고 **복호화**할 수도 있습니다.
 
 ### EFS 파일 복호화
@@ -138,15 +138,15 @@ EFS는 **대칭 키**인 **파일 암호화 키 (FEK)**를 사용하여 파일�
 
 ## Group Managed Service Accounts (gMSA)
 
-Microsoft는 IT 인프라에서 서비스 계정 관리를 간소화하기 위해 **그룹 관리 서비스 계정 (gMSA)**를 개발했습니다. 전통적인 서비스 계정은 종종 "**비밀번호 만료 안 함**" 설정이 활성화되어 있는 반면, gMSA는 더 안전하고 관리하기 쉬운 솔루션을 제공합니다:
+Microsoft는 IT 인프라에서 서비스 계정 관리를 단순화하기 위해 **그룹 관리 서비스 계정 (gMSA)**를 개발했습니다. 전통적인 서비스 계정은 종종 "**비밀번호 만료 안 함**" 설정이 활성화되어 있는 반면, gMSA는 보다 안전하고 관리하기 쉬운 솔루션을 제공합니다:
 
-- **자동 비밀번호 관리**: gMSA는 도메인 또는 컴퓨터 정책에 따라 자동으로 변경되는 복잡한 240자 비밀번호를 사용합니다. 이 과정은 Microsoft의 키 배포 서비스 (KDC)가 처리하여 수동 비밀번호 업데이트의 필요성을 없앱니다.
-- **강화된 보안**: 이러한 계정은 잠금에 면역이며 대화형 로그인을 위해 사용할 수 없어 보안이 강화됩니다.
+- **자동 비밀번호 관리**: gMSA는 도메인 또는 컴퓨터 정책에 따라 자동으로 변경되는 복잡한 240자 비밀번호를 사용합니다. 이 과정은 Microsoft의 키 배포 서비스(KDC)가 처리하여 수동 비밀번호 업데이트의 필요성을 없앱니다.
+- **강화된 보안**: 이러한 계정은 잠금에 면역이며 대화형 로그인에 사용할 수 없어 보안이 강화됩니다.
 - **다중 호스트 지원**: gMSA는 여러 호스트에서 공유할 수 있어 여러 서버에서 실행되는 서비스에 적합합니다.
 - **예약 작업 기능**: 관리 서비스 계정과 달리 gMSA는 예약 작업 실행을 지원합니다.
-- **SPN 관리 간소화**: 시스템은 컴퓨터의 sAMaccount 세부정보 또는 DNS 이름에 변경이 있을 때 서비스 주체 이름 (SPN)을 자동으로 업데이트하여 SPN 관리를 간소화합니다.
+- **단순화된 SPN 관리**: 시스템은 컴퓨터의 sAMaccount 세부정보 또는 DNS 이름에 변경이 있을 때 서비스 주체 이름(SPN)을 자동으로 업데이트하여 SPN 관리를 단순화합니다.
 
-gMSA의 비밀번호는 LDAP 속성 _**msDS-ManagedPassword**_에 저장되며 도메인 컨트롤러 (DC)에 의해 30일마다 자동으로 재설정됩니다. 이 비밀번호는 [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e)로 알려진 암호화된 데이터 블롭으로, 권한이 있는 관리자와 gMSA가 설치된 서버만 검색할 수 있어 안전한 환경을 보장합니다. 이 정보에 접근하려면 LDAPS와 같은 보안 연결이 필요하거나 'Sealing & Secure'로 인증된 연결이어야 합니다.
+gMSA의 비밀번호는 LDAP 속성 _**msDS-ManagedPassword**_에 저장되며 도메인 컨트롤러(DC)에 의해 30일마다 자동으로 재설정됩니다. 이 비밀번호는 [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e)로 알려진 암호화된 데이터 블롭으로, 권한이 있는 관리자와 gMSA가 설치된 서버만 검색할 수 있어 안전한 환경을 보장합니다. 이 정보에 접근하려면 LDAPS와 같은 보안 연결이 필요하거나 'Sealing & Secure'로 인증된 연결이어야 합니다.
 
 ![https://cube0x0.github.io/Relaying-for-gMSA/](../images/asd1.png)
 
@@ -168,7 +168,7 @@ active-directory-methodology/laps.md
 
 ## PS 제약 언어 모드
 
-PowerShell [**제약 언어 모드**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/)는 COM 객체 차단, 승인된 .NET 유형만 허용, XAML 기반 워크플로우, PowerShell 클래스 등 PowerShell을 효과적으로 사용하기 위해 필요한 많은 기능을 **잠급니다**.
+PowerShell [**제약 언어 모드**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/)는 COM 객체 차단, 승인된 .NET 유형만 허용, XAML 기반 워크플로, PowerShell 클래스 등 PowerShell을 효과적으로 사용하기 위해 필요한 많은 기능을 **잠급니다**.
 
 ### **확인**
 ```powershell
@@ -181,7 +181,7 @@ $ExecutionContext.SessionState.LanguageMode
 Powershell -version 2
 ```
 현재 Windows에서는 이 우회 방법이 작동하지 않지만, [**PSByPassCLM**](https://github.com/padovah4ck/PSByPassCLM)를 사용할 수 있습니다.\
-**컴파일하려면** **다음이 필요할 수 있습니다** **:** _**참조 추가**_ -> _찾아보기_ -> _찾아보기_ -> `C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0\31bf3856ad364e35\System.Management.Automation.dll`를 추가하고 **프로젝트를 .Net4.5로 변경하십시오**.
+**컴파일하려면** **다음이 필요할 수 있습니다** **:** _**참조 추가**_ -> _찾아보기_ -> _찾아보기_ -> `C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0\31bf3856ad364e35\System.Management.Automation.dll`을 추가하고 **프로젝트를 .Net4.5로 변경하십시오**.
 
 #### 직접 우회:
 ```bash
@@ -221,7 +221,7 @@ $command = "Write-Host 'My voice is my passport, verify me.'" $bytes = [System.T
 
 사용자를 인증하는 데 사용할 수 있는 API입니다.
 
-SSPI는 통신하려는 두 머신에 적합한 프로토콜을 찾는 역할을 합니다. 이를 위한 선호 방법은 Kerberos입니다. 그런 다음 SSPI는 사용할 인증 프로토콜을 협상합니다. 이러한 인증 프로토콜은 보안 지원 공급자(SSP)라고 하며, 각 Windows 머신 내에서 DLL 형태로 존재하며 두 머신 모두 통신할 수 있도록 동일한 것을 지원해야 합니다.
+SSPI는 통신을 원하는 두 머신에 적합한 프로토콜을 찾는 역할을 합니다. 이를 위한 선호 방법은 Kerberos입니다. 그런 다음 SSPI는 사용할 인증 프로토콜을 협상하며, 이러한 인증 프로토콜은 보안 지원 공급자(SSP)라고 하며, 각 Windows 머신 내에서 DLL 형태로 존재하고 두 머신 모두 동일한 프로토콜을 지원해야 통신할 수 있습니다.
 
 ### 주요 SSP
 
@@ -240,7 +240,7 @@ SSPI는 통신하려는 두 머신에 적합한 프로토콜을 찾는 역할을
 
 ## UAC - 사용자 계정 컨트롤
 
-[사용자 계정 컨트롤 (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works)은 **승격된 활동에 대한 동의 프롬프트**를 활성화하는 기능입니다.
+[사용자 계정 컨트롤 (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works)는 **승격된 활동에 대한 동의 프롬프트**를 활성화하는 기능입니다.
 
 {{#ref}}
 windows-security-controls/uac-user-account-control.md

@@ -13,7 +13,7 @@
 - **발급자**는 인증서를 발급한 CA를 나타냅니다.
 - **SubjectAlternativeName**은 주체에 대한 추가 이름을 허용하여 식별 유연성을 향상시킵니다.
 - **기본 제약 조건**은 인증서가 CA용인지 최종 엔티티용인지 식별하고 사용 제한을 정의합니다.
-- **확장 키 사용(EKUs)**은 인증서의 특정 목적을 정의하며, 코드 서명 또는 이메일 암호화와 같은 용도로 객체 식별자(OIDs)를 통해 구분합니다.
+- **확장 키 사용(EKUs)**은 인증서의 특정 목적을 개체 식별자(OIDs)를 통해 구분합니다.
 - **서명 알고리즘**은 인증서 서명 방법을 지정합니다.
 - **서명**은 발급자의 개인 키로 생성되어 인증서의 진위를 보장합니다.
 
@@ -28,13 +28,13 @@ AD CS는 AD 포리스트 내에서 지정된 컨테이너를 통해 CA 인증서
 - **인증 기관** 컨테이너는 신뢰할 수 있는 루트 CA 인증서를 보유합니다.
 - **등록 서비스** 컨테이너는 엔터프라이즈 CA 및 해당 인증서 템플릿을 자세히 설명합니다.
 - **NTAuthCertificates** 객체는 AD 인증을 위해 승인된 CA 인증서를 포함합니다.
-- **AIA (Authority Information Access)** 컨테이너는 중간 및 교차 CA 인증서와 함께 인증서 체인 검증을 용이하게 합니다.
+- **AIA (Authority Information Access)** 컨테이너는 중간 및 교차 CA 인증서를 통해 인증서 체인 검증을 용이하게 합니다.
 
 ### Certificate Acquisition: Client Certificate Request Flow
 
 1. 요청 프로세스는 클라이언트가 엔터프라이즈 CA를 찾는 것으로 시작됩니다.
 2. 공개-개인 키 쌍을 생성한 후, 공개 키 및 기타 세부 정보를 포함하는 CSR이 생성됩니다.
-3. CA는 사용 가능한 인증서 템플릿에 대해 CSR을 평가하고, 템플릿의 권한에 따라 인증서를 발급합니다.
+3. CA는 사용 가능한 인증서 템플릿에 대해 CSR을 평가하고 템플릿의 권한에 따라 인증서를 발급합니다.
 4. 승인 후, CA는 개인 키로 인증서에 서명하고 클라이언트에게 반환합니다.
 
 ### Certificate Templates
@@ -43,17 +43,17 @@ AD 내에서 정의된 이러한 템플릿은 인증서 발급을 위한 설정 
 
 ## Certificate Enrollment
 
-인증서 등록 프로세스는 관리자가 **인증서 템플릿을 생성**함으로써 시작되며, 이후 **엔터프라이즈 인증 기관(CA)**에 의해 **게시**됩니다. 이는 템플릿을 클라이언트 등록에 사용할 수 있도록 하며, 이는 Active Directory 객체의 `certificatetemplates` 필드에 템플릿 이름을 추가하여 달성됩니다.
+인증서 등록 프로세스는 관리자가 **인증서 템플릿을 생성**함으로써 시작되며, 이후 **엔터프라이즈 인증 기관(CA)**에 의해 **게시**됩니다. 이는 템플릿을 클라이언트 등록을 위해 사용할 수 있게 하며, 이는 Active Directory 객체의 `certificatetemplates` 필드에 템플릿 이름을 추가하여 달성됩니다.
 
-클라이언트가 인증서를 요청하려면 **등록 권한**이 부여되어야 합니다. 이러한 권한은 인증서 템플릿 및 엔터프라이즈 CA 자체의 보안 설명자에 의해 정의됩니다. 요청이 성공하려면 두 위치 모두에서 권한이 부여되어야 합니다.
+클라이언트가 인증서를 요청하려면 **등록 권한**이 부여되어야 합니다. 이러한 권한은 인증서 템플릿 및 엔터프라이즈 CA 자체의 보안 설명자에 의해 정의됩니다. 요청이 성공적으로 이루어지려면 두 위치 모두에서 권한이 부여되어야 합니다.
 
 ### Template Enrollment Rights
 
 이러한 권한은 Access Control Entries (ACEs)를 통해 지정되며, 다음과 같은 권한을 자세히 설명합니다:
 
-- **Certificate-Enrollment** 및 **Certificate-AutoEnrollment** 권한은 각각 특정 GUID와 연결됩니다.
-- **ExtendedRights**는 모든 확장 권한을 허용합니다.
-- **FullControl/GenericAll**은 템플릿에 대한 완전한 제어를 제공합니다.
+- **Certificate-Enrollment** 및 **Certificate-AutoEnrollment** 권한, 각각 특정 GUID와 연결됩니다.
+- **ExtendedRights**, 모든 확장 권한을 허용합니다.
+- **FullControl/GenericAll**, 템플릿에 대한 완전한 제어를 제공합니다.
 
 ### Enterprise CA Enrollment Rights
 
@@ -93,13 +93,13 @@ CN=NTAuthCertificates,CN=Public Key Services,CN=Services,CN=Configuration,DC=<do
 ```
 신뢰를 구축하는 데 중앙 역할을 합니다.
 
-### Secure Channel (Schannel) 인증
+### 보안 채널 (Schannel) 인증
 
-Schannel은 안전한 TLS/SSL 연결을 용이하게 하며, 핸드셰이크 중 클라이언트는 인증서를 제시하고, 성공적으로 검증되면 접근을 허가합니다. 인증서를 AD 계정에 매핑하는 과정은 Kerberos의 **S4U2Self** 기능이나 인증서의 **Subject Alternative Name (SAN)** 등을 포함할 수 있습니다.
+Schannel은 안전한 TLS/SSL 연결을 용이하게 하며, 핸드셰이크 중 클라이언트는 인증서를 제시하고, 성공적으로 검증되면 접근을 허가합니다. 인증서를 AD 계정에 매핑하는 과정은 Kerberos의 **S4U2Self** 기능이나 인증서의 **주체 대체 이름 (SAN)** 등을 포함할 수 있습니다.
 
 ### AD 인증서 서비스 열거
 
-AD의 인증서 서비스는 LDAP 쿼리를 통해 열거할 수 있으며, **Enterprise Certificate Authorities (CAs)** 및 그 구성에 대한 정보를 드러냅니다. 이는 특별한 권한 없이 도메인 인증된 사용자라면 누구나 접근할 수 있습니다. **[Certify](https://github.com/GhostPack/Certify)** 및 **[Certipy](https://github.com/ly4k/Certipy)**와 같은 도구는 AD CS 환경에서 열거 및 취약성 평가에 사용됩니다.
+AD의 인증서 서비스는 LDAP 쿼리를 통해 열거할 수 있으며, **기업 인증 기관 (CAs)** 및 그 구성에 대한 정보를 드러냅니다. 이는 특별한 권한 없이 도메인 인증된 사용자라면 누구나 접근할 수 있습니다. **[Certify](https://github.com/GhostPack/Certify)** 및 **[Certipy](https://github.com/ly4k/Certipy)**와 같은 도구는 AD CS 환경에서 열거 및 취약성 평가에 사용됩니다.
 
 이 도구를 사용하는 명령어는 다음과 같습니다:
 ```bash
@@ -115,7 +115,7 @@ certipy find -vulnerable -u john@corp.local -p Passw0rd -dc-ip 172.16.126.128
 certutil.exe -TCAInfo
 certutil -v -dstemplate
 ```
-## 참고문헌
+## 참고 문헌
 
 - [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)
 - [https://comodosslstore.com/blog/what-is-ssl-tls-client-authentication-how-does-it-work.html](https://comodosslstore.com/blog/what-is-ssl-tls-client-authentication-how-does-it-work.html)

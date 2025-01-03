@@ -381,33 +381,33 @@ if __name__ == '__main__':
 main(sys.argv)
 ```
 > [!NOTE]
-> 심볼릭 파일은 심볼릭 데이터와 병합된 상수 데이터를 포함할 수도 있습니다:
+> 기호 파일은 기호 데이터와 병합된 상수 데이터를 포함할 수도 있습니다:
 >
 > ```python
 >   # Hello world, my name is John.
 >   # ^                       ^
->   # ^ address 0             ^ address 24 (문자 수를 세세요)
+>   # ^ 주소 0                ^ 주소 24 (문자 수를 세세요)
 >   # 이를 메모리에 표현하기 위해, 문자열을
 >   # 파일의 시작 부분에 쓰고 싶습니다:
 >   #
 >   # hello_txt_contents = claripy.BVV('Hello world, my name is John.', 30*8)
 >   #
 >   # 아마도, 우리는 John을
->   # 심볼릭 변수로 바꾸고 싶을 것입니다. 우리는 호출할 것입니다:
+>   # 기호 변수로 바꾸고 싶을 것입니다. 우리는 호출할 것입니다:
 >   #
 >   # name_bitvector = claripy.BVS('symbolic_name', 4*8)
 >   #
 >   # 그런 다음, 프로그램이 fopen('hello.txt', 'r')를 호출하고
 >   # fread(buffer, sizeof(char), 30, hello_txt_file)를 호출하면, 버퍼는
->   # 파일에서 문자열을 포함하게 되며, 이름이 저장될 네 개의 심볼릭 바이트를 제외합니다.
+>   # 파일에서 문자열을 포함하게 되며, 이름이 저장될 네 개의 기호 바이트를 제외합니다.
 >   # (!)
 > ```
 
 ### 제약 조건 적용
 
 > [!NOTE]
-> 때때로 길이 16의 두 단어를 **문자별로** 비교하는 간단한 인간 작업은 (루프) **angr**에 많은 비용이 듭니다. 왜냐하면 이는 **지수적으로** 분기를 생성해야 하기 때문입니다. 각 if마다 1개의 분기를 생성하므로: `2^16`\
-> 따라서, **angr에게 이전 지점으로 가도록 요청하는 것이** 더 쉽고 (실제 어려운 부분이 이미 완료된 곳) **그 제약 조건을 수동으로 설정하는 것이** 더 쉽습니다.
+> 때때로 16 길이의 두 단어를 **문자별로** 비교하는 간단한 인간 작업은 (루프) **angr**에 많은 비용이 듭니다. 왜냐하면 그것은 **지수적으로** 분기를 생성해야 하기 때문입니다. 각 if마다 1개의 분기를 생성하므로: `2^16`\
+> 따라서, **angr에게 이전 지점으로 가달라고 요청하는 것이** 더 쉽고 (실제 어려운 부분이 이미 완료된 곳) **그 제약 조건을 수동으로 설정하는 것이** 더 쉽습니다.
 ```python
 # After perform some complex poperations to the input the program checks
 # char by char the password against another password saved, like in the snippet:
@@ -593,7 +593,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### 함수 후킹 / Simprocedure
+### 함수 훅킹 / Simprocedure
 ```python
 # Hook to the function called check_equals_WQNDNKKWAWOLXBAC
 
@@ -677,7 +677,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### 여러 매개변수를 가진 scanf 시뮬레이션
+### 여러 매개변수로 scanf 시뮬레이션하기
 ```python
 # This time, the solution involves simply replacing scanf with our own version,
 # since Angr does not support requesting multiple parameters with scanf.

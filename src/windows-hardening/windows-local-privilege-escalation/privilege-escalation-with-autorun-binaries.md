@@ -11,7 +11,7 @@ Get-CimInstance Win32_StartupCommand | select Name, command, Location, User | fl
 ```
 ## Scheduled Tasks
 
-**작업**은 **특정 빈도**로 실행되도록 예약할 수 있습니다. 실행되도록 예약된 이진 파일을 확인하려면:
+**작업**은 **특정 빈도**로 실행되도록 예약할 수 있습니다. 실행되도록 예약된 바이너리를 보려면:
 ```bash
 schtasks /query /fo TABLE /nh | findstr /v /i "disable deshab"
 schtasks /query /fo LIST 2>nul | findstr TaskName
@@ -36,7 +36,7 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 ## 레지스트리
 
 > [!NOTE]
-> [여기에서의 노트](https://answers.microsoft.com/en-us/windows/forum/all/delete-registry-key/d425ae37-9dcc-4867-b49c-723dcd15147f): **Wow6432Node** 레지스트리 항목은 64비트 Windows 버전을 실행하고 있음을 나타냅니다. 운영 체제는 이 키를 사용하여 64비트 Windows 버전에서 실행되는 32비트 응용 프로그램에 대한 HKEY_LOCAL_MACHINE\SOFTWARE의 별도 보기를 표시합니다.
+> [여기에서 노트](https://answers.microsoft.com/en-us/windows/forum/all/delete-registry-key/d425ae37-9dcc-4867-b49c-723dcd15147f): **Wow6432Node** 레지스트리 항목은 64비트 Windows 버전을 실행하고 있음을 나타냅니다. 운영 체제는 이 키를 사용하여 64비트 Windows 버전에서 실행되는 32비트 응용 프로그램에 대한 HKEY_LOCAL_MACHINE\SOFTWARE의 별도 보기를 표시합니다.
 
 ### 실행
 
@@ -162,7 +162,7 @@ Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion
 
 `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon`
 
-일반적으로 **Userinit** 키는 **userinit.exe**로 설정됩니다. 그러나 이 키가 수정되면, 지정된 실행 파일이 사용자 로그온 시 **Winlogon**에 의해 실행됩니다. 유사하게, **Shell** 키는 Windows의 기본 셸인 **explorer.exe**를 가리키도록 설정되어 있습니다.
+일반적으로 **Userinit** 키는 **userinit.exe**로 설정됩니다. 그러나 이 키가 수정되면, 지정된 실행 파일이 사용자 로그온 시 **Winlogon**에 의해 실행됩니다. 유사하게, **Shell** 키는 Windows의 기본 셸인 **explorer.exe**를 가리키도록 되어 있습니다.
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "Userinit"
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "Shell"
@@ -170,14 +170,14 @@ Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVers
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon' -Name "Shell"
 ```
 > [!NOTE]
-> 레지스트리 값을 덮어쓰거나 이진 파일을 덮어쓸 수 있다면 권한을 상승시킬 수 있습니다.
+> 레지스트리 값을 덮어쓰거나 바이너리를 덮어쓸 수 있다면 권한을 상승시킬 수 있습니다.
 
 ### 정책 설정
 
 - `HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer`
 - `HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer`
 
-**실행** 키를 확인하십시오.
+**실행** 키를 확인하세요.
 ```bash
 reg query "HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v "Run"
 reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer" /v "Run"
@@ -227,8 +227,8 @@ Active Setup은 다음 레지스트리 키를 통해 관리됩니다:
 
 **보안 통찰력:**
 
-- **`IsInstalled`**가 `"1"`로 설정된 키를 수정하거나 특정 **`StubPath`**에 쓰는 것은 권한 상승을 위한 무단 명령 실행으로 이어질 수 있습니다.
-- 충분한 권한이 주어질 경우, 어떤 **`StubPath`** 값에서 참조된 이진 파일을 변경하는 것도 권한 상승을 달성할 수 있습니다.
+- **`IsInstalled`**가 `"1"`로 설정된 키를 특정 **`StubPath`**로 수정하거나 작성하면 무단 명령 실행으로 이어질 수 있으며, 이는 권한 상승을 초래할 수 있습니다.
+- 어떤 **`StubPath`** 값에서 참조된 이진 파일을 변경하는 것도 충분한 권한이 있을 경우 권한 상승을 달성할 수 있습니다.
 
 Active Setup 구성 요소 전반에 걸쳐 **`StubPath`** 구성을 검사하기 위해 다음 명령을 사용할 수 있습니다:
 ```bash
@@ -291,15 +291,15 @@ HKLM\Software\Microsoft\Wow6432Node\Windows NT\CurrentVersion\Image File Executi
 ```
 ## SysInternals
 
-모든 autoruns를 찾을 수 있는 사이트는 **이미**[ **winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe)로 검색되었습니다. 그러나 **자동 실행되는** 파일의 **더 포괄적인 목록**을 원한다면 Sysinternals의 [autoruns](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns)를 사용할 수 있습니다:
+autoruns를 찾을 수 있는 모든 사이트는 **이미** [**winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe)로 검색되었습니다. 그러나 **자동 실행되는** 파일의 **더 포괄적인 목록**을 원한다면 Sysinternals의 [autoruns](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns)를 사용할 수 있습니다:
 ```
 autorunsc.exe -m -nobanner -a * -ct /accepteula
 ```
-## 더 많은 정보
+## More
 
 **레지스트리와 같은 Autoruns를 더 찾으려면** [**https://www.microsoftpressstore.com/articles/article.aspx?p=2762082\&seqNum=2**](https://www.microsoftpressstore.com/articles/article.aspx?p=2762082&seqNum=2)
 
-## 참고 문헌
+## References
 
 - [https://resources.infosecinstitute.com/common-malware-persistence-mechanisms/#gref](https://resources.infosecinstitute.com/common-malware-persistence-mechanisms/#gref)
 - [https://attack.mitre.org/techniques/T1547/001/](https://attack.mitre.org/techniques/T1547/001/)
