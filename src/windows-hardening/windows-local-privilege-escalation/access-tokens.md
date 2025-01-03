@@ -50,7 +50,7 @@ SeUndockPrivilege             Remove computer from docking station Disabled
 SeIncreaseWorkingSetPrivilege Increase a process working set       Disabled
 SeTimeZonePrivilege           Change the time zone                 Disabled
 ```
-oder mit _Process Explorer_ von Sysinternals (Prozess auswählen und auf den Reiter "Sicherheit" zugreifen):
+oder mit _Process Explorer_ von Sysinternals (Prozess auswählen und den Tab "Sicherheit" aufrufen):
 
 ![](<../../images/image (772).png>)
 
@@ -85,7 +85,7 @@ Es gibt zwei Arten von Tokens:
 
 #### Impersonate Tokens
 
-Mit dem _**incognito**_ Modul von Metasploit können Sie, wenn Sie über ausreichende Privilegien verfügen, andere **Tokens** leicht **auflisten** und **nachahmen**. Dies könnte nützlich sein, um **Aktionen auszuführen, als ob Sie der andere Benutzer wären**. Sie könnten auch mit dieser Technik **Privilegien erhöhen**.
+Mit dem _**incognito**_ Modul von Metasploit können Sie, wenn Sie über ausreichende Privilegien verfügen, andere **Tokens** leicht **auflisten** und **imitieren**. Dies könnte nützlich sein, um **Aktionen auszuführen, als ob Sie der andere Benutzer wären**. Sie könnten auch mit dieser Technik **Privilegien erhöhen**.
 
 ### Token-Privilegien
 

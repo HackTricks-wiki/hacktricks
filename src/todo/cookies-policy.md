@@ -4,7 +4,7 @@ Letzte Aktualisierung: 02.04.2023
 
 ### Einführung
 
-Diese Cookies-Richtlinie gilt für die folgenden Websites, die im Besitz des HackTricks-Teams sind und von diesem betrieben werden ("HackTricks", "wir", "uns" oder "unser"):
+Diese Cookies-Richtlinie gilt für die folgenden Websites, die im Besitz und unter der Verwaltung des HackTricks-Teams ("HackTricks", "wir", "uns" oder "unser") stehen:
 
 * hacktricks.xyz
 * [www.hacktricks.xyz](http://www.hacktricks.xyz/)

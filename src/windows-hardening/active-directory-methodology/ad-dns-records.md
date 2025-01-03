@@ -4,7 +4,7 @@
 
 Standardmäßig kann **jeder Benutzer** in Active Directory **alle DNS-Einträge** in den DNS-Zonen der Domäne oder des Waldes auflisten, ähnlich wie bei einem Zonenübertrag (Benutzer können die untergeordneten Objekte einer DNS-Zone in einer AD-Umgebung auflisten).
 
-Das Tool [**adidnsdump**](https://github.com/dirkjanm/adidnsdump) ermöglicht die **Auflistung** und **Exportierung** **aller DNS-Einträge** in der Zone zu Recon-Zwecken interner Netzwerke.
+Das Tool [**adidnsdump**](https://github.com/dirkjanm/adidnsdump) ermöglicht die **Auflistung** und **Exportierung** von **allen DNS-Einträgen** in der Zone zu Recon-Zwecken interner Netzwerke.
 ```bash
 git clone https://github.com/dirkjanm/adidnsdump
 cd adidnsdump

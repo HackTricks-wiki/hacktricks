@@ -53,8 +53,8 @@ In diesem Fall werde ich mich mit einem EPROM verbinden: ATMEL901 24C256 PU27:
 
 ![](<../../images/image (964).png>)
 
-Um mit dem Bus Pirate zu kommunizieren, habe ich Tera Term verwendet, das mit dem COM-Port des Bus Pirates verbunden ist, mit einem Setup --> Serielle Schnittstelle --> Geschwindigkeit von 115200.\
-In der folgenden Kommunikation finden Sie, wie Sie den Bus Pirate vorbereiten, um I2C zu sprechen und wie Sie aus dem Speicher lesen und schreiben (Kommentare erscheinen mit "#", erwarten Sie diesen Teil nicht in der Kommunikation):
+Um mit dem Bus Pirate zu kommunizieren, habe ich Tera Term verwendet, das mit dem COM-Port des Bus Pirate verbunden ist, mit einem Setup --> Serielle Schnittstelle --> Geschwindigkeit von 115200.\
+In der folgenden Kommunikation finden Sie, wie Sie den Bus Pirate vorbereiten, um I2C zu sprechen, und wie Sie aus dem Speicher lesen und schreiben (Kommentare erscheinen mit "#", erwarten Sie diesen Teil nicht in der Kommunikation):
 ```bash
 # Check communication with buspirate
 i

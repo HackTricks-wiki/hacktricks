@@ -44,7 +44,7 @@ Sie sollten mit dem Lesen dieses Beitrags beginnen, um einige grundlegende Konze
 
 > [!TIP]
 > Das Ziel dieser vierten Phase ist sehr einfach: **Wenden Sie einige Aufmerksamkeitsmechanismen an**. Diese werden viele **wiederholte Schichten** sein, die die **Beziehung eines Wortes im Vokabular zu seinen Nachbarn im aktuellen Satz, der zum Trainieren des LLM verwendet wird, erfassen**.\
-> Viele Schichten werden dafür verwendet, sodass viele trainierbare Parameter diese Informationen erfassen.
+> Viele Schichten werden dafür verwendet, sodass viele trainierbare Parameter diese Informationen erfassen werden.
 
 {{#ref}}
 4.-attention-mechanisms.md
@@ -73,7 +73,7 @@ Sie sollten mit dem Lesen dieses Beitrags beginnen, um einige grundlegende Konze
 ## 7.0. LoRA-Verbesserungen beim Feintuning
 
 > [!TIP]
-> Die Verwendung von **LoRA reduziert die benötigte Berechnung** erheblich, um **bereits trainierte Modelle fein abzustimmen**.
+> Die Verwendung von **LoRA reduziert die benötigte Berechnung** erheblich, um **bereits trainierte Modelle feinzujustieren**.
 
 {{#ref}}
 7.0.-lora-improvements-in-fine-tuning.md
@@ -82,7 +82,7 @@ Sie sollten mit dem Lesen dieses Beitrags beginnen, um einige grundlegende Konze
 ## 7.1. Feintuning für Klassifikation
 
 > [!TIP]
-> Das Ziel dieses Abschnitts ist zu zeigen, wie man ein bereits vortrainiertes Modell fein abstimmt, sodass das LLM anstelle von neuem Text die **Wahrscheinlichkeiten des gegebenen Textes für jede der angegebenen Kategorien** (wie ob ein Text Spam ist oder nicht) angibt.
+> Das Ziel dieses Abschnitts ist zu zeigen, wie man ein bereits vortrainiertes Modell feinjustiert, sodass das LLM anstelle von neuem Text die **Wahrscheinlichkeiten des gegebenen Textes für jede der gegebenen Kategorien** (wie ob ein Text Spam ist oder nicht) angibt.
 
 {{#ref}}
 7.1.-fine-tuning-for-classification.md
@@ -91,7 +91,7 @@ Sie sollten mit dem Lesen dieses Beitrags beginnen, um einige grundlegende Konze
 ## 7.2. Feintuning zur Befolgung von Anweisungen
 
 > [!TIP]
-> Das Ziel dieses Abschnitts ist zu zeigen, wie man **ein bereits vortrainiertes Modell zur Befolgung von Anweisungen fein abstimmt**, anstatt nur Text zu generieren, zum Beispiel, um auf Aufgaben als Chatbot zu antworten.
+> Das Ziel dieses Abschnitts ist zu zeigen, wie man **ein bereits vortrainiertes Modell feinjustiert, um Anweisungen zu befolgen**, anstatt nur Text zu generieren, zum Beispiel, um auf Aufgaben als Chatbot zu antworten.
 
 {{#ref}}
 7.2.-fine-tuning-to-follow-instructions.md

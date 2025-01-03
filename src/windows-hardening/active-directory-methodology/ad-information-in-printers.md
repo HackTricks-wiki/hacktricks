@@ -1,7 +1,7 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 Es gibt mehrere Blogs im Internet, die **die Gefahren hervorheben, Drucker mit LDAP mit Standard-/schwachen** Anmeldeinformationen konfiguriert zu lassen.\
-Das liegt daran, dass ein Angreifer **den Drucker dazu bringen könnte, sich gegen einen bösartigen LDAP-Server zu authentifizieren** (typischerweise reicht ein `nc -vv -l -p 444` aus) und die **Anmeldeinformationen des Druckers im Klartext** zu erfassen.
+Das liegt daran, dass ein Angreifer **den Drucker dazu bringen könnte, sich gegen einen bösartigen LDAP-Server zu authentifizieren** (typischerweise reicht ein `nc -vv -l -p 444`) und die **Anmeldeinformationen des Druckers im Klartext** zu erfassen.
 
 Außerdem enthalten mehrere Drucker **Protokolle mit Benutzernamen** oder könnten sogar in der Lage sein, **alle Benutzernamen** vom Domänencontroller herunterzuladen.
 
@@ -14,8 +14,8 @@ Einige Blogs zu diesem Thema:
 
 ## Druckerkonfiguration
 
-- **Standort**: Die LDAP-Serverliste befindet sich unter: `Netzwerk > LDAP-Einstellungen > LDAP einrichten`.
-- **Verhalten**: Die Schnittstelle ermöglicht LDAP-Serveränderungen, ohne Anmeldeinformationen erneut einzugeben, was die Benutzerfreundlichkeit erhöht, aber Sicherheitsrisiken birgt.
+- **Standort**: Die LDAP-Serverliste befindet sich unter: `Network > LDAP Setting > Setting Up LDAP`.
+- **Verhalten**: Die Schnittstelle ermöglicht LDAP-Serveränderungen, ohne die Anmeldeinformationen erneut einzugeben, was die Benutzerfreundlichkeit erhöht, aber Sicherheitsrisiken birgt.
 - **Ausnutzung**: Die Ausnutzung besteht darin, die LDAP-Serveradresse auf eine kontrollierte Maschine umzuleiten und die Funktion "Verbindung testen" zu nutzen, um Anmeldeinformationen zu erfassen.
 
 ## Anmeldeinformationen erfassen
@@ -32,7 +32,7 @@ Allerdings variiert der Erfolg dieser Methode.
 
 ### Methode 2: Vollständiger LDAP-Server mit Slapd
 
-Ein zuverlässigerer Ansatz besteht darin, einen vollständigen LDAP-Server einzurichten, da der Drucker eine Nullbindung gefolgt von einer Abfrage durchführt, bevor er versucht, die Anmeldeinformationen zu binden.
+Ein zuverlässigerer Ansatz besteht darin, einen vollständigen LDAP-Server einzurichten, da der Drucker eine Nullbindung durchführt, gefolgt von einer Abfrage, bevor er versucht, die Anmeldeinformationen zu binden.
 
 1. **LDAP-Server-Einrichtung**: Der Leitfaden folgt den Schritten aus [dieser Quelle](https://www.server-world.info/en/note?os=Fedora_26&p=openldap).
 2. **Wichtige Schritte**:

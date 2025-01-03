@@ -18,13 +18,13 @@ Außerdem können Sie **verschiedene** Arten von **Suchen** angeben:
 
 ![](<../../images/image (311).png>)
 
-Sie können auch das Kästchen aktivieren, um **das Spiel während des Scannens des Speichers zu stoppen**:
+Sie können auch das Kästchen ankreuzen, um **das Spiel während des Scannens des Speichers zu stoppen**:
 
 ![](<../../images/image (1052).png>)
 
 ### Hotkeys
 
-In _**Bearbeiten --> Einstellungen --> Hotkeys**_ können Sie verschiedene **Hotkeys** für verschiedene Zwecke festlegen, wie z.B. **das Spiel zu stoppen** (was sehr nützlich ist, wenn Sie zu einem bestimmten Zeitpunkt den Speicher scannen möchten). Weitere Optionen sind verfügbar:
+In _**Edit --> Settings --> Hotkeys**_ können Sie verschiedene **Hotkeys** für verschiedene Zwecke festlegen, wie z.B. **das Spiel zu stoppen** (was sehr nützlich ist, wenn Sie zu einem bestimmten Zeitpunkt den Speicher scannen möchten). Weitere Optionen sind verfügbar:
 
 ![](<../../images/image (864).png>)
 
@@ -42,11 +42,11 @@ Die **Änderung** im **Speicher** wird sofort **angewendet** (beachten Sie, dass
 
 ## Den Wert suchen
 
-Angenommen, es gibt einen wichtigen Wert (wie das Leben Ihres Benutzers), den Sie verbessern möchten, und Sie suchen nach diesem Wert im Speicher.
+Angenommen, es gibt einen wichtigen Wert (wie das Leben Ihres Benutzers), den Sie verbessern möchten, und Sie suchen diesen Wert im Speicher.
 
 ### Durch eine bekannte Änderung
 
-Angenommen, Sie suchen nach dem Wert 100, Sie **führen einen Scan** durch, um nach diesem Wert zu suchen, und finden viele Übereinstimmungen:
+Angenommen, Sie suchen den Wert 100, Sie **führen einen Scan** durch, um nach diesem Wert zu suchen, und finden viele Übereinstimmungen:
 
 ![](<../../images/image (108).png>)
 
@@ -75,7 +75,7 @@ Sie werden **alle Werte sehen, die auf die ausgewählte Weise geändert wurden**
 
 Sobald Sie Ihren Wert gefunden haben, können Sie ihn ändern.
 
-Beachten Sie, dass es **viele mögliche Änderungen** gibt und Sie diese **Schritte so oft wie Sie möchten** wiederholen können, um die Ergebnisse zu filtern:
+Beachten Sie, dass es eine **Menge möglicher Änderungen** gibt und Sie diese **Schritte so oft wiederholen können, wie Sie möchten**, um die Ergebnisse zu filtern:
 
 ![](<../../images/image (574).png>)
 
@@ -87,10 +87,10 @@ Verwenden Sie einige der erwähnten Tricks, um die Adresse zu finden, an der Ihr
 
 ![](<../../images/image (1067).png>)
 
-Die **erste Option** ist nützlich, um zu wissen, welche **Teile** des **Codes** diese **Adresse** **verwenden** (was für mehr Dinge nützlich ist, wie z.B. **zu wissen, wo Sie den Code** des Spiels **ändern können**).\
+Die **erste Option** ist nützlich, um zu wissen, welche **Teile** des **Codes** diese **Adresse verwenden** (was für mehr Dinge nützlich ist, wie z.B. **zu wissen, wo Sie den Code** des Spiels **ändern können**).\
 Die **zweite Option** ist spezifischer und wird in diesem Fall hilfreicher sein, da wir daran interessiert sind, **von wo dieser Wert geschrieben wird**.
 
-Sobald Sie eine dieser Optionen ausgewählt haben, wird der **Debugger** an das Programm **angehängt** und ein neues **leeres Fenster** erscheint. Jetzt **spielen** Sie das **Spiel** und **ändern** Sie diesen **Wert** (ohne das Spiel neu zu starten). Das **Fenster** sollte mit den **Adressen** **gefüllt** sein, die den **Wert** **ändern**:
+Sobald Sie eine dieser Optionen ausgewählt haben, wird der **Debugger** an das Programm **angehängt** und ein neues **leeres Fenster** erscheint. Jetzt **spielen** Sie das **Spiel** und **ändern** Sie diesen **Wert** (ohne das Spiel neu zu starten). Das **Fenster** sollte mit den **Adressen** gefüllt sein, die den **Wert ändern**:
 
 ![](<../../images/image (91).png>)
 
@@ -106,7 +106,7 @@ Befolgen Sie die vorherigen Schritte, um herauszufinden, wo sich der Wert befind
 
 ![](<../../images/image (1039).png>)
 
-Führen Sie dann einen neuen Scan durch, **um den hexadezimalen Wert zwischen "\[]"** zu suchen (den Wert von $edx in diesem Fall):
+Führen Sie dann einen neuen Scan durch, **um den Hex-Wert zwischen "\[]"** zu suchen (den Wert von $edx in diesem Fall):
 
 ![](<../../images/image (994).png>)
 
@@ -121,13 +121,13 @@ Klicken Sie nun auf das Kontrollkästchen "Zeiger" und fügen Sie die gefundene 
 
 ![](<../../images/image (392).png>)
 
-(Beachten Sie, dass die erste "Adresse" automatisch mit der Zeigeradresse ausgefüllt wird, die Sie eingeben)
+(Beachten Sie, dass die erste "Adresse" automatisch aus der Zeigeradresse ausgefüllt wird, die Sie eingeben)
 
 Klicken Sie auf OK und ein neuer Zeiger wird erstellt:
 
 ![](<../../images/image (308).png>)
 
-Jetzt, jedes Mal, wenn Sie diesen Wert ändern, ändern Sie den **wichtigen Wert, auch wenn die Speicheradresse, an der der Wert gespeichert ist, unterschiedlich ist.**
+Jetzt, jedes Mal, wenn Sie diesen Wert ändern, ändern Sie **den wichtigen Wert, auch wenn die Speicheradresse, an der der Wert gespeichert ist, unterschiedlich ist.**
 
 ### Code-Injektion
 
@@ -138,19 +138,19 @@ Stellen Sie sich also vor, Sie haben die Adresse gefunden, die 1 vom Leben Ihres
 ![](<../../images/image (203).png>)
 
 Klicken Sie auf "Disassembler anzeigen", um den **disassemblierten Code** zu erhalten.\
-Klicken Sie dann auf **CTRL+a**, um das Auto-Assembly-Fenster aufzurufen, und wählen Sie _**Vorlage --> Code-Injektion**_
+Klicken Sie dann auf **CTRL+a**, um das Auto-Assembly-Fenster aufzurufen, und wählen Sie _**Template --> Code Injection**_
 
 ![](<../../images/image (902).png>)
 
-Füllen Sie die **Adresse der Anweisung, die Sie ändern möchten** (dies wird normalerweise automatisch ausgefüllt):
+Füllen Sie die **Adresse der Anweisung aus, die Sie ändern möchten** (dies wird normalerweise automatisch ausgefüllt):
 
 ![](<../../images/image (744).png>)
 
-Eine Vorlage wird generiert:
+Ein Template wird generiert:
 
 ![](<../../images/image (944).png>)
 
-Fügen Sie Ihren neuen Assembly-Code in den Abschnitt "**newmem**" ein und entfernen Sie den ursprünglichen Code aus dem Abschnitt "**originalcode**", wenn Sie nicht möchten, dass er ausgeführt wird\*\*.\*\* In diesem Beispiel wird der injizierte Code 2 Punkte hinzufügen, anstatt 1 abzuziehen:
+Fügen Sie Ihren neuen Assembly-Code in den Abschnitt "**newmem**" ein und entfernen Sie den ursprünglichen Code aus dem "**originalcode**", wenn Sie nicht möchten, dass er ausgeführt wird\*\*.\*\* In diesem Beispiel wird der injizierte Code 2 Punkte hinzufügen, anstatt 1 abzuziehen:
 
 ![](<../../images/image (521).png>)
 
@@ -158,6 +158,6 @@ Fügen Sie Ihren neuen Assembly-Code in den Abschnitt "**newmem**" ein und entfe
 
 ## **Referenzen**
 
-- **Cheat Engine Tutorial, schließen Sie es ab, um zu lernen, wie Sie mit Cheat Engine beginnen** 
+- **Cheat Engine Tutorial, schließen Sie es ab, um zu lernen, wie Sie mit Cheat Engine beginnen können**
 
 {{#include ../../banners/hacktricks-training.md}}

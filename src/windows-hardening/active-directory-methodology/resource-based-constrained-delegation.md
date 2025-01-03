@@ -9,28 +9,28 @@ Dies ist ähnlich wie die grundlegende [Eingeschränkte Delegation](constrained-
 
 In diesem Fall hat das eingeschränkte Objekt ein Attribut namens _**msDS-AllowedToActOnBehalfOfOtherIdentity**_ mit dem Namen des Benutzers, der jeden anderen Benutzer gegen es impersonieren kann.
 
-Ein weiterer wichtiger Unterschied dieser eingeschränkten Delegation zu anderen Delegationen ist, dass jeder Benutzer mit **Schreibberechtigungen über ein Maschinenkonto** (_GenericAll/GenericWrite/WriteDacl/WriteProperty/etc_) das _**msDS-AllowedToActOnBehalfOfOtherIdentity**_ setzen kann (In den anderen Formen der Delegation benötigten Sie Domain-Admin-Rechte).
+Ein weiterer wichtiger Unterschied dieser eingeschränkten Delegation zu den anderen Delegationen ist, dass jeder Benutzer mit **Schreibberechtigungen über ein Maschinenkonto** (_GenericAll/GenericWrite/WriteDacl/WriteProperty/etc_) das _**msDS-AllowedToActOnBehalfOfOtherIdentity**_ setzen kann (In den anderen Formen der Delegation benötigten Sie Domain-Admin-Rechte).
 
 ### Neue Konzepte
 
-Bei der eingeschränkten Delegation wurde gesagt, dass die **`TrustedToAuthForDelegation`**-Flagge im _userAccountControl_-Wert des Benutzers erforderlich ist, um eine **S4U2Self** durchzuführen. Aber das ist nicht ganz richtig.\
-Die Realität ist, dass Sie auch ohne diesen Wert eine **S4U2Self** gegen jeden Benutzer durchführen können, wenn Sie ein **Dienst** (einen SPN haben) sind, aber wenn Sie **`TrustedToAuthForDelegation`** haben, wird das zurückgegebene TGS **Forwardable** sein, und wenn Sie **diese Flagge nicht haben**, wird das zurückgegebene TGS **nicht** **Forwardable** sein.
+Bei der eingeschränkten Delegation wurde gesagt, dass die **`TrustedToAuthForDelegation`**-Flagge im _userAccountControl_-Wert des Benutzers erforderlich ist, um eine **S4U2Self**-Anfrage durchzuführen. Aber das ist nicht ganz richtig.\
+Die Realität ist, dass Sie auch ohne diesen Wert eine **S4U2Self**-Anfrage gegen jeden Benutzer durchführen können, wenn Sie ein **Dienst** (einen SPN haben) sind, aber wenn Sie **`TrustedToAuthForDelegation`** haben, wird das zurückgegebene TGS **Forwardable** sein, und wenn Sie **diese Flagge nicht haben**, wird das zurückgegebene TGS **nicht** **Forwardable** sein.
 
 Wenn das **TGS**, das in **S4U2Proxy** verwendet wird, **NICHT Forwardable** ist, wird der Versuch, eine **grundlegende eingeschränkte Delegation** auszunutzen, **nicht funktionieren**. Aber wenn Sie versuchen, eine **ressourcenbasierte eingeschränkte Delegation auszunutzen, wird es funktionieren** (das ist keine Schwachstelle, es ist eine Funktion, anscheinend).
 
 ### Angriffsstruktur
 
-> Wenn Sie **äquivalente Schreibberechtigungen** über ein **Computer**-Konto haben, können Sie **privilegierten Zugriff** auf diese Maschine erhalten.
+> Wenn Sie **Schreibäquivalente Berechtigungen** über ein **Computer**-Konto haben, können Sie **privilegierten Zugriff** auf diese Maschine erhalten.
 
-Angenommen, der Angreifer hat bereits **äquivalente Schreibberechtigungen über den Computer des Opfers**.
+Angenommen, der Angreifer hat bereits **schreibäquivalente Berechtigungen über den Computer des Opfers**.
 
 1. Der Angreifer **kompromittiert** ein Konto, das einen **SPN** hat oder **erstellt einen** (“Service A”). Beachten Sie, dass **jeder** _Admin-Benutzer_ ohne andere spezielle Berechtigungen bis zu 10 **Computerobjekte** (**_**MachineAccountQuota**_**) **erstellen** und ihnen einen **SPN** zuweisen kann. Der Angreifer kann also einfach ein Computerobjekt erstellen und einen SPN festlegen.
 2. Der Angreifer **missbraucht seine SCHREIBBERECHTIGUNG** über den Computer des Opfers (ServiceB), um die **ressourcenbasierte eingeschränkte Delegation zu konfigurieren, die es ServiceA ermöglicht, jeden Benutzer** gegen diesen Computer des Opfers (ServiceB) zu impersonieren.
 3. Der Angreifer verwendet Rubeus, um einen **vollständigen S4U-Angriff** (S4U2Self und S4U2Proxy) von Service A zu Service B für einen Benutzer **mit privilegiertem Zugriff auf Service B** durchzuführen.
-1. S4U2Self (vom kompromittierten/erstellten SPN-Konto): Fordern Sie ein **TGS des Administrators für mich an** (Nicht Forwardable).
-2. S4U2Proxy: Verwenden Sie das **nicht Forwardable TGS** des vorherigen Schrittes, um ein **TGS** von **Administrator** zum **Opferhost** anzufordern.
+1. S4U2Self (vom kompromittierten/erstellten SPN-Konto): Fordern Sie ein **TGS von Administrator an** (Nicht Forwardable).
+2. S4U2Proxy: Verwenden Sie das **nicht Forwardable TGS** aus dem vorherigen Schritt, um ein **TGS** von **Administrator** zum **Opferhost** anzufordern.
 3. Selbst wenn Sie ein nicht Forwardable TGS verwenden, wird es funktionieren, da Sie die ressourcenbasierte eingeschränkte Delegation ausnutzen.
-4. Der Angreifer kann **pass-the-ticket** und **impersonieren** den Benutzer, um **Zugriff auf den Opfer-ServiceB** zu erhalten.
+4. Der Angreifer kann das **Ticket weitergeben** und den Benutzer **impersonieren**, um **Zugriff auf den Opfer-ServiceB** zu erhalten.
 
 Um das _**MachineAccountQuota**_ der Domäne zu überprüfen, können Sie Folgendes verwenden:
 ```powershell
@@ -72,7 +72,7 @@ msds-allowedtoactonbehalfofotheridentity
 ```
 ### Durchführung eines vollständigen S4U-Angriffs
 
-Zunächst haben wir das neue Computerobjekt mit dem Passwort `123456` erstellt, daher benötigen wir den Hash dieses Passworts:
+Zuerst haben wir das neue Computerobjekt mit dem Passwort `123456` erstellt, daher benötigen wir den Hash dieses Passworts:
 ```bash
 .\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local
 ```
@@ -90,7 +90,7 @@ rubeus.exe s4u /user:FAKECOMPUTER$ /aes256:<AES 256 hash> /impersonateuser:admin
 
 ### Zugriff
 
-Die letzte Befehlszeile führt den **vollständigen S4U-Angriff aus und injiziert das TGS** vom Administrator auf den Zielhost in **den Arbeitsspeicher**.\
+Die letzte Befehlszeile führt den **vollständigen S4U-Angriff aus und injiziert das TGS** vom Administrator in den Opfer-Host in **Speicher**.\
 In diesem Beispiel wurde ein TGS für den **CIFS**-Dienst vom Administrator angefordert, sodass Sie auf **C$** zugreifen können:
 ```bash
 ls \\victim.domain.local\C$
@@ -101,12 +101,12 @@ Erfahren Sie mehr über die [**verfügbaren Diensttickets hier**](silver-ticket.
 
 ## Kerberos-Fehler
 
-- **`KDC_ERR_ETYPE_NOTSUPP`**: Das bedeutet, dass Kerberos so konfiguriert ist, dass es DES oder RC4 nicht verwendet, und Sie nur den RC4-Hash bereitstellen. Stellen Sie Rubeus mindestens den AES256-Hash zur Verfügung (oder geben Sie ihm einfach die rc4-, aes128- und aes256-Hashes). Beispiel: `[Rubeus.Program]::MainString("s4u /user:FAKECOMPUTER /aes256:CC648CF0F809EE1AA25C52E963AC0487E87AC32B1F71ACC5304C73BF566268DA /aes128:5FC3D06ED6E8EA2C9BB9CC301EA37AD4 /rc4:EF266C6B963C0BB683941032008AD47F /impersonateuser:Administrator /msdsspn:CIFS/M3DC.M3C.LOCAL /ptt".split())`
-- **`KRB_AP_ERR_SKEW`**: Das bedeutet, dass die Uhrzeit des aktuellen Computers von der des DC abweicht und Kerberos nicht richtig funktioniert.
-- **`preauth_failed`**: Das bedeutet, dass der angegebene Benutzername + Hashes nicht funktionieren, um sich anzumelden. Möglicherweise haben Sie vergessen, das "$" im Benutzernamen anzugeben, als Sie die Hashes generiert haben (`.\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local`)
-- **`KDC_ERR_BADOPTION`**: Das kann bedeuten:
+- **`KDC_ERR_ETYPE_NOTSUPP`**: Dies bedeutet, dass Kerberos so konfiguriert ist, dass es DES oder RC4 nicht verwendet, und Sie nur den RC4-Hash bereitstellen. Stellen Sie Rubeus mindestens den AES256-Hash zur Verfügung (oder geben Sie ihm einfach die rc4-, aes128- und aes256-Hashes). Beispiel: `[Rubeus.Program]::MainString("s4u /user:FAKECOMPUTER /aes256:CC648CF0F809EE1AA25C52E963AC0487E87AC32B1F71ACC5304C73BF566268DA /aes128:5FC3D06ED6E8EA2C9BB9CC301EA37AD4 /rc4:EF266C6B963C0BB683941032008AD47F /impersonateuser:Administrator /msdsspn:CIFS/M3DC.M3C.LOCAL /ptt".split())`
+- **`KRB_AP_ERR_SKEW`**: Dies bedeutet, dass die Uhrzeit des aktuellen Computers von der des DC abweicht und Kerberos nicht richtig funktioniert.
+- **`preauth_failed`**: Dies bedeutet, dass der angegebene Benutzername + Hashes nicht funktionieren, um sich anzumelden. Möglicherweise haben Sie vergessen, das "$" im Benutzernamen anzugeben, als Sie die Hashes generiert haben (`.\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local`)
+- **`KDC_ERR_BADOPTION`**: Dies kann bedeuten:
   - Der Benutzer, den Sie zu impersonieren versuchen, kann nicht auf den gewünschten Dienst zugreifen (weil Sie ihn nicht impersonieren können oder weil er nicht über ausreichende Berechtigungen verfügt)
-  - Der angeforderte Dienst existiert nicht (wenn Sie ein Ticket für winrm anfordern, aber winrm nicht läuft)
+  - Der angeforderte Dienst existiert nicht (wenn Sie um ein Ticket für winrm bitten, aber winrm nicht läuft)
   - Der erstellte Fakecomputer hat seine Berechtigungen über den verwundbaren Server verloren und Sie müssen sie zurückgeben.
 
 ## Referenzen

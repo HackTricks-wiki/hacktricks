@@ -17,7 +17,7 @@ LitGPT ist ein Projekt, das von Lightning AI entwickelt wurde und das Lightning-
 ### [**LitServe**](https://github.com/Lightning-AI/LitServe)
 
 **Beschreibung:**\
-LitServe ist ein Bereitstellungstool von Lightning AI, das für die schnelle und effiziente Bereitstellung von KI-Modellen entwickelt wurde. Es vereinfacht die Integration von LLMs in Echtzeitanwendungen, indem es skalierbare und optimierte Servicemöglichkeiten bietet.
+LitServe ist ein Bereitstellungstool von Lightning AI, das für die schnelle und effiziente Bereitstellung von KI-Modellen entwickelt wurde. Es vereinfacht die Integration von LLMs in Echtzeitanwendungen, indem es skalierbare und optimierte Bereitstellungsfunktionen bereitstellt.
 
 ### [**Axolotl**](https://github.com/axolotl-ai-cloud/axolotl)
 
@@ -31,7 +31,7 @@ Axolotl ist eine cloudbasierte Plattform, die darauf abzielt, die Bereitstellung
 Es bietet mehrere Bereiche wie:
 
 * **Modelle**: Ein umfangreiches Repository von **vortrainierten maschinellen Lernmodellen**, in dem Benutzer Modelle für verschiedene Aufgaben wie Textgenerierung, Übersetzung, Bilderkennung und mehr durchsuchen, herunterladen und integrieren können.
-* **Datensätze:** Eine umfassende **Sammlung von Datensätzen**, die zum Trainieren und Evaluieren von Modellen verwendet werden. Sie erleichtert den einfachen Zugang zu verschiedenen Datenquellen, sodass Benutzer Daten für ihre spezifischen maschinellen Lernprojekte finden und nutzen können.
+* **Datensätze:** Eine umfassende **Sammlung von Datensätzen**, die zum Trainieren und Bewerten von Modellen verwendet werden. Sie erleichtert den einfachen Zugang zu verschiedenen Datenquellen, sodass Benutzer Daten für ihre spezifischen maschinellen Lernprojekte finden und nutzen können.
 * **Spaces:** Eine Plattform zum Hosten und Teilen von **interaktiven maschinellen Lernanwendungen** und Demos. Sie ermöglicht Entwicklern, ihre Modelle in Aktion zu **präsentieren**, benutzerfreundliche Schnittstellen zu erstellen und mit anderen durch das Teilen von Live-Demos zusammenzuarbeiten.
 
 ## [**TensorFlow Hub**](https://www.tensorflow.org/hub) **&** [**Kaggle**](https://www.kaggle.com/)

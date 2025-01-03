@@ -7,12 +7,12 @@
 Um mit der Datenextraktion von einem Android-Gerät zu beginnen, muss es entsperrt sein. Wenn es gesperrt ist, können Sie:
 
 - Überprüfen, ob das Gerät das Debugging über USB aktiviert hat.
-- Nach einem möglichen [Smudge-Angriff](https://www.usenix.org/legacy/event/woot10/tech/full_papers/Aviv.pdf) suchen.
-- Es mit [Brute-Force](https://www.cultofmac.com/316532/this-brute-force-device-can-crack-any-iphones-pin-code/) versuchen.
+- Nach einem möglichen [smudge attack](https://www.usenix.org/legacy/event/woot10/tech/full_papers/Aviv.pdf) suchen.
+- Es mit [Brute-force](https://www.cultofmac.com/316532/this-brute-force-device-can-crack-any-iphones-pin-code/) versuchen.
 
 ## Datenerfassung
 
-Erstellen Sie ein [Android-Backup mit adb](../mobile-pentesting/android-app-pentesting/adb-commands.md#backup) und extrahieren Sie es mit dem [Android Backup Extractor](https://sourceforge.net/projects/adbextractor/): `java -jar abe.jar unpack file.backup file.tar`
+Erstellen Sie ein [Android-Backup mit adb](../mobile-pentesting/android-app-pentesting/adb-commands.md#backup) und extrahieren Sie es mit [Android Backup Extractor](https://sourceforge.net/projects/adbextractor/): `java -jar abe.jar unpack file.backup file.tar`
 
 ### Wenn Root-Zugriff oder physische Verbindung zur JTAG-Schnittstelle
 

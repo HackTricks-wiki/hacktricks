@@ -26,7 +26,7 @@ exiftool file # Shows the metadata
 ```
 ### **Exiv2**
 
-Ähnlich wie exiftool, zum Anzeigen von Metadaten. Über `apt` installierbar, Quellcode auf [GitHub](https://github.com/Exiv2/exiv2) und hat eine [offizielle Website](http://www.exiv2.org/).
+Ähnlich wie exiftool, zum Anzeigen von Metadaten. Installierbar über `apt`, Quellcode auf [GitHub](https://github.com/Exiv2/exiv2) und hat eine [offizielle Website](http://www.exiv2.org/).
 ```bash
 exiv2 file # Shows the metadata
 ```
@@ -48,7 +48,7 @@ strings -e b -n 6 file # 16bit strings (big-endian)
 strings -e L -n 6 file # 32bit strings (little-endian)
 strings -e B -n 6 file # 32bit strings (big-endian)
 ```
-### **Comparison (cmp)**
+### **Vergleich (cmp)**
 
 Nützlich zum Vergleichen einer modifizierten Datei mit ihrer Originalversion, die online gefunden wurde.
 ```bash
@@ -79,7 +79,7 @@ Steghide ermöglicht das Verbergen von Daten in `JPEG, BMP, WAV und AU`-Dateien 
 **Befehle:**
 
 - `steghide info file` zeigt an, ob eine Datei versteckte Daten enthält.
-- `steghide extract -sf file [--passphrase password]` extrahiert die versteckten Daten, das Passwort ist optional.
+- `steghide extract -sf file [--passphrase password]` extrahiert die versteckten Daten, Passwort optional.
 
 Für die webbasierte Extraktion besuchen Sie [diese Website](https://futureboy.us/stegano/decinput.html).
 
@@ -95,8 +95,8 @@ zsteg spezialisiert sich auf das Aufdecken versteckter Daten in PNG- und BMP-Dat
 
 **Befehle:**
 
-- `zsteg -a datei` wendet alle Erkennungsmethoden auf eine Datei an.
-- `zsteg -E datei` gibt eine Nutzlast für die Datenextraktion an.
+- `zsteg -a file` wendet alle Erkennungsmethoden auf eine Datei an.
+- `zsteg -E file` gibt eine Nutzlast für die Datenextraktion an.
 
 ### **StegoVeritas und Stegsolve**
 
@@ -125,7 +125,7 @@ pngcheck stego.png
 ```
 ### **Zusätzliche Werkzeuge zur Bildanalyse**
 
-Für weitere Erkundungen sollten Sie in Betracht ziehen, folgende Seiten zu besuchen:
+Für weitere Erkundungen ziehen Sie in Betracht, folgende Seiten zu besuchen:
 
 - [Magic Eye Solver](http://magiceye.ecksdee.co.uk/)
 - [Image Error Level Analysis](https://29a.ch/sandbox/2012/imageerrorlevelanalysis/)
@@ -139,7 +139,7 @@ Für weitere Erkundungen sollten Sie in Betracht ziehen, folgende Seiten zu besu
 
 ### **Steghide (JPEG, BMP, WAV, AU)**
 
-Steghide ist ein vielseitiges Werkzeug, das zum Verstecken von Daten in JPEG-, BMP-, WAV- und AU-Dateien entwickelt wurde. Detaillierte Anweisungen finden Sie in der [Stego-Tricks-Dokumentation](stego-tricks.md#steghide).
+Steghide ist ein vielseitiges Werkzeug, das zum Verstecken von Daten in JPEG-, BMP-, WAV- und AU-Dateien entwickelt wurde. Detaillierte Anweisungen sind in der [Stego-Tricks-Dokumentation](stego-tricks.md#steghide) enthalten.
 
 ### **Stegpy (PNG, BMP, GIF, WebP, WAV)**
 
@@ -153,7 +153,7 @@ ffmpeg -v info -i stego.mp3 -f null -
 ```
 ### **WavSteg (WAV)**
 
-WavSteg zeichnet sich darin aus, Daten innerhalb von WAV-Dateien mithilfe der Strategie des am wenigsten signifikanten Bits zu verbergen und zu extrahieren. Es ist auf [GitHub](https://github.com/ragibson/Steganography#WavSteg) verfügbar. Die Befehle umfassen:
+WavSteg zeichnet sich darin aus, Daten innerhalb von WAV-Dateien mithilfe der Strategie des am wenigsten signifikanten Bits zu verbergen und zu extrahieren. Es ist auf [GitHub](https://github.com/ragibson/Steganography#WavSteg) verfügbar. Befehle umfassen:
 ```bash
 python3 WavSteg.py -r -b 1 -s soundfile -o outputfile
 
@@ -165,7 +165,7 @@ Deepsound ermöglicht die Verschlüsselung und Erkennung von Informationen in Au
 
 ### **Sonic Visualizer**
 
-Ein unschätzbares Werkzeug für die visuelle und analytische Inspektion von Audiodateien, Sonic Visualizer kann versteckte Elemente aufdecken, die mit anderen Mitteln nicht erkennbar sind. Besuchen Sie die [offizielle Website](https://www.sonicvisualiser.org/) für weitere Informationen.
+Ein unverzichtbares Werkzeug für die visuelle und analytische Inspektion von Audiodateien, Sonic Visualizer kann versteckte Elemente aufdecken, die mit anderen Mitteln nicht erkennbar sind. Besuchen Sie die [offizielle Website](https://www.sonicvisualiser.org/) für weitere Informationen.
 
 ### **DTMF Töne - Wähltöne**
 
@@ -175,7 +175,7 @@ Die Erkennung von DTMF-Tönen in Audiodateien kann durch Online-Tools wie [diese
 
 ### **Binäre Länge SQRT - QR-Code**
 
-Binäre Daten, die zu einer ganzen Zahl quadriert werden, könnten einen QR-Code darstellen. Verwenden Sie diesen Snippet zur Überprüfung:
+Binäre Daten, die zu einer ganzen Zahl quadriert werden, könnten einen QR-Code darstellen. Verwenden Sie diesen Code-Schnipsel zur Überprüfung:
 ```python
 import math
 math.sqrt(2500) #50

@@ -6,11 +6,11 @@ Dies ist die grundlegendste Art des Handels. Sie können **den Betrag des Vermö
 
 In der Regel können Sie auch den **aktuellen Marktpreis** verwenden, um die Transaktion so schnell wie möglich zum aktuellen Preis durchzuführen.
 
-**Stop Loss - Limit**: Sie können auch den Betrag und den Preis der Vermögenswerte angeben, die Sie kaufen oder verkaufen möchten, und gleichzeitig einen niedrigeren Preis angeben, um zu kaufen oder zu verkaufen, falls dieser erreicht wird (um Verluste zu stoppen).
+**Stop Loss - Limit**: Sie können auch den Betrag und den Preis der Vermögenswerte angeben, die Sie kaufen oder verkaufen möchten, während Sie auch einen niedrigeren Preis angeben, um zu kaufen oder zu verkaufen, falls dieser erreicht wird (um Verluste zu stoppen).
 
 ## Futures
 
-Ein Future ist ein Vertrag, bei dem sich 2 Parteien darauf einigen, **etwas in der Zukunft zu einem festen Preis zu erwerben**. Zum Beispiel, um 1 Bitcoin in 6 Monaten für 70.000$ zu verkaufen.
+Ein Future ist ein Vertrag, bei dem 2 Parteien eine Vereinbarung treffen, um **etwas in der Zukunft zu einem festen Preis zu erwerben**. Zum Beispiel, um 1 Bitcoin in 6 Monaten für 70.000$ zu verkaufen.
 
 Offensichtlich verliert die Verkäuferseite Geld, wenn der Bitcoin-Wert in 6 Monaten 80.000$ beträgt, und die Käuferseite verdient. Wenn der Bitcoin-Wert in 6 Monaten 60.000$ beträgt, passiert das Gegenteil.
 
@@ -35,9 +35,9 @@ Beachten Sie, dass in diesen Fällen die Gewinne und Verluste in Echtzeit erfolg
 
 ### Futures with Leverage
 
-**Leverage** ermöglicht es Ihnen, eine größere Position auf dem Markt mit einem kleineren Geldbetrag zu kontrollieren. Es ermöglicht Ihnen im Grunde, "viel mehr Geld zu setzen, als Sie haben", wobei Sie nur das Geld riskieren, das Sie tatsächlich haben.
+**Leverage** ermöglicht es Ihnen, eine größere Position auf dem Markt mit einem kleineren Geldbetrag zu kontrollieren. Es ermöglicht Ihnen im Grunde, "viel mehr Geld" zu setzen, als Sie haben, und dabei nur das Geld zu riskieren, das Sie tatsächlich haben.
 
-Wenn Sie beispielsweise eine Future-Position im BTC/USDT mit 100$ und einem 50-fachen Hebel eröffnen, bedeutet dies, dass Sie bei einem Anstieg des Preises um 1% 1x50 = 50% Ihrer ursprünglichen Investition (50$) gewinnen würden. Und daher hätten Sie 150$.\
+Wenn Sie beispielsweise eine Future-Position im BTC/USDT mit 100$ und einem 50-fachen Hebel eröffnen, bedeutet dies, dass Sie, wenn der Preis um 1% steigt, 1x50 = 50% Ihrer ursprünglichen Investition (50$) gewinnen würden. Und daher hätten Sie 150$.\
 Wenn der Preis jedoch um 1% sinkt, verlieren Sie 50% Ihres Kapitals (59$ in diesem Fall). Und wenn der Preis um 2% sinkt, verlieren Sie Ihre gesamte Wette (2x50 = 100%).
 
 Daher ermöglicht es das Leverage, die Höhe des Geldes, das Sie setzen, zu kontrollieren, während die Gewinne und Verluste erhöht werden.
@@ -64,5 +64,5 @@ Der Käufer zahlt jedoch eine Gebühr an den Verkäufer für die Eröffnung der 
 
 ### 4. **Gewinnpotenzial:**
 
-* **Futures:** Der Gewinn oder Verlust basiert auf der Differenz zwischen dem Marktpreis bei Fälligkeit und dem im Vertrag vereinbarten Preis.
-* **Optionen:** Der Käufer profitiert, wenn sich der Markt über den Ausübungspreis hinaus mehr als die gezahlte Prämie bewegt. Der Verkäufer profitiert, indem er die Prämie behält, wenn die Option nicht ausgeübt wird.
+* **Futures:** Der Gewinn oder Verlust basiert auf der Differenz zwischen dem Marktpreis bei Fälligkeit und dem vereinbarten Preis im Vertrag.
+* **Optionen:** Der Käufer profitiert, wenn sich der Markt über den Ausübungspreis hinaus günstig bewegt, mehr als die gezahlte Prämie. Der Verkäufer profitiert, indem er die Prämie behält, wenn die Option nicht ausgeübt wird.

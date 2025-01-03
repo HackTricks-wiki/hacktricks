@@ -3,7 +3,7 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 
-## **MSSQL Enumeration / Entdeckung**
+## **MSSQL Aufzählung / Entdeckung**
 
 ### Python
 
@@ -148,7 +148,7 @@ Es könnte auch möglich sein, **Befehle** innerhalb des MSSQL-Hosts auszuführe
 Invoke-SQLOSCmd -Instance "srv.sub.domain.local,1433" -Command "whoami" -RawResults
 # Invoke-SQLOSCmd automatically checks if xp_cmdshell is enable and enables it if necessary
 ```
-Überprüfen Sie in dem im **folgenden Abschnitt genannten** die manuelle Vorgehensweise.
+Überprüfen Sie auf der in der **folgenden Sektion genannten Seite, wie man dies manuell macht.**
 
 ### MSSQL Grundlegende Hacking-Tricks
 
@@ -160,7 +160,7 @@ Invoke-SQLOSCmd -Instance "srv.sub.domain.local,1433" -Command "whoami" -RawResu
 
 Wenn eine MSSQL-Instanz von einer anderen MSSQL-Instanz als vertrauenswürdig (Datenbanklink) angesehen wird. Wenn der Benutzer über Berechtigungen für die vertrauenswürdige Datenbank verfügt, kann er **die Vertrauensbeziehung nutzen, um auch in der anderen Instanz Abfragen auszuführen**. Diese Vertrauensstellungen können verkettet werden, und irgendwann könnte der Benutzer in der Lage sein, eine falsch konfigurierte Datenbank zu finden, in der er Befehle ausführen kann.
 
-**Die Links zwischen Datenbanken funktionieren sogar über Waldvertrauensstellungen hinweg.**
+**Die Links zwischen Datenbanken funktionieren sogar über Forest-Vertrauensstellungen hinweg.**
 
 ### Powershell-Missbrauch
 ```powershell
@@ -202,7 +202,7 @@ Sie können vertrauenswürdige Links einfach mit Metasploit überprüfen.
 msf> use exploit/windows/mssql/mssql_linkcrawler
 [msf> set DEPLOY true] #Set DEPLOY to true if you want to abuse the privileges to obtain a meterpreter session
 ```
-Beachten Sie, dass Metasploit nur versuchen wird, die Funktion `openquery()` in MSSQL auszunutzen (wenn Sie also keinen Befehl mit `openquery()` ausführen können, müssen Sie die `EXECUTE`-Methode **manuell** ausprobieren, um Befehle auszuführen, siehe mehr unten.)
+Beachten Sie, dass Metasploit nur die Funktion `openquery()` in MSSQL zu missbrauchen versucht (wenn Sie also keinen Befehl mit `openquery()` ausführen können, müssen Sie die `EXECUTE`-Methode **manuell** ausprobieren, um Befehle auszuführen, siehe mehr unten.)
 
 ### Manuell - Openquery()
 
@@ -228,7 +228,7 @@ Führen Sie Abfragen über den Link aus (Beispiel: Finden Sie weitere Links in d
 select * from openquery("dcorp-sql1", 'select * from master..sysservers')
 ```
 > [!WARNING]
-> Überprüfen Sie, wo doppelte und einfache Anführungszeichen verwendet werden. Es ist wichtig, sie auf diese Weise zu verwenden.
+> Überprüfen Sie, wo doppelte und einfache Anführungszeichen verwendet werden, es ist wichtig, sie auf diese Weise zu verwenden.
 
 ![](<../../images/image (643).png>)
 

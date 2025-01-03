@@ -6,7 +6,7 @@
 
 Prozesse können auf Hosts geöffnet werden, bei denen der Benutzername und entweder das Passwort oder der Hash bekannt sind, durch die Verwendung von WMI. Befehle werden über WMI von Wmiexec ausgeführt, was ein semi-interaktives Shell-Erlebnis bietet.
 
-**dcomexec.py:** Dieses Skript nutzt verschiedene DCOM-Endpunkte und bietet eine semi-interaktive Shell ähnlich wie wmiexec.py, wobei speziell das ShellBrowserWindow DCOM-Objekt verwendet wird. Es unterstützt derzeit MMC20. Anwendungs-, Shell-Fenster- und Shell-Browser-Fensterobjekte. (source: [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))
+**dcomexec.py:** Durch die Nutzung verschiedener DCOM-Endpunkte bietet dieses Skript eine semi-interaktive Shell ähnlich wie wmiexec.py, wobei speziell das ShellBrowserWindow DCOM-Objekt verwendet wird. Es unterstützt derzeit MMC20. Anwendungs-, Shell-Fenster- und Shell-Browser-Fensterobjekte. (source: [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))
 
 ## WMI-Grundlagen
 

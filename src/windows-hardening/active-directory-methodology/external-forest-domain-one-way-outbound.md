@@ -38,9 +38,9 @@ Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.my.domain.lo
 ```
 Diese Extraktion ist möglich, da das Konto, das mit einem **$** nach seinem Namen identifiziert wird, aktiv ist und zur Gruppe "Domain Users" der Domäne **A** gehört, wodurch es die mit dieser Gruppe verbundenen Berechtigungen erbt. Dies ermöglicht es Personen, sich mit den Anmeldeinformationen dieses Kontos gegen die Domäne **A** zu authentifizieren.
 
-**Warnung:** Es ist möglich, diese Situation auszunutzen, um in der Domäne **A** als Benutzer Fuß zu fassen, wenn auch mit eingeschränkten Berechtigungen. Dieser Zugriff ist jedoch ausreichend, um eine Enumeration in der Domäne **A** durchzuführen.
+**Warnung:** Es ist möglich, diese Situation auszunutzen, um einen Fuß in der Domäne **A** als Benutzer zu fassen, wenn auch mit eingeschränkten Berechtigungen. Dieser Zugriff ist jedoch ausreichend, um eine Enumeration in der Domäne **A** durchzuführen.
 
-In einem Szenario, in dem `ext.local` die vertrauende Domäne und `root.local` die vertrauenswürdige Domäne ist, würde ein Benutzerkonto mit dem Namen `EXT$` innerhalb von `root.local` erstellt. Durch spezifische Tools ist es möglich, die Kerberos-Vertrauensschlüssel zu dumpen, wodurch die Anmeldeinformationen von `EXT$` in `root.local` offengelegt werden. Der Befehl, um dies zu erreichen, ist:
+In einem Szenario, in dem `ext.local` die vertrauende Domäne und `root.local` die vertrauenswürdige Domäne ist, würde ein Benutzerkonto mit dem Namen `EXT$` innerhalb von `root.local` erstellt. Durch spezifische Tools ist es möglich, die Kerberos-Vertrauensschlüssel zu dumpen, wodurch die Anmeldeinformationen von `EXT$` in `root.local` offengelegt werden. Der Befehl, um dies zu erreichen, lautet:
 ```bash
 lsadump::trust /patch
 ```
@@ -54,9 +54,9 @@ Dieser Authentifizierungsschritt eröffnet die Möglichkeit, Dienste innerhalb v
 ```
 ### Sammeln des Klartext-Vertrauenspassworts
 
-Im vorherigen Ablauf wurde der Vertrauens-Hash anstelle des **Klartextpassworts** verwendet (das ebenfalls **von mimikatz** extrahiert wurde).
+Im vorherigen Ablauf wurde der Vertrauenshash anstelle des **Klartextpassworts** verwendet (das ebenfalls **von mimikatz** extrahiert wurde).
 
-Das Klartextpasswort kann erhalten werden, indem die \[ CLEAR ]-Ausgabe von mimikatz in Hexadezimal umgewandelt und Null-Bytes ‘\x00’ entfernt werden:
+Das Klartextpasswort kann erhalten werden, indem die \[ CLEAR ]-Ausgabe von mimikatz in Hexadezimal umgewandelt und Nullbytes ‘\x00’ entfernt werden:
 
 ![](<../../images/image (938).png>)
 

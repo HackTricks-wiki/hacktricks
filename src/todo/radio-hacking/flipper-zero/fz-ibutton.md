@@ -12,7 +12,7 @@ Für weitere Informationen darüber, was ein iButton ist, siehe:
 
 ## Design
 
-Der **blaue** Teil des folgenden Bildes zeigt, wie Sie den **echten iButton** **platzieren** müssen, damit der Flipper ihn **lesen** kann. Der **grüne** Teil zeigt, wie Sie den **Leser** mit dem Flipper Zero **berühren** müssen, um einen iButton **korrekt zu emulieren**.
+Der **blaue** Teil des folgenden Bildes zeigt, wie Sie den **echten iButton** platzieren müssen, damit der Flipper ihn **lesen** kann. Der **grüne** Teil zeigt, wie Sie den Flipper Zero **an den Leser** halten müssen, um **korrekt einen iButton zu emulieren**.
 
 <figure><img src="../../../images/image (565).png" alt=""><figcaption></figcaption></figure>
 
@@ -20,7 +20,7 @@ Der **blaue** Teil des folgenden Bildes zeigt, wie Sie den **echten iButton** **
 
 ### Lesen
 
-Im Lesemodus wartet der Flipper darauf, dass der iButton berührt wird, und kann jeden der drei Typen von Schlüsseln verarbeiten: **Dallas, Cyfral und Metakom**. Der Flipper wird **den Typ des Schlüssels selbst herausfinden**. Der Name des Schlüsselprotokolls wird auf dem Bildschirm über der ID-Nummer angezeigt.
+Im Lesemodus wartet der Flipper darauf, dass der iButton berührt wird, und kann jeden der drei Schlüsseltypen verarbeiten: **Dallas, Cyfral und Metakom**. Der Flipper wird **selbstständig den Typ des Schlüssels erkennen**. Der Name des Schlüsselprotokolls wird auf dem Bildschirm über der ID-Nummer angezeigt.
 
 ### Manuell hinzufügen
 

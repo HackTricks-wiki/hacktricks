@@ -18,19 +18,19 @@ Die folgenden Schritte werden empfohlen, um die Startkonfigurationen von Geräte
 
 3. **TFTP-Server einrichten**:
 
-- Konfigurieren Sie einen TFTP-Server, um Bilder über ein lokales Netzwerk zu laden:
+- Konfigurieren Sie einen TFTP-Server, um Images über ein lokales Netzwerk zu laden:
 %%%
 #setenv ipaddr 192.168.2.2 #lokale IP des Geräts
 #setenv serverip 192.168.2.1 #IP des TFTP-Servers
 #saveenv
 #reset
 #ping 192.168.2.1 #Netzwerkzugang überprüfen
-#tftp ${loadaddr} uImage-3.6.35 #loadaddr nimmt die Adresse, in die die Datei geladen werden soll, und den Dateinamen des Bildes auf dem TFTP-Server
+#tftp ${loadaddr} uImage-3.6.35 #loadaddr nimmt die Adresse, in die die Datei geladen werden soll, und den Dateinamen des Images auf dem TFTP-Server
 %%%
 
 4. **`ubootwrite.py` verwenden**:
 
-- Verwenden Sie `ubootwrite.py`, um das U-boot-Bild zu schreiben und eine modifizierte Firmware zu pushen, um Root-Zugriff zu erhalten.
+- Verwenden Sie `ubootwrite.py`, um das U-boot-Image zu schreiben und eine modifizierte Firmware zu pushen, um Root-Zugriff zu erhalten.
 
 5. **Debug-Funktionen überprüfen**:
 

@@ -21,7 +21,7 @@ Wenn man anstelle von fünfmaligem Senden jedes Codes (so gesendet, um sicherzus
 
 Und wenn man die **2 ms Wartezeit** zwischen den Signalen **entfernt**, kann man die Zeit auf **3 Minuten reduzieren.**
 
-Darüber hinaus kann durch die Verwendung der De Bruijn-Sequenz (eine Methode zur Reduzierung der benötigten Bits, um alle potenziellen binären Zahlen zu brute-forcen) diese **Zeit auf nur 8 Sekunden reduziert werden**:
+Darüber hinaus kann durch die Verwendung der De Bruijn-Sequenz (eine Methode zur Reduzierung der Anzahl der benötigten Bits, um alle potenziellen binären Zahlen zu brute-forcen) diese **Zeit auf nur 8 Sekunden reduziert werden**:
 
 <figure><img src="../../images/image (583).png" alt=""><figcaption></figcaption></figure>
 
@@ -45,7 +45,7 @@ Es ist möglich, dass jemand ein Gerät namens Code Grabber verwendet, um das RF
 
 Das **RF-Signal wird typischerweise mit einem rollenden Code übertragen**, was bedeutet, dass sich der Code bei jeder Verwendung ändert. Dies macht es **schwierig**, dass jemand das Signal **abfängt** und es **verwendet**, um **unbefugten** Zugang zur Garage zu erhalten.
 
-In einem rollenden Code-System haben die Fernbedienung und der Garagentoröffner einen **gemeinsamen Algorithmus**, der **bei jeder Verwendung einen neuen Code generiert**. Der Garagentoröffner reagiert nur auf den **richtigen Code**, was es viel schwieriger macht, unbefugten Zugang zur Garage zu erhalten, nur indem man einen Code abfängt.
+In einem rollenden Code-System haben die Fernbedienung und der Garagentoröffner einen **gemeinsamen Algorithmus**, der bei jeder Verwendung der Fernbedienung **einen neuen Code generiert**. Der Garagentoröffner reagiert nur auf den **richtigen Code**, was es viel schwieriger macht, unbefugten Zugang zur Garage zu erhalten, nur indem man einen Code abfängt.
 
 ### **Missing Link-Angriff**
 
@@ -53,19 +53,19 @@ Im Grunde hört man auf den Knopf und **fängt das Signal ab, während die Fernb
 
 ### Vollständiger Link-Jamming-Angriff
 
-Ein Angreifer könnte das Signal in der Nähe des Fahrzeugs oder Empfängers **stören**, sodass der **Empfänger den Code nicht tatsächlich „hören“ kann**, und sobald das passiert, kann man einfach den Code **abfangen und wiedergeben**, wenn man das Jamming gestoppt hat.
+Ein Angreifer könnte das Signal in der Nähe des Fahrzeugs oder des Empfängers **stören**, sodass der **Empfänger den Code nicht tatsächlich „hören“ kann**, und sobald das passiert, kann man einfach den Code **abfangen und wiedergeben**, wenn man das Stören gestoppt hat.
 
-Das Opfer wird irgendwann die **Schlüssel verwenden, um das Auto abzuschließen**, aber dann hat der Angriff **genug „Tür schließen“-Codes aufgezeichnet**, die hoffentlich erneut gesendet werden können, um die Tür zu öffnen (ein **Frequenzwechsel könnte erforderlich sein**, da es Autos gibt, die dieselben Codes zum Öffnen und Schließen verwenden, aber beide Befehle in unterschiedlichen Frequenzen abhören).
+Das Opfer wird irgendwann die **Schlüssel verwenden, um das Auto abzuschließen**, aber dann wird der Angriff **genug „Tür schließen“-Codes aufgezeichnet haben**, die hoffentlich erneut gesendet werden können, um die Tür zu öffnen (ein **Frequenzwechsel könnte erforderlich sein**, da es Autos gibt, die dieselben Codes zum Öffnen und Schließen verwenden, aber auf beide Befehle in unterschiedlichen Frequenzen hören).
 
 > [!WARNING]
-> **Jamming funktioniert**, aber es ist auffällig, denn wenn die **Person, die das Auto abschließt, einfach die Türen testet**, um sicherzustellen, dass sie abgeschlossen sind, würde sie bemerken, dass das Auto nicht abgeschlossen ist. Außerdem, wenn sie sich solcher Angriffe bewusst sind, könnten sie sogar hören, dass die Türen nie das **Geräusch** des Abschließens gemacht haben oder die **Lichter** des Autos nie geflackert haben, als sie die „abschließen“-Taste drückten.
+> **Jamming funktioniert**, aber es ist auffällig, denn wenn die **Person, die das Auto abschließt, einfach die Türen testet**, um sicherzustellen, dass sie abgeschlossen sind, würde sie bemerken, dass das Auto nicht abgeschlossen ist. Außerdem, wenn sie sich solcher Angriffe bewusst sind, könnten sie sogar hören, dass die Türen nie das **Geräusch** des Abschließens gemacht haben oder die **Lichter** des Autos nie geflackert haben, als sie den „Abschließen“-Knopf drückten.
 
-### **Code-Grabbing-Angriff (auch bekannt als ‘RollJam’)**
+### **Code-Grabbing-Angriff (auch bekannt als „RollJam“)**
+ 
+Dies ist eine **stealth Jamming-Technik**. Der Angreifer wird das Signal stören, sodass, wenn das Opfer versucht, die Tür abzuschließen, es nicht funktioniert, aber der Angreifer wird **diesen Code aufzeichnen**. Dann wird das Opfer **versuchen, das Auto erneut abzuschließen**, indem es den Knopf drückt, und das Auto wird **diesen zweiten Code aufzeichnen**.\
+Sofort danach kann der **Angreifer den ersten Code senden** und das **Auto wird abschließen** (das Opfer wird denken, dass der zweite Druck es geschlossen hat). Dann wird der Angreifer in der Lage sein, den **zweiten gestohlenen Code zu senden, um** das Auto zu öffnen (vorausgesetzt, dass ein **„Auto schließen“-Code auch verwendet werden kann, um es zu öffnen**). Ein Frequenzwechsel könnte erforderlich sein (da es Autos gibt, die dieselben Codes zum Öffnen und Schließen verwenden, aber auf beide Befehle in unterschiedlichen Frequenzen hören).
 
-Dies ist eine **stealth Jamming-Technik**. Der Angreifer wird das Signal stören, sodass es nicht funktioniert, wenn das Opfer versucht, die Tür abzuschließen, aber der Angreifer wird **diesen Code aufzeichnen**. Dann wird das Opfer **versuchen, das Auto erneut abzuschließen**, indem es den Knopf drückt, und das Auto wird **diesen zweiten Code aufzeichnen**.\
-Sofort danach kann der **Angreifer den ersten Code senden** und das **Auto wird sich abschließen** (das Opfer wird denken, dass der zweite Druck es geschlossen hat). Dann wird der Angreifer in der Lage sein, den **zweiten gestohlenen Code zu senden, um** das Auto zu öffnen (vorausgesetzt, dass ein **„Auto schließen“-Code auch verwendet werden kann, um es zu öffnen**). Ein Frequenzwechsel könnte erforderlich sein (da es Autos gibt, die dieselben Codes zum Öffnen und Schließen verwenden, aber beide Befehle in unterschiedlichen Frequenzen abhören).
-
-Der Angreifer kann **den Empfänger des Autos stören und nicht seinen eigenen Empfänger**, denn wenn der Empfänger des Autos beispielsweise in einem 1 MHz-Breitband abhört, wird der Angreifer nicht die genaue Frequenz stören, die von der Fernbedienung verwendet wird, sondern **eine nahe Frequenz in diesem Spektrum**, während der **Empfänger des Angreifers in einem kleineren Bereich abhört**, wo er das Signal der Fernbedienung **ohne das Störsignal** hören kann.
+Der Angreifer kann **den Empfänger des Autos stören und nicht seinen eigenen Empfänger**, denn wenn der Empfänger des Autos beispielsweise in einem 1 MHz-Breitband lauscht, wird der Angreifer nicht die genaue Frequenz stören, die von der Fernbedienung verwendet wird, sondern **eine nahe Frequenz in diesem Spektrum**, während der **Empfänger des Angreifers in einem kleineren Bereich lauscht**, wo er das Signal der Fernbedienung **ohne das Störsignal** hören kann.
 
 > [!WARNING]
 > Andere in den Spezifikationen gesehene Implementierungen zeigen, dass der **rollende Code ein Teil** des gesamten gesendeten Codes ist. Das heißt, der gesendete Code ist ein **24-Bit-Schlüssel**, wobei die ersten **12 der rollende Code** sind, die **zweiten 8 der Befehl** (wie abschließen oder aufschließen) und die letzten 4 die **Prüfziffer** sind. Fahrzeuge, die diesen Typ implementieren, sind auch natürlich anfällig, da der Angreifer lediglich das Segment des rollenden Codes ersetzen muss, um **jeden rollenden Code auf beiden Frequenzen verwenden zu können**.

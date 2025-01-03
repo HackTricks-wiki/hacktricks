@@ -12,7 +12,7 @@ Diese Persistenztechnik basiert also auf der Fähigkeit, jedes benötigte Privil
 
 ### Zugriff auf WMI
 
-Sie können einem Benutzer Zugriff auf **remote WMI ausführen** [**indem Sie dies verwenden**](https://github.com/samratashok/nishang/blob/master/Backdoors/Set-RemoteWMI.ps1):
+Sie können einem Benutzer Zugriff gewähren, um **WMI remote auszuführen** [**indem Sie dies verwenden**](https://github.com/samratashok/nishang/blob/master/Backdoors/Set-RemoteWMI.ps1):
 ```bash
 Set-RemoteWMI -UserName student1 -ComputerName dcorp-dc –namespace 'root\cimv2' -Verbose
 Set-RemoteWMI -UserName student1 -ComputerName dcorp-dc–namespace 'root\cimv2' -Remove -Verbose #Remove

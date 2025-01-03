@@ -12,19 +12,19 @@ Die MOSI (Master Out, Slave In) und MISO (Master In, Slave Out) sind verantwortl
 
 ## Firmware von EEPROMs dumpen
 
-Das Dumpen von Firmware kann nützlich sein, um die Firmware zu analysieren und Schwachstellen darin zu finden. Oftmals ist die Firmware nicht im Internet verfügbar oder irrelevant aufgrund von Variationen wie Modellnummer, Version usw. Daher kann es hilfreich sein, die Firmware direkt vom physischen Gerät zu extrahieren, um spezifisch nach Bedrohungen zu suchen.
+Das Dumpen von Firmware kann nützlich sein, um die Firmware zu analysieren und Schwachstellen zu finden. Oftmals ist die Firmware nicht im Internet verfügbar oder irrelevant aufgrund von Variationen wie Modellnummer, Version usw. Daher kann es hilfreich sein, die Firmware direkt vom physischen Gerät zu extrahieren, um spezifisch nach Bedrohungen zu suchen.
 
-Der Zugriff auf die serielle Konsole kann hilfreich sein, aber oft ist es so, dass die Dateien schreibgeschützt sind. Dies schränkt die Analyse aus verschiedenen Gründen ein. Zum Beispiel könnten Werkzeuge, die erforderlich sind, um Pakete zu senden und zu empfangen, nicht in der Firmware vorhanden sein. Daher ist es nicht machbar, die Binärdateien zu extrahieren, um sie zurückzuentwickeln. Daher kann es sehr hilfreich sein, die gesamte Firmware auf dem System zu dumpen und die Binärdateien zur Analyse zu extrahieren.
+Der Zugriff auf die serielle Konsole kann hilfreich sein, aber oft sind die Dateien schreibgeschützt. Dies schränkt die Analyse aus verschiedenen Gründen ein. Zum Beispiel könnten Werkzeuge, die erforderlich sind, um Pakete zu senden und zu empfangen, nicht in der Firmware vorhanden sein. Daher ist es nicht machbar, die Binärdateien zu extrahieren, um sie zurückzuentwickeln. Daher kann es sehr hilfreich sein, die gesamte Firmware auf dem System zu dumpen und die Binärdateien zur Analyse zu extrahieren.
 
-Außerdem kann das Dumpen der Firmware während des Red Teamings und beim physischen Zugriff auf Geräte helfen, die Dateien zu modifizieren oder bösartige Dateien einzuschleusen und sie dann in den Speicher zurückzuschreiben, was hilfreich sein könnte, um ein Hintertür in das Gerät einzupflanzen. Daher gibt es zahlreiche Möglichkeiten, die durch das Dumpen von Firmware freigeschaltet werden können.
+Außerdem kann das Dumpen der Firmware während des Red Teamings und des physischen Zugriffs auf Geräte helfen, die Dateien zu modifizieren oder bösartige Dateien einzuschleusen und sie dann in den Speicher zurückzuspielen, was hilfreich sein könnte, um ein Hintertür in das Gerät einzupflanzen. Daher gibt es zahlreiche Möglichkeiten, die durch das Dumpen von Firmware freigeschaltet werden können.
 
-### CH341A EEPROM-Programmierer und -Leser
+### CH341A EEPROM-Programmierer und -Lesegerät
 
 Dieses Gerät ist ein kostengünstiges Werkzeug zum Dumpen von Firmwares von EEPROMs und auch zum erneuten Flashen mit Firmware-Dateien. Dies war eine beliebte Wahl für die Arbeit mit Computer-BIOS-Chips (die nur EEPROMs sind). Dieses Gerät wird über USB angeschlossen und benötigt minimale Werkzeuge, um zu starten. Außerdem erledigt es die Aufgabe in der Regel schnell, sodass es auch beim physischen Zugriff auf Geräte hilfreich sein kann.
 
 ![drawing](../../images/board_image_ch341a.jpg)
 
-Schließen Sie den EEPROM-Speicher an den CH341a-Programmierer an und stecken Sie das Gerät in den Computer. Falls das Gerät nicht erkannt wird, versuchen Sie, Treiber auf dem Computer zu installieren. Stellen Sie außerdem sicher, dass der EEPROM in der richtigen Ausrichtung angeschlossen ist (in der Regel den VCC-Pin in umgekehrter Ausrichtung zum USB-Anschluss platzieren), da die Software sonst den Chip nicht erkennen kann. Verweisen Sie bei Bedarf auf das Diagramm:
+Schließen Sie den EEPROM-Speicher an den CH341a-Programmierer an und stecken Sie das Gerät in den Computer. Falls das Gerät nicht erkannt wird, versuchen Sie, Treiber auf dem Computer zu installieren. Stellen Sie außerdem sicher, dass der EEPROM in der richtigen Ausrichtung angeschlossen ist (in der Regel den VCC-Pin in umgekehrter Ausrichtung zum USB-Anschluss platzieren), da die Software sonst den Chip nicht erkennen kann. Konsultieren Sie das Diagramm, falls erforderlich:
 
 ![drawing](../../images/connect_wires_ch341a.jpg) ![drawing](../../images/eeprom_plugged_ch341a.jpg)
 
@@ -41,13 +41,13 @@ binwalk -e <filename>
 Die Dateien können .bin oder .rom sein, je nach den verwendeten Tools und Konfigurationen.
 
 > [!CAUTION]
-> Beachten Sie, dass die Extraktion von Firmware ein heikler Prozess ist und viel Geduld erfordert. Jede unsachgemäße Handhabung kann die Firmware potenziell beschädigen oder sogar vollständig löschen und das Gerät unbrauchbar machen. Es wird empfohlen, das spezifische Gerät zu studieren, bevor Sie versuchen, die Firmware zu extrahieren.
+> Beachten Sie, dass die Extraktion der Firmware ein heikler Prozess ist und viel Geduld erfordert. Jede unsachgemäße Handhabung kann die Firmware potenziell beschädigen oder sogar vollständig löschen und das Gerät unbrauchbar machen. Es wird empfohlen, das spezifische Gerät zu studieren, bevor Sie versuchen, die Firmware zu extrahieren.
 
 ### Bus Pirate + flashrom
 
 ![](<../../images/image (910).png>)
 
-Beachten Sie, dass selbst wenn das PINOUT des Pirate Bus Pins für **MOSI** und **MISO** angibt, um sich mit SPI zu verbinden, einige SPIs Pins als DI und DO angeben können. **MOSI -> DI, MISO -> DO**
+Beachten Sie, dass selbst wenn das PINOUT des Bus Pirate Pins für **MOSI** und **MISO** angibt, um sich mit SPI zu verbinden, einige SPIs Pins als DI und DO angeben können. **MOSI -> DI, MISO -> DO**
 
 ![](<../../images/image (360).png>)
 

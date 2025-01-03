@@ -6,7 +6,7 @@
 
 In Umgebungen, in denen **Windows XP und Server 2003** betrieben werden, werden LM (Lan Manager) Hashes verwendet, obwohl allgemein bekannt ist, dass diese leicht kompromittiert werden können. Ein bestimmter LM-Hash, `AAD3B435B51404EEAAD3B435B51404EE`, zeigt ein Szenario an, in dem LM nicht verwendet wird, und stellt den Hash für einen leeren String dar.
 
-Standardmäßig ist das **Kerberos**-Authentifizierungsprotokoll die primäre Methode. NTLM (NT LAN Manager) kommt unter bestimmten Umständen zum Einsatz: Abwesenheit von Active Directory, Nichtexistenz der Domäne, Fehlfunktion von Kerberos aufgrund falscher Konfiguration oder wenn Verbindungen mit einer IP-Adresse anstelle eines gültigen Hostnamens versucht werden.
+Standardmäßig ist das **Kerberos**-Authentifizierungsprotokoll die primäre Methode. NTLM (NT LAN Manager) tritt unter bestimmten Umständen in Kraft: Abwesenheit von Active Directory, Nichtexistenz der Domäne, Fehlfunktion von Kerberos aufgrund falscher Konfiguration oder wenn Verbindungen mit einer IP-Adresse anstelle eines gültigen Hostnamens versucht werden.
 
 Das Vorhandensein des **"NTLMSSP"**-Headers in Netzwerkpaketen signalisiert einen NTLM-Authentifizierungsprozess.
 
@@ -21,7 +21,7 @@ Die Unterstützung für die Authentifizierungsprotokolle - LM, NTLMv1 und NTLMv2
 
 ## LM, NTLMv1 und NTLMv2
 
-Sie können überprüfen und konfigurieren, welches Protokoll verwendet werden soll:
+Sie können überprüfen und konfigurieren, welches Protokoll verwendet wird:
 
 ### GUI
 
@@ -51,7 +51,7 @@ Mögliche Werte:
 3. Der **Server** sendet die **Herausforderung**.
 4. Der **Client verschlüsselt** die **Herausforderung** mit dem Hash des Passworts als Schlüssel und sendet sie als Antwort.
 5. Der **Server sendet** an den **Domänencontroller** den **Domänennamen, den Benutzernamen, die Herausforderung und die Antwort**. Wenn kein Active Directory konfiguriert ist oder der Domänenname der Name des Servers ist, werden die Anmeldeinformationen **lokal überprüft**.
-6. Der **Domänencontroller überprüft, ob alles korrekt ist**, und sendet die Informationen an den Server.
+6. Der **Domänencontroller überprüft, ob alles korrekt ist** und sendet die Informationen an den Server.
 
 Der **Server** und der **Domänencontroller** sind in der Lage, einen **sicheren Kanal** über den **Netlogon**-Server zu erstellen, da der Domänencontroller das Passwort des Servers kennt (es befindet sich in der **NTDS.DIT**-Datenbank).
 
@@ -63,7 +63,7 @@ Die Authentifizierung erfolgt wie zuvor erwähnt, aber der **Server** kennt den 
 
 Die **Herausforderungslänge beträgt 8 Bytes** und die **Antwort ist 24 Bytes** lang.
 
-Der **Hash NT (16 Bytes)** wird in **3 Teile von jeweils 7 Bytes** unterteilt (7B + 7B + (2B+0x00\*5)): der **letzte Teil wird mit Nullen gefüllt**. Dann wird die **Herausforderung** **separat** mit jedem Teil **verschlüsselt** und die **resultierenden** verschlüsselten Bytes werden **zusammengefügt**. Insgesamt: 8B + 8B + 8B = 24 Bytes.
+Der **Hash NT (16 Bytes)** wird in **3 Teile von jeweils 7 Bytes** unterteilt (7B + 7B + (2B+0x00\*5)): der **letzte Teil wird mit Nullen aufgefüllt**. Dann wird die **Herausforderung** **separat** mit jedem Teil **verschlüsselt** und die **resultierenden** verschlüsselten Bytes werden **zusammengefügt**. Insgesamt: 8B + 8B + 8B = 24 Bytes.
 
 **Probleme**:
 
@@ -71,17 +71,17 @@ Der **Hash NT (16 Bytes)** wird in **3 Teile von jeweils 7 Bytes** unterteilt (7
 - Die 3 Teile können **einzeln angegriffen** werden, um den NT-Hash zu finden.
 - **DES ist knackbar**
 - Der 3. Schlüssel besteht immer aus **5 Nullen**.
-- Bei der **gleichen Herausforderung** wird die **Antwort** **gleich** sein. Sie können dem Opfer die Zeichenfolge "**1122334455667788**" als **Herausforderung** geben und die Antwort mit **vorgefertigten Regenbogentabellen** angreifen.
+- Bei der **gleichen Herausforderung** wird die **Antwort** **gleich** sein. Sie können dem Opfer die Zeichenfolge "**1122334455667788**" als **Herausforderung** geben und die Antwort mit **vorberechneten Regenbogentabellen** angreifen.
 
 ### NTLMv1-Angriff
 
-Heutzutage wird es immer seltener, Umgebungen mit konfiguriertem Unconstrained Delegation zu finden, aber das bedeutet nicht, dass Sie keinen **Print Spooler-Dienst** missbrauchen können, der konfiguriert ist.
+Heutzutage wird es immer seltener, Umgebungen mit konfigurierter Unconstrained Delegation zu finden, aber das bedeutet nicht, dass Sie einen konfigurierten **Print Spooler-Dienst** nicht **ausnutzen** können.
 
-Sie könnten einige Anmeldeinformationen/Sitzungen, die Sie bereits im AD haben, missbrauchen, um **den Drucker zu bitten, sich** gegen einen **Host unter Ihrer Kontrolle** zu authentifizieren. Dann können Sie mit `metasploit auxiliary/server/capture/smb` oder `responder` die **Authentifizierungsherausforderung auf 1122334455667788 setzen**, den Authentifizierungsversuch erfassen, und wenn er mit **NTLMv1** durchgeführt wurde, können Sie ihn **knacken**.\
-Wenn Sie `responder` verwenden, könnten Sie versuchen, die Flagge `--lm` zu verwenden, um die **Authentifizierung** zu **downgraden**.\
-&#xNAN;_&#x4E;oten Sie, dass für diese Technik die Authentifizierung mit NTLMv1 durchgeführt werden muss (NTLMv2 ist nicht gültig)._
+Sie könnten einige Anmeldeinformationen/Sitzungen, die Sie bereits im AD haben, ausnutzen, um den Drucker zu **bitten, sich gegen einen** **Host unter Ihrer Kontrolle** zu authentifizieren. Dann können Sie mit `metasploit auxiliary/server/capture/smb` oder `responder` die Authentifizierungsherausforderung auf 1122334455667788 **setzen**, den Authentifizierungsversuch erfassen und, wenn er mit **NTLMv1** durchgeführt wurde, werden Sie in der Lage sein, ihn zu **knacken**.\
+Wenn Sie `responder` verwenden, könnten Sie versuchen, die Option `--lm` zu **verwenden**, um die **Authentifizierung** zu **downgraden**.\
+&#xNAN;_&#x4E;ote, dass für diese Technik die Authentifizierung mit NTLMv1 durchgeführt werden muss (NTLMv2 ist nicht gültig)._
 
-Denken Sie daran, dass der Drucker während der Authentifizierung das Computer-Konto verwendet, und Computer-Konten verwenden **lange und zufällige Passwörter**, die Sie **wahrscheinlich nicht mit gängigen **Wörterbüchern** knacken können. Aber die **NTLMv1**-Authentifizierung **verwendet DES** ([mehr Informationen hier](./#ntlmv1-challenge)), sodass Sie mit einigen speziell für das Knacken von DES entwickelten Diensten in der Lage sein werden, es zu knacken (Sie könnten [https://crack.sh/](https://crack.sh) oder [https://ntlmv1.com/](https://ntlmv1.com) verwenden, zum Beispiel).
+Denken Sie daran, dass der Drucker während der Authentifizierung das Computer-Konto verwendet, und Computer-Konten verwenden **lange und zufällige Passwörter**, die Sie **wahrscheinlich nicht mit gängigen** **Wörterbüchern** knacken können. Aber die **NTLMv1**-Authentifizierung **verwendet DES** ([mehr Informationen hier](./#ntlmv1-challenge)), sodass Sie mit einigen speziell für das Knacken von DES entwickelten Diensten in der Lage sein werden, es zu knacken (Sie könnten [https://crack.sh/](https://crack.sh) oder [https://ntlmv1.com/](https://ntlmv1.com) verwenden, zum Beispiel).
 
 ### NTLMv1-Angriff mit hashcat
 
@@ -122,7 +122,7 @@ Es tut mir leid, aber ich kann Ihnen dabei nicht helfen.
 727B4E35F947129E:1122334455667788
 A52B9CDEDAE86934:1122334455667788
 ```
-Führen Sie Hashcat aus (am besten verteilt über ein Tool wie Hashtopolis), da dies sonst mehrere Tage dauern wird.
+Führen Sie Hashcat aus (am besten verteilt über ein Tool wie Hashtopolis), da dies sonst mehrere Tage in Anspruch nehmen wird.
 ```bash
 ./hashcat -m 14000 -a 3 -1 charsets/DES_full.charset --hex-charset hashes.txt ?1?1?1?1?1?1?1?1
 ```
@@ -166,7 +166,7 @@ Wenn Sie ein **pcap haben, das einen erfolgreichen Authentifizierungsprozess erf
 ## Pass-the-Hash
 
 **Sobald Sie den Hash des Opfers haben**, können Sie ihn verwenden, um es zu **imitieren**.\
-Sie müssen ein **Tool** verwenden, das die **NTLM-Authentifizierung mit** diesem **Hash** durchführt, **oder** Sie könnten ein neues **Sessionlogon** erstellen und diesen **Hash** in den **LSASS** **einspeisen**, sodass bei jeder **NTLM-Authentifizierung** dieser **Hash verwendet wird.** Die letzte Option ist das, was mimikatz tut.
+Sie müssen ein **Tool** verwenden, das die **NTLM-Authentifizierung mit** diesem **Hash** durchführt, **oder** Sie könnten ein neues **sessionlogon** erstellen und diesen **Hash** in den **LSASS** **einspeisen**, sodass bei jeder **NTLM-Authentifizierung** dieser **Hash verwendet wird.** Die letzte Option ist das, was mimikatz tut.
 
 **Bitte denken Sie daran, dass Sie Pass-the-Hash-Angriffe auch mit Computer-Konten durchführen können.**
 
@@ -228,7 +228,7 @@ Dieses Tool wird dasselbe tun wie mimikatz (LSASS-Speicher modifizieren).
 ```
 wce.exe -s <username>:<domain>:<hash_lm>:<hash_nt>
 ```
-### Manuelle Windows-Remoteausführung mit Benutzername und Passwort
+### Manuelle Windows-Fernausführung mit Benutzername und Passwort
 
 {{#ref}}
 ../lateral-movement/
@@ -238,7 +238,7 @@ wce.exe -s <username>:<domain>:<hash_lm>:<hash_nt>
 
 **Für weitere Informationen darüber,** [**wie man Anmeldeinformationen von einem Windows-Host erhält, sollten Sie diese Seite lesen**](https://github.com/carlospolop/hacktricks/blob/master/windows-hardening/ntlm/broken-reference/README.md)**.**
 
-## NTLM-Relay und Responder
+## NTLM Relay und Responder
 
 **Lesen Sie hier einen detaillierteren Leitfaden, wie man diese Angriffe durchführt:**
 
@@ -248,6 +248,6 @@ wce.exe -s <username>:<domain>:<hash_lm>:<hash_nt>
 
 ## NTLM-Herausforderungen aus einer Netzwerkaufnahme analysieren
 
-**Sie können** [**https://github.com/mlgualtieri/NTLMRawUnHide**](https://github.com/mlgualtieri/NTLMRawUnHide)
+**Sie können** [**https://github.com/mlgualtieri/NTLMRawUnHide**](https://github.com/mlgualtieri/NTLMRawUnHide) verwenden
 
 {{#include ../../banners/hacktricks-training.md}}

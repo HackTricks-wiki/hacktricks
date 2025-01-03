@@ -10,7 +10,7 @@ Distributed Component Object Model (DCOM) Objekte bieten eine interessante Mögl
 ```bash
 Get-CimInstance Win32_DCOMApplication
 ```
-Das COM-Objekt, [MMC Application Class (MMC20.Application)](https://technet.microsoft.com/en-us/library/cc181199.aspx), ermöglicht das Scripting von MMC-Snap-In-Operationen. Bemerkenswerterweise enthält dieses Objekt eine `ExecuteShellCommand`-Methode unter `Document.ActiveView`. Weitere Informationen zu dieser Methode finden Sie [hier](<https://msdn.microsoft.com/en-us/library/aa815396(v=vs.85).aspx>). Überprüfen Sie es in Aktion:
+Das COM-Objekt, [MMC Application Class (MMC20.Application)](https://technet.microsoft.com/en-us/library/cc181199.aspx), ermöglicht das Scripting von MMC-Snap-In-Operationen. Bemerkenswert ist, dass dieses Objekt eine `ExecuteShellCommand`-Methode unter `Document.ActiveView` enthält. Weitere Informationen zu dieser Methode finden Sie [hier](<https://msdn.microsoft.com/en-us/library/aa815396(v=vs.85).aspx>). Überprüfen Sie es in Aktion:
 
 Diese Funktion erleichtert die Ausführung von Befehlen über ein Netzwerk durch eine DCOM-Anwendung. Um remote mit DCOM als Administrator zu interagieren, kann PowerShell wie folgt verwendet werden:
 ```powershell
@@ -18,7 +18,7 @@ Diese Funktion erleichtert die Ausführung von Befehlen über ein Netzwerk durch
 ```
 Dieser Befehl verbindet sich mit der DCOM-Anwendung und gibt eine Instanz des COM-Objekts zurück. Die ExecuteShellCommand-Methode kann dann aufgerufen werden, um einen Prozess auf dem Remote-Host auszuführen. Der Prozess umfasst die folgenden Schritte:
 
-Überprüfen der Methoden:
+Überprüfen Sie die Methoden:
 ```powershell
 $com = [activator]::CreateInstance([type]::GetTypeFromProgID("MMC20.Application", "10.10.10.10"))
 $com.Document.ActiveView | Get-Member
@@ -34,11 +34,11 @@ ls \\10.10.10.10\c$\Users
 ```
 ## ShellWindows & ShellBrowserWindow
 
-**Für weitere Informationen zu dieser Technik siehe den Originalbeitrag [https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/](https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/)**
+**Für weitere Informationen zu dieser Technik siehe den ursprünglichen Beitrag [https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/](https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/)**
 
-Das **MMC20.Application**-Objekt wurde als mangelhaft in Bezug auf explizite "LaunchPermissions" identifiziert, was zu Berechtigungen führt, die Administratoren den Zugriff erlauben. Für weitere Details kann ein Thread [hier](https://twitter.com/tiraniddo/status/817532039771525120) erkundet werden, und die Verwendung von [@tiraniddo](https://twitter.com/tiraniddo)’s OleView .NET zum Filtern von Objekten ohne explizite Startberechtigung wird empfohlen.
+Das **MMC20.Application**-Objekt wurde als mangelhaft in Bezug auf explizite "LaunchPermissions" identifiziert, was zu Berechtigungen führt, die Administratoren den Zugriff erlauben. Für weitere Details kann ein Thread [hier](https://twitter.com/tiraniddo/status/817532039771525120) erkundet werden, und die Verwendung von [@tiraniddo](https://twitter.com/tiraniddo)’s OleView .NET zum Filtern von Objekten ohne explizite Launch Permission wird empfohlen.
 
-Zwei spezifische Objekte, `ShellBrowserWindow` und `ShellWindows`, wurden aufgrund ihres Fehlens an expliziten Startberechtigungen hervorgehoben. Das Fehlen eines `LaunchPermission`-Registry-Eintrags unter `HKCR:\AppID\{guid}` bedeutet, dass keine expliziten Berechtigungen vorhanden sind.
+Zwei spezifische Objekte, `ShellBrowserWindow` und `ShellWindows`, wurden aufgrund ihres Fehlens an expliziten Launch Permissions hervorgehoben. Das Fehlen eines `LaunchPermission`-Registry-Eintrags unter `HKCR:\AppID\{guid}` bedeutet, dass keine expliziten Berechtigungen vorhanden sind.
 
 ### ShellWindows
 
@@ -55,7 +55,7 @@ $item.Document.Application.ShellExecute("cmd.exe", "/c calc.exe", "c:\windows\sy
 
 Laterale Bewegung kann durch das Ausnutzen von DCOM Excel-Objekten erreicht werden. Für detaillierte Informationen ist es ratsam, die Diskussion über die Nutzung von Excel DDE für laterale Bewegung über DCOM im [Blog von Cybereason](https://www.cybereason.com/blog/leveraging-excel-dde-for-lateral-movement-via-dcom) zu lesen.
 
-Das Empire-Projekt bietet ein PowerShell-Skript, das die Nutzung von Excel für Remote Code Execution (RCE) durch Manipulation von DCOM-Objekten demonstriert. Nachfolgend sind Ausschnitte aus dem Skript verfügbar im [GitHub-Repository von Empire](https://github.com/EmpireProject/Empire/blob/master/data/module_source/lateral_movement/Invoke-DCOM.ps1), die verschiedene Methoden zeigen, um Excel für RCE auszunutzen:
+Das Empire-Projekt bietet ein PowerShell-Skript, das die Nutzung von Excel für Remote Code Execution (RCE) durch Manipulation von DCOM-Objekten demonstriert. Nachfolgend sind Ausschnitte aus dem Skript verfügbar auf [Empires GitHub-Repository](https://github.com/EmpireProject/Empire/blob/master/data/module_source/lateral_movement/Invoke-DCOM.ps1), die verschiedene Methoden zur Ausnutzung von Excel für RCE zeigen:
 ```powershell
 # Detection of Office version
 elseif ($Method -Match "DetectOffice") {

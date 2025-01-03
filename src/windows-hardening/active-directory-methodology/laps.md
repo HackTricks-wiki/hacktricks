@@ -24,7 +24,7 @@ Get-DomainObject -SearchBase "LDAP://DC=sub,DC=domain,DC=local" | ? { $_."ms-mcs
 ```
 ### LAPS Passwortzugriff
 
-Sie könnten **die rohe LAPS-Richtlinie herunterladen** von `\\dc\SysVol\domain\Policies\{4A8A4E8E-929F-401A-95BD-A7D40E0976C8}\Machine\Registry.pol` und dann **`Parse-PolFile`** aus dem [**GPRegistryPolicyParser**](https://github.com/PowerShell/GPRegistryPolicyParser) Paket verwenden, um diese Datei in ein menschenlesbares Format zu konvertieren.
+Sie können die **rohe LAPS-Richtlinie** von `\\dc\SysVol\domain\Policies\{4A8A4E8E-929F-401A-95BD-A7D40E0976C8}\Machine\Registry.pol` herunterladen und dann **`Parse-PolFile`** aus dem [**GPRegistryPolicyParser**](https://github.com/PowerShell/GPRegistryPolicyParser) Paket verwenden, um diese Datei in ein menschenlesbares Format zu konvertieren.
 
 Darüber hinaus können die **nativ LAPS PowerShell-Cmdlets** verwendet werden, wenn sie auf einem Rechner installiert sind, auf den wir Zugriff haben:
 ```powershell
@@ -59,7 +59,7 @@ Get-DomainObject -Identity wkstn-2 -Properties ms-Mcs-AdmPwd
 
 Das [LAPSToolkit](https://github.com/leoloobeek/LAPSToolkit) erleichtert die Enumeration von LAPS mit mehreren Funktionen.\
 Eine davon ist das Parsen von **`ExtendedRights`** für **alle Computer mit aktivierten LAPS.** Dies zeigt **Gruppen**, die speziell **delegiert sind, um LAPS-Passwörter zu lesen**, die oft Benutzer in geschützten Gruppen sind.\
-Ein **Konto**, das einen **Computer** zu einer Domäne hinzugefügt hat, erhält `All Extended Rights` über diesen Host, und dieses Recht gibt dem **Konto** die Fähigkeit, **Passwörter zu lesen**. Die Enumeration kann ein Benutzerkonto zeigen, das das LAPS-Passwort auf einem Host lesen kann. Dies kann uns helfen, **spezifische AD-Benutzer** zu identifizieren, die LAPS-Passwörter lesen können.
+Ein **Konto**, das **einen Computer** zu einer Domäne hinzugefügt hat, erhält `All Extended Rights` über diesen Host, und dieses Recht gibt dem **Konto** die Fähigkeit, **Passwörter zu lesen**. Die Enumeration kann ein Benutzerkonto zeigen, das das LAPS-Passwort auf einem Host lesen kann. Dies kann uns helfen, **spezifische AD-Benutzer** zu identifizieren, die LAPS-Passwörter lesen können.
 ```powershell
 # Get groups that can read passwords
 Find-LAPSDelegatedGroups
@@ -103,7 +103,7 @@ Password: 2Z@Ae)7!{9#Cq
 
 ### **Ablaufdatum**
 
-Sobald man Administrator ist, ist es möglich, die **Passwörter** zu **erhalten** und einen Computer daran zu **hindern**, sein **Passwort** zu **aktualisieren**, indem man das Ablaufdatum in die Zukunft **setzt**.
+Sobald man Administrator ist, ist es möglich, die **Passwörter** zu **erhalten** und eine Maschine daran zu **hindern**, ihr **Passwort** zu **aktualisieren**, indem man das Ablaufdatum in die Zukunft **setzt**.
 ```powershell
 # Get expiration time
 Get-DomainObject -Identity computer-21 -Properties ms-mcs-admpwdexpirationtime

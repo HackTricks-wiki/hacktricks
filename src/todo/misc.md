@@ -18,9 +18,9 @@ nc -nv -u -z -w 1 \<IP> 160-16
 Ein leeres UDP-Paket wird an einen bestimmten Port gesendet. Wenn der UDP-Port offen ist, wird keine Antwort von der Zielmaschine zurückgesendet. Wenn der UDP-Port geschlossen ist, sollte ein ICMP-Port-unreachable-Paket von der Zielmaschine zurückgesendet werden.\
 
 UDP-Port-Scans sind oft unzuverlässig, da Firewalls und Router ICMP-Pakete möglicherweise verwerfen.\
-Dies kann zu falsch positiven Ergebnissen in Ihrem Scan führen, und Sie werden regelmäßig sehen,\
-dass UDP-Port-Scans alle UDP-Ports auf einer gescannten Maschine als offen anzeigen.\
-Die meisten Port-Scanner scannen nicht alle verfügbaren Ports und haben normalerweise eine vordefinierte Liste\
+Dies kann zu falsch positiven Ergebnissen in Ihrem Scan führen, und Sie werden regelmäßig sehen, dass\
+UDP-Port-Scans alle UDP-Ports auf einer gescannten Maschine als offen anzeigen.\
+o Die meisten Port-Scanner scannen nicht alle verfügbaren Ports und haben normalerweise eine vordefinierte Liste\
 von „interessanten Ports“, die gescannt werden.
 
 # CTF - Tricks

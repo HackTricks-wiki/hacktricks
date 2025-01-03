@@ -24,7 +24,7 @@ Komprimiert und dekomprimiert einen gegebenen Datenpuffer.
 
 **CryptAcquireContext**
 
-Aus [den Dokumenten](https://learn.microsoft.com/en-us/windows/win32/api/wincrypt/nf-wincrypt-cryptacquirecontexta): Die **CryptAcquireContext**-Funktion wird verwendet, um einen Handle für einen bestimmten Schlüsselcontainer innerhalb eines bestimmten kryptografischen Dienstanbieters (CSP) zu erwerben. **Dieser zurückgegebene Handle wird in Aufrufen von CryptoAPI**-Funktionen verwendet, die den ausgewählten CSP verwenden.
+Aus [den Dokumenten](https://learn.microsoft.com/en-us/windows/win32/api/wincrypt/nf-wincrypt-cryptacquirecontexta): Die **CryptAcquireContext**-Funktion wird verwendet, um einen Handle für einen bestimmten Schlüsselcontainer innerhalb eines bestimmten kryptografischen Dienstanbieters (CSP) zu erwerben. **Dieser zurückgegebene Handle wird in Aufrufen von CryptoAPI**-Funktionen verwendet, die den ausgewählten CSP nutzen.
 
 **CryptCreateHash**
 
@@ -68,7 +68,7 @@ Es besteht aus 3 Hauptteilen:
 - **XOR-Phase**: Schließlich wird der Klartext oder Chiffretext mit den zuvor erstellten Werten **XORed**. Die Funktion zum Verschlüsseln und Entschlüsseln ist dieselbe. Dazu wird eine **Schleife durch die erstellten 256 Bytes** so oft durchgeführt, wie es notwendig ist. Dies wird normalerweise in einem dekompilierten Code mit einem **%256 (mod 256)** erkannt.
 
 > [!NOTE]
-> **Um einen RC4 in einem Disassemblierungs-/dekompilierten Code zu identifizieren, können Sie nach 2 Schleifen der Größe 0x100 (unter Verwendung eines Schlüssels) suchen und dann ein XOR der Eingabedaten mit den 256 zuvor in den 2 Schleifen erstellten Werten, wahrscheinlich unter Verwendung eines %256 (mod 256)**
+> **Um einen RC4 in einem Disassembly/dekompilierten Code zu identifizieren, können Sie nach 2 Schleifen der Größe 0x100 (unter Verwendung eines Schlüssels) suchen und dann ein XOR der Eingabedaten mit den 256 zuvor in den 2 Schleifen erstellten Werten, wahrscheinlich unter Verwendung eines %256 (mod 256)**
 
 ### **Initialisierungsphase/Substitutionsbox:** (Beachten Sie die Zahl 256, die als Zähler verwendet wird, und wie eine 0 an jedem Platz der 256 Zeichen geschrieben wird)
 
@@ -88,7 +88,7 @@ Es besteht aus 3 Hauptteilen:
 
 - Verwendung von **Substitutionsboxen und Nachschlagetabellen**
 - Es ist möglich, **AES anhand der Verwendung spezifischer Nachschlagetabellenwerte** (Konstanten) zu unterscheiden. _Beachten Sie, dass die **Konstante** in der Binärdatei **gespeichert** oder _**dynamisch**_ **erzeugt** werden kann._
-- Der **Verschlüsselungsschlüssel** muss **durch 16** (normalerweise 32B) **teilbar** sein, und normalerweise wird ein **IV** von 16B verwendet.
+- Der **Verschlüsselungsschlüssel** muss **durch 16** (normalerweise 32B) teilbar sein, und normalerweise wird ein **IV** von 16B verwendet.
 
 ### SBox-Konstanten
 
@@ -104,7 +104,7 @@ Es besteht aus 3 Hauptteilen:
 ### Identifizierung
 
 In der folgenden Abbildung beachten Sie, wie die Konstante **0x9E3779B9** verwendet wird (beachten Sie, dass diese Konstante auch von anderen Krypto-Algorithmen wie **TEA** -Tiny Encryption Algorithm verwendet wird).\
-Beachten Sie auch die **Größe der Schleife** (**132**) und die **Anzahl der XOR-Operationen** in den **Disassemblierungs**-Anweisungen und im **Code**-Beispiel:
+Beachten Sie auch die **Größe der Schleife** (**132**) und die **Anzahl der XOR-Operationen** in den **Disassembly**-Anweisungen und im **Code**-Beispiel:
 
 ![](<../../images/image (381).png>)
 

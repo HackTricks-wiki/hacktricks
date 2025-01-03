@@ -6,7 +6,7 @@
 
 ### Komponenten eines Zertifikats
 
-- Der **Betreff** des Zertifikats bezeichnet seinen Eigentümer.
+- Der **Betreff** des Zertifikats bezeichnet dessen Eigentümer.
 - Ein **Öffentlicher Schlüssel** wird mit einem privat gehaltenen Schlüssel gekoppelt, um das Zertifikat mit seinem rechtmäßigen Eigentümer zu verknüpfen.
 - Der **Gültigkeitszeitraum**, definiert durch die **NotBefore**- und **NotAfter**-Daten, markiert die effektive Dauer des Zertifikats.
 - Eine eindeutige **Seriennummer**, die von der Zertifizierungsstelle (CA) bereitgestellt wird, identifiziert jedes Zertifikat.
@@ -26,13 +26,13 @@
 AD CS erkennt CA-Zertifikate in einem AD-Wald durch bestimmte Container an, die jeweils einzigartige Rollen erfüllen:
 
 - Der Container **Zertifizierungsstellen** enthält vertrauenswürdige Root-CA-Zertifikate.
-- Der Container **Registrierungsdienste** enthält Informationen zu Enterprise-CAs und deren Zertifikatvorlagen.
+- Der Container **Registrierungsdienste** enthält Unternehmens-CAs und deren Zertifikatvorlagen.
 - Das Objekt **NTAuthCertificates** umfasst CA-Zertifikate, die für die AD-Authentifizierung autorisiert sind.
 - Der Container **AIA (Authority Information Access)** erleichtert die Validierung der Zertifikatskette mit Zwischen- und Cross-CA-Zertifikaten.
 
-### Zertifikatserwerb: Client-Zertifikatsanforderungsfluss
+### Zertifikatserwerbung: Client-Zertifikatsanforderungsfluss
 
-1. Der Anforderungsprozess beginnt mit Clients, die eine Enterprise-CA finden.
+1. Der Anforderungsprozess beginnt mit Clients, die eine Unternehmens-CA finden.
 2. Ein CSR wird erstellt, der einen öffentlichen Schlüssel und andere Details enthält, nachdem ein öffentlich-privates Schlüsselpaar generiert wurde.
 3. Die CA bewertet den CSR anhand der verfügbaren Zertifikatvorlagen und stellt das Zertifikat basierend auf den Berechtigungen der Vorlage aus.
 4. Nach Genehmigung signiert die CA das Zertifikat mit ihrem privaten Schlüssel und gibt es an den Client zurück.
@@ -43,9 +43,9 @@ Diese Vorlagen, die innerhalb von AD definiert sind, umreißen die Einstellungen
 
 ## Zertifikatsregistrierung
 
-Der Registrierungsprozess für Zertifikate wird von einem Administrator initiiert, der **eine Zertifikatvorlage erstellt**, die dann von einer Enterprise-Zertifizierungsstelle (CA) **veröffentlicht** wird. Dies macht die Vorlage für die Client-Registrierung verfügbar, ein Schritt, der erreicht wird, indem der Name der Vorlage in das Feld `certificatetemplates` eines Active Directory-Objekts eingefügt wird.
+Der Registrierungsprozess für Zertifikate wird von einem Administrator initiiert, der **eine Zertifikatvorlage erstellt**, die dann von einer Unternehmens-Zertifizierungsstelle (CA) **veröffentlicht** wird. Dies macht die Vorlage für die Client-Registrierung verfügbar, ein Schritt, der erreicht wird, indem der Name der Vorlage in das Feld `certificatetemplates` eines Active Directory-Objekts eingefügt wird.
 
-Damit ein Client ein Zertifikat anfordern kann, müssen **Registrierungsrechte** gewährt werden. Diese Rechte werden durch Sicherheitsbeschreibungen auf der Zertifikatvorlage und der Enterprise-CA selbst definiert. Berechtigungen müssen an beiden Orten gewährt werden, damit eine Anfrage erfolgreich ist.
+Damit ein Client ein Zertifikat anfordern kann, müssen **Registrierungsrechte** gewährt werden. Diese Rechte werden durch Sicherheitsbeschreibungen auf der Zertifikatvorlage und der Unternehmens-CA selbst definiert. Berechtigungen müssen an beiden Orten gewährt werden, damit eine Anfrage erfolgreich ist.
 
 ### Vorlagenregistrierungsrechte
 
@@ -55,7 +55,7 @@ Diese Rechte werden durch Access Control Entries (ACEs) spezifiziert, die Berech
 - **ExtendedRights**, die alle erweiterten Berechtigungen erlauben.
 - **Vollzugriff/Gesamtzugriff**, die vollständige Kontrolle über die Vorlage bieten.
 
-### Enterprise-CA-Registrierungsrechte
+### Unternehmens-CA-Registrierungsrechte
 
 Die Rechte der CA sind in ihrer Sicherheitsbeschreibung festgelegt, die über die Verwaltungs-Konsole der Zertifizierungsstelle zugänglich ist. Einige Einstellungen erlauben sogar Benutzern mit niedrigen Berechtigungen den Remote-Zugriff, was ein Sicherheitsrisiko darstellen könnte.
 
@@ -70,11 +70,11 @@ Bestimmte Kontrollen können gelten, wie:
 
 Zertifikate können angefordert werden über:
 
-1. **Windows Client Certificate Enrollment Protocol** (MS-WCCE), unter Verwendung von DCOM-Schnittstellen.
-2. **ICertPassage Remote Protocol** (MS-ICPR), über benannte Pipes oder TCP/IP.
-3. Die **Webschnittstelle zur Zertifikatsregistrierung**, mit der Rolle der Webregistrierung der Zertifizierungsstelle installiert.
-4. Den **Zertifikatsregistrierungsdienst** (CES), in Verbindung mit dem Dienst zur Zertifikatsregistrierungspolitik (CEP).
-5. Den **Network Device Enrollment Service** (NDES) für Netzwerkgeräte, unter Verwendung des Simple Certificate Enrollment Protocol (SCEP).
+1. **Windows Client-Zertifikatregistrierungsprotokoll** (MS-WCCE), unter Verwendung von DCOM-Schnittstellen.
+2. **ICertPassage Remote-Protokoll** (MS-ICPR), über benannte Pipes oder TCP/IP.
+3. Die **Webschnittstelle zur Zertifikatregistrierung**, mit der Rolle der Webregistrierung der Zertifizierungsstelle installiert.
+4. Den **Zertifikatregistrierungsdienst** (CES), in Verbindung mit dem Dienst für die Zertifikatregistrierungsrichtlinie (CEP).
+5. Den **Netzwerkgerätregistrierungsdienst** (NDES) für Netzwerkgeräte, unter Verwendung des Simple Certificate Enrollment Protocol (SCEP).
 
 Windows-Benutzer können auch Zertifikate über die GUI (`certmgr.msc` oder `certlm.msc`) oder Befehlszeilentools (`certreq.exe` oder PowerShells `Get-Certificate`-Befehl) anfordern.
 ```powershell
@@ -83,7 +83,7 @@ Get-Certificate -Template "User" -CertStoreLocation "cert:\\CurrentUser\\My"
 ```
 ## Zertifikatauthentifizierung
 
-Active Directory (AD) unterstützt die Zertifikatauthentifizierung, hauptsächlich unter Verwendung der Protokolle **Kerberos** und **Secure Channel (Schannel)**.
+Active Directory (AD) unterstützt die Zertifikatauthentifizierung, hauptsächlich unter Verwendung der **Kerberos**- und **Secure Channel (Schannel)**-Protokolle.
 
 ### Kerberos-Authentifizierungsprozess
 
@@ -95,7 +95,7 @@ ist zentral für die Etablierung von Vertrauen für die Zertifikatauthentifizier
 
 ### Secure Channel (Schannel) Authentifizierung
 
-Schannel ermöglicht sichere TLS/SSL-Verbindungen, bei denen der Client während eines Handshakes ein Zertifikat präsentiert, das, wenn es erfolgreich validiert wird, den Zugriff autorisiert. Die Zuordnung eines Zertifikats zu einem AD-Konto kann die **S4U2Self**-Funktion von Kerberos oder den **Subject Alternative Name (SAN)** des Zertifikats umfassen, unter anderem Methoden.
+Schannel ermöglicht sichere TLS/SSL-Verbindungen, bei denen der Client während eines Handshakes ein Zertifikat präsentiert, das, wenn es erfolgreich validiert wird, den Zugriff autorisiert. Die Zuordnung eines Zertifikats zu einem AD-Konto kann die **S4U2Self**-Funktion von Kerberos oder den **Subject Alternative Name (SAN)** des Zertifikats sowie andere Methoden umfassen.
 
 ### AD-Zertifikatdienste Aufzählung
 

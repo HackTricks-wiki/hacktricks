@@ -9,7 +9,7 @@ Die **benutzerdefinierte Firmware und/oder kompilierten Binärdateien können ho
 3. Ein Cross-Compiler kann mit Buildroot oder anderen geeigneten Methoden für die Umgebung erstellt werden.
 4. Die Backdoor kann mit dem Cross-Compiler erstellt werden.
 5. Die Backdoor kann in das extrahierte Firmware-Verzeichnis /usr/bin kopiert werden.
-6. Die entsprechende QEMU-Binärdatei kann in das extrahierte Firmware-Rootfs kopiert werden.
+6. Die geeignete QEMU-Binärdatei kann in das extrahierte Firmware-Rootfs kopiert werden.
 7. Die Backdoor kann mit chroot und QEMU emuliert werden.
 8. Die Backdoor kann über netcat erreicht werden.
 9. Die QEMU-Binärdatei sollte aus dem extrahierten Firmware-Rootfs entfernt werden.

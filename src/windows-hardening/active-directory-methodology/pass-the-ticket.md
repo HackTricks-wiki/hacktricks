@@ -4,7 +4,7 @@
 
 ## Pass The Ticket (PTT)
 
-Im **Pass The Ticket (PTT)** Angriffsverfahren **stehlen Angreifer das Authentifizierungsticket eines Benutzers** anstelle seines Passworts oder Hash-Werte. Dieses gestohlene Ticket wird dann verwendet, um **den Benutzer zu impersonieren** und unbefugten Zugriff auf Ressourcen und Dienste innerhalb eines Netzwerks zu erlangen.
+Im **Pass The Ticket (PTT)** Angriffsverfahren stehlen Angreifer **das Authentifizierungsticket eines Benutzers** anstelle seines Passworts oder Hash-Werte. Dieses gestohlene Ticket wird dann verwendet, um **den Benutzer zu impersonieren** und unbefugten Zugriff auf Ressourcen und Dienste innerhalb eines Netzwerks zu erhalten.
 
 **Lesen**:
 

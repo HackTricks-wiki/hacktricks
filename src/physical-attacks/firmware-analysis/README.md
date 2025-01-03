@@ -4,7 +4,7 @@
 
 ## **Einführung**
 
-Firmware ist essentielle Software, die es Geräten ermöglicht, korrekt zu funktionieren, indem sie die Kommunikation zwischen den Hardwarekomponenten und der Software, mit der die Benutzer interagieren, verwaltet und erleichtert. Sie wird im permanenten Speicher gespeichert, sodass das Gerät von dem Moment an auf wichtige Anweisungen zugreifen kann, in dem es eingeschaltet wird, was zum Start des Betriebssystems führt. Die Untersuchung und potenzielle Modifikation der Firmware ist ein kritischer Schritt zur Identifizierung von Sicherheitsanfälligkeiten.
+Firmware ist essentielle Software, die es Geräten ermöglicht, korrekt zu funktionieren, indem sie die Kommunikation zwischen den Hardwarekomponenten und der Software, mit der die Benutzer interagieren, verwaltet und erleichtert. Sie wird im permanenten Speicher gespeichert, sodass das Gerät von dem Moment an, in dem es eingeschaltet wird, auf wichtige Anweisungen zugreifen kann, was zum Start des Betriebssystems führt. Die Untersuchung und potenzielle Modifikation der Firmware ist ein kritischer Schritt zur Identifizierung von Sicherheitsanfälligkeiten.
 
 ## **Informationsbeschaffung**
 
@@ -30,7 +30,7 @@ Der Erwerb von Firmware kann auf verschiedene Weise erfolgen, jede mit ihrem eig
 - **Herunterladen** von offiziellen Support-Seiten
 - Nutzung von **Google-Dork**-Abfragen zur Auffindung gehosteter Firmware-Dateien
 - Direkter Zugriff auf **Cloud-Speicher** mit Tools wie [S3Scanner](https://github.com/sa7mon/S3Scanner)
-- Abfangen von **Updates** mittels Man-in-the-Middle-Techniken
+- Abfangen von **Updates** über Man-in-the-Middle-Techniken
 - **Extrahieren** vom Gerät über Verbindungen wie **UART**, **JTAG** oder **PICit**
 - **Sniffen** von Update-Anfragen innerhalb der Gerätekommunikation
 - Identifizieren und Verwenden von **hardcodierten Update-Endpunkten**
@@ -60,7 +60,7 @@ Oder [**binvis.io**](https://binvis.io/#/) ([code](https://code.google.com/archi
 
 ### Abrufen des Dateisystems
 
-Mit den zuvor kommentierten Tools wie `binwalk -ev <bin>` sollten Sie in der Lage gewesen sein, das **Dateisystem zu extrahieren**.\
+Mit den zuvor genannten Tools wie `binwalk -ev <bin>` sollten Sie in der Lage gewesen sein, das **Dateisystem zu extrahieren**.\
 Binwalk extrahiert es normalerweise in einen **Ordner, der nach dem Dateisystemtyp benannt ist**, der normalerweise einer der folgenden ist: squashfs, ubifs, romfs, rootfs, jffs2, yaffs2, cramfs, initramfs.
 
 #### Manuelle Dateisystemextraktion
@@ -91,7 +91,7 @@ Alternativ kann auch der folgende Befehl ausgeführt werden.
 
 `$ dd if=DIR850L_REVB.bin bs=1 skip=$((0x1A0094)) of=dir.squashfs`
 
-- Für squashfs (verwendet im obigen Beispiel)
+- Für squashfs (wie im obigen Beispiel verwendet)
 
 `$ unsquashfs dir.squashfs`
 
@@ -168,7 +168,7 @@ Der Prozess der Emulation von Firmware ermöglicht die **dynamische Analyse** en
 
 ### Emulation einzelner Binärdateien
 
-Für die Untersuchung einzelner Programme ist es entscheidend, die Endianness und die CPU-Architektur des Programms zu identifizieren.
+Um einzelne Programme zu untersuchen, ist es entscheidend, die Endianness und die CPU-Architektur des Programms zu identifizieren.
 
 #### Beispiel mit MIPS-Architektur
 
@@ -208,7 +208,7 @@ Betriebssysteme wie [AttifyOS](https://github.com/adi0x90/attifyos) und [EmbedOS
 
 ## Vorbereitete OSs zur Analyse von Firmware
 
-- [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS ist eine Distribution, die Ihnen helfen soll, Sicherheitsbewertungen und Penetrationstests von Internet of Things (IoT)-Geräten durchzuführen. Es spart Ihnen viel Zeit, indem es eine vorkonfigurierte Umgebung mit allen notwendigen Tools bereitstellt.
+- [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS ist eine Distribution, die Ihnen hilft, Sicherheitsbewertungen und Penetrationstests von Internet of Things (IoT)-Geräten durchzuführen. Es spart Ihnen viel Zeit, indem es eine vorkonfigurierte Umgebung mit allen notwendigen Tools bereitstellt.
 - [**EmbedOS**](https://github.com/scriptingxss/EmbedOS): Eingebettetes Sicherheitstestbetriebssystem basierend auf Ubuntu 18.04, vorinstalliert mit Tools für die Sicherheitstests von Firmware.
 
 ## Verwundbare Firmware zum Üben

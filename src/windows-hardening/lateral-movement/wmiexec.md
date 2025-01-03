@@ -6,7 +6,7 @@
 
 Prozesse können auf Hosts geöffnet werden, bei denen der Benutzername und entweder das Passwort oder der Hash bekannt sind, durch die Verwendung von WMI. Befehle werden über WMI von Wmiexec ausgeführt, was ein semi-interaktives Shell-Erlebnis bietet.
 
-**dcomexec.py:** Durch die Nutzung verschiedener DCOM-Endpunkte bietet dieses Skript eine semi-interaktive Shell ähnlich wie wmiexec.py, wobei speziell das ShellBrowserWindow DCOM-Objekt verwendet wird. Es unterstützt derzeit MMC20. Anwendungs-, Shell-Fenster- und Shell-Browser-Fensterobjekte. (source: [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))
+**dcomexec.py:** Dieses Skript nutzt verschiedene DCOM-Endpunkte und bietet eine semi-interaktive Shell ähnlich wie wmiexec.py, wobei speziell das ShellBrowserWindow DCOM-Objekt verwendet wird. Es unterstützt derzeit MMC20. Anwendungs-, Shell-Fenster- und Shell-Browser-Fensterobjekte. (source: [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))
 
 ## WMI-Grundlagen
 
@@ -57,7 +57,7 @@ $c.methods
 # Method listing and invocation
 Invoke-WmiMethod -Class win32_share -Name Create -ArgumentList @($null, "Description", $null, "Name", $null, "c:\share\path",0)
 ```
-## WMI-Aufzählung
+## WMI Enumeration
 
 ### WMI-Dienststatus
 
@@ -91,7 +91,7 @@ Remote-Abfragen von WMI nach spezifischen Informationen, wie lokalen Administrat
 
 Die heimliche Identifizierung von lokalen Administratoren auf einem Remote-Computer und angemeldeten Benutzern kann durch spezifische WMI-Abfragen erreicht werden. `wmic` unterstützt auch das Lesen aus einer Textdatei, um Befehle gleichzeitig auf mehreren Knoten auszuführen.
 
-Um einen Prozess über WMI remote auszuführen, wie das Bereitstellen eines Empire-Agenten, wird die folgende Befehlsstruktur verwendet, wobei die erfolgreiche Ausführung durch einen Rückgabewert von "0" angezeigt wird:
+Um einen Prozess über WMI remote auszuführen, wie das Bereitstellen eines Empire-Agenten, wird die folgende Befehlsstruktur verwendet, wobei eine erfolgreiche Ausführung durch einen Rückgabewert von "0" angezeigt wird:
 ```bash
 wmic /node:hostname /user:user path win32_process call create "empire launcher string here"
 ```

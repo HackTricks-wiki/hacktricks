@@ -13,12 +13,12 @@ Die Data Protection API (DPAPI) wird hauptsächlich im Windows-Betriebssystem f�
 Zu den persönlichen Daten, die durch DPAPI geschützt sind, gehören:
 
 - Passwörter und Auto-Vervollständigungsdaten von Internet Explorer und Google Chrome
-- E-Mail- und interne FTP-Kontopasswörter für Anwendungen wie Outlook und Windows Mail
+- E-Mail- und interne FTP-Kontenpasswörter für Anwendungen wie Outlook und Windows Mail
 - Passwörter für freigegebene Ordner, Ressourcen, drahtlose Netzwerke und Windows Vault, einschließlich Verschlüsselungsschlüssel
 - Passwörter für Remote-Desktop-Verbindungen, .NET Passport und private Schlüssel für verschiedene Verschlüsselungs- und Authentifizierungszwecke
 - Netzwerkpasswörter, die vom Credential Manager verwaltet werden, und persönliche Daten in Anwendungen, die CryptProtectData verwenden, wie Skype, MSN Messenger und mehr
 
-## Liste Vault
+## List Vault
 ```bash
 # From cmd
 vaultcmd /listcreds:"Windows Credentials" /all
@@ -60,7 +60,7 @@ Get-ChildItem -Hidden C:\Users\USER\AppData\Local\Microsoft\Protect\
 Get-ChildItem -Hidden C:\Users\USER\AppData\Roaming\Microsoft\Protect\{SID}
 Get-ChildItem -Hidden C:\Users\USER\AppData\Local\Microsoft\Protect\{SID}
 ```
-Dies ist, wie eine Reihe von Master Keys eines Benutzers aussehen wird:
+Das ist, wie eine Reihe von Master Keys eines Benutzers aussieht:
 
 ![](<../../images/image (1121).png>)
 
@@ -76,17 +76,17 @@ Normalerweise **ist jeder Master Key ein verschlüsselter symmetrischer Schlüss
 
 ## HEKATOMB
 
-[**HEKATOMB**](https://github.com/Processus-Thief/HEKATOMB) ist ein Tool, das die Extraktion aller Benutzer und Computer aus dem LDAP-Verzeichnis und die Extraktion des Backup-Schlüssels des Domänencontrollers über RPC automatisiert. Das Skript wird dann die IP-Adressen aller Computer auflösen und einen smbclient auf allen Computern ausführen, um alle DPAPI-Blobs aller Benutzer abzurufen und alles mit dem Domänen-Backup-Schlüssel zu entschlüsseln.
+[**HEKATOMB**](https://github.com/Processus-Thief/HEKATOMB) ist ein Tool, das die Extraktion aller Benutzer und Computer aus dem LDAP-Verzeichnis und die Extraktion des Domain-Controller-Backup-Schlüssels über RPC automatisiert. Das Skript wird dann alle Computer-IP-Adressen auflösen und einen smbclient auf allen Computern ausführen, um alle DPAPI-Blobs aller Benutzer abzurufen und alles mit dem Domain-Backup-Schlüssel zu entschlüsseln.
 
 `python3 hekatomb.py -hashes :ed0052e5a66b1c8e942cc9481a50d56 DOMAIN.local/administrator@10.0.0.1 -debug -dnstcp`
 
 Mit der aus der LDAP-Computerliste extrahierten Liste können Sie jedes Subnetz finden, selbst wenn Sie sie nicht kannten!
 
-"Weil Domänen-Admin-Rechte nicht genug sind. Hacken Sie sie alle."
+"Weil Domain-Admin-Rechte nicht genug sind. Hackt sie alle."
 
 ## DonPAPI
 
-[**DonPAPI**](https://github.com/login-securite/DonPAPI) kann automatisch durch DPAPI geschützte Geheimnisse dumpen.
+[**DonPAPI**](https://github.com/login-securite/DonPAPI) kann automatisch Geheimnisse, die durch DPAPI geschützt sind, dumpen.
 
 ## Referenzen
 

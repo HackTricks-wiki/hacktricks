@@ -30,7 +30,7 @@ AD CS erkennt CA-Zertifikate in einem AD-Wald durch bestimmte Container an, die 
 - Das Objekt **NTAuthCertificates** umfasst CA-Zertifikate, die für die AD-Authentifizierung autorisiert sind.
 - Der Container **AIA (Authority Information Access)** erleichtert die Validierung der Zertifikatskette mit Zwischen- und Cross-CA-Zertifikaten.
 
-### Zertifikatserwerbung: Client-Zertifikatsanforderungsfluss
+### Zertifikatserwerb: Client-Zertifikatsanforderungsfluss
 
 1. Der Anforderungsprozess beginnt mit Clients, die eine Unternehmens-CA finden.
 2. Ein CSR wird erstellt, der einen öffentlichen Schlüssel und andere Details enthält, nachdem ein öffentlich-privates Schlüsselpaar generiert wurde.
@@ -99,7 +99,7 @@ Schannel ermöglicht sichere TLS/SSL-Verbindungen, bei denen der Client während
 
 ### AD-Zertifikatdienste Aufzählung
 
-Die Zertifikatdienste von AD können durch LDAP-Abfragen aufgezählt werden, die Informationen über **Enterprise Certificate Authorities (CAs)** und deren Konfigurationen offenbaren. Dies ist für jeden domänenauthentifizierten Benutzer ohne besondere Berechtigungen zugänglich. Tools wie **[Certify](https://github.com/GhostPack/Certify)** und **[Certipy](https://github.com/ly4k/Certipy)** werden zur Aufzählung und Schwachstellenbewertung in AD CS-Umgebungen verwendet.
+Die Zertifikatdienste von AD können durch LDAP-Abfragen aufgezählt werden, wodurch Informationen über **Enterprise Certificate Authorities (CAs)** und deren Konfigurationen offengelegt werden. Dies ist für jeden domänenauthentifizierten Benutzer ohne besondere Berechtigungen zugänglich. Tools wie **[Certify](https://github.com/GhostPack/Certify)** und **[Certipy](https://github.com/ly4k/Certipy)** werden zur Aufzählung und Schwachstellenbewertung in AD CS-Umgebungen verwendet.
 
 Befehle zur Verwendung dieser Tools umfassen:
 ```bash

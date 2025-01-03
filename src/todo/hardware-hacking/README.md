@@ -8,7 +8,7 @@ JTAG ermöglicht einen Boundary-Scan. Der Boundary-Scan analysiert bestimmte Sch
 
 Der JTAG-Standard definiert **spezifische Befehle für die Durchführung von Boundary-Scans**, einschließlich der folgenden:
 
-- **BYPASS** ermöglicht es Ihnen, einen bestimmten Chip zu testen, ohne den Overhead anderer Chips durchlaufen zu müssen.
+- **BYPASS** ermöglicht es Ihnen, einen bestimmten Chip zu testen, ohne die anderen Chips zu durchlaufen.
 - **SAMPLE/PRELOAD** nimmt eine Probe der Daten auf, die das Gerät im normalen Betriebsmodus betreten und verlassen.
 - **EXTEST** setzt und liest den Zustand der Pins.
 
@@ -47,6 +47,6 @@ Ein **dritter Weg**, um JTAG-Pins zu identifizieren, besteht darin, die **PCB zu
 
 SWD ist ein ARM-spezifisches Protokoll, das für das Debugging entwickelt wurde.
 
-Die SWD-Schnittstelle benötigt **zwei Pins**: ein bidirektionales **SWDIO**-Signal, das dem JTAG-**TDI- und TDO-Pin entspricht**, und einen Takt, **SWCLK**, der dem **TCK** in JTAG entspricht. Viele Geräte unterstützen den **Serial Wire oder JTAG Debug Port (SWJ-DP)**, eine kombinierte JTAG- und SWD-Schnittstelle, die es Ihnen ermöglicht, entweder eine SWD- oder JTAG-Sonde an das Ziel anzuschließen.
+Die SWD-Schnittstelle benötigt **zwei Pins**: ein bidirektionales **SWDIO**-Signal, das dem JTAG-**TDI- und TDO-Pin** entspricht, und einen Takt, **SWCLK**, der dem **TCK** in JTAG entspricht. Viele Geräte unterstützen den **Serial Wire oder JTAG Debug Port (SWJ-DP)**, eine kombinierte JTAG- und SWD-Schnittstelle, die es Ihnen ermöglicht, entweder eine SWD- oder JTAG-Sonde mit dem Ziel zu verbinden.
 
 {{#include ../../banners/hacktricks-training.md}}

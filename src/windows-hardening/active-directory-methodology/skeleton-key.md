@@ -4,7 +4,7 @@
 
 ## Skeleton Key Angriff
 
-Der **Skeleton Key Angriff** ist eine ausgeklügelte Technik, die es Angreifern ermöglicht, die **Active Directory-Authentifizierung zu umgehen**, indem sie ein **Master-Passwort** in den Domänencontroller injizieren. Dies ermöglicht es dem Angreifer, sich **als beliebiger Benutzer zu authentifizieren**, ohne dessen Passwort, was ihm effektiv **uneingeschränkten Zugriff** auf die Domäne gewährt.
+Der **Skeleton Key Angriff** ist eine ausgeklügelte Technik, die es Angreifern ermöglicht, die **Active Directory-Authentifizierung zu umgehen**, indem sie ein **Master-Passwort** in den Domänencontroller injizieren. Dies ermöglicht es dem Angreifer, sich **als jeder Benutzer** zu authentifizieren, ohne dessen Passwort, was ihm effektiv **uneingeschränkten Zugriff** auf die Domäne gewährt.
 
 Er kann unter Verwendung von [Mimikatz](https://github.com/gentilkiwi/mimikatz) durchgeführt werden. Um diesen Angriff durchzuführen, sind **Domain Admin-Rechte Voraussetzung**, und der Angreifer muss jeden Domänencontroller anvisieren, um einen umfassenden Zugriff zu gewährleisten. Der Effekt des Angriffs ist jedoch vorübergehend, da **ein Neustart des Domänencontrollers die Malware beseitigt**, was eine erneute Implementierung für anhaltenden Zugriff erforderlich macht.
 

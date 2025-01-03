@@ -36,7 +36,7 @@ Es ist auch als Manchester-Kodierung bekannt. Der logische Wert wird durch die P
 
 <figure><img src="../../images/image (634).png" alt=""><figcaption></figcaption></figure>
 
-**4. Kombination der vorherigen und anderer exotischer Methoden**
+**4. Kombination der vorherigen und anderer Exoten**
 
 > [!NOTE]
 > Es gibt IR-Protokolle, die **versuchen, universell** für mehrere Gerätetypen zu werden. Die bekanntesten sind RC5 und NEC. Leider bedeutet das bekannteste **nicht das häufigste**. In meiner Umgebung habe ich nur zwei NEC-Fernbedienungen und keine RC5 gesehen.
@@ -55,16 +55,16 @@ Dann werden die Daten übertragen. Die Struktur, das Preamble und die Bitkodieru
 
 **NEC-IR-Protokoll** enthält einen kurzen Befehl und einen Wiederholcode, der gesendet wird, solange die Taste gedrückt wird. Sowohl der Befehl als auch der Wiederholcode haben am Anfang dasselbe Preamble.
 
-Der **Befehl** von NEC besteht neben dem Preamble aus einem Adressbyte und einem Befehlsnummernbyte, durch das das Gerät versteht, was ausgeführt werden muss. Adress- und Befehlsnummernbytes werden mit inversen Werten dupliziert, um die Integrität der Übertragung zu überprüfen. Am Ende des Befehls gibt es ein zusätzliches Stoppbit.
+Der **NEC-Befehl** besteht neben dem Preamble aus einem Adressbyte und einem Befehlsnummernbyte, durch das das Gerät versteht, was ausgeführt werden muss. Adress- und Befehlsnummernbytes werden mit inversen Werten dupliziert, um die Integrität der Übertragung zu überprüfen. Am Ende des Befehls gibt es ein zusätzliches Stoppbit.
 
-Der **Wiederholcode** hat eine "1" nach dem Preamble, das ein Stoppbit ist.
+Der **Wiederholcode** hat nach dem Preamble eine "1", die ein Stoppbit ist.
 
 Für **Logik "0" und "1"** verwendet NEC die Pulsabstandskodierung: Zuerst wird ein Pulsstoß übertragen, nach dem eine Pause folgt, deren Länge den Wert des Bits festlegt.
 
 ### Klimaanlagen
 
 Im Gegensatz zu anderen Fernbedienungen **übertragen Klimaanlagen nicht nur den Code der gedrückten Taste**. Sie **übertragen auch alle Informationen**, wenn eine Taste gedrückt wird, um sicherzustellen, dass die **Klimaanlage und die Fernbedienung synchronisiert sind**.\
-Dies verhindert, dass eine auf 20ºC eingestellte Maschine auf 21ºC erhöht wird, wenn eine Fernbedienung verwendet wird, und dann, wenn eine andere Fernbedienung, die immer noch die Temperatur von 20ºC hat, verwendet wird, um die Temperatur weiter zu erhöhen, sie auf 21ºC "erhöht" (und nicht auf 22ºC, weil sie denkt, dass sie auf 21ºC ist).
+Dies verhindert, dass eine auf 20ºC eingestellte Maschine mit einer Fernbedienung auf 21ºC erhöht wird und dann, wenn eine andere Fernbedienung, die immer noch die Temperatur von 20ºC hat, verwendet wird, um die Temperatur weiter zu erhöhen, sie auf 21ºC "erhöht" (und nicht auf 22ºC, weil sie denkt, dass sie auf 21ºC ist).
 
 ### Angriffe
 

@@ -1,12 +1,10 @@
-# Privilegienerhöhung mit Autoruns
+# Privilegieneskalation mit Autoruns
 
 {{#include ../../banners/hacktricks-training.md}}
 
-
-
 ## WMIC
 
-**Wmic** kann verwendet werden, um Programme beim **Start** auszuführen. Sehen Sie, welche Binaries so programmiert sind, dass sie beim Start ausgeführt werden:
+**Wmic** kann verwendet werden, um Programme beim **Start** auszuführen. Sehen Sie, welche Binaries für den Start programmiert sind mit:
 ```bash
 wmic startup get caption,command 2>nul & ^
 Get-CimInstance Win32_StartupCommand | select Name, command, Location, User | fl
@@ -74,15 +72,15 @@ Registrierungsschlüssel, die als **Run** und **RunOnce** bekannt sind, sind daf
 - `HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnceEx`
 - `HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunOnceEx`
 
-In Windows Vista und späteren Versionen werden die **Run** und **RunOnce** Registrierungsschlüssel nicht automatisch generiert. Einträge in diesen Schlüsseln können entweder Programme direkt starten oder sie als Abhängigkeiten angeben. Um beispielsweise eine DLL-Datei beim Anmelden zu laden, könnte man den **RunOnceEx** Registrierungsschlüssel zusammen mit einem "Depend"-Schlüssel verwenden. Dies wird demonstriert, indem ein Registrierungseintrag hinzugefügt wird, um "C:\temp\evil.dll" während des Systemstarts auszuführen:
+In Windows Vista und späteren Versionen werden die **Run** und **RunOnce** Registrierungsschlüssel nicht automatisch generiert. Einträge in diesen Schlüsseln können entweder Programme direkt starten oder sie als Abhängigkeiten angeben. Zum Beispiel, um eine DLL-Datei beim Anmelden zu laden, könnte man den **RunOnceEx** Registrierungsschlüssel zusammen mit einem "Depend"-Schlüssel verwenden. Dies wird demonstriert, indem ein Registrierungseintrag hinzugefügt wird, um "C:\temp\evil.dll" während des Systemstarts auszuführen:
 ```
 reg add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnceEx\\0001\\Depend /v 1 /d "C:\\temp\\evil.dll"
 ```
 > [!NOTE]
-> **Exploit 1**: Wenn Sie in eines der genannten Registrierungen innerhalb von **HKLM** schreiben können, können Sie die Berechtigungen erhöhen, wenn sich ein anderer Benutzer anmeldet.
+> **Exploit 1**: Wenn Sie in einen der genannten Registrierungswerte innerhalb von **HKLM** schreiben können, können Sie die Berechtigungen erhöhen, wenn sich ein anderer Benutzer anmeldet.
 
 > [!NOTE]
-> **Exploit 2**: Wenn Sie eine der angegebenen Binärdateien in einer der Registrierungen innerhalb von **HKLM** überschreiben können, können Sie diese Binärdatei mit einem Hintertür versehen, wenn sich ein anderer Benutzer anmeldet, und die Berechtigungen erhöhen.
+> **Exploit 2**: Wenn Sie eine der angegebenen Binärdateien in einem der Registrierungswerte innerhalb von **HKLM** überschreiben können, können Sie diese Binärdatei mit einem Hintertür versehen, wenn sich ein anderer Benutzer anmeldet, und die Berechtigungen erhöhen.
 ```bash
 #CMD
 reg query HKLM\Software\Microsoft\Windows\CurrentVersion\Run
@@ -211,7 +209,7 @@ Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Co
 ```
 ### Installierte Komponente
 
-Active Setup ist eine Funktion in Windows, die **vor dem vollständigen Laden der Desktop-Umgebung initiiert wird**. Sie priorisiert die Ausführung bestimmter Befehle, die abgeschlossen sein müssen, bevor die Benutzeranmeldung fortgesetzt wird. Dieser Prozess erfolgt sogar vor anderen Starteinträgen, wie denen in den Registry-Bereichen Run oder RunOnce.
+Active Setup ist eine Funktion in Windows, die **vor dem vollständigen Laden der Desktopumgebung initiiert** wird. Sie priorisiert die Ausführung bestimmter Befehle, die abgeschlossen sein müssen, bevor die Benutzeranmeldung fortgesetzt wird. Dieser Prozess erfolgt sogar vor anderen Starteinträgen, wie denen in den Registry-Bereichen Run oder RunOnce.
 
 Active Setup wird über die folgenden Registrierungsschlüssel verwaltet:
 
@@ -230,7 +228,7 @@ Innerhalb dieser Schlüssel existieren verschiedene Unterschlüssel, die jeweils
 **Sicherheitsinformationen:**
 
 - Das Ändern oder Schreiben in einen Schlüssel, bei dem **`IsInstalled`** auf `"1"` gesetzt ist, mit einem bestimmten **`StubPath`** kann zu unbefugter Befehlsausführung führen, möglicherweise zur Erhöhung von Rechten.
-- Das Ändern der Binärdatei, die in einem beliebigen **`StubPath`**-Wert referenziert wird, könnte ebenfalls zur Erhöhung von Rechten führen, sofern ausreichende Berechtigungen vorhanden sind.
+- Das Ändern der Binärdatei, die in einem **`StubPath`**-Wert referenziert wird, könnte ebenfalls zur Erhöhung von Rechten führen, sofern ausreichende Berechtigungen vorhanden sind.
 
 Um die **`StubPath`**-Konfigurationen über Active Setup-Komponenten zu überprüfen, können diese Befehle verwendet werden:
 ```bash
@@ -252,7 +250,7 @@ Um BHOs, die auf einem System registriert sind, zu erkunden, können Sie die fol
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
 - `HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects`
 
-Jedes BHO wird durch seine **CLSID** in der Registrierung dargestellt, die als eindeutiger Identifikator dient. Detaillierte Informationen zu jeder CLSID finden Sie unter `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`.
+Jeder BHO wird durch seine **CLSID** in der Registrierung dargestellt, die als eindeutiger Identifikator dient. Detaillierte Informationen zu jeder CLSID finden Sie unter `HKLM\SOFTWARE\Classes\CLSID\{<CLSID>}`.
 
 Für die Abfrage von BHOs in der Registrierung können diese Befehle verwendet werden:
 ```bash

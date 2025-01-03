@@ -36,13 +36,13 @@ Wenn Sie nach einer **fehlenden DLL in einer bestimmten ausführbaren Datei** su
 
 ## Ausnutzen fehlender DLLs
 
-Um Privilegien zu eskalieren, haben wir die beste Chance, wenn wir in der Lage sind, **eine DLL zu schreiben, die ein privilegierter Prozess versuchen wird zu laden** an einem **Ort, wo sie gesucht wird**. Daher werden wir in der Lage sein, **eine DLL in einem** **Ordner** zu **schreiben**, wo die **DLL zuerst gesucht wird**, bevor der Ordner, in dem die **ursprüngliche DLL** ist (seltsamer Fall), oder wir werden in der Lage sein, **in einen Ordner zu schreiben, wo die DLL gesucht wird** und die ursprüngliche **DLL nicht in einem Ordner existiert**.
+Um die Privilegien zu eskalieren, haben wir die beste Chance, wenn wir in der Lage sind, **eine DLL zu schreiben, die ein privilegierter Prozess versuchen wird zu laden** an einem **Ort, wo sie gesucht wird**. Daher werden wir in der Lage sein, **eine DLL in einem** **Ordner** zu **schreiben**, wo die **DLL zuerst gesucht wird**, bevor der Ordner, in dem die **ursprüngliche DLL** ist (seltsamer Fall), oder wir werden in der Lage sein, **in einen Ordner zu schreiben, wo die DLL gesucht wird** und die ursprüngliche **DLL nicht in einem Ordner existiert**.
 
 ### DLL-Suchreihenfolge
 
 **In der** [**Microsoft-Dokumentation**](https://docs.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-search-order#factors-that-affect-searching) **finden Sie, wie die DLLs spezifisch geladen werden.**
 
-**Windows-Anwendungen** suchen nach DLLs, indem sie einer Reihe von **vordefinierten Suchpfaden** folgen, die einer bestimmten Reihenfolge entsprechen. Das Problem des DLL Hijacking tritt auf, wenn eine schädliche DLL strategisch in einem dieser Verzeichnisse platziert wird, um sicherzustellen, dass sie vor der authentischen DLL geladen wird. Eine Lösung zur Vermeidung dessen ist, sicherzustellen, dass die Anwendung absolute Pfade verwendet, wenn sie auf die benötigten DLLs verweist.
+**Windows-Anwendungen** suchen nach DLLs, indem sie einer Reihe von **vordefinierten Suchpfaden** folgen, die einer bestimmten Reihenfolge entsprechen. Das Problem des DLL Hijacking tritt auf, wenn eine schädliche DLL strategisch in einem dieser Verzeichnisse platziert wird, um sicherzustellen, dass sie vor der authentischen DLL geladen wird. Eine Lösung zur Vermeidung dessen besteht darin, sicherzustellen, dass die Anwendung absolute Pfade verwendet, wenn sie auf die benötigten DLLs verweist.
 
 Sie können die **DLL-Suchreihenfolge auf 32-Bit**-Systemen unten sehen:
 
@@ -73,11 +73,11 @@ Bestimmte Ausnahmen von der standardmäßigen DLL-Suchreihenfolge sind in der Wi
 
 **Anforderungen**:
 
-- Identifizieren Sie einen Prozess, der unter **verschiedenen Privilegien** (horizontale oder laterale Bewegung) arbeitet oder arbeiten wird, der **eine DLL** **fehlt**.
+- Identifizieren Sie einen Prozess, der unter **unterschiedlichen Privilegien** (horizontale oder laterale Bewegung) arbeitet oder arbeiten wird, der **eine DLL** **fehlt**.
 - Stellen Sie sicher, dass **Schreibzugriff** für ein **Verzeichnis** verfügbar ist, in dem die **DLL** **gesucht wird**. Dieser Ort könnte das Verzeichnis der ausführbaren Datei oder ein Verzeichnis innerhalb des Systempfads sein.
 
-Ja, die Anforderungen sind kompliziert zu finden, da **es standardmäßig seltsam ist, eine privilegierte ausführbare Datei ohne eine DLL zu finden** und es ist sogar **noch seltsamer, Schreibberechtigungen für einen Systempfad-Ordner zu haben** (standardmäßig können Sie das nicht). Aber in falsch konfigurierten Umgebungen ist dies möglich.\
-Falls Sie Glück haben und die Anforderungen erfüllen, könnten Sie das [UACME](https://github.com/hfiref0x/UACME) Projekt überprüfen. Auch wenn das **Hauptziel des Projekts darin besteht, UAC zu umgehen**, finden Sie dort möglicherweise einen **PoC** für ein DLL-Hijacking für die Windows-Version, die Sie verwenden können (wahrscheinlich müssen Sie nur den Pfad des Ordners ändern, in dem Sie Schreibberechtigungen haben).
+Ja, die Anforderungen sind kompliziert zu finden, da **es standardmäßig seltsam ist, eine privilegierte ausführbare Datei ohne eine DLL zu finden**, und es ist sogar **noch seltsamer, Schreibberechtigungen für einen Systempfad-Ordner zu haben** (standardmäßig können Sie das nicht). Aber in falsch konfigurierten Umgebungen ist dies möglich.\
+Falls Sie Glück haben und die Anforderungen erfüllen, könnten Sie das [UACME](https://github.com/hfiref0x/UACME) Projekt überprüfen. Auch wenn das **Hauptziel des Projekts darin besteht, UAC zu umgehen**, finden Sie dort möglicherweise einen **PoC** für ein DLL Hijacking für die Windows-Version, die Sie verwenden können (wahrscheinlich müssen Sie nur den Pfad des Ordners ändern, in dem Sie Schreibberechtigungen haben).
 
 Beachten Sie, dass Sie **Ihre Berechtigungen in einem Ordner überprüfen können**, indem Sie:
 ```bash
@@ -111,7 +111,7 @@ Darüber hinaus finden Sie im **nächsten Abschnitt** einige **grundlegende dll-
 
 ## **Erstellen und Kompilieren von Dlls**
 
-### **Dll Proxifying**
+### **Dll-Proxifizierung**
 
 Im Grunde ist ein **Dll-Proxy** eine Dll, die in der Lage ist, **Ihren schädlichen Code auszuführen, wenn sie geladen wird**, aber auch **auszusetzen** und **zu arbeiten**, wie **erwartet**, indem sie **alle Aufrufe an die echte Bibliothek weiterleitet**.
 
@@ -133,7 +133,7 @@ msfvenom -p windows/adduser USER=privesc PASS=Attacker@123 -f dll -o msf.dll
 ```
 ### Deine eigene
 
-Beachte, dass die Dll, die du kompilierst, in mehreren Fällen **mehrere Funktionen exportieren muss**, die vom Opferprozess geladen werden, wenn diese Funktionen nicht existieren, **kann die Binary sie nicht laden** und der **Exploit wird fehlschlagen**.
+Beachte, dass die Dll, die du kompilierst, in mehreren Fällen **mehrere Funktionen exportieren muss**, die vom Opferprozess geladen werden, wenn diese Funktionen nicht existieren, kann die **Binary sie nicht laden** und der **Exploit wird fehlschlagen**.
 ```c
 // Tested in Win10
 // i686-w64-mingw32-g++ dll.c -lws2_32 -o srrstr.dll -shared

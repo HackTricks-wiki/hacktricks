@@ -23,7 +23,7 @@ Die benutzerfreundliche Python-Codebasis und Benutzeroberfläche ermöglicht es 
 Es gibt drei Zweige innerhalb von FISSURE, um die Dateinavigation zu erleichtern und den Code-Redundanz zu reduzieren. Der Branch Python2\_maint-3.7 enthält eine Codebasis, die auf Python2, PyQt4 und GNU Radio 3.7 basiert; der Branch Python3\_maint-3.8 basiert auf Python3, PyQt5 und GNU Radio 3.8; und der Branch Python3\_maint-3.10 basiert auf Python3, PyQt5 und GNU Radio 3.10.
 
 |   Betriebssystem   |   FISSURE-Zweig   |
-| :----------------: | :----------------: |
+| :-----------------: | :---------------: |
 |  Ubuntu 18.04 (x64)  | Python2\_maint-3.7 |
 | Ubuntu 18.04.5 (x64) | Python2\_maint-3.7 |
 | Ubuntu 18.04.6 (x64) | Python2\_maint-3.7 |
@@ -36,7 +36,7 @@ Es gibt drei Zweige innerhalb von FISSURE, um die Dateinavigation zu erleichtern
 Diese Betriebssysteme befinden sich noch im Beta-Status. Sie sind in der Entwicklung und mehrere Funktionen sind bekanntlich nicht verfügbar. Elemente im Installer könnten mit vorhandenen Programmen in Konflikt stehen oder die Installation könnte fehlschlagen, bis der Status entfernt wird.
 
 |     Betriebssystem     |    FISSURE-Zweig   |
-| :--------------------: | :-----------------: |
+| :---------------------: | :----------------: |
 | DragonOS Focal (x86\_64) |  Python3\_maint-3.8 |
 |    Ubuntu 22.04 (x64)    | Python3\_maint-3.10 |
 
@@ -50,7 +50,7 @@ git checkout <Python2_maint-3.7> or <Python3_maint-3.8> or <Python3_maint-3.10>
 git submodule update --init
 ./install
 ```
-Dies installiert die PyQt-Softwareabhängigkeiten, die erforderlich sind, um die Installations-GUIs zu starten, falls sie nicht gefunden werden.
+Dies installiert die erforderlichen PyQt-Softwareabhängigkeiten, die benötigt werden, um die Installations-GUIs zu starten, falls sie nicht gefunden werden.
 
 Wählen Sie als Nächstes die Option aus, die am besten zu Ihrem Betriebssystem passt (sollte automatisch erkannt werden, wenn Ihr OS mit einer Option übereinstimmt).
 
@@ -104,7 +104,7 @@ Die folgende Liste umfasst "unterstützte" Hardware mit unterschiedlichen Integr
 
 ## Lektionen
 
-FISSURE kommt mit mehreren hilfreichen Anleitungen, um sich mit verschiedenen Technologien und Techniken vertraut zu machen. Viele enthalten Schritte zur Verwendung verschiedener Tools, die in FISSURE integriert sind.
+FISSURE enthält mehrere hilfreiche Anleitungen, um sich mit verschiedenen Technologien und Techniken vertraut zu machen. Viele beinhalten Schritte zur Verwendung verschiedener Werkzeuge, die in FISSURE integriert sind.
 
 * [Lesson1: OpenBTS](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson1\_OpenBTS.md)
 * [Lesson2: Lua Dissectors](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson2\_LuaDissectors.md)
@@ -120,10 +120,10 @@ FISSURE kommt mit mehreren hilfreichen Anleitungen, um sich mit verschiedenen Te
 
 ## Roadmap
 
-* [ ] Fügen Sie weitere Hardwaretypen, RF-Protokolle, Signalparameter und Analysetools hinzu
+* [ ] Fügen Sie weitere Hardwaretypen, RF-Protokolle, Signalparameter, Analysetools hinzu
 * [ ] Unterstützen Sie weitere Betriebssysteme
 * [ ] Entwickeln Sie Unterrichtsmaterial zu FISSURE (RF-Angriffe, Wi-Fi, GNU Radio, PyQt usw.)
-* [ ] Erstellen Sie einen Signalaufbereiter, Merkmals-Extraktor und Signal-Klassifizierer mit wählbaren AI/ML-Techniken
+* [ ] Erstellen Sie einen Signalaufbereiter, Merkmalsextraktor und Signalklassifizierer mit wählbaren AI/ML-Techniken
 * [ ] Implementieren Sie rekursive Demodulationsmechanismen zur Erzeugung eines Bitstroms aus unbekannten Signalen
 * [ ] Überführen Sie die Hauptkomponenten von FISSURE in ein generisches Sensor-Knoten-Bereitstellungsschema
 
@@ -132,7 +132,7 @@ FISSURE kommt mit mehreren hilfreichen Anleitungen, um sich mit verschiedenen Te
 Vorschläge zur Verbesserung von FISSURE sind ausdrücklich erwünscht. Hinterlassen Sie einen Kommentar auf der [Discussions](https://github.com/ainfosec/FISSURE/discussions)-Seite oder im Discord-Server, wenn Sie Gedanken zu Folgendem haben:
 
 * Vorschläge für neue Funktionen und Designänderungen
-* Software-Tools mit Installationsschritten
+* Softwaretools mit Installationsschritten
 * Neue Lektionen oder zusätzliches Material für bestehende Lektionen
 * Interessante RF-Protokolle
 * Weitere Hardware- und SDR-Typen zur Integration

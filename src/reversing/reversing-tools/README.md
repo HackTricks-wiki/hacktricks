@@ -19,7 +19,7 @@ Im Bereich von **WebAssembly** sind Werkzeuge zum **Dekompilieren** und **Kompil
 
 Das Dekompilieren von .Net-Assemblies kann mit Tools wie:
 
-- [ILSpy](https://github.com/icsharpcode/ILSpy) erfolgen, das auch ein [Plugin für Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode) bietet, das plattformübergreifende Nutzung ermöglicht.
+- [ILSpy](https://github.com/icsharpcode/ILSpy) erfolgen, das auch ein [Plugin für Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode) anbietet, das plattformübergreifende Nutzung ermöglicht.
 - Für Aufgaben, die **Dekompilierung**, **Modifikation** und **Rekompilierung** umfassen, wird [dnSpy](https://github.com/0xd4d/dnSpy/releases) dringend empfohlen. **Rechtsklick** auf eine Methode und Auswahl von **Methode ändern** ermöglicht Codeänderungen.
 - [JetBrains' dotPeek](https://www.jetbrains.com/es-es/decompiler/) ist eine weitere Alternative zum Dekompilieren von .Net-Assemblies.
 
@@ -27,7 +27,7 @@ Das Dekompilieren von .Net-Assemblies kann mit Tools wie:
 
 ### DNSpy-Logging
 
-Um Informationen mit DNSpy in eine Datei zu protokollieren, fügen Sie den folgenden .Net-Code-Schnipsel ein:
+Um Informationen mit DNSpy in eine Datei zu protokollieren, fügen Sie den folgenden .Net-Code-Snippet ein:
 
 %%%cpp
 using System.IO;
@@ -37,7 +37,7 @@ File.AppendAllText(path, "Passwort: " + password + "\n");
 
 ### DNSpy-Debugging
 
-Für effektives Debugging mit DNSpy wird eine Abfolge von Schritten empfohlen, um **Assembly-Attribute** für das Debugging anzupassen und sicherzustellen, dass Optimierungen, die das Debugging behindern könnten, deaktiviert sind. Dieser Prozess umfasst das Ändern der `DebuggableAttribute`-Einstellungen, das Rekompilieren der Assembly und das Speichern der Änderungen.
+Für effektives Debugging mit DNSpy wird eine Reihe von Schritten empfohlen, um **Assembly-Attribute** für das Debugging anzupassen und sicherzustellen, dass Optimierungen, die das Debugging behindern könnten, deaktiviert sind. Dieser Prozess umfasst das Ändern der `DebuggableAttribute`-Einstellungen, das Rekompilieren der Assembly und das Speichern der Änderungen.
 
 Darüber hinaus wird empfohlen, um eine .Net-Anwendung, die von **IIS** ausgeführt wird, zu debuggen, `iisreset /noforce` auszuführen, um IIS neu zu starten. Um DNSpy an den IIS-Prozess zum Debuggen anzuhängen, wird in der Anleitung beschrieben, wie man den **w3wp.exe**-Prozess innerhalb von DNSpy auswählt und die Debugging-Sitzung startet.
 
@@ -56,13 +56,13 @@ Um Java-Bytecode zu dekompilieren, können diese Tools sehr hilfreich sein:
 
 ### Verwendung von IDA
 
-- **Rundll32** wird von bestimmten Pfaden für 64-Bit- und 32-Bit-Versionen geladen.
+- **Rundll32** wird aus bestimmten Pfaden für 64-Bit- und 32-Bit-Versionen geladen.
 - **Windbg** wird als Debugger ausgewählt, mit der Option, beim Laden/Entladen von Bibliotheken anzuhalten.
 - Ausführungsparameter umfassen den DLL-Pfad und den Funktionsnamen. Diese Konfiguration stoppt die Ausführung beim Laden jeder DLL.
 
 ### Verwendung von x64dbg/x32dbg
 
-- Ähnlich wie bei IDA wird **rundll32** mit Befehlszeilenänderungen geladen, um die DLL und Funktion anzugeben.
+- Ähnlich wie bei IDA wird **rundll32** mit Befehlszeilenänderungen geladen, um die DLL und die Funktion anzugeben.
 - Die Einstellungen werden angepasst, um beim DLL-Eintritt zu brechen, sodass ein Haltepunkt am gewünschten DLL-Eintrittspunkt gesetzt werden kann.
 
 ### Bilder
@@ -91,7 +91,7 @@ scdbg.exe -f shellcode -r # Analysebericht
 scdbg.exe -f shellcode -i -r # Interaktive Hooks
 scdbg.exe -f shellcode -d # Dekodierten Shellcode dumpen
 scdbg.exe -f shellcode /findsc # Startoffset finden
-scdbg.exe -f shellcode /foff 0x0000004D # Von Offset ausführen
+scdbg.exe -f shellcode /foff 0x0000004D # Ausführung vom Offset
 %%%
 
 - **CyberChef** zum Disassemblieren von Shellcode: [CyberChef-Rezept](https://gchq.github.io/CyberChef/#recipe=To_Hex%28'Space',0%29Disassemble_x86%28'32','Full%20x86%20architecture',16,0,true,true%29)
@@ -100,7 +100,7 @@ scdbg.exe -f shellcode /foff 0x0000004D # Von Offset ausführen
 
 - Ein Obfuscator, der alle Anweisungen durch `mov` ersetzt.
 - Nützliche Ressourcen umfassen eine [YouTube-Erklärung](https://www.youtube.com/watch?v=2VF_wPkiBJY) und [PDF-Folien](https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas_2015_the_movfuscator.pdf).
-- **demovfuscator** könnte die Obfuskation des Movfuscators umkehren, wobei Abhängigkeiten wie `libcapstone-dev` und `libz3-dev` erforderlich sind, und die Installation von [keystone](https://github.com/keystone-engine/keystone/blob/master/docs/COMPILE-NIX.md).
+- **demovfuscator** könnte die Obfuskation von movfuscator rückgängig machen, wobei Abhängigkeiten wie `libcapstone-dev` und `libz3-dev` erforderlich sind, und die Installation von [keystone](https://github.com/keystone-engine/keystone/blob/master/docs/COMPILE-NIX.md).
 
 ## **Delphi**
 

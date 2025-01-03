@@ -8,8 +8,8 @@
 
 - [ ] [**Systeminformationen**](windows-local-privilege-escalation/#system-info) abrufen
 - [ ] Nach **Kernel** [**Exploits mit Skripten**](windows-local-privilege-escalation/#version-exploits) suchen
-- [ ] **Google verwenden, um nach** Kernel **Exploits** zu suchen
-- [ ] **searchsploit verwenden, um nach** Kernel **Exploits** zu suchen
+- [ ] **Google verwenden, um** nach Kernel **Exploits** zu suchen
+- [ ] **searchsploit verwenden, um** nach Kernel **Exploits** zu suchen
 - [ ] Interessante Informationen in [**Umgebungsvariablen**](windows-local-privilege-escalation/#environment)?
 - [ ] Passwörter im [**PowerShell-Verlauf**](windows-local-privilege-escalation/#powershell-history)?
 - [ ] Interessante Informationen in [**Internet-Einstellungen**](windows-local-privilege-escalation/#internet-settings)?
@@ -31,7 +31,7 @@
 - [ ] [**Benutzerprivilegien**](windows-local-privilege-escalation/#users-and-groups)
 - [ ] [**Aktuelle** Benutzer **privilegien**](windows-local-privilege-escalation/#users-and-groups) überprüfen
 - [ ] Bist du [**Mitglied einer privilegierten Gruppe**](windows-local-privilege-escalation/#privileged-groups)?
-- [ ] Überprüfen, ob du [eines dieser Tokens aktiviert hast](windows-local-privilege-escalation/#token-manipulation): **SeImpersonatePrivilege, SeAssignPrimaryPrivilege, SeTcbPrivilege, SeBackupPrivilege, SeRestorePrivilege, SeCreateTokenPrivilege, SeLoadDriverPrivilege, SeTakeOwnershipPrivilege, SeDebugPrivilege**?
+- [ ] Überprüfen, ob du [eines dieser Tokens aktiviert hast](windows-local-privilege-escalation/#token-manipulation): **SeImpersonatePrivilege, SeAssignPrimaryPrivilege, SeTcbPrivilege, SeBackupPrivilege, SeRestorePrivilege, SeCreateTokenPrivilege, SeLoadDriverPrivilege, SeTakeOwnershipPrivilege, SeDebugPrivilege** ?
 - [ ] [**Benutzersitzungen**](windows-local-privilege-escalation/#logged-users-sessions)?
 - [ ] Überprüfen[ **Benutzerverzeichnisse**](windows-local-privilege-escalation/#home-folders) (Zugriff?)
 - [ ] [**Passwortrichtlinie**](windows-local-privilege-escalation/#password-policy) überprüfen
@@ -40,7 +40,7 @@
 ### [Netzwerk](windows-local-privilege-escalation/#network)
 
 - [ ] **Aktuelle** [**Netzwerkinformationen**](windows-local-privilege-escalation/#network) überprüfen
-- [ ] **Versteckte lokale Dienste** überprüfen, die nach außen eingeschränkt sind
+- [ ] **Versteckte lokale Dienste** überprüfen, die auf das Internet beschränkt sind
 
 ### [Ausgeführte Prozesse](windows-local-privilege-escalation/#running-processes)
 
@@ -51,10 +51,10 @@
 
 ### [Dienste](windows-local-privilege-escalation/#services)
 
-- [ ] [Kannst du **irgendeinen Dienst** ändern?](windows-local-privilege-escalation/#permissions)
-- [ ] [Kannst du **die Binärdatei** ändern, die von einem **Dienst** **ausgeführt** wird?](windows-local-privilege-escalation/#modify-service-binary-path)
-- [ ] [Kannst du **die Registrierung** eines **Dienstes** ändern?](windows-local-privilege-escalation/#services-registry-modify-permissions)
-- [ ] [Kannst du von einem **nicht zitierten Dienst** Binärdateipfad profitieren?](windows-local-privilege-escalation/#unquoted-service-paths)
+- [ ] [Kannst du **irgendeinen Dienst** **modifizieren**?](windows-local-privilege-escalation/#permissions)
+- [ ] [Kannst du **die Binärdatei** modifizieren, die von einem **Dienst** **ausgeführt** wird?](windows-local-privilege-escalation/#modify-service-binary-path)
+- [ ] [Kannst du **die Registrierung** eines **Dienstes** **modifizieren**?](windows-local-privilege-escalation/#services-registry-modify-permissions)
+- [ ] [Kannst du von einem **nicht zitierten Dienst** Binärdatei **Pfad** profitieren?](windows-local-privilege-escalation/#unquoted-service-paths)
 
 ### [**Anwendungen**](windows-local-privilege-escalation/#applications)
 
@@ -64,9 +64,9 @@
 
 ### [DLL-Hijacking](windows-local-privilege-escalation/#path-dll-hijacking)
 
-- [ ] Kannst du **in irgendeinen Ordner innerhalb von PATH** schreiben?
-- [ ] Gibt es eine bekannte Dienstbinärdatei, die **versucht, eine nicht existierende DLL zu laden**?
-- [ ] Kannst du **in irgendeinen Binärordner** schreiben?
+- [ ] Kannst du **in irgendeinen Ordner innerhalb von PATH** **schreiben**?
+- [ ] Gibt es eine bekannte Dienstbinärdatei, die **versucht, eine nicht existierende DLL** zu laden?
+- [ ] Kannst du **in irgendeinen** **Binärordner** **schreiben**?
 
 ### [Netzwerk](windows-local-privilege-escalation/#network)
 
@@ -82,7 +82,7 @@
 - [ ] Interessante Informationen in [**gespeicherten RDP-Verbindungen**](windows-local-privilege-escalation/#saved-rdp-connections)?
 - [ ] Passwörter in [**kürzlich ausgeführten Befehlen**](windows-local-privilege-escalation/#recently-run-commands)?
 - [ ] [**Remote Desktop Credential Manager**](windows-local-privilege-escalation/#remote-desktop-credential-manager) Passwörter?
-- [ ] [**AppCmd.exe** existiert](windows-local-privilege-escalation/#appcmd-exe)? Anmeldeinformationen?
+- [ ] Existiert [**AppCmd.exe**](windows-local-privilege-escalation/#appcmd-exe)? Anmeldeinformationen?
 - [ ] [**SCClient.exe**](windows-local-privilege-escalation/#scclient-sccm)? DLL-Seitenladung?
 
 ### [Dateien und Registrierung (Anmeldeinformationen)](windows-local-privilege-escalation/#files-and-registry-credentials)
@@ -99,7 +99,7 @@
 - [ ] Möchtest du [**den Benutzer nach Anmeldeinformationen fragen**](windows-local-privilege-escalation/#ask-for-credentials)?
 - [ ] Interessante [**Dateien im Papierkorb**](windows-local-privilege-escalation/#credentials-in-the-recyclebin)?
 - [ ] Andere [**Registrierungen mit Anmeldeinformationen**](windows-local-privilege-escalation/#inside-the-registry)?
-- [ ] Innerhalb [**der Browserdaten**](windows-local-privilege-escalation/#browsers-history) (Datenbanken, Verlauf, Lesezeichen, ...)?
+- [ ] Innerhalb [**von Browserdaten**](windows-local-privilege-escalation/#browsers-history) (Datenbanken, Verlauf, Lesezeichen, ...)?
 - [ ] [**Allgemeine Passwortsuche**](windows-local-privilege-escalation/#generic-password-search-in-files-and-registry) in Dateien und Registrierung
 - [ ] [**Tools**](windows-local-privilege-escalation/#tools-that-search-for-passwords) zur automatischen Suche nach Passwörtern
 

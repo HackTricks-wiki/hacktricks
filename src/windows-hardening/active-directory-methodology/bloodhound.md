@@ -4,7 +4,7 @@
 
 ## AD Explorer
 
-[AD Explorer](https://docs.microsoft.com/en-us/sysinternals/downloads/adexplorer) stammt aus der Sysinternal Suite:
+[AD Explorer](https://docs.microsoft.com/en-us/sysinternals/downloads/adexplorer) ist aus der Sysinternal Suite:
 
 > Ein fortschrittlicher Active Directory (AD) Viewer und Editor. Sie können AD Explorer verwenden, um einfach durch eine AD-Datenbank zu navigieren, bevorzugte Standorte zu definieren, Objektattribute und -eigenschaften ohne Öffnen von Dialogfeldern anzuzeigen, Berechtigungen zu bearbeiten, das Schema eines Objekts anzuzeigen und anspruchsvolle Suchen auszuführen, die Sie speichern und erneut ausführen können.
 

@@ -10,11 +10,11 @@ iButton ist ein allgemeiner Name für einen elektronischen Identifizierungsschl�
 
 ### Was ist iButton? <a href="#what-is-ibutton" id="what-is-ibutton"></a>
 
-Normalerweise bezieht sich iButton auf die physische Form des Schlüssels und Lesegeräts - eine runde Münze mit zwei Kontakten. Für den Rahmen, der ihn umgibt, gibt es viele Variationen, von der häufigsten Kunststoffhalterung mit einem Loch bis hin zu Ringen, Anhängern usw.
+Normalerweise impliziert iButton die physische Form des Schlüssels und Lesegeräts - eine runde Münze mit zwei Kontakten. Für den Rahmen, der ihn umgibt, gibt es viele Variationen, von der häufigsten Kunststoffhalterung mit einem Loch bis hin zu Ringen, Anhängern usw.
 
 <figure><img src="../../images/image (1078).png" alt=""><figcaption></figcaption></figure>
 
-Wenn der Schlüssel das Lesegerät erreicht, **kommen die Kontakte in Berührung** und der Schlüssel wird mit Strom versorgt, um seine ID zu **übertragen**. Manchmal wird der Schlüssel **nicht sofort gelesen**, weil der **Kontakt-PSD eines Gegensprechers größer** ist, als er sein sollte. In diesem Fall konnten die äußeren Konturen des Schlüssels und des Lesegeräts nicht in Kontakt treten. Wenn das der Fall ist, müssen Sie den Schlüssel über eine der Wände des Lesegeräts drücken.
+Wenn der Schlüssel den Leser erreicht, **kommen die Kontakte in Berührung** und der Schlüssel wird mit Strom versorgt, um seine ID zu **übertragen**. Manchmal wird der Schlüssel **nicht sofort gelesen**, weil der **Kontakt-PSD eines Gegensprechers größer** ist, als er sein sollte. Daher konnten die äußeren Konturen des Schlüssels und des Lesers nicht in Kontakt treten. In diesem Fall müssen Sie den Schlüssel über eine der Wände des Lesers drücken.
 
 <figure><img src="../../images/image (290).png" alt=""><figcaption></figcaption></figure>
 
@@ -28,7 +28,7 @@ Flipper kann sowohl im Master- als auch im Slave-Modus arbeiten. Im Schlüssel-L
 
 ### Dallas-, Cyfral- & Metakom-Schlüssel
 
-Für Informationen darüber, wie diese Schlüssel funktionieren, siehe die Seite [https://blog.flipperzero.one/taming-ibutton/](https://blog.flipperzero.one/taming-ibutton/)
+Für Informationen darüber, wie diese Schlüssel funktionieren, besuchen Sie die Seite [https://blog.flipperzero.one/taming-ibutton/](https://blog.flipperzero.one/taming-ibutton/)
 
 ### Angriffe
 

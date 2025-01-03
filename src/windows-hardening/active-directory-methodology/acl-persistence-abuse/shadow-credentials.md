@@ -17,7 +17,7 @@ Um diese Technik anzuwenden, müssen bestimmte Bedingungen erfüllt sein:
 - Es wird mindestens ein Windows Server 2016 Domänencontroller benötigt.
 - Der Domänencontroller muss ein digitales Serverauthentifizierungszertifikat installiert haben.
 - Das Active Directory muss sich auf dem Windows Server 2016 Funktionslevel befinden.
-- Ein Konto mit delegierten Rechten zur Änderung des msDS-KeyCredentialLink-Attributs des Zielobjekts ist erforderlich.
+- Ein Konto mit delegierten Rechten zur Modifikation des msDS-KeyCredentialLink-Attributs des Zielobjekts ist erforderlich.
 
 ## Missbrauch
 
@@ -37,7 +37,7 @@ Es basiert auf DSInternals und bietet eine C#-Schnittstelle für diesen Angriff.
 **Whisker**-Funktionen umfassen:
 
 - **Add**: Generiert ein Schlüsselpaar und fügt eine Schlüsselanmeldeinformation hinzu.
-- **List**: Zeigt alle Einträge der Schlüsselanmeldeinformationen an.
+- **List**: Zeigt alle Schlüsselanmeldeinträge an.
 - **Remove**: Löscht eine angegebene Schlüsselanmeldeinformation.
 - **Clear**: Löscht alle Schlüsselanmeldeinformationen, was die legitime Nutzung von WHfB stören könnte.
 ```shell
@@ -51,7 +51,7 @@ python3 pywhisker.py -d "domain.local" -u "user1" -p "complexpassword" --target 
 ```
 ### [ShadowSpray](https://github.com/Dec0ne/ShadowSpray/)
 
-ShadowSpray zielt darauf ab, **GenericWrite/GenericAll-Berechtigungen auszunutzen, die breite Benutzergruppen möglicherweise über Domänenobjekte haben**, um ShadowCredentials umfassend anzuwenden. Es umfasst das Anmelden an der Domäne, das Überprüfen des funktionalen Niveaus der Domäne, das Auflisten von Domänenobjekten und den Versuch, KeyCredentials für den Erwerb von TGT und die Offenlegung des NT-Hashes hinzuzufügen. Aufräumoptionen und rekursive Ausnutzungstaktiken erhöhen seinen Nutzen.
+ShadowSpray zielt darauf ab, **GenericWrite/GenericAll-Berechtigungen auszunutzen, die breite Benutzergruppen möglicherweise über Domänenobjekte haben**, um ShadowCredentials umfassend anzuwenden. Es umfasst das Einloggen in die Domäne, die Überprüfung des funktionalen Niveaus der Domäne, das Auflisten von Domänenobjekten und den Versuch, KeyCredentials für den Erwerb von TGT und die Offenlegung des NT-Hashes hinzuzufügen. Aufräumoptionen und rekursive Ausnutzungstaktiken erhöhen seinen Nutzen.
 
 ## References
 

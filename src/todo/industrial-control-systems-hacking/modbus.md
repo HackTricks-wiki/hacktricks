@@ -20,7 +20,7 @@ Daten werden im Modbus-Protokoll als ASCII oder Binär übertragen, obwohl das b
 
 ## Funktionscodes
 
-Das ModBus-Protokoll funktioniert mit der Übertragung spezifischer Funktionscodes, die zur Steuerung der PLCs und verschiedener Steuergeräte verwendet werden. Dieser Abschnitt ist wichtig zu verstehen, da Wiederholungsangriffe durch die erneute Übertragung von Funktionscodes durchgeführt werden können. Legacy-Geräte unterstützen keine Verschlüsselung der Datenübertragung und haben normalerweise lange Drähte, die sie verbinden, was zu Manipulationen dieser Drähte und zum Erfassen/injizieren von Daten führt.
+Das ModBus-Protokoll arbeitet mit der Übertragung spezifischer Funktionscodes, die zur Steuerung der PLCs und verschiedener Steuergeräte verwendet werden. Dieser Abschnitt ist wichtig zu verstehen, da Wiederholungsangriffe durch das erneute Übertragen von Funktionscodes durchgeführt werden können. Legacy-Geräte unterstützen keine Verschlüsselung der Datenübertragung und haben normalerweise lange Drähte, die sie verbinden, was zu Manipulationen dieser Drähte und zum Erfassen/injizieren von Daten führt.
 
 ## Adressierung von Modbus
 

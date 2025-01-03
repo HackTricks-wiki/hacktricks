@@ -26,7 +26,7 @@ Die `.pfx`-Datei kann dann auf ein Zielsystem hochgeladen und mit einem Tool nam
 ```bash
 Rubeus.exe asktgt /user:harmj0y /certificate:C:\Temp\cert.pfx /password:CertPass!
 ```
-Ein wichtiger Hinweis wird gegeben, wie diese Technik, kombiniert mit einer anderen Methode, die im Abschnitt **THEFT5** beschrieben ist, es einem Angreifer ermöglicht, den **NTLM-Hash** eines Kontos dauerhaft zu erhalten, ohne mit dem Local Security Authority Subsystem Service (LSASS) zu interagieren und aus einem nicht erhöhten Kontext, was eine stealthier Methode für den langfristigen Diebstahl von Anmeldeinformationen bietet.
+Ein wichtiger Hinweis wird gegeben, wie diese Technik, kombiniert mit einer anderen Methode, die im Abschnitt **THEFT5** beschrieben ist, es einem Angreifer ermöglicht, dauerhaft den **NTLM-Hash** eines Kontos zu erhalten, ohne mit dem Local Security Authority Subsystem Service (LSASS) zu interagieren und aus einem nicht erhöhten Kontext, was eine stealthier Methode für den langfristigen Diebstahl von Anmeldeinformationen bietet.
 
 ## **Maschinenpersistenz mit Zertifikaten erlangen - PERSIST2**
 

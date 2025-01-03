@@ -16,13 +16,13 @@ smbexec.py WORKGROUP/genericuser:genericpassword@10.10.10.10
 ```
 ### Ausführen von Befehlen ohne Binaries
 
-- **Smbexec** ermöglicht die direkte Ausführung von Befehlen über Service-binPaths, wodurch die Notwendigkeit physischer Binaries auf dem Ziel entfällt.
+- **Smbexec** ermöglicht die direkte Ausführung von Befehlen über DienstbinPaths, wodurch die Notwendigkeit physischer Binaries auf dem Ziel entfällt.
 - Diese Methode ist nützlich, um einmalige Befehle auf einem Windows-Ziel auszuführen. Zum Beispiel ermöglicht die Kombination mit Metasploit's `web_delivery`-Modul die Ausführung eines PowerShell-zielgerichteten Reverse-Meterpreter-Payloads.
-- Durch das Erstellen eines Remote-Services auf dem Rechner des Angreifers mit binPath, der so eingestellt ist, dass der bereitgestellte Befehl über cmd.exe ausgeführt wird, ist es möglich, den Payload erfolgreich auszuführen, Callback und Payload-Ausführung mit dem Metasploit-Listener zu erreichen, selbst wenn Fehler bei der Service-Antwort auftreten.
+- Durch das Erstellen eines Remote-Dienstes auf dem Rechner des Angreifers mit binPath, der so eingestellt ist, dass der bereitgestellte Befehl über cmd.exe ausgeführt wird, ist es möglich, den Payload erfolgreich auszuführen, Callback und Payload-Ausführung mit dem Metasploit-Listener zu erreichen, selbst wenn Dienstantwortfehler auftreten.
 
 ### Beispielbefehle
 
-Das Erstellen und Starten des Services kann mit den folgenden Befehlen durchgeführt werden:
+Das Erstellen und Starten des Dienstes kann mit den folgenden Befehlen durchgeführt werden:
 ```bash
 sc create [ServiceName] binPath= "cmd.exe /c [PayloadCommand]"
 sc start [ServiceName]

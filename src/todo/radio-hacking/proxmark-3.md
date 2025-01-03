@@ -9,10 +9,10 @@ Das erste, was Sie tun müssen, ist, einen [**Proxmark3**](https://proxmark.com)
 ### Angreifen von MIFARE Classic 1KB
 
 Es hat **16 Sektoren**, jeder von ihnen hat **4 Blöcke** und jeder Block enthält **16B**. Die UID befindet sich im Sektor 0 Block 0 (und kann nicht geändert werden).\
-Um auf jeden Sektor zuzugreifen, benötigen Sie **2 Schlüssel** (**A** und **B**), die in **Block 3 jedes Sektors** gespeichert sind (Sektor-Trailer). Der Sektor-Trailer speichert auch die **Zugriffsbits**, die die **Lese- und Schreib**berechtigungen für **jeden Block** mit den 2 Schlüsseln geben.\
+Um auf jeden Sektor zuzugreifen, benötigen Sie **2 Schlüssel** (**A** und **B**), die in **Block 3 jedes Sektors** gespeichert sind (Sektortrailer). Der Sektortrailer speichert auch die **Zugriffsbits**, die die **Lese- und Schreib**berechtigungen für **jeden Block** mit den 2 Schlüsseln geben.\
 2 Schlüssel sind nützlich, um Berechtigungen zum Lesen zu geben, wenn Sie den ersten kennen, und zum Schreiben, wenn Sie den zweiten kennen (zum Beispiel).
 
-Es können mehrere Angriffe durchgeführt werden.
+Es können mehrere Angriffe durchgeführt werden
 ```bash
 proxmark3> hf mf #List attacks
 
@@ -31,7 +31,7 @@ proxmark3> hf mf eset 01 000102030405060708090a0b0c0d0e0f # Write those bytes to
 proxmark3> hf mf eget 01 # Read block 1
 proxmark3> hf mf wrbl 01 B FFFFFFFFFFFF 000102030405060708090a0b0c0d0e0f # Write to the card
 ```
-Der Proxmark3 ermöglicht es, andere Aktionen wie das **Abhören** einer **Tag-zu-Reader-Kommunikation** durchzuführen, um sensible Daten zu finden. In dieser Karte könnten Sie einfach die Kommunikation sniffen und den verwendeten Schlüssel berechnen, da die **verwendeten kryptografischen Operationen schwach sind** und Sie mit dem Klartext und dem Chiffretext ihn berechnen können (Tool `mfkey64`).
+Der Proxmark3 ermöglicht es, andere Aktionen wie das **Abhören** einer **Tag-zu-Reader-Kommunikation** durchzuführen, um zu versuchen, sensible Daten zu finden. In dieser Karte könnten Sie einfach die Kommunikation sniffen und den verwendeten Schlüssel berechnen, da die **verwendeten kryptografischen Operationen schwach sind** und Sie mit dem Klartext und dem Chiffretext diesen berechnen können (`mfkey64` Tool).
 
 ### Rohbefehle
 

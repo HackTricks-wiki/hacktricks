@@ -4,7 +4,7 @@
 
 ## Kerberoast
 
-Kerberoasting konzentriert sich auf den Erwerb von **TGS-Tickets**, insbesondere solchen, die mit Diensten verbunden sind, die unter **Benutzerkonten** in **Active Directory (AD)** betrieben werden, ausgenommen **Computer-Konten**. Die Verschlüsselung dieser Tickets verwendet Schlüssel, die aus **Benutzerpasswörtern** stammen, was die Möglichkeit des **Offline-Credential-Crackings** eröffnet. Die Verwendung eines Benutzerkontos als Dienst wird durch eine nicht leere **"ServicePrincipalName"**-Eigenschaft angezeigt.
+Kerberoasting konzentriert sich auf den Erwerb von **TGS-Tickets**, insbesondere solchen, die mit Diensten verbunden sind, die unter **Benutzerkonten** in **Active Directory (AD)** betrieben werden, ausgenommen **Computer-Konten**. Die Verschlüsselung dieser Tickets verwendet Schlüssel, die von **Benutzerpasswörtern** stammen, was die Möglichkeit des **Offline-Credential-Crackings** eröffnet. Die Verwendung eines Benutzerkontos als Dienst wird durch eine nicht leere **"ServicePrincipalName"**-Eigenschaft angezeigt.
 
 Für die Durchführung von **Kerberoasting** ist ein Domänenkonto erforderlich, das in der Lage ist, **TGS-Tickets** anzufordern; dieser Prozess erfordert jedoch keine **besonderen Berechtigungen**, was ihn für jeden mit **gültigen Domänenanmeldeinformationen** zugänglich macht.
 
@@ -85,7 +85,7 @@ Invoke-Kerberoast -OutputFormat hashcat | % { $_.Hash } | Out-File -Encoding ASC
 > [!WARNING]
 > Wenn ein TGS angefordert wird, wird das Windows-Ereignis `4769 - Ein Kerberos-Dienstticket wurde angefordert` generiert.
 
-### Knacken
+### Cracking
 ```bash
 john --format=krb5tgs --wordlist=passwords_kerb.txt hashes.kerberoast
 hashcat -m 13100 --force -a 0 hashes.kerberoast passwords_kerb.txt
@@ -101,7 +101,7 @@ Sie finden nützliche **Tools** für **Kerberoast**-Angriffe hier: [https://gith
 
 Wenn Sie diesen **Fehler** von Linux finden: **`Kerberos SessionError: KRB_AP_ERR_SKEW(Clock skew too great)`**, liegt das an Ihrer lokalen Zeit, Sie müssen den Host mit dem DC synchronisieren. Es gibt einige Optionen:
 
-- `ntpdate <IP des DC>` - Ab Ubuntu 16.04 veraltet
+- `ntpdate <IP des DC>` - Veraltet seit Ubuntu 16.04
 - `rdate -n <IP des DC>`
 
 ### Minderung
@@ -125,7 +125,7 @@ Durch die Implementierung dieser Maßnahmen können Organisationen das Risiko, d
 
 ## Kerberoast ohne Domänenkonto
 
-Im **September 2022** wurde eine neue Möglichkeit zur Ausnutzung eines Systems von einem Forscher namens Charlie Clark bekannt gemacht, die über seine Plattform [exploit.ph](https://exploit.ph/) geteilt wurde. Diese Methode ermöglicht den Erwerb von **Service Tickets (ST)** über eine **KRB_AS_REQ**-Anfrage, die bemerkenswerterweise keine Kontrolle über ein Active Directory-Konto erfordert. Im Wesentlichen, wenn ein Principal so eingerichtet ist, dass er keine Vorab-Authentifizierung benötigt – ein Szenario, das im Bereich der Cybersicherheit als **AS-REP Roasting-Angriff** bekannt ist – kann dieses Merkmal genutzt werden, um den Anfrageprozess zu manipulieren. Insbesondere wird das System durch die Änderung des **sname**-Attributs im Anfragekörper getäuscht, sodass es ein **ST** anstelle des standardmäßigen verschlüsselten Ticket Granting Ticket (TGT) ausstellt.
+Im **September 2022** wurde eine neue Möglichkeit zur Ausnutzung eines Systems von einem Forscher namens Charlie Clark bekannt gemacht, die über seine Plattform [exploit.ph](https://exploit.ph/) geteilt wurde. Diese Methode ermöglicht den Erwerb von **Service Tickets (ST)** über eine **KRB_AS_REQ**-Anfrage, die bemerkenswerterweise keine Kontrolle über ein Active Directory-Konto erfordert. Im Wesentlichen, wenn ein Principal so eingerichtet ist, dass er keine Vorab-Authentifizierung benötigt – ein Szenario, das in der Cybersicherheitswelt als **AS-REP Roasting-Angriff** bekannt ist – kann dieses Merkmal genutzt werden, um den Anfrageprozess zu manipulieren. Insbesondere wird das System durch die Änderung des **sname**-Attributs im Anfragekörper getäuscht, sodass es ein **ST** anstelle des standardmäßigen verschlüsselten Ticket Granting Ticket (TGT) ausstellt.
 
 Die Technik wird in diesem Artikel ausführlich erklärt: [Semperis Blogbeitrag](https://www.semperis.com/blog/new-attack-paths-as-requested-sts/).
 

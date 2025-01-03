@@ -2,7 +2,7 @@
 
 # Referrer-Header und Richtlinie
 
-Referrer ist der Header, der von Browsern verwendet wird, um anzuzeigen, welche die vorherige besuchte Seite war.
+Referrer ist der Header, der von Browsern verwendet wird, um anzugeben, welche die vorherige besuchte Seite war.
 
 ## Sensible Informationen geleakt
 

@@ -4,7 +4,7 @@
 
 ## Wie funktionieren sie
 
-Der Prozess ist in den folgenden Schritten skizziert, die veranschaulichen, wie Dienst-Binärdateien manipuliert werden, um eine Remote-Ausführung auf einem Zielrechner über SMB zu erreichen:
+Der Prozess ist in den folgenden Schritten skizziert, die zeigen, wie Dienst-Binärdateien manipuliert werden, um eine Remote-Ausführung auf einem Zielrechner über SMB zu erreichen:
 
 1. **Kopieren einer Dienst-Binärdatei in den ADMIN$-Freigabe über SMB** wird durchgeführt.
 2. **Erstellung eines Dienstes auf dem Remote-Rechner** erfolgt durch Verweisen auf die Binärdatei.
@@ -13,7 +13,7 @@ Der Prozess ist in den folgenden Schritten skizziert, die veranschaulichen, wie 
 
 ### **Prozess der manuellen Ausführung von PsExec**
 
-Angenommen, es gibt eine ausführbare Payload (erstellt mit msfvenom und obfuskiert mit Veil, um die Erkennung durch Antivirenprogramme zu umgehen), benannt 'met8888.exe', die eine meterpreter reverse_http Payload darstellt, werden die folgenden Schritte unternommen:
+Angenommen, es gibt eine ausführbare Payload (erstellt mit msfvenom und obfuskiert mit Veil, um die Erkennung durch Antivirenprogramme zu umgehen), genannt 'met8888.exe', die eine meterpreter reverse_http Payload darstellt, werden die folgenden Schritte unternommen:
 
 - **Kopieren der Binärdatei**: Die ausführbare Datei wird von einer Eingabeaufforderung in die ADMIN$-Freigabe kopiert, obwohl sie überall im Dateisystem platziert werden kann, um verborgen zu bleiben.
 

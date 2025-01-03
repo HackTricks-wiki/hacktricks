@@ -4,14 +4,14 @@
 
 ## Diamond Ticket
 
-**Wie ein goldenes Ticket** ist ein Diamantticket ein TGT, das verwendet werden kann, um **auf jeden Dienst als jeder Benutzer** zuzugreifen. Ein goldenes Ticket wird vollständig offline gefälscht, mit dem krbtgt-Hash dieser Domäne verschlüsselt und dann in eine Anmeldesitzung übergeben. Da Domänencontroller TGTs, die sie (oder sie) legitim ausgestellt haben, nicht verfolgen, akzeptieren sie gerne TGTs, die mit ihrem eigenen krbtgt-Hash verschlüsselt sind.
+**Wie ein goldenes Ticket** ist ein Diamantticket ein TGT, das verwendet werden kann, um **auf jeden Dienst als jeder Benutzer zuzugreifen**. Ein goldenes Ticket wird vollständig offline gefälscht, mit dem krbtgt-Hash dieser Domäne verschlüsselt und dann in eine Anmeldesitzung übergeben. Da Domänencontroller TGTs, die sie (oder sie) legitim ausgestellt haben, nicht verfolgen, akzeptieren sie gerne TGTs, die mit ihrem eigenen krbtgt-Hash verschlüsselt sind.
 
 Es gibt zwei gängige Techniken, um die Verwendung von goldenen Tickets zu erkennen:
 
 - Suchen Sie nach TGS-REQs, die kein entsprechendes AS-REQ haben.
 - Suchen Sie nach TGTs, die absurde Werte haben, wie zum Beispiel die Standardlebensdauer von 10 Jahren von Mimikatz.
 
-Ein **Diamantticket** wird erstellt, indem **die Felder eines legitimen TGTs, das von einem DC ausgestellt wurde, modifiziert werden**. Dies wird erreicht, indem **ein TGT angefordert**, **mit dem krbtgt-Hash der Domäne entschlüsselt**, **die gewünschten Felder des Tickets modifiziert** und dann **wieder verschlüsselt** wird. Dies **überwindet die beiden oben genannten Mängel** eines goldenen Tickets, weil:
+Ein **Diamantticket** wird erstellt, indem **die Felder eines legitimen TGTs, das von einem DC ausgestellt wurde, modifiziert werden**. Dies wird erreicht, indem ein **TGT angefordert**, es mit dem krbtgt-Hash der Domäne **entschlüsselt**, die gewünschten Felder des Tickets **modifiziert** und dann **wieder verschlüsselt** wird. Dies **überwindet die beiden oben genannten Mängel** eines goldenen Tickets, weil:
 
 - TGS-REQs ein vorhergehendes AS-REQ haben werden.
 - Das TGT wurde von einem DC ausgestellt, was bedeutet, dass es alle korrekten Details aus der Kerberos-Richtlinie der Domäne haben wird. Auch wenn diese in einem goldenen Ticket genau gefälscht werden können, ist es komplexer und anfälliger für Fehler.

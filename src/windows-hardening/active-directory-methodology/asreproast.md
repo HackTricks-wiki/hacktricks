@@ -52,7 +52,7 @@ bloodyAD -u user -p 'totoTOTOtoto1234*' -d crash.lab --host 10.100.10.5 add uac 
 ```
 ## ASREProast ohne Anmeldeinformationen
 
-Ein Angreifer kann eine Man-in-the-Middle-Position nutzen, um AS-REP-Pakete abzufangen, während sie das Netzwerk durchqueren, ohne sich auf die Deaktivierung der Kerberos-Vorab-Authentifizierung zu verlassen. Es funktioniert daher für alle Benutzer im VLAN.\
+Ein Angreifer kann eine Man-in-the-Middle-Position nutzen, um AS-REP-Pakete abzufangen, während sie das Netzwerk durchqueren, ohne sich darauf zu verlassen, dass die Kerberos-Vorautorisierung deaktiviert ist. Es funktioniert daher für alle Benutzer im VLAN.\
 [ASRepCatcher](https://github.com/Yaxxine7/ASRepCatcher) ermöglicht uns dies. Darüber hinaus zwingt das Tool Client-Workstations, RC4 zu verwenden, indem es die Kerberos-Verhandlung ändert.
 ```bash
 # Actively acting as a proxy between the clients and the DC, forcing RC4 downgrade if supported

@@ -220,7 +220,7 @@ optional = Some(i + 1);
 // explicitly handling the failing case.
 }
 ```
-### Traits
+### Eigenschaften
 
 Erstellen Sie eine neue Methode für einen Typ
 ```rust
@@ -254,7 +254,7 @@ assert_ne!(true, false);
 
 #### Arc
 
-Ein Arc kann Clone verwenden, um weitere Referenzen auf das Objekt zu erstellen, um sie an die Threads zu übergeben. Wenn der letzte Referenzzeiger auf einen Wert außerhalb des Gültigkeitsbereichs ist, wird die Variable verworfen.
+Ein Arc kann Clone verwenden, um weitere Referenzen auf das Objekt zu erstellen, um sie an die Threads weiterzugeben. Wenn der letzte Referenzzeiger auf einen Wert außerhalb des Gültigkeitsbereichs ist, wird die Variable verworfen.
 ```rust
 use std::sync::Arc;
 let apple = Arc::new("the same apple");

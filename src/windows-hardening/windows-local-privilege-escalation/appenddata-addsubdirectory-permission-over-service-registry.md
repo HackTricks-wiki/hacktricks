@@ -21,7 +21,7 @@ Dokumentationen zum **Performance**-Unterschlüssel und seiner Nutzung zur Leist
 
 Das Ziel war es, den **RPC Endpoint Mapper-Dienst** dazu zu bringen, die erstellte Performance-DLL zu laden. Beobachtungen zeigten, dass das Ausführen von WMI-Klassenabfragen im Zusammenhang mit Leistungsdaten über PowerShell zur Erstellung einer Protokolldatei führte, die die Ausführung beliebigen Codes im Kontext des **LOCAL SYSTEM** ermöglichte, wodurch erhöhte Berechtigungen gewährt wurden.
 
-Die Persistenz und die potenziellen Auswirkungen dieser Schwachstelle wurden hervorgehoben, was ihre Relevanz für Post-Exploitation-Strategien, laterale Bewegung und die Umgehung von Antivirus-/EDR-Systemen unterstrich.
+Die Persistenz und die potenziellen Auswirkungen dieser Schwachstelle wurden hervorgehoben, wobei ihre Relevanz für Post-Exploitation-Strategien, laterale Bewegung und die Umgehung von Antivirus-/EDR-Systemen betont wurde.
 
 Obwohl die Schwachstelle zunächst unbeabsichtigt durch das Skript offengelegt wurde, wurde betont, dass ihre Ausnutzung auf veraltete Windows-Versionen (z. B. **Windows 7 / Server 2008 R2**) beschränkt ist und lokalen Zugriff erfordert.
 

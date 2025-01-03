@@ -53,9 +53,9 @@
 - [https://github.com/prodigysml/Dr.-Watson](https://github.com/prodigysml/Dr.-Watson) : Burp-Plugin, Offline-Analyse zur Entdeckung von Domains, Subdomains und IPs
 - [https://github.com/hahwul/WebHackersWeapons](https://github.com/hahwul/WebHackersWeapons): Liste verschiedener Tools
 - [https://github.com/gauravnarwani97/Trishul](https://github.com/gauravnarwani97/Trishul) : BurpSuite-Plugin zur Auffindung von Schwachstellen (SQLi, XSS, SSTI)
-- [https://github.com/fransr/postMessage-tracker](https://github.com/fransr/postMessage-tracker) : Chrome-Erweiterung zur Verfolgung von Post-Nachrichtenfunktionen
+- [https://github.com/fransr/postMessage-tracker](https://github.com/fransr/postMessage-tracker) : Chrome-Erweiterung zum Verfolgen von Post-Nachrichtenfunktionen
 - [https://github.com/Quitten/Autorize](https://github.com/Quitten/Autorize) : Automatische Authentifizierungstests (Cookies entfernen und versuchen, die Anfrage zu senden)
-- [https://github.com/pikpikcu/xrcross](https://github.com/pikpikcu/xrcross): XRCross ist ein Rekonstruktionstool, Scanner und ein Werkzeug für Penetration/BugBounty-Tests. Dieses Tool wurde entwickelt, um (XSS|SSRF|CORS|SSTI|IDOR|RCE|LFI|SQLI) Schwachstellen zu testen
+- [https://github.com/pikpikcu/xrcross](https://github.com/pikpikcu/xrcross): XRCross ist ein Rekonstruktions-, Scanner- und Tool für Penetration/BugBounty-Tests. Dieses Tool wurde entwickelt, um (XSS|SSRF|CORS|SSTI|IDOR|RCE|LFI|SQLI) Schwachstellen zu testen
 
 # Windows
 
@@ -92,7 +92,7 @@ Hier eine Firmware mit Schwachstellen zur Analyse: [https://github.com/scripting
 
 und hier die OWASP-Methodologie zur Analyse von Firmware: [https://github.com/scriptingxss/owasp-fstm](https://github.com/scriptingxss/owasp-fstm)
 
-Firmware-Emulation: FIRMADYNE (https://github.com/firmadyne/firmadyne/) ist eine Plattform zur Automatisierung der Emulation und dynamischen Analyse von Linux-basierter Firmware.
+Firmware-Emulation: FIRMADYNE (https://github.com/firmadyne/firmadyne/) ist eine Plattform zur Automatisierung der Emulation und dynamischen Analyse von Linux-basierten Firmware.
 
 # ANDERE
 

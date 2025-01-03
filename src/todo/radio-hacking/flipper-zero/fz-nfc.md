@@ -70,7 +70,7 @@ Falls Flipper Zero nicht in der Lage ist, den Typ der Karte aus den Low-Level-Da
 #### EMV-Bankkarten (PayPass, payWave, Apple Pay, Google Pay) <a href="#emv-bank-cards-paypass-paywave-apple-pay-google-pay" id="emv-bank-cards-paypass-paywave-apple-pay-google-pay"></a>
 
 Neben dem einfachen Lesen der UID können Sie viel mehr Daten von einer Bankkarte extrahieren. Es ist möglich, **die vollständige Kartennummer** (die 16 Ziffern auf der Vorderseite der Karte), **Gültigkeitsdatum** und in einigen Fällen sogar den **Namen des Eigentümers** zusammen mit einer Liste der **neueste Transaktionen** zu erhalten.\
-Allerdings können Sie **den CVV auf diese Weise nicht lesen** (die 3 Ziffern auf der Rückseite der Karte). Außerdem sind **Bankkarten vor Replay-Angriffen geschützt**, sodass das Kopieren mit Flipper und der anschließende Versuch, es zu emulieren, um etwas zu bezahlen, nicht funktionieren wird.
+Allerdings können Sie **den CVV auf diese Weise nicht lesen** (die 3 Ziffern auf der Rückseite der Karte). Außerdem sind **Bankkarten vor Replay-Angriffen geschützt**, sodass das Kopieren mit Flipper und der anschließende Versuch, sie zu emulieren, um für etwas zu bezahlen, nicht funktionieren wird.
 
 ## Referenzen
 

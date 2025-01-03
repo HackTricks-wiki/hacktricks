@@ -116,7 +116,7 @@ Zuerst benötigst du einige ausführbare Dateien neben juicypotato.exe.
 
 Lade [Join-Object.ps1](https://github.com/ohpe/juicy-potato/blob/master/CLSID/utils/Join-Object.ps1) herunter und lade es in deine PS-Sitzung, und lade [GetCLSID.ps1](https://github.com/ohpe/juicy-potato/blob/master/CLSID/GetCLSID.ps1) herunter und führe es aus. Dieses Skript erstellt eine Liste möglicher CLSIDs, die getestet werden können.
 
-Lade dann [test_clsid.bat ](https://github.com/ohpe/juicy-potato/blob/master/Test/test_clsid.bat) herunter (ändere den Pfad zur CLSID-Liste und zur juicypotato ausführbaren Datei) und führe es aus. Es wird versuchen, jede CLSID zu testen, und **wenn sich die Portnummer ändert, bedeutet das, dass die CLSID funktioniert hat**.
+Lade dann [test_clsid.bat ](https://github.com/ohpe/juicy-potato/blob/master/Test/test_clsid.bat) herunter (ändere den Pfad zur CLSID-Liste und zur juicypotato-executablen Datei) und führe es aus. Es wird versuchen, jede CLSID zu testen, und **wenn sich die Portnummer ändert, bedeutet das, dass die CLSID funktioniert hat**.
 
 **Überprüfe** die funktionierenden CLSIDs **mit dem Parameter -c**
 

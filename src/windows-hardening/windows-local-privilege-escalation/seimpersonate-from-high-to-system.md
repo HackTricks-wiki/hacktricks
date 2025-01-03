@@ -4,7 +4,7 @@
 
 ### Code
 
-Der folgende Code von [hier](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962). Er ermöglicht es, **eine Prozess-ID als Argument anzugeben** und eine CMD **auszuführen als der Benutzer** des angegebenen Prozesses.\
+Der folgende Code von [hier](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962). Er ermöglicht es, **eine Prozess-ID als Argument anzugeben** und eine CMD **auszuführen, die als der Benutzer** des angegebenen Prozesses läuft.\
 Wenn Sie in einem High Integrity-Prozess laufen, können Sie **die PID eines Prozesses angeben, der als System läuft** (wie winlogon, wininit) und eine cmd.exe als System ausführen.
 ```cpp
 impersonateuser.exe 1234
@@ -142,7 +142,7 @@ return 0;
 ```
 ### Fehler
 
-In einigen Fällen versuchen Sie möglicherweise, sich als System auszugeben, und es funktioniert nicht, was eine Ausgabe wie die folgende zeigt:
+In einigen Fällen versuchen Sie möglicherweise, sich als System auszugeben, und es funktioniert nicht, wobei eine Ausgabe wie die folgende angezeigt wird:
 ```cpp
 [+] OpenProcess() success!
 [+] OpenProcessToken() success!
@@ -153,7 +153,7 @@ In einigen Fällen versuchen Sie möglicherweise, sich als System auszugeben, un
 [-] CreateProcessWithTokenW Return Code: 0
 [-] CreateProcessWithTokenW Error: 1326
 ```
-Das bedeutet, dass selbst wenn Sie auf einem High Integrity Level laufen, **Sie nicht genügend Berechtigungen haben**.\
+Das bedeutet, dass selbst wenn Sie auf einem hohen Integritätslevel arbeiten, **Sie nicht genügend Berechtigungen haben**.\
 Überprüfen wir die aktuellen Administratorberechtigungen für `svchost.exe`-Prozesse mit **processes explorer** (oder Sie können auch process hacker verwenden):
 
 1. Wählen Sie einen Prozess von `svchost.exe`
@@ -165,7 +165,7 @@ Das bedeutet, dass selbst wenn Sie auf einem High Integrity Level laufen, **Sie 
 
 ![](<../../images/image (437).png>)
 
-Das vorherige Bild enthält alle Berechtigungen, die "Administratoren" über den ausgewählten Prozess haben (wie Sie sehen können, haben sie im Fall von `svchost.exe` nur "Abfrage"-Berechtigungen)
+Das vorherige Bild enthält alle Berechtigungen, die "Administratoren" über den ausgewählten Prozess haben (wie Sie sehen können, haben sie im Fall von `svchost.exe` nur "Abfragen"-Berechtigungen)
 
 Sehen Sie sich die Berechtigungen an, die "Administratoren" über `winlogon.exe` haben:
 

@@ -4,7 +4,7 @@
 
 ## Wie funktionieren sie
 
-Der Prozess wird in den folgenden Schritten skizziert, die veranschaulichen, wie Dienst-Binärdateien manipuliert werden, um eine Remote-Ausführung auf einem Zielrechner über SMB zu erreichen:
+Der Prozess wird in den folgenden Schritten skizziert, die zeigen, wie Dienst-Binärdateien manipuliert werden, um eine Remote-Ausführung auf einem Zielrechner über SMB zu erreichen:
 
 1. **Kopieren einer Dienst-Binärdatei in den ADMIN$-Freigabe über SMB** wird durchgeführt.
 2. **Erstellung eines Dienstes auf dem Remote-Rechner** erfolgt durch Verweisen auf die Binärdatei.
@@ -17,7 +17,7 @@ Angenommen, es gibt eine ausführbare Payload (erstellt mit msfvenom und obfuski
 
 - **Kopieren der Binärdatei**: Die ausführbare Datei wird von einer Eingabeaufforderung in die ADMIN$-Freigabe kopiert, obwohl sie überall im Dateisystem platziert werden kann, um verborgen zu bleiben.
 - **Erstellen eines Dienstes**: Mit dem Windows-Befehl `sc`, der das Abfragen, Erstellen und Löschen von Windows-Diensten remote ermöglicht, wird ein Dienst namens "meterpreter" erstellt, der auf die hochgeladene Binärdatei verweist.
-- **Starten des Dienstes**: Der letzte Schritt besteht darin, den Dienst zu starten, was wahrscheinlich zu einem "time-out"-Fehler führen wird, da die Binärdatei kein echtes Dienst-Binärdateiformat ist und nicht den erwarteten Antwortcode zurückgibt. Dieser Fehler ist unerheblich, da das Hauptziel die Ausführung der Binärdatei ist.
+- **Starten des Dienstes**: Der letzte Schritt besteht darin, den Dienst zu starten, was wahrscheinlich zu einem "time-out"-Fehler führen wird, da die Binärdatei keine echte Dienst-Binärdatei ist und nicht den erwarteten Antwortcode zurückgibt. Dieser Fehler ist unerheblich, da das Hauptziel die Ausführung der Binärdatei ist.
 
 Die Beobachtung des Metasploit-Listeners wird zeigen, dass die Sitzung erfolgreich initiiert wurde.
 

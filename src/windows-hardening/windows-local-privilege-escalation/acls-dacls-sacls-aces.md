@@ -28,7 +28,7 @@ Die Local Security Authority (LSASS) verarbeitet Zugriffsanforderungen für Obje
 
 - **ACLs:** Definieren Zugriffsberechtigungen durch DACLs und Überwachungsregeln durch SACLs.
 - **Zugriffstoken:** Enthält Benutzer-, Gruppen- und Berechtigungsinformationen für eine Sitzung.
-- **Zugriffsentscheidung:** Wird durch den Vergleich der DACL-ACEs mit dem Zugriffstoken getroffen; SACLs werden zur Überwachung verwendet.
+- **Zugangsentscheidung:** Wird durch den Vergleich der DACL-ACEs mit dem Zugriffstoken getroffen; SACLs werden zur Überwachung verwendet.
 
 ### ACEs
 
@@ -55,22 +55,22 @@ Die Zugriffsbestimmung erfolgt durch die sequentielle Überprüfung jedes ACE, b
 
 Die Art und Weise, wie **ACEs** (Regeln, die sagen, wer auf etwas zugreifen kann oder nicht) in einer Liste namens **DACL** angeordnet sind, ist sehr wichtig. Dies liegt daran, dass das System, sobald es den Zugriff basierend auf diesen Regeln gewährt oder verweigert, aufhört, die restlichen zu überprüfen.
 
-Es gibt eine beste Möglichkeit, diese ACEs zu organisieren, und sie wird als **"kanonische Reihenfolge"** bezeichnet. Diese Methode hilft sicherzustellen, dass alles reibungslos und fair funktioniert. So geht es für Systeme wie **Windows 2000** und **Windows Server 2003**:
+Es gibt eine beste Methode, diese ACEs zu organisieren, und sie wird als **"kanonische Ordnung"** bezeichnet. Diese Methode hilft sicherzustellen, dass alles reibungslos und fair funktioniert. So geht es für Systeme wie **Windows 2000** und **Windows Server 2003**:
 
 - Zuerst alle Regeln, die **speziell für dieses Element** erstellt wurden, vor die, die von woanders stammen, wie einem übergeordneten Ordner.
 - In diesen spezifischen Regeln die, die **"nein" (verweigern)** sagen, vor die, die **"ja" (erlauben)** sagen.
-- Für die Regeln, die von woanders stammen, mit denjenigen von der **nächsten Quelle** beginnen, wie dem übergeordneten, und dann von dort zurückgehen. Wiederum **"nein"** vor **"ja."**
+- Für die Regeln, die von woanders stammen, beginnen Sie mit denjenigen aus der **nächsten Quelle**, wie dem übergeordneten, und gehen dann von dort zurück. Wiederum **"nein"** vor **"ja."**
 
 Diese Anordnung hilft auf zwei große Arten:
 
 - Sie stellt sicher, dass, wenn es ein spezifisches **"nein"** gibt, es respektiert wird, egal welche anderen **"ja"**-Regeln vorhanden sind.
 - Sie ermöglicht es dem Eigentümer eines Elements, das **letzte Wort** darüber zu haben, wer Zugang erhält, bevor Regeln von übergeordneten Ordnern oder weiter zurück in Kraft treten.
 
-Durch diese Vorgehensweise kann der Eigentümer einer Datei oder eines Ordners sehr genau festlegen, wer Zugang erhält, und sicherstellen, dass die richtigen Personen Zugang haben und die falschen nicht.
+Durch diese Vorgehensweise kann der Eigentümer einer Datei oder eines Ordners sehr präzise festlegen, wer Zugang erhält, und sicherstellen, dass die richtigen Personen Zugang haben und die falschen nicht.
 
 ![](https://www.ntfs.com/images/screenshots/ACEs.gif)
 
-So geht es bei dieser **"kanonischen Reihenfolge"** darum, sicherzustellen, dass die Zugriffsregeln klar sind und gut funktionieren, indem spezifische Regeln zuerst und alles auf intelligente Weise organisiert wird.
+So geht es bei dieser **"kanonischen Ordnung"** darum, sicherzustellen, dass die Zugriffsregeln klar sind und gut funktionieren, indem spezifische Regeln zuerst und alles auf intelligente Weise organisiert wird.
 
 ### GUI-Beispiel
 
@@ -92,7 +92,7 @@ Und zuletzt haben wir die SACL im Überwachungs-Tab:
 
 ![http://secureidentity.se/wp-content/uploads/2014/04/audit-tab.jpg](../../images/audit-tab.jpg)
 
-### Erklärung der Zugriffskontrolle in vereinfachter Form
+### Erklärung der Zugriffskontrolle auf vereinfachte Weise
 
 Bei der Verwaltung des Zugriffs auf Ressourcen, wie einen Ordner, verwenden wir Listen und Regeln, die als Zugriffskontrolllisten (ACLs) und Zugriffskontrolleinträge (ACEs) bekannt sind. Diese definieren, wer auf bestimmte Daten zugreifen kann oder nicht.
 
@@ -125,7 +125,7 @@ Zusammenfassend helfen ACLs und ACEs, präzise Zugriffskontrollen zu definieren,
 | ACE-Feld    | Beschreibung                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Typ         | Flag, das den Typ des ACE angibt. Windows 2000 und Windows Server 2003 unterstützen sechs Typen von ACE: Drei generische ACE-Typen, die an alle sicherbaren Objekte angehängt sind. Drei objektspezifische ACE-Typen, die für Active Directory-Objekte auftreten können.                                                                                                                                                                                                                                                            |
-| Flags       | Eine Menge von Bit-Flags, die Vererbung und Überwachung steuern.                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| Flags       | Eine Reihe von Bit-Flags, die Vererbung und Überwachung steuern.                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | Größe       | Anzahl der Bytes an Speicher, die für den ACE zugewiesen sind.                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | Zugriffsmaske | 32-Bit-Wert, dessen Bits den Zugriffsrechten für das Objekt entsprechen. Bits können entweder ein- oder ausgeschaltet werden, aber die Bedeutung der Einstellung hängt vom ACE-Typ ab. Wenn beispielsweise das Bit, das dem Recht entspricht, Berechtigungen zu lesen, aktiviert ist und der ACE-Typ verweigern ist, verweigert der ACE das Recht, die Berechtigungen des Objekts zu lesen. Wenn dasselbe Bit aktiviert ist, der ACE-Typ jedoch erlauben ist, gewährt der ACE das Recht, die Berechtigungen des Objekts zu lesen. Weitere Details zur Zugriffsmaske erscheinen in der nächsten Tabelle. |
 | SID         | Identifiziert einen Benutzer oder eine Gruppe, deren Zugriff durch diesen ACE kontrolliert oder überwacht wird.                                                                                                                                                                                                                                                                                                                                                                                                                                 |
@@ -133,15 +133,15 @@ Zusammenfassend helfen ACLs und ACEs, präzise Zugriffskontrollen zu definieren,
 ### Layout der Zugriffsmaske
 
 | Bit (Bereich) | Bedeutung                            | Beschreibung/Beispiel                       |
-| ----------- | ---------------------------------- | ----------------------------------------- |
-| 0 - 15      | Objektspezifische Zugriffsrechte      | Daten lesen, Ausführen, Daten anhängen           |
-| 16 - 22     | Standardzugriffsrechte             | Löschen, ACL schreiben, Eigentümer schreiben            |
-| 23          | Kann auf Sicherheits-ACL zugreifen            |                                           |
-| 24 - 27     | Reserviert                           |                                           |
-| 28          | Generisch ALLE (Lesen, Schreiben, Ausführen) | Alles darunter                          |
-| 29          | Generisch Ausführen                    | Alle Dinge, die notwendig sind, um ein Programm auszuführen |
-| 30          | Generisch Schreiben                      | Alle Dinge, die notwendig sind, um in eine Datei zu schreiben   |
-| 31          | Generisch Lesen                       | Alle Dinge, die notwendig sind, um eine Datei zu lesen       |
+| ------------- | ------------------------------------ | ------------------------------------------- |
+| 0 - 15        | Objektspezifische Zugriffsrechte    | Daten lesen, Ausführen, Daten anhängen      |
+| 16 - 22       | Standardzugriffsrechte               | Löschen, ACL schreiben, Eigentümer schreiben |
+| 23            | Kann auf Sicherheits-ACL zugreifen   |                                             |
+| 24 - 27       | Reserviert                           |                                             |
+| 28            | Generisch ALLE (Lesen, Schreiben, Ausführen) | Alles darunter                            |
+| 29            | Generisch Ausführen                  | Alle Dinge, die notwendig sind, um ein Programm auszuführen |
+| 30            | Generisch Schreiben                  | Alle Dinge, die notwendig sind, um in eine Datei zu schreiben |
+| 31            | Generisch Lesen                     | Alle Dinge, die notwendig sind, um eine Datei zu lesen |
 
 ## Referenzen
 

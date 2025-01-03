@@ -7,7 +7,7 @@
 
 Codes stammen von [https://github.com/jakespringer/angr_ctf](https://github.com/jakespringer/angr_ctf)
 
-### Eingabe zur Erreichung der Adresse (die Adresse anzeigend)
+### Eingabe, um die Adresse zu erreichen (die Adresse anzeigend)
 ```python
 import angr
 import sys
@@ -487,7 +487,7 @@ main(sys.argv)
 
 ### Simulation Managers
 
-Einige Simulation Manager können nützlicher sein als andere. Im vorherigen Beispiel gab es ein Problem, da viele nützliche Zweige erstellt wurden. Hier wird die **veritesting**-Technik diese zusammenführen und eine Lösung finden.\
+Einige Simulation Managers können nützlicher sein als andere. Im vorherigen Beispiel gab es ein Problem, da viele nützliche Zweige erstellt wurden. Hier wird die **veritesting**-Technik diese zusammenführen und eine Lösung finden.\
 Dieser Simulation Manager kann auch aktiviert werden mit: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 ```python
 import angr

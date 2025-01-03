@@ -25,7 +25,7 @@ Software:
 
 ### [dotPeek](https://www.jetbrains.com/decompiler/)
 
-dotPeek ist ein Decompiler, der **mehrere Formate dekompiliert und untersucht**, einschließlich **Bibliotheken** (.dll), **Windows-Metadaten-Dateien** (.winmd) und **ausführbaren Dateien** (.exe). Nach der Dekompilierung kann ein Assembly als Visual Studio-Projekt (.csproj) gespeichert werden.
+dotPeek ist ein Decompiler, der **mehrere Formate dekompiliert und untersucht**, einschließlich **Bibliotheken** (.dll), **Windows-Metadatendateien** (.winmd) und **ausführbaren Dateien** (.exe). Nach der Dekompilierung kann ein Assembly als Visual Studio-Projekt (.csproj) gespeichert werden.
 
 Der Vorteil hier ist, dass, wenn ein verlorener Quellcode aus einem Legacy-Assembly wiederhergestellt werden muss, diese Aktion Zeit sparen kann. Darüber hinaus bietet dotPeek eine praktische Navigation durch den dekompilierten Code, was es zu einem der perfekten Werkzeuge für die **Xamarin-Algorithmusanalyse** macht.
 
@@ -42,7 +42,7 @@ Mit einem umfassenden Add-In-Modell und einer API, die das Tool an Ihre genauen 
 
 ### [ILSpy](https://github.com/icsharpcode/ILSpy) & [dnSpy](https://github.com/dnSpy/dnSpy/releases)
 
-[ILSpy-Plugin für Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode): Sie können es auf jedem Betriebssystem haben (Sie können es direkt von VSCode installieren, es ist nicht notwendig, das Git herunterzuladen. Klicken Sie auf **Erweiterungen** und **suchen Sie nach ILSpy**).\
+[ILSpy-Plugin für Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode): Sie können es auf jedem Betriebssystem haben (Sie können es direkt von VSCode installieren, es ist nicht notwendig, das Git-Repository herunterzuladen. Klicken Sie auf **Erweiterungen** und **suchen Sie nach ILSpy**).\
 Wenn Sie **dekompilieren**, **modifizieren** und **wieder kompilieren** müssen, können Sie [**dnSpy**](https://github.com/dnSpy/dnSpy/releases) oder einen aktiv gepflegten Fork davon, [**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases), verwenden. (**Rechtsklick -> Methode ändern**, um etwas innerhalb einer Funktion zu ändern).
 
 ### DNSpy Protokollierung
@@ -84,7 +84,7 @@ Wenn Ihre .NET-Anwendung von **IIS** **ausgeführt** wird, können Sie sie mit *
 ```
 iisreset /noforce
 ```
-Dann, um mit dem Debuggen zu beginnen, sollten Sie alle geöffneten Dateien schließen und im **Debug Tab** **Attach to Process...** auswählen:
+Dann sollten Sie, um mit dem Debuggen zu beginnen, alle geöffneten Dateien schließen und im **Debug Tab** **Attach to Process...** auswählen:
 
 ![](<../../images/image (318).png>)
 
@@ -102,16 +102,16 @@ Klicken Sie auf ein beliebiges Modul in **Modules** und wählen Sie **Open All M
 
 ![](<../../images/image (922).png>)
 
-Klicken Sie mit der rechten Maustaste auf ein beliebiges Modul in **Assembly Explorer** und klicken Sie auf **Sort Assemblies**:
+Klicken Sie mit der rechten Maustaste auf ein beliebiges Modul im **Assembly Explorer** und klicken Sie auf **Sort Assemblies**:
 
 ![](<../../images/image (339).png>)
 
-## Java decompiler
+## Java-Decompiler
 
 [https://github.com/skylot/jadx](https://github.com/skylot/jadx)\
 [https://github.com/java-decompiler/jd-gui/releases](https://github.com/java-decompiler/jd-gui/releases)
 
-## Debugging DLLs
+## Debugging von DLLs
 
 ### Verwendung von IDA
 
@@ -134,9 +134,9 @@ Aber wie gelangen Sie zum Code der geladenen DLL? Mit dieser Methode weiß ich e
 - **Laden Sie rundll32** (64-Bit in C:\Windows\System32\rundll32.exe und 32-Bit in C:\Windows\SysWOW64\rundll32.exe)
 - **Ändern Sie die Befehlszeile** (_Datei --> Befehlszeile ändern_) und setzen Sie den Pfad der DLL und die Funktion, die Sie aufrufen möchten, zum Beispiel: "C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii_2.dll",DLLMain
 - Ändern Sie _Optionen --> Einstellungen_ und wählen Sie "**DLL Entry**".
-- Starten Sie dann **die Ausführung**, der Debugger wird an jedem DLL-Hauptpunkt anhalten, irgendwann werden Sie **im DLL-Eintrag Ihrer DLL anhalten**. Von dort aus suchen Sie einfach nach den Punkten, an denen Sie einen Haltepunkt setzen möchten.
+- Starten Sie dann die Ausführung, der Debugger wird an jedem DLL-Hauptpunkt anhalten, irgendwann werden Sie **im DLL-Eintrag Ihrer DLL anhalten**. Von dort aus suchen Sie einfach nach den Punkten, an denen Sie einen Haltepunkt setzen möchten.
 
-Beachten Sie, dass Sie, wenn die Ausführung aus irgendeinem Grund in win64dbg gestoppt wird, **sehen können, in welchem Code Sie sich befinden**, indem Sie **oben im win64dbg-Fenster** nachsehen:
+Beachten Sie, dass Sie, wenn die Ausführung aus irgendeinem Grund in win64dbg gestoppt wird, **sehen können, in welchem Code Sie sich befinden**, indem Sie oben im win64dbg-Fenster nachsehen:
 
 ![](<../../images/image (842).png>)
 
@@ -150,7 +150,7 @@ Dann können Sie sehen, wann die Ausführung in der DLL gestoppt wurde, die Sie 
 cheat-engine.md
 {{#endref}}
 
-[**PiNCE**](https://github.com/korcankaraokcu/PINCE) ist ein Front-End/Reverse-Engineering-Tool für den GNU Project Debugger (GDB), das sich auf Spiele konzentriert. Es kann jedoch für alle reverse-engineeringbezogenen Dinge verwendet werden.
+[**PiNCE**](https://github.com/korcankaraokcu/PINCE) ist ein Front-End-/Reverse-Engineering-Tool für den GNU Project Debugger (GDB), das sich auf Spiele konzentriert. Es kann jedoch für alle reverse-engineeringbezogenen Dinge verwendet werden.
 
 [**Decompiler Explorer**](https://dogbolt.org/) ist ein Web-Frontend für eine Reihe von Decompilern. Dieser Webdienst ermöglicht es Ihnen, die Ausgaben verschiedener Decompiler bei kleinen ausführbaren Dateien zu vergleichen.
 
@@ -166,7 +166,7 @@ cheat-engine.md
 Dann müssen Sie einen **Debugger** (Ida oder x64dbg) an den Prozess anhängen und einen **Haltepunkt an der angegebenen Speicheradresse** setzen und die Ausführung **fortsetzen**. Auf diese Weise debuggen Sie den Shellcode.
 
 Die Veröffentlichungsseite auf GitHub enthält ZIP-Dateien mit den kompilierten Versionen: [https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
-Sie finden eine leicht modifizierte Version von Blobrunner unter dem folgenden Link. Um es zu kompilieren, erstellen Sie einfach **ein C/C++-Projekt in Visual Studio Code, kopieren Sie den Code und bauen Sie es**.
+Sie finden eine leicht modifizierte Version von Blobrunner unter dem folgenden Link. Um es zu kompilieren, **erstellen Sie einfach ein C/C++-Projekt in Visual Studio Code, kopieren Sie den Code und bauen Sie es**.
 
 {{#ref}}
 blobrunner.md
@@ -174,7 +174,7 @@ blobrunner.md
 
 ### Debugging eines Shellcodes mit jmp2it
 
-[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4) ist sehr ähnlich zu Blobrunner. Es wird den **Shellcode** in einem Speicherbereich **allokieren** und eine **ewige Schleife** starten. Sie müssen dann den **Debugger** an den Prozess anhängen, **spielen Sie starten, warten Sie 2-5 Sekunden und drücken Sie Stopp**, und Sie werden sich in der **ewigen Schleife** wiederfinden. Springen Sie zur nächsten Anweisung der ewigen Schleife, da es ein Aufruf zum Shellcode sein wird, und schließlich werden Sie den Shellcode ausführen.
+[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4) ist sehr ähnlich wie Blobrunner. Es wird den **Shellcode** in einem Speicherbereich **allokieren** und eine **ewige Schleife** starten. Sie müssen dann den **Debugger** an den Prozess anhängen, **spielen Sie Start, warten Sie 2-5 Sekunden und drücken Sie Stop**, und Sie werden sich in der **ewigen Schleife** wiederfinden. Springen Sie zur nächsten Anweisung der ewigen Schleife, da es ein Aufruf zum Shellcode sein wird, und schließlich werden Sie den Shellcode ausführen.
 
 ![](<../../images/image (509).png>)
 
@@ -198,7 +198,7 @@ Sie können den Stack beispielsweise in einem Hexdump sehen:
 
 ![](<../../images/image (186).png>)
 
-### Deobfuscating Shellcode und Ausführen von Funktionen
+### Deobfuscating Shellcode und Abrufen ausgeführter Funktionen
 
 Sie sollten [**scdbg**](http://sandsprite.com/blogs/index.php?uid=7&pid=152) ausprobieren.\
 Es wird Ihnen Dinge sagen wie **welche Funktionen** der Shellcode verwendet und ob der Shellcode sich **im Speicher dekodiert**.
@@ -338,7 +338,7 @@ uVar2 = DAT_030004dc;
 uVar1 = *puVar6;
 if ((uVar1 & DAT_030004da & ~uVar4) != 0) {
 ```
-Die letzte Bedingung überprüft, ob **`uVar4`** in den **letzten Tasten** ist und nicht die aktuelle Taste ist, die auch als Loslassen einer Taste bezeichnet wird (die aktuelle Taste wird in **`uVar1`** gespeichert).
+Die letzte Bedingung überprüft, ob **`uVar4`** in den **letzten Tasten** ist und nicht die aktuelle Taste ist, die auch als Loslassen einer Taste bezeichnet wird (die aktuelle Taste ist in **`uVar1`** gespeichert).
 ```c
 if (uVar1 == 4) {
 DAT_030000d4 = 0;
@@ -371,8 +371,8 @@ Im vorherigen Code sehen Sie, dass wir **uVar1** (der Ort, an dem der **Wert des
 - Zuerst wird er mit dem **Wert 4** (**SELECT**-Taste) verglichen: In der Herausforderung löscht dieser Button den Bildschirm.
 - Dann wird er mit dem **Wert 8** (**START**-Taste) verglichen: In der Herausforderung wird überprüft, ob der Code gültig ist, um die Flagge zu erhalten.
 - In diesem Fall wird die Variable **`DAT_030000d8`** mit 0xf3 verglichen, und wenn der Wert gleich ist, wird ein bestimmter Code ausgeführt.
-- In allen anderen Fällen wird ein Zähler (`DAT_030000d4`) überprüft. Es ist ein Zähler, weil er 1 hinzufügt, direkt nachdem er in den Code eingetreten ist.\
-**Wenn** weniger als 8, wird etwas gemacht, das **Hinzufügen** von Werten zu \*\*`DAT_030000d8` \*\* beinhaltet (im Grunde werden die Werte der gedrückten Tasten in dieser Variablen addiert, solange der Zähler weniger als 8 ist).
+- In allen anderen Fällen wird ein Zähler (`DAT_030000d4`) überprüft. Es ist ein Zähler, weil er direkt nach dem Betreten des Codes um 1 erhöht wird.\
+**Wenn** weniger als 8, wird etwas gemacht, das **Werte** zu \*\*`DAT_030000d8` \*\* hinzufügt (grundsätzlich werden die Werte der gedrückten Tasten in dieser Variablen addiert, solange der Zähler weniger als 8 ist).
 
 In dieser Herausforderung mussten Sie also, wissend um die Werte der Tasten, eine **Kombination mit einer Länge kleiner als 8 drücken, deren resultierende Addition 0xf3 ist.**
 

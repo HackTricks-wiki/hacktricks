@@ -11,9 +11,9 @@ Damit kann ein Domänenadministrator einem Computer **erlauben**, einen **Benutz
 
 **Hinweis**: Wenn ein Benutzer in AD als ‘_Konto ist sensibel und kann nicht delegiert werden_’ markiert ist, können Sie **ihn nicht impersonieren**.
 
-Das bedeutet, dass wenn Sie den **Hash des Dienstes kompromittieren**, Sie **Benutzer impersonieren** und **Zugriff** in ihrem Namen auf den **konfigurierten Dienst** erhalten können (mögliche **privesc**).
+Das bedeutet, dass wenn Sie den Hash des Dienstes **kompromittieren**, Sie **Benutzer impersonieren** und **Zugriff** in ihrem Namen auf den **konfigurierten Dienst** erhalten können (mögliche **privesc**).
 
-Darüber hinaus haben Sie **nicht nur Zugriff auf den Dienst, den der Benutzer impersonieren kann, sondern auch auf jeden Dienst**, da der SPN (der angeforderte Dienstname) nicht überprüft wird, sondern nur die Berechtigungen. Daher können Sie, wenn Sie Zugriff auf den **CIFS-Dienst** haben, auch auf den **HOST-Dienst** zugreifen, indem Sie das `/altservice`-Flag in Rubeus verwenden.
+Darüber hinaus haben Sie **nicht nur Zugriff auf den Dienst, den der Benutzer impersonieren kann, sondern auch auf jeden Dienst**, da der SPN (der angeforderte Dienstname) nicht überprüft wird, sondern nur die Berechtigungen. Daher können Sie, wenn Sie Zugriff auf den **CIFS-Dienst** haben, auch Zugriff auf den **HOST-Dienst** mit dem `/altservice`-Flag in Rubeus erhalten.
 
 Außerdem ist **LDAP-Dienstzugriff auf DC** erforderlich, um einen **DCSync** auszunutzen.
 ```bash:Enumerate

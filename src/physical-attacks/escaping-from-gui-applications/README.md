@@ -98,18 +98,18 @@ Registrierungseditor: [https://sourceforge.net/projects/uberregedit/](https://so
 - CTRL+O – Datei öffnen
 - CTRL+S – Speichern CTRL+N – Neues RDP / Citrix
 
-## Wischgesten
+## Wischen
 
-- Wischen Sie von der linken Seite nach rechts, um alle offenen Fenster zu sehen, die KIOSK-App zu minimieren und direkt auf das gesamte Betriebssystem zuzugreifen;
-- Wischen Sie von der rechten Seite nach links, um das Aktionscenter zu öffnen, die KIOSK-App zu minimieren und direkt auf das gesamte Betriebssystem zuzugreifen;
+- Wischen Sie von der linken Seite nach rechts, um alle offenen Fenster zu sehen, minimieren Sie die KIOSK-App und greifen Sie direkt auf das gesamte Betriebssystem zu;
+- Wischen Sie von der rechten Seite nach links, um das Aktionscenter zu öffnen, minimieren Sie die KIOSK-App und greifen Sie direkt auf das gesamte Betriebssystem zu;
 - Wischen Sie von der oberen Kante nach unten, um die Titelleiste für eine im Vollbildmodus geöffnete App sichtbar zu machen;
 - Wischen Sie von unten nach oben, um die Taskleiste in einer Vollbild-App anzuzeigen.
 
 ## Internet Explorer Tricks
 
-### 'Bildwerkzeugleiste'
+### 'Bildtoolbar'
 
-Es ist eine Werkzeugleiste, die oben links im Bild erscheint, wenn darauf geklickt wird. Sie können Speichern, Drucken, Mailto und "Meine Bilder" im Explorer öffnen. Der Kiosk muss Internet Explorer verwenden.
+Es ist eine Toolbar, die oben links im Bild erscheint, wenn darauf geklickt wird. Sie können Speichern, Drucken, Mailto, "Meine Bilder" im Explorer öffnen. Der Kiosk muss Internet Explorer verwenden.
 
 ### Shell-Protokoll
 
@@ -134,7 +134,7 @@ Geben Sie diese URLs ein, um eine Explorer-Ansicht zu erhalten:
 - `Shell:Windows`
 - `shell:::{21EC2020-3AEA-1069-A2DD-08002B30309D}` --> Systemsteuerung
 - `shell:::{20D04FE0-3AEA-1069-A2D8-08002B30309D}` --> Mein Computer
-- `shell:::{{208D2C60-3AEA-1069-A2D7-08002B30309D}}` --> Meine Netzwerkplätze
+- `shell:::{{208D2C60-3AEA-1069-A2D7-08002B30309D}}` --> Meine Netzwerkstandorte
 - `shell:::{871C5380-42A0-1069-A2EA-08002B30309D}` --> Internet Explorer
 
 ## Dateierweiterungen anzeigen
@@ -161,7 +161,7 @@ Quelle: https://medium.com/@Rend_/give-me-a-browser-ill-give-you-a-shell-de19811
 
 - Kneifen Sie den Bildschirm mit fünf Fingern / Berühren Sie die Home-Taste / Wischen Sie mit 1 Finger schnell von unten nach oben: Um auf die Startseite zuzugreifen
 
-- Wischen Sie mit 1 Finger von unten am Bildschirm nur 1-2 Zoll (langsam): Die Dock-Leiste wird angezeigt
+- Wischen Sie mit einem Finger von unten auf dem Bildschirm nur 1-2 Zoll (langsam): Das Dock wird angezeigt
 
 - Wischen Sie mit 1 Finger von oben auf dem Display: Um Ihre Benachrichtigungen anzuzeigen
 
@@ -171,11 +171,11 @@ Quelle: https://medium.com/@Rend_/give-me-a-browser-ill-give-you-a-shell-de19811
 
 - Wischen Sie schnell mit 1 Finger von der Mitte des Bildschirms nach rechts oder links: Um zur nächsten/vorherigen App zu wechseln
 
-- Drücken und halten Sie die Ein-/Ausschalt-/Ruhe-Taste in der oberen rechten Ecke des **iPad +** Bewegen Sie den Schieberegler **zum Ausschalten** ganz nach rechts: Um auszuschalten
+- Drücken und halten Sie die Ein-/**Ausschalt**-/Ruhe-Taste in der oberen rechten Ecke des **iPad +** Bewegen Sie den Schieberegler **zum Ausschalten** ganz nach rechts: Um auszuschalten
 
-- Drücken Sie die Ein-/Ausschalt-/Ruhe-Taste in der oberen rechten Ecke des **iPad und die Home-Taste für einige Sekunden**: Um einen harten Ausschaltvorgang zu erzwingen
+- Drücken Sie die Ein-/**Ausschalt**-/Ruhe-Taste in der oberen rechten Ecke des **iPad und die Home-Taste für einige Sekunden**: Um einen harten Ausschaltvorgang zu erzwingen
 
-- Drücken Sie die Ein-/Ausschalt-/Ruhe-Taste in der oberen rechten Ecke des **iPad und die Home-Taste schnell**: Um einen Screenshot zu machen, der in der unteren linken Ecke des Displays angezeigt wird. Drücken Sie beide Tasten gleichzeitig sehr kurz, da bei längerem Halten ein harter Ausschaltvorgang durchgeführt wird.
+- Drücken Sie die Ein-/**Ausschalt**-/Ruhe-Taste in der oberen rechten Ecke des **iPad und die Home-Taste schnell**: Um einen Screenshot zu machen, der in der unteren linken Ecke des Displays angezeigt wird. Drücken Sie beide Tasten gleichzeitig sehr kurz, da bei längerem Halten ein harter Ausschaltvorgang durchgeführt wird.
 
 ## Verknüpfungen
 
@@ -214,8 +214,8 @@ Diese Verknüpfungen sind für die visuellen Einstellungen und Toneinstellungen,
 
 | Verknüpfung                                           | Aktion                                                  |
 | -------------------------------------------------- | ------------------------------------------------------- |
-| ⌘H                                                 | Gehe zur Startseite                                              |
-| ⌘⇧H (Befehl-Shift-H)                              | Gehe zur Startseite                                              |
+| ⌘H                                                 | Gehe zu Home                                              |
+| ⌘⇧H (Befehl-Shift-H)                              | Gehe zu Home                                              |
 | ⌘ (Leertaste)                                      | Spotlight öffnen                                          |
 | ⌘⇥ (Befehl-Tab)                                   | Liste der letzten zehn verwendeten Apps                                 |
 | ⌘\~                                                | Gehe zur letzten App                                       |

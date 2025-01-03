@@ -4,7 +4,7 @@
 
 - **Einfache Liste:** Einfach eine Liste mit einem Eintrag in jeder Zeile
 - **Laufzeitdatei:** Eine Liste, die zur Laufzeit gelesen wird (nicht im Speicher geladen). Zum Unterstützen großer Listen.
-- **Falländerung:** Wenden Sie einige Änderungen an einer Liste von Zeichenfolgen an (Keine Änderung, zu klein, zu GROSS, zu ordentlichem Namen - Erster Buchstabe groß und der Rest klein -, zu ordentlichem Namen - Erster Buchstabe groß und der Rest bleibt gleich -).
+- **Falländerung:** Wenden Sie einige Änderungen an einer Liste von Zeichenfolgen an (Keine Änderung, in Kleinbuchstaben, in GROSSBUCHSTABEN, in Eigennamen - Erster Buchstabe groß und der Rest in Kleinbuchstaben -, in Eigennamen - Erster Buchstabe groß und der Rest bleibt gleich -).
 - **Zahlen:** Zahlen von X bis Y mit Z Schritt oder zufällig generieren.
 - **Brute Forcer:** Zeichensatz, min. & max. Länge.
 

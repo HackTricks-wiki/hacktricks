@@ -16,7 +16,7 @@ reg query HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest /v Use
 ```
 ## LSA-Schutz
 
-Beginnend mit **Windows 8.1** hat Microsoft die Sicherheit von LSA verbessert, um **nicht autorisierte Speicherlesungen oder Code-Injektionen durch nicht vertrauenswürdige Prozesse** zu blockieren. Diese Verbesserung behindert die typische Funktionsweise von Befehlen wie `mimikatz.exe sekurlsa:logonpasswords`. Um **diesen verbesserten Schutz zu aktivieren**, sollte der _**RunAsPPL**_ Wert in _**HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA**_ auf 1 eingestellt werden:
+Beginnend mit **Windows 8.1** hat Microsoft die Sicherheit von LSA verbessert, um **nicht autorisierte Speicherlesungen oder Code-Injektionen durch nicht vertrauenswürdige Prozesse zu blockieren**. Diese Verbesserung beeinträchtigt die typische Funktionsweise von Befehlen wie `mimikatz.exe sekurlsa:logonpasswords`. Um **diesen verbesserten Schutz zu aktivieren**, sollte der _**RunAsPPL**_ Wert in _**HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA**_ auf 1 eingestellt werden:
 ```
 reg query HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA /v RunAsPPL
 ```
@@ -32,7 +32,7 @@ Es ist möglich, diesen Schutz mit dem Mimikatz-Treiber mimidrv.sys zu umgehen:
 
 Standardmäßig ist **Credential Guard** nicht aktiv und erfordert eine manuelle Aktivierung innerhalb einer Organisation. Es ist entscheidend für die Verbesserung der Sicherheit gegen Tools wie **Mimikatz**, die in ihrer Fähigkeit, Anmeldeinformationen zu extrahieren, eingeschränkt sind. Allerdings können Schwachstellen weiterhin ausgenutzt werden, indem benutzerdefinierte **Security Support Providers (SSP)** hinzugefügt werden, um Anmeldeinformationen im Klartext während der Anmeldeversuche zu erfassen.
 
-Um den Aktivierungsstatus von **Credential Guard** zu überprüfen, kann der Registrierungsschlüssel _**LsaCfgFlags**_ unter _**HKLM\System\CurrentControlSet\Control\LSA**_ inspiziert werden. Ein Wert von "**1**" zeigt die Aktivierung mit **UEFI-Sperre** an, "**2**" ohne Sperre, und "**0**" bedeutet, dass es nicht aktiviert ist. Diese Registrierungskontrolle, obwohl ein starker Indikator, ist nicht der einzige Schritt zur Aktivierung von Credential Guard. Detaillierte Anleitungen und ein PowerShell-Skript zur Aktivierung dieser Funktion sind online verfügbar.
+Um den Aktivierungsstatus von **Credential Guard** zu überprüfen, kann der Registrierungsschlüssel _**LsaCfgFlags**_ unter _**HKLM\System\CurrentControlSet\Control\LSA**_ inspiziert werden. Ein Wert von "**1**" zeigt die Aktivierung mit **UEFI-Sperre** an, "**2**" ohne Sperre und "**0**" bedeutet, dass es nicht aktiviert ist. Diese Registrierungskontrolle, obwohl ein starker Indikator, ist nicht der einzige Schritt zur Aktivierung von Credential Guard. Detaillierte Anleitungen und ein PowerShell-Skript zur Aktivierung dieser Funktion sind online verfügbar.
 ```powershell
 reg query HKLM\System\CurrentControlSet\Control\LSA /v LsaCfgFlags
 ```
@@ -46,7 +46,7 @@ Weitere Details zur Implementierung benutzerdefinierter SSPs zur Erfassung von A
 
 Traditionell werden bei der Verbindung zu einem Remote-Computer über RDP Ihre Anmeldeinformationen auf dem Zielcomputer gespeichert. Dies stellt ein erhebliches Sicherheitsrisiko dar, insbesondere bei der Verwendung von Konten mit erhöhten Rechten. Mit der Einführung des _**Restricted Admin-Modus**_ wird dieses Risiko jedoch erheblich reduziert.
 
-Bei der Initiierung einer RDP-Verbindung mit dem Befehl **mstsc.exe /RestrictedAdmin** erfolgt die Authentifizierung zum Remote-Computer, ohne Ihre Anmeldeinformationen darauf zu speichern. Dieser Ansatz stellt sicher, dass im Falle einer Malware-Infektion oder wenn ein böswilliger Benutzer Zugriff auf den Remote-Server erhält, Ihre Anmeldeinformationen nicht kompromittiert werden, da sie nicht auf dem Server gespeichert sind.
+Bei der Initiierung einer RDP-Verbindung mit dem Befehl **mstsc.exe /RestrictedAdmin** erfolgt die Authentifizierung am Remote-Computer, ohne Ihre Anmeldeinformationen darauf zu speichern. Dieser Ansatz stellt sicher, dass im Falle einer Malware-Infektion oder wenn ein böswilliger Benutzer Zugriff auf den Remote-Server erhält, Ihre Anmeldeinformationen nicht gefährdet sind, da sie nicht auf dem Server gespeichert sind.
 
 Es ist wichtig zu beachten, dass im **Restricted Admin-Modus** Versuche, auf Netzwerkressourcen aus der RDP-Sitzung zuzugreifen, nicht Ihre persönlichen Anmeldeinformationen verwenden; stattdessen wird die **Identität des Computers** verwendet.
 
@@ -68,7 +68,7 @@ Der Zugriff auf diese zwischengespeicherten Anmeldeinformationen ist streng kont
 
 **Mimikatz** kann verwendet werden, um diese zwischengespeicherten Anmeldeinformationen mit dem Befehl `lsadump::cache` zu extrahieren.
 
-Für weitere Details bietet die ursprüngliche [Quelle](http://juggernaut.wikidot.com/cached-credentials) umfassende Informationen.
+Für weitere Details bietet die ursprüngliche [source](http://juggernaut.wikidot.com/cached-credentials) umfassende Informationen.
 
 ## Geschützte Benutzer
 
@@ -82,9 +82,9 @@ Die Mitgliedschaft in der **Gruppe der geschützten Benutzer** führt zu mehrere
 
 Diese Schutzmaßnahmen werden aktiviert, sobald ein Benutzer, der Mitglied der **Gruppe der geschützten Benutzer** ist, sich am Gerät anmeldet. Dies stellt sicher, dass kritische Sicherheitsmaßnahmen zum Schutz vor verschiedenen Methoden des Anmeldeinformationskompromisses vorhanden sind.
 
-Für detailliertere Informationen konsultieren Sie die offizielle [Dokumentation](https://docs.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/protected-users-security-group).
+Für detailliertere Informationen konsultieren Sie die offizielle [documentation](https://docs.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/protected-users-security-group).
 
-**Tabelle aus** [**den Dokumenten**](https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/appendix-c--protected-accounts-and-groups-in-active-directory)**.**
+**Tabelle aus** [**den docs**](https://docs.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/appendix-c--protected-accounts-and-groups-in-active-directory)**.**
 
 | Windows Server 2003 RTM | Windows Server 2003 SP1+ | <p>Windows Server 2012,<br>Windows Server 2008 R2,<br>Windows Server 2008</p> | Windows Server 2016          |
 | ----------------------- | ------------------------ | ----------------------------------------------------------------------------- | ---------------------------- |

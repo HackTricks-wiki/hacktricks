@@ -59,7 +59,7 @@ net group "domain admins" spotless /add /domain
 ```
 ## **ForceChangePassword**
 
-Das Halten des `ExtendedRight` für einen Benutzer für `User-Force-Change-Password` ermöglicht Passwortzurücksetzungen, ohne das aktuelle Passwort zu kennen. Die Überprüfung dieses Rechts und dessen Ausnutzung kann über PowerShell oder alternative Befehlszeilentools erfolgen, die mehrere Methoden zum Zurücksetzen des Benutzerpassworts anbieten, einschließlich interaktiver Sitzungen und Einzeiler für nicht-interaktive Umgebungen. Die Befehle reichen von einfachen PowerShell-Aufrufen bis hin zur Verwendung von `rpcclient` auf Linux, was die Vielseitigkeit der Angriffsvektoren demonstriert.
+Das Halten des `ExtendedRight` für einen Benutzer für `User-Force-Change-Password` ermöglicht Passwortzurücksetzungen, ohne das aktuelle Passwort zu kennen. Die Überprüfung dieses Rechts und dessen Ausnutzung kann über PowerShell oder alternative Befehlszeilentools erfolgen, die mehrere Methoden zur Zurücksetzung des Passworts eines Benutzers bieten, einschließlich interaktiver Sitzungen und Einzeilern für nicht-interaktive Umgebungen. Die Befehle reichen von einfachen PowerShell-Aufrufen bis hin zur Verwendung von `rpcclient` auf Linux, was die Vielseitigkeit der Angriffsvektoren demonstriert.
 ```powershell
 Get-ObjectAcl -SamAccountName delegate -ResolveGUIDs | ? {$_.IdentityReference -eq "OFFENSE\spotless"}
 Set-DomainUserPassword -Identity delegate -Verbose
@@ -155,11 +155,11 @@ Die Struktur der Aufgabe, wie sie in der XML-Konfigurationsdatei dargestellt ist
 
 ### Benutzer und Gruppen
 
-GPOs ermöglichen auch die Manipulation von Benutzer- und Gruppenmitgliedschaften auf Zielsystemen. Durch das direkte Bearbeiten der Benutzer- und Gruppenrichtliniendateien können Angreifer Benutzer zu privilegierten Gruppen, wie der lokalen `administrators`-Gruppe, hinzufügen. Dies ist möglich durch die Delegation von GPO-Verwaltungsberechtigungen, die die Modifikation von Richtliniendateien erlaubt, um neue Benutzer hinzuzufügen oder Gruppenmitgliedschaften zu ändern.
+GPOs ermöglichen auch die Manipulation von Benutzer- und Gruppenmitgliedschaften auf Zielsystemen. Durch das direkte Bearbeiten der Benutzer- und Gruppenrichtliniendateien können Angreifer Benutzer zu privilegierten Gruppen, wie der lokalen `administrators`-Gruppe, hinzufügen. Dies ist durch die Delegation von GPO-Verwaltungsberechtigungen möglich, die die Modifikation von Richtliniendateien erlaubt, um neue Benutzer hinzuzufügen oder Gruppenmitgliedschaften zu ändern.
 
 Die XML-Konfigurationsdatei für Benutzer und Gruppen beschreibt, wie diese Änderungen umgesetzt werden. Durch das Hinzufügen von Einträgen zu dieser Datei können bestimmten Benutzern erhöhte Berechtigungen auf betroffenen Systemen gewährt werden. Diese Methode bietet einen direkten Ansatz zur Eskalation von Berechtigungen durch GPO-Manipulation.
 
-Darüber hinaus können zusätzliche Methoden zur Ausführung von Code oder zur Aufrechterhaltung der Persistenz, wie die Nutzung von Anmelde-/Abmeldeskripten, die Modifikation von Registrierungsschlüsseln für Autoruns, die Installation von Software über .msi-Dateien oder die Bearbeitung von Dienstkonfigurationen, ebenfalls in Betracht gezogen werden. Diese Techniken bieten verschiedene Möglichkeiten, um den Zugriff aufrechtzuerhalten und Zielsysteme durch den Missbrauch von GPOs zu kontrollieren.
+Darüber hinaus können auch zusätzliche Methoden zur Ausführung von Code oder zur Aufrechterhaltung der Persistenz in Betracht gezogen werden, wie die Nutzung von Anmelde-/Abmeldeskripten, das Ändern von Registrierungsschlüsseln für Autoruns, die Installation von Software über .msi-Dateien oder das Bearbeiten von Dienstkonfigurationen. Diese Techniken bieten verschiedene Möglichkeiten, um den Zugriff aufrechtzuerhalten und Zielsysteme durch den Missbrauch von GPOs zu kontrollieren.
 
 ## Referenzen
 

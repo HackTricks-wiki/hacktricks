@@ -26,7 +26,7 @@ Eine weitere Möglichkeit, dieses Problem zu vermeiden, die [**auffällig unsich
 
 > CredSSP-Authentifizierung delegiert die Benutzeranmeldeinformationen vom lokalen Computer an einen Remote-Computer. Diese Praxis erhöht das Sicherheitsrisiko der Remote-Operation. Wenn der Remote-Computer kompromittiert wird, können die Anmeldeinformationen, wenn sie an ihn übergeben werden, verwendet werden, um die Netzwerksitzung zu steuern.
 
-Es wird dringend empfohlen, **CredSSP** auf Produktionssystemen, sensiblen Netzwerken und ähnlichen Umgebungen aus Sicherheitsgründen zu deaktivieren. Um festzustellen, ob **CredSSP** aktiviert ist, kann der Befehl `Get-WSManCredSSP` ausgeführt werden. Dieser Befehl ermöglicht die **Überprüfung des CredSSP-Status** und kann sogar remote ausgeführt werden, vorausgesetzt, **WinRM** ist aktiviert.
+Es wird dringend empfohlen, dass **CredSSP** auf Produktionssystemen, sensiblen Netzwerken und ähnlichen Umgebungen aus Sicherheitsgründen deaktiviert wird. Um festzustellen, ob **CredSSP** aktiviert ist, kann der Befehl `Get-WSManCredSSP` ausgeführt werden. Dieser Befehl ermöglicht die **Überprüfung des CredSSP-Status** und kann sogar remote ausgeführt werden, vorausgesetzt, **WinRM** ist aktiviert.
 ```powershell
 Invoke-Command -ComputerName bizintel -Credential ta\redsuit -ScriptBlock {
 Get-WSManCredSSP
@@ -43,7 +43,7 @@ Invoke-Command -ComputerName bizintel -Credential $cred -ScriptBlock {
 Invoke-Command -ComputerName secdev -Credential $cred -ScriptBlock {hostname}
 }
 ```
-Alternativ wird empfohlen, eine PS-Session mit dem ersten Server herzustellen und `Invoke-Command` unter Verwendung von `$cred` auszuführen, um Aufgaben zu zentralisieren.
+Alternativ wird empfohlen, eine PS-Session mit dem ersten Server einzurichten und `Invoke-Command` mit `$cred` auszuführen, um Aufgaben zu zentralisieren.
 
 ### PSSession-Konfiguration registrieren
 

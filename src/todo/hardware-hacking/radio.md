@@ -8,8 +8,8 @@
 
 ### Grundkonfiguration
 
-Nach der Installation gibt es einige Dinge, die Sie in Betracht ziehen könnten zu konfigurieren.\
-In den Einstellungen (der zweite Tab-Button) können Sie das **SDR-Gerät** auswählen oder **eine Datei** zum Lesen auswählen und die Frequenz, auf die Sie syntonisieren möchten, sowie die Abtastrate (empfohlen bis zu 2,56 Msps, wenn Ihr PC dies unterstützt)\\
+Nach der Installation gibt es einige Dinge, die Sie in Betracht ziehen könnten, zu konfigurieren.\
+In den Einstellungen (der zweite Tab-Button) können Sie das **SDR-Gerät** auswählen oder **eine Datei auswählen**, um zu lesen, welche Frequenz syntonisiert werden soll und die Abtastrate (empfohlen bis zu 2,56 Msps, wenn Ihr PC dies unterstützt)\\
 
 ![](<../../images/image (245).png>)
 
@@ -45,7 +45,7 @@ Mit [**SigDigger** ](https://github.com/BatchDrake/SigDigger) synchronisieren Si
 
 ![](<../../images/image (597).png>)
 
-- **Nachdem Sie die Bits wiederhergestellt haben, müssen Sie sie möglicherweise irgendwie verarbeiten**. Zum Beispiel bedeutet in der Manchester-Codierung ein up+down eine 1 oder 0 und ein down+up wird das andere sein. Paare von 1s und 0s (ups und downs) werden eine echte 1 oder eine echte 0 sein.
+- **Nachdem Sie die Bits wiederhergestellt haben, müssen Sie sie möglicherweise irgendwie verarbeiten**. Zum Beispiel bedeutet in der Manchester-Codierung ein up+down eine 1 oder 0 und ein down+up die andere. Paare von 1s und 0s (ups und downs) werden zu einer echten 1 oder einer echten 0.
 - Selbst wenn ein Signal die Manchester-Codierung verwendet (es ist unmöglich, mehr als zwei 0s oder 1s hintereinander zu finden), könnten Sie **mehrere 1s oder 0s zusammen in der Präambel finden**!
 
 ### Aufdecken des Modulationstyps mit IQ
@@ -60,13 +60,13 @@ Wenn Sie ein Signal überprüfen, gibt es verschiedene Möglichkeiten, um heraus
 - Beachten Sie, dass, wenn die Informationen im Faktum verborgen sind, dass eine Phase geändert wird und nicht in der Phase selbst, Sie keine klar differenzierten Phasen sehen werden.
 - **FM erkennen**: IQ hat kein Feld zur Identifizierung von Frequenzen (Abstand zum Zentrum ist Amplitude und Winkel ist Phase).\
 Daher sollten Sie zur Identifizierung von FM **grundsätzlich nur einen Kreis** in diesem Diagramm sehen.\
-Darüber hinaus wird eine andere Frequenz im IQ-Diagramm durch eine **Geschwindigkeitsbeschleunigung über den Kreis** "dargestellt" (wenn Sie in SysDigger das Signal auswählen, wird das IQ-Diagramm gefüllt; wenn Sie eine Beschleunigung oder Richtungsänderung im erzeugten Kreis finden, könnte das bedeuten, dass es sich um FM handelt):
+Darüber hinaus wird eine andere Frequenz im IQ-Diagramm durch eine **Geschwindigkeitsbeschleunigung über den Kreis** "repräsentiert" (wenn Sie in SysDigger das Signal auswählen, wird das IQ-Diagramm gefüllt; wenn Sie eine Beschleunigung oder Richtungsänderung im erzeugten Kreis finden, könnte das bedeuten, dass es sich um FM handelt):
 
 ## AM-Beispiel
 
 {% file src="../../images/sigdigger_20220308_165547Z_2560000_433500000_float32_iq.raw" %}
 
-### AM aufdecken
+### Aufdecken von AM
 
 #### Überprüfung der Hüllkurve
 
@@ -80,7 +80,7 @@ Und so sieht ein Teil des Symbols mit der Wellenform aus:
 
 #### Überprüfung des Histogramms
 
-Sie können **das gesamte Signal auswählen**, wo sich die Informationen befinden, den **Amplitude**-Modus und **Auswahl** auswählen und auf **Histogramm** klicken. Sie können beobachten, dass nur 2 klare Ebenen gefunden werden
+Sie können **das gesamte Signal auswählen**, in dem sich die Informationen befinden, den **Amplitude**-Modus und **Auswahl** auswählen und auf **Histogramm** klicken. Sie können beobachten, dass nur 2 klare Ebenen gefunden werden.
 
 ![](<../../images/image (264).png>)
 
@@ -96,11 +96,11 @@ In diesem Beispiel können Sie sehen, wie es einen **großen Kreis** gibt, aber 
 
 ![](<../../images/image (222).png>)
 
-### Symbolrate ermitteln
+### Symbolrate erhalten
 
 #### Mit einem Symbol
 
-Wählen Sie das kleinste Symbol, das Sie finden können (damit Sie sicher sind, dass es nur 1 ist), und überprüfen Sie die "Auswahlfreq". In diesem Fall wäre es 1,013 kHz (also 1 kHz).
+Wählen Sie das kleinste Symbol aus, das Sie finden können (damit Sie sicher sind, dass es nur 1 ist), und überprüfen Sie die "Auswahlfreq". In diesem Fall wäre es 1,013 kHz (also 1 kHz).
 
 ![](<../../images/image (78).png>)
 
@@ -119,7 +119,7 @@ Nachdem Sie festgestellt haben, dass es sich um ein **AM-moduliertes** Signal ha
 - **Sync zu Auswahlintervallen** bedeutet, dass, wenn Sie zuvor Intervalle ausgewählt haben, um die Symbolrate zu finden, diese Symbolrate verwendet wird.
 - **Manuell** bedeutet, dass die angegebene Symbolrate verwendet wird.
 - Bei **Festintervallauswahl** geben Sie die Anzahl der Intervalle an, die ausgewählt werden sollen, und es berechnet die Symbolrate daraus.
-- **Gadner-Uhrensynchronisation** ist normalerweise die beste Option, aber Sie müssen dennoch eine ungefähre Symbolrate angeben.
+- **Gadner-Uhrensynchronisation** ist normalerweise die beste Option, aber Sie müssen immer noch eine ungefähre Symbolrate angeben.
 
 Wenn Sie auf Abtasten drücken, erscheint dies:
 
@@ -137,13 +137,13 @@ Schließlich können Sie durch **Erhöhen** des **Zooms** und **Ändern der Zeil
 
 Wenn das Signal mehr als 1 Bit pro Symbol hat (zum Beispiel 2), hat SigDigger **keine Möglichkeit zu wissen, welches Symbol** 00, 01, 10, 11 ist, sodass es verschiedene **Graustufen** verwendet, um jedes darzustellen (und wenn Sie die Bits kopieren, verwendet es **Zahlen von 0 bis 3**, die Sie behandeln müssen).
 
-Verwenden Sie auch **Codierungen** wie **Manchester**, und **up+down** kann **1 oder 0** sein und ein down+up kann eine 1 oder 0 sein. In diesen Fällen müssen Sie die **erhaltenen Ups (1) und Downs (0)** behandeln, um die Paare von 01 oder 10 als 0s oder 1s zu ersetzen.
+Verwenden Sie auch **Codierungen** wie **Manchester**, und **up+down** kann **1 oder 0** sein und ein down+up kann eine 1 oder 0 sein. In diesen Fällen müssen Sie die erhaltenen Ups (1) und Downs (0) behandeln, um die Paare von 01 oder 10 als 0s oder 1s zu ersetzen.
 
 ## FM-Beispiel
 
 {% file src="../../images/sigdigger_20220308_170858Z_2560000_433500000_float32_iq.raw" %}
 
-### FM aufdecken
+### Aufdecken von FM
 
 #### Überprüfung der Frequenzen und Wellenform
 
@@ -155,7 +155,7 @@ Im vorherigen Bild können Sie ziemlich gut beobachten, dass **2 Frequenzen verw
 
 ![](<../../images/image (717).png>)
 
-Das liegt daran, dass ich das Signal in beiden Frequenzen erfasst habe, daher ist eine ungefähr die andere negativ:
+Das liegt daran, dass ich das Signal in beiden Frequenzen erfasst habe, daher ist eine ungefähr die andere in negativ:
 
 ![](<../../images/image (942).png>)
 
@@ -171,7 +171,7 @@ Wenn die synchronisierte Frequenz **näher an einer Frequenz als an der anderen*
 
 ![](<../../images/image (871).png>)
 
-In diesem Fall, wenn Sie das **Amplitude-Histogramm** überprüfen, werden Sie **nur eine Amplitude** finden, sodass es **nicht AM sein kann** (wenn Sie viele Amplituden finden, könnte es daran liegen, dass das Signal entlang des Kanals an Leistung verloren hat):
+In diesem Fall, wenn Sie das **Amplitude-Histogramm** überprüfen, finden Sie **nur eine Amplitude**, sodass es **nicht AM sein kann** (wenn Sie viele Amplituden finden, könnte es daran liegen, dass das Signal entlang des Kanals an Leistung verloren hat):
 
 ![](<../../images/image (817).png>)
 
@@ -183,13 +183,13 @@ Und dies wäre das Phasenhistogramm (was sehr klar macht, dass das Signal nicht 
 
 IQ hat kein Feld zur Identifizierung von Frequenzen (Abstand zum Zentrum ist Amplitude und Winkel ist Phase).\
 Daher sollten Sie zur Identifizierung von FM **grundsätzlich nur einen Kreis** in diesem Diagramm sehen.\
-Darüber hinaus wird eine andere Frequenz im IQ-Diagramm durch eine **Geschwindigkeitsbeschleunigung über den Kreis** "dargestellt" (wenn Sie in SysDigger das Signal auswählen, wird das IQ-Diagramm gefüllt; wenn Sie eine Beschleunigung oder Richtungsänderung im erzeugten Kreis finden, könnte das bedeuten, dass es sich um FM handelt):
+Darüber hinaus wird eine andere Frequenz im IQ-Diagramm durch eine **Geschwindigkeitsbeschleunigung über den Kreis** "repräsentiert" (wenn Sie in SysDigger das Signal auswählen, wird das IQ-Diagramm gefüllt; wenn Sie eine Beschleunigung oder Richtungsänderung im erzeugten Kreis finden, könnte das bedeuten, dass es sich um FM handelt):
 
 ![](<../../images/image (81).png>)
 
-### Symbolrate ermitteln
+### Symbolrate erhalten
 
-Sie können die **gleiche Technik wie im AM-Beispiel verwenden**, um die Symbolrate zu ermitteln, sobald Sie die Frequenzen gefunden haben, die Symbole tragen.
+Sie können die **gleiche Technik wie im AM-Beispiel verwenden**, um die Symbolrate zu erhalten, sobald Sie die Frequenzen gefunden haben, die Symbole tragen.
 
 ### Bits erhalten
 

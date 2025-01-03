@@ -36,7 +36,7 @@ Verwenden Sie die Parameter `/startoffset`, `/endin` und `/renewmax`, um den Sta
 ```
 Get-DomainPolicy | select -expand KerberosPolicy
 ```
-Leider wird die Lebensdauer des TGTs nicht in 4769 protokolliert, sodass Sie diese Informationen nicht in den Windows-Ereignisprotokollen finden werden. Was Sie jedoch korrelieren können, ist **das Sehen von 4769 ohne ein vorhergehendes 4768**. Es ist **nicht möglich, ein TGS ohne ein TGT anzufordern**, und wenn es keinen Nachweis über die Ausstellung eines TGT gibt, können wir schließen, dass es offline gefälscht wurde.
+Leider wird die Lebensdauer des TGTs nicht in 4769 protokolliert, sodass Sie diese Informationen nicht in den Windows-Ereignisprotokollen finden werden. Was Sie jedoch korrelieren können, ist **das Sehen von 4769 ohne ein vorhergehendes 4768**. Es ist **nicht möglich, ein TGS ohne ein TGT anzufordern**, und wenn es keinen Nachweis über die Ausstellung eines TGTs gibt, können wir schließen, dass es offline gefälscht wurde.
 
 Um diese **Erkennung zu umgehen**, überprüfen Sie die diamond tickets:
 

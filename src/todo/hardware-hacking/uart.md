@@ -6,7 +6,7 @@
 
 UART ist ein serielles Protokoll, was bedeutet, dass es Daten zwischen Komponenten bitweise überträgt. Im Gegensatz dazu übertragen parallele Kommunikationsprotokolle Daten gleichzeitig über mehrere Kanäle. Zu den gängigen seriellen Protokollen gehören RS-232, I2C, SPI, CAN, Ethernet, HDMI, PCI Express und USB.
 
-Im Allgemeinen wird die Leitung hoch gehalten (bei einem logischen Wert von 1), während sich UART im Leerlaufzustand befindet. Um den Beginn einer Datenübertragung zu signalisieren, sendet der Sender ein Startbit an den Empfänger, während das Signal niedrig gehalten wird (bei einem logischen Wert von 0). Anschließend sendet der Sender fünf bis acht Datenbits, die die eigentliche Nachricht enthalten, gefolgt von einem optionalen Paritätsbit und einem oder zwei Stoppbits (mit einem logischen Wert von 1), abhängig von der Konfiguration. Das Paritätsbit, das zur Fehlerüberprüfung verwendet wird, ist in der Praxis selten zu sehen. Das Stoppbit (oder die Stoppbits) signalisiert das Ende der Übertragung.
+Im Allgemeinen wird die Leitung hoch gehalten (bei einem logischen Wert von 1), während sich UART im Leerlaufzustand befindet. Um den Beginn einer Datenübertragung zu signalisieren, sendet der Sender ein Startbit an den Empfänger, während das Signal niedrig gehalten wird (bei einem logischen Wert von 0). Anschließend sendet der Sender fünf bis acht Datenbits, die die eigentliche Nachricht enthalten, gefolgt von einem optionalen Paritätsbit und einem oder zwei Stoppbits (mit einem logischen Wert von 1), abhängig von der Konfiguration. Das Paritätsbit, das zur Fehlerüberprüfung verwendet wird, ist in der Praxis selten zu sehen. Das Stoppbit (oder die Stoppbits) signalisieren das Ende der Übertragung.
 
 Wir nennen die gängigste Konfiguration 8N1: acht Datenbits, keine Parität und ein Stoppbit. Wenn wir beispielsweise das Zeichen C oder 0x43 in ASCII in einer 8N1 UART-Konfiguration senden wollten, würden wir die folgenden Bits senden: 0 (das Startbit); 0, 1, 0, 0, 0, 0, 1, 1 (der Wert von 0x43 in binär) und 0 (das Stoppbit).
 
@@ -35,7 +35,7 @@ In einigen Zielgeräten ist der UART-Port vom Hersteller deaktiviert, indem RX o
 
 ### Identifizierung der UART-Baudrate
 
-Der einfachste Weg, die richtige Baudrate zu identifizieren, besteht darin, den **TX-Pin-Ausgang zu betrachten und die Daten zu lesen**. Wenn die Daten, die Sie erhalten, nicht lesbar sind, wechseln Sie zur nächsten möglichen Baudrate, bis die Daten lesbar werden. Sie können einen USB-zu-Seriell-Adapter oder ein Multifunktionsgerät wie Bus Pirate verwenden, um dies zu tun, zusammen mit einem Hilfsskript wie [baudrate.py](https://github.com/devttys0/baudrate/). Die gängigsten Baudraten sind 9600, 38400, 19200, 57600 und 115200.
+Der einfachste Weg, die richtige Baudrate zu identifizieren, besteht darin, den **TX-Pin-Ausgang zu betrachten und die Daten zu lesen**. Wenn die Daten, die Sie erhalten, nicht lesbar sind, wechseln Sie zur nächsten möglichen Baudrate, bis die Daten lesbar werden. Sie können einen USB-zu-Seriell-Adapter oder ein Multifunktionsgerät wie den Bus Pirate verwenden, um dies zu tun, zusammen mit einem Hilfsskript wie [baudrate.py](https://github.com/devttys0/baudrate/). Die gängigsten Baudraten sind 9600, 38400, 19200, 57600 und 115200.
 
 > [!CAUTION]
 > Es ist wichtig zu beachten, dass Sie in diesem Protokoll den TX eines Geräts mit dem RX des anderen verbinden müssen!
@@ -62,11 +62,11 @@ Konfigurieren Sie die Einstellungen wie Baudrate und Gerätename in der `Serial 
 
 Nach der Konfiguration verwenden Sie den Befehl `minicom`, um die UART-Konsole zu starten.
 
-## UART über Arduino UNO R3 (entfernbarer Atmel 328p-Chip)
+## UART über Arduino UNO R3 (entfernbares Atmel 328p-Chip-Board)
 
 Falls UART-Serial-zu-USB-Adapter nicht verfügbar sind, kann Arduino UNO R3 mit einem schnellen Hack verwendet werden. Da Arduino UNO R3 normalerweise überall erhältlich ist, kann dies viel Zeit sparen.
 
-Arduino UNO R3 hat einen USB-zu-Serial-Adapter, der auf der Platine selbst integriert ist. Um eine UART-Verbindung herzustellen, ziehen Sie einfach den Atmel 328p-Mikrocontroller-Chip von der Platine ab. Dieser Hack funktioniert bei Arduino UNO R3-Varianten, bei denen der Atmel 328p nicht auf der Platine verlötet ist (SMD-Version wird verwendet). Verbinden Sie den RX-Pin des Arduino (Digital Pin 0) mit dem TX-Pin der UART-Schnittstelle und den TX-Pin des Arduino (Digital Pin 1) mit dem RX-Pin der UART-Schnittstelle.
+Arduino UNO R3 hat einen USB-zu-Serial-Adapter, der auf dem Board selbst integriert ist. Um eine UART-Verbindung herzustellen, ziehen Sie einfach den Atmel 328p-Mikrocontroller-Chip vom Board ab. Dieser Hack funktioniert bei Arduino UNO R3-Varianten, bei denen der Atmel 328p nicht auf dem Board verlötet ist (SMD-Version wird verwendet). Verbinden Sie den RX-Pin des Arduino (Digital Pin 0) mit dem TX-Pin der UART-Schnittstelle und den TX-Pin des Arduino (Digital Pin 1) mit dem RX-Pin der UART-Schnittstelle.
 
 Schließlich wird empfohlen, die Arduino IDE zu verwenden, um die serielle Konsole zu erhalten. Wählen Sie im Menü im Abschnitt `tools` die Option `Serial Console` und setzen Sie die Baudrate gemäß der UART-Schnittstelle.
 
@@ -146,21 +146,21 @@ waiting a few secs to repeat....
 ```
 ## Dumping Firmware mit UART-Konsole
 
-Die UART-Konsole bietet eine großartige Möglichkeit, mit der zugrunde liegenden Firmware in einer Laufzeitumgebung zu arbeiten. Wenn der Zugriff auf die UART-Konsole jedoch schreibgeschützt ist, kann dies viele Einschränkungen mit sich bringen. In vielen eingebetteten Geräten wird die Firmware in EEPROMs gespeichert und in Prozessoren mit flüchtigem Speicher ausgeführt. Daher bleibt die Firmware schreibgeschützt, da die ursprüngliche Firmware während der Herstellung im EEPROM selbst gespeichert ist und neue Dateien aufgrund des flüchtigen Speichers verloren gehen würden. Daher ist das Dumpen der Firmware eine wertvolle Anstrengung, wenn man mit eingebetteten Firmwares arbeitet.
+UART-Konsole bietet eine großartige Möglichkeit, mit der zugrunde liegenden Firmware in der Laufzeitumgebung zu arbeiten. Aber wenn der Zugriff auf die UART-Konsole schreibgeschützt ist, kann dies viele Einschränkungen mit sich bringen. In vielen eingebetteten Geräten wird die Firmware in EEPROMs gespeichert und in Prozessoren mit flüchtigem Speicher ausgeführt. Daher bleibt die Firmware schreibgeschützt, da die ursprüngliche Firmware während der Herstellung im EEPROM selbst gespeichert ist und neue Dateien aufgrund des flüchtigen Speichers verloren gehen würden. Daher ist das Dumpen von Firmware eine wertvolle Anstrengung, wenn man mit eingebetteten Firmwares arbeitet.
 
-Es gibt viele Möglichkeiten, dies zu tun, und der SPI-Abschnitt behandelt Methoden, um Firmware direkt aus dem EEPROM mit verschiedenen Geräten zu extrahieren. Es wird jedoch empfohlen, zuerst zu versuchen, die Firmware mit UART zu dumpen, da das Dumpen der Firmware mit physischen Geräten und externen Interaktionen riskant sein kann.
+Es gibt viele Möglichkeiten, dies zu tun, und der SPI-Abschnitt behandelt Methoden, um Firmware direkt aus dem EEPROM mit verschiedenen Geräten zu extrahieren. Es wird jedoch empfohlen, zuerst zu versuchen, die Firmware mit UART zu dumpen, da das Dumpen von Firmware mit physischen Geräten und externen Interaktionen riskant sein kann.
 
-Das Dumpen der Firmware von der UART-Konsole erfordert zunächst den Zugriff auf Bootloader. Viele beliebte Anbieter verwenden uboot (Universal Bootloader) als ihren Bootloader, um Linux zu laden. Daher ist der Zugriff auf uboot notwendig.
+Das Dumpen von Firmware aus der UART-Konsole erfordert zunächst den Zugriff auf Bootloader. Viele beliebte Anbieter verwenden uboot (Universal Bootloader) als ihren Bootloader, um Linux zu laden. Daher ist der Zugriff auf uboot notwendig.
 
-Um Zugriff auf den Bootloader zu erhalten, verbinden Sie den UART-Port mit dem Computer und verwenden Sie eines der Serial Console-Tools und halten Sie die Stromversorgung des Geräts getrennt. Sobald die Einrichtung bereit ist, drücken und halten Sie die Eingabetaste. Schließen Sie schließlich die Stromversorgung des Geräts an und lassen Sie es booten.
+Um Zugriff auf den Bootloader zu erhalten, verbinden Sie den UART-Port mit dem Computer und verwenden Sie eines der Serial Console-Tools und halten Sie die Stromversorgung des Geräts getrennt. Sobald die Einrichtung bereit ist, drücken Sie die Eingabetaste und halten Sie sie gedrückt. Schließlich schließen Sie die Stromversorgung des Geräts an und lassen es booten.
 
-Durch diese Vorgehensweise wird das Laden von uboot unterbrochen und ein Menü angezeigt. Es wird empfohlen, die uboot-Befehle zu verstehen und das Hilfemenü zu verwenden, um sie aufzulisten. Dies könnte der Befehl `help` sein. Da verschiedene Anbieter unterschiedliche Konfigurationen verwenden, ist es notwendig, jede von ihnen separat zu verstehen.
+Dies wird uboot daran hindern, zu laden, und ein Menü bereitstellen. Es wird empfohlen, die uboot-Befehle zu verstehen und das Hilfemenü zu verwenden, um sie aufzulisten. Dies könnte der Befehl `help` sein. Da verschiedene Anbieter unterschiedliche Konfigurationen verwenden, ist es notwendig, jede von ihnen separat zu verstehen.
 
 In der Regel lautet der Befehl zum Dumpen der Firmware:
 ```
 md
 ```
-was für "Speicherabbild" steht. Dies wird den Speicher (EEPROM-Inhalt) auf dem Bildschirm ausgeben. Es wird empfohlen, die Ausgabe der seriellen Konsole zu protokollieren, bevor Sie das Verfahren starten, um das Speicherabbild zu erfassen.
+was für "Speicherabbild" steht. Dies wird den Speicher (EEPROM-Inhalt) auf dem Bildschirm ausgeben. Es wird empfohlen, die Ausgabe der seriellen Konsole vor Beginn des Verfahrens zu protokollieren, um das Speicherabbild zu erfassen.
 
 Schließlich entfernen Sie einfach alle unnötigen Daten aus der Protokolldatei und speichern Sie die Datei als `filename.rom` und verwenden Sie binwalk, um den Inhalt zu extrahieren:
 ```

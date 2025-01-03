@@ -44,7 +44,7 @@ Der Erstellungsprozess umfasst die Verwendung von candle.exe, einem Tool von wix
 ```
 candle.exe -out C:\tem\wix C:\tmp\Ethereal\msi.xml
 ```
-Zusätzlich ist es erwähnenswert, dass im Beitrag ein Bild bereitgestellt wird, das den Befehl und seine Ausgabe zeigt. Sie können es als visuelle Anleitung verwenden.
+Zusätzlich ist es erwähnenswert, dass im Beitrag ein Bild bereitgestellt wird, das den Befehl und seine Ausgabe zeigt. Sie können es zur visuellen Anleitung heranziehen.
 
 Darüber hinaus wird light.exe, ein weiteres Tool von wixtools, verwendet, um die MSI-Datei aus dem wixobject zu erstellen. Der auszuführende Befehl lautet wie folgt:
 ```
@@ -54,7 +54,7 @@ light.exe -out C:\tm\Ethereal\rick.msi C:\tmp\wix
 
 Bitte beachten Sie, dass diese Zusammenfassung wertvolle Informationen bieten soll, es jedoch empfohlen wird, sich auf den ursprünglichen Beitrag zu beziehen, um umfassendere Details und genaue Anweisungen zu erhalten.
 
-## Referenzen
+## References
 
 - [https://0xrick.github.io/hack-the-box/ethereal/#Creating-Malicious-msi-and-getting-root](https://0xrick.github.io/hack-the-box/ethereal/#Creating-Malicious-msi-and-getting-root)
 - [https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with)
