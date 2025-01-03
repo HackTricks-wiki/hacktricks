@@ -1,15 +1,15 @@
-# Ograničena Delegacija
+# Constrained Delegation
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Ograničena Delegacija
+## Constrained Delegation
 
 Korišćenjem ovoga, administrator domena može **dozvoliti** računaru da **imituje korisnika ili računar** protiv **usluge** mašine.
 
 - **Usluga za korisnika da se sam (**_**S4U2self**_**):** Ako **račun usluge** ima _userAccountControl_ vrednost koja sadrži [TRUSTED_TO_AUTH_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>) (T2A4D), onda može dobiti TGS za sebe (uslugu) u ime bilo kog drugog korisnika.
-- **Usluga za korisnika da proxy(**_**S4U2proxy**_**):** **Račun usluge** može dobiti TGS u ime bilo kog korisnika za uslugu postavljenu u **msDS-AllowedToDelegateTo.** Da bi to uradio, prvo mu je potreban TGS od tog korisnika za sebe, ali može koristiti S4U2self da dobije taj TGS pre nego što zatraži drugi.
+- **Usluga za korisnika da proxy(**_**S4U2proxy**_**):** **Račun usluge** može dobiti TGS u ime bilo kog korisnika za uslugu postavljenu u **msDS-AllowedToDelegateTo.** Da bi to uradio, prvo mu je potrebna TGS od tog korisnika za sebe, ali može koristiti S4U2self da dobije tu TGS pre nego što zatraži drugu.
 
-**Napomena**: Ako je korisnik označen kao ‘_Račun je osetljiv i ne može biti delegiran_’ u AD, nećete **moći da imitirate** njih.
+**Napomena**: Ako je korisnik označen kao ‘_Račun je osetljiv i ne može se delegirati_’ u AD, nećete **moći da imitirate** njih.
 
 To znači da ako **kompromitujete hash usluge** možete **imitirati korisnike** i dobiti **pristup** u njihovo ime do **konfigurisane usluge** (moguća **privesc**).
 
@@ -44,9 +44,9 @@ tgt::ask /user:dcorp-adminsrv$ /domain:dollarcorp.moneycorp.local /rc4:8c6264140
 .\Rubeus.exe asktgt /user:dcorp-adminsrv$ /rc4:cc098f204c5887eaa8253e7c2749156f /outfile:TGT_websvc.kirbi
 ```
 > [!WARNING]
-> Postoje **drugi načini da se dobije TGT tiket** ili **RC4** ili **AES256** bez da budete SYSTEM na računaru, kao što su Printer Bug i nekontrolisana delegacija, NTLM preusmeravanje i zloupotreba Active Directory Certificate Service.
+> Postoje **drugi načini za dobijanje TGT karte** ili **RC4** ili **AES256** bez da budete SYSTEM na računaru, kao što su Printer Bug i nekontrolisana delegacija, NTLM preusmeravanje i zloupotreba Active Directory Certificate Service.
 >
-> **Samo posedujući taj TGT tiket (ili heš) možete izvršiti ovaj napad bez kompromitovanja celog računara.**
+> **Samo imajući tu TGT kartu (ili heširanu) možete izvesti ovaj napad bez kompromitovanja celog računara.**
 ```bash:Using Rubeus
 #Obtain a TGS of the Administrator user to self
 .\Rubeus.exe s4u /ticket:TGT_websvc.kirbi /impersonateuser:Administrator /outfile:TGS_administrator

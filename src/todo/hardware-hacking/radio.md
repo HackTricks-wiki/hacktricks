@@ -4,7 +4,7 @@
 
 ## SigDigger
 
-[**SigDigger** ](https://github.com/BatchDrake/SigDigger)je besplatan analizer digitalnih signala za GNU/Linux i macOS, dizajniran za ekstrakciju informacija iz nepoznatih radio signala. Podržava razne SDR uređaje putem SoapySDR, i omogućava prilagodljivu demodulaciju FSK, PSK i ASK signala, dekodiranje analognog videa, analizu povremenih signala i slušanje analognih glasovnih kanala (sve u realnom vremenu).
+[**SigDigger** ](https://github.com/BatchDrake/SigDigger)je besplatan analizer digitalnih signala za GNU/Linux i macOS, dizajniran za ekstrakciju informacija iz nepoznatih radio signala. Podržava razne SDR uređaje putem SoapySDR, i omogućava podesivu demodulaciju FSK, PSK i ASK signala, dekodiranje analognog videa, analizu povremenih signala i slušanje analognih glasovnih kanala (sve u realnom vremenu).
 
 ### Osnovna konfiguracija
 
@@ -26,7 +26,7 @@ U ponašanju GUI-a preporučuje se da omogućite nekoliko stvari ako vaš PC to 
 
 ![](<../../images/image (960).png>)
 
-- **Tuner** u SigDigger-u pomaže da **uhvatite bolje signale** (ali to može i da ih pogorša). Idealno je početi sa 0 i nastaviti **povećavati dok** ne primetite da je **šum** koji se uvodi **veći** od **poboljšanja signala** koje vam je potrebno).
+- **Tuner** u SigDigger-u pomaže da **uhvatite bolje signale** (ali može ih i pogoršati). Idealno je početi sa 0 i nastaviti **povećavati dok** ne primetite da je **šum** koji se uvodi **veći** od **poboljšanja signala** koje vam je potrebno).
 
 ![](<../../images/image (1099).png>)
 
@@ -38,29 +38,29 @@ Sa [**SigDigger** ](https://github.com/BatchDrake/SigDigger)sinhronizujte se sa 
 
 ## Zanimljive trikove
 
-- Kada uređaj šalje serije informacija, obično je **prvi deo preambula** tako da **ne morate** da **brinete** ako **ne pronađete informacije** ili ako postoje neki **greške**.
+- Kada uređaj šalje serije informacija, obično je **prvi deo preambula** tako da **ne morate** da se **brinete** ako **ne pronađete informacije** ili ako postoje neki **greške**.
 - U okvirima informacija obično biste trebali **pronaći različite okvire dobro usklađene između njih**:
 
 ![](<../../images/image (1076).png>)
 
 ![](<../../images/image (597).png>)
 
-- **Nakon oporavka bitova možda ćete morati da ih obradite na neki način**. Na primer, u Mančesterskoj kodifikaciji, uspon+pad će biti 1 ili 0, a pad+uspon će biti drugi. Tako da parovi 1 i 0 (usponi i padovi) će biti pravi 1 ili pravi 0.
-- Čak i ako signal koristi Mančestersku kodifikaciju (nemoguće je pronaći više od dva 0 ili 1 u nizu), možete **pronaći nekoliko 1 ili 0 zajedno u preambuli**!
+- **Nakon oporavka bitova možda ćete morati da ih obradite na neki način**. Na primer, u Mančesterskoj kodifikaciji, up+down će biti 1 ili 0, a down+up će biti drugo. Tako da parovi 1s i 0s (ups i downs) će biti pravi 1 ili pravi 0.
+- Čak i ako signal koristi Mančestersku kodifikaciju (nemoguće je pronaći više od dva 0s ili 1s u nizu), možete **pronaći nekoliko 1s ili 0s zajedno u preambuli**!
 
 ### Otkriće tipa modulacije sa IQ
 
 Postoje 3 načina za skladištenje informacija u signalima: Modulacija **amplituda**, **frekvencija** ili **faza**.\
-Ako proveravate signal, postoje različiti načini da pokušate da otkrijete šta se koristi za skladištenje informacija (pronađite više načina u nastavku), ali dobar način je da proverite IQ graf.
+Ako proveravate signal, postoje različiti načini da pokušate da otkrijete šta se koristi za skladištenje informacija (pronađite više načina ispod), ali dobar način je da proverite IQ graf.
 
 ![](<../../images/image (788).png>)
 
-- **Detekcija AM**: Ako se na IQ grafu pojavi, na primer, **2 kruga** (verovatno jedan na 0 i drugi na različitoj amplitudi), to može značiti da je ovo AM signal. To je zato što je na IQ grafu razdaljina između 0 i kruga amplituda signala, tako da je lako vizualizovati različite amplitude koje se koriste.
-- **Detekcija PM**: Kao na prethodnoj slici, ako pronađete male krugove koji nisu povezani između njih, to verovatno znači da se koristi fazna modulacija. To je zato što je na IQ grafu ugao između tačke i 0,0 faza signala, tako da to znači da se koriste 4 različite faze.
+- **Detekcija AM**: Ako se na IQ grafu pojave, na primer, **2 kruga** (verovatno jedan na 0 i drugi na različitoj amplitudi), to može značiti da je ovo AM signal. To je zato što je na IQ grafu razdaljina između 0 i kruga amplituda signala, tako da je lako vizualizovati različite amplitude koje se koriste.
+- **Detekcija PM**: Kao na prethodnoj slici, ako pronađete male krugove koji nisu povezani između njih, to verovatno znači da se koristi fazna modulacija. To je zato što je na IQ grafu ugao između tačke i 0,0 faza signala, što znači da se koriste 4 različite faze.
 - Imajte na umu da ako je informacija skrivena u činjenici da se faza menja, a ne u samoj fazi, nećete videti različite faze jasno diferencirane.
 - **Detekcija FM**: IQ nema polje za identifikaciju frekvencija (razdaljina do centra je amplituda, a ugao je faza).\
 Stoga, da biste identifikovali FM, trebali biste **samo videti osnovni krug** u ovom grafu.\
-Štaviše, različita frekvencija je "predstavljena" na IQ grafu kao **brza akceleracija po krugu** (tako da u SysDigger-u, kada odaberete signal, IQ graf se popunjava, ako primetite akceleraciju ili promenu pravca u kreiranom krugu, to može značiti da je ovo FM):
+Štaviše, različita frekvencija je "predstavljena" na IQ grafu kao **brzina akceleracije oko kruga** (tako da u SysDigger-u, kada odaberete signal, IQ graf se popunjava, ako primetite akceleraciju ili promenu pravca u kreiranom krugu, to može značiti da je ovo FM):
 
 ## AM Primer
 
@@ -70,7 +70,7 @@ Stoga, da biste identifikovali FM, trebali biste **samo videti osnovni krug** u 
 
 #### Proveravanje omotača
 
-Proveravajući AM informacije sa [**SigDigger** ](https://github.com/BatchDrake/SigDigger) i samo gledajući u **omotač** možete videti različite jasne nivoe amplitude. Korišćeni signal šalje pulseve sa informacijama u AM, ovako izgleda jedan puls:
+Proveravajući AM informacije sa [**SigDigger** ](https://github.com/BatchDrake/SigDigger) i samo gledajući u **omotač**, možete videti različite jasne nivoe amplitude. Korišćeni signal šalje pulseve sa informacijama u AM, ovako izgleda jedan puls:
 
 ![](<../../images/image (590).png>)
 
@@ -88,11 +88,11 @@ Na primer, ako odaberete Frekvenciju umesto Amplitude u ovom AM signalu, pronać
 
 ![](<../../images/image (732).png>)
 
-Ako pronađete mnogo frekvencija, verovatno ovo neće biti FM, verovatno je frekvencija signala samo modifikovana zbog kanala.
+Ako pronađete mnogo frekvencija, to verovatno neće biti FM, verovatno je frekvencija signala samo modifikovana zbog kanala.
 
 #### Sa IQ
 
-U ovom primeru možete videti kako postoji **veliki krug** ali i **mnogo tačaka u centru.**
+U ovom primeru možete videti kako postoji **veliki krug**, ali takođe **mnogo tačaka u centru.**
 
 ![](<../../images/image (222).png>)
 
@@ -106,38 +106,38 @@ Odaberite najmanji simbol koji možete pronaći (tako da ste sigurni da je to sa
 
 #### Sa grupom simbola
 
-Takođe možete naznačiti broj simbola koje ćete odabrati i SigDigger će izračunati frekvenciju 1 simbola (što više simbola odabrano, to bolje). U ovom scenariju odabrao sam 10 simbola i "Selekcija frekvencije" je 1.004 Khz:
+Takođe možete naznačiti broj simbola koje ćete odabrati i SigDigger će izračunati frekvenciju 1 simbola (što više simbola odabrano, to bolje verovatno). U ovom scenariju odabrao sam 10 simbola i "Selekcija frekvencije" je 1.004 Khz:
 
 ![](<../../images/image (1008).png>)
 
 ### Dobijanje bitova
 
-Nakon što ste utvrdili da je ovo **AM modulirani** signal i **simbolna brzina** (i znajući da u ovom slučaju nešto što ide gore znači 1, a nešto što ide dole znači 0), vrlo je lako **dobiti bitove** kodirane u signalu. Dakle, odaberite signal sa informacijama i konfigurišite uzorkovanje i odluku i pritisnite uzorak (proverite da je **Amplituda** odabrana, otkrivena **Simbolna brzina** je konfigurisana i **Gadnerova oporavak takta** je odabrana):
+Nakon što ste otkrili da je ovo **AM modulirani** signal i **simbolna brzina** (i znajući da u ovom slučaju nešto up znači 1, a nešto down znači 0), vrlo je lako **dobiti bitove** kodirane u signalu. Dakle, odaberite signal sa informacijama i konfigurišite uzorkovanje i odluku i pritisnite uzorak (proverite da je **Amplituda** odabrana, otkrivena **Simbolna brzina** je konfigurisana i **Gadnerova oporavka takta** je odabrana):
 
 ![](<../../images/image (965).png>)
 
 - **Sinhronizacija sa selekcionim intervalima** znači da ako ste prethodno odabrali intervale da pronađete simbolnu brzinu, ta simbolna brzina će se koristiti.
 - **Ručno** znači da će se koristiti naznačena simbolna brzina
 - U **Fiksnoj selekciji intervala** naznačavate broj intervala koji treba odabrati i izračunava simbolnu brzinu iz toga
-- **Gadnerova oporavak takta** obično je najbolja opcija, ali još uvek morate naznačiti neku približnu simbolnu brzinu.
+- **Gadnerova oporavka takta** obično je najbolja opcija, ali još uvek morate naznačiti neku približnu simbolnu brzinu.
 
 Pritiskom na uzorak pojavljuje se ovo:
 
 ![](<../../images/image (644).png>)
 
-Sada, da biste naterali SigDigger da razume **gde je opseg** nivoa koji nosi informacije, morate kliknuti na **niži nivo** i držati pritisnuto dok ne dobijete najveći nivo:
+Sada, da biste naterali SigDigger da razume **gde je opseg** nivoa koji nosi informacije, morate kliknuti na **niži nivo** i držati pritisnuto dok ne dođete do najvećeg nivoa:
 
 ![](<../../images/image (439).png>)
 
 Da je, na primer, bilo **4 različita nivoa amplitude**, trebali biste konfigurisati **Bitove po simbolu na 2** i odabrati od najmanjeg do najvećeg.
 
-Na kraju **povećavajući** **Zoom** i **menjajući veličinu reda** možete videti bitove (i možete odabrati sve i kopirati da dobijete sve bitove):
+Na kraju **povećavajući** **Zoom** i **menjajući veličinu reda**, možete videti bitove (i možete odabrati sve i kopirati da dobijete sve bitove):
 
 ![](<../../images/image (276).png>)
 
-Ako signal ima više od 1 bita po simbolu (na primer 2), SigDigger **nema načina da zna koji simbol je** 00, 01, 10, 11, tako da će koristiti različite **sive skale** da predstavi svaki (i ako kopirate bitove koristiće **brojeve od 0 do 3**, moraćete da ih obradite).
+Ako signal ima više od 1 bita po simbolu (na primer 2), SigDigger **nema načina da zna koji simbol je** 00, 01, 10, 11, tako da će koristiti različite **sive skale** da predstavi svaki (i ako kopirate bitove, koristiće **brojeve od 0 do 3**, moraćete da ih obradite).
 
-Takođe, koristite **kodifikacije** kao što su **Mančester**, i **uspon+pad** može biti **1 ili 0**, a pad+uspon može biti 1 ili 0. U tim slučajevima morate **obraditi dobijene usponi (1) i padovi (0)** da zamenite parove 01 ili 10 kao 0 ili 1.
+Takođe, koristite **kodifikacije** kao što su **Mančester**, i **up+down** može biti **1 ili 0**, a down+up može biti 1 ili 0. U tim slučajevima morate **obraditi dobijene ups (1) i downs (0)** da zamenite parove 01 ili 10 kao 0s ili 1s.
 
 ## FM Primer
 
@@ -151,7 +151,7 @@ Primer signala koji šalje informacije modulirane u FM:
 
 ![](<../../images/image (725).png>)
 
-Na prethodnoj slici možete prilično dobro primetiti da se **koriste 2 frekvencije**, ali ako **posmatrate** **talasnu formu** možda nećete moći da ispravno identifikujete 2 različite frekvencije:
+Na prethodnoj slici možete prilično dobro primetiti da se **koriste 2 frekvencije**, ali ako **posmatrate** **talasnu formu**, možda nećete moći da identifikujete ispravno 2 različite frekvencije:
 
 ![](<../../images/image (717).png>)
 
@@ -167,11 +167,11 @@ Ako je sinhronizovana frekvencija **bliža jednoj frekvenciji nego drugoj**, lak
 
 #### Proveravanje histograma
 
-Proveravajući histogram frekvencije signala sa informacijama lako možete videti 2 različita signala:
+Proveravajući histogram frekvencije signala sa informacijama, lako možete videti 2 različita signala:
 
 ![](<../../images/image (871).png>)
 
-U ovom slučaju, ako proverite **Histogram Amplitude** pronaći ćete **samo jednu amplitudu**, tako da **ne može biti AM** (ako pronađete mnogo amplituda, to može biti zato što je signal gubio snagu duž kanala):
+U ovom slučaju, ako proverite **Histogram Amplitude**, pronaći ćete **samo jednu amplitudu**, tako da **ne može biti AM** (ako pronađete mnogo amplituda, to može biti zato što je signal gubio snagu duž kanala):
 
 ![](<../../images/image (817).png>)
 
@@ -183,7 +183,7 @@ I ovo bi bio histogram faze (što jasno pokazuje da signal nije moduliran u fazi
 
 IQ nema polje za identifikaciju frekvencija (razdaljina do centra je amplituda, a ugao je faza).\
 Stoga, da biste identifikovali FM, trebali biste **samo videti osnovni krug** u ovom grafu.\
-Štaviše, različita frekvencija je "predstavljena" na IQ grafu kao **brza akceleracija po krugu** (tako da u SysDigger-u, kada odaberete signal, IQ graf se popunjava, ako primetite akceleraciju ili promenu pravca u kreiranom krugu, to može značiti da je ovo FM):
+Štaviše, različita frekvencija je "predstavljena" na IQ grafu kao **brzina akceleracije oko kruga** (tako da u SysDigger-u, kada odaberete signal, IQ graf se popunjava, ako primetite akceleraciju ili promenu pravca u kreiranom krugu, to može značiti da je ovo FM):
 
 ![](<../../images/image (81).png>)
 

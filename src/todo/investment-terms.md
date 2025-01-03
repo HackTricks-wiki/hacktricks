@@ -2,11 +2,11 @@
 
 ## Spot
 
-Ovo je najosnovniji način trgovanja. Možete **naznačiti količinu imovine i cenu** koju želite da kupite ili prodate, i kada god ta cena bude postignuta, operacija se izvršava.
+Ovo je najosnovniji način trgovanja. Možete **naznačiti količinu imovine i cenu** koju želite da kupite ili prodate, i kada god ta cena bude dostignuta, operacija se izvršava.
 
 Obično možete koristiti i **trenutnu tržišnu cenu** kako biste izvršili transakciju što je brže moguće po trenutnoj ceni.
 
-**Stop Loss - Limit**: Takođe možete naznačiti količinu i cenu imovine koju želite da kupite ili prodate, dok takođe naznačavate nižu cenu za kupovinu ili prodaju u slučaju da bude postignuta (da biste zaustavili gubitke).
+**Stop Loss - Limit**: Takođe možete naznačiti količinu i cenu imovine koju želite da kupite ili prodate, dok takođe naznačavate nižu cenu za kupovinu ili prodaju u slučaju da bude dostignuta (da biste zaustavili gubitke).
 
 ## Futures
 
@@ -29,13 +29,13 @@ U slučaju da cena opadne, menadžer fonda će ostvariti dobit jer će prodati i
 
 ### Perpetual Futures
 
-**Ovo su "futures" koji traju neodređeno** (bez datuma završetka ugovora). Veoma je uobičajeno naći ih, na primer, na kripto berzama gde možete ulaziti i izlaziti iz futures na osnovu cene kriptovaluta.
+**Ovo su "futures" koji traju neodređeno** (bez datuma završetka ugovora). Veoma je uobičajeno naći ih, na primer, na kripto berzama gde možete ulaziti i izlaziti iz futures-a na osnovu cene kriptovaluta.
 
 Imajte na umu da u ovim slučajevima dobit i gubitak mogu biti u realnom vremenu, ako cena poraste 1% vi dobijate 1%, ako cena opadne 1%, izgubićete to.
 
 ### Futures sa Leverage
 
-**Leverage** vam omogućava da kontrolišete veću poziciju na tržištu sa manjim iznosom novca. U suštini vam omogućava da "kladite" mnogo više novca nego što imate, rizikujući samo novac koji zapravo imate.
+**Leverage** vam omogućava da kontrolišete veću poziciju na tržištu sa manjim iznosom novca. U suštini, omogućava vam da "kladite" mnogo više novca nego što imate, rizikujući samo novac koji zapravo imate.
 
 Na primer, ako otvorite futures poziciju u BTC/USDT sa 100$ uz 50x leverage, to znači da ako cena poraste 1%, tada biste zarađivali 1x50 = 50% od vaše početne investicije (50$). I stoga ćete imati 150$.\
 Međutim, ako cena opadne 1%, izgubićete 50% svojih sredstava (59$ u ovom slučaju). A ako cena opadne 2%, izgubićete celu svoju opkladu (2x50 = 100%).
@@ -60,9 +60,9 @@ Međutim, kupac će plaćati neku naknadu prodavcu za otvaranje opcije (tako da 
 ### 3. **Trošak:**
 
 * **Futures:** Nema unapred troška osim margine potrebne za održavanje pozicije, jer su i kupac i prodavac obavezni da završe trgovinu.
-* **Opcije:** Kupac mora unapred platiti **premiju opcije** za pravo da izvrši opciju. Ova premija je u suštini trošak opcije.
+* **Opcije:** Kupac mora unapred platiti **premiju opcije** za pravo da iskoristi opciju. Ova premija je u suštini trošak opcije.
 
 ### 4. **Potencijal za profit:**
 
 * **Futures:** Profit ili gubitak se zasniva na razlici između tržišne cene na isteku i dogovorene cene u ugovoru.
-* **Opcije:** Kupac ostvaruje profit kada tržište ide povoljno iznad izvršne cene za više od plaćene premije. Prodavac profitira zadržavanjem premije ako opcija nije izvršena.
+* **Opcije:** Kupac ostvaruje profit kada tržište ide povoljno iznad izvršne cene za više od plaćene premije. Prodavac profitira zadržavanjem premije ako opcija nije iskorišćena.

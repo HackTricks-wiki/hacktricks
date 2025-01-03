@@ -6,7 +6,7 @@
 
 ## WDigest
 
-Protokol [WDigest](<https://technet.microsoft.com/pt-pt/library/cc778868(v=ws.10).aspx?f=255&MSPPError=-2147217396>), uveden sa Windows XP, je dizajniran za autentifikaciju putem HTTP protokola i je **omogućen po defaultu na Windows XP do Windows 8.0 i Windows Server 2003 do Windows Server 2012**. Ova podrazumevana postavka rezultira u **čuvanju lozinki u običnom tekstu u LSASS** (Local Security Authority Subsystem Service). Napadač može koristiti Mimikatz da **izvuče ove kredencijale** izvršavanjem:
+Protokol [WDigest](<https://technet.microsoft.com/pt-pt/library/cc778868(v=ws.10).aspx?f=255&MSPPError=-2147217396>), uveden sa Windows XP, je dizajniran za autentifikaciju putem HTTP protokola i je **omogućen po defaultu na Windows XP do Windows 8.0 i Windows Server 2003 do Windows Server 2012**. Ova podrazumevana postavka rezultira u **čuvanju lozinki u običnom tekstu u LSASS** (Local Security Authority Subsystem Service). Napadač može koristiti Mimikatz da **izvuče ove akreditive** izvršavanjem:
 ```bash
 sekurlsa::wdigest
 ```
@@ -28,11 +28,11 @@ Moguće je zaobići ovu zaštitu koristeći Mimikatz drajver mimidrv.sys:
 
 ## Credential Guard
 
-**Credential Guard**, funkcija ekskluzivna za **Windows 10 (Enterprise i Education edicije)**, poboljšava sigurnost mašinskih kredencijala koristeći **Virtual Secure Mode (VSM)** i **Virtualization Based Security (VBS)**. Iskorišćava CPU virtuelizacione ekstenzije da izoluje ključne procese unutar zaštićenog memorijskog prostora, daleko od dometa glavnog operativnog sistema. Ova izolacija osigurava da čak ni kernel ne može pristupiti memoriji u VSM, efikasno štiteći kredencijale od napada poput **pass-the-hash**. **Local Security Authority (LSA)** funkcioniše unutar ovog sigurnog okruženja kao trustlet, dok **LSASS** proces u glavnom OS-u deluje samo kao komunikator sa VSM-ovim LSA.
+**Credential Guard**, funkcija ekskluzivna za **Windows 10 (Enterprise i Education izdanja)**, poboljšava sigurnost mašinskih kredencijala koristeći **Virtual Secure Mode (VSM)** i **Virtualization Based Security (VBS)**. Iskorišćava CPU virtuelizacione ekstenzije da izoluje ključne procese unutar zaštićenog memorijskog prostora, daleko od dometa glavnog operativnog sistema. Ova izolacija osigurava da čak ni kernel ne može pristupiti memoriji u VSM, efikasno štiteći kredencijale od napada poput **pass-the-hash**. **Local Security Authority (LSA)** funkcioniše unutar ovog sigurnog okruženja kao trustlet, dok **LSASS** proces u glavnom OS-u deluje samo kao komunikator sa VSM-ovim LSA.
 
 Podrazumevano, **Credential Guard** nije aktivan i zahteva ručnu aktivaciju unutar organizacije. Ključno je za poboljšanje sigurnosti protiv alata poput **Mimikatz**, koji su ometeni u svojoj sposobnosti da izvuku kredencijale. Međutim, ranjivosti se i dalje mogu iskoristiti dodavanjem prilagođenih **Security Support Providers (SSP)** za hvatanje kredencijala u čistom tekstu tokom pokušaja prijavljivanja.
 
-Da biste proverili status aktivacije **Credential Guard**, registry ključ _**LsaCfgFlags**_ pod _**HKLM\System\CurrentControlSet\Control\LSA**_ može se pregledati. Vrednost "**1**" označava aktivaciju sa **UEFI zaključavanjem**, "**2**" bez zaključavanja, a "**0**" označava da nije omogućeno. Ova provera registra, iako jak indikator, nije jedini korak za omogućavanje Credential Guard-a. Detaljna uputstva i PowerShell skripta za omogućavanje ove funkcije dostupni su online.
+Da biste proverili status aktivacije **Credential Guard**, registry ključ _**LsaCfgFlags**_ pod _**HKLM\System\CurrentControlSet\Control\LSA**_ može se pregledati. Vrednost "**1**" označava aktivaciju sa **UEFI zaključavanjem**, "**2**" bez zaključavanja, a "**0**" označava da nije omogućeno. Ova provera registra, iako je jak pokazatelj, nije jedini korak za omogućavanje Credential Guard-a. Detaljna uputstva i PowerShell skripta za omogućavanje ove funkcije dostupni su online.
 ```powershell
 reg query HKLM\System\CurrentControlSet\Control\LSA /v LsaCfgFlags
 ```
@@ -64,7 +64,7 @@ Broj keširanih prijava se može prilagoditi putem specifičnog **registry key-a
 ```bash
 reg query "HKEY_LOCAL_MACHINE\SOFTWARE\MICROSOFT\WINDOWS NT\CURRENTVERSION\WINLOGON" /v CACHEDLOGONSCOUNT
 ```
-Pristup ovim keširanim kredencijalima je strogo kontrolisan, pri čemu samo **SYSTEM** nalog ima potrebne dozvole za njihov pregled. Administratori koji trebaju pristupiti ovim informacijama moraju to učiniti sa privilegijama SYSTEM korisnika. Kredencijali se čuvaju na: `HKEY_LOCAL_MACHINE\SECURITY\Cache`
+Pristup ovim keširanim kredencijalima je strogo kontrolisan, pri čemu samo **SYSTEM** nalog ima potrebne dozvole za njihov pregled. Administratori koji trebaju pristup ovim informacijama moraju to učiniti sa privilegijama SYSTEM korisnika. Kredencijali se čuvaju na: `HKEY_LOCAL_MACHINE\SECURITY\Cache`
 
 **Mimikatz** se može koristiti za ekstrakciju ovih keširanih kredencijala koristeći komandu `lsadump::cache`.
 
@@ -76,11 +76,11 @@ Za više detalja, originalni [izvor](http://juggernaut.wikidot.com/cached-creden
 
 - **Delegacija kredencijala (CredSSP)**: Čak i ako je postavka grupne politike za **Dozvoli delegiranje podrazumevanih kredencijala** omogućena, plain text kredencijali zaštićenih korisnika neće biti keširani.
 - **Windows Digest**: Počevši od **Windows 8.1 i Windows Server 2012 R2**, sistem neće keširati plain text kredencijale zaštićenih korisnika, bez obzira na status Windows Digest-a.
-- **NTLM**: Sistem neće keširati plain text kredencijale zaštićenih korisnika ili NT one-way funkcije (NTOWF).
+- **NTLM**: Sistem neće keširati plain text kredencijale zaštićenih korisnika ili NT jednosmerne funkcije (NTOWF).
 - **Kerberos**: Za zaštićene korisnike, Kerberos autentifikacija neće generisati **DES** ili **RC4 ključeve**, niti će keširati plain text kredencijale ili dugoročne ključeve nakon inicijalne akvizicije Ticket-Granting Ticket (TGT).
 - **Offline prijavljivanje**: Zaštićeni korisnici neće imati keširan verifikator kreiran prilikom prijavljivanja ili otključavanja, što znači da offline prijavljivanje nije podržano za ove naloge.
 
-Ove zaštite se aktiviraju u trenutku kada se korisnik, koji je član **grupe zaštićenih korisnika**, prijavi na uređaj. Ovo osigurava da su kritične bezbednosne mere na snazi kako bi se zaštitili od različitih metoda kompromitacije kredencijala.
+Ove zaštite se aktiviraju u trenutku kada se korisnik, koji je član **grupe zaštićenih korisnika**, prijavi na uređaj. To osigurava da su kritične bezbednosne mere na snazi kako bi se zaštitili od različitih metoda kompromitovanja kredencijala.
 
 Za detaljnije informacije, konsultujte zvaničnu [dokumentaciju](https://docs.microsoft.com/en-us/windows-server/security/credentials-protection-and-management/protected-users-security-group).
 
@@ -88,21 +88,21 @@ Za detaljnije informacije, konsultujte zvaničnu [dokumentaciju](https://docs.mi
 
 | Windows Server 2003 RTM | Windows Server 2003 SP1+ | <p>Windows Server 2012,<br>Windows Server 2008 R2,<br>Windows Server 2008</p> | Windows Server 2016          |
 | ----------------------- | ------------------------ | ----------------------------------------------------------------------------- | ---------------------------- |
-| Operatori naloga       | Operatori naloga        | Operatori naloga                                                             | Operatori naloga            |
+| Account Operators       | Account Operators        | Account Operators                                                             | Account Operators            |
 | Administrator           | Administrator            | Administrator                                                                 | Administrator                |
-| Administratori          | Administratori           | Administratori                                                                | Administratori               |
-| Operatori rezervnih kopija | Operatori rezervnih kopija | Operatori rezervnih kopija                                                  | Operatori rezervnih kopija   |
-| Izdavači sertifikata    |                          |                                                                               |                              |
-| Administratori domena   | Administratori domena    | Administratori domena                                                         | Administratori domena        |
-| Kontrolori domena      | Kontrolori domena       | Kontrolori domena                                                            | Kontrolori domena           |
-| Administratori preduzeća | Administratori preduzeća | Administratori preduzeća                                                     | Administratori preduzeća     |
-|                         |                          |                                                                               | Administratori ključeva preduzeća |
-|                         |                          |                                                                               | Administratori ključeva      |
+| Administrators          | Administrators           | Administrators                                                                | Administrators               |
+| Backup Operators        | Backup Operators         | Backup Operators                                                              | Backup Operators             |
+| Cert Publishers         |                          |                                                                               |                              |
+| Domain Admins           | Domain Admins            | Domain Admins                                                                 | Domain Admins                |
+| Domain Controllers      | Domain Controllers       | Domain Controllers                                                            | Domain Controllers           |
+| Enterprise Admins       | Enterprise Admins        | Enterprise Admins                                                             | Enterprise Admins            |
+|                         |                          |                                                                               | Enterprise Key Admins        |
+|                         |                          |                                                                               | Key Admins                   |
 | Krbtgt                  | Krbtgt                   | Krbtgt                                                                        | Krbtgt                       |
-| Operatori štampe        | Operatori štampe        | Operatori štampe                                                               | Operatori štampe            |
-|                         |                          | Kontrolori domena samo za čitanje                                            | Kontrolori domena samo za čitanje |
-| Replikator              | Replikator               | Replikator                                                                    | Replikator                   |
-| Administratori šeme     | Administratori šeme      | Administratori šeme                                                           | Administratori šeme          |
-| Operatori servera       | Operatori servera        | Operatori servera                                                              | Operatori servera           |
+| Print Operators         | Print Operators          | Print Operators                                                               | Print Operators              |
+|                         |                          | Read-only Domain Controllers                                                  | Read-only Domain Controllers |
+| Replicator              | Replicator               | Replicator                                                                    | Replicator                   |
+| Schema Admins           | Schema Admins            | Schema Admins                                                                 | Schema Admins                |
+| Server Operators        | Server Operators         | Server Operators                                                              | Server Operators             |
 
 {{#include ../../banners/hacktricks-training.md}}

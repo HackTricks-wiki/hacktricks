@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Postoje različiti načini za izvršavanje komandi u spoljnim sistemima, ovde možete pronaći objašnjenja o tome kako funkcionišu glavne tehnike lateralnog kretanja u Windows-u:
+Postoje različiti načini za izvršavanje komandi u spoljnim sistemima, ovde možete pronaći objašnjenja kako funkcionišu glavne Windows tehnike lateralnog kretanja:
 
 - [**PsExec**](psexec-and-winexec.md)
 - [**SmbExec**](smbexec.md)

@@ -1,4 +1,4 @@
-# Eksterna šuma domena - Jednosmerno (Izlazno)
+# Eksterna šuma domena - Jednosmerno (izlazno)
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -30,7 +30,7 @@ MemberDistinguishedName : CN=S-1-5-21-1028541967-2937615241-1935644758-1115,CN=F
 ```
 ## Napad na poverljivi nalog
 
-Postoji bezbednosna ranjivost kada se uspostavi poverljiva veza između dva domena, ovde označena kao domen **A** i domen **B**, gde domen **B** proširuje svoje poverenje na domen **A**. U ovoj postavci, poseban nalog se kreira u domenu **A** za domen **B**, koji igra ključnu ulogu u procesu autentifikacije između dva domena. Ovaj nalog, povezan sa domenom **B**, koristi se za enkripciju karata za pristup uslugama širom domena.
+Postoji bezbednosna ranjivost kada se uspostavi poverljiva veza između dva domena, ovde označena kao domen **A** i domen **B**, gde domen **B** proširuje svoje poverenje na domen **A**. U ovoj postavci, poseban nalog se kreira u domenu **A** za domen **B**, koji igra ključnu ulogu u procesu autentifikacije između dva domena. Ovaj nalog, povezan sa domenom **B**, koristi se za enkripciju karata za pristup uslugama između domena.
 
 Ključni aspekt koji treba razumeti ovde je da se lozinka i hash ovog posebnog naloga mogu izvući iz Kontrolera domena u domenu **A** koristeći alat za komandnu liniju. Komanda za izvršavanje ove radnje je:
 ```powershell

@@ -11,7 +11,7 @@ Ova Politika kolačića se primenjuje na sledeće veb sajtove u vlasništvu i po
 * book.hacktricks.xyz
 * cloud.hacktricks.xyz
 
-Korišćenjem bilo kog od ovih veb sajtova, slažete se sa upotrebom kolačića u skladu sa ovom Politikom kolačića. Ako se ne slažete, molimo vas da onemogućite kolačiće u podešavanjima vašeg pregledača ili se suzdržite od korišćenja naših veb sajtova.
+Korišćenjem bilo kog od ovih veb sajtova, slažete se sa upotrebom kolačića u skladu sa ovom Politikom kolačića. Ako se ne slažete, molimo vas da onemogućite kolačiće u podešavanjima vašeg pretraživača ili se suzdržite od korišćenja naših veb sajtova.
 
 ### Šta su kolačići?
 
@@ -34,7 +34,7 @@ Pored naših kolačića, možemo takođe koristiti kolačiće trećih strana za 
 
 Upravljanje kolačićima
 
-Većina veb pregledača omogućava vam da upravljate kolačićima putem svojih podešavanja. Možete izabrati da blokirate, obrišete ili ograničite upotrebu kolačića na vašem uređaju. Međutim, imajte na umu da onemogućavanje kolačića može uticati na funkcionalnost i performanse naših veb sajtova.
+Većina veb pretraživača omogućava vam da upravljate kolačićima putem svojih podešavanja. Možete izabrati da blokirate, obrišete ili ograničite upotrebu kolačića na vašem uređaju. Međutim, imajte na umu da onemogućavanje kolačića može uticati na funkcionalnost i performanse naših veb sajtova.
 
 Izmene ove Politike kolačića
 

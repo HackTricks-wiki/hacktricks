@@ -31,11 +31,11 @@ Vrednost ovde je da ako izgubljeni izvorni kod zahteva obnavljanje iz nasleđeno
 
 ### [.NET Reflector](https://www.red-gate.com/products/reflector/)
 
-Sa sveobuhvatnim modelom dodataka i API-jem koji proširuje alat da odgovara vašim tačnim potrebama, .NET reflector štedi vreme i pojednostavljuje razvoj. Pogledajmo mnoštvo usluga inženjeringa unazad koje ovaj alat pruža:
+Sa sveobuhvatnim modelom dodataka i API-jem koji proširuje alat da odgovara vašim tačnim potrebama, .NET Reflector štedi vreme i pojednostavljuje razvoj. Pogledajmo mnoštvo usluga inženjeringa obrnutih koje ovaj alat pruža:
 
-- Pruža uvid u to kako podaci prolaze kroz biblioteku ili komponentu
+- Pruža uvid u to kako podaci teku kroz biblioteku ili komponentu
 - Pruža uvid u implementaciju i korišćenje .NET jezika i okvira
-- Pronalazi nedokumentovanu i neizloženu funkcionalnost kako bi se dobilo više iz API-ja i tehnologija koje se koriste.
+- Pronalazi nedokumentovanu i neizloženu funkcionalnost kako bi se više iskoristili API-ji i tehnologije koje se koriste.
 - Pronalazi zavisnosti i različite skupove
 - Prati tačnu lokaciju grešaka u vašem kodu, komponentama trećih strana i bibliotekama.
 - Debaguje u izvor svih .NET kodova sa kojima radite.
@@ -47,7 +47,7 @@ Ako vam je potrebno da **dekompajlirate**, **modifikujete** i **ponovo kompajlir
 
 ### DNSpy Logovanje
 
-Da biste **DNSpy-u omogućili da zabeleži neke informacije u datoteku**, možete koristiti ovaj isječak:
+Da biste **DNSpy logovao neke informacije u datoteku**, možete koristiti ovaj isječak:
 ```cs
 using System.IO;
 path = "C:\\inetpub\\temp\\MyTest2.txt";
@@ -142,7 +142,7 @@ Primetite da kada je izvršenje zaustavljeno iz bilo kog razloga u win64dbg mož
 
 Zatim, gledajući ovo možete videti kada je izvršenje zaustavljeno u DLL-u koji želite da debagujete.
 
-## GUI aplikacije / Video igre
+## GUI Aplikacije / Video igre
 
 [**Cheat Engine**](https://www.cheatengine.org/downloads.php) je koristan program za pronalaženje gde su važni podaci sačuvani unutar memorije pokrenute igre i njihovu promenu. Više informacija u:
 
@@ -201,7 +201,7 @@ Možete videti stek, na primer, unutar hex dump-a:
 ### Deobfuskacija shellcode-a i dobijanje izvršenih funkcija
 
 Trebalo bi da probate [**scdbg**](http://sandsprite.com/blogs/index.php?uid=7&pid=152).\
-Reći će vam stvari kao što su **koje funkcije** shellcode koristi i da li se shellcode **dekodira** u memoriji.
+Reći će vam stvari kao što su **koje funkcije** shellcode koristi i da li se shellcode **dekodira** sam u memoriji.
 ```bash
 scdbg.exe -f shellcode # Get info
 scdbg.exe -f shellcode -r #show analysis report at end of run
@@ -214,7 +214,7 @@ scDbg takođe ima grafički pokretač gde možete odabrati opcije koje želite i
 
 ![](<../../images/image (258).png>)
 
-Opcija **Create Dump** će dumpovati konačni shellcode ako se bilo koja promena izvrši na shellcode-u dinamički u memoriji (korisno za preuzimanje dekodiranog shellcode-a). **Start offset** može biti koristan za pokretanje shellcode-a na specifičnom offsetu. Opcija **Debug Shell** je korisna za debagovanje shellcode-a koristeći scDbg terminal (međutim, smatram da su bilo koje od opcija objašnjenih pre bolje za ovu svrhu jer ćete moći da koristite Ida ili x64dbg).
+Opcija **Create Dump** će dumpovati konačni shellcode ako se bilo koja promena izvrši na shellcode-u dinamički u memoriji (korisno za preuzimanje dekodiranog shellcode-a). **Start offset** može biti koristan za pokretanje shellcode-a na specifičnom offset-u. Opcija **Debug Shell** je korisna za debagovanje shellcode-a koristeći scDbg terminal (međutim, smatram da su bilo koje od opcija objašnjenih pre bolje za ovu svrhu jer ćete moći da koristite Ida ili x64dbg).
 
 ### Disassembling using CyberChef
 
@@ -222,12 +222,12 @@ Otpremite svoj shellcode fajl kao ulaz i koristite sledeći recept za dekompilac
 
 ## [Movfuscator](https://github.com/xoreaxeaxeax/movfuscator)
 
-Ovaj obfuskator **modifikuje sve instrukcije za `mov`** (da, stvarno kul). Takođe koristi prekide za promenu toka izvršenja. Za više informacija o tome kako funkcioniše:
+Ovaj obfuskator **modifikuje sve instrukcije za `mov`** (da, stvarno kul). Takođe koristi prekide za promenu toka izvršenja. Za više informacija o tome kako to funkcioniše:
 
 - [https://www.youtube.com/watch?v=2VF_wPkiBJY](https://www.youtube.com/watch?v=2VF_wPkiBJY)
 - [https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas_2015_the_movfuscator.pdf](https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas_2015_the_movfuscator.pdf)
 
-Ako imate sreće, [demovfuscator](https://github.com/kirschju/demovfuscator) će deofuskovati binarni fajl. Ima nekoliko zavisnosti
+Ako imate sreće, [demovfuscator](https://github.com/kirschju/demovfuscator) će deobfuskovati binarni fajl. Ima nekoliko zavisnosti
 ```
 apt-get install libcapstone-dev
 apt-get install libz3-dev
@@ -243,25 +243,25 @@ Da pronađete **ulaznu tačku** pretražujte funkcije po `::main` kao u:
 ![](<../../images/image (1080).png>)
 
 U ovom slučaju, binarni fajl se zvao authenticator, tako da je prilično očigledno da je ovo zanimljiva glavna funkcija.\
-Imajući **ime** **funkcija** koje se pozivaju, pretražujte ih na **Internetu** da biste saznali više o njihovim **ulazima** i **izlazima**.
+Imajući **ime** funkcija koje se pozivaju, pretražujte ih na **Internetu** da biste saznali više o njihovim **ulazima** i **izlazima**.
 
 ## **Delphi**
 
 Za Delphi kompajlirane binarne fajlove možete koristiti [https://github.com/crypto2011/IDR](https://github.com/crypto2011/IDR)
 
-Ako morate da obrnite Delphi binarni fajl, preporučujem da koristite IDA dodatak [https://github.com/Coldzer0/IDA-For-Delphi](https://github.com/Coldzer0/IDA-For-Delphi)
+Ako morate da obrnite Delphi binarni fajl, preporučujem da koristite IDA plugin [https://github.com/Coldzer0/IDA-For-Delphi](https://github.com/Coldzer0/IDA-For-Delphi)
 
-Samo pritisnite **ATL+f7** (import python plugin u IDA) i izaberite python dodatak.
+Samo pritisnite **ATL+f7** (import python plugin u IDA) i izaberite python plugin.
 
-Ovaj dodatak će izvršiti binarni fajl i dinamički rešiti imena funkcija na početku debagovanja. Nakon pokretanja debagovanja ponovo pritisnite dugme Start (zeleno ili f9) i breakpoint će se aktivirati na početku pravog koda.
+Ovaj plugin će izvršiti binarni fajl i dinamički rešiti imena funkcija na početku debagovanja. Nakon pokretanja debagovanja ponovo pritisnite dugme Start (zeleno ili f9) i breakpoint će se aktivirati na početku pravog koda.
 
 Takođe je veoma zanimljivo jer ako pritisnete dugme u grafičkoj aplikaciji, debager će se zaustaviti u funkciji koja je izvršena tim dugmetom.
 
 ## Golang
 
-Ako morate da obrnite Golang binarni fajl, preporučujem da koristite IDA dodatak [https://github.com/sibears/IDAGolangHelper](https://github.com/sibears/IDAGolangHelper)
+Ako morate da obrnite Golang binarni fajl, preporučujem da koristite IDA plugin [https://github.com/sibears/IDAGolangHelper](https://github.com/sibears/IDAGolangHelper)
 
-Samo pritisnite **ATL+f7** (import python plugin u IDA) i izaberite python dodatak.
+Samo pritisnite **ATL+f7** (import python plugin u IDA) i izaberite python plugin.
 
 Ovo će rešiti imena funkcija.
 
@@ -279,10 +279,10 @@ Ako dobijete **binarni** fajl GBA igre, možete koristiti različite alate za **
 
 - [**no$gba**](https://problemkaputt.de/gba.htm) (_Preuzmite debug verziju_) - Sadrži debager sa interfejsom
 - [**mgba** ](https://mgba.io)- Sadrži CLI debager
-- [**gba-ghidra-loader**](https://github.com/pudii/gba-ghidra-loader) - Ghidra dodatak
-- [**GhidraGBA**](https://github.com/SiD3W4y/GhidraGBA) - Ghidra dodatak
+- [**gba-ghidra-loader**](https://github.com/pudii/gba-ghidra-loader) - Ghidra plugin
+- [**GhidraGBA**](https://github.com/SiD3W4y/GhidraGBA) - Ghidra plugin
 
-U [**no$gba**](https://problemkaputt.de/gba.htm), u _**Options --> Emulation Setup --> Controls**_\*\* \*\* možete videti kako da pritisnete **dugmiće** Game Boy Advance
+U [**no$gba**](https://problemkaputt.de/gba.htm), u _**Options --> Emulation Setup --> Controls**_\*\* \*\* možete videti kako da pritisnete dugmadi Game Boy Advance
 
 ![](<../../images/image (581).png>)
 
@@ -299,7 +299,7 @@ DOWN = 128
 R = 256
 L = 256
 ```
-Dakle, u ovom tipu programa, zanimljiv deo će biti **kako program obrađuje korisnički unos**. Na adresi **0x4000130** pronaći ćete funkciju koja se često sreće: **KEYINPUT**.
+Dakle, u ovakvom programu, zanimljiv deo će biti **kako program obrađuje korisnički unos**. Na adresi **0x4000130** ćete pronaći funkciju koja se često sreće: **KEYINPUT**.
 
 ![](<../../images/image (447).png>)
 
@@ -370,13 +370,13 @@ U prethodnom kodu možete videti da upoređujemo **uVar1** (mesto gde se nalazi 
 
 - Prvo, upoređuje se sa **vrednost 4** (**SELECT** dugme): U izazovu ovo dugme briše ekran.
 - Zatim, upoređuje se sa **vrednost 8** (**START** dugme): U izazovu ovo proverava da li je kod validan za dobijanje zastavice.
-- U ovom slučaju var **`DAT_030000d8`** se upoređuje sa 0xf3 i ako je vrednost ista, izvršava se neki kod.
+- U ovom slučaju var **`DAT_030000d8`** se upoređuje sa 0xf3 i ako je vrednost ista, neki kod se izvršava.
 - U svim drugim slučajevima, proverava se neki kont (`DAT_030000d4`). To je kont jer dodaje 1 odmah nakon ulaska u kod.\
 **Ako** je manje od 8, nešto što uključuje **dodavanje** vrednosti u \*\*`DAT_030000d8` \*\* se radi (u suštini dodaje vrednosti pritisnutih tastera u ovoj varijabli sve dok je kont manji od 8).
 
 Dakle, u ovom izazovu, znajući vrednosti dugmadi, trebalo je da **pritisnete kombinaciju dužine manje od 8 koja rezultira sabiranjem 0xf3.**
 
-**Referenca za ovaj tutorijal:** [**https://exp.codes/Nostalgia/**](https://exp.codes/Nostalgia/)
+**Reference za ovaj tutorijal:** [**https://exp.codes/Nostalgia/**](https://exp.codes/Nostalgia/)
 
 ## Game Boy
 

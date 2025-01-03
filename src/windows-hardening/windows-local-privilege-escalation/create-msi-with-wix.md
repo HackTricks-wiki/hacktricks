@@ -1,8 +1,8 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-# Kreiranje zlonamernog MSI i dobijanje root pristupa
+# Kreiranje zlonamernog MSI i dobijanje root privilegija
 
-Kreiranje MSI instalatera će se obaviti korišćenjem wixtools, posebno će se koristiti [wixtools](http://wixtoolset.org). Vredno je napomenuti da su pokušani alternativni MSI graditelji, ali nisu bili uspešni u ovom konkretnom slučaju.
+Kreiranje MSI instalatera će se obaviti korišćenjem wixtools, posebno će se koristiti [wixtools](http://wixtoolset.org). Vredno je napomenuti da su pokušani alternativni MSI builderi, ali nisu bili uspešni u ovom konkretnom slučaju.
 
 Za sveobuhvatno razumevanje primera korišćenja wix MSI, preporučuje se da se konsultuje [ova stranica](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with). Ovde možete pronaći razne primere koji demonstriraju korišćenje wix MSI.
 
@@ -50,11 +50,11 @@ Takođe, light.exe, još jedan alat iz wixtools, biće korišćen za kreiranje M
 ```
 light.exe -out C:\tm\Ethereal\rick.msi C:\tmp\wix
 ```
-Slično prethodnoj komandi, slika je uključena u post koji ilustruje komandu i njen izlaz.
+Slično prethodnoj komandi, slika je uključena u post koja ilustruje komandu i njen izlaz.
 
 Imajte na umu da, iako ovaj sažetak ima za cilj da pruži vredne informacije, preporučuje se da se konsultujete sa originalnim postom za sveobuhvatnije detalje i tačne instrukcije.
 
-## Reference
+## References
 
 - [https://0xrick.github.io/hack-the-box/ethereal/#Creating-Malicious-msi-and-getting-root](https://0xrick.github.io/hack-the-box/ethereal/#Creating-Malicious-msi-and-getting-root)
 - [https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with)

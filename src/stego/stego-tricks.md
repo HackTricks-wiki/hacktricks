@@ -6,7 +6,7 @@
 
 ### **Binwalk**
 
-Alat za pretraživanje binarnih fajlova za ugrađene skrivene fajlove i podatke. Instalira se putem `apt` i njegov izvor je dostupan na [GitHub](https://github.com/ReFirmLabs/binwalk).
+Alat za pretraživanje binarnih fajlova za ugrađene skrivene fajlove i podatke. Instalira se putem `apt`, a njegov izvor je dostupan na [GitHub](https://github.com/ReFirmLabs/binwalk).
 ```bash
 binwalk file # Displays the embedded data
 binwalk -e file # Extracts the data
@@ -20,13 +20,13 @@ foremost -i file # Extracts data
 ```
 ### **Exiftool**
 
-Pomaže u prikazivanju metapodataka datoteka, dostupno [ovde](https://www.sno.phy.queensu.ca/~phil/exiftool/).
+Pomaže u prikazu metapodataka datoteke, dostupno [ovde](https://www.sno.phy.queensu.ca/~phil/exiftool/).
 ```bash
 exiftool file # Shows the metadata
 ```
 ### **Exiv2**
 
-Slično kao exiftool, za pregled metapodataka. Instalira se putem `apt`, izvor na [GitHub](https://github.com/Exiv2/exiv2), i ima [službenu stranicu](http://www.exiv2.org/).
+Slično exiftool-u, za pregled metapodataka. Instalira se putem `apt`, izvor na [GitHub](https://github.com/Exiv2/exiv2), i ima [službenu stranicu](http://www.exiv2.org/).
 ```bash
 exiv2 file # Shows the metadata
 ```
@@ -48,9 +48,9 @@ strings -e b -n 6 file # 16bit strings (big-endian)
 strings -e L -n 6 file # 32bit strings (little-endian)
 strings -e B -n 6 file # 32bit strings (big-endian)
 ```
-### **Upoređivanje (cmp)**
+### **Poređenje (cmp)**
 
-Koristan za upoređivanje izmenjene datoteke sa njenom originalnom verzijom pronađenom na mreži.
+Koristan za poređenje izmenjene datoteke sa njenom originalnom verzijom koja se nalazi na mreži.
 ```bash
 cmp original.jpg stego.jpg -b -l
 ```
@@ -91,7 +91,7 @@ stegcracker <file> [<wordlist>]
 ```
 ### **zsteg za PNG i BMP fajlove**
 
-zsteg se specijalizuje za otkrivanje skrivenih podataka u PNG i BMP fajlovima. Instalacija se vrši putem `gem install zsteg`, sa svojim [izvorom na GitHub-u](https://github.com/zed-0xff/zsteg).
+zsteg se specijalizuje za otkrivanje skrivenih podataka u PNG i BMP fajlovima. Instalacija se vrši putem `gem install zsteg`, sa svojim [izvorom na GitHubu](https://github.com/zed-0xff/zsteg).
 
 **Komande:**
 
@@ -102,7 +102,7 @@ zsteg se specijalizuje za otkrivanje skrivenih podataka u PNG i BMP fajlovima. I
 
 **stegoVeritas** proverava metapodatke, vrši transformacije slika i primenjuje LSB brute forcing među ostalim funkcijama. Koristite `stegoveritas.py -h` za punu listu opcija i `stegoveritas.py stego.jpg` da izvršite sve provere.
 
-**Stegsolve** primenjuje razne filtere boja kako bi otkrio skrivene tekstove ili poruke unutar slika. Dostupan je na [GitHub-u](https://github.com/eugenekolo/sec-tools/tree/master/stego/stegsolve/stegsolve).
+**Stegsolve** primenjuje razne filtere boja kako bi otkrio skrivene tekstove ili poruke unutar slika. Dostupan je na [GitHubu](https://github.com/eugenekolo/sec-tools/tree/master/stego/stegsolve/stegsolve).
 
 ### **FFT za detekciju skrivenog sadržaja**
 
@@ -110,11 +110,11 @@ Fast Fourier Transform (FFT) tehnike mogu otkriti skrivene sadržaje u slikama. 
 
 - [EPFL Demo](http://bigwww.epfl.ch/demo/ip/demos/FFT/)
 - [Ejectamenta](https://www.ejectamenta.com/Fourifier-fullscreen/)
-- [FFTStegPic na GitHub-u](https://github.com/0xcomposure/FFTStegPic)
+- [FFTStegPic na GitHubu](https://github.com/0xcomposure/FFTStegPic)
 
 ### **Stegpy za audio i slikovne fajlove**
 
-Stegpy omogućava umetanje informacija u slikovne i audio fajlove, podržavajući formate kao što su PNG, BMP, GIF, WebP i WAV. Dostupan je na [GitHub-u](https://github.com/dhsdshdhk/stegpy).
+Stegpy omogućava ugrađivanje informacija u slikovne i audio fajlove, podržavajući formate kao što su PNG, BMP, GIF, WebP i WAV. Dostupan je na [GitHubu](https://github.com/dhsdshdhk/stegpy).
 
 ### **Pngcheck za analizu PNG fajlova**
 
@@ -153,7 +153,7 @@ ffmpeg -v info -i stego.mp3 -f null -
 ```
 ### **WavSteg (WAV)**
 
-WavSteg se odlično snalazi u skrivanju i vađenju podataka unutar WAV fajlova koristeći strategiju najmanje značajne bit. Dostupan je na [GitHub](https://github.com/ragibson/Steganography#WavSteg). Komande uključuju:
+WavSteg se ističe u skrivanju i vađenju podataka unutar WAV fajlova koristeći strategiju najmanje značajnog bita. Dostupan je na [GitHub](https://github.com/ragibson/Steganography#WavSteg). Komande uključuju:
 ```bash
 python3 WavSteg.py -r -b 1 -s soundfile -o outputfile
 

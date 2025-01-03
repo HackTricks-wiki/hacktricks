@@ -1,6 +1,6 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
-Deo ovog cheat sheeta se zasniva na [angr dokumentaciji](https://docs.angr.io/_/downloads/en/stable/pdf/).
+Deo ovog cheat sheeta je zasnovan na [angr dokumentaciji](https://docs.angr.io/_/downloads/en/stable/pdf/).
 
 # Instalacija
 ```bash
@@ -121,7 +121,7 @@ simgr.active[0].regs.rip #Get RIP from the last state
 
 - Možete proslediti listu argumenata kroz `args` i rečnik promenljivih okruženja kroz `env` u `entry_state` i `full_init_state`. Vrednosti u ovim strukturama mogu biti stringovi ili bitvektori, i biće serijalizovane u stanje kao argumenti i okruženje za simuliranu izvršavanje. Podrazumevani `args` je prazna lista, tako da ako program koji analizirate očekuje da pronađe barem `argv[0]`, uvek biste to trebali obezbediti!
 - Ako želite da `argc` bude simboličan, možete proslediti simbolički bitvektor kao `argc` konstruktorima `entry_state` i `full_init_state`. Budite oprezni, međutim: ako to uradite, takođe biste trebali dodati ograničenje na rezultantno stanje da vaša vrednost za argc ne može biti veća od broja argumenata koje ste prosledili u `args`.
-- Da biste koristili stanje poziva, trebali biste ga pozvati sa `.call_state(addr, arg1, arg2, ...)`, gde je `addr` adresa funkcije koju želite da pozovete, a `argN` je N-ti argument toj funkciji, bilo kao python ceo broj, string, ili niz, ili bitvektor. Ako želite da imate alociranu memoriju i zapravo prosledite pokazivač na objekat, trebali biste to obaviti u PointerWrapper, tj. `angr.PointerWrapper("point to me!")`. Rezultati ovog API-ja mogu biti malo nepredvidivi, ali radimo na tome.
+- Da biste koristili stanje poziva, trebali biste ga pozvati sa `.call_state(addr, arg1, arg2, ...)`, gde je `addr` adresa funkcije koju želite da pozovete, a `argN` je N-ti argument toj funkciji, bilo kao python ceo broj, string, ili niz, ili bitvektor. Ako želite da imate alociranu memoriju i zapravo prosledite pokazivač na objekat, trebali biste ga obaviti u PointerWrapper, tj. `angr.PointerWrapper("point to me!")`. Rezultati ovog API-ja mogu biti pomalo nepredvidivi, ali radimo na tome.
 
 ## Bitvektori
 ```python

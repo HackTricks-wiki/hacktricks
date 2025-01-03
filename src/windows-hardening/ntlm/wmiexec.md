@@ -12,7 +12,7 @@ Procesi se mogu otvoriti na hostovima gde su korisničko ime i ili lozinka ili h
 
 ### Namespace
 
-Strukturiran u hijerarhiji sličnoj direktorijumu, WMI-jev najviši kontejner je \root, pod kojim su organizovani dodatni direktorijumi, poznati kao namespaces.
+Strukturiran u hijerarhiji nalik direktorijumu, WMI-jev kontejner na vrhu je \root, ispod kojeg su organizovani dodatni direktorijumi, poznati kao namespaces.
 Komande za listanje namespaces:
 ```bash
 # Retrieval of Root namespaces

@@ -4,7 +4,7 @@
 
 ## Access Tokens
 
-Svaki **korisnik prijavljen** na sistem **ima pristupni token sa bezbednosnim informacijama** za tu sesiju prijavljivanja. Sistem kreira pristupni token kada se korisnik prijavi. **Svaki proces izvršen** u ime korisnika **ima kopiju pristupnog tokena**. Token identifikuje korisnika, korisnikove grupe i korisnikove privilegije. Token takođe sadrži logon SID (Identifikator bezbednosti) koji identifikuje trenutnu sesiju prijavljivanja.
+Svaki **korisnik prijavljen** na sistem **ima pristupni token sa bezbednosnim informacijama** za tu sesiju prijavljivanja. Sistem kreira pristupni token kada se korisnik prijavi. **Svaki proces izvršen** u ime korisnika **ima kopiju pristupnog tokena**. Token identifikuje korisnika, korisničke grupe i privilegije korisnika. Token takođe sadrži logon SID (Identifikator bezbednosti) koji identifikuje trenutnu sesiju prijavljivanja.
 
 Možete videti ove informacije izvršavanjem `whoami /all`
 ```
@@ -56,8 +56,8 @@ ili korišćenjem _Process Explorer_ iz Sysinternals (izaberite proces i pristup
 
 ### Lokalni administrator
 
-Kada se lokalni administrator prijavi, **kreiraju se dva pristupna tokena**: jedan sa administratorskim pravima i drugi sa normalnim pravima. **Podrazumevano**, kada ovaj korisnik izvrši proces, koristi se onaj sa **redovnim** (ne-administratorskim) **pravima**. Kada ovaj korisnik pokuša da **izvrši** bilo šta **kao administrator** ("Run as Administrator" na primer), koristiće se **UAC** da zatraži dozvolu.\
-Ako želite da [**saznate više o UAC, pročitajte ovu stranicu**](../authentication-credentials-uac-and-efs/#uac)**.**
+Kada se lokalni administrator prijavi, **kreiraju se dva pristupna tokena**: jedan sa administratorskim pravima i drugi sa normalnim pravima. **Podrazumevano**, kada ovaj korisnik izvrši proces, koristi se onaj sa **redovnim** (ne-administratorskim) **pravima**. Kada ovaj korisnik pokuša da **izvrši** bilo šta **kao administrator** ("Run as Administrator" na primer), **UAC** će biti korišćen da zatraži dozvolu.\
+Ako želite da [**saznate više o UAC-u, pročitajte ovu stranicu**](../authentication-credentials-uac-and-efs/#uac)**.**
 
 ### Impersonacija korisničkih kredencijala
 
@@ -70,22 +70,22 @@ Možete pokrenuti proces koji **koristi različite akreditive za pristup mrežni
 ```
 runas /user:domain\username /netonly cmd.exe
 ```
-Ovo je korisno ako imate korisne akreditive za pristup objektima u mreži, ali ti akreditivi nisu validni unutar trenutnog hosta jer će se koristiti samo u mreži (u trenutnom hostu koristiće se privilegije vašeg trenutnog korisnika).
+Ovo je korisno ako imate korisničke podatke za pristup objektima u mreži, ali ti podaci nisu validni unutar trenutnog hosta jer će se koristiti samo u mreži (u trenutnom hostu koristiće se privilegije trenutnog korisnika).
 
 ### Tipovi tokena
 
 Postoje dva tipa tokena dostupna:
 
-- **Primarni token**: Služi kao reprezentacija bezbednosnih akreditiva procesa. Kreiranje i povezivanje primarnih tokena sa procesima su radnje koje zahtevaju povišene privilegije, naglašavajući princip odvajanja privilegija. Obično, usluga autentifikacije je odgovorna za kreiranje tokena, dok usluga prijavljivanja upravlja njegovim povezivanjem sa operativnim sistemom korisnika. Vredno je napomenuti da procesi nasleđuju primarni token svog roditeljskog procesa prilikom kreiranja.
+- **Primarni token**: Služi kao reprezentacija bezbednosnih podataka procesa. Kreiranje i povezivanje primarnih tokena sa procesima su radnje koje zahtevaju povišene privilegije, naglašavajući princip odvajanja privilegija. Obično, usluga autentifikacije je odgovorna za kreiranje tokena, dok usluga prijavljivanja upravlja njegovim povezivanjem sa operativnim sistemom korisnika. Vredno je napomenuti da procesi nasleđuju primarni token svog roditeljskog procesa prilikom kreiranja.
 - **Token impersonacije**: Omogućava serverskoj aplikaciji da privremeno usvoji identitet klijenta za pristup sigurnim objektima. Ovaj mehanizam je stratifikovan u četiri nivoa operacije:
 - **Anonimno**: Daje serveru pristup sličan onom neidentifikovanog korisnika.
 - **Identifikacija**: Omogućava serveru da verifikuje identitet klijenta bez korišćenja za pristup objektima.
 - **Impersonacija**: Omogućava serveru da funkcioniše pod identitetom klijenta.
-- **Delegacija**: Slično impersonaciji, ali uključuje sposobnost da se ovo usvajanje identiteta proširi na udaljene sisteme sa kojima server komunicira, osiguravajući očuvanje akreditiva.
+- **Delegacija**: Slično impersonaciji, ali uključuje sposobnost da se ovo preuzimanje identiteta proširi na udaljene sisteme sa kojima server komunicira, osiguravajući očuvanje podataka o autentifikaciji.
 
 #### Impersonate tokeni
 
-Korišćenjem _**incognito**_ modula metasploit-a, ako imate dovoljno privilegija, možete lako **navesti** i **impersonirati** druge **tokene**. Ovo može biti korisno za izvršavanje **akcija kao da ste drugi korisnik**. Takođe možete **povišiti privilegije** ovom tehnikom.
+Korišćenjem _**incognito**_ modula metasploit-a, ako imate dovoljno privilegija, možete lako **prikazati** i **impersonirati** druge **tokene**. Ovo može biti korisno za izvršavanje **akcija kao da ste drugi korisnik**. Takođe možete **povišiti privilegije** ovom tehnikom.
 
 ### Privilegije tokena
 

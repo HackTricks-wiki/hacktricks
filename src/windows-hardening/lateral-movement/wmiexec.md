@@ -12,7 +12,7 @@ Procesi se mogu otvoriti na hostovima gde su korisničko ime i ili lozinka ili h
 
 ### Namespace
 
-Strukturiran u hijerarhiji nalik direktorijumu, WMI-jev najviši kontejner je \root, pod kojim su organizovani dodatni direktorijumi, poznati kao namespaces.
+Strukturiran u hijerarhiji sličnoj direktorijumu, WMI-jev najviši kontejner je \root, pod kojim su organizovani dodatni direktorijumi, poznati kao namespaces.
 Komande za listanje namespaces:
 ```bash
 # Retrieval of Root namespaces
@@ -24,7 +24,7 @@ Get-WmiObject -Class "__Namespace" -Namespace "Root" -List -Recurse 2> $null | s
 # Listing of namespaces within "root\cimv2"
 Get-WmiObject -Class "__Namespace" -Namespace "root\cimv2" -List -Recurse 2> $null | select __Namespace | sort __Namespace
 ```
-Klase unutar imenskog prostora mogu se nabrojati koristeći:
+Klase unutar imenskog prostora mogu se navesti koristeći:
 ```bash
 gwmwi -List -Recurse # Defaults to "root\cimv2" if no namespace specified
 gwmi -Namespace "root/microsoft" -List -Recurse
@@ -43,9 +43,9 @@ Pozivanje klase:
 Get-WmiObject -Class win32_share
 Get-WmiObject -Namespace "root/microsoft/windows/defender" -Class MSFT_MpComputerStatus
 ```
-### Metode
+### Методи
 
-Metode, koje su jedna ili više izvršnih funkcija WMI klasa, mogu se izvršiti.
+Методи, који су једна или више извршних функција WMI класа, могу се извршити.
 ```bash
 # Class loading, method listing, and execution
 $c = [wmiclass]"win32_share"
@@ -89,7 +89,7 @@ Daljinsko upitovanje WMI za specifične informacije, kao što su lokalni adminis
 
 ### **Ručno daljinsko WMI upitovanje**
 
-Diskretno identifikovanje lokalnih administratora na udaljenoj mašini i prijavljenih korisnika može se postići kroz specifične WMI upite. `wmic` takođe podržava čitanje iz tekstualne datoteke za izvršavanje komandi na više čvorova istovremeno.
+Diskretno identifikovanje lokalnih administratora na daljinskoj mašini i prijavljenih korisnika može se postići kroz specifične WMI upite. `wmic` takođe podržava čitanje iz tekstualne datoteke za izvršavanje komandi na više čvorova istovremeno.
 
 Da bi se daljinski izvršio proces preko WMI, kao što je implementacija Empire agenta, koristi se sledeća struktura komande, pri čemu uspešno izvršenje označava povratna vrednost "0":
 ```bash

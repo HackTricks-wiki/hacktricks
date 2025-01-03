@@ -26,17 +26,17 @@ juicypotato.md
 
 ### SeAssignPrimaryPrivilege
 
-Veoma je slična **SeImpersonatePrivilege**, koristiće **istu metodu** za dobijanje privilegovanog tokena.\
+Vrlo je slična **SeImpersonatePrivilege**, koristiće **istu metodu** za dobijanje privilegovanog tokena.\
 Zatim, ova privilegija omogućava **dodeljivanje primarnog tokena** novom/obustavljenom procesu. Sa privilegovanim impersonacionim tokenom možete derivirati primarni token (DuplicateTokenEx).\
 Sa tokenom, možete kreirati **novi proces** koristeći 'CreateProcessAsUser' ili kreirati proces u obustavljenom stanju i **postaviti token** (generalno, ne možete modifikovati primarni token pokrenutog procesa).
 
 ### SeTcbPrivilege
 
-Ako ste omogućili ovaj token, možete koristiti **KERB_S4U_LOGON** da dobijete **impersonacioni token** za bilo kog drugog korisnika bez poznavanja kredencijala, **dodati proizvoljnu grupu** (administratore) u token, postaviti **nivo integriteta** tokena na "**medium**", i dodeliti ovaj token **trenutnoj niti** (SetThreadToken).
+Ako ste omogućili ovaj token, možete koristiti **KERB_S4U_LOGON** da dobijete **impersonacioni token** za bilo kog drugog korisnika bez poznavanja kredencijala, **dodati proizvoljnu grupu** (administratore) u token, postaviti **nivo integriteta** tokena na "**srednji**", i dodeliti ovaj token **trenutnoj niti** (SetThreadToken).
 
 ### SeBackupPrivilege
 
-Sistem se uzrokuje da **dodeli sve pristupne** kontrole za čitanje bilo kog fajla (ograničeno na operacije čitanja) ovom privilegijom. Koristi se za **čitanje hešova lozinki lokalnih Administrator** naloga iz registra, nakon čega se alati kao što su "**psexec**" ili "**wmiexec**" mogu koristiti sa hešom (Pass-the-Hash tehnika). Međutim, ova tehnika ne uspeva pod dva uslova: kada je lokalni Administrator nalog onemogućen, ili kada je politika na snazi koja uklanja administrativna prava lokalnim administratorima koji se povezuju na daljinu.\
+Sistem se uzrokuje da **dodeli sve pristupne** kontrole za čitanje bilo kog fajla (ograničeno na operacije čitanja) ovom privilegijom. Koristi se za **čitanje hešova lozinki lokalnih Administrator** naloga iz registra, nakon čega se alati poput "**psexec**" ili "**wmiexec**" mogu koristiti sa hešom (Pass-the-Hash tehnika). Međutim, ova tehnika ne uspeva pod dva uslova: kada je lokalni Administrator nalog onemogućen, ili kada je politika na snazi koja uklanja administrativna prava lokalnim administratorima koji se povezuju na daljinu.\
 Možete **zloupotrebiti ovu privilegiju** sa:
 
 - [https://github.com/Hackplayers/PsCabesha-tools/blob/master/Privesc/Acl-FullControl.ps1](https://github.com/Hackplayers/PsCabesha-tools/blob/master/Privesc/Acl-FullControl.ps1)
@@ -50,7 +50,7 @@ Možete **zloupotrebiti ovu privilegiju** sa:
 
 ### SeRestorePrivilege
 
-Ova privilegija omogućava **pristup za pisanje** bilo kojem sistemskom fajlu, bez obzira na Access Control List (ACL) fajla. Otvara brojne mogućnosti za eskalaciju, uključujući mogućnost **modifikacije servisa**, izvođenje DLL Hijacking-a i postavljanje **debuggera** putem Image File Execution Options među raznim drugim tehnikama.
+Ova privilegija omogućava **pristup za pisanje** bilo kojoj sistemskoj datoteci, bez obzira na Access Control List (ACL) datoteke. Otvara brojne mogućnosti za eskalaciju, uključujući mogućnost **modifikacije servisa**, izvođenje DLL Hijacking-a i postavljanje **debuggera** putem Image File Execution Options među raznim drugim tehnikama.
 
 ### SeCreateTokenPrivilege
 
@@ -64,7 +64,7 @@ SeCreateTokenPrivilege je moćna dozvola, posebno korisna kada korisnik ima spos
 
 ### SeLoadDriverPrivilege
 
-Ova privilegija omogućava **učitavanje i uklanjanje drajvera** uz kreiranje unosa u registru sa specifičnim vrednostima za `ImagePath` i `Type`. Pošto je direktan pristup za pisanje na `HKLM` (HKEY_LOCAL_MACHINE) ograničen, umesto toga mora se koristiti `HKCU` (HKEY_CURRENT_USER). Međutim, da bi `HKCU` bio prepoznat od strane jezgra za konfiguraciju drajvera, mora se pratiti specifičan put.
+Ova privilegija omogućava **učitavanje i uklanjanje drajvera** uređaja kreiranjem unosa u registru sa specifičnim vrednostima za `ImagePath` i `Type`. Pošto je direktan pristup za pisanje u `HKLM` (HKEY_LOCAL_MACHINE) ograničen, umesto toga mora se koristiti `HKCU` (HKEY_CURRENT_USER). Međutim, da bi `HKCU` bio prepoznat od strane jezgra za konfiguraciju drajvera, mora se pratiti specifičan put.
 
 Ovaj put je `\Registry\User\<RID>\System\CurrentControlSet\Services\DriverName`, gde je `<RID>` Relativni Identifikator trenutnog korisnika. Unutar `HKCU`, ovaj ceo put mora biti kreiran, i dve vrednosti treba postaviti:
 
@@ -92,7 +92,7 @@ Više načina za zloupotrebu ovog privilegija u [https://www.ired.team/offensive
 
 ### SeTakeOwnershipPrivilege
 
-Ovo je slično **SeRestorePrivilege**. Njegova primarna funkcija omogućava procesu da **preuzme vlasništvo nad objektom**, zaobilazeći zahtev za eksplicitnim diskrecionim pristupom kroz obezbeđivanje WRITE_OWNER prava pristupa. Proces uključuje prvo obezbeđivanje vlasništva nad nameravanom registracionom ključem u svrhu pisanja, a zatim menjanje DACL-a kako bi se omogućile operacije pisanja.
+Ovo je slično **SeRestorePrivilege**. Njegova primarna funkcija omogućava procesu da **preuzme vlasništvo nad objektom**, zaobilazeći zahtev za eksplicitnim diskrecionim pristupom kroz obezbeđivanje WRITE_OWNER prava pristupa. Proces uključuje prvo obezbeđivanje vlasništva nad željenim registrijskim ključem u svrhu pisanja, a zatim menjanje DACL-a kako bi se omogućile operacije pisanja.
 ```bash
 takeown /f 'C:\some\file.txt' #Now the file is owned by you
 icacls 'C:\some\file.txt' /grant <your_username>:F #Now you have full access
@@ -160,7 +160,7 @@ Potpuni cheat sheet za privilegije tokena na [https://github.com/gtworek/Priv2Ad
 | **`SeCreateToken`**        | _**Admin**_ | alat treće strane       | Kreirajte proizvoljni token uključujući lokalna admin prava sa `NtCreateToken`.                                                                                                                                                                                                                                                                          |                                                                                                                                                                                                                                                                                                                                |
 | **`SeDebug`**              | _**Admin**_ | **PowerShell**          | Duplirajte `lsass.exe` token.                                                                                                                                                                                                                                                                                                                   | Skripta se može naći na [FuzzySecurity](https://github.com/FuzzySecurity/PowerShell-Suite/blob/master/Conjure-LSASS.ps1)                                                                                                                                                                                                         |
 | **`SeLoadDriver`**         | _**Admin**_ | alat treće strane       | <p>1. Učitajte greškom kernel drajver kao što je <code>szkg64.sys</code><br>2. Iskoristite ranjivost drajvera<br><br>Alternativno, privilegija se može koristiti za uklanjanje drajvera vezanih za bezbednost sa <code>ftlMC</code> ugrađenom komandom. tj.: <code>fltMC sysmondrv</code></p>                                                                           | <p>1. Ranjivost <code>szkg64</code> je navedena kao <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-15732">CVE-2018-15732</a><br>2. <code>szkg64</code> <a href="https://www.greyhathacker.net/?p=1025">kod za eksploataciju</a> je kreirao <a href="https://twitter.com/parvezghh">Parvez Anwar</a></p> |
-| **`SeRestore`**            | _**Admin**_ | **PowerShell**          | <p>1. Pokrenite PowerShell/ISE sa prisutnom SeRestore privilegijom.<br>2. Omogućite privilegiju sa <a href="https://github.com/gtworek/PSBits/blob/master/Misc/EnableSeRestorePrivilege.ps1">Enable-SeRestorePrivilege</a>).<br>3. Preimenujte utilman.exe u utilman.old<br>4. Preimenujte cmd.exe u utilman.exe<br>5. Zaključajte konzolu i pritisnite Win+U</p> | <p>Napad može biti otkriven od strane nekog AV softvera.</p><p>Alternativna metoda se oslanja na zamenu servisnih binarnih fajlova smeštenih u "Program Files" koristeći istu privilegiju</p>                                                                                                                                                            |
+| **`SeRestore`**            | _**Admin**_ | **PowerShell**          | <p>1. Pokrenite PowerShell/ISE sa prisutnom SeRestore privilegijom.<br>2. Omogućite privilegiju sa <a href="https://github.com/gtworek/PSBits/blob/master/Misc/EnableSeRestorePrivilege.ps1">Enable-SeRestorePrivilege</a>.<br>3. Preimenujte utilman.exe u utilman.old<br>4. Preimenujte cmd.exe u utilman.exe<br>5. Zaključajte konzolu i pritisnite Win+U</p> | <p>Napad može biti otkriven od strane nekog AV softvera.</p><p>Alternativna metoda se oslanja na zamenu servisnih binarnih fajlova smeštenih u "Program Files" koristeći istu privilegiju</p>                                                                                                                                                            |
 | **`SeTakeOwnership`**      | _**Admin**_ | _**Ugrađene komande**_ | <p>1. <code>takeown.exe /f "%windir%\system32"</code><br>2. <code>icalcs.exe "%windir%\system32" /grant "%username%":F</code><br>3. Preimenujte cmd.exe u utilman.exe<br>4. Zaključajte konzolu i pritisnite Win+U</p>                                                                                                                                       | <p>Napad može biti otkriven od strane nekog AV softvera.</p><p>Alternativna metoda se oslanja na zamenu servisnih binarnih fajlova smeštenih u "Program Files" koristeći istu privilegiju.</p>                                                                                                                                                           |
 | **`SeTcb`**                | _**Admin**_ | alat treće strane       | <p>Manipulišite tokenima da uključite lokalna admin prava. Može zahtevati SeImpersonate.</p><p>Treba potvrditi.</p>                                                                                                                                                                                                                                     |                                                                                                                                                                                                                                                                                                                                |
 

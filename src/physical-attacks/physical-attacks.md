@@ -8,7 +8,7 @@
 
 Za situacije u kojima prilagođavanje hardvera nije moguće ili praktično, **softverski alati** nude rešenje. Pokretanje sistema sa **Live CD/USB** sa distribucijama kao što je **Kali Linux** omogućava pristup alatima kao što su **_killCmos_** i **_CmosPWD_**, koji mogu pomoći u oporavku BIOS lozinke.
 
-U slučajevima kada je BIOS lozinka nepoznata, pogrešno unošenje **tri puta** obično rezultira kodom greške. Ovaj kod može se koristiti na sajtovima kao što je [https://bios-pw.org](https://bios-pw.org) za potencijalno dobijanje upotrebljive lozinke.
+U slučajevima kada je BIOS lozinka nepoznata, pogrešno unošenje **tri puta** obično rezultira kodom greške. Ovaj kod se može koristiti na sajtovima kao što je [https://bios-pw.org](https://bios-pw.org) da bi se potencijalno povratila upotrebljiva lozinka.
 
 ### UEFI Bezbednost
 
@@ -48,10 +48,10 @@ Administratorske privilegije omogućavaju kreiranje kopija osetljivih fajlova, u
 
 ### Zaobilaženje BitLocker Enkripcije
 
-BitLocker enkripcija može se potencijalno zaobići ako se **oporavna lozinka** pronađe unutar fajla sa memory dump-om (**MEMORY.DMP**). Alati kao što su **Elcomsoft Forensic Disk Decryptor** ili **Passware Kit Forensic** mogu se koristiti u tu svrhu.
+BitLocker enkripcija može se potencijalno zaobići ako se **recovery password** pronađe unutar fajla sa memory dump-om (**MEMORY.DMP**). Alati kao što su **Elcomsoft Forensic Disk Decryptor** ili **Passware Kit Forensic** mogu se koristiti u tu svrhu.
 
-### Socijalno Inženjerstvo za Dodavanje Oporavne Ključeve
+### Socijalno Inženjerstvo za Dodavanje Ključa za Oporavak
 
-Nova BitLocker oporavna lozinka može se dodati putem taktika socijalnog inženjeringa, ubeđujući korisnika da izvrši komandu koja dodaje novu oporavnu lozinku sastavljenu od nula, čime se pojednostavljuje proces dekripcije.
+Novi BitLocker recovery key može se dodati putem taktika socijalnog inženjeringa, ubeđujući korisnika da izvrši komandu koja dodaje novi recovery key sastavljen od nula, čime se pojednostavljuje proces dekripcije.
 
 {{#include ../banners/hacktricks-training.md}}

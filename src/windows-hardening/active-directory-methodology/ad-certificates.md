@@ -13,7 +13,7 @@
 - **Izdao** se odnosi na CA koja je izdala sertifikat.
 - **SubjectAlternativeName** omogućava dodatna imena za subjekt, poboljšavajući fleksibilnost identifikacije.
 - **Osnovna ograničenja** identifikuju da li je sertifikat za CA ili krajnji entitet i definišu ograničenja korišćenja.
-- **Proširene svrhe ključeva (EKUs)** razdvajaju specifične svrhe sertifikata, kao što su potpisivanje koda ili enkripcija e-pošte, putem Identifikatora objekata (OIDs).
+- **Proširene svrhe ključeva (EKUs)** razdvajaju specifične svrhe sertifikata, kao što su potpisivanje koda ili enkripcija e-pošte, putem Identifikatora objekta (OIDs).
 - **Algoritam potpisa** specificira metodu za potpisivanje sertifikata.
 - **Potpis**, kreiran sa izdavačevim privatnim ključem, garantuje autentičnost sertifikata.
 
@@ -73,7 +73,7 @@ Sertifikati se mogu zahtevati putem:
 1. **Windows Client Certificate Enrollment Protocol** (MS-WCCE), koristeći DCOM interfejse.
 2. **ICertPassage Remote Protocol** (MS-ICPR), putem imenovanih cevi ili TCP/IP.
 3. **web interfejsa za upis sertifikata**, sa instaliranom ulogom Web upisa sertifikata.
-4. **Usluge upisa sertifikata** (CES), u saradnji sa uslugom politike upisa sertifikata (CEP).
+4. **Usluge upisa sertifikata** (CES), u kombinaciji sa uslugom politike upisa sertifikata (CEP).
 5. **Usluge upisa mrežnih uređaja** (NDES) za mrežne uređaje, koristeći Protokol za jednostavno upisivanje sertifikata (SCEP).
 
 Windows korisnici takođe mogu zahtevati sertifikate putem GUI (`certmgr.msc` ili `certlm.msc`) ili alata komandne linije (`certreq.exe` ili PowerShell-ove `Get-Certificate` komande).
@@ -87,7 +87,7 @@ Active Directory (AD) podržava autentifikaciju putem sertifikata, prvenstveno k
 
 ### Proces autentifikacije putem Kerberosa
 
-U procesu autentifikacije putem Kerberosa, zahtev korisnika za Ticket Granting Ticket (TGT) se potpisuje koristeći **privatni ključ** korisničkog sertifikata. Ovaj zahtev prolazi kroz nekoliko validacija od strane kontrolera domena, uključujući **validnost** sertifikata, **putanju** i **status opoziva**. Validacije takođe uključuju proveru da li sertifikat dolazi iz pouzdanog izvora i potvrđivanje prisustva izdavaoca u **NTAUTH sertifikat skladištu**. Uspešne validacije rezultiraju izdavanjem TGT-a. **`NTAuthCertificates`** objekat u AD, nalazi se na:
+U procesu autentifikacije putem Kerberosa, zahtev korisnika za Ticket Granting Ticket (TGT) se potpisuje koristeći **privatni ključ** sertifikata korisnika. Ovaj zahtev prolazi kroz nekoliko validacija od strane kontrolera domena, uključujući **validnost** sertifikata, **putanju** i **status opoziva**. Validacije takođe uključuju proveru da li sertifikat dolazi iz pouzdanog izvora i potvrđivanje prisustva izdavaoca u **NTAUTH sertifikat skladištu**. Uspešne validacije rezultiraju izdavanjem TGT-a. Objekat **`NTAuthCertificates`** u AD, nalazi se na:
 ```bash
 CN=NTAuthCertificates,CN=Public Key Services,CN=Services,CN=Configuration,DC=<domain>,DC=<com>
 ```

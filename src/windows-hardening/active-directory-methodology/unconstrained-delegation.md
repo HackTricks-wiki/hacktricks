@@ -4,11 +4,11 @@
 
 ## Unconstrained delegation
 
-Ovo je funkcija koju može postaviti Domenski Administrator na bilo koji **Računar** unutar domena. Tada, svaki put kada se **korisnik prijavi** na Računar, **kopija TGT-a** tog korisnika će biti **poslata unutar TGS-a** koji obezbeđuje DC **i sačuvana u memoriji u LSASS-u**. Dakle, ako imate Administratorske privilegije na mašini, moći ćete da **izvučete karte i pretvarate se da ste korisnici** na bilo kojoj mašini.
+Ovo je funkcija koju može postaviti Administrator domena na bilo koji **računar** unutar domena. Tada, svaki put kada se **korisnik prijavi** na računar, **kopija TGT-a** tog korisnika će biti **poslata unutar TGS-a** koji obezbeđuje DC **i sačuvana u memoriji u LSASS-u**. Dakle, ako imate administratorske privilegije na mašini, moći ćete da **izvučete karte i pretvarate se da ste korisnici** na bilo kojoj mašini.
 
-Dakle, ako se domenski administrator prijavi na Računar sa aktiviranom funkcijom "Unconstrained Delegation", a vi imate lokalne administratorske privilegije unutar te mašine, moći ćete da izvučete kartu i pretvarate se da ste Domenski Administrator bilo gde (domen privesc).
+Dakle, ako se administrator domena prijavi na računar sa aktiviranom funkcijom "Unconstrained Delegation", i imate lokalne administratorske privilegije unutar te mašine, moći ćete da izvučete kartu i pretvarate se da ste administrator domena bilo gde (domain privesc).
 
-Možete **pronaći Računarske objekte sa ovom atributom** proveravajući da li atribut [userAccountControl](<https://msdn.microsoft.com/en-us/library/ms680832(v=vs.85).aspx>) sadrži [ADS_UF_TRUSTED_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>). To možete uraditi sa LDAP filtrima ‘(userAccountControl:1.2.840.113556.1.4.803:=524288)’, što je ono što powerview radi:
+Možete **pronaći objekte računara sa ovom atributom** proveravajući da li atribut [userAccountControl](<https://msdn.microsoft.com/en-us/library/ms680832(v=vs.85).aspx>) sadrži [ADS_UF_TRUSTED_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>). To možete uraditi sa LDAP filtrima ‘(userAccountControl:1.2.840.113556.1.4.803:=524288)’, što je ono što powerview radi:
 
 <pre class="language-bash"><code class="lang-bash"># List unconstrained computers
 ## Powerview

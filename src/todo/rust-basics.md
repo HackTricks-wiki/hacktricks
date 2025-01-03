@@ -30,7 +30,7 @@ Možete koristiti funkcije kao što su `is_some()` ili `is_none()` da proverite 
 
 ### Makroi
 
-Makroi su moćniji od funkcija jer se šire da proizvedu više koda nego što ste ručno napisali. Na primer, potpis funkcije mora da deklarira broj i tip parametara koje funkcija ima. Makroi, s druge strane, mogu primiti promenljiv broj parametara: možemo pozvati `println!("hello")` sa jednim argumentom ili `println!("hello {}", name)` sa dva argumenta. Takođe, makroi se šire pre nego što kompajler interpretira značenje koda, tako da makro može, na primer, implementirati trait na datom tipu. Funkcija to ne može, jer se poziva u vreme izvođenja, a trait mora biti implementiran u vreme kompajliranja.
+Makroi su moćniji od funkcija jer se šire da proizvedu više koda nego što ste ručno napisali. Na primer, potpis funkcije mora da deklarira broj i tip parametara koje funkcija ima. Makroi, s druge strane, mogu primiti promenljiv broj parametara: možemo pozvati `println!("hello")` sa jednim argumentom ili `println!("hello {}", name)` sa dva argumenta. Takođe, makroi se šire pre nego što kompajler interpretira značenje koda, tako da makro može, na primer, implementirati trait na datom tipu. Funkcija to ne može, jer se poziva u vreme izvršavanja, a trait mora biti implementiran u vreme kompajliranja.
 ```rust
 macro_rules! my_macro {
 () => {

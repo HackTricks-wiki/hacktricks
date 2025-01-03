@@ -4,7 +4,7 @@
 
 ## JTAG
 
-JTAG omogućava izvođenje granice skeniranja. Granica skeniranja analizira određene sklopove, uključujući ugrađene ćelije za granice skeniranja i registre za svaki pin.
+JTAG omogućava izvođenje granice skeniranja. Granica skeniranja analizira određene sklopove, uključujući ugrađene ćelije za granicu skeniranja i registre za svaki pin.
 
 JTAG standard definiše **specifične komande za izvođenje granica skeniranja**, uključujući sledeće:
 
@@ -21,11 +21,11 @@ Možda ćete naići na ove instrukcije kada koristite alat kao što je JTAGulato
 
 ### Test Access Port
 
-Granice skeniranja uključuju testove četvoržičnog **Test Access Port (TAP)**, opšteg porta koji pruža **pristup JTAG test podršci** funkcijama ugrađenim u komponentu. TAP koristi sledećih pet signala:
+Granice skeniranja uključuju testove četvoržičanog **Test Access Port (TAP)**, port opšte namene koji pruža **pristup JTAG test podršci** funkcijama ugrađenim u komponentu. TAP koristi sledećih pet signala:
 
 - Ulaz testnog sata (**TCK**) TCK je **sat** koji definiše koliko često će TAP kontroler preuzeti jednu akciju (drugim rečima, skočiti na sledeće stanje u mašini stanja).
 - Ulaz za odabir testnog moda (**TMS**) TMS kontroliše **konačnu mašinu stanja**. Na svakoj otkucaju sata, JTAG TAP kontroler uređaja proverava napon na TMS pinu. Ako je napon ispod određenog praga, signal se smatra niskim i tumači se kao 0, dok se, ako je napon iznad određenog praga, signal smatra visokim i tumači se kao 1.
-- Ulaz testnih podataka (**TDI**) TDI je pin koji šalje **podatke u čip kroz ćelije skeniranja**. Svaki proizvođač je odgovoran za definisanje komunikacionog protokola preko ovog pina, jer JTAG to ne definiše.
+- Ulaz testnih podataka (**TDI**) TDI je pin koji šalje **podatke u čip kroz skener ćelije**. Svaki proizvođač je odgovoran za definisanje komunikacionog protokola preko ovog pina, jer JTAG to ne definiše.
 - Izlaz testnih podataka (**TDO**) TDO je pin koji šalje **podatke iz čipa**.
 - Ulaz za resetovanje testa (**TRST**) Opcioni TRST resetuje konačnu mašinu stanja **na poznato dobro stanje**. Alternativno, ako se TMS drži na 1 tokom pet uzastopnih ciklusa sata, poziva reset, na isti način na koji bi to uradio TRST pin, zbog čega je TRST opcionalan.
 
@@ -39,7 +39,7 @@ Ima **24 kanala** koje možete povezati sa pinovima ploče. Zatim izvodi **BF na
 
 Jeftiniji, ali mnogo sporiji način identifikacije JTAG pinova je korišćenje [**JTAGenum**](https://github.com/cyphunk/JTAGenum/) učitanog na Arduino-kompatibilnom mikrokontroleru.
 
-Korišćenjem **JTAGenum**, prvo biste **definisali pinove probnog** uređaja koji ćete koristiti za enumeraciju. Morali biste se osloniti na dijagram pinova uređaja, a zatim povezati te pinove sa testnim tačkama na vašem ciljanom uređaju.
+Korišćenjem **JTAGenum**, prvo biste **definisali pinove probnog** uređaja koji ćete koristiti za enumeraciju. Morali biste se osloniti na dijagram pinova uređaja, a zatim povezati te pinove sa test tačkama na vašem ciljanom uređaju.
 
 **Treći način** za identifikaciju JTAG pinova je **inspekcija PCB-a** za jedan od pinova. U nekim slučajevima, PCB-ovi mogu povoljno pružiti **Tag-Connect interfejs**, što je jasan pokazatelj da ploča takođe ima JTAG konektor. Možete videti kako taj interfejs izgleda na [https://www.tag-connect.com/info/](https://www.tag-connect.com/info/). Pored toga, inspekcija **tehničkih listova čipova na PCB-u** može otkriti dijagrame pinova koji ukazuju na JTAG interfejse.
 

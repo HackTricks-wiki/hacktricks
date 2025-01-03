@@ -11,7 +11,7 @@ Od Windows 8.1 i Windows Server 2012 R2 nadalje, značajne mere su implementiran
 - **LM hash i plain-text lozinke** više se ne čuvaju u memoriji radi poboljšanja bezbednosti. Specifična registracija, _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_ mora biti konfigurisana sa DWORD vrednošću `0` da bi se onemogućila Digest Authentication, osiguravajući da "plain-text" lozinke nisu keširane u LSASS.
 
 - **LSA zaštita** je uvedena da zaštiti proces Local Security Authority (LSA) od neovlašćenog čitanja memorije i injekcije koda. To se postiže označavanjem LSASS-a kao zaštićenog procesa. Aktivacija LSA zaštite uključuje:
-1. Modifikaciju registra na _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa_ postavljanjem `RunAsPPL` na `dword:00000001`.
+1. Modifikovanje registra na _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa_ postavljanjem `RunAsPPL` na `dword:00000001`.
 2. Implementaciju Group Policy Object (GPO) koja sprovodi ovu promenu registra na upravljanim uređajima.
 
 I pored ovih zaštita, alati poput Mimikatz mogu zaobići LSA zaštitu koristeći specifične drajvere, iako su takve akcije verovatno zabeležene u dnevnicima događaja.
@@ -31,14 +31,14 @@ Ovo omogućava iskopavanje memorije `lsass.exe` u datoteku, koja se zatim može 
 ```
 ## Mimikatz Opcije
 
-Manipulacija dnevnikom događaja u Mimikatz-u uključuje dve osnovne radnje: brisanje dnevnika događaja i patch-ovanje Event servisa kako bi se sprečilo beleženje novih događaja. Ispod su komande za izvođenje ovih radnji:
+Manipulacija dnevnikom događaja u Mimikatz-u uključuje dve glavne radnje: brisanje dnevnika događaja i patchovanje Event servisa kako bi se sprečilo beleženje novih događaja. Ispod su komande za izvođenje ovih radnji:
 
 #### Brisanje Dnevnika Događaja
 
-- **Komanda**: Ova radnja je usmerena na brisanje dnevnika događaja, čineći teže praćenje malicioznih aktivnosti.
+- **Komanda**: Ova radnja je usmerena na brisanje dnevnika događaja, čineći teže praćenje zlonamernih aktivnosti.
 - Mimikatz ne pruža direktnu komandu u svojoj standardnoj dokumentaciji za brisanje dnevnika događaja direktno putem komandne linije. Međutim, manipulacija dnevnikom događaja obično uključuje korišćenje sistemskih alata ili skripti van Mimikatz-a za brisanje specifičnih dnevnika (npr. korišćenjem PowerShell-a ili Windows Event Viewer-a).
 
-#### Eksperimentalna Funkcija: Patch-ovanje Event Servisa
+#### Eksperimentalna Funkcija: Patchovanje Event Servisa
 
 - **Komanda**: `event::drop`
 - Ova eksperimentalna komanda je dizajnirana da modifikuje ponašanje Event Logging Servisa, efikasno sprečavajući ga da beleži nove događaje.
@@ -72,7 +72,7 @@ Silver Tiketi omogućavaju pristup specifičnim uslugama. Ključna komanda i par
 
 - Komanda: Slična Golden Ticket-u, ali cilja specifične usluge.
 - Parametri:
-- `/service`: Usluga koja se cilja (npr., cifs, http).
+- `/service`: Usluga koju treba ciljati (npr., cifs, http).
 - Ostali parametri slični Golden Ticket-u.
 
 Primer:

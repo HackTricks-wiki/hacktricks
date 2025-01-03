@@ -19,7 +19,7 @@ _Slađana verzija_ [_RottenPotatoNG_](https://github.com/breenmachine/RottenPota
 
 [**Iz juicypotato Readme**](https://github.com/ohpe/juicy-potato/blob/master/README.md)**:**
 
-[RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG) i njene [varijante](https://github.com/decoder-it/lonelypotato) koriste lanac eskalacije privilegija zasnovan na [`BITS`](<https://msdn.microsoft.com/en-us/library/windows/desktop/bb968799(v=vs.85).aspx>) [servisu](https://github.com/breenmachine/RottenPotatoNG/blob/4eefb0dd89decb9763f2bf52c7a067440a9ec1f0/RottenPotatoEXE/MSFRottenPotato/MSFRottenPotato.cpp#L126) koji ima MiTM slušalicu na `127.0.0.1:6666` i kada imate `SeImpersonate` ili `SeAssignPrimaryToken` privilegije. Tokom pregleda Windows verzije otkrili smo podešavanje gde je `BITS` namerno onemogućen i port `6666` je zauzet.
+[RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG) i njene [varijante](https://github.com/decoder-it/lonelypotato) koriste lanac eskalacije privilegija zasnovan na [`BITS`](<https://msdn.microsoft.com/en-us/library/windows/desktop/bb968799(v=vs.85).aspx>) [servisu](https://github.com/breenmachine/RottenPotatoNG/blob/4eefb0dd89decb9763f2bf52c7a067440a9ec1f0/RottenPotatoEXE/MSFRottenPotato/MSFRottenPotato.cpp#L126) koji ima MiTM slušalac na `127.0.0.1:6666` i kada imate `SeImpersonate` ili `SeAssignPrimaryToken` privilegije. Tokom pregleda Windows verzije otkrili smo postavku gde je `BITS` namerno onemogućen i port `6666` je zauzet.
 
 Odlučili smo da oružamo [RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG): **Pozdravite Juicy Potato**.
 
@@ -38,8 +38,8 @@ Nakon nekog testiranja dobili smo i testirali opširnu listu [zanimljivih CLSID-
 JuicyPotato vam omogućava:
 
 - **Ciljani CLSID** _izaberite bilo koji CLSID koji želite._ [_Ovde_](http://ohpe.it/juicy-potato/CLSID/) _možete pronaći listu organizovanu po OS-u._
-- **COM slušalni port** _definišite COM slušalni port koji preferirate (umesto marširanog hardkodiranog 6666)_
-- **COM slušalna IP adresa** _povežite server na bilo koju IP adresu_
+- **COM slušalac port** _definišite COM slušalac port koji preferirate (umesto marširanog hardkodiranog 6666)_
+- **COM slušalac IP adresa** _vežite server na bilo koju IP adresu_
 - **Način kreiranja procesa** _u zavisnosti od privilegija impersoniranog korisnika možete izabrati:_
 - `CreateProcessWithToken` (potrebne `SeImpersonate`)
 - `CreateProcessAsUser` (potrebne `SeAssignPrimaryToken`)

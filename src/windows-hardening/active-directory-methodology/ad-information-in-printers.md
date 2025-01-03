@@ -1,11 +1,11 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-Postoji nekoliko blogova na Internetu koji **ističu opasnosti ostavljanja štampača konfiguranih sa LDAP sa podrazumevanim/slabim** lozinkama.\
+Postoji nekoliko blogova na internetu koji **ističu opasnosti ostavljanja štampača konfiguranih sa LDAP sa podrazumevanim/slabim** lozinkama.\
 To je zato što bi napadač mogao **prevariti štampač da se autentifikuje protiv lažnog LDAP servera** (obično je `nc -vv -l -p 444` dovoljno) i da uhvati **lozinke štampača u čistom tekstu**.
 
 Takođe, nekoliko štampača će sadržati **logove sa korisničkim imenima** ili čak mogu biti u mogućnosti da **preuzmu sva korisnička imena** sa Kontrolera domena.
 
-Sve ove **osetljive informacije** i uobičajeni **nedostatak sigurnosti** čine štampače veoma zanimljivim za napadače.
+Sve ove **osetljive informacije** i uobičajeni **nedostatak bezbednosti** čine štampače veoma zanimljivim za napadače.
 
 Neki blogovi o ovoj temi:
 
@@ -15,14 +15,14 @@ Neki blogovi o ovoj temi:
 ## Konfiguracija štampača
 
 - **Lokacija**: Lista LDAP servera se nalazi na: `Network > LDAP Setting > Setting Up LDAP`.
-- **Ponašanje**: Interfejs omogućava izmene LDAP servera bez ponovnog unošenja lozinki, što je usmereno na pogodnost korisnika, ali predstavlja sigurnosne rizike.
+- **Ponašanje**: Interfejs omogućava izmene LDAP servera bez ponovnog unošenja lozinki, što je usmereno na pogodnost korisnika, ali predstavlja bezbednosne rizike.
 - **Eksploatacija**: Eksploatacija uključuje preusmeravanje adrese LDAP servera na kontrolisanu mašinu i korišćenje funkcije "Test Connection" za hvatanje lozinki.
 
 ## Hvatanje lozinki
 
 **Za detaljnije korake, pogledajte originalni [izvor](https://grimhacker.com/2018/03/09/just-a-printer/).**
 
-### Metod 1: Netcat Listener
+### Metoda 1: Netcat Listener
 
 Jednostavan netcat listener bi mogao biti dovoljan:
 ```bash
@@ -34,7 +34,7 @@ Međutim, uspeh ove metode varira.
 
 Pouzdaniji pristup uključuje postavljanje potpunog LDAP servera jer štampač izvršava null bind nakon čega sledi upit pre nego što pokuša vezivanje kredencijala.
 
-1. **Postavljanje LDAP Servera**: Vodič prati korake iz [ovog izvora](https://www.server-world.info/en/note?os=Fedora_26&p=openldap).
+1. **Podešavanje LDAP Servera**: Vodič prati korake iz [ovog izvora](https://www.server-world.info/en/note?os=Fedora_26&p=openldap).
 2. **Ključni Koraci**:
 - Instalirajte OpenLDAP.
 - Konfigurišite admin lozinku.

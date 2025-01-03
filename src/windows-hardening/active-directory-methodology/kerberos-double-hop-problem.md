@@ -7,7 +7,7 @@
 
 Kerberos "Double Hop" problem se pojavljuje kada napadač pokušava da koristi **Kerberos autentifikaciju preko dva** **hopa**, na primer koristeći **PowerShell**/**WinRM**.
 
-Kada se **autentifikacija** vrši putem **Kerberos-a**, **akreditivi** **nisu** keširani u **memoriji.** Stoga, ako pokrenete mimikatz, **nećete pronaći akreditive** korisnika na mašini čak i ako on pokreće procese.
+Kada se **autentifikacija** vrši putem **Kerberos-a**, **akreditivi** **nisu** keširani u **memoriji.** Stoga, ako pokrenete mimikatz nećete **pronaći akreditive** korisnika na mašini čak i ako on pokreće procese.
 
 To je zato što su koraci prilikom povezivanja sa Kerberos-om sledeći:
 

@@ -69,13 +69,13 @@
 - [https://pentestlab.blog/2020/02/24/parent-pid-spoofing/](https://pentestlab.blog/2020/02/24/parent-pid-spoofing/) : Lažiranje roditeljskog PID-a
 - [https://github.com/the-xentropy/xencrypt](https://github.com/the-xentropy/xencrypt) : Enkriptovanje Powershell payload-a
 - [https://shells.systems/introducing-ninja-c2-the-c2-built-for-stealth-red-team-operations/](https://shells.systems/introducing-ninja-c2-the-c2-built-for-stealth-red-team-operations/) : Stealth C2
-- [https://windows-internals.com/faxing-your-way-to-system/](https://windows-internals.com/faxing-your-way-to-system/) : Serija logova o Windows Internals
+- [https://windows-internals.com/faxing-your-way-to-system/](https://windows-internals.com/faxing-your-way-to-system/) : Serija logova o Windows internals
 - [https://bestestredteam.com/2018/10/02/tracking-pixel-in-microsoft-office-document/](https://bestestredteam.com/2018/10/02/tracking-pixel-in-microsoft-office-document/) : Pratite ko otvara dokument
 - [https://github.com/Integration-IT/Active-Directory-Exploitation-Cheat-Sheet](https://github.com/Integration-IT/Active-Directory-Exploitation-Cheat-Sheet) : Active Directory Cheat Sheet
 
 # Firmware
 
-Alati koje mogu biti korisni za analizu firmvera (automatski):
+Alati koje vidim da mogu biti korisni za analizu firmvera (automatski):
 
 - [https://github.com/craigz28/firmwalker](https://github.com/craigz28/firmwalker)
 - [https://github.com/fkie-cad/FACT_core](https://github.com/fkie-cad/FACT_core)
@@ -86,7 +86,7 @@ Post-crema:
 - [https://blog.mindedsecurity.com/2018/09/pentesting-iot-devices-part-1-static.html](https://blog.mindedsecurity.com/2018/09/pentesting-iot-devices-part-1-static.html)
 - [https://blog.mindedsecurity.com/2018/10/pentesting-iot-devices-part-2-dynamic.html](https://blog.mindedsecurity.com/2018/10/pentesting-iot-devices-part-2-dynamic.html)
 
-Kako izvući firmware ako ga ne pronađemo online: [https://www.youtube.com/watch?v=Kxvpbu9STU4](https://www.youtube.com/watch?v=Kxvpbu9STU4)
+Kako izvući firmver ako ga ne pronađemo online: [https://www.youtube.com/watch?v=Kxvpbu9STU4](https://www.youtube.com/watch?v=Kxvpbu9STU4)
 
 Evo firmvera sa ranjivostima za analizu: [https://github.com/scriptingxss/IoTGoat](https://github.com/scriptingxss/IoTGoat)
 
@@ -102,14 +102,14 @@ Emulacija firmvera: FIRMADYNE (https://github.com/firmadyne/firmadyne/) je platf
 - [https://github.com/skelsec/jackdaw](https://github.com/skelsec/jackdaw)
 - [https://github.com/CoatiSoftware/Sourcetrail](https://github.com/CoatiSoftware/Sourcetrail) : Staticka analiza koda
 - [https://www.hackerdecabecera.com/2019/12/blectf-capture-flag-en-formato-hardware.html](https://www.hackerdecabecera.com/2019/12/blectf-capture-flag-en-formato-hardware.html) : Bluetooth LE CTF
-- [https://github.com/skeeto/endlessh](https://github.com/skeeto/endlessh) : SSH tarpit koji polako šalje beskonačni baner.
+- [https://github.com/skeeto/endlessh](https://github.com/skeeto/endlessh) : SSH tarpit koji polako šalje beskonačnu poruku.
 - AWS i Cloud alati: [https://github.com/toniblyx/my-arsenal-of-aws-security-tools](https://github.com/toniblyx/my-arsenal-of-aws-security-tools)
-- IFS (Interplanetary File System) za phishing: [https://www.trustwave.com/en-us/resources/blogs/spiderlabs-blog/using-the-interplanetary-file-system-for-offensive-operations/](https://www.trustwave.com/en-us/resources/blogs/spiderlabs-blog/using-the-interplanetary-file-system-for-offensive-operations/)
+- IFS (Interplanetarni sistem datoteka) za phishing: [https://www.trustwave.com/en-us/resources/blogs/spiderlabs-blog/using-the-interplanetary-file-system-for-offensive-operations/](https://www.trustwave.com/en-us/resources/blogs/spiderlabs-blog/using-the-interplanetary-file-system-for-offensive-operations/)
 - Usluge rotacije IP adresa: [https://medium.com/@lokeshdlk77/how-to-rotate-ip-address-in-brute-force-attack-e66407259212](https://medium.com/@lokeshdlk77/how-to-rotate-ip-address-in-brute-force-attack-e66407259212)
 - Linux rootkit: [https://github.com/aesophor/satanic-rootkit](https://github.com/aesophor/satanic-rootkit)
 - [https://theia-ide.org/](https://theia-ide.org) : Online IDE
 - [https://github.com/nahamsec/Resources-for-Beginner-Bug-Bounty-Hunters/](https://github.com/nahamsec/Resources-for-Beginner-Bug-Bounty-Hunters/) : Resursi za početak na BugBounties
-- [https://medium.com/macoclock/jailbreak-and-stuff-kickstart-tools-and-techniques-for-ios-application-pentesting-6fa53a3987ab](https://medium.com/macoclock/jailbreak-and-stuff-kickstart-tools-and-techniques-for-ios-application-pentesting-6fa53a3987ab) : IOS pentesting alati
+- [https://medium.com/macoclock/jailbreak-and-stuff-kickstart-tools-and-techniques-for-ios-application-pentesting-6fa53a3987ab](https://medium.com/macoclock/jailbreak-and-stuff-kickstart-tools-and-techniques-for-ios-application-pentesting-6fa53a3987ab) : IOS alati za pentesting
 - [https://github.com/random-robbie/keywords/blob/master/keywords.txt](https://github.com/random-robbie/keywords/blob/master/keywords.txt) : Ključne reči
 - [https://github.com/ElevenPaths/HomePWN](https://github.com/ElevenPaths/HomePWN) : Hacking IoT (Wifi, BLE, SSDP, MDNS)
 - [https://github.com/rackerlabs/scantron](https://github.com/rackerlabs/scantron) : automatizacija skeniranja

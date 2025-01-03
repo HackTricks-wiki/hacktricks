@@ -4,7 +4,7 @@
 
 ### Custom SSP
 
-[Learn what is a SSP (Security Support Provider) here.](../authentication-credentials-uac-and-efs/#security-support-provider-interface-sspi)\
+[Saaznajte šta je SSP (Security Support Provider) ovde.](../authentication-credentials-uac-and-efs/#security-support-provider-interface-sspi)\
 Možete kreirati **svoj SSP** da **zabeležite** u **čistom tekstu** **akreditive** korišćene za pristup mašini.
 
 #### Mimilib
@@ -26,7 +26,7 @@ I nakon ponovnog pokretanja, sve akreditive možete pronaći u čistom tekstu u 
 
 #### U memoriji
 
-Takođe možete ovo injektovati direktno u memoriju koristeći Mimikatz (imajte na umu da može biti malo nestabilno/ne radi).
+Takođe možete ovo ubrizgati direktno u memoriju koristeći Mimikatz (imajte na umu da može biti malo nestabilno/ne radi):
 ```powershell
 privilege::debug
 misc::memssp

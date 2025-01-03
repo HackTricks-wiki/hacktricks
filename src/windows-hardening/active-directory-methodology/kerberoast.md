@@ -4,21 +4,21 @@
 
 ## Kerberoast
 
-Kerberoasting se fokusira na sticanje **TGS karata**, posebno onih povezanih sa uslugama koje rade pod **korisničkim nalozima** u **Active Directory (AD)**, isključujući **računare**. Enkripcija ovih karata koristi ključeve koji potiču od **korisničkih lozinki**, što omogućava mogućnost **offline cracking-a kredencijala**. Korišćenje korisničkog naloga kao usluge označeno je ne-praznom **"ServicePrincipalName"** svojstvu.
+Kerberoasting se fokusira na sticanje **TGS karata**, posebno onih povezanih sa uslugama koje rade pod **korisničkim nalozima** u **Active Directory (AD)**, isključujući **računare**. Enkripcija ovih karata koristi ključeve koji potiču od **korisničkih lozinki**, što omogućava mogućnost **offline krakenja kredencijala**. Korišćenje korisničkog naloga kao usluge označeno je ne-praznom **"ServicePrincipalName"** svojstvu.
 
-Za izvršavanje **Kerberoasting-a**, neophodan je domen nalog sposoban da zahteva **TGS karte**; međutim, ovaj proces ne zahteva **posebne privilegije**, što ga čini dostupnim svima sa **validnim domen kredencijalima**.
+Za izvršavanje **Kerberoasting-a**, domen račun koji može da zahteva **TGS karte** je neophodan; međutim, ovaj proces ne zahteva **posebne privilegije**, što ga čini dostupnim svima sa **validnim domen kredencijalima**.
 
 ### Ključne tačke:
 
 - **Kerberoasting** cilja **TGS karte** za **usluge korisničkih naloga** unutar **AD**.
-- Karte enkriptovane sa ključevima iz **korisničkih lozinki** mogu se **crack-ovati offline**.
+- Karte enkriptovane sa ključevima iz **korisničkih lozinki** mogu se **krakati offline**.
 - Usluga se identifikuje po **ServicePrincipalName** koji nije null.
-- **Nema posebnih privilegija** potrebnih, samo **validni domen kredencijali**.
+- **Nema posebnih privilegija** je potrebno, samo **validni domen kredencijali**.
 
 ### **Napad**
 
 > [!WARNING]
-> **Kerberoasting alati** obično zahtevaju **`RC4 enkripciju`** prilikom izvođenja napada i iniciranja TGS-REQ zahteva. To je zato što je **RC4** [**slabiji**](https://www.stigviewer.com/stig/windows_10/2017-04-28/finding/V-63795) i lakši za crack-ovanje offline koristeći alate kao što je Hashcat nego druge algoritme enkripcije kao što su AES-128 i AES-256.\
+> **Kerberoasting alati** obično zahtevaju **`RC4 enkripciju`** prilikom izvođenja napada i iniciranja TGS-REQ zahteva. To je zato što je **RC4** [**slabiji**](https://www.stigviewer.com/stig/windows_10/2017-04-28/finding/V-63795) i lakši za krakenje offline koristeći alate kao što je Hashcat nego druge algoritme enkripcije kao što su AES-128 i AES-256.\
 > RC4 (tip 23) hešovi počinju sa **`$krb5tgs$23$*`** dok AES-256 (tip 18) počinju sa **`$krb5tgs$18$*`**.`
 
 #### **Linux**
@@ -93,7 +93,7 @@ hashcat -m 13100 --force -a 0 hashes.kerberoast passwords_kerb.txt
 ```
 ### Persistence
 
-Ako imate **dovoljna ovlašćenja** nad korisnikom, možete **učiniti ga kerberoastable**:
+Ako imate **dovoljno dozvola** nad korisnikom, možete **učiniti ga kerberoastable**:
 ```bash
 Set-DomainObject -Identity <username> -Set @{serviceprincipalname='just/whateverUn1Que'} -verbose
 ```
@@ -110,8 +110,8 @@ Kerberoasting se može sprovoditi sa visokim stepenom prikrivenosti ako je mogu�
 
 - Ime usluge ne bi trebalo da bude **krbtgt**, jer je to normalan zahtev.
 - Imena usluga koja se završavaju sa **$** treba isključiti kako bi se izbegli računi mašina korišćeni za usluge.
-- Zahtevi sa mašina treba da budu filtrirani isključivanjem imena računa formatiranih kao **machine@domain**.
-- Samo uspešni zahtevi za tikete treba da se uzmu u obzir, identifikovani kodom greške **'0x0'**.
+- Zahtevi sa mašina treba filtrirati isključivanjem imena računa formatiranih kao **machine@domain**.
+- Samo uspešni zahtevi za tikete treba uzeti u obzir, identifikovani kodom greške **'0x0'**.
 - **Najvažnije**, tip enkripcije tiketa treba da bude **0x17**, koji se često koristi u Kerberoasting napadima.
 ```bash
 Get-WinEvent -FilterHashtable @{Logname='Security';ID=4769} -MaxEvents 1000 | ?{$_.Message.split("`n")[8] -ne 'krbtgt' -and $_.Message.split("`n")[8] -ne '*$' -and $_.Message.split("`n")[3] -notlike '*$@*' -and $_.Message.split("`n")[18] -like '*0x0*' -and $_.Message.split("`n")[17] -like "*0x17*"} | select ExpandProperty message
@@ -130,7 +130,7 @@ U **septembru 2022**, novi način za eksploataciju sistema otkrio je istraživa�
 Tehnika je u potpunosti objašnjena u ovom članku: [Semperis blog post](https://www.semperis.com/blog/new-attack-paths-as-requested-sts/).
 
 > [!WARNING]
-> Morate pružiti listu korisnika jer nemamo važeći nalog za upit LDAP koristeći ovu tehniku.
+> Morate obezbediti listu korisnika jer nemamo važeći nalog za upit LDAP koristeći ovu tehniku.
 
 #### Linux
 

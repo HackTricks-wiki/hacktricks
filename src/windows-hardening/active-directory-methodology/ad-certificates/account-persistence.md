@@ -34,12 +34,12 @@ Druga metoda uključuje registraciju mašinskog naloga kompromitovanog sistema z
 ```bash
 Certify.exe request /ca:dc.theshire.local/theshire-DC-CA /template:Machine /machine
 ```
-Ovaj pristup omogućava napadaču da se autentifikuje na **Kerberos** kao mašinski nalog i koristi **S4U2Self** da dobije Kerberos servisne karte za bilo koju uslugu na hostu, efektivno dajući napadaču trajni pristup mašini.
+Ovaj pristup omogućava napadaču da se autentifikuje na **Kerberos** kao mašinski nalog i koristi **S4U2Self** da dobije Kerberos servisne karte za bilo koju uslugu na hostu, što efektivno daje napadaču trajni pristup mašini.
 
 ## **Produženje trajnosti kroz obnavljanje sertifikata - PERSIST3**
 
 Poslednja metoda koja se razmatra uključuje korišćenje **važenja** i **perioda obnove** šablona sertifikata. Obnavljanjem sertifikata pre njegovog isteka, napadač može održati autentifikaciju na Active Directory bez potrebe za dodatnim upisima karata, što bi moglo ostaviti tragove na serveru sertifikacione vlasti (CA).
 
-Ovaj pristup omogućava **produženu trajnost** metodom, minimizirajući rizik od otkrivanja kroz manje interakcija sa CA serverom i izbegavajući generisanje artefakata koji bi mogli upozoriti administratore na upad.
+Ovaj pristup omogućava **produženu trajnost**, minimizirajući rizik od otkrivanja kroz manje interakcija sa CA serverom i izbegavajući generisanje artefakata koji bi mogli upozoriti administratore na upad.
 
 {{#include ../../../banners/hacktricks-training.md}}

@@ -19,7 +19,7 @@ Ako umesto slanja svakog koda 5 puta (poslato ovako da bi se osiguralo da prijem
 
 <figure><img src="../../images/image (622).png" alt=""><figcaption></figcaption></figure>
 
-i ako **uklonite 2 ms čekanja** između signala, možete **smanjiti vreme na 3 minuta.**
+i ako **uklonite 2 ms čekanje** između signala, možete **smanjiti vreme na 3 minuta.**
 
 Štaviše, korišćenjem De Bruijn sekvence (način za smanjenje broja bitova potrebnih za slanje svih potencijalnih binarnih brojeva za brute-force) ovo **vreme se smanjuje na samo 8 sekundi**:
 
@@ -41,9 +41,9 @@ flipper-zero/fz-sub-ghz.md
 
 Automatski otvarači garažnih vrata obično koriste bežični daljinski upravljač za otvaranje i zatvaranje garažnih vrata. Daljinski upravljač **šalje radio frekvencijski (RF) signal** otvaraču garažnih vrata, koji aktivira motor za otvaranje ili zatvaranje vrata.
 
-Moguće je da neko koristi uređaj poznat kao "code grabber" da presretne RF signal i snimi ga za kasniju upotrebu. Ovo je poznato kao **replay attack**. Da bi se sprečio ovaj tip napada, mnogi moderni otvarači garažnih vrata koriste sigurniju metodu enkripcije poznatu kao **rolling code** sistem.
+Moguće je da neko koristi uređaj poznat kao "code grabber" da presretne RF signal i snimi ga za kasniju upotrebu. Ovo je poznato kao **replay napad**. Da bi se sprečio ovaj tip napada, mnogi moderni otvarači garažnih vrata koriste sigurniju metodu enkripcije poznatu kao **sistem rolnih kodova**.
 
-**RF signal se obično prenosi koristeći rolling code**, što znači da se kod menja sa svakom upotrebom. To otežava nekome da **presretne** signal i **iskoristi** ga za sticanje **neovlašćenog** pristupa garaži.
+**RF signal se obično prenosi koristeći rolni kod**, što znači da se kod menja sa svakom upotrebom. To otežava nekome da **presretne** signal i **iskoristi** ga za sticanje **neovlašćenog** pristupa garaži.
 
 U sistemu rolnih kodova, daljinski upravljač i otvarač garažnih vrata imaju **zajednički algoritam** koji **generiše novi kod** svaki put kada se daljinski upravljač koristi. Otvarač garažnih vrata će reagovati samo na **ispravan kod**, što znatno otežava nekome da dobije neovlašćen pristup garaži samo hvatanjem koda.
 
@@ -51,31 +51,31 @@ U sistemu rolnih kodova, daljinski upravljač i otvarač garažnih vrata imaju *
 
 U suštini, slušate dugme i **hvata signal dok je daljinski upravljač van dometa** uređaja (recimo automobila ili garaže). Zatim se pomerate do uređaja i **koristite uhvaćeni kod da ga otvorite**.
 
-### Napad na Potpunu Blokadu Linka
+### Napad na Potpuno Ometanje Linka
 
-Napadač bi mogao **blokirati signal blizu vozila ili prijemnika** tako da **prijemnik zapravo ne može ‘čuti’ kod**, i kada se to dogodi, možete jednostavno **uhvatiti i ponovo poslati** kod kada prestanete sa blokiranjem.
+Napadač bi mogao **ometati signal blizu vozila ili prijemnika** tako da **prijemnik zapravo ne može ‘čuti’ kod**, i kada se to dogodi, možete jednostavno **uhvatiti i ponovo poslati** kod kada prestanete sa ometanjem.
 
 Žrtva će u nekom trenutku koristiti **ključeve da zaključa automobil**, ali tada će napad **snimiti dovoljno "zatvori vrata" kodova** koji se nadaju da bi mogli biti ponovo poslati da otvore vrata (možda će biti potrebna **promena frekvencije** jer postoje automobili koji koriste iste kodove za otvaranje i zatvaranje, ali slušaju za obe komande na različitim frekvencijama).
 
 > [!WARNING]
-> **Blokiranje funkcioniše**, ali je primetno jer ako **osoba koja zaključava automobil jednostavno testira vrata** da bi se uverila da su zaključana, primetiće da je automobil otključan. Pored toga, ako su bili svesni takvih napada, mogli bi čak i da čuju da vrata nikada nisu napravila **zvuk** zaključavanja ili da svetla automobila nikada nisu trepnula kada su pritisnuli dugme ‘zaključaj’.
+> **Ometanje funkcioniše**, ali je primetno jer ako **osoba koja zaključava automobil jednostavno testira vrata** da bi se uverila da su zaključana, primetiće da je automobil otključan. Pored toga, ako su bili svesni takvih napada, mogli bi čak i da čuju da vrata nikada nisu napravila **zvuk** zaključavanja ili da svetla automobila nikada nisu trepnula kada su pritisnuli dugme ‘zaključaj’.
 
 ### **Napad na Hvatanje Koda (aka ‘RollJam’)**
 
-Ovo je **tehnika blokiranja koja je manje uočljiva**. Napadač će blokirati signal, tako da kada žrtva pokuša da zaključa vrata, to neće raditi, ali će napadač **snimiti ovaj kod**. Zatim će žrtva **ponovo pokušati da zaključa automobil** pritiskom na dugme i automobil će **snimiti ovaj drugi kod**.\
-Odmah nakon toga, **napadač može poslati prvi kod** i **automobil će se zaključati** (žrtva će pomisliti da je drugi pritisak zatvorio). Tada će napadač moći da **pošalje drugi ukradeni kod da otvori** automobil (pod pretpostavkom da se **"zatvori automobil" kod može takođe koristiti za otvaranje**). Možda će biti potrebna promena frekvencije (jer postoje automobili koji koriste iste kodove za otvaranje i zatvaranje, ali slušaju za obe komande na različitim frekvencijama).
+Ovo je **tehnika ometanja koja je manje uočljiva**. Napadač će ometati signal, tako da kada žrtva pokuša da zaključa vrata, to neće raditi, ali će napadač **snimiti ovaj kod**. Zatim će žrtva **ponovo pokušati da zaključa automobil** pritiskom na dugme i automobil će **snimiti ovaj drugi kod**.\
+Odmah nakon toga, **napadač može poslati prvi kod** i **automobil će se zaključati** (žrtva će misliti da je drugi pritisak zatvorio vrata). Tada će napadač moći da **pošalje drugi ukradeni kod da otvori** automobil (pod pretpostavkom da se **"zatvori automobil" kod može takođe koristiti za otvaranje**). Možda će biti potrebna promena frekvencije (jer postoje automobili koji koriste iste kodove za otvaranje i zatvaranje, ali slušaju za obe komande na različitim frekvencijama).
 
-Napadač može **blokirati prijemnik automobila, a ne svoj prijemnik** jer ako prijemnik automobila sluša, na primer, na 1MHz širokom opsegu, napadač neće **blokirati** tačnu frekvenciju koju koristi daljinski upravljač, već **blisku u tom spektru**, dok će **prijemnik napadača slušati u manjem opsegu** gde može slušati signal daljinskog upravljača **bez signala blokade**.
+Napadač može **ometati prijemnik automobila, a ne svoj prijemnik** jer ako prijemnik automobila sluša, na primer, na 1MHz širokom opsegu, napadač neće **ometati** tačnu frekvenciju koju koristi daljinski upravljač, već **blisku u tom spektru**, dok će **prijemnik napadača slušati u manjem opsegu** gde može slušati signal daljinskog upravljača **bez ometanja**.
 
 > [!WARNING]
-> Druge implementacije viđene u specifikacijama pokazuju da je **rolling code deo** ukupnog koda koji se šalje. Naime, kod koji se šalje je **24-bitni ključ** gde je prvih **12 rolling code**, **drugih 8 je komanda** (kao što su zaključavanje ili otključavanje) i poslednja 4 je **kontrolna suma**. Vozila koja implementiraju ovu vrstu su takođe prirodno podložna jer napadač jednostavno treba da zameni segment rolling code da bi mogao da **koristi bilo koji rolling code na obe frekvencije**.
+> Druge implementacije viđene u specifikacijama pokazuju da je **rolni kod deo** ukupnog koda koji se šalje. Naime, kod koji se šalje je **24-bitni ključ** gde je prvih **12 rolni kod**, **drugih 8 je komanda** (kao što su zaključavanje ili otključavanje), a poslednja 4 je **kontrolna suma**. Vozila koja implementiraju ovu vrstu su takođe prirodno podložna jer napadač jednostavno treba da zameni segment rolnih kodova da bi mogao da **koristi bilo koji rolni kod na obe frekvencije**.
 
 > [!CAUTION]
 > Imajte na umu da ako žrtva pošalje treći kod dok napadač šalje prvi, prvi i drugi kod će biti nevažeći.
 
-### Napad na Alarmno Zvono
+### Napad na Ometanje Zvuka Alarma
 
-Testirajući protiv aftermarket rolling code sistema instaliranog na automobilu, **slanje istog koda dva puta** odmah **aktivira alarm** i imobilizator, pružajući jedinstvenu **priliku za uskraćivanje usluge**. Ironično, sredstvo za **onemogućavanje alarma** i imobilizatora je bilo **pritiskanje** **daljinskog**, pružajući napadaču mogućnost da **neprekidno izvodi DoS napad**. Ili kombinujte ovaj napad sa **prethodnim da dobijete više kodova** jer bi žrtva želela da što pre zaustavi napad.
+Testirajući protiv aftermarket sistema rolnih kodova instaliranih na automobilu, **slanje istog koda dva puta** odmah **aktivira alarm** i imobilizator, pružajući jedinstvenu **priliku za uskraćivanje usluge**. Ironično, sredstvo za **onemogućavanje alarma** i imobilizatora je bilo **pritiskanje** **daljinskog**, pružajući napadaču mogućnost da **neprekidno izvodi DoS napad**. Ili kombinujte ovaj napad sa **prethodnim da dobijete više kodova** jer bi žrtva želela da što pre zaustavi napad.
 
 ## Reference
 

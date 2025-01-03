@@ -12,7 +12,7 @@ LangChain je okvir dizajniran za izgradnju aplikacija sa LLM-ovima. Omogućava p
 
 ### [**LitGPT**](https://github.com/Lightning-AI/litgpt)
 
-LitGPT je projekat koji je razvila Lightning AI i koji koristi Lightning okvir za olakšavanje obučavanja, fino podešavanja i implementacije modela zasnovanih na GPT-u. Besprekorno se integriše sa drugim alatima Lightning AI, pružajući optimizovane radne tokove za upravljanje velikim jezičkim modelima sa poboljšanim performansama i skalabilnošću.
+LitGPT je projekat koji je razvila Lightning AI i koji koristi Lightning okvir za olakšavanje obučavanja, fino podešavanje i implementaciju modela zasnovanih na GPT-u. Besprekorno se integriše sa drugim alatima Lightning AI, pružajući optimizovane radne tokove za upravljanje velikim jezičkim modelima sa poboljšanim performansama i skalabilnošću.
 
 ### [**LitServe**](https://github.com/Lightning-AI/LitServe)
 
@@ -44,7 +44,7 @@ Nudi nekoliko sekcija kao što su:
 
 ## [**Replicate**](https://replicate.com/home)
 
-**Replicate** je platforma koja omogućava programerima da pokreću modele mašinskog učenja u oblaku putem jednostavnog API-ja. Fokusira se na olakšavanje pristupa i implementacije ML modela bez potrebe za opsežnim postavljanjem infrastrukture.
+**Replicate** je platforma koja omogućava programerima da pokreću modele mašinskog učenja u oblaku putem jednostavnog API-ja. Fokusira se na to da učini ML modele lako dostupnim i implementabilnim bez potrebe za opsežnim postavljanjem infrastrukture.
 
-* **Models:** Repozitorij modela mašinskog učenja koje je doprinela zajednica, gde korisnici mogu pretraživati, isprobavati i integrisati modele u svoje aplikacije uz minimalan trud.
+* **Models:** Repozitorij modela mašinskog učenja koje je doprinela zajednica, a koji korisnici mogu pretraživati, isprobavati i integrisati modele u svoje aplikacije uz minimalan trud.
 * **API Access:** Jednostavni API-ji za pokretanje modela koji omogućavaju programerima da lako implementiraju i skaliraju modele unutar svojih aplikacija.

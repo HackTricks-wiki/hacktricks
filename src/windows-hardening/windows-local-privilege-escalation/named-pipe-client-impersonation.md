@@ -1,6 +1,6 @@
-# Imitacija Klijenta za Imenovane Cevi
+# Named Pipe Client Impersonation
 
-## Imitacija Klijenta za Imenovane Cevi
+## Named Pipe Client Impersonation
 
 {{#include ../../banners/hacktricks-training.md}}
 

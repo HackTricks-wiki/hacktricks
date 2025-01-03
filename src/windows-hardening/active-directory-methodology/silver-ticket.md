@@ -28,38 +28,38 @@ mimikatz.exe "kerberos::ptt <TICKET_FILE>"
 # Obtain a shell
 .\PsExec.exe -accepteula \\<TARGET> cmd
 ```
-CIFS servis je istaknut kao uobičajeni cilj za pristupanje fajl sistemu žrtve, ali se i drugi servisi kao što su HOST i RPCSS takođe mogu iskoristiti za zadatke i WMI upite.
+CIFS servis je istaknut kao uobičajena meta za pristupanje fajl sistemu žrtve, ali se i drugi servisi kao što su HOST i RPCSS takođe mogu iskoristiti za zadatke i WMI upite.
 
 ## Dostupne Usluge
 
-| Tip Usluge                                 | Usluge Silver Tickets                                                      |
+| Tip Usluge                                 | Usluge Silver Tiketi                                                      |
 | ------------------------------------------ | -------------------------------------------------------------------------- |
-| WMI                                        | <p>HOST</p><p>RPCSS</p>                                                   |
-| PowerShell Remoting                        | <p>HOST</p><p>HTTP</p><p>U zavisnosti od OS takođe:</p><p>WSMAN</p><p>RPCSS</p> |
+| WMI                                        | <p>HOST</p><p>RPCSS</p>                                                  |
+| PowerShell Daljinsko Upravljanje           | <p>HOST</p><p>HTTP</p><p>U zavisnosti od OS-a takođe:</p><p>WSMAN</p><p>RPCSS</p> |
 | WinRM                                      | <p>HOST</p><p>HTTP</p><p>U nekim slučajevima možete samo tražiti: WINRM</p> |
-| Zakazani Zadaci                            | HOST                                                                      |
-| Windows Deljenje Fajlova, takođe psexec   | CIFS                                                                      |
-| LDAP operacije, uključujući DCSync        | LDAP                                                                      |
-| Windows Alati za Udaljenu Administraciju  | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                        |
-| Zlatni Tiketi                              | krbtgt                                                                    |
+| Zakazani Zadaci                            | HOST                                                                     |
+| Windows Deljenje Fajlova, takođe psexec   | CIFS                                                                     |
+| LDAP operacije, uključujući DCSync        | LDAP                                                                     |
+| Windows Alati za Daljinsku Administraciju  | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                       |
+| Zlatni Tiketi                              | krbtgt                                                                   |
 
 Korišćenjem **Rubeus** možete **tražiti sve** ove tikete koristeći parametar:
 
 - `/altservice:host,RPCSS,http,wsman,cifs,ldap,krbtgt,winrm`
 
-### Silver tiketi ID-evi Događaja
+### ID događaja Silver tiketa
 
-- 4624: Prijava na Nalog
-- 4634: Odjava sa Naloga
-- 4672: Prijava Administratora
+- 4624: Prijava na nalog
+- 4634: Odjava sa naloga
+- 4672: Prijava administratora
 
-## Zloupotreba Uslužnih Tiketa
+## Zloupotreba Usluga tiketa
 
-U sledećim primerima zamislite da je tiket preuzet imitujući administratorski nalog.
+U sledećim primerima zamislimo da je tiket preuzet imitujući administratorski nalog.
 
 ### CIFS
 
-Sa ovim tiketom bićete u mogućnosti da pristupite `C$` i `ADMIN$` folderima putem **SMB** (ako su izloženi) i kopirate fajlove u deo udaljenog fajl sistema jednostavno radeći nešto poput:
+Sa ovim tiketom bićete u mogućnosti da pristupite `C$` i `ADMIN$` folderu putem **SMB** (ako su izloženi) i kopirate fajlove u deo udaljenog fajl sistema jednostavno radeći nešto poput:
 ```bash
 dir \\vulnerable.computer\C$
 dir \\vulnerable.computer\ADMIN$
@@ -97,7 +97,7 @@ Invoke-WmiMethod win32_process -ComputerName $Computer -name create -argumentlis
 #You can also use wmic
 wmic remote.computer.local list full /format:list
 ```
-Nađite **više informacija o wmiexec** na sledećoj stranici:
+Pronađite **više informacija o wmiexec** na sledećoj stranici:
 
 {{#ref}}
 ../lateral-movement/wmiexec.md

@@ -33,9 +33,9 @@
 - [ ] Da li ste [**član neke privilegovane grupe**](windows-local-privilege-escalation/#privileged-groups)?
 - [ ] Proverite da li imate [neki od ovih tokena aktiviranih](windows-local-privilege-escalation/#token-manipulation): **SeImpersonatePrivilege, SeAssignPrimaryPrivilege, SeTcbPrivilege, SeBackupPrivilege, SeRestorePrivilege, SeCreateTokenPrivilege, SeLoadDriverPrivilege, SeTakeOwnershipPrivilege, SeDebugPrivilege** ?
 - [ ] [**Sesije korisnika**](windows-local-privilege-escalation/#logged-users-sessions)?
-- [ ] Proverite [**korisničke foldere**](windows-local-privilege-escalation/#home-folders) (pristup?)
+- [ ] Proverite [**korisničke domove**](windows-local-privilege-escalation/#home-folders) (pristup?)
 - [ ] Proverite [**Politiku lozinki**](windows-local-privilege-escalation/#password-policy)
-- [ ] Šta je [**u Clipboard-u**](windows-local-privilege-escalation/#get-the-content-of-the-clipboard)?
+- [ ] Šta je [**unutar Clipboard-a**](windows-local-privilege-escalation/#get-the-content-of-the-clipboard)?
 
 ### [Mreža](windows-local-privilege-escalation/#network)
 
@@ -47,14 +47,14 @@
 - [ ] Binarne datoteke procesa [**dozvole za datoteke i foldere**](windows-local-privilege-escalation/#file-and-folder-permissions)
 - [ ] [**Rudarenje lozinki iz memorije**](windows-local-privilege-escalation/#memory-password-mining)
 - [ ] [**Neosigurane GUI aplikacije**](windows-local-privilege-escalation/#insecure-gui-apps)
-- [ ] Ukrao kredencijale sa **zanimljivim procesima** putem `ProcDump.exe` ? (firefox, chrome, itd ...)
+- [ ] Ukrao kredencijale sa **zanimljivih procesa** putem `ProcDump.exe` ? (firefox, chrome, itd ...)
 
 ### [Usluge](windows-local-privilege-escalation/#services)
 
 - [ ] [Možete li **modifikovati neku uslugu**?](windows-local-privilege-escalation/#permissions)
-- [ ] [Možete li **modifikovati** **binarne** datoteke koje **izvodi** neka **usluga**?](windows-local-privilege-escalation/#modify-service-binary-path)
-- [ ] [Možete li **modifikovati** **registru** neke **usluge**?](windows-local-privilege-escalation/#services-registry-modify-permissions)
-- [ ] [Možete li iskoristiti neku **necitiranu uslugu** binarnu **putanju**?](windows-local-privilege-escalation/#unquoted-service-paths)
+- [ ] [Možete li **modifikovati** **binarni** fajl koji se **izvršava** od strane neke **usluge**?](windows-local-privilege-escalation/#modify-service-binary-path)
+- [ ] [Možete li **modifikovati** **registru** bilo koje **usluge**?](windows-local-privilege-escalation/#services-registry-modify-permissions)
+- [ ] [Možete li iskoristiti bilo koju **necitiranu uslugu** binarnu **putanju**?](windows-local-privilege-escalation/#unquoted-service-paths)
 
 ### [**Aplikacije**](windows-local-privilege-escalation/#applications)
 
@@ -65,12 +65,12 @@
 ### [DLL Hijacking](windows-local-privilege-escalation/#path-dll-hijacking)
 
 - [ ] Možete li **pisati u bilo koji folder unutar PATH**?
-- [ ] Da li postoji neka poznata binarna datoteka usluge koja **pokušava da učita neku nepostojeću DLL**?
-- [ ] Možete li **pisati** u bilo koji **folder binarnih datoteka**?
+- [ ] Da li postoji neki poznati binarni fajl usluge koji **pokušava da učita neku nepostojeću DLL**?
+- [ ] Možete li **pisati** u bilo koji **folder binarnih fajlova**?
 
 ### [Mreža](windows-local-privilege-escalation/#network)
 
-- [ ] Enumerisati mrežu (deljenja, interfejsi, rute, susedi, ...)
+- [ ] Enumerišite mrežu (deljenja, interfejsi, rute, susedi, ...)
 - [ ] Obratite posebnu pažnju na mrežne usluge koje slušaju na localhost (127.0.0.1)
 
 ### [Windows kredencijali](windows-local-privilege-escalation/#windows-credentials)
@@ -97,10 +97,10 @@
 - [ ] Lozinka u [**IIS Web config datoteci**](windows-local-privilege-escalation/#iis-web-config)?
 - [ ] Zanimljive informacije u [**web** **logovima**](windows-local-privilege-escalation/#logs)?
 - [ ] Da li želite da [**tražite kredencijale**](windows-local-privilege-escalation/#ask-for-credentials) od korisnika?
-- [ ] Zanimljive [**datoteke unutar korpe za otpatke**](windows-local-privilege-escalation/#credentials-in-the-recyclebin)?
+- [ ] Zanimljive [**datoteke unutar Korpe za otpatke**](windows-local-privilege-escalation/#credentials-in-the-recyclebin)?
 - [ ] Druge [**registri koji sadrže kredencijale**](windows-local-privilege-escalation/#inside-the-registry)?
 - [ ] Unutar [**podataka pretraživača**](windows-local-privilege-escalation/#browsers-history) (dbs, istorija, obeleživači, ...)?
-- [ ] [**Generička pretraga lozinki**](windows-local-privilege-escalation/#generic-password-search-in-files-and-registry) u datotekama i registru
+- [ ] [**Opšta pretraga lozinki**](windows-local-privilege-escalation/#generic-password-search-in-files-and-registry) u datotekama i registru
 - [ ] [**Alati**](windows-local-privilege-escalation/#tools-that-search-for-passwords) za automatsku pretragu lozinki
 
 ### [Procureni handleri](windows-local-privilege-escalation/#leaked-handlers)
@@ -109,6 +109,6 @@
 
 ### [Impersonacija klijenta cevi](windows-local-privilege-escalation/#named-pipe-client-impersonation)
 
-- [ ] Proverite da li možete da ga zloupotrebite
+- [ ] Proverite da li možete da to zloupotrebite
 
 {{#include ../banners/hacktricks-training.md}}

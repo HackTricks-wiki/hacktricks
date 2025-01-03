@@ -20,17 +20,17 @@ Međutim, ako je **TGS** korišćen u **S4U2Proxy** **NISU Forwardable** pokuša
 
 ### Struktura napada
 
-> Ako imate **dozvole za pisanje ekvivalentne privilegijama** nad **računom računara** možete dobiti **privilegovan pristup** na toj mašini.
+> Ako imate **dozvole za pisanje ekvivalentne** nad **računom računara** možete dobiti **privilegovan pristup** na toj mašini.
 
-Pretpostavimo da napadač već ima **dozvole za pisanje ekvivalentne privilegijama nad žrtvinim računarom**.
+Pretpostavimo da napadač već ima **dozvole za pisanje ekvivalentne nad računarom žrtve**.
 
 1. Napadač **kompromituje** nalog koji ima **SPN** ili **kreira jedan** (“Usluga A”). Imajte na umu da **bilo koji** _Admin User_ bez bilo koje druge posebne privilegije može **kreirati** do 10 **objekata računara (**_**MachineAccountQuota**_**)** i postaviti im **SPN**. Tako da napadač može jednostavno kreirati objekat računara i postaviti SPN.
-2. Napadač **zloupotrebljava svoje DOZVOLE ZA PISANJE** nad žrtvinim računarom (UslugaB) da konfiguriše **delegaciju zasnovanu na resursima kako bi omogućio UslugiA da imituje bilo kog korisnika** prema tom žrtvinom računaru (UslugaB).
+2. Napadač **zloupotrebljava svoje DOZVOLE ZA PISANJE** nad računarom žrtve (UslugaB) da konfiguriše **delegaciju zasnovanu na resursima da omogući UslugiA da imituje bilo kog korisnika** prema toj žrtvi (UslugaB).
 3. Napadač koristi Rubeus da izvede **potpun S4U napad** (S4U2Self i S4U2Proxy) od Usluge A do Usluge B za korisnika **sa privilegovanim pristupom Usluzi B**.
 1. S4U2Self (iz SPN kompromitovanog/kreativnog naloga): Zatraži **TGS od Administratora za mene** (Nije Forwardable).
-2. S4U2Proxy: Koristi **ne Forwardable TGS** iz prethodnog koraka da zatraži **TGS** od **Administratora** za **žrtvinski host**.
+2. S4U2Proxy: Koristi **ne Forwardable TGS** iz prethodnog koraka da zatraži **TGS** od **Administratora** za **žrtvovanu mašinu**.
 3. Čak i ako koristite ne Forwardable TGS, pošto zloupotrebljavate Delegaciju zasnovanu na resursima, to će raditi.
-4. Napadač može **proći kroz tiket** i **imitirati** korisnika da dobije **pristup žrtvinskoj UsluziB**.
+4. Napadač može **proći kroz tiket** i **imitirati** korisnika da dobije **pristup žrtvi UslugaB**.
 
 Da biste proverili _**MachineAccountQuota**_ domena možete koristiti:
 ```powershell
@@ -76,8 +76,8 @@ Prvo, kreirali smo novi objekat Računar sa lozinkom `123456`, tako da nam je po
 ```bash
 .\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local
 ```
-Ovo će ispisati RC4 i AES heš vrednosti za taj nalog.\
-Sada se napad može izvršiti:
+Ovo će odštampati RC4 i AES heš za taj nalog.\
+Sada se napad može izvesti:
 ```bash
 rubeus.exe s4u /user:FAKECOMPUTER$ /aes256:<aes256 hash> /aes128:<aes128 hash> /rc4:<rc4 hash> /impersonateuser:administrator /msdsspn:cifs/victim.domain.local /domain:domain.local /ptt
 ```
@@ -86,11 +86,11 @@ Možete generisati više karata jednostavno postavljanjem pitanja jednom koriste
 rubeus.exe s4u /user:FAKECOMPUTER$ /aes256:<AES 256 hash> /impersonateuser:administrator /msdsspn:cifs/victim.domain.local /altservice:krbtgt,cifs,host,http,winrm,RPCSS,wsman,ldap /domain:domain.local /ptt
 ```
 > [!CAUTION]
-> Imajte na umu da korisnici imaju atribut pod nazivom "**Ne može biti delegiran**". Ako korisnik ima ovaj atribut postavljen na True, nećete moći da se pretvarate da je on. Ova svojstvo se može videti unutar bloodhound.
+> Imajte na umu da korisnici imaju atribut pod nazivom "**Ne može se delegirati**". Ako korisnik ima ovaj atribut postavljen na True, nećete moći da ga imitirate. Ova svojstvo se može videti unutar bloodhound.
 
-### Pristup
+### Pristupanje
 
-Poslednja komanda će izvršiti **potpun S4U napad i injektovati TGS** sa Administratora na žrtvovanu mašinu u **memoriji**.\
+Poslednja komanda će izvršiti **potpun S4U napad i injektovaće TGS** sa Administratora na žrtvovanu mašinu u **memoriji**.\
 U ovom primeru je zatražen TGS za **CIFS** servis od Administratora, tako da ćete moći da pristupite **C$**:
 ```bash
 ls \\victim.domain.local\C$
@@ -107,7 +107,7 @@ Saznajte o [**dostupnim servisnim kartama ovde**](silver-ticket.md#available-ser
 - **`KDC_ERR_BADOPTION`**: Ovo može značiti:
   - Korisnik kojeg pokušavate da imitira ne može da pristupi željenoj usluzi (jer ne možete da ga imitira ili zato što nema dovoljno privilegija)
   - Tražena usluga ne postoji (ako tražite kartu za winrm, ali winrm ne radi)
-  - Lažni računar je izgubio svoje privilegije nad ranjivim serverom i morate ih ponovo dodeliti.
+  - Lažni računar koji je kreiran je izgubio svoje privilegije nad ranjivim serverom i morate ih ponovo dodeliti.
 
 ## Reference
 

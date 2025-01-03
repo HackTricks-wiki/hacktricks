@@ -205,7 +205,7 @@ U ovom scenariju, ulaz je uzet sa `scanf("%u %u")` i vrednost `"1 1"` je data, t
 
 ![](<../../../images/image (136).png>)
 
-### Statičke vrednosti memorije (Globalne promenljive)
+### Statičke vrednosti memorije (globalne promenljive)
 ```python
 import angr
 import claripy
@@ -381,21 +381,21 @@ if __name__ == '__main__':
 main(sys.argv)
 ```
 > [!NOTE]
-> Imajte na umu da simbolički fajl može takođe sadržati konstantne podatke spojene sa simboličkim podacima:
+> Imajte na umu da simbolički fajl može sadržati i konstantne podatke pomešane sa simboličkim podacima:
 >
 > ```python
->   # Hello world, my name is John.
+>   # Zdravo svete, moje ime je John.
 >   # ^                       ^
 >   # ^ adresa 0             ^ adresa 24 (prebrojite broj karaktera)
->   # Da bismo ovo predstavili u memoriji, želeli bismo da upišemo string na
+>   # Da bismo ovo predstavili u memoriji, želeli bismo da napišemo string na
 >   # početak fajla:
 >   #
->   # hello_txt_contents = claripy.BVV('Hello world, my name is John.', 30*8)
+>   # hello_txt_contents = claripy.BVV('Zdravo svete, moje ime je John.', 30*8)
 >   #
 >   # Možda bismo, zatim, želeli da zamenimo John sa
 >   # simboličkom promenljivom. Nazvali bismo:
 >   #
->   # name_bitvector = claripy.BVS('symbolic_name', 4*8)
+>   # name_bitvector = claripy.BVS('simboličko_ime', 4*8)
 >   #
 >   # Tada, nakon što program pozove fopen('hello.txt', 'r') i zatim
 >   # fread(buffer, sizeof(char), 30, hello_txt_file), bafer bi sadržao
@@ -407,7 +407,7 @@ main(sys.argv)
 ### Primena Ograničenja
 
 > [!NOTE]
-> Ponekad jednostavne ljudske operacije kao što je upoređivanje 2 reči dužine 16 **karakter po karakter** (petlja), **koštaju** mnogo **angr** jer mora da generiše grane **eksponencijalno** jer generiše 1 granu po if: `2^16`\
+> Ponekad jednostavne ljudske operacije kao što su upoređivanje 2 reči dužine 16 **karakter po karakter** (petlja), **koštaju** mnogo **angr** jer mora da generiše grane **eksponencijalno** jer generiše 1 granu po if: `2^16`\
 > Stoga, lakše je **zamoliti angr da se vrati na prethodnu tačku** (gde je stvarni težak deo već urađen) i **ručno postaviti ta ograničenja**.
 ```python
 # After perform some complex poperations to the input the program checks
@@ -526,7 +526,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Hooking/Bypassing jedan poziv funkciji
+### Hooking/Zaobilaženje jednog poziva funkciji
 ```python
 # This level performs the following computations:
 #

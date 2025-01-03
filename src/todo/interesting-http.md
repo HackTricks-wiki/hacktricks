@@ -6,7 +6,7 @@ Referrer je header koji koriste pregledači da označe koja je bila prethodna st
 
 ## Osetljive informacije otkrivene
 
-Ako se u nekom trenutku unutar web stranice bilo koja osetljiva informacija nalazi u GET zahtevima, ako stranica sadrži linkove ka spoljnim izvorima ili napadač može da natera/predloži (socijalni inženjering) korisnika da poseti URL koji kontroliše napadač. To bi moglo omogućiti eksfiltraciju osetljivih informacija unutar poslednjeg GET zahteva.
+Ako se u nekom trenutku unutar web stranice bilo koja osetljiva informacija nalazi u GET zahtevima, ako stranica sadrži linkove ka spoljnim izvorima ili napadač može da natera/predloži (socijalno inženjerstvo) korisniku da poseti URL koji kontroliše napadač. To bi moglo omogućiti eksfiltraciju osetljivih informacija unutar poslednjeg GET zahteva.
 
 ## Mitigacija
 
@@ -21,7 +21,7 @@ Referrer-Policy: strict-origin
 Referrer-Policy: strict-origin-when-cross-origin
 Referrer-Policy: unsafe-url
 ```
-## Kontra-mitigation
+## Protiv-mitigator
 
 Možete prepisati ovo pravilo koristeći HTML meta tag (napadač treba da iskoristi i HTML injekciju):
 ```markup

@@ -43,7 +43,7 @@ Trebalo bi da počnete čitanjem ovog posta za neke osnovne koncepte koje treba 
 ## 4. Mehanizmi Pažnje
 
 > [!TIP]
-> Cilj ove četvrte faze je veoma jednostavan: **Primena nekih mehanizama pažnje**. Ovi će biti mnogi **ponovljeni slojevi** koji će **uhvatiti odnos reči u rečniku sa njenim susedima u trenutnoj rečenici koja se koristi za obuku LLM-a**.\
+> Cilj ove četvrte faze je veoma jednostavan: **Primena nekih mehanizama pažnje**. Ovi će biti mnogo **ponovljenih slojeva** koji će **uhvatiti odnos reči u rečniku sa njenim susedima u trenutnoj rečenici koja se koristi za obuku LLM-a**.\
 > Za ovo se koristi mnogo slojeva, tako da će mnogo parametara koji se mogu obučavati uhvatiti ove informacije.
 
 {{#ref}}

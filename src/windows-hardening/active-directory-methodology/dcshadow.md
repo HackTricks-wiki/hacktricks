@@ -49,7 +49,7 @@ lsadump::dcshadow /object:student1 /attribute:primaryGroupID /value:519
 #Second, add to the ACE permissions to your user and push it using DCShadow
 lsadump::dcshadow /object:CN=AdminSDHolder,CN=System,DC=moneycorp,DC=local /attribute:ntSecurityDescriptor /value:<whole modified ACL>
 ```
-## Shadowception - Dodeljivanje DCShadow dozvola koristeći DCShadow (bez izmenjenih logova dozvola)
+## Shadowception - Dodelite DCShadow dozvole koristeći DCShadow (bez izmenjenih logova dozvola)
 
 Moramo dodati sledeće ACE-ove sa SID-om našeg korisnika na kraju:
 
@@ -63,7 +63,7 @@ Moramo dodati sledeće ACE-ove sa SID-om našeg korisnika na kraju:
 
 Da biste dobili trenutni ACE objekta: `(New-Object System.DirectoryServices.DirectoryEntry("LDAP://DC=moneycorp,DC=loca l")).psbase.ObjectSecurity.sddl`
 
-Obratite pažnju da u ovom slučaju treba da napravite **several changes,** ne samo jedan. Dakle, u **mimikatz1 sesiji** (RPC server) koristite parametar **`/stack` sa svakom izmenom** koju želite da napravite. Na ovaj način, biće vam potrebna samo **`/push`** jednom da izvršite sve zadržane promene na lažnom serveru.
+Obratite pažnju da u ovom slučaju treba da napravite **several changes,** ne samo jedan. Dakle, u **mimikatz1 session** (RPC server) koristite parametar **`/stack` sa svakom izmenom** koju želite da napravite. Na ovaj način, biće vam potrebno samo **`/push`** jedan put da izvršite sve zadržane promene na lažnom serveru.
 
 [**Više informacija o DCShadow na ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1207-creating-rogue-domain-controllers-with-dcshadow)
 

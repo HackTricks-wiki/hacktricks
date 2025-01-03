@@ -4,7 +4,7 @@
 
 ## **Uvod**
 
-Firmware je osnovni softver koji omogućava uređajima da ispravno funkcionišu upravljanjem i olakšavanjem komunikacije između hardverskih komponenti i softvera s kojim korisnici interaguju. Čuva se u trajnoj memoriji, osiguravajući da uređaj može pristupiti vitalnim uputstvima od trenutka kada se uključi, što dovodi do pokretanja operativnog sistema. Istraživanje i potencijalno modifikovanje firmware-a je ključni korak u identifikaciji sigurnosnih ranjivosti.
+Firmware je osnovni softver koji omogućava uređajima da pravilno funkcionišu upravljajući i olakšavajući komunikaciju između hardverskih komponenti i softvera s kojim korisnici interaguju. Skladišti se u trajnoj memoriji, osiguravajući da uređaj može pristupiti vitalnim uputstvima od trenutka kada se uključi, što dovodi do pokretanja operativnog sistema. Istraživanje i potencijalno modifikovanje firmware-a je kritičan korak u identifikaciji sigurnosnih ranjivosti.
 
 ## **Prikupljanje informacija**
 
@@ -30,7 +30,7 @@ Dobijanje firmware-a može se pristupiti na različite načine, svaki sa svojim 
 - **Preuzimanje** sa zvaničnih sajtova za podršku
 - Korišćenje **Google dork** upita za pronalaženje hostovanih firmware datoteka
 - Pristupanje **cloud storage** direktno, uz alate poput [S3Scanner](https://github.com/sa7mon/S3Scanner)
-- Presretanje **ažuriranja** putem tehnika man-in-the-middle
+- Presretanje **ažuriranja** putem man-in-the-middle tehnika
 - **Ekstrakcija** sa uređaja putem konekcija kao što su **UART**, **JTAG**, ili **PICit**
 - **Sniffing** za zahteve za ažuriranje unutar komunikacije uređaja
 - Identifikovanje i korišćenje **hardkodiranih krajnjih tačaka za ažuriranje**
@@ -65,7 +65,7 @@ Binwalk obično izvlači unutar **foldera nazvanog po tipu datotečnog sistema**
 
 #### Ručna Ekstrakcija Datotečnog Sistema
 
-Ponekad, binwalk **neće imati magični bajt datotečnog sistema u svojim potpisima**. U tim slučajevima, koristite binwalk da **pronađete offset datotečnog sistema i izrezujete kompresovani datotečni sistem** iz binarnog fajla i **ručno ekstraktujete** datotečni sistem prema njegovom tipu koristeći korake u nastavku.
+Ponekad, binwalk **neće imati magični bajt datotečnog sistema u svojim potpisima**. U tim slučajevima, koristite binwalk da **pronađete offset datotečnog sistema i izrežete kompresovani datotečni sistem** iz binarnog fajla i **ručno ekstraktujete** datotečni sistem prema njegovom tipu koristeći korake u nastavku.
 ```
 $ binwalk DIR850L_REVB.bin
 
@@ -132,7 +132,7 @@ Za ekstrakciju **ugrađenih fajlova**, preporučuju se alati i resursi kao što 
 
 ### Ekstrakcija Fajl Sistema
 
-Koristeći `binwalk -ev <bin>`, obično se može ekstraktovati fajl sistem, često u direktorijum nazvan po tipu fajl sistema (npr. squashfs, ubifs). Međutim, kada **binwalk** ne prepozna tip fajl sistema zbog nedostajućih magic bajtova, ručna ekstrakcija je neophodna. To uključuje korišćenje `binwalk` za lociranje ofseta fajl sistema, a zatim `dd` komandu za izdvajanje fajl sistema:
+Korišćenjem `binwalk -ev <bin>`, obično se može ekstraktovati fajl sistem, često u direktorijum nazvan po tipu fajl sistema (npr. squashfs, ubifs). Međutim, kada **binwalk** ne prepozna tip fajl sistema zbog nedostajućih magic bytes, ručna ekstrakcija je neophodna. To uključuje korišćenje `binwalk` za lociranje ofseta fajl sistema, a zatim `dd` komandu za izdvajanje fajl sistema:
 ```bash
 $ binwalk DIR850L_REVB.bin
 
@@ -140,7 +140,7 @@ $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 ```
 Nakon toga, u zavisnosti od tipa datotečnog sistema (npr., squashfs, cpio, jffs2, ubifs), koriste se različite komande za ručno vađenje sadržaja.
 
-### Analiza datotečnog sistema
+### Analiza Datotečnog Sistema
 
 Sa izvučenim datotečnim sistemom, počinje potraga za sigurnosnim propustima. Pažnja se posvećuje nesigurnim mrežnim demonima, hardkodiranim akreditivima, API krajnjim tačkama, funkcionalnostima servera za ažuriranje, nekompajliranom kodu, skriptama za pokretanje i kompajliranim binarnim datotekama za analizu van mreže.
 
@@ -158,19 +158,19 @@ NSeveral tools assist in uncovering sensitive information and vulnerabilities wi
 - [**The Firmware Analysis and Comparison Tool (FACT)**](https://github.com/fkie-cad/FACT_core) za sveobuhvatnu analizu firmvera
 - [**FwAnalyzer**](https://github.com/cruise-automation/fwanalyzer), [**ByteSweep**](https://gitlab.com/bytesweep/bytesweep), [**ByteSweep-go**](https://gitlab.com/bytesweep/bytesweep-go), i [**EMBA**](https://github.com/e-m-b-a/emba) za statičku i dinamičku analizu
 
-### Provere sigurnosti na kompajliranim binarnim datotekama
+### Provere Bezbednosti na Kompajliranim Binarima
 
-I izvorni kod i kompajlirane binarne datoteke pronađene u datotečnom sistemu moraju se pažljivo pregledati zbog ranjivosti. Alati poput **checksec.sh** za Unix binarne datoteke i **PESecurity** za Windows binarne datoteke pomažu u identifikaciji nezaštićenih binarnih datoteka koje bi mogle biti iskorišćene.
+I izvorni kod i kompajlirane binarne datoteke pronađene u datotečnom sistemu moraju se pažljivo pregledati zbog ranjivosti. Alati kao što su **checksec.sh** za Unix binarne datoteke i **PESecurity** za Windows binarne datoteke pomažu u identifikaciji nezaštićenih binarnih datoteka koje bi mogle biti iskorišćene.
 
-## Emulacija firmvera za dinamičku analizu
+## Emulacija Firmvera za Dinamičku Analizu
 
 Proces emulacije firmvera omogućava **dinamičku analizu** ili rada uređaja ili pojedinačnog programa. Ovaj pristup može naići na izazove sa zavisnostima hardvera ili arhitekture, ali prenos korenskog datotečnog sistema ili specifičnih binarnih datoteka na uređaj sa odgovarajućom arhitekturom i redosledom bajtova, kao što je Raspberry Pi, ili na unapred izgrađenu virtuelnu mašinu, može olakšati dalja testiranja.
 
-### Emulacija pojedinačnih binarnih datoteka
+### Emulacija Pojedinačnih Binarnih Datoteka
 
 Za ispitivanje pojedinačnih programa, identifikacija redosleda bajtova programa i CPU arhitekture je ključna.
 
-#### Primer sa MIPS arhitekturom
+#### Primer sa MIPS Arhitekturom
 
 Da bi se emulirala binarna datoteka MIPS arhitekture, može se koristiti komanda:
 ```bash
@@ -192,15 +192,15 @@ Alati kao što su [Firmadyne](https://github.com/firmadyne/firmadyne), [Firmware
 
 ## Dinamička analiza u praksi
 
-U ovoj fazi koristi se stvarno ili emulirano okruženje uređaja za analizu. Važno je održati pristup shell-u operativnom sistemu i datotečnom sistemu. Emulacija možda neće savršeno oponašati interakcije hardvera, što zahteva povremena ponovna pokretanja emulacije. Analiza treba da ponovo pregleda datotečni sistem, iskoristi izložene veb stranice i mrežne usluge, i istraži ranjivosti bootloader-a. Testovi integriteta firmvera su ključni za identifikaciju potencijalnih ranjivosti backdoor-a.
+U ovoj fazi koristi se stvarno ili emulirano okruženje uređaja za analizu. Ključno je održati pristup shell-u operativnom sistemu i datotečnom sistemu. Emulacija možda neće savršeno oponašati interakcije hardvera, što zahteva povremena ponovna pokretanja emulacije. Analiza treba da ponovo pregleda datotečni sistem, iskoristi izložene veb stranice i mrežne usluge, i istraži ranjivosti bootloader-a. Testovi integriteta firmvera su kritični za identifikaciju potencijalnih ranjivosti backdoor-a.
 
 ## Tehnike analize u vreme izvođenja
 
-Analiza u vreme izvođenja uključuje interakciju sa procesom ili binarnom datotekom u njegovom operativnom okruženju, koristeći alate kao što su gdb-multiarch, Frida i Ghidra za postavljanje tačaka prekida i identifikaciju ranjivosti kroz fuzzing i druge tehnike.
+Analiza u vreme izvođenja uključuje interakciju sa procesom ili binarnom datotekom u njenom operativnom okruženju, koristeći alate kao što su gdb-multiarch, Frida i Ghidra za postavljanje tačaka prekida i identifikaciju ranjivosti kroz fuzzing i druge tehnike.
 
 ## Eksploatacija binarnih datoteka i dokaz koncepta
 
-Razvijanje PoC-a za identifikovane ranjivosti zahteva duboko razumevanje ciljne arhitekture i programiranje na jezicima nižeg nivoa. Zaštite u vreme izvođenja u ugrađenim sistemima su retke, ali kada su prisutne, tehnike kao što su Return Oriented Programming (ROP) mogu biti neophodne.
+Razvijanje PoC-a za identifikovane ranjivosti zahteva duboko razumevanje ciljne arhitekture i programiranje u jezicima nižeg nivoa. Zaštite u vreme izvođenja u ugrađenim sistemima su retke, ali kada su prisutne, tehnike kao što su Return Oriented Programming (ROP) mogu biti neophodne.
 
 ## Pripremljeni operativni sistemi za analizu firmvera
 

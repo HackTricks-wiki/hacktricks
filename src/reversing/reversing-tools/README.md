@@ -39,7 +39,7 @@ File.AppendAllText(path, "Password: " + password + "\n");
 
 Za efikasno debagovanje sa DNSpy, preporučuje se niz koraka za podešavanje **atributa biblioteke** za debagovanje, osiguravajući da su optimizacije koje bi mogle ometati debagovanje onemogućene. Ovaj proces uključuje promenu `DebuggableAttribute` podešavanja, rekonstrukciju biblioteke i čuvanje izmena.
 
-Pored toga, da biste debagovali .Net aplikaciju koju pokreće **IIS**, izvršavanje `iisreset /noforce` ponovo pokreće IIS. Da biste priključili DNSpy na IIS proces za debagovanje, vodič objašnjava kako da izaberete **w3wp.exe** proces unutar DNSpy i započnete sesiju debagovanja.
+Pored toga, da biste debagovali .Net aplikaciju koju pokreće **IIS**, izvršavanje `iisreset /noforce` ponovo pokreće IIS. Da biste priključili DNSpy na IIS proces za debagovanje, vodič savetuje da izaberete **w3wp.exe** proces unutar DNSpy i započnete sesiju debagovanja.
 
 Za sveobuhvatan pregled učitanih modula tokom debagovanja, preporučuje se pristup **Modules** prozoru u DNSpy, nakon čega se otvaraju svi moduli i sortiraju biblioteke radi lakše navigacije i debagovanja.
 
@@ -57,8 +57,8 @@ Za dekompilaciju Java bajtkoda, ovi alati mogu biti veoma korisni:
 ### Korišćenje IDA
 
 - **Rundll32** se učitava iz specifičnih putanja za 64-bitne i 32-bitne verzije.
-- **Windbg** se bira kao debager sa opcijom da se pauzira prilikom učitavanja/izbacivanja biblioteka.
-- Parametri izvršenja uključuju putanju DLL-a i naziv funkcije. Ova postavka zaustavlja izvršenje prilikom svakog učitavanja DLL-a.
+- **Windbg** se bira kao debager sa opcijom da se pauzira pri učitavanju/izlazku biblioteke omogućenom.
+- Parametri izvršenja uključuju putanju DLL-a i naziv funkcije. Ova postavka zaustavlja izvršenje pri svakom učitavanju DLL-a.
 
 ### Korišćenje x64dbg/x32dbg
 
@@ -80,7 +80,7 @@ Za dekompilaciju Java bajtkoda, ovi alati mogu biti veoma korisni:
 - **Blobrunner** i **jmp2it** su alati za alokaciju shellcode-a u memoriji i debagovanje sa Idom ili x64dbg.
 - Blobrunner [izdanja](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)
 - jmp2it [kompilovana verzija](https://github.com/adamkramer/jmp2it/releases/)
-- **Cutter** nudi emulaciju i inspekciju shellcode-a zasnovanu na GUI, ističući razlike u rukovanju shellcode-om kao datotekom naspram direktnog shellcode-a.
+- **Cutter** nudi emulaciju i inspekciju shellcode-a zasnovanu na GUI-u, ističući razlike u rukovanju shellcode-om kao datotekom naspram direktnog shellcode-a.
 
 ### Deobfuskacija i analiza
 
@@ -89,9 +89,9 @@ Za dekompilaciju Java bajtkoda, ovi alati mogu biti veoma korisni:
 scdbg.exe -f shellcode # Osnovne informacije
 scdbg.exe -f shellcode -r # Izveštaj o analizi
 scdbg.exe -f shellcode -i -r # Interaktivne petlje
-scdbg.exe -f shellcode -d # Ispis dekodiranog shellcode-a
-scdbg.exe -f shellcode /findsc # Pronađi početni offset
-scdbg.exe -f shellcode /foff 0x0000004D # Izvrši od offseta
+scdbg.exe -f shellcode -d # Dump-ovanje dekodiranog shellcode-a
+scdbg.exe -f shellcode /findsc # Pronađi start offset
+scdbg.exe -f shellcode /foff 0x0000004D # Izvrši od offset-a
 %%%
 
 - **CyberChef** za disasembleranje shellcode-a: [CyberChef recept](https://gchq.github.io/CyberChef/#recipe=To_Hex%28'Space',0%29Disassemble_x86%28'32','Full%20x86%20architecture',16,0,true,true%29)

@@ -45,16 +45,16 @@ Ovaj falsifikovani sertifikat će biti **važeći** do datuma isteka koji je nav
 
 Objekat `NTAuthCertificates` je definisan da sadrži jedan ili više **CA sertifikata** unutar svog atributa `cacertificate`, koji Active Directory (AD) koristi. Proces verifikacije od strane **domen kontrolera** uključuje proveru objekta `NTAuthCertificates` za unos koji odgovara **CA specificiranom** u polju Izdavača autentifikovanog **sertifikata**. Autentifikacija se nastavlja ako se pronađe podudaranje.
 
-Sertifikat CA sa sopstvenim potpisom može biti dodat u objekat `NTAuthCertificates` od strane napadača, pod uslovom da imaju kontrolu nad ovim AD objektom. Obično, samo članovi grupe **Enterprise Admin**, zajedno sa **Domain Admins** ili **Administrators** u **domeni korena šume**, imaju dozvolu da modifikuju ovaj objekat. Mogu urediti objekat `NTAuthCertificates` koristeći `certutil.exe` sa komandom `certutil.exe -dspublish -f C:\Temp\CERT.crt NTAuthCA126`, ili koristeći [**PKI Health Tool**](https://docs.microsoft.com/en-us/troubleshoot/windows-server/windows-security/import-third-party-ca-to-enterprise-ntauth-store#method-1---import-a-certificate-by-using-the-pki-health-tool).
+Sertifikat samopotpisanog CA može biti dodat u objekat `NTAuthCertificates` od strane napadača, pod uslovom da imaju kontrolu nad ovim AD objektom. Obično, samo članovi grupe **Enterprise Admin**, zajedno sa **Domain Admins** ili **Administrators** u **domeni korena šume**, imaju dozvolu da modifikuju ovaj objekat. Mogu urediti objekat `NTAuthCertificates` koristeći `certutil.exe` sa komandom `certutil.exe -dspublish -f C:\Temp\CERT.crt NTAuthCA126`, ili koristeći [**PKI Health Tool**](https://docs.microsoft.com/en-us/troubleshoot/windows-server/windows-security/import-third-party-ca-to-enterprise-ntauth-store#method-1---import-a-certificate-by-using-the-pki-health-tool).
 
 Ova sposobnost je posebno relevantna kada se koristi u kombinaciji sa prethodno opisanim metodom koja uključuje ForgeCert za dinamičko generisanje sertifikata.
 
 ## Zloćudna Konfiguracija - DPERSIST3
 
-Mogućnosti za **postojanost** kroz **modifikacije bezbednosnog opisa AD CS** komponenti su brojne. Modifikacije opisane u odeljku "[Domain Escalation](domain-escalation.md)" mogu biti zloćudno implementirane od strane napadača sa povišenim pristupom. Ovo uključuje dodavanje "kontrolnih prava" (npr., WriteOwner/WriteDACL/itd.) osetljivim komponentama kao što su:
+Mogućnosti za **postojanost** kroz **modifikacije bezbednosnog deskriptora AD CS** komponenti su brojne. Modifikacije opisane u odeljku "[Domain Escalation](domain-escalation.md)" mogu biti zloćudno implementirane od strane napadača sa povišenim pristupom. Ovo uključuje dodavanje "kontrolnih prava" (npr., WriteOwner/WriteDACL/etc.) osetljivim komponentama kao što su:
 
-- **AD računar objekat CA servera**
-- **RPC/DCOM server CA servera**
+- **AD računar** objekat **CA servera**
+- **RPC/DCOM server** **CA servera**
 - Bilo koji **potomak AD objekat ili kontejner** u **`CN=Public Key Services,CN=Services,CN=Configuration,DC=<DOMAIN>,DC=<COM>`** (na primer, kontejner za šablone sertifikata, kontejner za sertifikacione autoritete, objekat NTAuthCertificates, itd.)
 - **AD grupe kojima su dodeljena prava za kontrolu AD CS** po defaultu ili od strane organizacije (kao što je ugrađena grupa Cert Publishers i bilo koji od njenih članova)
 

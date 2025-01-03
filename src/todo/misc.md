@@ -16,8 +16,9 @@ Ako ne znate šta se nalazi iza usluge, pokušajte da napravite HTTP GET zahtev.
 nc -nv -u -z -w 1 \<IP> 160-16
 
 Prazan UDP paket se šalje na određeni port. Ako je UDP port otvoren, nema odgovora sa ciljne mašine. Ako je UDP port zatvoren, ICMP paket o nedostupnom portu treba da se vrati sa ciljne mašine.\
-UDP skeniranje portova je često nepouzdano, jer vatrozidi i ruteri mogu odbaciti ICMP\
-pakete. To može dovesti do lažnih pozitivnih rezultata u vašem skeniranju, i redovno ćete videti\
+
+UDP skeniranje portova često nije pouzdano, jer vatrozidi i ruteri mogu odbaciti ICMP\
+pakete. To može dovesti do lažno pozitivnih rezultata u vašem skeniranju, i redovno ćete videti\
 UDP skeniranja portova koja prikazuju sve UDP portove otvorene na skeniranoj mašini.\
 Većina skenera portova ne skenira sve dostupne portove, i obično imaju unapred postavljenu listu\
 “zanimljivih portova” koji se skeniraju.

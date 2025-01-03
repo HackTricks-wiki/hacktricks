@@ -18,11 +18,11 @@ $Cert.EnhancedKeyUsageList
 # cmd
 certutil.exe -dump -v cert.pfx
 ```
-## Izvoz Sertifikata Korišćenjem Crypto API-ja – THEFT1
+## Izvoz Sertifikata Korišćenjem Crypto API-a – THEFT1
 
 U **interaktivnoj desktop sesiji**, ekstrakcija korisničkog ili mašinskog sertifikata, zajedno sa privatnim ključem, može se lako izvršiti, posebno ako je **privatni ključ izvoziv**. To se može postići navigacijom do sertifikata u `certmgr.msc`, desnim klikom na njega i izborom `All Tasks → Export` za generisanje .pfx datoteke zaštićene lozinkom.
 
-Za **programatski pristup**, dostupni su alati kao što je PowerShell `ExportPfxCertificate` cmdlet ili projekti poput [TheWover’s CertStealer C# project](https://github.com/TheWover/CertStealer). Ovi alati koriste **Microsoft CryptoAPI** (CAPI) ili Cryptography API: Next Generation (CNG) za interakciju sa skladištem sertifikata. Ovi API-ji pružaju niz kriptografskih usluga, uključujući one potrebne za skladištenje i autentifikaciju sertifikata.
+Za **programatski pristup**, dostupni su alati kao što su PowerShell `ExportPfxCertificate` cmdlet ili projekti poput [TheWover’s CertStealer C# project](https://github.com/TheWover/CertStealer). Ovi alati koriste **Microsoft CryptoAPI** (CAPI) ili Cryptography API: Next Generation (CNG) za interakciju sa skladištem sertifikata. Ove API pružaju niz kriptografskih usluga, uključujući one potrebne za skladištenje i autentifikaciju sertifikata.
 
 Međutim, ako je privatni ključ postavljen kao neizvoziv, CAPI i CNG obično će blokirati ekstrakciju takvih sertifikata. Da bi se zaobišla ova ograničenja, mogu se koristiti alati kao što je **Mimikatz**. Mimikatz nudi `crypto::capi` i `crypto::cng` komande za patch-ovanje odgovarajućih API-ja, omogućavajući izvoz privatnih ključeva. Konkretno, `crypto::capi` patch-uje CAPI unutar trenutnog procesa, dok `crypto::cng` cilja memoriju **lsass.exe** za patch-ovanje.
 
@@ -52,7 +52,7 @@ dpapi::masterkey /in:"C:\PATH\TO\KEY" /rpc
 # With mimikatz, if the user's password is known
 dpapi::masterkey /in:"C:\PATH\TO\KEY" /sid:accountSid /password:PASS
 ```
-Da bi se pojednostavio proces dekripcije masterkey datoteka i privatnih ključeva, `certificates` komanda iz [**SharpDPAPI**](https://github.com/GhostPack/SharpDPAPI) se pokazuje korisnom. Prihvaća `/pvk`, `/mkfile`, `/password` ili `{GUID}:KEY` kao argumente za dekripciju privatnih ključeva i povezanih sertifikata, a zatim generiše `.pem` datoteku.
+Da bi se pojednostavio proces dekripcije masterkey i privatnih ključeva, komanda `certificates` iz [**SharpDPAPI**](https://github.com/GhostPack/SharpDPAPI) se pokazuje korisnom. Prihvaća `/pvk`, `/mkfile`, `/password` ili `{GUID}:KEY` kao argumente za dekripciju privatnih ključeva i povezanih sertifikata, a zatim generiše `.pem` datoteku.
 ```bash
 # Decrypting using SharpDPAPI
 SharpDPAPI.exe certificates /mkfile:C:\temp\mkeys.txt
@@ -70,7 +70,7 @@ Ručno dekriptovanje se može postići izvršavanjem komande `lsadump::secrets` 
 
 ## Pronalaženje sertifikat fajlova – THEFT4
 
-Sertifikati se ponekad nalaze direktno unutar fajl sistema, kao što su u deljenim fajlovima ili u Downloads folderu. Najčešće vrste fajlova sertifikata usmerenih ka Windows okruženjima su `.pfx` i `.p12` fajlovi. Iako ređe, fajlovi sa ekstenzijama `.pkcs12` i `.pem` takođe se pojavljuju. Dodatne značajne ekstenzije fajlova povezanih sa sertifikatima uključuju:
+Sertifikati se ponekad nalaze direktno unutar fajl sistema, kao što su u deljenim fajlovima ili u Downloads folderu. Najčešće vrste fajlova sertifikata usmerenih ka Windows okruženjima su `.pfx` i `.p12` fajlovi. Iako ređe, fajlovi sa ekstenzijama `.pkcs12` i `.pem` takođe se pojavljuju. Dodatne značajne ekstenzije fajlova vezanih za sertifikate uključuju:
 
 - `.key` za privatne ključeve,
 - `.crt`/`.cer` za samo sertifikate,
@@ -92,16 +92,16 @@ john --wordlist=passwords.txt hash.txt
 ```
 ## NTLM Credential Theft via PKINIT – THEFT5
 
-Data objašnjava metodu krađe NTLM akreditiva putem PKINIT, posebno kroz metodu krađe označenu kao THEFT5. Evo ponovnog objašnjenja u pasivnom glasu, sa anonimnim i sažetim sadržajem gde je to primenljivo:
+Dati sadržaj objašnjava metodu krađe NTLM akreditiva putem PKINIT, posebno kroz metodu krađe označenu kao THEFT5. Evo ponovnog objašnjenja u pasivnom glasu, sa anonimnim i sažetim sadržajem gde je to primenljivo:
 
-Da bi se podržala NTLM autentifikacija [MS-NLMP] za aplikacije koje ne omogućavaju Kerberos autentifikaciju, KDC je dizajniran da vrati NTLM jednosmernu funkciju (OWF) korisnika unutar privilegovanog atributnog sertifikata (PAC), posebno u `PAC_CREDENTIAL_INFO` baferu, kada se koristi PKCA. Shodno tome, ukoliko se nalog autentifikuje i obezbedi Ticket-Granting Ticket (TGT) putem PKINIT, mehanizam je inherentno obezbeđen koji omogućava trenutnom hostu da izvuče NTLM hash iz TGT-a kako bi podržao nasleđene autentifikacione protokole. Ovaj proces podrazumeva dekripciju `PAC_CREDENTIAL_DATA` strukture, koja je suštinski NDR serijalizovana predstava NTLM običnog teksta.
+Da bi se podržala NTLM autentifikacija [MS-NLMP] za aplikacije koje ne omogućavaju Kerberos autentifikaciju, KDC je dizajniran da vrati korisničku NTLM jednosmernu funkciju (OWF) unutar privilegovanog atributnog sertifikata (PAC), posebno u `PAC_CREDENTIAL_INFO` baferu, kada se koristi PKCA. Shodno tome, ukoliko se nalog autentifikuje i obezbedi Ticket-Granting Ticket (TGT) putem PKINIT, inherentno je obezbeđen mehanizam koji omogućava trenutnom hostu da izvuče NTLM hash iz TGT-a kako bi podržao nasleđene autentifikacione protokole. Ovaj proces podrazumeva dekripciju `PAC_CREDENTIAL_DATA` strukture, koja je suštinski NDR serijalizovana prikaz NTLM običnog teksta.
 
-Alat **Kekeo**, dostupan na [https://github.com/gentilkiwi/kekeo](https://github.com/gentilkiwi/kekeo), pominje se kao sposoban da zatraži TGT koji sadrži ove specifične podatke, čime se olakšava preuzimanje NTLM-a korisnika. Komanda koja se koristi u tu svrhu je sledeća:
+Alat **Kekeo**, dostupan na [https://github.com/gentilkiwi/kekeo](https://github.com/gentilkiwi/kekeo), pominje se kao sposoban da zatraži TGT koji sadrži ove specifične podatke, čime se olakšava preuzimanje korisničkog NTLM. Komanda koja se koristi u tu svrhu je sledeća:
 ```bash
 tgt::pac /caname:generic-DC-CA /subject:genericUser /castore:current_user /domain:domain.local
 ```
-Pored toga, primećeno je da Kekeo može obraditi sertifikate zaštićene pametnom karticom, pod uslovom da se pin može dobiti, uz referencu na [https://github.com/CCob/PinSwipe](https://github.com/CCob/PinSwipe). Ista sposobnost se navodi da podržava **Rubeus**, dostupan na [https://github.com/GhostPack/Rubeus](https://github.com/GhostPack/Rubeus).
+Pored toga, primećeno je da Kekeo može obraditi sertifikate zaštićene pametnim karticama, pod uslovom da se pin može dobiti, uz referencu na [https://github.com/CCob/PinSwipe](https://github.com/CCob/PinSwipe). Ista sposobnost se navodi da podržava **Rubeus**, dostupan na [https://github.com/GhostPack/Rubeus](https://github.com/GhostPack/Rubeus).
 
-Ovo objašnjenje obuhvata proces i alate uključene u krađu NTLM kredencijala putem PKINIT, fokusirajući se na preuzimanje NTLM hash-eva kroz TGT dobijen korišćenjem PKINIT, i alate koji olakšavaju ovaj proces.
+Ovo objašnjenje obuhvata proces i alate uključene u krađu NTLM akreditiva putem PKINIT-a, fokusirajući se na preuzimanje NTLM hash-eva kroz TGT dobijen korišćenjem PKINIT-a, i alate koji olakšavaju ovaj proces.
 
 {{#include ../../../banners/hacktricks-training.md}}

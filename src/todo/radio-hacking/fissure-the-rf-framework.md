@@ -1,10 +1,10 @@
 # FISSURE - RF okvir
 
-**Razumevanje i obrnuto inženjerstvo signala nezavisnog od frekvencije zasnovano na SDR-u**
+**Razumevanje i obrnuto inženjerstvo signala nezavisno od frekvencije zasnovano na SDR-u**
 
-FISSURE je okvir otvorenog koda za RF i obrnuto inženjerstvo dizajniran za sve nivoe veština sa mogućnostima za detekciju i klasifikaciju signala, otkrivanje protokola, izvršavanje napada, IQ manipulaciju, analizu ranjivosti, automatizaciju i AI/ML. Okvir je izgrađen da promoviše brzu integraciju softverskih modula, radija, protokola, podataka o signalima, skripti, tokova podataka, referentnog materijala i alata trećih strana. FISSURE je omogućavač radnog toka koji drži softver na jednom mestu i omogućava timovima da se lako prilagode dok dele istu proverenu osnovnu konfiguraciju za specifične Linux distribucije.
+FISSURE je okvir otvorenog koda za RF i obrnuto inženjerstvo dizajniran za sve nivoe veština sa mogućnostima za detekciju i klasifikaciju signala, otkrivanje protokola, izvršavanje napada, IQ manipulaciju, analizu ranjivosti, automatizaciju i AI/ML. Okvir je izgrađen da promoviše brzu integraciju softverskih modula, radija, protokola, podataka o signalima, skripti, tok grafova, referentnog materijala i alata trećih strana. FISSURE je omogućavač radnog toka koji drži softver na jednom mestu i omogućava timovima da se lako prilagode dok dele istu proverenu osnovnu konfiguraciju za specifične Linux distribucije.
 
-Okvir i alati uključeni u FISSURE su dizajnirani da detektuju prisustvo RF energije, razumeju karakteristike signala, prikupljaju i analiziraju uzorke, razvijaju tehnike prenosa i/ili injekcije, i kreiraju prilagođene terete ili poruke. FISSURE sadrži rastuću biblioteku informacija o protokolima i signalima koja pomaže u identifikaciji, kreiranju paketa i fuzzingu. Postoje mogućnosti online arhiviranja za preuzimanje signalnih datoteka i izradu plejlista za simulaciju saobraćaja i testiranje sistema.
+Okvir i alati uključeni u FISSURE su dizajnirani da detektuju prisustvo RF energije, razumeju karakteristike signala, prikupljaju i analiziraju uzorke, razvijaju tehnike prenosa i/ili injekcije, i kreiraju prilagođene terete ili poruke. FISSURE sadrži rastuću biblioteku informacija o protokolima i signalima kako bi pomogla u identifikaciji, kreiranju paketa i fuzzingu. Postoje mogućnosti online arhiviranja za preuzimanje signalnih datoteka i izgradnju plejlisti za simulaciju saobraćaja i testiranje sistema.
 
 Prijateljski Python kod i korisnički interfejs omogućavaju početnicima da brzo nauče o popularnim alatima i tehnikama koje se odnose na RF i obrnuto inženjerstvo. Obrazovni radnici u oblasti sajber bezbednosti i inženjerstva mogu iskoristiti ugrađeni materijal ili koristiti okvir za demonstraciju svojih stvarnih aplikacija. Programeri i istraživači mogu koristiti FISSURE za svoje svakodnevne zadatke ili da izlože svoja savremena rešenja široj publici. Kako svest i upotreba FISSURE raste u zajednici, tako će rasti i obim njegovih mogućnosti i širina tehnologije koju obuhvata.
 
@@ -20,7 +20,7 @@ Prijateljski Python kod i korisnički interfejs omogućavaju početnicima da brz
 
 **Podržano**
 
-Postoje tri grane unutar FISSURE-a kako bi se olakšalo navigaciju datotekama i smanjila redundancija koda. Grana Python2\_maint-3.7 sadrži kod baziran na Python2, PyQt4 i GNU Radio 3.7; grana Python3\_maint-3.8 je izgrađena oko Python3, PyQt5 i GNU Radio 3.8; a grana Python3\_maint-3.10 je izgrađena oko Python3, PyQt5 i GNU Radio 3.10.
+Postoje tri grane unutar FISSURE kako bi se olakšalo navigaciju datotekama i smanjila redundancija koda. Grana Python2\_maint-3.7 sadrži kod baziran na Python2, PyQt4 i GNU Radio 3.7; grana Python3\_maint-3.8 je izgrađena oko Python3, PyQt5 i GNU Radio 3.8; a grana Python3\_maint-3.10 je izgrađena oko Python3, PyQt5 i GNU Radio 3.10.
 
 |   Operativni sistem   |   FISSURE grana   |
 | :-------------------: | :---------------: |
@@ -37,8 +37,8 @@ Ovi operativni sistemi su još u beta statusu. U razvoju su i poznato je da nedo
 
 |     Operativni sistem     |    FISSURE grana   |
 | :-----------------------: | :----------------: |
-| DragonOS Focal (x86\_64) |  Python3\_maint-3.8 |
-|    Ubuntu 22.04 (x64)    | Python3\_maint-3.10 |
+| DragonOS Focal (x86\_64)  |  Python3\_maint-3.8 |
+|    Ubuntu 22.04 (x64)     | Python3\_maint-3.10 |
 
 Napomena: Određeni softverski alati ne rade za svaki OS. Pogledajte [Software And Conflicts](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Help/Markdown/SoftwareAndConflicts.md)
 
@@ -52,13 +52,13 @@ git submodule update --init
 ```
 Ovo će instalirati PyQt softverske zavisnosti potrebne za pokretanje instalacionih GUI-a ako nisu pronađene.
 
-Zatim, odaberite opciju koja najbolje odgovara vašem operativnom sistemu (trebalo bi da bude automatski otkriveno ako vaš OS odgovara nekoj od opcija).
+Zatim, izaberite opciju koja najbolje odgovara vašem operativnom sistemu (trebalo bi da bude automatski detektovana ako vaš OS odgovara nekoj od opcija).
 
 |                                          Python2\_maint-3.7                                          |                                          Python3\_maint-3.8                                          |                                          Python3\_maint-3.10                                         |
 | :--------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------: |
 | ![install1b](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/install1b.png) | ![install1a](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/install1a.png) | ![install1c](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/install1c.png) |
 
-Preporučuje se instalacija FISSURE na čistom operativnom sistemu kako bi se izbegli postojeći konflikti. Odaberite sve preporučene čekboksove (Default button) kako biste izbegli greške prilikom korišćenja raznih alata unutar FISSURE. Tokom instalacije biće više upita, uglavnom za povišene dozvole i korisnička imena. Ako stavka sadrži "Verify" sekciju na kraju, instalater će pokrenuti komandu koja sledi i označiti stavku čekboks zelenom ili crvenom bojom u zavisnosti od toga da li su komandom proizvedene greške. Obeležene stavke bez "Verify" sekcije će ostati crne nakon instalacije.
+Preporučuje se instalacija FISSURE na čistom operativnom sistemu kako bi se izbegli postojeći konflikti. Izaberite sve preporučene čekboksove (Default button) kako biste izbegli greške prilikom korišćenja raznih alata unutar FISSURE. Tokom instalacije biće više upita, uglavnom za povišene dozvole i korisnička imena. Ako stavka sadrži "Verify" sekciju na kraju, instalater će pokrenuti komandu koja sledi i označiti stavku čekboks zelenom ili crvenom bojom u zavisnosti od toga da li su nastale greške tokom izvršavanja komande. Obeležene stavke bez "Verify" sekcije će ostati crne nakon instalacije.
 
 ![install2](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/install2.png)
 
@@ -107,7 +107,7 @@ Sledeća je lista "podržanog" hardvera sa različitim nivoima integracije:
 FISSURE dolazi sa nekoliko korisnih vodiča kako bi se upoznali sa različitim tehnologijama i tehnikama. Mnogi uključuju korake za korišćenje raznih alata koji su integrisani u FISSURE.
 
 * [Lekcija1: OpenBTS](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson1\_OpenBTS.md)
-* [Lekcija2: Lua disekcioni](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson2\_LuaDissectors.md)
+* [Lekcija2: Lua disektori](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson2\_LuaDissectors.md)
 * [Lekcija3: Sound eXchange](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson3\_Sound\_eXchange.md)
 * [Lekcija4: ESP ploče](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson4\_ESP\_Boards.md)
 * [Lekcija5: Praćenje radiosonda](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson5\_Radiosonde\_Tracking.md)
@@ -151,7 +151,7 @@ Kreiranje [Problema](https://github.com/ainfosec/FISSURE/issues) kako bi se skre
 
 ## Saradnja
 
-Kontaktirajte Assured Information Security, Inc. (AIS) poslovni razvoj da predložite i formalizujete bilo koje mogućnosti saradnje oko FISSURE – bilo da se radi o posvećivanju vremena za integraciju vašeg softvera, angažovanju talentovanih ljudi iz AIS-a za razvoj rešenja za vaše tehničke izazove, ili integraciji FISSURE u druge platforme/aplikacije.
+Kontaktirajte Assured Information Security, Inc. (AIS) poslovni razvoj kako biste predložili i formalizovali bilo koje mogućnosti saradnje oko FISSURE – bilo da se radi o posvećivanju vremena za integraciju vašeg softvera, angažovanju talentovanih ljudi iz AIS-a za razvoj rešenja za vaše tehničke izazove, ili integraciji FISSURE u druge platforme/aplikacije.
 
 ## Licenca
 

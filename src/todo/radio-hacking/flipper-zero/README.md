@@ -13,6 +13,6 @@ Sa [**Flipper Zero**](https://flipperzero.one/) možete:
 - **Koristiti kao sigurnosni ključ (U2F)**
 - **Igrati Snake**
 
-**Ostali resursi za Flipper Zero su u** [**https://github.com/djsime1/awesome-flipperzer**](https://github.com/djsime1/awesome-flipperzero)
+**Ostali Flipper Zero resursi na** [**https://github.com/djsime1/awesome-flipperzer**](https://github.com/djsime1/awesome-flipperzero)
 
 {{#include ../../../banners/hacktricks-training.md}}

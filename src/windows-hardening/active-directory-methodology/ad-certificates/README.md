@@ -39,13 +39,13 @@ AD CS priznaje CA sertifikate u AD šumi kroz određene kontejnere, od kojih sva
 
 ### Šabloni sertifikata
 
-Definisani unutar AD, ovi šabloni opisuju podešavanja i dozvole za izdavanje sertifikata, uključujući dozvoljene EKUs i prava na upis ili modifikaciju, što je ključno za upravljanje pristupom uslugama sertifikata.
+Definisani unutar AD, ovi šabloni opisuju postavke i dozvole za izdavanje sertifikata, uključujući dozvoljene EKUs i prava na upis ili modifikaciju, što je ključno za upravljanje pristupom uslugama sertifikata.
 
-## Upis sertifikata
+## Upisivanje sertifikata
 
-Proces upisa za sertifikate pokreće administrator koji **kreira šablon sertifikata**, koji zatim **objavljuje** Enterprise Sertifikaciona vlast (CA). Ovo čini šablon dostupnim za upis klijenata, što se postiže dodavanjem imena šablona u polje `certificatetemplates` objekta Active Directory.
+Proces upisivanja sertifikata pokreće administrator koji **kreira šablon sertifikata**, koji zatim **objavljuje** Enterprise Sertifikaciona vlast (CA). Ovo čini šablon dostupnim za upis klijenata, što se postiže dodavanjem imena šablona u polje `certificatetemplates` objekta Active Directory.
 
-Da bi klijent zatražio sertifikat, **prava na upis** moraju biti dodeljena. Ova prava definišu se sigurnosnim descriptorima na šablonu sertifikata i samoj Enterprise CA. Dozvole moraju biti dodeljene na obe lokacije kako bi zahtev bio uspešan.
+Da bi klijent zatražio sertifikat, **prava na upis** moraju biti dodeljena. Ova prava definišu se sigurnosnim descriptorima na šablonu sertifikata i samoj Enterprise CA. Dozvole moraju biti dodeljene na oba mesta kako bi zahtev bio uspešan.
 
 ### Prava na upis šablona
 
@@ -73,10 +73,10 @@ Sertifikati se mogu zahtevati putem:
 1. **Windows Client Certificate Enrollment Protocol** (MS-WCCE), koristeći DCOM interfejse.
 2. **ICertPassage Remote Protocol** (MS-ICPR), putem imenovanih cevi ili TCP/IP.
 3. **web interfejsa za upis sertifikata**, sa instaliranom ulogom Web upisa sertifikata.
-4. **Usluge upisa sertifikata** (CES), u kombinaciji sa uslugom politike upisa sertifikata (CEP).
-5. **Usluge upisa mrežnih uređaja** (NDES) za mrežne uređaje, koristeći Protokol jednostavnog upisa sertifikata (SCEP).
+4. **Usluge za upis sertifikata** (CES), u kombinaciji sa uslugom politike upisa sertifikata (CEP).
+5. **Usluge za upis mrežnih uređaja** (NDES) za mrežne uređaje, koristeći Protokol za jednostavno upisivanje sertifikata (SCEP).
 
-Windows korisnici takođe mogu zahtevati sertifikate putem GUI (`certmgr.msc` ili `certlm.msc`) ili alata komandne linije (`certreq.exe` ili PowerShell-ove `Get-Certificate` komande).
+Windows korisnici takođe mogu zahtevati sertifikate putem GUI-a (`certmgr.msc` ili `certlm.msc`) ili alata komandne linije (`certreq.exe` ili PowerShell-ove `Get-Certificate` komande).
 ```powershell
 # Example of requesting a certificate using PowerShell
 Get-Certificate -Template "User" -CertStoreLocation "cert:\\CurrentUser\\My"

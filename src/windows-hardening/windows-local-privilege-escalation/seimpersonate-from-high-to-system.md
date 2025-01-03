@@ -2,10 +2,10 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-### Код
+### Code
 
-Следећи код из [овде](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962). Омогућава да **наведете ID процеса као аргумент** и CMD **који се извршава као корисник** наведеног процеса ће бити покренут.\
-Извршавајући у процесу високе интегритета, можете **навести PID процеса који се извршава као System** (као winlogon, wininit) и извршити cmd.exe као систем.
+Sledeći kod sa [ovde](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962). Omogućava da **naznačite ID procesa kao argument** i CMD **koji se izvršava kao korisnik** naznačenog procesa će biti pokrenut.\
+Pokretanjem u procesu visoke integriteta možete **naznačiti PID procesa koji se izvršava kao System** (kao winlogon, wininit) i izvršiti cmd.exe kao sistem.
 ```cpp
 impersonateuser.exe 1234
 ```
@@ -165,7 +165,7 @@ Proverimo trenutne Administrator dozvole nad `svchost.exe` procesima koristeći 
 
 ![](<../../images/image (437).png>)
 
-Prethodna slika sadrži sve privilegije koje "Administratori" imaju nad izabranim procesom (kao što možete videti, u slučaju `svchost.exe` oni imaju samo "Query" privilegije)
+Prethodna slika sadrži sve privilegije koje "Administratori" imaju nad izabranim procesom (kao što možete videti, u slučaju `svchost.exe` imaju samo "Query" privilegije)
 
 Pogledajte privilegije koje "Administratori" imaju nad `winlogon.exe`:
 

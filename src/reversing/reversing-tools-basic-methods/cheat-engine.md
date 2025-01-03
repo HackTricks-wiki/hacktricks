@@ -40,7 +40,7 @@ I konačno **označite kvačicu** da biste izvršili modifikaciju u memoriji:
 
 **Promena** u **memoriji** će odmah biti **primenjena** (napomena: dok igra ne koristi ovu vrednost ponovo, vrednost **neće biti ažurirana u igri**).
 
-## Traženje vrednosti
+## Pretraživanje vrednosti
 
 Dakle, pretpostavićemo da postoji važna vrednost (kao što je život vašeg korisnika) koju želite da poboljšate, i tražite ovu vrednost u memoriji)
 
@@ -55,7 +55,7 @@ Zatim, uradite nešto tako da **vrednost promeni**, i **zaustavite** igru i **iz
 ![](<../../images/image (684).png>)
 
 Cheat Engine će tražiti **vrednosti** koje su **prešle sa 100 na novu vrednost**. Čestitam, **pronašli ste** **adresu** vrednosti koju ste tražili, sada je možete modifikovati.\
-&#xNAN;_&#x49;f još uvek imate nekoliko vrednosti, uradite nešto da ponovo modifikujete tu vrednost, i izvršite još jedno "sledeće skeniranje" da filtrirate adrese._
+&#xNAN;_Ako još uvek imate nekoliko vrednosti, uradite nešto da ponovo modifikujete tu vrednost, i izvršite još jedno "sledeće skeniranje" da filtrirate adrese._
 
 ### Nepoznata vrednost, poznata promena
 
@@ -81,7 +81,7 @@ Napomena da postoji **mnogo mogućih promena** i možete ponavljati ove **korake
 
 ### Nasumična adresa u memoriji - Pronalaženje koda
 
-Do sada smo naučili kako da pronađemo adresu koja čuva vrednost, ali je veoma verovatno da u **različitim izvršavanjima igre ta adresa bude na različitim mestima u memoriji**. Dakle, hajde da saznamo kako da uvek pronađemo tu adresu.
+Do sada smo naučili kako da pronađemo adresu koja čuva vrednost, ali je veoma verovatno da će u **različitim izvršavanjima igre ta adresa biti na različitim mestima u memoriji**. Dakle, hajde da saznamo kako da uvek pronađemo tu adresu.
 
 Koristeći neke od pomenutih trikova, pronađite adresu gde vaša trenutna igra čuva važnu vrednost. Zatim (zaustavljajući igru ako želite) uradite **desni klik** na pronađenu **adresu** i izaberite "**Saznajte šta pristupa ovoj adresi**" ili "**Saznajte šta piše na ovoj adresi**":
 
@@ -102,7 +102,7 @@ Dakle, sada možete modifikovati tako da kod ne utiče na vaš broj, ili će uve
 
 ### Nasumična adresa u memoriji - Pronalaženje pokazivača
 
-Prateći prethodne korake, pronađite gde se vrednost koja vas zanima nalazi. Zatim, koristeći "**Saznajte šta piše na ovoj adresi**" saznajte koja adresa piše ovu vrednost i dvostruko kliknite na nju da biste dobili prikaz disasembly-a:
+Prateći prethodne korake, pronađite gde se vrednost koja vas zanima nalazi. Zatim, koristeći "**Saznajte šta piše na ovoj adresi**" saznajte koja adresa piše ovu vrednost i dvostruko kliknite na nju da biste dobili disassemblirani prikaz:
 
 ![](<../../images/image (1039).png>)
 
@@ -137,7 +137,7 @@ Dakle, zamislite da ste pronašli adresu koja oduzima 1 od života vašeg igrač
 
 ![](<../../images/image (203).png>)
 
-Kliknite na Prikaži disassembler da biste dobili **disassemble kod**.\
+Kliknite na Prikaži disassembler da biste dobili **disassemblirani kod**.\
 Zatim, kliknite **CTRL+a** da pozovete prozor Auto assemble i izaberite _**Template --> Injekcija koda**_
 
 ![](<../../images/image (902).png>)
@@ -158,6 +158,6 @@ Dakle, umetnite svoj novi assembly kod u sekciju "**newmem**" i uklonite origina
 
 ## **Reference**
 
-- **Cheat Engine tutorijal, završite ga da biste naučili kako da započnete sa Cheat Engine**
+- **Cheat Engine tutorijal, završite ga da biste naučili kako da počnete sa Cheat Engine**
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -4,7 +4,7 @@
 
 ## Napad na RFID sisteme sa Proxmark3
 
-Prva stvar koju treba da uradite je da imate [**Proxmark3**](https://proxmark.com) i [**instalirate softver i njegove zavisnosti**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux)[**e**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux).
+Prva stvar koju treba da uradite je da imate [**Proxmark3**](https://proxmark.com) i [**instalirate softver i njegove zavisnosti**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux)[**s**](https://github.com/Proxmark/proxmark3/wiki/Kali-Linux).
 
 ### Napad na MIFARE Classic 1KB
 
@@ -31,7 +31,7 @@ proxmark3> hf mf eset 01 000102030405060708090a0b0c0d0e0f # Write those bytes to
 proxmark3> hf mf eget 01 # Read block 1
 proxmark3> hf mf wrbl 01 B FFFFFFFFFFFF 000102030405060708090a0b0c0d0e0f # Write to the card
 ```
-Proxmark3 omogućava izvođenje drugih radnji kao što je **prisluškivanje** komunikacije između **Tag-a i Čitača** kako bi se pokušalo pronaći osetljive podatke. Na ovoj kartici možete jednostavno presresti komunikaciju i izračunati korišćeni ključ jer su **kriptograške operacije slabe** i poznavajući običan i šifrovani tekst možete ga izračunati (alat `mfkey64`).
+Proxmark3 omogućava izvođenje drugih radnji kao što je **prisluškivanje** komunikacije između **Tag-a i Čitača** kako bi se pokušalo pronaći osetljive podatke. Na ovoj kartici možete jednostavno presresti komunikaciju i izračunati korišćeni ključ jer su **kriptografske operacije slabe** i poznavajući običan i šifrovani tekst možete ga izračunati (alat `mfkey64`).
 
 ### Raw Commands
 

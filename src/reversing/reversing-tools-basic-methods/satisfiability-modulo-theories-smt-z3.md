@@ -1,6 +1,6 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-Veoma jednostavno, ovaj alat će nam pomoći da pronađemo vrednosti za promenljive koje treba da zadovolje određene uslove, a ručno izračunavanje bi bilo veoma dosadno. Stoga, možete Z3 da navedete uslove koje promenljive treba da zadovolje i on će pronaći neke vrednosti (ako je moguće).
+Veoma jednostavno, ovaj alat će nam pomoći da pronađemo vrednosti za promenljive koje treba da zadovolje određene uslove, a ručno izračunavanje bi bilo veoma dosadno. Stoga, možete Z3 ukazati na uslove koje promenljive treba da zadovolje i on će pronaći neke vrednosti (ako je moguće).
 
 **Neki tekstovi i primeri su preuzeti sa [https://ericpony.github.io/z3py-tutorial/guide-examples.htm](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)**
 
@@ -57,7 +57,7 @@ print("%s = %s" % (d.name(), m[d]))
 ```
 # Mašinska Aritmetika
 
-Moderni CPU-i i mainstream programski jezici koriste aritmetiku nad **fiksno velikim bit-vektorima**. Mašinska aritmetika je dostupna u Z3Py kao **Bit-Vektori**.
+Moderne CPU i mainstream programski jezici koriste aritmetiku nad **fiksno velikim bit-vektorima**. Mašinska aritmetika je dostupna u Z3Py kao **Bit-Vektori**.
 ```python
 from z3 import *
 
@@ -72,9 +72,9 @@ a = BitVecVal(-1, 32)
 b = BitVecVal(65535, 32)
 print(simplify(a == b)) #This is False
 ```
-## Potpisani/Ne potpisani brojevi
+## Potpisani/Nepotpisani Brojevi
 
-Z3 pruža posebne potpisane verzije aritmetičkih operacija gde je važno da li se **bit-vektor tretira kao potpisan ili ne potpisan**. U Z3Py, operatori **<, <=, >, >=, /, % i >>** odgovaraju **potpisanim** verzijama. Odgovarajući **ne potpisani** operatori su **ULT, ULE, UGT, UGE, UDiv, URem i LShR.**
+Z3 pruža posebne potpisane verzije aritmetičkih operacija gde je važno da li se **bit-vektor tretira kao potpisan ili nepotpisan**. U Z3Py, operatori **<, <=, >, >=, /, % i >>** odgovaraju **potpisanim** verzijama. Odgovarajući **nepotpisani** operatori su **ULT, ULE, UGT, UGE, UDiv, URem i LShR.**
 ```python
 from z3 import *
 
@@ -96,7 +96,7 @@ solve(ULT(x, 0))
 
 **Interpretirane funkcije** kao što su aritmetičke gde **funkcija +** ima **fiksnu standardnu interpretaciju** (sabira dva broja). **Neinterpretirane funkcije** i konstante su **maksimalno fleksibilne**; omogućavaju **bilo koju interpretaciju** koja je **dosledna** sa **ograničenjima** nad funkcijom ili konstantom.
 
-Primer: f primenjena dva puta na x rezultira ponovo u x, ali f primenjena jednom na x je različita od x.
+Primer: f primenjena dva puta na x rezultira ponovo u x, ali f primenjena jednom na x je drugačija od x.
 ```python
 from z3 import *
 

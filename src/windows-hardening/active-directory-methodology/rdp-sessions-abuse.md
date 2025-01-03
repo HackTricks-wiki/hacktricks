@@ -34,7 +34,7 @@ Proverite **druge načine za krađu sesija sa drugim alatima** [**na ovoj strani
 
 ## RDPInception
 
-Ako korisnik pristupi **RDP-u na mašini** gde **napadač** **čeka** na njega, napadač će moći da **ubaci beacon u RDP sesiju korisnika** i ako je **žrtva montirala svoj disk** prilikom pristupa putem RDP-a, **napadač bi mogao da mu pristupi**.
+Ako korisnik pristupi **RDP-u na mašini** gde **napadač** čeka na njega, napadač će moći da **ubaci beacon u RDP sesiju korisnika** i ako je **žrtva montirala svoj disk** prilikom pristupa putem RDP-a, **napadač bi mogao da mu pristupi**.
 
 U ovom slučaju, mogli biste samo da **kompromitujete** **originalni računar žrtve** tako što ćete napisati **backdoor** u **startup folder**.
 ```powershell

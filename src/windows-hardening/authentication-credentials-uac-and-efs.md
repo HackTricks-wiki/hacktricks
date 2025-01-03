@@ -7,7 +7,7 @@
 Lista odobrenih aplikacija je spisak odobrenih softverskih aplikacija ili izvršnih datoteka koje su dozvoljene da budu prisutne i da se pokreću na sistemu. Cilj je zaštititi okruženje od štetnog malvera i neodobrenog softvera koji nije u skladu sa specifičnim poslovnim potrebama organizacije.
 
 [AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) je Microsoftovo **rešenje za belu listu aplikacija** i daje sistemskim administratorima kontrolu nad **koje aplikacije i datoteke korisnici mogu da pokreću**. Pruža **detaljnu kontrolu** nad izvršnim datotekama, skriptama, Windows instalacionim datotekama, DLL-ovima, pakovanim aplikacijama i instalaterima pakovanih aplikacija.\
-Uobičajeno je da organizacije **blokiraju cmd.exe i PowerShell.exe** i pisanje pristupa određenim direktorijumima, **ali se sve to može zaobići**.
+Uobičajeno je da organizacije **blokiraju cmd.exe i PowerShell.exe** i pristup za pisanje određenim direktorijumima, **ali se sve to može zaobići**.
 
 ### Check
 
@@ -26,7 +26,7 @@ Ova putanja registra sadrži konfiguracije i politike koje primenjuje AppLocker,
 
 ### Bypass
 
-- Korisni **Writable folders** za zaobilaženje AppLocker politike: Ako AppLocker dozvoljava izvršavanje bilo čega unutar `C:\Windows\System32` ili `C:\Windows`, postoje **writable folders** koje možete koristiti za **bypass this**.
+- Korisni **Writable folders** za zaobilaženje AppLocker politike: Ako AppLocker dozvoljava izvršavanje bilo čega unutar `C:\Windows\System32` ili `C:\Windows`, postoje **writable folders** koje možete koristiti za **zaobilaženje ovoga**.
 ```
 C:\Windows\System32\Microsoft\Crypto\RSA\MachineKeys
 C:\Windows\System32\spool\drivers\color
@@ -35,7 +35,7 @@ C:\windows\tracing
 ```
 - Uobičajeni **trusted** [**"LOLBAS's"**](https://lolbas-project.github.io/) binarni fajlovi mogu biti korisni za zaobilaženje AppLocker-a.
 - **Loše napisani pravila takođe mogu biti zaobiđena**
-- Na primer, **`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`**, možete kreirati **folder pod nazivom `allowed`** bilo gde i biće dozvoljeno.
+- Na primer, **`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`**, možete kreirati **folder nazvan `allowed`** bilo gde i biće dozvoljen.
 - Organizacije često fokusiraju na **blokiranje `%System32%\WindowsPowerShell\v1.0\powershell.exe` izvršnog fajla**, ali zaboravljaju na **druge** [**lokacije PowerShell izvršnih fajlova**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations) kao što su `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` ili `PowerShell_ISE.exe`.
 - **DLL enforcement vrlo retko omogućen** zbog dodatnog opterećenja koje može staviti na sistem, i količine testiranja potrebnog da se osigura da ništa neće prestati da funkcioniše. Tako da korišćenje **DLL-ova kao backdoor-a će pomoći u zaobilaženju AppLocker-a**.
 - Možete koristiti [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) ili [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) da **izvršite Powershell** kod u bilo kojem procesu i zaobiđete AppLocker. Za više informacija pogledajte: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
@@ -103,19 +103,19 @@ sc query windefend
 ```
 ## Encrypted File System (EFS)
 
-EFS obezbeđuje datoteke putem enkripcije, koristeći **simetrični ključ** poznat kao **Ključ za enkripciju datoteka (FEK)**. Ovaj ključ je enkriptovan korisnikovim **javnim ključem** i smešten unutar $EFS **alternativnog toka podataka** enkriptovane datoteke. Kada je potrebna dekripcija, koristi se odgovarajući **privatni ključ** korisničkog digitalnog sertifikata za dekripciju FEK-a iz $EFS toka. Više detalja možete pronaći [ovde](https://en.wikipedia.org/wiki/Encrypting_File_System).
+EFS osigurava datoteke putem enkripcije, koristeći **simetrični ključ** poznat kao **Ključ za enkripciju datoteka (FEK)**. Ovaj ključ je enkriptovan korisnikovim **javnim ključem** i smešten unutar $EFS **alternativnog toka podataka** enkriptovane datoteke. Kada je potrebna dekripcija, koristi se odgovarajući **privatni ključ** korisničkog digitalnog sertifikata za dekripciju FEK-a iz $EFS toka. Više detalja možete pronaći [ovde](https://en.wikipedia.org/wiki/Encrypting_File_System).
 
 **Scenariji dekripcije bez inicijacije korisnika** uključuju:
 
-- Kada se datoteke ili fascikle presele na ne-EFS datotečni sistem, kao što je [FAT32](https://en.wikipedia.org/wiki/File_Allocation_Table), one se automatski dekriptuju.
-- Enkriptovane datoteke poslate preko mreže putem SMB/CIFS protokola se dekriptuju pre prenosa.
+- Kada se datoteke ili fascikle presele na ne-EFS datotečni sistem, kao što je [FAT32](https://en.wikipedia.org/wiki/File_Allocation_Table), automatski se dekriptuju.
+- Enkriptovane datoteke poslate preko mreže putem SMB/CIFS protokola dekriptuju se pre prenosa.
 
 Ova metoda enkripcije omogućava **transparentan pristup** enkriptovanim datotekama za vlasnika. Međutim, jednostavna promena lozinke vlasnika i prijavljivanje neće omogućiti dekripciju.
 
 **Ključne tačke**:
 
-- EFS koristi simetrični FEK, enkriptovan javnim ključem korisnika.
-- Dekripcija koristi privatni ključ korisnika za pristup FEK-u.
+- EFS koristi simetrični FEK, enkriptovan korisnikovim javnim ključem.
+- Dekripcija koristi korisnikov privatni ključ za pristup FEK-u.
 - Automatska dekripcija se dešava pod specifičnim uslovima, kao što su kopiranje na FAT32 ili mrežni prenos.
 - Enkriptovane datoteke su dostupne vlasniku bez dodatnih koraka.
 
@@ -130,7 +130,7 @@ Takođe možete koristiti `cipher /e` i `cipher /d` unutar fascikle da **enkript
 
 #### Biti Autoritet Sistem
 
-Ovaj način zahteva da **žrtva korisnik** bude **pokrenut** u **procesu** unutar hosta. Ako je to slučaj, koristeći `meterpreter` sesije možete imitirati token procesa korisnika (`impersonate_token` iz `incognito`). Ili možete jednostavno `migrate` u proces korisnika.
+Ovaj način zahteva da **žrtva korisnik** bude **pokrenut** u **procesu** unutar hosta. Ako je to slučaj, koristeći `meterpreter` sesije možete imitirati token procesa korisnika (`impersonate_token` iz `incognito`). Ili možete jednostavno `migrirati` u proces korisnika.
 
 #### Poznavanje lozinke korisnika
 
@@ -140,13 +140,13 @@ Ovaj način zahteva da **žrtva korisnik** bude **pokrenut** u **procesu** unuta
 
 Microsoft je razvio **Group Managed Service Accounts (gMSA)** kako bi pojednostavio upravljanje servisnim nalozima u IT infrastrukturnim sistemima. Za razliku od tradicionalnih servisnih naloga koji često imaju podešavanje "**Lozinka nikada ne ističe**" omogućeno, gMSA nude sigurnije i upravljivije rešenje:
 
-- **Automatsko upravljanje lozinkama**: gMSA koriste složenu, 240-karakternu lozinku koja se automatski menja u skladu sa politikom domena ili računara. Ovaj proces se obavlja putem Microsoftove usluge za distribuciju ključeva (KDC), eliminišući potrebu za ručnim ažuriranjima lozinki.
+- **Automatsko upravljanje lozinkama**: gMSA koriste složenu, 240-karakternu lozinku koja se automatski menja prema politici domena ili računara. Ovaj proces se obavlja putem Microsoftove usluge za distribuciju ključeva (KDC), eliminišući potrebu za ručnim ažuriranjima lozinki.
 - **Povećana sigurnost**: Ovi nalozi su imuni na zaključavanje i ne mogu se koristiti za interaktivna prijavljivanja, čime se povećava njihova sigurnost.
 - **Podrška za više hostova**: gMSA se mogu deliti između više hostova, što ih čini idealnim za usluge koje se pokreću na više servera.
 - **Mogućnost zakazanih zadataka**: Za razliku od upravljanih servisnih naloga, gMSA podržavaju pokretanje zakazanih zadataka.
-- **Pojednostavljeno upravljanje SPN-om**: Sistem automatski ažurira Ime servisnog glavnog entiteta (SPN) kada dođe do promena u detaljima sAMaccount-a računara ili DNS imenu, pojednostavljujući upravljanje SPN-om.
+- **Pojednostavljeno upravljanje SPN-om**: Sistem automatski ažurira Ime servisnog glavnog imena (SPN) kada dođe do promena u detaljima sAMaccount-a računara ili DNS imenu, pojednostavljujući upravljanje SPN-om.
 
-Lozinke za gMSA se čuvaju u LDAP svojstvu _**msDS-ManagedPassword**_ i automatski se resetuju svake 30 dana od strane kontrolera domena (DC). Ova lozinka, enkriptovani podatkovni blob poznat kao [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e), može se dobiti samo od strane ovlašćenih administratora i servera na kojima su gMSA instalirani, obezbeđujući sigurno okruženje. Da biste pristupili ovim informacijama, potrebna je sigurna veza kao što je LDAPS, ili veza mora biti autentifikovana sa 'Sealing & Secure'.
+Lozinke za gMSA se čuvaju u LDAP svojstvu _**msDS-ManagedPassword**_ i automatski se resetuju svake 30 dana od strane kontrolera domena (DC). Ova lozinka, enkriptovani podatkovni blob poznat kao [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e), može se preuzeti samo od strane ovlašćenih administratora i servera na kojima su gMSA instalirani, osiguravajući sigurno okruženje. Da biste pristupili ovim informacijama, potrebna je sigurna veza kao što je LDAPS, ili veza mora biti autentifikovana sa 'Sealing & Secure'.
 
 ![https://cube0x0.github.io/Relaying-for-gMSA/](../images/asd1.png)
 
@@ -175,13 +175,13 @@ PowerShell [**Constrained Language Mode**](https://devblogs.microsoft.com/powers
 $ExecutionContext.SessionState.LanguageMode
 #Values could be: FullLanguage or ConstrainedLanguage
 ```
-### Obilaženje
+### Zaobilaženje
 ```powershell
 #Easy bypass
 Powershell -version 2
 ```
-U trenutnom Windows-u ta zaobilaženja neće raditi, ali možete koristiti [**PSByPassCLM**](https://github.com/padovah4ck/PSByPassCLM).\
-**Da biste ga kompajlirali, možda ćete morati** **da** _**dodate referencu**_ -> _Pretraži_ -> _Pretraži_ -> dodajte `C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0\31bf3856ad364e35\System.Management.Automation.dll` i **promenite projekat na .Net4.5**.
+U trenutnom Windows-u ta zaobilaženje neće raditi, ali možete koristiti [**PSByPassCLM**](https://github.com/padovah4ck/PSByPassCLM).\
+**Da biste ga kompajlirali, možda će vam biti potrebno** **da** _**dodate referencu**_ -> _Pretraži_ -> _Pretraži_ -> dodajte `C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0\31bf3856ad364e35\System.Management.Automation.dll` i **promenite projekat na .Net4.5**.
 
 #### Direktno zaobilaženje:
 ```bash
@@ -221,7 +221,7 @@ Više informacija se može naći [ovde](https://blog.netspi.com/15-ways-to-bypas
 
 To je API koji se može koristiti za autentifikaciju korisnika.
 
-SSPI će biti zadužen za pronalaženje adekvatnog protokola za dve mašine koje žele da komuniciraju. Preferirani metod za ovo je Kerberos. Zatim će SSPI pregovarati koji autentifikacioni protokol će se koristiti, ovi autentifikacioni protokoli se nazivaju Security Support Provider (SSP), nalaze se unutar svake Windows mašine u obliku DLL-a i obe mašine moraju podržavati isti da bi mogle da komuniciraju.
+SSPI će biti zadužen za pronalaženje adekvatnog protokola za dve mašine koje žele da komuniciraju. Preferirani metod za ovo je Kerberos. Zatim će SSPI pregovarati koji će se protokol autentifikacije koristiti, ovi protokoli autentifikacije se nazivaju Security Support Provider (SSP), nalaze se unutar svake Windows mašine u obliku DLL-a i obe mašine moraju podržavati isti da bi mogle da komuniciraju.
 
 ### Glavni SSP-ovi
 

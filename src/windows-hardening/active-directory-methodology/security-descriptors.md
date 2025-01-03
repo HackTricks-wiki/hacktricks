@@ -10,7 +10,7 @@
 
 Ova tehnika postojanosti se zasniva na sposobnosti da se osvoje sve privilegije potrebne protiv određenih objekata, kako bi se mogla izvršiti radnja koja obično zahteva admin privilegije, ali bez potrebe da se bude admin.
 
-### Pristup WMI
+### Access to WMI
 
 Možete dati korisniku pristup da **izvrši udaljeno WMI** [**koristeći ovo**](https://github.com/samratashok/nishang/blob/master/Backdoors/Set-RemoteWMI.ps1):
 ```bash
@@ -26,7 +26,7 @@ Set-RemotePSRemoting -UserName student1 -ComputerName <remotehost> -Remove #Remo
 ```
 ### Daljinski pristup hešovima
 
-Pristupite **registru** i **izvršite dump hešova** kreirajući **Reg backdoor koristeći** [**DAMP**](https://github.com/HarmJ0y/DAMP)**,** tako da u bilo kojem trenutku možete da preuzmete **heš računara**, **SAM** i bilo koju **keširanu AD** kredenciju na računaru. Dakle, veoma je korisno dati ovu dozvolu **običnom korisniku protiv računara Kontrolera domena**:
+Pristupite **registru** i **izvršite dump hešova** kreirajući **Reg backdoor koristeći** [**DAMP**](https://github.com/HarmJ0y/DAMP)**,** tako da u bilo kojem trenutku možete da preuzmete **heš računara**, **SAM** i bilo koju **keširanu AD** kredenciju na računaru. Dakle, veoma je korisno dati ovu dozvolu **običnom korisniku protiv računara Domain Controller**:
 ```bash
 # allows for the remote retrieval of a system's machine and local account hashes, as well as its domain cached credentials.
 Add-RemoteRegBackdoor -ComputerName <remotehost> -Trustee student1 -Verbose

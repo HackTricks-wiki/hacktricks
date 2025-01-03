@@ -16,7 +16,7 @@ Proces pristupanja datoteci uključuje sistem koji proverava sigurnosni opis obj
 ### **Ključne Komponente**
 
 - **DACL:** Sadrži ACE koji dodeljuju ili odbijaju dozvole pristupa korisnicima i grupama za objekat. To je suštinski glavna ACL koja diktira prava pristupa.
-- **SACL:** Koristi se za reviziju pristupa objektima, gde ACE definišu tipove pristupa koji se beleže u Bezbednosni Događajni Zapis. Ovo može biti neprocenjivo za otkrivanje neovlašćenih pokušaja pristupa ili rešavanje problema sa pristupom.
+- **SACL:** Koristi se za reviziju pristupa objektima, gde ACE definišu tipove pristupa koji se beleže u Bezbednosnom Dnevniku Događaja. Ovo može biti neprocenjivo za otkrivanje neovlašćenih pokušaja pristupa ili rešavanje problema sa pristupom.
 
 ### **Interakcija Sistema sa ACL**
 
@@ -36,13 +36,13 @@ Postoje **tri glavne vrste Unosa Kontrole Pristupa (ACE)**:
 
 - **ACE Odbijen Pristup**: Ovaj ACE izričito odbija pristup objektu za određene korisnike ili grupe (u DACL).
 - **ACE Dozvoljen Pristup**: Ovaj ACE izričito odobrava pristup objektu za određene korisnike ili grupe (u DACL).
-- **Sistematski Revizorski ACE**: Postavljen unutar Sistematske Liste Kontrole Pristupa (SACL), ovaj ACE je odgovoran za generisanje revizorskih zapisa prilikom pokušaja pristupa objektu od strane korisnika ili grupa. Beleži da li je pristup bio odobren ili odbijen i prirodu pristupa.
+- **Sistematski Revizorski ACE**: Postavljen unutar Sistematske Liste Kontrole Pristupa (SACL), ovaj ACE je odgovoran za generisanje revizorskih logova prilikom pokušaja pristupa objektu od strane korisnika ili grupa. Beleži da li je pristup bio odobren ili odbijen i prirodu pristupa.
 
 Svaki ACE ima **četiri ključne komponente**:
 
 1. **Identifikator Sigurnosti (SID)** korisnika ili grupe (ili njihovog imena principa u grafičkoj reprezentaciji).
-2. **Zastavica** koja identifikuje tip ACE (pristup odbijen, dozvoljen ili sistematski revizorski).
-3. **Zastavice nasleđivanja** koje određuju da li deca objekti mogu nasleđivati ACE od svog roditelja.
+2. **Zastavicu** koja identifikuje tip ACE (pristup odbijen, dozvoljen ili sistematski revizorski).
+3. **Zastavice nasleđivanja** koje određuju da li mogući objekti mogu nasleđivati ACE od svog roditelja.
 4. [**Maska pristupa**](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/7a53f60e-e730-4dfe-bbe9-b21b62eb790b?redirectedfrom=MSDN), 32-bitna vrednost koja specificira prava dodeljena objektu.
 
 Određivanje pristupa se vrši sekvencijalnim ispitivanjem svakog ACE dok:
@@ -53,9 +53,9 @@ Određivanje pristupa se vrši sekvencijalnim ispitivanjem svakog ACE dok:
 
 ### Redosled ACE
 
-Način na koji su **ACE** (pravila koja kažu ko može ili ne može pristupiti nečemu) postavljeni u listu nazvanu **DACL** je veoma važan. To je zato što, kada sistem dodeli ili odbije pristup na osnovu ovih pravila, prestaje da gleda ostatak.
+Način na koji su **ACE** (pravila koja kažu ko može ili ne može pristupiti nečemu) postavljeni u listu nazvanu **DACL** je veoma važan. To je zato što, kada sistem odobri ili odbije pristup na osnovu ovih pravila, prestaje da gleda na ostala pravila.
 
-Postoji najbolji način za organizovanje ovih ACE, a to se zove **"kanonski red."** Ova metoda pomaže da se osigura da sve funkcioniše glatko i pravedno. Evo kako to ide za sisteme kao što su **Windows 2000** i **Windows Server 2003**:
+Postoji najbolji način za organizovanje ovih ACE, a to se naziva **"kanonski red."** Ova metoda pomaže da se osigura da sve funkcioniše glatko i pravedno. Evo kako to ide za sisteme kao što su **Windows 2000** i **Windows Server 2003**:
 
 - Prvo, stavite sva pravila koja su napravljena **specifično za ovu stavku** pre onih koja dolaze od nekuda drugde, kao što je roditeljski folder.
 - U tim specifičnim pravilima, stavite ona koja kažu **"ne" (odbiti)** pre onih koja kažu **"da" (dozvoliti)**.
@@ -88,7 +88,7 @@ I ako dodate ili izmenite Sigurnosni Princip:
 
 ![http://secureidentity.se/wp-content/uploads/2014/04/editseprincipalpointers1.jpg](../../images/editseprincipalpointers1.jpg)
 
-I na kraju imamo SACL u kartici Revizije:
+I na kraju imamo SACL u kartici Revizija:
 
 ![http://secureidentity.se/wp-content/uploads/2014/04/audit-tab.jpg](../../images/audit-tab.jpg)
 
@@ -102,7 +102,7 @@ Zamislite da imate folder nazvan Troškovi, i želite da svi imaju pristup osim 
 
 #### Dozvoljavanje Pristupa Specifičnom Članu Odbijene Grupe
 
-Recimo da Bob, direktor marketinga, treba pristup folderu Troškovi, iako marketinška ekipa generalno ne bi trebala imati pristup. Možemo dodati specifično pravilo (ACE) za Boba koje mu dodeljuje pristup, i postaviti ga pre pravila koje odbija pristup marketinškoj ekipi. Na ovaj način, Bob dobija pristup uprkos opštem ograničenju na njegov tim.
+Recimo da Bob, direktor marketinga, treba pristup folderu Troškovi, iako marketinška ekipa generalno ne bi trebala imati pristup. Možemo dodati specifično pravilo (ACE) za Boba koje mu dodeljuje pristup, i postaviti ga pre pravila koje odbija pristup marketinškoj ekipi. Na taj način, Bob dobija pristup uprkos opštem ograničenju na njegov tim.
 
 #### Razumevanje Unosa Kontrole Pristupa
 
@@ -116,7 +116,7 @@ Svaki ACE sadrži važne informacije kao što su ko se pravilo primenjuje (koris
 #### Ključne Razlike između Tipova ACE
 
 - **Generički ACE** su pogodna za jednostavne scenarije kontrole pristupa, gde se isto pravilo primenjuje na sve aspekte objekta ili na sve objekte unutar kontejnera.
-- **Specifični ACE** se koriste za složenije scenarije, posebno u okruženjima kao što je Active Directory, gde možda treba kontrolisati pristup specifičnim osobinama objekta na drugačiji način.
+- **Specifični ACE** se koriste za složenije scenarije, posebno u okruženjima kao što je Active Directory, gde možda treba kontrolisati pristup specifičnim osobinama objekta na različite načine.
 
 U sažetku, ACL i ACE pomažu u definisanju preciznih kontrola pristupa, osiguravajući da samo prave osobe ili grupe imaju pristup osetljivim informacijama ili resursima, sa mogućnošću prilagođavanja prava pristupa do nivoa pojedinačnih osobina ili tipova objekata.
 

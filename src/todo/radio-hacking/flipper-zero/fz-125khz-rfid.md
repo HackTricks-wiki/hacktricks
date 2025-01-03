@@ -5,7 +5,7 @@
 
 ## Uvod
 
-Za više informacija o tome kako 125kHz oznake funkcionišu, pogledajte:
+Za više informacija o tome kako 125kHz tagovi funkcionišu, proverite:
 
 {{#ref}}
 ../pentesting-rfid.md
@@ -13,14 +13,14 @@ Za više informacija o tome kako 125kHz oznake funkcionišu, pogledajte:
 
 ## Akcije
 
-Za više informacija o ovim tipovima oznaka [**pročitajte ovaj uvod**](../pentesting-rfid.md#low-frequency-rfid-tags-125khz).
+Za više informacija o ovim tipovima tagova [**pročitajte ovaj uvod**](../pentesting-rfid.md#low-frequency-rfid-tags-125khz).
 
 ### Čitanje
 
 Pokušava da **pročita** informacije sa kartice. Zatim može da je **emulira**.
 
 > [!WARNING]
-> Imajte na umu da neki interkomi pokušavaju da se zaštite od duplikacije ključeva slanjem komande za pisanje pre čitanja. Ako pisanje uspe, ta oznaka se smatra lažnom. Kada Flipper emulira RFID, ne postoji način za čitač da je razlikuje od originalne, tako da takvi problemi ne nastaju.
+> Imajte na umu da neki interkomi pokušavaju da se zaštite od dupliranja ključeva slanjem komande za pisanje pre čitanja. Ako pisanje uspe, taj tag se smatra lažnim. Kada Flipper emulira RFID, ne postoji način za čitač da ga razlikuje od originalnog, tako da takvi problemi ne nastaju.
 
 ### Dodaj Ručno
 
@@ -28,12 +28,12 @@ Možete kreirati **lažne kartice u Flipper Zero označavajući podatke** koje r
 
 #### ID-ovi na karticama
 
-Ponekad, kada dobijete karticu, pronaći ćete ID (ili deo) napisanu na vidljivom delu kartice.
+Ponekad, kada dobijete karticu, pronaći ćete ID (ili deo) napisan na vidljivom delu kartice.
 
 - **EM Marin**
 
 Na primer, na ovoj EM-Marin kartici moguće je **pročitati poslednja 3 od 5 bajtova u čistom obliku**.\
-Ostala 2 se mogu probiti ako ih ne možete pročitati sa kartice.
+Ostala 2 mogu se brute-forced ako ih ne možete pročitati sa kartice.
 
 <figure><img src="../../../images/image (104).png" alt=""><figcaption></figcaption></figure>
 

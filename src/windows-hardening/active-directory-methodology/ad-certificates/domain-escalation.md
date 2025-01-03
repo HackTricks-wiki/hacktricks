@@ -37,7 +37,7 @@ Da **pronađete ranjive šablone sertifikata** možete pokrenuti:
 Certify.exe find /vulnerable
 certipy find -username john@corp.local -password Passw0rd -dc-ip 172.16.126.128
 ```
-Da bi se **zloupotrebila ova ranjivost za imitiranja administratora**, može se pokrenuti:
+Da bi se **iskoristila ova ranjivost za oponašanje administratora**, može se pokrenuti:
 ```bash
 Certify.exe request /ca:dc.domain.local-DC-CA /template:VulnTemplate /altname:localadmin
 certipy req -username john@corp.local -password Passw0rd! -target-ip ca.corp.local -ca 'corp-CA' -template 'ESC1' -upn 'administrator@corp.local'
@@ -81,7 +81,7 @@ Da bi se enumerisali šabloni koji odgovaraju ovom scenariju unutar konfiguracio
 
 Ovaj scenario je sličan prvom i drugom, ali **zloupotrebljava** **drugi EKU** (Agent za Zahtev za Sertifikat) i **2 različita šablona** (stoga ima 2 seta zahteva),
 
-**EKU Agenta za Zahtev za Sertifikat** (OID 1.3.6.1.4.1.311.20.2.1), poznat kao **Agent za Upis** u Microsoft dokumentaciji, omogućava principalu da **upisuje** za **sertifikat** **u ime drugog korisnika**.
+**EKU Agenta za Zahtev za Sertifikat** (OID 1.3.6.1.4.1.311.20.2.1), poznat kao **Agent za Upis** u Microsoft dokumentaciji, omogućava principalu da **upisuje** **sertifikat** **u ime drugog korisnika**.
 
 **“Agent za upis”** se upisuje u takav **šablon** i koristi rezultantni **sertifikat da bi ko-potpisao CSR u ime drugog korisnika**. Zatim **šalje** **ko-potpisani CSR** CA, upisujući se u **šablon** koji **dozvoljava “upis u ime”**, a CA odgovara sa **sertifikatom koji pripada “drugom” korisniku**.
 
@@ -103,7 +103,7 @@ Ovaj scenario je sličan prvom i drugom, ali **zloupotrebljava** **drugi EKU** (
 
 ### Zloupotreba
 
-Možete koristiti [**Certify**](https://github.com/GhostPack/Certify) ili [**Certipy**](https://github.com/ly4k/Certipy) da biste zloupotrebili ovaj scenario:
+Možete koristiti [**Certify**](https://github.com/GhostPack/Certify) ili [**Certipy**](https://github.com/ly4k/Certipy) da zloupotrebite ovaj scenario:
 ```bash
 # Request an enrollment agent certificate
 Certify.exe request /ca:DC01.DOMAIN.LOCAL\DOMAIN-CA /template:Vuln-EnrollmentAgent
@@ -117,7 +117,7 @@ certipy req -username john@corp.local -password Pass0rd! -target-ip ca.corp.loca
 # Use Rubeus with the certificate to authenticate as the other user
 Rubeu.exe asktgt /user:CORP\itadmin /certificate:itadminenrollment.pfx /password:asdf
 ```
-**Korisnici** koji su ovlašćeni da **dobiju** **sertifikat agenta za upis**, šabloni u kojima su agenti za upis ovlašćeni da se upisuju, i **nalozi** u ime kojih agent za upis može delovati mogu biti ograničeni od strane preduzeća CA. To se postiže otvaranjem `certsrc.msc` **snap-in**-a, **desnim klikom na CA**, **klikom na Svojstva**, a zatim **navigacijom** do taba “Enrollment Agents”.
+**Korisnici** koji su ovlašćeni da **dobiju** **sertifikat agenta za upis**, šabloni u kojima su agenti za upis ovlašćeni da se upisuju, i **nalozi** u ime kojih agent za upis može delovati mogu biti ograničeni od strane preduzeća CA. To se postiže otvaranjem `certsrc.msc` **snap-in**-a, **desnim klikom na CA**, **klikom na Svojstva**, a zatim **navigacijom** do taba “Agenti za upis”.
 
 Međutim, primećeno je da je **podrazumevana** postavka za CA “**Ne ograničavaj agente za upis**.” Kada administratori omoguće ograničenje za agente za upis, postavljanjem na “Ograniči agente za upis,” podrazumevana konfiguracija ostaje izuzetno permisivna. Omogućava **Svima** pristup da se upisuju u sve šablone kao bilo ko.
 
@@ -125,9 +125,9 @@ Međutim, primećeno je da je **podrazumevana** postavka za CA “**Ne ograniča
 
 ### **Objašnjenje**
 
-**Sigurnosni opis** na **šablonima sertifikata** definiše **dozvole** koje specifični **AD principi** poseduju u vezi sa šablonom.
+**Bezbednosni opis** na **šablonima sertifikata** definiše **dozvole** koje specifični **AD principi** poseduju u vezi sa šablonom.
 
-Ako **napadač** poseduje potrebne **dozvole** da **izmeni** **šablon** i **uspostavi** bilo kakve **iskoristive pogrešne konfiguracije** navedene u **prethodnim odeljcima**, privilegijska eskalacija bi mogla biti olakšana.
+Ako **napadač** poseduje potrebne **dozvole** da **izmeni** **šablon** i **uspostavi** bilo kakve **iskoristive pogrešne konfiguracije** navedene u **prethodnim sekcijama**, privilegijska eskalacija bi mogla biti olakšana.
 
 Značajne dozvole koje se primenjuju na šablone sertifikata uključuju:
 
@@ -143,9 +143,9 @@ Primer privesc-a kao prethodni:
 
 <figure><img src="../../../images/image (814).png" alt=""><figcaption></figcaption></figure>
 
-ESC4 je kada korisnik ima privilegije pisanja nad šablonom sertifikata. Ovo se može, na primer, zloupotrebiti za prepisivanje konfiguracije šablona sertifikata kako bi se šablon učinio ranjivim na ESC1.
+ESC4 je kada korisnik ima privilegije pisanja nad šablonom sertifikata. Ovo se može, na primer, zloupotrebiti da se prepiše konfiguracija šablona sertifikata kako bi se šablon učinio ranjivim na ESC1.
 
-Kao što možemo videti u putanji iznad, samo `JOHNPC` ima ove privilegije, ali naš korisnik `JOHN` ima novu `AddKeyCredentialLink` ivicu prema `JOHNPC`. Pošto je ova tehnika povezana sa sertifikatima, implementirao sam i ovaj napad, koji je poznat kao [Shadow Credentials](https://posts.specterops.io/shadow-credentials-abusing-key-trust-account-mapping-for-takeover-8ee1a53566ab). Evo malog pregleda Certipy-ovog `shadow auto` komanda za preuzimanje NT hash-a žrtve.
+Kao što možemo videti u putanji iznad, samo `JOHNPC` ima ove privilegije, ali naš korisnik `JOHN` ima novu `AddKeyCredentialLink` ivicu prema `JOHNPC`. Pošto je ova tehnika povezana sa sertifikatima, implementirao sam i ovaj napad, koji je poznat kao [Shadow Credentials](https://posts.specterops.io/shadow-credentials-abusing-key-trust-account-mapping-for-takeover-8ee1a53566ab). Evo malog pregleda Certipy-ove `shadow auto` komande za preuzimanje NT heša žrtve.
 ```bash
 certipy shadow auto 'corp.local/john:Passw0rd!@dc.corp.local' -account 'johnpc'
 ```
@@ -160,7 +160,7 @@ certipy req -username john@corp.local -password Passw0rd -ca corp-DC-CA -target 
 # Restore config
 certipy template -username john@corp.local -password Passw0rd -template ESC4-Test -configuration ESC4-Test.json
 ```
-## Ranjiva PKI objekat pristup kontrola - ESC5
+## Vulnerable PKI Object Access Control - ESC5
 
 ### Objašnjenje
 
@@ -168,7 +168,7 @@ Opsežna mreža međusobno povezanih ACL zasnovanih odnosa, koja uključuje neko
 
 - AD računar objekat CA servera, koji može biti kompromitovan putem mehanizama kao što su S4U2Self ili S4U2Proxy.
 - RPC/DCOM server CA servera.
-- Bilo koji potomak AD objekat ili kontejner unutar specifične putanje kontejnera `CN=Public Key Services,CN=Services,CN=Configuration,DC=<DOMAIN>,DC=<COM>`. Ova putanja uključuje, ali nije ograničena na, kontejnere i objekte kao što su kontejner šablona sertifikata, kontejner sertifikacionih vlasti, NTAuthCertificates objekat i kontejner usluga upisa.
+- Bilo koji potomak AD objekta ili kontejner unutar specifične putanje kontejnera `CN=Public Key Services,CN=Services,CN=Configuration,DC=<DOMAIN>,DC=<COM>`. Ova putanja uključuje, ali nije ograničena na, kontejnere i objekte kao što su kontejner Šablona sertifikata, kontejner Sertifikacionih vlasti, objekat NTAuthCertificates i kontejner Usluga upisa.
 
 Bezbednost PKI sistema može biti kompromitovana ako napadač sa niskim privilegijama uspe da preuzme kontrolu nad bilo kojim od ovih kritičnih komponenti.
 
@@ -176,9 +176,9 @@ Bezbednost PKI sistema može biti kompromitovana ako napadač sa niskim privileg
 
 ### Objašnjenje
 
-Tema o kojoj se raspravlja u [**CQure Academy postu**](https://cqureacademy.com/blog/enhanced-key-usage) takođe se dotiče implikacija **`EDITF_ATTRIBUTESUBJECTALTNAME2`** oznake, kako je navedeno od strane Microsoft-a. Ova konfiguracija, kada je aktivirana na Sertifikacionoj Vlasti (CA), omogućava uključivanje **korisnički definisanih vrednosti** u **alternativno ime subjekta** za **bilo koji zahtev**, uključujući one konstruisane iz Active Directory®. Kao rezultat, ova odredba omogućava **napadaču** da se upiše putem **bilo kog šablona** postavljenog za **autentifikaciju** domena—specifično onih otvorenih za upis **neprivilegovanih** korisnika, poput standardnog šablona korisnika. Kao rezultat, može se obezbediti sertifikat, omogućavajući napadaču da se autentifikuje kao administrator domena ili **bilo koja druga aktivna entitet** unutar domena.
+Tema o kojoj se raspravlja u [**CQure Academy postu**](https://cqureacademy.com/blog/enhanced-key-usage) takođe se dotiče implikacija **`EDITF_ATTRIBUTESUBJECTALTNAME2`** oznake, kako je navedeno od strane Microsoft-a. Ova konfiguracija, kada je aktivirana na Sertifikacionoj vlasti (CA), omogućava uključivanje **korisnički definisanih vrednosti** u **alternativno ime subjekta** za **bilo koji zahtev**, uključujući one konstruisane iz Active Directory®. Kao rezultat, ova odredba omogućava **napadaču** da se upiše putem **bilo kog šablona** postavljenog za **autentifikaciju** domena—specifično onih otvorenih za upis **neprivilegovanih** korisnika, poput standardnog šablona korisnika. Kao rezultat, može se obezbediti sertifikat, omogućavajući napadaču da se autentifikuje kao administrator domena ili **bilo koja druga aktivna entitet** unutar domena.
 
-**Napomena**: Pristup za dodavanje **alternativnih imena** u Zahtev za potpisivanje sertifikata (CSR), putem `-attrib "SAN:"` argumenta u `certreq.exe` (poznat kao “Parovi imena i vrednosti”), predstavlja **kontrast** od strategije eksploatacije SAN-ova u ESC1. Ovde, razlika leži u **načinu na koji je informacija o računu enkapsulirana**—unutar atributa sertifikata, a ne ekstenzije.
+**Napomena**: Pristup za dodavanje **alternativnih imena** u Zahtev za potpisivanje sertifikata (CSR), putem argumenta `-attrib "SAN:"` u `certreq.exe` (poznat kao “Parovi imena i vrednosti”), predstavlja **kontrast** od strategije eksploatacije SAN-ova u ESC1. Ovde, razlika leži u **načinu na koji je informacija o računu enkapsulirana**—unutar atributa sertifikata, a ne ekstenzije.
 
 ### Zloupotreba
 
@@ -186,7 +186,7 @@ Da bi proverile da li je postavka aktivirana, organizacije mogu koristiti slede�
 ```bash
 certutil -config "CA_HOST\CA_NAME" -getreg "policy\EditFlags"
 ```
-Ova operacija suštinski koristi **pristup udaljenom registru**, stoga, alternativni pristup može biti:
+Ova operacija suštinski koristi **remote registry access**, stoga, alternativni pristup može biti:
 ```bash
 reg.exe query \\<CA_SERVER>\HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\CertSvc\Configuration\<CA_NAME>\PolicyModules\CertificateAuthority_MicrosoftDefault.Policy\ /v EditFlags
 ```
@@ -211,7 +211,7 @@ certutil -config "CA_HOST\CA_NAME" -setreg policy\EditFlags -EDITF_ATTRIBUTESUBJ
 > Nakon bezbednosnih ažuriranja iz maja 2022. godine, novoizdati **certifikati** će sadržati **bezbednosnu ekstenziju** koja uključuje **`objectSid` svojstvo zahtevaoca**. Za ESC1, ovaj SID se izvodi iz specificiranog SAN-a. Međutim, za **ESC6**, SID odražava **`objectSid` zahtevaoca**, a ne SAN.\
 > Da bi se iskoristio ESC6, neophodno je da sistem bude podložan ESC10 (Slabe Mape Certifikata), koji daje prioritet **SAN-u nad novom bezbednosnom ekstenzijom**.
 
-## Kontrola pristupa ranjive certifikacione vlasti - ESC7
+## Kontrola Pristupa Ranljive Certifikacione Autoritete - ESC7
 
 ### Napad 1
 
@@ -252,7 +252,7 @@ Certify.exe download /ca:dc.domain.local\theshire-DC-CA /id:336
 #### Objašnjenje
 
 > [!WARNING]
-> U **prethodnom napadu** **`Manage CA`** dozvole su korišćene za **omogućavanje** **EDITF_ATTRIBUTESUBJECTALTNAME2** oznake kako bi se izvršio **ESC6 napad**, ali to neće imati nikakav efekat dok se CA servis (`CertSvc`) ne restartuje. Kada korisnik ima pravo pristupa **`Manage CA`**, korisniku je takođe dozvoljeno da **restartuje servis**. Međutim, to **ne znači da korisnik može restartovati servis na daljinu**. Pored toga, **ESC6 možda neće raditi odmah** u većini zakrpljenih okruženja zbog bezbednosnih ažuriranja iz maja 2022.
+> U **prethodnom napadu** **`Manage CA`** dozvole su korišćene da se **omogući** **EDITF_ATTRIBUTESUBJECTALTNAME2** zastavica za izvođenje **ESC6 napada**, ali to neće imati nikakav efekat dok se CA servis (`CertSvc`) ne restartuje. Kada korisnik ima pravo pristupa **`Manage CA`**, korisniku je takođe dozvoljeno da **restartuje servis**. Međutim, to **ne znači da korisnik može da restartuje servis na daljinu**. Pored toga, **ESC6 možda neće raditi odmah** u većini zakrpljenih okruženja zbog bezbednosnih ažuriranja iz maja 2022.
 
 Stoga, ovde je predstavljen još jedan napad.
 
@@ -262,7 +262,7 @@ Preduvjeti:
 - **`Manage Certificates`** dozvola (može se dodeliti iz **`ManageCA`**)
 - Šablon sertifikata **`SubCA`** mora biti **omogućen** (može se omogućiti iz **`ManageCA`**)
 
-Tehnika se oslanja na činjenicu da korisnici sa pravima pristupa **`Manage CA`** _i_ **`Manage Certificates`** mogu **izdavati neuspela zahteva za sertifikate**. Šablon sertifikata **`SubCA`** je **ranjiv na ESC1**, ali **samo administratori** mogu da se upišu u šablon. Tako, **korisnik** može **zatražiti** da se upiše u **`SubCA`** - što će biti **odbijeno** - ali će **zatim biti odobreno od strane menadžera**.
+Tehnika se oslanja na činjenicu da korisnici sa pravima pristupa **`Manage CA`** _i_ **`Manage Certificates`** mogu **izdavati neuspela zahteva za sertifikate**. Šablon sertifikata **`SubCA`** je **ranjiv na ESC1**, ali **samo administratori** mogu da se upišu u šablon. Tako, **korisnik** može **zatražiti** da se upiše u **`SubCA`** - što će biti **odbijeno** - ali **zatim izdano od strane menadžera**.
 
 #### Zloupotreba
 
@@ -285,7 +285,7 @@ Certipy v4.0.0 - by Oliver Lyak (ly4k)
 
 [*] Successfully enabled 'SubCA' on 'corp-DC-CA'
 ```
-Ako smo ispunili preduslove za ovaj napad, možemo početi sa **zahtevom za sertifikat zasnovan na `SubCA` šablonu**.
+Ako smo ispunili preduslove za ovaj napad, možemo početi sa **zahtevom za sertifikat na osnovu `SubCA` šablona**.
 
 **Ovaj zahtev će biti odbijen**, ali ćemo sačuvati privatni ključ i zabeležiti ID zahteva.
 ```bash
@@ -323,12 +323,12 @@ Certipy v4.0.0 - by Oliver Lyak (ly4k)
 ### Objašnjenje
 
 > [!NOTE]
-> U okruženjima gde je **AD CS instaliran**, ako postoji **vulnerabilni web enrollment endpoint** i najmanje jedan **certificate template je objavljen** koji dozvoljava **enrollment domena računara i klijentsku autentifikaciju** (kao što je podrazumevani **`Machine`** template), postaje moguće da **bilo koji računar sa aktivnom spooler uslugom bude kompromitovan od strane napadača**!
+> U okruženjima gde je **AD CS instaliran**, ako postoji **vulnerabilni web enrollment endpoint** i najmanje jedan **sertifikatni šablon je objavljen** koji dozvoljava **upis domena i autentifikaciju klijenata** (kao što je podrazumevani **`Machine`** šablon), postaje moguće da **bilo koji računar sa aktivnom spooler uslugom bude kompromitovan od strane napadača**!
 
-Nekoliko **HTTP-based enrollment metoda** podržava AD CS, dostupnih kroz dodatne server uloge koje administratori mogu instalirati. Ove interfejse za HTTP-based sertifikate su podložni **NTLM relay napadima**. Napadač, sa **kompromitovane mašine, može da se pretvara da je bilo koji AD nalog koji se autentifikuje putem dolaznog NTLM**. Dok se pretvara da je žrtva, ove web interfejse može da koristi napadač da **zatraži klijentski autentifikacioni sertifikat koristeći `User` ili `Machine` sertifikat template**.
+Nekoliko **HTTP-baziranih metoda upisa** podržava AD CS, dostupnih kroz dodatne server uloge koje administratori mogu instalirati. Ove interfejse za HTTP-bazirani upis sertifikata su podložni **NTLM relay napadima**. Napadač, sa **kompromitovane mašine, može da se pretvara da je bilo koji AD nalog koji se autentifikuje putem dolaznog NTLM**. Dok se pretvara da je žrtva, ove web interfejse može da pristupi napadač da **zatraži sertifikat za autentifikaciju klijenta koristeći `User` ili `Machine` sertifikatne šablone**.
 
 - **Web enrollment interfejs** (starija ASP aplikacija dostupna na `http://<caserver>/certsrv/`), podrazumevano koristi samo HTTP, što ne nudi zaštitu od NTLM relay napada. Pored toga, izričito dozvoljava samo NTLM autentifikaciju kroz svoj Authorization HTTP header, čineći sigurnije metode autentifikacije poput Kerberos neprimenljivim.
-- **Certificate Enrollment Service** (CES), **Certificate Enrollment Policy** (CEP) Web Service, i **Network Device Enrollment Service** (NDES) podrazumevano podržavaju negotiate autentifikaciju putem svog Authorization HTTP header-a. Negotiate autentifikacija **podržava i** Kerberos i **NTLM**, omogućavajući napadaču da **smanji na NTLM** autentifikaciju tokom relay napada. Iako ove web usluge podrazumevano omogućavaju HTTPS, HTTPS sam po sebi **ne štiti od NTLM relay napada**. Zaštita od NTLM relay napada za HTTPS usluge je moguća samo kada je HTTPS kombinovan sa channel binding. Nažalost, AD CS ne aktivira Extended Protection for Authentication na IIS-u, što je potrebno za channel binding.
+- **Sertifikatna usluga upisa** (CES), **Politika upisa sertifikata** (CEP) Web Service, i **Usluga upisa mrežnih uređaja** (NDES) podrazumevano podržavaju negotiate autentifikaciju putem svog Authorization HTTP header-a. Negotiate autentifikacija **podržava i** Kerberos i **NTLM**, omogućavajući napadaču da **smanji na NTLM** autentifikaciju tokom relay napada. Iako ove web usluge podrazumevano omogućavaju HTTPS, HTTPS sam po sebi **ne štiti od NTLM relay napada**. Zaštita od NTLM relay napada za HTTPS usluge je moguća samo kada se HTTPS kombinuje sa channel binding. Nažalost, AD CS ne aktivira Extended Protection for Authentication na IIS-u, što je potrebno za channel binding.
 
 Uobičajeni **problem** sa NTLM relay napadima je **kratko trajanje NTLM sesija** i nemogućnost napadača da interaguje sa uslugama koje **zahtevaju NTLM potpisivanje**.
 
@@ -338,7 +338,7 @@ Ipak, ova ograničenja se prevazilaze iskorišćavanjem NTLM relay napada za sti
 account-persistence.md
 {{#endref}}
 
-Još jedno ograničenje NTLM relay napada je da **mašina pod kontrolom napadača mora biti autentifikovana od strane žrtvinog naloga**. Napadač može ili čekati ili pokušati da **prisili** ovu autentifikaciju:
+Još jedno ograničenje NTLM relay napada je to što **mašina pod kontrolom napadača mora biti autentifikovana od strane žrtvinog naloga**. Napadač može ili čekati ili pokušati da **prisili** ovu autentifikaciju:
 
 {{#ref}}
 ../printers-spooler-service-abuse.md
@@ -352,7 +352,7 @@ Certify.exe cas
 ```
 <figure><img src="../../../images/image (72).png" alt=""><figcaption></figcaption></figure>
 
-Svojstvo `msPKI-Enrollment-Servers` koristi preduzeća Certificate Authorities (CAs) za čuvanje tačaka krajnje usluge za upis sertifikata (CES). Ove tačke se mogu analizirati i navesti korišćenjem alata **Certutil.exe**:
+Svojstvo `msPKI-Enrollment-Servers` koristi preduzeće Certificate Authorities (CAs) za čuvanje tačaka krajnjeg korisnika Certificate Enrollment Service (CES). Ove tačke se mogu analizirati i navesti korišćenjem alata **Certutil.exe**:
 ```
 certutil.exe -enrollmentServerURL -config DC01.DOMAIN.LOCAL\DOMAIN-CA
 ```
@@ -380,9 +380,9 @@ execute-assembly C:\SpoolSample\SpoolSample\bin\Debug\SpoolSample.exe <victim> <
 ```
 #### Abuse with [Certipy](https://github.com/ly4k/Certipy)
 
-Zahtev za sertifikat se po defaultu pravi od strane Certipy na osnovu šablona `Machine` ili `User`, u zavisnosti od toga da li se ime naloga koje se preusmerava završava sa `$`. Specifikacija alternativnog šablona može se postići korišćenjem parametra `-template`.
+Zahtev za sertifikat se po defaultu pravi putem Certipy na osnovu šablona `Machine` ili `User`, u zavisnosti od toga da li se ime naloga koje se preusmerava završava sa `$`. Specifikacija alternativnog šablona može se postići korišćenjem `-template` parametra.
 
-Tehnika kao što je [PetitPotam](https://github.com/ly4k/PetitPotam) može se zatim koristiti za prinudnu autentifikaciju. Kada se radi sa domen kontrolerima, neophodno je specificirati `-template DomainController`.
+Tehnika poput [PetitPotam](https://github.com/ly4k/PetitPotam) se zatim može koristiti za primoravanje autentifikacije. Kada se radi sa domen kontrolerima, neophodno je specificirati `-template DomainController`.
 ```bash
 certipy relay -ca ca.corp.local
 Certipy v4.0.0 - by Oliver Lyak (ly4k)
@@ -399,18 +399,18 @@ Certipy v4.0.0 - by Oliver Lyak (ly4k)
 
 ### Objašnjenje
 
-Nova vrednost **`CT_FLAG_NO_SECURITY_EXTENSION`** (`0x80000`) za **`msPKI-Enrollment-Flag`**, poznata kao ESC9, sprečava umetanje **nove `szOID_NTDS_CA_SECURITY_EXT` sigurnosne ekstenzije** u sertifikat. Ova oznaka postaje relevantna kada je `StrongCertificateBindingEnforcement` postavljen na `1` (podrazumevana postavka), što se razlikuje od postavke `2`. Njena relevantnost se povećava u scenarijima gde bi slabija mapa sertifikata za Kerberos ili Schannel mogla biti iskorišćena (kao u ESC10), s obzirom na to da odsustvo ESC9 ne bi promenilo zahteve.
+Nova vrednost **`CT_FLAG_NO_SECURITY_EXTENSION`** (`0x80000`) za **`msPKI-Enrollment-Flag`**, poznata kao ESC9, sprečava umetanje **nove `szOID_NTDS_CA_SECURITY_EXT` sigurnosne ekstenzije** u sertifikat. Ova oznaka postaje relevantna kada je `StrongCertificateBindingEnforcement` postavljen na `1` (podrazumevano podešavanje), što se razlikuje od podešavanja `2`. Njena relevantnost se povećava u scenarijima gde bi slabija mapa sertifikata za Kerberos ili Schannel mogla biti iskorišćena (kao u ESC10), s obzirom na to da odsustvo ESC9 ne bi promenilo zahteve.
 
 Uslovi pod kojima postavka ove oznake postaje značajna uključuju:
 
 - `StrongCertificateBindingEnforcement` nije podešen na `2` (sa podrazumevanjem `1`), ili `CertificateMappingMethods` uključuje `UPN` oznaku.
-- Sertifikat je označen oznakom `CT_FLAG_NO_SECURITY_EXTENSION` unutar postavke `msPKI-Enrollment-Flag`.
+- Sertifikat je označen oznakom `CT_FLAG_NO_SECURITY_EXTENSION` unutar podešavanja `msPKI-Enrollment-Flag`.
 - Bilo koja EKU za autentifikaciju klijenta je specificirana sertifikatom.
 - `GenericWrite` dozvole su dostupne za bilo koji nalog kako bi se kompromitovao drugi.
 
-### Scenarij Zloupotrebe
+### Scenarij zloupotrebe
 
-Pretpostavimo da `John@corp.local` ima `GenericWrite` dozvole nad `Jane@corp.local`, sa ciljem da kompromituje `Administrator@corp.local`. `ESC9` šablon sertifikata, u koji `Jane@corp.local` može da se upiše, konfiguriše se sa oznakom `CT_FLAG_NO_SECURITY_EXTENSION` u svojoj postavci `msPKI-Enrollment-Flag`.
+Pretpostavimo da `John@corp.local` ima `GenericWrite` dozvole nad `Jane@corp.local`, sa ciljem da kompromituje `Administrator@corp.local`. `ESC9` šablon sertifikata, u koji `Jane@corp.local` može da se upiše, konfiguriše se sa oznakom `CT_FLAG_NO_SECURITY_EXTENSION` u svom podešavanju `msPKI-Enrollment-Flag`.
 
 U početku, `Jane`-in hash se stiče korišćenjem Shadow Credentials, zahvaljujući `John`-ovom `GenericWrite`:
 ```bash
@@ -428,7 +428,7 @@ certipy req -username jane@corp.local -hashes <hash> -ca corp-DC-CA -template ES
 ```
 Napomena je da `userPrincipalName` sertifikata odražava `Administrator`, bez ikakvog “object SID”.
 
-`Jane`'s `userPrincipalName` se zatim vraća na njen originalni, `Jane@corp.local`:
+`Jane`-in `userPrincipalName` se zatim vraća na njen originalni, `Jane@corp.local`:
 ```bash
 certipy account update -username John@corp.local -password Passw0rd! -user Jane -upn Jane@corp.local
 ```
@@ -440,14 +440,14 @@ certipy auth -pfx adminitrator.pfx -domain corp.local
 
 ### Objašnjenje
 
-Dve vrednosti registarskih ključeva na kontroleru domena se odnose na ESC10:
+Dve vrednosti registarskih ključeva na kontroleru domena se nazivaju ESC10:
 
 - Podrazumevana vrednost za `CertificateMappingMethods` pod `HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\SecurityProviders\Schannel` je `0x18` (`0x8 | 0x10`), prethodno postavljena na `0x1F`.
 - Podrazumevana postavka za `StrongCertificateBindingEnforcement` pod `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Kdc` je `1`, prethodno `0`.
 
 **Slučaj 1**
 
-Kada je `StrongCertificateBindingEnforcement` konfigurisana kao `0`.
+Kada je `StrongCertificateBindingEnforcement` konfigurisan kao `0`.
 
 **Slučaj 2**
 
@@ -455,7 +455,7 @@ Ako `CertificateMappingMethods` uključuje `UPN` bit (`0x4`).
 
 ### Slučaj Zloupotrebe 1
 
-Sa `StrongCertificateBindingEnforcement` konfigurisanim kao `0`, nalog A sa `GenericWrite` dozvolama može biti iskorišćen za kompromitovanje bilo kog naloga B.
+Sa `StrongCertificateBindingEnforcement` konfigurisanom kao `0`, nalog A sa `GenericWrite` dozvolama može biti iskorišćen da kompromituje bilo koji nalog B.
 
 Na primer, imajući `GenericWrite` dozvole nad `Jane@corp.local`, napadač ima za cilj da kompromituje `Administrator@corp.local`. Procedura odražava ESC9, omogućavajući korišćenje bilo kog šablona sertifikata.
 
@@ -534,7 +534,7 @@ ESC11                             : Encryption is not enforced for ICPR requests
 ```
 ### Abuse Scenario
 
-Potrebno je postaviti relay server:
+Potrebno je postaviti relani server:
 ```bash
 $ certipy relay -target 'rpc://DC01.domain.local' -ca 'DC01-CA' -dc-ip 192.168.100.100
 Certipy v4.7.0 - by Oliver Lyak (ly4k)
@@ -565,7 +565,7 @@ $ ntlmrelayx.py -t rpc://192.168.100.100 -rpc-mode ICPR -icpr-ca-name DC01-CA -s
 
 Administratori mogu postaviti Sertifikacionu Autoritetu da je čuva na spoljnjem uređaju kao što je "Yubico YubiHSM2".
 
-Ako je USB uređaj povezan sa CA serverom putem USB porta, ili USB uređaj server u slučaju da je CA server virtuelna mašina, potrebna je autentifikaciona ključ (ponekad nazvan "lozinka") za Ključni Skladišni Provajder da generiše i koristi ključeve u YubiHSM.
+Ako je USB uređaj povezan sa CA serverom putem USB porta, ili USB uređaj server u slučaju da je CA server virtuelna mašina, potrebna je autentifikaciona ključ (ponekad nazvan "lozinka") za Key Storage Provider da generiše i koristi ključeve u YubiHSM.
 
 Ovaj ključ/lozinka se čuva u registru pod `HKEY_LOCAL_MACHINE\SOFTWARE\Yubico\YubiHSM\AuthKeysetPassword` u čistom tekstu.
 
@@ -625,18 +625,18 @@ Sve što treba da uradi je da specificira šablon, dobiće sertifikat sa pravima
 ```bash
 certipy req -u "John@domain.local" -p "password" -dc-ip 192.168.100.100 -target "DC01.domain.local" -ca 'DC01-CA' -template 'VulnerableTemplate'
 ```
-## Kompromitovanje šuma uz objašnjenje sertifikata u pasivnom glasu
+## Kompromitovanje šuma sa sertifikatima objašnjeno u pasivnom glasu
 
-### Kršenje poverenja šuma od strane kompromitovanih CA
+### Rušenje poverenja šuma od strane kompromitovanih CA
 
-Konfiguracija za **cross-forest enrollment** je relativno jednostavna. **Root CA sertifikat** iz resursnog šuma je **objavljen u šumama naloga** od strane administratora, a **enterprise CA** sertifikati iz resursnog šuma su **dodati u `NTAuthCertificates` i AIA kontejnere u svakoj šumi naloga**. Da pojasnimo, ovaj aranžman daje **CA u resursnom šumu potpunu kontrolu** nad svim drugim šumama za koje upravlja PKI. Ako ovaj CA bude **kompromitovan od strane napadača**, sertifikati za sve korisnike u resursnom i šumama naloga mogli bi biti **falsifikovani od strane njih**, čime se krši bezbednosna granica šuma.
+Konfiguracija za **cross-forest enrollment** je relativno jednostavna. **Root CA sertifikat** iz resursnog šuma je **objavljen u šumama naloga** od strane administratora, a **enterprise CA** sertifikati iz resursnog šuma su **dodati u `NTAuthCertificates` i AIA kontejnere u svakoj šumi naloga**. Da pojasnimo, ovaj aranžman daje **CA u resursnom šumu potpunu kontrolu** nad svim drugim šumama za koje upravlja PKI. Ako bi ovaj CA bio **kompromitovan od strane napadača**, sertifikati za sve korisnike u resursnom i šumama naloga mogli bi biti **falsifikovani od strane njih**, čime bi se prekrila sigurnosna granica šuma.
 
-### Prava na upis koja se dodeljuju stranim principima
+### Prava za upis dodeljena stranim principima
 
-U multi-forest okruženjima, potrebna je opreznost u vezi sa Enterprise CA koje **objavljuju šablone sertifikata** koji omogućavaju **Authenticated Users ili strane principe** (korisnici/grupe van šuma kojima pripada Enterprise CA) **prava na upis i uređivanje**.\
-Nakon autentifikacije preko poverenja, **Authenticated Users SID** se dodaje u korisnički token od strane AD. Tako, ako domen poseduje Enterprise CA sa šablonom koji **omogućava prava na upis za Authenticated Users**, šablon bi potencijalno mogao biti **upisan od strane korisnika iz drugog šuma**. Slično, ako su **prava na upis izričito dodeljena stranom principu putem šablona**, **stvara se međusobni odnos kontrole pristupa između šuma**, omogućavajući principu iz jednog šuma da **upiše šablon iz drugog šuma**.
+U multi-forest okruženjima, potrebna je opreznost u vezi sa Enterprise CA koje **objavljuju šablone sertifikata** koji omogućavaju **Authenticated Users ili strane principe** (korisnici/grupe van šuma kojoj Enterprise CA pripada) **prava za upis i uređivanje**.\
+Nakon autentifikacije preko poverenja, **Authenticated Users SID** se dodaje korisničkom tokenu od strane AD. Tako, ako domen ima Enterprise CA sa šablonom koji **omogućava prava za upis Authenticated Users**, šablon bi potencijalno mogao biti **upisan od strane korisnika iz druge šume**. Slično, ako su **prava za upis izričito dodeljena stranom principu putem šablona**, **stvara se međusobni odnos kontrole pristupa između šuma**, omogućavajući principu iz jedne šume da **upisuje šablon iz druge šume**.
 
-Oba scenarija dovode do **povećanja površine napada** od jednog šuma do drugog. Podešavanja šablona sertifikata mogla bi biti iskorišćena od strane napadača za sticanje dodatnih privilegija u stranom domenu.
+Oba scenarija dovode do **povećanja površine napada** od jedne šume do druge. Podešavanja šablona sertifikata mogla bi biti iskorišćena od strane napadača da dobiju dodatna prava u stranoj domeni.
 
 
 {{#include ../../../banners/hacktricks-training.md}}

@@ -39,7 +39,7 @@ Poznato je i kao Mančestersko kodiranje. Logička vrednost se definiše polarit
 **4. Kombinacija prethodnih i drugih egzotika**
 
 > [!NOTE]
-> Postoje IR protokoli koji **pokušavaju da postanu univerzalni** za nekoliko tipova uređaja. Najpoznatiji su RC5 i NEC. Nažalost, najpoznatiji **ne znači i najčešći**. U mojoj okolini, sreo sam samo dva NEC daljinska upravljača i nijedan RC5.
+> Postoje IR protokoli koji **pokušavaju da postanu univerzalni** za nekoliko tipova uređaja. Najpoznatiji su RC5 i NEC. Nažalost, najpoznatiji **ne znači i najčešći**. U mom okruženju, sreo sam samo dva NEC daljinska upravljača i nijedan RC5.
 >
 > Proizvođači vole da koriste svoje jedinstvene IR protokole, čak i unutar iste grupe uređaja (na primer, TV kutije). Stoga, daljinski upravljači iz različitih kompanija, a ponekad i iz različitih modela iste kompanije, nisu u stanju da rade sa drugim uređajima istog tipa.
 
@@ -55,7 +55,7 @@ Zatim se prenose podaci. Struktura, preambula i način kodiranja bitova određen
 
 **NEC IR protokol** sadrži kratku komandu i kod ponavljanja, koji se šalje dok je dugme pritisnuto. I komanda i kod ponavljanja imaju istu preambulu na početku.
 
-NEC **komanda**, pored preamble, sastoji se od bajta adrese i bajta broja komande, pomoću kojih uređaj razume šta treba da se izvrši. Bajti adrese i broja komande su duplicirani sa inverznim vrednostima, kako bi se proverila celovitost prenosa. Na kraju komande postoji dodatni stop bit.
+NEC **komanda**, pored preamble, sastoji se od bajta adrese i bajta broja komande, po kojima uređaj razume šta treba da se izvrši. Bajti adrese i broja komande su duplicirani sa inverznim vrednostima, kako bi se proverila celovitost prenosa. Na kraju komande postoji dodatni stop bit.
 
 **Kod ponavljanja** ima "1" nakon preamble, što je stop bit.
 

@@ -6,11 +6,11 @@
 
 [AD Explorer](https://docs.microsoft.com/en-us/sysinternals/downloads/adexplorer) je iz Sysinternal Suite:
 
-> Napredni preglednik i uređivač Active Directory (AD). Možete koristiti AD Explorer za lako navigiranje AD bazi podataka, definisanje omiljenih lokacija, pregled svojstava objekata i atributa bez otvaranja dijaloga, uređivanje dozvola, pregled sheme objekta i izvršavanje složenih pretraga koje možete sačuvati i ponovo izvršiti.
+> Napredni preglednik i uređivač Active Directory (AD). Možete koristiti AD Explorer za lako navigiranje AD bazom podataka, definisanje omiljenih lokacija, pregled svojstava objekata i atributa bez otvaranja dijaloga, uređivanje dozvola, pregled sheme objekta i izvršavanje složenih pretraga koje možete sačuvati i ponovo izvršiti.
 
 ### Snapshots
 
-AD Explorer može kreirati snimke AD-a tako da ga možete proveriti offline.\
+AD Explorer može kreirati snimke AD-a kako biste mogli da ga proverite offline.\
 Može se koristiti za otkrivanje ranjivosti offline ili za upoređivanje različitih stanja AD DB-a tokom vremena.
 
 Biće vam potrebni korisničko ime, lozinka i pravac za povezivanje (bilo koji AD korisnik je potreban).
@@ -19,7 +19,7 @@ Da biste napravili snimak AD-a, idite na `File` --> `Create Snapshot` i unesite 
 
 ## ADRecon
 
-[**ADRecon**](https://github.com/adrecon/ADRecon) je alat koji izvlači i kombinuje razne artefakte iz AD okruženja. Informacije se mogu predstaviti u **specijalno formatiranom** Microsoft Excel **izveštaju** koji uključuje sažetke sa metrikama kako bi olakšao analizu i pružio celovitu sliku trenutnog stanja ciljnog AD okruženja.
+[**ADRecon**](https://github.com/adrecon/ADRecon) je alat koji izvlači i kombinuje razne artefakte iz AD okruženja. Informacije se mogu predstaviti u **posebno formatiranom** Microsoft Excel **izveštaju** koji uključuje sažetke sa metrikama kako bi olakšao analizu i pružio celovitu sliku trenutnog stanja ciljnog AD okruženja.
 ```bash
 # Run it
 .\ADRecon.ps1
@@ -42,7 +42,7 @@ Booldhound se sastoji od 2 glavna dela: **ingestors** i **aplikacija za vizualiz
 
 ### Instalacija
 
-Nakon kreiranja BloodHound CE, ceo projekat je ažuriran radi lakšeg korišćenja sa Docker-om. Najlakši način da se započne je korišćenje unapred konfigurisane Docker Compose konfiguracije.
+Nakon kreiranja BloodHound CE, ceo projekat je ažuriran radi lakšeg korišćenja sa Docker-om. Najlakši način da se započne je korišćenje njegove unapred konfigurirane Docker Compose konfiguracije.
 
 1. Instalirajte Docker Compose. Ovo bi trebalo da bude uključeno u [Docker Desktop](https://www.docker.com/products/docker-desktop/) instalaciju.
 2. Pokrenite:
@@ -82,6 +82,6 @@ group3r.exe -f <filepath-name.log>
 
 [**PingCastle**](https://www.pingcastle.com/documentation/) **procjenjuje bezbednosni položaj AD okruženja** i pruža lep **izveštaj** sa grafikonima.
 
-Da biste ga pokrenuli, možete izvršiti binarni fajl `PingCastle.exe` i započeće **interaktivnu sesiju** koja prikazuje meni opcija. Podrazumevana opcija koju treba koristiti je **`healthcheck`** koja će uspostaviti osnovnu **pregled** **domena**, i pronaći **pogrešne konfiguracije** i **ranjivosti**.&#x20;
+Da biste ga pokrenuli, možete izvršiti binarni fajl `PingCastle.exe` i započeće **interaktivnu sesiju** koja prikazuje meni opcija. Podrazumevana opcija koju treba koristiti je **`healthcheck`** koja će uspostaviti osnovnu **pregled** **domena**, i pronaći **neispravne konfiguracije** i **ranjivosti**.&#x20;
 
 {{#include ../../banners/hacktricks-training.md}}

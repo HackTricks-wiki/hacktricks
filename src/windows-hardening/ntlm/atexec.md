@@ -4,7 +4,7 @@
 
 ## Kako to funkcioniše
 
-At omogućava zakazivanje zadataka na hostovima gde znate korisničko ime/(lozinku/Hash). Dakle, možete ga koristiti za izvršavanje komandi na drugim hostovima i dobijanje izlaza.
+At omogućava zakazivanje zadataka na hostovima gde znate korisničko ime/(lozinku/Hash). Tako da ga možete koristiti za izvršavanje komandi na drugim hostovima i dobijanje izlaza.
 ```
 At \\victim 11:00:00PM shutdown -r
 ```

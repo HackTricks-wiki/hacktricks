@@ -2,7 +2,7 @@
 
 Preporučeni koraci za modifikaciju konfiguracija pokretanja uređaja i bootloader-a kao što je U-boot:
 
-1. **Pristupite Bootloader-ovom Interpreter Shell-u**:
+1. **Pristup Bootloader-ovom Interpreter Shell-u**:
 
 - Tokom pokretanja, pritisnite "0", razmak ili druge identifikovane "magične kodove" da biste pristupili bootloader-ovom interpreter shell-u.
 
@@ -41,7 +41,7 @@ Preporučeni koraci za modifikaciju konfiguracija pokretanja uređaja i bootload
 - Budite oprezni prilikom povezivanja jednog pina na masu i interakcije sa SPI ili NAND flash čipovima tokom sekvence pokretanja uređaja, posebno pre nego što se kernel dekompresuje. Konsultujte tehnički list NAND flash čipa pre nego što kratko spojite pinove.
 
 7. **Konfigurišite Rogue DHCP Server**:
-- Postavite rogue DHCP server sa zlonamernim parametrima za uređaj da bi ga usvojio tokom PXE pokretanja. Iskoristite alate kao što je Metasploit-ov (MSF) DHCP pomoćni server. Modifikujte 'FILENAME' parametar sa komandama za injekciju kao što su `'a";/bin/sh;#'` da biste testirali validaciju unosa za procedure pokretanja uređaja.
+- Postavite rogue DHCP server sa zlonamernim parametrima za uređaj da bi ga usvojio tokom PXE pokretanja. Iskoristite alate kao što je Metasploit-ov (MSF) DHCP pomoćni server. Izmenite 'FILENAME' parametar sa komandom za injekciju kao što je `'a";/bin/sh;#'` da biste testirali validaciju unosa za procedure pokretanja uređaja.
 
 **Napomena**: Koraci koji uključuju fizičku interakciju sa pinovima uređaja (\*označeni zvezdicama) treba da se pristupaju sa ekstremnim oprezom kako bi se izbeglo oštećenje uređaja.
 

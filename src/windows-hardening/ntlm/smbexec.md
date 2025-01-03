@@ -4,12 +4,12 @@
 
 ## Kako funkcioniše
 
-**Smbexec** je alat koji se koristi za daljinsko izvršavanje komandi na Windows sistemima, sličan **Psexec**, ali izbegava postavljanje bilo kojih malicioznih fajlova na ciljni sistem.
+**Smbexec** je alat koji se koristi za daljinsko izvršavanje komandi na Windows sistemima, sličan **Psexec**, ali izbegava postavljanje bilo kojih zlonamernih fajlova na ciljni sistem.
 
 ### Ključne tačke o **SMBExec**
 
-- Operiše tako što kreira privremenu uslugu (na primer, "BTOBTO") na ciljnoj mašini da izvrši komande putem cmd.exe (%COMSPEC%), bez ispuštanja bilo kakvih binarnih fajlova.
-- I pored svog stealth pristupa, generiše logove događaja za svaku izvršenu komandu, nudeći oblik neinteraktivnog "shell"-a.
+- Radi tako što kreira privremenu uslugu (na primer, "BTOBTO") na ciljnjoj mašini da izvrši komande putem cmd.exe (%COMSPEC%), bez preuzimanja bilo kakvih binarnih fajlova.
+- I pored svog diskretnog pristupa, generiše logove događaja za svaku izvršenu komandu, nudeći oblik neinteraktivnog "shell"-a.
 - Komanda za povezivanje koristeći **Smbexec** izgleda ovako:
 ```bash
 smbexec.py WORKGROUP/genericuser:genericpassword@10.10.10.10
@@ -17,8 +17,8 @@ smbexec.py WORKGROUP/genericuser:genericpassword@10.10.10.10
 ### Izvršavanje Komandi Bez Binarnih Fajlova
 
 - **Smbexec** omogućava direktno izvršavanje komandi kroz binPaths servisa, eliminišući potrebu za fizičkim binarnim fajlovima na meti.
-- Ova metoda je korisna za izvršavanje jednokratnih komandi na Windows meti. Na primer, kombinovanjem sa Metasploit-ovim `web_delivery` modulom omogućava se izvršavanje PowerShell-targetiranog reverznog Meterpreter payload-a.
-- Kreiranjem udaljenog servisa na napadačevoj mašini sa binPath postavljenim da izvrši pruženu komandu kroz cmd.exe, moguće je uspešno izvršiti payload, ostvarujući callback i izvršavanje payload-a sa Metasploit slušateljem, čak i ako dođe do grešaka u odgovoru servisa.
+- Ova metoda je korisna za izvršavanje jednokratnih komandi na Windows meti. Na primer, kombinovanjem sa Metasploit-ovim `web_delivery` modulom omogućava se izvršavanje PowerShell-targetiranog obrnuto Meterpreter payload-a.
+- Kreiranjem udaljenog servisa na napadačevoj mašini sa binPath postavljenim da izvrši pruženu komandu kroz cmd.exe, moguće je uspešno izvršiti payload, ostvarujući callback i izvršavanje payload-a sa Metasploit slušačem, čak i ako dođe do grešaka u odgovoru servisa.
 
 ### Primer Komandi
 

@@ -13,7 +13,7 @@ Preporučeno je da se provere dozvole servisa **RpcEptMapper** koristeći **rege
 
 Snimak ekrana je prikazao dozvole dodeljene korisniku sa niskim privilegijama, među kojima je bila istaknuta dozvola **Create Subkey**. Ova dozvola, takođe poznata kao **AppendData/AddSubdirectory**, odgovara nalazima skripte.
 
-Primećena je nemogućnost direktne izmene određenih vrednosti, ali sposobnost kreiranja novih podključeva. Primer koji je istaknut bio je pokušaj izmene vrednosti **ImagePath**, što je rezultiralo porukom o odbijenom pristupu.
+Primećena je nemogućnost direktne izmene određenih vrednosti, ali mogućnost kreiranja novih podključeva. Primer koji je istaknut bio je pokušaj izmene vrednosti **ImagePath**, što je rezultiralo porukom o odbijenom pristupu.
 
 Uprkos ovim ograničenjima, identifikovana je potencijalna mogućnost eskalacije privilegija kroz mogućnost korišćenja podključa **Performance** unutar registra servisa **RpcEptMapper**, podključa koji nije prisutan po defaultu. Ovo bi omogućilo registraciju DLL-a i praćenje performansi.
 

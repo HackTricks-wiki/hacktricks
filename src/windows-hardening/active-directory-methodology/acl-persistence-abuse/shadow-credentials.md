@@ -12,7 +12,7 @@ U postu je opisana metoda za postavljanje **javnih-privatnih ključeva** za aute
 
 ### Requirements
 
-Da biste primenili ovu tehniku, određeni uslovi moraju biti ispunjeni:
+Da bi se primenila ova tehnika, moraju biti ispunjeni određeni uslovi:
 
 - Potreban je minimum jedan Windows Server 2016 Domain Controller.
 - Domain Controller mora imati instaliran digitalni sertifikat za autentifikaciju servera.
@@ -24,7 +24,7 @@ Da biste primenili ovu tehniku, određeni uslovi moraju biti ispunjeni:
 Zloupotreba Key Trust za računar objekata obuhvata korake izvan dobijanja Ticket Granting Ticket (TGT) i NTLM hasha. Opcije uključuju:
 
 1. Kreiranje **RC4 silver ticket** za delovanje kao privilegovani korisnici na nameravanom hostu.
-2. Korišćenje TGT-a sa **S4U2Self** za impersonaciju **privilegovanim korisnicima**, što zahteva izmene u Service Ticket-u kako bi se dodala klasa usluge imenu usluge.
+2. Korišćenje TGT-a sa **S4U2Self** za impersonaciju **privilegovanim korisnicima**, što zahteva izmene u Service Ticket-u kako bi se dodala klasa usluge u ime usluge.
 
 Značajna prednost zloupotrebe Key Trust-a je njeno ograničenje na privatni ključ koji generiše napadač, izbegavajući delegaciju potencijalno ranjivim nalozima i ne zahtevajući kreiranje računa računara, što bi moglo biti teško ukloniti.
 
@@ -32,7 +32,7 @@ Značajna prednost zloupotrebe Key Trust-a je njeno ograničenje na privatni klj
 
 ### [**Whisker**](https://github.com/eladshamir/Whisker)
 
-Zasnovan je na DSInternals koji pruža C# interfejs za ovaj napad. Whisker i njegov Python pandan, **pyWhisker**, omogućavaju manipulaciju `msDS-KeyCredentialLink` atributom kako bi se stekla kontrola nad Active Directory nalozima. Ovi alati podržavaju razne operacije kao što su dodavanje, listanje, uklanjanje i brisanje ključnih kredencijala iz ciljnog objekta.
+Zasnovan je na DSInternals i pruža C# interfejs za ovaj napad. Whisker i njegov Python ekvivalent, **pyWhisker**, omogućavaju manipulaciju `msDS-KeyCredentialLink` atributom kako bi se stekla kontrola nad Active Directory nalozima. Ovi alati podržavaju razne operacije kao što su dodavanje, listanje, uklanjanje i brisanje ključnih kredencijala iz ciljnog objekta.
 
 **Whisker** funkcije uključuju:
 

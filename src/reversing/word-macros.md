@@ -11,7 +11,7 @@ Na primer, na sledećoj slici možete videti da se If koji nikada neće biti ta�
 
 ### Macro Forms
 
-Korišćenjem funkcije **GetObject** moguće je dobiti podatke iz formi makroa. Ovo se može koristiti za otežavanje analize. Sledeća slika prikazuje makro formu koja se koristi za **sakrivanje podataka unutar tekstualnih okvira** (tekstualni okvir može sakriti druge tekstualne okvire):
+Korišćenjem **GetObject** funkcije moguće je dobiti podatke iz formi makroa. Ovo se može koristiti za otežavanje analize. Sledeća slika prikazuje makro formu koja se koristi za **sakrivanje podataka unutar tekstualnih okvira** (tekstualni okvir može sakriti druge tekstualne okvire):
 
 ![](<../images/image (344).png>)
 

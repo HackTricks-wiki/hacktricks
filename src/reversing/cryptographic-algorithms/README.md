@@ -6,7 +6,7 @@
 
 ## Identifikacija Algoritama
 
-Ako završite u kodu **koristeći pomeranja udesno i ulevo, xore i nekoliko aritmetičkih operacija** veoma je verovatno da je to implementacija **kriptografskog algoritma**. Ovde će biti prikazani neki načini da se **identifikuje algoritam koji se koristi bez potrebe da se obrće svaki korak**.
+Ako završite u kodu **koristeći pomeranja udesno i ulevo, XOR-ove i nekoliko aritmetičkih operacija**, veoma je verovatno da je to implementacija **kriptografskog algoritma**. Ovde će biti prikazani neki načini da se **identifikuje algoritam koji se koristi bez potrebe da se obrće svaki korak**.
 
 ### API funkcije
 
@@ -55,7 +55,7 @@ Možete pristupiti tim podacima, **grupisati prvi dword** i pretražiti ga na Go
 
 ![](<../../images/image (372).png>)
 
-U ovom slučaju, ako tražite **0xA56363C6** možete pronaći da je povezan sa **tabelama AES algoritma**.
+U ovom slučaju, ako tražite **0xA56363C6**, možete pronaći da je povezan sa **tabelama AES algoritma**.
 
 ## RC4 **(Simetrična Kriptografija)**
 
@@ -108,11 +108,11 @@ Takođe obratite pažnju na **veličinu petlje** (**132**) i **broj XOR operacij
 
 ![](<../../images/image (381).png>)
 
-Kao što je ranije pomenuto, ovaj kod može biti vizualizovan unutar bilo kog dekompilatora kao **veoma duga funkcija** jer **nema skokova** unutar nje. Dekomplovani kod može izgledati ovako:
+Kao što je ranije pomenuto, ovaj kod može biti vizualizovan unutar bilo kog dekompilatora kao **veoma duga funkcija** jer **nema skakanja** unutar nje. Dekomplovani kod može izgledati ovako:
 
 ![](<../../images/image (382).png>)
 
-Stoga, moguće je identifikovati ovaj algoritam proverom **magične brojke** i **početnih XOR-ova**, videći **veoma dugu funkciju** i **upoređujući** neke **instrukcije** duge funkcije **sa implementacijom** (kao što je pomeranje ulevo za 7 i rotacija ulevo za 22).
+Stoga, moguće je identifikovati ovaj algoritam proverom **magične brojke** i **inicijalnih XOR-ova**, videći **veoma dugu funkciju** i **upoređujući** neke **instrukcije** duge funkcije **sa implementacijom** (kao što su pomeranje ulevo za 7 i rotacija ulevo za 22).
 
 ## RSA **(Asimetrična Kriptografija)**
 
@@ -127,7 +127,7 @@ Stoga, moguće je identifikovati ovaj algoritam proverom **magične brojke** i *
 ![](<../../images/image (383).png>)
 
 - U liniji 11 (levo) postoji `+7) >> 3` što je isto kao u liniji 35 (desno): `+7) / 8`
-- Linija 12 (levo) proverava da li je `modulus_len < 0x040` a u liniji 36 (desno) proverava da li je `inputLen+11 > modulusLen`
+- Linija 12 (levo) proverava da li je `modulus_len < 0x040` i u liniji 36 (desno) proverava da li je `inputLen+11 > modulusLen`
 
 ## MD5 & SHA (heš)
 
@@ -170,7 +170,7 @@ CRC heš algoritam izgleda ovako:
 ### Karakteristike
 
 - Nema prepoznatljivih konstanti
-- Možete pokušati da napišete algoritam u python-u i pretražujete slične stvari online
+- Možete pokušati da napišete algoritam u Python-u i pretražiti slične stvari online
 
 ### Identifikacija
 

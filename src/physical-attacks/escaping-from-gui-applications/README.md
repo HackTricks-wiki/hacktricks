@@ -2,7 +2,7 @@
 
 # Proverite moguće akcije unutar GUI aplikacije
 
-**Uobičajeni dijalozi** su opcije za **čuvanje datoteke**, **otvaranje datoteke**, odabir fonta, boje... Većina njih će **ponuditi punu funkcionalnost Explorera**. To znači da ćete moći da pristupite funkcionalnostima Explorera ako možete da pristupite ovim opcijama:
+**Uobičajeni dijalozi** su opcije za **čuvanje datoteke**, **otvaranje datoteke**, odabir fonta, boje... Većina njih će **ponuditi punu funkcionalnost Explorera**. To znači da ćete moći pristupiti funkcionalnostima Explorera ako možete pristupiti ovim opcijama:
 
 - Zatvori/Zatvori kao
 - Otvori/Otvori sa
@@ -20,11 +20,11 @@ Trebalo bi da proverite da li možete:
 
 ## Izvršavanje komandi
 
-Možda **koristeći opciju `Open with`** možete otvoriti/izvršiti neku vrstu shell-a.
+Možda **koristeći opciju `Otvori sa`** možete otvoriti/izvršiti neku vrstu shell-a.
 
 ### Windows
 
-Na primer _cmd.exe, command.com, Powershell/Powershell ISE, mmc.exe, at.exe, taskschd.msc..._ pronađite više binarnih datoteka koje se mogu koristiti za izvršavanje komandi (i obavljanje neočekivanih akcija) ovde: [https://lolbas-project.github.io/](https://lolbas-project.github.io)
+Na primer _cmd.exe, command.com, Powershell/Powershell ISE, mmc.exe, at.exe, taskschd.msc..._ pronađite više binarnih datoteka koje se mogu koristiti za izvršavanje komandi (i izvođenje neočekivanih akcija) ovde: [https://lolbas-project.github.io/](https://lolbas-project.github.io)
 
 ### \*NIX \_\_
 
@@ -35,7 +35,7 @@ _bash, sh, zsh..._ Više ovde: [https://gtfobins.github.io/](https://gtfobins.gi
 ## Zaobilaženje ograničenja putanja
 
 - **Promenljive okruženja**: Postoji mnogo promenljivih okruženja koje upućuju na neku putanju
-- **Drugi protokoli**: _about:, data:, ftp:, file:, mailto:, news:, res:, telnet:, view-source:_
+- **Ostali protokoli**: _about:, data:, ftp:, file:, mailto:, news:, res:, telnet:, view-source:_
 - **Simbolički linkovi**
 - **Prečice**: CTRL+N (otvori novu sesiju), CTRL+R (izvrši komande), CTRL+SHIFT+ESC (Upravnik zadataka), Windows+E (otvori explorer), CTRL-B, CTRL-I (Omiljeni), CTRL-H (Istorija), CTRL-L, CTRL-O (Dijalog za otvaranje datoteke), CTRL-P (Dijalog za štampanje), CTRL-S (Sačuvaj kao)
 - Skriveni Administrativni meni: CTRL-ALT-F8, CTRL-ESC-F9
@@ -85,13 +85,13 @@ Registry editor: [https://sourceforge.net/projects/uberregedit/](https://sourcef
 - WINDOWS+E – Pokreni Windows Explorer
 - WINDOWS+R – Pokreni
 - WINDOWS+U – Centar za pristupačnost
-- WINDOWS+F – Pretraži
+- WINDOWS+F – Pretraga
 - SHIFT+F10 – Kontekstualni meni
 - CTRL+SHIFT+ESC – Upravnik zadataka
 - CTRL+ALT+DEL – Splash ekran na novijim verzijama Windows-a
 - F1 – Pomoć F3 – Pretraga
-- F6 – Adresa
-- F11 – Prebaci u punu ekran unutar Internet Explorera
+- F6 – Adresna traka
+- F11 – Prebaci u pun ekran unutar Internet Explorera
 - CTRL+H – Istorija Internet Explorera
 - CTRL+T – Internet Explorer – Nova kartica
 - CTRL+N – Internet Explorer – Nova stranica
@@ -109,7 +109,7 @@ Registry editor: [https://sourceforge.net/projects/uberregedit/](https://sourcef
 
 ### 'Image Toolbar'
 
-To je alatna traka koja se pojavljuje u gornjem levom uglu slike kada se klikne. Moći ćete da Sačuvate, Štampate, Pošaljete putem maila, Otvorite "Moje slike" u Exploreru. Kiosk treba da koristi Internet Explorer.
+To je alatna traka koja se pojavljuje u gornjem levom uglu slike kada se klikne. Moći ćete da Sačuvate, Štampate, Pošaljete e-poštu, Otvorite "Moje slike" u Exploreru. Kiosk treba da koristi Internet Explorer.
 
 ### Shell protokol
 
@@ -159,21 +159,21 @@ Izvor: https://medium.com/@Rend_/give-me-a-browser-ill-give-you-a-shell-de19811d
 
 - Prevucite na jednu ili drugu stranu sa četiri ili pet prstiju: Da biste prešli na sledeću/poslednju aplikaciju
 
-- Stisnite ekran sa pet prstiju / Dodirnite dugme Home / Prevucite nagore sa 1 prstom sa donje strane ekrana u brzom pokretu nagore: Da biste pristupili Home
+- Stisnite ekran sa pet prstiju / Dodirnite dugme Home / Prevucite nagore sa 1 prstom sa donje strane ekrana u brzom pokretu: Da biste pristupili Home
 
-- Prevucite jedan prst sa donje strane ekrana samo 1-2 inča (sporo): Dock će se pojaviti
+- Prevucite jednim prstom sa donje strane ekrana samo 1-2 inča (sporo): Dock će se pojaviti
 
 - Prevucite nagore sa gornje strane ekrana sa 1 prstom: Da biste videli obaveštenja
 
 - Prevucite nagore sa 1 prstom u gornjem desnom uglu ekrana: Da biste videli kontrolni centar iPad Pro-a
 
-- Prevucite 1 prst sa leve strane ekrana 1-2 inča: Da biste videli prikaz dana
+- Prevucite 1 prstom sa leve strane ekrana 1-2 inča: Da biste videli prikaz dana
 
-- Brzo prevucite 1 prst iz centra ekrana na desno ili levo: Da biste prešli na sledeću/poslednju aplikaciju
+- Brzo prevucite 1 prstom iz centra ekrana na desno ili levo: Da biste prešli na sledeću/poslednju aplikaciju
 
 - Pritisnite i držite dugme On/**Off**/Sleep u gornjem desnom uglu **iPad +** Pomaknite klizač za **isključivanje** skroz udesno: Da biste isključili
 
-- Pritisnite dugme On/**Off**/Sleep u gornjem desnom uglu **iPad i dugme Home na nekoliko sekundi**: Da biste prisilili teško isključivanje
+- Pritisnite dugme On/**Off**/Sleep u gornjem desnom uglu **iPad i dugme Home nekoliko sekundi**: Da biste prisilili teško isključivanje
 
 - Pritisnite dugme On/**Off**/Sleep u gornjem desnom uglu **iPad i dugme Home brzo**: Da biste napravili snimak ekrana koji će se pojaviti u donjem levom uglu ekrana. Pritisnite oba dugmeta u isto vreme vrlo kratko, jer ako ih držite nekoliko sekundi, izvršiće se teško isključivanje.
 
@@ -235,7 +235,7 @@ Ove prečice su za vizuelne postavke i postavke zvuka, u zavisnosti od korišće
 | ⌥← ili ⌥→ (Opcija-Leva strelica ili Opcija-Desna strelica) | Pomeri se levo ili desno                                    |
 | ^⌥S (Control-Option-S)                             | Uključi ili isključi VoiceOver govor                         |
 | ⌘⇧⇥ (Command-Shift-Tab)                            | Prebaci se na prethodnu aplikaciju                              |
-| ⌘⇥ (Command-Tab)                                   | Vratite se na originalnu aplikaciju                         |
+| ⌘⇥ (Command-Tab)                                   | Prebaci se nazad na originalnu aplikaciju                         |
 | ←+→, zatim Opcija + ← ili Opcija+→                   | Navigirajte kroz Dock                                   |
 
 ### Safari prečice
@@ -251,9 +251,9 @@ Ove prečice su za vizuelne postavke i postavke zvuka, u zavisnosti od korišće
 | ^⇧⇥ (Control-Shift-Tab) | Prebaci se na prethodnu karticu                         |
 | ⌘L                      | Izaberi tekstualni unos/URL polje da ga izmenite     |
 | ⌘⇧T (Command-Shift-T)   | Otvori poslednju zatvorenu karticu (može se koristiti više puta) |
-| ⌘\[                     | Vraća se na prethodnu stranicu u vašoj istoriji pretraživanja      |
-| ⌘]                      | Ide napred na sledeću stranicu u vašoj istoriji pretraživanja   |
-| ⌘⇧R                     | Aktiviraj režim čitača                             |
+| ⌘\[                     | Vraća se na prethodnu stranicu u istoriji pretraživanja      |
+| ⌘]                      | Ide napred na sledeću stranicu u istoriji pretraživanja   |
+| ⌘⇧R                     | Aktivira režim čitača                             |
 
 ### Mail prečice
 

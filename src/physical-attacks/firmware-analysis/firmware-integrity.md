@@ -24,7 +24,7 @@ Ako je već dobijen root shell putem dinamičke analize, manipulacije bootloader
 4. Metasploit se može pripremiti za obradu dolaznih zahteva pokretanjem msfconsole-a i konfigurisanjem postavki prema payload-u.
 5. Meterpreter reverzni shell može se izvršiti na kompromitovanom uređaju.
 6. Meterpreter sesije se mogu pratiti dok se otvaraju.
-7. Post-exploitation aktivnosti se mogu izvesti.
+7. Post-exploitation aktivnosti se mogu izvoditi.
 
 Ako je moguće, ranjivosti unutar startup skripti mogu se iskoristiti za sticanje trajnog pristupa uređaju tokom ponovnog pokretanja. Ove ranjivosti se javljaju kada startup skripte referenciraju, [simbolički linkuju](https://www.chromium.org/chromium-os/chromiumos-design-docs/hardening-against-malicious-stateful-data) ili zavise od koda smeštenog na nepouzdanim montiranim lokacijama kao što su SD kartice i flash volumeni koji se koriste za skladištenje podataka van root fajl sistema.
 

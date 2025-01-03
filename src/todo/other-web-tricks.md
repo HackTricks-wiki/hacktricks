@@ -11,7 +11,7 @@ Nekoliko puta back-end veruje **Host header** da izvrši neke radnje. Na primer,
 
 ### Session booleans
 
-Nekada kada ispravno završite neku verifikaciju, back-end će **samo dodati boolean sa vrednošću "True" u sigurnosnu atributu vaše sesije**. Tada, druga tačka će znati da ste uspešno prošli tu proveru.\
+Nekada kada ispravno završite neku verifikaciju, back-end će **samo dodati boolean sa vrednošću "True" u sigurnosnu atribut vaše sesije**. Tada, druga tačka će znati da ste uspešno prošli tu proveru.\
 Međutim, ako **prođete proveru** i vašoj sesiji je dodeljena ta "True" vrednost u sigurnosnom atributu, možete pokušati da **pristupite drugim resursima** koji **zavise od istog atributa** ali za koje **ne biste trebali imati dozvole** za pristup. [WriteUp](https://medium.com/@ozguralp/a-less-known-attack-vector-second-order-idor-attacks-14468009781a).
 
 ### Register functionality

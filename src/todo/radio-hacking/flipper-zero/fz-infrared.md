@@ -16,7 +16,7 @@ Flipper koristi digitalni IR prijemnik TSOP, koji **omogućava presretanje signa
 
 Flipperov infracrveni **prijemnik je prilično osetljiv**. Možete čak i **uhvatiti signal** dok se nalazite **negde između** daljinskog upravljača i TV-a. Usmeravanje daljinskog upravljača direktno na Flipperov IR port nije neophodno. Ovo je korisno kada neko menja kanale dok stoji blizu TV-a, a i vi i Flipper ste na određenoj udaljenosti.
 
-Kako se **dekodiranje infracrvenog** signala dešava na **softverskoj** strani, Flipper Zero potencijalno podržava **prijem i prenos bilo kojih IR kodova daljinskog upravljača**. U slučaju **nepoznatih** protokola koji nisu mogli biti prepoznati - on **snima i reprodukuje** sirovi signal tačno onako kako je primljen.
+Kako se **dekodiranje infracrvenog** signala dešava na **softverskoj** strani, Flipper Zero potencijalno podržava **prijem i prenos bilo kojih IR daljinskih kodova**. U slučaju **nepoznatih** protokola koji nisu mogli biti prepoznati - on **snima i reprodukuje** sirovi signal tačno onako kako je primljen.
 
 ## Actions
 
@@ -26,7 +26,7 @@ Flipper Zero može se koristiti kao **univerzalni daljinski upravljač za kontro
 
 Dovoljno je pritisnuti dugme za napajanje u režimu Univerzalnog daljinskog upravljača, i Flipper će **uzastopno slati "Power Off"** komande svih TV-a koje poznaje: Sony, Samsung, Panasonic... i tako dalje. Kada TV primi svoj signal, reagovaće i isključiti se.
 
-Takav bruteforce zahteva vreme. Što je veći rečnik, duže će trajati da se završi. Nemoguće je saznati koji signal je tačno TV prepoznao jer nema povratne informacije od TV-a.
+Takav brute-force zahteva vreme. Što je veći rečnik, duže će trajati da se završi. Nemoguće je saznati koji signal je tačno TV prepoznao, pošto nema povratne informacije od TV-a.
 
 ### Learn New Remote
 

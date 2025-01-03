@@ -45,13 +45,7 @@ Write-Host
 
 # Uzorak izlaza:
 <strong># Ime zadatka:  Primer
-</strong># Putanja zadatka:  \Microsoft\Windows\Primer\
-# CLSID:  {1936ED8A-BD93-3213-E325-F38D112938E1}
-# [više poput prethodnog...]</code></pre>
-
-Proverom izlaza možete odabrati jedan koji će biti izvršen **svaki put kada se korisnik prijavi** na primer.
-
-Sada pretražujući CLSID **{1936ED8A-BD93-3213-E325-F38D112938EF}** u **HKEY\_**_**CLASSES\_**_**ROOT\CLSID** i u HKLM i HKCU, obično ćete otkriti da vrednost ne postoji u HKCU.
+</strong># Putanja zadatka
 ```bash
 # Exists in HKCR\CLSID\
 Get-ChildItem -Path "Registry::HKCR\CLSID\{1936ED8A-BD93-3213-E325-F38D112938EF}"

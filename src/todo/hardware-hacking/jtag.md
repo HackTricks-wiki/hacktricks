@@ -4,8 +4,8 @@
 
 ## JTAGenum
 
-[**JTAGenum** ](https://github.com/cyphunk/JTAGenum)je alat koji se može koristiti sa Raspberry PI ili Arduinom za pronalaženje JTAG pinova sa nepoznatog čipa.\
-U **Arduinu**, povežite **pinove od 2 do 11 sa 10 pinova koji potencijalno pripadaju JTAG-u**. Učitajte program u Arduino i on će pokušati da bruteforce sve pinove kako bi otkrio da li neki pin pripada JTAG-u i koji je koji.\
+[**JTAGenum** ](https://github.com/cyphunk/JTAGenum)je alat koji se može koristiti sa Raspberry PI ili Arduinom da pronađe JTAG pinove sa nepoznatog čipa.\
+U **Arduinu**, povežite **pinove od 2 do 11 sa 10 pinova koji potencijalno pripadaju JTAG-u**. Učitajte program u Arduino i on će pokušati da bruteforce sve pinove da vidi da li neki pin pripada JTAG-u i koji je koji.\
 U **Raspberry PI** možete koristiti samo **pinove od 1 do 6** (6 pinova, tako da ćete sporije testirati svaki potencijalni JTAG pin).
 
 ### Arduino

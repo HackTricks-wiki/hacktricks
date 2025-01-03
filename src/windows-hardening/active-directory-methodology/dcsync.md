@@ -4,11 +4,11 @@
 
 ## DCSync
 
-Dozvola **DCSync** podrazumeva da imate ove dozvole nad samim domenom: **DS-Replication-Get-Changes**, **Replicating Directory Changes All** i **Replicating Directory Changes In Filtered Set**.
+Dozvola **DCSync** podrazumeva posedovanje ovih dozvola nad samim domenom: **DS-Replication-Get-Changes**, **Replicating Directory Changes All** i **Replicating Directory Changes In Filtered Set**.
 
 **Važne napomene o DCSync:**
 
-- **DCSync napad simulira ponašanje Kontrolera domena i traži od drugih Kontrolera domena da repliciraju informacije** koristeći Directory Replication Service Remote Protocol (MS-DRSR). Pošto je MS-DRSR validna i neophodna funkcija Active Directory-a, ne može se isključiti ili onemogućiti.
+- **DCSync napad simulira ponašanje Kontrolera domena i traži od drugih Kontrolera domena da repliciraju informacije** koristeći Protokol za daljinsku replikaciju direktorijuma (MS-DRSR). Pošto je MS-DRSR važno i neophodno funkcija Active Directory-a, ne može se isključiti ili onemogućiti.
 - Po defaultu, samo grupe **Domain Admins, Enterprise Admins, Administrators i Domain Controllers** imaju potrebne privilegije.
 - Ako su lozinke bilo kojih naloga sačuvane sa reverzibilnom enkripcijom, dostupna je opcija u Mimikatz-u da vrati lozinku u čistom tekstu.
 
@@ -31,9 +31,9 @@ secretsdump.py -just-dc <user>:<password>@<ipaddress> -outputfile dcsync_hashes
 ```
 `-just-dc` generiše 3 fajla:
 
-- jedan sa **NTLM hešovima**
+- jedan sa **NTLM hash-ovima**
 - jedan sa **Kerberos ključevima**
-- jedan sa čistim lozinkama iz NTDS za bilo koje naloge sa [**reverzibilnom enkripcijom**](https://docs.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/store-passwords-using-reversible-encryption) omogućenim. Možete dobiti korisnike sa reverzibilnom enkripcijom pomoću
+- jedan sa lozinkama u čistom tekstu iz NTDS za bilo koje naloge sa [**reverzibilnom enkripcijom**](https://docs.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/store-passwords-using-reversible-encryption) omogućenom. Možete dobiti korisnike sa reverzibilnom enkripcijom pomoću
 
 ```powershell
 Get-DomainUser -Identity * | ? {$_.useraccountcontrol -like '*ENCRYPTED_TEXT_PWD_ALLOWED*'} |select samaccountname,useraccountcontrol

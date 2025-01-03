@@ -15,7 +15,7 @@ Proces je prikazan u koracima ispod, ilustrujući kako se binarni fajlovi servis
 
 Pretpostavljajući da postoji izvršni payload (napravljen sa msfvenom i obfuskovan korišćenjem Veil-a da bi se izbegla detekcija antivirusnog softvera), nazvan 'met8888.exe', koji predstavlja meterpreter reverse_http payload, sledeći koraci se preduzimaju:
 
-- **Kopiranje binarnog fajla**: Izvršni fajl se kopira na ADMIN$ deljenje iz komandne linije, iako može biti postavljen bilo gde na fajl sistemu da bi ostao skriven.
+- **Kopiranje binarnog fajla**: Izvršni fajl se kopira na ADMIN$ deljenje iz komandne linije, iako može biti postavljen bilo gde na datotečnom sistemu da bi ostao skriven.
 
 - **Kreiranje servisa**: Korišćenjem Windows `sc` komande, koja omogućava upit, kreiranje i brisanje Windows servisa na daljinu, kreira se servis nazvan "meterpreter" koji upućuje na otpremljeni binarni fajl.
 

@@ -1,8 +1,8 @@
-# Krađa Osetljivih Informacija sa Veba
+# Krađa Osetljivih Informacija sa Weba
 
 {{#include ../banners/hacktricks-training.md}}
 
-Ako u nekom trenutku pronađete **vеб страницу koja vam prikazuje osetljive informacije na osnovu vaše sesije**: Možda odražava kolačiće, ili štampa ili CC detalje ili bilo koje druge osetljive informacije, možete pokušati da ih ukradete.\
+Ako u nekom trenutku pronađete **web stranicu koja vam prikazuje osetljive informacije na osnovu vaše sesije**: Možda odražava kolačiće, ili štampa ili CC detalje ili bilo koje druge osetljive informacije, možete pokušati da ih ukradete.\
 Ovde vam predstavljam glavne načine na koje možete pokušati da to postignete:
 
 - [**CORS zaobilaženje**](../pentesting-web/cors-bypass.md): Ako možete da zaobiđete CORS zaglavlja, moći ćete da ukradete informacije izvršavajući Ajax zahtev za zloćudnu stranicu.

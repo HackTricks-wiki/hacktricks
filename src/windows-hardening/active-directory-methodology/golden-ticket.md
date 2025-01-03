@@ -4,7 +4,7 @@
 
 ## Zlatna karta
 
-Napad **Zlatna karta** se sastoji od **kreiranja legitimne Ticket Granting Ticket (TGT) koja imituje bilo kog korisnika** korišćenjem **NTLM heša Active Directory (AD) krbtgt naloga**. Ova tehnika je posebno korisna jer **omogućava pristup bilo kojoj usluzi ili mašini** unutar domena kao imitirani korisnik. Važno je zapamtiti da se **akreditivi krbtgt naloga nikada automatski ne ažuriraju**.
+Napad **Zlatna karta** se sastoji od **kreiranja legitimne Ticket Granting Ticket (TGT) imitujući bilo kog korisnika** korišćenjem **NTLM heša Active Directory (AD) krbtgt naloga**. Ova tehnika je posebno korisna jer **omogućava pristup bilo kojoj usluzi ili mašini** unutar domena kao imitirani korisnik. Važno je zapamtiti da se **akreditivi krbtgt naloga nikada automatski ne ažuriraju**.
 
 Da bi se **dobio NTLM heš** krbtgt naloga, mogu se koristiti različite metode. Može se izvući iz **Local Security Authority Subsystem Service (LSASS) procesa** ili iz **NT Directory Services (NTDS.dit) datoteke** koja se nalazi na bilo kom Domain Controller (DC) unutar domena. Pored toga, **izvođenje DCsync napada** je još jedna strategija za dobijanje ovog NTLM heša, koja se može izvesti korišćenjem alata kao što su **lsadump::dcsync modul** u Mimikatz ili **secretsdump.py skripta** od Impacket. Važno je naglasiti da za izvođenje ovih operacija, **obično su potrebne privilegije domen admina ili sličan nivo pristupa**.
 
@@ -36,7 +36,7 @@ Koristite parametre `/startoffset`, `/endin` i `/renewmax` da kontrolišete poč
 ```
 Get-DomainPolicy | select -expand KerberosPolicy
 ```
-Nažalost, trajanje TGT-a nije zabeleženo u 4769, tako da ovu informaciju nećete pronaći u Windows događajnim zapisima. Međutim, ono što možete korelirati je **videti 4769 bez prethodnog 4768**. **Nije moguće zatražiti TGS bez TGT-a**, i ako nema zapisa o izdatom TGT-u, možemo zaključiti da je falsifikovan offline.
+Nažalost, trajanje TGT-a nije zabeleženo u 4769, tako da ovu informaciju nećete pronaći u Windows dnevnicima događaja. Međutim, ono što možete korelirati je **videti 4769 bez prethodnog 4768**. **Nije moguće zatražiti TGS bez TGT-a**, i ako ne postoji zapis o izdatom TGT-u, možemo zaključiti da je falsifikovan offline.
 
 Da biste **zaobišli ovu detekciju**, proverite dijamantske karte:
 
@@ -50,7 +50,7 @@ diamond-ticket.md
 - 4672: Prijava administratora
 - `Get-WinEvent -FilterHashtable @{Logname='Security';ID=4672} -MaxEvents 1 | Format-List –Property`
 
-Ostale male trikove koje odbrambeni tim može da uradi je **uzbunjivanje na 4769 za osetljive korisnike** kao što je podrazumevani nalog administratora domena.
+Ostale male trikove koje odbrambeni tim može da uradi je **alarmirati na 4769 za osetljive korisnike** kao što je podrazumevani nalog administratora domena.
 
 ## Reference
 

@@ -4,7 +4,7 @@
 
 Po default-u **bilo koji korisnik** u Active Directory može **enumerisati sve DNS zapise** u DNS zonama Domena ili Šume, slično prenosu zone (korisnici mogu da navedu podobjekte DNS zone u AD okruženju).
 
-Alat [**adidnsdump**](https://github.com/dirkjanm/adidnsdump) omogućava **enumeraciju** i **izvoz** **svi DNS zapisa** u zoni za svrhe rekognicije unutrašnjih mreža.
+Alat [**adidnsdump**](https://github.com/dirkjanm/adidnsdump) omogućava **enumeraciju** i **izvoz** **svi DNS zapisa** u zoni za potrebe rekognicije unutrašnjih mreža.
 ```bash
 git clone https://github.com/dirkjanm/adidnsdump
 cd adidnsdump

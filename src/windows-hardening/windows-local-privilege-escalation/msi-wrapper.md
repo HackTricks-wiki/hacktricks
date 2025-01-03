@@ -3,7 +3,7 @@
 {{#include ../../banners/hacktricks-training.md}}
 
 Preuzmite besplatnu verziju aplikacije sa [https://www.exemsi.com/documentation/getting-started/](https://www.exemsi.com/download/), izvršite je i obavijte "maliciozni" binarni fajl.\
-Napomena: možete obavijati "**.bat**" ako **samo** želite da **izvršite** **komandne linije (umesto cmd.exe izaberite .bat fajl)**
+Napomena: možete obaviti "**.bat**" ako **samo** želite da **izvršite** **komandne linije (umesto cmd.exe izaberite .bat fajl)**
 
 ![](<../../images/image (417).png>)
 

@@ -7,7 +7,7 @@
 
 Local Administrator Password Solution (LAPS) je alat koji se koristi za upravljanje sistemom gde se **lozinke administratora**, koje su **jedinstvene, nasumične i često menjane**, primenjuju na računarima pridruženim domenu. Ove lozinke se sigurno čuvaju unutar Active Directory i dostupne su samo korisnicima kojima je odobrena dozvola putem Access Control Lists (ACLs). Bezbednost prenosa lozinki od klijenta do servera obezbeđena je korišćenjem **Kerberos verzije 5** i **Advanced Encryption Standard (AES)**.
 
-U objektima računara domena, implementacija LAPS-a rezultira dodavanjem dva nova atributa: **`ms-mcs-AdmPwd`** i **`ms-mcs-AdmPwdExpirationTime`**. Ovi atributi čuvaju **lozinku administratora u običnom tekstu** i **njeno vreme isteka**, redom.
+U objektima računara domena, implementacija LAPS-a rezultira dodavanjem dva nova atributa: **`ms-mcs-AdmPwd`** i **`ms-mcs-AdmPwdExpirationTime`**. Ovi atributi čuvaju **lozinku administratora u običnom tekstu** i **vreme isteka**, redom.
 
 ### Proverite da li je aktivirano
 ```bash
@@ -59,7 +59,7 @@ Get-DomainObject -Identity wkstn-2 -Properties ms-Mcs-AdmPwd
 
 The [LAPSToolkit](https://github.com/leoloobeek/LAPSToolkit) olakšava enumeraciju LAPS-a sa nekoliko funkcija.\
 Jedna od njih je parsiranje **`ExtendedRights`** za **sve računare sa omogućenim LAPS-om.** Ovo će prikazati **grupe** specifično **delegirane za čitanje LAPS lozinki**, koje su često korisnici u zaštićenim grupama.\
-**Nalog** koji je **priključen računaru** na domen prima `All Extended Rights` nad tim hostom, a ovo pravo daje **nalogu** mogućnost da **čita lozinke**. Enumeracija može prikazati korisnički nalog koji može čitati LAPS lozinku na hostu. Ovo može pomoći da **ciljamo specifične AD korisnike** koji mogu čitati LAPS lozinke.
+**Nalog** koji je **pridružio računar** domenu dobija `All Extended Rights` nad tim hostom, a ovo pravo daje **nalogu** mogućnost da **čita lozinke**. Enumeracija može prikazati korisnički nalog koji može čitati LAPS lozinku na hostu. Ovo može pomoći da **ciljamo specifične AD korisnike** koji mogu čitati LAPS lozinke.
 ```powershell
 # Get groups that can read passwords
 Find-LAPSDelegatedGroups
@@ -113,11 +113,11 @@ Get-DomainObject -Identity computer-21 -Properties ms-mcs-admpwdexpirationtime
 Set-DomainObject -Identity wkstn-2 -Set @{"ms-mcs-admpwdexpirationtime"="232609935231523081"}
 ```
 > [!WARNING]
-> Lozinka će se i dalje resetovati ako **admin** koristi **`Reset-AdmPwdPassword`** cmdlet; ili ako je **Ne dozvoli vreme isteka lozinke duže od onog što zahteva politika** omogućeno u LAPS GPO.
+> Lozinka će se i dalje resetovati ako **admin** koristi **`Reset-AdmPwdPassword`** cmdlet; ili ako je **Ne dozvoliti vreme isteka lozinke duže od onog što zahteva politika** omogućeno u LAPS GPO.
 
 ### Backdoor
 
-Izvorni kod za LAPS se može naći [ovde](https://github.com/GreyCorbel/admpwd), stoga je moguće staviti backdoor u kod (unutar `Get-AdmPwdPassword` metode u `Main/AdmPwd.PS/Main.cs`, na primer) koji će na neki način **izvući nove lozinke ili ih negde sačuvati**.
+Izvorni kod za LAPS se može naći [ovde](https://github.com/GreyCorbel/admpwd), stoga je moguće staviti backdoor u kod (unutar `Get-AdmPwdPassword` metode u `Main/AdmPwd.PS/Main.cs`, na primer) koji će na neki način **ekstraktovati nove lozinke ili ih čuvati negde**.
 
 Zatim, samo kompajlirajte novi `AdmPwd.PS.dll` i otpremite ga na mašinu u `C:\Tools\admpwd\Main\AdmPwd.PS\bin\Debug\AdmPwd.PS.dll` (i promenite vreme modifikacije).
 

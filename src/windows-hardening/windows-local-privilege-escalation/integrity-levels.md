@@ -37,7 +37,7 @@ NT AUTHORITY\INTERACTIVE:(I)(M,DC)
 NT AUTHORITY\SERVICE:(I)(M,DC)
 NT AUTHORITY\BATCH:(I)(M,DC)
 ```
-Sada dodelimo minimalni nivo integriteta **Visok** datoteci. Ovo **mora biti urađeno iz konzole** koja se pokreće kao **administrator**, jer će **obična konzola** raditi na srednjem nivou integriteta i **neće biti dozvoljeno** dodeliti visoki nivo integriteta objektu:
+Sada dodelimo minimalni nivo integriteta od **Visok** za datoteku. Ovo **mora biti urađeno iz konzole** koja se pokreće kao **administrator** jer će **obična konzola** raditi na srednjem nivou integriteta i **neće biti dozvoljeno** dodeliti visoki nivo integriteta objektu:
 ```
 icacls asd.txt /setintegritylevel(oi)(ci) High
 processed file: asd.txt

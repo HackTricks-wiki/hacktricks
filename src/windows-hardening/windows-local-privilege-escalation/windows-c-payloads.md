@@ -1,3 +1,5 @@
+{{#include ../../banners/hacktricks-training.md}}
+
 # Dodaj korisnika
 ```c
 // i686-w64-mingw32-gcc -o scsiaccess.exe useradd.c
