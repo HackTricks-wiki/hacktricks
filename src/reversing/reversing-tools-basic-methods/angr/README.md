@@ -1,6 +1,6 @@
 {{#include ../../../banners/hacktricks-training.md}}
 
-Parte di questo cheatsheet si basa sulla [documentazione di angr](https://docs.angr.io/_/downloads/en/stable/pdf/).
+Parte di questo cheatsheet si basa sulla [angr documentation](https://docs.angr.io/_/downloads/en/stable/pdf/).
 
 # Installazione
 ```bash
@@ -184,7 +184,7 @@ True
 >>> proj.is_hooked(0x20000)
 True
 ```
-Inoltre, puoi usare `proj.hook_symbol(name, hook)`, fornendo il nome di un simbolo come primo argomento, per agganciare l'indirizzo in cui si trova il simbolo
+Inoltre, puoi utilizzare `proj.hook_symbol(name, hook)`, fornendo il nome di un simbolo come primo argomento, per agganciare l'indirizzo in cui si trova il simbolo
 
 # Esempi
 

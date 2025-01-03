@@ -36,7 +36,7 @@ I seguenti passaggi sono raccomandati per modificare le configurazioni di avvio 
 
 - Verifica se le funzionalità di debug come il logging dettagliato, il caricamento di kernel arbitrari o l'avvio da fonti non affidabili sono abilitate.
 
-6. **Interferenza Hardware Cautelosa**:
+6. **Interferenza Hardware Cautelativa**:
 
 - Fai attenzione quando colleghi un pin a terra e interagisci con chip SPI o NAND flash durante la sequenza di avvio del dispositivo, in particolare prima che il kernel si decomprima. Consulta il datasheet del chip NAND flash prima di cortocircuitare i pin.
 

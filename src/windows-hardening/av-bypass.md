@@ -14,7 +14,7 @@ Il rilevamento statico si ottiene contrassegnando stringhe o array di byte malev
 
 - **Crittografia**
 
-Se crittografi il binario, non ci sarà modo per l'AV di rilevare il tuo programma, ma avrai bisogno di un caricatore per decrittografare ed eseguire il programma in memoria.
+Se crittografi il binario, non ci sarà modo per l'AV di rilevare il tuo programma, ma avrai bisogno di qualche tipo di loader per decrittografare ed eseguire il programma in memoria.
 
 - **Offuscamento**
 
@@ -47,16 +47,16 @@ Altri ottimi consigli da [@mgeeky](https://twitter.com/mariuszbit) per contrasta
 
 Come abbiamo detto prima in questo post, **gli strumenti pubblici** verranno eventualmente **rilevati**, quindi dovresti chiederti qualcosa:
 
-Ad esempio, se vuoi eseguire il dump di LSASS, **hai davvero bisogno di usare mimikatz**? O potresti usare un progetto diverso che è meno conosciuto e che esegue anche il dump di LSASS.
+Ad esempio, se vuoi eseguire il dump di LSASS, **hai davvero bisogno di usare mimikatz**? O potresti usare un progetto diverso che è meno conosciuto e fa anche il dump di LSASS.
 
-La risposta giusta è probabilmente la seconda. Prendendo mimikatz come esempio, è probabilmente uno dei, se non il più contrassegnato malware dagli AV e dagli EDR, mentre il progetto stesso è super interessante, è anche un incubo lavorarci per aggirare gli AV, quindi cerca alternative per ciò che stai cercando di ottenere.
+La risposta giusta è probabilmente l'ultima. Prendendo mimikatz come esempio, è probabilmente uno dei, se non il più contrassegnato malware dagli AV e EDR, mentre il progetto stesso è super interessante, è anche un incubo lavorarci per aggirare gli AV, quindi cerca alternative per ciò che stai cercando di ottenere.
 
 > [!NOTE]
-> Quando modifichi i tuoi payload per l'evasione, assicurati di **disattivare l'invio automatico dei campioni** in Defender, e per favore, seriamente, **NON CARICARE SU VIRUSTOTAL** se il tuo obiettivo è ottenere evasione a lungo termine. Se vuoi controllare se il tuo payload viene rilevato da un particolare AV, installalo su una VM, prova a disattivare l'invio automatico dei campioni e testalo lì finché non sei soddisfatto del risultato.
+> Quando modifichi i tuoi payload per l'evasione, assicurati di **disattivare l'invio automatico dei campioni** in Defender, e per favore, seriamente, **NON CARICARE SU VIRUSTOTAL** se il tuo obiettivo è raggiungere l'evasione a lungo termine. Se vuoi controllare se il tuo payload viene rilevato da un particolare AV, installalo su una VM, prova a disattivare l'invio automatico dei campioni e testalo lì fino a quando non sei soddisfatto del risultato.
 
 ## EXE vs DLL
 
-Ogni volta che è possibile, **dai sempre priorità all'uso delle DLL per l'evasione**, nella mia esperienza, i file DLL sono solitamente **molto meno rilevati** e analizzati, quindi è un trucco molto semplice da usare per evitare il rilevamento in alcuni casi (se il tuo payload ha un modo di eseguire come DLL, ovviamente).
+Ogni volta che è possibile, **dai sempre priorità all'uso delle DLL per l'evasione**, nella mia esperienza, i file DLL sono di solito **molto meno rilevati** e analizzati, quindi è un trucco molto semplice da usare per evitare il rilevamento in alcuni casi (se il tuo payload ha qualche modo di essere eseguito come una DLL, ovviamente).
 
 Come possiamo vedere in questa immagine, un Payload DLL di Havoc ha un tasso di rilevamento di 4/26 in antiscan.me, mentre il payload EXE ha un tasso di rilevamento di 7/26.
 
@@ -66,7 +66,7 @@ Ora mostreremo alcuni trucchi che puoi usare con i file DLL per essere molto pi�
 
 ## Sideloading DLL & Proxying
 
-**DLL Sideloading** sfrutta l'ordine di ricerca delle DLL utilizzato dal caricatore posizionando sia l'applicazione vittima che il payload malevolo accanto l'uno all'altro.
+**DLL Sideloading** sfrutta l'ordine di ricerca delle DLL utilizzato dal loader posizionando sia l'applicazione vittima che il payload malevolo accanto l'uno all'altro.
 
 Puoi controllare i programmi suscettibili al DLL Sideloading utilizzando [Siofra](https://github.com/Cybereason/siofra) e il seguente script di powershell:
 ```powershell
@@ -77,7 +77,7 @@ C:\Users\user\Desktop\Siofra64.exe --mode file-scan --enum-dependency --dll-hija
 ```
 Questo comando restituirà l'elenco dei programmi suscettibili al DLL hijacking all'interno di "C:\Program Files\\" e i file DLL che tentano di caricare.
 
-Ti consiglio vivamente di **esplorare i programmi DLL Hijackable/Sideloadable da solo**, questa tecnica è piuttosto furtiva se eseguita correttamente, ma se utilizzi programmi Sideloadable DLL pubblicamente noti, potresti essere facilmente scoperto.
+Ti consiglio vivamente di **esplorare i programmi DLL Hijackable/Sideloadable da solo**, questa tecnica è piuttosto furtiva se eseguita correttamente, ma se utilizzi programmi Sideloadable DLL pubblicamente noti, potresti essere facilmente catturato.
 
 Semplicemente posizionare una DLL malevola con il nome che un programma si aspetta di caricare, non caricherà il tuo payload, poiché il programma si aspetta alcune funzioni specifiche all'interno di quella DLL; per risolvere questo problema, utilizzeremo un'altra tecnica chiamata **DLL Proxying/Forwarding**.
 
@@ -107,7 +107,7 @@ Sia il nostro shellcode (codificato con [SGN](https://github.com/EgeBalci/sgn)) 
 <figure><img src="../images/image (193).png" alt=""><figcaption></figcaption></figure>
 
 > [!NOTE]
-> Ti **consiglio vivamente** di guardare il [VOD di S3cur3Th1sSh1t su twitch](https://www.twitch.tv/videos/1644171543) riguardo al DLL Sideloading e anche il [video di ippsec](https://www.youtube.com/watch?v=3eROsG_WNpE) per saperne di più su quanto abbiamo discusso in modo più approfondito.
+> Ti **consiglio vivamente** di guardare il [VOD di twitch di S3cur3Th1sSh1t](https://www.twitch.tv/videos/1644171543) riguardo al DLL Sideloading e anche il [video di ippsec](https://www.youtube.com/watch?v=3eROsG_WNpE) per saperne di più su quanto abbiamo discusso in modo più approfondito.
 
 ## [**Freeze**](https://github.com/optiv/Freeze)
 
@@ -199,7 +199,7 @@ O questo script che tramite memory patching patcherà ogni nuovo Powersh
 Ci sono diversi strumenti che possono essere utilizzati per **offuscare il codice C# in chiaro**, generare **modelli di metaprogrammazione** per compilare binari o **offuscare binari compilati** come:
 
 - [**InvisibilityCloak**](https://github.com/h4wkst3r/InvisibilityCloak)**: offuscatore C#**
-- [**Obfuscator-LLVM**](https://github.com/obfuscator-llvm/obfuscator): L'obiettivo di questo progetto è fornire un fork open-source della suite di compilazione [LLVM](http://www.llvm.org/) in grado di fornire maggiore sicurezza software attraverso [l'offuscamento del codice](<http://en.wikipedia.org/wiki/Obfuscation_(software)>) e la protezione contro manomissioni.
+- [**Obfuscator-LLVM**](https://github.com/obfuscator-llvm/obfuscator): L'obiettivo di questo progetto è fornire un fork open-source della suite di compilazione [LLVM](http://www.llvm.org/) in grado di fornire maggiore sicurezza del software attraverso [l'offuscamento del codice](<http://en.wikipedia.org/wiki/Obfuscation_(software)>) e la protezione contro manomissioni.
 - [**ADVobfuscator**](https://github.com/andrivet/ADVobfuscator): ADVobfuscator dimostra come utilizzare il linguaggio `C++11/14` per generare, al momento della compilazione, codice offuscato senza utilizzare alcuno strumento esterno e senza modificare il compilatore.
 - [**obfy**](https://github.com/fritzone/obfy): Aggiungi uno strato di operazioni offuscate generate dal framework di metaprogrammazione C++ che renderà la vita della persona che desidera craccare l'applicazione un po' più difficile.
 - [**Alcatraz**](https://github.com/weak1337/Alcatraz)**:** Alcatraz è un offuscatore binario x64 in grado di offuscare vari file pe diversi tra cui: .exe, .dll, .sys
@@ -267,7 +267,7 @@ La maggior parte dei framework C2 (sliver, Covenant, metasploit, CobaltStrike, H
 
 - **Fork\&Run**
 
-Comporta **la creazione di un nuovo processo sacrificial**, iniettare il tuo codice malevolo di post-exploitation in quel nuovo processo, eseguire il tuo codice malevolo e, quando hai finito, terminare il nuovo processo. Questo ha sia vantaggi che svantaggi. Il vantaggio del metodo fork and run è che l'esecuzione avviene **al di fuori** del nostro processo di impianto Beacon. Questo significa che se qualcosa nella nostra azione di post-exploitation va storto o viene catturato, c'è una **probabilità molto maggiore** che il nostro **impianto sopravviva.** Lo svantaggio è che hai una **maggiore probabilità** di essere catturato da **Rilevamenti Comportamentali**.
+Comporta **la creazione di un nuovo processo sacrificial**, iniettando il tuo codice malevolo di post-exploitation in quel nuovo processo, eseguendo il tuo codice malevolo e, una volta terminato, uccidendo il nuovo processo. Questo ha sia vantaggi che svantaggi. Il vantaggio del metodo fork and run è che l'esecuzione avviene **al di fuori** del nostro processo di impianto Beacon. Questo significa che se qualcosa nella nostra azione di post-exploitation va storto o viene catturato, c'è una **probabilità molto maggiore** che il nostro **impianto sopravviva.** Lo svantaggio è che hai una **maggiore probabilità** di essere catturato da **Rilevamenti Comportamentali**.
 
 <figure><img src="../images/image (215).png" alt=""><figcaption></figcaption></figure>
 
@@ -308,7 +308,7 @@ Questo è anche un altro grande intervento di [@mariuszbit](https://twitter.com/
 
 ### **Controlla quali parti Defender trova come malevole**
 
-Puoi utilizzare [**ThreatCheck**](https://github.com/rasta-mouse/ThreatCheck) che **rimuoverà parti del binario** fino a **scoprire quale parte Defender** trova come malevola e te lo dividerà.\
+Puoi utilizzare [**ThreatCheck**](https://github.com/rasta-mouse/ThreatCheck) che **rimuoverà parti del binario** fino a **scoprire quale parte Defender** trova come malevole e te lo dividerà.\
 Un altro strumento che fa **la stessa cosa è** [**avred**](https://github.com/dobin/avred) con un'offerta web aperta che fornisce il servizio in [**https://avred.r00ted.ch/**](https://avred.r00ted.ch/)
 
 ### **Server Telnet**

@@ -20,7 +20,7 @@ Per ulteriori informazioni su questi tipi di tag [**leggi questa introduzione**]
 Cerca di **leggere** le informazioni della scheda. Poi può **emularle**.
 
 > [!WARNING]
-> Nota che alcuni citofoni cercano di proteggersi dalla duplicazione delle chiavi inviando un comando di scrittura prima della lettura. Se la scrittura ha successo, quel tag è considerato falso. Quando Flipper emula RFID non c'è modo per il lettore di distinguerlo dall'originale, quindi non si verificano tali problemi.
+> Nota che alcuni citofoni cercano di proteggersi dalla duplicazione delle chiavi inviando un comando di scrittura prima di leggere. Se la scrittura ha successo, quel tag è considerato falso. Quando Flipper emula RFID non c'è modo per il lettore di distinguerlo dall'originale, quindi non si verificano tali problemi.
 
 ### Add Manually
 
@@ -32,8 +32,8 @@ A volte, quando ottieni una scheda, troverai l'ID (o parte di esso) scritto sull
 
 - **EM Marin**
 
-Ad esempio, in questa scheda EM-Marin nella scheda fisica è possibile **leggere gli ultimi 3 dei 5 byte in chiaro**.\
-Gli altri 2 possono essere forzati a tentativi se non riesci a leggerli dalla scheda.
+Ad esempio, in questa scheda EM-Marin nella scheda fisica è possibile **leggere gli ultimi 3 di 5 byte in chiaro**.\
+Gli altri 2 possono essere forzati a bruteforce se non puoi leggerli dalla scheda.
 
 <figure><img src="../../../images/image (104).png" alt=""><figcaption></figcaption></figure>
 

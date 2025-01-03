@@ -1,10 +1,10 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-Fondamentalmente, questo strumento ci aiuterà a trovare valori per variabili che devono soddisfare alcune condizioni e calcolarli a mano sarebbe molto fastidioso. Pertanto, puoi indicare a Z3 le condizioni che le variabili devono soddisfare e troverà alcuni valori (se possibile).
+Molto semplicemente, questo strumento ci aiuterà a trovare valori per variabili che devono soddisfare alcune condizioni e calcolarli a mano sarebbe molto fastidioso. Pertanto, puoi indicare a Z3 le condizioni che le variabili devono soddisfare e troverà alcuni valori (se possibile).
 
 **Alcuni testi ed esempi sono estratti da [https://ericpony.github.io/z3py-tutorial/guide-examples.htm](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)**
 
-# Operazioni di Base
+# Operazioni di base
 
 ## Booleans/E/O/Non
 ```python
@@ -55,9 +55,9 @@ print ("x = %s" % m[x])
 for d in m.decls():
 print("%s = %s" % (d.name(), m[d]))
 ```
-# Aritmetica della Macchina
+# Aritmetica Macchinistica
 
-Le CPU moderne e i linguaggi di programmazione più diffusi utilizzano l'aritmetica su **vettori di bit di dimensione fissa**. L'aritmetica della macchina è disponibile in Z3Py come **Vettori di Bit**.
+Le CPU moderne e i linguaggi di programmazione mainstream utilizzano l'aritmetica su **vettori di bit a dimensione fissa**. L'aritmetica macchinistica è disponibile in Z3Py come **Vettori di Bit**.
 ```python
 from z3 import *
 
@@ -94,7 +94,7 @@ solve(ULT(x, 0))
 ```
 ## Funzioni
 
-**Funzioni interpretate** come l'aritmetica dove la **funzione +** ha un'**interpretazione standard fissa** (aggiunge due numeri). **Funzioni non interpretate** e costanti sono **massimamente flessibili**; consentono **qualsiasi interpretazione** che sia **coerente** con i **vincoli** sulla funzione o costante.
+**Funzioni interpretate** come l'aritmetica dove la **funzione +** ha una **interpretazione standard fissa** (aggiunge due numeri). **Funzioni non interpretate** e costanti sono **massimamente flessibili**; consentono **qualsiasi interpretazione** che sia **coerente** con i **vincoli** sulla funzione o costante.
 
 Esempio: f applicata due volte a x restituisce di nuovo x, ma f applicata una volta a x è diversa da x.
 ```python

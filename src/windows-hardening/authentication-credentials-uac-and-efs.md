@@ -4,14 +4,14 @@
 
 ## Politica di AppLocker
 
-Un elenco di applicazioni approvate è un elenco di software o eseguibili approvati che sono autorizzati a essere presenti e a funzionare su un sistema. L'obiettivo è proteggere l'ambiente da malware dannoso e software non approvato che non si allinea con le specifiche esigenze aziendali di un'organizzazione.
+Un elenco di applicazioni approvate è un elenco di applicazioni software o eseguibili approvati che sono autorizzati a essere presenti ed eseguiti su un sistema. L'obiettivo è proteggere l'ambiente da malware dannoso e software non approvato che non si allinea con le specifiche esigenze aziendali di un'organizzazione.
 
-[AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) è la **soluzione di whitelisting delle applicazioni** di Microsoft e offre agli amministratori di sistema il controllo su **quali applicazioni e file gli utenti possono eseguire**. Fornisce **controllo granulare** su eseguibili, script, file di installazione di Windows, DLL, app confezionate e installer di app confezionate.\
+[AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) è la **soluzione di whitelisting delle applicazioni** di Microsoft e offre agli amministratori di sistema il controllo su **quali applicazioni e file gli utenti possono eseguire**. Fornisce **controllo granulare** su eseguibili, script, file di installazione di Windows, DLL, app confezionate e installatori di app confezionate.\
 È comune per le organizzazioni **bloccare cmd.exe e PowerShell.exe** e l'accesso in scrittura a determinate directory, **ma tutto questo può essere aggirato**.
 
 ### Controllo
 
-Controlla quali file/estensioni sono nella lista nera/bianca:
+Controlla quali file/estensioni sono nella lista nera/nella lista bianca:
 ```powershell
 Get-ApplockerPolicy -Effective -xml
 
@@ -36,11 +36,11 @@ C:\windows\tracing
 - I comuni **binaries** [**"LOLBAS's"**](https://lolbas-project.github.io/) possono essere utili per bypassare AppLocker.
 - **Regole scritte male potrebbero anche essere bypassate**
 - Ad esempio, **`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`**, puoi creare una **cartella chiamata `allowed`** ovunque e sarà consentita.
-- Le organizzazioni spesso si concentrano su **bloccare l'eseguibile `%System32%\WindowsPowerShell\v1.0\powershell.exe`**, ma dimenticano le **altre** [**posizioni eseguibili di PowerShell**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations) come `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` o `PowerShell_ISE.exe`.
+- Le organizzazioni spesso si concentrano sul **bloccare l'eseguibile `%System32%\WindowsPowerShell\v1.0\powershell.exe`**, ma dimenticano le **altre** [**posizioni eseguibili di PowerShell**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations) come `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` o `PowerShell_ISE.exe`.
 - **L'applicazione delle DLL è molto raramente abilitata** a causa del carico aggiuntivo che può mettere su un sistema e della quantità di test necessari per garantire che nulla si rompa. Quindi utilizzare **DLL come backdoor aiuterà a bypassare AppLocker**.
 - Puoi usare [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) o [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) per **eseguire codice Powershell** in qualsiasi processo e bypassare AppLocker. Per ulteriori informazioni controlla: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode).
 
-## Archiviazione delle credenziali
+## Archiviazione delle Credenziali
 
 ### Security Accounts Manager (SAM)
 
@@ -110,13 +110,13 @@ EFS protegge i file attraverso la crittografia, utilizzando una **chiave simmetr
 - Quando file o cartelle vengono spostati su un file system non EFS, come [FAT32](https://en.wikipedia.org/wiki/File_Allocation_Table), vengono automaticamente decrittografati.
 - I file crittografati inviati attraverso la rete tramite il protocollo SMB/CIFS vengono decrittografati prima della trasmissione.
 
-Questo metodo di crittografia consente un **accesso trasparente** ai file crittografati per il proprietario. Tuttavia, cambiare semplicemente la password del proprietario e accedere non permetterà la decrittazione.
+Questo metodo di crittografia consente un **accesso trasparente** ai file crittografati per il proprietario. Tuttavia, semplicemente cambiando la password del proprietario e accedendo non sarà possibile la decrittazione.
 
 **Punti chiave**:
 
 - EFS utilizza una FEK simmetrica, crittografata con la chiave pubblica dell'utente.
 - La decrittazione impiega la chiave privata dell'utente per accedere alla FEK.
-- La decrittazione automatica avviene in determinate condizioni, come il copia su FAT32 o la trasmissione in rete.
+- La decrittazione automatica avviene in determinate condizioni, come la copia su FAT32 o la trasmissione in rete.
 - I file crittografati sono accessibili al proprietario senza passaggi aggiuntivi.
 
 ### Controlla le informazioni EFS
@@ -160,7 +160,7 @@ Inoltre, controlla questa [pagina web](https://cube0x0.github.io/Relaying-for-gM
 
 ## LAPS
 
-La **Local Administrator Password Solution (LAPS)**, disponibile per il download da [Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899), consente la gestione delle password degli amministratori locali. Queste password, che sono **randomizzate**, uniche e **cambiate regolarmente**, sono memorizzate centralmente in Active Directory. L'accesso a queste password è limitato tramite ACL a utenti autorizzati. Con permessi sufficienti concessi, è fornita la possibilità di leggere le password degli amministratori locali.
+La **Local Administrator Password Solution (LAPS)**, disponibile per il download da [Microsoft](https://www.microsoft.com/en-us/download/details.aspx?id=46899), consente la gestione delle password degli amministratori locali. Queste password, che sono **randomizzate**, uniche e **cambiate regolarmente**, sono memorizzate centralmente in Active Directory. L'accesso a queste password è limitato tramite ACL a utenti autorizzati. Con permessi sufficienti concessi, è possibile leggere le password degli amministratori locali.
 
 {{#ref}}
 active-directory-methodology/laps.md
@@ -168,7 +168,7 @@ active-directory-methodology/laps.md
 
 ## PS Constrained Language Mode
 
-PowerShell [**Constrained Language Mode**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **blocca molte delle funzionalità** necessarie per utilizzare PowerShell in modo efficace, come il blocco degli oggetti COM, consentendo solo tipi .NET approvati, flussi di lavoro basati su XAML, classi PowerShell e altro ancora.
+PowerShell [**Constrained Language Mode**](https://devblogs.microsoft.com/powershell/powershell-constrained-language-mode/) **limita molte delle funzionalità** necessarie per utilizzare PowerShell in modo efficace, come il blocco degli oggetti COM, consentendo solo tipi .NET approvati, flussi di lavoro basati su XAML, classi PowerShell e altro ancora.
 
 ### **Controlla**
 ```powershell
@@ -195,7 +195,7 @@ Puoi usare [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/t
 
 ## Politica di Esecuzione PS
 
-Per impostazione predefinita è impostata su **riservata.** I principali modi per bypassare questa politica:
+Per impostazione predefinita è impostata su **restricted.** I principali modi per bypassare questa politica:
 ```powershell
 1º Just copy and paste inside the interactive PS console
 2º Read en Exec
@@ -217,13 +217,13 @@ $command = "Write-Host 'My voice is my passport, verify me.'" $bytes = [System.T
 ```
 More can be found [here](https://blog.netspi.com/15-ways-to-bypass-the-powershell-execution-policy/)
 
-## Interfaccia del Fornitore di Supporto Sicurezza (SSPI)
+## Security Support Provider Interface (SSPI)
 
 È l'API che può essere utilizzata per autenticare gli utenti.
 
-L'SSPI sarà responsabile della ricerca del protocollo adeguato per due macchine che vogliono comunicare. Il metodo preferito per questo è Kerberos. Poi l'SSPI negozierà quale protocollo di autenticazione sarà utilizzato, questi protocolli di autenticazione sono chiamati Fornitori di Supporto Sicurezza (SSP), si trovano all'interno di ogni macchina Windows sotto forma di DLL e entrambe le macchine devono supportare lo stesso per poter comunicare.
+L'SSPI sarà responsabile della ricerca del protocollo adeguato per due macchine che desiderano comunicare. Il metodo preferito per questo è Kerberos. Poi l'SSPI negozierà quale protocollo di autenticazione verrà utilizzato, questi protocolli di autenticazione sono chiamati Security Support Provider (SSP), si trovano all'interno di ogni macchina Windows sotto forma di DLL e entrambe le macchine devono supportare lo stesso per poter comunicare.
 
-### Principali SSP
+### Main SSPs
 
 - **Kerberos**: Il preferito
 - %windir%\Windows\System32\kerberos.dll
@@ -238,9 +238,9 @@ L'SSPI sarà responsabile della ricerca del protocollo adeguato per due macchine
 
 #### La negoziazione potrebbe offrire diversi metodi o solo uno.
 
-## UAC - Controllo Account Utente
+## UAC - User Account Control
 
-[Controllo Account Utente (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) è una funzionalità che abilita un **messaggio di consenso per attività elevate**.
+[User Account Control (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) è una funzionalità che abilita un **messaggio di consenso per attività elevate**.
 
 {{#ref}}
 windows-security-controls/uac-user-account-control.md

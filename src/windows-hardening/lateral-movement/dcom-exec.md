@@ -6,7 +6,7 @@
 
 **Per ulteriori informazioni su questa tecnica, controlla il post originale da [https://enigma0x3.net/2017/01/05/lateral-movement-using-the-mmc20-application-com-object/](https://enigma0x3.net/2017/01/05/lateral-movement-using-the-mmc20-application-com-object/)**
 
-Gli oggetti del Modello di Oggetti a Componenti Distribuiti (DCOM) presentano una capacità interessante per interazioni basate su rete con oggetti. Microsoft fornisce documentazione completa sia per DCOM che per il Modello di Oggetti a Componenti (COM), accessibile [qui per DCOM](https://msdn.microsoft.com/en-us/library/cc226801.aspx) e [qui per COM](<https://msdn.microsoft.com/en-us/library/windows/desktop/ms694363(v=vs.85).aspx>). Un elenco di applicazioni DCOM può essere recuperato utilizzando il comando PowerShell:
+Gli oggetti del Distributed Component Object Model (DCOM) presentano una capacità interessante per interazioni basate su rete con oggetti. Microsoft fornisce documentazione completa sia per DCOM che per il Component Object Model (COM), accessibile [qui per DCOM](https://msdn.microsoft.com/en-us/library/cc226801.aspx) e [qui per COM](<https://msdn.microsoft.com/en-us/library/windows/desktop/ms694363(v=vs.85).aspx>). Un elenco di applicazioni DCOM può essere recuperato utilizzando il comando PowerShell:
 ```bash
 Get-CimInstance Win32_DCOMApplication
 ```

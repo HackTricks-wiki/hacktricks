@@ -9,7 +9,7 @@ Puoi creare il tuo **SSP** per **catturare** in **testo chiaro** le **credenzial
 
 #### Mimilib
 
-Puoi utilizzare il binario `mimilib.dll` fornito da Mimikatz. **Questo registrerà all'interno di un file tutte le credenziali in testo chiaro.**\
+Puoi utilizzare il file binario `mimilib.dll` fornito da Mimikatz. **Questo registrerà all'interno di un file tutte le credenziali in testo chiaro.**\
 Posiziona il dll in `C:\Windows\System32\`\
 Ottieni un elenco dei pacchetti di sicurezza LSA esistenti:
 ```bash:attacker@target

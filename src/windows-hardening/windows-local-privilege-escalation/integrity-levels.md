@@ -6,7 +6,7 @@
 
 In Windows Vista e versioni successive, tutti gli elementi protetti hanno un'etichetta di **livello di integrità**. Questa configurazione assegna principalmente un livello di integrità "medio" a file e chiavi di registro, tranne per alcune cartelle e file a cui Internet Explorer 7 può scrivere a un livello di integrità basso. Il comportamento predefinito è che i processi avviati da utenti standard abbiano un livello di integrità medio, mentre i servizi operano tipicamente a un livello di integrità di sistema. Un'etichetta di alta integrità protegge la directory radice.
 
-Una regola fondamentale è che gli oggetti non possono essere modificati da processi con un livello di integrità inferiore a quello dell'oggetto. I livelli di integrità sono:
+Una regola chiave è che gli oggetti non possono essere modificati da processi con un livello di integrità inferiore a quello dell'oggetto. I livelli di integrità sono:
 
 - **Non attendibile**: Questo livello è per processi con accessi anonimi. %%%Esempio: Chrome%%%
 - **Basso**: Principalmente per interazioni internet, specialmente nella Modalità Protetta di Internet Explorer, che influisce su file e processi associati, e su alcune cartelle come la **Cartella Temporanea di Internet**. I processi a bassa integrità affrontano restrizioni significative, inclusa l'assenza di accesso in scrittura al registro e accesso limitato in scrittura al profilo utente.
@@ -37,7 +37,7 @@ NT AUTHORITY\INTERACTIVE:(I)(M,DC)
 NT AUTHORITY\SERVICE:(I)(M,DC)
 NT AUTHORITY\BATCH:(I)(M,DC)
 ```
-Ora, assegniamo un livello di integrità minimo di **High** al file. Questo **deve essere fatto da una console** eseguita come **amministratore** poiché una **console regolare** funzionerà a livello di integrità Medio e **non sarà autorizzata** ad assegnare un livello di integrità High a un oggetto:
+Ora, assegniamo un livello di integrità minimo di **High** al file. Questo **deve essere fatto da una console** eseguita come **amministratore** poiché una **console regolare** verrà eseguita a livello di integrità Medio e **non sarà autorizzata** ad assegnare un livello di integrità High a un oggetto:
 ```
 icacls asd.txt /setintegritylevel(oi)(ci) High
 processed file: asd.txt

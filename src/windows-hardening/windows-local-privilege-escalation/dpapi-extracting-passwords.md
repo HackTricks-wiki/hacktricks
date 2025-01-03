@@ -6,7 +6,7 @@
 
 ## Cos'è DPAPI
 
-L'API di Protezione Dati (DPAPI) è principalmente utilizzata all'interno del sistema operativo Windows per la **cifratura simmetrica di chiavi private asimmetriche**, sfruttando segreti utente o di sistema come una fonte significativa di entropia. Questo approccio semplifica la cifratura per gli sviluppatori consentendo loro di cifrare i dati utilizzando una chiave derivata dai segreti di accesso dell'utente o, per la cifratura di sistema, dai segreti di autenticazione del dominio del sistema, eliminando così la necessità per gli sviluppatori di gestire la protezione della chiave di cifratura.
+L'API di Protezione Dati (DPAPI) è utilizzata principalmente all'interno del sistema operativo Windows per la **cifratura simmetrica di chiavi private asimmetriche**, sfruttando segreti utente o di sistema come una fonte significativa di entropia. Questo approccio semplifica la cifratura per gli sviluppatori consentendo loro di cifrare i dati utilizzando una chiave derivata dai segreti di accesso dell'utente o, per la cifratura di sistema, dai segreti di autenticazione del dominio del sistema, eliminando così la necessità per gli sviluppatori di gestire la protezione della chiave di cifratura.
 
 ### Dati Protetti da DPAPI
 
@@ -76,7 +76,7 @@ Controlla il post [https://www.ired.team/offensive-security/credential-access-an
 
 ## HEKATOMB
 
-[**HEKATOMB**](https://github.com/Processus-Thief/HEKATOMB) è uno strumento che automatizza l'estrazione di tutti gli utenti e computer dal directory LDAP e l'estrazione della chiave di backup del controller di dominio tramite RPC. Lo script risolverà quindi tutti gli indirizzi IP dei computer e eseguirà un smbclient su tutti i computer per recuperare tutti i blob DPAPI di tutti gli utenti e decrittografare tutto con la chiave di backup del dominio.
+[**HEKATOMB**](https://github.com/Processus-Thief/HEKATOMB) è uno strumento che automatizza l'estrazione di tutti gli utenti e computer dalla directory LDAP e l'estrazione della chiave di backup del controller di dominio tramite RPC. Lo script risolverà quindi tutti gli indirizzi IP dei computer e eseguirà un smbclient su tutti i computer per recuperare tutti i blob DPAPI di tutti gli utenti e decrittografare tutto con la chiave di backup del dominio.
 
 `python3 hekatomb.py -hashes :ed0052e5a66b1c8e942cc9481a50d56 DOMAIN.local/administrator@10.0.0.1 -debug -dnstcp`
 
@@ -86,7 +86,7 @@ Con l'elenco dei computer estratti da LDAP puoi trovare ogni sottorete anche se 
 
 ## DonPAPI
 
-[**DonPAPI**](https://github.com/login-securite/DonPAPI) può dumpare segreti protetti da DPAPI automaticamente.
+[**DonPAPI**](https://github.com/login-securite/DonPAPI) può estrarre segreti protetti da DPAPI automaticamente.
 
 ## Riferimenti
 

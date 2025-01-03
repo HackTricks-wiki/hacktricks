@@ -4,7 +4,7 @@
 
 ## Bus Pirate
 
-Per testare se un Bus Pirate funziona, collegare +5V con VPU e 3.3V con ADC e accedere al bus pirate (utilizzando Tera Term ad esempio) e usare il comando `~`:
+Per testare se un Bus Pirate funziona, collegare +5V con VPU e 3.3V con ADC e accedere al bus pirate (Usando Tera Term ad esempio) e utilizzare il comando `~`:
 ```bash
 # Use command
 HiZ>~
@@ -43,7 +43,7 @@ Any key to exit
 #Press space
 Found 0 errors.
 ```
-Come puoi vedere nella riga di comando precedente, è stato detto che non sono stati trovati errori. Questo è molto utile per sapere se funziona dopo averlo acquistato o dopo aver aggiornato un firmware.
+Come puoi vedere nella riga di comando precedente, è stato detto che non sono stati trovati errori. Questo è molto utile per sapere che funziona dopo averlo acquistato o dopo aver aggiornato un firmware.
 
 Per connetterti con il bus pirate puoi seguire la documentazione:
 
@@ -53,7 +53,7 @@ In questo caso mi connetterò a un EPROM: ATMEL901 24C256 PU27:
 
 ![](<../../images/image (964).png>)
 
-Per comunicare con il bus pirate ho usato Tera Term connesso alla porta COM del bus pirate con un Setup --> Porta Serial --> Velocità di 115200.\
+Per comunicare con il bus pirate ho usato Tera Term connesso alla porta COM del bus pirate con un Setup --> Serial Port --> Speed di 115200.\
 Nella seguente comunicazione puoi trovare come preparare il bus pirate per parlare I2C e come scrivere e leggere dalla memoria (I commenti appaiono usando "#", non aspettarti quella parte nella comunicazione):
 ```bash
 # Check communication with buspirate

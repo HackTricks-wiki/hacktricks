@@ -12,7 +12,7 @@ Se si termina in un codice **che utilizza shift a destra e a sinistra, xors e di
 
 **CryptDeriveKey**
 
-Se questa funzione è utilizzata, puoi scoprire quale **algoritmo viene utilizzato** controllando il valore del secondo parametro:
+Se questa funzione è utilizzata, puoi scoprire quale **algoritmo è in uso** controllando il valore del secondo parametro:
 
 ![](<../../images/image (375) (1) (1) (1) (1).png>)
 
@@ -24,11 +24,11 @@ Comprimi e decomprimi un dato buffer.
 
 **CryptAcquireContext**
 
-Dai [documenti](https://learn.microsoft.com/en-us/windows/win32/api/wincrypt/nf-wincrypt-cryptacquirecontexta): La funzione **CryptAcquireContext** viene utilizzata per acquisire un handle a un particolare contenitore di chiavi all'interno di un particolare fornitore di servizi crittografici (CSP). **Questo handle restituito è utilizzato nelle chiamate alle funzioni CryptoAPI** che utilizzano il CSP selezionato.
+Dai [documenti](https://learn.microsoft.com/en-us/windows/win32/api/wincrypt/nf-wincrypt-cryptacquirecontexta): La funzione **CryptAcquireContext** è utilizzata per acquisire un handle a un particolare contenitore di chiavi all'interno di un particolare fornitore di servizi crittografici (CSP). **Questo handle restituito è utilizzato nelle chiamate alle funzioni CryptoAPI** che utilizzano il CSP selezionato.
 
 **CryptCreateHash**
 
-Inizia l'hashing di un flusso di dati. Se questa funzione è utilizzata, puoi scoprire quale **algoritmo viene utilizzato** controllando il valore del secondo parametro:
+Inizia l'hashing di un flusso di dati. Se questa funzione è utilizzata, puoi scoprire quale **algoritmo è in uso** controllando il valore del secondo parametro:
 
 ![](<../../images/image (376).png>)
 
@@ -48,7 +48,7 @@ Se cerchi la prima costante su Google, questo è ciò che ottieni:
 Pertanto, puoi assumere che la funzione decompilata sia un **calcolatore sha256.**\
 Puoi cercare qualsiasi altra costante e otterrai (probabilmente) lo stesso risultato.
 
-### informazioni sui dati
+### info sui dati
 
 Se il codice non ha alcuna costante significativa, potrebbe essere **in caricamento di informazioni dalla sezione .data**.\
 Puoi accedere a quei dati, **raggruppare il primo dword** e cercarlo su Google come abbiamo fatto nella sezione precedente:
@@ -64,13 +64,13 @@ In questo caso, se cerchi **0xA56363C6** puoi scoprire che è correlato alle **t
 È composto da 3 parti principali:
 
 - **Fase di inizializzazione/**: Crea una **tabella di valori da 0x00 a 0xFF** (256 byte in totale, 0x100). Questa tabella è comunemente chiamata **Substitution Box** (o SBox).
-- **Fase di mescolamento**: Eseguirà un **ciclo attraverso la tabella** creata prima (ciclo di 0x100 iterazioni, di nuovo) modificando ciascun valore con byte **semi-casuali**. Per creare questi byte semi-casuali, viene utilizzata la **chiave RC4**. Le **chiavi RC4** possono essere **tra 1 e 256 byte di lunghezza**, tuttavia di solito si raccomanda che siano superiori a 5 byte. Comunemente, le chiavi RC4 sono lunghe 16 byte.
+- **Fase di mescolamento**: **Ciclerà attraverso la tabella** creata prima (ciclo di 0x100 iterazioni, di nuovo) modificando ciascun valore con byte **semi-casuali**. Per creare questi byte semi-casuali, viene utilizzata la **chiave RC4**. Le **chiavi RC4** possono essere **tra 1 e 256 byte di lunghezza**, tuttavia si raccomanda generalmente che siano superiori a 5 byte. Comunemente, le chiavi RC4 sono lunghe 16 byte.
 - **Fase XOR**: Infine, il testo in chiaro o il testo cifrato è **XORato con i valori creati prima**. La funzione per crittografare e decrittografare è la stessa. Per questo, verrà eseguito un **ciclo attraverso i 256 byte creati** tante volte quanto necessario. Questo è solitamente riconosciuto in un codice decompilato con un **%256 (mod 256)**.
 
 > [!NOTE]
 > **Per identificare un RC4 in un codice disassemblato/decompilato puoi controllare 2 cicli di dimensione 0x100 (con l'uso di una chiave) e poi un XOR dei dati di input con i 256 valori creati prima nei 2 cicli probabilmente usando un %256 (mod 256)**
 
-### **Fase di Inizializzazione/Sostituzione Box:** (Nota il numero 256 usato come contatore e come uno 0 è scritto in ciascun posto dei 256 caratteri)
+### **Fase di Inizializzazione/Substitution Box:** (Nota il numero 256 usato come contatore e come uno 0 è scritto in ciascun posto dei 256 caratteri)
 
 ![](<../../images/image (377).png>)
 
@@ -108,7 +108,7 @@ Nota anche la **dimensione del ciclo** (**132**) e il **numero di operazioni XOR
 
 ![](<../../images/image (381).png>)
 
-Come accennato in precedenza, questo codice può essere visualizzato all'interno di qualsiasi decompilatore come una **funzione molto lunga** poiché **non ci sono salti** al suo interno. Il codice decompilato può apparire come segue:
+Come è stato menzionato prima, questo codice può essere visualizzato all'interno di qualsiasi decompilatore come una **funzione molto lunga** poiché **non ci sono salti** al suo interno. Il codice decompilato può apparire come segue:
 
 ![](<../../images/image (382).png>)
 
@@ -157,7 +157,7 @@ Nota l'uso di più costanti
 
 ### Identificare
 
-Controlla **le costanti della tabella di ricerca**:
+Controlla **costanti della tabella di ricerca**:
 
 ![](<../../images/image (387).png>)
 

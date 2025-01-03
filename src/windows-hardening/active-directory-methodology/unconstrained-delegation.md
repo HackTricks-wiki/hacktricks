@@ -1,4 +1,4 @@
-# Delegazione non vincolata
+# Delegazione Non Vincolata
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -6,7 +6,7 @@
 
 Questa è una funzionalità che un Amministratore di Dominio può impostare su qualsiasi **Computer** all'interno del dominio. Quindi, ogni volta che un **utente accede** al Computer, una **copia del TGT** di quell'utente verrà **inviata all'interno del TGS** fornito dal DC **e salvata in memoria in LSASS**. Quindi, se hai privilegi di Amministratore sulla macchina, sarai in grado di **estrarre i ticket e impersonare gli utenti** su qualsiasi macchina.
 
-Quindi, se un amministratore di dominio accede a un Computer con la funzionalità "Delegazione non vincolata" attivata, e tu hai privilegi di amministratore locale su quella macchina, sarai in grado di estrarre il ticket e impersonare l'Amministratore di Dominio ovunque (privilegi di dominio).
+Quindi, se un amministratore di dominio accede a un Computer con la funzionalità "Delegazione Non Vincolata" attivata, e tu hai privilegi di amministratore locale su quella macchina, sarai in grado di estrarre il ticket e impersonare l'Amministratore di Dominio ovunque (privilegi di dominio).
 
 Puoi **trovare oggetti Computer con questo attributo** controllando se l'attributo [userAccountControl](<https://msdn.microsoft.com/en-us/library/ms680832(v=vs.85).aspx>) contiene [ADS_UF_TRUSTED_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>). Puoi farlo con un filtro LDAP di ‘(userAccountControl:1.2.840.113556.1.4.803:=524288)’, che è ciò che fa powerview:
 
@@ -27,9 +27,9 @@ Carica il ticket di Administrator (o utente vittima) in memoria con **Mimikatz**
 Ulteriori informazioni: [https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/](https://www.harmj0y.net/blog/activedirectory/s4u2pwnage/)\
 [**Ulteriori informazioni sulla delegazione non vincolata in ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/domain-compromise-via-unrestricted-kerberos-delegation)
 
-### **Forzare l'autenticazione**
+### **Forzare l'Autenticazione**
 
-Se un attaccante è in grado di **compromettere un computer autorizzato per "Delegazione non vincolata"**, potrebbe **ingannare** un **Print server** per **accedere automaticamente** ad esso **salvando un TGT** nella memoria del server.\
+Se un attaccante è in grado di **compromettere un computer autorizzato per "Delegazione Non Vincolata"**, potrebbe **ingannare** un **Print server** per **accedere automaticamente** ad esso **salvando un TGT** nella memoria del server.\
 Quindi, l'attaccante potrebbe eseguire un **attacco Pass the Ticket per impersonare** l'account computer del server di stampa.
 
 Per far accedere un server di stampa a qualsiasi macchina puoi usare [**SpoolSample**](https://github.com/leechristensen/SpoolSample):

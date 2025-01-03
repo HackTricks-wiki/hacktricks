@@ -118,7 +118,7 @@ cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --sam
 ```
 cme smb 192.168.1.0/24 -u UserNAme -p 'PASSWORDHERE' --lsa
 ```
-### Dump il NTDS.dit dal DC di destinazione
+### Dumpare il NTDS.dit dal DC di destinazione
 ```
 cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds
 #~ cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds vss
@@ -133,7 +133,7 @@ cme smb 192.168.1.100 -u UserNAme -p 'PASSWORDHERE' --ntds
 ```
 ## Furto di SAM e SYSTEM
 
-Questi file dovrebbero essere **posizionati** in _C:\windows\system32\config\SAM_ e _C:\windows\system32\config\SYSTEM._ Ma **non puoi semplicemente copiarli in un modo normale** perché sono protetti.
+Questi file dovrebbero essere **posizionati** in _C:\windows\system32\config\SAM_ e _C:\windows\system32\config\SYSTEM._ Ma **non puoi semplicemente copiarli in modo regolare** perché sono protetti.
 
 ### Dal Registro
 
@@ -150,7 +150,7 @@ impacket-secretsdump -sam sam -security security -system system LOCAL
 ```
 ### Volume Shadow Copy
 
-Puoi eseguire copie di file protetti utilizzando questo servizio. Devi essere un Amministratore.
+Puoi eseguire copie di file protetti utilizzando questo servizio. Devi essere Amministratore.
 
 #### Using vssadmin
 
@@ -194,7 +194,7 @@ All'interno di questo database, vengono mantenute tre tabelle principali:
 
 Ulteriori informazioni su questo: [http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/](http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/)
 
-Windows utilizza _Ntdsa.dll_ per interagire con quel file ed è utilizzato da _lsass.exe_. Quindi, **parte** del file **NTDS.dit** potrebbe trovarsi **all'interno della memoria di `lsass`** (puoi trovare i dati più recentemente accessibili probabilmente a causa del miglioramento delle prestazioni utilizzando una **cache**).
+Windows utilizza _Ntdsa.dll_ per interagire con quel file ed è utilizzato da _lsass.exe_. Quindi, **parte** del file **NTDS.dit** potrebbe trovarsi **all'interno della memoria di `lsass`** (puoi trovare i dati più recentemente accessi probabilmente a causa del miglioramento delle prestazioni utilizzando una **cache**).
 
 #### Decrittazione degli hash all'interno di NTDS.dit
 
@@ -212,7 +212,7 @@ Disponibile da Windows Server 2008.
 ```bash
 ntdsutil "ac i ntds" "ifm" "create full c:\copy-ntds" quit quit
 ```
-Puoi anche utilizzare il trucco della [**volume shadow copy**](./#stealing-sam-and-system) per copiare il file **ntds.dit**. Ricorda che avrai anche bisogno di una copia del file **SYSTEM** (ancora, [**dump it from the registry or use the volume shadow copy**](./#stealing-sam-and-system) trick).
+Puoi anche utilizzare il trucco della [**volume shadow copy**](./#stealing-sam-and-system) per copiare il file **ntds.dit**. Ricorda che avrai anche bisogno di una copia del file **SYSTEM** (ancora, [**dumpalo dal registro o usa il trucco della volume shadow copy**](./#stealing-sam-and-system)).
 
 ### **Estrazione degli hash da NTDS.dit**
 
@@ -224,7 +224,7 @@ Puoi anche **estrarli automaticamente** utilizzando un utente admin di dominio v
 ```
 secretsdump.py -just-dc-ntlm <DOMAIN>/<USER>@<DOMAIN_CONTROLLER>
 ```
-Per **grandi file NTDS.dit** si consiglia di estrarlo utilizzando [gosecretsdump](https://github.com/c-sto/gosecretsdump).
+Per **grandi file NTDS.dit** si consiglia di estrarli utilizzando [gosecretsdump](https://github.com/c-sto/gosecretsdump).
 
 Infine, puoi anche utilizzare il **modulo metasploit**: _post/windows/gather/credentials/domain_hashdump_ o **mimikatz** `lsadump::lsa /inject`
 
@@ -234,7 +234,7 @@ Gli oggetti NTDS possono essere estratti in un database SQLite con [ntdsdotsqlit
 ```
 ntdsdotsqlite ntds.dit -o ntds.sqlite --system SYSTEM.hive
 ```
-Il `SYSTEM` hive è facoltativo ma consente la decrittazione dei segreti (hash NT e LM, credenziali supplementari come password in chiaro, chiavi kerberos o di fiducia, storie delle password NT e LM). Insieme ad altre informazioni, vengono estratti i seguenti dati: account utente e macchina con i loro hash, flag UAC, timestamp per l'ultimo accesso e cambio password, descrizione degli account, nomi, UPN, SPN, gruppi e appartenenze ricorsive, albero delle unità organizzative e appartenenza, domini fidati con tipo di fiducia, direzione e attributi...
+Il hive `SYSTEM` è facoltativo ma consente la decrittazione dei segreti (hash NT e LM, credenziali supplementari come password in chiaro, chiavi kerberos o di fiducia, storie delle password NT e LM). Insieme ad altre informazioni, vengono estratti i seguenti dati: account utente e macchina con i loro hash, flag UAC, timestamp per l'ultimo accesso e cambio password, descrizione degli account, nomi, UPN, SPN, gruppi e appartenenze ricorsive, albero delle unità organizzative e appartenenza, domini fidati con tipo di fiducia, direzione e attributi...
 
 ## Lazagne
 

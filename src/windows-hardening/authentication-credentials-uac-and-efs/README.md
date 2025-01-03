@@ -4,7 +4,7 @@
 
 ## Politica di AppLocker
 
-Un elenco di applicazioni approvate è un elenco di applicazioni software o eseguibili approvati che sono autorizzati a essere presenti e a funzionare su un sistema. L'obiettivo è proteggere l'ambiente da malware dannoso e software non approvato che non si allinea con le specifiche esigenze aziendali di un'organizzazione.
+Un elenco di applicazioni approvate è un elenco di applicazioni software o eseguibili approvati che sono autorizzati a essere presenti e a funzionare su un sistema. L'obiettivo è proteggere l'ambiente da malware dannosi e software non approvati che non si allineano con le specifiche esigenze aziendali di un'organizzazione.
 
 [AppLocker](https://docs.microsoft.com/en-us/windows/security/threat-protection/windows-defender-application-control/applocker/what-is-applocker) è la **soluzione di whitelisting delle applicazioni** di Microsoft e offre agli amministratori di sistema il controllo su **quali applicazioni e file gli utenti possono eseguire**. Fornisce **controllo granulare** su eseguibili, script, file di installazione di Windows, DLL, app confezionate e installatori di app confezionate.\
 È comune per le organizzazioni **bloccare cmd.exe e PowerShell.exe** e l'accesso in scrittura a determinate directory, **ma tutto questo può essere aggirato**.
@@ -34,7 +34,7 @@ C:\Windows\Tasks
 C:\windows\tracing
 ```
 - I comuni **binaries** [**"LOLBAS's"**](https://lolbas-project.github.io/) possono essere utili per bypassare AppLocker.
-- **Regole scritte male potrebbero anche essere bypassate**
+- **Regole scritte male possono essere bypassate**
 - Ad esempio, **`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`**, puoi creare una **cartella chiamata `allowed`** ovunque e sarà consentita.
 - Le organizzazioni spesso si concentrano su **bloccare l'eseguibile `%System32%\WindowsPowerShell\v1.0\powershell.exe`**, ma dimenticano le **altre** [**posizioni eseguibili di PowerShell**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations) come `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` o `PowerShell_ISE.exe`.
 - **L'applicazione delle DLL è molto raramente abilitata** a causa del carico aggiuntivo che può mettere su un sistema e della quantità di test necessari per garantire che nulla si rompa. Quindi utilizzare **DLL come backdoor aiuterà a bypassare AppLocker**.
@@ -58,14 +58,14 @@ Le **credenziali** sono **salvate** all'interno del **processo LSASS**: ticket K
 
 LSA potrebbe salvare su disco alcune credenziali:
 
-- Password dell'account computer dell'Active Directory (controller di dominio irraggiungibile).
+- Password dell'account computer di Active Directory (controller di dominio irraggiungibile).
 - Password degli account dei servizi Windows
 - Password per attività pianificate
 - Altro (password delle applicazioni IIS...)
 
 ### NTDS.dit
 
-È il database dell'Active Directory. È presente solo nei Domain Controllers.
+È il database di Active Directory. È presente solo nei Controller di Dominio.
 
 ## Defender
 
@@ -115,7 +115,7 @@ Questo metodo di crittografia consente un **accesso trasparente** ai file critto
 **Punti chiave**:
 
 - EFS utilizza una FEK simmetrica, crittografata con la chiave pubblica dell'utente.
-- La decrittazione utilizza la chiave privata dell'utente per accedere alla FEK.
+- La decrittazione impiega la chiave privata dell'utente per accedere alla FEK.
 - La decrittazione automatica avviene in determinate condizioni, come il copia su FAT32 o la trasmissione in rete.
 - I file crittografati sono accessibili al proprietario senza passaggi aggiuntivi.
 
@@ -181,7 +181,7 @@ $ExecutionContext.SessionState.LanguageMode
 Powershell -version 2
 ```
 In Windows attuale, quel bypass non funzionerà, ma puoi usare [**PSByPassCLM**](https://github.com/padovah4ck/PSByPassCLM).\
-**Per compilarlo potresti aver bisogno** **di** _**Aggiungere un Riferimento**_ -> _Sfoglia_ -> _Sfoglia_ -> aggiungi `C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0\31bf3856ad364e35\System.Management.Automation.dll` e **cambiare il progetto in .Net4.5**.
+**Per compilarlo potresti aver bisogno** **di** _**Aggiungere un Riferimento**_ -> _Sfoglia_ -> _Sfoglia_ -> aggiungi `C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0\31bf3856ad364e35\System.Management.Automation.dll` e **cambiare il progetto a .Net4.5**.
 
 #### Bypass diretto:
 ```bash
@@ -195,7 +195,7 @@ Puoi usare [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/t
 
 ## Politica di Esecuzione PS
 
-Per impostazione predefinita è impostata su **riservata.** I principali modi per bypassare questa politica:
+Per impostazione predefinita è impostata su **restricted.** I principali modi per bypassare questa politica:
 ```powershell
 1º Just copy and paste inside the interactive PS console
 2º Read en Exec

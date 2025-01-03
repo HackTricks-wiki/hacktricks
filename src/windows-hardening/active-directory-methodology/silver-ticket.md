@@ -32,22 +32,22 @@ Il servizio CIFS è evidenziato come un obiettivo comune per accedere al file sy
 
 ## Servizi Disponibili
 
-| Tipo di Servizio                           | Servizi Silver Tickets                                                    |
-| ------------------------------------------ | ------------------------------------------------------------------------- |
-| WMI                                        | <p>HOST</p><p>RPCSS</p>                                                 |
+| Tipo di Servizio                           | Biglietti Silver del Servizio                                            |
+| ------------------------------------------ | ------------------------------------------------------------------------ |
+| WMI                                        | <p>HOST</p><p>RPCSS</p>                                                |
 | PowerShell Remoting                        | <p>HOST</p><p>HTTP</p><p>A seconda del sistema operativo anche:</p><p>WSMAN</p><p>RPCSS</p> |
 | WinRM                                      | <p>HOST</p><p>HTTP</p><p>In alcune occasioni puoi semplicemente chiedere: WINRM</p> |
-| Attività Pianificate                       | HOST                                                                    |
-| Condivisione File di Windows, anche psexec | CIFS                                                                    |
-| Operazioni LDAP, incluso DCSync           | LDAP                                                                    |
-| Strumenti di Amministrazione Remota di Windows | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                      |
-| Golden Tickets                             | krbtgt                                                                |
+| Attività Pianificate                       | HOST                                                                   |
+| Condivisione File di Windows, anche psexec | CIFS                                                                   |
+| Operazioni LDAP, incluso DCSync           | LDAP                                                                   |
+| Strumenti di Amministrazione Remota di Windows | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                   |
+| Biglietti d'Oro                           | krbtgt                                                                 |
 
 Utilizzando **Rubeus** puoi **richiedere tutti** questi biglietti utilizzando il parametro:
 
 - `/altservice:host,RPCSS,http,wsman,cifs,ldap,krbtgt,winrm`
 
-### ID Evento dei Silver Tickets
+### ID Evento Biglietti Silver
 
 - 4624: Accesso all'Account
 - 4634: Disconnessione dall'Account
@@ -65,7 +65,7 @@ dir \\vulnerable.computer\C$
 dir \\vulnerable.computer\ADMIN$
 copy afile.txt \\vulnerable.computer\C$\Windows\Temp
 ```
-Potrai anche ottenere una shell all'interno dell'host o eseguire comandi arbitrari utilizzando **psexec**:
+Sarai anche in grado di ottenere una shell all'interno dell'host o eseguire comandi arbitrari utilizzando **psexec**:
 
 {{#ref}}
 ../lateral-movement/psexec-and-winexec.md
@@ -109,7 +109,7 @@ Con l'accesso winrm a un computer puoi **accedervi** e persino ottenere un Power
 ```bash
 New-PSSession -Name PSC -ComputerName the.computer.name; Enter-PSSession PSC
 ```
-Controlla la seguente pagina per apprendere **ulteriori modi per connettersi a un host remoto utilizzando winrm**:
+Controlla la seguente pagina per apprendere **altri modi per connettersi a un host remoto utilizzando winrm**:
 
 {{#ref}}
 ../lateral-movement/winrm.md

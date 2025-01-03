@@ -4,7 +4,7 @@
 
 ## UAC
 
-[Il Controllo Account Utente (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) è una funzionalità che consente un **messaggio di consenso per attività elevate**. Le applicazioni hanno diversi livelli di `integrità`, e un programma con un **alto livello** può eseguire operazioni che **potrebbero compromettere il sistema**. Quando UAC è abilitato, le applicazioni e le attività vengono sempre **eseguite sotto il contesto di sicurezza di un account non amministratore** a meno che un amministratore non autorizzi esplicitamente queste applicazioni/attività ad avere accesso di livello amministratore al sistema per essere eseguite. È una funzionalità di comodità che protegge gli amministratori da modifiche non intenzionali, ma non è considerata un confine di sicurezza.
+[Il Controllo Account Utente (UAC)](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works) è una funzionalità che consente un **messaggio di consenso per attività elevate**. Le applicazioni hanno diversi livelli di `integrità`, e un programma con un **alto livello** può eseguire compiti che **potrebbero compromettere il sistema**. Quando UAC è abilitato, le applicazioni e i compiti vengono sempre **eseguiti sotto il contesto di sicurezza di un account non amministratore** a meno che un amministratore non autorizzi esplicitamente queste applicazioni/compiti ad avere accesso di livello amministratore al sistema per essere eseguiti. È una funzionalità di comodità che protegge gli amministratori da modifiche non intenzionali ma non è considerata un confine di sicurezza.
 
 Per ulteriori informazioni sui livelli di integrità:
 
@@ -46,7 +46,7 @@ REG QUERY HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\
 HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Policies\System
 EnableLUA    REG_DWORD    0x1
 ```
-Se è **`1`** allora UAC è **attivato**, se è **`0`** o **non esiste**, allora UAC è **disattivato**.
+Se è **`1`** allora UAC è **attivato**, se è **`0`** o non **esiste**, allora UAC è **disattivato**.
 
 Poi, controlla **quale livello** è configurato:
 ```
@@ -85,7 +85,7 @@ whoami /groups | findstr Level
 ## Bypass UAC
 
 > [!NOTE]
-> Nota che se hai accesso grafico alla vittima, il bypass UAC è semplice poiché puoi semplicemente cliccare su "Sì" quando appare il prompt UAC.
+> Nota che se hai accesso grafico alla vittima, il bypass UAC è semplice poiché puoi semplicemente cliccare su "Sì" quando appare il prompt UAS.
 
 Il bypass UAC è necessario nella seguente situazione: **l'UAC è attivato, il tuo processo sta girando in un contesto di integrità media e il tuo utente appartiene al gruppo degli amministratori**.
 
@@ -119,7 +119,7 @@ dir \\127.0.0.1\c$\Users\Administrator\Desktop
 ```
 ### Bypass UAC con Cobalt Strike
 
-Le tecniche di Cobalt Strike funzioneranno solo se UAC non è impostato al suo massimo livello di sicurezza.
+Le tecniche di Cobalt Strike funzioneranno solo se UAC non è impostato al massimo livello di sicurezza.
 ```bash
 # UAC bypass via token duplication
 elevate uac-token-duplication [listener_name]
@@ -156,7 +156,7 @@ Also, usando [this](https://en.wikipedia.org/wiki/Windows_10_version_history) pa
 
 **Tutte** le tecniche utilizzate qui per bypassare AUC **richiedono** una **shell interattiva completa** con la vittima (una comune shell nc.exe non è sufficiente).
 
-Puoi ottenerlo usando una sessione **meterpreter**. Migra a un **processo** che ha il valore **Session** uguale a **1**:
+Puoi ottenerla usando una sessione **meterpreter**. Migra a un **processo** che ha il valore **Session** uguale a **1**:
 
 ![](<../../images/image (96).png>)
 
@@ -164,7 +164,7 @@ Puoi ottenerlo usando una sessione **meterpreter**. Migra a un **processo** che 
 
 ### Bypass UAC con GUI
 
-Se hai accesso a una **GUI puoi semplicemente accettare il prompt UAC** quando lo ricevi, non hai davvero bisogno di un bypass. Quindi, ottenere accesso a una GUI ti permetterà di bypassare l'UAC.
+Se hai accesso a una **GUI puoi semplicemente accettare il prompt UAC** quando lo ricevi, non hai realmente bisogno di un bypass. Quindi, ottenere accesso a una GUI ti permetterà di bypassare l'UAC.
 
 Inoltre, se ottieni una sessione GUI che qualcuno stava usando (potenzialmente tramite RDP) ci sono **alcuni strumenti che verranno eseguiti come amministratore** da dove potresti **eseguire** un **cmd** ad esempio **come admin** direttamente senza essere nuovamente sollecitato da UAC come [**https://github.com/oski02/UAC-GUI-Bypass-appverif**](https://github.com/oski02/UAC-GUI-Bypass-appverif). Questo potrebbe essere un po' più **furtivo**.
 

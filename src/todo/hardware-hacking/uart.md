@@ -8,7 +8,7 @@ UART è un protocollo seriale, il che significa che trasferisce dati tra compone
 
 In generale, la linea è mantenuta alta (a un valore logico di 1) mentre UART è nello stato inattivo. Poi, per segnalare l'inizio di un trasferimento di dati, il trasmettitore invia un bit di avvio al ricevitore, durante il quale il segnale è mantenuto basso (a un valore logico di 0). Successivamente, il trasmettitore invia da cinque a otto bit di dati contenenti il messaggio reale, seguiti da un bit di parità opzionale e uno o due bit di stop (con un valore logico di 1), a seconda della configurazione. Il bit di parità, utilizzato per il controllo degli errori, è raramente visto in pratica. Il bit di stop (o i bit) segnalano la fine della trasmissione.
 
-Chiamiamo la configurazione più comune 8N1: otto bit di dati, nessuna parità e un bit di stop. Ad esempio, se volessimo inviare il carattere C, o 0x43 in ASCII, in una configurazione UART 8N1, invieremmo i seguenti bit: 0 (il bit di avvio); 0, 1, 0, 0, 0, 0, 1, 1 (il valore di 0x43 in binario), e 0 (il bit di stop).
+Chiamiamo la configurazione più comune 8N1: otto bit di dati, nessun bit di parità e un bit di stop. Ad esempio, se volessimo inviare il carattere C, o 0x43 in ASCII, in una configurazione UART 8N1, invieremmo i seguenti bit: 0 (il bit di avvio); 0, 1, 0, 0, 0, 0, 1, 1 (il valore di 0x43 in binario), e 0 (il bit di stop).
 
 ![](<../../images/image (764).png>)
 
@@ -64,9 +64,9 @@ Dopo la configurazione, usa il comando `minicom` per avviare la Console UART.
 
 ## UART Via Arduino UNO R3 (Schede con Chip Atmel 328p Rimovibile)
 
-Nel caso in cui gli adattatori UART Serial to USB non siano disponibili, l'Arduino UNO R3 può essere utilizzato con un hack veloce. Poiché l'Arduino UNO R3 è solitamente disponibile ovunque, questo può far risparmiare molto tempo.
+Nel caso in cui gli adattatori UART Serial to USB non siano disponibili, l'Arduino UNO R3 può essere utilizzato con un rapido hack. Poiché l'Arduino UNO R3 è solitamente disponibile ovunque, questo può far risparmiare molto tempo.
 
-L'Arduino UNO R3 ha un adattatore USB a Serial integrato sulla scheda stessa. Per ottenere la connessione UART, basta estrarre il chip microcontrollore Atmel 328p dalla scheda. Questo hack funziona sulle varianti di Arduino UNO R3 che hanno l'Atmel 328p non saldato sulla scheda (viene utilizzata la versione SMD). Collega il pin RX dell'Arduino (Pin Digitale 0) al pin TX dell'interfaccia UART e il pin TX dell'Arduino (Pin Digitale 1) al pin RX dell'interfaccia UART.
+L'Arduino UNO R3 ha un adattatore USB to Serial integrato sulla scheda stessa. Per ottenere la connessione UART, basta estrarre il chip microcontrollore Atmel 328p dalla scheda. Questo hack funziona sulle varianti di Arduino UNO R3 che hanno l'Atmel 328p non saldato sulla scheda (viene utilizzata la versione SMD). Collega il pin RX dell'Arduino (Pin Digitale 0) al pin TX dell'interfaccia UART e il pin TX dell'Arduino (Pin Digitale 1) al pin RX dell'interfaccia UART.
 
 Infine, si consiglia di utilizzare l'Arduino IDE per ottenere la Console Serial. Nella sezione `tools` del menu, seleziona l'opzione `Serial Console` e imposta il baud rate secondo l'interfaccia UART.
 
@@ -148,7 +148,7 @@ waiting a few secs to repeat....
 
 La Console UART offre un ottimo modo per lavorare con il firmware sottostante nell'ambiente di runtime. Ma quando l'accesso alla Console UART è in sola lettura, potrebbe introdurre molte limitazioni. In molti dispositivi embedded, il firmware è memorizzato in EEPROM e viene eseguito in processori che hanno memoria volatile. Pertanto, il firmware è mantenuto in sola lettura poiché il firmware originale durante la produzione è all'interno dell'EEPROM stessa e eventuali nuovi file andrebbero persi a causa della memoria volatile. Pertanto, il dumping del firmware è uno sforzo prezioso quando si lavora con firmware embedded.
 
-Ci sono molti modi per farlo e la sezione SPI copre i metodi per estrarre il firmware direttamente dall'EEPROM con vari dispositivi. Tuttavia, si consiglia di provare prima a fare il dumping del firmware con UART poiché il dumping del firmware con dispositivi fisici e interazioni esterne può essere rischioso.
+Ci sono molti modi per farlo e la sezione SPI copre metodi per estrarre il firmware direttamente dall'EEPROM con vari dispositivi. Tuttavia, si consiglia di provare prima a fare il dumping del firmware con UART poiché il dumping del firmware con dispositivi fisici e interazioni esterne può essere rischioso.
 
 Il dumping del firmware dalla Console UART richiede prima di ottenere accesso ai bootloader. Molti fornitori popolari utilizzano uboot (Universal Bootloader) come loro bootloader per caricare Linux. Pertanto, è necessario ottenere accesso a uboot.
 

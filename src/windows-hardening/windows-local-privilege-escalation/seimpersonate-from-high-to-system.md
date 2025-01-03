@@ -5,7 +5,7 @@
 ### Codice
 
 Il seguente codice da [qui](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962). Permette di **indicare un Process ID come argomento** e un CMD **in esecuzione come l'utente** del processo indicato verrà eseguito.\
-Eseguendo in un processo ad alta integrità, puoi **indicare il PID di un processo in esecuzione come System** (come winlogon, wininit) ed eseguire un cmd.exe come system.
+Eseguendo in un processo ad alta integrità puoi **indicare il PID di un processo in esecuzione come System** (come winlogon, wininit) ed eseguire un cmd.exe come system.
 ```cpp
 impersonateuser.exe 1234
 ```
@@ -158,7 +158,7 @@ Controlliamo i permessi attuali dell'Amministratore sui processi `svchost.exe` c
 
 1. Seleziona un processo di `svchost.exe`
 2. Clicca con il tasto destro --> Proprietà
-3. All'interno della scheda "Sicurezza" clicca in basso a destra sul pulsante "Permessi"
+3. Nella scheda "Sicurezza" clicca in basso a destra sul pulsante "Permessi"
 4. Clicca su "Avanzate"
 5. Seleziona "Amministratori" e clicca su "Modifica"
 6. Clicca su "Mostra permessi avanzati"
@@ -171,6 +171,6 @@ Guarda i privilegi che gli "Amministratori" hanno su `winlogon.exe`:
 
 ![](<../../images/image (1102).png>)
 
-All'interno di quel processo gli "Amministratori" possono "Leggere la memoria" e "Leggere i permessi", il che probabilmente consente agli Amministratori di impersonare il token utilizzato da questo processo.
+All'interno di quel processo, gli "Amministratori" possono "Leggere la memoria" e "Leggere i permessi", il che probabilmente consente agli Amministratori di impersonare il token utilizzato da questo processo.
 
 {{#include ../../banners/hacktricks-training.md}}

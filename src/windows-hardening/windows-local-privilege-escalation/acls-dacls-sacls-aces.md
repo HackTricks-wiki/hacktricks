@@ -22,7 +22,7 @@ Il processo di accesso a un file comporta che il sistema controlli il descrittor
 
 Ogni sessione utente è associata a un token di accesso che contiene informazioni di sicurezza rilevanti per quella sessione, inclusi identità utente, di gruppo e privilegi. Questo token include anche un SID di accesso che identifica univocamente la sessione.
 
-L'Autorità di Sicurezza Locale (LSASS) elabora le richieste di accesso agli oggetti esaminando il DACL per le ACEs che corrispondono al principio di sicurezza che tenta di accedere. L'accesso viene immediatamente concesso se non vengono trovate ACEs rilevanti. Altrimenti, LSASS confronta le ACEs con il SID del principio di sicurezza nel token di accesso per determinare l'idoneità all'accesso.
+L'Autorità di Sicurezza Locale (LSASS) elabora le richieste di accesso agli oggetti esaminando il DACL per le ACEs che corrispondono al principio di sicurezza che tenta di accedere. L'accesso è immediatamente concesso se non vengono trovate ACEs rilevanti. Altrimenti, LSASS confronta le ACEs con il SID del principio di sicurezza nel token di accesso per determinare l'idoneità all'accesso.
 
 ### **Summarized Process**
 
@@ -42,10 +42,10 @@ Ogni ACE ha **quattro componenti critiche**:
 
 1. Il **Security Identifier (SID)** dell'utente o del gruppo (o il loro nome principale in una rappresentazione grafica).
 2. Un **flag** che identifica il tipo di ACE (accesso negato, consentito o audit di sistema).
-3. **Flags di ereditarietà** che determinano se gli oggetti figli possono ereditare l'ACE dal loro genitore.
+3. **Flags di eredità** che determinano se gli oggetti figli possono ereditare l'ACE dal loro genitore.
 4. Un [**access mask**](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/7a53f60e-e730-4dfe-bbe9-b21b62eb790b?redirectedfrom=MSDN), un valore a 32 bit che specifica i diritti concessi all'oggetto.
 
-La determinazione dell'accesso viene condotta esaminando sequenzialmente ogni ACE fino a quando:
+La determinazione dell'accesso viene condotta esaminando sequenzialmente ogni ACE fino a:
 
 - Un **Access-Denied ACE** nega esplicitamente i diritti richiesti a un fiduciario identificato nel token di accesso.
 - **Access-Allowed ACE(s)** concedono esplicitamente tutti i diritti richiesti a un fiduciario nel token di accesso.
@@ -57,7 +57,7 @@ Il modo in cui le **ACEs** (regole che dicono chi può o non può accedere a qua
 
 C'è un modo migliore per organizzare queste ACEs, e si chiama **"ordine canonico."** Questo metodo aiuta a garantire che tutto funzioni senza intoppi e in modo equo. Ecco come funziona per sistemi come **Windows 2000** e **Windows Server 2003**:
 
-- Prima, metti tutte le regole che sono fatte **specificamente per questo elemento** prima di quelle che provengono da altrove, come una cartella genitore.
+- Prima, metti tutte le regole fatte **specificamente per questo elemento** prima di quelle che provengono da altrove, come una cartella genitore.
 - In quelle regole specifiche, metti quelle che dicono **"no" (nega)** prima di quelle che dicono **"sì" (consenti)**.
 - Per le regole che provengono da altrove, inizia con quelle della **fonte più vicina**, come il genitore, e poi torna indietro da lì. Ancora una volta, metti **"no"** prima di **"sì."**
 
@@ -76,11 +76,11 @@ Quindi, questo **"ordine canonico"** riguarda tutto il garantire che le regole d
 
 [**Esempio da qui**](https://secureidentity.se/acl-dacl-sacl-and-the-ace/)
 
-Questa è la classica scheda di sicurezza di una cartella che mostra l'ACL, DACL e ACEs:
+Questa è la scheda di sicurezza classica di una cartella che mostra l'ACL, DACL e ACEs:
 
 ![http://secureidentity.se/wp-content/uploads/2014/04/classicsectab.jpg](../../images/classicsectab.jpg)
 
-Se clicchiamo sul **pulsante Avanzate**, otterremo più opzioni come l'ereditarietà:
+Se clicchiamo sul **pulsante Avanzate**, otterremo più opzioni come l'eredità:
 
 ![http://secureidentity.se/wp-content/uploads/2014/04/aceinheritance.jpg](../../images/aceinheritance.jpg)
 
@@ -94,7 +94,7 @@ E infine abbiamo il SACL nella scheda di Audit:
 
 ### Explaining Access Control in a Simplified Manner
 
-Quando gestiamo l'accesso alle risorse, come una cartella, utilizziamo elenchi e regole noti come Access Control Lists (ACLs) e Access Control Entries (ACEs). Questi definiscono chi può o non può accedere a determinati dati.
+Quando gestiamo l'accesso alle risorse, come una cartella, utilizziamo liste e regole note come Access Control Lists (ACLs) e Access Control Entries (ACEs). Queste definiscono chi può o non può accedere a determinati dati.
 
 #### Denying Access to a Specific Group
 
@@ -108,7 +108,7 @@ Diciamo che Bob, il direttore marketing, ha bisogno di accesso alla cartella Cos
 
 Le ACEs sono le singole regole in un'ACL. Identificano utenti o gruppi, specificano quali accessi sono consentiti o negati e determinano come queste regole si applicano agli elementi secondari (ereditarietà). Ci sono due principali tipi di ACEs:
 
-- **Generic ACEs**: Queste si applicano in modo ampio, influenzando tutti i tipi di oggetti o distinguendo solo tra contenitori (come cartelle) e non contenitori (come file). Ad esempio, una regola che consente agli utenti di vedere i contenuti di una cartella ma non di accedere ai file al suo interno.
+- **Generic ACEs**: Queste si applicano in modo ampio, influenzando tutti i tipi di oggetti o distinguendo solo tra contenitori (come cartelle) e non contenitori (come file). Ad esempio, una regola che consente agli utenti di vedere il contenuto di una cartella ma non di accedere ai file al suo interno.
 - **Object-Specific ACEs**: Queste forniscono un controllo più preciso, consentendo di impostare regole per tipi specifici di oggetti o persino per singole proprietà all'interno di un oggetto. Ad esempio, in una directory di utenti, una regola potrebbe consentire a un utente di aggiornare il proprio numero di telefono ma non le proprie ore di accesso.
 
 Ogni ACE contiene informazioni importanti come a chi si applica la regola (utilizzando un Security Identifier o SID), cosa consente o nega la regola (utilizzando un access mask) e come viene ereditata da altri oggetti.
@@ -118,7 +118,7 @@ Ogni ACE contiene informazioni importanti come a chi si applica la regola (utili
 - **Generic ACEs** sono adatte per scenari di controllo accessi semplici, dove la stessa regola si applica a tutti gli aspetti di un oggetto o a tutti gli oggetti all'interno di un contenitore.
 - **Object-Specific ACEs** sono utilizzate per scenari più complessi, specialmente in ambienti come Active Directory, dove potrebbe essere necessario controllare l'accesso a proprietà specifiche di un oggetto in modo diverso.
 
-In sintesi, le ACLs e le ACEs aiutano a definire controlli di accesso precisi, assicurando che solo gli individui o i gruppi giusti abbiano accesso a informazioni o risorse sensibili, con la possibilità di personalizzare i diritti di accesso fino al livello delle singole proprietà o tipi di oggetti.
+In sintesi, ACLs e ACEs aiutano a definire controlli di accesso precisi, assicurando che solo gli individui o i gruppi giusti abbiano accesso a informazioni o risorse sensibili, con la possibilità di personalizzare i diritti di accesso fino al livello delle singole proprietà o tipi di oggetti.
 
 ### Access Control Entry Layout
 
@@ -127,7 +127,7 @@ In sintesi, le ACLs e le ACEs aiutano a definire controlli di accesso precisi, a
 | Type        | Flag che indica il tipo di ACE. Windows 2000 e Windows Server 2003 supportano sei tipi di ACE: Tre tipi di ACE generici che sono attaccati a tutti gli oggetti sicuri. Tre tipi di ACE specifici per oggetti che possono verificarsi per oggetti di Active Directory.                                                                                                                                                                                                                                                            |
 | Flags       | Insieme di flag bit che controllano l'ereditarietà e l'audit.                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | Size        | Numero di byte di memoria allocati per l'ACE.                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| Access mask | Valore a 32 bit i cui bit corrispondono ai diritti di accesso per l'oggetto. I bit possono essere impostati accesi o spenti, ma il significato dell'impostazione dipende dal tipo di ACE. Ad esempio, se il bit che corrisponde al diritto di leggere i permessi è attivato, e il tipo di ACE è Nega, l'ACE nega il diritto di leggere i permessi dell'oggetto. Se lo stesso bit è impostato su acceso ma il tipo di ACE è Consenti, l'ACE concede il diritto di leggere i permessi dell'oggetto. Maggiori dettagli sull'Access mask appaiono nella tabella successiva. |
+| Access mask | Valore a 32 bit i cui bit corrispondono ai diritti di accesso per l'oggetto. I bit possono essere impostati sia su che giù, ma il significato dell'impostazione dipende dal tipo di ACE. Ad esempio, se il bit che corrisponde al diritto di leggere i permessi è attivato, e il tipo di ACE è Nega, l'ACE nega il diritto di leggere i permessi dell'oggetto. Se lo stesso bit è attivato ma il tipo di ACE è Consenti, l'ACE concede il diritto di leggere i permessi dell'oggetto. Maggiori dettagli sull'Access mask appaiono nella tabella successiva. |
 | SID         | Identifica un utente o un gruppo il cui accesso è controllato o monitorato da questo ACE.                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 
 ### Access Mask Layout
@@ -138,7 +138,7 @@ In sintesi, le ACLs e le ACEs aiutano a definire controlli di accesso precisi, a
 | 16 - 22     | Diritti di Accesso Standard             | Elimina, Scrivi ACL, Scrivi Proprietario            |
 | 23          | Può accedere alla sicurezza ACL            |                                           |
 | 24 - 27     | Riservato                           |                                           |
-| 28          | Generico TUTTO (Leggi, Scrivi, Esegui) | Tutto sotto                          |
+| 28          | Generico TUTTI (Leggi, Scrivi, Esegui) | Tutto sotto                          |
 | 29          | Generico Esegui                    | Tutte le cose necessarie per eseguire un programma |
 | 30          | Generico Scrivi                      | Tutte le cose necessarie per scrivere in un file   |
 | 31          | Generico Leggi                       | Tutte le cose necessarie per leggere un file       |

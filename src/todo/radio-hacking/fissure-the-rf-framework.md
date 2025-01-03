@@ -2,7 +2,7 @@
 
 **Comprensione e Ingegneria Inversa dei Segnali SDR Indipendenti dalla Frequenza**
 
-FISSURE è un framework open-source RF e di ingegneria inversa progettato per tutti i livelli di abilità, con hook per la rilevazione e classificazione dei segnali, scoperta dei protocolli, esecuzione degli attacchi, manipolazione IQ, analisi delle vulnerabilità, automazione e AI/ML. Il framework è stato costruito per promuovere l'integrazione rapida di moduli software, radio, protocolli, dati di segnale, script, grafi di flusso, materiale di riferimento e strumenti di terze parti. FISSURE è un abilitante del flusso di lavoro che mantiene il software in un'unica posizione e consente ai team di mettersi rapidamente al passo mentre condividono la stessa configurazione di base collaudata per specifiche distribuzioni Linux.
+FISSURE è un framework open-source RF e di ingegneria inversa progettato per tutti i livelli di abilità, con hook per la rilevazione e classificazione dei segnali, scoperta dei protocolli, esecuzione degli attacchi, manipolazione IQ, analisi delle vulnerabilità, automazione e AI/ML. Il framework è stato costruito per promuovere l'integrazione rapida di moduli software, radio, protocolli, dati di segnale, script, grafici di flusso, materiale di riferimento e strumenti di terze parti. FISSURE è un abilitante del flusso di lavoro che mantiene il software in un'unica posizione e consente ai team di mettersi rapidamente al passo mentre condividono la stessa configurazione di base collaudata per specifiche distribuzioni Linux.
 
 Il framework e gli strumenti inclusi in FISSURE sono progettati per rilevare la presenza di energia RF, comprendere le caratteristiche di un segnale, raccogliere e analizzare campioni, sviluppare tecniche di trasmissione e/o iniezione e creare payload o messaggi personalizzati. FISSURE contiene una libreria in crescita di informazioni su protocolli e segnali per assistere nell'identificazione, creazione di pacchetti e fuzzing. Esistono capacità di archiviazione online per scaricare file di segnale e costruire playlist per simulare il traffico e testare i sistemi.
 
@@ -33,7 +33,7 @@ Ci sono tre rami all'interno di FISSURE per rendere più facile la navigazione n
 
 **In Corso (beta)**
 
-Questi sistemi operativi sono ancora in stato beta. Sono in fase di sviluppo e diverse funzionalità sono note per mancare. Gli elementi nell'installer potrebbero entrare in conflitto con programmi esistenti o non installarsi fino a quando lo stato non viene rimosso.
+Questi sistemi operativi sono ancora in stato beta. Sono in fase di sviluppo e diverse funzionalità sono note per essere mancanti. Gli elementi nell'installer potrebbero entrare in conflitto con programmi esistenti o non installarsi fino a quando lo stato non viene rimosso.
 
 |     Sistema Operativo     |    Ramo FISSURE   |
 | :----------------------: | :-----------------: |
@@ -62,7 +62,7 @@ Si consiglia di installare FISSURE su un sistema operativo pulito per evitare co
 
 ![install2](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/install2.png)
 
-**Utilizzo**
+**Uso**
 
 Apri un terminale e inserisci:
 ```
@@ -84,9 +84,9 @@ Riferirsi al menu di aiuto di FISSURE per ulteriori dettagli sull'uso.
 
 **Capacità**
 
-| ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/detector.png)_**Rilevatore di Segnali**_ | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/iq.png)_**Manipolazione IQ**_      | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/library.png)_**Ricerca Segnali**_          | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/pd.png)_**Riconoscimento Modelli**_ |
+| ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/detector.png)_**Rilevatore di Segnale**_ | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/iq.png)_**Manipolazione IQ**_      | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/library.png)_**Ricerca Segnale**_          | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/pd.png)_**Riconoscimento Modelli**_ |
 | --------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/attack.png)_**Attacchi**_           | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/fuzzing.png)_**Fuzzing**_         | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/archive.png)_**Playlist di Segnali**_       | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/gallery.png)_**Galleria Immagini**_  |
+| ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/attack.png)_**Attacchi**_           | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/fuzzing.png)_**Fuzzing**_         | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/archive.png)_**Playlist di Segnale**_       | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/gallery.png)_**Galleria Immagini**_  |
 | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/packet.png)_**Creazione Pacchetti**_   | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/scapy.png)_**Integrazione Scapy**_ | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/crc\_calculator.png)_**Calcolatore CRC**_ | ![](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Icons/README/log.png)_**Registrazione**_            |
 
 **Hardware**

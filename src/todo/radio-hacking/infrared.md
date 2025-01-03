@@ -6,7 +6,7 @@
 
 **La luce infrarossa è invisibile agli esseri umani**. La lunghezza d'onda IR va da **0,7 a 1000 micron**. I telecomandi domestici utilizzano un segnale IR per la trasmissione dei dati e operano nella gamma di lunghezze d'onda di 0,75..1,4 micron. Un microcontrollore nel telecomando fa lampeggiare un LED infrarosso con una frequenza specifica, trasformando il segnale digitale in un segnale IR.
 
-Per ricevere i segnali IR si utilizza un **fotorecettore**. Esso **converte la luce IR in impulsi di tensione**, che sono già **segnali digitali**. Di solito, c'è un **filtro di luce scura all'interno del ricevitore**, che lascia **passare solo la lunghezza d'onda desiderata** e elimina il rumore.
+Per ricevere i segnali IR si utilizza un **fotorecettore**. Esso **converte la luce IR in impulsi di tensione**, che sono già **segnali digitali**. Di solito, c'è un **filtro di luce scura all'interno del ricevitore**, che lascia **passare solo la lunghezza d'onda desiderata** e taglia il rumore.
 
 ### Varietà di protocolli IR <a href="#variety-of-ir-protocols" id="variety-of-ir-protocols"></a>
 
@@ -26,7 +26,7 @@ I bit sono codificati modulando la durata dello spazio tra gli impulsi. La largh
 
 **2. Codifica della larghezza degli impulsi**
 
-I bit sono codificati modulando la larghezza dell'impulso. La larghezza dello spazio dopo l'esplosione dell'impulso è costante.
+I bit sono codificati mediante modulazione della larghezza dell'impulso. La larghezza dello spazio dopo l'esplosione dell'impulso è costante.
 
 <figure><img src="../../images/image (282).png" alt=""><figcaption></figcaption></figure>
 

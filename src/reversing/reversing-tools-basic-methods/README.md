@@ -55,7 +55,7 @@ File.AppendAllText(path, "Password: " + password + "\n");
 ```
 ### Debugging con DNSpy
 
-Per eseguire il debug del codice utilizzando DNSpy è necessario:
+Per eseguire il debug del codice utilizzando DNSpy, è necessario:
 
 Innanzitutto, modificare gli **attributi dell'Assembly** relativi al **debugging**:
 
@@ -63,7 +63,7 @@ Innanzitutto, modificare gli **attributi dell'Assembly** relativi al **debugging
 ```aspnet
 [assembly: Debuggable(DebuggableAttribute.DebuggingModes.IgnoreSymbolStoreSequencePoints)]
 ```
-Non c'è testo da tradurre.
+Tradurre in italiano.
 ```
 [assembly: Debuggable(DebuggableAttribute.DebuggingModes.Default |
 DebuggableAttribute.DebuggingModes.DisableOptimizations |
@@ -125,7 +125,7 @@ Fai clic con il tasto destro su qualsiasi modulo in **Assembly Explorer** e clic
 
 ![](<../../images/image (704).png>)
 
-Poi, quando inizi a fare debug **l'esecuzione si fermerà quando ogni DLL viene caricata**, quindi, quando rundll32 carica la tua DLL, l'esecuzione si fermerà.
+Poi, quando inizi a fare il debug **l'esecuzione si fermerà quando ogni DLL viene caricata**, quindi, quando rundll32 carica la tua DLL, l'esecuzione si fermerà.
 
 Ma, come puoi arrivare al codice della DLL che è stata caricata? Usando questo metodo, non so come.
 
@@ -174,7 +174,7 @@ blobrunner.md
 
 ### Debugging di uno shellcode con jmp2it
 
-[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4)è molto simile a blobrunner. **Allochera** lo **shellcode** all'interno di uno spazio di memoria e avvierà un **ciclo eterno**. Devi quindi **attaccare il debugger** al processo, **premere start, attendere 2-5 secondi e premere stop** e ti troverai all'interno del **ciclo eterno**. Salta alla prossima istruzione del ciclo eterno poiché sarà una chiamata allo shellcode, e infine ti troverai ad eseguire lo shellcode.
+[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4) è molto simile a blobrunner. **Allochera** lo **shellcode** all'interno di uno spazio di memoria e avvierà un **ciclo eterno**. Devi quindi **attaccare il debugger** al processo, **premere start, attendere 2-5 secondi e premere stop** e ti troverai all'interno del **ciclo eterno**. Salta alla prossima istruzione del ciclo eterno poiché sarà una chiamata allo shellcode, e infine ti troverai ad eseguire lo shellcode.
 
 ![](<../../images/image (509).png>)
 
@@ -214,15 +214,15 @@ scDbg dispone anche di un launcher grafico dove puoi selezionare le opzioni desi
 
 ![](<../../images/image (258).png>)
 
-L'opzione **Create Dump** eseguirà il dump del shellcode finale se viene apportata qualche modifica al shellcode dinamicamente in memoria (utile per scaricare il shellcode decodificato). L'**start offset** può essere utile per avviare il shellcode a un offset specifico. L'opzione **Debug Shell** è utile per eseguire il debug del shellcode utilizzando il terminale scDbg (tuttavia, trovo che nessuna delle opzioni spiegate prima sia migliore per questo scopo, poiché sarai in grado di utilizzare Ida o x64dbg).
+L'opzione **Create Dump** eseguirà il dump del shellcode finale se viene apportata una modifica al shellcode dinamicamente in memoria (utile per scaricare il shellcode decodificato). L'**offset di avvio** può essere utile per avviare il shellcode a un offset specifico. L'opzione **Debug Shell** è utile per eseguire il debug del shellcode utilizzando il terminale scDbg (tuttavia, trovo che nessuna delle opzioni spiegate prima sia migliore per questo scopo, poiché sarai in grado di utilizzare Ida o x64dbg).
 
-### Disassemblare usando CyberChef
+### Disassemblaggio usando CyberChef
 
 Carica il tuo file shellcode come input e usa la seguente ricetta per decompilarlo: [https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)](<https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)>)
 
 ## [Movfuscator](https://github.com/xoreaxeaxeax/movfuscator)
 
-Questo offuscatore **modifica tutte le istruzioni per `mov`** (sì, davvero figo). Utilizza anche interruzioni per cambiare i flussi di esecuzione. Per ulteriori informazioni su come funziona:
+Questo offuscante **modifica tutte le istruzioni per `mov`** (sì, davvero figo). Utilizza anche interruzioni per cambiare i flussi di esecuzione. Per ulteriori informazioni su come funziona:
 
 - [https://www.youtube.com/watch?v=2VF_wPkiBJY](https://www.youtube.com/watch?v=2VF_wPkiBJY)
 - [https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas_2015_the_movfuscator.pdf](https://github.com/xoreaxeaxeax/movfuscator/blob/master/slides/domas_2015_the_movfuscator.pdf)
@@ -232,7 +232,7 @@ Se sei fortunato, [demovfuscator](https://github.com/kirschju/demovfuscator) deo
 apt-get install libcapstone-dev
 apt-get install libz3-dev
 ```
-E [installa keystone](https://github.com/keystone-engine/keystone/blob/master/docs/COMPILE-NIX.md) (`apt-get install cmake; mkdir build; cd build; ../make-share.sh; make install`)
+E [install keystone](https://github.com/keystone-engine/keystone/blob/master/docs/COMPILE-NIX.md) (`apt-get install cmake; mkdir build; cd build; ../make-share.sh; make install`)
 
 Se stai giocando a un **CTF, questa soluzione per trovare il flag** potrebbe essere molto utile: [https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html](https://dustri.org/b/defeating-the-recons-movfuscator-crackme.html)
 
@@ -253,7 +253,7 @@ Se devi fare reverse engineering di un binario Delphi ti consiglio di usare il p
 
 Premi semplicemente **ATL+f7** (importa il plugin python in IDA) e seleziona il plugin python.
 
-Questo plugin eseguirà il binario e risolverà i nomi delle funzioni dinamicamente all'inizio del debug. Dopo aver avviato il debug premi di nuovo il pulsante Start (quello verde o f9) e un breakpoint verrà attivato all'inizio del codice reale.
+Questo plugin eseguirà il binario e risolverà i nomi delle funzioni dinamicamente all'inizio del debug. Dopo aver avviato il debug premi di nuovo il pulsante Start (quello verde o f9) e un breakpoint si attiverà all'inizio del codice reale.
 
 È anche molto interessante perché se premi un pulsante nell'applicazione grafica il debugger si fermerà nella funzione eseguita da quel pulsante.
 
@@ -265,7 +265,7 @@ Premi semplicemente **ATL+f7** (importa il plugin python in IDA) e seleziona il 
 
 Questo risolverà i nomi delle funzioni.
 
-## Python Compilato
+## Compiled Python
 
 In questa pagina puoi trovare come ottenere il codice python da un binario python compilato ELF/EXE:
 
@@ -369,7 +369,7 @@ DAT_030000d8 = DAT_030000d8 + 0x3a;
 Nel codice precedente puoi vedere che stiamo confrontando **uVar1** (il luogo dove si trova **il valore del pulsante premuto**) con alcuni valori:
 
 - Prima, viene confrontato con il **valore 4** (**pulsante SELECT**): In questa sfida questo pulsante cancella lo schermo
-- Poi, viene confrontato con il **valore 8** (**pulsante START**): In questa sfida questo verifica se il codice è valido per ottenere il flag.
+- Poi, viene confrontato con il **valore 8** (**pulsante START**): In questa sfida verifica se il codice è valido per ottenere il flag.
 - In questo caso la var **`DAT_030000d8`** viene confrontata con 0xf3 e se il valore è lo stesso viene eseguito del codice.
 - In tutti gli altri casi, viene controllato un cont (`DAT_030000d4`). È un cont perché aggiunge 1 subito dopo essere entrato nel codice.\
 **Se** è inferiore a 8 viene eseguita un'operazione che coinvolge **l'aggiunta** di valori a \*\*`DAT_030000d8` \*\* (fondamentalmente sta aggiungendo i valori dei tasti premuti in questa variabile finché il cont è inferiore a 8).

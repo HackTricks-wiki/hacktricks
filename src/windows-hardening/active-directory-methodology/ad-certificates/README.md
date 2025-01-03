@@ -19,9 +19,9 @@
 
 ### Considerazioni Speciali
 
-- **Subject Alternative Names (SANs)** espandono l'applicabilità di un certificato a più identità, cruciale per server con più domini. Processi di emissione sicuri sono vitali per evitare rischi di impersonificazione da parte di attaccanti che manipolano la specifica SAN.
+- I **Subject Alternative Names (SANs)** espandono l'applicabilità di un certificato a più identità, cruciale per i server con più domini. Processi di emissione sicuri sono vitali per evitare rischi di impersonificazione da parte di attaccanti che manipolano la specifica SAN.
 
-### Autorità di Certificazione (CAs) in Active Directory (AD)
+### Autorità di Certificazione (CA) in Active Directory (AD)
 
 AD CS riconosce i certificati CA in un bosco AD attraverso contenitori designati, ognuno con ruoli unici:
 
@@ -39,7 +39,7 @@ AD CS riconosce i certificati CA in un bosco AD attraverso contenitori designati
 
 ### Modelli di Certificato
 
-Definiti all'interno di AD, questi modelli delineano le impostazioni e i permessi per l'emissione dei certificati, inclusi EKUs consentiti e diritti di registrazione o modifica, critici per gestire l'accesso ai servizi di certificato.
+Definiti all'interno di AD, questi modelli delineano le impostazioni e i permessi per l'emissione dei certificati, inclusi EKU consentiti e diritti di registrazione o modifica, critici per gestire l'accesso ai servizi di certificato.
 
 ## Registrazione del Certificato
 

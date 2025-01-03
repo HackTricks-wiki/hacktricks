@@ -70,17 +70,17 @@ Puoi avviare un processo che **utilizza credenziali diverse per accedere ai serv
 ```
 runas /user:domain\username /netonly cmd.exe
 ```
-Questo è utile se hai credenziali valide per accedere a oggetti nella rete, ma quelle credenziali non sono valide all'interno dell'host attuale poiché saranno utilizzate solo nella rete (nell'host attuale verranno utilizzati i privilegi dell'utente corrente).
+Questo è utile se hai credenziali utili per accedere a oggetti nella rete, ma quelle credenziali non sono valide all'interno dell'host attuale poiché saranno utilizzate solo nella rete (nell'host attuale verranno utilizzati i privilegi dell'utente corrente).
 
 ### Tipi di token
 
 Ci sono due tipi di token disponibili:
 
 - **Token Primario**: Serve come rappresentazione delle credenziali di sicurezza di un processo. La creazione e l'associazione di token primari con i processi sono azioni che richiedono privilegi elevati, sottolineando il principio di separazione dei privilegi. Tipicamente, un servizio di autenticazione è responsabile della creazione del token, mentre un servizio di accesso gestisce la sua associazione con la shell del sistema operativo dell'utente. È importante notare che i processi ereditano il token primario del loro processo padre al momento della creazione.
-- **Token di Impersonificazione**: Consente a un'applicazione server di adottare temporaneamente l'identità del client per accedere a oggetti sicuri. Questo meccanismo è stratificato in quattro livelli di operazione:
+- **Token di Impersonificazione**: Consente a un'applicazione server di adottare temporaneamente l'identità del cliente per accedere a oggetti sicuri. Questo meccanismo è stratificato in quattro livelli di operazione:
 - **Anonimo**: Concede accesso al server simile a quello di un utente non identificato.
-- **Identificazione**: Consente al server di verificare l'identità del client senza utilizzarla per l'accesso agli oggetti.
-- **Impersonificazione**: Abilita il server a operare sotto l'identità del client.
+- **Identificazione**: Consente al server di verificare l'identità del cliente senza utilizzarla per l'accesso agli oggetti.
+- **Impersonificazione**: Abilita il server a operare sotto l'identità del cliente.
 - **Delegazione**: Simile all'Impersonificazione, ma include la possibilità di estendere questa assunzione di identità a sistemi remoti con cui il server interagisce, garantendo la preservazione delle credenziali.
 
 #### Token di Impersonificazione

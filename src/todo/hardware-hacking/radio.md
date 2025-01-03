@@ -9,7 +9,7 @@
 ### Configurazione di base
 
 Dopo l'installazione ci sono alcune cose che potresti considerare di configurare.\
-Nelle impostazioni (il secondo pulsante della scheda) puoi selezionare il **dispositivo SDR** o **selezionare un file** da leggere e quale frequenza sintonizzare e il tasso di campionamento (consigliato fino a 2.56Msps se il tuo PC lo supporta)\\
+Nelle impostazioni (il secondo pulsante della scheda) puoi selezionare il **dispositivo SDR** o **selezionare un file** da leggere e quale frequenza sintonizzare e il tasso di campionamento (raccomandato fino a 2.56Msps se il tuo PC lo supporta)\\
 
 ![](<../../images/image (245).png>)
 
@@ -18,11 +18,11 @@ Nel comportamento della GUI è consigliato abilitare alcune cose se il tuo PC lo
 ![](<../../images/image (472).png>)
 
 > [!NOTE]
-> Se ti rendi conto che il tuo PC non cattura segnali prova a disabilitare OpenGL e abbassare il tasso di campionamento.
+> Se ti rendi conto che il tuo PC non cattura nulla, prova a disabilitare OpenGL e abbassare il tasso di campionamento.
 
 ### Usi
 
-- Per **catturare un segnale e analizzarlo** basta mantenere premuto il pulsante "Push to capture" finché ne hai bisogno.
+- Per **catturare un po' di un segnale e analizzarlo** basta mantenere premuto il pulsante "Push to capture" finché ne hai bisogno.
 
 ![](<../../images/image (960).png>)
 
@@ -38,7 +38,7 @@ Con [**SigDigger** ](https://github.com/BatchDrake/SigDigger)sincronizza con il 
 
 ## Trucchi interessanti
 
-- Quando un dispositivo sta inviando burst di informazioni, di solito la **prima parte sarà un preambolo** quindi **non** devi **preoccuparti** se **non trovi informazioni** lì **o se ci sono degli errori**.
+- Quando un dispositivo sta inviando burst di informazioni, di solito la **prima parte sarà un preambolo**, quindi **non** devi **preoccuparti** se **non trovi informazioni** lì **o se ci sono alcuni errori**.
 - Nei frame di informazioni di solito dovresti **trovare diversi frame ben allineati tra loro**:
 
 ![](<../../images/image (1076).png>)
@@ -60,7 +60,7 @@ Se stai controllando un segnale ci sono diversi modi per cercare di capire cosa 
 - Nota che se le informazioni sono nascoste nel fatto che una fase è cambiata e non nella fase stessa, non vedrai fasi diverse chiaramente differenziate.
 - **Rilevamento FM**: IQ non ha un campo per identificare le frequenze (la distanza dal centro è l'ampiezza e l'angolo è la fase).\
 Pertanto, per identificare FM, dovresti **vedere solo fondamentalmente un cerchio** in questo grafico.\
-Inoltre, una frequenza diversa è "rappresentata" dal grafico IQ da una **accelerazione della velocità attorno al cerchio** (quindi in SysDigger selezionando il segnale il grafico IQ viene popolato, se trovi un'accelerazione o un cambiamento di direzione nel cerchio creato potrebbe significare che questo è FM):
+Inoltre, una frequenza diversa è "rappresentata" dal grafico IQ da un'**accelerazione di velocità attraverso il cerchio** (quindi in SysDigger selezionando il segnale il grafico IQ viene popolato, se trovi un'accelerazione o un cambiamento di direzione nel cerchio creato potrebbe significare che questo è FM):
 
 ## Esempio AM
 
@@ -129,7 +129,7 @@ Ora, per far capire a SigDigger **dove si trova l'intervallo** del livello che t
 
 ![](<../../images/image (439).png>)
 
-Se ci fossero stati ad esempio **4 livelli di ampiezza diversi**, dovresti configurare i **Bit per simbolo a 2** e selezionare dal più piccolo al più grande.
+Se ci fossero stati ad esempio **4 diversi livelli di ampiezza**, dovresti configurare i **Bit per simbolo a 2** e selezionare dal più piccolo al più grande.
 
 Infine **aumentando** lo **Zoom** e **cambiando la dimensione della riga** puoi vedere i bit (e puoi selezionare tutto e copiare per ottenere tutti i bit):
 
@@ -137,7 +137,7 @@ Infine **aumentando** lo **Zoom** e **cambiando la dimensione della riga** puoi 
 
 Se il segnale ha più di 1 bit per simbolo (ad esempio 2), SigDigger **non ha modo di sapere quale simbolo è** 00, 01, 10, 11, quindi utilizzerà diverse **scale di grigio** per rappresentare ciascuno (e se copi i bit utilizzerà **numeri da 0 a 3**, dovrai trattarli).
 
-Inoltre, usa **codificazioni** come **Manchester**, e **up+down** può essere **1 o 0** e un down+up può essere un 1 o 0. In quei casi devi **trattare gli up (1) e down (0) ottenuti** per sostituire le coppie di 01 o 10 come 0 o 1.
+Inoltre, usa **codificazioni** come **Manchester**, e **up+down** può essere **1 o 0** e un down+up può essere un 1 o 0. In quei casi devi **trattare gli up ottenuti (1) e i down (0)** per sostituire le coppie di 01 o 10 come 0 o 1.
 
 ## Esempio FM
 
@@ -159,7 +159,7 @@ Questo perché ho catturato il segnale in entrambe le frequenze, quindi una è a
 
 ![](<../../images/image (942).png>)
 
-Se la frequenza sincronizzata è **più vicina a una frequenza che all'altra** puoi facilmente vedere le 2 frequenze diverse:
+Se la frequenza sincronizzata è **più vicina a una frequenza che all'altra** puoi facilmente vedere le 2 diverse frequenze:
 
 ![](<../../images/image (422).png>)
 
@@ -181,9 +181,9 @@ E questo sarebbe l'istogramma di fase (che rende molto chiaro che il segnale non
 
 #### Con IQ
 
-IQ non ha un campo per identificare le frequenze (la distanza dal centro è l'ampiezza e l'angolo è la fase).\
+IQ non ha un campo per identificare le frequenze (la distanza dal centro è ampiezza e l'angolo è fase).\
 Pertanto, per identificare FM, dovresti **vedere solo fondamentalmente un cerchio** in questo grafico.\
-Inoltre, una frequenza diversa è "rappresentata" dal grafico IQ da una **accelerazione della velocità attorno al cerchio** (quindi in SysDigger selezionando il segnale il grafico IQ viene popolato, se trovi un'accelerazione o un cambiamento di direzione nel cerchio creato potrebbe significare che questo è FM):
+Inoltre, una frequenza diversa è "rappresentata" dal grafico IQ da un'**accelerazione di velocità attraverso il cerchio** (quindi in SysDigger selezionando il segnale il grafico IQ viene popolato, se trovi un'accelerazione o un cambiamento di direzione nel cerchio creato potrebbe significare che questo è FM):
 
 ![](<../../images/image (81).png>)
 

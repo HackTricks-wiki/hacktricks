@@ -63,21 +63,21 @@ L'autenticazione è come quella menzionata **prima ma** il **server** conosce l'
 
 La **lunghezza della sfida è di 8 byte** e la **risposta è lunga 24 byte**.
 
-L'**hash NT (16byte)** è diviso in **3 parti di 7byte ciascuna** (7B + 7B + (2B+0x00\*5)): l'**ultima parte è riempita di zeri**. Poi, la **sfida** è **criptata separatamente** con ciascuna parte e i byte **criptati risultanti** sono **uniti**. Totale: 8B + 8B + 8B = 24Bytes.
+L'**hash NT (16byte)** è diviso in **3 parti di 7byte ciascuna** (7B + 7B + (2B+0x00\*5)): l'**ultima parte è riempita di zeri**. Poi, la **sfida** è **criptata separatamente** con ciascuna parte e i byte criptati **risultanti** sono **uniti**. Totale: 8B + 8B + 8B = 24Bytes.
 
 **Problemi**:
 
 - Mancanza di **randomness**
 - Le 3 parti possono essere **attaccate separatamente** per trovare l'hash NT
 - **DES è crackabile**
-- La 3º chiave è sempre composta da **5 zeri**.
+- La 3ª chiave è sempre composta da **5 zeri**.
 - Dato la **stessa sfida**, la **risposta** sarà **la stessa**. Quindi, puoi dare come **sfida** alla vittima la stringa "**1122334455667788**" e attaccare la risposta utilizzando **tabelle rainbow precompute**.
 
 ### Attacco NTLMv1
 
 Al giorno d'oggi è sempre meno comune trovare ambienti con Delegazione Non Vincolata configurata, ma questo non significa che non puoi **abuse un servizio Print Spooler** configurato.
 
-Potresti abusare di alcune credenziali/sessioni che hai già sull'AD per **chiedere alla stampante di autenticarsi** contro qualche **host sotto il tuo controllo**. Poi, utilizzando `metasploit auxiliary/server/capture/smb` o `responder` puoi **impostare la sfida di autenticazione a 1122334455667788**, catturare il tentativo di autenticazione, e se è stato fatto utilizzando **NTLMv1** sarai in grado di **crackarlo**.\
+Potresti abusare di alcune credenziali/sessioni che hai già sull'AD per **chiedere alla stampante di autenticarsi** contro un **host sotto il tuo controllo**. Poi, utilizzando `metasploit auxiliary/server/capture/smb` o `responder` puoi **impostare la sfida di autenticazione a 1122334455667788**, catturare il tentativo di autenticazione, e se è stato fatto utilizzando **NTLMv1** sarai in grado di **crackarlo**.\
 Se stai usando `responder` potresti provare a \*\*usare il flag `--lm` \*\* per cercare di **downgradare** l'**autenticazione**.\
 &#xNAN;_&#x4E;ota che per questa tecnica l'autenticazione deve essere eseguita utilizzando NTLMv1 (NTLMv2 non è valido)._
 
@@ -85,7 +85,7 @@ Ricorda che la stampante utilizzerà l'account del computer durante l'autenticaz
 
 ### Attacco NTLMv1 con hashcat
 
-NTLMv1 può essere anche rotto con il NTLMv1 Multi Tool [https://github.com/evilmog/ntlmv1-multi](https://github.com/evilmog/ntlmv1-multi) che formatta i messaggi NTLMv1 in un metodo che può essere rotto con hashcat.
+NTLMv1 può anche essere rotto con il NTLMv1 Multi Tool [https://github.com/evilmog/ntlmv1-multi](https://github.com/evilmog/ntlmv1-multi) che formatta i messaggi NTLMv1 in un metodo che può essere rotto con hashcat.
 
 Il comando
 ```bash
@@ -159,14 +159,14 @@ La **lunghezza della sfida è di 8 byte** e **vengono inviati 2 risposte**: Una 
 
 **La prima risposta** è creata cifrando usando **HMAC_MD5** la **stringa** composta dal **client e dal dominio** e usando come **chiave** l'**hash MD4** dell'**NT hash**. Poi, il **risultato** sarà usato come **chiave** per cifrare usando **HMAC_MD5** la **sfida**. A questo, **verrà aggiunta una sfida del client di 8 byte**. Totale: 24 B.
 
-La **seconda risposta** è creata usando **diversi valori** (una nuova sfida del client, un **timestamp** per evitare **attacchi di ripetizione**...)
+La **seconda risposta** è creata usando **diversi valori** (una nuova sfida del client, un **timestamp** per evitare **attacchi di replay**...)
 
 Se hai un **pcap che ha catturato un processo di autenticazione riuscito**, puoi seguire questa guida per ottenere il dominio, il nome utente, la sfida e la risposta e provare a decifrare la password: [https://research.801labs.org/cracking-an-ntlmv2-hash/](https://www.801labs.org/research-portal/post/cracking-an-ntlmv2-hash/)
 
 ## Pass-the-Hash
 
 **Una volta che hai l'hash della vittima**, puoi usarlo per **impersonarla**.\
-Devi usare un **tool** che eseguirà l'**autenticazione NTLM usando** quell'**hash**, **oppure** potresti creare un nuovo **sessionlogon** e **iniettare** quell'**hash** all'interno del **LSASS**, così quando viene eseguita qualsiasi **autenticazione NTLM**, quell'**hash sarà usato.** L'ultima opzione è ciò che fa mimikatz.
+Devi usare uno **strumento** che **eseguirà** l'**autenticazione NTLM usando** quell'**hash**, **oppure** potresti creare un nuovo **sessionlogon** e **iniettare** quell'**hash** all'interno del **LSASS**, così quando viene eseguita qualsiasi **autenticazione NTLM**, quell'**hash verrà utilizzato.** L'ultima opzione è ciò che fa mimikatz.
 
 **Per favore, ricorda che puoi eseguire attacchi Pass-the-Hash anche usando account di computer.**
 
@@ -214,7 +214,7 @@ Invoke-SMBEnum -Domain dollarcorp.moneycorp.local -Username svcadmin -Hash b38ff
 ```
 #### Invoke-TheHash
 
-Questa funzione è un **mix di tutte le altre**. Puoi passare **diversi host**, **escludere** alcuni e **selezionare** l'**opzione** che desideri utilizzare (_SMBExec, WMIExec, SMBClient, SMBEnum_). Se selezioni **uno** tra **SMBExec** e **WMIExec** ma non fornisci alcun parametro _**Command**_, controllerà semplicemente se hai **sufficienti permessi**.
+Questa funzione è un **mix di tutte le altre**. Puoi passare **diversi host**, **escludere** alcuni e **selezionare** l'**opzione** che desideri utilizzare (_SMBExec, WMIExec, SMBClient, SMBEnum_). Se selezioni **uno** di **SMBExec** e **WMIExec** ma non fornisci alcun parametro _**Command**_, controllerà semplicemente se hai **sufficienti permessi**.
 ```
 Invoke-TheHash -Type WMIExec -Target 192.168.100.0/24 -TargetExclude 192.168.100.50 -Username Administ -ty    h F6F38B793DB6A94BA04A52F1D3EE92F0
 ```

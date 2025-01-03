@@ -12,7 +12,7 @@ LangChain è un framework progettato per costruire applicazioni con LLM. Permett
 
 ### [**LitGPT**](https://github.com/Lightning-AI/litgpt)
 
-LitGPT è un progetto sviluppato da Lightning AI che sfrutta il framework Lightning per facilitare l'addestramento, il fine-tuning e la distribuzione di modelli basati su GPT. Si integra senza problemi con altri strumenti di Lightning AI, fornendo flussi di lavoro ottimizzati per gestire modelli linguistici su larga scala con prestazioni e scalabilità migliorate.
+LitGPT è un progetto sviluppato da Lightning AI che sfrutta il framework Lightning per facilitare l'addestramento, il fine-tuning e la distribuzione di modelli basati su GPT. Si integra senza soluzione di continuità con altri strumenti di Lightning AI, fornendo flussi di lavoro ottimizzati per gestire modelli linguistici su larga scala con prestazioni e scalabilità migliorate.
 
 ### [**LitServe**](https://github.com/Lightning-AI/LitServe)
 
@@ -32,7 +32,7 @@ Offre diverse sezioni come:
 
 * **Modelli**: Un vasto repository di **modelli di apprendimento automatico pre-addestrati** dove gli utenti possono navigare, scaricare e integrare modelli per vari compiti come generazione di testo, traduzione, riconoscimento delle immagini e altro.
 * **Dataset:** Una **collezione completa di dataset** utilizzati per addestrare e valutare modelli. Facilita l'accesso a fonti di dati diverse, consentendo agli utenti di trovare e utilizzare dati per i loro specifici progetti di apprendimento automatico.
-* **Spazi:** Una piattaforma per ospitare e condividere **applicazioni di apprendimento automatico interattive** e dimostrazioni. Permette agli sviluppatori di **mostrare** i loro modelli in azione, creare interfacce user-friendly e collaborare con altri condividendo dimostrazioni dal vivo.
+* **Spazi:** Una piattaforma per ospitare e condividere **applicazioni interattive di apprendimento automatico** e dimostrazioni. Permette agli sviluppatori di **mostrare** i loro modelli in azione, creare interfacce user-friendly e collaborare con altri condividendo dimostrazioni dal vivo.
 
 ## [**TensorFlow Hub**](https://www.tensorflow.org/hub) **&** [**Kaggle**](https://www.kaggle.com/)
 

@@ -267,7 +267,7 @@ println!("{:?}", apple);
 ```
 #### Thread
 
-In questo caso passeremo al thread una variabile che sarà in grado di modificare.
+In questo caso passeremo al thread una variabile che sarà in grado di modificare
 ```rust
 fn main() {
 let status = Arc::new(Mutex::new(JobStatus { jobs_completed: 0 }));

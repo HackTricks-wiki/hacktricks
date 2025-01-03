@@ -2,9 +2,9 @@
 
 ## Spot
 
-Questo è il modo più basilare per fare trading. Puoi **indicare l'importo dell'asset e il prezzo** che desideri comprare o vendere, e ogni volta che quel prezzo viene raggiunto l'operazione viene eseguita.
+Questo è il modo più basilare per fare trading. Puoi **indicare l'importo dell'asset e il prezzo** che desideri comprare o vendere, e ogni volta che quel prezzo viene raggiunto l'operazione è completata.
 
-Di solito puoi anche utilizzare il **prezzo di mercato attuale** per effettuare la transazione il più rapidamente possibile al prezzo attuale.
+Di solito puoi anche utilizzare il **prezzo di mercato attuale** per eseguire la transazione il più rapidamente possibile al prezzo attuale.
 
 **Stop Loss - Limit**: Puoi anche indicare l'importo e il prezzo degli asset da comprare o vendere, indicando anche un prezzo inferiore per comprare o vendere nel caso venga raggiunto (per fermare le perdite).
 
@@ -14,9 +14,9 @@ Un future è un contratto in cui 2 parti giungono a un accordo per **acquisire q
 
 Ovviamente, se tra 6 mesi il valore del bitcoin è 80.000$, la parte venditrice perde denaro e la parte acquirente guadagna. Se tra 6 mesi il valore del bitcoin è 60.000$, succede il contrario.
 
-Tuttavia, questo è interessante, ad esempio, per le aziende che stanno generando un prodotto e hanno bisogno di avere la sicurezza di poterlo vendere a un prezzo che copra i costi. O per le aziende che vogliono garantire prezzi fissi in futuro per qualcosa anche se più alti.
+Tuttavia, questo è interessante, ad esempio, per le aziende che stanno generando un prodotto e hanno bisogno di avere la sicurezza di poterlo vendere a un prezzo che copra i costi. O per le aziende che vogliono assicurarsi prezzi fissi in futuro per qualcosa anche se più alti.
 
-Sebbene negli scambi questo venga solitamente utilizzato per cercare di realizzare un profitto.
+Sebbene negli scambi questo sia solitamente usato per cercare di realizzare un profitto.
 
 * Nota che una "Posizione Long" significa che qualcuno sta scommettendo che un prezzo aumenterà
 * Mentre una "Posizione Short" significa che qualcuno sta scommettendo che un prezzo scenderà
@@ -31,7 +31,7 @@ Nel caso in cui il prezzo scenda, il gestore del fondo guadagnerà benefici perc
 
 **Questi sono "futures" che dureranno indefinitamente** (senza una data di scadenza del contratto). È molto comune trovarli, ad esempio, negli scambi di criptovalute dove puoi entrare e uscire dai futures in base al prezzo delle criptovalute.
 
-Nota che in questi casi i benefici e le perdite possono essere in tempo reale, se il prezzo aumenta dell'1% guadagni l'1%, se il prezzo diminuisce dell'1%, lo perderai.
+Nota che in questi casi i benefici e le perdite possono essere in tempo reale; se il prezzo aumenta dell'1%, guadagni l'1%, se il prezzo diminuisce dell'1%, lo perderai.
 
 ### Futures con Leva
 
@@ -65,4 +65,4 @@ Tuttavia, l'acquirente pagherà una commissione al venditore per aprire l'opzion
 ### 4. **Potenziale di Profitto:**
 
 * **Futures:** Il profitto o la perdita si basa sulla differenza tra il prezzo di mercato alla scadenza e il prezzo concordato nel contratto.
-* **Opzioni:** L'acquirente guadagna quando il mercato si muove favorevolmente oltre il prezzo di esercizio di oltre il premio pagato. Il venditore guadagna mantenendo il premio se l'opzione non viene esercitata.
+* **Opzioni:** L'acquirente guadagna quando il mercato si muove favorevolmente oltre il prezzo di esercizio di più del premio pagato. Il venditore guadagna mantenendo il premio se l'opzione non viene esercitata.

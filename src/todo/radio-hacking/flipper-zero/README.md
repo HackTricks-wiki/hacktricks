@@ -13,6 +13,6 @@ Con [**Flipper Zero**](https://flipperzero.one/) puoi:
 - **Usarlo come chiave di sicurezza (U2F)**
 - **Giocare a Snake**
 
-**Altre risorse di Flipper Zero in** [**https://github.com/djsime1/awesome-flipperzero**](https://github.com/djsime1/awesome-flipperzero)
+**Altre risorse di Flipper Zero in** [**https://github.com/djsime1/awesome-flipperzer**](https://github.com/djsime1/awesome-flipperzero)
 
 {{#include ../../../banners/hacktricks-training.md}}

@@ -2,8 +2,8 @@
 
 # DCShadow
 
-Registra un **nuovo Domain Controller** nell'AD e lo utilizza per **inviare attributi** (SIDHistory, SPNs...) su oggetti specificati **senza** lasciare alcun **log** riguardo le **modifiche**. Hai **bisogno di privilegi DA** e devi essere all'interno del **dominio radice**.\
-Nota che se utilizzi dati errati, appariranno log piuttosto brutti.
+Registra un **nuovo Domain Controller** nell'AD e lo utilizza per **inviare attributi** (SIDHistory, SPNs...) su oggetti specificati **senza** lasciare alcun **log** riguardo alle **modifiche**. Hai **bisogno di privilegi DA** e devi essere all'interno del **dominio radice**.\
+Nota che se usi dati errati, appariranno log piuttosto brutti.
 
 Per eseguire l'attacco hai bisogno di 2 istanze di mimikatz. Una di esse avvierà i server RPC con privilegi SYSTEM (devi indicare qui le modifiche che desideri eseguire), e l'altra istanza sarà utilizzata per inviare i valori:
 ```bash:mimikatz1 (RPC servers)
@@ -18,7 +18,7 @@ lsadump::dcshadow /push
 Nota che **`elevate::token`** non funzionerà nella sessione `mimikatz1` poiché ha elevato i privilegi del thread, ma dobbiamo elevare il **privilegio del processo**.\
 Puoi anche selezionare un oggetto "LDAP": `/object:CN=Administrator,CN=Users,DC=JEFFLAB,DC=local`
 
-Puoi applicare le modifiche da un DA o da un utente con questi permessi minimi:
+Puoi spingere le modifiche da un DA o da un utente con questi permessi minimi:
 
 - Nell'**oggetto di dominio**:
 - _DS-Install-Replica_ (Aggiungi/Rimuovi Replica nel Dominio)
@@ -57,11 +57,11 @@ Dobbiamo aggiungere i seguenti ACE con il SID del nostro utente alla fine:
 - `(OA;;CR;1131f6ac-9c07-11d1-f79f-00c04fc2dcd2;;UserSID)`
 - `(OA;;CR;9923a32a-3607-11d2-b9be-0000f87a36b2;;UserSID)`
 - `(OA;;CR;1131f6ab-9c07-11d1-f79f-00c04fc2dcd2;;UserSID)`
-- Sull'oggetto computer dell'attaccante: `(A;;WP;;;UserSID)`
+- Sull'oggetto computer attaccante: `(A;;WP;;;UserSID)`
 - Sull'oggetto utente target: `(A;;WP;;;UserSID)`
 - Sull'oggetto Siti nel contenitore di Configurazione: `(A;CI;CCDC;;;UserSID)`
 
-Per ottenere l'attuale ACE di un oggetto: `(New-Object System.DirectoryServices.DirectoryEntry("LDAP://DC=moneycorp,DC=loca l")).psbase.ObjectSecurity.sddl`
+Per ottenere l'ACE attuale di un oggetto: `(New-Object System.DirectoryServices.DirectoryEntry("LDAP://DC=moneycorp,DC=loca l")).psbase.ObjectSecurity.sddl`
 
 Nota che in questo caso devi fare **diverse modifiche,** non solo una. Quindi, nella **sessione mimikatz1** (server RPC) usa il parametro **`/stack` con ogni modifica** che vuoi fare. In questo modo, dovrai solo **`/push`** una volta per eseguire tutte le modifiche accumulate nel server rogue.
 

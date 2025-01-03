@@ -4,7 +4,7 @@
 
 Questa sezione contiene tutto sui Sistemi di Controllo Industriale, inclusi concetti e metodologie per hackerarli con vari problemi di sicurezza che persistono in essi.
 
-I Sistemi di Controllo Industriale sono ovunque, poiché le industrie sono vitali per lo sviluppo economico di una nazione. Ma questi ICS sono difficili da aggiornare e ci sono pochi progressi in questo campo. Pertanto, trovare vulnerabilità di sicurezza è comune qui. La maggior parte dei protocolli e degli standard utilizzati qui sono stati sviluppati negli anni '90 e hanno capacità molto inferiori rispetto agli attuali scenari di attacco.
+I Sistemi di Controllo Industriale sono ovunque, poiché le industrie sono vitali per lo sviluppo economico di una nazione. Ma questi ICS sono difficili da aggiornare e ci sono pochi progressi in questo campo. Pertanto, trovare difetti di sicurezza è comune qui. La maggior parte dei protocolli e degli standard utilizzati qui sono stati sviluppati negli anni '90 e hanno capacità molto inferiori rispetto agli attuali scenari di attacco.
 
 È diventato importante proteggere questi sistemi poiché danneggiarli può costare molto e persino vite nel caso peggiore. Per comprendere la sicurezza dei Sistemi di Controllo Industriale, è necessario conoscere i loro interni.
 

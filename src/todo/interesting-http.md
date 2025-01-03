@@ -6,7 +6,7 @@ Il referrer è l'intestazione utilizzata dai browser per indicare quale fosse la
 
 ## Informazioni sensibili trapelate
 
-Se in un certo momento all'interno di una pagina web si trovano informazioni sensibili nei parametri di una richiesta GET, se la pagina contiene link a fonti esterne o un attaccante è in grado di far visitare (ingegneria sociale) all'utente un URL controllato dall'attaccante. Potrebbe essere in grado di esfiltrare le informazioni sensibili all'interno dell'ultima richiesta GET.
+Se in un certo momento all'interno di una pagina web si trovano informazioni sensibili nei parametri di una richiesta GET, se la pagina contiene link a fonti esterne o un attaccante è in grado di far visitare all'utente un URL controllato dall'attaccante (ingegneria sociale). Potrebbe essere in grado di esfiltrare le informazioni sensibili all'interno dell'ultima richiesta GET.
 
 ## Mitigazione
 
@@ -21,7 +21,7 @@ Referrer-Policy: strict-origin
 Referrer-Policy: strict-origin-when-cross-origin
 Referrer-Policy: unsafe-url
 ```
-## Contromisure
+## Contro-mitigazione
 
 Puoi sovrascrivere questa regola utilizzando un tag meta HTML (l'attaccante deve sfruttare un'iniezione HTML):
 ```markup

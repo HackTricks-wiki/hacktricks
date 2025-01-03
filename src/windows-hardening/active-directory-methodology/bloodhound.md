@@ -1,4 +1,4 @@
-# BloodHound & Other AD Enum Tools
+# BloodHound & Altri Strumenti di Enumerazione AD
 
 {{#include ../../banners/hacktricks-training.md}}
 
@@ -8,7 +8,7 @@
 
 > Un visualizzatore e editor avanzato di Active Directory (AD). Puoi utilizzare AD Explorer per navigare facilmente in un database AD, definire posizioni preferite, visualizzare proprietà e attributi degli oggetti senza aprire finestre di dialogo, modificare permessi, visualizzare uno schema di oggetto ed eseguire ricerche sofisticate che puoi salvare e rieseguire.
 
-### Snapshots
+### Snapshot
 
 AD Explorer può creare snapshot di un AD in modo da poterlo controllare offline.\
 Può essere utilizzato per scoprire vulnerabilità offline o per confrontare diversi stati del database AD nel tempo.
@@ -61,7 +61,7 @@ Hanno diverse opzioni, ma se vuoi eseguire SharpHound da un PC unito al dominio,
 ./SharpHound.exe --CollectionMethods All
 Invoke-BloodHound -CollectionMethod All
 ```
-> Puoi leggere di più su **CollectionMethod** e sulla sessione loop [qui](https://support.bloodhoundenterprise.io/hc/en-us/articles/17481375424795-All-SharpHound-Community-Edition-Flags-Explained)
+> Puoi leggere di più su **CollectionMethod** e la sessione loop [qui](https://support.bloodhoundenterprise.io/hc/en-us/articles/17481375424795-All-SharpHound-Community-Edition-Flags-Explained)
 
 Se desideri eseguire SharpHound utilizzando credenziali diverse, puoi creare una sessione CMD netonly ed eseguire SharpHound da lì:
 ```

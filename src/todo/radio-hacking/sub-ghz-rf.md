@@ -4,7 +4,7 @@
 
 ## Garage Doors
 
-I telecomandi per porte da garage operano tipicamente a frequenze nell'intervallo di 300-190 MHz, con le frequenze più comuni che sono 300 MHz, 310 MHz, 315 MHz e 390 MHz. Questo intervallo di frequenze è comunemente utilizzato per i telecomandi delle porte da garage perché è meno affollato rispetto ad altre bande di frequenza ed è meno probabile che subisca interferenze da altri dispositivi.
+I telecomandi per porte da garage operano tipicamente a frequenze nella gamma di 300-190 MHz, con le frequenze più comuni che sono 300 MHz, 310 MHz, 315 MHz e 390 MHz. Questa gamma di frequenze è comunemente utilizzata per i telecomandi delle porte da garage perché è meno affollata rispetto ad altre bande di frequenza ed è meno probabile che subisca interferenze da altri dispositivi.
 
 ## Car Doors
 
@@ -55,17 +55,17 @@ Fondamentalmente, ascolti il pulsante e **catturi il segnale mentre il telecoman
 
 Un attaccante potrebbe **disturbare il segnale vicino al veicolo o al ricevitore** in modo che il **ricevitore non possa effettivamente 'sentire' il codice**, e una volta che ciò accade puoi semplicemente **catturare e riprodurre** il codice quando hai smesso di disturbare.
 
-La vittima a un certo punto utilizzerà le **chiavi per chiudere l'auto**, ma poi l'attacco avrà **registrato abbastanza "codici di chiusura della porta"** che sperabilmente potrebbero essere inviati per aprire la porta (potrebbe essere necessaria **una modifica di frequenza** poiché ci sono auto che utilizzano gli stessi codici per aprire e chiudere ma ascoltano entrambi i comandi a frequenze diverse).
+La vittima a un certo punto utilizzerà le **chiavi per chiudere l'auto**, ma poi l'attacco avrà **registrato abbastanza "codici di chiusura porta"** che sperabilmente potrebbero essere inviati per aprire la porta (un **cambiamento di frequenza potrebbe essere necessario** poiché ci sono auto che utilizzano gli stessi codici per aprire e chiudere ma ascoltano entrambi i comandi a frequenze diverse).
 
 > [!WARNING]
 > **Il disturbo funziona**, ma è evidente poiché se la **persona che chiude l'auto semplicemente testa le porte** per assicurarsi che siano chiuse, noterebbe che l'auto è sbloccata. Inoltre, se fossero a conoscenza di tali attacchi, potrebbero anche ascoltare il fatto che le porte non hanno mai emesso il **suono** di chiusura o che le **luci** dell'auto non hanno mai lampeggiato quando hanno premuto il pulsante 'chiudi'.
 
 ### **Code Grabbing Attack ( aka ‘RollJam’ )**
 
-Questa è una **tecnica di disturbo più furtiva**. L'attaccante disturberà il segnale, quindi quando la vittima prova a chiudere la porta non funzionerà, ma l'attaccante **registrerà questo codice**. Poi, la vittima **proverà a chiudere di nuovo l'auto** premendo il pulsante e l'auto **registrerà questo secondo codice**.\
-Immediatamente dopo, l'**attaccante può inviare il primo codice** e l'**auto si chiuderà** (la vittima penserà che la seconda pressione l'abbia chiusa). Poi, l'attaccante sarà in grado di **inviare il secondo codice rubato per aprire** l'auto (supponendo che un **codice "chiudi auto" possa essere utilizzato anche per aprirla**). Potrebbe essere necessaria una modifica di frequenza (poiché ci sono auto che utilizzano gli stessi codici per aprire e chiudere ma ascoltano entrambi i comandi a frequenze diverse).
+Questa è una tecnica di **disturbo stealth**. L'attaccante disturberà il segnale, quindi quando la vittima prova a chiudere la porta non funzionerà, ma l'attaccante **registrerà questo codice**. Poi, la vittima **proverà a chiudere di nuovo l'auto** premendo il pulsante e l'auto **registrerà questo secondo codice**.\
+Immediatamente dopo, l'**attaccante può inviare il primo codice** e l'**auto si chiuderà** (la vittima penserà che la seconda pressione l'abbia chiusa). Poi, l'attaccante sarà in grado di **inviare il secondo codice rubato per aprire** l'auto (supponendo che un **codice "chiudi auto" possa essere utilizzato anche per aprirla**). Un cambiamento di frequenza potrebbe essere necessario (poiché ci sono auto che utilizzano gli stessi codici per aprire e chiudere ma ascoltano entrambi i comandi a frequenze diverse).
 
-L'attaccante può **disturbare il ricevitore dell'auto e non il suo ricevitore** perché se il ricevitore dell'auto sta ascoltando, ad esempio, una larghezza di banda di 1MHz, l'attaccante non **disturberà** la frequenza esatta utilizzata dal telecomando ma **una vicina in quello spettro** mentre il **ricevitore dell'attaccante ascolterà in un intervallo più ristretto** dove può ascoltare il segnale del telecomando **senza il segnale di disturbo**.
+L'attaccante può **disturbare il ricevitore dell'auto e non il suo ricevitore** perché se il ricevitore dell'auto sta ascoltando, ad esempio, una banda larga di 1MHz, l'attaccante non **disturberà** la frequenza esatta utilizzata dal telecomando ma **una vicina in quello spettro** mentre il **ricevitore dell'attaccante ascolterà in un intervallo più piccolo** dove può ascoltare il segnale del telecomando **senza il segnale di disturbo**.
 
 > [!WARNING]
 > Altre implementazioni viste nelle specifiche mostrano che il **codice rotolante è una porzione** del codice totale inviato. Ad esempio, il codice inviato è una **chiave a 24 bit** dove i primi **12 sono il codice rotolante**, gli **ultimi 8 sono il comando** (come chiudere o aprire) e gli ultimi 4 sono il **checksum**. I veicoli che implementano questo tipo sono anche naturalmente suscettibili poiché l'attaccante deve semplicemente sostituire il segmento del codice rotolante per poter **utilizzare qualsiasi codice rotolante su entrambe le frequenze**.

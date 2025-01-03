@@ -39,9 +39,9 @@ File.AppendAllText(path, "Password: " + password + "\n");
 
 Per un debugging efficace con DNSpy, si raccomanda una sequenza di passaggi per regolare gli **attributi dell'Assembly** per il debugging, assicurandosi che le ottimizzazioni che potrebbero ostacolare il debugging siano disabilitate. Questo processo include la modifica delle impostazioni di `DebuggableAttribute`, la ricompilazione dell'assembly e il salvataggio delle modifiche.
 
-Inoltre, per eseguire il debug di un'applicazione .Net eseguita da **IIS**, eseguire `iisreset /noforce` riavvia IIS. Per allegare DNSpy al processo IIS per il debugging, la guida istruisce su come selezionare il processo **w3wp.exe** all'interno di DNSpy e avviare la sessione di debugging.
+Inoltre, per eseguire il debug di un'applicazione .Net eseguita da **IIS**, eseguire `iisreset /noforce` riavvia IIS. Per allegare DNSpy al processo IIS per il debugging, la guida istruisce sulla selezione del processo **w3wp.exe** all'interno di DNSpy e sull'avvio della sessione di debugging.
 
-Per una visione completa dei moduli caricati durante il debugging, è consigliato accedere alla finestra **Moduli** in DNSpy, seguita dall'apertura di tutti i moduli e dall'ordinamento degli assembly per una navigazione e un debugging più facili.
+Per una visione completa dei moduli caricati durante il debugging, è consigliato accedere alla finestra **Moduli** in DNSpy, seguita dall'apertura di tutti i moduli e dalla ordinazione degli assembly per una navigazione e un debugging più facili.
 
 Questa guida racchiude l'essenza della decompilazione di WebAssembly e .Net, offrendo un percorso per gli sviluppatori per affrontare questi compiti con facilità.
 
@@ -58,12 +58,12 @@ Per decompilare bytecode Java, questi strumenti possono essere molto utili:
 
 - **Rundll32** viene caricato da percorsi specifici per le versioni a 64 bit e a 32 bit.
 - **Windbg** è selezionato come debugger con l'opzione di sospendere il caricamento/scaricamento della libreria abilitata.
-- I parametri di esecuzione includono il percorso DLL e il nome della funzione. Questa configurazione interrompe l'esecuzione al caricamento di ogni DLL.
+- I parametri di esecuzione includono il percorso della DLL e il nome della funzione. Questa configurazione interrompe l'esecuzione al caricamento di ogni DLL.
 
 ### Utilizzando x64dbg/x32dbg
 
 - Simile a IDA, **rundll32** viene caricato con modifiche alla riga di comando per specificare la DLL e la funzione.
-- Le impostazioni vengono regolate per interrompere all'ingresso della DLL, consentendo di impostare un breakpoint nel punto di ingresso desiderato della DLL.
+- Le impostazioni vengono regolate per interrompere all'ingresso della DLL, consentendo di impostare un punto di interruzione nel punto di ingresso desiderato della DLL.
 
 ### Immagini
 
@@ -90,7 +90,7 @@ scdbg.exe -f shellcode # Informazioni di base
 scdbg.exe -f shellcode -r # Rapporto di analisi
 scdbg.exe -f shellcode -i -r # Hook interattivi
 scdbg.exe -f shellcode -d # Dump del shellcode decodificato
-scdbg.exe -f shellcode /findsc # Trova offset di inizio
+scdbg.exe -f shellcode /findsc # Trova l'offset di partenza
 scdbg.exe -f shellcode /foff 0x0000004D # Esegui dall'offset
 %%%
 

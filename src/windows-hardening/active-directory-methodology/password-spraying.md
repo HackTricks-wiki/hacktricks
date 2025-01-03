@@ -91,7 +91,7 @@ legba kerberos --target 127.0.0.1 --username admin --password wordlists/password
 ```
 ## Outlook Web Access
 
-Ci sono diversi strumenti per il **password spraying outlook**.
+Ci sono diversi strumenti per p**assword spraying outlook**.
 
 - Con [MSF Owa_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_login/)
 - con [MSF Owa_ews_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_ews_login/)

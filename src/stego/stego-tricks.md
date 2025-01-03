@@ -6,7 +6,7 @@
 
 ### **Binwalk**
 
-Uno strumento per cercare file binari per file e dati nascosti incorporati. È installato tramite `apt` e il suo codice sorgente è disponibile su [GitHub](https://github.com/ReFirmLabs/binwalk).
+Uno strumento per cercare file binari per file e dati nascosti incorporati. È installato tramite `apt` e il suo sorgente è disponibile su [GitHub](https://github.com/ReFirmLabs/binwalk).
 ```bash
 binwalk file # Displays the embedded data
 binwalk -e file # Extracts the data
@@ -74,7 +74,7 @@ Per tentare di riparare un'immagine danneggiata, aggiungere un commento nei meta
 ```
 ### **Steghide per la Cancellazione dei Dati**
 
-Steghide facilita la nascita di dati all'interno di file `JPEG, BMP, WAV e AU`, capace di incorporare ed estrarre dati crittografati. L'installazione è semplice utilizzando `apt`, e il suo [codice sorgente è disponibile su GitHub](https://github.com/StefanoDeVuono/steghide).
+Steghide facilita la nascosta dei dati all'interno di file `JPEG, BMP, WAV e AU`, capace di incorporare ed estrarre dati crittografati. L'installazione è semplice utilizzando `apt`, e il suo [codice sorgente è disponibile su GitHub](https://github.com/StefanoDeVuono/steghide).
 
 **Comandi:**
 
@@ -104,7 +104,7 @@ zsteg si specializza nel rivelare dati nascosti in file PNG e BMP. L'installazio
 
 **Stegsolve** applica vari filtri di colore per rivelare testi o messaggi nascosti all'interno delle immagini. È disponibile su [GitHub](https://github.com/eugenekolo/sec-tools/tree/master/stego/stegsolve/stegsolve).
 
-### **FFT per la rilevazione di contenuti nascosti**
+### **FFT per la Rilevazione di Contenuti Nascosti**
 
 Le tecniche di Fast Fourier Transform (FFT) possono svelare contenuti nascosti nelle immagini. Risorse utili includono:
 
@@ -139,7 +139,7 @@ Per ulteriori esplorazioni, considera di visitare:
 
 ### **Steghide (JPEG, BMP, WAV, AU)**
 
-Steghide è uno strumento versatile progettato per nascondere dati in file JPEG, BMP, WAV e AU. I dettagli sono forniti nella [documentazione sui trucchi stego](stego-tricks.md#steghide).
+Steghide è uno strumento versatile progettato per nascondere dati in file JPEG, BMP, WAV e AU. Istruzioni dettagliate sono fornite nella [documentazione sui trucchi stego](stego-tricks.md#steghide).
 
 ### **Stegpy (PNG, BMP, GIF, WebP, WAV)**
 
@@ -169,13 +169,13 @@ Uno strumento prezioso per l'ispezione visiva e analitica dei file audio, Sonic 
 
 ### **DTMF Tones - Dial Tones**
 
-La rilevazione dei toni DTMF nei file audio può essere effettuata tramite strumenti online come [questo rilevatore DTMF](https://unframework.github.io/dtmf-detect/) e [DialABC](http://dialabc.com/sound/detect/index.html).
+La rilevazione dei toni DTMF nei file audio può essere ottenuta tramite strumenti online come [questo rilevatore DTMF](https://unframework.github.io/dtmf-detect/) e [DialABC](http://dialabc.com/sound/detect/index.html).
 
 ## **Altre Tecniche**
 
 ### **Binary Length SQRT - QR Code**
 
-I dati binari che si elevano al quadrato per ottenere un numero intero potrebbero rappresentare un codice QR. Usa questo frammento per controllare:
+I dati binari che si elevano al quadrato per diventare un numero intero potrebbero rappresentare un codice QR. Usa questo frammento per controllare:
 ```python
 import math
 math.sqrt(2500) #50

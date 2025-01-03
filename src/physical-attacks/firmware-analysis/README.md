@@ -15,11 +15,11 @@ Il firmware è un software essenziale che consente ai dispositivi di funzionare 
 - Layout hardware e schede tecniche
 - Metriche del codice sorgente e posizioni
 - Librerie esterne e tipi di licenza
-- Storico degli aggiornamenti e certificazioni normative
+- Storie degli aggiornamenti e certificazioni normative
 - Diagrammi architettonici e di flusso
 - Valutazioni di sicurezza e vulnerabilità identificate
 
-A questo scopo, gli strumenti di **intelligence open-source (OSINT)** sono inestimabili, così come l'analisi di eventuali componenti software open-source disponibili attraverso processi di revisione manuale e automatizzati. Strumenti come [Coverity Scan](https://scan.coverity.com) e [Semmle’s LGTM](https://lgtm.com/#explore) offrono analisi statica gratuita che possono essere sfruttate per trovare potenziali problemi.
+A questo scopo, gli strumenti di **intelligence open-source (OSINT)** sono inestimabili, così come l'analisi di eventuali componenti software open-source disponibili attraverso processi di revisione manuale e automatizzata. Strumenti come [Coverity Scan](https://scan.coverity.com) e [Semmle’s LGTM](https://lgtm.com/#explore) offrono analisi statica gratuita che può essere sfruttata per trovare potenziali problemi.
 
 ## **Acquisire il Firmware**
 
@@ -34,7 +34,7 @@ Ottenere il firmware può essere affrontato attraverso vari mezzi, ognuno con il
 - **Estraendo** dal dispositivo attraverso connessioni come **UART**, **JTAG** o **PICit**
 - **Sniffando** le richieste di aggiornamento all'interno della comunicazione del dispositivo
 - Identificando e utilizzando **endpoint di aggiornamento hardcoded**
-- **Dumpando** dal bootloader o dalla rete
+- **Dumping** dal bootloader o dalla rete
 - **Rimuovendo e leggendo** il chip di memoria, quando tutto il resto fallisce, utilizzando strumenti hardware appropriati
 
 ## Analizzare il firmware
@@ -77,7 +77,7 @@ DECIMAL HEXADECIMAL DESCRIPTION
 1704052 0x1A0074 PackImg section delimiter tag, little endian size: 32256 bytes; big endian size: 8257536 bytes
 1704084 0x1A0094 Squashfs filesystem, little endian, version 4.0, compression:lzma, size: 8256900 bytes, 2688 inodes, blocksize: 131072 bytes, created: 2016-07-12 02:28:41
 ```
-Esegui il seguente **comando dd** per estrarre il filesystem Squashfs.
+Esegui il seguente **dd command** per estrarre il filesystem Squashfs.
 ```
 $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 
@@ -87,7 +87,7 @@ $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 
 8257536 bytes (8.3 MB, 7.9 MiB) copied, 12.5777 s, 657 kB/s
 ```
-In alternativa, è possibile eseguire il seguente comando.
+In alternativa, il seguente comando potrebbe essere eseguito.
 
 `$ dd if=DIR850L_REVB.bin bs=1 skip=$((0x1A0094)) of=dir.squashfs`
 
@@ -128,7 +128,7 @@ fdisk -lu <bin> #lists partitions and filesystems, if there are multiple
 ```
 Per valutare lo stato della crittografia dell'immagine, si controlla l'**entropia** con `binwalk -E <bin>`. Un'entropia bassa suggerisce una mancanza di crittografia, mentre un'entropia alta indica una possibile crittografia o compressione.
 
-Per estrarre i **file incorporati**, si raccomandano strumenti e risorse come la documentazione **file-data-carving-recovery-tools** e **binvis.io** per l'ispezione dei file.
+Per estrarre i **file incorporati**, si raccomandano strumenti e risorse come la documentazione di **file-data-carving-recovery-tools** e **binvis.io** per l'ispezione dei file.
 
 ### Estrazione del Filesystem
 
@@ -152,7 +152,7 @@ Con il filesystem estratto, inizia la ricerca di vulnerabilità di sicurezza. Si
 - Binari incorporati per ulteriori analisi
 - Server web e binari comuni dei dispositivi IoT
 
-Diverse strumenti assistono nel rivelare informazioni sensibili e vulnerabilità all'interno del filesystem:
+Diverse strumenti aiutano a scoprire informazioni sensibili e vulnerabilità all'interno del filesystem:
 
 - [**LinPEAS**](https://github.com/carlospolop/PEASS-ng) e [**Firmwalker**](https://github.com/craigz28/firmwalker) per la ricerca di informazioni sensibili
 - [**The Firmware Analysis and Comparison Tool (FACT)**](https://github.com/fkie-cad/FACT_core) per un'analisi completa del firmware
@@ -166,7 +166,7 @@ Sia il codice sorgente che i binari compilati trovati nel filesystem devono esse
 
 Il processo di emulazione del firmware consente un'**analisi dinamica** sia del funzionamento di un dispositivo che di un singolo programma. Questo approccio può incontrare sfide con dipendenze hardware o architetturali, ma trasferire il filesystem root o binari specifici su un dispositivo con architettura e endianness corrispondenti, come un Raspberry Pi, o su una macchina virtuale pre-costruita, può facilitare ulteriori test.
 
-### Emulazione di Binari Singoli
+### Emulazione di Singoli Binari
 
 Per esaminare singoli programmi, è cruciale identificare l'endianness e l'architettura CPU del programma.
 

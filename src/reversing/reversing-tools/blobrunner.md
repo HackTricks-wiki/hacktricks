@@ -1,7 +1,7 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-L'unica riga modificata dal [codice originale](https://github.com/OALabs/BlobRunner) è la riga 10.  
-Per compilarlo, **crea un progetto C/C++ in Visual Studio Code, copia e incolla il codice e costruiscilo**.
+L'unica riga modificata del [codice originale](https://github.com/OALabs/BlobRunner) è la riga 10. 
+Per compilarlo, **crea semplicemente un progetto C/C++ in Visual Studio Code, copia e incolla il codice e costruiscilo**.
 ```c
 #include <stdio.h>
 #include <windows.h>

@@ -56,11 +56,11 @@ IsDomain     : True
 # You may also enumerate where foreign groups and/or users have been assigned
 # local admin access via Restricted Group by enumerating the GPOs in the foreign domain.
 ```
-Nella precedente enumerazione è stato trovato che l'utente **`crossuser`** è all'interno del gruppo **`External Admins`** che ha **accesso Admin** all'interno del **DC del dominio esterno**.
+Nell'enumerazione precedente è stato trovato che l'utente **`crossuser`** è all'interno del gruppo **`External Admins`** che ha **accesso Admin** all'interno del **DC del dominio esterno**.
 
 ## Accesso Iniziale
 
-Se non **sei riuscito** a trovare alcun **accesso speciale** del tuo utente nell'altro dominio, puoi comunque tornare alla metodologia AD e provare a **privesc da un utente non privilegiato** (cose come kerberoasting per esempio):
+Se non **sei riuscito** a trovare alcun accesso **speciale** del tuo utente nell'altro dominio, puoi comunque tornare alla metodologia AD e provare a **privesc da un utente non privilegiato** (cose come kerberoasting, per esempio):
 
 Puoi utilizzare le **funzioni di Powerview** per **enumerare** l'**altro dominio** usando il parametro `-Domain` come in:
 ```powershell
@@ -82,7 +82,7 @@ Enter-PSSession -ComputerName dc.external_domain.local -Credential domain\admini
 
 Puoi anche abusare della [**Storia SID**](sid-history-injection.md) attraverso un trust di foresta.
 
-Se un utente viene migrato **da una foresta a un'altra** e **il filtraggio SID non è abilitato**, diventa possibile **aggiungere un SID dall'altra foresta**, e questo **SID** sarà **aggiunto** al **token dell'utente** durante l'autenticazione **attraverso il trust**.
+Se un utente viene migrato **da una foresta a un'altra** e **il filtro SID non è abilitato**, diventa possibile **aggiungere un SID dall'altra foresta**, e questo **SID** sarà **aggiunto** al **token dell'utente** durante l'autenticazione **attraverso il trust**.
 
 > [!WARNING]
 > Come promemoria, puoi ottenere la chiave di firma con
@@ -91,7 +91,7 @@ Se un utente viene migrato **da una foresta a un'altra** e **il filtraggio SID n
 > Invoke-Mimikatz -Command '"lsadump::trust /patch"' -ComputerName dc.domain.local
 > ```
 
-Puoi **firmare con** la chiave **fidata** un **TGT che impersona** l'utente del dominio attuale.
+Puoi **firmare con** la chiave **fidata** un **TGT impersonando** l'utente del dominio attuale.
 ```bash
 # Get a TGT for the cross-domain privileged user to the other domain
 Invoke-Mimikatz -Command '"kerberos::golden /user:<username> /domain:<current domain> /SID:<current domain SID> /rc4:<trusted key> /target:<external.domain> /ticket:C:\path\save\ticket.kirbi"'

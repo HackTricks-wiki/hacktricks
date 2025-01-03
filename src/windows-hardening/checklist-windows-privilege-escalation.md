@@ -60,12 +60,12 @@
 
 - [ ] **Scrivere** [**permessi sulle applicazioni installate**](windows-local-privilege-escalation/#write-permissions)
 - [ ] [**Applicazioni di avvio**](windows-local-privilege-escalation/#run-at-startup)
-- [ ] **Driver vulnerabili** [**Driver**](windows-local-privilege-escalation/#drivers)
+- [ ] **Driver vulnerabili** [**Drivers**](windows-local-privilege-escalation/#drivers)
 
 ### [DLL Hijacking](windows-local-privilege-escalation/#path-dll-hijacking)
 
 - [ ] Puoi **scrivere in qualche cartella dentro PATH**?
-- [ ] Esiste qualche binario di servizio noto che **cerca di caricare qualche DLL non esistente**?
+- [ ] Esiste qualche binario di servizio noto che **cerca di caricare qualche DLL inesistente**?
 - [ ] Puoi **scrivere** in qualche **cartella di binari**?
 
 ### [Rete](windows-local-privilege-escalation/#network)

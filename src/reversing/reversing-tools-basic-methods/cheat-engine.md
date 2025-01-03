@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-[**Cheat Engine**](https://www.cheatengine.org/downloads.php) è un programma utile per trovare dove vengono salvati valori importanti nella memoria di un gioco in esecuzione e modificarli.\
+[**Cheat Engine**](https://www.cheatengine.org/downloads.php) è un programma utile per trovare dove vengono salvati valori importanti all'interno della memoria di un gioco in esecuzione e modificarli.\
 Quando lo scarichi e lo esegui, ti viene **presentato** un **tutorial** su come utilizzare lo strumento. Se vuoi imparare a usare lo strumento, è altamente consigliato completarlo.
 
 ## Cosa stai cercando?
@@ -59,13 +59,13 @@ Cheat Engine cercherà i **valori** che **sono passati da 100 al nuovo valore**.
 
 ### Valore sconosciuto, cambiamento noto
 
-Nello scenario in cui **non conosci il valore** ma sai **come farlo cambiare** (e persino il valore del cambiamento), puoi cercare il tuo numero.
+Nello scenario in cui **non conosci il valore** ma sai **come farlo cambiare** (e anche il valore del cambiamento), puoi cercare il tuo numero.
 
 Quindi, inizia eseguendo una scansione di tipo "**Valore iniziale sconosciuto**":
 
 ![](<../../images/image (890).png>)
 
-Poi, fai cambiare il valore, indica **come** il **valore** **è cambiato** (nel mio caso è diminuito di 1) ed esegui una **scansione successiva**:
+Poi, fai cambiare il valore, indica **come** il **valore** **è cambiato** (nel mio caso è diminuito di 1) e esegui una **scansione successiva**:
 
 ![](<../../images/image (371).png>)
 
@@ -98,7 +98,7 @@ Ora che hai trovato l'indirizzo che modifica il valore, puoi **modificare il cod
 
 ![](<../../images/image (1057).png>)
 
-Quindi, ora puoi modificarlo affinché il codice non influisca sul tuo numero, o influisca sempre in modo positivo.
+Quindi, ora puoi modificarlo in modo che il codice non influisca sul tuo numero, o influisca sempre in modo positivo.
 
 ### Indirizzo di memoria casuale - Trovare il puntatore
 
@@ -133,12 +133,12 @@ Ora, ogni volta che modifichi quel valore, stai **modificando il valore importan
 
 L'iniezione di codice è una tecnica in cui inietti un pezzo di codice nel processo target e poi reindirizzi l'esecuzione del codice per passare attraverso il tuo codice scritto (come darti punti invece di sottrarli).
 
-Quindi, immagina di aver trovato l'indirizzo che sottrae 1 dalla vita del tuo giocatore:
+Quindi, immagina di aver trovato l'indirizzo che sta sottraendo 1 dalla vita del tuo giocatore:
 
 ![](<../../images/image (203).png>)
 
 Fai clic su Mostra disassemblatore per ottenere il **codice disassemblato**.\
-Poi, fai clic su **CTRL+a** per invocare la finestra di Auto assemble e seleziona _**Modello --> Iniezione di codice**_
+Poi, fai clic su **CTRL+a** per invocare la finestra di Auto assemble e seleziona _**Template --> Iniezione di codice**_
 
 ![](<../../images/image (902).png>)
 
@@ -146,7 +146,7 @@ Compila l'**indirizzo dell'istruzione che vuoi modificare** (questo di solito vi
 
 ![](<../../images/image (744).png>)
 
-Verrà generato un modello:
+Verrà generato un template:
 
 ![](<../../images/image (944).png>)
 

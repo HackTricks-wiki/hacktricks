@@ -20,21 +20,21 @@ certutil.exe -dump -v cert.pfx
 ```
 ## Esportazione dei certificati utilizzando le Crypto API – THEFT1
 
-In una **sessione desktop interattiva**, estrarre un certificato utente o macchina, insieme alla chiave privata, può essere facilmente fatto, particolarmente se la **chiave privata è esportabile**. Questo può essere realizzato navigando al certificato in `certmgr.msc`, facendo clic destro su di esso e selezionando `All Tasks → Export` per generare un file .pfx protetto da password.
+In una **sessione desktop interattiva**, estrarre un certificato utente o macchina, insieme alla chiave privata, può essere facilmente fatto, in particolare se la **chiave privata è esportabile**. Questo può essere realizzato navigando al certificato in `certmgr.msc`, facendo clic destro su di esso e selezionando `All Tasks → Export` per generare un file .pfx protetto da password.
 
-Per un **approccio programmatico**, sono disponibili strumenti come il cmdlet PowerShell `ExportPfxCertificate` o progetti come [TheWover’s CertStealer C# project](https://github.com/TheWover/CertStealer). Questi utilizzano la **Microsoft CryptoAPI** (CAPI) o la Cryptography API: Next Generation (CNG) per interagire con il negozio di certificati. Queste API forniscono una gamma di servizi crittografici, inclusi quelli necessari per la memorizzazione e l'autenticazione dei certificati.
+Per un **approccio programmatico**, sono disponibili strumenti come il cmdlet PowerShell `ExportPfxCertificate` o progetti come [TheWover’s CertStealer C# project](https://github.com/TheWover/CertStealer). Questi utilizzano le **Microsoft CryptoAPI** (CAPI) o la Cryptography API: Next Generation (CNG) per interagire con il negozio di certificati. Queste API forniscono una gamma di servizi crittografici, inclusi quelli necessari per la memorizzazione e l'autenticazione dei certificati.
 
 Tuttavia, se una chiave privata è impostata come non esportabile, sia CAPI che CNG normalmente bloccheranno l'estrazione di tali certificati. Per bypassare questa restrizione, possono essere impiegati strumenti come **Mimikatz**. Mimikatz offre comandi `crypto::capi` e `crypto::cng` per patchare le rispettive API, consentendo l'esportazione delle chiavi private. In particolare, `crypto::capi` patcha il CAPI all'interno del processo corrente, mentre `crypto::cng` mira alla memoria di **lsass.exe** per la patch.
 
 ## Furto di certificati utente tramite DPAPI – THEFT2
 
-Maggiori informazioni su DPAPI in:
+Ulteriori informazioni su DPAPI in:
 
 {{#ref}}
 ../../windows-local-privilege-escalation/dpapi-extracting-passwords.md
 {{#endref}}
 
-In Windows, **le chiavi private dei certificati sono protette da DPAPI**. È fondamentale riconoscere che le **posizioni di archiviazione per le chiavi private utente e macchina** sono distinte, e le strutture dei file variano a seconda dell'API crittografica utilizzata dal sistema operativo. **SharpDPAPI** è uno strumento che può navigare automaticamente queste differenze durante la decrittazione dei blob DPAPI.
+In Windows, **le chiavi private dei certificati sono protette da DPAPI**. È fondamentale riconoscere che le **posizioni di archiviazione per le chiavi private utente e macchina** sono distinte e le strutture dei file variano a seconda dell'API crittografica utilizzata dal sistema operativo. **SharpDPAPI** è uno strumento che può navigare automaticamente queste differenze durante la decrittazione dei blob DPAPI.
 
 I **certificati utente** sono prevalentemente ospitati nel registro sotto `HKEY_CURRENT_USER\SOFTWARE\Microsoft\SystemCertificates`, ma alcuni possono anche essere trovati nella directory `%APPDATA%\Microsoft\SystemCertificates\My\Certificates`. Le corrispondenti **chiavi private** per questi certificati sono tipicamente memorizzate in `%APPDATA%\Microsoft\Crypto\RSA\User SID\` per le chiavi **CAPI** e `%APPDATA%\Microsoft\Crypto\Keys\` per le chiavi **CNG**.
 
@@ -70,7 +70,7 @@ La decrittografia manuale può essere ottenuta eseguendo il comando `lsadump::se
 
 ## Trovare File di Certificati – THEFT4
 
-I certificati si trovano a volte direttamente all'interno del filesystem, come nelle condivisioni di file o nella cartella Download. I tipi di file di certificati più comunemente incontrati mirati verso ambienti Windows sono i file `.pfx` e `.p12`. Anche se meno frequentemente, appaiono anche file con estensioni `.pkcs12` e `.pem`. Ulteriori estensioni di file relative ai certificati degne di nota includono:
+I certificati si trovano a volte direttamente all'interno del filesystem, come nelle condivisioni di file o nella cartella Download. I tipi di file di certificati più comunemente incontrati mirati agli ambienti Windows sono i file `.pfx` e `.p12`. Anche se meno frequentemente, appaiono anche file con estensioni `.pkcs12` e `.pem`. Ulteriori estensioni di file relative ai certificati degne di nota includono:
 
 - `.key` per chiavi private,
 - `.crt`/`.cer` per certificati solo,

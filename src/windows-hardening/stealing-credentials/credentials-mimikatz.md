@@ -8,7 +8,7 @@
 
 A partire da Windows 8.1 e Windows Server 2012 R2, sono state implementate misure significative per proteggere contro il furto di credenziali:
 
-- **LM hashes e password in chiaro** non sono più memorizzati in memoria per migliorare la sicurezza. Un'impostazione specifica del registro, _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_, deve essere configurata con un valore DWORD di `0` per disabilitare l'autenticazione Digest, assicurando che le password "in chiaro" non siano memorizzate nella cache di LSASS.
+- **LM hashes e password in chiaro** non sono più memorizzati in memoria per migliorare la sicurezza. Una specifica impostazione del registro, _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_, deve essere configurata con un valore DWORD di `0` per disabilitare l'autenticazione Digest, assicurando che le password "in chiaro" non siano memorizzate nella cache in LSASS.
 
 - **LSA Protection** è stata introdotta per proteggere il processo dell'Autorità di Sicurezza Locale (LSA) dalla lettura non autorizzata della memoria e dall'iniezione di codice. Questo viene realizzato contrassegnando LSASS come processo protetto. L'attivazione della protezione LSA comporta:
 1. Modificare il registro in _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa_ impostando `RunAsPPL` su `dword:00000001`.
@@ -66,7 +66,7 @@ Esempio:
 ```bash
 mimikatz "kerberos::golden /user:admin /domain:example.com /sid:S-1-5-21-123456789-123456789-123456789 /krbtgt:ntlmhash /ptt" exit
 ```
-### Creazione del Silver Ticket
+### Creazione di Silver Ticket
 
 I Silver Ticket concedono accesso a servizi specifici. Comando chiave e parametri:
 

@@ -9,17 +9,17 @@
 roguepotato-and-printspoofer.md
 {{#endref}}
 
-## Juicy Potato (abusing the golden privileges) <a href="#juicy-potato-abusing-the-golden-privileges" id="juicy-potato-abusing-the-golden-privileges"></a>
+## Juicy Potato (abuso dei privilegi dorati) <a href="#juicy-potato-abusing-the-golden-privileges" id="juicy-potato-abusing-the-golden-privileges"></a>
 
 _Versione zuccherata di_ [_RottenPotatoNG_](https://github.com/breenmachine/RottenPotatoNG)_, con un po' di succo, cioè **un altro strumento di escalation dei privilegi locali, da un Windows Service Accounts a NT AUTHORITY\SYSTEM**_
 
 #### Puoi scaricare juicypotato da [https://ci.appveyor.com/project/ohpe/juicy-potato/build/artifacts](https://ci.appveyor.com/project/ohpe/juicy-potato/build/artifacts)
 
-### Summary <a href="#summary" id="summary"></a>
+### Riepilogo <a href="#summary" id="summary"></a>
 
 [**Dal Readme di juicy-potato**](https://github.com/ohpe/juicy-potato/blob/master/README.md)**:**
 
-[RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG) e le sue [varianti](https://github.com/decoder-it/lonelypotato) sfruttano la catena di escalation dei privilegi basata su [`BITS`](<https://msdn.microsoft.com/en-us/library/windows/desktop/bb968799(v=vs.85).aspx>) [service](https://github.com/breenmachine/RottenPotatoNG/blob/4eefb0dd89decb9763f2bf52c7a067440a9ec1f0/RottenPotatoEXE/MSFRottenPotato/MSFRottenPotato.cpp#L126) avendo il listener MiTM su `127.0.0.1:6666` e quando hai privilegi `SeImpersonate` o `SeAssignPrimaryToken`. Durante una revisione della build di Windows abbiamo trovato una configurazione in cui `BITS` era intenzionalmente disabilitato e la porta `6666` era occupata.
+[RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG) e le sue [varianti](https://github.com/decoder-it/lonelypotato) sfruttano la catena di escalation dei privilegi basata su [`BITS`](<https://msdn.microsoft.com/en-us/library/windows/desktop/bb968799(v=vs.85).aspx>) [servizio](https://github.com/breenmachine/RottenPotatoNG/blob/4eefb0dd89decb9763f2bf52c7a067440a9ec1f0/RottenPotatoEXE/MSFRottenPotato/MSFRottenPotato.cpp#L126) che ha il listener MiTM su `127.0.0.1:6666` e quando hai privilegi `SeImpersonate` o `SeAssignPrimaryToken`. Durante una revisione della build di Windows abbiamo trovato una configurazione in cui `BITS` era intenzionalmente disabilitato e la porta `6666` era occupata.
 
 Abbiamo deciso di armare [RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG): **Dì ciao a Juicy Potato**.
 
@@ -29,28 +29,28 @@ Abbiamo scoperto che, oltre a `BITS`, ci sono diversi server COM che possiamo sf
 
 1. essere istanziabili dall'utente corrente, normalmente un "utente di servizio" che ha privilegi di impersonificazione
 2. implementare l'interfaccia `IMarshal`
-3. essere eseguiti come utente elevato (SYSTEM, Administrator, …)
+3. essere eseguiti come utente elevato (SYSTEM, Amministratore, …)
 
 Dopo alcuni test abbiamo ottenuto e testato un elenco esteso di [CLSID interessanti](http://ohpe.it/juicy-potato/CLSID/) su diverse versioni di Windows.
 
-### Juicy details <a href="#juicy-details" id="juicy-details"></a>
+### Dettagli succosi <a href="#juicy-details" id="juicy-details"></a>
 
 JuicyPotato ti consente di:
 
-- **Target CLSID** _scegli qualsiasi CLSID tu voglia._ [_Qui_](http://ohpe.it/juicy-potato/CLSID/) _puoi trovare l'elenco organizzato per OS._
-- **COM Listening port** _definisci la porta di ascolto COM che preferisci (anziché il 6666 hardcoded)_
-- **COM Listening IP address** _collega il server a qualsiasi IP_
-- **Process creation mode** _a seconda dei privilegi dell'utente impersonato puoi scegliere tra:_
+- **CLSID di destinazione** _scegli qualsiasi CLSID tu voglia._ [_Qui_](http://ohpe.it/juicy-potato/CLSID/) _puoi trovare l'elenco organizzato per OS._
+- **Porta di ascolto COM** _definisci la porta di ascolto COM che preferisci (anziché il 6666 hardcoded)_
+- **Indirizzo IP di ascolto COM** _collega il server a qualsiasi IP_
+- **Modalità di creazione del processo** _a seconda dei privilegi dell'utente impersonato puoi scegliere tra:_
 - `CreateProcessWithToken` (richiede `SeImpersonate`)
 - `CreateProcessAsUser` (richiede `SeAssignPrimaryToken`)
 - `entrambi`
-- **Process to launch** _lancia un eseguibile o uno script se lo sfruttamento ha successo_
-- **Process Argument** _personalizza gli argomenti del processo lanciato_
-- **RPC Server address** _per un approccio furtivo puoi autenticarti a un server RPC esterno_
-- **RPC Server port** _utile se vuoi autenticarti a un server esterno e il firewall blocca la porta `135`…_
-- **TEST mode** _principalmente per scopi di test, cioè testare i CLSID. Crea il DCOM e stampa l'utente del token. Vedi_ [_qui per il test_](http://ohpe.it/juicy-potato/Test/)
+- **Processo da avviare** _avvia un eseguibile o uno script se lo sfruttamento ha successo_
+- **Argomento del processo** _personalizza gli argomenti del processo avviato_
+- **Indirizzo del server RPC** _per un approccio furtivo puoi autenticarti a un server RPC esterno_
+- **Porta del server RPC** _utile se vuoi autenticarti a un server esterno e il firewall blocca la porta `135`…_
+- **Modalità TEST** _principalmente per scopi di test, cioè testare i CLSID. Crea il DCOM e stampa l'utente del token. Vedi_ [_qui per il test_](http://ohpe.it/juicy-potato/Test/)
 
-### Usage <a href="#usage" id="usage"></a>
+### Utilizzo <a href="#usage" id="usage"></a>
 ```
 T:\>JuicyPotato.exe
 JuicyPotato v0.1

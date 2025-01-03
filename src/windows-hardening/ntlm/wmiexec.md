@@ -89,13 +89,13 @@ La query remota di WMI per informazioni specifiche, come gli amministratori loca
 
 ### **Querying WMI Remota Manuale**
 
-L'identificazione furtiva degli amministratori locali su una macchina remota e degli utenti connessi può essere ottenuta attraverso query WMI specifiche. `wmic` supporta anche la lettura da un file di testo per eseguire comandi su più nodi contemporaneamente.
+L'identificazione furtiva degli amministratori locali su una macchina remota e degli utenti connessi può essere ottenuta attraverso query WMI specifiche. `wmic` supporta anche la lettura da un file di testo per eseguire comandi su più nodi simultaneamente.
 
 Per eseguire un processo in remoto tramite WMI, come il deployment di un agente Empire, viene impiegata la seguente struttura di comando, con l'esecuzione riuscita indicata da un valore di ritorno di "0":
 ```bash
 wmic /node:hostname /user:user path win32_process call create "empire launcher string here"
 ```
-Questo processo illustra la capacità di WMI per l'esecuzione remota e l'enumerazione del sistema, evidenziando la sua utilità sia per l'amministrazione di sistema che per il penetration testing.
+Questo processo illustra la capacità di WMI per l'esecuzione remota e l'enumerazione del sistema, evidenziando la sua utilità sia per l'amministrazione di sistema che per il pentesting.
 
 ## Riferimenti
 

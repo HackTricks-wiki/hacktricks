@@ -1,8 +1,8 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-# Creazione di MSI Maliziosi e Ottenimento di Root
+# Creazione di MSI Maliziosi e Ottenimento dei Privilegi di Root
 
-La creazione dell'installer MSI sarà effettuata utilizzando wixtools, in particolare [wixtools](http://wixtoolset.org) sarà utilizzato. Vale la pena menzionare che sono stati tentati costruttori MSI alternativi, ma non hanno avuto successo in questo caso particolare.
+La creazione dell'installer MSI sarà effettuata utilizzando wixtools, in particolare verranno utilizzati [wixtools](http://wixtoolset.org). Vale la pena menzionare che sono stati tentati costruttori MSI alternativi, ma non hanno avuto successo in questo caso particolare.
 
 Per una comprensione completa degli esempi di utilizzo di wix MSI, è consigliabile consultare [questa pagina](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with). Qui puoi trovare vari esempi che dimostrano l'uso di wix MSI.
 

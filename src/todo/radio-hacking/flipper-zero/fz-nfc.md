@@ -52,7 +52,7 @@ Per un'introduzione sulle NFC [**leggi questa pagina**](../pentesting-rfid.md#hi
 
 ### Leggi
 
-Flipper Zero può **leggere schede NFC**, tuttavia, **non comprende tutti i protocolli** basati su ISO 14443. Tuttavia, poiché **UID è un attributo a basso livello**, potresti trovarti in una situazione in cui **UID è già stato letto, ma il protocollo di trasferimento dati ad alto livello è ancora sconosciuto**. Puoi leggere, emulare e inserire manualmente UID utilizzando Flipper per i lettori primitivi che usano UID per l'autorizzazione.
+Flipper Zero può **leggere schede NFC**, tuttavia, **non comprende tutti i protocolli** basati su ISO 14443. Tuttavia, poiché **UID è un attributo a basso livello**, potresti trovarti in una situazione in cui **UID è già stato letto, ma il protocollo di trasferimento dati ad alto livello è ancora sconosciuto**. Puoi leggere, emulare e inserire manualmente l'UID utilizzando Flipper per i lettori primitivi che utilizzano l'UID per l'autorizzazione.
 
 #### Lettura dell'UID VS Lettura dei Dati Interni <a href="#reading-the-uid-vs-reading-the-data-inside" id="reading-the-uid-vs-reading-the-data-inside"></a>
 

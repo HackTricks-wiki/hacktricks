@@ -2,7 +2,7 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Intro <a href="#ir-signal-receiver-in-flipper-zero" id="ir-signal-receiver-in-flipper-zero"></a>
+## Introduzione <a href="#ir-signal-receiver-in-flipper-zero" id="ir-signal-receiver-in-flipper-zero"></a>
 
 Per ulteriori informazioni su come funziona l'infrarosso, controlla:
 
@@ -30,7 +30,7 @@ Tale attacco di forza bruta richiede tempo. Più grande è il dizionario, più a
 
 ### Impara Nuovo Telecomando
 
-È possibile **catturare un segnale infrarosso** con Flipper Zero. Se **trova il segnale nel database**, Flipper **saprà automaticamente a quale dispositivo si riferisce** e ti permetterà di interagire con esso.\
+È possibile **catturare un segnale infrarosso** con Flipper Zero. Se **trova il segnale nel database**, Flipper saprà automaticamente **a quale dispositivo appartiene** e ti permetterà di interagire con esso.\
 Se non lo trova, Flipper può **memorizzare** il **segnale** e ti permetterà di **riprodurlo**.
 
 ## Riferimenti

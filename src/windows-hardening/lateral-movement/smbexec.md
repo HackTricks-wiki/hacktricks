@@ -2,6 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
+
 ## Come Funziona
 
 **Smbexec** è uno strumento utilizzato per l'esecuzione remota di comandi su sistemi Windows, simile a **Psexec**, ma evita di posizionare file dannosi sul sistema target.
@@ -9,7 +10,7 @@
 ### Punti Chiave su **SMBExec**
 
 - Funziona creando un servizio temporaneo (ad esempio, "BTOBTO") sulla macchina target per eseguire comandi tramite cmd.exe (%COMSPEC%), senza scaricare alcun binario.
-- Nonostante il suo approccio furtivo, genera registri di eventi per ogni comando eseguito, offrendo una forma di "shell" non interattiva.
+- Nonostante il suo approccio furtivo, genera registri eventi per ogni comando eseguito, offrendo una forma di "shell" non interattiva.
 - Il comando per connettersi utilizzando **Smbexec** appare così:
 ```bash
 smbexec.py WORKGROUP/genericuser:genericpassword@10.10.10.10

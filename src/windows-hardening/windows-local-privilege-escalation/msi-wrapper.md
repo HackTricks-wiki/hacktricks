@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-Scarica l'applicazione gratuita da [https://www.exemsi.com/documentation/getting-started/](https://www.exemsi.com/download/), eseguila e avvolgi il binario "maligno" in essa.\
+Scarica l'applicazione della versione gratuita da [https://www.exemsi.com/documentation/getting-started/](https://www.exemsi.com/download/), eseguila e avvolgi il binario "maligno" su di essa.\
 Nota che puoi avvolgere un "**.bat**" se vuoi **solo** **eseguire** **comandi (invece di cmd.exe seleziona il file .bat)**
 
 ![](<../../images/image (417).png>)

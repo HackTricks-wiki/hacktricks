@@ -39,15 +39,15 @@ AD CS riconosce i certificati CA in un bosco AD attraverso contenitori designati
 
 ### Modelli di Certificato
 
-Definiti all'interno di AD, questi modelli delineano le impostazioni e i permessi per l'emissione dei certificati, inclusi EKU consentiti e diritti di iscrizione o modifica, critici per gestire l'accesso ai servizi di certificato.
+Definiti all'interno di AD, questi modelli delineano le impostazioni e i permessi per l'emissione dei certificati, inclusi EKU consentiti e diritti di registrazione o modifica, critici per gestire l'accesso ai servizi di certificato.
 
-## Iscrizione al Certificato
+## Registrazione del Certificato
 
-Il processo di iscrizione per i certificati è avviato da un amministratore che **crea un modello di certificato**, che viene poi **pubblicato** da un'Autorità di Certificazione (CA) aziendale. Questo rende il modello disponibile per l'iscrizione del client, un passaggio ottenuto aggiungendo il nome del modello al campo `certificatetemplates` di un oggetto Active Directory.
+Il processo di registrazione per i certificati è avviato da un amministratore che **crea un modello di certificato**, che viene poi **pubblicato** da un'Autorità di Certificazione (CA) aziendale. Questo rende il modello disponibile per la registrazione del client, un passaggio ottenuto aggiungendo il nome del modello al campo `certificatetemplates` di un oggetto Active Directory.
 
-Per un client per richiedere un certificato, devono essere concessi **diritti di iscrizione**. Questi diritti sono definiti da descrittori di sicurezza sul modello di certificato e sulla CA aziendale stessa. I permessi devono essere concessi in entrambe le posizioni affinché una richiesta abbia successo.
+Per un client per richiedere un certificato, devono essere concessi **diritti di registrazione**. Questi diritti sono definiti da descrittori di sicurezza sul modello di certificato e sulla CA aziendale stessa. I permessi devono essere concessi in entrambe le posizioni affinché una richiesta abbia successo.
 
-### Diritti di Iscrizione del Modello
+### Diritti di Registrazione del Modello
 
 Questi diritti sono specificati attraverso Access Control Entries (ACEs), dettagliando permessi come:
 
@@ -55,7 +55,7 @@ Questi diritti sono specificati attraverso Access Control Entries (ACEs), dettag
 - **ExtendedRights**, che consentono tutti i permessi estesi.
 - **FullControl/GenericAll**, fornendo il controllo completo sul modello.
 
-### Diritti di Iscrizione della CA Aziendale
+### Diritti di Registrazione della CA Aziendale
 
 I diritti della CA sono delineati nel suo descrittore di sicurezza, accessibile tramite la console di gestione dell'Autorità di Certificazione. Alcune impostazioni consentono anche a utenti con privilegi ridotti l'accesso remoto, il che potrebbe essere una preoccupazione per la sicurezza.
 
@@ -64,16 +64,16 @@ I diritti della CA sono delineati nel suo descrittore di sicurezza, accessibile 
 Possono applicarsi controlli specifici, come:
 
 - **Approvazione del Manager**: pone le richieste in uno stato di attesa fino all'approvazione da parte di un manager di certificati.
-- **Agenti di Iscrizione e Firme Autorizzate**: specificano il numero di firme richieste su un CSR e i necessari OIDs di Politica Applicativa.
+- **Agenti di Registrazione e Firme Autorizzate**: specificano il numero di firme richieste su un CSR e i necessari OIDs di Politica Applicativa.
 
 ### Metodi per Richiedere Certificati
 
 I certificati possono essere richiesti tramite:
 
 1. **Windows Client Certificate Enrollment Protocol** (MS-WCCE), utilizzando interfacce DCOM.
-2. **ICertPassage Remote Protocol** (MS-ICPR), tramite pipe nominate o TCP/IP.
-3. L'**interfaccia web di iscrizione ai certificati**, con il ruolo di Web Enrollment dell'Autorità di Certificazione installato.
-4. Il **Certificate Enrollment Service** (CES), in congiunzione con il servizio di Politica di Iscrizione ai Certificati (CEP).
+2. **ICertPassage Remote Protocol** (MS-ICPR), attraverso pipe nominate o TCP/IP.
+3. L'**interfaccia web di registrazione dei certificati**, con il ruolo di Web Enrollment dell'Autorità di Certificazione installato.
+4. Il **Certificate Enrollment Service** (CES), in congiunzione con il servizio di Politica di Registrazione dei Certificati (CEP).
 5. Il **Network Device Enrollment Service** (NDES) per dispositivi di rete, utilizzando il Simple Certificate Enrollment Protocol (SCEP).
 
 Gli utenti Windows possono anche richiedere certificati tramite l'interfaccia GUI (`certmgr.msc` o `certlm.msc`) o strumenti da riga di comando (`certreq.exe` o il comando `Get-Certificate` di PowerShell).
@@ -87,7 +87,7 @@ Active Directory (AD) supporta l'autenticazione con certificato, utilizzando pri
 
 ### Processo di Autenticazione Kerberos
 
-Nel processo di autenticazione Kerberos, la richiesta di un utente per un Ticket Granting Ticket (TGT) è firmata utilizzando la **chiave privata** del certificato dell'utente. Questa richiesta subisce diverse validazioni da parte del controller di dominio, inclusi la **validità** del certificato, il **percorso** e lo **stato di revoca**. Le validazioni includono anche la verifica che il certificato provenga da una fonte affidabile e la conferma della presenza dell'emittente nel **NTAUTH certificate store**. Validazioni riuscite portano all'emissione di un TGT. L'oggetto **`NTAuthCertificates`** in AD, si trova in:
+Nel processo di autenticazione Kerberos, la richiesta di un utente per un Ticket Granting Ticket (TGT) è firmata utilizzando la **chiave privata** del certificato dell'utente. Questa richiesta subisce diverse validazioni da parte del controller di dominio, inclusi la **validità**, il **percorso** e lo **stato di revoca** del certificato. Le validazioni includono anche la verifica che il certificato provenga da una fonte fidata e la conferma della presenza dell'emittente nel **NTAUTH certificate store**. Validazioni riuscite portano all'emissione di un TGT. L'oggetto **`NTAuthCertificates`** in AD, si trova in:
 ```bash
 CN=NTAuthCertificates,CN=Public Key Services,CN=Services,CN=Configuration,DC=<domain>,DC=<com>
 ```

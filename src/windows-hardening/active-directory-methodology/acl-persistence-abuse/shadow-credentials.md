@@ -51,9 +51,9 @@ python3 pywhisker.py -d "domain.local" -u "user1" -p "complexpassword" --target 
 ```
 ### [ShadowSpray](https://github.com/Dec0ne/ShadowSpray/)
 
-ShadowSpray mira a **sfruttare i permessi GenericWrite/GenericAll che ampi gruppi di utenti possono avere sugli oggetti di dominio** per applicare ShadowCredentials in modo ampio. Comporta il login nel dominio, la verifica del livello funzionale del dominio, l'enumerazione degli oggetti di dominio e il tentativo di aggiungere KeyCredentials per l'acquisizione del TGT e la rivelazione dell'hash NT. Le opzioni di pulizia e le tattiche di sfruttamento ricorsivo ne aumentano l'utilità.
+ShadowSpray mira a **sfruttare i permessi GenericWrite/GenericAll che ampi gruppi di utenti possono avere sugli oggetti di dominio** per applicare ShadowCredentials in modo ampio. Comporta il login nel dominio, la verifica del livello funzionale del dominio, l'enumerazione degli oggetti di dominio e il tentativo di aggiungere KeyCredentials per l'acquisizione del TGT e la rivelazione dell'hash NT. Opzioni di pulizia e tattiche di sfruttamento ricorsivo ne aumentano l'utilità.
 
-## Riferimenti
+## References
 
 - [https://posts.specterops.io/shadow-credentials-abusing-key-trust-account-mapping-for-takeover-8ee1a53566ab](https://posts.specterops.io/shadow-credentials-abusing-key-trust-account-mapping-for-takeover-8ee1a53566ab)
 - [https://github.com/eladshamir/Whisker](https://github.com/eladshamir/Whisker)

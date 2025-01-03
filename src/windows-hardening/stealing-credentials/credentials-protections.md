@@ -6,7 +6,7 @@
 
 ## WDigest
 
-Il protocollo [WDigest](<https://technet.microsoft.com/pt-pt/library/cc778868(v=ws.10).aspx?f=255&MSPPError=-2147217396>), introdotto con Windows XP, è progettato per l'autenticazione tramite il Protocollo HTTP ed è **abilitato per impostazione predefinita su Windows XP fino a Windows 8.0 e Windows Server 2003 fino a Windows Server 2012**. Questa impostazione predefinita comporta **l'archiviazione delle password in chiaro in LSASS** (Local Security Authority Subsystem Service). Un attaccante può utilizzare Mimikatz per **estrarre queste credenziali** eseguendo:
+Il protocollo [WDigest](<https://technet.microsoft.com/pt-pt/library/cc778868(v=ws.10).aspx?f=255&MSPPError=-2147217396>), introdotto con Windows XP, è progettato per l'autenticazione tramite il protocollo HTTP ed è **abilitato per impostazione predefinita su Windows XP fino a Windows 8.0 e Windows Server 2003 fino a Windows Server 2012**. Questa impostazione predefinita comporta **l'archiviazione delle password in chiaro in LSASS** (Local Security Authority Subsystem Service). Un attaccante può utilizzare Mimikatz per **estrarre queste credenziali** eseguendo:
 ```bash
 sekurlsa::wdigest
 ```
@@ -16,7 +16,7 @@ reg query HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest /v Use
 ```
 ## Protezione LSA
 
-A partire da **Windows 8.1**, Microsoft ha migliorato la sicurezza di LSA per **bloccare le letture di memoria non autorizzate o le iniezioni di codice da parte di processi non attendibili**. Questo miglioramento ostacola il funzionamento tipico di comandi come `mimikatz.exe sekurlsa:logonpasswords`. Per **abilitare questa protezione avanzata**, il valore _**RunAsPPL**_ in _**HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA**_ dovrebbe essere impostato su 1:
+A partire da **Windows 8.1**, Microsoft ha migliorato la sicurezza di LSA per **bloccare letture di memoria non autorizzate o iniezioni di codice da parte di processi non attendibili**. Questo miglioramento ostacola il funzionamento tipico di comandi come `mimikatz.exe sekurlsa:logonpasswords`. Per **abilitare questa protezione avanzata**, il valore _**RunAsPPL**_ in _**HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA**_ dovrebbe essere impostato su 1:
 ```
 reg query HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA /v RunAsPPL
 ```
@@ -28,11 +28,11 @@ reg query HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA /v RunAsPPL
 
 ## Credential Guard
 
-**Credential Guard**, una funzionalità esclusiva per **Windows 10 (edizioni Enterprise ed Education)**, migliora la sicurezza delle credenziali della macchina utilizzando **Virtual Secure Mode (VSM)** e **Virtualization Based Security (VBS)**. Sfrutta le estensioni di virtualizzazione della CPU per isolare i processi chiave all'interno di uno spazio di memoria protetto, lontano dalla portata del sistema operativo principale. Questa isolamento garantisce che anche il kernel non possa accedere alla memoria in VSM, proteggendo efficacemente le credenziali da attacchi come **pass-the-hash**. L'**Autorità di Sicurezza Locale (LSA)** opera all'interno di questo ambiente sicuro come un trustlet, mentre il processo **LSASS** nel sistema operativo principale funge semplicemente da comunicatore con l'LSA di VSM.
+**Credential Guard**, una funzionalità esclusiva di **Windows 10 (edizioni Enterprise ed Education)**, migliora la sicurezza delle credenziali della macchina utilizzando **Virtual Secure Mode (VSM)** e **Virtualization Based Security (VBS)**. Sfrutta le estensioni di virtualizzazione della CPU per isolare i processi chiave all'interno di uno spazio di memoria protetto, lontano dalla portata del sistema operativo principale. Questa isolamento garantisce che anche il kernel non possa accedere alla memoria in VSM, proteggendo efficacemente le credenziali da attacchi come **pass-the-hash**. L'**Autorità di Sicurezza Locale (LSA)** opera all'interno di questo ambiente sicuro come un trustlet, mentre il processo **LSASS** nel sistema operativo principale funge semplicemente da comunicatore con l'LSA di VSM.
 
 Per impostazione predefinita, **Credential Guard** non è attivo e richiede attivazione manuale all'interno di un'organizzazione. È fondamentale per migliorare la sicurezza contro strumenti come **Mimikatz**, che sono ostacolati nella loro capacità di estrarre credenziali. Tuttavia, le vulnerabilità possono ancora essere sfruttate attraverso l'aggiunta di **Security Support Providers (SSP)** personalizzati per catturare le credenziali in chiaro durante i tentativi di accesso.
 
-Per verificare lo stato di attivazione di **Credential Guard**, è possibile ispezionare la chiave di registro _**LsaCfgFlags**_ sotto _**HKLM\System\CurrentControlSet\Control\LSA**_. Un valore di "**1**" indica attivazione con **UEFI lock**, "**2**" senza lock, e "**0**" denota che non è abilitato. Questo controllo del registro, sebbene sia un forte indicatore, non è l'unico passo per abilitare Credential Guard. Sono disponibili online indicazioni dettagliate e uno script PowerShell per abilitare questa funzionalità.
+Per verificare lo stato di attivazione di **Credential Guard**, è possibile controllare la chiave di registro _**LsaCfgFlags**_ sotto _**HKLM\System\CurrentControlSet\Control\LSA**_. Un valore di "**1**" indica attivazione con **UEFI lock**, "**2**" senza blocco, e "**0**" denota che non è abilitato. Questo controllo del registro, sebbene sia un forte indicatore, non è l'unico passo per abilitare Credential Guard. Sono disponibili online indicazioni dettagliate e uno script PowerShell per abilitare questa funzionalità.
 ```powershell
 reg query HKLM\System\CurrentControlSet\Control\LSA /v LsaCfgFlags
 ```
@@ -46,7 +46,7 @@ Ulteriori dettagli sull'implementazione di SSP personalizzati per la cattura del
 
 Tradizionalmente, quando ci si connette a un computer remoto tramite RDP, le proprie credenziali vengono memorizzate sulla macchina di destinazione. Questo rappresenta un rischio significativo per la sicurezza, specialmente quando si utilizzano account con privilegi elevati. Tuttavia, con l'introduzione della _**modalità Restricted Admin**_, questo rischio è sostanzialmente ridotto.
 
-Quando si avvia una connessione RDP utilizzando il comando **mstsc.exe /RestrictedAdmin**, l'autenticazione al computer remoto viene eseguita senza memorizzare le proprie credenziali su di esso. Questo approccio garantisce che, in caso di infezione da malware o se un utente malintenzionato ottiene accesso al server remoto, le proprie credenziali non siano compromesse, poiché non sono memorizzate sul server.
+Quando si avvia una connessione RDP utilizzando il comando **mstsc.exe /RestrictedAdmin**, l'autenticazione al computer remoto viene eseguita senza memorizzare le proprie credenziali su di esso. Questo approccio garantisce che, in caso di infezione da malware o se un utente malintenzionato ottiene accesso al server remoto, le proprie credenziali non vengano compromesse, poiché non sono memorizzate sul server.
 
 È importante notare che in **modalità Restricted Admin**, i tentativi di accesso alle risorse di rete dalla sessione RDP non utilizzeranno le proprie credenziali personali; invece, verrà utilizzata l'**identità della macchina**.
 
@@ -58,7 +58,7 @@ Per ulteriori informazioni dettagliate visita [questa risorsa](https://blog.ahas
 
 ## Credenziali memorizzate
 
-Windows protegge le **credenziali di dominio** attraverso la **Local Security Authority (LSA)**, supportando i processi di accesso con protocolli di sicurezza come **Kerberos** e **NTLM**. Una caratteristica chiave di Windows è la sua capacità di memorizzare nella cache i **ultimi dieci accessi al dominio** per garantire che gli utenti possano ancora accedere ai propri computer anche se il **controller di dominio è offline**—un vantaggio per gli utenti di laptop spesso lontani dalla rete della propria azienda.
+Windows protegge le **credenziali di dominio** attraverso la **Local Security Authority (LSA)**, supportando i processi di accesso con protocolli di sicurezza come **Kerberos** e **NTLM**. Una caratteristica chiave di Windows è la sua capacità di memorizzare nella cache i **ultimi dieci accessi al dominio** per garantire che gli utenti possano comunque accedere ai propri computer anche se il **controller di dominio è offline**—un vantaggio per gli utenti di laptop spesso lontani dalla rete della propria azienda.
 
 Il numero di accessi memorizzati nella cache è regolabile tramite una specifica **chiave di registro o policy di gruppo**. Per visualizzare o modificare questa impostazione, viene utilizzato il seguente comando:
 ```bash

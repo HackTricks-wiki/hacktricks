@@ -4,7 +4,7 @@
 
 ## ASREPRoast
 
-ASREPRoast è un attacco di sicurezza che sfrutta gli utenti che non hanno l'**attributo richiesto di pre-autenticazione Kerberos**. Fondamentalmente, questa vulnerabilità consente agli attaccanti di richiedere l'autenticazione per un utente dal Domain Controller (DC) senza bisogno della password dell'utente. Il DC risponde quindi con un messaggio crittografato con la chiave derivata dalla password dell'utente, che gli attaccanti possono tentare di decifrare offline per scoprire la password dell'utente.
+ASREPRoast è un attacco di sicurezza che sfrutta gli utenti che mancano dell'**attributo richiesto per la pre-autenticazione Kerberos**. Fondamentalmente, questa vulnerabilità consente agli attaccanti di richiedere l'autenticazione per un utente dal Domain Controller (DC) senza bisogno della password dell'utente. Il DC risponde quindi con un messaggio crittografato con la chiave derivata dalla password dell'utente, che gli attaccanti possono tentare di decifrare offline per scoprire la password dell'utente.
 
 I principali requisiti per questo attacco sono:
 

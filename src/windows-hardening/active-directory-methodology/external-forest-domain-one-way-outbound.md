@@ -40,7 +40,7 @@ Questa estrazione è possibile perché l'account, identificato con un **$** dopo
 
 **Attenzione:** È fattibile sfruttare questa situazione per ottenere un accesso nel dominio **A** come utente, sebbene con permessi limitati. Tuttavia, questo accesso è sufficiente per eseguire l'enumerazione nel dominio **A**.
 
-In uno scenario in cui `ext.local` è il dominio fiduciante e `root.local` è il dominio fidato, un account utente chiamato `EXT$` verrebbe creato all'interno di `root.local`. Attraverso strumenti specifici, è possibile estrarre le chiavi di fiducia di Kerberos, rivelando le credenziali di `EXT$` in `root.local`. Il comando per ottenere questo è:
+In uno scenario in cui `ext.local` è il dominio fiducioso e `root.local` è il dominio fidato, un account utente chiamato `EXT$` verrebbe creato all'interno di `root.local`. Attraverso strumenti specifici, è possibile estrarre le chiavi di fiducia di Kerberos, rivelando le credenziali di `EXT$` in `root.local`. Il comando per ottenere questo è:
 ```bash
 lsadump::trust /patch
 ```
@@ -56,7 +56,7 @@ Questo passaggio di autenticazione apre la possibilità di enumerare e persino s
 
 Nel flusso precedente è stato utilizzato l'hash di fiducia invece della **password in chiaro** (che è stata anche **estratta da mimikatz**).
 
-La password in chiaro può essere ottenuta convertendo l'output \[ CLEAR ] da mimikatz da esadecimale e rimuovendo i byte nulli ‘\x00’:
+La password in chiaro può essere ottenuta convertendo l'output \[ CLEAR ] di mimikatz da esadecimale e rimuovendo i byte nulli ‘\x00’:
 
 ![](<../../images/image (938).png>)
 

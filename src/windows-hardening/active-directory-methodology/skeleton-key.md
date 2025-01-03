@@ -6,7 +6,7 @@
 
 L'**attacco Skeleton Key** è una tecnica sofisticata che consente agli attaccanti di **bypassare l'autenticazione di Active Directory** **iniettando una password master** nel controller di dominio. Questo consente all'attaccante di **autenticarsi come qualsiasi utente** senza la loro password, **concedendo loro accesso illimitato** al dominio.
 
-Può essere eseguito utilizzando [Mimikatz](https://github.com/gentilkiwi/mimikatz). Per portare a termine questo attacco, **i diritti di Domain Admin sono un prerequisito**, e l'attaccante deve mirare a ciascun controller di dominio per garantire una violazione completa. Tuttavia, l'effetto dell'attacco è temporaneo, poiché **riavviare il controller di dominio eradicare il malware**, rendendo necessaria una reimplementazione per un accesso sostenuto.
+Può essere eseguito utilizzando [Mimikatz](https://github.com/gentilkiwi/mimikatz). Per portare a termine questo attacco, **i diritti di Domain Admin sono un prerequisito**, e l'attaccante deve mirare a ciascun controller di dominio per garantire una violazione completa. Tuttavia, l'effetto dell'attacco è temporaneo, poiché **riavviare il controller di dominio eradicata il malware**, rendendo necessaria una reimplementazione per un accesso sostenuto.
 
 **Eseguire l'attacco** richiede un singolo comando: `misc::skeleton`.
 
@@ -20,7 +20,7 @@ Ecco i comandi PowerShell per migliorare le misure di sicurezza:
 
 - In particolare, per rilevare il driver di Mimikatz, può essere utilizzato il seguente comando: `Get-WinEvent -FilterHashtable @{Logname='System';ID=7045} | ?{$_.message -like "*Kernel Mode Driver*" -and $_.message -like "*mimidrv*"}`
 
-- Per rafforzare `lsass.exe`, si raccomanda di abilitarlo come processo protetto: `New-ItemProperty HKLM:\SYSTEM\CurrentControlSet\Control\Lsa -Name RunAsPPL -Value 1 -Verbose`
+- Per rafforzare `lsass.exe`, è consigliato abilitarlo come processo protetto: `New-ItemProperty HKLM:\SYSTEM\CurrentControlSet\Control\Lsa -Name RunAsPPL -Value 1 -Verbose`
 
 La verifica dopo un riavvio del sistema è cruciale per garantire che le misure protettive siano state applicate con successo. Questo è realizzabile tramite: `Get-WinEvent -FilterHashtable @{Logname='System';ID=12} | ?{$_.message -like "*protected process*`
 

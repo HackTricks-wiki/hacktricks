@@ -49,10 +49,10 @@ Con queste informazioni potresti provare a cercare informazioni sulla scheda e s
 
 ### Script
 
-Il software Proxmark3 viene fornito con un elenco precaricato di **script di automazione** che puoi utilizzare per eseguire semplici operazioni. Per recuperare l'elenco completo, utilizza il comando `script list`. Successivamente, utilizza il comando `script run`, seguito dal nome dello script:
+Il software Proxmark3 viene fornito con un elenco precaricato di **script di automazione** che puoi utilizzare per eseguire semplici attività. Per recuperare l'elenco completo, utilizza il comando `script list`. Successivamente, utilizza il comando `script run`, seguito dal nome dello script:
 ```
 proxmark3> script run mfkeys
 ```
-Puoi creare uno script per **fuzz tag readers**, quindi copiando i dati di una **carta valida** basta scrivere uno **script Lua** che **randomizzi** uno o più **byte** casuali e controlli se il **reader si blocca** con qualsiasi iterazione.
+Puoi creare uno script per **fuzz tag readers**, quindi copiando i dati di una **carta valida** basta scrivere uno **script Lua** che **randomizzi** uno o più **byte** casuali e controlli se il **reader si blocca** con qualche iterazione.
 
 {{#include ../../banners/hacktricks-training.md}}

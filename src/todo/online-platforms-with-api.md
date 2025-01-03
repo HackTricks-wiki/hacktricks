@@ -59,11 +59,11 @@ Hai un accesso gratuito.
 
 ## [fullcontact](https://www.fullcontact.com/)
 
-Consente di cercare per email, dominio o nome dell'azienda e recuperare informazioni "personali" correlate. Può anche verificare email. C'è un accesso gratuito.
+Permette di cercare per email, dominio o nome dell'azienda e recuperare informazioni "personali" correlate. Può anche verificare email. C'è un accesso gratuito.
 
 ## [RiskIQ](https://www.spiderfoot.net/documentation/)
 
-Molte informazioni da domini e IP anche nella versione gratuita/comunitaria.
+Molte informazioni su domini e IP anche nella versione gratuita/comunitaria.
 
 ## [\_IntelligenceX](https://intelx.io/)
 
@@ -75,7 +75,7 @@ Cerca per IP e raccogli informazioni relative ad attività sospette. C'è un acc
 
 ## [Greynoise](https://viz.greynoise.io/)
 
-Cerca per IP o intervallo di IP e ottieni informazioni sugli IP che scansionano Internet. 15 giorni di accesso gratuito.
+Cerca per IP o intervallo di IP e ottieni informazioni sugli IP che scansionano Internet. Accesso gratuito per 15 giorni.
 
 ## [Shodan](https://www.shodan.io/)
 

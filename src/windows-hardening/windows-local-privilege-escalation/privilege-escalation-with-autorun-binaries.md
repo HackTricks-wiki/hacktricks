@@ -138,14 +138,14 @@ Get-ItemProperty -Path 'Registry::HKLM\Software\Wow6432Node\Microsoft\Windows\Ru
 Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\RunOnceEx'
 Get-ItemProperty -Path 'Registry::HKCU\Software\Wow6432Node\Microsoft\Windows\RunOnceEx'
 ```
-### Startup Path
+### Percorso di Avvio
 
 - `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders`
 - `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders`
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders`
 - `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders`
 
-I collegamenti posizionati nella cartella **Startup** attiveranno automaticamente servizi o applicazioni all'accesso dell'utente o al riavvio del sistema. La posizione della cartella **Startup** è definita nel registro sia per l'ambito **Local Machine** che per l'ambito **Current User**. Ciò significa che qualsiasi collegamento aggiunto a queste posizioni **Startup** specificate garantirà che il servizio o il programma collegato si avvii dopo il processo di accesso o riavvio, rendendolo un metodo semplice per pianificare l'esecuzione automatica dei programmi.
+I collegamenti posizionati nella cartella **Avvio** attiveranno automaticamente servizi o applicazioni all'accesso dell'utente o al riavvio del sistema. La posizione della cartella **Avvio** è definita nel registro sia per l'ambito **Macchina Locale** che per l'**Utente Corrente**. Ciò significa che qualsiasi collegamento aggiunto a queste posizioni **Avvio** specificate garantirà che il servizio o il programma collegato si avvii dopo il processo di accesso o riavvio, rendendolo un metodo semplice per programmare l'esecuzione automatica dei programmi.
 
 > [!NOTE]
 > Se puoi sovrascrivere qualsiasi \[User] Shell Folder sotto **HKLM**, sarai in grado di puntarlo a una cartella controllata da te e posizionare una backdoor che verrà eseguita ogni volta che un utente accede al sistema, aumentando i privilegi.
@@ -230,7 +230,7 @@ All'interno di queste chiavi, esistono vari sottochiavi, ciascuna corrispondente
 **Approfondimenti sulla Sicurezza:**
 
 - Modificare o scrivere in una chiave dove **`IsInstalled`** è impostato su `"1"` con un **`StubPath`** specifico può portare all'esecuzione non autorizzata di comandi, potenzialmente per l'escalation dei privilegi.
-- Alterare il file binario a cui si fa riferimento in qualsiasi valore di **`StubPath`** potrebbe anche portare all'escalation dei privilegi, date sufficienti autorizzazioni.
+- Alterare il file binario a cui si fa riferimento in qualsiasi valore di **`StubPath`** potrebbe anche ottenere l'escalation dei privilegi, date sufficienti autorizzazioni.
 
 Per ispezionare le configurazioni di **`StubPath`** attraverso i componenti di Active Setup, possono essere utilizzati i seguenti comandi:
 ```bash
@@ -243,9 +243,9 @@ reg query "HKCU\SOFTWARE\Wow6432Node\Microsoft\Active Setup\Installed Components
 
 ### Panoramica dei Browser Helper Objects (BHO)
 
-I Browser Helper Objects (BHO) sono moduli DLL che aggiungono funzionalità extra a Microsoft Internet Explorer. Si caricano in Internet Explorer e Windows Explorer ad ogni avvio. Tuttavia, la loro esecuzione può essere bloccata impostando la chiave **NoExplorer** a 1, impedendo loro di caricarsi con le istanze di Windows Explorer.
+I Browser Helper Objects (BHO) sono moduli DLL che aggiungono funzionalità extra a Internet Explorer di Microsoft. Si caricano in Internet Explorer e Windows Explorer ad ogni avvio. Tuttavia, la loro esecuzione può essere bloccata impostando la chiave **NoExplorer** a 1, impedendo loro di caricarsi con le istanze di Windows Explorer.
 
-I BHO sono compatibili con Windows 10 tramite Internet Explorer 11 ma non sono supportati in Microsoft Edge, il browser predefinito nelle versioni più recenti di Windows.
+I BHO sono compatibili con Windows 10 tramite Internet Explorer 11, ma non sono supportati in Microsoft Edge, il browser predefinito nelle versioni più recenti di Windows.
 
 Per esplorare i BHO registrati su un sistema, puoi ispezionare le seguenti chiavi di registro:
 
@@ -276,7 +276,7 @@ reg query "HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows NT\CurrentVersion\Font Dr
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Font Drivers'
 Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Wow6432Node\Microsoft\Windows NT\CurrentVersion\Font Drivers'
 ```
-### Comando Apri
+### Comando di apertura
 
 - `HKLM\SOFTWARE\Classes\htmlfile\shell\open\command`
 - `HKLM\SOFTWARE\Wow6432Node\Classes\htmlfile\shell\open\command`
@@ -293,7 +293,7 @@ HKLM\Software\Microsoft\Wow6432Node\Windows NT\CurrentVersion\Image File Executi
 ```
 ## SysInternals
 
-Nota che tutti i siti dove puoi trovare autorun sono **già stati cercati da**[ **winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe). Tuttavia, per un **elenco più completo di file auto-eseguiti** puoi usare [autoruns ](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns)di sysinternals:
+Nota che tutti i siti dove puoi trovare autorun sono **già stati cercati da** [**winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe). Tuttavia, per un **elenco più completo di file auto-eseguiti** puoi utilizzare [autoruns](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns) di sysinternals:
 ```
 autorunsc.exe -m -nobanner -a * -ct /accepteula
 ```
