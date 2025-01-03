@@ -1,6 +1,5 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-
 # Sudo/Admin Groepe
 
 ## **PE - Metode 1**
@@ -42,7 +41,7 @@ polkit-agent-helper-1: error response to PolicyKit daemon: GDBus.Error:org.freed
 ==== AUTHENTICATION FAILED ===
 Error executing command as another user: Not authorized
 ```
-**Dit is nie omdat jy nie toestemmings het nie, maar omdat jy nie sonder 'n GUI gekonnekteer is nie**. En daar is 'n oplossing vir hierdie probleem hier: [https://github.com/NixOS/nixpkgs/issues/18012\#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). Jy het **2 verskillende ssh-sessies** nodig:
+**Dit is nie omdat jy nie toestemmings het nie, maar omdat jy nie sonder 'n GUI gekonnekteer is nie**. En daar is 'n oplossing vir hierdie probleem hier: [https://github.com/NixOS/nixpkgs/issues/18012\#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). Jy het **2 verskillende ssh sessies** nodig:
 ```bash:session1
 echo $$ #Step1: Get current PID
 pkexec "/bin/bash" #Step 3, execute pkexec
@@ -65,7 +64,7 @@ As dit die geval is, om **root te word kan jy net uitvoer**:
 ```text
 sudo su
 ```
-# Shadow Group
+# Shadow Groep
 
 Gebruikers van die **groep shadow** kan **lees** die **/etc/shadow** lêer:
 ```text
@@ -111,7 +110,7 @@ Om die **rauwe beeld** te **open**, kan jy **GIMP** gebruik, kies die **`screen.
 
 ![](../../images/image%20%28208%29.png)
 
-Verander dan die Breedte en Hoogte na die waardes wat op die skerm gebruik word en kyk na verskillende Beeldtipes \(en kies die een wat die skerm beter vertoon\):
+Verander dan die Breedte en Hoogte na diegene wat op die skerm gebruik word en kyk na verskillende Beeldtipes \(en kies die een wat die skerm beter vertoon\):
 
 ![](../../images/image%20%28295%29.png)
 
@@ -125,15 +124,18 @@ find / -group root -perm -g=w 2>/dev/null
 ```
 # Docker Groep
 
-Jy kan die wortel lêersisteem van die gasheer masjien aan 'n instansie se volume monteer, sodat wanneer die instansie begin, dit onmiddellik 'n `chroot` in daardie volume laai. Dit gee jou effektief wortel op die masjien.
+Jy kan die wortel lêer stelsel van die gasheer masjien aan 'n instansie se volume monteer, sodat wanneer die instansie begin, dit onmiddellik 'n `chroot` in daardie volume laai. Dit gee jou effektief wortel op die masjien.
 
-{% embed url="https://github.com/KrustyHack/docker-privilege-escalation" %}
+{{#ref}}
+https://github.com/KrustyHack/docker-privilege-escalation
+{{#endref}}
 
-{% embed url="https://fosterelli.co/privilege-escalation-via-docker.html" %}
+{{#ref}}
+https://fosterelli.co/privilege-escalation-via-docker.html
+{{#endref}}
 
 # lxc/lxd Groep
 
 [lxc - Privilege Escalation](lxd-privilege-escalation.md)
-
 
 {{#include ../../banners/hacktricks-training.md}}

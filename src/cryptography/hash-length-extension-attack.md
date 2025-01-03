@@ -17,17 +17,19 @@ Dan is dit moontlik vir 'n **aanvaller** om **data** toe te voeg en 'n geldige *
 
 Basies genereer die kwesbare algoritmes die hashes deur eerstens **'n blok data te hash**, en dan, **uit** die **voorheen** geskepte **hash** (toestand), voeg hulle **die volgende blok data** by en **hash dit**.
 
-Stel jou voor dat die geheim "secret" is en die data "data", die MD5 van "secretdata" is 6036708eba0d11f6ef52ad44e8b74d5b.\
+Stel jou voor dat die geheim "secret" is en die data "data" is, die MD5 van "secretdata" is 6036708eba0d11f6ef52ad44e8b74d5b.\
 As 'n aanvaller die string "append" wil byvoeg, kan hy:
 
 - 'n MD5 van 64 "A"s genereer
-- Die toestand van die voorheen geinitialiseerde hash verander na 6036708eba0d11f6ef52ad44e8b74d5b
+- Die toestand van die voorheen geïnitialiseerde hash verander na 6036708eba0d11f6ef52ad44e8b74d5b
 - Die string "append" byvoeg
 - Die hash voltooi en die resultaat sal 'n **geldige een wees vir "secret" + "data" + "padding" + "append"**
 
 ## **Gereedskap**
 
-{% embed url="https://github.com/iagox86/hash_extender" %}
+{{#ref}}
+https://github.com/iagox86/hash_extender
+{{#endref}}
 
 ## Verwysings
 

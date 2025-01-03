@@ -4,8 +4,12 @@ As jy op een of ander manier 'n plaintekst met RC4 kan enkripteer, kan jy enige 
 
 As jy 'n bekende plaintekst kan enkripteer, kan jy ook die wagwoord onttrek. Meer verwysings kan gevind word in die HTB Kryptos masjien:
 
-{% embed url="https://0xrick.github.io/hack-the-box/kryptos/" %}
+{{#ref}}
+https://0xrick.github.io/hack-the-box/kryptos/
+{{#endref}}
 
-{% embed url="https://0xrick.github.io/hack-the-box/kryptos/" %}
+{{#ref}}
+https://0xrick.github.io/hack-the-box/kryptos/
+{{#endref}}
 
 {{#include ../banners/hacktricks-training.md}}
