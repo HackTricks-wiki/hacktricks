@@ -20,7 +20,7 @@ Get-AppLockerPolicy -Effective | select -ExpandProperty RuleCollections
 $a = Get-ApplockerPolicy -effective
 $a.rulecollections
 ```
-Esta ruta del registro contiene las configuraciones y políticas aplicadas por AppLocker, proporcionando una forma de revisar el conjunto actual de reglas aplicadas en el sistema:
+Esta ruta del registro contiene las configuraciones y políticas aplicadas por AppLocker, proporcionando una forma de revisar el conjunto actual de reglas impuestas en el sistema:
 
 - `HKLM\Software\Policies\Microsoft\Windows\SrpV2`
 
@@ -61,7 +61,7 @@ LSA podría guardar en disco algunas credenciales:
 - Contraseña de la cuenta de computadora del Active Directory (controlador de dominio inaccesible).
 - Contraseñas de las cuentas de servicios de Windows.
 - Contraseñas para tareas programadas.
-- Más (contraseña de aplicaciones de IIS...)
+- Más (contraseña de aplicaciones IIS...)
 
 ### NTDS.dit
 
@@ -119,12 +119,12 @@ Este método de encriptación permite **acceso transparente** a archivos encript
 - La desencriptación automática ocurre bajo condiciones específicas, como copiar a FAT32 o transmisión por red.
 - Los archivos encriptados son accesibles para el propietario sin pasos adicionales.
 
-### Ver información de EFS
+### Verificar información de EFS
 
-Verifica si un **usuario** ha **utilizado** este **servicio** comprobando si existe esta ruta: `C:\users\<username>\appdata\roaming\Microsoft\Protect`
+Verifique si un **usuario** ha **utilizado** este **servicio** comprobando si existe esta ruta: `C:\users\<username>\appdata\roaming\Microsoft\Protect`
 
-Verifica **quién** tiene **acceso** al archivo usando cipher /c \<file>\
-También puedes usar `cipher /e` y `cipher /d` dentro de una carpeta para **encriptar** y **desencriptar** todos los archivos
+Verifique **quién** tiene **acceso** al archivo usando cipher /c \<file>\
+También puede usar `cipher /e` y `cipher /d` dentro de una carpeta para **encriptar** y **desencriptar** todos los archivos
 
 ### Desencriptando archivos EFS
 
@@ -134,7 +134,9 @@ Este método requiere que el **usuario víctima** esté **ejecutando** un **proc
 
 #### Conociendo la contraseña del usuario
 
-{% embed url="https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files" %}
+{{#ref}}
+https://github.com/gentilkiwi/mimikatz/wiki/howto-~-decrypt-EFS-files
+{{#endref}}
 
 ## Group Managed Service Accounts (gMSA)
 
@@ -143,10 +145,10 @@ Microsoft desarrolló **Group Managed Service Accounts (gMSA)** para simplificar
 - **Gestión Automática de Contraseñas**: los gMSA utilizan una contraseña compleja de 240 caracteres que cambia automáticamente de acuerdo con la política de dominio o computadora. Este proceso es manejado por el Servicio de Distribución de Claves (KDC) de Microsoft, eliminando la necesidad de actualizaciones manuales de contraseñas.
 - **Seguridad Mejorada**: estas cuentas son inmunes a bloqueos y no pueden ser utilizadas para inicios de sesión interactivos, mejorando su seguridad.
 - **Soporte para Múltiples Hosts**: los gMSA pueden ser compartidos entre múltiples hosts, lo que los hace ideales para servicios que se ejecutan en múltiples servidores.
-- **Capacidad de Tareas Programadas**: a diferencia de las cuentas de servicio administradas, los gMSA soportan la ejecución de tareas programadas.
+- **Capacidad de Tareas Programadas**: a diferencia de las cuentas de servicio administradas, los gMSA admiten la ejecución de tareas programadas.
 - **Gestión Simplificada de SPN**: el sistema actualiza automáticamente el Nombre Principal del Servicio (SPN) cuando hay cambios en los detalles de sAMaccount de la computadora o en el nombre DNS, simplificando la gestión de SPN.
 
-Las contraseñas para los gMSA se almacenan en la propiedad LDAP _**msDS-ManagedPassword**_ y se restablecen automáticamente cada 30 días por los Controladores de Dominio (DCs). Esta contraseña, un blob de datos encriptados conocido como [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e), solo puede ser recuperada por administradores autorizados y los servidores en los que están instalados los gMSA, asegurando un entorno seguro. Para acceder a esta información, se requiere una conexión segura como LDAPS, o la conexión debe ser autenticada con 'Sealing & Secure'.
+Las contraseñas para gMSA se almacenan en la propiedad LDAP _**msDS-ManagedPassword**_ y se restablecen automáticamente cada 30 días por los Controladores de Dominio (DC). Esta contraseña, un blob de datos encriptados conocido como [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e), solo puede ser recuperada por administradores autorizados y los servidores en los que están instalados los gMSA, asegurando un entorno seguro. Para acceder a esta información, se requiere una conexión segura como LDAPS, o la conexión debe estar autenticada con 'Sealing & Secure'.
 
 ![https://cube0x0.github.io/Relaying-for-gMSA/](../../images/asd1.png)
 

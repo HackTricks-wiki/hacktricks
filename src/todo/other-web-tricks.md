@@ -24,11 +24,13 @@ Registra un correo electrónico, antes de confirmarlo cambia el correo, luego, s
 
 ### Acceso al servicio interno de atención al cliente de empresas usando Atlassian
 
-{% embed url="https://yourcompanyname.atlassian.net/servicedesk/customer/user/login" %}
+{{#ref}}
+https://yourcompanyname.atlassian.net/servicedesk/customer/user/login
+{{#endref}}
 
 ### Método TRACE
 
-Los desarrolladores pueden olvidar deshabilitar varias opciones de depuración en el entorno de producción. Por ejemplo, el método HTTP `TRACE` está diseñado para fines de diagnóstico. Si está habilitado, el servidor web responderá a las solicitudes que utilicen el método `TRACE` repitiendo en la respuesta la solicitud exacta que se recibió. Este comportamiento a menudo es inofensivo, pero ocasionalmente conduce a la divulgación de información, como el nombre de los encabezados de autenticación internos que pueden ser añadidos a las solicitudes por proxies inversos.![Image for post](https://miro.medium.com/max/60/1*wDFRADTOd9Tj63xucenvAA.png?q=20)
+Los desarrolladores pueden olvidar deshabilitar varias opciones de depuración en el entorno de producción. Por ejemplo, el método HTTP `TRACE` está diseñado para fines de diagnóstico. Si está habilitado, el servidor web responderá a las solicitudes que utilicen el método `TRACE` replicando en la respuesta la solicitud exacta que se recibió. Este comportamiento a menudo es inofensivo, pero ocasionalmente conduce a la divulgación de información, como el nombre de los encabezados de autenticación internos que pueden ser añadidos a las solicitudes por proxies inversos.![Image for post](https://miro.medium.com/max/60/1*wDFRADTOd9Tj63xucenvAA.png?q=20)
 
 ![Image for post](https://miro.medium.com/max/1330/1*wDFRADTOd9Tj63xucenvAA.png)
 

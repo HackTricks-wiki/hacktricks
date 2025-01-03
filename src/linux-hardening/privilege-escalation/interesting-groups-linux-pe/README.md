@@ -6,7 +6,7 @@
 
 ### **PE - Método 1**
 
-**A veces**, **por defecto (o porque algún software lo necesita)** dentro del **/etc/sudoers** archivo puedes encontrar algunas de estas líneas:
+**A veces**, **por defecto (o porque algún software lo necesita)** dentro del **/etc/sudoers** puedes encontrar algunas de estas líneas:
 ```bash
 # Allow members of group sudo to execute any command
 %sudo	ALL=(ALL:ALL) ALL
@@ -56,7 +56,7 @@ pkttyagent --process <PID of session1> #Step 2, attach pkttyagent to session1
 ```
 ## Grupo Wheel
 
-**A veces**, **por defecto** dentro del **/etc/sudoers** puedes encontrar esta línea:
+**A veces**, **por defecto** dentro del **/etc/sudoers** archivo puedes encontrar esta línea:
 ```
 %wheel	ALL=(ALL:ALL) ALL
 ```
@@ -72,7 +72,7 @@ Los usuarios del **grupo shadow** pueden **leer** el **/etc/shadow** archivo:
 ```
 -rw-r----- 1 root shadow 1824 Apr 26 19:10 /etc/shadow
 ```
-Así que, lee el archivo y trata de **crackear algunos hashes**.
+Así que, lee el archivo e intenta **crackear algunos hashes**.
 
 ## Grupo de Personal
 
@@ -163,7 +163,7 @@ El **grupo de video** tiene acceso para ver la salida de la pantalla. Básicamen
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size
 ```
-Para **abrir** la **imagen en bruto** puedes usar **GIMP**, seleccionar el archivo **`screen.raw`** y seleccionar como tipo de archivo **Datos de imagen en bruto**:
+Para **abrir** la **imagen en bruto** puedes usar **GIMP**, seleccionar el \*\*`screen.raw`\*\* y seleccionar como tipo de archivo **Datos de imagen en bruto**:
 
 ![](<../../../images/image (463).png>)
 
@@ -201,9 +201,13 @@ Finalmente, si no te gustan ninguna de las sugerencias anteriores, o no están f
 
 Si tienes permisos de escritura sobre el socket de docker, lee [**esta publicación sobre cómo escalar privilegios abusando del socket de docker**](../#writable-docker-socket)**.**
 
-{% embed url="https://github.com/KrustyHack/docker-privilege-escalation" %}
+{{#ref}}
+https://github.com/KrustyHack/docker-privilege-escalation
+{{#endref}}
 
-{% embed url="https://fosterelli.co/privilege-escalation-via-docker.html" %}
+{{#ref}}
+https://fosterelli.co/privilege-escalation-via-docker.html
+{{#endref}}
 
 ## Grupo lxc/lxd
 

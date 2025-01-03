@@ -1,0 +1,4 @@
+Sitemap: https://www.hacktricks.wiki/sitemap.xml
+
+User-agent: *
+Disallow:

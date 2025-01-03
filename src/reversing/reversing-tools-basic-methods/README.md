@@ -43,11 +43,11 @@ Con un modelo de complemento integral y una API que extiende la herramienta para
 ### [ILSpy](https://github.com/icsharpcode/ILSpy) & [dnSpy](https://github.com/dnSpy/dnSpy/releases)
 
 [Plugin ILSpy para Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode): Puedes tenerlo en cualquier sistema operativo (puedes instalarlo directamente desde VSCode, no es necesario descargar el git. Haz clic en **Extensiones** y **busca ILSpy**).\
-Si necesitas **descompilar**, **modificar** y **recompilar** de nuevo, puedes usar [**dnSpy**](https://github.com/dnSpy/dnSpy/releases) o un fork mantenido activamente de él, [**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases). (**Clic derecho -> Modificar método** para cambiar algo dentro de una función).
+Si necesitas **descompilar**, **modificar** y **recompilar** de nuevo, puedes usar [**dnSpy**](https://github.com/dnSpy/dnSpy/releases) o un fork mantenido activamente de él, [**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases). (**Clic derecho -> Modificar Método** para cambiar algo dentro de una función).
 
 ### Registro de DNSpy
 
-Para hacer que **DNSpy registre información en un archivo**, podrías usar este fragmento:
+Para hacer que **DNSpy registre alguna información en un archivo**, podrías usar este fragmento:
 ```cs
 using System.IO;
 path = "C:\\inetpub\\temp\\MyTest2.txt";
@@ -57,7 +57,7 @@ File.AppendAllText(path, "Password: " + password + "\n");
 
 Para depurar código usando DNSpy, necesitas:
 
-Primero, cambia los **atributos de ensamblado** relacionados con la **depuración**:
+Primero, cambiar los **atributos de la Asamblea** relacionados con la **depuración**:
 
 ![](<../../images/image (973).png>)
 ```aspnet
@@ -78,7 +78,7 @@ Luego guarda el nuevo archivo a través de _**Archivo >> Guardar módulo...**_:
 
 ![](<../../images/image (602).png>)
 
-Esto es necesario porque si no lo haces, en **tiempo de ejecución** se aplicarán varias **optimizaciones** al código y podría ser posible que mientras depuras un **punto de interrupción nunca se active** o que algunas **variables no existan**.
+Esto es necesario porque si no lo haces, en **tiempo de ejecución** se aplicarán varias **optimizaciones** al código y podría ser posible que mientras depuras un **punto de interrupción nunca se active** o algunas **variables no existan**.
 
 Luego, si tu aplicación .NET está siendo **ejecutada** por **IIS**, puedes **reiniciarla** con:
 ```
@@ -125,22 +125,22 @@ Haz clic derecho en cualquier módulo en **Assembly Explorer** y haz clic en **S
 
 ![](<../../images/image (704).png>)
 
-Luego, cuando comiences a depurar, **la ejecución se detendrá cuando se cargue cada DLL**, luego, cuando rundll32 cargue tu DLL, la ejecución se detendrá.
+Luego, cuando comiences a depurar **la ejecución se detendrá cuando se cargue cada DLL**, luego, cuando rundll32 cargue tu DLL, la ejecución se detendrá.
 
 Pero, ¿cómo puedes llegar al código de la DLL que fue cargada? Usando este método, no sé cómo.
 
 ### Usando x64dbg/x32dbg
 
 - **Cargar rundll32** (64 bits en C:\Windows\System32\rundll32.exe y 32 bits en C:\Windows\SysWOW64\rundll32.exe)
-- **Cambiar la línea de comandos** (_File --> Change Command Line_) y establecer la ruta de la dll y la función que deseas llamar, por ejemplo: "C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii_2.dll",DLLMain
+- **Cambiar la Línea de Comando** (_File --> Change Command Line_) y establecer la ruta de la dll y la función que deseas llamar, por ejemplo: "C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii_2.dll",DLLMain
 - Cambiar _Options --> Settings_ y seleccionar "**DLL Entry**".
-- Luego **iniciar la ejecución**, el depurador se detendrá en cada main de dll, en algún momento te **detendrás en la entrada de la dll de tu dll**. Desde allí, solo busca los puntos donde deseas poner un punto de interrupción.
+- Luego **iniciar la ejecución**, el depurador se detendrá en cada main de dll, en algún momento te **detendrás en la entrada de dll de tu dll**. Desde allí, solo busca los puntos donde deseas poner un punto de interrupción.
 
-Ten en cuenta que cuando la ejecución se detiene por cualquier razón en win64dbg, puedes ver **en qué código estás** mirando en **la parte superior de la ventana de win64dbg**:
+Ten en cuenta que cuando la ejecución se detiene por cualquier razón en win64dbg puedes ver **en qué código estás** mirando en **la parte superior de la ventana de win64dbg**:
 
 ![](<../../images/image (842).png>)
 
-Luego, mirando esto, puedes ver cuándo se detuvo la ejecución en la dll que deseas depurar.
+Luego, mirando esto puedes ver cuándo se detuvo la ejecución en la dll que deseas depurar.
 
 ## Aplicaciones GUI / Videojuegos
 
@@ -150,13 +150,15 @@ Luego, mirando esto, puedes ver cuándo se detuvo la ejecución en la dll que de
 cheat-engine.md
 {{#endref}}
 
-[**PiNCE**](https://github.com/korcankaraokcu/PINCE) es una herramienta de front-end/reverse engineering para el depurador del Proyecto GNU (GDB), enfocada en juegos. Sin embargo, se puede usar para cualquier cosa relacionada con la ingeniería inversa.
+[**PiNCE**](https://github.com/korcankaraokcu/PINCE) es una herramienta de interfaz/reverse engineering para el Depurador del Proyecto GNU (GDB), enfocada en juegos. Sin embargo, se puede usar para cualquier cosa relacionada con la ingeniería inversa.
 
-[**Decompiler Explorer**](https://dogbolt.org/) es un front-end web para varios descompiladores. Este servicio web te permite comparar la salida de diferentes descompiladores en pequeños ejecutables.
+[**Decompiler Explorer**](https://dogbolt.org/) es una interfaz web para varios descompiladores. Este servicio web te permite comparar la salida de diferentes descompiladores en pequeños ejecutables.
 
 ## ARM & MIPS
 
-{% embed url="https://github.com/nongiach/arm_now" %}
+{{#ref}}
+https://github.com/nongiach/arm_now
+{{#endref}}
 
 ## Shellcodes
 
@@ -166,7 +168,7 @@ cheat-engine.md
 Luego, necesitas **adjuntar un depurador** (Ida o x64dbg) al proceso y poner un **punto de interrupción en la dirección de memoria indicada** y **reanudar** la ejecución. De esta manera estarás depurando el shellcode.
 
 La página de lanzamientos de github contiene zips con los lanzamientos compilados: [https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)\
-Puedes encontrar una versión ligeramente modificada de Blobrunner en el siguiente enlace. Para compilarlo, simplemente **crea un proyecto en C/C++ en Visual Studio Code, copia y pega el código y compílalo**.
+Puedes encontrar una versión ligeramente modificada de Blobrunner en el siguiente enlace. Para compilarlo, simplemente **crea un proyecto C/C++ en Visual Studio Code, copia y pega el código y compílalo**.
 
 {{#ref}}
 blobrunner.md
@@ -174,7 +176,7 @@ blobrunner.md
 
 ### Depurando un shellcode con jmp2it
 
-[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4) es muy similar a blobrunner. **Asignará** el **shellcode** dentro de un espacio de memoria y comenzará un **bucle eterno**. Luego necesitas **adjuntar el depurador** al proceso, **presionar iniciar, esperar 2-5 segundos y presionar detener** y te encontrarás dentro del **bucle eterno**. Salta a la siguiente instrucción del bucle eterno, ya que será una llamada al shellcode, y finalmente te encontrarás ejecutando el shellcode.
+[**jmp2it** ](https://github.com/adamkramer/jmp2it/releases/tag/v1.4) es muy similar a blobrunner. **Asignará** el **shellcode** dentro de un espacio de memoria y comenzará un **bucle eterno**. Luego necesitas **adjuntar el depurador** al proceso, **presionar iniciar, esperar 2-5 segundos y presionar detener** y te encontrarás dentro del **bucle eterno**. Salta a la siguiente instrucción del bucle eterno ya que será una llamada al shellcode, y finalmente te encontrarás ejecutando el shellcode.
 
 ![](<../../images/image (509).png>)
 
@@ -184,7 +186,7 @@ Puedes descargar una versión compilada de [jmp2it en la página de lanzamientos
 
 [**Cutter**](https://github.com/rizinorg/cutter/releases/tag/v1.12.0) es la GUI de radare. Usando cutter puedes emular el shellcode e inspeccionarlo dinámicamente.
 
-Ten en cuenta que Cutter te permite "Abrir archivo" y "Abrir shellcode". En mi caso, cuando abrí el shellcode como un archivo, lo descompiló correctamente, pero cuando lo abrí como un shellcode no lo hizo:
+Ten en cuenta que Cutter te permite "Abrir Archivo" y "Abrir Shellcode". En mi caso, cuando abrí el shellcode como un archivo, lo descompiló correctamente, pero cuando lo abrí como un shellcode no lo hizo:
 
 ![](<../../images/image (562).png>)
 
@@ -201,7 +203,7 @@ Puedes ver la pila, por ejemplo, dentro de un volcado hexadecimal:
 ### Desofuscando shellcode y obteniendo funciones ejecutadas
 
 Deberías probar [**scdbg**](http://sandsprite.com/blogs/index.php?uid=7&pid=152).\
-Te dirá cosas como **qué funciones** está utilizando el shellcode y si el shellcode se **decodifica** a sí mismo en memoria.
+Te dirá cosas como **qué funciones** está utilizando el shellcode y si el shellcode se está **decodificando** a sí mismo en memoria.
 ```bash
 scdbg.exe -f shellcode # Get info
 scdbg.exe -f shellcode -r #show analysis report at end of run
@@ -218,7 +220,7 @@ La opción **Create Dump** volcará el shellcode final si se realiza algún camb
 
 ### Desensamblando usando CyberChef
 
-Sube tu archivo de shellcode como entrada y usa la siguiente receta para decompilarlo: [https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)](<https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)>)
+Sube tu archivo de shellcode como entrada y usa la siguiente receta para descompilarlo: [https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)](<https://gchq.github.io/CyberChef/#recipe=To_Hex('Space',0)Disassemble_x86('32','Full%20x86%20architecture',16,0,true,true)>)
 
 ## [Movfuscator](https://github.com/xoreaxeaxeax/movfuscator)
 
@@ -249,7 +251,7 @@ Teniendo el **nombre** de las **funciones** que se están llamando, búscalas en
 
 Para binarios compilados en Delphi puedes usar [https://github.com/crypto2011/IDR](https://github.com/crypto2011/IDR)
 
-Si tienes que hacer ingeniería inversa a un binario de Delphi, te sugeriría usar el plugin de IDA [https://github.com/Coldzer0/IDA-For-Delphi](https://github.com/Coldzer0/IDA-For-Delphi)
+Si tienes que revertir un binario de Delphi, te sugeriría usar el plugin de IDA [https://github.com/Coldzer0/IDA-For-Delphi](https://github.com/Coldzer0/IDA-For-Delphi)
 
 Solo presiona **ATL+f7** (importar plugin de python en IDA) y selecciona el plugin de python.
 
@@ -259,7 +261,7 @@ También es muy interesante porque si presionas un botón en la aplicación grá
 
 ## Golang
 
-Si tienes que hacer ingeniería inversa a un binario de Golang, te sugeriría usar el plugin de IDA [https://github.com/sibears/IDAGolangHelper](https://github.com/sibears/IDAGolangHelper)
+Si tienes que revertir un binario de Golang, te sugeriría usar el plugin de IDA [https://github.com/sibears/IDAGolangHelper](https://github.com/sibears/IDAGolangHelper)
 
 Solo presiona **ATL+f7** (importar plugin de python en IDA) y selecciona el plugin de python.
 
@@ -380,7 +382,9 @@ Así que, en este desafío, conociendo los valores de los botones, necesitabas *
 
 ## Game Boy
 
-{% embed url="https://www.youtube.com/watch?v=VVbRe7wr3G4" %}
+{{#ref}}
+https://www.youtube.com/watch?v=VVbRe7wr3G4
+{{#endref}}
 
 ## Cursos
 

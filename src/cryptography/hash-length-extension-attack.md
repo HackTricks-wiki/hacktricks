@@ -9,13 +9,13 @@ Imagina un servidor que está **firmando** algunos **datos** al **agregar** un *
 - **El algoritmo (y es vulnerable a este ataque)**
 - **El padding es conocido**
 - Generalmente se usa uno por defecto, así que si se cumplen los otros 3 requisitos, este también lo es
-- El padding varía dependiendo de la longitud del secreto+datos, por eso se necesita la longitud del secreto
+- El padding varía dependiendo de la longitud del secreto + datos, por eso se necesita la longitud del secreto
 
 Entonces, es posible que un **atacante** **agregue** **datos** y **genere** una **firma** válida para los **datos anteriores + datos agregados**.
 
 ## ¿Cómo?
 
-Básicamente, los algoritmos vulnerables generan los hashes primero **hasheando un bloque de datos**, y luego, **desde** el **hash** (estado) **creado previamente**, **agregan el siguiente bloque de datos** y **lo hashean**.
+Básicamente, los algoritmos vulnerables generan los hashes primero **hasheando un bloque de datos**, y luego, **desde** el **hash** **creado previamente** (estado), **agregan el siguiente bloque de datos** y **lo hashean**.
 
 Entonces, imagina que el secreto es "secreto" y los datos son "datos", el MD5 de "secretodata" es 6036708eba0d11f6ef52ad44e8b74d5b.\
 Si un atacante quiere agregar la cadena "agregar", puede:
@@ -27,7 +27,9 @@ Si un atacante quiere agregar la cadena "agregar", puede:
 
 ## **Herramienta**
 
-{% embed url="https://github.com/iagox86/hash_extender" %}
+{{#ref}}
+https://github.com/iagox86/hash_extender
+{{#endref}}
 
 ## Referencias
 

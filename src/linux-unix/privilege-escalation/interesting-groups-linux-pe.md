@@ -1,6 +1,5 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-
 # Grupos Sudo/Admin
 
 ## **PE - Método 1**
@@ -30,7 +29,7 @@ Verifica el contenido de:
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
 ```
-Ahí encontrarás qué grupos tienen permiso para ejecutar **pkexec** y **por defecto** en algunos linux pueden **aparecer** algunos de los grupos **sudo o admin**.
+Ahí encontrarás qué grupos tienen permiso para ejecutar **pkexec** y **por defecto** en algunas distribuciones de Linux pueden **aparecer** algunos de los grupos **sudo o admin**.
 
 Para **convertirte en root puedes ejecutar**:
 ```bash
@@ -127,9 +126,13 @@ find / -group root -perm -g=w 2>/dev/null
 
 Puedes montar el sistema de archivos raíz de la máquina host en el volumen de una instancia, de modo que cuando la instancia se inicie, carga inmediatamente un `chroot` en ese volumen. Esto te da efectivamente acceso root en la máquina.
 
-{% embed url="https://github.com/KrustyHack/docker-privilege-escalation" %}
+{{#ref}}
+https://github.com/KrustyHack/docker-privilege-escalation
+{{#endref}}
 
-{% embed url="https://fosterelli.co/privilege-escalation-via-docker.html" %}
+{{#ref}}
+https://fosterelli.co/privilege-escalation-via-docker.html
+{{#endref}}
 
 # Grupo lxc/lxd
 

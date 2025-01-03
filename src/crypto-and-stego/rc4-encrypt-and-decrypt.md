@@ -4,8 +4,12 @@ Si puedes de alguna manera cifrar un texto plano usando RC4, puedes descifrar cu
 
 Si puedes cifrar un texto plano conocido, también puedes extraer la contraseña. Más referencias se pueden encontrar en la máquina HTB Kryptos:
 
-{% embed url="https://0xrick.github.io/hack-the-box/kryptos/" %}
+{{#ref}}
+https://0xrick.github.io/hack-the-box/kryptos/
+{{#endref}}
 
-{% embed url="https://0xrick.github.io/hack-the-box/kryptos/" %}
+{{#ref}}
+https://0xrick.github.io/hack-the-box/kryptos/
+{{#endref}}
 
 {{#include ../banners/hacktricks-training.md}}
