@@ -153,3 +153,4 @@ During runtime and additional structure `class_rw_t` is used containing pointers
 {{#include ../../../banners/hacktricks-training.md}}
 
 
+

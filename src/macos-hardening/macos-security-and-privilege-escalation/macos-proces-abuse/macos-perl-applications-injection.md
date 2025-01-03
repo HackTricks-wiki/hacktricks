@@ -72,3 +72,4 @@ For example, if a script is importing **`use File::Basename;`** it would be poss
 {{#include ../../../banners/hacktricks-training.md}}
 
 
+

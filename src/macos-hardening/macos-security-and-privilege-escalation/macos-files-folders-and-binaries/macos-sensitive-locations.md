@@ -275,3 +275,4 @@ These are notifications that the user should see in the screen:
 {{#include ../../../banners/hacktricks-training.md}}
 
 
+

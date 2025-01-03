@@ -83,3 +83,4 @@ At the end this was fixed by giving the new permission **`kTCCServiceEndpointSec
 {{#include ../../../banners/hacktricks-training.md}}
 
 
+

@@ -33,3 +33,4 @@ RUBYOPT="-I/tmp -rinject" ruby hello.rb --disable-rubyopt
 {{#include ../../../banners/hacktricks-training.md}}
 
 
+
