@@ -7,7 +7,7 @@
 
 Shambulio la **Overpass The Hash/Pass The Key (PTK)** limetengenezwa kwa mazingira ambapo itifaki ya NTLM ya jadi imezuiliwa, na uthibitishaji wa Kerberos unachukua kipaumbele. Shambulio hili linatumia NTLM hash au funguo za AES za mtumiaji ili kuomba tiketi za Kerberos, kuruhusu ufikiaji usioidhinishwa wa rasilimali ndani ya mtandao.
 
-Ili kutekeleza shambulio hili, hatua ya kwanza ni kupata NTLM hash au nywila ya akaunti ya mtumiaji aliyechaguliwa. Baada ya kupata taarifa hii, Tiketi ya Kutoa Tiketi (TGT) kwa akaunti hiyo inaweza kupatikana, ikiruhusu mshambuliaji kufikia huduma au mashine ambazo mtumiaji ana ruhusa.
+Ili kutekeleza shambulio hili, hatua ya kwanza ni kupata NTLM hash au nywila ya akaunti ya mtumiaji anayelengwa. Baada ya kupata taarifa hii, Tiketi ya Kutoa Tiketi (TGT) kwa akaunti hiyo inaweza kupatikana, ikiruhusu mshambuliaji kufikia huduma au mashine ambazo mtumiaji ana ruhusa.
 
 Mchakato unaweza kuanzishwa kwa amri zifuatazo:
 ```bash
@@ -24,7 +24,7 @@ Mfuatano wa amri mbadala ukitumia Rubeus.exe unaonyesha uso mwingine wa mbinu hi
 .\Rubeus.exe asktgt /domain:jurassic.park /user:velociraptor /rc4:2a3de7fe356ee524cc9f3d579f2e0aa7 /ptt
 .\PsExec.exe -accepteula \\labwws02.jurassic.park cmd
 ```
-Hii mbinu inakidhi njia ya **Pass the Key**, ikilenga kutawala na kutumia tiketi moja kwa moja kwa madhumuni ya uthibitishaji. Ni muhimu kutambua kwamba kuanzishwa kwa ombi la TGT kunasababisha tukio `4768: A Kerberos authentication ticket (TGT) was requested`, ikionyesha matumizi ya RC4-HMAC kama chaguo la default, ingawa mifumo ya kisasa ya Windows inapendelea AES256.
+Hii mbinu inakidhi njia ya **Pass the Key**, ikilenga kutawala na kutumia tiketi moja kwa moja kwa madhumuni ya uthibitishaji. Ni muhimu kutambua kwamba kuanzishwa kwa ombi la TGT kunasababisha tukio `4768: A Kerberos authentication ticket (TGT) was requested`, ikionyesha matumizi ya RC4-HMAC kama chaguo la kawaida, ingawa mifumo ya kisasa ya Windows inapendelea AES256.
 
 Ili kuzingatia usalama wa operesheni na kutumia AES256, amri ifuatayo inaweza kutumika:
 ```bash

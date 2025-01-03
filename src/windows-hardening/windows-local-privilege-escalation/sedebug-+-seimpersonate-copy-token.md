@@ -1,11 +1,11 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-Msimbo ufuatao **unatumia mamlaka SeDebug na SeImpersonate** ili nakala ya token kutoka kwa **mchakato unaotembea kama SYSTEM** na **mamlaka yote ya token**. \
-Katika kesi hii, msimbo huu unaweza kukusanywa na kutumika kama **Windows service binary** ili kuangalia kama inafanya kazi.\
-Hata hivyo, sehemu kuu ya **msimbo ambapo kuinua kunatokea** iko ndani ya **`Exploit`** **function**.\
-Ndani ya hiyo function unaweza kuona kwamba **mchakato **_**lsass.exe**_** unatafutwa**, kisha **token yake inakopwa**, na hatimaye token hiyo inatumika kuzalisha _**cmd.exe**_ mpya yenye mamlaka yote ya token iliyokopwa.
+Msimu ufuatao **unatumia mamlaka SeDebug na SeImpersonate** ili nakala token kutoka kwa **mchakato unaotembea kama SYSTEM** na ukiwa na **mamlaka yote ya token**. \
+Katika kesi hii, msimu huu unaweza kukusanywa na kutumika kama **Windows service binary** ili kuangalia kama inafanya kazi.\
+Hata hivyo, sehemu kuu ya **msimu ambapo kuinua kunatokea** iko ndani ya **`Exploit`** **function**.\
+Ndani ya hiyo function unaweza kuona kwamba **mchakato **_**lsass.exe**_** unatafutwa**, kisha **token yake inakopwa**, na hatimaye token hiyo inatumika kuzalisha _**cmd.exe**_ mpya ikiwa na mamlaka yote ya token iliyokopwa.
 
-**Mchakato mingine** unaotembea kama SYSTEM wenye mamlaka yote au nyingi za token ni: **services.exe**, **svhost.exe** (moja ya za kwanza), **wininit.exe**, **csrss.exe**... (_kumbuka kwamba huwezi kukopa token kutoka kwa mchakato uliohifadhiwa_). Zaidi ya hayo, unaweza kutumia zana [Process Hacker](https://processhacker.sourceforge.io/downloads.php) ikifanya kazi kama msimamizi kuona token za mchakato.
+**Mchakato mingine** inayotembea kama SYSTEM ikiwa na mamlaka yote au nyingi za token ni: **services.exe**, **svhost.exe** (moja ya za kwanza), **wininit.exe**, **csrss.exe**... (_kumbuka kwamba huwezi kukopa token kutoka kwa mchakato uliohifadhiwa_). Zaidi ya hayo, unaweza kutumia zana [Process Hacker](https://processhacker.sourceforge.io/downloads.php) ikifanya kazi kama msimamizi kuona token za mchakato.
 ```c
 // From https://cboard.cprogramming.com/windows-programming/106768-running-my-program-service.html
 #include <windows.h>

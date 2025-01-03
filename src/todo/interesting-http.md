@@ -10,7 +10,7 @@ Ikiwa katika wakati fulani ndani ya ukurasa wa wavuti taarifa nyeti ziko kwenye 
 
 ## Mitigation
 
-Unaweza kufanya kivinjari kufuata **Referrer-policy** ambayo inaweza **kuepusha** taarifa nyeti kutumwa kwa programu nyingine za wavuti:
+Unaweza kufanya kivinjari kifuatilie **Referrer-policy** ambayo inaweza **kuepusha** taarifa nyeti kutumwa kwa programu nyingine za wavuti:
 ```
 Referrer-Policy: no-referrer
 Referrer-Policy: no-referrer-when-downgrade

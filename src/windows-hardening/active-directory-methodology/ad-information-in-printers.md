@@ -3,9 +3,9 @@
 Kuna blogu kadhaa kwenye Mtandao ambazo **zinasisitiza hatari za kuacha printers zikiwa zimewekwa na LDAP zikiwa na** akauti za kuingia za kawaida/dhaifu.\
 Hii ni kwa sababu mshambuliaji anaweza **kudanganya printer kujiunga na seva ya LDAP isiyo halali** (kawaida `nc -vv -l -p 444` inatosha) na kukamata **akauti za printer kwa maandiko wazi**.
 
-Pia, printers kadhaa zitakuwa na **kumbukumbu za majina ya watumiaji** au zinaweza hata kuwa na uwezo wa **kupakua majina yote ya watumiaji** kutoka kwa Domain Controller.
+Pia, printers kadhaa zitakuwa na **logs zenye majina ya watumiaji** au zinaweza hata kuwa na uwezo wa **kupakua majina yote ya watumiaji** kutoka kwa Domain Controller.
 
-Taarifa hii **nyeti** na ukosefu wa **usalama** wa kawaida hufanya printers kuwa za kuvutia sana kwa washambuliaji.
+Taarifa hii **nyeti** na **ukosefu wa usalama** wa kawaida inafanya printers kuwa za kuvutia sana kwa washambuliaji.
 
 Baadhi ya blogu kuhusu mada hii:
 
@@ -20,7 +20,7 @@ Baadhi ya blogu kuhusu mada hii:
 
 ## Kukamata Akauti
 
-**Kwa hatua za kina zaidi, rejelea [chanzo](https://grimhacker.com/2018/03/09/just-a-printer/).**
+**Kwa hatua za kina zaidi, rejea kwenye [chanzo](https://grimhacker.com/2018/03/09/just-a-printer/).**
 
 ### Njia 1: Netcat Listener
 
@@ -41,7 +41,7 @@ Njia ya kuaminika zaidi inahusisha kuanzisha seva kamili ya LDAP kwa sababu prin
 - Ingiza mifano ya msingi.
 - Weka jina la kikoa kwenye DB ya LDAP.
 - Sanidi LDAP TLS.
-3. **LDAP Service Execution**: Mara baada ya kuanzishwa, huduma ya LDAP inaweza kuendeshwa kwa kutumia:
+3. **LDAP Service Execution**: Mara tu inapoanzishwa, huduma ya LDAP inaweza kuendeshwa kwa kutumia:
 ```bash
 slapd -d 2
 ```

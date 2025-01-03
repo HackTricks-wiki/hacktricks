@@ -8,13 +8,13 @@
 
 Ili kupokea ishara za IR, **photoreceiver** hutumiwa. In **geuza mwanga wa IR kuwa mapigo ya voltage**, ambayo tayari ni **ishara za kidijitali**. Kawaida, kuna **filter ya mwanga mweusi ndani ya mpokeaji**, ambayo inaruhusu **tu wavelength inayotakiwa kupita** na kuondoa kelele.
 
-### Aina za Itifaki za IR <a href="#variety-of-ir-protocols" id="variety-of-ir-protocols"></a>
+### Aina mbalimbali za Itifaki za IR <a href="#variety-of-ir-protocols" id="variety-of-ir-protocols"></a>
 
 Itifaki za IR zinatofautiana katika mambo 3:
 
 - uandishi wa bit
 - muundo wa data
-- mzunguko wa kubeba — mara nyingi katika wigo wa 36..38 kHz
+- frequency ya carrier — mara nyingi katika wigo wa 36..38 kHz
 
 #### Njia za uandishi wa bit <a href="#bit-encoding-ways" id="bit-encoding-ways"></a>
 
@@ -36,28 +36,28 @@ Inajulikana pia kama uandishi wa Manchester. Thamani ya mantiki inafafanuliwa na
 
 <figure><img src="../../images/image (634).png" alt=""><figcaption></figcaption></figure>
 
-**4. Mchanganyiko wa zile za awali na nyingine za kipekee**
+**4. Mchanganyiko wa zile zilizopita na nyingine za kipekee**
 
 > [!NOTE]
-> Kuna itifaki za IR ambazo **zinajaribu kuwa za ulimwengu** kwa aina kadhaa za vifaa. Zile maarufu ni RC5 na NEC. Kwa bahati mbaya, maarufu zaidi **haimaanishi maarufu zaidi**. Katika mazingira yangu, nilikutana na remote mbili za NEC na hakuna RC5.
+> Kuna itifaki za IR ambazo **zinajaribu kuwa za ulimwengu** kwa aina kadhaa za vifaa. Zile maarufu zaidi ni RC5 na NEC. Kwa bahati mbaya, maarufu zaidi **haimaanishi maarufu zaidi**. Katika mazingira yangu, nilikutana na remote mbili za NEC na hakuna RC5.
 >
-> Watengenezaji wanapenda kutumia itifaki zao za kipekee za IR, hata ndani ya safu sawa za vifaa (kwa mfano, TV-boxes). Kwa hivyo, remotes kutoka kampuni tofauti na wakati mwingine kutoka mifano tofauti kutoka kampuni moja, hazina uwezo wa kufanya kazi na vifaa vingine vya aina hiyo.
+> Watengenezaji wanapenda kutumia itifaki zao za kipekee za IR, hata ndani ya safu moja ya vifaa (kwa mfano, TV-boxes). Kwa hivyo, remotes kutoka kampuni tofauti na wakati mwingine kutoka mifano tofauti kutoka kampuni moja, hazina uwezo wa kufanya kazi na vifaa vingine vya aina hiyo.
 
 ### Kuchunguza ishara ya IR
 
-Njia ya kuaminika zaidi kuona jinsi ishara ya IR ya remote inavyoonekana ni kutumia oscilloscope. Haitaondoa au kubadilisha ishara iliyopokelewa, inaonyeshwa tu "kama ilivyo". Hii ni muhimu kwa ajili ya kupima na kutatua matatizo. Nitaonyesha ishara inayotarajiwa kwa mfano wa itifaki ya NEC IR.
+Njia ya kuaminika zaidi kuona jinsi ishara ya IR ya remote inavyoonekana ni kutumia oscilloscope. Haitaondoa au kubadilisha ishara iliyopokelewa, inajitokeza "kama ilivyo". Hii ni muhimu kwa ajili ya kupima na kurekebisha. Nitaonyesha ishara inayotarajiwa kwa mfano wa itifaki ya NEC IR.
 
 <figure><img src="../../images/image (235).png" alt=""><figcaption></figcaption></figure>
 
-Kawaida, kuna preamble mwanzoni mwa pakiti iliyoundwa. Hii inaruhusu mpokeaji kubaini kiwango cha gain na mandhari. Pia kuna itifaki bila preamble, kwa mfano, Sharp.
+Kawaida, kuna preamble mwanzoni mwa pakiti iliyoundwa. Hii inaruhusu mpokeaji kubaini kiwango cha gain na mandharinyuma. Pia kuna itifaki bila preamble, kwa mfano, Sharp.
 
 Kisha data inatumwa. Muundo, preamble, na njia ya uandishi wa bit zinatolewa na itifaki maalum.
 
 **Itifaki ya NEC IR** ina amri fupi na nambari ya kurudia, ambayo inatumwa wakati kifungo kinashinikizwa. Zote amri na nambari ya kurudia zina preamble sawa mwanzoni.
 
-**Amri ya NEC**, mbali na preamble, ina byte ya anwani na byte ya nambari ya amri, ambayo kifaa kinaelewa kinachohitajika kutekelezwa. Byte za anwani na nambari ya amri zinajirudia kwa thamani za kinyume, ili kuangalia uadilifu wa uhamasishaji. Kuna bit ya kusitisha ya ziada mwishoni mwa amri.
+**Amri ya NEC**, mbali na preamble, ina byte ya anwani na byte ya nambari ya amri, ambayo kifaa kinaelewa ni nini kinapaswa kufanywa. Byte za anwani na nambari ya amri zinajirudia kwa thamani za kinyume, ili kuangalia uadilifu wa uhamasishaji. Kuna bit ya kusimamisha ya ziada mwishoni mwa amri.
 
-**Nambari ya kurudia** ina "1" baada ya preamble, ambayo ni bit ya kusitisha.
+**Nambari ya kurudia** ina "1" baada ya preamble, ambayo ni bit ya kusimamisha.
 
 Kwa **mantiki "0" na "1"** NEC inatumia Uandishi wa Umbali wa Pulse: kwanza, mlipuko wa pigo unatumwa baada ya hapo kuna pause, urefu wake unakamilisha thamani ya bit.
 

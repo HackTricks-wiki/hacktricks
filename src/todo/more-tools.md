@@ -62,7 +62,7 @@
 - [https://github.com/Mr-Un1k0d3r/PoisonHandler](https://github.com/Mr-Un1k0d3r/PoisonHandler) : Harakati za pembeni
 - [https://freddiebarrsmith.com/trix/trix.html](https://freddiebarrsmith.com/trix/trix.html) : LOL bins
 - [https://gist.github.com/netbiosX/ee35fcd3722e401a38136cff7b751d79](https://gist.github.com/netbiosX/ee35fcd3722e401a38136cff7b751d79) ([https://pentestlab.blog/2020/01/13/persistence-image-file-execution-options-injection/](https://pentestlab.blog/2020/01/13/persistence-image-file-execution-options-injection/)): Uendelevu
-- [https://github.com/odzhan/injection](https://github.com/odzhan/injection) : Mbinu za Uingizaji wa Mchakato wa Windows
+- [https://github.com/odzhan/injection](https://github.com/odzhan/injection) : Mbinu za Uingiliaji wa Mchakato wa Windows
 - [https://github.com/BankSecurity/Red_Team](https://github.com/BankSecurity/Red_Team) : Mifumo ya Red Team
 - [https://github.com/l0ss/Grouper2](https://github.com/l0ss/Grouper2) : pata makosa yanayohusiana na usalama katika Sera ya Kundi la Active Directory.
 - [https://www.wietzebeukema.nl/blog/powershell-obfuscation-using-securestring](https://www.wietzebeukema.nl/blog/powershell-obfuscation-using-securestring) : Ufafanuzi wa securestring
@@ -75,7 +75,7 @@
 
 # Firmware
 
-Zana ambazo naona zinaweza kuwa nzuri kwa kuchambua firmware (kiotomatiki):
+Zana ambazo naona zinaweza kuwa nzuri kwa kuchambua firmware (za kiotomatiki):
 
 - [https://github.com/craigz28/firmwalker](https://github.com/craigz28/firmwalker)
 - [https://github.com/fkie-cad/FACT_core](https://github.com/fkie-cad/FACT_core)

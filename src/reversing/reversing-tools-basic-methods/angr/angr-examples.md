@@ -201,7 +201,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-Katika hali hii, ingizo lilichukuliwa na `scanf("%u %u")` na thamani `"1 1"` ilitolewa, hivyo thamani **`0x00000001`** za stack zinatokana na **ingizo la mtumiaji**. Unaweza kuona jinsi thamani hizi zinavyoanza katika `$ebp - 8`. Hivyo, katika msimbo tumepunguza **bytes 8 kutoka `$esp` (kama katika wakati huo `$ebp` na `$esp` zilikuwa na thamani sawa)** na kisha tumepush BVS.
+Katika hali hii, ingizo lilichukuliwa na `scanf("%u %u")` na thamani `"1 1"` ilitolewa, hivyo thamani **`0x00000001`** za stack zinatokana na **ingizo la mtumiaji**. Unaweza kuona jinsi thamani hizi zinavyoanza katika `$ebp - 8`. Hivyo, katika msimbo tumepunguza byte 8 kutoka `$esp` (kama katika wakati huo `$ebp` na `$esp` zilikuwa na thamani sawa) na kisha tumepush BVS.
 
 ![](<../../../images/image (136).png>)
 
@@ -407,8 +407,8 @@ main(sys.argv)
 ### Kutumia Vikwazo
 
 > [!NOTE]
-> Wakati mwingine operesheni rahisi za kibinadamu kama kulinganisha maneno 2 ya urefu 16 **char kwa char** (mzunguko), **gharama** nyingi kwa **angr** kwa sababu inahitaji kuzalisha matawi **kwa kiwango** kwa sababu inazalisha tawi 1 kwa kila ikiwa: `2^16`\
-> Kwa hivyo, ni rahisi **kuomba angr kufikia hatua ya awali** (ambapo sehemu ngumu halisi tayari imefanywa) na **kuiweka vikwazo hivyo kwa mikono**.
+> Wakati mwingine operesheni rahisi za kibinadamu kama kulinganisha maneno 2 yenye urefu wa 16 **char kwa char** (mzunguko), **gharama** nyingi kwa **angr** kwa sababu inahitaji kuzalisha matawi **kwa kiwango** kwa sababu inazalisha tawi 1 kwa kila ikiwa: `2^16`\
+> Kwa hivyo, ni rahisi **kuomba angr kufikia hatua ya awali** (ambapo sehemu halisi ngumu tayari imefanywa) na **kweka vikwazo hivyo kwa mikono**.
 ```python
 # After perform some complex poperations to the input the program checks
 # char by char the password against another password saved, like in the snippet:
@@ -483,12 +483,12 @@ main(sys.argv)
 > Katika baadhi ya hali unaweza kuanzisha **veritesting**, ambayo itachanganya hali zinazofanana, ili kuokoa matawi yasiyo na maana na kupata suluhisho: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 
 > [!NOTE]
-> Jambo lingine unaloweza kufanya katika hali hizi ni **kuunganisha kazi kwa kumpa angr kitu ambacho kinaweza kueleweka** kwa urahisi zaidi.
+> Jambo lingine unaloweza kufanya katika hali hizi ni **kuunganisha kazi ikitoa angr kitu ambacho kinaweza kueleweka** kwa urahisi zaidi.
 
 ### Wasimamizi wa Uigaji
 
 Wasimamizi wengine wa uigaji wanaweza kuwa na manufaa zaidi kuliko wengine. Katika mfano uliopita kulikuwa na tatizo kwani matawi mengi ya manufaa yaliumbwa. Hapa, mbinu ya **veritesting** itachanganya hayo na itapata suluhisho.\
-Wasimamizi hawa wa uigaji pia wanaweza kuanzishwa na: `simulation = project.factory.simgr(initial_state, veritesting=True)`
+Msimamizi huu wa uigaji pia unaweza kuanzishwa na: `simulation = project.factory.simgr(initial_state, veritesting=True)`
 ```python
 import angr
 import claripy
@@ -740,7 +740,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### Binaries za Kihistoria
+### Binaries za Kistatik
 ```python
 # This challenge is the exact same as the first challenge, except that it was
 # compiled as a static binary. Normally, Angr automatically replaces standard

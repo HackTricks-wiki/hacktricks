@@ -2,7 +2,7 @@
 
 Kwa msingi, chombo hiki kitatusaidia kupata thamani za mabadiliko ambayo yanahitaji kutimiza masharti fulani na kuhesabu kwa mkono kutakuwa na usumbufu mkubwa. Hivyo, unaweza kuashiria kwa Z3 masharti ambayo mabadiliko yanahitaji kutimiza na itapata baadhi ya thamani (ikiwa inawezekana).
 
-**Baadhi ya maandiko na mifano yamechukuliwa kutoka [https://ericpony.github.io/z3py-tutorial/guide-examples.htm](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)**
+**Baadhi ya maandiko na mifano yameondolewa kutoka [https://ericpony.github.io/z3py-tutorial/guide-examples.htm](https://ericpony.github.io/z3py-tutorial/guide-examples.htm)**
 
 # Operesheni za Msingi
 
@@ -74,7 +74,7 @@ print(simplify(a == b)) #This is False
 ```
 ## Nambari Zilizotiwa Saini/Zisizotiwa Saini
 
-Z3 inatoa toleo maalum la shughuli za kihesabu ambapo ina umuhimu ikiwa **bit-vector inachukuliwa kama iliyo na saini au isiyo na saini**. Katika Z3Py, waendeshaji **<, <=, >, >=, /, % na >>** wanalingana na toleo la **saini**. Waendeshaji wa **sio saini** ni **ULT, ULE, UGT, UGE, UDiv, URem na LShR.**
+Z3 inatoa toleo maalum la operesheni za kihesabu ambapo ina umuhimu ikiwa **bit-vector inachukuliwa kama iliyo na saini au isiyo na saini**. Katika Z3Py, waendeshaji **<, <=, >, >=, /, % na >>** wanalingana na toleo la **saini**. Waendeshaji wa **saini isiyo** ni **ULT, ULE, UGT, UGE, UDiv, URem na LShR.**
 ```python
 from z3 import *
 
@@ -94,9 +94,9 @@ solve(ULT(x, 0))
 ```
 ## Functions
 
-**Kazi zilizotafsiriwa** kama vile hisabati ambapo **kazi +** ina **ufafanuzi wa kawaida ulio thabiti** (inaongeza nambari mbili). **Kazi zisizotafsiriwa** na constants ni **za kubadilika kwa kiwango cha juu**; zinaruhusu **ufafanuzi wowote** ambao ni **sawa** na **vizuizi** juu ya kazi au constant.
+**Kazi zilizotafsiriwa** kama za hesabu ambapo **kazi +** ina **ufafanuzi wa kawaida ulio thabiti** (inaongeza nambari mbili). **Kazi zisizotafsiriwa** na constants ni **za kubadilika kwa kiwango cha juu**; zinaruhusu **ufafanuzi wowote** ambao ni **kulingana** na **vizuizi** juu ya kazi au constant.
 
-Mfano: f inatumika mara mbili kwa x inarudi x tena, lakini f inatumika mara moja kwa x ni tofauti na x.
+Mfano: f inatumika mara mbili kwa x inasababisha x tena, lakini f inatumika mara moja kwa x ni tofauti na x.
 ```python
 from z3 import *
 

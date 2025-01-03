@@ -8,7 +8,7 @@ Ruhusa la **DCSync** linamaanisha kuwa na ruhusa hizi juu ya eneo lenyewe: **DS-
 
 **Maelezo Muhimu Kuhusu DCSync:**
 
-- **Shambulio la DCSync linaiga tabia ya Kituo cha Kikoa na linaomba Kituo kingine cha Kikoa kuiga taarifa** kwa kutumia Protokali ya Huduma ya Kuiga Katalogi ya Mbali (MS-DRSR). Kwa sababu MS-DRSR ni kazi halali na muhimu ya Active Directory, haiwezi kuzuiwa au kuzimwa.
+- **Shambulio la DCSync linaiga tabia ya Kituo cha Kikoa na linaomba Kituo kingine cha Kikoa kuiga taarifa** kwa kutumia Protokali ya Huduma ya Kuiga Katalogi ya Mbali (MS-DRSR). Kwa sababu MS-DRSR ni kazi halali na muhimu ya Active Directory, haiwezi kuzuiliwa au kuzimwa.
 - Kwa kawaida, ni **Wakosoaji wa Kikoa, Wakosoaji wa Biashara, Wasimamizi, na Vikundi vya Kituo cha Kikoa** pekee vina ruhusa zinazohitajika.
 - Ikiwa nywila za akaunti yoyote zimehifadhiwa kwa usimbaji wa kurudi nyuma, chaguo linapatikana katika Mimikatz kurudisha nywila hiyo kwa maandiko wazi.
 
@@ -45,15 +45,15 @@ Ikiwa wewe ni admin wa domain, unaweza kutoa ruhusa hii kwa mtumiaji yeyote kwa 
 ```powershell
 Add-ObjectAcl -TargetDistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -PrincipalSamAccountName username -Rights DCSync -Verbose
 ```
-Kisha, unaweza **kuangalia kama mtumiaji amepewa** haki 3 kwa kuziangalia katika matokeo ya (unapaswa kuwa na uwezo wa kuona majina ya haki ndani ya uwanja wa "ObjectType"):
+Kisha, unaweza **kuangalia kama mtumiaji amepewa** haki 3 kwa kutafuta katika matokeo ya (unapaswa kuwa na uwezo wa kuona majina ya haki ndani ya uwanja wa "ObjectType"):
 ```powershell
 Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveGUIDs | ?{$_.IdentityReference -match "student114"}
 ```
 ### Kupunguza
 
-- Kitambulisho cha Tukio la Usalama 4662 (Sera ya Ukaguzi kwa kitu lazima iwekwe) – Operesheni ilifanywa kwenye kitu
-- Kitambulisho cha Tukio la Usalama 5136 (Sera ya Ukaguzi kwa kitu lazima iwekwe) – Kitu cha huduma ya directory kilibadilishwa
-- Kitambulisho cha Tukio la Usalama 4670 (Sera ya Ukaguzi kwa kitu lazima iwekwe) – Ruhusa kwenye kitu zilibadilishwa
+- Security Event ID 4662 (Sera ya Ukaguzi kwa kitu lazima iwekwe) – Operesheni ilifanyika kwenye kitu
+- Security Event ID 5136 (Sera ya Ukaguzi kwa kitu lazima iwekwe) – Kitu cha huduma ya directory kilibadilishwa
+- Security Event ID 4670 (Sera ya Ukaguzi kwa kitu lazima iwekwe) – Ruhusa kwenye kitu zilibadilishwa
 - AD ACL Scanner - Unda na kulinganisha ripoti za ACLs. [https://github.com/canix1/ADACLScanner](https://github.com/canix1/ADACLScanner)
 
 ## Marejeleo

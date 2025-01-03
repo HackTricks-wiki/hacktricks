@@ -1,6 +1,6 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-Line pekee iliyobadilishwa kutoka kwa [original code](https://github.com/OALabs/BlobRunner) ni line 10. Ili kuikamilisha tu **unda mradi wa C/C++ katika Visual Studio Code, nakili na ubandike msimbo na ujenge**.
+Line pekee iliyobadilishwa kutoka kwa [original code](https://github.com/OALabs/BlobRunner) ni line 10. Ili kuikamilisha tu **unda mradi wa C/C++ katika Visual Studio Code, nakili na bandika msimbo na ujenge**.
 ```c
 #include <stdio.h>
 #include <windows.h>

@@ -4,7 +4,7 @@
 
 ## Intro
 
-iButton ni jina la jumla la funguo ya kitambulisho cha kielektroniki iliyowekwa katika **konteina ya chuma yenye umbo la sarafu**. Pia inaitwa **Dallas Touch** Memory au kumbukumbu ya mawasiliano. Ingawa mara nyingi inaitwa kwa makosa kama funguo “za magnetic”, hakuna **kitu chochote cha magnetic** ndani yake. Kwa kweli, **microchip** kamili inayofanya kazi kwenye protokali ya kidijitali imefichwa ndani.
+iButton ni jina la jumla la funguo ya kitambulisho cha kielektroniki kilichowekwa katika **konteina ya chuma yenye umbo la sarafu**. Pia inaitwa **Dallas Touch** Memory au kumbukumbu ya mawasiliano. Ingawa mara nyingi inaitwa kwa makosa kama funguo “za magnetic”, hakuna **kitu chochote cha magnetic** ndani yake. Kwa kweli, **microchip** kamili inayofanya kazi kwenye protokali ya kidijitali imefichwa ndani.
 
 <figure><img src="../../images/image (915).png" alt=""><figcaption></figcaption></figure>
 
@@ -20,7 +20,7 @@ Wakati funguo inafikia msomaji, **mawasiliano yanagusa** na funguo inapata nguvu
 
 ### **1-Wire protocol** <a href="#id-1-wire-protocol" id="id-1-wire-protocol"></a>
 
-Funguo za Dallas hubadilishana data kwa kutumia protokali ya 1-wire. Kwa mawasiliano moja tu ya kuhamasisha data (!!) katika pande zote mbili, kutoka kwa bwana hadi mtumwa na kinyume chake. Protokali ya 1-wire inafanya kazi kulingana na mfano wa Bwana-Mtumwa. Katika topolojia hii, Bwana daima huanzisha mawasiliano na Mtumwa anafuata maagizo yake.
+Funguo za Dallas hubadilishana data kwa kutumia protokali ya 1-wire. Kwa mawasiliano moja tu ya kuhamasisha data (!!) katika mwelekeo wote, kutoka kwa bwana hadi mtumwa na kinyume chake. Protokali ya 1-wire inafanya kazi kulingana na mfano wa Master-Slave. Katika topolojia hii, Bwana daima huanzisha mawasiliano na Mtumwa anafuata maagizo yake.
 
 Wakati funguo (Mtumwa) inagusa intercom (Bwana), chip ndani ya funguo inawashwa, ikipata nguvu kutoka kwa intercom, na funguo inaanzishwa. Kufuatia hiyo, intercom inaomba kitambulisho cha funguo. Kisha, tutaangalia mchakato huu kwa undani zaidi.
 

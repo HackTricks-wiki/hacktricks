@@ -23,7 +23,7 @@ Ingawa katika masoko hii kawaida hutumiwa kujaribu kupata faida.
 
 ### Hedging With Futures <a href="#mntl-sc-block_7-0" id="mntl-sc-block_7-0"></a>
 
-Ikiwa meneja wa mfuko anaogopa kwamba hisa fulani zitashuka anaweza kuchukua short position juu ya mali fulani kama bitcoin au mikataba ya futures ya S&P 500. Hii itakuwa sawa na kununua au kuwa na mali fulani na kuunda mkataba wa kuziuza hizo katika wakati ujao kwa bei kubwa.&#x20;
+Ikiwa meneja wa mfuko anaogopa kwamba hisa fulani zitashuka, anaweza kuchukua short position juu ya mali fulani kama bitcoin au mikataba ya futures ya S&P 500. Hii itakuwa sawa na kununua au kuwa na mali fulani na kuunda mkataba wa kuziuza hizo katika wakati ujao kwa bei kubwa.&#x20;
 
 Ikiwa bei itashuka meneja wa mfuko atapata faida kwa sababu atauza mali hizo kwa bei kubwa. Ikiwa bei ya mali itapanda meneja hatapata faida hiyo lakini bado atahifadhi mali zake.
 
@@ -40,22 +40,22 @@ Kumbuka kwamba katika kesi hizi faida na hasara zinaweza kuwa katika wakati hali
 Kwa mfano, ikiwa unafungua nafasi ya future katika BTC/USDT kwa 100$ na leverage ya 50x hii inamaanisha kwamba ikiwa bei itapanda 1%, basi utakuwa unashinda 1x50 = 50% ya uwekezaji wako wa awali (50$). Na hivyo utakuwa na 150$.\
 Hata hivyo, ikiwa bei itashuka 1%, utapoteza 50% ya fedha zako (59$ katika kesi hii). Na ikiwa bei itashuka 2% utapoteza beti yako yote (2x50 = 100%).
 
-Kwa hivyo, leveraging inaruhusu kudhibiti kiasi cha pesa unazobeti wakati ikiongeza faida na hasara.
+Kwa hivyo, leveraging inaruhusu kudhibiti kiasi cha pesa unazobeti wakati unapanua faida na hasara.
 
 ## Differences Futures & Options
 
-Tofauti kuu kati ya futures na options ni kwamba mkataba ni wa hiari kwa mnunuzi: Anaweza kuamua kuutekeleza au la (kawaida atafanya hivyo tu ikiwa atafaidika). Muuzaji lazima auze ikiwa mnunuzi anataka kutumia chaguo hilo.\
-Hata hivyo, mnunuzi atakuwa akilipa ada fulani kwa muuzaji kwa kufungua chaguo hilo (hivyo muuzaji, ambaye anaonekana kuchukua hatari zaidi, anaanza kupata pesa).
+Tofauti kuu kati ya futures na options ni kwamba mkataba ni wa hiari kwa mnunuzi: Anaweza kuamua kuutekeleza au la (kawaida atafanya hivyo tu ikiwa atafaidika). Muuzaji lazima auze ikiwa mnunuzi anataka kutumia chaguo.\
+Hata hivyo, mnunuzi atakuwa akilipa ada fulani kwa muuzaji kwa kufungua chaguo (hivyo muuzaji, ambaye anaonekana kuchukua hatari zaidi, anaanza kupata pesa).
 
 ### 1. **Obligation vs. Right:**
 
 * **Futures:** Unaponunua au kuuza mkataba wa futures, unajiingiza katika **makubaliano ya kulazimisha** kununua au kuuza mali kwa bei maalum katika tarehe ya baadaye. Wote mnunuzi na muuzaji **wanalazimika** kutekeleza mkataba wakati wa kumalizika (isipokuwa mkataba umefungwa kabla ya hapo).
-* **Options:** Kwa options, una **haki, lakini si wajibu**, wa kununua (katika kesi ya **call option**) au kuuza (katika kesi ya **put option**) mali kwa bei maalum kabla au katika tarehe fulani ya kumalizika. **Mnunuzi** ana chaguo la kutekeleza, wakati **muuzaji** anawajibika kutekeleza biashara ikiwa mnunuzi atamua kutumia chaguo hilo.
+* **Options:** Kwa options, una **haki, lakini si wajibu**, wa kununua (katika kesi ya **call option**) au kuuza (katika kesi ya **put option**) mali kwa bei maalum kabla au katika tarehe fulani ya kumalizika. **Mnunuzi** ana chaguo la kutekeleza, wakati **muuzaji** anawajibika kutekeleza biashara ikiwa mnunuzi atamua kutumia chaguo.
 
 ### 2. **Risk:**
 
 * **Futures:** Wote mnunuzi na muuzaji wanachukua **hatari isiyo na kikomo** kwa sababu wanawajibika kukamilisha mkataba. Hatari ni tofauti kati ya bei iliyokubaliwa na bei ya soko katika tarehe ya kumalizika.
-* **Options:** Hatari ya mnunuzi imepunguzwa kwa **premium** iliyolipwa kununua chaguo. Ikiwa soko halihamishi kwa faida ya mwenye chaguo, wanaweza kuacha chaguo hilo likamalizika. Hata hivyo, **muuzaji** (mwandishi) wa chaguo ana hatari isiyo na kikomo ikiwa soko litahamia kwa kiasi kikubwa dhidi yao.
+* **Options:** Hatari ya mnunuzi imepunguzwa kwa **premium** iliyolipwa kununua chaguo. Ikiwa soko halihamishi kwa faida ya mwenye chaguo, wanaweza tu kuacha chaguo likifutwa. Hata hivyo, **muuzaji** (mwandishi) wa chaguo ana hatari isiyo na kikomo ikiwa soko litahamia kwa kiasi kikubwa dhidi yao.
 
 ### 3. **Cost:**
 

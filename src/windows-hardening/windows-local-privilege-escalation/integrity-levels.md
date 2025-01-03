@@ -1,19 +1,19 @@
-# Viwango vya Uaminifu
+# Integrity Levels
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Viwango vya Uaminifu
+## Integrity Levels
 
 Katika Windows Vista na toleo la baadaye, vitu vyote vilivyolindwa vinakuja na lebo ya **kiwango cha uaminifu**. Mpangilio huu kwa kawaida unatoa kiwango cha "kati" cha uaminifu kwa faili na funguo za rejista, isipokuwa kwa folda na faili fulani ambazo Internet Explorer 7 inaweza kuandika kwa kiwango cha chini cha uaminifu. Tabia ya kawaida ni kwamba michakato inayozinduliwa na watumiaji wa kawaida ina kiwango cha kati cha uaminifu, wakati huduma kwa kawaida hufanya kazi kwa kiwango cha uaminifu wa mfumo. Lebo ya uaminifu wa juu inalinda saraka ya mzizi.
 
 Kanuni muhimu ni kwamba vitu haviwezi kubadilishwa na michakato yenye kiwango cha chini cha uaminifu kuliko kiwango cha kitu. Viwango vya uaminifu ni:
 
-- **Hauaminiki**: Kiwango hiki ni kwa michakato yenye kuingia kwa siri. %%%Mfano: Chrome%%%
-- **Chini**: Kimsingi kwa mwingiliano wa mtandao, hasa katika Modu ya Kulindwa ya Internet Explorer, ikihusisha faili na michakato zinazohusiana, na folda fulani kama **Folda ya Mtandao ya Muda**. Michakato ya chini ya uaminifu inakabiliwa na vizuizi vikubwa, ikiwa ni pamoja na kukosa ufikiaji wa kuandika rejista na ufikiaji mdogo wa kuandika wasifu wa mtumiaji.
-- **Kati**: Kiwango cha kawaida kwa shughuli nyingi, kinachotolewa kwa watumiaji wa kawaida na vitu bila viwango maalum vya uaminifu. Hata wanachama wa kundi la Wasimamizi hufanya kazi kwa kiwango hiki kwa kawaida.
-- **Juu**: Imehifadhiwa kwa wasimamizi, ikiwaruhusu kubadilisha vitu vilivyo na viwango vya chini vya uaminifu, ikiwa ni pamoja na vile vilivyo katika kiwango cha juu chenyewe.
-- **Mfumo**: Kiwango cha juu zaidi cha uendeshaji kwa kernel ya Windows na huduma za msingi, ambacho hakiwezi kufikiwa hata na wasimamizi, kuhakikisha ulinzi wa kazi muhimu za mfumo.
-- **Mfunguo**: Kiwango cha kipekee ambacho kiko juu ya vingine vyote, kikiruhusu vitu katika kiwango hiki kufuta kitu kingine chochote.
+- **Untrusted**: Kiwango hiki ni kwa michakato yenye kuingia kwa siri. %%%Mfano: Chrome%%%
+- **Low**: Kimsingi kwa mwingiliano wa mtandao, hasa katika Modu ya Kulinda ya Internet Explorer, ikihusisha faili na michakato zinazohusiana, na folda fulani kama **Folda ya Mtandao ya Muda**. Michakato ya uaminifu wa chini inakabiliwa na vizuizi vikubwa, ikiwa ni pamoja na kukosa ufikiaji wa kuandika rejista na ufikiaji mdogo wa kuandika wasifu wa mtumiaji.
+- **Medium**: Kiwango cha kawaida kwa shughuli nyingi, kinachotolewa kwa watumiaji wa kawaida na vitu bila viwango maalum vya uaminifu. Hata wanachama wa kundi la Wasimamizi hufanya kazi kwa kiwango hiki kwa kawaida.
+- **High**: Imehifadhiwa kwa wasimamizi, ikiwaruhusu kubadilisha vitu kwa viwango vya chini vya uaminifu, ikiwa ni pamoja na vile vya kiwango cha juu mwenyewe.
+- **System**: Kiwango cha juu zaidi cha uendeshaji kwa kernel ya Windows na huduma za msingi, ambacho hakiwezi kufikiwa hata na wasimamizi, kuhakikisha ulinzi wa kazi muhimu za mfumo.
+- **Installer**: Kiwango cha kipekee ambacho kiko juu ya vingine vyote, kikiruhusu vitu vilivyo katika kiwango hiki kuondoa kitu kingine chochote.
 
 Unaweza kupata kiwango cha uaminifu cha mchakato kwa kutumia **Process Explorer** kutoka **Sysinternals**, ukifikia **mali** ya mchakato na kuangalia kichupo cha "**Usalama**":
 
@@ -23,7 +23,7 @@ Unaweza pia kupata **kiwango chako cha uaminifu cha sasa** kwa kutumia `whoami /
 
 ![](<../../images/image (325).png>)
 
-### Viwango vya Uaminifu katika Mfumo wa Faili
+### Integrity Levels in File-system
 
 Kitu ndani ya mfumo wa faili kinaweza kuhitaji **mahitaji ya kiwango cha chini cha uaminifu** na ikiwa mchakato huna mchakato huu wa uaminifu hautaweza kuingiliana nacho.\
 Kwa mfano, hebu **tufanye faili ya kawaida kutoka kwa konsole ya mtumiaji wa kawaida na kuangalia ruhusa**:
@@ -66,7 +66,7 @@ Access is denied.
 
 ### Viwango vya Uaminifu katika Binaries
 
-Nimefanya nakala ya `cmd.exe` katika `C:\Windows\System32\cmd-low.exe` na kuweka kiwango chake cha **uaminifu kuwa wa chini kutoka kwa konso ya msimamizi:**
+Nimefanya nakala ya `cmd.exe` katika `C:\Windows\System32\cmd-low.exe` na kuweka kiwango chake cha **uaminifu kuwa wa chini kutoka kwa konsoli ya msimamizi:**
 ```
 icacls C:\Windows\System32\cmd-low.exe
 C:\Windows\System32\cmd-low.exe NT AUTHORITY\SYSTEM:(I)(F)
@@ -80,7 +80,7 @@ Sasa, ninapokimbia `cmd-low.exe` itafanya **kazi chini ya kiwango cha chini cha 
 
 ![](<../../images/image (313).png>)
 
-Kwa watu wenye hamu, ikiwa utaweka kiwango cha juu cha uaminifu kwa binary (`icacls C:\Windows\System32\cmd-high.exe /setintegritylevel high`) haitafanya kazi kwa kiwango cha juu cha uaminifu moja kwa moja (ikiwa utaikumbusha kutoka kiwango cha kati cha uaminifu --kwa default-- itafanya kazi chini ya kiwango cha kati cha uaminifu).
+Kwa watu wenye hamu, ikiwa utaweka kiwango cha juu cha uaminifu kwa binary (`icacls C:\Windows\System32\cmd-high.exe /setintegritylevel high`) haitafanya kazi kwa kiwango cha juu cha uaminifu kiotomatiki (ikiwa unakiita kutoka kiwango cha kati cha uaminifu --kwa default-- itafanya kazi chini ya kiwango cha kati cha uaminifu).
 
 ### Viwango vya Uaminifu katika Mchakato
 

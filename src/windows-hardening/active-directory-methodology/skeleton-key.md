@@ -6,7 +6,7 @@
 
 **Shambulio la Skeleton Key** ni mbinu ya kisasa inayowezesha washambuliaji **kuzidi uthibitisho wa Active Directory** kwa **kuingiza nenosiri kuu** kwenye kidhibiti cha eneo. Hii inamwezesha mshambuliaji **kujiandikisha kama mtumiaji yeyote** bila nenosiri lao, kwa ufanisi **ikitoa ufikiaji usio na kikomo** kwa eneo hilo.
 
-Inaweza kufanywa kwa kutumia [Mimikatz](https://github.com/gentilkiwi/mimikatz). Ili kutekeleza shambulio hili, **haki za Admin wa Eneo ni lazima**, na mshambuliaji lazima alenge kila kidhibiti cha eneo ili kuhakikisha uvunjaji wa kina. Hata hivyo, athari za shambulio ni za muda mfupi, kwani **kuanzisha upya kidhibiti cha eneo kunafuta programu hasidi**, na hivyo inahitaji utekelezaji upya kwa ufikiaji wa kudumu.
+Inaweza kufanywa kwa kutumia [Mimikatz](https://github.com/gentilkiwi/mimikatz). Ili kutekeleza shambulio hili, **haki za Domain Admin ni lazima**, na mshambuliaji lazima alenge kila kidhibiti cha eneo ili kuhakikisha uvunjaji wa kina. Hata hivyo, athari za shambulio ni za muda mfupi, kwani **kuanzisha upya kidhibiti cha eneo kunafuta malware**, na hivyo inahitaji kutekelezwa tena kwa ufikiaji wa kudumu.
 
 **Kutekeleza shambulio** kunahitaji amri moja: `misc::skeleton`.
 

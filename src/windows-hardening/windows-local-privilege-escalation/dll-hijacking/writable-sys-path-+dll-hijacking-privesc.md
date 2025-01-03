@@ -6,7 +6,7 @@
 
 Ikiwa umeona kwamba unaweza **kuandika katika folda ya System Path** (kumbuka kwamba hii haitafanya kazi ikiwa unaweza kuandika katika folda ya User Path) inawezekana kwamba unaweza **kuinua mamlaka** katika mfumo.
 
-Ili kufanya hivyo unaweza kutumia **Dll Hijacking** ambapo uta **hijack maktaba inayopakiwa** na huduma au mchakato wenye **mamlaka zaidi** kuliko yako, na kwa sababu huduma hiyo inachukua Dll ambayo labda hata haipo katika mfumo mzima, itajaribu kuipakia kutoka System Path ambapo unaweza kuandika.
+Ili kufanya hivyo unaweza kutumia **Dll Hijacking** ambapo uta **hijack maktaba inayopakuliwa** na huduma au mchakato wenye **mamlaka zaidi** kuliko yako, na kwa sababu huduma hiyo inapakua Dll ambayo labda hata haipo katika mfumo mzima, itajaribu kuipakua kutoka System Path ambapo unaweza kuandika.
 
 Kwa maelezo zaidi kuhusu **nini Dll Hijacking** angalia:
 
@@ -18,9 +18,9 @@ Kwa maelezo zaidi kuhusu **nini Dll Hijacking** angalia:
 
 ### Finding a missing Dll
 
-Jambo la kwanza unahitaji ni **kubaini mchakato** unaotembea na **mamlaka zaidi** kuliko yako ambao unajaribu **kupakia Dll kutoka System Path** unayoweza kuandika.
+Jambo la kwanza unahitaji ni **kubaini mchakato** unaotembea na **mamlaka zaidi** kuliko yako ambao unajaribu **kupakua Dll kutoka System Path** unayoweza kuandika.
 
-Shida katika kesi hizi ni kwamba labda michakato hiyo tayari inatembea. Ili kupata ni Dll zipi zinakosekana huduma unahitaji kuanzisha procmon haraka iwezekanavyo (kabla ya michakato kupakiwa). Hivyo, ili kupata .dll zinazokosekana fanya:
+Shida katika kesi hizi ni kwamba labda michakato hiyo tayari inatembea. Ili kupata ni Dll zipi zinakosekana huduma hizo unahitaji kuzindua procmon haraka iwezekanavyo (kabla ya michakato kupakuliwa). Hivyo, ili kupata .dll zinazokosekana fanya:
 
 - **Unda** folda `C:\privesc_hijacking` na ongeza njia `C:\privesc_hijacking` kwenye **System Path env variable**. Unaweza kufanya hivi **kwa mikono** au kwa **PS**:
 ```powershell
@@ -39,7 +39,7 @@ $newPath = "$envPath;$folderPath"
 [Environment]::SetEnvironmentVariable("PATH", $newPath, "Machine")
 }
 ```
-- Fungua **`procmon`** na nenda kwenye **`Options`** --> **`Enable boot logging`** na bonyeza **`OK`** kwenye ujumbe.
+- Anzisha **`procmon`** na nenda kwenye **`Options`** --> **`Enable boot logging`** na bonyeza **`OK`** kwenye ujumbe.
 - Kisha, **reboot**. Wakati kompyuta inapoanzishwa upya **`procmon`** itaanza **kurekodi** matukio mara moja.
 - Mara **Windows** inapokuwa **imeanzishwa, tekeleza `procmon`** tena, itakuambia kwamba imekuwa ikifanya kazi na itaku **uliza kama unataka kuhifadhi** matukio kwenye faili. Sema **ndiyo** na **hifadhi matukio kwenye faili**.
 - **Baada** ya **faili** kutengenezwa, **funga** dirisha lililo wazi la **`procmon`** na **fungua faili la matukio**.

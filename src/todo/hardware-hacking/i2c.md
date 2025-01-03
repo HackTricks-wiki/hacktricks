@@ -4,7 +4,7 @@
 
 ## Bus Pirate
 
-Ili kujaribu kama Bus Pirate inafanya kazi, ung'anisha +5V na VPU na 3.3V na ADC na upate bus pirate (Tumia Tera Term kwa mfano) na tumia amri `~`:
+Ili kujaribu kama Bus Pirate inafanya kazi, ung'anisha +5V na VPU na 3.3V na ADC na upate bus pirate (Kwa kutumia Tera Term kwa mfano) na tumia amri `~`:
 ```bash
 # Use command
 HiZ>~
@@ -43,17 +43,17 @@ Any key to exit
 #Press space
 Found 0 errors.
 ```
-Kama unavyoona katika amri ya awali ilisema kwamba ilipata makosa 0. Hii ni muhimu kujua inafanya kazi baada ya kuununua au baada ya kubadilisha firmware.
+Kama unavyoona katika mstari wa amri uliopita, ilisema kwamba ilipata makosa 0. Hii ni muhimu kujua inafanya kazi baada ya kuununua au baada ya kubadilisha firmware.
 
 Ili kuungana na bus pirate unaweza kufuata nyaraka:
 
 ![](<../../images/image (484).png>)
 
-Katika kesi hii nitaungana na EPROM: ATMEL901 24C256 PU27:
+Katika kesi hii, nitaungana na EPROM: ATMEL901 24C256 PU27:
 
 ![](<../../images/image (964).png>)
 
-Ili kuzungumza na bus pirate nilitumia Tera Term iliyounganishwa na bandari ya COM ya pirate bus na Setup --> Serial Port --> Speed ya 115200.\
+Ili kuzungumza na bus pirate nilitumia Tera Term iliyounganishwa na bandari ya COM ya pirate bus na Mipangilio --> Bandari ya Serial --> Kasi ya 115200.\
 Katika mawasiliano yafuatayo unaweza kupata jinsi ya kuandaa bus pirate kuzungumza I2C na jinsi ya kuandika na kusoma kutoka kwenye kumbukumbu (Maoni yanaonekana kwa kutumia "#", usitarajie sehemu hiyo katika mawasiliano):
 ```bash
 # Check communication with buspirate

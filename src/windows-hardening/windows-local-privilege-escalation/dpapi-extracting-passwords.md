@@ -6,17 +6,17 @@
 
 ## DPAPI ni Nini
 
-Data Protection API (DPAPI) inatumika hasa ndani ya mfumo wa uendeshaji wa Windows kwa **symmetric encryption ya funguo za kibinafsi zisizo sawa**, ikitumia siri za mtumiaji au mfumo kama chanzo muhimu cha entropy. Njia hii inarahisisha encryption kwa waendelezaji kwa kuwapa uwezo wa kuficha data kwa kutumia funguo zilizotokana na siri za kuingia za mtumiaji au, kwa ajili ya encryption ya mfumo, siri za uthibitishaji wa kikoa cha mfumo, hivyo kuondoa hitaji kwa waendelezaji kusimamia ulinzi wa funguo za encryption wenyewe.
+Data Protection API (DPAPI) inatumika hasa ndani ya mfumo wa uendeshaji wa Windows kwa **symmetric encryption ya funguo za kibinafsi zisizo za kawaida**, ikitumia siri za mtumiaji au mfumo kama chanzo muhimu cha entropy. Njia hii inarahisisha usimbaji kwa waendelezaji kwa kuwapa uwezo wa kusimbisha data kwa kutumia funguo zilizotokana na siri za kuingia za mtumiaji au, kwa usimbaji wa mfumo, siri za uthibitishaji wa kikoa cha mfumo, hivyo kuondoa hitaji kwa waendelezaji kusimamia ulinzi wa funguo za usimbaji wenyewe.
 
 ### Data Iliyolindwa na DPAPI
 
-Miongoni mwa data binafsi zilizolindwa na DPAPI ni:
+Miongoni mwa data za kibinafsi zilizolindwa na DPAPI ni:
 
 - Nywila za Internet Explorer na Google Chrome na data ya kukamilisha kiotomatiki
 - Nywila za barua pepe na akaunti za FTP za ndani kwa programu kama Outlook na Windows Mail
-- Nywila za folda zilizoshirikiwa, rasilimali, mitandao isiyo na waya, na Windows Vault, ikiwa ni pamoja na funguo za encryption
-- Nywila za muunganisho wa desktop ya mbali, .NET Passport, na funguo za kibinafsi kwa madhumuni mbalimbali ya encryption na uthibitishaji
-- Nywila za mtandao zinazodhibitiwa na Credential Manager na data binafsi katika programu zinazotumia CryptProtectData, kama Skype, MSN messenger, na zaidi
+- Nywila za folda zilizoshirikiwa, rasilimali, mitandao isiyo na waya, na Windows Vault, ikiwa ni pamoja na funguo za usimbaji
+- Nywila za muunganisho wa desktop ya mbali, .NET Passport, na funguo za kibinafsi kwa madhumuni mbalimbali ya usimbaji na uthibitishaji
+- Nywila za mtandao zinazodhibitiwa na Credential Manager na data za kibinafsi katika programu zinazotumia CryptProtectData, kama Skype, MSN messenger, na zaidi
 
 ## Orodha ya Vault
 ```bash

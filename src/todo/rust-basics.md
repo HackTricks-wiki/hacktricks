@@ -30,7 +30,7 @@ Unaweza kutumia kazi kama `is_some()` au `is_none()` kuangalia thamani ya Chaguo
 
 ### Macros
 
-Macros ni zenye nguvu zaidi kuliko kazi kwa sababu zinapanuka kutoa msimbo zaidi kuliko ule ulioandika kwa mikono. Kwa mfano, saini ya kazi lazima itangaze idadi na aina ya vigezo ambavyo kazi ina. Hata hivyo, Macros zinaweza kuchukua idadi tofauti ya vigezo: tunaweza kuita `println!("hello")` na hoja moja au `println!("hello {}", name)` na hoja mbili. Pia, macros zinapanuliwa kabla ya mkusanyiko kufasiri maana ya msimbo, hivyo macro inaweza, kwa mfano, kutekeleza sifa kwenye aina fulani. Kazi haiwezi, kwa sababu inaitwa wakati wa wakati wa kukimbia na sifa inahitaji kutekelezwa wakati wa mkusanyiko.
+Macros ni zenye nguvu zaidi kuliko kazi kwa sababu zinapanuka kutoa msimbo zaidi kuliko ule ulioandika kwa mikono. Kwa mfano, saini ya kazi lazima itangaze idadi na aina ya vigezo ambavyo kazi ina. Hata hivyo, macros zinaweza kuchukua idadi tofauti ya vigezo: tunaweza kuita `println!("hello")` na hoja moja au `println!("hello {}", name)` na hoja mbili. Pia, macros zinapanuliwa kabla ya mkusanyiko kufasiri maana ya msimbo, hivyo macro inaweza, kwa mfano, kutekeleza sifa kwenye aina fulani. Kazi haiwezi, kwa sababu inaitwa wakati wa utekelezaji na sifa inahitaji kutekelezwa wakati wa mkusanyiko.
 ```rust
 macro_rules! my_macro {
 () => {
@@ -267,7 +267,7 @@ println!("{:?}", apple);
 ```
 #### Threads
 
-Katika kesi hii tutapita nyuzi mabadiliko ya kubadilisha.
+Katika kesi hii tutapitia nyuzi mabadiliko ya kubadilisha.
 ```rust
 fn main() {
 let status = Arc::new(Mutex::new(JobStatus { jobs_completed: 0 }));

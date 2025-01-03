@@ -38,7 +38,7 @@ Hatua zifuatazo zinapendekezwa kwa kubadilisha mipangilio ya kuanzisha kifaa na 
 
 6. **Uingiliaji wa Kihardware wa Tahadhari**:
 
-- Kuwa makini unapounganisha pini moja na ardhi na kuingiliana na chips za SPI au NAND flash wakati wa mchakato wa kuanzisha kifaa, hasa kabla ya kernel kufungua. Kagua karatasi ya data ya chip ya NAND flash kabla ya kufupisha pini.
+- Kuwa makini unapounganisha pini moja na ardhi na kuingiliana na SPI au NAND flash chips wakati wa mchakato wa kuanzisha kifaa, hasa kabla ya kernel kufungua. Kagua karatasi ya data ya NAND flash chip kabla ya kufupisha pini.
 
 7. **Sanidi Server ya DHCP ya Ulaghai**:
 - Sanidi server ya DHCP ya ulaghai yenye vigezo vya uharibifu ili kifaa kiweze kuyakubali wakati wa kuanzisha PXE. Tumia zana kama server ya DHCP ya msaada ya Metasploit (MSF). Badilisha parameter ya 'FILENAME' kwa amri za kuingiza kama `'a";/bin/sh;#'` ili kujaribu uthibitishaji wa ingizo kwa taratibu za kuanzisha kifaa.

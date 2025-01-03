@@ -56,11 +56,11 @@ IsDomain     : True
 # You may also enumerate where foreign groups and/or users have been assigned
 # local admin access via Restricted Group by enumerating the GPOs in the foreign domain.
 ```
-Katika orodha ya awali iligundulika kwamba mtumiaji **`crossuser`** yuko ndani ya kundi la **`External Admins`** ambalo lina **ufikiaji wa Admin** ndani ya **DC ya eneo la nje**.
+Katika orodha iliyopita iligundulika kwamba mtumiaji **`crossuser`** yuko ndani ya kundi la **`External Admins`** ambalo lina **upatikanaji wa Admin** ndani ya **DC ya eneo la nje**.
 
-## Ufikiaji wa Awali
+## Upatikanaji wa Awali
 
-Ikiwa hujaweza kupata **ufikiaji maalum** wa mtumiaji wako katika eneo lingine, bado unaweza kurudi kwenye Mbinu za AD na kujaribu **privesc kutoka kwa mtumiaji asiye na mamlaka** (mambo kama kerberoasting kwa mfano):
+Ikiwa hujaweza kupata **upatikanaji maalum** wa mtumiaji wako katika eneo lingine, bado unaweza kurudi kwenye Mbinu za AD na kujaribu **privesc kutoka kwa mtumiaji asiye na mamlaka** (mambo kama kerberoasting kwa mfano):
 
 Unaweza kutumia **Powerview functions** ili **kuorodhesha** **eneo lingine** kwa kutumia param ya `-Domain` kama ilivyo:
 ```powershell

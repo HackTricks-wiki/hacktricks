@@ -4,12 +4,12 @@
 
 ## Diamond Ticket
 
-**Kama tiketi ya dhahabu**, tiketi ya almasi ni TGT ambayo inaweza kutumika **kuingia kwenye huduma yoyote kama mtumiaji yeyote**. Tiketi ya dhahabu inaundwa kabisa bila mtandao, imefungwa kwa hash ya krbtgt ya eneo hilo, na kisha kuingizwa kwenye kikao cha kuingia kwa matumizi. Kwa sababu waendesha eneo hawafuatilii TGTs ambazo zimepewa kihalali, watakubali kwa furaha TGTs ambazo zimefungwa kwa hash yao ya krbtgt.
+**Kama tiketi ya dhahabu**, tiketi ya almasi ni TGT ambayo inaweza kutumika **kufikia huduma yoyote kama mtumiaji yeyote**. Tiketi ya dhahabu inaundwa kabisa mtandaoni, imefungwa kwa hash ya krbtgt ya eneo hilo, na kisha kuhamishwa kwenye kikao cha kuingia kwa matumizi. Kwa sababu waendesha eneo hawafuatilii TGTs ambazo zimepewa kihalali, watakubali kwa furaha TGTs ambazo zimefungwa kwa hash yao ya krbtgt.
 
-Kuna mbinu mbili za kawaida kugundua matumizi ya tiketi za dhahabu:
+Kuna mbinu mbili za kawaida za kugundua matumizi ya tiketi za dhahabu:
 
 - Angalia TGS-REQs ambazo hazina AS-REQ inayolingana.
-- Angalia TGTs ambazo zina thamani za kipumbavu, kama vile muda wa maisha wa miaka 10 wa Mimikatz.
+- Angalia TGTs ambazo zina thamani za kipumbavu, kama vile muda wa miaka 10 wa Mimikatz.
 
 **Tiketi ya almasi** inatengenezwa kwa **kubadilisha maeneo ya TGT halali ambayo ilitolewa na DC**. Hii inafikiwa kwa **kuomba** **TGT**, **kuifungua** kwa hash ya krbtgt ya eneo, **kubadilisha** maeneo yanayohitajika ya tiketi, kisha **kuifunga tena**. Hii **inasuluhisha mapungufu mawili yaliyotajwa hapo juu** ya tiketi ya dhahabu kwa sababu:
 

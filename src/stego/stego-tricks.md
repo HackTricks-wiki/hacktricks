@@ -50,7 +50,7 @@ strings -e B -n 6 file # 32bit strings (big-endian)
 ```
 ### **Comparison (cmp)**
 
-Inatumika kwa kulinganisha faili iliyobadilishwa na toleo lake asilia lililopatikana mtandaoni.
+Inatumika kwa kulinganisha faili iliyobadilishwa na toleo lake la asili lililopatikana mtandaoni.
 ```bash
 cmp original.jpg stego.jpg -b -l
 ```
@@ -58,13 +58,13 @@ cmp original.jpg stego.jpg -b -l
 
 ### **Takwimu Zilizofichwa Katika Nafasi**
 
-Makarakteri yasiyoonekana katika nafasi zinazonekana kuwa tupu yanaweza kuficha taarifa. Ili kutoa data hii, tembelea [https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder](https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder).
+Mifumo isiyoonekana katika nafasi zinazonekana kuwa tupu inaweza kuficha taarifa. Ili kutoa data hii, tembelea [https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder](https://www.irongeek.com/i.php?page=security/unicode-steganography-homoglyph-encoder).
 
 ## **Kutoa Takwimu Kutoka kwa Picha**
 
-### **Kutambua Maelezo ya Picha kwa kutumia GraphicMagick**
+### **Kutambua Maelezo ya Picha kwa GraphicMagick**
 
-[GraphicMagick](https://imagemagick.org/script/download.php) hutumika kubaini aina za faili za picha na kutambua uwezekano wa uharibifu. Tekeleza amri iliyo hapa chini ili kukagua picha:
+[GraphicMagick](https://imagemagick.org/script/download.php) inatumika kubaini aina za faili za picha na kutambua uwezekano wa uharibifu. Tekeleza amri iliyo hapa chini ili kukagua picha:
 ```bash
 ./magick identify -verbose stego.jpg
 ```
@@ -74,7 +74,7 @@ Ili kujaribu kurekebisha picha iliyo haribika, kuongeza maoni ya metadata kunawe
 ```
 ### **Steghide kwa Kuficha Data**
 
-Steghide inarahisisha kuficha data ndani ya `JPEG, BMP, WAV, na AU` faili, ina uwezo wa kuingiza na kutoa data iliyosimbwa. Usanidi ni rahisi kutumia `apt`, na [mchakato wa chanzo upo kwenye GitHub](https://github.com/StefanoDeVuono/steghide).
+Steghide inarahisisha kuficha data ndani ya `JPEG, BMP, WAV, na AU` faili, ina uwezo wa kuingiza na kutoa data iliyosimbwa. Usanidi ni rahisi kutumia `apt`, na [mwanzo wa msimbo upo kwenye GitHub](https://github.com/StefanoDeVuono/steghide).
 
 **Amri:**
 
@@ -91,7 +91,7 @@ stegcracker <file> [<wordlist>]
 ```
 ### **zsteg kwa Faili za PNG na BMP**
 
-zsteg inajikita katika kufichua data iliyofichwa katika faili za PNG na BMP. Usanidi unafanywa kupitia `gem install zsteg`, ikiwa na [chanzo kwenye GitHub](https://github.com/zed-0xff/zsteg).
+zsteg inajikita katika kugundua data iliyofichwa katika faili za PNG na BMP. Usanidi unafanywa kupitia `gem install zsteg`, ikiwa na [chanzo kwenye GitHub](https://github.com/zed-0xff/zsteg).
 
 **Amri:**
 
@@ -104,9 +104,9 @@ zsteg inajikita katika kufichua data iliyofichwa katika faili za PNG na BMP. Usa
 
 **Stegsolve** inatumia filters mbalimbali za rangi kufichua maandiko au ujumbe uliofichwa ndani ya picha. Inapatikana kwenye [GitHub](https://github.com/eugenekolo/sec-tools/tree/master/stego/stegsolve/stegsolve).
 
-### **FFT kwa Ugunduzi wa Maudhui ya Kufichwa**
+### **FFT kwa Ugunduzi wa Maudhui ya Fichwa**
 
-Fast Fourier Transform (FFT) mbinu zinaweza kufichua maudhui yaliyofichwa katika picha. Rasilimali muhimu ni pamoja na:
+Mbinu za Fast Fourier Transform (FFT) zinaweza kufichua maudhui yaliyofichwa katika picha. Rasilimali muhimu ni pamoja na:
 
 - [EPFL Demo](http://bigwww.epfl.ch/demo/ip/demos/FFT/)
 - [Ejectamenta](https://www.ejectamenta.com/Fourifier-fullscreen/)
@@ -135,7 +135,7 @@ Kwa uchunguzi zaidi, fikiria kutembelea:
 
 ## **Kutoa Data kutoka kwa Sauti**
 
-**Audio steganography** inatoa njia ya kipekee ya kuficha taarifa ndani ya faili za sauti. Zana tofauti hutumiwa kwa ajili ya kuingiza au kupata maudhui yaliyofichwa.
+**Audio steganography** inatoa njia ya kipekee ya kuficha habari ndani ya faili za sauti. Zana tofauti hutumiwa kwa ajili ya kuingiza au kupata maudhui yaliyofichwa.
 
 ### **Steghide (JPEG, BMP, WAV, AU)**
 
@@ -147,13 +147,13 @@ Zana hii inafaa kwa aina mbalimbali za muundo ikiwa ni pamoja na PNG, BMP, GIF, 
 
 ### **ffmpeg**
 
-ffmpeg ni muhimu kwa kutathmini uaminifu wa faili za sauti, ikionyesha taarifa za kina na kubaini tofauti zozote.
+ffmpeg ni muhimu kwa kutathmini uadilifu wa faili za sauti, ikionyesha maelezo ya kina na kubaini tofauti zozote.
 ```bash
 ffmpeg -v info -i stego.mp3 -f null -
 ```
 ### **WavSteg (WAV)**
 
-WavSteg inajulikana kwa kuficha na kutoa data ndani ya faili za WAV kwa kutumia mkakati wa bit isiyo na umuhimu. Inapatikana kwenye [GitHub](https://github.com/ragibson/Steganography#WavSteg). Amri ni:
+WavSteg inajulikana kwa kuficha na kutoa data ndani ya faili za WAV kwa kutumia mkakati wa bit isiyo na umuhimu. Inapatikana kwenye [GitHub](https://github.com/ragibson/Steganography#WavSteg). Amri zinajumuisha:
 ```bash
 python3 WavSteg.py -r -b 1 -s soundfile -o outputfile
 
@@ -165,7 +165,7 @@ Deepsound inaruhusu usimbaji na kugundua habari ndani ya faili za sauti kwa kutu
 
 ### **Sonic Visualizer**
 
-Chombo kisicho na thamani kwa ukaguzi wa kuona na wa uchambuzi wa faili za sauti, Sonic Visualizer inaweza kufichua vipengele vilivyojificha ambavyo haviwezi kugundulika kwa njia nyingine. Tembelea [official website](https://www.sonicvisualiser.org/) kwa maelezo zaidi.
+Kifaa kisicho na thamani kwa ukaguzi wa kuona na wa uchambuzi wa faili za sauti, Sonic Visualizer inaweza kufichua vipengele vilivyofichwa ambavyo haviwezi kugundulika kwa njia nyingine. Tembelea [official website](https://www.sonicvisualiser.org/) kwa maelezo zaidi.
 
 ### **DTMF Tones - Dial Tones**
 
@@ -175,7 +175,7 @@ Kugundua sauti za DTMF katika faili za sauti kunaweza kufanywa kupitia zana za m
 
 ### **Binary Length SQRT - QR Code**
 
-Data za binary ambazo zinaweza kuja na nambari kamili zinaweza kuwakilisha QR code. Tumia kipande hiki kuangalia:
+Data za binary ambazo zinafanya mraba kuwa nambari kamili zinaweza kuwakilisha QR code. Tumia kipande hiki kuangalia:
 ```python
 import math
 math.sqrt(2500) #50

@@ -6,17 +6,17 @@
 
 ## Kutambua Algorithimu
 
-Ikiwa unamaliza katika msimbo **ukitumia shift kulia na kushoto, xors na operesheni kadhaa za hesabu** kuna uwezekano mkubwa kwamba ni utekelezaji wa **algorithimu ya kijamii**. Hapa kuna njia kadhaa za **kutambua algorithimu inayotumika bila kuhitaji kubadilisha kila hatua**.
+Ikiwa unamaliza katika msimbo **ukitumia shift kulia na kushoto, xors na operesheni kadhaa za hesabu** kuna uwezekano mkubwa kwamba ni utekelezaji wa **algorithimu ya kijamii**. Hapa kuna njia kadhaa za **kutambua algorithimu inayotumika bila kuhitaji kurudi nyuma kila hatua**.
 
 ### API functions
 
 **CryptDeriveKey**
 
-Ikiwa kazi hii inatumika, unaweza kupata ni **algorithimu gani inatumika** ukichunguza thamani ya parameter ya pili:
+Ikiwa kazi hii inatumika, unaweza kupata ni **algorithimu gani inayotumika** ukichunguza thamani ya parameter ya pili:
 
 ![](<../../images/image (375) (1) (1) (1) (1).png>)
 
-Angalia hapa jedwali la algorithimu zinazowezekana na thamani zao zilizotengwa: [https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id](https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id)
+Angalia hapa jedwali la algorithimu zinazowezekana na thamani zao zilizotolewa: [https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id](https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id)
 
 **RtlCompressBuffer/RtlDecompressBuffer**
 
@@ -24,16 +24,16 @@ Inapunguza na kufungua buffer fulani ya data.
 
 **CryptAcquireContext**
 
-Kutoka [the docs](https://learn.microsoft.com/en-us/windows/win32/api/wincrypt/nf-wincrypt-cryptacquirecontexta): Kazi ya **CryptAcquireContext** inatumika kupata mkono wa chombo maalum cha funguo ndani ya mtoa huduma maalum wa kijamii (CSP). **Huu mkono uliorejeshwa unatumika katika wito wa kazi za CryptoAPI** zinazotumia CSP iliyochaguliwa.
+Kutoka [the docs](https://learn.microsoft.com/en-us/windows/win32/api/wincrypt/nf-wincrypt-cryptacquirecontexta): Kazi ya **CryptAcquireContext** inatumika kupata mkono wa chombo maalum cha funguo ndani ya mtoa huduma wa kijamii maalum (CSP). **Huu mkono uliorejeshwa unatumika katika wito wa kazi za CryptoAPI** zinazotumia CSP iliyochaguliwa.
 
 **CryptCreateHash**
 
-Inaanzisha hashing ya mtiririko wa data. Ikiwa kazi hii inatumika, unaweza kupata ni **algorithimu gani inatumika** ukichunguza thamani ya parameter ya pili:
+Inaanzisha hashing ya mtiririko wa data. Ikiwa kazi hii inatumika, unaweza kupata ni **algorithimu gani inayotumika** ukichunguza thamani ya parameter ya pili:
 
 ![](<../../images/image (376).png>)
 
 \
-Angalia hapa jedwali la algorithimu zinazowezekana na thamani zao zilizotengwa: [https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id](https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id)
+Angalia hapa jedwali la algorithimu zinazowezekana na thamani zao zilizotolewa: [https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id](https://docs.microsoft.com/en-us/windows/win32/seccrypto/alg-id)
 
 ### Misingi ya msimbo
 
@@ -65,12 +65,12 @@ Imepangwa kwa sehemu 3 kuu:
 
 - **Hatua ya Kuanza/**: Inaunda **meza ya thamani kutoka 0x00 hadi 0xFF** (256bytes kwa jumla, 0x100). Meza hii kwa kawaida inaitwa **Substitution Box** (au SBox).
 - **Hatua ya Kuchanganya**: Itakuwa **inazunguka kupitia meza** iliyoundwa hapo awali (zunguko wa 0x100, tena) ikibadilisha kila thamani kwa **bytes za nadharia**. Ili kuunda hizi bytes za nadharia, funguo ya RC4 **inatumika**. Funguo za RC4 **zinaweza kuwa** **kati ya 1 na 256 bytes kwa urefu**, hata hivyo kawaida inapendekezwa iwe juu ya 5 bytes. Kwa kawaida, funguo za RC4 ni 16 bytes kwa urefu.
-- **Hatua ya XOR**: Hatimaye, maandiko ya wazi au cyphertext **yanapigwa XOR na thamani zilizoundwa hapo awali**. Kazi ya kuandika na kufungua ni sawa. Kwa hili, **zunguko kupitia bytes 256 zilizoundwa** utafanywa mara nyingi kadri inavyohitajika. Hii kwa kawaida inatambuliwa katika msimbo uliotolewa na **%256 (mod 256)**.
+- **Hatua ya XOR**: Hatimaye, maandiko ya wazi au cyphertext **yanapigwa XOR na thamani zilizoundwa hapo awali**. Kazi ya kuandika na kufungua ni ile ile. Kwa hili, **zunguko kupitia bytes 256 zilizoundwa** utafanywa mara nyingi kadri inavyohitajika. Hii kwa kawaida inatambuliwa katika msimbo uliotolewa na **%256 (mod 256)**.
 
 > [!NOTE]
 > **Ili kutambua RC4 katika msimbo wa disassembly/uliotolewa unaweza kuangalia kwa zunguko 2 za ukubwa 0x100 (kwa kutumia funguo) na kisha XOR ya data ya ingizo na thamani 256 zilizoundwa hapo awali katika zunguko 2 labda kwa kutumia %256 (mod 256)**
 
-### **Hatua ya Kuanza/Substitution Box:** (Kumbuka nambari 256 inayotumika kama hesabu na jinsi 0 inavyoandikwa katika kila mahali pa wahusika 256)
+### **Hatua ya Kuanza/Substitution Box:** (Angalia nambari 256 inayotumika kama hesabu na jinsi 0 inavyandikwa katika kila mahali pa wahusika 256)
 
 ![](<../../images/image (377).png>)
 
@@ -98,7 +98,7 @@ Imepangwa kwa sehemu 3 kuu:
 
 ### Tabia
 
-- Ni nadra kupata malware ikitumia lakini kuna mifano (Ursnif)
+- Ni nadra kupata malware inayotumia lakini kuna mifano (Ursnif)
 - Rahisi kubaini ikiwa algorithimu ni Serpent au la kulingana na urefu wake (kazi ndefu sana)
 
 ### Kutambua
@@ -112,7 +112,7 @@ Kama ilivyotajwa hapo awali, msimbo huu unaweza kuonyeshwa ndani ya decompiler y
 
 ![](<../../images/image (382).png>)
 
-Kwa hivyo, inawezekana kutambua algorithimu hii ukichunguza **nambari ya kichawi** na **XORs za awali**, kuona **kazi ndefu sana** na **kulinganisha** baadhi ya **maelekezo** ya kazi ndefu **na utekelezaji** (kama shift kushoto kwa 7 na kuzungusha kushoto kwa 22).
+Kwa hivyo, inawezekana kutambua algorithimu hii ukichunguza **nambari ya kichawi** na **XOR za awali**, kuona **kazi ndefu sana** na **kulinganisha** baadhi ya **maelekezo** ya kazi ndefu **na utekelezaji** (kama shift kushoto kwa 7 na kuzungusha kushoto kwa 22).
 
 ## RSA **(Kijamii Crypt)**
 
@@ -120,7 +120,7 @@ Kwa hivyo, inawezekana kutambua algorithimu hii ukichunguza **nambari ya kichawi
 
 - Ngumu zaidi kuliko algorithimu za kijamii
 - Hakuna misingi! (utekelezaji wa kawaida ni mgumu kubaini)
-- KANAL (mchambuzi wa crypto) inashindwa kuonyesha vidokezo juu ya RSA kwani inategemea misingi.
+- KANAL (mchambuzi wa crypto) inashindwa kuonyesha vidokezo juu ya RSA na inategemea misingi.
 
 ### Kutambua kwa kulinganisha
 

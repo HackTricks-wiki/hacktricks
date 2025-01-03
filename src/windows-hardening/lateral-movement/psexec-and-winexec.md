@@ -8,18 +8,18 @@ Mchakato umeelezwa katika hatua zilizo hapa chini, ukionyesha jinsi binaries za 
 
 1. **Nakili ya binary ya huduma kwenye ADMIN$ share kupitia SMB** inafanywa.
 2. **Uundaji wa huduma kwenye mashine ya mbali** unafanywa kwa kuelekeza kwenye binary.
-3. Huduma inaanza **kwa mbali**.
-4. Baada ya kutoka, huduma inasimamishwa, na binary inafutwa.
+3. Huduma hiyo **inaanzishwa kwa mbali**.
+4. Baada ya kutoka, huduma hiyo **inasitishwa, na binary inafutwa**.
 
 ### **Mchakato wa Kutekeleza PsExec kwa Mikono**
 
-Kukisia kuna payload inayoweza kutekelezwa (iliyoundwa na msfvenom na kufichwa kwa kutumia Veil ili kuepuka kugunduliwa na antivirus), inayoitwa 'met8888.exe', ikiwakilisha payload ya meterpreter reverse_http, hatua zifuatazo zinachukuliwa:
+Tukichukulia kuna payload inayoweza kutekelezwa (iliyoundwa na msfvenom na kufichwa kwa kutumia Veil ili kuepuka kugunduliwa na antivirus), inayoitwa 'met8888.exe', ikiwakilisha payload ya meterpreter reverse_http, hatua zifuatazo zinachukuliwa:
 
-- **Nakili binary**: Executable inanakiliwa kwenye ADMIN$ share kutoka kwa amri ya amri, ingawa inaweza kuwekwa mahali popote kwenye mfumo wa faili ili kubaki kufichwa.
-- **Kuunda huduma**: Kwa kutumia amri ya Windows `sc`, ambayo inaruhusu kuuliza, kuunda, na kufuta huduma za Windows kwa mbali, huduma inayoitwa "meterpreter" inaundwa ili kuelekeza kwenye binary iliyopakiwa.
+- **Nakili binary**: Executable inakopiwa kwenye ADMIN$ share kutoka kwa amri ya amri, ingawa inaweza kuwekwa mahali popote kwenye mfumo wa faili ili kubaki kufichwa.
+- **Kuunda huduma**: Kwa kutumia amri ya Windows `sc`, ambayo inaruhusu kuuliza, kuunda, na kufuta huduma za Windows kwa mbali, huduma inayoitwa "meterpreter" inaundwa kuelekea kwenye binary iliyopakiwa.
 - **Kuanza huduma**: Hatua ya mwisho inahusisha kuanzisha huduma, ambayo kwa uwezekano itasababisha kosa la "time-out" kwa sababu binary sio binary halisi ya huduma na inashindwa kurudisha msimbo wa majibu unaotarajiwa. Kosa hili halina umuhimu kwani lengo kuu ni utekelezaji wa binary.
 
-Uchunguzi wa msikilizaji wa Metasploit utaonyesha kuwa kikao kimeanzishwa kwa mafanikio.
+Uangalizi wa msikilizaji wa Metasploit utaonyesha kuwa kikao kimeanzishwa kwa mafanikio.
 
 [Learn more about the `sc` command](https://technet.microsoft.com/en-us/library/bb490995.aspx).
 

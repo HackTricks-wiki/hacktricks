@@ -36,9 +36,9 @@ ls \\10.10.10.10\c$\Users
 
 **Kwa maelezo zaidi kuhusu mbinu hii angalia chapisho la asili [https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/](https://enigma0x3.net/2017/01/23/lateral-movement-via-dcom-round-2/)**
 
-Objekti **MMC20.Application** iligundulika kuwa haina "LaunchPermissions" wazi, ikirudi kwenye ruhusa zinazoruhusu Wasimamizi kupata. Kwa maelezo zaidi, thread inaweza kuchunguzwa [hapa](https://twitter.com/tiraniddo/status/817532039771525120), na matumizi ya [@tiraniddo](https://twitter.com/tiraniddo)’s OleView .NET kwa ajili ya kuchuja objekti bila Ruhusa ya Kuanzisha inashauriwa.
+Objekti **MMC20.Application** iligundulika kuwa haina "LaunchPermissions" wazi, ikirudi kwenye ruhusa zinazoruhusu Wasimamizi kupata. Kwa maelezo zaidi, mjadala unaweza kuchunguzwa [hapa](https://twitter.com/tiraniddo/status/817532039771525120), na matumizi ya [@tiraniddo](https://twitter.com/tiraniddo)’s OleView .NET kwa ajili ya kuchuja objekti bila Ruhusa ya Uzinduzi inashauriwa.
 
-Objekti mbili maalum, `ShellBrowserWindow` na `ShellWindows`, zilisisitizwa kutokana na ukosefu wa Ruhusa za Kuanzisha wazi. Ukosefu wa kiingilio cha rejista cha `LaunchPermission` chini ya `HKCR:\AppID\{guid}` unaashiria ukosefu wa ruhusa wazi.
+Objekti mbili maalum, `ShellBrowserWindow` na `ShellWindows`, zilisisitizwa kutokana na ukosefu wa Ruhusa za Uzinduzi wazi. Ukosefu wa kiingilio cha rejista cha `LaunchPermission` chini ya `HKCR:\AppID\{guid}` unaashiria ukosefu wa ruhusa wazi.
 
 ### ShellWindows
 
@@ -53,9 +53,9 @@ $item.Document.Application.ShellExecute("cmd.exe", "/c calc.exe", "c:\windows\sy
 ```
 ### Lateral Movement with Excel DCOM Objects
 
-Harakati za upande zinaweza kufanywa kwa kutumia vitu vya DCOM Excel. Kwa maelezo ya kina, ni vyema kusoma mjadala kuhusu kutumia Excel DDE kwa harakati za upande kupitia DCOM kwenye [blogu ya Cybereason](https://www.cybereason.com/blog/leveraging-excel-dde-for-lateral-movement-via-dcom).
+Lateral movement inaweza kupatikana kwa kutumia DCOM Excel objects. Kwa maelezo ya kina, ni vyema kusoma mjadala kuhusu kutumia Excel DDE kwa ajili ya lateral movement kupitia DCOM kwenye [blogu ya Cybereason](https://www.cybereason.com/blog/leveraging-excel-dde-for-lateral-movement-via-dcom).
 
-Mradi wa Empire unatoa skripti ya PowerShell, ambayo inaonyesha matumizi ya Excel kwa utekelezaji wa msimbo wa mbali (RCE) kwa kubadilisha vitu vya DCOM. Hapa chini kuna vipande kutoka kwa skripti inayopatikana kwenye [hifadhi ya GitHub ya Empire](https://github.com/EmpireProject/Empire/blob/master/data/module_source/lateral_movement/Invoke-DCOM.ps1), ikionyesha mbinu tofauti za kutumia Excel kwa RCE:
+Mradi wa Empire unatoa script ya PowerShell, ambayo inaonyesha matumizi ya Excel kwa ajili ya remote code execution (RCE) kwa kubadilisha DCOM objects. Hapa chini kuna vipande kutoka kwa script inayopatikana kwenye [hifadhi ya GitHub ya Empire](https://github.com/EmpireProject/Empire/blob/master/data/module_source/lateral_movement/Invoke-DCOM.ps1), ikionyesha mbinu tofauti za kutumia Excel kwa RCE:
 ```powershell
 # Detection of Office version
 elseif ($Method -Match "DetectOffice") {
@@ -80,7 +80,7 @@ $Obj.DDEInitiate("cmd", "/c $Command")
 ```
 ### Zana za Uhamasishaji wa Mwelekeo
 
-Zana mbili zimeangaziwa kwa ajili ya kujiendesha kwa mbinu hizi:
+Zana mbili zimeangaziwa kwa ajili ya kuhamasisha mbinu hizi:
 
 - **Invoke-DCOM.ps1**: Skripti ya PowerShell iliyotolewa na mradi wa Empire inayorahisisha mwito wa mbinu tofauti za kutekeleza msimbo kwenye mashine za mbali. Skripti hii inapatikana katika hifadhi ya Empire GitHub.
 

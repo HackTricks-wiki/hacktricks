@@ -39,19 +39,19 @@ AD CS inatambua cheti za CA katika msitu wa AD kupitia vyombo vilivyotengwa, kil
 
 ### Certificate Templates
 
-Zimefafanuliwa ndani ya AD, templeti hizi zinaelezea mipangilio na ruhusa za kutoa vyeti, ikiwa ni pamoja na EKUs zinazoruhusiwa na haki za usajili au mabadiliko, muhimu kwa usimamizi wa ufikiaji wa huduma za cheti.
+Zimefafanuliwa ndani ya AD, templeti hizi zinaelezea mipangilio na ruhusa za kutoa cheti, ikiwa ni pamoja na EKUs zinazoruhusiwa na haki za usajili au mabadiliko, muhimu kwa usimamizi wa ufikiaji wa huduma za cheti.
 
 ## Certificate Enrollment
 
-Mchakato wa usajili wa vyeti huanzishwa na msimamizi ambaye **anaunda templeti ya cheti**, ambayo kisha **inasambazwa** na Mamlaka ya Cheti ya Biashara (CA). Hii inafanya templeti ipatikane kwa usajili wa mteja, hatua inayofikiwa kwa kuongeza jina la templeti kwenye uwanja wa `certificatetemplates` wa kitu cha Active Directory.
+Mchakato wa usajili wa cheti huanzishwa na msimamizi ambaye **anaunda templeti ya cheti**, ambayo kisha **inasambazwa** na Mamlaka ya Cheti ya Biashara (CA). Hii inafanya templeti ipatikane kwa usajili wa mteja, hatua inayofikiwa kwa kuongeza jina la templeti kwenye uwanja wa `certificatetemplates` wa kitu cha Active Directory.
 
 Ili mteja aombe cheti, **haki za usajili** lazima zipewe. Haki hizi zinafafanuliwa na waelekezi wa usalama kwenye templeti ya cheti na CA ya Biashara yenyewe. Ruhusa lazima zipewe katika maeneo yote mawili ili ombi liwe na mafanikio.
 
 ### Template Enrollment Rights
 
-Haki hizi zinafafanuliwa kupitia Kuingilia kwa Udhibiti wa Ufikiaji (ACEs), zikielezea ruhusa kama:
+Haki hizi zinaelezwa kupitia Kuingilia kwa Udhibiti wa Ufikiaji (ACEs), zikifafanua ruhusa kama:
 
-- Haki za **Usajili wa Cheti** na **Usajili wa Kiotomatiki wa Cheti**, kila moja ikihusishwa na GUID maalum.
+- Haki za **Usajili wa Cheti** na **AutoEnrollment ya Cheti**, kila moja ikihusishwa na GUID maalum.
 - **Haki za Kupanua**, zikiruhusu ruhusa zote za kupanua.
 - **FullControl/GenericAll**, ikitoa udhibiti kamili juu ya templeti.
 
@@ -68,7 +68,7 @@ Madhara fulani yanaweza kutumika, kama:
 
 ### Methods to Request Certificates
 
-Vyeti vinaweza kuombwa kupitia:
+Cheti zinaweza kuombwa kupitia:
 
 1. **Windows Client Certificate Enrollment Protocol** (MS-WCCE), ikitumia interfaces za DCOM.
 2. **ICertPassage Remote Protocol** (MS-ICPR), kupitia mabomba yaliyopewa majina au TCP/IP.
@@ -76,7 +76,7 @@ Vyeti vinaweza kuombwa kupitia:
 4. **Huduma ya Usajili wa Cheti** (CES), kwa kushirikiana na huduma ya Sera ya Usajili wa Cheti (CEP).
 5. **Huduma ya Usajili wa Vifaa vya Mtandao** (NDES) kwa vifaa vya mtandao, ikitumia Protokali ya Usajili wa Cheti Rahisi (SCEP).
 
-Watumiaji wa Windows wanaweza pia kuomba vyeti kupitia GUI (`certmgr.msc` au `certlm.msc`) au zana za mistari ya amri (`certreq.exe` au amri ya PowerShell `Get-Certificate`).
+Watumiaji wa Windows wanaweza pia kuomba cheti kupitia GUI (`certmgr.msc` au `certlm.msc`) au zana za mstari wa amri (`certreq.exe` au amri ya PowerShell `Get-Certificate`).
 ```powershell
 # Example of requesting a certificate using PowerShell
 Get-Certificate -Template "User" -CertStoreLocation "cert:\\CurrentUser\\My"
@@ -87,7 +87,7 @@ Active Directory (AD) inasaidia uthibitisho wa cheti, hasa ikitumia **Kerberos**
 
 ### Mchakato wa Uthibitisho wa Kerberos
 
-Katika mchakato wa uthibitisho wa Kerberos, ombi la mtumiaji la Tiketi ya Kutoa Tiketi (TGT) linatiwa saini kwa kutumia **funguo ya faragha** ya cheti cha mtumiaji. Ombi hili hupitia uthibitisho kadhaa na msimamizi wa eneo, ikiwa ni pamoja na **halali** ya cheti, **njia**, na **hali ya kufutwa**. Uthibitisho pia unajumuisha kuangalia kwamba cheti kinatoka kwa chanzo kinachotegemewa na kuthibitisha uwepo wa mtoaji katika **duka la cheti la NTAUTH**. Uthibitisho uliofanikiwa unapelekea utoaji wa TGT. Kitu cha **`NTAuthCertificates`** katika AD, kinachopatikana kwenye:
+Katika mchakato wa uthibitisho wa Kerberos, ombi la mtumiaji la Tiketi ya Kutoa Tiketi (TGT) linatiwa saini kwa kutumia **funguo ya faragha** ya cheti cha mtumiaji. Ombi hili hupitia uthibitisho kadhaa na msimamizi wa eneo, ikiwa ni pamoja na **uhalali** wa cheti, **njia**, na **hali ya kufutwa**. Uthibitisho pia unajumuisha kuangalia kwamba cheti kinatoka kwa chanzo kinachotegemewa na kuthibitisha uwepo wa mtoaji katika **duka la cheti la NTAUTH**. Uthibitisho uliofanikiwa unapelekea utoaji wa TGT. Kitu cha **`NTAuthCertificates`** katika AD, kinapatikana kwenye:
 ```bash
 CN=NTAuthCertificates,CN=Public Key Services,CN=Services,CN=Configuration,DC=<domain>,DC=<com>
 ```
@@ -95,13 +95,13 @@ ni muhimu katika kuanzisha uaminifu kwa uthibitishaji wa cheti.
 
 ### Uthibitishaji wa Kituo Salama (Schannel)
 
-Schannel inarahisisha muunganisho salama wa TLS/SSL, ambapo wakati wa mkutano, mteja anawasilisha cheti ambacho, ikiwa kimefanikiwa kuthibitishwa, kinatoa ruhusa ya ufikiaji. Mchoro wa cheti kwa akaunti ya AD unaweza kujumuisha kazi ya Kerberos **S4U2Self** au **Subject Alternative Name (SAN)** ya cheti, miongoni mwa mbinu nyingine.
+Schannel inarahisisha muunganisho salama wa TLS/SSL, ambapo wakati wa mkutano, mteja anawasilisha cheti ambacho, ikiwa kimefanikiwa kuthibitishwa, kinatoa ruhusa ya ufikiaji. Mchoro wa cheti kwa akaunti ya AD unaweza kujumuisha kazi ya Kerberos **S4U2Self** au **Jina Alternatif la Mhusika (SAN)** la cheti, kati ya mbinu nyingine.
 
 ### Uhesabu wa Huduma za Cheti za AD
 
 Huduma za cheti za AD zinaweza kuhesabiwa kupitia maswali ya LDAP, zikifunua habari kuhusu **Mamlaka ya Cheti ya Biashara (CAs)** na mipangilio yao. Hii inapatikana kwa mtumiaji yeyote aliyeidhinishwa na kikoa bila ruhusa maalum. Zana kama **[Certify](https://github.com/GhostPack/Certify)** na **[Certipy](https://github.com/ly4k/Certipy)** zinatumika kwa uhesabu na tathmini ya udhaifu katika mazingira ya AD CS.
 
-Amri za kutumia zana hizi ni pamoja na:
+Amri za kutumia zana hizi ni:
 ```bash
 # Enumerate trusted root CA certificates and Enterprise CAs with Certify
 Certify.exe cas
@@ -115,7 +115,7 @@ certipy find -vulnerable -u john@corp.local -p Passw0rd -dc-ip 172.16.126.128
 certutil.exe -TCAInfo
 certutil -v -dstemplate
 ```
-## Marejeo
+## Marejeleo
 
 - [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)
 - [https://comodosslstore.com/blog/what-is-ssl-tls-client-authentication-how-does-it-work.html](https://comodosslstore.com/blog/what-is-ssl-tls-client-authentication-how-does-it-work.html)

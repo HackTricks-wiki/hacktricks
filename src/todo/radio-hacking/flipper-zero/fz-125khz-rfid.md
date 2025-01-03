@@ -20,15 +20,15 @@ Kwa maelezo zaidi kuhusu aina hizi za vitambulisho [**soma utangulizi huu**](../
 Inajaribu **kusoma** taarifa za kadi. Kisha inaweza **kuiga** hizo.
 
 > [!WARNING]
-> Kumbuka kwamba baadhi ya intercoms zinajaribu kujilinda kutokana na nakala za funguo kwa kutuma amri ya kuandika kabla ya kusoma. Ikiwa kuandika kunafanikiwa, kitambulisho hicho kinachukuliwa kuwa bandia. Wakati Flipper inapoiga RFID, hakuna njia kwa msomaji kutofautisha kati yake na ile ya asili, hivyo matatizo kama hayo hayatokea.
+> Kumbuka kwamba baadhi ya intercoms zinajaribu kujilinda kutokana na nakala za funguo kwa kutuma amri ya kuandika kabla ya kusoma. Ikiwa kuandika kunafanikiwa, vitambulisho hivyo vinachukuliwa kuwa vya uwongo. Wakati Flipper inapoiga RFID, hakuna njia kwa msomaji kutofautisha kati yake na ile ya asili, hivyo matatizo kama hayo hayatokea.
 
 ### Add Manually
 
-Unaweza kuunda **kadi bandia katika Flipper Zero ukionyesha data** unazozingatia kwa mikono kisha uige.
+Unaweza kuunda **kadi za uwongo katika Flipper Zero ukionyesha data** unayoingiza kwa mikono kisha uige.
 
 #### IDs on cards
 
-Wakati mwingine, unapopata kadi utaona ID (au sehemu) yake imeandikwa kwenye kadi inayoonekana.
+Wakati mwingine, unapopata kadi utaona ID (au sehemu yake) imeandikwa kwenye kadi inayoonekana.
 
 - **EM Marin**
 

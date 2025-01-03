@@ -3,7 +3,7 @@
 Katika jibu la ping TTL:\
 127 = Windows\
 254 = Cisco\
-Yote mengine, baadhi ya linux
+Mengine, baadhi ya linux
 
 $1$- md5\
 $2$au $2a$ - Blowfish\
@@ -17,10 +17,10 @@ nc -nv -u -z -w 1 \<IP> 160-16
 
 Pakiti tupu ya UDP inatumwa kwa bandari maalum. Ikiwa bandari ya UDP iko wazi, hakuna jibu litatumwa kutoka kwa mashine lengwa. Ikiwa bandari ya UDP imefungwa, pakiti ya ICMP port unreachable inapaswa kutumwa kutoka kwa mashine lengwa.\
 
-Kuchunguza bandari za UDP mara nyingi hakuhakikishiwi, kwani firewalls na routers zinaweza kuondoa pakiti za ICMP.\
-Hii inaweza kusababisha matokeo ya uwongo katika uchunguzi wako, na utaona mara kwa mara\
+Kuchunguza bandari za UDP mara nyingi hakutegemeki, kwani firewalls na routers zinaweza kuondoa pakiti za ICMP\
+hii inaweza kusababisha matokeo ya uwongo katika uchunguzi wako, na utaona mara kwa mara\
 uchunguzi wa bandari za UDP ukionyesha bandari zote za UDP zikiwa wazi kwenye mashine iliyochunguzwa.\
-au Skana nyingi za bandari hazichunguzi bandari zote zinazopatikana, na kwa kawaida zina orodha iliyowekwa ya “bandari za kuvutia” zinazochunguzwa.
+au Skana nyingi za bandari hazichunguze bandari zote zinazopatikana, na kwa kawaida zina orodha iliyowekwa ya “bandari za kuvutia” zinazochunguzwa.
 
 # CTF - Tricks
 
@@ -40,7 +40,7 @@ binwalk -M -e -d=10000 suspicious.pdf #Extract, look inside extracted files and 
 **Uuencode** --> Anza na "_begin \<mode> \<filename>_" na herufi za ajabu\
 **Xxencoding** --> Anza na "_begin \<mode> \<filename>_" na B64\
 \
-**Vigenere** (uchambuzi wa mara kwa mara) —> [https://www.guballa.de/vigenere-solver](https://www.guballa.de/vigenere-solver)\
+**Vigenere** (uchambuzi wa masafa) —> [https://www.guballa.de/vigenere-solver](https://www.guballa.de/vigenere-solver)\
 **Scytale** (mabadiliko ya wahusika) —> [https://www.dcode.fr/scytale-cipher](https://www.dcode.fr/scytale-cipher)
 
 **25x25 = QR**

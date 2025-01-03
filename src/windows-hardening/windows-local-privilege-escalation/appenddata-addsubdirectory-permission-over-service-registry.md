@@ -11,9 +11,9 @@ Mfunguo mbili za rejista zilipatikana kuwa zinaweza kuandikwa na mtumiaji wa sas
 
 Ilipendekezwa kuangalia ruhusa za huduma ya **RpcEptMapper** kwa kutumia **regedit GUI**, hasa kwenye kichupo cha **Ruhusa za Ufanisi** katika dirisha la **Advanced Security Settings**. Njia hii inaruhusu tathmini ya ruhusa zilizotolewa kwa watumiaji au vikundi maalum bila kuhitaji kuchunguza kila Kuingilia Udhibiti wa Ufikiaji (ACE) moja kwa moja.
 
-Picha ilionyesha ruhusa zilizotolewa kwa mtumiaji mwenye mamlaka ya chini, ambapo ruhusa ya **Create Subkey** ilikuwa ya kutambulika. Ruhusa hii, pia inajulikana kama **AppendData/AddSubdirectory**, inalingana na matokeo ya script.
+Picha ilionyesha ruhusa zilizotolewa kwa mtumiaji mwenye mamlaka ya chini, ambapo ruhusa ya **Create Subkey** ilikuwa ya kutajwa. Ruhusa hii, pia inajulikana kama **AppendData/AddSubdirectory**, inalingana na matokeo ya script.
 
-Uwezo wa kubadilisha baadhi ya thamani moja kwa moja haukuwezekana, lakini uwezo wa kuunda funguo mpya za chini ulionekana. Mfano ulionyesha jaribio la kubadilisha thamani ya **ImagePath**, ambalo lilisababisha ujumbe wa kukataliwa kwa ufikiaji.
+Kutokuweza kubadilisha baadhi ya thamani moja kwa moja, lakini uwezo wa kuunda funguo mpya za chini, ulionekana. Mfano ulioangaziwa ulikuwa ni jaribio la kubadilisha thamani ya **ImagePath**, ambayo ilipelekea ujumbe wa kukataliwa kwa ufikiaji.
 
 Licha ya vikwazo hivi, uwezekano wa kupandisha mamlaka ulitambuliwa kupitia uwezekano wa kutumia funguo ya **Performance** ndani ya muundo wa rejista wa huduma ya **RpcEptMapper**, funguo ambayo haipo kwa kawaida. Hii inaweza kuruhusu usajili wa DLL na ufuatiliaji wa utendaji.
 
@@ -23,6 +23,6 @@ Lengo lilikuwa kulazimisha huduma ya **RPC Endpoint Mapper** kupakia DLL ya Perf
 
 Uthibitisho wa kudumu na athari zinazoweza kutokea za udhaifu huu zilisisitizwa, zikionyesha umuhimu wake kwa mikakati ya baada ya unyakuzi, harakati za pembeni, na kuepuka mifumo ya antivirus/EDR.
 
-Ingawa udhaifu huu ulifunuliwa kwa bahati mbaya kupitia script, ilisisitizwa kuwa unyakuzi wake unategemea toleo la zamani la Windows (mfano, **Windows 7 / Server 2008 R2**) na unahitaji ufikiaji wa ndani.
+Ingawa udhaifu huu ulifunuliwa kwa bahati mbaya kupitia script, ilisisitizwa kuwa unyakuzi wake unakabiliwa na toleo la zamani la Windows (mfano, **Windows 7 / Server 2008 R2**) na unahitaji ufikiaji wa ndani.
 
 {{#include ../../banners/hacktricks-training.md}}

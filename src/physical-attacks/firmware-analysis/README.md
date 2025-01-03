@@ -28,7 +28,7 @@ Kupata firmware kunaweza kufanywa kwa njia mbalimbali, kila moja ikiwa na ngazi 
 - **Moja kwa moja** kutoka kwa chanzo (waendelezaji, watengenezaji)
 - **Kujenga** kutoka kwa maelekezo yaliyotolewa
 - **Kupakua** kutoka kwa tovuti rasmi za msaada
-- Kutumia **Google dork** maswali ya kutafuta faili za firmware zilizohifadhiwa
+- Kutumia **Google dork** maswali kutafuta faili za firmware zilizohifadhiwa
 - Kufikia **hifadhi ya wingu** moja kwa moja, kwa kutumia zana kama [S3Scanner](https://github.com/sa7mon/S3Scanner)
 - Kukamata **sasisho** kupitia mbinu za mtu katikati
 - **Kutoa** kutoka kwa kifaa kupitia muunganisho kama **UART**, **JTAG**, au **PICit**
@@ -56,7 +56,7 @@ Zaidi ya hayo, unaweza kutumia zana hizi kutoa **faili zilizojumuishwa ndani ya 
 ../../forensics/basic-forensic-methodology/partitions-file-systems-carving/file-data-carving-recovery-tools.md
 {{#endref}}
 
-Au [**binvis.io**](https://binvis.io/#/) ([code](https://code.google.com/archive/p/binvis/)) kuchunguza faili hiyo.
+Au [**binvis.io**](https://binvis.io/#/) ([code](https://code.google.com/archive/p/binvis/)) ili kukagua faili.
 
 ### Kupata Mfumo wa Faili
 
@@ -65,7 +65,7 @@ Binwalk kawaida hutoa ndani ya **folda iliyopewa jina kama aina ya mfumo wa fail
 
 #### Utoaji wa Mfumo wa Faili kwa Mikono
 
-Wakati mwingine, binwalk **haitakuwa na byte ya kichawi ya mfumo wa faili katika saini zake**. Katika kesi hizi, tumia binwalk ili **kupata offset ya mfumo wa faili na kuchonga mfumo wa faili uliofinywa** kutoka kwa binary na **kutoa kwa mikono** mfumo wa faili kulingana na aina yake kwa kutumia hatua zilizo hapa chini.
+Wakati mwingine, binwalk **haitakuwa na byte ya kichawi ya mfumo wa faili katika saini zake**. Katika kesi hizi, tumia binwalk ili **kupata offset ya mfumo wa faili na kuchonga mfumo wa faili ulio pandwa** kutoka kwa binary na **kutoa kwa mikono** mfumo wa faili kulingana na aina yake kwa kutumia hatua zilizo hapa chini.
 ```
 $ binwalk DIR850L_REVB.bin
 
@@ -95,7 +95,7 @@ Kwa upande mwingine, amri ifuatayo inaweza pia kutekelezwa.
 
 `$ unsquashfs dir.squashfs`
 
-Faili zitakuwa katika "`squashfs-root`" directory baada ya hapo.
+Faili zitakuwa katika saraka "`squashfs-root`" baada ya hapo.
 
 - Faili za archive za CPIO
 
@@ -113,7 +113,7 @@ Faili zitakuwa katika "`squashfs-root`" directory baada ya hapo.
 
 ## Kuchambua Firmware
 
-Mara firmware inapopatikana, ni muhimu kuichambua ili kuelewa muundo wake na uwezekano wa udhaifu. Mchakato huu unahusisha kutumia zana mbalimbali kuchambua na kutoa data muhimu kutoka kwa picha ya firmware.
+Mara tu firmware inapopatikana, ni muhimu kuichambua ili kuelewa muundo wake na uwezekano wa udhaifu. Mchakato huu unahusisha kutumia zana mbalimbali kuchambua na kutoa data muhimu kutoka kwa picha ya firmware.
 
 ### Zana za Uchambuzi wa Awali
 
@@ -132,7 +132,7 @@ Kwa ajili ya kutoa **faili zilizojumuishwa**, zana na rasilimali kama vile nyara
 
 ### Kutolewa kwa Faili za Mfumo
 
-Kwa kutumia `binwalk -ev <bin>`, mtu anaweza kawaida kutoa mfumo wa faili, mara nyingi katika saraka iliyopewa jina la aina ya mfumo wa faili (mfano, squashfs, ubifs). Hata hivyo, wakati **binwalk** inashindwa kutambua aina ya mfumo wa faili kutokana na kukosekana kwa byte za uchawi, utoaji wa mikono unahitajika. Hii inahusisha kutumia `binwalk` kutafuta offset ya mfumo wa faili, ikifuatiwa na amri ya `dd` ili kuchonga mfumo wa faili:
+Kwa kutumia `binwalk -ev <bin>`, mtu anaweza kawaida kutoa mfumo wa faili, mara nyingi katika saraka iliyopewa jina la aina ya mfumo wa faili (mfano, squashfs, ubifs). Hata hivyo, wakati **binwalk** inashindwa kutambua aina ya mfumo wa faili kutokana na kukosekana kwa byte za kichawi, utoaji wa mikono unahitajika. Hii inahusisha kutumia `binwalk` kutafuta offset ya mfumo wa faili, ikifuatiwa na amri ya `dd` ili kuchonga mfumo wa faili:
 ```bash
 $ binwalk DIR850L_REVB.bin
 
@@ -142,7 +142,7 @@ Baada ya hapo, kulingana na aina ya mfumo wa faili (kwa mfano, squashfs, cpio, j
 
 ### Uchambuzi wa Mfumo wa Faili
 
-Mara mfumo wa faili unapotolewa, utafutaji wa kasoro za usalama huanza. Kipaumbele kinatolewa kwa daemons zisizo salama za mtandao, akidi za siri zilizowekwa kwa nguvu, mwisho wa API, kazi za seva za sasisho, msimbo usio na muundo, skripti za kuanzisha, na binaries zilizokusanywa kwa uchambuzi wa mbali.
+Mara mfumo wa faili umepatikana, utafutaji wa kasoro za usalama huanza. Kipaumbele kinatolewa kwa daemons zisizo salama za mtandao, akidi za siri zilizowekwa kwa nguvu, mwisho wa API, kazi za seva za sasisho, msimbo usio na muundo, skripti za kuanzisha, na binaries zilizokusanywa kwa uchambuzi wa mbali.
 
 **Mikoa muhimu** na **vitu** vya kukagua ni pamoja na:
 
@@ -160,11 +160,11 @@ Zana kadhaa husaidia katika kugundua taarifa nyeti na udhaifu ndani ya mfumo wa 
 
 ### Ukaguzi wa Usalama kwenye Binaries Zilizokusanywa
 
-Msimbo wa chanzo na binaries zilizokusanywa zinazopatikana katika mfumo wa faili lazima zichunguzwe kwa udhaifu. Zana kama **checksec.sh** kwa binaries za Unix na **PESecurity** kwa binaries za Windows husaidia kubaini binaries zisizo na ulinzi ambazo zinaweza kutumika.
+Msimbo wa chanzo na binaries zilizokusanywa zinazopatikana katika mfumo wa faili zinapaswa kuchunguzwa kwa udhaifu. Zana kama **checksec.sh** kwa binaries za Unix na **PESecurity** kwa binaries za Windows husaidia kubaini binaries zisizo na ulinzi ambazo zinaweza kutumiwa.
 
 ## Kuiga Firmware kwa Uchambuzi wa Dinamik
 
-Mchakato wa kuiga firmware unaruhusu **uchambuzi wa dinamik** ama wa uendeshaji wa kifaa au programu binafsi. Njia hii inaweza kukutana na changamoto za utegemezi wa vifaa au usanifu, lakini kuhamasisha mfumo wa faili wa mzizi au binaries maalum kwa kifaa chenye usanifu na endianness inayolingana, kama vile Raspberry Pi, au kwa mashine halisi iliyojengwa awali, kunaweza kuwezesha majaribio zaidi.
+Mchakato wa kuiga firmware unaruhusu **uchambuzi wa dinamik** ama wa uendeshaji wa kifaa au programu binafsi. Njia hii inaweza kukutana na changamoto za utegemezi wa vifaa au usanifu, lakini kuhamasisha mfumo wa faili wa mzizi au binaries maalum kwa kifaa chenye usanifu na endianness inayolingana, kama vile Raspberry Pi, au kwa mashine halisi iliyojengwa, kunaweza kuwezesha majaribio zaidi.
 
 ### Kuiga Binaries Binafsi
 
@@ -176,7 +176,7 @@ Ili kuiga binary ya usanifu wa MIPS, mtu anaweza kutumia amri:
 ```bash
 file ./squashfs-root/bin/busybox
 ```
-Na kufunga zana za emulation zinazohitajika:
+Na ili kufunga zana za emulation zinazohitajika:
 ```bash
 sudo apt-get install qemu qemu-user qemu-user-static qemu-system-arm qemu-system-mips qemu-system-x86 qemu-utils
 ```
@@ -184,7 +184,7 @@ Kwa MIPS (big-endian), `qemu-mips` inatumika, na kwa binaries za little-endian, 
 
 #### Uigaji wa Muktadha wa ARM
 
-Kwa binaries za ARM, mchakato ni sawa, na emulator `qemu-arm` inatumika kwa uigaji.
+Kwa binaries za ARM, mchakato ni sawa, huku emulator `qemu-arm` ikitumika kwa uigaji.
 
 ### Uigaji wa Mfumo Kamili
 
@@ -192,7 +192,7 @@ Zana kama [Firmadyne](https://github.com/firmadyne/firmadyne), [Firmware Analysi
 
 ## Uchambuzi wa Dynamic katika Vitendo
 
-Katika hatua hii, mazingira halisi au ya kuigiza ya kifaa yanatumika kwa uchambuzi. Ni muhimu kudumisha ufikiaji wa shell kwa OS na mfumo wa faili. Uigaji huenda usifanane kikamilifu na mwingiliano wa vifaa, hivyo inahitajika mara kwa mara kuanzisha upya uigaji. Uchambuzi unapaswa kutembelea mfumo wa faili, kutumia kurasa za wavuti zilizofichuliwa na huduma za mtandao, na kuchunguza udhaifu wa bootloader. Majaribio ya uadilifu wa firmware ni muhimu ili kubaini udhaifu wa backdoor unaoweza kuwepo.
+Katika hatua hii, mazingira halisi au ya uigaji ya kifaa hutumiwa kwa uchambuzi. Ni muhimu kudumisha ufikiaji wa shell kwa OS na mfumo wa faili. Uigaji huenda usifanane kikamilifu na mwingiliano wa vifaa, hivyo inahitajika mara kwa mara kuanzisha upya uigaji. Uchambuzi unapaswa kutembelea mfumo wa faili, kutumia kurasa za wavuti zilizofichuliwa na huduma za mtandao, na kuchunguza udhaifu wa bootloader. Majaribio ya uadilifu wa firmware ni muhimu ili kubaini udhaifu wa backdoor unaoweza kuwepo.
 
 ## Mbinu za Uchambuzi wa Wakati
 
@@ -208,24 +208,24 @@ Mifumo ya uendeshaji kama [AttifyOS](https://github.com/adi0x90/attifyos) na [Em
 
 ## Mifumo ya Uendeshaji Iliyoandaliwa Kuchambua Firmware
 
-- [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS ni distro iliyokusudiwa kukusaidia kufanya tathmini ya usalama na mtihani wa penetration wa vifaa vya Internet of Things (IoT). Inakuokoa muda mwingi kwa kutoa mazingira yaliyoandaliwa mapema na zana zote muhimu zilizopakiwa.
+- [**AttifyOS**](https://github.com/adi0x90/attifyos): AttifyOS ni distro inayokusudia kukusaidia kufanya tathmini ya usalama na mtihani wa penetration wa vifaa vya Internet of Things (IoT). Inakuokoa muda mwingi kwa kutoa mazingira yaliyoandaliwa mapema na zana zote muhimu zilizopakiwa.
 - [**EmbedOS**](https://github.com/scriptingxss/EmbedOS): Mfumo wa uendeshaji wa mtihani wa usalama wa embedded unaotegemea Ubuntu 18.04 uliojaa zana za mtihani wa usalama wa firmware.
 
-## Firmware Zenye Udhaifu za Kufanya Mazoezi
+## Firmware Inayoweza Kuathiriwa kwa Mazoezi
 
-Ili kufanya mazoezi ya kugundua udhaifu katika firmware, tumia miradi ifuatayo ya firmware yenye udhaifu kama hatua ya mwanzo.
+Ili kufanya mazoezi ya kugundua udhaifu katika firmware, tumia miradi ifuatayo ya firmware inayoweza kuathiriwa kama hatua ya kuanzia.
 
 - OWASP IoTGoat
 - [https://github.com/OWASP/IoTGoat](https://github.com/OWASP/IoTGoat)
-- Mradi wa Firmware ya Router yenye Udhaifu
+- Mradi wa Firmware ya Router Inayoweza Kuathiriwa
 - [https://github.com/praetorian-code/DVRF](https://github.com/praetorian-code/DVRF)
-- Router ya ARM yenye Udhaifu (DVAR)
+- Router ya ARM Inayoweza Kuathiriwa (DVAR)
 - [https://blog.exploitlab.net/2018/01/dvar-damn-vulnerable-arm-router.html](https://blog.exploitlab.net/2018/01/dvar-damn-vulnerable-arm-router.html)
 - ARM-X
 - [https://github.com/therealsaumil/armx#downloads](https://github.com/therealsaumil/armx#downloads)
 - Azeria Labs VM 2.0
 - [https://azeria-labs.com/lab-vm-2-0/](https://azeria-labs.com/lab-vm-2-0/)
-- Kifaa cha IoT chenye Udhaifu (DVID)
+- Kifaa cha IoT Inayoweza Kuathiriwa (DVID)
 - [https://github.com/Vulcainreo/DVID](https://github.com/Vulcainreo/DVID)
 
 ## Marejeleo

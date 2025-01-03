@@ -4,7 +4,7 @@
 
 ## Intro
 
-Kwa maelezo zaidi kuhusu iButton angalia:
+Kwa maelezo zaidi kuhusu iButton ni nini angalia:
 
 {{#ref}}
 ../ibutton.md
@@ -12,7 +12,7 @@ Kwa maelezo zaidi kuhusu iButton angalia:
 
 ## Design
 
-Sehemu ya **bluu** ya picha ifuatayo ni jinsi unavyohitaji **kueka iButton halisi** ili Flipper aweze **kuisoma.** Sehemu ya **kijani** ni jinsi unavyohitaji **kugusa msomaji** na Flipper zero ili **kuiga iButton** kwa usahihi.
+Sehemu ya **bluu** ya picha ifuatayo ni jinsi unavyohitaji **kueka iButton halisi** ili Flipper iweze **kuisoma.** Sehemu ya **kijani** ni jinsi unavyohitaji **kugusa msomaji** na Flipper zero ili **kuiga iButton** kwa usahihi.
 
 <figure><img src="../../../images/image (565).png" alt=""><figcaption></figcaption></figure>
 
@@ -20,7 +20,7 @@ Sehemu ya **bluu** ya picha ifuatayo ni jinsi unavyohitaji **kueka iButton halis
 
 ### Read
 
-Katika Modu ya Kusoma Flipper anasubiri funguo ya iButton kugusa na anaweza kuchakata aina yoyote ya funguo tatu: **Dallas, Cyfral, na Metakom**. Flipper atajua **aina ya funguo yenyewe**. Jina la protokali ya funguo litakuwa kwenye skrini juu ya nambari ya ID.
+Katika Modu ya Kusoma Flipper inasubiri funguo ya iButton kugusa na inaweza kuchakata aina yoyote ya funguo tatu: **Dallas, Cyfral, na Metakom**. Flipper itajua **aina ya funguo yenyewe**. Jina la protokali ya funguo litakuwa kwenye skrini juu ya nambari ya ID.
 
 ### Add manually
 

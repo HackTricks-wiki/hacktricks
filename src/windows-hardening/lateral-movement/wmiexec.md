@@ -4,15 +4,15 @@
 
 ## Jinsi Inavyofanya Kazi
 
-Mchakato unaweza kufunguliwa kwenye mwenyeji ambapo jina la mtumiaji na ama nenosiri au hash zinajulikana kupitia matumizi ya WMI. Amri zinafanywa kwa kutumia WMI na Wmiexec, ikitoa uzoefu wa shell wa nusu-interactive.
+Mchakato unaweza kufunguliwa kwenye mwenyeji ambapo jina la mtumiaji na ama nenosiri au hash vinajulikana kupitia matumizi ya WMI. Amri zinafanywa kwa kutumia WMI na Wmiexec, ikitoa uzoefu wa shell wa nusu-interactive.
 
-**dcomexec.py:** Kutumia mwisho tofauti wa DCOM, skripti hii inatoa shell ya nusu-interactive kama wmiexec.py, ikitumia hasa kitu cha ShellBrowserWindow DCOM. Hivi sasa inasaidia MMC20. Maombi, Shell Windows, na Shell Browser Window objects. (chanzo: [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))
+**dcomexec.py:** Kutumia mwisho tofauti wa DCOM, skripti hii inatoa shell ya nusu-interactive inayofanana na wmiexec.py, hasa ikitumia kitu cha DCOM cha ShellBrowserWindow. Hivi sasa inasaidia MMC20. Maombi, Windows za Shell, na vitu vya Shell Browser Window. (chanzo: [Hacking Articles](https://www.hackingarticles.in/beginners-guide-to-impacket-tool-kit-part-1/))
 
 ## Misingi ya WMI
 
 ### Namespace
 
-Imeundwa katika muundo wa hierarchi ya directory, kontena ya juu ya WMI ni \root, chini ambayo directories za ziada, zinazojulikana kama namespaces, zimepangwa. 
+Imeundwa katika muundo wa hierarchi ya directory, kontena la juu la WMI ni \root, chini ambayo directories za ziada, zinazojulikana kama namespaces, zimepangwa. 
 Amri za kuorodhesha namespaces:
 ```bash
 # Retrieval of Root namespaces
@@ -87,7 +87,7 @@ wmic sysaccount list /format:list
 ```
 Kuchunguza kwa mbali WMI kwa habari maalum, kama wasimamizi wa ndani au watumiaji walioingia, kunawezekana kwa ujenzi wa amri kwa makini.
 
-### **Kuchunguza WMI kwa Mkono kwa Mbali**
+### **Kuchunguza WMI kwa Mbali kwa Mikono**
 
 Utambuzi wa kimya wa wasimamizi wa ndani kwenye mashine ya mbali na watumiaji walioingia unaweza kufanywa kupitia maswali maalum ya WMI. `wmic` pia inasaidia kusoma kutoka kwa faili ya maandiko ili kutekeleza amri kwenye nodi nyingi kwa wakati mmoja.
 

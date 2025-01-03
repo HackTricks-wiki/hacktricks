@@ -8,8 +8,8 @@ Jambo la kwanza unahitaji kufanya ni kuwa na [**Proxmark3**](https://proxmark.co
 
 ### Kushambulia MIFARE Classic 1KB
 
-Ina **sektari 16**, kila moja ina **blocks 4** na kila block ina **16B**. UID iko katika sektari 0 block 0 (na haiwezi kubadilishwa).\
-Ili kufikia kila sektari unahitaji **funguo 2** (**A** na **B**) ambazo zimehifadhiwa katika **block 3 ya kila sektari** (sektari trailer). Trailer ya sektari pia inahifadhi **vigezo vya ufikiaji** vinavyotoa **ruhusa za kusoma na kuandika** kwenye **kila block** kwa kutumia funguo 2.\
+Ina **sehemu 16**, kila moja ina **blocks 4** na kila block ina **16B**. UID iko katika sehemu 0 block 0 (na haiwezi kubadilishwa).\
+Ili kufikia kila sehemu unahitaji **funguo 2** (**A** na **B**) ambazo zimehifadhiwa katika **block 3 ya kila sehemu** (sehemu trailer). Sehemu trailer pia inahifadhi **vifungo vya ufikiaji** vinavyotoa **ruhusa za kusoma na kuandika** kwenye **kila block** kwa kutumia funguo 2.\
 Funguo 2 ni muhimu kutoa ruhusa za kusoma ikiwa unajua ya kwanza na kuandika ikiwa unajua ya pili (kwa mfano).
 
 Mashambulizi kadhaa yanaweza kufanywa
@@ -31,7 +31,7 @@ proxmark3> hf mf eset 01 000102030405060708090a0b0c0d0e0f # Write those bytes to
 proxmark3> hf mf eget 01 # Read block 1
 proxmark3> hf mf wrbl 01 B FFFFFFFFFFFF 000102030405060708090a0b0c0d0e0f # Write to the card
 ```
-Proxmark3 inaruhusu kufanya vitendo vingine kama **kusikiliza** mawasiliano ya **Tag na Reader** ili kujaribu kupata data nyeti. Katika kadi hii unaweza tu kusikiliza mawasiliano na kuhesabu funguo iliyotumika kwa sababu **operesheni za kijasusi zilizotumika ni dhaifu** na kujua maandiko ya wazi na maandiko ya cipher unaweza kuhesabu (`mfkey64` tool).
+Proxmark3 inaruhusu kufanya vitendo vingine kama **kusikiliza** mawasiliano ya **Tag na Reader** ili kujaribu kupata data nyeti. Katika kadi hii unaweza tu kusikiliza mawasiliano na kuhesabu funguo zilizotumika kwa sababu **operesheni za kijasusi zilizotumika ni dhaifu** na kujua maandiko ya wazi na maandiko ya cipher unaweza kuhesabu (`mfkey64` tool).
 
 ### Amri Mbichi
 

@@ -4,11 +4,11 @@
 
 ## Basic Information
 
-SPI (Serial Peripheral Interface) ni Protokali ya Mawasiliano ya Mfululizo wa Synchronous inayotumika katika mifumo iliyojumuishwa kwa mawasiliano ya umbali mfupi kati ya ICs (Integrated Circuits). Protokali ya Mawasiliano ya SPI inatumia usanifu wa bwana-mtumwa ambao unaratibiwa na Saa na Ishara ya Kuchagua Chip. Usanifu wa bwana-mtumwa unajumuisha bwana (kawaida ni microprocessor) anayesimamia vifaa vya nje kama EEPROM, sensorer, vifaa vya kudhibiti, n.k. ambavyo vinachukuliwa kuwa watumwa.
+SPI (Serial Peripheral Interface) ni Protokali ya Mawasiliano ya Mfululizo wa Sawa inayotumika katika mifumo iliyojumuishwa kwa mawasiliano ya umbali mfupi kati ya ICs (Mizunguko Iliyounganishwa). Protokali ya Mawasiliano ya SPI inatumia usanifu wa bwana-mtumwa ambao unaratibiwa na Saa na Ishara ya Kuchagua Chip. Usanifu wa bwana-mtumwa unajumuisha bwana (kawaida ni microprocessor) anayesimamia vifaa vya nje kama EEPROM, sensorer, vifaa vya kudhibiti, n.k. ambavyo vinachukuliwa kuwa watumwa.
 
-Watumwa wengi wanaweza kuunganishwa na bwana lakini watumwa hawawezi kuwasiliana na kila mmoja. Watumwa wanadhibitiwa na pini mbili, saa na kuchagua chip. Kwa kuwa SPI ni protokali ya mawasiliano ya synchronous, pini za ingizo na pato zinafuata ishara za saa. Kuchagua chip kunatumika na bwana kuchagua mtumwa na kuwasiliana naye. Wakati kuchagua chip kuna juu, kifaa cha mtumwa hakichaguliwi wakati ambapo kiko chini, chip imechaguliwa na bwana atakuwa akifanya mawasiliano na mtumwa.
+Watumwa wengi wanaweza kuunganishwa na bwana lakini watumwa hawawezi kuwasiliana na kila mmoja. Watumwa wanadhibitiwa na pini mbili, saa na kuchagua chip. Kwa kuwa SPI ni protokali ya mawasiliano ya mfululizo wa sawa, pini za ingizo na pato zinafuata ishara za saa. Kuchagua chip kunatumika na bwana kuchagua mtumwa na kuwasiliana naye. Wakati kuchagua chip kuna juu, kifaa cha mtumwa hakichaguliwi wakati ambapo kiko chini, chip imechaguliwa na bwana atakuwa akifanya kazi na mtumwa.
 
-MOSI (Master Out, Slave In) na MISO (Master In, Slave Out) wanawajibika kwa kutuma data na kupokea data. Data inatumwa kwa kifaa cha mtumwa kupitia pini ya MOSI wakati kuchagua chip kunashikiliwa chini. Data ya ingizo ina maagizo, anwani za kumbukumbu au data kulingana na karatasi ya data ya muuzaji wa kifaa cha mtumwa. Kwa ingizo halali, pini ya MISO inawajibika kwa kutuma data kwa bwana. Data ya pato inatumwa hasa katika mzunguko wa saa unaofuata baada ya ingizo kumalizika. Pini za MISO hutuma data hadi data itakapokuwa imetumwa kikamilifu au bwana kuweka pini ya kuchagua chip juu (katika kesi hiyo, mtumwa atasitisha kutuma na bwana hatasikiliza baada ya mzunguko huo wa saa).
+MOSI (Master Out, Slave In) na MISO (Master In, Slave Out) wanawajibika kwa kutuma data na kupokea data. Data inatumwa kwa kifaa cha mtumwa kupitia pini ya MOSI wakati kuchagua chip kunashikiliwa chini. Data ya ingizo ina maagizo, anwani za kumbukumbu au data kulingana na karatasi ya data ya muuzaji wa kifaa cha mtumwa. Baada ya ingizo halali, pini ya MISO inawajibika kwa kutuma data kwa bwana. Data ya pato inatumwa hasa katika mzunguko wa saa unaofuata baada ya ingizo kumalizika. Pini za MISO hutuma data hadi data itakapokuwa imetumwa kikamilifu au bwana kuweka pini ya kuchagua chip juu (katika kesi hiyo, mtumwa atasitisha kutuma na bwana hatasikiliza baada ya mzunguko huo wa saa).
 
 ## Dumping Firmware from EEPROMs
 
@@ -24,11 +24,11 @@ Kifaa hiki ni zana isiyo na gharama kubwa kwa kutoa firmwares kutoka EEPROMs na 
 
 ![drawing](../../images/board_image_ch341a.jpg)
 
-Unganisha kumbukumbu ya EEPROM na CH341a Programmer na uunganishi kifaa kwenye kompyuta. Ikiwa kifaa hakitambuliwi, jaribu kufunga madereva kwenye kompyuta. Pia, hakikisha kwamba EEPROM imeunganishwa kwa mwelekeo sahihi (kawaida, weka pini ya VCC katika mwelekeo wa kinyume na kiunganishi cha USB) au sivyo, programu haitakuwa na uwezo wa kutambua chip. Angalia mchoro ikiwa inahitajika:
+Unganisha kumbukumbu ya EEPROM na CH341a Programmer na uunganishi kifaa kwenye kompyuta. Ikiwa kifaa hakigunduliki, jaribu kufunga madereva kwenye kompyuta. Pia, hakikisha kwamba EEPROM imeunganishwa kwa mwelekeo sahihi (kawaida, weka Pini ya VCC katika mwelekeo wa kinyume na kiunganishi cha USB) la sivyo, programu haitakuwa na uwezo wa kugundua chip. Angalia mchoro ikiwa inahitajika:
 
 ![drawing](../../images/connect_wires_ch341a.jpg) ![drawing](../../images/eeprom_plugged_ch341a.jpg)
 
-Hatimaye, tumia programu kama flashrom, G-Flash (GUI), n.k. kwa kutoa firmware. G-Flash ni zana ya GUI ndogo inayofanya kazi haraka na inatambua EEPROM kiotomatiki. Hii inaweza kuwa na manufaa ikiwa firmware inahitaji kutolewa haraka, bila kuingilia sana katika nyaraka.
+Hatimaye, tumia programu kama flashrom, G-Flash (GUI), n.k. kwa ajili ya kutoa firmware. G-Flash ni zana ya GUI ndogo inayofanya kazi haraka na inagundua EEPROM kiotomatiki. Hii inaweza kuwa na manufaa ikiwa firmware inahitaji kutolewa haraka, bila kuingilia sana katika nyaraka.
 
 ![drawing](../../images/connected_status_ch341a.jpg)
 
@@ -41,13 +41,13 @@ binwalk -e <filename>
 I inaweza kuwa .bin au .rom kulingana na zana na mipangilio inayotumika.
 
 > [!CAUTION]
-> Kumbuka kwamba uchimbaji wa firmware ni mchakato wa nyeti na unahitaji uvumilivu mwingi. Kila makosa yanaweza kuharibu firmware au hata kuifuta kabisa na kufanya kifaa kisitumike. Inapendekezwa kujifunza kifaa maalum kabla ya kujaribu kuchimbua firmware.
+> Kumbuka kwamba uchimbaji wa firmware ni mchakato wa nyeti na unahitaji uvumilivu mwingi. Kila makosa yanaweza kuharibu firmware au hata kuifuta kabisa na kufanya kifaa kisitumike. Inapendekezwa kujifunza kifaa maalum kabla ya kujaribu kuchimba firmware.
 
 ### Bus Pirate + flashrom
 
 ![](<../../images/image (910).png>)
 
-Kumbuka kwamba hata kama PINOUT ya Pirate Bus inaonyesha pini za **MOSI** na **MISO** kuunganishwa na SPI hata hivyo baadhi ya SPIs zinaweza kuonyesha pini kama DI na DO. **MOSI -> DI, MISO -> DO**
+Kumbuka kwamba hata kama PINOUT ya Pirate Bus inaonyesha pini za **MOSI** na **MISO** kuunganishwa na SPI, hata hivyo baadhi ya SPIs zinaweza kuonyesha pini kama DI na DO. **MOSI -> DI, MISO -> DO**
 
 ![](<../../images/image (360).png>)
 

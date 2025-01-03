@@ -28,20 +28,20 @@ mimikatz.exe "kerberos::ptt <TICKET_FILE>"
 # Obtain a shell
 .\PsExec.exe -accepteula \\<TARGET> cmd
 ```
-Huduma ya CIFS inasisitizwa kama lengo la kawaida la kufikia mfumo wa faili wa mwathirika, lakini huduma nyingine kama HOST na RPCSS pia zinaweza kutumika kwa kazi na maswali ya WMI.
+Huduma ya CIFS inasisitizwa kama lengo la kawaida kwa kupata mfumo wa faili wa mwathirika, lakini huduma nyingine kama HOST na RPCSS pia zinaweza kutumika kwa kazi na maswali ya WMI.
 
 ## Huduma Zinazopatikana
 
-| Aina ya Huduma                            | Tiketi za Silver za Huduma                                               |
-| ----------------------------------------- | ------------------------------------------------------------------------ |
-| WMI                                       | <p>HOST</p><p>RPCSS</p>                                                |
-| PowerShell Remoting                       | <p>HOST</p><p>HTTP</p><p>Kulingana na OS pia:</p><p>WSMAN</p><p>RPCSS</p> |
-| WinRM                                     | <p>HOST</p><p>HTTP</p><p>Katika matukio mengine unaweza tu kuuliza: WINRM</p> |
-| Kazi za Ratiba                            | HOST                                                                   |
-| Windows File Share, pia psexec           | CIFS                                                                   |
-| Operesheni za LDAP, ikiwa ni pamoja na DCSync | LDAP                                                                   |
-| Zana za Usimamizi wa Windows Remote Server | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                     |
-| Tiketi za Dhahabu                         | krbtgt                                                                 |
+| Aina ya Huduma                             | Tiketi za Fedha za Huduma za Silver                                       |
+| ------------------------------------------ | -------------------------------------------------------------------------- |
+| WMI                                        | <p>HOST</p><p>RPCSS</p>                                                    |
+| PowerShell Remoting                        | <p>HOST</p><p>HTTP</p><p>Kulingana na OS pia:</p><p>WSMAN</p><p>RPCSS</p> |
+| WinRM                                      | <p>HOST</p><p>HTTP</p><p>Katika matukio mengine unaweza tu kuuliza: WINRM</p> |
+| Kazi za Ratiba                            | HOST                                                                       |
+| Kushiriki Faili za Windows, pia psexec    | CIFS                                                                       |
+| Operesheni za LDAP, ikiwa ni pamoja na DCSync | LDAP                                                                       |
+| Zana za Usimamizi wa Server ya Mbali ya Windows | <p>RPCSS</p><p>LDAP</p><p>CIFS</p>                                         |
+| Tiketi za Dhahabu                          | krbtgt                                                                     |
 
 Kwa kutumia **Rubeus** unaweza **kuomba zote** tiketi hizi kwa kutumia parameter:
 
@@ -65,15 +65,15 @@ dir \\vulnerable.computer\C$
 dir \\vulnerable.computer\ADMIN$
 copy afile.txt \\vulnerable.computer\C$\Windows\Temp
 ```
-Utapata pia uwezo wa kupata shell ndani ya mwenyeji au kutekeleza amri za kawaida ukitumia **psexec**:
+Utapata pia uwezo wa kupata shell ndani ya mwenyeji au kutekeleza amri zisizo na mpangilio ukitumia **psexec**:
 
 {{#ref}}
 ../lateral-movement/psexec-and-winexec.md
 {{#endref}}
 
-### HOST
+### MWEZI
 
-Kwa ruhusa hii unaweza kuunda kazi zilizopangwa katika kompyuta za mbali na kutekeleza amri za kawaida:
+Kwa ruhusa hii unaweza kuunda kazi zilizopangwa katika kompyuta za mbali na kutekeleza amri zisizo na mpangilio:
 ```bash
 #Check you have permissions to use schtasks over a remote server
 schtasks /S some.vuln.pc

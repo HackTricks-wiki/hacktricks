@@ -4,7 +4,7 @@
 
 ## [Esolangs Wiki](https://esolangs.org/wiki/Main_Page)
 
-Angalia wiki hiyo kutafuta lugha zaidi za esoteric
+Angalia hiyo wiki kutafuta lugha zaidi za esoteric
 
 ## Malbolge
 ```

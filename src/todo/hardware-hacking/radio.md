@@ -4,7 +4,7 @@
 
 ## SigDigger
 
-[**SigDigger** ](https://github.com/BatchDrake/SigDigger)ni mchanganuzi wa ishara za dijiti bure kwa GNU/Linux na macOS, ulioandaliwa kutoa taarifa za ishara za redio zisizojulikana. Inasaidia vifaa mbalimbali vya SDR kupitia SoapySDR, na inaruhusu demodulation inayoweza kubadilishwa ya ishara za FSK, PSK na ASK, kufungua video za analojia, kuchambua ishara zenye mchanganyiko na kusikiliza vituo vya sauti vya analojia (yote kwa wakati halisi).
+[**SigDigger** ](https://github.com/BatchDrake/SigDigger)ni mchanganuzi wa ishara za dijiti bure kwa GNU/Linux na macOS, ulioandaliwa kutoa taarifa za ishara za redio zisizojulikana. Inasaidia vifaa mbalimbali vya SDR kupitia SoapySDR, na inaruhusu demodulation inayoweza kubadilishwa ya ishara za FSK, PSK na ASK, kufungua video za analojia, kuchambua ishara zenye mzunguko na kusikiliza njia za sauti za analojia (yote kwa wakati halisi).
 
 ### Mipangilio ya Msingi
 
@@ -18,7 +18,7 @@ Katika tabia ya GUI inapendekezwa kuwezesha mambo machache ikiwa PC yako inasaid
 ![](<../../images/image (472).png>)
 
 > [!NOTE]
-> Ikiwa unagundua kuwa PC yako haitoi mambo jaribu kuzima OpenGL na kupunguza kiwango cha sampuli.
+> Ikiwa unagundua kuwa PC yako haikamata mambo jaribu kuzima OpenGL na kupunguza kiwango cha sampuli.
 
 ### Matumizi
 
@@ -30,22 +30,22 @@ Katika tabia ya GUI inapendekezwa kuwezesha mambo machache ikiwa PC yako inasaid
 
 ![](<../../images/image (1099).png>)
 
-### Sambaza na kituo cha redio
+### Sambaza na njia ya redio
 
-Na [**SigDigger** ](https://github.com/BatchDrake/SigDigger)sambaza na kituo unachotaka kusikia, pangilia chaguo la "Baseband audio preview", pangilia upana wa bendi ili kupata taarifa zote zinazotumwa na kisha weka Tuner kwenye kiwango kabla ya kelele kuanza kuongezeka:
+Na [**SigDigger** ](https://github.com/BatchDrake/SigDigger)sambaza na channel unayotaka kusikia, pangilia chaguo "Baseband audio preview", pangilia upana wa bendi ili kupata taarifa zote zinazotumwa na kisha weka Tuner kwenye kiwango kabla ya kelele kuanza kuongezeka:
 
 ![](<../../images/image (585).png>)
 
 ## Hila za Kuvutia
 
-- Wakati kifaa kinatuma mchanganyiko wa taarifa, kwa kawaida **sehemu ya kwanza itakuwa preamble** hivyo **huna** haja ya **kuhofia** ikiwa **hupati taarifa** hapo **au ikiwa kuna makosa**.
+- Wakati kifaa kinatuma mizunguko ya taarifa, kwa kawaida **sehemu ya kwanza itakuwa preamble** hivyo **huna** haja ya **kuhofia** ikiwa **hupati taarifa** hapo **au ikiwa kuna makosa**.
 - Katika fremu za taarifa kwa kawaida unapaswa **kupata fremu tofauti zikiwa zimepangwa vizuri kati yao**:
 
 ![](<../../images/image (1076).png>)
 
 ![](<../../images/image (597).png>)
 
-- **Baada ya kurejesha bits unapaswa kuzichakata kwa namna fulani**. Kwa mfano, katika codification ya Manchester up+down itakuwa 1 au 0 na down+up itakuwa nyingine. Hivyo, jozi za 1s na 0s (ups na downs) zitakuwa 1 halisi au 0 halisi.
+- **Baada ya kurejesha bits unaweza kuhitaji kuzifanyia kazi kwa namna fulani**. Kwa mfano, katika codification ya Manchester up+down itakuwa 1 au 0 na down+up itakuwa nyingine. Hivyo, jozi za 1s na 0s (ups na downs) zitakuwa 1 halisi au 0 halisi.
 - Hata kama ishara inatumia codification ya Manchester (haiwezekani kupata zaidi ya 0s au 1s mbili mfululizo), unaweza **kupata 1s au 0s kadhaa pamoja katika preamble**!
 
 ### Kufichua aina ya moduli kwa IQ
@@ -56,9 +56,9 @@ Ikiwa unachunguza ishara kuna njia tofauti za kujaribu kubaini ni ipi inatumika 
 ![](<../../images/image (788).png>)
 
 - **Kugundua AM**: Ikiwa katika grafu ya IQ inaonekana kwa mfano **duka 2** (labda moja katika 0 na nyingine katika amplitude tofauti), inaweza kumaanisha kuwa hii ni ishara ya AM. Hii ni kwa sababu katika grafu ya IQ umbali kati ya 0 na duka ni amplitude ya ishara, hivyo ni rahisi kuona amplitudes tofauti zinazo tumika.
-- **Kugundua PM**: Kama katika picha ya awali, ikiwa unapata mduka midogo isiyohusiana kati yao inaweza kumaanisha kuwa moduli ya awamu inatumika. Hii ni kwa sababu katika grafu ya IQ, pembe kati ya nukta na 0,0 ni awamu ya ishara, hivyo inamaanisha kuwa awamu 4 tofauti zinatumika.
-- Kumbuka kwamba ikiwa taarifa imefichwa katika ukweli kwamba awamu inabadilishwa na sio katika awamu yenyewe, huwezi kuona awamu tofauti zikiwa zimejulikana wazi.
-- **Kugundua FM**: IQ haina uwanja wa kutambua frequencies (umbali hadi katikati ni amplitude na pembe ni awamu).\
+- **Kugundua PM**: Kama katika picha ya awali, ikiwa unapata mduka midogo isiyohusiana kati yao inaweza kumaanisha kuwa moduli ya phase inatumika. Hii ni kwa sababu katika grafu ya IQ, pembe kati ya nukta na 0,0 ni phase ya ishara, hivyo inamaanisha kuwa hatua 4 tofauti zinatumika.
+- Kumbuka kwamba ikiwa taarifa imefichwa katika ukweli kwamba phase inabadilishwa na sio katika phase yenyewe, huwezi kuona phases tofauti zikiwa zimejulikana wazi.
+- **Kugundua FM**: IQ haina uwanja wa kutambua frequencies (umbali hadi katikati ni amplitude na pembe ni phase).\
 Kwa hivyo, ili kutambua FM, unapaswa **kuona kimsingi duara tu** katika grafu hii.\
 Zaidi ya hayo, frequency tofauti "inawakilishwa" na grafu ya IQ kwa **kuongezeka kwa kasi katika duara** (hivyo katika SysDigger kuchagua ishara grafu ya IQ inajazwa, ikiwa unapata ongezeko au mabadiliko ya mwelekeo katika duara iliyoundwa inaweza kumaanisha kuwa hii ni FM):
 
@@ -70,7 +70,7 @@ Zaidi ya hayo, frequency tofauti "inawakilishwa" na grafu ya IQ kwa **kuongezeka
 
 #### Kuangalia envelope
 
-Kuangalia taarifa za AM na [**SigDigger** ](https://github.com/BatchDrake/SigDigger)na kuangalia tu **envelop** unaweza kuona viwango tofauti vya amplitude. Ishara inayotumika inatuma mapigo yenye taarifa katika AM, hii ndiyo jinsi mapigo moja yanavyoonekana:
+Kuangalia taarifa za AM na [**SigDigger** ](https://github.com/BatchDrake/SigDigger)na kuangalia tu **envelop** unaweza kuona viwango tofauti vya amplitude. Ishara inayotumika inatuma mizunguko yenye taarifa katika AM, hii ndiyo jinsi mzunguko mmoja unavyoonekana:
 
 ![](<../../images/image (590).png>)
 
@@ -88,11 +88,11 @@ Kwa mfano, ikiwa unachagua Frequency badala ya Amplitude katika ishara hii ya AM
 
 ![](<../../images/image (732).png>)
 
-Ikiwa unapata frequencies nyingi huenda hii isiwe FM, labda frequency ya ishara ilibadilishwa tu kwa sababu ya kituo.
+Ikiwa unapata frequencies nyingi huenda hii isiwe FM, labda frequency ya ishara ilibadilishwa tu kwa sababu ya channel.
 
-#### Kwa IQ
+#### Na IQ
 
-Katika mfano huu unaweza kuona jinsi kuna **duara kubwa** lakini pia **pointi nyingi katikati.**
+Katika mfano huu unaweza kuona jinsi kuna **duka kubwa** lakini pia **mambo mengi katikati.**
 
 ![](<../../images/image (222).png>)
 
@@ -106,22 +106,22 @@ Chagua alama ndogo zaidi unayoweza kupata (hivyo unahakikisha ni 1 tu) na angali
 
 #### Kwa kundi la alama
 
-Unaweza pia kuashiria idadi ya alama unazopanga kuchagua na SigDigger itakadiria frequency ya alama 1 (alama zaidi zilizochaguliwa bora zaidi labda). Katika hali hii nilichagua alama 10 na "Selection freq" ni 1.004 Khz:
+Unaweza pia kuashiria idadi ya alama unazopanga kuchagua na SigDigger itahesabu frequency ya alama 1 (alama zaidi zilizochaguliwa bora zaidi labda). Katika hali hii nilichagua alama 10 na "Selection freq" ni 1.004 Khz:
 
 ![](<../../images/image (1008).png>)
 
 ### Pata Bits
 
-Baada ya kugundua hii ni ishara ya **AM modulated** na **kasi ya alama** (na kujua kwamba katika kesi hii kitu chochote juu kinamaanisha 1 na kitu chochote chini kinamaanisha 0), ni rahisi sana **kupata bits** zilizowekwa katika ishara. Hivyo, chagua ishara yenye taarifa na pangilia sampuli na uamuzi na bonyeza sampuli (hakikisha kuwa **Amplitude** imechaguliwa, kasi iliyogunduliwa ya **Symbol rate** imepangiliwa na **Gadner clock recovery** imechaguliwa):
+Baada ya kugundua hii ni ishara **iliyorekebishwa ya AM** na **kiwango cha alama** (na kujua kwamba katika kesi hii kitu kilichoinuka kinamaanisha 1 na kitu kilichoshuka kinamaanisha 0), ni rahisi sana **kupata bits** zilizowekwa katika ishara. Hivyo, chagua ishara yenye taarifa na pangilia sampuli na uamuzi na bonyeza sampuli (hakikisha kuwa **Amplitude** imechaguliwa, kiwango kilichogunduliwa cha **Symbol rate** kimepangiliwa na **Gadner clock recovery** imechaguliwa):
 
 ![](<../../images/image (965).png>)
 
-- **Sync to selection intervals** inamaanisha kwamba ikiwa hapo awali umechagua vipindi ili kupata kasi ya alama, kasi hiyo ya alama itatumika.
-- **Manual** inamaanisha kwamba kasi ya alama iliyotajwa itatumika
-- Katika **Fixed interval selection** unaashiria idadi ya vipindi vinavyopaswa kuchaguliwa na inakadiria kasi ya alama kutoka hapo
-- **Gadner clock recovery** kwa kawaida ndiyo chaguo bora, lakini bado unahitaji kuashiria baadhi ya kasi ya alama ya karibu.
+- **Sync to selection intervals** inamaanisha kwamba ikiwa hapo awali umechagua intervals ili kupata kiwango cha alama, kiwango hicho cha alama kitatumika.
+- **Manual** inamaanisha kwamba kiwango kilichoonyeshwa cha alama kitatumika
+- Katika **Fixed interval selection** unaashiria idadi ya intervals ambazo zinapaswa kuchaguliwa na inahesabu kiwango cha alama kutoka kwake
+- **Gadner clock recovery** kwa kawaida ndiyo chaguo bora, lakini bado unahitaji kuashiria kiwango fulani cha alama.
 
-Ukibonyeza sampuli hii inaonekana:
+Bonyeza sampuli hii inatokea:
 
 ![](<../../images/image (644).png>)
 
@@ -151,11 +151,11 @@ Mfano wa ishara inayotuma taarifa iliyorekebishwa katika FM:
 
 ![](<../../images/image (725).png>)
 
-Katika picha ya awali unaweza kuona vizuri kwamba **frequencies 2 zinatumika** lakini ikiwa unachunguza **waveform** huenda usiweze kutambua kwa usahihi frequencies 2 tofauti:
+Katika picha ya awali unaweza kuona vizuri kwamba **frequencies 2 zinatumika** lakini ikiwa unafanya **angalau** waveform huenda usiweze kutambua kwa usahihi frequencies 2 tofauti:
 
 ![](<../../images/image (717).png>)
 
-Hii ni kwa sababu nilikamata ishara katika frequencies zote mbili, hivyo moja ni karibu na nyingine kwa hasi:
+Hii ni kwa sababu nilikamata ishara katika frequencies zote, hivyo moja ni karibu na nyingine kwa upande hasi:
 
 ![](<../../images/image (942).png>)
 
@@ -171,17 +171,17 @@ Kuangalia histogram ya frequency ya ishara yenye taarifa unaweza kwa urahisi kuo
 
 ![](<../../images/image (871).png>)
 
-Katika kesi hii ikiwa unachunguza **Amplitude histogram** utapata **amplitude moja tu**, hivyo **haiwezi kuwa AM** (ikiwa unapata amplitudes nyingi huenda ni kwa sababu ishara imekuwa ikipoteza nguvu katika kituo):
+Katika kesi hii ikiwa unachunguza **Amplitude histogram** utapata **amplitude moja tu**, hivyo **haiwezi kuwa AM** (ikiwa unapata amplitudes nyingi huenda ni kwa sababu ishara imekuwa ikipoteza nguvu katika channel):
 
 ![](<../../images/image (817).png>)
 
-Na hii ingekuwa histogram ya awamu (ambayo inaonyesha wazi kuwa ishara haijarekebishwa katika awamu):
+Na hii ingekuwa histogram ya phase (ambayo inaonyesha wazi ishara haijarekebishwa katika phase):
 
 ![](<../../images/image (996).png>)
 
-#### Kwa IQ
+#### Na IQ
 
-IQ haina uwanja wa kutambua frequencies (umbali hadi katikati ni amplitude na pembe ni awamu).\
+IQ haina uwanja wa kutambua frequencies (umbali hadi katikati ni amplitude na pembe ni phase).\
 Kwa hivyo, ili kutambua FM, unapaswa **kuona kimsingi duara tu** katika grafu hii.\
 Zaidi ya hayo, frequency tofauti "inawakilishwa" na grafu ya IQ kwa **kuongezeka kwa kasi katika duara** (hivyo katika SysDigger kuchagua ishara grafu ya IQ inajazwa, ikiwa unapata ongezeko au mabadiliko ya mwelekeo katika duara iliyoundwa inaweza kumaanisha kuwa hii ni FM):
 
@@ -193,6 +193,6 @@ Unaweza kutumia **mbinu ile ile iliyotumika katika mfano wa AM** kupata kiwango 
 
 ### Pata Bits
 
-Unaweza kutumia **mbinu ile ile iliyotumika katika mfano wa AM** kupata bits mara tu umepata **ishara imejarekebishwa katika frequency** na **kasi ya alama**.
+Unaweza kutumia **mbinu ile ile iliyotumika katika mfano wa AM** kupata bits mara tu umepata **ishara imejarekebishwa katika frequency** na **kiwango cha alama**.
 
 {{#include ../../banners/hacktricks-training.md}}

@@ -4,7 +4,7 @@
 
 1. Unda Pipe mpya
 2. Unda na anzisha huduma ambayo itakuwa na uhusiano na pipe iliyoundwa na kuandika kitu. Msimbo wa huduma utaendesha msimbo huu wa PS ulioandikwa: `$pipe = new-object System.IO.Pipes.NamedPipeClientStream("piper"); $pipe.Connect(); $sw = new-object System.IO.StreamWriter($pipe); $sw.WriteLine("Go"); $sw.Dispose();`
-3. Huduma inapata data kutoka kwa mteja katika pipe, inaita ImpersonateNamedPipeClient na inasubiri huduma ikamilike
+3. Huduma inapata data kutoka kwa mteja kwenye pipe, inaita ImpersonateNamedPipeClient na inasubiri huduma ikamilike
 4. Hatimaye, inatumia token iliyopatikana kutoka kwa huduma kuanzisha _cmd.exe_ mpya
 
 > [!WARNING]

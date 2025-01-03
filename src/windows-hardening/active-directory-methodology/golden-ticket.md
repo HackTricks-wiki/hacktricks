@@ -4,11 +4,11 @@
 
 ## Golden ticket
 
-A **Golden Ticket** attack consist on the **creation of a legitimate Ticket Granting Ticket (TGT) impersonating any user** through the use of the **NTLM hash of the Active Directory (AD) krbtgt account**. H technique hii ni faida kubwa kwa sababu inaruhusu **access to any service or machine** ndani ya domain kama mtumiaji anayejulikana. Ni muhimu kukumbuka kwamba **krbtgt account's credentials are never automatically updated**.
+A **Golden Ticket** attack consist on the **creation of a legitimate Ticket Granting Ticket (TGT) impersonating any user** through the use of the **NTLM hash of the Active Directory (AD) krbtgt account**. Hii mbinu ni faida kubwa kwa sababu inaruhusu **access to any service or machine** ndani ya domain kama mtumiaji anayejulikana. Ni muhimu kukumbuka kwamba **krbtgt account's credentials are never automatically updated**.
 
-Ili **acquire the NTLM hash** ya akaunti ya krbtgt, njia mbalimbali zinaweza kutumika. Inaweza kutolewa kutoka kwa **Local Security Authority Subsystem Service (LSASS) process** au **NT Directory Services (NTDS.dit) file** iliyoko kwenye Domain Controller (DC) yoyote ndani ya domain. Zaidi ya hayo, **executing a DCsync attack** ni mkakati mwingine wa kupata NTLM hash hii, ambayo inaweza kufanywa kwa kutumia zana kama **lsadump::dcsync module** katika Mimikatz au **secretsdump.py script** na Impacket. Ni muhimu kusisitiza kwamba ili kufanya shughuli hizi, **domain admin privileges or a similar level of access is typically required**.
+Ili **acquire the NTLM hash** ya akaunti ya krbtgt, mbinu mbalimbali zinaweza kutumika. Inaweza kutolewa kutoka kwa **Local Security Authority Subsystem Service (LSASS) process** au **NT Directory Services (NTDS.dit) file** iliyoko kwenye Domain Controller (DC) yoyote ndani ya domain. Zaidi ya hayo, **executing a DCsync attack** ni mkakati mwingine wa kupata NTLM hash hii, ambayo inaweza kufanywa kwa kutumia zana kama **lsadump::dcsync module** katika Mimikatz au **secretsdump.py script** na Impacket. Ni muhimu kusisitiza kwamba ili kufanya operesheni hizi, **domain admin privileges or a similar level of access is typically required**.
 
-Ingawa NTLM hash inatumika kama njia inayofaa kwa ajili ya kusudi hili, inashauriwa **strongly recommended** ku **forge tickets using the Advanced Encryption Standard (AES) Kerberos keys (AES128 and AES256)** kwa sababu za usalama wa operesheni.
+Ingawa NTLM hash inatumika kama njia inayofaa kwa ajili ya kusudi hili, inashauriwa **strongly** ku **forge tickets using the Advanced Encryption Standard (AES) Kerberos keys (AES128 and AES256)** kwa sababu za usalama wa operesheni.
 ```bash:From Linux
 python ticketer.py -nthash 25b2076cda3bfd6209161a6c78a69c1c -domain-sid S-1-5-21-1339291983-1349129144-367733775 -domain jurassic.park stegosaurus
 export KRB5CCNAME=/root/impacket-examples/stegosaurus.ccache
@@ -24,11 +24,11 @@ klist #List tickets in memory
 # Example using aes key
 kerberos::golden /user:Administrator /domain:dollarcorp.moneycorp.local /sid:S-1-5-21-1874506631-3219952063-538504511 /aes256:430b2fdb13cc820d73ecf123dddd4c9d76425d4c2156b89ac551efb9d591a439 /ticket:golden.kirbi
 ```
-**Mara** tu unapoingiza **tiketi ya dhahabu**, unaweza kufikia faili za pamoja **(C$)**, na kutekeleza huduma na WMI, hivyo unaweza kutumia **psexec** au **wmiexec** kupata shell (inaonekana huwezi kupata shell kupitia winrm).
+**Mara** umepata **tiketi ya dhahabu iliyoingizwa**, unaweza kufikia faili za pamoja **(C$)**, na kutekeleza huduma na WMI, hivyo unaweza kutumia **psexec** au **wmiexec** kupata shell (inaonekana huwezi kupata shell kupitia winrm).
 
 ### Kupita njia za kawaida za kugundua
 
-Njia za kawaida za kugundua tiketi ya dhahabu ni kwa **kukagua trafiki ya Kerberos** kwenye waya. Kwa kawaida, Mimikatz **inasaini TGT kwa miaka 10**, ambayo itajitokeza kama isiyo ya kawaida katika maombi ya TGS yanayofanywa nayo.
+Njia za kawaida zaidi za kugundua tiketi ya dhahabu ni kwa **kukagua trafiki ya Kerberos** kwenye waya. Kwa kawaida, Mimikatz **inasaini TGT kwa miaka 10**, ambayo itajitokeza kama isiyo ya kawaida katika maombi ya TGS yanayofanywa nayo.
 
 `Lifetime : 3/11/2021 12:39:57 PM ; 3/9/2031 12:39:57 PM ; 3/9/2031 12:39:57 PM`
 
@@ -52,7 +52,7 @@ diamond-ticket.md
 
 Hila nyingine ndogo ambazo walinzi wanaweza kufanya ni **kuonya kuhusu 4769 kwa watumiaji nyeti** kama akaunti ya msimamizi wa eneo la msingi.
 
-## Marejeleo
+## Marejeo
 
 - [https://www.tarlogic.com/blog/how-to-attack-kerberos/](https://www.tarlogic.com/blog/how-to-attack-kerberos/)
 - [https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-golden-tickets] (https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/kerberos-golden-tickets)

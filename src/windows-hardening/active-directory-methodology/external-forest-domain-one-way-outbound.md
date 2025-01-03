@@ -54,13 +54,13 @@ Hatua hii ya uthibitishaji inafungua uwezekano wa kuhesabu na hata kutumia hudum
 ```
 ### Kukusanya nenosiri la kuaminiana la wazi
 
-Katika mchakato uliopita, ilitumika hash ya kuaminiana badala ya **nenosiri la wazi** (ambalo pia lilikuwa **limeondolewa na mimikatz**).
+Katika mchakato uliopita, ilitumika hash ya kuaminiana badala ya **nenosiri la wazi** (ambalo pia **lilipatikana na mimikatz**).
 
 Nenosiri la wazi linaweza kupatikana kwa kubadilisha \[ CLEAR ] kutoka kwa mimikatz kutoka hexadecimal na kuondoa bytes za null ‘\x00’:
 
 ![](<../../images/image (938).png>)
 
-Wakati mwingine unapounda uhusiano wa kuaminiana, nenosiri lazima liandikwe na mtumiaji kwa ajili ya kuaminiana. Katika onyesho hili, ufunguo ni nenosiri la kuaminiana la awali na kwa hivyo linaweza kusomeka na binadamu. Kadri ufunguo unavyopitia (siku 30), nenosiri la wazi halitaweza kusomeka na binadamu lakini kiufundi bado linaweza kutumika.
+Wakati mwingine, wakati wa kuunda uhusiano wa kuaminiana, nenosiri lazima liandikwe na mtumiaji kwa ajili ya kuaminiana. Katika onyesho hili, ufunguo ni nenosiri la kuaminiana la awali na hivyo linaweza kusomeka na binadamu. Kadri ufunguo unavyobadilika (siku 30), nenosiri la wazi halitaweza kusomeka na binadamu lakini kiufundi bado linaweza kutumika.
 
 Nenosiri la wazi linaweza kutumika kufanya uthibitishaji wa kawaida kama akaunti ya kuaminiana, mbadala wa kuomba TGT kwa kutumia ufunguo wa siri wa Kerberos wa akaunti ya kuaminiana. Hapa, kuuliza root.local kutoka ext.local kwa wanachama wa Domain Admins:
 

@@ -4,15 +4,15 @@
 
 ## ASREPRoast
 
-ASREPRoast ni shambulio la usalama linalotumia watumiaji ambao hawana **sifa inayohitajika ya Kerberos pre-authentication**. Kimsingi, udhaifu huu unaruhusu washambuliaji kuomba uthibitisho kwa mtumiaji kutoka kwa Domain Controller (DC) bila kuhitaji nenosiri la mtumiaji. DC kisha inajibu kwa ujumbe uliofichwa kwa kutumia ufunguo uliochukuliwa kutoka kwa nenosiri la mtumiaji, ambao washambuliaji wanaweza kujaribu kuuvunja bila mtandao ili kugundua nenosiri la mtumiaji.
+ASREPRoast ni shambulio la usalama linalotumia watumiaji ambao hawana **sifa ya awali ya uthibitisho ya Kerberos**. Kimsingi, udhaifu huu unaruhusu washambuliaji kuomba uthibitisho kwa mtumiaji kutoka kwa Msimamizi wa Kikoa (DC) bila kuhitaji nenosiri la mtumiaji. DC kisha inajibu kwa ujumbe uliofungwa kwa kutumia ufunguo uliochukuliwa kutoka kwa nenosiri la mtumiaji, ambao washambuliaji wanaweza kujaribu kuuvunja bila mtandao ili kugundua nenosiri la mtumiaji.
 
 Mahitaji makuu ya shambulio hili ni:
 
-- **Ukosefu wa Kerberos pre-authentication**: Watumiaji wa lengo hawapaswi kuwa na kipengele hiki cha usalama kimewezeshwa.
-- **Muunganisho na Domain Controller (DC)**: Washambuliaji wanahitaji kupata DC ili kutuma maombi na kupokea ujumbe uliofichwa.
-- **Akaunti ya kikoa ya hiari**: Kuwa na akaunti ya kikoa kunawawezesha washambuliaji kutambua kwa ufanisi watumiaji walio hatarini kupitia maswali ya LDAP. Bila akaunti kama hiyo, washambuliaji lazima wahisi majina ya watumiaji.
+- **Ukosefu wa awali ya uthibitisho ya Kerberos**: Watumiaji wa lengo hawapaswi kuwa na kipengele hiki cha usalama kimewezeshwa.
+- **Muunganisho na Msimamizi wa Kikoa (DC)**: Washambuliaji wanahitaji ufikiaji wa DC ili kutuma maombi na kupokea ujumbe uliofungwa.
+- **Akaunti ya kikoa ya hiari**: Kuwa na akaunti ya kikoa kunawawezesha washambuliaji kutambua kwa ufanisi watumiaji walio hatarini kupitia maswali ya LDAP. Bila akaunti kama hiyo, washambuliaji lazima wakadirie majina ya watumiaji.
 
-#### Kuorodhesha watumiaji walio hatarini (hitaji akreditivu za kikoa)
+#### Kuorodhesha watumiaji walio hatarini (hitaji akidi za kikoa)
 ```bash:Using Windows
 Get-DomainUser -PreauthNotRequired -verbose #List vuln users using PowerView
 ```
@@ -52,7 +52,7 @@ bloodyAD -u user -p 'totoTOTOtoto1234*' -d crash.lab --host 10.100.10.5 add uac 
 ```
 ## ASREProast bila hati
 
-Mshambuliaji anaweza kutumia nafasi ya mtu katikati kukamata pakiti za AS-REP wakati zinapopita kwenye mtandao bila kutegemea kuondolewa kwa awali ya uthibitishaji wa Kerberos. Hivyo inafanya kazi kwa watumiaji wote kwenye VLAN.\
+Mshambuliaji anaweza kutumia nafasi ya mtu katikati kukamata pakiti za AS-REP wakati zinapopita kwenye mtandao bila kutegemea kuondolewa kwa awali ya uthibitisho wa Kerberos. Hivyo inafanya kazi kwa watumiaji wote kwenye VLAN.\
 [ASRepCatcher](https://github.com/Yaxxine7/ASRepCatcher) inatufanya tuweze kufanya hivyo. Zaidi ya hayo, chombo hiki kinawalazimisha vituo vya wateja kutumia RC4 kwa kubadilisha mazungumzo ya Kerberos.
 ```bash
 # Actively acting as a proxy between the clients and the DC, forcing RC4 downgrade if supported

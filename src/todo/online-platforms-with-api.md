@@ -50,7 +50,7 @@ Kulingana na maoni na vipimo vingine pata ikiwa domain inahusiana na taarifa za 
 
 ## [ipinfo](https://ipinfo.io/)
 
-Pata taarifa za msingi kutoka kwa anwani ya IP. Unaweza kupima hadi 100K/ mwezi.
+Pata taarifa za msingi kutoka anwani ya IP. Unaweza kupima hadi 100K/ mwezi.
 
 ## [securitytrails](https://securitytrails.com/app/account)
 
@@ -79,7 +79,7 @@ Tafuta kwa IP au anuwai ya IP na pata taarifa kuhusu IPs zinazoskanisha Mtandao.
 
 ## [Shodan](https://www.shodan.io/)
 
-Pata taarifa za skana za anwani ya IP. Ina upatikanaji wa bure wa API.
+Pata taarifa za skana za anwani ya IP. Ina upatikanaji wa bure wa api.
 
 ## [Censys](https://censys.io/)
 
@@ -112,7 +112,7 @@ Pata taarifa za kuvutia kutoka kwa IPs
 
 ## [haveibeenpwned](https://haveibeenpwned.com/)
 
-Tafuta kwa domain na barua pepe na pata ikiwa ilipatikana na nywila. Kibiashara?
+Tafuta kwa domain na barua pepe na pata ikiwa imepata na nywila. Kibiashara?
 
 ### [IP2Location.io](https://www.ip2location.io/)
 

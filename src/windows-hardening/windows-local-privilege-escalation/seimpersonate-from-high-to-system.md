@@ -1,11 +1,11 @@
-# SeImpersonate kutoka Juu Hadi Mfumo
+# SeImpersonate kutoka High Hadi System
 
 {{#include ../../banners/hacktricks-training.md}}
 
 ### Code
 
 Msimbo ufuatao kutoka [hapa](https://medium.com/@seemant.bisht24/understanding-and-abusing-access-tokens-part-ii-b9069f432962). Inaruhusu **kuashiria ID ya Mchakato kama hoja** na CMD **inayoendesha kama mtumiaji** wa mchakato ulioashiriwa itatekelezwa.\
-Ikiwa inatekelezwa katika mchakato wa Juu wa Uaminifu unaweza **kuashiria PID ya mchakato unaoendesha kama Mfumo** (kama winlogon, wininit) na kutekeleza cmd.exe kama mfumo.
+Ikiwa inatekelezwa katika mchakato wa High Integrity unaweza **kuashiria PID ya mchakato unaoendesha kama System** (kama winlogon, wininit) na kutekeleza cmd.exe kama system.
 ```cpp
 impersonateuser.exe 1234
 ```
@@ -154,14 +154,14 @@ Wakati mwingine unaweza kujaribu kujifanya kuwa System na haitafanya kazi ikiony
 [-] CreateProcessWithTokenW Error: 1326
 ```
 Hii inamaanisha kwamba hata kama unafanya kazi kwenye kiwango cha Juu cha Uaminifu **huna ruhusa za kutosha**.\
-Hebu tuangalie ruhusa za sasa za Administrator juu ya mchakato wa `svchost.exe` kwa kutumia **processes explorer** (au unaweza pia kutumia process hacker):
+Hebu tuangalie ruhusa za sasa za Msimamizi juu ya mchakato wa `svchost.exe` kwa kutumia **processes explorer** (au unaweza pia kutumia process hacker):
 
 1. Chagua mchakato wa `svchost.exe`
 2. Bonyeza kulia --> Mali
 3. Ndani ya "Usalama" Tab bonyeza chini kulia kwenye kitufe "Ruhusa"
-4. Bonyeza "Advanced"
-5. Chagua "Administrators" na bonyeza "Edit"
-6. Bonyeza "Show advanced permissions"
+4. Bonyeza kwenye "Advanced"
+5. Chagua "Administrators" na bonyeza kwenye "Edit"
+6. Bonyeza kwenye "Show advanced permissions"
 
 ![](<../../images/image (437).png>)
 
@@ -171,6 +171,6 @@ Tazama ruhusa "Administrators" wanazo juu ya `winlogon.exe`:
 
 ![](<../../images/image (1102).png>)
 
-Ndani ya mchakato huo "Administrators" wanaweza "Read Memory" na "Read Permissions" ambayo huenda inawawezesha Administrators kuiga token inayotumika na mchakato huu.
+Ndani ya mchakato huo "Administrators" wanaweza "Read Memory" na "Read Permissions" ambayo huenda inawawezesha Msimamizi kuiga token inayotumika na mchakato huu.
 
 {{#include ../../banners/hacktricks-training.md}}

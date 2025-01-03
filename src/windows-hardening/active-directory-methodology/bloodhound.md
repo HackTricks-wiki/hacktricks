@@ -6,7 +6,7 @@
 
 [AD Explorer](https://docs.microsoft.com/en-us/sysinternals/downloads/adexplorer) ni kutoka Sysinternal Suite:
 
-> Mtazamaji na mhariri wa hali ya juu wa Active Directory (AD). Unaweza kutumia AD Explorer kuvinjari hifadhidata ya AD kwa urahisi, kufafanua maeneo unayopenda, kuangalia mali za vitu, na sifa bila kufungua masanduku ya mazungumzo, kuhariri ruhusa, kuangalia muundo wa kitu, na kutekeleza utafutaji wa hali ya juu ambao unaweza kuokoa na kuutekeleza tena.
+> Mtazamaji na mhariri wa hali ya juu wa Active Directory (AD). Unaweza kutumia AD Explorer kuvinjari hifadhidata ya AD kwa urahisi, kufafanua maeneo unayopenda, kuona mali za vitu, na sifa bila kufungua sanduku za mazungumzo, kuhariri ruhusa, kuona muundo wa kitu, na kutekeleza utafutaji wa hali ya juu ambao unaweza kuokoa na kuutekeleza tena.
 
 ### Snapshots
 
@@ -34,7 +34,7 @@ BloodHound inatumia nadharia ya grafu kufichua uhusiano wa siri na mara nyingi u
 
 Hivyo, [Bloodhound ](https://github.com/BloodHoundAD/BloodHound) ni chombo cha ajabu ambacho kinaweza kuhesabu kikoa kiotomatiki, kuhifadhi taarifa zote, kutafuta njia zinazowezekana za kupandisha mamlaka na kuonyesha taarifa zote kwa kutumia grafu.
 
-Booldhound inajumuisha sehemu 2 kuu: **ingestors** na **programu ya uonyeshaji**.
+Bloodhound inajumuisha sehemu 2 kuu: **ingestors** na **programu ya uonyeshaji**.
 
 **Ingestors** zinatumika ku **hesabu kikoa na kutoa taarifa zote** katika muundo ambao programu ya uonyeshaji itaelewa.
 
@@ -56,14 +56,14 @@ Baada ya hii, utahitaji kubadilisha nenosiri lililotengenezwa kwa bahati na utak
 
 ### SharpHound
 
-Wana chaguzi kadhaa lakini ikiwa unataka kuendesha SharpHound kutoka kwa PC iliyojiunga na eneo, ukitumia mtumiaji wako wa sasa na kutoa taarifa zote, unaweza kufanya:
+Wana chaguzi kadhaa lakini ikiwa unataka kuendesha SharpHound kutoka PC iliyojiunga na eneo, ukitumia mtumiaji wako wa sasa na kutoa taarifa zote unaweza kufanya:
 ```
 ./SharpHound.exe --CollectionMethods All
 Invoke-BloodHound -CollectionMethod All
 ```
 > Unaweza kusoma zaidi kuhusu **CollectionMethod** na kikao cha loop [hapa](https://support.bloodhoundenterprise.io/hc/en-us/articles/17481375424795-All-SharpHound-Community-Edition-Flags-Explained)
 
-Ikiwa unataka kutekeleza SharpHound ukitumia akreditif tofauti unaweza kuunda kikao cha CMD netonly na kuendesha SharpHound kutoka hapo:
+Ikiwa unataka kutekeleza SharpHound kwa kutumia akreditif tofauti unaweza kuunda kikao cha CMD netonly na kuendesha SharpHound kutoka hapo:
 ```
 runas /netonly /user:domain\user "powershell.exe -exec bypass"
 ```
@@ -72,7 +72,7 @@ runas /netonly /user:domain\user "powershell.exe -exec bypass"
 ## Group3r
 
 [**Group3r**](https://github.com/Group3r/Group3r) ni chombo cha kutafuta **vulnerabilities** katika Active Directory zinazohusiana na **Group Policy**. \
-Unahitaji **kuendesha group3r** kutoka kwa mwenyeji ndani ya eneo la kazi ukitumia **mtumiaji yeyote wa eneo**.
+Unahitaji **kukimbia group3r** kutoka kwa mwenyeji ndani ya eneo la kikoa ukitumia **mtumiaji yeyote wa kikoa**.
 ```bash
 group3r.exe -f <filepath-name.log>
 # -s sends results to stdin
@@ -80,8 +80,8 @@ group3r.exe -f <filepath-name.log>
 ```
 ## PingCastle
 
-[**PingCastle**](https://www.pingcastle.com/documentation/) **inafanya tathmini ya usalama wa mazingira ya AD** na inatoa **ripoti** nzuri yenye grafu.
+[**PingCastle**](https://www.pingcastle.com/documentation/) **inapima usalama wa mazingira ya AD** na inatoa **ripoti** nzuri yenye grafu.
 
-Ili kuikimbia, unaweza kutekeleza binary `PingCastle.exe` na itaanzisha **sehemu ya maingiliano** ikionyesha menyu ya chaguzi. Chaguo la default kutumia ni **`healthcheck`** ambalo litaanzisha **muonekano** wa **kimsingi** wa **domaine**, na kutafuta **mipangilio isiyo sahihi** na **udhaifu**.&#x20;
+Ili kuikimbia, unaweza kutekeleza binary `PingCastle.exe` na itaanzisha **sehemu ya mwingiliano** ikionyesha menyu ya chaguzi. Chaguo la default kutumia ni **`healthcheck`** ambalo litaanzisha **muonekano** wa **kimsingi** wa **domaine**, na kutafuta **makosa ya usanidi** na **udhaifu**.&#x20;
 
 {{#include ../../banners/hacktricks-training.md}}

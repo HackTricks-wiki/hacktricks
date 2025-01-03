@@ -12,7 +12,7 @@ Mchakato unaweza kufunguliwa kwenye mwenyeji ambapo jina la mtumiaji na ama neno
 
 ### Namespace
 
-Imeundwa katika muundo wa hierarchi ya directory, kontena la juu la WMI ni \root, chini yake kuna directories za ziada, zinazojulikana kama namespaces, zimepangwa.
+Imeundwa katika muundo wa hierarchi ya directory, kontena la juu la WMI ni \root, chini ambayo directories za ziada, zinazojulikana kama namespaces, zimepangwa. 
 Amri za kuorodhesha namespaces:
 ```bash
 # Retrieval of Root namespaces
@@ -31,8 +31,7 @@ gwmi -Namespace "root/microsoft" -List -Recurse
 ```
 ### **Darasa**
 
-Kujua jina la darasa la WMI, kama win32_process, na nafasi ambayo linaishi ni muhimu kwa operesheni yoyote ya WMI. 
-Amri za kuorodhesha madarasa yanayoanza na `win32`:
+Kujua jina la darasa la WMI, kama win32_process, na nafasi ambayo linaishi ni muhimu kwa operesheni yoyote ya WMI. Amri za kuorodhesha madarasa yanayoanza na `win32`:
 ```bash
 Get-WmiObject -Recurse -List -class win32* | more # Defaults to "root\cimv2"
 gwmi -Namespace "root/microsoft" -List -Recurse -Class "MSFT_MpComput*"
@@ -85,11 +84,11 @@ wmic useraccount list /format:list
 wmic group list /format:list
 wmic sysaccount list /format:list
 ```
-Kuchunguza kwa mbali WMI kwa habari maalum, kama wasimamizi wa ndani au watumiaji walioingia, kunawezekana kwa ujenzi wa amri kwa makini.
+Remote querying of WMI for specific information, such as local admins or logged-on users, is feasible with careful command construction.
 
-### **Kuchunguza WMI kwa Mkono kwa Mbali**
+### **Manual Remote WMI Querying**
 
-Utambuzi wa kimya wa wasimamizi wa ndani kwenye mashine ya mbali na watumiaji walioingia unaweza kufanywa kupitia maswali maalum ya WMI. `wmic` pia inasaidia kusoma kutoka kwa faili ya maandiko ili kutekeleza amri kwenye nodi nyingi kwa wakati mmoja.
+Stealthy identification of local admins on a remote machine and logged-on users can be achieved through specific WMI queries. `wmic` pia pia inasaidia kusoma kutoka kwa faili la maandiko ili kutekeleza amri kwenye nodi nyingi kwa wakati mmoja.
 
 Ili kutekeleza mchakato kwa mbali kupitia WMI, kama vile kupeleka wakala wa Empire, muundo wa amri ifuatayo unatumika, huku utekelezaji wa mafanikio ukionyeshwa na thamani ya kurudi "0":
 ```bash

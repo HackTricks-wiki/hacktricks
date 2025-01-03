@@ -4,7 +4,7 @@
 
 ## RDP Process Injection
 
-Ikiwa **kikundi cha nje** kina **ufikiaji wa RDP** kwa **kompyuta** yoyote katika eneo la sasa, **mshambuliaji** anaweza **kudhoofisha kompyuta hiyo na kumsubiri**.
+Ikiwa **kikundi cha nje** kina **ufikiaji wa RDP** kwa **kompyuta** yoyote katika eneo la sasa, **mshambuliaji** anaweza **kuharibu kompyuta hiyo na kumsubiri**.
 
 Mara tu mtumiaji huyo anapofikia kupitia RDP, **mshambuliaji anaweza kuhamasisha kwenye kikao cha mtumiaji huyo** na kutumia ruhusa zake katika eneo la nje.
 ```powershell
@@ -34,7 +34,7 @@ Angalia **njia nyingine za kuiba vikao kwa kutumia zana nyingine** [**katika uku
 
 ## RDPInception
 
-Ikiwa mtumiaji anapata kupitia **RDP kwenye mashine** ambapo **mshambuliaji** anangojea **kwa ajili yake**, mshambuliaji ataweza **kuingiza beacon katika kikao cha RDP cha mtumiaji** na ikiwa **mhasiriwa ameunganisha diski yake** alipoingia kupitia RDP, **mshambuliaji anaweza kuipata**.
+Ikiwa mtumiaji anapata kupitia **RDP kwenye mashine** ambapo **mshambuliaji** anangojea, mshambuliaji ataweza **kuingiza beacon katika kikao cha RDP cha mtumiaji** na ikiwa **mhasiriwa ameunganisha diski yake** alipoingia kupitia RDP, **mshambuliaji anaweza kuipata**.
 
 Katika kesi hii unaweza tu **kudhoofisha** **kompyuta** ya **mhasiriwa** kwa kuandika **backdoor** katika **folda ya kuanzisha**.
 ```powershell

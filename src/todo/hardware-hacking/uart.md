@@ -12,7 +12,7 @@ Tunaita usanidi wa kawaida zaidi 8N1: bits nane za data, hakuna parity, na bit m
 
 ![](<../../images/image (764).png>)
 
-Zana za vifaa kuwasiliana na UART:
+Vifaa vya vifaa kuwasiliana na UART:
 
 - Adaptari ya USB-to-serial
 - Adaptari zenye chips CP2102 au PL2303
@@ -26,12 +26,12 @@ Kwa kutumia **multimeter** na kifaa kikiwa kimezimwa:
 
 - Ili kubaini pini ya **GND** tumia hali ya **Continuity Test**, weka uongozi wa nyuma kwenye ardhi na jaribu na uongozi mwekundu hadi usikie sauti kutoka kwa multimeter. Pini kadhaa za GND zinaweza kupatikana kwenye PCB, hivyo unaweza kuwa umepata au hujapata ile inayohusiana na UART.
 - Ili kubaini bandari ya **VCC**, weka hali ya **DC voltage mode** na uweke hadi 20 V ya voltage. Uongozi mweusi kwenye ardhi na uongozi mwekundu kwenye pini. Washa kifaa. Ikiwa multimeter inapima voltage isiyobadilika ya 3.3 V au 5 V, umepata pini ya Vcc. Ikiwa unapata voltage nyingine, jaribu tena na bandari nyingine.
-- Ili kubaini bandari ya **TX**, weka **DC voltage mode** hadi 20 V ya voltage, uongozi mweusi kwenye ardhi, na uongozi mwekundu kwenye pini, na washia kifaa. Ikiwa unapata voltage inabadilika kwa sekunde chache kisha inastabilika kwenye thamani ya Vcc, umepata bandari ya TX. Hii ni kwa sababu wakati wa kuwasha, inatuma data za debug.
+- Ili kubaini bandari ya **TX**, weka **DC voltage mode** hadi 20 V ya voltage, uongozi mweusi kwenye ardhi, na uongozi mwekundu kwenye pini, na washia kifaa. Ikiwa unapata voltage inabadilika kwa sekunde chache kisha inastabilika kwenye thamani ya Vcc, umepata bandari ya TX. Hii ni kwa sababu wakati wa kuwasha, inatuma data fulani za debug.
 - Bandari ya **RX** itakuwa karibu zaidi na zingine 3, ina mabadiliko madogo ya voltage na thamani ya chini zaidi ya pini zote za UART.
 
 Unaweza kuchanganya bandari za TX na RX na hakuna kitu kitakachotokea, lakini ikiwa unachanganya bandari za GND na VCC unaweza kuharibu mzunguko.
 
-Katika baadhi ya vifaa vya lengo, bandari ya UART imezimwa na mtengenezaji kwa kuzima RX au TX au hata zote mbili. Katika kesi hiyo, inaweza kuwa na manufaa kufuatilia muunganisho kwenye bodi ya mzunguko na kupata sehemu fulani ya kuvunja. Kidokezo kikubwa kuhusu kuthibitisha kutokuwepo kwa UART na kuvunja mzunguko ni kuangalia dhamana ya kifaa. Ikiwa kifaa kimepelekwa na dhamana fulani, mtengenezaji huacha interfaces za debug (katika kesi hii, UART) na hivyo, lazima awe ameondoa UART na ataiunganisha tena wakati wa kujaribu. Pini hizi za kuvunja zinaweza kuunganishwa kwa kulehemu au nyaya za jumper.
+Katika baadhi ya vifaa vya lengo, bandari ya UART imezimwa na mtengenezaji kwa kuzima RX au TX au hata zote mbili. Katika kesi hiyo, inaweza kuwa na manufaa kufuatilia muunganisho kwenye bodi ya mzunguko na kupata sehemu ya kuvunja. Kidokezo kikubwa kuhusu kuthibitisha kutokuwepo kwa UART na kuvunja mzunguko ni kuangalia dhamana ya kifaa. Ikiwa kifaa kimepelekwa na dhamana fulani, mtengenezaji huacha interfaces za debug (katika kesi hii, UART) na hivyo, lazima awe ameondoa UART na ataiunganisha tena wakati wa debugging. Pini hizi za kuvunja zinaweza kuunganishwa kwa kulehemu au nyaya za jumper.
 
 ### Identifying the UART Baud Rate
 
@@ -44,7 +44,7 @@ Njia rahisi ya kubaini kiwango sahihi cha baud ni kuangalia **matokeo ya pini ya
 
 Chip ya CP210X inatumika katika bodi nyingi za prototyping kama NodeMCU (ikiwa na esp8266) kwa Mawasiliano ya Serial. Adaptari hizi ni za bei nafuu na zinaweza kutumika kuunganisha kwenye interface ya UART ya lengo. Kifaa kina pini 5: 5V, GND, RXD, TXD, 3.3V. Hakikisha kuunganisha voltage kama inavyoungwa mkono na lengo ili kuepuka uharibifu wowote. Mwishowe, ungana pini ya RXD ya Adaptari na TXD ya lengo na pini ya TXD ya Adaptari na RXD ya lengo.
 
-Ikiwa adaptari haijagundulika, hakikisha kuwa madereva wa CP210X yamewekwa kwenye mfumo wa mwenyeji. Mara baada ya adaptari kugundulika na kuunganishwa, zana kama picocom, minicom au screen zinaweza kutumika.
+Ikiwa adaptari haijagundulika, hakikisha kuwa madereva ya CP210X yamewekwa kwenye mfumo wa mwenyeji. Mara baada ya adaptari kugundulika na kuunganishwa, zana kama picocom, minicom au screen zinaweza kutumika.
 
 Ili orodhesha vifaa vilivyounganishwa kwenye mifumo ya Linux/MacOS:
 ```
@@ -72,7 +72,7 @@ Hatimaye, inapendekezwa kutumia Arduino IDE kupata Serial Console. Katika sehemu
 
 ## Bus Pirate
 
-Katika hali hii tutakuwa tukichunguza mawasiliano ya UART ya Arduino inayotuma uchapishaji wote wa programu kwa Monitor ya Serial.
+Katika hali hii tutakuwa tukichunguza mawasiliano ya UART ya Arduino inayotuma uchapishaji wote wa programu kwa Serial Monitor.
 ```bash
 # Check the modes
 UART>m
@@ -162,12 +162,12 @@ md
 ```
 ambayo inasimama kwa "memory dump". Hii itatoa yaliyomo kwenye kumbukumbu (EEPROM Content) kwenye skrini. Inapendekezwa kurekodi matokeo ya Serial Console kabla ya kuanza mchakato wa kukamata memory dump.
 
-Hatimaye, ondolea tu data zisizohitajika kutoka kwa faili la log na uhifadhi faili kama `filename.rom` na tumia binwalk kutoa yaliyomo:
+Hatimaye, ondoa tu data zisizohitajika kutoka kwa faili la log na uhifadhi faili kama `filename.rom` na tumia binwalk kutoa yaliyomo:
 ```
 binwalk -e <filename.rom>
 ```
 Hii itataja maudhui yanayowezekana kutoka kwa EEPROM kulingana na saini zilizopatikana katika faili la hex.
 
-Ingawa, ni muhimu kutambua kwamba si kila wakati uboot imefunguliwa hata kama inatumika. Ikiwa Funguo ya Kuingia haifanyi chochote, angalia funguo tofauti kama Funguo ya Nafasi, n.k. Ikiwa bootloader imefungwa na haikatizwa, njia hii haitafanya kazi. Ili kuangalia ikiwa uboot ni bootloader wa kifaa, angalia matokeo kwenye UART Console wakati wa kuanzisha kifaa. Inaweza kutaja uboot wakati wa kuanzisha. 
+Ingawa, ni muhimu kutambua kwamba si kila wakati uboot imefunguliwa hata kama inatumika. Ikiwa Funguo ya Kuingia haifanyi chochote, angalia funguo tofauti kama Funguo ya Nafasi, n.k. Ikiwa bootloader imefungwa na haikatizwa, njia hii haitafanya kazi. Ili kuangalia ikiwa uboot ndio bootloader wa kifaa, angalia matokeo kwenye UART Console wakati wa kuanzisha kifaa. Inaweza kutaja uboot wakati wa kuanzisha. 
 
 {{#include ../../banners/hacktricks-training.md}}

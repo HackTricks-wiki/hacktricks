@@ -20,12 +20,12 @@ Katika ulimwengu wa **WebAssembly**, zana za **decompiling** na **compiling** ni
 Decompiling assemblies za .Net inaweza kufanywa kwa zana kama:
 
 - [ILSpy](https://github.com/icsharpcode/ILSpy), ambayo pia inatoa [plugin kwa Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode), ikiruhusu matumizi ya cross-platform.
-- Kwa kazi zinazohusisha **decompilation**, **modification**, na **recompilation**, [dnSpy](https://github.com/0xd4d/dnSpy/releases) inapendekezwa sana. **Kulia-bonyeza** njia na kuchagua **Modify Method** inaruhusu mabadiliko ya msimbo.
+- Kwa kazi zinazohusisha **decompilation**, **modification**, na **recompilation**, [dnSpy](https://github.com/0xd4d/dnSpy/releases) inapendekezwa sana. **Kulia-bofya** njia na kuchagua **Modify Method** inaruhusu mabadiliko ya msimbo.
 - [JetBrains' dotPeek](https://www.jetbrains.com/es-es/decompiler/) ni chaguo jingine kwa decompiling assemblies za .Net.
 
 ## Kuimarisha Debugging na Logging na DNSpy
 
-### DNSpy Logging
+### Logging ya DNSpy
 
 Ili kuandika taarifa kwenye faili kwa kutumia DNSpy, jumuisha kipande hiki cha msimbo wa .Net:
 
@@ -35,13 +35,13 @@ path = "C:\\inetpub\\temp\\MyTest2.txt";
 File.AppendAllText(path, "Password: " + password + "\n");
 %%%
 
-### DNSpy Debugging
+### Debugging ya DNSpy
 
 Kwa debugging bora na DNSpy, mfululizo wa hatua unashauriwa kubadilisha **Assembly attributes** kwa ajili ya debugging, kuhakikisha kuwa optimizations ambazo zinaweza kuzuia debugging zimezimwa. Mchakato huu unajumuisha kubadilisha mipangilio ya `DebuggableAttribute`, recompiling assembly, na kuokoa mabadiliko.
 
-Zaidi ya hayo, ili kubadilisha programu ya .Net inayotumiwa na **IIS**, kutekeleza `iisreset /noforce` kunaanzisha upya IIS. Ili kuunganisha DNSpy kwenye mchakato wa IIS kwa ajili ya debugging, mwongo huu unatoa maelekezo ya kuchagua mchakato wa **w3wp.exe** ndani ya DNSpy na kuanza kikao cha debugging.
+Zaidi ya hayo, ili debug programu ya .Net inayotumiwa na **IIS**, kutekeleza `iisreset /noforce` kunaanzisha upya IIS. Ili kuunganisha DNSpy kwenye mchakato wa IIS kwa ajili ya debugging, mwongo huu unashauri kuchagua mchakato wa **w3wp.exe** ndani ya DNSpy na kuanza kikao cha debugging.
 
-Kwa mtazamo wa kina wa moduli zilizopakiwa wakati wa debugging, kufikia dirisha la **Modules** ndani ya DNSpy kunashauriwa, kisha kufungua moduli zote na kupanga assemblies kwa urahisi wa urambazaji na debugging.
+Kwa mtazamo wa kina wa moduli zilizoloadiwa wakati wa debugging, kufikia dirisha la **Modules** ndani ya DNSpy kunashauriwa, kisha kufungua moduli zote na kupanga assemblies kwa urahisi wa urambazaji na debugging.
 
 Mwongo huu unajumuisha kiini cha WebAssembly na decompilation ya .Net, ukitoa njia kwa waendelezaji kuhamasika katika kazi hizi kwa urahisi.
 
@@ -58,11 +58,11 @@ Ili decompile bytecode ya Java, zana hizi zinaweza kuwa na msaada mkubwa:
 
 - **Rundll32** inaloadiwa kutoka njia maalum za toleo la 64-bit na 32-bit.
 - **Windbg** inachaguliwa kama debugger na chaguo la kusimamisha wakati wa kupakia/kutoa maktaba limewezeshwa.
-- Vigezo vya utekelezaji vinajumuisha njia ya DLL na jina la kazi. Mpangilio huu unasimamisha utekelezaji wakati wa kupakia kila DLL.
+- Mipangilio ya utekelezaji inajumuisha njia ya DLL na jina la kazi. Mpangilio huu unasimamisha utekelezaji wakati wa kupakia kila DLL.
 
 ### Kutumia x64dbg/x32dbg
 
-- Kama IDA, **rundll32** inaloadiwa na marekebisho ya amri za mstari ili kubainisha DLL na kazi.
+- Kama IDA, **rundll32** inaloadiwa na marekebisho ya mistari ya amri ili kubainisha DLL na kazi.
 - Mipangilio inarekebishwa ili kuvunja kwenye kuingia kwa DLL, ikiruhusu kuweka breakpoint kwenye kiingilio kinachotakiwa cha DLL.
 
 ### Picha
@@ -80,7 +80,7 @@ Ili decompile bytecode ya Java, zana hizi zinaweza kuwa na msaada mkubwa:
 - **Blobrunner** na **jmp2it** ni zana za kugawa shellcodes katika kumbukumbu na kuzi-debug na Ida au x64dbg.
 - Blobrunner [releases](https://github.com/OALabs/BlobRunner/releases/tag/v0.0.5)
 - jmp2it [compiled version](https://github.com/adamkramer/jmp2it/releases/)
-- **Cutter** inatoa emulation na ukaguzi wa shellcode kwa kutumia GUI, ikionyesha tofauti katika usimamizi wa shellcode kama faili dhidi ya shellcode ya moja kwa moja.
+- **Cutter** inatoa emulation na ukaguzi wa shellcode kwa kutumia GUI, ikionyesha tofauti katika kushughulikia shellcode kama faili dhidi ya shellcode ya moja kwa moja.
 
 ### Deobfuscation na Uchambuzi
 

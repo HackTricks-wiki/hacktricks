@@ -5,9 +5,9 @@
 
 ## Msingi wa Resource-based Constrained Delegation
 
-Hii ni sawa na [Constrained Delegation](constrained-delegation.md) ya msingi lakini **badala** ya kutoa ruhusa kwa **kitu** ku **jifanya kama mtumiaji yeyote dhidi ya huduma**. Resource-based Constrained Delegation **inasanifisha** katika **kitu ambacho kinaweza kujifanya kama mtumiaji yeyote dhidi yake**.
+Hii ni sawa na [Constrained Delegation](constrained-delegation.md) ya msingi lakini **badala** ya kutoa ruhusa kwa **kitu** ku **wakilisha mtumiaji yeyote dhidi ya huduma**. Resource-based Constrained Delegation **inasanifisha** katika **kitu ambacho kinaweza kuwakilisha mtumiaji yeyote dhidi yake**.
 
-Katika kesi hii, kitu kilichozuiliwa kitakuwa na sifa inayoitwa _**msDS-AllowedToActOnBehalfOfOtherIdentity**_ yenye jina la mtumiaji ambaye anaweza kujifanya kama mtumiaji mwingine dhidi yake.
+Katika kesi hii, kitu kilichozuiliwa kitakuwa na sifa inayoitwa _**msDS-AllowedToActOnBehalfOfOtherIdentity**_ yenye jina la mtumiaji ambaye anaweza kuwakilisha mtumiaji mwingine yeyote dhidi yake.
 
 Tofauti nyingine muhimu kutoka kwa Constrained Delegation hii hadi delegations nyingine ni kwamba mtumiaji yeyote mwenye **ruhusa za kuandika juu ya akaunti ya mashine** (_GenericAll/GenericWrite/WriteDacl/WriteProperty/etc_) anaweza kuweka _**msDS-AllowedToActOnBehalfOfOtherIdentity**_ (Katika aina nyingine za Delegation ulihitaji ruhusa za admin wa kikoa).
 
@@ -24,13 +24,13 @@ Hata hivyo, ikiwa **TGS** iliyotumika katika **S4U2Proxy** **SIO Forwardable** k
 
 Fikiria kwamba mshambuliaji tayari ana **ruhusa sawa za kuandika juu ya kompyuta ya mwathirika**.
 
-1. Mshambuliaji **anavunja** akaunti ambayo ina **SPN** au **anaunda moja** (“Huduma A”). Kumbuka kwamba **mtumiaji yeyote** _Admin User_ bila ruhusa nyingine maalum anaweza **kuunda** hadi 10 **vitu vya Kompyuta (**_**MachineAccountQuota**_**)** na kuziweka SPN. Hivyo mshambuliaji anaweza tu kuunda kitu cha Kompyuta na kuweka SPN.
-2. Mshambuliaji **anatumia ruhusa zake za KUANDIKA** juu ya kompyuta ya mwathirika (HudumaB) ili kuunda **resource-based constrained delegation ili kuruhusu HudumaA kujifanya kama mtumiaji yeyote** dhidi ya kompyuta hiyo ya mwathirika (HudumaB).
+1. Mshambuliaji **anachafua** akaunti ambayo ina **SPN** au **anaunda moja** (“Huduma A”). Kumbuka kwamba **mtumiaji yeyote** _Admin User_ bila ruhusa nyingine maalum anaweza **kuunda** hadi 10 **vitu vya Kompyuta (**_**MachineAccountQuota**_**)** na kuziweka SPN. Hivyo mshambuliaji anaweza tu kuunda kitu cha Kompyuta na kuweka SPN.
+2. Mshambuliaji **anatumia ruhusa zake za KUANDIKA** juu ya kompyuta ya mwathirika (HudumaB) ili kuunda **resource-based constrained delegation ili kuruhusu HudumaA kuwakilisha mtumiaji yeyote** dhidi ya kompyuta hiyo ya mwathirika (HudumaB).
 3. Mshambuliaji anatumia Rubeus kutekeleza **shambulio kamili la S4U** (S4U2Self na S4U2Proxy) kutoka Huduma A hadi Huduma B kwa mtumiaji **aliye na ufikiaji wa ruhusa kwa Huduma B**.
-1. S4U2Self (kutoka akaunti ya SPN iliyovunjwa/iliyoundwa): Omba **TGS ya Msimamizi kwangu** (Sio Forwardable).
+1. S4U2Self (kutoka akaunti ya SPN iliyochafuliwa/iliyoundwa): Omba **TGS ya Msimamizi kwangu** (Sio Forwardable).
 2. S4U2Proxy: Tumia **TGS isiyo Forwardable** ya hatua iliyopita kuomba **TGS** kutoka **Msimamizi** hadi **kompyuta ya mwathirika**.
 3. Hata kama unatumia TGS isiyo Forwardable, kwani unatumia Resource-based constrained delegation, itafanya kazi.
-4. Mshambuliaji anaweza **kupitisha tiketi** na **kujifanya** kama mtumiaji ili kupata **ufikiaji kwa HudumaB ya mwathirika**.
+4. Mshambuliaji anaweza **kupitisha tiketi** na **kuwakilisha** mtumiaji ili kupata **ufikiaji kwa HudumaB ya mwathirika**.
 
 Ili kuangalia _**MachineAccountQuota**_ ya kikoa unaweza kutumia:
 ```powershell
@@ -76,7 +76,7 @@ Kwanza kabisa, tuliumba kituo kipya cha Kompyuta chenye nenosiri `123456`, hivyo
 ```bash
 .\Rubeus.exe hash /password:123456 /user:FAKECOMPUTER$ /domain:domain.local
 ```
-Hii itachapisha hash za RC4 na AES za akaunti hiyo.\
+Hii itachapisha hash za RC4 na AES kwa akaunti hiyo.\
 Sasa, shambulio linaweza kufanywa:
 ```bash
 rubeus.exe s4u /user:FAKECOMPUTER$ /aes256:<aes256 hash> /aes128:<aes128 hash> /rc4:<rc4 hash> /impersonateuser:administrator /msdsspn:cifs/victim.domain.local /domain:domain.local /ptt

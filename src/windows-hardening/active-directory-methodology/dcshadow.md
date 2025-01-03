@@ -2,10 +2,10 @@
 
 # DCShadow
 
-Inajisajili **Domain Controller** mpya katika AD na kuitumia **kushinikiza sifa** (SIDHistory, SPNs...) kwenye vitu vilivyotajwa **bila** kuacha **maandishi** yoyote kuhusu **mabadiliko**. Unahitaji ruhusa za DA na uwe ndani ya **domain ya mzizi**.\
-Kumbuka kwamba ikiwa utatumia data mbaya, maandiko mabaya yatatokea.
+Inajisajili **Msimamizi Mpya wa Kikoa** katika AD na kuitumia **kushinikiza sifa** (SIDHistory, SPNs...) kwenye vitu vilivyotajwa **bila** kuacha **kumbukumbu** kuhusu **mabadiliko**. Unahitaji ruhusa za DA na uwe ndani ya **kikoa cha mzizi**.\
+Kumbuka kwamba ikiwa utatumia data mbaya, kumbukumbu mbaya sana zitaonekana.
 
-Ili kutekeleza shambulio unahitaji mifano 2 ya mimikatz. Moja yao itaanzisha seva za RPC kwa ruhusa za SYSTEM (lazima uonyeshe hapa mabadiliko unayotaka kufanya), na mfano mwingine utatumika kushinikiza thamani:
+Ili kutekeleza shambulio unahitaji mifano 2 ya mimikatz. Moja yao itaanzisha seva za RPC kwa ruhusa za SYSTEM (lazima uonyeshe hapa mabadiliko unayotaka kutekeleza), na mfano mwingine utatumika kushinikiza thamani:
 ```bash:mimikatz1 (RPC servers)
 !+
 !processtoken
@@ -22,8 +22,8 @@ Unaweza kusukuma mabadiliko kutoka kwa DA au kutoka kwa mtumiaji mwenye ruhusa h
 
 - Katika **object ya domain**:
 - _DS-Install-Replica_ (Ongeza/ondoa Replica katika Domain)
-- _DS-Replication-Manage-Topology_ (Simamisha Topolojia ya Replika)
-- _DS-Replication-Synchronize_ (Sawaisha Replika)
+- _DS-Replication-Manage-Topology_ (Simamia Replication Topology)
+- _DS-Replication-Synchronize_ (Synchronization ya Replication)
 - **Object za Sites** (na watoto wake) katika **Configuration container**:
 - _CreateChild and DeleteChild_
 - Object ya **kompyuta ambayo imeandikishwa kama DC**:
@@ -31,8 +31,8 @@ Unaweza kusukuma mabadiliko kutoka kwa DA au kutoka kwa mtumiaji mwenye ruhusa h
 - **Object ya lengo**:
 - _WriteProperty_ (Sio Andika)
 
-Unaweza kutumia [**Set-DCShadowPermissions**](https://github.com/samratashok/nishang/blob/master/ActiveDirectory/Set-DCShadowPermissions.ps1) kutoa ruhusa hizi kwa mtumiaji asiye na mamlaka (kumbuka kwamba hii itacha baadhi ya kumbukumbu). Hii ni ya kikomo zaidi kuliko kuwa na mamlaka ya DA.\
-Kwa mfano: `Set-DCShadowPermissions -FakeDC mcorp-student1 SAMAccountName root1user -Username student1 -Verbose` Hii inamaanisha kwamba jina la mtumiaji _**student1**_ anapokuwa kwenye mashine _**mcorp-student1**_ ana ruhusa za DCShadow juu ya object _**root1user**_.
+Unaweza kutumia [**Set-DCShadowPermissions**](https://github.com/samratashok/nishang/blob/master/ActiveDirectory/Set-DCShadowPermissions.ps1) kutoa mamlaka haya kwa mtumiaji asiye na mamlaka (kumbuka kwamba hii itacha baadhi ya kumbukumbu). Hii ni ya kikomo zaidi kuliko kuwa na mamlaka ya DA.\
+Kwa mfano: `Set-DCShadowPermissions -FakeDC mcorp-student1 SAMAccountName root1user -Username student1 -Verbose` Hii inamaanisha kwamba jina la mtumiaji _**student1**_ anapokuwa kwenye mashine _**mcorp-student1**_ ana mamlaka ya DCShadow juu ya object _**root1user**_.
 
 ## Kutumia DCShadow kuunda backdoors
 ```bash:Set Enterprise Admins in SIDHistory to a user
@@ -63,7 +63,7 @@ Tunahitaji kuongeza ACEs zifuatazo na SID ya mtumiaji wetu mwishoni:
 
 Ili kupata ACE ya sasa ya kitu: `(New-Object System.DirectoryServices.DirectoryEntry("LDAP://DC=moneycorp,DC=loca l")).psbase.ObjectSecurity.sddl`
 
-Kumbuka kwamba katika kesi hii unahitaji kufanya **mabadiliko kadhaa,** si moja tu. Hivyo, katika **mimikatz1 session** (RPC server) tumia parameter **`/stack` na kila mabadiliko** unayotaka kufanya. Kwa njia hii, utahitaji tu **`/push`** mara moja ili kutekeleza mabadiliko yote yaliyokamatwa kwenye seva ya rogue.
+Kumbuka kwamba katika kesi hii unahitaji kufanya **mabadiliko kadhaa,** si moja tu. Hivyo, katika **mimikatz1 session** (RPC server) tumia parameter **`/stack` na kila mabadiliko** unayotaka kufanya. Kwa njia hii, utahitaji tu **`/push`** mara moja ili kutekeleza mabadiliko yote yaliyokwama kwenye seva ya rogue.
 
 [**Taarifa zaidi kuhusu DCShadow katika ired.team.**](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/t1207-creating-rogue-domain-controllers-with-dcshadow)
 

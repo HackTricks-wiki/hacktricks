@@ -4,7 +4,7 @@
 
 ## Introduction
 
-**Low-Power Wide Area Network** (LPWAN) ni kundi la teknolojia za wireless, zenye nguvu ndogo, za mtandao wa eneo kubwa zilizoundwa kwa ajili ya **mawasiliano ya umbali mrefu** kwa kiwango cha chini cha bit.\
+**Low-Power Wide Area Network** (LPWAN) ni kundi la teknolojia za wireless, zenye nguvu ya chini, za mtandao wa eneo kubwa zilizoundwa kwa ajili ya **mawasiliano ya umbali mrefu** kwa kiwango cha chini cha bit.\
 Zinaweza kufikia zaidi ya **maili sita** na **betri** zao zinaweza kudumu hadi **miaka 20**.
 
 Long Range (**LoRa**) ni maarufu katika nchi nyingi na ina spesifikesheni ya chanzo wazi inayoitwa **LoRaWAN**.

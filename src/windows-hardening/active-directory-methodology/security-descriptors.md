@@ -4,11 +4,11 @@
 
 ## Security Descriptors
 
-[From the docs](https://learn.microsoft.com/en-us/windows/win32/secauthz/security-descriptor-definition-language): Lugha ya Mwelekeo wa Maelezo ya Usalama (SDDL) inaelezea muundo unaotumika kuelezea mwelekeo wa usalama. SDDL inatumia nyuzi za ACE kwa DACL na SACL: `ace_type;ace_flags;rights;object_guid;inherit_object_guid;account_sid;`
+[From the docs](https://learn.microsoft.com/en-us/windows/win32/secauthz/security-descriptor-definition-language): Security Descriptor Definition Language (SDDL) inafafanua muundo unaotumika kuelezea desktipu ya usalama. SDDL inatumia nyuzi za ACE kwa DACL na SACL: `ace_type;ace_flags;rights;object_guid;inherit_object_guid;account_sid;`
 
-Mwelekeo wa **usalama** unatumika **kuhifadhi** **idhini** ambazo **kitu** kina **juu** ya **kitu**. Ikiwa unaweza tu **kufanya** **mabadiliko madogo** katika **mwelekeo wa usalama** wa kitu, unaweza kupata haki za kuvutia sana juu ya hicho kitu bila kuhitaji kuwa mwanachama wa kundi lenye mamlaka.
+**desktipu za usalama** zinatumika **kuhifadhi** **idhini** ambazo **kitu** kina **juu** ya **kitu**. Ikiwa unaweza tu **kufanya** **mabadiliko madogo** katika **desktipu ya usalama** ya kitu, unaweza kupata ruhusa za kuvutia sana juu ya hicho kitu bila kuhitaji kuwa mwanachama wa kundi lenye mamlaka.
 
-Kisha, mbinu hii ya kudumu inategemea uwezo wa kushinda kila haki inayohitajika dhidi ya vitu fulani, ili uweze kutekeleza kazi ambayo kwa kawaida inahitaji mamlaka ya admin lakini bila kuhitaji kuwa admin.
+Hivyo, mbinu hii ya kudumu inategemea uwezo wa kushinda kila ruhusa inayohitajika dhidi ya vitu fulani, ili uweze kutekeleza kazi ambayo kawaida inahitaji ruhusa za admin lakini bila kuhitaji kuwa admin.
 
 ### Access to WMI
 
@@ -19,7 +19,7 @@ Set-RemoteWMI -UserName student1 -ComputerName dcorp-dc–namespace 'root\cimv2'
 ```
 ### Access to WinRM
 
-Mpe **mtumiaji ufikiaji wa winrm PS console** [**kwa kutumia hii**](https://github.com/samratashok/nishang/blob/master/Backdoors/Set-RemoteWMI.ps1)**:**
+Pata ufikiaji wa **winrm PS console kwa mtumiaji** [**ukitumia hii**](https://github.com/samratashok/nishang/blob/master/Backdoors/Set-RemoteWMI.ps1)**:**
 ```bash
 Set-RemotePSRemoting -UserName student1 -ComputerName <remotehost> -Verbose
 Set-RemotePSRemoting -UserName student1 -ComputerName <remotehost> -Remove #Remove

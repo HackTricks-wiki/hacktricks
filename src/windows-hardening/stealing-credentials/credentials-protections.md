@@ -16,7 +16,7 @@ reg query HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest /v Use
 ```
 ## LSA Protection
 
-Kuanzia na **Windows 8.1**, Microsoft iliboresha usalama wa LSA ili **kuzuia usomaji wa kumbukumbu zisizoidhinishwa au sindikizo la msimbo na michakato isiyoaminika**. Uboreshaji huu unakwamisha utendaji wa kawaida wa amri kama `mimikatz.exe sekurlsa:logonpasswords`. Ili **kuwezesha ulinzi huu ulioimarishwa**, thamani ya _**RunAsPPL**_ katika _**HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA**_ inapaswa kubadilishwa kuwa 1:
+Kuanzia na **Windows 8.1**, Microsoft iliboresha usalama wa LSA ili **kuzuia usomaji wa kumbukumbu zisizoidhinishwa au uingizaji wa msimbo na michakato isiyoaminika**. Uboreshaji huu unakwamisha utendaji wa kawaida wa amri kama `mimikatz.exe sekurlsa:logonpasswords`. Ili **kuwezesha ulinzi huu ulioimarishwa**, thamani ya _**RunAsPPL**_ katika _**HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA**_ inapaswa kubadilishwa kuwa 1:
 ```
 reg query HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA /v RunAsPPL
 ```
@@ -28,11 +28,11 @@ Inawezekana kupita ulinzi huu kwa kutumia Mimikatz driver mimidrv.sys:
 
 ## Credential Guard
 
-**Credential Guard**, kipengele ambacho ni cha kipekee kwa **Windows 10 (Enterprise na Education editions)**, kinaongeza usalama wa akiba za mashine kwa kutumia **Virtual Secure Mode (VSM)** na **Virtualization Based Security (VBS)**. Kinatumia nyongeza za virtualisasi za CPU ili kutenga michakato muhimu ndani ya nafasi ya kumbukumbu iliyo salama, mbali na ufikiaji wa mfumo wa uendeshaji mkuu. Kutengwa huku kunahakikisha kwamba hata kernel haiwezi kufikia kumbukumbu katika VSM, kwa ufanisi ikilinda akiba dhidi ya mashambulizi kama **pass-the-hash**. **Local Security Authority (LSA)** inafanya kazi ndani ya mazingira haya salama kama trustlet, wakati mchakato wa **LSASS** katika OS kuu unafanya kazi kama mwasilishaji tu na LSA ya VSM.
+**Credential Guard**, kipengele ambacho ni cha kipekee kwa **Windows 10 (Enterprise na Education editions)**, kinaongeza usalama wa akiba za mashine kwa kutumia **Virtual Secure Mode (VSM)** na **Virtualization Based Security (VBS)**. Kinatumia nyongeza za virtualisasi za CPU ili kutenga michakato muhimu ndani ya nafasi ya kumbukumbu iliyo salama, mbali na ufikiaji wa mfumo wa uendeshaji mkuu. Kutengwa huku kunahakikisha kwamba hata kernel haiwezi kufikia kumbukumbu katika VSM, kwa ufanisi ikilinda akiba za mashine dhidi ya mashambulizi kama **pass-the-hash**. **Local Security Authority (LSA)** inafanya kazi ndani ya mazingira haya salama kama trustlet, wakati mchakato wa **LSASS** katika mfumo wa uendeshaji mkuu unafanya kazi kama mwasiliani tu na LSA ya VSM.
 
-Kwa kawaida, **Credential Guard** haifanyi kazi na inahitaji kuanzishwa kwa mikono ndani ya shirika. Ni muhimu kwa kuongeza usalama dhidi ya zana kama **Mimikatz**, ambazo zinakabiliwa na uwezo wao wa kutoa akiba. Hata hivyo, udhaifu bado unaweza kutumika kupitia kuongeza **Security Support Providers (SSP)** za kawaida ili kukamata akiba katika maandiko wazi wakati wa majaribio ya kuingia.
+Kwa kawaida, **Credential Guard** haifanyi kazi na inahitaji kuanzishwa kwa mikono ndani ya shirika. Ni muhimu kwa kuongeza usalama dhidi ya zana kama **Mimikatz**, ambazo zinakabiliwa na uwezo wao wa kutoa akiba za mashine. Hata hivyo, udhaifu bado unaweza kutumika kupitia kuongeza **Security Support Providers (SSP)** za kawaida ili kukamata akiba za mashine katika maandiko wazi wakati wa majaribio ya kuingia.
 
-Ili kuthibitisha hali ya kuanzishwa kwa **Credential Guard**, funguo ya rejista _**LsaCfgFlags**_ chini ya _**HKLM\System\CurrentControlSet\Control\LSA**_ inaweza kukaguliwa. Thamani ya "**1**" inaonyesha kuanzishwa kwa **UEFI lock**, "**2**" bila lock, na "**0**" inaashiria haijawashwa. Ukaguzi huu wa rejista, ingawa ni kiashiria kizuri, si hatua pekee ya kuanzisha Credential Guard. Mwongozo wa kina na skripti ya PowerShell ya kuanzisha kipengele hiki zinapatikana mtandaoni.
+Ili kuthibitisha hali ya kuanzishwa kwa **Credential Guard**, funguo ya rejista _**LsaCfgFlags**_ chini ya _**HKLM\System\CurrentControlSet\Control\LSA**_ inaweza kukaguliwa. Thamani ya "**1**" inaonyesha kuanzishwa kwa **UEFI lock**, "**2**" bila lock, na "**0**" inaashiria haijaanzishwa. Ukaguzi huu wa rejista, ingawa ni kiashiria kizuri, si hatua pekee ya kuanzisha Credential Guard. Mwongozo wa kina na skripti ya PowerShell ya kuanzisha kipengele hiki zinapatikana mtandaoni.
 ```powershell
 reg query HKLM\System\CurrentControlSet\Control\LSA /v LsaCfgFlags
 ```
@@ -54,11 +54,11 @@ Kipengele hiki kinatoa hatua muhimu mbele katika kulinda muunganisho wa desktop 
 
 ![](../../images/RAM.png)
 
-Kwa maelezo zaidi tembelea [rasilimali hii](https://blog.ahasayen.com/restricted-admin-mode-for-rdp/).
+Kwa maelezo zaidi tembelea [hiki kiungo](https://blog.ahasayen.com/restricted-admin-mode-for-rdp/).
 
 ## Cached Credentials
 
-Windows inalinda **akidi za kikoa** kupitia **Local Security Authority (LSA)**, ikisaidia michakato ya kuingia kwa kutumia itifaki za usalama kama **Kerberos** na **NTLM**. Kipengele muhimu cha Windows ni uwezo wake wa kuhifadhi **kuingia kwa kikoa kumi za mwisho** ili kuhakikisha watumiaji wanaweza kuendelea kufikia kompyuta zao hata kama **kikundi cha kudhibiti kikoa kiko offline**—faida kwa watumiaji wa laptop ambao mara nyingi wako mbali na mtandao wa kampuni yao.
+Windows inalinda **akidi za kikoa** kupitia **Local Security Authority (LSA)**, ikisaidia michakato ya kuingia kwa kutumia itifaki za usalama kama **Kerberos** na **NTLM**. Kipengele muhimu cha Windows ni uwezo wake wa kuhifadhi **kuingia kwa kikoa kumi za mwisho** ili kuhakikisha watumiaji wanaweza bado kufikia kompyuta zao hata kama **kikundi cha kudhibiti kikoa kiko offline**—faida kwa watumiaji wa laptop ambao mara nyingi wako mbali na mtandao wa kampuni yao.
 
 Idadi ya kuingia zilizohifadhiwa inaweza kubadilishwa kupitia **funguo maalum za rejista au sera ya kikundi**. Ili kuona au kubadilisha mipangilio hii, amri ifuatayo inatumika:
 ```bash
@@ -74,9 +74,9 @@ Kwa maelezo zaidi, chanzo cha asili [source](http://juggernaut.wikidot.com/cache
 
 Uanachama katika **kikundi cha Watumiaji Waliohifadhiwa** unaleta maboresho kadhaa ya usalama kwa watumiaji, kuhakikisha viwango vya juu vya ulinzi dhidi ya wizi wa sifa na matumizi mabaya:
 
-- **Delegation ya Sifa (CredSSP)**: Hata kama mipangilio ya Kundi la Sera ya **Ruhusu kuhamasisha sifa za kawaida** imewezeshwa, sifa za maandiko wazi za Watumiaji Waliohifadhiwa hazitahifadhiwa.
+- **Delegation ya Sifa (CredSSP)**: Hata kama mipangilio ya Kundi la Sera kwa **Ruhusu kuhamasisha sifa za kawaida** imewezeshwa, sifa za maandiko wazi za Watumiaji Waliohifadhiwa hazitahifadhiwa.
 - **Windows Digest**: Kuanzia **Windows 8.1 na Windows Server 2012 R2**, mfumo hautahifadhi sifa za maandiko wazi za Watumiaji Waliohifadhiwa, bila kujali hali ya Windows Digest.
-- **NTLM**: Mfumo hautahifadhi sifa za maandiko wazi za Watumiaji Waliohifadhiwa au kazi za upande mmoja za NT (NTOWF).
+- **NTLM**: Mfumo hautahifadhi sifa za maandiko wazi za Watumiaji Waliohifadhiwa au kazi za NT moja kwa moja (NTOWF).
 - **Kerberos**: Kwa Watumiaji Waliohifadhiwa, uthibitishaji wa Kerberos hautazalisha **DES** au **RC4 keys**, wala hautahifadhi sifa za maandiko wazi au funguo za muda mrefu zaidi ya upatikanaji wa Tiketi ya Kutoa Tiketi (TGT) ya awali.
 - **Kuingia Bila Mtandao**: Watumiaji Waliohifadhiwa hawatakuwa na mthibitishaji wa akiba aliyeundwa wakati wa kuingia au kufungua, ikimaanisha kuwa kuingia bila mtandao hakusaidiwi kwa akaunti hizi.
 

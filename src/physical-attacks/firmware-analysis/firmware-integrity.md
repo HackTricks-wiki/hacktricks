@@ -20,10 +20,10 @@ Ikiwa shell ya root tayari imepatikana kupitia uchambuzi wa dynamic, manipulerin
 
 1. Mchoro wa firmware wa lengo na endianness inapaswa kutambuliwa.
 2. Msfvenom inaweza kutumika kubainisha payload ya lengo, IP ya mwenye shambulio, nambari ya bandari inayosikiliza, aina ya faili, mchoro, jukwaa, na faili ya matokeo.
-3. Payload inaweza kuhamishwa kwa kifaa kilichovunjwa na kuhakikisha kuwa ina ruhusa za utekelezaji.
+3. Payload inaweza kuhamishwa kwa kifaa kilichovunjwa na kuhakikisha kuwa ina ruhusa za kutekeleza.
 4. Metasploit inaweza kuandaliwa kushughulikia maombi yanayokuja kwa kuanzisha msfconsole na kuunda mipangilio kulingana na payload.
 5. Meterpreter reverse shell inaweza kutekelezwa kwenye kifaa kilichovunjwa.
-6. Session za meterpreter zinaweza kufuatiliwa kadri zinavyofunguka.
+6. Session za Meterpreter zinaweza kufuatiliwa kadri zinavyofunguka.
 7. Shughuli za baada ya shambulio zinaweza kufanywa.
 
 Ikiwa inawezekana, udhaifu ndani ya scripts za kuanzisha zinaweza kutumiwa kupata ufikiaji wa kudumu kwa kifaa wakati wa kuanzisha upya. Udhaifu huu unatokea wakati scripts za kuanzisha zinarejelea, [kuunganisha kwa alama](https://www.chromium.org/chromium-os/chromiumos-design-docs/hardening-against-malicious-stateful-data), au kutegemea msimbo ulio katika maeneo yasiyoaminika yaliyowekwa kama vile kadi za SD na volumes za flash zinazotumiwa kuhifadhi data nje ya mifumo ya faili ya root.

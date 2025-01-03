@@ -6,7 +6,7 @@
 
 **Kurekebisha BIOS** kunaweza kufanywa kwa njia kadhaa. Karamani nyingi zina **betri** ambayo, ikiondolewa kwa takriban **dakika 30**, itarejesha mipangilio ya BIOS, ikiwa ni pamoja na nenosiri. Vinginevyo, **jumper kwenye karatasi mama** inaweza kubadilishwa ili kurekebisha mipangilio hii kwa kuunganisha pini maalum.
 
-Kwa hali ambapo marekebisho ya vifaa hayawezekani au si ya vitendo, **zana za programu** hutoa suluhisho. Kuendesha mfumo kutoka **Live CD/USB** na usambazaji kama **Kali Linux** kunatoa ufikiaji wa zana kama **_killCmos_** na **_CmosPWD_**, ambazo zinaweza kusaidia katika urejeleaji wa nenosiri la BIOS.
+Kwa hali ambapo marekebisho ya vifaa hayawezekani au si ya vitendo, **zana za programu** zinatoa suluhisho. Kuendesha mfumo kutoka kwa **Live CD/USB** na usambazaji kama **Kali Linux** kunatoa ufikiaji wa zana kama **_killCmos_** na **_CmosPWD_**, ambazo zinaweza kusaidia katika urejeleaji wa nenosiri la BIOS.
 
 Katika matukio ambapo nenosiri la BIOS halijulikani, kuingiza kwa makosa **mara tatu** kawaida husababisha msimbo wa kosa. Msimbo huu unaweza kutumika kwenye tovuti kama [https://bios-pw.org](https://bios-pw.org) ili kupata nenosiri linaloweza kutumika.
 
@@ -48,10 +48,10 @@ Mamlaka ya msimamizi yanaruhusu kuunda nakala za faili nyeti, ikiwa ni pamoja na
 
 ### Bypassing BitLocker Encryption
 
-BitLocker encryption inaweza kupitishwa ikiwa **nenosiri la urejeleaji** linapatikana ndani ya faili ya memory dump (**MEMORY.DMP**). Zana kama **Elcomsoft Forensic Disk Decryptor** au **Passware Kit Forensic** zinaweza kutumika kwa kusudi hili.
+BitLocker encryption inaweza kupita ikiwa **nenosiri la urejeleaji** litapatikana ndani ya faili ya memory dump (**MEMORY.DMP**). Zana kama **Elcomsoft Forensic Disk Decryptor** au **Passware Kit Forensic** zinaweza kutumika kwa kusudi hili.
 
 ### Social Engineering for Recovery Key Addition
 
-Nenosiri jipya la urejeleaji la BitLocker linaweza kuongezwa kupitia mbinu za uhandisi wa kijamii, kumshawishi mtumiaji kutekeleza amri inayoongeza nenosiri jipya lililotengenezwa kwa sifuri, hivyo kurahisisha mchakato wa ufichuzi.
+Nenosiri jipya la urejeleaji la BitLocker linaweza kuongezwa kupitia mbinu za ushirikiano wa kijamii, kumshawishi mtumiaji kutekeleza amri inayoongeza nenosiri jipya lililotengenezwa kwa sifuri, hivyo kurahisisha mchakato wa ufichuzi.
 
 {{#include ../banners/hacktricks-training.md}}

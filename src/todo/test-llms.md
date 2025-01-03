@@ -39,7 +39,7 @@ Inatoa sehemu kadhaa kama:
 **TensorFlow Hub** ni hifadhi kamili ya moduli za kujifunza mashine zinazoweza kutumika tena zilizotengenezwa na Google. Inalenga kuwezesha kushiriki na kupeleka mifano ya kujifunza mashine, hasa zile zilizojengwa na TensorFlow.
 
 * **Modules:** Mkusanyiko mkubwa wa mifano iliyofundishwa awali na vipengele vya mfano ambapo watumiaji wanaweza kuvinjari, kupakua, na kuunganisha moduli kwa kazi kama vile uainishaji wa picha, embedding ya maandiko, na zaidi.
-* **Tutorials:** Mwongozo wa hatua kwa hatua na mifano ambayo inawasaidia watumiaji kuelewa jinsi ya kutekeleza na kuboresha mifano kwa kutumia TensorFlow Hub.
+* **Tutorials:** Mwongozo wa hatua kwa hatua na mifano ambayo inawasaidia watumiaji kuelewa jinsi ya kutekeleza na kuboresha mifano wakitumia TensorFlow Hub.
 * **Documentation:** Miongozo kamili na marejeleo ya API yanayosaidia waendelezaji kutumia rasilimali za hifadhi kwa ufanisi.
 
 ## [**Replicate**](https://replicate.com/home)

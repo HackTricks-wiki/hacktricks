@@ -65,7 +65,7 @@ Ikiwa una **uthibitisho halali wa mtumiaji mwingine yeyote**, unaweza **kuunda**
 ```
 runas /user:domain\username cmd.exe
 ```
-**access token** pia ina **reference** ya vikao vya kuingia ndani ya **LSASS**, hii ni muhimu ikiwa mchakato unahitaji kufikia vitu fulani vya mtandao.\
+**access token** pia ina **reference** ya vikao vya kuingia ndani ya **LSASS**, hii ni muhimu ikiwa mchakato unahitaji kufikia baadhi ya vitu vya mtandao.\
 Unaweza kuzindua mchakato ambao **unatumia akidi tofauti za kufikia huduma za mtandao** kwa kutumia:
 ```
 runas /user:domain\username /netonly cmd.exe
@@ -76,20 +76,20 @@ Hii ni muhimu ikiwa una akreditif muhimu za kufikia vitu katika mtandao lakini a
 
 Kuna aina mbili za tokeni zinazopatikana:
 
-- **Tokeni Kuu**: Inatumika kama uwakilishi wa akreditif za usalama za mchakato. Uundaji na uhusiano wa tokeni kuu na michakato ni vitendo vinavyohitaji ruhusa za juu, ikisisitiza kanuni ya kutenganisha ruhusa. Kwa kawaida, huduma ya uthibitishaji inawajibika kwa uundaji wa tokeni, wakati huduma ya kuingia inashughulikia uhusiano wake na shell ya mfumo wa uendeshaji wa mtumiaji. Inafaa kutajwa kwamba michakato inarithi tokeni kuu ya mchakato wake mzazi wakati wa uundaji.
-- **Tokeni ya Kuiga**: Inamuwezesha programu ya seva kuchukua kitambulisho cha mteja kwa muda ili kufikia vitu salama. Mekanismu hii imegawanywa katika ngazi nne za uendeshaji:
-- **Kujulikana**: Inatoa ufikiaji wa seva kama wa mtumiaji asiyejulikana.
-- **Utambulisho**: Inaruhusu seva kuthibitisha kitambulisho cha mteja bila kukitumia kwa ufikiaji wa vitu.
-- **Kuiga**: Inamwezesha seva kufanya kazi chini ya kitambulisho cha mteja.
-- **Delegation**: Kama Kuiga lakini inajumuisha uwezo wa kupanua dhana hii ya kitambulisho kwa mifumo ya mbali ambayo seva inawasiliana nayo, kuhakikisha uhifadhi wa akreditif.
+- **Primary Token**: Inatumika kama uwakilishi wa akreditif za usalama za mchakato. Uundaji na ushirikiano wa tokeni za msingi na michakato ni vitendo vinavyohitaji ruhusa za juu, ikisisitiza kanuni ya kutenganisha ruhusa. Kwa kawaida, huduma ya uthibitishaji inawajibika kwa uundaji wa tokeni, wakati huduma ya kuingia inashughulikia ushirikiano wake na shell ya mfumo wa uendeshaji wa mtumiaji. Inafaa kutajwa kwamba michakato inarithi tokeni ya msingi ya mchakato wao mzazi wakati wa uundaji.
+- **Impersonation Token**: Inamuwezesha programu ya seva kuchukua kitambulisho cha mteja kwa muda ili kufikia vitu salama. Mekanismu hii imegawanywa katika ngazi nne za uendeshaji:
+- **Anonymous**: Inatoa ufikiaji wa seva sawa na wa mtumiaji asiyejulikana.
+- **Identification**: Inaruhusu seva kuthibitisha kitambulisho cha mteja bila kukitumia kwa ufikiaji wa vitu.
+- **Impersonation**: Inamwezesha seva kufanya kazi chini ya kitambulisho cha mteja.
+- **Delegation**: Kama Impersonation lakini inajumuisha uwezo wa kupanua dhana hii ya kitambulisho kwa mifumo ya mbali ambayo seva inawasiliana nayo, kuhakikisha uhifadhi wa akreditif.
 
-#### Tokeni za Kuiga
+#### Impersonate Tokens
 
-Kwa kutumia moduli ya _**incognito**_ ya metasploit ikiwa una ruhusa za kutosha unaweza kwa urahisi **orodhesha** na **kuiga** tokeni nyingine **. Hii inaweza kuwa muhimu kufanya **vitendo kana kwamba wewe ni mtumiaji mwingine**. Unaweza pia **kuinua ruhusa** kwa kutumia mbinu hii.
+Kwa kutumia moduli ya _**incognito**_ ya metasploit ikiwa una ruhusa za kutosha unaweza kwa urahisi **orodhesha** na **kujifanya** tokeni nyingine. Hii inaweza kuwa muhimu kufanya **vitendo kana kwamba wewe ni mtumiaji mwingine**. Unaweza pia **kuinua ruhusa** kwa kutumia mbinu hii.
 
-### Ruhusa za Tokeni
+### Token Privileges
 
-Jifunze ni zipi **ruhusa za tokeni zinaweza kutumika vibaya ili kuinua ruhusa:**
+Jifunze ni zipi **ruhusa za tokeni zinazoweza kutumika vibaya ili kuinua ruhusa:**
 
 {{#ref}}
 privilege-escalation-abusing-tokens.md

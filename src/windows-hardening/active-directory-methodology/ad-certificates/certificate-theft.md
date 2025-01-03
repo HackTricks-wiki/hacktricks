@@ -4,7 +4,7 @@
 
 **Hii ni muhtasari mdogo wa sura za Wizi za utafiti mzuri kutoka [https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf](https://www.specterops.io/assets/resources/Certified_Pre-Owned.pdf)**
 
-## Nifanye nini na cheti
+## Nini naweza kufanya na cheti
 
 Kabla ya kuangalia jinsi ya kuiba vyeti, hapa kuna taarifa kuhusu jinsi ya kupata matumizi ya cheti:
 ```powershell
@@ -41,10 +41,10 @@ Katika Windows, **funguo binafsi za cheti zinahifadhiwa na DPAPI**. Ni muhimu ku
 Ili **kutoa cheti na funguo binafsi zinazohusiana**, mchakato unajumuisha:
 
 1. **Kuchagua cheti lengwa** kutoka duka la mtumiaji na kupata jina la duka la funguo zake.
-2. **Kutatua funguo ya DPAPI inayohitajika** ili kufungua funguo binafsi inayohusiana.
-3. **Kufungua funguo binafsi** kwa kutumia funguo ya DPAPI ya maandiko.
+2. **Kutafuta DPAPI masterkey inayohitajika** ili kufungua funguo binafsi inayohusiana.
+3. **Kufungua funguo binafsi** kwa kutumia DPAPI masterkey ya maandiko.
 
-Kwa **kupata funguo ya maandiko ya DPAPI**, mbinu zifuatazo zinaweza kutumika:
+Kwa **kupata DPAPI masterkey ya maandiko**, mbinu zifuatazo zinaweza kutumika:
 ```bash
 # With mimikatz, when running in the user's context
 dpapi::masterkey /in:"C:\PATH\TO\KEY" /rpc
@@ -64,9 +64,9 @@ openssl pkcs12 -in cert.pem -keyex -CSP "Microsoft Enhanced Cryptographic Provid
 
 Cheti za mashine zinahifadhiwa na Windows katika rejista kwenye `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\SystemCertificates` na funguo za faragha zinazohusiana ziko katika `%ALLUSERSPROFILE%\Application Data\Microsoft\Crypto\RSA\MachineKeys` (kwa CAPI) na `%ALLUSERSPROFILE%\Application Data\Microsoft\Crypto\Keys` (kwa CNG) zimefungwa kwa kutumia funguo za DPAPI za mashine. Funguo hizi hazinaweza kufunguliwa kwa funguo za akiba za DPAPI za kanda; badala yake, **DPAPI_SYSTEM LSA siri**, ambayo ni lazima itumike na mtumiaji wa SYSTEM, inahitajika.
 
-Fungua kwa mikono inaweza kufikiwa kwa kutekeleza amri `lsadump::secrets` katika **Mimikatz** ili kutoa siri ya DPAPI_SYSTEM LSA, na kisha kutumia funguo hii kufungua funguo za master za mashine. Vinginevyo, amri ya Mimikatz `crypto::certificates /export /systemstore:LOCAL_MACHINE` inaweza kutumika baada ya kurekebisha CAPI/CNG kama ilivyoelezwa hapo awali.
+Funguo za kufungua zinaweza kupatikana kwa kutekeleza amri `lsadump::secrets` katika **Mimikatz** ili kutoa siri ya DPAPI_SYSTEM LSA, na kisha kutumia funguo hii kufungua funguo za master za mashine. Vinginevyo, amri ya Mimikatz `crypto::certificates /export /systemstore:LOCAL_MACHINE` inaweza kutumika baada ya kurekebisha CAPI/CNG kama ilivyoelezwa hapo awali.
 
-**SharpDPAPI** inatoa njia ya kiotomatiki zaidi na amri zake za vyeti. Wakati bendera ya `/machine` inapotumika na ruhusa za juu, inainua hadi SYSTEM, inatoa siri ya DPAPI_SYSTEM LSA, inaitumia kufungua funguo za master za DPAPI za mashine, na kisha inatumia funguo hizi za maandiko kama jedwali la kutafuta kufungua funguo zozote za faragha za cheti cha mashine.
+**SharpDPAPI** inatoa njia ya kiotomatiki zaidi kwa amri zake za vyeti. Wakati bendera ya `/machine` inapotumika na ruhusa za juu, inainua hadi SYSTEM, inatoa siri ya DPAPI_SYSTEM LSA, inaitumia kufungua funguo za master za DPAPI za mashine, na kisha inatumia funguo hizi za maandiko kama jedwali la kutafuta kufungua funguo zozote za faragha za cheti cha mashine.
 
 ## Kutafuta Faili za Vyeti – THEFT4
 
@@ -79,7 +79,7 @@ Vyeti mara nyingine hupatikana moja kwa moja ndani ya mfumo wa faili, kama vile 
 
 Faili hizi zinaweza kutafutwa kwa kutumia PowerShell au amri ya prompt kwa kutafuta viambatisho vilivyotajwa.
 
-Katika hali ambapo faili ya cheti ya PKCS#12 inapatikana na inalindwa na nenosiri, kutoa hash kunawezekana kupitia matumizi ya `pfx2john.py`, inayopatikana kwenye [fossies.org](https://fossies.org/dox/john-1.9.0-jumbo-1/pfx2john_8py_source.html). Kisha, JohnTheRipper inaweza kutumika kujaribu kuvunja nenosiri.
+Katika hali ambapo faili ya cheti ya PKCS#12 inapatikana na inalindwa na nenosiri, utoaji wa hash unaweza kufanywa kwa kutumia `pfx2john.py`, inayopatikana kwenye [fossies.org](https://fossies.org/dox/john-1.9.0-jumbo-1/pfx2john_8py_source.html). Kisha, JohnTheRipper inaweza kutumika kujaribu kuvunja nenosiri.
 ```powershell
 # Example command to search for certificate files in PowerShell
 Get-ChildItem -Recurse -Path C:\Users\ -Include *.pfx, *.p12, *.pkcs12, *.pem, *.key, *.crt, *.cer, *.csr, *.jks, *.keystore, *.keys
@@ -92,15 +92,15 @@ john --wordlist=passwords.txt hash.txt
 ```
 ## NTLM Credential Theft via PKINIT – THEFT5
 
-Maudhui yaliyotolewa yanaelezea mbinu ya wizi wa akreditivu za NTLM kupitia PKINIT, hasa kupitia mbinu ya wizi iliyopewa jina THEFT5. Hapa kuna ufafanuzi wa upya kwa sauti ya pasivu, huku maudhui yakiwa yamefichwa na kufupishwa inapohitajika:
+Maudhui yaliyotolewa yanaelezea mbinu ya wizi wa akreditivu za NTLM kupitia PKINIT, hasa kupitia mbinu ya wizi iliyopewa jina THEFT5. Hapa kuna ufafanuzi wa upya kwa sauti ya passiv, huku maudhui yakiwa yamefichwa na kufupishwa inapohitajika:
 
-Ili kusaidia uthibitishaji wa NTLM [MS-NLMP] kwa programu ambazo hazifanyii kazi uthibitishaji wa Kerberos, KDC imeundwa kurudisha kazi ya moja kwa moja ya NTLM (OWF) ya mtumiaji ndani ya cheti cha sifa (PAC), hasa katika buffer ya `PAC_CREDENTIAL_INFO`, wakati PKCA inatumika. Kwa hivyo, iwapo akaunti itathibitishwa na kupata Tiketi ya Kutoa Tiketi (TGT) kupitia PKINIT, mekanizma inapatikana ambayo inaruhusu mwenyeji wa sasa kutoa hash ya NTLM kutoka kwa TGT ili kudumisha itifaki za uthibitishaji za zamani. Mchakato huu unajumuisha ufichuzi wa muundo wa `PAC_CREDENTIAL_DATA`, ambao kimsingi ni picha ya NDR iliyosimbwa ya NTLM plaintext.
+Ili kusaidia uthibitishaji wa NTLM [MS-NLMP] kwa programu ambazo hazifanyii kazi uthibitishaji wa Kerberos, KDC imeundwa kurudisha kazi ya moja kwa moja ya NTLM (OWF) ya mtumiaji ndani ya cheti cha sifa (PAC), hasa katika buffer ya `PAC_CREDENTIAL_INFO`, wakati PKCA inatumika. Kwa hivyo, iwapo akaunti itathibitishwa na kupata Tiketi ya Kutoa Tiketi (TGT) kupitia PKINIT, mekanismu inapatikana ambayo inaruhusu mwenyeji wa sasa kutoa hash ya NTLM kutoka kwa TGT ili kudumisha itifaki za uthibitishaji za zamani. Mchakato huu unajumuisha ufichuzi wa muundo wa `PAC_CREDENTIAL_DATA`, ambao kimsingi ni picha ya NDR iliyosimbwa ya NTLM plaintext.
 
 Kifaa **Kekeo**, kinachopatikana kwenye [https://github.com/gentilkiwi/kekeo](https://github.com/gentilkiwi/kekeo), kinatajwa kuwa na uwezo wa kuomba TGT inayojumuisha data hii maalum, hivyo kurahisisha upatikanaji wa NTLM wa mtumiaji. Amri inayotumika kwa ajili ya kusudi hili ni kama ifuatavyo:
 ```bash
 tgt::pac /caname:generic-DC-CA /subject:genericUser /castore:current_user /domain:domain.local
 ```
-Zaidi ya hayo, inabainishwa kuwa Kekeo inaweza kushughulikia vyeti vilivyolindwa na kadi za smartcard, ikiwa pini inaweza kupatikana, huku ikirejelea [https://github.com/CCob/PinSwipe](https://github.com/CCob/PinSwipe). Uwezo huo huo unaripotiwa kuungwa mkono na **Rubeus**, inayopatikana katika [https://github.com/GhostPack/Rubeus](https://github.com/GhostPack/Rubeus).
+Zaidi ya hayo, inabainishwa kuwa Kekeo inaweza kushughulikia vyeti vilivyolindwa na kadi za smartcard, ikiwa pin inaweza kupatikana, huku ikirejelea [https://github.com/CCob/PinSwipe](https://github.com/CCob/PinSwipe). Uwezo huo huo unaripotiwa kuungwa mkono na **Rubeus**, inayopatikana katika [https://github.com/GhostPack/Rubeus](https://github.com/GhostPack/Rubeus).
 
 Maelezo haya yanajumuisha mchakato na zana zinazohusika katika wizi wa akreditivu za NTLM kupitia PKINIT, zikilenga katika kupata hash za NTLM kupitia TGT iliyopatikana kwa kutumia PKINIT, na matumizi yanayosaidia mchakato huu.
 
