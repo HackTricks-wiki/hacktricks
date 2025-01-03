@@ -17,7 +17,7 @@ Dann ist es möglich für einen **Angreifer**, **Daten** **anzuhängen** und ein
 
 ### Wie?
 
-Grundsätzlich generieren die anfälligen Algorithmen die Hashes, indem sie zuerst einen Block von Daten **hashen** und dann, **aus** dem **zuvor** erstellten **Hash** (Zustand), den **nächsten Block von Daten** **hinzufügen** und **hashen**.
+Grundsätzlich generieren die anfälligen Algorithmen die Hashes, indem sie zuerst einen **Block von Daten hashen** und dann, **aus** dem **zuvor** erstellten **Hash** (Zustand), den **nächsten Block von Daten hinzufügen** und **hashen**.
 
 Stellen Sie sich vor, das Geheimnis ist "secret" und die Daten sind "data", der MD5 von "secretdata" ist 6036708eba0d11f6ef52ad44e8b74d5b.\
 Wenn ein Angreifer die Zeichenfolge "append" anhängen möchte, kann er:
@@ -29,7 +29,9 @@ Wenn ein Angreifer die Zeichenfolge "append" anhängen möchte, kann er:
 
 ### **Tool**
 
-{% embed url="https://github.com/iagox86/hash_extender" %}
+{{#ref}}
+https://github.com/iagox86/hash_extender
+{{#endref}}
 
 ### Referenzen
 

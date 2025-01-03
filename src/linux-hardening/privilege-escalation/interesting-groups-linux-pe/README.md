@@ -33,7 +33,7 @@ cat /etc/polkit-1/localauthority.conf.d/*
 ```
 Dort finden Sie, welche Gruppen berechtigt sind, **pkexec** auszuführen, und **standardmäßig** erscheinen in einigen Linux-Distributionen die Gruppen **sudo** und **admin**.
 
-Um **root zu werden, können Sie** ausführen:
+Um **root zu werden, können Sie** Folgendes ausführen:
 ```bash
 pkexec "/bin/sh" #You will be prompted for your user password
 ```
@@ -56,13 +56,13 @@ pkttyagent --process <PID of session1> #Step 2, attach pkttyagent to session1
 ```
 ## Wheel-Gruppe
 
-**Manchmal** **findet man** **standardmäßig** in der **/etc/sudoers**-Datei diese Zeile:
+**Manchmal** **findet man standardmäßig** in der **/etc/sudoers**-Datei diese Zeile:
 ```
 %wheel	ALL=(ALL:ALL) ALL
 ```
 Das bedeutet, dass **jeder Benutzer, der zur Gruppe wheel gehört, alles als sudo ausführen kann**.
 
-Wenn dies der Fall ist, um **root zu werden, können Sie einfach ausführen**:
+Wenn dies der Fall ist, können Sie **zum Root werden, indem Sie einfach** ausführen:
 ```
 sudo su
 ```
@@ -109,7 +109,7 @@ $ pspy64
 2024/02/01 22:02:14 CMD: UID=0     PID=17890  | sshd: mane [priv]
 2024/02/01 22:02:15 CMD: UID=0     PID=17891  | -bash
 ```
-**Exploits**
+**Ausnutzen**
 ```bash
 # 0x1 Add a run-parts script in /usr/local/bin/
 $ vi /usr/local/bin/run-parts
@@ -146,11 +146,11 @@ Beachten Sie, dass Sie mit debugfs auch **Dateien schreiben** können. Um beispi
 debugfs -w /dev/sda1
 debugfs:  dump /tmp/asd1.txt /tmp/asd2.txt
 ```
-Wenn Sie jedoch versuchen, **Dateien, die root gehören, zu schreiben** (wie `/etc/shadow` oder `/etc/passwd`), erhalten Sie einen "**Zugriff verweigert**" Fehler.
+Wenn Sie jedoch versuchen, **Dateien, die root gehören**, zu **schreiben** (wie `/etc/shadow` oder `/etc/passwd`), erhalten Sie einen "**Zugriff verweigert**" Fehler.
 
 ## Video Gruppe
 
-Mit dem Befehl `w` können Sie **herausfinden, wer im System angemeldet ist** und es wird eine Ausgabe wie die folgende angezeigt:
+Mit dem Befehl `w` können Sie **herausfinden, wer im System angemeldet ist**, und es wird eine Ausgabe wie die folgende angezeigt:
 ```bash
 USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT
 yossi    tty1                      22:16    5:13m  0.05s  0.04s -bash
@@ -158,7 +158,7 @@ moshe    pts/1    10.10.14.44      02:53   24:07   0.06s  0.06s /bin/bash
 ```
 Die **tty1** bedeutet, dass der Benutzer **yossi physisch** an einem Terminal auf der Maschine angemeldet ist.
 
-Die **video-Gruppe** hat Zugriff auf die Anzeige der Bildschirmausgabe. Grundsätzlich können Sie die Bildschirme beobachten. Um dies zu tun, müssen Sie **das aktuelle Bild auf dem Bildschirm** in Rohdaten erfassen und die Auflösung ermitteln, die der Bildschirm verwendet. Die Bildschirmdaten können in `/dev/fb0` gespeichert werden, und Sie können die Auflösung dieses Bildschirms unter `/sys/class/graphics/fb0/virtual_size` finden.
+Die **Video-Gruppe** hat Zugriff auf die Anzeige der Bildschirmausgabe. Grundsätzlich können Sie die Bildschirme beobachten. Um dies zu tun, müssen Sie **das aktuelle Bild auf dem Bildschirm** in Rohdaten erfassen und die Auflösung ermitteln, die der Bildschirm verwendet. Die Bildschirmdaten können in `/dev/fb0` gespeichert werden, und Sie können die Auflösung dieses Bildschirms unter `/sys/class/graphics/fb0/virtual_size` finden.
 ```bash
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size
@@ -199,11 +199,15 @@ Schließlich, wenn Ihnen keine der vorherigen Vorschläge gefällt oder sie aus 
 ../docker-security/
 {{#endref}}
 
-Wenn Sie Schreibberechtigungen über den Docker-Socket haben, lesen Sie [**diesen Beitrag darüber, wie man Privilegien durch den Missbrauch des Docker-Sockets eskaliert**](../#writable-docker-socket)**.**
+Wenn Sie Schreibberechtigungen über den Docker-Socket haben, lesen Sie [**diesen Beitrag darüber, wie man Privilegien durch den Docker-Socket eskaliert**](../#writable-docker-socket)**.**
 
-{% embed url="https://github.com/KrustyHack/docker-privilege-escalation" %}
+{{#ref}}
+https://github.com/KrustyHack/docker-privilege-escalation
+{{#endref}}
 
-{% embed url="https://fosterelli.co/privilege-escalation-via-docker.html" %}
+{{#ref}}
+https://fosterelli.co/privilege-escalation-via-docker.html
+{{#endref}}
 
 ## lxc/lxd Gruppe
 

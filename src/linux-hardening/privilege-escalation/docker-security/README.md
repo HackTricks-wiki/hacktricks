@@ -4,7 +4,7 @@
 
 ## **Grundlegende Sicherheit des Docker-Engines**
 
-Der **Docker-Engine** verwendet die **Namespaces** und **Cgroups** des Linux-Kernels, um Container zu isolieren und bietet eine grundlegende Sicherheitsebene. Zusätzlicher Schutz wird durch **Capabilities dropping**, **Seccomp** und **SELinux/AppArmor** bereitgestellt, was die Container-Isolation verbessert. Ein **auth plugin** kann die Benutzeraktionen weiter einschränken.
+Der **Docker-Engine** verwendet die **Namespaces** und **Cgroups** des Linux-Kernels, um Container zu isolieren, und bietet eine grundlegende Sicherheitsebene. Zusätzlicher Schutz wird durch **Capabilities dropping**, **Seccomp** und **SELinux/AppArmor** bereitgestellt, was die Container-Isolation verbessert. Ein **auth plugin** kann die Benutzeraktionen weiter einschränken.
 
 ![Docker-Sicherheit](https://sreeninet.files.wordpress.com/2016/03/dockersec1.png)
 
@@ -40,7 +40,7 @@ Für weitere [**Informationen lesen Sie dies**](https://docs.docker.com/engine/s
 
 - **`docker scan`**
 
-Der **`docker scan`** Befehl ermöglicht es Ihnen, vorhandene Docker-Images mit dem Bildnamen oder der ID zu scannen. Führen Sie beispielsweise den folgenden Befehl aus, um das hello-world-Image zu scannen:
+Der **`docker scan`** Befehl ermöglicht es Ihnen, vorhandene Docker-Images anhand des Bildnamens oder der ID zu scannen. Führen Sie beispielsweise den folgenden Befehl aus, um das hello-world-Image zu scannen:
 ```bash
 docker scan hello-world
 
@@ -102,7 +102,7 @@ In containerisierten Umgebungen ist die Isolierung von Projekten und deren Proze
 
 **Control Groups (CGroups)**
 
-- **Funktion**: Primär verwendet zur Zuteilung von Ressourcen unter Prozessen.
+- **Funktion**: Hauptsächlich zur Zuteilung von Ressourcen unter Prozessen verwendet.
 - **Sicherheitsaspekt**: CGroups selbst bieten keine Isolationssicherheit, außer für die Funktion `release_agent`, die, wenn sie falsch konfiguriert ist, potenziell für unbefugten Zugriff ausgenutzt werden könnte.
 
 **Capability Drop**
@@ -110,7 +110,7 @@ In containerisierten Umgebungen ist die Isolierung von Projekten und deren Proze
 - **Bedeutung**: Es ist ein entscheidendes Sicherheitsmerkmal für die Prozessisolierung.
 - **Funktionalität**: Es schränkt die Aktionen ein, die ein Root-Prozess ausführen kann, indem bestimmte Fähigkeiten entzogen werden. Selbst wenn ein Prozess mit Root-Rechten ausgeführt wird, verhindert das Fehlen der erforderlichen Fähigkeiten, dass er privilegierte Aktionen ausführt, da die Syscalls aufgrund unzureichender Berechtigungen fehlschlagen.
 
-Dies sind die **verbleibenden Fähigkeiten**, nachdem der Prozess die anderen fallen gelassen hat:
+Dies sind die **verbleibenden Fähigkeiten**, nachdem der Prozess die anderen entzogen hat:
 ```
 Current: cap_chown,cap_dac_override,cap_fowner,cap_fsetid,cap_kill,cap_setgid,cap_setuid,cap_setpcap,cap_net_bind_service,cap_net_raw,cap_sys_chroot,cap_mknod,cap_audit_write,cap_setfcap=ep
 ```
@@ -168,7 +168,7 @@ cgroups.md
 
 Fähigkeiten ermöglichen **eine genauere Kontrolle über die Fähigkeiten, die für den Root-Benutzer erlaubt sein können**. Docker verwendet die Linux-Kernel-Fähigkeitsfunktion, um **die Operationen zu begrenzen, die innerhalb eines Containers durchgeführt werden können**, unabhängig von der Art des Benutzers.
 
-Wenn ein Docker-Container ausgeführt wird, **gibt der Prozess sensible Fähigkeiten auf, die der Prozess nutzen könnte, um aus der Isolation zu entkommen**. Dies versucht sicherzustellen, dass der Prozess keine sensiblen Aktionen ausführen und entkommen kann:
+Wenn ein Docker-Container ausgeführt wird, **verliert der Prozess sensible Fähigkeiten, die der Prozess nutzen könnte, um aus der Isolation zu entkommen**. Dies versucht sicherzustellen, dass der Prozess keine sensiblen Aktionen ausführen und entkommen kann:
 
 {{#ref}}
 ../linux-capabilities.md
@@ -209,7 +209,7 @@ Dieser Mechanismus stellt sicher, dass selbst wenn ein Prozess innerhalb eines C
 In Docker spielt ein Autorisierungs-Plugin eine entscheidende Rolle für die Sicherheit, indem es entscheidet, ob Anfragen an den Docker-Daemon erlaubt oder blockiert werden. Diese Entscheidung wird getroffen, indem zwei wichtige Kontexte untersucht werden:
 
 - **Authentifizierungskontext**: Dies umfasst umfassende Informationen über den Benutzer, wie wer sie sind und wie sie sich authentifiziert haben.
-- **Befehlskontext**: Dies umfasst alle relevanten Daten, die mit der gestellten Anfrage zusammenhängen.
+- **Befehlskontext**: Dies umfasst alle relevanten Daten, die sich auf die gestellte Anfrage beziehen.
 
 Diese Kontexte helfen sicherzustellen, dass nur legitime Anfragen von authentifizierten Benutzern verarbeitet werden, was die Sicherheit der Docker-Operationen erhöht.
 
@@ -229,7 +229,7 @@ sudo apt-get install -y stress-ng && stress-ng --vm 1 --vm-bytes 1G --verify -t 
 # While loop
 docker run -d --name malicious-container -c 512 busybox sh -c 'while true; do :; done'
 ```
-- Bandwidth DoS
+- Bandbreiten-DoS
 ```bash
 nc -lvp 4444 >/dev/null & while true; do cat /dev/urandom | nc <target IP> 4444; done
 ```
@@ -237,7 +237,7 @@ nc -lvp 4444 >/dev/null & while true; do cat /dev/urandom | nc <target IP> 4444;
 
 ### --privileged-Flag
 
-Auf der folgenden Seite können Sie lernen, **was der `--privileged`-Flag impliziert**:
+Auf der folgenden Seite können Sie lernen, **was der `--privileged`-Flag bedeutet**:
 
 {{#ref}}
 docker-privileged.md
@@ -247,9 +247,9 @@ docker-privileged.md
 
 #### no-new-privileges
 
-Wenn Sie einen Container ausführen, in dem ein Angreifer es schafft, als Benutzer mit niedrigen Rechten Zugriff zu erhalten. Wenn Sie eine **fehlerhaft konfigurierte SUID-Binärdatei** haben, kann der Angreifer diese missbrauchen und **die Privilegien innerhalb** des Containers eskalieren. Dies könnte ihm ermöglichen, aus dem Container zu entkommen.
+Wenn Sie einen Container ausführen, in dem ein Angreifer es schafft, als Benutzer mit niedrigen Rechten Zugriff zu erhalten. Wenn Sie eine **fehlerhaft konfigurierte SUID-Binärdatei** haben, kann der Angreifer diese missbrauchen und **die Berechtigungen innerhalb** des Containers eskalieren. Dies könnte ihm ermöglichen, aus dem Container zu entkommen.
 
-Das Ausführen des Containers mit der aktivierten **`no-new-privileges`**-Option wird **diese Art der Privilegieneskalation verhindern**.
+Das Ausführen des Containers mit der aktivierten **`no-new-privileges`**-Option wird **diese Art der Berechtigungseskalation verhindern**.
 ```
 docker run -it --security-opt=no-new-privileges:true nonewpriv
 ```
@@ -274,7 +274,7 @@ Für weitere **`--security-opt`** Optionen siehe: [https://docs.docker.com/engin
 
 ### Verwaltung von Geheimnissen: Best Practices
 
-Es ist entscheidend, Geheimnisse nicht direkt in Docker-Images einzubetten oder Umgebungsvariablen zu verwenden, da diese Methoden Ihre sensiblen Informationen für jeden, der Zugriff auf den Container hat, durch Befehle wie `docker inspect` oder `exec` offenlegen.
+Es ist entscheidend, Geheimnisse nicht direkt in Docker-Images einzubetten oder Umgebungsvariablen zu verwenden, da diese Methoden Ihre sensiblen Informationen für jeden, der Zugriff auf den Container hat, durch Befehle wie `docker inspect` oder `exec` zugänglich machen.
 
 **Docker-Volumes** sind eine sicherere Alternative, die empfohlen wird, um auf sensible Informationen zuzugreifen. Sie können als temporäres Dateisystem im Speicher genutzt werden, wodurch die Risiken im Zusammenhang mit `docker inspect` und Protokollierung gemindert werden. Allerdings könnten Root-Benutzer und solche mit `exec`-Zugriff auf den Container weiterhin auf die Geheimnisse zugreifen.
 
@@ -283,7 +283,7 @@ Es ist entscheidend, Geheimnisse nicht direkt in Docker-Images einzubetten oder 
 Um BuildKit zu nutzen, kann es auf drei Arten aktiviert werden:
 
 1. Durch eine Umgebungsvariable: `export DOCKER_BUILDKIT=1`
-2. Durch das Voranstellen von Befehlen: `DOCKER_BUILDKIT=1 docker build .`
+2. Durch das Präfixen von Befehlen: `DOCKER_BUILDKIT=1 docker build .`
 3. Durch die standardmäßige Aktivierung in der Docker-Konfiguration: `{ "features": { "buildkit": true } }`, gefolgt von einem Docker-Neustart.
 
 BuildKit ermöglicht die Verwendung von Geheimnissen zur Bauzeit mit der Option `--secret`, um sicherzustellen, dass diese Geheimnisse nicht im Image-Bau-Cache oder im endgültigen Image enthalten sind, indem ein Befehl wie folgt verwendet wird:
@@ -309,36 +309,40 @@ In Kubernetes-Umgebungen werden Secrets nativ unterstützt und können mit Tools
 
 ### gVisor
 
-**gVisor** ist ein Anwendungs-Kernel, der in Go geschrieben ist und einen wesentlichen Teil der Linux-Systemoberfläche implementiert. Er umfasst eine [Open Container Initiative (OCI)](https://www.opencontainers.org) Runtime namens `runsc`, die eine **Isolationsgrenze zwischen der Anwendung und dem Host-Kernel** bietet. Die `runsc` Runtime integriert sich mit Docker und Kubernetes, was es einfach macht, sandboxed Container auszuführen.
+**gVisor** ist ein Anwendungs-Kernel, der in Go geschrieben ist und einen wesentlichen Teil der Linux-Systemoberfläche implementiert. Er enthält eine [Open Container Initiative (OCI)](https://www.opencontainers.org) Runtime namens `runsc`, die eine **Isolationsgrenze zwischen der Anwendung und dem Host-Kernel** bietet. Die `runsc` Runtime integriert sich mit Docker und Kubernetes, was es einfach macht, sandboxed Container auszuführen.
 
-{% embed url="https://github.com/google/gvisor" %}
+{{#ref}}
+https://github.com/google/gvisor
+{{#endref}}
 
 ### Kata Containers
 
-**Kata Containers** ist eine Open-Source-Community, die daran arbeitet, eine sichere Container-Runtime mit leichten virtuellen Maschinen zu erstellen, die sich anfühlen und wie Container funktionieren, aber **stärkere Arbeitslastisolierung durch Hardware-Virtualisierung** Technologie als zweite Verteidigungsebene bieten.
+**Kata Containers** ist eine Open-Source-Community, die daran arbeitet, eine sichere Container-Runtime mit leichten virtuellen Maschinen zu erstellen, die sich anfühlen und funktionieren wie Container, aber **stärkere Arbeitslastisolierung durch Hardware-Virtualisierung** Technologie als zweite Verteidigungsebene bieten.
 
-{% embed url="https://katacontainers.io/" %}
+{{#ref}}
+https://katacontainers.io/
+{{#endref}}
 
 ### Zusammenfassende Tipps
 
-- **Verwenden Sie nicht das `--privileged` Flag oder mounten Sie einen** [**Docker-Socket innerhalb des Containers**](https://raesene.github.io/blog/2016/03/06/The-Dangers-Of-Docker.sock/)**.** Der Docker-Socket ermöglicht das Erstellen von Containern, sodass es ein einfacher Weg ist, die vollständige Kontrolle über den Host zu übernehmen, indem beispielsweise ein weiterer Container mit dem `--privileged` Flag ausgeführt wird.
+- **Verwenden Sie nicht das `--privileged` Flag oder mounten Sie einen** [**Docker-Socket innerhalb des Containers**](https://raesene.github.io/blog/2016/03/06/The-Dangers-Of-Docker.sock/)**.** Der Docker-Socket ermöglicht das Erstellen von Containern, sodass es ein einfacher Weg ist, die vollständige Kontrolle über den Host zu übernehmen, indem beispielsweise ein anderer Container mit dem `--privileged` Flag ausgeführt wird.
 - **Führen Sie nicht als root innerhalb des Containers aus. Verwenden Sie einen** [**anderen Benutzer**](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#user) **und** [**Benutzernamensräume**](https://docs.docker.com/engine/security/userns-remap/)**.** Der Root im Container ist derselbe wie auf dem Host, es sei denn, er wird mit Benutzernamensräumen umgeschrieben. Er ist nur leicht eingeschränkt durch hauptsächlich Linux-Namensräume, Fähigkeiten und cgroups.
 - [**Entfernen Sie alle Fähigkeiten**](https://docs.docker.com/engine/reference/run/#runtime-privilege-and-linux-capabilities) **(`--cap-drop=all`) und aktivieren Sie nur die, die erforderlich sind** (`--cap-add=...`). Viele Arbeitslasten benötigen keine Fähigkeiten, und das Hinzufügen erhöht den Umfang eines potenziellen Angriffs.
 - [**Verwenden Sie die Sicherheitsoption „no-new-privileges“**](https://raesene.github.io/blog/2019/06/01/docker-capabilities-and-no-new-privs/), um zu verhindern, dass Prozesse mehr Privilegien erlangen, beispielsweise durch SUID-Binärdateien.
 - [**Begrenzen Sie die Ressourcen, die dem Container zur Verfügung stehen**](https://docs.docker.com/engine/reference/run/#runtime-constraints-on-resources)**.** Ressourcenlimits können die Maschine vor Denial-of-Service-Angriffen schützen.
 - **Passen Sie** [**seccomp**](https://docs.docker.com/engine/security/seccomp/)**,** [**AppArmor**](https://docs.docker.com/engine/security/apparmor/) **(oder SELinux)** Profile an, um die Aktionen und Syscalls, die für den Container verfügbar sind, auf das Minimum zu beschränken.
 - **Verwenden Sie** [**offizielle Docker-Images**](https://docs.docker.com/docker-hub/official_images/) **und verlangen Sie Signaturen** oder erstellen Sie Ihre eigenen basierend auf ihnen. Erben oder verwenden Sie keine [backdoored](https://arstechnica.com/information-technology/2018/06/backdoored-images-downloaded-5-million-times-finally-removed-from-docker-hub/) Images. Bewahren Sie auch Root-Schlüssel und Passphrasen an einem sicheren Ort auf. Docker plant, Schlüssel mit UCP zu verwalten.
-- **Bauen Sie regelmäßig** Ihre Images neu, um **Sicherheitsupdates auf den Host und die Images anzuwenden.**
+- **Bauen Sie regelmäßig** **Ihre Images neu, um** **Sicherheitspatches auf den Host und die Images anzuwenden.**
 - Verwalten Sie Ihre **Secrets weise**, damit es für den Angreifer schwierig ist, darauf zuzugreifen.
 - Wenn Sie **den Docker-Daemon exponieren, verwenden Sie HTTPS** mit Client- und Serverauthentifizierung.
 - In Ihrem Dockerfile, **bevorzugen Sie COPY anstelle von ADD**. ADD extrahiert automatisch gezippte Dateien und kann Dateien von URLs kopieren. COPY hat diese Fähigkeiten nicht. Vermeiden Sie wann immer möglich die Verwendung von ADD, damit Sie nicht anfällig für Angriffe über entfernte URLs und Zip-Dateien sind.
 - Haben Sie **getrennte Container für jeden Mikro-s**ervice.
-- **Setzen Sie kein ssh** innerhalb des Containers ein, „docker exec“ kann verwendet werden, um sich in den Container einzuloggen.
+- **Setzen Sie ssh** nicht in den Container, „docker exec“ kann verwendet werden, um sich in den Container einzuloggen.
 - Haben Sie **kleinere** Container **Images**.
 
 ## Docker Breakout / Privilegieneskalation
 
-Wenn Sie **innerhalb eines Docker-Containers** sind oder Zugriff auf einen Benutzer in der **Docker-Gruppe** haben, könnten Sie versuchen, **zu entkommen und Privilegien zu eskalieren**:
+Wenn Sie **in einem Docker-Container** sind oder Zugriff auf einen Benutzer in der **Docker-Gruppe** haben, könnten Sie versuchen, **zu entkommen und Privilegien zu eskalieren**:
 
 {{#ref}}
 docker-breakout-privilege-escalation/
@@ -346,7 +350,7 @@ docker-breakout-privilege-escalation/
 
 ## Umgehung des Docker-Authentifizierungs-Plugins
 
-Wenn Sie Zugriff auf den Docker-Socket haben oder Zugriff auf einen Benutzer in der **Docker-Gruppe** haben, aber Ihre Aktionen durch ein Docker-Auth-Plugin eingeschränkt werden, überprüfen Sie, ob Sie es **umgehen können:**
+Wenn Sie Zugriff auf den Docker-Socket haben oder Zugriff auf einen Benutzer in der **Docker-Gruppe haben, aber Ihre Aktionen durch ein Docker-Auth-Plugin eingeschränkt werden**, überprüfen Sie, ob Sie es **umgehen können:**
 
 {{#ref}}
 authz-and-authn-docker-access-authorization-plugin.md

@@ -1,6 +1,5 @@
 {{#include ../../banners/hacktricks-training.md}}
 
-
 # Sudo/Admin Gruppen
 
 ## **PE - Methode 1**
@@ -25,7 +24,8 @@ Finde alle SUID-Binärdateien und überprüfe, ob die Binärdatei **Pkexec** vor
 ```bash
 find / -perm -4000 2>/dev/null
 ```
-Wenn Sie feststellen, dass die Binärdatei pkexec eine SUID-Binärdatei ist und Sie zu sudo oder admin gehören, könnten Sie wahrscheinlich Binärdateien als sudo mit pkexec ausführen. Überprüfen Sie den Inhalt von:
+Wenn Sie feststellen, dass die Binärdatei pkexec eine SUID-Binärdatei ist und Sie zu sudo oder admin gehören, könnten Sie wahrscheinlich Binärdateien als sudo mit pkexec ausführen.
+Überprüfen Sie den Inhalt von:
 ```bash
 cat /etc/polkit-1/localauthority.conf.d/*
 ```
@@ -41,7 +41,7 @@ polkit-agent-helper-1: error response to PolicyKit daemon: GDBus.Error:org.freed
 ==== AUTHENTICATION FAILED ===
 Error executing command as another user: Not authorized
 ```
-**Es liegt nicht daran, dass Sie keine Berechtigungen haben, sondern daran, dass Sie ohne eine GUI nicht verbunden sind**. Und es gibt eine Lösung für dieses Problem hier: [https://github.com/NixOS/nixpkgs/issues/18012\#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). Sie benötigen **2 verschiedene SSH-Sitzungen**:
+**Es liegt nicht daran, dass Sie keine Berechtigungen haben, sondern daran, dass Sie ohne eine GUI nicht verbunden sind**. Und es gibt einen Workaround für dieses Problem hier: [https://github.com/NixOS/nixpkgs/issues/18012\#issuecomment-335350903](https://github.com/NixOS/nixpkgs/issues/18012#issuecomment-335350903). Sie benötigen **2 verschiedene SSH-Sitzungen**:
 ```bash:session1
 echo $$ #Step1: Get current PID
 pkexec "/bin/bash" #Step 3, execute pkexec
@@ -64,9 +64,9 @@ Wenn dies der Fall ist, um **root zu werden, können Sie einfach ausführen**:
 ```text
 sudo su
 ```
-# Shadow Group
+# Shadow-Gruppe
 
-Benutzer der **Gruppe shadow** können die **/etc/shadow** Datei **lesen**:
+Benutzer der **Gruppe shadow** können die **/etc/shadow**-Datei **lesen**:
 ```text
 -rw-r----- 1 root shadow 1824 Apr 26 19:10 /etc/shadow
 ```
@@ -76,7 +76,7 @@ So, lesen Sie die Datei und versuchen Sie, **einige Hashes zu knacken**.
 
 Dieses Privileg ist fast **äquivalent zu Root-Zugriff**, da Sie auf alle Daten innerhalb der Maschine zugreifen können.
 
-Dateien:`/dev/sd[a-z][1-9]`
+Dateien: `/dev/sd[a-z][1-9]`
 ```text
 debugfs /dev/sda1
 debugfs: cd /root
@@ -101,7 +101,7 @@ moshe    pts/1    10.10.14.44      02:53   24:07   0.06s  0.06s /bin/bash
 ```
 Die **tty1** bedeutet, dass der Benutzer **yossi physisch** an einem Terminal auf der Maschine angemeldet ist.
 
-Die **video-Gruppe** hat Zugriff auf die Anzeige der Bildschirmausgabe. Grundsätzlich können Sie die Bildschirme beobachten. Um dies zu tun, müssen Sie **das aktuelle Bild auf dem Bildschirm** in Rohdaten erfassen und die Auflösung ermitteln, die der Bildschirm verwendet. Die Bildschirmdaten können in `/dev/fb0` gespeichert werden, und Sie können die Auflösung dieses Bildschirms unter `/sys/class/graphics/fb0/virtual_size` finden.
+Die **Video-Gruppe** hat Zugriff auf die Anzeige der Bildschirmausgabe. Grundsätzlich können Sie die Bildschirme beobachten. Um dies zu tun, müssen Sie **das aktuelle Bild auf dem Bildschirm** in Rohdaten erfassen und die Auflösung ermitteln, die der Bildschirm verwendet. Die Bildschirmdaten können in `/dev/fb0` gespeichert werden, und Sie können die Auflösung dieses Bildschirms unter `/sys/class/graphics/fb0/virtual_size` finden.
 ```bash
 cat /dev/fb0 > /tmp/screen.raw
 cat /sys/class/graphics/fb0/virtual_size
@@ -110,13 +110,13 @@ Um das **raw image** zu **öffnen**, können Sie **GIMP** verwenden, die **`scre
 
 ![](../../images/image%20%28208%29.png)
 
-Ändern Sie dann die Breite und Höhe auf die Werte, die auf dem Bildschirm verwendet werden, und überprüfen Sie verschiedene Bildtypen \(und wählen Sie den aus, der den Bildschirm am besten darstellt\):
+Ändern Sie dann die Breite und Höhe auf die Werte, die auf dem Bildschirm verwendet werden, und überprüfen Sie verschiedene Bildtypen \(und wählen Sie denjenigen aus, der den Bildschirm am besten darstellt\):
 
 ![](../../images/image%20%28295%29.png)
 
 # Root-Gruppe
 
-Es scheint, dass standardmäßig **Mitglieder der Root-Gruppe** Zugriff haben könnten, um einige **Service**-Konfigurationsdateien oder einige **Bibliotheks**-Dateien oder **andere interessante Dinge** zu ändern, die zur Eskalation von Rechten verwendet werden könnten...
+Es scheint, dass **Mitglieder der Root-Gruppe** standardmäßig Zugriff auf die **Änderung** einiger **Service**-Konfigurationsdateien oder einiger **Bibliotheks**-Dateien oder **anderer interessanter Dinge** haben, die zur Eskalation von Rechten verwendet werden könnten...
 
 **Überprüfen Sie, welche Dateien Root-Mitglieder ändern können**:
 ```bash
@@ -124,11 +124,15 @@ find / -group root -perm -g=w 2>/dev/null
 ```
 # Docker-Gruppe
 
-Sie können das Root-Dateisystem des Host-Systems in das Volume einer Instanz einbinden, sodass beim Start der Instanz sofort ein `chroot` in dieses Volume geladen wird. Dies gibt Ihnen effektiv Root-Zugriff auf die Maschine.
+Sie können das Root-Dateisystem des Host-Systems in das Volume einer Instanz einhängen, sodass beim Start der Instanz sofort ein `chroot` in dieses Volume geladen wird. Dies gibt Ihnen effektiv Root-Zugriff auf die Maschine.
 
-{% embed url="https://github.com/KrustyHack/docker-privilege-escalation" %}
+{{#ref}}
+https://github.com/KrustyHack/docker-privilege-escalation
+{{#endref}}
 
-{% embed url="https://fosterelli.co/privilege-escalation-via-docker.html" %}
+{{#ref}}
+https://fosterelli.co/privilege-escalation-via-docker.html
+{{#endref}}
 
 # lxc/lxd Gruppe
 

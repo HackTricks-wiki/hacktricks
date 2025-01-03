@@ -25,7 +25,7 @@ Software:
 
 ### [dotPeek](https://www.jetbrains.com/decompiler/)
 
-dotPeek ist ein Decompiler, der **mehrere Formate dekompiliert und untersucht**, einschließlich **Bibliotheken** (.dll), **Windows-Metadatendateien** (.winmd) und **ausführbaren Dateien** (.exe). Nach der Dekompilierung kann ein Assembly als Visual Studio-Projekt (.csproj) gespeichert werden.
+dotPeek ist ein Decompiler, der **mehrere Formate dekompiliert und untersucht**, einschließlich **Bibliotheken** (.dll), **Windows-Metadaten-Dateien** (.winmd) und **ausführbaren Dateien** (.exe). Nach der Dekomplierung kann ein Assembly als Visual Studio-Projekt (.csproj) gespeichert werden.
 
 Der Vorteil hier ist, dass, wenn ein verlorener Quellcode aus einem Legacy-Assembly wiederhergestellt werden muss, diese Aktion Zeit sparen kann. Darüber hinaus bietet dotPeek eine praktische Navigation durch den dekompilierten Code, was es zu einem der perfekten Werkzeuge für die **Xamarin-Algorithmusanalyse** macht.
 
@@ -38,11 +38,11 @@ Mit einem umfassenden Add-In-Modell und einer API, die das Tool an Ihre genauen 
 - Findet undocumented und unexposed Funktionalitäten, um mehr aus den verwendeten APIs und Technologien herauszuholen.
 - Findet Abhängigkeiten und verschiedene Assemblies
 - Verfolgt den genauen Standort von Fehlern in Ihrem Code, Drittanbieterkomponenten und Bibliotheken.
-- Debuggt in die Quelle des gesamten .NET-Codes, mit dem Sie arbeiten.
+- Debuggt in die Quelle aller .NET-Codes, mit denen Sie arbeiten.
 
 ### [ILSpy](https://github.com/icsharpcode/ILSpy) & [dnSpy](https://github.com/dnSpy/dnSpy/releases)
 
-[ILSpy-Plugin für Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode): Sie können es auf jedem Betriebssystem haben (Sie können es direkt von VSCode installieren, es ist nicht notwendig, das Git-Repository herunterzuladen. Klicken Sie auf **Erweiterungen** und **suchen Sie nach ILSpy**).\
+[ILSpy-Plugin für Visual Studio Code](https://github.com/icsharpcode/ilspy-vscode): Sie können es auf jedem Betriebssystem haben (Sie können es direkt von VSCode installieren, es ist nicht notwendig, das Git herunterzuladen. Klicken Sie auf **Erweiterungen** und **suchen Sie nach ILSpy**).\
 Wenn Sie **dekompilieren**, **modifizieren** und **wieder kompilieren** müssen, können Sie [**dnSpy**](https://github.com/dnSpy/dnSpy/releases) oder einen aktiv gepflegten Fork davon, [**dnSpyEx**](https://github.com/dnSpyEx/dnSpy/releases), verwenden. (**Rechtsklick -> Methode ändern**, um etwas innerhalb einer Funktion zu ändern).
 
 ### DNSpy Protokollierung
@@ -127,12 +127,12 @@ Klicken Sie mit der rechten Maustaste auf ein beliebiges Modul im **Assembly Exp
 
 Wenn Sie dann mit dem Debuggen beginnen, **wird die Ausführung gestoppt, wenn jede DLL geladen wird**. Wenn rundll32 Ihre DLL lädt, wird die Ausführung gestoppt.
 
-Aber wie gelangen Sie zum Code der geladenen DLL? Mit dieser Methode weiß ich es nicht.
+Aber wie gelangen Sie zu dem Code der geladenen DLL? Mit dieser Methode weiß ich es nicht.
 
 ### Verwendung von x64dbg/x32dbg
 
 - **Laden Sie rundll32** (64-Bit in C:\Windows\System32\rundll32.exe und 32-Bit in C:\Windows\SysWOW64\rundll32.exe)
-- **Ändern Sie die Befehlszeile** (_Datei --> Befehlszeile ändern_) und setzen Sie den Pfad der DLL und die Funktion, die Sie aufrufen möchten, zum Beispiel: "C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii_2.dll",DLLMain
+- **Ändern Sie die Befehlszeile** (_Datei --> Befehlszeile ändern_) und setzen Sie den Pfad der DLL und die Funktion, die Sie aufrufen möchten, z. B.: "C:\Windows\SysWOW64\rundll32.exe" "Z:\shared\Cybercamp\rev2\\\14.ridii_2.dll",DLLMain
 - Ändern Sie _Optionen --> Einstellungen_ und wählen Sie "**DLL Entry**".
 - Starten Sie dann die Ausführung, der Debugger wird an jedem DLL-Hauptpunkt anhalten, irgendwann werden Sie **im DLL-Eintrag Ihrer DLL anhalten**. Von dort aus suchen Sie einfach nach den Punkten, an denen Sie einen Haltepunkt setzen möchten.
 
@@ -156,7 +156,9 @@ cheat-engine.md
 
 ## ARM & MIPS
 
-{% embed url="https://github.com/nongiach/arm_now" %}
+{{#ref}}
+https://github.com/nongiach/arm_now
+{{#endref}}
 
 ## Shellcodes
 
@@ -198,7 +200,7 @@ Sie können den Stack beispielsweise in einem Hexdump sehen:
 
 ![](<../../images/image (186).png>)
 
-### Deobfuscating Shellcode und Abrufen ausgeführter Funktionen
+### Deobfuscating Shellcode und Ausführen von Funktionen
 
 Sie sollten [**scdbg**](http://sandsprite.com/blogs/index.php?uid=7&pid=152) ausprobieren.\
 Es wird Ihnen Dinge sagen wie **welche Funktionen** der Shellcode verwendet und ob der Shellcode sich **im Speicher dekodiert**.
@@ -338,7 +340,7 @@ uVar2 = DAT_030004dc;
 uVar1 = *puVar6;
 if ((uVar1 & DAT_030004da & ~uVar4) != 0) {
 ```
-Die letzte Bedingung überprüft, ob **`uVar4`** in den **letzten Tasten** ist und nicht die aktuelle Taste ist, die auch als Loslassen einer Taste bezeichnet wird (die aktuelle Taste ist in **`uVar1`** gespeichert).
+Die letzte Bedingung überprüft, ob **`uVar4`** in den **letzten Tasten** ist und nicht die aktuelle Taste ist, die auch als Loslassen einer Taste bezeichnet wird (die aktuelle Taste wird in **`uVar1`** gespeichert).
 ```c
 if (uVar1 == 4) {
 DAT_030000d4 = 0;
@@ -371,16 +373,18 @@ Im vorherigen Code sehen Sie, dass wir **uVar1** (der Ort, an dem der **Wert des
 - Zuerst wird er mit dem **Wert 4** (**SELECT**-Taste) verglichen: In der Herausforderung löscht dieser Button den Bildschirm.
 - Dann wird er mit dem **Wert 8** (**START**-Taste) verglichen: In der Herausforderung wird überprüft, ob der Code gültig ist, um die Flagge zu erhalten.
 - In diesem Fall wird die Variable **`DAT_030000d8`** mit 0xf3 verglichen, und wenn der Wert gleich ist, wird ein bestimmter Code ausgeführt.
-- In allen anderen Fällen wird ein Zähler (`DAT_030000d4`) überprüft. Es ist ein Zähler, weil er direkt nach dem Betreten des Codes um 1 erhöht wird.\
-**Wenn** weniger als 8, wird etwas gemacht, das **Werte** zu \*\*`DAT_030000d8` \*\* hinzufügt (grundsätzlich werden die Werte der gedrückten Tasten in dieser Variablen addiert, solange der Zähler weniger als 8 ist).
+- In allen anderen Fällen wird ein Zähler (`DAT_030000d4`) überprüft. Es ist ein Zähler, weil er 1 hinzufügt, direkt nachdem er in den Code eingetreten ist.\
+**Wenn** weniger als 8, wird etwas gemacht, das **Hinzufügen** von Werten zu \*\*`DAT_030000d8` \*\* beinhaltet (grundsätzlich werden die Werte der gedrückten Tasten in dieser Variablen addiert, solange der Zähler weniger als 8 ist).
 
-In dieser Herausforderung mussten Sie also, wissend um die Werte der Tasten, eine **Kombination mit einer Länge kleiner als 8 drücken, deren resultierende Addition 0xf3 ist.**
+In dieser Herausforderung mussten Sie also, wissend um die Werte der Tasten, **eine Kombination mit einer Länge kleiner als 8 drücken, deren resultierende Addition 0xf3 ist.**
 
 **Referenz für dieses Tutorial:** [**https://exp.codes/Nostalgia/**](https://exp.codes/Nostalgia/)
 
 ## Game Boy
 
-{% embed url="https://www.youtube.com/watch?v=VVbRe7wr3G4" %}
+{{#ref}}
+https://www.youtube.com/watch?v=VVbRe7wr3G4
+{{#endref}}
 
 ## Kurse
 

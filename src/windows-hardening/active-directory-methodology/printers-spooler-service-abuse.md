@@ -45,17 +45,19 @@ Wenn ein Angreifer bereits einen Computer mit [Unbeschränkter Delegation](uncon
 
 ## RCP Zwangs-Authentifizierung
 
-{% embed url="https://github.com/p0dalirius/Coercer" %}
+{{#ref}}
+https://github.com/p0dalirius/Coercer
+{{#endref}}
 
 ## PrivExchange
 
 Der `PrivExchange`-Angriff ist das Ergebnis eines Fehlers, der in der **Exchange Server `PushSubscription`-Funktion** gefunden wurde. Diese Funktion ermöglicht es, dass der Exchange-Server von jedem Domänenbenutzer mit einem Postfach gezwungen wird, sich bei einem beliebigen vom Client bereitgestellten Host über HTTP zu authentifizieren.
 
-Standardmäßig läuft der **Exchange-Dienst als SYSTEM** und erhält übermäßige Berechtigungen (insbesondere hat er **WriteDacl-Berechtigungen auf der Domäne vor dem kumulativen Update 2019**). Dieser Fehler kann ausgenutzt werden, um die **Weiterleitung von Informationen zu LDAP zu ermöglichen und anschließend die NTDS-Datenbank der Domäne zu extrahieren**. In Fällen, in denen die Weiterleitung zu LDAP nicht möglich ist, kann dieser Fehler dennoch verwendet werden, um sich bei anderen Hosts innerhalb der Domäne weiterzuleiten und zu authentifizieren. Die erfolgreiche Ausnutzung dieses Angriffs gewährt sofortigen Zugriff auf den Domänenadministrator mit jedem authentifizierten Domänenbenutzerkonto.
+Standardmäßig läuft der **Exchange-Dienst als SYSTEM** und erhält übermäßige Berechtigungen (insbesondere hat er **WriteDacl-Berechtigungen auf der Domäne vor dem kumulativen Update 2019**). Dieser Fehler kann ausgenutzt werden, um die **Weiterleitung von Informationen zu LDAP zu ermöglichen und anschließend die NTDS-Datenbank der Domäne zu extrahieren**. In Fällen, in denen eine Weiterleitung zu LDAP nicht möglich ist, kann dieser Fehler dennoch verwendet werden, um sich bei anderen Hosts innerhalb der Domäne weiterzuleiten und zu authentifizieren. Die erfolgreiche Ausnutzung dieses Angriffs gewährt sofortigen Zugriff auf den Domänenadministrator mit jedem authentifizierten Domänenbenutzerkonto.
 
 ## Innerhalb von Windows
 
-Wenn Sie sich bereits auf der Windows-Maschine befinden, können Sie Windows zwingen, sich mit privilegierten Konten mit folgendem Befehl zu einem Server zu verbinden:
+Wenn Sie sich bereits auf der Windows-Maschine befinden, können Sie Windows zwingen, sich mit privilegierten Konten mit folgendem Befehl mit einem Server zu verbinden:
 
 ### Defender MpCmdRun
 ```bash
