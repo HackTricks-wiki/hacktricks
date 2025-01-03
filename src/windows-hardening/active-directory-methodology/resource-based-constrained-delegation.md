@@ -27,7 +27,7 @@
 2. 攻击者**利用其对受害计算机的写权限**（ServiceB）配置**基于资源的受限委派，以允许 ServiceA 对该受害计算机（ServiceB）进行 impersonate 任何用户**。
 3. 攻击者使用 Rubeus 执行**完整的 S4U 攻击**（S4U2Self 和 S4U2Proxy），从服务 A 到服务 B，针对**具有对服务 B 的特权访问的用户**。
    1. S4U2Self（来自被破坏/创建的 SPN 账户）：请求**管理员的 TGS 给我**（不可转发）。
-   2. S4U2Proxy：使用前一步的**不可转发 TGS**请求从**管理员**到**受害主机**的**TGS**。
+   2. S4U2Proxy：使用前一步的**不可转发 TGS**请求**管理员**到**受害主机**的**TGS**。
    3. 即使您使用的是不可转发的 TGS，由于您正在利用基于资源的受限委派，它将有效。
    4. 攻击者可以**传票**并**冒充**用户以获得对**受害 ServiceB**的**访问**。
 
@@ -89,7 +89,7 @@ rubeus.exe s4u /user:FAKECOMPUTER$ /aes256:<AES 256 hash> /impersonateuser:admin
 
 ### 访问
 
-最后一条命令行将执行 **完整的 S4U 攻击，并将 TGS 从 Administrator 注入到受害主机的 **内存** 中。\
+最后一条命令将执行 **完整的 S4U 攻击，并将 TGS** 从 Administrator 注入到受害主机的 **内存** 中。\
 在此示例中，请求了 Administrator 的 **CIFS** 服务的 TGS，因此您将能够访问 **C$**：
 ```bash
 ls \\victim.domain.local\C$

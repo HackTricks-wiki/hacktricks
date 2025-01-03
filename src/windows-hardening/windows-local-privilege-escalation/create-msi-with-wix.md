@@ -4,7 +4,7 @@
 
 MSI 安装程序的创建将使用 wixtools，具体来说，将利用 [wixtools](http://wixtoolset.org)。值得一提的是，尝试了其他 MSI 构建工具，但在这个特定案例中并未成功。
 
-为了全面了解 wix MSI 的使用示例，建议查阅 [此页面](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with)。在这里，您可以找到各种示例，演示 wix MSI 的用法。
+为了全面理解 wix MSI 的使用示例，建议查阅 [此页面](https://www.codeproject.com/Tips/105638/A-quick-introduction-Create-an-MSI-installer-with)。在这里，您可以找到各种示例，演示 wix MSI 的用法。
 
 目标是生成一个将执行 lnk 文件的 MSI。为了实现这一点，可以使用以下 XML 代码（[xml 来自这里](https://0xrick.github.io/hack-the-box/ethereal/#Creating-Malicious-msi-and-getting-root)）：
 ```markup

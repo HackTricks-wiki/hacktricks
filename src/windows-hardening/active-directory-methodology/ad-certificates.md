@@ -43,7 +43,7 @@ AD CS 通过指定的容器在 AD 林中承认 CA 证书，每个容器承担独
 
 ## 证书注册
 
-证书的注册过程由管理员 **创建证书模板**，然后由企业证书颁发机构 (CA) **发布**。这使得模板可用于客户端注册，此步骤通过将模板名称添加到 Active Directory 对象的 `certificatetemplates` 字段来实现。
+证书的注册过程由管理员 **创建证书模板**，然后由企业证书颁发机构 (CA) **发布**。这使得模板可用于客户端注册，这一步通过将模板名称添加到 Active Directory 对象的 `certificatetemplates` 字段来实现。
 
 为了让客户端请求证书，必须授予 **注册权限**。这些权限由证书模板和企业 CA 本身的安全描述符定义。必须在两个位置授予权限，才能成功请求。
 
@@ -51,7 +51,7 @@ AD CS 通过指定的容器在 AD 林中承认 CA 证书，每个容器承担独
 
 这些权限通过访问控制条目 (ACEs) 指定，详细说明权限，如：
 
-- **Certificate-Enrollment** 和 **Certificate-AutoEnrollment** 权限，每个权限与特定 GUID 相关联。
+- **Certificate-Enrollment** 和 **Certificate-AutoEnrollment** 权限，每个权限与特定的 GUID 相关联。
 - **ExtendedRights**，允许所有扩展权限。
 - **FullControl/GenericAll**，提供对模板的完全控制。
 
@@ -87,7 +87,7 @@ Active Directory (AD) 支持证书认证，主要利用 **Kerberos** 和 **安�
 
 ### Kerberos 认证过程
 
-在 Kerberos 认证过程中，用户请求票证授予票证 (TGT) 时，使用用户证书的 **私钥** 对该请求进行签名。该请求经过域控制器的多个验证，包括证书的 **有效性**、**路径** 和 **撤销状态**。验证还包括确认证书来自受信任的来源，并确认发行者在 **NTAUTH 证书存储** 中的存在。成功的验证将导致 TGT 的发放。AD 中的 **`NTAuthCertificates`** 对象位于：
+在 Kerberos 认证过程中，用户请求的票证授予票证 (TGT) 使用用户证书的 **私钥** 进行签名。该请求经过域控制器的多个验证，包括证书的 **有效性**、**路径** 和 **撤销状态**。验证还包括确认证书来自受信任的来源，并确认发行者在 **NTAUTH 证书存储** 中的存在。成功的验证将导致 TGT 的发放。AD 中的 **`NTAuthCertificates`** 对象位于：
 ```bash
 CN=NTAuthCertificates,CN=Public Key Services,CN=Services,CN=Configuration,DC=<domain>,DC=<com>
 ```
@@ -99,7 +99,7 @@ Schannel 促进安全的 TLS/SSL 连接，在握手过程中，客户端提供�
 
 ### AD 证书服务枚举
 
-可以通过 LDAP 查询枚举 AD 的证书服务，揭示有关 **企业证书颁发机构 (CAs)** 及其配置的信息。这对任何经过域认证的用户都是可访问的，无需特殊权限。工具如 **[Certify](https://github.com/GhostPack/Certify)** 和 **[Certipy](https://github.com/ly4k/Certipy)** 用于在 AD CS 环境中的枚举和漏洞评估。
+可以通过 LDAP 查询枚举 AD 的证书服务，揭示有关 **企业证书颁发机构 (CAs)** 及其配置的信息。这对任何经过域认证的用户都是可访问的，无需特殊权限。工具如 **[Certify](https://github.com/GhostPack/Certify)** 和 **[Certipy](https://github.com/ly4k/Certipy)** 用于在 AD CS 环境中进行枚举和漏洞评估。
 
 使用这些工具的命令包括：
 ```bash

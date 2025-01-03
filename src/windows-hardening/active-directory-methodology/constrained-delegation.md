@@ -1,19 +1,19 @@
-# 受限委派
+# Constrained Delegation
 
 {{#include ../../banners/hacktricks-training.md}}
 
-## 受限委派
+## Constrained Delegation
 
-使用此功能，域管理员可以**允许**计算机**模拟用户或计算机**以访问机器的**服务**。
+使用此功能，域管理员可以**允许**计算机**冒充用户或计算机**以访问机器的**服务**。
 
-- **用户自我服务（**_**S4U2self**_**）：** 如果**服务账户**的_userAccountControl_值包含[TRUSTED_TO_AUTH_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>) (T2A4D)，则它可以代表任何其他用户为自己（该服务）获取TGS。
-- **用户代理服务（**_**S4U2proxy**_**）：** **服务账户**可以代表任何用户为在**msDS-AllowedToDelegateTo**中设置的服务获取TGS。为此，它首先需要从该用户获取TGS，但可以使用S4U2self在请求另一个之前获取该TGS。
+- **Service for User to self (**_**S4U2self**_**):** 如果**服务账户**的_userAccountControl_值包含[TRUSTED_TO_AUTH_FOR_DELEGATION](<https://msdn.microsoft.com/en-us/library/aa772300(v=vs.85).aspx>) (T2A4D)，则它可以代表任何其他用户为自己（该服务）获取TGS。
+- **Service for User to Proxy(**_**S4U2proxy**_**):** **服务账户**可以代表任何用户为在**msDS-AllowedToDelegateTo**中设置的服务获取TGS。为此，它首先需要从该用户获取TGS，但可以使用S4U2self在请求另一个之前获取该TGS。
 
-**注意**：如果用户在AD中标记为‘_账户是敏感的，无法被委派_’，则您将**无法模拟**他们。
+**注意**：如果用户在AD中标记为‘_账户是敏感的，无法被委托_’，您将**无法冒充**他们。
 
-这意味着如果您**破解了服务的哈希**，您可以**模拟用户**并代表他们获得对**配置的服务**的**访问**（可能的**特权提升**）。
+这意味着如果您**破解了服务的哈希**，您可以**冒充用户**并代表他们获得对**配置的服务**的**访问**（可能的**特权提升**）。
 
-此外，您**不仅可以访问用户能够模拟的服务，还可以访问任何服务**，因为SPN（请求的服务名称）没有被检查，只有权限。因此，如果您可以访问**CIFS服务**，您也可以使用Rubeus中的`/altservice`标志访问**HOST服务**。
+此外，您**不仅可以访问用户能够冒充的服务，还可以访问任何服务**，因为SPN（请求的服务名称）没有被检查，只有权限。因此，如果您可以访问**CIFS服务**，您也可以使用Rubeus中的`/altservice`标志访问**HOST服务**。
 
 此外，**DC上的LDAP服务访问**是利用**DCSync**所需的。
 ```bash:Enumerate

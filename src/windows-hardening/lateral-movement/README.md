@@ -2,7 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-有不同的方法在外部系统中执行命令，这里可以找到主要的 Windows 横向移动技术的工作原理说明：
+有不同的方法在外部系统中执行命令，这里可以找到主要Windows横向移动技术的工作原理解释：
 
 - [**PsExec**](psexec-and-winexec.md)
 - [**SmbExec**](smbexec.md)

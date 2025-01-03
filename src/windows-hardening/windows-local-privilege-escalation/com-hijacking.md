@@ -51,7 +51,7 @@ Write-Host
 
 检查输出后，您可以选择一个将在 **每次用户登录时** 执行的任务，例如。
 
-现在在 **HKEY\_**_**CLASSES\_**_**ROOT\CLSID** 以及 HKLM 和 HKCU 中搜索 CLSID **{1936ED8A-BD93-3213-E325-F38D112938EF}**，通常会发现该值在 HKCU 中不存在。
+现在在 **HKEY\_**_**CLASSES\_**_**ROOT\CLSID** 和 HKLM 及 HKCU 中搜索 CLSID **{1936ED8A-BD93-3213-E325-F38D112938EF}**，通常会发现该值在 HKCU 中不存在。
 ```bash
 # Exists in HKCR\CLSID\
 Get-ChildItem -Path "Registry::HKCR\CLSID\{1936ED8A-BD93-3213-E325-F38D112938EF}"

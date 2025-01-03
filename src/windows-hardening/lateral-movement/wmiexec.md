@@ -24,14 +24,14 @@ Get-WmiObject -Class "__Namespace" -Namespace "Root" -List -Recurse 2> $null | s
 # Listing of namespaces within "root\cimv2"
 Get-WmiObject -Class "__Namespace" -Namespace "root\cimv2" -List -Recurse 2> $null | select __Namespace | sort __Namespace
 ```
-可以使用以下命令列出命名空间中的类：
+在命名空间内可以使用以下方式列出类：
 ```bash
 gwmwi -List -Recurse # Defaults to "root\cimv2" if no namespace specified
 gwmi -Namespace "root/microsoft" -List -Recurse
 ```
 ### **类**
 
-知道 WMI 类名，例如 win32_process，以及它所在的命名空间对于任何 WMI 操作都是至关重要的。  
+知道 WMI 类名，例如 win32_process，以及它所在的命名空间，对于任何 WMI 操作都是至关重要的。
 列出以 `win32` 开头的类的命令：
 ```bash
 Get-WmiObject -Recurse -List -class win32* | more # Defaults to "root\cimv2"
@@ -89,15 +89,15 @@ wmic sysaccount list /format:list
 
 ### **手动远程 WMI 查询**
 
-可以通过特定的 WMI 查询隐秘地识别远程计算机上的本地管理员和登录用户。`wmic` 还支持从文本文件读取，以便同时在多个节点上执行命令。
+可以通过特定的 WMI 查询隐秘地识别远程机器上的本地管理员和登录用户。`wmic` 还支持从文本文件读取，以便同时在多个节点上执行命令。
 
 要通过 WMI 远程执行一个进程，例如部署 Empire 代理，使用以下命令结构，成功执行的返回值为 "0"：
 ```bash
 wmic /node:hostname /user:user path win32_process call create "empire launcher string here"
 ```
-该过程展示了WMI远程执行和系统枚举的能力，突显了其在系统管理和渗透测试中的实用性。
+这个过程展示了WMI远程执行和系统枚举的能力，突显了它在系统管理和渗透测试中的实用性。
 
-## 参考
+## 参考文献
 
 - [https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-3-wmi-and-winrm/](https://blog.ropnop.com/using-credentials-to-own-windows-boxes-part-2-psexec-and-services/)
 

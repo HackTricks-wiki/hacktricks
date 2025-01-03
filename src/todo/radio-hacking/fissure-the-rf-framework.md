@@ -6,7 +6,7 @@ FISSURE是一个开源的RF和逆向工程框架，旨在适应所有技能水�
 
 FISSURE中包含的框架和工具旨在检测RF能量的存在，理解信号的特性，收集和分析样本，开发传输和/或注入技术，并制作自定义有效载荷或消息。FISSURE包含一个不断增长的协议和信号信息库，以协助识别、数据包制作和模糊测试。在线归档功能可用于下载信号文件并构建播放列表，以模拟流量和测试系统。
 
-友好的Python代码库和用户界面使初学者能够快速了解涉及RF和逆向工程的流行工具和技术。网络安全和工程教育者可以利用内置材料或利用该框架展示他们自己的实际应用。开发人员和研究人员可以将FISSURE用于日常任务或向更广泛的受众展示他们的前沿解决方案。随着FISSURE在社区中的认知和使用的增长，其能力和所涵盖技术的广度也将随之增加。
+友好的Python代码库和用户界面使初学者能够快速了解涉及RF和逆向工程的流行工具和技术。网络安全和工程教育者可以利用内置材料或利用该框架展示他们自己的实际应用。开发人员和研究人员可以将FISSURE用于日常任务或向更广泛的受众展示他们的前沿解决方案。随着FISSURE在社区中的认知和使用的增长，其能力的范围和所涵盖的技术的广度也将随之增加。
 
 **附加信息**
 
@@ -31,9 +31,9 @@ FISSURE中有三个分支，以便于文件导航并减少代码冗余。Python2
 | Ubuntu 20.04.4 (x64) | Python3\_maint-3.8 |
 |  KDE neon 5.25 (x64) | Python3\_maint-3.8 |
 
-**进行中（beta）**
+**进行中（测试版）**
 
-这些操作系统仍处于beta状态。它们正在开发中，已知缺少多个功能。安装程序中的项目可能与现有程序冲突或在状态被移除之前无法安装。
+这些操作系统仍处于测试版状态。它们正在开发中，已知缺少多个功能。安装程序中的项目可能与现有程序冲突或在状态被移除之前无法安装。
 
 |     操作系统     |    FISSURE分支   |
 | :--------------: | :--------------: |
@@ -115,7 +115,7 @@ FISSURE附带了几本有用的指南，以帮助熟悉不同的技术和技巧�
 * [Lesson7: 数据类型](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson7\_Data\_Types.md)
 * [Lesson8: 自定义GNU Radio模块](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson8\_Custom\_GNU\_Radio\_Blocks.md)
 * [Lesson9: TPMS](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson9\_TPMS.md)
-* [Lesson10: 无线电考试](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson10\_Ham\_Radio\_Exams.md)
+* [Lesson10: 无线电业余考试](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson10\_Ham\_Radio\_Exams.md)
 * [Lesson11: Wi-Fi工具](https://github.com/ainfosec/FISSURE/blob/Python3\_maint-3.8/Lessons/Markdown/Lesson11\_WiFi\_Tools.md)
 
 ## 路线图
@@ -151,7 +151,7 @@ FISSURE附带了几本有用的指南，以帮助熟悉不同的技术和技巧�
 
 ## 合作
 
-请联系Assured Information Security, Inc. (AIS)商业发展部，提出并正式化任何FISSURE合作机会——无论是通过投入时间集成您的软件，还是让AIS的优秀人才为您的技术挑战开发解决方案，或将FISSURE集成到其他平台/应用程序中。
+请联系Assured Information Security, Inc. (AIS)商业发展部门，提出并正式化任何FISSURE合作机会——无论是通过投入时间集成您的软件，还是让AIS的优秀人才为您的技术挑战开发解决方案，或将FISSURE集成到其他平台/应用程序中。
 
 ## 许可证
 

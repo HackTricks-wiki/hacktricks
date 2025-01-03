@@ -4,7 +4,7 @@
 
 ### Custom SSP
 
-[了解什么是 SSP (Security Support Provider) 在这里。](../authentication-credentials-uac-and-efs/#security-support-provider-interface-sspi)\
+[了解什么是 SSP（安全支持提供者）这里。](../authentication-credentials-uac-and-efs/#security-support-provider-interface-sspi)\
 您可以创建您自己的 **SSP** 来 **捕获** 以 **明文** 形式使用的 **凭据** 以访问机器。
 
 #### Mimilib

@@ -13,7 +13,7 @@
 AD Explorer 可以创建 AD 的快照，以便您可以离线检查。\
 它可以用于离线发现漏洞，或比较 AD 数据库在不同时间的不同状态。
 
-您需要提供用户名、密码和连接方向（需要任何 AD 用户）。
+您需要用户名、密码和连接方向（需要任何 AD 用户）。
 
 要创建 AD 的快照，请转到 `File` --> `Create Snapshot` 并输入快照的名称。
 
@@ -28,17 +28,17 @@ AD Explorer 可以创建 AD 的快照，以便您可以离线检查。\
 
 来自 [https://github.com/BloodHoundAD/BloodHound](https://github.com/BloodHoundAD/BloodHound)
 
-> BloodHound 是一个单页面的 Javascript 网络应用程序，建立在 [Linkurious](http://linkurio.us/) 之上，使用 [Electron](http://electron.atom.io/) 编译，并配备一个由 C# 数据收集器提供数据的 [Neo4j](https://neo4j.com/) 数据库。
+> BloodHound 是一个单页面的 Javascript 网络应用程序，建立在 [Linkurious](http://linkurio.us/) 之上，使用 [Electron](http://electron.atom.io/) 编译，并通过 C# 数据收集器提供 [Neo4j](https://neo4j.com/) 数据库。
 
-BloodHound 使用图论来揭示 Active Directory 或 Azure 环境中隐藏的、通常是无意的关系。攻击者可以使用 BloodHound 轻松识别高度复杂的攻击路径，这些路径在其他情况下将无法快速识别。防御者可以使用 BloodHound 识别并消除这些相同的攻击路径。蓝队和红队都可以使用 BloodHound 更深入地理解 Active Directory 或 Azure 环境中的权限关系。
+BloodHound 使用图论揭示 Active Directory 或 Azure 环境中隐藏的、通常是无意的关系。攻击者可以使用 BloodHound 轻松识别高度复杂的攻击路径，这些路径在其他情况下将无法快速识别。防御者可以使用 BloodHound 识别并消除这些相同的攻击路径。蓝队和红队都可以使用 BloodHound 更深入地理解 Active Directory 或 Azure 环境中的权限关系。
 
 因此，[Bloodhound](https://github.com/BloodHoundAD/BloodHound) 是一个惊人的工具，可以自动枚举域，保存所有信息，查找可能的权限提升路径，并使用图形显示所有信息。
 
 BloodHound 由两个主要部分组成：**ingestors** 和 **visualisation application**。
 
-**ingestors** 用于 **枚举域并提取所有信息**，以便可视化应用程序理解的格式。
+**ingestors** 用于 **枚举域并提取所有信息**，以可被可视化应用程序理解的格式。
 
-**visualisation application 使用 neo4j** 来显示所有信息之间的关系，并展示在域中提升权限的不同方式。
+**visualisation application 使用 neo4j** 显示所有信息之间的关系，并展示在域中提升权限的不同方式。
 
 ### 安装
 
@@ -52,7 +52,7 @@ curl -L https://ghst.ly/getbhce | docker compose -f - up
 3. 在 Docker Compose 的终端输出中找到随机生成的密码。  
 4. 在浏览器中，导航到 http://localhost:8080/ui/login。使用用户名 admin 和日志中的随机生成密码登录。  
 
-之后，您需要更改随机生成的密码，您将准备好新的界面，从中可以直接下载 ingestors。  
+之后，您需要更改随机生成的密码，您将拥有新的界面，从中可以直接下载 ingestors。  
 
 ### SharpHound  
 

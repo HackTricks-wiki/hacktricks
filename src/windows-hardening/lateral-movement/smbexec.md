@@ -10,7 +10,7 @@
 
 - 它通过在目标机器上创建一个临时服务（例如，“BTOBTO”）来通过 cmd.exe (%COMSPEC%) 执行命令，而不放置任何二进制文件。
 - 尽管采用隐蔽的方法，但它确实为每个执行的命令生成事件日志，提供了一种非交互式的“shell”。
-- 使用 **Smbexec** 连接的命令如下：
+- 使用 **Smbexec** 连接的命令如下所示：
 ```bash
 smbexec.py WORKGROUP/genericuser:genericpassword@10.10.10.10
 ```

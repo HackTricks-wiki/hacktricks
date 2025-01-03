@@ -17,12 +17,12 @@ Kerberos "Double Hop" 问题出现在攻击者试图在两个跳跃中使用 **K
 
 ### Unconstrained Delegation
 
-如果在 PC 上启用了 **unconstrained delegation**，则不会发生这种情况，因为 **Server** 将 **获取** 每个访问它的用户的 **TGT**。此外，如果使用了不受限制的委托，你可能会 **妥协域控制器**。\
+如果在 PC 上启用了 **unconstrained delegation**，则不会发生这种情况，因为 **Server** 将 **获取** 每个访问它的用户的 **TGT**。此外，如果使用了不受限制的委托，你可能可以 **从中妥协域控制器**。\
 [**更多信息请参见不受限制的委托页面**](unconstrained-delegation.md)。
 
 ### CredSSP
 
-另一种避免此问题的方法是 [**显著不安全**](https://docs.microsoft.com/en-us/powershell/module/microsoft.wsman.management/enable-wsmancredssp?view=powershell-7) 的 **凭据安全支持提供程序**。来自 Microsoft 的说明：
+另一种避免此问题的方法是 [**显著不安全**](https://docs.microsoft.com/en-us/powershell/module/microsoft.wsman.management/enable-wsmancredssp?view=powershell-7) 的 **凭据安全支持提供程序**。来自微软的说明：
 
 > CredSSP 认证将用户凭据从本地计算机委托到远程计算机。这种做法增加了远程操作的安全风险。如果远程计算机被攻破，当凭据被传递给它时，这些凭据可以用于控制网络会话。
 
@@ -77,7 +77,7 @@ winrs -r:http://bizintel:5446 -u:ta\redsuit -p:2600leet hostname
 2. 解压并运行 `Install-sshd.ps1` 脚本。
 3. 添加防火墙规则以打开 22 端口，并验证 SSH 服务是否正在运行。
 
-要解决 `Connection reset` 错误，可能需要更新权限以允许所有人对 OpenSSH 目录的读取和执行访问。
+要解决 `Connection reset` 错误，可能需要更新权限，以允许所有人对 OpenSSH 目录的读取和执行访问。
 ```bash
 icacls.exe "C:\Users\redsuit\Documents\ssh\OpenSSH-Win64" /grant Everyone:RX /T
 ```

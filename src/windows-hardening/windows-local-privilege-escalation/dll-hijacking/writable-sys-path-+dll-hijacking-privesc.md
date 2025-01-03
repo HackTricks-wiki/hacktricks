@@ -18,7 +18,7 @@
 
 ### 查找缺失的Dll
 
-你需要做的第一件事是**识别一个运行权限高于你的进程**，该进程正在尝试**从你可以写入的系统路径加载Dll**。
+你需要做的第一件事是**识别一个运行权限高于你的进程**，该进程试图**从你可以写入的系统路径加载Dll**。
 
 在这种情况下的问题是，这些进程可能已经在运行。要找出哪些Dll缺失，你需要尽快启动procmon（在进程加载之前）。因此，要查找缺失的.dll，请执行以下操作：
 
@@ -61,7 +61,7 @@ $newPath = "$envPath;$folderPath"
 | 诊断策略服务 (DPS)              | Unknown.DLL        | `C:\Windows\System32\svchost.exe -k LocalServiceNoNetwork -p -s DPS` |
 | ???                              | SharedRes.dll      | `C:\Windows\system32\svchost.exe -k UnistackSvcGroup`                |
 
-找到这个之后，我发现了一篇有趣的博客文章，也解释了如何 [**滥用 WptsExtensions.dll 进行权限提升**](https://juggernaut-sec.com/dll-hijacking/#Windows_10_Phantom_DLL_Hijacking_-_WptsExtensionsdll)。这正是我们 **现在要做的**。
+找到这个之后，我发现了一篇有趣的博客文章，它也解释了如何 [**滥用 WptsExtensions.dll 进行权限提升**](https://juggernaut-sec.com/dll-hijacking/#Windows_10_Phantom_DLL_Hijacking_-_WptsExtensionsdll)。这正是我们 **现在要做的**。
 
 ### 利用
 
@@ -71,11 +71,11 @@ $newPath = "$envPath;$folderPath"
 
 > [!WARNING]
 > 请注意，**并非所有服务都以** **`NT AUTHORITY\SYSTEM`** 运行，有些服务也以 **`NT AUTHORITY\LOCAL SERVICE`** 运行，该服务具有 **较少的权限**，你 **将无法创建新用户** 来滥用其权限。\
-> 然而，该用户具有 **`seImpersonate`** 权限，因此你可以使用[ **potato suite 来提升权限**](../roguepotato-and-printspoofer.md)。因此，在这种情况下，反向 shell 是比尝试创建用户更好的选择。
+> 然而，该用户具有 **`seImpersonate`** 权限，因此你可以使用 [**potato suite 来提升权限**](../roguepotato-and-printspoofer.md)。因此，在这种情况下，反向 shell 是比尝试创建用户更好的选择。
 
-在撰写时，**任务调度程序** 服务是以 **Nt AUTHORITY\SYSTEM** 运行的。
+在撰写时，**任务调度程序** 服务以 **Nt AUTHORITY\SYSTEM** 运行。
 
-生成了恶意 Dll 之后（_在我的情况下，我使用了 x64 反向 shell，并且我得到了一个 shell，但防御者杀死了它，因为它来自 msfvenom_），将其保存到可写的系统路径中，命名为 **WptsExtensions.dll**，并 **重启** 计算机（或重启服务，或做任何需要的事情以重新运行受影响的服务/程序）。
+生成了恶意 Dll 后（_在我的情况下，我使用了 x64 反向 shell，并得到了一个 shell，但防御者杀死了它，因为它来自 msfvenom_），将其保存到可写的系统路径中，命名为 **WptsExtensions.dll**，并 **重启** 计算机（或重启服务，或做任何需要的事情以重新运行受影响的服务/程序）。
 
 当服务重新启动时，**dll 应该被加载和执行**（你可以 **重用** **procmon** 技巧来检查 **库是否按预期加载**）。
 

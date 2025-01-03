@@ -3,7 +3,7 @@
 在 ping 响应 TTL：\
 127 = Windows\
 254 = Cisco\
-其他，某些 Linux
+其他的是某些 Linux
 
 $1$- md5\
 $2$或 $2a$ - Blowfish\
@@ -25,7 +25,7 @@ UDP 端口扫描显示被扫描机器上的所有 UDP 端口都是开放的。\
 
 # CTF - 技巧
 
-在 **Windows** 上使用 **Winzip** 搜索文件。\
+在 **Windows** 中使用 **Winzip** 搜索文件。\
 **备用数据流**：_dir /r | find ":$DATA"_\
 ```
 binwalk --dd=".*" <file> #Extract everything
@@ -38,8 +38,8 @@ binwalk -M -e -d=10000 suspicious.pdf #Extract, look inside extracted files and 
 **Basae64**(6—>8) —> 0...9, a...z, A…Z,+,/\
 **Base32**(5 —>8) —> A…Z, 2…7\
 **Base85** (Ascii85, 7—>8) —> 0...9, a...z, A...Z, ., -, :, +, =, ^, !, /, \*, ?, &, <, >, (, ), \[, ], {, }, @, %, $, #\
-**Uuencode** --> Start with "_begin \<mode> \<filename>_" 和奇怪的字符\
-**Xxencoding** --> Start with "_begin \<mode> \<filename>_" 和 B64\
+**Uuencode** --> Start with "_begin \<mode> \<filename>_" and weird chars\
+**Xxencoding** --> Start with "_begin \<mode> \<filename>_" and B64\
 \
 **Vigenere** (频率分析) —> [https://www.guballa.de/vigenere-solver](https://www.guballa.de/vigenere-solver)\
 **Scytale** (字符偏移) —> [https://www.dcode.fr/scytale-cipher](https://www.dcode.fr/scytale-cipher)
@@ -53,6 +53,6 @@ Snow --> 使用空格和制表符隐藏消息
 
 # Characters
 
-%E2%80%AE => RTL 字符 (反向书写有效载荷)
+%E2%80%AE => RTL字符 (反向书写有效载荷)
 
 {{#include ../banners/hacktricks-training.md}}

@@ -33,9 +33,9 @@ Flipper Zero 具有基于 [﻿](https://www.st.com/en/nfc/st25r3916.html#overvie
 ### Read
 
 > [!NOTE]
-> 查找使用的频率信息（也是查找使用的频率的另一种方法）
+> 查找使用的频率信息（也是查找使用频率的另一种方法）
 
-**读取**选项 **在配置的频率上监听**，默认调制为 433.92 AM。如果在读取时 **找到某些内容**，则 **屏幕上会提供信息**。这些信息可以用于将来复制信号。
+**读取**选项 **在配置的频率上监听**，默认调制为 433.92 AM。如果在读取时 **发现了某些内容**，则 **屏幕上会提供信息**。这些信息可以用于将来复制信号。
 
 在使用读取时，可以按 **左按钮** 并 **进行配置**。\
 此时它有 **4 种调制方式**（AM270、AM650、FM328 和 FM476），并存储了 **几个相关频率**：
@@ -88,7 +88,7 @@ Flipper Zero 具有基于 [﻿](https://www.st.com/en/nfc/st25r3916.html#overvie
 
 查看 [https://docs.flipperzero.one/sub-ghz/supported-vendors](https://docs.flipperzero.one/sub-ghz/supported-vendors) 中的列表
 
-### 按区域支持的频率
+### 按地区支持的频率
 
 查看 [https://docs.flipperzero.one/sub-ghz/frequencies](https://docs.flipperzero.one/sub-ghz/frequencies) 中的列表
 

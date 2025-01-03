@@ -4,7 +4,7 @@
 
 ## ASREPRoast
 
-ASREPRoast 是一种安全攻击，利用缺乏 **Kerberos 预身份验证所需属性** 的用户。基本上，这个漏洞允许攻击者向域控制器 (DC) 请求用户的身份验证，而无需用户的密码。然后，DC 会以用户的密码派生密钥加密的消息进行响应，攻击者可以尝试离线破解以发现用户的密码。
+ASREPRoast 是一种安全攻击，利用缺乏 **Kerberos 预身份验证所需属性** 的用户。基本上，这个漏洞允许攻击者向域控制器 (DC) 请求用户的身份验证，而无需用户的密码。然后，DC 用用户的密码派生密钥加密消息进行响应，攻击者可以尝试离线破解以发现用户的密码。
 
 此攻击的主要要求是：
 
@@ -33,7 +33,7 @@ python GetNPUsers.py jurassic.park/triceratops:Sh4rpH0rns -request -format hashc
 Get-ASREPHash -Username VPN114user -verbose #From ASREPRoast.ps1 (https://github.com/HarmJ0y/ASREPRoast)
 ```
 > [!WARNING]
-> 使用 Rubeus 进行 AS-REP Roasting 将生成一个 4768，加密类型为 0x17，预认证类型为 0。
+> 使用 Rubeus 进行 AS-REP Roasting 将生成一个 4768，加密类型为 0x17，预身份验证类型为 0。
 
 ### 破解
 ```bash

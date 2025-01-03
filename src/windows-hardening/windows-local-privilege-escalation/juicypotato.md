@@ -19,19 +19,19 @@ _一个经过糖化的_ [_RottenPotatoNG_](https://github.com/breenmachine/Rotte
 
 [**来自 juicy-potato 的 Readme**](https://github.com/ohpe/juicy-potato/blob/master/README.md)**:**
 
-[RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG) 及其 [变体](https://github.com/decoder-it/lonelypotato) 利用基于 [`BITS`](<https://msdn.microsoft.com/en-us/library/windows/desktop/bb968799(v=vs.85).aspx>) [服务](https://github.com/breenmachine/RottenPotatoNG/blob/4eefb0dd89decb9763f2bf52c7a067440a9ec1f0/RottenPotatoEXE/MSFRottenPotato/MSFRottenPotato.cpp#L126) 的权限提升链，具有在 `127.0.0.1:6666` 上的 MiTM 监听器，并且当你拥有 `SeImpersonate` 或 `SeAssignPrimaryToken` 权限时。在一次 Windows 构建审查中，我们发现一个设置，其中 `BITS` 被故意禁用，端口 `6666` 被占用。
+[RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG) 及其 [变种](https://github.com/decoder-it/lonelypotato) 利用基于 [`BITS`](<https://msdn.microsoft.com/en-us/library/windows/desktop/bb968799(v=vs.85).aspx>) [服务](https://github.com/breenmachine/RottenPotatoNG/blob/4eefb0dd89decb9763f2bf52c7a067440a9ec1f0/RottenPotatoEXE/MSFRottenPotato/MSFRottenPotato.cpp#L126) 的权限提升链，具有在 `127.0.0.1:6666` 上的 MiTM 监听器，并且当你拥有 `SeImpersonate` 或 `SeAssignPrimaryToken` 权限时。在一次 Windows 构建审查中，我们发现了一个故意禁用 `BITS` 的设置，并且端口 `6666` 被占用。
 
 我们决定武器化 [RottenPotatoNG](https://github.com/breenmachine/RottenPotatoNG)：**向 Juicy Potato 打个招呼**。
 
 > 有关理论，请参见 [Rotten Potato - 从服务账户到 SYSTEM 的权限提升](https://foxglovesecurity.com/2016/09/26/rotten-potato-privilege-escalation-from-service-accounts-to-system/) 并跟随链接和参考链。
 
-我们发现，除了 `BITS` 之外，还有几个 COM 服务器可以利用。它们只需要：
+我们发现，除了 `BITS` 之外，还有几个 COM 服务器可以被滥用。它们只需要：
 
 1. 由当前用户实例化，通常是具有模拟权限的“服务用户”
 2. 实现 `IMarshal` 接口
 3. 以提升的用户身份运行（SYSTEM，Administrator，…）
 
-经过一些测试，我们获得并测试了一份在多个 Windows 版本上的 [有趣 CLSID 的广泛列表](http://ohpe.it/juicy-potato/CLSID/)。
+经过一些测试，我们在多个 Windows 版本上获得并测试了一份广泛的 [有趣 CLSID 列表](http://ohpe.it/juicy-potato/CLSID/)。
 
 ### Juicy 细节 <a href="#juicy-details" id="juicy-details"></a>
 
@@ -47,7 +47,7 @@ JuicyPotato 允许你：
 - **要启动的进程** _如果利用成功，启动一个可执行文件或脚本_
 - **进程参数** _自定义启动进程的参数_
 - **RPC 服务器地址** _为了隐蔽的方法，你可以认证到外部 RPC 服务器_
-- **RPC 服务器端口** _如果你想认证到外部服务器并且防火墙阻止端口 `135`，这很有用…_
+- **RPC 服务器端口** _如果你想认证到外部服务器并且防火墙阻止了端口 `135`，这很有用…_
 - **测试模式** _主要用于测试目的，即测试 CLSID。它创建 DCOM 并打印令牌的用户。请参见_ [_这里进行测试_](http://ohpe.it/juicy-potato/Test/)
 
 ### 使用 <a href="#usage" id="usage"></a>
@@ -69,7 +69,7 @@ Optional args:
 ```
 ### 最后思考 <a href="#final-thoughts" id="final-thoughts"></a>
 
-[**来自 juicy-potato Readme**](https://github.com/ohpe/juicy-potato/blob/master/README.md#final-thoughts)**:**
+[**来自 juicy-potato 读我**](https://github.com/ohpe/juicy-potato/blob/master/README.md#final-thoughts)**:**
 
 如果用户拥有 `SeImpersonate` 或 `SeAssignPrimaryToken` 权限，那么你就是 **SYSTEM**。
 

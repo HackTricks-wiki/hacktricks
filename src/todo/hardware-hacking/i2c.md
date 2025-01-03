@@ -43,7 +43,7 @@ Any key to exit
 #Press space
 Found 0 errors.
 ```
-如您在前面的命令行中看到的，它显示找到 0 个错误。这在购买后或刷新固件后确认其正常工作时非常有用。
+如您在前面的命令行中看到的，它显示找到 0 个错误。这在购买后或刷新固件后确认其正常工作非常有用。
 
 要连接到 bus pirate，您可以参考文档：
 
@@ -53,8 +53,8 @@ Found 0 errors.
 
 ![](<../../images/image (964).png>)
 
-为了与 bus pirate 通信，我使用 Tera Term 连接到 pirate bus COM 端口，设置为 Setup --> Serial Port --> Speed 为 115200。\
-在以下通信中，您可以找到如何准备 bus pirate 以进行 I2C 通信，以及如何从内存中写入和读取（注释使用 "#" 出现，不要期待通信中包含该部分）：
+与 bus pirate 通信时，我使用 Tera Term 连接到 pirate bus COM 端口，设置为 Setup --> Serial Port --> Speed 为 115200。\
+在以下通信中，您可以找到如何准备 bus pirate 以进行 I2C 通信，以及如何从内存中写入和读取（注释部分使用 "#"，请不要期待在通信中看到该部分）：
 ```bash
 # Check communication with buspirate
 i

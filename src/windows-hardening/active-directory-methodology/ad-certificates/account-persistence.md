@@ -6,7 +6,7 @@
 
 ## **理解通过证书进行的活动用户凭证盗窃 – PERSIST1**
 
-在用户可以请求允许域身份验证的证书的场景中，攻击者有机会**请求**并**窃取**该证书以**维持在网络上的持久性**。默认情况下，Active Directory中的`User`模板允许此类请求，尽管有时可能会被禁用。
+在用户可以请求允许域身份验证的证书的场景中，攻击者有机会**请求**并**窃取**此证书以**维持持久性**在网络上。默认情况下，Active Directory中的`User`模板允许此类请求，尽管有时可能会被禁用。
 
 使用名为[**Certify**](https://github.com/GhostPack/Certify)的工具，可以搜索启用持久访问的有效证书：
 ```bash
@@ -22,7 +22,7 @@ Certify.exe request /ca:CA-SERVER\CA-NAME /template:TEMPLATE-NAME
 ```bash
 openssl pkcs12 -in cert.pem -keyex -CSP "Microsoft Enhanced Cryptographic Provider v1.0" -export -out cert.pfx
 ```
-`.pfx` 文件可以上传到目标系统，并与一个名为 [**Rubeus**](https://github.com/GhostPack/Rubeus) 的工具一起使用，以请求用户的票据授权票证 (TGT)，从而在证书 **有效**（通常为一年）期间延长攻击者的访问权限：
+`.pfx` 文件可以上传到目标系统，并与一个名为 [**Rubeus**](https://github.com/GhostPack/Rubeus) 的工具一起使用，以请求用户的票据授权票证 (TGT)，从而延长攻击者的访问权限，直到证书 **有效**（通常为一年）：
 ```bash
 Rubeus.exe asktgt /user:harmj0y /certificate:C:\Temp\cert.pfx /password:CertPass!
 ```
@@ -34,11 +34,11 @@ Rubeus.exe asktgt /user:harmj0y /certificate:C:\Temp\cert.pfx /password:CertPass
 ```bash
 Certify.exe request /ca:dc.theshire.local/theshire-DC-CA /template:Machine /machine
 ```
-这种访问权限使攻击者能够以机器帐户身份对 **Kerberos** 进行身份验证，并利用 **S4U2Self** 获取主机上任何服务的 Kerberos 服务票证，从而有效地授予攻击者对该机器的持久访问权限。
+这种访问权限使攻击者能够以机器帐户身份对 **Kerberos** 进行身份验证，并利用 **S4U2Self** 为主机上的任何服务获取 Kerberos 服务票证，从而有效地授予攻击者对该机器的持久访问权限。
 
 ## **通过证书续订扩展持久性 - PERSIST3**
 
-最后讨论的方法涉及利用证书模板的 **有效性** 和 **续订周期**。通过在证书到期之前 **续订** 证书，攻击者可以在不需要额外票证注册的情况下保持对 Active Directory 的身份验证，这可能会在证书授权 (CA) 服务器上留下痕迹。
+最后讨论的方法涉及利用证书模板的 **有效性** 和 **续订期**。通过在证书到期之前 **续订** 证书，攻击者可以在不需要额外票证注册的情况下保持对 Active Directory 的身份验证，这可能会在证书授权 (CA) 服务器上留下痕迹。
 
 这种方法允许一种 **扩展持久性** 方法，通过与 CA 服务器的较少交互来最小化被检测的风险，并避免生成可能会提醒管理员入侵的工件。
 

@@ -4,7 +4,7 @@
 
 ## 什么是 DPAPI
 
-数据保护 API (DPAPI) 主要用于 Windows 操作系统中，用于 **对称加密非对称私钥**，利用用户或系统秘密作为重要的熵来源。这种方法简化了开发人员的加密工作，使他们能够使用从用户登录秘密派生的密钥进行数据加密，或者在系统加密中使用系统的域认证秘密，从而免去开发人员自己管理加密密钥保护的需要。
+数据保护 API (DPAPI) 主要用于 Windows 操作系统中 **对称加密非对称私钥**，利用用户或系统秘密作为重要的熵来源。这种方法简化了开发人员的加密工作，使他们能够使用从用户登录秘密派生的密钥进行数据加密，或者在系统加密中使用系统的域认证秘密，从而免去开发人员自己管理加密密钥保护的需要。
 
 ### DPAPI 保护的数据
 
@@ -13,10 +13,10 @@ DPAPI 保护的个人数据包括：
 - Internet Explorer 和 Google Chrome 的密码和自动完成数据
 - 应用程序（如 Outlook 和 Windows Mail）的电子邮件和内部 FTP 账户密码
 - 共享文件夹、资源、无线网络和 Windows Vault 的密码，包括加密密钥
-- 远程桌面连接、.NET Passport 和各种加密和认证目的的私钥密码
+- 远程桌面连接、.NET Passport 和各种加密与认证目的的私钥密码
 - 由凭据管理器管理的网络密码以及使用 CryptProtectData 的应用程序中的个人数据，如 Skype、MSN messenger 等
 
-## List Vault
+## 列表 Vault
 ```bash
 # From cmd
 vaultcmd /listcreds:"Windows Credentials" /all
@@ -49,7 +49,7 @@ dpapi::cred /in:C:\path\to\encrypted\file /masterkey:<MASTERKEY>
 ```
 ## 主密钥
 
-用于加密用户 RSA 密钥的 DPAPI 密钥存储在 `%APPDATA%\Microsoft\Protect\{SID}` 目录下，其中 {SID} 是该用户的 [**安全标识符**](https://en.wikipedia.org/wiki/Security_Identifier)。**DPAPI 密钥与保护用户私钥的主密钥存储在同一个文件中**。它通常是 64 字节的随机数据。（请注意，此目录受到保护，因此您无法使用 `dir` 从 cmd 列出它，但您可以从 PS 列出它）。
+用于加密用户 RSA 密钥的 DPAPI 密钥存储在 `%APPDATA%\Microsoft\Protect\{SID}` 目录下，其中 {SID} 是该用户的 [**安全标识符**](https://en.wikipedia.org/wiki/Security_Identifier)。**DPAPI 密钥与保护用户私钥的主密钥存储在同一文件中**。它通常是 64 字节的随机数据。（请注意，此目录受到保护，因此您无法使用 `dir` 从 cmd 列出它，但您可以从 PS 列出它）。
 ```bash
 Get-ChildItem C:\Users\USER\AppData\Roaming\Microsoft\Protect\
 Get-ChildItem C:\Users\USER\AppData\Local\Microsoft\Protect
@@ -74,13 +74,13 @@ Get-ChildItem -Hidden C:\Users\USER\AppData\Local\Microsoft\Protect\{SID}
 
 ## HEKATOMB
 
-[**HEKATOMB**](https://github.com/Processus-Thief/HEKATOMB) 是一个自动提取LDAP目录中所有用户和计算机以及通过RPC提取域控制器备份密钥的工具。该脚本将解析所有计算机的IP地址，并在所有计算机上执行smbclient以检索所有用户的所有DPAPI blob，并使用域备份密钥解密所有内容。
+[**HEKATOMB**](https://github.com/Processus-Thief/HEKATOMB) 是一个自动提取LDAP目录中所有用户和计算机的工具，并通过RPC提取域控制器备份密钥。然后，脚本将解析所有计算机的IP地址，并在所有计算机上执行smbclient以检索所有用户的所有DPAPI blob，并使用域备份密钥解密所有内容。
 
 `python3 hekatomb.py -hashes :ed0052e5a66b1c8e942cc9481a50d56 DOMAIN.local/administrator@10.0.0.1 -debug -dnstcp`
 
 通过从LDAP提取的计算机列表，您可以找到每个子网络，即使您不知道它们！
 
-“因为域管理员权限还不够。黑掉他们所有人。”
+“因为域管理员权限还不够。黑掉他们所有。”
 
 ## DonPAPI
 

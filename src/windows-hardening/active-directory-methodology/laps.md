@@ -5,7 +5,7 @@
 
 ## 基本信息
 
-Local Administrator Password Solution (LAPS) 是一个用于管理系统的工具，其中 **管理员密码** 是 **唯一的、随机生成的，并且经常更改**，适用于加入域的计算机。这些密码安全地存储在 Active Directory 中，仅对通过访问控制列表 (ACL) 授予权限的用户可访问。通过使用 **Kerberos 版本 5** 和 **高级加密标准 (AES)** 确保从客户端到服务器的密码传输安全。
+Local Administrator Password Solution (LAPS) 是一个用于管理系统的工具，其中 **管理员密码** 是 **唯一的、随机生成的，并且经常更改**，应用于域加入的计算机。这些密码安全地存储在 Active Directory 中，仅对通过访问控制列表 (ACL) 授予权限的用户可访问。通过使用 **Kerberos 版本 5** 和 **高级加密标准 (AES)** 确保从客户端到服务器的密码传输安全。
 
 在域的计算机对象中，LAPS 的实施导致添加两个新属性：**`ms-mcs-AdmPwd`** 和 **`ms-mcs-AdmPwdExpirationTime`**。这些属性分别存储 **明文管理员密码** 和 **其过期时间**。
 

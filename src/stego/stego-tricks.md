@@ -89,36 +89,36 @@ Steghide 方便地在 `JPEG, BMP, WAV, 和 AU` 文件中隐藏数据，能够嵌
 ```bash
 stegcracker <file> [<wordlist>]
 ```
-### **zsteg用于PNG和BMP文件**
+### **zsteg for PNG and BMP Files**
 
-zsteg专注于揭示PNG和BMP文件中的隐藏数据。安装通过`gem install zsteg`完成，其[源代码在GitHub上](https://github.com/zed-0xff/zsteg)。
+zsteg 专注于揭示 PNG 和 BMP 文件中的隐藏数据。安装通过 `gem install zsteg` 完成，其 [源代码在 GitHub](https://github.com/zed-0xff/zsteg)。
 
 **命令：**
 
-- `zsteg -a file`对文件应用所有检测方法。
-- `zsteg -E file`指定用于数据提取的有效载荷。
+- `zsteg -a file` 对文件应用所有检测方法。
+- `zsteg -E file` 指定用于数据提取的有效载荷。
 
-### **StegoVeritas和Stegsolve**
+### **StegoVeritas and Stegsolve**
 
-**stegoVeritas**检查元数据，执行图像转换，并应用LSB暴力破解等功能。使用`stegoveritas.py -h`获取完整选项列表，使用`stegoveritas.py stego.jpg`执行所有检查。
+**stegoVeritas** 检查元数据，执行图像转换，并应用 LSB 暴力破解等功能。使用 `stegoveritas.py -h` 获取完整选项列表，使用 `stegoveritas.py stego.jpg` 执行所有检查。
 
-**Stegsolve**应用各种颜色滤镜以揭示图像中的隐藏文本或消息。它可在[GitHub上](https://github.com/eugenekolo/sec-tools/tree/master/stego/stegsolve/stegsolve)获取。
+**Stegsolve** 应用各种颜色滤镜以揭示图像中的隐藏文本或消息。它可在 [GitHub](https://github.com/eugenekolo/sec-tools/tree/master/stego/stegsolve/stegsolve) 上获取。
 
-### **FFT用于隐藏内容检测**
+### **FFT for Hidden Content Detection**
 
-快速傅里叶变换（FFT）技术可以揭示图像中的隐蔽内容。实用资源包括：
+快速傅里叶变换 (FFT) 技术可以揭示图像中的隐藏内容。 有用的资源包括：
 
-- [EPFL演示](http://bigwww.epfl.ch/demo/ip/demos/FFT/)
+- [EPFL Demo](http://bigwww.epfl.ch/demo/ip/demos/FFT/)
 - [Ejectamenta](https://www.ejectamenta.com/Fourifier-fullscreen/)
-- [GitHub上的FFTStegPic](https://github.com/0xcomposure/FFTStegPic)
+- [FFTStegPic on GitHub](https://github.com/0xcomposure/FFTStegPic)
 
-### **Stegpy用于音频和图像文件**
+### **Stegpy for Audio and Image Files**
 
-Stegpy允许将信息嵌入图像和音频文件，支持PNG、BMP、GIF、WebP和WAV等格式。它可在[GitHub上](https://github.com/dhsdshdhk/stegpy)获取。
+Stegpy 允许将信息嵌入图像和音频文件，支持 PNG、BMP、GIF、WebP 和 WAV 等格式。它可在 [GitHub](https://github.com/dhsdshdhk/stegpy) 上获取。
 
-### **Pngcheck用于PNG文件分析**
+### **Pngcheck for PNG File Analysis**
 
-要分析PNG文件或验证其真实性，请使用：
+要分析 PNG 文件或验证其真实性，请使用：
 ```bash
 apt-get install pngcheck
 pngcheck stego.png
@@ -184,7 +184,7 @@ math.sqrt(2500) #50
 
 ### **盲文翻译**
 
-对于盲文翻译，[Branah Braille Translator](https://www.branah.com/braille-translator) 是一个优秀的资源。
+对于盲文翻译，[Branah Braille Translator](https://www.branah.com/braille-translator) 是一个很好的资源。
 
 ## **参考文献**
 

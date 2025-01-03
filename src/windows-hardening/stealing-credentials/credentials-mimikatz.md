@@ -2,9 +2,9 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-**本页面基于 [adsecurity.org](https://adsecurity.org/?page_id=1821) 的内容**。请查看原文以获取更多信息！
+**本页面基于 [adsecurity.org](https://adsecurity.org/?page_id=1821) 的内容**。查看原文以获取更多信息！
 
-## 内存中的 LM 和明文
+## LM 和内存中的明文
 
 从 Windows 8.1 和 Windows Server 2012 R2 开始，实施了重要措施以防止凭据盗窃：
 
@@ -14,7 +14,7 @@
 1. 修改注册表 _HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa_，将 `RunAsPPL` 设置为 `dword:00000001`。
 2. 实施一个强制此注册表更改的组策略对象（GPO），以在受管理设备上执行。
 
-尽管有这些保护措施，像 Mimikatz 这样的工具仍然可以使用特定驱动程序绕过 LSA 保护，尽管此类操作可能会被记录在事件日志中。
+尽管有这些保护措施，像 Mimikatz 这样的工具仍然可以使用特定驱动程序绕过 LSA 保护，尽管此类行为可能会被记录在事件日志中。
 
 ### 反制 SeDebugPrivilege 移除
 
@@ -45,7 +45,7 @@ sc start TrustedInstaller
 - 示例：`mimikatz "privilege::debug" "event::drop" exit`
 
 - `privilege::debug` 命令确保 Mimikatz 以必要的权限操作，以修改系统服务。
-- `event::drop` 命令随后修补事件日志服务。
+- 然后，`event::drop` 命令修补事件日志服务。
 
 ### Kerberos 票证攻击
 
@@ -72,7 +72,7 @@ Silver Tickets 授予对特定服务的访问权限。关键命令和参数：
 
 - 命令：类似于 Golden Ticket，但针对特定服务。
 - 参数：
-- `/service`: 目标服务（例如，cifs，http）。
+- `/service`：要针对的服务（例如，cifs，http）。
 - 其他参数类似于 Golden Ticket。
 
 示例：
@@ -114,7 +114,7 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 - **清除票证**：
 - 命令：`kerberos::purge`
 - 清除会话中的所有 Kerberos 票证。
-- 在使用票证操作命令之前很有用，以避免冲突。
+- 在使用票证操作命令之前清除，以避免冲突。
 
 ### Active Directory 篡改
 
@@ -152,7 +152,7 @@ mimikatz "kerberos::golden /domain:child.example.com /sid:S-1-5-21-123456789-123
 
 ### 杂项
 
-- **MISC::Skeleton**：在 DC 上向 LSASS 注入后门。
+- **MISC::Skeleton**：在 DC 的 LSASS 中注入后门。
 - `mimikatz "privilege::debug" "misc::skeleton" exit`
 
 ### 权限提升

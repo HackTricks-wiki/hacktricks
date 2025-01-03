@@ -17,9 +17,9 @@
 
 尽管存在这些限制，但通过利用 **RpcEptMapper** 服务的注册表结构中的 **Performance** 子项，识别出潜在的权限提升机会，该子项默认情况下不存在。这可能使 DLL 注册和性能监控成为可能。
 
-查阅了关于 **Performance** 子项及其在性能监控中的使用的文档，开发了一个概念验证 DLL。该 DLL 演示了 **OpenPerfData**、**CollectPerfData** 和 **ClosePerfData** 函数的实现，通过 **rundll32** 测试，确认其操作成功。
+查阅了有关 **Performance** 子项及其在性能监控中使用的文档，开发了一个概念验证 DLL。该 DLL 演示了 **OpenPerfData**、**CollectPerfData** 和 **ClosePerfData** 函数的实现，通过 **rundll32** 测试，确认其操作成功。
 
-目标是强制 **RPC Endpoint Mapper service** 加载精心制作的 Performance DLL。观察发现，通过 PowerShell 执行与性能数据相关的 WMI 类查询会导致创建日志文件，从而在 **LOCAL SYSTEM** 上下文中执行任意代码，从而授予提升的权限。
+目标是强迫 **RPC Endpoint Mapper service** 加载精心制作的 Performance DLL。观察发现，通过 PowerShell 执行与性能数据相关的 WMI 类查询会生成一个日志文件，从而使得在 **LOCAL SYSTEM** 上下文中执行任意代码成为可能，从而授予提升的权限。
 
 强调了该漏洞的持久性和潜在影响，突显其在后期利用策略、横向移动和规避 antivirus/EDR 系统中的相关性。
 

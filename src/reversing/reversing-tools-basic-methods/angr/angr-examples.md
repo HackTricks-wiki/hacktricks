@@ -201,7 +201,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-在这个场景中，输入是通过 `scanf("%u %u")` 获取的，给定的值是 `"1 1"`，因此栈中的值 **`0x00000001`** 来自 **用户输入**。你可以看到这些值从 `$ebp - 8` 开始。因此，在代码中我们 **从 `$esp` 中减去了 8 字节（因为那时 `$ebp` 和 `$esp` 的值是相同的）**，然后我们推送了 BVS。
+在这个场景中，输入是通过 `scanf("%u %u")` 获取的，给定的值是 `"1 1"`，因此栈中的值 **`0x00000001`** 来自 **用户输入**。你可以看到这些值从 `$ebp - 8` 开始。因此，在代码中我们 **从 `$esp` 中减去了 8 字节（因为那时 `$ebp` 和 `$esp` 的值相同）**，然后我们推送了 BVS。
 
 ![](<../../../images/image (136).png>)
 
@@ -266,7 +266,7 @@ raise Exception('Could not find the solution')
 if __name__ == '__main__':
 main(sys.argv)
 ```
-### 动态内存值（Malloc）
+### 动态内存值 (Malloc)
 ```python
 import angr
 import claripy
@@ -386,7 +386,7 @@ main(sys.argv)
 > ```python
 >   # Hello world, my name is John.
 >   # ^                       ^
->   # ^ 地址 0             ^ 地址 24 (计算字符数)
+>   # ^ 地址 0                ^ 地址 24 (计算字符数)
 >   # 为了在内存中表示这一点，我们希望将字符串写入
 >   # 文件的开头：
 >   #
@@ -406,8 +406,8 @@ main(sys.argv)
 ### 应用约束
 
 > [!NOTE]
-> 有时，简单的人类操作，比如逐个字符比较两个长度为 16 的单词（循环），**对** **angr** **的成本**很高，因为它需要生成**指数级**的分支，因为它每个 if 生成 1 个分支：`2^16`\
-> 因此，更容易**让 angr 回到一个之前的点**（在那里真正困难的部分已经完成）并**手动设置这些约束**。
+> 有时，简单的人类操作，比如逐个字符比较两个长度为 16 的单词（循环），**对 angr 的成本**很高，因为它需要生成**指数级**的分支，因为它每个 if 生成 1 个分支：`2^16`\
+> 因此，**让 angr 回到之前的点**（真实的困难部分已经完成）并**手动设置这些约束**会更容易。
 ```python
 # After perform some complex poperations to the input the program checks
 # char by char the password against another password saved, like in the snippet:
@@ -482,7 +482,7 @@ main(sys.argv)
 > 在某些情况下，您可以激活 **veritesting**，这将合并相似的状态，以节省无用的分支并找到解决方案： `simulation = project.factory.simgr(initial_state, veritesting=True)`
 
 > [!NOTE]
-> 在这些情况下，您还可以 **hook 函数，给 angr 一些它可以更容易理解的东西**。
+> 在这些情况下，您还可以做的另一件事是 **hook 函数，给 angr 提供更容易理解的内容**。
 
 ### Simulation Managers
 

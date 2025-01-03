@@ -26,7 +26,7 @@ $a.rulecollections
 
 ### 绕过
 
-- 有用的 **可写文件夹** 用于绕过 AppLocker 策略：如果 AppLocker 允许在 `C:\Windows\System32` 或 `C:\Windows` 内执行任何内容，则可以使用 **可写文件夹** 来 **绕过此限制**。
+- 有用的 **可写文件夹** 以绕过 AppLocker 策略：如果 AppLocker 允许在 `C:\Windows\System32` 或 `C:\Windows` 内执行任何内容，则可以使用 **可写文件夹** 来 **绕过此限制**。
 ```
 C:\Windows\System32\Microsoft\Crypto\RSA\MachineKeys
 C:\Windows\System32\spool\drivers\color
@@ -36,7 +36,7 @@ C:\windows\tracing
 - 常见的 **trusted** [**"LOLBAS's"**](https://lolbas-project.github.io/) 二进制文件也可以用于绕过 AppLocker。
 - **编写不当的规则也可能被绕过**
 - 例如，**`<FilePathCondition Path="%OSDRIVE%*\allowed*"/>`**，您可以在任何地方创建一个 **名为 `allowed` 的文件夹**，它将被允许。
-- 组织通常还会专注于 **阻止 `%System32%\WindowsPowerShell\v1.0\powershell.exe` 可执行文件**，但忘记了 **其他** [**PowerShell 可执行文件位置**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations)，例如 `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` 或 `PowerShell_ISE.exe`。
+- 组织通常还专注于 **阻止 `%System32%\WindowsPowerShell\v1.0\powershell.exe` 可执行文件**，但忘记了 **其他** [**PowerShell 可执行文件位置**](https://www.powershelladmin.com/wiki/PowerShell_Executables_File_System_Locations)，例如 `%SystemRoot%\SysWOW64\WindowsPowerShell\v1.0\powershell.exe` 或 `PowerShell_ISE.exe`。
 - **DLL 强制执行很少启用**，因为它可能对系统造成额外负担，并且需要大量测试以确保不会出现故障。因此，使用 **DLL 作为后门将有助于绕过 AppLocker**。
 - 您可以使用 [**ReflectivePick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) 或 [**SharpPick**](https://github.com/PowerShellEmpire/PowerTools/tree/master/PowerPick) 在任何进程中 **执行 Powershell** 代码并绕过 AppLocker。有关更多信息，请查看: [https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode](https://hunter2.gitbook.io/darthsidious/defense-evasion/bypassing-applocker-and-powershell-contstrained-language-mode)。
 
@@ -58,8 +58,8 @@ LSA 将是 **检查** 提供的凭据的 **SAM** 文件（用于本地登录）�
 
 LSA 可以在磁盘上保存一些凭据：
 
-- Active Directory 的计算机帐户密码（无法访问的域控制器）。
-- Windows 服务帐户的密码
+- Active Directory 的计算机账户密码（无法访问的域控制器）。
+- Windows 服务账户的密码
 - 计划任务的密码
 - 更多（IIS 应用程序的密码...）
 
@@ -69,7 +69,7 @@ LSA 可以在磁盘上保存一些凭据：
 
 ## Defender
 
-[**Microsoft Defender**](https://en.wikipedia.org/wiki/Microsoft_Defender) 是 Windows 10 和 Windows 11 以及 Windows Server 版本中可用的防病毒软件。它 **阻止** 常见的渗透测试工具，如 **`WinPEAS`**。但是，有方法可以 **绕过这些保护**。
+[**Microsoft Defender**](https://en.wikipedia.org/wiki/Microsoft_Defender) 是 Windows 10 和 Windows 11 以及 Windows Server 版本中可用的防病毒软件。它 **阻止** 常见的渗透测试工具，如 **`WinPEAS`**。然而，有一些方法可以 **绕过这些保护**。
 
 ### 检查
 
@@ -130,7 +130,7 @@ EFS 通过加密保护文件，使用称为 **文件加密密钥 (FEK)** 的 **�
 
 #### 成为权限系统
 
-这种方式要求 **受害者用户** 在主机内 **运行** 一个 **进程**。如果是这种情况，使用 `meterpreter` 会话可以模拟用户进程的令牌（`incognito` 中的 `impersonate_token`）。或者您可以直接 `migrate` 到用户的进程。
+这种方式要求 **受害者用户** 在主机内 **运行** 一个 **进程**。如果是这种情况，使用 `meterpreter` 会话可以模拟用户进程的令牌 (`impersonate_token` 来自 `incognito`)。或者您可以直接 `migrate` 到用户的进程。
 
 #### 知道用户密码
 
@@ -146,7 +146,7 @@ EFS 通过加密保护文件，使用称为 **文件加密密钥 (FEK)** 的 **�
 - **计划任务能力**：与管理服务账户不同，gMSA 支持运行计划任务。
 - **简化 SPN 管理**：当计算机的 sAMaccount 详细信息或 DNS 名称发生更改时，系统会自动更新服务主体名称 (SPN)，简化 SPN 管理。
 
-gMSA 的密码存储在 LDAP 属性 _**msDS-ManagedPassword**_ 中，并由域控制器 (DC) 每 30 天自动重置一次。此密码是一个加密数据块，称为 [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e)，只能由授权管理员和安装 gMSA 的服务器检索，从而确保安全环境。要访问此信息，需要安全连接，例如 LDAPS，或者连接必须经过“密封和安全”认证。
+gMSA 的密码存储在 LDAP 属性 _**msDS-ManagedPassword**_ 中，并由域控制器 (DC) 每 30 天自动重置。此密码是一个加密数据块，称为 [MSDS-MANAGEDPASSWORD_BLOB](https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-adts/a9019740-3d73-46ef-a9ae-3ea8eb86ac2e)，只能由授权管理员和安装 gMSA 的服务器检索，从而确保安全环境。要访问此信息，需要安全连接，如 LDAPS，或连接必须经过“密封和安全”认证。
 
 ![https://cube0x0.github.io/Relaying-for-gMSA/](../images/asd1.png)
 
@@ -181,7 +181,7 @@ $ExecutionContext.SessionState.LanguageMode
 Powershell -version 2
 ```
 在当前的Windows中，该绕过方法将无法工作，但您可以使用[ **PSByPassCLM**](https://github.com/padovah4ck/PSByPassCLM)。\
-**要编译它，您可能需要** **添加引用** -> _浏览_ -> _浏览_ -> 添加 `C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0\31bf3856ad364e35\System.Management.Automation.dll` 并**将项目更改为 .Net4.5**。
+**要编译它，您可能需要** **添加一个引用** -> _浏览_ -> _浏览_ -> 添加 `C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0\31bf3856ad364e35\System.Management.Automation.dll` 并**将项目更改为 .Net4.5**。
 
 #### 直接绕过：
 ```bash
@@ -221,7 +221,7 @@ $command = "Write-Host 'My voice is my passport, verify me.'" $bytes = [System.T
 
 是用于验证用户的 API。
 
-SSPI 将负责为想要通信的两台机器找到合适的协议。首选方法是 Kerberos。然后，SSPI 将协商使用哪个身份验证协议，这些身份验证协议称为安全支持提供者 (SSP)，以 DLL 形式位于每台 Windows 机器内部，并且两台机器必须支持相同的协议才能进行通信。
+SSPI 将负责为想要通信的两台机器找到合适的协议。首选方法是 Kerberos。然后，SSPI 将协商使用哪个身份验证协议，这些身份验证协议称为安全支持提供者 (SSP)，以 DLL 形式位于每台 Windows 机器内部，且两台机器必须支持相同的协议才能进行通信。
 
 ### 主要 SSPs
 

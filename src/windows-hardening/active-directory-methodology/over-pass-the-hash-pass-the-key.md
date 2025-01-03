@@ -5,9 +5,9 @@
 
 ## Overpass The Hash/Pass The Key (PTK)
 
-**Overpass The Hash/Pass The Key (PTK)** 攻击旨在传统 NTLM 协议受到限制且 Kerberos 认证优先的环境中。此攻击利用用户的 NTLM 哈希或 AES 密钥来请求 Kerberos 票证，从而实现对网络内资源的未经授权访问。
+**Overpass The Hash/Pass The Key (PTK)** 攻击旨在传统 NTLM 协议受到限制且 Kerberos 认证占主导地位的环境中。此攻击利用用户的 NTLM 哈希或 AES 密钥来请求 Kerberos 票证，从而实现对网络内资源的未经授权访问。
 
-要执行此攻击，第一步涉及获取目标用户帐户的 NTLM 哈希或密码。在获取此信息后，可以为该帐户获取票证授予票证 (TGT)，允许攻击者访问用户拥有权限的服务或机器。
+要执行此攻击，第一步涉及获取目标用户帐户的 NTLM 哈希或密码。获得此信息后，可以为该帐户获取票证授予票证 (TGT)，使攻击者能够访问用户拥有权限的服务或机器。
 
 该过程可以通过以下命令启动：
 ```bash
@@ -24,7 +24,7 @@ python psexec.py jurassic.park/velociraptor@labwws02.jurassic.park -k -no-pass
 .\Rubeus.exe asktgt /domain:jurassic.park /user:velociraptor /rc4:2a3de7fe356ee524cc9f3d579f2e0aa7 /ptt
 .\PsExec.exe -accepteula \\labwws02.jurassic.park cmd
 ```
-该方法与 **Pass the Key** 方法相似，重点在于直接控制和利用票证进行身份验证。需要注意的是，TGT 请求的发起会触发事件 `4768: A Kerberos authentication ticket (TGT) was requested`，这表明默认使用 RC4-HMAC，尽管现代 Windows 系统更倾向于使用 AES256。
+该方法镜像了 **Pass the Key** 方法，重点在于直接控制和利用票证进行身份验证。需要注意的是，TGT 请求的发起会触发事件 `4768: A Kerberos authentication ticket (TGT) was requested`，这表明默认使用 RC4-HMAC，尽管现代 Windows 系统更倾向于使用 AES256。
 
 为了符合操作安全并使用 AES256，可以应用以下命令：
 ```bash

@@ -16,7 +16,7 @@ reg query HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest /v Use
 ```
 ## LSA 保护
 
-从 **Windows 8.1** 开始，Microsoft 增强了 LSA 的安全性，以 **阻止不受信任进程的未经授权的内存读取或代码注入**。这一增强阻碍了像 `mimikatz.exe sekurlsa:logonpasswords` 这样的命令的典型功能。要 **启用这种增强保护**，应将 _**HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA**_ 中的 _**RunAsPPL**_ 值调整为 1：
+从 **Windows 8.1** 开始，Microsoft 增强了 LSA 的安全性，以 **阻止不受信任进程的未经授权的内存读取或代码注入**。此增强功能妨碍了像 `mimikatz.exe sekurlsa:logonpasswords` 这样的命令的典型功能。要 **启用此增强保护**，应将 _**HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA**_ 中的 _**RunAsPPL**_ 值调整为 1：
 ```
 reg query HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA /v RunAsPPL
 ```
@@ -30,7 +30,7 @@ reg query HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\LSA /v RunAsPPL
 
 **凭据保护**是 **Windows 10（企业版和教育版）** 独有的功能，通过 **虚拟安全模式（VSM）** 和 **基于虚拟化的安全性（VBS）** 增强机器凭据的安全性。它利用 CPU 虚拟化扩展将关键进程隔离在受保护的内存空间中，远离主操作系统的触及。这种隔离确保即使是内核也无法访问 VSM 中的内存，有效保护凭据免受 **pass-the-hash** 等攻击。**本地安全机构（LSA）** 在这个安全环境中作为信任组件运行，而主操作系统中的 **LSASS** 进程仅充当与 VSM 的 LSA 的通信者。
 
-默认情况下，**凭据保护** 并未激活，需要在组织内手动激活。它对于增强抵御像 **Mimikatz** 这样的工具的安全性至关重要，这些工具在提取凭据的能力上受到限制。然而，仍然可以通过添加自定义 **安全支持提供程序（SSP）** 来利用漏洞，在登录尝试期间捕获明文凭据。
+默认情况下，**凭据保护** 并未激活，需要在组织内手动激活。它对于增强抵御像 **Mimikatz** 这样的工具的安全性至关重要，这些工具在提取凭据时受到限制。然而，仍然可以通过添加自定义 **安全支持提供程序（SSP）** 来利用漏洞，在登录尝试期间捕获明文凭据。
 
 要验证 **凭据保护** 的激活状态，可以检查注册表项 _**LsaCfgFlags**_，位于 _**HKLM\System\CurrentControlSet\Control\LSA**_ 下。值为 "**1**" 表示激活并带有 **UEFI 锁**，"**2**" 表示没有锁，"**0**" 表示未启用。此注册表检查虽然是一个强有力的指示，但并不是启用凭据保护的唯一步骤。有关启用此功能的详细指导和 PowerShell 脚本可在线获取。
 ```powershell
@@ -64,7 +64,7 @@ Windows 通过 **本地安全机构 (LSA)** 保护 **域凭据**，支持使用 
 ```bash
 reg query "HKEY_LOCAL_MACHINE\SOFTWARE\MICROSOFT\WINDOWS NT\CURRENTVERSION\WINLOGON" /v CACHEDLOGONSCOUNT
 ```
-访问这些缓存凭据的权限受到严格控制，只有 **SYSTEM** 账户拥有查看它们所需的权限。需要访问此信息的管理员必须以 SYSTEM 用户权限进行操作。凭据存储在：`HKEY_LOCAL_MACHINE\SECURITY\Cache`
+访问这些缓存凭据的权限受到严格控制，只有 **SYSTEM** 账户拥有查看它们所需的权限。需要访问此信息的管理员必须以 SYSTEM 用户权限进行操作。凭据存储在： `HKEY_LOCAL_MACHINE\SECURITY\Cache`
 
 **Mimikatz** 可以通过命令 `lsadump::cache` 提取这些缓存凭据。
 
@@ -77,7 +77,7 @@ reg query "HKEY_LOCAL_MACHINE\SOFTWARE\MICROSOFT\WINDOWS NT\CURRENTVERSION\WINLO
 - **凭据委派 (CredSSP)**：即使 **允许委派默认凭据** 的组策略设置已启用，受保护用户的明文凭据也不会被缓存。
 - **Windows Digest**：从 **Windows 8.1 和 Windows Server 2012 R2** 开始，系统将不会缓存受保护用户的明文凭据，无论 Windows Digest 状态如何。
 - **NTLM**：系统不会缓存受保护用户的明文凭据或 NT 单向函数 (NTOWF)。
-- **Kerberos**：对于受保护用户，Kerberos 认证不会生成 **DES** 或 **RC4 密钥**，也不会缓存明文凭据或超出初始票证授予票证 (TGT) 获取的长期密钥。
+- **Kerberos**：对于受保护用户，Kerberos 认证不会生成 **DES** 或 **RC4 密钥**，也不会缓存明文凭据或超出初始票证授予票 (TGT) 获取的长期密钥。
 - **离线登录**：受保护用户在登录或解锁时不会创建缓存验证器，这意味着这些账户不支持离线登录。
 
 这些保护措施在 **受保护用户组** 的成员登录设备时立即激活。这确保了关键安全措施到位，以防止各种凭据泄露方法。

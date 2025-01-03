@@ -52,8 +52,8 @@ Get-ObjectAcl -DistinguishedName "dc=dollarcorp,dc=moneycorp,dc=local" -ResolveG
 ### 缓解措施
 
 - 安全事件 ID 4662（对象的审计策略必须启用）– 对一个对象执行了操作
-- 安全事件 ID 5136（对象的审计策略必须启用）– 目录服务对象已被修改
-- 安全事件 ID 4670（对象的审计策略必须启用）– 对象的权限已被更改
+- 安全事件 ID 5136（对象的审计策略必须启用）– 目录服务对象被修改
+- 安全事件 ID 4670（对象的审计策略必须启用）– 对象的权限被更改
 - AD ACL 扫描器 - 创建和比较 ACL 的创建报告。 [https://github.com/canix1/ADACLScanner](https://github.com/canix1/ADACLScanner)
 
 ## 参考文献

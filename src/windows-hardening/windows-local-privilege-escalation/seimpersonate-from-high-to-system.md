@@ -154,7 +154,7 @@ return 0;
 [-] CreateProcessWithTokenW Error: 1326
 ```
 这意味着即使您在高完整性级别运行，**您也没有足够的权限**。\
-让我们使用 **processes explorer**（或者您也可以使用 process hacker）检查当前对 `svchost.exe` 进程的管理员权限：
+让我们检查当前管理员对 `svchost.exe` 进程的权限，使用 **processes explorer**（或者您也可以使用 process hacker）：
 
 1. 选择一个 `svchost.exe` 进程
 2. 右键点击 --> 属性

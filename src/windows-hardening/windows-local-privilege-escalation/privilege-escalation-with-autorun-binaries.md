@@ -1,6 +1,8 @@
-# 使用 Autoruns 提权
+# 使用 Autoruns 提升权限
 
 {{#include ../../banners/hacktricks-training.md}}
+
+
 
 ## WMIC
 
@@ -24,7 +26,7 @@ schtasks /Create /RU "SYSTEM" /SC ONLOGON /TN "SchedPE" /TR "cmd /c net localgro
 ```
 ## 文件夹
 
-所有位于 **启动文件夹** 的二进制文件将在启动时执行。常见的启动文件夹如下所列，但启动文件夹在注册表中指示。[阅读此以了解更多信息。](privilege-escalation-with-autorun-binaries.md#startup-path)
+所有位于 **启动文件夹中的二进制文件将在启动时执行**。常见的启动文件夹如下所列，但启动文件夹在注册表中指示。[阅读此内容以了解更多信息。](privilege-escalation-with-autorun-binaries.md#startup-path)
 ```bash
 dir /b "C:\Documents and Settings\All Users\Start Menu\Programs\Startup" 2>nul
 dir /b "C:\Documents and Settings\%username%\Start Menu\Programs\Startup" 2>nul
@@ -72,15 +74,15 @@ Get-ChildItem "C:\Users\$env:USERNAME\Start Menu\Programs\Startup"
 - `HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnceEx`
 - `HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\RunOnceEx`
 
-在 Windows Vista 及更高版本中，**Run** 和 **RunOnce** 注册表键不会自动生成。这些键中的条目可以直接启动程序或将其指定为依赖项。例如，要在登录时加载 DLL 文件，可以使用 **RunOnceEx** 注册表键以及一个 "Depend" 键。这通过添加一个注册表项来演示在系统启动期间执行 "C:\temp\evil.dll"：
+在 Windows Vista 及更高版本中，**Run** 和 **RunOnce** 注册表键不会自动生成。这些键中的条目可以直接启动程序或将其指定为依赖项。例如，要在登录时加载 DLL 文件，可以使用 **RunOnceEx** 注册表键以及一个 "Depend" 键。这通过添加一个注册表项来执行 "C:\temp\evil.dll" 在系统启动期间来演示：
 ```
 reg add HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnceEx\\0001\\Depend /v 1 /d "C:\\temp\\evil.dll"
 ```
 > [!NOTE]
-> **利用 1**：如果您可以在 **HKLM** 中的任何提到的注册表项内写入，则当其他用户登录时，您可以提升权限。
+> **Exploit 1**: 如果您可以在 **HKLM** 中的任何提到的注册表项内写入，则当其他用户登录时，您可以提升权限。
 
 > [!NOTE]
-> **利用 2**：如果您可以覆盖 **HKLM** 中任何注册表项上指示的任何二进制文件，则当其他用户登录时，您可以用后门修改该二进制文件并提升权限。
+> **Exploit 2**: 如果您可以覆盖 **HKLM** 中任何注册表项上指示的任何二进制文件，则当其他用户登录时，您可以用后门修改该二进制文件并提升权限。
 ```bash
 #CMD
 reg query HKLM\Software\Microsoft\Windows\CurrentVersion\Run
@@ -162,7 +164,7 @@ Get-ItemProperty -Path 'Registry::HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion
 
 `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon`
 
-通常，**Userinit** 键设置为 **userinit.exe**。然而，如果此键被修改，指定的可执行文件将在用户登录时由 **Winlogon** 启动。同样，**Shell** 键旨在指向 **explorer.exe**，这是 Windows 的默认外壳。
+通常，**Userinit** 键被设置为 **userinit.exe**。然而，如果此键被修改，指定的可执行文件将在用户登录时由 **Winlogon** 启动。同样，**Shell** 键旨在指向 **explorer.exe**，这是 Windows 的默认外壳。
 ```bash
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "Userinit"
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "Shell"
@@ -188,28 +190,28 @@ Get-ItemProperty -Path 'Registry::HKCU\Software\Microsoft\Windows\CurrentVersion
 
 ### 更改安全模式命令提示符
 
-在 Windows 注册表的 `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot` 下，默认设置有一个 **`AlternateShell`** 值为 `cmd.exe`。这意味着当你在启动时选择“带命令提示符的安全模式”（通过按 F8），将使用 `cmd.exe`。但是，可以设置计算机在不需要按 F8 和手动选择的情况下自动以此模式启动。
+在 Windows 注册表的 `HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot` 下，默认设置有一个 **`AlternateShell`** 值为 `cmd.exe`。这意味着当你在启动时选择“带命令提示符的安全模式”（通过按 F8），将使用 `cmd.exe`。但是，可以设置计算机自动以此模式启动，而无需按 F8 并手动选择。
 
-创建自动在“带命令提示符的安全模式”中启动的启动选项的步骤：
+创建自动以“带命令提示符的安全模式”启动的引导选项的步骤：
 
-1. 更改 `boot.ini` 文件的属性以移除只读、系统和隐藏标志： `attrib c:\boot.ini -r -s -h`
+1. 更改 `boot.ini` 文件的属性以移除只读、系统和隐藏标志：`attrib c:\boot.ini -r -s -h`
 2. 打开 `boot.ini` 进行编辑。
-3. 插入一行，如： `multi(0)disk(0)rdisk(0)partition(1)\WINDOWS="Microsoft Windows XP Professional" /fastdetect /SAFEBOOT:MINIMAL(ALTERNATESHELL)`
+3. 插入一行，如：`multi(0)disk(0)rdisk(0)partition(1)\WINDOWS="Microsoft Windows XP Professional" /fastdetect /SAFEBOOT:MINIMAL(ALTERNATESHELL)`
 4. 保存对 `boot.ini` 的更改。
-5. 重新应用原始文件属性： `attrib c:\boot.ini +r +s +h`
+5. 重新应用原始文件属性：`attrib c:\boot.ini +r +s +h`
 
-- **Exploit 1:** 更改 **AlternateShell** 注册表项允许自定义命令 shell 设置，可能用于未经授权的访问。
-- **Exploit 2 (PATH 写权限):** 对系统 **PATH** 变量的任何部分具有写权限，特别是在 `C:\Windows\system32` 之前，可以执行自定义 `cmd.exe`，如果系统在安全模式下启动，这可能是一个后门。
-- **Exploit 3 (PATH 和 boot.ini 写权限):** 对 `boot.ini` 的写访问权限使得自动安全模式启动成为可能，从而在下次重启时促进未经授权的访问。
+- **Exploit 1:** 更改 **AlternateShell** 注册表键允许自定义命令 shell 设置，可能用于未经授权的访问。
+- **Exploit 2 (PATH 写权限):** 对系统 **PATH** 变量的任何部分具有写权限，特别是在 `C:\Windows\system32` 之前，可以执行自定义的 `cmd.exe`，如果系统在安全模式下启动，这可能是一个后门。
+- **Exploit 3 (PATH 和 boot.ini 写权限):** 对 `boot.ini` 的写入访问使得自动安全模式启动成为可能，从而在下次重启时促进未经授权的访问。
 
 要检查当前的 **AlternateShell** 设置，请使用以下命令：
 ```bash
 reg query HKLM\SYSTEM\CurrentControlSet\Control\SafeBoot /v AlternateShell
 Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SafeBoot' -Name 'AlternateShell'
 ```
-### 已安装组件
+### 安装的组件
 
-Active Setup 是 Windows 中的一个功能，它**在桌面环境完全加载之前启动**。它优先执行某些命令，这些命令必须在用户登录之前完成。此过程甚至在其他启动项（例如 Run 或 RunOnce 注册表部分中的项）被触发之前发生。
+Active Setup 是 Windows 中的一个功能，它**在桌面环境完全加载之前启动**。它优先执行某些命令，这些命令必须在用户登录继续之前完成。这个过程甚至在其他启动项（例如 Run 或 RunOnce 注册表部分中的项）被触发之前就发生。
 
 Active Setup 通过以下注册表键进行管理：
 
@@ -222,12 +224,12 @@ Active Setup 通过以下注册表键进行管理：
 
 - **IsInstalled:**
 - `0` 表示该组件的命令将不会执行。
-- `1` 表示该命令将为每个用户执行一次，如果缺少 `IsInstalled` 值，则这是默认行为。
+- `1` 表示命令将为每个用户执行一次，如果缺少 `IsInstalled` 值，则这是默认行为。
 - **StubPath:** 定义 Active Setup 要执行的命令。它可以是任何有效的命令行，例如启动 `notepad`。
 
 **安全洞察：**
 
-- 修改或写入 **`IsInstalled`** 设置为 `"1"` 的键，并指定 **`StubPath`** 可能导致未经授权的命令执行，从而可能导致权限提升。
+- 修改或写入 **`IsInstalled`** 设置为 `"1"` 的键，并指定 **`StubPath`**，可能导致未经授权的命令执行，从而可能实现权限提升。
 - 更改任何 **`StubPath`** 值中引用的二进制文件也可能实现权限提升，前提是具有足够的权限。
 
 要检查 Active Setup 组件中的 **`StubPath`** 配置，可以使用以下命令：
@@ -291,7 +293,7 @@ HKLM\Software\Microsoft\Wow6432Node\Windows NT\CurrentVersion\Image File Executi
 ```
 ## SysInternals
 
-请注意，您可以找到 autoruns 的所有站点 **已经被**[ **winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe) 搜索过。然而，对于 **更全面的自动执行** 文件列表，您可以使用来自 Sysinternals 的 [autoruns](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns)：
+请注意，您可以找到 autoruns 的所有网站 **已经被**[ **winpeas.exe**](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe) **搜索过**。然而，对于 **更全面的自动执行** 文件列表，您可以使用来自 Sysinternals 的 [autoruns](https://docs.microsoft.com/en-us/sysinternals/downloads/autoruns)：
 ```
 autorunsc.exe -m -nobanner -a * -ct /accepteula
 ```

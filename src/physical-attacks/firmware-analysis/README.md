@@ -19,7 +19,7 @@
 - 架构和流程图
 - 安全评估和已识别的漏洞
 
-为此，**开源情报（OSINT）**工具是不可或缺的，同时通过手动和自动审查过程分析任何可用的开源软件组件也很重要。像[Coverity Scan](https://scan.coverity.com)和[Semmle’s LGTM](https://lgtm.com/#explore)这样的工具提供免费的静态分析，可以用来发现潜在问题。
+为此，**开源情报（OSINT）**工具是不可或缺的，分析任何可用的开源软件组件通过手动和自动审查过程也同样重要。像[Coverity Scan](https://scan.coverity.com)和[Semmle’s LGTM](https://lgtm.com/#explore)这样的工具提供免费的静态分析，可以用来发现潜在问题。
 
 ## **获取固件**
 
@@ -29,7 +29,7 @@
 - **根据**提供的说明进行**构建**
 - **从**官方支持网站**下载**
 - 利用**Google dork**查询查找托管的固件文件
-- 直接访问**云存储**，使用工具如[S3Scanner](https://github.com/sa7mon/S3Scanner)
+- 直接访问**云存储**，使用像[S3Scanner](https://github.com/sa7mon/S3Scanner)这样的工具
 - 通过中间人技术**拦截**更新
 - 通过**UART**、**JTAG**或**PICit**等连接**提取**设备中的固件
 - 在设备通信中**嗅探**更新请求
@@ -48,7 +48,7 @@ hexdump -C -n 512 <bin> > hexdump.out
 hexdump -C <bin> | head # might find signatures in header
 fdisk -lu <bin> #lists a drives partition and filesystems if multiple
 ```
-如果你使用这些工具没有找到太多信息，可以使用 `binwalk -E <bin>` 检查图像的 **熵**，如果熵低，那么它不太可能被加密。如果熵高，则很可能被加密（或以某种方式压缩）。
+如果你使用这些工具没有找到太多信息，可以使用 `binwalk -E <bin>` 检查图像的 **entropy**，如果熵低，那么它不太可能被加密。如果熵高，则可能被加密（或以某种方式压缩）。
 
 此外，你可以使用这些工具提取 **嵌入固件中的文件**：
 
@@ -61,11 +61,11 @@ fdisk -lu <bin> #lists a drives partition and filesystems if multiple
 ### 获取文件系统
 
 使用之前提到的工具，如 `binwalk -ev <bin>`，你应该能够 **提取文件系统**。\
-Binwalk 通常会将其提取到一个 **以文件系统类型命名的文件夹** 中，通常是以下之一：squashfs, ubifs, romfs, rootfs, jffs2, yaffs2, cramfs, initramfs。
+Binwalk 通常会将其提取到一个 **以文件系统类型命名的文件夹** 中，通常是以下之一：squashfs、ubifs、romfs、rootfs、jffs2、yaffs2、cramfs、initramfs。
 
 #### 手动文件系统提取
 
-有时，binwalk **在其签名中没有文件系统的魔术字节**。在这些情况下，使用 binwalk **找到文件系统的偏移量并从二进制文件中切割压缩的文件系统**，并根据其类型使用以下步骤 **手动提取** 文件系统。
+有时，binwalk **在其签名中没有文件系统的魔术字节**。在这些情况下，使用 binwalk **查找文件系统的偏移量并从二进制文件中切割压缩的文件系统**，并根据其类型使用以下步骤 **手动提取** 文件系统。
 ```
 $ binwalk DIR850L_REVB.bin
 
@@ -117,7 +117,7 @@ $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 
 ### 初步分析工具
 
-提供了一组命令用于对二进制文件（称为 `<bin>`）进行初步检查。这些命令有助于识别文件类型、提取字符串、分析二进制数据以及理解分区和文件系统细节：
+提供了一组命令用于对二进制文件（称为 `<bin>`）进行初步检查。这些命令有助于识别文件类型、提取字符串、分析二进制数据以及理解分区和文件系统的细节：
 ```bash
 file <bin>
 strings -n8 <bin>
@@ -128,7 +128,7 @@ fdisk -lu <bin> #lists partitions and filesystems, if there are multiple
 ```
 为了评估图像的加密状态，使用 `binwalk -E <bin>` 检查 **entropy**。低熵表明缺乏加密，而高熵则表示可能存在加密或压缩。
 
-对于提取 **embedded files**，建议使用 **file-data-carving-recovery-tools** 文档和 **binvis.io** 进行文件检查的工具和资源。
+对于提取 **embedded files**，推荐使用 **file-data-carving-recovery-tools** 文档和 **binvis.io** 进行文件检查的工具和资源。
 
 ### 提取文件系统
 
@@ -168,7 +168,7 @@ $ dd if=DIR850L_REVB.bin bs=1 skip=1704084 of=dir.squashfs
 
 ### 模拟单个二进制文件
 
-在检查单个程序时，识别程序的字节序和 CPU 架构至关重要。
+检查单个程序时，识别程序的字节序和 CPU 架构至关重要。
 
 #### MIPS 架构示例
 
@@ -192,7 +192,7 @@ sudo apt-get install qemu qemu-user qemu-user-static qemu-system-arm qemu-system
 
 ## 实践中的动态分析
 
-在此阶段，使用真实或仿真设备环境进行分析。保持对操作系统和文件系统的 shell 访问至关重要。仿真可能无法完美模拟硬件交互，因此需要偶尔重新启动仿真。分析应重新访问文件系统，利用暴露的网页和网络服务，并探索引导加载程序漏洞。固件完整性测试对于识别潜在后门漏洞至关重要。
+在这个阶段，使用真实或仿真的设备环境进行分析。保持对操作系统和文件系统的 shell 访问是至关重要的。仿真可能无法完美模拟硬件交互，因此需要偶尔重新启动仿真。分析应重新访问文件系统，利用暴露的网页和网络服务，并探索引导加载程序漏洞。固件完整性测试对于识别潜在后门漏洞至关重要。
 
 ## 运行时分析技术
 
@@ -200,7 +200,7 @@ sudo apt-get install qemu qemu-user qemu-user-static qemu-system-arm qemu-system
 
 ## 二进制利用和概念验证
 
-为识别的漏洞开发 PoC 需要对目标架构和低级语言编程有深入理解。嵌入式系统中的二进制运行时保护很少见，但在存在时，可能需要使用如返回导向编程（ROP）等技术。
+为识别的漏洞开发 PoC 需要对目标架构和低级语言编程有深入理解。嵌入式系统中的二进制运行时保护很少，但在存在时，可能需要使用如返回导向编程（ROP）等技术。
 
 ## 准备好的操作系统用于固件分析
 
@@ -208,7 +208,7 @@ sudo apt-get install qemu qemu-user qemu-user-static qemu-system-arm qemu-system
 
 ## 准备好的操作系统用于分析固件
 
-- [**AttifyOS**](https://github.com/adi0x90/attifyos)：AttifyOS 是一个旨在帮助您对物联网（IoT）设备进行安全评估和渗透测试的发行版。它通过提供一个预配置的环境，加载所有必要工具，节省了您大量时间。
+- [**AttifyOS**](https://github.com/adi0x90/attifyos)：AttifyOS 是一个旨在帮助您对物联网（IoT）设备进行安全评估和渗透测试的发行版。它通过提供一个预配置的环境，加载所有必要的工具，为您节省了大量时间。
 - [**EmbedOS**](https://github.com/scriptingxss/EmbedOS)：基于 Ubuntu 18.04 的嵌入式安全测试操作系统，预装固件安全测试工具。
 
 ## 漏洞固件练习

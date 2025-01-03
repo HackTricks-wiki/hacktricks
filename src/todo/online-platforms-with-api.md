@@ -22,8 +22,8 @@
 
 ## [Clearbit](https://dashboard.clearbit.com/)
 
-查找与电子邮件（其他平台上的个人资料）、域名（基本公司信息、邮件和工作的人）和公司（从邮件获取公司信息）相关的个人数据。\
-您需要付费才能访问所有可能性。\
+查找与电子邮件（其他平台上的个人资料）、域名（基本公司信息、邮件和员工）和公司（从邮件获取公司信息）相关的个人数据。\
+您需要付费才能访问所有功能。\
 商业？
 
 ## [BuiltWith](https://builtwith.com/)
@@ -55,7 +55,7 @@
 ## [securitytrails](https://securitytrails.com/app/account)
 
 该平台提供有关域名和IP地址的信息，例如IP或域名服务器内的域名、由电子邮件拥有的域名（查找相关域名）、域名的IP历史（查找CloudFlare背后的主机）、使用某个名称服务器的所有域名....\
-您有一些免费访问。
+您有一些免费访问权限。
 
 ## [fullcontact](https://www.fullcontact.com/)
 
@@ -67,7 +67,7 @@
 
 ## [\_IntelligenceX](https://intelx.io/)
 
-搜索域名、IP和电子邮件并获取来自数据泄露的信息。提供一些免费访问。
+搜索域名、IP和电子邮件并获取泄露信息。提供一些免费访问。
 
 ## [IBM X-Force Exchange](https://exchange.xforce.ibmcloud.com/)
 
@@ -91,12 +91,12 @@
 
 ## [Dehashed](https://www.dehashed.com/data)
 
-查找电子邮件甚至域名的泄露凭据\
+查找泄露的电子邮件和域名凭据\
 商业？
 
 ## [psbdmp](https://psbdmp.ws/)
 
-搜索电子邮件出现的pastebins。商业？
+搜索出现某个电子邮件的pastebins。商业？
 
 ## [emailrep.io](https://emailrep.io/key)
 
@@ -104,7 +104,7 @@
 
 ## [ghostproject](https://ghostproject.fr/)
 
-获取泄露电子邮件的密码。商业？
+从泄露的电子邮件中获取密码。商业？
 
 ## [Binaryedge](https://www.binaryedge.io/)
 
@@ -112,7 +112,7 @@
 
 ## [haveibeenpwned](https://haveibeenpwned.com/)
 
-通过域名和电子邮件搜索并获取是否被攻破及密码。商业？
+通过域名和电子邮件搜索，查看是否被泄露及密码。商业？
 
 ### [IP2Location.io](https://www.ip2location.io/)
 

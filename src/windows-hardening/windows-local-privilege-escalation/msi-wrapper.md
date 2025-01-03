@@ -2,8 +2,8 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
-从 [https://www.exemsi.com/documentation/getting-started/](https://www.exemsi.com/download/) 下载免费版本的应用程序，执行它并将“恶意”二进制文件包装在其中。\
-请注意，如果您**只**想**执行** **命令行（而不是选择 cmd.exe，选择 .bat 文件）**，您可以包装一个“**.bat**”文件。
+从 [https://www.exemsi.com/documentation/getting-started/](https://www.exemsi.com/download/) 下载免费版本应用程序，执行它并将“恶意”二进制文件包装在其中。\
+请注意，如果您**只**想**执行** **命令行（而不是选择cmd.exe，请选择.bat文件）**，您可以包装一个“**.bat**”。
 
 ![](<../../images/image (417).png>)
 

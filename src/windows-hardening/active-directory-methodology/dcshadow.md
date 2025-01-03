@@ -24,7 +24,7 @@ lsadump::dcshadow /push
 - _DS-Install-Replica_（在域中添加/删除副本）
 - _DS-Replication-Manage-Topology_（管理复制拓扑）
 - _DS-Replication-Synchronize_（复制同步）
-- 在 **配置容器** 中的 **站点对象**（及其子对象）：
+- **配置容器** 中的 **站点对象**（及其子对象）：
 - _CreateChild 和 DeleteChild_
 - 作为 DC 注册的 **计算机对象**：
 - _WriteProperty_（不是 Write）
@@ -61,7 +61,7 @@ lsadump::dcshadow /object:CN=AdminSDHolder,CN=System,DC=moneycorp,DC=local /attr
 - 在目标用户对象上：`(A;;WP;;;UserSID)`
 - 在配置容器中的站点对象上：`(A;CI;CCDC;;;UserSID)`
 
-要获取对象的当前 ACE：`(New-Object System.DirectoryServices.DirectoryEntry("LDAP://DC=moneycorp,DC=local")).psbase.ObjectSecurity.sddl`
+要获取对象的当前 ACE：`(New-Object System.DirectoryServices.DirectoryEntry("LDAP://DC=moneycorp,DC=loca l")).psbase.ObjectSecurity.sddl`
 
 请注意，在这种情况下，您需要进行 **多个更改，** 而不仅仅是一个。因此，在 **mimikatz1 会话**（RPC 服务器）中，使用参数 **`/stack` 进行每个更改。** 这样，您只需 **`/push`** 一次即可在流氓服务器上执行所有堆积的更改。
 

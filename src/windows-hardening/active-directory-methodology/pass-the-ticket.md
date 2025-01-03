@@ -4,16 +4,16 @@
 
 ## Pass The Ticket (PTT)
 
-在**Pass The Ticket (PTT)**攻击方法中，攻击者**窃取用户的认证票证**，而不是他们的密码或哈希值。这个被窃取的票证随后被用来**冒充用户**，从而获得对网络内资源和服务的未授权访问。
+在**Pass The Ticket (PTT)**攻击方法中，攻击者**窃取用户的认证票据**，而不是他们的密码或哈希值。这个被窃取的票据随后被用来**冒充用户**，从而在网络中获得对资源和服务的未授权访问。
 
 **阅读**：
 
-- [从Windows中收集票证](../../network-services-pentesting/pentesting-kerberos-88/harvesting-tickets-from-windows.md)
-- [从Linux中收集票证](../../network-services-pentesting/pentesting-kerberos-88/harvesting-tickets-from-linux.md)
+- [从Windows中收集票据](../../network-services-pentesting/pentesting-kerberos-88/harvesting-tickets-from-windows.md)
+- [从Linux中收集票据](../../network-services-pentesting/pentesting-kerberos-88/harvesting-tickets-from-linux.md)
 
-### **在平台之间交换Linux和Windows票证**
+### **在平台之间交换Linux和Windows票据**
 
-[**ticket_converter**](https://github.com/Zer1t0/ticket_converter)工具仅使用票证本身和输出文件来转换票证格式。
+[**ticket_converter**](https://github.com/Zer1t0/ticket_converter)工具仅使用票据本身和输出文件来转换票据格式。
 ```bash
 python ticket_converter.py velociraptor.ccache velociraptor.kirbi
 Converting ccache => kirbi

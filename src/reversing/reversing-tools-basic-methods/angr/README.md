@@ -28,7 +28,7 @@ proj.filename #Get filename "/bin/true"
 #Usually you won't need to use them but you could
 angr.Project('examples/fauxware/fauxware', main_opts={'backend': 'blob', 'arch': 'i386'}, lib_opts={'libc.so.6': {'backend': 'elf'}})
 ```
-# 加载的和主对象信息
+# 加载和主对象信息
 
 ## 加载的数据
 ```python
@@ -94,7 +94,7 @@ block.instruction_addrs #Get instructions addresses "[0x401670, 0x401672, 0x4016
 ```
 # 动态分析
 
-## 仿真管理器，状态
+## 模拟管理器，状态
 ```python
 #Live States
 #This is useful to modify content in a live analysis
@@ -119,9 +119,9 @@ simgr.active[0].regs.rip #Get RIP from the last state
 ```
 ## 调用函数
 
-- 你可以通过 `args` 传递参数列表，通过 `env` 传递环境变量字典到 `entry_state` 和 `full_init_state`。这些结构中的值可以是字符串或位向量，并将被序列化为模拟执行的参数和环境。默认的 `args` 是一个空列表，因此如果你分析的程序期望至少找到一个 `argv[0]`，你应该始终提供它！
-- 如果你希望 `argc` 是符号的，可以将一个符号位向量作为 `argc` 传递给 `entry_state` 和 `full_init_state` 构造函数。不过要小心：如果这样做，你还应该向结果状态添加一个约束，确保你的 argc 值不能大于你传递给 `args` 的参数数量。
-- 要使用调用状态，你应该使用 `.call_state(addr, arg1, arg2, ...)` 调用它，其中 `addr` 是你想要调用的函数的地址，`argN` 是该函数的第 N 个参数，可以是 Python 整数、字符串、数组或位向量。如果你想分配内存并实际传递一个对象的指针，你应该将其包装在 PointerWrapper 中，即 `angr.PointerWrapper("point to me!")`。这个 API 的结果可能有点不可预测，但我们正在努力改进它。
+- 您可以通过 `args` 传递参数列表，通过 `env` 传递环境变量字典到 `entry_state` 和 `full_init_state`。这些结构中的值可以是字符串或位向量，并将被序列化为模拟执行的参数和环境。默认的 `args` 是一个空列表，因此如果您分析的程序期望找到至少一个 `argv[0]`，您应该始终提供它！
+- 如果您希望 `argc` 是符号的，可以将符号位向量作为 `argc` 传递给 `entry_state` 和 `full_init_state` 构造函数。不过要小心：如果您这样做，您还应该向结果状态添加一个约束，确保您的 argc 值不能大于您传递给 `args` 的参数数量。
+- 要使用调用状态，您应该使用 `.call_state(addr, arg1, arg2, ...)` 调用它，其中 `addr` 是您想要调用的函数的地址，`argN` 是该函数的第 N 个参数，可以是 Python 整数、字符串、数组或位向量。如果您想分配内存并实际传递一个对象的指针，您应该将其包装在 PointerWrapper 中，即 `angr.PointerWrapper("point to me!")`。此 API 的结果可能有些不可预测，但我们正在努力改进它。
 
 ## 位向量
 ```python

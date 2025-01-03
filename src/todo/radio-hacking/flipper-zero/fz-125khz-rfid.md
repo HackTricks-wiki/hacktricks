@@ -2,7 +2,8 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-## Intro
+
+## 介绍
 
 有关125kHz标签工作原理的更多信息，请查看：
 
@@ -10,24 +11,24 @@
 ../pentesting-rfid.md
 {{#endref}}
 
-## Actions
+## 操作
 
 有关这些类型标签的更多信息 [**请阅读此介绍**](../pentesting-rfid.md#low-frequency-rfid-tags-125khz)。
 
-### Read
+### 读取
 
 尝试**读取**卡片信息。然后可以**模拟**它们。
 
 > [!WARNING]
 > 请注意，一些对讲机试图通过在读取之前发送写入命令来保护自己免受密钥复制。如果写入成功，则该标签被视为假标签。当Flipper模拟RFID时，读卡器无法将其与原始标签区分开，因此不会出现此类问题。
 
-### Add Manually
+### 手动添加
 
 您可以在Flipper Zero中创建**指示您手动输入数据的假卡**，然后模拟它。
 
-#### IDs on cards
+#### 卡片上的ID
 
-有时，当您获得一张卡时，您会发现卡片上可见的ID（或部分ID）。
+有时，当您获得一张卡时，您会发现卡片上可见地写有ID（或部分ID）。
 
 - **EM Marin**
 
@@ -42,12 +43,13 @@
 
 <figure><img src="../../../images/image (1014).png" alt=""><figcaption></figcaption></figure>
 
-### Emulate/Write
+### 模拟/写入
 
 在**复制**一张卡或**手动输入**ID后，可以使用Flipper Zero**模拟**它或**写入**到真实卡片中。
 
-## References
+## 参考
 
 - [https://blog.flipperzero.one/rfid/](https://blog.flipperzero.one/rfid/)
+
 
 {{#include ../../../banners/hacktricks-training.md}}

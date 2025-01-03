@@ -1,4 +1,4 @@
-# 检查清单 - 本地 Windows 提权
+# 清单 - 本地 Windows 提权
 
 {{#include ../banners/hacktricks-training.md}}
 
@@ -7,14 +7,14 @@
 ### [系统信息](windows-local-privilege-escalation/#system-info)
 
 - [ ] 获取 [**系统信息**](windows-local-privilege-escalation/#system-info)
-- [ ] 使用脚本搜索 **内核** [**漏洞**](windows-local-privilege-escalation/#version-exploits)
-- [ ] 使用 **Google 搜索** 内核 **漏洞**
-- [ ] 使用 **searchsploit 搜索** 内核 **漏洞**
+- [ ] 搜索 **内核** [**利用脚本**](windows-local-privilege-escalation/#version-exploits)
+- [ ] 使用 **Google 搜索** 内核 **利用**
+- [ ] 使用 **searchsploit 搜索** 内核 **利用**
 - [ ] [**环境变量**](windows-local-privilege-escalation/#environment) 中有趣的信息？
 - [ ] [**PowerShell 历史**](windows-local-privilege-escalation/#powershell-history) 中的密码？
-- [ ] [**Internet 设置**](windows-local-privilege-escalation/#internet-settings) 中有趣的信息？
+- [ ] [**互联网设置**](windows-local-privilege-escalation/#internet-settings) 中有趣的信息？
 - [ ] [**驱动器**](windows-local-privilege-escalation/#drives)？
-- [ ] [**WSUS 漏洞**](windows-local-privilege-escalation/#wsus)？
+- [ ] [**WSUS 利用**](windows-local-privilege-escalation/#wsus)？
 - [ ] [**AlwaysInstallElevated**](windows-local-privilege-escalation/#alwaysinstallelevated)？
 
 ### [日志/AV 枚举](windows-local-privilege-escalation/#enumeration)
@@ -39,14 +39,14 @@
 
 ### [网络](windows-local-privilege-escalation/#network)
 
-- [ ] 检查 **当前** [**网络信息**](windows-local-privilege-escalation/#network)
+- [ ] 检查 **当前** [**网络** **信息**](windows-local-privilege-escalation/#network)
 - [ ] 检查 **隐藏的本地服务** 是否限制外部访问
 
 ### [运行中的进程](windows-local-privilege-escalation/#running-processes)
 
-- [ ] 进程二进制文件 [**文件和文件夹权限**](windows-local-privilege-escalation/#file-and-folder-permissions)
+- [ ] 进程二进制 [**文件和文件夹权限**](windows-local-privilege-escalation/#file-and-folder-permissions)
 - [ ] [**内存密码挖掘**](windows-local-privilege-escalation/#memory-password-mining)
-- [ ] [**不安全的 GUI 应用程序**](windows-local-privilege-escalation/#insecure-gui-apps)
+- [ ] [**不安全的 GUI 应用**](windows-local-privilege-escalation/#insecure-gui-apps)
 - [ ] 通过 `ProcDump.exe` 偷取 **有趣进程** 的凭据？（firefox, chrome 等 ...）
 
 ### [服务](windows-local-privilege-escalation/#services)
@@ -76,7 +76,7 @@
 ### [Windows 凭据](windows-local-privilege-escalation/#windows-credentials)
 
 - [ ] [**Winlogon**](windows-local-privilege-escalation/#winlogon-credentials) 凭据
-- [ ] [**Windows Vault**](windows-local-privilege-escalation/#credentials-manager-windows-vault) 中你可以使用的凭据？
+- [ ] [**Windows Vault**](windows-local-privilege-escalation/#credentials-manager-windows-vault) 凭据你可以使用？
 - [ ] 有趣的 [**DPAPI 凭据**](windows-local-privilege-escalation/#dpapi)？
 - [ ] 保存的 [**Wifi 网络**](windows-local-privilege-escalation/#wifi) 密码？
 - [ ] [**保存的 RDP 连接**](windows-local-privilege-escalation/#saved-rdp-connections) 中有趣的信息？
@@ -95,7 +95,7 @@
 - [ ] [**McAfee SiteList.xml**](windows-local-privilege-escalation/#mcafee-sitelist.xml) 文件？
 - [ ] [**缓存的 GPP 密码**](windows-local-privilege-escalation/#cached-gpp-pasword)？
 - [ ] [**IIS Web 配置文件**](windows-local-privilege-escalation/#iis-web-config) 中的密码？
-- [ ] [**Web 日志**](windows-local-privilege-escalation/#logs) 中有趣的信息？
+- [ ] [**网络日志**](windows-local-privilege-escalation/#logs) 中有趣的信息？
 - [ ] 你想要 [**向用户请求凭据**](windows-local-privilege-escalation/#ask-for-credentials) 吗？
 - [ ] [**回收站中的有趣文件**](windows-local-privilege-escalation/#credentials-in-the-recyclebin)？
 - [ ] 其他 [**包含凭据的注册表**](windows-local-privilege-escalation/#inside-the-registry)？

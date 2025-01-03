@@ -3,8 +3,8 @@
 **代码流程：**
 
 1. 创建一个新的管道
-2. 创建并启动一个服务，该服务将连接到创建的管道并写入内容。服务代码将执行以下编码的 PS 代码：`$pipe = new-object System.IO.Pipes.NamedPipeClientStream("piper"); $pipe.Connect(); $sw = new-object System.IO.StreamWriter($pipe); $sw.WriteLine("Go"); $sw.Dispose();`
-3. 服务从管道中的客户端接收数据，调用 ImpersonateNamedPipeClient 并等待服务完成
+2. 创建并启动一个服务，该服务将连接到创建的管道并写入一些内容。服务代码将执行以下编码的 PS 代码：`$pipe = new-object System.IO.Pipes.NamedPipeClientStream("piper"); $pipe.Connect(); $sw = new-object System.IO.StreamWriter($pipe); $sw.WriteLine("Go"); $sw.Dispose();`
+3. 服务从客户端接收管道中的数据，调用 ImpersonateNamedPipeClient 并等待服务完成
 4. 最后，使用从服务获得的令牌生成一个新的 _cmd.exe_
 
 > [!WARNING]

