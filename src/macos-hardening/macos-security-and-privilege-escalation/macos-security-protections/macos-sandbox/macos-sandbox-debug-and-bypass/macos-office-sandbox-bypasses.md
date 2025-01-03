@@ -16,7 +16,7 @@ Bu nedenle, kaçış yapmak **`plist`** LaunchAgent'ı `~/Library/LaunchAgents/~
 
 Sandbox içinde **Login Item** (kullanıcı giriş yaptığında çalıştırılacak uygulamalar) oluşturmanın mümkün olduğu keşfedildi. Ancak, bu uygulamalar **notarize edilmedikçe** **çalışmayacak** ve **argüman eklemek mümkün değil** (yani sadece **`bash`** kullanarak bir ters shell çalıştıramazsınız).
 
-Önceki Sandbox kaçışından sonra, Microsoft `~/Library/LaunchAgents` dizinine dosya yazma seçeneğini devre dışı bıraktı. Ancak, bir **zip dosyasını Login Item olarak** koyarsanız, `Archive Utility` sadece mevcut konumda **açacaktır**. Bu nedenle, varsayılan olarak `~/Library` içindeki `LaunchAgents` klasörü oluşturulmadığı için, **`LaunchAgents/~$escape.plist`** içindeki plist'i **zipleyip** zip dosyasını **`~/Library`** içine koymak mümkün oldu, böylece açıldığında kalıcılık hedefine ulaşacaktır.
+Önceki Sandbox bypass'ından, Microsoft `~/Library/LaunchAgents` dizinine dosya yazma seçeneğini devre dışı bıraktı. Ancak, bir **zip dosyasını Login Item olarak** koyarsanız, `Archive Utility` sadece mevcut konumda **açacaktır**. Bu nedenle, varsayılan olarak `~/Library` içindeki `LaunchAgents` klasörü oluşturulmadığı için, **`LaunchAgents/~$escape.plist`** içindeki plist'i **zipleyip** zip dosyasını **`~/Library`** içine koymak mümkün oldu, böylece açıldığında kalıcılık hedefine ulaşacaktır.
 
 [**orijinal raporu buradan kontrol edin**](https://objective-see.org/blog/blog_0x4B.html).
 
@@ -42,11 +42,11 @@ Open aracının **belirli env** değişkenleri ile bir uygulama çalıştırmak 
 
 ### Word Sandbox Bypass with Open and stdin
 
-**`open`** aracı ayrıca **`--stdin`** parametresini destekliyordu (ve önceki kaçıştan sonra `--env` kullanmak artık mümkün değildi).
+**`open`** aracı ayrıca **`--stdin`** parametresini de destekliyordu (ve önceki bypass'tan sonra `--env` kullanmak artık mümkün değildi).
 
 Şu durum var ki, **`python`** Apple tarafından imzalanmış olsa da, **`quarantine`** niteliğine sahip bir betiği **çalıştırmaz**. Ancak, stdin'den bir betik geçmek mümkündü, böylece karantinada olup olmadığını kontrol etmeyecektir:&#x20;
 
 1. Rastgele Python komutları içeren bir **`~$exploit.py`** dosyası bırakın.
-2. _open_ **`–stdin='~$exploit.py' -a Python`** komutunu çalıştırın, bu Python uygulamasını standart girdi olarak bıraktığımız dosya ile çalıştırır. Python, kodumuzu memnuniyetle çalıştırır ve çünkü bu _launchd_'nin bir çocuk süreci olduğundan, Word'ün sandbox kurallarına bağlı değildir.
+2. _open_ **`–stdin='~$exploit.py' -a Python`** komutunu çalıştırın; bu, Python uygulamasını standart girdi olarak bıraktığımız dosya ile çalıştırır. Python, kodumuzu memnuniyetle çalıştırır ve çünkü bu, _launchd_'nin bir çocuk süreci olduğundan, Word'ün sandbox kurallarına bağlı değildir.
 
 {{#include ../../../../../banners/hacktricks-training.md}}

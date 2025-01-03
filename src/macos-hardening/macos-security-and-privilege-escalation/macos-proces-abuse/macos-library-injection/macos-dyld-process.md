@@ -10,8 +10,8 @@ Bu bağlayıcı, tüm yürütülebilir kütüphaneleri bulmak, bunları belleğe
 
 Elbette, **`dyld`** herhangi bir bağımlılığa sahip değildir (sistem çağrılarını ve libSystem alıntılarını kullanır).
 
-> [!CAUTION]
-> Eğer bu bağlayıcı herhangi bir güvenlik açığı içeriyorsa, herhangi bir ikili dosya (hatta yüksek ayrıcalıklı olanlar) çalıştırılmadan önce çalıştırıldığı için, **ayrıcalıkları yükseltmek** mümkün olacaktır.
+> [!DİKKAT]
+> Eğer bu bağlayıcı herhangi bir güvenlik açığı içeriyorsa, herhangi bir ikili dosya (hatta yüksek ayrıcalıklı olanlar) çalıştırılmadan önce çalıştırıldığı için, **ayrıcalıkları artırmak** mümkün olacaktır.
 
 ### Akış
 
@@ -23,14 +23,14 @@ Dyld, **`dyldboostrap::start`** tarafından yüklenecek ve bu, **yığın kanary
 ./
 {{#endref}}
 
-Sonra, önemli sistem kütüphanelerini önceden bağlayan dyld paylaşılan önbelleğini haritalar ve ardından ikilinin bağımlı olduğu kütüphaneleri haritalar ve tüm gerekli kütüphaneler yüklenene kadar özyinelemeli olarak devam eder. Bu nedenle:
+Daha sonra, önemli sistem kütüphanelerini önceden bağlayan dyld paylaşılan önbelleğini haritalar ve ardından ikilinin bağımlı olduğu kütüphaneleri haritalar ve gerekli tüm kütüphaneler yüklenene kadar özyinelemeli olarak devam eder. Bu nedenle:
 
 1. `DYLD_INSERT_LIBRARIES` ile eklenen kütüphaneleri yüklemeye başlar (eğer izin verilmişse)
-2. Sonra paylaşılan önbellek kütüphanelerini
-3. Sonra içe aktarılan kütüphaneleri
+2. Daha sonra paylaşılan önbellek kütüphanelerini
+3. Daha sonra içe aktarılan kütüphaneleri
 1. &#x20;Sonra kütüphaneleri özyinelemeli olarak içe aktarmaya devam eder
 
-Tüm kütüphaneler yüklendikten sonra, bu kütüphanelerin **başlatıcıları** çalıştırılır. Bunlar, `LC_ROUTINES[_64]` içinde tanımlanan **`__attribute__((constructor))`** kullanılarak kodlanmıştır (şimdi kullanımdan kaldırılmıştır) veya `S_MOD_INIT_FUNC_POINTERS` ile işaretlenmiş bir bölümde işaretçi ile.
+Tüm kütüphaneler yüklendikten sonra, bu kütüphanelerin **başlatıcıları** çalıştırılır. Bunlar, `LC_ROUTINES[_64]` (şimdi kullanımdan kaldırılmış) içinde tanımlanan **`__attribute__((constructor))`** kullanılarak kodlanmıştır veya `S_MOD_INIT_FUNC_POINTERS` ile işaretlenmiş bir bölümde işaretçi ile.
 
 Sonlandırıcılar **`__attribute__((destructor))`** ile kodlanmıştır ve `S_MOD_TERM_FUNC_POINTERS` ile işaretlenmiş bir bölümde yer alır (**`__DATA.__mod_term_func`**).
 
@@ -42,15 +42,15 @@ macOS'taki tüm ikili dosyalar dinamik olarak bağlantılıdır. Bu nedenle, iki
 
 - **`__TEXT.__[auth_]stubs`**: `__DATA` bölümlerinden işaretçiler
 - **`__TEXT.__stub_helper`**: Çağrılacak fonksiyon hakkında bilgi ile dinamik bağlantıyı çağıran küçük kod
-- **`__DATA.__[auth_]got`**: Global Offset Tablosu (içe aktarılan fonksiyonların adresleri, çözüldüğünde, yükleme zamanında `S_NON_LAZY_SYMBOL_POINTERS` bayrağı ile işaretlendiği için bağlanır)
-- **`__DATA.__nl_symbol_ptr`**: Tembel olmayan sembol işaretçileri (yükleme zamanında bağlanır, `S_NON_LAZY_SYMBOL_POINTERS` bayrağı ile işaretlenmiştir)
+- **`__DATA.__[auth_]got`**: Küresel Ofset Tablosu (içe aktarılan fonksiyonların adresleri, çözüldüğünde, yükleme zamanında işaretlendiği için `S_NON_LAZY_SYMBOL_POINTERS` ile bağlanır)
+- **`__DATA.__nl_symbol_ptr`**: Tembel olmayan sembol işaretçileri (yükleme zamanında işaretlendiği için `S_NON_LAZY_SYMBOL_POINTERS` ile bağlanır)
 - **`__DATA.__la_symbol_ptr`**: Tembel sembol işaretçileri (ilk erişimde bağlanır)
 
-> [!WARNING]
+> [!UYARI]
 > "auth\_" ön eki ile başlayan işaretçilerin, onu korumak için bir işlem içi şifreleme anahtarı kullandığını unutmayın (PAC). Ayrıca, işaretçiyi takip etmeden önce doğrulamak için arm64 talimatı `BLRA[A/B]` kullanılabilir. Ve RETA\[A/B] bir RET adresi yerine kullanılabilir.\
 > Aslında, **`__TEXT.__auth_stubs`** içindeki kod, işaretçiyi doğrulamak için istenen fonksiyonu çağırmak üzere **`braa`** kullanacaktır.
 >
-> Ayrıca, mevcut dyld sürümleri **her şeyi tembel olmayan** olarak yükler. 
+> Ayrıca, mevcut dyld sürümleri **her şeyi tembel olmayan** olarak yükler.
 
 ### Tembel sembolleri bulma
 ```c
@@ -95,13 +95,13 @@ Disassembly of section __TEXT,__stubs:
 100003f9c: f9400210    	ldr	x16, [x16]
 100003fa0: d61f0200    	br	x16
 ```
-görüyoruz ki **GOT adresine atlıyoruz**, bu durumda çözümleme tembel değil ve printf fonksiyonunun adresini içerecektir.
+görüyoruz ki **GOT adresine atlıyoruz**, bu durumda non-lazy olarak çözülür ve printf fonksiyonunun adresini içerecektir.
 
-Diğer durumlarda doğrudan GOT'a atlamak yerine, **`__DATA.__la_symbol_ptr`**'a atlayabilir, bu da yüklemeye çalıştığı fonksiyonu temsil eden bir değeri yükler, ardından **`__TEXT.__stub_helper`**'a atlar, bu da **`__DATA.__nl_symbol_ptr`**'a atlar ve bu da **`dyld_stub_binder`**'ın adresini içerir, bu da parametre olarak fonksiyon numarasını ve bir adres alır.\
-Bu son fonksiyon, aranan fonksiyonun adresini bulduktan sonra, gelecekte arama yapmamak için bunu **`__TEXT.__stub_helper`**'daki ilgili konuma yazar.
+Diğer durumlarda doğrudan GOT'a atlamak yerine, **`__DATA.__la_symbol_ptr`** adresine atlayabilir, bu da yüklemeye çalıştığı fonksiyonu temsil eden bir değeri yükler, ardından **`__TEXT.__stub_helper`** adresine atlar, bu da **`__DATA.__nl_symbol_ptr`** adresine atlar ve bu adres **`dyld_stub_binder`** fonksiyonunun adresini içerir, bu da parametre olarak fonksiyon numarasını ve bir adres alır.\
+Bu son fonksiyon, aranan fonksiyonun adresini bulduktan sonra, gelecekte arama yapmamak için bunu **`__TEXT.__stub_helper`** içindeki ilgili konuma yazar.
 
 > [!TIP]
-> Ancak mevcut dyld sürümlerinin her şeyi tembel olarak yüklediğini unutmayın.
+> Ancak mevcut dyld sürümlerinin her şeyi non-lazy olarak yüklediğini unutmayın.
 
 #### Dyld opcode'ları
 
@@ -180,9 +180,9 @@ Ana fonksiyona girmeden önce bu ilginç değerlerin hepsini hata ayıklama ile 
 
 ## dyld_all_image_infos
 
-Bu, dyld tarafından dışa aktarılan ve dyld durumu hakkında bilgi içeren bir yapıdır; versiyon, dyld_image_info dizisine işaretçi, dyld_image_notifier, eğer işlem paylaşılan önbellekten ayrılmışsa, libSystem başlatıcısının çağrılıp çağrılmadığı, dyls'nin kendi Mach başlığına işaretçi, dyld versiyon dizesine işaretçi gibi bilgiler içerir.
+Bu, dyld tarafından dışa aktarılan ve dyld durumu hakkında bilgi içeren bir yapıdır; versiyon, dyld_image_info dizisine işaretçi, dyld_image_notifier, eğer proc paylaşılan önbellekten ayrılmışsa, libSystem başlatıcısının çağrılıp çağrılmadığı, dyls'nin kendi Mach başlığına işaretçi, dyld versiyon dizesine işaretçi gibi bilgiler içerir...
 
-## dyld env değişkenleri
+## dyld env variables
 
 ### debug dyld
 
@@ -264,7 +264,7 @@ dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
 - `DYLD_PRINT_BINDINGS`: Bağlandığında sembolleri yazdır
 - `DYLD_WEAK_BINDINGS`: Sadece zayıf sembolleri bağlandığında yazdır
 - `DYLD_PRINT_CODE_SIGNATURES`: Kod imzası kayıt işlemlerini yazdır
-- `DYLD_PRINT_DOFS`: Yüklenen D-Trace nesne formatı bölümlerini yazdır
+- `DYLD_PRINT_DOFS`: Yüklenmiş D-Trace nesne formatı bölümlerini yazdır
 - `DYLD_PRINT_ENV`: dyld tarafından görülen ortamı yazdır
 - `DYLD_PRINT_INTERPOSTING`: Ara bağlama işlemlerini yazdır
 - `DYLD_PRINT_LIBRARIES`: Yüklenen kütüphaneleri yazdır
@@ -279,7 +279,7 @@ dyld[21623]: running initializer 0x18e59e5c0 in /usr/lib/libSystem.B.dylib
 - `DYLD_SHARED_REGION`: "kullan", "özel", "kaçın"
 - `DYLD_USE_CLOSURES`: Kapatmaları etkinleştir
 
-Daha fazlasını bulmak için şunları kullanmak mümkündür:
+Daha fazlasını bulmak mümkündür:
 ```bash
 strings /usr/lib/dyld | grep "^DYLD_" | sort -u
 ```

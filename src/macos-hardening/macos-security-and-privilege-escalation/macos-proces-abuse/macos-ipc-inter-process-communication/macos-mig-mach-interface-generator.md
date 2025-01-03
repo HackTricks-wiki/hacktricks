@@ -89,7 +89,7 @@ routine[1];
 {{#endtab}}
 {{#endtabs}}
 
-Önceki yapıya dayanarak **`myipc_server_routine`** fonksiyonu **mesaj ID'sini** alacak ve çağrılacak uygun fonksiyonu döndürecektir:
+Önceki yapıya dayanarak, **`myipc_server_routine`** fonksiyonu **mesaj ID'sini** alacak ve çağrılacak uygun fonksiyonu döndürecektir:
 ```c
 mig_external mig_routine_t myipc_server_routine
 (mach_msg_header_t *InHeadP)
@@ -104,11 +104,11 @@ return 0;
 return SERVERPREFmyipc_subsystem.routine[msgh_id].stub_routine;
 }
 ```
-Bu örnekte tanımlamalarda yalnızca 1 fonksiyon tanımlamışız, ancak daha fazla fonksiyon tanımlasaydık, bunlar **`SERVERPREFmyipc_subsystem`** dizisi içinde yer alırdı ve ilki ID **500**'e, ikincisi ID **501**'e atanırdı...
+Bu örnekte tanımlarda yalnızca 1 fonksiyon tanımlamışız, ancak daha fazla fonksiyon tanımlasaydık, bunlar **`SERVERPREFmyipc_subsystem`** dizisi içinde yer alırdı ve ilki ID **500**'e, ikincisi ID **501**'e atanırdı...
 
-Eğer fonksiyonun bir **reply** göndermesi bekleniyorsa, `mig_internal kern_return_t __MIG_check__Reply__<name>` fonksiyonu da mevcut olurdu.
+Eğer fonksiyonun bir **cevap** göndermesi bekleniyorsa, `mig_internal kern_return_t __MIG_check__Reply__<name>` fonksiyonu da mevcut olurdu.
 
-Aslında bu ilişkiyi **`myipcServer.h`** içindeki **`subsystem_to_name_map_myipc`** yapısında tanımlamak mümkündür (**`subsystem*to_name_map*\***`\*\* diğer dosyalarda):
+Aslında, bu ilişkiyi **`myipcServer.h`** dosyasındaki **`subsystem_to_name_map_myipc`** yapısında tanımlamak mümkündür (**`subsystem*to_name_map*\***`\*\* diğer dosyalarda):
 ```c
 #ifndef subsystem_to_name_map_myipc
 #define subsystem_to_name_map_myipc \
@@ -221,7 +221,7 @@ NDR_record, `libsystem_kernel.dylib` tarafından dışa aktarılır ve MIG'in **
 
 Bu ilginçtir çünkü bir ikili dosyada `_NDR_record` bir bağımlılık olarak bulunursa (`jtool2 -S <binary> | grep NDR` veya `nm`), bu, ikili dosyanın bir MIG istemcisi veya sunucusu olduğu anlamına gelir.
 
-Ayrıca **MIG sunucuları**, `__DATA.__const` içinde (veya macOS çekirdeğinde `__CONST.__constdata` ve diğer \*OS çekirdeklerinde `__DATA_CONST.__const` içinde) dağıtım tablosuna sahiptir. Bu, **`jtool2`** ile dökülebilir.
+Ayrıca **MIG sunucuları**, `__DATA.__const` içinde (veya macOS çekirdeğinde `__CONST.__constdata` ve diğer \*OS çekirdeklerinde `__DATA_CONST.__const`) dağıtım tablosuna sahiptir. Bu, **`jtool2`** ile dökülebilir.
 
 Ve **MIG istemcileri**, sunuculara `__mach_msg` ile göndermek için `__NDR_record` kullanacaktır.
 
@@ -229,7 +229,7 @@ Ve **MIG istemcileri**, sunuculara `__mach_msg` ile göndermek için `__NDR_reco
 
 ### jtool
 
-Birçok ikili dosya artık mach portlarını açmak için MIG kullanıyorsa, **MIG'in nasıl kullanıldığını** ve her mesaj kimliği ile **MIG'in hangi işlevleri yürüttüğünü** bilmek ilginçtir.
+Birçok ikili dosya artık mach portlarını açmak için MIG kullanıyorsa, **MIG'in nasıl kullanıldığını tanımlamak** ve her mesaj kimliği ile **MIG'in yürüttüğü işlevleri** bilmek ilginçtir.
 
 [**jtool2**](../../macos-apps-inspecting-debugging-and-fuzzing/#jtool2), bir Mach-O ikili dosyasından MIG bilgilerini ayrıştırabilir, mesaj kimliğini belirtebilir ve yürütülecek işlevi tanımlayabilir:
 ```bash
@@ -365,17 +365,17 @@ return r0;
 {{#endtab}}
 {{#endtabs}}
 
-Aslında **`0x100004000`** fonksiyonuna giderseniz, **`routine_descriptor`** yapıların dizisini bulacaksınız. Yapının ilk elemanı, **fonksiyonun** uygulandığı **adres** ve **yapı 0x28 bayt** alır, bu yüzden her 0x28 bayttan (0. bayttan başlayarak) 8 bayt alabilir ve bu, çağrılacak **fonksiyonun adresi** olacaktır:
+Aslında **`0x100004000`** fonksiyonuna giderseniz, **`routine_descriptor`** yapıların dizisini bulacaksınız. Yapının ilk elemanı, **fonksiyonun** uygulandığı **adres** ve **yapı 0x28 byte** alır, bu yüzden her 0x28 byte'tan (byte 0'dan başlayarak) 8 byte alabilir ve bu, çağrılacak **fonksiyonun adresi** olacaktır:
 
 <figure><img src="../../../../images/image (35).png" alt=""><figcaption></figcaption></figure>
 
 <figure><img src="../../../../images/image (36).png" alt=""><figcaption></figcaption></figure>
 
-Bu veriler [**bu Hopper script'i kullanarak**](https://github.com/knightsc/hopper/blob/master/scripts/MIG%20Detect.py) çıkarılabilir.
+Bu veriler [**bu Hopper script'ini kullanarak**](https://github.com/knightsc/hopper/blob/master/scripts/MIG%20Detect.py) çıkarılabilir.
 
 ### Debug
 
-MIG tarafından üretilen kod ayrıca giriş ve çıkış işlemleri hakkında günlükler oluşturmak için `kernel_debug` çağrısını da yapar. Bunları **`trace`** veya **`kdv`** kullanarak kontrol etmek mümkündür: `kdv all | grep MIG`
+MIG tarafından üretilen kod ayrıca giriş ve çıkış işlemleri hakkında günlükler oluşturmak için `kernel_debug` çağrısını yapar. Bunları **`trace`** veya **`kdv`** kullanarak kontrol etmek mümkündür: `kdv all | grep MIG`
 
 ## References
 

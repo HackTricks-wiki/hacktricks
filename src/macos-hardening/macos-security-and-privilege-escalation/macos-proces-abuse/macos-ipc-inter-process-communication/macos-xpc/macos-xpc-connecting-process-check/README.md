@@ -38,7 +38,7 @@ macos-xpc_connection_get_audit_token-attack.md
 
 ### Trustcache - Aşağı Dönüş Saldırıları Önleme
 
-Trustcache, yalnızca izin verilen değiştirilmemiş ikili dosyaların çalıştırılmasını sağlayan Apple Silicon makinelerinde tanıtılan bir savunma yöntemidir. Bu, aşağı sürüm versiyonlarının çalıştırılmasını önler.
+Trustcache, yalnızca izin verilen değiştirilmemiş ikili dosyaların çalıştırılmasını sağlamak için Apple Silicon makinelerinde tanıtılan bir savunma yöntemidir ve Apple ikili dosyalarının CDHSAH veritabanını depolar. Bu, aşağı sürüm versiyonlarının çalıştırılmasını önler.
 
 ### Kod Örnekleri
 

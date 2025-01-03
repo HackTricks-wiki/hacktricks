@@ -8,7 +8,7 @@
 
 Başlangıçta bu veritabanı, `/System/Library/Security/authorization.plist` içeriğinden oluşturulur. Daha sonra bazı hizmetler, bu veritabanına diğer izinleri eklemek veya mevcut verileri değiştirmek için ekleme yapabilir.
 
-Kurallar, veritabanının içindeki `rules` tablosunda saklanır ve aşağıdaki sütunları içerir:
+Kurallar, veritabanındaki `rules` tablosunda saklanır ve aşağıdaki sütunları içerir:
 
 - **id**: Her kural için benzersiz bir tanımlayıcı, otomatik olarak artırılır ve birincil anahtar olarak hizmet eder.
 - **name**: Yetkilendirme sisteminde kuralı tanımlamak ve referans almak için kullanılan kuralın benzersiz adı.

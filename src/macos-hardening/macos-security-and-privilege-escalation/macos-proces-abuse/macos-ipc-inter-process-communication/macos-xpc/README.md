@@ -4,23 +4,23 @@
 
 ## Temel Bilgiler
 
-XPC, macOS tarafından kullanılan XNU (çekirdek) arasındaki İletişim için bir çerçevedir ve **işlemler arasında iletişim** sağlar. XPC, sistemdeki farklı işlemler arasında **güvenli, asenkron yöntem çağrıları** yapma mekanizması sunar. Bu, her **bileşenin** işini yapmak için **sadece ihtiyaç duyduğu izinlerle** çalıştığı **ayrılmış ayrıcalıklarla uygulamaların** oluşturulmasına olanak tanıyan Apple'ın güvenlik paradigmasının bir parçasıdır ve böylece tehlikeye atılmış bir işlemin potansiyel zararını sınırlamaktadır.
+XPC, macOS tarafından kullanılan çekirdek olan XNU'nun (XNU stands for XNU) süreçler arası iletişim için bir çerçevedir. XPC, sistemdeki farklı süreçler arasında **güvenli, asenkron yöntem çağrıları** yapma mekanizması sağlar. Bu, her bir **bileşenin** işini yapmak için **gereken izinlerle** çalıştığı **ayrıcalık ayrılmış uygulamaların** oluşturulmasına olanak tanıyan Apple'ın güvenlik paradigmasının bir parçasıdır ve böylece tehlikeye atılmış bir sürecin potansiyel zararını sınırlamaktadır.
 
-XPC, aynı sistemde çalışan farklı programların veri göndermesi ve alması için bir dizi yöntem olan bir İletişim (IPC) biçimi kullanır.
+XPC, aynı sistemde çalışan farklı programların veri göndermesi ve alması için bir dizi yöntem olan bir tür Süreçler Arası İletişim (IPC) kullanır.
 
 XPC'nin temel faydaları şunlardır:
 
-1. **Güvenlik**: Çalışmayı farklı işlemlere ayırarak, her işleme yalnızca ihtiyaç duyduğu izinler verilebilir. Bu, bir işlem tehlikeye atılsa bile, zarar verme yeteneğinin sınırlı olduğu anlamına gelir.
-2. **Kararlılık**: XPC, çökme durumlarını meydana geldiği bileşene izole etmeye yardımcı olur. Bir işlem çökerse, sistemin geri kalanını etkilemeden yeniden başlatılabilir.
-3. **Performans**: XPC, farklı görevlerin farklı işlemlerde aynı anda çalıştırılmasına olanak tanıyarak kolay eşzamanlılık sağlar.
+1. **Güvenlik**: Çalışmayı farklı süreçlere ayırarak, her bir sürece yalnızca ihtiyaç duyduğu izinler verilebilir. Bu, bir süreç tehlikeye atılsa bile, zarar verme yeteneğinin sınırlı olduğu anlamına gelir.
+2. **Kararlılık**: XPC, çökme durumlarını meydana geldiği bileşene izole etmeye yardımcı olur. Bir süreç çökerse, sistemin geri kalanını etkilemeden yeniden başlatılabilir.
+3. **Performans**: XPC, farklı görevlerin farklı süreçlerde aynı anda çalıştırılmasına olanak tanıyarak kolay eşzamanlılık sağlar.
 
-Tek **dezavantaj**, **bir uygulamayı birkaç işleme ayırmanın** ve bunların XPC aracılığıyla iletişim kurmasının **daha az verimli** olmasıdır. Ancak günümüz sistemlerinde bu neredeyse fark edilmez ve faydalar daha iyidir.
+Tek **dezavantaj**, **bir uygulamayı birkaç sürece ayırmanın** ve bunların XPC aracılığıyla iletişim kurmasının **daha az verimli** olmasıdır. Ancak günümüz sistemlerinde bu neredeyse fark edilmez ve faydalar daha iyidir.
 
 ## Uygulama Özel XPC hizmetleri
 
-Bir uygulamanın XPC bileşenleri **uygulamanın kendisinin içindedir.** Örneğin, Safari'de bunları **`/Applications/Safari.app/Contents/XPCServices`** içinde bulabilirsiniz. **`.xpc`** uzantısına sahiptirler (örneğin **`com.apple.Safari.SandboxBroker.xpc`**) ve ana ikili dosya ile birlikte **paketler**: `/Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/MacOS/com.apple.Safari.SandboxBroker` ve bir `Info.plist: /Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/Info.plist`
+Bir uygulamanın XPC bileşenleri **uygulamanın kendisinin içindedir.** Örneğin, Safari'de bunları **`/Applications/Safari.app/Contents/XPCServices`** içinde bulabilirsiniz. **`.xpc`** uzantısına sahiptirler (örneğin **`com.apple.Safari.SandboxBroker.xpc`**) ve ana ikili dosya ile birlikte **paketler** halinde bulunurlar: `/Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/MacOS/com.apple.Safari.SandboxBroker` ve bir `Info.plist: /Applications/Safari.app/Contents/XPCServices/com.apple.Safari.SandboxBroker.xpc/Contents/Info.plist`
 
-Bir **XPC bileşeninin diğer XPC bileşenlerinden veya ana uygulama ikili dosyasından farklı haklara ve ayrıcalıklara sahip olacağını** düşünebilirsiniz. BİR XPC hizmeti, **Info.plist** dosyasında **JoinExistingSession** [**True**](https://developer.apple.com/documentation/bundleresources/information_property_list/xpcservice/joinexistingsession) olarak ayarlandığında hariçtir. Bu durumda, XPC hizmeti, onu çağıran uygulama ile **aynı güvenlik oturumunda** çalışacaktır.
+Bir **XPC bileşeninin**, diğer XPC bileşenlerinden veya ana uygulama ikili dosyasından farklı **haklara ve ayrıcalıklara sahip olacağını** düşünebilirsiniz. BİR XPC hizmeti, **Info.plist** dosyasında **JoinExistingSession** [**JoinExistingSession**](https://developer.apple.com/documentation/bundleresources/information_property_list/xpcservice/joinexistingsession) "True" olarak ayarlandığında hariçtir. Bu durumda, XPC hizmeti, onu çağıran uygulama ile **aynı güvenlik oturumunda** çalışacaktır.
 
 XPC hizmetleri, gerektiğinde **launchd** tarafından **başlatılır** ve tüm görevler **tamamlandığında** sistem kaynaklarını serbest bırakmak için **kapalı** tutulur. **Uygulama özel XPC bileşenleri yalnızca uygulama tarafından kullanılabilir**, böylece potansiyel güvenlik açıklarıyla ilişkili riski azaltır.
 
@@ -28,7 +28,7 @@ XPC hizmetleri, gerektiğinde **launchd** tarafından **başlatılır** ve tüm 
 
 Sistem genelindeki XPC hizmetleri tüm kullanıcılar tarafından erişilebilir. Bu hizmetler, ya launchd ya da Mach türünde olup, **`/System/Library/LaunchDaemons`**, **`/Library/LaunchDaemons`**, **`/System/Library/LaunchAgents`** veya **`/Library/LaunchAgents`** gibi belirli dizinlerde bulunan plist dosyalarında **tanımlanmalıdır.**
 
-Bu plist dosyalarında, hizmetin adıyla birlikte **`MachServices`** adında bir anahtar ve ikili dosyanın yolunu içeren **`Program`** adında bir anahtar bulunacaktır:
+Bu plist dosyaları, hizmetin adıyla birlikte **`MachServices`** adında bir anahtar ve ikili dosyanın yolunu içeren **`Program`** adında bir anahtar içerecektir:
 ```xml
 cat /Library/LaunchDaemons/com.jamf.management.daemon.plist
 
@@ -72,8 +72,8 @@ Her XPC mesajı, serileştirmeyi ve serileştirmeyi basitleştiren bir sözlük 
 Ayrıca, `xpc_copy_description(object)` fonksiyonu, hata ayıklama amaçları için yararlı olabilecek nesnenin bir dize temsilini almak için kullanılabilir.\
 Bu nesnelerin ayrıca `xpc_<object>_copy`, `xpc_<object>_equal`, `xpc_<object>_hash`, `xpc_<object>_serialize`, `xpc_<object>_deserialize` gibi çağrılacak bazı yöntemleri vardır...
 
-`xpc_object_t` nesneleri, `xpc_<objetType>_create` fonksiyonu çağrılarak oluşturulur; bu, nesnenin sınıf türünü (bir `XPC_TYPE_*`'dan biri) ve boyutunu (metadata için ekstra 40B eklenir) belirten `_xpc_base_create(Class, Size)` fonksiyonunu içten çağırır. Bu, nesnenin verilerinin 40B'lik bir ofsetten başlayacağı anlamına gelir.\
-Bu nedenle, `xpc_<objectType>_t`, `xpc_object_t`'nin bir alt sınıfı gibi olup, `os_object_t*`'nin bir alt sınıfıdır.
+`xpc_object_t` nesneleri, `xpc_<objetType>_create` fonksiyonu çağrılarak oluşturulur; bu, nesnenin sınıf türünü (bir `XPC_TYPE_*` türü) ve boyutunu (metadata için ekstra 40B eklenir) belirten `_xpc_base_create(Class, Size)` fonksiyonunu içten çağırır. Bu, nesnenin verilerinin 40B'lik bir ofsetten başlayacağı anlamına gelir.\
+Bu nedenle, `xpc_<objectType>_t`, `xpc_object_t`'nin bir alt sınıfı gibi olup, `os_object_t*`'nin bir alt sınıfı olacaktır.
 
 > [!WARNING]
 > Anahtarın türünü ve gerçek değerini almak veya ayarlamak için `xpc_dictionary_[get/set]_<objectType>` kullananın geliştirici olması gerektiğini unutmayın.
@@ -99,7 +99,7 @@ XPC, mesajları iletmek için GCD kullanır, ayrıca `xpc.transactionq`, `xpc.io
 ## XPC Hizmetleri
 
 Bunlar, diğer projelerin **`XPCServices`** klasöründe bulunan **`.xpc`** uzantılı paketlerdir ve `Info.plist` dosyasında `CFBundlePackageType` **`XPC!`** olarak ayarlanmıştır.\
-Bu dosya, uygulama, kullanıcı, sistem veya bir sandbox tanımlayabilen `_SandboxProfile` gibi diğer yapılandırma anahtarlarına sahiptir veya hizmete erişmek için gerekli olan yetkilendirmeleri veya kimlikleri belirtebilen `_AllowedClients` anahtarına sahiptir. Bu ve diğer yapılandırma seçenekleri, hizmet başlatıldığında yapılandırmak için yararlı olacaktır.
+Bu dosya, uygulama, kullanıcı, sistem veya bir sandbox tanımlayabilen `_SandboxProfile` gibi diğer yapılandırma anahtarlarına sahiptir veya hizmete erişmek için gerekli olan yetkilendirmeleri veya kimlikleri belirtebilecek `_AllowedClients` anahtarına sahiptir. Bu ve diğer yapılandırma seçenekleri, hizmet başlatıldığında yapılandırmak için yararlı olacaktır.
 
 ### Bir Hizmeti Başlatma
 
@@ -116,7 +116,7 @@ XPC kütüphanesi, `xpc_ktrace_pid0` ve `xpc_ktrace_pid1` çağrılarıyla eylem
 
 ## XPC Olay Mesajları
 
-Uygulamalar, böyle olaylar gerçekleştiğinde **talep üzerine başlatılmalarını** sağlayan farklı olay **mesajlarına** **abone** olabilirler. Bu hizmetlerin **kurulumu**, **önceki dosyalarla aynı dizinlerde** bulunan **launchd plist dosyalarında** yapılır ve ekstra bir **`LaunchEvent`** anahtarı içerir.
+Uygulamalar, böyle olaylar gerçekleştiğinde **talep üzerine başlatılabilen** farklı olay **mesajlarına** **abone** olabilirler. Bu hizmetlerin **kurulumu**, **önceki dosyalarla aynı dizinlerde** bulunan **launchd plist dosyalarında** yapılır ve ekstra bir **`LaunchEvent`** anahtarı içerir.
 
 ### XPC Bağlantı Süreci Kontrolü
 
@@ -128,7 +128,7 @@ macos-xpc-connecting-process-check/
 
 ## XPC Yetkilendirmesi
 
-Apple, uygulamaların **bazı hakları yapılandırmalarına ve bunları nasıl alacaklarına** izin verir, böylece çağrılan süreç bu haklara sahipse, XPC hizmetinden bir yöntemi **çağırmasına izin verilir**:
+Apple, uygulamaların **bazı hakları yapılandırmasına ve bunları nasıl alacaklarına** izin verir, böylece çağrılan süreç bu haklara sahipse, XPC hizmetinden bir yöntemi **çağırmasına izin verilir**:
 
 {{#ref}}
 macos-xpc-authorization.md
@@ -149,7 +149,7 @@ xpcspy -U <prog-name> -t 'i:com.apple.*' -t 'o:com.apple.*' -r
 ```
 Başka bir kullanılabilir araç [**XPoCe2**](https://newosxbook.com/tools/XPoCe2.html).
 
-## XPC İletişim C Kodu Örneği
+## XPC İletişimi C Kodu Örneği
 
 {{#tabs}}
 {{#tab name="xpc_server.c"}}

@@ -4,7 +4,7 @@
 
 ## Sayım
 
-Sisteminizde yüklü Java uygulamalarını bulun. **Info.plist** dosyasındaki Java uygulamalarının **`java.`** dizesini içeren bazı java parametreleri barındırdığı gözlemlenmiştir, bu yüzden bunun için arama yapabilirsiniz:
+Sisteminizde yüklü Java uygulamalarını bulun. **Info.plist** içindeki Java uygulamalarının **`java.`** dizesini içeren bazı java parametreleri barındırdığı gözlemlenmiştir, bu nedenle bunun için arama yapabilirsiniz:
 ```bash
 # Search only in /Applications folder
 sudo find /Applications -name 'Info.plist' -exec grep -l "java\." {} \; 2>/dev/null
@@ -14,7 +14,7 @@ sudo find / -name 'Info.plist' -exec grep -l "java\." {} \; 2>/dev/null
 ```
 ## \_JAVA_OPTIONS
 
-Env değişkeni **`_JAVA_OPTIONS`** bir java derlenmiş uygulamasının yürütülmesinde rastgele java parametreleri enjekte etmek için kullanılabilir:
+Env değişkeni **`_JAVA_OPTIONS`** bir java derlenmiş uygulamasının yürütülmesinde keyfi java parametrelerini enjekte etmek için kullanılabilir:
 ```bash
 # Write your payload in a script called /tmp/payload.sh
 export _JAVA_OPTIONS='-Xms2m -Xmx5m -XX:OnOutOfMemoryError="/tmp/payload.sh"'
@@ -102,7 +102,7 @@ err.printStackTrace();
 }
 }
 ```
-Ajanı derlemek için çalıştırın:
+Ajanı derlemek için şunu çalıştırın:
 ```bash
 javac Agent.java # Create Agent.class
 jar cvfm Agent.jar manifest.txt Agent.class # Create Agent.jar
@@ -149,6 +149,6 @@ sudo eslogger lookup | grep vmoption # Give FDA to the Terminal
 # Launch the Java app
 /Applications/Android\ Studio.app/Contents/MacOS/studio
 ```
-Android Studio'nun bu örnekte **`/Applications/Android Studio.app.vmoptions`** dosyasını yüklemeye çalışmasının ne kadar ilginç olduğunu not edin; bu, **`admin`** grubundaki herhangi bir kullanıcının yazma erişimine sahip olduğu bir yerdir. 
+Android Studio'nun bu örnekte **`/Applications/Android Studio.app.vmoptions`** dosyasını yüklemeye çalışmasının ne kadar ilginç olduğunu not edin; bu, **`admin` grubundaki** herhangi bir kullanıcının yazma erişimine sahip olduğu bir yerdir. 
 
 {{#include ../../../banners/hacktricks-training.md}}

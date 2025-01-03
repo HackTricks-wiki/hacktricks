@@ -2,17 +2,17 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**Bu, [https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/](https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/) adresindeki gönderinin bir özetidir. Daha fazla ayrıntı için kontrol edin!**
+**Bu, [https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/](https://blog.xpnsec.com/macos-injection-via-third-party-frameworks/) gönderisinin bir özetidir. Daha fazla ayrıntı için kontrol edin!**
 
 ## .NET Core Hata Ayıklama <a href="#net-core-debugging" id="net-core-debugging"></a>
 
 ### **Hata Ayıklama Oturumu Kurma** <a href="#net-core-debugging" id="net-core-debugging"></a>
 
-.NET'te hata ayıklayıcı ve hata ayıklanan arasındaki iletişimin yönetimi [**dbgtransportsession.cpp**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp) tarafından yapılmaktadır. Bu bileşen, [dbgtransportsession.cpp#L127](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L127) adresinde görüldüğü gibi her .NET işlemi için iki adlandırılmış boru kurar ve bu borular [twowaypipe.cpp#L27](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/debug-pal/unix/twowaypipe.cpp#L27) aracılığıyla başlatılır. Bu borular **`-in`** ve **`-out`** ile sonlandırılır.
+.NET'te hata ayıklayıcı ve hata ayıklanan arasındaki iletişimin yönetimi [**dbgtransportsession.cpp**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp) tarafından yapılmaktadır. Bu bileşen, [dbgtransportsession.cpp#L127](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L127) adresinde görüldüğü gibi her .NET işlemi için iki adlandırılmış boru kurar ve bunlar [twowaypipe.cpp#L27](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/debug-pal/unix/twowaypipe.cpp#L27) aracılığıyla başlatılır. Bu borular **`-in`** ve **`-out`** ile sonlandırılır.
 
 Kullanıcının **`$TMPDIR`** dizinine giderek, .Net uygulamalarını hata ayıklamak için mevcut olan hata ayıklama FIFO'larını bulabilirsiniz.
 
-[**DbgTransportSession::TransportWorker**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L1259) bir hata ayıklayıcıdan gelen iletişimi yönetmekten sorumludur. Yeni bir hata ayıklama oturumu başlatmak için, bir hata ayıklayıcının `out` borusu aracılığıyla `MessageHeader` yapısıyla başlayan bir mesaj göndermesi gerekir; bu yapı .NET kaynak kodunda ayrıntılı olarak açıklanmıştır:
+[**DbgTransportSession::TransportWorker**](https://github.com/dotnet/runtime/blob/0633ecfb79a3b2f1e4c098d1dd0166bc1ae41739/src/coreclr/debug/shared/dbgtransportsession.cpp#L1259) bir hata ayıklayıcıdan gelen iletişimi yönetmekten sorumludur. Yeni bir hata ayıklama oturumu başlatmak için, bir hata ayıklayıcı `out` borusu aracılığıyla `MessageHeader` yapısıyla başlayan bir mesaj göndermelidir; bu yapı .NET kaynak kodunda ayrıntılı olarak açıklanmıştır:
 ```c
 struct MessageHeader {
 MessageType   m_eType;        // Message type
@@ -31,7 +31,7 @@ DWORD         m_dwMinorVersion;
 BYTE          m_sMustBeZero[8];
 }
 ```
-Yeni bir oturum talep etmek için, bu yapı aşağıdaki gibi doldurulur, mesaj türü `MT_SessionRequest` ve protokol sürümü mevcut sürüme ayarlanır:
+Yeni bir oturum talep etmek için, bu yapı aşağıdaki gibi doldurulur, mesaj türü `MT_SessionRequest` ve protokol sürümü mevcut sürüm olarak ayarlanır:
 ```c
 static const DWORD kCurrentMajorVersion = 2;
 static const DWORD kCurrentMinorVersion = 0;

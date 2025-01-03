@@ -142,7 +142,7 @@ fclose(stderr); // Close the file stream
 {{#endtab}}
 
 {{#tab name="Shell"}}
-`$HOME/Dowloads`'ı `/tmp/downloads`'a kopyalayın.
+`$HOME/Dowloads`'ı `/tmp/downloads`'a kopyala.
 ```bash
 cp -r "$HOME/Downloads" "/tmp/downloads"
 ```
@@ -254,7 +254,7 @@ cp -r "$HOME/Library/Application Support/AddressBook" "/tmp/contacts"
 
 {{#tabs}}
 {{#tab name="ObjectiveC"}}
-`$HOME/Library/Calendars`'ı `/tmp/calendars`'a kopyalayın.
+`$HOME/Library/Calendars`'ı `/tmp/calendars`'a kopyala.
 ```objectivec
 #include <syslog.h>
 #include <stdio.h>
@@ -303,7 +303,7 @@ cp -r "$HOME/Library/Calendars" "/tmp/calendars"
 
 {{#tabs}}
 {{#tab name="ObjetiveC - Kaydet"}}
-3 saniyelik bir video kaydedin ve **`/tmp/recording.mov`** konumuna kaydedin.
+3 saniyelik bir video kaydedin ve **`/tmp/recording.mov`** konumuna kaydedin
 ```objectivec
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
@@ -713,7 +713,7 @@ screencapture -V 5 /tmp/screen.mov
 - **Yetki**: Yok
 - **TCC**: `kTCCServiceAccessibility`
 
-Finder'ın kontrolünü kabul etmek için TCC ayrıcalığını kullanarak enter tuşuna basın ve bu şekilde TCC'yi atlayın.
+Finder kontrolünü kabul etmek için TCC ayrıcalığını kullanarak enter tuşuna basın ve bu şekilde TCC'yi atlayın.
 
 {{#tabs}}
 {{#tab name="TCC'yi Kabul Et"}}
@@ -877,6 +877,6 @@ return 0;
 {{#endtab}}
 {{#endtabs}}
 
-> [!CAUTION] > **Erişilebilirlik çok güçlü bir izindir**, bunu başka şekillerde kötüye kullanabilirsiniz, örneğin **tuş vuruşu saldırısını** sadece bununla gerçekleştirebilirsiniz, System Events'i çağırmanıza gerek kalmadan.
+> [!CAUTION] > **Erişilebilirlik çok güçlü bir izindir**, bunu başka şekillerde kötüye kullanabilirsiniz, örneğin **tuş vuruşları saldırısını** sadece bununla gerçekleştirebilirsiniz, System Events'i çağırmanıza gerek kalmadan.
 
 {{#include ../../../../banners/hacktricks-training.md}}

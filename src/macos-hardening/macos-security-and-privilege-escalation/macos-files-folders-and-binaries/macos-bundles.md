@@ -8,19 +8,19 @@ macOS'taki paketler, uygulamalar, kütüphaneler ve diğer gerekli dosyalar dahi
 
 ### Bir Paketin Temel Bileşenleri
 
-Bir paket içinde, özellikle `<application>.app/Contents/` dizininde, çeşitli önemli kaynaklar barındırılır:
+Bir paket içinde, özellikle `<application>.app/Contents/` dizininde, çeşitli önemli kaynaklar bulunmaktadır:
 
 - **\_CodeSignature**: Bu dizin, uygulamanın bütünlüğünü doğrulamak için hayati öneme sahip kod imzalama detaylarını saklar. Kod imzalama bilgilerini incelemek için şu komutları kullanabilirsiniz: %%%bash openssl dgst -binary -sha1 /Applications/Safari.app/Contents/Resources/Assets.car | openssl base64 %%%
 - **MacOS**: Kullanıcı etkileşimi sırasında çalışan uygulamanın yürütülebilir ikili dosyasını içerir.
 - **Resources**: Uygulamanın kullanıcı arayüzü bileşenleri için bir depo, resimler, belgeler ve arayüz tanımları (nib/xib dosyaları) içerir.
-- **Info.plist**: Uygulamanın ana yapılandırma dosyası olarak işlev görür ve sistemin uygulamayı uygun şekilde tanıması ve etkileşimde bulunması için kritik öneme sahiptir.
+- **Info.plist**: Uygulamanın ana yapılandırma dosyası olarak işlev görür, sistemin uygulamayı uygun şekilde tanıması ve etkileşimde bulunması için kritik öneme sahiptir.
 
 #### Info.plist İçindeki Önemli Anahtarlar
 
 `Info.plist` dosyası, uygulama yapılandırması için bir köşe taşıdır ve aşağıdaki gibi anahtarlar içerir:
 
 - **CFBundleExecutable**: `Contents/MacOS` dizininde bulunan ana yürütülebilir dosyanın adını belirtir.
-- **CFBundleIdentifier**: Uygulama için küresel bir tanımlayıcı sağlar ve macOS tarafından uygulama yönetimi için yaygın olarak kullanılır.
+- **CFBundleIdentifier**: Uygulama için küresel bir tanımlayıcı sağlar, macOS tarafından uygulama yönetimi için yaygın olarak kullanılır.
 - **LSMinimumSystemVersion**: Uygulamanın çalışması için gereken minimum macOS sürümünü belirtir.
 
 ### Paketleri Keşfetmek
@@ -33,7 +33,7 @@ Bu keşif, `_CodeSignature`, `MacOS`, `Resources` gibi dizinleri ve `Info.plist`
 
 Yaygın dizinlerin ötesinde, paketler ayrıca şunları içerebilir:
 
-- **Frameworks**: Uygulama tarafından kullanılan paketlenmiş çerçeveleri içerir. Çerçeveler, ekstra kaynaklara sahip dylib'ler gibidir.
+- **Frameworks**: Uygulama tarafından kullanılan paketlenmiş çerçeveleri içerir. Çerçeveler, ekstra kaynaklarla birlikte dylib gibidir.
 - **PlugIns**: Uygulamanın yeteneklerini artıran eklentiler ve uzantılar için bir dizin.
 - **XPCServices**: Uygulama tarafından dış süreç iletişimi için kullanılan XPC hizmetlerini barındırır.
 

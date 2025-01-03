@@ -4,7 +4,7 @@
 
 ## AppleMobileFileIntegrity.kext ve amfid
 
-Sistemde çalışan kodun bütünlüğünü sağlamak için XNU'nun kod imzası doğrulama mantığını sunar. Ayrıca, yetkilendirmeleri kontrol edebilir ve hata ayıklama veya görev bağlantı noktalarını elde etme gibi diğer hassas görevleri yönetebilir.
+Sistemde çalışan kodun bütünlüğünü sağlamak için XNU'nun kod imzası doğrulama mantığını sunar. Ayrıca, yetkilendirmeleri kontrol edebilir ve hata ayıklama veya görev portlarını elde etme gibi diğer hassas görevleri yönetebilir.
 
 Ayrıca, bazı işlemler için kext, kullanıcı alanında çalışan daemon `/usr/libexec/amfid` ile iletişim kurmayı tercih eder. Bu güven ilişkisi, birkaç jailbreak'te kötüye kullanılmıştır.
 
@@ -27,17 +27,17 @@ Kaydettiği bazı MACF politikaları şunlardır:
 - **`file_check_library_validation`**: Kütüphane doğrulama fonksiyonunu çağırır; bu, diğer şeylerin yanı sıra, bir platform ikili dosyasının başka bir platform ikili dosyasını yükleyip yüklemediğini veya sürecin ve yeni yüklenen dosyanın aynı TeamID'ye sahip olup olmadığını kontrol eder. Belirli yetkilendirmeler, herhangi bir kütüphaneyi yüklemeye de izin verecektir.
 - **`policy_initbsd`**: Güvenilir NVRAM Anahtarlarını ayarlar
 - **`policy_syscall`**: İkili dosyanın sınırsız segmentlere sahip olup olmadığını, çevresel değişkenlere izin verilip verilmediğini kontrol eder... bu, bir süreç `amfi_check_dyld_policy_self()` ile başlatıldığında da çağrılır.
-- **`proc_check_inherit_ipc_ports`**: Bir süreç yeni bir ikili dosya çalıştırdığında, diğer süreçlerin sürecin görev bağlantı noktası üzerindeki SEND haklarını koruyup korumayacağını kontrol eder. Platform ikili dosyalarına izin verilir, `get-task-allow` yetkilendirmesi buna izin verir, `task_for_pid-allow` yetkilendirmeleri izinlidir ve aynı TeamID'ye sahip ikili dosyalar.
+- **`proc_check_inherit_ipc_ports`**: Bir süreç yeni bir ikili dosya çalıştırdığında, diğer süreçlerin sürecin görev portu üzerindeki SEND haklarını koruyup korumayacağını kontrol eder. Platform ikili dosyalarına izin verilir, `get-task-allow` yetkilendirmesi buna izin verir, `task_for_pid-allow` yetkilendirmeleri izinlidir ve aynı TeamID'ye sahip ikili dosyalar.
 - **`proc_check_expose_task`**: Yetkilendirmeleri zorlar
 - **`amfi_exc_action_check_exception_send`**: Bir istisna mesajı hata ayıklayıcıya gönderilir
 - **`amfi_exc_action_label_associate & amfi_exc_action_label_copy/populate & amfi_exc_action_label_destroy & amfi_exc_action_label_init & amfi_exc_action_label_update`**: İstisna işleme sırasında etiket yaşam döngüsü (hata ayıklama)
-- **`proc_check_get_task`**: `get-task-allow` gibi yetkilendirmeleri kontrol eder; bu, diğer süreçlerin görev bağlantı noktalarını almasına izin verir ve `task_for_pid-allow`, bu da sürecin diğer süreçlerin görev bağlantı noktalarını almasına izin verir. Hiçbiri yoksa, `amfid permitunrestricteddebugging`'i çağırarak izin verilip verilmediğini kontrol eder.
-- **`proc_check_mprotect`**: `mprotect` çağrıldığında `VM_PROT_TRUSTED` bayrağı ile reddeder; bu, bölgenin geçerli bir kod imzası varmış gibi muamele edilmesi gerektiğini gösterir.
-- **`vnode_check_exec`**: Çalıştırılabilir dosyalar belleğe yüklendiğinde çağrılır ve `cs_hard | cs_kill` ayarlarını yapar; bu, sayfalardan herhangi biri geçersiz hale gelirse süreci öldürecektir.
+- **`proc_check_get_task`**: `get-task-allow` gibi yetkilendirmeleri kontrol eder; bu, diğer süreçlerin görev portlarını almasına izin verir ve `task_for_pid-allow`, bu da sürecin diğer süreçlerin görev portlarını almasına izin verir. Eğer bunlardan hiçbiri yoksa, `amfid permitunrestricteddebugging`'i çağırarak izin verilip verilmediğini kontrol eder.
+- **`proc_check_mprotect`**: `mprotect` çağrıldığında `VM_PROT_TRUSTED` bayrağı ile reddeder; bu, bölgenin geçerli bir kod imzasına sahipmiş gibi muamele edilmesi gerektiğini gösterir.
+- **`vnode_check_exec`**: Çalıştırılabilir dosyalar belleğe yüklendiğinde çağrılır ve `cs_hard | cs_kill` ayarlarını yapar; bu, herhangi bir sayfa geçersiz hale gelirse süreci öldürecektir.
 - **`vnode_check_getextattr`**: MacOS: `com.apple.root.installed` ve `isVnodeQuarantined()` kontrol eder
 - **`vnode_check_setextattr`**: Get + com.apple.private.allow-bless ve internal-installer-equivalent yetkilendirmesi
 - &#x20;**`vnode_check_signature`**: Yetkilendirmeleri, güvenilir önbelleği ve `amfid` kullanarak kod imzasını kontrol etmek için XNU'yu çağıran kod
-- &#x20;**`proc_check_run_cs_invalid`**: `ptrace()` çağrılarını (`PT_ATTACH` ve `PT_TRACE_ME`) engeller. `get-task-allow`, `run-invalid-allow` ve `run-unsigned-code` gibi herhangi bir yetkilendirmeyi kontrol eder ve hiçbiri yoksa, hata ayıklamanın izinli olup olmadığını kontrol eder.
+- &#x20;**`proc_check_run_cs_invalid`**: `ptrace()` çağrılarını (`PT_ATTACH` ve `PT_TRACE_ME`) keser. `get-task-allow`, `run-invalid-allow` ve `run-unsigned-code` gibi herhangi bir yetkilendirmeyi kontrol eder ve eğer hiçbiri yoksa, hata ayıklamanın izinli olup olmadığını kontrol eder.
 - **`proc_check_map_anon`**: mmap **`MAP_JIT`** bayrağı ile çağrıldığında, AMFI `dynamic-codesigning` yetkilendirmesini kontrol eder.
 
 `AMFI.kext` ayrıca diğer çekirdek uzantıları için bir API sunar ve bağımlılıklarını bulmak mümkündür:
@@ -68,11 +68,11 @@ No variant specified, falling back to release
 Bu, `AMFI.kext`'in kullanıcı modunda kod imzalarını kontrol etmek için kullanacağı kullanıcı modu çalışan daemon'dur.\
 `AMFI.kext`'in daemon ile iletişim kurması için `HOST_AMFID_PORT` üzerinden mach mesajları kullanır; bu özel port `18`'dir.
 
-macOS'ta kök süreçlerin özel portları ele geçirmesi artık mümkün değildir çünkü bunlar `SIP` tarafından korunmaktadır ve yalnızca launchd bunlara erişebilir. iOS'ta, yanıtı geri gönderen sürecin `amfid`'nin CDHash'inin hardcoded olduğu kontrol edilir.
+macOS'ta root süreçlerin özel portları ele geçirmesi artık mümkün değildir çünkü bunlar `SIP` tarafından korunmaktadır ve yalnızca launchd bunlara erişebilir. iOS'ta, yanıtı geri gönderen sürecin `amfid`'nin CDHash'inin hardcoded olduğu kontrol edilir.
 
-`amfid`'in bir ikiliyi kontrol etmesi istendiğinde ve bunun yanıtını görmek mümkündür; bunu hata ayıklayarak ve `mach_msg` içinde bir kesme noktası ayarlayarak yapabilirsiniz.
+`amfid`'in bir ikiliyi kontrol etmesi istendiğinde ve yanıtı alındığında, bunu hata ayıklayarak ve `mach_msg` içinde bir kesme noktası ayarlayarak görmek mümkündür.
 
-Özel port üzerinden bir mesaj alındığında **MIG**, her işlevi çağırdığı işlevine göndermek için kullanılır. Ana işlevler tersine mühendislik ile çözümlenmiş ve kitapta açıklanmıştır.
+Özel port üzerinden bir mesaj alındığında **MIG**, her fonksiyonu çağırdığı fonksiyona göndermek için kullanılır. Ana fonksiyonlar tersine mühendislik ile çözüldü ve kitapta açıklandı.
 
 ## Provisioning Profiles
 
@@ -88,10 +88,10 @@ openssl asn1parse -inform der -in /path/to/profile
 
 security cms -D -i /path/to/profile
 ```
-Bu provisioning profilleri bazen sertifikalı olarak adlandırılsa da, bunların bir sertifikadan daha fazlası vardır:
+Bu provisioning profilleri bazen sertifikalı olarak adlandırılsa da, bunlar bir sertifikadan daha fazlasını içerir:
 
 - **AppIDName:** Uygulama Tanımlayıcısı
-- **AppleInternalProfile**: Bunu Apple İç profili olarak belirler
+- **AppleInternalProfile**: Bunu bir Apple İç profil olarak belirler
 - **ApplicationIdentifierPrefix**: AppIDName'e eklenir (TeamIdentifier ile aynı)
 - **CreationDate**: `YYYY-MM-DDTHH:mm:ssZ` formatında tarih
 - **DeveloperCertificates**: Base64 verisi olarak kodlanmış (genellikle bir) sertifika dizisi
@@ -116,9 +116,9 @@ Bu, `amfid`'in bir şeyin izin verilip verilmeyeceğini sormak için çağırdı
 
 macOS'ta bu `MobileDevice.framework` içinde yer alır.
 
-## AMFI Güven Trust Cache'leri
+## AMFI Güven Caches
 
-iOS AMFI, ad-hoc imzalanmış bilinen hash'lerin bir listesini, **Trust Cache** olarak adlandırılan ve kext'in `__TEXT.__const` bölümünde bulunan bir listeyi sürdürmektedir. Çok özel ve hassas işlemlerde, bu Trust Cache'i bir dış dosya ile genişletmek mümkündür.
+iOS AMFI, ad-hoc imzalanmış bilinen hash'lerin bir listesini, **Güven Cache** olarak adlandırılan ve kext'in `__TEXT.__const` bölümünde bulunan bir listeyi sürdürmektedir. Çok özel ve hassas işlemlerde, bu Güven Cache'i bir dış dosya ile genişletmek mümkündür.
 
 ## Referanslar
 

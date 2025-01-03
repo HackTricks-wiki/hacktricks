@@ -4,7 +4,7 @@
 
 ## Gatekeeper
 
-Gatekeeper genellikle **Quarantine + Gatekeeper + XProtect** kombinasyonunu ifade etmek için kullanılır; bu, kullanıcıların **potansiyel olarak zararlı yazılımları çalıştırmalarını engellemeye** çalışan 3 macOS güvenlik modülüdür.
+Gatekeeper genellikle **Quarantine + Gatekeeper + XProtect** kombinasyonunu ifade etmek için kullanılır; bu, potansiyel olarak kötü niyetli yazılımların çalıştırılmasını **önlemeye** çalışan 3 macOS güvenlik modülüdür.
 
 Daha fazla bilgi için:
 
@@ -24,7 +24,7 @@ macos-sip.md
 
 ### Sandbox
 
-MacOS Sandbox, sandbox içinde çalışan uygulamaları, uygulamanın çalıştığı Sandbox profilinde belirtilen **izin verilen eylemlerle** sınırlamaktadır. Bu, **uygulamanın yalnızca beklenen kaynaklara erişmesini** sağlamaya yardımcı olur.
+MacOS Sandbox, sandbox içinde çalışan uygulamaları, uygulamanın çalıştığı Sandbox profilinde belirtilen **izin verilen eylemlerle** **sınırlamaktadır**. Bu, **uygulamanın yalnızca beklenen kaynaklara erişmesini** sağlamaya yardımcı olur.
 
 {{#ref}}
 macos-sandbox/
@@ -40,7 +40,7 @@ macos-tcc/
 
 ### Başlatma/Ortam Kısıtlamaları ve Güven Cache'i
 
-macOS'taki başlatma kısıtlamaları, bir sürecin **başlatılmasını düzenlemek** için bir güvenlik özelliğidir; **kimin** bir süreci başlatabileceğini, **nasıl** ve **nereden** tanımlayarak. macOS Ventura ile tanıtılan bu özellikler, sistem ikili dosyalarını bir **güven cache'i** içinde kısıtlama kategorilerine ayırır. Her yürütülebilir ikili dosya, **başlatma** için belirli **kurallara** sahiptir; bunlar arasında **kendisi**, **ebeveyn** ve **sorumlu** kısıtlamaları bulunur. macOS Sonoma'da üçüncü taraf uygulamalara **Ortam** Kısıtlamaları olarak genişletilen bu özellikler, süreç başlatma koşullarını yöneterek potansiyel sistem istismarlarını azaltmaya yardımcı olur.
+macOS'taki başlatma kısıtlamaları, bir sürecin **başlatılmasını düzenlemek** için bir güvenlik özelliğidir; **kimin** bir süreci başlatabileceğini, **nasıl** ve **nereden** tanımlayarak. macOS Ventura ile tanıtılan bu özellikler, sistem ikili dosyalarını bir **güven cache'i** içinde kısıtlama kategorilerine ayırır. Her yürütülebilir ikili dosya, **başlatma** için belirli **kurallara** sahiptir; bunlar arasında **kendisi**, **ebeveyni** ve **sorumlu** kısıtlamaları bulunur. macOS Sonoma'da üçüncü taraf uygulamalara **Ortam** Kısıtlamaları olarak genişletilen bu özellikler, süreç başlatma koşullarını yöneterek potansiyel sistem istismarlarını azaltmaya yardımcı olur.
 
 {{#ref}}
 macos-launch-environment-constraints.md
@@ -48,28 +48,28 @@ macos-launch-environment-constraints.md
 
 ## MRT - Kötü Amaçlı Yazılım Kaldırma Aracı
 
-Kötü Amaçlı Yazılım Kaldırma Aracı (MRT), macOS'un güvenlik altyapısının bir parçasıdır. Adından da anlaşılacağı gibi, MRT'nin ana işlevi **bilinen kötü amaçlı yazılımları enfekte olmuş sistemlerden kaldırmaktır**.
+Kötü Amaçlı Yazılım Kaldırma Aracı (MRT), macOS'un güvenlik altyapısının bir parçasıdır. Adından da anlaşılacağı gibi, MRT'nin ana işlevi, **enfekte sistemlerden bilinen kötü amaçlı yazılımları kaldırmaktır**.
 
-Bir Mac'te kötü amaçlı yazılım tespit edildiğinde (ya XProtect ya da başka bir yöntemle), MRT otomatik olarak **kötü amaçlı yazılımı kaldırmak için** kullanılabilir. MRT, arka planda sessizce çalışır ve genellikle sistem güncellendiğinde veya yeni bir kötü amaçlı yazılım tanımı indirildiğinde çalışır (MRT'nin kötü amaçlı yazılımı tespit etmek için kurallarının ikilinin içinde olduğu görünmektedir).
+Bir Mac'te kötü amaçlı yazılım tespit edildiğinde (ya XProtect ya da başka bir yöntemle), MRT otomatik olarak **kötü amaçlı yazılımı kaldırmak için** kullanılabilir. MRT, arka planda sessizce çalışır ve genellikle sistem güncellendiğinde veya yeni bir kötü amaçlı yazılım tanımı indirildiğinde çalışır (MRT'nin kötü amaçlı yazılımı tespit etmek için kurallarının ikili dosyanın içinde olduğu görünmektedir).
 
-Hem XProtect hem de MRT, macOS'un güvenlik önlemlerinin bir parçası olmasına rağmen, farklı işlevler yerine getirir:
+Hem XProtect hem de MRT, macOS'un güvenlik önlemlerinin bir parçası olmasına rağmen, farklı işlevler yerine getirirler:
 
-- **XProtect**, önleyici bir araçtır. **İndirilen dosyaları kontrol eder** (belirli uygulamalar aracılığıyla) ve bilinen kötü amaçlı yazılım türlerini tespit ederse, dosyanın **açılmasını engeller**, böylece kötü amaçlı yazılımın sisteminizi enfekte etmesini önler.
-- **MRT** ise **reaktif bir araçtır**. Kötü amaçlı yazılım bir sistemde tespit edildikten sonra çalışır ve amacı, sistemin temizlenmesi için zararlı yazılımı kaldırmaktır.
+- **XProtect**, önleyici bir araçtır. Dosyaları **indirilirken kontrol eder** (belirli uygulamalar aracılığıyla) ve bilinen kötü amaçlı yazılım türlerini tespit ederse, dosyanın **açılmasını engeller**, böylece kötü amaçlı yazılımın sisteminizi ilk etapta enfekte etmesini önler.
+- **MRT** ise, **reaktif bir araçtır**. Kötü amaçlı yazılım bir sistemde tespit edildikten sonra çalışır ve amacı, sistemin temizlenmesi için sorunlu yazılımı kaldırmaktır.
 
 MRT uygulaması **`/Library/Apple/System/Library/CoreServices/MRT.app`** konumundadır.
 
 ## Arka Plan Görevleri Yönetimi
 
-**macOS**, artık her seferinde bir aracın **kod yürütmesini sürdürmek için bilinen bir tekniği** (Login Items, Daemons gibi) kullandığında kullanıcıyı **uyarıyor**, böylece kullanıcı **hangi yazılımın sürdüğünü** daha iyi biliyor.
+**macOS**, artık her seferinde bir aracın bilinen bir **teknik kullanarak kod yürütmesini sürdürdüğünde** (örneğin Giriş Öğeleri, Daemon'lar...) kullanıcıyı bilgilendirir, böylece kullanıcı **hangi yazılımın sürdüğünü** daha iyi bilir.
 
 <figure><img src="../../../images/image (1183).png" alt=""><figcaption></figcaption></figure>
 
 Bu, `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/backgroundtaskmanagementd` konumundaki bir **daemon** ile çalışır ve **ajan** `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Support/BackgroundTaskManagementAgent.app` konumundadır.
 
-**`backgroundtaskmanagementd`**'nin bir şeyin kalıcı bir klasörde yüklü olduğunu bilmesinin yolu, **FSEvents** alarak ve bunlar için bazı **işleyiciler** oluşturarak gerçekleşir.
+**`backgroundtaskmanagementd`**'nin bir şeyin kalıcı bir klasörde yüklü olduğunu bilme şekli, **FSEvents** alarak ve bunlar için bazı **işleyiciler** oluşturarak gerçekleşir.
 
-Ayrıca, sıkça kalıcı olan **bilinen uygulamaları** içeren bir plist dosyası vardır; bu dosya Apple tarafından yönetilmektedir ve konumu: `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/attributions.plist`
+Ayrıca, sıkça kalıcı olan **bilinen uygulamaları** içeren bir plist dosyası vardır; bu dosya Apple tarafından yönetilmektedir ve konumu: `/System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Versions/A/Resources/attributions.plist`'dir.
 ```json
 [...]
 "us.zoom.ZoomDaemon" => {
@@ -92,7 +92,7 @@ Apple cli aracını kullanarak **tüm** yapılandırılmış arka plan öğeleri
 # The tool will always ask for the users password
 sfltool dumpbtm
 ```
-Ayrıca, bu bilgileri [**DumpBTM**](https://github.com/objective-see/DumpBTM) ile listelemek de mümkündür.
+Ayrıca, bu bilgiyi [**DumpBTM**](https://github.com/objective-see/DumpBTM) ile listelemek de mümkündür.
 ```bash
 # You need to grant the Terminal Full Disk Access for this to work
 chmod +x dumpBTM

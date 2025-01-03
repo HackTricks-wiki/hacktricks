@@ -28,7 +28,7 @@ PERL5LIB=/tmp/ PERL5OPT=-Mpmod
 ```
 ## Bağımlılıklar aracılığıyla
 
-Perl'in çalıştırdığı bağımlılık klasör sırasını listelemek mümkündür:
+Perl'in çalıştığı bağımlılık klasör sırasını listelemek mümkündür:
 ```bash
 perl -e 'print join("\n", @INC)'
 ```
@@ -44,10 +44,10 @@ Bu, şöyle bir şey döndürecektir:
 /System/Library/Perl/Extras/5.30/darwin-thread-multi-2level
 /System/Library/Perl/Extras/5.30
 ```
-Bazı döndürülen klasörler hiç var olmuyor, ancak **`/Library/Perl/5.30`** **vardır**, **SIP** tarafından **korunmamaktadır** ve **SIP** tarafından **korunan** klasörlerden **öncedir**. Bu nedenle, biri o klasörü kötüye kullanarak oraya script bağımlılıkları ekleyebilir, böylece yüksek ayrıcalıklı bir Perl scripti bunu yükleyebilir.
+Bazı döndürülen klasörler hiç mevcut değil, ancak **`/Library/Perl/5.30`** **mevcuttur**, **SIP** tarafından **korunmamaktadır** ve **SIP** tarafından **korunan** klasörlerden **öncedir**. Bu nedenle, biri o klasörü kötüye kullanarak oraya script bağımlılıkları ekleyebilir, böylece yüksek ayrıcalıklı bir Perl scripti bunu yükleyebilir.
 
 > [!WARNING]
-> Ancak, o klasöre yazmak için **root olmanız gerektiğini** unutmayın ve günümüzde bu **TCC istemini** alacaksınız:
+> Ancak, o klasöre yazmak için **root olmanız gerektiğini** unutmayın ve günümüzde bu **TCC istemi** ile karşılaşacaksınız:
 
 <figure><img src="../../../images/image (28).png" alt="" width="244"><figcaption></figcaption></figure>
 

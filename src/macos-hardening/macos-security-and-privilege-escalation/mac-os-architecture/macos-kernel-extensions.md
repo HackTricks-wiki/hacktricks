@@ -8,14 +8,14 @@ Kernel uzantıları (Kexts), **macOS çekirdek alanına doğrudan yüklenen** ve
 
 ### Gereksinimler
 
-Açıkça, bu kadar güçlü olduğu için **bir kernel uzantısını yüklemek karmaşıktır**. Yüklenebilmesi için bir kernel uzantısının karşılaması gereken **gereksinimler** şunlardır:
+Açıkça, bu kadar güçlü olduğu için **bir kernel uzantısını yüklemek karmaşıktır**. Bir kernel uzantısının yüklenebilmesi için karşılaması gereken **gereksinimler** şunlardır:
 
 - **Kurtarma moduna** girerken, kernel **uzantılarının yüklenmesine izin verilmelidir**:
 
 <figure><img src="../../../images/image (327).png" alt=""><figcaption></figcaption></figure>
 
 - Kernel uzantısı, yalnızca **Apple tarafından verilebilen** bir kernel kod imzalama sertifikası ile **imzalanmış olmalıdır**. Şirketin detaylı bir şekilde inceleneceği ve neden gerektiği.
-- Kernel uzantısı ayrıca **notarize edilmelidir**, Apple bunu kötü amaçlı yazılım için kontrol edebilecektir.
+- Kernel uzantısı ayrıca **notarize edilmelidir**, Apple bunu kötü amaçlı yazılımlar için kontrol edebilecektir.
 - Ardından, **root** kullanıcısı kernel uzantısını **yükleyebilen** kişidir ve paket içindeki dosyalar **root'a ait olmalıdır**.
 - Yükleme sürecinde, paket **korumalı bir kök olmayan konumda** hazırlanmalıdır: `/Library/StagedExtensions` (bu, `com.apple.rootless.storage.KernelExtensionManagement` iznini gerektirir).
 - Son olarak, yüklemeye çalışırken, kullanıcı [**bir onay isteği alacaktır**](https://developer.apple.com/library/archive/technotes/tn2459/_index.html) ve kabul edilirse, bilgisayar **yeniden başlatılmalıdır**.
@@ -45,13 +45,13 @@ kextstat | grep " 22 " | cut -c2-5,50- | cut -d '(' -f1
 ## Kernelcache
 
 > [!CAUTION]
-> `/System/Library/Extensions/` içinde kernel uzantılarının bulunması beklenmesine rağmen, bu klasöre giderseniz **hiçbir ikili dosya bulamayacaksınız**. Bunun nedeni **kernelcache**'dir ve bir `.kext` dosyasını tersine mühendislik yapmak için onu elde etmenin bir yolunu bulmanız gerekir.
+> `/System/Library/Extensions/` içinde kernel uzantılarının bulunması beklenmesine rağmen, bu klasöre giderseniz **hiçbir ikili dosya bulamayacaksınız**. Bunun nedeni **kernelcache**'dir ve bir `.kext`'i tersine mühendislik yapmak için onu elde etmenin bir yolunu bulmanız gerekir.
 
-**Kernelcache**, **XNU çekirdeğinin önceden derlenmiş ve önceden bağlantılı bir versiyonudur**, ayrıca temel cihaz **sürücüleri** ve **kernel uzantıları** ile birlikte gelir. **Sıkıştırılmış** bir formatta depolanır ve önyükleme süreci sırasında belleğe açılır. Kernelcache, çekirdeğin ve kritik sürücülerin çalışmaya hazır bir versiyonunu bulundurarak **daha hızlı bir önyükleme süresi** sağlar; bu, bu bileşenlerin dinamik olarak yüklenmesi ve bağlanması için harcanacak zaman ve kaynakları azaltır.
+**Kernelcache**, **XNU çekirdeğinin önceden derlenmiş ve önceden bağlantılı bir versiyonu** ile birlikte temel cihaz **sürücüleri** ve **kernel uzantıları** içerir. **Sıkıştırılmış** bir formatta depolanır ve önyükleme süreci sırasında belleğe açılır. Kernelcache, çekirdeğin ve kritik sürücülerin çalışmaya hazır bir versiyonunu bulundurarak **daha hızlı bir önyükleme süresi** sağlar; bu, bu bileşenlerin dinamik olarak yüklenmesi ve bağlanması için harcanacak zaman ve kaynakları azaltır.
 
 ### Yerel Kernelcache
 
-iOS'ta **`/System/Library/Caches/com.apple.kernelcaches/kernelcache`** içinde bulunur, macOS'ta ise şunları kullanarak bulabilirsiniz: **`find / -name "kernelcache" 2>/dev/null`** \
+iOS'ta **`/System/Library/Caches/com.apple.kernelcaches/kernelcache`** içinde bulunur, macOS'ta ise şunlarla bulabilirsiniz: **`find / -name "kernelcache" 2>/dev/null`** \
 Benim durumumda macOS'ta şunu buldum:
 
 - `/System/Volumes/Preboot/1BAEB4B5-180B-4C46-BD53-51152B7D92DA/boot/DAD35E7BC0CDA79634C20BD1BD80678DFB510B2AAD3D25C1228BB34BCD0A711529D3D571C93E29E1D0C1264750FA043F/System/Library/Caches/com.apple.kernelcaches/kernelcache`
@@ -85,7 +85,7 @@ pyimg4 im4p extract -i kernelcache.release.iphone14 -o kernelcache.release.iphon
 
 - [**KernelDebugKit Github**](https://github.com/dortania/KdkSupportPkg/releases)
 
-[https://github.com/dortania/KdkSupportPkg/releases](https://github.com/dortania/KdkSupportPkg/releases) adresinde tüm kernel hata ayıklama kitlerini bulmak mümkündür. Bunu indirebilir, bağlayabilir, [Suspicious Package](https://www.mothersruin.com/software/SuspiciousPackage/get.html) aracıyla açabilir, **`.kext`** klasörüne erişebilir ve **çıkarabilirsiniz**.
+[https://github.com/dortania/KdkSupportPkg/releases](https://github.com/dortania/KdkSupportPkg/releases) adresinde tüm kernel hata ayıklama kitlerini bulmak mümkündür. Bunu indirebilir, monte edebilir, [Suspicious Package](https://www.mothersruin.com/software/SuspiciousPackage/get.html) aracıyla açabilir, **`.kext`** klasörüne erişebilir ve **çıkarabilirsiniz**.
 
 Semboller için kontrol edin:
 ```bash
@@ -109,7 +109,7 @@ img4tool -e kernelcache.release.iphone14 -o kernelcache.release.iphone14.e
 ```
 ### Kernelcache'i İnceleme
 
-Kernelcache'in sembollere sahip olup olmadığını kontrol edin.
+Kernelcache'in sembollere sahip olup olmadığını kontrol et
 ```bash
 nm -a kernelcache.release.iphone14.e | wc -l
 ```

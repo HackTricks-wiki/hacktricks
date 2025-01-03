@@ -54,7 +54,7 @@ Bir **çekirdek uzantısını** yüklemek için çekirdekten talepte bulunmak i�
 
 ### **`com.apple.private.icloud-account-access`**
 
-Yetki **`com.apple.private.icloud-account-access`**, **`com.apple.iCloudHelper`** XPC servisi ile iletişim kurmayı sağlar ve bu da **iCloud token'ları** sağlar.
+Yetki **`com.apple.private.icloud-account-access`**, **`com.apple.iCloudHelper`** XPC servisi ile iletişim kurmayı sağlar ve bu, **iCloud token'ları** sağlar.
 
 **iMovie** ve **Garageband** bu yetkiye sahipti.
 
@@ -113,7 +113,7 @@ Uygulama paketinin içindeki dosyaları (app.app içinde) değiştirmeye izin ve
 
 <figure><img src="../../../images/image (31).png" alt=""><figcaption></figcaption></figure>
 
-Bu erişime sahip olanları kontrol etmek mümkündür _Sistem Ayarları_ > _Gizlilik ve Güvenlik_ > _Uygulama Yönetimi._
+Bu erişime sahip olanları kontrol etmek mümkündür _Sistem Ayarları_ > _Gizlilik ve Güvenlik_ > _Uygulama Yönetimi_.
 
 ### `kTCCServiceAccessibility`
 
@@ -127,10 +127,10 @@ Bu yetki, `mmap()` sistem fonksiyonuna `MAP_JIT` bayrağını geçirerek **yazı
 
 ### `com.apple.security.cs.allow-unsigned-executable-memory`
 
-Bu yetki, **C kodunu geçersiz kılmaya veya yamanmaya** izin verir, uzun zamandır kullanılmayan **`NSCreateObjectFileImageFromMemory`** (temelde güvensizdir) veya **DVDPlayback** çerçevesini kullanmayı sağlar. Daha fazla bilgi için [**bunu kontrol edin**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-unsigned-executable-memory).
+Bu yetki, **C kodunu geçersiz kılmaya veya yamanmaya** izin verir, uzun süredir kullanılmayan **`NSCreateObjectFileImageFromMemory`** (temelde güvensizdir) veya **DVDPlayback** çerçevesini kullanmayı sağlar. Daha fazla bilgi için [**bunu kontrol edin**](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_security_cs_allow-unsigned-executable-memory).
 
 > [!CAUTION]
-> Bu yetkiyi dahil etmek, uygulamanızı bellek güvensiz kod dillerindeki yaygın güvenlik açıklarına maruz bırakır. Uygulamanızın bu istisnaya ihtiyaç duyup duymadığını dikkatlice değerlendirin.
+> Bu yetkiyi dahil etmek, uygulamanızı bellek güvensiz kod dillerindeki yaygın güvenlik açıklarına maruz bırakır. Uygulamanızın bu istisnaya ihtiyacı olup olmadığını dikkatlice değerlendirin.
 
 ### `com.apple.security.cs.disable-executable-page-protection`
 

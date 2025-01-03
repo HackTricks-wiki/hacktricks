@@ -7,7 +7,7 @@
 - **/Applications**: Yüklenen uygulamalar burada olmalıdır. Tüm kullanıcılar bunlara erişebilir.
 - **/bin**: Komut satırı ikili dosyaları
 - **/cores**: Varsa, çekirdek dökümlerini saklamak için kullanılır
-- **/dev**: Her şey bir dosya olarak kabul edilir, bu nedenle burada donanım cihazlarını görebilirsiniz.
+- **/dev**: Her şey bir dosya olarak kabul edilir, bu nedenle burada donanım aygıtlarını görebilirsiniz.
 - **/etc**: Yapılandırma dosyaları
 - **/Library**: Tercihler, önbellekler ve günlüklerle ilgili birçok alt dizin ve dosya burada bulunabilir. Kök dizinde ve her kullanıcının dizininde bir Library klasörü vardır.
 - **/private**: Belgelendirilmemiştir ancak bahsedilen birçok klasör özel dizine sembolik bağlantılardır.
@@ -25,7 +25,7 @@
 - **Sistem uygulamaları** `/System/Applications` altında bulunur
 - **Yüklenen** uygulamalar genellikle `/Applications` veya `~/Applications` dizininde yüklenir
 - **Uygulama verileri**, root olarak çalışan uygulamalar için `/Library/Application Support` ve kullanıcı olarak çalışan uygulamalar için `~/Library/Application Support` dizininde bulunabilir.
-- Üçüncü taraf uygulamaların **daemon'ları** **root olarak çalışması gereken** genellikle `/Library/PrivilegedHelperTools/` dizininde bulunur
+- Üçüncü taraf uygulamaların **daemon'ları** **root olarak çalışması gereken** genellikle `/Library/PrivilegedHelperTools/` dizininde bulunur.
 - **Sandboxed** uygulamalar `~/Library/Containers` klasörüne haritalanır. Her uygulamanın uygulamanın paket kimliğine göre adlandırılmış bir klasörü vardır (`com.apple.Safari`).
 - **Kernel** `/System/Library/Kernels/kernel` dizinindedir
 - **Apple'ın kernel uzantıları** `/System/Library/Extensions` dizinindedir
@@ -63,7 +63,7 @@ macos-installers-abuse.md
 - **`.Spotlight-V100`**: Bu klasör, sistemdeki her hacmin kök dizininde görünür.
 - **`.metadata_never_index`**: Bu dosya bir hacmin kökünde bulunuyorsa, Spotlight o hacmi dizinlemez.
 - **`.noindex`**: Bu uzantıya sahip dosya ve klasörler Spotlight tarafından dizinlenmez.
-- **`.sdef`**: Paketler içindeki dosyalar, bir AppleScript ile uygulama ile nasıl etkileşim kurulabileceğini belirtir.
+- **`.sdef`**: AppleScript ile uygulama ile nasıl etkileşim kurulabileceğini belirten paket içindeki dosyalar.
 
 ### macOS Paketleri
 
@@ -97,7 +97,7 @@ dyldex_all [dyld_shared_cache_path] # Extract all
 
 <figure><img src="../../../images/image (1152).png" alt="" width="563"><figcaption></figcaption></figure>
 
-Bazı çıkarıcılar çalışmayabilir çünkü dylib'ler, bilinmeyen adreslere atlama yapabilecekleri için sabit kodlanmış adreslerle önceden bağlantılıdır.
+Bazı çıkarıcılar çalışmayabilir çünkü dylib'ler, bilinmeyen adreslere atlama yapabilecek şekilde, sabit kodlanmış adreslerle önceden bağlantılıdır.
 
 > [!TIP]
 > Xcode'da bir emülatör kullanarak macos'ta diğer \*OS cihazlarının Paylaşılan Kütüphane Önbelleğini indirmenin de mümkün olduğunu unutmayın. Bunlar şu dizinde indirilecektir: ls `$HOME/Library/Developer/Xcode/<*>OS\ DeviceSupport/<version>/Symbols/System/Library/Caches/com.apple.dyld/`, örneğin: `$HOME/Library/Developer/Xcode/iOS\ DeviceSupport/14.1\ (18A8395)/Symbols/System/Library/Caches/com.apple.dyld/dyld_shared_cache_arm64`
@@ -106,7 +106,7 @@ Bazı çıkarıcılar çalışmayabilir çünkü dylib'ler, bilinmeyen adreslere
 
 **`dyld`** SLC'nin haritalanıp haritalanmadığını bilmek için **`shared_region_check_np`** sistem çağrısını kullanır (bu adresi döndürür) ve **`shared_region_map_and_slide_np`** ile SLC'yi haritalar.
 
-SLC ilk kullanımda kaydırılsa bile, tüm **işlemler** **aynı kopyayı** kullanır, bu da saldırganın sistemde işlemleri çalıştırabilmesi durumunda **ASLR** korumasını **ortadan kaldırır**. Bu geçmişte gerçekten istismar edildi ve paylaşılan alan sayfası ile düzeltildi.
+SLC ilk kullanımda kaydırılsa bile, tüm **işlemler** **aynı kopyayı** kullanır, bu da saldırganın sistemde işlemleri çalıştırabilmesi durumunda **ASLR** korumasını **ortadan kaldırır**. Bu geçmişte gerçekten istismar edildi ve paylaşılan bölge sayfası ile düzeltildi.
 
 Branch havuzları, görüntü haritalamaları arasında küçük alanlar oluşturan küçük Mach-O dylib'lerdir ve bu da işlevlerin araya girmesini imkansız hale getirir.
 
@@ -114,8 +114,8 @@ Branch havuzları, görüntü haritalamaları arasında küçük alanlar oluştu
 
 Aşağıdaki çevre değişkenlerini kullanarak:
 
-- **`DYLD_DHARED_REGION=private DYLD_SHARED_CACHE_DIR=</path/dir> DYLD_SHARED_CACHE_DONT_VALIDATE=1`** -> Bu, yeni bir paylaşılan kütüphane önbelleği yüklemeye izin verecektir.
-- **`DYLD_SHARED_CACHE_DIR=avoid`** ve kütüphaneleri gerçek olanlarla paylaşılan önbelleğe simlinklerle manuel olarak değiştirmek (bunları çıkarmanız gerekecek).
+- **`DYLD_DHARED_REGION=private DYLD_SHARED_CACHE_DIR=</path/dir> DYLD_SHARED_CACHE_DONT_VALIDATE=1`** -> Bu, yeni bir paylaşılan kütüphane önbelleğini yüklemeye izin verecektir.
+- **`DYLD_SHARED_CACHE_DIR=avoid`** ve kütüphaneleri gerçek olanlarla paylaşılan önbelleğe sembolik bağlantılarla manuel olarak değiştirmek (bunları çıkarmanız gerekecek).
 
 ## Özel Dosya İzinleri
 
@@ -125,11 +125,11 @@ Bir **klasörde**, **okuma** onu **listelemeye** izin verir, **yazma** dosyalar�
 
 ### Bayrak değiştiricileri
 
-Dosyalarda ayarlanabilecek bazı bayraklar vardır, bu da dosyanın farklı davranmasına neden olur. Bir dizindeki dosyaların **bayraklarını kontrol edebilirsiniz**: `ls -lO /path/directory`
+Dosyalarda farklı davranmalarını sağlayacak bazı bayraklar ayarlanabilir. Bir dizindeki dosyaların **bayraklarını kontrol edebilirsiniz**: `ls -lO /path/directory`
 
 - **`uchg`**: **uchange** bayrağı, **dosyanın** değiştirilmesini veya silinmesini **önler**. Ayarlamak için: `chflags uchg file.txt`
 - Root kullanıcısı **bayrağı kaldırabilir** ve dosyayı değiştirebilir.
-- **`restricted`**: Bu bayrak dosyanın **SIP tarafından korunmasını** sağlar (bu bayrağı bir dosyaya ekleyemezsiniz).
+- **`restricted`**: Bu bayrak dosyayı **SIP tarafından korunmuş** hale getirir (bu bayrağı bir dosyaya ekleyemezsiniz).
 - **`Sticky bit`**: Eğer bir dizin sticky bit'e sahipse, **yalnızca** **dizin sahibi veya root dosyaları yeniden adlandırabilir veya silebilir**. Genellikle bu, sıradan kullanıcıların diğer kullanıcıların dosyalarını silmesini veya taşınmasını önlemek için /tmp dizininde ayarlanır.
 
 Tüm bayraklar `sys/stat.h` dosyasında bulunabilir (bunu `mdfind stat.h | grep stat.h` kullanarak bulabilirsiniz) ve şunlardır:
@@ -158,7 +158,7 @@ Tüm bayraklar `sys/stat.h` dosyasında bulunabilir (bunu `mdfind stat.h | grep 
 
 Dosya **ACL'leri**, farklı kullanıcılara daha **ince izinler** atamak için **ACE** (Erişim Kontrol Girdileri) içerir.
 
-Bir **dizin** için bu izinleri vermek mümkündür: `listele`, `arama`, `dosya_ekle`, `alt_dizin_ekle`, `çocuk_sil`, `çocuk_sil`.\
+Bir **dizin** için bu izinler verilebilir: `listele`, `arama`, `dosya_ekle`, `alt_dizin_ekle`, `çocuk_sil`, `çocuk_sil`.\
 Ve bir **dosya** için: `okuma`, `yazma`, `ekleme`, `çalıştırma`.
 
 Dosya ACL'ler içeriyorsa, izinleri listelediğinizde **"+" bulacaksınız**:
@@ -189,9 +189,9 @@ Genişletilmiş niteliklerin bir adı ve istenen herhangi bir değeri vardır ve
 - `com.apple.logd.metadata`: `/var/db/diagnostics` içindeki dosyalar için logd tarafından kullanılır
 - `com.apple.genstore.*`: Nesil depolama (`/.DocumentRevisions-V100` dosya sisteminin kökünde)
 - `com.apple.rootless`: MacOS: Dosyayı etiketlemek için Sistem Bütünlüğü Koruması tarafından kullanılır (III/10)
-- `com.apple.uuidb.boot-uuid`: benzersiz UUID ile önyükleme dönemlerinin logd işaretleri
+- `com.apple.uuidb.boot-uuid`: Benzersiz UUID ile önyükleme dönemlerinin logd işaretlemeleri
 - `com.apple.decmpfs`: MacOS: Şeffaf dosya sıkıştırması (II/7)
-- `com.apple.cprotect`: \*OS: Dosya başına şifreleme verileri (III/11)
+- `com.apple.cprotect`: \*OS: Dosya başına şifreleme verisi (III/11)
 - `com.apple.installd.*`: \*OS: installd tarafından kullanılan meta veriler, örneğin, `installType`, `uniqueInstallID`
 
 ### Kaynak Forkları | macOS ADS
@@ -237,7 +237,7 @@ macos-memory-dumping.md
 
 ## Risk Kategorisi Dosyaları Mac OS
 
-`/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/System` dizini, **farklı dosya uzantılarıyla ilişkili risk hakkında bilgilerin saklandığı yerdir**. Bu dizin, dosyaları çeşitli risk seviyelerine ayırarak Safari'nin bu dosyaları indirdikten sonra nasıl işleyeceğini etkiler. Kategoriler şunlardır:
+`/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/System` dizini, **farklı dosya uzantılarıyla ilişkili risk hakkında bilgilerin saklandığı yerdir**. Bu dizin, dosyaları çeşitli risk seviyelerine ayırarak, Safari'nin bu dosyaları indirdikten sonra nasıl işleyeceğini etkiler. Kategoriler şunlardır:
 
 - **LSRiskCategorySafe**: Bu kategorideki dosyalar **tamamen güvenli** olarak kabul edilir. Safari, bu dosyaları indirdikten sonra otomatik olarak açacaktır.
 - **LSRiskCategoryNeutral**: Bu dosyalar uyarı içermez ve Safari tarafından **otomatik olarak açılmaz**.
@@ -246,13 +246,13 @@ macos-memory-dumping.md
 
 ## Log dosyaları
 
-- **`$HOME/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV2`**: İndirilen dosyalar hakkında, nereden indirildikleri gibi bilgiler içerir.
+- **`$HOME/Library/Preferences/com.apple.LaunchServices.QuarantineEventsV2`**: İndirilen dosyalar hakkında, nereden indirildikleri gibi bilgileri içerir.
 - **`/var/log/system.log`**: OSX sistemlerinin ana günlüğü. com.apple.syslogd.plist, syslogging'in yürütülmesinden sorumludur (devre dışı olup olmadığını kontrol etmek için `launchctl list` içinde "com.apple.syslogd" arayabilirsiniz).
 - **`/private/var/log/asl/*.asl`**: İlginç bilgiler içerebilecek Apple Sistem Günlükleridir.
 - **`$HOME/Library/Preferences/com.apple.recentitems.plist`**: "Finder" aracılığıyla en son erişilen dosyaları ve uygulamaları saklar.
 - **`$HOME/Library/Preferences/com.apple.loginitems.plsit`**: Sistem başlangıcında başlatılacak öğeleri saklar.
 - **`$HOME/Library/Logs/DiskUtility.log`**: DiskUtility Uygulaması için günlük dosyası (sürücüler hakkında bilgi, USB'ler dahil).
-- **`/Library/Preferences/SystemConfiguration/com.apple.airport.preferences.plist`**: Kablosuz erişim noktaları hakkında veriler.
+- **`/Library/Preferences/SystemConfiguration/com.apple.airport.preferences.plist`**: Kablosuz erişim noktaları hakkında veri.
 - **`/private/var/db/launchd.db/com.apple.launchd/overrides.plist`**: Devre dışı bırakılan daemonların listesi.
 
 {{#include ../../../banners/hacktricks-training.md}}

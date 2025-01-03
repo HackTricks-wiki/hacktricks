@@ -4,11 +4,11 @@
 
 ## Temel Bilgiler
 
-Mach-o ikili dosyaları, ikilinin içindeki imzaların **offset** ve **boyutunu** belirten **`LC_CODE_SIGNATURE`** adlı bir yükleme komutu içerir. Aslında, GUI aracı MachOView kullanarak, ikilinin sonunda bu bilgileri içeren **Kod İmzası** adlı bir bölüm bulmak mümkündür:
+Mach-o ikili dosyaları, ikili dosya içindeki imzaların **offset** ve **boyutunu** belirten **`LC_CODE_SIGNATURE`** adlı bir yükleme komutu içerir. Aslında, GUI aracı MachOView kullanarak, ikili dosyanın sonunda bu bilgileri içeren **Kod İmzası** adlı bir bölüm bulmak mümkündür:
 
 <figure><img src="../../../images/image (1) (1) (1) (1).png" alt="" width="431"><figcaption></figcaption></figure>
 
-Kod İmzasının sihirli başlığı **`0xFADE0CC0`**'dır. Ardından, bunları içeren superBlob'un uzunluğu ve blob sayısı gibi bilgiler vardır.\
+Kod İmzasının sihirli başlığı **`0xFADE0CC0`**'dır. Ardından, bunları içeren süperBlob'un uzunluğu ve blob sayısı gibi bilgiler vardır.\
 Bu bilgiyi [kaynak kodda burada](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L276) bulmak mümkündür:
 ```c
 /*
@@ -105,8 +105,8 @@ Not edin ki, bu yapının farklı versiyonları vardır ve eski olanlar daha az 
 
 ## Kod İmzalama Sayfaları
 
-Tam ikili dosyanın hash'lenmesi verimsiz ve hatta yalnızca bellekte kısmen yüklüyse işe yaramaz olur. Bu nedenle, kod imzası aslında her ikili sayfanın ayrı ayrı hash'lenmesiyle oluşturulan bir hash'ler hash'idir.\
-Aslında, önceki **Kod Dizini** kodunda **sayfa boyutunun belirtildiğini** görebilirsiniz. Ayrıca, ikilinin boyutu bir sayfa boyutunun katı değilse, **CodeLimit** alanı imzanın nerede sona erdiğini belirtir.
+Tam ikili dosyanın hash'lenmesi verimsiz ve hatta yararsız olurdu, çünkü bu yalnızca bellekte kısmen yüklendiğinde geçerlidir. Bu nedenle, kod imzası aslında her ikili sayfanın ayrı ayrı hash'lenmesiyle oluşturulan bir hash'ler hash'idir.\
+Aslında, önceki **Kod Dizini** kodunda **sayfa boyutunun belirtildiğini** görebilirsiniz. Ayrıca, ikilinin boyutu bir sayfa boyutunun katı değilse, **CodeLimit** alanı imzanın sonunun nerede olduğunu belirtir.
 ```bash
 # Get all hashes of /bin/ps
 codesign -d -vvvvvv /bin/ps
@@ -148,7 +148,7 @@ Uygulamaların tüm yetkilerin tanımlandığı bir **yetki blob'u** içerebilec
 
 ## Özel Slotlar
 
-MacOS uygulamaları, ikili dosya içinde çalıştırmak için ihtiyaç duydukları her şeye sahip değildir, aynı zamanda **harici kaynaklar** (genellikle uygulamaların **paketinde**) kullanırlar. Bu nedenle, ikili dosya içinde bazı ilginç harici kaynakların değiştirilmediğini kontrol etmek için hash'lerini içeren bazı slotlar bulunmaktadır.
+MacOS uygulamaları, çalıştırmak için ihtiyaç duydukları her şeyi ikili dosya içinde bulundurmazlar, aynı zamanda **harici kaynaklar** (genellikle uygulamaların **paketinde**) kullanırlar. Bu nedenle, ikili dosya içinde bazı ilginç harici kaynakların hash'lerini içeren slotlar bulunmaktadır.
 
 Aslında, Kod Dizini yapılarında **`nSpecialSlots`** adında özel slot sayısını belirten bir parametre görmek mümkündür. Özel slot 0 yoktur ve en yaygın olanları (-1'den -6'ya kadar) şunlardır:
 
@@ -162,7 +162,7 @@ Aslında, Kod Dizini yapılarında **`nSpecialSlots`** adında özel slot sayıs
 
 ## Kod İmzalama Bayrakları
 
-Her süreç, çekirdek tarafından başlatılan ve bazıları **kod imzası** ile geçersiz kılınabilen `status` olarak bilinen bir bitmask ile ilişkilidir. Kod imzalamasında dahil edilebilecek bu bayraklar [kodda tanımlanmıştır](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L36):
+Her süreç, çekirdek tarafından başlatılan ve bazıları **kod imzası** ile geçersiz kılınabilen `status` adı verilen bir bitmask ile ilişkilidir. Kod imzalamada dahil edilebilecek bu bayraklar [kodda tanımlanmıştır](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/osfmk/kern/cs_blobs.h#L36):
 ```c
 /* code signing attributes of a process */
 #define CS_VALID                    0x00000001  /* dynamically valid */
@@ -213,7 +213,7 @@ Not edin ki [**exec_mach_imgact**](https://github.com/apple-oss-distributions/xn
 
 Her uygulama, yürütülebilmesi için **karşılaması gereken** bazı **gereksinimler** saklar. Eğer **uygulama, uygulama tarafından karşılanmayan gereksinimler içeriyorsa**, yürütülmeyecektir (muhtemelen değiştirilmiştir).
 
-Bir ikili dosyanın gereksinimleri, **özel bir dilbilgisi** kullanır; bu, **ifadelerin** bir akışıdır ve `0xfade0c00` sihirli değeri kullanılarak bloblar olarak kodlanmıştır; **hash'i özel bir kod slotunda** saklanır.
+Bir ikili dosyanın gereksinimleri, **özel bir dilbilgisi** kullanır; bu, **ifadelerin** bir akışıdır ve `0xfade0c00` sihirli değeri kullanılarak bloblar olarak kodlanır; **hash'i özel bir kod slotunda** saklanır.
 
 Bir ikili dosyanın gereksinimleri, çalıştırılarak görülebilir:
 ```bash
@@ -226,7 +226,7 @@ Executable=/Applications/Signal.app/Contents/MacOS/Signal
 designated => identifier "org.whispersystems.signal-desktop" and anchor apple generic and certificate 1[field.1.2.840.113635.100.6.2.6] /* exists */ and certificate leaf[field.1.2.840.113635.100.6.1.13] /* exists */ and certificate leaf[subject.OU] = U68MSDN6DR
 ```
 > [!NOTE]
-> Bu imzaların sertifika bilgileri, TeamID, kimlikler, yetkilendirmeler ve birçok diğer verileri kontrol edebileceğini unutmayın.
+> Bu imzaların sertifika bilgileri, TeamID, kimlikler, haklar ve birçok diğer verileri kontrol edebileceğini unutmayın.
 
 Ayrıca, `csreq` aracı kullanarak bazı derlenmiş gereksinimler oluşturmak mümkündür:
 ```bash
@@ -284,11 +284,11 @@ od -A x -t x1 /tmp/output.csreq
 
 ## Kod İmzası Uygulaması
 
-**Kernel**, uygulamanın kodunun çalışmasına izin vermeden önce **kod imzasını kontrol eder**. Ayrıca, bellekte yeni kod yazmak ve çalıştırmak için bir yol, `mprotect` çağrıldığında `MAP_JIT` bayrağının kullanılmasıdır. Uygulamanın bunu yapabilmesi için özel bir yetkiye ihtiyacı olduğunu unutmayın.
+**Kernel**, uygulamanın kodunun çalışmasına izin vermeden önce **kod imzasını kontrol eder**. Ayrıca, bellekte yeni kod yazmak ve çalıştırmak için bir yol, `mprotect` çağrıldığında `MAP_JIT` bayrağının kötüye kullanılmasıdır. Uygulamanın bunu yapabilmesi için özel bir yetkiye ihtiyacı olduğunu unutmayın.
 
 ## `cs_blobs` & `cs_blob`
 
-[**cs_blob**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/ubc_internal.h#L106) yapısı, çalışan sürecin üzerindeki yetki hakkında bilgi içerir. `csb_platform_binary` ayrıca uygulamanın bir platform ikili dosyası olup olmadığını bildirir (bu, OS tarafından güvenlik mekanizmalarını uygulamak için farklı zamanlarda kontrol edilir, örneğin bu süreçlerin görev portlarına SEND haklarını korumak için).
+[**cs_blob**](https://github.com/apple-oss-distributions/xnu/blob/94d3b452840153a99b38a3a9659680b2a006908e/bsd/sys/ubc_internal.h#L106) yapısı, çalışan sürecin üzerindeki yetki hakkında bilgi içerir. `csb_platform_binary` ayrıca uygulamanın bir platform ikili olup olmadığını bildirir (bu, OS tarafından güvenlik mekanizmalarını uygulamak için farklı zamanlarda kontrol edilir, örneğin bu süreçlerin görev portlarına SEND haklarını korumak için).
 ```c
 struct cs_blob {
 struct cs_blob  *csb_next;

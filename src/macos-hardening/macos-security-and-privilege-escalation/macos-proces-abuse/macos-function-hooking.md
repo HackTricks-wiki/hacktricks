@@ -4,7 +4,7 @@
 
 ## Function Interposing
 
-Bir **dylib** oluşturun ve **`__interpose` (`__DATA___interpose`)** bölümünü (veya **`S_INTERPOSING`** ile işaretlenmiş bir bölümü) içeren **function pointers** çiftleri ile doldurun; bu çiftler **orijinal** ve **değiştirilmiş** fonksiyonlara atıfta bulunur.
+Bir **dylib** oluşturun ve içinde **`__interpose` (`__DATA___interpose`)** bölümü (veya **`S_INTERPOSING`** ile işaretlenmiş bir bölüm) bulunan, **orijinal** ve **değiştirme** fonksiyonlarına atıfta bulunan **fonksiyon işaretçileri** çiftleri içersin.
 
 Sonra, **`DYLD_INSERT_LIBRARIES`** ile dylib'i **enjekte** edin (interposing, ana uygulama yüklenmeden önce gerçekleşmelidir). Açıkça, [**`DYLD_INSERT_LIBRARIES`** kullanımına uygulanan **kısıtlamalar** burada da geçerlidir](macos-library-injection/#check-restrictions).
 
@@ -84,7 +84,7 @@ Ayrıca, **interposing'in süreç ile yüklenen kütüphaneler arasında gerçek
 
 ### Dinamik Interposing
 
-Artık bir fonksiyonu dinamik olarak **`dyld_dynamic_interpose`** fonksiyonu kullanarak interpose etmek de mümkündür. Bu, bir fonksiyonu yalnızca başlangıçtan değil, çalışma zamanında programatik olarak interpose etmeyi sağlar.
+Artık bir fonksiyonu dinamik olarak **`dyld_dynamic_interpose`** fonksiyonu kullanarak interpose etmek de mümkündür. Bu, bir fonksiyonu yalnızca başlangıçta yapmak yerine çalışma zamanında programatik olarak interpose etmeyi sağlar.
 
 Sadece **değiştirilecek fonksiyonun ve yerine geçecek fonksiyonun** **tuple'larını** belirtmek yeterlidir.
 ```c
@@ -99,11 +99,11 @@ const struct dyld_interpose_tuple array[], size_t count);
 
 ObjectiveC'de bir metod şu şekilde çağrılır: **`[myClassInstance nameOfTheMethodFirstParam:param1 secondParam:param2]`**
 
-**nesne**, **metod** ve **parametreler** gereklidir. Ve bir metod çağrıldığında **msg gönderilir** `objc_msgSend` fonksiyonu kullanılarak: `int i = ((int (*)(id, SEL, NSString *, NSString *))objc_msgSend)(someObject, @selector(method1p1:p2:), value1, value2);`
+**nesne**, **metod** ve **parametreler** gereklidir. Ve bir metod çağrıldığında bir **msg gönderilir** `objc_msgSend` fonksiyonu kullanılarak: `int i = ((int (*)(id, SEL, NSString *, NSString *))objc_msgSend)(someObject, @selector(method1p1:p2:), value1, value2);`
 
 Nesne **`someObject`**, metod **`@selector(method1p1:p2:)`** ve argümanlar **value1**, **value2**'dir.
 
-Nesne yapıları takip edilerek, **metodların** **isimleri** ve **metod koduna** işaretçilerin **bulunduğu** bir **diziye** ulaşmak mümkündür.
+Nesne yapıları takip edilerek, **metodların** **isimleri** ve **metod koduna** işaretçilerin **bulunduğu** bir **metodlar dizisine** ulaşmak mümkündür.
 
 > [!CAUTION]
 > Metodlar ve sınıflar isimlerine göre erişildiğinden, bu bilginin ikili dosyada saklandığını unutmayın, bu nedenle `otool -ov </path/bin>` veya [`class-dump </path/bin>`](https://github.com/nygard/class-dump) ile geri almak mümkündür.
@@ -178,7 +178,7 @@ return 0;
 ```
 ### Method Swizzling with method_exchangeImplementations
 
-Fonksiyon **`method_exchangeImplementations`**, **bir fonksiyonun** **uygulamasının** **adresini** **diğerine değiştirmeye** olanak tanır.
+Fonksiyon **`method_exchangeImplementations`**, **bir fonksiyonun** **uygulama** **adresini** **diğerine değiştirmeye** olanak tanır.
 
 > [!CAUTION]
 > Bu nedenle bir fonksiyon çağrıldığında **çalıştırılan diğeri**dir.
@@ -232,7 +232,7 @@ return 0;
 
 ### Method Swizzling with method_setImplementation
 
-Önceki format garip çünkü bir metodun uygulamasını diğerinin üzerine değiştiriyorsunuz. **`method_setImplementation`** fonksiyonunu kullanarak bir **metodun uygulamasını diğerinin** üzerine **değiştirebilirsiniz**.
+Önceki format garip çünkü bir metodun uygulamasını diğerinin uygulamasıyla değiştiriyorsunuz. **`method_setImplementation`** fonksiyonunu kullanarak bir **metodun uygulamasını diğerinin** uygulamasıyla **değiştirebilirsiniz**.
 
 Sadece, **orijinal olanın uygulama adresini saklamayı** unutmayın, eğer onu yeni uygulamadan çağıracaksanız, çünkü daha sonra o adresi bulmak çok daha karmaşık olacaktır.
 ```objectivec
@@ -286,7 +286,7 @@ return 0;
 }
 }
 ```
-## Hooking Saldırı Metodolojisi
+## Hooking Attack Methodology
 
 Bu sayfada fonksiyonları hooklamak için farklı yollar tartışıldı. Ancak, bunlar **saldırı için süreç içinde kod çalıştırmayı** içeriyordu.
 
@@ -294,9 +294,9 @@ Bunu yapmak için en kolay teknik, bir [Dyld'yi ortam değişkenleri aracılığ
 
 Ancak, her iki seçenek de **korumasız** ikili/dizilerle **sınırlıdır**. Sınırlamalar hakkında daha fazla bilgi edinmek için her tekniği kontrol edin.
 
-Ancak, bir fonksiyon hooklama saldırısı çok spesifiktir, bir saldırgan bunu **bir süreçten hassas bilgileri çalmak için** yapar (aksi takdirde sadece bir süreç enjeksiyonu saldırısı yapardınız). Ve bu hassas bilgiler, MacPass gibi kullanıcı tarafından indirilen uygulamalarda bulunabilir.
+Ancak, bir fonksiyon hooking saldırısı çok spesifiktir, bir saldırgan bunu **bir süreçten hassas bilgileri çalmak için** yapar (aksi takdirde sadece bir süreç enjeksiyonu saldırısı yapardınız). Ve bu hassas bilgiler, MacPass gibi kullanıcı tarafından indirilen uygulamalarda bulunabilir.
 
-Bu nedenle, saldırgan vektörü ya bir zafiyet bulmak ya da uygulamanın imzasını kaldırmak, **`DYLD_INSERT_LIBRARIES`** env değişkenini uygulamanın Info.plist dosyasına ekleyerek bir şeyler eklemek olacaktır:
+Bu nedenle, saldırgan vektörü ya bir zafiyet bulmak ya da uygulamanın imzasını kaldırmak, uygulamanın Info.plist dosyasına **`DYLD_INSERT_LIBRARIES`** env değişkenini eklemek olacaktır.
 ```xml
 <key>LSEnvironment</key>
 <dict>
@@ -304,11 +304,11 @@ Bu nedenle, saldırgan vektörü ya bir zafiyet bulmak ya da uygulamanın imzas�
 <string>/Applications/Application.app/Contents/malicious.dylib</string>
 </dict>
 ```
-ve ardından **yeniden kaydet** uygulamayı:
+ve ardından **uygulamayı yeniden kaydet**:
 ```bash
 /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f /Applications/Application.app
 ```
-Bu kütüphaneye bilgileri dışa aktarmak için hooking kodunu ekleyin: Parolalar, mesajlar...
+Kütüphaneye bilgileri dışa aktarmak için hooking kodunu ekleyin: Parolalar, mesajlar...
 
 > [!CAUTION]
 > Daha yeni macOS sürümlerinde, eğer uygulama ikili dosyasının **imzasını kaldırırsanız** ve daha önce çalıştırılmışsa, macOS **uygulamayı bir daha çalıştırmayacaktır**.

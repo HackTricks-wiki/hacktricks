@@ -141,7 +141,7 @@ Kaynak kodu, kütüphaneleri yüklemek için yararlı olan birkaç bayrak tanım
 - `MH_NO_HEAP_EXECUTION`: Yığın/veri sayfaları için yürütme yok
 - `MH_HAS_OBJC`: İkili oBject-C bölümlerine sahiptir
 - `MH_SIM_SUPPORT`: Simülatör desteği
-- `MH_DYLIB_IN_CACHE`: Paylaşılan kütüphane önbelleğinde dylibs/frameworks için kullanılır.
+- `MH_DYLIB_IN_CACHE`: Paylaşılan kütüphane önbelleğinde dylibs/frameworks üzerinde kullanılır.
 
 ## **Mach-O Yükleme komutları**
 
@@ -154,7 +154,7 @@ uint32_t cmd;           /* type of load command */
 uint32_t cmdsize;       /* total size of command in bytes */
 };
 ```
-**50 farklı yükleme komut türü** vardır ve sistem bunları farklı şekilde işler. En yaygın olanları: `LC_SEGMENT_64`, `LC_LOAD_DYLINKER`, `LC_MAIN`, `LC_LOAD_DYLIB` ve `LC_CODE_SIGNATURE`.
+**Sistem tarafından farklı şekilde işlenen yaklaşık **50 farklı yükleme komutu türü** vardır. En yaygın olanları: `LC_SEGMENT_64`, `LC_LOAD_DYLINKER`, `LC_MAIN`, `LC_LOAD_DYLIB` ve `LC_CODE_SIGNATURE`.
 
 ### **LC_SEGMENT/LC_SEGMENT_64**
 
@@ -169,18 +169,18 @@ Bu komutlar, bir işlem çalıştırıldığında **sanallaştırılmış bellek
 
 Başlıkta önce **segment başlığı** bulunur:
 
-<pre class="language-c"><code class="lang-c">struct segment_command_64 { /* for 64-bit architectures */
+<pre class="language-c"><code class="lang-c">struct segment_command_64 { /* 64-bit mimariler için */
 uint32_t	cmd;		/* LC_SEGMENT_64 */
-uint32_t	cmdsize;	/* includes sizeof section_64 structs */
-char		segname[16];	/* segment name */
-uint64_t	vmaddr;		/* memory address of this segment */
-uint64_t	vmsize;		/* memory size of this segment */
-uint64_t	fileoff;	/* file offset of this segment */
-uint64_t	filesize;	/* amount to map from the file */
-int32_t		maxprot;	/* maximum VM protection */
-int32_t		initprot;	/* initial VM protection */
-<strong>	uint32_t	nsects;		/* number of sections in segment */
-</strong>	uint32_t	flags;		/* flags */
+uint32_t	cmdsize;	/* section_64 yapı boyutunu içerir */
+char		segname[16];	/* segment adı */
+uint64_t	vmaddr;		/* bu segmentin bellek adresi */
+uint64_t	vmsize;		/* bu segmentin bellek boyutu */
+uint64_t	fileoff;	/* bu segmentin dosya ofseti */
+uint64_t	filesize;	/* dosyadan haritalanacak miktar */
+int32_t		maxprot;	/* maksimum VM koruma */
+int32_t		initprot;	/* başlangıç VM koruma */
+<strong>	uint32_t	nsects;		/* segmentteki bölüm sayısı */
+</strong>	uint32_t	flags;		/* bayraklar */
 };
 </code></pre>
 
@@ -188,7 +188,7 @@ Segment başlığı örneği:
 
 <figure><img src="../../../images/image (1126).png" alt=""><figcaption></figcaption></figure>
 
-Bu başlık, **sonrasında gelen başlıkları olan bölüm sayısını** tanımlar:
+Bu başlık, **sonrasında görünen bölüm başlıklarının sayısını** tanımlar:
 ```c
 struct section_64 { /* for 64-bit architectures */
 char		sectname[16];	/* name of this section */
@@ -236,9 +236,9 @@ Bu cmd tarafından yüklenen yaygın segmentler:
 - `__cfstring`: CoreFoundation string'leri
 - `__data`: Küresel değişkenler (başlatılmış olanlar)
 - `__bss`: Statik değişkenler (başlatılmamış olanlar)
-- `__objc_*` (\_\_objc_classlist, \_\_objc_protolist, vb.): Objective-C çalışma zamanı tarafından kullanılan bilgiler
+- `__objc_*` (\_\_objc_classlist, \_\_objc_protolist, vb): Objective-C çalışma zamanı tarafından kullanılan bilgiler
 - **`__DATA_CONST`**: \_\_DATA.\_\_const sabit olacağı garanti edilmez (yazma izinleri), diğer işaretçiler ve GOT da öyle. Bu bölüm, `__const`, bazı başlatıcılar ve GOT tablosunu (bir kez çözüldüğünde) **sadece okunabilir** hale getirir.
-- **`__LINKEDIT`**: Bağlayıcı (dyld) için sembol, string ve yer değiştirme tablosu girişleri gibi bilgileri içerir. `__TEXT` veya `__DATA` içinde olmayan içerikler için genel bir konteynerdir ve içeriği diğer yükleme komutlarında tanımlanır.
+- **`__LINKEDIT`**: Bağlayıcı (dyld) için sembol, string ve yer değiştirme tablosu girişleri gibi bilgileri içerir. `__TEXT` veya `__DATA` içinde olmayan içerikler için genel bir konteynırdır ve içeriği diğer yükleme komutlarında tanımlanır.
 - dyld bilgisi: Yeniden temel alma, Tembel/tembel olmayan/zayıf bağlama opcode'ları ve dışa aktarma bilgisi
 - Fonksiyon başlangıçları: Fonksiyonların başlangıç adresleri tablosu
 - Kod İçindeki Veri: \_\_text içindeki veri adaları
@@ -258,7 +258,7 @@ Kodda görüldüğü gibi, **segmentler ayrıca bayrakları destekler** (her ne 
 
 ### **`LC_UNIXTHREAD/LC_MAIN`**
 
-**`LC_MAIN`** **entryoff** niteliğinde giriş noktasını içerir. Yükleme sırasında, **dyld** bu değeri (bellekteki) **ikili tabanın** üzerine **ekler**, ardından **bu talimata atlar** ve ikilinin kodunun yürütülmesine başlar.
+**`LC_MAIN`** **entryoff** niteliğinde giriş noktasını içerir. Yükleme sırasında, **dyld** bu değeri (bellekteki) **ikili tabanına** **ekler**, ardından **bu talimata atlar** ve ikilinin kodunun yürütülmesine başlar.
 
 **`LC_UNIXTHREAD`** ana iş parçacığı başlatıldığında kayıtların sahip olması gereken değerleri içerir. Bu zaten kullanımdan kaldırılmıştır ancak **`dyld`** hala bunu kullanır. Bu kayıtların ayarlandığı değerleri görmek mümkündür:
 ```bash
@@ -295,7 +295,7 @@ Ancak, bu bölüm hakkında bazı bilgileri [**bu blog yazısında**](https://da
 
 ### **`LC_LOAD_DYLINKER`**
 
-Paylaşılan kütüphaneleri süreç adres alanına haritalayan **dinamik bağlayıcı yürütülebilir dosyasının yolunu** içerir. **Değer her zaman `/usr/lib/dyld` olarak ayarlanır**. macOS'ta, dylib haritalamanın **kullanıcı modunda**, çekirdek modunda değil, gerçekleştiğini belirtmek önemlidir.
+Paylaşılan kütüphaneleri süreç adres alanına haritalayan **dinamik bağlayıcı yürütülebilir dosyasının yolunu** içerir. **Değer her zaman `/usr/lib/dyld` olarak ayarlanır**. macOS'ta, dylib haritalamanın **kullanıcı modunda**, çekirdek modunda değil olduğunu belirtmek önemlidir.
 
 ### **`LC_IDENT`**
 
@@ -311,9 +311,9 @@ Süreç çalıştırılmadan önce dyld'ye ortam değişkenlerini belirtmeye ola
 
 ### **`LC_LOAD_DYLIB`**
 
-Bu yükleme komutu, **yükleyiciye** (dyld) **söz konusu kütüphaneyi yüklemesi ve bağlaması** için talimat veren bir **dinamik** **kütüphane** bağımlılığını tanımlar. Mach-O ikili dosyasının gerektirdiği **her kütüphane için bir `LC_LOAD_DYLIB` yükleme komutu vardır**.
+Bu yükleme komutu, **yükleyiciye** (dyld) **söz konusu kütüphaneyi yüklemesi ve bağlaması** talimatını veren bir **dinamik** **kütüphane** bağımlılığını tanımlar. Mach-O ikilisinin ihtiyaç duyduğu **her kütüphane için bir `LC_LOAD_DYLIB` yükleme komutu vardır**.
 
-- Bu yükleme komutu, **gerçek bağımlı dinamik kütüphaneyi tanımlayan bir struct dylib içeren** **`dylib_command`** türünde bir yapıdır:
+- Bu yükleme komutu, gerçek bağımlı dinamik kütüphaneyi tanımlayan bir struct dylib içeren **`dylib_command`** türünde bir yapıdır:
 ```objectivec
 struct dylib_command {
 uint32_t        cmd;            /* LC_LOAD_{,WEAK_}DYLIB */

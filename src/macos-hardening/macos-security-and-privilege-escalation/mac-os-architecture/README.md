@@ -4,9 +4,9 @@
 
 ## XNU Kernel
 
-**macOS'in temeli XNU'dur**, bu "X is Not Unix" anlamına gelir. Bu çekirdek esasen **Mach mikro çekirdeği** (daha sonra tartışılacak) ve **Berkeley Software Distribution** (**BSD**) unsurlarından oluşmaktadır. XNU ayrıca **I/O Kit adı verilen bir sistem aracılığıyla çekirdek sürücüleri için bir platform sağlar**. XNU çekirdeği, **kaynak kodu serbestçe erişilebilir** olan Darwin açık kaynak projesinin bir parçasıdır.
+**macOS'in temeli XNU'dur**, bu "X is Not Unix" anlamına gelir. Bu çekirdek esasen **Mach mikro çekirdeği** (daha sonra tartışılacak) ve **Berkeley Yazılım Dağıtımı** (**BSD**) unsurlarından oluşur. XNU ayrıca **I/O Kit adlı bir sistem aracılığıyla çekirdek sürücüleri için bir platform sağlar**. XNU çekirdeği, **kaynak kodu serbestçe erişilebilir** olan Darwin açık kaynak projesinin bir parçasıdır.
 
-Bir güvenlik araştırmacısı veya Unix geliştiricisi perspektifinden, **macOS** oldukça **benzer** bir **FreeBSD** sistemi gibi görünebilir; şık bir GUI ve birçok özel uygulama ile. BSD için geliştirilen çoğu uygulama, Unix kullanıcılarına aşina olan komut satırı araçlarının tamamı macOS'ta mevcut olduğundan, macOS'ta derlenip çalıştırılabilir. Ancak, XNU çekirdeği Mach'ı içerdiğinden, geleneksel bir Unix benzeri sistem ile macOS arasında bazı önemli farklılıklar vardır ve bu farklılıklar potansiyel sorunlara neden olabilir veya benzersiz avantajlar sağlayabilir.
+Bir güvenlik araştırmacısı veya Unix geliştiricisi perspektifinden, **macOS** oldukça **benzer** bir **FreeBSD** sistemi gibi görünebilir; şık bir GUI ve birçok özel uygulama ile. BSD için geliştirilen çoğu uygulama, Unix kullanıcılarına aşina olan komut satırı araçları macOS'ta mevcut olduğundan, macOS'ta değişiklik yapmadan derlenip çalıştırılabilir. Ancak, XNU çekirdeği Mach'ı içerdiğinden, geleneksel bir Unix benzeri sistem ile macOS arasında bazı önemli farklılıklar vardır ve bu farklılıklar potansiyel sorunlara neden olabilir veya benzersiz avantajlar sağlayabilir.
 
 XNU'nun açık kaynak versiyonu: [https://opensource.apple.com/source/xnu/](https://opensource.apple.com/source/xnu/)
 
@@ -14,11 +14,11 @@ XNU'nun açık kaynak versiyonu: [https://opensource.apple.com/source/xnu/](http
 
 Mach, **UNIX uyumlu** olacak şekilde tasarlanmış bir **mikro çekirdek**'tir. Ana tasarım ilkelerinden biri, **çekirdek** alanında çalışan **kod** miktarını **minimize** etmek ve bunun yerine dosya sistemi, ağ ve I/O gibi birçok tipik çekirdek işlevinin **kullanıcı düzeyinde görevler olarak çalışmasına** izin vermekti.
 
-XNU'da, Mach, bir çekirdeğin genellikle ele aldığı birçok kritik düşük seviyeli işlemin **sorumlusudur**, örneğin işlemci zamanlaması, çoklu görev ve sanal bellek yönetimi.
+XNU'da, Mach genellikle bir çekirdeğin ele aldığı kritik düşük seviyeli işlemlerden birçoklarından **sorumludur**, örneğin işlemci zamanlaması, çoklu görev ve sanal bellek yönetimi.
 
 ### BSD
 
-XNU **çekirdeği** ayrıca **FreeBSD** projesinden türetilmiş önemli miktarda kodu **içermektedir**. Bu kod, Mach ile birlikte çekirdek parçası olarak **aynı adres alanında çalışır**. Ancak, XNU içindeki FreeBSD kodu, Mach ile uyumluluğunu sağlamak için gerekli değişiklikler yapıldığından, orijinal FreeBSD kodundan önemli ölçüde farklı olabilir. FreeBSD, aşağıdakiler dahil birçok çekirdek işlemi için katkıda bulunur:
+XNU **çekirdeği** ayrıca **FreeBSD** projesinden türetilmiş önemli miktarda kodu **içerir**. Bu kod, Mach ile birlikte çekirdek parçası olarak **aynı adres alanında çalışır**. Ancak, XNU içindeki FreeBSD kodu, Mach ile uyumluluğunu sağlamak için gerekli değişiklikler yapıldığından, orijinal FreeBSD kodundan önemli ölçüde farklı olabilir. FreeBSD, aşağıdakiler dahil birçok çekirdek işlemi için katkıda bulunur:
 
 - Süreç yönetimi
 - Sinyal işleme
@@ -29,7 +29,7 @@ XNU **çekirdeği** ayrıca **FreeBSD** projesinden türetilmiş önemli miktard
 
 BSD ve Mach arasındaki etkileşimi anlamak karmaşık olabilir, çünkü farklı kavramsal çerçevelere sahiptirler. Örneğin, BSD, temel yürütme birimi olarak süreçleri kullanırken, Mach, iş parçacıkları temelinde çalışır. Bu tutarsızlık, XNU'da **her BSD sürecini tam olarak bir Mach iş parçacığı içeren bir Mach görevi ile ilişkilendirerek** uzlaştırılır. BSD'nin fork() sistem çağrısı kullanıldığında, çekirdek içindeki BSD kodu, bir görev ve bir iş parçacığı yapısı oluşturmak için Mach işlevlerini kullanır.
 
-Ayrıca, **Mach ve BSD her biri farklı güvenlik modelleri** sürdürmektedir: **Mach'ın** güvenlik modeli **port haklarına** dayanırken, BSD'nin güvenlik modeli **süreç sahipliğine** dayanır. Bu iki model arasındaki farklılıklar zaman zaman yerel ayrıcalık yükseltme güvenlik açıklarına neden olmuştur. Tipik sistem çağrılarının yanı sıra, **kullanıcı alanı programlarının çekirdek ile etkileşimde bulunmasına izin veren Mach tuzakları** da vardır. Bu farklı unsurlar bir araya gelerek macOS çekirdeğinin çok yönlü, hibrit mimarisini oluşturur.
+Ayrıca, **Mach ve BSD her biri farklı güvenlik modelleri** sürdürmektedir: **Mach'ın** güvenlik modeli **port haklarına** dayanırken, BSD'nin güvenlik modeli **süreç sahipliği** temelinde çalışır. Bu iki model arasındaki farklılıklar zaman zaman yerel ayrıcalık yükseltme güvenlik açıklarına neden olmuştur. Tipik sistem çağrılarının yanı sıra, **kullanıcı alanı programlarının çekirdek ile etkileşimde bulunmasına izin veren Mach tuzakları** da vardır. Bu farklı unsurlar bir araya gelerek macOS çekirdeğinin çok yönlü, hibrit mimarisini oluşturur.
 
 ### I/O Kit - Sürücüler
 
@@ -57,7 +57,7 @@ macos-kernel-extensions.md
 
 ### macOS System Extensions
 
-macOS, Çekirdek Uzantılarını kullanmak yerine, çekirdek ile etkileşimde bulunmak için kullanıcı düzeyinde API'ler sunan Sistem Uzantılarını oluşturmuştur. Bu şekilde, geliştiriciler çekirdek uzantılarını kullanmaktan kaçınabilirler.
+macOS, çekirdek ile etkileşimde bulunmak için kullanıcı düzeyinde API'ler sunan Sistem Uzantılarını oluşturmuştur. Bu şekilde, geliştiriciler çekirdek uzantılarını kullanmaktan kaçınabilirler.
 
 {{#ref}}
 macos-system-extensions.md

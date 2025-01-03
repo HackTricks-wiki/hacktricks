@@ -13,19 +13,19 @@ Başlangıçta, **`task_threads()`** fonksiyonu, uzaktaki görevden bir iş par�
 
 İş parçacığını kontrol etmek için, **`thread_suspend()`** çağrılır ve yürütmesi durdurulur.
 
-Uzaktaki iş parçacığında yalnızca **durdurma** ve **başlatma**, **kayıt** değerlerini **alma** ve **değiştirme** işlemlerine izin verilir. Uzaktan fonksiyon çağrıları, `x0` ile `x7` kayıtlarını **argümanlar** ile ayarlayarak, **`pc`**'yi hedeflenen fonksiyona yapılandırarak ve iş parçacığını etkinleştirerek başlatılır. İş parçacığının dönüşten sonra çökmediğinden emin olmak, dönüşün tespit edilmesini gerektirir.
+Uzaktaki iş parçacığında yalnızca **durdurma** ve **başlatma**, **kayıt değerlerini alma** ve **değiştirme** işlemlerine izin verilir. Uzaktan fonksiyon çağrıları, `x0` ile `x7` kayıtlarını **argümanlar** ile ayarlayarak, **`pc`**'yi hedeflenen fonksiyona yapılandırarak ve iş parçacığını etkinleştirerek başlatılır. İş parçacığının dönüşten sonra çökmediğinden emin olmak, dönüşün tespit edilmesini gerektirir.
 
-Bir strateji, uzaktaki iş parçacığı için `thread_set_exception_ports()` kullanarak **bir istisna işleyici kaydetmektir**, fonksiyon çağrısından önce `lr` kaydını geçersiz bir adrese ayarlamaktır. Bu, fonksiyon yürütüldükten sonra bir istisna tetikler, istisna portuna bir mesaj gönderir ve dönüş değerini kurtarmak için iş parçacığının durumunu incelemeyi sağlar. Alternatif olarak, Ian Beer’in triple_fetch istismarından benimsenen bir yöntemle, `lr` sonsuz döngüye ayarlanır. İş parçacığının kayıtları, **`pc` o talimata işaret edene kadar** sürekli izlenir.
+Bir strateji, uzaktaki iş parçacığı için `thread_set_exception_ports()` kullanarak **bir istisna işleyicisi kaydetmektir**, `lr` kaydını fonksiyon çağrısından önce geçersiz bir adrese ayarlamaktır. Bu, fonksiyon yürütüldükten sonra bir istisna tetikler, istisna portuna bir mesaj gönderir ve dönüş değerini kurtarmak için iş parçacığının durumunu incelemeyi sağlar. Alternatif olarak, Ian Beer’in triple_fetch istismarından benimsenen bir yöntemle, `lr` sonsuz döngüye ayarlanır. İş parçacığının kayıtları, **`pc` o talimata işaret edene kadar** sürekli izlenir.
 
 ## 2. Mach ports for communication
 
-Sonraki aşama, uzaktaki iş parçacığı ile iletişimi kolaylaştırmak için Mach portları kurmaktır. Bu portlar, görevler arasında keyfi gönderme ve alma haklarının aktarımında önemlidir.
+Sonraki aşama, uzaktaki iş parçacığı ile iletişimi kolaylaştırmak için Mach portları kurmaktır. Bu portlar, görevler arasında keyfi gönderme ve alma haklarının aktarımında önemli bir rol oynar.
 
 İki yönlü iletişim için, bir yerel ve diğeri uzaktaki görevde olmak üzere iki Mach alma hakkı oluşturulur. Ardından, her port için bir gönderme hakkı karşıt göreve aktarılır ve mesaj alışverişine olanak tanır.
 
 Yerel port üzerinde odaklanıldığında, alma hakkı yerel görev tarafından tutulur. Port, `mach_port_allocate()` ile oluşturulur. Bu port için bir gönderme hakkını uzaktaki göreve aktarmak zorluk teşkil eder.
 
-Bir strateji, `thread_set_special_port()` kullanarak yerel port için bir gönderme hakkını uzaktaki iş parçacığının `THREAD_KERNEL_PORT`'una yerleştirmeyi içerir. Ardından, uzaktaki iş parçacığına `mach_thread_self()` çağrısı yapması talimatı verilir, böylece gönderme hakkını alır.
+Bir strateji, `thread_set_special_port()` kullanarak yerel port için bir gönderme hakkını uzaktaki iş parçacığının `THREAD_KERNEL_PORT`'una yerleştirmektir. Ardından, uzaktaki iş parçacığına `mach_thread_self()` çağrısı yapması talimatı verilir, böylece gönderme hakkını alır.
 
 Uzaktaki port için süreç esasen tersine çevrilir. Uzaktaki iş parçacığı, `mach_reply_port()` aracılığıyla bir Mach portu oluşturması için yönlendirilir (çünkü `mach_port_allocate()` dönüş mekanizması nedeniyle uygun değildir). Port oluşturulduktan sonra, uzaktaki iş parçacığında bir gönderme hakkı oluşturmak için `mach_port_insert_right()` çağrılır. Bu hak daha sonra `thread_set_special_port()` kullanılarak çekirdekte saklanır. Yerel görevde, uzaktaki iş parçacığı üzerinde `thread_get_special_port()` kullanılarak uzaktaki görevde yeni tahsis edilen Mach portuna bir gönderme hakkı edinilir.
 
@@ -97,7 +97,7 @@ Amaç, yerel ve uzaktaki görevler arasında paylaşılan bellek oluşturarak ve
 
 2. **Uzaktaki Süreçte Paylaşılan Bellek Oluşturma**:
 
-- Uzaktaki süreçte `malloc()` ile `OS_xpc_shmem` nesnesi için bellek tahsis edin.
+- Uzaktaki süreçte `OS_xpc_shmem` nesnesi için bellek tahsis edin ve `malloc()` ile uzaktan çağrı yapın.
 - Yerel `OS_xpc_shmem` nesnesinin içeriğini uzaktaki sürece kopyalayın. Ancak, bu ilk kopya `0x18` ofsetinde yanlış Mach bellek girişi adlarına sahip olacaktır.
 
 3. **Mach Bellek Girişini Düzeltme**:
@@ -107,7 +107,7 @@ Amaç, yerel ve uzaktaki görevler arasında paylaşılan bellek oluşturarak ve
 
 4. **Paylaşılan Bellek Kurulumunu Tamamlama**:
 - Uzaktaki `OS_xpc_shmem` nesnesini doğrulayın.
-- `xpc_shmem_remote()` ile uzaktan bir çağrı yaparak paylaşılan bellek eşlemesini kurun.
+- `xpc_shmem_remote()` ile uzaktan çağrı yaparak paylaşılan bellek haritasını oluşturun.
 
 Bu adımları izleyerek, yerel ve uzaktaki görevler arasında paylaşılan bellek verimli bir şekilde kurulacak ve veri transferleri ile birden fazla argüman gerektiren fonksiyonların yürütülmesi kolaylaşacaktır.
 
@@ -131,10 +131,10 @@ Paylaşılan belleği başarıyla kurduktan ve keyfi yürütme yetenekleri kazan
 
 1. **Keyfi Bellek İşlemleri**:
 
-- Paylaşılan alandan veri kopyalamak için `memcpy()` çağrısını yaparak keyfi bellek okumaları gerçekleştirin.
-- Paylaşılan alana veri aktarmak için `memcpy()` kullanarak keyfi bellek yazmaları gerçekleştirin.
+- Paylaşılan bölgeden veri kopyalamak için `memcpy()` çağrısını yaparak keyfi bellek okumaları gerçekleştirin.
+- Paylaşılan bölgeye veri aktarmak için `memcpy()` kullanarak keyfi bellek yazmaları gerçekleştirin.
 
-2. **Birden Fazla Argümanla Fonksiyon Çağrılarıyla İlgilenme**:
+2. **Birden Fazla Argümanla Fonksiyon Çağrıları Yönetimi**:
 
 - 8'den fazla argüman gerektiren fonksiyonlar için, ek argümanları çağrı konvansiyonuna uygun olarak yığında düzenleyin.
 
@@ -143,7 +143,7 @@ Paylaşılan belleği başarıyla kurduktan ve keyfi yürütme yetenekleri kazan
 - Daha önce kurulmuş portlar aracılığıyla görevler arasında Mach portlarını Mach mesajları ile aktarın.
 
 4. **Dosya Tanımlayıcı Transferi**:
-- Ian Beer'in `triple_fetch` adlı tekniğinde vurguladığı gibi, dosyaportları kullanarak süreçler arasında dosya tanımlayıcılarını aktarın.
+- `triple_fetch` tekniği ile Ian Beer tarafından vurgulanan dosyaportları kullanarak süreçler arasında dosya tanımlayıcılarını aktarın.
 
 Bu kapsamlı kontrol, [threadexec](https://github.com/bazad/threadexec) kütüphanesi içinde kapsüllenmiştir ve kurban süreci ile etkileşim için ayrıntılı bir uygulama ve kullanıcı dostu bir API sağlar.
 

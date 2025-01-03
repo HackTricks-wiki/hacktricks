@@ -4,7 +4,7 @@
 
 ## Temel Bilgiler
 
-macOS'taki başlatma kısıtlamaları, **bir sürecin nasıl, kim tarafından ve nereden başlatılacağını düzenleyerek** güvenliği artırmak için tanıtılmıştır. macOS Ventura'da başlatılan bu kısıtlamalar, **her sistem ikili dosyasını belirli kısıtlama kategorilerine** ayıran bir çerçeve sağlar; bu kategoriler **güven cache'inde** tanımlanmıştır ve sistem ikili dosyalarını ve bunların ilgili hash'lerini içeren bir listedir. Bu kısıtlamalar, sistemdeki her yürütülebilir ikili dosyayı kapsar ve **belirli bir ikili dosyanın başlatılması için gereksinimleri** belirleyen bir dizi **kural** içerir. Kurallar, bir ikilinin karşılaması gereken kendi kısıtlamalarını, ebeveyn sürecinin karşılaması gereken ebeveyn kısıtlamalarını ve diğer ilgili varlıkların uyması gereken sorumlu kısıtlamaları kapsar.
+macOS'taki başlatma kısıtlamaları, **bir sürecin nasıl, kim tarafından ve nereden başlatılacağını düzenleyerek** güvenliği artırmak için tanıtılmıştır. macOS Ventura ile başlatılan bu kısıtlamalar, **her sistem ikili dosyasını belirli kısıtlama kategorilerine** ayıran bir çerçeve sağlar; bu kategoriler **güven cache'inde** tanımlanmıştır ve sistem ikili dosyalarını ve bunların ilgili hash'lerini içerir. Bu kısıtlamalar, sistemdeki her yürütülebilir ikili dosyayı kapsar ve **belirli bir ikili dosyanın başlatılması için gereksinimleri** belirleyen bir dizi **kural** içerir. Kurallar, bir ikilinin karşılaması gereken kendi kısıtlamalarını, ebeveyn sürecinin karşılaması gereken ebeveyn kısıtlamalarını ve diğer ilgili varlıkların uyması gereken sorumlu kısıtlamaları kapsar.
 
 Mekanizma, macOS Sonoma'dan itibaren **Ortam Kısıtlamaları** aracılığıyla üçüncü taraf uygulamalara da uzanır ve geliştiricilerin uygulamalarını korumalarına olanak tanır; bu, bir **dizi anahtar ve değer belirleyerek** yapılır.
 
@@ -13,7 +13,7 @@ Mekanizma, macOS Sonoma'dan itibaren **Ortam Kısıtlamaları** aracılığıyla
 4 tür kısıtlama vardır:
 
 - **Kendi Kısıtlamaları**: **çalışan** ikiliye uygulanan kısıtlamalar.
-- **Ebeveyn Süreci**: **sürecin ebeveynine** uygulanan kısıtlamalar (örneğin **`launchd`** bir XP hizmeti çalıştırıyorsa)
+- **Ebeveyn Süreci**: **sürecin ebeveynine** uygulanan kısıtlamalar (örneğin **`launchd`** bir XP hizmetini çalıştırıyorsa)
 - **Sorumlu Kısıtlamalar**: **hizmeti çağıran sürece** uygulanan kısıtlamalar bir XPC iletişimi içinde
 - **Kütüphane yükleme kısıtlamaları**: Yüklenebilecek kodu seçici olarak tanımlamak için kütüphane yükleme kısıtlamalarını kullanın
 
@@ -28,15 +28,15 @@ Bir LC, **gerçekler** ve **mantıksal işlemler** (ve, veya..) ile oluşturulmu
 [**Bir LC'nin kullanabileceği gerçekler belgelenmiştir**](https://developer.apple.com/documentation/security/defining_launch_environment_and_library_constraints). Örneğin:
 
 - is-init-proc: Yürütülebilir dosyanın işletim sisteminin başlatma süreci (`launchd`) olup olmadığını belirten bir Boolean değeri.
-- is-sip-protected: Yürütülebilir dosyanın Sistem Bütünlüğü Koruması (SIP) tarafından korunup korunmadığını belirten bir Boolean değeri.
-- `on-authorized-authapfs-volume:` İşletim sisteminin yürütülebilir dosyayı yetkilendirilmiş, kimlik doğrulaması yapılmış bir APFS hacminden yükleyip yüklemediğini belirten bir Boolean değeri.
-- `on-authorized-authapfs-volume`: İşletim sisteminin yürütülebilir dosyayı yetkilendirilmiş, kimlik doğrulaması yapılmış bir APFS hacminden yükleyip yüklemediğini belirten bir Boolean değeri.
+- is-sip-protected: Yürütülebilir dosyanın Sistem Bütünlüğü Koruması (SIP) tarafından korunan bir dosya olup olmadığını belirten bir Boolean değeri.
+- `on-authorized-authapfs-volume:` İşletim sisteminin yürütülebilir dosyayı yetkilendirilmiş, kimlik doğrulanmış bir APFS hacminden yükleyip yüklemediğini belirten bir Boolean değeri.
+- `on-authorized-authapfs-volume`: İşletim sisteminin yürütülebilir dosyayı yetkilendirilmiş, kimlik doğrulanmış bir APFS hacminden yükleyip yüklemediğini belirten bir Boolean değeri.
 - Cryptexes hacmi
 - `on-system-volume:` İşletim sisteminin yürütülebilir dosyayı şu anda önyüklenmiş sistem hacminden yükleyip yüklemediğini belirten bir Boolean değeri.
 - İçinde /System...
 - ...
 
-Bir Apple ikilisi imzalandığında, **onu güven cache'inde bir LC kategorisine atar**.
+Bir Apple ikilisi imzalandığında, **onu bir LC kategorisine atar** **güven cache'inde**.
 
 - **iOS 16 LC kategorileri** [**tersine çevrildi ve burada belgelenmiştir**](https://gist.github.com/LinusHenze/4cd5d7ef057a144cda7234e2c247c056).
 - Mevcut **LC kategorileri (macOS 14 - Somona)** tersine çevrildi ve [**açıklamaları burada bulunabilir**](https://gist.github.com/theevilbit/a6fef1e0397425a334d064f7b6e1be53).
@@ -54,7 +54,7 @@ Parent Constraint: is-init-proc
 
 ### LC Kategorilerini Tersine Çevirme
 
-Bununla ilgili daha fazla bilgiye [**buradan ulaşabilirsiniz**](https://theevilbit.github.io/posts/launch_constraints_deep_dive/#reversing-constraints), ama temelde, **AMFI (AppleMobileFileIntegrity)** içinde tanımlanmışlardır, bu yüzden **KEXT**'i almak için Kernel Development Kit'i indirmeniz gerekir. **`kConstraintCategory`** ile başlayan semboller **ilginç** olanlardır. Bunları çıkardığınızda, [ASN.1 Decoder](https://holtstrom.com/michael/tools/asn1decoder.php) veya python-asn1 kütüphanesi ve `dump.py` scripti ile çözmeniz gereken DER (ASN.1) kodlu bir akış elde edeceksiniz, [andrivet/python-asn1](https://github.com/andrivet/python-asn1/tree/master) size daha anlaşılır bir dize verecektir.
+Bununla ilgili daha fazla bilgiye [**buradan ulaşabilirsiniz**](https://theevilbit.github.io/posts/launch_constraints_deep_dive/#reversing-constraints), ama temelde, **AMFI (AppleMobileFileIntegrity)** içinde tanımlanmışlardır, bu yüzden **KEXT**'i almak için Kernel Geliştirme Kitini indirmeniz gerekir. **`kConstraintCategory`** ile başlayan semboller **ilginç** olanlardır. Bunları çıkardığınızda, [ASN.1 Decoder](https://holtstrom.com/michael/tools/asn1decoder.php) veya python-asn1 kütüphanesi ve `dump.py` scripti ile çözmeniz gereken DER (ASN.1) kodlu bir akış elde edeceksiniz, [andrivet/python-asn1](https://github.com/andrivet/python-asn1/tree/master) daha anlaşılır bir dize verecektir.
 
 ## Ortam Kısıtlamaları
 
@@ -66,7 +66,7 @@ codesign -d -vvvv app.app
 ```
 ## Güven Cache'leri
 
-**macOS**'ta birkaç güven cache'i vardır:
+**macOS**'ta birkaç güven cache'i bulunmaktadır:
 
 - **`/System/Volumes/Preboot/*/boot/*/usr/standalone/firmware/FUD/BaseSystemTrustCache.img4`**
 - **`/System/Volumes/Preboot/*/boot/*/usr/standalone/firmware/FUD/StaticTrustCache.img4`**
@@ -75,13 +75,13 @@ codesign -d -vvvv app.app
 Ve iOS'ta **`/usr/standalone/firmware/FUD/StaticTrustCache.img4`** içinde olduğu görünmektedir.
 
 > [!WARNING]
-> Apple Silicon cihazlarda çalışan macOS'ta, eğer bir Apple imzalı ikili güven cache'inde yoksa, AMFI onu yüklemeyi reddedecektir.
+> Apple Silicon cihazlarda çalışan macOS'ta, eğer bir Apple imzalı ikili güven cache'inde yoksa, AMFI bunu yüklemeyi reddedecektir.
 
 ### Güven Cache'lerini Sıralama
 
-Önceki güven cache dosyaları **IMG4** ve **IM4P** formatındadır, IM4P IMG4 formatının yük bölümüdür.
+Önceki güven cache dosyaları **IMG4** ve **IM4P** formatındadır, IM4P IMG4 formatının yükleme bölümüdür.
 
-Veritabanlarının yükünü çıkarmak için [**pyimg4**](https://github.com/m1stadev/PyIMG4) kullanabilirsiniz:
+Veritabanlarının yükleme bölümünü çıkarmak için [**pyimg4**](https://github.com/m1stadev/PyIMG4) kullanabilirsiniz:
 ```bash
 # Installation
 python3 -m pip install pyimg4
@@ -152,11 +152,11 @@ Sonoma sürümünde, dikkat çekici bir nokta, daemon XPC hizmetinin **sorumlulu
 - **XPC Hizmetini Başlatma**: Bir hata olarak varsayılırsa, bu yapılandırma, XPC hizmetini saldırgan kod aracılığıyla başlatmaya izin vermez.
 - **Aktif Bir Hizmete Bağlanma**: Eğer XPC hizmeti zaten çalışıyorsa (muhtemelen orijinal uygulaması tarafından etkinleştirilmişse), ona bağlanmak için hiçbir engel yoktur.
 
-XPC hizmetinde kısıtlamalar uygulamak, **potansiyel saldırılar için pencereyi daraltarak** faydalı olabilir, ancak temel endişeyi ele almaz. XPC hizmetinin güvenliğini sağlamak, esasen **bağlanan istemcinin etkili bir şekilde doğrulanmasını** gerektirir. Bu, hizmetin güvenliğini güçlendirmenin tek yoludur. Ayrıca, bahsedilen sorumluluk yapılandırmasının şu anda çalıştığını belirtmekte fayda var; bu, tasarlanan amaçla uyumlu olmayabilir.
+XPC hizmetinde kısıtlamalar uygulamak, **potansiyel saldırılar için pencereyi daraltarak** faydalı olabilir, ancak temel endişeyi ele almaz. XPC hizmetinin güvenliğini sağlamak, esasen **bağlanan istemcinin etkili bir şekilde doğrulanmasını** gerektirir. Bu, hizmetin güvenliğini güçlendirmenin tek yoludur. Ayrıca, bahsedilen sorumluluk yapılandırmasının şu anda çalıştığını belirtmek gerekir; bu, tasarlanan amaçla uyumlu olmayabilir.
 
 ### Electron Koruması
 
-Uygulamanın **LaunchService tarafından açılması gerektiği** gereksinimi olsa bile (ebeveyn kısıtlamalarında). Bu, **`open`** kullanılarak (çevre değişkenlerini ayarlayabilir) veya **Launch Services API** kullanılarak (çevre değişkenlerinin belirtilebileceği yer) gerçekleştirilebilir.
+Uygulamanın **LaunchService tarafından açılması gerektiği** gereksinimi olsa bile (ebeveyn kısıtlamalarında). Bu, **`open`** kullanılarak (çevre değişkenlerini ayarlayabilen) veya **Launch Services API** kullanılarak (çevre değişkenlerinin belirtilebileceği) gerçekleştirilebilir.
 
 ## Referanslar
 

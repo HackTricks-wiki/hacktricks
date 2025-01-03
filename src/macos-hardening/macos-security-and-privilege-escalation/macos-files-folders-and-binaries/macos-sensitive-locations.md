@@ -6,26 +6,26 @@
 
 ### Gölge Parolalar
 
-Gölge parola, **`/var/db/dslocal/nodes/Default/users/`** konumundaki plistlerde kullanıcının yapılandırması ile birlikte saklanır.\
+Gölge parolası, **`/var/db/dslocal/nodes/Default/users/`** konumundaki plistlerde kullanıcının yapılandırması ile birlikte saklanır.\
 Aşağıdaki tek satırlık komut, **kullanıcılar hakkında tüm bilgileri** (hash bilgileri dahil) dökmek için kullanılabilir:
 ```bash
 for l in /var/db/dslocal/nodes/Default/users/*; do if [ -r "$l" ];then echo "$l"; defaults read "$l"; fi; done
 ```
 [**Bu tür scriptler**](https://gist.github.com/teddziuba/3ff08bdda120d1f7822f3baf52e606c2) veya [**şu**](https://github.com/octomagon/davegrohl.git) **hashcat** **formatına** dönüştürmek için kullanılabilir.
 
-Tüm hizmet dışı hesapların kimlik bilgilerini hashcat formatında `-m 7100` (macOS PBKDF2-SHA512) dökecek alternatif bir tek satırlık komut:
+Hashcat formatında `-m 7100` (macOS PBKDF2-SHA512) tüm hizmet dışı hesapların kimlik bilgilerini dökecek alternatif bir tek satırlık komut:
 ```bash
 sudo bash -c 'for i in $(find /var/db/dslocal/nodes/Default/users -type f -regex "[^_]*"); do plutil -extract name.0 raw $i | awk "{printf \$0\":\$ml\$\"}"; for j in {iterations,salt,entropy}; do l=$(k=$(plutil -extract ShadowHashData.0 raw $i) && base64 -d <<< $k | plutil -extract SALTED-SHA512-PBKDF2.$j raw -); if [[ $j == iterations ]]; then echo -n $l; else base64 -d <<< $l | xxd -p -c 0 | awk "{printf \"$\"\$0}"; fi; done; echo ""; done'
 ```
-Başka bir kullanıcının `ShadowHashData`sını elde etmenin bir yolu `dscl` kullanmaktır: `` sudo dscl . -read /Users/`whoami` ShadowHashData ``
+Başka bir kullanıcıya ait `ShadowHashData`'yı elde etmenin bir yolu `dscl` kullanmaktır: `` sudo dscl . -read /Users/`whoami` ShadowHashData ``
 
 ### /etc/master.passwd
 
-Bu dosya **yalnızca** sistem **tek kullanıcı modunda** çalıştığında kullanılır (bu nedenle çok sık değildir).
+Bu dosya **yalnızca** sistemin **tek kullanıcı modunda** çalıştığı zaman **kullanılır** (bu nedenle çok sık değildir).
 
 ### Anahtar Zinciri Dökümü
 
-Şifrelerin şifresinin çözüldüğünü **dökme** işlemi için güvenlik ikili dosyasını kullanırken, kullanıcıdan bu işlemi onaylaması için birkaç istem olacaktır.
+Şifrelerin şifresinin çözüldüğü **dökümü** almak için security ikili dosyasını kullanırken, kullanıcıdan bu işlemi onaylaması için birkaç istem geleceğini unutmayın.
 ```bash
 #security
 security dump-trust-settings [-s] [-d] #List certificates
@@ -41,7 +41,7 @@ security dump-keychain -d #Dump all the info, included secrets (the user will be
 
 ### Keychaindump Genel Bakış
 
-**keychaindump** adlı bir araç, macOS anahtar zincirlerinden şifreleri çıkarmak için geliştirilmiştir, ancak Big Sur gibi daha yeni macOS sürümlerinde sınırlamalarla karşılaşmaktadır; bu durum bir [tartışmada](https://github.com/juuso/keychaindump/issues/10#issuecomment-751218760) belirtilmiştir. **keychaindump** kullanmak, saldırganın erişim sağlaması ve **root** ayrıcalıklarını artırması gerektirir. Araç, anahtar zincirinin kullanıcı girişi sırasında varsayılan olarak kilidinin açılmasını kullanarak, uygulamaların kullanıcı şifresini tekrar tekrar istemeden erişim sağlamasına olanak tanır. Ancak, bir kullanıcı her kullanım sonrası anahtar zincirini kilitlemeyi tercih ederse, **keychaindump** etkisiz hale gelir.
+**keychaindump** adlı bir araç, macOS anahtar zincirlerinden şifreleri çıkarmak için geliştirilmiştir, ancak Big Sur gibi daha yeni macOS sürümlerinde sınırlamalarla karşılaşmaktadır; bu durum bir [tartışmada](https://github.com/juuso/keychaindump/issues/10#issuecomment-751218760) belirtilmiştir. **keychaindump** kullanmak, saldırganın erişim sağlaması ve **root** ayrıcalıklarını yükseltmesi gerektirir. Araç, anahtar zincirinin kullanıcı girişi sırasında varsayılan olarak kilidinin açılmasını kullanarak, uygulamaların kullanıcı şifresini tekrar tekrar istemeden erişim sağlamasına olanak tanır. Ancak, bir kullanıcı her kullanım sonrası anahtar zincirini kilitlemeyi tercih ederse, **keychaindump** etkisiz hale gelir.
 
 **Keychaindump**, Apple tarafından yetkilendirme ve kriptografik işlemler için bir daemon olarak tanımlanan **securityd** adlı belirli bir süreci hedef alarak çalışır; bu, anahtar zincirine erişim için kritik öneme sahiptir. Çıkarma süreci, kullanıcının giriş şifresinden türetilen bir **Master Key**'in tanımlanmasını içerir. Bu anahtar, anahtar zinciri dosyasını okumak için gereklidir. **Master Key**'i bulmak için, **keychaindump** `vmmap` komutunu kullanarak **securityd**'nin bellek yığınını tarar ve `MALLOC_TINY` olarak işaretlenmiş alanlarda potansiyel anahtarları arar. Bu bellek konumlarını incelemek için aşağıdaki komut kullanılır:
 ```bash
@@ -235,7 +235,7 @@ Aynı zamanda daemon ve bağlantılar hakkında bilgi almak için de kullanılab
 Bu, kullanıcının ekranda görmesi gereken bildirimlerdir:
 
 - **`CFUserNotification`**: Bu API, ekranda bir mesajla pop-up gösterme imkanı sağlar.
-- **Bülten Tahtası**: Bu, iOS'ta kaybolan ve Bildirim Merkezi'nde saklanan bir banner gösterir.
-- **`NSUserNotificationCenter`**: Bu, MacOS'taki iOS bülten tahtasıdır. Bildirimlerin bulunduğu veritabanı `/var/folders/<user temp>/0/com.apple.notificationcenter/db2/db` konumundadır.
+- **Bülten Panosu**: Bu, iOS'ta kaybolan ve Bildirim Merkezi'nde saklanan bir banner gösterir.
+- **`NSUserNotificationCenter`**: Bu, MacOS'taki iOS bülten panosudur. Bildirimlerin bulunduğu veritabanı `/var/folders/<user temp>/0/com.apple.notificationcenter/db2/db` konumundadır.
 
 {{#include ../../../banners/hacktricks-training.md}}

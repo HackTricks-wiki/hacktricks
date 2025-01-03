@@ -10,7 +10,7 @@ Takas dosyaları, örneğin `/private/var/vm/swapfile0`, **fiziksel bellek doldu
 
 ### Hibernasyon Görüntüsü
 
-`/private/var/vm/sleepimage` konumundaki dosya, **hibernasyon modunda** kritik öneme sahiptir. **OS X hibernasyona geçtiğinde bellek verileri bu dosyada saklanır**. Bilgisayar uyandığında, sistem bu dosyadan bellek verilerini alır ve kullanıcı kaldığı yerden devam edebilir.
+`/private/var/vm/sleepimage` konumundaki dosya, **hibernasyon modunda** kritik öneme sahiptir. **OS X hibernasyona geçtiğinde bellek verileri bu dosyada saklanır**. Bilgisayar uyandığında, sistem bu dosyadan bellek verilerini alır ve kullanıcının kaldığı yerden devam etmesine olanak tanır.
 
 Modern MacOS sistemlerinde, bu dosyanın genellikle güvenlik nedenleriyle şifreli olduğunu ve kurtarmanın zor olduğunu belirtmek gerekir.
 

@@ -4,24 +4,24 @@
 
 ## PID Yeniden Kullanımı
 
-Bir macOS **XPC servisi**, çağrılan süreci **PID**'ye göre kontrol ediyorsa ve **denetim belirteci**'ne göre değilse, PID yeniden kullanımı saldırısına karşı savunmasızdır. Bu saldırı, bir **yarı zamanlı durum** üzerine kuruludur; burada bir **istismar**, **XPC** servisine **mesajlar gönderecek** ve hemen ardından **`posix_spawn(NULL, target_binary, NULL, &attr, target_argv, environ)`** ile **izin verilen** ikiliyi çalıştıracaktır.
+Bir macOS **XPC servisi**, çağrılan süreci **PID**'ye göre kontrol ediyorsa ve **denetim belirteci**'ne göre değilse, PID yeniden kullanımı saldırısına karşı savunmasızdır. Bu saldırı, bir **yarış durumu** temelinde gerçekleşir; burada bir **sömürü**, **XPC** servisine **mesajlar gönderecek** ve hemen ardından **`posix_spawn(NULL, target_binary, NULL, &attr, target_argv, environ)`** ile **izin verilen** ikiliyi çalıştıracaktır.
 
-Bu fonksiyon, **izin verilen ikilinin PID'sini** alacak, ancak **kötü niyetli XPC mesajı** daha önce gönderilmiş olacaktır. Dolayısıyla, eğer **XPC** servisi, göndericiyi **doğrulamak** için **PID**'yi kullanır ve **`posix_spawn`**'ın çalıştırılmasından SONRA kontrol ederse, bunun **yetkili** bir süreçten geldiğini düşünecektir.
+Bu fonksiyon, **izin verilen ikilinin PID'sini** alacak, ancak **kötü niyetli XPC mesajı** daha önce gönderilmiş olacaktır. Dolayısıyla, eğer **XPC** servisi, göndereni **doğrulamak** için **PID**'yi kullanır ve **`posix_spawn`**'dan sonra kontrol ederse, bunun **yetkili** bir süreçten geldiğini düşünecektir.
 
-### İstismar örneği
+### Sömürü örneği
 
 Eğer **`shouldAcceptNewConnection`** fonksiyonunu veya onun tarafından çağrılan ve **`processIdentifier`**'ı çağıran bir fonksiyonu bulursanız ve **`auditToken`**'ı çağırmıyorsa, bu büyük olasılıkla **süreç PID'sini** doğruladığı anlamına gelir.\
-Örneğin, bu resimde (referanstan alınmıştır) olduğu gibi:
+Örneğin, bu resimde (referanstan alınmıştır):
 
 <figure><img src="../../../../../../images/image (306).png" alt="https://wojciechregula.blog/images/2020/04/pid.png"><figcaption></figcaption></figure>
 
-İstismarın 2 parçasını görmek için bu örnek istismarı kontrol edin (yine, referanstan alınmıştır):
+Sömürü örneğini kontrol edin (yine, referanstan alınmıştır) ve sömürünün 2 parçasını görün:
 
-- Birkaç fork **üreten** bir parça
-- **Her fork**, mesajı gönderdikten hemen sonra **`posix_spawn`**'ı çalıştırırken **yükü** XPC servisine **gönderecektir**.
+- Bir tanesi **birkaç fork** oluşturur
+- **Her fork**, mesajı gönderdikten hemen sonra **`posix_spawn`**'ı çalıştırırken **XPC** servisine **yükü** **gönderecektir**.
 
 > [!CAUTION]
-> İstismarın çalışması için ` export`` `` `**`OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES`** olarak ayarlanması veya istismar içine şunların konulması önemlidir:
+> Sömürünün çalışması için ` export`` `` `**`OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES`** olarak ayarlamak veya sömürü içine koymak önemlidir:
 >
 > ```objectivec
 > asm(".section __DATA,__objc_fork_ok\n"
@@ -31,7 +31,7 @@ Eğer **`shouldAcceptNewConnection`** fonksiyonunu veya onun tarafından çağr�
 
 {{#tabs}}
 {{#tab name="NSTasks"}}
-İlk seçenek, **`NSTasks`** kullanarak çocukları başlatmak için argüman ile RC'yi istismar etmektir.
+İlk seçenek, **`NSTasks`** kullanarak çocukları başlatmak ve RC'yi sömürmek için argüman.
 ```objectivec
 // Code from https://wojciechregula.blog/post/learn-xpc-exploitation-part-2-say-no-to-the-pid/
 // gcc -framework Foundation expl.m -o expl
@@ -140,7 +140,7 @@ return 0;
 {{#endtab}}
 
 {{#tab name="fork"}}
-Bu örnek, **PID yarış durumu**nu istismar edecek **çocuk süreçleri başlatmak için ham **`fork`** kullanır** ve ardından **bir Sert bağlantı aracılığıyla başka bir yarış durumunu istismar eder:**
+Bu örnek, **PID yarış durumu**nu istismar edecek **çocuk süreçleri başlatmak için ham **`fork`** kullanır** ve ardından **bir Hard link aracılığıyla başka bir yarış durumunu istismar eder:**
 ```objectivec
 // export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
 // gcc -framework Foundation expl.m -o expl

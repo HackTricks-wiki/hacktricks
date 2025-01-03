@@ -4,7 +4,7 @@
 
 ## **x64'e Giriş**
 
-x64, x86-64 olarak da bilinir, esasen masaüstü ve sunucu bilgisayarlarında kullanılan 64-bit bir işlemci mimarisidir. Intel tarafından üretilen x86 mimarisinden türetilmiş ve daha sonra AMD tarafından AMD64 adıyla benimsenmiştir; günümüzde kişisel bilgisayarlar ve sunucularda yaygın olarak kullanılan mimaridir.
+x64, x86-64 olarak da bilinir, esasen masaüstü ve sunucu bilgisayarlarında kullanılan 64-bit bir işlemci mimarisidir. Intel tarafından üretilen x86 mimarisinden türetilmiş ve daha sonra AMD tarafından AMD64 adıyla benimsenmiştir; günümüzde kişisel bilgisayarlarda ve sunucularda yaygın olarak kullanılan mimaridir.
 
 ### **Kayıtlar**
 
@@ -23,10 +23,10 @@ x64, x86 mimarisini genişleterek **16 genel amaçlı kayıt** sunar: `rax`, `rb
 
 x64 çağrı sözleşmesi işletim sistemlerine göre değişiklik gösterir. Örneğin:
 
-- **Windows**: İlk **dört parametre** **`rcx`**, **`rdx`**, **`r8`** ve **`r9`** kayıtlarında geçilir. Diğer parametreler yığına itilir. Dönen değer **`rax`** içindedir.
-- **System V (genellikle UNIX benzeri sistemlerde kullanılır)**: İlk **altı tamsayı veya işaretçi parametre** **`rdi`**, **`rsi`**, **`rdx`**, **`rcx`**, **`r8`** ve **`r9`** kayıtlarında geçilir. Dönen değer de **`rax`** içindedir.
+- **Windows**: İlk **dört parametre** **`rcx`**, **`rdx`**, **`r8`** ve **`r9`** kayıtlarında geçilir. Diğer parametreler yığına itilir. Dönen değer **`rax`**'tadır.
+- **System V (genellikle UNIX benzeri sistemlerde kullanılır)**: İlk **altı tam sayı veya işaretçi parametre** **`rdi`**, **`rsi`**, **`rdx`**, **`rcx`**, **`r8`** ve **`r9`** kayıtlarında geçilir. Dönen değer de **`rax`**'tadır.
 
-Fonksiyonun altıdan fazla girişi varsa, **geri kalan yığında geçilecektir**. **RSP**, yığın işaretçisi, **16 byte hizalı** olmalıdır; bu, işaret ettiği adresin herhangi bir çağrıdan önce 16'ya tam bölünebilir olması gerektiği anlamına gelir. Bu, genellikle bir fonksiyon çağrısı yapmadan önce RSP'nin düzgün bir şekilde hizalandığından emin olmamız gerektiği anlamına gelir. Ancak pratikte, sistem çağrıları bu gereklilik karşılanmadığında bile birçok kez çalışır.
+Fonksiyonun altıdan fazla girişi varsa, **geri kalan yığında geçilir**. **RSP**, yığın işaretçisi, **16 byte hizalanmış** olmalıdır; bu, işaret ettiği adresin herhangi bir çağrıdan önce 16'ya tam bölünebilir olması gerektiği anlamına gelir. Bu, genellikle bir fonksiyon çağrısı yapmadan önce RSP'nin düzgün bir şekilde hizalandığından emin olmamız gerektiği anlamına gelir. Ancak pratikte, sistem çağrıları bu gereklilik karşılanmasa bile birçok kez çalışır.
 
 ### Swift'te Çağrı Sözleşmesi
 
@@ -37,31 +37,31 @@ Swift'in kendi **çağrı sözleşmesi** vardır, [**burada bulabilirsiniz**](ht
 x64 talimatları, önceki x86 talimatlarıyla uyumluluğu koruyarak ve yenilerini tanıtarak zengin bir set sunar.
 
 - **`mov`**: Bir **değeri** bir **kayıttan** veya **bellek konumundan** diğerine **taşır**.
-- Örnek: `mov rax, rbx` — `rbx`'teki değeri `rax`'a taşır.
+- Örnek: `mov rax, rbx` — `rbx`'teki değeri `rax`'e taşır.
 - **`push`** ve **`pop`**: Yığına değerleri itme veya çekme.
 - Örnek: `push rax` — `rax`'teki değeri yığına iter.
-- Örnek: `pop rax` — Yığının üstündeki değeri `rax`'a çeker.
+- Örnek: `pop rax` — Yığının üstündeki değeri `rax`'e çeker.
 - **`add`** ve **`sub`**: **Toplama** ve **çıkarma** işlemleri.
-- Örnek: `add rax, rcx` — `rax` ve `rcx`'teki değerleri toplar, sonucu `rax`'ta saklar.
+- Örnek: `add rax, rcx` — `rax` ve `rcx`'teki değerleri toplar, sonucu `rax`'te saklar.
 - **`mul`** ve **`div`**: **Çarpma** ve **bölme** işlemleri. Not: Bunların operand kullanımıyla ilgili belirli davranışları vardır.
 - **`call`** ve **`ret`**: **Fonksiyonları çağırmak** ve **geri dönmek** için kullanılır.
 - **`int`**: Yazılım **kesintisi** tetiklemek için kullanılır. Örneğin, `int 0x80` 32-bit x86 Linux'ta sistem çağrıları için kullanılmıştır.
 - **`cmp`**: İki değeri **karşılaştırır** ve sonuca göre CPU'nun bayraklarını ayarlar.
 - Örnek: `cmp rax, rdx` — `rax`'ı `rdx` ile karşılaştırır.
 - **`je`, `jne`, `jl`, `jge`, ...**: Önceki bir `cmp` veya testin sonuçlarına göre kontrol akışını değiştiren **koşullu atlama** talimatları.
-- Örnek: `cmp rax, rdx` talimatından sonra, `je label` — `rax` `rdx`'e eşitse `label`'a atlar.
+- Örnek: `cmp rax, rdx` talimatından sonra, `je label` — `rax` `rdx`'e eşitse `label`'e atlar.
 - **`syscall`**: Bazı x64 sistemlerde (modern Unix gibi) **sistem çağrıları** için kullanılır.
 - **`sysenter`**: Bazı platformlarda optimize edilmiş bir **sistem çağrısı** talimatıdır.
 
 ### **Fonksiyon Prologu**
 
 1. **Eski temel işaretçiyi it**: `push rbp` (çağıranın temel işaretçisini kaydeder)
-2. **Mevcut yığın işaretçisini temel işaretçiye aktar**: `mov rbp, rsp` (mevcut fonksiyon için yeni temel işaretçiyi ayarlar)
+2. **Mevcut yığın işaretçisini temel işaretçiye taşı**: `mov rbp, rsp` (mevcut fonksiyon için yeni temel işaretçiyi ayarlar)
 3. **Yerel değişkenler için yığında alan ayır**: `sub rsp, <size>` (burada `<size>`, gereken byte sayısıdır)
 
 ### **Fonksiyon Epilogu**
 
-1. **Mevcut temel işaretçiyi yığın işaretçisine aktar**: `mov rsp, rbp` (yerel değişkenleri serbest bırak)
+1. **Mevcut temel işaretçiyi yığın işaretçisine taşı**: `mov rsp, rbp` (yerel değişkenleri serbest bırak)
 2. **Eski temel işaretçiyi yığından çıkar**: `pop rbp` (çağıranın temel işaretçisini geri yükler)
 3. **Dön**: `ret` (kontrolü çağırana geri verir)
 

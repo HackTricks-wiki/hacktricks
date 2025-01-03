@@ -6,17 +6,17 @@
 
 Bir macOS **yükleyici paketi** (aynı zamanda `.pkg` dosyası olarak da bilinir), macOS tarafından **yazılım dağıtımı** için kullanılan bir dosya formatıdır. Bu dosyalar, bir yazılım parçasının doğru bir şekilde kurulması ve çalışması için gereken her şeyi içeren bir **kutunun** içindeymiş gibi davranır.
 
-Paket dosyası, hedef bilgisayara yüklenecek **dosya ve dizinlerin hiyerarşisini** tutan bir arşivdir. Ayrıca, yapılandırma dosyalarını ayarlamak veya yazılımın eski sürümlerini temizlemek gibi kurulumdan önce ve sonra görevleri yerine getirmek için **betikler** de içerebilir.
+Paket dosyası, hedef bilgisayara yüklenecek **dosya ve dizinlerin hiyerarşisini** tutan bir arşivdir. Ayrıca, yapılandırma dosyalarını ayarlamak veya yazılımın eski sürümlerini temizlemek gibi kurulumdan önce ve sonra görevleri yerine getirmek için **scriptler** de içerebilir.
 
 ### Hiyerarşi
 
 <figure><img src="../../../images/Pasted Graphic.png" alt="https://www.youtube.com/watch?v=iASSG0_zobQ"><figcaption></figcaption></figure>
 
-- **Dağıtım (xml)**: Özelleştirmeler (başlık, karşılama metni…) ve betik/kurulum kontrolleri
-- **Paket Bilgisi (xml)**: Bilgi, kurulum gereksinimleri, kurulum yeri, çalıştırılacak betiklerin yolları
+- **Dağıtım (xml)**: Özelleştirmeler (başlık, karşılama metni…) ve script/kurulum kontrolleri
+- **Paket Bilgisi (xml)**: Bilgi, kurulum gereksinimleri, kurulum yeri, çalıştırılacak scriptlerin yolları
 - **Malzeme listesi (bom)**: Yüklenmesi, güncellenmesi veya kaldırılması gereken dosyaların listesi ve dosya izinleri
 - **Yük (CPIO arşivi gzip sıkıştırılmış)**: Paket Bilgisi'nden `install-location`'da yüklenecek dosyalar
-- **Betikler (CPIO arşivi gzip sıkıştırılmış)**: Kurulumdan önce ve sonra betikler ve yürütme için geçici bir dizine çıkarılan daha fazla kaynak.
+- **Scriptler (CPIO arşivi gzip sıkıştırılmış)**: Kurulumdan önce ve sonra scriptler ve yürütme için geçici bir dizine çıkarılan daha fazla kaynak.
 
 ### Sıkıştırmayı Aç
 ```bash
@@ -32,11 +32,11 @@ xar -xf "/path/to/package.pkg"
 cat Scripts | gzip -dc | cpio -i
 cpio -i < Scripts
 ```
-Installer'ın içeriğini manuel olarak sıkıştırmadan görselleştirmek için ücretsiz [**Suspicious Package**](https://mothersruin.com/software/SuspiciousPackage/) aracını da kullanabilirsiniz.
+Installer'ın içeriğini manuel olarak sıkıştırmadan görselleştirmek için ücretsiz bir araç olan [**Suspicious Package**](https://mothersruin.com/software/SuspiciousPackage/) kullanabilirsiniz.
 
 ## DMG Temel Bilgiler
 
-DMG dosyaları, veya Apple Disk Görüntüleri, Apple'ın macOS'u tarafından disk görüntüleri için kullanılan bir dosya formatıdır. Bir DMG dosyası esasen **monte edilebilir bir disk görüntüsü** (kendi dosya sistemini içerir) olup, genellikle sıkıştırılmış ve bazen şifrelenmiş ham blok verileri içerir. Bir DMG dosyasını açtığınızda, macOS **onu fiziksel bir disk gibi monte eder**, böylece içeriğine erişebilirsiniz.
+DMG dosyaları veya Apple Disk Görüntüleri, Apple'ın macOS'u tarafından disk görüntüleri için kullanılan bir dosya formatıdır. Bir DMG dosyası esasen **monte edilebilir bir disk görüntüsü** (kendi dosya sistemini içerir) olup, genellikle sıkıştırılmış ve bazen şifrelenmiş ham blok verileri içerir. Bir DMG dosyasını açtığınızda, macOS **onu fiziksel bir disk gibi monte eder**, böylece içeriğine erişebilirsiniz.
 
 > [!CAUTION]
 > **`.dmg`** yükleyicilerinin **çok sayıda formatı** desteklediğini ve geçmişte bazılarının zafiyetler içerdiğini ve **kernel kodu yürütme** elde etmek için kötüye kullanıldığını unutmayın.
@@ -45,13 +45,13 @@ DMG dosyaları, veya Apple Disk Görüntüleri, Apple'ın macOS'u tarafından di
 
 <figure><img src="../../../images/image (225).png" alt=""><figcaption></figcaption></figure>
 
-Bir DMG dosyasının hiyerarşisi içeriğe bağlı olarak farklı olabilir. Ancak, uygulama DMG'leri için genellikle bu yapıyı takip eder:
+Bir DMG dosyasının hiyerarşisi içeriğe bağlı olarak farklılık gösterebilir. Ancak, uygulama DMG'leri için genellikle bu yapıyı takip eder:
 
 - Üst Düzey: Bu, disk görüntüsünün köküdür. Genellikle uygulamayı ve muhtemelen Uygulamalar klasörüne bir bağlantı içerir.
-- Uygulama (.app): Bu, gerçek uygulamadır. macOS'ta, bir uygulama genellikle uygulamayı oluşturan birçok bireysel dosya ve klasör içeren bir pakettir.
+- Uygulama (.app): Bu, gerçek uygulamadır. macOS'ta bir uygulama genellikle uygulamayı oluşturan birçok bireysel dosya ve klasör içeren bir pakettir.
 - Uygulamalar Bağlantısı: Bu, macOS'taki Uygulamalar klasörüne bir kısayoldur. Bunun amacı, uygulamayı kolayca yüklemenizi sağlamaktır. .app dosyasını bu kısayola sürükleyerek uygulamayı yükleyebilirsiniz.
 
-## Privesc pkg kötüye kullanımı
+## pkg kötüye kullanımı ile Privesc
 
 ### Kamu dizinlerinden yürütme
 
@@ -61,7 +61,7 @@ Eğer bir ön veya sonrası yükleme betiği örneğin **`/var/tmp/Installerutil
 
 ### AuthorizationExecuteWithPrivileges
 
-Bu, birçok yükleyici ve güncelleyici tarafından **root olarak bir şey yürütmek için** çağrılan bir [kamusal işlev](https://developer.apple.com/documentation/security/1540038-authorizationexecutewithprivileg) dir. Bu işlev, **yürütülecek dosyanın** **yolunu** parametre olarak kabul eder, ancak eğer bir saldırgan bu dosyayı **değiştirebilirse**, root ile yürütmesini **kötüye kullanabilir** ve **ayrıcalıkları artırabilir**.
+Bu, birkaç yükleyici ve güncelleyici tarafından **root olarak bir şey yürütmek için** çağrılan bir [kamusal işlev](https://developer.apple.com/documentation/security/1540038-authorizationexecutewithprivileg) dir. Bu işlev, **yürütülecek dosyanın** **yolu** nu parametre olarak kabul eder, ancak bir saldırgan bu dosyayı **değiştirebilirse**, root ile yürütmesini **kötüye kullanabilir** ve **ayrıcalıkları artırabilir**.
 ```bash
 # Breakpoint in the function to check wich file is loaded
 (lldb) b AuthorizationExecuteWithPrivileges
@@ -71,9 +71,9 @@ For more info check this talk: [https://www.youtube.com/watch?v=lTOItyjTTkw](htt
 
 ### Montaj ile yürütme
 
-Eğer bir yükleyici `/tmp/fixedname/bla/bla` yoluna yazıyorsa, yükleme sürecini kötüye kullanmak için yükleme sırasında **herhangi bir dosyayı değiştirmek** amacıyla **/tmp/fixedname** üzerinde noowners ile **bir montaj oluşturmak** mümkündür.
+Eğer bir yükleyici `/tmp/fixedname/bla/bla` yoluna yazıyorsa, yükleme sürecini kötüye kullanmak için **yükleme sırasında herhangi bir dosyayı değiştirmek** amacıyla `noowners` ile `/tmp/fixedname` üzerinde **bir montaj oluşturmak** mümkündür.
 
-Bunun bir örneği **CVE-2021-26089**'dur; bu, root olarak yürütme elde etmek için **dönemsel bir betiği** **üst üste yazmayı** başarmıştır. Daha fazla bilgi için konuşmaya göz atın: [**OBTS v4.0: "Mount(ain) of Bugs" - Csaba Fitzl**](https://www.youtube.com/watch?v=jSYPazD4VcE)
+Bunun bir örneği **CVE-2021-26089**'dur; bu, kök olarak yürütme elde etmek için **dönemsel bir betiği** **üst üste yazmayı** başarmıştır. Daha fazla bilgi için konuşmaya bakın: [**OBTS v4.0: "Mount(ain) of Bugs" - Csaba Fitzl**](https://www.youtube.com/watch?v=jSYPazD4VcE)
 
 ## pkg kötü amaçlı yazılım olarak
 
@@ -83,7 +83,7 @@ Gerçek bir yük olmadan sadece **kötü amaçlı yazılım** içeren **ön ve s
 
 ### Dağıtım xml'inde JS
 
-Paketin **dağıtım xml** dosyasına **`<script>`** etiketleri eklemek mümkündür ve bu kod yürütülecek ve **`system.run`** kullanarak **komutlar** **yürütme** yeteneğine sahip olacaktır:
+Paketin **dağıtım xml** dosyasına **`<script>`** etiketleri eklemek mümkündür ve bu kod yürütülecek ve **`system.run`** kullanarak **komutlar** **yürütülebilir**:
 
 <figure><img src="../../../images/image (1043).png" alt=""><figcaption></figcaption></figure>
 

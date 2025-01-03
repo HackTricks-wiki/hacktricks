@@ -6,7 +6,7 @@
 
 Bir işlem, çalışan bir yürütülebilir dosyanın bir örneğidir, ancak işlemler kod çalıştırmaz, bunlar ipliklerdir. Bu nedenle **işlemler sadece çalışan iplikler için konteynerlerdir** bellek, tanımlayıcılar, portlar, izinler sağlayarak...
 
-Geleneksel olarak, işlemler diğer işlemler içinde (PID 1 hariç) **`fork`** çağrısı yapılarak başlatılırdı; bu, mevcut işlemin tam bir kopyasını oluşturur ve ardından **çocuk işlem** genellikle yeni yürütülebilir dosyayı yüklemek ve çalıştırmak için **`execve`** çağrısını yapardı. Daha sonra, bu işlemi bellek kopyalamadan daha hızlı hale getirmek için **`vfork`** tanıtıldı.\
+Geleneksel olarak, işlemler diğer işlemler içinde (PID 1 hariç) **`fork`** çağrılarak başlatılırdı; bu, mevcut işlemin tam bir kopyasını oluşturur ve ardından **çocuk işlem** genellikle yeni yürütülebilir dosyayı yüklemek ve çalıştırmak için **`execve`** çağrısını yapardı. Daha sonra, bu işlemi bellek kopyalamadan daha hızlı hale getirmek için **`vfork`** tanıtıldı.\
 Ardından **`posix_spawn`** tanıtıldı; bu, **`vfork`** ve **`execve`**'yi tek bir çağrıda birleştirir ve bayrakları kabul eder:
 
 - `POSIX_SPAWN_RESETIDS`: Etkili kimlikleri gerçek kimliklere sıfırla
@@ -16,14 +16,14 @@ Ardından **`posix_spawn`** tanıtıldı; bu, **`vfork`** ve **`execve`**'yi tek
 - `POSIX_SPAWN_SETEXEC`: Aynı işlemde exec (daha fazla seçenekle `execve` gibi)
 - `POSIX_SPAWN_START_SUSPENDED`: Askıya alınmış olarak başlat
 - `_POSIX_SPAWN_DISABLE_ASLR`: ASLR olmadan başlat
-- `_POSIX_SPAWN_NANO_ALLOCATOR:` libmalloc'un Nano ayıracını kullan
-- `_POSIX_SPAWN_ALLOW_DATA_EXEC:` Veri segmentlerinde `rwx` iznine izin ver
+- `_POSIX_SPAWN_NANO_ALLOCATOR:` libmalloc'un Nano ayıracısını kullan
+- `_POSIX_SPAWN_ALLOW_DATA_EXEC:` Veri segmentlerinde `rwx`'e izin ver
 - `POSIX_SPAWN_CLOEXEC_DEFAULT`: exec(2) ile varsayılan olarak tüm dosya tanımlarını kapat
 - `_POSIX_SPAWN_HIGH_BITS_ASLR:` ASLR kaydırmasının yüksek bitlerini rastgeleleştir
 
 Ayrıca, `posix_spawn`, oluşturulan işlemin bazı yönlerini kontrol eden bir **`posix_spawnattr`** dizisi belirtmeye ve tanımlayıcıların durumunu değiştirmek için **`posix_spawn_file_actions`** kullanmaya olanak tanır.
 
-Bir işlem öldüğünde, **ana işleme dönüş kodunu gönderir** (eğer ana işlem öldüyse, yeni ana işlem PID 1'dir) `SIGCHLD` sinyali ile. Ana işlem, bu değeri almak için `wait4()` veya `waitid()` çağrısını yapmalıdır ve bu gerçekleşene kadar çocuk bir zombi durumunda kalır; hala listelenir ancak kaynak tüketmez.
+Bir işlem öldüğünde, **ana işleme dönüş kodunu gönderir** (eğer ana işlem öldüyse, yeni ana işlem PID 1'dir) `SIGCHLD` sinyali ile. Ana işlem, bu değeri `wait4()` veya `waitid()` çağrısını yaparak almalıdır ve bu gerçekleşene kadar çocuk bir zombi durumunda kalır; hala listelenir ancak kaynak tüketmez.
 
 ### PIDs
 
@@ -38,9 +38,9 @@ Koalisyon, Darwin'de işlemleri gruplamanın başka bir yoludur. Bir koalisyona 
 
 ### Credentials & Personae
 
-Her işlem, sistemdeki **ayrıcalıklarını tanımlayan** **kimlik bilgilerini** taşır. Her işlem birincil bir `uid` ve birincil bir `gid` (birden fazla gruba ait olabilir) olacaktır.\
-Ayrıca, ikili dosya `setuid/setgid` bitine sahipse kullanıcı ve grup kimliğini değiştirmek de mümkündür.\
-Yeni `uid`/`gid` ayarlamak için birkaç işlev vardır.
+Her işlem, sistemdeki **ayrıcalıklarını tanımlayan** **kimlik bilgilerini** taşır. Her işlem birincil bir `uid` ve birincil bir `gid`'ye sahip olacaktır (ancak birkaç gruba ait olabilir).\
+Eğer ikili dosya `setuid/setgid` bitine sahipse, kullanıcı ve grup kimliğini değiştirmek de mümkündür.\
+Yeni `uid`/`gid`'ler ayarlamak için birkaç işlev vardır.
 
 Syscall **`persona`**, **alternatif** bir **kimlik bilgileri** seti sağlar. Bir persona benimsemek, uid'sini, gid'sini ve grup üyeliklerini **bir anda** üstlenmeyi gerektirir. [**kaynak kodunda**](https://github.com/apple/darwin-xnu/blob/main/bsd/sys/persona.h) yapı bulmak mümkündür:
 ```c
@@ -59,13 +59,13 @@ char     persona_name[MAXLOGNAME + 1];
 ## Thread'lerin Temel Bilgileri
 
 1. **POSIX Thread'leri (pthreads):** macOS, C/C++ için standart bir threading API'sinin parçası olan POSIX thread'lerini (`pthreads`) destekler. macOS'taki pthread'lerin implementasyonu `/usr/lib/system/libsystem_pthread.dylib` içinde bulunur ve bu, kamuya açık `libpthread` projesinden gelmektedir. Bu kütüphane, thread'leri oluşturmak ve yönetmek için gerekli fonksiyonları sağlar.
-2. **Thread Oluşturma:** Yeni thread'ler oluşturmak için `pthread_create()` fonksiyonu kullanılır. İçsel olarak, bu fonksiyon XNU çekirdeğine özgü daha düşük seviyeli bir sistem çağrısı olan `bsdthread_create()`'i çağırır. Bu sistem çağrısı, thread davranışını belirten, planlama politikaları ve yığın boyutu da dahil olmak üzere `pthread_attr`'dan (özellikler) türetilen çeşitli bayrakları alır.
-- **Varsayılan Yığın Boyutu:** Yeni thread'ler için varsayılan yığın boyutu 512 KB'dir, bu da tipik işlemler için yeterlidir ancak daha fazla veya daha az alana ihtiyaç varsa thread özellikleri aracılığıyla ayarlanabilir.
-3. **Thread Başlatma:** `__pthread_init()` fonksiyonu, yığın konumu ve boyutu hakkında ayrıntıları içerebilecek ortam değişkenlerini ayrıştırmak için `env[]` argümanını kullanarak thread kurulumu sırasında kritik öneme sahiptir.
+2. **Thread Oluşturma:** Yeni thread'ler oluşturmak için `pthread_create()` fonksiyonu kullanılır. İçsel olarak, bu fonksiyon XNU çekirdeğine özgü daha düşük seviyeli bir sistem çağrısı olan `bsdthread_create()`'i çağırır. Bu sistem çağrısı, thread davranışını belirten, planlama politikaları ve yığın boyutu dahil olmak üzere `pthread_attr`'dan (özellikler) türetilen çeşitli bayrakları alır.
+- **Varsayılan Yığın Boyutu:** Yeni thread'ler için varsayılan yığın boyutu 512 KB'dir, bu tipik işlemler için yeterlidir ancak daha fazla veya daha az alana ihtiyaç varsa thread özellikleri aracılığıyla ayarlanabilir.
+3. **Thread Başlatma:** `__pthread_init()` fonksiyonu, thread kurulumu sırasında kritik öneme sahiptir ve yığın konumu ve boyutu hakkında bilgiler içerebilecek ortam değişkenlerini ayrıştırmak için `env[]` argümanını kullanır.
 
 #### macOS'ta Thread Sonlandırma
 
-1. **Thread'leri Sonlandırma:** Thread'ler genellikle `pthread_exit()` çağrılarak sonlandırılır. Bu fonksiyon, bir thread'in temiz bir şekilde çıkmasına, gerekli temizliği yapmasına ve thread'in herhangi bir katılımcıya geri değer göndermesine olanak tanır.
+1. **Thread'leri Sonlandırma:** Thread'ler genellikle `pthread_exit()` çağrılarak sonlandırılır. Bu fonksiyon, bir thread'in temiz bir şekilde çıkmasını sağlar, gerekli temizliği yapar ve thread'in herhangi bir katılımcıya geri dönüş değeri göndermesine olanak tanır.
 2. **Thread Temizliği:** `pthread_exit()` çağrıldığında, tüm ilişkili thread yapılarının kaldırılmasını yöneten `pthread_terminate()` fonksiyonu çağrılır. Bu, Mach thread portlarını (Mach, XNU çekirdeğindeki iletişim alt sistemidir) serbest bırakır ve thread ile ilişkili çekirdek düzeyindeki yapıların kaldırılmasını sağlayan bir sistem çağrısı olan `bsdthread_terminate`'i çağırır.
 
 #### Senkronizasyon Mekanizmaları
@@ -73,13 +73,13 @@ char     persona_name[MAXLOGNAME + 1];
 Paylaşılan kaynaklara erişimi yönetmek ve yarış koşullarını önlemek için macOS, birkaç senkronizasyon ilkesini sağlar. Bu, çoklu thread ortamlarında veri bütünlüğünü ve sistem kararlılığını sağlamak için kritik öneme sahiptir:
 
 1. **Mutex'ler:**
-- **Normal Mutex (İmza: 0x4D555458):** 60 baytlık bir bellek ayak izi olan standart mutex (56 bayt mutex için ve 4 bayt imza için).
+- **Normal Mutex (İmza: 0x4D555458):** 60 baytlık bellek ayak izi olan standart mutex (56 bayt mutex için ve 4 bayt imza için).
 - **Hızlı Mutex (İmza: 0x4d55545A):** Normal mutex'e benzer ancak daha hızlı işlemler için optimize edilmiştir, boyutu da 60 bayttır.
 2. **Koşul Değişkenleri:**
 - Belirli koşulların gerçekleşmesini beklemek için kullanılır, boyutu 44 bayttır (40 bayt artı 4 bayt imza).
 - **Koşul Değişkeni Özellikleri (İmza: 0x434e4441):** Koşul değişkenleri için yapılandırma özellikleri, boyutu 12 bayttır.
 3. **Bir Kez Değişkeni (İmza: 0x4f4e4345):**
-- Bir başlangıç kodunun yalnızca bir kez çalıştırılmasını sağlar. Boyutu 12 bayttır.
+- Bir parça başlatma kodunun yalnızca bir kez çalıştırılmasını sağlar. Boyutu 12 bayttır.
 4. **Okuma-Yazma Kilitleri:**
 - Aynı anda birden fazla okuyucu veya bir yazar olmasına izin verir, paylaşılan verilere verimli erişimi kolaylaştırır.
 - **Okuma Yazma Kilidi (İmza: 0x52574c4b):** Boyutu 196 bayttır.
@@ -90,7 +90,7 @@ Paylaşılan kaynaklara erişimi yönetmek ve yarış koşullarını önlemek i�
 
 ### Thread Yerel Değişkenler (TLV)
 
-**Thread Yerel Değişkenler (TLV)**, Mach-O dosyaları (macOS'taki çalıştırılabilir dosyaların formatı) bağlamında, çoklu thread'li bir uygulamada **her thread'e özgü** değişkenleri tanımlamak için kullanılır. Bu, her thread'in bir değişkenin kendi ayrı örneğine sahip olmasını sağlar ve mutex'ler gibi açık senkronizasyon mekanizmalarına ihtiyaç duymadan çatışmaları önlemeye ve veri bütünlüğünü korumaya olanak tanır.
+**Thread Yerel Değişkenler (TLV)**, Mach-O dosyaları (macOS'taki çalıştırılabilir dosyaların formatı) bağlamında, çoklu thread'li bir uygulamada **her thread'e özgü** değişkenleri tanımlamak için kullanılır. Bu, her thread'in bir değişkenin kendi ayrı örneğine sahip olmasını sağlar ve mutex'ler gibi açık senkronizasyon mekanizmalarına ihtiyaç duymadan çakışmaları önlemeye ve veri bütünlüğünü korumaya olanak tanır.
 
 C ve ilgili dillerde, bir thread yerel değişkeni tanımlamak için **`__thread`** anahtar kelimesini kullanabilirsiniz. İşte örneğinizde nasıl çalıştığı:
 ```c
@@ -117,7 +117,7 @@ Thread önceliklerini anlamak, işletim sisteminin hangi thread'lerin ne zaman �
 
 1. **Nice:**
 - Bir sürecin `nice` değeri, önceliğini etkileyen bir sayıdır. Her sürecin -20 (en yüksek öncelik) ile 19 (en düşük öncelik) arasında bir nice değeri vardır. Bir süreç oluşturulduğunda varsayılan nice değeri genellikle 0'dır.
-- Daha düşük bir nice değeri ( -20'ye daha yakın) bir süreci daha "bencil" hale getirir ve ona daha yüksek nice değerlerine sahip diğer süreçlere kıyasla daha fazla CPU süresi verir.
+- Daha düşük bir nice değeri ( -20'ye daha yakın) bir süreci daha "bencil" hale getirir ve ona daha yüksek nice değerine sahip diğer süreçlere kıyasla daha fazla CPU süresi verir.
 2. **Renice:**
 - `renice`, zaten çalışan bir sürecin nice değerini değiştirmek için kullanılan bir komuttur. Bu, süreçlerin önceliğini dinamik olarak ayarlamak için kullanılabilir; yeni nice değerlerine göre CPU zaman tahsisatını artırabilir veya azaltabilir.
 - Örneğin, bir sürecin geçici olarak daha fazla CPU kaynağına ihtiyacı varsa, `renice` kullanarak nice değerini düşürebilirsiniz.
@@ -131,11 +131,11 @@ QoS sınıfları, özellikle **Grand Central Dispatch (GCD)**'yi destekleyen mac
 2. **Kullanıcı Başlatılan:**
 - Kullanıcının başlattığı ve hemen sonuç beklediği görevler, örneğin bir belge açma veya hesaplamalar gerektiren bir düğmeye tıklama gibi. Bunlar yüksek önceliklidir ancak kullanıcı etkileşimli olanların altındadır.
 3. **Yardımcı:**
-- Bu görevler uzun süreli olup genellikle bir ilerleme göstergesi gösterir (örneğin, dosya indirme, veri içe aktarma). Kullanıcı başlatılan görevlerden daha düşük önceliğe sahiptir ve hemen bitmeleri gerekmez.
+- Bu görevler uzun süreli çalışır ve genellikle bir ilerleme göstergesi gösterir (örneğin, dosya indirme, veri içe aktarma). Kullanıcı başlatılan görevlerden daha düşük önceliğe sahiptir ve hemen bitmeleri gerekmez.
 4. **Arka Plan:**
 - Bu sınıf, arka planda çalışan ve kullanıcıya görünmeyen görevler içindir. Bunlar, dizin oluşturma, senkronizasyon veya yedekleme gibi görevler olabilir. En düşük önceliğe sahiptir ve sistem performansı üzerinde minimal etkiye sahiptir.
 
-QoS sınıflarını kullanarak, geliştiricilerin tam öncelik numaralarını yönetmeleri gerekmez, bunun yerine görevin doğasına odaklanmaları ve sistemin CPU kaynaklarını buna göre optimize etmesi sağlanır.
+QoS sınıflarını kullanarak, geliştiricilerin tam öncelik numaralarını yönetmeleri gerekmez, bunun yerine görevin doğasına odaklanırlar ve sistem CPU kaynaklarını buna göre optimize eder.
 
 Ayrıca, zamanlayıcının dikkate alacağı bir dizi zamanlama parametresi belirlemek için farklı **thread zamanlama politikaları** vardır. Bu, `thread_policy_[set/get]` kullanılarak yapılabilir. Bu, yarış durumu saldırılarında faydalı olabilir.
 
@@ -185,7 +185,7 @@ macos-chromium-injection.md
 
 ### Kirli NIB
 
-NIB dosyaları, bir uygulama içindeki **kullanıcı arayüzü (UI) öğelerini** ve etkileşimlerini tanımlar. Ancak, **keyfi komutlar çalıştırabilirler** ve **Gatekeeper**, bir **NIB dosyası değiştirildiğinde** zaten çalıştırılmış bir uygulamanın çalışmasını durdurmaz. Bu nedenle, keyfi programların keyfi komutlar çalıştırmasını sağlamak için kullanılabilirler:
+NIB dosyaları, bir uygulama içindeki **kullanıcı arayüzü (UI) öğelerini** ve etkileşimlerini tanımlar. Ancak, **keyfi komutlar çalıştırabilirler** ve **Gatekeeper**, bir **NIB dosyası değiştirildiğinde** zaten çalıştırılan bir uygulamanın çalışmasını durdurmaz. Bu nedenle, keyfi programların keyfi komutlar çalıştırmasını sağlamak için kullanılabilirler:
 
 {{#ref}}
 macos-dirty-nib.md
@@ -234,19 +234,19 @@ Ancak, **`PYTHONSTARTUP`** scripti, **`PYTHONINSPECT`** etkileşimli oturumu olu
 
 > [!CAUTION]
 > Genel olarak, çevresel değişkenleri kötüye kullanarak python'un keyfi kod çalıştırmasını sağlamak için bir yol bulamadım.\
-> Ancak, çoğu insan **Hombrew** kullanarak python yükler, bu da python'u varsayılan admin kullanıcı için **yazılabilir bir konuma** yükler. Bunu şu şekilde ele geçirebilirsiniz:
+> Ancak, çoğu insan **Hombrew** kullanarak python'u kurar; bu, python'u varsayılan admin kullanıcı için **yazılabilir bir konuma** kurar. Bunu şu şekilde ele geçirebilirsiniz:
 >
 > ```bash
 > mv /opt/homebrew/bin/python3 /opt/homebrew/bin/python3.old
 > cat > /opt/homebrew/bin/python3 <<EOF
 > #!/bin/bash
-> # Ekstra ele geçirme kodu
+> # Ek ele geçirme kodu
 > /opt/homebrew/bin/python3.old "$@"
 > EOF
 > chmod +x /opt/homebrew/bin/python3
 > ```
 >
-> Hatta **root** bu kodu python çalıştırırken çalıştıracaktır.
+> Hatta **root** python çalıştırıldığında bu kodu çalıştıracaktır.
 
 ## Tespit
 
@@ -255,15 +255,15 @@ Ancak, **`PYTHONSTARTUP`** scripti, **`PYTHONINSPECT`** etkileşimli oturumu olu
 [**Shield**](https://theevilbit.github.io/shield/) ([**Github**](https://github.com/theevilbit/Shield)), **süreç enjeksiyonu** eylemlerini **tespit edebilen ve engelleyebilen** açık kaynak bir uygulamadır:
 
 - **Çevresel Değişkenler Kullanarak**: Aşağıdaki çevresel değişkenlerin varlığını izler: **`DYLD_INSERT_LIBRARIES`**, **`CFNETWORK_LIBRARY_PATH`**, **`RAWCAMERA_BUNDLE_PATH`** ve **`ELECTRON_RUN_AS_NODE`**
-- **`task_for_pid`** çağrılarını kullanarak: Bir sürecin başka birinin **görev portunu** almak istediğini bulmak için, bu da kodu sürece enjekte etmeye olanak tanır.
-- **Electron uygulama parametreleri**: Birisi, bir Electron uygulamasını hata ayıklama modunda başlatmak için **`--inspect`**, **`--inspect-brk`** ve **`--remote-debugging-port`** komut satırı argümanlarını kullanabilir ve böylece ona kod enjekte edebilir.
-- **Sembolik bağlantılar** veya **sert bağlantılar** kullanarak: Tipik olarak en yaygın istismar, **kendi kullanıcı ayrıcalıklarımızla bir bağlantı yerleştirmek** ve **daha yüksek bir ayrıcalık** konumuna işaret etmektir. Hem sert bağlantı hem de sembolik bağlantı için tespit çok basittir. Bağlantıyı oluşturan sürecin hedef dosyadan **farklı bir ayrıcalık seviyesine** sahip olması durumunda bir **uyarı** oluştururuz. Ne yazık ki, sembolik bağlantılar durumunda engelleme mümkün değildir, çünkü bağlantının oluşturulmasından önce hedefi hakkında bilgiye sahip değiliz. Bu, Apple'ın EndpointSecurity çerçevesinin bir sınırlamasıdır.
+- **`task_for_pid`** çağrıları kullanarak: Bir sürecin başka birinin **görev portunu almak istediğini** bulmak için, bu da sürece kod enjekte etmeye olanak tanır.
+- **Electron uygulama parametreleri**: Birisi **`--inspect`**, **`--inspect-brk`** ve **`--remote-debugging-port`** komut satırı argümanlarını kullanarak bir Electron uygulamasını hata ayıklama modunda başlatabilir ve böylece ona kod enjekte edebilir.
+- **Sembolik bağlantılar** veya **sert bağlantılar** kullanarak: Tipik olarak en yaygın istismar, **kendi kullanıcı ayrıcalıklarımızla bir bağlantı yerleştirmek** ve **daha yüksek bir ayrıcalık** konumuna işaret etmektir. Hem sert bağlantılar hem de sembolik bağlantılar için tespit çok basittir. Bağlantıyı oluşturan sürecin hedef dosyadan **farklı bir ayrıcalık seviyesine** sahip olması durumunda bir **uyarı** oluştururuz. Ne yazık ki, sembolik bağlantılar durumunda engelleme mümkün değildir, çünkü bağlantının oluşturulmasından önce hedefi hakkında bilgiye sahip değiliz. Bu, Apple'ın EndpointSecurity çerçevesinin bir sınırlamasıdır.
 
 ### Diğer süreçler tarafından yapılan çağrılar
 
-[**bu blog yazısında**](https://knight.sc/reverse%20engineering/2019/04/15/detecting-task-modifications.html) bir sürece kod enjekte eden diğer **süreçler hakkında bilgi almak için** **`task_name_for_pid`** fonksiyonunu nasıl kullanabileceğinizi bulabilirsiniz ve ardından o diğer süreç hakkında bilgi alabilirsiniz.
+[**bu blog yazısında**](https://knight.sc/reverse%20engineering/2019/04/15/detecting-task-modifications.html) bir sürece kod enjekte eden diğer **süreçler hakkında bilgi almak için** **`task_name_for_pid`** fonksiyonunu nasıl kullanabileceğinizi bulabilirsiniz.
 
-Bu fonksiyonu çağırmak için, süreci çalıştıranla **aynı uid**'ye sahip olmanız veya **root** olmanız gerektiğini unutmayın (ve bu, süreç hakkında bilgi döndürür, kod enjekte etme yolu sağlamaz).
+Bu fonksiyonu çağırmak için, süreci çalıştıranla **aynı uid**'ye sahip olmanız veya **root** olmanız gerektiğini unutmayın (ve bu, sürecin bilgilerini döndürür, kod enjekte etme yolu sağlamaz).
 
 ## Referanslar
 
